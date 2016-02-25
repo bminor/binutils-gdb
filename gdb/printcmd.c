@@ -1,6 +1,6 @@
 /* Print values for GNU debugger GDB.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -358,9 +358,9 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
   /* String printing should go through val_print_scalar_formatted.  */
   gdb_assert (options->format != 's');
 
-  if (len > sizeof(LONGEST) &&
-      (TYPE_CODE (type) == TYPE_CODE_INT
-       || TYPE_CODE (type) == TYPE_CODE_ENUM))
+  if (len > sizeof(LONGEST)
+      && (TYPE_CODE (type) == TYPE_CODE_INT
+	  || TYPE_CODE (type) == TYPE_CODE_ENUM))
     {
       switch (options->format)
 	{
@@ -1543,11 +1543,21 @@ display_command (char *arg, int from_tty)
   newobj->exp = expr;
   newobj->block = innermost_block;
   newobj->pspace = current_program_space;
-  newobj->next = display_chain;
   newobj->number = ++display_number;
   newobj->format = fmt;
   newobj->enabled_p = 1;
-  display_chain = newobj;
+  newobj->next = NULL;
+
+  if (display_chain == NULL)
+    display_chain = newobj;
+  else
+    {
+      struct display *last;
+
+      for (last = display_chain; last->next != NULL; last = last->next)
+	;
+      last->next = newobj;
+    }
 
   if (from_tty)
     do_one_display (newobj);

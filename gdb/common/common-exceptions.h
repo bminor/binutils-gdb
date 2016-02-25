@@ -1,6 +1,6 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -116,12 +116,32 @@ struct gdb_exception
   const char *message;
 };
 
+/* The different exception mechanisms that TRY/CATCH can map to.  */
+
+/* Make GDB exceptions use setjmp/longjmp behind the scenes.  This is
+   the only mode supported when GDB is built as a C program.  */
+#define GDB_XCPT_SJMP 1
+
+/* Make GDB exceptions use try/catch behind the scenes.  Can't be made
+   the default until we stop throwing exceptions from signal
+   handlers.  */
+#define GDB_XCPT_TRY 2
+
+/* Specify this mode to build with TRY/CATCH mapped directly to raw
+   try/catch.  GDB won't work correctly, but building that way catches
+   code tryin to break/continue out of the try block, along with
+   spurious code between the TRY and the CATCH block.  */
+#define GDB_XCPT_RAW_TRY 3
+
+/* Always use setjmp/longmp, even in C++ mode.  */
+#define GDB_XCPT GDB_XCPT_SJMP
+
 /* Functions to drive the exceptions state machine.  Though declared
    here by necessity, these functions should be considered internal to
    the exceptions subsystem and not used other than via the TRY/CATCH
    macros defined below.  */
 
-#ifndef __cplusplus
+#if GDB_XCPT == GDB_XCPT_SJMP
 extern SIGJMP_BUF *exceptions_state_mc_init (void);
 extern int exceptions_state_mc_action_iter (void);
 extern int exceptions_state_mc_action_iter_1 (void);
@@ -157,7 +177,7 @@ extern void exception_rethrow (void);
 
   */
 
-#ifndef __cplusplus
+#if GDB_XCPT == GDB_XCPT_SJMP
 
 #define TRY \
      { \
@@ -176,7 +196,9 @@ extern void exception_rethrow (void);
 #define END_CATCH				\
   }
 
-#else
+#endif /* GDB_XCPT_SJMP */
+
+#if GDB_XCPT == GDB_XCPT_TRY || GDB_XCPT == GDB_XCPT_RAW_TRY
 
 /* Prevent error/quit during TRY from calling cleanups established
    prior to here.  This pops out the scope in either case of normal
@@ -194,6 +216,8 @@ struct exception_try_scope
 
   void *saved_state;
 };
+
+#if GDB_XCPT == GDB_XCPT_TRY
 
 /* We still need to wrap TRY/CATCH in C++ so that cleanups and C++
    exceptions can coexist.  The TRY blocked is wrapped in a
@@ -217,6 +241,15 @@ struct exception_try_scope
     exception_rethrow ();			\
   }
 
+#else
+
+#define TRY try
+#define CATCH(EXCEPTION, MASK) \
+  catch (struct gdb_exception ## _ ## MASK &EXCEPTION)
+#define END_CATCH
+
+#endif
+
 /* The exception types client code may catch.  They're just shims
    around gdb_exception that add nothing but type info.  Which is used
    is selected depending on the MASK argument passed to CATCH.  */
@@ -233,7 +266,7 @@ struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
 {
 };
 
-#endif
+#endif /* GDB_XCPT_TRY || GDB_XCPT_RAW_TRY */
 
 /* *INDENT-ON* */
 

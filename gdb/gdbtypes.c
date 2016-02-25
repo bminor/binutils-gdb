@@ -1,6 +1,6 @@
 /* Support routines for manipulating internal types for GDB.
 
-   Copyright (C) 1992-2015 Free Software Foundation, Inc.
+   Copyright (C) 1992-2016 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -1081,8 +1081,8 @@ create_array_type_with_stride (struct type *result_type,
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
   if (has_static_range (TYPE_RANGE_DATA (range_type))
-     && (!type_not_associated (result_type)
-        && !type_not_allocated (result_type)))
+      && (!type_not_associated (result_type)
+	  && !type_not_allocated (result_type)))
     {
       LONGEST low_bound, high_bound;
 

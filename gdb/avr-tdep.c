@@ -1,6 +1,6 @@
 /* Target-dependent code for Atmel AVR, for GDB.
 
-   Copyright (C) 1996-2015 Free Software Foundation, Inc.
+   Copyright (C) 1996-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1632,7 +1632,6 @@ _initialize_avr_tdep (void)
   /* FIXME: TRoth/2002-02-18: This should probably be changed to 'info avr
      io_registers' to signify it is not available on other platforms.  */
 
-  add_cmd ("io_registers", class_info, avr_io_reg_read_command,
-	   _("query remote avr target for io space register values"),
-	   &infolist);
+  add_info ("io_registers", avr_io_reg_read_command,
+	    _("query remote avr target for io space register values"));
 }

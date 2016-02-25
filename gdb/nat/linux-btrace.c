@@ -1,6 +1,6 @@
 /* Linux-dependent part of branch trace support for GDB, and GDBserver.
 
-   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+   Copyright (C) 2013-2016 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -461,7 +461,7 @@ kernel_supports_bts (void)
     }
 }
 
-/* Check whether the kernel supports Intel(R) Processor Trace.  */
+/* Check whether the kernel supports Intel Processor Trace.  */
 
 static int
 kernel_supports_pt (void)
@@ -618,7 +618,7 @@ linux_supports_bts (void)
   return cached > 0;
 }
 
-/* Check whether the linux target supports Intel(R) Processor Trace.  */
+/* Check whether the linux target supports Intel Processor Trace.  */
 
 static int
 linux_supports_pt (void)
@@ -779,7 +779,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
 #if defined (PERF_ATTR_SIZE_VER5)
 
-/* Enable branch tracing in Intel(R) Processor Trace format.  */
+/* Enable branch tracing in Intel Processor Trace format.  */
 
 static struct btrace_target_info *
 linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
@@ -938,7 +938,7 @@ linux_disable_bts (struct btrace_tinfo_bts *tinfo)
   return BTRACE_ERR_NONE;
 }
 
-/* Disable Intel(R) Processor Trace tracing.  */
+/* Disable Intel Processor Trace tracing.  */
 
 static enum btrace_error
 linux_disable_pt (struct btrace_tinfo_pt *tinfo)
@@ -1073,7 +1073,7 @@ linux_read_bts (struct btrace_data_bts *btrace,
   return BTRACE_ERR_NONE;
 }
 
-/* Fill in the Intel(R) Processor Trace configuration information.  */
+/* Fill in the Intel Processor Trace configuration information.  */
 
 static void
 linux_fill_btrace_pt_config (struct btrace_data_pt_config *conf)
@@ -1081,7 +1081,7 @@ linux_fill_btrace_pt_config (struct btrace_data_pt_config *conf)
   conf->cpu = btrace_this_cpu ();
 }
 
-/* Read branch trace data in Intel(R) Processor Trace format for the thread
+/* Read branch trace data in Intel Processor Trace format for the thread
    given by TINFO into BTRACE using the TYPE reading method.  */
 
 static enum btrace_error
@@ -1135,7 +1135,7 @@ linux_read_btrace (struct btrace_data *btrace,
       return linux_read_bts (&btrace->variant.bts, tinfo, type);
 
     case BTRACE_FORMAT_PT:
-      /* We read btrace in Intel(R) Processor Trace format.  */
+      /* We read btrace in Intel Processor Trace format.  */
       btrace->format = BTRACE_FORMAT_PT;
       btrace->variant.pt.data = NULL;
       btrace->variant.pt.size = 0;

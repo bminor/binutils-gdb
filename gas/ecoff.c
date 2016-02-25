@@ -1,5 +1,5 @@
 /* ECOFF debugging support.
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    This file was put together by Ian Lance Taylor <ian@cygnus.com>.  A
    good deal of it comes directly from mips-tfile.c, by Michael
@@ -2196,12 +2196,9 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
      want to use the actual file name.  */
   if (file_name == (const char *) NULL)
     {
-      char *file;
-
       if (first_file != (efdr_t *) NULL)
 	as_fatal (_("fake .file after real one"));
-      as_where (&file, (unsigned int *) NULL);
-      file_name = (const char *) file;
+      file_name = as_where ((unsigned int *) NULL);
 
       /* Automatically generate ECOFF debugging information, since I
          think that's what other ECOFF assemblers do.  We don't do
@@ -5181,10 +5178,10 @@ void
 ecoff_generate_asm_lineno (void)
 {
   unsigned int lineno;
-  char *filename;
+  const char *filename;
   lineno_list_t *list;
 
-  as_where (&filename, &lineno);
+  filename = as_where (&lineno);
 
   if (current_stabs_filename == (char *) NULL
       || filename_cmp (current_stabs_filename, filename))

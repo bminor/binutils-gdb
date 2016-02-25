@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -1745,6 +1745,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget spu-*-*]
 	 && ![istarget v850*-*-*]
 	 && ![istarget visium-*-*]
+	 && ![istarget xgate-*-*]
 	 && ![istarget xstormy16-*-*]
 	 && ![istarget *-*-irix*]
 	 && ![istarget *-*-rtems] } {

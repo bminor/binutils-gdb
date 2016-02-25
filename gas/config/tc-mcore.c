@@ -1,5 +1,5 @@
 /* tc-mcore.c -- Assemble code for M*Core
-   Copyright (C) 1999-2015 Free Software Foundation, Inc.
+   Copyright (C) 1999-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -141,7 +141,7 @@ static struct hash_control * opcode_hash_control;	/* Opcode mnemonics.  */
 #define POOL_START_LABEL ".LS"
 
 static void
-make_name (char * s, char * p, int n)
+make_name (char * s, const char * p, int n)
 {
   static const char hex[] = "0123456789ABCDEF";
 
@@ -455,7 +455,7 @@ void
 md_begin (void)
 {
   const mcore_opcode_info * opcode;
-  char * prev_name = "";
+  const char * prev_name = "";
 
   opcode_hash_control = hash_new ();
 
@@ -523,7 +523,7 @@ parse_reg (char * s, unsigned * reg)
 
 static struct Cregs
 {
-  char * name;
+  const char * name;
   unsigned int crnum;
 }
 cregs[] =
@@ -611,7 +611,7 @@ parse_psrmod (char * s, unsigned * reg)
   char buf[10];
   static struct psrmods
   {
-    char *       name;
+    const char *       name;
     unsigned int value;
   }
   psrmods[] =
@@ -1917,7 +1917,7 @@ md_apply_fix (fixS *   fixP,
 	       segT     segment ATTRIBUTE_UNUSED)
 {
   char *       buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
-  char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
+  const char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
   const char * symname;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */
   offsetT      val  = *valP;

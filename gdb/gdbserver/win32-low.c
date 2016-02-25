@@ -1,5 +1,5 @@
 /* Low level interface to Windows debugging, for gdbserver.
-   Copyright (C) 2006-2015 Free Software Foundation, Inc.
+   Copyright (C) 2006-2016 Free Software Foundation, Inc.
 
    Contributed by Leo Zayas.  Based on "win32-nat.c" from GDB.
 
@@ -198,7 +198,7 @@ thread_rec (ptid_t ptid, int get_context)
   if (thread == NULL)
     return NULL;
 
-  th = inferior_target_data (thread);
+  th = (win32_thread_info *) inferior_target_data (thread);
   if (get_context)
     win32_require_context (th);
   return th;
@@ -229,11 +229,12 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 
 /* Delete a thread from the list of threads.  */
 static void
-delete_thread_info (struct inferior_list_entry *thread)
+delete_thread_info (struct inferior_list_entry *entry)
 {
-  win32_thread_info *th = inferior_target_data ((struct thread_info *) thread);
+  struct thread_info *thread = (struct thread_info *) entry;
+  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
 
-  remove_thread ((struct thread_info *) thread);
+  remove_thread (thread);
   CloseHandle (th->h);
   free (th);
 }
@@ -432,7 +433,7 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
 {
   struct thread_info *thread = (struct thread_info *) this_thread;
   int thread_id = * (int *) id_ptr;
-  win32_thread_info *th = inferior_target_data (thread);
+  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
 
   if (thread_id == -1 || thread_id == th->tid)
     {
@@ -523,7 +524,7 @@ strwinerror (DWORD error)
 			       NULL,
 			       error,
 			       0, /* Default language */
-			       (LPVOID)&msgbuf,
+			       (LPTSTR) &msgbuf,
 			       0,
 			       NULL);
   if (chars != 0)
@@ -654,7 +655,7 @@ win32_create_inferior (char *program, char **program_args)
   argslen = 1;
   for (argc = 1; program_args[argc]; argc++)
     argslen += strlen (program_args[argc]) + 1;
-  args = alloca (argslen);
+  args = (char *) alloca (argslen);
   args[0] = '\0';
   for (argc = 1; program_args[argc]; argc++)
     {
@@ -673,7 +674,7 @@ win32_create_inferior (char *program, char **program_args)
   err = GetLastError ();
   if (!ret && err == ERROR_FILE_NOT_FOUND)
     {
-      char *exename = alloca (strlen (program) + 5);
+      char *exename = (char *) alloca (strlen (program) + 5);
       strcat (strcpy (exename, program), ".exe");
       ret = create_process (exename, args, flags, &pi);
       err = GetLastError ();
@@ -746,7 +747,7 @@ win32_attach (unsigned long pid)
 
 /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  */
 static void
-handle_output_debug_string (struct target_waitstatus *ourstatus)
+handle_output_debug_string (void)
 {
 #define READ_BUFFER_LEN 1024
   CORE_ADDR addr;
@@ -818,10 +819,7 @@ win32_kill (int pid)
       if (current_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
 	break;
       else if (current_event.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
-	{
-	  struct target_waitstatus our_status = { 0 };
-	  handle_output_debug_string (&our_status);
-	}
+	handle_output_debug_string ();
     }
 
   win32_clear_inferiors ();
@@ -928,12 +926,12 @@ win32_resume (struct thread_resume *resume_info, size_t n)
 
   if (!ptid_equal (resume_info[0].thread, minus_one_ptid))
     {
-      sig = resume_info[0].sig;
+      sig = gdb_signal_from_host (resume_info[0].sig);
       step = resume_info[0].kind == resume_step;
     }
   else
     {
-      sig = 0;
+      sig = GDB_SIGNAL_0;
       step = 0;
     }
 
@@ -941,12 +939,14 @@ win32_resume (struct thread_resume *resume_info, size_t n)
     {
       if (current_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
 	{
-	  OUTMSG (("Cannot continue with signal %d here.\n", sig));
+	  OUTMSG (("Cannot continue with signal %s here.\n",
+		   gdb_signal_to_string (sig)));
 	}
       else if (sig == last_sig)
 	continue_status = DBG_EXCEPTION_NOT_HANDLED;
       else
-	OUTMSG (("Can only continue with recieved signal %d.\n", last_sig));
+	OUTMSG (("Can only continue with received signal %s.\n",
+		 gdb_signal_to_string (last_sig)));
     }
 
   last_sig = GDB_SIGNAL_0;
@@ -1344,7 +1344,7 @@ static void
 suspend_one_thread (struct inferior_list_entry *entry)
 {
   struct thread_info *thread = (struct thread_info *) entry;
-  win32_thread_info *th = inferior_target_data (thread);
+  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
 
   if (!th->suspended)
     {
@@ -1571,7 +1571,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
-      handle_output_debug_string (ourstatus);
+      handle_output_debug_string ();
       break;
 
     default:
@@ -1794,7 +1794,7 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 
 static struct target_ops win32_target_ops = {
   win32_create_inferior,
-  NULL,  /* arch_setup */
+  NULL,  /* post_create_inferior */
   win32_attach,
   win32_kill,
   win32_detach,

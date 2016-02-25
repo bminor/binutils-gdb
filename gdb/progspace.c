@@ -1,6 +1,6 @@
 /* Program and address space management, for GDB, the GNU debugger.
 
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -133,8 +133,16 @@ add_program_space (struct address_space *aspace)
 
   program_space_alloc_data (pspace);
 
-  pspace->next = program_spaces;
-  program_spaces = pspace;
+  if (program_spaces == NULL)
+    program_spaces = pspace;
+  else
+    {
+      struct program_space *last;
+
+      for (last = program_spaces; last->next != NULL; last = last->next)
+	;
+      last->next = pspace;
+    }
 
   return pspace;
 }

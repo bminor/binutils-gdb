@@ -1,6 +1,6 @@
 # configure.tgt
 #
-#   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+#   Copyright (C) 2013-2016 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,6 +49,8 @@ aarch64_be-*-elf)	targ_emul=aarch64elfb
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b armelfb armelf" ;;
 aarch64-*-elf)		targ_emul=aarch64elf
 			targ_extra_emuls="aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb" ;;
+aarch64-*-cloudabi*)	targ_emul=aarch64cloudabi
+			targ_extra_emuls=aarch64cloudabib ;;
 aarch64-*-freebsd*)	targ_emul=aarch64fbsd
 			targ_extra_emuls="aarch64fbsdb aarch64elf" ;;
 aarch64_be-*-linux*)	targ_emul=aarch64linuxb
@@ -488,7 +490,8 @@ mips*vr4100el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4100-*-elf*)	targ_emul=elf32b4300 ;;
 mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
-mips*el-sde-elf*)	targ_emul=elf32ltsmip
+mips*el-sde-elf* | mips*el-mti-elf* | mips*el-img-elf*)
+			targ_emul=elf32ltsmip
 			targ_extra_emuls="elf32btsmip elf32ltsmipn32 elf64ltsmip elf32btsmipn32 elf64btsmip" ;;
 mips*-sde-elf* | mips*-mti-elf* | mips*-img-elf*)
 			targ_emul=elf32btsmip

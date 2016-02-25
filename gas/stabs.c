@@ -1,5 +1,5 @@
 /* Generic stabs parsing for gas.
-   Copyright (C) 1989-2015 Free Software Foundation, Inc.
+   Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -34,8 +34,8 @@
 
 int outputting_stabs_line_debug = 0;
 
-static void s_stab_generic (int, char *, char *);
-static void generate_asm_file (int, char *);
+static void s_stab_generic (int, const char *, const char *);
+static void generate_asm_file (int, const char *);
 
 /* Allow backends to override the names used for the stab sections.  */
 #ifndef STAB_SECTION_NAME
@@ -176,10 +176,13 @@ aout_process_stab (what, string, type, other, desc)
    kinds of stab sections.  */
 
 static void
-s_stab_generic (int what, char *stab_secname, char *stabstr_secname)
+s_stab_generic (int          what,
+		const char * stab_secname,
+	       	const char * stabstr_secname)
 {
   long longint;
-  char *string, *saved_string_obstack_end;
+  const char *string;
+  char *saved_string_obstack_end;
   int type;
   int other;
   int desc;
@@ -487,10 +490,10 @@ s_desc (ignore)
 void
 stabs_generate_asm_file (void)
 {
-  char *file;
+  const char *file;
   unsigned int lineno;
 
-  as_where (&file, &lineno);
+  file = as_where (&lineno);
   if (use_gnu_debug_info_extensions)
     {
       const char *dir;
@@ -509,15 +512,15 @@ stabs_generate_asm_file (void)
    TYPE is one of N_SO, N_SOL.  */
 
 static void
-generate_asm_file (int type, char *file)
+generate_asm_file (int type, const char *file)
 {
   static char *last_file;
   static int label_count;
   char *hold;
   char sym[30];
   char *buf;
-  char *tmp = file;
-  char *file_endp = file + strlen (file);
+  const char *tmp = file;
+  const char *file_endp = file + strlen (file);
   char *bufp;
 
   if (last_file != NULL
@@ -580,7 +583,7 @@ stabs_generate_asm_lineno (void)
 {
   static int label_count;
   char *hold;
-  char *file;
+  const char *file;
   unsigned int lineno;
   char *buf;
   char sym[30];
@@ -595,7 +598,7 @@ stabs_generate_asm_lineno (void)
 
   hold = input_line_pointer;
 
-  as_where (&file, &lineno);
+  file = as_where (&lineno);
 
   /* Don't emit sequences of stabs for the same line.  */
   if (prev_file == NULL)
@@ -658,7 +661,6 @@ stabs_generate_asm_func (const char *funcname, const char *startlabname)
   static int void_emitted_p;
   char *hold = input_line_pointer;
   char *buf;
-  char *file;
   unsigned int lineno;
 
   if (! void_emitted_p)
@@ -668,7 +670,7 @@ stabs_generate_asm_func (const char *funcname, const char *startlabname)
       void_emitted_p = 1;
     }
 
-  as_where (&file, &lineno);
+  as_where (&lineno);
   if (asprintf (&buf, "\"%s:F1\",%d,0,%d,%s",
 		funcname, N_FUN, lineno + 1, startlabname) == -1)
     as_fatal ("%s", xstrerror (errno));

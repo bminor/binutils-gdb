@@ -1,5 +1,5 @@
 /* POWER/PowerPC XCOFF linker support.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -4145,7 +4145,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
   if (! flinfo->info->keep_memory)
     copy = TRUE;
   hash = TRUE;
-  if ((output_bfd->flags & BFD_TRADITIONAL_FORMAT) != 0)
+  if (flinfo->info->traditional_format)
     hash = FALSE;
 
   if (! _bfd_coff_get_external_symbols (input_bfd))
@@ -5118,7 +5118,8 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
   xcoff_data (output_bfd)->sntoc = section_index;
 
   /* Fill out the TC0 symbol.  */
-  if (!bfd_xcoff_put_symbol_name (output_bfd, flinfo->strtab, &irsym, "TOC"))
+  if (!bfd_xcoff_put_symbol_name (output_bfd, flinfo->info, flinfo->strtab,
+				  &irsym, "TOC"))
     return FALSE;
   irsym.n_value = best_address;
   irsym.n_scnum = section_index;
@@ -5383,7 +5384,8 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 	 the reloc.  */
       if (flinfo->info->strip != strip_all)
 	{
-	  result = bfd_xcoff_put_symbol_name (output_bfd, flinfo->strtab,
+	  result = bfd_xcoff_put_symbol_name (output_bfd, flinfo->info,
+					      flinfo->strtab,
 					      &irsym, h->root.root.string);
 	  if (!result)
 	    return FALSE;
@@ -5557,8 +5559,8 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 
   h->indx = obj_raw_syment_count (output_bfd);
 
-  result = bfd_xcoff_put_symbol_name (output_bfd, flinfo->strtab, &isym,
-				      h->root.root.string);
+  result = bfd_xcoff_put_symbol_name (output_bfd, flinfo->info, flinfo->strtab,
+				      &isym, h->root.root.string);
   if (!result)
     return FALSE;
 

@@ -1,5 +1,5 @@
 /* tc-ft32.c -- Assemble code for ft32
-   Copyright (C) 2008-2015 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -79,7 +79,7 @@ parse_condition (char **ptr)
 {
   char *s = *ptr;
   static const struct {
-    char *name;
+    const char *name;
     int bits;
   } ccs[] = {
     { "gt,"   , (2 << FT32_FLD_CR_BIT) | (5 << FT32_FLD_CB_BIT) | (1 << FT32_FLD_CV_BIT)},

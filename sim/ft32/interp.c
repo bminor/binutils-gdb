@@ -1,6 +1,6 @@
 /* Simulator for the FT32 processor
 
-   Copyright (C) 2008-2015 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
    Contributed by FTDI <support@ftdichip.com>
 
    This file is part of simulators.
@@ -788,7 +788,7 @@ SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
 	  host_callback *cb,
 	  struct bfd *abfd,
-	  char **argv)
+	  char * const *argv)
 {
   char c;
   size_t i;
@@ -807,9 +807,7 @@ sim_open (SIM_OPEN_KIND kind,
       return 0;
     }
 
-  /* getopt will print the error message so we just have to exit if this fails.
-     FIXME: Hmmm...  in the case of gdb we need getopt to call
-     print_filtered.  */
+  /* The parser will print an error message for us, so we silently return.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
       free_state (sd);
@@ -862,17 +860,11 @@ sim_open (SIM_OPEN_KIND kind,
   return sd;
 }
 
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  sim_module_uninstall (sd);
-}
-
 SIM_RC
 sim_create_inferior (SIM_DESC sd,
 		     struct bfd *abfd,
-		     char **argv,
-		     char **env)
+		     char * const *argv,
+		     char * const *env)
 {
   uint32_t addr;
   sim_cpu *cpu = STATE_CPU (sd, 0);
@@ -883,7 +875,11 @@ sim_create_inferior (SIM_DESC sd,
   else
     addr = 0;
 
-  if (STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG)
+  /* Standalone mode (i.e. `run`) will take care of the argv for us in
+     sim_open() -> sim_parse_args().  But in debug mode (i.e. 'target sim'
+     with `gdb`), we need to handle it because the user can change the
+     argv on the fly via gdb's 'run'.  */
+  if (STATE_PROG_ARGV (sd) != argv)
     {
       freeargv (STATE_PROG_ARGV (sd));
       STATE_PROG_ARGV (sd) = dupargv (argv);

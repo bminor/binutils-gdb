@@ -1,4 +1,3 @@
-
 ARC_RELOC_HOWTO(ARC_NONE, 0, \
                 2, \
                 32, \
@@ -32,7 +31,7 @@ ARC_RELOC_HOWTO(ARC_32, 4, \
                 32, \
                 replace_word32, \
                 bitfield, \
-                ( S + A ))
+                (NON_ME ( S + A ) ))
 
 ARC_RELOC_HOWTO(ARC_N8, 8, \
                 0, \
@@ -286,6 +285,13 @@ ARC_RELOC_HOWTO(ARC_SDA16_ST2, 48, \
                 signed, \
                 ( ( ( S + A ) - _SDA_BASE_ ) >> 2 ))
 
+ARC_RELOC_HOWTO(ARC_32_PCREL, 49, \
+                2, \
+                32, \
+                replace_word32, \
+                signed, \
+                ( ( S + A ) - PDATA ))
+
 ARC_RELOC_HOWTO(ARC_PC32, 50, \
                 2, \
                 32, \
@@ -354,7 +360,7 @@ ARC_RELOC_HOWTO(ARC_GOTPC, 58, \
                 32, \
                 replace_word32, \
                 signed, \
-                ( ( GOT + A ) - P ))
+                ( GOT_BEGIN - P ))
 
 ARC_RELOC_HOWTO(ARC_S21W_PCREL_PLT, 60, \
                 2, \
@@ -377,13 +383,6 @@ ARC_RELOC_HOWTO(ARC_TLS_DTPMOD, 66, \
                 dont, \
                 0)
 
-ARC_RELOC_HOWTO(ARC_TLS_DTPOFF, 67, \
-                2, \
-                32, \
-                replace_word32, \
-                dont, \
-                0)
-
 ARC_RELOC_HOWTO(ARC_TLS_TPOFF, 68, \
                 2, \
                 32, \
@@ -396,12 +395,12 @@ ARC_RELOC_HOWTO(ARC_TLS_GD_GOT, 69, \
                 32, \
                 replace_word32, \
                 dont, \
-                0)
+                ( G + GOT - P))
 
 ARC_RELOC_HOWTO(ARC_TLS_GD_LD, 70, \
                 2, \
-                32, \
-                replace_word32, \
+                0, \
+                replace_none, \
                 dont, \
                 0)
 
@@ -417,28 +416,35 @@ ARC_RELOC_HOWTO(ARC_TLS_IE_GOT, 72, \
                 32, \
                 replace_word32, \
                 dont, \
-                0)
+                ( G + GOT - P))
+
+ARC_RELOC_HOWTO(ARC_TLS_DTPOFF, 67, \
+                2, \
+                32, \
+                replace_word32, \
+                dont, \
+                ( S - TLS_REL ))
 
 ARC_RELOC_HOWTO(ARC_TLS_DTPOFF_S9, 73, \
                 2, \
                 32, \
                 replace_word32, \
                 dont, \
-                0)
+                ( S - TLS_REL ))
 
 ARC_RELOC_HOWTO(ARC_TLS_LE_S9, 74, \
                 2, \
                 32, \
                 replace_word32, \
                 dont, \
-                0)
+                ( ( S + TCB_SIZE ) - TLS_REL ))
 
 ARC_RELOC_HOWTO(ARC_TLS_LE_32, 75, \
                 2, \
                 32, \
                 replace_word32, \
                 dont, \
-                0)
+                ( ( S + A + TCB_SIZE ) - TLS_REL ))
 
 ARC_RELOC_HOWTO(ARC_S25W_PCREL_PLT, 76, \
                 2, \

@@ -1,6 +1,6 @@
 /* tc-i370.c -- Assembler for the IBM 360/370/390 instruction set.
    Loosely based on the ppc files by Linas Vepstas <linas@linas.org> 1998, 99
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -102,7 +102,7 @@ static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
 /* Structure to hold information about predefined registers.  */
 struct pd_reg
   {
-    char *name;
+    const char *name;
     int value;
   };
 
@@ -582,7 +582,7 @@ i370_elf_suffix (char **str_p, expressionS *exp_p)
 {
   struct map_bfd
   {
-    char *string;
+    const char *string;
     int length;
     bfd_reloc_code_real_type reloc;
   };
@@ -2375,7 +2375,7 @@ md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
 
-  return (addr + (1 << align) - 1) & (-1 << align);
+  return (addr + (1 << align) - 1) & -(1 << align);
 }
 
 /* We don't have any form of relaxing.  */
@@ -2498,7 +2498,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	 any operands that need relocation.  Due to the 12-bit naturew of
 	 i370 addressing, this would be unusual.  */
         {
-          char *sfile;
+          const char *sfile;
           unsigned int sline;
 
           /* Use expr_symbol_where to see if this is an expression

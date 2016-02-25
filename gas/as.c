@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987-2015 Free Software Foundation, Inc.
+   Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -142,7 +142,8 @@ static void
 select_emulation_mode (int argc, char **argv)
 {
   int i;
-  char *p, *em = 0;
+  char *p;
+  const char *em = NULL;
 
   for (i = 1; i < argc; i++)
     if (!strncmp ("--em", argv[i], 4))
@@ -275,7 +276,7 @@ Options:\n\
 #ifdef USE_EMULATIONS
   {
     int i;
-    char *def_em;
+    const char *def_em;
 
     fprintf (stream, "\
   --em=[");
@@ -642,7 +643,7 @@ parse_args (int * pargc, char *** pargv)
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
 	  printf (_("GNU assembler %s\n"), BFD_VERSION_STRING);
-	  printf (_("Copyright (C) 2015 Free Software Foundation, Inc.\n"));
+	  printf (_("Copyright (C) 2016 Free Software Foundation, Inc.\n"));
 	  printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or later.\n\

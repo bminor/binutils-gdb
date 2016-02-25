@@ -1,6 +1,6 @@
 // copy-relocs.h -- handle COPY relocations for gold   -*- C++ -*-
 
-// Copyright (C) 2006-2015 Free Software Foundation, Inc.
+// Copyright (C) 2006-2016 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -65,10 +65,15 @@ class Copy_relocs
   // will wind up.  REL is the reloc itself.  The Output_data_reloc
   // section is where the dynamic relocs are put.
   void
-  copy_reloc(Symbol_table*, Layout*, Sized_symbol<size>* sym,
+  copy_reloc(Symbol_table*,
+	     Layout*,
+	     Sized_symbol<size>* sym,
              Sized_relobj_file<size, big_endian>* object,
-	     unsigned int shndx, Output_section* output_section,
-	     const Reloc& rel,
+	     unsigned int shndx,
+	     Output_section* output_section,
+	     unsigned int r_type,
+	     typename elfcpp::Elf_types<size>::Elf_Addr r_offset,
+	     typename elfcpp::Elf_types<size>::Elf_Swxword r_addend,
 	     Output_data_reloc<sh_type, true, size, big_endian>*);
 
   // Return whether there are any saved relocations.
@@ -135,8 +140,13 @@ class Copy_relocs
 
   // Save a reloc against SYM for possible emission later.
   void
-  save(Symbol*, Sized_relobj_file<size, big_endian>*, unsigned int shndx,
-       Output_section*, const Reloc& rel);
+  save(Symbol*,
+       Sized_relobj_file<size, big_endian>*,
+       unsigned int shndx,
+       Output_section*,
+       unsigned int r_type,
+       typename elfcpp::Elf_types<size>::Elf_Addr r_offset,
+       typename elfcpp::Elf_types<size>::Elf_Swxword r_addend);
 
   // The target specific relocation type of the COPY relocation.
   const unsigned int copy_reloc_type_;

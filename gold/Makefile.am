@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#  Copyright (C) 2006-2015 Free Software Foundation, Inc.
+#  Copyright (C) 2006-2016 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -173,12 +173,13 @@ diststuff: $(EXTRA_DIST)
 
 TARGETSOURCES = \
 	i386.cc x86_64.cc sparc.cc powerpc.cc arm.cc arm-reloc-property.cc tilegx.cc \
-	mips.cc aarch64.cc aarch64-reloc-property.cc
+	mips.cc aarch64.cc aarch64-reloc-property.cc s390.cc
 
 ALL_TARGETOBJS = \
 	i386.$(OBJEXT) x86_64.$(OBJEXT) sparc.$(OBJEXT) powerpc.$(OBJEXT) \
 	arm.$(OBJEXT) arm-reloc-property.$(OBJEXT) tilegx.$(OBJEXT) \
-	mips.$(OBJEXT) aarch64.$(OBJEXT) aarch64-reloc-property.$(OBJEXT)
+	mips.$(OBJEXT) aarch64.$(OBJEXT) aarch64-reloc-property.$(OBJEXT) \
+	s390.$(OBJEXT)
 
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES) $(DEFFILES)
 libgold_a_LIBADD = $(LIBOBJS)

@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2015 Free Software Foundation, Inc.
+# Copyright (C) 2012-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -111,6 +111,7 @@ if { [is_elf_format] } then {
 	    run_dump_test "file"
 	}
     }
+    run_dump_test "file-2"
     setup_xfail "nds32*-*-*"
     run_dump_test "group0a"
     run_dump_test "group0b"
@@ -149,7 +150,7 @@ if { [is_elf_format] } then {
 	    # against ordinary symbols into relocations against section symbols.
 	    # This is usually revealed by the error message:
 	    #  symbol `sym' required but not present
-    	setup_xfail "m681*-*-*" "m68hc*-*-*" "arc-*-*"
+	    setup_xfail "m681*-*-*" "m68hc*-*-*" "arc*-*-*"
 	    run_dump_test redef
 	    run_dump_test equ-reloc
 	}
@@ -200,18 +201,24 @@ if { [is_elf_format] } then {
     run_dump_test "section7"
     run_dump_test "section8"
     run_dump_test "section9"
+    run_dump_test "section10"
     run_dump_test "dwarf2-1"
     run_dump_test "dwarf2-2"
     run_dump_test "dwarf2-3"
     run_dump_test "dwarf2-4"
+    run_dump_test "bss"
+    run_dump_test "bad-bss"
     run_dump_test "bad-section-flag"
     run_dump_test "bad-size"
     run_dump_test "bad-group"
 
     run_dump_test "syms"
     
-    run_dump_test "common1"
-    run_dump_test "common2"
+    # hpux has a non-standard common directive.
+    if { ![istarget "*-*-hpux*"] } then {
+	run_dump_test "common1"
+	run_dump_test "common2"
+    }
 
     run_dump_test "strtab"
 

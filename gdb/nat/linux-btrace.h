@@ -1,6 +1,6 @@
 /* Linux-dependent part of branch trace support for GDB, and GDBserver.
 
-   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+   Copyright (C) 2013-2016 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -63,7 +63,8 @@ struct btrace_tinfo_bts
   struct perf_event_buffer bts;
 };
 
-/* Branch trace target information for Intel(R) Processor Trace.  */
+/* Branch trace target information for Intel Processor Trace
+   tracing.  */
 struct btrace_tinfo_pt
 {
   /* The Linux perf_event configuration for collecting the branch trace.  */

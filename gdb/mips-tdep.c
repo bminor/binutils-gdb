@@ -1,6 +1,6 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 1988-2015 Free Software Foundation, Inc.
+   Copyright (C) 1988-2016 Free Software Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -1518,10 +1518,8 @@ mips_insn_size (enum mips_isa isa, ULONGEST insn)
   switch (isa)
     {
     case ISA_MICROMIPS:
-      if (micromips_op (insn) == 0x1f)
-        return 3 * MIPS_INSN16_SIZE;
-      else if (((micromips_op (insn) & 0x4) == 0x4)
-	       || ((micromips_op (insn) & 0x7) == 0x0))
+      if ((micromips_op (insn) & 0x4) == 0x4
+	  || (micromips_op (insn) & 0x7) == 0x0)
         return 2 * MIPS_INSN16_SIZE;
       else
         return MIPS_INSN16_SIZE;
@@ -1881,12 +1879,6 @@ micromips_next_pc (struct frame_info *frame, CORE_ADDR pc)
   pc += MIPS_INSN16_SIZE;
   switch (mips_insn_size (ISA_MICROMIPS, insn))
     {
-    /* 48-bit instructions.  */
-    case 3 * MIPS_INSN16_SIZE: /* POOL48A: bits 011111 */
-      /* No branch or jump instructions in this category.  */
-      pc += 2 * MIPS_INSN16_SIZE;
-      break;
-
     /* 32-bit instructions.  */
     case 2 * MIPS_INSN16_SIZE:
       insn <<= 16;
@@ -2993,13 +2985,6 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
       loc += MIPS_INSN16_SIZE;
       switch (mips_insn_size (ISA_MICROMIPS, insn))
 	{
-	/* 48-bit instructions.  */
-	case 3 * MIPS_INSN16_SIZE:
-	  /* No prologue instructions in this category.  */
-	  this_non_prologue_insn = 1;
-	  loc += 2 * MIPS_INSN16_SIZE;
-	  break;
-
 	/* 32-bit instructions.  */
 	case 2 * MIPS_INSN16_SIZE:
 	  insn <<= 16;
@@ -4041,11 +4026,6 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
          its destination address.  */
       switch (mips_insn_size (ISA_MICROMIPS, insn))
 	{
-	/* 48-bit instructions.  */
-	case 3 * MIPS_INSN16_SIZE: /* POOL48A: bits 011111 */
-	  loc += 2 * MIPS_INSN16_SIZE;
-	  break;
-
 	/* 32-bit instructions.  */
 	case 2 * MIPS_INSN16_SIZE:
 	  switch (micromips_op (insn))
@@ -6769,11 +6749,6 @@ micromips_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       loc += MIPS_INSN16_SIZE;
       switch (mips_insn_size (ISA_MICROMIPS, insn))
 	{
-	/* 48-bit instructions.  */
-	case 3 * MIPS_INSN16_SIZE:
-	  /* No epilogue instructions in this category.  */
-	  return 0;
-
 	/* 32-bit instructions.  */
 	case 2 * MIPS_INSN16_SIZE:
 	  insn <<= 16;
@@ -7122,9 +7097,7 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
 	  int size;
 
 	  insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &err);
-	  size = (err != 0
-		  ? 2 : (mips_insn_size (ISA_MICROMIPS, insn) == 2
-			 ? 2 : 4));
+	  size = err ? 2 : mips_insn_size (ISA_MICROMIPS, insn);
 	  *pcptr = unmake_compact_addr (pc);
 	  *lenptr = size;
 	  return (size == 2) ? micromips16_big_breakpoint
@@ -7170,12 +7143,11 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
 	  static gdb_byte micromips16_little_breakpoint[] = { 0x85, 0x46 };
 	  static gdb_byte micromips32_little_breakpoint[] = { 0x5, 0, 0x7, 0 };
 	  ULONGEST insn;
-	  int status;
+	  int err;
 	  int size;
 
-	  insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &status);
-	  size = status ? 2
-			: mips_insn_size (ISA_MICROMIPS, insn) == 2 ? 2 : 4;
+	  insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &err);
+	  size = err ? 2 : mips_insn_size (ISA_MICROMIPS, insn);
 	  *pcptr = unmake_compact_addr (pc);
 	  *lenptr = size;
 	  return (size == 2) ? micromips16_little_breakpoint
@@ -7375,12 +7347,14 @@ micromips_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch,
 {
   ULONGEST insn;
   int status;
+  int size;
 
   insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, addr, &status);
   if (status)
     return 0;
+  size = mips_insn_size (ISA_MICROMIPS, insn);
   insn <<= 16;
-  if (mips_insn_size (ISA_MICROMIPS, insn) == 2 * MIPS_INSN16_SIZE)
+  if (size == 2 * MIPS_INSN16_SIZE)
     {
       insn |= mips_fetch_instruction (gdbarch, ISA_MICROMIPS, addr, &status);
       if (status)

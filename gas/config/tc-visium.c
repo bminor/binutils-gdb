@@ -1,6 +1,6 @@
 /* This is the machine dependent code of the Visium Assembler.
 
-   Copyright (C) 2005-2015 Free Software Foundation, Inc.
+   Copyright (C) 2005-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -224,7 +224,7 @@ md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
 
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
 void
@@ -265,7 +265,7 @@ static struct visium_option_table visium_opts[] =
 
 struct visium_arch_option_table
 {
-  char *name;
+  const char *name;
   enum visium_arch_val value;
 };
 
@@ -280,10 +280,10 @@ static struct visium_arch_option_table visium_archs[] =
 
 struct visium_long_option_table
 {
-  char *option;			/* Substring to match.  */
-  char *help;			/* Help information.  */
+  const char *option;			/* Substring to match.  */
+  const char *help;			/* Help information.  */
   int (*func) (char *subopt);	/* Function to decode sub-option.  */
-  char *deprecated;		/* If non-null, print this message.  */
+  const char *deprecated;		/* If non-null, print this message.  */
 };
 
 static int

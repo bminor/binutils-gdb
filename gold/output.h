@@ -1,6 +1,6 @@
 // output.h -- manage the output file for gold   -*- C++ -*-
 
-// Copyright (C) 2006-2015 Free Software Foundation, Inc.
+// Copyright (C) 2006-2016 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -2335,6 +2335,13 @@ class Output_data_got : public Output_data_got_base
   bool
   add_local(Relobj* object, unsigned int sym_index, unsigned int got_type);
 
+  // Add an entry for a local symbol plus ADDEND to the GOT.  This returns
+  // true if this is a new GOT entry, false if the symbol already has a GOT
+  // entry.
+  bool
+  add_local(Relobj* object, unsigned int sym_index, unsigned int got_type,
+            uint64_t addend);
+
   // Like add_local, but use the PLT offset of the local symbol if it
   // has one.
   bool
@@ -2353,6 +2360,13 @@ class Output_data_got : public Output_data_got_base
 		     unsigned int got_type, Output_data_reloc_generic* rel_dyn,
 		     unsigned int r_type);
 
+  // Add an entry for a local symbol plus ADDEND to the GOT, and add a dynamic
+  // relocation of type R_TYPE for the GOT entry.
+  void
+  add_local_with_rel(Relobj* object, unsigned int sym_index,
+		     unsigned int got_type, Output_data_reloc_generic* rel_dyn,
+		     unsigned int r_type, uint64_t addend);
+
   // Add a pair of entries for a local symbol to the GOT, and add
   // a dynamic relocation of type R_TYPE using the section symbol of
   // the output section to which input section SHNDX maps, on the first.
@@ -2363,6 +2377,17 @@ class Output_data_got : public Output_data_got_base
 			  unsigned int shndx, unsigned int got_type,
 			  Output_data_reloc_generic* rel_dyn,
 			  unsigned int r_type);
+
+  // Add a pair of entries for a local symbol plus ADDEND to the GOT, and add
+  // a dynamic relocation of type R_TYPE using the section symbol of
+  // the output section to which input section SHNDX maps, on the first.
+  // The first got entry will have a value of zero, the second the
+  // value of the local symbol.
+  void
+  add_local_pair_with_rel(Relobj* object, unsigned int sym_index,
+			  unsigned int shndx, unsigned int got_type,
+			  Output_data_reloc_generic* rel_dyn,
+			  unsigned int r_type, uint64_t addend);
 
   // Add a pair of entries for a local symbol to the GOT, and add
   // a dynamic relocation of type R_TYPE using STN_UNDEF on the first.
@@ -2434,25 +2459,39 @@ class Output_data_got : public Output_data_got_base
    public:
     // Create a zero entry.
     Got_entry()
-      : local_sym_index_(RESERVED_CODE), use_plt_or_tls_offset_(false)
+      : local_sym_index_(RESERVED_CODE), use_plt_or_tls_offset_(false),
+	addend_(0)
     { this->u_.constant = 0; }
 
     // Create a global symbol entry.
     Got_entry(Symbol* gsym, bool use_plt_or_tls_offset)
       : local_sym_index_(GSYM_CODE),
-	use_plt_or_tls_offset_(use_plt_or_tls_offset)
+	use_plt_or_tls_offset_(use_plt_or_tls_offset), addend_(0)
     { this->u_.gsym = gsym; }
 
     // Create a local symbol entry.
     Got_entry(Relobj* object, unsigned int local_sym_index,
 	      bool use_plt_or_tls_offset)
       : local_sym_index_(local_sym_index),
-	use_plt_or_tls_offset_(use_plt_or_tls_offset)
+	use_plt_or_tls_offset_(use_plt_or_tls_offset), addend_(0)
     {
       gold_assert(local_sym_index != GSYM_CODE
 		  && local_sym_index != CONSTANT_CODE
 		  && local_sym_index != RESERVED_CODE
 		  && local_sym_index == this->local_sym_index_);
+      this->u_.object = object;
+    }
+
+    // Create a local symbol entry plus addend.
+    Got_entry(Relobj* object, unsigned int local_sym_index,
+        bool use_plt_or_tls_offset, uint64_t addend)
+      : local_sym_index_(local_sym_index),
+	use_plt_or_tls_offset_(use_plt_or_tls_offset), addend_(addend)
+    {
+      gold_assert(local_sym_index != GSYM_CODE
+      && local_sym_index != CONSTANT_CODE
+      && local_sym_index != RESERVED_CODE
+      && local_sym_index == this->local_sym_index_);
       this->u_.object = object;
     }
 
@@ -2489,6 +2528,8 @@ class Output_data_got : public Output_data_got_base
     // Whether to use the PLT offset of the symbol if it has one.
     // For TLS symbols, whether to offset the symbol value.
     bool use_plt_or_tls_offset_ : 1;
+    // The addend.
+    uint64_t addend_;
   };
 
   typedef std::vector<Got_entry> Got_entries;

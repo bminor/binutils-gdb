@@ -49,16 +49,16 @@ Disassembly of section \.dat[0-9a-f ]+:
 Disassembly of section \.got:
 
 [0-9a-f ]+<_GLOBAL_OFFSET_TABLE_-0x20>:
-[0-9a-f ]+:	00 00 04 b8 	.*
+[0-9a-f ]+:	00 00 03 b0 	.*
 [0-9a-f	 ]+: R_FRV_FUNCDESC_VALUE	WF9
 [0-9a-f ]+:	00 00 00 02 	.*
-[0-9a-f ]+:	00 00 04 b0 	.*
+[0-9a-f ]+:	00 00 03 a8 	.*
 [0-9a-f	 ]+: R_FRV_FUNCDESC_VALUE	WF8
 [0-9a-f ]+:	00 00 00 02 	.*
-[0-9a-f ]+:	00 00 04 a8 	.*
+[0-9a-f ]+:	00 00 03 a0 	.*
 [0-9a-f	 ]+: R_FRV_FUNCDESC_VALUE	WF0
 [0-9a-f ]+:	00 00 00 02 	.*
-[0-9a-f ]+:	00 00 04 a0 	.*
+[0-9a-f ]+:	00 00 03 98 	.*
 [0-9a-f	 ]+: R_FRV_FUNCDESC_VALUE	WF7
 [0-9a-f ]+:	00 00 00 02 	.*
 

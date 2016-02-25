@@ -692,6 +692,8 @@ DEFAULT_TARGET_X32_FALSE
 DEFAULT_TARGET_X32_TRUE
 DEFAULT_TARGET_X86_64_FALSE
 DEFAULT_TARGET_X86_64_TRUE
+DEFAULT_TARGET_S390_FALSE
+DEFAULT_TARGET_S390_TRUE
 DEFAULT_TARGET_SPARC_FALSE
 DEFAULT_TARGET_SPARC_TRUE
 DEFAULT_TARGET_POWERPC_FALSE
@@ -3475,6 +3477,14 @@ fi
 else
   DEFAULT_TARGET_SPARC_TRUE='#'
   DEFAULT_TARGET_SPARC_FALSE=
+fi
+
+	 if test "$targ_obj" = "s390"; then
+  DEFAULT_TARGET_S390_TRUE=
+  DEFAULT_TARGET_S390_FALSE='#'
+else
+  DEFAULT_TARGET_S390_TRUE='#'
+  DEFAULT_TARGET_S390_FALSE=
 fi
 
 	target_x86_64=no
@@ -6328,6 +6338,7 @@ fi
     powerpc*) false;;
     x86_64) false;;
     sparc64) false;;
+    s390x) false;;
     *) true;;
   esac; then
   FN_PTRS_IN_SO_WITHOUT_PIC_TRUE=
@@ -7753,6 +7764,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEFAULT_TARGET_SPARC_TRUE}" && test -z "${DEFAULT_TARGET_SPARC_FALSE}"; then
   as_fn_error "conditional \"DEFAULT_TARGET_SPARC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_S390_TRUE}" && test -z "${DEFAULT_TARGET_S390_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_S390\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEFAULT_TARGET_X86_64_TRUE}" && test -z "${DEFAULT_TARGET_X86_64_FALSE}"; then

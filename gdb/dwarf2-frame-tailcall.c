@@ -1,6 +1,6 @@
 /* Virtual tail call frames unwinder for GDB.
 
-   Copyright (C) 2010-2015 Free Software Foundation, Inc.
+   Copyright (C) 2010-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -386,13 +386,15 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
       /* call_site_find_chain can throw an exception.  */
       chain = call_site_find_chain (prev_gdbarch, prev_pc, this_pc);
 
-      if (entry_cfa_sp_offsetp == NULL)
-	break;
-      sp_regnum = gdbarch_sp_regnum (prev_gdbarch);
-      if (sp_regnum == -1)
-	break;
-      prev_sp = frame_unwind_register_unsigned (this_frame, sp_regnum);
-      prev_sp_p = 1;
+      if (entry_cfa_sp_offsetp != NULL)
+	{
+	  sp_regnum = gdbarch_sp_regnum (prev_gdbarch);
+	  if (sp_regnum != -1)
+	    {
+	      prev_sp = frame_unwind_register_unsigned (this_frame, sp_regnum);
+	      prev_sp_p = 1;
+	    }
+	}
     }
   CATCH (except, RETURN_MASK_ERROR)
     {

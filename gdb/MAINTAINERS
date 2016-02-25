@@ -308,6 +308,7 @@ the native maintainer when resolving ABI issues.
 	rx		--target=rx-elf ,-Werror
 
 	s390		--target=s390-linux-gnu ,-Werror
+			Andreas Arnez		arnez@linux.vnet.ibm.com
 
 	score	--target=score-elf
 			Qinwei		qinwei@sunnorth.com.cn
@@ -369,6 +370,8 @@ FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 Core: Generic components used by all of GDB
 
 threads			Mark Kettenis		kettenis@gnu.org
+
+linespec		Keith Seitz             keiths@redhat.com
 
 language support
   Ada			Joel Brobecker		brobecker@adacore.com
@@ -470,6 +473,7 @@ FSF assignment and have submitted one good patch.
 Pedro Alves					pedro_alves@portugalmail.pt
 David Anderson					davea@sgi.com
 John David Anglin				dave.anglin@nrc-cnrc.gc.ca
+Andreas Arnez					arnez@linux.vnet.ibm.com
 Shrinivas Atre					shrinivasa@kpitcummins.com
 Sterling Augustine				saugustine@google.com
 John Baldwin					jhb@freebsd.org
@@ -567,6 +571,7 @@ Mark Kettenis					kettenis@gnu.org
 Marc Khouzam					marc.khouzam@ericsson.com
 Jim Kingdon					kingdon@panix.com
 Paul Koning					paul_koning@dell.com
+Marcin Kościelnicki				koriakin@0x04.net
 Jan Kratochvil					jan.kratochvil@redhat.com
 Maxim Kuvyrkov					maxim@kugelworks.com
 Pierre Langlois 				pierre.langlois@arm.com

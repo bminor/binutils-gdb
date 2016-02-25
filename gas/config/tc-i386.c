@@ -1,5 +1,5 @@
 /* tc-i386.c -- Assemble code for the Intel 80386
-   Copyright (C) 1989-2015 Free Software Foundation, Inc.
+   Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -552,6 +552,15 @@ static int allow_index_reg = 0;
    specified explicitly.  */
 static int omit_lock_prefix = 0;
 
+/* 1 if the assembler should encode lfence, mfence, and sfence as
+   "lock addl $0, (%{re}sp)".  */
+static int avoid_fence = 0;
+
+/* 1 if the assembler should generate relax relocations.  */
+
+static int generate_relax_relocations
+  = DEFAULT_GENERATE_X86_RELAX_RELOCATIONS;
+
 static enum check_kind
   {
     check_none = 0,
@@ -950,6 +959,8 @@ static const arch_entry cpu_arch[] =
     CPU_CLZERO_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".mwaitx"), PROCESSOR_UNKNOWN,
     CPU_MWAITX_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".ospke"), PROCESSOR_UNKNOWN,
+    CPU_OSPKE_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF
@@ -1868,6 +1879,9 @@ register_number (const reg_entry *r)
 
   if (r->reg_flags & RegRex)
     nr += 8;
+
+  if (r->reg_flags & RegVRex)
+    nr += 16;
 
   return nr;
 }
@@ -4216,6 +4230,8 @@ optimize_imm (void)
 		i.op[op].imms->X_add_number =
 		  (((i.op[op].imms->X_add_number & 0xffff) ^ 0x8000) - 0x8000);
 	      }
+#ifdef BFD64
+	    /* Store 32-bit immediate in 64-bit for 64-bit BFD.  */
 	    if ((i.types[op].bitfield.imm32)
 		&& ((i.op[op].imms->X_add_number & ~(((offsetT) 2 << 31) - 1))
 		    == 0))
@@ -4224,6 +4240,7 @@ optimize_imm (void)
 						^ ((offsetT) 1 << 31))
 					       - ((offsetT) 1 << 31));
 	      }
+#endif
 	    i.types[op]
 	      = operand_type_or (i.types[op],
 				 smallest_imm_type (i.op[op].imms->X_add_number));
@@ -4304,6 +4321,8 @@ optimize_disp (void)
 		op_disp = (((op_disp & 0xffff) ^ 0x8000) - 0x8000);
 		i.types[op].bitfield.disp64 = 0;
 	      }
+#ifdef BFD64
+	    /* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
 	    if (i.types[op].bitfield.disp32
 		&& (op_disp & ~(((offsetT) 2 << 31) - 1)) == 0)
 	      {
@@ -4314,6 +4333,7 @@ optimize_disp (void)
 		op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
 		i.types[op].bitfield.disp64 = 0;
 	      }
+#endif
 	    if (!op_disp && i.types[op].bitfield.baseindex)
 	      {
 		i.types[op].bitfield.disp8 = 0;
@@ -6948,6 +6968,22 @@ output_insn (void)
       unsigned int j;
       unsigned int prefix;
 
+      if (avoid_fence
+         && i.tm.base_opcode == 0xfae
+         && i.operands == 1
+         && i.imm_operands == 1
+         && (i.op[0].imms->X_add_number == 0xe8
+             || i.op[0].imms->X_add_number == 0xf0
+             || i.op[0].imms->X_add_number == 0xf8))
+        {
+          /* Encode lfence, mfence, and sfence as
+             f0 83 04 24 00   lock addl $0x0, (%{re}sp).  */
+          offsetT val = 0x240483f0ULL;
+          p = frag_more (5);
+          md_number_to_chars (p, val, 5);
+          return;
+        }
+
       /* Some processors fail on LOCK prefix. This options makes
 	 assembler ignore LOCK prefix and serves as a workaround.  */
       if (omit_lock_prefix)
@@ -7239,9 +7275,14 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	      /* Check for "call/jmp *mem", "mov mem, %reg",
 		 "test %reg, mem" and "binop mem, %reg" where binop
 		 is one of adc, add, and, cmp, or, sbb, sub, xor
-		 instructions.  */
-	      if ((i.rm.mode == 2
-		   || (i.rm.mode == 0 && i.rm.regmem == 5))
+		 instructions.  Always generate R_386_GOT32X for
+		 "sym*GOT" operand in 32-bit mode.  */
+	      if ((generate_relax_relocations
+		   || (!object_64bit
+		       && i.rm.mode == 0
+		       && i.rm.regmem == 5))
+		  && (i.rm.mode == 2
+		      || (i.rm.mode == 0 && i.rm.regmem == 5))
 		  && ((i.operands == 1
 		       && i.tm.base_opcode == 0xff
 		       && (i.rm.reg == 2 || i.rm.reg == 4))
@@ -9609,11 +9650,13 @@ const char *md_shortopts = "qn";
 #define OPTION_MEVEXLIG (OPTION_MD_BASE + 16)
 #define OPTION_MEVEXWIG (OPTION_MD_BASE + 17)
 #define OPTION_MBIG_OBJ (OPTION_MD_BASE + 18)
-#define OPTION_OMIT_LOCK_PREFIX (OPTION_MD_BASE + 19)
+#define OPTION_MOMIT_LOCK_PREFIX (OPTION_MD_BASE + 19)
 #define OPTION_MEVEXRCIG (OPTION_MD_BASE + 20)
 #define OPTION_MSHARED (OPTION_MD_BASE + 21)
 #define OPTION_MAMD64 (OPTION_MD_BASE + 22)
 #define OPTION_MINTEL64 (OPTION_MD_BASE + 23)
+#define OPTION_MFENCE_AS_LOCK_ADD (OPTION_MD_BASE + 24)
+#define OPTION_MRELAX_RELOCATIONS (OPTION_MD_BASE + 25)
 
 struct option md_longopts[] =
 {
@@ -9644,7 +9687,9 @@ struct option md_longopts[] =
 # if defined (TE_PE) || defined (TE_PEP)
   {"mbig-obj", no_argument, NULL, OPTION_MBIG_OBJ},
 #endif
-  {"momit-lock-prefix", required_argument, NULL, OPTION_OMIT_LOCK_PREFIX},
+  {"momit-lock-prefix", required_argument, NULL, OPTION_MOMIT_LOCK_PREFIX},
+  {"mfence-as-lock-add", required_argument, NULL, OPTION_MFENCE_AS_LOCK_ADD},
+  {"mrelax-relocations", required_argument, NULL, OPTION_MRELAX_RELOCATIONS},
   {"mevexrcig", required_argument, NULL, OPTION_MEVEXRCIG},
   {"mamd64", no_argument, NULL, OPTION_MAMD64},
   {"mintel64", no_argument, NULL, OPTION_MINTEL64},
@@ -9955,13 +10000,31 @@ md_parse_option (int c, char *arg)
       break;
 #endif
 
-    case OPTION_OMIT_LOCK_PREFIX:
+    case OPTION_MOMIT_LOCK_PREFIX:
       if (strcasecmp (arg, "yes") == 0)
         omit_lock_prefix = 1;
       else if (strcasecmp (arg, "no") == 0)
         omit_lock_prefix = 0;
       else
         as_fatal (_("invalid -momit-lock-prefix= option: `%s'"), arg);
+      break;
+
+    case OPTION_MFENCE_AS_LOCK_ADD:
+      if (strcasecmp (arg, "yes") == 0)
+        avoid_fence = 1;
+      else if (strcasecmp (arg, "no") == 0)
+        avoid_fence = 0;
+      else
+        as_fatal (_("invalid -mfence-as-lock-add= option: `%s'"), arg);
+      break;
+
+    case OPTION_MRELAX_RELOCATIONS:
+      if (strcasecmp (arg, "yes") == 0)
+        generate_relax_relocations = 1;
+      else if (strcasecmp (arg, "no") == 0)
+        generate_relax_relocations = 0;
+      else
+        as_fatal (_("invalid -mrelax-relocations= option: `%s'"), arg);
       break;
 
     case OPTION_MAMD64:
@@ -10144,6 +10207,13 @@ md_show_usage (FILE *stream)
   -momit-lock-prefix=[no|yes]\n\
                           strip all lock prefixes\n"));
   fprintf (stream, _("\
+  -mfence-as-lock-add=[no|yes]\n\
+                          encode lfence, mfence and sfence as\n\
+                           lock addl $0x0, (%%{re}sp)\n"));
+  fprintf (stream, _("\
+  -mrelax-relocations=[no|yes]\n\
+                          generate relax relocations\n"));
+  fprintf (stream, _("\
   -mamd64                 accept only AMD64 ISA\n"));
   fprintf (stream, _("\
   -mintel64               accept only Intel64 ISA\n"));
@@ -10317,7 +10387,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
       int align;
 
       align = bfd_get_section_alignment (stdoutput, segment);
-      size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+      size = ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
     }
 #endif
 

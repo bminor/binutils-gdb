@@ -1,6 +1,6 @@
 /* Low level child interface to ptrace.
 
-   Copyright (C) 2004-2015 Free Software Foundation, Inc.
+   Copyright (C) 2004-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,5 +32,10 @@ extern struct target_ops *inf_ptrace_target (void);
 extern struct target_ops *
   inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)
 					(struct gdbarch *, int, int));
+
+/* Return which PID to pass to ptrace in order to observe/control the
+   tracee identified by PTID.  */
+
+extern pid_t get_ptrace_pid (ptid_t);
 
 #endif

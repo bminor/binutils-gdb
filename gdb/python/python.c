@@ -1,6 +1,6 @@
 /* General python/gdb code
 
-   Copyright (C) 2008-2015 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -748,7 +748,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   TRY
     {
       if (location != NULL)
-	sals = decode_line_1 (location, 0, 0, 0);
+	sals = decode_line_1 (location, 0, NULL, NULL, 0);
       else
 	{
 	  set_default_source_symtab_and_line ();

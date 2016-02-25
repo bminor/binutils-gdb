@@ -1,5 +1,5 @@
 /* Parse options for the GNU linker.
-   Copyright (C) 1991-2015 Free Software Foundation, Inc.
+   Copyright (C) 1991-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -65,9 +65,9 @@ static void help (void);
 
 enum control_enum {
   /* Use one dash before long option name.  */
-  ONE_DASH,
+  ONE_DASH = 1,
   /* Use two dashes before long option name.  */
-  TWO_DASHES,
+  TWO_DASHES = 2,
   /* Only accept two dashes before the long option name.
      This is an overloading of the use of this enum, since originally it
      was only intended to tell the --help display function how to display
@@ -679,7 +679,28 @@ parse_args (unsigned argc, char **argv)
       switch (optc)
 	{
 	case '?':
-	  einfo (_("%P: unrecognized option '%s'\n"), argv[last_optind]);
+	  {
+	    /* If the last word on the command line is an option that
+	       requires an argument, getopt will refuse to recognise it.
+	       Try to catch such options here and issue a more helpful
+	       error message than just "unrecognized option".  */
+	    int opt;
+
+	    for (opt = ARRAY_SIZE (ld_options); opt--;)
+	      if (ld_options[opt].opt.has_arg == required_argument
+		  /* FIXME: There are a few short options that do not
+		     have long equivalents, but which require arguments.
+		     We should handle them too.  */
+		  && ld_options[opt].opt.name != NULL
+		  && strcmp (argv[last_optind] + ld_options[opt].control, ld_options[opt].opt.name) == 0)
+		{
+		  einfo (_("%P: %s: missing argument\n"), argv[last_optind]);
+		  break;
+		}
+
+	    if (opt == -1)
+	      einfo (_("%P: unrecognized option '%s'\n"), argv[last_optind]);
+	  }
 	  /* Fall through.  */
 
 	default:
@@ -997,7 +1018,7 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_PLUGIN_OPT:
 	  if (plugin_opt_plugin_arg (optarg))
-	    einfo(_("%P%F: bad -plugin-opt option\n"));
+	    einfo (_("%P%F: bad -plugin-opt option\n"));
 	  break;
 #endif /* ENABLE_PLUGINS */
 	case 'q':
@@ -1565,15 +1586,14 @@ parse_args (unsigned argc, char **argv)
   /* We may have -Bsymbolic, -Bsymbolic-functions, --dynamic-list-data,
      --dynamic-list-cpp-new, --dynamic-list-cpp-typeinfo and
      --dynamic-list FILE.  -Bsymbolic and -Bsymbolic-functions are
-     for shared libraries.  -Bsymbolic overrides all others and vice
-     versa.  */
+     for PIC outputs.  -Bsymbolic overrides all others and vice versa.  */
   switch (command_line.symbolic)
     {
     case symbolic_unset:
       break;
     case symbolic:
-      /* -Bsymbolic is for shared library only.  */
-      if (bfd_link_dll (&link_info))
+      /* -Bsymbolic is for PIC output only.  */
+      if (bfd_link_pic (&link_info))
 	{
 	  link_info.symbolic = TRUE;
 	  /* Should we free the unused memory?  */
@@ -1582,8 +1602,8 @@ parse_args (unsigned argc, char **argv)
 	}
       break;
     case symbolic_functions:
-      /* -Bsymbolic-functions is for shared library only.  */
-      if (bfd_link_dll (&link_info))
+      /* -Bsymbolic-functions is for PIC output only.  */
+      if (bfd_link_pic (&link_info))
 	command_line.dynamic_list = dynamic_list_data;
       break;
     }

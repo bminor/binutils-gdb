@@ -1,6 +1,6 @@
 // dynobj.h -- dynamic object support for gold   -*- C++ -*-
 
-// Copyright (C) 2006-2015 Free Software Foundation, Inc.
+// Copyright (C) 2006-2016 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -132,7 +132,7 @@ class Dynobj : public Object
 		       bool for_gnu_hash_table);
 
   // Sized version of create_elf_hash_table.
-  template<bool big_endian>
+  template<int size, bool big_endian>
   static void
   sized_create_elf_hash_table(const std::vector<uint32_t>& bucket,
 			      const std::vector<uint32_t>& chain,

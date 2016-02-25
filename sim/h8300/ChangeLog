@@ -1,3 +1,166 @@
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (sim_open): Mark argv const.
+	(sim_create_inferior): Mark argv and env const.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (sim_open): Update sim_parse_args comment.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_ENDIAN): Change BIG_ENDIAN to BIG.
+	* configure: Regenerate.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (sim_state_initialize): Delete.
+	(sim_open): Replace sim_state_initialize call with SBR_REGNUM
+	assignment.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (h8300_reg_store): Delete sd.  Change init_pointers to
+	use CPU_STATE (cpu).  Change h8_set_pc to cpu->pc.  Return -1 and
+	drop the printf if the default case.  Change all the set func calls
+	to use cpu->regs[rn] instead.
+	(h8300_reg_store): Delete sd.  Change init_pointers to
+	use CPU_STATE (cpu).  Change h8_get_pc to cpu->pc.  Return -1 and
+	drop the printf if the default case.  Change all the get func calls
+	to use cpu->regs[rn] instead.  Add ZERO_REGNUM case.  Return 2 and
+	4 instead of -1 at the end.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (lvalue): Change sim_engine_set_run_state calls to
+	sim_engine_halt.  Declare local cpu.
+	(fetch_1): Likewise.
+	(store_1): Likewise.
+	(sim_resume): Rename to ...
+	(step_once): ... this.  Declare init1, poll_count, reason, and
+	sigrc variables.  Delete step checking.  Change
+	sim_engine_set_run_state calls to sim_engine_halt.  Delete poll
+	logic.  Change while(1) loop to while(0).
+	(sim_engine_run): New function.
+	* Makefile.in (SIM_OBJS): Add sim-resume.o.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (sim_open): Delete current_alignment and
+	current_target_byte_order assignments.
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN and
+	SIM_AC_OPTION_ALIGNMENT.
+	* configure: Regenerate.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (sim_store_register): Rename to ...
+	(h8300_reg_store): ... this.  Declare sd.
+	(sim_fetch_register): Rename to ...
+	(h8300_reg_fetch): ... this.  Declare sd.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (lreg): Delete.
+	(init_pointers): Delete lreg assignments.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* inst.h: Delete file.
+	* Makefile.in (compile.o): Delete rule.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (H8300_OPTIONS): New enum from common/sim-options.c.
+	(h8300_option_handler): New func from common/sim-options.c.
+	(h8300_options): New options from common/sim-options.c.
+	(sim_open): Call sim_add_option_table.
+	* tconfig.h: Delete file.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.h (SIM_HAVE_SIMCACHE): Delete.
+
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (sim_callback, sim_kind, myname): Delete.
+	(init_pointers, sim_store_register, sim_fetch_register, sim_info):
+	Change sim_callback->printf_filtered calls to sim_io_printf.
+	(sim_resume): Likewise.  Declare sim_callback.
+	(sim_open): Delete sim_callback, sim_kind, and myname assignment.
+	(sim_load); Use sd to look up myname, sim_callback, and sim_kind.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-reason.o and sim-stop.o.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Add sim-reason.o and sim-stop.o.
+	* compile.c (sim_stop, sim_stop_reason): Delete.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-load.o.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (sim_close): Delete.
+
+2015-11-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (littleendian): Delete.
+	(init_pointers): Delete littleendian usage.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2011-2015 Free Software Foundation, Inc.
+# Copyright 2011-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ set syscall_insn ""
 
 if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
     set syscall_insn "\[ \t\](int|syscall|sysenter)\[ \t\]"
-} elseif [is_aarch32_target] {
+} elseif { [istarget "aarch64*-*-linux*"] || [istarget "arm*-*-linux*"] } {
     set syscall_insn "\[ \t\](swi|svc)\[ \t\]"
 } else {
     return -1
@@ -48,8 +48,6 @@ proc disp_step_cross_syscall { syscall } {
 	    fail "run to main ($syscall)"
 	    return
 	}
-
-	set is_target_remote [gdb_is_target_remote]
 
 	# Delete the breakpoint on main.
 	gdb_test_no_output "delete break 1"
@@ -130,10 +128,6 @@ proc disp_step_cross_syscall { syscall } {
 	gdb_test_no_output "set displaced-stepping on"
 
 	# Check the address of next instruction of syscall.
-	if {$syscall == "vfork" && $is_target_remote} {
-	    setup_kfail server/13796 "*-*-*"
-	}
-
 	if {[gdb_test "stepi" "x/i .*=>.*" "single step over $syscall"] != 0} {
 	    return -1
 	}

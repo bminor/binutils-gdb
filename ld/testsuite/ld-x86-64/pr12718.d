@@ -13,7 +13,4 @@ Section Headers:
  +\[ 3\] +.symtab +SYMTAB +0+ +[0-9a-f]+ +[0-9a-f]+ 18 +4 +[0-9] +8
  +\[ 4\] +.strtab +STRTAB +0+ +[0-9a-f]+ +[0-9a-f]+ 00 +0 +0 +1
 Key to Flags:
-  W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\), l \(large\)
-  I \(info\), L \(link order\), G \(group\), T \(TLS\), E \(exclude\), x \(unknown\)
-  O \(extra OS processing required\) o \(OS specific\), p \(processor specific\)
 #pass

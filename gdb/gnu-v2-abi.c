@@ -1,6 +1,6 @@
 /* Abstraction of GNU v2 abi.
 
-   Copyright (C) 2001-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
@@ -40,7 +40,7 @@ gnuv2_is_destructor_name (const char *name)
       || startswith (name, "__dt__"))
     return complete_object_dtor;
   else
-    return 0;
+    return (enum dtor_kinds) 0;
 }
 
 static enum ctor_kinds
@@ -51,7 +51,7 @@ gnuv2_is_constructor_name (const char *name)
       || startswith (name, "__ct__"))
     return complete_object_ctor;
   else
-    return 0;
+    return (enum ctor_kinds) 0;
 }
 
 static int

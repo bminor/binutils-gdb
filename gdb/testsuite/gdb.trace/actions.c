@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 1998-2015 Free Software Foundation, Inc.
+   Copyright 1998-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
  */
 
 #include <string.h>
+
+#include "trace-common.h"
 
 static char   gdb_char_test;
 static short  gdb_short_test;
@@ -135,6 +137,8 @@ main (argc, argv, envp)
 {
   int i;
   unsigned long myparms[10];
+
+  FAST_TRACEPOINT_LABEL (fast_tracepoint_loc);
 
   begin ();
   for (i = 0; i < sizeof (myparms) / sizeof (myparms[0]); i++)

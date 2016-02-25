@@ -1,5 +1,5 @@
 /* mips.h.  Mips opcode list for GDB, the GNU debugger.
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
 
@@ -1825,6 +1825,12 @@ extern int bfd_mips_num_opcodes;
    "E" 5 bit PC relative address * 4 (MIPS16OP_*_IMM5)
    "m" 7 bit register list for save instruction (18 bit extended)
    "M" 7 bit register list for restore instruction (18 bit extended)
+
+   Characters used so far, for quick reference when adding more:
+   "   456 8 0"
+   "[]<>"
+   "ABCDE  HI KLM  P RS UVWXYZ"
+   "a   e   ijklm  pq    vwxyz"
   */
 
 /* Save/restore encoding for the args field when all 4 registers are

@@ -1,4 +1,4 @@
-#   Copyright 1998-2015 Free Software Foundation, Inc.
+#   Copyright 1998-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -390,46 +390,28 @@ gdb_test "tbreak $stop_line" \
 gdb_test continue "Continuing\\..*main \\(.*\\) at.*$srcfile:$stop_line\[\t\r\n \]+$stop_line.*print_long_arg_list \\( a, b, c, d, e, f, .struct1, .struct2, .struct3, .struct4,.*" "continue to tbreak7"
 
 set stop_line [gdb_get_line_number "-step2-"]
-if { [istarget "hppa*-*-hpux*"] } {
-    #
-    # NOTE:(FIXME)
-    # the aCC demangler cannot demangle the name of a function with >10 args.
-    # so I added a .* after the name of the function, to match the
-    # incredibly long mangled name 
-    # (getting aCC's libdemangle.a bundled w/ the system?)
-    # DTS CLLbs16994  coulter 990114
-    # 
-    # FIXME: use step for hppa* testing for now
-    # guo 990621
-    #
-    gdb_test "step" \
-	"print_long_arg_list.*\\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.375\}, d3=\{double1 = 675.09375\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at .*${srcfile}:$stop_line\[\r\n\]+$stop_line\[ \t\]+printf\\(\"double :.*\", a\\);" \
-	"step into print_long_arg_list"
-} else {
-
-    # We can't just assume that a "step" will get us into
-    # print_long_arg_list here,either.
-    gdb_test "tbreak print_long_arg_list" \
-	"Temporary breakpoint .* file .*$srcfile, line .*" \
-	"tbreak in print_long_arg_list after stepping into memcpy"
-    # The short match case below handles cases where a buffer
-    # overflows or something, and expect can't deal with the full
-    # line.  Perhaps a more elegant solution exists... -sts 1999-08-17
-    if {![gdb_skip_float_test "step into print_long_arg_list"]} {
-	gdb_test_multiple "continue" "step into print_long_arg_list" {
-	    -re ".*print_long_arg_list \\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.375\}, d3=\{double1 = 675.09375\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at .*${srcfile}:$stop_line\[\r\n\]+$stop_line\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {
-		pass "step into print_long_arg_list"
-	    }
-	    -re ".*print_long_arg_list.*\\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}.*\\) at .*${srcfile}:$stop_line\[\r\n\]+$stop_line\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {
-		pass "step into print_long_arg_list (short match)"
-	    }
+# We can't just assume that a "step" will get us into
+# print_long_arg_list here,either.
+gdb_test "tbreak print_long_arg_list" \
+    "Temporary breakpoint .* file .*$srcfile, line .*" \
+    "tbreak in print_long_arg_list after stepping into memcpy"
+# The short match case below handles cases where a buffer
+# overflows or something, and expect can't deal with the full
+# line.  Perhaps a more elegant solution exists... -sts 1999-08-17
+if {![gdb_skip_float_test "step into print_long_arg_list"]} {
+    gdb_test_multiple "continue" "step into print_long_arg_list" {
+	-re ".*print_long_arg_list \\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.375\}, d3=\{double1 = 675.09375\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at .*${srcfile}:$stop_line\[\r\n\]+$stop_line\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {
+	    pass "step into print_long_arg_list"
 	}
-    } else {
-	# If skipping float tests, don't expect anything in arg list.
-	gdb_test "continue" \
-	    "print_long_arg_list \\(.*\\).*" \
-	    "step into print_long_arg_list"
+	-re ".*print_long_arg_list.*\\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}.*\\) at .*${srcfile}:$stop_line\[\r\n\]+$stop_line\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {
+	    pass "step into print_long_arg_list (short match)"
+	}
     }
+} else {
+    # If skipping float tests, don't expect anything in arg list.
+    gdb_test "continue" \
+	"print_long_arg_list \\(.*\\).*" \
+	"step into print_long_arg_list"
 }
 
 set ws "\[\n\r\t \]+"
@@ -538,12 +520,6 @@ gdb_test continue "Continuing\\..*main \\(\\) at .*$srcfile:$stop_line\[\r\n\t \
 "continue to tbreak9"
 
 #call print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)
-
-# FIXME:
-# HP aCC demangler currently does not handle hp aCC functions with >10 args
-# DTS CLLbs16994  coulter 990114
-
-if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*" CLLbs16994}
 
 if {![gdb_skip_float_test "print print_long_arg_list"] && \
     ![gdb_skip_stdio_test "print print_long_arg_list"] } {

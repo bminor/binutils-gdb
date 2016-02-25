@@ -1,6 +1,6 @@
 /* QNX Neutrino specific low level interface, for the remote server
    for GDB.
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -933,7 +933,7 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 
 static struct target_ops nto_target_ops = {
   nto_create_inferior,
-  NULL,  /* arch_setup */
+  NULL,  /* post_create_inferior */
   nto_attach,
   nto_kill,
   nto_detach,

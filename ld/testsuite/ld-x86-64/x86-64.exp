@@ -1,5 +1,5 @@
 # Expect script for ld-x86_64 tests
-#   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -321,6 +321,10 @@ run_dump_test "mov1a"
 run_dump_test "mov1b"
 run_dump_test "mov1c"
 run_dump_test "mov1d"
+run_dump_test "mov2a"
+run_dump_test "mov2b"
+run_dump_test "mov2c"
+run_dump_test "mov2d"
 run_dump_test "load1a"
 run_dump_test "load1b"
 run_dump_test "load1c"
@@ -347,7 +351,10 @@ run_dump_test "pr18815"
 run_dump_test "pr19013"
 run_dump_test "pr19013-x32"
 run_dump_test "pr19013-nacl"
+run_dump_test "pr19162"
 run_dump_test "pr19175"
+run_dump_test "pr18591"
+run_dump_test "pr19615"
 
 # Add $PLT_CFLAGS if PLT is expected.
 global PLT_CFLAGS
@@ -386,7 +393,7 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build libplt-main1.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC -Wa,-mrelax-relocations=yes" \
 	    { plt-main1.c } \
 	    {{readelf {-Wr} plt-main1.rd}} \
 	    "libplt-main1.a" \
@@ -394,7 +401,7 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build libplt-main2.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC -Wa,-mrelax-relocations=yes" \
 	    { plt-main2.c } \
 	    {{readelf {-Wr} plt-main2.rd}} \
 	    "libplt-main2.a" \
@@ -402,7 +409,7 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build libplt-main3.a" \
 	    "" \
-	    "-fPIC $PLT_CFLAGS" \
+	    "-fPIC -Wa,-mrelax-relocations=yes $PLT_CFLAGS" \
 	    { plt-main3.c } \
 	    {{readelf {-Wr} plt-main3.rd}} \
 	    "libplt-main3.a" \
@@ -410,7 +417,7 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build libplt-main4.a" \
 	    "" \
-	    "-fPIC $PLT_CFLAGS" \
+	    "-fPIC -Wa,-mrelax-relocations=yes $PLT_CFLAGS" \
 	    { plt-main4.c } \
 	    {{readelf {-Wr} plt-main4.rd}} \
 	    "libplt-main4.a" \
@@ -540,10 +547,26 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build gotpcrel1" \
 	    "tmpdir/gotpcrel1d.so" \
-	    "" \
+	    "-Wa,-mrelax-relocations=yes" \
 	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
 	    {{objdump {-dw} gotpcrel1.dd}} \
 	    "gotpcrel1" \
+	] \
+	[list \
+	    "Build pr19319.so" \
+	    "-shared" \
+	    "" \
+	    { pr19319a.S } \
+	    "" \
+	    "pr19319.so" \
+	] \
+	[list \
+	    "Build pr19319" \
+	    "-pie -nostdlib -nostartfiles tmpdir/pr19319.so" \
+	    "" \
+	    { pr19319b.S } \
+	    {{objdump {-dw} pr19319.dd}} \
+	    "pr19319" \
 	] \
     ]
 

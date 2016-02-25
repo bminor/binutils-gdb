@@ -1,6 +1,6 @@
 // parameters.cc -- general parameters for a link using gold
 
-// Copyright (C) 2006-2015 Free Software Foundation, Inc.
+// Copyright (C) 2006-2016 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -297,16 +297,6 @@ set_parameters_options(const General_options* options)
 void
 set_parameters_target(Target* target)
 {
-  if (parameters->options_valid() && parameters->options().user_set_m())
-    {
-      const char* emulation = parameters->options().m();
-      Target* output = select_target_by_emulation(emulation);
-      if (!output)
-	gold_error(_("unrecognised output emulation: %s"), emulation);
-      else if (output != target)
-	gold_error(_("input file is incompatible with %s output emulation"),
-		   emulation);
-    }
   static_parameters.set_target(target);
 }
 

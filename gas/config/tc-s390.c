@@ -1,5 +1,5 @@
 /* tc-s390.c -- Assemble for the S390
-   Copyright (C) 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 2000-2016 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -582,7 +582,7 @@ static void
 s390_insert_operand (unsigned char *insn,
 		     const struct s390_operand *operand,
 		     offsetT val,
-		     char *file,
+		     const char *file,
 		     unsigned int line)
 {
   addressT uval;
@@ -2047,7 +2047,7 @@ md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
 
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
 /* We don't have any form of relaxing.  */
@@ -2316,7 +2316,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       else
 	{
-	  char *sfile;
+	  const char *sfile;
 	  unsigned int sline;
 
 	  /* Use expr_symbol_where to see if this is an expression

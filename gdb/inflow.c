@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -412,7 +412,7 @@ child_terminal_ours_1 (int output_only)
 
   if (tinfo->run_terminal != NULL || gdb_has_a_terminal () == 0)
     return;
-
+  else
     {
 #ifdef SIGTTOU
       /* Ignore this signal since it will happen when we try to set the

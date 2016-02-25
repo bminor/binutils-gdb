@@ -1,7 +1,7 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -142,6 +142,12 @@ extern void startup_inferior (int);
 extern char *construct_inferior_arguments (int, char **);
 
 /* From infcmd.c */
+
+/* Initial inferior setup.  Determines the exec file is not yet known,
+   takes any necessary post-attaching actions, fetches the target
+   description and syncs the shared library list.  */
+
+extern void setup_inferior (int from_tty);
 
 extern void post_create_inferior (struct target_ops *, int);
 
@@ -298,6 +304,9 @@ struct inferior
   /* True if the PID was actually faked by GDB.  */
   int fake_pid_p;
 
+  /* The highest thread number this inferior ever had.  */
+  int highest_thread_num;
+
   /* State of GDB control of inferior process execution.
      See `struct inferior_control_state'.  */
   struct inferior_control_state control;
@@ -363,6 +372,12 @@ struct inferior
      this inferior stops.  For continuations associated with a
      specific thread, see `struct thread_info'.  */
   struct continuation *continuations;
+
+  /* True if setup_inferior wasn't called for this inferior yet.
+     Until that is done, we must not access inferior memory or
+     registers, as we haven't determined the target
+     architecture/description.  */
+  int needs_setup;
 
   /* Private data used by the target vector implementation.  */
   struct private_inferior *priv;
@@ -477,6 +492,9 @@ extern struct inferior *iterate_over_inferiors (int (*) (struct inferior *,
 
 /* Returns true if the inferior list is not empty.  */
 extern int have_inferiors (void);
+
+/* Returns the number of live inferiors (real live processes).  */
+extern int number_of_live_inferiors (void);
 
 /* Returns true if there are any live inferiors in the inferior list
    (not cores, not executables, real live processes).  */

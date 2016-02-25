@@ -1,5 +1,5 @@
 /* Data structures and API for event locations in GDB.
-   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+   Copyright (C) 2013-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -126,17 +126,26 @@ extern struct event_location *
 extern const char *
   get_linespec_location (const struct event_location *location);
 
-/* Create a new address location.  The return result is malloc'd
-   and should be freed with delete_event_location.  */
+/* Create a new address location.
+   ADDR is the address corresponding to this event_location.
+   ADDR_STRING, a string of ADDR_STRING_LEN characters, is
+   the expression that was parsed to determine the address ADDR.  */
 
 extern struct event_location *
-  new_address_location (CORE_ADDR addr);
+  new_address_location (CORE_ADDR addr, const char *addr_string,
+			int addr_string_len);
 
 /* Return the address location (a CORE_ADDR) of the given event_location
    (which must be of type ADDRESS_LOCATION).  */
 
 extern CORE_ADDR
   get_address_location (const struct event_location *location);
+
+/* Return the expression (a string) that was used to compute the address
+   of the given event_location (which must be of type ADDRESS_LOCATION).  */
+
+extern const char *
+  get_address_string_location (const struct event_location *location);
 
 /* Create a new probe location.  The return result is malloc'd
    and should be freed with delete_event_location.  */
@@ -198,11 +207,23 @@ extern struct event_location *
    but invalid, input, e.g., if it is called with missing argument parameters
    or invalid options.
 
-   The return result must be freed with delete_event_location.  */
+   The return result must be freed with delete_event_location.
+
+   This function is intended to be used by CLI commands and will parse
+   explicit locations in a CLI-centric way.  Other interfaces should use
+   string_to_event_location_basic if they want to maintain support for
+   legacy specifications of probe, address, and linespec locations.  */
 
 extern struct event_location *
   string_to_event_location (char **argp,
 			    const struct language_defn *langauge);
+
+/* Like string_to_event_location, but does not attempt to parse explicit
+   locations.  */
+
+extern struct event_location *
+  string_to_event_location_basic (char **argp,
+				  const struct language_defn *language);
 
 /* Attempt to convert the input string in *ARGP into an explicit location.
    ARGP is advanced past any processed input.  Returns an event_location

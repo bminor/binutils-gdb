@@ -1,5 +1,5 @@
 /* TI C6X assembler.
-   Copyright (C) 2010-2015 Free Software Foundation, Inc.
+   Copyright (C) 2010-2016 Free Software Foundation, Inc.
    Contributed by Joseph Myers <joseph@codesourcery.com>
    		  Bernd Schmidt  <bernds@codesourcery.com>
 
@@ -4484,7 +4484,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED,
   /* Round up section sizes to ensure that text sections consist of
      whole fetch packets.  */
   int align = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << align) - 1) & ((valueT) -1 << align));
+  return ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
 }
 
 /* No special undefined symbol handling needed for now.  */

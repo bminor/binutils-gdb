@@ -22,7 +22,6 @@
    freed as they might be needed again. A single area of memory may be
    defined to generate aborts.  */
 
-#include "armopts.h"
 #include "armos.h"
 #include "armdefs.h"
 #include "ansidecl.h"
@@ -216,13 +215,6 @@ ARMul_ReLoadInstr (ARMul_State * state, ARMword address, ARMword isize)
 ARMword ARMul_LoadInstrS (ARMul_State * state, ARMword address, ARMword isize)
 {
   state->NumScycles++;
-
-#ifdef HOURGLASS
-  if ((state->NumScycles & HOURGLASS_RATE) == 0)
-    {
-      HOURGLASS;
-    }
-#endif
 
   return ARMul_ReLoadInstr (state, address, isize);
 }

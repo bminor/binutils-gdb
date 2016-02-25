@@ -1,6 +1,6 @@
 /* Symbol table definitions for GDB.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "vec.h"
 #include "gdb_vecs.h"
 #include "gdbtypes.h"
+#include "common/enum-flags.h"
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -834,6 +835,10 @@ DEF_VEC_O (block_symbol_d);
 
 extern const struct symbol_impl *symbol_impls;
 
+/* For convenience.  All fields are NULL.  This means "there is no
+   symbol".  */
+extern const struct block_symbol null_block_symbol;
+
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 
@@ -1473,7 +1478,7 @@ extern int identify_source_line (struct symtab *, int, int, CORE_ADDR);
 
 /* Flags passed as 4th argument to print_source_lines.  */
 
-enum print_source_lines_flags
+enum print_source_lines_flag
   {
     /* Do not print an error message.  */
     PRINT_SOURCE_LINES_NOERROR = (1 << 0),
@@ -1481,9 +1486,10 @@ enum print_source_lines_flags
     /* Print the filename in front of the source lines.  */
     PRINT_SOURCE_LINES_FILENAME = (1 << 1)
   };
+DEF_ENUM_FLAGS_TYPE (enum print_source_lines_flag, print_source_lines_flags);
 
 extern void print_source_lines (struct symtab *, int, int,
-				enum print_source_lines_flags);
+				print_source_lines_flags);
 
 extern void forget_cached_source_info_for_objfile (struct objfile *);
 extern void forget_cached_source_info (void);
@@ -1597,6 +1603,9 @@ extern int basenames_may_differ;
 int compare_filenames_for_search (const char *filename,
 				  const char *search_name);
 
+int compare_glob_filenames_for_search (const char *filename,
+				       const char *search_name);
+
 int iterate_over_some_symtabs (const char *name,
 			       const char *real_path,
 			       int (*callback) (struct symtab *symtab,
@@ -1609,8 +1618,6 @@ void iterate_over_symtabs (const char *name,
 			   int (*callback) (struct symtab *symtab,
 					    void *data),
 			   void *data);
-
-DEF_VEC_I (CORE_ADDR);
 
 VEC (CORE_ADDR) *find_pcs_for_symtab_line (struct symtab *symtab, int line,
 					   struct linetable_entry **best_entry);

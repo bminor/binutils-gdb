@@ -1,5 +1,5 @@
 /* MIPS-specific support for ELF
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -1707,6 +1707,7 @@ mips_elf_check_mips16_stubs (struct bfd_link_info *info,
       h->fn_stub->flags &= ~SEC_RELOC;
       h->fn_stub->reloc_count = 0;
       h->fn_stub->flags |= SEC_EXCLUDE;
+      h->fn_stub->output_section = bfd_abs_section_ptr;
     }
 
   if (h->call_stub != NULL
@@ -1719,6 +1720,7 @@ mips_elf_check_mips16_stubs (struct bfd_link_info *info,
       h->call_stub->flags &= ~SEC_RELOC;
       h->call_stub->reloc_count = 0;
       h->call_stub->flags |= SEC_EXCLUDE;
+      h->call_stub->output_section = bfd_abs_section_ptr;
     }
 
   if (h->call_fp_stub != NULL
@@ -1731,6 +1733,7 @@ mips_elf_check_mips16_stubs (struct bfd_link_info *info,
       h->call_fp_stub->flags &= ~SEC_RELOC;
       h->call_fp_stub->reloc_count = 0;
       h->call_fp_stub->flags |= SEC_EXCLUDE;
+      h->call_fp_stub->output_section = bfd_abs_section_ptr;
     }
 }
 
@@ -13107,9 +13110,8 @@ static const struct opcode_descriptor bz_insns_16[] = {
 
 /* Switch between a 5-bit register index and its 3-bit shorthand.  */
 
-#define BZ16_REG(opcode) ((((((opcode) >> 7) & 7) + 0x1e) & 0x17) + 2)
-#define BZ16_REG_FIELD(r) \
-  (((2 <= (r) && (r) <= 7) ? (r) : ((r) - 16)) << 7)
+#define BZ16_REG(opcode) ((((((opcode) >> 7) & 7) + 0x1e) & 0xf) + 2)
+#define BZ16_REG_FIELD(r) (((r) & 7) << 7)
 
 
 /* 32-bit instructions with a delay slot.  */
@@ -14864,6 +14866,199 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Merge object file header flags from IBFD into OBFD.  Raise an error
+   if there are conflicting settings.  */
+
+static bfd_boolean
+mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
+{
+  struct mips_elf_obj_tdata *out_tdata = mips_elf_tdata (obfd);
+  flagword old_flags;
+  flagword new_flags;
+  bfd_boolean ok;
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_NOREORDER;
+  old_flags = elf_elfheader (obfd)->e_flags;
+
+  /* Check flag compatibility.  */
+
+  new_flags &= ~EF_MIPS_NOREORDER;
+  old_flags &= ~EF_MIPS_NOREORDER;
+
+  /* Some IRIX 6 BSD-compatibility objects have this bit set.  It
+     doesn't seem to matter.  */
+  new_flags &= ~EF_MIPS_XGOT;
+  old_flags &= ~EF_MIPS_XGOT;
+
+  /* MIPSpro generates ucode info in n64 objects.  Again, we should
+     just be able to ignore this.  */
+  new_flags &= ~EF_MIPS_UCODE;
+  old_flags &= ~EF_MIPS_UCODE;
+
+  /* DSOs should only be linked with CPIC code.  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    new_flags |= EF_MIPS_PIC | EF_MIPS_CPIC;
+
+  if (new_flags == old_flags)
+    return TRUE;
+
+  ok = TRUE;
+
+  if (((new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0)
+      != ((old_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0))
+    {
+      (*_bfd_error_handler)
+	(_("%B: warning: linking abicalls files with non-abicalls files"),
+	 ibfd);
+      ok = TRUE;
+    }
+
+  if (new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC))
+    elf_elfheader (obfd)->e_flags |= EF_MIPS_CPIC;
+  if (! (new_flags & EF_MIPS_PIC))
+    elf_elfheader (obfd)->e_flags &= ~EF_MIPS_PIC;
+
+  new_flags &= ~ (EF_MIPS_PIC | EF_MIPS_CPIC);
+  old_flags &= ~ (EF_MIPS_PIC | EF_MIPS_CPIC);
+
+  /* Compare the ISAs.  */
+  if (mips_32bit_flags_p (old_flags) != mips_32bit_flags_p (new_flags))
+    {
+      (*_bfd_error_handler)
+	(_("%B: linking 32-bit code with 64-bit code"),
+	 ibfd);
+      ok = FALSE;
+    }
+  else if (!mips_mach_extends_p (bfd_get_mach (ibfd), bfd_get_mach (obfd)))
+    {
+      /* OBFD's ISA isn't the same as, or an extension of, IBFD's.  */
+      if (mips_mach_extends_p (bfd_get_mach (obfd), bfd_get_mach (ibfd)))
+	{
+	  /* Copy the architecture info from IBFD to OBFD.  Also copy
+	     the 32-bit flag (if set) so that we continue to recognise
+	     OBFD as a 32-bit binary.  */
+	  bfd_set_arch_info (obfd, bfd_get_arch_info (ibfd));
+	  elf_elfheader (obfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
+	  elf_elfheader (obfd)->e_flags
+	    |= new_flags & (EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
+
+	  /* Update the ABI flags isa_level, isa_rev, isa_ext fields.  */
+	  update_mips_abiflags_isa (obfd, &out_tdata->abiflags);
+
+	  /* Copy across the ABI flags if OBFD doesn't use them
+	     and if that was what caused us to treat IBFD as 32-bit.  */
+	  if ((old_flags & EF_MIPS_ABI) == 0
+	      && mips_32bit_flags_p (new_flags)
+	      && !mips_32bit_flags_p (new_flags & ~EF_MIPS_ABI))
+	    elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_ABI;
+	}
+      else
+	{
+	  /* The ISAs aren't compatible.  */
+	  (*_bfd_error_handler)
+	    (_("%B: linking %s module with previous %s modules"),
+	     ibfd,
+	     bfd_printable_name (ibfd),
+	     bfd_printable_name (obfd));
+	  ok = FALSE;
+	}
+    }
+
+  new_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
+  old_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
+
+  /* Compare ABIs.  The 64-bit ABI does not use EF_MIPS_ABI.  But, it
+     does set EI_CLASS differently from any 32-bit ABI.  */
+  if ((new_flags & EF_MIPS_ABI) != (old_flags & EF_MIPS_ABI)
+      || (elf_elfheader (ibfd)->e_ident[EI_CLASS]
+	  != elf_elfheader (obfd)->e_ident[EI_CLASS]))
+    {
+      /* Only error if both are set (to different values).  */
+      if (((new_flags & EF_MIPS_ABI) && (old_flags & EF_MIPS_ABI))
+	  || (elf_elfheader (ibfd)->e_ident[EI_CLASS]
+	      != elf_elfheader (obfd)->e_ident[EI_CLASS]))
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: ABI mismatch: linking %s module with previous %s modules"),
+	     ibfd,
+	     elf_mips_abi_name (ibfd),
+	     elf_mips_abi_name (obfd));
+	  ok = FALSE;
+	}
+      new_flags &= ~EF_MIPS_ABI;
+      old_flags &= ~EF_MIPS_ABI;
+    }
+
+  /* Compare ASEs.  Forbid linking MIPS16 and microMIPS ASE modules together
+     and allow arbitrary mixing of the remaining ASEs (retain the union).  */
+  if ((new_flags & EF_MIPS_ARCH_ASE) != (old_flags & EF_MIPS_ARCH_ASE))
+    {
+      int old_micro = old_flags & EF_MIPS_ARCH_ASE_MICROMIPS;
+      int new_micro = new_flags & EF_MIPS_ARCH_ASE_MICROMIPS;
+      int old_m16 = old_flags & EF_MIPS_ARCH_ASE_M16;
+      int new_m16 = new_flags & EF_MIPS_ARCH_ASE_M16;
+      int micro_mis = old_m16 && new_micro;
+      int m16_mis = old_micro && new_m16;
+
+      if (m16_mis || micro_mis)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: ASE mismatch: linking %s module with previous %s modules"),
+	     ibfd,
+	     m16_mis ? "MIPS16" : "microMIPS",
+	     m16_mis ? "microMIPS" : "MIPS16");
+	  ok = FALSE;
+	}
+
+      elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_ARCH_ASE;
+
+      new_flags &= ~ EF_MIPS_ARCH_ASE;
+      old_flags &= ~ EF_MIPS_ARCH_ASE;
+    }
+
+  /* Compare NaN encodings.  */
+  if ((new_flags & EF_MIPS_NAN2008) != (old_flags & EF_MIPS_NAN2008))
+    {
+      _bfd_error_handler (_("%B: linking %s module with previous %s modules"),
+			  ibfd,
+			  (new_flags & EF_MIPS_NAN2008
+			   ? "-mnan=2008" : "-mnan=legacy"),
+			  (old_flags & EF_MIPS_NAN2008
+			   ? "-mnan=2008" : "-mnan=legacy"));
+      ok = FALSE;
+      new_flags &= ~EF_MIPS_NAN2008;
+      old_flags &= ~EF_MIPS_NAN2008;
+    }
+
+  /* Compare FP64 state.  */
+  if ((new_flags & EF_MIPS_FP64) != (old_flags & EF_MIPS_FP64))
+    {
+      _bfd_error_handler (_("%B: linking %s module with previous %s modules"),
+			  ibfd,
+			  (new_flags & EF_MIPS_FP64
+			   ? "-mfp64" : "-mfp32"),
+			  (old_flags & EF_MIPS_FP64
+			   ? "-mfp64" : "-mfp32"));
+      ok = FALSE;
+      new_flags &= ~EF_MIPS_FP64;
+      old_flags &= ~EF_MIPS_FP64;
+    }
+
+  /* Warn about any other mismatches */
+  if (new_flags != old_flags)
+    {
+      (*_bfd_error_handler)
+	(_("%B: uses different e_flags (0x%lx) fields than previous modules "
+	   "(0x%lx)"),
+	 ibfd, (unsigned long) new_flags,
+	 (unsigned long) old_flags);
+      ok = FALSE;
+    }
+
+  return ok;
+}
+
 /* Merge object attributes from IBFD into OBFD.  Raise an error if
    there are conflicting attributes.  */
 static bfd_boolean
@@ -15010,7 +15205,37 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  return _bfd_elf_merge_object_attributes (ibfd, obfd);
+}
+
+/* Merge object ABI flags from IBFD into OBFD.  Raise an error if
+   there are conflicting settings.  */
+
+static bfd_boolean
+mips_elf_merge_obj_abiflags (bfd *ibfd, bfd *obfd)
+{
+  obj_attribute *out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+  struct mips_elf_obj_tdata *out_tdata = mips_elf_tdata (obfd);
+  struct mips_elf_obj_tdata *in_tdata = mips_elf_tdata (ibfd);
+
+  /* Update the output abiflags fp_abi using the computed fp_abi.  */
+  out_tdata->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
+
+#define max(a, b) ((a) > (b) ? (a) : (b))
+  /* Merge abiflags.  */
+  out_tdata->abiflags.isa_level = max (out_tdata->abiflags.isa_level,
+				       in_tdata->abiflags.isa_level);
+  out_tdata->abiflags.isa_rev = max (out_tdata->abiflags.isa_rev,
+				     in_tdata->abiflags.isa_rev);
+  out_tdata->abiflags.gpr_size = max (out_tdata->abiflags.gpr_size,
+				      in_tdata->abiflags.gpr_size);
+  out_tdata->abiflags.cpr1_size = max (out_tdata->abiflags.cpr1_size,
+				       in_tdata->abiflags.cpr1_size);
+  out_tdata->abiflags.cpr2_size = max (out_tdata->abiflags.cpr2_size,
+				       in_tdata->abiflags.cpr2_size);
+#undef max
+  out_tdata->abiflags.ases |= in_tdata->abiflags.ases;
+  out_tdata->abiflags.flags1 |= in_tdata->abiflags.flags1;
 
   return TRUE;
 }
@@ -15021,12 +15246,11 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 bfd_boolean
 _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  flagword old_flags;
-  flagword new_flags;
-  bfd_boolean ok;
+  struct mips_elf_obj_tdata *out_tdata;
+  struct mips_elf_obj_tdata *in_tdata;
   bfd_boolean null_input_bfd = TRUE;
   asection *sec;
-  obj_attribute *out_attr;
+  bfd_boolean ok;
 
   /* Check if we have the same endianness.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
@@ -15040,6 +15264,9 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (!is_mips_elf (ibfd) || !is_mips_elf (obfd))
     return TRUE;
 
+  in_tdata = mips_elf_tdata (ibfd);
+  out_tdata = mips_elf_tdata (obfd);
+
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
     {
       (*_bfd_error_handler)
@@ -15048,22 +15275,9 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       return FALSE;
     }
 
-  /* Set up the FP ABI attribute from the abiflags if it is not already
-     set.  */
-  if (mips_elf_tdata (ibfd)->abiflags_valid)
-    {
-      obj_attribute *in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
-      if (in_attr[Tag_GNU_MIPS_ABI_FP].i == Val_GNU_MIPS_ABI_FP_ANY)
-        in_attr[Tag_GNU_MIPS_ABI_FP].i =
-	  mips_elf_tdata (ibfd)->abiflags.fp_abi;
-    }
-
-  if (!mips_elf_merge_obj_attributes (ibfd, obfd))
-    return FALSE;
-
-  /* Check to see if the input BFD actually contains any sections.
-     If not, its flags may not have been initialised either, but it cannot
-     actually cause any incompatibility.  */
+  /* Check to see if the input BFD actually contains any sections.  If not,
+     then it has no attributes, and its flags may not have been initialized
+     either, but it cannot actually cause any incompatibility.  */
   for (sec = ibfd->sections; sec != NULL; sec = sec->next)
     {
       /* Ignore synthetic sections and empty .text, .data and .bss sections
@@ -15086,17 +15300,19 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     return TRUE;
 
   /* Populate abiflags using existing information.  */
-  if (!mips_elf_tdata (ibfd)->abiflags_valid)
+  if (in_tdata->abiflags_valid)
     {
-      infer_mips_abiflags (ibfd, &mips_elf_tdata (ibfd)->abiflags);
-      mips_elf_tdata (ibfd)->abiflags_valid = TRUE;
-    }
-  else
-    {
-      Elf_Internal_ABIFlags_v0 abiflags;
+      obj_attribute *in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
       Elf_Internal_ABIFlags_v0 in_abiflags;
+      Elf_Internal_ABIFlags_v0 abiflags;
+
+      /* Set up the FP ABI attribute from the abiflags if it is not already
+         set.  */
+      if (in_attr[Tag_GNU_MIPS_ABI_FP].i == Val_GNU_MIPS_ABI_FP_ANY)
+        in_attr[Tag_GNU_MIPS_ABI_FP].i = in_tdata->abiflags.fp_abi;
+
       infer_mips_abiflags (ibfd, &abiflags);
-      in_abiflags = mips_elf_tdata (ibfd)->abiflags;
+      in_abiflags = in_tdata->abiflags;
 
       /* It is not possible to infer the correct ISA revision
          for R3 or R5 so drop down to R2 for the checks.  */
@@ -15111,7 +15327,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       if (abiflags.fp_abi != Val_GNU_MIPS_ABI_FP_ANY
 	  && in_abiflags.fp_abi != abiflags.fp_abi)
 	(*_bfd_error_handler)
-	  (_("%B: warning: Inconsistent FP ABI between e_flags and "
+	  (_("%B: warning: Inconsistent FP ABI between .gnu.attributes and "
 	     ".MIPS.abiflags"), ibfd);
       if ((in_abiflags.ases & abiflags.ases) != abiflags.ases)
 	(*_bfd_error_handler)
@@ -15130,12 +15346,17 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	     ".MIPS.abiflags (0x%lx)"), ibfd,
 	   (unsigned long) in_abiflags.flags2);
     }
+  else
+    {
+      infer_mips_abiflags (ibfd, &in_tdata->abiflags);
+      in_tdata->abiflags_valid = TRUE;
+    }
 
-  if (!mips_elf_tdata (obfd)->abiflags_valid)
+  if (!out_tdata->abiflags_valid)
     {
       /* Copy input abiflags if output abiflags are not already valid.  */
-      mips_elf_tdata (obfd)->abiflags = mips_elf_tdata (ibfd)->abiflags;
-      mips_elf_tdata (obfd)->abiflags_valid = TRUE;
+      out_tdata->abiflags = in_tdata->abiflags;
+      out_tdata->abiflags_valid = TRUE;
     }
 
   if (! elf_flags_init (obfd))
@@ -15155,218 +15376,19 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	    return FALSE;
 
 	  /* Update the ABI flags isa_level, isa_rev and isa_ext fields.  */
-	  update_mips_abiflags_isa (obfd, &mips_elf_tdata (obfd)->abiflags);
+	  update_mips_abiflags_isa (obfd, &out_tdata->abiflags);
 	}
 
-      return TRUE;
-    }
-
-  /* Update the output abiflags fp_abi using the computed fp_abi.  */
-  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
-  mips_elf_tdata (obfd)->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
-
-#define max(a,b) ((a) > (b) ? (a) : (b))
-  /* Merge abiflags.  */
-  mips_elf_tdata (obfd)->abiflags.isa_level
-    = max (mips_elf_tdata (obfd)->abiflags.isa_level,
-	   mips_elf_tdata (ibfd)->abiflags.isa_level);
-  mips_elf_tdata (obfd)->abiflags.isa_rev
-    = max (mips_elf_tdata (obfd)->abiflags.isa_rev,
-	   mips_elf_tdata (ibfd)->abiflags.isa_rev);
-  mips_elf_tdata (obfd)->abiflags.gpr_size
-    = max (mips_elf_tdata (obfd)->abiflags.gpr_size,
-	   mips_elf_tdata (ibfd)->abiflags.gpr_size);
-  mips_elf_tdata (obfd)->abiflags.cpr1_size
-    = max (mips_elf_tdata (obfd)->abiflags.cpr1_size,
-	   mips_elf_tdata (ibfd)->abiflags.cpr1_size);
-  mips_elf_tdata (obfd)->abiflags.cpr2_size
-    = max (mips_elf_tdata (obfd)->abiflags.cpr2_size,
-	   mips_elf_tdata (ibfd)->abiflags.cpr2_size);
-#undef max
-  mips_elf_tdata (obfd)->abiflags.ases
-    |= mips_elf_tdata (ibfd)->abiflags.ases;
-  mips_elf_tdata (obfd)->abiflags.flags1
-    |= mips_elf_tdata (ibfd)->abiflags.flags1;
-
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_NOREORDER;
-  old_flags = elf_elfheader (obfd)->e_flags;
-
-  /* Check flag compatibility.  */
-
-  new_flags &= ~EF_MIPS_NOREORDER;
-  old_flags &= ~EF_MIPS_NOREORDER;
-
-  /* Some IRIX 6 BSD-compatibility objects have this bit set.  It
-     doesn't seem to matter.  */
-  new_flags &= ~EF_MIPS_XGOT;
-  old_flags &= ~EF_MIPS_XGOT;
-
-  /* MIPSpro generates ucode info in n64 objects.  Again, we should
-     just be able to ignore this.  */
-  new_flags &= ~EF_MIPS_UCODE;
-  old_flags &= ~EF_MIPS_UCODE;
-
-  /* DSOs should only be linked with CPIC code.  */
-  if ((ibfd->flags & DYNAMIC) != 0)
-    new_flags |= EF_MIPS_PIC | EF_MIPS_CPIC;
-
-  if (new_flags == old_flags)
-    return TRUE;
-
-  ok = TRUE;
-
-  if (((new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0)
-      != ((old_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0))
-    {
-      (*_bfd_error_handler)
-	(_("%B: warning: linking abicalls files with non-abicalls files"),
-	 ibfd);
       ok = TRUE;
     }
+  else
+    ok = mips_elf_merge_obj_e_flags (ibfd, obfd);
 
-  if (new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC))
-    elf_elfheader (obfd)->e_flags |= EF_MIPS_CPIC;
-  if (! (new_flags & EF_MIPS_PIC))
-    elf_elfheader (obfd)->e_flags &= ~EF_MIPS_PIC;
+  ok = mips_elf_merge_obj_attributes (ibfd, obfd) && ok;
 
-  new_flags &= ~ (EF_MIPS_PIC | EF_MIPS_CPIC);
-  old_flags &= ~ (EF_MIPS_PIC | EF_MIPS_CPIC);
+  ok = mips_elf_merge_obj_abiflags (ibfd, obfd) && ok;
 
-  /* Compare the ISAs.  */
-  if (mips_32bit_flags_p (old_flags) != mips_32bit_flags_p (new_flags))
-    {
-      (*_bfd_error_handler)
-	(_("%B: linking 32-bit code with 64-bit code"),
-	 ibfd);
-      ok = FALSE;
-    }
-  else if (!mips_mach_extends_p (bfd_get_mach (ibfd), bfd_get_mach (obfd)))
-    {
-      /* OBFD's ISA isn't the same as, or an extension of, IBFD's.  */
-      if (mips_mach_extends_p (bfd_get_mach (obfd), bfd_get_mach (ibfd)))
-	{
-	  /* Copy the architecture info from IBFD to OBFD.  Also copy
-	     the 32-bit flag (if set) so that we continue to recognise
-	     OBFD as a 32-bit binary.  */
-	  bfd_set_arch_info (obfd, bfd_get_arch_info (ibfd));
-	  elf_elfheader (obfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
-	  elf_elfheader (obfd)->e_flags
-	    |= new_flags & (EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
-
-	  /* Update the ABI flags isa_level, isa_rev, isa_ext fields.  */
-	  update_mips_abiflags_isa (obfd, &mips_elf_tdata (obfd)->abiflags);
-
-	  /* Copy across the ABI flags if OBFD doesn't use them
-	     and if that was what caused us to treat IBFD as 32-bit.  */
-	  if ((old_flags & EF_MIPS_ABI) == 0
-	      && mips_32bit_flags_p (new_flags)
-	      && !mips_32bit_flags_p (new_flags & ~EF_MIPS_ABI))
-	    elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_ABI;
-	}
-      else
-	{
-	  /* The ISAs aren't compatible.  */
-	  (*_bfd_error_handler)
-	    (_("%B: linking %s module with previous %s modules"),
-	     ibfd,
-	     bfd_printable_name (ibfd),
-	     bfd_printable_name (obfd));
-	  ok = FALSE;
-	}
-    }
-
-  new_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
-  old_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
-
-  /* Compare ABIs.  The 64-bit ABI does not use EF_MIPS_ABI.  But, it
-     does set EI_CLASS differently from any 32-bit ABI.  */
-  if ((new_flags & EF_MIPS_ABI) != (old_flags & EF_MIPS_ABI)
-      || (elf_elfheader (ibfd)->e_ident[EI_CLASS]
-	  != elf_elfheader (obfd)->e_ident[EI_CLASS]))
-    {
-      /* Only error if both are set (to different values).  */
-      if (((new_flags & EF_MIPS_ABI) && (old_flags & EF_MIPS_ABI))
-	  || (elf_elfheader (ibfd)->e_ident[EI_CLASS]
-	      != elf_elfheader (obfd)->e_ident[EI_CLASS]))
-	{
-	  (*_bfd_error_handler)
-	    (_("%B: ABI mismatch: linking %s module with previous %s modules"),
-	     ibfd,
-	     elf_mips_abi_name (ibfd),
-	     elf_mips_abi_name (obfd));
-	  ok = FALSE;
-	}
-      new_flags &= ~EF_MIPS_ABI;
-      old_flags &= ~EF_MIPS_ABI;
-    }
-
-  /* Compare ASEs.  Forbid linking MIPS16 and microMIPS ASE modules together
-     and allow arbitrary mixing of the remaining ASEs (retain the union).  */
-  if ((new_flags & EF_MIPS_ARCH_ASE) != (old_flags & EF_MIPS_ARCH_ASE))
-    {
-      int old_micro = old_flags & EF_MIPS_ARCH_ASE_MICROMIPS;
-      int new_micro = new_flags & EF_MIPS_ARCH_ASE_MICROMIPS;
-      int old_m16 = old_flags & EF_MIPS_ARCH_ASE_M16;
-      int new_m16 = new_flags & EF_MIPS_ARCH_ASE_M16;
-      int micro_mis = old_m16 && new_micro;
-      int m16_mis = old_micro && new_m16;
-
-      if (m16_mis || micro_mis)
-	{
-	  (*_bfd_error_handler)
-	    (_("%B: ASE mismatch: linking %s module with previous %s modules"),
-	     ibfd,
-	     m16_mis ? "MIPS16" : "microMIPS",
-	     m16_mis ? "microMIPS" : "MIPS16");
-	  ok = FALSE;
-	}
-
-      elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_ARCH_ASE;
-
-      new_flags &= ~ EF_MIPS_ARCH_ASE;
-      old_flags &= ~ EF_MIPS_ARCH_ASE;
-    }
-
-  /* Compare NaN encodings.  */
-  if ((new_flags & EF_MIPS_NAN2008) != (old_flags & EF_MIPS_NAN2008))
-    {
-      _bfd_error_handler (_("%B: linking %s module with previous %s modules"),
-			  ibfd,
-			  (new_flags & EF_MIPS_NAN2008
-			   ? "-mnan=2008" : "-mnan=legacy"),
-			  (old_flags & EF_MIPS_NAN2008
-			   ? "-mnan=2008" : "-mnan=legacy"));
-      ok = FALSE;
-      new_flags &= ~EF_MIPS_NAN2008;
-      old_flags &= ~EF_MIPS_NAN2008;
-    }
-
-  /* Compare FP64 state.  */
-  if ((new_flags & EF_MIPS_FP64) != (old_flags & EF_MIPS_FP64))
-    {
-      _bfd_error_handler (_("%B: linking %s module with previous %s modules"),
-			  ibfd,
-			  (new_flags & EF_MIPS_FP64
-			   ? "-mfp64" : "-mfp32"),
-			  (old_flags & EF_MIPS_FP64
-			   ? "-mfp64" : "-mfp32"));
-      ok = FALSE;
-      new_flags &= ~EF_MIPS_FP64;
-      old_flags &= ~EF_MIPS_FP64;
-    }
-
-  /* Warn about any other mismatches */
-  if (new_flags != old_flags)
-    {
-      (*_bfd_error_handler)
-	(_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-	 ibfd, (unsigned long) new_flags,
-	 (unsigned long) old_flags);
-      ok = FALSE;
-    }
-
-  if (! ok)
+  if (!ok)
     {
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -16118,6 +16140,9 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
   if (mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64
       || mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64A)
     i_ehdrp->e_ident[EI_ABIVERSION] = 3;
+
+  if (elf_stack_flags (abfd) && !(elf_stack_flags (abfd) & PF_X))
+    i_ehdrp->e_ident[EI_ABIVERSION] = 5;
 }
 
 int

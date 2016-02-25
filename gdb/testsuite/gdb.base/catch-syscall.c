@@ -31,12 +31,19 @@ int write_syscall = SYS_write;
 int unknown_syscall = 123456789;
 int exit_group_syscall = SYS_exit_group;
 
+/* Set by the test when it wants execve.  */
+int do_execve = 0;
+
 int
-main (void)
+main (int argc, char *const argv[])
 {
 	int fd[2];
 	char buf1[2] = "a";
 	char buf2[2];
+
+	/* Test a simple self-exec, but only on request.  */
+	if (do_execve)
+	  execv (*argv, argv);
 
 	/* A close() with a wrong argument.  We are only
 	   interested in the syscall.  */

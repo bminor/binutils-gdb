@@ -1,5 +1,5 @@
 /* Generic symbol-table support for the BFD library.
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -219,8 +219,7 @@ CODE_FRAGMENT
 .#define BSF_EXPORT	BSF_GLOBAL {* No real difference.  *}
 .
 .  {* A normal C symbol would be one of:
-.     <<BSF_LOCAL>>, <<BSF_COMMON>>,  <<BSF_UNDEFINED>> or
-.     <<BSF_GLOBAL>>.  *}
+.     <<BSF_LOCAL>>, <<BSF_UNDEFINED>> or <<BSF_GLOBAL>>.  *}
 .
 .  {* The symbol is a debugging record. The value has an arbitrary
 .     meaning, unless BSF_DEBUGGING_RELOC is also set.  *}

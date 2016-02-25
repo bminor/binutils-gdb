@@ -1,5 +1,5 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2490,12 +2490,14 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	}
       else
 	{
+	  eh->plt_got.offset = (bfd_vma) -1;
 	  h->plt.offset = (bfd_vma) -1;
 	  h->needs_plt = 0;
 	}
     }
   else
     {
+      eh->plt_got.offset = (bfd_vma) -1;
       h->plt.offset = (bfd_vma) -1;
       h->needs_plt = 0;
     }
@@ -2820,6 +2822,11 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       if (roff < 2)
 	continue;
 
+      /* Addend for R_386_GOT32 and R_386_GOT32X relocations must be 0.  */
+      addend = bfd_get_32 (abfd, contents + roff);
+      if (addend != 0)
+	continue;
+
       modrm = bfd_get_8 (abfd, contents + roff - 1);
       baseless = (modrm & 0xc7) == 0x5;
 
@@ -2913,11 +2920,6 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
 	    {
 	      /* The function is locally defined.   */
 convert_branch:
-	      addend = bfd_get_32 (abfd, contents + roff);
-	      /* Addend for R_386_GOT32X relocation must be 0.  */
-	      if (addend != 0)
-		continue;
-
 	      /* Convert R_386_GOT32X to R_386_PC32.  */
 	      if (modrm == 0x15 || (modrm & 0xf8) == 0x90)
 		{
@@ -2976,11 +2978,11 @@ convert_branch:
 	  if (h == htab->elf.hdynamic)
 	    continue;
 
-	  /* bfd_link_hash_new is set by an assignment in a linker
-	     script in bfd_elf_record_link_assignment.  */
-	  if ((h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak
-	       || h->root.type == bfd_link_hash_new)
+	  /* def_regular is set by an assignment in a linker script in
+	     bfd_elf_record_link_assignment.  */
+	  if ((h->def_regular
+	       || h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak)
 	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
 	    {
 convert_load:
@@ -3007,11 +3009,6 @@ convert_load:
 		}
 	      else
 		{
-		  /* Addend for R_386_GOT32X relocation must be 0.  */
-		  addend = bfd_get_32 (abfd, contents + roff);
-		  if (addend != 0)
-		    continue;
-
 		  if (opcode == 0x85)
 		    {
 		      /* Convert "test %reg1, foo@GOT(%reg2)" to
@@ -3599,6 +3596,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   bfd_vma *local_got_offsets;
   bfd_vma *local_tlsdesc_gotents;
   Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *wrel;
   Elf_Internal_Rela *relend;
   bfd_boolean is_vxworks_tls;
   unsigned plt_entry_size;
@@ -3623,9 +3621,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 
   plt_entry_size = GET_PLT_ENTRY_SIZE (output_bfd);
 
-  rel = relocs;
+  rel = wrel = relocs;
   relend = relocs + input_section->reloc_count;
-  for (; rel < relend; rel++)
+  for (; rel < relend; wrel++, rel++)
     {
       unsigned int r_type;
       reloc_howto_type *howto;
@@ -3646,7 +3644,11 @@ elf_i386_relocate_section (bfd *output_bfd,
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == R_386_GNU_VTINHERIT
 	  || r_type == R_386_GNU_VTENTRY)
-	continue;
+	{
+	  if (wrel != rel)
+	    *wrel = *rel;
+	  continue;
+	}
 
       if ((indx = r_type) >= R_386_standard
 	  && ((indx = r_type - R_386_ext_offset) - R_386_standard
@@ -3772,11 +3774,29 @@ elf_i386_relocate_section (bfd *output_bfd,
 	}
 
       if (sec != NULL && discarded_section (sec))
-	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-					 rel, 1, relend, howto, 0, contents);
+	{
+	  _bfd_clear_contents (howto, input_bfd, input_section,
+			       contents + rel->r_offset);
+	  wrel->r_offset = rel->r_offset;
+	  wrel->r_info = 0;
+	  wrel->r_addend = 0;
+
+	  /* For ld -r, remove relocations in debug sections against
+	     sections defined in discarded sections.  Not done for
+	     eh_frame editing code expects to be present.  */
+	   if (bfd_link_relocatable (info)
+	       && (input_section->flags & SEC_DEBUGGING))
+	     wrel--;
+
+	   continue;
+	}
 
       if (bfd_link_relocatable (info))
-	continue;
+	{
+	  if (wrel != rel)
+	    *wrel = *rel;
+	  continue;
+	}
 
       /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
 	 it here if it is defined in a non-shared object.  */
@@ -3975,8 +3995,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 		 branch to direct branch.  It is OK to convert adc,
 		 add, and, cmp, or, sbb, sub, test, xor only when PIC
 		 is false.   */
-	      unsigned int opcode;
-	      opcode = bfd_get_8 (abfd, contents + rel->r_offset - 2);
+	      unsigned int opcode, addend;
+	      addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      if (addend != 0)
+		goto r_386_got32;
+	      opcode = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 	      if (opcode != 0x8b && opcode != 0xff)
 		goto r_386_got32;
 	    }
@@ -3995,10 +4018,12 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	  /* It is relative to .got.plt section.  */
 	  if (h->got.offset != (bfd_vma) -1)
-	    /* Use GOT entry.  */
+	    /* Use GOT entry.  Mask off the least significant bit in
+	       GOT offset which may be set by R_386_GOT32 processing
+	       below.  */
 	    relocation = (htab->elf.sgot->output_section->vma
 			  + htab->elf.sgot->output_offset
-			  + h->got.offset - offplt);
+			  + (h->got.offset & ~1) - offplt);
 	  else
 	    /* Use GOTPLT entry.  */
 	    relocation = (h->plt.offset / plt_entry_size - 1 + 3) * 4;
@@ -4006,9 +4031,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  if (!bfd_link_pic (info))
 	    {
 	      /* If not PIC, add the .got.plt section address for
-		 baseless adressing.  */
+		 baseless addressing.  */
 	      unsigned int modrm;
-	      modrm = bfd_get_8 (abfd, contents + rel->r_offset - 1);
+	      modrm = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
 	      if ((modrm & 0xc7) == 0x5)
 		relocation += offplt;
 	    }
@@ -4365,6 +4390,7 @@ r_386_got32:
 			      contents + roff);
 		  /* Skip R_386_PC32/R_386_PLT32.  */
 		  rel++;
+		  wrel++;
 		  continue;
 		}
 	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTDESC)
@@ -4704,6 +4730,7 @@ r_386_got32:
 			  contents + roff + 8);
 	      /* Skip R_386_PLT32.  */
 	      rel++;
+	      wrel++;
 	      continue;
 	    }
 	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTDESC)
@@ -4801,6 +4828,7 @@ r_386_got32:
 		      "\x65\xa1\0\0\0\0\x90\x8d\x74\x26", 11);
 	      /* Skip R_386_PC32/R_386_PLT32.  */
 	      rel++;
+	      wrel++;
 	      continue;
 	    }
 
@@ -4942,6 +4970,29 @@ check_relocation_error:
 	      return FALSE;
 	    }
 	}
+
+      if (wrel != rel)
+	*wrel = *rel;
+    }
+
+  if (wrel != rel)
+    {
+      Elf_Internal_Shdr *rel_hdr;
+      size_t deleted = rel - wrel;
+
+      rel_hdr = _bfd_elf_single_rel_hdr (input_section->output_section);
+      rel_hdr->sh_size -= rel_hdr->sh_entsize * deleted;
+      if (rel_hdr->sh_size == 0)
+	{
+	  /* It is too late to remove an empty reloc section.  Leave
+	     one NONE reloc.
+	     ??? What is wrong with an empty section???  */
+	  rel_hdr->sh_size = rel_hdr->sh_entsize;
+	  deleted -= 1;
+	}
+      rel_hdr = _bfd_elf_single_rel_hdr (input_section);
+      rel_hdr->sh_size -= rel_hdr->sh_entsize * deleted;
+      input_section->reloc_count -= deleted;
     }
 
   return TRUE;
@@ -5308,19 +5359,23 @@ elf_i386_reloc_type_class (const struct bfd_link_info *info,
   bfd *abfd = info->output_bfd;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_link_hash_table *htab = elf_hash_table (info);
-  unsigned long r_symndx = ELF32_R_SYM (rela->r_info);
-  Elf_Internal_Sym sym;
 
-  if (htab->dynsym == NULL
-      || !bed->s->swap_symbol_in (abfd,
-				  (htab->dynsym->contents
-				   + r_symndx * sizeof (Elf32_External_Sym)),
-				  0, &sym))
-    abort ();
+  if (htab->dynsym != NULL
+      && htab->dynsym->contents != NULL)
+    {
+      /* Check relocation against STT_GNU_IFUNC symbol if there are
+         dynamic symbols.  */
+      unsigned long r_symndx = ELF32_R_SYM (rela->r_info);
+      Elf_Internal_Sym sym;
+      if (!bed->s->swap_symbol_in (abfd,
+				   (htab->dynsym->contents
+				    + r_symndx * sizeof (Elf32_External_Sym)),
+				   0, &sym))
+	abort ();
 
-  /* Check relocation against STT_GNU_IFUNC symbol.  */
-  if (ELF32_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
-    return reloc_class_ifunc;
+      if (ELF32_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	return reloc_class_ifunc;
+    }
 
   switch (ELF32_R_TYPE (rela->r_info))
     {
@@ -5633,9 +5688,9 @@ bad_return:
       reloc_index = H_GET_32 (abfd, (plt_contents + plt_offset
 				     + bed->plt->plt_reloc_offset));
       reloc_index /= sizeof (Elf32_External_Rel);
-      if (reloc_index >= count)
-	abort ();
-      plt_sym_val[reloc_index] = plt->vma + plt_offset;
+      if (reloc_index < count)
+	plt_sym_val[reloc_index] = plt->vma + plt_offset;
+
       plt_offset += bed->plt->plt_entry_size;
 
       /* PR binutils/18437: Skip extra relocations in the .rel.plt

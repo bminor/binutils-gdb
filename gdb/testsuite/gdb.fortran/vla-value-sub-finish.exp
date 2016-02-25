@@ -1,4 +1,4 @@
-# Copyright 2015 Free Software Foundation, Inc.
+# Copyright 2015-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ if ![runto_main] {
 
 gdb_breakpoint [gdb_get_line_number "array2-almost-filled"]
 gdb_continue_to_breakpoint "array2-almost-filled"
+# array2 size is 296352 bytes.
+gdb_test_no_output "set max-value-size 1024*1024"
 gdb_test "print array2" " = \\( *\\( *\\( *30, *3, *3,\[()3, .\]*\\)" \
   "print array2 in foo after it was filled"
 gdb_test "print array2(2,1,1)=20" " = 20" \

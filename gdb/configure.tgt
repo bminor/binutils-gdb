@@ -44,7 +44,8 @@ aarch64*-*-elf)
 aarch64*-*-linux*)
 	# Target: AArch64 linux
 	gdb_target_obs="aarch64-tdep.o aarch64-linux-tdep.o aarch64-insn.o \
-			arm.o arm-tdep.o arm-linux-tdep.o \
+			arm.o arm-linux.o arm-get-next-pcs.o arm-tdep.o \
+			arm-linux-tdep.o \
 			glibc-tdep.o linux-tdep.o solib-svr4.o \
 			symfile-mem.o linux-record.o"
 	build_gdbserver=yes
@@ -84,31 +85,34 @@ am33_2.0*-*-linux*)
 
 arm*-wince-pe | arm*-*-mingw32ce*)
 	# Target: ARM based machine running Windows CE (win32)
-	gdb_target_obs="arm.o arm-tdep.o arm-wince-tdep.o windows-tdep.o"
+	gdb_target_obs="arm.o arm-get-next-pcs.o arm-tdep.o \
+			arm-wince-tdep.o windows-tdep.o"
 	build_gdbserver=yes
 	;;
 arm*-*-linux*)
 	# Target: ARM based machine running GNU/Linux
-	gdb_target_obs="arm.o arm-tdep.o arm-linux-tdep.o glibc-tdep.o \
+	gdb_target_obs="arm.o arm-linux.o arm-get-next-pcs.o arm-tdep.o \
+                        arm-linux-tdep.o glibc-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o"
 	build_gdbserver=yes
 	;;
 arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
 	# Target: NetBSD/arm
-	gdb_target_obs="arm.o arm-tdep.o armnbsd-tdep.o solib-svr4.o"
+	gdb_target_obs="arm.o arm-get-next-pcs.o arm-tdep.o armnbsd-tdep.o \
+			solib-svr4.o"
 	;;
 arm*-*-openbsd*)
 	# Target: OpenBSD/arm
-	gdb_target_obs="arm.o arm-tdep.o armbsd-tdep.o armobsd-tdep.o \
-			obsd-tdep.o solib-svr4.o"
+	gdb_target_obs="arm.o arm-get-next-pcs.o arm-tdep.o armbsd-tdep.o \
+			armobsd-tdep.o obsd-tdep.o solib-svr4.o"
 	;;
 arm*-*-symbianelf*)
 	# Target: SymbianOS/arm
-	gdb_target_obs="arm.o arm-tdep.o arm-symbian-tdep.o"
+	gdb_target_obs="arm.o arm-get-next-pcs.o arm-tdep.o arm-symbian-tdep.o"
 	;;
 arm*-*-*)
 	# Target: ARM embedded system
-	gdb_target_obs="arm.o arm-tdep.o"
+	gdb_target_obs="arm.o arm-get-next-pcs.o arm-tdep.o"
 	gdb_sim=../sim/arm/libsim.a
 	;;
 
@@ -448,14 +452,13 @@ powerpc*-*-*)
 	# Target: PowerPC running eabi
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o solib-svr4.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
-	if test -f ../sim/ppc/Makefile; then
-	  gdb_sim=../sim/ppc/libsim.a
-	fi
+	gdb_sim=../sim/ppc/libsim.a
 	;;
 
 s390*-*-linux*)
 	# Target: S390 running Linux
-	gdb_target_obs="s390-linux-tdep.o solib-svr4.o linux-tdep.o"
+	gdb_target_obs="s390-linux-tdep.o solib-svr4.o linux-tdep.o \
+			linux-record.o"
 	build_gdbserver=yes
 	;;
 
@@ -474,9 +477,6 @@ rx-*-elf)
 score-*-*)
 	# Target: S+core embedded system
 	gdb_target_obs="score-tdep.o"
-	if test -f ../sim/score/Makefile; then
-	  gdb_sim=../sim/score/libsim.a
-	fi
 	build_gdbserver=yes
 	;;
 

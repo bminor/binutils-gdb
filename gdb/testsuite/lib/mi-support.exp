@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Free Software Foundation, Inc.
+# Copyright 1999-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -886,6 +886,9 @@ proc mi_run_cmd_full {use_mi_command args} {
 	# to better handle RUN.
 	send_gdb  "jump *$start\n"
 	warning "Using CLI jump command, expect run-to-main FAIL"
+	gdb_expect {
+	    -re "${run_match}&\"jump \\*${start}\\n\"\[\r\n\]+~\"Continuing at 0x\[0-9A-Fa-f\]+\\n.\"\[\r\n\]+\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n${mi_gdb_prompt}" {}
+	}
 	return 0
     }
 
@@ -1965,19 +1968,8 @@ proc mi_load_shlibs { args } {
     mi_gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "\^done" ""
 }
 
-proc mi_reverse_list { list } {
-    if { [llength $list] <= 1 } {
-	return $list
-    }
-    set tail [lrange $list 1 [llength $list]]
-    set rtail [mi_reverse_list $tail]
-    lappend rtail [lindex $list 0]
-    return $rtail
-}
-
-proc mi_check_thread_states { xstates test } {
+proc mi_check_thread_states { states test } {
     global expect_out
-    set states [mi_reverse_list $xstates]
     set pattern ".*\\^done,threads=\\\["
     foreach s $states {
 	set pattern "${pattern}(.*)state=\"$s\""
@@ -2509,4 +2501,13 @@ proc mi_make_breakpoint_table {bp_list} {
 proc mi_skip_python_tests {} {
     global mi_gdb_prompt
     return [skip_python_tests_prompt "$mi_gdb_prompt$"]
+}
+
+# Check whether we're testing with the remote or extended-remote
+# targets.
+
+proc mi_is_target_remote {} {
+    global mi_gdb_prompt
+
+    return [gdb_is_target_remote_prompt "$mi_gdb_prompt"]
 }

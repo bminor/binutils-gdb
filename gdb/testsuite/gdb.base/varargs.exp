@@ -1,4 +1,4 @@
-# Copyright 1997-2015 Free Software Foundation, Inc.
+# Copyright 1997-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,10 +42,6 @@ if [support_complex_tests] {
     lappend additional_flags "additional_flags=-DTEST_COMPLEX"
 }
 
-if {$hp_cc_compiler} {
-    lappend additional_flags "additional_flags=-Ae"
-}
-
 # build the first test case
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	   executable ${additional_flags}] != "" } {
@@ -69,19 +65,6 @@ if [gdb_skip_stdio_test "varargs.exp"] {
 if ![runto test] then {
     perror "couldn't run to breakpoint"
     continue
-}
-
-if { $hp_aCC_compiler } {
-    # When compiled w/ aCC we need to disable overload resolution
-    # for command line calls.
-    # We need it for vararg calls since the aCC compiler gives us no
-    # information about the undeclared arguments, or even that there 
-    # _are_ undeclared arguments. As far as gdb is concerned it only
-    # knows about the declared arguments. So we need to force the call
-    # even though the overload resolution mechanism says that the types
-    # don't match. 
-    # - guo
-    gdb_test_no_output "set overload-resolution 0"
 }
 
 gdb_test_stdio "print find_max1(5,1,2,3,4,5)" \

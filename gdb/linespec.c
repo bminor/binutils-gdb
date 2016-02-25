@@ -116,6 +116,10 @@ struct linespec_state
   /* The program space as seen when the module was entered.  */
   struct program_space *program_space;
 
+  /* If not NULL, the search is restricted to just this program
+     space.  */
+  struct program_space *search_pspace;
+
   /* The default symtab to use, if no other symtab is specified.  */
   struct symtab *default_symtab;
 
@@ -263,7 +267,8 @@ static struct symtabs_and_lines decode_objc (struct linespec_state *self,
 					     linespec_p ls,
 					     const char *arg);
 
-static VEC (symtab_ptr) *symtabs_from_filename (const char *);
+static VEC (symtab_ptr) *symtabs_from_filename (const char *,
+						struct program_space *pspace);
 
 static VEC (block_symbol_d) *find_label_symbols
      (struct linespec_state *self,
@@ -294,7 +299,9 @@ static void add_all_symbol_names_from_pspace (struct collect_info *info,
 					      struct program_space *pspace,
 					      VEC (const_char_ptr) *names);
 
-static VEC (symtab_ptr) *collect_symtabs_from_filename (const char *file);
+static VEC (symtab_ptr) *
+  collect_symtabs_from_filename (const char *file,
+				 struct program_space *pspace);
 
 static void decode_digits_ordinary (struct linespec_state *self,
 				    linespec_p ls,
@@ -1836,7 +1843,8 @@ create_sals_line_offset (struct linespec_state *self,
       fullname = symtab_to_fullname (self->default_symtab);
       VEC_pop (symtab_ptr, ls->file_symtabs);
       VEC_free (symtab_ptr, ls->file_symtabs);
-      ls->file_symtabs = collect_symtabs_from_filename (fullname);
+      ls->file_symtabs = collect_symtabs_from_filename (fullname,
+							self->search_pspace);
       use_default = 1;
     }
 
@@ -2096,7 +2104,8 @@ convert_explicit_location_to_sals (struct linespec_state *self,
       TRY
 	{
 	  result->file_symtabs
-	    = symtabs_from_filename (explicit_loc->source_filename);
+	    = symtabs_from_filename (explicit_loc->source_filename,
+				     self->search_pspace);
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -2287,7 +2296,8 @@ parse_linespec (linespec_parser *parser, const char *arg)
       TRY
 	{
 	  PARSER_RESULT (parser)->file_symtabs
-	    = symtabs_from_filename (user_filename);
+	    = symtabs_from_filename (user_filename,
+				     PARSER_STATE (parser)->search_pspace);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
@@ -2369,6 +2379,7 @@ parse_linespec (linespec_parser *parser, const char *arg)
 static void
 linespec_state_constructor (struct linespec_state *self,
 			    int flags, const struct language_defn *language,
+			    struct program_space *search_pspace,
 			    struct symtab *default_symtab,
 			    int default_line,
 			    struct linespec_result *canonical)
@@ -2377,6 +2388,7 @@ linespec_state_constructor (struct linespec_state *self,
   self->language = language;
   self->funfirstline = (flags & DECODE_LINE_FUNFIRSTLINE) ? 1 : 0;
   self->list_mode = (flags & DECODE_LINE_LIST_MODE) ? 1 : 0;
+  self->search_pspace = search_pspace;
   self->default_symtab = default_symtab;
   self->default_line = default_line;
   self->canonical = canonical;
@@ -2391,6 +2403,7 @@ linespec_state_constructor (struct linespec_state *self,
 static void
 linespec_parser_new (linespec_parser *parser,
 		     int flags, const struct language_defn *language,
+		     struct program_space *search_pspace,
 		     struct symtab *default_symtab,
 		     int default_line,
 		     struct linespec_result *canonical)
@@ -2400,6 +2413,7 @@ linespec_parser_new (linespec_parser *parser,
   memset (PARSER_RESULT (parser), 0, sizeof (struct linespec));
   PARSER_EXPLICIT (parser)->line_offset.sign = LINE_OFFSET_UNKNOWN;
   linespec_state_constructor (PARSER_STATE (parser), flags, language,
+			      search_pspace,
 			      default_symtab, default_line, canonical);
 }
 
@@ -2453,7 +2467,7 @@ linespec_lex_to_end (char **stringp)
   if (stringp == NULL || *stringp == NULL)
     return;
 
-  linespec_parser_new (&parser, 0, current_language, NULL, 0, NULL);
+  linespec_parser_new (&parser, 0, current_language, NULL, NULL, 0, NULL);
   cleanup = make_cleanup (linespec_parser_delete, &parser);
   parser.lexer.saved_arg = *stringp;
   PARSER_STREAM (&parser) = orig = *stringp;
@@ -2500,9 +2514,27 @@ event_location_to_sals (linespec_parser *parser,
       break;
 
     case ADDRESS_LOCATION:
-      result
-	= convert_address_location_to_sals (PARSER_STATE (parser),
-					    get_address_location (location));
+      {
+	const char *addr_string = get_address_string_location (location);
+	CORE_ADDR addr = get_address_location (location);
+
+	if (addr_string != NULL)
+	  {
+	    char *expr = xstrdup (addr_string);
+	    const char *const_expr = expr;
+	    struct cleanup *cleanup = make_cleanup (xfree, expr);
+
+	    addr = linespec_expression_to_pc (&const_expr);
+	    if (PARSER_STATE (parser)->canonical != NULL)
+	      PARSER_STATE (parser)->canonical->location
+		= copy_event_location (location);
+
+	    do_cleanups (cleanup);
+	  }
+
+	result = convert_address_location_to_sals (PARSER_STATE (parser),
+						   addr);
+      }
       break;
 
     case EXPLICIT_LOCATION:
@@ -2532,6 +2564,7 @@ event_location_to_sals (linespec_parser *parser,
 
 void
 decode_line_full (const struct event_location *location, int flags,
+		  struct program_space *search_pspace,
 		  struct symtab *default_symtab,
 		  int default_line, struct linespec_result *canonical,
 		  const char *select_mode,
@@ -2552,7 +2585,8 @@ decode_line_full (const struct event_location *location, int flags,
 	      || select_mode == multiple_symbols_cancel);
   gdb_assert ((flags & DECODE_LINE_LIST_MODE) == 0);
 
-  linespec_parser_new (&parser, flags, current_language, default_symtab,
+  linespec_parser_new (&parser, flags, current_language,
+		       search_pspace, default_symtab,
 		       default_line, canonical);
   cleanups = make_cleanup (linespec_parser_delete, &parser);
   save_current_program_space ();
@@ -2605,6 +2639,7 @@ decode_line_full (const struct event_location *location, int flags,
 
 struct symtabs_and_lines
 decode_line_1 (const struct event_location *location, int flags,
+	       struct program_space *search_pspace,
 	       struct symtab *default_symtab,
 	       int default_line)
 {
@@ -2612,7 +2647,8 @@ decode_line_1 (const struct event_location *location, int flags,
   linespec_parser parser;
   struct cleanup *cleanups;
 
-  linespec_parser_new (&parser, flags, current_language, default_symtab,
+  linespec_parser_new (&parser, flags, current_language,
+		       search_pspace, default_symtab,
 		       default_line, NULL);
   cleanups = make_cleanup (linespec_parser_delete, &parser);
   save_current_program_space ();
@@ -2642,7 +2678,7 @@ decode_line_with_current_source (char *string, int flags)
 
   location = string_to_event_location (&string, current_language);
   cleanup = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, flags,
+  sals = decode_line_1 (location, flags, NULL,
 			cursal.symtab, cursal.line);
 
   if (*string)
@@ -2667,11 +2703,11 @@ decode_line_with_last_displayed (char *string, int flags)
   location = string_to_event_location (&string, current_language);
   cleanup = make_cleanup_delete_event_location (location);
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (location, flags,
+    sals = decode_line_1 (location, flags, NULL,
 			  get_last_displayed_symtab (),
 			  get_last_displayed_line ());
   else
-    sals = decode_line_1 (location, flags, (struct symtab *) NULL, 0);
+    sals = decode_line_1 (location, flags, NULL, (struct symtab *) NULL, 0);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
@@ -3234,10 +3270,13 @@ add_symtabs_to_list (struct symtab *symtab, void *d)
   return 0;
 }
 
-/* Given a file name, return a VEC of all matching symtabs.  */
+/* Given a file name, return a VEC of all matching symtabs.  If
+   SEARCH_PSPACE is not NULL, the search is restricted to just that
+   program space.  */
 
 static VEC (symtab_ptr) *
-collect_symtabs_from_filename (const char *file)
+collect_symtabs_from_filename (const char *file,
+			       struct program_space *search_pspace)
 {
   struct symtab_collector collector;
   struct cleanup *cleanups;
@@ -3249,27 +3288,37 @@ collect_symtabs_from_filename (const char *file)
   cleanups = make_cleanup_htab_delete (collector.symtab_table);
 
   /* Find that file's data.  */
-  ALL_PSPACES (pspace)
-  {
-    if (pspace->executing_startup)
-      continue;
+  if (search_pspace == NULL)
+    {
+      ALL_PSPACES (pspace)
+        {
+	  if (pspace->executing_startup)
+	    continue;
 
-    set_current_program_space (pspace);
-    iterate_over_symtabs (file, add_symtabs_to_list, &collector);
-  }
+	  set_current_program_space (pspace);
+	  iterate_over_symtabs (file, add_symtabs_to_list, &collector);
+	}
+    }
+  else
+    {
+      set_current_program_space (search_pspace);
+      iterate_over_symtabs (file, add_symtabs_to_list, &collector);
+    }
 
   do_cleanups (cleanups);
   return collector.symtabs;
 }
 
-/* Return all the symtabs associated to the FILENAME.  */
+/* Return all the symtabs associated to the FILENAME.  If SEARCH_PSPACE is
+   not NULL, the search is restricted to just that program space.  */
 
 static VEC (symtab_ptr) *
-symtabs_from_filename (const char *filename)
+symtabs_from_filename (const char *filename,
+		       struct program_space *search_pspace)
 {
   VEC (symtab_ptr) *result;
   
-  result = collect_symtabs_from_filename (filename);
+  result = collect_symtabs_from_filename (filename, search_pspace);
 
   if (VEC_empty (symtab_ptr, result))
     {
@@ -3367,9 +3416,13 @@ find_function_symbols (struct linespec_state *state,
   /* Try NAME as an Objective-C selector.  */
   find_imps (name, &symbol_names);
   if (!VEC_empty (const_char_ptr, symbol_names))
-    add_all_symbol_names_from_pspace (&info, VAR_DOMAIN, NULL, symbol_names);
+    add_all_symbol_names_from_pspace (&info, VAR_DOMAIN, state->search_pspace,
+				      symbol_names);
   else
-    add_matching_symbols_to_info (name, VAR_DOMAIN, &info, NULL);
+    {
+      add_matching_symbols_to_info (name, VAR_DOMAIN, &info,
+				    state->search_pspace);
+    }
 
   do_cleanups (cleanup);
 

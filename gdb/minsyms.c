@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright (C) 1992-2015 Free Software Foundation, Inc.
+   Copyright (C) 1992-2016 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -697,10 +697,10 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc_in,
 		     symbol isn't an object or function (e.g. a
 		     label), or it may just mean that the size was not
 		     specified.  */
-		  if (MSYMBOL_SIZE (&msymbol[hi]) == 0
-		      && best_zero_sized == -1)
+		  if (MSYMBOL_SIZE (&msymbol[hi]) == 0)
 		    {
-		      best_zero_sized = hi;
+		      if (best_zero_sized == -1)
+			best_zero_sized = hi;
 		      hi--;
 		      continue;
 		    }

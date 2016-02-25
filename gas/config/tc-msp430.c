@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002-2015 Free Software Foundation, Inc.
+  Copyright (C) 2002-2016 Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -105,7 +105,7 @@ int linkrelax = 1;
 
 struct rcodes_s
 {
-  char * name;
+  const char * name;
   int    index;	/* Corresponding insn_opnumb.  */
   int    sop;	/* Opcode if jump length is short.  */
   long   lpos;	/* Label position.  */
@@ -160,7 +160,7 @@ static struct rcodes_s msp430x_rcodes[] =
 
 struct hcodes_s
 {
-  char * name;
+  const char * name;
   int    index;		/* Corresponding insn_opnumb.  */
   int    tlab;		/* Number of labels in short mode.  */
   int    op0;		/* Opcode for first word of short jump.  */
@@ -694,8 +694,6 @@ static unsigned int silicon_errata_warn = 0;
 #define SILICON_ERRATA_CPU12 		(1 << 3)
 #define SILICON_ERRATA_CPU13 		(1 << 4)
 #define SILICON_ERRATA_CPU19 		(1 << 5)
-#define SILICON_ERRATA_CPU42 		(1 << 6)
-#define SILICON_ERRATA_CPU42_PLUS	(1 << 7)
 
 static void
 msp430_set_arch (int option)
@@ -712,7 +710,7 @@ msp430_set_arch (int option)
 /* This is a copy of the same data structure found in gcc/config/msp430/msp430.c
    Keep these two structures in sync.
    The data in this structure has been extracted from the devices.csv file
-   released by TI, updated as of 8 October 2015.  */
+   released by TI, updated as of March 2016.  */
 
 struct msp430_mcu_data
 {
@@ -1138,7 +1136,13 @@ msp430_mcu_data [] =
   { "msp430fg6626",2,8 },
   { "msp430fr2032",2,0 },
   { "msp430fr2033",2,0 },
+  { "msp430fr2310",2,0 },
+  { "msp430fr2311",2,0 },
   { "msp430fr2433",2,8 },
+  { "msp430fr2532",2,8 },
+  { "msp430fr2533",2,8 },
+  { "msp430fr2632",2,8 },
+  { "msp430fr2633",2,8 },
   { "msp430fr2xx_4xxgeneric",2,8 },
   { "msp430fr4131",2,0 },
   { "msp430fr4132",2,0 },
@@ -1172,6 +1176,8 @@ msp430_mcu_data [] =
   { "msp430fr5858",2,8 },
   { "msp430fr5859",2,8 },
   { "msp430fr5867",2,8 },
+  { "msp430fr5862",2,8 },
+  { "msp430fr5864",2,8 },
   { "msp430fr58671",2,8 },
   { "msp430fr5868",2,8 },
   { "msp430fr5869",2,8 },
@@ -1182,6 +1188,8 @@ msp430_mcu_data [] =
   { "msp430fr5888",2,8 },
   { "msp430fr5889",2,8 },
   { "msp430fr58891",2,8 },
+  { "msp430fr5892",2,8 },
+  { "msp430fr5894",2,8 },
   { "msp430fr5922",2,8 },
   { "msp430fr59221",2,8 },
   { "msp430fr5947",2,8 },
@@ -1191,6 +1199,8 @@ msp430_mcu_data [] =
   { "msp430fr5957",2,8 },
   { "msp430fr5958",2,8 },
   { "msp430fr5959",2,8 },
+  { "msp430fr5962",2,8 },
+  { "msp430fr5964",2,8 },
   { "msp430fr5967",2,8 },
   { "msp430fr5968",2,8 },
   { "msp430fr5969",2,8 },
@@ -1203,6 +1213,8 @@ msp430_mcu_data [] =
   { "msp430fr5988",2,8 },
   { "msp430fr5989",2,8 },
   { "msp430fr59891",2,8 },
+  { "msp430fr5992",2,8 },
+  { "msp430fr5994",2,8 },
   { "msp430fr5xx_6xxgeneric",2,8 },
   { "msp430fr6820",2,8 },
   { "msp430fr6822",2,8 },
@@ -1327,7 +1339,7 @@ md_parse_option (int c, char * arg)
 	signed int i;
 	const struct
 	{
-	  char *       name;
+	  const char *       name;
 	  unsigned int length;
 	  unsigned int bitfield;
 	} erratas[] =
@@ -1338,8 +1350,6 @@ md_parse_option (int c, char * arg)
 	  { STRING_COMMA_LEN ("cpu12"), SILICON_ERRATA_CPU12 },
 	  { STRING_COMMA_LEN ("cpu13"), SILICON_ERRATA_CPU13 },
 	  { STRING_COMMA_LEN ("cpu19"), SILICON_ERRATA_CPU19 },
-	  { STRING_COMMA_LEN ("cpu42"), SILICON_ERRATA_CPU42 },
-	  { STRING_COMMA_LEN ("cpu42+"), SILICON_ERRATA_CPU42_PLUS },
 	};
 
 	do
@@ -1579,7 +1589,7 @@ md_show_usage (FILE * stream)
   fprintf (stream,
 	   _("  -msilicon-errata=<name>[,<name>...] - enable fixups for silicon errata\n"
 	     "  -msilicon-errata-warn=<name>[,<name>...] - warn when a fixup might be needed\n"
-	     "   supported errata names: cpu4, cpu8, cpu11, cpu12, cpu13, cpu19, cpu42, cpu42+\n"));
+	     "   supported errata names: cpu4, cpu8, cpu11, cpu12, cpu13, cpu19\n"));
   fprintf (stream,
 	   _("  -mQ - enable relaxation at assembly time. DANGEROUS!\n"
 	     "  -mP - enable polymorph instructions\n"));
@@ -2605,9 +2615,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      switch (check_for_nop & - check_for_nop)
 		{
 		case NOP_CHECK_INTERRUPT:
-		  if (warn_interrupt_nops
-		      || silicon_errata_warn & SILICON_ERRATA_CPU42
-		      || silicon_errata_warn & SILICON_ERRATA_CPU42_PLUS)
+		  if (warn_interrupt_nops)
 		    {
 		      if (gen_interrupt_nops)
 			as_warn (_("NOP inserted between two instructions that change interrupt state"));
@@ -2615,8 +2623,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 			as_warn (_("a NOP might be needed here because of successive changes in interrupt state"));
 		    }
 
-		  if (gen_interrupt_nops
-		      || silicon_errata_fix & SILICON_ERRATA_CPU42_PLUS)
+		  if (gen_interrupt_nops)
 		    /* Emit a NOP between interrupt enable/disable.
 		       See 1.3.4.1 of the MSP430x5xx User Guide.  */
 		    doit = TRUE;
@@ -3179,63 +3186,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    break;
 	  }
 
-	case 7:
-	  {
-	    int reg;
-
-	    /* RRUX: Synthetic unsigned right shift of a register by one bit.  */
-	    if (extended & 0xff)
-	      {
-		as_bad (_("repeat count cannot be used with %s"), opcode->name);
-		break;
-	      }
-
-	    line = extract_operand (line, l1, sizeof (l1));
-	    if ((reg = check_reg (l1)) == -1)
-	      {
-		as_bad (_("expected register as argument of %s"),
-			opcode->name);
-		break;
-	      }
-
-	    if (target_is_430xv2 () && reg == 0)
-	      {
-		as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
-		break;
-	      }
-
-	    if (byte_op)
-	      {
-		/* Tricky - there is no single instruction that will do this.
-		   Encode as: RRA.B rN { BIC.B #0x80, rN  */
-		op_length = 6;
-		frag = frag_more (op_length);
-		where = frag - frag_now->fr_literal;
-		bin = 0x1140 | reg;
-		bfd_putl16 ((bfd_vma) bin, frag);
-		dwarf2_emit_insn (2);
-		bin = 0xc070 | reg;
-		bfd_putl16 ((bfd_vma) bin, frag + 2);
-		bin = 0x0080;
-		bfd_putl16 ((bfd_vma) bin, frag + 4);
-		dwarf2_emit_insn (4);
-	      }
-	    else
-	      {
-		/* Encode as RRUM[.A] rN.  */
-		bin = opcode->bin_opcode;
-		if (! addr_op)
-		  bin |= 0x10;
-		bin |= reg;
-		op_length = 2;
-		frag = frag_more (op_length);
-		where = frag - frag_now->fr_literal;
-		bfd_putl16 ((bfd_vma) bin, frag);
-		dwarf2_emit_insn (op_length);
-	      }
-	    break;
-	  }
-
 	case 8:
 	  {
 	    bfd_boolean need_reloc = FALSE;
@@ -3667,6 +3617,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  else if (! addr_op)
 	    extended |= BYTE_OPERATION;
 
+	  if (is_opcode ("rrux"))
+	    extended |= IGNORE_CARRY_BIT;
+	  
 	  if (op1.ol != 0 && ((extended & 0xf) != 0))
 	    {
 	      as_bad (_("repeat instruction used with non-register mode instruction"));
@@ -3955,7 +3908,7 @@ md_section_align (asection * seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
 
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
 /* If you define this macro, it should return the offset between the

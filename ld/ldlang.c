@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991-2015 Free Software Foundation, Inc.
+   Copyright (C) 1991-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -1499,11 +1499,12 @@ next_matching_output_section_statement (lang_output_section_statement_type *os,
 
 lang_output_section_statement_type *
 lang_output_section_find_by_flags (const asection *sec,
+				   flagword sec_flags,
 				   lang_output_section_statement_type **exact,
 				   lang_match_sec_type_func match_type)
 {
   lang_output_section_statement_type *first, *look, *found;
-  flagword look_flags, sec_flags, differ;
+  flagword look_flags, differ;
 
   /* We know the first statement on this list is *ABS*.  May as well
      skip it.  */
@@ -1511,7 +1512,6 @@ lang_output_section_find_by_flags (const asection *sec,
   first = first->next;
 
   /* First try for an exact match.  */
-  sec_flags = sec->flags;
   found = NULL;
   for (look = first; look; look = look->next)
     {
@@ -1695,7 +1695,7 @@ lang_output_section_find_by_flags (const asection *sec,
   if (found || !match_type)
     return found;
 
-  return lang_output_section_find_by_flags (sec, NULL, NULL);
+  return lang_output_section_find_by_flags (sec, sec_flags, NULL, NULL);
 }
 
 /* Find the last output section before given output statement.
@@ -5457,18 +5457,23 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 
       /* For sections in the relro segment..  */
       for (sec = link_info.output_bfd->section_last; sec; sec = sec->prev)
-	if (!IGNORE_SECTION (sec)
+	if ((sec->flags & SEC_ALLOC) != 0
 	    && sec->vma >= expld.dataseg.base
 	    && sec->vma < expld.dataseg.relro_end - expld.dataseg.relro_offset)
 	  {
 	    /* Where do we want to put this section so that it ends as
 	       desired?  */
-	    bfd_vma start = sec->vma;
-	    bfd_vma end = start + sec->size;
-	    bfd_vma bump = desired_end - end;
+	    bfd_vma start, end, bump;
+
+	    end = start = sec->vma;
+	    if ((sec->flags & SEC_HAS_CONTENTS) != 0
+		|| (sec->flags & SEC_THREAD_LOCAL) == 0)
+	      end += sec->size;
+	    bump = desired_end - end;
 	    /* We'd like to increase START by BUMP, but we must heed
 	       alignment so the increase might be less than optimum.  */
-	    start += bump & ~(((bfd_vma) 1 << sec->alignment_power) - 1);
+	    start += bump;
+	    start &= ~(((bfd_vma) 1 << sec->alignment_power) - 1);
 	    /* This is now the desired end for the previous section.  */
 	    desired_end = start;
 	  }

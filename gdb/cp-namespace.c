@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright (C) 2003-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2016 Free Software Foundation, Inc.
 
    Contributed by David Carlton and by Kealia, Inc.
 
@@ -208,14 +208,14 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 
       lang_this = lookup_language_this (language_def (language_cplus), block);
       if (lang_this.symbol == NULL)
-	return (struct block_symbol) {NULL, NULL};
+	return null_block_symbol;
 
       type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
       /* If TYPE_NAME is NULL, abandon trying to find this symbol.
 	 This can happen for lambda functions compiled with clang++,
 	 which outputs no name for the container class.  */
       if (TYPE_NAME (type) == NULL)
-	return (struct block_symbol) {NULL, NULL};
+	return null_block_symbol;
 
       /* Look for symbol NAME in this class.  */
       sym = cp_lookup_nested_symbol (type, name, block, domain);
@@ -273,7 +273,7 @@ cp_search_static_and_baseclasses (const char *name,
   if (klass_sym.symbol == NULL)
     {
       do_cleanups (cleanup);
-      return (struct block_symbol) {NULL, NULL};
+      return null_block_symbol;
     }
   klass_type = SYMBOL_TYPE (klass_sym.symbol);
 
@@ -492,7 +492,7 @@ cp_lookup_symbol_via_imports (const char *scope,
 	}
     }
 
-  return (struct block_symbol) {NULL, NULL};
+  return null_block_symbol;
 }
 
 /* Helper function that searches an array of symbols for one named NAME.  */
@@ -640,7 +640,7 @@ cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  return (struct block_symbol) {NULL, NULL};
+  return null_block_symbol;
 }
 
 /* Searches for NAME in the current namespace, and by applying
@@ -928,7 +928,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
 	return sym;
     }
 
-  return (struct block_symbol) {NULL, NULL};
+  return null_block_symbol;
 }
 
 /* Look up a symbol named NESTED_NAME that is nested inside the C++
@@ -1005,7 +1005,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
 			      "cp_lookup_nested_symbol (...) = NULL"
 			      " (func/method)\n");
 	}
-      return (struct block_symbol) {NULL, NULL};
+      return null_block_symbol;
 
     default:
       internal_error (__FILE__, __LINE__,

@@ -1,3 +1,172 @@
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_ENVIRONMENT): Delete call.
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_INLINE): Delete call.
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Mark argv const.
+	(sim_create_inferior): Mark argv and env const.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* endian.c (get_word): Delete all arch/big endian logic.
+	(get_longword, write_word, write_longword): Likewise.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Update sim_parse_args comment.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
+	* configure: Regenerate.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (d10v_reg_store, d10v_reg_fetch): Define.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+	(sim_store_register): Rename to ...
+	(d10v_reg_store): ... this.  Rename cpu to sd.
+	(sim_fetch_register): Rename to ...
+	(d10v_reg_fetch): ... this.  Rename cpu to sd.
+
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-hload.o.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-reason.o and sim-stop.o.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete sim_create_inferior call.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* d10v_sim.h (d10v_callback): Delete.
+	* interp.c (d10v_callback): Delete.
+	(do_long, do_2_short, do_parallel, set_dmap_register,
+	set_imap_register, xfer_mem, dmem_addr, imem_addr, sim_info,
+	sim_create_inferior): Replace d10v_callback->printf_filtered
+	with sim_io_printf.
+	(sim_open): Delete d10v_callback assignment.
+	* simops.c (move_to_cr, trace_input_func, do_trace_output_flush,
+	do_trace_output_finish, trace_output_40, trace_output_32,
+	trace_output_16, trace_output_void, trace_output_flag, OP_5F20,
+	OP_5201, OP_27000000, OP_3220, OP_3400, OP_3000, OP_6C1F, OP_6C01,
+	OP_6E1F, OP_6E01): Replace d10v_callback->printf_filtered with
+	sim_io_printf and d10v_callback->flush_stdout with
+	sim_io_flush_stdout.
+	(OP_5F00): Likewise.  Rename d10v_callback to cb.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Add sim-reason.o, sim-resume.o, and
+	sim-stop.o.
+	* d10v_sim.h (struct d10v_memory): Delete fault member.
+	(struct _state): Delete exception member.
+	* interp.c (lookup_hash): Call sim_engine_halt instead of setting
+	State.exception.
+	(do_2_short, do_parallel): Delete State.exception checks.
+	(sim_size): Mark static.
+	(map_memory): Call sim_engine_halt instead of returning fault.
+	Call xcalloc instead of calloc and checking the return.
+	(dmem_addr): Call sim_engine_halt when phys_size is 0.
+	(imem_addr): Likewise.
+	(stop_simulator, sim_stop, sim_stop_reason): Delete.
+	(sim_resume): Rename to ...
+	(step_once): ... this.  Delete State.exception code and move
+	siggnal checking to sim_engine_run.
+	(sim_engine_run): New function.
+	* simops.c (EXCEPTION): Define.
+	(move_to_cr): Call EXCEPTION instead of setting State.exception.
+	(OP_30000000, OP_6401, OP_6001, OP_6000, OP_32010000, OP_31000000,
+	OP_6601, OP_6201, OP_6200, OP_33010000, OP_5201, OP_27000000,
+	OP_2F000000, OP_3220, OP_3200, OP_3400, OP_3000, OP_34000000,
+	OP_6800, OP_6C1F, OP_6801, OP_6C01, OP_36010000, OP_35000000,
+	OP_6A00, OP_6E1F, OP_6A01, OP_6E01, OP_37010000, OP_5FE0): Likewise.
+	(OP_5F20): Call sim_engine_halt instead of setting State.exception.
+	(OP_5F00): Call sim_engine_halt and EXCEPTION instead of setting
+	State.exception.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* d10v_sim.h (struct simops): Add SIM_DESC and SIM_CPU to func args.
+	(SET_CREG, SET_HW_CREG, SET_PSW_BIT): Pass sd and cpu to move_to_cr.
+	(dmem_addr, imem_addr, move_to_cr): Add SIM_DESC and SIM_CPU args.
+	(RB, SW, RW, SLW, RLW): Pass sd and cpu to dmem_addr.
+	* endian.c: Change d10v_sim.h include to sim-main.h.
+	* gencode.c: Likewise.  Add SIM_DESC and SIM_CPU args to all OPs.
+	* interp.c (lookup_hash, do_long, do_2_short, do_parallel,
+	map_memory, set_dmap_register, dmap_register, set_imap_register,
+	imap_register, sim_d10v_translate_dmap_addr, xfer_mem,
+	sim_d10v_translate_imap_addr, sim_d10v_translate_addr): Add
+	SIM_DESC and SIM_CPU args and adjust all callers.
+	(trace_sd): Delete.
+	(sim_open): Do not assign trace_sd.
+	(sim_resume, sim_create_inferior, sim_fetch_register,
+	sim_store_register): Set up cpu from the first one in sd.
+	* simops.c (move_to_cr): Add SIM_DESC and SIM_CPU args.
+	(trace_input_func, trace_input, do_trace_output_finish,
+	do_trace_output_finish, trace_output_40, trace_output_32,
+	trace_output_16, trace_output_void, trace_output_flag): Add
+	SIM_DESC arg.
+	(trace_input_func): Likewise.  Change trace_sd to sd.
+	(OP_*): Add SIM_DESC and SIM_CPU args to all OP funcs.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_close): Delete.
+
+2015-11-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_d10v_translate_dmap_addr): Mark static.
+	(sim_d10v_translate_imap_addr): Likewise.
+	(sim_d10v_translate_addr): Likewise.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

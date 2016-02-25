@@ -1,5 +1,5 @@
 /* Functions for manipulating expressions designed to be executed on the agent
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -308,6 +308,9 @@ ax_reg (struct agent_expr *x, int reg)
     }
   else
     {
+      /* Get the remote register number.  */
+      reg = gdbarch_remote_register_number (x->gdbarch, reg);
+
       /* Make sure the register number is in range.  */
       if (reg < 0 || reg > 0xffff)
         error (_("GDB bug: ax-general.c (ax_reg): "
@@ -456,7 +459,11 @@ ax_reg_mask (struct agent_expr *ax, int reg)
     }
   else
     {
-      int byte = reg / 8;
+      int byte;
+
+      /* Get the remote register number.  */
+      reg = gdbarch_remote_register_number (ax->gdbarch, reg);
+      byte = reg / 8;
 
       /* Grow the bit mask if necessary.  */
       if (byte >= ax->reg_mask_len)

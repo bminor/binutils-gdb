@@ -1,5 +1,5 @@
 /* tc-bfin.c -- Assembler for the ADI Blackfin.
-   Copyright (C) 2005-2015 Free Software Foundation, Inc.
+   Copyright (C) 2005-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -796,7 +796,7 @@ md_section_align (segment, size)
      valueT size;
 {
   int boundary = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << boundary) - 1) & (-1 << boundary));
+  return ((size + (1 << boundary) - 1) & -(1 << boundary));
 }
 
 

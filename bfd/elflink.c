@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -555,6 +555,19 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
   if (h == NULL)
     return provide;
 
+  if (h->versioned == unknown)
+    {
+      /* Set versioned if symbol version is unknown.  */
+      char *version = strrchr (name, ELF_VER_CHR);
+      if (version)
+	{
+	  if (version > name && version[-1] != ELF_VER_CHR)
+	    h->versioned = versioned_hidden;
+	  else
+	    h->versioned = versioned;
+	}
+    }
+
   switch (h->root.type)
     {
     case bfd_link_hash_defined:
@@ -632,9 +645,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   if ((h->def_dynamic
        || h->ref_dynamic
-       || bfd_link_pic (info)
-       || (bfd_link_pde (info)
-	   && elf_hash_table (info)->is_relocatable_executable))
+       || bfd_link_dll (info)
+       || elf_hash_table (info)->is_relocatable_executable)
       && h->dynindx == -1)
     {
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -875,9 +887,9 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 			  &dynsymcount);
 
   /* There is an unused NULL entry at the head of the table which
-     we must account for in our count.  Unless there weren't any
-     symbols, which means we'll have no table at all.  */
-  if (dynsymcount != 0)
+     we must account for in our count.  We always create the dynsym
+     section, even if it is empty, with dynamic sections.  */
+  if (elf_hash_table (info)->dynamic_sections_created)
     ++dynsymcount;
 
   elf_hash_table (info)->dynsymcount = dynsymcount;
@@ -3598,11 +3610,14 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* If we are creating a shared library, create all the dynamic
 	 sections immediately.  We need to attach them to something,
 	 so we attach them to this BFD, provided it is the right
-	 format and is not from ld --just-symbols.  FIXME: If there
+	 format and is not from ld --just-symbols.  Always create the
+	 dynamic sections for -E/--dynamic-list.  FIXME: If there
 	 are no input BFD's of the same format as the output, we can't
 	 make a shared library.  */
       if (!just_syms
-	  && bfd_link_pic (info)
+	  && (bfd_link_pic (info)
+	      || info->export_dynamic
+	      || info->dynamic)
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
@@ -4562,8 +4577,10 @@ error_free_dyn:
 		break;
 	      }
 
-	  /* Don't add DT_NEEDED for references from the dummy bfd.  */
+	  /* Don't add DT_NEEDED for references from the dummy bfd nor
+	     for unmatched symbol.  */
 	  if (!add_needed
+	      && matched
 	      && definition
 	      && ((dynsym
 		   && h->ref_regular_nonweak
@@ -10988,6 +11005,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  unsigned int reloc_count = 0;
+	  unsigned int additional_reloc_count = 0;
 	  struct bfd_elf_section_data *esdi = NULL;
 
 	  if (p->type == bfd_section_reloc_link_order
@@ -11016,7 +11034,15 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		   reloc sections themselves can't have relocations.  */
 		reloc_count = 0;
 	      else if (emit_relocs)
-		reloc_count = sec->reloc_count;
+		{
+		  reloc_count = sec->reloc_count;
+		  if (bed->elf_backend_count_additional_relocs)
+		    {
+		      int c;
+		      c = (*bed->elf_backend_count_additional_relocs) (sec);
+		      additional_reloc_count += c;
+		    }
+		}
 	      else if (bed->elf_backend_count_relocs)
 		reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
 
@@ -11065,14 +11091,21 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  if (reloc_count == 0)
 	    continue;
 
+	  reloc_count += additional_reloc_count;
 	  o->reloc_count += reloc_count;
 
 	  if (p->type == bfd_indirect_link_order && emit_relocs)
 	    {
 	      if (esdi->rel.hdr)
-		esdo->rel.count += NUM_SHDR_ENTRIES (esdi->rel.hdr);
+		{
+		  esdo->rel.count += NUM_SHDR_ENTRIES (esdi->rel.hdr);
+		  esdo->rel.count += additional_reloc_count;
+		}
 	      if (esdi->rela.hdr)
-		esdo->rela.count += NUM_SHDR_ENTRIES (esdi->rela.hdr);
+		{
+		  esdo->rela.count += NUM_SHDR_ENTRIES (esdi->rela.hdr);
+		  esdo->rela.count += additional_reloc_count;
+		}
 	    }
 	  else
 	    {
@@ -11379,15 +11412,20 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    {
 		      const char *iclass, *oclass;
 
-		      if (bed->s->elfclass == ELFCLASS64)
+		      switch (bed->s->elfclass)
 			{
-			  iclass = "ELFCLASS32";
-			  oclass = "ELFCLASS64";
+			case ELFCLASS64: oclass = "ELFCLASS64"; break;
+			case ELFCLASS32: oclass = "ELFCLASS32"; break;
+			case ELFCLASSNONE: oclass = "ELFCLASSNONE"; break;
+			default: abort ();
 			}
-		      else
+
+		      switch (elf_elfheader (sub)->e_ident[EI_CLASS])
 			{
-			  iclass = "ELFCLASS64";
-			  oclass = "ELFCLASS32";
+			case ELFCLASS64: iclass = "ELFCLASS64"; break;
+			case ELFCLASS32: iclass = "ELFCLASS32"; break;
+			case ELFCLASSNONE: iclass = "ELFCLASSNONE"; break;
+			default: abort ();
 			}
 
 		      bfd_set_error (bfd_error_wrong_format);

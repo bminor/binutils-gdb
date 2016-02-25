@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -302,7 +302,7 @@ const pseudo_typeS md_pseudo_table[] =
 /* Structure to hold information about predefined registers.  */
 struct pd_reg
   {
-    char *name;
+    const char *name;
     int value;
   };
 
@@ -1294,6 +1294,7 @@ PowerPC options:\n\
 -mpower6, -mpwr6        generate code for Power6 architecture\n\
 -mpower7, -mpwr7        generate code for Power7 architecture\n\
 -mpower8, -mpwr8        generate code for Power8 architecture\n\
+-mpower9, -mpwr9        generate code for Power9 architecture\n\
 -mcell                  generate code for Cell Broadband Engine architecture\n\
 -mcom                   generate code Power/PowerPC common instructions\n\
 -many                   generate code for any architecture (PWR/PWRX/PPC)\n"));
@@ -1401,7 +1402,7 @@ ppc_mach (void)
     return bfd_mach_ppc;
 }
 
-extern char*
+extern const char*
 ppc_target_format (void)
 {
 #ifdef OBJ_COFF
@@ -1773,7 +1774,7 @@ ppc_insert_operand (unsigned long insn,
 		    const struct powerpc_operand *operand,
 		    offsetT val,
 		    ppc_cpu_t cpu,
-		    char *file,
+		    const char *file,
 		    unsigned int line)
 {
   long min, max, right;
@@ -1863,7 +1864,7 @@ static bfd_reloc_code_real_type
 ppc_elf_suffix (char **str_p, expressionS *exp_p)
 {
   struct map_bfd {
-    char *string;
+    const char *string;
     unsigned int length : 8;
     unsigned int valid32 : 1;
     unsigned int valid64 : 1;
@@ -3084,6 +3085,11 @@ md_assemble (char *str)
 		  reloc = BFD_RELOC_PPC_TPREL16;
 		  break;
 		}
+
+	      /* addpcis.  */
+	      if (opcode->opcode == (19 << 26) + (2 << 1)
+		  && reloc == BFD_RELOC_HI16_S)
+		reloc = BFD_RELOC_PPC_REL16DX_HA;
 
 	      /* If VLE-mode convert LO/HI/HA relocations.  */
       	      if (opcode->flags & PPC_OPCODE_VLE)
@@ -6090,7 +6096,7 @@ md_section_align (asection *seg ATTRIBUTE_UNUSED, valueT addr)
 #else
   int align = bfd_get_section_alignment (stdoutput, seg);
 
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 #endif
 }
 
@@ -6415,13 +6421,14 @@ ppc_handle_align (struct frag *fragP)
 
       if ((ppc_cpu & PPC_OPCODE_POWER6) != 0
 	  || (ppc_cpu & PPC_OPCODE_POWER7) != 0
-	  || (ppc_cpu & PPC_OPCODE_POWER8) != 0)
+	  || (ppc_cpu & PPC_OPCODE_POWER8) != 0
+	  || (ppc_cpu & PPC_OPCODE_POWER9) != 0)
 	{
-	  /* For power6, power7 and power8, we want the last nop to be a group
-	     terminating one.  Do this by inserting an rs_fill frag immediately
-	     after this one, with its address set to the last nop location.
-	     This will automatically reduce the number of nops in the current
-	     frag by one.  */
+	  /* For power6, power7, power8 and power9, we want the last nop to be
+	     a group terminating one.  Do this by inserting an rs_fill frag
+	     immediately after this one, with its address set to the last nop
+	     location.  This will automatically reduce the number of nops in
+	     the current frag by one.  */
 	  if (count > 4)
 	    {
 	      struct frag *group_nop = xmalloc (SIZEOF_STRUCT_FRAG + 4);
@@ -6436,13 +6443,14 @@ ppc_handle_align (struct frag *fragP)
 	    }
 
 	  if ((ppc_cpu & PPC_OPCODE_POWER7) != 0
-	      || (ppc_cpu & PPC_OPCODE_POWER8) != 0)
+	      || (ppc_cpu & PPC_OPCODE_POWER8) != 0
+	      || (ppc_cpu & PPC_OPCODE_POWER9) != 0)
 	    {
 	      if (ppc_cpu & PPC_OPCODE_E500MC)
 		/* e500mc group terminating nop: "ori 0,0,0".  */
 		md_number_to_chars (dest, 0x60000000, 4);
 	      else
-		/* power7/power8 group terminating nop: "ori 2,2,0".  */
+		/* power7/power8/power9 group terminating nop: "ori 2,2,0".  */
 		md_number_to_chars (dest, 0x60420000, 4);
 	    }
 	  else
@@ -6468,6 +6476,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       /* Hack around bfd_install_relocation brain damage.  */
       if (fixP->fx_pcrel)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
+
+      if (fixP->fx_addsy == abs_section_sym)
+	fixP->fx_done = 1;
     }
   else
     fixP->fx_done = 1;
@@ -6578,6 +6589,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
     case BFD_RELOC_HI16_S:
     case BFD_RELOC_HI16_S_PCREL:
+    case BFD_RELOC_PPC_REL16DX_HA:
 #ifdef OBJ_ELF
       if (REPORT_OVERFLOW_HI && ppc_obj64)
 	{
@@ -6623,9 +6635,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
   if (operand != NULL)
     {
       /* Handle relocs in an insn.  */
-      char *where;
-      unsigned long insn;
-
       switch (fixP->fx_r_type)
 	{
 #ifdef OBJ_ELF
@@ -6786,22 +6795,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 #endif
       if ((fieldval != 0 && APPLY_RELOC) || operand->insert != NULL)
 	{
+	  unsigned long insn;
+	  unsigned char *where;
+
 	  /* Fetch the instruction, insert the fully resolved operand
 	     value, and stuff the instruction back again.  */
-	  where = fixP->fx_frag->fr_literal + fixP->fx_where;
+	  where = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
 	  if (target_big_endian)
 	    {
 	      if (fixP->fx_size == 4)
-		insn = bfd_getb32 ((unsigned char *) where);
+		insn = bfd_getb32 (where);
 	      else
-		insn = bfd_getb16 ((unsigned char *) where);
+		insn = bfd_getb16 (where);
 	    }
 	  else
 	    {
 	      if (fixP->fx_size == 4)
-		insn = bfd_getl32 ((unsigned char *) where);
+		insn = bfd_getl32 (where);
 	      else
-		insn = bfd_getl16 ((unsigned char *) where);
+		insn = bfd_getl16 (where);
 	    }
 	  insn = ppc_insert_operand (insn, operand, fieldval,
 				     fixP->tc_fix_data.ppc_cpu,
@@ -6809,16 +6821,16 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  if (target_big_endian)
 	    {
 	      if (fixP->fx_size == 4)
-		bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+		bfd_putb32 (insn, where);
 	      else
-		bfd_putb16 ((bfd_vma) insn, (unsigned char *) where);
+		bfd_putb16 (insn, where);
 	    }
 	  else
 	    {
 	      if (fixP->fx_size == 4)
-		bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+		bfd_putl32 (insn, where);
 	      else
-		bfd_putl16 ((bfd_vma) insn, (unsigned char *) where);
+		bfd_putl16 (insn, where);
 	    }
 	}
 
@@ -6829,7 +6841,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       gas_assert (fixP->fx_addsy != NULL);
       if (fixP->fx_r_type == BFD_RELOC_NONE)
 	{
-	  char *sfile;
+	  const char *sfile;
 	  unsigned int sline;
 
 	  /* Use expr_symbol_where to see if this is an expression
@@ -7037,6 +7049,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_LO16_PCREL:
 	case BFD_RELOC_HI16_PCREL:
 	case BFD_RELOC_HI16_S_PCREL:
+	case BFD_RELOC_PPC_REL16DX_HA:
 	case BFD_RELOC_64_PCREL:
 	case BFD_RELOC_32_PCREL:
 	case BFD_RELOC_16_PCREL:
@@ -7056,7 +7069,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	default:
 	  if (fixP->fx_addsy)
 	    {
-	      char *sfile;
+	      const char *sfile;
 	      unsigned int sline;
 
 	      /* Use expr_symbol_where to see if this is an
@@ -7158,7 +7171,7 @@ tc_ppc_regname_to_dw2regnum (char *regname)
   unsigned int i;
   const char *p;
   char *q;
-  static struct { char *name; int dw2regnum; } regnames[] =
+  static struct { const char *name; int dw2regnum; } regnames[] =
     {
       { "sp", 1 }, { "r.sp", 1 }, { "rtoc", 2 }, { "r.toc", 2 },
       { "mq", 64 }, { "lr", 65 }, { "ctr", 66 }, { "ap", 67 },

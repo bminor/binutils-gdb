@@ -1,5 +1,5 @@
 /* tc-nds32.c -- Assemble for the nds32
-   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+   Copyright (C) 2012-2016 Free Software Foundation, Inc.
    Contributed by Andes Technology Corporation.
 
    This file is part of GAS, the GNU Assembler.
@@ -5380,7 +5380,7 @@ md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
 
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }
 
 /* GAS will call this function when a symbol table lookup fails, before it

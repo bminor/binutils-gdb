@@ -1,5 +1,5 @@
 /* tc-rx.c -- Assembler for the Renesas RX
-   Copyright (C) 2008-2015 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -106,6 +106,21 @@ struct option md_longopts[] =
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
+struct cpu_type
+{
+  const char *cpu_name;
+  int type;
+};
+
+struct cpu_type  cpu_type_list[] =
+{
+  {"rx100",RX100},
+  {"rx200",RX200},
+  {"rx600",RX600},
+  {"rx610",RX610},
+  {"rxv2",RXV2}
+};
+
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
 {
@@ -161,25 +176,27 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
       return 1;
 
     case OPTION_CPU:
-      if (strcasecmp (arg, "rx100") == 0)
-        rx_cpu = RX100;
-      else if (strcasecmp (arg, "rx200") == 0)
-	rx_cpu = RX200;
-      else if (strcasecmp (arg, "rx600") == 0)
-	rx_cpu = RX600;
-      else if (strcasecmp (arg, "rx610") == 0)
-	rx_cpu = RX610;
-      else
-	{
-	  as_warn (_("unrecognised RX CPU type %s"), arg);
-	  break;
-	}
-      return 1;
+      {
+	unsigned int i;
+	for (i = 0; i < ARRAY_SIZE (cpu_type_list); i++)
+	  {
+	    if (strcasecmp (arg, cpu_type_list[i].cpu_name) == 0)
+	      {
+		rx_cpu = cpu_type_list[i].type;
+		if (rx_cpu == RXV2)
+		  elf_flags |= E_FLAG_RX_V2;
+		return 1;
+	      }
+	  }
+	as_warn (_("unrecognised RX CPU type %s"), arg);
+	break;
+      }
 
     case OPTION_DISALLOW_STRING_INSNS:
       elf_flags |= E_FLAG_RX_SINSNS_SET | E_FLAG_RX_SINSNS_NO;
       return 1;
     }
+
   return 0;
 }
 
@@ -197,7 +214,7 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("  --mrelax\n"));
   fprintf (stream, _("  --mpid\n"));
   fprintf (stream, _("  --mint-register=<value>\n"));
-  fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610>\n"));
+  fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610|rxv2>\n"));
   fprintf (stream, _("  --mno-allow-string-insns"));
 }
 
@@ -249,10 +266,10 @@ rx_include (int ignore)
   FILE * try;
   char * path;
   char * filename;
-  char * current_filename;
+  const char * current_filename;
   char * last_char;
-  char * p;
-  char * d;
+  const char * p;
+  const char * d;
   char * f;
   char   end_char;
   size_t len;
@@ -283,7 +300,7 @@ rx_include (int ignore)
       return;
     }
 
-  as_where (& current_filename, NULL);
+   current_filename = as_where (NULL);
   f = (char *) xmalloc (strlen (current_filename) + strlen (filename) + 1);
 
   /* Check the filename.  If [@]..FILE[@] is found then replace
@@ -291,7 +308,7 @@ rx_include (int ignore)
      of any directory prefixes or extensions.  */
   if ((p = rx_strcasestr (filename, "..file")) != NULL)
     {
-      char * c;
+      const char * c;
 
       len = 6; /* strlen ("..file"); */
 
@@ -400,7 +417,7 @@ parse_rx_section (char * name)
   asection * sec;
   int   type;
   int   attr = SHF_ALLOC | SHF_EXECINSTR;
-  int   align = 2;
+  int   align = 1;
   char  end_char;
 
   do
@@ -428,9 +445,9 @@ parse_rx_section (char * name)
 		p++;
 	      switch (*p)
 		{
-		case '2': align = 2; break;
-		case '4': align = 4; break;
-		case '8': align = 8; break;
+		case '2': align = 1; break;
+		case '4': align = 2; break;
+		case '8': align = 3; break;
 		default:
 		  as_bad (_("unrecognised alignment value in .SECTION directive: %s"), p);
 		  ignore_rest_of_line ();
@@ -1206,7 +1223,7 @@ md_number_to_chars (char * buf, valueT val, int n)
 
 static struct
 {
-  char * fname;
+  const char * fname;
   int    reloc;
 }
 reloc_functions[] =
@@ -1248,7 +1265,7 @@ valueT
 md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }
 
 				/* NOP - 1 cycle */
@@ -1552,7 +1569,7 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
       if (fragP->fr_subtype >= next_size)
 	fragP->fr_subtype = 0;
       tprintf ("\033[34m -> mypc %lu next_size %u new %d old %d delta %d (fetchalign)\033[0m\n",
-	       mypc & 7,
+	       (unsigned long) (mypc & 7),
 	       next_size, fragP->fr_subtype, oldsize, fragP->fr_subtype-oldsize);
 
       newsize = fragP->fr_subtype;

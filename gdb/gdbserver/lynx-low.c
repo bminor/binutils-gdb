@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -343,7 +343,7 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
   if (ptid_equal (ptid, minus_one_ptid))
     ptid = thread_to_gdb_id (current_thread);
 
-  regcache_invalidate ();
+  regcache_invalidate_pid (ptid_get_pid (ptid));
 
   errno = 0;
   lynx_ptrace (request, ptid, 1, signal, 0);
@@ -546,16 +546,36 @@ lynx_detach (int pid)
   return 0;
 }
 
+/* A callback for find_inferior which removes from the thread list
+   all threads belonging to process PROC.  */
+
+static int
+lynx_delete_thread_callback (struct inferior_list_entry *entry, void *proc)
+{
+  struct process_info *process = (struct process_info *) proc;
+
+  if (ptid_get_pid (entry->id) == pid_of (process))
+    {
+      struct thread_info *thr = find_thread_ptid (entry->id);
+
+      remove_thread (thr);
+    }
+
+  return 0;
+}
+
 /* Implement the mourn target_ops method.  */
 
 static void
 lynx_mourn (struct process_info *proc)
 {
+  find_inferior (&all_threads, lynx_delete_thread_callback, proc);
+
   /* Free our private data.  */
   free (proc->priv);
   proc->priv = NULL;
 
-  clear_inferiors ();
+  remove_process (proc);
 }
 
 /* Implement the join target_ops method.  */
@@ -722,7 +742,7 @@ lynx_request_interrupt (void)
 
 static struct target_ops lynx_target_ops = {
   lynx_create_inferior,
-  NULL,  /* arch_setup */
+  NULL,  /* post_create_inferior */
   lynx_attach,
   lynx_kill,
   lynx_detach,

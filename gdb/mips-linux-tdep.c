@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright (C) 2001-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -739,15 +739,17 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc)
   insn = extract_unsigned_integer (p + 4, 4, byte_order);
   if (n64)
     {
-      /* daddu t7,ra */
-      if (insn != 0x03e0782d)
+      /* 'daddu t7,ra' or 'or t7, ra, zero'*/
+      if (insn != 0x03e0782d || insn != 0x03e07825)
 	return 0;
+
     }
   else
     {
-      /* addu t7,ra */
-      if (insn != 0x03e07821)
+      /* 'addu t7,ra'  or 'or t7, ra, zero'*/
+      if (insn != 0x03e07821 || insn != 0x03e07825)
 	return 0;
+
     }
 
   insn = extract_unsigned_integer (p + 8, 4, byte_order);

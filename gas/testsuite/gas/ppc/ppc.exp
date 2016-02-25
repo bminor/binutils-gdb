@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2015 Free Software Foundation, Inc.
+# Copyright (C) 2012-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,6 +69,7 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "simpshft"
 	run_dump_test "altivec"
 	run_dump_test "altivec2"
+	run_dump_test "altivec3"
 	run_dump_test "altivec_and_spe"
 	run_dump_test "booke"
 	run_dump_test "e500"
@@ -85,8 +86,10 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "power6"
 	run_dump_test "power7"
 	run_dump_test "power8"
+	run_dump_test "power9"
 	run_dump_test "vsx"
 	run_dump_test "vsx2"
+	run_dump_test "vsx3"
 	run_dump_test "htm"
 	run_dump_test "titan"
     }

@@ -1,6 +1,6 @@
 // script_test_1a.cc -- linker script test 1 for gold  -*- C++ -*-
 
-// Copyright (C) 2008-2015 Free Software Foundation, Inc.
+// Copyright (C) 2008-2016 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -24,7 +24,14 @@
 
 #include "script_test_1.h"
 
-extern char a, b, c, d, e, f, g;
+extern char
+  a __attribute__((__aligned__(1))),
+  b __attribute__((__aligned__(1))),
+  c __attribute__((__aligned__(1))),
+  d __attribute__((__aligned__(1))),
+  e __attribute__((__aligned__(1))),
+  f __attribute__((__aligned__(1))),
+  g __attribute__((__aligned__(1)));
 int sym = 3;
 int common_sym;
 

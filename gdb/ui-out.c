@@ -1,6 +1,6 @@
 /* Output generating routines for GDB.
 
-   Copyright (C) 1999-2015 Free Software Foundation, Inc.
+   Copyright (C) 1999-2016 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -36,12 +36,6 @@ struct ui_out_hdr
     char *colhdr;
     struct ui_out_hdr *next;
   };
-
-/* Maintain a stack so that the info applicable to the inner most list
-   is always available.  Stack/nested level 0 is reserved for the
-   top-level result.  */
-
-enum { MAX_UI_OUT_LEVELS = 8 };
 
 struct ui_out_level
   {

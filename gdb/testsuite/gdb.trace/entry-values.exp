@@ -1,4 +1,4 @@
-# Copyright 2013-2015 Free Software Foundation, Inc.
+# Copyright 2013-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -57,6 +57,8 @@ if { [istarget "arm*-*-*"] || [istarget "aarch64*-*-*"] } {
     # returns.  The only exception is JALRC, in which case execution
     # resumes from `insn1' instead.
     set call_insn {jalrc|[jb]al[sxr]*[ \t][^\r\n]+\r\n}
+} elseif [is_amd64_regs_target] {
+    set call_insn "callq"
 } else {
     set call_insn "call"
 }
@@ -64,7 +66,7 @@ if { [istarget "arm*-*-*"] || [istarget "aarch64*-*-*"] } {
 # Calculate the offset of the instruction in bar returned from foo.
 set test "disassemble bar"
 gdb_test_multiple $test $test {
-    -re ".*$hex <\\+$decimal>:\[ \t\]+$call_insn\[^\r\n\]+\r\n\[ \]+$hex <\\+($decimal)>:.*$gdb_prompt $" {
+    -re ".*$hex <\\+$decimal>:\[ \t\]+\\y$call_insn\\y\[^\r\n\]+\r\n\[ \]+$hex <\\+($decimal)>:.*$gdb_prompt $" {
 	set returned_from_foo $expect_out(1,string)
     }
     -re ".*$gdb_prompt $" {
@@ -214,20 +216,12 @@ if ![gdb_target_supports_trace] {
 
 gdb_test "trace foo" "Tracepoint $decimal at .*"
 
-if [is_amd64_regs_target] {
-    set spreg "\$rsp"
-} elseif [is_x86_like_target] {
-    set spreg "\$esp"
-} else {
-    set spreg "\$sp"
-}
-
 # Collect arguments i and j.  Collect 'global1' which is entry value
 # of argument i.  Don't collect 'global2' to test the entry value of
 # argument j.
 
 gdb_trace_setactions "set action for tracepoint 1" "" \
-    "collect i, j, global1, \(\*\(void \*\*\) \($spreg\)\) @ 64" "^$"
+    "collect i, j, global1, \(\*\(void \*\*\) \(\$$spreg\)\) @ 128" "^$"
 
 gdb_test_no_output "tstart"
 

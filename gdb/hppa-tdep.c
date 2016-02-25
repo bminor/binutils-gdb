@@ -1,6 +1,6 @@
 /* Target-dependent code for the HP PA-RISC architecture.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -104,7 +104,7 @@ static const struct objfile_data *hppa_objfile_priv_data = NULL;
 static int
 hppa_sign_extend (unsigned val, unsigned bits)
 {
-  return (int) (val >> (bits - 1) ? (-1 << bits) | val : val);
+  return (int) (val >> (bits - 1) ? (-(1 << bits)) | val : val);
 }
 
 /* For many immediate values the sign bit is the low bit!  */
@@ -112,7 +112,7 @@ hppa_sign_extend (unsigned val, unsigned bits)
 static int
 hppa_low_hppa_sign_extend (unsigned val, unsigned bits)
 {
-  return (int) ((val & 0x1 ? (-1 << (bits - 1)) : 0) | val >> 1);
+  return (int) ((val & 0x1 ? (-(1 << (bits - 1))) : 0) | val >> 1);
 }
 
 /* Extract the bits at positions between FROM and TO, using HP's numbering
@@ -1357,7 +1357,7 @@ prologue_inst_adjust_sp (unsigned long inst)
 
   /* std,ma X,D(sp) */
   if ((inst & 0xffe00008) == 0x73c00008)
-    return (inst & 0x1 ? -1 << 13 : 0) | (((inst >> 4) & 0x3ff) << 3);
+    return (inst & 0x1 ? -(1 << 13) : 0) | (((inst >> 4) & 0x3ff) << 3);
 
   /* addil high21,%r30; ldo low11,(%r1),%r30)
      save high bits in save_high21 for later use.  */
@@ -2066,7 +2066,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 		CORE_ADDR offset;
 		
 		if ((inst >> 26) == 0x1c)
-		  offset = (inst & 0x1 ? -1 << 13 : 0)
+		  offset = (inst & 0x1 ? -(1 << 13) : 0)
 		    | (((inst >> 4) & 0x3ff) << 3);
 		else if ((inst >> 26) == 0x03)
 		  offset = hppa_low_hppa_sign_extend (inst & 0x1f, 5);

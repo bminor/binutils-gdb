@@ -1,5 +1,5 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright (C) 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 2000-2016 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
    PIC and shlib bits based primarily on elf32-m68k.c and elf32-i386.c.
@@ -4032,8 +4032,10 @@ elf_cris_discard_excess_program_dynamics (struct elf_cris_link_hash_entry *h,
 	 have to export it as a dynamic symbol.  This was already done for
 	 functions; doing this for all symbols would presumably not
 	 introduce new problems.  Of course we don't do this if we're
-	 exporting all dynamic symbols.  */
-      if (! info->export_dynamic
+	 exporting all dynamic symbols, or all data symbols, regardless of
+	 them being referenced or not.  */
+      if (! (info->export_dynamic
+	     || (h->root.type != STT_FUNC && info->dynamic_data))
 	  && h->root.dynindx != -1
 	  && !h->root.def_dynamic
 	  && !h->root.ref_dynamic)

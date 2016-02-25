@@ -1,5 +1,5 @@
 /* tc-metag.c -- Assembler for the Imagination Technologies Meta.
-   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+   Copyright (C) 2013-2016 Free Software Foundation, Inc.
    Contributed by Imagination Technologies Ltd.
 
    This file is part of GAS, the GNU Assembler.
@@ -5791,7 +5791,7 @@ static const insn_parser insn_parsers[ENC_MAX] =
 
 struct metag_core_option
 {
-  char *name;
+  const char *name;
   unsigned int value;
 };
 
@@ -5899,10 +5899,10 @@ metag_parse_dsp (char * str)
 
 struct metag_long_option
 {
-  char * option;                /* Substring to match.  */
-  char * help;                  /* Help information.  */
+  const char * option;                /* Substring to match.  */
+  const char * help;                  /* Help information.  */
   int (* func) (char * subopt); /* Function to decode sub-option.  */
-  char * deprecated;            /* If non-null, print this message.  */
+  const char * deprecated;            /* If non-null, print this message.  */
 };
 
 struct metag_long_option metag_long_opts[] =
@@ -6879,7 +6879,7 @@ metag_handle_align (fragS * fragP)
 }
 
 static char *
-metag_end_of_match (char * cont, char * what)
+metag_end_of_match (char * cont, const char * what)
 {
   int len = strlen (what);
 

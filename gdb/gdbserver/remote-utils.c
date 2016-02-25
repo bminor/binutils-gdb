@@ -1,5 +1,5 @@
 /* Remote utility routines for the remote server for GDB.
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -402,6 +402,11 @@ remote_close (void)
 {
   delete_file_handler (remote_desc);
 
+#ifndef USE_WIN32API
+  /* Remove SIGIO handler.  */
+  signal (SIGIO, SIG_IGN);
+#endif
+
 #ifdef USE_WIN32API
   closesocket (remote_desc);
 #else
@@ -526,7 +531,7 @@ write_ptid (char *buf, ptid_t ptid)
   return buf;
 }
 
-ULONGEST
+static ULONGEST
 hex_or_minus_one (char *buf, char **obuf)
 {
   ULONGEST ret;
@@ -775,19 +780,19 @@ check_remote_input_interrupt_request (void)
   input_interrupt (0);
 }
 
-/* Asynchronous I/O support.  SIGIO must be enabled when waiting, in order to
-   accept Control-C from the client, and must be disabled when talking to
-   the client.  */
+/* Asynchronous I/O support.  SIGIO must be unblocked when waiting,
+   in order to accept Control-C from the client, and must be blocked
+   when talking to the client.  */
 
 static void
-unblock_async_io (void)
+block_unblock_async_io (int block)
 {
 #ifndef USE_WIN32API
   sigset_t sigio_set;
 
   sigemptyset (&sigio_set);
   sigaddset (&sigio_set, SIGIO);
-  sigprocmask (SIG_UNBLOCK, &sigio_set, NULL);
+  sigprocmask (block ? SIG_BLOCK : SIG_UNBLOCK, &sigio_set, NULL);
 #endif
 }
 
@@ -823,9 +828,8 @@ enable_async_io (void)
   if (async_io_enabled)
     return;
 
-#ifndef USE_WIN32API
-  signal (SIGIO, input_interrupt);
-#endif
+  block_unblock_async_io (0);
+
   async_io_enabled = 1;
 #ifdef __QNX__
   nto_comctrl (1);
@@ -839,9 +843,8 @@ disable_async_io (void)
   if (!async_io_enabled)
     return;
 
-#ifndef USE_WIN32API
-  signal (SIGIO, SIG_IGN);
-#endif
+  block_unblock_async_io (1);
+
   async_io_enabled = 0;
 #ifdef __QNX__
   nto_comctrl (0);
@@ -852,12 +855,14 @@ disable_async_io (void)
 void
 initialize_async_io (void)
 {
-  /* Make sure that async I/O starts disabled.  */
+  /* Make sure that async I/O starts blocked.  */
   async_io_enabled = 1;
   disable_async_io ();
 
-  /* Make sure the signal is unblocked.  */
-  unblock_async_io ();
+  /* Install the signal handler.  */
+#ifndef USE_WIN32API
+  signal (SIGIO, input_interrupt);
+#endif
 }
 
 /* Internal buffer used by readchar.
@@ -882,7 +887,10 @@ readchar (void)
       if (readchar_bufcnt <= 0)
 	{
 	  if (readchar_bufcnt == 0)
-	    fprintf (stderr, "readchar: Got EOF\n");
+	    {
+	      if (remote_debug)
+		fprintf (stderr, "readchar: Got EOF\n");
+	    }
 	  else
 	    perror ("readchar");
 
@@ -956,6 +964,15 @@ getpkt (char *buf)
       while (1)
 	{
 	  c = readchar ();
+
+	  /* The '\003' may appear before or after each packet, so
+	     check for an input interrupt.  */
+	  if (c == '\003')
+	    {
+	      (*the_target->request_interrupt) ();
+	      continue;
+	    }
+
 	  if (c == '$')
 	    break;
 	  if (remote_debug)
@@ -1029,6 +1046,22 @@ getpkt (char *buf)
 	}
     }
 
+  /* The readchar above may have already read a '\003' out of the socket
+     and moved it to the local buffer.  For example, when GDB sends
+     vCont;c immediately followed by interrupt (see
+     gdb.base/interrupt-noterm.exp).  As soon as we see the vCont;c, we'll
+     resume the inferior and wait.  Since we've already moved the '\003'
+     to the local buffer, SIGIO won't help.  In that case, if we don't
+     check for interrupt after the vCont;c packet, the interrupt character
+     would stay in the buffer unattended until after the next (unrelated)
+     stop.  */
+  while (readchar_bufcnt > 0 && *readchar_bufp == '\003')
+    {
+      /* Consume the interrupt character in the buffer.  */
+      readchar ();
+      (*the_target->request_interrupt) ();
+    }
+
   return bp - buf;
 }
 
@@ -1072,39 +1105,6 @@ outreg (struct regcache *regcache, int regno, char *buf)
 }
 
 void
-new_thread_notify (int id)
-{
-  char own_buf[256];
-
-  /* The `n' response is not yet part of the remote protocol.  Do nothing.  */
-  if (1)
-    return;
-
-  if (server_waiting == 0)
-    return;
-
-  sprintf (own_buf, "n%x", id);
-  disable_async_io ();
-  putpkt (own_buf);
-  enable_async_io ();
-}
-
-void
-dead_thread_notify (int id)
-{
-  char own_buf[256];
-
-  /* The `x' response is not yet part of the remote protocol.  Do nothing.  */
-  if (1)
-    return;
-
-  sprintf (own_buf, "x%x", id);
-  disable_async_io ();
-  putpkt (own_buf);
-  enable_async_io ();
-}
-
-void
 prepare_resume_reply (char *buf, ptid_t ptid,
 		      struct target_waitstatus *status)
 {
@@ -1119,6 +1119,9 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     case TARGET_WAITKIND_VFORKED:
     case TARGET_WAITKIND_VFORK_DONE:
     case TARGET_WAITKIND_EXECD:
+    case TARGET_WAITKIND_THREAD_CREATED:
+    case TARGET_WAITKIND_SYSCALL_ENTRY:
+    case TARGET_WAITKIND_SYSCALL_RETURN:
       {
 	struct thread_info *saved_thread;
 	const char **regp;
@@ -1160,6 +1163,23 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    xfree (status->value.execd_pathname);
 	    status->value.execd_pathname = NULL;
 	    buf += strlen (buf);
+	  }
+	else if (status->kind == TARGET_WAITKIND_THREAD_CREATED
+		 && report_thread_events)
+	  {
+	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
+
+	    sprintf (buf, "T%02xcreate:;", signal);
+	  }
+	else if (status->kind == TARGET_WAITKIND_SYSCALL_ENTRY
+		 || status->kind == TARGET_WAITKIND_SYSCALL_RETURN)
+	  {
+	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
+	    const char *event = (status->kind == TARGET_WAITKIND_SYSCALL_ENTRY
+				 ? "syscall_entry" : "syscall_return");
+
+	    sprintf (buf, "T%02x%s:%x;", signal, event,
+		     status->value.syscall_number);
 	  }
 	else
 	  sprintf (buf, "T%02x", status->value.sig);
@@ -1275,6 +1295,14 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 		 status->value.sig, ptid_get_pid (ptid));
       else
 	sprintf (buf, "X%02x", status->value.sig);
+      break;
+    case TARGET_WAITKIND_THREAD_EXITED:
+      sprintf (buf, "w%x;", status->value.integer);
+      buf += strlen (buf);
+      buf = write_ptid (buf, ptid);
+      break;
+    case TARGET_WAITKIND_NO_RESUMED:
+      sprintf (buf, "N");
       break;
     default:
       error ("unhandled waitkind");

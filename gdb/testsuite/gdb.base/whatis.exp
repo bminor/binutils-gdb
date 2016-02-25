@@ -1,4 +1,4 @@
-# Copyright 1988-2015 Free Software Foundation, Inc.
+# Copyright 1988-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -281,14 +281,6 @@ gdb_test "whatis v_double_pointer" \
     "whatis double pointer"
 
 
-if { $hp_aCC_compiler } {
-    set unstruct "unnamed\.struct\..*"
-    set ununion "unnamed\.union\..*"
-} else {
-    set unstruct "\.\.\."
-    set ununion "\.\.\."
-}
-
 # test whatis command with structure types
 gdb_test "whatis v_struct1" \
     "type = struct t_struct" \
@@ -299,7 +291,7 @@ gdb_test "whatis struct t_struct" \
     "whatis named structure using type name"
 
 gdb_test "whatis v_struct2" \
-    "type = struct \{$unstruct\}" \
+    "type = struct \{\.\.\.\}" \
     "whatis unnamed structure"
 
 
@@ -313,15 +305,11 @@ gdb_test "whatis union t_union" \
     "whatis named union using type name"
 
 gdb_test "whatis v_union2" \
-    "type = union \{$ununion\}" \
+    "type = union \{\.\.\.\}" \
     "whatis unnamed union"
 
 
-# HP-UX: HP aCC compiler w/ +objdebug option detects language as
-# c++, so we need the 'void' pattern here.
-# Without +objdebug compilation option we still need to match ''.
-# - guo
-# Also, using stabs we will mark these functions as prototyped.  This
+# Using stabs we will mark these functions as prototyped.  This
 # is harmless but causes an extra VOID to be printed.
 set void "(void|)"
 
@@ -428,14 +416,8 @@ gdb_test "whatis nested_su.outer_int" \
     "type = int" \
     "whatis outer structure member"
 
-if {$hp_aCC_compiler} {
-    set outer "outer_struct::"
-} else {
-    set outer ""
-}
-
 gdb_test "whatis nested_su.inner_struct_instance" \
-    "type = struct ${outer}inner_struct" \
+    "type = struct inner_struct" \
     "whatis inner structure"
 
 gdb_test "whatis nested_su.inner_struct_instance.inner_int" \
@@ -443,7 +425,7 @@ gdb_test "whatis nested_su.inner_struct_instance.inner_int" \
     "whatis inner structure member"
 
 gdb_test "whatis nested_su.inner_union_instance" \
-    "type = union ${outer}inner_union" \
+    "type = union inner_union" \
     "whatis inner union"
 
 gdb_test "whatis nested_su.inner_union_instance.inner_union_int" \

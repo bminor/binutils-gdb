@@ -1,4 +1,4 @@
-@c Copyright (C) 1991-2015 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2016 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @c man end
@@ -326,6 +326,30 @@ single-thread computers
 @option{-momit-lock-prefix=@var{yes}} will omit all lock prefixes.
 @option{-momit-lock-prefix=@var{no}} will encode lock prefix as usual,
 which is the default.
+
+@cindex @samp{-mfence-as-lock-add=} option, i386
+@cindex @samp{-mfence-as-lock-add=} option, x86-64
+@item -mfence-as-lock-add=@var{no}
+@itemx -mfence-as-lock-add=@var{yes}
+These options control how the assembler should encode lfence, mfence and
+sfence.
+@option{-mfence-as-lock-add=@var{yes}} will encode lfence, mfence and
+sfence as @samp{lock addl $0x0, (%rsp)} in 64-bit mode and
+@samp{lock addl $0x0, (%esp)} in 32-bit mode.
+@option{-mfence-as-lock-add=@var{no}} will encode lfence, mfence and
+sfence as usual, which is the default.
+
+@cindex @samp{-mrelax-relocations=} option, i386
+@cindex @samp{-mrelax-relocations=} option, x86-64
+@item -mrelax-relocations=@var{no}
+@itemx -mrelax-relocations=@var{yes}
+These options control whether the assembler should generate relax
+relocations, R_386_GOT32X, in 32-bit mode, or R_X86_64_GOTPCRELX and
+R_X86_64_REX_GOTPCRELX, in 64-bit mode.
+@option{-mrelax-relocations=@var{yes}} will generate relax relocations.
+@option{-mrelax-relocations=@var{no}} will not generate relax
+relocations.  The default can be controlled by a configure option
+@option{--enable-x86-relax-relocations}.
 
 @cindex @samp{-mevexrcig=} option, i386
 @cindex @samp{-mevexrcig=} option, x86-64

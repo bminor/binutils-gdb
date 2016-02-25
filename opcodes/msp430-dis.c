@@ -1,5 +1,5 @@
 /* Disassemble MSP430 instructions.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    Contributed by Dmitry Diky <diwil@mail.ru>
 
@@ -1102,7 +1102,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		}
 	      else if (extension_word)
 		{
-		  if (extension_word & (1 << 6))
+		  if (extension_word & BYTE_OPERATION)
 		    bc = ".w";
 		  else
 		    {
@@ -1181,7 +1181,12 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 	prin (stream, "rpt #%d { ", (extension_word & 0xf) + 1);
     }
 
-  if (extension_word && opcode->name[strlen (opcode->name) - 1] != 'x')
+  /* Special case:  RRC with an extension word and the ZC bit set is actually RRU.  */
+  if (extension_word
+      && (extension_word & IGNORE_CARRY_BIT)
+      && strcmp (opcode->name, "rrc") == 0)
+    (*prin) (stream, "rrux%s", bc);
+  else if (extension_word && opcode->name[strlen (opcode->name) - 1] != 'x')
     (*prin) (stream, "%sx%s", opcode->name, bc);
   else
     (*prin) (stream, "%s%s", opcode->name, bc);

@@ -1,6 +1,6 @@
 /* Tracing functionality for remote targets in custom GDB protocol
 
-   Copyright (C) 1997-2015 Free Software Foundation, Inc.
+   Copyright (C) 1997-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1428,14 +1428,14 @@ encode_actions_1 (struct command_line *action,
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
-		  for (i = 0; i < gdbarch_num_regs (tloc->gdbarch); i++)
+		  for (i = 0; i < gdbarch_num_regs (target_gdbarch ()); i++)
 		    add_register (collect, i);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$arg", action_exp, 4))
 		{
 		  add_local_symbols (collect,
-				     tloc->gdbarch,
+				     target_gdbarch (),
 				     tloc->address,
 				     frame_reg,
 				     frame_offset,
@@ -1446,7 +1446,7 @@ encode_actions_1 (struct command_line *action,
 	      else if (0 == strncasecmp ("$loc", action_exp, 4))
 		{
 		  add_local_symbols (collect,
-				     tloc->gdbarch,
+				     target_gdbarch (),
 				     tloc->address,
 				     frame_reg,
 				     frame_offset,
@@ -1459,7 +1459,7 @@ encode_actions_1 (struct command_line *action,
 		  struct cleanup *old_chain1 = NULL;
 
 		  aexpr = gen_trace_for_return_address (tloc->address,
-							tloc->gdbarch,
+							target_gdbarch (),
 							trace_string);
 
 		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
@@ -1513,7 +1513,7 @@ encode_actions_1 (struct command_line *action,
 		      {
 			const char *name = &exp->elts[2].string;
 
-			i = user_reg_map_name_to_regnum (tloc->gdbarch,
+			i = user_reg_map_name_to_regnum (target_gdbarch (),
 							 name, strlen (name));
 			if (i == -1)
 			  internal_error (__FILE__, __LINE__,
@@ -1543,7 +1543,7 @@ encode_actions_1 (struct command_line *action,
 
 			collect_symbol (collect,
 					exp->elts[2].symbol,
-					tloc->gdbarch,
+					target_gdbarch (),
 					frame_reg,
 					frame_offset,
 					tloc->address,
@@ -2720,7 +2720,7 @@ scope_info (char *args, int from_tty)
 
   location = string_to_event_location (&args, current_language);
   back_to = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL, 0);
+  sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL, NULL, 0);
   if (sals.nelts == 0)
     {
       /* Presumably decode_line_1 has already warned.  */

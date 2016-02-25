@@ -1,5 +1,5 @@
 /* PPC ELF support for BFD.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    By Michael Meissner, Cygnus Support, <meissner@cygnus.com>,
    from information in the System V Application Binary Interface,
@@ -148,6 +148,9 @@ START_RELOC_NUMBERS (elf_ppc_reloc_type)
   RELOC_NUMBER (R_PPC_VLE_SDAREL_HI16D,	230)
   RELOC_NUMBER (R_PPC_VLE_SDAREL_HA16A,	231)
   RELOC_NUMBER (R_PPC_VLE_SDAREL_HA16D,	232)
+
+/* Power9 split rel16 for addpcis.  */
+  RELOC_NUMBER (R_PPC_REL16DX_HA,	246)
 
 /* Support STT_GNU_IFUNC plt calls.  */
   RELOC_NUMBER (R_PPC_IRELATIVE,	248)

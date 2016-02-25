@@ -1,5 +1,5 @@
 /* tc-xtensa.c -- Assemble Xtensa instructions.
-   Copyright (C) 2003-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1163,11 +1163,11 @@ do_align_targets (void)
 static void
 directive_push (directiveE directive, bfd_boolean negated, const void *datum)
 {
-  char *file;
+  const char *file;
   unsigned int line;
   state_stackS *stack = (state_stackS *) xmalloc (sizeof (state_stackS));
 
-  as_where (&file, &line);
+  file = as_where (&line);
 
   stack->directive = directive;
   stack->negated = negated;
@@ -5961,15 +5961,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	    {
 	    case BFD_RELOC_8:
 	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF8;
-	      fixP->fx_signed = 1;
+	      fixP->fx_signed = 0;
 	      break;
 	    case BFD_RELOC_16:
 	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF16;
-	      fixP->fx_signed = 1;
+	      fixP->fx_signed = 0;
 	      break;
 	    case BFD_RELOC_32:
 	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF32;
-	      fixP->fx_signed = 1;
+	      fixP->fx_signed = 0;
 	      break;
 	    default:
 	      break;
@@ -6327,8 +6327,6 @@ finish_vinsn (vliw_insn *vinsn)
 {
   IStack slotstack;
   int i;
-  char *file_name;
-  unsigned line;
 
   if (find_vinsn_conflicts (vinsn))
     {
@@ -6350,9 +6348,7 @@ finish_vinsn (vliw_insn *vinsn)
 
   if (vinsn->format == XTENSA_UNDEFINED)
     {
-      as_where (&file_name, &line);
-      as_bad_where (file_name, line,
-		    _("couldn't find a valid instruction format"));
+      as_bad (_("couldn't find a valid instruction format"));
       fprintf (stderr, _("    ops were: "));
       for (i = 0; i < vinsn->num_slots; i++)
 	fprintf (stderr, _(" %s;"),
@@ -6376,8 +6372,7 @@ finish_vinsn (vliw_insn *vinsn)
 
   if (resources_conflict (vinsn))
     {
-      as_where (&file_name, &line);
-      as_bad_where (file_name, line, _("illegal resource usage in bundle"));
+      as_bad (_("illegal resource usage in bundle"));
       fprintf (stderr, "    ops were: ");
       for (i = 0; i < vinsn->num_slots; i++)
 	fprintf (stderr, " %s;",
@@ -6474,8 +6469,7 @@ finish_vinsn (vliw_insn *vinsn)
   /* Now check resource conflicts on the modified bundle.  */
   if (resources_conflict (vinsn))
     {
-      as_where (&file_name, &line);
-      as_bad_where (file_name, line, _("illegal resource usage in bundle"));
+      as_bad (_("illegal resource usage in bundle"));
       fprintf (stderr, "    ops were: ");
       for (i = 0; i < vinsn->num_slots; i++)
 	fprintf (stderr, " %s;",
@@ -8491,12 +8485,12 @@ static bfd_boolean is_local_forward_loop (const TInsn *, fragS *);
 static void
 xtensa_sanity_check (void)
 {
-  char *file_name;
+  const char *file_name;
   unsigned line;
   frchainS *frchP;
   asection *s;
 
-  as_where (&file_name, &line);
+  file_name = as_where (&line);
   for (s = stdoutput->sections; s; s = s->next)
     for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
       {
@@ -9180,14 +9174,14 @@ xtensa_relax_frag (fragS *fragP, long stretch, int *stretched_p)
   xtensa_isa isa = xtensa_default_isa;
   int unreported = fragP->tc_frag_data.unreported_expansion;
   long new_stretch = 0;
-  char *file_name;
+  const char *file_name;
   unsigned line;
   int lit_size;
   static xtensa_insnbuf vbuf = NULL;
   int slot, num_slots;
   xtensa_format fmt;
 
-  as_where (&file_name, &line);
+  file_name = as_where (&line);
   new_logical_line (fragP->fr_file, fragP->fr_line);
 
   fragP->tc_frag_data.unreported_expansion = 0;
@@ -10293,10 +10287,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec, fragS *fragp)
   int slot;
   int num_slots;
   xtensa_format fmt;
-  char *file_name;
+  const char *file_name;
   unsigned line;
 
-  as_where (&file_name, &line);
+  file_name = as_where (&line);
   new_logical_line (fragp->fr_file, fragp->fr_line);
 
   switch (fragp->fr_subtype)
@@ -11061,6 +11055,10 @@ xtensa_move_literals (void)
   fixS *fix, *next_fix, **fix_splice;
   sym_list *lit;
   struct litpool_seg *lps;
+  const char *init_name = INIT_SECTION_NAME;
+  const char *fini_name = FINI_SECTION_NAME;
+  int init_name_len = strlen(init_name);
+  int fini_name_len = strlen(fini_name);
 
   mark_literal_frags (literal_head->next);
 
@@ -11171,9 +11169,13 @@ xtensa_move_literals (void)
 
   for (segment = literal_head->next; segment; segment = segment->next)
     {
+      const char *seg_name = segment_name (segment->seg);
+
       /* Keep the literals for .init and .fini in separate sections.  */
-      if (!strcmp (segment_name (segment->seg), INIT_SECTION_NAME)
-	  || !strcmp (segment_name (segment->seg), FINI_SECTION_NAME))
+      if ((!memcmp (seg_name, init_name, init_name_len) &&
+	   !strcmp (seg_name + init_name_len, ".literal")) ||
+	  (!memcmp (seg_name, fini_name, fini_name_len) &&
+	   !strcmp (seg_name + fini_name_len, ".literal")))
 	continue;
 
       frchain_from = seg_info (segment->seg)->frchainP;
@@ -12563,7 +12565,7 @@ tinsn_to_slotbuf (xtensa_format fmt,
       expressionS *exp = &tinsn->tok[i];
       int rc;
       unsigned line;
-      char *file_name;
+      const char *file_name;
       uint32 opnd_value;
 
       switch (exp->X_op)
@@ -12584,7 +12586,7 @@ tinsn_to_slotbuf (xtensa_format fmt,
 	case O_constant:
 	  if (xtensa_operand_is_visible (isa, opcode, i) == 0)
 	    break;
-	  as_where (&file_name, &line);
+	  file_name = as_where (&line);
 	  /* It is a constant and we called this function
 	     then we have to try to fit it.  */
 	  xtensa_insnbuf_set_operand (slotbuf, fmt, slot, opcode, i,

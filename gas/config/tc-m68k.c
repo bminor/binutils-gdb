@@ -1,5 +1,5 @@
 /* tc-m68k.c -- Assemble for the m68k family
-   Copyright (C) 1987-2015 Free Software Foundation, Inc.
+   Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -122,7 +122,7 @@ struct label_line
 {
   struct label_line *next;
   symbolS *label;
-  char *file;
+  const char *file;
   unsigned int line;
   int text;
 };
@@ -4792,7 +4792,7 @@ m68k_frob_label (symbolS *sym)
   n = (struct label_line *) xmalloc (sizeof *n);
   n->next = labels;
   n->label = sym;
-  as_where (&n->file, &n->line);
+  n->file = as_where (&n->line);
   n->text = 0;
   labels = n;
   current_label = n;
@@ -7888,7 +7888,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
   int align;
 
   align = bfd_get_section_alignment (stdoutput, segment);
-  size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+  size = ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
 #endif
 
   return size;
@@ -8098,7 +8098,7 @@ m68k_elf_cons (int nbytes /* 4=.long */)
 #endif
 
 int
-tc_m68k_regname_to_dw2regnum (char *regname)
+tc_m68k_regname_to_dw2regnum (const char *regname)
 {
   unsigned int regnum;
   static const char *const regnames[] =

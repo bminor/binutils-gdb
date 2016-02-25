@@ -3,7 +3,7 @@ dnl
 dnl And be careful when changing it!  If you must add tests with square
 dnl brackets, be sure changequote invocations surround it.
 dnl
-dnl   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2016 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -70,11 +70,22 @@ ac_default_compressed_debug_sections=unset
 # Provide a configure time option to override our default.
 AC_ARG_ENABLE(compressed_debug_sections,
 	      AS_HELP_STRING([--enable-compressed-debug-sections={all,gas,none}],
-	      [compress debug sections by default])],
+	      [compress debug sections by default]),
 [case ,"${enableval}", in
   ,yes, | ,all, | *,gas,*) ac_default_compressed_debug_sections=yes ;;
   ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
   *)   ac_default_compressed_debug_sections=unset ;;
+esac])dnl
+
+# PR gas/19520
+# Decide if x86 assembler should generate relax relocations.
+ac_default_x86_relax_relocations=unset
+# Provide a configure time option to override our default.
+AC_ARG_ENABLE(x86_relax_relocations,
+	      AS_HELP_STRING([--enable-x86-relax-relocations],
+	      [generate x86 relax relocations by default]),
+[case "${enableval}" in
+  no)  ac_default_x86_relax_relocations=0 ;;
 esac])dnl
 
 using_cgen=no
@@ -166,6 +177,17 @@ for this_target in $target $canon_targets ; do
       | i386-*-go32* \
       | i386-go32-rtems*)
 	AC_DEFINE(STRICTCOFF, 1, [Using strict COFF?])
+	;;
+
+      i386-*-solaris2 \
+      | x86_64-*-solaris2 \
+      | i386-*-solaris2.[[0-9]] \
+      | i386-*-solaris2.1[[01]] \
+      | x86_64-*-solaris2.1[[01]])
+	if test ${this_target} = $target \
+	   && test ${ac_default_x86_relax_relocations} = unset; then
+	  ac_default_x86_relax_relocations=0
+	fi
 	;;
 
       i860-*-*)
@@ -549,7 +571,14 @@ changequote([,])dnl
 
 done
 
-if test x$ac_default_compressed_debug_sections == xyes ; then
+if test ${ac_default_x86_relax_relocations} = unset; then
+  ac_default_x86_relax_relocations=1
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_GENERATE_X86_RELAX_RELOCATIONS,
+  $ac_default_x86_relax_relocations,
+  [Define to 1 if you want to generate x86 relax relocations by default.])
+
+if test x$ac_default_compressed_debug_sections = xyes ; then
   AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
 fi
 
@@ -736,7 +765,7 @@ AC_DEFINE_UNQUOTED(TARGET_OS,		"${target_os}",    [Target OS.])
 AC_PROG_YACC
 AM_PROG_LEX
 
-ALL_LINGUAS="fr tr es rw id ru fi ja"
+ALL_LINGUAS="fr tr es rw id ru fi ja zh_CN"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 

@@ -1,6 +1,6 @@
 /* CTF format support.
 
-   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+   Copyright (C) 2012-2016 Free Software Foundation, Inc.
    Contributed by Hui Zhu <hui_zhu@mentor.com>
    Contributed by Yao Qi <yao@codesourcery.com>
 
@@ -617,6 +617,15 @@ ctf_write_uploaded_tp (struct trace_file_writer *self,
 }
 
 /* This is the implementation of trace_file_write_ops method
+   write_tdesc.  */
+
+static void
+ctf_write_tdesc (struct trace_file_writer *self)
+{
+  /* Nothing so far. */
+}
+
+/* This is the implementation of trace_file_write_ops method
    write_definition_end.  */
 
 static void
@@ -799,6 +808,7 @@ static const struct trace_file_write_ops ctf_write_ops =
   ctf_write_status,
   ctf_write_uploaded_tsv,
   ctf_write_uploaded_tp,
+  ctf_write_tdesc,
   ctf_write_definition_end,
   NULL,
   &ctf_write_frame_ops,

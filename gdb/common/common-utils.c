@@ -1,6 +1,6 @@
 /* Shared general utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -253,7 +253,7 @@ strtoulst (const char *num, const char **trailer, int base)
     return result;
 }
 
-/* See documentation in cli-utils.h.  */
+/* See documentation in common-utils.h.  */
 
 char *
 skip_spaces (char *chp)
@@ -277,7 +277,7 @@ skip_spaces_const (const char *chp)
   return chp;
 }
 
-/* See documentation in cli-utils.h.  */
+/* See documentation in common-utils.h.  */
 
 const char *
 skip_to_space_const (const char *chp)

@@ -1,5 +1,5 @@
 /* tc-sh64.c -- Assemble code for the SuperH SH SHcompact and SHmedia.
-   Copyright (C) 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 2000-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2020,7 +2020,7 @@ shmedia_md_estimate_size_before_relax (fragS *fragP,
 	  offsetT value = fragP->fr_offset
 	    + (fragP->fr_symbol == NULL ? 0 : S_GET_VALUE (fragP->fr_symbol));
 
-	  if (value >= ((offsetT) -1 << 15) && value < ((offsetT) 1 << 15))
+	  if (value >= (-((offsetT) 1 << 15)) && value < ((offsetT) 1 << 15))
 	    {
 	      /* Fits in 16-bit signed number.  */
 	      int what = GET_WHAT (fragP->fr_subtype);

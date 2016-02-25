@@ -1,6 +1,6 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
 
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -1738,7 +1738,7 @@ symfile_bfd_open (const char *name)
 #if defined(__GO32__) || defined(_WIN32) || defined (__CYGWIN__)
       if (desc < 0)
 	{
-	  char *exename = alloca (strlen (expanded_name) + 5);
+	  char *exename = (char *) alloca (strlen (expanded_name) + 5);
 
 	  strcat (strcpy (exename, expanded_name), ".exe");
 	  desc = openp (getenv ("PATH"),

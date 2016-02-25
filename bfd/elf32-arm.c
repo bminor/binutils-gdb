@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1689,6 +1689,60 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 0x00000000,		/* src_mask */
 	 0x00000000,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+  EMPTY_HOWTO (130),
+  EMPTY_HOWTO (131),
+  HOWTO (R_ARM_THM_ALU_ABS_G0_NC,/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_bitfield,/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_ALU_ABS_G0_NC",/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x00000000,		/* src_mask.  */
+	 0x00000000,		/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
+  HOWTO (R_ARM_THM_ALU_ABS_G1_NC,/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_bitfield,/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_ALU_ABS_G1_NC",/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x00000000,		/* src_mask.  */
+	 0x00000000,		/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
+  HOWTO (R_ARM_THM_ALU_ABS_G2_NC,/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_bitfield,/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_ALU_ABS_G2_NC",/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x00000000,		/* src_mask.  */
+	 0x00000000,		/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
+  HOWTO (R_ARM_THM_ALU_ABS_G3_NC,/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_bitfield,/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_ALU_ABS_G3_NC",/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x00000000,		/* src_mask.  */
+	 0x00000000,		/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
 };
 
 /* 160 onwards: */
@@ -1889,7 +1943,11 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_LDC_SB_G0, R_ARM_LDC_SB_G0},
     {BFD_RELOC_ARM_LDC_SB_G1, R_ARM_LDC_SB_G1},
     {BFD_RELOC_ARM_LDC_SB_G2, R_ARM_LDC_SB_G2},
-    {BFD_RELOC_ARM_V4BX,	     R_ARM_V4BX}
+    {BFD_RELOC_ARM_V4BX,	     R_ARM_V4BX},
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC, R_ARM_THM_ALU_ABS_G3_NC},
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC, R_ARM_THM_ALU_ABS_G2_NC},
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC, R_ARM_THM_ALU_ABS_G1_NC},
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC, R_ARM_THM_ALU_ABS_G0_NC}
   };
 
 static reloc_howto_type *
@@ -2744,6 +2802,7 @@ typedef struct _arm_elf_section_data
   elf32_vfp11_erratum_list *erratumlist;
   unsigned int stm32l4xx_erratumcount;
   elf32_stm32l4xx_erratum_list *stm32l4xx_erratumlist;
+  unsigned int additional_reloc_count;
   /* Information about unwind tables.  */
   union
   {
@@ -3445,20 +3504,23 @@ create_ifunc_sections (struct bfd_link_info *info)
 static bfd_boolean
 using_thumb_only (struct elf32_arm_link_hash_table *globals)
 {
-  int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				       Tag_CPU_arch);
-  int profile;
+  int arch;
+  int profile = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+					  Tag_CPU_arch_profile);
 
-  if (arch == TAG_CPU_ARCH_V6_M || arch == TAG_CPU_ARCH_V6S_M)
+  if (profile)
+    return profile == 'M';
+
+  arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  if (arch == TAG_CPU_ARCH_V6_M
+      || arch == TAG_CPU_ARCH_V6S_M
+      || arch == TAG_CPU_ARCH_V7E_M
+      || arch == TAG_CPU_ARCH_V8M_BASE
+      || arch == TAG_CPU_ARCH_V8M_MAIN)
     return TRUE;
 
-  if (arch != TAG_CPU_ARCH_V7 && arch != TAG_CPU_ARCH_V7E_M)
-    return FALSE;
-
-  profile = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				      Tag_CPU_arch_profile);
-
-  return profile == 'M';
+  return FALSE;
 }
 
 /* Determine if we're dealing with a Thumb-2 object.  */
@@ -3513,6 +3575,9 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 	  htab->plt_entry_size
 	    = 4 * ARRAY_SIZE (elf32_arm_vxworks_exec_plt_entry);
 	}
+
+      if (elf_elfheader (dynobj))
+	elf_elfheader (dynobj)->e_ident[EI_CLASS] = ELFCLASS32;
     }
   else
     {
@@ -11023,6 +11088,33 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       }
       return bfd_reloc_ok;
 
+    case R_ARM_THM_ALU_ABS_G0_NC:
+    case R_ARM_THM_ALU_ABS_G1_NC:
+    case R_ARM_THM_ALU_ABS_G2_NC:
+    case R_ARM_THM_ALU_ABS_G3_NC:
+	{
+	    const int shift_array[4] = {0, 8, 16, 24};
+	    bfd_vma insn = bfd_get_16 (input_bfd, hit_data);
+	    bfd_vma addr = value;
+	    int shift = shift_array[r_type - R_ARM_THM_ALU_ABS_G0_NC];
+
+	    /* Compute address.  */
+	    if (globals->use_rel)
+		signed_addend = insn & 0xff;
+	    addr += signed_addend;
+	    if (branch_type == ST_BRANCH_TO_THUMB)
+		addr |= 1;
+	    /* Clean imm8 insn.  */
+	    insn &= 0xff00;
+	    /* And update with correct part of address.  */
+	    insn |= (addr >> shift) & 0xff;
+	    /* Update insn.  */
+	    bfd_put_16 (input_bfd, insn, hit_data);
+	}
+
+	*unresolved_reloc_p = FALSE;
+	return bfd_reloc_ok;
+
     default:
       return bfd_reloc_notsupported;
     }
@@ -11534,6 +11626,8 @@ insert_cantunwind_after(asection *text_sec, asection *exidx_sec)
     &exidx_arm_data->u.exidx.unwind_edit_tail,
     INSERT_EXIDX_CANTUNWIND_AT_END, text_sec, UINT_MAX);
 
+  exidx_arm_data->additional_reloc_count++;
+
   adjust_exidx_size(exidx_sec, 8);
 }
 
@@ -11649,6 +11743,18 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
 	/* An error?  */
 	continue;
 
+      if (last_unwind_type > 0)
+	{
+	  unsigned int first_word = bfd_get_32 (ibfd, contents);
+	  /* Add cantunwind if first unwind item does not match section
+	     start.  */
+	  if (first_word != sec->vma)
+	    {
+	      insert_cantunwind_after (last_text_sec, last_exidx_sec);
+	      last_unwind_type = 0;
+	    }
+	}
+
       for (j = 0; j < hdr->sh_size; j += 8)
 	{
 	  unsigned int second_word = bfd_get_32 (ibfd, contents + j + 4);
@@ -11676,7 +11782,7 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
 	  else
 	    unwind_type = 2;
 
-	  if (elide)
+	  if (elide && !bfd_link_relocatable (info))
 	    {
 	      add_unwind_table_edit (&unwind_edit_head, &unwind_edit_tail,
 				     DELETE_EXIDX_ENTRY, NULL, j / 8);
@@ -11703,7 +11809,8 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
     }
 
   /* Add terminating CANTUNWIND entry.  */
-  if (last_exidx_sec && last_unwind_type != 0)
+  if (!bfd_link_relocatable (info) && last_exidx_sec
+      && last_unwind_type != 0)
     insert_cantunwind_after(last_text_sec, last_exidx_sec);
 
   return TRUE;
@@ -12186,6 +12293,47 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8),		/* V7E_M.  */
       T(V8)		/* V8.  */
     };
+  const int v8m_baseline[] =
+    {
+      -1,		/* PRE_V4.  */
+      -1,		/* V4.  */
+      -1,		/* V4T.  */
+      -1,		/* V5T.  */
+      -1,		/* V5TE.  */
+      -1,		/* V5TEJ.  */
+      -1,		/* V6.  */
+      -1,		/* V6KZ.  */
+      -1,		/* V6T2.  */
+      -1,		/* V6K.  */
+      -1,		/* V7.  */
+      T(V8M_BASE),	/* V6_M.  */
+      T(V8M_BASE),	/* V6S_M.  */
+      -1,		/* V7E_M.  */
+      -1,		/* V8.  */
+      -1,
+      T(V8M_BASE)	/* V8-M BASELINE.  */
+    };
+  const int v8m_mainline[] =
+    {
+      -1,		/* PRE_V4.  */
+      -1,		/* V4.  */
+      -1,		/* V4T.  */
+      -1,		/* V5T.  */
+      -1,		/* V5TE.  */
+      -1,		/* V5TEJ.  */
+      -1,		/* V6.  */
+      -1,		/* V6KZ.  */
+      -1,		/* V6T2.  */
+      -1,		/* V6K.  */
+      T(V8M_MAIN),	/* V7.  */
+      T(V8M_MAIN),	/* V6_M.  */
+      T(V8M_MAIN),	/* V6S_M.  */
+      T(V8M_MAIN),	/* V7E_M.  */
+      -1,		/* V8.  */
+      -1,
+      T(V8M_MAIN),	/* V8-M BASELINE.  */
+      T(V8M_MAIN)	/* V8-M MAINLINE.  */
+    };
   const int v4t_plus_v6_m[] =
     {
       -1,		/* PRE_V4.  */
@@ -12203,6 +12351,9 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V6S_M),		/* V6S_M.  */
       T(V7E_M),		/* V7E_M.  */
       T(V8),		/* V8.  */
+      -1,		/* Unused.  */
+      T(V8M_BASE),	/* V8-M BASELINE.  */
+      T(V8M_MAIN),	/* V8-M MAINLINE.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
   const int *comb[] =
@@ -12214,6 +12365,9 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       v6s_m,
       v7e_m,
       v8,
+      NULL,
+      v8m_baseline,
+      v8m_mainline,
       /* Pseudo-architecture.  */
       v4t_plus_v6_m
     };
@@ -12246,7 +12400,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
   if (tagh <= TAG_CPU_ARCH_V6KZ)
     return result;
 
-  result = comb[tagh - T(V6T2)][tagl];
+  result = comb[tagh - T(V6T2)] ? comb[tagh - T(V6T2)][tagl] : -1;
 
   /* Use Tag_CPU_arch == V4T and Tag_also_compatible_with (Tag_CPU_arch V6_M)
      as the canonical version.  */
@@ -12429,7 +12583,10 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		"ARM v7",
 		"ARM v6-M",
 		"ARM v6S-M",
-		"ARM v8"
+		"ARM v8",
+		"",
+		"ARM v8-M.baseline",
+		"ARM v8-M.mainline",
 	    };
 
 	    /* Merge Tag_CPU_arch and Tag_also_compatible_with.  */
@@ -13459,6 +13616,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		may_need_local_target_p = TRUE;
 		break;
 	      }
+	    else goto jump_over;
+	      
 	    /* Fall through.  */
 
 	  case R_ARM_MOVW_ABS_NC:
@@ -13478,6 +13637,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    /* Fall through.  */
 	  case R_ARM_ABS32:
 	  case R_ARM_ABS32_NOI:
+	jump_over:
 	    if (h != NULL && bfd_link_executable (info))
 	      {
 		h->pointer_equality_needed = 1;
@@ -15332,6 +15492,7 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
   struct elf32_arm_link_hash_table *globals;
+  struct elf_segment_map *m;
 
   i_ehdrp = elf_elfheader (abfd);
 
@@ -15357,6 +15518,26 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
       else
 	i_ehdrp->e_flags |= EF_ARM_ABI_FLOAT_SOFT;
     }
+
+  /* Scan segment to set p_flags attribute if it contains only sections with
+     SHF_ARM_NOREAD flag.  */
+  for (m = elf_seg_map (abfd); m != NULL; m = m->next)
+    {
+      unsigned int j;
+
+      if (m->count == 0)
+	continue;
+      for (j = 0; j < m->count; j++)
+	{
+	  if (!(elf_section_flags (m->sections[j]) & SHF_ARM_NOREAD))
+	    break;
+	}
+      if (j == m->count)
+	{
+	  m->p_flags = PF_X;
+	  m->p_flags_valid = 1;
+	}
+    }
 }
 
 static enum elf_reloc_type_class
@@ -15372,6 +15553,8 @@ elf32_arm_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
       return reloc_class_plt;
     case R_ARM_COPY:
       return reloc_class_copy;
+    case R_ARM_IRELATIVE:
+      return reloc_class_ifunc;
     default:
       return reloc_class_normal;
     }
@@ -15408,6 +15591,10 @@ elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
       hdr->sh_type = SHT_ARM_EXIDX;
       hdr->sh_flags |= SHF_LINK_ORDER;
     }
+
+  if (sec->flags & SEC_ELF_NOREAD)
+    hdr->sh_flags |= SHF_ARM_NOREAD;
+
   return TRUE;
 }
 
@@ -16159,8 +16346,7 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
    ARM DDI 0406C.b (ID072512).  */
 
 static inline bfd_vma
-create_instruction_branch_absolute (const void *const from,
-				    const void *const to)
+create_instruction_branch_absolute (int branch_offset)
 {
   /* A8.8.18 B (A8-334)
      B target_address (Encoding T4).  */
@@ -16168,7 +16354,6 @@ create_instruction_branch_absolute (const void *const from,
   /* jump offset is:  S:I1:I2:imm10:imm11:0.  */
   /* with : I1 = NOT (J1 EOR S) I2 = NOT (J2 EOR S).  */
 
-  int branch_offset = to - (from + 4);
   int s = ((branch_offset & 0x1000000) >> 24);
   int j1 = s ^ !((branch_offset & 0x800000) >> 23);
   int j2 = s ^ !((branch_offset & 0x400000) >> 22);
@@ -16381,8 +16566,8 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
 	current_stub_contents =
 	  push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			      create_instruction_branch_absolute
-			      (current_stub_contents,
-			       (char*)initial_insn_addr + 4));
+			      (initial_insn_addr - current_stub_contents));
+			       
 
       /* Fill the remaining of the stub with deterministic contents.  */
       current_stub_contents =
@@ -16443,8 +16628,7 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
 	  current_stub_contents =
 	    push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 				create_instruction_branch_absolute
-				(current_stub_contents,
-				 (char *) initial_insn_addr + 4));
+				(initial_insn_addr - current_stub_contents));
        }
     }
   else /* if (!wback).  */
@@ -16481,8 +16665,7 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
 	  current_stub_contents =
 	    push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 				create_instruction_branch_absolute
-				(current_stub_contents,
-				 (char *) initial_insn_addr + 4));
+				(initial_insn_addr - current_stub_contents));
 	}
     }
 
@@ -16527,8 +16710,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
 
       /* Fill the remaining of the stub with deterministic contents.  */
       current_stub_contents =
@@ -16596,8 +16778,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
   else if (wback && !restore_pc && !restore_rn)
     {
@@ -16617,8 +16798,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
   else if (!wback && restore_pc && !restore_rn)
     {
@@ -16699,8 +16879,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char *) initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
   else if (!wback && restore_pc && restore_rn)
     {
@@ -16770,8 +16949,7 @@ stm32l4xx_create_replacing_stub_vldm (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
   else
     {
@@ -16848,8 +17026,7 @@ stm32l4xx_create_replacing_stub_vldm (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
 
   /* Fill the remaining of the stub with deterministic contents.  */
@@ -16883,6 +17060,39 @@ stm32l4xx_create_replacing_stub (struct elf32_arm_link_hash_table * htab,
 
 /* End of stm32l4xx work-around.  */
 
+
+static void
+elf32_arm_add_relocation (bfd *output_bfd, struct bfd_link_info *info,
+			  asection *output_sec, Elf_Internal_Rela *rel)
+{
+  BFD_ASSERT (output_sec && rel);
+  struct bfd_elf_section_reloc_data *output_reldata;
+  struct elf32_arm_link_hash_table *htab;
+  struct bfd_elf_section_data *oesd = elf_section_data (output_sec);
+  Elf_Internal_Shdr *rel_hdr;
+
+
+  if (oesd->rel.hdr)
+    {
+      rel_hdr = oesd->rel.hdr;
+      output_reldata = &(oesd->rel);
+    }
+  else if (oesd->rela.hdr)
+    {
+      rel_hdr = oesd->rela.hdr;
+      output_reldata = &(oesd->rela);
+    }
+  else
+    {
+      abort ();
+    }
+
+  bfd_byte *erel = rel_hdr->contents;
+  erel += output_reldata->count * rel_hdr->sh_entsize;
+  htab = elf32_arm_hash_table (info);
+  SWAP_RELOC_OUT (htab) (output_bfd, rel, erel);
+  output_reldata->count++;
+}
 
 /* Do code byteswapping.  Return FALSE afterwards so that the section is
    written out as normal.  */
@@ -17020,17 +17230,16 @@ elf32_arm_write_section (bfd *output_bfd,
 
 		    (*_bfd_error_handler)
 		      (_("%B(%#x): error: Cannot create STM32L4XX veneer. "
-			 "Jump out of range by %d bytes. "
+			 "Jump out of range by %ld bytes. "
 			 "Cannot encode branch instruction. "),
 		       output_bfd,
-		       stm32l4xx_errnode->vma - 4,
+		       (long) (stm32l4xx_errnode->vma - 4),
 		       out_of_range);
 		    continue;
 		  }
 
 		insn = create_instruction_branch_absolute
-		  ((void *) stm32l4xx_errnode->vma-4,
-		   (void *) stm32l4xx_errnode->u.b.veneer->vma);
+		  (stm32l4xx_errnode->u.b.veneer->vma - stm32l4xx_errnode->vma);
 
 		/* The instruction is before the label.  */
 		target -= 4;
@@ -17042,13 +17251,14 @@ elf32_arm_write_section (bfd *output_bfd,
 
 	    case STM32L4XX_ERRATUM_VENEER:
 	      {
-		bfd_vma veneer, veneer_r;
+		bfd_byte * veneer;
+		bfd_byte * veneer_r;
 		unsigned int insn;
 
-		veneer = (bfd_vma) (contents + target);
-		veneer_r = (bfd_vma) (contents + target +
-				      stm32l4xx_errnode->u.b.veneer->vma -
-				      stm32l4xx_errnode->vma - 4);
+		veneer = contents + target;
+		veneer_r = veneer
+		  + stm32l4xx_errnode->u.b.veneer->vma
+		  - stm32l4xx_errnode->vma - 4;
 
 		if ((signed) (veneer_r - veneer -
 			      STM32L4XX_ERRATUM_VLDM_VENEER_SIZE >
@@ -17128,6 +17338,26 @@ elf32_arm_write_section (bfd *output_bfd,
 			   usual BFD method.  */
 			prel31_offset = (text_offset - exidx_offset)
 					& 0x7ffffffful;
+			if (bfd_link_relocatable (link_info))
+			  {
+			    /* Here relocation for new EXIDX_CANTUNWIND is
+			       created, so there is no need to
+			       adjust offset by hand.  */
+			    prel31_offset = text_sec->output_offset
+					    + text_sec->size;
+
+			    /* New relocation entity.  */
+			    asection *text_out = text_sec->output_section;
+			    Elf_Internal_Rela rel;
+			    rel.r_addend = 0;
+			    rel.r_offset = exidx_offset;
+			    rel.r_info = ELF32_R_INFO (text_out->target_index,
+						       R_ARM_PREL31);
+
+			    elf32_arm_add_relocation (output_bfd, link_info,
+						      sec->output_section,
+						      &rel);
+			  }
 
 			/* First address we can't unwind.  */
 			bfd_put_32 (output_bfd, prel31_offset,
@@ -17615,6 +17845,31 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
+static bfd_boolean
+elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr * hdr)
+{
+  if (hdr->sh_flags & SHF_ARM_NOREAD)
+    *flags |= SEC_ELF_NOREAD;
+  return TRUE;
+}
+
+static flagword
+elf32_arm_lookup_section_flags (char *flag_name)
+{
+  if (!strcmp (flag_name, "SHF_ARM_NOREAD"))
+    return SHF_ARM_NOREAD;
+
+  return SEC_NO_FLAGS;
+}
+
+static unsigned int
+elf32_arm_count_additional_relocs (asection *sec)
+{
+  struct _arm_elf_section_data *arm_data;
+  arm_data = get_arm_elf_section_data (sec);
+  return arm_data->additional_reloc_count;
+}
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_TARGET_ID			ARM_ELF_DATA
 #define ELF_MACHINE_CODE		EM_ARM
@@ -17669,6 +17924,7 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 #define elf_backend_output_arch_local_syms      elf32_arm_output_arch_local_syms
 #define elf_backend_begin_write_processing      elf32_arm_begin_write_processing
 #define elf_backend_add_symbol_hook		elf32_arm_add_symbol_hook
+#define elf_backend_count_additional_relocs	elf32_arm_count_additional_relocs
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1
@@ -17692,6 +17948,11 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 #define elf_backend_obj_attrs_section_type	SHT_ARM_ATTRIBUTES
 #define elf_backend_obj_attrs_order		elf32_arm_obj_attrs_order
 #define elf_backend_obj_attrs_handle_unknown 	elf32_arm_obj_attrs_handle_unknown
+
+#undef elf_backend_section_flags
+#define elf_backend_section_flags		elf32_arm_section_flags
+#undef elf_backend_lookup_section_flags_hook
+#define elf_backend_lookup_section_flags_hook   elf32_arm_lookup_section_flags
 
 #include "elf32-target.h"
 

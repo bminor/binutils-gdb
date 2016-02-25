@@ -1,5 +1,5 @@
 /* Support for printing C and C++ types for GDB, the GNU debugger.
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1305,30 +1305,30 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 	      if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0)
 		fprintf_filtered (stream, "\n");
 
-		for (i = 0; i < TYPE_TYPE_DEFN_FIELD_COUNT (type); i++)
-		  {
-		    struct type *target = TYPE_TYPE_DEFN_FIELD_TYPE (type, i);
+	      for (i = 0; i < TYPE_TYPE_DEFN_FIELD_COUNT (type); i++)
+		{
+		  struct type *target = TYPE_TYPE_DEFN_FIELD_TYPE (type, i);
 
-		    /* !!keiths: for now, maintain the status quo.  */
-		    if (TYPE_CODE (target) != TYPE_CODE_TYPEDEF)
-		      continue;
-		    /* Dereference the typedef declaration itself.  */
-		    gdb_assert (TYPE_CODE (target) == TYPE_CODE_TYPEDEF);
-		    target = TYPE_TARGET_TYPE (target);
+		  /* !!keiths: for now, maintain the status quo.  */
+		  if (TYPE_CODE (target) != TYPE_CODE_TYPEDEF)
+		    continue;
+		  /* Dereference the typedef declaration itself.  */
+		  gdb_assert (TYPE_CODE (target) == TYPE_CODE_TYPEDEF);
+		  target = TYPE_TARGET_TYPE (target);
 
-		    print_spaces_filtered (level + 4, stream);
-		    fprintf_filtered (stream, "typedef ");
+		  print_spaces_filtered (level + 4, stream);
+		  fprintf_filtered (stream, "typedef ");
 
-		    /* We want to print typedefs with substitutions
-		       from the template parameters or globally-known
-		       typedefs but not local typedefs.  */
-		    c_print_type (target,
-				  TYPE_TYPE_DEFN_FIELD_NAME (type, i),
-				  stream, show - 1, level + 4,
-				  &semi_local_flags);
-		    fprintf_filtered (stream, ";\n");
-		  }
-	      }
+		  /* We want to print typedefs with substitutions
+		     from the template parameters or globally-known
+		     typedefs but not local typedefs.  */
+		  c_print_type (target,
+				TYPE_TYPE_DEFN_FIELD_NAME (type, i),
+				stream, show - 1, level + 4,
+				&semi_local_flags);
+		  fprintf_filtered (stream, ";\n");
+		}
+	    }
 
 	    fprintfi_filtered (level, stream, "}");
 	  }

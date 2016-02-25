@@ -1,6 +1,6 @@
 /* Native-dependent code for AMD64 BSD's.
 
-   Copyright (C) 2003-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,7 +52,7 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETREGS, get_ptrace_pid (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
@@ -70,7 +70,7 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
       if (amd64bsd_xsave_len != 0)
 	{
 	  xstateregs = alloca (amd64bsd_xsave_len);
-	  if (ptrace (PT_GETXSTATE, ptid_get_pid (inferior_ptid),
+	  if (ptrace (PT_GETXSTATE, get_ptrace_pid (inferior_ptid),
 		      (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
 	    perror_with_name (_("Couldn't get extended state status"));
 
@@ -79,7 +79,7 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
 	}
 #endif
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETFPREGS, get_ptrace_pid (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
@@ -100,13 +100,13 @@ amd64bsd_store_inferior_registers (struct target_ops *ops,
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETREGS, get_ptrace_pid (inferior_ptid),
                   (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name (_("Couldn't get registers"));
 
       amd64_collect_native_gregset (regcache, &regs, regnum);
 
-      if (ptrace (PT_SETREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_SETREGS, get_ptrace_pid (inferior_ptid),
 	          (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name (_("Couldn't write registers"));
 
@@ -123,26 +123,26 @@ amd64bsd_store_inferior_registers (struct target_ops *ops,
       if (amd64bsd_xsave_len != 0)
 	{
 	  xstateregs = alloca (amd64bsd_xsave_len);
-	  if (ptrace (PT_GETXSTATE, ptid_get_pid (inferior_ptid),
+	  if (ptrace (PT_GETXSTATE, get_ptrace_pid (inferior_ptid),
 		      (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
 	    perror_with_name (_("Couldn't get extended state status"));
 
 	  amd64_collect_xsave (regcache, regnum, xstateregs, 0);
 
-	  if (ptrace (PT_SETXSTATE, ptid_get_pid (inferior_ptid),
+	  if (ptrace (PT_SETXSTATE, get_ptrace_pid (inferior_ptid),
 		      (PTRACE_TYPE_ARG3) xstateregs, amd64bsd_xsave_len) == -1)
 	    perror_with_name (_("Couldn't write extended state status"));
 	  return;
 	}
 #endif
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETFPREGS, get_ptrace_pid (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
       amd64_collect_fxsave (regcache, regnum, &fpregs);
 
-      if (ptrace (PT_SETFPREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_SETFPREGS, get_ptrace_pid (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't write floating point status"));
     }
@@ -172,7 +172,7 @@ amd64bsd_dr_get (ptid_t ptid, int regnum)
 {
   struct dbreg dbregs;
 
-  if (ptrace (PT_GETDBREGS, ptid_get_pid (inferior_ptid),
+  if (ptrace (PT_GETDBREGS, get_ptrace_pid (inferior_ptid),
 	      (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
     perror_with_name (_("Couldn't read debug registers"));
 
@@ -184,7 +184,7 @@ amd64bsd_dr_set (int regnum, unsigned long value)
 {
   struct dbreg dbregs;
 
-  if (ptrace (PT_GETDBREGS, ptid_get_pid (inferior_ptid),
+  if (ptrace (PT_GETDBREGS, get_ptrace_pid (inferior_ptid),
               (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
     perror_with_name (_("Couldn't get debug registers"));
 
@@ -195,7 +195,7 @@ amd64bsd_dr_set (int regnum, unsigned long value)
 
   DBREG_DRX ((&dbregs), regnum) = value;
 
-  if (ptrace (PT_SETDBREGS, ptid_get_pid (inferior_ptid),
+  if (ptrace (PT_SETDBREGS, get_ptrace_pid (inferior_ptid),
               (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
     perror_with_name (_("Couldn't write debug registers"));
 }

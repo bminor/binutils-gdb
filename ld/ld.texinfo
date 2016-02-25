@@ -1,6 +1,6 @@
 \input texinfo
 @setfilename ld.info
-@c Copyright (C) 1991-2015 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2016 Free Software Foundation, Inc.
 @syncodeindex ky cp
 @c man begin INCLUDE
 @include configdoc.texi
@@ -55,7 +55,7 @@ This file documents the @sc{gnu} linker LD
 @end ifset
 version @value{VERSION}.
 
-Copyright @copyright{} 1991-2015 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2016 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -92,7 +92,7 @@ section entitled ``GNU Free Documentation License''.
 
 @vskip 0pt plus 1filll
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2015 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2016 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -1325,15 +1325,21 @@ libraries.
 When creating a shared library, bind references to global symbols to the
 definition within the shared library, if any.  Normally, it is possible
 for a program linked against a shared library to override the definition
-within the shared library.  This option is only meaningful on ELF
-platforms which support shared libraries.
+within the shared library.  This option can also be used with the
+@option{--export-dynamic} option, when creating a position independent
+executable, to bind references to global symbols to the definition within
+the executable.  This option is only meaningful on ELF platforms which
+support shared libraries and position independent executables.
 
 @kindex -Bsymbolic-functions
 @item -Bsymbolic-functions
 When creating a shared library, bind references to global function
 symbols to the definition within the shared library, if any.
+This option can also be used with the @option{--export-dynamic} option,
+when creating a position independent executable, to bind references
+to global function symbols to the definition within the executable.
 This option is only meaningful on ELF platforms which support shared
-libraries.
+libraries and position independent executables.
 
 @kindex --dynamic-list=@var{dynamic-list-file}
 @item --dynamic-list=@var{dynamic-list-file}
@@ -1801,7 +1807,7 @@ ELF executable, the contents of the environment variable
 @code{LD_RUN_PATH} will be used if it is defined.
 
 The @option{-rpath} option may also be used on SunOS.  By default, on
-SunOS, the linker will form a runtime search patch out of all the
+SunOS, the linker will form a runtime search path out of all the
 @option{-L} options it is given.  If a @option{-rpath} option is used, the
 runtime search path will be formed exclusively using the @option{-rpath}
 options, ignoring the @option{-L} options.  This can be useful when using
@@ -6108,7 +6114,8 @@ This is equivalent to either
 @end smallexample
 or
 @smallexample
-(ALIGN(@var{maxpagesize}) + (. & (@var{maxpagesize} - @var{commonpagesize})))
+(ALIGN(@var{maxpagesize})
+ + ((. + @var{commonpagesize} - 1) & (@var{maxpagesize} - @var{commonpagesize})))
 @end smallexample
 @noindent
 depending on whether the latter uses fewer @var{commonpagesize} sized pages

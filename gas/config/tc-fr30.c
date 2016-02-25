@@ -1,5 +1,5 @@
 /* tc-fr30.c -- Assembler for the Fujitsu FR30.
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -156,7 +156,7 @@ md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
 
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }
 
 symbolS *
@@ -363,7 +363,7 @@ fr30_is_colon_insn (char *start, char *nul_char)
 	{
 	  /* Yup - it might be delay slot instruction.  */
 	  int           i;
-	  static char * delay_insns [] =
+	  static const char * delay_insns [] =
 	  {
 	    "call", "jmp", "ret", "bra", "bno",
 	    "beq",  "bne", "bc",  "bnc", "bn",
@@ -373,7 +373,7 @@ fr30_is_colon_insn (char *start, char *nul_char)
 
 	  for (i = sizeof (delay_insns) / sizeof (delay_insns[0]); i--;)
 	    {
-	      char * insn = delay_insns[i];
+	      const char * insn = delay_insns[i];
 	      int    len  = strlen (insn);
 
 	      if (start [len] != 0)

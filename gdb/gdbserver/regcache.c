@@ -1,5 +1,5 @@
 /* Register support routines for the remote server for GDB.
-   Copyright (C) 2001-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -107,13 +107,23 @@ regcache_invalidate_one (struct inferior_list_entry *entry,
   return 0;
 }
 
+/* See regcache.h.  */
+
+void
+regcache_invalidate_pid (int pid)
+{
+  find_inferior (&all_threads, regcache_invalidate_one, &pid);
+}
+
+/* See regcache.h.  */
+
 void
 regcache_invalidate (void)
 {
   /* Only update the threads of the current process.  */
   int pid = ptid_get_pid (current_thread->entry.id);
 
-  find_inferior (&all_threads, regcache_invalidate_one, &pid);
+  regcache_invalidate_pid (pid);
 }
 
 #endif
@@ -135,8 +145,9 @@ init_register_cache (struct regcache *regcache,
 	= (unsigned char *) xcalloc (1, tdesc->registers_size);
       regcache->registers_owned = 1;
       regcache->register_status
-	= (unsigned char *) xcalloc (1, tdesc->num_registers);
-      gdb_assert (REG_UNAVAILABLE == 0);
+	= (unsigned char *) xmalloc (tdesc->num_registers);
+      memset ((void *) regcache->register_status, REG_UNAVAILABLE,
+	      tdesc->num_registers);
 #else
       gdb_assert_not_reached ("can't allocate memory from the heap");
 #endif
@@ -240,18 +251,6 @@ registers_from_string (struct regcache *regcache, char *buf)
 	len = tdesc->registers_size * 2;
     }
   hex2bin (buf, registers, len / 2);
-}
-
-struct reg *
-find_register_by_name (const struct target_desc *tdesc, const char *name)
-{
-  int i;
-
-  for (i = 0; i < tdesc->num_registers; i++)
-    if (strcmp (name, tdesc->reg_defs[i].name) == 0)
-      return &tdesc->reg_defs[i];
-  internal_error (__FILE__, __LINE__, "Unknown register %s requested",
-		  name);
 }
 
 int
@@ -423,6 +422,28 @@ collect_register (struct regcache *regcache, int n, void *buf)
 {
   memcpy (buf, register_data (regcache, n, 1),
 	  register_size (regcache->tdesc, n));
+}
+
+enum register_status
+regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
+			    ULONGEST *val)
+{
+  int size;
+
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->tdesc->num_registers);
+
+  size = register_size (regcache->tdesc, regnum);
+
+  if (size > (int) sizeof (ULONGEST))
+    error (_("That operation is not available on integers of more than"
+            "%d bytes."),
+          (int) sizeof (ULONGEST));
+
+  *val = 0;
+  collect_register (regcache, regnum, val);
+
+  return REG_VALID;
 }
 
 #ifndef IN_PROCESS_AGENT

@@ -1,5 +1,5 @@
 /* tc-arc.c -- Assembler for the ARC
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
    Contributor: Claudiu Zissulescu <claziss@synopsys.com>
 
@@ -24,6 +24,7 @@
 #include "subsegs.h"
 #include "struc-symbol.h"
 #include "dwarf2dbg.h"
+#include "dw2gencfi.h"
 #include "safe-ctype.h"
 
 #include "opcode/arc.h"
@@ -31,9 +32,9 @@
 
 /* Defines section.  */
 
-#define MAX_FLAG_NAME_LENGHT 3
 #define MAX_INSN_FIXUPS      2
 #define MAX_CONSTR_STR       20
+#define FRAG_MAX_GROWTH      8
 
 #ifdef DEBUG
 # define pr_debug(fmt, args...) fprintf (stderr, fmt, ##args)
@@ -43,11 +44,50 @@
 
 #define MAJOR_OPCODE(x)  (((x) & 0xF8000000) >> 27)
 #define SUB_OPCODE(x)	 (((x) & 0x003F0000) >> 16)
-#define LP_INSN(x)	 ((MAJOR_OPCODE (x) == 0x4) &&	\
+#define LP_INSN(x)	 ((MAJOR_OPCODE (x) == 0x4) && \
 			  (SUB_OPCODE (x) == 0x28))
 
 /* Equal to MAX_PRECISION in atof-ieee.c.  */
 #define MAX_LITTLENUMS 6
+
+/* Enum used to enumerate the relaxable ins operands.  */
+enum rlx_operand_type
+{
+  EMPTY = 0,
+  REGISTER,
+  REGISTER_S,     /* Register for short instruction(s).  */
+  REGISTER_NO_GP, /* Is a register but not gp register specifically.  */
+  REGISTER_DUP,   /* Duplication of previous operand of type register.  */
+  IMMEDIATE,
+  BRACKET
+};
+
+enum arc_rlx_types
+{
+  ARC_RLX_NONE = 0,
+  ARC_RLX_BL_S,
+  ARC_RLX_BL,
+  ARC_RLX_B_S,
+  ARC_RLX_B,
+  ARC_RLX_ADD_U3,
+  ARC_RLX_ADD_U6,
+  ARC_RLX_ADD_LIMM,
+  ARC_RLX_LD_U7,
+  ARC_RLX_LD_S9,
+  ARC_RLX_LD_LIMM,
+  ARC_RLX_MOV_U8,
+  ARC_RLX_MOV_S12,
+  ARC_RLX_MOV_LIMM,
+  ARC_RLX_SUB_U3,
+  ARC_RLX_SUB_U6,
+  ARC_RLX_SUB_LIMM,
+  ARC_RLX_MPY_U6,
+  ARC_RLX_MPY_LIMM,
+  ARC_RLX_MOV_RU6,
+  ARC_RLX_MOV_RLIMM,
+  ARC_RLX_ADD_RRU6,
+  ARC_RLX_ADD_RRLIMM,
+};
 
 /* Macros section.  */
 
@@ -83,130 +123,136 @@ extern int target_big_endian;
 const char *arc_target_format = DEFAULT_TARGET_FORMAT;
 static int byte_order = DEFAULT_BYTE_ORDER;
 
+/* By default relaxation is disabled.  */
+static int relaxation_state = 0;
+
 extern int arc_get_mach (char *);
 
-/* Forward declaration.  */
+/* Forward declarations.  */
 static void arc_lcomm (int);
 static void arc_option (int);
 static void arc_extra_reloc (int);
 
+
 const pseudo_typeS md_pseudo_table[] =
-  {
-    /* Make sure that .word is 32 bits.  */
-    { "word", cons, 4 },
+{
+  /* Make sure that .word is 32 bits.  */
+  { "word", cons, 4 },
 
-    { "align",   s_align_bytes, 0 }, /* Defaulting is invalid (0).  */
-    { "lcomm",   arc_lcomm, 0 },
-    { "lcommon", arc_lcomm, 0 },
-    { "cpu",     arc_option, 0 },
+  { "align",   s_align_bytes, 0 }, /* Defaulting is invalid (0).  */
+  { "lcomm",   arc_lcomm, 0 },
+  { "lcommon", arc_lcomm, 0 },
+  { "cpu",     arc_option, 0 },
 
-    { "tls_gd_ld",   arc_extra_reloc, BFD_RELOC_ARC_TLS_GD_LD },
-    { "tls_gd_call", arc_extra_reloc, BFD_RELOC_ARC_TLS_GD_CALL },
+  { "tls_gd_ld",   arc_extra_reloc, BFD_RELOC_ARC_TLS_GD_LD },
+  { "tls_gd_call", arc_extra_reloc, BFD_RELOC_ARC_TLS_GD_CALL },
 
-    { NULL, NULL, 0 }
-  };
+  { NULL, NULL, 0 }
+};
 
 const char *md_shortopts = "";
 
 enum options
-  {
-    OPTION_EB = OPTION_MD_BASE,
-    OPTION_EL,
+{
+  OPTION_EB = OPTION_MD_BASE,
+  OPTION_EL,
 
-    OPTION_ARC600,
-    OPTION_ARC601,
-    OPTION_ARC700,
-    OPTION_ARCEM,
-    OPTION_ARCHS,
+  OPTION_ARC600,
+  OPTION_ARC601,
+  OPTION_ARC700,
+  OPTION_ARCEM,
+  OPTION_ARCHS,
 
-    OPTION_MCPU,
-    OPTION_CD,
+  OPTION_MCPU,
+  OPTION_CD,
+  OPTION_RELAX,
 
-    /* The following options are deprecated and provided here only for
-       compatibility reasons.  */
-    OPTION_USER_MODE,
-    OPTION_LD_EXT_MASK,
-    OPTION_SWAP,
-    OPTION_NORM,
-    OPTION_BARREL_SHIFT,
-    OPTION_MIN_MAX,
-    OPTION_NO_MPY,
-    OPTION_EA,
-    OPTION_MUL64,
-    OPTION_SIMD,
-    OPTION_SPFP,
-    OPTION_DPFP,
-    OPTION_XMAC_D16,
-    OPTION_XMAC_24,
-    OPTION_DSP_PACKA,
-    OPTION_CRC,
-    OPTION_DVBF,
-    OPTION_TELEPHONY,
-    OPTION_XYMEMORY,
-    OPTION_LOCK,
-    OPTION_SWAPE,
-    OPTION_RTSC,
-    OPTION_FPUDA
-  };
+  /* The following options are deprecated and provided here only for
+     compatibility reasons.  */
+  OPTION_USER_MODE,
+  OPTION_LD_EXT_MASK,
+  OPTION_SWAP,
+  OPTION_NORM,
+  OPTION_BARREL_SHIFT,
+  OPTION_MIN_MAX,
+  OPTION_NO_MPY,
+  OPTION_EA,
+  OPTION_MUL64,
+  OPTION_SIMD,
+  OPTION_SPFP,
+  OPTION_DPFP,
+  OPTION_XMAC_D16,
+  OPTION_XMAC_24,
+  OPTION_DSP_PACKA,
+  OPTION_CRC,
+  OPTION_DVBF,
+  OPTION_TELEPHONY,
+  OPTION_XYMEMORY,
+  OPTION_LOCK,
+  OPTION_SWAPE,
+  OPTION_RTSC,
+  OPTION_FPUDA
+};
 
 struct option md_longopts[] =
-  {
-    { "EB",		no_argument,	   NULL, OPTION_EB },
-    { "EL",		no_argument,	   NULL, OPTION_EL },
-    { "mcpu",		required_argument, NULL, OPTION_MCPU },
-    { "mA6",		no_argument,	   NULL, OPTION_ARC600 },
-    { "mARC600",	no_argument,	   NULL, OPTION_ARC600 },
-    { "mARC601",	no_argument,	   NULL, OPTION_ARC601 },
-    { "mARC700",	no_argument,	   NULL, OPTION_ARC700 },
-    { "mA7",		no_argument,	   NULL, OPTION_ARC700 },
-    { "mEM",		no_argument,	   NULL, OPTION_ARCEM },
-    { "mHS",		no_argument,	   NULL, OPTION_ARCHS },
-    { "mcode-density",	no_argument,	   NULL, OPTION_CD },
+{
+  { "EB",		no_argument,	   NULL, OPTION_EB },
+  { "EL",		no_argument,	   NULL, OPTION_EL },
+  { "mcpu",		required_argument, NULL, OPTION_MCPU },
+  { "mA6",		no_argument,	   NULL, OPTION_ARC600 },
+  { "mARC600",		no_argument,	   NULL, OPTION_ARC600 },
+  { "mARC601",		no_argument,	   NULL, OPTION_ARC601 },
+  { "mARC700",		no_argument,	   NULL, OPTION_ARC700 },
+  { "mA7",		no_argument,	   NULL, OPTION_ARC700 },
+  { "mEM",		no_argument,	   NULL, OPTION_ARCEM },
+  { "mHS",		no_argument,	   NULL, OPTION_ARCHS },
+  { "mcode-density",	no_argument,	   NULL, OPTION_CD },
+  { "mrelax",           no_argument,       NULL, OPTION_RELAX },
 
-    /* The following options are deprecated and provided here only for
-       compatibility reasons.  */
-    { "mav2em", no_argument, NULL, OPTION_ARCEM },
-    { "mav2hs", no_argument, NULL, OPTION_ARCHS },
-    { "muser-mode-only", no_argument, NULL, OPTION_USER_MODE },
-    { "mld-extension-reg-mask", required_argument, NULL, OPTION_LD_EXT_MASK },
-    { "mswap", no_argument, NULL, OPTION_SWAP },
-    { "mnorm", no_argument, NULL, OPTION_NORM },
-    { "mbarrel-shifter", no_argument, NULL, OPTION_BARREL_SHIFT },
-    { "mbarrel_shifter", no_argument, NULL, OPTION_BARREL_SHIFT },
-    { "mmin-max", no_argument, NULL, OPTION_MIN_MAX },
-    { "mmin_max", no_argument, NULL, OPTION_MIN_MAX },
-    { "mno-mpy", no_argument, NULL, OPTION_NO_MPY },
-    { "mea", no_argument, NULL, OPTION_EA },
-    { "mEA", no_argument, NULL, OPTION_EA },
-    { "mmul64", no_argument, NULL, OPTION_MUL64 },
-    { "msimd", no_argument, NULL, OPTION_SIMD},
-    { "mspfp", no_argument, NULL, OPTION_SPFP},
-    { "mspfp-compact", no_argument, NULL, OPTION_SPFP},
-    { "mspfp_compact", no_argument, NULL, OPTION_SPFP},
-    { "mspfp-fast", no_argument, NULL, OPTION_SPFP},
-    { "mspfp_fast", no_argument, NULL, OPTION_SPFP},
-    { "mdpfp", no_argument, NULL, OPTION_DPFP},
-    { "mdpfp-compact", no_argument, NULL, OPTION_DPFP},
-    { "mdpfp_compact", no_argument, NULL, OPTION_DPFP},
-    { "mdpfp-fast", no_argument, NULL, OPTION_DPFP},
-    { "mdpfp_fast", no_argument, NULL, OPTION_DPFP},
-    { "mmac-d16", no_argument, NULL, OPTION_XMAC_D16},
-    { "mmac_d16", no_argument, NULL, OPTION_XMAC_D16},
-    { "mmac-24", no_argument, NULL, OPTION_XMAC_24},
-    { "mmac_24", no_argument, NULL, OPTION_XMAC_24},
-    { "mdsp-packa", no_argument, NULL, OPTION_DSP_PACKA},
-    { "mdsp_packa", no_argument, NULL, OPTION_DSP_PACKA},
-    { "mcrc", no_argument, NULL, OPTION_CRC},
-    { "mdvbf", no_argument, NULL, OPTION_DVBF},
-    { "mtelephony", no_argument, NULL, OPTION_TELEPHONY},
-    { "mxy", no_argument, NULL, OPTION_XYMEMORY},
-    { "mlock", no_argument, NULL, OPTION_LOCK},
-    { "mswape", no_argument, NULL, OPTION_SWAPE},
-    { "mrtsc", no_argument, NULL, OPTION_RTSC},
-    { "mfpuda", no_argument, NULL, OPTION_FPUDA},
+  /* The following options are deprecated and provided here only for
+     compatibility reasons.  */
+  { "mav2em", no_argument, NULL, OPTION_ARCEM },
+  { "mav2hs", no_argument, NULL, OPTION_ARCHS },
+  { "muser-mode-only", no_argument, NULL, OPTION_USER_MODE },
+  { "mld-extension-reg-mask", required_argument, NULL, OPTION_LD_EXT_MASK },
+  { "mswap", no_argument, NULL, OPTION_SWAP },
+  { "mnorm", no_argument, NULL, OPTION_NORM },
+  { "mbarrel-shifter", no_argument, NULL, OPTION_BARREL_SHIFT },
+  { "mbarrel_shifter", no_argument, NULL, OPTION_BARREL_SHIFT },
+  { "mmin-max", no_argument, NULL, OPTION_MIN_MAX },
+  { "mmin_max", no_argument, NULL, OPTION_MIN_MAX },
+  { "mno-mpy", no_argument, NULL, OPTION_NO_MPY },
+  { "mea", no_argument, NULL, OPTION_EA },
+  { "mEA", no_argument, NULL, OPTION_EA },
+  { "mmul64", no_argument, NULL, OPTION_MUL64 },
+  { "msimd", no_argument, NULL, OPTION_SIMD},
+  { "mspfp", no_argument, NULL, OPTION_SPFP},
+  { "mspfp-compact", no_argument, NULL, OPTION_SPFP},
+  { "mspfp_compact", no_argument, NULL, OPTION_SPFP},
+  { "mspfp-fast", no_argument, NULL, OPTION_SPFP},
+  { "mspfp_fast", no_argument, NULL, OPTION_SPFP},
+  { "mdpfp", no_argument, NULL, OPTION_DPFP},
+  { "mdpfp-compact", no_argument, NULL, OPTION_DPFP},
+  { "mdpfp_compact", no_argument, NULL, OPTION_DPFP},
+  { "mdpfp-fast", no_argument, NULL, OPTION_DPFP},
+  { "mdpfp_fast", no_argument, NULL, OPTION_DPFP},
+  { "mmac-d16", no_argument, NULL, OPTION_XMAC_D16},
+  { "mmac_d16", no_argument, NULL, OPTION_XMAC_D16},
+  { "mmac-24", no_argument, NULL, OPTION_XMAC_24},
+  { "mmac_24", no_argument, NULL, OPTION_XMAC_24},
+  { "mdsp-packa", no_argument, NULL, OPTION_DSP_PACKA},
+  { "mdsp_packa", no_argument, NULL, OPTION_DSP_PACKA},
+  { "mcrc", no_argument, NULL, OPTION_CRC},
+  { "mdvbf", no_argument, NULL, OPTION_DVBF},
+  { "mtelephony", no_argument, NULL, OPTION_TELEPHONY},
+  { "mxy", no_argument, NULL, OPTION_XYMEMORY},
+  { "mlock", no_argument, NULL, OPTION_LOCK},
+  { "mswape", no_argument, NULL, OPTION_SWAPE},
+  { "mrtsc", no_argument, NULL, OPTION_RTSC},
+  { "mfpuda", no_argument, NULL, OPTION_FPUDA},
 
-    { NULL,		no_argument, NULL, 0 }
-  };
+  { NULL,		no_argument, NULL, 0 }
+};
 
 size_t md_longopts_size = sizeof (md_longopts);
 
@@ -242,6 +288,8 @@ struct arc_insn
 			     short.  */
   bfd_boolean has_limm;   /* Boolean value: TRUE if limm field is
 			     valid.  */
+  bfd_boolean relax;	  /* Boolean value: TRUE if needs
+			     relaxation.  */
 };
 
 /* Structure to hold any last two instructions.  */
@@ -256,6 +304,11 @@ static struct arc_last_insn
   /* Boolean value: TRUE if current insn has delay slot.  */
   bfd_boolean has_delay_slot;
 } arc_last_insns[2];
+
+/* Forward declaration.  */
+static void assemble_insn
+  (const struct arc_opcode *, const expressionS *, int,
+   const struct arc_flags *, int, struct arc_insn *);
 
 /* The cpu for which we are generating code.  */
 static unsigned arc_target = ARC_OPCODE_BASE;
@@ -296,15 +349,6 @@ static const struct cpu_type
   { "all",    ARC_OPCODE_BASE,    bfd_mach_arc_arcv2,
     0x00, 0x00 },
   { 0, 0, 0, 0, 0 }
-};
-
-struct arc_flags
-{
-  /* Name of the parsed flag.  */
-  char name[MAX_FLAG_NAME_LENGHT+1];
-
-  /* The code of the parsed flag.  Valid when is not zero.  */
-  unsigned char code;
 };
 
 /* Used by the arc_reloc_op table.  Order is important.  */
@@ -354,22 +398,147 @@ static const struct arc_reloc_op_tag
   unsigned int complex_expr : 1;
 }
   arc_reloc_op[] =
-    {
-      DEF (gotoff,  BFD_RELOC_ARC_GOTOFF,	 1),
-      DEF (gotpc,   BFD_RELOC_ARC_GOTPC32,	 0),
-      DEF (plt,	    BFD_RELOC_ARC_PLT32,	 0),
-      DEF (sda,	    DUMMY_RELOC_ARC_ENTRY,	 1),
-      DEF (pcl,	    BFD_RELOC_ARC_PC32,		 1),
-      DEF (tlsgd,   BFD_RELOC_ARC_TLS_GD_GOT,	 0),
-      DEF (tlsie,   BFD_RELOC_ARC_TLS_IE_GOT,	 0),
-      DEF (tpoff9,  BFD_RELOC_ARC_TLS_LE_S9,	 0),
-      DEF (tpoff,   BFD_RELOC_ARC_TLS_LE_32,	 0),
-      DEF (dtpoff9, BFD_RELOC_ARC_TLS_DTPOFF_S9, 0),
-      DEF (dtpoff,  BFD_RELOC_ARC_TLS_DTPOFF,	 0),
-    };
+{
+  DEF (gotoff,  BFD_RELOC_ARC_GOTOFF,		1),
+  DEF (gotpc,   BFD_RELOC_ARC_GOTPC32,		0),
+  DEF (plt,	BFD_RELOC_ARC_PLT32,		0),
+  DEF (sda,	DUMMY_RELOC_ARC_ENTRY,		1),
+  DEF (pcl,	BFD_RELOC_ARC_PC32,		1),
+  DEF (tlsgd,   BFD_RELOC_ARC_TLS_GD_GOT,	0),
+  DEF (tlsie,   BFD_RELOC_ARC_TLS_IE_GOT,	0),
+  DEF (tpoff9,  BFD_RELOC_ARC_TLS_LE_S9,	0),
+  DEF (tpoff,   BFD_RELOC_ARC_TLS_LE_32,	1),
+  DEF (dtpoff9, BFD_RELOC_ARC_TLS_DTPOFF_S9,	0),
+  DEF (dtpoff,  BFD_RELOC_ARC_TLS_DTPOFF,	0),
+};
 
 static const int arc_num_reloc_op
 = sizeof (arc_reloc_op) / sizeof (*arc_reloc_op);
+
+/* Structure for relaxable instruction that have to be swapped with a
+   smaller alternative instruction.  */
+struct arc_relaxable_ins
+{
+  /* Mnemonic that should be checked.  */
+  const char *mnemonic_r;
+
+  /* Operands that should be checked.
+     Indexes of operands from operand array.  */
+  enum rlx_operand_type operands[6];
+
+  /* Flags that should be checked.  */
+  unsigned flag_classes[5];
+
+  /* Mnemonic (smaller) alternative to be used later for relaxation.  */
+  const char *mnemonic_alt;
+
+  /* Index of operand that generic relaxation has to check.  */
+  unsigned opcheckidx;
+
+  /* Base subtype index used.  */
+  enum arc_rlx_types subtype;
+};
+
+#define RELAX_TABLE_ENTRY(BITS, ISSIGNED, SIZE, NEXT)			\
+  { (ISSIGNED) ? ((1 << ((BITS) - 1)) - 1) : ((1 << (BITS)) - 1),	\
+      (ISSIGNED) ? -(1 << ((BITS) - 1)) : 0,				\
+      (SIZE),								\
+      (NEXT) }								\
+
+#define RELAX_TABLE_ENTRY_MAX(ISSIGNED, SIZE, NEXT)	\
+  { (ISSIGNED) ? 0x7FFFFFFF : 0xFFFFFFFF,		\
+      (ISSIGNED) ? -(0x7FFFFFFF) : 0,                   \
+      (SIZE),                                           \
+      (NEXT) }                                          \
+
+
+/* ARC relaxation table.  */
+const relax_typeS md_relax_table[] =
+{
+  /* Fake entry.  */
+  {0, 0, 0, 0},
+
+  /* BL_S s13 ->
+     BL s25.  */
+  RELAX_TABLE_ENTRY(13, 1, 2, ARC_RLX_BL),
+  RELAX_TABLE_ENTRY(25, 1, 4, ARC_RLX_NONE),
+
+  /* B_S s10 ->
+     B s25.  */
+  RELAX_TABLE_ENTRY(10, 1, 2, ARC_RLX_B),
+  RELAX_TABLE_ENTRY(25, 1, 4, ARC_RLX_NONE),
+
+  /* ADD_S c,b, u3 ->
+     ADD<.f> a,b,u6 ->
+     ADD<.f> a,b,limm.  */
+  RELAX_TABLE_ENTRY(3, 0, 2, ARC_RLX_ADD_U6),
+  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_ADD_LIMM),
+  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+
+  /* LD_S a, [b, u7] ->
+     LD<zz><.x><.aa><.di> a, [b, s9] ->
+     LD<zz><.x><.aa><.di> a, [b, limm] */
+  RELAX_TABLE_ENTRY(7, 0, 2, ARC_RLX_LD_S9),
+  RELAX_TABLE_ENTRY(9, 1, 4, ARC_RLX_LD_LIMM),
+  RELAX_TABLE_ENTRY_MAX(1, 8, ARC_RLX_NONE),
+
+  /* MOV_S b, u8 ->
+     MOV<.f> b, s12 ->
+     MOV<.f> b, limm.  */
+  RELAX_TABLE_ENTRY(8, 0, 2, ARC_RLX_MOV_S12),
+  RELAX_TABLE_ENTRY(8, 0, 4, ARC_RLX_MOV_LIMM),
+  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+
+  /* SUB_S c, b, u3 ->
+     SUB<.f> a, b, u6 ->
+     SUB<.f> a, b, limm.  */
+  RELAX_TABLE_ENTRY(3, 0, 2, ARC_RLX_SUB_U6),
+  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_SUB_LIMM),
+  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+
+  /* MPY<.f> a, b, u6 ->
+     MPY<.f> a, b, limm.  */
+  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_MPY_LIMM),
+  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+
+  /* MOV<.f><.cc> b, u6 ->
+     MOV<.f><.cc> b, limm.  */
+  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_MOV_RLIMM),
+  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+
+  /* ADD<.f><.cc> b, b, u6 ->
+     ADD<.f><.cc> b, b, limm.  */
+  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_ADD_RRLIMM),
+  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+};
+
+/* Order of this table's entries matters!  */
+const struct arc_relaxable_ins arc_relaxable_insns[] =
+{
+  { "bl", { IMMEDIATE }, { 0 }, "bl_s", 0, ARC_RLX_BL_S },
+  { "b", { IMMEDIATE }, { 0 }, "b_s", 0, ARC_RLX_B_S },
+  { "add", { REGISTER, REGISTER_DUP, IMMEDIATE }, { 5, 1, 0 }, "add",
+    2, ARC_RLX_ADD_RRU6},
+  { "add", { REGISTER_S, REGISTER_S, IMMEDIATE }, { 0 }, "add_s", 2,
+    ARC_RLX_ADD_U3 },
+  { "add", { REGISTER, REGISTER, IMMEDIATE }, { 5, 0 }, "add", 2,
+    ARC_RLX_ADD_U6 },
+  { "ld", { REGISTER_S, BRACKET, REGISTER_S, IMMEDIATE, BRACKET },
+    { 0 }, "ld_s", 3, ARC_RLX_LD_U7 },
+  { "ld", { REGISTER, BRACKET, REGISTER_NO_GP, IMMEDIATE, BRACKET },
+    { 11, 4, 14, 17, 0 }, "ld", 3, ARC_RLX_LD_S9 },
+  { "mov", { REGISTER_S, IMMEDIATE }, { 0 }, "mov_s", 1, ARC_RLX_MOV_U8 },
+  { "mov", { REGISTER, IMMEDIATE }, { 5, 0 }, "mov", 1, ARC_RLX_MOV_S12 },
+  { "mov", { REGISTER, IMMEDIATE }, { 5, 1, 0 },"mov", 1, ARC_RLX_MOV_RU6 },
+  { "sub", { REGISTER_S, REGISTER_S, IMMEDIATE }, { 0 }, "sub_s", 2,
+    ARC_RLX_SUB_U3 },
+  { "sub", { REGISTER, REGISTER, IMMEDIATE }, { 5, 0 }, "sub", 2,
+    ARC_RLX_SUB_U6 },
+  { "mpy", { REGISTER, REGISTER, IMMEDIATE }, { 5, 0 }, "mpy", 2,
+    ARC_RLX_MPY_U6 },
+};
+
+const unsigned arc_num_relaxable_ins = ARRAY_SIZE (arc_relaxable_insns);
 
 /* Flags to set in the elf header.  */
 static flagword arc_eflag = 0x00;
@@ -380,33 +549,6 @@ symbolS * GOT_symbol = 0;
 /* Set to TRUE when we assemble instructions.  */
 static bfd_boolean assembling_insn = FALSE;
 
-/* Functions declaration.  */
-
-static void assemble_tokens (const char *, expressionS *, int,
-			     struct arc_flags *, int);
-static const struct arc_opcode *find_opcode_match (const struct arc_opcode *,
-						   expressionS *, int *,
-						   struct arc_flags *,
-						   int, int *);
-static void assemble_insn (const struct arc_opcode *, const expressionS *,
-			   int, const struct arc_flags *, int,
-			   struct arc_insn *);
-static void emit_insn (struct arc_insn *);
-static unsigned insert_operand (unsigned, const struct arc_operand *,
-				offsetT, char *, unsigned);
-static const struct arc_opcode *find_special_case_flag (const char *,
-							int *,
-							struct arc_flags *);
-static const struct arc_opcode *find_special_case (const char *,
-						   int *,
-						   struct arc_flags *,
-						   expressionS *, int *);
-static const struct arc_opcode *find_special_case_pseudo (const char *,
-							  int *,
-							  expressionS *,
-							  int *,
-							  struct arc_flags *);
-
 /* Functions implementation.  */
 
 /* Like md_number_to_chars but used for limms.  The 4-byte limm value,
@@ -414,9 +556,7 @@ static const struct arc_opcode *find_special_case_pseudo (const char *,
    this function is used for regular 4 byte instructions as well.  */
 
 static void
-md_number_to_chars_midend (char *buf,
-			   valueT val,
-			   int n)
+md_number_to_chars_midend (char *buf, valueT val, int n)
 {
   if (n == 4)
     {
@@ -514,28 +654,47 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 
   c = get_symbol_name (&cpu);
   mach = arc_get_mach (cpu);
-  restore_line_pointer (c);
 
   if (mach == -1)
     goto bad_cpu;
 
   if (!mach_type_specified_p)
     {
-      arc_mach_type = mach;
+      if ((!strcmp ("ARC600", cpu))
+	  || (!strcmp ("ARC601", cpu))
+	  || (!strcmp ("A6", cpu)))
+	{
+	  md_parse_option (OPTION_MCPU, "arc600");
+	}
+      else if ((!strcmp ("ARC700", cpu))
+	       || (!strcmp ("A7", cpu)))
+	{
+	  md_parse_option (OPTION_MCPU, "arc700");
+	}
+      else if (!strcmp ("EM", cpu))
+	{
+	  md_parse_option (OPTION_MCPU, "arcem");
+	}
+      else if (!strcmp ("HS", cpu))
+	{
+	  md_parse_option (OPTION_MCPU, "archs");
+	}
+      else
+	as_fatal ("could not find the architecture");
+
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
 	as_fatal ("could not set architecture and machine");
-
-      mach_type_specified_p = 1;
     }
   else
     if (arc_mach_type != mach)
       as_warn ("Command-line value overrides \".cpu\" directive");
 
+  restore_line_pointer (c);
   demand_empty_rest_of_line ();
-
   return;
 
  bad_cpu:
+  restore_line_pointer (c);
   as_bad ("invalid identifier for \".cpu\"");
   ignore_rest_of_line ();
 }
@@ -623,11 +782,11 @@ tokenize_arguments (char *str,
   bfd_boolean saw_arg = FALSE;
   int brk_lvl = 0;
   int num_args = 0;
-  const char *p;
   int i;
   size_t len;
   const struct arc_reloc_op_tag *r;
   expressionS tmpE;
+  char *reloc_name, c;
 
   memset (tok, 0, sizeof (*tok) * ntok);
 
@@ -685,6 +844,8 @@ tokenize_arguments (char *str,
 	  if (*input_line_pointer != '@')
 	    goto normalsymbol; /* This is not a relocation.  */
 
+	relocationsym:
+
 	  /* A relocation opernad has the following form
 	     @identifier@relocation_type.  The identifier is already
 	     in tok!  */
@@ -695,37 +856,29 @@ tokenize_arguments (char *str,
 	    }
 
 	  /* Parse @relocation_type.  */
-	  memset (&tmpE, 0, sizeof (tmpE));
-	  tmpE.X_op = O_symbol;
-	  expression (&tmpE);
-
-	  if (tmpE.X_op != O_symbol)
+	  input_line_pointer++;
+	  c = get_symbol_name (&reloc_name);
+	  len = input_line_pointer - reloc_name;
+	  if (len == 0)
 	    {
 	      as_bad (_("No relocation operand"));
 	      goto err;
 	    }
-	  p = S_GET_NAME (tmpE.X_add_symbol);
-	  len = strlen (p);
 
 	  /* Go through known relocation and try to find a match.  */
 	  r = &arc_reloc_op[0];
 	  for (i = arc_num_reloc_op - 1; i >= 0; i--, r++)
-	    if (len == r->length && memcmp (p, r->name, len) == 0)
+	    if (len == r->length
+		&& memcmp (reloc_name, r->name, len) == 0)
 	      break;
-
 	  if (i < 0)
 	    {
-	      as_bad (_("Unknown relocation operand: @%s"), p);
-	      goto err;
-	    }
-	  tok->X_md = r->op;
-	  tok->X_add_number = tmpE.X_add_number;
-	  if (tmpE.X_add_number && !r->complex_expr)
-	    {
-	      as_bad (_("Complex relocation operand."));
+	      as_bad (_("Unknown relocation operand: @%s"), reloc_name);
 	      goto err;
 	    }
 
+	  *input_line_pointer = c;
+	  SKIP_WHITESPACE_AFTER_NAME ();
 	  /* Extra check for TLS: base.  */
 	  if (*input_line_pointer == '@')
 	    {
@@ -733,17 +886,44 @@ tokenize_arguments (char *str,
 	      if (tok->X_op_symbol != NULL
 		  || tok->X_op != O_symbol)
 		{
-		  as_bad (_("Unable to parse this reloc"));
+		  as_bad (_("Unable to parse TLS base: %s"),
+			  input_line_pointer);
 		  goto err;
 		}
 	      input_line_pointer++;
 	      char *sym_name;
-	      char c = get_symbol_name (&sym_name);
+	      c = get_symbol_name (&sym_name);
 	      base = symbol_find_or_make (sym_name);
 	      tok->X_op = O_subtract;
 	      tok->X_op_symbol = base;
 	      restore_line_pointer (c);
+	      tmpE.X_add_number = 0;
 	    }
+	  else if ((*input_line_pointer != '+')
+		   && (*input_line_pointer != '-'))
+	    {
+	      tmpE.X_add_number = 0;
+	    }
+	  else
+	    {
+	      /* Parse the constant of a complex relocation expression
+		 like @identifier@reloc +/- const.  */
+	      if (! r->complex_expr)
+		{
+		  as_bad (_("@%s is not a complex relocation."), r->name);
+		  goto err;
+		}
+	      expression (&tmpE);
+	      if (tmpE.X_op != O_constant)
+		{
+		  as_bad (_("Bad expression: @%s + %s."),
+			  r->name, input_line_pointer);
+		  goto err;
+		}
+	    }
+
+	  tok->X_md = r->op;
+	  tok->X_add_number = tmpE.X_add_number;
 
 	  debug_exp (tok);
 
@@ -763,7 +943,14 @@ tokenize_arguments (char *str,
 	    goto err;
 
 	  tok->X_op = O_absent;
+	  tok->X_md = O_absent;
 	  expression (tok);
+
+	  /* Legacy: There are cases when we have
+	     identifier@relocation_type, if it is the case parse the
+	     relocation type as well.  */
+	  if (*input_line_pointer == '@')
+	    goto relocationsym;
 
 	normalsymbol:
 	  debug_exp (tok);
@@ -871,1272 +1058,186 @@ tokenize_flags (const char *str,
   return -1;
 }
 
-/* The public interface to the instruction assembler.  */
-
-void
-md_assemble (char *str)
-{
-  char *opname;
-  expressionS tok[MAX_INSN_ARGS];
-  int ntok, nflg;
-  size_t opnamelen;
-  struct arc_flags flags[MAX_INSN_FLGS];
-
-  /* Split off the opcode.  */
-  opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123468");
-  opname = xmalloc (opnamelen + 1);
-  memcpy (opname, str, opnamelen);
-  opname[opnamelen] = '\0';
-
-  /* Signalize we are assmbling the instructions.  */
-  assembling_insn = TRUE;
-
-  /* Tokenize the flags.  */
-  if ((nflg = tokenize_flags (str + opnamelen, flags, MAX_INSN_FLGS)) == -1)
-    {
-      as_bad (_("syntax error"));
-      return;
-    }
-
-  /* Scan up to the end of the mnemonic which must end in space or end
-     of string.  */
-  str += opnamelen;
-  for (; *str != '\0'; str++)
-    if (*str == ' ')
-      break;
-
-  /* Tokenize the rest of the line.  */
-  if ((ntok = tokenize_arguments (str, tok, MAX_INSN_ARGS)) < 0)
-    {
-      as_bad (_("syntax error"));
-      return;
-    }
-
-  /* Finish it off.  */
-  assemble_tokens (opname, tok, ntok, flags, nflg);
-  assembling_insn = FALSE;
-}
-
-/* Callback to insert a register into the hash table.  */
+/* Apply the fixups in order.  */
 
 static void
-declare_register (char *name, int number)
-{
-  const char *err;
-  symbolS *regS = symbol_create (name, reg_section,
-				 number, &zero_address_frag);
-
-  err = hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
-  if (err)
-    as_fatal ("Inserting \"%s\" into register table failed: %s",
-	      name, err);
-}
-
-/* Construct symbols for each of the general registers.  */
-
-static void
-declare_register_set (void)
+apply_fixups (struct arc_insn *insn, fragS *fragP, int fix)
 {
   int i;
-  for (i = 0; i < 32; ++i)
-    {
-      char name[7];
 
-      sprintf (name, "r%d", i);
-      declare_register (name, i);
-      if ((i & 0x01) == 0)
+  for (i = 0; i < insn->nfixups; i++)
+    {
+      struct arc_fixup *fixup = &insn->fixups[i];
+      int size, pcrel, offset = 0;
+
+      /* FIXME! the reloc size is wrong in the BFD file.
+	 When it is fixed please delete me.  */
+      size = (insn->short_insn && !fixup->islong) ? 2 : 4;
+
+      if (fixup->islong)
+	offset = (insn->short_insn) ? 2 : 4;
+
+      /* Some fixups are only used internally, thus no howto.  */
+      if ((int) fixup->reloc == 0)
+	as_fatal (_("Unhandled reloc type"));
+
+      if ((int) fixup->reloc < 0)
 	{
-	  sprintf (name, "r%dr%d", i, i+1);
-	  declare_register (name, i);
-	}
-    }
-}
-
-/* Port-specific assembler initialization.  This function is called
-   once, at assembler startup time.  */
-
-void
-md_begin (void)
-{
-  unsigned int i;
-
-  /* The endianness can be chosen "at the factory".  */
-  target_big_endian = byte_order == BIG_ENDIAN;
-
-  if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, arc_mach_type))
-    as_warn (_("could not set architecture and machine"));
-
-  /* Set elf header flags.  */
-  bfd_set_private_flags (stdoutput, arc_eflag);
-
-  /* Set up a hash table for the instructions.  */
-  arc_opcode_hash = hash_new ();
-  if (arc_opcode_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
-
-  /* Initialize the hash table with the insns.  */
-  for (i = 0; i < arc_num_opcodes;)
-    {
-      const char *name, *retval;
-
-      name = arc_opcodes[i].name;
-      retval = hash_insert (arc_opcode_hash, name, (void *) &arc_opcodes[i]);
-      if (retval)
-	as_fatal (_("internal error: can't hash opcode '%s': %s"),
-		  name, retval);
-
-      while (++i < arc_num_opcodes
-	     && (arc_opcodes[i].name == name
-		 || !strcmp (arc_opcodes[i].name, name)))
-	continue;
-    }
-
-  /* Register declaration.  */
-  arc_reg_hash = hash_new ();
-  if (arc_reg_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
-
-  declare_register_set ();
-  declare_register ("gp", 26);
-  declare_register ("fp", 27);
-  declare_register ("sp", 28);
-  declare_register ("ilink", 29);
-  declare_register ("ilink1", 29);
-  declare_register ("ilink2", 30);
-  declare_register ("blink", 31);
-
-  declare_register ("mlo", 57);
-  declare_register ("mmid", 58);
-  declare_register ("mhi", 59);
-
-  declare_register ("acc1", 56);
-  declare_register ("acc2", 57);
-
-  declare_register ("lp_count", 60);
-  declare_register ("pcl", 63);
-
-  /* Initialize the last instructions.  */
-  memset (&arc_last_insns[0], 0, sizeof (arc_last_insns));
-}
-
-/* Write a value out to the object file, using the appropriate
-   endianness.  */
-
-void
-md_number_to_chars (char *buf,
-		    valueT val,
-		    int n)
-{
-  if (target_big_endian)
-    number_to_chars_bigendian (buf, val, n);
-  else
-    number_to_chars_littleendian (buf, val, n);
-}
-
-/* Round up a section size to the appropriate boundary.  */
-
-valueT
-md_section_align (segT segment,
-		  valueT size)
-{
-  int align = bfd_get_section_alignment (stdoutput, segment);
-
-  return ((size + (1 << align) - 1) & (-1 << align));
-}
-
-/* The location from which a PC relative jump should be calculated,
-   given a PC relative reloc.  */
-
-long
-md_pcrel_from_section (fixS *fixP,
-		       segT sec)
-{
-  offsetT base = fixP->fx_where + fixP->fx_frag->fr_address;
-
-  pr_debug ("pcrel_from_section, fx_offset = %d\n", (int) fixP->fx_offset);
-
-  if (fixP->fx_addsy != (symbolS *) NULL
-      && (!S_IS_DEFINED (fixP->fx_addsy)
-	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
-    {
-      pr_debug ("Unknown pcrel symbol: %s\n", S_GET_NAME (fixP->fx_addsy));
-
-      /* The symbol is undefined (or is defined but not in this section).
-	 Let the linker figure it out.  */
-      return 0;
-    }
-
-  if ((int) fixP->fx_r_type < 0)
-    {
-      /* These are the "internal" relocations.  Align them to
-	 32 bit boundary (PCL), for the moment.  */
-      base &= ~3;
-    }
-  else
-    {
-      switch (fixP->fx_r_type)
-	{
-	case BFD_RELOC_ARC_PC32:
-	  /* The hardware calculates relative to the start of the
-	     insn, but this relocation is relative to location of the
-	     LIMM, compensate.  TIP: the base always needs to be
-	     substracted by 4 as we do not support this type of PCrel
-	     relocation for short instructions.  */
-	  base -= fixP->fx_where - fixP->fx_dot_value;
-	  gas_assert ((fixP->fx_where - fixP->fx_dot_value) == 4);
-	  /* Fall through.  */
-	case BFD_RELOC_ARC_PLT32:
-	case BFD_RELOC_ARC_S25H_PCREL_PLT:
-	case BFD_RELOC_ARC_S21H_PCREL_PLT:
-	case BFD_RELOC_ARC_S25W_PCREL_PLT:
-	case BFD_RELOC_ARC_S21W_PCREL_PLT:
-
-	case BFD_RELOC_ARC_S21H_PCREL:
-	case BFD_RELOC_ARC_S25H_PCREL:
-	case BFD_RELOC_ARC_S13_PCREL:
-	case BFD_RELOC_ARC_S21W_PCREL:
-	case BFD_RELOC_ARC_S25W_PCREL:
-	  base &= ~3;
-	  break;
-	default:
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("unhandled reloc %s in md_pcrel_from_section"),
-		  bfd_get_reloc_code_name (fixP->fx_r_type));
-	  break;
-	}
-    }
-
-  pr_debug ("pcrel from %x + %lx = %x, symbol: %s (%x)\n",
-	    fixP->fx_frag->fr_address, fixP->fx_where, base,
-	    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "(null)",
-	    fixP->fx_addsy ? S_GET_VALUE (fixP->fx_addsy) : 0);
-
-  return base;
-}
-
-/* Given a BFD relocation find the coresponding operand.  */
-
-static const struct arc_operand *
-find_operand_for_reloc (extended_bfd_reloc_code_real_type reloc)
-{
-  unsigned i;
-
-  for (i = 0; i < arc_num_operands; i++)
-    if (arc_operands[i].default_reloc == reloc)
-      return  &arc_operands[i];
-  return NULL;
-}
-
-/* Apply a fixup to the object code.  At this point all symbol values
-   should be fully resolved, and we attempt to completely resolve the
-   reloc.  If we can not do that, we determine the correct reloc code
-   and put it back in the fixup.  To indicate that a fixup has been
-   eliminated, set fixP->fx_done.  */
-
-void
-md_apply_fix (fixS *fixP,
-	      valueT *valP,
-	      segT seg)
-{
-  char * const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
-  valueT value = *valP;
-  unsigned insn = 0;
-  symbolS *fx_addsy, *fx_subsy;
-  offsetT fx_offset;
-  segT add_symbol_segment = absolute_section;
-  segT sub_symbol_segment = absolute_section;
-  const struct arc_operand *operand = NULL;
-  extended_bfd_reloc_code_real_type reloc;
-
-  pr_debug ("%s:%u: apply_fix: r_type=%d (%s) value=0x%lX offset=0x%lX\n",
-	    fixP->fx_file, fixP->fx_line, fixP->fx_r_type,
-	    ((int) fixP->fx_r_type < 0) ? "Internal":
-	    bfd_get_reloc_code_name (fixP->fx_r_type), value,
-	    fixP->fx_offset);
-
-  fx_addsy = fixP->fx_addsy;
-  fx_subsy = fixP->fx_subsy;
-  fx_offset = 0;
-
-  if (fx_addsy)
-    {
-      add_symbol_segment = S_GET_SEGMENT (fx_addsy);
-    }
-
-  if (fx_subsy
-      && fixP->fx_r_type != BFD_RELOC_ARC_TLS_DTPOFF
-      && fixP->fx_r_type != BFD_RELOC_ARC_TLS_DTPOFF_S9
-      && fixP->fx_r_type != BFD_RELOC_ARC_TLS_GD_LD)
-    {
-      resolve_symbol_value (fx_subsy);
-      sub_symbol_segment = S_GET_SEGMENT (fx_subsy);
-
-      if (sub_symbol_segment == absolute_section)
-	{
-	  /* The symbol is really a constant.  */
-	  fx_offset -= S_GET_VALUE (fx_subsy);
-	  fx_subsy = NULL;
+	  /* FIXME! the reloc size is wrong in the BFD file.
+	     When it is fixed please enable me.
+	     size = (insn->short_insn && !fixup->islong) ? 2 : 4; */
+	  pcrel = fixup->pcrel;
 	}
       else
 	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("can't resolve `%s' {%s section} - `%s' {%s section}"),
-			fx_addsy ? S_GET_NAME (fx_addsy) : "0",
-			segment_name (add_symbol_segment),
-			S_GET_NAME (fx_subsy),
-			segment_name (sub_symbol_segment));
-	  return;
+	  reloc_howto_type *reloc_howto =
+	    bfd_reloc_type_lookup (stdoutput,
+				   (bfd_reloc_code_real_type) fixup->reloc);
+	  gas_assert (reloc_howto);
+
+	  /* FIXME! the reloc size is wrong in the BFD file.
+	     When it is fixed please enable me.
+	     size = bfd_get_reloc_size (reloc_howto); */
+	  pcrel = reloc_howto->pc_relative;
+	}
+
+      pr_debug ("%s:%d: apply_fixups: new %s fixup (PCrel:%s) of size %d @ \
+offset %d + %d\n",
+		fragP->fr_file, fragP->fr_line,
+		(fixup->reloc < 0) ? "Internal" :
+		bfd_get_reloc_code_name (fixup->reloc),
+		pcrel ? "Y" : "N",
+		size, fix, offset);
+      fix_new_exp (fragP, fix + offset,
+		   size, &fixup->exp, pcrel, fixup->reloc);
+
+      /* Check for ZOLs, and update symbol info if any.  */
+      if (LP_INSN (insn->insn))
+	{
+	  gas_assert (fixup->exp.X_add_symbol);
+	  ARC_SET_FLAG (fixup->exp.X_add_symbol, ARC_FLAG_ZOL);
 	}
     }
+}
 
-  if (fx_addsy
-      && !S_IS_WEAK (fx_addsy))
+/* Actually output an instruction with its fixup.  */
+
+static void
+emit_insn0 (struct arc_insn *insn, char *where, bfd_boolean relax)
+{
+  char *f = where;
+
+  pr_debug ("Emit insn : 0x%x\n", insn->insn);
+  pr_debug ("\tShort   : 0x%d\n", insn->short_insn);
+  pr_debug ("\tLong imm: 0x%lx\n", insn->limm);
+
+  /* Write out the instruction.  */
+  if (insn->short_insn)
     {
-      if (add_symbol_segment == seg
-	  && fixP->fx_pcrel)
+      if (insn->has_limm)
 	{
-	  value += S_GET_VALUE (fx_addsy);
-	  value -= md_pcrel_from_section (fixP, seg);
-	  fx_addsy = NULL;
-	  fixP->fx_pcrel = FALSE;
-	}
-      else if (add_symbol_segment == absolute_section)
-	{
-	  value = fixP->fx_offset;
-	  fx_offset += S_GET_VALUE (fixP->fx_addsy);
-	  fx_addsy = NULL;
-	  fixP->fx_pcrel = FALSE;
-	}
-    }
-
-  if (!fx_addsy)
-    fixP->fx_done = TRUE;
-
-  if (fixP->fx_pcrel)
-    {
-      if (fx_addsy
-	  && ((S_IS_DEFINED (fx_addsy)
-	       && S_GET_SEGMENT (fx_addsy) != seg)
-	      || S_IS_WEAK (fx_addsy)))
-	value += md_pcrel_from_section (fixP, seg);
-
-      switch (fixP->fx_r_type)
-	{
-	case BFD_RELOC_ARC_32_ME:
-	  /* This is a pc-relative value in a LIMM.  Adjust it to the
-	     address of the instruction not to the address of the
-	     LIMM.  Note: it is not anylonger valid this afirmation as
-	     the linker consider ARC_PC32 a fixup to entire 64 bit
-	     insn.  */
-	  fixP->fx_offset += fixP->fx_frag->fr_address;
-	  /* Fall through.  */
-	case BFD_RELOC_32:
-	  fixP->fx_r_type = BFD_RELOC_ARC_PC32;
-	  /* Fall through.  */
-	case BFD_RELOC_ARC_PC32:
-	  break;
-	default:
-	  if ((int) fixP->fx_r_type < 0)
-	    as_fatal (_("PC relative relocation not allowed for (internal) type %d"),
-		      fixP->fx_r_type);
-	  break;
-	}
-    }
-
-  pr_debug ("%s:%u: apply_fix: r_type=%d (%s) value=0x%lX offset=0x%lX\n",
-	    fixP->fx_file, fixP->fx_line, fixP->fx_r_type,
-	    ((int) fixP->fx_r_type < 0) ? "Internal":
-	    bfd_get_reloc_code_name (fixP->fx_r_type), value,
-	    fixP->fx_offset);
-
-  if (!fixP->fx_done)
-    return;
-
-  /* Addjust the value if we have a constant.  */
-  value += fx_offset;
-
-  /* For hosts with longs bigger than 32-bits make sure that the top
-     bits of a 32-bit negative value read in by the parser are set,
-     so that the correct comparisons are made.  */
-  if (value & 0x80000000)
-    value |= (-1L << 31);
-
-  reloc = fixP->fx_r_type;
-  switch (reloc)
-    {
-    case BFD_RELOC_8:
-    case BFD_RELOC_16:
-    case BFD_RELOC_24:
-    case BFD_RELOC_32:
-    case BFD_RELOC_64:
-      md_number_to_chars (fixpos, value, fixP->fx_size);
-      return;
-
-    case BFD_RELOC_ARC_GOTPC32:
-      /* I cannot fix an GOTPC relocation because I need to relax it
-	 from ld rx,[pcl,@sym@gotpc] to add rx,pcl,@sym@gotpc.  */
-      as_bad (_("Unsupported operation on reloc"));
-      return;
-    case BFD_RELOC_ARC_GOTOFF:
-    case BFD_RELOC_ARC_32_ME:
-    case BFD_RELOC_ARC_PC32:
-      md_number_to_chars_midend (fixpos, value, fixP->fx_size);
-      return;
-
-    case BFD_RELOC_ARC_PLT32:
-      md_number_to_chars_midend (fixpos, value, fixP->fx_size);
-      return;
-
-    case BFD_RELOC_ARC_S25H_PCREL_PLT:
-      reloc = BFD_RELOC_ARC_S25W_PCREL;
-      goto solve_plt;
-
-    case BFD_RELOC_ARC_S21H_PCREL_PLT:
-      reloc = BFD_RELOC_ARC_S21H_PCREL;
-      goto solve_plt;
-
-    case BFD_RELOC_ARC_S25W_PCREL_PLT:
-      reloc = BFD_RELOC_ARC_S25W_PCREL;
-      goto solve_plt;
-
-    case BFD_RELOC_ARC_S21W_PCREL_PLT:
-      reloc = BFD_RELOC_ARC_S21W_PCREL;
-
-    case BFD_RELOC_ARC_S25W_PCREL:
-    case BFD_RELOC_ARC_S21W_PCREL:
-    case BFD_RELOC_ARC_S21H_PCREL:
-    case BFD_RELOC_ARC_S25H_PCREL:
-    case BFD_RELOC_ARC_S13_PCREL:
-    solve_plt:
-      operand = find_operand_for_reloc (reloc);
-      gas_assert (operand);
-      break;
-
-    case BFD_RELOC_ARC_TLS_DTPOFF:
-    case BFD_RELOC_ARC_TLS_LE_32:
-      if (fixP->fx_done)
-	{
-	  gas_assert (!fixP->fx_addsy);
-	  gas_assert (!fixP->fx_subsy);
-	  md_number_to_chars_midend (fixpos, value, fixP->fx_size);
-	  return;
+	  if (!relax)
+	    f = frag_more (6);
+	  md_number_to_chars (f, insn->insn, 2);
+	  md_number_to_chars_midend (f + 2, insn->limm, 4);
+	  dwarf2_emit_insn (6);
 	}
       else
 	{
-	  value = fixP->fx_offset;
-	  fixP->fx_offset = 0;
-	}
-      /* Fall through.  */
-    case BFD_RELOC_ARC_TLS_GD_GOT:
-    case BFD_RELOC_ARC_TLS_IE_GOT:
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      md_number_to_chars_midend (fixpos, value, fixP->fx_size);
-      return;
-
-    case BFD_RELOC_ARC_TLS_GD_LD:
-      gas_assert (!fixP->fx_offset);
-      if (fixP->fx_subsy)
-	fixP->fx_offset
-	  = (S_GET_VALUE (fixP->fx_subsy)
-	     - fixP->fx_frag->fr_address- fixP->fx_where);
-      fixP->fx_subsy = NULL;
-      /* Fall through.  */
-    case BFD_RELOC_ARC_TLS_GD_CALL:
-      /* These two relocs are there just to allow ld to change the tls
-	 model for this symbol, by patching the code.  */
-      /* Fall through.  */
-      /* The offset - and scale, if any - will be installed by the
-	 linker.  */
-      gas_assert (!fixP->fx_done);
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      return;
-
-    case BFD_RELOC_ARC_TLS_LE_S9:
-    case BFD_RELOC_ARC_TLS_DTPOFF_S9:
-      as_bad (_("TLS_*_S9 relocs are not supported yet"));
-      break;
-
-    default:
-      {
-	if ((int) fixP->fx_r_type >= 0)
-	  as_fatal (_("unhandled relocation type %s"),
-		    bfd_get_reloc_code_name (fixP->fx_r_type));
-
-	/* The rest of these fixups needs to be completely resolved as
-	   constants.  */
-	if (fixP->fx_addsy != 0
-	    && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section)
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("non-absolute expression in constant field"));
-
-	gas_assert (-(int) fixP->fx_r_type < (int) arc_num_operands);
-	operand = &arc_operands[-(int) fixP->fx_r_type];
-	break;
-      }
-    }
-
-  if (target_big_endian)
-    {
-      switch (fixP->fx_size)
-	{
-	case 4:
-	  insn = bfd_getb32 (fixpos);
-	  break;
-	case 2:
-	  insn = bfd_getb16 (fixpos);
-	  break;
-	default:
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("unknown fixup size"));
+	  if (!relax)
+	    f = frag_more (2);
+	  md_number_to_chars (f, insn->insn, 2);
+	  dwarf2_emit_insn (2);
 	}
     }
   else
     {
-      insn = 0;
-      switch (fixP->fx_size)
+      if (insn->has_limm)
 	{
-	case 4:
-	  insn = bfd_getl16 (fixpos) << 16 | bfd_getl16 (fixpos + 2);
-	  break;
-	case 2:
-	  insn = bfd_getl16 (fixpos);
-	  break;
-	default:
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("unknown fixup size"));
+	  if (!relax)
+	    f = frag_more (8);
+	  md_number_to_chars_midend (f, insn->insn, 4);
+	  md_number_to_chars_midend (f + 4, insn->limm, 4);
+	  dwarf2_emit_insn (8);
 	}
-    }
-
-  insn = insert_operand (insn, operand, (offsetT) value,
-			 fixP->fx_file, fixP->fx_line);
-
-  md_number_to_chars_midend (fixpos, insn, fixP->fx_size);
-}
-
-/* Prepare machine-dependent frags for relaxation.
-
-   Called just before relaxation starts.  Any symbol that is now undefined
-   will not become defined.
-
-   Return the correct fr_subtype in the frag.
-
-   Return the initial "guess for fr_var" to caller.  The guess for fr_var
-   is *actually* the growth beyond fr_fix.  Whatever we do to grow fr_fix
-   or fr_var contributes to our returned value.
-
-   Although it may not be explicit in the frag, pretend
-   fr_var starts with a value.  */
-
-int
-md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
-			       segT segment ATTRIBUTE_UNUSED)
-{
-  int growth = 4;
-
-  fragP->fr_var = 4;
-  pr_debug ("%s:%d: md_estimate_size_before_relax: %d\n",
-	   fragP->fr_file, fragP->fr_line, growth);
-
-  as_fatal (_("md_estimate_size_before_relax\n"));
-  return growth;
-}
-
-/* Translate internal representation of relocation info to BFD target
-   format.  */
-
-arelent *
-tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
-	      fixS *fixP)
-{
-  arelent *reloc;
-  bfd_reloc_code_real_type code;
-
-  reloc = (arelent *) xmalloc (sizeof (* reloc));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
-  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
-  reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
-
-  /* Make sure none of our internal relocations make it this far.
-     They'd better have been fully resolved by this point.  */
-  gas_assert ((int) fixP->fx_r_type > 0);
-
-  code = fixP->fx_r_type;
-
-  /* if we have something like add gp, pcl,
-     _GLOBAL_OFFSET_TABLE_@gotpc.  */
-  if (code == BFD_RELOC_ARC_GOTPC32
-      && GOT_symbol
-      && fixP->fx_addsy == GOT_symbol)
-    code = BFD_RELOC_ARC_GOTPC;
-
-  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
-  if (reloc->howto == NULL)
-    {
-      as_bad_where (fixP->fx_file, fixP->fx_line,
-		    _("cannot represent `%s' relocation in object file"),
-		    bfd_get_reloc_code_name (code));
-      return NULL;
-    }
-
-  if (!fixP->fx_pcrel != !reloc->howto->pc_relative)
-    as_fatal (_("internal error? cannot generate `%s' relocation"),
-	      bfd_get_reloc_code_name (code));
-
-  gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
-
-  if (code == BFD_RELOC_ARC_TLS_DTPOFF
-      || code ==  BFD_RELOC_ARC_TLS_DTPOFF_S9)
-    {
-      asymbol *sym
-	= fixP->fx_subsy ? symbol_get_bfdsym (fixP->fx_subsy) : NULL;
-      /* We just want to store a 24 bit index, but we have to wait
-	 till after write_contents has been called via
-	 bfd_map_over_sections before we can get the index from
-	 _bfd_elf_symbol_from_bfd_symbol.  Thus, the write_relocs
-	 function is elf32-arc.c has to pick up the slack.
-	 Unfortunately, this leads to problems with hosts that have
-	 pointers wider than long (bfd_vma).  There would be various
-	 ways to handle this, all error-prone :-(  */
-      reloc->addend = (bfd_vma) sym;
-      if ((asymbol *) reloc->addend != sym)
-	{
-	  as_bad ("Can't store pointer\n");
-	  return NULL;
-	}
-    }
-  else
-    reloc->addend = fixP->fx_offset;
-
-  return reloc;
-}
-
-/* Perform post-processing of machine-dependent frags after relaxation.
-   Called after relaxation is finished.
-   In:	Address of frag.
-   fr_type == rs_machine_dependent.
-   fr_subtype is what the address relaxed to.
-
-   Out: Any fixS:s and constants are set up.  */
-
-void
-md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
-		 segT segment ATTRIBUTE_UNUSED,
-		 fragS *fragP ATTRIBUTE_UNUSED)
-{
-  pr_debug ("%s:%d: md_convert_frag, subtype: %d, fix: %d, var: %d\n",
-	    fragP->fr_file, fragP->fr_line,
-	    fragP->fr_subtype, fragP->fr_fix, fragP->fr_var);
-  abort ();
-}
-
-/* We have no need to default values of symbols.  We could catch
-   register names here, but that is handled by inserting them all in
-   the symbol table to begin with.  */
-
-symbolS *
-md_undefined_symbol (char *name)
-{
-  /* The arc abi demands that a GOT[0] should be referencible as
-     [pc+_DYNAMIC@gotpc].  Hence we convert a _DYNAMIC@gotpc to a
-     GOTPC reference to _GLOBAL_OFFSET_TABLE_.  */
-  if (((*name == '_')
-       && (*(name+1) == 'G')
-       && (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0))
-      || ((*name == '_')
-	  && (*(name+1) == 'D')
-	  && (strcmp (name, DYNAMIC_STRUCT_NAME) == 0)))
-    {
-      if (!GOT_symbol)
-	{
-	  if (symbol_find (name))
-	    as_bad ("GOT already in symbol table");
-
-	  GOT_symbol = symbol_new (GLOBAL_OFFSET_TABLE_NAME, undefined_section,
-				   (valueT) 0, &zero_address_frag);
-	};
-      return GOT_symbol;
-    }
-  return NULL;
-}
-
-/* Turn a string in input_line_pointer into a floating point constant
-   of type type, and store the appropriate bytes in *litP.  The number
-   of LITTLENUMS emitted is stored in *sizeP.  An error message is
-   returned, or NULL on OK.  */
-
-char *
-md_atof (int type, char *litP, int *sizeP)
-{
-  return ieee_md_atof (type, litP, sizeP, target_big_endian);
-}
-
-/* Called for any expression that can not be recognized.  When the
-   function is called, `input_line_pointer' will point to the start of
-   the expression.  */
-
-void
-md_operand (expressionS *expressionP ATTRIBUTE_UNUSED)
-{
-  char *p = input_line_pointer;
-  if (*p == '@')
-    {
-      input_line_pointer++;
-      expressionP->X_op = O_symbol;
-      expression (expressionP);
-    }
-}
-
-/* This function is called from the function 'expression', it attempts
-   to parse special names (in our case register names).  It fills in
-   the expression with the identified register.  It returns TRUE if
-   it is a register and FALSE otherwise.  */
-
-bfd_boolean
-arc_parse_name (const char *name,
-		struct expressionS *e)
-{
-  struct symbol *sym;
-
-  if (!assembling_insn)
-    return FALSE;
-
-  /* Handle only registers.  */
-  if (e->X_op != O_absent)
-    return FALSE;
-
-  sym = hash_find (arc_reg_hash, name);
-  if (sym)
-    {
-      e->X_op = O_register;
-      e->X_add_number = S_GET_VALUE (sym);
-      return TRUE;
-    }
-  return FALSE;
-}
-
-/* md_parse_option
-   Invocation line includes a switch not recognized by the base assembler.
-   See if it's a processor-specific option.
-
-   New options (supported) are:
-
-   -mcpu=<cpu name>		 Assemble for selected processor
-   -EB/-mbig-endian		 Big-endian
-   -EL/-mlittle-endian		 Little-endian
-
-   The following CPU names are recognized:
-   arc700, av2em, av2hs.  */
-
-int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
-{
-  int cpu_flags = EF_ARC_CPU_GENERIC;
-
-  switch (c)
-    {
-    case OPTION_ARC600:
-    case OPTION_ARC601:
-      return md_parse_option (OPTION_MCPU, "arc600");
-
-    case OPTION_ARC700:
-      return md_parse_option (OPTION_MCPU, "arc700");
-
-    case OPTION_ARCEM:
-      return md_parse_option (OPTION_MCPU, "arcem");
-
-    case OPTION_ARCHS:
-      return md_parse_option (OPTION_MCPU, "archs");
-
-    case OPTION_MCPU:
-      {
-	int i;
-	char *s = alloca (strlen (arg) + 1);
-
-	{
-	  char *t = s;
-	  char *arg1 = arg;
-
-	  do
-	    *t = TOLOWER (*arg1++);
-	  while (*t++);
-	}
-
-	for (i = 0; cpu_types[i].name; ++i)
-	  {
-	    if (!strcmp (cpu_types[i].name, s))
-	      {
-		arc_target      = cpu_types[i].flags;
-		arc_target_name = cpu_types[i].name;
-		arc_features    = cpu_types[i].features;
-		arc_mach_type   = cpu_types[i].mach;
-		cpu_flags       = cpu_types[i].eflags;
-
-		mach_type_specified_p = 1;
-		break;
-	      }
-	  }
-
-	if (!cpu_types[i].name)
-	  {
-	    as_fatal (_("unknown architecture: %s\n"), arg);
-	  }
-	break;
-      }
-
-    case OPTION_EB:
-      arc_target_format = "elf32-bigarc";
-      byte_order = BIG_ENDIAN;
-      break;
-
-    case OPTION_EL:
-      arc_target_format = "elf32-littlearc";
-      byte_order = LITTLE_ENDIAN;
-      break;
-
-    case OPTION_CD:
-      /* This option has an effect only on ARC EM.  */
-      if (arc_target & ARC_OPCODE_ARCv2EM)
-	arc_features |= ARC_CD;
-      break;
-
-    case OPTION_USER_MODE:
-    case OPTION_LD_EXT_MASK:
-    case OPTION_SWAP:
-    case OPTION_NORM:
-    case OPTION_BARREL_SHIFT:
-    case OPTION_MIN_MAX:
-    case OPTION_NO_MPY:
-    case OPTION_EA:
-    case OPTION_MUL64:
-    case OPTION_SIMD:
-    case OPTION_SPFP:
-    case OPTION_DPFP:
-    case OPTION_XMAC_D16:
-    case OPTION_XMAC_24:
-    case OPTION_DSP_PACKA:
-    case OPTION_CRC:
-    case OPTION_DVBF:
-    case OPTION_TELEPHONY:
-    case OPTION_XYMEMORY:
-    case OPTION_LOCK:
-    case OPTION_SWAPE:
-    case OPTION_RTSC:
-    case OPTION_FPUDA:
-      /* Dummy options.  */
-
-    default:
-      return 0;
-    }
-
-  if (cpu_flags != EF_ARC_CPU_GENERIC)
-    arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
-
-  return 1;
-}
-
-void
-md_show_usage (FILE *stream)
-{
-  fprintf (stream, _("ARC-specific assembler options:\n"));
-
-  fprintf (stream, "  -mcpu=<cpu name>\t  assemble for CPU <cpu name>\n");
-  fprintf (stream,
-	   "  -mcode-density\t  enable code density option for ARC EM\n");
-
-  fprintf (stream, _("\
-  -EB                     assemble code for a big-endian cpu\n"));
-  fprintf (stream, _("\
-  -EL                     assemble code for a little-endian cpu\n"));
-}
-
-static void
-preprocess_operands (const struct arc_opcode *opcode,
-		     expressionS *tok,
-		     int ntok)
-{
-  int i;
-  size_t len;
-  const char *p;
-  unsigned j;
-  const struct arc_aux_reg *auxr;
-
-  for (i = 0; i < ntok; i++)
-    {
-      switch (tok[i].X_op)
-	{
-	case O_illegal:
-	case O_absent:
-	  break; /* Throw and error.  */
-
-	case O_symbol:
-	  if (opcode->class != AUXREG)
-	    break;
-	  /* Convert the symbol to a constant if possible.  */
-	  p = S_GET_NAME (tok[i].X_add_symbol);
-	  len = strlen (p);
-
-	  auxr = &arc_aux_regs[0];
-	  for (j = 0; j < arc_num_aux_regs; j++, auxr++)
-	    if (len == auxr->length
-		&& strcasecmp (auxr->name, p) == 0)
-	      {
-		tok[i].X_op = O_constant;
-		tok[i].X_add_number = auxr->address;
-		break;
-	      }
-	  break;
-	default:
-	  break;
-	}
-    }
-}
-
-/* Given an opcode name, pre-tockenized set of argumenst and the
-   opcode flags, take it all the way through emission.  */
-
-static void
-assemble_tokens (const char *opname,
-		 expressionS *tok,
-		 int ntok,
-		 struct arc_flags *pflags,
-		 int nflgs)
-{
-  bfd_boolean found_something = FALSE;
-  const struct arc_opcode *opcode;
-  int cpumatch = 1;
-
-  /* Search opcodes.  */
-  opcode = (const struct arc_opcode *) hash_find (arc_opcode_hash, opname);
-
-  /* Couldn't find opcode conventional way, try special cases.  */
-  if (!opcode)
-    opcode = find_special_case (opname, &nflgs, pflags, tok, &ntok);
-
-  if (opcode)
-    {
-      pr_debug ("%s:%d: assemble_tokens: %s trying opcode 0x%08X\n",
-		frag_now->fr_file, frag_now->fr_line, opcode->name,
-		opcode->opcode);
-
-      preprocess_operands (opcode, tok, ntok);
-
-      found_something = TRUE;
-      opcode = find_opcode_match (opcode, tok, &ntok, pflags, nflgs, &cpumatch);
-      if (opcode)
-	{
-	  struct arc_insn insn;
-	  assemble_insn (opcode, tok, ntok, pflags, nflgs, &insn);
-	  emit_insn (&insn);
-	  return;
-	}
-    }
-
-  if (found_something)
-    {
-      if (cpumatch)
-	as_bad (_("inappropriate arguments for opcode '%s'"), opname);
       else
-	as_bad (_("opcode '%s' not supported for target %s"), opname,
-		arc_target_name);
+	{
+	  if (!relax)
+	    f = frag_more (4);
+	  md_number_to_chars_midend (f, insn->insn, 4);
+	  dwarf2_emit_insn (4);
+	}
     }
-  else
-    as_bad (_("unknown opcode '%s'"), opname);
+
+  if (!relax)
+    apply_fixups (insn, frag_now, (f - frag_now->fr_literal));
 }
-
-/* Used to find special case opcode.  */
-
-static const struct arc_opcode *
-find_special_case (const char *opname,
-		   int *nflgs,
-		   struct arc_flags *pflags,
-		   expressionS *tok,
-		   int *ntok)
-{
-  const struct arc_opcode *opcode;
-
-  opcode = find_special_case_pseudo (opname, ntok, tok, nflgs, pflags);
-
-  if (opcode == NULL)
-    opcode = find_special_case_flag (opname, nflgs, pflags);
-
-  return opcode;
-}
-
-/* Swap operand tokens.  */
 
 static void
-swap_operand (expressionS *operand_array,
-	      unsigned source,
-	      unsigned destination)
+emit_insn1 (struct arc_insn *insn)
 {
-  expressionS cpy_operand;
-  expressionS *src_operand;
-  expressionS *dst_operand;
-  size_t size;
+  /* How frag_var's args are currently configured:
+     - rs_machine_dependent, to dictate it's a relaxation frag.
+     - FRAG_MAX_GROWTH, maximum size of instruction
+     - 0, variable size that might grow...unused by generic relaxation.
+     - frag_now->fr_subtype, fr_subtype starting value, set previously.
+     - s, opand expression.
+     - 0, offset but it's unused.
+     - 0, opcode but it's unused.  */
+  symbolS *s = make_expr_symbol (&insn->fixups[0].exp);
+  frag_now->tc_frag_data.pcrel = insn->fixups[0].pcrel;
 
-  if (source == destination)
-    return;
+  if (frag_room () < FRAG_MAX_GROWTH)
+    {
+      /* Handle differently when frag literal memory is exhausted.
+	 This is used because when there's not enough memory left in
+	 the current frag, a new frag is created and the information
+	 we put into frag_now->tc_frag_data is disregarded.  */
 
-  src_operand = &operand_array[source];
-  dst_operand = &operand_array[destination];
-  size = sizeof (expressionS);
+      struct arc_relax_type relax_info_copy;
+      relax_substateT subtype = frag_now->fr_subtype;
 
-  /* Make copy of operand to swap with and swap.  */
-  memcpy (&cpy_operand, dst_operand, size);
-  memcpy (dst_operand, src_operand, size);
-  memcpy (src_operand, &cpy_operand, size);
+      memcpy (&relax_info_copy, &frag_now->tc_frag_data,
+	      sizeof (struct arc_relax_type));
+
+      frag_wane (frag_now);
+      frag_grow (FRAG_MAX_GROWTH);
+
+      memcpy (&frag_now->tc_frag_data, &relax_info_copy,
+	      sizeof (struct arc_relax_type));
+
+      frag_var (rs_machine_dependent, FRAG_MAX_GROWTH, 0,
+		subtype, s, 0, 0);
+    }
+  else
+    frag_var (rs_machine_dependent, FRAG_MAX_GROWTH, 0,
+	      frag_now->fr_subtype, s, 0, 0);
 }
 
-/* Check if *op matches *tok type.
-   Returns FALSE if they don't match, TRUE if they match.  */
-
-static bfd_boolean
-pseudo_operand_match (const expressionS *tok,
-		      const struct arc_operand_operation *op)
+static void
+emit_insn (struct arc_insn *insn)
 {
-  offsetT min, max, val;
-  bfd_boolean ret;
-  const struct arc_operand *operand_real = &arc_operands[op->operand_idx];
-
-  ret = FALSE;
-  switch (tok->X_op)
-    {
-    case O_constant:
-      if (operand_real->bits == 32 && (operand_real->flags & ARC_OPERAND_LIMM))
-	ret = 1;
-      else if (!(operand_real->flags & ARC_OPERAND_IR))
-	{
-	  val = tok->X_add_number;
-	  if (operand_real->flags & ARC_OPERAND_SIGNED)
-	    {
-	      max = (1 << (operand_real->bits - 1)) - 1;
-	      min = -(1 << (operand_real->bits - 1));
-	    }
-	  else
-	    {
-	      max = (1 << operand_real->bits) - 1;
-	      min = 0;
-	    }
-	  if (min <= val && val <= max)
-	    ret = TRUE;
-	}
-      break;
-
-    case O_symbol:
-      /* Handle all symbols as long immediates or signed 9.  */
-      if (operand_real->flags & ARC_OPERAND_LIMM ||
-	  ((operand_real->flags & ARC_OPERAND_SIGNED) && operand_real->bits == 9))
-	ret = TRUE;
-      break;
-
-    case O_register:
-      if (operand_real->flags & ARC_OPERAND_IR)
-	ret = TRUE;
-      break;
-
-    case O_bracket:
-      if (operand_real->flags & ARC_OPERAND_BRAKET)
-	ret = TRUE;
-      break;
-
-    default:
-      /* Unknown.  */
-      break;
-    }
-  return ret;
-}
-
-/* Find pseudo instruction in array.  */
-
-static const struct arc_pseudo_insn *
-find_pseudo_insn (const char *opname,
-		  int ntok,
-		  const expressionS *tok)
-{
-  const struct arc_pseudo_insn *pseudo_insn = NULL;
-  const struct arc_operand_operation *op;
-  unsigned int i;
-  int j;
-
-  for (i = 0; i < arc_num_pseudo_insn; ++i)
-    {
-      pseudo_insn = &arc_pseudo_insns[i];
-      if (strcmp (pseudo_insn->mnemonic_p, opname) == 0)
-	{
-	  op = pseudo_insn->operand;
-	  for (j = 0; j < ntok; ++j)
-	    if (!pseudo_operand_match (&tok[j], &op[j]))
-	      break;
-
-	  /* Found the right instruction.  */
-	  if (j == ntok)
-	    return pseudo_insn;
-	}
-    }
-  return NULL;
-}
-
-/* Assumes the expressionS *tok is of sufficient size.  */
-
-static const struct arc_opcode *
-find_special_case_pseudo (const char *opname,
-			  int *ntok,
-			  expressionS *tok,
-			  int *nflgs,
-			  struct arc_flags *pflags)
-{
-  const struct arc_pseudo_insn *pseudo_insn = NULL;
-  const struct arc_operand_operation *operand_pseudo;
-  const struct arc_operand *operand_real;
-  unsigned i;
-  char construct_operand[MAX_CONSTR_STR];
-
-  /* Find whether opname is in pseudo instruction array.  */
-  pseudo_insn = find_pseudo_insn (opname, *ntok, tok);
-
-  if (pseudo_insn == NULL)
-    return NULL;
-
-  /* Handle flag, Limited to one flag at the moment.  */
-  if (pseudo_insn->flag_r != NULL)
-    *nflgs += tokenize_flags (pseudo_insn->flag_r, &pflags[*nflgs],
-			      MAX_INSN_FLGS - *nflgs);
-
-  /* Handle operand operations.  */
-  for (i = 0; i < pseudo_insn->operand_cnt; ++i)
-    {
-      operand_pseudo = &pseudo_insn->operand[i];
-      operand_real = &arc_operands[operand_pseudo->operand_idx];
-
-      if (operand_real->flags & ARC_OPERAND_BRAKET &&
-	  !operand_pseudo->needs_insert)
-	continue;
-
-      /* Has to be inserted (i.e. this token does not exist yet).  */
-      if (operand_pseudo->needs_insert)
-	{
-	  if (operand_real->flags & ARC_OPERAND_BRAKET)
-	    {
-	      tok[i].X_op = O_bracket;
-	      ++(*ntok);
-	      continue;
-	    }
-
-	  /* Check if operand is a register or constant and handle it
-	     by type.  */
-	  if (operand_real->flags & ARC_OPERAND_IR)
-	    snprintf (construct_operand, MAX_CONSTR_STR, "r%d",
-		      operand_pseudo->count);
-	  else
-	    snprintf (construct_operand, MAX_CONSTR_STR, "%d",
-		      operand_pseudo->count);
-
-	  tokenize_arguments (construct_operand, &tok[i], 1);
-	  ++(*ntok);
-	}
-
-      else if (operand_pseudo->count)
-	{
-	  /* Operand number has to be adjusted accordingly (by operand
-	     type).  */
-	  switch (tok[i].X_op)
-	    {
-	    case O_constant:
-	      tok[i].X_add_number += operand_pseudo->count;
-	      break;
-
-	    case O_symbol:
-	      break;
-
-	    default:
-	      /* Ignored.  */
-	      break;
-	    }
-	}
-    }
-
-  /* Swap operands if necessary.  Only supports one swap at the
-     moment.  */
-  for (i = 0; i < pseudo_insn->operand_cnt; ++i)
-    {
-      operand_pseudo = &pseudo_insn->operand[i];
-
-      if (operand_pseudo->swap_operand_idx == i)
-	continue;
-
-      swap_operand (tok, i, operand_pseudo->swap_operand_idx);
-
-      /* Prevent a swap back later by breaking out.  */
-      break;
-    }
-
-  return (const struct arc_opcode *)
-    hash_find (arc_opcode_hash,	pseudo_insn->mnemonic_r);
-}
-
-static const struct arc_opcode *
-find_special_case_flag (const char *opname,
-			int *nflgs,
-			struct arc_flags *pflags)
-{
-  unsigned int i;
-  const char *flagnm;
-  unsigned flag_idx, flag_arr_idx;
-  size_t flaglen, oplen;
-  const struct arc_flag_special *arc_flag_special_opcode;
-  const struct arc_opcode *opcode;
-
-  /* Search for special case instruction.  */
-  for (i = 0; i < arc_num_flag_special; i++)
-    {
-      arc_flag_special_opcode = &arc_flag_special_cases[i];
-      oplen = strlen (arc_flag_special_opcode->name);
-
-      if (strncmp (opname, arc_flag_special_opcode->name, oplen) != 0)
-	continue;
-
-      /* Found a potential special case instruction, now test for
-	 flags.  */
-      for (flag_arr_idx = 0;; ++flag_arr_idx)
-	{
-	  flag_idx = arc_flag_special_opcode->flags[flag_arr_idx];
-	  if (flag_idx == 0)
-	    break;  /* End of array, nothing found.  */
-
-	  flagnm = arc_flag_operands[flag_idx].name;
-	  flaglen = strlen (flagnm);
-	  if (strcmp (opname + oplen, flagnm) == 0)
-	    {
-	      opcode = (const struct arc_opcode *)
-		hash_find (arc_opcode_hash,
-			   arc_flag_special_opcode->name);
-
-	      if (*nflgs + 1 > MAX_INSN_FLGS)
-		break;
-	      memcpy (pflags[*nflgs].name, flagnm, flaglen);
-	      pflags[*nflgs].name[flaglen] = '\0';
-	      (*nflgs)++;
-	      return opcode;
-	    }
-	}
-    }
-  return NULL;
+  if (insn->relax)
+    emit_insn1 (insn);
+  else
+    emit_insn0 (insn, NULL, FALSE);
 }
 
 /* Check whether a symbol involves a register.  */
 
-static int
+static bfd_boolean
 contains_register (symbolS *sym)
 {
   if (sym)
-  {
-    expressionS *ex = symbol_get_value_expression (sym);
-    return ((O_register == ex->X_op)
-	    && !contains_register (ex->X_add_symbol)
-	    && !contains_register (ex->X_op_symbol));
-  }
-  else
-    return 0;
+    {
+      expressionS *ex = symbol_get_value_expression (sym);
+
+      return ((O_register == ex->X_op)
+	      && !contains_register (ex->X_add_symbol)
+	      && !contains_register (ex->X_op_symbol));
+    }
+
+  return FALSE;
 }
 
 /* Returns the register number within a symbol.  */
@@ -2149,24 +1250,6 @@ get_register (symbolS *sym)
 
   expressionS *ex = symbol_get_value_expression (sym);
   return regno (ex->X_add_number);
-}
-
-/* Allocates a tok entry.  */
-
-static int
-allocate_tok (expressionS *tok, int ntok, int cidx)
-{
-  if (ntok > MAX_INSN_ARGS - 2)
-    return 0; /* No space left.  */
-
-  if (cidx > ntok)
-    return 0; /* Incorect args.  */
-
-  memcpy (&tok[ntok+1], &tok[ntok], sizeof (*tok));
-
-  if (cidx == ntok)
-    return 1; /* Success.  */
-  return allocate_tok (tok, ntok - 1, cidx);
 }
 
 /* Return true if a RELOC is generic.  A generic reloc is PC-rel of a
@@ -2190,9 +1273,26 @@ generic_reloc_p (extended_bfd_reloc_code_real_type reloc)
     case BFD_RELOC_ARC_SDA32_ME:
       return FALSE;
     default:
-      break;
+      return TRUE;
     }
-  return TRUE;
+}
+
+/* Allocates a tok entry.  */
+
+static int
+allocate_tok (expressionS *tok, int ntok, int cidx)
+{
+  if (ntok > MAX_INSN_ARGS - 2)
+    return 0; /* No space left.  */
+
+  if (cidx > ntok)
+    return 0; /* Incorect args.  */
+
+  memcpy (&tok[ntok+1], &tok[ntok], sizeof (*tok));
+
+  if (cidx == ntok)
+    return 1; /* Success.  */
+  return allocate_tok (tok, ntok - 1, cidx);
 }
 
 /* Search forward through all variants of an opcode looking for a
@@ -2504,6 +1604,1382 @@ find_opcode_match (const struct arc_opcode *first_opcode,
   return NULL;
 }
 
+/* Swap operand tokens.  */
+
+static void
+swap_operand (expressionS *operand_array,
+	      unsigned source,
+	      unsigned destination)
+{
+  expressionS cpy_operand;
+  expressionS *src_operand;
+  expressionS *dst_operand;
+  size_t size;
+
+  if (source == destination)
+    return;
+
+  src_operand = &operand_array[source];
+  dst_operand = &operand_array[destination];
+  size = sizeof (expressionS);
+
+  /* Make copy of operand to swap with and swap.  */
+  memcpy (&cpy_operand, dst_operand, size);
+  memcpy (dst_operand, src_operand, size);
+  memcpy (src_operand, &cpy_operand, size);
+}
+
+/* Check if *op matches *tok type.
+   Returns FALSE if they don't match, TRUE if they match.  */
+
+static bfd_boolean
+pseudo_operand_match (const expressionS *tok,
+		      const struct arc_operand_operation *op)
+{
+  offsetT min, max, val;
+  bfd_boolean ret;
+  const struct arc_operand *operand_real = &arc_operands[op->operand_idx];
+
+  ret = FALSE;
+  switch (tok->X_op)
+    {
+    case O_constant:
+      if (operand_real->bits == 32 && (operand_real->flags & ARC_OPERAND_LIMM))
+	ret = 1;
+      else if (!(operand_real->flags & ARC_OPERAND_IR))
+	{
+	  val = tok->X_add_number + op->count;
+	  if (operand_real->flags & ARC_OPERAND_SIGNED)
+	    {
+	      max = (1 << (operand_real->bits - 1)) - 1;
+	      min = -(1 << (operand_real->bits - 1));
+	    }
+	  else
+	    {
+	      max = (1 << operand_real->bits) - 1;
+	      min = 0;
+	    }
+	  if (min <= val && val <= max)
+	    ret = TRUE;
+	}
+      break;
+
+    case O_symbol:
+      /* Handle all symbols as long immediates or signed 9.  */
+      if (operand_real->flags & ARC_OPERAND_LIMM ||
+	  ((operand_real->flags & ARC_OPERAND_SIGNED) && operand_real->bits == 9))
+	ret = TRUE;
+      break;
+
+    case O_register:
+      if (operand_real->flags & ARC_OPERAND_IR)
+	ret = TRUE;
+      break;
+
+    case O_bracket:
+      if (operand_real->flags & ARC_OPERAND_BRAKET)
+	ret = TRUE;
+      break;
+
+    default:
+      /* Unknown.  */
+      break;
+    }
+  return ret;
+}
+
+/* Find pseudo instruction in array.  */
+
+static const struct arc_pseudo_insn *
+find_pseudo_insn (const char *opname,
+		  int ntok,
+		  const expressionS *tok)
+{
+  const struct arc_pseudo_insn *pseudo_insn = NULL;
+  const struct arc_operand_operation *op;
+  unsigned int i;
+  int j;
+
+  for (i = 0; i < arc_num_pseudo_insn; ++i)
+    {
+      pseudo_insn = &arc_pseudo_insns[i];
+      if (strcmp (pseudo_insn->mnemonic_p, opname) == 0)
+	{
+	  op = pseudo_insn->operand;
+	  for (j = 0; j < ntok; ++j)
+	    if (!pseudo_operand_match (&tok[j], &op[j]))
+	      break;
+
+	  /* Found the right instruction.  */
+	  if (j == ntok)
+	    return pseudo_insn;
+	}
+    }
+  return NULL;
+}
+
+/* Assumes the expressionS *tok is of sufficient size.  */
+
+static const struct arc_opcode *
+find_special_case_pseudo (const char *opname,
+			  int *ntok,
+			  expressionS *tok,
+			  int *nflgs,
+			  struct arc_flags *pflags)
+{
+  const struct arc_pseudo_insn *pseudo_insn = NULL;
+  const struct arc_operand_operation *operand_pseudo;
+  const struct arc_operand *operand_real;
+  unsigned i;
+  char construct_operand[MAX_CONSTR_STR];
+
+  /* Find whether opname is in pseudo instruction array.  */
+  pseudo_insn = find_pseudo_insn (opname, *ntok, tok);
+
+  if (pseudo_insn == NULL)
+    return NULL;
+
+  /* Handle flag, Limited to one flag at the moment.  */
+  if (pseudo_insn->flag_r != NULL)
+    *nflgs += tokenize_flags (pseudo_insn->flag_r, &pflags[*nflgs],
+			      MAX_INSN_FLGS - *nflgs);
+
+  /* Handle operand operations.  */
+  for (i = 0; i < pseudo_insn->operand_cnt; ++i)
+    {
+      operand_pseudo = &pseudo_insn->operand[i];
+      operand_real = &arc_operands[operand_pseudo->operand_idx];
+
+      if (operand_real->flags & ARC_OPERAND_BRAKET &&
+	  !operand_pseudo->needs_insert)
+	continue;
+
+      /* Has to be inserted (i.e. this token does not exist yet).  */
+      if (operand_pseudo->needs_insert)
+	{
+	  if (operand_real->flags & ARC_OPERAND_BRAKET)
+	    {
+	      tok[i].X_op = O_bracket;
+	      ++(*ntok);
+	      continue;
+	    }
+
+	  /* Check if operand is a register or constant and handle it
+	     by type.  */
+	  if (operand_real->flags & ARC_OPERAND_IR)
+	    snprintf (construct_operand, MAX_CONSTR_STR, "r%d",
+		      operand_pseudo->count);
+	  else
+	    snprintf (construct_operand, MAX_CONSTR_STR, "%d",
+		      operand_pseudo->count);
+
+	  tokenize_arguments (construct_operand, &tok[i], 1);
+	  ++(*ntok);
+	}
+
+      else if (operand_pseudo->count)
+	{
+	  /* Operand number has to be adjusted accordingly (by operand
+	     type).  */
+	  switch (tok[i].X_op)
+	    {
+	    case O_constant:
+	      tok[i].X_add_number += operand_pseudo->count;
+	      break;
+
+	    case O_symbol:
+	      break;
+
+	    default:
+	      /* Ignored.  */
+	      break;
+	    }
+	}
+    }
+
+  /* Swap operands if necessary.  Only supports one swap at the
+     moment.  */
+  for (i = 0; i < pseudo_insn->operand_cnt; ++i)
+    {
+      operand_pseudo = &pseudo_insn->operand[i];
+
+      if (operand_pseudo->swap_operand_idx == i)
+	continue;
+
+      swap_operand (tok, i, operand_pseudo->swap_operand_idx);
+
+      /* Prevent a swap back later by breaking out.  */
+      break;
+    }
+
+  return (const struct arc_opcode *)
+    hash_find (arc_opcode_hash,	pseudo_insn->mnemonic_r);
+}
+
+static const struct arc_opcode *
+find_special_case_flag (const char *opname,
+			int *nflgs,
+			struct arc_flags *pflags)
+{
+  unsigned int i;
+  const char *flagnm;
+  unsigned flag_idx, flag_arr_idx;
+  size_t flaglen, oplen;
+  const struct arc_flag_special *arc_flag_special_opcode;
+  const struct arc_opcode *opcode;
+
+  /* Search for special case instruction.  */
+  for (i = 0; i < arc_num_flag_special; i++)
+    {
+      arc_flag_special_opcode = &arc_flag_special_cases[i];
+      oplen = strlen (arc_flag_special_opcode->name);
+
+      if (strncmp (opname, arc_flag_special_opcode->name, oplen) != 0)
+	continue;
+
+      /* Found a potential special case instruction, now test for
+	 flags.  */
+      for (flag_arr_idx = 0;; ++flag_arr_idx)
+	{
+	  flag_idx = arc_flag_special_opcode->flags[flag_arr_idx];
+	  if (flag_idx == 0)
+	    break;  /* End of array, nothing found.  */
+
+	  flagnm = arc_flag_operands[flag_idx].name;
+	  flaglen = strlen (flagnm);
+	  if (strcmp (opname + oplen, flagnm) == 0)
+	    {
+	      opcode = (const struct arc_opcode *)
+		hash_find (arc_opcode_hash,
+			   arc_flag_special_opcode->name);
+
+	      if (*nflgs + 1 > MAX_INSN_FLGS)
+		break;
+	      memcpy (pflags[*nflgs].name, flagnm, flaglen);
+	      pflags[*nflgs].name[flaglen] = '\0';
+	      (*nflgs)++;
+	      return opcode;
+	    }
+	}
+    }
+  return NULL;
+}
+
+/* Used to find special case opcode.  */
+
+static const struct arc_opcode *
+find_special_case (const char *opname,
+		   int *nflgs,
+		   struct arc_flags *pflags,
+		   expressionS *tok,
+		   int *ntok)
+{
+  const struct arc_opcode *opcode;
+
+  opcode = find_special_case_pseudo (opname, ntok, tok, nflgs, pflags);
+
+  if (opcode == NULL)
+    opcode = find_special_case_flag (opname, nflgs, pflags);
+
+  return opcode;
+}
+
+static void
+preprocess_operands (const struct arc_opcode *opcode,
+		     expressionS *tok,
+		     int ntok)
+{
+  int i;
+  size_t len;
+  const char *p;
+  unsigned j;
+  const struct arc_aux_reg *auxr;
+
+  for (i = 0; i < ntok; i++)
+    {
+      switch (tok[i].X_op)
+	{
+	case O_illegal:
+	case O_absent:
+	  break; /* Throw and error.  */
+
+	case O_symbol:
+	  if (opcode->class != AUXREG)
+	    break;
+	  /* Convert the symbol to a constant if possible.  */
+	  p = S_GET_NAME (tok[i].X_add_symbol);
+	  len = strlen (p);
+
+	  auxr = &arc_aux_regs[0];
+	  for (j = 0; j < arc_num_aux_regs; j++, auxr++)
+	    if (len == auxr->length
+		&& strcasecmp (auxr->name, p) == 0)
+	      {
+		tok[i].X_op = O_constant;
+		tok[i].X_add_number = auxr->address;
+		break;
+	      }
+	  break;
+	default:
+	  break;
+	}
+    }
+}
+
+/* Given an opcode name, pre-tockenized set of argumenst and the
+   opcode flags, take it all the way through emission.  */
+
+static void
+assemble_tokens (const char *opname,
+		 expressionS *tok,
+		 int ntok,
+		 struct arc_flags *pflags,
+		 int nflgs)
+{
+  bfd_boolean found_something = FALSE;
+  const struct arc_opcode *opcode;
+  int cpumatch = 1;
+
+  /* Search opcodes.  */
+  opcode = (const struct arc_opcode *) hash_find (arc_opcode_hash, opname);
+
+  /* Couldn't find opcode conventional way, try special cases.  */
+  if (!opcode)
+    opcode = find_special_case (opname, &nflgs, pflags, tok, &ntok);
+
+  if (opcode)
+    {
+      pr_debug ("%s:%d: assemble_tokens: %s trying opcode 0x%08X\n",
+		frag_now->fr_file, frag_now->fr_line, opcode->name,
+		opcode->opcode);
+
+      preprocess_operands (opcode, tok, ntok);
+
+      found_something = TRUE;
+      opcode = find_opcode_match (opcode, tok, &ntok, pflags, nflgs, &cpumatch);
+      if (opcode)
+	{
+	  struct arc_insn insn;
+	  assemble_insn (opcode, tok, ntok, pflags, nflgs, &insn);
+	  emit_insn (&insn);
+	  return;
+	}
+    }
+
+  if (found_something)
+    {
+      if (cpumatch)
+	as_bad (_("inappropriate arguments for opcode '%s'"), opname);
+      else
+	as_bad (_("opcode '%s' not supported for target %s"), opname,
+		arc_target_name);
+    }
+  else
+    as_bad (_("unknown opcode '%s'"), opname);
+}
+
+/* The public interface to the instruction assembler.  */
+
+void
+md_assemble (char *str)
+{
+  char *opname;
+  expressionS tok[MAX_INSN_ARGS];
+  int ntok, nflg;
+  size_t opnamelen;
+  struct arc_flags flags[MAX_INSN_FLGS];
+
+  /* Split off the opcode.  */
+  opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123468");
+  opname = xmalloc (opnamelen + 1);
+  memcpy (opname, str, opnamelen);
+  opname[opnamelen] = '\0';
+
+  /* Signalize we are assmbling the instructions.  */
+  assembling_insn = TRUE;
+
+  /* Tokenize the flags.  */
+  if ((nflg = tokenize_flags (str + opnamelen, flags, MAX_INSN_FLGS)) == -1)
+    {
+      as_bad (_("syntax error"));
+      return;
+    }
+
+  /* Scan up to the end of the mnemonic which must end in space or end
+     of string.  */
+  str += opnamelen;
+  for (; *str != '\0'; str++)
+    if (*str == ' ')
+      break;
+
+  /* Tokenize the rest of the line.  */
+  if ((ntok = tokenize_arguments (str, tok, MAX_INSN_ARGS)) < 0)
+    {
+      as_bad (_("syntax error"));
+      return;
+    }
+
+  /* Finish it off.  */
+  assemble_tokens (opname, tok, ntok, flags, nflg);
+  assembling_insn = FALSE;
+}
+
+/* Callback to insert a register into the hash table.  */
+
+static void
+declare_register (char *name, int number)
+{
+  const char *err;
+  symbolS *regS = symbol_create (name, reg_section,
+				 number, &zero_address_frag);
+
+  err = hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
+  if (err)
+    as_fatal ("Inserting \"%s\" into register table failed: %s",
+	      name, err);
+}
+
+/* Construct symbols for each of the general registers.  */
+
+static void
+declare_register_set (void)
+{
+  int i;
+  for (i = 0; i < 64; ++i)
+    {
+      char name[7];
+
+      sprintf (name, "r%d", i);
+      declare_register (name, i);
+      if ((i & 0x01) == 0)
+	{
+	  sprintf (name, "r%dr%d", i, i+1);
+	  declare_register (name, i);
+	}
+    }
+}
+
+/* Port-specific assembler initialization.  This function is called
+   once, at assembler startup time.  */
+
+void
+md_begin (void)
+{
+  unsigned int i;
+
+  /* The endianness can be chosen "at the factory".  */
+  target_big_endian = byte_order == BIG_ENDIAN;
+
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, arc_mach_type))
+    as_warn (_("could not set architecture and machine"));
+
+  /* Set elf header flags.  */
+  bfd_set_private_flags (stdoutput, arc_eflag);
+
+  /* Set up a hash table for the instructions.  */
+  arc_opcode_hash = hash_new ();
+  if (arc_opcode_hash == NULL)
+    as_fatal (_("Virtual memory exhausted"));
+
+  /* Initialize the hash table with the insns.  */
+  for (i = 0; i < arc_num_opcodes;)
+    {
+      const char *name, *retval;
+
+      name = arc_opcodes[i].name;
+      retval = hash_insert (arc_opcode_hash, name, (void *) &arc_opcodes[i]);
+      if (retval)
+	as_fatal (_("internal error: can't hash opcode '%s': %s"),
+		  name, retval);
+
+      while (++i < arc_num_opcodes
+	     && (arc_opcodes[i].name == name
+		 || !strcmp (arc_opcodes[i].name, name)))
+	continue;
+    }
+
+  /* Register declaration.  */
+  arc_reg_hash = hash_new ();
+  if (arc_reg_hash == NULL)
+    as_fatal (_("Virtual memory exhausted"));
+
+  declare_register_set ();
+  declare_register ("gp", 26);
+  declare_register ("fp", 27);
+  declare_register ("sp", 28);
+  declare_register ("ilink", 29);
+  declare_register ("ilink1", 29);
+  declare_register ("ilink2", 30);
+  declare_register ("blink", 31);
+
+  declare_register ("mlo", 57);
+  declare_register ("mmid", 58);
+  declare_register ("mhi", 59);
+
+  declare_register ("acc1", 56);
+  declare_register ("acc2", 57);
+
+  declare_register ("lp_count", 60);
+  declare_register ("pcl", 63);
+
+  /* Initialize the last instructions.  */
+  memset (&arc_last_insns[0], 0, sizeof (arc_last_insns));
+}
+
+/* Write a value out to the object file, using the appropriate
+   endianness.  */
+
+void
+md_number_to_chars (char *buf,
+		    valueT val,
+		    int n)
+{
+  if (target_big_endian)
+    number_to_chars_bigendian (buf, val, n);
+  else
+    number_to_chars_littleendian (buf, val, n);
+}
+
+/* Round up a section size to the appropriate boundary.  */
+
+valueT
+md_section_align (segT segment,
+		  valueT size)
+{
+  int align = bfd_get_section_alignment (stdoutput, segment);
+
+  return ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
+}
+
+/* The location from which a PC relative jump should be calculated,
+   given a PC relative reloc.  */
+
+long
+md_pcrel_from_section (fixS *fixP,
+		       segT sec)
+{
+  offsetT base = fixP->fx_where + fixP->fx_frag->fr_address;
+
+  pr_debug ("pcrel_from_section, fx_offset = %d\n", (int) fixP->fx_offset);
+
+  if (fixP->fx_addsy != (symbolS *) NULL
+      && (!S_IS_DEFINED (fixP->fx_addsy)
+	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
+    {
+      pr_debug ("Unknown pcrel symbol: %s\n", S_GET_NAME (fixP->fx_addsy));
+
+      /* The symbol is undefined (or is defined but not in this section).
+	 Let the linker figure it out.  */
+      return 0;
+    }
+
+  if ((int) fixP->fx_r_type < 0)
+    {
+      /* These are the "internal" relocations.  Align them to
+	 32 bit boundary (PCL), for the moment.  */
+      base &= ~3;
+    }
+  else
+    {
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_ARC_PC32:
+	  /* The hardware calculates relative to the start of the
+	     insn, but this relocation is relative to location of the
+	     LIMM, compensate.  The base always needs to be
+	     substracted by 4 as we do not support this type of PCrel
+	     relocation for short instructions.  */
+	  base -= 4;
+	  /* Fall through.  */
+	case BFD_RELOC_ARC_PLT32:
+	case BFD_RELOC_ARC_S25H_PCREL_PLT:
+	case BFD_RELOC_ARC_S21H_PCREL_PLT:
+	case BFD_RELOC_ARC_S25W_PCREL_PLT:
+	case BFD_RELOC_ARC_S21W_PCREL_PLT:
+
+	case BFD_RELOC_ARC_S21H_PCREL:
+	case BFD_RELOC_ARC_S25H_PCREL:
+	case BFD_RELOC_ARC_S13_PCREL:
+	case BFD_RELOC_ARC_S21W_PCREL:
+	case BFD_RELOC_ARC_S25W_PCREL:
+	  base &= ~3;
+	  break;
+	default:
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("unhandled reloc %s in md_pcrel_from_section"),
+		  bfd_get_reloc_code_name (fixP->fx_r_type));
+	  break;
+	}
+    }
+
+  pr_debug ("pcrel from %x + %lx = %x, symbol: %s (%x)\n",
+	    fixP->fx_frag->fr_address, fixP->fx_where, base,
+	    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "(null)",
+	    fixP->fx_addsy ? S_GET_VALUE (fixP->fx_addsy) : 0);
+
+  return base;
+}
+
+/* Given a BFD relocation find the coresponding operand.  */
+
+static const struct arc_operand *
+find_operand_for_reloc (extended_bfd_reloc_code_real_type reloc)
+{
+  unsigned i;
+
+  for (i = 0; i < arc_num_operands; i++)
+    if (arc_operands[i].default_reloc == reloc)
+      return  &arc_operands[i];
+  return NULL;
+}
+
+/* Insert an operand value into an instruction.  */
+
+static unsigned
+insert_operand (unsigned insn,
+		const struct arc_operand *operand,
+		offsetT val,
+		const char *file,
+		unsigned line)
+{
+  offsetT min = 0, max = 0;
+
+  if (operand->bits != 32
+      && !(operand->flags & ARC_OPERAND_NCHK)
+      && !(operand->flags & ARC_OPERAND_FAKE))
+    {
+      if (operand->flags & ARC_OPERAND_SIGNED)
+	{
+	  max = (1 << (operand->bits - 1)) - 1;
+	  min = -(1 << (operand->bits - 1));
+	}
+      else
+	{
+	  max = (1 << operand->bits) - 1;
+	  min = 0;
+	}
+
+      if (val < min || val > max)
+	as_bad_value_out_of_range (_("operand"),
+				   val, min, max, file, line);
+    }
+
+  pr_debug ("insert field: %ld <= %ld <= %ld in 0x%08x\n",
+	    min, val, max, insn);
+
+  if ((operand->flags & ARC_OPERAND_ALIGNED32)
+      && (val & 0x03))
+    as_bad_where (file, line,
+		  _("Unaligned operand. Needs to be 32bit aligned"));
+
+  if ((operand->flags & ARC_OPERAND_ALIGNED16)
+      && (val & 0x01))
+    as_bad_where (file, line,
+		  _("Unaligned operand. Needs to be 16bit aligned"));
+
+  if (operand->insert)
+    {
+      const char *errmsg = NULL;
+
+      insn = (*operand->insert) (insn, val, &errmsg);
+      if (errmsg)
+	as_warn_where (file, line, "%s", errmsg);
+    }
+  else
+    {
+      if (operand->flags & ARC_OPERAND_TRUNCATE)
+	{
+	  if (operand->flags & ARC_OPERAND_ALIGNED32)
+	    val >>= 2;
+	  if (operand->flags & ARC_OPERAND_ALIGNED16)
+	    val >>= 1;
+	}
+      insn |= ((val & ((1 << operand->bits) - 1)) << operand->shift);
+    }
+  return insn;
+}
+
+/* Apply a fixup to the object code.  At this point all symbol values
+   should be fully resolved, and we attempt to completely resolve the
+   reloc.  If we can not do that, we determine the correct reloc code
+   and put it back in the fixup.  To indicate that a fixup has been
+   eliminated, set fixP->fx_done.  */
+
+void
+md_apply_fix (fixS *fixP,
+	      valueT *valP,
+	      segT seg)
+{
+  char * const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
+  valueT value = *valP;
+  unsigned insn = 0;
+  symbolS *fx_addsy, *fx_subsy;
+  offsetT fx_offset;
+  segT add_symbol_segment = absolute_section;
+  segT sub_symbol_segment = absolute_section;
+  const struct arc_operand *operand = NULL;
+  extended_bfd_reloc_code_real_type reloc;
+
+  pr_debug ("%s:%u: apply_fix: r_type=%d (%s) value=0x%lX offset=0x%lX\n",
+	    fixP->fx_file, fixP->fx_line, fixP->fx_r_type,
+	    ((int) fixP->fx_r_type < 0) ? "Internal":
+	    bfd_get_reloc_code_name (fixP->fx_r_type), value,
+	    fixP->fx_offset);
+
+  fx_addsy = fixP->fx_addsy;
+  fx_subsy = fixP->fx_subsy;
+  fx_offset = 0;
+
+  if (fx_addsy)
+    {
+      add_symbol_segment = S_GET_SEGMENT (fx_addsy);
+    }
+
+  if (fx_subsy
+      && fixP->fx_r_type != BFD_RELOC_ARC_TLS_DTPOFF
+      && fixP->fx_r_type != BFD_RELOC_ARC_TLS_DTPOFF_S9
+      && fixP->fx_r_type != BFD_RELOC_ARC_TLS_GD_LD)
+    {
+      resolve_symbol_value (fx_subsy);
+      sub_symbol_segment = S_GET_SEGMENT (fx_subsy);
+
+      if (sub_symbol_segment == absolute_section)
+	{
+	  /* The symbol is really a constant.  */
+	  fx_offset -= S_GET_VALUE (fx_subsy);
+	  fx_subsy = NULL;
+	}
+      else
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("can't resolve `%s' {%s section} - `%s' {%s section}"),
+			fx_addsy ? S_GET_NAME (fx_addsy) : "0",
+			segment_name (add_symbol_segment),
+			S_GET_NAME (fx_subsy),
+			segment_name (sub_symbol_segment));
+	  return;
+	}
+    }
+
+  if (fx_addsy
+      && !S_IS_WEAK (fx_addsy))
+    {
+      if (add_symbol_segment == seg
+	  && fixP->fx_pcrel)
+	{
+	  value += S_GET_VALUE (fx_addsy);
+	  value -= md_pcrel_from_section (fixP, seg);
+	  fx_addsy = NULL;
+	  fixP->fx_pcrel = FALSE;
+	}
+      else if (add_symbol_segment == absolute_section)
+	{
+	  value = fixP->fx_offset;
+	  fx_offset += S_GET_VALUE (fixP->fx_addsy);
+	  fx_addsy = NULL;
+	  fixP->fx_pcrel = FALSE;
+	}
+    }
+
+  if (!fx_addsy)
+    fixP->fx_done = TRUE;
+
+  if (fixP->fx_pcrel)
+    {
+      if (fx_addsy
+	  && ((S_IS_DEFINED (fx_addsy)
+	       && S_GET_SEGMENT (fx_addsy) != seg)
+	      || S_IS_WEAK (fx_addsy)))
+	value += md_pcrel_from_section (fixP, seg);
+
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_ARC_32_ME:
+	  /* This is a pc-relative value in a LIMM.  Adjust it to the
+	     address of the instruction not to the address of the
+	     LIMM.  Note: it is not anylonger valid this afirmation as
+	     the linker consider ARC_PC32 a fixup to entire 64 bit
+	     insn.  */
+	  fixP->fx_offset += fixP->fx_frag->fr_address;
+	  /* Fall through.  */
+	case BFD_RELOC_32:
+	  fixP->fx_r_type = BFD_RELOC_ARC_PC32;
+	  /* Fall through.  */
+	case BFD_RELOC_ARC_PC32:
+	  /* fixP->fx_offset += fixP->fx_where - fixP->fx_dot_value; */
+	  break;
+	default:
+	  if ((int) fixP->fx_r_type < 0)
+	    as_fatal (_("PC relative relocation not allowed for (internal) type %d"),
+		      fixP->fx_r_type);
+	  break;
+	}
+    }
+
+  pr_debug ("%s:%u: apply_fix: r_type=%d (%s) value=0x%lX offset=0x%lX\n",
+	    fixP->fx_file, fixP->fx_line, fixP->fx_r_type,
+	    ((int) fixP->fx_r_type < 0) ? "Internal":
+	    bfd_get_reloc_code_name (fixP->fx_r_type), value,
+	    fixP->fx_offset);
+
+
+  /* Now check for TLS relocations.  */
+  reloc = fixP->fx_r_type;
+  switch (reloc)
+    {
+    case BFD_RELOC_ARC_TLS_DTPOFF:
+    case BFD_RELOC_ARC_TLS_LE_32:
+      if (fixP->fx_done)
+	break;
+      /* Fall through.  */
+    case BFD_RELOC_ARC_TLS_GD_GOT:
+    case BFD_RELOC_ARC_TLS_IE_GOT:
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      break;
+
+    case BFD_RELOC_ARC_TLS_GD_LD:
+      gas_assert (!fixP->fx_offset);
+      if (fixP->fx_subsy)
+	fixP->fx_offset
+	  = (S_GET_VALUE (fixP->fx_subsy)
+	     - fixP->fx_frag->fr_address- fixP->fx_where);
+      fixP->fx_subsy = NULL;
+      /* Fall through.  */
+    case BFD_RELOC_ARC_TLS_GD_CALL:
+      /* These two relocs are there just to allow ld to change the tls
+	 model for this symbol, by patching the code.  The offset -
+	 and scale, if any - will be installed by the linker.  */
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      break;
+
+    case BFD_RELOC_ARC_TLS_LE_S9:
+    case BFD_RELOC_ARC_TLS_DTPOFF_S9:
+      as_bad (_("TLS_*_S9 relocs are not supported yet"));
+      break;
+
+    default:
+      break;
+    }
+
+  if (!fixP->fx_done)
+    {
+      return;
+    }
+
+  /* Addjust the value if we have a constant.  */
+  value += fx_offset;
+
+  /* For hosts with longs bigger than 32-bits make sure that the top
+     bits of a 32-bit negative value read in by the parser are set,
+     so that the correct comparisons are made.  */
+  if (value & 0x80000000)
+    value |= (-1L << 31);
+
+  reloc = fixP->fx_r_type;
+  switch (reloc)
+    {
+    case BFD_RELOC_8:
+    case BFD_RELOC_16:
+    case BFD_RELOC_24:
+    case BFD_RELOC_32:
+    case BFD_RELOC_64:
+    case BFD_RELOC_ARC_32_PCREL:
+      md_number_to_chars (fixpos, value, fixP->fx_size);
+      return;
+
+    case BFD_RELOC_ARC_GOTPC32:
+      /* I cannot fix an GOTPC relocation because I need to relax it
+	 from ld rx,[pcl,@sym@gotpc] to add rx,pcl,@sym@gotpc.  */
+      as_bad (_("Unsupported operation on reloc"));
+      return;
+
+    case BFD_RELOC_ARC_TLS_DTPOFF:
+    case BFD_RELOC_ARC_TLS_LE_32:
+      gas_assert (!fixP->fx_addsy);
+      gas_assert (!fixP->fx_subsy);
+
+    case BFD_RELOC_ARC_GOTOFF:
+    case BFD_RELOC_ARC_32_ME:
+    case BFD_RELOC_ARC_PC32:
+      md_number_to_chars_midend (fixpos, value, fixP->fx_size);
+      return;
+
+    case BFD_RELOC_ARC_PLT32:
+      md_number_to_chars_midend (fixpos, value, fixP->fx_size);
+      return;
+
+    case BFD_RELOC_ARC_S25H_PCREL_PLT:
+      reloc = BFD_RELOC_ARC_S25W_PCREL;
+      goto solve_plt;
+
+    case BFD_RELOC_ARC_S21H_PCREL_PLT:
+      reloc = BFD_RELOC_ARC_S21H_PCREL;
+      goto solve_plt;
+
+    case BFD_RELOC_ARC_S25W_PCREL_PLT:
+      reloc = BFD_RELOC_ARC_S25W_PCREL;
+      goto solve_plt;
+
+    case BFD_RELOC_ARC_S21W_PCREL_PLT:
+      reloc = BFD_RELOC_ARC_S21W_PCREL;
+
+    case BFD_RELOC_ARC_S25W_PCREL:
+    case BFD_RELOC_ARC_S21W_PCREL:
+    case BFD_RELOC_ARC_S21H_PCREL:
+    case BFD_RELOC_ARC_S25H_PCREL:
+    case BFD_RELOC_ARC_S13_PCREL:
+    solve_plt:
+      operand = find_operand_for_reloc (reloc);
+      gas_assert (operand);
+      break;
+
+    default:
+      {
+	if ((int) fixP->fx_r_type >= 0)
+	  as_fatal (_("unhandled relocation type %s"),
+		    bfd_get_reloc_code_name (fixP->fx_r_type));
+
+	/* The rest of these fixups needs to be completely resolved as
+	   constants.  */
+	if (fixP->fx_addsy != 0
+	    && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section)
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("non-absolute expression in constant field"));
+
+	gas_assert (-(int) fixP->fx_r_type < (int) arc_num_operands);
+	operand = &arc_operands[-(int) fixP->fx_r_type];
+	break;
+      }
+    }
+
+  if (target_big_endian)
+    {
+      switch (fixP->fx_size)
+	{
+	case 4:
+	  insn = bfd_getb32 (fixpos);
+	  break;
+	case 2:
+	  insn = bfd_getb16 (fixpos);
+	  break;
+	default:
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("unknown fixup size"));
+	}
+    }
+  else
+    {
+      insn = 0;
+      switch (fixP->fx_size)
+	{
+	case 4:
+	  insn = bfd_getl16 (fixpos) << 16 | bfd_getl16 (fixpos + 2);
+	  break;
+	case 2:
+	  insn = bfd_getl16 (fixpos);
+	  break;
+	default:
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("unknown fixup size"));
+	}
+    }
+
+  insn = insert_operand (insn, operand, (offsetT) value,
+			 fixP->fx_file, fixP->fx_line);
+
+  md_number_to_chars_midend (fixpos, insn, fixP->fx_size);
+}
+
+/* Prepare machine-dependent frags for relaxation.
+
+   Called just before relaxation starts.  Any symbol that is now undefined
+   will not become defined.
+
+   Return the correct fr_subtype in the frag.
+
+   Return the initial "guess for fr_var" to caller.  The guess for fr_var
+   is *actually* the growth beyond fr_fix.  Whatever we do to grow fr_fix
+   or fr_var contributes to our returned value.
+
+   Although it may not be explicit in the frag, pretend
+   fr_var starts with a value.  */
+
+int
+md_estimate_size_before_relax (fragS *fragP,
+			       segT segment)
+{
+  int growth;
+
+  /* If the symbol is not located within the same section AND it's not
+     an absolute section, use the maximum.  OR if the symbol is a
+     constant AND the insn is by nature not pc-rel, use the maximum.
+     OR if the symbol is being equated against another symbol, use the
+     maximum.  OR if the symbol is weak use the maximum.  */
+  if ((S_GET_SEGMENT (fragP->fr_symbol) != segment
+       && S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
+      || (symbol_constant_p (fragP->fr_symbol)
+	  && !fragP->tc_frag_data.pcrel)
+      || symbol_equated_p (fragP->fr_symbol)
+      || S_IS_WEAK (fragP->fr_symbol))
+    {
+      while (md_relax_table[fragP->fr_subtype].rlx_more != ARC_RLX_NONE)
+	++fragP->fr_subtype;
+    }
+
+  growth = md_relax_table[fragP->fr_subtype].rlx_length;
+  fragP->fr_var = growth;
+
+  pr_debug ("%s:%d: md_estimate_size_before_relax: %d\n",
+	   fragP->fr_file, fragP->fr_line, growth);
+
+  return growth;
+}
+
+/* Translate internal representation of relocation info to BFD target
+   format.  */
+
+arelent *
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
+	      fixS *fixP)
+{
+  arelent *reloc;
+  bfd_reloc_code_real_type code;
+
+  reloc = (arelent *) xmalloc (sizeof (* reloc));
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
+  reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
+
+  /* Make sure none of our internal relocations make it this far.
+     They'd better have been fully resolved by this point.  */
+  gas_assert ((int) fixP->fx_r_type > 0);
+
+  code = fixP->fx_r_type;
+
+  /* if we have something like add gp, pcl,
+     _GLOBAL_OFFSET_TABLE_@gotpc.  */
+  if (code == BFD_RELOC_ARC_GOTPC32
+      && GOT_symbol
+      && fixP->fx_addsy == GOT_symbol)
+    code = BFD_RELOC_ARC_GOTPC;
+
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+  if (reloc->howto == NULL)
+    {
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+		    _("cannot represent `%s' relocation in object file"),
+		    bfd_get_reloc_code_name (code));
+      return NULL;
+    }
+
+  if (!fixP->fx_pcrel != !reloc->howto->pc_relative)
+    as_fatal (_("internal error? cannot generate `%s' relocation"),
+	      bfd_get_reloc_code_name (code));
+
+  gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+
+  if (code == BFD_RELOC_ARC_TLS_DTPOFF
+      || code ==  BFD_RELOC_ARC_TLS_DTPOFF_S9)
+    {
+      asymbol *sym
+	= fixP->fx_subsy ? symbol_get_bfdsym (fixP->fx_subsy) : NULL;
+      /* We just want to store a 24 bit index, but we have to wait
+	 till after write_contents has been called via
+	 bfd_map_over_sections before we can get the index from
+	 _bfd_elf_symbol_from_bfd_symbol.  Thus, the write_relocs
+	 function is elf32-arc.c has to pick up the slack.
+	 Unfortunately, this leads to problems with hosts that have
+	 pointers wider than long (bfd_vma).  There would be various
+	 ways to handle this, all error-prone :-(  */
+      reloc->addend = (bfd_vma) sym;
+      if ((asymbol *) reloc->addend != sym)
+	{
+	  as_bad ("Can't store pointer\n");
+	  return NULL;
+	}
+    }
+  else
+    reloc->addend = fixP->fx_offset;
+
+  return reloc;
+}
+
+/* Perform post-processing of machine-dependent frags after relaxation.
+   Called after relaxation is finished.
+   In:	Address of frag.
+   fr_type == rs_machine_dependent.
+   fr_subtype is what the address relaxed to.
+
+   Out: Any fixS:s and constants are set up.  */
+
+void
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+		 segT segment ATTRIBUTE_UNUSED,
+		 fragS *fragP)
+{
+  const relax_typeS *table_entry;
+  char *dest;
+  const struct arc_opcode *opcode;
+  struct arc_insn insn;
+  int size, fix;
+  struct arc_relax_type *relax_arg = &fragP->tc_frag_data;
+
+  fix = (fragP->fr_fix < 0 ? 0 : fragP->fr_fix);
+  dest = fragP->fr_literal + fix;
+  table_entry = TC_GENERIC_RELAX_TABLE + fragP->fr_subtype;
+
+  pr_debug ("%s:%d: md_convert_frag, subtype: %d, fix: %d, var: %d\n",
+	    fragP->fr_file, fragP->fr_line,
+	    fragP->fr_subtype, fix, fragP->fr_var);
+
+  if (fragP->fr_subtype <= 0
+      && fragP->fr_subtype >= arc_num_relax_opcodes)
+    as_fatal (_("no relaxation found for this instruction."));
+
+  opcode = &arc_relax_opcodes[fragP->fr_subtype];
+
+  assemble_insn (opcode, relax_arg->tok, relax_arg->ntok, relax_arg->pflags,
+	relax_arg->nflg, &insn);
+
+  apply_fixups (&insn, fragP, fix);
+
+  size = insn.short_insn ? (insn.has_limm ? 6 : 2) : (insn.has_limm ? 8 : 4);
+  gas_assert (table_entry->rlx_length == size);
+  emit_insn0 (&insn, dest, TRUE);
+
+  fragP->fr_fix += table_entry->rlx_length;
+  fragP->fr_var = 0;
+}
+
+/* We have no need to default values of symbols.  We could catch
+   register names here, but that is handled by inserting them all in
+   the symbol table to begin with.  */
+
+symbolS *
+md_undefined_symbol (char *name)
+{
+  /* The arc abi demands that a GOT[0] should be referencible as
+     [pc+_DYNAMIC@gotpc].  Hence we convert a _DYNAMIC@gotpc to a
+     GOTPC reference to _GLOBAL_OFFSET_TABLE_.  */
+  if (((*name == '_')
+       && (*(name+1) == 'G')
+       && (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0))
+      || ((*name == '_')
+	  && (*(name+1) == 'D')
+	  && (strcmp (name, DYNAMIC_STRUCT_NAME) == 0)))
+    {
+      if (!GOT_symbol)
+	{
+	  if (symbol_find (name))
+	    as_bad ("GOT already in symbol table");
+
+	  GOT_symbol = symbol_new (GLOBAL_OFFSET_TABLE_NAME, undefined_section,
+				   (valueT) 0, &zero_address_frag);
+	};
+      return GOT_symbol;
+    }
+  return NULL;
+}
+
+/* Turn a string in input_line_pointer into a floating point constant
+   of type type, and store the appropriate bytes in *litP.  The number
+   of LITTLENUMS emitted is stored in *sizeP.  An error message is
+   returned, or NULL on OK.  */
+
+char *
+md_atof (int type, char *litP, int *sizeP)
+{
+  return ieee_md_atof (type, litP, sizeP, target_big_endian);
+}
+
+/* Called for any expression that can not be recognized.  When the
+   function is called, `input_line_pointer' will point to the start of
+   the expression.  */
+
+void
+md_operand (expressionS *expressionP ATTRIBUTE_UNUSED)
+{
+  char *p = input_line_pointer;
+  if (*p == '@')
+    {
+      input_line_pointer++;
+      expressionP->X_op = O_symbol;
+      expression (expressionP);
+    }
+}
+
+/* This function is called from the function 'expression', it attempts
+   to parse special names (in our case register names).  It fills in
+   the expression with the identified register.  It returns TRUE if
+   it is a register and FALSE otherwise.  */
+
+bfd_boolean
+arc_parse_name (const char *name,
+		struct expressionS *e)
+{
+  struct symbol *sym;
+
+  if (!assembling_insn)
+    return FALSE;
+
+  /* Handle only registers.  */
+  if (e->X_op != O_absent)
+    return FALSE;
+
+  sym = hash_find (arc_reg_hash, name);
+  if (sym)
+    {
+      e->X_op = O_register;
+      e->X_add_number = S_GET_VALUE (sym);
+      return TRUE;
+    }
+  return FALSE;
+}
+
+/* md_parse_option
+   Invocation line includes a switch not recognized by the base assembler.
+   See if it's a processor-specific option.
+
+   New options (supported) are:
+
+   -mcpu=<cpu name>		 Assemble for selected processor
+   -EB/-mbig-endian		 Big-endian
+   -EL/-mlittle-endian		 Little-endian
+   -mrelax                       Enable relaxation
+
+   The following CPU names are recognized:
+   arc700, av2em, av2hs.  */
+
+int
+md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+{
+  int cpu_flags = EF_ARC_CPU_GENERIC;
+
+  switch (c)
+    {
+    case OPTION_ARC600:
+    case OPTION_ARC601:
+      return md_parse_option (OPTION_MCPU, "arc600");
+
+    case OPTION_ARC700:
+      return md_parse_option (OPTION_MCPU, "arc700");
+
+    case OPTION_ARCEM:
+      return md_parse_option (OPTION_MCPU, "arcem");
+
+    case OPTION_ARCHS:
+      return md_parse_option (OPTION_MCPU, "archs");
+
+    case OPTION_MCPU:
+      {
+	int i;
+	char *s = alloca (strlen (arg) + 1);
+
+	{
+	  char *t = s;
+	  char *arg1 = arg;
+
+	  do
+	    *t = TOLOWER (*arg1++);
+	  while (*t++);
+	}
+
+	for (i = 0; cpu_types[i].name; ++i)
+	  {
+	    if (!strcmp (cpu_types[i].name, s))
+	      {
+		arc_target      = cpu_types[i].flags;
+		arc_target_name = cpu_types[i].name;
+		arc_features    = cpu_types[i].features;
+		arc_mach_type   = cpu_types[i].mach;
+		cpu_flags       = cpu_types[i].eflags;
+
+		mach_type_specified_p = 1;
+		break;
+	      }
+	  }
+
+	if (!cpu_types[i].name)
+	  {
+	    as_fatal (_("unknown architecture: %s\n"), arg);
+	  }
+	break;
+      }
+
+    case OPTION_EB:
+      arc_target_format = "elf32-bigarc";
+      byte_order = BIG_ENDIAN;
+      break;
+
+    case OPTION_EL:
+      arc_target_format = "elf32-littlearc";
+      byte_order = LITTLE_ENDIAN;
+      break;
+
+    case OPTION_CD:
+      /* This option has an effect only on ARC EM.  */
+      if (arc_target & ARC_OPCODE_ARCv2EM)
+	arc_features |= ARC_CD;
+      break;
+
+    case OPTION_RELAX:
+      relaxation_state = 1;
+      break;
+
+    case OPTION_USER_MODE:
+    case OPTION_LD_EXT_MASK:
+    case OPTION_SWAP:
+    case OPTION_NORM:
+    case OPTION_BARREL_SHIFT:
+    case OPTION_MIN_MAX:
+    case OPTION_NO_MPY:
+    case OPTION_EA:
+    case OPTION_MUL64:
+    case OPTION_SIMD:
+    case OPTION_SPFP:
+    case OPTION_DPFP:
+    case OPTION_XMAC_D16:
+    case OPTION_XMAC_24:
+    case OPTION_DSP_PACKA:
+    case OPTION_CRC:
+    case OPTION_DVBF:
+    case OPTION_TELEPHONY:
+    case OPTION_XYMEMORY:
+    case OPTION_LOCK:
+    case OPTION_SWAPE:
+    case OPTION_RTSC:
+    case OPTION_FPUDA:
+      /* Dummy options are accepted but have no effect.  */
+      break;
+
+    default:
+      return 0;
+    }
+
+  if (cpu_flags != EF_ARC_CPU_GENERIC)
+    arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
+
+  return 1;
+}
+
+void
+md_show_usage (FILE *stream)
+{
+  fprintf (stream, _("ARC-specific assembler options:\n"));
+
+  fprintf (stream, "  -mcpu=<cpu name>\t  assemble for CPU <cpu name>\n");
+  fprintf (stream,
+	   "  -mcode-density\t  enable code density option for ARC EM\n");
+
+  fprintf (stream, _("\
+  -EB                     assemble code for a big-endian cpu\n"));
+  fprintf (stream, _("\
+  -EL                     assemble code for a little-endian cpu\n"));
+  fprintf (stream, _("\
+  -mrelax                  Enable relaxation\n"));
+
+}
+
 /* Find the proper relocation for the given opcode.  */
 
 static extended_bfd_reloc_code_real_type
@@ -2515,7 +2991,7 @@ find_reloc (const char *name,
 {
   unsigned int i;
   int j;
-  bfd_boolean found_flag;
+  bfd_boolean found_flag, tmp;
   extended_bfd_reloc_code_real_type ret = BFD_RELOC_UNUSED;
 
   for (i = 0; i < arc_num_equiv_tab; i++)
@@ -2527,17 +3003,34 @@ find_reloc (const char *name,
 	continue;
       if (r->mnemonic && (strcmp (r->mnemonic, opcodename)))
 	continue;
-      if (r->flagcode)
+      if (r->flags[0])
 	{
 	  if (!nflg)
 	    continue;
 	  found_flag = FALSE;
-	  for (j = 0; j < nflg; j++)
-	    if (pflags[i].code == r->flagcode)
-	      {
-		found_flag = TRUE;
-		break;
-	      }
+	  unsigned * psflg = (unsigned *)r->flags;
+	  do
+	    {
+	      tmp = FALSE;
+	      for (j = 0; j < nflg; j++)
+		if (!strcmp (pflags[j].name,
+			     arc_flag_operands[*psflg].name))
+		  {
+		    tmp = TRUE;
+		    break;
+		  }
+	      if (!tmp)
+		{
+		  found_flag = FALSE;
+		  break;
+		}
+	      else
+		{
+		  found_flag = TRUE;
+		}
+	      ++ psflg;
+	    } while (*psflg);
+
 	  if (!found_flag)
 	    continue;
 	}
@@ -2553,6 +3046,192 @@ find_reloc (const char *name,
     as_bad (_("Unable to find %s relocation for instruction %s"),
 	    name, opcodename);
   return ret;
+}
+
+/* All the symbol types that are allowed to be used for
+   relaxation.  */
+
+static bfd_boolean
+may_relax_expr (expressionS tok)
+{
+  /* Check if we have unrelaxable relocs.  */
+  switch (tok.X_md)
+    {
+    default:
+      break;
+    case O_plt:
+      return FALSE;
+    }
+
+  switch (tok.X_op)
+    {
+    case O_symbol:
+    case O_multiply:
+    case O_divide:
+    case O_modulus:
+    case O_add:
+    case O_subtract:
+      break;
+
+    default:
+      return FALSE;
+    }
+  return TRUE;
+}
+
+/* Checks if flags are in line with relaxable insn.  */
+
+static bfd_boolean
+relaxable_flag (const struct arc_relaxable_ins *ins,
+		const struct arc_flags *pflags,
+		int nflgs)
+{
+  unsigned flag_class,
+    flag,
+    flag_class_idx = 0,
+    flag_idx = 0;
+
+  const struct arc_flag_operand *flag_opand;
+  int i, counttrue = 0;
+
+  /* Iterate through flags classes.  */
+  while ((flag_class = ins->flag_classes[flag_class_idx]) != 0)
+    {
+      /* Iterate through flags in flag class.  */
+      while ((flag = arc_flag_classes[flag_class].flags[flag_idx])
+	     != 0)
+	{
+	  flag_opand = &arc_flag_operands[flag];
+	  /* Iterate through flags in ins to compare.  */
+	  for (i = 0; i < nflgs; ++i)
+	    {
+	      if (strcmp (flag_opand->name, pflags[i].name) == 0)
+		++counttrue;
+	    }
+
+	  ++flag_idx;
+	}
+
+      ++flag_class_idx;
+      flag_idx = 0;
+    }
+
+  /* If counttrue == nflgs, then all flags have been found.  */
+  return (counttrue == nflgs ? TRUE : FALSE);
+}
+
+/* Checks if operands are in line with relaxable insn.  */
+
+static bfd_boolean
+relaxable_operand (const struct arc_relaxable_ins *ins,
+		   const expressionS *tok,
+		   int ntok)
+{
+  const enum rlx_operand_type *operand = &ins->operands[0];
+  int i = 0;
+
+  while (*operand != EMPTY)
+    {
+      const expressionS *epr = &tok[i];
+
+      if (i != 0 && i >= ntok)
+	return FALSE;
+
+      switch (*operand)
+	{
+	case IMMEDIATE:
+	  if (!(epr->X_op == O_multiply
+		|| epr->X_op == O_divide
+		|| epr->X_op == O_modulus
+		|| epr->X_op == O_add
+		|| epr->X_op == O_subtract
+		|| epr->X_op == O_symbol))
+	    return FALSE;
+	  break;
+
+	case REGISTER_DUP:
+	  if ((i <= 0)
+	      || (epr->X_add_number != tok[i - 1].X_add_number))
+	    return FALSE;
+	  /* Fall through.  */
+	case REGISTER:
+	  if (epr->X_op != O_register)
+	    return FALSE;
+	  break;
+
+	case REGISTER_S:
+	  if (epr->X_op != O_register)
+	    return FALSE;
+
+	  switch (epr->X_add_number)
+	    {
+	    case 0: case 1: case 2: case 3:
+	    case 12: case 13: case 14: case 15:
+	      break;
+	    default:
+	      return FALSE;
+	    }
+	  break;
+
+	case REGISTER_NO_GP:
+	  if ((epr->X_op != O_register)
+	      || (epr->X_add_number == 26)) /* 26 is the gp register.  */
+	    return FALSE;
+	  break;
+
+	case BRACKET:
+	  if (epr->X_op != O_bracket)
+	    return FALSE;
+	  break;
+
+	default:
+	  /* Don't understand, bail out.  */
+	  return FALSE;
+	  break;
+	}
+
+      ++i;
+      operand = &ins->operands[i];
+    }
+
+  return (i == ntok ? TRUE : FALSE);
+}
+
+/* Return TRUE if this OPDCODE is a candidate for relaxation.  */
+
+static bfd_boolean
+relax_insn_p (const struct arc_opcode *opcode,
+	      const expressionS *tok,
+	      int ntok,
+	      const struct arc_flags *pflags,
+	      int nflg)
+{
+  unsigned i;
+  bfd_boolean rv = FALSE;
+
+  /* Check the relaxation table.  */
+  for (i = 0; i < arc_num_relaxable_ins && relaxation_state; ++i)
+    {
+      const struct arc_relaxable_ins *arc_rlx_ins = &arc_relaxable_insns[i];
+
+      if ((strcmp (opcode->name, arc_rlx_ins->mnemonic_r) == 0)
+	  && may_relax_expr (tok[arc_rlx_ins->opcheckidx])
+	  && relaxable_operand (arc_rlx_ins, tok, ntok)
+	  && relaxable_flag (arc_rlx_ins, pflags, nflg))
+	{
+	  rv = TRUE;
+	  frag_now->fr_subtype = arc_relaxable_insns[i].subtype;
+	  memcpy (&frag_now->tc_frag_data.tok, tok,
+		sizeof (expressionS) * ntok);
+	  memcpy (&frag_now->tc_frag_data.pflags, pflags,
+		sizeof (struct arc_flags) * nflg);
+	  frag_now->tc_frag_data.nflg = nflg;
+	  frag_now->tc_frag_data.ntok = ntok;
+	  break;
+	}
+    }
+
+  return rv;
 }
 
 /* Turn an opcode description and a set of arguments into
@@ -2799,6 +3478,8 @@ assemble_insn (const struct arc_opcode *opcode,
 	  << flg_operand->shift;
     }
 
+  insn->relax = relax_insn_p (opcode, tok, ntok, pflags, nflg);
+
   /* Short instruction?  */
   insn->short_insn = ARC_SHORT (opcode->mask) ? TRUE : FALSE;
 
@@ -2815,169 +3496,6 @@ assemble_insn (const struct arc_opcode *opcode,
       && is_br_jmp_insn_p (arc_last_insns[0].opcode))
     as_bad_where (frag_now->fr_file, frag_now->fr_line,
 		  _("A jump/branch instruction in delay slot."));
-}
-
-/* Actually output an instruction with its fixup.  */
-
-static void
-emit_insn (struct arc_insn *insn)
-{
-  char *f;
-  int i;
-
-  pr_debug ("Emit insn : 0x%x\n", insn->insn);
-  pr_debug ("\tShort   : 0x%d\n", insn->short_insn);
-  pr_debug ("\tLong imm: 0x%lx\n", insn->limm);
-
-  /* Write out the instruction.  */
-  if (insn->short_insn)
-    {
-      if (insn->has_limm)
-	{
-	  f = frag_more (6);
-	  md_number_to_chars (f, insn->insn, 2);
-	  md_number_to_chars_midend (f + 2, insn->limm, 4);
-	  dwarf2_emit_insn (6);
-	}
-      else
-	{
-	  f = frag_more (2);
-	  md_number_to_chars (f, insn->insn, 2);
-	  dwarf2_emit_insn (2);
-	}
-    }
-  else
-    {
-      if (insn->has_limm)
-	{
-	  f = frag_more (8);
-	  md_number_to_chars_midend (f, insn->insn, 4);
-	  md_number_to_chars_midend (f + 4, insn->limm, 4);
-	  dwarf2_emit_insn (8);
-	}
-      else
-	{
-	  f = frag_more (4);
-	  md_number_to_chars_midend (f, insn->insn, 4);
-	  dwarf2_emit_insn (4);
-	}
-    }
-
-  /* Apply the fixups in order.  */
-  for (i = 0; i < insn->nfixups; i++)
-    {
-      struct arc_fixup *fixup = &insn->fixups[i];
-      int size, pcrel, offset = 0;
-
-      /*FIXME! the reloc size is wrong in the BFD file.  When it will
-	be fixed please delete me.  */
-      size = (insn->short_insn && !fixup->islong) ? 2 : 4;
-
-      if (fixup->islong)
-	offset = (insn->short_insn) ? 2 : 4;
-
-      /* Some fixups are only used internally, thus no howto.  */
-      if ((int) fixup->reloc < 0)
-	{
-	  /*FIXME! the reloc size is wrong in the BFD file.  When it
-	    will be fixed please enable me.
-	    size = (insn->short_insn && !fixup->islong) ? 2 : 4; */
-	  pcrel = fixup->pcrel;
-	}
-      else
-	{
-	  reloc_howto_type *reloc_howto =
-	    bfd_reloc_type_lookup (stdoutput,
-				   (bfd_reloc_code_real_type) fixup->reloc);
-	  gas_assert (reloc_howto);
-	  /*FIXME! the reloc size is wrong in the BFD file.  When it
-	    will be fixed please enable me.
-	    size = bfd_get_reloc_size (reloc_howto); */
-	  pcrel = reloc_howto->pc_relative;
-	}
-
-      pr_debug ("%s:%d: emit_insn: new %s fixup (PCrel:%s) of size %d @ offset %d\n",
-		frag_now->fr_file, frag_now->fr_line,
-		(fixup->reloc < 0) ? "Internal" :
-		bfd_get_reloc_code_name (fixup->reloc),
-		pcrel ? "Y" : "N",
-		size, offset);
-      fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
-		   size, &fixup->exp, pcrel, fixup->reloc);
-
-      /* Check for ZOLs, and update symbol info if any.  */
-      if (LP_INSN (insn->insn))
-	{
-	  gas_assert (fixup->exp.X_add_symbol);
-	  ARC_SET_FLAG (fixup->exp.X_add_symbol, ARC_FLAG_ZOL);
-	}
-    }
-}
-
-/* Insert an operand value into an instruction.  */
-
-static unsigned
-insert_operand (unsigned insn,
-		const struct arc_operand *operand,
-		offsetT val,
-		char *file,
-		unsigned line)
-{
-  offsetT min = 0, max = 0;
-
-  if (operand->bits != 32
-      && !(operand->flags & ARC_OPERAND_NCHK)
-      && !(operand->flags & ARC_OPERAND_FAKE))
-    {
-      if (operand->flags & ARC_OPERAND_SIGNED)
-	{
-	  max = (1 << (operand->bits - 1)) - 1;
-	  min = -(1 << (operand->bits - 1));
-	}
-      else
-	{
-	  max = (1 << operand->bits) - 1;
-	  min = 0;
-	}
-
-      if (val < min || val > max)
-	as_bad_value_out_of_range (_("operand"),
-				   val, min, max, file, line);
-    }
-
-  pr_debug ("insert field: %ld <= %ld <= %ld in 0x%08x\n",
-	    min, val, max, insn);
-
-  if ((operand->flags & ARC_OPERAND_ALIGNED32)
-      && (val & 0x03))
-    as_bad_where (file, line,
-		  _("Unaligned operand. Needs to be 32bit aligned"));
-
-  if ((operand->flags & ARC_OPERAND_ALIGNED16)
-      && (val & 0x01))
-    as_bad_where (file, line,
-		  _("Unaligned operand. Needs to be 16bit aligned"));
-
-  if (operand->insert)
-    {
-      const char *errmsg = NULL;
-
-      insn = (*operand->insert) (insn, val, &errmsg);
-      if (errmsg)
-	as_warn_where (file, line, "%s", errmsg);
-    }
-  else
-    {
-      if (operand->flags & ARC_OPERAND_TRUNCATE)
-	{
-	  if (operand->flags & ARC_OPERAND_ALIGNED32)
-	    val >>= 2;
-	  if (operand->flags & ARC_OPERAND_ALIGNED16)
-	    val >>= 1;
-	}
-      insn |= ((val & ((1 << operand->bits) - 1)) << operand->shift);
-    }
-  return insn;
 }
 
 void
@@ -3046,7 +3564,7 @@ arc_check_reloc (expressionS *exp,
       && exp->X_op == O_subtract
       && exp->X_op_symbol != NULL
       && exp->X_op_symbol->bsym->section == now_seg)
-    *r_type_p = BFD_RELOC_ARC_PC32;
+    *r_type_p = BFD_RELOC_ARC_32_PCREL;
 }
 
 
@@ -3140,4 +3658,42 @@ arc_frob_label (symbolS * sym)
     check_zol (sym);
 
   dwarf2_emit_label (sym);
+}
+
+/* Used because generic relaxation assumes a pc-rel value whilst we
+   also relax instructions that use an absolute value resolved out of
+   relative values (if that makes any sense).  An example: 'add r1,
+   r2, @.L2 - .'  The symbols . and @.L2 are relative to the section
+   but if they're in the same section we can subtract the section
+   offset relocation which ends up in a resolved value.  So if @.L2 is
+   .text + 0x50 and . is .text + 0x10, we can say that .text + 0x50 -
+   .text + 0x40 = 0x10.  */
+int
+arc_pcrel_adjust (fragS *fragP)
+{
+  if (!fragP->tc_frag_data.pcrel)
+    return fragP->fr_address + fragP->fr_fix;
+
+  return 0;
+}
+
+/* Initialize the DWARF-2 unwind information for this procedure.  */
+
+void
+tc_arc_frame_initial_instructions (void)
+{
+  /* Stack pointer is register 28.  */
+  cfi_add_CFA_def_cfa_register (28);
+}
+
+int
+tc_arc_regname_to_dw2regnum (char *regname)
+{
+  struct symbol *sym;
+
+  sym = hash_find (arc_reg_hash, regname);
+  if (sym)
+    return S_GET_VALUE (sym);
+
+  return -1;
 }

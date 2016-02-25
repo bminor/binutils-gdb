@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991-2015 Free Software Foundation, Inc.
+   Copyright (C) 1991-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -771,7 +771,7 @@ parse_symflags (const char *s, char **other)
 
 #define PARSE_OTHER(fname,fval)								   \
       else if (len >= (int) sizeof fname && strncasecmp (fname, s, sizeof fname - 1) == 0) \
-	fval = strndup (s + sizeof fname - 1, len - sizeof fname + 1)
+	fval = xstrndup (s + sizeof fname - 1, len - sizeof fname + 1)
       
       if (0) ;
       PARSE_FLAG ("local", BSF_LOCAL);
@@ -4082,10 +4082,10 @@ copy_main (int argc, char *argv[])
 	      fatal (_("bad format for %s"), "--add-symbol");
 	    t = strchr (s + 1, ':');
 
-	    newsym->symdef = strndup (optarg, s - optarg);
+	    newsym->symdef = xstrndup (optarg, s - optarg);
 	    if (t)
 	      {
-		newsym->section = strndup (s + 1, t - (s + 1));
+		newsym->section = xstrndup (s + 1, t - (s + 1));
 		newsym->symval = strtol (t + 1, NULL, 0);
 	      }
 	    else

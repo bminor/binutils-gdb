@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2015 Free Software Foundation, Inc.
+# Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -51,6 +51,8 @@ RANLIB = @RANLIB@
 
 # The name of the compiler to use.
 COMPILER = @COMPILER@
+# Set to CFLAGS or CXXFLAGS, depending on compiler/language.
+COMPILER_CFLAGS = @COMPILER_CFLAGS@
 
 CC = @CC@
 CXX = @CXX@
@@ -129,13 +131,14 @@ WERROR_CFLAGS = @WERROR_CFLAGS@
 WARN_CFLAGS_NO_FORMAT = `echo " $(WARN_CFLAGS) " \
 		   | sed "s/ -Wformat-nonliteral / -Wno-format-nonliteral /g"`
 
-# CFLAGS is specifically reserved for setting from the command line
+# These are specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
 CPPFLAGS = @CPPFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS_BASE =  ${CFLAGS} ${GLOBAL_CFLAGS} \
+INTERNAL_CFLAGS_BASE =  ${COMPILER_CFLAGS} ${GLOBAL_CFLAGS} \
 	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${CPPFLAGS}
 INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
 INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER
@@ -181,7 +184,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/common-exceptions.c $(srcdir)/symbol.c \
 	$(srcdir)/common/btrace-common.c \
 	$(srcdir)/common/fileio.c $(srcdir)/nat/linux-namespaces.c \
-	$(srcdir)/arch/arm.c
+	$(srcdir)/arch/arm.c $(srcdir)/common/common-regcache.c \
+	$(srcdir)/arch/arm-linux.c $(srcdir)/arch/arm-get-next-pcs.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -195,7 +199,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
       tdesc.o print-utils.o rsp-low.o errors.o common-debug.o cleanups.o \
-      common-exceptions.o symbol.o btrace-common.o fileio.o \
+      common-exceptions.o symbol.o btrace-common.o fileio.o common-regcache.o \
       $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
@@ -491,6 +495,18 @@ regcache-ipa.o: regcache.c
 i386-linux-ipa.o: i386-linux.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
+i386-mmx-linux-ipa.o: i386-mmx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+i386-avx-linux-ipa.o: i386-avx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+i386-mpx-linux-ipa.o: i386-mpx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+i386-avx512-linux-ipa.o: i386-avx512-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
 linux-i386-ipa.o: linux-i386-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
@@ -498,6 +514,15 @@ linux-amd64-ipa.o: linux-amd64-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 amd64-linux-ipa.o: amd64-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+amd64-avx-linux-ipa.o: amd64-avx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+amd64-mpx-linux-ipa.o: amd64-mpx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+amd64-avx512-linux-ipa.o: amd64-avx512-linux.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 linux-aarch64-ipa.o: linux-aarch64-ipa.c
@@ -583,16 +608,28 @@ waitstatus.o: ../target/waitstatus.c
 fileio.o: ../common/fileio.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+common-regcache.o: ../common/common-regcache.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
 # Arch object files rules form ../arch
 
 arm.o: ../arch/arm.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+arm-linux.o: ../arch/arm-linux.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+arm-get-next-pcs.o: ../arch/arm-get-next-pcs.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
 # Native object files rules from ../nat
 
 x86-dregs.o: ../nat/x86-dregs.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+amd64-linux-siginfo.o: ../nat/amd64-linux-siginfo.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 linux-btrace.o: ../nat/linux-btrace.c
@@ -835,7 +872,7 @@ reg-tilegx32.c : $(srcdir)/../regformats/reg-tilegx32.dat $(regdat_sh)
 
 # A list of all the objects we might care about in this build, for
 # dependency tracking.
-all_object_files = $(OBS) $(GDBREPLAY_OBS)
+all_object_files = $(OBS) $(GDBREPLAY_OBS) $(IPA_OBJS)
 
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,

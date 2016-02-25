@@ -1,6 +1,6 @@
 /* spu.c -- Assembler for the IBM Synergistic Processing Unit (SPU)
 
-   Copyright (C) 2006-2015 Free Software Foundation, Inc.
+   Copyright (C) 2006-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -245,7 +245,7 @@ insn_fmt_string (struct spu_opcode *format)
   for (i = 1; i <= format->arg[0]; i++)
     {
       int arg = format->arg[i];
-      char *exp;
+      const char *exp;
       if (i > 1 && arg != A_P && format->arg[i-1] != A_P)
 	buf[len++] =  ',';
       if (arg == A_P)

@@ -1,6 +1,6 @@
 /* General utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1677,8 +1677,9 @@ init_page_info (void)
          Only try to use tgetnum function if rl_get_screen_size
          did not return a useful value. */
       if (((rows <= 0) && (tgetnum ("li") < 0))
-	/* Also disable paging if inside EMACS.  */
-	  || getenv ("EMACS"))
+	/* Also disable paging if inside Emacs.  $EMACS was used
+	   before Emacs v25.1, $INSIDE_EMACS is used since then.  */
+	  || getenv ("EMACS") || getenv ("INSIDE_EMACS"))
 	{
 	  /* The number of lines per page is not mentioned in the terminal
 	     description or EMACS evironment variable is set.  This probably
@@ -1867,7 +1868,8 @@ prompt_for_continue (void)
       while (*p == ' ' || *p == '\t')
 	++p;
       if (p[0] == 'q')
-	quit ();
+	/* Do not call quit here; there is no possibility of SIGINT.  */
+	throw_quit ("Quit");
       xfree (ignore);
     }
   immediate_quit--;
@@ -3355,14 +3357,14 @@ gdb_filename_fnmatch (const char *pattern, const char *string, int flags)
 
     /* Replace '\' by '/' in both strings.  */
 
-    pattern_slash = alloca (strlen (pattern) + 1);
+    pattern_slash = (char *) alloca (strlen (pattern) + 1);
     strcpy (pattern_slash, pattern);
     pattern = pattern_slash;
     for (; *pattern_slash != 0; pattern_slash++)
       if (IS_DIR_SEPARATOR (*pattern_slash))
 	*pattern_slash = '/';
 
-    string_slash = alloca (strlen (string) + 1);
+    string_slash = (char *) alloca (strlen (string) + 1);
     strcpy (string_slash, string);
     string = string_slash;
     for (; *string_slash != 0; string_slash++)
@@ -3376,6 +3378,83 @@ gdb_filename_fnmatch (const char *pattern, const char *string, int flags)
 #endif /* HAVE_CASE_INSENSITIVE_FILE_SYSTEM */
 
   return fnmatch (pattern, string, flags);
+}
+
+/* Return the number of path elements in PATH.
+   / = 1
+   /foo = 2
+   /foo/ = 2
+   foo/bar = 2
+   foo/ = 1  */
+
+int
+count_path_elements (const char *path)
+{
+  int count = 0;
+  const char *p = path;
+
+  if (HAS_DRIVE_SPEC (p))
+    {
+      p = STRIP_DRIVE_SPEC (p);
+      ++count;
+    }
+
+  while (*p != '\0')
+    {
+      if (IS_DIR_SEPARATOR (*p))
+	++count;
+      ++p;
+    }
+
+  /* Backup one if last character is /, unless it's the only one.  */
+  if (p > path + 1 && IS_DIR_SEPARATOR (p[-1]))
+    --count;
+
+  /* Add one for the file name, if present.  */
+  if (p > path && !IS_DIR_SEPARATOR (p[-1]))
+    ++count;
+
+  return count;
+}
+
+/* Remove N leading path elements from PATH.
+   N must be non-negative.
+   If PATH has more than N path elements then return NULL.
+   If PATH has exactly N path elements then return "".
+   See count_path_elements for a description of how we do the counting.  */
+
+const char *
+strip_leading_path_elements (const char *path, int n)
+{
+  int i = 0;
+  const char *p = path;
+
+  gdb_assert (n >= 0);
+
+  if (n == 0)
+    return p;
+
+  if (HAS_DRIVE_SPEC (p))
+    {
+      p = STRIP_DRIVE_SPEC (p);
+      ++i;
+    }
+
+  while (i < n)
+    {
+      while (*p != '\0' && !IS_DIR_SEPARATOR (*p))
+	++p;
+      if (*p == '\0')
+	{
+	  if (i + 1 == n)
+	    return "";
+	  return NULL;
+	}
+      ++p;
+      ++i;
+    }
+
+  return p;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

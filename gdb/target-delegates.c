@@ -587,20 +587,20 @@ debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum
 }
 
 static int
-delegate_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+delegate_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   self = self->beneath;
   return self->to_insert_mask_watchpoint (self, arg1, arg2, arg3);
 }
 
 static int
-tdefault_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+tdefault_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   return 1;
 }
 
 static int
-debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insert_mask_watchpoint (...)\n", debug_target.to_shortname);
@@ -612,7 +612,7 @@ debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -620,20 +620,20 @@ debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
 }
 
 static int
-delegate_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+delegate_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   self = self->beneath;
   return self->to_remove_mask_watchpoint (self, arg1, arg2, arg3);
 }
 
 static int
-tdefault_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+tdefault_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   return 1;
 }
 
 static int
-debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_remove_mask_watchpoint (...)\n", debug_target.to_shortname);
@@ -645,7 +645,7 @@ debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -1530,23 +1530,23 @@ debug_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
   return result;
 }
 
-static char *
+static const char *
 delegate_thread_name (struct target_ops *self, struct thread_info *arg1)
 {
   self = self->beneath;
   return self->to_thread_name (self, arg1);
 }
 
-static char *
+static const char *
 tdefault_thread_name (struct target_ops *self, struct thread_info *arg1)
 {
   return NULL;
 }
 
-static char *
+static const char *
 debug_thread_name (struct target_ops *self, struct thread_info *arg1)
 {
-  char * result;
+  const char * result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_thread_name (...)\n", debug_target.to_shortname);
   result = debug_target.to_thread_name (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_thread_name (", debug_target.to_shortname);
@@ -1554,7 +1554,7 @@ debug_thread_name (struct target_ops *self, struct thread_info *arg1)
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_thread_info_p (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_char_p (result);
+  target_debug_print_const_char_p (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }
@@ -1803,6 +1803,30 @@ debug_async (struct target_ops *self, int arg1)
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_async (...)\n", debug_target.to_shortname);
   debug_target.to_async (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_async (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_int (arg1);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+static void
+delegate_thread_events (struct target_ops *self, int arg1)
+{
+  self = self->beneath;
+  self->to_thread_events (self, arg1);
+}
+
+static void
+tdefault_thread_events (struct target_ops *self, int arg1)
+{
+}
+
+static void
+debug_thread_events (struct target_ops *self, int arg1)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_thread_events (...)\n", debug_target.to_shortname);
+  debug_target.to_thread_events (&debug_target, arg1);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_thread_events (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg1);
@@ -4186,6 +4210,8 @@ install_delegators (struct target_ops *ops)
     ops->to_is_async_p = delegate_is_async_p;
   if (ops->to_async == NULL)
     ops->to_async = delegate_async;
+  if (ops->to_thread_events == NULL)
+    ops->to_thread_events = delegate_thread_events;
   if (ops->to_supports_non_stop == NULL)
     ops->to_supports_non_stop = delegate_supports_non_stop;
   if (ops->to_always_non_stop_p == NULL)
@@ -4424,6 +4450,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_can_async_p = tdefault_can_async_p;
   ops->to_is_async_p = tdefault_is_async_p;
   ops->to_async = tdefault_async;
+  ops->to_thread_events = tdefault_thread_events;
   ops->to_supports_non_stop = tdefault_supports_non_stop;
   ops->to_always_non_stop_p = tdefault_always_non_stop_p;
   ops->to_find_memory_regions = dummy_find_memory_regions;
@@ -4579,6 +4606,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_can_async_p = debug_can_async_p;
   ops->to_is_async_p = debug_is_async_p;
   ops->to_async = debug_async;
+  ops->to_thread_events = debug_thread_events;
   ops->to_supports_non_stop = debug_supports_non_stop;
   ops->to_always_non_stop_p = debug_always_non_stop_p;
   ops->to_find_memory_regions = debug_find_memory_regions;

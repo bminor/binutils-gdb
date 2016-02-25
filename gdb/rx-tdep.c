@@ -1,6 +1,6 @@
 /* Target-dependent code for the Renesas RX for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2015 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -813,7 +813,8 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 						struct_addr);
 	    }
 	  else if (TYPE_CODE (arg_type) != TYPE_CODE_STRUCT
-		   && TYPE_CODE (arg_type) != TYPE_CODE_UNION)
+		   && TYPE_CODE (arg_type) != TYPE_CODE_UNION
+		   && arg_size <= 8)
 	    {
 	      /* Argument is a scalar.  */
 	      if (arg_size == 8)

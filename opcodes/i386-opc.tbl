@@ -1,5 +1,5 @@
 // i386 opcode table.
-// Copyright (C) 2007-2015 Free Software Foundation, Inc.
+// Copyright (C) 2007-2016 Free Software Foundation, Inc.
 //
 // This file is part of the GNU opcodes library.
 //
@@ -5951,3 +5951,10 @@ mwaitx, 3, 0xf01, 0xfb, 2, CpuMWAITX|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No
 // Need to ensure only "mwaitx %rax,%rcx,%rbx" is accepted.
 mwaitx, 3, 0xf01, 0xfb, 2, CpuMWAITX|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoRex64|NoAVX, { Reg64, Reg64, Reg64 }
 // MONITORX/MWAITX instructions end
+
+// OSPKE instructions.
+
+rdpkru, 0, 0xf01ee, None, 3, CpuOSPKE, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+wrpkru, 0, 0xf01ef, None, 3, CpuOSPKE, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// OSPKE instructions end.

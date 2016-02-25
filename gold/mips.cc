@@ -1,6 +1,6 @@
 // mips.cc -- mips target support for gold.
 
-// Copyright (C) 2011-2015 Free Software Foundation, Inc.
+// Copyright (C) 2011-2016 Free Software Foundation, Inc.
 // Written by Sasa Stankovic <sasa.stankovic@imgtec.com>
 //        and Aleksandar Simeonov <aleksandar.simeonov@rt-rk.com>.
 // This file contains borrowed and adapted code from bfd/elfxx-mips.c.
@@ -2642,9 +2642,9 @@ class Mips_output_section_reginfo : public Output_section
 // The MIPS target has relocation types which default handling of relocatable
 // relocation cannot process.  So we have to extend the default code.
 
-template<bool big_endian, int sh_type, typename Classify_reloc>
+template<bool big_endian, typename Classify_reloc>
 class Mips_scan_relocatable_relocs :
-  public Default_scan_relocatable_relocs<sh_type, Classify_reloc>
+  public Default_scan_relocatable_relocs<Classify_reloc>
 {
  public:
   // Return the strategy to use for a local symbol which is a section
@@ -2652,7 +2652,7 @@ class Mips_scan_relocatable_relocs :
   inline Relocatable_relocs::Reloc_strategy
   local_section_strategy(unsigned int r_type, Relobj* object)
   {
-    if (sh_type == elfcpp::SHT_RELA)
+    if (Classify_reloc::sh_type == elfcpp::SHT_RELA)
       return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA;
     else
       {
@@ -2662,7 +2662,7 @@ class Mips_scan_relocatable_relocs :
             return Relocatable_relocs::RELOC_SPECIAL;
 
           default:
-            return Default_scan_relocatable_relocs<sh_type, Classify_reloc>::
+            return Default_scan_relocatable_relocs<Classify_reloc>::
                 local_section_strategy(r_type, object);
           }
       }
@@ -2860,6 +2860,190 @@ class Symbol_visitor_check_symbols
   Symbol_table* symtab_;
 };
 
+// Relocation types, parameterized by SHT_REL vs. SHT_RELA, size,
+// and endianness. The relocation format for MIPS-64 is non-standard.
+
+template<int sh_type, int size, bool big_endian>
+struct Mips_reloc_types;
+
+template<bool big_endian>
+struct Mips_reloc_types<elfcpp::SHT_REL, 32, big_endian>
+{
+  typedef typename elfcpp::Rel<32, big_endian> Reloc;
+  typedef typename elfcpp::Rel_write<32, big_endian> Reloc_write;
+
+  static unsigned typename elfcpp::Elf_types<32>::Elf_Swxword
+  get_r_addend(const Reloc*)
+  { return 0; }
+
+  static inline void
+  set_reloc_addend(Reloc_write*,
+		   typename elfcpp::Elf_types<32>::Elf_Swxword)
+  { gold_unreachable(); }
+};
+
+template<bool big_endian>
+struct Mips_reloc_types<elfcpp::SHT_RELA, 32, big_endian>
+{
+  typedef typename elfcpp::Rela<32, big_endian> Reloc;
+  typedef typename elfcpp::Rela_write<32, big_endian> Reloc_write;
+
+  static unsigned typename elfcpp::Elf_types<32>::Elf_Swxword
+  get_r_addend(const Reloc* reloc)
+  { return reloc->get_r_addend(); }
+
+  static inline void
+  set_reloc_addend(Reloc_write* p,
+		   typename elfcpp::Elf_types<32>::Elf_Swxword val)
+  { p->put_r_addend(val); }
+};
+
+template<bool big_endian>
+struct Mips_reloc_types<elfcpp::SHT_REL, 64, big_endian>
+{
+  typedef typename elfcpp::Mips64_rel<big_endian> Reloc;
+  typedef typename elfcpp::Mips64_rel_write<big_endian> Reloc_write;
+
+  static unsigned typename elfcpp::Elf_types<64>::Elf_Swxword
+  get_r_addend(const Reloc*)
+  { return 0; }
+
+  static inline void
+  set_reloc_addend(Reloc_write*,
+		   typename elfcpp::Elf_types<64>::Elf_Swxword)
+  { gold_unreachable(); }
+};
+
+template<bool big_endian>
+struct Mips_reloc_types<elfcpp::SHT_RELA, 64, big_endian>
+{
+  typedef typename elfcpp::Mips64_rela<big_endian> Reloc;
+  typedef typename elfcpp::Mips64_rela_write<big_endian> Reloc_write;
+
+  static unsigned typename elfcpp::Elf_types<64>::Elf_Swxword
+  get_r_addend(const Reloc* reloc)
+  { return reloc->get_r_addend(); }
+
+  static inline void
+  set_reloc_addend(Reloc_write* p,
+		   typename elfcpp::Elf_types<64>::Elf_Swxword val)
+  { p->put_r_addend(val); }
+};
+
+// Forward declaration.
+static unsigned int
+mips_get_size_for_reloc(unsigned int, Relobj*);
+
+// A class for inquiring about properties of a relocation,
+// used while scanning relocs during a relocatable link and
+// garbage collection.
+
+template<int sh_type_, int size, bool big_endian>
+class Mips_classify_reloc;
+
+template<int sh_type_, bool big_endian>
+class Mips_classify_reloc<sh_type_, 32, big_endian> :
+    public gold::Default_classify_reloc<sh_type_, 32, big_endian>
+{
+ public:
+  typedef typename Mips_reloc_types<sh_type_, 32, big_endian>::Reloc
+      Reltype;
+  typedef typename Mips_reloc_types<sh_type_, 32, big_endian>::Reloc_write
+      Reltype_write;
+
+  // Return the symbol referred to by the relocation.
+  static inline unsigned int
+  get_r_sym(const Reltype* reloc)
+  { return elfcpp::elf_r_sym<32>(reloc->get_r_info()); }
+
+  // Return the type of the relocation.
+  static inline unsigned int
+  get_r_type(const Reltype* reloc)
+  { return elfcpp::elf_r_type<32>(reloc->get_r_info()); }
+
+  // Return the explicit addend of the relocation (return 0 for SHT_REL).
+  static inline unsigned int
+  get_r_addend(const Reltype* reloc)
+  {
+    if (sh_type_ == elfcpp::SHT_REL)
+      return 0;
+    return Mips_reloc_types<sh_type_, 32, big_endian>::get_r_addend(reloc);
+  }
+
+  // Write the r_info field to a new reloc, using the r_info field from
+  // the original reloc, replacing the r_sym field with R_SYM.
+  static inline void
+  put_r_info(Reltype_write* new_reloc, Reltype* reloc, unsigned int r_sym)
+  {
+    unsigned int r_type = elfcpp::elf_r_type<32>(reloc->get_r_info());
+    new_reloc->put_r_info(elfcpp::elf_r_info<64>(r_sym, r_type));
+  }
+
+  // Write the r_addend field to a new reloc.
+  static inline void
+  put_r_addend(Reltype_write* to,
+	       typename elfcpp::Elf_types<32>::Elf_Swxword addend)
+  { Mips_reloc_types<sh_type_, 32, big_endian>::set_reloc_addend(to, addend); }
+
+  // Return the size of the addend of the relocation (only used for SHT_REL).
+  static unsigned int
+  get_size_for_reloc(unsigned int r_type, Relobj* obj)
+  { return mips_get_size_for_reloc(r_type, obj); }
+};
+
+template<int sh_type_, bool big_endian>
+class Mips_classify_reloc<sh_type_, 64, big_endian> :
+    public gold::Default_classify_reloc<sh_type_, 64, big_endian>
+{
+ public:
+  typedef typename Mips_reloc_types<sh_type_, 64, big_endian>::Reloc
+      Reltype;
+  typedef typename Mips_reloc_types<sh_type_, 64, big_endian>::Reloc_write
+      Reltype_write;
+
+  // Return the symbol referred to by the relocation.
+  static inline unsigned int
+  get_r_sym(const Reltype* reloc)
+  { return reloc->get_r_sym(); }
+
+  // Return the type of the relocation.
+  static inline unsigned int
+  get_r_type(const Reltype* reloc)
+  { return reloc->get_r_type(); }
+
+  // Return the explicit addend of the relocation (return 0 for SHT_REL).
+  static inline typename elfcpp::Elf_types<64>::Elf_Swxword
+  get_r_addend(const Reltype* reloc)
+  {
+    if (sh_type_ == elfcpp::SHT_REL)
+      return 0;
+    return Mips_reloc_types<sh_type_, 64, big_endian>::get_r_addend(reloc);
+  }
+
+  // Write the r_info field to a new reloc, using the r_info field from
+  // the original reloc, replacing the r_sym field with R_SYM.
+  static inline void
+  put_r_info(Reltype_write* new_reloc, Reltype* reloc, unsigned int r_sym)
+  {
+    new_reloc->put_r_sym(r_sym);
+    new_reloc->put_r_ssym(reloc->get_r_ssym());
+    new_reloc->put_r_type3(reloc->get_r_type3());
+    new_reloc->put_r_type2(reloc->get_r_type2());
+    new_reloc->put_r_type(reloc->get_r_type());
+  }
+
+  // Write the r_addend field to a new reloc.
+  static inline void
+  put_r_addend(Reltype_write* to,
+	       typename elfcpp::Elf_types<64>::Elf_Swxword addend)
+  { Mips_reloc_types<sh_type_, 64, big_endian>::set_reloc_addend(to, addend); }
+
+  // Return the size of the addend of the relocation (only used for SHT_REL).
+  static unsigned int
+  get_size_for_reloc(unsigned int r_type, Relobj* obj)
+  { return mips_get_size_for_reloc(r_type, obj); }
+};
+
 template<int size, bool big_endian>
 class Target_mips : public Sized_target<size, big_endian>
 {
@@ -2870,6 +3054,10 @@ class Target_mips : public Sized_target<size, big_endian>
     Reloca_section;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype32;
   typedef typename elfcpp::Swap<size, big_endian>::Valtype Valtype;
+  typedef typename Mips_reloc_types<elfcpp::SHT_REL, size, big_endian>::Reloc
+      Reltype;
+  typedef typename Mips_reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
+      Relatype;
 
  public:
   Target_mips(const Target::Target_info* info = &mips_info)
@@ -2955,6 +3143,21 @@ class Target_mips : public Sized_target<size, big_endian>
                           const unsigned char* plocal_symbols,
                           Relocatable_relocs*);
 
+  // Scan the relocs for --emit-relocs.
+  void
+  emit_relocs_scan(Symbol_table* symtab,
+		   Layout* layout,
+		   Sized_relobj_file<size, big_endian>* object,
+		   unsigned int data_shndx,
+		   unsigned int sh_type,
+		   const unsigned char* prelocs,
+		   size_t reloc_count,
+		   Output_section* output_section,
+		   bool needs_special_offset_handling,
+		   size_t local_symbol_count,
+		   const unsigned char* plocal_syms,
+		   Relocatable_relocs* rr);
+
   // Emit relocations for a section.
   void
   relocate_relocs(const Relocate_info<size, big_endian>*,
@@ -2964,7 +3167,6 @@ class Target_mips : public Sized_target<size, big_endian>
                   Output_section* output_section,
                   typename elfcpp::Elf_types<size>::Elf_Off
                     offset_in_output_section,
-                  const Relocatable_relocs*,
                   unsigned char* view,
                   Mips_address view_address,
                   section_size_type view_size,
@@ -3165,6 +3367,17 @@ class Target_mips : public Sized_target<size, big_endian>
   use_32bit_micromips_instructions() const
   { return this->insn32_; }
 
+  // Return the r_sym field from a relocation.
+  unsigned int
+  get_r_sym(const unsigned char* preloc) const
+  {
+    // Since REL and RELA relocs share the same structure through
+    // the r_info field, we can just use REL here.
+    Reltype rel(preloc);
+    return Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>::
+	get_r_sym(&rel);
+  }
+
  protected:
   // Return the value to use for a dynamic symbol which requires special
   // treatment.  This is how we support equality comparisons of function
@@ -3269,7 +3482,7 @@ class Target_mips : public Sized_target<size, big_endian>
           Sized_relobj_file<size, big_endian>* object,
           unsigned int data_shndx,
           Output_section* output_section,
-          const elfcpp::Rel<size, big_endian>& reloc, unsigned int r_type,
+          const Reltype& reloc, unsigned int r_type,
           const elfcpp::Sym<size, big_endian>& lsym,
           bool is_discarded);
 
@@ -3278,7 +3491,7 @@ class Target_mips : public Sized_target<size, big_endian>
           Sized_relobj_file<size, big_endian>* object,
           unsigned int data_shndx,
           Output_section* output_section,
-          const elfcpp::Rela<size, big_endian>& reloc, unsigned int r_type,
+          const Relatype& reloc, unsigned int r_type,
           const elfcpp::Sym<size, big_endian>& lsym,
           bool is_discarded);
 
@@ -3287,8 +3500,8 @@ class Target_mips : public Sized_target<size, big_endian>
           Sized_relobj_file<size, big_endian>* object,
           unsigned int data_shndx,
           Output_section* output_section,
-          const elfcpp::Rela<size, big_endian>* rela,
-          const elfcpp::Rel<size, big_endian>* rel,
+          const Relatype* rela,
+          const Reltype* rel,
           unsigned int rel_type,
           unsigned int r_type,
           const elfcpp::Sym<size, big_endian>& lsym,
@@ -3299,7 +3512,7 @@ class Target_mips : public Sized_target<size, big_endian>
            Sized_relobj_file<size, big_endian>* object,
            unsigned int data_shndx,
            Output_section* output_section,
-           const elfcpp::Rel<size, big_endian>& reloc, unsigned int r_type,
+           const Reltype& reloc, unsigned int r_type,
            Symbol* gsym);
 
     inline void
@@ -3307,7 +3520,7 @@ class Target_mips : public Sized_target<size, big_endian>
            Sized_relobj_file<size, big_endian>* object,
            unsigned int data_shndx,
            Output_section* output_section,
-           const elfcpp::Rela<size, big_endian>& reloc, unsigned int r_type,
+           const Relatype& reloc, unsigned int r_type,
            Symbol* gsym);
 
     inline void
@@ -3315,8 +3528,8 @@ class Target_mips : public Sized_target<size, big_endian>
            Sized_relobj_file<size, big_endian>* object,
            unsigned int data_shndx,
            Output_section* output_section,
-           const elfcpp::Rela<size, big_endian>* rela,
-           const elfcpp::Rel<size, big_endian>* rel,
+           const Relatype* rela,
+           const Reltype* rel,
            unsigned int rel_type,
            unsigned int r_type,
            Symbol* gsym);
@@ -3327,7 +3540,7 @@ class Target_mips : public Sized_target<size, big_endian>
                                         Sized_relobj_file<size, big_endian>*,
                                         unsigned int,
                                         Output_section*,
-                                        const elfcpp::Rel<size, big_endian>&,
+                                        const Reltype&,
                                         unsigned int,
                                         const elfcpp::Sym<size, big_endian>&)
     { return false; }
@@ -3338,7 +3551,7 @@ class Target_mips : public Sized_target<size, big_endian>
                                          Sized_relobj_file<size, big_endian>*,
                                          unsigned int,
                                          Output_section*,
-                                         const elfcpp::Rel<size, big_endian>&,
+                                         const Reltype&,
                                          unsigned int, Symbol*)
     { return false; }
 
@@ -3348,7 +3561,7 @@ class Target_mips : public Sized_target<size, big_endian>
                                         Sized_relobj_file<size, big_endian>*,
                                         unsigned int,
                                         Output_section*,
-                                        const elfcpp::Rela<size, big_endian>&,
+                                        const Relatype&,
                                         unsigned int,
                                         const elfcpp::Sym<size, big_endian>&)
     { return false; }
@@ -3359,7 +3572,7 @@ class Target_mips : public Sized_target<size, big_endian>
                                          Sized_relobj_file<size, big_endian>*,
                                          unsigned int,
                                          Output_section*,
-                                         const elfcpp::Rela<size, big_endian>&,
+                                         const Relatype&,
                                          unsigned int, Symbol*)
     { return false; }
    private:
@@ -3392,45 +3605,10 @@ class Target_mips : public Sized_target<size, big_endian>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<size, big_endian>*, Target_mips*,
-             Output_section*, size_t relnum,
-             const elfcpp::Rela<size, big_endian>*,
-             const elfcpp::Rel<size, big_endian>*,
-             unsigned int,
-             unsigned int,  const Sized_symbol<size>*,
-             const Symbol_value<size>*,
-             unsigned char*,
-             Mips_address,
-             section_size_type);
-
-    inline bool
-    relocate(const Relocate_info<size, big_endian>*, Target_mips*,
-             Output_section*, size_t relnum,
-             const elfcpp::Rel<size, big_endian>&,
-             unsigned int, const Sized_symbol<size>*,
-             const Symbol_value<size>*,
-             unsigned char*,
-             Mips_address,
-             section_size_type);
-
-    inline bool
-    relocate(const Relocate_info<size, big_endian>*, Target_mips*,
-             Output_section*, size_t relnum,
-             const elfcpp::Rela<size, big_endian>&,
-             unsigned int, const Sized_symbol<size>*,
-             const Symbol_value<size>*,
-             unsigned char*,
-             Mips_address,
-             section_size_type);
-  };
-
-  // A class which returns the size required for a relocation type,
-  // used while scanning relocs during a relocatable link.
-  class Relocatable_size_for_reloc
-  {
-   public:
-    unsigned int
-    get_size_for_reloc(unsigned int, Relobj*);
+    relocate(const Relocate_info<size, big_endian>*, unsigned int,
+	     Target_mips*, Output_section*, size_t, const unsigned char*,
+	     const Sized_symbol<size>*, const Symbol_value<size>*,
+	     unsigned char*, Mips_address, section_size_type);
   };
 
   // This POD class holds the dynamic relocations that should be emitted instead
@@ -3600,12 +3778,16 @@ class Target_mips : public Sized_target<size, big_endian>
   copy_reloc(Symbol_table* symtab, Layout* layout,
              Sized_relobj_file<size, big_endian>* object,
              unsigned int shndx, Output_section* output_section,
-             Symbol* sym, const elfcpp::Rel<size, big_endian>& reloc)
+             Symbol* sym, const Reltype& reloc)
   {
+    unsigned int r_type =
+	Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>::
+	  get_r_type(&reloc);
     this->copy_relocs_.copy_reloc(symtab, layout,
                                   symtab->get_sized_symbol<size>(sym),
                                   object, shndx, output_section,
-                                  reloc, this->rel_dyn_section(layout));
+				  r_type, reloc.get_r_offset(), 0,
+                                  this->rel_dyn_section(layout));
   }
 
   void
@@ -3749,7 +3931,6 @@ class Target_mips : public Sized_target<size, big_endian>
   // TODO(sasa): This should be a linker option.
   bool insn32_;
 };
-
 
 // Helper structure for R_MIPS*_HI16/LO16 and R_MIPS*_GOT16/LO16 relocations.
 // It records high part of the relocation pair.
@@ -7535,10 +7716,10 @@ Target_mips<size, big_endian>::gc_process_relocs(
                         const unsigned char* plocal_symbols)
 {
   typedef Target_mips<size, big_endian> Mips;
-  typedef typename Target_mips<size, big_endian>::Scan Scan;
+  typedef Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>
+      Classify_reloc;
 
-  gold::gc_process_relocs<size, big_endian, Mips, elfcpp::SHT_REL, Scan,
-                          typename Target_mips::Relocatable_size_for_reloc>(
+  gold::gc_process_relocs<size, big_endian, Mips, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -7570,34 +7751,43 @@ Target_mips<size, big_endian>::scan_relocs(
                         const unsigned char* plocal_symbols)
 {
   typedef Target_mips<size, big_endian> Mips;
-  typedef typename Target_mips<size, big_endian>::Scan Scan;
 
   if (sh_type == elfcpp::SHT_REL)
-    gold::scan_relocs<size, big_endian, Mips, elfcpp::SHT_REL, Scan>(
-      symtab,
-      layout,
-      this,
-      object,
-      data_shndx,
-      prelocs,
-      reloc_count,
-      output_section,
-      needs_special_offset_handling,
-      local_symbol_count,
-      plocal_symbols);
+    {
+      typedef Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>
+	  Classify_reloc;
+
+      gold::scan_relocs<size, big_endian, Mips, Scan, Classify_reloc>(
+	symtab,
+	layout,
+	this,
+	object,
+	data_shndx,
+	prelocs,
+	reloc_count,
+	output_section,
+	needs_special_offset_handling,
+	local_symbol_count,
+	plocal_symbols);
+    }
   else if (sh_type == elfcpp::SHT_RELA)
-    gold::scan_relocs<size, big_endian, Mips, elfcpp::SHT_RELA, Scan>(
-      symtab,
-      layout,
-      this,
-      object,
-      data_shndx,
-      prelocs,
-      reloc_count,
-      output_section,
-      needs_special_offset_handling,
-      local_symbol_count,
-      plocal_symbols);
+    {
+      typedef Mips_classify_reloc<elfcpp::SHT_RELA, size, big_endian>
+	  Classify_reloc;
+
+      gold::scan_relocs<size, big_endian, Mips, Scan, Classify_reloc>(
+	symtab,
+	layout,
+	this,
+	object,
+	data_shndx,
+	prelocs,
+	reloc_count,
+	output_section,
+	needs_special_offset_handling,
+	local_symbol_count,
+	plocal_symbols);
+    }
 }
 
 template<int size, bool big_endian>
@@ -8252,41 +8442,48 @@ Target_mips<size, big_endian>::relocate_section(
   typedef typename Target_mips<size, big_endian>::Relocate Mips_relocate;
 
   if (sh_type == elfcpp::SHT_REL)
-    gold::relocate_section<size, big_endian, Mips, elfcpp::SHT_REL,
-      Mips_relocate, gold::Default_comdat_behavior>(
-      relinfo,
-      this,
-      prelocs,
-      reloc_count,
-      output_section,
-      needs_special_offset_handling,
-      view,
-      address,
-      view_size,
-      reloc_symbol_changes);
+    {
+      typedef Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>
+	  Classify_reloc;
+
+      gold::relocate_section<size, big_endian, Mips, Mips_relocate,
+			     gold::Default_comdat_behavior, Classify_reloc>(
+	relinfo,
+	this,
+	prelocs,
+	reloc_count,
+	output_section,
+	needs_special_offset_handling,
+	view,
+	address,
+	view_size,
+	reloc_symbol_changes);
+    }
   else if (sh_type == elfcpp::SHT_RELA)
-    gold::relocate_section<size, big_endian, Mips, elfcpp::SHT_RELA,
-      Mips_relocate, gold::Default_comdat_behavior>(
-      relinfo,
-      this,
-      prelocs,
-      reloc_count,
-      output_section,
-      needs_special_offset_handling,
-      view,
-      address,
-      view_size,
-     reloc_symbol_changes);
+    {
+      typedef Mips_classify_reloc<elfcpp::SHT_RELA, size, big_endian>
+	  Classify_reloc;
+
+      gold::relocate_section<size, big_endian, Mips, Mips_relocate,
+			     gold::Default_comdat_behavior, Classify_reloc>(
+	relinfo,
+	this,
+	prelocs,
+	reloc_count,
+	output_section,
+	needs_special_offset_handling,
+	view,
+	address,
+	view_size,
+	reloc_symbol_changes);
+    }
 }
 
 // Return the size of a relocation while scanning during a relocatable
 // link.
 
-template<int size, bool big_endian>
 unsigned int
-Target_mips<size, big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
-    unsigned int r_type,
-    Relobj* object)
+mips_get_size_for_reloc(unsigned int r_type, Relobj* object)
 {
   switch (r_type)
     {
@@ -8369,13 +8566,14 @@ Target_mips<size, big_endian>::scan_relocatable_relocs(
                         const unsigned char* plocal_symbols,
                         Relocatable_relocs* rr)
 {
+  typedef Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>
+      Classify_reloc;
+  typedef Mips_scan_relocatable_relocs<big_endian, Classify_reloc>
+      Scan_relocatable_relocs;
+
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  typedef Mips_scan_relocatable_relocs<big_endian, elfcpp::SHT_REL,
-    Relocatable_size_for_reloc> Scan_relocatable_relocs;
-
-  gold::scan_relocatable_relocs<size, big_endian, elfcpp::SHT_REL,
-    Scan_relocatable_relocs>(
+  gold::scan_relocatable_relocs<size, big_endian, Scan_relocatable_relocs>(
     symtab,
     layout,
     object,
@@ -8386,6 +8584,45 @@ Target_mips<size, big_endian>::scan_relocatable_relocs(
     needs_special_offset_handling,
     local_symbol_count,
     plocal_symbols,
+    rr);
+}
+
+// Scan the relocs for --emit-relocs.
+
+template<int size, bool big_endian>
+void
+Target_mips<size, big_endian>::emit_relocs_scan(
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int data_shndx,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_syms,
+    Relocatable_relocs* rr)
+{
+  typedef Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>
+      Classify_reloc;
+  typedef gold::Default_emit_relocs_strategy<Classify_reloc>
+      Emit_relocs_strategy;
+
+  gold_assert(sh_type == elfcpp::SHT_REL);
+
+  gold::scan_relocatable_relocs<size, big_endian, Emit_relocs_strategy>(
+    symtab,
+    layout,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_syms,
     rr);
 }
 
@@ -8401,22 +8638,23 @@ Target_mips<size, big_endian>::relocate_relocs(
                         Output_section* output_section,
                         typename elfcpp::Elf_types<size>::Elf_Off
                           offset_in_output_section,
-                        const Relocatable_relocs* rr,
                         unsigned char* view,
                         Mips_address view_address,
                         section_size_type view_size,
                         unsigned char* reloc_view,
                         section_size_type reloc_view_size)
 {
+  typedef Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>
+      Classify_reloc;
+
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  gold::relocate_relocs<size, big_endian, elfcpp::SHT_REL>(
+  gold::relocate_relocs<size, big_endian, Classify_reloc>(
     relinfo,
     prelocs,
     reloc_count,
     output_section,
     offset_in_output_section,
-    rr,
     view,
     view_address,
     view_size,
@@ -8577,8 +8815,8 @@ Target_mips<size, big_endian>::Scan::local(
                         Sized_relobj_file<size, big_endian>* object,
                         unsigned int data_shndx,
                         Output_section* output_section,
-                        const elfcpp::Rela<size, big_endian>* rela,
-                        const elfcpp::Rel<size, big_endian>* rel,
+                        const Relatype* rela,
+                        const Reltype* rel,
                         unsigned int rel_type,
                         unsigned int r_type,
                         const elfcpp::Sym<size, big_endian>& lsym,
@@ -8588,23 +8826,24 @@ Target_mips<size, big_endian>::Scan::local(
     return;
 
   Mips_address r_offset;
-  typename elfcpp::Elf_types<size>::Elf_WXword r_info;
+  unsigned int r_sym;
   typename elfcpp::Elf_types<size>::Elf_Swxword r_addend;
 
   if (rel_type == elfcpp::SHT_RELA)
     {
       r_offset = rela->get_r_offset();
-      r_info = rela->get_r_info();
+      r_sym = Mips_classify_reloc<elfcpp::SHT_RELA, size, big_endian>::
+	  get_r_sym(rela);
       r_addend = rela->get_r_addend();
     }
   else
     {
       r_offset = rel->get_r_offset();
-      r_info = rel->get_r_info();
+      r_sym = Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>::
+	  get_r_sym(rel);
       r_addend = 0;
     }
 
-  unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
   Mips_relobj<size, big_endian>* mips_obj =
     Mips_relobj<size, big_endian>::as_mips_relobj(object);
 
@@ -8682,7 +8921,6 @@ Target_mips<size, big_endian>::Scan::local(
       // R_MIPS_GOT_LO16 or R_MIPS_CALL_LO16.
       Mips_output_data_got<size, big_endian>* got =
         target->got_section(symtab, layout);
-      unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
       got->record_local_got_symbol(mips_obj, r_sym, r_addend, r_type, -1U);
     }
 
@@ -8817,7 +9055,6 @@ Target_mips<size, big_endian>::Scan::local(
             // executable), we need to create a dynamic relocation for
             // this location.
             Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-            unsigned int r_sym = elfcpp::elf_r_sym<32>(r_info);
             rel_dyn->add_symbolless_local_addend(object, r_sym,
                                                  elfcpp::R_MIPS_REL32,
                                                  output_section, data_shndx,
@@ -8836,7 +9073,6 @@ Target_mips<size, big_endian>::Scan::local(
     case elfcpp::R_MIPS16_TLS_GD:
     case elfcpp::R_MICROMIPS_TLS_GD:
       {
-        unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
         bool output_is_shared = parameters->options().shared();
         const tls::Tls_optimization optimized_type
             = Target_mips<size, big_endian>::optimize_tls_reloc(
@@ -8956,7 +9192,7 @@ Target_mips<size, big_endian>::Scan::local(
                         Sized_relobj_file<size, big_endian>* object,
                         unsigned int data_shndx,
                         Output_section* output_section,
-                        const elfcpp::Rel<size, big_endian>& reloc,
+                        const Reltype& reloc,
                         unsigned int r_type,
                         const elfcpp::Sym<size, big_endian>& lsym,
                         bool is_discarded)
@@ -8971,7 +9207,7 @@ Target_mips<size, big_endian>::Scan::local(
     object,
     data_shndx,
     output_section,
-    (const elfcpp::Rela<size, big_endian>*) NULL,
+    (const Relatype*) NULL,
     &reloc,
     elfcpp::SHT_REL,
     r_type,
@@ -8988,7 +9224,7 @@ Target_mips<size, big_endian>::Scan::local(
                         Sized_relobj_file<size, big_endian>* object,
                         unsigned int data_shndx,
                         Output_section* output_section,
-                        const elfcpp::Rela<size, big_endian>& reloc,
+                        const Relatype& reloc,
                         unsigned int r_type,
                         const elfcpp::Sym<size, big_endian>& lsym,
                         bool is_discarded)
@@ -9004,7 +9240,7 @@ Target_mips<size, big_endian>::Scan::local(
     data_shndx,
     output_section,
     &reloc,
-    (const elfcpp::Rel<size, big_endian>*) NULL,
+    (const Reltype*) NULL,
     elfcpp::SHT_RELA,
     r_type,
     lsym, is_discarded);
@@ -9021,30 +9257,31 @@ Target_mips<size, big_endian>::Scan::global(
                                 Sized_relobj_file<size, big_endian>* object,
                                 unsigned int data_shndx,
                                 Output_section* output_section,
-                                const elfcpp::Rela<size, big_endian>* rela,
-                                const elfcpp::Rel<size, big_endian>* rel,
+                                const Relatype* rela,
+                                const Reltype* rel,
                                 unsigned int rel_type,
                                 unsigned int r_type,
                                 Symbol* gsym)
 {
   Mips_address r_offset;
-  typename elfcpp::Elf_types<size>::Elf_WXword r_info;
+  unsigned int r_sym;
   typename elfcpp::Elf_types<size>::Elf_Swxword r_addend;
 
   if (rel_type == elfcpp::SHT_RELA)
     {
       r_offset = rela->get_r_offset();
-      r_info = rela->get_r_info();
+      r_sym = Mips_classify_reloc<elfcpp::SHT_RELA, size, big_endian>::
+	  get_r_sym(rela);
       r_addend = rela->get_r_addend();
     }
   else
     {
       r_offset = rel->get_r_offset();
-      r_info = rel->get_r_info();
+      r_sym = Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>::
+	  get_r_sym(rel);
       r_addend = 0;
     }
 
-  unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
   Mips_relobj<size, big_endian>* mips_obj =
     Mips_relobj<size, big_endian>::as_mips_relobj(object);
   Mips_symbol<size>* mips_sym = Mips_symbol<size>::as_mips_sym(gsym);
@@ -9461,7 +9698,7 @@ Target_mips<size, big_endian>::Scan::global(
                                 Sized_relobj_file<size, big_endian>* object,
                                 unsigned int data_shndx,
                                 Output_section* output_section,
-                                const elfcpp::Rela<size, big_endian>& reloc,
+                                const Relatype& reloc,
                                 unsigned int r_type,
                                 Symbol* gsym)
 {
@@ -9473,7 +9710,7 @@ Target_mips<size, big_endian>::Scan::global(
     data_shndx,
     output_section,
     &reloc,
-    (const elfcpp::Rel<size, big_endian>*) NULL,
+    (const Reltype*) NULL,
     elfcpp::SHT_RELA,
     r_type,
     gsym);
@@ -9488,7 +9725,7 @@ Target_mips<size, big_endian>::Scan::global(
                                 Sized_relobj_file<size, big_endian>* object,
                                 unsigned int data_shndx,
                                 Output_section* output_section,
-                                const elfcpp::Rel<size, big_endian>& reloc,
+                                const Reltype& reloc,
                                 unsigned int r_type,
                                 Symbol* gsym)
 {
@@ -9499,7 +9736,7 @@ Target_mips<size, big_endian>::Scan::global(
     object,
     data_shndx,
     output_section,
-    (const elfcpp::Rela<size, big_endian>*) NULL,
+    (const Relatype*) NULL,
     &reloc,
     elfcpp::SHT_REL,
     r_type,
@@ -9561,13 +9798,11 @@ template<int size, bool big_endian>
 inline bool
 Target_mips<size, big_endian>::Relocate::relocate(
                         const Relocate_info<size, big_endian>* relinfo,
+                        unsigned int rel_type,
                         Target_mips* target,
                         Output_section* output_section,
                         size_t relnum,
-                        const elfcpp::Rela<size, big_endian>* rela,
-                        const elfcpp::Rel<size, big_endian>* rel,
-                        unsigned int rel_type,
-                        unsigned int r_type,
+                        const unsigned char* preloc,
                         const Sized_symbol<size>* gsym,
                         const Symbol_value<size>* psymval,
                         unsigned char* view,
@@ -9575,19 +9810,29 @@ Target_mips<size, big_endian>::Relocate::relocate(
                         section_size_type)
 {
   Mips_address r_offset;
-  typename elfcpp::Elf_types<size>::Elf_WXword r_info;
+  unsigned int r_sym;
+  unsigned int r_type;
   typename elfcpp::Elf_types<size>::Elf_Swxword r_addend;
 
   if (rel_type == elfcpp::SHT_RELA)
     {
-      r_offset = rela->get_r_offset();
-      r_info = rela->get_r_info();
-      r_addend = rela->get_r_addend();
+      const Relatype rela(preloc);
+      r_offset = rela.get_r_offset();
+      r_sym = Mips_classify_reloc<elfcpp::SHT_RELA, size, big_endian>::
+	  get_r_sym(&rela);
+      r_type = Mips_classify_reloc<elfcpp::SHT_RELA, size, big_endian>::
+	  get_r_type(&rela);
+      r_addend = rela.get_r_addend();
     }
   else
     {
-      r_offset = rel->get_r_offset();
-      r_info = rel->get_r_info();
+
+      const Reltype rel(preloc);
+      r_offset = rel.get_r_offset();
+      r_sym = Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>::
+	  get_r_sym(&rel);
+      r_type = Mips_classify_reloc<elfcpp::SHT_REL, size, big_endian>::
+	  get_r_type(&rel);
       r_addend = 0;
     }
 
@@ -9595,9 +9840,8 @@ Target_mips<size, big_endian>::Relocate::relocate(
   typename Reloc_funcs::Status reloc_status = Reloc_funcs::STATUS_OKAY;
 
   Mips_relobj<size, big_endian>* object =
-    Mips_relobj<size, big_endian>::as_mips_relobj(relinfo->object);
+      Mips_relobj<size, big_endian>::as_mips_relobj(relinfo->object);
 
-  unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
   bool target_is_16_bit_code = false;
   bool target_is_micromips_code = false;
   bool cross_mode_jump;
@@ -10186,68 +10430,6 @@ Target_mips<size, big_endian>::Relocate::relocate(
   return true;
 }
 
-template<int size, bool big_endian>
-inline bool
-Target_mips<size, big_endian>::Relocate::relocate(
-                        const Relocate_info<size, big_endian>* relinfo,
-                        Target_mips* target,
-                        Output_section* output_section,
-                        size_t relnum,
-                        const elfcpp::Rela<size, big_endian>& reloc,
-                        unsigned int r_type,
-                        const Sized_symbol<size>* gsym,
-                        const Symbol_value<size>* psymval,
-                        unsigned char* view,
-                        Mips_address address,
-                        section_size_type view_size)
-{
-  return relocate(
-    relinfo,
-    target,
-    output_section,
-    relnum,
-    &reloc,
-    (const elfcpp::Rel<size, big_endian>*) NULL,
-    elfcpp::SHT_RELA,
-    r_type,
-    gsym,
-    psymval,
-    view,
-    address,
-    view_size);
-}
-
-template<int size, bool big_endian>
-inline bool
-Target_mips<size, big_endian>::Relocate::relocate(
-                        const Relocate_info<size, big_endian>* relinfo,
-                        Target_mips* target,
-                        Output_section* output_section,
-                        size_t relnum,
-                        const elfcpp::Rel<size, big_endian>& reloc,
-                        unsigned int r_type,
-                        const Sized_symbol<size>* gsym,
-                        const Symbol_value<size>* psymval,
-                        unsigned char* view,
-                        Mips_address address,
-                        section_size_type view_size)
-{
-  return relocate(
-    relinfo,
-    target,
-    output_section,
-    relnum,
-    (const elfcpp::Rela<size, big_endian>*) NULL,
-    &reloc,
-    elfcpp::SHT_REL,
-    r_type,
-    gsym,
-    psymval,
-    view,
-    address,
-    view_size);
-}
-
 // Get the Reference_flags for a particular relocation.
 
 template<int size, bool big_endian>
@@ -10490,7 +10672,8 @@ const Target::Target_info Target_mips<size, big_endian>::mips_info =
   0,                    // large_common_section_flags
   NULL,                 // attributes_section
   NULL,                 // attributes_vendor
-  "__start"		// entry_symbol_name
+  "__start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 template<int size, bool big_endian>
@@ -10529,7 +10712,8 @@ const Target::Target_info Target_mips_nacl<size, big_endian>::mips_nacl_info =
   0,                    // large_common_section_flags
   NULL,                 // attributes_section
   NULL,                 // attributes_vendor
-  "_start"              // entry_symbol_name
+  "_start",             // entry_symbol_name
+  32,			// hash_entry_size
 };
 
 // Target selector for Mips.  Note this is never instantiated directly.

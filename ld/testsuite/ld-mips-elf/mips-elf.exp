@@ -1,5 +1,5 @@
 # Expect script for MIPS ELF linker tests
-#   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -665,6 +665,16 @@ set mips16_intermix_test [list \
 run_ld_link_tests $mips16_intermix_test
 
 run_dump_test "mips16-local-stubs-1"
+
+set mips16_fp_stub_test [list \
+    [list "Floating-point stub for mips16 functions" \
+	 "$abi_ldflags(o32)" "" \
+	 "$abi_asflags(o32) -mips32r2" \
+	 {mips16-fp-stub-1.s mips16-fp-stub-2.s} \
+	 {{readelf --debug-dump=frames mips16-fp-stub.d}} \
+	 "mips16-fp-stub"]]
+
+run_ld_link_tests $mips16_fp_stub_test
 
 set o32flagslist [list [list as $abi_asflags(o32)] [list ld $abi_ldflags(o32)]]
 

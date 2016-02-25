@@ -1,5 +1,5 @@
 /* GNU/Linux/m68k specific low level interface, for the remote server for GDB.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -119,7 +119,7 @@ static struct regset_info m68k_regsets[] = {
     FP_REGS,
     m68k_fill_fpregset, m68k_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static const gdb_byte m68k_breakpoint[] = { 0x4E, 0x4F };
@@ -132,23 +132,6 @@ m68k_sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = m68k_breakpoint_len;
   return m68k_breakpoint;
-}
-
-static CORE_ADDR
-m68k_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-
-  collect_register_by_name (regcache, "pc", &pc);
-  return pc;
-}
-
-static void
-m68k_set_pc (struct regcache *regcache, CORE_ADDR value)
-{
-  unsigned long newpc = value;
-
-  supply_register_by_name (regcache, "pc", &newpc);
 }
 
 static int
@@ -222,8 +205,8 @@ struct linux_target_ops the_low_target = {
   m68k_cannot_fetch_register,
   m68k_cannot_store_register,
   NULL, /* fetch_register */
-  m68k_get_pc,
-  m68k_set_pc,
+  linux_get_pc_32bit,
+  linux_set_pc_32bit,
   NULL, /* breakpoint_kind_from_pc */
   m68k_sw_breakpoint_from_kind,
   NULL,

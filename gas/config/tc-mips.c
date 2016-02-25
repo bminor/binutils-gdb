@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -1307,7 +1307,7 @@ static void mips16_macro (struct mips_cl_insn * ip);
 static void mips_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_immed
-  (char *, unsigned int, int, bfd_reloc_code_real_type, offsetT,
+  (const char *, unsigned int, int, bfd_reloc_code_real_type, offsetT,
    unsigned int, unsigned long *);
 static size_t my_getSmallExpression
   (expressionS *, bfd_reloc_code_real_type *, char *);
@@ -2089,10 +2089,8 @@ mips_lookup_ase (const char *name)
 }
 
 /* Return the length of a microMIPS instruction in bytes.  If bits of
-   the mask beyond the low 16 are 0, then it is a 16-bit instruction.
-   Otherwise assume a 32-bit instruction; 48-bit instructions (0x1f
-   major opcode) will require further modifications to the opcode
-   table.  */
+   the mask beyond the low 16 are 0, then it is a 16-bit instruction,
+   otherwise it is a 32-bit instruction.  */
 
 static inline unsigned int
 micromips_insn_length (const struct mips_opcode *mo)
@@ -3464,6 +3462,12 @@ md_begin (void)
     {
       if (g_switch_seen && g_switch_value != 0)
 	as_bad (_("-G may not be used in position-independent code"));
+      g_switch_value = 0;
+    }
+  else if (mips_abicalls)
+    {
+      if (g_switch_seen && g_switch_value != 0)
+	as_bad (_("-G may not be used with abicalls"));
       g_switch_value = 0;
     }
 
@@ -12689,8 +12693,8 @@ macro (struct mips_cl_insn *ip, char *str)
     case M_DROL_I:
       {
 	unsigned int rot;
-	char *l;
-	char *rr;
+	const char *l;
+	const char *rr;
 
 	rot = imm_expr.X_add_number & 0x3f;
 	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
@@ -12769,8 +12773,8 @@ macro (struct mips_cl_insn *ip, char *str)
     case M_DROR_I:
       {
 	unsigned int rot;
-	char *l;
-	char *rr;
+	const char *l;
+	const char *rr;
 
 	rot = imm_expr.X_add_number & 0x3f;
 	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
@@ -13780,7 +13784,7 @@ mips16_immed_in_range_p (const struct mips_int_operand *operand,
    is the length that the user requested, or 0 if none.  */
 
 static void
-mips16_immed (char *file, unsigned int line, int type,
+mips16_immed (const char *file, unsigned int line, int type,
 	      bfd_reloc_code_real_type reloc, offsetT val,
 	      unsigned int user_insn_length, unsigned long *insn)
 {
@@ -16500,7 +16504,7 @@ md_section_align (asection *seg, valueT addr)
   if (align > 4)
     align = 4;
 
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
 /* Utility routine, called from above as well.  If called while the

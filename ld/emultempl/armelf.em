@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 1991-2015 Free Software Foundation, Inc.
+#   Copyright (C) 1991-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -52,6 +52,19 @@ gld${EMULATION_NAME}_before_parse (void)
   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
+}
+
+static void
+gld${EMULATION_NAME}_set_symbols (void)
+{
+  /* PR 19106: The section resizing code in gldarmelf_after_allocation
+     is effectively the same as relaxation, so prevent early memory
+     region checks which produce bogus error messages.
+     Note - this test has nothing to do with symbols.  It is just here
+     because this is the first emulation routine that is called after
+     the command line has been parsed.  */
+  if (!bfd_link_relocatable (&link_info))
+    TARGET_ENABLE_RELAXATION;
 }
 
 static void
@@ -280,55 +293,52 @@ gld${EMULATION_NAME}_after_allocation (void)
 {
   int ret;
 
-  if (!bfd_link_relocatable (&link_info))
+  /* Build a sorted list of input text sections, then use that to process
+     the unwind table index.  */
+  unsigned int list_size = 10;
+  asection **sec_list = (asection **)
+      xmalloc (list_size * sizeof (asection *));
+  unsigned int sec_count = 0;
+
+  LANG_FOR_EACH_INPUT_STATEMENT (is)
     {
-      /* Build a sorted list of input text sections, then use that to process
-	 the unwind table index.  */
-      unsigned int list_size = 10;
-      asection **sec_list = (asection **)
-          xmalloc (list_size * sizeof (asection *));
-      unsigned int sec_count = 0;
+      bfd *abfd = is->the_bfd;
+      asection *sec;
 
-      LANG_FOR_EACH_INPUT_STATEMENT (is)
+      if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+	continue;
+
+      for (sec = abfd->sections; sec != NULL; sec = sec->next)
 	{
-	  bfd *abfd = is->the_bfd;
-	  asection *sec;
+	  asection *out_sec = sec->output_section;
 
-	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
-	    continue;
-
-	  for (sec = abfd->sections; sec != NULL; sec = sec->next)
+	  if (out_sec
+	      && elf_section_data (sec)
+	      && elf_section_type (sec) == SHT_PROGBITS
+	      && (elf_section_flags (sec) & SHF_EXECINSTR) != 0
+	      && (sec->flags & SEC_EXCLUDE) == 0
+	      && sec->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
+	      && out_sec != bfd_abs_section_ptr)
 	    {
-	      asection *out_sec = sec->output_section;
-
-	      if (out_sec
-		  && elf_section_data (sec)
-		  && elf_section_type (sec) == SHT_PROGBITS
-		  && (elf_section_flags (sec) & SHF_EXECINSTR) != 0
-		  && (sec->flags & SEC_EXCLUDE) == 0
-		  && sec->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
-		  && out_sec != bfd_abs_section_ptr)
+	      if (sec_count == list_size)
 		{
-		  if (sec_count == list_size)
-		    {
-		      list_size *= 2;
-		      sec_list = (asection **)
-                          xrealloc (sec_list, list_size * sizeof (asection *));
-		    }
-
-		  sec_list[sec_count++] = sec;
+		  list_size *= 2;
+		  sec_list = (asection **)
+		      xrealloc (sec_list, list_size * sizeof (asection *));
 		}
+
+	      sec_list[sec_count++] = sec;
 	    }
 	}
-
-      qsort (sec_list, sec_count, sizeof (asection *), &compare_output_sec_vma);
-
-      if (elf32_arm_fix_exidx_coverage (sec_list, sec_count, &link_info,
-					   merge_exidx_entries))
-	need_laying_out = 1;
-
-      free (sec_list);
     }
+
+  qsort (sec_list, sec_count, sizeof (asection *), &compare_output_sec_vma);
+
+  if (elf32_arm_fix_exidx_coverage (sec_list, sec_count, &link_info,
+				    merge_exidx_entries))
+    need_laying_out = 1;
+
+  free (sec_list);
 
   /* bfd_elf32_discard_info just plays with debugging sections,
      ie. doesn't affect any code, so we can delay resizing the
@@ -728,6 +738,7 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=arm_elf_create_output_section_statements
 
 # Replace the elf before_parse function with our own.
 LDEMUL_BEFORE_PARSE=gld"${EMULATION_NAME}"_before_parse
+LDEMUL_SET_SYMBOLS=gld"${EMULATION_NAME}"_set_symbols
 
 # Call the extra arm-elf function
 LDEMUL_FINISH=gld${EMULATION_NAME}_finish

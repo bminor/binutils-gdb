@@ -1,6 +1,6 @@
 /* GDB CLI commands.
 
-   Copyright (C) 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 2000-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -818,7 +818,7 @@ edit_command (char *arg, int from_tty)
       arg1 = arg;
       location = string_to_event_location (&arg1, current_language);
       cleanup = make_cleanup_delete_event_location (location);
-      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
+      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, NULL, NULL, 0);
 
       filter_sals (&sals);
       if (! sals.nelts)
@@ -907,7 +907,7 @@ list_command (char *arg, int from_tty)
   cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Pull in the current default source line if necessary.  */
-  if (arg == 0 || arg[0] == '+' || arg[0] == '-')
+  if (arg == NULL || ((arg[0] == '+' || arg[0] == '-') && arg[1] == '\0'))
     {
       set_default_source_symtab_and_line ();
       cursal = get_current_source_symtab_and_line ();
@@ -930,27 +930,26 @@ list_command (char *arg, int from_tty)
 
 	  print_source_lines (cursal.symtab, first,
 			      first + get_lines_to_list (), 0);
-	  return;
 	}
-    }
 
-  /* "l" or "l +" lists next ten lines.  */
+      /* "l" or "l +" lists next ten lines.  */
+      else if (arg == NULL || arg[0] == '+')
+	print_source_lines (cursal.symtab, cursal.line,
+			    cursal.line + get_lines_to_list (), 0);
 
-  if (arg == 0 || strcmp (arg, "+") == 0)
-    {
-      print_source_lines (cursal.symtab, cursal.line,
-			  cursal.line + get_lines_to_list (), 0);
-      return;
-    }
+      /* "l -" lists previous ten lines, the ones before the ten just
+	 listed.  */
+      else if (arg[0] == '-')
+	{
+	  if (get_first_line_listed () == 1)
+	    error (_("Already at the start of %s."),
+		   symtab_to_filename_for_display (cursal.symtab));
+	  print_source_lines (cursal.symtab,
+			      max (get_first_line_listed ()
+				   - get_lines_to_list (), 1),
+			      get_first_line_listed (), 0);
+	}
 
-  /* "l -" lists previous ten lines, the ones before the ten just
-     listed.  */
-  if (strcmp (arg, "-") == 0)
-    {
-      print_source_lines (cursal.symtab,
-			  max (get_first_line_listed () 
-			       - get_lines_to_list (), 1),
-			  get_first_line_listed (), 0);
       return;
     }
 
@@ -972,7 +971,7 @@ list_command (char *arg, int from_tty)
 
       location = string_to_event_location (&arg1, current_language);
       make_cleanup_delete_event_location (location);
-      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
+      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, NULL, NULL, 0);
 
       filter_sals (&sals);
       if (!sals.nelts)
@@ -1016,10 +1015,10 @@ list_command (char *arg, int from_tty)
 	  make_cleanup_delete_event_location (location);
 	  if (dummy_beg)
 	    sals_end = decode_line_1 (location,
-				      DECODE_LINE_LIST_MODE, 0, 0);
+				      DECODE_LINE_LIST_MODE, NULL, NULL, 0);
 	  else
 	    sals_end = decode_line_1 (location, DECODE_LINE_LIST_MODE,
-				      sal.symtab, sal.line);
+				      NULL, sal.symtab, sal.line);
 
 	  filter_sals (&sals_end);
 	  if (sals_end.nelts == 0)
@@ -1897,8 +1896,12 @@ Lines can be specified in these ways:\n\
   FUNCTION, to list around beginning of that function,\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
   *ADDRESS, to list around the line containing that address.\n\
-With two args if one is empty it stands for ten lines away from \
-the other arg."));
+With two args, if one is empty, it stands for ten lines away from\n\
+the other arg.\n\
+\n\
+By default, when a single location is given, display ten lines.\n\
+This can be changed using \"set listsize\", and the current value\n\
+can be shown using \"show listsize\"."));
 
   add_com_alias ("l", "list", class_files, 1);
 

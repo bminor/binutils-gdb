@@ -1,6 +1,6 @@
 /* Generic SDT probe support for GDB.
 
-   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+   Copyright (C) 2012-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -228,6 +228,7 @@ struct bound_probe
    symtabs_and_lines object and updates LOC or throws an error.  */
 
 extern struct symtabs_and_lines parse_probes (const struct event_location *loc,
+					      struct program_space *pspace,
 					      struct linespec_result *canon);
 
 /* Helper function to register the proper probe_ops to a newly created probe.

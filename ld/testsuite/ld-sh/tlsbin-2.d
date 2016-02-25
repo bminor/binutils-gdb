@@ -27,9 +27,7 @@ Section Headers:
  +\[[0-9a-f]+\] \.symtab .*
  +\[[0-9a-f]+\] \.strtab .*
 Key to Flags:
-.*
-.*
-.*
+#...
 
 Elf file type is EXEC \(Executable file\)
 Entry point 0x402000

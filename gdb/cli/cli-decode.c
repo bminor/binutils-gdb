@@ -1,6 +1,6 @@
 /* Handle lists of commands, their decoding and documentation, for GDB.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -855,7 +855,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 struct cmd_list_element *
 add_info (const char *name, cmd_cfunc_ftype *fun, const char *doc)
 {
-  return add_cmd (name, no_class, fun, doc, &infolist);
+  return add_cmd (name, class_info, fun, doc, &infolist);
 }
 
 /* Add an alias to the list of info subcommands.  */

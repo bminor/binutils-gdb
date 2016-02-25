@@ -1,4 +1,4 @@
-# Copyright (C) 1993-2015 Free Software Foundation, Inc.
+# Copyright (C) 1993-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -20,6 +20,13 @@
 # True if the object format is known to be ELF.
 #
 proc is_elf_format {} {
+    # config.sub for these targets curiously transforms a target doublet
+    # ending in -elf to -none.  eg. m68hc12-elf to m68hc12-unknown-none
+    # They are always elf.
+    if { [istarget m68hc1*-*] || [istarget xgate-*] } {
+	return 1;
+    }
+
     if { ![istarget *-*-sysv4*]
 	 && ![istarget *-*-unixware*]
 	 && ![istarget *-*-elf*]

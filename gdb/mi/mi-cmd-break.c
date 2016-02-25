@@ -1,5 +1,5 @@
 /* MI Command Set - breakpoint and watchpoint commands.
-   Copyright (C) 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 2000-2016 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -341,7 +341,7 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
     }
   else
     {
-      location = string_to_event_location (&address, current_language);
+      location = string_to_event_location_basic (&address, current_language);
       if (*address)
 	{
 	  delete_event_location (location);

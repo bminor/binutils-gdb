@@ -1,6 +1,6 @@
 /* This test file is part of GDB, the GNU debugger.
 
-   Copyright 1995-2015 Free Software Foundation, Inc.
+   Copyright 1995-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,18 +28,11 @@
    test_compiler_info.
 
    TODO: all clients should use test_compiler_info and should not
-   use gcc_compiled, hp_cc_compiler, or hp_aCC_compiler.
+   use gcc_compiled.
 
    */
 
-/* Note the semicolon at the end of this line.  Older versions of
-   hp c++ have a bug in string preprocessing: if the last token on a
-   line is a string, then the preprocessor concatenates the next line
-   onto the current line and eats the newline!  That messes up TCL of
-   course.  That happens with HP aC++ A.03.13, but it no longer happens
-   with HP aC++ A.03.45. */
-
-set compiler_info "unknown" ;
+set compiler_info "unknown"
 
 #if defined (__GNUC__)
 #if defined (__GNUC_PATCHLEVEL__)
@@ -48,20 +41,6 @@ set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ __GNUC_PATCHLEVEL__} -]
 #else
 set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ "unknown"} -]
 #endif
-#endif
-
-#if defined (__HP_CXD_SPP)
-/* older hp ansi c, such as A.11.01.25171.gp, defines this */
-set compiler_info [join {hpcc __HP_CXD_SPP} -]
-#endif
-
-#if defined (__HP_cc)
-/* newer hp ansi c, such as B.11.11.28706.gp, defines this */
-set compiler_info [join {hpcc __HP_cc} -]
-#endif
-
-#if defined (__HP_aCC)
-set compiler_info [join {hpacc __HP_aCC} -]
 #endif
 
 #if defined (__xlc__)

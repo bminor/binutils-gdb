@@ -1,5 +1,5 @@
 /* COFF specific linker code.
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -872,9 +872,10 @@ _bfd_coff_final_link (bfd *abfd,
 	      asymbol *sym = bfd_get_outsymbols (sub) [i];
 	      file_ptr pos;
 	      struct internal_syment isym;
-	      bfd_size_type string_size = 0;
+	      union internal_auxent iaux;
+	      bfd_size_type string_size = 0, indx;
 	      bfd_vma written = 0;
-	      bfd_boolean rewrite = FALSE;
+	      bfd_boolean rewrite = FALSE, hash;
 
 	      if (! (sym->flags & BSF_LOCAL)
 		  || (sym->flags & (BSF_SECTION_SYM | BSF_DEBUGGING_RELOC
@@ -900,23 +901,52 @@ _bfd_coff_final_link (bfd *abfd,
 					     * symesz;
 	      if (bfd_seek (abfd, pos, SEEK_SET) != 0)
 		goto error_return;
-	      if (! coff_write_alien_symbol(abfd, sym, &isym, &written,
+	      if (! coff_write_alien_symbol(abfd, sym, &isym, &iaux, &written,
 					    &string_size, NULL, NULL))
 		goto error_return;
 
-	      if (string_size)
-		{
-		  bfd_boolean hash = ! (abfd->flags & BFD_TRADITIONAL_FORMAT);
-		  bfd_size_type indx;
+	      hash = !flaginfo.info->traditional_format;
 
-		  indx = _bfd_stringtab_add (flaginfo.strtab,
-					     bfd_asymbol_name (sym), hash,
+	      if (string_size >= 6 && isym.n_sclass == C_FILE
+		  && ! isym._n._n_n._n_zeroes && isym.n_numaux)
+		{
+		  indx = _bfd_stringtab_add (flaginfo.strtab, ".file", hash,
 					     FALSE);
 		  if (indx == (bfd_size_type) -1)
 		    goto error_return;
 		  isym._n._n_n._n_offset = STRING_SIZE_SIZE + indx;
 		  bfd_coff_swap_sym_out (abfd, &isym, flaginfo.outsyms);
-		  rewrite = TRUE;
+		  if (bfd_seek (abfd, pos, SEEK_SET) != 0
+		      || bfd_bwrite (flaginfo.outsyms, symesz,
+				     abfd) != symesz)
+		    goto error_return;
+		  string_size -= 6;
+		}
+
+	      if (string_size)
+		{
+		  indx = _bfd_stringtab_add (flaginfo.strtab,
+					     bfd_asymbol_name (sym), hash,
+					     FALSE);
+		  if (indx == (bfd_size_type) -1)
+		    goto error_return;
+		  if (isym.n_sclass != C_FILE)
+		    {
+		      isym._n._n_n._n_offset = STRING_SIZE_SIZE + indx;
+		      bfd_coff_swap_sym_out (abfd, &isym, flaginfo.outsyms);
+		      rewrite = TRUE;
+		    }
+		  else
+		    {
+		      BFD_ASSERT (isym.n_numaux == 1);
+		      iaux.x_file.x_n.x_offset = STRING_SIZE_SIZE + indx;
+		      bfd_coff_swap_aux_out (abfd, &iaux, isym.n_type, C_FILE,
+					     0, 1, flaginfo.outsyms + symesz);
+		      if (bfd_seek (abfd, pos + symesz, SEEK_SET) != 0
+			  || bfd_bwrite (flaginfo.outsyms + symesz, symesz,
+					 abfd) != symesz)
+			goto error_return;
+		    }
 		}
 
 	      if (isym.n_sclass == C_FILE)
@@ -1413,7 +1443,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
   if (! flaginfo->info->keep_memory)
     copy = TRUE;
   hash = TRUE;
-  if ((output_bfd->flags & BFD_TRADITIONAL_FORMAT) != 0)
+  if (flaginfo->info->traditional_format)
     hash = FALSE;
 
   if (! _bfd_coff_get_external_symbols (input_bfd))
@@ -1591,7 +1621,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
       /* If this is an enum, struct, or union tag, see if we have
          already output an identical type.  */
       if (! skip
-	  && (flaginfo->output_bfd->flags & BFD_TRADITIONAL_FORMAT) == 0
+	  && !flaginfo->info->traditional_format
 	  && (isym.n_sclass == C_ENTAG
 	      || isym.n_sclass == C_STRTAG
 	      || isym.n_sclass == C_UNTAG)
@@ -2602,7 +2632,7 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
       bfd_size_type indx;
 
       hash = TRUE;
-      if ((output_bfd->flags & BFD_TRADITIONAL_FORMAT) != 0)
+      if (flaginfo->info->traditional_format)
 	hash = FALSE;
       indx = _bfd_stringtab_add (flaginfo->strtab, h->root.root.string, hash,
 				 FALSE);

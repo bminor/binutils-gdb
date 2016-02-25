@@ -1,6 +1,6 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -567,6 +567,26 @@ static const struct symbol_register_ops mdebug_register_funcs = {
 static int mdebug_register_index;
 static int mdebug_regparm_index;
 
+/* Common code for symbols describing data.  */
+
+static void
+add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
+		 struct symbol *s, int aclass_index, struct block *b,
+		 struct objfile *objfile, char *name)
+{
+  SYMBOL_DOMAIN (s) = VAR_DOMAIN;
+  SYMBOL_ACLASS_INDEX (s) = aclass_index;
+  add_symbol (s, top_stack->cur_st, b);
+
+  /* Type could be missing if file is compiled without debugging info.  */
+  if (SC_IS_UNDEF (sh->sc)
+      || sh->sc == scNil || sh->index == indexNil)
+    SYMBOL_TYPE (s) = objfile_type (objfile)->nodebug_data_symbol;
+  else
+    SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
+  /* Value of a data symbol is its memory address.  */
+}
+
 static int
 parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	      struct section_offsets *section_offsets, struct objfile *objfile)
@@ -581,7 +601,6 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
   struct type *t;
   struct field *f;
   int count = 1;
-  enum address_class theclass;
   TIR tir;
   long svalue = sh->value;
   int bitsize;
@@ -622,15 +641,14 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       break;
 
     case stGlobal:		/* External symbol, goes into global block.  */
-      theclass = LOC_STATIC;
       b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (top_stack->cur_st),
 			     GLOBAL_BLOCK);
       s = new_symbol (name);
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
-      goto data;
+      add_data_symbol (sh, ax, bigend, s, LOC_STATIC, b, objfile, name);
+      break;
 
     case stStatic:		/* Static data, goes into current block.  */
-      theclass = LOC_STATIC;
       b = top_stack->cur_block;
       s = new_symbol (name);
       if (SC_IS_COMMON (sh->sc))
@@ -644,29 +662,19 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	}
       else
 	SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
-      goto data;
+      add_data_symbol (sh, ax, bigend, s, LOC_STATIC, b, objfile, name);
+      break;
 
     case stLocal:		/* Local variable, goes into current block.  */
       b = top_stack->cur_block;
       s = new_symbol (name);
       SYMBOL_VALUE (s) = svalue;
       if (sh->sc == scRegister)
-	theclass = mdebug_register_index;
+	add_data_symbol (sh, ax, bigend, s, mdebug_register_index,
+			 b, objfile, name);
       else
-	theclass = LOC_LOCAL;
-
-    data:			/* Common code for symbols describing data.  */
-      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
-      SYMBOL_ACLASS_INDEX (s) = theclass;
-      add_symbol (s, top_stack->cur_st, b);
-
-      /* Type could be missing if file is compiled without debugging info.  */
-      if (SC_IS_UNDEF (sh->sc)
-	  || sh->sc == scNil || sh->index == indexNil)
-	SYMBOL_TYPE (s) = objfile_type (objfile)->nodebug_data_symbol;
-      else
-	SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
-      /* Value of a data symbol is its memory address.  */
+	add_data_symbol (sh, ax, bigend, s, LOC_LOCAL,
+			 b, objfile, name);
       break;
 
     case stParam:		/* Arg to procedure, goes into current

@@ -1,6 +1,6 @@
 /* Everything about signal catchpoints, for GDB.
 
-   Copyright (C) 2011-2015 Free Software Foundation, Inc.
+   Copyright (C) 2011-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -220,14 +220,16 @@ signal_catchpoint_print_it (bpstat bs)
   ptid_t ptid;
   struct target_waitstatus last;
   const char *signal_name;
+  struct ui_out *uiout = current_uiout;
 
   get_last_target_status (&ptid, &last);
 
   signal_name = signal_to_name_or_int (last.value.sig);
 
   annotate_catchpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
 
-  printf_filtered (_("\nCatchpoint %d (signal %s), "), b->number, signal_name);
+  printf_filtered (_("Catchpoint %d (signal %s), "), b->number, signal_name);
 
   return PRINT_SRC_AND_LOC;
 }
@@ -279,7 +281,7 @@ signal_catchpoint_print_one (struct breakpoint *b,
 	  obstack_grow (&text, name, strlen (name));
         }
       obstack_grow (&text, "", 1);
-      ui_out_field_string (uiout, "what", obstack_base (&text));
+      ui_out_field_string (uiout, "what", (const char *) obstack_base (&text));
       do_cleanups (cleanup);
     }
   else

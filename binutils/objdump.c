@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -488,9 +488,23 @@ dump_section_header (bfd *abfd, asection *section,
     }
   PF (SEC_SMALL_DATA, "SMALL_DATA");
   if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
-    PF (SEC_COFF_SHARED, "SHARED");
+    {
+      PF (SEC_COFF_SHARED, "SHARED");
+      PF (SEC_COFF_NOREAD, "NOREAD");
+    }
+  else if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      /* Note - sections can have both the READONLY and NOREAD attributes
+	 set.  In this case the NOREAD takes precedence, but we report both
+	 since the user may need to know that both bits are set.  */
+      PF (SEC_ELF_NOREAD, "NOREAD");
+    }
   PF (SEC_THREAD_LOCAL, "THREAD_LOCAL");
   PF (SEC_GROUP, "GROUP");
+  if (bfd_get_arch (abfd) == bfd_arch_mep)
+    {
+      PF (SEC_MEP_VLIW, "VLIW");
+    }
 
   if ((section->flags & SEC_LINK_ONCE) != 0)
     {

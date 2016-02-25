@@ -1,5 +1,5 @@
 /* tc-m32r.c -- Assembler for the Renesas M32R.
-   Copyright (C) 1996-2015 Free Software Foundation, Inc.
+   Copyright (C) 1996-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1450,7 +1450,7 @@ md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
 
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }
 
 symbolS *
@@ -2300,7 +2300,7 @@ printf(" => %s\n",reloc->howto->name);
 }
 
 inline static char *
-m32r_end_of_match (char *cont, char *what)
+m32r_end_of_match (char *cont, const char *what)
 {
   int len = strlen (what);
 

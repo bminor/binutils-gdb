@@ -1,5 +1,5 @@
 /* tc-z8k.c -- Assemble code for the Zilog Z800n
-   Copyright (C) 1992-2015 Free Software Foundation, Inc.
+   Copyright (C) 1992-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -380,7 +380,7 @@ checkfor (char *ptr, char what)
 /* Make sure the mode supplied is the size of a word.  */
 
 static void
-regword (int mode, char *string)
+regword (int mode, const char *string)
 {
   int ok;
 
@@ -394,7 +394,7 @@ regword (int mode, char *string)
 /* Make sure the mode supplied is the size of an address.  */
 
 static void
-regaddr (int mode, char *string)
+regaddr (int mode, const char *string)
 {
   int ok;
 
@@ -407,7 +407,7 @@ regaddr (int mode, char *string)
 
 struct ctrl_names {
   int value;
-  char *name;
+  const char *name;
 };
 
 static struct ctrl_names ctrl_table[] = {
@@ -450,7 +450,7 @@ get_ctrl_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UN
 
 struct flag_names {
   int value;
-  char *name;
+  const char *name;
 };
 
 static struct flag_names flag_table[] = {
@@ -500,7 +500,7 @@ get_flags_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_U
 
 struct interrupt_names {
   int value;
-  char *name;
+  const char *name;
 };
 
 static struct interrupt_names intr_table[] = {
@@ -564,7 +564,7 @@ get_interrupt_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBU
 
 struct cc_names {
   int value;
-  char *name;
+  const char *name;
 };
 
 static struct cc_names table[] = {

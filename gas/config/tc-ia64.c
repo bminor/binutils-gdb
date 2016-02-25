@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -302,7 +302,7 @@ static struct
 	struct label_fix *tag_fixups;
 	struct unw_rec_list *unwind_record;	/* Unwind directive.  */
 	expressionS opnd[6];
-	char *src_file;
+	const char *src_file;
 	unsigned int src_line;
 	struct dwarf2_line_info debug_line;
       }
@@ -672,7 +672,7 @@ static struct rsrc {
   int insn_srlz;                    /* current insn serialization state */
   int data_srlz;                    /* current data serialization state */
   int qp_regno;                     /* qualifying predicate for this usage */
-  char *file;                       /* what file marked this dependency */
+  const char *file;                       /* what file marked this dependency */
   unsigned int line;                /* what line marked this dependency */
   struct mem_offset mem_offset;     /* optional memory offset hint */
   enum { CMP_NONE, CMP_OR, CMP_AND } cmp_type; /* OR or AND compare? */
@@ -3339,7 +3339,7 @@ dot_vframe (int dummy ATTRIBUTE_UNUSED)
   if (! (unwind.prologue_mask & 2))
     add_unwind_entry (output_psp_gr (reg), NOT_A_CHAR);
   else if (reg != unwind.prologue_gr
-		  + (unsigned) popcount (unwind.prologue_mask & (-2 << 1)))
+		  + (unsigned) popcount (unwind.prologue_mask & -(2 << 1)))
     as_warn (_("Operand of .vframe contradicts .prologue"));
 }
 
@@ -3421,7 +3421,7 @@ dot_save (int dummy ATTRIBUTE_UNUSED)
       if (! (unwind.prologue_mask & 4))
 	add_unwind_entry (output_pfs_gr (reg2), NOT_A_CHAR);
       else if (reg2 != unwind.prologue_gr
-		       + (unsigned) popcount (unwind.prologue_mask & (-4 << 1)))
+		       + (unsigned) popcount (unwind.prologue_mask & -(4 << 1)))
 	as_warn (_("Second operand of .save contradicts .prologue"));
       break;
     case REG_AR + AR_LC:
@@ -3440,7 +3440,7 @@ dot_save (int dummy ATTRIBUTE_UNUSED)
       if (! (unwind.prologue_mask & 1))
 	add_unwind_entry (output_preds_gr (reg2), NOT_A_CHAR);
       else if (reg2 != unwind.prologue_gr
-		       + (unsigned) popcount (unwind.prologue_mask & (-1 << 1)))
+		       + (unsigned) popcount (unwind.prologue_mask & -(1 << 1)))
 	as_warn (_("Second operand of .save contradicts .prologue"));
       break;
     case REG_PRIUNAT:
@@ -4360,12 +4360,14 @@ dot_prologue (int dummy ATTRIBUTE_UNUSED)
 	as_warn (_("Pointless use of zero first operand to .prologue"));
       else
 	mask = e.X_add_number;
-	n = popcount (mask);
+
+      n = popcount (mask);
 
       if (sep == ',')
 	parse_operand_and_eval (&e, 0);
       else
 	e.X_op = O_absent;
+
       if (e.X_op == O_constant
 	  && e.X_add_number >= 0
 	  && e.X_add_number < 128)
@@ -4385,7 +4387,6 @@ dot_prologue (int dummy ATTRIBUTE_UNUSED)
 	  as_bad (_("Second operand to .prologue must be the first of %d general registers"), n);
 	  grsave = 0;
 	}
-
     }
 
   if (mask)
@@ -10855,7 +10856,7 @@ md_assemble (char *str)
   /* Build the instruction.  */
   CURR_SLOT.qp_regno = qp_regno;
   CURR_SLOT.idesc = idesc;
-  as_where (&CURR_SLOT.src_file, &CURR_SLOT.src_line);
+  CURR_SLOT.src_file = as_where (&CURR_SLOT.src_line);
   dwarf2_where (&CURR_SLOT.debug_line);
   dwarf2_consume_line_info ();
 
@@ -11765,7 +11766,7 @@ ia64_check_label (symbolS *label)
    the relocatable file.  */
 struct alias
 {
-  char *file;		/* The file where the directive is seen.  */
+  const char *file;		/* The file where the directive is seen.  */
   unsigned int line;	/* The line number the directive is at.  */
   const char *name;	/* The original name of the symbol.  */
 };
@@ -11858,7 +11859,7 @@ dot_alias (int section)
     }
 
   h = (struct alias *) xmalloc (sizeof (struct alias));
-  as_where (&h->file, &h->line);
+  h->file = as_where (&h->line);
   h->name = name;
 
   error_string = hash_jam (ahash, alias, (void *) h);

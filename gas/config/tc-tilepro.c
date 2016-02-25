@@ -1,5 +1,5 @@
 /* tc-tilepro.c -- Assemble for a TILEPro chip.
-   Copyright (C) 2011-2015 Free Software Foundation, Inc.
+   Copyright (C) 2011-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -352,7 +352,7 @@ static tilepro_bundle_bits
 insert_operand (tilepro_bundle_bits bits,
                 const struct tilepro_operand *operand,
                 int operand_value,
-                char *file,
+                const char *file,
                 unsigned lineno)
 {
   /* Range-check the immediate.  */

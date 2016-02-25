@@ -1,6 +1,6 @@
 /* Work with executable files, for GDB. 
 
-   Copyright (C) 1988-2015 Free Software Foundation, Inc.
+   Copyright (C) 1988-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -141,6 +141,7 @@ void
 exec_file_locate_attach (int pid, int from_tty)
 {
   char *exec_file, *full_exec_path = NULL;
+  struct cleanup *old_chain;
 
   /* Do nothing if we already have an executable filename.  */
   exec_file = (char *) get_exec_file (0);
@@ -155,9 +156,12 @@ exec_file_locate_attach (int pid, int from_tty)
   /* If gdb_sysroot is not empty and the discovered filename
      is absolute then prefix the filename with gdb_sysroot.  */
   if (*gdb_sysroot != '\0' && IS_ABSOLUTE_PATH (exec_file))
-    full_exec_path = exec_file_find (exec_file, NULL);
-
-  if (full_exec_path == NULL)
+    {
+      full_exec_path = exec_file_find (exec_file, NULL);
+      if (full_exec_path == NULL)
+	return;
+    }
+  else
     {
       /* It's possible we don't have a full path, but rather just a
 	 filename.  Some targets, such as HP-UX, don't provide the
@@ -170,8 +174,12 @@ exec_file_locate_attach (int pid, int from_tty)
 	full_exec_path = xstrdup (exec_file);
     }
 
+  old_chain = make_cleanup (xfree, full_exec_path);
+
   exec_file_attach (full_exec_path, from_tty);
   symbol_file_add_main (full_exec_path, from_tty);
+
+  do_cleanups (old_chain);
 }
 
 /* Set FILENAME as the new exec file.
@@ -254,7 +262,7 @@ exec_file_attach (const char *filename, int from_tty)
 #if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
 	  if (scratch_chan < 0)
 	    {
-	      char *exename = alloca (strlen (filename) + 5);
+	      char *exename = (char *) alloca (strlen (filename) + 5);
 
 	      strcat (strcpy (exename, filename), ".exe");
 	      scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST,

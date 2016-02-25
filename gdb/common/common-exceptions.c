@@ -1,6 +1,6 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,9 +20,9 @@
 #include "common-defs.h"
 #include "common-exceptions.h"
 
-const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, NULL };
+const struct gdb_exception exception_none = { (enum return_reason) 0, GDB_NO_ERROR, NULL };
 
-#ifndef __cplusplus
+#if GDB_XCPT == GDB_XCPT_SJMP
 
 /* Possible catcher states.  */
 enum catcher_state {
@@ -213,7 +213,7 @@ exceptions_state_mc_action_iter_1 (void)
   return exceptions_state_mc (CATCH_ITER_1);
 }
 
-#else /* !__cplusplus */
+#else /* !GDB_XCPT_SJMP */
 
 /* How many nested TRY blocks we have.  See exception_messages and
    throw_it.  */
@@ -261,7 +261,7 @@ gdb_exception_sliced_copy (struct gdb_exception *to, const struct gdb_exception 
   *to = *from;
 }
 
-#endif /* !__cplusplus */
+#endif /* !GDB_XCPT_SJMP */
 
 /* Return EXCEPTION to the nearest containing catch_errors().  */
 
@@ -272,7 +272,7 @@ throw_exception (struct gdb_exception exception)
 
   do_cleanups (all_cleanups ());
 
-#ifndef __cplusplus
+#if GDB_XCPT == GDB_XCPT_SJMP
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h.  */
@@ -320,7 +320,7 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
 {
   struct gdb_exception e;
   char *new_message;
-#ifndef __cplusplus
+#if GDB_XCPT == GDB_XCPT_SJMP
   int depth = catcher_list_size ();
 #else
   int depth = try_scope_depth;

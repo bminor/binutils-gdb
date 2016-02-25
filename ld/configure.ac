@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script
 dnl
-dnl   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2016 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -215,23 +215,11 @@ AC_SEARCH_LIBS([dlopen], [dl])
 AM_CONDITIONAL([ENABLE_PLUGINS], [test x$plugins = xyes])
 
 AC_ARG_ENABLE(initfini-array,
-	[  --enable-initfini-array	use .init_array/.fini_array sections],
-	[], [
-AC_CACHE_CHECK(for .preinit_array/.init_array/.fini_array support,
-		 gcc_cv_initfini_array, [dnl
-  if test "x${build}" = "x${target}" ; then
-    AC_RUN_IFELSE([AC_LANG_SOURCE([
-static int x = -1;
-int main (void) { return x; }
-int foo (void) { x = 0; }
-int (*fp) (void) __attribute__ ((section (".init_array"))) = foo;])],
-	     [gcc_cv_initfini_array=yes], [gcc_cv_initfini_array=no],
-	     [gcc_cv_initfini_array=no])
-   else
-     gcc_cv_initfini_array=no
-   fi])
-  enable_initfini_array=$gcc_cv_initfini_array
-])
+[  --disable-initfini-array do not use .init_array/.fini_array sections],
+[case "${enableval}" in
+ yes|no) ;;
+ *) AC_MSG_ERROR([invalid --enable-initfini-array argument]) ;;
+ esac], [enable_initfini_array=yes])
 AC_SUBST(enable_initfini_array)
 if test $enable_initfini_array = yes; then
   AC_DEFINE(HAVE_INITFINI_ARRAY, 1,
@@ -384,7 +372,7 @@ do
   fi
 done
 
-if test x$ac_default_compressed_debug_sections == xyes ; then
+if test x$ac_default_compressed_debug_sections = xyes ; then
   AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
 fi
 

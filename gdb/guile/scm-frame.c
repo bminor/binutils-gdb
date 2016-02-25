@@ -1,6 +1,6 @@
 /* Scheme interface to stack frames.
 
-   Copyright (C) 2008-2015 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1045,7 +1045,7 @@ gdbscm_unwind_stop_reason_string (SCM reason_scm)
   if (reason < UNWIND_FIRST || reason > UNWIND_LAST)
     scm_out_of_range (FUNC_NAME, reason_scm);
 
-  str = unwind_stop_reason_to_string (reason);
+  str = unwind_stop_reason_to_string ((enum unwind_stop_reason) reason);
   return gdbscm_scm_from_c_string (str);
 }
 

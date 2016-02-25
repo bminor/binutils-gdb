@@ -6,9 +6,7 @@ sinclude(../common/acinclude.m4)
 SIM_AC_COMMON
 
 dnl Options available in this module
-SIM_AC_OPTION_INLINE()
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
-SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_WARNINGS
 SIM_AC_OPTION_RESERVED_BITS(1)
 
@@ -37,14 +35,14 @@ AC_SUBST(SIM_SUBTARGET)
 mips_endian=
 default_endian=
 case "${target}" in
-  mips64el*-*-*)	mips_endian=LITTLE_ENDIAN ;;
-  mips64vr*el-*-*)      default_endian=LITTLE_ENDIAN ;;
-  mips64*-*-*)          default_endian=BIG_ENDIAN ;;
-  mips16*-*-*)          default_endian=BIG_ENDIAN ;;
-  mipsisa32*-*-*)       default_endian=BIG_ENDIAN ;;
-  mipsisa64*-*-*)       default_endian=BIG_ENDIAN ;;
-  mips*-*-*)            default_endian=BIG_ENDIAN ;;
-  *)                    default_endian=BIG_ENDIAN ;;
+  mips64el*-*-*)        mips_endian=LITTLE ;;
+  mips64vr*el-*-*)      default_endian=LITTLE ;;
+  mips64*-*-*)          default_endian=BIG ;;
+  mips16*-*-*)          default_endian=BIG ;;
+  mipsisa32*-*-*)       default_endian=BIG ;;
+  mipsisa64*-*-*)       default_endian=BIG ;;
+  mips*-*-*)            default_endian=BIG ;;
+  *)                    default_endian=BIG ;;
 esac
 SIM_AC_OPTION_ENDIAN($mips_endian,$default_endian)
 
@@ -85,16 +83,6 @@ case "${target}" in
   *)                    mips_fpu=HARD_FLOATING_POINT ;;
 esac
 SIM_AC_OPTION_FLOAT($mips_fpu,$mips_fpu_bitsize)
-
-
-
-#
-# Select the level of SMP support
-#
-case "${target}" in
-  *)                    mips_smp=0 ;;
-esac
-SIM_AC_OPTION_SMP($mips_smp)
 
 
 
@@ -234,7 +222,7 @@ if test ${sim_gen} = MULTI; then
 
   cat << __EOF__ > multi-run.c
 /* Main entry point for MULTI simulators.
-   Copyright (C) 2003-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -271,7 +259,7 @@ sim_engine_run (SIM_DESC sd,
 
   if (STATE_ARCHITECTURE (sd) == NULL)
     mach = bfd_mach_${sim_multi_default};
-  else if (elf_elfheader (sd->base.prog_bfd)->e_flags
+  else if (elf_elfheader (STATE_PROG_BFD (sd))->e_flags
 	   & EF_MIPS_ARCH_ASE_MICROMIPS)
     mach = bfd_mach_mips_micromips;
   else
@@ -444,7 +432,6 @@ case "${target}" in
   mips*tx39*)
 	hw_enabled=yes
 	hw_extra_devices="tx3904cpu tx3904irc tx3904tmr tx3904sio" 
-	SIM_SUBTARGET="$SIM_SUBTARGET -DTARGET_TX3904=1"
 	;;
   *)
 	;;

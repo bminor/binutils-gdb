@@ -1,4 +1,4 @@
-# Copyright 2011-2015 Free Software Foundation, Inc.
+# Copyright 2011-2016 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -56,14 +56,6 @@ if ![runto_main] {
 if { ![gdb_target_supports_trace] } then {
     unsupported "Current target does not support trace"
     return -1
-}
-
-if [is_amd64_regs_target] {
-    set pcreg "rip"
-} elseif [is_x86_like_target] {
-    set pcreg "eip"
-} else {
-    set pcreg "pc"
 }
 
 

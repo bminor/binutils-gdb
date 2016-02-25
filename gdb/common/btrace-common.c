@@ -1,4 +1,4 @@
-/* Copyright (C) 2014-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -35,7 +35,7 @@ btrace_format_string (enum btrace_format format)
       return _("Branch Trace Store");
 
     case BTRACE_FORMAT_PT:
-      return _("Intel(R) Processor Trace");
+      return _("Intel Processor Trace");
     }
 
   internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));

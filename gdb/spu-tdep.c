@@ -1,5 +1,5 @@
 /* SPU target-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2006-2015 Free Software Foundation, Inc.
+   Copyright (C) 2006-2016 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
    Based on a port by Sid Manning <sid@us.ibm.com>.
@@ -2001,7 +2001,7 @@ spu_catch_start (struct objfile *objfile)
 
   /* Use a numerical address for the set_breakpoint command to avoid having
      the breakpoint re-set incorrectly.  */
-  location = new_address_location (pc);
+  location = new_address_location (pc, NULL, 0);
   back_to = make_cleanup_delete_event_location (location);
   create_breakpoint (get_objfile_arch (objfile), location,
 		     NULL /* cond_string */, -1 /* thread */,

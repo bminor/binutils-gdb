@@ -1,6 +1,6 @@
 /* GNU/Linux/Nios II specific low level interface, for the remote server for
    GDB.
-   Copyright (C) 2008-2015 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
    Contributed by Mentor Graphics, Inc.
 
@@ -95,28 +95,6 @@ nios2_cannot_store_register (int regno)
   return 0;
 }
 
-/* Implement the get_pc linux_target_ops method.  */
-
-static CORE_ADDR
-nios2_get_pc (struct regcache *regcache)
-{
-  union nios2_register pc;
-
-  collect_register_by_name (regcache, "pc", pc.buf);
-  return pc.reg32;
-}
-
-/* Implement the set_pc linux_target_ops method.  */
-
-static void
-nios2_set_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  union nios2_register newpc;
-
-  newpc.reg32 = pc;
-  supply_register_by_name (regcache, "pc", newpc.buf);
-}
-
 /* Breakpoint support.  Also see comments on nios2_breakpoint_from_pc
    in nios2-tdep.c.  */
 
@@ -142,18 +120,6 @@ nios2_sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = nios2_breakpoint_len;
   return (const gdb_byte *) &nios2_breakpoint;
-}
-
-/* Implement the breakpoint_reinsert_addr linux_target_ops method.  */
-
-static CORE_ADDR
-nios2_reinsert_addr (void)
-{
-  union nios2_register ra;
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
-
-  collect_register_by_name (regcache, "ra", ra.buf);
-  return ra.reg32;
 }
 
 /* Implement the breakpoint_at linux_target_ops method.  */
@@ -239,7 +205,7 @@ static struct regset_info nios2_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
     nios2_num_regs * 4, GENERAL_REGS,
     nios2_fill_gregset, nios2_store_gregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info nios2_regsets_info =
@@ -275,11 +241,11 @@ struct linux_target_ops the_low_target =
   nios2_cannot_fetch_register,
   nios2_cannot_store_register,
   NULL,
-  nios2_get_pc,
-  nios2_set_pc,
+  linux_get_pc_32bit,
+  linux_set_pc_32bit,
   NULL, /* breakpoint_kind_from_pc */
   nios2_sw_breakpoint_from_kind,
-  nios2_reinsert_addr,
+  NULL, /* get_next_pcs */
   0,
   nios2_breakpoint_at,
 };

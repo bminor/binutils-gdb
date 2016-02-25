@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright (C) 1992-2015 Free Software Foundation, Inc.
+   Copyright (C) 1992-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -282,14 +282,17 @@ elf_file_symbol (const char *s, int appfile)
 
       symbol_get_bfdsym (sym)->flags |= BSF_FILE;
 
-      if (symbol_rootP != sym)
+      if (symbol_rootP != sym
+	  && (symbol_rootP->bsym == NULL
+	      || !(symbol_rootP->bsym->flags & BSF_FILE)))
 	{
 	  symbol_remove (sym, &symbol_rootP, &symbol_lastP);
 	  symbol_insert (sym, symbol_rootP, &symbol_rootP, &symbol_lastP);
-#ifdef DEBUG
-	  verify_symbol_chain (symbol_rootP, symbol_lastP);
-#endif
 	}
+
+#ifdef DEBUG
+      verify_symbol_chain (symbol_rootP, symbol_lastP);
+#endif
     }
 
 #ifdef NEED_ECOFF_DEBUG
@@ -544,7 +547,7 @@ get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 
 void
 obj_elf_change_section (const char *name,
-			int type,
+			unsigned int type,
 			bfd_vma attr,
 			int entsize,
 			const char *group_name,
@@ -618,7 +621,9 @@ obj_elf_change_section (const char *name,
 	      && ssect->type != SHT_PREINIT_ARRAY)
 	    {
 	      /* We allow to specify any type for a .note section.  */
-	      if (ssect->type != SHT_NOTE)
+	      if (ssect->type != SHT_NOTE
+		  /* Processor and application defined types are allowed too.  */
+		  && type < SHT_LOPROC)
 		as_warn (_("setting incorrect section type for %s"),
 			 name);
 	    }
@@ -630,7 +635,8 @@ obj_elf_change_section (const char *name,
 	    }
 	}
 
-      if (old_sec == NULL && (attr & ~ssect->attr) != 0)
+      if (old_sec == NULL && ((attr & ~(SHF_MASKOS | SHF_MASKPROC))
+			      & ~ssect->attr) != 0)
 	{
 	  /* As a GNU extension, we permit a .note section to be
 	     allocatable.  If the linker sees an allocatable .note
@@ -679,6 +685,7 @@ obj_elf_change_section (const char *name,
 	      override = TRUE;
 	    }
 	}
+
       if (!override && old_sec == NULL)
 	attr |= ssect->attr;
     }
@@ -742,6 +749,11 @@ obj_elf_change_section (const char *name,
 		  | SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
 		  | SEC_THREAD_LOCAL)))
 	    as_warn (_("ignoring changed section attributes for %s"), name);
+	  else
+	    /* FIXME: Maybe we should consider removing a previously set
+	       processor or application specific attribute as suspicious ?  */
+	    elf_section_flags (sec) = attr;
+
 	  if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	    as_warn (_("ignoring changed section entity size for %s"), name);
 	}
@@ -803,14 +815,26 @@ obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *is_clone)
 	    }
 	default:
 	  {
-	    char *bad_msg = _("unrecognized .section attribute: want a,e,w,x,M,S,G,T");
+	    char *bad_msg = _("unrecognized .section attribute: want a,e,w,x,M,S,G,T or number");
 #ifdef md_elf_section_letter
 	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr != (bfd_vma) -1)
 	      attr |= md_attr;
 	    else
 #endif
-	      as_fatal ("%s", bad_msg);
+	      if (ISDIGIT (*str))
+		{
+		  char * end;
+
+		  attr |= strtoul (str, & end, 0);
+		  /* Update str and len, allowing for the fact that
+		     we will execute str++ and len-- below.  */
+		  end --;
+		  len -= (end - str);
+		  str = end;
+		}
+	      else
+		as_fatal ("%s", bad_msg);
 	  }
 	  break;
 	}
@@ -843,6 +867,17 @@ obj_elf_section_type (char *str, size_t len, bfd_boolean warn)
       return md_type;
   }
 #endif
+
+  if (ISDIGIT (*str))
+    {
+      char * end;
+      int type = strtoul (str, & end, 0);
+
+      if (warn && (size_t) (end - str) != len)
+	as_warn (_("extraneous characters at end of numeric section type"));
+
+      return type;
+    }
 
   if (warn)
     as_warn (_("unrecognized section type"));
@@ -1043,9 +1078,17 @@ obj_elf_section (int push)
 	      else if (c == '@' || c == '%')
 		{
 		  ++input_line_pointer;
-		  c = get_symbol_name (& beg);
-		  (void) restore_line_pointer (c);
-		  type = obj_elf_section_type (beg, input_line_pointer - beg, TRUE);
+
+		  if (ISDIGIT (* input_line_pointer))
+		    {
+		      type = strtoul (input_line_pointer, & input_line_pointer, 0);
+		    }
+		  else
+		    {
+		      c = get_symbol_name (& beg);
+		      (void) restore_line_pointer (c);
+		      type = obj_elf_section_type (beg, input_line_pointer - beg, TRUE);
+		    }
 		}
 	      else
 		input_line_pointer = save;
@@ -2002,7 +2045,7 @@ obj_elf_ident (int ignore ATTRIBUTE_UNUSED)
 void
 obj_elf_init_stab_section (segT seg)
 {
-  char *file;
+  const char *file;
   char *p;
   char *stabstr_name;
   unsigned int stroff;
@@ -2015,7 +2058,7 @@ obj_elf_init_stab_section (segT seg)
   p = frag_more (12);
   /* Zero it out.  */
   memset (p, 0, 12);
-  as_where (&file, NULL);
+  file = as_where (NULL);
   stabstr_name = (char *) xmalloc (strlen (segment_name (seg)) + 4);
   strcpy (stabstr_name, segment_name (seg));
   strcat (stabstr_name, "str");

@@ -20,7 +20,7 @@ Disassembly of section .text:
 0x[0-9a-f]+ 2e02 7080 ffff feff 	asr	r0,0xfffffeff,r2
 0x[0-9a-f]+ 2e02 7f80 0000 0100 	asr	r0,0x100,0x100
 0x[0-9a-f]+ 2902 0f80 0000 0000 	asr	r0,r1,0
-			68: ARC_32_ME	foo
+			68: R_ARC_32_ME	foo
 0x[0-9a-f]+ 28c2 0080           	asr	r0,r0,r2
 0x[0-9a-f]+ 2bc2 0140           	asr	r3,r3,r5
 0x[0-9a-f]+ 2ec2 0201           	asr.eq	r6,r6,r8
