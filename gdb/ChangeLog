@@ -1,3 +1,9 @@
+2016-02-25  Doug Evans  <dje@google.com>
+
+	* remote-m32r-sdi.c (recv_char_data): Initialize val to avoid
+	compiler warning.
+	(recv_long_data): Ditto.
+
 2016-02-25  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* i386-linux-tdep.c (i386_linux_handle_segmentation_fault):
