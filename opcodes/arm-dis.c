@@ -820,17 +820,17 @@ static const struct opcode32 coprocessor_opcodes[] =
 
   /* FP v5.  */
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
-    0xfe000a00, 0xff800f00, "vsel%20-21c%u.f32\t%y1, %y2, %y0"},
+    0xfe000a00, 0xff800f50, "vsel%20-21c%u.f32\t%y1, %y2, %y0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
-    0xfe000b00, 0xff800f00, "vsel%20-21c%u.f64\t%z1, %z2, %z0"},
+    0xfe000b00, 0xff800f50, "vsel%20-21c%u.f64\t%z1, %z2, %z0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
-    0xfe800a00, 0xffb00f40, "vmaxnm%u.f32\t%y1, %y2, %y0"},
+    0xfe800a00, 0xffb00f50, "vmaxnm%u.f32\t%y1, %y2, %y0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
-    0xfe800b00, 0xffb00f40, "vmaxnm%u.f64\t%z1, %z2, %z0"},
+    0xfe800b00, 0xffb00f50, "vmaxnm%u.f64\t%z1, %z2, %z0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
-    0xfe800a40, 0xffb00f40, "vminnm%u.f32\t%y1, %y2, %y0"},
+    0xfe800a40, 0xffb00f50, "vminnm%u.f32\t%y1, %y2, %y0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
-    0xfe800b40, 0xffb00f40, "vminnm%u.f64\t%z1, %z2, %z0"},
+    0xfe800b40, 0xffb00f50, "vminnm%u.f64\t%z1, %z2, %z0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
     0xfebc0a40, 0xffbc0f50, "vcvt%16-17?mpna%u.%7?su32.f32\t%y1, %y0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
@@ -840,9 +840,9 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
     0x0eb60b40, 0x0fbe0f50, "vrint%7,16??xzr%c.f64\t%z1, %z0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
-    0xfeb80a40, 0xffbc0f50, "vrint%16-17?mpna%u.f32\t%y1, %y0"},
+    0xfeb80a40, 0xffbc0fd0, "vrint%16-17?mpna%u.f32\t%y1, %y0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
-    0xfeb80b40, 0xffbc0f50, "vrint%16-17?mpna%u.f64\t%z1, %z0"},
+    0xfeb80b40, 0xffbc0fd0, "vrint%16-17?mpna%u.f64\t%z1, %z0"},
 
   /* Generic coprocessor instructions.  */
   {ARM_FEATURE_CORE_LOW (0), SENTINEL_GENERIC_START, 0, "" },
@@ -890,6 +890,80 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
     0xfe100010, 0xff100010,
     "mrc2%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
+
+  /* ARMv8.2 half-precision Floating point coprocessor 9 (VFP) instructions.
+     cp_num: bit <11:8> == 0b1001.
+     cond: bit <31:28> == 0b1110, otherwise, it's UNPREDICTABLE.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0eb009c0, 0x0fbf0fd0, "vabs%c.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e300900, 0x0fb00f50, "vadd%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0eb40940, 0x0fbf0f50, "vcmp%7'e%c.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0eb50940, 0x0fbf0f70, "vcmp%7'e%c.f16\t%y1, #0.0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0eba09c0, 0x0fbe0fd0, "vcvt%c.f16.%16?us%7?31%7?26\t%y1, %y1, #%5,0-3k"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0ebe09c0, 0x0fbe0fd0, "vcvt%c.%16?us%7?31%7?26.f16\t%y1, %y1, #%5,0-3k"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0ebc0940, 0x0fbe0f50, "vcvt%7`r%c.%16?su32.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0eb80940, 0x0fbf0f50, "vcvt%c.f16.%7?su32\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0xfebc0940, 0xffbc0f50, "vcvt%16-17?mpna%u.%7?su32.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e800900, 0x0fb00f50, "vdiv%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0ea00900, 0x0fb00f50, "vfma%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0ea00940, 0x0fb00f50, "vfms%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e900940, 0x0fb00f50, "vfnma%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e900900, 0x0fb00f50, "vfnms%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0xfeb00ac0, 0xffbf0fd0, "vins.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0xfeb00a40, 0xffbf0fd0, "vmovx%c.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0d100900, 0x0f300f00, "vldr%c.16\t%y1, %A"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0d000900, 0x0f300f00, "vstr%c.16\t%y1, %A"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0xfe800900, 0xffb00f50, "vmaxnm%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0xfe800940, 0xffb00f50, "vminnm%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e000900, 0x0fb00f50, "vmla%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e000940, 0x0fb00f50, "vmls%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e100910, 0x0ff00f7f, "vmov%c.f16\t%12-15r, %y2"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e000910, 0x0ff00f7f, "vmov%c.f16\t%y2, %12-15r"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0xeb00900, 0x0fb00ff0, "vmov%c.f16\t%y1, #%0-3,16-19E"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e200900, 0x0fb00f50, "vmul%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0eb10940, 0x0fbf0fd0, "vneg%c.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e100940, 0x0fb00f50, "vnmla%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e100900, 0x0fb00f50, "vnmls%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e200940, 0x0fb00f50, "vnmul%c.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0eb60940, 0x0fbe0f50, "vrint%7,16??xzr%c.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0xfeb80940, 0xffbc0fd0, "vrint%16-17?mpna%u.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0xfe000900, 0xff800f50, "vsel%20-21c%u.f16\t%y1, %y2, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0eb109c0, 0x0fbf0fd0, "vsqrt%c.f16\t%y1, %y0"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+    0x0e300940, 0x0fb00f50, "vsub%c.f16\t%y1, %y2, %y0"},
 
   {ARM_FEATURE_CORE_LOW (0), 0, 0, 0}
 };
@@ -3198,6 +3272,7 @@ print_insn_coprocessor (bfd_vma pc,
   unsigned long mask;
   unsigned long value = 0;
   int cond;
+  int cp_num;
   struct arm_private_data *private_data = info->private_data;
   arm_feature_set allowed_arches = ARM_ARCH_NONE;
 
@@ -3236,6 +3311,8 @@ print_insn_coprocessor (bfd_vma pc,
 
       mask = insn->mask;
       value = insn->value;
+      cp_num = (given >> 8) & 0xf;
+
       if (thumb)
 	{
 	  /* The high 4 bits are 0xe for Arm conditional instructions, and
@@ -3271,6 +3348,26 @@ print_insn_coprocessor (bfd_vma pc,
       if (! ARM_CPU_HAS_FEATURE (insn->arch, allowed_arches))
 	continue;
 
+      if (insn->value == 0xfe000010     /* mcr2  */
+	  || insn->value == 0xfe100010  /* mrc2  */
+	  || insn->value == 0xfc100000  /* ldc2  */
+	  || insn->value == 0xfc000000) /* stc2  */
+	{
+	  if (cp_num == 9 || cp_num == 10 || cp_num == 11)
+	    is_unpredictable = TRUE;
+	}
+      else if (insn->value == 0x0e000000     /* cdp  */
+	       || insn->value == 0xfe000000  /* cdp2  */
+	       || insn->value == 0x0e000010  /* mcr  */
+	       || insn->value == 0x0e100010  /* mrc  */
+	       || insn->value == 0x0c100000  /* ldc  */
+	       || insn->value == 0x0c000000) /* stc  */
+	{
+	  /* Floating-point instructions.  */
+	  if (cp_num == 9 || cp_num == 10 || cp_num == 11)
+	    continue;
+	}
+
       for (c = insn->assembler; *c; c++)
 	{
 	  if (*c == '%')
@@ -3284,14 +3381,20 @@ print_insn_coprocessor (bfd_vma pc,
 		case 'A':
 		  {
 		    int rn = (given >> 16) & 0xf;
-  		    bfd_vma offset = given & 0xff;
+		    bfd_vma offset = given & 0xff;
 
 		    func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
 
 		    if (PRE_BIT_SET || WRITEBACK_BIT_SET)
 		      {
 			/* Not unindexed.  The offset is scaled.  */
-			offset = offset * 4;
+			if (cp_num == 9)
+			  /* vldr.16/vstr.16 will shift the address
+			     left by 1 bit only.  */
+			  offset = offset * 2;
+			else
+			  offset = offset * 4;
+
 			if (NEGATIVE_BIT_SET)
 			  offset = - offset;
 			if (rn != 15)
@@ -3361,6 +3464,9 @@ print_insn_coprocessor (bfd_vma pc,
 
 		  /* Fall through.  */
 		case 'c':
+		  if (cond != COND_UNCOND && cp_num == 9)
+		    is_unpredictable = TRUE;
+
 		  func (stream, "%s", arm_conditional[cond]);
 		  break;
 

@@ -270,7 +270,7 @@ send_three_arg_cmd (unsigned char cmd, unsigned long arg1, unsigned long arg2,
 static unsigned char
 recv_char_data (void)
 {
-  unsigned char val;
+  unsigned char val = 0; /* -Wall */
 
   recv_data (&val, 1);
   return val;
@@ -279,7 +279,7 @@ recv_char_data (void)
 static unsigned long
 recv_long_data (void)
 {
-  unsigned long val;
+  unsigned long val = 0; /* -Wall */
 
   recv_data (&val, 4);
   return ntohl (val);

@@ -378,7 +378,7 @@ extern "C" {
 
 extern int debug_codeselection;
 
-void error (char *format, ...);
+void error (const char *format, ...);
 void warn (char *format, ...);
 int  semantic_error (char *syntax);
 void semantic_error_2 (char *syntax);

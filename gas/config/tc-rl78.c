@@ -436,7 +436,7 @@ md_number_to_chars (char * buf, valueT val, int n)
 }
 
 static void
-require_end_of_expr (char *fname)
+require_end_of_expr (const char *fname)
 {
   while (* input_line_pointer == ' '
 	 || * input_line_pointer == '\t')
@@ -454,7 +454,7 @@ require_end_of_expr (char *fname)
 
 static struct
 {
-  char * fname;
+  const char * fname;
   int    reloc;
 }
 reloc_functions[] =

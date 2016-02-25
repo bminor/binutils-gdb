@@ -108,7 +108,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 struct cpu_type
 {
-  char *cpu_name;
+  const char *cpu_name;
   int type;
 };
 
@@ -1223,7 +1223,7 @@ md_number_to_chars (char * buf, valueT val, int n)
 
 static struct
 {
-  char * fname;
+  const char * fname;
   int    reloc;
 }
 reloc_functions[] =

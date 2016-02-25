@@ -246,6 +246,9 @@ struct linux_target_ops
      due to SYSCALL_SIGTRAP.  */
   void (*get_syscall_trapinfo) (struct regcache *regcache,
 				int *sysno, int *sysret);
+
+  /* See target.h.  */
+  int (*get_ipa_tdesc_idx) (void);
 };
 
 extern struct linux_target_ops the_low_target;

@@ -74,7 +74,7 @@ extern const char line_comment_chars[];
 extern const char line_separator_chars[];
 
 /* Table of -I directories.  */
-extern char **include_dirs;
+extern const char **include_dirs;
 extern int include_dir_count;
 extern int include_dir_maxlen;
 
@@ -134,7 +134,7 @@ extern void ignore_rest_of_line (void);
 #define discard_rest_of_line ignore_rest_of_line
 extern unsigned output_leb128 (char *, valueT, int);
 extern void pseudo_set (symbolS * symbolP);
-extern void read_a_source_file (char *name);
+extern void read_a_source_file (const char *name);
 extern void read_begin (void);
 extern void read_print_statistics (FILE *);
 extern char *read_symbol_name (void);

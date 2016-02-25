@@ -396,7 +396,8 @@ void
 i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
 				      struct ui_out *uiout)
 {
-  CORE_ADDR lower_bound, upper_bound, access;
+  /* -Wmaybe-uninitialized  */
+  CORE_ADDR lower_bound = 0, upper_bound = 0, access = 0;
   int is_upper;
   long sig_code = 0;
 

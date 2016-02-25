@@ -1,3 +1,151 @@
+2016-02-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* as.c (select_emulation_mode): Add const qualifiers.
+	* as.h: Likewise.
+	* config/bfin-defs.h: Likewise.
+	* config/bfin-parse.y: Likewise.
+	* config/rx-parse.y: Likewise.
+	* config/tc-aarch64.c (struct aarch64_option_table): Likewise.
+	(struct aarch64_cpu_option_table): Likewise.
+	(struct aarch64_arch_option_table): Likewise.
+	(struct aarch64_option_cpu_value_table): Likewise.
+	(struct aarch64_long_option_table): Likewise.
+	(struct aarch64_option_abi_value_table): Likewise.
+	* config/tc-arm.c (struct reloc_entry): Likewise.
+	(tc_gen_reloc): Likewise.
+	(struct arm_option_table): Likewise.
+	(struct arm_legacy_option_table): Likewise.
+	(struct arm_cpu_option_table): Likewise.
+	(struct arm_arch_option_table): Likewise.
+	(struct arm_option_extension_value_table): Likewise.
+	(struct arm_option_fpu_value_table): Likewise.
+	(struct arm_option_value_table): Likewise.
+	(struct arm_long_option_table): Likewise.
+	* config/tc-avr.c (struct avr_opcodes_s): Likewise.
+	(struct mcu_type_s): Likewise.
+	(struct exp_mod_s): Likewise.
+	(avr_operand): Likewise.
+	(avr_operands): Likewise.
+	* config/tc-d10v.c (md_begin): Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-fr30.c (fr30_is_colon_insn): Likewise.
+	* config/tc-ft32.c (parse_condition): Likewise.
+	* config/tc-h8300.c (do_a_fix_imm): Likewise.
+	* config/tc-hppa.c (pa_ip): Likewise.
+	(hppa_regname_to_dw2regnum): Likewise.
+	* config/tc-i370.c (i370_elf_suffix): Likewise.
+	* config/tc-i960.c (struct tabentry): Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-m68k.h: Likewise.
+	* config/tc-mcore.c (parse_psrmod): Likewise.
+	* config/tc-metag.c (struct metag_core_option): Likewise.
+	(struct metag_long_option): Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mips.c (macro): Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-msp430.c (struct rcodes_s): Likewise.
+	(struct hcodes_s): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-ns32k.c (struct ns32k_option): Likewise.
+	(optlist): Likewise.
+	* config/tc-ppc.c (ppc_elf_suffix): Likewise.
+	(tc_ppc_regname_to_dw2regnum): Likewise.
+	* config/tc-ppc.h: Likewise.
+	* config/tc-rl78.c: Likewise.
+	* config/tc-rx.c (struct cpu_type): Likewise.
+	* config/tc-sh.c (sh_regname_to_dw2regnum): Likewise.
+	* config/tc-sparc.c (struct priv_reg_entry): Likewise.
+	(sparc_ip): Likewise.
+	* config/tc-spu.c (insn_fmt_string): Likewise.
+	* config/tc-tic54x.c (tic54x_set_default_include): Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-visium.c (struct visium_arch_option_table): Likewise.
+	(struct visium_long_option_table): Likewise.
+	* config/tc-xgate.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* read.c (add_include_dir): Likewise.
+	* read.h: Likewise.
+
+2016-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/all/gas.exp: Change target pattern to cover
+	arceb-*.
+	* testsuite/gas/all/redef3.d: Likewise.
+	* testsuite/gas/elf/elf.exp: Likewise.
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (BAD_FP16): New error message macro.
+	(do_scalar_fp16_v82_encode): Change the coproc field to 9 for armv8.2
+	fp16 scalar instructions.
+	(neon_check_type): Allow different size from key.
+	(do_vfp_nsyn_add_sub): Add support SE_H shape support.
+	(try_vfp_nsyn): Likewise.
+	(do_vfp_nsyn_mla_mls): Likewise.
+	(do_vfp_nsyn_fma_fms): Likewise.
+	(do_vfp_nsyn_ldm_stm): Likewise
+	(do_vfp_nsyn_sqrt): Likewise
+	(do_vfp_nsyn_div): Likewise
+	(do_vfp_nsyn_nmul): Likewise.
+	(do_vfp_nsyn_cmp): Likewise.
+	(do_neon_shll): Likewise.
+	(do_vfp_nsyn_cvt_fpv8): Likewise.
+	(do_neon_cvttb_2): Likewise.
+	(do_neon_mov): Likewise.
+	(do_neon_rshift_round_imm): Likewise.
+	(do_neon_ldr_str): Likewise.
+	(do_vfp_nsyn_fpv8): Likewise.
+	(do_vmaxnm): Likewise.
+	(do_vrint_1): Likewise.
+	(insns): New entry for vins, vmovx.
+	(md_apply_fix): Left shift 1 bit for fp16 vldr/vstr.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-thumb.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-scalar.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-scalar.s: New.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad.s: New
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad.d: New
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad.l: New
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (NEON_ENC_TAB): Add fp16 instruction shape.
+	(neon_shape_class): New SC_HALF.
+	(neon_shape_el): New SE_H.
+	(neon_shape_el_size): New size for SE_H.
+	(N_F_ALL): New macro to aggregate N_F16, N_F32, N_64.
+	(neon_select_shape): Add SE_H support code.
+	(el_type_of_type_chk): Use N_F_ALL.
+	(do_vfp_nsyn_cvt): Add SE_H shape support.
+	(do_neon_cvtz): Likewise.
+	(do_neon_cvt_1): Likewise.
+	(do_neon_cvttb_1): Likewise.
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/gas/arm/copro.d: Adjust output.
+	* testsuite/gas/arm/copro.s: Adjust co-processor num.
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/gas/arm/mask_1.d: New.
+	* testsuite/gas/arm/mask_1.s: New.
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/gas/arm/copro.s: Use coprocessor other than 10, 11.
+	* testsuite/gas/arm/copro.d: Update.
+
+2016-02-24  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add entry for cortex-a32.
+	* doc/c-arm.texi (ARM Options): Document cortex-a32.
+
+2016-02-24  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+    * doc/c-arm.texi (ARM Options): Document cortex-a17.
+
 2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/elf/elf.exp: Skip tests for common directive on

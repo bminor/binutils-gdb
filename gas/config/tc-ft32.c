@@ -79,7 +79,7 @@ parse_condition (char **ptr)
 {
   char *s = *ptr;
   static const struct {
-    char *name;
+    const char *name;
     int bits;
   } ccs[] = {
     { "gt,"   , (2 << FT32_FLD_CR_BIT) | (5 << FT32_FLD_CB_BIT) | (1 << FT32_FLD_CV_BIT)},

@@ -102,7 +102,7 @@ const char FLT_CHARS[] = "fd";	/* We don't want to support lowercase,
 /* Internal structs.  */
 struct ns32k_option
 {
-  char *pattern;
+  const char *pattern;
   unsigned long or;
   unsigned long and;
 };
@@ -803,7 +803,7 @@ optlist (char *str,			/* The string to extract options from.  */
 	 unsigned long *default_map)	/* Default pattern and output.  */
 {
   int i, j, k, strlen1, strlen2;
-  char *patternP, *strP;
+  const char *patternP, *strP;
 
   strlen1 = strlen (str);
 

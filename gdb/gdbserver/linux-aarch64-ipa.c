@@ -143,9 +143,18 @@ gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
 			+ aarch64_ft_collect_regmap[regnum] * FT_CR_SIZE);
 }
 
+/* Return target_desc to use for IPA, given the tdesc index passed by
+   gdbserver.  Index is ignored, since we have only one tdesc
+   at the moment.  */
+
+const struct target_desc *
+get_ipa_tdesc (int idx)
+{
+  return tdesc_aarch64;
+}
+
 void
 initialize_low_tracepoint (void)
 {
   init_registers_aarch64 ();
-  ipa_tdesc = tdesc_aarch64;
 }

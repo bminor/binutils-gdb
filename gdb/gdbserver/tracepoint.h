@@ -124,6 +124,7 @@ int handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc);
 
 #ifdef IN_PROCESS_AGENT
 void initialize_low_tracepoint (void);
+const struct target_desc *get_ipa_tdesc (int idx);
 void supply_fast_tracepoint_registers (struct regcache *regcache,
 				       const unsigned char *regs);
 void supply_static_tracepoint_registers (struct regcache *regcache,
@@ -131,9 +132,6 @@ void supply_static_tracepoint_registers (struct regcache *regcache,
 					 CORE_ADDR pc);
 void set_trampoline_buffer_space (CORE_ADDR begin, CORE_ADDR end,
 				  char *errmsg);
-
-extern const struct target_desc *ipa_tdesc;
-
 #else
 void stop_tracing (void);
 

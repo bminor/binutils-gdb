@@ -1891,7 +1891,7 @@ tic54x_set_default_include (int dot)
       len = strlen (dir);
       if (include_dir_count == 0)
 	{
-	  include_dirs = (char **) xmalloc (sizeof (*include_dirs));
+	  include_dirs = XNEWVEC (const char *, 1);
 	  include_dir_count = 1;
 	}
       include_dirs[0] = dir;

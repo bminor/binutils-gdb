@@ -363,7 +363,7 @@ fr30_is_colon_insn (char *start, char *nul_char)
 	{
 	  /* Yup - it might be delay slot instruction.  */
 	  int           i;
-	  static char * delay_insns [] =
+	  static const char * delay_insns [] =
 	  {
 	    "call", "jmp", "ret", "bra", "bno",
 	    "beq",  "bne", "bc",  "bnc", "bn",
@@ -373,7 +373,7 @@ fr30_is_colon_insn (char *start, char *nul_char)
 
 	  for (i = sizeof (delay_insns) / sizeof (delay_insns[0]); i--;)
 	    {
-	      char * insn = delay_insns[i];
+	      const char * insn = delay_insns[i];
 	      int    len  = strlen (insn);
 
 	      if (start [len] != 0)

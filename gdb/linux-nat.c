@@ -303,9 +303,10 @@ static struct lwp_info *find_lwp_pid (ptid_t ptid);
 
 static int lwp_status_pending_p (struct lwp_info *lp);
 
-static int check_stopped_by_breakpoint (struct lwp_info *lp);
 static int sigtrap_is_event (int status);
 static int (*linux_nat_status_is_event) (int status) = sigtrap_is_event;
+
+static void save_stop_reason (struct lwp_info *lp);
 
 
 /* LWP accessors.  */
@@ -2321,30 +2322,6 @@ check_stopped_by_watchpoint (struct lwp_info *lp)
   return lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
-/* Called when the LWP stopped for a trap that could be explained by a
-   watchpoint or a breakpoint.  */
-
-static void
-save_sigtrap (struct lwp_info *lp)
-{
-  gdb_assert (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON);
-  gdb_assert (lp->status != 0);
-
-  /* Check first if this was a SW/HW breakpoint before checking
-     watchpoints, because at least s390 can't tell the data address of
-     hardware watchpoint hits, and the kernel returns
-     stopped-by-watchpoint as long as there's a watchpoint set.  */
-  if (linux_nat_status_is_event (lp->status))
-    check_stopped_by_breakpoint (lp);
-
-  /* Note that TRAP_HWBKPT can indicate either a hardware breakpoint
-     or hardware watchpoint.  Check which is which if we got
-     TARGET_STOPPED_BY_HW_BREAKPOINT.  */
-  if (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON
-      || lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
-    check_stopped_by_watchpoint (lp);
-}
-
 /* Returns true if the LWP had stopped for a watchpoint.  */
 
 static int
@@ -2441,7 +2418,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	  /* Save the sigtrap event.  */
 	  lp->status = status;
 	  gdb_assert (lp->signalled);
-	  save_sigtrap (lp);
+	  save_stop_reason (lp);
 	}
       else
 	{
@@ -2583,28 +2560,31 @@ select_event_lwp_callback (struct lwp_info *lp, void *data)
   return 0;
 }
 
-/* Called when the LWP got a signal/trap that could be explained by a
-   software or hardware breakpoint.  */
+/* Called when the LWP stopped for a signal/trap.  If it stopped for a
+   trap check what caused it (breakpoint, watchpoint, trace, etc.),
+   and save the result in the LWP's stop_reason field.  If it stopped
+   for a breakpoint, decrement the PC if necessary on the lwp's
+   architecture.  */
 
-static int
-check_stopped_by_breakpoint (struct lwp_info *lp)
+static void
+save_stop_reason (struct lwp_info *lp)
 {
-  /* Arrange for a breakpoint to be hit again later.  We don't keep
-     the SIGTRAP status and don't forward the SIGTRAP signal to the
-     LWP.  We will handle the current event, eventually we will resume
-     this LWP, and this breakpoint will trap again.
-
-     If we do not do this, then we run the risk that the user will
-     delete or disable the breakpoint, but the LWP will have already
-     tripped on it.  */
-
-  struct regcache *regcache = get_thread_regcache (lp->ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct regcache *regcache;
+  struct gdbarch *gdbarch;
   CORE_ADDR pc;
   CORE_ADDR sw_bp_pc;
 #if USE_SIGTRAP_SIGINFO
   siginfo_t siginfo;
 #endif
+
+  gdb_assert (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON);
+  gdb_assert (lp->status != 0);
+
+  if (!linux_nat_status_is_event (lp->status))
+    return;
+
+  regcache = get_thread_regcache (lp->ptid);
+  gdbarch = get_regcache_arch (regcache);
 
   pc = regcache_read_pc (regcache);
   sw_bp_pc = pc - gdbarch_decr_pc_after_break (gdbarch);
@@ -2614,33 +2594,29 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
     {
       if (siginfo.si_signo == SIGTRAP)
 	{
-	  if (GDB_ARCH_IS_TRAP_BRKPT (siginfo.si_code))
+	  if (GDB_ARCH_IS_TRAP_BRKPT (siginfo.si_code)
+	      && GDB_ARCH_IS_TRAP_HWBKPT (siginfo.si_code))
 	    {
-	      if (debug_linux_nat)
-		fprintf_unfiltered (gdb_stdlog,
-				    "CSBB: %s stopped by software "
-				    "breakpoint\n",
-				    target_pid_to_str (lp->ptid));
-
-	      /* Back up the PC if necessary.  */
-	      if (pc != sw_bp_pc)
-		regcache_write_pc (regcache, sw_bp_pc);
-
-	      lp->stop_pc = sw_bp_pc;
-	      lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
-	      return 1;
+	      /* The si_code is ambiguous on this arch -- check debug
+		 registers.  */
+	      if (!check_stopped_by_watchpoint (lp))
+		lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
 	    }
-	  else if (siginfo.si_code == TRAP_HWBKPT)
+	  else if (GDB_ARCH_IS_TRAP_BRKPT (siginfo.si_code))
 	    {
-	      if (debug_linux_nat)
-		fprintf_unfiltered (gdb_stdlog,
-				    "CSBB: %s stopped by hardware "
-				    "breakpoint/watchpoint\n",
-				    target_pid_to_str (lp->ptid));
-
-	      lp->stop_pc = pc;
-	      lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
-	      return 1;
+	      /* If we determine the LWP stopped for a SW breakpoint,
+		 trust it.  Particularly don't check watchpoint
+		 registers, because at least on s390, we'd find
+		 stopped-by-watchpoint as long as there's a watchpoint
+		 set.  */
+	      lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
+	    }
+	  else if (GDB_ARCH_IS_TRAP_HWBKPT (siginfo.si_code))
+	    {
+	      /* This can indicate either a hardware breakpoint or
+		 hardware watchpoint.  Check debug registers.  */
+	      if (!check_stopped_by_watchpoint (lp))
+		lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 	    }
 	  else if (siginfo.si_code == TRAP_TRACE)
 	    {
@@ -2648,6 +2624,13 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
 		fprintf_unfiltered (gdb_stdlog,
 				    "CSBB: %s stopped by trace\n",
 				    target_pid_to_str (lp->ptid));
+
+	      /* We may have single stepped an instruction that
+		 triggered a watchpoint.  In that case, on some
+		 architectures (such as x86), instead of TRAP_HWBKPT,
+		 si_code indicates TRAP_TRACE, and we need to check
+		 the debug registers separately.  */
+	      check_stopped_by_watchpoint (lp);
 	    }
 	}
     }
@@ -2658,6 +2641,18 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
     {
       /* The LWP was either continued, or stepped a software
 	 breakpoint instruction.  */
+      lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
+    }
+
+  if (hardware_breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
+    lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
+
+  if (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON)
+    check_stopped_by_watchpoint (lp);
+#endif
+
+  if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT)
+    {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "CSBB: %s stopped by software breakpoint\n",
@@ -2667,25 +2662,25 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
       if (pc != sw_bp_pc)
 	regcache_write_pc (regcache, sw_bp_pc);
 
-      lp->stop_pc = sw_bp_pc;
-      lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
-      return 1;
+      /* Update this so we record the correct stop PC below.  */
+      pc = sw_bp_pc;
     }
-
-  if (hardware_breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
+  else if (lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
-			    "CSBB: stopped by hardware breakpoint %s\n",
+			    "CSBB: %s stopped by hardware breakpoint\n",
 			    target_pid_to_str (lp->ptid));
-
-      lp->stop_pc = pc;
-      lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
-      return 1;
     }
-#endif
+  else if (lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "CSBB: %s stopped by hardware watchpoint\n",
+			    target_pid_to_str (lp->ptid));
+    }
 
-  return 0;
+  lp->stop_pc = pc;
 }
 
 
@@ -3057,7 +3052,7 @@ linux_nat_filter_event (int lwpid, int status)
   /* An interesting event.  */
   gdb_assert (lp);
   lp->status = status;
-  save_sigtrap (lp);
+  save_stop_reason (lp);
   return lp;
 }
 

@@ -141,7 +141,7 @@ static struct hash_control * opcode_hash_control;	/* Opcode mnemonics.  */
 #define POOL_START_LABEL ".LS"
 
 static void
-make_name (char * s, char * p, int n)
+make_name (char * s, const char * p, int n)
 {
   static const char hex[] = "0123456789ABCDEF";
 
@@ -455,7 +455,7 @@ void
 md_begin (void)
 {
   const mcore_opcode_info * opcode;
-  char * prev_name = "";
+  const char * prev_name = "";
 
   opcode_hash_control = hash_new ();
 
@@ -523,7 +523,7 @@ parse_reg (char * s, unsigned * reg)
 
 static struct Cregs
 {
-  char * name;
+  const char * name;
   unsigned int crnum;
 }
 cregs[] =
@@ -611,7 +611,7 @@ parse_psrmod (char * s, unsigned * reg)
   char buf[10];
   static struct psrmods
   {
-    char *       name;
+    const char *       name;
     unsigned int value;
   }
   psrmods[] =

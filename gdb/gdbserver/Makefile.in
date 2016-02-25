@@ -495,6 +495,18 @@ regcache-ipa.o: regcache.c
 i386-linux-ipa.o: i386-linux.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
+i386-mmx-linux-ipa.o: i386-mmx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+i386-avx-linux-ipa.o: i386-avx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+i386-mpx-linux-ipa.o: i386-mpx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+i386-avx512-linux-ipa.o: i386-avx512-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
 linux-i386-ipa.o: linux-i386-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
@@ -502,6 +514,15 @@ linux-amd64-ipa.o: linux-amd64-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 amd64-linux-ipa.o: amd64-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+amd64-avx-linux-ipa.o: amd64-avx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+amd64-mpx-linux-ipa.o: amd64-mpx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+amd64-avx512-linux-ipa.o: amd64-avx512-linux.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 linux-aarch64-ipa.o: linux-aarch64-ipa.c

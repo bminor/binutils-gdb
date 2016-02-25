@@ -134,6 +134,7 @@ trace_vdebug (const char *fmt, ...)
 # define ust_loaded IPA_SYM_EXPORTED_NAME (ust_loaded)
 # define helper_thread_id IPA_SYM_EXPORTED_NAME (helper_thread_id)
 # define cmd_buf IPA_SYM_EXPORTED_NAME (cmd_buf)
+# define ipa_tdesc_idx IPA_SYM_EXPORTED_NAME (ipa_tdesc_idx)
 #endif
 
 #ifndef IN_PROCESS_AGENT
@@ -171,6 +172,7 @@ struct ipa_sym_addresses
   CORE_ADDR addr_get_trace_state_variable_value;
   CORE_ADDR addr_set_trace_state_variable_value;
   CORE_ADDR addr_ust_loaded;
+  CORE_ADDR addr_ipa_tdesc_idx;
 };
 
 static struct
@@ -207,6 +209,7 @@ static struct
   IPA_SYM(get_trace_state_variable_value),
   IPA_SYM(set_trace_state_variable_value),
   IPA_SYM(ust_loaded),
+  IPA_SYM(ipa_tdesc_idx),
 };
 
 static struct ipa_sym_addresses ipa_sym_addrs;
@@ -3211,6 +3214,11 @@ cmd_qtstart (char *packet)
 
   *packet = '\0';
 
+  /* Tell IPA about the correct tdesc.  */
+  if (write_inferior_integer (ipa_sym_addrs.addr_ipa_tdesc_idx,
+			      target_get_ipa_tdesc_idx ()))
+    error ("Error setting ipa_tdesc_idx variable in lib");
+
   /* Start out empty.  */
   if (agent_loaded_p ())
     write_inferior_data_pointer (ipa_sym_addrs.addr_tracepoints, 0);
@@ -4694,19 +4702,20 @@ collect_data_at_step (struct tracepoint_hit_ctx *ctx,
 #endif
 
 #ifdef IN_PROCESS_AGENT
-/* The target description used by the IPA.  Given that the IPA library
-   is built for a specific architecture that is loaded into the
-   inferior, there only needs to be one such description per
-   build.  */
-const struct target_desc *ipa_tdesc;
+/* The target description index for IPA.  Passed from gdbserver, used
+   to select ipa_tdesc.  */
+EXTERN_C_PUSH
+IP_AGENT_EXPORT_VAR int ipa_tdesc_idx;
+EXTERN_C_POP
 #endif
 
 static struct regcache *
 get_context_regcache (struct tracepoint_hit_ctx *ctx)
 {
   struct regcache *regcache = NULL;
-
 #ifdef IN_PROCESS_AGENT
+  const struct target_desc *ipa_tdesc = get_ipa_tdesc (ipa_tdesc_idx);
+
   if (ctx->type == fast_tracepoint)
     {
       struct fast_tracepoint_ctx *fctx = (struct fast_tracepoint_ctx *) ctx;
@@ -5779,11 +5788,13 @@ IP_AGENT_EXPORT_FUNC void
 gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
 {
   struct fast_tracepoint_ctx ctx;
+  const struct target_desc *ipa_tdesc;
 
   /* Don't do anything until the trace run is completely set up.  */
   if (!tracing)
     return;
 
+  ipa_tdesc = get_ipa_tdesc (ipa_tdesc_idx);
   ctx.base.type = fast_tracepoint;
   ctx.regs = regs;
   ctx.regcache_initted = 0;
@@ -6629,6 +6640,7 @@ gdb_probe (const struct marker *mdata, void *probe_private,
 {
   struct tracepoint *tpoint;
   struct static_tracepoint_ctx ctx;
+  const struct target_desc *ipa_tdesc;
 
   /* Don't do anything until the trace run is completely set up.  */
   if (!tracing)
@@ -6637,6 +6649,7 @@ gdb_probe (const struct marker *mdata, void *probe_private,
       return;
     }
 
+  ipa_tdesc = get_ipa_tdesc (ipa_tdesc_idx);
   ctx.base.type = static_tracepoint;
   ctx.regcache_initted = 0;
   ctx.regs = regs;

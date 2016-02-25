@@ -1,3 +1,57 @@
+2016-02-25  Doug Evans  <dje@google.com>
+
+	* remote-m32r-sdi.c (recv_char_data): Initialize val to avoid
+	compiler warning.
+	(recv_long_data): Ditto.
+
+2016-02-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* i386-linux-tdep.c (i386_linux_handle_segmentation_fault):
+	Initialize variables.
+
+2016-02-25  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* ax-general.c (ax_reg): Call gdbarch_remote_register_number.
+	(ax_reg_mask): Likewise.
+
+2016-02-24  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (save_sigtrap) Delete.
+	(stop_wait_callback): Call save_stop_reason instead of
+	save_sigtrap.
+	(check_stopped_by_breakpoint): Rename to ...
+	(save_stop_reason): ... this.  Bits of save_sigtrap folded here.
+	Use GDB_ARCH_IS_TRAP_HWBKPT and handle ambiguous
+	GDB_ARCH_IS_TRAP_BRKPT / GDB_ARCH_IS_TRAP_HWBKPT.  Factor out
+	common code between the USE_SIGTRAP_SIGINFO and
+	!USE_SIGTRAP_SIGINFO blocks.
+	(linux_nat_filter_event): Call save_stop_reason instead of
+	save_sigtrap.
+	* nat/linux-ptrace.h: Check for both SI_KERNEL and TRAP_BRKPT
+	si_code for MIPS.
+	* nat/linux-ptrace.h: Fix "TRAP_HWBPT" typo in x86 table.  Add
+	comments on MIPS behavior.
+	(GDB_ARCH_IS_TRAP_HWBKPT): Define for all archs.
+
+2016-02-24  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* rs6000-tdep.c (rs6000_frame_cache): Initialize frame and pc to 0
+	to avoid spurious warnings.
+
+2016-02-24  Gary Benson  <gbenson@redhat.com>
+
+	* exec.c (exec_file_locate_attach): Do not attempt to
+	locate main executable locally if not found in sysroot.
+
+2016-02-24  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.11 released.
+
+2016-02-24  Wei-cheng Wang  <cole945@gmail.com>
+
+	* rs6000-tdep.c (rs6000_frame_cache, rs6000_frame_this_id): Handle
+	unavailable PC/SP to build unavailable frame.
+
 2016-02-23  Doug Evans  <dje@google.com>
 
 	Extend "skip" command to support -file, -gfile, -function, -rfunction.

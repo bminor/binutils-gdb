@@ -2300,7 +2300,7 @@ printf(" => %s\n",reloc->howto->name);
 }
 
 inline static char *
-m32r_end_of_match (char *cont, char *what)
+m32r_end_of_match (char *cont, const char *what)
 {
   int len = strlen (what);
 

@@ -2490,12 +2490,14 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	}
       else
 	{
+	  eh->plt_got.offset = (bfd_vma) -1;
 	  h->plt.offset = (bfd_vma) -1;
 	  h->needs_plt = 0;
 	}
     }
   else
     {
+      eh->plt_got.offset = (bfd_vma) -1;
       h->plt.offset = (bfd_vma) -1;
       h->needs_plt = 0;
     }

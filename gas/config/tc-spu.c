@@ -245,7 +245,7 @@ insn_fmt_string (struct spu_opcode *format)
   for (i = 1; i <= format->arg[0]; i++)
     {
       int arg = format->arg[i];
-      char *exp;
+      const char *exp;
       if (i > 1 && arg != A_P && format->arg[i-1] != A_P)
 	buf[len++] =  ',';
       if (arg == A_P)

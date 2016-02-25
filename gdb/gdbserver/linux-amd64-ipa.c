@@ -20,6 +20,7 @@
 
 #include "server.h"
 #include "tracepoint.h"
+#include "linux-x86-tdesc.h"
 
 /* Defined in auto-generated file amd64-linux.c.  */
 void init_registers_amd64_linux (void);
@@ -166,9 +167,34 @@ supply_static_tracepoint_registers (struct regcache *regcache,
 
 #endif /* HAVE_UST */
 
+/* Return target_desc to use for IPA, given the tdesc index passed by
+   gdbserver.  */
+
+const struct target_desc *
+get_ipa_tdesc (int idx)
+{
+  switch (idx)
+    {
+    case X86_TDESC_SSE:
+      return tdesc_amd64_linux;
+    case X86_TDESC_AVX:
+      return tdesc_amd64_avx_linux;
+    case X86_TDESC_MPX:
+      return tdesc_amd64_mpx_linux;
+    case X86_TDESC_AVX512:
+      return tdesc_amd64_avx512_linux;
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "unknown ipa tdesc index: %d", idx);
+      return tdesc_amd64_linux;
+    }
+}
+
 void
 initialize_low_tracepoint (void)
 {
   init_registers_amd64_linux ();
-  ipa_tdesc = tdesc_amd64_linux;
+  init_registers_amd64_avx_linux ();
+  init_registers_amd64_mpx_linux ();
+  init_registers_amd64_avx512_linux ();
 }

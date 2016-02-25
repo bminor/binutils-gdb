@@ -8098,7 +8098,7 @@ m68k_elf_cons (int nbytes /* 4=.long */)
 #endif
 
 int
-tc_m68k_regname_to_dw2regnum (char *regname)
+tc_m68k_regname_to_dw2regnum (const char *regname)
 {
   unsigned int regnum;
   static const char *const regnames[] =

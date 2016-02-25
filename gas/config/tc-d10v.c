@@ -275,7 +275,7 @@ md_section_align (asection *seg, valueT addr)
 void
 md_begin (void)
 {
-  char *prev_name = "";
+  const char *prev_name = "";
   struct d10v_opcode *opcode;
   d10v_hash = hash_new ();
 

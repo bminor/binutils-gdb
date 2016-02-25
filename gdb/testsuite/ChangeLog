@@ -1,3 +1,33 @@
+2016-02-25  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/branches.c: Remove.
+
+2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR gdb/13808
+	* gdb.trace/ftrace.exp (test_fast_tracepoints): Remove kfail.
+
+2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/ftrace.exp: Remove unnecessary target check.
+
+2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/entry-values.exp: Surround $call_insn with '\y',
+	change x86_64 call_insn to 'callq'.
+
+2016-02-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/tfile-avx.c: Move to...
+	* gdb.trace/tracefile-pseudo-reg.c: Here.
+	* gdb.trace/tfile-avx.exp: Move to...
+	* gdb.trace/tracefile-pseudo-reg.exp: Here.
+
+2016-02-24  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/attach-pie-noexec.exp: Do not expect an error
+	message on attach.
+
 2016-02-23  Doug Evans  <dje@google.com>
 
 	* gdb.base/skip.c (test_skip): New function.

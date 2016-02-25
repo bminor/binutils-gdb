@@ -1,3 +1,62 @@
+2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR gdb/13808
+	* Makefile.in: Add i386-*-linux-ipa.o and amd64-*-linux-ipa.o.
+	* configure.srv: Ditto.
+	* linux-aarch64-ipa.c (get_ipa_tdesc): New function.
+	(initialize_low_tracepoint): Remove ipa_tdesc assignment.
+	* linux-amd64-ipa.c: Add "linux-x86-tdesc.h" include.
+	(init_registers_amd64_linux): Remove prototype.
+	(tdesc_amd64_linux): Remove declaration.
+	(get_ipa_tdesc): New function.
+	(initialize_low_tracepoint): Remove ipa_tdesc assignment,
+	initialize remaining tdescs.
+	* linux-i386-ipa.c: Add "linux-x86-tdesc.h" include.
+	(init_registers_i386_linux): Remove prototype.
+	(tdesc_i386_linux): Remove declaration.
+	(get_ipa_tdesc): New function.
+	(initialize_low_tracepoint): Remove ipa_tdesc assignment,
+	initialize remaining tdescs.
+	* linux-low.c (linux_get_ipa_tdesc_idx): New function.
+	(linux_target_ops): wire in linux_get_ipa_tdesc_idx.
+	* linux-low.h (struct linux_target_ops): Add get_ipa_tdesc_idx.
+	* linux-x86-low.c: Move tdesc declarations to linux-x86-tdesc.h.
+	(x86_get_ipa_tdesc_idx): New function.
+	(the_low_target): Wire in x86_get_ipa_tdesc_idx.
+	* linux-x86-tdesc.h: New file.
+	* target.h (struct target_ops): Add get_ipa_tdesc_idx.
+	(target_get_ipa_tdesc_idx): New macro.
+	* tracepoint.c (ipa_tdesc_idx): New macro.
+	(struct ipa_sym_addresses): Add addr_ipa_tdesc_idx.
+	(symbol_list): Add ipa_tdesc_idx.
+	(cmd_qtstart): Write ipa_tdesc_idx in the target.
+	(ipa_tdesc): Remove.
+	(ipa_tdesc_idx): New variable.
+	(get_context_regcache): Use get_ipa_tdesc.
+	(gdb_collect): Ditto.
+	(gdb_probe): Ditto.
+	* tracepoint.h (get_ipa_tdesc): New prototype.
+	(ipa_tdesc): Remove.
+
+2016-02-24  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (check_stopped_by_breakpoint): Rename to ...
+	(save_stop_reason): ... this.  Use GDB_ARCH_IS_TRAP_HWBKPT and
+	handle ambiguous GDB_ARCH_IS_TRAP_BRKPT / GDB_ARCH_IS_TRAP_HWBKPT.
+	Factor out common code between the USE_SIGTRAP_SIGINFO and
+	!USE_SIGTRAP_SIGINFO blocks.
+	(linux_low_filter_event): Call save_stop_reason instead of
+	check_stopped_by_breakpoint and check_stopped_by_watchpoint.
+	Update comments.
+	(linux_wait_1): Update comments.
+
+2016-02-24  Wei-cheng Wang  <cole945@gmail.com>
+
+	* linux-ppc-low.c (ppc_supports_z_point_type): New function:
+	(ppc_insert_point, ppc_remove_point): Insert/remove z-packet breakpoints.
+	(ppc64_emit_ops_vector): Add target ops - ppc_supports_z_point_type,
+	ppc_insert_point, ppc_remove_point.
+
 2016-02-17  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* linux-s390-low.c (s390_supports_z_point_type): New function.

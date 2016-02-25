@@ -166,7 +166,7 @@ int target_big_endian = TARGET_BYTES_BIG_ENDIAN;
 /* Variables for handling include file directory table.  */
 
 /* Table of pointers to directories to search for .include's.  */
-char **include_dirs;
+const char **include_dirs;
 
 /* How many are in the table.  */
 int include_dir_count;
@@ -809,7 +809,7 @@ do_align (unsigned int n, char *fill, unsigned int len, unsigned int max)
 /* We read the file, putting things into a web that represents what we
    have been reading.  */
 void
-read_a_source_file (char *name)
+read_a_source_file (const char *name)
 {
   char nul_char;
   char next_char;
@@ -5972,16 +5972,15 @@ add_include_dir (char *path)
 
   if (include_dir_count == 0)
     {
-      include_dirs = (char **) xmalloc (2 * sizeof (*include_dirs));
+      include_dirs = XNEWVEC (const char *, 2);
       include_dirs[0] = ".";	/* Current dir.  */
       include_dir_count = 2;
     }
   else
     {
       include_dir_count++;
-      include_dirs =
-	(char **) xrealloc (include_dirs,
-			    include_dir_count * sizeof (*include_dirs));
+      include_dirs = XRESIZEVEC (const char *, include_dirs,
+				 include_dir_count);
     }
 
   include_dirs[include_dir_count - 1] = path;	/* New one.  */

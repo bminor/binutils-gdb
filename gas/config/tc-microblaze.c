@@ -621,7 +621,7 @@ parse_exp (char *s, expressionS *e)
 #define IMM_MAX    9
 
 struct imm_type {
-	char *isuffix;	 /* Suffix String */
+	const char *isuffix;	 /* Suffix String */
 	int itype;       /* Suffix Type */
 	int otype;       /* Offset Type */
 };
