@@ -3861,6 +3861,42 @@ is_32bit_relative_branch (bfd_byte *contents, bfd_vma offset)
 	      && (contents [offset - 1] & 0xf0) == 0x80));
 }
 
+static bfd_boolean
+elf_x86_64_need_pic (bfd *input_bfd, struct elf_link_hash_entry *h,
+		     reloc_howto_type *howto)
+{
+  const char *fmt;
+  const char *v;
+  const char *pic = "";
+
+  switch (ELF_ST_VISIBILITY (h->other))
+    {
+    case STV_HIDDEN:
+      v = _("hidden symbol");
+      break;
+    case STV_INTERNAL:
+      v = _("internal symbol");
+      break;
+    case STV_PROTECTED:
+      v = _("protected symbol");
+      break;
+    default:
+      v = _("symbol");
+      pic = _("; recompile with -fPIC");
+      break;
+    }
+
+  if (h->def_regular)
+    fmt = _("%B: relocation %s against %s `%s' can not be used when making a shared object%s");
+  else
+    fmt = _("%B: relocation %s against undefined %s `%s' can not be used when making a shared object%s");
+
+  (*_bfd_error_handler) (fmt, input_bfd, howto->name,
+			 v,  h->root.root.string, pic);
+  bfd_set_error (bfd_error_bad_value);
+  return FALSE;
+}
+
 /* Relocate an x86_64 ELF section.  */
 
 static bfd_boolean
@@ -4078,8 +4114,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      (*_bfd_error_handler)
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't handled by %s"), input_bfd,
-		 x86_64_elf_howto_table[r_type].name,
-		 name, __FUNCTION__);
+		 howto->name, name, __FUNCTION__);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 
@@ -4103,8 +4138,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  (*_bfd_error_handler)
 		    (_("%B: relocation %s against STT_GNU_IFUNC "
 		       "symbol `%s' has non-zero addend: %d"),
-		     input_bfd, x86_64_elf_howto_table[r_type].name,
-		     name, rel->r_addend);
+		     input_bfd, howto->name, name, rel->r_addend);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -4536,39 +4570,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		}
 
 	      if (fail)
-		{
-		  const char *fmt;
-		  const char *v;
-		  const char *pic = "";
-
-		  switch (ELF_ST_VISIBILITY (h->other))
-		    {
-		    case STV_HIDDEN:
-		      v = _("hidden symbol");
-		      break;
-		    case STV_INTERNAL:
-		      v = _("internal symbol");
-		      break;
-		    case STV_PROTECTED:
-		      v = _("protected symbol");
-		      break;
-		    default:
-		      v = _("symbol");
-		      pic = _("; recompile with -fPIC");
-		      break;
-		    }
-
-		  if (h->def_regular)
-		    fmt = _("%B: relocation %s against %s `%s' can not be used when making a shared object%s");
-		  else
-		    fmt = _("%B: relocation %s against undefined %s `%s' can not be used when making a shared object%s");
-
-		  (*_bfd_error_handler) (fmt, input_bfd,
-					 x86_64_elf_howto_table[r_type].name,
-					 v,  h->root.root.string, pic);
-		  bfd_set_error (bfd_error_bad_value);
-		  return FALSE;
-		}
+		return elf_x86_64_need_pic (input_bfd, h, howto);
 	    }
 	  /* Fall through.  */
 
@@ -4681,16 +4683,16 @@ direct:
 				 "symbol `%s' at 0x%lx in section `%A' is "
 				 "out of range"),
 			       input_bfd, input_section, addend,
-			       x86_64_elf_howto_table[r_type].name,
-			       name, (unsigned long) rel->r_offset);
+			       howto->name, name,
+			       (unsigned long) rel->r_offset);
 			  else
 			    (*_bfd_error_handler)
 			      (_("%B: addend 0x%x in relocation %s against "
 				 "symbol `%s' at 0x%lx in section `%A' is "
 				 "out of range"),
 			       input_bfd, input_section, addend,
-			       x86_64_elf_howto_table[r_type].name,
-			       name, (unsigned long) rel->r_offset);
+			       howto->name, name,
+			       (unsigned long) rel->r_offset);
 			  bfd_set_error (bfd_error_bad_value);
 			  return FALSE;
 			}

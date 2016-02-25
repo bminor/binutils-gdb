@@ -1,5 +1,11 @@
 2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_need_pic): New function.
+	(elf_x86_64_relocate_section): Use it.  Replace
+	x86_64_elf_howto_table[r_type] with howto.
+
+2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19698
 	* elflink.c (bfd_elf_record_link_assignment): Set versioned if
 	symbol version is unknown.
