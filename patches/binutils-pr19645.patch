@@ -1,4 +1,4 @@
-From eb48bed6bc5dc33b5f8d70941e70a6fc51496b13 Mon Sep 17 00:00:00 2001
+From 33ca69eb177f447732336e6e25f2db8a3d260f3b Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 22 Feb 2016 09:18:52 -0800
 Subject: [PATCH] Properly implement STT_COMMON
@@ -148,6 +148,13 @@ ld/
 	* testsuite/ld-elfcomm/common-3b.rd: Likewise.
 	* testsuite/ld-i386/pr19645.d: Likewise.
 	* testsuite/ld-i386/pr19645.s: Likewise.
+	* testsuite/ld-x86-64/largecomm-1.s: Likewise.
+	* testsuite/ld-x86-64/largecomm-1a.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1b.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1c.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1d.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1e.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1f.d: Likewise.
 	* testsuite/ld-x86-64/pr19645.d: Likewise.
 	* testsuite/ld-x86-64/pr19645.s: Likewise.
 	* testsuite/ld-elfcomm/elfcomm.exp: Test --elf-stt-common=yes
@@ -238,10 +245,17 @@ ld/
  ld/testsuite/ld-i386/pr19645.d              |  13 ++++
  ld/testsuite/ld-i386/pr19645.s              |   6 ++
  ld/testsuite/ld-x86-64/dwarfreloc.exp       |  58 +++++++++++++---
+ ld/testsuite/ld-x86-64/largecomm-1.s        |   3 +
+ ld/testsuite/ld-x86-64/largecomm-1a.d       |   8 +++
+ ld/testsuite/ld-x86-64/largecomm-1b.d       |   8 +++
+ ld/testsuite/ld-x86-64/largecomm-1c.d       |   8 +++
+ ld/testsuite/ld-x86-64/largecomm-1d.d       |   8 +++
+ ld/testsuite/ld-x86-64/largecomm-1e.d       |   8 +++
+ ld/testsuite/ld-x86-64/largecomm-1f.d       |   8 +++
  ld/testsuite/ld-x86-64/pr19645.d            |  13 ++++
  ld/testsuite/ld-x86-64/pr19645.s            |   6 ++
- ld/testsuite/ld-x86-64/x86-64.exp           |   1 +
- 82 files changed, 1147 insertions(+), 341 deletions(-)
+ ld/testsuite/ld-x86-64/x86-64.exp           |   7 ++
+ 89 files changed, 1204 insertions(+), 341 deletions(-)
  create mode 100644 binutils/testsuite/binutils-all/common-1.s
  create mode 100644 binutils/testsuite/binutils-all/common-1a.d
  create mode 100644 binutils/testsuite/binutils-all/common-1b.d
@@ -287,6 +301,13 @@ ld/
  create mode 100644 ld/testsuite/ld-elfcomm/dummy.s
  create mode 100644 ld/testsuite/ld-i386/pr19645.d
  create mode 100644 ld/testsuite/ld-i386/pr19645.s
+ create mode 100644 ld/testsuite/ld-x86-64/largecomm-1.s
+ create mode 100644 ld/testsuite/ld-x86-64/largecomm-1a.d
+ create mode 100644 ld/testsuite/ld-x86-64/largecomm-1b.d
+ create mode 100644 ld/testsuite/ld-x86-64/largecomm-1c.d
+ create mode 100644 ld/testsuite/ld-x86-64/largecomm-1d.d
+ create mode 100644 ld/testsuite/ld-x86-64/largecomm-1e.d
+ create mode 100644 ld/testsuite/ld-x86-64/largecomm-1f.d
  create mode 100644 ld/testsuite/ld-x86-64/pr19645.d
  create mode 100644 ld/testsuite/ld-x86-64/pr19645.s
 
@@ -532,7 +553,7 @@ index 7223dd3..79a14f3 100644
  	    case STT_OBJECT:
  	      sym->symbol.flags |= BSF_OBJECT;
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 7d565f5..34fdf2d 100644
+index 993e9b9..0e3abff 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
 @@ -525,8 +525,10 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
@@ -547,7 +568,7 @@ index 7d565f5..34fdf2d 100644
        || (d != NULL
  	  && h->root.type == bfd_link_hash_new
  	  && (*d->match) (&d->head, NULL, h->root.root.string)))
-@@ -9025,6 +9027,28 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
+@@ -9038,6 +9040,28 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
    return FALSE;
  }
  
@@ -576,7 +597,7 @@ index 7d565f5..34fdf2d 100644
  /* Add an external symbol to the symbol table.  This is called from
     the hash table traversal routine.  When generating a shared object,
     we go through the symbol table twice.  The first time we output
-@@ -9044,6 +9068,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9057,6 +9081,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
    const struct elf_backend_data *bed;
    long indx;
    int ret;
@@ -584,7 +605,7 @@ index 7d565f5..34fdf2d 100644
    /* A symbol is bound locally if it is forced local or it is locally
       defined, hidden versioned, not referenced by shared library and
       not exported when linking executable.  */
-@@ -9178,35 +9203,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9191,35 +9216,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
  	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
      strip = TRUE;
  
@@ -623,7 +644,7 @@ index 7d565f5..34fdf2d 100644
    switch (h->root.type)
      {
      default:
-@@ -9281,6 +9292,42 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9294,6 +9305,42 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
        return TRUE;
      }
  
@@ -666,7 +687,7 @@ index 7d565f5..34fdf2d 100644
    /* Give the processor backend a chance to tweak the symbol value,
       and also to finish up anything that needs to be done for this
       symbol.  FIXME: Not calling elf_backend_finish_dynamic_symbol for
-@@ -9317,7 +9364,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9330,7 +9377,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
  	  || ELF_ST_BIND (sym.st_info) == STB_WEAK))
      {
        int bindtype;
@@ -1112,7 +1133,7 @@ index dd34a9f..a627028 100644
    based targets.
  
 diff --git a/gas/as.c b/gas/as.c
-index 9bfac61..b94e11e 100644
+index 55214f4..14980b9 100644
 --- a/gas/as.c
 +++ b/gas/as.c
 @@ -96,6 +96,10 @@ int debug_memory = 0;
@@ -1126,7 +1147,7 @@ index 9bfac61..b94e11e 100644
  /* Keep the output file.  */
  static int keep_it = 0;
  
-@@ -299,6 +303,9 @@ Options:\n\
+@@ -300,6 +304,9 @@ Options:\n\
    --size-check=[error|warning]\n\
  			  ELF .size directive check (default --size-check=error)\n"));
    fprintf (stream, _("\
@@ -1136,7 +1157,7 @@ index 9bfac61..b94e11e 100644
    --sectname-subst        enable section name substitution sequences\n"));
  #endif
    fprintf (stream, _("\
-@@ -463,6 +470,7 @@ parse_args (int * pargc, char *** pargv)
+@@ -464,6 +471,7 @@ parse_args (int * pargc, char *** pargv)
        OPTION_EXECSTACK,
        OPTION_NOEXECSTACK,
        OPTION_SIZE_CHECK,
@@ -1144,7 +1165,7 @@ index 9bfac61..b94e11e 100644
        OPTION_SECTNAME_SUBST,
        OPTION_ALTERNATE,
        OPTION_AL,
-@@ -498,6 +506,7 @@ parse_args (int * pargc, char *** pargv)
+@@ -499,6 +507,7 @@ parse_args (int * pargc, char *** pargv)
      ,{"execstack", no_argument, NULL, OPTION_EXECSTACK}
      ,{"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK}
      ,{"size-check", required_argument, NULL, OPTION_SIZE_CHECK}
@@ -1152,7 +1173,7 @@ index 9bfac61..b94e11e 100644
      ,{"sectname-subst", no_argument, NULL, OPTION_SECTNAME_SUBST}
  #endif
      ,{"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
-@@ -867,6 +876,16 @@ This program has absolutely no warranty.\n"));
+@@ -868,6 +877,16 @@ This program has absolutely no warranty.\n"));
  	    as_fatal (_("Invalid --size-check= option: `%s'"), optarg);
  	  break;
  
@@ -1170,7 +1191,7 @@ index 9bfac61..b94e11e 100644
  	  flag_sectname_subst = 1;
  	  break;
 diff --git a/gas/as.h b/gas/as.h
-index 4ee3f1b..aaf4ceb 100644
+index bf1206f..4e5601b 100644
 --- a/gas/as.h
 +++ b/gas/as.h
 @@ -592,6 +592,9 @@ COMMON enum
@@ -1406,7 +1427,7 @@ index 0000000..c18284e
 + +[0-9]+: +0+4 +30 +TLS +GLOBAL +DEFAULT +COM +foobar
 +#pass
 diff --git a/gas/testsuite/gas/elf/elf.exp b/gas/testsuite/gas/elf/elf.exp
-index 2ed764d..489a546 100644
+index a2a86dd..fb5619d 100644
 --- a/gas/testsuite/gas/elf/elf.exp
 +++ b/gas/testsuite/gas/elf/elf.exp
 @@ -218,6 +218,10 @@ if { [is_elf_format] } then {
@@ -2727,6 +2748,99 @@ index afe5f6c..959ae9c 100644
  set status [remote_exec host [concat sh -c [list "$cmd >dump.out 2>ld.stderr"]] "" "/dev/null"]
  send_log "$cmd\n"
  remote_upload host "ld.stderr"
+diff --git a/ld/testsuite/ld-x86-64/largecomm-1.s b/ld/testsuite/ld-x86-64/largecomm-1.s
+new file mode 100644
+index 0000000..cfadc4f
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/largecomm-1.s
+@@ -0,0 +1,3 @@
++	.data
++	.dc.a foobar
++	.largecomm foobar,30,4
+diff --git a/ld/testsuite/ld-x86-64/largecomm-1a.d b/ld/testsuite/ld-x86-64/largecomm-1a.d
+new file mode 100644
+index 0000000..63462bf
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/largecomm-1a.d
+@@ -0,0 +1,8 @@
++#source: largecomm-1.s
++#as: --elf-stt-common=yes
++#ld: -r
++#readelf: -s -W
++
++#...
++ +[0-9]+: +0+4 +30 +COMMON +GLOBAL +DEFAULT +LARGE_COM +foobar
++#pass
+diff --git a/ld/testsuite/ld-x86-64/largecomm-1b.d b/ld/testsuite/ld-x86-64/largecomm-1b.d
+new file mode 100644
+index 0000000..8f62d0d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/largecomm-1b.d
+@@ -0,0 +1,8 @@
++#source: largecomm-1.s
++#as: --elf-stt-common=no
++#ld: -r
++#readelf: -s -W
++
++#...
++ +[0-9]+: +0+4 +30 +OBJECT +GLOBAL +DEFAULT +LARGE_COM +foobar
++#pass
+diff --git a/ld/testsuite/ld-x86-64/largecomm-1c.d b/ld/testsuite/ld-x86-64/largecomm-1c.d
+new file mode 100644
+index 0000000..7e6a8cc
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/largecomm-1c.d
+@@ -0,0 +1,8 @@
++#source: largecomm-1.s
++#as: --elf-stt-common=yes
++#ld: -r -z nocommon
++#readelf: -s -W
++
++#...
++ +[0-9]+: +0+4 +30 +OBJECT +GLOBAL +DEFAULT +LARGE_COM +foobar
++#pass
+diff --git a/ld/testsuite/ld-x86-64/largecomm-1d.d b/ld/testsuite/ld-x86-64/largecomm-1d.d
+new file mode 100644
+index 0000000..4025e7b
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/largecomm-1d.d
+@@ -0,0 +1,8 @@
++#source: largecomm-1.s
++#as: --elf-stt-common=yes
++#ld: -r -z common
++#readelf: -s -W
++
++#...
++ +[0-9]+: +0+4 +30 +COMMON +GLOBAL +DEFAULT +LARGE_COM +foobar
++#pass
+diff --git a/ld/testsuite/ld-x86-64/largecomm-1e.d b/ld/testsuite/ld-x86-64/largecomm-1e.d
+new file mode 100644
+index 0000000..b1a3a03
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/largecomm-1e.d
+@@ -0,0 +1,8 @@
++#source: largecomm-1.s
++#as: --elf-stt-common=no
++#ld: -r -z common
++#readelf: -s -W
++
++#...
++ +[0-9]+: +0+4 +30 +COMMON +GLOBAL +DEFAULT +LARGE_COM +foobar
++#pass
+diff --git a/ld/testsuite/ld-x86-64/largecomm-1f.d b/ld/testsuite/ld-x86-64/largecomm-1f.d
+new file mode 100644
+index 0000000..3b5bd92
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/largecomm-1f.d
+@@ -0,0 +1,8 @@
++#source: largecomm-1.s
++#as: --elf-stt-common=no
++#ld: -r -z nocommon
++#readelf: -s -W
++
++#...
++ +[0-9]+: +0+4 +30 +OBJECT +GLOBAL +DEFAULT +LARGE_COM +foobar
++#pass
 diff --git a/ld/testsuite/ld-x86-64/pr19645.d b/ld/testsuite/ld-x86-64/pr19645.d
 new file mode 100644
 index 0000000..9445fda
@@ -2759,10 +2873,23 @@ index 0000000..88331ed
 +	movq foobar@GOTPCREL(%rip), %rax
 +	.comm foobar,30,4
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 7248377..edfe60d 100644
+index 7248377..9fa4357 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
-@@ -355,6 +355,7 @@ run_dump_test "pr19162"
+@@ -239,6 +239,12 @@ run_dump_test "pr14215"
+ run_dump_test "pr14207"
+ run_dump_test "gotplt1"
+ run_dump_test "pie1"
++run_dump_test "largecomm-1a"
++run_dump_test "largecomm-1b"
++run_dump_test "largecomm-1c"
++run_dump_test "largecomm-1d"
++run_dump_test "largecomm-1e"
++run_dump_test "largecomm-1f"
+ 
+ if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
+     return
+@@ -355,6 +361,7 @@ run_dump_test "pr19162"
  run_dump_test "pr19175"
  run_dump_test "pr18591"
  run_dump_test "pr19615"
