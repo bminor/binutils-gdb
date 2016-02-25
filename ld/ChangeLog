@@ -1,3 +1,7 @@
+2016-02-25  Nick Clifton  <nickc@redhat.com>
+
+	* ld.h (struct ld_config_type): Remove specified_data_size field.
+
 2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19698
