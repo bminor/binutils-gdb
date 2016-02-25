@@ -1,3 +1,8 @@
+2016-02-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* i386-linux-tdep.c (i386_linux_handle_segmentation_fault):
+	Initialize variables.
+
 2016-02-25  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* ax-general.c (ax_reg): Call gdbarch_remote_register_number.
