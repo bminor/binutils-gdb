@@ -87,7 +87,7 @@ struct type_map_instance
   const struct type *type;
 
   /* The corresponding gcc type handle.  */
-  gcc_type gcc_type;
+  gcc_type gcc_type_handle;
 };
 
 /* Flag to enable internal debugging.  */
@@ -107,7 +107,7 @@ static gcc_type ccp_convert_func (struct compile_cplus_instance *context,
 static char *
 copy_stoken (const struct stoken *token)
 {
-  char *string = xmalloc (token->length + 1);
+  char *string = (char *) xmalloc (token->length + 1);
 
   strncpy (string, token->ptr, token->length);
   string[token->length] = '\0';
@@ -119,7 +119,7 @@ copy_stoken (const struct stoken *token)
 static hashval_t
 hash_type_map_instance (const void *p)
 {
-  const struct type_map_instance *inst = p;
+  const struct type_map_instance *inst = (struct type_map_instance *) p;
 
   return htab_hash_pointer (inst->type);
 }
@@ -129,8 +129,8 @@ hash_type_map_instance (const void *p)
 static int
 eq_type_map_instance (const void *a, const void *b)
 {
-  const struct type_map_instance *insta = a;
-  const struct type_map_instance *instb = b;
+  const struct type_map_instance *insta = (struct type_map_instance *) a;
+  const struct type_map_instance *instb = (struct type_map_instance *) b;
 
   return insta->type == instb->type;
 }
@@ -152,14 +152,14 @@ insert_type (struct compile_cplus_instance *context, struct type *type,
   void **slot;
 
   inst.type = type;
-  inst.gcc_type = gcc_type;
+  inst.gcc_type_handle = gcc_type;
   slot = htab_find_slot (context->type_map, &inst, INSERT);
 
-  add = *slot;
+  add = (struct type_map_instance *) *slot;
 
   /* The type might have already been inserted in order to handle
      recursive types.  */
-  gdb_assert (add == NULL || add->gcc_type == gcc_type);
+  gdb_assert (add == NULL || add->gcc_type_handle == gcc_type);
 
   if (add == NULL)
     {
@@ -263,7 +263,7 @@ get_current_search_block (void)
    This function may return NULL if TYPE represents an anonymous type.  */
 
 static VEC (compile_cplus_scope_def) *
-ccp_type_name_to_scopes (const char *typename)
+ccp_type_name_to_scopes (const char *type_name)
 {
   const char *p;
   char *lookup_name;
@@ -272,7 +272,7 @@ ccp_type_name_to_scopes (const char *typename)
   VEC (compile_cplus_scope_def) *result = NULL;
   const struct block *block = get_current_search_block ();
 
-  if (typename == NULL)
+  if (type_name == NULL)
     {
       /* An anonymous type.  We cannot really do much here.  We simply cannot
 	 look up anonymous types easily/at all.  */
@@ -280,7 +280,7 @@ ccp_type_name_to_scopes (const char *typename)
     }
 
   back_to = make_cleanup (free_current_contents, &lookup_name);
-  p = typename;
+  p = type_name;
   while (1)
     {
       struct stoken s;
@@ -299,7 +299,7 @@ ccp_type_name_to_scopes (const char *typename)
       else
 	{
 	  running_length += 2 + s.length;
-	  lookup_name = xrealloc (lookup_name, running_length);
+	  lookup_name = (char *) xrealloc (lookup_name, running_length);
 	  strcat (lookup_name, "::");
 	  strncat (lookup_name, s.ptr, s.length);
 	}
@@ -510,8 +510,8 @@ ccp_pop_processing_context (struct compile_cplus_instance *context,
   CPCALL (pop_namespace, context);
 }
 
-/* Create a new processing context for TYPE with name TYPENAME.
-   [TYPENAME could be TYPE_NAME or SYMBOL_NATURAL_NAME.]
+/* Create a new processing context for TYPE with name TYPE_NAME.
+   [TYPE_NAME could be TYPE_NAME or SYMBOL_NATURAL_NAME.]
 
    If TYPE is a nested or local definition, *NESTED_TYPE is set to the
    result and this function returns NULL.
@@ -522,7 +522,7 @@ ccp_pop_processing_context (struct compile_cplus_instance *context,
 
 struct compile_cplus_context *
 new_processing_context (struct compile_cplus_instance *context,
-			const char *typename, struct type *type,
+			const char *type_name, struct type *type,
 			gcc_type *nested_type)
 {
   char *name;
@@ -538,7 +538,7 @@ new_processing_context (struct compile_cplus_instance *context,
   /* Break the type name into components.  If TYPE was defined in some
      superclass, we do not process TYPE but process the enclosing type
      instead.  */
-  CONTEXT_SCOPES (pctx) = ccp_type_name_to_scopes (typename);
+  CONTEXT_SCOPES (pctx) = ccp_type_name_to_scopes (type_name);
   make_cleanup (VEC_cleanup (compile_cplus_scope_def),
 		&CONTEXT_SCOPES (pctx));
 
@@ -574,8 +574,8 @@ new_processing_context (struct compile_cplus_instance *context,
 	  inst.type = type;
 	  slot = htab_find_slot (context->type_map, &inst, NO_INSERT);
 	  gdb_assert (*slot != NULL);
-	  found = *slot;
-	  *nested_type = found->gcc_type;
+	  found = (struct type_map_instance *) *slot;
+	  *nested_type = found->gcc_type_handle;
 	  do_cleanups (cleanups);
 	  return NULL;
 	}
@@ -913,14 +913,14 @@ ccp_convert_method (struct compile_cplus_instance *context,
 {
   int i;
   gcc_type result, func_type, class_type;
-  enum gcc_cp_qualifiers quals;
-  enum gcc_cp_ref_qualifiers rquals;
+  gcc_cp_qualifiers_flags quals;
+  gcc_cp_ref_qualifiers_flags rquals;
 
   /* Get the actual (proto)type of the method, as a function.  */
   func_type = ccp_convert_func (context, method_type, 1);
 
   class_type = convert_cplus_type (context, parent_type);
-  quals = 0; // !!keiths FIXME
+  quals = (enum gcc_cp_qualifiers) 0; // !!keiths FIXME
   rquals = GCC_CP_REF_QUAL_NONE; // !!keiths FIXME
   CPOPS ("build_method_type\n");
   result = CPCALL (build_method_type, context,
@@ -1117,7 +1117,7 @@ maybe_canonicalize_special_function (const char *field_name,
 
       /* Size of buffer: 'li', 'i', sizeof operator name, '\0'  */
       len = 2 + end - field_name + 1;
-      *outname = xmalloc (len);
+      *outname = (char *) xmalloc (len);
       strcpy (*outname, "li");
       strncat (*outname, field_name, end - field_name);
       (*outname)[len] = '\0';
@@ -1282,7 +1282,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	  const char *filename;
 	  unsigned int line;
 	  const char *kind; //debug
-	  enum gcc_cp_symbol_kind sym_kind = GCC_CP_SYMBOL_FUNCTION;
+	  gcc_cp_symbol_kind_flags sym_kind = GCC_CP_SYMBOL_FUNCTION;
 	  const char *name;
 	  char *special_name;
 	  struct cleanup *back_to;
@@ -1471,7 +1471,7 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
 	{
 	  bases.elements = XNEWVEC (gcc_type, num_baseclasses);
 	  bases.n_elements = num_baseclasses;
-	  bases.virtualp = xcalloc (num_baseclasses, sizeof (char));
+	  bases.virtualp = (char *) xcalloc (num_baseclasses, sizeof (char));
 	  for (i = 0; i < num_baseclasses; ++i)
 	    {
 	      struct type *base_type = TYPE_BASECLASS (type, i);
@@ -1545,7 +1545,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
   struct cleanup *cleanups;
   /* !!keiths: This does not appear to work. GCC complains about
      being unable to convert enum values from '(MyEnum)0' to 'int'.  */
-  _Bool scoped_enum_p = /*TYPE_DECLARED_CLASS (type) ? TRUE :*/ FALSE;
+  int scoped_enum_p = /*TYPE_DECLARED_CLASS (type) ? TRUE :*/ FALSE;
 
   /* Create an empty cleanup chain.  */
   cleanups = make_cleanup (null_cleanup, NULL);
@@ -1743,7 +1743,7 @@ ccp_convert_qualified (struct compile_cplus_instance *context,
 {
   struct type *unqual = make_unqualified_type (type);
   gcc_type unqual_converted;
-  enum gcc_cp_qualifiers quals = 0;
+  gcc_cp_qualifiers_flags quals = (enum gcc_cp_qualifiers) 0;
   gcc_type result;
 
   unqual_converted = convert_cplus_type (context, unqual);
@@ -1784,7 +1784,7 @@ ccp_convert_namespace (struct compile_cplus_instance *context,
 {
   int need_new_context;
   gcc_type dummy;
-  char *name;
+  char *name = NULL;
   struct compile_cplus_scope *scope;
   struct compile_cplus_context *pctx;
   struct cleanup *cleanups;
@@ -1905,9 +1905,9 @@ convert_cplus_type (struct compile_cplus_instance *context,
   gcc_type result;
 
   inst.type = type;
-  found = htab_find (context->type_map, &inst);
+  found = (struct type_map_instance *) htab_find (context->type_map, &inst);
   if (found != NULL)
-    return found->gcc_type;
+    return found->gcc_type_handle;
 
   result = convert_type_cplus_basic (context, type);
   if (result != DONT_CACHE_TYPE)

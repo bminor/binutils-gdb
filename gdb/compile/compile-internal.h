@@ -24,6 +24,9 @@
 
 /* enum-flags wrapper.  */
 DEF_ENUM_FLAGS_TYPE (enum gcc_qualifiers, gcc_qualifiers_flags);
+DEF_ENUM_FLAGS_TYPE (enum gcc_cp_qualifiers, gcc_cp_qualifiers_flags);
+DEF_ENUM_FLAGS_TYPE (enum gcc_cp_ref_qualifiers, gcc_cp_ref_qualifiers_flags);
+DEF_ENUM_FLAGS_TYPE (enum gcc_cp_symbol_kind, gcc_cp_symbol_kind_flags);
 
 /* Debugging flag for the "compile" family of commands.  */
 

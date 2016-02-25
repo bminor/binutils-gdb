@@ -55,7 +55,7 @@ struct symbol_error
 static hashval_t
 hash_symbol_error (const void *a)
 {
-  const struct symbol_error *se = a;
+  const struct symbol_error *se = (struct symbol_error *) a;
 
   return htab_hash_pointer (se->sym);
 }
@@ -65,8 +65,8 @@ hash_symbol_error (const void *a)
 static int
 eq_symbol_error (const void *a, const void *b)
 {
-  const struct symbol_error *sea = a;
-  const struct symbol_error *seb = b;
+  const struct symbol_error *sea = (struct symbol_error *) a;
+  const struct symbol_error *seb = (struct symbol_error *) b;
 
   return sea->sym == seb->sym;
 }
@@ -76,7 +76,7 @@ eq_symbol_error (const void *a, const void *b)
 static void
 del_symbol_error (void *a)
 {
-  struct symbol_error *se = a;
+  struct symbol_error *se = (struct symbol_error *) a;
 
   xfree (se->message);
   xfree (se);
@@ -117,7 +117,7 @@ error_symbol_once (struct compile_cplus_instance *context,
     return;
 
   search.sym = sym;
-  err = htab_find (context->symbol_err_map, &search);
+  err = (struct symbol_error *) htab_find (context->symbol_err_map, &search);
   if (err == NULL || err->message == NULL)
     return;
 
@@ -169,10 +169,8 @@ convert_one_symbol (struct compile_cplus_instance *context,
   else
     {
       gcc_decl decl;
-      /* pmuldoon: As far as I can tell, kind is properly assigned in
-	 all scenarios, but GCC on compiling GDB still complains about "use
-	 maybe uninitialized".  Add temporary pacifier.  */
-      enum gcc_cp_symbol_kind kind = -1;
+      /* Squash compiler warning.  */
+      gcc_cp_symbol_kind_flags kind = GCC_CP_FLAG_BASE;
       CORE_ADDR addr = 0;
       char *symbol_name = NULL, *name = NULL;
 
@@ -358,7 +356,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	    }
 
 	  /* Define the decl.  */
-	  CPOPS ("new_decl %s %d %s\n", name, kind, symbol_name);
+	  CPOPS ("new_decl %s %d %s\n", name, (int) kind, symbol_name);
 	  decl = CPCALL (new_decl, context,
 			 name, kind, sym_type, symbol_name, addr,
 			 filename, line);
@@ -437,7 +435,7 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
   struct minimal_symbol *msym = bmsym.minsym;
   struct objfile *objfile = bmsym.objfile;
   struct type *type;
-  enum gcc_cp_symbol_kind kind;
+  gcc_cp_symbol_kind_flags kind;
   gcc_type sym_type;
   gcc_decl decl;
   CORE_ADDR addr;
@@ -492,7 +490,7 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
      information for the symbol.  While we have access to the demangled
      name, we still don't know what A::B::C::D::E::F means without debug
      info, no?  */
-  CPOPS ("new_decl minsym %s %d\n", MSYMBOL_NATURAL_NAME (msym), kind);
+  CPOPS ("new_decl minsym %s %d\n", MSYMBOL_NATURAL_NAME (msym), (int) kind);
   decl = CPCALL (new_decl, context,
 		 MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
 		 NULL, addr, NULL, 0);
@@ -562,7 +560,8 @@ gcc_cplus_convert_symbol (void *datum,
 			  enum gcc_cp_oracle_request request,
 			  const char *identifier)
 {
-  struct compile_cplus_instance *context = datum;
+  struct compile_cplus_instance *context
+    = (struct compile_cplus_instance *) datum;
   domain_enum domain;
   int found = 0;
   struct search_multiple_result search_result;
@@ -695,7 +694,8 @@ gcc_address
 gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 			  const char *identifier)
 {
-  struct compile_cplus_instance *context = datum;
+  struct compile_cplus_instance *context
+    = (struct compile_cplus_instance *) datum;
   gcc_address result = 0;
   int found = 0;
 
@@ -771,7 +771,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 static hashval_t
 hash_symname (const void *a)
 {
-  const struct symbol *sym = a;
+  const struct symbol *sym = (struct symbol *) a;
 
   return htab_hash_string (SYMBOL_NATURAL_NAME (sym));
 }
@@ -782,8 +782,8 @@ hash_symname (const void *a)
 static int
 eq_symname (const void *a, const void *b)
 {
-  const struct symbol *syma = a;
-  const struct symbol *symb = b;
+  const struct symbol *syma = (struct symbol *) a;
+  const struct symbol *symb = (struct symbol *) b;
 
   return strcmp (SYMBOL_NATURAL_NAME (syma), SYMBOL_NATURAL_NAME (symb)) == 0;
 }
