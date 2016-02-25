@@ -47,7 +47,8 @@ targ64_extra_libpath=
 case "${targ}" in
 aarch64_be-*-elf)	targ_emul=aarch64elfb
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b armelfb armelf" ;;
-aarch64-*-elf)		targ_emul=aarch64elf
+aarch64-*-elf | aarch64-*-rtems*)
+			targ_emul=aarch64elf
 			targ_extra_emuls="aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb" ;;
 aarch64-*-cloudabi*)	targ_emul=aarch64cloudabi
 			targ_extra_emuls=aarch64cloudabib ;;
