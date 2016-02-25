@@ -84,7 +84,7 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 static void
-insert_sreg (char *regname, int regnum)
+insert_sreg (const char *regname, int regnum)
 {
   /* Must be large enough to hold the names of the special registers.  */
   char buf[80];
@@ -153,7 +153,7 @@ match_sft_register (char *name)
 #define MAX_REG_NO  35
 /* Currently we have 35 software registers defined -
    we borrowed from MIPS.   */
-  static char *soft_reg[] =
+  static const char *soft_reg[] =
     {
       "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
       "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", "t9",

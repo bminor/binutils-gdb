@@ -911,7 +911,7 @@ md_section_align (asection *seg, valueT addr)
 void
 md_begin (void)
 {
-  char *prev_name = "";
+  const char *prev_name = "";
   const struct mn10300_opcode *op;
 
   mn10300_hash = hash_new ();
@@ -2443,7 +2443,7 @@ set_arch_mach (int mach)
 }
 
 static inline char *
-mn10300_end_of_match (char *cont, char *what)
+mn10300_end_of_match (char *cont, const char *what)
 {
   int len = strlen (what);
 

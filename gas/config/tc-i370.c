@@ -102,7 +102,7 @@ static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
 /* Structure to hold information about predefined registers.  */
 struct pd_reg
   {
-    char *name;
+    const char *name;
     int value;
   };
 
@@ -582,7 +582,7 @@ i370_elf_suffix (char **str_p, expressionS *exp_p)
 {
   struct map_bfd
   {
-    char *string;
+    const char *string;
     int length;
     bfd_reloc_code_real_type reloc;
   };

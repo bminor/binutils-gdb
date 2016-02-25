@@ -302,7 +302,7 @@ const pseudo_typeS md_pseudo_table[] =
 /* Structure to hold information about predefined registers.  */
 struct pd_reg
   {
-    char *name;
+    const char *name;
     int value;
   };
 
@@ -1402,7 +1402,7 @@ ppc_mach (void)
     return bfd_mach_ppc;
 }
 
-extern char*
+extern const char*
 ppc_target_format (void)
 {
 #ifdef OBJ_COFF
@@ -1864,7 +1864,7 @@ static bfd_reloc_code_real_type
 ppc_elf_suffix (char **str_p, expressionS *exp_p)
 {
   struct map_bfd {
-    char *string;
+    const char *string;
     unsigned int length : 8;
     unsigned int valid32 : 1;
     unsigned int valid64 : 1;
@@ -7171,7 +7171,7 @@ tc_ppc_regname_to_dw2regnum (char *regname)
   unsigned int i;
   const char *p;
   char *q;
-  static struct { char *name; int dw2regnum; } regnames[] =
+  static struct { const char *name; int dw2regnum; } regnames[] =
     {
       { "sp", 1 }, { "r.sp", 1 }, { "rtoc", 2 }, { "r.toc", 2 },
       { "mq", 64 }, { "lr", 65 }, { "ctr", 66 }, { "ap", 67 },

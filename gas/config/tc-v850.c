@@ -1885,7 +1885,7 @@ md_section_align (asection *seg, valueT addr)
 void
 md_begin (void)
 {
-  char *prev_name = "";
+  const char *prev_name = "";
   const struct v850_opcode *op;
 
   if (strncmp (TARGET_CPU, "v850e3v5", 8) == 0)

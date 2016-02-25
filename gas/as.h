@@ -380,7 +380,7 @@ COMMON int flag_execstack;
 COMMON int flag_noexecstack;
 
 /* name of emitted object file */
-COMMON char *out_file_name;
+COMMON const char *out_file_name;
 
 /* name of file defining extensions to the basic instruction set */
 COMMON char *insttbl_file_name;

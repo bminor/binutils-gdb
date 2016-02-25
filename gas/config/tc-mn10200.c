@@ -682,7 +682,7 @@ md_section_align (asection *seg, valueT addr)
 void
 md_begin (void)
 {
-  char *prev_name = "";
+  const char *prev_name = "";
   const struct mn10200_opcode *op;
 
   mn10200_hash = hash_new ();

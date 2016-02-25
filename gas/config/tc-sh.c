@@ -950,7 +950,7 @@ void
 md_begin (void)
 {
   const sh_opcode_info *opcode;
-  char *prev_name = "";
+  const char *prev_name = "";
   unsigned int target_arch;
 
   target_arch
@@ -4490,7 +4490,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
 #ifdef OBJ_ELF
 inline static char *
-sh_end_of_match (char *cont, char *what)
+sh_end_of_match (char *cont, const char *what)
 {
   int len = strlen (what);
 
@@ -4603,7 +4603,7 @@ sh_regname_to_dw2regnum (char *regname)
   unsigned int i;
   const char *p;
   char *q;
-  static struct { char *name; int dw2regnum; } regnames[] =
+  static struct { const char *name; int dw2regnum; } regnames[] =
     {
       { "pr", 17 }, { "t", 18 }, { "gbr", 19 }, { "mach", 20 },
       { "macl", 21 }, { "fpul", 23 }

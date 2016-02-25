@@ -105,7 +105,7 @@ int linkrelax = 1;
 
 struct rcodes_s
 {
-  char * name;
+  const char * name;
   int    index;	/* Corresponding insn_opnumb.  */
   int    sop;	/* Opcode if jump length is short.  */
   long   lpos;	/* Label position.  */
@@ -160,7 +160,7 @@ static struct rcodes_s msp430x_rcodes[] =
 
 struct hcodes_s
 {
-  char * name;
+  const char * name;
   int    index;		/* Corresponding insn_opnumb.  */
   int    tlab;		/* Number of labels in short mode.  */
   int    op0;		/* Opcode for first word of short jump.  */
@@ -1339,7 +1339,7 @@ md_parse_option (int c, char * arg)
 	signed int i;
 	const struct
 	{
-	  char *       name;
+	  const char *       name;
 	  unsigned int length;
 	  unsigned int bitfield;
 	} erratas[] =

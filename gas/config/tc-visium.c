@@ -265,7 +265,7 @@ static struct visium_option_table visium_opts[] =
 
 struct visium_arch_option_table
 {
-  char *name;
+  const char *name;
   enum visium_arch_val value;
 };
 
@@ -280,10 +280,10 @@ static struct visium_arch_option_table visium_archs[] =
 
 struct visium_long_option_table
 {
-  char *option;			/* Substring to match.  */
-  char *help;			/* Help information.  */
+  const char *option;			/* Substring to match.  */
+  const char *help;			/* Help information.  */
   int (*func) (char *subopt);	/* Function to decode sub-option.  */
-  char *deprecated;		/* If non-null, print this message.  */
+  const char *deprecated;		/* If non-null, print this message.  */
 };
 
 static int

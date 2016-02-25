@@ -7715,8 +7715,8 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 struct aarch64_option_table
 {
-  char *option;			/* Option name to match.  */
-  char *help;			/* Help information.  */
+  const char *option;			/* Option name to match.  */
+  const char *help;			/* Help information.  */
   int *var;			/* Variable to change.  */
   int value;			/* What to change it to.  */
   char *deprecated;		/* If non-null, print this message.  */
@@ -7738,7 +7738,7 @@ static struct aarch64_option_table aarch64_opts[] = {
 
 struct aarch64_cpu_option_table
 {
-  char *name;
+  const char *name;
   const aarch64_feature_set value;
   /* The canonical name of the CPU, or NULL to use NAME converted to upper
      case.  */
@@ -7780,7 +7780,7 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 
 struct aarch64_arch_option_table
 {
-  char *name;
+  const char *name;
   const aarch64_feature_set value;
 };
 
@@ -7797,7 +7797,7 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
 /* ISA extensions.  */
 struct aarch64_option_cpu_value_table
 {
-  char *name;
+  const char *name;
   const aarch64_feature_set value;
 };
 
@@ -7819,8 +7819,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 
 struct aarch64_long_option_table
 {
-  char *option;			/* Substring to match.  */
-  char *help;			/* Help information.  */
+  const char *option;			/* Substring to match.  */
+  const char *help;			/* Help information.  */
   int (*func) (char *subopt);	/* Function to decode sub-option.  */
   char *deprecated;		/* If non-null, print this message.  */
 };
@@ -7979,7 +7979,7 @@ aarch64_parse_arch (char *str)
 /* ABIs.  */
 struct aarch64_option_abi_value_table
 {
-  char *name;
+  const char *name;
   enum aarch64_abi_type value;
 };
 

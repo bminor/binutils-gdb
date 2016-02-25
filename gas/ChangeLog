@@ -1,3 +1,73 @@
+2016-02-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* as.c (select_emulation_mode): Add const qualifiers.
+	* as.h: Likewise.
+	* config/bfin-defs.h: Likewise.
+	* config/bfin-parse.y: Likewise.
+	* config/rx-parse.y: Likewise.
+	* config/tc-aarch64.c (struct aarch64_option_table): Likewise.
+	(struct aarch64_cpu_option_table): Likewise.
+	(struct aarch64_arch_option_table): Likewise.
+	(struct aarch64_option_cpu_value_table): Likewise.
+	(struct aarch64_long_option_table): Likewise.
+	(struct aarch64_option_abi_value_table): Likewise.
+	* config/tc-arm.c (struct reloc_entry): Likewise.
+	(tc_gen_reloc): Likewise.
+	(struct arm_option_table): Likewise.
+	(struct arm_legacy_option_table): Likewise.
+	(struct arm_cpu_option_table): Likewise.
+	(struct arm_arch_option_table): Likewise.
+	(struct arm_option_extension_value_table): Likewise.
+	(struct arm_option_fpu_value_table): Likewise.
+	(struct arm_option_value_table): Likewise.
+	(struct arm_long_option_table): Likewise.
+	* config/tc-avr.c (struct avr_opcodes_s): Likewise.
+	(struct mcu_type_s): Likewise.
+	(struct exp_mod_s): Likewise.
+	(avr_operand): Likewise.
+	(avr_operands): Likewise.
+	* config/tc-d10v.c (md_begin): Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-fr30.c (fr30_is_colon_insn): Likewise.
+	* config/tc-ft32.c (parse_condition): Likewise.
+	* config/tc-h8300.c (do_a_fix_imm): Likewise.
+	* config/tc-hppa.c (pa_ip): Likewise.
+	(hppa_regname_to_dw2regnum): Likewise.
+	* config/tc-i370.c (i370_elf_suffix): Likewise.
+	* config/tc-i960.c (struct tabentry): Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-m68k.h: Likewise.
+	* config/tc-mcore.c (parse_psrmod): Likewise.
+	* config/tc-metag.c (struct metag_core_option): Likewise.
+	(struct metag_long_option): Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mips.c (macro): Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-msp430.c (struct rcodes_s): Likewise.
+	(struct hcodes_s): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-ns32k.c (struct ns32k_option): Likewise.
+	(optlist): Likewise.
+	* config/tc-ppc.c (ppc_elf_suffix): Likewise.
+	(tc_ppc_regname_to_dw2regnum): Likewise.
+	* config/tc-ppc.h: Likewise.
+	* config/tc-rl78.c: Likewise.
+	* config/tc-rx.c (struct cpu_type): Likewise.
+	* config/tc-sh.c (sh_regname_to_dw2regnum): Likewise.
+	* config/tc-sparc.c (struct priv_reg_entry): Likewise.
+	(sparc_ip): Likewise.
+	* config/tc-spu.c (insn_fmt_string): Likewise.
+	* config/tc-tic54x.c (tic54x_set_default_include): Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-visium.c (struct visium_arch_option_table): Likewise.
+	(struct visium_long_option_table): Likewise.
+	* config/tc-xgate.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* read.c (add_include_dir): Likewise.
+	* read.h: Likewise.
+
 2016-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/gas/all/gas.exp: Change target pattern to cover

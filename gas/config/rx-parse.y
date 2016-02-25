@@ -1277,7 +1277,7 @@ token_table[] =
 
 static struct
 {
-  char * string;
+  const char * string;
   int    token;
 }
 condition_opcode_table[] =
@@ -1291,7 +1291,7 @@ condition_opcode_table[] =
 
 static struct
 {
-  char * string;
+  const char * string;
   int    val;
 }
 condition_table[] =
@@ -1333,7 +1333,7 @@ rx_lex_init (char * beginning, char * ending)
 }
 
 static int
-check_condition (char * base)
+check_condition (const char * base)
 {
   char * cp;
   unsigned int i;

@@ -516,7 +516,7 @@ struct asm_barrier_opt
 
 struct reloc_entry
 {
-  char *                    name;
+  const char *                    name;
   bfd_reloc_code_real_type  reloc;
 };
 
@@ -24095,7 +24095,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 
     default:
       {
-	char * type;
+	const char * type;
 
 	switch (fixp->fx_r_type)
 	  {
@@ -24906,11 +24906,11 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 struct arm_option_table
 {
-  char *option;		/* Option name to match.  */
-  char *help;		/* Help information.  */
+  const char *option;		/* Option name to match.  */
+  const char *help;		/* Help information.  */
   int  *var;		/* Variable to change.	*/
   int	value;		/* What to change it to.  */
-  char *deprecated;	/* If non-null, print this message.  */
+  const char *deprecated;	/* If non-null, print this message.  */
 };
 
 struct arm_option_table arm_opts[] =
@@ -24943,10 +24943,10 @@ struct arm_option_table arm_opts[] =
 
 struct arm_legacy_option_table
 {
-  char *option;				/* Option name to match.  */
+  const char *option;				/* Option name to match.  */
   const arm_feature_set	**var;		/* Variable to change.	*/
   const arm_feature_set	value;		/* What to change it to.  */
-  char *deprecated;			/* If non-null, print this message.  */
+  const char *deprecated;			/* If non-null, print this message.  */
 };
 
 const struct arm_legacy_option_table arm_legacy_opts[] =
@@ -25064,7 +25064,7 @@ const struct arm_legacy_option_table arm_legacy_opts[] =
 
 struct arm_cpu_option_table
 {
-  char *name;
+  const char *name;
   size_t name_len;
   const arm_feature_set	value;
   /* For some CPUs we assume an FPU unless the user explicitly sets
@@ -25245,7 +25245,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
 
 struct arm_arch_option_table
 {
-  char *name;
+  const char *name;
   size_t name_len;
   const arm_feature_set	value;
   const arm_feature_set	default_fpu;
@@ -25316,7 +25316,7 @@ static const struct arm_arch_option_table arm_archs[] =
 /* ISA extensions in the co-processor and main instruction set space.  */
 struct arm_option_extension_value_table
 {
-  char *name;
+  const char *name;
   size_t name_len;
   const arm_feature_set merge_value;
   const arm_feature_set clear_value;
@@ -25378,7 +25378,7 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 /* ISA floating-point and Advanced SIMD extensions.  */
 struct arm_option_fpu_value_table
 {
-  char *name;
+  const char *name;
   const arm_feature_set value;
 };
 
@@ -25434,7 +25434,7 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
 
 struct arm_option_value_table
 {
-  char *name;
+  const char *name;
   long value;
 };
 
@@ -25459,10 +25459,10 @@ static const struct arm_option_value_table arm_eabis[] =
 
 struct arm_long_option_table
 {
-  char * option;		/* Substring to match.	*/
-  char * help;			/* Help information.  */
+  const char * option;		/* Substring to match.	*/
+  const char * help;			/* Help information.  */
   int (* func) (char * subopt);	/* Function to decode sub-option.  */
-  char * deprecated;		/* If non-null, print this message.  */
+  const char * deprecated;		/* If non-null, print this message.  */
 };
 
 static bfd_boolean

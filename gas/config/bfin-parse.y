@@ -158,16 +158,16 @@ extern INSTR_T insn;
 static Expr_Node *binary (Expr_Op_Type, Expr_Node *, Expr_Node *);
 static Expr_Node *unary  (Expr_Op_Type, Expr_Node *);
 
-static void notethat (char *, ...);
+static void notethat (const char *, ...);
 
 char *current_inputline;
 extern char *yytext;
-int yyerror (char *);
+int yyerror (const char *);
 
 /* Used to set SRCx fields to all 1s as described in the PRM.  */
 static Register reg7 = {REG_R7, 0};
 
-void error (char *format, ...)
+void error (const char *format, ...)
 {
     va_list ap;
     static char buffer[2000];
@@ -180,7 +180,7 @@ void error (char *format, ...)
 }
 
 int
-yyerror (char *msg)
+yyerror (const char *msg)
 {
   if (msg[0] == '\0')
     error ("%s", msg);
@@ -4651,7 +4651,7 @@ unary (Expr_Op_Type op, Expr_Node *x)
 
 int debug_codeselection = 0;
 static void
-notethat (char *format, ...)
+notethat (const char *format, ...)
 {
   va_list ap;
   va_start (ap, format);

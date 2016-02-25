@@ -291,7 +291,7 @@ md_begin (void)
   struct xgate_opcode *xgate_opcode_ptr = NULL;
   struct xgate_opcode *xgate_op_table = NULL;
   struct xgate_opcode_handle *op_handles = 0;
-  char *prev_op_name = 0;
+  const char *prev_op_name = 0;
   int handle_enum = 0;
   int number_of_op_handles = 0;
   int i, j = 0;

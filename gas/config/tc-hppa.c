@@ -465,7 +465,7 @@ struct hppa_fix_struct
 
 struct pd_reg
   {
-    char *name;
+    const char *name;
     int value;
   };
 
@@ -473,7 +473,7 @@ struct pd_reg
    to a condition number which can be recorded in an instruction.  */
 struct fp_cond_map
   {
-    char *string;
+    const char *string;
     int cond;
   };
 
@@ -481,7 +481,7 @@ struct fp_cond_map
    string to a field selector type.  */
 struct selector_entry
   {
-    char *prefix;
+    const char *prefix;
     int field_selector;
   };
 
@@ -3167,7 +3167,7 @@ pa_parse_addb_64_cmpltr (char **s)
 static void
 pa_ip (char *str)
 {
-  char *error_message = "";
+  const char *error_message = "";
   char *s, c, *argstart, *name, *save_s;
   const char *args;
   int match = FALSE;
@@ -8694,7 +8694,7 @@ hppa_regname_to_dw2regnum (char *regname)
   unsigned int i;
   const char *p;
   char *q;
-  static struct { char *name; int dw2regnum; } regnames[] =
+  static struct { const char *name; int dw2regnum; } regnames[] =
     {
       { "sp", 30 }, { "rp", 2 },
     };
