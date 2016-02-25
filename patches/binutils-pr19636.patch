@@ -1,59 +1,118 @@
-From a42496a8de0da8fdb37953ca85a76b4d99732eaf Mon Sep 17 00:00:00 2001
+From a3a5e04ffbea45a1a8833efef68f9b6a12e9736e Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sun, 14 Feb 2016 06:10:10 -0800
-Subject: [PATCH] [x86] Resolve undefweak and defined symbols in executable
+Subject: [PATCH] [x86] Resolve non-PIC undefweak symbols in executable
 
-For i386 and x86-64, undefined weak and defined symbols are resolved
-without dynamic relocation when creating executable.  Undefined weak
-symbols aren't needed in the dynamic symbol table in executable.  One
-exception is on i386, we need undefined weak symbols in the dynamic
-symbol table in PIE if input relocatable files contain branchs without
-PLT so that we can branch to 0 with dynamic relocation in text section.
+For i386 and x86-64, non-PIC references to undefined weak symbols are
+resolved without dynamic relocation when creating executable.  Resolved
+undefined weak symbols are removed from the dynamic symbol table in
+executable.  One exception is on i386, we need resolved undefined weak
+symbols in the dynamic symbol table in PIE if input relocatable files
+contain branchs without PLT so that we can branch to 0 with dynamic
+relocation in text section.
 
-This makes behaviors of static executable, dynamic executable and
-position independent executable consistent with references to undefined
-weak and defined symbols, regardless if the relocatable input is
-compiled with PIC or not.
+This makes behaviors of dynamic executable and position independent
+executable predictable with mixed PIC and non-PIC references to undefined
+weak symbols.  If all references to undefined weak symbols are PIC,
+dynamic relocations against undefined weak symbols will be generated
+in executable unless -z nodynamic-undefined-weak is passed to linker.
 
 bfd/
 
 	PR ld/19636
-	* elf32-i386.c (elf_i386_fixup_symbol): New function.
+	PR ld/19704
+	PR ld/19719
+	* elf-bfd.h (elf_link_hash_table): Add has_interp_section.
+	* elf32-i386.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): New.
+	(elf_i386_link_hash_entry): Add has_got_reloc and
+	has_non_got_reloc.
+	(elf_i386_link_hash_newfunc): Initialize has_got_reloc and
+	has_non_got_reloc.
+	(elf_i386_copy_indirect_symbol): Copy has_got_reloc and
+	has_non_got_reloc.
+	(elf_i386_check_relocs): Set has_got_reloc and has_non_got_reloc.
+	(elf_i386_fixup_symbol): New function.
 	(elf_i386_pie_finish_undefweak_symbol): Likewise.
 	(elf_i386_allocate_dynrelocs): Don't allocate space for dynamic
-	relocations and discard relocations against undefined weak symbols
-	in executable.  Don't make undefined weak symbols in executable
-	dynamic.  Keep dynamic non-GOT/non-PLT relocation against
-	undefined weak symbols in PIE.
+	relocations and discard relocations against resolved undefined
+	weak symbols in executable.  Don't make resolved undefined weak
+	symbols in executable dynamic.  Keep dynamic non-GOT/non-PLT
+	relocation against undefined weak symbols in PIE.
 	(elf_i386_relocate_section): Don't generate dynamic relocations
-	against weak undefined symbols in PIE, except for R_386_PC32.
+	against resolved undefined weak symbols in PIE, except for
+	R_386_PC32.
 	(elf_i386_finish_dynamic_symbol): Keep PLT/GOT entries without
-	dynamic PLT/GOT relocations for undefined weak symbols in PIE.
-	Don't generate dynamic relocation against undefined weak symbol
-	in executable.
+	dynamic PLT/GOT relocations for resolved undefined weak symbols.
+	Don't generate dynamic relocation against resolved undefined weak
+	symbol in executable.
 	(elf_i386_finish_dynamic_sections): Call
 	elf_i386_pie_finish_undefweak_symbol on all symbols in PIE.
 	(elf_backend_fixup_symbol): New.
-	* elf64-x86-64.c (elf_x86_64_fixup_symbol): New function.
+	* elf64-x86-64.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): New.
+	(elf_x86_64_link_hash_entry): Add has_got_reloc and
+	has_non_got_reloc.
+	(elf_x86_64_link_hash_newfunc): Initialize has_got_reloc and
+	has_non_got_reloc.
+	(elf_x86_64_copy_indirect_symbol): Copy has_got_reloc and
+	has_non_got_reloc.
+	(elf_x86_64_check_relocs): Set has_got_reloc and
+	has_non_got_reloc.
+	(elf_x86_64_fixup_symbol): New function.
 	(elf_x86_64_pie_finish_undefweak_symbol): Likewise.
 	(elf_x86_64_allocate_dynrelocs): Don't allocate space for dynamic
-	relocations and discard relocations against undefined weak symbols
-	in executable.  Don't make undefined weak symbols in executable
-	dynamic.
-	(elf_x86_64_relocate_section): Don't generate dynamic relocations
-	against weak undefined symbols in PIE.
+	relocations and discard relocations against resolved undefined
+	weak symbols in executable.  Don't make resolved undefined weak
+	symbols in executable dynamic.
+	(elf_x86_64_relocate_section): Check relocation overflow for
+	dynamic relocations against unresolved weak undefined symbols.
+	Don't generate dynamic relocations against resolved weak
+	undefined symbols in PIE.
 	(elf_x86_64_finish_dynamic_symbol): Keep PLT/GOT entries without
-	dynamic PLT/GOT relocations for undefined weak symbols in PIE.
-	Don't generate dynamic relocation against undefined weak symbol
-	in executable.
+	dynamic PLT/GOT relocations for resolved undefined weak symbols.
+	Don't generate dynamic relocation against resolved undefined weak
+	symbol in executable.
 	(elf_x86_64_finish_dynamic_sections): Call
 	elf_x86_64_pie_finish_undefweak_symbol on all symbols in PIE.
 	(elf_backend_fixup_symbol): New.
+	* elflink.c (bfd_elf_size_dynamic_sections): Set
+	has_interp_section if there is a .interp section.
+
+include/
+
+	PR ld/19636
+	PR ld/19704
+	PR ld/19719
+	* bfdlink.h (bfd_link_info): Add dynamic_undefined_weak.
 
 ld/
 
 	PR ld/19636
-	* testsuite/ld-i386/pr19636-1.s: New file.
+	PR ld/19704
+	PR ld/19719
+	* Makefile.am (ELF_X86_DEPS): Add dynamic_undefined_weak.sh.
+	* Makefile.in: Regenerated.
+	* NEWS: Mention -z nodynamic-undefined-weak.
+	* ld.texinfo: Document -z nodynamic-undefined-weak.
+	* ldmain.c (main): Initialize dynamic_undefined_weak to -1.
+	* emulparams/dynamic_undefined_weak.sh: New file.
+	* emulparams/elf32_x86_64.sh: Source dynamic_undefined_weak.sh.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_i386_be.sh: Likewise.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_i386_vxworks.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/extern_protected_data.sh (PARSE_AND_LIST_OPTIONS):
+	Append.
+	(PARSE_AND_LIST_ARGS_CASE_Z): Likewise.
+	* testsuite/ld-elf/pr19719a.c: New file.
+	* testsuite/ld-elf/pr19719b.c: Likewise.
+	* testsuite/ld-elf/pr19719c.c: Likewise.
+	* testsuite/ld-elf/pr19719d.c: Likewise.
+	* testsuite/ld-i386/pr19636-1.s: Likewise.
 	* testsuite/ld-i386/pr19636-1a.d: Likewise.
 	* testsuite/ld-i386/pr19636-1b.d: Likewise.
 	* testsuite/ld-i386/pr19636-1c.d: Likewise.
@@ -86,6 +145,9 @@ ld/
 	* testsuite/ld-i386/pr19636-4b.d: Likewise.
 	* testsuite/ld-i386/pr19636-4c.d: Likewise.
 	* testsuite/ld-i386/pr19636-4d.d: Likewise.
+	* testsuite/ld-i386/pr19704.out: Likewise.
+	* testsuite/ld-i386/pr19704a.c: Likewise.
+	* testsuite/ld-i386/pr19704b.c: Likewise.
 	* testsuite/ld-x86-64/pr19636-1.s: Likewise.
 	* testsuite/ld-x86-64/pr19636-1a.d: Likewise.
 	* testsuite/ld-x86-64/pr19636-1b.d: Likewise.
@@ -110,75 +172,117 @@ ld/
 	* testsuite/ld-x86-64/pr19636-3b.d: Likewise.
 	* testsuite/ld-x86-64/pr19636-3c.d: Likewise.
 	* testsuite/ld-x86-64/pr19636-3d.d: Likewise.
-	* testsuite/ld-i386/i386.exp: Run PR ld/19636 tests.
+	* testsuite/ld-x86-64/pr19704.out: Likewise.
+	* testsuite/ld-x86-64/pr19704a.c: Likewise.
+	* testsuite/ld-x86-64/pr19704b.c: Likewise.
+	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): New.
+	Run mix_pic_and_non_pic.
+	* testsuite/ld-i386/i386.exp (undefined_weak): New.
+	Run undefined_weak and PR ld/19636 tests.
 	* testsuite/ld-x86-64/x86-64.exp: Likewise.
 	* testsuite/ld-x86-64/pr13082-3b.d: Likewise.
 	* testsuite/ld-x86-64/pr13082-4b.d: Likewise.
 ---
- bfd/elf32-i386.c                         | 233 +++++++++++++++++++++++--------
- bfd/elf64-x86-64.c                       | 226 ++++++++++++++++++++----------
- ld/testsuite/ld-i386/i386.exp            |  29 ++++
- ld/testsuite/ld-i386/pr19636-1.s         |   9 ++
- ld/testsuite/ld-i386/pr19636-1a.d        |  16 +++
- ld/testsuite/ld-i386/pr19636-1b.d        |  19 +++
- ld/testsuite/ld-i386/pr19636-1c.d        |   9 ++
- ld/testsuite/ld-i386/pr19636-1d-nacl.d   | 124 ++++++++++++++++
- ld/testsuite/ld-i386/pr19636-1d.d        |  26 ++++
- ld/testsuite/ld-i386/pr19636-1e.d        |  19 +++
- ld/testsuite/ld-i386/pr19636-1f.d        |  19 +++
+ bfd/elf-bfd.h                            |   3 +
+ bfd/elf32-i386.c                         | 285 +++++++++++++++++++++-------
+ bfd/elf64-x86-64.c                       | 309 ++++++++++++++++++++++---------
+ bfd/elflink.c                            |   3 +
+ include/bfdlink.h                        |   4 +
+ ld/Makefile.am                           |   1 +
+ ld/Makefile.in                           |   1 +
+ ld/NEWS                                  |   3 +
+ ld/emulparams/dynamic_undefined_weak.sh  |  12 ++
+ ld/emulparams/elf32_x86_64.sh            |   1 +
+ ld/emulparams/elf_i386.sh                |   1 +
+ ld/emulparams/elf_i386_be.sh             |   1 +
+ ld/emulparams/elf_i386_chaos.sh          |   1 +
+ ld/emulparams/elf_i386_ldso.sh           |   1 +
+ ld/emulparams/elf_i386_vxworks.sh        |   1 +
+ ld/emulparams/elf_iamcu.sh               |   1 +
+ ld/emulparams/elf_k1om.sh                |   1 +
+ ld/emulparams/elf_l1om.sh                |   1 +
+ ld/emulparams/elf_x86_64.sh              |   1 +
+ ld/emulparams/extern_protected_data.sh   |   8 +-
+ ld/ld.texinfo                            |   6 +
+ ld/ldmain.c                              |   1 +
+ ld/testsuite/ld-elf/pr19719a.c           |  12 ++
+ ld/testsuite/ld-elf/pr19719b.c           |   8 +
+ ld/testsuite/ld-elf/pr19719c.c           |   8 +
+ ld/testsuite/ld-elf/pr19719d.c           |   5 +
+ ld/testsuite/ld-elf/shared.exp           |  60 ++++++
+ ld/testsuite/ld-i386/i386.exp            |  91 +++++++++
+ ld/testsuite/ld-i386/pr19636-1.s         |   9 +
+ ld/testsuite/ld-i386/pr19636-1a.d        |  16 ++
+ ld/testsuite/ld-i386/pr19636-1b.d        |  19 ++
+ ld/testsuite/ld-i386/pr19636-1c.d        |   9 +
+ ld/testsuite/ld-i386/pr19636-1d-nacl.d   | 124 +++++++++++++
+ ld/testsuite/ld-i386/pr19636-1d.d        |  26 +++
+ ld/testsuite/ld-i386/pr19636-1e.d        |  19 ++
+ ld/testsuite/ld-i386/pr19636-1f.d        |  19 ++
  ld/testsuite/ld-i386/pr19636-1g.d        |  12 ++
- ld/testsuite/ld-i386/pr19636-1h.d        |  19 +++
- ld/testsuite/ld-i386/pr19636-1i.d        |   9 ++
- ld/testsuite/ld-i386/pr19636-2.s         |   9 ++
- ld/testsuite/ld-i386/pr19636-2a.d        |  19 +++
+ ld/testsuite/ld-i386/pr19636-1h.d        |  19 ++
+ ld/testsuite/ld-i386/pr19636-1i.d        |   9 +
+ ld/testsuite/ld-i386/pr19636-2.s         |   9 +
+ ld/testsuite/ld-i386/pr19636-2a.d        |  19 ++
  ld/testsuite/ld-i386/pr19636-2b.d        |  22 +++
- ld/testsuite/ld-i386/pr19636-2c-nacl.d   | 126 +++++++++++++++++
- ld/testsuite/ld-i386/pr19636-2c.d        |  28 ++++
+ ld/testsuite/ld-i386/pr19636-2c-nacl.d   | 126 +++++++++++++
+ ld/testsuite/ld-i386/pr19636-2c.d        |  28 +++
  ld/testsuite/ld-i386/pr19636-2d-nacl.d   |  21 +++
- ld/testsuite/ld-i386/pr19636-2d.d        |  17 +++
+ ld/testsuite/ld-i386/pr19636-2d.d        |  17 ++
  ld/testsuite/ld-i386/pr19636-2e-nacl.d   |  21 +++
- ld/testsuite/ld-i386/pr19636-2e.d        |  17 +++
+ ld/testsuite/ld-i386/pr19636-2e.d        |  17 ++
  ld/testsuite/ld-i386/pr19636-3.s         |   5 +
- ld/testsuite/ld-i386/pr19636-3a.d        |  10 ++
+ ld/testsuite/ld-i386/pr19636-3a.d        |  10 +
  ld/testsuite/ld-i386/pr19636-3b.d        |   6 +
- ld/testsuite/ld-i386/pr19636-3c.d        |   9 ++
+ ld/testsuite/ld-i386/pr19636-3c.d        |   9 +
  ld/testsuite/ld-i386/pr19636-3d.d        |  14 ++
  ld/testsuite/ld-i386/pr19636-3e.d        |  14 ++
  ld/testsuite/ld-i386/pr19636-3f.d        |   6 +
- ld/testsuite/ld-i386/pr19636-3g.d        |   9 ++
+ ld/testsuite/ld-i386/pr19636-3g.d        |   9 +
  ld/testsuite/ld-i386/pr19636-4.s         |  14 ++
- ld/testsuite/ld-i386/pr19636-4a.d        |   8 ++
- ld/testsuite/ld-i386/pr19636-4b.d        |  10 ++
- ld/testsuite/ld-i386/pr19636-4c.d        |  10 ++
- ld/testsuite/ld-i386/pr19636-4d.d        |  10 ++
+ ld/testsuite/ld-i386/pr19636-4a.d        |   8 +
+ ld/testsuite/ld-i386/pr19636-4b.d        |  10 +
+ ld/testsuite/ld-i386/pr19636-4c.d        |  10 +
+ ld/testsuite/ld-i386/pr19636-4d.d        |  10 +
+ ld/testsuite/ld-i386/pr19704.out         |   1 +
+ ld/testsuite/ld-i386/pr19704a.c          |  13 ++
+ ld/testsuite/ld-i386/pr19704b.c          |   7 +
  ld/testsuite/ld-x86-64/pr13082-3b.d      |   4 +-
  ld/testsuite/ld-x86-64/pr13082-4b.d      |   4 +-
  ld/testsuite/ld-x86-64/pr19636-1.s       |   5 +
- ld/testsuite/ld-x86-64/pr19636-1a.d      |  10 ++
+ ld/testsuite/ld-x86-64/pr19636-1a.d      |  10 +
  ld/testsuite/ld-x86-64/pr19636-1b.d      |   6 +
- ld/testsuite/ld-x86-64/pr19636-1c.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr19636-1c.d      |   9 +
  ld/testsuite/ld-x86-64/pr19636-1d.d      |  14 ++
  ld/testsuite/ld-x86-64/pr19636-1e.d      |  14 ++
  ld/testsuite/ld-x86-64/pr19636-1f.d      |   6 +
- ld/testsuite/ld-x86-64/pr19636-1g.d      |   9 ++
- ld/testsuite/ld-x86-64/pr19636-2.s       |   9 ++
- ld/testsuite/ld-x86-64/pr19636-2a.d      |  17 +++
- ld/testsuite/ld-x86-64/pr19636-2b.d      |  20 +++
- ld/testsuite/ld-x86-64/pr19636-2c.d      |   9 ++
- ld/testsuite/ld-x86-64/pr19636-2d-nacl.d |  37 +++++
- ld/testsuite/ld-x86-64/pr19636-2d.d      |  25 ++++
- ld/testsuite/ld-x86-64/pr19636-2e.d      |  19 +++
- ld/testsuite/ld-x86-64/pr19636-2f.d      |  19 +++
+ ld/testsuite/ld-x86-64/pr19636-1g.d      |   9 +
+ ld/testsuite/ld-x86-64/pr19636-2.s       |   9 +
+ ld/testsuite/ld-x86-64/pr19636-2a.d      |  17 ++
+ ld/testsuite/ld-x86-64/pr19636-2b.d      |  20 ++
+ ld/testsuite/ld-x86-64/pr19636-2c.d      |   9 +
+ ld/testsuite/ld-x86-64/pr19636-2d-nacl.d |  37 ++++
+ ld/testsuite/ld-x86-64/pr19636-2d.d      |  25 +++
+ ld/testsuite/ld-x86-64/pr19636-2e.d      |  19 ++
+ ld/testsuite/ld-x86-64/pr19636-2f.d      |  19 ++
  ld/testsuite/ld-x86-64/pr19636-2g.d      |  13 ++
- ld/testsuite/ld-x86-64/pr19636-2h.d      |  20 +++
- ld/testsuite/ld-x86-64/pr19636-2i.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr19636-2h.d      |  20 ++
+ ld/testsuite/ld-x86-64/pr19636-2i.d      |   9 +
  ld/testsuite/ld-x86-64/pr19636-3.s       |  14 ++
- ld/testsuite/ld-x86-64/pr19636-3a.d      |   8 ++
- ld/testsuite/ld-x86-64/pr19636-3b.d      |  10 ++
- ld/testsuite/ld-x86-64/pr19636-3c.d      |  10 ++
- ld/testsuite/ld-x86-64/pr19636-3d.d      |  10 ++
- ld/testsuite/ld-x86-64/x86-64.exp        |  20 +++
- 63 files changed, 1387 insertions(+), 137 deletions(-)
+ ld/testsuite/ld-x86-64/pr19636-3a.d      |   8 +
+ ld/testsuite/ld-x86-64/pr19636-3b.d      |  10 +
+ ld/testsuite/ld-x86-64/pr19636-3c.d      |  10 +
+ ld/testsuite/ld-x86-64/pr19636-3d.d      |  10 +
+ ld/testsuite/ld-x86-64/pr19704.out       |   1 +
+ ld/testsuite/ld-x86-64/pr19704a.c        |  13 ++
+ ld/testsuite/ld-x86-64/pr19704b.c        |   7 +
+ ld/testsuite/ld-x86-64/x86-64.exp        |  82 ++++++++
+ 94 files changed, 1805 insertions(+), 165 deletions(-)
+ create mode 100644 ld/emulparams/dynamic_undefined_weak.sh
+ create mode 100644 ld/testsuite/ld-elf/pr19719a.c
+ create mode 100644 ld/testsuite/ld-elf/pr19719b.c
+ create mode 100644 ld/testsuite/ld-elf/pr19719c.c
+ create mode 100644 ld/testsuite/ld-elf/pr19719d.c
  create mode 100644 ld/testsuite/ld-i386/pr19636-1.s
  create mode 100644 ld/testsuite/ld-i386/pr19636-1a.d
  create mode 100644 ld/testsuite/ld-i386/pr19636-1b.d
@@ -212,6 +316,9 @@ ld/
  create mode 100644 ld/testsuite/ld-i386/pr19636-4b.d
  create mode 100644 ld/testsuite/ld-i386/pr19636-4c.d
  create mode 100644 ld/testsuite/ld-i386/pr19636-4d.d
+ create mode 100644 ld/testsuite/ld-i386/pr19704.out
+ create mode 100644 ld/testsuite/ld-i386/pr19704a.c
+ create mode 100644 ld/testsuite/ld-i386/pr19704b.c
  create mode 100644 ld/testsuite/ld-x86-64/pr19636-1.s
  create mode 100644 ld/testsuite/ld-x86-64/pr19636-1a.d
  create mode 100644 ld/testsuite/ld-x86-64/pr19636-1b.d
@@ -236,25 +343,133 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/pr19636-3b.d
  create mode 100644 ld/testsuite/ld-x86-64/pr19636-3c.d
  create mode 100644 ld/testsuite/ld-x86-64/pr19636-3d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19704.out
+ create mode 100644 ld/testsuite/ld-x86-64/pr19704a.c
+ create mode 100644 ld/testsuite/ld-x86-64/pr19704b.c
 
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index ea4d59a..e8a4dd5 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -499,6 +499,9 @@ struct elf_link_hash_table
+      when linking against or generating a shared object.  */
+   bfd_boolean dynamic_sections_created;
+ 
++  /* Whether there is a .interp section.  */
++  bfd_boolean has_interp_section;
++
+   /* True if this target has relocatable executables, so needs dynamic
+      section symbols.  */
+   bfd_boolean is_relocatable_executable;
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index a8951d8..269d5c7 100644
+index f6c9c65..1a869aa 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
-@@ -2147,6 +2147,24 @@ elf_i386_gc_sweep_hook (bfd *abfd,
+@@ -737,6 +737,20 @@ static const struct elf_i386_backend_data elf_i386_arch_bed =
+ 
+ #define	elf_backend_arch_data	&elf_i386_arch_bed
+ 
++/* Is a undefined weak symbol which is resolved to 0.  Reference to an
++   undefined weak symbol is resolved to 0 when building executable if
++   it isn't dynamic and
++   1. Has non-GOT/non-PLT relocations in text section.  Or
++   2. Has no GOT/PLT relocation.
++ */
++#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, EH) \
++  ((EH)->elf.root.type == bfd_link_hash_undefweak		\
++   && bfd_link_executable (INFO)				\
++   && (!elf_hash_table (INFO)->has_interp_section		\
++       || !(EH)->has_got_reloc					\
++       || (EH)->has_non_got_reloc				\
++       || !(INFO)->dynamic_undefined_weak))
++
+ /* i386 ELF linker hash entry.  */
+ 
+ struct elf_i386_link_hash_entry
+@@ -767,6 +781,12 @@ struct elf_i386_link_hash_entry
+   /* Symbol is referenced by R_386_GOTOFF relocation.  */
+   unsigned int gotoff_ref : 1;
+ 
++  /* Symbol has GOT or PLT relocations.  */
++  unsigned int has_got_reloc : 1;
++
++  /* Symbol has non-GOT/non-PLT relocations in text sections.  */
++  unsigned int has_non_got_reloc : 1;
++
+   /* Reference count of C/C++ function pointer relocations in read-write
+      section which can be resolved at run-time.  */
+   bfd_signed_vma func_pointer_refcount;
+@@ -895,6 +915,8 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
+       eh->dyn_relocs = NULL;
+       eh->tls_type = GOT_UNKNOWN;
+       eh->gotoff_ref = 0;
++      eh->has_got_reloc = 0;
++      eh->has_non_got_reloc = 0;
+       eh->func_pointer_refcount = 0;
+       eh->plt_got.offset = (bfd_vma) -1;
+       eh->tlsdesc_got = (bfd_vma) -1;
+@@ -1138,6 +1160,9 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
+      generate a R_386_COPY reloc.  */
+   edir->gotoff_ref |= eind->gotoff_ref;
+ 
++  edir->has_got_reloc |= eind->has_got_reloc;
++  edir->has_non_got_reloc |= eind->has_non_got_reloc;
++
+   if (ELIMINATE_COPY_RELOCS
+       && ind->root.type != bfd_link_hash_indirect
+       && dir->dynamic_adjusted)
+@@ -1630,6 +1655,7 @@ elf_i386_check_relocs (bfd *abfd,
+ 	  if (h == NULL)
+ 	    continue;
+ 
++	  eh->has_got_reloc = 1;
+ 	  h->needs_plt = 1;
+ 	  h->plt.refcount += 1;
+ 	  break;
+@@ -1760,18 +1786,27 @@ elf_i386_check_relocs (bfd *abfd,
+ 		return FALSE;
+ 	    }
+ 	  if (r_type != R_386_TLS_IE)
+-	    break;
++	    {
++	      if (eh != NULL)
++		eh->has_got_reloc = 1;
++	      break;
++	    }
+ 	  /* Fall through */
+ 
+ 	case R_386_TLS_LE_32:
+ 	case R_386_TLS_LE:
++	  if (eh != NULL)
++	    eh->has_got_reloc = 1;
+ 	  if (bfd_link_executable (info))
+ 	    break;
+ 	  info->flags |= DF_STATIC_TLS;
+-	  /* Fall through */
++	  goto do_relocation;
+ 
+ 	case R_386_32:
+ 	case R_386_PC32:
++	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
++	    eh->has_non_got_reloc = 1;
++do_relocation:
+ 	  if (h != NULL && bfd_link_executable (info))
+ 	    {
+ 	      /* If this reloc is in a read-only section, we might
+@@ -2147,6 +2182,24 @@ elf_i386_gc_sweep_hook (bfd *abfd,
    return TRUE;
  }
  
-+/* Remove undefined weak symbol from the dynamic symbol table in
-+   executable.  */
++/* Remove undefined weak symbol from the dynamic symbol table if it
++   is resolved to 0.   */
 +
 +static bfd_boolean
 +elf_i386_fixup_symbol (struct bfd_link_info *info,
 +		       struct elf_link_hash_entry *h)
 +{
-+  if (h->root.type == bfd_link_hash_undefweak
-+      && bfd_link_executable (info)
-+      && h->dynindx != -1)
++  if (h->dynindx != -1
++      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
++					  elf_i386_hash_entry (h)))
 +    {
 +      h->dynindx = -1;
 +      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
@@ -266,28 +481,43 @@ index a8951d8..269d5c7 100644
  /* Adjust a symbol defined by a dynamic object and referenced by a
     regular object.  The current definition is in some section of the
     dynamic object, but we're not including those sections.  We have to
-@@ -2405,7 +2423,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2335,6 +2388,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+   struct elf_i386_link_hash_entry *eh;
+   struct elf_dyn_relocs *p;
+   unsigned plt_entry_size;
++  bfd_boolean resolved_to_zero;
+ 
+   if (h->root.type == bfd_link_hash_indirect)
+     return TRUE;
+@@ -2348,6 +2402,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 
+   plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
+ 
++  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
++
+   /* Clear the reference count of function pointer relocations if
+      symbol isn't a normal function.  */
+   if (h->type != STT_FUNC)
+@@ -2405,7 +2461,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
        /* Make sure this symbol is output as a dynamic symbol.
  	 Undefined weak syms won't yet be marked as dynamic.  */
        if (h->dynindx == -1
 -	  && !h->forced_local)
 +	  && !h->forced_local
-+	  && (h->root.type != bfd_link_hash_undefweak
-+	      || !bfd_link_executable (info)))
++	  && !resolved_to_zero)
  	{
  	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
  	    return FALSE;
-@@ -2462,9 +2482,16 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2462,9 +2519,15 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
  		 script.  */
  	      htab->elf.sgotplt->size += 4;
  
 -	      /* We also need to make an entry in the .rel.plt section.  */
 -	      htab->elf.srelplt->size += sizeof (Elf32_External_Rel);
 -	      htab->elf.srelplt->reloc_count++;
-+	      /* There should be no PLT relocation against undefined
-+		 weak symbol in executable.  */
-+	      if (h->root.type != bfd_link_hash_undefweak
-+		  || !bfd_link_executable (info))
++	      /* There should be no PLT relocation against resolved
++		 undefined weak symbol in executable.  */
++	      if (!resolved_to_zero)
 +		{
 +		  /* We also need to make an entry in the .rel.plt
 +		     section.  */
@@ -297,38 +527,37 @@ index a8951d8..269d5c7 100644
  	    }
  
  	  if (get_elf_i386_backend_data (info->output_bfd)->is_vxworks
-@@ -2518,7 +2545,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2520,7 +2583,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
        /* Make sure this symbol is output as a dynamic symbol.
  	 Undefined weak syms won't yet be marked as dynamic.  */
        if (h->dynindx == -1
 -	  && !h->forced_local)
 +	  && !h->forced_local
-+	  && (h->root.type != bfd_link_hash_undefweak
-+	      || !bfd_link_executable (info)))
++	  && !resolved_to_zero)
  	{
  	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
  	    return FALSE;
-@@ -2546,7 +2575,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2548,7 +2612,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
  	 R_386_TLS_IE resp. R_386_TLS_GOTIE needs one dynamic relocation,
  	 (but if both R_386_TLS_IE_32 and R_386_TLS_IE is present, we
  	 need two), R_386_TLS_GD needs one if local symbol and two if
 -	 global.  */
-+	 global.  No dynamic relocation against undefined weak symbol
-+	 in executable.  */
++	 global.  No dynamic relocation against resolved undefined weak
++	 symbol in executable.  */
        if (tls_type == GOT_TLS_IE_BOTH)
  	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rel);
        else if ((GOT_TLS_GD_P (tls_type) && h->dynindx == -1)
-@@ -2555,7 +2585,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2557,7 +2622,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
        else if (GOT_TLS_GD_P (tls_type))
  	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rel);
        else if (! GOT_TLS_GDESC_P (tls_type)
 -	       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 +	       && ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-+		    && !bfd_link_executable (info))
++		    && !resolved_to_zero)
  		   || h->root.type != bfd_link_hash_undefweak)
  	       && (bfd_link_pic (info)
  		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-@@ -2611,13 +2642,43 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2613,15 +2679,43 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
  	}
  
        /* Also discard relocs on undefined weak syms with non-default
@@ -342,14 +571,14 @@ index a8951d8..269d5c7 100644
 +	  /* Undefined weak symbol is never bound locally in shared
 +	     library.  */
 +	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-+	      || bfd_link_pie (info))
++	      || resolved_to_zero)
 +	    {
 +	      if (h->non_got_ref)
 +		{
 +		  /* Keep dynamic non-GOT/non-PLT relocation so that we
 +		     can branch to 0 without PLT.  */
 +		  struct elf_dyn_relocs **pp;
- 
++
 +		  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 +		    if (p->pc_count == 0)
 +		      *pp = p->next;
@@ -359,7 +588,9 @@ index a8951d8..269d5c7 100644
 +			p->count = p->pc_count;
 +			pp = &p->next;
 +		      }
-+
+ 
+-	  /* Make sure undefined weak symbols are output as a dynamic
+-	     symbol in PIEs.  */
 +		  if (eh->dyn_relocs != NULL)
 +		    {
 +		      /* Make sure undefined weak symbols are output
@@ -372,40 +603,80 @@ index a8951d8..269d5c7 100644
 +	      else
 +		eh->dyn_relocs = NULL;
 +	    }
- 	  /* Make sure undefined weak symbols are output as a dynamic
- 	     symbol in PIEs.  */
  	  else if (h->dynindx == -1
-@@ -2645,7 +2706,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 		   && !h->forced_local)
+ 	    {
+@@ -2637,7 +2731,10 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	 dynamic.  Keep dynamic relocations for run-time function
+ 	 pointer initialization.  */
+ 
+-      if ((!h->non_got_ref || eh->func_pointer_refcount > 0)
++      if ((!h->non_got_ref
++	   || eh->func_pointer_refcount > 0
++	   || (h->root.type == bfd_link_hash_undefweak
++	       && !resolved_to_zero))
+ 	  && ((h->def_dynamic
+ 	       && !h->def_regular)
+ 	      || (htab->elf.dynamic_sections_created
+@@ -2647,7 +2744,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
  	  /* Make sure this symbol is output as a dynamic symbol.
  	     Undefined weak syms won't yet be marked as dynamic.  */
  	  if (h->dynindx == -1
 -	      && !h->forced_local)
 +	      && !h->forced_local
-+	      && (h->root.type != bfd_link_hash_undefweak
-+		  || !bfd_link_executable (info)))
++	      && !resolved_to_zero)
  	    {
  	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
  		return FALSE;
-@@ -4244,11 +4307,15 @@ r_386_got32:
+@@ -3640,6 +3738,7 @@ elf_i386_relocate_section (bfd *output_bfd,
+       int tls_type;
+       bfd_vma st_size;
+       asection *resolved_plt;
++      bfd_boolean resolved_to_zero;
+ 
+       r_type = ELF32_R_TYPE (rel->r_info);
+       if (r_type == R_386_GNU_VTINHERIT
+@@ -3981,6 +4080,9 @@ elf_i386_relocate_section (bfd *output_bfd,
+ 	}
+ 
+       eh = (struct elf_i386_link_hash_entry *) h;
++      resolved_to_zero = (eh != NULL
++			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
++
+       switch (r_type)
+ 	{
+ 	case R_386_GOT32X:
+@@ -4246,18 +4348,25 @@ r_386_got32:
  	      || is_vxworks_tls)
  	    break;
  
 -	  /* Copy dynamic function pointer relocations.  */
 +	  /* Copy dynamic function pointer relocations.  Don't generate
-+	     dynamic relocations against weak undefined symbols in
-+	     PIE, except for R_386_PC32.  */
++	     dynamic relocations against resolved undefined weak symbols
++	     in PIE, except for R_386_PC32.  */
  	  if ((bfd_link_pic (info)
  	       && (h == NULL
 -		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 -		   || h->root.type != bfd_link_hash_undefweak)
 +		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-+			&& (!bfd_link_pie (info)
++			&& (!resolved_to_zero
 +			    || r_type == R_386_PC32))
 +		       || h->root.type != bfd_link_hash_undefweak))
  	       && ((r_type != R_386_PC32 && r_type != R_386_SIZE32)
  		   || !SYMBOL_CALLS_LOCAL (info, h)))
  	      || (ELIMINATE_COPY_RELOCS
-@@ -5009,6 +5076,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 		  && !bfd_link_pic (info)
+ 		  && h != NULL
+ 		  && h->dynindx != -1
+-		  && (!h->non_got_ref || eh->func_pointer_refcount > 0)
++		  && (!h->non_got_ref
++		      || eh->func_pointer_refcount > 0
++		      || (h->root.type == bfd_link_hash_undefweak
++			  && !resolved_to_zero))
+ 		  && ((h->def_dynamic
+ 		       && !h->def_regular)
+ 		      || h->root.type == bfd_link_hash_undefweak
+@@ -5011,6 +5120,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
    unsigned plt_entry_size;
    const struct elf_i386_backend_data *abed;
    struct elf_i386_link_hash_entry *eh;
@@ -413,20 +684,19 @@ index a8951d8..269d5c7 100644
  
    htab = elf_i386_hash_table (info);
    if (htab == NULL)
-@@ -5017,6 +5085,12 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
-   abed = get_elf_i386_backend_data (output_bfd);
-   plt_entry_size = GET_PLT_ENTRY_SIZE (output_bfd);
+@@ -5021,6 +5131,11 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
  
-+  /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
-+     undefined weak symbols in executable so that they are resolved
-+     to 0 at run-time.  */
-+  local_undefweak = (h->root.type == bfd_link_hash_undefweak
-+		     && bfd_link_executable (info));
-+
    eh = (struct elf_i386_link_hash_entry *) h;
  
++  /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
++     resolved undefined weak symbols in executable so that their
++     references have value 0 at run-time.  */
++  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
++
    if (h->plt.offset != (bfd_vma) -1)
-@@ -5046,6 +5120,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+     {
+       bfd_vma plt_index;
+@@ -5048,6 +5163,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
  	 it up.  */
  
        if ((h->dynindx == -1
@@ -434,7 +704,7 @@ index a8951d8..269d5c7 100644
  	   && !((h->forced_local || bfd_link_executable (info))
  		&& h->def_regular
  		&& h->type == STT_GNU_IFUNC))
-@@ -5134,54 +5209,61 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5136,54 +5252,61 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
                        + abed->plt->plt_got_offset);
  	}
  
@@ -540,7 +810,7 @@ index a8951d8..269d5c7 100644
  	}
      }
    else if (eh->plt_got.offset != (bfd_vma) -1)
-@@ -5227,7 +5309,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5229,7 +5352,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
  		  plt->contents + plt_offset + plt_got_offset);
      }
  
@@ -550,7 +820,7 @@ index a8951d8..269d5c7 100644
        && (h->plt.offset != (bfd_vma) -1
  	  || eh->plt_got.offset != (bfd_vma) -1))
      {
-@@ -5244,9 +5327,13 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5246,9 +5370,12 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
  	sym->st_value = 0;
      }
  
@@ -560,12 +830,11 @@ index a8951d8..269d5c7 100644
        && ! GOT_TLS_GD_ANY_P (elf_i386_hash_entry(h)->tls_type)
 -      && (elf_i386_hash_entry(h)->tls_type & GOT_TLS_IE) == 0)
 +      && (elf_i386_hash_entry(h)->tls_type & GOT_TLS_IE) == 0
-+      && (!bfd_link_executable (info)
-+	  || h->root.type != bfd_link_hash_undefweak))
++      && !local_undefweak)
      {
        Elf_Internal_Rela rel;
  
-@@ -5346,6 +5433,25 @@ elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
+@@ -5348,6 +5475,25 @@ elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
  					 h, NULL);
  }
  
@@ -591,7 +860,7 @@ index a8951d8..269d5c7 100644
  /* Used to decide how to sort relocs in an optimal manner for the
     dynamic linker, before writing them out.  */
  
-@@ -5624,6 +5730,12 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
+@@ -5626,6 +5772,12 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
  		 elf_i386_finish_local_dynamic_symbol,
  		 info);
  
@@ -604,7 +873,7 @@ index a8951d8..269d5c7 100644
    return TRUE;
  }
  
-@@ -5801,6 +5913,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
+@@ -5803,6 +5955,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
    ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
  #define elf_backend_hash_symbol		      elf_i386_hash_symbol
  #define elf_backend_add_symbol_hook           elf_i386_add_symbol_hook
@@ -613,23 +882,174 @@ index a8951d8..269d5c7 100644
  #include "elf32-target.h"
  
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 8ea478d..4a5578b 100644
+index 48d263e..b87fd81 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
-@@ -2363,6 +2363,24 @@ pointer:
+@@ -742,6 +742,20 @@ static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
+ 
+ #define	elf_backend_arch_data	&elf_x86_64_arch_bed
+ 
++/* Is a undefined weak symbol which is resolved to 0.  Reference to an
++   undefined weak symbol is resolved to 0 when building executable if
++   it isn't dynamic and
++   1. Has non-GOT/non-PLT relocations in text section.  Or
++   2. Has no GOT/PLT relocation.
++ */
++#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, EH) \
++  ((EH)->elf.root.type == bfd_link_hash_undefweak		\
++   && bfd_link_executable (INFO)				\
++   && (!elf_hash_table (INFO)->has_interp_section		\
++       || !(EH)->has_got_reloc					\
++       || (EH)->has_non_got_reloc				\
++       || !(INFO)->dynamic_undefined_weak))
++
+ /* x86-64 ELF linker hash entry.  */
+ 
+ struct elf_x86_64_link_hash_entry
+@@ -776,6 +790,12 @@ struct elf_x86_64_link_hash_entry
+   /* TRUE if symbol has at least one BND relocation.  */
+   unsigned int has_bnd_reloc : 1;
+ 
++  /* TRUE if symbol has GOT or PLT relocations.  */
++  unsigned int has_got_reloc : 1;
++
++  /* TRUE if symbol has non-GOT/non-PLT relocations in text sections.  */
++  unsigned int has_non_got_reloc : 1;
++
+   /* Reference count of C/C++ function pointer relocations in read-write
+      section which can be resolved at run-time.  */
+   bfd_signed_vma func_pointer_refcount;
+@@ -919,6 +939,8 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
+       eh->tls_type = GOT_UNKNOWN;
+       eh->needs_copy = 0;
+       eh->has_bnd_reloc = 0;
++      eh->has_got_reloc = 0;
++      eh->has_non_got_reloc = 0;
+       eh->func_pointer_refcount = 0;
+       eh->plt_bnd.offset = (bfd_vma) -1;
+       eh->plt_got.offset = (bfd_vma) -1;
+@@ -1136,6 +1158,12 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
+   if (!edir->has_bnd_reloc)
+     edir->has_bnd_reloc = eind->has_bnd_reloc;
+ 
++  if (!edir->has_got_reloc)
++    edir->has_got_reloc = eind->has_got_reloc;
++
++  if (!edir->has_non_got_reloc)
++    edir->has_non_got_reloc = eind->has_non_got_reloc;
++
+   if (eind->dyn_relocs != NULL)
+     {
+       if (edir->dyn_relocs != NULL)
+@@ -1595,6 +1623,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+       unsigned int r_type;
+       unsigned long r_symndx;
+       struct elf_link_hash_entry *h;
++      struct elf_x86_64_link_hash_entry *eh;
+       Elf_Internal_Sym *isym;
+       const char *name;
+       bfd_boolean size_reloc;
+@@ -1760,6 +1789,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 				       rel, rel_end, h, r_symndx))
+ 	return FALSE;
+ 
++      eh = (struct elf_x86_64_link_hash_entry *) h;
+       switch (r_type)
+ 	{
+ 	case R_X86_64_TLSLD:
+@@ -1781,6 +1811,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	      bfd_set_error (bfd_error_bad_value);
+ 	      return FALSE;
+ 	    }
++	  if (eh != NULL)
++	    eh->has_got_reloc = 1;
+ 	  break;
+ 
+ 	case R_X86_64_GOTTPOFF:
+@@ -1815,7 +1847,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	    if (h != NULL)
+ 	      {
+ 		h->got.refcount += 1;
+-		old_tls_type = elf_x86_64_hash_entry (h)->tls_type;
++		old_tls_type = eh->tls_type;
+ 	      }
+ 	    else
+ 	      {
+@@ -1873,8 +1905,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 
+ 	    if (old_tls_type != tls_type)
+ 	      {
+-		if (h != NULL)
+-		  elf_x86_64_hash_entry (h)->tls_type = tls_type;
++		if (eh != NULL)
++		  eh->tls_type = tls_type;
+ 		else
+ 		  elf_x86_64_local_got_tls_type (abfd) [r_symndx] = tls_type;
+ 	      }
+@@ -1885,6 +1917,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	case R_X86_64_GOTPC32:
+ 	case R_X86_64_GOTPC64:
+ 	create_got:
++	  if (eh != NULL)
++	    eh->has_got_reloc = 1;
+ 	  if (htab->elf.sgot == NULL)
+ 	    {
+ 	      if (htab->elf.dynobj == NULL)
+@@ -1909,6 +1943,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	  if (h == NULL)
+ 	    continue;
+ 
++	  eh->has_got_reloc = 1;
+ 	  h->needs_plt = 1;
+ 	  h->plt.refcount += 1;
+ 	  break;
+@@ -1961,6 +1996,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	case R_X86_64_PC64:
+ 	case R_X86_64_64:
+ pointer:
++	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
++	    eh->has_non_got_reloc = 1;
+ 	  if (h != NULL && bfd_link_executable (info))
+ 	    {
+ 	      /* If this reloc is in a read-only section, we might
+@@ -1994,11 +2031,7 @@ pointer:
+ 			  || (!ABI_64_P (abfd)
+ 			      && (r_type == R_X86_64_32
+ 				  || r_type == R_X86_64_32S))))
+-		    {
+-		      struct elf_x86_64_link_hash_entry *eh
+-			= (struct elf_x86_64_link_hash_entry *) h;
+-		      eh->func_pointer_refcount += 1;
+-		    }
++		    eh->func_pointer_refcount += 1;
+ 		}
+ 	    }
+ 
+@@ -2061,9 +2094,7 @@ do_size:
+ 	      /* If this is a global symbol, we count the number of
+ 		 relocations we need for this symbol.  */
+ 	      if (h != NULL)
+-		{
+-		  head = &((struct elf_x86_64_link_hash_entry *) h)->dyn_relocs;
+-		}
++		head = &eh->dyn_relocs;
+ 	      else
+ 		{
+ 		  /* Track dynamic relocs needed for local syms too.
+@@ -2363,6 +2394,24 @@ pointer:
    return TRUE;
  }
  
-+/* Remove undefined weak symbol from the dynamic symbol table in
-+   executable.  */
++/* Remove undefined weak symbol from the dynamic symbol table if it
++   is resolved to 0.   */
 +
 +static bfd_boolean
 +elf_x86_64_fixup_symbol (struct bfd_link_info *info,
 +		       struct elf_link_hash_entry *h)
 +{
-+  if (h->root.type == bfd_link_hash_undefweak
-+      && bfd_link_executable (info)
-+      && h->dynindx != -1)
++  if (h->dynindx != -1
++      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
++					  elf_x86_64_hash_entry (h)))
 +    {
 +      h->dynindx = -1;
 +      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
@@ -641,18 +1061,34 @@ index 8ea478d..4a5578b 100644
  /* Adjust a symbol defined by a dynamic object and referenced by a
     regular object.  The current definition is in some section of the
     dynamic object, but we're not including those sections.  We have to
-@@ -2641,7 +2659,9 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -2552,6 +2601,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+   struct elf_dyn_relocs *p;
+   const struct elf_backend_data *bed;
+   unsigned int plt_entry_size;
++  bfd_boolean resolved_to_zero;
+ 
+   if (h->root.type == bfd_link_hash_indirect)
+     return TRUE;
+@@ -2565,6 +2615,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+   bed = get_elf_backend_data (info->output_bfd);
+   plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
+ 
++  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
++
+   /* We can't use the GOT PLT if pointer equality is needed since
+      finish_dynamic_symbol won't clear symbol value and the dynamic
+      linker won't update the GOT slot.  We will get into an infinite
+@@ -2641,7 +2693,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
        /* Make sure this symbol is output as a dynamic symbol.
  	 Undefined weak syms won't yet be marked as dynamic.  */
        if (h->dynindx == -1
 -	  && !h->forced_local)
 +	  && !h->forced_local
-+	  && (h->root.type != bfd_link_hash_undefweak
-+	      || !bfd_link_executable (info)))
++	  && !resolved_to_zero)
  	{
  	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
  	    return FALSE;
-@@ -2715,10 +2735,16 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -2715,10 +2768,15 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  		 script.  */
  	      htab->elf.sgotplt->size += GOT_ENTRY_SIZE;
  
@@ -660,10 +1096,9 @@ index 8ea478d..4a5578b 100644
 -		 section.  */
 -	      htab->elf.srelplt->size += bed->s->sizeof_rela;
 -	      htab->elf.srelplt->reloc_count++;
-+	      /* There should be no PLT relocation against undefined
-+		 weak symbol in executable.  */
-+	      if (h->root.type != bfd_link_hash_undefweak
-+		  || !bfd_link_executable (info))
++	      /* There should be no PLT relocation against resolved
++		 undefined weak symbol in executable.  */
++	      if (!resolved_to_zero)
 +		{
 +		  /* We also need to make an entry in the .rela.plt
 +		     section.  */
@@ -673,26 +1108,25 @@ index 8ea478d..4a5578b 100644
  	    }
  	}
        else
-@@ -2753,7 +2779,9 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -2755,7 +2813,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
        /* Make sure this symbol is output as a dynamic symbol.
  	 Undefined weak syms won't yet be marked as dynamic.  */
        if (h->dynindx == -1
 -	  && !h->forced_local)
 +	  && !h->forced_local
-+	  && (h->root.type != bfd_link_hash_undefweak
-+	      || !bfd_link_executable (info)))
++	  && !resolved_to_zero)
  	{
  	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
  	    return FALSE;
-@@ -2777,15 +2805,17 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -2779,15 +2838,17 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  	}
        dyn = htab->elf.dynamic_sections_created;
        /* R_X86_64_TLSGD needs one dynamic relocation if local symbol
 -	 and two if global.
 -	 R_X86_64_GOTTPOFF needs one dynamic relocation.  */
 +	 and two if global.  R_X86_64_GOTTPOFF needs one dynamic
-+	 relocation.  No dynamic relocation against undefined weak
-+	 symbol in executable.  */
++	 relocation.  No dynamic relocation against resolved undefined
++	 weak symbol in executable.  */
        if ((GOT_TLS_GD_P (tls_type) && h->dynindx == -1)
  	  || tls_type == GOT_TLS_IE)
  	htab->elf.srelgot->size += bed->s->sizeof_rela;
@@ -701,11 +1135,11 @@ index 8ea478d..4a5578b 100644
        else if (! GOT_TLS_GDESC_P (tls_type)
 -	       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 +	       && ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-+		    && !bfd_link_executable (info))
++		    && !resolved_to_zero)
  		   || h->root.type != bfd_link_hash_undefweak)
  	       && (bfd_link_pic (info)
  		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-@@ -2832,12 +2862,15 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -2834,16 +2895,16 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  	}
  
        /* Also discard relocs on undefined weak syms with non-default
@@ -719,29 +1153,75 @@ index 8ea478d..4a5578b 100644
 +	      /* Undefined weak symbol is never bound locally in shared
 +		 library.  */
 +	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-+		  || bfd_link_pie (info))
++		  || resolved_to_zero)
  		eh->dyn_relocs = NULL;
+-
+-	      /* Make sure undefined weak symbols are output as a dynamic
+-		 symbol in PIEs.  */
+ 	      else if (h->dynindx == -1
+ 		       && ! h->forced_local
+ 		       && ! bfd_elf_link_record_dynamic_symbol (info, h))
+@@ -2875,7 +2936,10 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+ 	 dynamic.  Keep dynamic relocations for run-time function
+ 	 pointer initialization.  */
  
- 	      /* Make sure undefined weak symbols are output as a dynamic
-@@ -2884,6 +2917,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+-      if ((!h->non_got_ref || eh->func_pointer_refcount > 0)
++      if ((!h->non_got_ref
++	   || eh->func_pointer_refcount > 0
++	   || (h->root.type == bfd_link_hash_undefweak
++	       && !resolved_to_zero))
+ 	  && ((h->def_dynamic
+ 	       && !h->def_regular)
+ 	      || (htab->elf.dynamic_sections_created
+@@ -2886,6 +2950,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  	     Undefined weak syms won't yet be marked as dynamic.  */
  	  if (h->dynindx == -1
  	      && ! h->forced_local
-+	      && (h->root.type != bfd_link_hash_undefweak
-+		  || !bfd_link_executable (info))
++	      && ! resolved_to_zero
  	      && ! bfd_elf_link_record_dynamic_symbol (info, h))
  	    return FALSE;
  
-@@ -4508,7 +4543,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
- 	      && (input_section->flags & SEC_ALLOC) != 0
+@@ -3949,6 +4014,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+       int tls_type;
+       asection *base_got, *resolved_plt;
+       bfd_vma st_size;
++      bfd_boolean resolved_to_zero;
+ 
+       r_type = ELF32_R_TYPE (rel->r_info);
+       if (r_type == (int) R_X86_64_GNU_VTINHERIT
+@@ -4259,6 +4325,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+ 	    }
+ 	}
+ 
++      resolved_to_zero = (eh != NULL
++			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
++
+       /* When generating a shared object, the relocations handled here are
+ 	 copied into the output file to be resolved at run time.  */
+       switch (r_type)
+@@ -4539,13 +4608,16 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+ 	case R_X86_64_PC32:
+ 	case R_X86_64_PC32_BND:
+ 	  /* Don't complain about -fPIC if the symbol is undefined when
+-	     building executable.  */
+-	  if (bfd_link_pic (info)
+-	      && (input_section->flags & SEC_ALLOC) != 0
++	     building executable unless it is unresolved weak symbol.  */
++          if ((input_section->flags & SEC_ALLOC) != 0
  	      && (input_section->flags & SEC_READONLY) != 0
  	      && h != NULL
 -	      && !(bfd_link_executable (info)
-+	      && !(bfd_link_pie (info)
- 		   && h->root.type == bfd_link_hash_undefined))
+-		   && h->root.type == bfd_link_hash_undefined))
++	      && ((bfd_link_executable (info)
++		  && h->root.type == bfd_link_hash_undefweak
++		  && !resolved_to_zero)
++		  || (bfd_link_pic (info)
++		      && !(bfd_link_pie (info)
++			   && h->root.type == bfd_link_hash_undefined))))
  	    {
  	      bfd_boolean fail = FALSE;
-@@ -4523,7 +4558,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+ 	      bfd_boolean branch
+@@ -4559,7 +4631,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
  		     defined locally or for a branch.  */
  		  fail = !h->def_regular && !branch;
  		}
@@ -750,13 +1230,13 @@ index 8ea478d..4a5578b 100644
  			 && (h->needs_copy || eh->needs_copy)))
  		{
  		  /* Symbol doesn't need copy reloc and isn't referenced
-@@ -4585,17 +4620,19 @@ direct:
+@@ -4589,17 +4661,19 @@ direct:
  	   /* Don't copy a pc-relative relocation into the output file
  	      if the symbol needs copy reloc or the symbol is undefined
  	      when building executable.  Copy dynamic function pointer
 -	      relocations.  */
 +	      relocations.  Don't generate dynamic relocations against
-+	      weak undefined symbols in PIE.  */
++	      resolved undefined weak symbols in PIE.  */
  	  if ((bfd_link_pic (info)
 -	       && !(bfd_link_executable (info)
 +	       && !(bfd_link_pie (info)
@@ -769,12 +1249,36 @@ index 8ea478d..4a5578b 100644
 -		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 -		   || h->root.type != bfd_link_hash_undefweak)
 +		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-+			&& !bfd_link_pie (info))
++			&& !resolved_to_zero)
 +		       || h->root.type != bfd_link_hash_undefweak))
  	       && ((! IS_X86_64_PCREL_TYPE (r_type)
  		      && r_type != R_X86_64_SIZE32
  		      && r_type != R_X86_64_SIZE64)
-@@ -5336,12 +5373,13 @@ static bfd_boolean
+@@ -4608,7 +4682,10 @@ direct:
+ 		  && !bfd_link_pic (info)
+ 		  && h != NULL
+ 		  && h->dynindx != -1
+-		  && (!h->non_got_ref || eh->func_pointer_refcount > 0)
++		  && (!h->non_got_ref
++		      || eh->func_pointer_refcount > 0
++		      || (h->root.type == bfd_link_hash_undefweak
++			  && !resolved_to_zero))
+ 		  && ((h->def_dynamic
+ 		       && !h->def_regular)
+ 		      || h->root.type == bfd_link_hash_undefweak
+@@ -4647,6 +4724,11 @@ direct:
+ 			   || ! SYMBOLIC_BIND (info, h)
+ 			   || ! h->def_regular))
+ 		{
++		  if ((r_type != R_X86_64_PC64 && r_type != R_X86_64_64)
++		      && bfd_link_executable (info)
++		      && h->root.type == bfd_link_hash_undefweak
++		      && !resolved_to_zero)
++		    return elf_x86_64_need_pic (input_bfd, h, howto);
+ 		  outrel.r_info = htab->r_info (h->dynindx, r_type);
+ 		  outrel.r_addend = rel->r_addend;
+ 		}
+@@ -5340,12 +5422,13 @@ static bfd_boolean
  elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  				  struct bfd_link_info *info,
  				  struct elf_link_hash_entry *h,
@@ -789,20 +1293,19 @@ index 8ea478d..4a5578b 100644
  
    htab = elf_x86_64_hash_table (info);
    if (htab == NULL)
-@@ -5354,6 +5392,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
- 	  ? &elf_x86_64_bnd_arch_bed
- 	  : get_elf_x86_64_backend_data (output_bfd));
+@@ -5360,6 +5443,11 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  
-+  /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
-+     undefined weak symbols in executable so that they are resolved
-+     to 0 at run-time.  */
-+  local_undefweak = (h->root.type == bfd_link_hash_undefweak
-+		     && bfd_link_executable (info));
-+
    eh = (struct elf_x86_64_link_hash_entry *) h;
  
++  /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
++     resolved undefined weak symbols in executable so that their
++     references have value 0 at run-time.  */
++  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
++
    if (h->plt.offset != (bfd_vma) -1)
-@@ -5385,6 +5429,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+     {
+       bfd_vma plt_index;
+@@ -5389,6 +5477,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
        /* This symbol has an entry in the procedure linkage table.  Set
  	 it up.	 */
        if ((h->dynindx == -1
@@ -810,7 +1313,7 @@ index 8ea478d..4a5578b 100644
  	   && !((h->forced_local || bfd_link_executable (info))
  		&& h->def_regular
  		&& h->type == STT_GNU_IFUNC))
-@@ -5485,60 +5530,67 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5489,60 +5578,67 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  		  resolved_plt->contents + plt_offset + plt_got_offset);
  
        /* Fill in the entry in the global offset table, initially this
@@ -929,7 +1432,7 @@ index 8ea478d..4a5578b 100644
      }
    else if (eh->plt_got.offset != (bfd_vma) -1)
      {
-@@ -5600,7 +5652,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5604,7 +5700,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  		  plt->contents + plt_offset + plt_got_offset);
      }
  
@@ -939,7 +1442,7 @@ index 8ea478d..4a5578b 100644
        && (h->plt.offset != (bfd_vma) -1
  	  || eh->plt_got.offset != (bfd_vma) -1))
      {
-@@ -5617,9 +5670,13 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5621,9 +5718,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  	sym->st_value = 0;
      }
  
@@ -949,12 +1452,11 @@ index 8ea478d..4a5578b 100644
        && ! GOT_TLS_GD_ANY_P (elf_x86_64_hash_entry (h)->tls_type)
 -      && elf_x86_64_hash_entry (h)->tls_type != GOT_TLS_IE)
 +      && elf_x86_64_hash_entry (h)->tls_type != GOT_TLS_IE
-+      && (!bfd_link_executable (info)
-+	  || h->root.type != bfd_link_hash_undefweak))
++      && !local_undefweak)
      {
        Elf_Internal_Rela rela;
  
-@@ -5725,6 +5782,25 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
+@@ -5729,6 +5829,25 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
  					     info, h, NULL);
  }
  
@@ -980,7 +1482,7 @@ index 8ea478d..4a5578b 100644
  /* Used to decide how to sort relocs in an optimal manner for the
     dynamic linker, before writing them out.  */
  
-@@ -5998,6 +6074,12 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
+@@ -6002,6 +6121,12 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
  		 elf_x86_64_finish_local_dynamic_symbol,
  		 info);
  
@@ -993,7 +1495,7 @@ index 8ea478d..4a5578b 100644
    return TRUE;
  }
  
-@@ -6409,6 +6491,8 @@ static const struct bfd_elf_special_section
+@@ -6413,6 +6538,8 @@ static const struct bfd_elf_special_section
    elf_x86_64_hash_symbol
  #define elf_backend_omit_section_dynsym \
    ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
@@ -1002,8 +1504,374 @@ index 8ea478d..4a5578b 100644
  
  #include "elf64-target.h"
  
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index 993e9b9..94d9e30 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -6072,6 +6072,9 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
+ 					      bed->s->sizeof_sym))
+ 	    return FALSE;
+ 	}
++
++      elf_hash_table (info)->has_interp_section
++	= bfd_get_section_by_name (dynobj, ".interp") != NULL;
+     }
+ 
+   if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
+diff --git a/include/bfdlink.h b/include/bfdlink.h
+index 9b849aa..860811c 100644
+--- a/include/bfdlink.h
++++ b/include/bfdlink.h
+@@ -542,6 +542,10 @@ struct bfd_link_info
+      backend to decide.  */
+   int extern_protected_data;
+ 
++  /* > 0 to treat undefined weak symbol in the executable as dynamic,
++     requiring dynamic relocation.  */
++  int dynamic_undefined_weak;
++
+   /* Non-zero if auto-import thunks for DATA items in pei386 DLLs
+      should be generated/linked against.  Set to 1 if this feature
+      is explicitly requested by the user, -1 if enabled by default.  */
+diff --git a/ld/Makefile.am b/ld/Makefile.am
+index 7339298..4a8c0b6 100644
+--- a/ld/Makefile.am
++++ b/ld/Makefile.am
+@@ -671,6 +671,7 @@ ELF_DEPS = $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/elf-generic.em $(src
+ ELF_GEN_DEPS = $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em $(srcdir)/emultempl/genelf.em $(srcdir)/scripttempl/DWARF.sc
+ ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ 	       $(srcdir)/emulparams/extern_protected_data.sh \
++	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
+ 	       $(srcdir)/emulparams/call_nop.sh
+ 
+ @TDIRS@
+diff --git a/ld/Makefile.in b/ld/Makefile.in
+index 8803e22..45388d7 100644
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -887,6 +887,7 @@ ELF_DEPS = $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/elf-generic.em $(src
+ ELF_GEN_DEPS = $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em $(srcdir)/emultempl/genelf.em $(srcdir)/scripttempl/DWARF.sc
+ ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ 	       $(srcdir)/emulparams/extern_protected_data.sh \
++	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
+ 	       $(srcdir)/emulparams/call_nop.sh
+ 
+ 
+diff --git a/ld/NEWS b/ld/NEWS
+index d80cdcf..dce600d 100644
+--- a/ld/NEWS
++++ b/ld/NEWS
+@@ -1,5 +1,8 @@
+ -*- text -*-
+ 
++* Support for -z nodynamic-undefined-weak in the x86 ELF linker, which
++  avoids dynamic relocations against undefined weak symbols in executable.
++
+ Changes in 2.26:
+ 
+ * Add --fix-stm32l4xx-629360 to the ARM linker to enable a link-time
+diff --git a/ld/emulparams/dynamic_undefined_weak.sh b/ld/emulparams/dynamic_undefined_weak.sh
+new file mode 100644
+index 0000000..82d88d6
+--- /dev/null
++++ b/ld/emulparams/dynamic_undefined_weak.sh
+@@ -0,0 +1,12 @@
++PARSE_AND_LIST_OPTIONS_NODYNAMIC_UNDEFINED_WEAK='
++  fprintf (file, _("\
++  -z nodynamic-undefined-weak Do not treat undefined weak symbol as dynamic\n"));
++'
++
++PARSE_AND_LIST_ARGS_CASE_Z_NODYNAMIC_UNDEFINED_WEAK='
++      else if (strcmp (optarg, "nodynamic-undefined-weak") == 0)
++	link_info.dynamic_undefined_weak = FALSE;
++'
++
++PARSE_AND_LIST_OPTIONS="$PARSE_AND_LIST_OPTIONS $PARSE_AND_LIST_OPTIONS_NODYNAMIC_UNDEFINED_WEAK"
++PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_NODYNAMIC_UNDEFINED_WEAK"
+diff --git a/ld/emulparams/elf32_x86_64.sh b/ld/emulparams/elf32_x86_64.sh
+index 0a03548..1b285c5 100644
+--- a/ld/emulparams/elf32_x86_64.sh
++++ b/ld/emulparams/elf32_x86_64.sh
+@@ -1,5 +1,6 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=32
+diff --git a/ld/emulparams/elf_i386.sh b/ld/emulparams/elf_i386.sh
+index 7dceea9..3451bb2 100644
+--- a/ld/emulparams/elf_i386.sh
++++ b/ld/emulparams/elf_i386.sh
+@@ -1,5 +1,6 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+diff --git a/ld/emulparams/elf_i386_be.sh b/ld/emulparams/elf_i386_be.sh
+index 40ed8c6..70db443 100644
+--- a/ld/emulparams/elf_i386_be.sh
++++ b/ld/emulparams/elf_i386_be.sh
+@@ -1,4 +1,5 @@
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+diff --git a/ld/emulparams/elf_i386_chaos.sh b/ld/emulparams/elf_i386_chaos.sh
+index 33757bf..aa36cb5 100644
+--- a/ld/emulparams/elf_i386_chaos.sh
++++ b/ld/emulparams/elf_i386_chaos.sh
+@@ -1,5 +1,6 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf_chaos
+ OUTPUT_FORMAT="elf32-i386"
+diff --git a/ld/emulparams/elf_i386_ldso.sh b/ld/emulparams/elf_i386_ldso.sh
+index f780581..1328520 100644
+--- a/ld/emulparams/elf_i386_ldso.sh
++++ b/ld/emulparams/elf_i386_ldso.sh
+@@ -1,5 +1,6 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+diff --git a/ld/emulparams/elf_i386_vxworks.sh b/ld/emulparams/elf_i386_vxworks.sh
+index cb289e6..aaea8c4 100644
+--- a/ld/emulparams/elf_i386_vxworks.sh
++++ b/ld/emulparams/elf_i386_vxworks.sh
+@@ -12,4 +12,5 @@ GENERATE_PIE_SCRIPT=yes
+ NO_SMALL_DATA=yes
+ . ${srcdir}/emulparams/vxworks.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+diff --git a/ld/emulparams/elf_iamcu.sh b/ld/emulparams/elf_iamcu.sh
+index 5fae651..863027b 100644
+--- a/ld/emulparams/elf_iamcu.sh
++++ b/ld/emulparams/elf_iamcu.sh
+@@ -1,5 +1,6 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-iamcu"
+diff --git a/ld/emulparams/elf_k1om.sh b/ld/emulparams/elf_k1om.sh
+index 289274d..494efcc 100644
+--- a/ld/emulparams/elf_k1om.sh
++++ b/ld/emulparams/elf_k1om.sh
+@@ -1,5 +1,6 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+diff --git a/ld/emulparams/elf_l1om.sh b/ld/emulparams/elf_l1om.sh
+index 17fa8e2..b115879 100644
+--- a/ld/emulparams/elf_l1om.sh
++++ b/ld/emulparams/elf_l1om.sh
+@@ -1,5 +1,6 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+diff --git a/ld/emulparams/elf_x86_64.sh b/ld/emulparams/elf_x86_64.sh
+index 5d31da1..0159a6c 100644
+--- a/ld/emulparams/elf_x86_64.sh
++++ b/ld/emulparams/elf_x86_64.sh
+@@ -1,5 +1,6 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
++. ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+diff --git a/ld/emulparams/extern_protected_data.sh b/ld/emulparams/extern_protected_data.sh
+index fd4bd3b..65c68ad 100644
+--- a/ld/emulparams/extern_protected_data.sh
++++ b/ld/emulparams/extern_protected_data.sh
+@@ -1,9 +1,13 @@
+-PARSE_AND_LIST_OPTIONS='
++PARSE_AND_LIST_OPTIONS_NOEXTEN_PROTECTED_DATA='
+   fprintf (file, _("\
+   -z noextern-protected-data  Do not treat protected data symbol as external\n"));
+ '
+ 
+-PARSE_AND_LIST_ARGS_CASE_Z='
++PARSE_AND_LIST_ARGS_CASE_Z_NOEXTEN_PROTECTED_DATA='
+       else if (strcmp (optarg, "noextern-protected-data") == 0)
+ 	link_info.extern_protected_data = FALSE;
+ '
++
++
++PARSE_AND_LIST_OPTIONS="$PARSE_AND_LIST_OPTIONS $PARSE_AND_LIST_OPTIONS_NOEXTEN_PROTECTED_DATA"
++PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_NOEXTEN_PROTECTED_DATA"
+diff --git a/ld/ld.texinfo b/ld/ld.texinfo
+index 723e5e8..ee462c5 100644
+--- a/ld/ld.texinfo
++++ b/ld/ld.texinfo
+@@ -1199,6 +1199,12 @@ generated by compiler.  Updates on protected data symbols by another
+ module aren't visible to the resulting shared library.  Supported for
+ i386 and x86-64.
+ 
++@item nodynamic-undefined-weak
++Don't treat undefined weak symbols as dynamic when building executable.
++This option overrides linker backend default.  It can be used to avoid
++dynamic relocations against undefined weak symbols in executable.
++Supported for i386 and x86-64.
++
+ @item call-nop=prefix-addr
+ @itemx call-nop=prefix-nop
+ @itemx call-nop=suffix-nop
+diff --git a/ld/ldmain.c b/ld/ldmain.c
+index 7425da0..21133ab 100644
+--- a/ld/ldmain.c
++++ b/ld/ldmain.c
+@@ -278,6 +278,7 @@ main (int argc, char **argv)
+   link_info.fini_function = "_fini";
+   link_info.relax_pass = 1;
+   link_info.extern_protected_data = -1;
++  link_info.dynamic_undefined_weak = -1;
+   link_info.pei386_auto_import = -1;
+   link_info.spare_dynamic_tags = 5;
+   link_info.path_separator = ':';
+diff --git a/ld/testsuite/ld-elf/pr19719a.c b/ld/testsuite/ld-elf/pr19719a.c
+new file mode 100644
+index 0000000..72249a5
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr19719a.c
+@@ -0,0 +1,12 @@
++#include <stdio.h>
++
++extern int foo (void);
++extern int bar (void);
++
++int
++main (void)
++{
++  if (foo () == bar ())
++    printf ("PASS\n");
++  return 0;
++}
+diff --git a/ld/testsuite/ld-elf/pr19719b.c b/ld/testsuite/ld-elf/pr19719b.c
+new file mode 100644
+index 0000000..6ef6268
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr19719b.c
+@@ -0,0 +1,8 @@
++extern int __attribute__ ((weak)) fun (void);
++int
++foo (void)
++{
++  if (&fun != 0)
++    return fun ();
++  return 0;
++}
+diff --git a/ld/testsuite/ld-elf/pr19719c.c b/ld/testsuite/ld-elf/pr19719c.c
+new file mode 100644
+index 0000000..5c877d9
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr19719c.c
+@@ -0,0 +1,8 @@
++extern int __attribute__ ((weak)) fun (void);
++int
++bar (void)
++{
++  if (&fun != 0)
++    return fun ();
++  return 0;
++}
+diff --git a/ld/testsuite/ld-elf/pr19719d.c b/ld/testsuite/ld-elf/pr19719d.c
+new file mode 100644
+index 0000000..231eeef
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr19719d.c
+@@ -0,0 +1,5 @@
++int
++fun (void)
++{
++  return 20;
++}
+diff --git a/ld/testsuite/ld-elf/shared.exp b/ld/testsuite/ld-elf/shared.exp
+index a864430..e615f55 100644
+--- a/ld/testsuite/ld-elf/shared.exp
++++ b/ld/testsuite/ld-elf/shared.exp
+@@ -582,3 +582,63 @@ if { [istarget *-*-linux*]
+ 	] \
+     ]
+ }
++
++proc mix_pic_and_non_pic {cflags ldflags} {
++    set testname "Mixing PIC and non-PIC"
++    if { ![ string match "" $cflags$ldflags] } {
++	set testname "$testname ($cflags $ldflags)"
++    }
++
++    run_cc_link_tests [list \
++	[list \
++	    "Build libpr19719a.so" \
++	    "-shared -Wl,-soname,libpr19719.so" \
++	    "-fPIC" \
++	    { pr19719d.c } \
++	    {} \
++	    "libpr19719a.so" \
++	] \
++	[list \
++	    "Build libpr19719b.so" \
++	    "-shared -Wl,-soname,libpr19719.so" \
++	    "-fPIC" \
++	    { dummy.c } \
++	    {} \
++	    "libpr19719b.so" \
++	] \
++	[list \
++	    "Build pr19073b.o" \
++	    "-r -nostdlib" \
++	    "-fPIC" \
++	    { pr19719b.c } \
++	    {} \
++	    "libpr19719b.o" \
++	] \
++    ]
++
++    exec cp tmpdir/libpr19719b.so tmpdir/libpr19719.so
++
++    run_ld_link_exec_tests [] [list \
++	[list \
++	    "Run pr19719" \
++	    "$ldflags tmpdir/libpr19719b.o tmpdir/libpr19719.so -R tmpdir" \
++	    "" \
++	    { pr19719a.c pr19719c.c } \
++	    "pr19719" \
++	    "pass.out" \
++	    "$cflags" \
++	] \
++    ]
++
++    exec cp tmpdir/libpr19719a.so tmpdir/libpr19719.so
++
++    set exec_output [run_host_cmd tmpdir/pr19719 ""]
++    if {![string match "PASS" $exec_output]} {
++	fail $testname
++    } else {
++	pass $testname
++    }
++}
++
++mix_pic_and_non_pic "" ""
++mix_pic_and_non_pic "-fPIE" "-pie"
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index 1a79694..9c030d1 100644
+index 1a79694..ab8f017 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
 @@ -320,6 +320,35 @@ run_dump_test "load5b"
@@ -1042,6 +1910,82 @@ index 1a79694..9c030d1 100644
  
  if { !([istarget "i?86-*-linux*"]
         || [istarget "i?86-*-gnu*"]
+@@ -339,6 +368,62 @@ run_dump_test "pr17935-2"
+ run_dump_test "pr18801"
+ run_dump_test "pr18815"
+ 
++proc undefined_weak {cflags ldflags} {
++    set testname "Undefined weak symbol"
++    if { ![ string match "" $cflags$ldflags] } {
++	set testname "$testname ($cflags $ldflags)"
++    }
++
++    if { [ regexp "\-fPIE" $cflags]
++	 && ![ regexp "\-z nodynamic-undefined-weak" $ldflags] } {
++	set weak_symbol "Weak defined"
++    } else {
++	set weak_symbol "Weak undefined"
++    }
++
++    run_cc_link_tests [list \
++	[list \
++	    "Build libpr19704a.so" \
++	    "-shared -Wl,-soname,libpr19704.so" \
++	    "" \
++	    { dummy.s } \
++	    {} \
++	    "libpr19704a.so" \
++	] \
++	[list \
++	    "Build libpr19704b.so" \
++	    "-shared -Wl,-soname,libpr19704.so" \
++	    "-fPIC" \
++	    { pr19704b.c } \
++	    {} \
++	    "libpr19704b.so" \
++	] \
++    ]
++
++    exec cp tmpdir/libpr19704a.so tmpdir/libpr19704.so
++
++    run_ld_link_exec_tests [] [list \
++	[list \
++	    "Run pr19704" \
++	    "$ldflags tmpdir/libpr19704.so -R tmpdir" \
++	    "" \
++	    { pr19704a.c } \
++	    "pr19704" \
++	    "pr19704.out" \
++	    "$cflags" \
++	] \
++    ]
++
++    exec cp tmpdir/libpr19704b.so tmpdir/libpr19704.so
++
++    set exec_output [run_host_cmd tmpdir/pr19704 ""]
++    if {![string match $weak_symbol $exec_output]} {
++	fail $testname
++    } else {
++	pass $testname
++    }
++}
++
+ # Add $PLT_CFLAGS if PLT is expected.
+ global PLT_CFLAGS
+ 
+@@ -636,6 +721,12 @@ if { [isnative]
+ 	    "got1.out" \
+ 	] \
+     ]
++
++    undefined_weak "" ""
++    undefined_weak "-fPIE" ""
++    undefined_weak "-fPIE" "-pie"
++    undefined_weak "-fPIE" "-z nodynamic-undefined-weak"
++    undefined_weak "-fPIE" "-pie -z nodynamic-undefined-weak"
+ }
+ 
+ if { !([istarget "i?86-*-linux*"]
 diff --git a/ld/testsuite/ld-i386/pr19636-1.s b/ld/testsuite/ld-i386/pr19636-1.s
 new file mode 100644
 index 0000000..b2bc4df
@@ -1059,13 +2003,13 @@ index 0000000..b2bc4df
 +	call func3@PLT
 diff --git a/ld/testsuite/ld-i386/pr19636-1a.d b/ld/testsuite/ld-i386/pr19636-1a.d
 new file mode 100644
-index 0000000..ef17c89
+index 0000000..e96a460
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1a.d
 @@ -0,0 +1,16 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -pie -m elf_i386
++#ld: -pie -m elf_i386 -z nodynamic-undefined-weak
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
@@ -1081,13 +2025,13 @@ index 0000000..ef17c89
 +  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
 diff --git a/ld/testsuite/ld-i386/pr19636-1b.d b/ld/testsuite/ld-i386/pr19636-1b.d
 new file mode 100644
-index 0000000..bbf9442
+index 0000000..5bce6cc
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1b.d
 @@ -0,0 +1,19 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -pie -E -m elf_i386
++#ld: -pie -E -m elf_i386 -z nodynamic-undefined-weak
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
@@ -1106,13 +2050,13 @@ index 0000000..bbf9442
 +  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
 diff --git a/ld/testsuite/ld-i386/pr19636-1c.d b/ld/testsuite/ld-i386/pr19636-1c.d
 new file mode 100644
-index 0000000..a23392d
+index 0000000..baf5aa3
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1c.d
 @@ -0,0 +1,9 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -pie -E -m elf_i386
++#ld: -pie -E -m elf_i386 -z nodynamic-undefined-weak
 +#readelf : --wide --dyn-syms
 +
 +#failif
@@ -1121,13 +2065,13 @@ index 0000000..a23392d
 +#...
 diff --git a/ld/testsuite/ld-i386/pr19636-1d-nacl.d b/ld/testsuite/ld-i386/pr19636-1d-nacl.d
 new file mode 100644
-index 0000000..173cd28
+index 0000000..7ff0e89
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1d-nacl.d
 @@ -0,0 +1,124 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -pie -m elf_i386
++#ld: -pie -m elf_i386 -z nodynamic-undefined-weak
 +#objdump: -dw
 +#target: i?86-*-nacl* x86_64-*-nacl*
 +
@@ -1251,13 +2195,13 @@ index 0000000..173cd28
 +[ 	]*[a-f0-9]+:	e8 af ff ff ff       	call   40 <_start-0x40>
 diff --git a/ld/testsuite/ld-i386/pr19636-1d.d b/ld/testsuite/ld-i386/pr19636-1d.d
 new file mode 100644
-index 0000000..5430991
+index 0000000..d413b87
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1d.d
 @@ -0,0 +1,26 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -pie -m elf_i386
++#ld: -pie -m elf_i386 -z nodynamic-undefined-weak
 +#objdump: -dw
 +#notarget: i?86-*-nacl* x86_64-*-nacl*
 +
@@ -1283,13 +2227,13 @@ index 0000000..5430991
 +[ 	]*[a-f0-9]+:	e8 df ff ff ff       	call   120 <_start-0x10>
 diff --git a/ld/testsuite/ld-i386/pr19636-1e.d b/ld/testsuite/ld-i386/pr19636-1e.d
 new file mode 100644
-index 0000000..91fb7d3
+index 0000000..bcabd4d
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1e.d
 @@ -0,0 +1,19 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -shared -m elf_i386
++#ld: -shared -m elf_i386 -z nodynamic-undefined-weak
 +#readelf : -r --wide --dyn-syms
 +
 +Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 2 entries:
@@ -1308,13 +2252,13 @@ index 0000000..91fb7d3
 +#pass
 diff --git a/ld/testsuite/ld-i386/pr19636-1f.d b/ld/testsuite/ld-i386/pr19636-1f.d
 new file mode 100644
-index 0000000..242d493
+index 0000000..52513fc
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1f.d
 @@ -0,0 +1,19 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -shared -Bsymbolic -m elf_i386
++#ld: -shared -Bsymbolic -m elf_i386 -z nodynamic-undefined-weak
 +#readelf : -r --wide --dyn-syms
 +
 +Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 2 entries:
@@ -1333,13 +2277,13 @@ index 0000000..242d493
 +#pass
 diff --git a/ld/testsuite/ld-i386/pr19636-1g.d b/ld/testsuite/ld-i386/pr19636-1g.d
 new file mode 100644
-index 0000000..0335a6e
+index 0000000..9cd4472
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1g.d
 @@ -0,0 +1,12 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -m elf_i386
++#ld: -m elf_i386 -z nodynamic-undefined-weak
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
@@ -1351,13 +2295,13 @@ index 0000000..0335a6e
 +  0x[0-9a-f]+ [0 ]+\.+
 diff --git a/ld/testsuite/ld-i386/pr19636-1h.d b/ld/testsuite/ld-i386/pr19636-1h.d
 new file mode 100644
-index 0000000..6e30314
+index 0000000..ed06d2f
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1h.d
 @@ -0,0 +1,19 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -E -m elf_i386
++#ld: -E -m elf_i386 -z nodynamic-undefined-weak
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
@@ -1376,13 +2320,13 @@ index 0000000..6e30314
 +  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
 diff --git a/ld/testsuite/ld-i386/pr19636-1i.d b/ld/testsuite/ld-i386/pr19636-1i.d
 new file mode 100644
-index 0000000..a7a4e8f
+index 0000000..c65a267
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19636-1i.d
 @@ -0,0 +1,9 @@
 +#source: pr19636-1.s
 +#as: --32 -mrelax-relocations=no
-+#ld: -E -m elf_i386
++#ld: -E -m elf_i386 -z nodynamic-undefined-weak
 +#readelf : --wide --dyn-syms
 +
 +#failif
@@ -1926,6 +2870,45 @@ index 0000000..a9487f0
 +#...
 + +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
 +#pass
+diff --git a/ld/testsuite/ld-i386/pr19704.out b/ld/testsuite/ld-i386/pr19704.out
+new file mode 100644
+index 0000000..3506f46
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19704.out
+@@ -0,0 +1 @@
++Weak undefined
+diff --git a/ld/testsuite/ld-i386/pr19704a.c b/ld/testsuite/ld-i386/pr19704a.c
+new file mode 100644
+index 0000000..aa52e00
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19704a.c
+@@ -0,0 +1,13 @@
++#include <stdio.h>
++
++extern int __attribute__ ((weak)) fun (void);
++
++int
++main (void)
++{
++  if (&fun != 0)
++    fun ();
++  else
++    printf ("Weak undefined\n");
++  return 0;
++}
+diff --git a/ld/testsuite/ld-i386/pr19704b.c b/ld/testsuite/ld-i386/pr19704b.c
+new file mode 100644
+index 0000000..1d688e1
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19704b.c
+@@ -0,0 +1,7 @@
++#include <stdio.h>
++
++void
++fun (void)
++{
++  printf ("Weak defined\n");
++}
 diff --git a/ld/testsuite/ld-x86-64/pr13082-3b.d b/ld/testsuite/ld-x86-64/pr13082-3b.d
 index 12efaf0..766dd74 100644
 --- a/ld/testsuite/ld-x86-64/pr13082-3b.d
@@ -2088,13 +3071,13 @@ index 0000000..8814ecd
 +	call func3@PLT
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2a.d b/ld/testsuite/ld-x86-64/pr19636-2a.d
 new file mode 100644
-index 0000000..5a1894c
+index 0000000..6631170
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2a.d
 @@ -0,0 +1,17 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -pie -m elf_x86_64
++#ld: -pie -m elf_x86_64 -z nodynamic-undefined-weak
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
@@ -2111,13 +3094,13 @@ index 0000000..5a1894c
 +  0x[0-9a-f]+ [0 ]+\.+
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2b.d b/ld/testsuite/ld-x86-64/pr19636-2b.d
 new file mode 100644
-index 0000000..5cc255c
+index 0000000..d1df9ba
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2b.d
 @@ -0,0 +1,20 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -pie -E -m elf_x86_64
++#ld: -pie -E -m elf_x86_64 -z nodynamic-undefined-weak
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
@@ -2137,13 +3120,13 @@ index 0000000..5cc255c
 +  0x[0-9a-f]+ [0 ]+\.+
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2c.d b/ld/testsuite/ld-x86-64/pr19636-2c.d
 new file mode 100644
-index 0000000..73bde74
+index 0000000..cbbbd52
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2c.d
 @@ -0,0 +1,9 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -pie -E -m elf_x86_64
++#ld: -pie -E -m elf_x86_64 -z nodynamic-undefined-weak
 +#readelf : --wide --dyn-syms
 +
 +#failif
@@ -2152,13 +3135,13 @@ index 0000000..73bde74
 +#...
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2d-nacl.d b/ld/testsuite/ld-x86-64/pr19636-2d-nacl.d
 new file mode 100644
-index 0000000..70cae22
+index 0000000..2e00053
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2d-nacl.d
 @@ -0,0 +1,37 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -pie -m elf_x86_64
++#ld: -pie -m elf_x86_64 -z nodynamic-undefined-weak
 +#objdump: -dw
 +#target: x86_64-*-nacl*
 +
@@ -2195,13 +3178,13 @@ index 0000000..70cae22
 +[ 	]*[a-f0-9]+:	e8 ae ff ff ff       	callq  40 <_start-0x40>
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2d.d b/ld/testsuite/ld-x86-64/pr19636-2d.d
 new file mode 100644
-index 0000000..b8a469d
+index 0000000..52e118f
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2d.d
 @@ -0,0 +1,25 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -pie -m elf_x86_64
++#ld: -pie -m elf_x86_64 -z nodynamic-undefined-weak
 +#objdump: -dw
 +#notarget: x86_64-*-nacl*
 +
@@ -2226,13 +3209,13 @@ index 0000000..b8a469d
 +[ 	]*[a-f0-9]+:	e8 de ff ff ff       	callq  1b0 <_start-0x10>
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2e.d b/ld/testsuite/ld-x86-64/pr19636-2e.d
 new file mode 100644
-index 0000000..21a6e95
+index 0000000..2d4f064
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2e.d
 @@ -0,0 +1,19 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -shared -m elf_x86_64
++#ld: -shared -m elf_x86_64 -z nodynamic-undefined-weak
 +#readelf : -r --wide --dyn-syms
 +
 +Relocation section '\.rela\.dyn' at offset [0x0-9a-f]+ contains 2 entries:
@@ -2251,13 +3234,13 @@ index 0000000..21a6e95
 +#pass
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2f.d b/ld/testsuite/ld-x86-64/pr19636-2f.d
 new file mode 100644
-index 0000000..9388fd3
+index 0000000..2b12ede
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2f.d
 @@ -0,0 +1,19 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -shared -Bsymbolic -m elf_x86_64
++#ld: -shared -Bsymbolic -m elf_x86_64 -z nodynamic-undefined-weak
 +#readelf : -r --wide --dyn-syms
 +
 +Relocation section '\.rela\.dyn' at offset [0x0-9a-f]+ contains 2 entries:
@@ -2276,13 +3259,13 @@ index 0000000..9388fd3
 +#pass
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2g.d b/ld/testsuite/ld-x86-64/pr19636-2g.d
 new file mode 100644
-index 0000000..782b86c
+index 0000000..b0cd2b2
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2g.d
 @@ -0,0 +1,13 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -m elf_x86_64
++#ld: -m elf_x86_64 -z nodynamic-undefined-weak
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
@@ -2295,13 +3278,13 @@ index 0000000..782b86c
 +  0x[0-9a-f]+ [0 ]+\.+
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2h.d b/ld/testsuite/ld-x86-64/pr19636-2h.d
 new file mode 100644
-index 0000000..3676839
+index 0000000..a1935e4
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2h.d
 @@ -0,0 +1,20 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -E -m elf_x86_64
++#ld: -E -m elf_x86_64 -z nodynamic-undefined-weak
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
@@ -2321,13 +3304,13 @@ index 0000000..3676839
 +  0x[0-9a-f]+ [0 ]+\.+
 diff --git a/ld/testsuite/ld-x86-64/pr19636-2i.d b/ld/testsuite/ld-x86-64/pr19636-2i.d
 new file mode 100644
-index 0000000..c65f397
+index 0000000..b4ec4c8
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636-2i.d
 @@ -0,0 +1,9 @@
 +#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
-+#ld: -E -m elf_x86_64
++#ld: -E -m elf_x86_64 -z nodynamic-undefined-weak
 +#readelf : --wide --dyn-syms
 +
 +#failif
@@ -2416,11 +3399,51 @@ index 0000000..3d9a6d7
 +#...
 + +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
 +#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19704.out b/ld/testsuite/ld-x86-64/pr19704.out
+new file mode 100644
+index 0000000..3506f46
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19704.out
+@@ -0,0 +1 @@
++Weak undefined
+diff --git a/ld/testsuite/ld-x86-64/pr19704a.c b/ld/testsuite/ld-x86-64/pr19704a.c
+new file mode 100644
+index 0000000..aa52e00
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19704a.c
+@@ -0,0 +1,13 @@
++#include <stdio.h>
++
++extern int __attribute__ ((weak)) fun (void);
++
++int
++main (void)
++{
++  if (&fun != 0)
++    fun ();
++  else
++    printf ("Weak undefined\n");
++  return 0;
++}
+diff --git a/ld/testsuite/ld-x86-64/pr19704b.c b/ld/testsuite/ld-x86-64/pr19704b.c
+new file mode 100644
+index 0000000..1d688e1
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19704b.c
+@@ -0,0 +1,7 @@
++#include <stdio.h>
++
++void
++fun (void)
++{
++  printf ("Weak defined\n");
++}
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 7248377..a8c356b 100644
+index 7248377..214b08b 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
-@@ -355,6 +355,26 @@ run_dump_test "pr19162"
+@@ -355,6 +355,82 @@ run_dump_test "pr19162"
+ run_dump_test "pr19175"
  run_dump_test "pr18591"
  run_dump_test "pr19615"
  run_dump_test "pr19645"
@@ -2444,9 +3467,78 @@ index 7248377..a8c356b 100644
 +run_dump_test "pr19636-3a"
 +run_dump_test "pr19636-3b"
 +run_dump_test "pr19636-3c"
++
++proc undefined_weak {cflags ldflags} {
++    set testname "Undefined weak symbol"
++    if { ![ string match "" $cflags$ldflags] } {
++	set testname "$testname ($cflags $ldflags)"
++    }
++
++    if { [ regexp "\-fPIE" $cflags]
++	 && ![ regexp "\-z nodynamic-undefined-weak" $ldflags] } {
++	set weak_symbol "Weak defined"
++    } else {
++	set weak_symbol "Weak undefined"
++    }
++
++    run_cc_link_tests [list \
++	[list \
++	    "Build libpr19704a.so" \
++	    "-shared -Wl,-soname,libpr19704.so" \
++	    "" \
++	    { dummy.s } \
++	    {} \
++	    "libpr19704a.so" \
++	] \
++	[list \
++	    "Build libpr19704b.so" \
++	    "-shared -Wl,-soname,libpr19704.so" \
++	    "-fPIC" \
++	    { pr19704b.c } \
++	    {} \
++	    "libpr19704b.so" \
++	] \
++    ]
++
++    exec cp tmpdir/libpr19704a.so tmpdir/libpr19704.so
++
++    run_ld_link_exec_tests [] [list \
++	[list \
++	    "Run pr19704" \
++	    "$ldflags tmpdir/libpr19704.so -R tmpdir" \
++	    "" \
++	    { pr19704a.c } \
++	    "pr19704" \
++	    "pr19704.out" \
++	    "$cflags" \
++	] \
++    ]
++
++    exec cp tmpdir/libpr19704b.so tmpdir/libpr19704.so
++
++    set exec_output [run_host_cmd tmpdir/pr19704 ""]
++    if {![string match $weak_symbol $exec_output]} {
++	fail $testname
++    } else {
++	pass $testname
++    }
++}
  
  # Add $PLT_CFLAGS if PLT is expected.
  global PLT_CFLAGS
+@@ -686,6 +762,12 @@ if { [isnative] && [which $CC] != 0 } {
+ 	    ] \
+ 	]
+     }
++
++    undefined_weak "" ""
++    undefined_weak "-fPIE" ""
++    undefined_weak "-fPIE" "-pie"
++    undefined_weak "-fPIE" "-z nodynamic-undefined-weak"
++    undefined_weak "-fPIE" "-pie -z nodynamic-undefined-weak"
+ }
+ 
+ if { ![istarget "x86_64-*-linux*"]} {
 -- 
 2.5.0
 

@@ -1,4 +1,4 @@
-From ff14210ceceb8d97971176e0059fcbe98638d15b Mon Sep 17 00:00:00 2001
+From 448207b5eb92770cb8471a6e668bb711dbe7c558 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Wed, 10 Feb 2016 15:12:27 -0800
 Subject: [PATCH] Optimize x86 GOT32X/GOTPCRELX relocations
@@ -120,7 +120,7 @@ ld/
 	* testsuite/ld-x86-64/x86-64.exp: Run pr13082-3c, pr13082-3d
 	and tests for PR ld/19609.
 ---
- bfd/elf32-i386.c                        |  77 +++++++++-----
+ bfd/elf32-i386.c                        |  79 +++++++++-----
  bfd/elf64-x86-64.c                      | 178 +++++++++++++++++++++++++-------
  ld/testsuite/ld-i386/got1.dd            |   4 +-
  ld/testsuite/ld-i386/i386.exp           |  14 +++
@@ -129,7 +129,7 @@ ld/
  ld/testsuite/ld-i386/load1.d            |   8 +-
  ld/testsuite/ld-i386/load4b.d           |   2 +-
  ld/testsuite/ld-i386/load5b.d           |   2 +-
- ld/testsuite/ld-i386/mov1b.d            |   4 +-
+ ld/testsuite/ld-i386/mov1b.d            |   6 +-
  ld/testsuite/ld-i386/pr19609-1.s        |  12 +++
  ld/testsuite/ld-i386/pr19609-1a.d       |  17 +++
  ld/testsuite/ld-i386/pr19609-1b.d       |  17 +++
@@ -159,8 +159,8 @@ ld/
  ld/testsuite/ld-x86-64/lea1d.d          |   7 +-
  ld/testsuite/ld-x86-64/lea1e.d          |   7 +-
  ld/testsuite/ld-x86-64/lea1f.d          |  13 ++-
- ld/testsuite/ld-x86-64/mov1b.d          |   6 +-
- ld/testsuite/ld-x86-64/mov1d.d          |   6 +-
+ ld/testsuite/ld-x86-64/mov1b.d          |   8 +-
+ ld/testsuite/ld-x86-64/mov1d.d          |   8 +-
  ld/testsuite/ld-x86-64/pr13082-3b.d     |   5 +-
  ld/testsuite/ld-x86-64/pr13082-3c.d     |   9 ++
  ld/testsuite/ld-x86-64/pr13082-3d.d     |  10 ++
@@ -200,7 +200,7 @@ ld/
  ld/testsuite/ld-x86-64/pr19609-5d.d     |   4 +
  ld/testsuite/ld-x86-64/pr19609-5e.d     |  12 +++
  ld/testsuite/ld-x86-64/x86-64.exp       |  31 ++++++
- 80 files changed, 1107 insertions(+), 118 deletions(-)
+ 80 files changed, 1111 insertions(+), 122 deletions(-)
  create mode 100644 ld/testsuite/ld-i386/pr19609-1.s
  create mode 100644 ld/testsuite/ld-i386/pr19609-1a.d
  create mode 100644 ld/testsuite/ld-i386/pr19609-1b.d
@@ -256,10 +256,10 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/pr19609-5e.d
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 269d5c7..5565345 100644
+index 1a869aa..98f06ec 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
-@@ -2825,6 +2825,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+@@ -2862,6 +2862,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
    struct elf_i386_link_hash_table *htab;
    bfd_boolean changed_contents;
    bfd_boolean changed_relocs;
@@ -267,7 +267,7 @@ index 269d5c7..5565345 100644
    bfd_signed_vma *local_got_refcounts;
  
    /* Don't even try to convert non-ELF outputs.  */
-@@ -2851,6 +2852,8 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+@@ -2888,6 +2889,8 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
    changed_relocs = FALSE;
    local_got_refcounts = elf_local_got_refcounts (abfd);
  
@@ -276,7 +276,7 @@ index 269d5c7..5565345 100644
    /* Get the section contents.  */
    if (elf_section_data (sec)->this_hdr.contents != NULL)
      contents = elf_section_data (sec)->this_hdr.contents;
-@@ -2875,6 +2878,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+@@ -2912,6 +2915,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
        unsigned int addend;
        unsigned int nop;
        bfd_vma nop_offset;
@@ -284,7 +284,7 @@ index 269d5c7..5565345 100644
  
        if (r_type != R_386_GOT32 && r_type != R_386_GOT32X)
  	continue;
-@@ -2891,9 +2895,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+@@ -2928,9 +2932,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
        modrm = bfd_get_8 (abfd, contents + roff - 1);
        baseless = (modrm & 0xc7) == 0x5;
  
@@ -295,7 +295,7 @@ index 269d5c7..5565345 100644
  	{
  	  /* For PIC, disallow R_386_GOT32X without a base register
  	     since we don't know what the GOT base is.   Allow
-@@ -2922,7 +2924,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+@@ -2959,7 +2961,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
  
        opcode = bfd_get_8 (abfd, contents + roff - 2);
  
@@ -304,7 +304,7 @@ index 269d5c7..5565345 100644
        if (opcode != 0x8b)
  	{
  	  /* Only convert R_386_GOT32X relocation for call, jmp or
-@@ -2930,14 +2932,12 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+@@ -2967,14 +2969,12 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
  	     instructions.  */
  	  if (r_type != R_386_GOT32X)
  	    continue;
@@ -323,14 +323,14 @@ index 269d5c7..5565345 100644
        /* Try to convert R_386_GOT32 and R_386_GOT32X.  Get the symbol
  	 referred to by the reloc.  */
        if (r_symndx < symtab_hdr->sh_info)
-@@ -2972,6 +2972,27 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+@@ -3009,6 +3009,27 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
        if (h->type == STT_GNU_IFUNC)
  	continue;
  
 +      /* Undefined weak symbol is only bound locally in executable
 +	 and its reference is resolved as 0.  */
-+      if (h->root.type == bfd_link_hash_undefweak
-+	  && bfd_link_executable (link_info))
++      if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info,
++					   elf_i386_hash_entry (h)))
 +	{
 +	  if (opcode == 0xff)
 +	    {
@@ -351,7 +351,7 @@ index 269d5c7..5565345 100644
        if (opcode == 0xff)
  	{
  	  /* We have "call/jmp *foo@GOT[(%reg)]".  */
-@@ -3049,27 +3070,29 @@ convert_branch:
+@@ -3086,27 +3107,29 @@ convert_branch:
  convert_load:
  	      if (opcode == 0x8b)
  		{
@@ -395,24 +395,26 @@ index 269d5c7..5565345 100644
  		  if (opcode == 0x85)
  		    {
  		      /* Convert "test %reg1, foo@GOT(%reg2)" to
-@@ -4323,9 +4346,9 @@ r_386_got32:
- 		  && h != NULL
- 		  && h->dynindx != -1
- 		  && (!h->non_got_ref || eh->func_pointer_refcount > 0)
+@@ -4367,10 +4390,10 @@ r_386_got32:
+ 		      || eh->func_pointer_refcount > 0
+ 		      || (h->root.type == bfd_link_hash_undefweak
+ 			  && !resolved_to_zero))
 -		  && ((h->def_dynamic
 -		       && !h->def_regular)
 -		      || h->root.type == bfd_link_hash_undefweak
+-		      || h->root.type == bfd_link_hash_undefined)))
 +		  && ((h->def_dynamic && !h->def_regular)
 +		      /* Undefined weak symbol is bound locally when
 +			 PIC is false.  */
- 		      || h->root.type == bfd_link_hash_undefined)))
++		      || h->root.type == bfd_link_hash_undefweak)))
  	    {
  	      Elf_Internal_Rela outrel;
+ 	      bfd_boolean skip, relocate;
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 4a5578b..9e7aa07 100644
+index b87fd81..2f82b27 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
-@@ -3037,6 +3037,8 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+@@ -3069,6 +3069,8 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
    bfd_boolean changed_relocs;
    bfd_signed_vma *local_got_refcounts;
    bfd_vma maxpagesize;
@@ -421,7 +423,7 @@ index 4a5578b..9e7aa07 100644
  
    /* Don't even try to convert non-ELF outputs.  */
    if (!is_elf_hash_table (link_info->hash))
-@@ -3072,6 +3074,13 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+@@ -3104,6 +3106,13 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
  	goto error_return;
      }
  
@@ -435,7 +437,7 @@ index 4a5578b..9e7aa07 100644
    irelend = internal_relocs + sec->reloc_count;
    for (irel = internal_relocs; irel < irelend; irel++)
      {
-@@ -3085,10 +3094,12 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+@@ -3117,10 +3126,12 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
        bfd_signed_vma raddend;
        unsigned int opcode;
        unsigned int modrm;
@@ -451,7 +453,7 @@ index 4a5578b..9e7aa07 100644
  	continue;
  
        roff = irel->r_offset;
-@@ -3102,26 +3113,27 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+@@ -3134,26 +3145,27 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
  
        opcode = bfd_get_8 (abfd, contents + roff - 2);
  
@@ -493,7 +495,7 @@ index 4a5578b..9e7aa07 100644
        /* Get the symbol referred to by the reloc.  */
        if (r_symndx < symtab_hdr->sh_info)
  	{
-@@ -3162,22 +3174,59 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+@@ -3194,22 +3206,59 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
  	  /* STT_GNU_IFUNC must keep GOTPCREL relocations.  We also
  	     avoid optimizing GOTPCREL relocations againt _DYNAMIC
  	     since ld.so may use its link-time address.  */
@@ -513,8 +515,8 @@ index 4a5578b..9e7aa07 100644
 +	     It is OK convert mov with R_X86_64_GOTPCREL to
 +	     R_X86_64_PC32.  */
 +	  if ((relocx || opcode == 0x8b)
-+	      && h->root.type == bfd_link_hash_undefweak
-+	      && bfd_link_executable (link_info))
++	      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info,
++						  elf_x86_64_hash_entry (h)))
 +	    {
 +	      if (opcode == 0xff)
 +		{
@@ -564,7 +566,7 @@ index 4a5578b..9e7aa07 100644
  	      tsec = h->root.u.def.section;
  	      toff = h->root.u.def.value;
  	      symtype = h->type;
-@@ -3186,6 +3235,10 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+@@ -3218,6 +3267,10 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
  	    continue;
  	}
  
@@ -575,7 +577,7 @@ index 4a5578b..9e7aa07 100644
        if (tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
  	{
  	  /* At this stage in linking, no SEC_MERGE symbol has been
-@@ -3309,15 +3362,55 @@ convert:
+@@ -3341,15 +3394,55 @@ convert:
  	}
        else
  	{
@@ -635,7 +637,7 @@ index 4a5578b..9e7aa07 100644
  	      modrm = bfd_get_8 (abfd, contents + roff - 1);
  	      if (opcode == 0x85)
  		{
-@@ -3333,18 +3426,23 @@ convert:
+@@ -3365,18 +3458,23 @@ convert:
  		  modrm = 0xc0 | (modrm & 0x38) >> 3 | (opcode & 0x3c);
  		  opcode = 0x81;
  		}
@@ -664,10 +666,10 @@ index 4a5578b..9e7aa07 100644
  	    }
  
  	  bfd_put_8 (abfd, opcode, contents + roff - 2);
-@@ -4642,9 +4740,9 @@ direct:
- 		  && h != NULL
- 		  && h->dynindx != -1
- 		  && (!h->non_got_ref || eh->func_pointer_refcount > 0)
+@@ -4686,9 +4784,9 @@ direct:
+ 		      || eh->func_pointer_refcount > 0
+ 		      || (h->root.type == bfd_link_hash_undefweak
+ 			  && !resolved_to_zero))
 -		  && ((h->def_dynamic
 -		       && !h->def_regular)
 -		      || h->root.type == bfd_link_hash_undefweak
@@ -700,7 +702,7 @@ index e6e82de..cfea36b 100644
  [ 	]*[a-f0-9]+:	83 ec 0c             	sub    \$0xc,%esp
  [ 	]*[a-f0-9]+:	6a 00                	push   \$0x0
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index 9c030d1..f47890f 100644
+index ab8f017..f110e47 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
 @@ -349,6 +349,20 @@ run_dump_test "pr19636-4a"
@@ -844,9 +846,17 @@ index 6db0b28..96726a4 100644
 +[ 	]*[a-f0-9]+:	c7 c0 ([0-9a-f]{2} ){4} *	mov    \$0x[a-f0-9]+,%eax
  #pass
 diff --git a/ld/testsuite/ld-i386/mov1b.d b/ld/testsuite/ld-i386/mov1b.d
-index ae40862..92ea4b3 100644
+index ae40862..1b7cc2f 100644
 --- a/ld/testsuite/ld-i386/mov1b.d
 +++ b/ld/testsuite/ld-i386/mov1b.d
+@@ -1,6 +1,6 @@
+ #source: mov1.s
+ #as: --32
+-#ld: -pie -melf_i386
++#ld: -pie -melf_i386 --no-dynamic-linker
+ #objdump: -dw
+ 
+ .*: +file format .*
 @@ -10,6 +10,6 @@ Disassembly of section .text:
  
  #...
@@ -899,13 +909,13 @@ index 0000000..214adaf
 +[ 	]*[a-f0-9]+:	f7 c1 00 00 00 00    	test   \$0x0,%ecx
 diff --git a/ld/testsuite/ld-i386/pr19609-1b.d b/ld/testsuite/ld-i386/pr19609-1b.d
 new file mode 100644
-index 0000000..89ca594
+index 0000000..ebd6bc9
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19609-1b.d
 @@ -0,0 +1,17 @@
 +#source: pr19609-1.s
 +#as: --32 -mrelax-relocations=yes
-+#ld: -pie -melf_i386
++#ld: -pie -melf_i386 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -945,13 +955,13 @@ index 0000000..e7d1c13
 +[ 	]*[a-f0-9]+:	85 8a fc ff ff ff    	test   %ecx,-0x4\(%edx\)
 diff --git a/ld/testsuite/ld-i386/pr19609-1d.d b/ld/testsuite/ld-i386/pr19609-1d.d
 new file mode 100644
-index 0000000..e5dbb67
+index 0000000..4b50f8c
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19609-1d.d
 @@ -0,0 +1,17 @@
 +#source: pr19609-1.s
 +#as: --32 -mrelax-relocations=yes
-+#ld: -E -melf_i386
++#ld: -E -melf_i386 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -991,13 +1001,13 @@ index 0000000..a515ad6
 +[ 	]*[a-f0-9]+:	85 8a fc ff ff ff    	test   %ecx,-0x4\(%edx\)
 diff --git a/ld/testsuite/ld-i386/pr19609-1f.d b/ld/testsuite/ld-i386/pr19609-1f.d
 new file mode 100644
-index 0000000..c26fcc2
+index 0000000..99ed5bb
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19609-1f.d
 @@ -0,0 +1,17 @@
 +#source: pr19609-1.s
 +#as: --32 -mrelax-relocations=yes
-+#ld: -pie --dynamic-list-data -melf_i386
++#ld: -pie --dynamic-list-data -melf_i386 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -1014,13 +1024,13 @@ index 0000000..c26fcc2
 +[ 	]*[a-f0-9]+:	f7 c1 00 00 00 00    	test   \$0x0,%ecx
 diff --git a/ld/testsuite/ld-i386/pr19609-1g.d b/ld/testsuite/ld-i386/pr19609-1g.d
 new file mode 100644
-index 0000000..ba81129
+index 0000000..2fc9731
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19609-1g.d
 @@ -0,0 +1,17 @@
 +#source: pr19609-1.s
 +#as: --32 -mrelax-relocations=yes
-+#ld: -pie -E -melf_i386
++#ld: -pie -E -melf_i386 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -1037,13 +1047,13 @@ index 0000000..ba81129
 +[ 	]*[a-f0-9]+:	f7 c1 00 00 00 00    	test   \$0x0,%ecx
 diff --git a/ld/testsuite/ld-i386/pr19609-1h.d b/ld/testsuite/ld-i386/pr19609-1h.d
 new file mode 100644
-index 0000000..04d4c3f
+index 0000000..79fe5d5
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr19609-1h.d
 @@ -0,0 +1,17 @@
 +#source: pr19609-1.s
 +#as: --32 -mrelax-relocations=yes
-+#ld: -pie -E -Bsymbolic-functions -melf_i386
++#ld: -pie -E -Bsymbolic-functions -melf_i386 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -1422,16 +1432,18 @@ index 8d6cd78..b7abeb3 100644
 +[ 	]*[a-f0-9]+:	41 c7 c3 ([0-9a-f]{2} ){4} *	mov    \$0x[a-f0-9]+,%r11d
  #pass
 diff --git a/ld/testsuite/ld-x86-64/mov1b.d b/ld/testsuite/ld-x86-64/mov1b.d
-index f112c1c..dd0b0a9 100644
+index f112c1c..7421853 100644
 --- a/ld/testsuite/ld-x86-64/mov1b.d
 +++ b/ld/testsuite/ld-x86-64/mov1b.d
-@@ -1,5 +1,5 @@
+@@ -1,6 +1,6 @@
  #source: mov1.s
 -#as: --64
+-#ld: -pie -melf_x86_64
 +#as: --64 -mrelax-relocations=yes
- #ld: -pie -melf_x86_64
++#ld: -pie -melf_x86_64 --no-dynamic-linker
  #objdump: -dw
  
+ .*: +file format .*
 @@ -10,6 +10,6 @@ Disassembly of section .text:
  
  #...
@@ -1442,16 +1454,18 @@ index f112c1c..dd0b0a9 100644
 +[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 *	mov    \$0x0,%rax
  #pass
 diff --git a/ld/testsuite/ld-x86-64/mov1d.d b/ld/testsuite/ld-x86-64/mov1d.d
-index 794a546..9c32c90 100644
+index 794a546..7cdab0c 100644
 --- a/ld/testsuite/ld-x86-64/mov1d.d
 +++ b/ld/testsuite/ld-x86-64/mov1d.d
-@@ -1,5 +1,5 @@
+@@ -1,6 +1,6 @@
  #source: mov1.s
 -#as: --x32
+-#ld: -pie -melf32_x86_64
 +#as: --x32 -mrelax-relocations=yes
- #ld: -pie -melf32_x86_64
++#ld: -pie -melf32_x86_64 --no-dynamic-linker
  #objdump: -dw
  
+ .*: +file format .*
 @@ -10,6 +10,6 @@ Disassembly of section .text:
  
  #...
@@ -1579,13 +1593,13 @@ index 0000000..a908e39
 +[ 	]*[a-f0-9]+:	41 f7 c4 00 00 00 00 	test   \$0x0,%r12d
 diff --git a/ld/testsuite/ld-x86-64/pr19609-1b.d b/ld/testsuite/ld-x86-64/pr19609-1b.d
 new file mode 100644
-index 0000000..b9e6277
+index 0000000..d5e2e85
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19609-1b.d
 @@ -0,0 +1,23 @@
 +#source: pr19609-1.s
 +#as: --64 -mrelax-relocations=yes
-+#ld: -pie -melf_x86_64
++#ld: -pie -melf_x86_64 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -1637,13 +1651,13 @@ index 0000000..3b1e98d
 +[ 	]*[a-f0-9]+:	44 85 25 ([0-9a-f]{2} ){4} *	test   %r12d,0x[a-f0-9]+\(%rip\)        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
 diff --git a/ld/testsuite/ld-x86-64/pr19609-1d.d b/ld/testsuite/ld-x86-64/pr19609-1d.d
 new file mode 100644
-index 0000000..c9990f8
+index 0000000..980d8dc
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19609-1d.d
 @@ -0,0 +1,23 @@
 +#source: pr19609-1.s
 +#as: --64 -mrelax-relocations=yes
-+#ld: -E -melf_x86_64
++#ld: -E -melf_x86_64 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -1695,13 +1709,13 @@ index 0000000..dac5fef
 +[ 	]*[a-f0-9]+:	44 85 25 ([0-9a-f]{2} ){4} *	test   %r12d,0x[a-f0-9]+\(%rip\)        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
 diff --git a/ld/testsuite/ld-x86-64/pr19609-1f.d b/ld/testsuite/ld-x86-64/pr19609-1f.d
 new file mode 100644
-index 0000000..406edc6
+index 0000000..93a7f2c
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19609-1f.d
 @@ -0,0 +1,23 @@
 +#source: pr19609-1.s
 +#as: --64 -mrelax-relocations=yes
-+#ld: -pie --dynamic-list-data -melf_x86_64
++#ld: -pie --dynamic-list-data -melf_x86_64 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -1724,13 +1738,13 @@ index 0000000..406edc6
 +[ 	]*[a-f0-9]+:	41 f7 c4 00 00 00 00 	test   \$0x0,%r12d
 diff --git a/ld/testsuite/ld-x86-64/pr19609-1g.d b/ld/testsuite/ld-x86-64/pr19609-1g.d
 new file mode 100644
-index 0000000..2661435
+index 0000000..05a4964
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19609-1g.d
 @@ -0,0 +1,23 @@
 +#source: pr19609-1.s
 +#as: --64 -mrelax-relocations=yes
-+#ld: -pie -E -melf_x86_64
++#ld: -pie -E -melf_x86_64 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -1782,13 +1796,13 @@ index 0000000..5675076
 +[ 	]*[a-f0-9]+:	41 f7 c4 00 00 00 00 	test   \$0x0,%r12d
 diff --git a/ld/testsuite/ld-x86-64/pr19609-1i.d b/ld/testsuite/ld-x86-64/pr19609-1i.d
 new file mode 100644
-index 0000000..e0cc613
+index 0000000..8ef42ad
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19609-1i.d
 @@ -0,0 +1,23 @@
 +#source: pr19609-1.s
 +#as: --x32 -mrelax-relocations=yes
-+#ld: -pie -melf32_x86_64
++#ld: -pie -melf32_x86_64 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -1840,13 +1854,13 @@ index 0000000..4a36a70
 +[ 	]*[a-f0-9]+:	44 85 25 ([0-9a-f]{2} ){4} *	test   %r12d,0x[a-f0-9]+\(%rip\)        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
 diff --git a/ld/testsuite/ld-x86-64/pr19609-1k.d b/ld/testsuite/ld-x86-64/pr19609-1k.d
 new file mode 100644
-index 0000000..2e6c642
+index 0000000..faab0df
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19609-1k.d
 @@ -0,0 +1,23 @@
 +#source: pr19609-1.s
 +#as: --64 -mrelax-relocations=yes
-+#ld: -pie -E -Bsymbolic-functions -melf_x86_64
++#ld: -pie -E -Bsymbolic-functions -melf_x86_64 --no-dynamic-linker
 +#objdump: -dw
 +
 +.*: +file format .*
@@ -2244,7 +2258,7 @@ index 0000000..b6b6c65
 +[a-f0-9]+ <_start>:
 +[ ]+[a-f0-9]+:	ff 15 ([0-9a-f]{2} ){4} *	callq  \*-?0x[a-f0-9]+\(%rip\)        # [a-f0-9]+ <[0-9a-zA-Z_]+[\+\-]+0x[a-f0-9]+>
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index a8c356b..7d585dd 100644
+index 214b08b..8ec1071 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
 @@ -299,6 +299,8 @@ run_dump_test "pr13082-2a"
@@ -2290,8 +2304,8 @@ index a8c356b..7d585dd 100644
 +run_dump_test "pr19609-5d"
 +run_dump_test "pr19609-5e"
  
- # Add $PLT_CFLAGS if PLT is expected.
- global PLT_CFLAGS
+ proc undefined_weak {cflags ldflags} {
+     set testname "Undefined weak symbol"
 -- 
 2.5.0
 
