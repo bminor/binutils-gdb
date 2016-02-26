@@ -1,3 +1,8 @@
+2016-02-26  Keith Seitz  <keiths@redhat.com>
+
+	* rs6000-tdep.c (rs6000_frame_cache): Explicitly cast return result
+	to avoid invalid conversion from void *.
+
 2016-02-26  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_record_exreg_ld_st_insn): Set 'single_reg'
