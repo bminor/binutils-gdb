@@ -1,6 +1,15 @@
 2016-02-26  Jiong Wang  <jiong.wang@arm.com>
 
 	Backport from master:
+	2014-11-11  Jiong Wang <jiong.wang@arm.com>
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Append board_cflags if gcc
+	driver used as link tool.
+	(run_cc_link_exec_tests): Likewise.
+
+2016-02-26  Jiong Wang  <jiong.wang@arm.com>
+
+	Backport from master:
 	2014-10-30  Will Newton  <will.newton@linaro.org>
 
 	* ld-unique/unique.exp: Use a wider glob for matching ARM
