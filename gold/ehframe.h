@@ -323,6 +323,11 @@ class Cie
 	unsigned int addralign, Eh_frame_hdr* eh_frame_hdr,
 	Post_fdes* post_fdes);
 
+  // Return the FDE encoding.
+  unsigned char
+  fde_encoding() const
+  { return this->fde_encoding_; }
+
   friend bool operator<(const Cie&, const Cie&);
   friend bool operator==(const Cie&, const Cie&);
 
