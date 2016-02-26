@@ -3070,6 +3070,8 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
   bfd_boolean changed_relocs;
   bfd_signed_vma *local_got_refcounts;
   bfd_vma maxpagesize;
+  bfd_boolean is_pic;
+  bfd_boolean require_reloc_pc32;
 
   /* Don't even try to convert non-ELF outputs.  */
   if (!is_elf_hash_table (link_info->hash))
@@ -3105,6 +3107,13 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	goto error_return;
     }
 
+  is_pic = bfd_link_pic (link_info);
+
+  /* TRUE if we can convert only to R_X86_64_PC32.  Enable it for
+     --no-relax.  */
+  require_reloc_pc32
+    = link_info->disable_target_specific_optimizations > 1;
+
   irelend = internal_relocs + sec->reloc_count;
   for (irel = internal_relocs; irel < irelend; irel++)
     {
@@ -3118,10 +3127,12 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
       bfd_signed_vma raddend;
       unsigned int opcode;
       unsigned int modrm;
+      bfd_boolean relocx;
+      bfd_boolean to_reloc_pc32;
 
-      if (r_type != R_X86_64_GOTPCREL
-	  && r_type != R_X86_64_GOTPCRELX
-	  && r_type != R_X86_64_REX_GOTPCRELX)
+      relocx = (r_type == R_X86_64_GOTPCRELX
+		|| r_type == R_X86_64_REX_GOTPCRELX);
+      if (!relocx && r_type != R_X86_64_GOTPCREL)
 	continue;
 
       roff = irel->r_offset;
@@ -3135,25 +3146,26 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 
       opcode = bfd_get_8 (abfd, contents + roff - 2);
 
-      /* It is OK to convert mov to lea.  */
+      /* Convert mov to lea since it has been done for a while.  */
       if (opcode != 0x8b)
 	{
 	  /* Only convert R_X86_64_GOTPCRELX and R_X86_64_REX_GOTPCRELX
-	     for mov call, jmp or one of adc, add, and, cmp, or, sbb,
-	     sub, test, xor instructions.  */
-	  if (r_type != R_X86_64_GOTPCRELX
-	      && r_type != R_X86_64_REX_GOTPCRELX)
+	     for call, jmp or one of adc, add, and, cmp, or, sbb, sub,
+	     test, xor instructions.  */
+	  if (!relocx)
 	    continue;
-
-	  /* It is OK to convert indirect branch to direct branch.  */
-	  if (opcode != 0xff)
-	    {
-	      /* It is OK to convert adc, add, and, cmp, or, sbb, sub,
-		 test, xor only when PIC is false.   */
-	      if (bfd_link_pic (link_info))
-		continue;
-	    }
 	}
+
+      /* We convert only to R_X86_64_PC32:
+	 1. Branch.
+	 2. R_X86_64_GOTPCREL since we can't modify REX byte.
+	 3. require_reloc_pc32 is true.
+	 4. PIC.
+       */
+      to_reloc_pc32 = (opcode == 0xff
+		       || !relocx
+		       || require_reloc_pc32
+		       || is_pic);
 
       /* Get the symbol referred to by the reloc.  */
       if (r_symndx < symtab_hdr->sh_info)
@@ -3195,22 +3207,59 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	  /* STT_GNU_IFUNC must keep GOTPCREL relocations.  We also
 	     avoid optimizing GOTPCREL relocations againt _DYNAMIC
 	     since ld.so may use its link-time address.  */
-	  if ((h->def_regular
-	       || h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak)
-	      && h->type != STT_GNU_IFUNC
-	      && h != htab->elf.hdynamic
-	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	  if (h->type == STT_GNU_IFUNC)
+	    continue;
+
+	  /* Undefined weak symbol is only bound locally in executable
+	     and its reference is resolved as 0 without relocation
+	     overflow.  We can only perform this optimization for
+	     GOTPCRELX relocations since we need to modify REX byte.
+	     It is OK convert mov with R_X86_64_GOTPCREL to
+	     R_X86_64_PC32.  */
+	  if ((relocx || opcode == 0x8b)
+	      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info,
+						  elf_x86_64_hash_entry (h)))
+	    {
+	      if (opcode == 0xff)
+		{
+		  /* Skip for branch instructions since R_X86_64_PC32
+		     may overflow.  */
+		  if (require_reloc_pc32)
+		    continue;
+		}
+	      else if (relocx)
+		{
+		  /* For non-branch instructions, we can convert to
+		     R_X86_64_32/R_X86_64_32S since we know if there
+		     is a REX byte.  */
+		  to_reloc_pc32 = FALSE;
+		}
+
+	      /* Since we don't know the current PC when PIC is true,
+		 we can't convert to R_X86_64_PC32.  */
+	      if (to_reloc_pc32 && is_pic)
+		continue;
+
+	      goto convert;
+	    }
+	  else if ((h->def_regular
+		    || h->root.type == bfd_link_hash_defined
+		    || h->root.type == bfd_link_hash_defweak)
+		   && h != htab->elf.hdynamic
+		   && SYMBOL_REFERENCES_LOCAL (link_info, h))
 	    {
 	      /* bfd_link_hash_new or bfd_link_hash_undefined is
-	         set by an assignment in a linker script in
-	         bfd_elf_record_link_assignment.  FIXME: If we
-		 ever get a linker error due relocation overflow,
-		 we will skip this optimization.  */
+		 set by an assignment in a linker script in
+		 bfd_elf_record_link_assignment.   */
 	      if (h->def_regular
 		  && (h->root.type == bfd_link_hash_new
 		      || h->root.type == bfd_link_hash_undefined))
-		goto convert;
+		{
+		  /* Skip since R_X86_64_32/R_X86_64_32S may overflow.  */
+		  if (require_reloc_pc32)
+		    continue;
+		  goto convert;
+		}
 	      tsec = h->root.u.def.section;
 	      toff = h->root.u.def.value;
 	      symtype = h->type;
@@ -3218,6 +3267,10 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	  else
 	    continue;
 	}
+
+      /* We can only estimate relocation overflow for R_X86_64_PC32.  */
+      if (!to_reloc_pc32)
+	goto convert;
 
       if (tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	{
@@ -3342,15 +3395,55 @@ convert:
 	}
       else
 	{
+	  unsigned int rex;
+	  unsigned int rex_mask = REX_R;
+
+	  if (r_type == R_X86_64_REX_GOTPCRELX)
+	    rex = bfd_get_8 (abfd, contents + roff - 3);
+	  else
+	    rex = 0;
+
 	  if (opcode == 0x8b)
 	    {
-	      /* Convert "mov foo@GOTPCREL(%rip), %reg" to
-		 "lea foo(%rip), %reg".  */
-	      opcode = 0x8d;
-	      r_type = R_X86_64_PC32;
+	      if (to_reloc_pc32)
+		{
+		  /* Convert "mov foo@GOTPCREL(%rip), %reg" to
+		     "lea foo(%rip), %reg".  */
+		  opcode = 0x8d;
+		  r_type = R_X86_64_PC32;
+		}
+	      else
+		{
+		  /* Convert "mov foo@GOTPCREL(%rip), %reg" to
+		     "mov $foo, %reg".  */
+		  opcode = 0xc7;
+		  modrm = bfd_get_8 (abfd, contents + roff - 1);
+		  modrm = 0xc0 | (modrm & 0x38) >> 3;
+		  if ((rex & REX_W) != 0
+		      && ABI_64_P (link_info->output_bfd))
+		    {
+		      /* Keep the REX_W bit in REX byte for LP64.  */
+		      r_type = R_X86_64_32S;
+		      goto rewrite_modrm_rex;
+		    }
+		  else
+		    {
+		      /* If the REX_W bit in REX byte isn't needed,
+			 use R_X86_64_32 and clear the W bit to avoid
+			 sign-extend imm32 to imm64.  */
+		      r_type = R_X86_64_32;
+		      /* Clear the W bit in REX byte.  */
+		      rex_mask |= REX_W;
+		      goto rewrite_modrm_rex;
+		    }
+		}
 	    }
 	  else
 	    {
+	      /* R_X86_64_PC32 isn't supported.  */
+	      if (to_reloc_pc32)
+		continue;
+
 	      modrm = bfd_get_8 (abfd, contents + roff - 1);
 	      if (opcode == 0x85)
 		{
@@ -3366,18 +3459,23 @@ convert:
 		  modrm = 0xc0 | (modrm & 0x38) >> 3 | (opcode & 0x3c);
 		  opcode = 0x81;
 		}
+
+	      /* Use R_X86_64_32 with 32-bit operand to avoid relocation
+		 overflow when sign-extending imm32 to imm64.  */
+	      r_type = (rex & REX_W) != 0 ? R_X86_64_32S : R_X86_64_32;
+
+rewrite_modrm_rex:
 	      bfd_put_8 (abfd, modrm, contents + roff - 1);
 
-	      if (r_type == R_X86_64_REX_GOTPCRELX)
+	      if (rex)
 		{
 		  /* Move the R bit to the B bit in REX byte.  */
-		  unsigned int rex = bfd_get_8 (abfd, contents + roff - 3);
-		  rex = (rex & ~REX_R) | (rex & REX_R) >> 2;
+		  rex = (rex & ~rex_mask) | (rex & REX_R) >> 2;
 		  bfd_put_8 (abfd, rex, contents + roff - 3);
 		}
-	      /* No addend for R_X86_64_32S relocation.  */
+
+	      /* No addend for R_X86_64_32/R_X86_64_32S relocations.  */
 	      irel->r_addend = 0;
-	      r_type = R_X86_64_32S;
 	    }
 
 	  bfd_put_8 (abfd, opcode, contents + roff - 2);
@@ -4688,9 +4786,9 @@ direct:
 		      || eh->func_pointer_refcount > 0
 		      || (h->root.type == bfd_link_hash_undefweak
 			  && !resolved_to_zero))
-		  && ((h->def_dynamic
-		       && !h->def_regular)
-		      || h->root.type == bfd_link_hash_undefweak
+		  && ((h->def_dynamic && !h->def_regular)
+		      /* Undefined weak symbol is bound locally when
+			 PIC is false.  */
 		      || h->root.type == bfd_link_hash_undefined)))
 	    {
 	      Elf_Internal_Rela outrel;

@@ -2863,6 +2863,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
   struct elf_i386_link_hash_table *htab;
   bfd_boolean changed_contents;
   bfd_boolean changed_relocs;
+  bfd_boolean is_pic;
   bfd_signed_vma *local_got_refcounts;
 
   /* Don't even try to convert non-ELF outputs.  */
@@ -2889,6 +2890,8 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
   changed_relocs = FALSE;
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
+  is_pic = bfd_link_pic (link_info);
+
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
     contents = elf_section_data (sec)->this_hdr.contents;
@@ -2913,6 +2916,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       unsigned int addend;
       unsigned int nop;
       bfd_vma nop_offset;
+      bfd_boolean to_reloc_32;
 
       if (r_type != R_386_GOT32 && r_type != R_386_GOT32X)
 	continue;
@@ -2929,9 +2933,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       modrm = bfd_get_8 (abfd, contents + roff - 1);
       baseless = (modrm & 0xc7) == 0x5;
 
-      if (r_type == R_386_GOT32X
-	  && baseless
-	  && bfd_link_pic (link_info))
+      if (r_type == R_386_GOT32X && baseless && is_pic)
 	{
 	  /* For PIC, disallow R_386_GOT32X without a base register
 	     since we don't know what the GOT base is.   Allow
@@ -2960,7 +2962,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
 
       opcode = bfd_get_8 (abfd, contents + roff - 2);
 
-      /* It is OK to convert mov to lea.  */
+      /* Convert mov to lea since it has been done for a while.  */
       if (opcode != 0x8b)
 	{
 	  /* Only convert R_386_GOT32X relocation for call, jmp or
@@ -2968,13 +2970,11 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
 	     instructions.  */
 	  if (r_type != R_386_GOT32X)
 	    continue;
-
-	  /* It is OK to convert indirect branch to direct branch.  It
-	     is OK to convert adc, add, and, cmp, or, sbb, sub, test,
-	     xor only when PIC is false.   */
-	  if (opcode != 0xff && bfd_link_pic (link_info))
-	    continue;
 	}
+
+      /* Convert to R_386_32 if PIC is false or there is no base
+	 register.  */
+      to_reloc_32 = !is_pic || baseless;
 
       /* Try to convert R_386_GOT32 and R_386_GOT32X.  Get the symbol
 	 referred to by the reloc.  */
@@ -3009,6 +3009,27 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       /* STT_GNU_IFUNC must keep GOT32 relocations.  */
       if (h->type == STT_GNU_IFUNC)
 	continue;
+
+      /* Undefined weak symbol is only bound locally in executable
+	 and its reference is resolved as 0.  */
+      if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info,
+					   elf_i386_hash_entry (h)))
+	{
+	  if (opcode == 0xff)
+	    {
+	      /* No direct branch to 0 for PIC.  */
+	      if (is_pic)
+		continue;
+	      else
+		goto convert_branch;
+	    }
+	  else
+	    {
+	      /* We can convert load of address 0 to R_386_32.  */
+	      to_reloc_32 = TRUE;
+	      goto convert_load;
+	    }
+	}
 
       if (opcode == 0xff)
 	{
@@ -3087,27 +3108,29 @@ convert_branch:
 convert_load:
 	      if (opcode == 0x8b)
 		{
-		  /* Convert "mov foo@GOT(%reg1), %reg2" to
-		     "lea foo@GOTOFF(%reg1), %reg2".  */
-		  if (r_type == R_386_GOT32X
-		      && (baseless || !bfd_link_pic (link_info)))
+		  if (to_reloc_32)
 		    {
+		      /* Convert "mov foo@GOT[(%reg1)], %reg2" to
+			 "mov $foo, %reg2" with R_386_32.  */
 		      r_type = R_386_32;
-		      /* For R_386_32, convert
-			 "lea foo@GOTOFF(%reg1), %reg2" to
-			 "lea foo@GOT, %reg2".  */
-		      if (!baseless)
-			{
-			  modrm = 0x5 | (modrm & 0x38);
-			  bfd_put_8 (abfd, modrm, contents + roff - 1);
-			}
+		      modrm = 0xc0 | (modrm & 0x38) >> 3;
+		      bfd_put_8 (abfd, modrm, contents + roff - 1);
+		      opcode = 0xc7;
 		    }
 		  else
-		    r_type = R_386_GOTOFF;
-		  opcode = 0x8d;
+		    {
+		      /* Convert "mov foo@GOT(%reg1), %reg2" to
+			 "lea foo@GOTOFF(%reg1), %reg2".  */
+		      r_type = R_386_GOTOFF;
+		      opcode = 0x8d;
+		    }
 		}
 	      else
 		{
+		  /* Only R_386_32 is supported.  */
+		  if (!to_reloc_32)
+		    continue;
+
 		  if (opcode == 0x85)
 		    {
 		      /* Convert "test %reg1, foo@GOT(%reg2)" to
@@ -4369,10 +4392,10 @@ r_386_got32:
 		      || eh->func_pointer_refcount > 0
 		      || (h->root.type == bfd_link_hash_undefweak
 			  && !resolved_to_zero))
-		  && ((h->def_dynamic
-		       && !h->def_regular)
-		      || h->root.type == bfd_link_hash_undefweak
-		      || h->root.type == bfd_link_hash_undefined)))
+		  && ((h->def_dynamic && !h->def_regular)
+		      /* Undefined weak symbol is bound locally when
+			 PIC is false.  */
+		      || h->root.type == bfd_link_hash_undefweak)))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip, relocate;

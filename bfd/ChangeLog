@@ -1,5 +1,20 @@
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19609
+	* elf32-i386.c (elf_i386_convert_load): Convert to R_386_32 for
+	load with locally bound symbols if PIC is false or there is no
+	base register.  Optimize branch to 0 if PIC is false.
+	(elf_i386_relocate_section): Don't generate dynamic relocations
+	against undefined weak symbols if PIC is false.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Disable optimization
+	if we can't estimate relocation overflow with --no-relax.
+	Convert to R_X86_64_32S/R_X86_64_32 for load with locally bound
+	symbols if PIC is false.  Optimize branch to 0 if PIC is false.
+	(elf_x86_64_relocate_section): Don't generate dynamic relocations
+	against undefined weak symbols if PIC is false.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19645
 	* bfd.c (bfd): Change flags to 20 bits.
 	(BFD_CONVERT_ELF_COMMON): New.
