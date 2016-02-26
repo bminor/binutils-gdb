@@ -542,6 +542,10 @@ struct bfd_link_info
      backend to decide.  */
   int extern_protected_data;
 
+  /* > 0 to treat undefined weak symbol in the executable as dynamic,
+     requiring dynamic relocation.  */
+  int dynamic_undefined_weak;
+
   /* Non-zero if auto-import thunks for DATA items in pei386 DLLs
      should be generated/linked against.  Set to 1 if this feature
      is explicitly requested by the user, -1 if enabled by default.  */
