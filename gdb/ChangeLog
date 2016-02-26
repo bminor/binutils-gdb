@@ -1,5 +1,13 @@
 2016-02-26  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-tdep.c (arm_record_exreg_ld_st_insn): Set 'single_reg'
+	per bit 8.  Check bit 20 instead of bit 4 for VMOV
+	instruction.  Record D registers for instructions changing
+	S registers.  Change of the order of length and address
+	in record_buf_mem array.
+
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-tdep.c (thumb_record_ld_st_reg_offset): Fix the register
 	number of Rd.
 

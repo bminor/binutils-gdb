@@ -1,5 +1,11 @@
 2016-02-26  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.reverse/insn-reverse.c [__arm__] (ext_reg_load): New.
+	[__arm__] (ext_reg_mov, ext_reg_push_pop): New.
+	(testcases): Update.
+
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.reverse/aarch64.c: Rename to ...
 	* gdb.reverse/insn-reverse.c: ... it.
 	* gdb.reverse/aarch64.exp: Rename to ...

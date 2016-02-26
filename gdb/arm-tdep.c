@@ -10909,13 +10909,13 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
   const int num_regs = gdbarch_num_regs (arm_insn_r->gdbarch);
 
   opcode = bits (arm_insn_r->arm_insn, 20, 24);
-  single_reg = bit (arm_insn_r->arm_insn, 8);
+  single_reg = !bit (arm_insn_r->arm_insn, 8);
   op_vldm_vstm = opcode & 0x1b;
 
   /* Handle VMOV instructions.  */
   if ((opcode & 0x1e) == 0x04)
     {
-      if (bit (arm_insn_r->arm_insn, 4))
+      if (bit (arm_insn_r->arm_insn, 20)) /* to_arm_registers bit 20? */
 	{
 	  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
 	  record_buf[1] = bits (arm_insn_r->arm_insn, 16, 19);
@@ -10923,18 +10923,29 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
 	}
       else
 	{
-	  uint8_t reg_m = ((bits (arm_insn_r->arm_insn, 0, 3) << 1)
-			   | bit (arm_insn_r->arm_insn, 5));
+	  uint8_t reg_m = bits (arm_insn_r->arm_insn, 0, 3);
+	  uint8_t bit_m = bit (arm_insn_r->arm_insn, 5);
 
-	  if (!single_reg)
+	  if (single_reg)
 	    {
-	      record_buf[0] = num_regs + reg_m;
-	      record_buf[1] = num_regs + reg_m + 1;
-	      arm_insn_r->reg_rec_count = 2;
+	      /* The first S register number m is REG_M:M (M is bit 5),
+		 the corresponding D register number is REG_M:M / 2, which
+		 is REG_M.  */
+	      record_buf[arm_insn_r->reg_rec_count++] = ARM_D0_REGNUM + reg_m;
+	      /* The second S register number is REG_M:M + 1, the
+		 corresponding D register number is (REG_M:M + 1) / 2.
+		 IOW, if bit M is 1, the first and second S registers
+		 are mapped to different D registers, otherwise, they are
+		 in the same D register.  */
+	      if (bit_m)
+		{
+		  record_buf[arm_insn_r->reg_rec_count++]
+		    = ARM_D0_REGNUM + reg_m + 1;
+		}
 	    }
 	  else
 	    {
-	      record_buf[0] = reg_m + ARM_D0_REGNUM;
+	      record_buf[0] = ((bit_m << 4) + reg_m + ARM_D0_REGNUM);
 	      arm_insn_r->reg_rec_count = 1;
 	    }
 	}
@@ -10949,7 +10960,7 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
       reg_rn = bits (arm_insn_r->arm_insn, 16, 19);
       regcache_raw_read_unsigned (reg_cache, reg_rn, &u_regval);
       imm_off8 = bits (arm_insn_r->arm_insn, 0, 7);
-      imm_off32 = imm_off8 << 24;
+      imm_off32 = imm_off8 << 2;
       memory_count = imm_off8;
 
       if (bit (arm_insn_r->arm_insn, 23))
@@ -10965,19 +10976,19 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
 
       while (memory_count > 0)
 	{
-	  if (!single_reg)
+	  if (single_reg)
 	    {
-	      record_buf_mem[memory_index] = start_address;
-	      record_buf_mem[memory_index + 1] = 4;
+	      record_buf_mem[memory_index] = 4;
+	      record_buf_mem[memory_index + 1] = start_address;
 	      start_address = start_address + 4;
 	      memory_index = memory_index + 2;
 	    }
 	  else
 	    {
-	      record_buf_mem[memory_index] = start_address;
-	      record_buf_mem[memory_index + 1] = 4;
-	      record_buf_mem[memory_index + 2] = start_address + 4;
-	      record_buf_mem[memory_index + 3] = 4;
+	      record_buf_mem[memory_index] = 4;
+	      record_buf_mem[memory_index + 1] = start_address;
+	      record_buf_mem[memory_index + 2] = 4;
+	      record_buf_mem[memory_index + 3] = start_address + 4;
 	      start_address = start_address + 8;
 	      memory_index = memory_index + 4;
 	    }
@@ -10991,25 +11002,36 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
     {
       uint32_t reg_count, reg_vd;
       uint32_t reg_index = 0;
+      uint32_t bit_d = bit (arm_insn_r->arm_insn, 22);
 
       reg_vd = bits (arm_insn_r->arm_insn, 12, 15);
       reg_count = bits (arm_insn_r->arm_insn, 0, 7);
 
-      if (single_reg)
-	reg_vd = reg_vd | (bit (arm_insn_r->arm_insn, 22) << 4);
-      else
-	reg_vd = (reg_vd << 1) | bit (arm_insn_r->arm_insn, 22);
+      /* REG_VD is the first D register number.  If the instruction
+	 loads memory to S registers (SINGLE_REG is TRUE), the register
+	 number is (REG_VD << 1 | bit D), so the corresponding D
+	 register number is (REG_VD << 1 | bit D) / 2 = REG_VD.  */
+      if (!single_reg)
+	reg_vd = reg_vd | (bit_d << 4);
 
-      if (bit (arm_insn_r->arm_insn, 21))
+      if (bit (arm_insn_r->arm_insn, 21) /* write back */)
 	record_buf[reg_index++] = bits (arm_insn_r->arm_insn, 16, 19);
+
+      /* If the instruction loads memory to D register, REG_COUNT should
+	 be divided by 2, according to the ARM Architecture Reference
+	 Manual.  If the instruction loads memory to S register, divide by
+	 2 as well because two S registers are mapped to D register.  */
+      reg_count  = reg_count / 2;
+      if (single_reg && bit_d)
+	{
+	  /* Increase the register count if S register list starts from
+	     an odd number (bit d is one).  */
+	  reg_count++;
+	}
 
       while (reg_count > 0)
 	{
-	  if (single_reg)
-	    record_buf[reg_index++] = num_regs + reg_vd + reg_count - 1;
-	  else
-	    record_buf[reg_index++] = ARM_D0_REGNUM + reg_vd + reg_count - 1;
-
+	  record_buf[reg_index++] = ARM_D0_REGNUM + reg_vd + reg_count - 1;
 	  reg_count--;
 	}
       arm_insn_r->reg_rec_count = reg_index;
@@ -11023,7 +11045,7 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
       reg_rn = bits (arm_insn_r->arm_insn, 16, 19);
       regcache_raw_read_unsigned (reg_cache, reg_rn, &u_regval);
       imm_off8 = bits (arm_insn_r->arm_insn, 0, 7);
-      imm_off32 = imm_off8 << 24;
+      imm_off32 = imm_off8 << 2;
 
       if (bit (arm_insn_r->arm_insn, 23))
 	start_address = u_regval + imm_off32;
@@ -11032,16 +11054,16 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
 
       if (single_reg)
 	{
-	  record_buf_mem[memory_index] = start_address;
-	  record_buf_mem[memory_index + 1] = 4;
+	  record_buf_mem[memory_index] = 4;
+	  record_buf_mem[memory_index + 1] = start_address;
 	  arm_insn_r->mem_rec_count = 1;
 	}
       else
 	{
-	  record_buf_mem[memory_index] = start_address;
-	  record_buf_mem[memory_index + 1] = 4;
-	  record_buf_mem[memory_index + 2] = start_address + 4;
-	  record_buf_mem[memory_index + 3] = 4;
+	  record_buf_mem[memory_index] = 4;
+	  record_buf_mem[memory_index + 1] = start_address;
+	  record_buf_mem[memory_index + 2] = 4;
+	  record_buf_mem[memory_index + 3] = start_address + 4;
 	  arm_insn_r->mem_rec_count = 2;
 	}
     }
@@ -11058,7 +11080,8 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
       else
 	{
 	  reg_vd = (reg_vd << 1) | bit (arm_insn_r->arm_insn, 22);
-	  record_buf[0] = num_regs + reg_vd;
+	  /* Record register D rather than pseudo register S.  */
+	  record_buf[0] = ARM_D0_REGNUM + reg_vd / 2;
 	}
       arm_insn_r->reg_rec_count = 1;
     }
