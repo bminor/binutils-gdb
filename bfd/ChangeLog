@@ -1,3 +1,118 @@
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19609
+	* elf32-i386.c (elf_i386_convert_load): Convert to R_386_32 for
+	load with locally bound symbols if PIC is false or there is no
+	base register.  Optimize branch to 0 if PIC is false.
+	(elf_i386_relocate_section): Don't generate dynamic relocations
+	against undefined weak symbols if PIC is false.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Disable optimization
+	if we can't estimate relocation overflow with --no-relax.
+	Convert to R_X86_64_32S/R_X86_64_32 for load with locally bound
+	symbols if PIC is false.  Optimize branch to 0 if PIC is false.
+	(elf_x86_64_relocate_section): Don't generate dynamic relocations
+	against undefined weak symbols if PIC is false.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19645
+	* bfd.c (bfd): Change flags to 20 bits.
+	(BFD_CONVERT_ELF_COMMON): New.
+	(BFD_USE_ELF_STT_COMMON): Likewise.
+	(BFD_FLAGS_SAVED): Add BFD_CONVERT_ELF_COMMON and
+	BFD_USE_ELF_STT_COMMON.
+	(BFD_FLAGS_FOR_BFD_USE_MASK): Likewise.
+	* configure.ac: Remove --enable-elf-stt-common.
+	* elf.c (swap_out_syms): Choose STT_COMMON or STT_OBJECT for
+	common symbol depending on BFD_CONVERT_ELF_COMMON and
+	BFD_USE_ELF_STT_COMMON.
+	* elfcode.h (elf_slurp_symbol_table): Set BSF_ELF_COMMON for
+	STT_COMMON.
+	* elflink.c (bfd_elf_link_mark_dynamic_symbol): Also check
+	STT_COMMON.
+	(elf_link_convert_common_type): New function.
+	(elf_link_output_extsym): Choose STT_COMMON or STT_OBJECT for
+	common symbol depending on BFD_CONVERT_ELF_COMMON and
+	BFD_USE_ELF_STT_COMMON.  Set sym.st_info after sym.st_shndx.
+	* elfxx-target.h (TARGET_BIG_SYM): Add BFD_CONVERT_ELF_COMMON
+	and BFD_USE_ELF_STT_COMMON to object_flags.
+	(TARGET_LITTLE_SYM): Likewise.
+	* syms.c (BSF_KEEP_G): Renamed to ...
+	(BSF_ELF_COMMON): This.
+	* bfd-in2.h: Regenerated.
+	* config.in: Likewise.
+	* configure: Likewise.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19636
+	PR ld/19704
+	PR ld/19719
+	* elf32-i386.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): New.
+	(elf_i386_link_hash_entry): Add has_got_reloc and
+	has_non_got_reloc.
+	(elf_i386_link_hash_table): Add interp.
+	(elf_i386_link_hash_newfunc): Initialize has_got_reloc and
+	has_non_got_reloc.
+	(elf_i386_copy_indirect_symbol): Copy has_got_reloc and
+	has_non_got_reloc.
+	(elf_i386_check_relocs): Set has_got_reloc and has_non_got_reloc.
+	(elf_i386_fixup_symbol): New function.
+	(elf_i386_pie_finish_undefweak_symbol): Likewise.
+	(elf_i386_allocate_dynrelocs): Don't allocate space for dynamic
+	relocations and discard relocations against resolved undefined
+	weak symbols in executable.  Don't make resolved undefined weak
+	symbols in executable dynamic.  Keep dynamic non-GOT/non-PLT
+	relocation against undefined weak symbols in PIE.
+	(elf_i386_size_dynamic_sections): Set interp to .interp section.
+	(elf_i386_relocate_section): Don't generate dynamic relocations
+	against resolved undefined weak symbols in PIE, except for
+	R_386_PC32.
+	(elf_i386_finish_dynamic_symbol): Keep PLT/GOT entries without
+	dynamic PLT/GOT relocations for resolved undefined weak symbols.
+	Don't generate dynamic relocation against resolved undefined weak
+	symbol in executable.
+	(elf_i386_finish_dynamic_sections): Call
+	elf_i386_pie_finish_undefweak_symbol on all symbols in PIE.
+	(elf_backend_fixup_symbol): New.
+	* elf64-x86-64.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): New.
+	(elf_x86_64_link_hash_entry): Add has_got_reloc and
+	has_non_got_reloc.
+	(elf_x86_64_link_hash_table): Add interp.
+	(elf_x86_64_link_hash_newfunc): Initialize has_got_reloc and
+	has_non_got_reloc.
+	(elf_x86_64_copy_indirect_symbol): Copy has_got_reloc and
+	has_non_got_reloc.
+	(elf_x86_64_check_relocs): Set has_got_reloc and
+	has_non_got_reloc.
+	(elf_x86_64_fixup_symbol): New function.
+	(elf_x86_64_pie_finish_undefweak_symbol): Likewise.
+	(elf_x86_64_allocate_dynrelocs): Don't allocate space for dynamic
+	relocations and discard relocations against resolved undefined
+	weak symbols in executable.  Don't make resolved undefined weak
+	symbols in executable dynamic.
+	(elf_x86_64_size_dynamic_sections): Set interp to .interp section.
+	(elf_x86_64_relocate_section): Check relocation overflow for
+	dynamic relocations against unresolved weak undefined symbols.
+	Don't generate dynamic relocations against resolved weak
+	undefined symbols in PIE.
+	(elf_x86_64_finish_dynamic_symbol): Keep PLT/GOT entries without
+	dynamic PLT/GOT relocations for resolved undefined weak symbols.
+	Don't generate dynamic relocation against resolved undefined weak
+	symbol in executable.
+	(elf_x86_64_finish_dynamic_sections): Call
+	elf_x86_64_pie_finish_undefweak_symbol on all symbols in PIE.
+	(elf_backend_fixup_symbol): New.
+
+2016-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (create_linkage_sections): Create sfpr when
+	save_restore_funcs, rest of sections when not relocatable.
+	(ppc64_elf_init_stub_bfd): Always call create_linkage_sections.
+	(sfpr_define): Define all symbols on emitted code.
+	(ppc64_elf_func_desc_adjust): Adjust for sfpr now being created
+	when relocatable.  Move sfpr_define loop earlier.
+
 2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_need_pic): New function.

@@ -2209,6 +2209,11 @@ write_object_file (void)
   obj_frob_file_after_relocs ();
 #endif
 
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
+  if (IS_ELF && flag_use_elf_stt_common)
+    stdoutput->flags |= BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON;
+#endif
+
   /* Once all relocations have been written, we can compress the
      contents of the debug sections.  This needs to be done before
      we start writing any sections, because it will affect the file

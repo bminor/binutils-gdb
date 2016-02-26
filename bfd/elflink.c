@@ -525,8 +525,10 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
 
   if ((info->dynamic_data
        && (h->type == STT_OBJECT
+	   || h->type == STT_COMMON
 	   || (sym != NULL
-	       && ELF_ST_TYPE (sym->st_info) == STT_OBJECT)))
+	       && (ELF_ST_TYPE (sym->st_info) == STT_OBJECT
+		   || ELF_ST_TYPE (sym->st_info) == STT_COMMON))))
       || (d != NULL
 	  && h->root.type == bfd_link_hash_new
 	  && (*d->match) (&d->head, NULL, h->root.root.string)))
@@ -9038,6 +9040,28 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
   return FALSE;
 }
 
+/* Convert ELF common symbol TYPE.  */
+
+static int
+elf_link_convert_common_type (struct bfd_link_info *info, int type)
+{
+  /* Commom symbol can only appear in relocatable link.  */
+  if (!bfd_link_relocatable (info))
+    abort ();
+  switch (info->elf_stt_common)
+    {
+    case unchanged:
+      break;
+    case elf_stt_common:
+      type = STT_COMMON;
+      break;
+    case no_elf_stt_common:
+      type = STT_OBJECT;
+      break;
+    }
+  return type;
+}
+
 /* Add an external symbol to the symbol table.  This is called from
    the hash table traversal routine.  When generating a shared object,
    we go through the symbol table twice.  The first time we output
@@ -9057,6 +9081,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   const struct elf_backend_data *bed;
   long indx;
   int ret;
+  unsigned int type;
   /* A symbol is bound locally if it is forced local or it is locally
      defined, hidden versioned, not referenced by shared library and
      not exported when linking executable.  */
@@ -9191,35 +9216,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
     strip = TRUE;
 
+  type = h->type;
+
   /* If we're stripping it, and it's not a dynamic symbol, there's
      nothing else to do.   However, if it is a forced local symbol or
      an ifunc symbol we need to give the backend finish_dynamic_symbol
      function a chance to make it dynamic.  */
   if (strip
       && h->dynindx == -1
-      && h->type != STT_GNU_IFUNC
+      && type != STT_GNU_IFUNC
       && !h->forced_local)
     return TRUE;
 
   sym.st_value = 0;
   sym.st_size = h->size;
   sym.st_other = h->other;
-  if (local_bind)
-    {
-      sym.st_info = ELF_ST_INFO (STB_LOCAL, h->type);
-      /* Turn off visibility on local symbol.  */
-      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
-    }
-  /* Set STB_GNU_UNIQUE only if symbol is defined in regular object.  */
-  else if (h->unique_global && h->def_regular)
-    sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, h->type);
-  else if (h->root.type == bfd_link_hash_undefweak
-	   || h->root.type == bfd_link_hash_defweak)
-    sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
-  else
-    sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);
-  sym.st_target_internal = h->target_internal;
-
   switch (h->root.type)
     {
     default:
@@ -9294,6 +9305,42 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       return TRUE;
     }
 
+  if (type == STT_COMMON || type == STT_OBJECT)
+    switch (h->root.type)
+      {
+      case bfd_link_hash_common:
+	type = elf_link_convert_common_type (flinfo->info, type);
+	break;
+      case bfd_link_hash_defined:
+      case bfd_link_hash_defweak:
+	if (bed->common_definition (&sym))
+	  type = elf_link_convert_common_type (flinfo->info, type);
+	else
+	  type = STT_OBJECT;
+	break;
+      case bfd_link_hash_undefined:
+      case bfd_link_hash_undefweak:
+	break;
+      default:
+	abort ();
+      }
+
+  if (local_bind)
+    {
+      sym.st_info = ELF_ST_INFO (STB_LOCAL, type);
+      /* Turn off visibility on local symbol.  */
+      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
+    }
+  /* Set STB_GNU_UNIQUE only if symbol is defined in regular object.  */
+  else if (h->unique_global && h->def_regular)
+    sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, type);
+  else if (h->root.type == bfd_link_hash_undefweak
+	   || h->root.type == bfd_link_hash_defweak)
+    sym.st_info = ELF_ST_INFO (STB_WEAK, type);
+  else
+    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
+  sym.st_target_internal = h->target_internal;
+
   /* Give the processor backend a chance to tweak the symbol value,
      and also to finish up anything that needs to be done for this
      symbol.  FIXME: Not calling elf_backend_finish_dynamic_symbol for
@@ -9330,7 +9377,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  || ELF_ST_BIND (sym.st_info) == STB_WEAK))
     {
       int bindtype;
-      unsigned int type = ELF_ST_TYPE (sym.st_info);
+      type = ELF_ST_TYPE (sym.st_info);
 
       /* Turn an undefined IFUNC symbol into a normal FUNC symbol. */
       if (type == STT_GNU_IFUNC)

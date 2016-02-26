@@ -242,6 +242,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{-W}] [@b{--warn}] [@b{--fatal-warnings}] [@b{-w}] [@b{-x}]
  [@b{-Z}] [@b{@@@var{FILE}}]
  [@b{--sectname-subst}] [@b{--size-check=[error|warning]}]
+ [@b{--elf-stt-common=[no|yes]}]
  [@b{--target-help}] [@var{target-options}]
  [@b{--}|@var{files} @dots{}]
 @c
@@ -712,9 +713,17 @@ will have its dwarf line number information placed into a section called
 then debug line section will still be called just @var{.debug_line} without any
 suffix.
 
+@ifset ELF
 @item --size-check=error
 @itemx --size-check=warning
 Issue an error or warning for invalid ELF .size directive.
+
+@item --elf-stt-common=no
+@itemx --elf-stt-common=yes
+These options control whether the ELF assembler should generate common
+symbols with the @code{STT_COMMON} type.  The default can be controlled
+by a configure option @option{--enable-elf-stt-common}.
+@end ifset
 
 @item --help
 Print a summary of the command line options and exit.

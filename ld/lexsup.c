@@ -1759,6 +1759,10 @@ elf_shlib_list_options (FILE *file)
   fprintf (file, _("\
   -z norelro                  Don't create RELRO program header\n"));
   fprintf (file, _("\
+  -z common                   Generate common symbols with STT_COMMON type\n"));
+  fprintf (file, _("\
+  -z nocommon                 Generate common symbols with STT_OBJECT type\n"));
+  fprintf (file, _("\
   -z stacksize=SIZE           Set size of stack segment\n"));
   fprintf (file, _("\
   -z text                     Treat DT_TEXTREL in shared object as error\n"));

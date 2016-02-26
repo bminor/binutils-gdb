@@ -231,7 +231,9 @@ CODE_FRAGMENT
 .
 .  {* Used by the linker.  *}
 .#define BSF_KEEP		(1 << 5)
-.#define BSF_KEEP_G		(1 << 6)
+.
+.  {* An ELF common symbol.  *}
+.#define BSF_ELF_COMMON		(1 << 6)
 .
 .  {* A weak global symbol, overridable without warnings by
 .     a regular global symbol of the same name.  *}

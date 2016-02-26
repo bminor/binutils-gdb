@@ -7470,12 +7470,16 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	}
       else if (bfd_is_com_section (syms[idx]->section))
 	{
-#ifdef USE_STT_COMMON
-	  if (type == STT_OBJECT)
-	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_COMMON);
-	  else
-#endif
-	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
+	  if (type != STT_TLS)
+	    {
+	      if ((abfd->flags & BFD_CONVERT_ELF_COMMON))
+		type = ((abfd->flags & BFD_USE_ELF_STT_COMMON)
+			? STT_COMMON : STT_OBJECT);
+	      else
+		type = ((flags & BSF_ELF_COMMON) != 0
+			? STT_COMMON : STT_OBJECT);
+	    }
+	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	}
       else if (bfd_is_und_section (syms[idx]->section))
 	sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)

@@ -15,8 +15,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#if (defined __aarch64__)
 #include <arm_neon.h>
+#endif
 
+#if (defined __aarch64__)
 static void
 load (void)
 {
@@ -85,15 +88,77 @@ adv_simd_vect_shift (void)
 {
   asm ("fcvtzs s0, s0, #1");
 }
+#elif (defined __arm__)
+static void
+ext_reg_load (void)
+{
+  char in[8];
+
+  asm ("vldr d0, [%0]" : : "r" (in));
+  asm ("vldr s3, [%0]" : : "r" (in));
+
+  asm ("vldm %0, {d3-d4}" : : "r" (in));
+  asm ("vldm %0, {s9-s11}" : : "r" (in));
+}
+
+static void
+ext_reg_mov (void)
+{
+  int i, j;
+  double d;
+
+  i = 1;
+  j = 2;
+
+  asm ("vmov s4, s5, %0, %1" : "=r" (i), "=r" (j): );
+  asm ("vmov s7, s8, %0, %1" : "=r" (i), "=r" (j): );
+  asm ("vmov %0, %1, s10, s11" : : "r" (i), "r" (j));
+  asm ("vmov %0, %1, s1, s2" : : "r" (i), "r" (j));
+
+  asm ("vmov %P2, %0, %1" : "=r" (i), "=r" (j): "w" (d));
+  asm ("vmov %1, %2, %P0" : "=w" (d) : "r" (i), "r" (j));
+}
+
+static void
+ext_reg_push_pop (void)
+{
+  double d;
+
+  asm ("vpush {%P0}" : : "w" (d));
+  asm ("vpop {%P0}" : : "w" (d));
+}
+#endif
+
+typedef void (*testcase_ftype) (void);
+
+/* Functions testing instruction decodings.  GDB will read n_testcases
+   to know how many functions to test.  */
+
+static testcase_ftype testcases[] =
+{
+#if (defined __aarch64__)
+  load,
+  move,
+  adv_simd_mod_imm,
+  adv_simd_scalar_index,
+  adv_simd_smlal,
+  adv_simd_vect_shift,
+#elif (defined __arm__)
+  ext_reg_load,
+  ext_reg_mov,
+  ext_reg_push_pop,
+#endif
+};
+
+static int n_testcases = (sizeof (testcases) / sizeof (testcase_ftype));
 
 int
 main ()
 {
-  load ();
-  move ();
-  adv_simd_mod_imm ();
-  adv_simd_scalar_index ();
-  adv_simd_smlal ();
-  adv_simd_vect_shift ();
+  int i = 0;
+
+  for (i = 0; i < n_testcases; i++)
+    testcases[i] ();
+
   return 0;
 }

@@ -12,5 +12,11 @@
 [ 	]*[a-f0-9]+:	48 03 05 35 00 20 00 	add    0x200035\(%rip\),%rax        # 600128 <_GLOBAL_OFFSET_TABLE_\+0x18>
 [ 	]*[a-f0-9]+:	48 8b 05 2e 00 20 00 	mov    0x20002e\(%rip\),%rax        # 600128 <_GLOBAL_OFFSET_TABLE_\+0x18>
 [ 	]*[a-f0-9]+:	48 85 05 27 00 20 00 	test   %rax,0x200027\(%rip\)        # 600128 <_GLOBAL_OFFSET_TABLE_\+0x18>
-[ 	]*[a-f0-9]+:	48 8d ([0-9a-f]{2} ){5}[ 	]+lea[ 	]+.*
+[ 	]*[a-f0-9]+:	48 c7 c0 09 01 40 00 	mov    \$0x400109,%rax
+
+0+400108 <foo>:
+[ 	]*[a-f0-9]+:	c3                   	retq   
+
+0+400109 <bar>:
+[ 	]*[a-f0-9]+:	c3                   	retq   
 #pass

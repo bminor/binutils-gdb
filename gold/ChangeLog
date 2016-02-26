@@ -1,3 +1,11 @@
+2016-02-26  Egor Kochetov  <egor.kochetov@intel.com>
+	    Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19735
+	* ehframe.h (Cie::fde_encoding): New method.
+	* ehframe.cc (Eh_frame::read_fde): Discard FDEs for zero-length
+	address ranges.
+
 2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/Makefile.am (x86_64_mov_to_lea5.o): Pass
