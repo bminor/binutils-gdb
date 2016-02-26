@@ -1,3 +1,12 @@
+2016-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (create_linkage_sections): Create sfpr when
+	save_restore_funcs, rest of sections when not relocatable.
+	(ppc64_elf_init_stub_bfd): Always call create_linkage_sections.
+	(sfpr_define): Define all symbols on emitted code.
+	(ppc64_elf_func_desc_adjust): Adjust for sfpr now being created
+	when relocatable.  Move sfpr_define loop earlier.
+
 2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_need_pic): New function.
