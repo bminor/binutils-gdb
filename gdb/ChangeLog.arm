@@ -1,0 +1,6 @@
+2016-02-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+    Backport from mainline
+    2016-02-04  Yao Qi  <yao.qi@linaro.org>
+
+    * remote.c (remote_wait_as): Set rs->waiting_for_stop_reply to
+    0 before handling 'F' and set it back afterwards.
