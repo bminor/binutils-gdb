@@ -1,5 +1,12 @@
 2016-02-26  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.reverse/aarch64.c: Rename to ...
+	* gdb.reverse/insn-reverse.c: ... it.
+	* gdb.reverse/aarch64.exp: Rename to ...
+	* gdb.reverse/insn-reverse.exp: ... it.
+
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.reverse/aarch64.c: [__aarch64__] Include arm_neon.h.
 	(testcase_ftype): New.
 	(testcases): New array.
