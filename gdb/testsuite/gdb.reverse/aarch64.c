@@ -15,8 +15,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#if (defined __aarch64__)
 #include <arm_neon.h>
+#endif
 
+#if (defined __aarch64__)
 static void
 load (void)
 {
@@ -85,15 +88,34 @@ adv_simd_vect_shift (void)
 {
   asm ("fcvtzs s0, s0, #1");
 }
+#endif
+
+typedef void (*testcase_ftype) (void);
+
+/* Functions testing instruction decodings.  GDB will read n_testcases
+   to know how many functions to test.  */
+
+static testcase_ftype testcases[] =
+{
+#if (defined __aarch64__)
+  load,
+  move,
+  adv_simd_mod_imm,
+  adv_simd_scalar_index,
+  adv_simd_smlal,
+  adv_simd_vect_shift,
+#endif
+};
+
+static int n_testcases = (sizeof (testcases) / sizeof (testcase_ftype));
 
 int
 main ()
 {
-  load ();
-  move ();
-  adv_simd_mod_imm ();
-  adv_simd_scalar_index ();
-  adv_simd_smlal ();
-  adv_simd_vect_shift ();
+  int i = 0;
+
+  for (i = 0; i < n_testcases; i++)
+    testcases[i] ();
+
   return 0;
 }

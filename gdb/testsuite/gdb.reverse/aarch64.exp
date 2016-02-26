@@ -17,13 +17,6 @@ if ![supports_reverse] {
     return
 }
 
-# Test aarch64 instruction recording.
-
-if {![is_aarch64_target]} then {
-    verbose "Skipping aarch64 instruction recording tests."
-    return
-}
-
 standard_testfile
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile \
@@ -34,6 +27,22 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile \
 if { ![runto main] } then {
     fail "run to main"
     return
+}
+
+# Read function name from testcases[N].
+
+proc read_testcase { n } {
+    global gdb_prompt
+
+    set result -1
+    gdb_test_multiple "print testcases\[${n}\]" "read name of test case ${n}" {
+	-re "\[$\].*= .*<(.*)>.*$gdb_prompt $" {
+	    set result $expect_out(1,string)
+	}
+	-re "$gdb_prompt $" { }
+    }
+
+    return $result
 }
 
 # In each function FUNC, GDB turns on process record, and single step
@@ -107,9 +116,15 @@ proc test { func } {
     }
 }
 
-test "load"
-test "move"
-test "adv_simd_mod_imm"
-test "adv_simd_scalar_index"
-test "adv_simd_smlal"
-test "adv_simd_vect_shift"
+set n_testcases [get_integer_valueof "n_testcases" 0]
+
+if { ${n_testcases} == 0 } {
+    untested "No test"
+    return 1
+}
+
+for { set i 0 } { ${i} < ${n_testcases} } { incr i } {
+    set testcase [read_testcase $i]
+
+    test $testcase
+}

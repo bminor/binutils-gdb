@@ -1,3 +1,14 @@
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/aarch64.c: [__aarch64__] Include arm_neon.h.
+	(testcase_ftype): New.
+	(testcases): New array.
+	(n_testcases): New.
+	(main): Call each element in testcases.
+	* gdb.reverse/aarch64.exp: Remove is_aarch64_target check.
+	(read_testcase): New.
+	Do the tests in a loop.
+
 2016-02-25  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/branches.c: Remove.
