@@ -1,5 +1,51 @@
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19645
+	* NEWS: Mention -z common/-z nocommon for ELF targets.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Handle
+	-z common and -z nocommon.
+	* ld.texinfo: Document -z common/-z nocommon.
+	* lexsup.c (elf_shlib_list_options): Add -z common/-z nocommon.
+	* testsuite/ld-elf/tls_common.exp: Test --elf-stt-common=no and
+	--elf-stt-common=yes with assembler.
+	* testsuite/ld-elfcomm/common-1.s: New file.
+	* testsuite/ld-elfcomm/common-1a.d: Likewise.
+	* testsuite/ld-elfcomm/common-1b.d: Likewise.
+	* testsuite/ld-elfcomm/common-1c.d: Likewise.
+	* testsuite/ld-elfcomm/common-1d.d: Likewise.
+	* testsuite/ld-elfcomm/common-1e.d: Likewise.
+	* testsuite/ld-elfcomm/common-1f.d: Likewise.
+	* testsuite/ld-elfcomm/common-2.s: Likewise.
+	* testsuite/ld-elfcomm/common-2a.d: Likewise.
+	* testsuite/ld-elfcomm/common-2b.d: Likewise.
+	* testsuite/ld-elfcomm/common-2c.d: Likewise.
+	* testsuite/ld-elfcomm/common-2d.d: Likewise.
+	* testsuite/ld-elfcomm/common-2e.d: Likewise.
+	* testsuite/ld-elfcomm/common-2f.d: Likewise.
+	* testsuite/ld-elfcomm/common-3a.rd: Likewise.
+	* testsuite/ld-elfcomm/common-3b.rd: Likewise.
+	* testsuite/ld-i386/pr19645.d: Likewise.
+	* testsuite/ld-i386/pr19645.s: Likewise.
+	* testsuite/ld-x86-64/largecomm-1.s: Likewise.
+	* testsuite/ld-x86-64/largecomm-1a.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1b.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1c.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1d.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1e.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1f.d: Likewise.
+	* testsuite/ld-x86-64/pr19645.d: Likewise.
+	* testsuite/ld-x86-64/pr19645.s: Likewise.
+	* testsuite/ld-elfcomm/elfcomm.exp: Test --elf-stt-common=yes
+	with assembler.
+	(assembler_generates_commons): Removed.
+	Run -z common/-z nocommon tests.  Run *.d tests.
+	* testsuite/ld-i386/i386.exp: Run pr19645.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-x86-64/dwarfreloc.exp: Test --elf-stt-common with
+	assembler.  Test STT_COMMON with readelf.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19636
 	PR ld/19704
 	PR ld/19719

@@ -1,3 +1,41 @@
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19645
+	* NEWS: Mention --enable-elf-stt-common and --elf-stt-common=
+	for ELF assemblers.
+	* as.c (flag_use_elf_stt_common): New.
+	(show_usage): Add --elf-stt-common=.
+	(option_values): Add OPTION_ELF_STT_COMMON.
+	(std_longopts): Add --elf-stt-common=.
+	(parse_args): Handle --elf-stt-common=.
+	* as.h (flag_use_elf_stt_common): New.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* configure.ac: Add --enable-elf-stt-common and define
+	DEFAULT_GENERATE_ELF_STT_COMMON.
+	* gas/write.c (write_object_file): Set BFD_CONVERT_ELF_COMMON
+	and BFD_USE_ELF_STT_COMMON if flag_use_elf_stt_common is set.
+	* doc/as.texinfo: Document --elf-stt-common=.
+	* testsuite/gas/elf/common3.s: New file.
+	* testsuite/gas/elf/common3a.d: Likewise.
+	* testsuite/gas/elf/common3b.d: Likewise.
+	* testsuite/gas/elf/common4.s: Likewise.
+	* testsuite/gas/elf/common4a.d: Likewise.
+	* testsuite/gas/elf/common4b.d: Likewise.
+	* testsuite/gas/i386/dw2-compress-3b.d: Likewise.
+	* testsuite/gas/i386/dw2-compressed-3b.d: Likewise.
+	* testsuite/gas/elf/elf.exp: Run common3a, common3b, common4a
+	and common4b.
+	* testsuite/gas/i386/dw2-compress-3.d: Renamed to ...
+	* testsuite/gas/i386/dw2-compress-3a.d: This.  Pass
+	--elf-stt-common=no to as.
+	* testsuite/gas/i386/dw2-compressed-3.d: Renamed to ...
+	* testsuite/gas/i386/dw2-compressed-3a.d: This.  Pass
+	--elf-stt-common=no to as.
+	* testsuite/gas/i386/i386.exp: Run dw2-compress-3a,
+	dw2-compress-3b, dw2-compressed-3a and dw2-compressed-3b instead
+	of dw2-compress-3 and dw2-compressed-3.
+
 2016-02-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* as.c (select_emulation_mode): Add const qualifiers.

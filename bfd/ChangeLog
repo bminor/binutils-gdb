@@ -1,5 +1,35 @@
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19645
+	* bfd.c (bfd): Change flags to 20 bits.
+	(BFD_CONVERT_ELF_COMMON): New.
+	(BFD_USE_ELF_STT_COMMON): Likewise.
+	(BFD_FLAGS_SAVED): Add BFD_CONVERT_ELF_COMMON and
+	BFD_USE_ELF_STT_COMMON.
+	(BFD_FLAGS_FOR_BFD_USE_MASK): Likewise.
+	* configure.ac: Remove --enable-elf-stt-common.
+	* elf.c (swap_out_syms): Choose STT_COMMON or STT_OBJECT for
+	common symbol depending on BFD_CONVERT_ELF_COMMON and
+	BFD_USE_ELF_STT_COMMON.
+	* elfcode.h (elf_slurp_symbol_table): Set BSF_ELF_COMMON for
+	STT_COMMON.
+	* elflink.c (bfd_elf_link_mark_dynamic_symbol): Also check
+	STT_COMMON.
+	(elf_link_convert_common_type): New function.
+	(elf_link_output_extsym): Choose STT_COMMON or STT_OBJECT for
+	common symbol depending on BFD_CONVERT_ELF_COMMON and
+	BFD_USE_ELF_STT_COMMON.  Set sym.st_info after sym.st_shndx.
+	* elfxx-target.h (TARGET_BIG_SYM): Add BFD_CONVERT_ELF_COMMON
+	and BFD_USE_ELF_STT_COMMON to object_flags.
+	(TARGET_LITTLE_SYM): Likewise.
+	* syms.c (BSF_KEEP_G): Renamed to ...
+	(BSF_ELF_COMMON): This.
+	* bfd-in2.h: Regenerated.
+	* config.in: Likewise.
+	* configure: Likewise.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19636
 	PR ld/19704
 	PR ld/19719

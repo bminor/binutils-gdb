@@ -1,5 +1,11 @@
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19645
+	* bfdlink.h (bfd_link_elf_stt_common): New enum.
+	(bfd_link_info): Add elf_stt_common.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19636
 	PR ld/19704
 	PR ld/19719
