@@ -28,7 +28,7 @@
 # arm, powerpc, and sparc so far.
 if {!(([istarget "i?86-*-*"]
        || [istarget "x86_64-*-*"]
-       || [istarget "arm-*-*"]
+       || [istarget "arm*-*-*"]
        || [istarget "powerpc*-*-*"]
        || [istarget "sparc*-*-*"])
       && ([istarget "*-*-elf*"]
