@@ -1,3 +1,8 @@
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_record_ld_st_reg_offset): Fix the register
+	number of Rd.
+
 2016-02-25  Doug Evans  <dje@google.com>
 
 	* remote-m32r-sdi.c (recv_char_data): Initialize val to avoid

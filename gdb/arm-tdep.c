@@ -11512,10 +11512,10 @@ thumb_record_ld_st_reg_offset (insn_decode_record *thumb_insn_r)
         }
       else
         {
-          /* Format 8; special data processing insns.  */
-          reg_src1 = bits (thumb_insn_r->arm_insn, 0, 2);
-          record_buf[0] = ARM_PS_REGNUM;
-          record_buf[1] = reg_src1;
+	  /* Format 8; special data processing insns.  */
+	  record_buf[0] = ARM_PS_REGNUM;
+	  record_buf[1] = (bit (thumb_insn_r->arm_insn, 7) << 3
+			   | bits (thumb_insn_r->arm_insn, 0, 2));
           thumb_insn_r->reg_rec_count = 2;
         }
     }
