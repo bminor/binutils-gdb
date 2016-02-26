@@ -1,3 +1,16 @@
+2016-02-26  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new testcases.
+	* testsuite/ld-aarch64/emit-relocs-270.d: Update to use new boundary.
+	* testsuite/ld-aarch64/emit-relocs-271.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-272.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-270-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-270-overflow.s: New.
+	* testsuite/ld-aarch64/emit-relocs-271-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-271-overflow.s: New.
+	* testsuite/ld-aarch64/emit-relocs-272-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-272-overflow.s: New.
+
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19609
