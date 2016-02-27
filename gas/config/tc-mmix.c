@@ -640,7 +640,7 @@ get_putget_operands (struct mmix_opcode *insn, char *operands,
 /* Handle MMIX-specific option.  */
 
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {

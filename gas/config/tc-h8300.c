@@ -2197,7 +2197,7 @@ const struct mach_func mach_table[] =
 };
 
 int
-md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c ATTRIBUTE_UNUSED, const char *arg ATTRIBUTE_UNUSED)
 {
   unsigned int i;
   switch (c)

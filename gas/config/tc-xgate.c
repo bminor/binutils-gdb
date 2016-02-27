@@ -200,7 +200,7 @@ md_atof (int type, char *litP, int *sizeP)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {

@@ -113,7 +113,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 const char * md_shortopts = "";
 
 int
-md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
+md_parse_option (int c ATTRIBUTE_UNUSED, const char * arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {

@@ -25581,7 +25581,7 @@ struct arm_long_option_table
 {
   const char * option;		/* Substring to match.	*/
   const char * help;			/* Help information.  */
-  int (* func) (char * subopt);	/* Function to decode sub-option.  */
+  int (* func) (const char * subopt);	/* Function to decode sub-option.  */
   const char * deprecated;		/* If non-null, print this message.  */
 };
 
@@ -25709,7 +25709,7 @@ arm_parse_extension (const char *str, const arm_feature_set **opt_p)
 }
 
 static bfd_boolean
-arm_parse_cpu (char *str)
+arm_parse_cpu (const char *str)
 {
   const struct arm_cpu_option_table *opt;
   const char *ext = strchr (str, '+');
@@ -25759,7 +25759,7 @@ arm_parse_cpu (char *str)
 }
 
 static bfd_boolean
-arm_parse_arch (char *str)
+arm_parse_arch (const char *str)
 {
   const struct arm_arch_option_table *opt;
   const char *ext = strchr (str, '+');
@@ -25794,7 +25794,7 @@ arm_parse_arch (char *str)
 }
 
 static bfd_boolean
-arm_parse_fpu (char * str)
+arm_parse_fpu (const char * str)
 {
   const struct arm_option_fpu_value_table * opt;
 
@@ -25810,7 +25810,7 @@ arm_parse_fpu (char * str)
 }
 
 static bfd_boolean
-arm_parse_float_abi (char * str)
+arm_parse_float_abi (const char * str)
 {
   const struct arm_option_value_table * opt;
 
@@ -25827,7 +25827,7 @@ arm_parse_float_abi (char * str)
 
 #ifdef OBJ_ELF
 static bfd_boolean
-arm_parse_eabi (char * str)
+arm_parse_eabi (const char * str)
 {
   const struct arm_option_value_table *opt;
 
@@ -25843,7 +25843,7 @@ arm_parse_eabi (char * str)
 #endif
 
 static bfd_boolean
-arm_parse_it_mode (char * str)
+arm_parse_it_mode (const char * str)
 {
   bfd_boolean ret = TRUE;
 
@@ -25866,7 +25866,7 @@ arm_parse_it_mode (char * str)
 }
 
 static bfd_boolean
-arm_ccs_mode (char * unused ATTRIBUTE_UNUSED)
+arm_ccs_mode (const char * unused ATTRIBUTE_UNUSED)
 {
   codecomposer_syntax = TRUE;
   arm_comment_chars[0] = ';';
@@ -25896,7 +25896,7 @@ struct arm_long_option_table arm_long_opts[] =
 };
 
 int
-md_parse_option (int c, char * arg)
+md_parse_option (int c, const char * arg)
 {
   struct arm_option_table *opt;
   const struct arm_legacy_option_table *fopt;

@@ -81,7 +81,7 @@ static int ins_err = INS_R800;
 static int ins_used = INS_Z80;
 
 int
-md_parse_option (int c, char* arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char* arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {

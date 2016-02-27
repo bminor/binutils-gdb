@@ -3189,7 +3189,7 @@ nds32_all_ext (void)
    recognized.  This will be handled by the generic code.  */
 
 int
-nds32_parse_option (int c, char *arg)
+nds32_parse_option (int c, const char *arg)
 {
   struct nds32_parse_option_table *coarse_tune;
   struct nds32_set_option_table *fine_tune;

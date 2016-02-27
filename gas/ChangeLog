@@ -1,5 +1,85 @@
 2016-03-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-aarch64.c (struct aarch64_long_option_table): Ad const
+	qualifier.
+	* config/tc-alpha.c (md_parse_option): Likewise.
+	* config/tc-arc.c (md_parse_option): Likewise.
+	* config/tc-arm.c (struct arm_long_option_table): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-avr.c (md_parse_option): Likewise.
+	* config/tc-bfin.c (md_parse_option): Likewise.
+	* config/tc-cr16.c (md_parse_option): Likewise.
+	* config/tc-cris.c (s_cris_arch): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-crx.c (md_parse_option): Likewise.
+	* config/tc-d10v.c (md_parse_option): Likewise.
+	* config/tc-d30v.c (md_parse_option): Likewise.
+	* config/tc-dlx.c (md_parse_option): Likewise.
+	* config/tc-epiphany.c (md_parse_option): Likewise.
+	* config/tc-fr30.c (md_parse_option): Likewise.
+	* config/tc-frv.c (md_parse_option): Likewise.
+	* config/tc-ft32.c (md_parse_option): Likewise.
+	* config/tc-h8300.c (md_parse_option): Likewise.
+	* config/tc-hppa.c (md_parse_option): Likewise.
+	* config/tc-i370.c (md_parse_option): Likewise.
+	* config/tc-i386.c (md_parse_option): Likewise.
+	* config/tc-i860.c (md_parse_option): Likewise.
+	* config/tc-i960.c (md_parse_option): Likewise.
+	* config/tc-ia64.c (md_parse_option): Likewise.
+	* config/tc-ip2k.c (md_parse_option): Likewise.
+	* config/tc-iq2000.c (md_parse_option): Likewise.
+	* config/tc-lm32.c (md_parse_option): Likewise.
+	* config/tc-m32c.c (md_parse_option): Likewise.
+	* config/tc-m32r.c (md_parse_option): Likewise.
+	* config/tc-m68hc11.c (md_parse_option): Likewise.
+	* config/tc-m68k.c (md_parse_option): Likewise.
+	* config/tc-mcore.c (md_parse_option): Likewise.
+	* config/tc-mep.c (md_parse_option): Likewise.
+	* config/tc-metag.c (struct metag_long_option): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-microblaze.c (md_parse_option): Likewise.
+	* config/tc-microblaze.h (md_parse_option): Remove prototype.
+	* config/tc-mips.c (md_parse_option): Adjust.
+	* config/tc-mmix.c (md_parse_option): Likewise.
+	* config/tc-mn10200.c (md_parse_option): Likewise.
+	* config/tc-mn10300.c (md_parse_option): Likewise.
+	* config/tc-moxie.c (md_parse_option): Likewise.
+	* config/tc-msp430.c (md_parse_option): Likewise.
+	* config/tc-mt.c (md_parse_option): Likewise.
+		* config/tc-nds32.c (md_parse_option): Likewise.
+		* config/tc-nds32.h (nds32_parse_option): Likewise.
+	* config/tc-nios2.c (md_parse_option): Likewise.
+	* config/tc-ns32k.c (md_parse_option): Likewise.
+	* config/tc-or1k.c (md_parse_option): Likewise.
+	* config/tc-pdp11.c (md_parse_option): Likewise.
+	* config/tc-pj.c (md_parse_option): Likewise.
+	* config/tc-ppc.c (md_parse_option): Likewise.
+	* config/tc-rl78.c (md_parse_option): Likewise.
+	* config/tc-rx.c (md_parse_option): Likewise.
+	* config/tc-s390.c (s390_parse_cpu): Likewise.
+	* config/tc-score.c (md_parse_option): Likewise.
+	* config/tc-sh.c (md_parse_option): Likewise.
+	* config/tc-sparc.c (md_parse_option): Likewise.
+	* config/tc-spu.c (md_parse_option): Likewise.
+	* config/tc-tic30.c (md_parse_option): Likewise.
+	* config/tc-tic4x.c (md_parse_option): Likewise.
+	* config/tc-tic54x.c (md_parse_option): Likewise.
+	* config/tc-tic6x.c (md_parse_option): Likewise.
+	* config/tc-tilegx.c (md_parse_option): Likewise.
+	* config/tc-tilepro.c (md_parse_option): Likewise.
+	* config/tc-v850.c (md_parse_option): Likewise.
+	* config/tc-vax.c (md_parse_option): Likewise.
+	* config/tc-visium.c (struct visium_long_option_table): Likewise.
+	* config/tc-xc16x.c (md_parse_option): Likewise.
+	* config/tc-xgate.c (md_parse_option): Likewise.
+	* config/tc-xstormy16.c (md_parse_option): Likewise.
+	* config/tc-xtensa.c (md_parse_option): Likewise.
+	* config/tc-z80.c (md_parse_option): Likewise.
+	* config/tc-z8k.c (md_parse_option): Likewise.
+	* tc.h (md_parse_option): Likewise.
+
+2016-03-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-bfin.c (gencode): Use XOBNEW obstack_alloc () wrapper.
 	* config/tc-hppa.c (fix_new_hppa): Likewise.
 	(pa_vtable_entry): Likewise.

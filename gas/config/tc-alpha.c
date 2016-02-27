@@ -5602,7 +5602,7 @@ md_atof (int type, char *litP, int *sizeP)
 /* Take care of the target-specific command-line options.  */
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {

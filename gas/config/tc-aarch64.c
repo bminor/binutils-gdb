@@ -7825,7 +7825,7 @@ struct aarch64_long_option_table
 {
   const char *option;			/* Substring to match.  */
   const char *help;			/* Help information.  */
-  int (*func) (char *subopt);	/* Function to decode sub-option.  */
+  int (*func) (const char *subopt);	/* Function to decode sub-option.  */
   char *deprecated;		/* If non-null, print this message.  */
 };
 
@@ -7917,7 +7917,7 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
 }
 
 static int
-aarch64_parse_cpu (char *str)
+aarch64_parse_cpu (const char *str)
 {
   const struct aarch64_cpu_option_table *opt;
   const char *ext = strchr (str, '+');
@@ -7949,7 +7949,7 @@ aarch64_parse_cpu (char *str)
 }
 
 static int
-aarch64_parse_arch (char *str)
+aarch64_parse_arch (const char *str)
 {
   const struct aarch64_arch_option_table *opt;
   const char *ext = strchr (str, '+');
@@ -7994,7 +7994,7 @@ static const struct aarch64_option_abi_value_table aarch64_abis[] = {
 };
 
 static int
-aarch64_parse_abi (char *str)
+aarch64_parse_abi (const char *str)
 {
   const struct aarch64_option_abi_value_table *opt;
   size_t optlen = strlen (str);
@@ -8029,7 +8029,7 @@ static struct aarch64_long_option_table aarch64_long_opts[] = {
 };
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   struct aarch64_option_table *opt;
   struct aarch64_long_option_table *lopt;

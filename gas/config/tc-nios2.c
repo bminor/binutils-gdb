@@ -3540,7 +3540,7 @@ nios2_use_arch (const char *arch)
 /* The following functions are called by machine-independent parts of
    the assembler. */
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {

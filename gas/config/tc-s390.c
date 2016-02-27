@@ -262,7 +262,7 @@ s390_target_format (void)
    In case of an error, S390_OPCODE_MAXCPU is returned.  */
 
 static unsigned int
-s390_parse_cpu (char *         arg,
+s390_parse_cpu (const char *         arg,
 		unsigned int * ret_flags,
 		bfd_boolean    allow_extensions)
 {
@@ -324,7 +324,7 @@ s390_parse_cpu (char *         arg,
   ilp_bak = input_line_pointer;
   if (icpu != S390_OPCODE_MAXCPU)
     {
-      input_line_pointer = arg;
+      input_line_pointer = (char *) arg;
       *ret_flags = (cpu_table[icpu].flags & S390_INSTR_FLAG_FACILITY_MASK);
 
       while (*input_line_pointer == '+' && allow_extensions)
@@ -368,7 +368,7 @@ s390_parse_cpu (char *         arg,
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {

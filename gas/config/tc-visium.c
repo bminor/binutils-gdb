@@ -282,12 +282,12 @@ struct visium_long_option_table
 {
   const char *option;			/* Substring to match.  */
   const char *help;			/* Help information.  */
-  int (*func) (char *subopt);	/* Function to decode sub-option.  */
+  int (*func) (const char *subopt);	/* Function to decode sub-option.  */
   const char *deprecated;		/* If non-null, print this message.  */
 };
 
 static int
-visium_parse_arch (char *str)
+visium_parse_arch (const char *str)
 {
   struct visium_arch_option_table *opt;
 
@@ -317,7 +317,7 @@ static struct visium_long_option_table visium_long_opts[] =
 };
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   struct visium_option_table *opt;
   struct visium_long_option_table *lopt;

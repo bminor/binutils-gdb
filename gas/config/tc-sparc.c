@@ -490,7 +490,7 @@ struct option md_longopts[] = {
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   /* We don't get a chance to initialize anything before we're called,
      so handle that now.  */

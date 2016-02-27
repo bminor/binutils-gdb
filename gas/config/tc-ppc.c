@@ -1078,7 +1078,7 @@ const struct option md_longopts[] = {
 const size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   ppc_cpu_t new_cpu;
 

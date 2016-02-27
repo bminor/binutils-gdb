@@ -195,7 +195,7 @@ static int optbits = 0;
 static int optbitset = 0;
 
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   int i, idx;
   switch (c)

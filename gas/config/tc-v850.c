@@ -1562,7 +1562,7 @@ md_show_usage (FILE *stream)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   if (c != 'm')
     {

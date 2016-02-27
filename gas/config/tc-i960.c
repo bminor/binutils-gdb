@@ -1827,7 +1827,7 @@ static const struct tabentry arch_tab[] =
 };
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -1847,7 +1847,7 @@ md_parse_option (int c, char *arg)
     case 'A':
       {
 	const struct tabentry *tp;
-	char *p = arg;
+	const char *p = arg;
 
 	for (tp = arch_tab; tp->flag != NULL; tp++)
 	  if (!strcmp (p, tp->flag))

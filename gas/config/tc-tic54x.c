@@ -2461,7 +2461,7 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -2490,7 +2490,7 @@ md_parse_option (int c, char *arg)
       break;
     case OPTION_STDERR_TO_FILE:
       {
-	char *filename = arg;
+	const char *filename = arg;
 	FILE *fp = fopen (filename, "w+");
 
 	if (fp == NULL)

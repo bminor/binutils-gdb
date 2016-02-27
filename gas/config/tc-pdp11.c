@@ -85,7 +85,7 @@ const pseudo_typeS md_pseudo_table[] =
 static struct hash_control *insn_hash = NULL;
 
 static int
-set_option (char *arg)
+set_option (const char *arg)
 {
   int yes = 1;
 
@@ -1043,7 +1043,7 @@ md_create_long_jump (char *ptr ATTRIBUTE_UNUSED,
 }
 
 static int
-set_cpu_model (char *arg)
+set_cpu_model (const char *arg)
 {
   char buf[4];
   char *model = buf;
@@ -1159,7 +1159,7 @@ set_cpu_model (char *arg)
 }
 
 static int
-set_machine_model (char *arg)
+set_machine_model (const char *arg)
 {
   if (strncmp (arg, "pdp-11/", 7) != 0
       && strncmp (arg, "pdp11/", 6) != 0
@@ -1246,7 +1246,7 @@ size_t md_longopts_size = sizeof (md_longopts);
    See if it's a processor-specific option.  */
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   init_defaults ();
 

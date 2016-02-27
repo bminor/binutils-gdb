@@ -814,7 +814,7 @@ size_t md_longopts_size = sizeof md_longopts;
 
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -952,20 +952,21 @@ md_parse_option (int c, char *arg)
     case option_target_hardware:
       {
 	int earliest, latest = 0;
+	char *end;
 	if (*arg == 0 || *arg == '-')
 	  as_fatal (_("invalid target hardware version"));
 
-	earliest = strtol (arg, &arg, 0);
+	earliest = strtol (arg, &end, 0);
 
-	if (*arg == 0)
+	if (*end == 0)
 	  latest = earliest;
-	else if (*arg == '-')
+	else if (*end == '-')
 	  {
-	    if (*++arg == 0)
+	    if (*++end == 0)
 	      as_fatal (_("invalid target hardware version"));
-	    latest = strtol (arg, &arg, 0);
+	    latest = strtol (end, &end, 0);
 	  }
-	if (*arg != 0)
+	if (*end != 0)
 	  as_fatal (_("invalid target hardware version"));
 
 	xtensa_setup_hw_workarounds (earliest, latest);
@@ -1008,12 +1009,13 @@ md_parse_option (int c, char *arg)
     case option_auto_litpool_limit:
       {
 	int value = 0;
+	char *end;
 	if (auto_litpool_limit < 0)
 	  as_fatal (_("no-auto-litpools is incompatible with auto-litpool-limit"));
 	if (*arg == 0 || *arg == '-')
 	  as_fatal (_("invalid auto-litpool-limit argument"));
-	value = strtol (arg, &arg, 10);
-	if (*arg != 0)
+	value = strtol (arg, &end, 10);
+	if (*end != 0)
 	  as_fatal (_("invalid auto-litpool-limit argument"));
 	if (value < 100 || value > 10000)
 	  as_fatal (_("invalid auto-litpool-limit argument (range is 100-10000)"));

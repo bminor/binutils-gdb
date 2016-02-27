@@ -2710,7 +2710,7 @@ md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
 
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {

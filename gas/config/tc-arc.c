@@ -2913,7 +2913,7 @@ arc_parse_name (const char *name,
    arc700, av2em, av2hs.  */
 
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {

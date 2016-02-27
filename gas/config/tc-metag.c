@@ -5821,7 +5821,7 @@ static const struct metag_core_option metag_dsps[] =
 
 /* Parse a CPU command line option.  */
 static int
-metag_parse_cpu (char * str)
+metag_parse_cpu (const char * str)
 {
   const struct metag_core_option * opt;
   int optlen;
@@ -5847,7 +5847,7 @@ metag_parse_cpu (char * str)
 
 /* Parse an FPU command line option.  */
 static int
-metag_parse_fpu (char * str)
+metag_parse_fpu (const char * str)
 {
   const struct metag_core_option * opt;
   int optlen;
@@ -5873,7 +5873,7 @@ metag_parse_fpu (char * str)
 
 /* Parse a DSP command line option.  */
 static int
-metag_parse_dsp (char * str)
+metag_parse_dsp (const char * str)
 {
   const struct metag_core_option * opt;
   int optlen;
@@ -5901,7 +5901,7 @@ struct metag_long_option
 {
   const char * option;                /* Substring to match.  */
   const char * help;                  /* Help information.  */
-  int (* func) (char * subopt); /* Function to decode sub-option.  */
+  int (* func) (const char * subopt); /* Function to decode sub-option.  */
   const char * deprecated;            /* If non-null, print this message.  */
 };
 
@@ -5917,7 +5917,7 @@ struct metag_long_option metag_long_opts[] =
   };
 
 int
-md_parse_option (int c, char * arg)
+md_parse_option (int c, const char * arg)
 {
   struct metag_long_option *lopt;
 

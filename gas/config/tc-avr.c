@@ -555,7 +555,7 @@ avr_set_arch (int dummy ATTRIBUTE_UNUSED)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -566,7 +566,7 @@ md_parse_option (int c, char *arg)
 
 	{
 	  char *t = s;
-	  char *arg1 = arg;
+	  const char *arg1 = arg;
 
 	  do
 	    *t = TOLOWER (*arg1++);

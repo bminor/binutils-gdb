@@ -490,7 +490,7 @@ m68hc11_print_statistics (FILE *file)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   get_default_target ();
   switch (c)

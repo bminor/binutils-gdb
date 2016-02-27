@@ -7716,7 +7716,7 @@ score_set_mach (const char *arg)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {

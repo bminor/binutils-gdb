@@ -265,7 +265,7 @@ tic6x_use_pid (const char *arg)
 /* Parse a target-specific option.  */
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {

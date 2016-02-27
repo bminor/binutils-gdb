@@ -44,7 +44,7 @@
 
 /* as.c.  */
 /* Extend GAS command line option handling capability.  */
-extern int nds32_parse_option (int, char *);
+extern int nds32_parse_option (int, const char *);
 extern void nds32_after_parse_args (void);
 /* The endianness of the target format may change based on command
    line arguments.  */

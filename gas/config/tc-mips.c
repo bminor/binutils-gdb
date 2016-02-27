@@ -14046,7 +14046,7 @@ mips_set_option_string (const char **string_ptr, const char *new_value)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   unsigned int i;
 

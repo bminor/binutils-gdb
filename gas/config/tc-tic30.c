@@ -1163,7 +1163,7 @@ md_apply_fix (fixS *fixP,
 
 int
 md_parse_option (int c ATTRIBUTE_UNUSED,
-		 char *arg ATTRIBUTE_UNUSED)
+		 const char *arg ATTRIBUTE_UNUSED)
 {
   debug ("In md_parse_option()\n");
   return 0;

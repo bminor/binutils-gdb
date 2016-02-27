@@ -105,7 +105,7 @@ set_isa (enum isa_attr isa_num)
 static void s_bss (int);
 
 int
-md_parse_option (int c, char * arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char * arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {

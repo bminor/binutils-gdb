@@ -6981,7 +6981,7 @@ emit_one_bundle (void)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
 
   switch (c)
