@@ -1025,25 +1025,16 @@ ia64_flush_insns (void)
     as_bad (_("qualifying predicate not followed by instruction"));
 }
 
-static void
-ia64_do_align (int nbytes)
-{
-  char *saved_input_line_pointer = input_line_pointer;
-
-  input_line_pointer = "";
-  s_align_bytes (nbytes);
-  input_line_pointer = saved_input_line_pointer;
-}
-
 void
 ia64_cons_align (int nbytes)
 {
   if (md.auto_align)
     {
-      char *saved_input_line_pointer = input_line_pointer;
-      input_line_pointer = "";
-      s_align_bytes (nbytes);
-      input_line_pointer = saved_input_line_pointer;
+      int log;
+      for (log = 0; (nbytes & 1) != 1; nbytes >>= 1)
+	log++;
+
+      do_align (log, NULL, 0, 0);
     }
 }
 
@@ -4290,7 +4281,7 @@ dot_proc (int dummy ATTRIBUTE_UNUSED)
     }
   last_pending->next = NULL;
   demand_empty_rest_of_line ();
-  ia64_do_align (16);
+  do_align (4, NULL, 0, 0);
 
   unwind.prologue = 0;
   unwind.prologue_count = 0;
@@ -4843,20 +4834,20 @@ stmt_float_cons (int kind)
   switch (kind)
     {
     case 'd':
-      alignment = 8;
+      alignment = 3;
       break;
 
     case 'x':
     case 'X':
-      alignment = 16;
+      alignment = 4;
       break;
 
     case 'f':
     default:
-      alignment = 4;
+      alignment = 2;
       break;
     }
-  ia64_do_align (alignment);
+  do_align (alignment, NULL, 0, 0);
   float_cons (kind);
 }
 

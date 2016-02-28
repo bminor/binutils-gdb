@@ -1,5 +1,12 @@
 2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-ia64.c (ia64_do_align): Remove.
+	(ia64_cons_align): Call do_align () directly.
+	(dot_proc): Likewise.
+	(stmt_float_cons): Likewise.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* listing.c (listing_message): Use XNEW style allocation macros.
 	* read.c (read_a_source_file): Likewise.
 	(read_symbol_name): Likewise.
