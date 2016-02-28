@@ -1,5 +1,12 @@
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-ia64.c (md_assemble): Add temporary variable to pass to
+	get_symbol_name ().
+	* config/tc-sparc.c (s_register): Cast a literal to char * in
+	assignment.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-i960.c (parse_expr): Cast to char * when assigning to
 	input_line_pointer.
 	* config/tc-m32r.c (expand_debug_syms): Likewise.

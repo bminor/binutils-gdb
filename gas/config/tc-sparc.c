@@ -4413,7 +4413,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
       if (regname[0] == 'i')
 	regname = NULL;
       else
-	regname = "";
+	regname = (char *) "";
     }
   else
     {

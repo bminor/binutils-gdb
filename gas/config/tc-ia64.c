@@ -10667,7 +10667,8 @@ check_dv (struct ia64_opcode *idesc)
 void
 md_assemble (char *str)
 {
-  char *saved_input_line_pointer, *mnemonic;
+  char *saved_input_line_pointer, *temp;
+  const char *mnemonic;
   const struct pseudo_opcode *pdesc;
   struct ia64_opcode *idesc;
   unsigned char qp_regno;
@@ -10679,7 +10680,8 @@ md_assemble (char *str)
 
   /* extract the opcode (mnemonic):  */
 
-  ch = get_symbol_name (&mnemonic);
+  ch = get_symbol_name (&temp);
+  mnemonic = temp;
   pdesc = (struct pseudo_opcode *) hash_find (md.pseudo_hash, mnemonic);
   if (pdesc)
     {
