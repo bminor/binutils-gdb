@@ -483,9 +483,9 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 		    {
 		      /* Skip the '.'  */
 		      name_scope++;
-		      sym = d_lookup_symbol_imports (current->import_src,
-						     name + name_scope,
-						     block, domain);
+		      sym = d_lookup_symbol_in_module (current->import_src,
+						       name + name_scope,
+						       block, domain, 1);
 		    }
 		}
 	    }
@@ -494,8 +494,8 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	      /* If this import statement creates no alias, pass
 		 current->import_src as MODULE to direct the search
 		 towards the imported module.  */
-	      sym = d_lookup_symbol_imports (current->import_src,
-					     name, block, domain);
+	      sym = d_lookup_symbol_in_module (current->import_src,
+					       name, block, domain, 1);
 	    }
 	  current->searched = 0;
 	  discard_cleanups (searched_cleanup);

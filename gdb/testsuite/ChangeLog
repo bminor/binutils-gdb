@@ -1,3 +1,8 @@
+2016-02-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/circular.c: New file.
+	* gdb.dlang/circular.exp: New file.
+
 2016-02-26  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.reverse/insn-reverse.c [__arm__] (ext_reg_load): New.

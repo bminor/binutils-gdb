@@ -1,3 +1,8 @@
+2016-02-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-namespace.c (d_lookup_symbol_imports): Avoid recursive lookups from
+	cyclic imports.
+
 2016-02-26  Keith Seitz  <keiths@redhat.com>
 
 	* rs6000-tdep.c (rs6000_frame_cache): Explicitly cast return result
