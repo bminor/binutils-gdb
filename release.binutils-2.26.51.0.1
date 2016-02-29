@@ -1,4 +1,4 @@
-This is the beta release of binutils 2.25.51.0.4 for Linux, which is
+This is the beta release of binutils 2.26.51.0.1 for Linux, which is
 based on binutils 2015 1114 master branch on sourceware.org plus
 various changes. It is purely for Linux.
 
@@ -143,12 +143,60 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.25.51.0.4 to
+Please report any bugs related to binutils 2.26.51.0.1 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.25.51.0.4:
+
+1. Update from binutils 2016 0226.
+2. Add support for Intel rdpkru and wrpkru instructions.
+3. Fix wrong GOT offset used with GOT relocation in i386 linker.  PR
+19601.
+4. Fix AVX512 register number check in x86 assembler.
+5. Fix a segmentation fault with IFUNC in x86 linker.  PR 19539.
+6. Optimize local symbol address load for x86 ld.  PR 19609.
+7. Make behaviors of dynamic executable and position independent
+executable predictable with mixed PIC and non-PIC references to
+undefined weak symbols.  Remove unused dynamic symbols.  Add
+-z nodynamic-undefined-weak to x86 ELF linker.  PRs 19636/19704/19719.
+8. Add -mrelax-relocations= to x86 assembler.  PR 19520.
+9. Add -mfence-as-lock-add= to x86 assembler.
+10. Improve 32-bit x86 disassembler with buffer address > 2GB.
+11. Speedup x86-64 linker optimization.  PR 19542.
+12. Fix a linker regression with linker-defined versioned symbol.  PR
+19698.
+13. Enable -E/--export-dynamic for static link.  PR 19617.
+14. Re-enable -Bsymbolic and -Bsymbolic-functions for PIE.  PR 19615.
+15. Remove extra section symbols with objcopy/strip.  PR 19547.
+16. Don't add DT_NEEDED for unmatched symbol.  PR 19553.
+17. Support gnu_debuglink with compressed debug sections.  PR 19523.
+18. Fix STT_COMMON support.  Add -z common/-z nocommon options to ELF
+linker.  Add --elf-stt-common= option to ELF objcopy.  PR 19645.
+19. Improve LTO for relocatable link.  PR 19317.
+20. Improve LTO for mingw.  PR 18199.
+21. Improve ar.  PR 19256.
+22. Improve addr2line.  PR 19315.
+23. Improve gold support.
+24. Improve COFF support.
+25. Improve Mach-O support.
+26. Improve aarch64 support.
+27. Improve arc support.
+28. Improve arm support.
+29. Improve m68k support.
+30. Improve hppa support.
+31. Improve microblaze support.
+32. Improve msp430 support.
+33. Improve nios2 support.
+34. Improve ppc support.
+35. Improve rl78 support.
+36. Improve rx support.
+37. Improve s390 support.
+38. Improve sparc support.
+39. Improve xtensa support.
 
 Changes from binutils 2.25.51.0.3:
 
@@ -1193,7 +1241,7 @@ already been defined.  PR 12001.
 16. Improve ppc support.
 17. Improve tic6x support.
 
-It is available as users/hjl/linux/release/2.25.51.0.4 tag at
+It is available as users/hjl/linux/release/2.26.51.0.1 tag at
 
 https://sourceware.org/git/?p=binutils-gdb.git;a=summary
 
@@ -1202,4 +1250,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-11/14/2015
+02/29/2016
