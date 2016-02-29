@@ -1,3 +1,15 @@
+2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19739
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	merge flags of other input sections for relocatable link.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
 2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
