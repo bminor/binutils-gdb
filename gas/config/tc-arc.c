@@ -343,7 +343,7 @@ static const struct cpu_type
   { "arc700", ARC_OPCODE_ARC700,  bfd_mach_arc_arc700,
     E_ARC_MACH_ARC700,  0x00},
   { "arcem",  ARC_OPCODE_ARCv2EM, bfd_mach_arc_arcv2,
-    EF_ARC_CPU_ARCV2EM, 0x00},
+    EF_ARC_CPU_ARCV2EM, ARC_CD},
   { "archs",  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,
     EF_ARC_CPU_ARCV2HS, ARC_CD},
   { "all",    ARC_OPCODE_BASE,    bfd_mach_arc_arcv2,

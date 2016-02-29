@@ -1,3 +1,8 @@
+2016-02-29  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+
+	* scripttempl/arclinux.sc: Force .tdata and .tbss to always be
+	generated.
+
 2016-02-26  Renlin Li  <renlin.li@arm.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp: Run new testcases.

@@ -688,10 +688,11 @@ arc_elf_final_write_processing (bfd * abfd,
     default:
       abort ();
     }
+  if ((elf_elfheader (abfd)->e_flags & EF_ARC_MACH) == EF_ARC_CPU_GENERIC)
+    elf_elfheader (abfd)->e_flags |= val;
 
-  elf_elfheader (abfd)->e_flags &= ~EF_ARC_MACH;
-  elf_elfheader (abfd)->e_flags |= val;
   elf_elfheader (abfd)->e_machine = emf;
+
   /* Record whatever is the current syscall ABI version.  */
   elf_elfheader (abfd)->e_flags |= E_ARC_OSABI_CURRENT;
 }
@@ -1319,14 +1320,24 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		}
 	      else if (is_reloc_for_PLT (howto))
 		{
+		  /* Fail if it is linking for PIE and the symbol is
+		     undefined.  */
+		  if (bfd_link_executable (info)
+		      && !(*info->callbacks->undefined_symbol)
+		        (info, h->root.root.string, input_bfd, input_section,
+		         rel->r_offset, TRUE))
+		    {
+		      return FALSE;
+		    }
 		  reloc_data.sym_value = h->plt.offset;
 		  reloc_data.sym_section = htab->splt;
 
 		  reloc_data.should_relocate = TRUE;
 		}
-	      else if (!(*info->callbacks->undefined_symbol)
+	      else if (!bfd_link_pic (info)
+		       && !(*info->callbacks->undefined_symbol)
 		       (info, h->root.root.string, input_bfd, input_section,
-			rel->r_offset,!bfd_link_pic (info)))
+			rel->r_offset, TRUE))
 		{
 		  return FALSE;
 		}
@@ -1443,7 +1454,7 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	  case R_ARC_32_ME:
 	  case R_ARC_PC32:
 	  case R_ARC_32_PCREL:
-	    if (bfd_link_pic (info)
+	    if (bfd_link_pic (info) && !bfd_link_pie (info)
 		&& ((r_type != R_ARC_PC32 && r_type != R_ARC_32_PCREL)
 		    || (h != NULL
 			&& h->dynindx != -1
@@ -1509,6 +1520,11 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		    else
 		      {
 			BFD_ASSERT (h->dynindx != -1);
+
+			/* This type of dynamic relocation cannot be created
+			   for code sections.  */
+			BFD_ASSERT ((input_section->flags & SEC_CODE) == 0);
+
 			if ((input_section->flags & SEC_ALLOC) != 0)
 			  relocate = FALSE;
 			else
@@ -1715,7 +1731,7 @@ elf_arc_check_relocs (bfd *		         abfd,
 	    /* FALLTHROUGH */
 	  case R_ARC_PC32:
 	  case R_ARC_32_PCREL:
-	    if (bfd_link_pic (info)
+	    if (bfd_link_pic (info) && !bfd_link_pie (info)
 		&& ((r_type != R_ARC_PC32 && r_type != R_ARC_32_PCREL)
 		    || (h != NULL
 			&& h->dynindx != -1
