@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2015 Free Software Foundation, Inc.
+# Copyright (C) 2010-2016 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -462,6 +462,38 @@ proc test_bkpt_temporary { } {
     }
 }
 
+# Test address locations.
+
+proc test_bkpt_address {} {
+    global gdb_prompt decimal srcfile
+
+    # Delete all breakpoints
+    delete_breakpoints
+
+    gdb_test "python gdb.Breakpoint(\"*main\")" \
+	".*Breakpoint ($decimal)+ at .*$srcfile, line ($decimal)+\."
+
+    gdb_py_test_silent_cmd \
+	"python main_loc = gdb.parse_and_eval(\"main\").address" \
+	"eval address of main" 0
+
+    # Python 2 vs 3 ... Check `int' first. If that fails, try `long'.
+    gdb_test_multiple "python main_addr = int(main_loc)" "int value of main" {
+	-re "Traceback.*$gdb_prompt $" {
+	    gdb_test_no_output "python main_addr = long(main_loc)" \
+		"long value of main"
+	}
+	-re "$gdb_prompt $" {
+	    pass "int value of main"
+	}
+    }
+
+    # Include whitespace in the linespec to double-check proper
+    # grokking of argument to gdb.Breakpoint.
+    gdb_test "python gdb.Breakpoint(\"  *{}\".format(str(main_addr)))" \
+	".*Breakpoint ($decimal)+ at .*$srcfile, line ($decimal)+\."
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
@@ -470,3 +502,4 @@ test_watchpoints
 test_bkpt_internal
 test_bkpt_eval_funcs
 test_bkpt_temporary
+test_bkpt_address

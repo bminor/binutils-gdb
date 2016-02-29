@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1626,7 +1626,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 }
 
 struct value *
-value_cstring (char *ptr, ssize_t len, struct type *char_type)
+value_cstring (const char *ptr, ssize_t len, struct type *char_type)
 {
   struct value *val;
   int lowbound = current_language->string_lower_bound;
@@ -1649,7 +1649,7 @@ value_cstring (char *ptr, ssize_t len, struct type *char_type)
    string may contain embedded null bytes.  */
 
 struct value *
-value_string (char *ptr, ssize_t len, struct type *char_type)
+value_string (const char *ptr, ssize_t len, struct type *char_type)
 {
   struct value *val;
   int lowbound = current_language->string_lower_bound;

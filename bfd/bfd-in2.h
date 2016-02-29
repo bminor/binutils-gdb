@@ -7,7 +7,7 @@
 
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -1434,6 +1434,9 @@ typedef struct bfd_section
   /* Indicate that section has the no read flag set. This happens
      when memory read flag isn't set. */
 #define SEC_COFF_NOREAD 0x40000000
+
+  /* Indicate that section has the no read flag set.  */
+#define SEC_ELF_NOREAD 0x80000000
 
   /*  End of section flags.  */
 
@@ -3336,6 +3339,7 @@ instruction.  */
   BFD_RELOC_PPC64_ADDR16_HIGH,
   BFD_RELOC_PPC64_ADDR16_HIGHA,
   BFD_RELOC_PPC64_ADDR64_LOCAL,
+  BFD_RELOC_PPC64_ENTRY,
 
 /* PowerPC and PowerPC64 thread-local storage relocations.  */
   BFD_RELOC_PPC_TLS,
@@ -3520,6 +3524,12 @@ pc-relative or some form of GOT-indirect relocation.  */
 
 /* ARM support for STT_GNU_IFUNC.  */
   BFD_RELOC_ARM_IRELATIVE,
+
+/* Thumb1 relocations to support execute-only code.  */
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC,
 
 /* These relocs are only used within the ARM assembler.  They are not
 (at present) written to any object files.  */
@@ -5581,6 +5591,12 @@ BFD_RELOC_MACH_O_PAIR.  */
 /* Pair of relocation.  Contains the first symbol.  */
   BFD_RELOC_MACH_O_PAIR,
 
+/* Symbol will be substracted.  Must be followed by a BFD_RELOC_32.  */
+  BFD_RELOC_MACH_O_SUBTRACTOR32,
+
+/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64.  */
+  BFD_RELOC_MACH_O_SUBTRACTOR64,
+
 /* PCREL relocations.  They are marked as branch to create PLT entry if
 required.  */
   BFD_RELOC_MACH_O_X86_64_BRANCH32,
@@ -5593,12 +5609,6 @@ required.  */
 the linker could optimize the movq to a leaq if possible.  */
   BFD_RELOC_MACH_O_X86_64_GOT_LOAD,
 
-/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64.  */
-  BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32,
-
-/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64.  */
-  BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64,
-
 /* Same as BFD_RELOC_32_PCREL but with an implicit -1 addend.  */
   BFD_RELOC_MACH_O_X86_64_PCREL32_1,
 
@@ -5607,6 +5617,18 @@ the linker could optimize the movq to a leaq if possible.  */
 
 /* Same as BFD_RELOC_32_PCREL but with an implicit -4 addend.  */
   BFD_RELOC_MACH_O_X86_64_PCREL32_4,
+
+/* Addend for PAGE or PAGEOFF.  */
+  BFD_RELOC_MACH_O_ARM64_ADDEND,
+
+/* Relative offset to page of GOT slot.  */
+  BFD_RELOC_MACH_O_ARM64_GOT_LOAD_PAGE21,
+
+/* Relative offset within page of GOT slot.  */
+  BFD_RELOC_MACH_O_ARM64_GOT_LOAD_PAGEOFF12,
+
+/* Address of a GOT entry.  */
+  BFD_RELOC_MACH_O_ARM64_POINTER_TO_GOT,
 
 /* This is a 32 bit reloc for the microblaze that stores the
 low 16 bits of a value  */
@@ -6350,8 +6372,7 @@ typedef struct bfd_symbol
 #define BSF_EXPORT     BSF_GLOBAL /* No real difference.  */
 
   /* A normal C symbol would be one of:
-     <<BSF_LOCAL>>, <<BSF_COMMON>>,  <<BSF_UNDEFINED>> or
-     <<BSF_GLOBAL>>.  */
+     <<BSF_LOCAL>>, <<BSF_UNDEFINED>> or <<BSF_GLOBAL>>.  */
 
   /* The symbol is a debugging record. The value has an arbitrary
      meaning, unless BSF_DEBUGGING_RELOC is also set.  */
@@ -6363,7 +6384,9 @@ typedef struct bfd_symbol
 
   /* Used by the linker.  */
 #define BSF_KEEP               (1 << 5)
-#define BSF_KEEP_G             (1 << 6)
+
+  /* An ELF common symbol.  */
+#define BSF_ELF_COMMON         (1 << 6)
 
   /* A weak global symbol, overridable without warnings by
      a regular global symbol of the same name.  */
@@ -6567,7 +6590,7 @@ struct bfd
   ENUM_BITFIELD (bfd_direction) direction : 2;
 
   /* Format_specific flags.  */
-  flagword flags : 18;
+  flagword flags : 20;
 
   /* Values that may appear in the flags field of a BFD.  These also
      appear in the object_flags field of the bfd_target structure, where
@@ -6647,16 +6670,23 @@ struct bfd
   /* Compress sections in this BFD with SHF_COMPRESSED from gABI.  */
 #define BFD_COMPRESS_GABI 0x20000
 
+  /* Convert ELF common symbol type to STT_COMMON or STT_OBJECT in this
+     BFD.  */
+#define BFD_CONVERT_ELF_COMMON 0x40000
+
+  /* Use the ELF STT_COMMON type in this BFD.  */
+#define BFD_USE_ELF_STT_COMMON 0x80000
+
   /* Flags bits to be saved in bfd_preserve_save.  */
 #define BFD_FLAGS_SAVED \
   (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_PLUGIN \
-   | BFD_COMPRESS_GABI)
+   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON)
 
   /* Flags bits which are for BFD use only.  */
 #define BFD_FLAGS_FOR_BFD_USE_MASK \
   (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
    | BFD_PLUGIN | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT \
-   | BFD_COMPRESS_GABI)
+   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON)
 
   /* Is the file descriptor being cached?  That is, can it be closed as
      needed, and re-opened when accessed later?  */

@@ -204,7 +204,7 @@ handle_T2_insn (ARMul_State * state,
 
 	    simm32 = (J1 << 19) | (J2 << 18) | (imm6 << 12) | (imm11 << 1);
 	    if (S)
-	      simm32 |= (-1 << 20);
+	      simm32 |= -(1 << 20);
 	    break;
 	  }
 
@@ -217,7 +217,7 @@ handle_T2_insn (ARMul_State * state,
 
 	    simm32 = (I1 << 23) | (I2 << 22) | (imm10 << 12) | (imm11 << 1);
 	    if (S)
-	      simm32 |= (-1 << 24);
+	      simm32 |= -(1 << 24);
 	    break;
 	  }
 
@@ -230,7 +230,7 @@ handle_T2_insn (ARMul_State * state,
 
 	    simm32 = (I1 << 23) | (I2 << 22) | (imm10h << 12) | (imm10l << 2);
 	    if (S)
-	      simm32 |= (-1 << 24);
+	      simm32 |= -(1 << 24);
 
 	    CLEART;
 	    state->Reg[14] = (pc + 4) | 1;
@@ -246,7 +246,7 @@ handle_T2_insn (ARMul_State * state,
 
 	    simm32 = (I1 << 23) | (I2 << 22) | (imm10 << 12) | (imm11 << 1);
 	    if (S)
-	      simm32 |= (-1 << 24);
+	      simm32 |= -(1 << 24);
 	    state->Reg[14] = (pc + 4) | 1;
 	    break;
 	  }
@@ -1078,7 +1078,7 @@ handle_T2_insn (ARMul_State * state,
 	ARMword Rn = tBITS (0, 3);
 	ARMword msbit = ntBITS (0, 5);
 	ARMword lsbit = (ntBITS (12, 14) << 2) | ntBITS (6, 7);
-	ARMword mask = -1 << lsbit;
+	ARMword mask = -(1 << lsbit);
 
 	tASSERT (tBIT (4) == 0);
 	tASSERT (ntBIT (15) == 0);
@@ -1489,7 +1489,7 @@ handle_T2_insn (ARMul_State * state,
 	
 	state->Reg[Rt] = ARMul_LoadByte (state, address);
 	if (state->Reg[Rt] & 0x80)
-	  state->Reg[Rt] |= -1 << 8;
+	  state->Reg[Rt] |= -(1 << 8);
 
 	* pvalid = t_resolved;
 	break;
@@ -1542,7 +1542,7 @@ handle_T2_insn (ARMul_State * state,
 
 	state->Reg[Rt] = ARMul_LoadHalfWord (state, address);
 	if (state->Reg[Rt] & 0x8000)
-	  state->Reg[Rt] |= -1 << 16;
+	  state->Reg[Rt] |= -(1 << 16);
 
 	* pvalid = t_branch;
 	break;
@@ -1564,7 +1564,7 @@ handle_T2_insn (ARMul_State * state,
 	    val = state->Reg[Rm];
 	    val = (val >> ror) | (val << (32 - ror));
 	    if (val & 0x8000)
-	      val |= -1 << 16;
+	      val |= -(1 << 16);
 	    state->Reg[Rd] = val;
 	  }
 	else

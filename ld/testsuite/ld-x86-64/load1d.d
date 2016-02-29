@@ -9,40 +9,40 @@
 Disassembly of section .text:
 
 0+[a-f0-9]+ <_start>:
-[ 	]*[a-f0-9]+:	13 05 5e 01 20 00    	adc    0x20015e\(%rip\),%eax        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	03 1d 58 01 20 00    	add    0x200158\(%rip\),%ebx        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	23 0d 52 01 20 00    	and    0x200152\(%rip\),%ecx        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	3b 15 4c 01 20 00    	cmp    0x20014c\(%rip\),%edx        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	0b 35 46 01 20 00    	or     0x200146\(%rip\),%esi        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	1b 3d 40 01 20 00    	sbb    0x200140\(%rip\),%edi        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	2b 2d 3a 01 20 00    	sub    0x20013a\(%rip\),%ebp        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	44 33 05 33 01 20 00 	xor    0x200133\(%rip\),%r8d        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	44 85 3d 2c 01 20 00 	test   %r15d,0x20012c\(%rip\)        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	48 13 05 25 01 20 00 	adc    0x200125\(%rip\),%rax        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	48 03 1d 1e 01 20 00 	add    0x20011e\(%rip\),%rbx        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	48 23 0d 17 01 20 00 	and    0x200117\(%rip\),%rcx        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	48 3b 15 10 01 20 00 	cmp    0x200110\(%rip\),%rdx        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	48 0b 3d 09 01 20 00 	or     0x200109\(%rip\),%rdi        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	48 1b 35 02 01 20 00 	sbb    0x200102\(%rip\),%rsi        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	48 2b 2d fb 00 20 00 	sub    0x2000fb\(%rip\),%rbp        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	4c 33 05 f4 00 20 00 	xor    0x2000f4\(%rip\),%r8        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	4c 85 3d ed 00 20 00 	test   %r15,0x2000ed\(%rip\)        # 2002d0 <_DYNAMIC\+0x70>
-[ 	]*[a-f0-9]+:	13 05 ef 00 20 00    	adc    0x2000ef\(%rip\),%eax        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	03 1d e9 00 20 00    	add    0x2000e9\(%rip\),%ebx        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	23 0d e3 00 20 00    	and    0x2000e3\(%rip\),%ecx        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	3b 15 dd 00 20 00    	cmp    0x2000dd\(%rip\),%edx        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	0b 35 d7 00 20 00    	or     0x2000d7\(%rip\),%esi        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	1b 3d d1 00 20 00    	sbb    0x2000d1\(%rip\),%edi        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	2b 2d cb 00 20 00    	sub    0x2000cb\(%rip\),%ebp        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	44 33 05 c4 00 20 00 	xor    0x2000c4\(%rip\),%r8d        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	44 85 3d bd 00 20 00 	test   %r15d,0x2000bd\(%rip\)        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	48 13 05 b6 00 20 00 	adc    0x2000b6\(%rip\),%rax        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	48 03 1d af 00 20 00 	add    0x2000af\(%rip\),%rbx        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	48 23 0d a8 00 20 00 	and    0x2000a8\(%rip\),%rcx        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	48 3b 15 a1 00 20 00 	cmp    0x2000a1\(%rip\),%rdx        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	48 0b 3d 9a 00 20 00 	or     0x20009a\(%rip\),%rdi        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	48 1b 35 93 00 20 00 	sbb    0x200093\(%rip\),%rsi        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	48 2b 2d 8c 00 20 00 	sub    0x20008c\(%rip\),%rbp        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	4c 33 05 85 00 20 00 	xor    0x200085\(%rip\),%r8        # 2002d8 <_DYNAMIC\+0x78>
-[ 	]*[a-f0-9]+:	4c 85 3d 7e 00 20 00 	test   %r15,0x20007e\(%rip\)        # 2002d8 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	13 05 5a 01 20 00    	adc    0x20015a\(%rip\),%eax        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	03 1d 54 01 20 00    	add    0x200154\(%rip\),%ebx        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	23 0d 4e 01 20 00    	and    0x20014e\(%rip\),%ecx        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	3b 15 48 01 20 00    	cmp    0x200148\(%rip\),%edx        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	0b 35 42 01 20 00    	or     0x200142\(%rip\),%esi        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	1b 3d 3c 01 20 00    	sbb    0x20013c\(%rip\),%edi        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	2b 2d 36 01 20 00    	sub    0x200136\(%rip\),%ebp        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	44 33 05 2f 01 20 00 	xor    0x20012f\(%rip\),%r8d        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	44 85 3d 28 01 20 00 	test   %r15d,0x200128\(%rip\)        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	48 13 05 21 01 20 00 	adc    0x200121\(%rip\),%rax        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	48 03 1d 1a 01 20 00 	add    0x20011a\(%rip\),%rbx        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	48 23 0d 13 01 20 00 	and    0x200113\(%rip\),%rcx        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	48 3b 15 0c 01 20 00 	cmp    0x20010c\(%rip\),%rdx        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	48 0b 3d 05 01 20 00 	or     0x200105\(%rip\),%rdi        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	48 1b 35 fe 00 20 00 	sbb    0x2000fe\(%rip\),%rsi        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	48 2b 2d f7 00 20 00 	sub    0x2000f7\(%rip\),%rbp        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	4c 33 05 f0 00 20 00 	xor    0x2000f0\(%rip\),%r8        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	4c 85 3d e9 00 20 00 	test   %r15,0x2000e9\(%rip\)        # 2002b8 <_DYNAMIC\+0x70>
+[ 	]*[a-f0-9]+:	13 05 eb 00 20 00    	adc    0x2000eb\(%rip\),%eax        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	03 1d e5 00 20 00    	add    0x2000e5\(%rip\),%ebx        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	23 0d df 00 20 00    	and    0x2000df\(%rip\),%ecx        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	3b 15 d9 00 20 00    	cmp    0x2000d9\(%rip\),%edx        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	0b 35 d3 00 20 00    	or     0x2000d3\(%rip\),%esi        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	1b 3d cd 00 20 00    	sbb    0x2000cd\(%rip\),%edi        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	2b 2d c7 00 20 00    	sub    0x2000c7\(%rip\),%ebp        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	44 33 05 c0 00 20 00 	xor    0x2000c0\(%rip\),%r8d        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	44 85 3d b9 00 20 00 	test   %r15d,0x2000b9\(%rip\)        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	48 13 05 b2 00 20 00 	adc    0x2000b2\(%rip\),%rax        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	48 03 1d ab 00 20 00 	add    0x2000ab\(%rip\),%rbx        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	48 23 0d a4 00 20 00 	and    0x2000a4\(%rip\),%rcx        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	48 3b 15 9d 00 20 00 	cmp    0x20009d\(%rip\),%rdx        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	48 0b 3d 96 00 20 00 	or     0x200096\(%rip\),%rdi        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	48 1b 35 8f 00 20 00 	sbb    0x20008f\(%rip\),%rsi        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	48 2b 2d 88 00 20 00 	sub    0x200088\(%rip\),%rbp        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	4c 33 05 81 00 20 00 	xor    0x200081\(%rip\),%r8        # 2002c0 <_DYNAMIC\+0x78>
+[ 	]*[a-f0-9]+:	4c 85 3d 7a 00 20 00 	test   %r15,0x20007a\(%rip\)        # 2002c0 <_DYNAMIC\+0x78>
 #pass

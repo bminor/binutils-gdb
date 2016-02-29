@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
 
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -42,7 +42,7 @@ SECTION
 #include "elf-bfd.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
-#include "elf-linux-psinfo.h"
+#include "elf-linux-core.h"
 
 #ifdef CORE_HEADER
 #include CORE_HEADER
@@ -3360,6 +3360,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   /* SHT_GROUP sections are in relocatable files only.  */
   if (link_info == NULL || bfd_link_relocatable (link_info))
     {
+      bfd_size_type reloc_count = 0;
+
       /* Put SHT_GROUP sections first.  */
       for (sec = abfd->sections; sec != NULL; sec = sec->next)
 	{
@@ -3376,7 +3378,14 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	      else
 		d->this_idx = section_number++;
 	    }
+
+	  /* Count relocations.  */
+	  reloc_count += sec->reloc_count;
 	}
+
+      /* Clear HAS_RELOC if there are no relocations.  */
+      if (reloc_count == 0)
+	abfd->flags &= ~HAS_RELOC;
     }
 
   for (sec = abfd->sections; sec; sec = sec->next)
@@ -6487,13 +6496,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       first_matching_lma = TRUE;
       first_suggested_lma = TRUE;
 
-      for (section = ibfd->sections;
+      for (section = first_section, j = 0;
 	   section != NULL;
 	   section = section->next)
-	if (section == first_section)
-	  break;
-
-      for (j = 0; section != NULL; section = section->next)
 	{
 	  if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	    {
@@ -7572,12 +7577,16 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	}
       else if (bfd_is_com_section (syms[idx]->section))
 	{
-#ifdef USE_STT_COMMON
-	  if (type == STT_OBJECT)
-	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_COMMON);
-	  else
-#endif
-	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
+	  if (type != STT_TLS)
+	    {
+	      if ((abfd->flags & BFD_CONVERT_ELF_COMMON))
+		type = ((abfd->flags & BFD_USE_ELF_STT_COMMON)
+			? STT_COMMON : STT_OBJECT);
+	      else
+		type = ((flags & BSF_ELF_COMMON) != 0
+			? STT_COMMON : STT_OBJECT);
+	    }
+	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	}
       /* Output undefined secondary symbols as weak.  */
       else if (bfd_is_und_section (syms[idx]->section))
@@ -9401,6 +9410,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
     case NT_SIGINFO:
       return elfcore_make_note_pseudosection (abfd, ".note.linuxcore.siginfo",
 					      note);
+
+    case NT_FREEBSD_THRMISC:
+      if (note->namesz == 8
+	  && strcmp (note->namedata, "FreeBSD") == 0)
+	return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
+      else
+	return TRUE;
     }
 }
 
@@ -9898,9 +9914,7 @@ elfcore_write_linux_prpsinfo32
 {
   struct elf_external_linux_prpsinfo32 data;
 
-  memset (&data, 0, sizeof (data));
-  LINUX_PRPSINFO32_SWAP_FIELDS (abfd, prpsinfo, data);
-
+  swap_linux_prpsinfo32_out (abfd, prpsinfo, &data);
   return elfcore_write_note (abfd, buf, bufsiz, "CORE", NT_PRPSINFO,
 			     &data, sizeof (data));
 }
@@ -9912,9 +9926,7 @@ elfcore_write_linux_prpsinfo64
 {
   struct elf_external_linux_prpsinfo64 data;
 
-  memset (&data, 0, sizeof (data));
-  LINUX_PRPSINFO64_SWAP_FIELDS (abfd, prpsinfo, data);
-
+  swap_linux_prpsinfo64_out (abfd, prpsinfo, &data);
   return elfcore_write_note (abfd, buf, bufsiz,
 			     "CORE", NT_PRPSINFO, &data, sizeof (data));
 }

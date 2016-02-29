@@ -1,4 +1,4 @@
-# Copyright 2010-2015 Free Software Foundation, Inc.
+# Copyright 2010-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,10 +23,12 @@ if ![istarget *-linux*] {
     continue
 }
 
-# Remote protocol does not support follow-exec notifications.
-
-if [is_remote target] {
-    continue
+# In remote mode we cannot use the 'set args' command, and this
+# test requires it.
+if { [target_info exists gdb_protocol] } then {
+    if { [target_info gdb_protocol] == "remote" } then {
+	continue
+    }
 }
 
 standard_testfile .c

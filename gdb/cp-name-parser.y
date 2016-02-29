@@ -1,6 +1,6 @@
 /* YACC parser for C++ names, for GDB.
 
-   Copyright (C) 2003-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2016 Free Software Foundation, Inc.
 
    Parts of the lexer are based on c-exp.y from GDB.
 
@@ -528,7 +528,7 @@ oper	:	OPERATOR NEW
 		   since it's not clear that it's parseable.  */
 conversion_op
 		:	OPERATOR typespec_2
-			{ $$ = fill_comp (DEMANGLE_COMPONENT_CAST, $2, NULL); }
+			{ $$ = fill_comp (DEMANGLE_COMPONENT_CONVERSION, $2, NULL); }
 		;
 
 conversion_op_name

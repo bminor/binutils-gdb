@@ -1,6 +1,6 @@
 /* Select target systems and architectures at runtime for GDB.
 
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -466,6 +466,14 @@ target_terminal_is_inferior (void)
 
 /* See target.h.  */
 
+int
+target_terminal_is_ours (void)
+{
+  return (terminal_state == terminal_is_ours);
+}
+
+/* See target.h.  */
+
 void
 target_terminal_inferior (void)
 {
@@ -746,21 +754,35 @@ unpush_target (struct target_ops *t)
   return 1;
 }
 
+/* Unpush TARGET and assert that it worked.  */
+
+static void
+unpush_target_and_assert (struct target_ops *target)
+{
+  if (!unpush_target (target))
+    {
+      fprintf_unfiltered (gdb_stderr,
+			  "pop_all_targets couldn't find target %s\n",
+			  target->to_shortname);
+      internal_error (__FILE__, __LINE__,
+		      _("failed internal consistency check"));
+    }
+}
+
 void
 pop_all_targets_above (enum strata above_stratum)
 {
   while ((int) (current_target.to_stratum) > (int) above_stratum)
-    {
-      if (!unpush_target (target_stack))
-	{
-	  fprintf_unfiltered (gdb_stderr,
-			      "pop_all_targets couldn't find target %s\n",
-			      target_stack->to_shortname);
-	  internal_error (__FILE__, __LINE__,
-			  _("failed internal consistency check"));
-	  break;
-	}
-    }
+    unpush_target_and_assert (target_stack);
+}
+
+/* See target.h.  */
+
+void
+pop_all_targets_at_and_above (enum strata stratum)
+{
+  while ((int) (current_target.to_stratum) >= (int) stratum)
+    unpush_target_and_assert (target_stack);
 }
 
 void
@@ -1822,8 +1844,9 @@ read_memory_robust (struct target_ops *ops,
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
 	      xfree (buffer);
-	      read_whatever_is_readable (ops, offset + xfered_total, unit_size,
-					 offset + xfered_total + to_read, &result);
+	      read_whatever_is_readable (ops, offset + xfered_total,
+					 offset + xfered_total + to_read,
+					 unit_size, &result);
 	      xfered_total += to_read;
 	    }
 	  else
@@ -2142,6 +2165,8 @@ target_pre_inferior (int from_tty)
      the inferior was attached to.  */
   current_inferior ()->attach_flag = 0;
 
+  current_inferior ()->highest_thread_num = 0;
+
   agent_capability_invalidate ();
 }
 
@@ -2250,7 +2275,7 @@ target_pid_to_str (ptid_t ptid)
   return (*current_target.to_pid_to_str) (&current_target, ptid);
 }
 
-char *
+const char *
 target_thread_name (struct thread_info *info)
 {
   return current_target.to_thread_name (&current_target, info);
@@ -3833,6 +3858,14 @@ target_async (int enable)
 {
   infrun_async (enable);
   current_target.to_async (&current_target, enable);
+}
+
+/* See target.h.  */
+
+void
+target_thread_events (int enable)
+{
+  current_target.to_thread_events (&current_target, enable);
 }
 
 /* Controls if targets can report that they can/are async.  This is

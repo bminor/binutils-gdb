@@ -5,7 +5,7 @@ dump\.o:     file format .*
 
 Disassembly of section .*:
 
-00000000 <\..*>:
+00000000 <.*>:
    [0-9a-f]+:	c3 00[ 	]+mov\.b	r0, \[r0\]
    [0-9a-f]+:	c3 70[ 	]+mov\.b	r0, \[r7\]
    [0-9a-f]+:	c3 07[ 	]+mov\.b	r7, \[r0\]
@@ -167,13 +167,13 @@ Disassembly of section .*:
  [0-9a-f]+:	ef 1f                         	mov\.l	r1, r15
  [0-9a-f]+:	ef f0                         	mov\.l	r15, r0
  [0-9a-f]+:	ef ff                         	mov\.l	r15, r15
- [0-9a-f]+:	3c 00 00                      	mov\.b	#0, 0\[r0\]
+ [0-9a-f]+:	f8 04 00                      	mov\.b	#0, \[r0\]
  [0-9a-f]+:	f8 f4 00                      	mov\.b	#0, \[r15\]
  [0-9a-f]+:	f9 04 fc 00                   	mov\.b	#0, 252\[r0\]
  [0-9a-f]+:	f9 f4 fc 00                   	mov\.b	#0, 252\[r15\]
  [0-9a-f]+:	fa 04 fc ff 00                	mov\.b	#0, 65532\[r0\]
  [0-9a-f]+:	fa f4 fc ff 00                	mov\.b	#0, 65532\[r15\]
- [0-9a-f]+:	3c 00 ff                      	mov\.b	#255, 0\[r0\]
+ [0-9a-f]+:	f8 04 ff                      	mov\.b	#255, \[r0\]
  [0-9a-f]+:	f8 f4 ff                      	mov\.b	#255, \[r15\]
  [0-9a-f]+:	f9 04 fc ff                   	mov\.b	#255, 252\[r0\]
  [0-9a-f]+:	f9 f4 fc ff                   	mov\.b	#255, 252\[r15\]
@@ -185,13 +185,13 @@ Disassembly of section .*:
  [0-9a-f]+:	f9 f5 7e 80                   	mov\.w	#-128, 252\[r15\]
  [0-9a-f]+:	fa 05 fe 7f 80                	mov\.w	#-128, 65532\[r0\]
  [0-9a-f]+:	fa f5 fe 7f 80                	mov\.w	#-128, 65532\[r15\]
- [0-9a-f]+:	3d 00 7f                      	mov\.w	#127, 0\[r0\]
+ [0-9a-f]+:	f8 05 7f                      	mov\.w	#127, \[r0\]
  [0-9a-f]+:	f8 f5 7f                      	mov\.w	#127, \[r15\]
  [0-9a-f]+:	f9 05 7e 7f                   	mov\.w	#127, 252\[r0\]
  [0-9a-f]+:	f9 f5 7e 7f                   	mov\.w	#127, 252\[r15\]
  [0-9a-f]+:	fa 05 fe 7f 7f                	mov\.w	#127, 65532\[r0\]
  [0-9a-f]+:	fa f5 fe 7f 7f                	mov\.w	#127, 65532\[r15\]
- [0-9a-f]+:	3d 00 00                      	mov\.w	#0, 0\[r0\]
+ [0-9a-f]+:	f8 05 00                      	mov\.w	#0, \[r0\]
  [0-9a-f]+:	f8 f5 00                      	mov\.w	#0, \[r15\]
  [0-9a-f]+:	f9 05 7e 00                   	mov\.w	#0, 252\[r0\]
  [0-9a-f]+:	f9 f5 7e 00                   	mov\.w	#0, 252\[r15\]
@@ -209,7 +209,7 @@ Disassembly of section .*:
  [0-9a-f]+:	f9 f6 3f 80                   	mov.l	#-128, 252\[r15\]
  [0-9a-f]+:	fa 06 ff 3f 80                	mov.l	#-128, 65532\[r0\]
  [0-9a-f]+:	fa f6 ff 3f 80                	mov.l	#-128, 65532\[r15\]
- [0-9a-f]+:	3e 00 7f                      	mov.l	#127, 0\[r0\]
+ [0-9a-f]+:	f8 06 7f                      	mov.l	#127, \[r0\]
  [0-9a-f]+:	f8 f6 7f                      	mov.l	#127, \[r15\]
  [0-9a-f]+:	f9 06 3f 7f                   	mov.l	#127, 252\[r0\]
  [0-9a-f]+:	f9 f6 3f 7f                   	mov.l	#127, 252\[r15\]

@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987-2015 Free Software Foundation, Inc.
+   Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -380,7 +380,7 @@ COMMON int flag_execstack;
 COMMON int flag_noexecstack;
 
 /* name of emitted object file */
-COMMON char *out_file_name;
+COMMON const char *out_file_name;
 
 /* name of file defining extensions to the basic instruction set */
 COMMON char *insttbl_file_name;
@@ -453,13 +453,13 @@ typedef struct _pseudo_type pseudo_typeS;
   void FCN (const char *format, ...) \
     __attribute__ ((__format__ (__printf__, 1, 2)))
 #define PRINTF_WHERE_LIKE(FCN) \
-  void FCN (char *file, unsigned int line, const char *format, ...) \
+  void FCN (const char *file, unsigned int line, const char *format, ...) \
     __attribute__ ((__format__ (__printf__, 3, 4)))
 
 #else /* __GNUC__ < 2 || defined(VMS) */
 
 #define PRINTF_LIKE(FCN)	void FCN (const char *format, ...)
-#define PRINTF_WHERE_LIKE(FCN)	void FCN (char *file, \
+#define PRINTF_WHERE_LIKE(FCN)	void FCN (const char *file, \
 					  unsigned int line, \
 					  const char *format, ...)
 
@@ -477,17 +477,19 @@ void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
 void   sprint_value (char *, addressT);
 int    had_errors (void);
 int    had_warnings (void);
-void   as_warn_value_out_of_range (char *, offsetT, offsetT, offsetT, char *, unsigned);
-void   as_bad_value_out_of_range (char *, offsetT, offsetT, offsetT, char *, unsigned);
+void   as_warn_value_out_of_range (char *, offsetT, offsetT, offsetT,
+				   const char *, unsigned);
+void   as_bad_value_out_of_range (char *, offsetT, offsetT, offsetT,
+				  const char *, unsigned);
 void   print_version_id (void);
 char * app_push (void);
 char * atof_ieee (char *, int, LITTLENUM_TYPE *);
 char * ieee_md_atof (int, char *, int *, bfd_boolean);
 char * vax_md_atof (int, char *, int *);
-char * input_scrub_include_file (char *, char *);
+char * input_scrub_include_file (const char *, char *);
 void   input_scrub_insert_line (const char *);
 void   input_scrub_insert_file (char *);
-char * input_scrub_new_file (char *);
+char * input_scrub_new_file (const char *);
 char * input_scrub_next_buffer (char **bufp);
 size_t do_scrub_chars (size_t (*get) (char *, size_t), char *, size_t);
 int    gen_to_words (LITTLENUM_TYPE *, int, long);
@@ -497,14 +499,14 @@ void   cond_finish_check (int);
 void   cond_exit_macro (int);
 int    seen_at_least_1_file (void);
 void   app_pop (char *);
-void   as_where (char **, unsigned int *);
+const char * as_where (unsigned int *);
 void   bump_line_counters (void);
 void   do_scrub_begin (int);
 void   input_scrub_begin (void);
 void   input_scrub_close (void);
 void   input_scrub_end (void);
-int    new_logical_line (char *, int);
-int    new_logical_line_flags (char *, int, int);
+int    new_logical_line (const char *, int);
+int    new_logical_line_flags (const char *, int, int);
 void   subsegs_begin (void);
 void   subseg_change (segT, int);
 segT   subseg_new (const char *, subsegT);
@@ -513,7 +515,7 @@ void   subseg_set (segT, subsegT);
 int    subseg_text_p (segT);
 int    seg_not_empty_p (segT);
 void   start_dependencies (char *);
-void   register_dependency (char *);
+void   register_dependency (const char *);
 void   print_dependencies (void);
 segT   subseg_get (const char *, int);
 
@@ -578,7 +580,7 @@ COMMON int flag_m68k_mri;
 #ifdef WARN_COMMENTS
 COMMON int           warn_comment;
 COMMON unsigned int  found_comment;
-COMMON char *        found_comment_file;
+COMMON const char *        found_comment_file;
 #endif
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
@@ -589,6 +591,9 @@ COMMON enum
     size_check_warning
   }
 flag_size_check;
+
+/* If we should generate ELF common symbols with the STT_COMMON type.  */
+extern int flag_use_elf_stt_common;
 
 /* If section name substitution sequences should be honored */
 COMMON int flag_sectname_subst;

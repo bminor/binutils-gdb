@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright (C) 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 2000-2016 Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -337,10 +337,10 @@ elf_s390_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 	&& strcasecmp (elf_howto_table[i].name, r_name) == 0)
       return &elf_howto_table[i];
 
-    if (strcasecmp (elf64_s390_vtinherit_howto.name, r_name) == 0)
-      return &elf64_s390_vtinherit_howto;
-    if (strcasecmp (elf64_s390_vtentry_howto.name, r_name) == 0)
-      return &elf64_s390_vtentry_howto;
+  if (strcasecmp (elf64_s390_vtinherit_howto.name, r_name) == 0)
+    return &elf64_s390_vtinherit_howto;
+  if (strcasecmp (elf64_s390_vtentry_howto.name, r_name) == 0)
+    return &elf64_s390_vtentry_howto;
 
   return NULL;
 }
@@ -1040,9 +1040,6 @@ elf_s390_check_relocs (bfd *abfd,
 
       switch (r_type)
 	{
-	case R_390_GOTOFF16:
-	case R_390_GOTOFF32:
-	case R_390_GOTOFF64:
 	case R_390_GOTPC:
 	case R_390_GOTPCDBL:
 	  /* These relocs do not need a GOT slot.  They just load the
@@ -1050,6 +1047,11 @@ elf_s390_check_relocs (bfd *abfd,
 	     the GOT.  Since the GOT pointer has been set up above we
 	     are done.  */
 	  break;
+	case R_390_GOTOFF16:
+	case R_390_GOTOFF32:
+	case R_390_GOTOFF64:
+	  if (h == NULL || !s390_is_ifunc_symbol_p (h) || !h->def_regular)
+	    break;
 
 	case R_390_PLT12DBL:
 	case R_390_PLT16DBL:
@@ -1465,6 +1467,12 @@ elf_s390_gc_sweep_hook (bfd *abfd,
 	case R_390_GOTOFF16:
 	case R_390_GOTOFF32:
 	case R_390_GOTOFF64:
+	  if (h != NULL && s390_is_ifunc_symbol_p (h) && h->def_regular)
+	    {
+	      h->plt.refcount--;
+	      break;
+	    }
+
 	case R_390_GOTPC:
 	case R_390_GOTPCDBL:
 	  break;
@@ -2640,6 +2648,18 @@ elf_s390_relocate_section (bfd *output_bfd,
 	case R_390_GOTOFF64:
 	  /* Relocation is relative to the start of the global offset
 	     table.  */
+
+	  if (h != NULL
+	      && s390_is_ifunc_symbol_p (h)
+	      && h->def_regular
+	      && !bfd_link_executable (info))
+	    {
+	      relocation = (htab->elf.iplt->output_section->vma
+			    + htab->elf.iplt->output_offset
+			    + h->plt.offset
+			    - htab->elf.sgot->output_section->vma);
+	      goto do_relocation;
+	    }
 
 	  /* Note that sgot->output_offset is not involved in this
 	     calculation.  We always want the start of .got.  If we

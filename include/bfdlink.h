@@ -1,5 +1,5 @@
 /* bfdlink.h -- header file for BFD link routines
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -40,6 +40,15 @@ enum bfd_link_discard
   discard_none,		/* Don't discard any locals.  */
   discard_l,		/* Discard local temporary symbols.  */
   discard_all		/* Discard all locals.  */
+};
+
+/* Whether to generate ELF common symbols with the STT_COMMON type
+   during a relocatable link.  */
+enum bfd_link_elf_stt_common
+{
+  unchanged,
+  elf_stt_common,
+  no_elf_stt_common
 };
 
 /* Describes the type of hash table entry structure being used.
@@ -324,6 +333,9 @@ struct bfd_link_info
   /* Which local symbols to discard.  */
   ENUM_BITFIELD (bfd_link_discard) discard : 2;
 
+  /* Whether to generate ELF common symbols with the STT_COMMON type.  */
+  ENUM_BITFIELD (bfd_link_elf_stt_common) elf_stt_common : 2;
+
   /* Criteria for skipping symbols when determining
      whether to include an object from an archive. */
   ENUM_BITFIELD (bfd_link_common_skip_ar_symbols) common_skip_ar_symbols : 2;
@@ -556,6 +568,10 @@ struct bfd_link_info
      reference external.  0 to treat it as internal.  -1 to let
      backend to decide.  */
   int extern_protected_data;
+
+  /* > 0 to treat undefined weak symbol in the executable as dynamic,
+     requiring dynamic relocation.  */
+  int dynamic_undefined_weak;
 
   /* Non-zero if auto-import thunks for DATA items in pei386 DLLs
      should be generated/linked against.  Set to 1 if this feature

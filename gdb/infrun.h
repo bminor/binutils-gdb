@@ -1,4 +1,4 @@
-/* Copyright (C) 1986-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -111,6 +111,12 @@ extern int normal_stop (void);
 
 extern void get_last_target_status (ptid_t *ptid,
 				    struct target_waitstatus *status);
+
+extern void set_last_target_status (ptid_t ptid,
+				    struct target_waitstatus status);
+
+/* Stop all threads.  Only returns after everything is halted.  */
+extern void stop_all_threads (void);
 
 extern void prepare_for_detach (void);
 

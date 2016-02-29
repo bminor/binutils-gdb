@@ -1,5 +1,6 @@
 #name: Valid v7e-m+fpv5-d16
 #objdump: -dr --prefix-addresses --show-raw-insn
+#skip: *-*-pe *-wince-* *-*-coff
 
 .*: +file format .*arm.*
 

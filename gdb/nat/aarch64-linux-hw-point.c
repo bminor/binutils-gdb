@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2016 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -411,7 +411,6 @@ aarch64_dr_state_remove_one_point (struct aarch64_debug_reg_state *state,
 
   /* Set up state pointers.  */
   is_watchpoint = (type != hw_execute);
-  gdb_assert (aarch64_point_is_aligned (is_watchpoint, addr, len));
   if (is_watchpoint)
     {
       num_regs = aarch64_num_wp_regs;
@@ -460,13 +459,21 @@ aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			   int len, int is_insert,
 			   struct aarch64_debug_reg_state *state)
 {
-  /* The hardware breakpoint on AArch64 should always be 4-byte
-     aligned, but on AArch32, it can be 2-byte aligned.  */
-  if (!aarch64_point_is_aligned (0 /* is_watchpoint */ , addr, len))
-    return -1;
-
   if (is_insert)
-    return aarch64_dr_state_insert_one_point (state, type, addr, len);
+    {
+      /* The hardware breakpoint on AArch64 should always be 4-byte
+	 aligned, but on AArch32, it can be 2-byte aligned.  Note that
+	 we only check the alignment on inserting breakpoint because
+	 aarch64_point_is_aligned needs the inferior_ptid inferior's
+	 regcache to decide whether the inferior is 32-bit or 64-bit.
+	 However when GDB follows the parent process and detach breakpoints
+	 from child process, inferior_ptid is the child ptid, but the
+	 child inferior doesn't exist in GDB's view yet.  */
+      if (!aarch64_point_is_aligned (0 /* is_watchpoint */ , addr, len))
+	return -1;
+
+      return aarch64_dr_state_insert_one_point (state, type, addr, len);
+    }
   else
     return aarch64_dr_state_remove_one_point (state, type, addr, len);
 }
@@ -561,8 +568,8 @@ aarch64_linux_set_debug_regs (const struct aarch64_debug_reg_state *state,
   ctrl = watchpoint ? state->dr_ctrl_wp : state->dr_ctrl_bp;
   if (count == 0)
     return;
-  iov.iov_len = (offsetof (struct user_hwdebug_state, dbg_regs[count - 1])
-		 + sizeof (regs.dbg_regs [count - 1]));
+  iov.iov_len = (offsetof (struct user_hwdebug_state, dbg_regs)
+		 + count * sizeof (regs.dbg_regs[0]));
 
   for (i = 0; i < count; i++)
     {

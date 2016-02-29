@@ -1,5 +1,5 @@
 /* tc-h8300.c -- Assemble code for the Renesas H8/300
-   Copyright (C) 1991-2015 Free Software Foundation, Inc.
+   Copyright (C) 1991-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -355,7 +355,7 @@ static void clever_message (const struct h8_instruction *, struct h8_op *);
 static void fix_operand_size (struct h8_op *, int);
 static void build_bytes (const struct h8_instruction *, struct h8_op *);
 static void do_a_fix_imm (int, int, struct h8_op *, int, const struct h8_instruction *);
-static void check_operand (struct h8_op *, unsigned int, char *);
+static void check_operand (struct h8_op *, unsigned int, const char *);
 static const struct h8_instruction * get_specific (const struct h8_instruction *, struct h8_op *, int) ;
 static char *get_operands (unsigned, char *, struct h8_op *);
 static void get_operand (char **, struct h8_op *, int);
@@ -826,7 +826,7 @@ get_operand (char **ptr, struct h8_op *op, int direction)
 	    op->mode |= DISP | direction;
 	  src = skip_colonthing (src, &op->mode);
 
-	  if (*src != ')' && '(')
+	  if (*src != ')')
 	    {
 	      as_bad (_("expected @(exp, reg16)"));
 	      return;
@@ -1286,7 +1286,7 @@ get_specific (const struct h8_instruction *instruction,
 }
 
 static void
-check_operand (struct h8_op *operand, unsigned int width, char *string)
+check_operand (struct h8_op *operand, unsigned int width, const char *string)
 {
   if (operand->exp.X_add_symbol == 0
       && operand->exp.X_op_symbol == 0)
@@ -1340,7 +1340,7 @@ do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode, cons
   int where;
   char *bytes = frag_now->fr_literal + offset;
 
-  char *t = ((operand->mode & MODE) == IMM) ? "#" : "@";
+  const char *t = ((operand->mode & MODE) == IMM) ? "#" : "@";
 
   if (operand->exp.X_add_symbol == 0)
     {

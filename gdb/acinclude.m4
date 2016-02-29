@@ -12,6 +12,9 @@ sinclude(libmcheck.m4)
 # This gets GDB_AC_TRANSFORM.
 sinclude(transform.m4)
 
+# This gets AM_GDB_WARNINGS.
+sinclude(warning.m4)
+
 dnl gdb/configure.in uses BFD_NEED_DECLARATION, so get its definition.
 sinclude(../bfd/bfd.m4)
 
@@ -73,7 +76,7 @@ m4_include(ptrace.m4)
 ## From Franc,ois Pinard                     ##
 ## ----------------------------------------- ##
 
-# Copyright (C) 1996-2015 Free Software Foundation, Inc.
+# Copyright (C) 1996-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

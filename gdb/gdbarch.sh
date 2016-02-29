@@ -2,7 +2,7 @@
 
 # Architecture commands for GDB, the GNU debugger.
 #
-# Copyright (C) 1998-2015 Free Software Foundation, Inc.
+# Copyright (C) 1998-2016 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -446,6 +446,12 @@ M:int:ax_pseudo_register_collect:struct agent_expr *ax, int reg:ax, reg
 # Return -1 if something goes wrong, 0 otherwise.
 M:int:ax_pseudo_register_push_stack:struct agent_expr *ax, int reg:ax, reg
 
+# Some targets/architectures can do extra processing/display of
+# segmentation faults.  E.g., Intel MPX boundary faults.
+# Call the architecture dependent function to handle the fault.
+# UIOUT is the output stream where the handler will place information.
+M:void:handle_segmentation_fault:struct ui_out *uiout:uiout
+
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
@@ -720,6 +726,9 @@ M:ULONGEST:core_xfer_shared_libraries_aix:gdb_byte *readbuf, ULONGEST offset, UL
 
 # How the core target converts a PTID from a core file to a string.
 M:char *:core_pid_to_str:ptid_t ptid:ptid
+
+# How the core target extracts the name of a thread from a core file.
+M:const char *:core_thread_name:struct thread_info *thr:thr
 
 # BFD target to use when generating a core file.
 V:const char *:gcore_bfd_target:::0:0:::pstring (gdbarch->gcore_bfd_target)
@@ -1025,6 +1034,12 @@ m:int:has_shared_address_space:void:::default_has_shared_address_space::0
 # True if a fast tracepoint can be set at an address.
 m:int:fast_tracepoint_valid_at:CORE_ADDR addr, char **msg:addr, msg::default_fast_tracepoint_valid_at::0
 
+# Guess register state based on tracepoint location.  Used for tracepoints
+# where no registers have been collected, but there's only one location,
+# allowing us to guess the PC value, and perhaps some other registers.
+# On entry, regcache has all registers marked as unavailable.
+m:void:guess_tracepoint_registers:struct regcache *regcache, CORE_ADDR addr:regcache, addr::default_guess_tracepoint_registers::0
+
 # Return the "auto" target charset.
 f:const char *:auto_charset:void::default_auto_charset:default_auto_charset::0
 # Return the "auto" target wide charset.
@@ -1177,7 +1192,7 @@ cat <<EOF
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1185,12 +1200,12 @@ cat <<EOF
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -1247,6 +1262,8 @@ struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
 struct mem_range;
 struct syscalls_info;
+struct thread_info;
+struct ui_out;
 
 #include "regcache.h"
 

@@ -1,6 +1,6 @@
 /* C language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2015 Free Software Foundation, Inc.
+   Copyright (C) 1992-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,8 +41,7 @@ extern void _initialize_c_language (void);
    character set name.  */
 
 static const char *
-charset_for_string_type (enum c_string_type str_type,
-			 struct gdbarch *gdbarch)
+charset_for_string_type (c_string_type str_type, struct gdbarch *gdbarch)
 {
   switch (str_type & ~C_CHAR)
     {
@@ -72,11 +71,11 @@ charset_for_string_type (enum c_string_type str_type,
    characters of this type in target BYTE_ORDER to the host character
    set.  */
 
-static enum c_string_type
+static c_string_type
 classify_type (struct type *elttype, struct gdbarch *gdbarch,
 	       const char **encoding)
 {
-  enum c_string_type result;
+  c_string_type result;
 
   /* We loop because ELTTYPE may be a typedef, and we want to
      successively peel each typedef until we reach a type we
@@ -155,7 +154,7 @@ c_emit_char (int c, struct type *type,
 void
 c_printchar (int c, struct type *type, struct ui_file *stream)
 {
-  enum c_string_type str_type;
+  c_string_type str_type;
 
   str_type = classify_type (type, get_type_arch (type), NULL);
   switch (str_type)
@@ -191,7 +190,7 @@ c_printstr (struct ui_file *stream, struct type *type,
 	    const char *user_encoding, int force_ellipses,
 	    const struct value_print_options *options)
 {
-  enum c_string_type str_type;
+  c_string_type str_type;
   const char *type_encoding;
   const char *encoding;
 
@@ -577,7 +576,7 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	struct obstack output;
 	struct cleanup *cleanup;
 	struct value *result;
-	enum c_string_type dest_type;
+	c_string_type dest_type;
 	const char *dest_charset;
 	int satisfy_expected = 0;
 
@@ -589,8 +588,8 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 
 	++*pos;
 	limit = *pos + BYTES_TO_EXP_ELEM (oplen + 1);
-	dest_type
-	  = (enum c_string_type) longest_to_int (exp->elts[*pos].longconst);
+	dest_type = ((enum c_string_type_values)
+		     longest_to_int (exp->elts[*pos].longconst));
 	switch (dest_type & ~C_CHAR)
 	  {
 	  case C_STRING:
@@ -702,7 +701,7 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 			obstack_object_size (&output));
 	      }
 	    else
-	      result = value_cstring (obstack_base (&output),
+	      result = value_cstring ((const char *) obstack_base (&output),
 				      obstack_object_size (&output),
 				      type);
 	  }

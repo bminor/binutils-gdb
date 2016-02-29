@@ -1,3 +1,188 @@
+2016-02-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (sim_engine_run): Change sd->base.prog_bfd to
+	STATE_PROG_BFD (sd).
+	* configure: Regenerate.
+
+2016-01-18  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR sim/19441
+	* micromips.igen (delayslot_micromips): Enable for `micromips32',
+	`micromips64' and `micromipsdsp' only.
+	(process_isa_mode): Enable for `micromips32' and `micromips64' only.
+	(do_micromips_jalr, do_micromips_jal): Likewise.
+	(compute_movep_src_reg): Likewise.
+	(compute_andi16_imm): Likewise.
+	(convert_fmt_micromips): Likewise.
+	(convert_fmt_micromips_cvt_d): Likewise.
+	(convert_fmt_micromips_cvt_s): Likewise.
+	(FMT_MICROMIPS): Likewise.
+	(FMT_MICROMIPS_CVT_D): Likewise.
+	(FMT_MICROMIPS_CVT_S): Likewise.
+
+2016-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include elf-bfd.h.
+	(sim_create_inferior): Truncate pc to 32-bits when EI_CLASS is
+	ELFCLASS32.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_SMP): Delete call.
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_INLINE): Delete call.
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Mark argv const.
+	(sim_create_inferior): Mark argv and env const.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Update sim_parse_args comment.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
+	* configure: Regenerate.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (mips_endian): Change LITTLE_ENDIAN to LITTLE.
+	(default_endian): Likewise.  Change BIG_ENDIAN to BIG.
+	* configure: Regenerate.
+	* sim-main.h (BigEndianMem): Change BIG_ENDIAN to BFD_ENDIAN_BIG.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-tx3904cpu.c (CPU, SD): Delete.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (mips_reg_store, mips_reg_fetch): Define.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+	(sim_store_register): Rename to ...
+	(mips_reg_store): ... this.  Delete local cpu var.
+	Update sim_io_eprintf calls.
+	(sim_fetch_register): Rename to ...
+	(mips_reg_fetch): ... this.  Delete local cpu var.
+	Update sim_io_eprintf calls.
+
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-hload.o.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_write, sim_read): Delete.
+	(store_word): Delete call to AddressTranslation and set paddr=vaddr.
+	(load_word): Likewise.
+	* micromips.igen (cache): Likewise.
+	* mips.igen (do_ll, do_lld, do_sc, do_scd, do_suxc1_32, do_swc1,
+	do_swxc1, cache, do_load, do_load_left, do_load_right, do_store,
+	do_store_left, do_store_right, do_load_double, do_store_double):
+	Likewise.
+	(do_pref): Delete call to AddressTranslation and stub out Prefetch.
+	(do_prefx): Likewise.
+	* sim-main.c (address_translation, prefetch): Delete.
+	(ifetch32, ifetch16): Delete call to AddressTranslation and set
+	paddr=vaddr.
+	* sim-main.h (Uncached, CachedNoncoherent, CachedCoherent, Cached,
+	address_translation, AddressTranslation, prefetch, Prefetch): Delete.
+	(LoadMemory, StoreMemory): Delete CCA arg.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_SUBTARGET): Drop -DTARGET_TX3904=1.
+	* configure: Regenerated.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_QUIET_NAN_NEGATED): Move from tconfig.h.
+	* tconfig.h: Delete.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.h (SIM_HANDLES_LMA): Delete.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_WATCHPOINTS): Delete.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c [SIM_HAVE_FLATMEM] (sim_open): Delete flatmem code.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.h (SIM_HAVE_SIMCACHE): Delete.
+
+2015-12-15  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* micromips.igen (process_isa_mode): Fix left shift of negative
+	value.
+
+2015-11-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_MODULO_MEMORY): Delete.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-reason.o and sim-stop.o.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_close): Rename to ...
+	(mips_sim_close): ... this.  Delete calls to sim_module_uninstall and
+	sim_io_shutdown.
+	* sim-main.h (mips_sim_close): Declare.
+	(SIM_CLOSE_HOOK): Define.
+
 2015-09-25  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Ali Lown  <ali.lown@imgtec.com>
 

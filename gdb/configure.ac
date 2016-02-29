@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright (C) 1995-2015 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2016 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -1243,13 +1243,13 @@ if test "$ENABLE_LIBMCHECK" = "yes" \
 fi
 
 AC_ARG_WITH(intel_pt,
-  AS_HELP_STRING([--with-intel-pt], [include Intel(R) Processor Trace support (auto/yes/no)]),
+  AS_HELP_STRING([--with-intel-pt], [include Intel Processor Trace support (auto/yes/no)]),
   [], [with_intel_pt=auto])
 AC_MSG_CHECKING([whether to use intel pt])
 AC_MSG_RESULT([$with_intel_pt])
 
 if test "${with_intel_pt}" = no; then
-  AC_MSG_WARN([Intel(R) Processor Trace support disabled; some features may be unavailable.])
+  AC_MSG_WARN([Intel Processor Trace support disabled; some features may be unavailable.])
   HAVE_LIBIPT=no
 else
   AC_PREPROC_IFELSE(AC_LANG_SOURCE([[
@@ -1448,7 +1448,8 @@ fi
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
 AC_CHECK_MEMBERS([struct reg.r_fs, struct reg.r_gs], [], [],
-                 [#include <machine/reg.h>])
+                 [#include <sys/types.h>
+#include <machine/reg.h>])
 
 # See if <sys/user.h> supports the %fs_base and %gs_bas amd64 segment registers.
 # Older amd64 Linux's don't have the fs_base and gs_base members of
@@ -1509,6 +1510,13 @@ if test $gdb_cv_have_pt_getxmmregs = yes; then
   AC_DEFINE(HAVE_PT_GETXMMREGS, 1,
   [Define if sys/ptrace.h defines the PT_GETXMMREGS request.])
 fi
+
+# See if <sys/ptrace.h> supports LWP names on FreeBSD
+# Older FreeBSD versions don't have the pl_tdname member of
+# `struct ptrace_lwpinfo'.
+AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_tdname], [], [],
+                 [#include <sys/ptrace.h>])
+
 
 # Detect which type of /proc is in use, such as for Solaris.
 
@@ -1850,25 +1858,6 @@ if test "x$gdb_cv_thread_db_h_has_td_notls" = "xyes"; then
             [Define if <thread_db.h> has the TD_NOTLS error code.])
 fi
 
-dnl See if we have a sys/syscall header file that has __NR_tkill.
-if test "x$ac_cv_header_sys_syscall_h" = "xyes"; then
-   AC_CACHE_CHECK([whether <sys/syscall.h> has __NR_tkill],
-                  gdb_cv_sys_syscall_h_has_tkill,
-     AC_TRY_COMPILE(
-       [#include <sys/syscall.h>],
-       [int i = __NR_tkill;],
-       gdb_cv_sys_syscall_h_has_tkill=yes,
-       gdb_cv_sys_syscall_h_has_tkill=no
-     )
-   )
-fi
-dnl See if we can issue tkill syscall.
-if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes"; then
-  AC_CHECK_FUNC(syscall,
-    AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
-  )
-fi
-
 dnl Check if we can disable the virtual address space randomization.
 dnl The functionality of setarch -R.
 AC_CHECK_DECLS([ADDR_NO_RANDOMIZE],,, [#include <sys/personality.h>])
@@ -1924,113 +1913,7 @@ GDB_AC_WITH_DIR(SYSTEM_GDBINIT, system-gdbinit,
     [automatically load a system-wide gdbinit file],
     [])
 
-AC_ARG_ENABLE(werror,
-  AS_HELP_STRING([--enable-werror], [treat compile warnings as errors]),
-  [case "${enableval}" in
-     yes | y) ERROR_ON_WARNING="yes" ;;
-     no | n)  ERROR_ON_WARNING="no" ;;
-     *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
-   esac])
-
-# Enable -Werror by default when using gcc in C mode.  Leave it off
-# for C++ until we're warning clean.  Turn it off for releases.
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" \
-   && test x"$enable_build_with_cxx" != x"yes" \
-   && $development; then
-    ERROR_ON_WARNING=yes
-fi
-
-WERROR_CFLAGS=""
-if test "${ERROR_ON_WARNING}" = yes ; then
-    WERROR_CFLAGS="-Werror"
-fi
-
-# These options work in either C or C++ modes.
-build_warnings="-Wall -Wpointer-arith \
--Wno-unused -Wunused-value -Wunused-function \
--Wno-switch -Wno-char-subscripts \
--Wempty-body"
-
-# Now add in C and C++ specific options, depending on mode.
-if test "$enable_build_with_cxx" = "yes"; then
-   build_warnings="$build_warnings -Wno-sign-compare -Wno-write-strings \
--Wno-narrowing"
-else
-   build_warnings="$build_warnings -Wpointer-sign -Wmissing-prototypes \
--Wdeclaration-after-statement -Wmissing-parameter-type \
--Wold-style-declaration -Wold-style-definition"
-fi
-
-# Enable -Wno-format by default when using gcc on mingw since many
-# GCC versions complain about %I64.
-case "${host}" in
-  *-*-mingw32*) build_warnings="$build_warnings -Wno-format" ;;
-  *) build_warnings="$build_warnings -Wformat-nonliteral" ;;
-esac
-
-AC_ARG_ENABLE(build-warnings,
-AS_HELP_STRING([--enable-build-warnings], [enable build-time compiler warnings if gcc is used]),
-[case "${enableval}" in
-  yes)	;;
-  no)	build_warnings="-w";;
-  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
-  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
-  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
-  echo "Setting compiler warning flags = $build_warnings" 6>&1
-fi])dnl
-AC_ARG_ENABLE(gdb-build-warnings,
-AS_HELP_STRING([--enable-gdb-build-warnings], [enable GDB specific build-time compiler warnings if gcc is used]),
-[case "${enableval}" in
-  yes)	;;
-  no)	build_warnings="-w";;
-  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
-  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
-  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
-  echo "Setting GDB specific compiler warning flags = $build_warnings" 6>&1
-fi])dnl
-
-# The set of warnings supported by a C++ compiler is not the same as
-# of the C compiler.
-if test "$enable_build_with_cxx" = "yes"; then
-    AC_LANG_PUSH([C++])
-fi
-
-WARN_CFLAGS=""
-if test "x${build_warnings}" != x -a "x$GCC" = xyes
-then
-    AC_MSG_CHECKING(compiler warning flags)
-    # Separate out the -Werror flag as some files just cannot be
-    # compiled with it enabled.
-    for w in ${build_warnings}; do
-	case $w in
-	-Werr*) WERROR_CFLAGS=-Werror ;;
-	*)
-	    # Check whether GCC accepts it.
-	    saved_CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS $w"
-	    saved_CXXFLAGS="$CXXFLAGS"
-	    CXXFLAGS="$CXXFLAGS $w"
-	    AC_TRY_COMPILE([],[],WARN_CFLAGS="${WARN_CFLAGS} $w",)
-	    CFLAGS="$saved_CFLAGS"
-	    CXXFLAGS="$saved_CXXFLAGS"
-	esac
-    done
-    AC_MSG_RESULT(${WARN_CFLAGS} ${WERROR_CFLAGS})
-fi
-AC_SUBST(WARN_CFLAGS)
-AC_SUBST(WERROR_CFLAGS)
-
-if test "$enable_build_with_cxx" = "yes"; then
-   AC_LANG_POP([C++])
-fi
+AM_GDB_WARNINGS
 
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,
@@ -2273,6 +2156,14 @@ if test "${ignore_sim}" = "false"; then
     SIM="${gdb_sim}"
     SIM_OBS="remote-sim.o"
     AC_DEFINE(WITH_SIM, 1, [Define if the simulator is being linked in.])
+
+    # Some tdep code should only be compiled in when the ppc sim is
+    # built.  PR sim/13418.
+    case $target in
+      powerpc*-*-*)
+	AC_DEFINE(WITH_PPC_SIM, 1, [Define if the PPC simulator is being linked in.])
+	;;
+    esac
   fi
 fi
 AC_SUBST(SIM)
@@ -2442,8 +2333,7 @@ AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
 GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])
 GDB_AC_TRANSFORM([gcore], [GCORE_TRANSFORM_NAME])
 AC_CONFIG_FILES([gcore], [chmod +x gcore])
-
-AC_OUTPUT(Makefile gdb-gdb.gdb doc/Makefile data-directory/Makefile,
+AC_CONFIG_FILES([Makefile gdb-gdb.gdb doc/Makefile data-directory/Makefile],
 [
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)
@@ -2451,4 +2341,4 @@ echo > stamp-h ;;
 esac
 ])
 
-exit 0
+AC_OUTPUT

@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2015 Free Software Foundation, Inc.
+# Copyright (C) 2012-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ case $target_triplet in {
 	run_dump_test redef
 	# These targets fail redef2 because they disallow redefined
 	# symbols on relocs.
-	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "arc-*-*"
+	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "arc*-*-*"
 	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"

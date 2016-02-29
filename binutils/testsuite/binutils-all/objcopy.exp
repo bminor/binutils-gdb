@@ -1,4 +1,4 @@
-#   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1005,6 +1005,23 @@ proc objcopy_test_symbol_manipulation {} {
     }
 }
 
+proc objcopy_test_elf_common_symbols {} {
+    global srcdir
+    global subdir
+
+    # hpux has a non-standard common directive.
+    if { [istarget "*-*-hpux*"] } then {
+	return
+    }
+
+    set test_list [lsort [glob -nocomplain $srcdir/$subdir/common-*.d]]
+    foreach t $test_list {
+        # We need to strip the ".d", but can leave the dirname.
+        verbose [file rootname $t]
+        run_dump_test [file rootname $t]
+    }
+}
+
 # ia64 specific tests
 if { ([istarget "ia64-*-elf*"]
        || [istarget "ia64-*-linux*"]) } {
@@ -1014,6 +1031,7 @@ if { ([istarget "ia64-*-elf*"]
 # ELF specific tests
 if [is_elf_format] {
     objcopy_test_symbol_manipulation
+    objcopy_test_elf_common_symbols
     objcopy_test "ELF unknown section type" unknown.s
     objcopy_test_readelf "ELF group" group.s
     objcopy_test_readelf "ELF group" group-2.s
@@ -1104,3 +1122,43 @@ if [is_elf_format] {
     run_dump_test "exclude-1b"
 }
 run_dump_test "localize-hidden-2"
+
+# Test objcopying an object file without global symbol
+
+proc objcopy_test_without_global_symbol { } {
+    global OBJCOPY
+    global OBJCOPYFLAGS
+    global OBJDUMP
+    global OBJDUMPFLAGS
+    global srcdir
+    global subdir
+
+    set test "strip without global symbol "
+
+    if { [target_compile $srcdir/$subdir/pr19547.c tmpdir/pr19547.o object debug] != "" } {
+	untested $test
+	return
+    }
+
+    if [is_remote host] {
+	set objfile [remote_download host tmpdir/pr19547.o]
+    } else {
+	set objfile tmpdir/pr19547.o
+    }
+
+    set exec_output [binutils_run $OBJCOPY "$OBJCOPYFLAGS --strip-unneeded $objfile"]
+    if ![string equal "" $exec_output] {
+	fail $test
+	return
+    }
+
+    set exec_output [binutils_run $OBJDUMP "$OBJDUMPFLAGS -t $objfile"]
+    if {![regexp "no symbols" $exec_output]} {
+	fail $test
+	return
+    }
+
+    pass $test
+}
+
+objcopy_test_without_global_symbol

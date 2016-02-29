@@ -1,4 +1,4 @@
-# Copyright 2015 Free Software Foundation, Inc.
+# Copyright 2015-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ gdb_test_multiple "complete set gnutarget " $test {
 }
 
 set corebz2file ${srcdir}/${subdir}/${testfile}.core.bz2
-set corefile ${objdir}/${subdir}/${testfile}.core
+set corefile [standard_output_file ${testfile}.core]
 # Entry point of the original executable.
 set address 0x400078
 

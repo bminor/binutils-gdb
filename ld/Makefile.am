@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2016 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -121,6 +121,12 @@ CXX_FOR_TARGET = ` \
       echo $$r/../gcc/g++ -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
     else \
       echo $$r/../gcc/g++ -B$$r/../gcc/; \
+    fi; \
+  elif [ -f $$r/../gcc/xg++ ] ; then \
+    if [ -f $$r/../newlib/Makefile ] ; then \
+      echo $$r/../gcc/xg++ -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/../gcc/xg++ -B$$r/../gcc/; \
     fi; \
   else \
     if [ "@host@" = "@target@" ] ; then \
@@ -663,6 +669,10 @@ GENSCRIPTS = LIB_PATH='${LIB_PATH}' $(SHELL) $(srcdir)/genscripts.sh "${srcdir}"
 GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 ELF_DEPS = $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/elf-generic.em $(srcdir)/scripttempl/DWARF.sc
 ELF_GEN_DEPS = $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em $(srcdir)/emultempl/genelf.em $(srcdir)/scripttempl/DWARF.sc
+ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+	       $(srcdir)/emulparams/extern_protected_data.sh \
+	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
+	       $(srcdir)/emulparams/call_nop.sh
 
 @TDIRS@
 
@@ -1293,37 +1303,37 @@ eelf32xtensa.c: $(srcdir)/emulparams/elf32xtensa.sh $(ELF_DEPS) \
   $(srcdir)/scripttempl/elfxtensa.sc ${GEN_DEPENDS}
 
 eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_i386_chaos.c: $(srcdir)/emulparams/elf_i386_chaos.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf_chaos.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf_chaos.sc ${GEN_DEPENDS}
 
 eelf_i386_fbsd.c: $(srcdir)/emulparams/elf_i386_fbsd.sh \
   $(srcdir)/emulparams/elf_i386.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_i386_nacl.c: $(srcdir)/emulparams/elf_i386_nacl.sh \
   $(srcdir)/emulparams/elf_i386.sh \
   $(srcdir)/emulparams/elf_nacl.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
   $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_i386_vxworks.c: $(srcdir)/emulparams/elf_i386_vxworks.sh \
   $(srcdir)/emulparams/vxworks.sh $(srcdir)/emultempl/vxworks.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_iamcu.c: $(srcdir)/emulparams/elf_iamcu.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_s390.c: $(srcdir)/emulparams/elf_s390.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1858,12 +1868,12 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
 
 eelf32_x86_64.c: $(srcdir)/emulparams/elf32_x86_64.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32_x86_64_nacl.c: $(srcdir)/emulparams/elf32_x86_64_nacl.sh \
   $(srcdir)/emulparams/elf32_x86_64.sh \
   $(srcdir)/emulparams/elf_nacl.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf64_aix.c: $(srcdir)/emulparams/elf64_aix.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1971,40 +1981,40 @@ eelf64tilegx_be.c: $(srcdir)/emulparams/elf64tilegx_be.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_l1om.c: $(srcdir)/emulparams/elf_l1om.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_l1om_fbsd.c: $(srcdir)/emulparams/elf_l1om_fbsd.sh \
   $(srcdir)/emulparams/elf_l1om.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_k1om.c: $(srcdir)/emulparams/elf_k1om.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_k1om_fbsd.c: $(srcdir)/emulparams/elf_k1om_fbsd.sh \
   $(srcdir)/emulparams/elf_k1om.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_x86_64_cloudabi.c: $(srcdir)/emulparams/elf_x86_64_cloudabi.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_x86_64_fbsd.c: $(srcdir)/emulparams/elf_x86_64_fbsd.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_x86_64_nacl.c: $(srcdir)/emulparams/elf_x86_64_nacl.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
   $(srcdir)/emulparams/elf_nacl.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_x86_64_sol2.c: $(srcdir)/emulparams/elf_x86_64_sol2.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
   $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 ehppa64linux.c: $(srcdir)/emulparams/hppa64linux.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

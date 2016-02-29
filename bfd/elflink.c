@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -546,8 +546,10 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
 
   if ((info->dynamic_data
        && (h->type == STT_OBJECT
+	   || h->type == STT_COMMON
 	   || (sym != NULL
-	       && ELF_ST_TYPE (sym->st_info) == STT_OBJECT)))
+	       && (ELF_ST_TYPE (sym->st_info) == STT_OBJECT
+		   || ELF_ST_TYPE (sym->st_info) == STT_COMMON))))
       || (d != NULL
 	  && h->root.type == bfd_link_hash_new
 	  && (*d->match) (&d->head, NULL, h->root.root.string)))
@@ -575,6 +577,19 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
   h = elf_link_hash_lookup (htab, name, !provide, TRUE, FALSE);
   if (h == NULL)
     return provide;
+
+  if (h->versioned == unknown)
+    {
+      /* Set versioned if symbol version is unknown.  */
+      char *version = strrchr (name, ELF_VER_CHR);
+      if (version)
+	{
+	  if (version > name && version[-1] != ELF_VER_CHR)
+	    h->versioned = versioned_hidden;
+	  else
+	    h->versioned = versioned;
+	}
+    }
 
   switch (h->root.type)
     {
@@ -653,9 +668,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   if ((h->def_dynamic
        || h->ref_dynamic
-       || bfd_link_pic (info)
-       || (bfd_link_pde (info)
-	   && elf_hash_table (info)->is_relocatable_executable))
+       || bfd_link_dll (info)
+       || elf_hash_table (info)->is_relocatable_executable)
       && h->dynindx == -1)
     {
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -896,9 +910,9 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 			  &dynsymcount);
 
   /* There is an unused NULL entry at the head of the table which
-     we must account for in our count.  Unless there weren't any
-     symbols, which means we'll have no table at all.  */
-  if (dynsymcount != 0)
+     we must account for in our count.  We always create the dynsym
+     section, even if it is empty, with dynamic sections.  */
+  if (elf_hash_table (info)->dynamic_sections_created)
     ++dynsymcount;
 
   elf_hash_table (info)->dynsymcount = dynsymcount;
@@ -1505,7 +1519,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
      any such confusion would seem to indicate an erroneous program or
      shared library.  We also permit a common symbol in a regular
      object to override a weak symbol in a shared object.
-     
+
      We let a definition in a dynamic object override the old secondary
      symbol.  */
 
@@ -3659,11 +3673,14 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* If we are creating a shared library, create all the dynamic
 	 sections immediately.  We need to attach them to something,
 	 so we attach them to this BFD, provided it is the right
-	 format and is not from ld --just-symbols.  FIXME: If there
+	 format and is not from ld --just-symbols.  Always create the
+	 dynamic sections for -E/--dynamic-list.  FIXME: If there
 	 are no input BFD's of the same format as the output, we can't
 	 make a shared library.  */
       if (!just_syms
-	  && bfd_link_pic (info)
+	  && (bfd_link_pic (info)
+	      || info->export_dynamic
+	      || info->dynamic)
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
@@ -4645,8 +4662,10 @@ error_free_dyn:
 		break;
 	      }
 
-	  /* Don't add DT_NEEDED for references from the dummy bfd.  */
+	  /* Don't add DT_NEEDED for references from the dummy bfd nor
+	     for unmatched symbol.  */
 	  if (!add_needed
+	      && matched
 	      && definition
 	      && ((dynsym
 		   && h->ref_regular_nonweak
@@ -9115,6 +9134,28 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
   return FALSE;
 }
 
+/* Convert ELF common symbol TYPE.  */
+
+static int
+elf_link_convert_common_type (struct bfd_link_info *info, int type)
+{
+  /* Commom symbol can only appear in relocatable link.  */
+  if (!bfd_link_relocatable (info))
+    abort ();
+  switch (info->elf_stt_common)
+    {
+    case unchanged:
+      break;
+    case elf_stt_common:
+      type = STT_COMMON;
+      break;
+    case no_elf_stt_common:
+      type = STT_OBJECT;
+      break;
+    }
+  return type;
+}
+
 /* Add an external symbol to the symbol table.  This is called from
    the hash table traversal routine.  When generating a shared object,
    we go through the symbol table twice.  The first time we output
@@ -9134,6 +9175,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   const struct elf_backend_data *bed;
   long indx;
   int ret;
+  unsigned int type;
   /* A symbol is bound locally if it is forced local or it is locally
      defined, hidden versioned, not referenced by shared library and
      not exported when linking executable.  */
@@ -9268,49 +9310,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
     strip = TRUE;
 
+  type = h->type;
+
   /* If we're stripping it, and it's not a dynamic symbol, there's
      nothing else to do.   However, if it is a forced local symbol or
      an ifunc symbol we need to give the backend finish_dynamic_symbol
      function a chance to make it dynamic.  */
   if (strip
       && h->dynindx == -1
-      && h->type != STT_GNU_IFUNC
+      && type != STT_GNU_IFUNC
       && !h->forced_local)
     return TRUE;
 
   sym.st_value = 0;
   sym.st_size = h->size;
   sym.st_other = h->other;
-  if (local_bind)
-    {
-      sym.st_info = ELF_ST_INFO (STB_LOCAL, h->type);
-      /* Turn off visibility on local symbol.  */
-      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
-    }
-  /* Set STB_GNU_UNIQUE only if symbol is defined in regular object.  */
-  else if (h->unique_global && h->def_regular)
-    sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, h->type);
-  else if (h->root.type == bfd_link_hash_undefweak
-	   || h->root.type == bfd_link_hash_defweak)
-    {
-      /* Generate defined secondary symbols for "ld -shared -z secondary"
-	 and "ld -r".  For undefined secondary symbols, we convert them
-	 to weak symbols.  We also convert defined secondary symbols in
-	 executables to weak symbols since their bindings in executables
-	 are final and can't be changed.  */
-      if ((bfd_link_relocatable (flinfo->info)
-	   || (!bfd_link_executable (flinfo->info)
-	       && flinfo->info->emit_secondary))
-	  && h->root.type == bfd_link_hash_defweak
-	  && h->root.secondary)
-	  sym.st_info = ELF_ST_INFO (STB_SECONDARY, h->type);
-	else
-	  sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
-    }
-  else
-    sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);
-  sym.st_target_internal = h->target_internal;
-
   switch (h->root.type)
     {
     default:
@@ -9385,6 +9399,56 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       return TRUE;
     }
 
+  if (type == STT_COMMON || type == STT_OBJECT)
+    switch (h->root.type)
+      {
+      case bfd_link_hash_common:
+	type = elf_link_convert_common_type (flinfo->info, type);
+	break;
+      case bfd_link_hash_defined:
+      case bfd_link_hash_defweak:
+	if (bed->common_definition (&sym))
+	  type = elf_link_convert_common_type (flinfo->info, type);
+	else
+	  type = STT_OBJECT;
+	break;
+      case bfd_link_hash_undefined:
+      case bfd_link_hash_undefweak:
+	break;
+      default:
+	abort ();
+      }
+
+  if (local_bind)
+    {
+      sym.st_info = ELF_ST_INFO (STB_LOCAL, type);
+      /* Turn off visibility on local symbol.  */
+      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
+    }
+  /* Set STB_GNU_UNIQUE only if symbol is defined in regular object.  */
+  else if (h->unique_global && h->def_regular)
+    sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, type);
+  else if (h->root.type == bfd_link_hash_undefweak
+	   || h->root.type == bfd_link_hash_defweak)
+    {
+      /* Generate defined secondary symbols for "ld -shared -z secondary"
+	 and "ld -r".  For undefined secondary symbols, we convert them
+	 to weak symbols.  We also convert defined secondary symbols in
+	 executables to weak symbols since their bindings in executables
+	 are final and can't be changed.  */
+      if ((bfd_link_relocatable (flinfo->info)
+	   || (!bfd_link_executable (flinfo->info)
+	       && flinfo->info->emit_secondary))
+	  && h->root.type == bfd_link_hash_defweak
+	  && h->root.secondary)
+	  sym.st_info = ELF_ST_INFO (STB_SECONDARY, type);
+	else
+	  sym.st_info = ELF_ST_INFO (STB_WEAK, type);
+    }
+  else
+    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
+  sym.st_target_internal = h->target_internal;
+
   /* Give the processor backend a chance to tweak the symbol value,
      and also to finish up anything that needs to be done for this
      symbol.  FIXME: Not calling elf_backend_finish_dynamic_symbol for
@@ -9422,7 +9486,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  || ELF_ST_BIND (sym.st_info) == STB_SECONDARY))
     {
       int bindtype;
-      unsigned int type = ELF_ST_TYPE (sym.st_info);
+      type = ELF_ST_TYPE (sym.st_info);
 
       /* Turn an undefined IFUNC symbol into a normal FUNC symbol. */
       if (type == STT_GNU_IFUNC)
@@ -11099,6 +11163,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  unsigned int reloc_count = 0;
+	  unsigned int additional_reloc_count = 0;
 	  struct bfd_elf_section_data *esdi = NULL;
 
 	  if (p->type == bfd_section_reloc_link_order
@@ -11127,7 +11192,15 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		   reloc sections themselves can't have relocations.  */
 		reloc_count = 0;
 	      else if (emit_relocs)
-		reloc_count = sec->reloc_count;
+		{
+		  reloc_count = sec->reloc_count;
+		  if (bed->elf_backend_count_additional_relocs)
+		    {
+		      int c;
+		      c = (*bed->elf_backend_count_additional_relocs) (sec);
+		      additional_reloc_count += c;
+		    }
+		}
 	      else if (bed->elf_backend_count_relocs)
 		reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
 
@@ -11176,14 +11249,21 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  if (reloc_count == 0)
 	    continue;
 
+	  reloc_count += additional_reloc_count;
 	  o->reloc_count += reloc_count;
 
 	  if (p->type == bfd_indirect_link_order && emit_relocs)
 	    {
 	      if (esdi->rel.hdr)
-		esdo->rel.count += NUM_SHDR_ENTRIES (esdi->rel.hdr);
+		{
+		  esdo->rel.count += NUM_SHDR_ENTRIES (esdi->rel.hdr);
+		  esdo->rel.count += additional_reloc_count;
+		}
 	      if (esdi->rela.hdr)
-		esdo->rela.count += NUM_SHDR_ENTRIES (esdi->rela.hdr);
+		{
+		  esdo->rela.count += NUM_SHDR_ENTRIES (esdi->rela.hdr);
+		  esdo->rela.count += additional_reloc_count;
+		}
 	    }
 	  else
 	    {
@@ -11490,15 +11570,20 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    {
 		      const char *iclass, *oclass;
 
-		      if (bed->s->elfclass == ELFCLASS64)
+		      switch (bed->s->elfclass)
 			{
-			  iclass = "ELFCLASS32";
-			  oclass = "ELFCLASS64";
+			case ELFCLASS64: oclass = "ELFCLASS64"; break;
+			case ELFCLASS32: oclass = "ELFCLASS32"; break;
+			case ELFCLASSNONE: oclass = "ELFCLASSNONE"; break;
+			default: abort ();
 			}
-		      else
+
+		      switch (elf_elfheader (sub)->e_ident[EI_CLASS])
 			{
-			  iclass = "ELFCLASS64";
-			  oclass = "ELFCLASS32";
+			case ELFCLASS64: iclass = "ELFCLASS64"; break;
+			case ELFCLASS32: iclass = "ELFCLASS32"; break;
+			case ELFCLASSNONE: iclass = "ELFCLASSNONE"; break;
+			default: abort ();
 			}
 
 		      bfd_set_error (bfd_error_wrong_format);

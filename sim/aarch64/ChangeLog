@@ -1,0 +1,125 @@
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_ENVIRONMENT): Delete call.
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_INLINE): Delete call.
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_create_inferior): Mark argv and env const.
+	(sim_open): Mark argv const.
+
+2016-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Delete dis-asm.h include.
+	(info, opbuf, op_printf, aarch64_print_insn, sim_dis_read): Delete.
+	(sim_create_inferior): Delete disassemble init logic.
+	(OPTION_DISAS, aarch64_option_handler, aarch64_options): Delete.
+	(sim_open): Delete sim_add_option_table call.
+	* memory.c (mem_error): Delete disas check.
+	* simulator.c: Delete dis-asm.h include.
+	(disas): Delete.
+	(HALT_UNALLOC): Replace disassembly logic with TRACE_DISASM.
+	(HALT_NYI): Likewise.
+	(handle_halt): Delete disas call.
+	(aarch64_step): Replace disas logic with TRACE_DISASM.
+	* simulator.h: Delete dis-asm.h include.
+	(aarch64_print_insn): Delete.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* simulator.c (MAX, MIN): Delete.
+	(do_vec_maxv): Change MAX to max and MIN to min.
+	(do_vec_fminmaxV): Likewise.
+
+2016-01-04  Tristan Gingold  <gingold@adacore.com>
+
+	* simulator.c: Remove syscall.h include.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
+	* configure: Regenerate.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_dis_read): Change private_data to application_data.
+	(sim_create_inferior): Likewise.
+
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-hload.o.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_create_inferior): Update comment and argv check.
+
+2015-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (system_get): New function.  Provides read
+	access to the dczid system register.
+	(do_mrs): New function - implements the MRS instruction.
+	(dexSystem): Call do_mrs for the MRS instruction.  Halt on
+	unimplemented system instructions.
+
+2015-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac: New configure template.
+	* aclocal.m4: Generate.
+	* config.in: Generate.
+	* configure: Generate.
+	* cpustate.c: New file - functions for accessing AArch64 registers.
+	* cpustate.h: New header.
+	* decode.h: New header.
+	* interp.c: New file - interface between GDB and simulator.
+	* Makefile.in: New makefile template.
+	* memory.c: New file - functions for simulating aarch64 memory
+	accesses.
+	* memory.h: New header.
+	* sim-main.h: New header.
+	* simulator.c: New file - aarch64 simulator functions.
+	* simulator.h: New header.

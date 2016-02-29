@@ -1,4 +1,4 @@
-/* Copyright (C) 1995-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,14 @@ void arm_fill_vfpregset_num (struct regcache *regcache, void *buf, int num);
 void arm_store_vfpregset_num (struct regcache *regcache, const void *buf,
 			      int num);
 
+int arm_breakpoint_kind_from_pc (CORE_ADDR *pcptr);
+const gdb_byte *arm_sw_breakpoint_from_kind (int kind , int *size);
+int arm_breakpoint_kind_from_current_state (CORE_ADDR *pcptr);
+int arm_breakpoint_at (CORE_ADDR where);
+
 void initialize_low_arch_aarch32 (void);
 
 void init_registers_arm_with_neon (void);
+int arm_is_thumb_mode (void);
+
 extern const struct target_desc *tdesc_arm_with_neon;

@@ -1,5 +1,5 @@
 /* Linux-specific ptrace manipulation routines.
-   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+   Copyright (C) 2012-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -261,7 +261,7 @@ linux_ptrace_test_ret_to_nx (void)
    FUNCTION).  For MMU targets, CHILD_STACK is ignored.  */
 
 static int
-linux_fork_to_function (gdb_byte *child_stack, void (*function) (gdb_byte *))
+linux_fork_to_function (gdb_byte *child_stack, int (*function) (void *))
 {
   int child_pid;
 
@@ -298,8 +298,8 @@ linux_fork_to_function (gdb_byte *child_stack, void (*function) (gdb_byte *))
 /* A helper function for linux_check_ptrace_features, called after
    the child forks a grandchild.  */
 
-static void
-linux_grandchild_function (gdb_byte *child_stack)
+static int
+linux_grandchild_function (void *child_stack)
 {
   /* Free any allocated stack.  */
   xfree (child_stack);
@@ -313,14 +313,14 @@ linux_grandchild_function (gdb_byte *child_stack)
    the parent process forks a child.  The child allows itself to
    be traced by its parent.  */
 
-static void
-linux_child_function (gdb_byte *child_stack)
+static int
+linux_child_function (void *child_stack)
 {
   ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0);
   kill (getpid (), SIGSTOP);
 
   /* Fork a grandchild.  */
-  linux_fork_to_function (child_stack, linux_grandchild_function);
+  linux_fork_to_function ((gdb_byte *) child_stack, linux_grandchild_function);
 
   /* This code is only reacheable by the child (grandchild's parent)
      process.  */

@@ -1,5 +1,5 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
-   Copyright (C) 1989-2015 Free Software Foundation, Inc.
+   Copyright (C) 1989-2016 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -1973,7 +1973,7 @@ static unsigned
 insert_operand (unsigned insn,
 		const struct alpha_operand *operand,
 		offsetT val,
-		char *file,
+		const char *file,
 		unsigned line)
 {
   if (operand->bits != 32 && !(operand->flags & AXP_OPERAND_NOOVERFLOW))

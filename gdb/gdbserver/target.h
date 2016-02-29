@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -21,6 +21,7 @@
 #ifndef TARGET_H
 #define TARGET_H
 
+#include <sys/types.h> /* for mode_t */
 #include "target/target.h"
 #include "target/resume.h"
 #include "target/wait.h"
@@ -74,8 +75,9 @@ struct target_ops
 
   int (*create_inferior) (char *program, char **args);
 
-  /* Architecture-specific setup.  */
-  void (*arch_setup) (void);
+  /* Do additional setup after a new process is created, including
+     exec-wrapper completion.  */
+  void (*post_create_inferior) (void);
 
   /* Attach to a running process.
 
@@ -306,8 +308,9 @@ struct target_ops
   int (*read_loadmap) (const char *annex, CORE_ADDR offset,
 		       unsigned char *myaddr, unsigned int len);
 
-  /* Target specific qSupported support.  */
-  void (*process_qsupported) (const char *);
+  /* Target specific qSupported support.  FEATURES is an array of
+     features with COUNT elements.  */
+  void (*process_qsupported) (char **features, int count);
 
   /* Return 1 if the target supports tracepoints, 0 (or leave the
      callback NULL) otherwise.  */
@@ -451,6 +454,26 @@ struct target_ops
      specific meaning like the Z0 kind parameter.
      SIZE is set to the software breakpoint's length in memory.  */
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
+
+  /* Return the thread's name, or NULL if the target is unable to determine it.
+     The returned value must not be freed by the caller.  */
+  const char *(*thread_name) (ptid_t thread);
+
+  /* Return the breakpoint kind for this target based on the current
+     processor state (e.g. the current instruction mode on ARM) and the
+     PC.  The PCPTR is adjusted to the real memory location in case a flag
+     (e.g., the Thumb bit on ARM) is present in the PC.  */
+  int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
+
+  /* Returns true if the target can software single step.  */
+  int (*supports_software_single_step) (void);
+
+  /* Return 1 if the target supports catch syscall, 0 (or leave the
+     callback NULL) otherwise.  */
+  int (*supports_catch_syscall) (void);
+
+  /* Return tdesc index for IPA.  */
+  int (*get_ipa_tdesc_idx) (void);
 };
 
 extern struct target_ops *the_target;
@@ -460,11 +483,11 @@ void set_target_ops (struct target_ops *);
 #define create_inferior(program, args) \
   (*the_target->create_inferior) (program, args)
 
-#define target_arch_setup()			 \
-  do						 \
-    {						 \
-      if (the_target->arch_setup != NULL)	 \
-	(*the_target->arch_setup) ();		 \
+#define target_post_create_inferior()			 \
+  do							 \
+    {							 \
+      if (the_target->post_create_inferior != NULL)	 \
+	(*the_target->post_create_inferior) ();		 \
     } while (0)
 
 #define myattach(pid) \
@@ -519,12 +542,20 @@ int kill_inferior (int);
   (the_target->supports_multi_process ? \
    (*the_target->supports_multi_process) () : 0)
 
-#define target_process_qsupported(query)		\
+#define target_process_qsupported(features, count)	\
   do							\
     {							\
       if (the_target->process_qsupported)		\
-	the_target->process_qsupported (query);		\
+	the_target->process_qsupported (features, count); \
     } while (0)
+
+#define target_supports_catch_syscall()              	\
+  (the_target->supports_catch_syscall ?			\
+   (*the_target->supports_catch_syscall) () : 0)
+
+#define target_get_ipa_tdesc_idx()			\
+  (the_target->get_ipa_tdesc_idx			\
+   ? (*the_target->get_ipa_tdesc_idx) () : 0)
 
 #define target_supports_tracepoints()			\
   (the_target->supports_tracepoints			\
@@ -638,6 +669,15 @@ int kill_inferior (int);
    ? (*the_target->breakpoint_kind_from_pc) (pcptr) \
    : default_breakpoint_kind_from_pc (pcptr))
 
+#define target_breakpoint_kind_from_current_state(pcptr) \
+  (the_target->breakpoint_kind_from_current_state \
+   ? (*the_target->breakpoint_kind_from_current_state) (pcptr) \
+   : target_breakpoint_kind_from_pc (pcptr))
+
+#define target_supports_software_single_step() \
+  (the_target->supports_software_single_step ? \
+   (*the_target->supports_software_single_step) () : 0)
+
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 
 int start_non_stop (int nonstop);
@@ -645,21 +685,19 @@ int start_non_stop (int nonstop);
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	       int connected_wait);
 
-#define prepare_to_access_memory()		\
-  (the_target->prepare_to_access_memory		\
-   ? (*the_target->prepare_to_access_memory) () \
-   : 0)
+/* Prepare to read or write memory from the inferior process.  See the
+   corresponding target_ops methods for more details.  */
 
-#define done_accessing_memory()				\
-  do							\
-    {							\
-      if (the_target->done_accessing_memory)     	\
-	(*the_target->done_accessing_memory) ();  	\
-    } while (0)
+int prepare_to_access_memory (void);
+void done_accessing_memory (void);
 
 #define target_core_of_thread(ptid)		\
   (the_target->core_of_thread ? (*the_target->core_of_thread) (ptid) \
    : -1)
+
+#define target_thread_name(ptid)                                \
+  (the_target->thread_name ? (*the_target->thread_name) (ptid)  \
+   : NULL)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 

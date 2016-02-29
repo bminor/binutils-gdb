@@ -1,6 +1,6 @@
 /* Code dealing with dummy stack frames, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -130,7 +130,7 @@ pop_dummy_frame_bpt (struct breakpoint *b, void *dummy_voidp)
 {
   struct dummy_frame *dummy = (struct dummy_frame *) dummy_voidp;
 
-  if (b->thread == pid_to_thread_id (dummy->id.ptid)
+  if (b->thread == ptid_to_global_thread_id (dummy->id.ptid)
       && b->disposition == disp_del && frame_id_eq (b->frame_id, dummy->id.id))
     {
       while (b->related_breakpoint != b)

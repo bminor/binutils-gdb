@@ -1,5 +1,5 @@
 /* macro.c - macro support for gas
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -648,7 +648,7 @@ free_macro (macro_entry *macro)
 const char *
 define_macro (size_t idx, sb *in, sb *label,
 	      size_t (*get_line) (sb *),
-	      char *file, unsigned int line,
+	      const char *file, unsigned int line,
 	      const char **namep)
 {
   macro_entry *macro;

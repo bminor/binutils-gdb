@@ -1,5 +1,5 @@
 /* ELF support for BFD.
-   Copyright (C) 1991-2015 Free Software Foundation, Inc.
+   Copyright (C) 1991-2016 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -599,6 +599,20 @@
 /* Note segment for SystemTap probes.  */
 #define NT_STAPSDT	3
 
+/* Note segments for core files on FreeBSD systems.  Note name is
+   "FreeBSD".  */
+
+#define	NT_FREEBSD_THRMISC	7	/* Thread miscellaneous info. */
+#define	NT_FREEBSD_PROCSTAT_PROC	8	/* Procstat proc data. */
+#define	NT_FREEBSD_PROCSTAT_FILES	9	/* Procstat files data. */
+#define	NT_FREEBSD_PROCSTAT_VMMAP	10	/* Procstat vmmap data. */
+#define	NT_FREEBSD_PROCSTAT_GROUPS	11	/* Procstat groups data. */
+#define	NT_FREEBSD_PROCSTAT_UMASK	12	/* Procstat umask data. */
+#define	NT_FREEBSD_PROCSTAT_RLIMIT	13	/* Procstat rlimit data. */
+#define	NT_FREEBSD_PROCSTAT_OSREL	14	/* Procstat osreldate data. */
+#define	NT_FREEBSD_PROCSTAT_PSSTRINGS	15	/* Procstat ps_strings data. */
+#define	NT_FREEBSD_PROCSTAT_AUXV	16	/* Procstat auxv data. */
+
 /* Note segments for core files on NetBSD systems.  Note name
    must start with "NetBSD-CORE".  */
 
@@ -1015,6 +1029,7 @@
 #define AT_SUN_LDNAME   2006    /* String giving name of dynamic linker.  */
 #define AT_SUN_LPAGESZ  2007    /* Large pagesize.   */
 #define AT_SUN_PLATFORM 2008    /* Platform name string.  */
+#undef AT_SUN_HWCAP
 #define AT_SUN_HWCAP    2009	/* Machine dependent hints about
 				   processor capabilities.  */
 #define AT_SUN_IFLUSH   2010    /* Should flush icache? */

@@ -1,4 +1,4 @@
-#   Copyright 1988-2015 Free Software Foundation, Inc.
+#   Copyright 1988-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -587,6 +587,8 @@ set show_conv_list \
 	{$_sdata = void} \
 	{$_siginfo = void} \
 	{$_thread = 0} \
+	{$_gthread = 0} \
+	{$_inferior = 1} \
 	{$_exception = <error: No frame selected>} \
 	{$_probe_argc = <error: No frame selected>} \
 	{$_probe_arg0 = <error: No frame selected>} \

@@ -1,5 +1,5 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
-   Copyright (C) 1989-2015 Free Software Foundation, Inc.
+   Copyright (C) 1989-2016 Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
    This file is part of the GNU opcodes library.
@@ -2185,41 +2185,7 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
   else
     insn = bfd_getl16 (buffer);
 
-  if ((insn & 0xfc00) == 0x7c00)
-    {
-      /* This is a 48-bit microMIPS instruction.  */
-      higher = insn;
-
-      status = (*info->read_memory_func) (memaddr + 2, buffer, 2, info);
-      if (status != 0)
-	{
-	  infprintf (is, "micromips 0x%x", higher);
-	  (*info->memory_error_func) (status, memaddr + 2, info);
-	  return -1;
-	}
-      if (info->endian == BFD_ENDIAN_BIG)
-	insn = bfd_getb16 (buffer);
-      else
-	insn = bfd_getl16 (buffer);
-      higher = (higher << 16) | insn;
-
-      status = (*info->read_memory_func) (memaddr + 4, buffer, 2, info);
-      if (status != 0)
-	{
-	  infprintf (is, "micromips 0x%x", higher);
-	  (*info->memory_error_func) (status, memaddr + 4, info);
-	  return -1;
-	}
-      if (info->endian == BFD_ENDIAN_BIG)
-	insn = bfd_getb16 (buffer);
-      else
-	insn = bfd_getl16 (buffer);
-      infprintf (is, "0x%x%04x (48-bit insn)", higher, insn);
-
-      info->insn_type = dis_noninsn;
-      return 6;
-    }
-  else if ((insn & 0x1c00) == 0x0000 || (insn & 0x1000) == 0x1000)
+  if ((insn & 0x1c00) == 0x0000 || (insn & 0x1000) == 0x1000)
     {
       /* This is a 32-bit microMIPS instruction.  */
       higher = insn;

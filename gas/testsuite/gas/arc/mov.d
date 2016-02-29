@@ -15,7 +15,7 @@ Disassembly of section .text:
 0x[0-9a-f]+ 230a 1f80 4242 4242 	mov	r11,0x42424242
 0x[0-9a-f]+ 260a 7f80 1234 5678 	mov	0,0x12345678
 0x[0-9a-f]+ 200a 0f80 0000 0000 	mov	r0,0
-			34: ARC_32_ME	foo
+			34: R_ARC_32_ME	foo
 0x[0-9a-f]+ 20ca 0040           	mov	r0,r1
 0x[0-9a-f]+ 23ca 0100           	mov	r3,r4
 0x[0-9a-f]+ 26ca 01c1           	mov.eq	r6,r7

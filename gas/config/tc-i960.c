@@ -1,5 +1,5 @@
 /* tc-i960.c - All the i80960-specific stuff
-   Copyright (C) 1989-2015 Free Software Foundation, Inc.
+   Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
    This file is part of GAS.
 
@@ -240,7 +240,7 @@ struct regop
    operands.  */
 static const struct
   {
-    char *reg_name;
+    const char *reg_name;
     int reg_num;
   }
 regnames[] =
@@ -335,7 +335,7 @@ regnames[] =
    'abase' (indirect addressing) registers.  */
 static const struct
 {
-  char *areg_name;
+  const char *areg_name;
   int areg_num;
 }
 aregs[] =
@@ -559,7 +559,7 @@ emit (long instr)		/* Word to be output, host byte order.  */
 
 static void
 get_cdisp (char *dispP, /* Displacement as specified in source instruction.  */
-	   char *ifmtP, /* "COBR" or "CTRL" (for use in error message).  */
+	   const char *ifmtP, /* "COBR" or "CTRL" (for use in error message).  */
 	   long instr,  /* Instruction needing the displacement.  */
 	   int numbits, /* # bits of displacement (13 for COBR, 24 for CTRL).  */
 	   int var_frag,/* 1 if varying length code fragment should be emitted;
@@ -1809,7 +1809,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 struct tabentry
 {
-  char *flag;
+  const char *flag;
   int arch;
 };
 static const struct tabentry arch_tab[] =

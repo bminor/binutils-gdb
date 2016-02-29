@@ -1,6 +1,6 @@
 /* AArch64 assembler/disassembler support.
 
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GNU Binutils.
@@ -38,6 +38,7 @@ typedef uint32_t aarch64_insn;
 
 /* The following bitmasks control CPU features.  */
 #define AARCH64_FEATURE_V8	0x00000001	/* All processors.  */
+#define AARCH64_FEATURE_V8_2	0x00000020      /* ARMv8.2 processors.  */
 #define AARCH64_FEATURE_CRYPTO	0x00010000	/* Crypto instructions.  */
 #define AARCH64_FEATURE_FP	0x00020000	/* FP instructions.  */
 #define AARCH64_FEATURE_SIMD	0x00040000	/* SIMD instructions.  */
@@ -46,6 +47,10 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_PAN	0x00200000	/* PAN instructions.  */
 #define AARCH64_FEATURE_LOR	0x00400000	/* LOR instructions.  */
 #define AARCH64_FEATURE_RDMA	0x00800000	/* v8.1 SIMD instructions.  */
+#define AARCH64_FEATURE_V8_1	0x01000000	/* v8.1 features.  */
+#define AARCH64_FEATURE_F16	0x02000000	/* v8.2 FP16 instructions.  */
+#define AARCH64_FEATURE_RAS	0x04000000	/* RAS Extensions.  */
+#define AARCH64_FEATURE_PROFILE	0x08000000	/* Statistical Profiling.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -54,11 +59,24 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_ARCH_V8_1	AARCH64_FEATURE (AARCH64_FEATURE_V8, \
 						 AARCH64_FEATURE_FP  \
 						 | AARCH64_FEATURE_SIMD	\
+						 | AARCH64_FEATURE_CRC	\
+						 | AARCH64_FEATURE_V8_1 \
 						 | AARCH64_FEATURE_LSE	\
 						 | AARCH64_FEATURE_PAN	\
 						 | AARCH64_FEATURE_LOR	\
 						 | AARCH64_FEATURE_RDMA)
-
+#define AARCH64_ARCH_V8_2	AARCH64_FEATURE (AARCH64_FEATURE_V8,	\
+						 AARCH64_FEATURE_V8_2	\
+						 | AARCH64_FEATURE_F16	\
+						 | AARCH64_FEATURE_RAS	\
+						 | AARCH64_FEATURE_FP	\
+						 | AARCH64_FEATURE_SIMD	\
+						 | AARCH64_FEATURE_CRC	\
+						 | AARCH64_FEATURE_V8_1 \
+						 | AARCH64_FEATURE_LSE	\
+						 | AARCH64_FEATURE_PAN	\
+						 | AARCH64_FEATURE_LOR	\
+						 | AARCH64_FEATURE_RDMA)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
@@ -219,6 +237,7 @@ enum aarch64_opnd
   AARCH64_OPND_BARRIER,		/* Barrier operand.  */
   AARCH64_OPND_BARRIER_ISB,	/* Barrier operand for ISB.  */
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
+  AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -263,6 +282,7 @@ enum aarch64_opnd_qualifier
      constraint qualifiers for immediate operands wherever possible.  */
   AARCH64_OPND_QLF_V_8B,
   AARCH64_OPND_QLF_V_16B,
+  AARCH64_OPND_QLF_V_2H,
   AARCH64_OPND_QLF_V_4H,
   AARCH64_OPND_QLF_V_8H,
   AARCH64_OPND_QLF_V_2S,
@@ -426,6 +446,7 @@ enum aarch64_op
   OP_SBFX,
   OP_SBFIZ,
   OP_BFI,
+  OP_BFC,		/* ARMv8.2.  */
   OP_UBFIZ,
   OP_UXTB,
   OP_UXTH,
@@ -634,6 +655,7 @@ struct aarch64_name_value_pair
 extern const struct aarch64_name_value_pair aarch64_operand_modifiers [];
 extern const struct aarch64_name_value_pair aarch64_barrier_options [16];
 extern const struct aarch64_name_value_pair aarch64_prfops [32];
+extern const struct aarch64_name_value_pair aarch64_hint_options [];
 
 typedef struct
 {
@@ -654,8 +676,13 @@ typedef struct
 {
   const char *name;
   uint32_t value;
-  int has_xt;
+  uint32_t flags ;
 } aarch64_sys_ins_reg;
+
+extern bfd_boolean aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *);
+extern bfd_boolean
+aarch64_sys_ins_reg_supported_p (const aarch64_feature_set,
+				 const aarch64_sys_ins_reg *);
 
 extern const aarch64_sys_ins_reg aarch64_sys_regs_ic [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_dc [];
@@ -762,6 +789,7 @@ struct aarch64_opnd_info
       aarch64_insn pstatefield;
       const aarch64_sys_ins_reg *sysins_op;
       const struct aarch64_name_value_pair *barrier;
+      const struct aarch64_name_value_pair *hint_option;
       const struct aarch64_name_value_pair *prfop;
     };
 

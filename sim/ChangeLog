@@ -1,3 +1,35 @@
+2016-02-03  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* MAINTAINERS (Past sim maintainers): Add Thiemo Seufer.
+
+2016-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete sim_common check and the
+	AC_CONFIG_SUBDIRS(common) call.
+	* configure: Regenerate.
+	* configure.tgt (sim_common): Delete the variable.
+
+2016-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: Delete /common/cconfig.h entry.
+
+2016-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add myself as AArch64 sim maintainer.
+
+2015-12-09  Tristan Gingold  <gingold@adacore.com>
+
+	* aarch64/simulator.c: Remove syscall.h include.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Delete mention of tconfig.h.
+
+2015-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Add aarch64 entry.
+	* configure: Regenerate.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_ARG_ENABLE(sim)): Call AS_HELP_STRING.

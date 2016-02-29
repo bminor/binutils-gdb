@@ -1,6 +1,6 @@
 /* tc-aarch64.c -- Assemble for the AArch64 ISA
 
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -406,6 +406,7 @@ static struct hash_control *aarch64_reg_hsh;
 static struct hash_control *aarch64_barrier_opt_hsh;
 static struct hash_control *aarch64_nzcv_hsh;
 static struct hash_control *aarch64_pldop_hsh;
+static struct hash_control *aarch64_hint_opt_hsh;
 
 /* Stuff needed to resolve the label ambiguity
    As:
@@ -743,7 +744,7 @@ aarch64_reg_parse_32_64 (char **ccp, int reject_sp, int reject_rz,
    otherwise return FALSE.
 
    Accept only one occurrence of:
-   8b 16b 4h 8h 2s 4s 1d 2d
+   8b 16b 2h 4h 8h 2s 4s 1d 2d
    b h s d q  */
 static bfd_boolean
 parse_neon_type_for_operand (struct neon_type_el *parsed_type, char **str)
@@ -802,7 +803,8 @@ elt_size:
 	first_error (_("missing element size"));
       return FALSE;
     }
-  if (width != 0 && width * element_size != 64 && width * element_size != 128)
+  if (width != 0 && width * element_size != 64 && width * element_size != 128
+      && !(width == 2 && element_size == 16))
     {
       first_error_fmt (_
 		       ("invalid element size %d and vector size combination %c"),
@@ -3471,10 +3473,8 @@ parse_address_reloc (char **str, aarch64_opnd_info *operand)
 static bfd_boolean
 parse_half (char **str, int *internal_fixup_p)
 {
-  char *p, *saved;
-  int dummy;
+  char *p = *str;
 
-  p = *str;
   skip_past_char (&p, '#');
 
   gas_assert (internal_fixup_p);
@@ -3503,12 +3503,6 @@ parse_half (char **str, int *internal_fixup_p)
     }
   else
     *internal_fixup_p = 1;
-
-  /* Avoid parsing a register as a general symbol.  */
-  saved = p;
-  if (aarch64_reg_parse_32_64 (&p, 0, 0, &dummy, &dummy) != PARSE_FAIL)
-    return FALSE;
-  p = saved;
 
   if (! my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, 1))
     return FALSE;
@@ -3604,6 +3598,41 @@ parse_barrier (char **str)
   return o->value;
 }
 
+/* Parse an operand for a PSB barrier.  Set *HINT_OPT to the hint-option record
+   return 0 if successful.  Otherwise return PARSE_FAIL.  */
+
+static int
+parse_barrier_psb (char **str,
+		   const struct aarch64_name_value_pair ** hint_opt)
+{
+  char *p, *q;
+  const struct aarch64_name_value_pair *o;
+
+  p = q = *str;
+  while (ISALPHA (*q))
+    q++;
+
+  o = hash_find_n (aarch64_hint_opt_hsh, p, q - p);
+  if (!o)
+    {
+      set_fatal_syntax_error
+	( _("unknown or missing option to PSB"));
+      return PARSE_FAIL;
+    }
+
+  if (o->value != 0x11)
+    {
+      /* PSB only accepts option name 'CSYNC'.  */
+      set_syntax_error
+	(_("the specified option is not accepted for PSB"));
+      return PARSE_FAIL;
+    }
+
+  *str = q;
+  *hint_opt = o;
+  return 0;
+}
+
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
    Returns the encoding for the option, or PARSE_FAIL.
 
@@ -3686,6 +3715,10 @@ parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
   o = hash_find (sys_ins_regs, buf);
   if (!o)
     return NULL;
+
+  if (!aarch64_sys_ins_reg_supported_p (cpu_variant, o))
+    as_bad (_("selected processor does not support system register "
+	      "name '%s'"), buf);
 
   *str = q;
   return o;
@@ -4226,11 +4259,11 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 static void
 output_info (const char *format, ...)
 {
-  char *file;
+  const char *file;
   unsigned int line;
   va_list args;
 
-  as_where (&file, &line);
+  file = as_where (&line);
   if (file)
     {
       if (line != 0)
@@ -4631,6 +4664,14 @@ vectype_to_qualifier (const struct neon_type_el *vectype)
   /* Element size in bytes indexed by neon_el_type.  */
   const unsigned char ele_size[5]
     = {1, 2, 4, 8, 16};
+  const unsigned int ele_base [5] =
+    {
+      AARCH64_OPND_QLF_V_8B,
+      AARCH64_OPND_QLF_V_2H,
+      AARCH64_OPND_QLF_V_2S,
+      AARCH64_OPND_QLF_V_1D,
+      AARCH64_OPND_QLF_V_1Q
+  };
 
   if (!vectype->defined || vectype->type == NT_invtype)
     goto vectype_conversion_fail;
@@ -4645,14 +4686,28 @@ vectype_to_qualifier (const struct neon_type_el *vectype)
       /* Vector register.  */
       int reg_size = ele_size[vectype->type] * vectype->width;
       unsigned offset;
-      if (reg_size != 16 && reg_size != 8)
+      unsigned shift;
+      if (reg_size != 16 && reg_size != 8 && reg_size != 4)
 	goto vectype_conversion_fail;
-      /* The conversion is calculated based on the relation of the order of
-	 qualifiers to the vector element size and vector register size.  */
-      offset = (vectype->type == NT_q)
-	? 8 : (vectype->type << 1) + (reg_size >> 4);
-      gas_assert (offset <= 8);
-      return AARCH64_OPND_QLF_V_8B + offset;
+
+      /* The conversion is by calculating the offset from the base operand
+	 qualifier for the vector type.  The operand qualifiers are regular
+	 enough that the offset can established by shifting the vector width by
+	 a vector-type dependent amount.  */
+      shift = 0;
+      if (vectype->type == NT_b)
+	shift = 4;
+      else if (vectype->type == NT_h || vectype->type == NT_s)
+	shift = 2;
+      else if (vectype->type >= NT_d)
+	shift = 1;
+      else
+	gas_assert (0);
+
+      offset = ele_base [vectype->type] + (vectype->width >> shift);
+      gas_assert (AARCH64_OPND_QLF_V_8B <= offset
+		  && offset <= AARCH64_OPND_QLF_V_1Q);
+      return offset;
     }
 
 vectype_conversion_fail:
@@ -5637,6 +5692,12 @@ sys_reg_ins:
 	  if (val == PARSE_FAIL)
 	    po_imm_or_fail (0, 31);
 	  inst.base.operands[i].prfop = aarch64_prfops + val;
+	  break;
+
+	case AARCH64_OPND_BARRIER_PSB:
+	  val = parse_barrier_psb (&str, &(info->hint_option));
+	  if (val == PARSE_FAIL)
+	    goto failure;
 	  break;
 
 	default:
@@ -7502,7 +7563,8 @@ md_begin (void)
       || (aarch64_reg_hsh = hash_new ()) == NULL
       || (aarch64_barrier_opt_hsh = hash_new ()) == NULL
       || (aarch64_nzcv_hsh = hash_new ()) == NULL
-      || (aarch64_pldop_hsh = hash_new ()) == NULL)
+      || (aarch64_pldop_hsh = hash_new ()) == NULL
+      || (aarch64_hint_opt_hsh = hash_new ()) == NULL)
     as_fatal (_("virtual memory exhausted"));
 
   fill_instruction_hash_table ();
@@ -7598,6 +7660,17 @@ md_begin (void)
 			   (void *) (aarch64_prfops + i));
     }
 
+  for (i = 0; aarch64_hint_options[i].name != NULL; i++)
+    {
+      const char* name = aarch64_hint_options[i].name;
+
+      checked_hash_insert (aarch64_hint_opt_hsh, name,
+			   (void *) (aarch64_hint_options + i));
+      /* Also hash the name in the upper case.  */
+      checked_hash_insert (aarch64_pldop_hsh, get_upper_str (name),
+			   (void *) (aarch64_hint_options + i));
+    }
+
   /* Set the cpu variant based on the command-line options.  */
   if (!mcpu_cpu_opt)
     mcpu_cpu_opt = march_cpu_opt;
@@ -7642,8 +7715,8 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 struct aarch64_option_table
 {
-  char *option;			/* Option name to match.  */
-  char *help;			/* Help information.  */
+  const char *option;			/* Option name to match.  */
+  const char *help;			/* Help information.  */
   int *var;			/* Variable to change.  */
   int value;			/* What to change it to.  */
   char *deprecated;		/* If non-null, print this message.  */
@@ -7665,7 +7738,7 @@ static struct aarch64_option_table aarch64_opts[] = {
 
 struct aarch64_cpu_option_table
 {
-  char *name;
+  const char *name;
   const aarch64_feature_set value;
   /* The canonical name of the CPU, or NULL to use NAME converted to upper
      case.  */
@@ -7707,7 +7780,7 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 
 struct aarch64_arch_option_table
 {
-  char *name;
+  const char *name;
   const aarch64_feature_set value;
 };
 
@@ -7717,13 +7790,14 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"all", AARCH64_ANY},
   {"armv8-a", AARCH64_ARCH_V8},
   {"armv8.1-a", AARCH64_ARCH_V8_1},
+  {"armv8.2-a", AARCH64_ARCH_V8_2},
   {NULL, AARCH64_ARCH_NONE}
 };
 
 /* ISA extensions.  */
 struct aarch64_option_cpu_value_table
 {
-  char *name;
+  const char *name;
   const aarch64_feature_set value;
 };
 
@@ -7737,13 +7811,16 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"lor",		AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0)},
   {"rdma",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD
 					 | AARCH64_FEATURE_RDMA, 0)},
+  {"fp16",		AARCH64_FEATURE (AARCH64_FEATURE_F16
+					 | AARCH64_FEATURE_FP, 0)},
+  {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0)},
   {NULL,		AARCH64_ARCH_NONE}
 };
 
 struct aarch64_long_option_table
 {
-  char *option;			/* Substring to match.  */
-  char *help;			/* Help information.  */
+  const char *option;			/* Substring to match.  */
+  const char *help;			/* Help information.  */
   int (*func) (char *subopt);	/* Function to decode sub-option.  */
   char *deprecated;		/* If non-null, print this message.  */
 };
@@ -7902,7 +7979,7 @@ aarch64_parse_arch (char *str)
 /* ABIs.  */
 struct aarch64_option_abi_value_table
 {
-  char *name;
+  const char *name;
   enum aarch64_abi_type value;
 };
 

@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright (C) 1999-2015 Free Software Foundation, Inc.
+   Copyright (C) 1999-2016 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -350,8 +350,7 @@ dwarf2_where (struct dwarf2_line_info *line)
 {
   if (debug_type == DEBUG_DWARF2)
     {
-      char *filename;
-      as_where (&filename, &line->line);
+      const char *filename = as_where (&line->line);
       line->filenum = get_filenum (filename, 0);
       line->column = 0;
       line->flags = DWARF2_FLAG_IS_STMT;

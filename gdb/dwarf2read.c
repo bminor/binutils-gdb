@@ -1,6 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
 
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract
@@ -11894,7 +11894,6 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
   int found_base;
   unsigned int dummy;
   const gdb_byte *buffer;
-  CORE_ADDR marker;
   int low_set;
   CORE_ADDR low = 0;
   CORE_ADDR high = 0;
@@ -11912,18 +11911,6 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
       return 0;
     }
   buffer = dwarf2_per_objfile->ranges.buffer + offset;
-
-  /* Read in the largest possible address.  */
-  marker = read_address (obfd, buffer, cu, &dummy);
-  if ((marker & mask) == mask)
-    {
-      /* If we found the largest possible address, then
-	 read the base address.  */
-      base = read_address (obfd, buffer + addr_size, cu, &dummy);
-      buffer += 2 * addr_size;
-      offset += 2 * addr_size;
-      found_base = 1;
-    }
 
   low_set = 0;
 
@@ -11949,9 +11936,9 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 	 the base address.  Check for a base address here.  */
       if ((range_beginning & mask) == mask)
 	{
-	  /* If we found the largest possible address, then
-	     read the base address.  */
-	  base = read_address (obfd, buffer + addr_size, cu, &dummy);
+	  /* If we found the largest possible address, then we already
+	     have the base address in range_end.  */
+	  base = range_end;
 	  found_base = 1;
 	  continue;
 	}
@@ -13218,7 +13205,20 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     {
-      TYPE_LENGTH (type) = DW_UNSND (attr);
+      if (attr_form_is_constant (attr))
+        TYPE_LENGTH (type) = DW_UNSND (attr);
+      else
+	{
+	  /* For the moment, dynamic type sizes are not supported
+	     by GDB's struct type.  The actual size is determined
+	     on-demand when resolving the type of a given object,
+	     so set the type's length to zero for now.  Otherwise,
+	     we record an expression as the length, and that expression
+	     could lead to a very large value, which could eventually
+	     lead to us trying to allocate that much memory when creating
+	     a value of that type.  */
+          TYPE_LENGTH (type) = 0;
+	}
     }
   else
     {
@@ -15048,7 +15048,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      the bounds as signed, and thus sign-extend their values, when
      the base type is signed.  */
   negative_mask =
-    (LONGEST) -1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1);
+    -((LONGEST) 1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1));
   if (low.kind == PROP_CONST
       && !TYPE_UNSIGNED (base_type) && (low.data.const_val & negative_mask))
     low.data.const_val |= negative_mask;
@@ -15936,7 +15936,8 @@ read_partial_die (const struct die_reader_specs *reader,
 	     compilers pick up the new representation, we'll support this
 	     practice.  */
 	  if (DW_UNSND (&attr) == DW_CC_program
-	      && cu->language == language_fortran)
+	      && cu->language == language_fortran
+	      && part_die->name != NULL)
 	    set_objfile_main_name (objfile, part_die->name, language_fortran);
 	  break;
 	case DW_AT_inline:

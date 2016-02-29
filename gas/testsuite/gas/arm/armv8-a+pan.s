@@ -2,13 +2,13 @@
 	.arch armv8-a
 	.arch_extension pan
 
-A1:     
 	.arm
+A1:
         setpan #0
         setpan #1
 
-T1:     
         .thumb
+T1:
         setpan #0
         setpan #1
 

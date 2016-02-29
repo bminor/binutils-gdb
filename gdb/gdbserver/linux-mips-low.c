@@ -1,5 +1,5 @@
 /* GNU/Linux/MIPS specific low level interface, for the remote server for GDB.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -273,18 +273,6 @@ mips_sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = mips_breakpoint_len;
   return (const gdb_byte *) &mips_breakpoint;
-}
-
-/* We only place breakpoints in empty marker functions, and thread locking
-   is outside of the function.  So rather than importing software single-step,
-   we can just run until exit.  */
-static CORE_ADDR
-mips_reinsert_addr (void)
-{
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
-  union mips_register ra;
-  collect_register_by_name (regcache, "r31", ra.buf);
-  return register_size (regcache->tdesc, 0) == 4 ? ra.reg32 : ra.reg64;
 }
 
 static int
@@ -892,7 +880,7 @@ struct linux_target_ops the_low_target = {
   mips_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   mips_sw_breakpoint_from_kind,
-  mips_reinsert_addr,
+  NULL, /* get_next_pcs */
   0,
   mips_breakpoint_at,
   mips_supports_z_point_type,

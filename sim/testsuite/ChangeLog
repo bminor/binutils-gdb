@@ -1,6 +1,25 @@
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* common/bits-gen.c (main): Change BIG_ENDIAN to BFD_ENDIAN_BIG and
+	LITTLE_ENDIAN and BFD_ENDIAN_LITTLE.
+
+2015-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* sim/aarch64: New directory.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp (slurp_options): Pull in global subdir/srcdir.
+	Replace $srcdir and $subdir in the read option.
+
 2015-04-13  Hans-Peter Nilsson  <hp@axis.com>
 
-	* sim-defs.exp (sim_init): Unset target ldscript here.
+	* lib/sim-defs.exp (sim_init): Unset target ldscript here.
 
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 

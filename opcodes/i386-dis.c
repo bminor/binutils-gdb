@@ -1,5 +1,5 @@
 /* Print i386 instructions for GDB, the GNU debugger.
-   Copyright (C) 1988-2015 Free Software Foundation, Inc.
+   Copyright (C) 1988-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -758,6 +758,7 @@ enum
   MOD_0F01_REG_1,
   MOD_0F01_REG_2,
   MOD_0F01_REG_3,
+  MOD_0F01_REG_5,
   MOD_0F01_REG_7,
   MOD_0F12_PREFIX_0,
   MOD_0F13,
@@ -929,6 +930,7 @@ enum
   RM_0F01_REG_1,
   RM_0F01_REG_2,
   RM_0F01_REG_3,
+  RM_0F01_REG_5,
   RM_0F01_REG_7,
   RM_0FAE_REG_5,
   RM_0FAE_REG_6,
@@ -3554,7 +3556,7 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F01_REG_2) },
     { MOD_TABLE (MOD_0F01_REG_3) },
     { "smswD",	{ Sv }, 0 },
-    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F01_REG_5) },
     { "lmsw",	{ Ew }, 0 },
     { MOD_TABLE (MOD_0F01_REG_7) },
   },
@@ -11685,6 +11687,11 @@ static const struct dis386 mod_table[][2] = {
     { RM_TABLE (RM_0F01_REG_3) },
   },
   {
+    /* MOD_0F01_REG_5 */
+    { Bad_Opcode },
+    { RM_TABLE (RM_0F01_REG_5) },
+  },
+  {
     /* MOD_0F01_REG_7 */
     { "invlpg",		{ Mb }, 0 },
     { RM_TABLE (RM_0F01_REG_7) },
@@ -12427,6 +12434,17 @@ static const struct dis386 rm_table[][8] = {
     { "clgi",		{ Skip_MODRM }, 0 },
     { "skinit",		{ Skip_MODRM }, 0 },
     { "invlpga",	{ Skip_MODRM }, 0 },
+  },
+  {
+    /* RM_0F01_REG_5 */
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "rdpkru",		{ Skip_MODRM }, 0 },
+    { "wrpkru",		{ Skip_MODRM }, 0 },
   },
   {
     /* RM_0F01_REG_7 */
@@ -13626,7 +13644,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     if (op_index[i] != -1 && op_riprel[i])
       {
 	(*info->fprintf_func) (info->stream, "        # ");
-	(*info->print_address_func) ((bfd_vma) (start_pc + codep - start_codep
+	(*info->print_address_func) ((bfd_vma) (start_pc + (codep - start_codep)
 						+ op_address[op_index[i]]), info);
 	break;
       }
@@ -16140,7 +16158,7 @@ OP_J (int bytemode, int sizeflag)
 	     the displacement is added!  */
 	  mask = 0xffff;
 	  if ((prefixes & PREFIX_DATA) == 0)
-	    segment = ((start_pc + codep - start_codep)
+	    segment = ((start_pc + (codep - start_codep))
 		       & ~((bfd_vma) 0xffff));
 	}
       if (address_mode != mode_64bit

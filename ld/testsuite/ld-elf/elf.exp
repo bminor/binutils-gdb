@@ -1,5 +1,5 @@
 # Expect script for various ELF tests.
-#   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -109,6 +109,8 @@ if { [check_shared_lib_support] } then {
     }
     # xfail on tic6x due to non-PIC/non-PID warnings
     setup_xfail "tic6x-*-*"
+    # Fails on MIPS because ABI trickery means that a NULL reloc is also emitted.
+    setup_xfail "mips*-*-*"
     run_ld_link_tests {
 	{"-Bsymbolic-functions"
 	    "-shared -Bsymbolic-functions" "" ""

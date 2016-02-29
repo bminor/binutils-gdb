@@ -10,7 +10,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2015 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2016 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -1131,6 +1131,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--decompress-debug-sections}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
+        [@option{--elf-stt-common=@var{val}}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]
         [@option{--help}] [@option{--info}]
@@ -1872,7 +1873,7 @@ ELF ABI.  Note - if compression would actually make a section
 @itemx --compress-debug-sections=zlib-gabi
 For ELF files, these options control how DWARF debug sections are
 compressed.  @option{--compress-debug-sections=none} is equivalent
-to @option{--nocompress-debug-sections}.
+to @option{--decompress-debug-sections}.
 @option{--compress-debug-sections=zlib} and
 @option{--compress-debug-sections=zlib-gabi} are equivalent to
 @option{--compress-debug-sections}.
@@ -1885,6 +1886,14 @@ renamed.
 @item --decompress-debug-sections
 Decompress DWARF debug sections using zlib.  The original section
 names of the compressed sections are restored.
+
+@item --elf-stt-common=yes
+@itemx --elf-stt-common=no
+For ELF files, these options control whether common symbols should be
+converted to the @code{STT_COMMON} or @code{STT_OBJECT} type.
+@option{--elf-stt-common=yes} converts common symbol type to
+@code{STT_COMMON}. @option{--elf-stt-common=no} converts common symbol
+type to @code{STT_OBJECT}.
 
 @item -V
 @itemx --version
@@ -2124,6 +2133,11 @@ although @command{ld} relocates the sections correctly, using @samp{objdump
 -h} to list the file section headers cannot show the correct addresses.
 Instead, it shows the usual addresses, which are implicit for the
 target.
+
+Note, in some cases it is possible for a section to have both the
+READONLY and the NOREAD attributes set.  In such cases the NOREAD
+attribute takes precedence, but @command{objdump} will report both
+since the exact setting of the flag bits might be important.
 
 @item -H
 @itemx --help

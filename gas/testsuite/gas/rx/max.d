@@ -3,9 +3,9 @@
 dump\.o:     file format .*
 
 
-Disassembly of section \..*:
+Disassembly of section .*:
 
-00000000 <\..*>:
+00000000 <.*>:
    0:	fd 74 40 80                   	max	#-128, r0
    4:	fd 74 4f 80                   	max	#-128, r15
    8:	fd 74 40 7f                   	max	#127, r0

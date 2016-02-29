@@ -17,18 +17,16 @@ Section Headers:
  +\[[ 0-9]+\] .dynstr +.*
  +\[[ 0-9]+\] .rela.dyn +.*
  +\[[ 0-9]+\] .rela.plt +.*
- +\[[ 0-9]+\] .tdata +PROGBITS +0+100104e8 [0-9a-f]+ 0+60 00 WAT +0 +0 +1
- +\[[ 0-9]+\] .tbss +NOBITS +0+10010548 [0-9a-f]+ 0+20 00 WAT +0 +0 +1
- +\[[ 0-9]+\] .dynamic +DYNAMIC +0+10010548 [0-9a-f]+ 0+130 10 +WA +5 +0 +8
- +\[[ 0-9]+\] .got +PROGBITS +0+10010678 [0-9a-f]+ 0+90 08 +WA +0 +0 +8
- +\[[ 0-9]+\] .got.plt +PROGBITS +0+10010708 [0-9a-f]+ 0+20 08 +WA +0 +0 +8
+ +\[[ 0-9]+\] .tdata +PROGBITS +0+100104b0 [0-9a-f]+ 0+60 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .tbss +NOBITS +0+10010510 [0-9a-f]+ 0+20 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+10010510 [0-9a-f]+ 0+130 10 +WA +5 +0 +8
+ +\[[ 0-9]+\] .got +PROGBITS +0+10010640 [0-9a-f]+ 0+90 08 +WA +0 +0 +8
+ +\[[ 0-9]+\] .got.plt +PROGBITS +0+100106d0 [0-9a-f]+ 0+20 08 +WA +0 +0 +8
  +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
 Key to Flags:
-.*
-.*
-.*
+#...
 
 Elf file type is DYN \(Shared object file\)
 Entry point 0x1000
@@ -37,10 +35,10 @@ There are [0-9]+ program headers, starting at offset [0-9]+
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
  +LOAD +0x0+10000 0x0+ 0x0+ 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x10000
- +LOAD +0x0+ 0x0+10000000 0x0+10000000 0x0+4e8 0x0+4e8 R +0x10000
- +LOAD +0x0+4e8 0x0+100104e8 0x0+100104e8 0x0+240 0x0+240 RW +0x10000
- +DYNAMIC +0x0+548 0x0+10010548 0x0+10010548 0x0+130 0x0+130 RW +0x8
- +TLS +0x0+4e8 0x0+100104e8 0x0+100104e8 0x0+60 0x0+80 R +0x1
+ +LOAD +0x0+ 0x0+10000000 0x0+10000000 0x0+4b0 0x0+4b0 R +0x10000
+ +LOAD +0x0+4b0 0x0+100104b0 0x0+100104b0 0x0+240 0x0+240 RW +0x10000
+ +DYNAMIC +0x0+510 0x0+10010510 0x0+10010510 0x0+130 0x0+130 RW +0x8
+ +TLS +0x0+4b0 0x0+100104b0 0x0+100104b0 0x0+60 0x0+80 R +0x1
 
  Section to Segment mapping:
  +Segment Sections...
@@ -74,8 +72,6 @@ Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
-.* SECTION +LOCAL +DEFAULT +2 *
-.* SECTION +LOCAL +DEFAULT +8 *
 .* TLS +GLOBAL +DEFAULT +8 sg8
 .* TLS +GLOBAL +DEFAULT +8 sg3
 .* TLS +GLOBAL +DEFAULT +8 sg4

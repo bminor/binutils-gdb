@@ -368,12 +368,7 @@ power9:
 	xscmpeqdp   30,40,50
 	xscmpgtdp   31,41,51
 	xscmpgedp   32,42,52
-	xscmpnedp   33,43,53
 	xsmincdp    34,44,54
 	xsmaxcdp    35,45,55
 	xsminjdp    36,46,56
 	xsmaxjdp    37,47,57
-	xvcmpnedp   38,48,58
-	xvcmpnedp.  39,49,59
-	xvcmpnesp   40,50,60
-	xvcmpnesp.  41,51,61

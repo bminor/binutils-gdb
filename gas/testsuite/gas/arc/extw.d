@@ -15,7 +15,7 @@ Disassembly of section .text:
 0x00000030 212f 1f88 ffff feff 	ext[hw]+	r9,0xfffffeff
 0x00000038 232f 1f88 4242 4242 	ext[hw]+	r11,0x42424242
 0x00000040 202f 0f88 0000 0000 	ext[hw]+	r0,0
-			44: ARC_32_ME	foo
+			44: R_ARC_32_ME	foo
 0x00000048 202f 8048           	ext[hw]+.f	r0,r1
 0x0000004c 226f 8048           	ext[hw]+.f	r2,0x1
 0x00000050 262f f108           	ext[hw]+.f	0,r4

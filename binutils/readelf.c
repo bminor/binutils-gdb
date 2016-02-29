@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -2778,16 +2778,36 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case EF_ARC_CPU_ARCV2HS:
 	      strcat (buf, ", ARC HS");
 	      break;
+	    case EF_ARC_CPU_GENERIC:
+	      strcat (buf, ", ARC generic");
+	      break;
+	    case E_ARC_MACH_ARC600:
+	      strcat (buf, ", ARC600");
+	      break;
+	    case E_ARC_MACH_ARC601:
+	      strcat (buf, ", ARC601");
+	      break;
+	    case E_ARC_MACH_ARC700:
+	      strcat (buf, ", ARC700");
+	      break;
 	    default:
-	      strcat (buf, ", unrecognized flag for ARCv2");
+	      strcat (buf, ", unrecognized cpu flag for ARCv2");
 	      break;
 	    }
 	  switch (e_flags & EF_ARC_OSABI_MSK)
 	    {
-	      /* Only upstream 3.9+ kernels will support ARCv2
-		 ISA.  */
+	    case E_ARC_OSABI_ORIG:
+	      strcat (buf, ", (ABI:legacy)");
+	      break;
+	    case E_ARC_OSABI_V2:
+	      strcat (buf, ", (ABI:v2)");
+	      break;
+	      /* Only upstream 3.9+ kernels will support ARCv2 ISA.  */
 	    case E_ARC_OSABI_V3:
 	      strcat (buf, ", v3 no-legacy-syscalls ABI");
+	      break;
+	    default:
+	      strcat (buf, ", unrecognised ARC OSABI flag");
 	      break;
 	    }
 	  break;
@@ -3378,6 +3398,8 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if (e_flags & E_FLAG_RX_SINSNS_SET)
 	    strcat (buf, e_flags & E_FLAG_RX_SINSNS_YES
 		    ? ", uses String instructions" : ", bans String instructions");
+	  if (e_flags & E_FLAG_RX_V2)
+	    strcat (buf, ", V2");
 	  break;
 
 	case EM_S390:
@@ -3874,6 +3896,7 @@ static const char *
 get_section_type_name (unsigned int sh_type)
 {
   static char buff[32];
+  const char * result;
 
   switch (sh_type)
     {
@@ -3908,8 +3931,6 @@ get_section_type_name (unsigned int sh_type)
     default:
       if ((sh_type >= SHT_LOPROC) && (sh_type <= SHT_HIPROC))
 	{
-	  const char * result;
-
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_MIPS:
@@ -3952,12 +3973,10 @@ get_section_type_name (unsigned int sh_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "LOPROC+%x", sh_type - SHT_LOPROC);
+	  sprintf (buff, "LOPROC+%#x", sh_type - SHT_LOPROC);
 	}
       else if ((sh_type >= SHT_LOOS) && (sh_type <= SHT_HIOS))
 	{
-	  const char * result;
-
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_IA_64:
@@ -3971,7 +3990,7 @@ get_section_type_name (unsigned int sh_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "LOOS+%x", sh_type - SHT_LOOS);
+	  sprintf (buff, "LOOS+%#x", sh_type - SHT_LOOS);
 	}
       else if ((sh_type >= SHT_LOUSER) && (sh_type <= SHT_HIUSER))
 	{
@@ -3980,12 +3999,17 @@ get_section_type_name (unsigned int sh_type)
 	    case EM_V800:
 	    case EM_V850:
 	    case EM_CYGNUS_V850:
-	      return get_v850_section_type_name (sh_type);
+	      result = get_v850_section_type_name (sh_type);
+	      break;
 	    default:
+	      result = NULL;
 	      break;
 	    }
 
-	  sprintf (buff, "LOUSER+%x", sh_type - SHT_LOUSER);
+	  if (result != NULL)
+	    return result;
+
+	  sprintf (buff, "LOUSER+%#x", sh_type - SHT_LOUSER);
 	}
       else
 	/* This message is probably going to be displayed in a 15
@@ -5275,7 +5299,11 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* 18 */ { STRING_COMMA_LEN ("EXCLUDE") },
       /* SPARC specific.  */
       /* 19 */ { STRING_COMMA_LEN ("ORDERED") },
-      /* 20 */ { STRING_COMMA_LEN ("COMPRESSED") }
+      /* 20 */ { STRING_COMMA_LEN ("COMPRESSED") },
+      /* ARM specific.  */
+      /* 21 */ { STRING_COMMA_LEN ("ENTRYSECT") },
+      /* 22 */ { STRING_COMMA_LEN ("ARM_NOREAD") },
+      /* 23 */ { STRING_COMMA_LEN ("COMDEF") }
     };
 
   if (do_section_details)
@@ -5345,6 +5373,17 @@ get_elf_section_flags (bfd_vma sh_flags)
 		  if (flag == SHF_ORDERED)
 		    sindex = 19;
 		  break;
+
+		case EM_ARM:
+		  switch (flag)
+		    {
+		    case SHF_ENTRYSECT: sindex = 21; break;
+		    case SHF_ARM_NOREAD: sindex = 22; break;
+		    case SHF_COMDEF: sindex = 23; break;
+		    default: break;
+		    }
+		  break;
+
 		default:
 		  break;
 		}
@@ -5397,6 +5436,9 @@ get_elf_section_flags (bfd_vma sh_flags)
 		   || elf_header.e_machine == EM_K1OM)
 		  && flag == SHF_X86_64_LARGE)
 		*p = 'l';
+	      else if (elf_header.e_machine == EM_ARM
+		       && flag == SHF_ARM_NOREAD)
+		  *p = 'y';
 	      else if (flag & SHF_MASKOS)
 		{
 		  *p = 'o';
@@ -5967,18 +6009,20 @@ process_section_headers (FILE * file)
 
   if (!do_section_details)
     {
+      /* The ordering of the letters shown here matches the ordering of the
+	 corresponding SHF_xxx values, and hence the order in which these
+	 letters will be displayed to the user.  */
+      printf (_("Key to Flags:\n\
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n\
+  L (link order), O (extra OS processing required), G (group), T (TLS),\n\
+  C (compressed), x (unknown), o (OS specific), E (exclude),\n"));
       if (elf_header.e_machine == EM_X86_64
 	  || elf_header.e_machine == EM_L1OM
 	  || elf_header.e_machine == EM_K1OM)
-	printf (_("Key to Flags:\n\
-  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)\n\
-  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
-  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
-      else
-	printf (_("Key to Flags:\n\
-  W (write), A (alloc), X (execute), M (merge), S (strings)\n\
-  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
-  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
+	printf (_("l (large), "));
+      else if (elf_header.e_machine == EM_ARM)
+	printf (_("y (noread), "));
+      printf ("p (processor specific)\n");
     }
 
   return 1;
@@ -11405,6 +11449,9 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 3; /* R_M32C_32.  */
     case EM_M32R:
       return reloc_type == 34; /* R_M32R_32_RELA.  */
+    case EM_68HC11:
+    case EM_68HC12:
+      return reloc_type == 6; /* R_M68HC11_32.  */
     case EM_MCORE:
       return reloc_type == 1; /* R_MCORE_ADDR32.  */
     case EM_CYGNUS_MEP:
@@ -11530,6 +11577,9 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 6;
     case EM_ALPHA:
       return reloc_type == 10; /* R_ALPHA_SREL32.  */
+    case EM_ARC_COMPACT:
+    case EM_ARC_COMPACT2:
+      return reloc_type == 49; /* R_ARC_32_PCREL.  */
     case EM_ARM:
       return reloc_type == 3;  /* R_ARM_REL32 */
     case EM_MICROBLAZE:
@@ -11950,6 +12000,7 @@ apply_relocations (void *                     file,
 	     referencing a global array.  For an example of this see
 	     the _clz.o binary in libgcc.a.  */
 	  if (sym != symtab
+	      && ELF_ST_TYPE (sym->st_info) != STT_COMMON
 	      && ELF_ST_TYPE (sym->st_info) > STT_SECTION)
 	    {
 	      warn (_("skipping unexpected symbol type %s in %ld'th relocation in section %s\n"),
@@ -12732,10 +12783,11 @@ typedef struct
 
 static const char * arm_attr_tag_CPU_arch[] =
   {"Pre-v4", "v4", "v4T", "v5T", "v5TE", "v5TEJ", "v6", "v6KZ", "v6T2",
-   "v6K", "v7", "v6-M", "v6S-M", "v7E-M", "v8"};
+   "v6K", "v7", "v6-M", "v6S-M", "v7E-M", "v8", "", "v8-M.baseline",
+   "v8-M.mainline"};
 static const char * arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
 static const char * arm_attr_tag_THUMB_ISA_use[] =
-  {"No", "Thumb-1", "Thumb-2"};
+  {"No", "Thumb-1", "Thumb-2", "Yes"};
 static const char * arm_attr_tag_FP_arch[] =
   {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16", "VFPv4", "VFPv4-D16",
    "FP for ARMv8", "FPv5/FP-D16 for ARMv8"};
@@ -15388,6 +15440,35 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
 }
 
 static const char *
+get_freebsd_elfcore_note_type (unsigned e_type)
+{
+  switch (e_type)
+    {
+    case NT_FREEBSD_THRMISC:
+      return _("NT_THRMISC (thrmisc structure)");
+    case NT_FREEBSD_PROCSTAT_PROC:
+      return _("NT_PROCSTAT_PROC (proc data)");
+    case NT_FREEBSD_PROCSTAT_FILES:
+      return _("NT_PROCSTAT_FILES (files data)");
+    case NT_FREEBSD_PROCSTAT_VMMAP:
+      return _("NT_PROCSTAT_VMMAP (vmmap data)");
+    case NT_FREEBSD_PROCSTAT_GROUPS:
+      return _("NT_PROCSTAT_GROUPS (groups data)");
+    case NT_FREEBSD_PROCSTAT_UMASK:
+      return _("NT_PROCSTAT_UMASK (umask data)");
+    case NT_FREEBSD_PROCSTAT_RLIMIT:
+      return _("NT_PROCSTAT_RLIMIT (rlimit data)");
+    case NT_FREEBSD_PROCSTAT_OSREL:
+      return _("NT_PROCSTAT_OSREL (osreldate data)");
+    case NT_FREEBSD_PROCSTAT_PSSTRINGS:
+      return _("NT_PROCSTAT_PSSTRINGS (ps_strings data)");
+    case NT_FREEBSD_PROCSTAT_AUXV:
+      return _("NT_PROCSTAT_AUXV (auxv data)");
+    }
+  return get_note_type (e_type);
+}
+
+static const char *
 get_netbsd_elfcore_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -15635,6 +15716,10 @@ process_note (Elf_Internal_Note * pnote)
   else if (const_strneq (pnote->namedata, "GNU"))
     /* GNU-specific object file notes.  */
     nt = get_gnu_elf_note_type (pnote->type);
+
+  else if (const_strneq (pnote->namedata, "FreeBSD"))
+    /* FreeBSD-specific core file notes.  */
+    nt = get_freebsd_elfcore_note_type (pnote->type);
 
   else if (const_strneq (pnote->namedata, "NetBSD-CORE"))
     /* NetBSD-specific core file notes.  */

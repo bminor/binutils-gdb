@@ -1,5 +1,5 @@
 /* write.c - emit .o file
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -192,7 +192,7 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
   TC_INIT_FIX_DATA (fixP);
 #endif
 
-  as_where (&fixP->fx_file, &fixP->fx_line);
+  fixP->fx_file = as_where (&fixP->fx_line);
 
   {
 
@@ -355,12 +355,15 @@ record_alignment (/* Segment to which alignment pertains.  */
 		  segT seg,
 		  /* Alignment, as a power of 2 (e.g., 1 => 2-byte
 		     boundary, 2 => 4-byte boundary, etc.)  */
-		  int align)
+		  unsigned int align)
 {
   if (seg == absolute_section)
     return;
 
-  if ((unsigned int) align > bfd_get_section_alignment (stdoutput, seg))
+  if (align <= OCTETS_PER_BYTE_POWER)
+    return;
+
+  if (align > bfd_get_section_alignment (stdoutput, seg))
     bfd_set_section_alignment (stdoutput, seg, align);
 }
 
@@ -1134,7 +1137,7 @@ fix_segment (bfd *abfd ATTRIBUTE_UNUSED,
 
 static void
 install_reloc (asection *sec, arelent *reloc, fragS *fragp,
-	       char *file, unsigned int line)
+	       const char *file, unsigned int line)
 {
   char *err;
   bfd_reloc_status_type s;
@@ -1430,14 +1433,12 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
     {
-      stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
       compression_header_size
 	= bfd_get_compression_header_size (stdoutput, NULL);
       header_size = compression_header_size;
     }
   else
     {
-      stdoutput->flags |= BFD_COMPRESS;
       compression_header_size = 0;
       header_size = 12;
     }
@@ -2208,12 +2209,23 @@ write_object_file (void)
   obj_frob_file_after_relocs ();
 #endif
 
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
+  if (IS_ELF && flag_use_elf_stt_common)
+    stdoutput->flags |= BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON;
+#endif
+
   /* Once all relocations have been written, we can compress the
      contents of the debug sections.  This needs to be done before
      we start writing any sections, because it will affect the file
      layout, which is fixed once we start writing contents.  */
   if (flag_compress_debug)
-    bfd_map_over_sections (stdoutput, compress_debug, (char *) 0);
+    {
+      if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
+	stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
+      else
+	stdoutput->flags |= BFD_COMPRESS;
+      bfd_map_over_sections (stdoutput, compress_debug, (char *) 0);
+    }
 
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
 }

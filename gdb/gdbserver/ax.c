@@ -1,5 +1,5 @@
 /* Agent expression code for remote server.
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -375,7 +375,7 @@ emit_le_goto (int *offset_p, int *size_p)
 /* Scan an agent expression for any evidence that the given PC is the
    target of a jump bytecode in the expression.  */
 
-int
+static int
 is_goto_target (struct agent_expr *aexpr, int pc)
 {
   int i;

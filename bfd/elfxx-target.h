@@ -1,5 +1,5 @@
 /* Target definitions for NN-bit ELF
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -538,6 +538,9 @@
 #ifndef elf_backend_count_relocs
 #define elf_backend_count_relocs		NULL
 #endif
+#ifndef elf_backend_count_additional_relocs
+#define elf_backend_count_additional_relocs	NULL
+#endif
 #ifndef elf_backend_sort_relocs_p
 #define elf_backend_sort_relocs_p		NULL
 #endif
@@ -755,6 +758,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_ignore_undef_symbol,
   elf_backend_emit_relocs,
   elf_backend_count_relocs,
+  elf_backend_count_additional_relocs,
   elf_backend_sort_relocs_p,
   elf_backend_grok_prstatus,
   elf_backend_grok_psinfo,
@@ -846,7 +850,7 @@ const bfd_target TARGET_BIG_SYM =
   /* object_flags: mask of all file flags */
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS
    | DYNAMIC | WP_TEXT | D_PAGED | BFD_COMPRESS | BFD_DECOMPRESS
-   | BFD_COMPRESS_GABI),
+   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON),
 
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY
@@ -945,7 +949,7 @@ const bfd_target TARGET_LITTLE_SYM =
   /* object_flags: mask of all file flags */
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS
    | DYNAMIC | WP_TEXT | D_PAGED | BFD_COMPRESS | BFD_DECOMPRESS
-   | BFD_COMPRESS_GABI),
+   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON),
 
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY

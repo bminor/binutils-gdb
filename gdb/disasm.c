@@ -1,6 +1,6 @@
 /* Disassemble support for GDB.
 
-   Copyright (C) 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 2000-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -86,11 +86,10 @@ allocate_dis_line_table (void)
 			    xfree, xcalloc, xfree);
 }
 
-/* Add DLE to TABLE.
-   Returns 1 if added, 0 if already present.  */
+/* Add a new dis_line_entry containing SYMTAB and LINE to TABLE.  */
 
 static void
-maybe_add_dis_line_entry (htab_t table, struct symtab *symtab, int line)
+add_dis_line_entry (htab_t table, struct symtab *symtab, int line)
 {
   void **slot;
   struct dis_line_entry dle, *dlep;
@@ -340,7 +339,7 @@ do_mixed_source_and_assembly_deprecated
   int out_of_order = 0;
   int next_line = 0;
   int num_displayed = 0;
-  enum print_source_lines_flags psl_flags = 0;
+  print_source_lines_flags psl_flags = 0;
   struct cleanup *ui_out_chain;
   struct cleanup *ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
   struct cleanup *ui_out_list_chain = make_cleanup (null_cleanup, 0);
@@ -501,7 +500,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   int out_of_order = 0;
   int next_line = 0;
   int num_displayed = 0;
-  enum print_source_lines_flags psl_flags = 0;
+  print_source_lines_flags psl_flags = 0;
   struct cleanup *cleanups;
   struct cleanup *ui_out_chain;
   struct cleanup *ui_out_tuple_chain;
@@ -552,7 +551,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
       pc += length;
 
       if (sal.symtab != NULL)
-	maybe_add_dis_line_entry (dis_line_table, sal.symtab, sal.line);
+	add_dis_line_entry (dis_line_table, sal.symtab, sal.line);
     }
 
   /* Second pass: print the disassembly.

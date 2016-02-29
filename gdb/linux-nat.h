@@ -1,6 +1,6 @@
 /* Native debugging support for GNU/Linux (LWP layer).
 
-   Copyright (C) 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 2000-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,11 +36,6 @@ struct lwp_info
   /* If this flag is set, we need to set the event request flags the
      next time we see this LWP stop.  */
   int must_set_ptrace_flags;
-
-  /* Non-zero if this LWP is cloned.  In this context "cloned" means
-     that the LWP is reporting to its parent using a signal other than
-     SIGCHLD.  */
-  int cloned;
 
   /* Non-zero if we sent this LWP a SIGSTOP (but the LWP didn't report
      it back yet).  */
@@ -93,7 +88,7 @@ struct lwp_info
      or to a local variable in lin_lwp_wait.  */
   struct target_waitstatus waitstatus;
 
-  /* Signal wether we are in a SYSCALL_ENTRY or
+  /* Signal whether we are in a SYSCALL_ENTRY or
      in a SYSCALL_RETURN event.
      Values:
      - TARGET_WAITKIND_SYSCALL_ENTRY
@@ -140,8 +135,6 @@ extern void lin_thread_get_thread_signals (sigset_t *mask);
 /* Find process PID's pending signal set from /proc/pid/status.  */
 void linux_proc_pending_signals (int pid, sigset_t *pending,
 				 sigset_t *blocked, sigset_t *ignored);
-
-extern int lin_lwp_attach_lwp (ptid_t ptid);
 
 /* For linux_stop_lwp see nat/linux-nat.h.  */
 

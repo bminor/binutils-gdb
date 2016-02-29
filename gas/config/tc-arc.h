@@ -1,5 +1,5 @@
 /* tc-arc.h - Macros and type defines for the ARC.
-   Copyright 2014 Free Software Foundation, Inc.
+   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    Contributed by Claudiu Zissulescu (claziss@synopsys.com)
 
@@ -125,14 +125,20 @@ extern long md_pcrel_from_section (struct fix *, segT);
   arc_cons_fix_new ((FRAG), (OFF), (LEN), (EXP), (RELOC))
 
 /* We don't want gas to fixup the following program memory related
-   relocations.  */
-#define TC_VALIDATE_FIX(FIXP,SEG,SKIP)			     \
-  if ((FIXP->fx_r_type == BFD_RELOC_ARC_GOTPC32)	     \
-      && FIXP->fx_addsy != NULL				     \
-      && FIXP->fx_subsy == NULL)			     \
-    {							     \
-      symbol_mark_used_in_reloc (FIXP->fx_addsy);	     \
-      goto SKIP;					     \
+   relocations.  Check also that fx_addsy is not NULL, in order to
+   make sure that the fixup refers to some sort of label.  */
+#define TC_VALIDATE_FIX(FIXP,SEG,SKIP)				     \
+  if ((FIXP->fx_r_type == BFD_RELOC_ARC_GOTPC32			     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_PLT32		     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_S25W_PCREL_PLT	     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_S25H_PCREL_PLT	     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_S21W_PCREL_PLT	     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_S21H_PCREL_PLT)	     \
+      && FIXP->fx_addsy != NULL					     \
+      && FIXP->fx_subsy == NULL)				     \
+    {								     \
+      symbol_mark_used_in_reloc (FIXP->fx_addsy);		     \
+      goto SKIP;						     \
     }
 
 /* BFD_RELOC_ARC_TLS_GD_LD may use fx_subsy to store a label that is
@@ -171,19 +177,84 @@ extern long md_pcrel_from_section (struct fix *, segT);
 /* This hook is required to parse register names as operands.  */
 #define md_parse_name(name, exp, m, c) arc_parse_name (name, exp)
 
+/* Used within frags to pass some information to some relaxation
+   machine dependent values.  */
+#define TC_FRAG_TYPE struct arc_relax_type
+
+/* Adjust non PC-rel values at relaxation time.  */
+#define TC_PCREL_ADJUST(F) arc_pcrel_adjust (F)
+
+extern int arc_pcrel_adjust (fragS *);
 extern bfd_boolean arc_parse_name (const char *, struct expressionS *);
 extern int tc_arc_fix_adjustable (struct fix *);
 extern void arc_handle_align (fragS *);
 extern void arc_cons_fix_new (fragS *, int, int, expressionS *,
 			      bfd_reloc_code_real_type);
 extern void arc_frob_label (symbolS *);
+extern void tc_arc_frame_initial_instructions (void);
+extern int tc_arc_regname_to_dw2regnum (char *regname);
 
 /* The blink register is r31.  */
 #define DWARF2_DEFAULT_RETURN_COLUMN	31
 /* Registers are generally saved at negative offsets to the CFA.  */
 #define DWARF2_CIE_DATA_ALIGNMENT	(-4)
 
+/* We want .cfi_* pseudo-ops for generating unwind info.  */
+#define TARGET_USE_CFIPOP 1
+
+/* CFI hooks.  */
+#define tc_cfi_frame_initial_instructions  tc_arc_frame_initial_instructions
+#define tc_regname_to_dw2regnum tc_arc_regname_to_dw2regnum
+
 /* Define the NOPs.  */
 #define NOP_OPCODE_S   0x000078E0
 #define NOP_OPCODE_L   0x264A7000 /* mov 0,0.  */
 
+#define MAX_FLAG_NAME_LENGHT 3
+
+struct arc_flags
+{
+  /* Name of the parsed flag.  */
+  char name[MAX_FLAG_NAME_LENGHT + 1];
+
+  /* The code of the parsed flag.  Valid when is not zero.  */
+  unsigned char code;
+};
+
+#ifndef MAX_INSN_ARGS
+#define MAX_INSN_ARGS	     6
+#endif
+
+#ifndef MAX_INSN_FLGS
+#define MAX_INSN_FLGS	     3
+#endif
+
+extern const relax_typeS md_relax_table[];
+#define TC_GENERIC_RELAX_TABLE md_relax_table
+
+/* Used to construct instructions at md_convert_frag stage of
+   relaxation.  */
+struct arc_relax_type
+{
+  /* Dictates whether the pc-relativity should be kept in mind when
+     relax_frag is called or whether the pc-relativity should be
+     solved outside of relaxation.  For clarification: BL(_S) and
+     B(_S) use pcrel == 1 and ADD with a solvable expression as 3rd
+     operand use pcrel == 0.  */
+  unsigned char pcrel;
+
+  /* Expressions that dictate the operands.  Used for re-assembling in
+     md_convert_frag.  */
+  expressionS tok[MAX_INSN_ARGS];
+
+  /* Number of tok (i.e. number of operands).  Used for re-assembling
+     in md_convert_frag.  */
+  int ntok;
+
+  /* Flags of instruction.  Used for re-assembling in
+     md_convert_frag.  */
+  struct arc_flags pflags[MAX_INSN_FLGS];
+
+  /* Number of flags.  Used for re-assembling in md_convert_frag.  */
+  int nflg;
+};

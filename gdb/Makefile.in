@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2015 Free Software Foundation, Inc.
+# Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -81,6 +81,8 @@ CATALOGS = @CATALOGS@
 
 # The name of the compiler to use.
 COMPILER = @COMPILER@
+# Set to CFLAGS or CXXFLAGS, depending on compiler/language.
+COMPILER_CFLAGS = @COMPILER_CFLAGS@
 
 # If you are compiling with GCC, make sure that either 1) You have the
 # fixed include files where GCC can reach them, or 2) You use the
@@ -551,9 +553,10 @@ GLOBAL_CFLAGS = $(MH_CFLAGS)
 
 PROFILE_CFLAGS = @PROFILE_CFLAGS@
 
-# CFLAGS is specifically reserved for setting from the command line
-# when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
+# These are specifically reserved for setting from the command line
+# when running make.  I.E.: "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
 
 # Set by configure, for e.g. expat.  Python installations are such that
 # C headers are included using their basename (for example, we #include
@@ -563,14 +566,9 @@ CFLAGS = @CFLAGS@
 # a bit the consequences by putting the Python includes last in the list.
 INTERNAL_CPPFLAGS = @CPPFLAGS@ @GUILE_CPPFLAGS@ @PYTHON_CPPFLAGS@
 
-# Need to pass this to testsuite for "make check".  Probably should be
-# consistent with top-level Makefile.in and gdb/testsuite/Makefile.in
-# so "make check" has the same result no matter where it is run.
-CXXFLAGS = -g -O
-
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS_BASE = \
-	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
+	$(COMPILER_CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) $(ZLIBINC) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
 	$(INTL_CFLAGS) $(INCGNU) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS)
@@ -585,7 +583,9 @@ LDFLAGS = @LDFLAGS@
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
 # PROFILE_CFLAGS is _not_ included, however, because we use monstartup.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS)
+INTERNAL_LDFLAGS = \
+	$(COMPILER_CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) \
+	$(LDFLAGS) $(CONFIG_LDFLAGS)
 
 # If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, then refer to libiberty.
@@ -657,7 +657,8 @@ ALL_64_TARGET_OBS = \
 
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
-	armbsd-tdep.o arm.o arm-linux-tdep.o arm-symbian-tdep.o \
+	armbsd-tdep.o arm.o arm-linux.o arm-linux-tdep.o \
+	arm-get-next-pcs.o arm-symbian-tdep.o \
 	armnbsd-tdep.o armobsd-tdep.o \
 	arm-tdep.o arm-wince-tdep.o \
 	avr-tdep.o \
@@ -875,7 +876,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	stabsread.c stack.c probe.c stap-probe.c std-regs.c \
 	symfile.c symfile-debug.c symfile-mem.c symmisc.c symtab.c \
 	target.c target-dcache.c target-descriptions.c target-memory.c \
-	thread.c top.c tracepoint.c \
+	tid-parse.c thread.c top.c tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
 	typeprint.c \
@@ -894,7 +895,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
 	common/errors.c common/common-debug.c common/common-exceptions.c \
-	common/btrace-common.c common/fileio.c \
+	common/btrace-common.c common/fileio.c common/common-regcache.c \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -965,7 +966,7 @@ psymtab.h psympriv.h progspace.h bfin-tdep.h \
 amd64-darwin-tdep.h charset-list.h \
 config/djgpp/langinfo.h config/djgpp/nl_types.h darwin-nat.h \
 dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
-i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h nios2-tdep.h \
+i386-darwin-tdep.h x86-nat.h linux-record.h moxie-tdep.h nios2-tdep.h \
 ft32-tdep.h \
 osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
@@ -985,8 +986,9 @@ i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
-common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h \
-nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h arch/aarch64-insn.h
+common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h nat/amd64-linux-siginfo.h\
+nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h arch/aarch64-insn.h \
+tid-parse.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1028,7 +1030,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	linespec.o dictionary.o namespace.o \
 	location.o infcall.o \
 	infcmd.o infrun.o \
-	expprint.o environ.o stack.o thread.o thread-fsm.o \
+	expprint.o environ.o stack.o tid-parse.o thread.o thread-fsm.o \
 	exceptions.o \
 	extension.o \
 	filesystem.o \
@@ -1085,6 +1087,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
 	common-exceptions.o btrace-common.o fileio.o \
+	common-regcache.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -1153,6 +1156,14 @@ check-read1: force
 	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
 	  cd testsuite; \
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-read1; \
+	else true; fi
+
+check-parallel: force
+	@if [ -f testsuite/Makefile ]; then \
+	  rootme=`pwd`; export rootme; \
+	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
+	  cd testsuite; \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-parallel; \
 	else true; fi
 
 # The idea is to parallelize testing of multilibs, for example:
@@ -1660,8 +1671,9 @@ ALLDEPFILES = \
 	amd64-dicos-tdep.c \
 	amd64-linux-nat.c amd64-linux-tdep.c \
 	amd64-sol2-tdep.c \
-	arm.c \
-	arm-linux-nat.c arm-linux-tdep.c arm-symbian-tdep.c arm-tdep.c \
+	arm.c arm-get-next-pcs.c \
+	arm-linux.c arm-linux-nat.c arm-linux-tdep.c \
+	arm-symbian-tdep.c arm-tdep.c \
 	armnbsd-nat.c armbsd-tdep.c armnbsd-tdep.c armobsd-tdep.c \
 	avr-tdep.c \
 	bfin-linux-tdep.c bfin-tdep.c \
@@ -2266,6 +2278,11 @@ btrace-common.o: ${srcdir}/common/btrace-common.c
 fileio.o: ${srcdir}/common/fileio.c
 	$(COMPILE) $(srcdir)/common/fileio.c
 	$(POSTCOMPILE)
+
+common-regcache.o: ${srcdir}/common/common-regcache.c
+	$(COMPILE) $(srcdir)/common/common-regcache.c
+	$(POSTCOMPILE)
+
 #
 # gdb/target/ dependencies
 #
@@ -2284,6 +2301,14 @@ waitstatus.o: ${srcdir}/target/waitstatus.c
 
 arm.o: ${srcdir}/arch/arm.c
 	$(COMPILE) $(srcdir)/arch/arm.c
+	$(POSTCOMPILE)
+
+arm-linux.o: ${srcdir}/arch/arm-linux.c
+	$(COMPILE) $(srcdir)/arch/arm-linux.c
+	$(POSTCOMPILE)
+
+arm-get-next-pcs.o: ${srcdir}/arch/arm-get-next-pcs.c
+	$(COMPILE) $(srcdir)/arch/arm-get-next-pcs.c
 	$(POSTCOMPILE)
 
 # gdb/nat/ dependencies
@@ -2333,6 +2358,10 @@ x86-linux.o: ${srcdir}/nat/x86-linux.c
 
 x86-linux-dregs.o: ${srcdir}/nat/x86-linux-dregs.c
 	$(COMPILE) $(srcdir)/nat/x86-linux-dregs.c
+	$(POSTCOMPILE)
+
+amd64-linux-siginfo.o: ${srcdir}/nat/amd64-linux-siginfo.c
+	$(COMPILE) $(srcdir)/nat/amd64-linux-siginfo.c
 	$(POSTCOMPILE)
 
 linux-namespaces.o: ${srcdir}/nat/linux-namespaces.c

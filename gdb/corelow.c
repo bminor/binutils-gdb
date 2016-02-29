@@ -1,6 +1,6 @@
 /* Core dump and executable file functions below target vector, for GDB.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -986,6 +986,15 @@ core_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return buf;
 }
 
+static const char *
+core_thread_name (struct target_ops *self, struct thread_info *thr)
+{
+  if (core_gdbarch
+      && gdbarch_core_thread_name_p (core_gdbarch))
+    return gdbarch_core_thread_name (core_gdbarch, thr);
+  return NULL;
+}
+
 static int
 core_has_memory (struct target_ops *ops)
 {
@@ -1038,6 +1047,7 @@ init_core_ops (void)
   core_ops.to_thread_alive = core_thread_alive;
   core_ops.to_read_description = core_read_description;
   core_ops.to_pid_to_str = core_pid_to_str;
+  core_ops.to_thread_name = core_thread_name;
   core_ops.to_stratum = process_stratum;
   core_ops.to_has_memory = core_has_memory;
   core_ops.to_has_stack = core_has_stack;

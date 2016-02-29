@@ -1,6 +1,6 @@
 /* Low-level child interface to ptrace.
 
-   Copyright (C) 1988-2015 Free Software Foundation, Inc.
+   Copyright (C) 1988-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -304,7 +304,7 @@ inf_ptrace_interrupt (struct target_ops *self, ptid_t ptid)
 /* Return which PID to pass to ptrace in order to observe/control the
    tracee identified by PTID.  */
 
-static pid_t
+pid_t
 get_ptrace_pid (ptid_t ptid)
 {
   pid_t pid;

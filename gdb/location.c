@@ -1,5 +1,5 @@
 /* Data structures and API for event locations in GDB.
-   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+   Copyright (C) 2013-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -113,13 +113,16 @@ get_linespec_location (const struct event_location *location)
 /* See description in location.h.  */
 
 struct event_location *
-new_address_location (CORE_ADDR addr)
+new_address_location (CORE_ADDR addr, const char *addr_string,
+		      int addr_string_len)
 {
   struct event_location *location;
 
   location = XCNEW (struct event_location);
   EL_TYPE (location) = ADDRESS_LOCATION;
   EL_ADDRESS (location) = addr;
+  if (addr_string != NULL)
+    EL_STRING (location) = xstrndup (addr_string, addr_string_len);
   return location;
 }
 
@@ -130,6 +133,15 @@ get_address_location (const struct event_location *location)
 {
   gdb_assert (EL_TYPE (location) == ADDRESS_LOCATION);
   return EL_ADDRESS (location);
+}
+
+/* See description in location.h.  */
+
+const char *
+get_address_string_location (const struct event_location *location)
+{
+  gdb_assert (EL_TYPE (location) == ADDRESS_LOCATION);
+  return EL_STRING (location);
 }
 
 /* See description in location.h.  */
@@ -510,11 +522,13 @@ string_to_explicit_location (const char **argp,
   struct event_location *location;
 
   /* It is assumed that input beginning with '-' and a non-digit
-     character is an explicit location.  */
+     character is an explicit location.  "-p" is reserved, though,
+     for probe locations.  */
   if (argp == NULL
       || *argp == '\0'
       || *argp[0] != '-'
-      || !isalpha ((*argp)[1]))
+      || !isalpha ((*argp)[1])
+      || ((*argp)[0] == '-' && (*argp)[1] == 'p'))
     return NULL;
 
   location = new_explicit_location (NULL);
@@ -622,52 +636,65 @@ string_to_explicit_location (const char **argp,
 /* See description in location.h.  */
 
 struct event_location *
+string_to_event_location_basic (char **stringp,
+				const struct language_defn *language)
+{
+  struct event_location *location;
+  const char *arg, *orig, *cs;
+
+  /* Try the input as a probe spec.  */
+  cs = *stringp;
+  if (cs != NULL && probe_linespec_to_ops (&cs) != NULL)
+    {
+      location = new_probe_location (*stringp);
+      *stringp += strlen (*stringp);
+    }
+  else
+    {
+      /* Try an address location.  */
+      if (*stringp != NULL && **stringp == '*')
+	{
+	  const char *arg, *orig;
+	  CORE_ADDR addr;
+
+	  orig = arg = *stringp;
+	  addr = linespec_expression_to_pc (&arg);
+	  location = new_address_location (addr, orig, arg - orig);
+	  *stringp += arg - orig;
+	}
+      else
+	{
+	  /* Everything else is a linespec.  */
+	  location = new_linespec_location (stringp);
+	}
+    }
+
+  return location;
+}
+
+/* See description in location.h.  */
+
+struct event_location *
 string_to_event_location (char **stringp,
 			  const struct language_defn *language)
 {
   struct event_location *location;
+  const char *arg, *orig;
 
-  /* First, check if the string is an address location.  */
-  if (*stringp != NULL && **stringp == '*')
+  /* Try an explicit location.  */
+  orig = arg = *stringp;
+  location = string_to_explicit_location (&arg, language, 0);
+  if (location != NULL)
     {
-      const char *arg, *orig;
-      CORE_ADDR addr;
-
-      orig = arg = *stringp;
-      addr = linespec_expression_to_pc (&arg);
-      location = new_address_location (addr);
+      /* It was a valid explicit location.  Advance STRINGP to
+	 the end of input.  */
       *stringp += arg - orig;
     }
   else
     {
-      const char *cs;
-
-      /* Next, try the input as a probe spec.  */
-      cs = *stringp;
-      if (cs != NULL && probe_linespec_to_ops (&cs) != NULL)
-	{
-	  location = new_probe_location (*stringp);
-	  *stringp += strlen (*stringp);
-	}
-      else
-	{
-	  const char *arg, *orig;
-
-	  /* Next, try an explicit location.  */
-	  orig = arg = *stringp;
-	  location = string_to_explicit_location (&arg, language, 0);
-	  if (location != NULL)
-	    {
-	      /* It was a valid explicit location.  Advance STRINGP to
-		 the end of input.  */
-	      *stringp += arg - orig;
-	    }
-	  else
-	    {
-	      /* Everything else is a linespec.  */
-	      location = new_linespec_location (stringp);
-	    }
-	}
+      /* Everything else is a "basic" linespec, address, or probe
+	 location.  */
+      location = string_to_event_location_basic (stringp, language);
     }
 
   return location;

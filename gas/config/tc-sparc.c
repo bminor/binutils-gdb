@@ -1,5 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright (C) 1989-2015 Free Software Foundation, Inc.
+   Copyright (C) 1989-2016 Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
@@ -47,7 +47,7 @@ static int get_expression (char *);
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "sparclite"
 #endif
-static char *default_arch = DEFAULT_ARCH;
+static const char *default_arch = DEFAULT_ARCH;
 
 /* Non-zero if the initial values of `max_architecture' and `sparc_arch_size'
    have been set.  */
@@ -241,8 +241,8 @@ enum sparc_arch_types {v6, v7, v8, leon, sparclet, sparclite, sparc86x, v8plus,
   | HWCAP2_XMPMUL | HWCAP2_XMONT
 
 static struct sparc_arch {
-  char *name;
-  char *opcode_arch;
+  const char *name;
+  const char *opcode_arch;
   enum sparc_arch_types arch_type;
   /* Default word size, as specified during configuration.
      A value of zero means can't be used to specify default architecture.  */
@@ -300,7 +300,7 @@ static struct sparc_arch {
 static enum sparc_arch_types default_arch_type;
 
 static struct sparc_arch *
-lookup_arch (char *name)
+lookup_arch (const char *name)
 {
   struct sparc_arch *sa;
 
@@ -760,9 +760,9 @@ md_show_usage (FILE *stream)
 /* Native operand size opcode translation.  */
 struct
   {
-    char *name;
-    char *name32;
-    char *name64;
+    const char *name;
+    const char *name32;
+    const char *name64;
   } native_op_table[] =
 {
   {"ldn", "ld", "ldx"},
@@ -782,7 +782,7 @@ struct
 
 struct priv_reg_entry
 {
-  char *name;
+  const char *name;
   int regnum;
 };
 
@@ -904,7 +904,7 @@ md_begin (void)
   for (i = 0; native_op_table[i].name; i++)
     {
       const struct sparc_opcode *insn;
-      char *name = ((sparc_arch_size == 32)
+      const char *name = ((sparc_arch_size == 32)
 		    ? native_op_table[i].name32
 		    : native_op_table[i].name64);
       insn = (struct sparc_opcode *) hash_find (op_hash, name);
@@ -1547,7 +1547,7 @@ get_hwcap_name (bfd_uint64_t mask)
 static int
 sparc_ip (char *str, const struct sparc_opcode **pinsn)
 {
-  char *error_message = "";
+  const char *error_message = "";
   char *s;
   const char *args;
   char c;
@@ -2065,7 +2065,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  static const struct ops
 		  {
 		    /* The name as it appears in assembler.  */
-		    char *name;
+		    const char *name;
 		    /* strlen (name), precomputed for speed */
 		    int len;
 		    /* The reloc this pseudo-op translates to.  */
@@ -2370,7 +2370,9 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		char format;
 
 		if (*s++ == '%'
-		    && ((format = *s) == 'f')
+		    && ((format = *s) == 'f'
+                        || format == 'd'
+                        || format == 'q')
 		    && ISDIGIT (*++s))
 		  {
 		    for (mask = 0; ISDIGIT (*s); ++s)
@@ -2381,19 +2383,23 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		    if ((*args == 'v'
 			 || *args == 'B'
 			 || *args == '5'
-			 || *args == 'H')
+			 || *args == 'H'
+			 || format == 'd')
 			&& (mask & 1))
 		      {
+                        /* register must be even numbered */
 			break;
-		      }		/* register must be even numbered */
+		      }
 
 		    if ((*args == 'V'
 			 || *args == 'R'
-			 || *args == 'J')
+			 || *args == 'J'
+			 || format == 'q')
 			&& (mask & 3))
 		      {
+                        /* register must be multiple of 4 */
 			break;
-		      }		/* register must be multiple of 4 */
+		      }
 
 		    if (mask >= 64)
 		      {
@@ -2512,7 +2518,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 
 	      {
 		char *s1;
-		char *op_arg = NULL;
+		const char *op_arg = NULL;
 		static expressionS op_exp;
 		bfd_reloc_code_real_type old_reloc = the_insn.reloc;
 
@@ -2521,7 +2527,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  {
 		    static const struct ops {
 		      /* The name as it appears in assembler.  */
-		      char *name;
+		      const char *name;
 		      /* strlen (name), precomputed for speed */
 		      int len;
 		      /* The reloc this pseudo-op translates to.  */

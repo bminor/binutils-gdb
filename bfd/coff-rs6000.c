@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
    Written by Metin G. Ozisik, Mimi Phuong-Thao Vo, and John Gilmore.
    Archive support from Damon A. Permezel.
    Contributed by IBM Corporation and Cygnus Support.
@@ -420,7 +420,7 @@ _bfd_xcoff_swap_sym_in (bfd *abfd, void * ext1, void * in1)
     }
 
   in->n_value = H_GET_32 (abfd, ext->e_value);
-  in->n_scnum = H_GET_16 (abfd, ext->e_scnum);
+  in->n_scnum = (short) H_GET_16 (abfd, ext->e_scnum);
   in->n_type = H_GET_16 (abfd, ext->e_type);
   in->n_sclass = H_GET_8 (abfd, ext->e_sclass);
   in->n_numaux = H_GET_8 (abfd, ext->e_numaux);
@@ -3523,7 +3523,8 @@ _bfd_xcoff_put_ldsymbol_name (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static bfd_boolean
-_bfd_xcoff_put_symbol_name (bfd *abfd, struct bfd_strtab_hash *strtab,
+_bfd_xcoff_put_symbol_name (struct bfd_link_info *info,
+			    struct bfd_strtab_hash *strtab,
 			    struct internal_syment *sym,
 			    const char *name)
 {
@@ -3536,9 +3537,7 @@ _bfd_xcoff_put_symbol_name (bfd *abfd, struct bfd_strtab_hash *strtab,
       bfd_boolean hash;
       bfd_size_type indx;
 
-      hash = TRUE;
-      if ((abfd->flags & BFD_TRADITIONAL_FORMAT) != 0)
-	hash = FALSE;
+      hash = !info->traditional_format;
       indx = _bfd_stringtab_add (strtab, name, hash, FALSE);
       if (indx == (bfd_size_type) -1)
 	return FALSE;

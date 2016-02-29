@@ -1,5 +1,5 @@
 /* Inferior process information for the remote server for GDB.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -162,6 +162,29 @@ find_thread_process (const struct process_info *const process)
     find_inferior (&all_threads, thread_pid_matches_callback, &pid);
 }
 
+/* Helper for find_any_thread_of_pid.  Returns true if a thread
+   matches a PID.  */
+
+static int
+thread_of_pid (struct inferior_list_entry *entry, void *pid_p)
+{
+  int pid = *(int *) pid_p;
+
+  return (ptid_get_pid (entry->id) == pid);
+}
+
+/* See gdbthread.h.  */
+
+struct thread_info *
+find_any_thread_of_pid (int pid)
+{
+  struct inferior_list_entry *entry;
+
+  entry = find_inferior (&all_threads, thread_of_pid, &pid);
+
+  return (struct thread_info *) entry;
+}
+
 ptid_t
 gdb_id_to_thread_id (ptid_t gdb_id)
 {
@@ -316,6 +339,7 @@ remove_process (struct process_info *process)
   free_all_breakpoints (process);
   gdb_assert (find_thread_process (process) == NULL);
   remove_inferior (&all_processes, &process->entry);
+  VEC_free (int, process->syscalls_to_catch);
   free (process);
 }
 

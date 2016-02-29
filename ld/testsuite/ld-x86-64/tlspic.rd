@@ -26,9 +26,7 @@ Section Headers:
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
 Key to Flags:
-.*
-.*
-.*
+#...
 
 Elf file type is DYN \(Shared object file\)
 Entry point 0x1000
@@ -72,8 +70,6 @@ Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
-.* SECTION +LOCAL +DEFAULT +7 *
-.* SECTION +LOCAL +DEFAULT +8 *
 .* TLS +GLOBAL +DEFAULT +8 sg8
 .* TLS +GLOBAL +DEFAULT +8 sg3
 .* TLS +GLOBAL +DEFAULT +8 sg4

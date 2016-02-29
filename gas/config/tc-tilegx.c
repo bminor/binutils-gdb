@@ -1,5 +1,5 @@
 /* tc-tilegx.c -- Assemble for a Tile-Gx chip.
-   Copyright (C) 2011-2015 Free Software Foundation, Inc.
+   Copyright (C) 2011-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -396,7 +396,7 @@ static tilegx_bundle_bits
 insert_operand (tilegx_bundle_bits bits,
                 const struct tilegx_operand *operand,
                 int operand_value,
-                char *file,
+                const char *file,
                 unsigned lineno)
 {
   /* Range-check the immediate.  */
@@ -434,7 +434,8 @@ insert_operand (tilegx_bundle_bits bits,
 
 
 static int
-apply_special_operator (operatorT op, offsetT num, char *file, unsigned lineno)
+apply_special_operator (operatorT op, offsetT num, const char *file,
+		       	unsigned lineno)
 {
   int ret;
   int check_shift = -1;

@@ -1,4 +1,4 @@
-# Copyright 1998-2015 Free Software Foundation, Inc.
+# Copyright 1998-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -330,7 +330,7 @@ proc gdb_unavailable_registers_test_1 { } {
     test_register "\$pc"
 
     gdb_test "info registers" \
-	"<unavailable>.*<unavailable>" \
+	".*<unavailable>.*<unavailable>.*" \
 	"info registers, multiple registers not available"
 
     gdb_test "info registers \$$spreg" \

@@ -1,3 +1,204 @@
+2016-02-23  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Skipping Over Functions and Files): Document new
+	options to "skip" command.  Update docs of output of "info skip".
+
+2016-02-18  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.texinfo (Signals): Add bound violation display hints for
+	a SIGSEGV.
+
+2016-02-18  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.texinfo (Trace File Format): Add documentation for description
+	section lines.
+
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.texinfo (Trace File Format): Remove misleading information
+	about register block ordering.
+
+2016-02-01  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Value Sizes): Fix typo.
+
+2016-02-01  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Skipping Over Functions and Files): Fix typo.
+
+2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Value Sizes): New section.
+	(Data): Add the 'Value Sizes' node to the menu.
+
+2016-01-26  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Debugging Output): Fix subject verb disagreements.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Debugging Output): Document "set/show debug fbsd-lwp".
+
+2016-01-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Mention that GDB displays the ID and name
+	of the thread that hit a breakpoint or received a signal.
+
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads) <thread ID lists>: Document star ranges.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Document the $_gthread convenience
+	variable.
+	(Convenience Vars): Likewise.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Document "info threads -gid".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* python.texi (Breakpoints In Python) <Breakpoint.thread>: Add
+	anchor.
+	(Threads In Python): Document new InferiorThread.global_num
+	attribute.
+
+2016-01-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Document per-inferior thread IDs,
+	qualified thread IDs, global thread IDs and thread ID lists.
+	(Set Watchpoints, Thread-Specific Breakpoints): Adjust to refer to
+	thread IDs.
+	(Convenience Vars): Document the $_thread convenience variable.
+	(Ada Tasks): Adjust to refer to thread IDs.
+	(GDB/MI Async Records, GDB/MI Thread Commands, GDB/MI Ada Tasking
+	Commands, GDB/MI Variable Objects): Update to mention global
+	thread IDs.
+	* guile.texi (Breakpoints In Guile)
+	<breakpoint-thread/set-breakpoint-thread breakpoint>: Mention
+	global thread IDs instead of thread IDs.
+	* python.texi (Threads In Python): Adjust documentation of
+	InferiorThread.num.
+	(Breakpoint.thread): Mention global thread IDs instead of thread
+	IDs.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* python.texi (Threads In Python): Document
+	InferiorThread.inferior.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Inferiors and Programs): Document the $_inferior
+	convenience variable.
+	(Convenience Vars): Likewise.
+
+2016-01-12  Josh Stone  <jistone@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Remote Configuration): List the QCatchSyscalls packet.
+	(Stop Reply Packets): List the syscall entry and return stop reasons.
+	(General Query Packets): Describe QCatchSyscalls, and add it to the
+	table and the detailed list of stub features.
+
+2016-01-12  Pedro Alves  <palves@redhat.com>
+
+	Remove use of the registered trademark symbol throughout.
+
+2016-01-12  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Interrupts): Update the document on handling
+	interrupt when program is stopped.
+
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.texinfo (Forks): Correct Linux kernel version where
+	fork and exec events are supported, add notes about support
+	of these events in target remote mode.
+	(Connecting): Reorganize and clarify distinctions between
+	target remote, extended-remote, and multiprocess.
+	Reorganize related text from separate sections into new
+	sections.
+	(Server): Note effects of target extended-remote mode.
+	Delete section on Multi-Process Mode for gdbserver.
+	Move some text to "Connecting" node.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Replace warning with explanation
+	about single-threaded programs.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Remove mention of SGI.
+	(Forks): Remove mention of HP-UX.
+	(Breakpoints): Remove mention of HP-UX.
+	(Set Watchpoints) <hardware watchpoints>: Don't mention HP-UX.
+	Reword in terms of architectures.
+	(Set Catchpoints) <catch exec, catch fork, catch vfork>: Don't
+	mention supported systems.
+	(Convenience Vars): Don't mention HP-UX.
+	(Jumping): Remove mention of HP-UX in comment.
+	(Files) <shared libraries>: Update supported shared library types
+	list.  Remove mention of HP-UX.
+	(Native): Remove HP-UX subsection.
+	(SVR4 Process Information): Remove mention of HP-UX.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Stack): Reorder menu.
+
+2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Update text to mention
+	-var-set-format's new zero-hexadecimal format.
+
+2015-12-08  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.texinfo (Ada Mode Into): Move overloading support
+	description to its own node.
+	(Overloading support for Ada): New node.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	PR 14618
+	* gdb.texinfo (Stop Reply Packets): Document the N stop reply.
+	(Remote Configuration): Add the "set/show remote
+	no-resumed-stop-reply" to the available settings table.
+	(General Query Packets): Document the "no-resumed" qSupported
+	feature.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Remote Configuration): List "set/show remote
+	thread-events" command in configuration table.
+	(Stop Reply Packets): Document "T05 create" stop
+	reason and 'w' stop reply.
+	(General Query Packets): Document QThreadEvents packet.  Document
+	QThreadEvents qSupported feature.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Bootstrapping): Add "interrupting remote targets"
+	anchor.
+	(Packets): Document vCtrlC.
+
+2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Thread List Format): Mention thread names.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	PR 17539
+	* gdb.texinfo (Inferiors and Programs): Adjust "maint info
+	program-spaces" example to ascending order listing.
+	(Threads): Adjust "info threads" example to ascending order
+	listing.
+	(Forks): Adjust "info inferiors" example to ascending order
+	listing.
+
 2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (Process Record and Replay): Document "record

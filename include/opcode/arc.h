@@ -1,5 +1,5 @@
 /* Opcode table for the ARC.
-   Copyright 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
    Contributed by Claudiu Zissulescu (claziss@synopsys.com)
 
@@ -24,8 +24,13 @@
 #ifndef OPCODE_ARC_H
 #define OPCODE_ARC_H
 
+#ifndef MAX_INSN_ARGS
 #define MAX_INSN_ARGS	     6
+#endif
+
+#ifndef MAX_INSN_FLGS
 #define MAX_INSN_FLGS	     3
+#endif
 
 /* Instruction Class.  */
 typedef enum
@@ -343,7 +348,7 @@ struct arc_reloc_equiv_tab
 {
   const char * name;	   /* String to lookup.  */
   const char * mnemonic;   /* Extra matching condition.  */
-  unsigned     flagcode;   /* Extra matching condition.  */
+  unsigned     flags[32];  /* Extra matching condition.  */
   signed int   oldreloc;   /* Old relocation.  */
   signed int   newreloc;   /* New relocation.  */
 };
@@ -409,5 +414,8 @@ struct arc_aux_reg
 
 extern const struct arc_aux_reg arc_aux_regs[];
 extern const unsigned arc_num_aux_regs;
+
+extern const struct arc_opcode arc_relax_opcodes[];
+extern const unsigned arc_num_relax_opcodes;
 
 #endif /* OPCODE_ARC_H */

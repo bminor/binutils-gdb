@@ -1,5 +1,5 @@
 # Expect script for ld-plugin tests
-#   Copyright (C) 2010-2015 Free Software Foundation, Inc.
+#   Copyright (C) 2010-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -39,6 +39,12 @@ global base_dir
 # Look for the name we can dlopen in the test plugin's libtool control script.
 set plugin_name [file_contents "$base_dir/libldtestplug.la"]
 set plugin_name [regsub "'.*" [regsub ".*dlname='" "$plugin_name" ""] ""]
+# Even though the API supports plugins it does not mean that the
+# linker was configured with --enable-plugins.  Check for that here.
+if { $plugin_name == "" } {
+    verbose "The linker is not configured to support plugins"
+    return
+}
 verbose "plugin name is '$plugin_name'"
 
 set plugin2_name [file_contents "$base_dir/libldtestplug2.la"]

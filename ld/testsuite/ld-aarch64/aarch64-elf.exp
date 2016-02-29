@@ -1,5 +1,5 @@
 # Expect script for various AARCH64 ELF tests.
-# Copyright (C) 2009-2015 Free Software Foundation, Inc.
+# Copyright (C) 2009-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -159,6 +159,8 @@ run_dump_test "emit-relocs-537"
 run_dump_test "emit-relocs-537-overflow"
 run_dump_test "emit-relocs-538"
 
+run_dump_test "reloc-overflow-bad"
+
 # test addend correctness when --emit-relocs specified for non-relocatable obj.
 run_dump_test "emit-relocs-local-addend"
 # test addend correctness when -r specified.
@@ -170,7 +172,6 @@ run_dump_test "pcrel_pic_defined_local"
 
 run_dump_test "limit-b"
 run_dump_test "limit-bl"
-run_dump_test "farcall-section"
 run_dump_test "farcall-back"
 run_dump_test "farcall-b-defsym"
 run_dump_test "farcall-bl-defsym"
@@ -181,6 +182,8 @@ run_dump_test "farcall-bl"
 run_dump_test "farcall-b"
 run_dump_test "farcall-b-none-function"
 run_dump_test "farcall-bl-none-function"
+run_dump_test "farcall-b-section"
+run_dump_test "farcall-bl-section"
 
 run_dump_test "tls-relax-all"
 run_dump_test "tls-relax-gd-le"
@@ -280,9 +283,9 @@ run_dump_test "plt_mapping_symbol"
 
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
-  {} "copy-reloc-so.so"}
+    {} "copy-reloc-so.so"}
   {"ld-aarch64/exe with copy relocation" "-e0 tmpdir/copy-reloc-so.so" "" ""
-  {copy-reloc-exe.s} {{objdump -R copy-reloc.d}} "copy-reloc"}
+    {copy-reloc-exe.s} {{objdump -R copy-reloc.d}} "copy-reloc"}
 }
 
 run_ld_link_tests $aarch64elflinktests

@@ -1,5 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,6 +42,7 @@
 #include "completer.h"
 #include "ui-out.h"
 #include "readline/readline.h"
+#include "common/enum-flags.h"
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -94,7 +95,7 @@ static struct program_space *current_source_pspace;
    and friends should be rewritten to count characters and see where
    things are wrapping, but that would be a fair amount of work.  */
 
-int lines_to_list = 10;
+static int lines_to_list = 10;
 static void
 show_lines_to_list (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
@@ -1327,7 +1328,7 @@ identify_source_line (struct symtab *s, int line, int mid_statement,
 
 static void
 print_source_lines_base (struct symtab *s, int line, int stopline,
-			 enum print_source_lines_flags flags)
+			 print_source_lines_flags flags)
 {
   int c;
   int desc;
@@ -1361,7 +1362,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   else
     {
       desc = last_source_error;
-	  flags |= PRINT_SOURCE_LINES_NOERROR;
+      flags |= PRINT_SOURCE_LINES_NOERROR;
       noprint = 1;
     }
 
@@ -1487,7 +1488,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
 void
 print_source_lines (struct symtab *s, int line, int stopline,
-		    enum print_source_lines_flags flags)
+		    print_source_lines_flags flags)
 {
   print_source_lines_base (s, line, stopline, flags);
 }

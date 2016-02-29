@@ -1,5 +1,5 @@
 /* AArch64-specific support for NN-bit ELF.
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2639,33 +2639,20 @@ aarch64_select_branch_stub (bfd_vma value, bfd_vma place)
 /* Determine the type of stub needed, if any, for a call.  */
 
 static enum elf_aarch64_stub_type
-aarch64_type_of_stub (struct bfd_link_info *info,
-		      asection *input_sec,
+aarch64_type_of_stub (asection *input_sec,
 		      const Elf_Internal_Rela *rel,
 		      asection *sym_sec,
 		      unsigned char st_type,
-		      struct elf_aarch64_link_hash_entry *hash,
 		      bfd_vma destination)
 {
   bfd_vma location;
   bfd_signed_vma branch_offset;
   unsigned int r_type;
-  struct elf_aarch64_link_hash_table *globals;
   enum elf_aarch64_stub_type stub_type = aarch64_stub_none;
-  bfd_boolean via_plt_p;
 
   if (st_type != STT_FUNC
-      && (sym_sec != bfd_abs_section_ptr))
+      && (sym_sec == input_sec))
     return stub_type;
-
-  globals = elf_aarch64_hash_table (info);
-  via_plt_p = (globals->root.splt != NULL && hash != NULL
-	       && hash->root.plt.offset != (bfd_vma) - 1);
-  /* Make sure call to plt stub can fit into the branch range.  */
-  if (via_plt_p)
-    destination = (globals->root.splt->output_section->vma
-		   + globals->root.splt->output_offset
-		   + hash->root.plt.offset);
 
   /* Determine where the call point is.  */
   location = (input_sec->output_offset
@@ -4142,8 +4129,8 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 		    }
 
 		  /* Determine what (if any) linker stub is needed.  */
-		  stub_type = aarch64_type_of_stub
-		    (info, section, irela, sym_sec, st_type, hash, destination);
+		  stub_type = aarch64_type_of_stub (section, irela, sym_sec,
+						    st_type, destination);
 		  if (stub_type == aarch64_stub_none)
 		    continue;
 
@@ -4174,7 +4161,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 		      goto error_ret_free_internal;
 		    }
 
-		  stub_entry->target_value = sym_value;
+		  stub_entry->target_value = sym_value + irela->r_addend;
 		  stub_entry->target_section = sym_sec;
 		  stub_entry->stub_type = stub_type;
 		  stub_entry->h = hash;
@@ -5280,15 +5267,28 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	/* Check if a stub has to be inserted because the destination
 	   is too far away.  */
 	struct elf_aarch64_stub_hash_entry *stub_entry = NULL;
-	if (! aarch64_valid_branch_p (value, place))
+
+	/* If the branch destination is directed to plt stub, "value" will be
+	   the final destination, otherwise we should plus signed_addend, it may
+	   contain non-zero value, for example call to local function symbol
+	   which are turned into "sec_sym + sec_off", and sec_off is kept in
+	   signed_addend.  */
+	if (! aarch64_valid_branch_p (via_plt_p ? value : value + signed_addend,
+				      place))
 	  /* The target is out of reach, so redirect the branch to
 	     the local stub for this function.  */
 	stub_entry = elfNN_aarch64_get_stub_entry (input_section, sym_sec, h,
 						   rel, globals);
 	if (stub_entry != NULL)
-	  value = (stub_entry->stub_offset
-		   + stub_entry->stub_sec->output_offset
-		   + stub_entry->stub_sec->output_section->vma);
+	  {
+	    value = (stub_entry->stub_offset
+		     + stub_entry->stub_sec->output_offset
+		     + stub_entry->stub_sec->output_section->vma);
+
+	    /* We have redirected the destination to stub entry address,
+	       so ignore any addend record in the original rela entry.  */
+	    signed_addend = 0;
+	  }
       }
       value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						   signed_addend, weak_undef_p);
@@ -6392,10 +6392,6 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  break;
 	}
 
-      if (!save_addend)
-	addend = 0;
-
-
       /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
          because such sections are not SEC_ALLOC and thus ld.so will
          not process them.  */
@@ -6435,6 +6431,34 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		     name, input_bfd, input_section, rel->r_offset);
 		  return FALSE;
 		}
+	      /* Overflow can occur when a variable is referenced with a type
+		 that has a larger alignment than the type with which it was
+		 declared. eg:
+		   file1.c: extern int foo; int a (void) { return foo; }
+		   file2.c: char bar, foo, baz;
+		 If the variable is placed into a data section at an offset
+		 that is incompatible with the larger alignment requirement
+		 overflow will occur.  (Strictly speaking this is not overflow
+		 but rather an alignment problem, but the bfd_reloc_ error
+		 enum does not have a value to cover that situation).
+
+		 Try to catch this situation here and provide a more helpful
+		 error message to the user.  */
+	      if (addend & ((1 << howto->rightshift) - 1)
+		  /* FIXME: Are we testing all of the appropriate reloc
+		     types here ?  */
+		  && (real_r_type == BFD_RELOC_AARCH64_LD_LO19_PCREL
+		      || real_r_type == BFD_RELOC_AARCH64_LDST16_LO12
+		      || real_r_type == BFD_RELOC_AARCH64_LDST32_LO12
+		      || real_r_type == BFD_RELOC_AARCH64_LDST64_LO12
+		      || real_r_type == BFD_RELOC_AARCH64_LDST128_LO12))
+		{
+		  info->callbacks->warning
+		    (info, _("One possible cause of this error is that the \
+symbol is being referenced in the indicated code as if it had a larger \
+alignment than was declared where it was defined."),
+		     name, input_bfd, input_section, rel->r_offset);
+		}
 	      break;
 
 	    case bfd_reloc_undefined:
@@ -6469,6 +6493,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	      break;
 	    }
 	}
+
+      if (!save_addend)
+	addend = 0;
     }
 
   return TRUE;

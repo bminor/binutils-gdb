@@ -1,5 +1,5 @@
 /* bfin-defs.h ADI Blackfin gas header file
-   Copyright (C) 2005-2015 Free Software Foundation, Inc.
+   Copyright (C) 2005-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -378,7 +378,7 @@ extern "C" {
 
 extern int debug_codeselection;
 
-void error (char *format, ...);
+void error (const char *format, ...);
 void warn (char *format, ...);
 int  semantic_error (char *syntax);
 void semantic_error_2 (char *syntax);

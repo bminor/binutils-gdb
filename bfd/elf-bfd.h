@@ -1,5 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright (C) 1992-2015 Free Software Foundation, Inc.
+   Copyright (C) 1992-2016 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -731,15 +731,15 @@ typedef enum {
 struct bfd_elf_special_section
 {
   const char *prefix;
-  int prefix_length;
+  unsigned int prefix_length;
   /* 0 means name must match PREFIX exactly.
      -1 means name must start with PREFIX followed by an arbitrary string.
      -2 means name must match PREFIX exactly or consist of PREFIX followed
      by a dot then anything.
      > 0 means name must start with the first PREFIX_LENGTH chars of
      PREFIX and finish with the last SUFFIX_LENGTH chars of PREFIX.  */
-  int suffix_length;
-  int type;
+  signed int suffix_length;
+  unsigned int type;
   bfd_vma attr;
 };
 
@@ -1169,6 +1169,11 @@ struct elf_backend_data
      or if all relocs are being preserved in the output.  */
   unsigned int (*elf_backend_count_relocs)
     (struct bfd_link_info *, asection *);
+
+  /* Count additionals relocations.  Called for relocatable links if
+     additional relocations needs to be created.  */
+  unsigned int (*elf_backend_count_additional_relocs)
+    (asection *);
 
   /* Say whether to sort relocs output by ld -r and ld --emit-relocs,
      by r_offset.  If NULL, default to true.  */
@@ -1997,7 +2002,7 @@ extern bfd_boolean _bfd_elf_find_line
   (bfd *, asymbol **, asymbol *, const char **, unsigned int *);
 extern bfd_boolean _bfd_elf_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *);
-extern bfd_boolean _bfd_elf_find_function
+extern asymbol *_bfd_elf_find_function
   (bfd *, asymbol **, asection *, bfd_vma, const char **, const char **);
 #define _bfd_elf_read_minisymbols _bfd_generic_read_minisymbols
 #define _bfd_elf_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol

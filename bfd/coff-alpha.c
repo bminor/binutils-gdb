@@ -1,5 +1,5 @@
 /* BFD back-end for ALPHA Extended-Coff files.
-   Copyright (C) 1993-2015 Free Software Foundation, Inc.
+   Copyright (C) 1993-2016 Free Software Foundation, Inc.
    Modified from coff-mips.c by Steve Chamberlain <sac@cygnus.com> and
    Ian Lance Taylor <ian@cygnus.com>.
 
@@ -2187,7 +2187,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 static bfd *
 alpha_ecoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 {
-  file_ptr filestart;
+  ufile_ptr filestart;
 
   if (last_file == NULL)
     filestart = bfd_ardata (archive)->first_file_filepos;
@@ -2208,6 +2208,12 @@ alpha_ecoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 	 BSD-4.4-style element with a long odd size.  */
       filestart = last_file->proxy_origin + size;
       filestart += filestart % 2;
+      if (filestart <= last_file->proxy_origin)
+	{
+	  /* Prevent looping.  See PR19256.  */
+	  bfd_set_error (bfd_error_malformed_archive);
+	  return NULL;
+	}
     }
 
   return alpha_ecoff_get_elt_at_filepos (archive, filestart);

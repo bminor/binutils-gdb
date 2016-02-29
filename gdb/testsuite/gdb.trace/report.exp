@@ -1,4 +1,4 @@
-#   Copyright 1998-2015 Free Software Foundation, Inc.
+#   Copyright 1998-2016 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -386,7 +386,7 @@ proc use_collected_data { data_source } {
 
 	# There is always a thread of an inferior, either a live one or
 	# a faked one.
-	gdb_test "info threads" "\\* ${decimal}    (process|Thread) ${decimal}\[ \t\].*"
+	gdb_test "info threads" "\\* ${decimal}    (process|Thread) \[0-9\.\]+\[ \t\].*"
 	gdb_test "info inferiors" "\\* 1    process ${decimal} \[ \t\]+${binfile}.*"
     }
 }

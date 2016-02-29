@@ -1,5 +1,5 @@
 /* Imagination Technologies Meta opcode table.
-   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+   Copyright (C) 2013-2016 Free Software Foundation, Inc.
    Contributed by Imagination Technologies Ltd.
 
    This file is part of GDB and GAS.
@@ -683,7 +683,7 @@ typedef struct
   enum scond_code code;
 } split_condition;
 
-static const split_condition metag_scondtab[] =
+static const split_condition metag_scondtab[] ATTRIBUTE_UNUSED =
   {
     { "LEQ",   SCOND_LEQ },
     { "LEZ",   SCOND_LEQ },

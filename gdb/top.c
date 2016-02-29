@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -542,7 +542,6 @@ command_loop (void)
 {
   struct cleanup *old_chain;
   char *command;
-  int stdin_is_tty = ISATTY (stdin);
 
   while (instream && !feof (instream))
     {
@@ -550,7 +549,7 @@ command_loop (void)
 	(*window_hook) (instream, get_prompt ());
 
       clear_quit_flag ();
-      if (instream == stdin && stdin_is_tty)
+      if (instream == stdin)
 	reinitialize_more_filter ();
       old_chain = make_cleanup (null_cleanup, 0);
 
@@ -1261,7 +1260,7 @@ print_gdb_version (struct ui_file *stream)
   /* Second line is a copyright notice.  */
 
   fprintf_filtered (stream,
-		    "Copyright (C) 2015 Free Software Foundation, Inc.\n");
+		    "Copyright (C) 2016 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on

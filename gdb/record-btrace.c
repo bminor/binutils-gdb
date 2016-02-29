@@ -1,6 +1,6 @@
 /* Branch trace support for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+   Copyright (C) 2013-2016 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -218,7 +218,7 @@ record_btrace_open (const char *args, int from_tty)
 
   disable_chain = make_cleanup (null_cleanup, NULL);
   ALL_NON_EXITED_THREADS (tp)
-    if (args == NULL || *args == 0 || number_is_in_list (args, tp->num))
+    if (args == NULL || *args == 0 || number_is_in_list (args, tp->global_num))
       {
 	btrace_enable (tp, &record_btrace_conf);
 
@@ -332,7 +332,7 @@ record_btrace_print_bts_conf (const struct btrace_config_bts *conf)
     }
 }
 
-/* Print an Intel(R) Processor Trace configuration.  */
+/* Print an Intel Processor Trace configuration.  */
 
 static void
 record_btrace_print_pt_conf (const struct btrace_config_pt *conf)
@@ -438,8 +438,8 @@ record_btrace_info (struct target_ops *self)
     }
 
   printf_unfiltered (_("Recorded %u instructions in %u functions (%u gaps) "
-		       "for thread %d (%s).\n"), insns, calls, gaps,
-		     tp->num, target_pid_to_str (tp->ptid));
+		       "for thread %s (%s).\n"), insns, calls, gaps,
+		     print_thread_id (tp), target_pid_to_str (tp->ptid));
 
   if (btrace_is_replaying (tp))
     printf_unfiltered (_("Replay in progress.  At instruction %u.\n"),
@@ -639,7 +639,7 @@ static void
 btrace_print_lines (struct btrace_line_range lines, struct ui_out *uiout,
 		    struct cleanup **ui_item_chain, int flags)
 {
-  enum print_source_lines_flags psl_flags;
+  print_source_lines_flags psl_flags;
   int line;
 
   psl_flags = 0;
@@ -1044,11 +1044,12 @@ btrace_call_history (struct ui_out *uiout,
 		     const struct btrace_thread_info *btinfo,
 		     const struct btrace_call_iterator *begin,
 		     const struct btrace_call_iterator *end,
-		     enum record_print_flag flags)
+		     int int_flags)
 {
   struct btrace_call_iterator it;
+  record_print_flags flags = (enum record_print_flag) int_flags;
 
-  DEBUG ("ftrace (0x%x): [%u; %u)", flags, btrace_call_number (begin),
+  DEBUG ("ftrace (0x%x): [%u; %u)", int_flags, btrace_call_number (begin),
 	 btrace_call_number (end));
 
   for (it = *begin; btrace_call_cmp (&it, end) < 0; btrace_call_next (&it, 1))
@@ -1114,7 +1115,7 @@ btrace_call_history (struct ui_out *uiout,
 /* The to_call_history method of target record-btrace.  */
 
 static void
-record_btrace_call_history (struct target_ops *self, int size, int flags)
+record_btrace_call_history (struct target_ops *self, int size, int int_flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_call_history *history;
@@ -1122,6 +1123,7 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
   struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
   unsigned int context, covered;
+  record_print_flags flags = (enum record_print_flag) int_flags;
 
   uiout = current_uiout;
   uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
@@ -1136,7 +1138,7 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
     {
       struct btrace_insn_iterator *replay;
 
-      DEBUG ("call-history (0x%x): %d", flags, size);
+      DEBUG ("call-history (0x%x): %d", int_flags, size);
 
       /* If we're replaying, we start at the replay position.  Otherwise, we
 	 start at the tail of the trace.  */
@@ -1171,7 +1173,7 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
       begin = history->begin;
       end = history->end;
 
-      DEBUG ("call-history (0x%x): %d, prev: [%u; %u)", flags, size,
+      DEBUG ("call-history (0x%x): %d, prev: [%u; %u)", int_flags, size,
 	     btrace_call_number (&begin), btrace_call_number (&end));
 
       if (size < 0)
@@ -1204,7 +1206,8 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
 
 static void
 record_btrace_call_history_range (struct target_ops *self,
-				  ULONGEST from, ULONGEST to, int flags)
+				  ULONGEST from, ULONGEST to,
+				  int int_flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_call_history *history;
@@ -1213,6 +1216,7 @@ record_btrace_call_history_range (struct target_ops *self,
   struct ui_out *uiout;
   unsigned int low, high;
   int found;
+  record_print_flags flags = (enum record_print_flag) int_flags;
 
   uiout = current_uiout;
   uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
@@ -1220,7 +1224,7 @@ record_btrace_call_history_range (struct target_ops *self,
   low = from;
   high = to;
 
-  DEBUG ("call-history (0x%x): [%u; %u)", flags, low, high);
+  DEBUG ("call-history (0x%x): [%u; %u)", int_flags, low, high);
 
   /* Check for wrap-arounds.  */
   if (low != from || high != to)
@@ -1257,9 +1261,11 @@ record_btrace_call_history_range (struct target_ops *self,
 
 static void
 record_btrace_call_history_from (struct target_ops *self,
-				 ULONGEST from, int size, int flags)
+				 ULONGEST from, int size,
+				 int int_flags)
 {
   ULONGEST begin, end, context;
+  record_print_flags flags = (enum record_print_flag) int_flags;
 
   context = abs (size);
   if (context == 0)
@@ -1858,7 +1864,7 @@ record_btrace_resume_thread (struct thread_info *tp,
 {
   struct btrace_thread_info *btinfo;
 
-  DEBUG ("resuming thread %d (%s): %x (%s)", tp->num,
+  DEBUG ("resuming thread %s (%s): %x (%s)", print_thread_id (tp),
 	 target_pid_to_str (tp->ptid), flag, btrace_thread_flag_to_str (flag));
 
   btinfo = &tp->btrace;
@@ -2125,7 +2131,8 @@ record_btrace_cancel_resume (struct thread_info *tp)
   if (flags == 0)
     return;
 
-  DEBUG ("cancel resume thread %d (%s): %x (%s)", tp->num,
+  DEBUG ("cancel resume thread %s (%s): %x (%s)",
+	 print_thread_id (tp),
 	 target_pid_to_str (tp->ptid), flags,
 	 btrace_thread_flag_to_str (flags));
 
@@ -2348,7 +2355,7 @@ record_btrace_step_thread (struct thread_info *tp)
   flags = btinfo->flags & (BTHR_MOVE | BTHR_STOP);
   btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
 
-  DEBUG ("stepping thread %d (%s): %x (%s)", tp->num,
+  DEBUG ("stepping thread %s (%s): %x (%s)", print_thread_id (tp),
 	 target_pid_to_str (tp->ptid), flags,
 	 btrace_thread_flag_to_str (flags));
 
@@ -2557,7 +2564,8 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   /* We moved the replay position but did not update registers.  */
   registers_changed_ptid (eventing->ptid);
 
-  DEBUG ("wait ended by thread %d (%s): %s", eventing->num,
+  DEBUG ("wait ended by thread %s (%s): %s",
+	 print_thread_id (eventing),
 	 target_pid_to_str (eventing->ptid),
 	 target_waitstatus_to_string (status));
 
@@ -2880,7 +2888,7 @@ cmd_record_btrace_bts_start (char *args, int from_tty)
   END_CATCH
 }
 
-/* Start recording Intel(R) Processor Trace.  */
+/* Start recording in Intel Processor Trace format.  */
 
 static void
 cmd_record_btrace_pt_start (char *args, int from_tty)
@@ -3042,7 +3050,7 @@ This format may not be available on all processors."),
 
   add_cmd ("pt", class_obscure, cmd_record_btrace_pt_start,
 	   _("\
-Start branch trace recording in Intel(R) Processor Trace format.\n\n\
+Start branch trace recording in Intel Processor Trace format.\n\n\
 This format may not be available on all processors."),
 	   &record_btrace_cmdlist);
   add_alias_cmd ("pt", "btrace pt", class_obscure, 1, &record_cmdlist);

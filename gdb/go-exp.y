@@ -1,6 +1,6 @@
 /* YACC parser for Go expressions, for GDB.
 
-   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+   Copyright (C) 2012-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -975,7 +975,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
   ++tokptr;
 
   value->type = C_STRING | (quote == '\'' ? C_CHAR : 0); /*FIXME*/
-  value->ptr = obstack_base (&tempbuf);
+  value->ptr = (char *) obstack_base (&tempbuf);
   value->length = obstack_object_size (&tempbuf);
 
   *outptr = tokptr;
@@ -1363,7 +1363,7 @@ build_packaged_name (const char *package, int package_len,
   obstack_grow_str (&name_obstack, ".");
   obstack_grow (&name_obstack, name, name_len);
   obstack_grow (&name_obstack, "", 1);
-  result.ptr = obstack_base (&name_obstack);
+  result.ptr = (char *) obstack_base (&name_obstack);
   result.length = obstack_object_size (&name_obstack) - 1;
 
   return result;

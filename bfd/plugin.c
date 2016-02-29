@@ -1,5 +1,5 @@
 /* Plugin support for BFD.
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -709,7 +709,7 @@ const bfd_target plugin_vec =
   0,				/* symbol_leading_char.  */
   '/',				/* ar_pad_char.  */
   15,				/* ar_max_namelen.  */
-  0,				/* match priority.  */
+  255,				/* match priority.  */
 
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,

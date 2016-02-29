@@ -1,5 +1,5 @@
 /* aarch64-dis.c -- AArch64 disassembler.
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -173,11 +173,18 @@ get_greg_qualifier_from_value (aarch64_insn value)
   return qualifier;
 }
 
-/* Given VALUE, return qualifier for a vector register.  */
+/* Given VALUE, return qualifier for a vector register.  This does not support
+   decoding instructions that accept the 2H vector type.  */
+
 static inline enum aarch64_opnd_qualifier
 get_vreg_qualifier_from_value (aarch64_insn value)
 {
   enum aarch64_opnd_qualifier qualifier = AARCH64_OPND_QLF_V_8B + value;
+
+  /* Instructions using vector type 2H should not call this function.  Skip over
+     the 2H qualifier.  */
+  if (qualifier >= AARCH64_OPND_QLF_V_2H)
+    qualifier += 1;
 
   assert (value <= 0x8
 	  && aarch64_get_qualifier_standard_value (qualifier) == value);
@@ -248,7 +255,7 @@ aarch64_ext_regrt_sysins (const aarch64_operand *self, aarch64_opnd_info *info,
   /* This will make the constraint checking happy and more importantly will
      help the disassembler determine whether this operand is optional or
      not.  */
-  info->present = inst->operands[0].sysins_op->has_xt;
+  info->present = aarch64_sys_ins_reg_has_xt (inst->operands[0].sysins_op);
 
   return 1;
 }
@@ -1034,7 +1041,7 @@ aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	DEBUG_TRACE ("%s found value: %x, has_xt: %d, i: %d.",
 		     info->sysins_op->name,
 		     (unsigned)info->sysins_op->value,
-		     info->sysins_op->has_xt, i);
+		     aarch64_sys_ins_reg_has_xt (info->sysins_op), i);
 	return 1;
       }
 
@@ -1065,6 +1072,33 @@ aarch64_ext_prfop (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* prfop in Rt */
   info->prfop = aarch64_prfops + extract_field (FLD_Rt, code, 0);
   return 1;
+}
+
+/* Decode the hint number for an alias taking an operand.  Set info->hint_option
+   to the matching name/value pair in aarch64_hint_options.  */
+
+int
+aarch64_ext_hint (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		  aarch64_opnd_info *info,
+		  aarch64_insn code,
+		  const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  /* CRm:op2.  */
+  unsigned hint_number;
+  int i;
+
+  hint_number = extract_fields (code, 0, 2, FLD_CRm, FLD_op2);
+
+  for (i = 0; aarch64_hint_options[i].name != NULL; i++)
+    {
+      if (hint_number == aarch64_hint_options[i].value)
+	{
+	  info->hint_option = &(aarch64_hint_options[i]);
+	  return 1;
+	}
+    }
+
+  return 0;
 }
 
 /* Decode the extended register operand for e.g.
@@ -1601,6 +1635,45 @@ convert_bfm_to_bfi (aarch64_inst *inst)
 }
 
 /* The instruction written:
+     BFC <Xd>, #<lsb>, #<width>
+   is equivalent to:
+     BFM <Xd>, XZR, #((64-<lsb>)&0x3f), #(<width>-1).  */
+
+static int
+convert_bfm_to_bfc (aarch64_inst *inst)
+{
+  int64_t immr, imms, val;
+
+  /* Should have been assured by the base opcode value.  */
+  assert (inst->operands[1].reg.regno == 0x1f);
+
+  immr = inst->operands[2].imm.value;
+  imms = inst->operands[3].imm.value;
+  val = inst->operands[2].qualifier == AARCH64_OPND_QLF_imm_0_31 ? 32 : 64;
+  if (imms < immr)
+    {
+      /* Drop XZR from the second operand.  */
+      copy_operand_info (inst, 1, 2);
+      copy_operand_info (inst, 2, 3);
+      inst->operands[3].type = AARCH64_OPND_NIL;
+
+      /* Recalculate the immediates.  */
+      inst->operands[1].imm.value = (val - immr) & (val - 1);
+      inst->operands[2].imm.value = imms + 1;
+
+      /* The two opcodes have different qualifiers for the operands; reset to
+	 help the checking.  */
+      reset_operand_qualifier (inst, 1);
+      reset_operand_qualifier (inst, 2);
+      reset_operand_qualifier (inst, 3);
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/* The instruction written:
      LSL <Xd>, <Xn>, #<shift>
    is equivalent to:
      UBFM <Xd>, <Xn>, #((64-<shift>)&0x3f), #(63-<shift>).  */
@@ -1759,6 +1832,8 @@ convert_to_alias (aarch64_inst *inst, const aarch64_opcode *alias)
     case OP_BFI:
     case OP_UBFIZ:
       return convert_bfm_to_bfi (inst);
+    case OP_BFC:
+      return convert_bfm_to_bfc (inst);
     case OP_MOV_V:
       return convert_orr_to_mov (inst);
     case OP_MOV_IMM_WIDE:
@@ -1866,7 +1941,7 @@ determine_disassembling_preference (struct aarch64_inst *inst)
   for (; alias; alias = aarch64_find_next_alias_opcode (alias))
     {
       DEBUG_TRACE ("try %s", alias->name);
-      assert (alias_opcode_p (alias));
+      assert (alias_opcode_p (alias) || opcode_has_alias (opcode));
 
       /* An alias can be a pseudo opcode which will never be used in the
 	 disassembly, e.g. BIC logical immediate is such a pseudo opcode

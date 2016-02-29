@@ -1,5 +1,5 @@
 /* Memory breakpoint operations for the remote server for GDB.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -267,7 +267,7 @@ Z_packet_to_raw_bkpt_type (char z_type)
 }
 
 int
-any_persistent_commands ()
+any_persistent_commands (void)
 {
   struct process_info *proc = current_process ();
   struct breakpoint *bp;
@@ -1023,13 +1023,8 @@ check_gdb_bp_preconditions (char z_type, int *err)
       *err = 1;
       return 0;
     }
-  else if (current_thread == NULL)
-    {
-      *err = -1;
-      return 0;
-    }
-  else
-    return 1;
+
+  return 1;
 }
 
 /* See mem-break.h.  This is a wrapper for set_gdb_breakpoint_1 that
@@ -1047,9 +1042,11 @@ set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind, int *err)
      access memory.  */
   if (z_type == Z_PACKET_SW_BP)
     {
-      *err = prepare_to_access_memory ();
-      if (*err != 0)
-	return NULL;
+      if (prepare_to_access_memory () != 0)
+	{
+	  *err = -1;
+	  return NULL;
+	}
     }
 
   bp = set_gdb_breakpoint_1 (z_type, addr, kind, err);
@@ -1272,7 +1269,7 @@ gdb_condition_true_at_breakpoint (CORE_ADDR where)
 
 /* Add commands COMMANDS to GDBserver's breakpoint BP.  */
 
-void
+static void
 add_commands_to_breakpoint (struct breakpoint *bp,
 			    struct agent_expr *commands, int persist)
 {
@@ -1660,6 +1657,23 @@ hardware_breakpoint_inserted_here (CORE_ADDR addr)
     if (bp->raw_type == raw_bkpt_type_hw
 	&& bp->pc == addr
 	&& bp->inserted)
+      return 1;
+
+  return 0;
+}
+
+/* See mem-break.h.  */
+
+int
+reinsert_breakpoint_inserted_here (CORE_ADDR addr)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
+    if (bp->type == reinsert_breakpoint
+	&& bp->raw->pc == addr
+	&& bp->raw->inserted)
       return 1;
 
   return 0;

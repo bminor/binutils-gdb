@@ -1,4 +1,4 @@
-# Copyright 1992-2015 Free Software Foundation, Inc.
+# Copyright 1992-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -420,9 +420,6 @@ proc test_print_mi_classes { } {
 # incapable of printing the member of an anonymous union.
 # We test the printing of the member first, and perform the other tests
 # only if the test succeeds, to avoid the infinite loop.
-#
-# GDB HEAD 2004-01-27 with hp aCC A.03.45 crashes on the first test.
-# -- chastain 2004-01-27
 
 proc test_print_anon_union {} {
     global gdb_prompt

@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2016 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -1838,6 +1838,10 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_process_record (gdbarch, i386_process_record);
   set_gdbarch_process_record_signal (gdbarch, amd64_linux_record_signal);
+
+  set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
+  set_gdbarch_handle_segmentation_fault (gdbarch,
+					 i386_linux_handle_segmentation_fault);
 }
 
 static void

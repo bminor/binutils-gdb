@@ -1,6 +1,6 @@
 /* tc-microblaze.c -- Assemble code for Xilinx MicroBlaze
 
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -621,7 +621,7 @@ parse_exp (char *s, expressionS *e)
 #define IMM_MAX    9
 
 struct imm_type {
-	char *isuffix;	 /* Suffix String */
+	const char *isuffix;	 /* Suffix String */
 	int itype;       /* Suffix Type */
 	int otype;       /* Offset Type */
 };
@@ -737,9 +737,9 @@ parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
     as_fatal (_("operand must be a constant or a label"));
   else if (e->X_op == O_constant)
     {
-      /* Special case: sign extend negative 32-bit values to 64-bits.  */
+      /* Special case: sign extend negative 32-bit values to offsetT size.  */
       if ((e->X_add_number >> 31) == 1)
-	e->X_add_number |= -(1 << 31);
+	e->X_add_number |= -((addressT) (1U << 31));
 
       if (e->X_add_number < min || e->X_add_number > max)
 	{
@@ -1960,7 +1960,7 @@ md_apply_fix (fixS *   fixP,
 	      segT     segment)
 {
   char *       buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
-  char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
+  const char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
   const char * symname;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */
   offsetT      val  = (offsetT) * valp;
@@ -2257,7 +2257,7 @@ md_estimate_size_before_relax (fragS * fragP,
 		{
                   /* Variable not in small data read only segment accessed
 		     using small data read only anchor.  */
-                  char *file = fragP->fr_file ? fragP->fr_file : _("unknown");
+                  const char *file = fragP->fr_file ? fragP->fr_file : _("unknown");
 
                   as_bad_where (file, fragP->fr_line,
                                 _("Variable is accessed using small data read "
@@ -2280,7 +2280,7 @@ md_estimate_size_before_relax (fragS * fragP,
                 }
 	      else
 		{
-                  char *file = fragP->fr_file ? fragP->fr_file : _("unknown");
+                  const char *file = fragP->fr_file ? fragP->fr_file : _("unknown");
 
                   as_bad_where (file, fragP->fr_line,
                                 _("Variable is accessed using small data read "

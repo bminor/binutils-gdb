@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991-2015 Free Software Foundation, Inc.
+   Copyright (C) 1991-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -220,6 +220,9 @@ static enum
   decompress = 1 << 4
 } do_debug_sections = nothing;
 
+/* Whether to generate ELF common symbols with the STT_COMMON type.  */
+static enum bfd_link_discard do_elf_stt_common = unchanged;
+
 /* Whether to change the leading character in symbol names.  */
 static bfd_boolean change_leading_char = FALSE;
 
@@ -294,6 +297,7 @@ enum command_line_switch
   OPTION_DEBUGGING,
   OPTION_DECOMPRESS_DEBUG_SECTIONS,
   OPTION_DUMP_SECTION,
+  OPTION_ELF_STT_COMMON,
   OPTION_EXTRACT_DWO,
   OPTION_EXTRACT_SYMBOL,
   OPTION_FILE_ALIGNMENT,
@@ -403,6 +407,7 @@ static struct option copy_options[] =
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
   {"dump-section", required_argument, 0, OPTION_DUMP_SECTION},
+  {"elf-stt-common", required_argument, 0, OPTION_ELF_STT_COMMON},
   {"enable-deterministic-archives", no_argument, 0, 'D'},
   {"extract-dwo", no_argument, 0, OPTION_EXTRACT_DWO},
   {"extract-symbol", no_argument, 0, OPTION_EXTRACT_SYMBOL},
@@ -622,6 +627,8 @@ copy_usage (FILE *stream, int exit_status)
      --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n\
                                    Compress DWARF debug sections using zlib\n\
      --decompress-debug-sections   Decompress DWARF debug sections using zlib\n\
+     --elf-stt-common=[yes|no]     Generate ELF common symbols with STT_COMMON\n\
+                                     type\n\
   -v --verbose                     List all object files modified\n\
   @<file>                          Read options from <file>\n\
   -V --version                     Display this program's version number\n\
@@ -771,7 +778,7 @@ parse_symflags (const char *s, char **other)
 
 #define PARSE_OTHER(fname,fval)								   \
       else if (len >= (int) sizeof fname && strncasecmp (fname, s, sizeof fname - 1) == 0) \
-	fval = strndup (s + sizeof fname - 1, len - sizeof fname + 1)
+	fval = xstrndup (s + sizeof fname - 1, len - sizeof fname + 1)
       
       if (0) ;
       PARSE_FLAG ("local", BSF_LOCAL);
@@ -1796,13 +1803,22 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       return FALSE;
     }
 
-  if ((do_debug_sections & compress) != 0
-      && do_debug_sections != compress
-      && ibfd->xvec->flavour != bfd_target_elf_flavour)
+  if (ibfd->xvec->flavour != bfd_target_elf_flavour)
     {
-      non_fatal (_("--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported on `%s'"),
-		 bfd_get_archive_filename (ibfd));
-      return FALSE;
+      if ((do_debug_sections & compress) != 0
+	  && do_debug_sections != compress)
+	{
+	  non_fatal (_("--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported on `%s'"),
+		     bfd_get_archive_filename (ibfd));
+	  return FALSE;
+	}
+
+      if (do_elf_stt_common)
+	{
+	  non_fatal (_("--elf-stt-common=[yes|no] is unsupported on `%s'"),
+		     bfd_get_archive_filename (ibfd));
+	  return FALSE;
+	}
     }
 
   if (verbose)
@@ -2738,6 +2754,19 @@ copy_file (const char *input_filename, const char *output_filename,
       break;
     case decompress:
       ibfd->flags |= BFD_DECOMPRESS;
+      break;
+    default:
+      break;
+    }
+
+  switch (do_elf_stt_common)
+    {
+    case elf_stt_common:
+      ibfd->flags |= BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON;
+      break;
+      break;
+    case no_elf_stt_common:
+      ibfd->flags |= BFD_CONVERT_ELF_COMMON;
       break;
     default:
       break;
@@ -4058,10 +4087,10 @@ copy_main (int argc, char *argv[])
 	      fatal (_("bad format for %s"), "--add-symbol");
 	    t = strchr (s + 1, ':');
 
-	    newsym->symdef = strndup (optarg, s - optarg);
+	    newsym->symdef = xstrndup (optarg, s - optarg);
 	    if (t)
 	      {
-		newsym->section = strndup (s + 1, t - (s + 1));
+		newsym->section = xstrndup (s + 1, t - (s + 1));
 		newsym->symval = strtol (t + 1, NULL, 0);
 	      }
 	    else
@@ -4220,6 +4249,16 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_DECOMPRESS_DEBUG_SECTIONS:
 	  do_debug_sections = decompress;
+	  break;
+
+	case OPTION_ELF_STT_COMMON:
+	  if (strcasecmp (optarg, "yes") == 0)
+	    do_elf_stt_common = elf_stt_common;
+	  else if (strcasecmp (optarg, "no") == 0)
+	    do_elf_stt_common = no_elf_stt_common;
+	  else
+	    fatal (_("unrecognized --elf-stt-common= option `%s'"),
+		   optarg);
 	  break;
 
 	case OPTION_GAP_FILL:

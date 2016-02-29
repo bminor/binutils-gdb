@@ -1,6 +1,6 @@
 /* Scheme interface to breakpoints.
 
-   Copyright (C) 2008-2015 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -425,8 +425,8 @@ gdbscm_register_breakpoint_x (SCM self)
 
   pending_breakpoint_scm = self;
   location = bp_smob->spec.location;
-  copy = location;
-  eloc = new_linespec_location (&copy);
+  copy = skip_spaces (location);
+  eloc = string_to_event_location_basic (&copy, current_language);
   cleanup = make_cleanup_delete_event_location (eloc);
 
   TRY
@@ -745,7 +745,7 @@ gdbscm_set_breakpoint_thread_x (SCM self, SCM newvalue)
   if (scm_is_signed_integer (newvalue, LONG_MIN, LONG_MAX))
     {
       id = scm_to_long (newvalue);
-      if (! valid_thread_id (id))
+      if (!valid_global_thread_id (id))
 	{
 	  gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG2, newvalue,
 				     _("invalid thread id"));
@@ -1273,14 +1273,14 @@ Set the breakpoint's \"hit\" count.  The value must be zero.\n\
 
   { "breakpoint-thread", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_thread),
     "\
-Return the breakpoint's thread id or #f if there isn't one." },
+Return the breakpoint's global thread id or #f if there isn't one." },
 
   { "set-breakpoint-thread!", 2, 0, 0,
     as_a_scm_t_subr (gdbscm_set_breakpoint_thread_x),
     "\
-Set the thread id for this breakpoint.\n\
+Set the global thread id for this breakpoint.\n\
 \n\
-  Arguments: <gdb:breakpoint> thread-id" },
+  Arguments: <gdb:breakpoint> global-thread-id" },
 
   { "breakpoint-task", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_task),
     "\

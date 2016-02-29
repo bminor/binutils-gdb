@@ -1,6 +1,6 @@
 /* Target-dependent code for Analog Devices Blackfin processor, for GDB.
 
-   Copyright (C) 2005-2015 Free Software Foundation, Inc.
+   Copyright (C) 2005-2016 Free Software Foundation, Inc.
 
    Contributed by Analog Devices, Inc.
 
@@ -531,7 +531,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
       int container_len = (TYPE_LENGTH (value_type) + 3) & ~3;
 
       sp -= container_len;
-      write_memory (sp, value_contents_writeable (args[i]), container_len);
+      write_memory (sp, value_contents (args[i]), container_len);
     }
 
   /* Initialize R0, R1, and R2 to the first 3 words of parameters.  */

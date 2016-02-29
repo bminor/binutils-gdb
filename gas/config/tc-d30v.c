@@ -1,5 +1,5 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
-   Copyright (C) 1997-2015 Free Software Foundation, Inc.
+   Copyright (C) 1997-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1840,7 +1840,7 @@ d30v_start_line (void)
 }
 
 static void
-check_size (long value, int bits, char *file, int line)
+check_size (long value, int bits, const char *file, int line)
 {
   int tmp, max;
 

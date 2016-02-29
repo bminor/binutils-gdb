@@ -1,5 +1,5 @@
 /* Generic BFD support for file formats.
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -345,6 +345,16 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
       if (temp)
 	{
+	  int match_priority = temp->match_priority;
+#if BFD_SUPPORTS_PLUGINS
+	  /* If this object can be handled by a plugin, give that the
+	     lowest priority; objects both handled by a plugin and
+	     with an underlying object format will be claimed
+	     separately by the plugin.  */
+	  if (bfd_plugin_target_p (*target))
+	    match_priority = (*target)->match_priority;
+#endif
+
 	  match_targ = temp;
 	  if (preserve.marker != NULL)
 	    bfd_preserve_finish (abfd, &preserve);
@@ -366,9 +376,9 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 		matching_vector[match_count] = temp;
 	      match_count++;
 
-	      if (temp->match_priority < best_match)
+	      if (match_priority < best_match)
 		{
-		  best_match = temp->match_priority;
+		  best_match = match_priority;
 		  best_count = 0;
 		}
 	      best_count++;

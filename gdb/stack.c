@@ -1,6 +1,6 @@
 /* Print and select stack frames for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1509,27 +1509,32 @@ frame_info (char *addr_exp, int from_tty)
   wrap_here ("    ");
   printf_filtered ("saved %s = ", pc_regname);
 
-  TRY
+  if (!frame_id_p (frame_unwind_caller_id (fi)))
+    val_print_unavailable (gdb_stdout);
+  else
     {
-      caller_pc = frame_unwind_caller_pc (fi);
-      caller_pc_p = 1;
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      switch (ex.error)
+      TRY
 	{
-	case NOT_AVAILABLE_ERROR:
-	  val_print_unavailable (gdb_stdout);
-	  break;
-	case OPTIMIZED_OUT_ERROR:
-	  val_print_not_saved (gdb_stdout);
-	  break;
-	default:
-	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
-	  break;
+	  caller_pc = frame_unwind_caller_pc (fi);
+	  caller_pc_p = 1;
 	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  switch (ex.error)
+	    {
+	    case NOT_AVAILABLE_ERROR:
+	      val_print_unavailable (gdb_stdout);
+	      break;
+	    case OPTIMIZED_OUT_ERROR:
+	      val_print_not_saved (gdb_stdout);
+	      break;
+	    default:
+	      fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+	      break;
+	    }
+	}
+      END_CATCH
     }
-  END_CATCH
 
   if (caller_pc_p)
     fputs_filtered (paddress (gdbarch, caller_pc), gdb_stdout);
@@ -2082,6 +2087,7 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
   struct print_variable_and_value_data cb_data;
   const struct block *block;
   CORE_ADDR pc;
+  struct gdb_exception except = exception_none;
 
   if (!get_frame_pc_if_available (frame, &pc))
     {
@@ -2102,9 +2108,27 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
   cb_data.stream = stream;
   cb_data.values_printed = 0;
 
-  iterate_over_block_local_vars (block,
-				 do_print_variable_and_value,
-				 &cb_data);
+  /* Temporarily change the selected frame to the given FRAME.
+     This allows routines that rely on the selected frame instead
+     of being given a frame as parameter to use the correct frame.  */
+  select_frame (frame);
+
+  TRY
+    {
+      iterate_over_block_local_vars (block,
+				     do_print_variable_and_value,
+				     &cb_data);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      except = ex;
+    }
+  END_CATCH
+
+  /* Restore the selected frame, and then rethrow if there was a problem.  */
+  select_frame (frame_find_by_id (cb_data.frame_id));
+  if (except.reason < 0)
+    throw_exception (except);
 
   /* do_print_variable_and_value invalidates FRAME.  */
   frame = NULL;

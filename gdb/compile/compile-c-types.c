@@ -1,6 +1,6 @@
 /* Convert types from GDB to GCC
 
-   Copyright (C) 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -293,7 +293,7 @@ convert_qualified (struct compile_c_instance *context, struct type *type)
 {
   struct type *unqual = make_unqualified_type (type);
   gcc_type unqual_converted;
-  int quals = 0;
+  gcc_qualifiers_flags quals = 0;
 
   unqual_converted = convert_type (context, unqual);
 

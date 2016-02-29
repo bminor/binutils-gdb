@@ -1,6 +1,6 @@
 /* YACC parser for D expressions, for GDB.
 
-   Copyright (C) 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1005,7 +1005,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
   else
     value->type = C_STRING;
 
-  value->ptr = obstack_base (&tempbuf);
+  value->ptr = (char *) obstack_base (&tempbuf);
   value->length = obstack_object_size (&tempbuf);
 
   *outptr = tokptr;
@@ -1558,7 +1558,7 @@ yylex (void)
 	      obstack_grow (&name_obstack, next->value.sval.ptr,
 			    next->value.sval.length);
 
-	      yylval.sval.ptr = obstack_base (&name_obstack);
+	      yylval.sval.ptr = (char *) obstack_base (&name_obstack);
 	      yylval.sval.length = obstack_object_size (&name_obstack);
 
 	      current.token = classify_name (pstate, expression_context_block);
@@ -1638,7 +1638,7 @@ yylex (void)
 	  obstack_grow (&name_obstack, next->value.sval.ptr,
 			next->value.sval.length);
 
-	  yylval.sval.ptr = obstack_base (&name_obstack);
+	  yylval.sval.ptr = (char *) obstack_base (&name_obstack);
 	  yylval.sval.length = obstack_object_size (&name_obstack);
 	  current.value = yylval;
 	  current.token = classification;

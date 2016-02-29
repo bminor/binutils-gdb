@@ -1,5 +1,5 @@
 /* tc-xgate.c -- Assembler code for Freescale XGATE
-   Copyright (C) 2010-2015 Free Software Foundation, Inc.
+   Copyright (C) 2010-2016 Free Software Foundation, Inc.
    Contributed by Sean Keys <skeys@ipdatasys.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -291,7 +291,7 @@ md_begin (void)
   struct xgate_opcode *xgate_opcode_ptr = NULL;
   struct xgate_opcode *xgate_op_table = NULL;
   struct xgate_opcode_handle *op_handles = 0;
-  char *prev_op_name = 0;
+  const char *prev_op_name = 0;
   int handle_enum = 0;
   int number_of_op_handles = 0;
   int i, j = 0;

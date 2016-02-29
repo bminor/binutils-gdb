@@ -1,4 +1,4 @@
-@c Copyright (C) 2009-2015 Free Software Foundation, Inc.
+@c Copyright (C) 2009-2016 Free Software Foundation, Inc.
 @c Contributed by ARM Ltd.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -83,8 +83,8 @@ extensions.
 This option specifies the target architecture.  The assembler will
 issue an error message if an attempt is made to assemble an
 instruction which will not execute on the target architecture.  The
-following architecture names are recognized: @code{armv8-a} and
-@code{armv8.1-a}.
+following architecture names are recognized: @code{armv8-a},
+@code{armv8.1-a} and @code{armv8.2-a}.
 
 If both @option{-mcpu} and @option{-march} are specified, the
 assembler will use the setting for @option{-mcpu}.  If neither are
@@ -128,7 +128,7 @@ automatically cause those extensions to be disabled.
 @multitable @columnfractions .12 .17 .17 .54
 @headitem Extension @tab Minimum Architecture @tab Enabled by default
  @tab Description
-@item @code{crc} @tab ARMv8-A @tab No
+@item @code{crc} @tab ARMv8-A @tab ARMv8.1-A or later
  @tab Enable CRC instructions.
 @item @code{crypto} @tab ARMv8-A @tab No
  @tab Enable cryptographic extensions.  This implies @code{fp} and @code{simd}.
@@ -142,6 +142,11 @@ automatically cause those extensions to be disabled.
  @tab Enable Limited Ordering Regions extensions.
 @item @code{rdma} @tab ARMv8-A @tab ARMv8-A or later
  @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
+@item @code{fp16} @tab ARMv8.2-A @tab ARMv8.2-A or later
+ @tab Enable ARMv8.2 16-bit floating-point support.  This implies
+ @code{fp}.
+@item @code{profile} @tab ARMv8.2-A @tab No
+ @tab Enable statistical profiling extensions.
 @end multitable
 
 @node AArch64 Syntax

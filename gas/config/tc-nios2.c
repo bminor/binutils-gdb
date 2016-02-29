@@ -1,5 +1,5 @@
 /* Altera Nios II assembler.
-   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+   Copyright (C) 2012-2016 Free Software Foundation, Inc.
    Contributed by Nigel Gray (ngray@altera.com).
    Contributed by Mentor Graphics, Inc.
 
@@ -3471,7 +3471,7 @@ output_movia (nios2_insn_infoS *insn)
      and puts it in the current frag.  */
   char *f = frag_more (8);
   nios2_insn_relocS *reloc = insn->insn_reloc;
-  unsigned long reg, code;
+  unsigned long reg, code = 0;
   const struct nios2_opcode *op = insn->insn_nios2_opcode;
 
   /* If the reloc is NULL, there was an error assembling the movia.  */

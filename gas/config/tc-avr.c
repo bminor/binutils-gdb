@@ -1,6 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright (C) 1999-2015 Free Software Foundation, Inc.
+   Copyright (C) 1999-2016 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -37,9 +37,9 @@ struct avr_property_record_link
 
 struct avr_opcodes_s
 {
-  char *        name;
-  char *        constraints;
-  char *        opcode;
+  const char *        name;
+  const char *        constraints;
+  const char *        opcode;
   int           insn_size;		/* In words.  */
   int           isa;
   unsigned int  bin_opcode;
@@ -61,7 +61,7 @@ const char line_separator_chars[] = "$";
 const char *md_shortopts = "m:";
 struct mcu_type_s
 {
-  char *name;
+  const char *name;
   int isa;
   int mach;
 };
@@ -380,7 +380,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 struct exp_mod_s
 {
-  char *                    name;
+  const char *                    name;
   bfd_reloc_code_real_type  reloc;
   bfd_reloc_code_real_type  neg_reloc;
   int                       have_pm;
@@ -860,7 +860,7 @@ avr_ldi_expression (expressionS *exp)
 static unsigned int
 avr_operand (struct avr_opcodes_s *opcode,
 	     int where,
-	     char *op,
+	     const char *op,
 	     char **line)
 {
   expressionS op_expr;
@@ -998,7 +998,7 @@ avr_operand (struct avr_opcodes_s *opcode,
       if (*str == '+')
 	{
 	  ++str;
-          char *s;
+          const char *s;
           for (s = opcode->opcode; *s; ++s)
             {
               if (*s == '+')
@@ -1145,7 +1145,7 @@ avr_operand (struct avr_opcodes_s *opcode,
 static unsigned int
 avr_operands (struct avr_opcodes_s *opcode, char **line)
 {
-  char *op = opcode->constraints;
+  const char *op = opcode->constraints;
   unsigned int bin = opcode->bin_opcode;
   char *frag = frag_more (opcode->insn_size * 2);
   char *str = *line;

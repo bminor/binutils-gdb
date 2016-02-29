@@ -83,6 +83,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module multiarch:
   # Code from module nocrash:
   # Code from module pathmax:
+  # Code from module rawmemchr:
   # Code from module readlink:
   # Code from module rename:
   # Code from module rmdir:
@@ -99,6 +100,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module stdint:
   # Code from module stdio:
   # Code from module stdlib:
+  # Code from module strchrnul:
   # Code from module streq:
   # Code from module string:
   # Code from module strnlen1:
@@ -251,6 +253,12 @@ AC_DEFUN([gl_INIT],
   gl_STRING_MODULE_INDICATOR([memmem])
   gl_MULTIARCH
   gl_PATHMAX
+  gl_FUNC_RAWMEMCHR
+  if test $HAVE_RAWMEMCHR = 0; then
+    AC_LIBOBJ([rawmemchr])
+    gl_PREREQ_RAWMEMCHR
+  fi
+  gl_STRING_MODULE_INDICATOR([rawmemchr])
   gl_FUNC_READLINK
   if test $HAVE_READLINK = 0 || test $REPLACE_READLINK = 1; then
     AC_LIBOBJ([readlink])
@@ -280,6 +288,12 @@ AC_DEFUN([gl_INIT],
   gl_STDINT_H
   gl_STDIO_H
   gl_STDLIB_H
+  gl_FUNC_STRCHRNUL
+  if test $HAVE_STRCHRNUL = 0 || test $REPLACE_STRCHRNUL = 1; then
+    AC_LIBOBJ([strchrnul])
+    gl_PREREQ_STRCHRNUL
+  fi
+  gl_STRING_MODULE_INDICATOR([strchrnul])
   gl_HEADER_STRING_H
   gl_FUNC_STRSTR
   if test $REPLACE_STRSTR = 1; then
@@ -497,6 +511,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/memchr.valgrind
   lib/memmem.c
   lib/pathmax.h
+  lib/rawmemchr.c
+  lib/rawmemchr.valgrind
   lib/readlink.c
   lib/ref-add.sin
   lib/ref-del.sin
@@ -511,6 +527,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/stdio.in.h
   lib/stdlib.in.h
   lib/str-two-way.h
+  lib/strchrnul.c
+  lib/strchrnul.valgrind
   lib/streq.h
   lib/string.in.h
   lib/stripslash.c
@@ -579,6 +597,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/nocrash.m4
   m4/off_t.m4
   m4/pathmax.m4
+  m4/rawmemchr.m4
   m4/readlink.m4
   m4/rename.m4
   m4/rmdir.m4
@@ -590,6 +609,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/stdint.m4
   m4/stdio_h.m4
   m4/stdlib_h.m4
+  m4/strchrnul.m4
   m4/string_h.m4
   m4/strstr.m4
   m4/strtok_r.m4

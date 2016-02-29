@@ -1,4 +1,4 @@
-dnl Copyright (C) 2014-2015 Free Software Foundation, Inc.
+dnl Copyright (C) 2014-2016 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -32,10 +32,12 @@ AC_DEFUN([GDB_AC_BUILD_WITH_CXX],
     [enable_build_with_cxx=no])
 
   if test "$enable_build_with_cxx" = "yes"; then
-    # We're using -fpermissive as shortcut for now.
-    COMPILER='$(CXX) -fpermissive'
+    COMPILER='$(CXX)'
+    COMPILER_CFLAGS='$(CXXFLAGS)'
    else
     COMPILER='$(CC)'
+    COMPILER_CFLAGS='$(CFLAGS)'
   fi
   AC_SUBST(COMPILER)
+  AC_SUBST(COMPILER_CFLAGS)
 ])

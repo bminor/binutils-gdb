@@ -1,4 +1,4 @@
-#   Copyright 1997-2015 Free Software Foundation, Inc.
+#   Copyright 1997-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 # It was written by Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 # on September/2008.
 
-if { [is_remote target] || ![isnative] } then {
+if { ![isnative] } then {
     continue
 }
 
@@ -322,6 +322,28 @@ proc test_catch_syscall_mid_vfork {} {
     }
 }
 
+proc test_catch_syscall_execve {} {
+    global gdb_prompt decimal
+
+    with_test_prefix "execve" {
+
+	# Tell the test program we want an execve.
+	gdb_test_no_output "set do_execve = 1"
+
+	# Check for entry/return across the execve, making sure that the
+	# syscall_state isn't lost when turning into a new process.
+	insert_catch_syscall_with_arg "execve"
+	check_continue "execve"
+
+	# Continue to main so extended-remote can read files as needed.
+	# (Otherwise that "Reading" output confuses gdb_continue_to_end.)
+	gdb_continue "main"
+
+	# Now can we finish?
+	check_for_program_end
+    }
+}
+
 proc test_catch_syscall_fail_nodatadir {} {
     with_test_prefix "fail no datadir" {
 	# Sanitizing.
@@ -391,6 +413,9 @@ proc do_syscall_tests {} {
 
     # Testing the 'catch syscall' command starting mid-vfork.
     if [runto_main] then { test_catch_syscall_mid_vfork }
+
+    # Testing that 'catch syscall' entry/return tracks across execve.
+    if [runto_main] then { test_catch_syscall_execve }
 
     # Testing if the 'catch syscall' command works when switching to
     # different architectures on-the-fly (PR gdb/10737).

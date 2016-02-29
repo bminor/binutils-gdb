@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2015 Free Software Foundation, Inc.
+// Copyright (C) 2006-2016 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -833,6 +833,10 @@ class General_options
 		 N_("(ARM only) Rewrite BX rn branch to ARMv4 interworking "
 		    "veneer"),
 		 NULL);
+
+  DEFINE_bool(long_plt, options::TWO_DASHES, '\0', false,
+	      N_("(ARM only) Generate long PLT entries"),
+	      N_("(ARM only) Do not generate long PLT entries"));
 
   DEFINE_bool(g, options::EXACTLY_ONE_DASH, '\0', false,
 	      N_("Ignored"), NULL);

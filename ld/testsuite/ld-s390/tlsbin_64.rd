@@ -26,9 +26,7 @@ Section Headers:
  +\[[ 0-9]+\] .symtab .*
  +\[[ 0-9]+\] .strtab .*
 Key to Flags:
-.*
-.*
-.*
+#...
 
 Elf file type is EXEC \(Executable file\)
 Entry point 0x[0-9a-f]+

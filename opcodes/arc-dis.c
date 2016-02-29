@@ -1,5 +1,5 @@
 /* Instruction printing code for the ARC.
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
    Contributed by Claudiu Zissulescu (claziss@synopsys.com)
 
@@ -82,15 +82,13 @@ special_flag_p (const char *opname,
 		const char *flgname)
 {
   const struct arc_flag_special *flg_spec;
-  size_t len;
   unsigned i, j, flgidx;
 
   for (i = 0; i < arc_num_flag_special; i++)
     {
       flg_spec = &arc_flag_special_cases[i];
-      len = strlen (flg_spec->name);
 
-      if (strncmp (opname, flg_spec->name, len) != 0)
+      if (strcmp (opname, flg_spec->name))
 	continue;
 
       /* Found potential special case instruction.  */
@@ -127,7 +125,7 @@ print_insn_arc (bfd_vma memaddr,
   int flags;
   bfd_boolean need_comma;
   bfd_boolean open_braket;
-
+  int size;
 
   lowbyte  = ((info->endian == BFD_ENDIAN_LITTLE) ? 1 : 0);
   highbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 0 : 1);
@@ -148,8 +146,46 @@ print_insn_arc (bfd_vma memaddr,
       break;
     }
 
+  /* This variable may be set by the instruction decoder.  It suggests
+     the number of bytes objdump should display on a single line.  If
+     the instruction decoder sets this, it should always set it to
+     the same value in order to get reasonable looking output.  */
+
+  info->bytes_per_line  = 8;
+
+  /* In the next lines, we set two info variables control the way
+     objdump displays the raw data.  For example, if bytes_per_line is
+     8 and bytes_per_chunk is 4, the output will look like this:
+     00:   00000000 00000000
+     with the chunks displayed according to "display_endian".  */
+
+  if (info->section
+      && !(info->section->flags & SEC_CODE))
+    {
+      /* This is not a CODE section.  */
+      switch (info->section->size)
+	{
+	case 1:
+	case 2:
+	case 4:
+	  size = info->section->size;
+	  break;
+	default:
+	  size = (info->section->size & 0x01) ? 1 : 4;
+	  break;
+	}
+      info->bytes_per_chunk = 1;
+      info->display_endian = info->endian;
+    }
+  else
+    {
+      size = 2;
+      info->bytes_per_chunk = 2;
+      info->display_endian = info->endian;
+    }
+
   /* Read the insn into a host word.  */
-  status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+  status = (*info->read_memory_func) (memaddr, buffer, size, info);
   if (status != 0)
     {
       (*info->memory_error_func) (status, memaddr, info);
@@ -159,20 +195,29 @@ print_insn_arc (bfd_vma memaddr,
   if (info->section
       && !(info->section->flags & SEC_CODE))
     {
-      /* Sort of data section, just print a 32 bit number.  */
-      insnLen = 4;
-      status = (*info->read_memory_func) (memaddr + 2, &buffer[2], 2, info);
-      if (status != 0)
+      /* Data section.  */
+      unsigned long data;
+
+      data = bfd_get_bits (buffer, size * 8,
+			   info->display_endian == BFD_ENDIAN_BIG);
+      switch (size)
 	{
-	  (*info->memory_error_func) (status, memaddr + 2, info);
-	  return -1;
+	case 1:
+	  (*info->fprintf_func) (info->stream, ".byte\t0x%02lx", data);
+	  break;
+	case 2:
+	  (*info->fprintf_func) (info->stream, ".short\t0x%04lx", data);
+	  break;
+	case 4:
+	  (*info->fprintf_func) (info->stream, ".word\t0x%08lx", data);
+	  break;
+	default:
+	  abort ();
 	}
-      insn[0] = ARRANGE_ENDIAN (info, buffer);
-      (*info->fprintf_func) (info->stream, ".long %#08x", insn[0]);
-      return insnLen;
+      return size;
     }
 
-  if ((((buffer[lowbyte] & 0xf8) > 0x38)
+  if (   (((buffer[lowbyte] & 0xf8) > 0x38)
        && ((buffer[lowbyte] & 0xf8) != 0x48))
       || ((info->mach == bfd_mach_arc_arcv2)
 	  && ((buffer[lowbyte] & 0xF8) == 0x48)) /* FIXME! ugly.  */
@@ -195,20 +240,6 @@ print_insn_arc (bfd_vma memaddr,
 	}
       insn[0] = ARRANGE_ENDIAN (info, buffer);
     }
-
-  /* This variable may be set by the instruction decoder.  It suggests
-     the number of bytes objdump should display on a single line.  If
-     the instruction decoder sets this, it should always set it to
-     the same value in order to get reasonable looking output.  */
-  info->bytes_per_line  = 8;
-
-  /* The next two variables control the way objdump displays the raw data.
-     For example, if bytes_per_line is 8 and bytes_per_chunk is 4, the
-     output will look like this:
-     00:   00000000 00000000
-     with the chunks displayed according to "display_endian".  */
-  info->bytes_per_chunk = 2;
-  info->display_endian  = info->endian;
 
   /* Set some defaults for the insn info.  */
   info->insn_info_valid    = 1;

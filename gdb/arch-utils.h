@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -203,5 +203,9 @@ extern void default_infcall_munmap (CORE_ADDR addr, CORE_ADDR size);
 extern char *default_gcc_target_options (struct gdbarch *gdbarch);
 extern const char *default_gnu_triplet_regexp (struct gdbarch *gdbarch);
 extern int default_addressable_memory_unit_size (struct gdbarch *gdbarch);
+
+extern void default_guess_tracepoint_registers (struct gdbarch *gdbarch,
+						struct regcache *regcache,
+						CORE_ADDR addr);
 
 #endif

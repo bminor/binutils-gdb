@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on AArch64 systems.
 
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -299,7 +299,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      if (aarch64_debug)
 		{
 		  debug_printf ("aarch64: prologue analysis gave up "
-				"addr=0x%s opcode=0x%x (orr x register)\n",
+				"addr=%s opcode=0x%x (orr x register)\n",
 				core_addr_to_string_nz (start), insn);
 		}
 	      break;
@@ -365,7 +365,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	{
 	  if (aarch64_debug)
 	    {
-	      debug_printf ("aarch64: prologue analysis gave up addr=0x%s"
+	      debug_printf ("aarch64: prologue analysis gave up addr=%s"
 			    " opcode=0x%x\n",
 			    core_addr_to_string_nz (start), insn);
 	    }
@@ -855,7 +855,8 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 
 typedef struct
 {
-  /* Value to pass on stack.  */
+  /* Value to pass on stack.  It can be NULL if this item is for stack
+     padding.  */
   const gdb_byte *data;
 
   /* Size in bytes of value to pass on stack.  */
@@ -894,6 +895,17 @@ aarch64_type_align (struct type *t)
       return TYPE_LENGTH (t);
 
     case TYPE_CODE_ARRAY:
+      if (TYPE_VECTOR (t))
+	{
+	  /* Use the natural alignment for vector types (the same for
+	     scalar type), but the maximum alignment is 128-bit.  */
+	  if (TYPE_LENGTH (t) > 16)
+	    return 16;
+	  else
+	    return TYPE_LENGTH (t);
+	}
+      else
+	return aarch64_type_align (TYPE_TARGET_TYPE (t));
     case TYPE_CODE_COMPLEX:
       return aarch64_type_align (TYPE_TARGET_TYPE (t));
 
@@ -910,18 +922,26 @@ aarch64_type_align (struct type *t)
     }
 }
 
-/* Return 1 if *TY is a homogeneous floating-point aggregate as
-   defined in the AAPCS64 ABI document; otherwise return 0.  */
+/* Return 1 if *TY is a homogeneous floating-point aggregate or
+   homogeneous short-vector aggregate as defined in the AAPCS64 ABI
+   document; otherwise return 0.  */
 
 static int
-is_hfa (struct type *ty)
+is_hfa_or_hva (struct type *ty)
 {
   switch (TYPE_CODE (ty))
     {
     case TYPE_CODE_ARRAY:
       {
 	struct type *target_ty = TYPE_TARGET_TYPE (ty);
-	if (TYPE_CODE (target_ty) == TYPE_CODE_FLT && TYPE_LENGTH (ty) <= 4)
+
+	if (TYPE_VECTOR (ty))
+	  return 0;
+
+	if (TYPE_LENGTH (ty) <= 4 /* HFA or HVA has at most 4 members.  */
+	    && (TYPE_CODE (target_ty) == TYPE_CODE_FLT /* HFA */
+		|| (TYPE_CODE (target_ty) == TYPE_CODE_ARRAY /* HVA */
+		    && TYPE_VECTOR (target_ty))))
 	  return 1;
 	break;
       }
@@ -929,12 +949,15 @@ is_hfa (struct type *ty)
     case TYPE_CODE_UNION:
     case TYPE_CODE_STRUCT:
       {
+	/* HFA or HVA has at most four members.  */
 	if (TYPE_NFIELDS (ty) > 0 && TYPE_NFIELDS (ty) <= 4)
 	  {
 	    struct type *member0_type;
 
 	    member0_type = check_typedef (TYPE_FIELD_TYPE (ty, 0));
-	    if (TYPE_CODE (member0_type) == TYPE_CODE_FLT)
+	    if (TYPE_CODE (member0_type) == TYPE_CODE_FLT
+		|| (TYPE_CODE (member0_type) == TYPE_CODE_ARRAY
+		    && TYPE_VECTOR (member0_type)))
 	      {
 		int i;
 
@@ -989,12 +1012,13 @@ struct aarch64_call_info
 static void
 pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 	   struct aarch64_call_info *info, struct type *type,
-	   const bfd_byte *buf)
+	   struct value *arg)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   enum type_code typecode = TYPE_CODE (type);
   int regnum = AARCH64_X0_REGNUM + info->ngrn;
+  const bfd_byte *buf = value_contents (arg);
 
   info->argnum++;
 
@@ -1033,17 +1057,23 @@ static int
 pass_in_v (struct gdbarch *gdbarch,
 	   struct regcache *regcache,
 	   struct aarch64_call_info *info,
-	   const bfd_byte *buf)
+	   int len, const bfd_byte *buf)
 {
   if (info->nsrn < 8)
     {
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int regnum = AARCH64_V0_REGNUM + info->nsrn;
+      gdb_byte reg[V_REGISTER_SIZE];
 
       info->argnum++;
       info->nsrn++;
 
-      regcache_cooked_write (regcache, regnum, buf);
+      memset (reg, 0, sizeof (reg));
+      /* PCS C.1, the argument is allocated to the least significant
+	 bits of V register.  */
+      memcpy (reg, buf, len);
+      regcache_cooked_write (regcache, regnum, reg);
+
       if (aarch64_debug)
 	{
 	  debug_printf ("arg %d in %s\n", info->argnum,
@@ -1059,8 +1089,9 @@ pass_in_v (struct gdbarch *gdbarch,
 
 static void
 pass_on_stack (struct aarch64_call_info *info, struct type *type,
-	       const bfd_byte *buf)
+	       struct value *arg)
 {
+  const bfd_byte *buf = value_contents (arg);
   int len = TYPE_LENGTH (type);
   int align;
   stack_item_t item;
@@ -1094,7 +1125,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
       int pad = align - (info->nsaa & (align - 1));
 
       item.len = pad;
-      item.data = buf;
+      item.data = NULL;
 
       VEC_safe_push (stack_item_t, info->si, &item);
       info->nsaa += pad;
@@ -1108,7 +1139,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 static void
 pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
 		    struct aarch64_call_info *info, struct type *type,
-		    const bfd_byte *buf)
+		    struct value *arg)
 {
   int len = TYPE_LENGTH (type);
   int nregs = (len + X_REGISTER_SIZE - 1) / X_REGISTER_SIZE;
@@ -1116,13 +1147,13 @@ pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
   /* PCS C.13 - Pass in registers if we have enough spare */
   if (info->ngrn + nregs <= 8)
     {
-      pass_in_x (gdbarch, regcache, info, type, buf);
+      pass_in_x (gdbarch, regcache, info, type, arg);
       info->ngrn += nregs;
     }
   else
     {
       info->ngrn = 8;
-      pass_on_stack (info, type, buf);
+      pass_on_stack (info, type, arg);
     }
 }
 
@@ -1134,10 +1165,11 @@ pass_in_v_or_stack (struct gdbarch *gdbarch,
 		    struct regcache *regcache,
 		    struct aarch64_call_info *info,
 		    struct type *type,
-		    const bfd_byte *buf)
+		    struct value *arg)
 {
-  if (!pass_in_v (gdbarch, regcache, info, buf))
-    pass_on_stack (info, type, buf);
+  if (!pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (type),
+		  value_contents (arg)))
+    pass_on_stack (info, type, arg);
 }
 
 /* Implement the "push_dummy_call" gdbarch method.  */
@@ -1251,8 +1283,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		arg_type = builtin_type (gdbarch)->builtin_int32;
 	      arg = value_cast (arg_type, arg);
 	    }
-	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type,
-			      value_contents (arg));
+	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 
 	case TYPE_CODE_COMPLEX:
@@ -1262,25 +1293,26 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      struct type *target_type =
 		check_typedef (TYPE_TARGET_TYPE (arg_type));
 
-	      pass_in_v (gdbarch, regcache, &info, buf);
 	      pass_in_v (gdbarch, regcache, &info,
+			 TYPE_LENGTH (target_type), buf);
+	      pass_in_v (gdbarch, regcache, &info,
+			 TYPE_LENGTH (target_type),
 			 buf + TYPE_LENGTH (target_type));
 	    }
 	  else
 	    {
 	      info.nsrn = 8;
-	      pass_on_stack (&info, arg_type, value_contents (arg));
+	      pass_on_stack (&info, arg_type, arg);
 	    }
 	  break;
 	case TYPE_CODE_FLT:
-	  pass_in_v_or_stack (gdbarch, regcache, &info, arg_type,
-			      value_contents (arg));
+	  pass_in_v_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 
 	case TYPE_CODE_STRUCT:
 	case TYPE_CODE_ARRAY:
 	case TYPE_CODE_UNION:
-	  if (is_hfa (arg_type))
+	  if (is_hfa_or_hva (arg_type))
 	    {
 	      int elements = TYPE_NFIELDS (arg_type);
 
@@ -1299,15 +1331,21 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct type *field_type =
 			check_typedef (value_type (field));
 
-		      pass_in_v_or_stack (gdbarch, regcache, &info, field_type,
-					  value_contents_writeable (field));
+		      pass_in_v_or_stack (gdbarch, regcache, &info,
+					  field_type, field);
 		    }
 		}
 	      else
 		{
 		  info.nsrn = 8;
-		  pass_on_stack (&info, arg_type, value_contents (arg));
+		  pass_on_stack (&info, arg_type, arg);
 		}
+	    }
+	  else if (TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (arg_type) && (len == 16 || len == 8))
+	    {
+	      /* Short vector types are passed in V registers.  */
+	      pass_in_v_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	    }
 	  else if (len > 16)
 	    {
@@ -1323,18 +1361,15 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* Construct the indirection.  */
 	      arg_type = lookup_pointer_type (arg_type);
 	      arg = value_from_pointer (arg_type, sp);
-	      pass_in_x_or_stack (gdbarch, regcache, &info, arg_type,
-				  value_contents (arg));
+	      pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	    }
 	  else
 	    /* PCS C.15 / C.18 multiple values pass.  */
-	    pass_in_x_or_stack (gdbarch, regcache, &info, arg_type,
-				value_contents (arg));
+	    pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 
 	default:
-	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type,
-			      value_contents (arg));
+	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 	}
     }
@@ -1348,7 +1383,8 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       stack_item_t *si = VEC_last (stack_item_t, info.si);
 
       sp -= si->len;
-      write_memory (sp, si->data, si->len);
+      if (si->data != NULL)
+	write_memory (sp, si->data, si->len);
       VEC_pop (stack_item_t, info.si);
     }
 
@@ -1613,7 +1649,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       memcpy (valbuf, buf, len);
       valbuf += len;
     }
-  else if (is_hfa (type))
+  else if (is_hfa_or_hva (type))
     {
       int elements = TYPE_NFIELDS (type);
       struct type *member_type = check_typedef (TYPE_FIELD_TYPE (type, 0));
@@ -1623,11 +1659,11 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       for (i = 0; i < elements; i++)
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
-	  bfd_byte buf[X_REGISTER_SIZE];
+	  bfd_byte buf[V_REGISTER_SIZE];
 
 	  if (aarch64_debug)
 	    {
-	      debug_printf ("read HFA return value element %d from %s\n",
+	      debug_printf ("read HFA or HVA return value element %d from %s\n",
 			    i + 1,
 			    gdbarch_register_name (gdbarch, regno));
 	    }
@@ -1636,6 +1672,15 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  memcpy (valbuf, buf, len);
 	  valbuf += len;
 	}
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	   && (TYPE_LENGTH (type) == 16 || TYPE_LENGTH (type) == 8))
+    {
+      /* Short vector is returned in V register.  */
+      gdb_byte buf[V_REGISTER_SIZE];
+
+      regcache_cooked_read (regs, AARCH64_V0_REGNUM, buf);
+      memcpy (valbuf, buf, TYPE_LENGTH (type));
     }
   else
     {
@@ -1669,14 +1714,10 @@ aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 
   type = check_typedef (type);
 
-  /* In the AArch64 ABI, "integer" like aggregate types are returned
-     in registers.  For an aggregate type to be integer like, its size
-     must be less than or equal to 4 * X_REGISTER_SIZE.  */
-
-  if (is_hfa (type))
+  if (is_hfa_or_hva (type))
     {
-      /* PCS B.5 If the argument is a Named HFA, then the argument is
-         used unmodified.  */
+      /* v0-v7 are used to return values and one register is allocated
+	 for one member.  However, HFA or HVA has at most four members.  */
       return 0;
     }
 
@@ -1742,7 +1783,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	    }
 	}
     }
-  else if (is_hfa (type))
+  else if (is_hfa_or_hva (type))
     {
       int elements = TYPE_NFIELDS (type);
       struct type *member_type = check_typedef (TYPE_FIELD_TYPE (type, 0));
@@ -1756,7 +1797,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 
 	  if (aarch64_debug)
 	    {
-	      debug_printf ("write HFA return value element %d to %s\n",
+	      debug_printf ("write HFA or HVA return value element %d to %s\n",
 			    i + 1,
 			    gdbarch_register_name (gdbarch, regno));
 	    }
@@ -1765,6 +1806,15 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  regcache_cooked_write (regs, regno, tmpbuf);
 	  valbuf += len;
 	}
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	   && (TYPE_LENGTH (type) == 8 || TYPE_LENGTH (type) == 16))
+    {
+      /* Short vector.  */
+      gdb_byte buf[V_REGISTER_SIZE];
+
+      memcpy (buf, valbuf, TYPE_LENGTH (type));
+      regcache_cooked_write (regs, AARCH64_V0_REGNUM, buf);
     }
   else
     {
@@ -3142,15 +3192,17 @@ aarch64_record_asimd_load_store (insn_decode_record *aarch64_insn_r)
       else
         {
           for (sindex = 0; sindex < selem; sindex++)
-            if (bit (aarch64_insn_r->aarch64_insn, 22))
-              record_buf[reg_index++] = reg_rt + AARCH64_V0_REGNUM;
-            else
-              {
-                record_buf_mem[mem_index++] = esize / 8;
-                record_buf_mem[mem_index++] = address + addr_offset;
-              }
-            addr_offset = addr_offset + (esize / 8);
-            reg_rt = (reg_rt + 1) % 32;
+	    {
+	      if (bit (aarch64_insn_r->aarch64_insn, 22))
+		record_buf[reg_index++] = reg_rt + AARCH64_V0_REGNUM;
+	      else
+		{
+		  record_buf_mem[mem_index++] = esize / 8;
+		  record_buf_mem[mem_index++] = address + addr_offset;
+		}
+	      addr_offset = addr_offset + (esize / 8);
+	      reg_rt = (reg_rt + 1) % 32;
+	    }
         }
     }
   /* Load/store multiple structure.  */

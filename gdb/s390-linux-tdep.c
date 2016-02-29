@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 2001-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -165,6 +165,40 @@ s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
      continues to restart the system call at this point.  */
   if (register_size (gdbarch, S390_SYSTEM_CALL_REGNUM) > 0)
     regcache_cooked_write_unsigned (regcache, S390_SYSTEM_CALL_REGNUM, 0);
+}
+
+/* The "guess_tracepoint_registers" gdbarch method.  */
+
+static void
+s390_guess_tracepoint_registers (struct gdbarch *gdbarch,
+				 struct regcache *regcache,
+				 CORE_ADDR addr)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int sz = register_size (gdbarch, S390_PSWA_REGNUM);
+  gdb_byte *reg = (gdb_byte *) alloca (sz);
+  ULONGEST pswm, pswa;
+
+  /* Set PSWA from the location and a default PSWM (the only part we're
+     unlikely to get right is the CC).  */
+  if (tdep->abi == ABI_LINUX_S390)
+    {
+      /* 31-bit PSWA needs high bit set (it's very unlikely the target
+	 was in 24-bit mode).  */
+      pswa = addr | 0x80000000UL;
+      pswm = 0x070d0000UL;
+    }
+  else
+    {
+      pswa = addr;
+      pswm = 0x0705000180000000ULL;
+    }
+
+  store_unsigned_integer (reg, sz, gdbarch_byte_order (gdbarch), pswa);
+  regcache_raw_supply (regcache, S390_PSWA_REGNUM, reg);
+
+  store_unsigned_integer (reg, sz, gdbarch_byte_order (gdbarch), pswm);
+  regcache_raw_supply (regcache, S390_PSWM_REGNUM, reg);
 }
 
 
@@ -2619,7 +2653,7 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
     case 197: /* fstat64 */
     case 221: /* fcntl64 */
       if (abi == ABI_LINUX_S390)
-        return syscall;
+        return (enum gdb_syscall) syscall;
       return gdb_sys_no_syscall;
     /* These syscalls don't exist on s390.  */
     case 17: /* break */
@@ -2717,22 +2751,29 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
       return gdb_sys_newfstatat;
     /* 313+ not yet supported */
     default:
-      /* Most "old" syscalls copied from i386.  */
-      if (syscall <= 221)
-        return syscall;
-      /* xattr syscalls.  */
-      if (syscall >= 224 && syscall <= 235)
-        return syscall + 2;
-      /* timer syscalls.  */
-      if (syscall >= 254 && syscall <= 262)
-        return syscall + 5;
-      /* mq_* and kexec_load */
-      if (syscall >= 271 && syscall <= 277)
-        return syscall + 6;
-      /* ioprio_set .. epoll_pwait */
-      if (syscall >= 282 && syscall <= 312)
-        return syscall + 7;
-      return gdb_sys_no_syscall;
+      {
+	int ret;
+
+	/* Most "old" syscalls copied from i386.  */
+	if (syscall <= 221)
+	  ret = syscall;
+	/* xattr syscalls.  */
+	else if (syscall >= 224 && syscall <= 235)
+	  ret = syscall + 2;
+	/* timer syscalls.  */
+	else if (syscall >= 254 && syscall <= 262)
+	  ret = syscall + 5;
+	/* mq_* and kexec_load */
+	else if (syscall >= 271 && syscall <= 277)
+	  ret = syscall + 6;
+	/* ioprio_set .. epoll_pwait */
+	else if (syscall >= 282 && syscall <= 312)
+	  ret = syscall + 7;
+	else
+	  ret = gdb_sys_no_syscall;
+
+	return (enum gdb_syscall) ret;
+      }
     }
 }
 
@@ -7850,6 +7891,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    s390_iterate_over_regset_sections);
   set_gdbarch_cannot_store_register (gdbarch, s390_cannot_store_register);
   set_gdbarch_write_pc (gdbarch, s390_write_pc);
+  set_gdbarch_guess_tracepoint_registers (gdbarch, s390_guess_tracepoint_registers);
   set_gdbarch_pseudo_register_read (gdbarch, s390_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, s390_pseudo_register_write);
   set_tdesc_pseudo_register_name (gdbarch, s390_pseudo_register_name);

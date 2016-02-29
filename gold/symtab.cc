@@ -1,6 +1,6 @@
 // symtab.cc -- the gold symbol table
 
-// Copyright (C) 2006-2015 Free Software Foundation, Inc.
+// Copyright (C) 2006-2016 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1171,7 +1171,8 @@ Symbol_table::add_from_relobj(
 
       const char* name = sym_names + st_name;
 
-      if (strcmp (name, "__gnu_lto_slim") == 0)
+      if (!parameters->options().relocatable()
+	  && strcmp (name, "__gnu_lto_slim") == 0)
         gold_info(_("%s: plugin needed to handle lto object"),
 		  relobj->name().c_str());
 
@@ -1986,8 +1987,9 @@ Symbol_table::do_define_in_output_data(
     return sym;
   else
     {
-      if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(name))
+      if (defined == PREDEFINED
+	  && (binding == elfcpp::STB_LOCAL
+	      || this->version_script_.symbol_is_local(name)))
 	this->force_local(oldsym);
       delete sym;
       return oldsym;
