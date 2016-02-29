@@ -1,3 +1,10 @@
+2016-02-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19162
+	* testsuite/ld-elf/pr19162.d: New file.
+	* testsuite/ld-elf/pr19162a.s: Likwise.
+	* testsuite/ld-elf/pr19162b.s: Likwise.
+
 2016-02-29 Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* testsuite/ld-elf/merge.d: Removed xfail for ARC.
