@@ -1,3 +1,10 @@
+2016-03-31  Catalin Udma  <catalin.udma@freescale.com>
+
+	PR python/19743
+	* gdb.python/py-mi-events-gdb.py: New file.
+	* gdb.python/py-mi-events.c: New file.
+	* gdb.python/py-mi-events.exp: New file.
+
 2016-03-30  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.reverse/until-precsave.exp: Match function name only.

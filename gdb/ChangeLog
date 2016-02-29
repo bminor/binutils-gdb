@@ -1,3 +1,13 @@
+2016-03-31  Catalin Udma  <catalin.udma@freescale.com>
+
+	PR python/19743
+	* python/python.c (execute_gdb_command): Use console uiout
+	when executing gdb command.
+	* utils.c (restore_ui_out_closure): New structure.
+	(do_restore_ui_out): New function.
+	(make_cleanup_restore_ui_out): Likewise.
+	* utils.h (make_cleanup_restore_ui_out): Declare.
+
 2016-03-31  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention that support for "target m32rsdi", "target mips",

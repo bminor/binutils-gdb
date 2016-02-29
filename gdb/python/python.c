@@ -658,9 +658,16 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       /* Copy the argument text in case the command modifies it.  */
       char *copy = xstrdup (arg);
       struct cleanup *cleanup = make_cleanup (xfree, copy);
+      struct interp *interp;
 
       make_cleanup_restore_integer (&interpreter_async);
       interpreter_async = 0;
+
+      make_cleanup_restore_ui_out (&current_uiout);
+      /* Use the console interpreter uiout to have the same print format
+	for console or MI.  */
+      interp = interp_lookup ("console");
+      current_uiout = interp_ui_out (interp);
 
       prevent_dont_repeat ();
       if (to_string)
