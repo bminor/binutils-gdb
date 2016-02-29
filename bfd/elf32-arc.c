@@ -1158,6 +1158,22 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	  reloc_data.sym_value = sym->st_value;
 	  reloc_data.sym_section = sec;
 
+	  /* Mergeable section handling.  */
+	  if ((sec->flags & SEC_MERGE)
+	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      asection *msec;
+	      msec = sec;
+	      rel->r_addend = _bfd_elf_rel_local_sym (output_bfd, sym,
+						      &msec, rel->r_addend);
+	      rel->r_addend -= (sec->output_section->vma
+				+ sec->output_offset
+				+ sym->st_value);
+	      rel->r_addend += msec->output_section->vma + msec->output_offset;
+
+	      reloc_data.reloc_addend = rel->r_addend;
+	    }
+
 	  if ((is_reloc_for_GOT (howto)
 	       || is_reloc_for_TLS (howto)) && entry != NULL)
 	    {

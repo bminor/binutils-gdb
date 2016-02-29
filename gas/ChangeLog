@@ -1,3 +1,13 @@
+2016-02-29  Cupertino Miranda  <cmiranda@synopsys.com>
+	    Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
+
+        * config/tc-arc.c (arc_extra_reloc): Change size to 0.
+        (tc_arc_fix_adjustable): Changed default return value to 1.
+        * testsuite/gas/arc/j.d: Updated expected symbol
+        * testsuite/gas/arc/jl.d: Likewise
+        * testsuite/gas/arc/relax-avoid1.d: Likewise
+        * testsuite/gas/arc/st.d: Likewise
+
 2016-02-29  Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
 
 	* config/tc-arc.c: Enable code density instructions for ARC EM.

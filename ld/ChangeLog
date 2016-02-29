@@ -1,3 +1,9 @@
+2016-02-29 Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-elf/merge.d: Removed xfail for ARC.
+	* testsuite/ld-elf/merge2.d: Likewise.
+	* testsuite/ld-elf/merge3.d: Likewise.
+
 2016-02-29  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
 
 	* scripttempl/arclinux.sc: Force .tdata and .tbss to always be
