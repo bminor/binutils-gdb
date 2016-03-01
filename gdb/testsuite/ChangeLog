@@ -1,5 +1,9 @@
 2016-03-01  Pedro Alves  <palves@redhat.com>
 
+	* gdb.trace/ftrace-lock.c: Include <unistd.h>.
+
+2016-03-01  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/watchpoint-fork-child.c: Include "watchpoint-fork.h"
 	before anything else.
 	* gdb.threads/watchpoint-fork-mt.c: Likewise.  Don't define
