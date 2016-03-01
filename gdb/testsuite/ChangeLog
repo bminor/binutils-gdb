@@ -1,5 +1,10 @@
 2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.arch/s390-tdbregs.exp: Use prepare_for_testing instead of
+	manually constructing the output path.
+
+2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.arch/s390-stackless.S: New.
 	* gdb.arch/s390-stackless.exp: New.
 
