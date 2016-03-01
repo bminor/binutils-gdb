@@ -3,6 +3,8 @@
 #ld: -shared -z max-page-size=0x200000
 #readelf: -l --wide
 #target: *-*-linux* *-*-gnu* *-*-nacl*
+#notarget: arc-*-*
+# arc target has an extra 64K stack section.
 
 #...
  +LOAD +0x0+[0-9a-f]{3} +0x[0-9a-f]+ +0x[0-9a-f]+ +0x0+[0-9a-f]{3} +0x0+[0-9a-f]{3} +R[WE]+ +0x200000
