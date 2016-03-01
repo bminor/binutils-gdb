@@ -1,3 +1,8 @@
+2016-03-01  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19747
+	* rl78-dis.c (print_insn_rl78_common): Fix typo.
+
 2016-02-24  Renlin Li  <renlin.li@arm.com>
 
 	* arm-dis.c (coprocessor_opcodes): Add fp16 instruction entries.
