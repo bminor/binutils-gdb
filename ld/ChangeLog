@@ -1,5 +1,9 @@
 2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-plugin/lto.exp: Update PR ld/12365 test for GCC 6.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/pr19162.d: Skip arc target.
 
 2016-02-29  H.J. Lu  <hongjiu.lu@intel.com>
