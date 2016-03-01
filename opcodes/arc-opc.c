@@ -642,9 +642,6 @@ extract_g_s (unsigned insn ATTRIBUTE_UNUSED,
    defines.  */
 #include "arc-fxi.h"
 
-/* Abbreviations for instruction subsets.  */
-#define BASE			ARC_OPCODE_BASE
-
 /* The flag operands table.
 
    The format of the table is

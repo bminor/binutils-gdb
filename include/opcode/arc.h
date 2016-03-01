@@ -171,11 +171,6 @@ extern const unsigned arc_num_opcodes;
 #define ARC_XMAC     0x1000
 #define ARC_CRC      0x1000
 
-/* Base architecture -- all cpus.  */
-#define ARC_OPCODE_BASE				\
-  (ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700	\
-   | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS)
-
 /* A macro to check for short instructions.  */
 #define ARC_SHORT(mask)				\
   (((mask) & 0xFFFF0000) ? 0 : 1)

@@ -1,3 +1,7 @@
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h (ARC_OPCODE_BASE): Delete.
+
 2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19807

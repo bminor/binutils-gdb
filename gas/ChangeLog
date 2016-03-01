@@ -1,5 +1,17 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-arc.c (arc_target): Delay initialisation until
+	arc_select_cpu.
+	(arc_target_name): Likewise.
+	(arc_features): Likewise.
+	(arc_mach_type): Likewise.
+	(cpu_types): Remove "all" entry.
+	(arc_select_cpu): New function, most of the content is from...
+	(md_parse_option): ... here.  Call new arc_select_cpu.
+	(md_begin): Call arc_select_cpu if needed, default is now arc700.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/gas/arc/inline-data-1.d: Add target restriction.
 	* testsuite/gas/arc/inline-data-2.d: New file.
 

@@ -1,3 +1,8 @@
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/binutils-all/objdump.exp (cpus_expected): Add ARC700
+	to the architecture list.
+
 2016-03-21  Nick Clifton  <nickc@redhat.com>
 
 	* dlltool.c: Replace use of alloca with call to xmalloc.

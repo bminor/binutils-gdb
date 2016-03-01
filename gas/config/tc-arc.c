@@ -311,12 +311,12 @@ static void assemble_insn
    const struct arc_flags *, int, struct arc_insn *);
 
 /* The cpu for which we are generating code.  */
-static unsigned arc_target = ARC_OPCODE_BASE;
-static const char *arc_target_name = "<all>";
-static unsigned arc_features = 0x00;
+static unsigned arc_target;
+static const char *arc_target_name;
+static unsigned arc_features;
 
 /* The default architecture.  */
-static int arc_mach_type = bfd_mach_arc_arcv2;
+static int arc_mach_type;
 
 /* Non-zero if the cpu type has been explicitly specified.  */
 static int mach_type_specified_p = 0;
@@ -346,8 +346,6 @@ static const struct cpu_type
     EF_ARC_CPU_ARCV2EM, ARC_CD},
   { "archs",  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,
     EF_ARC_CPU_ARCV2HS, ARC_CD},
-  { "all",    ARC_OPCODE_BASE,    bfd_mach_arc_arcv2,
-    0x00, 0x00 },
   { 0, 0, 0, 0, 0 }
 };
 
@@ -567,6 +565,35 @@ md_number_to_chars_midend (char *buf, valueT val, int n)
     {
       md_number_to_chars (buf, val, n);
     }
+}
+
+/* Select an appropriate entry from CPU_TYPES based on ARG and initialise
+   the relevant static global variables.  */
+
+static void
+arc_select_cpu (const char *arg)
+{
+  int cpu_flags = EF_ARC_CPU_GENERIC;
+  int i;
+
+  for (i = 0; cpu_types[i].name; ++i)
+    {
+      if (!strcasecmp (cpu_types[i].name, arg))
+        {
+          arc_target = cpu_types[i].flags;
+          arc_target_name = cpu_types[i].name;
+          arc_features = cpu_types[i].features;
+          arc_mach_type = cpu_types[i].mach;
+          cpu_flags = cpu_types[i].eflags;
+          break;
+        }
+    }
+
+  if (!cpu_types[i].name)
+    as_fatal (_("unknown architecture: %s\n"), arg);
+
+  if (cpu_flags != EF_ARC_CPU_GENERIC)
+    arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
 }
 
 /* Here ends all the ARCompact extension instruction assembling
@@ -2088,6 +2115,9 @@ md_begin (void)
 {
   unsigned int i;
 
+  if (!mach_type_specified_p)
+    arc_select_cpu ("arc700");
+
   /* The endianness can be chosen "at the factory".  */
   target_big_endian = byte_order == BIG_ENDIAN;
 
@@ -2874,8 +2904,6 @@ arc_parse_name (const char *name,
 int
 md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 {
-  int cpu_flags = EF_ARC_CPU_GENERIC;
-
   switch (c)
     {
     case OPTION_ARC600:
@@ -2893,36 +2921,8 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_MCPU:
       {
-	int i;
-	char *s = xmalloc (strlen (arg) + 1);
-
-	{
-	  char *t = s;
-	  char *arg1 = arg;
-
-	  do
-	    *t = TOLOWER (*arg1++);
-	  while (*t++);
-	}
-
-	for (i = 0; cpu_types[i].name; ++i)
-	  {
-	    if (strcmp (cpu_types[i].name, s) == 0)
-	      {
-		arc_target      = cpu_types[i].flags;
-		arc_target_name = cpu_types[i].name;
-		arc_features    = cpu_types[i].features;
-		arc_mach_type   = cpu_types[i].mach;
-		cpu_flags       = cpu_types[i].eflags;
-
-		mach_type_specified_p = 1;
-		break;
-	      }
-	  }
-
-	if (!cpu_types[i].name)
-	  as_fatal (_("unknown architecture: %s\n"), arg);
-	free (s);
+        arc_select_cpu (arg);
+        mach_type_specified_p = 1;
 	break;
       }
 
@@ -2975,9 +2975,6 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
     default:
       return 0;
     }
-
-  if (cpu_flags != EF_ARC_CPU_GENERIC)
-    arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
 
   return 1;
 }
