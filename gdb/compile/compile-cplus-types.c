@@ -1801,6 +1801,8 @@ ccp_convert_namespace (struct compile_cplus_instance *context,
       name = cp_func_name (TYPE_NAME (type));
       make_cleanup (xfree, name);
     }
+  else
+    name = NULL;
 
   need_new_context = ccp_need_new_context (pctx);
   if (need_new_context)
