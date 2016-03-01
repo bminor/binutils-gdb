@@ -1,3 +1,7 @@
+2016-03-01  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/arm-neon.exp: Pass quiet to prepare_for_testing.
+
 2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/s390-tdbregs.exp: Use prepare_for_testing instead of
