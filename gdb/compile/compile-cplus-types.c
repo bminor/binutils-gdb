@@ -1830,6 +1830,12 @@ static gcc_type
 convert_type_cplus_basic (struct compile_cplus_instance *context,
 			  struct type *type)
 {
+  /* Reference types seem to always have a const qualifier, but we
+     don't want that to be propagated to the GCC type, because GCC
+     doesn't like the reference types themselves to be qualified.  */
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    return ccp_convert_reference (context, type);
+
   /* If we are converting a qualified type, first convert the
      unqualified type and then apply the qualifiers.  */
   if ((TYPE_INSTANCE_FLAGS (type) & (TYPE_INSTANCE_FLAG_CONST
@@ -1839,8 +1845,10 @@ convert_type_cplus_basic (struct compile_cplus_instance *context,
 
   switch (TYPE_CODE (type))
     {
+#if 0
     case TYPE_CODE_REF:
       return ccp_convert_reference (context, type);
+#endif
 
     case TYPE_CODE_PTR:
       return ccp_convert_pointer (context, type);
