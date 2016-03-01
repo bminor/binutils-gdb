@@ -1,5 +1,10 @@
 2016-03-01  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.arch/arm-disp-step.exp: Use standard_testfile and
+	prepare_for_testing.
+
+2016-03-01  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.arch/arm-neon.exp: Pass quiet to prepare_for_testing.
 
 2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
