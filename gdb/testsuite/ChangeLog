@@ -1,3 +1,7 @@
+2016-03-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/catch-fork-kill.c: Include <sys/wait.h>.
+
 2016-03-01  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.arch/arm-disp-step.exp: Use standard_testfile and
