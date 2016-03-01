@@ -1,3 +1,8 @@
+2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_backchain_frame_unwind_cache): Avoid
+	exception when attempting to access the inferior's backchain.
+
 2016-02-29  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-tdep.c (aarch64_canonicalize_syscall): Support
