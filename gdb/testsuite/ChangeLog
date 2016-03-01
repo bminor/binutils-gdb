@@ -1,5 +1,15 @@
 2016-03-01  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/watchpoint-fork-child.c: Include "watchpoint-fork.h"
+	before anything else.
+	* gdb.threads/watchpoint-fork-mt.c: Likewise.  Don't define
+	_GNU_SOURCE here.
+	* gdb.threads/watchpoint-fork-st.c: Include "watchpoint-fork.h"
+	before anything else.
+	* gdb.threads/watchpoint-fork.h: Define _GNU_SOURCE.
+
+2016-03-01  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/catch-fork-kill.c: Include <sys/wait.h>.
 
 2016-03-01  Yao Qi  <yao.qi@linaro.org>
