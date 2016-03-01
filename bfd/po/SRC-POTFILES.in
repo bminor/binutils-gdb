@@ -307,6 +307,7 @@ mach-o.h
 merge.c
 mipsbsd.c
 mmo.c
+netbsd-core.c
 netbsd.h
 newsos3.c
 nlm-target.h

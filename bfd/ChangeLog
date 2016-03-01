@@ -1,3 +1,8 @@
+2016-03-02  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2016-02-29  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* elf32-arc.c (elf_arc_relocate_section): Added rules to fix the
