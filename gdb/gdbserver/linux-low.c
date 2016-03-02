@@ -4158,17 +4158,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	  || lwp->pending_signals != NULL
 	  || lwp->bp_reinsert != 0
 	  || fast_tp_collecting))
-    {
-      struct pending_signals *p_sig = XNEW (struct pending_signals);
-
-      p_sig->prev = lwp->pending_signals;
-      p_sig->signal = signal;
-      if (info == NULL)
-	memset (&p_sig->info, 0, sizeof (siginfo_t));
-      else
-	memcpy (&p_sig->info, info, sizeof (siginfo_t));
-      lwp->pending_signals = p_sig;
-    }
+    enqueue_pending_signal (lwp, signal, info);
 
   if (lwp->status_pending_p)
     {
