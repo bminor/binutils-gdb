@@ -1,8 +1,4 @@
-/* Test case for forgotten hw-watchpoints after fork()-off of a process.
-
-   Copyright 2012-2016 Free Software Foundation, Inc.
-
-   This file is part of GDB.
+/* Copyright 2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,19 +11,23 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* pthread_yield is a GNU extension.  */
-#define _GNU_SOURCE
+asm ("circular1_found_start: .globl circular1_found_start");
 
-#ifdef THREAD
-#include <pthread.h>
+/* DWARF will describe this function as being inside a D module.  */
 
-extern volatile int step;
-extern pthread_t thread;
-#endif /* THREAD */
+void
+found (void)
+{
+}
 
-extern volatile int var;
+asm ("circular1_found_end: .globl circular1_found_end");
 
-extern void marker (void);
-extern void forkoff (int nr);
+int
+main (void)
+{
+  found ();
+  return 0;
+}
+

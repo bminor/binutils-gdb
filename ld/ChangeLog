@@ -1,3 +1,61 @@
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): Add xfails.
+	Xfail mix_pic_and_non_pic on "arm*-*-*" "aarch64*-*-*".
+
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19739
+	* emultempl/mmo.em (mmo_place_orphan): Don't merge flags of other
+	input sections for relocatable link.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19739
+	* ld/emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	merge flags of other input sections for relocatable link.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-plugin/lto.exp: Update PR ld/12365 test for GCC 6.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19162.d: Skip arc target.
+
+2016-02-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19162
+	* testsuite/ld-elf/pr19162.d: New file.
+	* testsuite/ld-elf/pr19162a.s: Likwise.
+	* testsuite/ld-elf/pr19162b.s: Likwise.
+
+2016-02-29 Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-elf/merge.d: Removed xfail for ARC.
+	* testsuite/ld-elf/merge2.d: Likewise.
+	* testsuite/ld-elf/merge3.d: Likewise.
+
+2016-02-29  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+
+	* scripttempl/arclinux.sc: Force .tdata and .tbss to always be
+	generated.
+
+2016-02-26  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new testcases.
+	* testsuite/ld-aarch64/emit-relocs-270.d: Update to use new boundary.
+	* testsuite/ld-aarch64/emit-relocs-271.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-272.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-270-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-270-overflow.s: New.
+	* testsuite/ld-aarch64/emit-relocs-271-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-271-overflow.s: New.
+	* testsuite/ld-aarch64/emit-relocs-272-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-272-overflow.s: New.
+
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19609

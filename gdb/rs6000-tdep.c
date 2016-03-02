@@ -3239,7 +3239,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
-      return (*this_cache);
+      return (struct rs6000_frame_cache *) (*this_cache);
     }
   END_CATCH
 

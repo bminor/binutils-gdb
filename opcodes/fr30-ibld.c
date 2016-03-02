@@ -881,7 +881,7 @@ fr30_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 4, 16, total_length, pc, & value);
-        value = ((value) | (((-1UL) << (4))));
+        value = ((value) | (-16));
         fields->f_m4 = value;
       }
       break;

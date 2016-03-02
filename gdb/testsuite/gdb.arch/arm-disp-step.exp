@@ -22,14 +22,11 @@ if {![is_aarch32_target]} then {
     return
 }
 
-set testfile "arm-disp-step"
-set srcfile ${testfile}.S
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .S
 
 set additional_flags "-Wa,-g"
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    untested arm-disp-step.exp
+if { [prepare_for_testing $testfile.exp $testfile $srcfile [list debug $additional_flags]] } {
     return -1
 }
 
@@ -409,10 +406,6 @@ proc test_add_rn_pc {} {
     # Test the value in r3 is correct.
     gdb_assert { [expr {$pc_val + 4 + 4} == $r3_val] }
 }
-
-# Get things started.
-
-clean_restart ${testfile}
 
 # Turn displaced stepping off before runto main. When displaced stepping
 # is on, and we type 'run', GDB will first try to single step on _dl_debug_state,

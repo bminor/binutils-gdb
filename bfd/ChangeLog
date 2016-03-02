@@ -1,3 +1,25 @@
+2016-03-02  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2016-02-29  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_relocate_section): Added rules to fix the
+	relocation addend when sections get merged.
+
+2016-02-29  Cupertino Miranda <Cupertino.Miranda@synopsys.com>
+
+	* elf32-arc.c (arc_elf_final_write_processing): Add condition to
+	the flag change.
+        (elf_arc_relocate_section): Fixes and conditions to support PIE.
+	Assert for code sections dynamic relocs.
+
+2016-02-26  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Fix signed overflow
+	check for MOVW_SABS_G0, MOVW_SABS_G1, MOVW_SABS_G2.
+
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19609

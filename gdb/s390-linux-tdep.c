@@ -2180,7 +2180,7 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR backchain;
   ULONGEST reg;
-  LONGEST sp;
+  LONGEST sp, tmp;
   int i;
 
   /* Set up ABI call-saved/call-clobbered registers.  */
@@ -2193,7 +2193,9 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
 
   /* Get the backchain.  */
   reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
-  backchain = read_memory_unsigned_integer (reg, word_size, byte_order);
+  if (!safe_read_memory_integer (reg, word_size, byte_order, &tmp))
+    tmp = 0;
+  backchain = (CORE_ADDR) tmp;
 
   /* A zero backchain terminates the frame chain.  As additional
      sanity check, let's verify that the spill slot for SP in the

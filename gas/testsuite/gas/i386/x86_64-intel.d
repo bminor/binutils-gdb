@@ -6,7 +6,7 @@
 .*: +file format .*
 
 Disassembly of section .text:
-0+ <bar-0x1a7>:
+0+ <.*>:
 [ 	]*[a-f0-9]+:	01 ca                	add    edx,ecx
 [ 	]*[a-f0-9]+:	44 01 ca             	add    edx,r9d
 [ 	]*[a-f0-9]+:	41 01 ca             	add    r10d,ecx

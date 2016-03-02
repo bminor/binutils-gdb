@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <pthread.h>
+#include <unistd.h>
 #include "trace-common.h"
 
 /* Called if the testcase failed.  */

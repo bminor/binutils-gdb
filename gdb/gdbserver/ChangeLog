@@ -1,3 +1,13 @@
+2016-03-02  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_resume_one_lwp_throw): Replace code with
+	enqueue_pending_signal.
+
+2016-03-02  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (cmd_qtstart): Only set ipa_tdesc_idx if agent
+	is actually loaded.
+
 2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* linux-s390-low.c (s390_num_regs_3264): Define on 31-bit too.

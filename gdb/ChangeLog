@@ -1,3 +1,40 @@
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* MAINTAINERS (Write After Approval): Add Bernhard Heckel.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* dwarf2read.c (new_symbol_full): Fix detection of gfortran compilers.
+
+2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_backchain_frame_unwind_cache): Avoid
+	exception when attempting to access the inferior's backchain.
+
+2016-02-29  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-tdep.c (aarch64_canonicalize_syscall): Support
+	eventfd2, eventfd2, dup3, inotify_init1, fallocate and pipe2.
+	Return gdb_sys_epoll_create1 instead of gdb_sys_epoll_create
+	for aarch64_sys_epoll_create1.
+
+2016-02-29  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-record.h (enum gdb_syscall) <gdb_sys_fallocate>: New.
+	<gdb_sys_eventfd2, gdb_sys_epoll_create1, gdb_sys_dup3>: New.
+	<gdb_sys_pipe2, gdb_sys_inotify_init1>: New.
+	* linux-record.c (record_linux_system_call): Handle them.
+
+2016-02-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-namespace.c (d_lookup_symbol_imports): Avoid recursive lookups from
+	cyclic imports.
+
+2016-02-26  Keith Seitz  <keiths@redhat.com>
+
+	* rs6000-tdep.c (rs6000_frame_cache): Explicitly cast return result
+	to avoid invalid conversion from void *.
+
 2016-02-26  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_record_exreg_ld_st_insn): Set 'single_reg'

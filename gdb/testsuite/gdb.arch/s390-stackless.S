@@ -1,6 +1,4 @@
-/* Test case for forgotten hw-watchpoints after fork()-off of a process.
-
-   Copyright 2012-2016 Free Software Foundation, Inc.
+/* Copyright 2015-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -15,19 +13,21 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* pthread_yield is a GNU extension.  */
-#define _GNU_SOURCE
+	.text
 
-#ifdef THREAD
-#include <pthread.h>
+	.align	8
+	.globl  main
+	.type	main, @function
+	/* Ensure an invalid stack pointer and link register.  Don't
+	use zero, since that may be handled specially.  */
+main:	la	%r15,3(0,0)
+	la	%r14,1(0,0)
+	j	1f
+	.size	main, .-main
 
-extern volatile int step;
-extern pthread_t thread;
-#endif /* THREAD */
-
-extern volatile int var;
-
-extern void marker (void);
-extern void forkoff (int nr);
+	/* Outside any function.  */
+	.byte	0,1
+1:	st	%r15,0(%r15)
+	br	%r14

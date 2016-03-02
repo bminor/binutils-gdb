@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
+#include <sys/wait.h>
 
 int fds[2] = { -1, -1 };
 
