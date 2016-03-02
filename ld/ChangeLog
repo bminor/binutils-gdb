@@ -1,3 +1,17 @@
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19739
+	* emultempl/mmo.em (mmo_place_orphan): Don't merge flags of other
+	input sections for relocatable link.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19739
+	* ld/emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	merge flags of other input sections for relocatable link.
+
 2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-plugin/lto.exp: Update PR ld/12365 test for GCC 6.
