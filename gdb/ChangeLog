@@ -1,3 +1,7 @@
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* dwarf2read.c (new_symbol_full): Fix detection of gfortran compilers.
+
 2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c (s390_backchain_frame_unwind_cache): Avoid
