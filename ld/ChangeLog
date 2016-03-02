@@ -1,5 +1,10 @@
 2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): Add xfails.
+	Xfail mix_pic_and_non_pic on "arm*-*-*" "aarch64*-*-*".
+
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19739
 	* emultempl/mmo.em (mmo_place_orphan): Don't merge flags of other
 	input sections for relocatable link.

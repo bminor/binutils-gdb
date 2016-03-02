@@ -583,7 +583,7 @@ if { [istarget *-*-linux*]
     ]
 }
 
-proc mix_pic_and_non_pic {cflags ldflags} {
+proc mix_pic_and_non_pic {xfails cflags ldflags} {
     set testname "Mixing PIC and non-PIC"
     if { ![ string match "" $cflags$ldflags] } {
 	set testname "$testname ($cflags $ldflags)"
@@ -632,6 +632,10 @@ proc mix_pic_and_non_pic {cflags ldflags} {
 
     exec cp tmpdir/libpr19719a.so tmpdir/libpr19719.so
 
+    foreach targ $xfails {
+	setup_xfail $targ
+    }
+
     set exec_output [run_host_cmd tmpdir/pr19719 ""]
     if {![string match "PASS" $exec_output]} {
 	fail $testname
@@ -640,5 +644,5 @@ proc mix_pic_and_non_pic {cflags ldflags} {
     }
 }
 
-mix_pic_and_non_pic "" ""
-mix_pic_and_non_pic "-fPIE" "-pie"
+mix_pic_and_non_pic [list "arm*-*-*" "aarch64*-*-*"] "" ""
+mix_pic_and_non_pic [] "-fPIE" "-pie"
