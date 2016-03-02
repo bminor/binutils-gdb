@@ -1,3 +1,7 @@
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/x86_64-intel.d: Adjusted for COFF.
+
 2016-02-29  Cupertino Miranda  <cmiranda@synopsys.com>
 	    Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
 
