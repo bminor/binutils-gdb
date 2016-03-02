@@ -1,6 +1,7 @@
 2016-03-02  Alan Modra  <amodra@gmail.com>
 
 	* fr30-ibld.c: Regenerate.
+	* rl78-decode.c: Regenerate.
 
 2016-03-01  Nick Clifton  <nickc@redhat.com>
 
