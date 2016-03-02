@@ -1,5 +1,9 @@
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
+	* MAINTAINERS (Write After Approval): Add Bernhard Heckel.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
 	* dwarf2read.c (new_symbol_full): Fix detection of gfortran compilers.
 
 2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
