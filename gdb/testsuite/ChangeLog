@@ -1,5 +1,9 @@
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
+	* gdb.fortran/vla-history.exp: Lookup array elements and printing exceeds timeout.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
 	* gdb.cp/vla-cxx.cc: Insert dummy assignment as anchor for an breakpoint.
 
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
