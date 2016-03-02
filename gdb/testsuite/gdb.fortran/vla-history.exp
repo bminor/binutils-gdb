@@ -30,9 +30,6 @@ gdb_breakpoint [gdb_get_line_number "vla1-init"]
 gdb_continue_to_breakpoint "vla1-init"
 gdb_test "print vla1" " = <not allocated>" "print non-allocated vla1"
 
-gdb_breakpoint [gdb_get_line_number "vla2-allocated"]
-gdb_continue_to_breakpoint "vla2-allocated"
-
 gdb_breakpoint [gdb_get_line_number "vla1-filled"]
 gdb_continue_to_breakpoint "vla1-filled"
 with_timeout_factor 2 {
