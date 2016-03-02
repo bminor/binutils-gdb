@@ -3214,10 +3214,13 @@ cmd_qtstart (char *packet)
 
   *packet = '\0';
 
-  /* Tell IPA about the correct tdesc.  */
-  if (write_inferior_integer (ipa_sym_addrs.addr_ipa_tdesc_idx,
-			      target_get_ipa_tdesc_idx ()))
-    error ("Error setting ipa_tdesc_idx variable in lib");
+  if (agent_loaded_p ())
+    {
+      /* Tell IPA about the correct tdesc.  */
+      if (write_inferior_integer (ipa_sym_addrs.addr_ipa_tdesc_idx,
+				  target_get_ipa_tdesc_idx ()))
+        error ("Error setting ipa_tdesc_idx variable in lib");
+    }
 
   /* Start out empty.  */
   if (agent_loaded_p ())
