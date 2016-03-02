@@ -1,5 +1,9 @@
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
+	* gdb.cp/vla-cxx.cc: Insert dummy assignment as anchor for an breakpoint.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
 	* gdb.mi/vla.f90: Nullify pointer after declaration.
 
 2016-03-01  Pedro Alves  <palves@redhat.com>
