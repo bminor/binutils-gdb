@@ -1,5 +1,6 @@
 2016-03-02  Alan Modra  <amodra@gmail.com>
 
+	* or1k-desc.h: Regenerate.
 	* fr30-ibld.c: Regenerate.
 	* rl78-decode.c: Regenerate.
 
