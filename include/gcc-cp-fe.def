@@ -1,6 +1,6 @@
 /* Interface between GCC C++ FE and GDB  -*- c -*-
 
-   Copyright (C) 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    This file is part of GCC.
 
@@ -326,6 +326,11 @@ GCC_METHOD4 (gcc_type, build_method_type,
 GCC_METHOD2 (gcc_type, int_type,
 	     int /* bool */,		   /* Argument IS_UNSIGNED.  */
 	     unsigned long)                /* Argument SIZE_IN_BYTES.  */
+
+/* Return the 'char' type, a distinct type from both 'signed char' and
+   'unsigned char' returned by int_type.  */
+
+GCC_METHOD0 (gcc_type, char_type)
 
 /* Return a floating point type with the given properties.  */
 

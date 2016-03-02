@@ -1690,8 +1690,15 @@ ccp_convert_int (struct compile_cplus_instance *context, struct type *type)
 {
   gcc_type result;
 
-  CPOPS ("int_type %d %d\n", TYPE_LENGTH (type), TYPE_UNSIGNED (type));
-  result = CPCALL (int_type, context, TYPE_UNSIGNED (type), TYPE_LENGTH (type));
+  CPOPS ("int_type %d %d %d\n", TYPE_LENGTH (type), TYPE_UNSIGNED (type),
+	 TYPE_NOSIGN (type));
+  if (TYPE_NOSIGN (type))
+    {
+      gdb_assert (TYPE_LENGTH (type) == 1);
+      result = CPCALL (char_type, context);
+    }
+  else
+    result = CPCALL (int_type, context, TYPE_UNSIGNED (type), TYPE_LENGTH (type));
   CPOPS ("\tgcc_type = %lld\n", result);
   return result;
 }

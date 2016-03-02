@@ -1,6 +1,6 @@
 /* Interface between GCC C++ FE and GDB
 
-   Copyright (C) 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    This file is part of GCC.
 
@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-3
+  GCC_CP_FE_VERSION_0 = 0xffffffff-4
 };
 
 /* Qualifiers.  */

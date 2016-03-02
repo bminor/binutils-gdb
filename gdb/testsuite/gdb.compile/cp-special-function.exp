@@ -230,7 +230,7 @@ CompileExpression::add_imp "d->pub_var" -21
 # "'d' cannot be used as function"
  CompileExpression::add_exp "d.int_ = 27; var = d.get ()" 27
  CompileExpression::add_imp "d ()" -27
- CompileExpression::add_imp "d (3)" 4
+ CompileExpression::add_imp "d (3)" 30
  CompileExpression::add_imp "a (b)" 3
 
 CompileExpression::add_exp "d.int_ = 28; var = d.get ()" 28
@@ -248,8 +248,7 @@ CompileExpression::add_imp "d\[b\]" 26
 
 CompileExpression::add_exp "d.int_ = 29; var = d.int_" 29
 CompileExpression::add_exp "ch = d; var = ch;" 29
-# !!keiths: Why do I need to "force" this to signed to work?
-CompileExpression::add_exp "signed char a_char = d; var = a_char - 9" 20
+CompileExpression::add_exp "char a_char = d; var = a_char - 9" 20
 
 CompileExpression::add_exp "d.int_ = 30; var = d.int_" 30
 CompileExpression::add_imp "d" -30

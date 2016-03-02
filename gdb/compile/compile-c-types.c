@@ -256,6 +256,11 @@ convert_func (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_int (struct compile_c_instance *context, struct type *type)
 {
+  if (TYPE_NOSIGN (type))
+    {
+      gdb_assert (TYPE_LENGTH (type) == 1);
+      return C_CTX (context)->c_ops->char_type (C_CTX (context));
+    }
   return C_CTX (context)->c_ops->int_type (C_CTX (context),
 					   TYPE_UNSIGNED (type),
 					   TYPE_LENGTH (type));
