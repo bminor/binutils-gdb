@@ -1,3 +1,15 @@
+2016-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (set_flags_for_sub32): Correct type of signbit.
+	(CondCompare): Swap interpretation of bit 30.
+	(DO_ADDP): Delete macro.
+	(do_vec_ADDP): Copy source registers before starting to update
+	destination register.
+	(do_vec_FADDP): Likewise.
+	(do_vec_load_store): Fix computation of sizeof_operation.
+	(rbit64): Fix type of constant.
+	(aarch64_step): When displaying insn value, display all 32 bits.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
