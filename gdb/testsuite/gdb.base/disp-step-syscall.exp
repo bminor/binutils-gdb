@@ -15,11 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if { ![support_displaced_stepping] } {
-    unsupported "displaced stepping"
-    return -1
-}
-
 set syscall_insn ""
 
 # Define the syscall instruction for each target.
@@ -124,6 +119,11 @@ proc disp_step_cross_syscall { syscall } {
 	    return -1
 	}
 
+	foreach_with_prefix displaced {"off" "on"} {
+	    if {$displaced == "on" && ![support_displaced_stepping]} {
+		continue
+	    }
+
 	set ret [setup $syscall]
 
 	set syscall_insn_addr [lindex $ret 0]
@@ -149,7 +149,7 @@ proc disp_step_cross_syscall { syscall } {
 	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, .*" \
 	    "continue to syscall insn $syscall"
 
-	gdb_test_no_output "set displaced-stepping on"
+	gdb_test_no_output "set displaced-stepping $displaced"
 
 	# Check the address of next instruction of syscall.
 	if {[gdb_test "stepi" "x/i .*=>.*" "single step over $syscall"] != 0} {
@@ -164,6 +164,7 @@ proc disp_step_cross_syscall { syscall } {
 	gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
 	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
 	    "continue to marker ($syscall)"
+	}
     }
 }
 

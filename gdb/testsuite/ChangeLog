@@ -1,5 +1,12 @@
 2016-03-03  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/disp-step-syscall.exp: Don't invoke
+	support_displaced_stepping.
+	(disp_step_cross_syscall): Test with displaced stepping off and
+	on if supported.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/disp-step-syscall.exp (check_pc_after_cross_syscall): New
 	proc.
 	(setup): New proc.
