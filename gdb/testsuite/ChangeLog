@@ -1,3 +1,11 @@
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp (check_pc_after_cross_syscall): New
+	proc.
+	(setup): New proc.
+	(disp_step_cross_syscall): Move code to check_pc_after_cross_syscall
+	and setup.
+
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* gdb.fortran/vla-history.exp: Remove breakpoint.
