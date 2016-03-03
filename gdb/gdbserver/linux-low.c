@@ -529,8 +529,11 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  child_thr->last_status.kind = TARGET_WAITKIND_STOPPED;
 
 	  /* If we're suspending all threads, leave this one suspended
-	     too.  */
-	  if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS)
+	     too.  If the fork/clone parent is stepping over a breakpoint,
+	     all other threads have been suspended already.  Leave the
+	     child suspended too.  */
+	  if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
+	      || event_lwp->bp_reinsert != 0)
 	    {
 	      if (debug_threads)
 		debug_printf ("HEW: leaving child suspended\n");
@@ -583,9 +586,12 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	 before calling linux_resume_one_lwp.  */
       new_lwp->stopped = 1;
 
-     /* If we're suspending all threads, leave this one suspended
-	too.  */
-      if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS)
+      /* If we're suspending all threads, leave this one suspended
+	 too.  If the fork/clone parent is stepping over a breakpoint,
+	 all other threads have been suspended already.  Leave the
+	 child suspended too.  */
+      if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
+	  || event_lwp->bp_reinsert != 0)
 	new_lwp->suspended = 1;
 
       /* Normally we will get the pending SIGSTOP.  But in some cases
