@@ -2101,6 +2101,21 @@ plugin_section_order.so: plugin_section_order.o
 plugin_section_order.o: plugin_section_order.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
 
+check_SCRIPTS += plugin_layout_with_alignment.sh
+check_DATA += plugin_layout_with_alignment.stdout
+MOSTLYCLEANFILES += plugin_layout_with_alignment
+plugin_layout_with_alignment.o: plugin_layout_with_alignment.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
+plugin_layout_with_alignment: plugin_layout_with_alignment.o plugin_section_alignment.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_section_alignment.so" plugin_layout_with_alignment.o
+plugin_layout_with_alignment.stdout: plugin_layout_with_alignment
+	$(TEST_NM) -n --synthetic plugin_layout_with_alignment > plugin_layout_with_alignment.stdout
+
+plugin_section_alignment.so: plugin_section_alignment.o
+	$(CXXLINK) -Bgcctestdir/ -shared plugin_section_alignment.o
+plugin_section_alignment.o: plugin_section_alignment.cc
+	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
+
 endif PLUGINS
 
 check_PROGRAMS += exclude_libs_test

@@ -158,6 +158,15 @@ unique_segment_for_sections(const char* segment_name,
 			    uint64_t align,
 			    const struct ld_plugin_section *section_list,
 			    unsigned int num_sections);
+
+static enum ld_plugin_status
+get_input_section_alignment(const struct ld_plugin_section section,
+                            unsigned int* addralign);
+
+static enum ld_plugin_status
+get_input_section_size(const struct ld_plugin_section section,
+                       uint64_t* secsize);
+
 };
 
 #endif // ENABLE_PLUGINS
@@ -202,7 +211,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 27;
+  const int tv_fixed_size = 29;
 
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv* tv = new ld_plugin_tv[tv_size];
@@ -327,6 +336,14 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_UNIQUE_SEGMENT_FOR_SECTIONS;
   tv[i].tv_u.tv_unique_segment_for_sections = unique_segment_for_sections;
+
+  ++i;
+  tv[i].tv_tag = LDPT_GET_INPUT_SECTION_ALIGNMENT;
+  tv[i].tv_u.tv_get_input_section_alignment = get_input_section_alignment;
+
+  ++i;
+  tv[i].tv_tag = LDPT_GET_INPUT_SECTION_SIZE;
+  tv[i].tv_u.tv_get_input_section_size = get_input_section_size;
 
   ++i;
   tv[i].tv_tag = LDPT_NULL;
@@ -1729,6 +1746,53 @@ get_input_section_contents(const struct ld_plugin_section section,
   *len = plen;
   return LDPS_OK;
 }
+
+// Get the alignment of the specified section in the object corresponding
+// to the handle.  This plugin interface can only be called in the
+// claim_file handler of the plugin.
+
+static enum ld_plugin_status
+get_input_section_alignment(const struct ld_plugin_section section,
+                            unsigned int* addralign)
+{
+  gold_assert(parameters->options().has_plugins());
+
+  if (!parameters->options().plugins()->in_claim_file_handler())
+    return LDPS_ERR;
+
+  Object* obj
+    = parameters->options().plugins()->get_elf_object(section.handle);
+
+  if (obj == NULL)
+    return LDPS_BAD_HANDLE;
+
+  *addralign = obj->section_addralign(section.shndx);
+  return LDPS_OK;
+}
+
+// Get the size of the specified section in the object corresponding
+// to the handle.  This plugin interface can only be called in the
+// claim_file handler of the plugin.
+
+static enum ld_plugin_status
+get_input_section_size(const struct ld_plugin_section section,
+                       uint64_t* secsize)
+{
+  gold_assert(parameters->options().has_plugins());
+
+  if (!parameters->options().plugins()->in_claim_file_handler())
+    return LDPS_ERR;
+
+  Object* obj
+    = parameters->options().plugins()->get_elf_object(section.handle);
+
+  if (obj == NULL)
+    return LDPS_BAD_HANDLE;
+
+  *secsize = obj->section_size(section.shndx);
+  return LDPS_OK;
+}
+
 
 // Specify the ordering of sections in the final layout. The sections are
 // specified as (handle,shndx) pairs in the two arrays in the order in
