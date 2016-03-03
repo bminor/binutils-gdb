@@ -124,46 +124,45 @@ proc step_over_syscall { syscall } {
 		continue
 	    }
 
-	set ret [setup $syscall]
+	    set ret [setup $syscall]
 
-	set syscall_insn_addr [lindex $ret 0]
-	set syscall_insn_next_addr [lindex $ret 1]
-	if { $syscall_insn_addr == -1 } {
-	    return -1
-	}
-
-	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in |__libc_|)$syscall \\(\\).*" \
-	    "continue to $syscall (3rd time)"
-
-	# Hit the breakpoint on $syscall for the third time.  In this time, we'll set
-	# breakpoint on the syscall insn we recorded previously, and single step over it.
-
-	set syscall_insn_bp 0
-	gdb_test_multiple "break \*$syscall_insn_addr"  "break on syscall insn" {
-	    -re "Breakpoint (\[0-9\]*) at .*$gdb_prompt $" {
-		set syscall_insn_bp $expect_out(1,string)
-		pass "break on syscall insns"
+	    set syscall_insn_addr [lindex $ret 0]
+	    set syscall_insn_next_addr [lindex $ret 1]
+	    if { $syscall_insn_addr == -1 } {
+		return -1
 	    }
-	}
 
-	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, .*" \
-	    "continue to syscall insn $syscall"
+	    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in |__libc_|)$syscall \\(\\).*" \
+		"continue to $syscall (3rd time)"
 
-	gdb_test_no_output "set displaced-stepping $displaced"
+	    # Hit the breakpoint on $syscall for the third time.  In this time, we'll set
+	    # breakpoint on the syscall insn we recorded previously, and single step over it.
 
-	# Check the address of next instruction of syscall.
-	if {[gdb_test "stepi" "x/i .*=>.*" "single step over $syscall"] != 0} {
-	    return -1
-	}
+	    set syscall_insn_bp 0
+	    gdb_test_multiple "break \*$syscall_insn_addr"  "break on syscall insn" {
+		-re "Breakpoint (\[0-9\]*) at .*$gdb_prompt $" {
+		    set syscall_insn_bp $expect_out(1,string)
+		    pass "break on syscall insns"
+		}
+	    }
 
-	check_pc_after_cross_syscall $syscall $syscall_insn_next_addr
+	    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, .*" \
+		"continue to syscall insn $syscall"
 
-	# Delete breakpoint syscall insns to avoid interference to other syscalls.
-	delete_breakpoints
+	    gdb_test_no_output "set displaced-stepping $displaced"
 
-	gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
-	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
-	    "continue to marker ($syscall)"
+	    # Check the address of next instruction of syscall.
+	    if {[gdb_test "stepi" "x/i .*=>.*" "single step over $syscall"] != 0} {
+		return -1
+	    }
+	    check_pc_after_cross_syscall $syscall $syscall_insn_next_addr
+
+	    # Delete breakpoint syscall insns to avoid interference to other syscalls.
+	    delete_breakpoints
+
+	    gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
+	    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+		"continue to marker ($syscall)"
 	}
     }
 }

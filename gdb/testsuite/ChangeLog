@@ -1,5 +1,10 @@
 2016-03-03  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/step-over-syscall.exp (disp_step_cross_syscall): Fix
+	code format.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/disp-step-fork.c: Rename to ...
 	* gdb.base/step-over-fork.c: ... it.  New file.
 	* gdb.base/disp-step-vfork.c: Rename to ...
