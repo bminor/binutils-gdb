@@ -168,5 +168,62 @@ proc disp_step_cross_syscall { syscall } {
     }
 }
 
+# Set a breakpoint with a condition that evals false on syscall
+# instruction.  In fact, it tests GDBserver steps over syscall
+# instruction.
+
+proc break_cond_on_syscall { syscall } {
+    with_test_prefix "break cond on target : $syscall" {
+	set testfile "disp-step-$syscall"
+
+	set ret [setup $syscall]
+
+	set syscall_insn_addr [lindex $ret 0]
+	set syscall_insn_next_addr [lindex $ret 1]
+	if { $syscall_insn_addr == -1 } {
+	    return -1
+	}
+
+	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in |__libc_|)$syscall \\(\\).*" \
+	    "continue to $syscall"
+	# Delete breakpoint syscall insns to avoid interference with other syscalls.
+	delete_breakpoints
+
+
+	# Create a breakpoint with a condition that evals false.
+	gdb_test "break \*$syscall_insn_addr if main == 0" \
+	    "Breakpoint \[0-9\]* at .*"
+
+	gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
+	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+	    "continue to marker ($syscall)"
+    }
+}
+
 disp_step_cross_syscall "fork"
 disp_step_cross_syscall "vfork"
+
+set testfile "disp-step-fork"
+clean_restart $testfile
+if { ![runto main] } then {
+    fail "run to main"
+    return -1
+}
+
+set cond_bp_target 1
+
+set test "set breakpoint condition-evaluation target"
+gdb_test_multiple $test $test {
+    -re "warning: Target does not support breakpoint condition evaluation.\r\nUsing host evaluation mode instead.\r\n$gdb_prompt $" {
+	# Target doesn't support breakpoint condition
+	# evaluation on its side.
+	set cond_bp_target 0
+    }
+    -re "^$test\r\n$gdb_prompt $" {
+    }
+}
+
+if { $cond_bp_target } {
+    break_cond_on_syscall "fork"
+    break_cond_on_syscall "vfork"
+}

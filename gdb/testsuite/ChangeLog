@@ -1,5 +1,11 @@
 2016-03-03  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/disp-step-syscall.exp (break_cond_on_syscall): New.
+	If target supports condition evaluation on target, invoke
+	break_cond_on_syscall for fork and vfork.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/disp-step-syscall.exp: Don't invoke
 	support_displaced_stepping.
 	(disp_step_cross_syscall): Test with displaced stepping off and
