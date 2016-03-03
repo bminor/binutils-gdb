@@ -1,4 +1,10 @@
 2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+
+        PR 19751
+        * arm.cc (Reloc_stub::Key::name): Add unused attribute.
+        * dirsearch.cc (Dir_caches::~Dir_caches): Likewise.
+
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
             Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
 
 	* output.cc (Output_reloc_writer): New type.
