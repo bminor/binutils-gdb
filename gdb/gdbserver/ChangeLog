@@ -1,5 +1,9 @@
 2016-03-03  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c: Update comments to start_step_over.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
 	PR server/19736
 	* linux-low.c (handle_extended_wait): Set child suspended
 	if event_lwp->bp_reinsert isn't zero.
