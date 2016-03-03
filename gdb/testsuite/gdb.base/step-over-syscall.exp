@@ -47,7 +47,7 @@ proc check_pc_after_cross_syscall { syscall syscall_insn_next_addr } {
 proc setup { syscall } {
     global gdb_prompt syscall_insn
 
-    set testfile "disp-step-$syscall"
+    set testfile "step-over-$syscall"
 
     clean_restart $testfile
 
@@ -107,12 +107,12 @@ proc setup { syscall } {
     return [list $syscall_insn_addr [get_hexadecimal_valueof "\$pc" "0"]]
 }
 
-proc disp_step_cross_syscall { syscall } {
+proc step_over_syscall { syscall } {
     with_test_prefix "$syscall" {
 	global syscall_insn
 	global gdb_prompt
 
-	set testfile "disp-step-$syscall"
+	set testfile "step-over-$syscall"
 
 	if [build_executable ${testfile}.exp ${testfile} ${testfile}.c {debug}] {
 	    untested ${testfile}.exp
@@ -174,7 +174,7 @@ proc disp_step_cross_syscall { syscall } {
 
 proc break_cond_on_syscall { syscall } {
     with_test_prefix "break cond on target : $syscall" {
-	set testfile "disp-step-$syscall"
+	set testfile "step-over-$syscall"
 
 	set ret [setup $syscall]
 
@@ -200,10 +200,10 @@ proc break_cond_on_syscall { syscall } {
     }
 }
 
-disp_step_cross_syscall "fork"
-disp_step_cross_syscall "vfork"
+step_over_syscall "fork"
+step_over_syscall "vfork"
 
-set testfile "disp-step-fork"
+set testfile "step-over-fork"
 clean_restart $testfile
 if { ![runto main] } then {
     fail "run to main"

@@ -1,5 +1,16 @@
 2016-03-03  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/disp-step-fork.c: Rename to ...
+	* gdb.base/step-over-fork.c: ... it.  New file.
+	* gdb.base/disp-step-vfork.c: Rename to ...
+	* gdb.base/step-over-vfork.c: ... it.  New file.
+	* gdb.base/disp-step-syscall.exp: Rename to ...
+	* gdb.base/step-over-syscall.exp: ... it.  New file.
+	(disp_step_cross_syscall): Rename to ...
+	(step_over_syscall): ... it.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/disp-step-syscall.exp (break_cond_on_syscall): New.
 	If target supports condition evaluation on target, invoke
 	break_cond_on_syscall for fork and vfork.
