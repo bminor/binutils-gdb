@@ -1,5 +1,12 @@
 2016-03-03  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/step-over-syscall.exp (step_over_syscall): Kfail.
+	Invoke step_over_syscall "clone" and break_cond_on_syscall
+	"clone".
+	* gdb.base/step-over-clone.c: New file.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/step-over-syscall.exp (disp_step_cross_syscall): Fix
 	code format.
 

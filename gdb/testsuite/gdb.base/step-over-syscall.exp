@@ -124,6 +124,13 @@ proc step_over_syscall { syscall } {
 		continue
 	    }
 
+	    if { $displaced == "on" && $syscall == "clone" } {
+		# GDB doesn't support stepping over clone syscall with
+		# displaced stepping.
+		kfail "gdb/19675" "single step over clone"
+		continue
+	    }
+
 	    set ret [setup $syscall]
 
 	    set syscall_insn_addr [lindex $ret 0]
@@ -193,6 +200,18 @@ proc break_cond_on_syscall { syscall } {
 	gdb_test "break \*$syscall_insn_addr if main == 0" \
 	    "Breakpoint \[0-9\]* at .*"
 
+	if { $syscall == "clone" } {
+	    # Create a breakpoint in the child with the condition that
+	    # evals false, so that GDBserver can get the event from the
+	    # child but GDB doesn't see it.  In this way, we don't have
+	    # to adjust the test flow for "clone".
+	    # This is a regression test for PR server/19736.  In this way,
+	    # we can test that GDBserver gets an event from the child and
+	    # set suspend count correctly while the parent is stepping over
+	    # the breakpoint.
+	    gdb_test "break clone_fn if main == 0"
+	}
+
 	gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
 	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
 	    "continue to marker ($syscall)"
@@ -201,6 +220,7 @@ proc break_cond_on_syscall { syscall } {
 
 step_over_syscall "fork"
 step_over_syscall "vfork"
+step_over_syscall "clone"
 
 set testfile "step-over-fork"
 clean_restart $testfile
@@ -225,4 +245,5 @@ gdb_test_multiple $test $test {
 if { $cond_bp_target } {
     break_cond_on_syscall "fork"
     break_cond_on_syscall "vfork"
+    break_cond_on_syscall "clone"
 }
