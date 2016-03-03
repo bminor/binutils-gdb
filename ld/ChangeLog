@@ -1,5 +1,9 @@
 2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/pr19162.d: Skip hppa-*-*.
+
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): Add xfails.
 	Xfail mix_pic_and_non_pic on "arm*-*-*" "aarch64*-*-*".
 
