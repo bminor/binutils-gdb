@@ -1179,6 +1179,8 @@ Sized_pluginobj<size, big_endian>::do_should_include_member(
   for (int i = 0; i < this->nsyms_; ++i)
     {
       const struct ld_plugin_symbol& sym = this->syms_[i];
+      if (sym.def == LDPK_UNDEF || sym.def == LDPK_WEAKUNDEF)
+        continue;
       const char* name = sym.name;
       Symbol* symbol;
       Archive::Should_include t = Archive::should_include_member(symtab,

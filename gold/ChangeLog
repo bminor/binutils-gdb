@@ -1,3 +1,8 @@
+2015-03-03  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* plugin.cc (do_should_include_member): Ignore LDPK_UNDEF and
+	LDPK_WEAKUNDEF symbols.
+
 2015-03-03  Evgenii Stepanov  <eugenis@google.com>
 
 	* plugin.h (Pluginobj::get_symbol_resolution_info): Add version
