@@ -1,3 +1,12 @@
+2015-03-03  Evgenii Stepanov  <eugenis@google.com>
+
+	* plugin.h (Pluginobj::get_symbol_resolution_info): Add version
+	parameter.
+	* plugin.cc (get_symbols_v3): New function.
+	(Plugin::load): Add LDPT_GET_SYMBOLS_V3.
+	(Pluginobj::get_symbol_resolution_info): Return LDPS_NO_SYMS when using
+	new version.
+
 2016-02-26  Egor Kochetov  <egor.kochetov@intel.com>
 	    Cary Coutant  <ccoutant@gmail.com>
 

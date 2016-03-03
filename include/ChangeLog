@@ -1,3 +1,7 @@
+2015-03-03  Evgenii Stepanov  <eugenis@google.com>
+
+	* plugin-api.h (enum ld_plugin_tag): Add LDPT_GET_SYMBOLS_V3.
+
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19645

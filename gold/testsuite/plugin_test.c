@@ -57,6 +57,7 @@ static ld_plugin_register_cleanup register_cleanup_hook = NULL;
 static ld_plugin_add_symbols add_symbols = NULL;
 static ld_plugin_get_symbols get_symbols = NULL;
 static ld_plugin_get_symbols get_symbols_v2 = NULL;
+static ld_plugin_get_symbols get_symbols_v3 = NULL;
 static ld_plugin_add_input_file add_input_file = NULL;
 static ld_plugin_message message = NULL;
 static ld_plugin_get_input_file get_input_file = NULL;
@@ -123,6 +124,9 @@ onload(struct ld_plugin_tv *tv)
           break;
         case LDPT_GET_SYMBOLS_V2:
           get_symbols_v2 = entry->tv_u.tv_get_symbols;
+          break;
+        case LDPT_GET_SYMBOLS_V3:
+          get_symbols_v3 = entry->tv_u.tv_get_symbols;
           break;
         case LDPT_ADD_INPUT_FILE:
           add_input_file = entry->tv_u.tv_add_input_file;
@@ -420,9 +424,9 @@ all_symbols_read_hook(void)
 
   (*message)(LDPL_INFO, "all symbols read hook called");
 
-  if (get_symbols_v2 == NULL)
+  if (get_symbols_v3 == NULL)
     {
-      fprintf(stderr, "tv_get_symbols (v2) interface missing\n");
+      fprintf(stderr, "tv_get_symbols (v3) interface missing\n");
       return LDPS_ERR;
     }
 
@@ -430,8 +434,13 @@ all_symbols_read_hook(void)
        claimed_file != NULL;
        claimed_file = claimed_file->next)
     {
-      (*get_symbols_v2)(claimed_file->handle, claimed_file->nsyms,
-                     claimed_file->syms);
+      enum ld_plugin_status status = (*get_symbols_v3)(
+          claimed_file->handle, claimed_file->nsyms, claimed_file->syms);
+      if (status == LDPS_NO_SYMS)
+        {
+          (*message)(LDPL_INFO, "%s: no symbols", claimed_file->name);
+          continue;
+        }
 
       for (i = 0; i < claimed_file->nsyms; ++i)
         {

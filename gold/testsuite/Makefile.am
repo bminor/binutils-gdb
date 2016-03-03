@@ -2021,6 +2021,22 @@ plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 	rm -f $@
 	$(TEST_AR) crT $@ $^
 
+
+check_PROGRAMS += plugin_test_start_lib
+check_SCRIPTS += plugin_test_start_lib.sh
+check_DATA += plugin_test_start_lib.err
+MOSTLYCLEANFILES += plugin_test_start_lib.err
+plugin_test_start_lib: unused.o plugin_start_lib_test.o plugin_start_lib_test_2.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_start_lib_test.o \
+		-Wl,--start-lib plugin_start_lib_test_2.syms -Wl,--end-lib 2>plugin_test_start_lib.err
+plugin_test_start_lib.err: plugin_test_start_lib
+	@touch plugin_test_start_lib.err
+
+
+plugin_start_lib_test_2.syms: plugin_start_lib_test_2.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+
+
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c
