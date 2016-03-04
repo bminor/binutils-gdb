@@ -14,7 +14,7 @@
 	(ld_plugin_tv): Add tv_get_input_section_alignment and
 	tv_get_input_section_size.
 
-2015-03-03  Evgenii Stepanov  <eugenis@google.com>
+2016-03-03  Evgenii Stepanov  <eugenis@google.com>
 
 	* plugin-api.h (enum ld_plugin_tag): Add LDPT_GET_SYMBOLS_V3.
 
