@@ -1172,9 +1172,12 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   newdef = !bfd_is_und_section (sec) && !bfd_is_com_section (sec);
 
+  /* The old common symbol in executable is a definition if the new
+     definition comes from a shared library.  */
   olddef = (h->root.type != bfd_link_hash_undefined
 	    && h->root.type != bfd_link_hash_undefweak
-	    && h->root.type != bfd_link_hash_common);
+	    && (h->root.type != bfd_link_hash_common
+		|| (!olddyn && newdyn && bfd_link_executable (info))));
 
   /* NEWFUNC and OLDFUNC indicate whether the new or old symbol,
      respectively, appear to be a function.  */

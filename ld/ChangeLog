@@ -1,3 +1,10 @@
+2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	* testsuite/ld-elf/pr19579a.c: New file.
+	* testsuite/ld-elf/pr19579b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/19579 test.
+
 2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr19162.d: Skip hppa-*-*.

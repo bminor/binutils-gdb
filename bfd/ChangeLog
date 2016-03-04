@@ -1,3 +1,10 @@
+2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	* elflink.c (_bfd_elf_merge_symbol): Treat common symbol in
+	executable as definition if the new definition comes from a
+	shared library.
+
 2016-03-02  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
