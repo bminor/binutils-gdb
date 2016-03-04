@@ -9884,11 +9884,6 @@ arm_record_extension_space (insn_decode_record *arm_insn_r)
                 {
                   /* SPSR is going to be changed.  */
                   /* We need to get SPSR value, which is yet to be done.  */
-                  printf_unfiltered (_("Process record does not support "
-                                     "instruction  0x%0x at address %s.\n"),
-                                     arm_insn_r->arm_insn,
-                                     paddress (arm_insn_r->gdbarch, 
-                                     arm_insn_r->this_addr));
                   return -1;
                 }
             }
@@ -9929,10 +9924,6 @@ arm_record_extension_space (insn_decode_record *arm_insn_r)
               arm_insn_r->reg_rec_count = 2;
 
               /* Save SPSR also;how?  */
-              printf_unfiltered (_("Process record does not support "
-                                  "instruction 0x%0x at address %s.\n"),
-                                  arm_insn_r->arm_insn,
-                  paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
               return -1;
             }
           else if(8 == bits (arm_insn_r->arm_insn, 4, 7) 
@@ -9978,11 +9969,6 @@ arm_record_extension_space (insn_decode_record *arm_insn_r)
             {
               /* SPSR is going to be changed.  */
               /* we need to get SPSR value, which is yet to be done  */
-              printf_unfiltered (_("Process record does not support "
-                                   "instruction 0x%0x at address %s.\n"),
-                                    arm_insn_r->arm_insn,
-                                    paddress (arm_insn_r->gdbarch, 
-                                    arm_insn_r->this_addr));
               return -1;
             }
         }
@@ -10059,10 +10045,7 @@ arm_record_extension_space (insn_decode_record *arm_insn_r)
 
   /* To be done for ARMv5 and later; as of now we return -1.  */
   if (-1 == ret)
-    printf_unfiltered (_("Process record does not support instruction x%0x "
-                         "at address %s.\n"),arm_insn_r->arm_insn,
-                         paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
-
+    return ret;
 
   REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
   MEM_ALLOC (arm_insn_r->arm_mems, arm_insn_r->mem_rec_count, record_buf_mem);
@@ -10148,10 +10131,6 @@ arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
         {
           /* SPSR is going to be changed.  */
           /* How to read SPSR value?  */
-          printf_unfiltered (_("Process record does not support instruction "
-                            "0x%0x at address %s.\n"),
-                            arm_insn_r->arm_insn,
-                        paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
           return -1;
         }
     }
@@ -10207,10 +10186,6 @@ arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
       arm_insn_r->reg_rec_count = 2;
 
       /* Save SPSR also; how?  */
-      printf_unfiltered (_("Process record does not support instruction "
-                           "0x%0x at address %s.\n"),arm_insn_r->arm_insn,
-                           paddress (arm_insn_r->gdbarch, 
-                           arm_insn_r->this_addr));
       return -1;
     }
   else if (11 == arm_insn_r->decode
@@ -12720,12 +12695,19 @@ decode_insn (insn_decode_record *arm_record, record_type_t record_type,
     {
       arm_record->cond = bits (arm_record->arm_insn, 28, 31);
       insn_id = bits (arm_record->arm_insn, 25, 27);
-      ret = arm_record_extension_space (arm_record);
-      /* If this insn has fallen into extension space
-	 then we need not decode it anymore.  */
-      if (ret != -1 && !INSN_RECORDED(arm_record))
+
+      if (arm_record->cond == 0xf)
+	ret = arm_record_extension_space (arm_record);
+      else
 	{
+	  /* If this insn has fallen into extension space
+	     then we need not decode it anymore.  */
 	  ret = arm_handle_insn[insn_id] (arm_record);
+	}
+      if (ret != ARM_RECORD_SUCCESS)
+	{
+	  arm_record_unsupported_insn (arm_record);
+	  ret = -1;
 	}
     }
   else if (THUMB_RECORD == record_type)
@@ -12734,6 +12716,11 @@ decode_insn (insn_decode_record *arm_record, record_type_t record_type,
       arm_record->cond = -1;
       insn_id = bits (arm_record->arm_insn, 13, 15);
       ret = thumb_handle_insn[insn_id] (arm_record);
+      if (ret != ARM_RECORD_SUCCESS)
+	{
+	  arm_record_unsupported_insn (arm_record);
+	  ret = -1;
+	}
     }
   else if (THUMB2_RECORD == record_type)
     {
@@ -12744,9 +12731,9 @@ decode_insn (insn_decode_record *arm_record, record_type_t record_type,
       arm_record->arm_insn
 	= (arm_record->arm_insn >> 16) | (arm_record->arm_insn << 16);
 
-      insn_id = thumb2_record_decode_insn_handler (arm_record);
+      ret = thumb2_record_decode_insn_handler (arm_record);
 
-      if (insn_id != ARM_RECORD_SUCCESS)
+      if (ret != ARM_RECORD_SUCCESS)
 	{
 	  arm_record_unsupported_insn (arm_record);
 	  ret = -1;

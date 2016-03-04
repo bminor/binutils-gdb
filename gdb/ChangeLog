@@ -1,3 +1,13 @@
+2016-03-04  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_record_extension_space): Remove code
+	printing "Process record does not support".
+	(arm_record_data_proc_misc_ld_str): Likewise.
+	(decode_insn): Call arm_record_extension_space if condition
+	is 0xf.  Call arm_record_unsupported_insn if ret isn't
+	ARM_RECORD_SUCCESS.  Use 'ret' instead of 'insn_id' to hold
+	the value of thumb2_record_decode_insn_handler.
+
 2016-03-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* features/feature_to_c.sh: Print the help when passing no
