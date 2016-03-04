@@ -25,7 +25,7 @@
 2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19739
-	* ld/emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
 	merge flags of other input sections for relocatable link.
 
 2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
