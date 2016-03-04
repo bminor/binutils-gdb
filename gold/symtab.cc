@@ -3817,6 +3817,21 @@ Sized_symbol<32>::init_output_data(const char* name, const char* version,
 				   unsigned char nonvis,
 				   bool offset_is_from_end,
 				   bool is_predefined);
+
+template
+void
+Sized_symbol<32>::init_constant(const char* name, const char* version,
+				Value_type value, Size_type symsize,
+				elfcpp::STT type, elfcpp::STB binding,
+				elfcpp::STV visibility, unsigned char nonvis,
+				bool is_predefined);
+
+template
+void
+Sized_symbol<32>::init_undefined(const char* name, const char* version,
+				 Value_type value, elfcpp::STT type,
+				 elfcpp::STB binding, elfcpp::STV visibility,
+				 unsigned char nonvis);
 #endif
 
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
@@ -3830,6 +3845,21 @@ Sized_symbol<64>::init_output_data(const char* name, const char* version,
 				   unsigned char nonvis,
 				   bool offset_is_from_end,
 				   bool is_predefined);
+
+template
+void
+Sized_symbol<64>::init_constant(const char* name, const char* version,
+				Value_type value, Size_type symsize,
+				elfcpp::STT type, elfcpp::STB binding,
+				elfcpp::STV visibility, unsigned char nonvis,
+				bool is_predefined);
+
+template
+void
+Sized_symbol<64>::init_undefined(const char* name, const char* version,
+				 Value_type value, elfcpp::STT type,
+				 elfcpp::STB binding, elfcpp::STV visibility,
+				 unsigned char nonvis);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE
