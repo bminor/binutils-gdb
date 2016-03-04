@@ -1,3 +1,8 @@
+2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (ARM_ARCH_V8_1A): Add FPU_NEON_EXT_RDMA.
+	(ARM_CPU_HAS_FEATURE): Add comment.
+
 2015-03-03  Evgenii Stepanov  <eugenis@google.com>
 
 	* plugin-api.h (enum ld_plugin_tag): Add LDPT_GET_SYMBOLS_V3.

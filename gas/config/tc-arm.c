@@ -271,7 +271,7 @@ static const arm_feature_set fpu_crypto_ext_armv8 =
 static const arm_feature_set crc_ext_armv8 =
   ARM_FEATURE_COPROC (CRC_EXT_ARMV8);
 static const arm_feature_set fpu_neon_ext_v8_1 =
-  ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8 | FPU_NEON_EXT_RDMA);
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -6085,6 +6085,16 @@ parse_cond (char **str)
   return c->value;
 }
 
+/* Record a use of the given feature.  */
+static void
+record_feature_use (const arm_feature_set *feature)
+{
+  if (thumb_mode)
+    ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, *feature);
+  else
+    ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, *feature);
+}
+
 /* If the given feature available in the selected CPU, mark it as used.
    Returns TRUE iff feature is available.  */
 static bfd_boolean
@@ -6096,10 +6106,7 @@ mark_feature_used (const arm_feature_set *feature)
 
   /* Add the appropriate architecture feature for the barrier option used.
      */
-  if (thumb_mode)
-    ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, *feature);
-  else
-    ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, *feature);
+  record_feature_use (feature);
 
   return TRUE;
 }
@@ -15023,6 +15030,38 @@ do_neon_qdmulh (void)
 }
 
 static void
+do_neon_qrdmlah (void)
+{
+  /* Check we're on the correct architecture.  */
+  if (!mark_feature_used (&fpu_neon_ext_armv8))
+    inst.error =
+      _("instruction form not available on this architecture.");
+  else if (!mark_feature_used (&fpu_neon_ext_v8_1))
+    {
+      as_warn (_("this instruction implies use of ARMv8.1 AdvSIMD."));
+      record_feature_use (&fpu_neon_ext_v8_1);
+    }
+
+  if (inst.operands[2].isscalar)
+    {
+      enum neon_shape rs = neon_select_shape (NS_DDS, NS_QQS, NS_NULL);
+      struct neon_type_el et = neon_check_type (3, rs,
+	N_EQK, N_EQK, N_S16 | N_S32 | N_KEY);
+      NEON_ENCODE (SCALAR, inst);
+      neon_mul_mac (et, neon_quad (rs));
+    }
+  else
+    {
+      enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+      struct neon_type_el et = neon_check_type (3, rs,
+	N_EQK, N_EQK, N_S16 | N_S32 | N_KEY);
+      NEON_ENCODE (INTEGER, inst);
+      /* The U bit (rounding) comes from bit mask.  */
+      neon_three_same (neon_quad (rs), 0, et.size);
+    }
+}
+
+static void
 do_neon_fcmp_absolute (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
@@ -20311,10 +20350,10 @@ static const struct asm_opcode insns[] =
  NUF(vrsqrts,   0200f10,  3, (RNDQ, oRNDQ, RNDQ), neon_step),
  NUF(vrsqrtsq,  0200f10,  3, (RNQ,  oRNQ,  RNQ),  neon_step),
  /* ARM v8.1 extension.  */
- nUF(vqrdmlah,  _vqrdmlah, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
- nUF(vqrdmlahq, _vqrdmlah, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
- nUF(vqrdmlsh,  _vqrdmlsh, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
- nUF(vqrdmlshq, _vqrdmlsh, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
+ nUF (vqrdmlah,  _vqrdmlah, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qrdmlah),
+ nUF (vqrdmlahq, _vqrdmlah, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qrdmlah),
+ nUF (vqrdmlsh,  _vqrdmlsh, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qrdmlah),
+ nUF (vqrdmlshq, _vqrdmlsh, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qrdmlah),
 
   /* Two address, int/float. Types S8 S16 S32 F32.  */
  NUF(vabsq,     1b10300, 2, (RNQ,  RNQ),      neon_abs_neg),
@@ -25350,25 +25389,25 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
-  ARM_EXT_OPT ("simd",   FPU_ARCH_NEON_VFP_ARMV8,
-			ARM_FEATURE_COPROC (FPU_NEON_ARMV8),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("os",	ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6M)),
   ARM_EXT_OPT ("pan",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
 			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_PAN, 0),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("rdma",  FPU_ARCH_NEON_VFP_ARMV8_1,
+			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V7A)),
+  ARM_EXT_OPT ("simd",  FPU_ARCH_NEON_VFP_ARMV8,
+			ARM_FEATURE_COPROC (FPU_NEON_ARMV8),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("virt",	ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT | ARM_EXT_ADIV
 				     | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
-  ARM_EXT_OPT ("rdma",  FPU_ARCH_NEON_VFP_ARMV8,
-			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("xscale",ARM_FEATURE_COPROC (ARM_CEXT_XSCALE),
 			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ANY),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }

@@ -1,5 +1,5 @@
-#name: Valid v8-a+rdma
-#as: -march=armv8-a+rdma
+#name: Valid ARMv8.1-A with +simd
+#as: -march=armv8.1-a+simd
 #objdump: -dr
 #skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
 #source: armv8-a+rdma.s
@@ -76,4 +76,3 @@ Disassembly of section .text:
   f4:	efa1 0f62 	vqrdmlsh.s32	d0, d1, d2\[1\]
   f8:	ffa2 0f42 	vqrdmlsh.s32	q0, q1, d2\[0\]
   fc:	ffa2 0f62 	vqrdmlsh.s32	q0, q1, d2\[1\]
-

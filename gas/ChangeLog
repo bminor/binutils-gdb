@@ -1,3 +1,22 @@
+2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/gas/tc-arm.c (fpu_neon_ext_v8_1): Restrict to the ARMv8.1 RDMA
+	feature.
+	(record_feature_use): New.
+	(mark_feature_used): Use record_feature_use.
+	(do_neon_qrdmlah): New.
+	(insns): Use do_neon_qrdmlah for vqrdmlah and vqrdmlsh and
+	variants.
+	(arm_extensions): Put into alphabetical order.  Re-indent "simd"
+	and "rdma" entries.  Fix the incorrect merge value for "+rdma".
+	* testsuite/gas/arm/armv8-a+rdma-warning.d: New.
+	* testsuite/gas/arm/armv8-a+rdma.d: Add assembler command line options.
+	Make source file explicit.
+	* testsuite/gas/arm/armv8-a+rdma.l: New.
+	* testsuite/gas/arm/armv8-a+rdma.s: Remove .arch and .arch_extension
+	directives.  Fix white-space.
+	* testsuite/gas/arm/armv8_1-a+simd.d: New.
+
 2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/x86_64-intel.d: Adjusted for COFF.
