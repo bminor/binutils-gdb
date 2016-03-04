@@ -1,5 +1,12 @@
 2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* config/tc-arm.c (aeabi_set_public_attributes): Emit attribute
+	for ARMv8.1 AdvSIMD use.
+	* testsuite/gas/arm/attr-march-armv8-a+rdma.d: New.
+	* testsuite/gas/arm/attr-march-armv8_1-a+simd.d: New.
+
+2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* config/gas/tc-arm.c (fpu_neon_ext_v8_1): Restrict to the ARMv8.1 RDMA
 	feature.
 	(record_feature_use): New.

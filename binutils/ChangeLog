@@ -1,3 +1,7 @@
+2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* readelf.c (arm_attry_tag_FP_arch): Add "NEON for ARMv8.1".
+
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19645
