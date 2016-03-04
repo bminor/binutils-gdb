@@ -41,6 +41,18 @@
 	* plugin.cc (do_should_include_member): Ignore LDPK_UNDEF and
 	LDPK_WEAKUNDEF symbols.
 
+2016-03-03  Than McIntosh  <thanm@google.com>
+
+	* plugin.cc (Plugin::load): Include hooks for get_input_section_size
+	and get_input_section_alignment in transfer vector.
+	(get_input_section_alignment): New function.
+	(get_input_section_size): New function.
+	* testsuite/Makefile.am: Add plugin_layout_with_alignment.sh test.
+	* testsuite/Makefile.in: [Regenerate.]
+	* testsuite/plugin_section_alignment.cc: New test file.
+	* testsuite/plugin_layout_with_alignment.cc: New test file.
+	* testsuite/plugin_layout_with_alignment.sh: New test file.
+
 2015-03-03  Evgenii Stepanov  <eugenis@google.com>
 
 	* plugin.h (Pluginobj::get_symbol_resolution_info): Add version
