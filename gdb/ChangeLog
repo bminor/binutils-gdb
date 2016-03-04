@@ -1,5 +1,10 @@
 2016-03-04  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-tdep.c (arm_record_vdata_transfer_insn): Simplify the
+	condition check.  Record the right D register number.
+
+2016-03-04  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-tdep.c (arm_record_extension_space): Remove code
 	printing "Process record does not support".
 	(arm_record_data_proc_misc_ld_str): Likewise.

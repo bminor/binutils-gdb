@@ -10800,12 +10800,7 @@ arm_record_vdata_transfer_insn (insn_decode_record *arm_insn_r)
       /* Handle VMOV instruction.  */
       if (bits_a == 0x00)
         {
-          if (bit (arm_insn_r->arm_insn, 20))
-            record_buf[0] = reg_t;
-          else
-            record_buf[0] = num_regs + (bit (arm_insn_r->arm_insn, 7) |
-                            (reg_v << 1));
-
+	  record_buf[0] = reg_t;
           arm_insn_r->reg_rec_count = 1;
         }
       /* Handle VMRS instruction.  */
@@ -10823,11 +10818,7 @@ arm_record_vdata_transfer_insn (insn_decode_record *arm_insn_r)
       /* Handle VMOV instruction.  */
       if (bits_a == 0x00)
         {
-          if (bit (arm_insn_r->arm_insn, 20))
-            record_buf[0] = reg_t;
-          else
-            record_buf[0] = num_regs + (bit (arm_insn_r->arm_insn, 7) |
-                            (reg_v << 1));
+	  record_buf[0] = ARM_D0_REGNUM + reg_v;
 
           arm_insn_r->reg_rec_count = 1;
         }
