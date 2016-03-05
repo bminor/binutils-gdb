@@ -1,5 +1,10 @@
 2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* gdb.trace/change-loc.exp: Don't depend on tracepoint location
+	ordering.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* gdb.trace/unavailable-dwarf-piece.c (foo): Add foo_start_lbl label.
 	(bar): Add bar_start_lbl label.
 	* gdb.trace/unavailable-dwarf-piece.exp: Use foo/bar_start_lbl instead
