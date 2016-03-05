@@ -1,3 +1,10 @@
+2016-03-05  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* avr-tdep.c (AVR_LAST_ARG_REGNUM): Define.
+	(avr_push_dummy_call): Correct last needed argument register.
+	Write MSB of argument into register and subsequent bytes into
+	other registers in decreasing order.
+
 2016-03-04  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_record_vdata_transfer_insn): Simplify the
