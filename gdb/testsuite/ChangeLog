@@ -1,3 +1,10 @@
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/unavailable-dwarf-piece.c (foo): Add foo_start_lbl label.
+	(bar): Add bar_start_lbl label.
+	* gdb.trace/unavailable-dwarf-piece.exp: Use foo/bar_start_lbl instead
+	of foo/bar for emitting DWARF and tracing.
+
 2016-03-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* analyze-racy-logs.py: Set executable bit.
