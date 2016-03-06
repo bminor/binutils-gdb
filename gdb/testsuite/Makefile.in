@@ -52,6 +52,12 @@ RUNTESTFLAGS =
 
 FORCE_PARALLEL =
 
+# Default number of iterations that we will use to run the testsuite
+# if the user does not specify the RACY_ITER environment variable
+# (e.g., when the user calls the make rule directly from the command
+# line).
+DEFAULT_RACY_ITER = 3
+
 RUNTEST_FOR_TARGET = `\
   if [ -f $${srcdir}/../../dejagnu/runtest ]; then \
     echo $${srcdir}/../../dejagnu/runtest; \
@@ -140,7 +146,8 @@ installcheck:
 # given.  If RUNTESTFLAGS is not empty, then by default the tests will
 # be serialized.  This can be overridden by setting FORCE_PARALLEL to
 # any non-empty value.  For a non-GNU make, do not parallelize.
-@GMAKE_TRUE@CHECK_TARGET = $(if $(FORCE_PARALLEL),check-parallel,$(if $(RUNTESTFLAGS),check-single,$(if $(saw_dash_j),check-parallel,check-single)))
+@GMAKE_TRUE@CHECK_TARGET_TMP = $(if $(FORCE_PARALLEL),check-parallel,$(if $(RUNTESTFLAGS),check-single,$(if $(saw_dash_j),check-parallel,check-single)))
+@GMAKE_TRUE@CHECK_TARGET = $(if $(RACY_ITER),$(addsuffix -racy,$(CHECK_TARGET_TMP)),$(CHECK_TARGET_TMP))
 @GMAKE_FALSE@CHECK_TARGET = check-single
 
 # Note that we must resort to a recursive make invocation here,
@@ -190,6 +197,26 @@ DO_RUNTEST = \
 check-single:
 	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none)
 
+check-single-racy:
+	-rm -rf cache racy_outputs temp
+	mkdir -p racy_outputs; \
+	racyiter="$(RACY_ITER)"; \
+	test "x$$racyiter" == "x" && \
+	  racyiter=$(DEFAULT_RACY_ITER); \
+	if test $$racyiter -lt 2 ; then \
+	  echo "RACY_ITER must be at least 2."; \
+	  exit 1; \
+	fi; \
+	trap "exit" INT; \
+	for n in `seq $$racyiter` ; do \
+	  mkdir -p racy_outputs/$$n; \
+	  $(DO_RUNTEST) --outdir=racy_outputs/$$n $(RUNTESTFLAGS) \
+	    $(expanded_tests_or_none); \
+	done; \
+	$(srcdir)/analyze-racy-logs.py \
+	  `ls racy_outputs/*/gdb.sum` > racy.sum; \
+	sed -n '/=== gdb Summary ===/,$$ p' racy.sum
+
 check-parallel:
 	-rm -rf cache outputs temp
 	$(MAKE) -k do-check-parallel; \
@@ -200,6 +227,31 @@ check-parallel:
 	  `find outputs -name gdb.log -print` > gdb.log; \
 	sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
 	exit $$result
+
+check-parallel-racy:
+	-rm -rf cache racy_outputs temp
+	racyiter="$(RACY_ITER)"; \
+	test "x$$racyiter" == "x" && \
+	  racyiter=$(DEFAULT_RACY_ITER); \
+	if test $$racyiter -lt 2 ; then \
+	  echo "RACY_ITER must be at least 2."; \
+	  exit 1; \
+	fi; \
+	trap "exit" INT; \
+	for n in `seq $$racyiter` ; do \
+	  $(MAKE) -k do-check-parallel-racy \
+	    RACY_OUTPUT_N=$$n; \
+	  $(SHELL) $(srcdir)/dg-extract-results.sh \
+	    `find racy_outputs/$$n -name gdb.sum -print` > \
+	    racy_outputs/$$n/gdb.sum; \
+	  $(SHELL) $(srcdir)/dg-extract-results.sh -L \
+	    `find racy_outputs/$$n -name gdb.log -print` > \
+	    racy_outputs/$$n/gdb.log; \
+	  sed -n '/=== gdb Summary ===/,$$ p' racy_outputs/$$n/gdb.sum; \
+	done; \
+	$(srcdir)/analyze-racy-logs.py \
+	  `ls racy_outputs/*/gdb.sum` > racy.sum; \
+	sed -n '/=== gdb Summary ===/,$$ p' racy.sum
 
 # Turn a list of .exp files into "check/" targets.  Only examine .exp
 # files appearing in a gdb.* directory -- we don't want to pick up
@@ -214,9 +266,9 @@ slow_tests = gdb.base/break-interp.exp gdb.base/interp.exp \
 	gdb.base/multi-forks.exp
 @GMAKE_TRUE@all_tests := $(shell cd $(srcdir) && find gdb.* -name '*.exp' -print)
 @GMAKE_TRUE@reordered_tests := $(slow_tests) $(filter-out $(slow_tests),$(all_tests))
-@GMAKE_TRUE@TEST_TARGETS := $(addprefix check/,$(reordered_tests))
+@GMAKE_TRUE@TEST_TARGETS := $(addprefix $(if $(RACY_ITER),check-racy,check)/,$(reordered_tests))
 @GMAKE_TRUE@else
-@GMAKE_TRUE@TEST_TARGETS := $(addprefix check/,$(expanded_tests_or_none))
+@GMAKE_TRUE@TEST_TARGETS := $(addprefix $(if $(RACY_ITER),check-racy,check)/,$(expanded_tests_or_none))
 @GMAKE_TRUE@endif
 
 do-check-parallel: $(TEST_TARGETS)
@@ -225,6 +277,15 @@ do-check-parallel: $(TEST_TARGETS)
 @GMAKE_TRUE@check/%.exp:
 @GMAKE_TRUE@	-mkdir -p outputs/$*
 @GMAKE_TRUE@	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp $(RUNTESTFLAGS)
+
+do-check-parallel-racy: $(TEST_TARGETS)
+	@:
+
+@GMAKE_TRUE@check-racy/%.exp:
+@GMAKE_TRUE@	-mkdir -p racy_outputs/$(RACY_OUTPUT_N)/$*
+@GMAKE_TRUE@	$(DO_RUNTEST) GDB_PARALLEL=yes \
+@GMAKE_TRUE@	  --outdir=racy_outputs/$(RACY_OUTPUT_N)/$* $*.exp \
+@GMAKE_TRUE@	  $(RUNTESTFLAGS)
 
 check/no-matching-tests-found:
 	@echo ""

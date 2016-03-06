@@ -1,3 +1,15 @@
+2016-03-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (DEFAULT_RACY_ITER): New variable.
+	(CHECK_TARGET_TMP): Likewise.
+	(check-single-racy): New rule.
+	(check-parallel-racy): Likewise.
+	(TEST_TARGETS): Adjust rule to account for RACY_ITER.
+	(do-check-parallel-racy): New rule.
+	(check-racy/%.exp): Likewise.
+	* README (Racy testcases): New section.
+	* analyze-racy-logs.py: New file.
+
 2016-03-03  Doug Evans  <dje@google.com>
 
 	* gdb.base/skip.exp: Use with_test_prefix.
