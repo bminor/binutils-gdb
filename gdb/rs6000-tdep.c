@@ -3336,10 +3336,10 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (!fdata.frameless)
     {
       /* Frameless really means stackless.  */
-      LONGEST backchain;
+      ULONGEST backchain;
 
-      if (safe_read_memory_integer (cache->base, wordsize,
-				    byte_order, &backchain))
+      if (safe_read_memory_unsigned_integer (cache->base, wordsize,
+					     byte_order, &backchain))
         cache->base = (CORE_ADDR) backchain;
     }
 

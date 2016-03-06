@@ -1,5 +1,11 @@
 2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* corefile.c (safe_read_memory_unsigned_integer): New function.
+	* gdbcore.h (safe_read_memory_unsigned_integer): New prototype.
+	* rs6000-tdep.c (rs6000_frame_cache): Read backchain as unsigned.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* rs6000-tdep.c: Add "ax.h" and "ax-gdb.h" includes.
 	(rs6000_gen_return_address): New function.
 	(rs6000_gdbarch_init): Wire in the above.
