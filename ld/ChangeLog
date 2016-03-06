@@ -17,6 +17,12 @@
 	* testsuite/ld-x86-64/x86-64.exp: Link tmpdir/pr18900.o before
 	tmpdir/pr18900.so and test --as-needed.
 
+	2016-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Link tmpdir/copyreloc-main.o
+	before tmpdir/copyreloc-lib.so and test --as-needed.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
