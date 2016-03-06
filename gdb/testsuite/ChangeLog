@@ -1,3 +1,7 @@
+2016-03-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* analyze-racy-logs.py: Set executable bit.
+
 2016-03-05  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (DEFAULT_RACY_ITER): New variable.
