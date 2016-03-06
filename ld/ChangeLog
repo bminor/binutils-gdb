@@ -1,3 +1,9 @@
+2016-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Link tmpdir/copyreloc-main.o
+	before tmpdir/copyreloc-lib.so and test --as-needed.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19579

@@ -514,18 +514,26 @@ if { [isnative]
 	    "copyreloc-lib.so" \
 	] \
 	[list \
-	    "Build copyreloc-main with PIE and GOTOFF (1)" \
-	    "tmpdir/copyreloc-lib.so -pie" \
+	    "Build libcopyreloc-main.a" \
+	    "" \
 	    "" \
 	    { copyreloc-main.S } \
+	    {} \
+	    "libcopyreloc-main.a" \
+	] \
+	[list \
+	    "Build copyreloc-main with PIE and GOTOFF (1)" \
+	    "tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { dummy.s } \
 	    {{readelf {-Wr} copyreloc-main1.rd}} \
 	    "copyreloc-main" \
 	] \
 	[list \
 	    "Build copyreloc-main with PIE and GOTOFF (2)" \
-	    "tmpdir/copyreloc-lib.so -pie" \
+	    "tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
 	    "" \
-	    { copyreloc-main.S } \
+	    { dummy.s } \
 	    {{readelf {-Wr} copyreloc-main2.rd}} \
 	    "copyreloc-main" \
 	] \
@@ -681,9 +689,9 @@ if { [isnative]
 	] \
 	[list \
 	    "Run copyreloc-main with PIE and GOTOFF" \
-	    "tmpdir/copyreloc-lib.so -pie" \
+	    "--as-needed tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
 	    "" \
-	    { copyreloc-main.S } \
+	    { dummy.s } \
 	    "copyreloc-main" \
 	    "copyreloc-main.out" \
 	] \
