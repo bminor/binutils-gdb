@@ -1,3 +1,9 @@
+2016-03-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/19775
+	* archive.c (bfd_generic_openr_next_archived_file): Allow zero
+	length elements in the archive.
+
 2016-03-07  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Always create .got

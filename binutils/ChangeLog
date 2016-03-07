@@ -1,3 +1,10 @@
+2016-03-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/19775
+	* testsuite/binutils-all/ar.exp (proc empty_archive): New proc.
+	Run the new proc.
+	* testsuite/binutils-all/empty: New, empty, file.
+
 2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* readelf.c (arm_attry_tag_FP_arch): Add "NEON for ARMv8.1".
