@@ -1,3 +1,8 @@
+2016-03-07  Pedro Alves  <palves@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Check whether info.abfd is NULL
+	before calling bfd_get_flavour.
+
 2016-03-05  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
 
 	* avr-tdep.c (AVR_LAST_ARG_REGNUM): Define.
