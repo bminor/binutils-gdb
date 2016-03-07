@@ -643,18 +643,26 @@ if { [isnative] && [which $CC] != 0 } {
 	    "pr18900.so" \
 	] \
 	[list \
-	    "Build pr18900a" \
-	    "tmpdir/pr18900.so" \
+	    "Build pr18900.o" \
+	    "-r -nostdlib" \
 	    "" \
 	    { pr18900b.c pr18900c.c } \
+	    "" \
+	    "pr18900.o" \
+	] \
+	[list \
+	    "Build pr18900a" \
+	    "tmpdir/pr18900.o tmpdir/pr18900.so" \
+	    "" \
+	    { dummy.s } \
 	    {{readelf {-Wrd} pr18900a.rd}} \
 	    "pr18900a" \
 	] \
 	[list \
 	    "Build pr18900b" \
-	    "tmpdir/pr18900.so" \
+	    "-Wl,--as-needed tmpdir/pr18900.o tmpdir/pr18900.so" \
 	    "" \
-	    { pr18900b.c pr18900c.c } \
+	    { dummy.s } \
 	    {{readelf {-Wrd} pr18900b.rd}} \
 	    "pr18900b" \
 	] \
@@ -746,9 +754,9 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run pr18900" \
-	    "tmpdir/pr18900.so" \
+	    "tmpdir/pr18900.o tmpdir/pr18900.so" \
 	    "" \
-	    { pr18900b.c pr18900c.c } \
+	    { dummy.s } \
 	    "pr18900" \
 	    "pr18900.out" \
 	] \
