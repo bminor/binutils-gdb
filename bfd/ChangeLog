@@ -1,3 +1,8 @@
+2016-03-07  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Always create .got
+	section if the symbol "_GLOBAL_OFFSET_TABLE_" is referenced.
+
 2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19579

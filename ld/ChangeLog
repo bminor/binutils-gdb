@@ -1,3 +1,10 @@
+2016-03-07  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/implicit_got_section_1.s: New test source file.
+	* testsuite/ld-aarch64/implicit_got_section_1.d: New test expected
+	result.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new test.
+
 2016-03-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Link tmpdir/copyreloc-main.o
