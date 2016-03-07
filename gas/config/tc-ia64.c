@@ -3521,7 +3521,7 @@ dot_restorereg (int pred)
   add_unwind_entry (output_spill_reg (ab, reg, 0, 0, qp), sep);
 }
 
-static char *special_linkonce_name[] =
+static const char *special_linkonce_name[] =
   {
     ".gnu.linkonce.ia64unw.", ".gnu.linkonce.ia64unwi."
   };
@@ -5007,7 +5007,7 @@ static void
 print_prmask (valueT mask)
 {
   int regno;
-  char *comma = "";
+  const char *comma = "";
   for (regno = 0; regno < 64; regno++)
     {
       if (mask & ((valueT) 1 << regno))

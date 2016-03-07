@@ -266,7 +266,7 @@ md_begin (void)
     {
       struct h8_opcode *first_skipped = 0;
       int len, cmplen = 0;
-      char *src = p1->name;
+      const char *src = p1->name;
       char *dst, *buffer;
 
       if (p1->name == 0)

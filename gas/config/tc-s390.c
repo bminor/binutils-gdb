@@ -33,7 +33,7 @@
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "s390"
 #endif
-static char *default_arch = DEFAULT_ARCH;
+static const char *default_arch = DEFAULT_ARCH;
 /* Either 32 or 64, selects file format.  */
 static int s390_arch_size = 0;
 
@@ -705,7 +705,7 @@ s390_insert_operand (unsigned char *insn,
 
 struct map_tls
   {
-    char *string;
+    const char *string;
     int length;
     bfd_reloc_code_real_type reloc;
   };
@@ -780,7 +780,7 @@ elf_suffix_type;
 
 struct map_bfd
   {
-    char *string;
+    const char *string;
     int length;
     elf_suffix_type suffix;
   };

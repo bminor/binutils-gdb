@@ -69,38 +69,18 @@ epiphany_elf_section_rtn (int i)
 
   if (force_code_align)
     {
-      /* The s_align_ptwo function expects that we are just after a .align
-	 directive and it will either try and read the align value or stop
-	 if end of line so we must fake it out so it thinks we are at the
-	 end of the line.  */
-      char *old_input_line_pointer = input_line_pointer;
-
-      input_line_pointer = "\n";
-      s_align_ptwo (1);
+      do_align (1, NULL, 0, 0);
       force_code_align = FALSE;
-
-      /* Restore.  */
-      input_line_pointer = old_input_line_pointer;
     }
 }
 
 static void
 epiphany_elf_section_text (int i)
 {
-  char *old_input_line_pointer;
-
   obj_elf_text (i);
 
-  /* The s_align_ptwo function expects that we are just after a .align
-     directive and it will either try and read the align value or stop if
-     end of line so we must fake it out so it thinks we are at the end of
-     the line.  */
-  old_input_line_pointer = input_line_pointer;
-  input_line_pointer = "\n";
-  s_align_ptwo (1);
+  do_align (1, NULL, 0, 0);
   force_code_align = FALSE;
-  /* Restore.  */
-  input_line_pointer = old_input_line_pointer;
 }
 
 /* The target specific pseudo-ops which we support.  */
@@ -405,71 +385,16 @@ parse_reglist (const char * s, int * mask)
 }
 
 
-void
-md_assemble (char *str)
-{
+/* Assemble an instruction,  push and pop pseudo instructions should have
+   already been expanded.  */
+
+static void
+epiphany_assemble (const char *str)
+    {
   epiphany_insn insn;
   char *errmsg = 0;
-  const char * pperr = 0;
-  int regmask=0, push=0, pop=0;
 
   memset (&insn, 0, sizeof (insn));
-
-  /* Special-case push/pop instruction macros.  */
-  if (0 == strncmp (str, "push {", 6))
-    {
-      char * s = str + 6;
-      push = 1;
-      pperr = parse_reglist (s, &regmask);
-    }
-  else if (0 == strncmp (str, "pop {", 5))
-    {
-      char * s = str + 5;
-      pop = 1;
-      pperr = parse_reglist (s, &regmask);
-    }
-
-  if (pperr)
-    {
-      as_bad ("%s", pperr);
-      return;
-    }
-
-  if (push && regmask)
-    {
-      char buff[20];
-      int i,p ATTRIBUTE_UNUSED;
-
-      md_assemble ("mov r15,4");
-      md_assemble ("sub sp,sp,r15");
-
-      for (i = 0, p = 1; i <= 15; ++i, regmask >>= 1)
-	{
-	  if (regmask == 1)
-	    sprintf (buff, "str r%d,[sp]", i); /* Last one.  */
-	  else if (regmask & 1)
-	    sprintf (buff, "str r%d,[sp],-r15", i);
-	  else
-	    continue;
-	  md_assemble (buff);
-	}
-      return;
-    }
-  else if (pop && regmask)
-    {
-      char buff[20];
-      int i,p;
-
-      md_assemble ("mov r15,4");
-
-      for (i = 15, p = 1 << 15; i >= 0; --i, p >>= 1)
-	if (regmask & p)
-	  {
-	    sprintf (buff, "ldr r%d,[sp],+r15", i);
-	    md_assemble (buff);
-	  }
-      return;
-    }
 
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
@@ -594,6 +519,71 @@ md_assemble (char *str)
     default:
       break;
     }
+}
+
+void
+md_assemble (char *str)
+{
+  const char * pperr = 0;
+  int regmask=0, push=0, pop=0;
+
+  /* Special-case push/pop instruction macros.  */
+  if (0 == strncmp (str, "push {", 6))
+    {
+      char * s = str + 6;
+      push = 1;
+      pperr = parse_reglist (s, &regmask);
+    }
+  else if (0 == strncmp (str, "pop {", 5))
+    {
+      char * s = str + 5;
+      pop = 1;
+      pperr = parse_reglist (s, &regmask);
+    }
+
+  if (pperr)
+    {
+      as_bad ("%s", pperr);
+      return;
+    }
+
+  if (push && regmask)
+    {
+      char buff[20];
+      int i,p ATTRIBUTE_UNUSED;
+
+      epiphany_assemble ("mov r15,4");
+      epiphany_assemble ("sub sp,sp,r15");
+
+      for (i = 0, p = 1; i <= 15; ++i, regmask >>= 1)
+	{
+	  if (regmask == 1)
+	    sprintf (buff, "str r%d,[sp]", i); /* Last one.  */
+	  else if (regmask & 1)
+	    sprintf (buff, "str r%d,[sp],-r15", i);
+	  else
+	    continue;
+	  epiphany_assemble (buff);
+	}
+      return;
+    }
+  else if (pop && regmask)
+    {
+      char buff[20];
+      int i,p;
+
+      epiphany_assemble ("mov r15,4");
+
+      for (i = 15, p = 1 << 15; i >= 0; --i, p >>= 1)
+	if (regmask & p)
+	  {
+	    sprintf (buff, "ldr r%d,[sp],+r15", i);
+	    epiphany_assemble (buff);
+	  }
+      return;
+    }
+
+  epiphany_assemble (str);
 }
 
 /* The syntax in the manual says constants begin with '#'.

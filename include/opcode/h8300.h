@@ -261,7 +261,7 @@ struct h8_opcode
   int how;
   enum h8_model available;
   int time;
-  char *name;
+  const char *name;
   struct arg args;
   struct code data;
 };

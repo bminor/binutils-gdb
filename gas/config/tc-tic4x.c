@@ -618,7 +618,7 @@ tic4x_atof (char *str, char what_kind, LITTLENUM_TYPE *words)
 }
 
 static void
-tic4x_insert_reg (char *regname, int regnum)
+tic4x_insert_reg (const char *regname, int regnum)
 {
   char buf[32];
   int i;
@@ -634,7 +634,7 @@ tic4x_insert_reg (char *regname, int regnum)
 }
 
 static void
-tic4x_insert_sym (char *symname, int value)
+tic4x_insert_sym (const char *symname, int value)
 {
   symbolS *symbolP;
 
@@ -1239,7 +1239,7 @@ tic4x_inst_insert (const tic4x_inst_t *inst)
 
 /* Make a new instruction template.  */
 static tic4x_inst_t *
-tic4x_inst_make (char *name, unsigned long opcode, char *args)
+tic4x_inst_make (const char *name, unsigned long opcode, char *args)
 {
   static tic4x_inst_t *insts = NULL;
   static char *names = NULL;
@@ -1271,7 +1271,7 @@ tic4x_inst_make (char *name, unsigned long opcode, char *args)
 static int
 tic4x_inst_add (const tic4x_inst_t *insts)
 {
-  char *s = insts->name;
+  const char *s = insts->name;
   char *d;
   unsigned int i;
   int ok = 1;
@@ -1295,7 +1295,7 @@ tic4x_inst_add (const tic4x_inst_t *insts)
 	    {
 	      tic4x_inst_t *inst;
 	      int k = 0;
-	      char *c = tic4x_conds[i].name;
+	      const char *c = tic4x_conds[i].name;
 	      char *e = d;
 
 	      while (*c)
@@ -1407,7 +1407,7 @@ static int
 tic4x_indirect_parse (tic4x_operand_t *operand,
 		      const tic4x_indirect_t *indirect)
 {
-  char *n = indirect->name;
+  const char *n = indirect->name;
   char *s = input_line_pointer;
   char *b;
   symbolS *symbolP;

@@ -1,3 +1,35 @@
+2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-arc.c: Add const qualifiers.
+	* config/tc-h8300.c (md_begin): Likewise.
+	* config/tc-ia64.c (print_prmask): Likewise.
+	* config/tc-msp430.c (msp430_operands): Likewise.
+	* config/tc-nds32.c (struct suffix_name): Likewise.
+	(struct nds32_parse_option_table): Likewise.
+	(struct nds32_set_option_table): Likewise.
+	(do_pseudo_pushpopm): Likewise.
+	(do_pseudo_pushpop_stack): Likewise.
+	(nds32_relax_relocs): Likewise.
+	(nds32_flag): Likewise.
+	(struct nds32_hint_map): Likewise.
+	(nds32_find_reloc_table): Likewise.
+	(nds32_match_hint_insn): Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sh.c (get_specific): Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic4x.c (tic4x_inst_add): Likewise.
+	(tic4x_indirect_parse): Likewise.
+	* config/tc-vax.c (vax_cons): Likewise.
+	* config/tc-z80.c (struct reg_entry): Likewise.
+	* config/tc-epiphany.c (md_assemble): Adjust.
+	(epiphany_assemble): New function.
+	(epiphany_elf_section_rtn): Call do_align directly.
+	(epiphany_elf_section_text): Likewise.
+	* config/tc-ip2k.c (ip2k_elf_section_rtn): Likewise.
+	(ip2k_elf_section_text): Likewise.
+	* read.c (do_align): Make it not static.
+	* read.h (do_align): New prototype.
+
 2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (aeabi_set_public_attributes): Emit attribute

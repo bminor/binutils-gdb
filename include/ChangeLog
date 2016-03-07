@@ -1,3 +1,17 @@
+2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* opcode/dlx.h (struct dlx_opcode): Add const qualifiers.
+	* opcode/h8300.h (struct h8_opcode): Likewise.
+	* opcode/hppa.h (struct pa_opcode): Likewise.
+	* opcode/msp430.h: Likewise.
+	* opcode/spu.h (struct spu_opcode): Likewise.
+	* opcode/tic30.h (struct _register): Likewise.
+	* opcode/tic4x.h (struct tic4x_register): Likewise.
+	(struct tic4x_cond): Likewise.
+	(struct tic4x_indirect): Likewise.
+	(struct tic4x_inst): Likewise.
+	* opcode/visium.h (struct reg_entry): Likewise.
+
 2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* arm.h (ARM_ARCH_V8_1A): Add FPU_NEON_EXT_RDMA.

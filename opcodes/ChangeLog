@@ -1,3 +1,11 @@
+2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* mcore-opc.h: Add const qualifiers.
+	* microblaze-opc.h (struct op_code_struct): Likewise.
+	* sh-opc.h: Likewise.
+	* tic4x-dis.c (tic4x_print_indirect): Likewise.
+	(tic4x_print_op): Likewise.
+
 2016-03-02  Alan Modra  <amodra@gmail.com>
 
 	* or1k-desc.h: Regenerate.

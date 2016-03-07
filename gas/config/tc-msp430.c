@@ -2542,7 +2542,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
      support it for compatibility purposes.  */
   if (addr_op && opcode->fmt >= 0)
     {
-      char * old_name = opcode->name;
+      const char * old_name = opcode->name;
       char real_name[32];
 
       sprintf (real_name, "%sa", old_name);
