@@ -1,3 +1,14 @@
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+            Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* output.cc (Output_reloc_writer): New type.
+	(Output_data_reloc_base::do_write): Move implementation to template
+	in output.h and replace with invocation of template.
+	* output.h (Output_file): Move to top of file.
+	(Output_reloc::get_symbol_index): Move to public interface.
+	(Output_reloc::get_address): Likewise.
+	(Output_data_reloc_base::do_write_generic): New function template.
+
 2016-03-04  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/19019
