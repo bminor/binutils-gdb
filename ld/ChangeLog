@@ -1,3 +1,11 @@
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19774
+	* testsuite/ld-ifunc/ifunc.exp: Link tmpdir/pr18808a.o before
+	tmpdir/libpr18808.so.  Link tmpdir/pr18841a.o before
+	tmpdir/libpr18841b.so and tmpdir/libpr18841c.so.  Test
+	--as-needed for pr18841c.
+
 2016-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19774
