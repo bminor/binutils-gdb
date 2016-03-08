@@ -1,5 +1,10 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* cris-tdep.c (cris_gdbarch_init): Return 0 if the info's byte
+	order is BFD_ENDIAN_BIG or if the cris version is unsupported.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* doublest.c: Extend comments.
 	(floatformat_to_doublest, floatformat_from_doublest): Copy the
 	floatformat's total size, not the host type's size.
