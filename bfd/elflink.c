@@ -1172,12 +1172,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   newdef = !bfd_is_und_section (sec) && !bfd_is_com_section (sec);
 
-  /* The old common symbol in executable is a definition if the new
-     definition comes from a shared library.  */
   olddef = (h->root.type != bfd_link_hash_undefined
 	    && h->root.type != bfd_link_hash_undefweak
-	    && (h->root.type != bfd_link_hash_common
-		|| (!olddyn && newdyn && bfd_link_executable (info))));
+	    && h->root.type != bfd_link_hash_common);
 
   /* NEWFUNC and OLDFUNC indicate whether the new or old symbol,
      respectively, appear to be a function.  */
@@ -1489,13 +1486,16 @@ _bfd_elf_merge_symbol (bfd *abfd,
      represent variables; this can cause confusion in principle, but
      any such confusion would seem to indicate an erroneous program or
      shared library.  We also permit a common symbol in a regular
-     object to override a weak symbol in a shared object.  */
+     object to override a weak symbol in a shared object.  A common
+     symbol in executable also overrides a symbol in a shared object.  */
 
   if (newdyn
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
-	      && (newweak || newfunc))))
+	      && (newweak
+		  || newfunc
+		  || (!olddyn && bfd_link_executable (info))))))
     {
       *override = TRUE;
       newdef = FALSE;

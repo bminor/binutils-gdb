@@ -1,3 +1,9 @@
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	* elflink.c (_bfd_elf_merge_symbol): Group common symbol checking
+	together.
+
 2016-03-08  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
