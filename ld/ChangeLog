@@ -1,5 +1,17 @@
 2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19784
+	* testsuite/ld-i386/i386.exp: Remove pr19636-2e-nacl test.
+	* testsuite/ld-i386/pr19636-2e-nacl.d: Moved to ...
+	* testsuite/ld-i386/pr19636-2e.d: Here.  Remove notarget.
+	* testsuite/ld-ifunc/ifunc.exp: Run PR ld/19784 tests.
+	* testsuite/ld-ifunc/pass.out: New file.
+	* testsuite/ld-ifunc/pr19784a.c: Likewise.
+	* testsuite/ld-ifunc/pr19784b.c: Likewise.
+	* testsuite/ld-ifunc/pr19784c.c: Likewise.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19774
 	* testsuite/ld-ifunc/ifunc.exp: Link tmpdir/pr18808a.o before
 	tmpdir/libpr18808.so.  Link tmpdir/pr18841a.o before

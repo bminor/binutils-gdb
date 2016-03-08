@@ -505,6 +505,30 @@ run_cc_link_tests [list \
 	{} \
 	"libpr18841c.so" \
     ] \
+    [list \
+	"Build libpr19784a.so" \
+	"-shared -Wl,-Bsymbolic-functions" \
+	"-fPIC -O2 -g" \
+	{ pr19784b.c pr19784c.c } \
+	{} \
+	"libpr19784a.so" \
+    ] \
+    [list \
+	"Build libpr19784b.so" \
+	"-shared -Wl,-Bsymbolic-functions" \
+	"-fPIC -O2 -g" \
+	{ pr19784c.c pr19784b.c } \
+	{} \
+	"libpr19784b.so" \
+    ] \
+    [list \
+	"Build pr19784a.o" \
+	"" \
+	"" \
+	{ pr19784a.c } \
+	"" \
+	"" \
+    ] \
 ]
 
 run_ld_link_exec_tests [] [list \
@@ -531,5 +555,21 @@ run_ld_link_exec_tests [] [list \
 	{ dummy.c } \
 	"pr18841c" \
 	"pr18841.out" \
+    ] \
+    [list \
+	"Run pr19784a" \
+	"tmpdir/pr19784a.o tmpdir/libpr19784a.so" \
+	"" \
+	{ dummy.c } \
+	"pr19784a" \
+	"pass.out" \
+    ] \
+    [list \
+	"Run pr19784b" \
+	"--as-needed tmpdir/pr19784a.o tmpdir/libpr19784b.so" \
+	"" \
+	{ dummy.c } \
+	"pr19784b" \
+	"pass.out" \
     ] \
 ]

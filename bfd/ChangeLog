@@ -1,5 +1,12 @@
 2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19784
+	* elf32-i386.c (elf_i386_check_relocs): Increment PLT reference
+	count for locally defined local IFUNC symbols in shared object.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19579
 	* elflink.c (_bfd_elf_merge_symbol): Group common symbol checking
 	together.
