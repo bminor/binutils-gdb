@@ -686,7 +686,15 @@ floatformat_mantissa (const struct floatformat *fmt,
    If the host and target formats agree, we just copy the raw data
    into the appropriate type of variable and return, letting the host
    increase precision as necessary.  Otherwise, we call the conversion
-   routine and let it do the dirty work.  */
+   routine and let it do the dirty work.  Note that even if the target
+   and host floating-point formats match, the length of the types
+   might still be different, so the conversion routines must make sure
+   to not overrun any buffers.  For example, on x86, long double is
+   the 80-bit extended precision type on both 32-bit and 64-bit ABIs,
+   but by default it is stored as 12 bytes on 32-bit, and 16 bytes on
+   64-bit, for alignment reasons.  See comment in store_typed_floating
+   for a discussion about zeroing out remaining bytes in the target
+   buffer.  */
 
 static const struct floatformat *host_float_format = GDB_HOST_FLOAT_FORMAT;
 static const struct floatformat *host_double_format = GDB_HOST_DOUBLE_FORMAT;
@@ -707,25 +715,26 @@ floatformat_to_doublest (const struct floatformat *fmt,
 			 const void *in, DOUBLEST *out)
 {
   gdb_assert (fmt != NULL);
+
   if (fmt == host_float_format)
     {
-      float val;
+      float val = 0;
 
-      memcpy (&val, in, sizeof (val));
+      memcpy (&val, in, floatformat_totalsize_bytes (fmt));
       *out = val;
     }
   else if (fmt == host_double_format)
     {
-      double val;
+      double val = 0;
 
-      memcpy (&val, in, sizeof (val));
+      memcpy (&val, in, floatformat_totalsize_bytes (fmt));
       *out = val;
     }
   else if (fmt == host_long_double_format)
     {
-      long double val;
+      long double val = 0;
 
-      memcpy (&val, in, sizeof (val));
+      memcpy (&val, in, floatformat_totalsize_bytes (fmt));
       *out = val;
     }
   else
@@ -737,23 +746,24 @@ floatformat_from_doublest (const struct floatformat *fmt,
 			   const DOUBLEST *in, void *out)
 {
   gdb_assert (fmt != NULL);
+
   if (fmt == host_float_format)
     {
       float val = *in;
 
-      memcpy (out, &val, sizeof (val));
+      memcpy (out, &val, floatformat_totalsize_bytes (fmt));
     }
   else if (fmt == host_double_format)
     {
       double val = *in;
 
-      memcpy (out, &val, sizeof (val));
+      memcpy (out, &val, floatformat_totalsize_bytes (fmt));
     }
   else if (fmt == host_long_double_format)
     {
       long double val = *in;
 
-      memcpy (out, &val, sizeof (val));
+      memcpy (out, &val, floatformat_totalsize_bytes (fmt));
     }
   else
     convert_doublest_to_floatformat (fmt, in, out);

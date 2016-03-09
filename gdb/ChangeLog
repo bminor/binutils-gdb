@@ -1,5 +1,11 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* doublest.c: Extend comments.
+	(floatformat_to_doublest, floatformat_from_doublest): Copy the
+	floatformat's total size, not the host type's size.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* doublest.c (floatformat_totalsize_bytes): New function.
 	(floatformat_from_type): Assert that the type's length is at least
 	as long as the floatformat's totalsize.
