@@ -1485,13 +1485,16 @@ _bfd_elf_merge_symbol (bfd *abfd,
      represent variables; this can cause confusion in principle, but
      any such confusion would seem to indicate an erroneous program or
      shared library.  We also permit a common symbol in a regular
-     object to override a weak symbol in a shared object.  */
+     object to override a weak symbol in a shared object.  A common
+     symbol in executable also overrides a symbol in a shared object.  */
 
   if (newdyn
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
-	      && (newweak || newfunc))))
+	      && (newweak
+		  || newfunc
+		  || (!olddyn && bfd_link_executable (info))))))
     {
       *override = TRUE;
       newdef = FALSE;
