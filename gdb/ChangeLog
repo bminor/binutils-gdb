@@ -1,3 +1,8 @@
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* hppa-linux-tdep.c (hppa_linux_init_abi): Set the long double
+	format to floatformats_ieee_double.
+
 2016-03-07  Pedro Alves  <palves@redhat.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Check whether info.abfd is NULL
