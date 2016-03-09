@@ -1,5 +1,14 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* doublest.c (floatformat_totalsize_bytes): New function.
+	(floatformat_from_type): Assert that the type's length is at least
+	as long as the floatformat's totalsize.
+	* doublest.h (floatformat_totalsize_bytes): New declaration.
+	* gdbtypes.c (arch_float_type): Assert that the type's length is
+	at least as long as the floatformat's totalsize.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* hppa-linux-tdep.c (hppa_linux_init_abi): Set the long double
 	format to floatformats_ieee_double.
 

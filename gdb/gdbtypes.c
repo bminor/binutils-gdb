@@ -4682,6 +4682,15 @@ arch_float_type (struct gdbarch *gdbarch,
 
   t = arch_type (gdbarch, TYPE_CODE_FLT, bit / TARGET_CHAR_BIT, name);
   TYPE_FLOATFORMAT (t) = floatformats;
+
+  if (floatformats != NULL)
+    {
+      size_t len = TYPE_LENGTH (t);
+
+      gdb_assert (len >= floatformat_totalsize_bytes (floatformats[0]));
+      gdb_assert (len >= floatformat_totalsize_bytes (floatformats[1]));
+    }
+
   return t;
 }
 
