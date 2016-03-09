@@ -1,5 +1,10 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* top.c (window_hook): Delete.
+	(command_loop): Remove references to window_hook.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/command-line-input.exp: New file.
 
 2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>

@@ -124,12 +124,6 @@ char *current_directory;
 /* The directory name is actually stored here (usually).  */
 char gdb_dirbuf[1024];
 
-/* Function to call before reading a command, if nonzero.
-   The function receives two args: an input stream,
-   and a prompt string.  */
-
-void (*window_hook) (FILE *, char *);
-
 /* Buffer used for reading command lines, and the size
    allocated for it so far.  */
 
@@ -545,9 +539,6 @@ command_loop (void)
 
   while (instream && !feof (instream))
     {
-      if (window_hook && instream == stdin)
-	(*window_hook) (instream, get_prompt ());
-
       clear_quit_flag ();
       if (instream == stdin)
 	reinitialize_more_filter ();
