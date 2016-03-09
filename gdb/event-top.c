@@ -650,13 +650,8 @@ command_line_handler (char *rl)
   /* Save into global buffer if appropriate.  */
   if (repeat)
     {
-      if (linelength > saved_command_line_size)
-	{
-	  saved_command_line
-	    = (char *) xrealloc (saved_command_line, linelength);
-	  saved_command_line_size = linelength;
-	}
-      strcpy (saved_command_line, linebuffer);
+      xfree (saved_command_line);
+      saved_command_line = xstrdup (linebuffer);
       if (!more_to_come)
 	{
 	  command_handler (saved_command_line);

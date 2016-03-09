@@ -506,8 +506,7 @@ captured_main (void *data)
   ndir = 0;
 
   clear_quit_flag ();
-  saved_command_line = (char *) xmalloc (saved_command_line_size);
-  saved_command_line[0] = '\0';
+  saved_command_line = (char *) xstrdup ("");
   instream = stdin;
 
 #ifdef __MINGW32__

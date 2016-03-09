@@ -1,5 +1,17 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (command_line_handler): Use xfree + xstrdup instead
+	of xrealloc + strcpy.
+	* main.c (captured_main): Use xstrdup instead of xmalloc plus
+	manual clear.
+	* top.c (saved_command_line): Rewrite comment.
+	(saved_command_line_size): Delete.
+	(command_line_input): Use xfree + xstrdup instead of xrealloc +
+	strcpy.
+	* top.h (saved_command_line_size): Delete declaration.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c: Include buffer.h.
 	(gdb_readline_no_editing_callback): Use struct buffer instead
 	of xrealloc.

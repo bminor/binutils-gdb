@@ -125,11 +125,9 @@ char *current_directory;
 /* The directory name is actually stored here (usually).  */
 char gdb_dirbuf[1024];
 
-/* Buffer used for reading command lines, and the size
-   allocated for it so far.  */
-
+/* The last command line executed on the console.  Used for command
+   repetitions.  */
 char *saved_command_line;
-int saved_command_line_size = 100;
 
 /* Nonzero if the current command is modified by "server ".  This
    affects things like recording into the command history, commands
@@ -1222,13 +1220,8 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
   /* Save into global buffer if appropriate.  */
   if (repeat)
     {
-      if (linelength > saved_command_line_size)
-	{
-	  saved_command_line
-	    = (char *) xrealloc (saved_command_line, linelength);
-	  saved_command_line_size = linelength;
-	}
-      strcpy (saved_command_line, linebuffer);
+      xfree (saved_command_line);
+      saved_command_line = xstrdup (linebuffer);
       return saved_command_line;
     }
 
