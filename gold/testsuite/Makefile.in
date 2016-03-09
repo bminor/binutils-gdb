@@ -6198,7 +6198,6 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo 'main' > retain_symbols_file_test.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo 't1' >> retain_symbols_file_test.in
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_ZN4t16bC1Ev' >> retain_symbols_file_test.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_ZNK4t20a3getEv' >> retain_symbols_file_test.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_Z3t18v' >> retain_symbols_file_test.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '__tcf_0' >> retain_symbols_file_test.in

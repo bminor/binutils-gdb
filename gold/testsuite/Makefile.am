@@ -2214,7 +2214,6 @@ MOSTLYCLEANFILES += retain_symbols_file_test retain_symbols_file_test.in \
 retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
 	echo 'main' > retain_symbols_file_test.in
 	echo 't1' >> retain_symbols_file_test.in
-	echo '_ZN4t16bC1Ev' >> retain_symbols_file_test.in
 	echo '_ZNK4t20a3getEv' >> retain_symbols_file_test.in
 	echo '_Z3t18v' >> retain_symbols_file_test.in
 	echo '__tcf_0' >> retain_symbols_file_test.in

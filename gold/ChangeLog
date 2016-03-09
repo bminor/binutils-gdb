@@ -1,6 +1,15 @@
 2016-03-08  Cary Coutant  <ccoutant@gmail.com>
 
         PR 19751
+	* testsuite/Makefile.am (retain_symbols_file_test): Remove check
+	for constructor.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/dynamic_list.sh: Likewise.
+	* testsuite/retain_symbols_file_test.sh: Likewise.
+
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+
+        PR 19751
         * arm.cc (Reloc_stub::Key::name): Add unused attribute.
         * dirsearch.cc (Dir_caches::~Dir_caches): Likewise.
 
