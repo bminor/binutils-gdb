@@ -2011,9 +2011,12 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
      bother searching for it -- with modern compilers this would be mostly
      pointless anyway.  Trust that we'll either have valid DWARF-2 CFI data
      or else a valid backchain ...  */
-  func = get_frame_func (this_frame);
-  if (!func)
-    return 0;
+  if (!get_frame_func_if_available (this_frame, &info->func))
+    {
+      info->func = -1;
+      return 0;
+    }
+  func = info->func;
 
   /* Try to analyze the prologue.  */
   result = s390_analyze_prologue (gdbarch, func,
@@ -2167,7 +2170,6 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
       info->local_base = prev_sp - size;
     }
 
-  info->func = func;
   return 1;
 }
 
@@ -2267,7 +2269,11 @@ s390_frame_this_id (struct frame_info *this_frame,
     = s390_frame_unwind_cache (this_frame, this_prologue_cache);
 
   if (info->frame_base == -1)
-    return;
+    {
+      if (info->func != -1)
+	*this_id = frame_id_build_unavailable_stack (info->func);
+      return;
+    }
 
   *this_id = frame_id_build (info->frame_base, info->func);
 }
