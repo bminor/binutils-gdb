@@ -1,3 +1,23 @@
+2016-03-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_analyze_prologue): Ignore BRC and BRCL
+	instructions that do nothing or are conditional traps.
+
+2016-03-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_prologue_frame_unwind_cache): Store
+	frame func's PC in info->func before any other failure can occur.
+	(s390_frame_this_id): Use frame_id_build_unavailable_stack if
+	info->func has been filled out.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* osabi.c (gdb_osabi_names): Avoid spaces in osabi names.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* frv-tdep.c (frv_gdbarch_init): Handle bfd_mach_fr300.
+
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
 	* cris-tdep.c (cris_gdbarch_init): Return 0 if the info's byte

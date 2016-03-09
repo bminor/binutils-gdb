@@ -1,3 +1,10 @@
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* cpu-v850.c (N): Append ":old-gcc-abi" instead of " (using old
+	gcc ABI)" to printable name.
+	* cpu-v850_rh850.c (bfd_v850_rh850_arch): Use "v850:rh850" instead
+	of "v850-rh850" as printable name.
+
 2016-03-09  Leon Winter  <winter-gcc@bfw-online.de>
 
 	PR ld/19623

@@ -6146,10 +6146,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -shared plugin_section_order.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_order.o: plugin_section_order.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_layout_with_alignment.o: plugin_layout_with_alignment.cc
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_layout_with_alignment.o: plugin_layout_with_alignment.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_layout_with_alignment: plugin_layout_with_alignment.o plugin_section_alignment.so gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_section_alignment.so" plugin_layout_with_alignment.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_section_alignment.so" plugin_layout_with_alignment.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_layout_with_alignment.stdout: plugin_layout_with_alignment
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_NM) -n --synthetic plugin_layout_with_alignment > plugin_layout_with_alignment.stdout
 
