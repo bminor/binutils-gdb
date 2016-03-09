@@ -16675,18 +16675,18 @@ do_neon_ld_st_interleave (void)
    values, terminated with -1.  */
 
 static int
-neon_alignment_bit (int size, int align, int *do_align, ...)
+neon_alignment_bit (int size, int align, int *do_alignment, ...)
 {
   va_list ap;
   int result = FAIL, thissize, thisalign;
 
   if (!inst.operands[1].immisalign)
     {
-      *do_align = 0;
+      *do_alignment = 0;
       return SUCCESS;
     }
 
-  va_start (ap, do_align);
+  va_start (ap, do_alignment);
 
   do
     {
@@ -16703,7 +16703,7 @@ neon_alignment_bit (int size, int align, int *do_align, ...)
   va_end (ap);
 
   if (result == SUCCESS)
-    *do_align = 1;
+    *do_alignment = 1;
   else
     first_error (_("unsupported alignment for instruction"));
 
@@ -16714,7 +16714,7 @@ static void
 do_neon_ld_st_lane (void)
 {
   struct neon_type_el et = neon_check_type (1, NS_NULL, N_8 | N_16 | N_32);
-  int align_good, do_align = 0;
+  int align_good, do_alignment = 0;
   int logsize = neon_logbits (et.size);
   int align = inst.operands[1].imm >> 8;
   int n = (inst.instruction >> 8) & 3;
@@ -16734,11 +16734,11 @@ do_neon_ld_st_lane (void)
   switch (n)
     {
     case 0:  /* VLD1 / VST1.  */
-      align_good = neon_alignment_bit (et.size, align, &do_align, 16, 16,
+      align_good = neon_alignment_bit (et.size, align, &do_alignment, 16, 16,
 				       32, 32, -1);
       if (align_good == FAIL)
 	return;
-      if (do_align)
+      if (do_alignment)
 	{
 	  unsigned alignbits = 0;
 	  switch (et.size)
@@ -16752,11 +16752,11 @@ do_neon_ld_st_lane (void)
       break;
 
     case 1:  /* VLD2 / VST2.  */
-      align_good = neon_alignment_bit (et.size, align, &do_align, 8, 16, 16, 32,
-				       32, 64, -1);
+      align_good = neon_alignment_bit (et.size, align, &do_alignment, 8, 16,
+		      16, 32, 32, 64, -1);
       if (align_good == FAIL)
 	return;
-      if (do_align)
+      if (do_alignment)
 	inst.instruction |= 1 << 4;
       break;
 
@@ -16766,11 +16766,11 @@ do_neon_ld_st_lane (void)
       break;
 
     case 3:  /* VLD4 / VST4.  */
-      align_good = neon_alignment_bit (et.size, align, &do_align, 8, 32,
+      align_good = neon_alignment_bit (et.size, align, &do_alignment, 8, 32,
 				       16, 64, 32, 64, 32, 128, -1);
       if (align_good == FAIL)
 	return;
-      if (do_align)
+      if (do_alignment)
 	{
 	  unsigned alignbits = 0;
 	  switch (et.size)
@@ -16801,7 +16801,7 @@ static void
 do_neon_ld_dup (void)
 {
   struct neon_type_el et = neon_check_type (1, NS_NULL, N_8 | N_16 | N_32);
-  int align_good, do_align = 0;
+  int align_good, do_alignment = 0;
 
   if (et.type == NT_invtype)
     return;
@@ -16811,7 +16811,7 @@ do_neon_ld_dup (void)
     case 0:  /* VLD1.  */
       gas_assert (NEON_REG_STRIDE (inst.operands[0].imm) != 2);
       align_good = neon_alignment_bit (et.size, inst.operands[1].imm >> 8,
-				       &do_align, 16, 16, 32, 32, -1);
+				       &do_alignment, 16, 16, 32, 32, -1);
       if (align_good == FAIL)
 	return;
       switch (NEON_REGLIST_LENGTH (inst.operands[0].imm))
@@ -16825,7 +16825,8 @@ do_neon_ld_dup (void)
 
     case 1:  /* VLD2.  */
       align_good = neon_alignment_bit (et.size, inst.operands[1].imm >> 8,
-				       &do_align, 8, 16, 16, 32, 32, 64, -1);
+				       &do_alignment, 8, 16, 16, 32, 32, 64,
+				       -1);
       if (align_good == FAIL)
 	return;
       constraint (NEON_REGLIST_LENGTH (inst.operands[0].imm) != 2,
@@ -16848,7 +16849,7 @@ do_neon_ld_dup (void)
     case 3:  /* VLD4.  */
       {
 	int align = inst.operands[1].imm >> 8;
-	align_good = neon_alignment_bit (et.size, align, &do_align, 8, 32,
+	align_good = neon_alignment_bit (et.size, align, &do_alignment, 8, 32,
 					 16, 64, 32, 64, 32, 128, -1);
 	if (align_good == FAIL)
 	  return;
@@ -16866,7 +16867,7 @@ do_neon_ld_dup (void)
     default: ;
     }
 
-  inst.instruction |= do_align << 4;
+  inst.instruction |= do_alignment << 4;
 }
 
 /* Disambiguate VLD<n> and VST<n> instructions, and fill in common bits (those
