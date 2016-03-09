@@ -1252,6 +1252,19 @@ Output_data_reloc_base<sh_type, dynamic, size, big_endian>
     os->set_should_link_to_dynsym();
 }
 
+// Standard relocation writer, which just calls Output_reloc::write().
+
+template<int sh_type, bool dynamic, int size, bool big_endian>
+struct Output_reloc_writer
+{
+  typedef Output_reloc<sh_type, dynamic, size, big_endian> Output_reloc_type;
+  typedef std::vector<Output_reloc_type> Relocs;
+
+  static void
+  write(typename Relocs::const_iterator p, unsigned char* pov)
+  { p->write(pov); }
+};
+
 // Write out relocation data.
 
 template<int sh_type, bool dynamic, int size, bool big_endian>
@@ -1259,32 +1272,8 @@ void
 Output_data_reloc_base<sh_type, dynamic, size, big_endian>::do_write(
     Output_file* of)
 {
-  const off_t off = this->offset();
-  const off_t oview_size = this->data_size();
-  unsigned char* const oview = of->get_output_view(off, oview_size);
-
-  if (this->sort_relocs())
-    {
-      gold_assert(dynamic);
-      std::sort(this->relocs_.begin(), this->relocs_.end(),
-		Sort_relocs_comparison());
-    }
-
-  unsigned char* pov = oview;
-  for (typename Relocs::const_iterator p = this->relocs_.begin();
-       p != this->relocs_.end();
-       ++p)
-    {
-      p->write(pov);
-      pov += reloc_size;
-    }
-
-  gold_assert(pov - oview == oview_size);
-
-  of->write_output_view(off, oview_size, oview);
-
-  // We no longer need the relocation entries.
-  this->relocs_.clear();
+  typedef Output_reloc_writer<sh_type, dynamic, size, big_endian> Writer;
+  this->do_write_generic<Writer>(of);
 }
 
 // Class Output_relocatable_relocs.

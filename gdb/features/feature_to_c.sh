@@ -19,13 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-output=$1
-shift
-
-if test -z "$output" || test -z "$1"; then
+if test -z "$1" || test -z "$2"; then
   echo "Usage: $0 OUTPUTFILE INPUTFILE..."
   exit 1
 fi
+
+output=$1
+shift
 
 if test -e "$output"; then
   echo "Output file \"$output\" already exists; refusing to overwrite."

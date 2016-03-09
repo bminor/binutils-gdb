@@ -1,3 +1,67 @@
+2016-03-09  Leon Winter  <winter-gcc@bfw-online.de>
+
+	PR ld/19623
+	* cofflink.c (_bfd_coff_generic_relocate_section): Do not apply
+	relocations against absolute symbols.
+
+2016-03-09  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/19775
+	* coff-alpha.c (alpha_ecoff_openr_next_archived_file): Allow zero
+	length elements in the archive.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19789
+	* elflink.c (elf_link_add_object_symbols): Create dynamic sections
+	for -E/--dynamic-list only when not relocatable.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19784
+	* elf32-i386.c (elf_i386_check_relocs): Increment PLT reference
+	count for locally defined local IFUNC symbols in shared object.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	* elflink.c (_bfd_elf_merge_symbol): Group common symbol checking
+	together.
+
+2016-03-08  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-arc.c (arc_bfd_get_32): Becomes an alias for bfd_get_32.
+	(arc_bfd_put_32): Becomes an alias for bfd_put_32.
+	(arc_elf_howto_init): Added assert to validate relocations.
+	(get_middle_endian_relocation): Delete.
+	(middle_endian_convert): New function.
+	(ME): Redefine, now does nothing.
+	(IS_ME): New define.
+	(arc_do_relocation): Extend the attached 'ARC_RELOC_HOWTO'
+	definition to call middle_endian_convert.  Add a new local
+	variable and make use of this throughout. Added call to
+	arc_bfd_get_8 and arc_bfd_put_8 for 8 bit relocations.
+
+2016-03-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/19775
+	* archive.c (bfd_generic_openr_next_archived_file): Allow zero
+	length elements in the archive.
+
+2016-03-07  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Always create .got
+	section if the symbol "_GLOBAL_OFFSET_TABLE_" is referenced.
+
+2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	* elflink.c (_bfd_elf_merge_symbol): Treat common symbol in
+	executable as definition if the new definition comes from a
+	shared library.
+
 2016-03-02  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.

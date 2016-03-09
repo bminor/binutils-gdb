@@ -153,6 +153,8 @@ extern void generate_lineno_debug (void);
 extern void s_abort (int) ATTRIBUTE_NORETURN;
 extern void s_align_bytes (int arg);
 extern void s_align_ptwo (int);
+extern void do_align (unsigned int align, char *fill, unsigned int length,
+		      unsigned int max);
 extern void bss_alloc (symbolS *, addressT, unsigned);
 extern offsetT parse_align (int);
 extern symbolS *s_comm_internal (int, symbolS *(*) (int, symbolS *, addressT));

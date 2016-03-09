@@ -371,7 +371,7 @@ SH4AL-dsp                                          SH4A
 
 typedef struct
 {
-  char *name;
+  const char *name;
   sh_arg_type arg[4];
   sh_nibble_type nibbles[9];
   unsigned int arch;

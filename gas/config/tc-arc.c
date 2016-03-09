@@ -2048,7 +2048,7 @@ md_assemble (char *str)
 /* Callback to insert a register into the hash table.  */
 
 static void
-declare_register (char *name, int number)
+declare_register (const char *name, int number)
 {
   const char *err;
   symbolS *regS = symbol_create (name, reg_section,

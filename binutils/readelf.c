@@ -12775,7 +12775,8 @@ static const char * arm_attr_tag_FP_arch[] =
    "FP for ARMv8", "FPv5/FP-D16 for ARMv8"};
 static const char * arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1", "WMMXv2"};
 static const char * arm_attr_tag_Advanced_SIMD_arch[] =
-  {"No", "NEONv1", "NEONv1 with Fused-MAC", "NEON for ARMv8"};
+  {"No", "NEONv1", "NEONv1 with Fused-MAC", "NEON for ARMv8",
+   "NEON for ARMv8.1"};
 static const char * arm_attr_tag_PCS_config[] =
   {"None", "Bare platform", "Linux application", "Linux DSO", "PalmOS 2004",
    "PalmOS (reserved)", "SymbianOS 2004", "SymbianOS (reserved)"};

@@ -3079,7 +3079,7 @@ class Target_mips : public Sized_target<size, big_endian>
 
   // Make a new symbol table entry for the Mips target.
   Sized_symbol<size>*
-  make_symbol() const
+  make_symbol(const char*, elfcpp::STT, Object*, unsigned int, uint64_t)
   { return new Mips_symbol<size>(); }
 
   // Process the relocations to determine unreferenced sections for

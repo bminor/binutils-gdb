@@ -1,3 +1,67 @@
+2016-03-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* analyze-racy-logs.py: Set executable bit.
+
+2016-03-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (DEFAULT_RACY_ITER): New variable.
+	(CHECK_TARGET_TMP): Likewise.
+	(check-single-racy): New rule.
+	(check-parallel-racy): Likewise.
+	(TEST_TARGETS): Adjust rule to account for RACY_ITER.
+	(do-check-parallel-racy): New rule.
+	(check-racy/%.exp): Likewise.
+	* README (Racy testcases): New section.
+	* analyze-racy-logs.py: New file.
+
+2016-03-03  Doug Evans  <dje@google.com>
+
+	* gdb.base/skip.exp: Use with_test_prefix.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/step-over-syscall.exp (step_over_syscall): Kfail.
+	Invoke step_over_syscall "clone" and break_cond_on_syscall
+	"clone".
+	* gdb.base/step-over-clone.c: New file.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/step-over-syscall.exp (disp_step_cross_syscall): Fix
+	code format.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-fork.c: Rename to ...
+	* gdb.base/step-over-fork.c: ... it.  New file.
+	* gdb.base/disp-step-vfork.c: Rename to ...
+	* gdb.base/step-over-vfork.c: ... it.  New file.
+	* gdb.base/disp-step-syscall.exp: Rename to ...
+	* gdb.base/step-over-syscall.exp: ... it.  New file.
+	(disp_step_cross_syscall): Rename to ...
+	(step_over_syscall): ... it.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp (break_cond_on_syscall): New.
+	If target supports condition evaluation on target, invoke
+	break_cond_on_syscall for fork and vfork.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp: Don't invoke
+	support_displaced_stepping.
+	(disp_step_cross_syscall): Test with displaced stepping off and
+	on if supported.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp (check_pc_after_cross_syscall): New
+	proc.
+	(setup): New proc.
+	(disp_step_cross_syscall): Move code to check_pc_after_cross_syscall
+	and setup.
+
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* gdb.fortran/vla-history.exp: Remove breakpoint.

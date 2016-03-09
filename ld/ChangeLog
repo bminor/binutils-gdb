@@ -1,3 +1,62 @@
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19789
+	* testsuite/ld-elf/pr19789.d: New file.
+	* testsuite/ld-elf/pr19789.s: Likewise.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19784
+	* testsuite/ld-i386/i386.exp: Remove pr19636-2e-nacl test.
+	* testsuite/ld-i386/pr19636-2e-nacl.d: Moved to ...
+	* testsuite/ld-i386/pr19636-2e.d: Here.  Remove notarget.
+	* testsuite/ld-ifunc/ifunc.exp: Run PR ld/19784 tests.
+	* testsuite/ld-ifunc/pass.out: New file.
+	* testsuite/ld-ifunc/pr19784a.c: Likewise.
+	* testsuite/ld-ifunc/pr19784b.c: Likewise.
+	* testsuite/ld-ifunc/pr19784c.c: Likewise.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19774
+	* testsuite/ld-ifunc/ifunc.exp: Link tmpdir/pr18808a.o before
+	tmpdir/libpr18808.so.  Link tmpdir/pr18841a.o before
+	tmpdir/libpr18841b.so and tmpdir/libpr18841c.so.  Test
+	--as-needed for pr18841c.
+
+2016-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19774
+	* testsuite/ld-i386/i386.exp: Link tmpdir/pr18900.o before
+	tmpdir/pr18900.so and test --as-needed.  Link tmpdir/gotpc1.o
+	before tmpdir/got1d.so and test --as-needed.
+	* testsuite/ld-x86-64/x86-64.exp: Link tmpdir/pr18900.o before
+	tmpdir/pr18900.so and test --as-needed.
+
+2016-03-07  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/implicit_got_section_1.s: New test source file.
+	* testsuite/ld-aarch64/implicit_got_section_1.d: New test expected
+	result.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new test.
+
+2016-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Link tmpdir/copyreloc-main.o
+	before tmpdir/copyreloc-lib.so and test --as-needed.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	* testsuite/ld-elf/pr19579a.c: New file.
+	* testsuite/ld-elf/pr19579b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/19579 test.
+
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19162.d: Skip hppa-*-*.
+
 2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): Add xfails.
@@ -14,7 +73,7 @@
 2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19739
-	* ld/emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
 	merge flags of other input sections for relocatable link.
 
 2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>

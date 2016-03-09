@@ -44,7 +44,6 @@ check_absent()
 }
 
 check_present 't1'
-check_present 't16b::t16b()'
 check_present 't20a::get()'
 check_present 't18()'
 check_absent 't10'

@@ -337,7 +337,6 @@ run_dump_test "pr19636-2c-nacl"
 run_dump_test "pr19636-2d"
 run_dump_test "pr19636-2d-nacl"
 run_dump_test "pr19636-2e"
-run_dump_test "pr19636-2e-nacl"
 run_dump_test "pr19636-3a"
 run_dump_test "pr19636-3b"
 run_dump_test "pr19636-3c"
@@ -514,18 +513,26 @@ if { [isnative]
 	    "copyreloc-lib.so" \
 	] \
 	[list \
-	    "Build copyreloc-main with PIE and GOTOFF (1)" \
-	    "tmpdir/copyreloc-lib.so -pie" \
+	    "Build libcopyreloc-main.a" \
+	    "" \
 	    "" \
 	    { copyreloc-main.S } \
+	    {} \
+	    "libcopyreloc-main.a" \
+	] \
+	[list \
+	    "Build copyreloc-main with PIE and GOTOFF (1)" \
+	    "tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
+	    "" \
+	    { dummy.s } \
 	    {{readelf {-Wr} copyreloc-main1.rd}} \
 	    "copyreloc-main" \
 	] \
 	[list \
 	    "Build copyreloc-main with PIE and GOTOFF (2)" \
-	    "tmpdir/copyreloc-lib.so -pie" \
+	    "tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
 	    "" \
-	    { copyreloc-main.S } \
+	    { dummy.s } \
 	    {{readelf {-Wr} copyreloc-main2.rd}} \
 	    "copyreloc-main" \
 	] \
@@ -602,18 +609,26 @@ if { [isnative]
 	    "pr18900.so" \
 	] \
 	[list \
-	    "Build pr18900a" \
-	    "tmpdir/pr18900.so" \
+	    "Build pr18900.o" \
+	    "-r -nostdlib" \
 	    "" \
 	    { pr18900b.c pr18900c.c } \
+	    "" \
+	    "pr18900.o" \
+	] \
+	[list \
+	    "Build pr18900a" \
+	    "tmpdir/pr18900.o tmpdir/pr18900.so" \
+	    "" \
+	    { dummy.s } \
 	    {{readelf {-Wrd} pr18900a.rd}} \
 	    "pr18900a" \
 	] \
 	[list \
 	    "Build pr18900b" \
-	    "tmpdir/pr18900.so" \
+	    "-Wl,--as-needed tmpdir/pr18900.o tmpdir/pr18900.so" \
 	    "" \
-	    { pr18900b.c pr18900c.c } \
+	    { dummy.s } \
 	    {{readelf {-Wrd} pr18900b.rd}} \
 	    "pr18900b" \
 	] \
@@ -634,10 +649,18 @@ if { [isnative]
 	    "got1d.so" \
 	] \
 	[list \
-	    "Build gotpc1" \
-	    "tmpdir/got1d.so" \
-	    "-Wa,-mrelax-relocations=yes" \
+	    "Build gotpc1.o" \
+	    "-r -nostdlib" \
+	    "" \
 	    { got1a.S got1b.c got1c.c } \
+	    "" \
+	    "gotpc1.o" \
+	] \
+	[list \
+	    "Build gotpc1" \
+	    "-Wl,--as-needed tmpdir/gotpc1.o tmpdir/got1d.so" \
+	    "-Wa,-mrelax-relocations=yes" \
+	    { dummy.s } \
 	    {{objdump {-dw} got1.dd}} \
 	    "got1" \
 	] \
@@ -681,9 +704,9 @@ if { [isnative]
 	] \
 	[list \
 	    "Run copyreloc-main with PIE and GOTOFF" \
-	    "tmpdir/copyreloc-lib.so -pie" \
+	    "--as-needed tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
 	    "" \
-	    { copyreloc-main.S } \
+	    { dummy.s } \
 	    "copyreloc-main" \
 	    "copyreloc-main.out" \
 	] \
@@ -713,9 +736,9 @@ if { [isnative]
 	] \
 	[list \
 	    "Run pr18900" \
-	    "tmpdir/pr18900.so" \
+	    "tmpdir/pr18900.o tmpdir/pr18900.so" \
 	    "" \
-	    { pr18900b.c pr18900c.c } \
+	    { dummy.s } \
 	    "pr18900" \
 	    "pr18900.out" \
 	] \

@@ -1625,7 +1625,7 @@ set_flags_for_sub32 (sim_cpu *cpu, uint32_t value1, uint32_t value2)
 {
   uint32_t result = value1 - value2;
   uint32_t flags = 0;
-  uint32_t signbit = 1ULL << 31;
+  uint32_t signbit = 1U << 31;
 
   if (result == 0)
     flags |= Z;
@@ -2454,7 +2454,7 @@ static void
 CondCompare (sim_cpu *cpu) /* aka: ccmp and ccmn  */
 {
   /* instr[31]    = size : 0 ==> 32 bit, 1 ==> 64 bit
-     instr[30]    = compare with positive (0) or negative value (1)
+     instr[30]    = compare with positive (1) or negative value (0)
      instr[29,21] = 1 1101 0010
      instr[20,16] = Rm or const
      instr[15,12] = cond
@@ -2477,7 +2477,7 @@ CondCompare (sim_cpu *cpu) /* aka: ccmp and ccmn  */
       return;
     }
 
-  negate = uimm (aarch64_get_instr (cpu), 30, 30) ? -1 : 1;
+  negate = uimm (aarch64_get_instr (cpu), 30, 30) ? 1 : -1;
   rm = uimm (aarch64_get_instr (cpu), 20, 16);
   rn = uimm (aarch64_get_instr (cpu),  9,  5);
 
@@ -5089,21 +5089,6 @@ do_vec_sub_long (sim_cpu *cpu)
     }
 }
 
-#define DO_ADDP(FN)							\
-  do									\
-    {									\
-      for (i = 0; i < range; i++)					\
-	{								\
-	  aarch64_set_vec_##FN (cpu, vd, i,				\
-				aarch64_get_vec_##FN (cpu, vn, i * 2)	\
-				+ aarch64_get_vec_##FN (cpu, vn, i * 2 + 1)); \
-	  aarch64_set_vec_##FN (cpu, vd, i + range,			\
-				aarch64_get_vec_##FN (cpu, vm, i * 2)	\
-				+ aarch64_get_vec_##FN (cpu, vm, i * 2 + 1)); \
-	}								\
-      }									\
-    while (0)
-
 static void
 do_vec_ADDP (sim_cpu *cpu)
 {
@@ -5117,6 +5102,8 @@ do_vec_ADDP (sim_cpu *cpu)
      instr[9,5]   = Vn
      instr[4,0]   = V dest.  */
 
+  FRegister copy_vn;
+  FRegister copy_vm;
   unsigned full = uimm (aarch64_get_instr (cpu), 30, 30);
   unsigned size = uimm (aarch64_get_instr (cpu), 23, 22);
   unsigned vm = uimm (aarch64_get_instr (cpu), 20, 16);
@@ -5128,28 +5115,50 @@ do_vec_ADDP (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x2F);
 
+  /* Make copies of the source registers in case vd == vn/vm.  */
+  copy_vn = cpu->fr[vn];
+  copy_vm = cpu->fr[vm];
+
   switch (size)
     {
     case 0:
       range = full ? 8 : 4;
-      DO_ADDP (u8);
+      for (i = 0; i < range; i++)
+	{
+	  aarch64_set_vec_u8 (cpu, vd, i,
+			      copy_vn.b[i * 2] + copy_vn.b[i * 2 + 1]);
+	  aarch64_set_vec_u8 (cpu, vd, i + range,
+			      copy_vm.b[i * 2] + copy_vm.b[i * 2 + 1]);
+	}
       return;
 
     case 1:
       range = full ? 4 : 2;
-      DO_ADDP (u16);
+      for (i = 0; i < range; i++)
+	{
+	  aarch64_set_vec_u16 (cpu, vd, i,
+			       copy_vn.h[i * 2] + copy_vn.h[i * 2 + 1]);
+	  aarch64_set_vec_u16 (cpu, vd, i + range,
+			       copy_vm.h[i * 2] + copy_vm.h[i * 2 + 1]);
+	}
       return;
 
     case 2:
       range = full ? 2 : 1;
-      DO_ADDP (u32);
+      for (i = 0; i < range; i++)
+	{
+	  aarch64_set_vec_u32 (cpu, vd, i,
+			       copy_vn.w[i * 2] + copy_vn.w[i * 2 + 1]);
+	  aarch64_set_vec_u32 (cpu, vd, i + range,
+			       copy_vm.w[i * 2] + copy_vm.w[i * 2 + 1]);
+	}
       return;
 
     case 3:
       if (! full)
 	HALT_UNALLOC;
-      range = 1;
-      DO_ADDP (u64);
+      aarch64_set_vec_u64 (cpu, vd, 0, copy_vn.v[0] + copy_vn.v[1]);
+      aarch64_set_vec_u64 (cpu, vd, 1, copy_vm.v[0] + copy_vm.v[1]);
       return;
 
     default:
@@ -6054,28 +6063,43 @@ do_vec_FADDP (sim_cpu *cpu)
 
   if (uimm (aarch64_get_instr (cpu), 22, 22))
     {
+      /* Extract values before adding them incase vd == vn/vm.  */
+      double tmp1 = aarch64_get_vec_double (cpu, vn, 0);
+      double tmp2 = aarch64_get_vec_double (cpu, vn, 1);
+      double tmp3 = aarch64_get_vec_double (cpu, vm, 0);
+      double tmp4 = aarch64_get_vec_double (cpu, vm, 1);
+
       if (! full)
 	HALT_UNALLOC;
 
-      aarch64_set_vec_double (cpu, vd, 0, aarch64_get_vec_double (cpu, vn, 0)
-			      + aarch64_get_vec_double (cpu, vn, 1));
-      aarch64_set_vec_double (cpu, vd, 1, aarch64_get_vec_double (cpu, vm, 0)
-			      + aarch64_get_vec_double (cpu, vm, 1));
+      aarch64_set_vec_double (cpu, vd, 0, tmp1 + tmp2);
+      aarch64_set_vec_double (cpu, vd, 1, tmp3 + tmp4);
     }
   else
     {
-      aarch64_set_vec_float (cpu, vd, 0, aarch64_get_vec_float (cpu, vn, 0)
-			     + aarch64_get_vec_float (cpu, vn, 1));
+      /* Extract values before adding them incase vd == vn/vm.  */
+      float tmp1 = aarch64_get_vec_float (cpu, vn, 0);
+      float tmp2 = aarch64_get_vec_float (cpu, vn, 1);
+      float tmp5 = aarch64_get_vec_float (cpu, vm, 0);
+      float tmp6 = aarch64_get_vec_float (cpu, vm, 1);
+
       if (full)
-	aarch64_set_vec_float (cpu, vd, 1, aarch64_get_vec_float (cpu, vn, 2)
-			       + aarch64_get_vec_float (cpu, vn, 3));
-      aarch64_set_vec_float (cpu, vd, full ? 2 : 1,
-			     aarch64_get_vec_float (cpu, vm, 0)
-			     + aarch64_get_vec_float (cpu, vm, 1));
-      if (full)
-	aarch64_set_vec_float (cpu, vd, 3,
-			       aarch64_get_vec_float (cpu, vm, 2)
-			       + aarch64_get_vec_float (cpu, vm, 3));
+	{
+	  float tmp3 = aarch64_get_vec_float (cpu, vn, 2);
+	  float tmp4 = aarch64_get_vec_float (cpu, vn, 3);
+	  float tmp7 = aarch64_get_vec_float (cpu, vm, 2);
+	  float tmp8 = aarch64_get_vec_float (cpu, vm, 3);
+
+	  aarch64_set_vec_float (cpu, vd, 0, tmp1 + tmp2);
+	  aarch64_set_vec_float (cpu, vd, 1, tmp3 + tmp4);
+	  aarch64_set_vec_float (cpu, vd, 2, tmp5 + tmp6);
+	  aarch64_set_vec_float (cpu, vd, 3, tmp7 + tmp8);
+	}
+      else
+	{
+	  aarch64_set_vec_float (cpu, vd, 0, tmp1 + tmp2);
+	  aarch64_set_vec_float (cpu, vd, 1, tmp5 + tmp6);
+	}
     }
 }
 
@@ -10937,11 +10961,24 @@ do_vec_load_store (sim_cpu *cpu)
 	      sizeof_operation <<= uimm (aarch64_get_instr (cpu), 11, 10);
 	      break;
 
-	    case 2:
-	    case 6:
-	    case 10:
 	    case 7:
-	      sizeof_operation = 2 << uimm (aarch64_get_instr (cpu), 11, 10);
+	      /* One register, immediate offset variant.  */
+	      sizeof_operation = 8;
+	      break;
+	      
+	    case 10:
+	      /* Two registers, immediate offset variant.  */
+	      sizeof_operation = 16;
+	      break;
+
+	    case 6:
+	      /* Three registers, immediate offset variant.  */
+	      sizeof_operation = 24;
+	      break;
+
+	    case 2:
+	      /* Four registers, immediate offset variant.  */
+	      sizeof_operation = 32;
 	      break;
 
 	    default:
@@ -11421,7 +11458,7 @@ rbit64 (sim_cpu *cpu)
   for (i = 0; i < 64; i++)
     {
       result <<= 1;
-      result |= (value & 1L);
+      result |= (value & 1UL);
       value >>= 1;
     }
   aarch64_set_reg_u64 (cpu, rd, NO_SP, result);
@@ -13019,7 +13056,7 @@ aarch64_step (sim_cpu *cpu)
   aarch64_set_next_PC (cpu, pc + 4);
   aarch64_get_instr (cpu) = aarch64_get_mem_u32 (cpu, pc);
 
-  TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %x", pc,
+  TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %08x", pc,
 	      aarch64_get_instr (cpu));
   TRACE_DISASM (cpu, pc);
 

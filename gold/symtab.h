@@ -1113,8 +1113,8 @@ class Sized_symbol : public Symbol
 
   // Initialize fields for an undefined symbol.
   void
-  init_undefined(const char* name, const char* version, elfcpp::STT,
-		 elfcpp::STB, elfcpp::STV, unsigned char nonvis);
+  init_undefined(const char* name, const char* version, Value_type value,
+		 elfcpp::STT, elfcpp::STB, elfcpp::STV, unsigned char nonvis);
 
   // Override existing symbol.
   template<bool big_endian>
@@ -1480,6 +1480,12 @@ class Symbol_table
   void
   define_symbols(const Layout*, int count, const Define_symbol_in_segment*,
 		 bool only_if_ref);
+
+  // Add a target-specific global symbol.
+  // (Used by SPARC backend to add STT_SPARC_REGISTER symbols.)
+  void
+  add_target_global_symbol(Symbol* sym)
+  { this->target_symbols_.push_back(sym); }
 
   // Define SYM using a COPY reloc.  POSD is the Output_data where the
   // symbol should be defined--typically a .dyn.bss section.  VALUE is
@@ -1951,6 +1957,8 @@ class Symbol_table
   const Version_script_info& version_script_;
   Garbage_collection* gc_;
   Icf* icf_;
+  // Target-specific symbols, if any.
+  std::vector<Symbol*> target_symbols_;
 };
 
 // We inline get_sized_symbol for efficiency.

@@ -72,35 +72,18 @@ ip2k_elf_section_rtn (int i)
 
   if (force_code_align)
     {
-      /* The s_align_ptwo function expects that we are just after a .align
-	 directive and it will either try and read the align value or stop
-	 if end of line so we must fake it out so it thinks we are at the
-	 end of the line.  */
-      char *old_input_line_pointer = input_line_pointer;
-      input_line_pointer = "\n";
-      s_align_ptwo (1);
+      do_align (1, NULL, 0, 0);
       force_code_align = 0;
-      /* Restore.  */
-      input_line_pointer = old_input_line_pointer;
     }
 }
 
 static void
 ip2k_elf_section_text (int i)
 {
-  char *old_input_line_pointer;
   obj_elf_text(i);
 
-  /* the s_align_ptwo function expects that we are just after a .align
-     directive and it will either try and read the align value or stop if
-     end of line so we must fake it out so it thinks we are at the end of
-     the line.  */
-  old_input_line_pointer = input_line_pointer;
-  input_line_pointer = "\n";
-  s_align_ptwo (1);
+  do_align (1, NULL, 0, 0);
   force_code_align = 0;
-  /* Restore.  */
-  input_line_pointer = old_input_line_pointer;
 }
 
 /* The target specific pseudo-ops which we support.  */

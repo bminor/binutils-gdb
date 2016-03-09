@@ -1677,7 +1677,7 @@ static sh_opcode_info *
 get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 {
   sh_opcode_info *this_try = opcode;
-  char *name = opcode->name;
+  const char *name = opcode->name;
   int n = 0;
 
   while (opcode->name)

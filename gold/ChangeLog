@@ -1,3 +1,93 @@
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+
+        PR 19751
+	* testsuite/Makefile.am (retain_symbols_file_test): Remove check
+	for constructor.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/dynamic_list.sh: Likewise.
+	* testsuite/retain_symbols_file_test.sh: Likewise.
+
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+
+        PR 19751
+        * arm.cc (Reloc_stub::Key::name): Add unused attribute.
+        * dirsearch.cc (Dir_caches::~Dir_caches): Likewise.
+
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+            Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* output.cc (Output_reloc_writer): New type.
+	(Output_data_reloc_base::do_write): Move implementation to template
+	in output.h and replace with invocation of template.
+	* output.h (Output_file): Move to top of file.
+	(Output_reloc::get_symbol_index): Move to public interface.
+	(Output_reloc::get_address): Likewise.
+	(Output_data_reloc_base::do_write_generic): New function template.
+
+2016-03-04  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19019
+	PR gold/19763
+	* symtab.cc: Instantiate Sized_symbol::init_constant and
+	Sized_symbol::init_undefined.
+
+2016-03-03  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19019
+	* layout.h (Layout::add_target_specific_dynamic_tag): New function.
+	* layout.cc (Layout::add_target_specific_dynamic_tag): New function.
+	* mips.cc (Target_mips::make_symbol): Adjust function signature.
+	* sparc.cc (Target_sparc::Target_sparc): Initialize register_syms_.
+	(Target_sparc::do_is_defined_by_abi): Remove test for
+	STT_SPARC_REGISTER.
+	(Target_sparc::Register_symbol): New struct type.
+	(Target_sparc::register_syms_): New data member.
+	(Target_sparc<64, true>::sparc_info): Set has_make_symbol to true.
+	(Target_sparc::make_symbol): New function.
+	(Target_sparc::do_finalize_sections): Add register symbols and new
+	dynamic table entries.
+	* symtab.h (Sized_symbol::init_undefined): Add value parameter.
+	(Symbol_table::add_target_global_symbol): New function.
+	(Symbol_table::target_symbols_): New data member.
+	* symtab.cc (Sized_symbol::init_undefined): Add value parameter.
+	(Symbol_table::Symbol_table): Initialize target_symbols_.
+	(Symbol_table::add_from_object): Pass additional parameters to
+	Target::make_symbol.
+	(Symbol_table::define_special_symbol): Likewise.
+	(Symbol_table::add_undefined_symbol_from_command_line): Pass 0 for
+	undefined symbol value.
+	(Symbol_table::set_dynsym_indexes): Process target-specific symbols.
+	(Symbol_table::sized_finalize): Likewise.
+	(Symbol_table::sized_write_globals): Likewise.
+	* target.h (Sized_target::make_symbol): Add name, st_type, object,
+	st_shndx, and value parameters.
+
+2016-03-03  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* plugin.cc (do_should_include_member): Ignore LDPK_UNDEF and
+	LDPK_WEAKUNDEF symbols.
+
+2016-03-03  Than McIntosh  <thanm@google.com>
+
+	* plugin.cc (Plugin::load): Include hooks for get_input_section_size
+	and get_input_section_alignment in transfer vector.
+	(get_input_section_alignment): New function.
+	(get_input_section_size): New function.
+	* testsuite/Makefile.am: Add plugin_layout_with_alignment.sh test.
+	* testsuite/Makefile.in: [Regenerate.]
+	* testsuite/plugin_section_alignment.cc: New test file.
+	* testsuite/plugin_layout_with_alignment.cc: New test file.
+	* testsuite/plugin_layout_with_alignment.sh: New test file.
+
+2016-03-03  Evgenii Stepanov  <eugenis@google.com>
+
+	* plugin.h (Pluginobj::get_symbol_resolution_info): Add version
+	parameter.
+	* plugin.cc (get_symbols_v3): New function.
+	(Plugin::load): Add LDPT_GET_SYMBOLS_V3.
+	(Pluginobj::get_symbol_resolution_info): Return LDPS_NO_SYMS when using
+	new version.
+
 2016-02-26  Egor Kochetov  <egor.kochetov@intel.com>
 	    Cary Coutant  <ccoutant@gmail.com>
 

@@ -529,8 +529,11 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  child_thr->last_status.kind = TARGET_WAITKIND_STOPPED;
 
 	  /* If we're suspending all threads, leave this one suspended
-	     too.  */
-	  if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS)
+	     too.  If the fork/clone parent is stepping over a breakpoint,
+	     all other threads have been suspended already.  Leave the
+	     child suspended too.  */
+	  if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
+	      || event_lwp->bp_reinsert != 0)
 	    {
 	      if (debug_threads)
 		debug_printf ("HEW: leaving child suspended\n");
@@ -583,9 +586,12 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	 before calling linux_resume_one_lwp.  */
       new_lwp->stopped = 1;
 
-     /* If we're suspending all threads, leave this one suspended
-	too.  */
-      if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS)
+      /* If we're suspending all threads, leave this one suspended
+	 too.  If the fork/clone parent is stepping over a breakpoint,
+	 all other threads have been suspended already.  Leave the
+	 child suspended too.  */
+      if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
+	  || event_lwp->bp_reinsert != 0)
 	new_lwp->suspended = 1;
 
       /* Normally we will get the pending SIGSTOP.  But in some cases
@@ -4619,18 +4625,10 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
    of the way.  If we let other threads run while we do that, they may
    pass by the breakpoint location and miss hitting it.  To avoid
    that, a step-over momentarily stops all threads while LWP is
-   single-stepped while the breakpoint is temporarily uninserted from
-   the inferior.  When the single-step finishes, we reinsert the
-   breakpoint, and let all threads that are supposed to be running,
-   run again.
-
-   On targets that don't support hardware single-step, we don't
-   currently support full software single-stepping.  Instead, we only
-   support stepping over the thread event breakpoint, by asking the
-   low target where to place a reinsert breakpoint.  Since this
-   routine assumes the breakpoint being stepped over is a thread event
-   breakpoint, it usually assumes the return address of the current
-   function is a good enough place to set the reinsert breakpoint.  */
+   single-stepped by either hardware or software while the breakpoint
+   is temporarily uninserted from the inferior.  When the single-step
+   finishes, we reinsert the breakpoint, and let all threads that are
+   supposed to be running, run again.  */
 
 static int
 start_step_over (struct lwp_info *lwp)

@@ -1,3 +1,60 @@
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* cris-tdep.c (cris_gdbarch_init): Return 0 if the info's byte
+	order is BFD_ENDIAN_BIG or if the cris version is unsupported.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* doublest.c: Extend comments.
+	(floatformat_to_doublest, floatformat_from_doublest): Copy the
+	floatformat's total size, not the host type's size.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* doublest.c (floatformat_totalsize_bytes): New function.
+	(floatformat_from_type): Assert that the type's length is at least
+	as long as the floatformat's totalsize.
+	* doublest.h (floatformat_totalsize_bytes): New declaration.
+	* gdbtypes.c (arch_float_type): Assert that the type's length is
+	at least as long as the floatformat's totalsize.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* hppa-linux-tdep.c (hppa_linux_init_abi): Set the long double
+	format to floatformats_ieee_double.
+
+2016-03-07  Pedro Alves  <palves@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Check whether info.abfd is NULL
+	before calling bfd_get_flavour.
+
+2016-03-05  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* avr-tdep.c (AVR_LAST_ARG_REGNUM): Define.
+	(avr_push_dummy_call): Correct last needed argument register.
+	Write MSB of argument into register and subsequent bytes into
+	other registers in decreasing order.
+
+2016-03-04  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_record_vdata_transfer_insn): Simplify the
+	condition check.  Record the right D register number.
+
+2016-03-04  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_record_extension_space): Remove code
+	printing "Process record does not support".
+	(arm_record_data_proc_misc_ld_str): Likewise.
+	(decode_insn): Call arm_record_extension_space if condition
+	is 0xf.  Call arm_record_unsupported_insn if ret isn't
+	ARM_RECORD_SUCCESS.  Use 'ret' instead of 'insn_id' to hold
+	the value of thumb2_record_decode_insn_handler.
+
+2016-03-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* features/feature_to_c.sh: Print the help when passing no
+	argument.
+
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* MAINTAINERS (Write After Approval): Add Bernhard Heckel.

@@ -1999,7 +1999,15 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 pointer:
 	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
 	    eh->has_non_got_reloc = 1;
-	  if (h != NULL && bfd_link_executable (info))
+	  /* STT_GNU_IFUNC symbol must go through PLT even if it is
+	     locally defined and undefined symbol may turn out to be
+	     a STT_GNU_IFUNC symbol later.  */
+	  if (h != NULL
+	      && (bfd_link_executable (info)
+		  || ((h->type == STT_GNU_IFUNC
+		       || h->root.type == bfd_link_hash_undefweak
+		       || h->root.type == bfd_link_hash_undefined)
+		      && SYMBOLIC_BIND (info, h))))
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this

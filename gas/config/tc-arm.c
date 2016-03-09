@@ -271,7 +271,7 @@ static const arm_feature_set fpu_crypto_ext_armv8 =
 static const arm_feature_set crc_ext_armv8 =
   ARM_FEATURE_COPROC (CRC_EXT_ARMV8);
 static const arm_feature_set fpu_neon_ext_v8_1 =
-  ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8 | FPU_NEON_EXT_RDMA);
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -6085,6 +6085,16 @@ parse_cond (char **str)
   return c->value;
 }
 
+/* Record a use of the given feature.  */
+static void
+record_feature_use (const arm_feature_set *feature)
+{
+  if (thumb_mode)
+    ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, *feature);
+  else
+    ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, *feature);
+}
+
 /* If the given feature available in the selected CPU, mark it as used.
    Returns TRUE iff feature is available.  */
 static bfd_boolean
@@ -6096,10 +6106,7 @@ mark_feature_used (const arm_feature_set *feature)
 
   /* Add the appropriate architecture feature for the barrier option used.
      */
-  if (thumb_mode)
-    ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, *feature);
-  else
-    ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, *feature);
+  record_feature_use (feature);
 
   return TRUE;
 }
@@ -15023,6 +15030,38 @@ do_neon_qdmulh (void)
 }
 
 static void
+do_neon_qrdmlah (void)
+{
+  /* Check we're on the correct architecture.  */
+  if (!mark_feature_used (&fpu_neon_ext_armv8))
+    inst.error =
+      _("instruction form not available on this architecture.");
+  else if (!mark_feature_used (&fpu_neon_ext_v8_1))
+    {
+      as_warn (_("this instruction implies use of ARMv8.1 AdvSIMD."));
+      record_feature_use (&fpu_neon_ext_v8_1);
+    }
+
+  if (inst.operands[2].isscalar)
+    {
+      enum neon_shape rs = neon_select_shape (NS_DDS, NS_QQS, NS_NULL);
+      struct neon_type_el et = neon_check_type (3, rs,
+	N_EQK, N_EQK, N_S16 | N_S32 | N_KEY);
+      NEON_ENCODE (SCALAR, inst);
+      neon_mul_mac (et, neon_quad (rs));
+    }
+  else
+    {
+      enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+      struct neon_type_el et = neon_check_type (3, rs,
+	N_EQK, N_EQK, N_S16 | N_S32 | N_KEY);
+      NEON_ENCODE (INTEGER, inst);
+      /* The U bit (rounding) comes from bit mask.  */
+      neon_three_same (neon_quad (rs), 0, et.size);
+    }
+}
+
+static void
 do_neon_fcmp_absolute (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
@@ -16636,18 +16675,18 @@ do_neon_ld_st_interleave (void)
    values, terminated with -1.  */
 
 static int
-neon_alignment_bit (int size, int align, int *do_align, ...)
+neon_alignment_bit (int size, int align, int *do_alignment, ...)
 {
   va_list ap;
   int result = FAIL, thissize, thisalign;
 
   if (!inst.operands[1].immisalign)
     {
-      *do_align = 0;
+      *do_alignment = 0;
       return SUCCESS;
     }
 
-  va_start (ap, do_align);
+  va_start (ap, do_alignment);
 
   do
     {
@@ -16664,7 +16703,7 @@ neon_alignment_bit (int size, int align, int *do_align, ...)
   va_end (ap);
 
   if (result == SUCCESS)
-    *do_align = 1;
+    *do_alignment = 1;
   else
     first_error (_("unsupported alignment for instruction"));
 
@@ -16675,7 +16714,7 @@ static void
 do_neon_ld_st_lane (void)
 {
   struct neon_type_el et = neon_check_type (1, NS_NULL, N_8 | N_16 | N_32);
-  int align_good, do_align = 0;
+  int align_good, do_alignment = 0;
   int logsize = neon_logbits (et.size);
   int align = inst.operands[1].imm >> 8;
   int n = (inst.instruction >> 8) & 3;
@@ -16695,11 +16734,11 @@ do_neon_ld_st_lane (void)
   switch (n)
     {
     case 0:  /* VLD1 / VST1.  */
-      align_good = neon_alignment_bit (et.size, align, &do_align, 16, 16,
+      align_good = neon_alignment_bit (et.size, align, &do_alignment, 16, 16,
 				       32, 32, -1);
       if (align_good == FAIL)
 	return;
-      if (do_align)
+      if (do_alignment)
 	{
 	  unsigned alignbits = 0;
 	  switch (et.size)
@@ -16713,11 +16752,11 @@ do_neon_ld_st_lane (void)
       break;
 
     case 1:  /* VLD2 / VST2.  */
-      align_good = neon_alignment_bit (et.size, align, &do_align, 8, 16, 16, 32,
-				       32, 64, -1);
+      align_good = neon_alignment_bit (et.size, align, &do_alignment, 8, 16,
+		      16, 32, 32, 64, -1);
       if (align_good == FAIL)
 	return;
-      if (do_align)
+      if (do_alignment)
 	inst.instruction |= 1 << 4;
       break;
 
@@ -16727,11 +16766,11 @@ do_neon_ld_st_lane (void)
       break;
 
     case 3:  /* VLD4 / VST4.  */
-      align_good = neon_alignment_bit (et.size, align, &do_align, 8, 32,
+      align_good = neon_alignment_bit (et.size, align, &do_alignment, 8, 32,
 				       16, 64, 32, 64, 32, 128, -1);
       if (align_good == FAIL)
 	return;
-      if (do_align)
+      if (do_alignment)
 	{
 	  unsigned alignbits = 0;
 	  switch (et.size)
@@ -16762,7 +16801,7 @@ static void
 do_neon_ld_dup (void)
 {
   struct neon_type_el et = neon_check_type (1, NS_NULL, N_8 | N_16 | N_32);
-  int align_good, do_align = 0;
+  int align_good, do_alignment = 0;
 
   if (et.type == NT_invtype)
     return;
@@ -16772,7 +16811,7 @@ do_neon_ld_dup (void)
     case 0:  /* VLD1.  */
       gas_assert (NEON_REG_STRIDE (inst.operands[0].imm) != 2);
       align_good = neon_alignment_bit (et.size, inst.operands[1].imm >> 8,
-				       &do_align, 16, 16, 32, 32, -1);
+				       &do_alignment, 16, 16, 32, 32, -1);
       if (align_good == FAIL)
 	return;
       switch (NEON_REGLIST_LENGTH (inst.operands[0].imm))
@@ -16786,7 +16825,8 @@ do_neon_ld_dup (void)
 
     case 1:  /* VLD2.  */
       align_good = neon_alignment_bit (et.size, inst.operands[1].imm >> 8,
-				       &do_align, 8, 16, 16, 32, 32, 64, -1);
+				       &do_alignment, 8, 16, 16, 32, 32, 64,
+				       -1);
       if (align_good == FAIL)
 	return;
       constraint (NEON_REGLIST_LENGTH (inst.operands[0].imm) != 2,
@@ -16809,7 +16849,7 @@ do_neon_ld_dup (void)
     case 3:  /* VLD4.  */
       {
 	int align = inst.operands[1].imm >> 8;
-	align_good = neon_alignment_bit (et.size, align, &do_align, 8, 32,
+	align_good = neon_alignment_bit (et.size, align, &do_alignment, 8, 32,
 					 16, 64, 32, 64, 32, 128, -1);
 	if (align_good == FAIL)
 	  return;
@@ -16827,7 +16867,7 @@ do_neon_ld_dup (void)
     default: ;
     }
 
-  inst.instruction |= do_align << 4;
+  inst.instruction |= do_alignment << 4;
 }
 
 /* Disambiguate VLD<n> and VST<n> instructions, and fill in common bits (those
@@ -20311,10 +20351,10 @@ static const struct asm_opcode insns[] =
  NUF(vrsqrts,   0200f10,  3, (RNDQ, oRNDQ, RNDQ), neon_step),
  NUF(vrsqrtsq,  0200f10,  3, (RNQ,  oRNQ,  RNQ),  neon_step),
  /* ARM v8.1 extension.  */
- nUF(vqrdmlah,  _vqrdmlah, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
- nUF(vqrdmlahq, _vqrdmlah, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
- nUF(vqrdmlsh,  _vqrdmlsh, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
- nUF(vqrdmlshq, _vqrdmlsh, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
+ nUF (vqrdmlah,  _vqrdmlah, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qrdmlah),
+ nUF (vqrdmlahq, _vqrdmlah, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qrdmlah),
+ nUF (vqrdmlsh,  _vqrdmlsh, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qrdmlah),
+ nUF (vqrdmlshq, _vqrdmlsh, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qrdmlah),
 
   /* Two address, int/float. Types S8 S16 S32 F32.  */
  NUF(vabsq,     1b10300, 2, (RNQ,  RNQ),      neon_abs_neg),
@@ -25202,6 +25242,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-r7",	ARM_ARCH_V7R_IDIV,
 						 FPU_ARCH_VFP_V3D16,
 								  "Cortex-R7"),
+  ARM_CPU_OPT ("cortex-r8",	ARM_ARCH_V7R_IDIV,
+						 FPU_ARCH_VFP_V3D16,
+								  "Cortex-R8"),
   ARM_CPU_OPT ("cortex-m7",	ARM_ARCH_V7EM,	 FPU_NONE,	  "Cortex-M7"),
   ARM_CPU_OPT ("cortex-m4",	ARM_ARCH_V7EM,	 FPU_NONE,	  "Cortex-M4"),
   ARM_CPU_OPT ("cortex-m3",	ARM_ARCH_V7M,	 FPU_NONE,	  "Cortex-M3"),
@@ -25350,25 +25393,25 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
-  ARM_EXT_OPT ("simd",   FPU_ARCH_NEON_VFP_ARMV8,
-			ARM_FEATURE_COPROC (FPU_NEON_ARMV8),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("os",	ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6M)),
   ARM_EXT_OPT ("pan",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
 			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_PAN, 0),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("rdma",  FPU_ARCH_NEON_VFP_ARMV8_1,
+			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V7A)),
+  ARM_EXT_OPT ("simd",  FPU_ARCH_NEON_VFP_ARMV8,
+			ARM_FEATURE_COPROC (FPU_NEON_ARMV8),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("virt",	ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT | ARM_EXT_ADIV
 				     | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
-  ARM_EXT_OPT ("rdma",  FPU_ARCH_NEON_VFP_ARMV8,
-			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("xscale",ARM_FEATURE_COPROC (ARM_CEXT_XSCALE),
 			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ANY),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }
@@ -26119,7 +26162,9 @@ aeabi_set_public_attributes (void)
     aeabi_set_attribute_int (Tag_WMMX_arch, 1);
 
   /* Tag_Advanced_SIMD_arch (formerly Tag_NEON_arch).  */
-  if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_armv8))
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_v8_1))
+    aeabi_set_attribute_int (Tag_Advanced_SIMD_arch, 4);
+  else if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_armv8))
     aeabi_set_attribute_int (Tag_Advanced_SIMD_arch, 3);
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_v1))
     {

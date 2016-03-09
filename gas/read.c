@@ -754,7 +754,7 @@ in_bss (void)
    MAX is the maximum number of characters to skip when doing the alignment,
     or 0 if there is no maximum.  */
 
-static void
+void
 do_align (unsigned int n, char *fill, unsigned int len, unsigned int max)
 {
   if (now_seg == absolute_section || in_bss ())

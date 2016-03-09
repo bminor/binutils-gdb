@@ -1,3 +1,43 @@
+2016-03-08  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/arc-reloc.def: Add a call to ME within the formula for each
+	relocation that requires middle-endian correction.
+
+2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* opcode/dlx.h (struct dlx_opcode): Add const qualifiers.
+	* opcode/h8300.h (struct h8_opcode): Likewise.
+	* opcode/hppa.h (struct pa_opcode): Likewise.
+	* opcode/msp430.h: Likewise.
+	* opcode/spu.h (struct spu_opcode): Likewise.
+	* opcode/tic30.h (struct _register): Likewise.
+	* opcode/tic4x.h (struct tic4x_register): Likewise.
+	(struct tic4x_cond): Likewise.
+	(struct tic4x_indirect): Likewise.
+	(struct tic4x_inst): Likewise.
+	* opcode/visium.h (struct reg_entry): Likewise.
+
+2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (ARM_ARCH_V8_1A): Add FPU_NEON_EXT_RDMA.
+	(ARM_CPU_HAS_FEATURE): Add comment.
+
+2016-03-03  Than McIntosh <thanm@google.com>
+
+	* plugin-api.h: Add new hooks to the plugin transfer vector to
+	to support querying section alignment and section size.
+	(ld_plugin_get_input_section_alignment): New hook.
+	(ld_plugin_get_input_section_size): New hook.
+	(ld_plugin_tag): Add LDPT_GET_INPUT_SECTION_ALIGNMENT
+	and LDPT_GET_INPUT_SECTION_SIZE.
+	(ld_plugin_tv): Add tv_get_input_section_alignment and
+	tv_get_input_section_size.
+
+2016-03-03  Evgenii Stepanov  <eugenis@google.com>
+
+	* plugin-api.h (enum ld_plugin_tag): Add LDPT_GET_SYMBOLS_V3.
+
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19645

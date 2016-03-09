@@ -102,7 +102,7 @@ class Dir_caches
     : lock_(), caches_()
   { }
 
-  ~Dir_caches();
+  ~Dir_caches() ATTRIBUTE_UNUSED;
 
   // Add a cache for a directory.
   void add(const char*);

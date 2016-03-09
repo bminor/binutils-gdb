@@ -31,7 +31,7 @@
 /* Put here all non-digit non-letter characters that may occur in an
    operand.  */
 static char operand_special_chars[] = "%$-+(,)*._~/<>&^!:[@]";
-static char *ordinal_names[] =
+static const char *ordinal_names[] =
 {
   N_("first"), N_("second"), N_("third"), N_("fourth"), N_("fifth")
 };

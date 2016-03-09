@@ -4048,10 +4048,10 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case BFD_ENDIAN_BIG:
-      internal_error (__FILE__, __LINE__,
-		      _("cris_gdbarch_init: big endian byte order in info"));
-      break;
-    
+      /* Cris is always little endian, but the user could have forced
+	 big endian with "set endian".  */
+      return 0;
+
     default:
       internal_error (__FILE__, __LINE__,
 		      _("cris_gdbarch_init: unknown byte order in info"));
@@ -4083,9 +4083,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case 8:
     case 9:
       /* Old versions; not supported.  */
-      internal_error (__FILE__, __LINE__, 
-		      _("cris_gdbarch_init: unsupported CRIS version"));
-      break;
+      return 0;
 
     case 10:
     case 11: 
@@ -4125,8 +4123,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, 
-		      _("cris_gdbarch_init: unknown CRIS version"));
+      /* Unknown version.  */
+      return 0;
     }
 
   /* Dummy frame functions (shared between CRISv10 and CRISv32 since they

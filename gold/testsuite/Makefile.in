@@ -301,8 +301,15 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug_gabi.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err pr18689a.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr18689b.o flagstest_o_ttext_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections.check \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections.cmp \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gnu.check \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gnu.cmp \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi.cmp \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi.check \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr18689a.o pr18689b.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_11.a protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_lib binary.txt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
@@ -427,7 +434,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_8 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_38 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.sh \
@@ -436,7 +444,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_6.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib.sh
 
 # Test that symbols known in the IR file but not in the replacement file
 # produce an unresolved symbol error.
@@ -450,7 +459,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.o.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib.err
 # Make a copy of two_file_test_1.o, which does not define the symbol _Z4t16av.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_40 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
@@ -464,15 +474,20 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	two_file_test_1c.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_thin.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_thin.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_41 = plugin_test_tls
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_42 = plugin_test_tls.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_43 = plugin_test_tls.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_44 = plugin_test_tls.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_45 = unused.c \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_final_layout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_46 = plugin_final_layout.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_47 = plugin_final_layout.stdout plugin_final_layout_readelf.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_final_layout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_layout_with_alignment
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_46 = plugin_final_layout.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_layout_with_alignment.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_47 = plugin_final_layout.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_final_layout_readelf.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_layout_with_alignment.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_48 = exclude_libs_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test
@@ -541,7 +556,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test_inc_1.t \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test_inc_2.t \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test_inc_3.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test_inc_3.t \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test_2
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_52 = large
 @GCC_FALSE@large_DEPENDENCIES =
 @MCMODEL_MEDIUM_FALSE@large_DEPENDENCIES =
@@ -650,6 +666,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_1 \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2.stdout \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2 \
+@GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2_gabi \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2.stdout \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_2 \
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_3.stdout \
@@ -1010,7 +1027,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_8$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__EXEEXT_22 = plugin_test_tls$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_23 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT) \
@@ -1717,6 +1735,13 @@ plugin_test_8_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+plugin_test_start_lib_SOURCES = plugin_test_start_lib.c
+plugin_test_start_lib_OBJECTS = plugin_test_start_lib.$(OBJEXT)
+plugin_test_start_lib_LDADD = $(LDADD)
+plugin_test_start_lib_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 plugin_test_tls_SOURCES = plugin_test_tls.c
 plugin_test_tls_OBJECTS = plugin_test_tls.$(OBJEXT)
 plugin_test_tls_LDADD = $(LDADD)
@@ -2183,12 +2208,12 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	plugin_test_10.c plugin_test_11.c plugin_test_2.c \
 	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
 	plugin_test_6.c plugin_test_7.c plugin_test_8.c \
-	plugin_test_tls.c $(protected_1_SOURCES) \
-	$(protected_2_SOURCES) $(relro_now_test_SOURCES) \
-	$(relro_script_test_SOURCES) $(relro_strip_test_SOURCES) \
-	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
-	script_test_11.c script_test_12.c script_test_12i.c \
-	$(script_test_2_SOURCES) script_test_3.c \
+	plugin_test_start_lib.c plugin_test_tls.c \
+	$(protected_1_SOURCES) $(protected_2_SOURCES) \
+	$(relro_now_test_SOURCES) $(relro_script_test_SOURCES) \
+	$(relro_strip_test_SOURCES) $(relro_test_SOURCES) \
+	$(script_test_1_SOURCES) script_test_11.c script_test_12.c \
+	script_test_12i.c $(script_test_2_SOURCES) script_test_3.c \
 	$(searched_file_test_SOURCES) start_lib_test.c \
 	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
 	$(tls_phdrs_script_test_SOURCES) $(tls_pic_test_SOURCES) \
@@ -3690,6 +3715,15 @@ pie_copyrelocs_test$(EXEEXT): $(pie_copyrelocs_test_OBJECTS) $(pie_copyrelocs_te
 @PLUGINS_FALSE@plugin_test_8$(EXEEXT): $(plugin_test_8_OBJECTS) $(plugin_test_8_DEPENDENCIES) 
 @PLUGINS_FALSE@	@rm -f plugin_test_8$(EXEEXT)
 @PLUGINS_FALSE@	$(LINK) $(plugin_test_8_OBJECTS) $(plugin_test_8_LDADD) $(LIBS)
+@GCC_FALSE@plugin_test_start_lib$(EXEEXT): $(plugin_test_start_lib_OBJECTS) $(plugin_test_start_lib_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f plugin_test_start_lib$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(plugin_test_start_lib_OBJECTS) $(plugin_test_start_lib_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@plugin_test_start_lib$(EXEEXT): $(plugin_test_start_lib_OBJECTS) $(plugin_test_start_lib_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f plugin_test_start_lib$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(plugin_test_start_lib_OBJECTS) $(plugin_test_start_lib_LDADD) $(LIBS)
+@PLUGINS_FALSE@plugin_test_start_lib$(EXEEXT): $(plugin_test_start_lib_OBJECTS) $(plugin_test_start_lib_DEPENDENCIES) 
+@PLUGINS_FALSE@	@rm -f plugin_test_start_lib$(EXEEXT)
+@PLUGINS_FALSE@	$(LINK) $(plugin_test_start_lib_OBJECTS) $(plugin_test_start_lib_LDADD) $(LIBS)
 @GCC_FALSE@plugin_test_tls$(EXEEXT): $(plugin_test_tls_OBJECTS) $(plugin_test_tls_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f plugin_test_tls$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(plugin_test_tls_OBJECTS) $(plugin_test_tls_LDADD) $(LIBS)
@@ -4040,6 +4074,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_7.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_8.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_start_lib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_tls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_1.Po@am__quote@
@@ -4533,10 +4568,14 @@ plugin_test_10.sh.log: plugin_test_10.sh
 	@p='plugin_test_10.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_11.sh.log: plugin_test_11.sh
 	@p='plugin_test_11.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_start_lib.sh.log: plugin_test_start_lib.sh
+	@p='plugin_test_start_lib.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_tls.sh.log: plugin_test_tls.sh
 	@p='plugin_test_tls.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_final_layout.sh.log: plugin_final_layout.sh
 	@p='plugin_final_layout.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_layout_with_alignment.sh.log: plugin_layout_with_alignment.sh
+	@p='plugin_layout_with_alignment.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 exclude_libs_test.sh.log: exclude_libs_test.sh
 	@p='exclude_libs_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 discard_locals_test.sh.log: discard_locals_test.sh
@@ -4841,6 +4880,8 @@ plugin_test_10.log: plugin_test_10$(EXEEXT)
 	@p='plugin_test_10$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_11.log: plugin_test_11$(EXEEXT)
 	@p='plugin_test_11$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_start_lib.log: plugin_test_start_lib$(EXEEXT)
+	@p='plugin_test_start_lib$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_tls.log: plugin_test_tls$(EXEEXT)
 	@p='plugin_test_tls$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 exclude_libs_test.log: exclude_libs_test$(EXEEXT)
@@ -6048,6 +6089,14 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	rm -f $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_AR) crT $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_start_lib: unused.o plugin_start_lib_test.o plugin_start_lib_test_2.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_start_lib_test.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@		-Wl,--start-lib plugin_start_lib_test_2.syms -Wl,--end-lib 2>plugin_test_start_lib.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_start_lib.err: plugin_test_start_lib
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_start_lib.err
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_start_lib_test_2.syms: plugin_start_lib_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.so: plugin_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -shared plugin_test.o
@@ -6097,6 +6146,17 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -shared plugin_section_order.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_order.o: plugin_section_order.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_layout_with_alignment.o: plugin_layout_with_alignment.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_layout_with_alignment: plugin_layout_with_alignment.o plugin_section_alignment.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_section_alignment.so" plugin_layout_with_alignment.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_layout_with_alignment.stdout: plugin_layout_with_alignment
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_NM) -n --synthetic plugin_layout_with_alignment > plugin_layout_with_alignment.stdout
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_alignment.so: plugin_section_alignment.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared plugin_section_alignment.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_alignment.o: plugin_section_alignment.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test.syms: exclude_libs_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@libexclude_libs_test_1.a: exclude_libs_test_1.o
@@ -6138,7 +6198,6 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo 'main' > retain_symbols_file_test.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo 't1' >> retain_symbols_file_test.in
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_ZN4t16bC1Ev' >> retain_symbols_file_test.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_ZNK4t20a3getEv' >> retain_symbols_file_test.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_Z3t18v' >> retain_symbols_file_test.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '__tcf_0' >> retain_symbols_file_test.in
