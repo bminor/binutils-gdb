@@ -38,4 +38,4 @@ static const bfd_arch_info_type arch_info_struct[] =
 };
 
 const bfd_arch_info_type bfd_v850_rh850_arch =
-  R (bfd_mach_v850,     "v850-rh850",   TRUE,  & arch_info_struct[0]);
+  R (bfd_mach_v850,     "v850:rh850",   TRUE,  & arch_info_struct[0]);

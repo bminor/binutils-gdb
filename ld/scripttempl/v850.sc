@@ -13,7 +13,7 @@ cat << EOF
 
 OUTPUT_FORMAT("elf32-v850", "elf32-v850",
 	      "elf32-v850")
-OUTPUT_ARCH(v850)
+OUTPUT_ARCH(v850:old-gcc-abi)
 ${RELOCATING+ENTRY(_start)}
 SEARCH_DIR(.);
 EXTERN(__ctbp __ep __gp);

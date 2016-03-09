@@ -1,3 +1,8 @@
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* scripttempl/v850.sc: Use "v850:old-gcc-abi" as OUTPUT_ARCH.
+	* scripttempl/v850_rh850.sc: Use "v850:rh850" as OUTPUT_ARCH.
+
 2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19789
