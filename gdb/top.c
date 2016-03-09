@@ -50,6 +50,7 @@
 #include "maint.h"
 #include "filenames.h"
 #include "frame.h"
+#include "buffer.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -603,65 +604,60 @@ prevent_dont_repeat (void)
 
 /* Read a line from the stream "instream" without command line editing.
 
-   It prints PROMPT_ARG once at the start.
+   It prints PROMPT once at the start.
    Action is compatible with "readline", e.g. space for the result is
    malloc'd and should be freed by the caller.
 
    A NULL return means end of file.  */
 
 static char *
-gdb_readline_no_editing (const char *prompt_arg)
+gdb_readline_no_editing (const char *prompt)
 {
-  int c;
-  char *result;
-  int input_index = 0;
-  int result_size = 80;
+  struct buffer line_buffer;
 
-  if (prompt_arg)
+  buffer_init (&line_buffer);
+
+  if (prompt != NULL)
     {
       /* Don't use a _filtered function here.  It causes the assumed
          character position to be off, since the newline we read from
          the user is not accounted for.  */
-      fputs_unfiltered (prompt_arg, gdb_stdout);
+      fputs_unfiltered (prompt, gdb_stdout);
       gdb_flush (gdb_stdout);
     }
 
-  result = (char *) xmalloc (result_size);
-
   while (1)
     {
+      int c;
+
       /* Read from stdin if we are executing a user defined command.
          This is the right thing for prompt_for_continue, at least.  */
       c = fgetc (instream ? instream : stdin);
 
       if (c == EOF)
 	{
-	  if (input_index > 0)
+	  if (line_buffer.used_size > 0)
 	    /* The last line does not end with a newline.  Return it, and
 	       if we are called again fgetc will still return EOF and
 	       we'll return NULL then.  */
 	    break;
-	  xfree (result);
+	  xfree (buffer_finish (&line_buffer));
 	  return NULL;
 	}
 
       if (c == '\n')
 	{
-	  if (input_index > 0 && result[input_index - 1] == '\r')
-	    input_index--;
+	  if (line_buffer.used_size > 0
+	      && line_buffer.buffer[line_buffer.used_size - 1] == '\r')
+	    line_buffer.used_size--;
 	  break;
 	}
 
-      result[input_index++] = c;
-      while (input_index >= result_size)
-	{
-	  result_size *= 2;
-	  result = (char *) xrealloc (result, result_size);
-	}
+      buffer_grow_char (&line_buffer, c);
     }
 
-  result[input_index++] = '\0';
-  return result;
+  buffer_grow_char (&line_buffer, '\0');
+  return buffer_finish (&line_buffer);
 }
 
 /* Variables which control command line editing and history

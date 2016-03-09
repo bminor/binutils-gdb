@@ -1,5 +1,12 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* common/buffer.h (buffer_grow_char): New function.
+	* top.c: Include buffer.h.
+	(gdb_readline_no_editing): Rename 'prompt_arg' parameter to
+	'prompt'.  Use struct buffer instead of xrealloc.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* defs.h (gdb_readline): Delete declaration.
 	* top.c (gdb_readline): Rename to ...
 	(gdb_readline_no_editing): ... this, and make static.
