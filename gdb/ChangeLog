@@ -1,5 +1,9 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* utils.c (prompt_for_continue): Update comments.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (async_annotation_suffix): Delete.
 	(top_level_prompt, command_line_handler): Don't use
 	'async_annotation_suffix' and simplify.
