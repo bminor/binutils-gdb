@@ -1,5 +1,24 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (more_to_come): Delete.
+	(struct readline_input_state): Delete.
+	(readline_input_state): Delete.
+	(get_command_line_buffer): New function.
+	(command_handler): Update comments.  Don't handle NULL commands
+	here.  Do not execute commented lines.
+	(command_line_append_input_line): New function.
+	(handle_line_of_input): New function, partly based on
+	command_line_handler and command_line_input.
+	(command_line_handler): Rewrite.
+	* event-top.h (command_handler): New declaration.
+	(command_loop): Defer command execution to command_handler.
+	(command_line_input): Update comments.  Simplify, using struct
+	buffer and handle_line_of_input.
+	* top.h (struct buffer): New forward declaration.
+	(handle_line_of_input): New declaration.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (command_line_handler): Use xfree + xstrdup instead
 	of xrealloc + strcpy.
 	* main.c (captured_main): Use xstrdup instead of xmalloc plus

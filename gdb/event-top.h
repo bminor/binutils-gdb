@@ -34,6 +34,8 @@ extern void async_init_signals (void);
 extern void set_async_editing_command (char *args, int from_tty,
 				       struct cmd_list_element *c);
 
+extern void command_handler (char *command);
+
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
 #ifndef STOP_SIGNAL
 #include <signal.h>

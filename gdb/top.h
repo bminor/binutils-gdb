@@ -20,6 +20,8 @@
 #ifndef TOP_H
 #define TOP_H
 
+struct buffer;
+
 /* From top.c.  */
 extern char *saved_command_line;
 extern FILE *instream;
@@ -96,5 +98,9 @@ extern void show_history (char *, int);
 extern void set_verbose (char *, int, struct cmd_list_element *);
 
 extern void do_restore_instream_cleanup (void *stream);
+
+extern char *handle_line_of_input (struct buffer *cmd_line_buffer,
+				   char *rl, int repeat,
+				   char *annotation_suffix);
 
 #endif
