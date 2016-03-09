@@ -608,8 +608,9 @@ prevent_dont_repeat (void)
    malloc'd and should be freed by the caller.
 
    A NULL return means end of file.  */
-char *
-gdb_readline (const char *prompt_arg)
+
+static char *
+gdb_readline_no_editing (const char *prompt_arg)
 {
   int c;
   char *result;
@@ -1117,7 +1118,7 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
 	}
       else
 	{
-	  rl = gdb_readline (prompt);
+	  rl = gdb_readline_no_editing (prompt);
 	}
 
       if (annotation_level > 1 && instream == stdin)

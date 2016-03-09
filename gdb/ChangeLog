@@ -1,5 +1,11 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* defs.h (gdb_readline): Delete declaration.
+	* top.c (gdb_readline): Rename to ...
+	(gdb_readline_no_editing): ... this, and make static.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* utils.c (prompt_for_continue): Update comments.
 
 2016-03-09  Pedro Alves  <palves@redhat.com>
