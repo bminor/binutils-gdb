@@ -66,7 +66,7 @@ struct blah { union { double d; char c; } u; } bss_item3;
 __attribute__ ((section(".bss.v4_a1")))
 char bss_item4[3];
 
-int main ()
+int main (void)
 {
   return 0;
 }

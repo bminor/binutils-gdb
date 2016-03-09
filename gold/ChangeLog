@@ -1,3 +1,11 @@
+2016-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/plugin_layout_with_alignment.cc: Renamed to ..
+	* testsuite/plugin_layout_with_alignment.c: This.
+	* testsuite/Makefile.am (plugin_layout_with_alignment.o): Updated.
+	(plugin_layout_with_alignment): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
 2016-03-08  Cary Coutant  <ccoutant@gmail.com>
 
         PR 19751
