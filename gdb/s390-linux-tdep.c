@@ -1567,13 +1567,25 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
 	    break;
 	}
 
+      /* BRC/BRCL -- branch relative on condition.  Ignore "branch
+	 never", branch to following instruction, and "conditional
+	 trap" (BRC +2).  Otherwise terminate search.  */
+      else if (is_ri (insn, op1_brc, op2_brc, &r1, &i2))
+	{
+	  if (r1 != 0 && i2 != 1 && i2 != 2)
+	    break;
+	}
+      else if (is_ril (insn, op1_brcl, op2_brcl, &r1, &i2))
+	{
+	  if (r1 != 0 && i2 != 3)
+	    break;
+	}
+
       /* Terminate search when hitting any other branch instruction.  */
       else if (is_rr (insn, op_basr, &r1, &r2)
 	       || is_rx (insn, op_bas, &r1, &d2, &x2, &b2)
 	       || is_rr (insn, op_bcr, &r1, &r2)
 	       || is_rx (insn, op_bc, &r1, &d2, &x2, &b2)
-	       || is_ri (insn, op1_brc, op2_brc, &r1, &i2)
-	       || is_ril (insn, op1_brcl, op2_brcl, &r1, &i2)
 	       || is_ril (insn, op1_brasl, op2_brasl, &r2, &i2))
 	break;
 

@@ -1,5 +1,10 @@
 2016-03-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (s390_analyze_prologue): Ignore BRC and BRCL
+	instructions that do nothing or are conditional traps.
+
+2016-03-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (s390_prologue_frame_unwind_cache): Store
 	frame func's PC in info->func before any other failure can occur.
 	(s390_frame_this_id): Use frame_id_build_unavailable_stack if
