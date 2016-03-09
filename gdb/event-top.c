@@ -37,6 +37,7 @@
 #include "gdbcmd.h"		/* for dont_repeat() */
 #include "annotate.h"
 #include "maint.h"
+#include "buffer.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -382,7 +383,7 @@ top_level_prompt (void)
   return xstrdup (prompt);
 }
 
-/* When there is an event ready on the stdin file desriptor, instead
+/* When there is an event ready on the stdin file descriptor, instead
    of calling readline directly throught the callback function, or
    instead of calling gdb_readline_no_editing_callback, give gdb a
    chance to detect errors and do something.  */
@@ -678,9 +679,10 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 {
   int c;
   char *result;
-  int input_index = 0;
-  int result_size = 80;
+  struct buffer line_buffer;
   static int done_once = 0;
+
+  buffer_init (&line_buffer);
 
   /* Unbuffer the input stream, so that, later on, the calls to fgetc
      fetch only one char at the time from the stream.  The fgetc's will
@@ -693,8 +695,6 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
       setbuf (instream, NULL);
       done_once = 1;
     }
-
-  result = (char *) xmalloc (result_size);
 
   /* We still need the while loop here, even though it would seem
      obvious to invoke gdb_readline_no_editing_callback at every
@@ -712,32 +712,31 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 
       if (c == EOF)
 	{
-	  if (input_index > 0)
-	    /* The last line does not end with a newline.  Return it,
-	       and if we are called again fgetc will still return EOF
-	       and we'll return NULL then.  */
-	    break;
-	  xfree (result);
+	  if (line_buffer.used_size > 0)
+	    {
+	      /* The last line does not end with a newline.  Return it, and
+		 if we are called again fgetc will still return EOF and
+		 we'll return NULL then.  */
+	      break;
+	    }
+	  xfree (buffer_finish (&line_buffer));
 	  (*input_handler) (0);
 	  return;
 	}
 
       if (c == '\n')
 	{
-	  if (input_index > 0 && result[input_index - 1] == '\r')
-	    input_index--;
+	  if (line_buffer.used_size > 0
+	      && line_buffer.buffer[line_buffer.used_size - 1] == '\r')
+	    line_buffer.used_size--;
 	  break;
 	}
 
-      result[input_index++] = c;
-      while (input_index >= result_size)
-	{
-	  result_size *= 2;
-	  result = (char *) xrealloc (result, result_size);
-	}
+      buffer_grow_char (&line_buffer, c);
     }
 
-  result[input_index++] = '\0';
+  buffer_grow_char (&line_buffer, '\0');
+  result = buffer_finish (&line_buffer);
   (*input_handler) (result);
 }
 
