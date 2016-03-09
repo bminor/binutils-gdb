@@ -1,5 +1,16 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (gdb_readline2): Rename to ...
+	(gdb_readline_no_editing_callback): ... this.
+	(change_line_handler, stdin_event_handler)
+	(gdb_setup_readline): Adjust.
+	* event-top.h (gdb_readline2): Rename to ...
+	(gdb_readline_no_editing_callback): ... this, and move closer to
+	other readline-related declarations.
+	* mi/mi-interp.c (mi_interpreter_resume): Adjust.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* top.c (window_hook): Delete.
 	(command_loop): Remove references to window_hook.
 

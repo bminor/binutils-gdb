@@ -189,9 +189,9 @@ cli_command_loop (void *data)
 /* Change the function to be invoked every time there is a character
    ready on stdin.  This is used when the user sets the editing off,
    therefore bypassing readline, and letting gdb handle the input
-   itself, via gdb_readline2.  Also it is used in the opposite case in
-   which the user sets editing on again, by restoring readline
-   handling of the input.  */
+   itself, via gdb_readline_no_editing_callback.  Also it is used in
+   the opposite case in which the user sets editing on again, by
+   restoring readline handling of the input.  */
 static void
 change_line_handler (void)
 {
@@ -209,9 +209,9 @@ change_line_handler (void)
     }
   else
     {
-      /* Turn off editing by using gdb_readline2.  */
+      /* Turn off editing by using gdb_readline_no_editing_callback.  */
       gdb_rl_callback_handler_remove ();
-      call_readline = gdb_readline2;
+      call_readline = gdb_readline_no_editing_callback;
 
       /* Set up the command handler as well, in case we are called as
          first thing from .gdbinit.  */
@@ -410,8 +410,9 @@ top_level_prompt (void)
 
 /* When there is an event ready on the stdin file desriptor, instead
    of calling readline directly throught the callback function, or
-   instead of calling gdb_readline2, give gdb a chance to detect
-   errors and do something.  */
+   instead of calling gdb_readline_no_editing_callback, give gdb a
+   chance to detect errors and do something.  */
+
 void
 stdin_event_handler (int error, gdb_client_data client_data)
 {
@@ -699,13 +700,11 @@ command_line_handler (char *rl)
 }
 
 /* Does reading of input from terminal w/o the editing features
-   provided by the readline library.  */
+   provided by the readline library.  Calls the line input handler
+   once we have a whole input line.  */
 
-/* NOTE: 1999-04-30 Asynchronous version of gdb_readline; gdb_readline
-   will become obsolete when the event loop is made the default
-   execution for gdb.  */
 void
-gdb_readline2 (gdb_client_data client_data)
+gdb_readline_no_editing_callback (gdb_client_data client_data)
 {
   int c;
   char *result;
@@ -728,11 +727,12 @@ gdb_readline2 (gdb_client_data client_data)
   result = (char *) xmalloc (result_size);
 
   /* We still need the while loop here, even though it would seem
-     obvious to invoke gdb_readline2 at every character entered.  If
-     not using the readline library, the terminal is in cooked mode,
-     which sends the characters all at once.  Poll will notice that the
-     input fd has changed state only after enter is pressed.  At this
-     point we still need to fetch all the chars entered.  */
+     obvious to invoke gdb_readline_no_editing_callback at every
+     character entered.  If not using the readline library, the
+     terminal is in cooked mode, which sends the characters all at
+     once.  Poll will notice that the input fd has changed state only
+     after enter is pressed.  At this point we still need to fetch all
+     the chars entered.  */
 
   while (1)
     {
@@ -1055,7 +1055,7 @@ gdb_setup_readline (void)
   else
     {
       async_command_editing_p = 0;
-      call_readline = gdb_readline2;
+      call_readline = gdb_readline_no_editing_callback;
     }
   
   /* When readline has read an end-of-line character, it passes the

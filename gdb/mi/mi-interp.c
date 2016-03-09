@@ -181,7 +181,7 @@ mi_interpreter_resume (void *data)
 
   /* These overwrite some of the initialization done in
      _intialize_event_loop.  */
-  call_readline = gdb_readline2;
+  call_readline = gdb_readline_no_editing_callback;
   input_handler = mi_execute_command_input_handler;
   async_command_editing_p = 0;
   /* FIXME: This is a total hack for now.  PB's use of the MI

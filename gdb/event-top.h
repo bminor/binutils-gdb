@@ -44,7 +44,6 @@ extern void handle_stop_sig (int sig);
 #endif
 extern void handle_sigint (int sig);
 extern void handle_sigterm (int sig);
-extern void gdb_readline2 (void *client_data);
 extern void async_request_quit (void *arg);
 extern void stdin_event_handler (int error, void *client_data);
 extern void async_disable_stdin (void);
@@ -62,6 +61,7 @@ extern void (*input_handler) (char *);
 extern int input_fd;
 extern void (*after_char_processing_hook) (void);
 extern int call_stdin_event_handler_again_p;
+extern void gdb_readline_no_editing_callback (void *client_data);
 
 /* Wrappers for rl_callback_handler_remove and
    rl_callback_handler_install that keep track of whether the callback
