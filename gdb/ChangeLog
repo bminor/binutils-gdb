@@ -1,5 +1,9 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* osabi.c (gdb_osabi_names): Avoid spaces in osabi names.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* frv-tdep.c (frv_gdbarch_init): Handle bfd_mach_fr300.
 
 2016-03-09  Pedro Alves  <palves@redhat.com>
