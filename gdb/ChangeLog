@@ -1,3 +1,7 @@
+2016-03-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* target.h: Fix doc string of target_can_use_hardware_watchpoint.
+
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
 	* event-top.c (more_to_come): Delete.
