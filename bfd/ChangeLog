@@ -1,3 +1,9 @@
+2016-03-09  Leon Winter  <winter-gcc@bfw-online.de>
+
+	PR ld/19623
+	* cofflink.c (_bfd_coff_generic_relocate_section): Do not apply
+	relocations against absolute symbols.
+
 2016-03-09  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/19775
