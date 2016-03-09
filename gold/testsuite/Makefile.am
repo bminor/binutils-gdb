@@ -1368,6 +1368,8 @@ check_PROGRAMS += flagstest_compress_debug_sections
 check_DATA += flagstest_compress_debug_sections.stdout \
 	      flagstest_compress_debug_sections.cmp \
 	      flagstest_compress_debug_sections.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections.check \
+		    flagstest_compress_debug_sections.cmp
 flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
@@ -1402,6 +1404,8 @@ check_PROGRAMS += flagstest_compress_debug_sections_gnu
 check_DATA += flagstest_compress_debug_sections_gnu.stdout \
 	      flagstest_compress_debug_sections_gnu.cmp \
 	      flagstest_compress_debug_sections_gnu.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections_gnu.check \
+		    flagstest_compress_debug_sections_gnu.cmp
 flagstest_compress_debug_sections_gnu: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gnu
 	test -s $@
@@ -1427,6 +1431,8 @@ check_PROGRAMS += flagstest_compress_debug_sections_gabi
 check_DATA += flagstest_compress_debug_sections_gabi.stdout \
 	      flagstest_compress_debug_sections_gabi.cmp \
 	      flagstest_compress_debug_sections_gabi.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections_gabi.cmp \
+		    flagstest_compress_debug_sections_gabi.check
 flagstest_compress_debug_sections_gabi: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gabi
 	test -s $@
@@ -2557,7 +2563,7 @@ memory_test.stdout: memory_test
 # Test INCLUDE directives in linker scripts.
 # The binary isn't runnable, so we just check that we can build it without errors.
 check_DATA += memory_test_2
-MOSTLYCLEANFILES += memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
+MOSTLYCLEANFILES += memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t memory_test_2
 memory_test_inc_1.t: $(srcdir)/memory_test_inc_1.t.src
 	cp $< $@
 memory_test_inc_2.t: $(srcdir)/memory_test_inc_2.t.src
@@ -2583,7 +2589,7 @@ gdb_index_test_1.stdout: gdb_index_test_1
 # Test that --gdb-index functions correctly with compressed debug sections.
 check_SCRIPTS += gdb_index_test_2.sh
 check_DATA += gdb_index_test_2.stdout
-MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2
+MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2 gdb_index_test_2_gabi
 gdb_index_test_cdebug.o: gdb_index_test.cc
 	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections -c -o $@ $<
 gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
