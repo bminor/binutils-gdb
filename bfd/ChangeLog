@@ -1,5 +1,11 @@
 2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19789
+	* elflink.c (elf_link_add_object_symbols): Create dynamic sections
+	for -E/--dynamic-list only when not relocatable.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19784
 	* elf32-i386.c (elf_i386_check_relocs): Increment PLT reference
 	count for locally defined local IFUNC symbols in shared object.

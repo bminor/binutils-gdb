@@ -1,5 +1,11 @@
 2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19789
+	* testsuite/ld-elf/pr19789.d: New file.
+	* testsuite/ld-elf/pr19789.s: Likewise.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19784
 	* testsuite/ld-i386/i386.exp: Remove pr19636-2e-nacl test.
 	* testsuite/ld-i386/pr19636-2e-nacl.d: Moved to ...

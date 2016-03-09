@@ -3621,8 +3621,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 make a shared library.  */
       if (!just_syms
 	  && (bfd_link_pic (info)
-	      || info->export_dynamic
-	      || info->dynamic)
+	      || (!bfd_link_relocatable (info)
+		  && (info->export_dynamic || info->dynamic)))
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
