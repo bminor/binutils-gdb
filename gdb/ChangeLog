@@ -1,5 +1,13 @@
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (async_annotation_suffix): Delete.
+	(top_level_prompt, command_line_handler): Don't use
+	'async_annotation_suffix' and simplify.
+	* event-top.h (async_annotation_suffix): Delete declaration.
+	(init_main): Remove reference to 'async_annotation_suffix'.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (gdb_readline2): Rename to ...
 	(gdb_readline_no_editing_callback): ... this.
 	(change_line_handler, stdin_event_handler)

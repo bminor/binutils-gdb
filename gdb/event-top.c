@@ -107,10 +107,6 @@ void (*call_readline) (gdb_client_data);
    loop as default engine, and event-top.c is merged into top.c.  */
 int async_command_editing_p;
 
-/* This is the annotation suffix that will be used when the
-   annotation_level is 2.  */
-char *async_annotation_suffix;
-
 /* This is used to display the notification of the completion of an
    asynchronous execution command.  */
 int exec_done_display_p = 0;
@@ -363,49 +359,27 @@ display_gdb_prompt (const char *new_prompt)
 static char *
 top_level_prompt (void)
 {
-  char *prefix;
-  char *prompt = NULL;
-  char *suffix;
-  char *composed_prompt;
-  size_t prompt_length;
+  char *prompt;
 
   /* Give observers a chance of changing the prompt.  E.g., the python
      `gdb.prompt_hook' is installed as an observer.  */
   observer_notify_before_prompt (get_prompt ());
 
-  prompt = xstrdup (get_prompt ());
+  prompt = get_prompt ();
 
   if (annotation_level >= 2)
     {
       /* Prefix needs to have new line at end.  */
-      prefix = (char *) alloca (strlen (async_annotation_suffix) + 10);
-      strcpy (prefix, "\n\032\032pre-");
-      strcat (prefix, async_annotation_suffix);
-      strcat (prefix, "\n");
+      const char prefix[] = "\n\032\032pre-prompt\n";
 
       /* Suffix needs to have a new line at end and \032 \032 at
 	 beginning.  */
-      suffix = (char *) alloca (strlen (async_annotation_suffix) + 6);
-      strcpy (suffix, "\n\032\032");
-      strcat (suffix, async_annotation_suffix);
-      strcat (suffix, "\n");
-    }
-  else
-    {
-      prefix = "";
-      suffix = "";
+      const char suffix[] = "\n\032\032prompt\n";
+
+      return concat (prefix, prompt, suffix, NULL);
     }
 
-  prompt_length = strlen (prefix) + strlen (prompt) + strlen (suffix);
-  composed_prompt = (char *) xmalloc (prompt_length + 1);
-
-  strcpy (composed_prompt, prefix);
-  strcat (composed_prompt, prompt);
-  strcat (composed_prompt, suffix);
-
-  xfree (prompt);
-
-  return composed_prompt;
+  return xstrdup (prompt);
 }
 
 /* When there is an event ready on the stdin file desriptor, instead
@@ -517,11 +491,7 @@ command_line_handler (char *rl)
   int repeat = (instream == stdin);
 
   if (annotation_level > 1 && instream == stdin)
-    {
-      printf_unfiltered (("\n\032\032post-"));
-      puts_unfiltered (async_annotation_suffix);
-      printf_unfiltered (("\n"));
-    }
+    printf_unfiltered (("\n\032\032post-prompt\n"));
 
   if (linebuffer == 0)
     {

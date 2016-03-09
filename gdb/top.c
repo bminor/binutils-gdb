@@ -1897,10 +1897,6 @@ init_main (void)
      the DEFAULT_PROMPT is.  */
   set_prompt (DEFAULT_PROMPT);
 
-  /* Set things up for annotation_level > 1, if the user ever decides
-     to use it.  */
-  async_annotation_suffix = "prompt";
-
   /* Set the important stuff up for command editing.  */
   command_editing_p = 1;
   history_expansion_p = 0;
