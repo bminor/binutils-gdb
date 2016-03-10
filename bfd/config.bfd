@@ -53,6 +53,7 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
+ i370-* | \
  sh5*-*-* | sh64*-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
@@ -541,6 +542,7 @@ case "${targ}" in
     targ_defvec=i370_elf32_vec
     targ_selvecs="i370_elf32_vec"
     ;;
+
   i[3-7]86-*-sco3.2v5*coff)
     targ_defvec=i386_coff_vec
     targ_selvecs=i386_elf32_vec
