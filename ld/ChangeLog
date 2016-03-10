@@ -1,3 +1,10 @@
+2016-03-10  Mickael Guene  <mickael.guene@st.com>
+
+	PR gas/19744
+	* testsuite/ld-arm/arm-elf.exp: New tests.
+	* testsuite/ld-arm/thumb1-adds-armv7-m.s: New.
+	* testsuite/ld-arm/thumb1-movs-armv7-m.s: New.
+
 2016-03-10  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elf32msp430.sc (.rodata): Remove spurious LONG(0).
