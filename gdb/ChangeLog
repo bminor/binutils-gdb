@@ -1,3 +1,10 @@
+2016-03-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Install
+	gdb/function/as_string.py.
+	* python/lib/gdb/function/as_string.py: New file.
+	* NEWS: Mention the new $_as_string function.
+
 2016-03-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* target.h: Fix doc string of target_can_use_hardware_watchpoint.

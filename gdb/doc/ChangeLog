@@ -1,3 +1,7 @@
+2016-03-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.texinfo (Convenience Functions): Document $_as_string.
+
 2016-02-23  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Skipping Over Functions and Files): Document new

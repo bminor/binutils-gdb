@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.11
 
+* New Python-based convenience function $_as_string(val), which returns
+  the textual representation of a value.  This function is especially
+  useful to obtain the text label of an enum value.
+
 * Intel MPX bound violation handling.
 
    Segmentation faults caused by a Intel MPX boundary violation
