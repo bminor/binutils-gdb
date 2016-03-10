@@ -1,3 +1,73 @@
+2016-03-31  Wei-cheng Wang  <cole945@gmail.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR/17221
+	* Makefile.in: Add powerpc-*-ipa.o
+	* configure.srv: Add ipa_obj for powerpc*-linux.
+	* linux-ppc-ipa.c: New file.
+	* linux-ppc-low.c: Added linux-ppc-tdesc.h, ax.h, tracepoint.h
+	includes.
+	(PPC_FIELD): New macro.
+	(PPC_SEXT): New macro.
+	(PPC_OP6): New macro.
+	(PPC_BO): New macro.
+	(PPC_LI): New macro.
+	(PPC_BD): New macro.
+	(init_registers_*): Move prototype to linux-ppc-tdesc.h.
+	(tdesc_*): Move declaration to linux-ppc-tdesc.h.
+	(ppc_get_hwcap): Rename to ppc_get_auxv and add type parameter.
+	(ppc_get_thread_area): New function.
+	(is_elfv2_inferior): New function.
+	(gen_ds_form): New function.
+	(GEN_STD): New macro.
+	(GEN_STDU): New macro.
+	(GEN_LD): New macro.
+	(GEN_LDU): New macro.
+	(gen_d_form): New function.
+	(GEN_ADDI): New macro.
+	(GEN_ADDIS): New macro.
+	(GEN_LI): New macro.
+	(GEN_LIS): New macro.
+	(GEN_ORI): New macro.
+	(GEN_ORIS): New macro.
+	(GEN_LWZ): New macro.
+	(GEN_STW): New macro.
+	(GEN_STWU): New macro.
+	(gen_xfx_form): New function.
+	(GEN_MFSPR): New macro.
+	(GEN_MTSPR): New macro.
+	(GEN_MFCR): New macro.
+	(GEN_MTCR): New macro.
+	(GEN_SYNC): New macro.
+	(GEN_LWSYNC): New macro.
+	(gen_x_form): New function.
+	(GEN_OR): New macro.
+	(GEN_MR): New macro.
+	(GEN_LWARX): New macro.
+	(GEN_STWCX): New macro.
+	(GEN_CMPW): New macro.
+	(gen_md_form): New function.
+	(GEN_RLDICL): New macro.
+	(GEN_RLDICR): New macro.
+	(gen_i_form): New function.
+	(GEN_B): New macro.
+	(GEN_BL): New macro.
+	(gen_b_form): New function.
+	(GEN_BNE): New macro.
+	(GEN_LOAD): New macro.
+	(GEN_STORE): New macro.
+	(gen_limm): New function.
+	(gen_atomic_xchg): New function.
+	(gen_call): New function.
+	(ppc_relocate_instruction): New function.
+	(ppc_install_fast_tracepoint_jump_pad): New function.
+	(ppc_get_min_fast_tracepoint_insn_len): New function.
+	(ppc_get_ipa_tdesc_idx): New function.
+	(the_low_target): Wire in the new functions.
+	(initialize_low_arch) [!__powerpc64__]: Don'it initialize 64-bit
+	tdescs.
+	* linux-ppc-tdesc.h: New file.
+
 2016-03-31  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* linux-aarch64-ipa.c: Add <sys/mman.h> and <sys/auxv.h> includes.

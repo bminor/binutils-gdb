@@ -31,6 +31,7 @@ srv_amd64_linux_regobj="amd64-linux.o amd64-avx-linux.o amd64-avx512-linux.o amd
 
 ipa_i386_linux_regobj="i386-linux-ipa.o i386-avx-linux-ipa.o i386-avx512-linux-ipa.o i386-mpx-linux-ipa.o i386-mmx-linux-ipa.o"
 ipa_amd64_linux_regobj="amd64-linux-ipa.o amd64-avx-linux-ipa.o amd64-avx512-linux-ipa.o amd64-mpx-linux-ipa.o"
+ipa_ppc_linux_regobj="powerpc-32l-ipa.o powerpc-altivec32l-ipa.o powerpc-cell32l-ipa.o powerpc-vsx32l-ipa.o powerpc-isa205-32l-ipa.o powerpc-isa205-altivec32l-ipa.o powerpc-isa205-vsx32l-ipa.o powerpc-e500l-ipa.o powerpc-64l-ipa.o powerpc-altivec64l-ipa.o powerpc-cell64l-ipa.o powerpc-vsx64l-ipa.o powerpc-isa205-64l-ipa.o powerpc-isa205-altivec64l-ipa.o powerpc-isa205-vsx64l-ipa.o"
 
 srv_i386_32bit_xmlfiles="i386/32bit-core.xml i386/32bit-sse.xml i386/32bit-avx.xml i386/32bit-avx512.xml i386/32bit-mpx.xml"
 srv_i386_64bit_xmlfiles="i386/64bit-core.xml i386/64bit-sse.xml i386/64bit-avx.xml i386/64bit-avx512.xml i386/x32-core.xml i386/64bit-mpx.xml"
@@ -258,6 +259,7 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			ipa_obj="${ipa_ppc_linux_regobj} linux-ppc-ipa.o"
 			;;
   powerpc-*-lynxos*)	srv_regobj="powerpc-32.o"
 			srv_tgtobj="lynx-low.o lynx-ppc-low.o"

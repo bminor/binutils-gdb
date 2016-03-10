@@ -24,69 +24,23 @@
 #include <asm/ptrace.h>
 
 #include "nat/ppc-linux.h"
+#include "linux-ppc-tdesc.h"
+#include "ax.h"
+#include "tracepoint.h"
+
+#define PPC_FIELD(value, from, len) \
+	(((value) >> (32 - (from) - (len))) & ((1 << (len)) - 1))
+#define PPC_SEXT(v, bs) \
+	((((CORE_ADDR) (v) & (((CORE_ADDR) 1 << (bs)) - 1)) \
+	  ^ ((CORE_ADDR) 1 << ((bs) - 1))) \
+	 - ((CORE_ADDR) 1 << ((bs) - 1)))
+#define PPC_OP6(insn)	PPC_FIELD (insn, 0, 6)
+#define PPC_BO(insn)	PPC_FIELD (insn, 6, 5)
+#define PPC_LI(insn)	(PPC_SEXT (PPC_FIELD (insn, 6, 24), 24) << 2)
+#define PPC_BD(insn)	(PPC_SEXT (PPC_FIELD (insn, 16, 14), 14) << 2)
 
 static unsigned long ppc_hwcap;
 
-
-/* Defined in auto-generated file powerpc-32l.c.  */
-void init_registers_powerpc_32l (void);
-extern const struct target_desc *tdesc_powerpc_32l;
-
-/* Defined in auto-generated file powerpc-altivec32l.c.  */
-void init_registers_powerpc_altivec32l (void);
-extern const struct target_desc *tdesc_powerpc_altivec32l;
-
-/* Defined in auto-generated file powerpc-cell32l.c.  */
-void init_registers_powerpc_cell32l (void);
-extern const struct target_desc *tdesc_powerpc_cell32l;
-
-/* Defined in auto-generated file powerpc-vsx32l.c.  */
-void init_registers_powerpc_vsx32l (void);
-extern const struct target_desc *tdesc_powerpc_vsx32l;
-
-/* Defined in auto-generated file powerpc-isa205-32l.c.  */
-void init_registers_powerpc_isa205_32l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_32l;
-
-/* Defined in auto-generated file powerpc-isa205-altivec32l.c.  */
-void init_registers_powerpc_isa205_altivec32l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_altivec32l;
-
-/* Defined in auto-generated file powerpc-isa205-vsx32l.c.  */
-void init_registers_powerpc_isa205_vsx32l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_vsx32l;
-
-/* Defined in auto-generated file powerpc-e500l.c.  */
-void init_registers_powerpc_e500l (void);
-extern const struct target_desc *tdesc_powerpc_e500l;
-
-/* Defined in auto-generated file powerpc-64l.c.  */
-void init_registers_powerpc_64l (void);
-extern const struct target_desc *tdesc_powerpc_64l;
-
-/* Defined in auto-generated file powerpc-altivec64l.c.  */
-void init_registers_powerpc_altivec64l (void);
-extern const struct target_desc *tdesc_powerpc_altivec64l;
-
-/* Defined in auto-generated file powerpc-cell64l.c.  */
-void init_registers_powerpc_cell64l (void);
-extern const struct target_desc *tdesc_powerpc_cell64l;
-
-/* Defined in auto-generated file powerpc-vsx64l.c.  */
-void init_registers_powerpc_vsx64l (void);
-extern const struct target_desc *tdesc_powerpc_vsx64l;
-
-/* Defined in auto-generated file powerpc-isa205-64l.c.  */
-void init_registers_powerpc_isa205_64l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_64l;
-
-/* Defined in auto-generated file powerpc-isa205-altivec64l.c.  */
-void init_registers_powerpc_isa205_altivec64l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_altivec64l;
-
-/* Defined in auto-generated file powerpc-isa205-vsx64l.c.  */
-void init_registers_powerpc_isa205_vsx64l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_vsx64l;
 
 #define ppc_num_regs 73
 
@@ -342,7 +296,7 @@ ppc_set_pc (struct regcache *regcache, CORE_ADDR pc)
 
 
 static int
-ppc_get_hwcap (unsigned long *valp)
+ppc_get_auxv (unsigned long type, unsigned long *valp)
 {
   const struct target_desc *tdesc = current_process ()->tdesc;
   int wordsize = register_size (tdesc, 0);
@@ -354,7 +308,7 @@ ppc_get_hwcap (unsigned long *valp)
       if (wordsize == 4)
 	{
 	  unsigned int *data_p = (unsigned int *)data;
-	  if (data_p[0] == AT_HWCAP)
+	  if (data_p[0] == type)
 	    {
 	      *valp = data_p[1];
 	      return 1;
@@ -363,7 +317,7 @@ ppc_get_hwcap (unsigned long *valp)
       else
 	{
 	  unsigned long *data_p = (unsigned long *)data;
-	  if (data_p[0] == AT_HWCAP)
+	  if (data_p[0] == type)
 	    {
 	      *valp = data_p[1];
 	      return 1;
@@ -680,7 +634,7 @@ ppc_arch_setup (void)
   free_register_cache (regcache);
   if (ppc64_64bit_inferior_p (msr))
     {
-      ppc_get_hwcap (&ppc_hwcap);
+      ppc_get_auxv (AT_HWCAP, &ppc_hwcap);
       if (ppc_hwcap & PPC_FEATURE_CELL)
 	tdesc = tdesc_powerpc_cell64l;
       else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
@@ -714,7 +668,7 @@ ppc_arch_setup (void)
   tdesc = tdesc_powerpc_32l;
   current_process ()->tdesc = tdesc;
 
-  ppc_get_hwcap (&ppc_hwcap);
+  ppc_get_auxv (AT_HWCAP, &ppc_hwcap);
   if (ppc_hwcap & PPC_FEATURE_CELL)
     tdesc = tdesc_powerpc_cell32l;
   else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
@@ -756,10 +710,802 @@ ppc_arch_setup (void)
   current_process ()->tdesc = tdesc;
 }
 
+/* Implementation of linux_target_ops method "supports_tracepoints".  */
+
 static int
 ppc_supports_tracepoints (void)
 {
   return 1;
+}
+
+/* Get the thread area address.  This is used to recognize which
+   thread is which when tracing with the in-process agent library.  We
+   don't read anything from the address, and treat it as opaque; it's
+   the address itself that we assume is unique per-thread.  */
+
+static int
+ppc_get_thread_area (int lwpid, CORE_ADDR *addr)
+{
+  struct lwp_info *lwp = find_lwp_pid (pid_to_ptid (lwpid));
+  struct thread_info *thr = get_lwp_thread (lwp);
+  struct regcache *regcache = get_thread_regcache (thr, 1);
+  ULONGEST tp = 0;
+
+#ifdef __powerpc64__
+  if (register_size (regcache->tdesc, 0) == 8)
+    collect_register_by_name (regcache, "r13", &tp);
+  else
+#endif
+    collect_register_by_name (regcache, "r2", &tp);
+
+  *addr = tp;
+
+  return 0;
+}
+
+#ifdef __powerpc64__
+
+/* Older glibc doesn't provide this.  */
+
+#ifndef EF_PPC64_ABI
+#define EF_PPC64_ABI 3
+#endif
+
+/* Returns 1 if inferior is using ELFv2 ABI.  Undefined for 32-bit
+   inferiors.  */
+
+static int
+is_elfv2_inferior (void)
+{
+  /* To be used as fallback if we're unable to determine the right result -
+     assume inferior uses the same ABI as gdbserver.  */
+#if _CALL_ELF == 2
+  const int def_res = 1;
+#else
+  const int def_res = 0;
+#endif
+  unsigned long phdr;
+  Elf64_Ehdr ehdr;
+
+  if (!ppc_get_auxv (AT_PHDR, &phdr))
+    return def_res;
+
+  /* Assume ELF header is at the beginning of the page where program headers
+     are located.  If it doesn't look like one, bail.  */
+
+  read_inferior_memory (phdr & ~0xfff, (unsigned char *) &ehdr, sizeof ehdr);
+  if (memcmp(ehdr.e_ident, ELFMAG, SELFMAG))
+    return def_res;
+
+  return (ehdr.e_flags & EF_PPC64_ABI) == 2;
+}
+
+#endif
+
+/* Generate a ds-form instruction in BUF and return the number of bytes written
+
+   0      6     11   16          30 32
+   | OPCD | RST | RA |     DS    |XO|  */
+
+__attribute__((unused)) /* Maybe unused due to conditional compilation.  */
+static int
+gen_ds_form (uint32_t *buf, int opcd, int rst, int ra, int ds, int xo)
+{
+  uint32_t insn;
+
+  gdb_assert ((opcd & ~0x3f) == 0);
+  gdb_assert ((rst & ~0x1f) == 0);
+  gdb_assert ((ra & ~0x1f) == 0);
+  gdb_assert ((xo & ~0x3) == 0);
+
+  insn = (rst << 21) | (ra << 16) | (ds & 0xfffc) | (xo & 0x3);
+  *buf = (opcd << 26) | insn;
+  return 1;
+}
+
+/* Followings are frequently used ds-form instructions.  */
+
+#define GEN_STD(buf, rs, ra, offset)	gen_ds_form (buf, 62, rs, ra, offset, 0)
+#define GEN_STDU(buf, rs, ra, offset)	gen_ds_form (buf, 62, rs, ra, offset, 1)
+#define GEN_LD(buf, rt, ra, offset)	gen_ds_form (buf, 58, rt, ra, offset, 0)
+#define GEN_LDU(buf, rt, ra, offset)	gen_ds_form (buf, 58, rt, ra, offset, 1)
+
+/* Generate a d-form instruction in BUF.
+
+   0      6     11   16             32
+   | OPCD | RST | RA |       D      |  */
+
+static int
+gen_d_form (uint32_t *buf, int opcd, int rst, int ra, int si)
+{
+  uint32_t insn;
+
+  gdb_assert ((opcd & ~0x3f) == 0);
+  gdb_assert ((rst & ~0x1f) == 0);
+  gdb_assert ((ra & ~0x1f) == 0);
+
+  insn = (rst << 21) | (ra << 16) | (si & 0xffff);
+  *buf = (opcd << 26) | insn;
+  return 1;
+}
+
+/* Followings are frequently used d-form instructions.  */
+
+#define GEN_ADDI(buf, rt, ra, si)	gen_d_form (buf, 14, rt, ra, si)
+#define GEN_ADDIS(buf, rt, ra, si)	gen_d_form (buf, 15, rt, ra, si)
+#define GEN_LI(buf, rt, si)		GEN_ADDI (buf, rt, 0, si)
+#define GEN_LIS(buf, rt, si)		GEN_ADDIS (buf, rt, 0, si)
+#define GEN_ORI(buf, rt, ra, si)	gen_d_form (buf, 24, rt, ra, si)
+#define GEN_ORIS(buf, rt, ra, si)	gen_d_form (buf, 25, rt, ra, si)
+#define GEN_LWZ(buf, rt, ra, si)	gen_d_form (buf, 32, rt, ra, si)
+#define GEN_STW(buf, rt, ra, si)	gen_d_form (buf, 36, rt, ra, si)
+#define GEN_STWU(buf, rt, ra, si)	gen_d_form (buf, 37, rt, ra, si)
+
+/* Generate a xfx-form instruction in BUF and return the number of bytes
+   written.
+
+   0      6     11         21        31 32
+   | OPCD | RST |    RI    |    XO   |/|  */
+
+static int
+gen_xfx_form (uint32_t *buf, int opcd, int rst, int ri, int xo)
+{
+  uint32_t insn;
+  unsigned int n = ((ri & 0x1f) << 5) | ((ri >> 5) & 0x1f);
+
+  gdb_assert ((opcd & ~0x3f) == 0);
+  gdb_assert ((rst & ~0x1f) == 0);
+  gdb_assert ((xo & ~0x3ff) == 0);
+
+  insn = (rst << 21) | (n << 11) | (xo << 1);
+  *buf = (opcd << 26) | insn;
+  return 1;
+}
+
+/* Followings are frequently used xfx-form instructions.  */
+
+#define GEN_MFSPR(buf, rt, spr)		gen_xfx_form (buf, 31, rt, spr, 339)
+#define GEN_MTSPR(buf, rt, spr)		gen_xfx_form (buf, 31, rt, spr, 467)
+#define GEN_MFCR(buf, rt)		gen_xfx_form (buf, 31, rt, 0, 19)
+#define GEN_MTCR(buf, rt)		gen_xfx_form (buf, 31, rt, 0x3cf, 144)
+#define GEN_SYNC(buf, L, E)             gen_xfx_form (buf, 31, L & 0x3, \
+						      E & 0xf, 598)
+#define GEN_LWSYNC(buf)			GEN_SYNC (buf, 1, 0)
+
+
+/* Generate a x-form instruction in BUF and return the number of bytes written.
+
+   0      6     11   16   21       31 32
+   | OPCD | RST | RA | RB |   XO   |RC|  */
+
+static int
+gen_x_form (uint32_t *buf, int opcd, int rst, int ra, int rb, int xo, int rc)
+{
+  uint32_t insn;
+
+  gdb_assert ((opcd & ~0x3f) == 0);
+  gdb_assert ((rst & ~0x1f) == 0);
+  gdb_assert ((ra & ~0x1f) == 0);
+  gdb_assert ((rb & ~0x1f) == 0);
+  gdb_assert ((xo & ~0x3ff) == 0);
+  gdb_assert ((rc & ~1) == 0);
+
+  insn = (rst << 21) | (ra << 16) | (rb << 11) | (xo << 1) | rc;
+  *buf = (opcd << 26) | insn;
+  return 1;
+}
+
+/* Followings are frequently used x-form instructions.  */
+
+#define GEN_OR(buf, ra, rs, rb)		gen_x_form (buf, 31, rs, ra, rb, 444, 0)
+#define GEN_MR(buf, ra, rs)		GEN_OR (buf, ra, rs, rs)
+#define GEN_LWARX(buf, rt, ra, rb)	gen_x_form (buf, 31, rt, ra, rb, 20, 0)
+#define GEN_STWCX(buf, rs, ra, rb)	gen_x_form (buf, 31, rs, ra, rb, 150, 1)
+/* Assume bf = cr7.  */
+#define GEN_CMPW(buf, ra, rb)		gen_x_form (buf, 31, 28, ra, rb, 0, 0)
+
+
+/* Generate a md-form instruction in BUF and return the number of bytes written.
+
+   0      6    11   16   21   27   30 31 32
+   | OPCD | RS | RA | sh | mb | XO |sh|Rc|  */
+
+static int
+gen_md_form (uint32_t *buf, int opcd, int rs, int ra, int sh, int mb,
+	     int xo, int rc)
+{
+  uint32_t insn;
+  unsigned int n = ((mb & 0x1f) << 1) | ((mb >> 5) & 0x1);
+  unsigned int sh0_4 = sh & 0x1f;
+  unsigned int sh5 = (sh >> 5) & 1;
+
+  gdb_assert ((opcd & ~0x3f) == 0);
+  gdb_assert ((rs & ~0x1f) == 0);
+  gdb_assert ((ra & ~0x1f) == 0);
+  gdb_assert ((sh & ~0x3f) == 0);
+  gdb_assert ((mb & ~0x3f) == 0);
+  gdb_assert ((xo & ~0x7) == 0);
+  gdb_assert ((rc & ~0x1) == 0);
+
+  insn = (rs << 21) | (ra << 16) | (sh0_4 << 11) | (n << 5)
+	 | (sh5 << 1) | (xo << 2) | (rc & 1);
+  *buf = (opcd << 26) | insn;
+  return 1;
+}
+
+/* The following are frequently used md-form instructions.  */
+
+#define GEN_RLDICL(buf, ra, rs ,sh, mb) \
+				gen_md_form (buf, 30, rs, ra, sh, mb, 0, 0)
+#define GEN_RLDICR(buf, ra, rs ,sh, mb) \
+				gen_md_form (buf, 30, rs, ra, sh, mb, 1, 0)
+
+/* Generate a i-form instruction in BUF and return the number of bytes written.
+
+   0      6                          30 31 32
+   | OPCD |            LI            |AA|LK|  */
+
+static int
+gen_i_form (uint32_t *buf, int opcd, int li, int aa, int lk)
+{
+  uint32_t insn;
+
+  gdb_assert ((opcd & ~0x3f) == 0);
+
+  insn = (li & 0x3fffffc) | (aa & 1) | (lk & 1);
+  *buf = (opcd << 26) | insn;
+  return 1;
+}
+
+/* The following are frequently used i-form instructions.  */
+
+#define GEN_B(buf, li)		gen_i_form (buf, 18, li, 0, 0)
+#define GEN_BL(buf, li)		gen_i_form (buf, 18, li, 0, 1)
+
+/* Generate a b-form instruction in BUF and return the number of bytes written.
+
+   0      6    11   16               30 31 32
+   | OPCD | BO | BI |      BD        |AA|LK|  */
+
+static int
+gen_b_form (uint32_t *buf, int opcd, int bo, int bi, int bd,
+	    int aa, int lk)
+{
+  uint32_t insn;
+
+  gdb_assert ((opcd & ~0x3f) == 0);
+  gdb_assert ((bo & ~0x1f) == 0);
+  gdb_assert ((bi & ~0x1f) == 0);
+
+  insn = (bo << 21) | (bi << 16) | (bd & 0xfffc) | (aa & 1) | (lk & 1);
+  *buf = (opcd << 26) | insn;
+  return 1;
+}
+
+/* The following are frequently used b-form instructions.  */
+/* Assume bi = cr7.  */
+#define GEN_BNE(buf, bd)  gen_b_form (buf, 16, 0x4, (7 << 2) | 2, bd, 0 ,0)
+
+/* GEN_LOAD and GEN_STORE generate 64- or 32-bit load/store for ppc64 or ppc32
+   respectively.  They are primary used for save/restore GPRs in jump-pad,
+   not used for bytecode compiling.  */
+
+#ifdef __powerpc64__
+#define GEN_LOAD(buf, rt, ra, si, is_64)	(is_64 ? \
+						 GEN_LD (buf, rt, ra, si) : \
+						 GEN_LWZ (buf, rt, ra, si))
+#define GEN_STORE(buf, rt, ra, si, is_64)	(is_64 ? \
+						 GEN_STD (buf, rt, ra, si) : \
+						 GEN_STW (buf, rt, ra, si))
+#else
+#define GEN_LOAD(buf, rt, ra, si, is_64)	GEN_LWZ (buf, rt, ra, si)
+#define GEN_STORE(buf, rt, ra, si, is_64)	GEN_STW (buf, rt, ra, si)
+#endif
+
+/* Generate a sequence of instructions to load IMM in the register REG.
+   Write the instructions in BUF and return the number of bytes written.  */
+
+static int
+gen_limm (uint32_t *buf, int reg, uint64_t imm, int is_64)
+{
+  uint32_t *p = buf;
+
+  if ((imm + 32768) < 65536)
+    {
+      /* li	reg, imm[15:0] */
+      p += GEN_LI (p, reg, imm);
+    }
+  else if ((imm >> 32) == 0)
+    {
+      /* lis	reg, imm[31:16]
+	 ori	reg, reg, imm[15:0]
+	 rldicl reg, reg, 0, 32 */
+      p += GEN_LIS (p, reg, (imm >> 16) & 0xffff);
+      if ((imm & 0xffff) != 0)
+	p += GEN_ORI (p, reg, reg, imm & 0xffff);
+      /* Clear upper 32-bit if sign-bit is set.  */
+      if (imm & (1u << 31) && is_64)
+	p += GEN_RLDICL (p, reg, reg, 0, 32);
+    }
+  else
+    {
+      gdb_assert (is_64);
+      /* lis    reg, <imm[63:48]>
+	 ori    reg, reg, <imm[48:32]>
+	 rldicr reg, reg, 32, 31
+	 oris   reg, reg, <imm[31:16]>
+	 ori    reg, reg, <imm[15:0]> */
+      p += GEN_LIS (p, reg, ((imm >> 48) & 0xffff));
+      if (((imm >> 32) & 0xffff) != 0)
+        p += GEN_ORI (p, reg, reg, ((imm >> 32) & 0xffff));
+      p += GEN_RLDICR (p, reg, reg, 32, 31);
+      if (((imm >> 16) & 0xffff) != 0)
+        p += GEN_ORIS (p, reg, reg, ((imm >> 16) & 0xffff));
+      if ((imm & 0xffff) != 0)
+        p += GEN_ORI (p, reg, reg, (imm & 0xffff));
+    }
+
+  return p - buf;
+}
+
+/* Generate a sequence for atomically exchange at location LOCK.
+   This code sequence clobbers r6, r7, r8.  LOCK is the location for
+   the atomic-xchg, OLD_VALUE is expected old value stored in the
+   location, and R_NEW is a register for the new value.  */
+
+static int
+gen_atomic_xchg (uint32_t *buf, CORE_ADDR lock, int old_value, int r_new,
+		 int is_64)
+{
+  const int r_lock = 6;
+  const int r_old = 7;
+  const int r_tmp = 8;
+  uint32_t *p = buf;
+
+  /*
+  1: lwarx   TMP, 0, LOCK
+     cmpwi   TMP, OLD
+     bne     1b
+     stwcx.  NEW, 0, LOCK
+     bne     1b */
+
+  p += gen_limm (p, r_lock, lock, is_64);
+  p += gen_limm (p, r_old, old_value, is_64);
+
+  p += GEN_LWARX (p, r_tmp, 0, r_lock);
+  p += GEN_CMPW (p, r_tmp, r_old);
+  p += GEN_BNE (p, -8);
+  p += GEN_STWCX (p, r_new, 0, r_lock);
+  p += GEN_BNE (p, -16);
+
+  return p - buf;
+}
+
+/* Generate a sequence of instructions for calling a function
+   at address of FN.  Return the number of bytes are written in BUF.  */
+
+static int
+gen_call (uint32_t *buf, CORE_ADDR fn, int is_64, int is_opd)
+{
+  uint32_t *p = buf;
+
+  /* Must be called by r12 for caller to calculate TOC address. */
+  p += gen_limm (p, 12, fn, is_64);
+  if (is_opd)
+    {
+      p += GEN_LOAD (p, 11, 12, 16, is_64);
+      p += GEN_LOAD (p, 2, 12, 8, is_64);
+      p += GEN_LOAD (p, 12, 12, 0, is_64);
+    }
+  p += GEN_MTSPR (p, 12, 9);		/* mtctr  r12 */
+  *p++ = 0x4e800421;			/* bctrl */
+
+  return p - buf;
+}
+
+/* Copy the instruction from OLDLOC to *TO, and update *TO to *TO + size
+   of instruction.  This function is used to adjust pc-relative instructions
+   when copying.  */
+
+static void
+ppc_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
+{
+  uint32_t insn, op6;
+  long rel, newrel;
+
+  read_inferior_memory (oldloc, (unsigned char *) &insn, 4);
+  op6 = PPC_OP6 (insn);
+
+  if (op6 == 18 && (insn & 2) == 0)
+    {
+      /* branch && AA = 0 */
+      rel = PPC_LI (insn);
+      newrel = (oldloc - *to) + rel;
+
+      /* Out of range. Cannot relocate instruction.  */
+      if (newrel >= (1 << 25) || newrel < -(1 << 25))
+	return;
+
+      insn = (insn & ~0x3fffffc) | (newrel & 0x3fffffc);
+    }
+  else if (op6 == 16 && (insn & 2) == 0)
+    {
+      /* conditional branch && AA = 0 */
+
+      /* If the new relocation is too big for even a 26-bit unconditional
+	 branch, there is nothing we can do.  Just abort.
+
+	 Otherwise, if it can be fit in 16-bit conditional branch, just
+	 copy the instruction and relocate the address.
+
+	 If the it's  big for conditional-branch (16-bit), try to invert the
+	 condition and jump with 26-bit branch.  For example,
+
+	 beq  .Lgoto
+	 INSN1
+
+	 =>
+
+	 bne  1f (+8)
+	 b    .Lgoto
+       1:INSN1
+
+	 After this transform, we are actually jump from *TO+4 instead of *TO,
+	 so check the relocation again because it will be 1-insn farther then
+	 before if *TO is after OLDLOC.
+
+
+	 For BDNZT (or so) is transformed from
+
+	 bdnzt  eq, .Lgoto
+	 INSN1
+
+	 =>
+
+	 bdz    1f (+12)
+	 bf     eq, 1f (+8)
+	 b      .Lgoto
+       1:INSN1
+
+	 See also "BO field encodings".  */
+
+      rel = PPC_BD (insn);
+      newrel = (oldloc - *to) + rel;
+
+      if (newrel < (1 << 15) && newrel >= -(1 << 15))
+	insn = (insn & ~0xfffc) | (newrel & 0xfffc);
+      else if ((PPC_BO (insn) & 0x14) == 0x4 || (PPC_BO (insn) & 0x14) == 0x10)
+	{
+	  newrel -= 4;
+
+	  /* Out of range. Cannot relocate instruction.  */
+	  if (newrel >= (1 << 25) || newrel < -(1 << 25))
+	    return;
+
+	  if ((PPC_BO (insn) & 0x14) == 0x4)
+	    insn ^= (1 << 24);
+	  else if ((PPC_BO (insn) & 0x14) == 0x10)
+	    insn ^= (1 << 22);
+
+	  /* Jump over the unconditional branch.  */
+	  insn = (insn & ~0xfffc) | 0x8;
+	  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+	  *to += 4;
+
+	  /* Build a unconditional branch and copy LK bit.  */
+	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
+	  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+	  *to += 4;
+
+	  return;
+	}
+      else if ((PPC_BO (insn) & 0x14) == 0)
+	{
+	  uint32_t bdnz_insn = (16 << 26) | (0x10 << 21) | 12;
+	  uint32_t bf_insn = (16 << 26) | (0x4 << 21) | 8;
+
+	  newrel -= 8;
+
+	  /* Out of range. Cannot relocate instruction.  */
+	  if (newrel >= (1 << 25) || newrel < -(1 << 25))
+	    return;
+
+	  /* Copy BI field.  */
+	  bf_insn |= (insn & 0x1f0000);
+
+	  /* Invert condition.  */
+	  bdnz_insn |= (insn ^ (1 << 22)) & (1 << 22);
+	  bf_insn |= (insn ^ (1 << 24)) & (1 << 24);
+
+	  write_inferior_memory (*to, (unsigned char *) &bdnz_insn, 4);
+	  *to += 4;
+	  write_inferior_memory (*to, (unsigned char *) &bf_insn, 4);
+	  *to += 4;
+
+	  /* Build a unconditional branch and copy LK bit.  */
+	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
+	  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+	  *to += 4;
+
+	  return;
+	}
+      else /* (BO & 0x14) == 0x14, branch always.  */
+	{
+	  /* Out of range. Cannot relocate instruction.  */
+	  if (newrel >= (1 << 25) || newrel < -(1 << 25))
+	    return;
+
+	  /* Build a unconditional branch and copy LK bit.  */
+	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
+	  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+	  *to += 4;
+
+	  return;
+	}
+    }
+
+  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+  *to += 4;
+}
+
+/* Implement install_fast_tracepoint_jump_pad of target_ops.
+   See target.h for details.  */
+
+static int
+ppc_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
+				      CORE_ADDR collector,
+				      CORE_ADDR lockaddr,
+				      ULONGEST orig_size,
+				      CORE_ADDR *jump_entry,
+				      CORE_ADDR *trampoline,
+				      ULONGEST *trampoline_size,
+				      unsigned char *jjump_pad_insn,
+				      ULONGEST *jjump_pad_insn_size,
+				      CORE_ADDR *adjusted_insn_addr,
+				      CORE_ADDR *adjusted_insn_addr_end,
+				      char *err)
+{
+  uint32_t buf[256];
+  uint32_t *p = buf;
+  int j, offset;
+  CORE_ADDR buildaddr = *jump_entry;
+  const CORE_ADDR entryaddr = *jump_entry;
+  int rsz, min_frame, frame_size, tp_reg;
+#ifdef __powerpc64__
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+  int is_64 = register_size (regcache->tdesc, 0) == 8;
+  int is_opd = is_64 && !is_elfv2_inferior ();
+#else
+  int is_64 = 0, is_opd = 0;
+#endif
+
+#ifdef __powerpc64__
+  if (is_64)
+    {
+      /* Minimum frame size is 32 bytes for ELFv2, and 112 bytes for ELFv1.  */
+      rsz = 8;
+      min_frame = 112;
+      frame_size = (40 * rsz) + min_frame;
+      tp_reg = 13;
+    }
+  else
+    {
+#endif
+      rsz = 4;
+      min_frame = 16;
+      frame_size = (40 * rsz) + min_frame;
+      tp_reg = 2;
+#ifdef __powerpc64__
+    }
+#endif
+
+  /* Stack frame layout for this jump pad,
+
+     High	thread_area (r13/r2)    |
+		tpoint			- collecting_t obj
+		PC/<tpaddr>		| +36
+		CTR			| +35
+		LR			| +34
+		XER			| +33
+		CR			| +32
+		R31			|
+		R29			|
+		...			|
+		R1			| +1
+		R0			- collected registers
+		...			|
+		...			|
+     Low	Back-chain		-
+
+
+     The code flow of this jump pad,
+
+     1. Adjust SP
+     2. Save GPR and SPR
+     3. Prepare argument
+     4. Call gdb_collector
+     5. Restore GPR and SPR
+     6. Restore SP
+     7. Build a jump for back to the program
+     8. Copy/relocate original instruction
+     9. Build a jump for replacing orignal instruction.  */
+
+  /* Adjust stack pointer.  */
+  if (is_64)
+    p += GEN_STDU (p, 1, 1, -frame_size);		/* stdu   r1,-frame_size(r1) */
+  else
+    p += GEN_STWU (p, 1, 1, -frame_size);		/* stwu   r1,-frame_size(r1) */
+
+  /* Store GPRs.  Save R1 later, because it had just been modified, but
+     we want the original value.  */
+  for (j = 2; j < 32; j++)
+    p += GEN_STORE (p, j, 1, min_frame + j * rsz, is_64);
+  p += GEN_STORE (p, 0, 1, min_frame + 0 * rsz, is_64);
+  /* Set r0 to the original value of r1 before adjusting stack frame,
+     and then save it.  */
+  p += GEN_ADDI (p, 0, 1, frame_size);
+  p += GEN_STORE (p, 0, 1, min_frame + 1 * rsz, is_64);
+
+  /* Save CR, XER, LR, and CTR.  */
+  p += GEN_MFCR (p, 3);					/* mfcr   r3 */
+  p += GEN_MFSPR (p, 4, 1);				/* mfxer  r4 */
+  p += GEN_MFSPR (p, 5, 8);				/* mflr   r5 */
+  p += GEN_MFSPR (p, 6, 9);				/* mfctr  r6 */
+  p += GEN_STORE (p, 3, 1, min_frame + 32 * rsz, is_64);/* std    r3, 32(r1) */
+  p += GEN_STORE (p, 4, 1, min_frame + 33 * rsz, is_64);/* std    r4, 33(r1) */
+  p += GEN_STORE (p, 5, 1, min_frame + 34 * rsz, is_64);/* std    r5, 34(r1) */
+  p += GEN_STORE (p, 6, 1, min_frame + 35 * rsz, is_64);/* std    r6, 35(r1) */
+
+  /* Save PC<tpaddr>  */
+  p += gen_limm (p, 3, tpaddr, is_64);
+  p += GEN_STORE (p, 3, 1, min_frame + 36 * rsz, is_64);
+
+
+  /* Setup arguments to collector.  */
+  /* Set r4 to collected registers.  */
+  p += GEN_ADDI (p, 4, 1, min_frame);
+  /* Set r3 to TPOINT.  */
+  p += gen_limm (p, 3, tpoint, is_64);
+
+  /* Prepare collecting_t object for lock.  */
+  p += GEN_STORE (p, 3, 1, min_frame + 37 * rsz, is_64);
+  p += GEN_STORE (p, tp_reg, 1, min_frame + 38 * rsz, is_64);
+  /* Set R5 to collecting object.  */
+  p += GEN_ADDI (p, 5, 1, 37 * rsz);
+
+  p += GEN_LWSYNC (p);
+  p += gen_atomic_xchg (p, lockaddr, 0, 5, is_64);
+  p += GEN_LWSYNC (p);
+
+  /* Call to collector.  */
+  p += gen_call (p, collector, is_64, is_opd);
+
+  /* Simply write 0 to release the lock.  */
+  p += gen_limm (p, 3, lockaddr, is_64);
+  p += gen_limm (p, 4, 0, is_64);
+  p += GEN_LWSYNC (p);
+  p += GEN_STORE (p, 4, 3, 0, is_64);
+
+  /* Restore stack and registers.  */
+  p += GEN_LOAD (p, 3, 1, min_frame + 32 * rsz, is_64);	/* ld	r3, 32(r1) */
+  p += GEN_LOAD (p, 4, 1, min_frame + 33 * rsz, is_64);	/* ld	r4, 33(r1) */
+  p += GEN_LOAD (p, 5, 1, min_frame + 34 * rsz, is_64);	/* ld	r5, 34(r1) */
+  p += GEN_LOAD (p, 6, 1, min_frame + 35 * rsz, is_64);	/* ld	r6, 35(r1) */
+  p += GEN_MTCR (p, 3);					/* mtcr	  r3 */
+  p += GEN_MTSPR (p, 4, 1);				/* mtxer  r4 */
+  p += GEN_MTSPR (p, 5, 8);				/* mtlr   r5 */
+  p += GEN_MTSPR (p, 6, 9);				/* mtctr  r6 */
+
+  /* Restore GPRs.  */
+  for (j = 2; j < 32; j++)
+    p += GEN_LOAD (p, j, 1, min_frame + j * rsz, is_64);
+  p += GEN_LOAD (p, 0, 1, min_frame + 0 * rsz, is_64);
+  /* Restore SP.  */
+  p += GEN_ADDI (p, 1, 1, frame_size);
+
+  /* Flush instructions to inferior memory.  */
+  write_inferior_memory (buildaddr, (unsigned char *) buf, (p - buf) * 4);
+
+  /* Now, insert the original instruction to execute in the jump pad.  */
+  *adjusted_insn_addr = buildaddr + (p - buf) * 4;
+  *adjusted_insn_addr_end = *adjusted_insn_addr;
+  ppc_relocate_instruction (adjusted_insn_addr_end, tpaddr);
+
+  /* Verify the relocation size.  If should be 4 for normal copy,
+     8 or 12 for some conditional branch.  */
+  if ((*adjusted_insn_addr_end - *adjusted_insn_addr == 0)
+      || (*adjusted_insn_addr_end - *adjusted_insn_addr > 12))
+    {
+      sprintf (err, "E.Unexpected instruction length = %d"
+		    "when relocate instruction.",
+		    (int) (*adjusted_insn_addr_end - *adjusted_insn_addr));
+      return 1;
+    }
+
+  buildaddr = *adjusted_insn_addr_end;
+  p = buf;
+  /* Finally, write a jump back to the program.  */
+  offset = (tpaddr + 4) - buildaddr;
+  if (offset >= (1 << 25) || offset < -(1 << 25))
+    {
+      sprintf (err, "E.Jump back from jump pad too far from tracepoint "
+		    "(offset 0x%x > 26-bit).", offset);
+      return 1;
+    }
+  /* b <tpaddr+4> */
+  p += GEN_B (p, offset);
+  write_inferior_memory (buildaddr, (unsigned char *) buf, (p - buf) * 4);
+  *jump_entry = buildaddr + (p - buf) * 4;
+
+  /* The jump pad is now built.  Wire in a jump to our jump pad.  This
+     is always done last (by our caller actually), so that we can
+     install fast tracepoints with threads running.  This relies on
+     the agent's atomic write support.  */
+  offset = entryaddr - tpaddr;
+  if (offset >= (1 << 25) || offset < -(1 << 25))
+    {
+      sprintf (err, "E.Jump back from jump pad too far from tracepoint "
+		    "(offset 0x%x > 26-bit).", offset);
+      return 1;
+    }
+  /* b <jentry> */
+  GEN_B ((uint32_t *) jjump_pad_insn, offset);
+  *jjump_pad_insn_size = 4;
+
+  return 0;
+}
+
+/* Returns the minimum instruction length for installing a tracepoint.  */
+
+static int
+ppc_get_min_fast_tracepoint_insn_len (void)
+{
+  return 4;
+}
+
+/* Implementation of linux_target_ops method "get_ipa_tdesc_idx".  */
+
+static int
+ppc_get_ipa_tdesc_idx (void)
+{
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+  const struct target_desc *tdesc = regcache->tdesc;
+
+#ifdef __powerpc64__
+  if (tdesc == tdesc_powerpc_64l)
+    return PPC_TDESC_BASE;
+  if (tdesc == tdesc_powerpc_altivec64l)
+    return PPC_TDESC_ALTIVEC;
+  if (tdesc == tdesc_powerpc_cell64l)
+    return PPC_TDESC_CELL;
+  if (tdesc == tdesc_powerpc_vsx64l)
+    return PPC_TDESC_VSX;
+  if (tdesc == tdesc_powerpc_isa205_64l)
+    return PPC_TDESC_ISA205;
+  if (tdesc == tdesc_powerpc_isa205_altivec64l)
+    return PPC_TDESC_ISA205_ALTIVEC;
+  if (tdesc == tdesc_powerpc_isa205_vsx64l)
+    return PPC_TDESC_ISA205_VSX;
+#endif
+
+  if (tdesc == tdesc_powerpc_32l)
+    return PPC_TDESC_BASE;
+  if (tdesc == tdesc_powerpc_altivec32l)
+    return PPC_TDESC_ALTIVEC;
+  if (tdesc == tdesc_powerpc_cell32l)
+    return PPC_TDESC_CELL;
+  if (tdesc == tdesc_powerpc_vsx32l)
+    return PPC_TDESC_VSX;
+  if (tdesc == tdesc_powerpc_isa205_32l)
+    return PPC_TDESC_ISA205;
+  if (tdesc == tdesc_powerpc_isa205_altivec32l)
+    return PPC_TDESC_ISA205_ALTIVEC;
+  if (tdesc == tdesc_powerpc_isa205_vsx32l)
+    return PPC_TDESC_ISA205_VSX;
+  if (tdesc == tdesc_powerpc_e500l)
+    return PPC_TDESC_E500;
+
+  return 0;
 }
 
 struct linux_target_ops the_low_target = {
@@ -789,13 +1535,15 @@ struct linux_target_ops the_low_target = {
   NULL, /* prepare_to_resume */
   NULL, /* process_qsupported */
   ppc_supports_tracepoints,
-  NULL, /* get_thread_area */
-  NULL, /* install_fast_tracepoint_jump_pad */
+  ppc_get_thread_area,
+  ppc_install_fast_tracepoint_jump_pad,
   NULL, /* emit_ops */
-  NULL, /* get_min_fast_tracepoint_insn_len */
+  ppc_get_min_fast_tracepoint_insn_len,
   NULL, /* supports_range_stepping */
   NULL, /* breakpoint_kind_from_current_state */
   ppc_supports_hardware_single_step,
+  NULL, /* get_syscall_trapinfo */
+  ppc_get_ipa_tdesc_idx,
 };
 
 void
@@ -811,6 +1559,7 @@ initialize_low_arch (void)
   init_registers_powerpc_isa205_altivec32l ();
   init_registers_powerpc_isa205_vsx32l ();
   init_registers_powerpc_e500l ();
+#if __powerpc64__
   init_registers_powerpc_64l ();
   init_registers_powerpc_altivec64l ();
   init_registers_powerpc_cell64l ();
@@ -818,6 +1567,7 @@ initialize_low_arch (void)
   init_registers_powerpc_isa205_64l ();
   init_registers_powerpc_isa205_altivec64l ();
   init_registers_powerpc_isa205_vsx64l ();
+#endif
 
   initialize_regsets_info (&ppc_regsets_info);
 }
