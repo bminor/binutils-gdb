@@ -526,10 +526,8 @@ new_processing_context (struct compile_cplus_instance *context,
 			gcc_type *nested_type)
 {
   char *name;
-  gcc_type result;
   struct cleanup *cleanups;
   struct compile_cplus_context *pctx;
-  VEC (compile_cplus_scope_def) *scopes = NULL;
 
   *nested_type = GCC_TYPE_NONE;
   pctx = XCNEW (struct compile_cplus_context);
@@ -747,7 +745,6 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
   int need_new_context;
   gcc_type typedef_type, result;
   char *name;
-  struct compile_cplus_scope *scope;
   struct compile_cplus_context *pctx;
   struct cleanup *cleanups;
 
@@ -803,8 +800,6 @@ ccp_convert_type_defns (struct compile_cplus_instance *context,
 
   for (i = 0; i < TYPE_TYPE_DEFN_FIELD_COUNT (type); ++i)
     {
-      const char *name = TYPE_TYPE_DEFN_FIELD_NAME (type, i);
-
       /* !!keiths: Is this "all" I need to do?? */
       (void) convert_cplus_type (context,
 				 TYPE_TYPE_DEFN_FIELD_TYPE (type, i));
@@ -911,7 +906,6 @@ static gcc_type
 ccp_convert_method (struct compile_cplus_instance *context,
 		    struct type *parent_type, struct type *method_type)
 {
-  int i;
   gcc_type result, func_type, class_type;
   gcc_cp_qualifiers_flags quals;
   gcc_cp_ref_qualifiers_flags rquals;
@@ -1409,7 +1403,6 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
 {
   int i, need_new_context;
   gcc_type result;
-  struct compile_cplus_scope *scope;
   struct compile_cplus_context *pctx;
   char *name = NULL;
   const char *filename = NULL;
@@ -1537,7 +1530,6 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
 {
   int i, need_new_context;
   gcc_type int_type, result;
-  struct compile_cplus_scope *scope;
   struct compile_cplus_context *pctx;
   char *name = NULL;
   const char *filename = NULL;
@@ -1792,7 +1784,6 @@ ccp_convert_namespace (struct compile_cplus_instance *context,
   int need_new_context;
   gcc_type dummy;
   char *name = NULL;
-  struct compile_cplus_scope *scope;
   struct compile_cplus_context *pctx;
   struct cleanup *cleanups;
 

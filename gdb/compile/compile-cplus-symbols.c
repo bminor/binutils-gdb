@@ -566,7 +566,6 @@ gcc_cplus_convert_symbol (void *datum,
   int found = 0;
   struct search_multiple_result search_result;
   struct cleanup *cleanups;
-  enum search_domain search_domain;
 
   switch (request)
     {
