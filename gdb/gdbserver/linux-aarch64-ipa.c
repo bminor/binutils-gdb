@@ -133,8 +133,8 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
 		     + (aarch64_ft_collect_regmap[i] * FT_CR_SIZE));
 }
 
-IP_AGENT_EXPORT_FUNC ULONGEST
-gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
+ULONGEST
+get_raw_reg (const unsigned char *raw_regs, int regnum)
 {
   if (regnum >= AARCH64_NUM_FT_COLLECT_GREGS)
     return 0;

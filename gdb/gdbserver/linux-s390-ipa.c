@@ -261,8 +261,8 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
       supply_register (regcache, i, ((char *) buf) + s390_regmap[i]);
 }
 
-IP_AGENT_EXPORT_FUNC ULONGEST
-gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
+ULONGEST
+get_raw_reg (const unsigned char *raw_regs, int regnum)
 {
   int offset;
   if (regnum >= s390_regnum)

@@ -1,3 +1,32 @@
+2016-03-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-aarch64-ipa.c: Rename gdb_agent_get_raw_reg to get_raw_reg.
+	* linux-amd64-ipa.c: Likewise.
+	* linux-i386-ipa.c: Likewise.
+	* linux-s390-ipa.c: Likewise.
+	* tracepoint.c: IPA-export gdb_collect_ptr instead of gdb_collect,
+	ditto for get_raw_reg_ptr, get_trace_state_variable_value_ptr,
+	set_trace_state_variable_value_ptr.
+	(struct ipa_sym_addresses): Likewise.
+	(symbol_list): Likewise.
+	(install_fast_tracepoint): Dereference gdb_collect_ptr instead of
+	accessing gdb_collect directly.
+	(gdb_collect_ptr_type): New typedef.
+	(get_raw_reg_ptr_type): New typedef.
+	(get_trace_state_variable_value_ptr_type): New typedef.
+	(set_trace_state_variable_value_ptr_type): New typedef.
+	(gdb_collect_ptr): New global.
+	(get_raw_reg_ptr): New global.
+	(get_trace_state_variable_value_ptr): New global.
+	(set_trace_state_variable_value_ptr): New global.
+	(get_raw_reg_func_addr): Dereference get_raw_reg_ptr instead of
+	accessing get_raw_reg directly.
+	(get_get_tsv_func_addr): Likewise for
+	get_trace_state_variable_value_ptr.
+	(get_set_tsv_func_addr): Likewise for
+	set_trace_state_variable_value_ptr.
+	* tracepoint.h: Rename gdb_agent_get_raw_reg to get_raw_reg.
+
 2016-03-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tracepoint.c (cmd_qtenable_disable): Remove whitespace.
