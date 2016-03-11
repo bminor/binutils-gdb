@@ -1083,11 +1083,13 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		  return FALSE;
 		}
 
-	      val = bfd_get_32 (abfd, info->stabs + r->address);
+	      val = bfd_get_32 (abfd, info->stabs
+				+ r->address * bfd_octets_per_byte (abfd));
 	      val &= r->howto->src_mask;
 	      sym = *r->sym_ptr_ptr;
 	      val += sym->value + sym->section->vma + r->addend;
-	      bfd_put_32 (abfd, (bfd_vma) val, info->stabs + r->address);
+	      bfd_put_32 (abfd, (bfd_vma) val, info->stabs
+			  + r->address * bfd_octets_per_byte (abfd));
 	    }
 	}
 

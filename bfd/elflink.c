@@ -7751,10 +7751,15 @@ resolve_symbol (const char *name,
   return FALSE;
 }
 
+/* Looks up NAME in SECTIONS.  If found sets RESULT to NAME's address (in
+   bytes) and returns TRUE, otherwise returns FALSE.  Accepts pseudo-section
+   names like "foo.end" which is the end address of section "foo".  */
+   
 static bfd_boolean
 resolve_section (const char *name,
 		 asection *sections,
-		 bfd_vma *result)
+		 bfd_vma *result,
+		 bfd * abfd)
 {
   asection *curr;
   unsigned int len;
@@ -7767,6 +7772,7 @@ resolve_section (const char *name,
       }
 
   /* Hmm. still haven't found it. try pseudo-section names.  */
+  /* FIXME: This could be coded more efficiently...  */
   for (curr = sections; curr; curr = curr->next)
     {
       len = strlen (curr->name);
@@ -7777,7 +7783,7 @@ resolve_section (const char *name,
 	{
 	  if (strncmp (".end", name + len, 4) == 0)
 	    {
-	      *result = curr->vma + curr->size;
+	      *result = curr->vma + curr->size / bfd_octets_per_byte (abfd);
 	      return TRUE;
 	    }
 
@@ -7859,7 +7865,7 @@ eval_symbol (bfd_vma *result,
 
       if (symbol_is_section)
 	{
-	  if (!resolve_section (symbuf, flinfo->output_bfd->sections, result)
+	  if (!resolve_section (symbuf, flinfo->output_bfd->sections, result, input_bfd)
 	      && !resolve_symbol (symbuf, input_bfd, flinfo, result,
 				  isymbuf, locsymcount))
 	    {
@@ -7872,7 +7878,7 @@ eval_symbol (bfd_vma *result,
 	  if (!resolve_symbol (symbuf, input_bfd, flinfo, result,
 			       isymbuf, locsymcount)
 	      && !resolve_section (symbuf, flinfo->output_bfd->sections,
-				   result))
+				   result, input_bfd))
 	    {
 	      undefined_reference ("symbol", symbuf);
 	      return FALSE;
@@ -8096,8 +8102,8 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   else
     shift = (8 * wordsz) - (start + len);
 
-  /* FIXME: octets_per_byte.  */
-  x = get_value (wordsz, chunksz, input_bfd, contents + rel->r_offset);
+  x = get_value (wordsz, chunksz, input_bfd,
+		 contents + rel->r_offset * bfd_octets_per_byte (input_bfd));
 
 #ifdef DEBUG
   printf ("Doing complex reloc: "
@@ -8129,8 +8135,8 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  (unsigned long) relocation, (unsigned long) (mask << shift),
 	  (unsigned long) ((relocation & mask) << shift), (unsigned long) x);
 #endif
-  /* FIXME: octets_per_byte.  */
-  put_value (wordsz, chunksz, input_bfd, x, contents + rel->r_offset);
+  put_value (wordsz, chunksz, input_bfd, x,
+	     contents + rel->r_offset * bfd_octets_per_byte (input_bfd));
   return r;
 }
 
@@ -10535,11 +10541,13 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  break;
 	default:
 	  {
-	    /* FIXME: octets_per_byte.  */
 	    if (! (o->flags & SEC_EXCLUDE))
 	      {
 		file_ptr offset = (file_ptr) o->output_offset;
 		bfd_size_type todo = o->size;
+
+		offset *= bfd_octets_per_byte (output_bfd);
+
 		if ((o->flags & SEC_ELF_REVERSE_COPY))
 		  {
 		    /* Reverse-copy input section to output.  */
@@ -10703,8 +10711,11 @@ elf_reloc_link_order (bfd *output_bfd,
 	    }
 	  break;
 	}
+
       ok = bfd_set_section_contents (output_bfd, output_section, buf,
-				     link_order->offset, size);
+				     link_order->offset
+				     * bfd_octets_per_byte (output_bfd),
+				     size);
       free (buf);
       if (! ok)
 	return FALSE;
@@ -10886,9 +10897,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
     {
       s = sections[n]->u.indirect.section;
       offset &= ~(bfd_vma) 0 << s->alignment_power;
-      s->output_offset = offset;
+      s->output_offset = offset / bfd_octets_per_byte (abfd);
       sections[n]->offset = offset;
-      /* FIXME: octets_per_byte.  */
       offset += sections[n]->size;
     }
 
@@ -11948,10 +11958,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    continue;
 	  if (strcmp (o->name, ".dynstr") != 0)
 	    {
-	      /* FIXME: octets_per_byte.  */
 	      if (! bfd_set_section_contents (abfd, o->output_section,
 					      o->contents,
-					      (file_ptr) o->output_offset,
+					      (file_ptr) o->output_offset
+					      * bfd_octets_per_byte (abfd),
 					      o->size))
 		goto error_return;
 	    }

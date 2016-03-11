@@ -1375,7 +1375,8 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
     }
 
   return _bfd_relocate_contents (howto, input_bfd, relocation,
-				 contents + address);
+				 contents
+				 + address * bfd_octets_per_byte (input_bfd));
 }
 
 /* Relocate a given location using a given value and howto.  */
