@@ -1,3 +1,13 @@
+2016-03-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* remote-utils.c (look_up_one_symbol): Remove own_buf, handle 'v'
+	packets.
+	(relocate_instruction): Remove own_buf.
+	* server.c (own_buf): Make global.
+	(handle_v_requests): Make global.
+	* server.h (own_buf): New declaration.
+	(handle_v_requests): New prototype.
+
 2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	PR 18377
