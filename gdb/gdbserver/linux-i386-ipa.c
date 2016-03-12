@@ -269,6 +269,21 @@ get_ipa_tdesc (int idx)
     }
 }
 
+/* Allocate buffer for the jump pads.  On i386, we can reach an arbitrary
+   address with a jump instruction, so just allocate normally.  */
+
+void *
+alloc_jump_pad_buffer (size_t size)
+{
+  void *res = mmap (NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+		    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+  if (res == MAP_FAILED)
+    return NULL;
+
+  return res;
+}
+
 void
 initialize_low_tracepoint (void)
 {

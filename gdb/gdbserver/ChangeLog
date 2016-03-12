@@ -1,3 +1,17 @@
+2016-03-31  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-aarch64-ipa.c: Add <sys/mman.h> and <sys/auxv.h> includes.
+	(alloc_jump_pad_buffer): New function.
+	* linux-amd64-ipa.c: Add <sys/mman.h> include.
+	(alloc_jump_pad_buffer): New function.
+	* linux-i386-ipa.c (alloc_jump_pad_buffer): New function.
+	* linux-s390-ipa.c: Add <sys/mman.h> and <sys/auxv.h> includes.
+	(alloc_jump_pad_buffer): New function.
+	* tracepoint.c (getauxval) [!HAVE_GETAUXVAL]: New function.
+	(initialize_tracepoint): Delegate to alloc_jump_pad_buffer.
+	* tracepoint.h (alloc_jump_pad_buffer): New prototype.
+	(getauxval) [!HAVE_GETAUXVAL]: New prototype.
+
 2016-03-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* linux-aarch64-ipa.c: Rename gdb_agent_get_raw_reg to get_raw_reg.

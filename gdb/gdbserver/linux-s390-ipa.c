@@ -19,8 +19,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+#include <sys/mman.h>
 #include "tracepoint.h"
 #include "linux-s390-tdesc.h"
+#ifdef HAVE_GETAUXVAL
+#include <sys/auxv.h>
+#endif
 
 #define FT_FPR(x) (0x000 + (x) * 0x10)
 #define FT_VR(x) (0x000 + (x) * 0x10)
@@ -368,6 +372,61 @@ get_ipa_tdesc (int idx)
       return tdesc_s390_linux32;
 #endif
     }
+}
+
+/* Allocate buffer for the jump pads.  On 31-bit, JG reaches everywhere,
+   so just allocate normally.  On 64-bit, we have +/-4GiB of reach, and
+   the executable is usually mapped at 0x80000000 - aim for somewhere
+   below it.  */
+
+void *
+alloc_jump_pad_buffer (size_t size)
+{
+#ifdef __s390x__
+  uintptr_t addr;
+  uintptr_t exec_base = getauxval (AT_PHDR);
+  int pagesize;
+  void *res;
+
+  if (exec_base == 0)
+    exec_base = 0x80000000;
+
+  pagesize = sysconf (_SC_PAGE_SIZE);
+  if (pagesize == -1)
+    perror_with_name ("sysconf");
+
+  addr = exec_base - size;
+
+  /* size should already be page-aligned, but this can't hurt.  */
+  addr &= ~(pagesize - 1);
+
+  /* Search for a free area.  If we hit 0, we're out of luck.  */
+  for (; addr; addr -= pagesize)
+    {
+      /* No MAP_FIXED - we don't want to zap someone's mapping.  */
+      res = mmap ((void *) addr, size,
+		  PROT_READ | PROT_WRITE | PROT_EXEC,
+		  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+      /* If we got what we wanted, return.  */
+      if ((uintptr_t) res == addr)
+	return res;
+
+      /* If we got a mapping, but at a wrong address, undo it.  */
+      if (res != MAP_FAILED)
+	munmap (res, size);
+    }
+
+  return NULL;
+#else
+  void *res = mmap (NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+		    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+  if (res == MAP_FAILED)
+    return NULL;
+
+  return res;
+#endif
 }
 
 void

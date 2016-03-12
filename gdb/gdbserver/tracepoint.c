@@ -216,6 +216,34 @@ static struct ipa_sym_addresses ipa_sym_addrs;
 
 static int read_inferior_integer (CORE_ADDR symaddr, int *val);
 
+#if !defined HAVE_GETAUXVAL && defined IN_PROCESS_AGENT
+/* Retrieve the value of TYPE from the auxiliary vector.  If TYPE is not
+   found, 0 is returned.  This function is provided if glibc is too old.  */
+
+unsigned long
+getauxval (unsigned long type)
+{
+  unsigned long data[2];
+  FILE *f = fopen ("/proc/self/auxv", "r");
+  unsigned long value = 0;
+
+  if (f == NULL)
+    return 0;
+
+  while (fread (data, sizeof (data), 1, f) > 0)
+    {
+      if (data[0] == type)
+	{
+	  value = data[1];
+	  break;
+	}
+    }
+
+  fclose (f);
+  return value;
+}
+#endif
+
 /* Returns true if both the in-process agent library and the static
    tracepoints libraries are loaded in the inferior, and agent has
    capability on static tracepoints.  */
@@ -7400,35 +7428,22 @@ initialize_tracepoint (void)
 
 #ifdef IN_PROCESS_AGENT
   {
-    uintptr_t addr;
     int pagesize;
+    size_t jump_pad_size;
 
     pagesize = sysconf (_SC_PAGE_SIZE);
     if (pagesize == -1)
       perror_with_name ("sysconf");
 
-    gdb_tp_heap_buffer = (char *) xmalloc (5 * 1024 * 1024);
-
 #define SCRATCH_BUFFER_NPAGES 20
 
-    /* Allocate scratch buffer aligned on a page boundary, at a low
-       address (close to the main executable's code).  */
-    for (addr = pagesize; addr != 0; addr += pagesize)
-      {
-	gdb_jump_pad_buffer
-	  = (char *) mmap ((void *) addr,
-			   pagesize * SCRATCH_BUFFER_NPAGES,
-			   PROT_READ | PROT_WRITE | PROT_EXEC,
-			   MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-			   -1, 0);
-	if (gdb_jump_pad_buffer != MAP_FAILED)
-	  break;
-      }
+    jump_pad_size = pagesize * SCRATCH_BUFFER_NPAGES;
 
-    if (addr == 0)
+    gdb_tp_heap_buffer = (char *) xmalloc (5 * 1024 * 1024);
+    gdb_jump_pad_buffer = alloc_jump_pad_buffer (jump_pad_size);
+    if (gdb_jump_pad_buffer == NULL)
       perror_with_name ("mmap");
-
-    gdb_jump_pad_buffer_end = gdb_jump_pad_buffer + pagesize * SCRATCH_BUFFER_NPAGES;
+    gdb_jump_pad_buffer_end = gdb_jump_pad_buffer + jump_pad_size;
   }
 
   gdb_trampoline_buffer = gdb_trampoline_buffer_end = 0;

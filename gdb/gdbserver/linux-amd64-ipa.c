@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+#include <sys/mman.h>
 #include "tracepoint.h"
 #include "linux-x86-tdesc.h"
 
@@ -188,6 +189,23 @@ get_ipa_tdesc (int idx)
 		      "unknown ipa tdesc index: %d", idx);
       return tdesc_amd64_linux;
     }
+}
+
+/* Allocate buffer for the jump pads.  Since we're using 32-bit jumps
+   to reach them, and the executable is at low addresses, MAP_32BIT
+   works just fine.  Shared libraries, being allocated at the top,
+   are unfortunately out of luck.  */
+
+void *
+alloc_jump_pad_buffer (size_t size)
+{
+  void *res = mmap (NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+		    MAP_PRIVATE | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+
+  if (res == MAP_FAILED)
+    return NULL;
+
+  return res;
 }
 
 void
