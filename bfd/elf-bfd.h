@@ -212,6 +212,10 @@ struct elf_link_hash_entry
   /* Symbol is defined by a shared library with non-default visibility
      in a read/write section.  */
   unsigned int protected_def : 1;
+  /* Symbol is defiend by linker.  */
+  unsigned int def_linker : 1;
+  /* Symbol is defiend by linker and absolue.  */
+  unsigned int def_linker_abs : 1;
 
   /* String table index in .dynstr if this is a dynamic symbol.  */
   unsigned long dynstr_index;
@@ -2644,6 +2648,16 @@ extern asection _bfd_elf_large_com_section;
 #define SYMBOLIC_BIND(INFO, H) \
     (!(H)->unique_global \
      && ((INFO)->symbolic || ((INFO)->dynamic && !(H)->dynamic)))
+
+/* Will a relocation be resolved to absolute symbol in shared object.  */
+#define RESOLVED_TO_ABS_IN_PIC(INFO, H) \
+   ((bfd_link_pie (INFO)					\
+     || (bfd_link_dll (INFO)					\
+	 && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
+	     || SYMBOLIC_BIND ((INFO), (H)))))			\
+    && (H)->def_regular						\
+    && (!(H)->def_linker || (H)->def_linker_abs)		\
+    && bfd_is_abs_section ((H)->root.u.def.section))
 
 #ifdef __cplusplus
 }

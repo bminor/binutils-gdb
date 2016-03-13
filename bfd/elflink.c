@@ -543,7 +543,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 				struct bfd_link_info *info,
 				const char *name,
 				bfd_boolean provide,
-				bfd_boolean hidden)
+				bfd_boolean hidden,
+				bfd_boolean abssym)
 {
   struct elf_link_hash_entry *h, *hv;
   struct elf_link_hash_table *htab;
@@ -628,6 +629,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
     h->verinfo.verdef = NULL;
 
   h->def_regular = 1;
+  h->def_linker = 1;
+  h->def_linker_abs = abssym;
 
   if (hidden)
     {

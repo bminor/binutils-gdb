@@ -1354,10 +1354,14 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 	 will do no harm.  */
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
+	  /* Symbol defined --defsym command-line option or absolute
+	     symbol defined in linker script have absolute value.  */
 	  if (!bfd_elf_record_link_assignment (link_info.output_bfd,
 					       &link_info,
 					       exp->assign.dst, provide,
-					       exp->assign.hidden))
+					       exp->assign.hidden,
+					       (exp->assign.defsym
+						|| !expld.rel_from_abs)))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",
 		   exp->assign.dst);
 	}
@@ -1506,6 +1510,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 		library.  */
 	     ehdr_start = h;
 	     ehdr_start_save = h->root;
+	     h->def_linker = 1;
 	     h->root.type = bfd_link_hash_defined;
 	     h->root.u.def.section = bfd_abs_section_ptr;
 	     h->root.u.def.value = 0;

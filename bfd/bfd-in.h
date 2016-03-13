@@ -649,7 +649,7 @@ enum notice_asneeded_action {
 
 extern bfd_boolean bfd_elf_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *, bfd_boolean,
-   bfd_boolean);
+   bfd_boolean, bfd_boolean);
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_get_bfd_needed_list

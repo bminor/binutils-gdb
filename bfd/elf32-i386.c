@@ -751,6 +751,12 @@ static const struct elf_i386_backend_data elf_i386_arch_bed =
        || (EH)->has_non_got_reloc				\
        || !(INFO)->dynamic_undefined_weak))
 
+/* Will a relocation be resolved to absolute value in shared object or
+   to zero?  */
+#define RESOLVED_TO_ZERO_OR_ABS(INFO, EH) \
+  (UNDEFINED_WEAK_RESOLVED_TO_ZERO ((INFO), (EH))		\
+   || RESOLVED_TO_ABS_IN_PIC ((INFO), &(EH)->elf))
+
 /* i386 ELF linker hash entry.  */
 
 struct elf_i386_link_hash_entry
@@ -2397,7 +2403,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   struct elf_i386_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
   unsigned plt_entry_size;
-  bfd_boolean resolved_to_zero;
+  bfd_boolean resolved_to_zero_or_abs;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -2411,7 +2417,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
-  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
+  resolved_to_zero_or_abs = RESOLVED_TO_ZERO_OR_ABS (info, eh);
 
   /* Clear the reference count of function pointer relocations if
      symbol isn't a normal function.  */
@@ -2467,11 +2473,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       use_plt_got = eh->plt_got.refcount > 0;
 
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
+      /* Make sure this symbol is output as a dynamic symbol.  Absolute
+	 and undefined weak symbols won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-	  && !resolved_to_zero)
+	  && !resolved_to_zero_or_abs)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -2528,9 +2534,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		 script.  */
 	      htab->elf.sgotplt->size += 4;
 
-	      /* There should be no PLT relocation against resolved
-		 undefined weak symbol in executable.  */
-	      if (!resolved_to_zero)
+	      /* There should be no PLT relocation against absolute
+		 and resolved undefined weak symbols in executable.  */
+	      if (!resolved_to_zero_or_abs)
 		{
 		  /* We also need to make an entry in the .rel.plt
 		     section.  */
@@ -2589,11 +2595,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       bfd_boolean dyn;
       int tls_type = elf_i386_hash_entry(h)->tls_type;
 
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
+      /* Make sure this symbol is output as a dynamic symbol.  Absolute
+	 and undefined weak symbols won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-	  && !resolved_to_zero)
+	  && !resolved_to_zero_or_abs)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -2621,8 +2627,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 R_386_TLS_IE resp. R_386_TLS_GOTIE needs one dynamic relocation,
 	 (but if both R_386_TLS_IE_32 and R_386_TLS_IE is present, we
 	 need two), R_386_TLS_GD needs one if local symbol and two if
-	 global.  No dynamic relocation against resolved undefined weak
-	 symbol in executable.  */
+	 global.  No dynamic relocation against resolved absolute and
+	 undefined weak symbols in executable.  */
       if (tls_type == GOT_TLS_IE_BOTH)
 	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rel);
       else if ((GOT_TLS_GD_P (tls_type) && h->dynindx == -1)
@@ -2632,7 +2638,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rel);
       else if (! GOT_TLS_GDESC_P (tls_type)
 	       && ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		    && !resolved_to_zero)
+		    && !resolved_to_zero_or_abs)
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (bfd_link_pic (info)
 		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
@@ -2654,6 +2660,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   if (bfd_link_pic (info))
     {
+      struct elf_dyn_relocs **pp;
+
       /* The only reloc that uses pc_count is R_386_PC32, which will
 	 appear on a call or on something like ".long foo - .".  We
 	 want calls to protected symbols to resolve directly to the
@@ -2662,8 +2670,6 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 should avoid writing assembly like ".long foo - .".  */
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
-	  struct elf_dyn_relocs **pp;
-
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      p->count -= p->pc_count;
@@ -2677,7 +2683,6 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       if (get_elf_i386_backend_data (info->output_bfd)->is_vxworks)
 	{
-	  struct elf_dyn_relocs **pp;
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
@@ -2689,47 +2694,60 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility or in PIE.  */
-      if (eh->dyn_relocs != NULL
-	  && h->root.type == bfd_link_hash_undefweak)
+      if (eh->dyn_relocs != NULL)
 	{
-	  /* Undefined weak symbol is never bound locally in shared
-	     library.  */
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	      || resolved_to_zero)
+	  if (h->root.type == bfd_link_hash_undefweak)
 	    {
-	      if (h->non_got_ref)
+	      /* Undefined weak symbol is never bound locally in shared
+		 library.  */
+	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		  || resolved_to_zero_or_abs)
 		{
-		  /* Keep dynamic non-GOT/non-PLT relocation so that we
-		     can branch to 0 without PLT.  */
-		  struct elf_dyn_relocs **pp;
-
-		  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
-		    if (p->pc_count == 0)
-		      *pp = p->next;
-		    else
-		      {
-			/* Remove non-R_386_PC32 relocation.  */
-			p->count = p->pc_count;
-			pp = &p->next;
-		      }
-
-		  if (eh->dyn_relocs != NULL)
+		  if (h->non_got_ref)
 		    {
-		      /* Make sure undefined weak symbols are output
-			 as dynamic symbols in PIEs for dynamic non-GOT
-			 non-PLT reloations.  */
-		      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-			return FALSE;
+		      /* Keep dynamic non-GOT/non-PLT relocation so that we
+			 can branch to 0 without PLT.  */
+		      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+			if (p->pc_count == 0)
+			  *pp = p->next;
+			else
+			  {
+			    /* Remove non-R_386_PC32 relocation.  */
+			    p->count = p->pc_count;
+			    pp = &p->next;
+			  }
+
+		      if (eh->dyn_relocs != NULL)
+			{
+			  /* Make sure undefined weak symbols are output
+			     as dynamic symbols in PIEs for dynamic non-GOT
+			     non-PLT reloations.  */
+			  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+			    return FALSE;
+			}
 		    }
+		  else
+		    eh->dyn_relocs = NULL;
 		}
-	      else
-		eh->dyn_relocs = NULL;
+	      else if (h->dynindx == -1
+		       && !h->forced_local)
+		{
+		  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		    return FALSE;
+		}
 	    }
-	  else if (h->dynindx == -1
-		   && !h->forced_local)
+	  else if (resolved_to_zero_or_abs)
 	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
+	      /* Discard space for non-pc-relative relocs against
+		 absolute symbols which are always resolved at
+		 link-time.  */
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+		{
+		  if (p->pc_count == 0)
+		    *pp = p->next;
+		  else
+		    pp = &p->next;
+		}
 	    }
 	}
     }
@@ -2743,7 +2761,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if ((!h->non_got_ref
 	   || eh->func_pointer_refcount > 0
 	   || (h->root.type == bfd_link_hash_undefweak
-	       && !resolved_to_zero))
+	       && !resolved_to_zero_or_abs))
 	  && ((h->def_dynamic
 	       && !h->def_regular)
 	      || (htab->elf.dynamic_sections_created
@@ -2751,10 +2769,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		      || h->root.type == bfd_link_hash_undefined))))
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.
-	     Undefined weak syms won't yet be marked as dynamic.  */
+	     Absolute and undefined weak symbols won't yet be marked
+	     as dynamic.  */
 	  if (h->dynindx == -1
 	      && !h->forced_local
-	      && !resolved_to_zero)
+	      && !resolved_to_zero_or_abs)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
@@ -3020,8 +3039,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
 
       /* Undefined weak symbol is only bound locally in executable
 	 and its reference is resolved as 0.  */
-      if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info,
-					   elf_i386_hash_entry (h)))
+      if (RESOLVED_TO_ZERO_OR_ABS (link_info, elf_i386_hash_entry (h)))
 	{
 	  if (opcode == 0xff)
 	    {
@@ -3771,7 +3789,7 @@ elf_i386_relocate_section (bfd *output_bfd,
       int tls_type;
       bfd_vma st_size;
       asection *resolved_plt;
-      bfd_boolean resolved_to_zero;
+      bfd_boolean resolved_to_zero_or_abs;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == R_386_GNU_VTINHERIT
@@ -4113,8 +4131,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 	}
 
       eh = (struct elf_i386_link_hash_entry *) h;
-      resolved_to_zero = (eh != NULL
-			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
+      resolved_to_zero_or_abs = (eh != NULL
+				 && RESOLVED_TO_ZERO_OR_ABS (info, eh));
 
       switch (r_type)
 	{
@@ -4370,24 +4388,31 @@ r_386_got32:
 	  unresolved_reloc = FALSE;
 	  break;
 
+	case R_386_32:
+	  /* R_386_32 relocation against absolute symbol or undefined
+	     weak symbol in executable is resolved at link-time.  */
+	  if (resolved_to_zero_or_abs)
+	    break;
+	  goto direct;
+
 	case R_386_SIZE32:
 	  /* Set to symbol size.  */
 	  relocation = st_size;
 	  /* Fall through.  */
 
-	case R_386_32:
 	case R_386_PC32:
+direct:
 	  if ((input_section->flags & SEC_ALLOC) == 0
 	      || is_vxworks_tls)
 	    break;
 
 	  /* Copy dynamic function pointer relocations.  Don't generate
-	     dynamic relocations against resolved undefined weak symbols
-	     in PIE, except for R_386_PC32.  */
+	     dynamic relocations against absolute nor resolved undefined
+	     weak symbols in PIE, except for R_386_PC32.  */
 	  if ((bfd_link_pic (info)
 	       && (h == NULL
 		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-			&& (!resolved_to_zero
+			&& (!resolved_to_zero_or_abs
 			    || r_type == R_386_PC32))
 		       || h->root.type != bfd_link_hash_undefweak))
 	       && ((r_type != R_386_PC32 && r_type != R_386_SIZE32)
@@ -4399,7 +4424,7 @@ r_386_got32:
 		  && (!h->non_got_ref
 		      || eh->func_pointer_refcount > 0
 		      || (h->root.type == bfd_link_hash_undefweak
-			  && !resolved_to_zero))
+			  && !resolved_to_zero_or_abs))
 		  && ((h->def_dynamic && !h->def_regular)
 		      /* Undefined weak symbol is bound locally when
 			 PIC is false.  */
