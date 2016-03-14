@@ -1,3 +1,13 @@
+2016-03-10  Mickael Guene  <mickael.guene@st.com>
+
+	PR gas/19744
+	* config/tc-arm.c (do_arit): Protect against bad relocations usage.
+	(do_mov): Likewise.
+	(do_t_add_sub): Allow pcrop relocations for Thumb-2 targets.
+	(do_t_mov_cmp): Likewise.
+	(do_t_add_sub): Protect against bad relocations usage.
+	(do_t_mov_cmp): Likewise.
+
 2016-03-09  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-arm.c (neon_alignment_bit): Rename do_align to

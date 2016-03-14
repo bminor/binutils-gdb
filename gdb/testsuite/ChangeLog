@@ -1,3 +1,59 @@
+2016-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint.exp: New tests for 'maint info line-table'.
+
+2016-03-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-as-string.exp: New file.
+	* gdb.python/py-as-string.c: New file.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-into-signal.exp: Adjust to "Program received
+	signal" -> "Thread NN received signal" output change.
+	* gdb.threads/ia64-sigill.exp: Likewise.
+	* gdb.threads/linux-dp.exp: Likewise.
+	* gdb.threads/manythreads.exp: Likewise.
+	* gdb.threads/pending-step.exp: Likewise.
+	* gdb.threads/print-threads.exp: Likewise.
+	* gdb.threads/sigstep-threads.exp: Likewise.
+	* gdb.threads/staticthreads.exp: Likewise.
+	* gdb.threads/tls.exp: Likewise.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/ftrace.exp: Set arg0exp for ppc.
+	* gdb.trace/mi-trace-unavailable.exp: Set pcnum for ppc.
+	* gdb.trace/pending.exp: Accept leading dot before function name.
+	* gdb.trace/trace-common.h: Add fast tracepoint dummy insn for ppc.
+	* lib/trace-support.exp: Set registers for ppc.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/entry-values.exp: Link ${binfile}1.o to ${binfile}1 and
+	use it for disassembly; accept .main in addition to main in backtrace.
+
+2016-03-09  Wei-cheng Wang  <cole945@gmail.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/actions.c (gdb_recursion_test_fp): New typedef.
+	(gdb_recursion_test_ptr): New global variable.
+	(gdb_recursion_test): Call gdb_recursion_test_ptr instead of
+	gdb_recursion_test.
+	(gdb_c_test): Ditto.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/change-loc.exp: Don't depend on tracepoint location
+	ordering.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/unavailable-dwarf-piece.c (foo): Add foo_start_lbl label.
+	(bar): Add bar_start_lbl label.
+	* gdb.trace/unavailable-dwarf-piece.exp: Use foo/bar_start_lbl instead
+	of foo/bar for emitting DWARF and tracing.
+
 2016-03-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* analyze-racy-logs.py: Set executable bit.

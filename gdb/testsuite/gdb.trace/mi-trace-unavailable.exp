@@ -137,6 +137,8 @@ proc test_trace_unavailable { data_source } {
 	    set pcnum 8
 	} elseif [is_aarch64_target] {
 	    set pcnum 32
+	} elseif [istarget "powerpc*-*-*"] {
+	    set pcnum 64
 	} else {
 	    # Other ports support tracepoint should define the number
 	    # of its own pc register.

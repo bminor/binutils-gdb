@@ -285,8 +285,6 @@ extern void print_transfer_performance (struct ui_file *stream,
 
 typedef void initialize_file_ftype (void);
 
-extern char *gdb_readline (const char *);
-
 extern char *gdb_readline_wrapper (const char *);
 
 extern char *command_line_input (const char *, int, char *);

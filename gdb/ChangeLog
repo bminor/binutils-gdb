@@ -1,3 +1,132 @@
+2016-03-13  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390-linux-tdep.c (s390_gen_return_address): New function.
+	(s390_gdbarch_init): Fill gen_return_address hook.
+
+2016-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* symmisc.c (maintenance_info_line_tables): New function.
+	(maintenance_print_one_line_table): New function.
+	(_initialize_symmisc): Register 'maint info line-table' command.
+	* NEWS: Mention new command.
+
+2016-03-11  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390-linux-tdep.c (s390_ax_pseudo_register_collect): New function.
+	(s390_ax_pseudo_register_push_stack): New function.
+	(s390_gdbarch_init): Fill ax_pseudo_register_collect and
+	ax_pseudo_register_push_stack hooks.
+
+2016-03-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Install
+	gdb/function/as_string.py.
+	* python/lib/gdb/function/as_string.py: New file.
+	* NEWS: Mention the new $_as_string function.
+
+2016-03-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* target.h: Fix doc string of target_can_use_hardware_watchpoint.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (more_to_come): Delete.
+	(struct readline_input_state): Delete.
+	(readline_input_state): Delete.
+	(get_command_line_buffer): New function.
+	(command_handler): Update comments.  Don't handle NULL commands
+	here.  Do not execute commented lines.
+	(command_line_append_input_line): New function.
+	(handle_line_of_input): New function, partly based on
+	command_line_handler and command_line_input.
+	(command_line_handler): Rewrite.
+	* event-top.h (command_handler): New declaration.
+	(command_loop): Defer command execution to command_handler.
+	(command_line_input): Update comments.  Simplify, using struct
+	buffer and handle_line_of_input.
+	* top.h (struct buffer): New forward declaration.
+	(handle_line_of_input): New declaration.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (command_line_handler): Use xfree + xstrdup instead
+	of xrealloc + strcpy.
+	* main.c (captured_main): Use xstrdup instead of xmalloc plus
+	manual clear.
+	* top.c (saved_command_line): Rewrite comment.
+	(saved_command_line_size): Delete.
+	(command_line_input): Use xfree + xstrdup instead of xrealloc +
+	strcpy.
+	* top.h (saved_command_line_size): Delete declaration.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c: Include buffer.h.
+	(gdb_readline_no_editing_callback): Use struct buffer instead
+	of xrealloc.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* common/buffer.h (buffer_grow_char): New function.
+	* top.c: Include buffer.h.
+	(gdb_readline_no_editing): Rename 'prompt_arg' parameter to
+	'prompt'.  Use struct buffer instead of xrealloc.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (gdb_readline): Delete declaration.
+	* top.c (gdb_readline): Rename to ...
+	(gdb_readline_no_editing): ... this, and make static.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (prompt_for_continue): Update comments.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (async_annotation_suffix): Delete.
+	(top_level_prompt, command_line_handler): Don't use
+	'async_annotation_suffix' and simplify.
+	* event-top.h (async_annotation_suffix): Delete declaration.
+	(init_main): Remove reference to 'async_annotation_suffix'.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (gdb_readline2): Rename to ...
+	(gdb_readline_no_editing_callback): ... this.
+	(change_line_handler, stdin_event_handler)
+	(gdb_setup_readline): Adjust.
+	* event-top.h (gdb_readline2): Rename to ...
+	(gdb_readline_no_editing_callback): ... this, and move closer to
+	other readline-related declarations.
+	* mi/mi-interp.c (mi_interpreter_resume): Adjust.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* top.c (window_hook): Delete.
+	(command_loop): Remove references to window_hook.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/command-line-input.exp: New file.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* corefile.c (safe_read_memory_unsigned_integer): New function.
+	* gdbcore.h (safe_read_memory_unsigned_integer): New prototype.
+	* rs6000-tdep.c (rs6000_frame_cache): Read backchain as unsigned.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* rs6000-tdep.c: Add "ax.h" and "ax-gdb.h" includes.
+	(rs6000_gen_return_address): New function.
+	(rs6000_gdbarch_init): Wire in the above.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* rs6000-tdep.c (rs6000_ax_pseudo_register_collect): New function.
+	(rs6000_gdbarch_init): Wire in the above.
+
 2016-03-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c (s390_analyze_prologue): Ignore BRC and BRCL

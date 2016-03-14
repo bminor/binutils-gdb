@@ -86,7 +86,7 @@ proc corefunc { threadtype executable } {
 		# Main test:
 		set test "attach (pass $passes), pending signal catch"
 		if {[gdb_test_multiple "attach $testpid" $test {
-		    -re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*Program received signal SIGALRM.*$gdb_prompt $" {
+		    -re "Attaching to program.*`?$escapedbinfile'?, process $testpid.* received signal SIGALRM.*$gdb_prompt $" {
 			# nonthreaded:
 			pass $test
 			verbose -log "$test succeeded on the attempt # $attempt of $attempts"

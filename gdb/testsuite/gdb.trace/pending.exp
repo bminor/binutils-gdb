@@ -307,7 +307,8 @@ proc pending_tracepoint_installed_during_trace { trace_type } \
 \[0-9\]+\[\t \]+\(fast |\)tracepoint\[ \]+keep y.*pendfunc2.*" \
 	"tracepoint is resolved"
 
-    gdb_test "tfind start" "#0  $hex in pendfunc2 .*" "tfind test frame 0"
+    # powerpc64 shows "in .pendfunc2" here.
+    gdb_test "tfind start" "#0  $hex in .?pendfunc2 .*" "tfind test frame 0"
     gdb_test "tfind" "Target failed to find requested trace frame..*" "tfind test frame"
 }}
 

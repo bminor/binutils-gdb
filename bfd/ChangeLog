@@ -1,3 +1,24 @@
+2016-03-11  Dan Gissel  <dgisselq@ieee.org>
+
+	PR 19713
+	* elf.c (_bfd_elf_section_offset): Ensure that the returned offset
+	uses bytes not octets.
+	* elflink.c (resolve_section): Likewise.
+	Add a bfd parameter.
+	(eval_section): Pass the input_bfd to resolve_section.
+	(bfd_elf_perform_complex_relocation): Convert byte offset to
+	octets before read and writing values.
+	(elf_link_input_bfd): Add byte to octet conversions.
+	(elf_reloc_link_order): Likewise.
+	(elf_fixup_link_order): Likewise.
+	(bfd_elf_final_link): Likewise.
+	* reloc.c (_bfd_final_link_relocate): Likewise.
+	* syms.c (_bfd_stab_section_find_nearest_line): Likewise.
+
+2016-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Mark the i370 target as obsolete.
+
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
 	* cpu-v850.c (N): Append ":old-gcc-abi" instead of " (using old

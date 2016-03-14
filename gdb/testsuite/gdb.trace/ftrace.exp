@@ -242,6 +242,8 @@ if [is_amd64_regs_target] {
     set arg0exp "*(int *) (\$ebp + 8)"
 } elseif { [istarget "aarch64*-*-*"] } {
     set arg0exp "\$x0"
+} elseif [istarget "powerpc*-*-*"] {
+    set arg0exp "\$r3"
 } else {
     set arg0exp ""
 }

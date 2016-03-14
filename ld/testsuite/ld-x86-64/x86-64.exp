@@ -245,6 +245,8 @@ run_dump_test "largecomm-1c"
 run_dump_test "largecomm-1d"
 run_dump_test "largecomm-1e"
 run_dump_test "largecomm-1f"
+run_dump_test "pr19539a"
+run_dump_test "pr19539b"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return

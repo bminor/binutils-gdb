@@ -1808,7 +1808,9 @@ set_screen_width_and_height (int width, int height)
 }
 
 /* Wait, so the user can read what's on the screen.  Prompt the user
-   to continue by pressing RETURN.  */
+   to continue by pressing RETURN.  'q' is also provided because
+   telling users what to do in the prompt is more user-friendly than
+   expecting them to think of Ctrl-C/SIGINT.  */
 
 static void
 prompt_for_continue (void)
@@ -1829,9 +1831,9 @@ prompt_for_continue (void)
   if (annotation_level > 1)
     strcat (cont_prompt, "\n\032\032prompt-for-continue\n");
 
-  /* We must do this *before* we call gdb_readline, else it will eventually
-     call us -- thinking that we're trying to print beyond the end of the 
-     screen.  */
+  /* We must do this *before* we call gdb_readline_wrapper, else it
+     will eventually call us -- thinking that we're trying to print
+     beyond the end of the screen.  */
   reinitialize_more_filter ();
 
   immediate_quit++;
@@ -1840,16 +1842,8 @@ prompt_for_continue (void)
   /* We'll need to handle input.  */
   target_terminal_ours ();
 
-  /* On a real operating system, the user can quit with SIGINT.
-     But not on GO32.
-
-     'q' is provided on all systems so users don't have to change habits
-     from system to system, and because telling them what to do in
-     the prompt is more user-friendly than expecting them to think of
-     SIGINT.  */
-  /* Call readline, not gdb_readline, because GO32 readline handles control-C
-     whereas control-C to gdb_readline will cause the user to get dumped
-     out to DOS.  */
+  /* Call gdb_readline_wrapper, not readline, in order to keep an
+     event loop running.  */
   ignore = gdb_readline_wrapper (cont_prompt);
 
   /* Add time spend in this routine to prompt_for_continue_wait_time.  */

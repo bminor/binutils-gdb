@@ -235,6 +235,12 @@ set armelftests_common_3 {
     {"ADDS thumb1 relocations" "-static -T arm.ld" "" "" {thumb1-adds.s}
      {{objdump -dw thumb1-adds.d}}
      "thumb1-adds"}
+    {"MOVS thumb1 relocations for armv7-m target" "-static -T arm.ld" "" "" {thumb1-movs-armv7-m.s}
+     {{objdump -dw thumb1-movs.d}}
+     "thumb1-movs"}
+    {"ADDS thumb1 relocations for armv7-m target" "-static -T arm.ld" "" "" {thumb1-adds-armv7-m.s}
+     {{objdump -dw thumb1-adds.d}}
+     "thumb1-adds"}
 }
 
 run_ld_link_tests $armelftests_common_1

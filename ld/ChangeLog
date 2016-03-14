@@ -1,3 +1,27 @@
+2016-03-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19539
+	* testsuite/ld-i386/i386.exp: Run pr19539.
+	* testsuite/ld-i386/pr19539.d: New file.
+	* testsuite/ld-i386/pr19539.s: Likewise.
+	* testsuite/ld-i386/pr19539.t: Likewise.
+	* testsuite/ld-x86-64/pr19539.s: Likewise.
+	* testsuite/ld-x86-64/pr19539.t: Likewise.
+	* testsuite/ld-x86-64/pr19539a.d: Likewise.
+	* testsuite/ld-x86-64/pr19539b.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr19539a and pr19539b.
+
+2016-03-10  Mickael Guene  <mickael.guene@st.com>
+
+	PR gas/19744
+	* testsuite/ld-arm/arm-elf.exp: New tests.
+	* testsuite/ld-arm/thumb1-adds-armv7-m.s: New.
+	* testsuite/ld-arm/thumb1-movs-armv7-m.s: New.
+
+2016-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc (.rodata): Remove spurious LONG(0).
+
 2016-03-09  Pedro Alves  <palves@redhat.com>
 
 	* scripttempl/v850.sc: Use "v850:old-gcc-abi" as OUTPUT_ARCH.

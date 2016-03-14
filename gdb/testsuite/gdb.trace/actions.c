@@ -48,6 +48,11 @@ static union GDB_UNION_TEST
 } gdb_union1_test;
 
 void gdb_recursion_test (int, int, int, int,  int,  int,  int);
+/* This function pointer is used to force the function to be called via
+   the global entry instead of local entry on ppc64le; otherwise, breakpoints
+   set at the global entry (i.e., '*foo') will not be hit.  */
+typedef void (*gdb_recursion_test_fp) (int, int, int, int,  int,  int,  int);
+gdb_recursion_test_fp gdb_recursion_test_ptr = gdb_recursion_test;
 
 void gdb_recursion_test (int depth, 
 			 int q1, 
@@ -66,7 +71,7 @@ void gdb_recursion_test (int depth,
   q5 = q6;						/* gdbtestline 6 */
   q6 = q;						/* gdbtestline 7 */
   if (depth--)						/* gdbtestline 8 */
-    gdb_recursion_test (depth, q1, q2, q3, q4, q5, q6);	/* gdbtestline 9 */
+    gdb_recursion_test_ptr (depth, q1, q2, q3, q4, q5, q6);	/* gdbtestline 9 */
 }
 
 
@@ -105,7 +110,7 @@ unsigned long   gdb_c_test( unsigned long *parm )
    gdb_structp_test      = &gdb_struct1_test;
    gdb_structpp_test     = &gdb_structp_test;
 
-   gdb_recursion_test (3, (long) parm[1], (long) parm[2], (long) parm[3],
+   gdb_recursion_test_ptr (3, (long) parm[1], (long) parm[2], (long) parm[3],
 		       (long) parm[4], (long) parm[5], (long) parm[6]);
 
    gdb_char_test = gdb_short_test = gdb_long_test = 0;

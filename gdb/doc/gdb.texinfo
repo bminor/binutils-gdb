@@ -10760,6 +10760,19 @@ checks all stack frames from the immediate caller to the frame specified
 by @var{number_of_frames}, whereas @code{$_caller_matches} only checks the
 frame specified by @var{number_of_frames}.
 
+@item $_as_string(@var{value})
+@findex $_as_string@r{, convenience function}
+Return the string representation of @var{value}.
+
+This function is useful to obtain the textual label (enumerator) of an
+enumeration value.  For example, assuming the variable @var{node} is of
+an enumerated type:
+
+@smallexample
+(gdb) printf "Visiting node of type %s\n", $_as_string(node)
+Visiting node of type NODE_INTEGER
+@end smallexample
+
 @end table
 
 @value{GDBN} provides the ability to list and get help on
@@ -17161,6 +17174,15 @@ line 1574.
 @}
 (@value{GDBP})
 @end smallexample
+
+@kindex maint info line-table
+@cindex listing @value{GDBN}'s internal line tables
+@cindex line tables, listing @value{GDBN}'s internal
+@item maint info line-table @r{[} @var{regexp} @r{]}
+
+List the @code{struct linetable} from all @code{struct symtab}
+instances whose name matches @var{regexp}.  If @var{regexp} is not
+given, list the @code{struct linetable} from all @code{struct symtab}.
 
 @kindex maint set symbol-cache-size
 @cindex symbol cache size

@@ -363,6 +363,7 @@ run_dump_test "pr19609-2b"
 run_dump_test "pr19609-2c"
 run_dump_test "undefweaka"
 run_dump_test "undefweakb"
+run_dump_test "pr19539"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]

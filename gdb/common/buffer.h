@@ -31,6 +31,15 @@ struct buffer
    accommodate the new data.  */
 void buffer_grow (struct buffer *buffer, const char *data, size_t size);
 
+/* Append C to the end of BUFFER.  Grows the buffer to accommodate the
+   new data.  */
+
+static inline void
+buffer_grow_char (struct buffer *buffer, char c)
+{
+  buffer_grow (buffer, &c, 1);
+}
+
 /* Release any memory held by BUFFER.  */
 void buffer_free (struct buffer *buffer);
 

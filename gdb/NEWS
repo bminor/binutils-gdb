@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.11
 
+* New Python-based convenience function $_as_string(val), which returns
+  the textual representation of a value.  This function is especially
+  useful to obtain the text label of an enum value.
+
 * Intel MPX bound violation handling.
 
    Segmentation faults caused by a Intel MPX boundary violation
@@ -26,6 +30,9 @@ skip -rfunction regular-expression
   A generalized form of the skip command, with new support for
   glob-style file names and regular expressions for function names.
   Additionally, a file spec and a function spec may now be combined.
+
+maint info line-table REGEXP
+  Display the contents of GDB's internal line table data struture.
 
 *** Changes in GDB 7.11
 

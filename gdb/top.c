@@ -50,6 +50,7 @@
 #include "maint.h"
 #include "filenames.h"
 #include "frame.h"
+#include "buffer.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -124,17 +125,9 @@ char *current_directory;
 /* The directory name is actually stored here (usually).  */
 char gdb_dirbuf[1024];
 
-/* Function to call before reading a command, if nonzero.
-   The function receives two args: an input stream,
-   and a prompt string.  */
-
-void (*window_hook) (FILE *, char *);
-
-/* Buffer used for reading command lines, and the size
-   allocated for it so far.  */
-
+/* The last command line executed on the console.  Used for command
+   repetitions.  */
 char *saved_command_line;
-int saved_command_line_size = 100;
 
 /* Nonzero if the current command is modified by "server ".  This
    affects things like recording into the command history, commands
@@ -540,40 +533,17 @@ execute_command_to_string (char *p, int from_tty)
 void
 command_loop (void)
 {
-  struct cleanup *old_chain;
-  char *command;
-
   while (instream && !feof (instream))
     {
-      if (window_hook && instream == stdin)
-	(*window_hook) (instream, get_prompt ());
-
-      clear_quit_flag ();
-      if (instream == stdin)
-	reinitialize_more_filter ();
-      old_chain = make_cleanup (null_cleanup, 0);
+      char *command;
 
       /* Get a command-line.  This calls the readline package.  */
       command = command_line_input (instream == stdin ?
 				    get_prompt () : (char *) NULL,
 				    instream == stdin, "prompt");
-      if (command == 0)
-	{
-	  do_cleanups (old_chain);
-	  return;
-	}
-
-      make_command_stats_cleanup (1);
-
-      /* Do not execute commented lines.  */
-      if (command[0] != '#')
-	{
-	  execute_command (command, instream == stdin);
-
-	  /* Do any commands attached to breakpoint we are stopped at.  */
-	  bpstat_do_actions ();
-	}
-      do_cleanups (old_chain);
+      if (command == NULL)
+	return;
+      command_handler (command);
     }
 }
 
@@ -612,64 +582,60 @@ prevent_dont_repeat (void)
 
 /* Read a line from the stream "instream" without command line editing.
 
-   It prints PROMPT_ARG once at the start.
+   It prints PROMPT once at the start.
    Action is compatible with "readline", e.g. space for the result is
    malloc'd and should be freed by the caller.
 
    A NULL return means end of file.  */
-char *
-gdb_readline (const char *prompt_arg)
-{
-  int c;
-  char *result;
-  int input_index = 0;
-  int result_size = 80;
 
-  if (prompt_arg)
+static char *
+gdb_readline_no_editing (const char *prompt)
+{
+  struct buffer line_buffer;
+
+  buffer_init (&line_buffer);
+
+  if (prompt != NULL)
     {
       /* Don't use a _filtered function here.  It causes the assumed
          character position to be off, since the newline we read from
          the user is not accounted for.  */
-      fputs_unfiltered (prompt_arg, gdb_stdout);
+      fputs_unfiltered (prompt, gdb_stdout);
       gdb_flush (gdb_stdout);
     }
 
-  result = (char *) xmalloc (result_size);
-
   while (1)
     {
+      int c;
+
       /* Read from stdin if we are executing a user defined command.
          This is the right thing for prompt_for_continue, at least.  */
       c = fgetc (instream ? instream : stdin);
 
       if (c == EOF)
 	{
-	  if (input_index > 0)
+	  if (line_buffer.used_size > 0)
 	    /* The last line does not end with a newline.  Return it, and
 	       if we are called again fgetc will still return EOF and
 	       we'll return NULL then.  */
 	    break;
-	  xfree (result);
+	  xfree (buffer_finish (&line_buffer));
 	  return NULL;
 	}
 
       if (c == '\n')
 	{
-	  if (input_index > 0 && result[input_index - 1] == '\r')
-	    input_index--;
+	  if (line_buffer.used_size > 0
+	      && line_buffer.buffer[line_buffer.used_size - 1] == '\r')
+	    line_buffer.used_size--;
 	  break;
 	}
 
-      result[input_index++] = c;
-      while (input_index >= result_size)
-	{
-	  result_size *= 2;
-	  result = (char *) xrealloc (result, result_size);
-	}
+      buffer_grow_char (&line_buffer, c);
     }
 
-  result[input_index++] = '\0';
-  return result;
+  buffer_grow_char (&line_buffer, '\0');
+  return buffer_finish (&line_buffer);
 }
 
 /* Variables which control command line editing and history
@@ -1030,32 +996,26 @@ gdb_safe_append_history (void)
   do_cleanups (old_chain);
 }
 
-/* Read one line from the command input stream `instream'
-   into the local static buffer `linebuffer' (whose current length
-   is `linelength').
-   The buffer is made bigger as necessary.
-   Returns the address of the start of the line.
+/* Read one line from the command input stream `instream' into a local
+   static buffer.  The buffer is made bigger as necessary.  Returns
+   the address of the start of the line.
 
    NULL is returned for end of file.
 
-   *If* the instream == stdin & stdin is a terminal, the line read
-   is copied into the file line saver (global var char *line,
-   length linesize) so that it can be duplicated.
+   *If* the instream == stdin & stdin is a terminal, the line read is
+   copied into the global 'saved_command_line' so that it can be
+   repeated.
 
-   This routine either uses fancy command line editing or
-   simple input as the user has requested.  */
+   This routine either uses fancy command line editing or simple input
+   as the user has requested.  */
 
 char *
 command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
 {
-  static char *linebuffer = 0;
-  static unsigned linelength = 0;
+  static struct buffer cmd_line_buffer;
+  static int cmd_line_buffer_initialized;
   const char *prompt = prompt_arg;
-  char *p;
-  char *p1;
-  char *rl;
-  char *nline;
-  char got_eof = 0;
+  char *cmd;
 
   /* The annotation suffix must be non-NULL.  */
   if (annotation_suffix == NULL)
@@ -1079,13 +1039,14 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
       prompt = local_prompt;
     }
 
-  if (linebuffer == 0)
+  if (!cmd_line_buffer_initialized)
     {
-      linelength = 80;
-      linebuffer = (char *) xmalloc (linelength);
+      buffer_init (&cmd_line_buffer);
+      cmd_line_buffer_initialized = 1;
     }
 
-  p = linebuffer;
+  /* Starting a new command line.  */
+  cmd_line_buffer.used_size = 0;
 
   /* Control-C quits instantly if typed while in this loop
      since it should not wait until the user types a newline.  */
@@ -1098,6 +1059,8 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
 
   while (1)
     {
+      char *rl;
+
       /* Make sure that all output has been output.  Some machines may
          let you get away with leaving out some of the gdb_flush, but
          not all.  */
@@ -1126,40 +1089,19 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
 	}
       else
 	{
-	  rl = gdb_readline (prompt);
+	  rl = gdb_readline_no_editing (prompt);
 	}
 
-      if (annotation_level > 1 && instream == stdin)
+      cmd = handle_line_of_input (&cmd_line_buffer, rl,
+				  repeat, annotation_suffix);
+      if (cmd == (char *) EOF)
 	{
-	  puts_unfiltered ("\n\032\032post-");
-	  puts_unfiltered (annotation_suffix);
-	  puts_unfiltered ("\n");
-	}
-
-      if (!rl || rl == (char *) EOF)
-	{
-	  got_eof = 1;
+	  cmd = NULL;
 	  break;
 	}
-      if (strlen (rl) + 1 + (p - linebuffer) > linelength)
-	{
-	  linelength = strlen (rl) + 1 + (p - linebuffer);
-	  nline = (char *) xrealloc (linebuffer, linelength);
-	  p += nline - linebuffer;
-	  linebuffer = nline;
-	}
-      p1 = rl;
-      /* Copy line.  Don't copy null at end.  (Leaves line alone
-         if this was just a newline).  */
-      while (*p1)
-	*p++ = *p1++;
-
-      xfree (rl);		/* Allocated in readline.  */
-
-      if (p == linebuffer || *(p - 1) != '\\')
+      if (cmd != NULL)
 	break;
 
-      p--;			/* Put on top of '\'.  */
       prompt = NULL;
     }
 
@@ -1169,82 +1111,7 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
 #endif
   immediate_quit--;
 
-  if (got_eof)
-    return NULL;
-
-#define SERVER_COMMAND_LENGTH 7
-  server_command =
-    (p - linebuffer > SERVER_COMMAND_LENGTH)
-    && strncmp (linebuffer, "server ", SERVER_COMMAND_LENGTH) == 0;
-  if (server_command)
-    {
-      /* Note that we don't set `line'.  Between this and the check in
-         dont_repeat, this insures that repeating will still do the
-         right thing.  */
-      *p = '\0';
-      return linebuffer + SERVER_COMMAND_LENGTH;
-    }
-
-  /* Do history expansion if that is wished.  */
-  if (history_expansion_p && instream == stdin
-      && ISATTY (instream))
-    {
-      char *history_value;
-      int expanded;
-
-      *p = '\0';		/* Insert null now.  */
-      expanded = history_expand (linebuffer, &history_value);
-      if (expanded)
-	{
-	  /* Print the changes.  */
-	  printf_unfiltered ("%s\n", history_value);
-
-	  /* If there was an error, call this function again.  */
-	  if (expanded < 0)
-	    {
-	      xfree (history_value);
-	      return command_line_input (prompt, repeat,
-					 annotation_suffix);
-	    }
-	  if (strlen (history_value) > linelength)
-	    {
-	      linelength = strlen (history_value) + 1;
-	      linebuffer = (char *) xrealloc (linebuffer, linelength);
-	    }
-	  strcpy (linebuffer, history_value);
-	  p = linebuffer + strlen (linebuffer);
-	}
-      xfree (history_value);
-    }
-
-  /* If we just got an empty line, and that is supposed to repeat the
-     previous command, return the value in the global buffer.  */
-  if (repeat && p == linebuffer)
-    return saved_command_line;
-  for (p1 = linebuffer; *p1 == ' ' || *p1 == '\t'; p1++);
-  if (repeat && !*p1)
-    return saved_command_line;
-
-  *p = 0;
-
-  /* Add line to history if appropriate.  */
-  if (*linebuffer && input_from_terminal_p ())
-    gdb_add_history (linebuffer);
-
-  /* Save into global buffer if appropriate.  */
-  if (repeat)
-    {
-      if (linelength > saved_command_line_size)
-	{
-	  saved_command_line
-	    = (char *) xrealloc (saved_command_line, linelength);
-	  saved_command_line_size = linelength;
-	}
-      strcpy (saved_command_line, linebuffer);
-      return saved_command_line;
-    }
-
-  return linebuffer;
+  return cmd;
 }
 
 /* Print the GDB banner.  */
@@ -1905,10 +1772,6 @@ init_main (void)
   /* Initialize the prompt to a simple "(gdb) " prompt or to whatever
      the DEFAULT_PROMPT is.  */
   set_prompt (DEFAULT_PROMPT);
-
-  /* Set things up for annotation_level > 1, if the user ever decides
-     to use it.  */
-  async_annotation_suffix = "prompt";
 
   /* Set the important stuff up for command editing.  */
   command_editing_p = 1;

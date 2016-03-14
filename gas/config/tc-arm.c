@@ -787,6 +787,7 @@ struct asm_opcode
 #define BAD_RANGE	_("branch out of range")
 #define BAD_FP16	_("selected processor does not support fp16 instruction")
 #define UNPRED_REG(R)	_("using " R " results in unpredictable behaviour")
+#define THUMB1_RELOC_ONLY  _("relocation valid in thumb1 code only")
 
 static struct hash_control * arm_ops_hsh;
 static struct hash_control * arm_cond_hsh;
@@ -8315,6 +8316,9 @@ do_adrl (void)
 static void
 do_arit (void)
 {
+  constraint (inst.reloc.type >= BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+	      && inst.reloc.type <= BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC ,
+	      THUMB1_RELOC_ONLY);
   if (!inst.operands[1].present)
     inst.operands[1].reg = inst.operands[0].reg;
   inst.instruction |= inst.operands[0].reg << 12;
@@ -8972,6 +8976,9 @@ do_mlas (void)
 static void
 do_mov (void)
 {
+  constraint (inst.reloc.type >= BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+	      && inst.reloc.type <= BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC ,
+	      THUMB1_RELOC_ONLY);
   inst.instruction |= inst.operands[0].reg << 12;
   encode_arm_shifter_operand (1);
 }
@@ -10472,9 +10479,12 @@ do_t_add_sub (void)
 		  inst.instruction |= (Rd << 4) | Rs;
 		  if (inst.reloc.type < BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
 		      || inst.reloc.type > BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC)
-		    inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
-		  if (inst.size_req != 2)
-		    inst.relax = opcode;
+		  {
+		    if (inst.size_req == 2)
+		      inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
+		    else
+		      inst.relax = opcode;
+		  }
 		}
 	      else
 		constraint (inst.size_req == 2, BAD_HIREG);
@@ -10482,6 +10492,9 @@ do_t_add_sub (void)
 	  if (inst.size_req == 4
 	      || (inst.size_req != 2 && !opcode))
 	    {
+	      constraint (inst.reloc.type >= BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+			  && inst.reloc.type <= BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC ,
+			  THUMB1_RELOC_ONLY);
 	      if (Rd == REG_PC)
 		{
 		  constraint (add, BAD_PC);
@@ -11826,17 +11839,21 @@ do_t_mov_cmp (void)
 	    {
 	      inst.instruction = THUMB_OP16 (opcode);
 	      inst.instruction |= Rn << 8;
-	      if (inst.size_req == 2)
+	      if (inst.reloc.type < BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+		  || inst.reloc.type > BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC)
 		{
-		  if (inst.reloc.type < BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
-		      || inst.reloc.type > BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC)
+		  if (inst.size_req == 2)
 		    inst.reloc.type = BFD_RELOC_ARM_THUMB_IMM;
+		  else
+		    inst.relax = opcode;
 		}
-	      else
-		  inst.relax = opcode;
 	    }
 	  else
 	    {
+	      constraint (inst.reloc.type >= BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+			  && inst.reloc.type <= BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC ,
+			  THUMB1_RELOC_ONLY);
+
 	      inst.instruction = THUMB_OP32 (inst.instruction);
 	      inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
 	      inst.instruction |= Rn << r0off;

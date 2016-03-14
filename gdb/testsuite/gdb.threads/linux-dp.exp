@@ -94,7 +94,7 @@ for {set i 0} {$i < 5} {incr i} {
 	}
 	-re "^$gdb_prompt $" {
 	}
-	-re "Program received signal.*(Unknown signal|SIGUSR|Real-time event).*$gdb_prompt $" {
+	-re " received signal.*(Unknown signal|SIGUSR|Real-time event).*$gdb_prompt $" {
 	    # It would be nice if we could catch the message that GDB prints
 	    # when it first notices that the thread library doesn't support
 	    # debugging, or if we could explicitly ask GDB somehow.
