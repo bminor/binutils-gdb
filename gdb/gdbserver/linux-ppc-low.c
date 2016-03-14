@@ -1463,6 +1463,1600 @@ ppc_get_min_fast_tracepoint_insn_len (void)
   return 4;
 }
 
+/* Emits a given buffer into the target at current_insn_ptr.  Length
+   is in units of 32-bit words.  */
+
+static void
+emit_insns (uint32_t *buf, int n)
+{
+  n = n * sizeof (uint32_t);
+  write_inferior_memory (current_insn_ptr, (unsigned char *) buf, n);
+  current_insn_ptr += n;
+}
+
+#define __EMIT_ASM(NAME, INSNS)					\
+  do								\
+    {								\
+      extern uint32_t start_bcax_ ## NAME [];			\
+      extern uint32_t end_bcax_ ## NAME [];			\
+      emit_insns (start_bcax_ ## NAME,				\
+		  end_bcax_ ## NAME - start_bcax_ ## NAME);	\
+      __asm__ (".section .text.__ppcbcax\n\t"			\
+	       "start_bcax_" #NAME ":\n\t"			\
+	       INSNS "\n\t"					\
+	       "end_bcax_" #NAME ":\n\t"			\
+	       ".previous\n\t");				\
+    } while (0)
+
+#define _EMIT_ASM(NAME, INSNS)		__EMIT_ASM (NAME, INSNS)
+#define EMIT_ASM(INSNS)			_EMIT_ASM (__LINE__, INSNS)
+
+/*
+
+  Bytecode execution stack frame - 32-bit
+
+	|  LR save area           (SP + 4)
+ SP' -> +- Back chain             (SP + 0)
+	|  Save r31   for access saved arguments
+	|  Save r30   for bytecode stack pointer
+	|  Save r4    for incoming argument *value
+	|  Save r3    for incoming argument regs
+ r30 -> +- Bytecode execution stack
+	|
+	|  64-byte (8 doublewords) at initial.
+	|  Expand stack as needed.
+	|
+	+-
+        |  Some padding for minimum stack frame and 16-byte alignment.
+        |  16 bytes.
+ SP     +- Back-chain (SP')
+
+  initial frame size
+  = 16 + (4 * 4) + 64
+  = 96
+
+   r30 is the stack-pointer for bytecode machine.
+       It should point to next-empty, so we can use LDU for pop.
+   r3  is used for cache of the high part of TOP value.
+       It was the first argument, pointer to regs.
+   r4  is used for cache of the low part of TOP value.
+       It was the second argument, pointer to the result.
+       We should set *result = TOP after leaving this function.
+
+ Note:
+ * To restore stack at epilogue
+   => sp = r31
+ * To check stack is big enough for bytecode execution.
+   => r30 - 8 > SP + 8
+ * To return execution result.
+   => 0(r4) = TOP
+
+ */
+
+/* Regardless of endian, register 3 is always high part, 4 is low part.
+   These defines are used when the register pair is stored/loaded.
+   Likewise, to simplify code, have a similiar define for 5:6. */
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#define TOP_FIRST	"4"
+#define TOP_SECOND	"3"
+#define TMP_FIRST	"6"
+#define TMP_SECOND	"5"
+#else
+#define TOP_FIRST	"3"
+#define TOP_SECOND	"4"
+#define TMP_FIRST	"5"
+#define TMP_SECOND	"6"
+#endif
+
+/* Emit prologue in inferior memory.  See above comments.  */
+
+static void
+ppc_emit_prologue (void)
+{
+  EMIT_ASM (/* Save return address.  */
+	    "mflr  0		\n"
+	    "stw   0, 4(1)	\n"
+	    /* Adjust SP.  96 is the initial frame size.  */
+	    "stwu  1, -96(1)	\n"
+	    /* Save r30 and incoming arguments.  */
+	    "stw   31, 96-4(1)	\n"
+	    "stw   30, 96-8(1)	\n"
+	    "stw   4, 96-12(1)	\n"
+	    "stw   3, 96-16(1)	\n"
+	    /* Point r31 to original r1 for access arguments.  */
+	    "addi  31, 1, 96	\n"
+	    /* Set r30 to pointing stack-top.  */
+	    "addi  30, 1, 64	\n"
+	    /* Initial r3/TOP to 0.  */
+	    "li    3, 0		\n"
+	    "li    4, 0		\n");
+}
+
+/* Emit epilogue in inferior memory.  See above comments.  */
+
+static void
+ppc_emit_epilogue (void)
+{
+  EMIT_ASM (/* *result = TOP */
+	    "lwz   5, -12(31)	\n"
+	    "stw   " TOP_FIRST ", 0(5)	\n"
+	    "stw   " TOP_SECOND ", 4(5)	\n"
+	    /* Restore registers.  */
+	    "lwz   31, -4(31)	\n"
+	    "lwz   30, -8(31)	\n"
+	    /* Restore SP.  */
+	    "lwz   1, 0(1)      \n"
+	    /* Restore LR.  */
+	    "lwz   0, 4(1)	\n"
+	    /* Return 0 for no-error.  */
+	    "li    3, 0		\n"
+	    "mtlr  0		\n"
+	    "blr		\n");
+}
+
+/* TOP = stack[--sp] + TOP  */
+
+static void
+ppc_emit_add (void)
+{
+  EMIT_ASM ("lwzu  " TMP_FIRST ", 8(30)	\n"
+	    "lwz   " TMP_SECOND ", 4(30)\n"
+	    "addc  4, 6, 4	\n"
+	    "adde  3, 5, 3	\n");
+}
+
+/* TOP = stack[--sp] - TOP  */
+
+static void
+ppc_emit_sub (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "subfc  4, 4, 6	\n"
+	    "subfe  3, 3, 5	\n");
+}
+
+/* TOP = stack[--sp] * TOP  */
+
+static void
+ppc_emit_mul (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "mulhwu 7, 6, 4	\n"
+	    "mullw  3, 6, 3	\n"
+	    "mullw  5, 4, 5	\n"
+	    "mullw  4, 6, 4	\n"
+	    "add    3, 5, 3	\n"
+	    "add    3, 7, 3	\n");
+}
+
+/* TOP = stack[--sp] << TOP  */
+
+static void
+ppc_emit_lsh (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "subfic 3, 4, 32\n"		/* r3 = 32 - TOP */
+	    "addi   7, 4, -32\n"	/* r7 = TOP - 32 */
+	    "slw    5, 5, 4\n"		/* Shift high part left */
+	    "slw    4, 6, 4\n"		/* Shift low part left */
+	    "srw    3, 6, 3\n"		/* Shift low to high if shift < 32 */
+	    "slw    7, 6, 7\n"		/* Shift low to high if shift >= 32 */
+	    "or     3, 5, 3\n"
+	    "or     3, 7, 3\n");	/* Assemble high part */
+}
+
+/* Top = stack[--sp] >> TOP
+   (Arithmetic shift right)  */
+
+static void
+ppc_emit_rsh_signed (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "addi   7, 4, -32\n"	/* r7 = TOP - 32 */
+	    "sraw   3, 5, 4\n"		/* Shift high part right */
+	    "cmpwi  7, 1\n"
+	    "blt    0, 1f\n"		/* If shift <= 32, goto 1: */
+	    "sraw   4, 5, 7\n"		/* Shift high to low */
+	    "b      2f\n"
+	    "1:\n"
+	    "subfic 7, 4, 32\n"		/* r7 = 32 - TOP */
+	    "srw    4, 6, 4\n"		/* Shift low part right */
+	    "slw    5, 5, 7\n"		/* Shift high to low */
+	    "or     4, 4, 5\n"		/* Assemble low part */
+	    "2:\n");
+}
+
+/* Top = stack[--sp] >> TOP
+   (Logical shift right)  */
+
+static void
+ppc_emit_rsh_unsigned (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "subfic 3, 4, 32\n"		/* r3 = 32 - TOP */
+	    "addi   7, 4, -32\n"	/* r7 = TOP - 32 */
+	    "srw    6, 6, 4\n"		/* Shift low part right */
+	    "slw    3, 5, 3\n"		/* Shift high to low if shift < 32 */
+	    "srw    7, 5, 7\n"		/* Shift high to low if shift >= 32 */
+	    "or     6, 6, 3\n"
+	    "srw    3, 5, 4\n"		/* Shift high part right */
+	    "or     4, 6, 7\n");	/* Assemble low part */
+}
+
+/* Emit code for signed-extension specified by ARG.  */
+
+static void
+ppc_emit_ext (int arg)
+{
+  switch (arg)
+    {
+    case 8:
+      EMIT_ASM ("extsb  4, 4\n"
+		"srawi 3, 4, 31");
+      break;
+    case 16:
+      EMIT_ASM ("extsh  4, 4\n"
+		"srawi 3, 4, 31");
+      break;
+    case 32:
+      EMIT_ASM ("srawi 3, 4, 31");
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+/* Emit code for zero-extension specified by ARG.  */
+
+static void
+ppc_emit_zero_ext (int arg)
+{
+  switch (arg)
+    {
+    case 8:
+      EMIT_ASM ("clrlwi 4,4,24\n"
+		"li 3, 0\n");
+      break;
+    case 16:
+      EMIT_ASM ("clrlwi 4,4,16\n"
+		"li 3, 0\n");
+      break;
+    case 32:
+      EMIT_ASM ("li 3, 0");
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+/* TOP = !TOP
+   i.e., TOP = (TOP == 0) ? 1 : 0;  */
+
+static void
+ppc_emit_log_not (void)
+{
+  EMIT_ASM ("or      4, 3, 4	\n"
+	    "cntlzw  4, 4	\n"
+	    "srwi    4, 4, 5	\n"
+	    "li      3, 0	\n");
+}
+
+/* TOP = stack[--sp] & TOP  */
+
+static void
+ppc_emit_bit_and (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "and  4, 6, 4	\n"
+	    "and  3, 5, 3	\n");
+}
+
+/* TOP = stack[--sp] | TOP  */
+
+static void
+ppc_emit_bit_or (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "or  4, 6, 4	\n"
+	    "or  3, 5, 3	\n");
+}
+
+/* TOP = stack[--sp] ^ TOP  */
+
+static void
+ppc_emit_bit_xor (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "xor  4, 6, 4	\n"
+	    "xor  3, 5, 3	\n");
+}
+
+/* TOP = ~TOP
+   i.e., TOP = ~(TOP | TOP)  */
+
+static void
+ppc_emit_bit_not (void)
+{
+  EMIT_ASM ("nor  3, 3, 3	\n"
+	    "nor  4, 4, 4	\n");
+}
+
+/* TOP = stack[--sp] == TOP  */
+
+static void
+ppc_emit_equal (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "xor     4, 6, 4	\n"
+	    "xor     3, 5, 3	\n"
+	    "or      4, 3, 4	\n"
+	    "cntlzw  4, 4	\n"
+	    "srwi    4, 4, 5	\n"
+	    "li      3, 0	\n");
+}
+
+/* TOP = stack[--sp] < TOP
+   (Signed comparison)  */
+
+static void
+ppc_emit_less_signed (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "cmplw   6, 6, 4		\n"
+	    "cmpw    7, 5, 3		\n"
+	    /* CR6 bit 0 = low less and high equal */
+	    "crand   6*4+0, 6*4+0, 7*4+2\n"
+	    /* CR7 bit 0 = (low less and high equal) or high less */
+	    "cror    7*4+0, 7*4+0, 6*4+0\n"
+	    "mfcr    4			\n"
+	    "rlwinm  4, 4, 29, 31, 31	\n"
+	    "li      3, 0		\n");
+}
+
+/* TOP = stack[--sp] < TOP
+   (Unsigned comparison)  */
+
+static void
+ppc_emit_less_unsigned (void)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "cmplw   6, 6, 4		\n"
+	    "cmplw   7, 5, 3		\n"
+	    /* CR6 bit 0 = low less and high equal */
+	    "crand   6*4+0, 6*4+0, 7*4+2\n"
+	    /* CR7 bit 0 = (low less and high equal) or high less */
+	    "cror    7*4+0, 7*4+0, 6*4+0\n"
+	    "mfcr    4			\n"
+	    "rlwinm  4, 4, 29, 31, 31	\n"
+	    "li      3, 0		\n");
+}
+
+/* Access the memory address in TOP in size of SIZE.
+   Zero-extend the read value.  */
+
+static void
+ppc_emit_ref (int size)
+{
+  switch (size)
+    {
+    case 1:
+      EMIT_ASM ("lbz   4, 0(4)\n"
+		"li    3, 0");
+      break;
+    case 2:
+      EMIT_ASM ("lhz   4, 0(4)\n"
+		"li    3, 0");
+      break;
+    case 4:
+      EMIT_ASM ("lwz   4, 0(4)\n"
+		"li    3, 0");
+      break;
+    case 8:
+      if (__BYTE_ORDER == __LITTLE_ENDIAN)
+	EMIT_ASM ("lwz   3, 4(4)\n"
+		  "lwz   4, 0(4)");
+      else
+	EMIT_ASM ("lwz   3, 0(4)\n"
+		  "lwz   4, 4(4)");
+      break;
+    }
+}
+
+/* TOP = NUM  */
+
+static void
+ppc_emit_const (LONGEST num)
+{
+  uint32_t buf[10];
+  uint32_t *p = buf;
+
+  p += gen_limm (p, 3, num >> 32 & 0xffffffff, 0);
+  p += gen_limm (p, 4, num & 0xffffffff, 0);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* Set TOP to the value of register REG by calling get_raw_reg function
+   with two argument, collected buffer and register number.  */
+
+static void
+ppc_emit_reg (int reg)
+{
+  uint32_t buf[13];
+  uint32_t *p = buf;
+
+  /* fctx->regs is passed in r3 and then saved in -16(31).  */
+  p += GEN_LWZ (p, 3, 31, -16);
+  p += GEN_LI (p, 4, reg);	/* li	r4, reg */
+  p += gen_call (p, get_raw_reg_func_addr (), 0, 0);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+
+  if (__BYTE_ORDER == __LITTLE_ENDIAN)
+    {
+      EMIT_ASM ("mr 5, 4\n"
+		"mr 4, 3\n"
+		"mr 3, 5\n");
+    }
+}
+
+/* TOP = stack[--sp] */
+
+static void
+ppc_emit_pop (void)
+{
+  EMIT_ASM ("lwzu " TOP_FIRST ", 8(30)	\n"
+	    "lwz " TOP_SECOND ", 4(30)	\n");
+}
+
+/* stack[sp++] = TOP
+
+   Because we may use up bytecode stack, expand 8 doublewords more
+   if needed.  */
+
+static void
+ppc_emit_stack_flush (void)
+{
+  /* Make sure bytecode stack is big enough before push.
+     Otherwise, expand 64-byte more.  */
+
+  EMIT_ASM ("  stw   " TOP_FIRST ", 0(30)	\n"
+	    "  stw   " TOP_SECOND ", 4(30)\n"
+	    "  addi  5, 30, -(8 + 8)	\n"
+	    "  cmpw  7, 5, 1		\n"
+	    "  bgt   7, 1f		\n"
+	    "  stwu  31, -64(1)		\n"
+	    "1:addi  30, 30, -8		\n");
+}
+
+/* Swap TOP and stack[sp-1]  */
+
+static void
+ppc_emit_swap (void)
+{
+  EMIT_ASM ("lwz  " TMP_FIRST ", 8(30)	\n"
+	    "lwz  " TMP_SECOND ", 12(30)	\n"
+	    "stw  " TOP_FIRST ", 8(30)	\n"
+	    "stw  " TOP_SECOND ", 12(30)	\n"
+	    "mr   3, 5		\n"
+	    "mr   4, 6		\n");
+}
+
+/* Discard N elements in the stack.  Also used for ppc64.  */
+
+static void
+ppc_emit_stack_adjust (int n)
+{
+  uint32_t buf[6];
+  uint32_t *p = buf;
+
+  n = n << 3;
+  if ((n >> 15) != 0)
+    {
+      emit_error = 1;
+      return;
+    }
+
+  p += GEN_ADDI (p, 30, 30, n);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* Call function FN.  */
+
+static void
+ppc_emit_call (CORE_ADDR fn)
+{
+  uint32_t buf[11];
+  uint32_t *p = buf;
+
+  p += gen_call (p, fn, 0, 0);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* FN's prototype is `LONGEST(*fn)(int)'.
+   TOP = fn (arg1)
+  */
+
+static void
+ppc_emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  uint32_t buf[15];
+  uint32_t *p = buf;
+
+  /* Setup argument.  arg1 is a 16-bit value.  */
+  p += gen_limm (p, 3, (uint32_t) arg1, 0);
+  p += gen_call (p, fn, 0, 0);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+
+  if (__BYTE_ORDER == __LITTLE_ENDIAN)
+    {
+      EMIT_ASM ("mr 5, 4\n"
+		"mr 4, 3\n"
+		"mr 3, 5\n");
+    }
+}
+
+/* FN's prototype is `void(*fn)(int,LONGEST)'.
+   fn (arg1, TOP)
+
+   TOP should be preserved/restored before/after the call.  */
+
+static void
+ppc_emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  uint32_t buf[21];
+  uint32_t *p = buf;
+
+  /* Save TOP.  0(30) is next-empty.  */
+  p += GEN_STW (p, 3, 30, 0);
+  p += GEN_STW (p, 4, 30, 4);
+
+  /* Setup argument.  arg1 is a 16-bit value.  */
+  if (__BYTE_ORDER == __LITTLE_ENDIAN)
+    {
+       p += GEN_MR (p, 5, 4);
+       p += GEN_MR (p, 6, 3);
+    }
+  else
+    {
+       p += GEN_MR (p, 5, 3);
+       p += GEN_MR (p, 6, 4);
+    }
+  p += gen_limm (p, 3, (uint32_t) arg1, 0);
+  p += gen_call (p, fn, 0, 0);
+
+  /* Restore TOP */
+  p += GEN_LWZ (p, 3, 30, 0);
+  p += GEN_LWZ (p, 4, 30, 4);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* Note in the following goto ops:
+
+   When emitting goto, the target address is later relocated by
+   write_goto_address.  OFFSET_P is the offset of the branch instruction
+   in the code sequence, and SIZE_P is how to relocate the instruction,
+   recognized by ppc_write_goto_address.  In current implementation,
+   SIZE can be either 24 or 14 for branch of conditional-branch instruction.
+ */
+
+/* If TOP is true, goto somewhere.  Otherwise, just fall-through.  */
+
+static void
+ppc_emit_if_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("or.    3, 3, 4	\n"
+	    "lwzu " TOP_FIRST ", 8(30)	\n"
+	    "lwz " TOP_SECOND ", 4(30)	\n"
+	    "1:bne  0, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 12;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Unconditional goto.  Also used for ppc64.  */
+
+static void
+ppc_emit_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("1:b	1b");
+
+  if (offset_p)
+    *offset_p = 0;
+  if (size_p)
+    *size_p = 24;
+}
+
+/* Goto if stack[--sp] == TOP  */
+
+static void
+ppc_emit_eq_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("lwzu  " TMP_FIRST ", 8(30)	\n"
+	    "lwz   " TMP_SECOND ", 4(30)	\n"
+	    "xor   4, 6, 4	\n"
+	    "xor   3, 5, 3	\n"
+	    "or.   3, 3, 4	\n"
+	    "lwzu  " TOP_FIRST ", 8(30)	\n"
+	    "lwz   " TOP_SECOND ", 4(30)	\n"
+	    "1:beq 0, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 28;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] != TOP  */
+
+static void
+ppc_emit_ne_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("lwzu  " TMP_FIRST ", 8(30)	\n"
+	    "lwz   " TMP_SECOND ", 4(30)	\n"
+	    "xor   4, 6, 4	\n"
+	    "xor   3, 5, 3	\n"
+	    "or.   3, 3, 4	\n"
+	    "lwzu  " TOP_FIRST ", 8(30)	\n"
+	    "lwz   " TOP_SECOND ", 4(30)	\n"
+	    "1:bne 0, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 28;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] < TOP  */
+
+static void
+ppc_emit_lt_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "cmplw   6, 6, 4		\n"
+	    "cmpw    7, 5, 3		\n"
+	    /* CR6 bit 0 = low less and high equal */
+	    "crand   6*4+0, 6*4+0, 7*4+2\n"
+	    /* CR7 bit 0 = (low less and high equal) or high less */
+	    "cror    7*4+0, 7*4+0, 6*4+0\n"
+	    "lwzu    " TOP_FIRST ", 8(30)	\n"
+	    "lwz     " TOP_SECOND ", 4(30)\n"
+	    "1:blt   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 32;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] <= TOP  */
+
+static void
+ppc_emit_le_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "cmplw   6, 6, 4		\n"
+	    "cmpw    7, 5, 3		\n"
+	    /* CR6 bit 0 = low less/equal and high equal */
+	    "crandc   6*4+0, 7*4+2, 6*4+1\n"
+	    /* CR7 bit 0 = (low less/eq and high equal) or high less */
+	    "cror    7*4+0, 7*4+0, 6*4+0\n"
+	    "lwzu    " TOP_FIRST ", 8(30)	\n"
+	    "lwz     " TOP_SECOND ", 4(30)\n"
+	    "1:blt   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 32;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] > TOP  */
+
+static void
+ppc_emit_gt_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "cmplw   6, 6, 4		\n"
+	    "cmpw    7, 5, 3		\n"
+	    /* CR6 bit 0 = low greater and high equal */
+	    "crand   6*4+0, 6*4+1, 7*4+2\n"
+	    /* CR7 bit 0 = (low greater and high equal) or high greater */
+	    "cror    7*4+0, 7*4+1, 6*4+0\n"
+	    "lwzu    " TOP_FIRST ", 8(30)	\n"
+	    "lwz     " TOP_SECOND ", 4(30)\n"
+	    "1:blt   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 32;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] >= TOP  */
+
+static void
+ppc_emit_ge_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
+	    "lwz " TMP_SECOND ", 4(30)	\n"
+	    "cmplw   6, 6, 4		\n"
+	    "cmpw    7, 5, 3		\n"
+	    /* CR6 bit 0 = low ge and high equal */
+	    "crandc  6*4+0, 7*4+2, 6*4+0\n"
+	    /* CR7 bit 0 = (low ge and high equal) or high greater */
+	    "cror    7*4+0, 7*4+1, 6*4+0\n"
+	    "lwzu    " TOP_FIRST ", 8(30)\n"
+	    "lwz     " TOP_SECOND ", 4(30)\n"
+	    "1:blt   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 32;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Relocate previous emitted branch instruction.  FROM is the address
+   of the branch instruction, TO is the goto target address, and SIZE
+   if the value we set by *SIZE_P before.  Currently, it is either
+   24 or 14 of branch and conditional-branch instruction.
+   Also used for ppc64.  */
+
+static void
+ppc_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
+{
+  long rel = to - from;
+  uint32_t insn;
+  int opcd;
+
+  read_inferior_memory (from, (unsigned char *) &insn, 4);
+  opcd = (insn >> 26) & 0x3f;
+
+  switch (size)
+    {
+    case 14:
+      if (opcd != 16
+	  || (rel >= (1 << 15) || rel < -(1 << 15)))
+	emit_error = 1;
+      insn = (insn & ~0xfffc) | (rel & 0xfffc);
+      break;
+    case 24:
+      if (opcd != 18
+	  || (rel >= (1 << 25) || rel < -(1 << 25)))
+	emit_error = 1;
+      insn = (insn & ~0x3fffffc) | (rel & 0x3fffffc);
+      break;
+    default:
+      emit_error = 1;
+    }
+
+  if (!emit_error)
+    write_inferior_memory (from, (unsigned char *) &insn, 4);
+}
+
+/* Table of emit ops for 32-bit.  */
+
+static struct emit_ops ppc_emit_ops_impl =
+{
+  ppc_emit_prologue,
+  ppc_emit_epilogue,
+  ppc_emit_add,
+  ppc_emit_sub,
+  ppc_emit_mul,
+  ppc_emit_lsh,
+  ppc_emit_rsh_signed,
+  ppc_emit_rsh_unsigned,
+  ppc_emit_ext,
+  ppc_emit_log_not,
+  ppc_emit_bit_and,
+  ppc_emit_bit_or,
+  ppc_emit_bit_xor,
+  ppc_emit_bit_not,
+  ppc_emit_equal,
+  ppc_emit_less_signed,
+  ppc_emit_less_unsigned,
+  ppc_emit_ref,
+  ppc_emit_if_goto,
+  ppc_emit_goto,
+  ppc_write_goto_address,
+  ppc_emit_const,
+  ppc_emit_call,
+  ppc_emit_reg,
+  ppc_emit_pop,
+  ppc_emit_stack_flush,
+  ppc_emit_zero_ext,
+  ppc_emit_swap,
+  ppc_emit_stack_adjust,
+  ppc_emit_int_call_1,
+  ppc_emit_void_call_2,
+  ppc_emit_eq_goto,
+  ppc_emit_ne_goto,
+  ppc_emit_lt_goto,
+  ppc_emit_le_goto,
+  ppc_emit_gt_goto,
+  ppc_emit_ge_goto
+};
+
+#ifdef __powerpc64__
+
+/*
+
+  Bytecode execution stack frame - 64-bit
+
+	|  LR save area           (SP + 16)
+	|  CR save area           (SP + 8)
+ SP' -> +- Back chain             (SP + 0)
+	|  Save r31   for access saved arguments
+	|  Save r30   for bytecode stack pointer
+	|  Save r4    for incoming argument *value
+	|  Save r3    for incoming argument regs
+ r30 -> +- Bytecode execution stack
+	|
+	|  64-byte (8 doublewords) at initial.
+	|  Expand stack as needed.
+	|
+	+-
+        |  Some padding for minimum stack frame.
+        |  112 for ELFv1.
+ SP     +- Back-chain (SP')
+
+  initial frame size
+  = 112 + (4 * 8) + 64
+  = 208
+
+   r30 is the stack-pointer for bytecode machine.
+       It should point to next-empty, so we can use LDU for pop.
+   r3  is used for cache of TOP value.
+       It was the first argument, pointer to regs.
+   r4  is the second argument, pointer to the result.
+       We should set *result = TOP after leaving this function.
+
+ Note:
+ * To restore stack at epilogue
+   => sp = r31
+ * To check stack is big enough for bytecode execution.
+   => r30 - 8 > SP + 112
+ * To return execution result.
+   => 0(r4) = TOP
+
+ */
+
+/* Emit prologue in inferior memory.  See above comments.  */
+
+static void
+ppc64v1_emit_prologue (void)
+{
+  /* On ELFv1, function pointers really point to function descriptor,
+     so emit one here.  We don't care about contents of words 1 and 2,
+     so let them just overlap out code.  */
+  uint64_t opd = current_insn_ptr + 8;
+  uint32_t buf[2];
+
+  /* Mind the strict aliasing rules.  */
+  memcpy (buf, &opd, sizeof buf);
+  emit_insns(buf, 2);
+  EMIT_ASM (/* Save return address.  */
+	    "mflr  0		\n"
+	    "std   0, 16(1)	\n"
+	    /* Save r30 and incoming arguments.  */
+	    "std   31, -8(1)	\n"
+	    "std   30, -16(1)	\n"
+	    "std   4, -24(1)	\n"
+	    "std   3, -32(1)	\n"
+	    /* Point r31 to current r1 for access arguments.  */
+	    "mr    31, 1	\n"
+	    /* Adjust SP.  208 is the initial frame size.  */
+	    "stdu  1, -208(1)	\n"
+	    /* Set r30 to pointing stack-top.  */
+	    "addi  30, 1, 168	\n"
+	    /* Initial r3/TOP to 0.  */
+	    "li	   3, 0		\n");
+}
+
+/* Emit prologue in inferior memory.  See above comments.  */
+
+static void
+ppc64v2_emit_prologue (void)
+{
+  EMIT_ASM (/* Save return address.  */
+	    "mflr  0		\n"
+	    "std   0, 16(1)	\n"
+	    /* Save r30 and incoming arguments.  */
+	    "std   31, -8(1)	\n"
+	    "std   30, -16(1)	\n"
+	    "std   4, -24(1)	\n"
+	    "std   3, -32(1)	\n"
+	    /* Point r31 to current r1 for access arguments.  */
+	    "mr    31, 1	\n"
+	    /* Adjust SP.  208 is the initial frame size.  */
+	    "stdu  1, -208(1)	\n"
+	    /* Set r30 to pointing stack-top.  */
+	    "addi  30, 1, 168	\n"
+	    /* Initial r3/TOP to 0.  */
+	    "li	   3, 0		\n");
+}
+
+/* Emit epilogue in inferior memory.  See above comments.  */
+
+static void
+ppc64_emit_epilogue (void)
+{
+  EMIT_ASM (/* Restore SP.  */
+	    "ld    1, 0(1)      \n"
+	    /* *result = TOP */
+	    "ld    4, -24(1)	\n"
+	    "std   3, 0(4)	\n"
+	    /* Restore registers.  */
+	    "ld    31, -8(1)	\n"
+	    "ld    30, -16(1)	\n"
+            /* Restore LR.  */
+	    "ld    0, 16(1)	\n"
+	    /* Return 0 for no-error.  */
+	    "li    3, 0		\n"
+	    "mtlr  0		\n"
+	    "blr		\n");
+}
+
+/* TOP = stack[--sp] + TOP  */
+
+static void
+ppc64_emit_add (void)
+{
+  EMIT_ASM ("ldu  4, 8(30)	\n"
+	    "add  3, 4, 3	\n");
+}
+
+/* TOP = stack[--sp] - TOP  */
+
+static void
+ppc64_emit_sub (void)
+{
+  EMIT_ASM ("ldu  4, 8(30)	\n"
+	    "sub  3, 4, 3	\n");
+}
+
+/* TOP = stack[--sp] * TOP  */
+
+static void
+ppc64_emit_mul (void)
+{
+  EMIT_ASM ("ldu    4, 8(30)	\n"
+	    "mulld  3, 4, 3	\n");
+}
+
+/* TOP = stack[--sp] << TOP  */
+
+static void
+ppc64_emit_lsh (void)
+{
+  EMIT_ASM ("ldu  4, 8(30)	\n"
+	    "sld  3, 4, 3	\n");
+}
+
+/* Top = stack[--sp] >> TOP
+   (Arithmetic shift right)  */
+
+static void
+ppc64_emit_rsh_signed (void)
+{
+  EMIT_ASM ("ldu   4, 8(30)	\n"
+	    "srad  3, 4, 3	\n");
+}
+
+/* Top = stack[--sp] >> TOP
+   (Logical shift right)  */
+
+static void
+ppc64_emit_rsh_unsigned (void)
+{
+  EMIT_ASM ("ldu  4, 8(30)	\n"
+	    "srd  3, 4, 3	\n");
+}
+
+/* Emit code for signed-extension specified by ARG.  */
+
+static void
+ppc64_emit_ext (int arg)
+{
+  switch (arg)
+    {
+    case 8:
+      EMIT_ASM ("extsb  3, 3");
+      break;
+    case 16:
+      EMIT_ASM ("extsh  3, 3");
+      break;
+    case 32:
+      EMIT_ASM ("extsw  3, 3");
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+/* Emit code for zero-extension specified by ARG.  */
+
+static void
+ppc64_emit_zero_ext (int arg)
+{
+  switch (arg)
+    {
+    case 8:
+      EMIT_ASM ("rldicl 3,3,0,56");
+      break;
+    case 16:
+      EMIT_ASM ("rldicl 3,3,0,48");
+      break;
+    case 32:
+      EMIT_ASM ("rldicl 3,3,0,32");
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+/* TOP = !TOP
+   i.e., TOP = (TOP == 0) ? 1 : 0;  */
+
+static void
+ppc64_emit_log_not (void)
+{
+  EMIT_ASM ("cntlzd  3, 3	\n"
+	    "srdi    3, 3, 6	\n");
+}
+
+/* TOP = stack[--sp] & TOP  */
+
+static void
+ppc64_emit_bit_and (void)
+{
+  EMIT_ASM ("ldu  4, 8(30)	\n"
+	    "and  3, 4, 3	\n");
+}
+
+/* TOP = stack[--sp] | TOP  */
+
+static void
+ppc64_emit_bit_or (void)
+{
+  EMIT_ASM ("ldu  4, 8(30)	\n"
+	    "or   3, 4, 3	\n");
+}
+
+/* TOP = stack[--sp] ^ TOP  */
+
+static void
+ppc64_emit_bit_xor (void)
+{
+  EMIT_ASM ("ldu  4, 8(30)	\n"
+	    "xor  3, 4, 3	\n");
+}
+
+/* TOP = ~TOP
+   i.e., TOP = ~(TOP | TOP)  */
+
+static void
+ppc64_emit_bit_not (void)
+{
+  EMIT_ASM ("nor  3, 3, 3	\n");
+}
+
+/* TOP = stack[--sp] == TOP  */
+
+static void
+ppc64_emit_equal (void)
+{
+  EMIT_ASM ("ldu     4, 8(30)	\n"
+	    "xor     3, 3, 4	\n"
+	    "cntlzd  3, 3	\n"
+	    "srdi    3, 3, 6	\n");
+}
+
+/* TOP = stack[--sp] < TOP
+   (Signed comparison)  */
+
+static void
+ppc64_emit_less_signed (void)
+{
+  EMIT_ASM ("ldu     4, 8(30)		\n"
+	    "cmpd    7, 4, 3		\n"
+	    "mfcr    3			\n"
+	    "rlwinm  3, 3, 29, 31, 31	\n");
+}
+
+/* TOP = stack[--sp] < TOP
+   (Unsigned comparison)  */
+
+static void
+ppc64_emit_less_unsigned (void)
+{
+  EMIT_ASM ("ldu     4, 8(30)		\n"
+	    "cmpld   7, 4, 3		\n"
+	    "mfcr    3			\n"
+	    "rlwinm  3, 3, 29, 31, 31	\n");
+}
+
+/* Access the memory address in TOP in size of SIZE.
+   Zero-extend the read value.  */
+
+static void
+ppc64_emit_ref (int size)
+{
+  switch (size)
+    {
+    case 1:
+      EMIT_ASM ("lbz   3, 0(3)");
+      break;
+    case 2:
+      EMIT_ASM ("lhz   3, 0(3)");
+      break;
+    case 4:
+      EMIT_ASM ("lwz   3, 0(3)");
+      break;
+    case 8:
+      EMIT_ASM ("ld    3, 0(3)");
+      break;
+    }
+}
+
+/* TOP = NUM  */
+
+static void
+ppc64_emit_const (LONGEST num)
+{
+  uint32_t buf[5];
+  uint32_t *p = buf;
+
+  p += gen_limm (p, 3, num, 1);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* Set TOP to the value of register REG by calling get_raw_reg function
+   with two argument, collected buffer and register number.  */
+
+static void
+ppc64v1_emit_reg (int reg)
+{
+  uint32_t buf[15];
+  uint32_t *p = buf;
+
+  /* fctx->regs is passed in r3 and then saved in 176(1).  */
+  p += GEN_LD (p, 3, 31, -32);
+  p += GEN_LI (p, 4, reg);
+  p += GEN_STD (p, 2, 1, 40);	/* Save TOC.  */
+  p += gen_call (p, get_raw_reg_func_addr (), 1, 1);
+  p += GEN_LD (p, 2, 1, 40);	/* Restore TOC.  */
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* Likewise, for ELFv2.  */
+
+static void
+ppc64v2_emit_reg (int reg)
+{
+  uint32_t buf[12];
+  uint32_t *p = buf;
+
+  /* fctx->regs is passed in r3 and then saved in 176(1).  */
+  p += GEN_LD (p, 3, 31, -32);
+  p += GEN_LI (p, 4, reg);
+  p += GEN_STD (p, 2, 1, 24);	/* Save TOC.  */
+  p += gen_call (p, get_raw_reg_func_addr (), 1, 0);
+  p += GEN_LD (p, 2, 1, 24);	/* Restore TOC.  */
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* TOP = stack[--sp] */
+
+static void
+ppc64_emit_pop (void)
+{
+  EMIT_ASM ("ldu  3, 8(30)");
+}
+
+/* stack[sp++] = TOP
+
+   Because we may use up bytecode stack, expand 8 doublewords more
+   if needed.  */
+
+static void
+ppc64_emit_stack_flush (void)
+{
+  /* Make sure bytecode stack is big enough before push.
+     Otherwise, expand 64-byte more.  */
+
+  EMIT_ASM ("  std   3, 0(30)		\n"
+	    "  addi  4, 30, -(112 + 8)	\n"
+	    "  cmpd  7, 4, 1		\n"
+	    "  bgt   7, 1f		\n"
+	    "  stdu  31, -64(1)		\n"
+	    "1:addi  30, 30, -8		\n");
+}
+
+/* Swap TOP and stack[sp-1]  */
+
+static void
+ppc64_emit_swap (void)
+{
+  EMIT_ASM ("ld   4, 8(30)	\n"
+	    "std  3, 8(30)	\n"
+	    "mr   3, 4		\n");
+}
+
+/* Call function FN - ELFv1.  */
+
+static void
+ppc64v1_emit_call (CORE_ADDR fn)
+{
+  uint32_t buf[13];
+  uint32_t *p = buf;
+
+  p += GEN_STD (p, 2, 1, 40);	/* Save TOC.  */
+  p += gen_call (p, fn, 1, 1);
+  p += GEN_LD (p, 2, 1, 40);	/* Restore TOC.  */
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* Call function FN - ELFv2.  */
+
+static void
+ppc64v2_emit_call (CORE_ADDR fn)
+{
+  uint32_t buf[10];
+  uint32_t *p = buf;
+
+  p += GEN_STD (p, 2, 1, 24);	/* Save TOC.  */
+  p += gen_call (p, fn, 1, 0);
+  p += GEN_LD (p, 2, 1, 24);	/* Restore TOC.  */
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* FN's prototype is `LONGEST(*fn)(int)'.
+   TOP = fn (arg1)
+  */
+
+static void
+ppc64v1_emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  uint32_t buf[13];
+  uint32_t *p = buf;
+
+  /* Setup argument.  arg1 is a 16-bit value.  */
+  p += gen_limm (p, 3, arg1, 1);
+  p += GEN_STD (p, 2, 1, 40);	/* Save TOC.  */
+  p += gen_call (p, fn, 1, 1);
+  p += GEN_LD (p, 2, 1, 40);	/* Restore TOC.  */
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* Likewise for ELFv2.  */
+
+static void
+ppc64v2_emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  uint32_t buf[10];
+  uint32_t *p = buf;
+
+  /* Setup argument.  arg1 is a 16-bit value.  */
+  p += gen_limm (p, 3, arg1, 1);
+  p += GEN_STD (p, 2, 1, 24);	/* Save TOC.  */
+  p += gen_call (p, fn, 1, 0);
+  p += GEN_LD (p, 2, 1, 24);	/* Restore TOC.  */
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* FN's prototype is `void(*fn)(int,LONGEST)'.
+   fn (arg1, TOP)
+
+   TOP should be preserved/restored before/after the call.  */
+
+static void
+ppc64v1_emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  uint32_t buf[17];
+  uint32_t *p = buf;
+
+  /* Save TOP.  0(30) is next-empty.  */
+  p += GEN_STD (p, 3, 30, 0);
+
+  /* Setup argument.  arg1 is a 16-bit value.  */
+  p += GEN_MR (p, 4, 3);		/* mr	r4, r3 */
+  p += gen_limm (p, 3, arg1, 1);
+  p += GEN_STD (p, 2, 1, 40);	/* Save TOC.  */
+  p += gen_call (p, fn, 1, 1);
+  p += GEN_LD (p, 2, 1, 40);	/* Restore TOC.  */
+
+  /* Restore TOP */
+  p += GEN_LD (p, 3, 30, 0);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* Likewise for ELFv2.  */
+
+static void
+ppc64v2_emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  uint32_t buf[14];
+  uint32_t *p = buf;
+
+  /* Save TOP.  0(30) is next-empty.  */
+  p += GEN_STD (p, 3, 30, 0);
+
+  /* Setup argument.  arg1 is a 16-bit value.  */
+  p += GEN_MR (p, 4, 3);		/* mr	r4, r3 */
+  p += gen_limm (p, 3, arg1, 1);
+  p += GEN_STD (p, 2, 1, 24);	/* Save TOC.  */
+  p += gen_call (p, fn, 1, 0);
+  p += GEN_LD (p, 2, 1, 24);	/* Restore TOC.  */
+
+  /* Restore TOP */
+  p += GEN_LD (p, 3, 30, 0);
+
+  emit_insns (buf, p - buf);
+  gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
+}
+
+/* If TOP is true, goto somewhere.  Otherwise, just fall-through.  */
+
+static void
+ppc64_emit_if_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("cmpdi  7, 3, 0	\n"
+	    "ldu    3, 8(30)	\n"
+	    "1:bne  7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 8;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] == TOP  */
+
+static void
+ppc64_emit_eq_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("ldu     4, 8(30)	\n"
+	    "cmpd    7, 4, 3	\n"
+	    "ldu     3, 8(30)	\n"
+	    "1:beq   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 12;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] != TOP  */
+
+static void
+ppc64_emit_ne_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("ldu     4, 8(30)	\n"
+	    "cmpd    7, 4, 3	\n"
+	    "ldu     3, 8(30)	\n"
+	    "1:bne   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 12;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] < TOP  */
+
+static void
+ppc64_emit_lt_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("ldu     4, 8(30)	\n"
+	    "cmpd    7, 4, 3	\n"
+	    "ldu     3, 8(30)	\n"
+	    "1:blt   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 12;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] <= TOP  */
+
+static void
+ppc64_emit_le_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("ldu     4, 8(30)	\n"
+	    "cmpd    7, 4, 3	\n"
+	    "ldu     3, 8(30)	\n"
+	    "1:ble   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 12;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] > TOP  */
+
+static void
+ppc64_emit_gt_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("ldu     4, 8(30)	\n"
+	    "cmpd    7, 4, 3	\n"
+	    "ldu     3, 8(30)	\n"
+	    "1:bgt   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 12;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Goto if stack[--sp] >= TOP  */
+
+static void
+ppc64_emit_ge_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM ("ldu     4, 8(30)	\n"
+	    "cmpd    7, 4, 3	\n"
+	    "ldu     3, 8(30)	\n"
+	    "1:bge   7, 1b	\n");
+
+  if (offset_p)
+    *offset_p = 12;
+  if (size_p)
+    *size_p = 14;
+}
+
+/* Table of emit ops for 64-bit ELFv1.  */
+
+static struct emit_ops ppc64v1_emit_ops_impl =
+{
+  ppc64v1_emit_prologue,
+  ppc64_emit_epilogue,
+  ppc64_emit_add,
+  ppc64_emit_sub,
+  ppc64_emit_mul,
+  ppc64_emit_lsh,
+  ppc64_emit_rsh_signed,
+  ppc64_emit_rsh_unsigned,
+  ppc64_emit_ext,
+  ppc64_emit_log_not,
+  ppc64_emit_bit_and,
+  ppc64_emit_bit_or,
+  ppc64_emit_bit_xor,
+  ppc64_emit_bit_not,
+  ppc64_emit_equal,
+  ppc64_emit_less_signed,
+  ppc64_emit_less_unsigned,
+  ppc64_emit_ref,
+  ppc64_emit_if_goto,
+  ppc_emit_goto,
+  ppc_write_goto_address,
+  ppc64_emit_const,
+  ppc64v1_emit_call,
+  ppc64v1_emit_reg,
+  ppc64_emit_pop,
+  ppc64_emit_stack_flush,
+  ppc64_emit_zero_ext,
+  ppc64_emit_swap,
+  ppc_emit_stack_adjust,
+  ppc64v1_emit_int_call_1,
+  ppc64v1_emit_void_call_2,
+  ppc64_emit_eq_goto,
+  ppc64_emit_ne_goto,
+  ppc64_emit_lt_goto,
+  ppc64_emit_le_goto,
+  ppc64_emit_gt_goto,
+  ppc64_emit_ge_goto
+};
+
+/* Table of emit ops for 64-bit ELFv2.  */
+
+static struct emit_ops ppc64v2_emit_ops_impl =
+{
+  ppc64v2_emit_prologue,
+  ppc64_emit_epilogue,
+  ppc64_emit_add,
+  ppc64_emit_sub,
+  ppc64_emit_mul,
+  ppc64_emit_lsh,
+  ppc64_emit_rsh_signed,
+  ppc64_emit_rsh_unsigned,
+  ppc64_emit_ext,
+  ppc64_emit_log_not,
+  ppc64_emit_bit_and,
+  ppc64_emit_bit_or,
+  ppc64_emit_bit_xor,
+  ppc64_emit_bit_not,
+  ppc64_emit_equal,
+  ppc64_emit_less_signed,
+  ppc64_emit_less_unsigned,
+  ppc64_emit_ref,
+  ppc64_emit_if_goto,
+  ppc_emit_goto,
+  ppc_write_goto_address,
+  ppc64_emit_const,
+  ppc64v2_emit_call,
+  ppc64v2_emit_reg,
+  ppc64_emit_pop,
+  ppc64_emit_stack_flush,
+  ppc64_emit_zero_ext,
+  ppc64_emit_swap,
+  ppc_emit_stack_adjust,
+  ppc64v2_emit_int_call_1,
+  ppc64v2_emit_void_call_2,
+  ppc64_emit_eq_goto,
+  ppc64_emit_ne_goto,
+  ppc64_emit_lt_goto,
+  ppc64_emit_le_goto,
+  ppc64_emit_gt_goto,
+  ppc64_emit_ge_goto
+};
+
+#endif
+
+/* Implementation of linux_target_ops method "emit_ops".  */
+
+static struct emit_ops *
+ppc_emit_ops (void)
+{
+#ifdef __powerpc64__
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+
+  if (register_size (regcache->tdesc, 0) == 8)
+    {
+      if (is_elfv2_inferior ())
+        return &ppc64v2_emit_ops_impl;
+      else
+        return &ppc64v1_emit_ops_impl;
+    }
+#endif
+  return &ppc_emit_ops_impl;
+}
+
 /* Implementation of linux_target_ops method "get_ipa_tdesc_idx".  */
 
 static int
@@ -1537,7 +3131,7 @@ struct linux_target_ops the_low_target = {
   ppc_supports_tracepoints,
   ppc_get_thread_area,
   ppc_install_fast_tracepoint_jump_pad,
-  NULL, /* emit_ops */
+  ppc_emit_ops,
   ppc_get_min_fast_tracepoint_insn_len,
   NULL, /* supports_range_stepping */
   NULL, /* breakpoint_kind_from_current_state */

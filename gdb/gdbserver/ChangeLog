@@ -2,6 +2,94 @@
 	    Marcin Kościelnicki  <koriakin@0x04.net>
 
 	PR/17221
+	* linux-ppc-low.c (emit_insns): New function.
+	(__EMIT_ASM, _EMIT_ASM, EMIT_ASM): New macros.
+	(ppc_emit_prologue): New function.
+	(ppc_emit_epilogue): New function.
+	(ppc_emit_add): New function.
+	(ppc_emit_sub): New function.
+	(ppc_emit_mul): New function.
+	(ppc_emit_lsh): New function.
+	(ppc_emit_rsh_signed): New function.
+	(ppc_emit_rsh_unsigned): New function.
+	(ppc_emit_ext): New function.
+	(ppc_emit_zero_ext): New function.
+	(ppc_emit_log_not): New function.
+	(ppc_emit_bit_and): New function.
+	(ppc_emit_bit_or): New function.
+	(ppc_emit_bit_xor): New function.
+	(ppc_emit_bit_not): New function.
+	(ppc_emit_equal): New function.
+	(ppc_emit_less_signed): New function.
+	(ppc_emit_less_unsigned): New function.
+	(ppc_emit_ref): New function.
+	(ppc_emit_const): New function.
+	(ppc_emit_reg): New function.
+	(ppc_emit_pop): New function.
+	(ppc_emit_stack_flush): New function.
+	(ppc_emit_swap): New function.
+	(ppc_emit_stack_adjust): New function.
+	(ppc_emit_call): New function.
+	(ppc_emit_int_call_1): New function.
+	(ppc_emit_void_call_2): New function.
+	(ppc_emit_if_goto): New function.
+	(ppc_emit_goto): New function.
+	(ppc_emit_eq_goto): New function.
+	(ppc_emit_ne_goto): New function.
+	(ppc_emit_lt_goto): New function.
+	(ppc_emit_le_goto): New function.
+	(ppc_emit_gt_goto): New function.
+	(ppc_emit_ge_goto): New function.
+	(ppc_write_goto_address): New function.
+	(ppc_emit_ops_impl): New static variable.
+	(ppc64v1_emit_prologue): New function.
+	(ppc64v2_emit_prologue): New function.
+	(ppc64_emit_epilogue): New function.
+	(ppc64_emit_add): New function.
+	(ppc64_emit_sub): New function.
+	(ppc64_emit_mul): New function.
+	(ppc64_emit_lsh): New function.
+	(ppc64_emit_rsh_signed): New function.
+	(ppc64_emit_rsh_unsigned): New function.
+	(ppc64_emit_ext): New function.
+	(ppc64_emit_zero_ext): New function.
+	(ppc64_emit_log_not): New function.
+	(ppc64_emit_bit_and): New function.
+	(ppc64_emit_bit_or): New function.
+	(ppc64_emit_bit_xor): New function.
+	(ppc64_emit_bit_not): New function.
+	(ppc64_emit_equal): New function.
+	(ppc64_emit_less_signed): New function.
+	(ppc64_emit_less_unsigned): New function.
+	(ppc64_emit_ref): New function.
+	(ppc64_emit_const): New function.
+	(ppc64v1_emit_reg): New function.
+	(ppc64v2_emit_reg): New function.
+	(ppc64_emit_pop): New function.
+	(ppc64_emit_stack_flush): New function.
+	(ppc64_emit_swap): New function.
+	(ppc64v1_emit_call): New function.
+	(ppc64v2_emit_call): New function.
+	(ppc64v1_emit_int_call_1): New function.
+	(ppc64v2_emit_int_call_1): New function.
+	(ppc64v1_emit_void_call_2): New function.
+	(ppc64v2_emit_void_call_2): New function.
+	(ppc64_emit_if_goto): New function.
+	(ppc64_emit_eq_goto): New function.
+	(ppc64_emit_ne_goto): New function.
+	(ppc64_emit_lt_goto): New function.
+	(ppc64_emit_le_goto): New function.
+	(ppc64_emit_gt_goto): New function.
+	(ppc64_emit_ge_goto): New function.
+	(ppc64v1_emit_ops_impl): New static variable.
+	(ppc64v2_emit_ops_impl): New static variable.
+	(ppc_emit_ops): New function.
+	(linux_low_target): Wire in ppc_emit_ops.
+
+2016-03-31  Wei-cheng Wang  <cole945@gmail.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR/17221
 	* Makefile.in: Add powerpc-*-ipa.o
 	* configure.srv: Add ipa_obj for powerpc*-linux.
 	* linux-ppc-ipa.c: New file.
