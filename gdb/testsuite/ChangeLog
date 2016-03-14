@@ -1,3 +1,8 @@
+2016-03-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/default.exp: Add $_as_string to the list of expected
+	convenience functions.
+
 2016-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/maint.exp: New tests for 'maint info line-table'.

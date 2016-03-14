@@ -612,6 +612,7 @@ if ![skip_python_tests] {
 	    {$_regex = <internal function _regex>} \
 	    {$_streq = <internal function _streq>} \
 	    {$_strlen = <internal function _strlen>} \
+	    {$_as_string = <internal function _as_string>} \
 	    {$_caller_is = <internal function _caller_is>} \
 	    {$_caller_matches = <internal function _caller_matches>} \
 	    {$_any_caller_is = <internal function _any_caller_is>} \
