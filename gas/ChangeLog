@@ -1,5 +1,15 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-arc.c (find_opcode_match): Move lnflg, and i
+	declarations to start of block.  Reset code on all flags before
+	attempting to match them.  Handle multiple hits on the same flag.
+	Handle flag class.
+	* testsuite/gas/arc/asm-errors.d: New file.
+	* testsuite/gas/arc/asm-errors.err: New file.
+	* testsuite/gas/arc/asm-errors.s: New file.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-arc.c (cpu_types): Add nps400 entry.
 	(check_zol): Handle nps400.
 

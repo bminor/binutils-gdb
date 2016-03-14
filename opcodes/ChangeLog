@@ -1,5 +1,10 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arc-opc.c (arc_flag_classes): Convert all flag classes to use
+	the new class enum values.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arc-dis.c (print_insn_arc): Handle nps400.
 
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>

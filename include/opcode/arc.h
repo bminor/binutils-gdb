@@ -72,15 +72,15 @@ typedef enum
 /* Flags class.  */
 typedef enum
   {
-    FNONE,
-    CND,  /* Conditional flags.  */
-    WBM,  /* Write-back modes.  */
-    FLG,  /* F Flag.  */
-    SBP,  /* Static branch prediction.  */
-    DLY,  /* Delay slot.  */
-    DIF,  /* Bypass caches.  */
-    SGX,  /* Sign extend modes.  */
-    SZM   /* Data size modes.  */
+    F_CLASS_NONE,
+
+    /* At most one flag from the set of flags can appear in the
+       instruction.  */
+    F_CLASS_OPTIONAL,
+
+    /* Exactly one from from the set of flags must appear in the
+       instruction.  */
+    F_CLASS_REQUIRED,
   } flag_class_t;
 
 /* The opcode table is an array of struct arc_opcode.  */

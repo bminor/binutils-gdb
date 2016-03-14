@@ -1,0 +1,4 @@
+[^:]*: Assembler messages:
+[^:]*:2: Error: inappropriate arguments for opcode 'adc'
+[^:]*:3: Error: inappropriate arguments for opcode 'adc'
+[^:]*:4: Error: inappropriate arguments for opcode 'adc'

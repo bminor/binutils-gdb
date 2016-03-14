@@ -803,65 +803,66 @@ const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
 const struct arc_flag_class arc_flag_classes[] =
 {
 #define C_EMPTY     0
-  { FNONE, { F_NULL } },
+  { F_CLASS_NONE, { F_NULL } },
 
 #define C_CC	    (C_EMPTY + 1)
-  { CND, { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL, F_NOTZERO,
-	   F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS, F_CARRY, F_CARRYSET,
-	   F_LOWER, F_CARRYCLR, F_NOTCARRY, F_HIGHER, F_OVERFLOWSET,
-	   F_OVERFLOW, F_NOTOVERFLOW, F_OVERFLOWCLR, F_GT, F_GE, F_LT,
-	   F_LE, F_HI, F_LS, F_PNZ, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL,
+			F_NOTZERO, F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS,
+			F_CARRY, F_CARRYSET, F_LOWER, F_CARRYCLR,
+			F_NOTCARRY, F_HIGHER, F_OVERFLOWSET, F_OVERFLOW,
+			F_NOTOVERFLOW, F_OVERFLOWCLR, F_GT, F_GE, F_LT,
+			F_LE, F_HI, F_LS, F_PNZ, F_NULL } },
 
 #define C_AA_ADDR3  (C_CC + 1)
 #define C_AA27	    (C_CC + 1)
-  { WBM, { F_A3, F_AW3, F_AB3, F_AS3, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_A3, F_AW3, F_AB3, F_AS3, F_NULL } },
 #define C_AA_ADDR9  (C_AA_ADDR3 + 1)
 #define C_AA21	     (C_AA_ADDR3 + 1)
-  { WBM, { F_A9, F_AW9, F_AB9, F_AS9, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_A9, F_AW9, F_AB9, F_AS9, F_NULL } },
 #define C_AA_ADDR22 (C_AA_ADDR9 + 1)
 #define C_AA8	   (C_AA_ADDR9 + 1)
-  { WBM, { F_A22, F_AW22, F_AB22, F_AS22, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_A22, F_AW22, F_AB22, F_AS22, F_NULL } },
 
 #define C_F	    (C_AA_ADDR22 + 1)
-  { FLG, { F_FLAG, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_FLAG, F_NULL } },
 #define C_FHARD	    (C_F + 1)
-  { FLG, { F_FFAKE, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_FFAKE, F_NULL } },
 
 #define C_T	    (C_FHARD + 1)
-  { SBP, { F_NT, F_T, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_NT, F_T, F_NULL } },
 #define C_D	    (C_T + 1)
-  { DLY, { F_ND, F_D, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_ND, F_D, F_NULL } },
 
 #define C_DHARD	    (C_D + 1)
-  { DLY, { F_DFAKE, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_DFAKE, F_NULL } },
 
 #define C_DI20	    (C_DHARD + 1)
-  { DIF, { F_DI11, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_DI11, F_NULL }},
 #define C_DI16	    (C_DI20 + 1)
-  { DIF, { F_DI15, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_DI15, F_NULL }},
 #define C_DI26	    (C_DI16 + 1)
-  { DIF, { F_DI5, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_DI5, F_NULL }},
 
 #define C_X25	    (C_DI26 + 1)
-  { SGX, { F_SIGN6, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_SIGN6, F_NULL }},
 #define C_X15	   (C_X25 + 1)
-  { SGX, { F_SIGN16, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_SIGN16, F_NULL }},
 #define C_XHARD	   (C_X15 + 1)
 #define C_X	   (C_X15 + 1)
-  { SGX, { F_SIGNX, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_SIGNX, F_NULL }},
 
 #define C_ZZ13	      (C_X + 1)
-  { SZM, { F_SIZEB17, F_SIZEW17, F_H17, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_SIZEB17, F_SIZEW17, F_H17, F_NULL}},
 #define C_ZZ23	      (C_ZZ13 + 1)
-  { SZM, { F_SIZEB7, F_SIZEW7, F_H7, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_SIZEB7, F_SIZEW7, F_H7, F_NULL}},
 #define C_ZZ29	      (C_ZZ23 + 1)
-  { SZM, { F_SIZEB1, F_SIZEW1, F_H1, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_SIZEB1, F_SIZEW1, F_H1, F_NULL}},
 
 #define C_AS	    (C_ZZ29 + 1)
-  { SZM, { F_ASFAKE, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_ASFAKE, F_NULL}},
 
 #define C_NE	    (C_AS + 1)
-  { CND, { F_NE, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_NE, F_NULL}},
 };
 
 /* The operands table.

@@ -1370,7 +1370,7 @@ find_opcode_match (const struct arc_opcode *first_opcode,
     {
       const unsigned char *opidx;
       const unsigned char *flgidx;
-      int tokidx = 0;
+      int tokidx = 0, lnflg, i;
       const expressionS *t = &emptyE;
 
       pr_debug ("%s:%d: find_opcode_match: trying opcode 0x%08X ",
@@ -1596,20 +1596,23 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 	}
       pr_debug ("opr ");
 
-      /* Check the flags.  Iterate over the valid flag classes.  */
-      int lnflg = nflgs;
+      /* Setup ready for flag parsing.  */
+      lnflg = nflgs;
+      for (i = 0; i < nflgs; i++)
+        first_pflag [i].code = 0;
 
-      for (flgidx = opcode->flags; *flgidx && lnflg; ++flgidx)
+      /* Check the flags.  Iterate over the valid flag classes.  */
+      for (flgidx = opcode->flags; *flgidx; ++flgidx)
 	{
 	  /* Get a valid flag class.  */
 	  const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
 	  const unsigned *flgopridx;
+	  int cl_matches = 0;
 
 	  for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
 	    {
 	      const struct arc_flag_operand *flg_operand;
 	      struct arc_flags *pflag = first_pflag;
-	      int i;
 
 	      flg_operand = &arc_flag_operands[*flgopridx];
 	      for (i = 0; i < nflgs; i++, pflag++)
@@ -1617,13 +1620,20 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 		  /* Match against the parsed flags.  */
 		  if (!strcmp (flg_operand->name, pflag->name))
 		    {
-		      /*TODO: Check if it is duplicated.  */
+		      if (pflag->code != 0)
+			goto match_failed;
+		      cl_matches++;
 		      pflag->code = *flgopridx;
 		      lnflg--;
 		      break; /* goto next flag class and parsed flag.  */
 		    }
 		}
 	    }
+
+	  if (cl_flags->class == F_CLASS_REQUIRED && cl_matches == 0)
+	    goto match_failed;
+	  if (cl_flags->class == F_CLASS_OPTIONAL && cl_matches > 1)
+	    goto match_failed;
 	}
       /* Did I check all the parsed flags?  */
       if (lnflg)
