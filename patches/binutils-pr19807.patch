@@ -1,0 +1,372 @@
+From a60f9fe1b335d2d90b8d55278c9e592afe315ce4 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Sun, 13 Mar 2016 19:40:18 -0700
+Subject: [PATCH] Add -z noreloc-overflow ld option to x86-64 ld
+
+Add -z noreloc-overflow command-line option to the x86-64 ELF linker to
+disable relocation overflow check.  This can be used to avoid relocation
+overflow check if there will be no dynamic relocation overflow at
+run-time.
+
+bfd/
+
+	PR ld/19807
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Check
+	no_reloc_overflow_check to diable R_X86_64_32/R_X86_64_32S
+	relocation overflow check.
+
+include/
+
+	PR ld/19807
+	* bfdlink.h (bfd_link_info): Add no_reloc_overflow_check.
+
+ld/
+
+	PR ld/19807
+	* Makefile.am (ELF_X86_DEPS): Add
+	$(srcdir)/emulparams/reloc_overflow.sh.
+	* Makefile.in: Regenerated.
+	* NEWS: Mention -z noreloc-overflow.
+	* ld.texinfo: Document -z noreloc-overflow.
+	* emulparams/elf32_x86_64.sh: Source
+	${srcdir}/emulparams/reloc_overflow.sh.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/reloc_overflow.sh: New file.
+	* testsuite/ld-x86-64/pr19807-1.s: New file.
+	* testsuite/ld-x86-64/pr19807-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2.s: Likewise.
+	* testsuite/ld-x86-64/pr19807-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2b.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2c.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2d.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2e.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/19807 tests.
+---
+ bfd/elf64-x86-64.c                  |  7 +++++--
+ include/bfdlink.h                   |  3 +++
+ ld/Makefile.am                      |  1 +
+ ld/Makefile.in                      |  1 +
+ ld/NEWS                             |  3 +++
+ ld/emulparams/elf32_x86_64.sh       |  1 +
+ ld/emulparams/elf_x86_64.sh         |  1 +
+ ld/emulparams/reloc_overflow.sh     | 11 +++++++++++
+ ld/ld.texinfo                       |  5 +++++
+ ld/testsuite/ld-x86-64/pr19807-1.s  |  8 ++++++++
+ ld/testsuite/ld-x86-64/pr19807-1a.d | 13 +++++++++++++
+ ld/testsuite/ld-x86-64/pr19807-1b.d | 13 +++++++++++++
+ ld/testsuite/ld-x86-64/pr19807-2.s  |  8 ++++++++
+ ld/testsuite/ld-x86-64/pr19807-2a.d |  4 ++++
+ ld/testsuite/ld-x86-64/pr19807-2b.d |  8 ++++++++
+ ld/testsuite/ld-x86-64/pr19807-2c.d | 13 +++++++++++++
+ ld/testsuite/ld-x86-64/pr19807-2d.d |  8 ++++++++
+ ld/testsuite/ld-x86-64/pr19807-2e.d | 13 +++++++++++++
+ ld/testsuite/ld-x86-64/x86-64.exp   |  7 +++++++
+ 19 files changed, 126 insertions(+), 2 deletions(-)
+ create mode 100644 ld/emulparams/reloc_overflow.sh
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-1.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-1a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-1b.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-2.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-2a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-2b.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-2c.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-2d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19807-2e.d
+
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index 380376d..089e88e 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -1974,7 +1974,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	     cannot be used in shared libs.  Don't error out for
+ 	     sections we don't care about, such as debug sections or
+ 	     non-constant sections.  */
+-	  if (bfd_link_pic (info)
++	  if (!info->no_reloc_overflow_check
++	      && bfd_link_pic (info)
+ 	      && (sec->flags & SEC_ALLOC) != 0
+ 	      && (sec->flags & SEC_READONLY) != 0)
+ 	    {
+@@ -4843,7 +4844,9 @@ direct:
+ 	      else
+ 		{
+ 		  /* This symbol is local, or marked to become local.  */
+-		  if (r_type == htab->pointer_r_type)
++		  if (r_type == htab->pointer_r_type
++		      || (r_type == R_X86_64_32
++			  && info->no_reloc_overflow_check))
+ 		    {
+ 		      relocate = TRUE;
+ 		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
+diff --git a/include/bfdlink.h b/include/bfdlink.h
+index eeea6ef..a285f6d 100644
+--- a/include/bfdlink.h
++++ b/include/bfdlink.h
+@@ -446,6 +446,9 @@ struct bfd_link_info
+   /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
+   unsigned int nointerp: 1;
+ 
++  /* TRUE if we shouldn't check relocation overflow.  */
++  unsigned int no_reloc_overflow_check: 1;
++
+   /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
+   unsigned int call_nop_as_suffix : 1;
+ 
+diff --git a/ld/Makefile.am b/ld/Makefile.am
+index 4a8c0b6..d14e769 100644
+--- a/ld/Makefile.am
++++ b/ld/Makefile.am
+@@ -672,6 +672,7 @@ ELF_GEN_DEPS = $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em
+ ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ 	       $(srcdir)/emulparams/extern_protected_data.sh \
+ 	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
++	       $(srcdir)/emulparams/reloc_overflow.sh \
+ 	       $(srcdir)/emulparams/call_nop.sh
+ 
+ @TDIRS@
+diff --git a/ld/Makefile.in b/ld/Makefile.in
+index 45388d7..8c69228 100644
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -888,6 +888,7 @@ ELF_GEN_DEPS = $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em
+ ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ 	       $(srcdir)/emulparams/extern_protected_data.sh \
+ 	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
++	       $(srcdir)/emulparams/reloc_overflow.sh \
+ 	       $(srcdir)/emulparams/call_nop.sh
+ 
+ 
+diff --git a/ld/NEWS b/ld/NEWS
+index 4bf8091..b88da5c 100644
+--- a/ld/NEWS
++++ b/ld/NEWS
+@@ -1,5 +1,8 @@
+ -*- text -*-
+ 
++* Support for -z noreloc-overflow in the x86-64 ELF linker to disable
++  relocation overflow check.
++
+ * Add -z common/-z nocommon options for ELF targets to control whether to
+   convert common symbols to the STT_COMMON type during a relocatable link.
+ 
+diff --git a/ld/emulparams/elf32_x86_64.sh b/ld/emulparams/elf32_x86_64.sh
+index 1b285c5..967c1b4 100644
+--- a/ld/emulparams/elf32_x86_64.sh
++++ b/ld/emulparams/elf32_x86_64.sh
+@@ -1,6 +1,7 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
+ . ${srcdir}/emulparams/dynamic_undefined_weak.sh
++. ${srcdir}/emulparams/reloc_overflow.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=32
+diff --git a/ld/emulparams/elf_x86_64.sh b/ld/emulparams/elf_x86_64.sh
+index 0159a6c..e935f90 100644
+--- a/ld/emulparams/elf_x86_64.sh
++++ b/ld/emulparams/elf_x86_64.sh
+@@ -1,6 +1,7 @@
+ . ${srcdir}/emulparams/plt_unwind.sh
+ . ${srcdir}/emulparams/extern_protected_data.sh
+ . ${srcdir}/emulparams/dynamic_undefined_weak.sh
++. ${srcdir}/emulparams/reloc_overflow.sh
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+diff --git a/ld/emulparams/reloc_overflow.sh b/ld/emulparams/reloc_overflow.sh
+new file mode 100644
+index 0000000..7ba0ee5
+--- /dev/null
++++ b/ld/emulparams/reloc_overflow.sh
+@@ -0,0 +1,11 @@
++PARSE_AND_LIST_OPTIONS_RELOC_OVERFLOW='
++  fprintf (file, _("\
++  -z noreloc-overflow         Disable relocation overflow check\n"));
++'
++PARSE_AND_LIST_ARGS_CASE_Z_RELOC_OVERFLOW='
++      else if (strcmp (optarg, "noreloc-overflow") == 0)
++	link_info.no_reloc_overflow_check = TRUE;
++'
++
++PARSE_AND_LIST_OPTIONS="$PARSE_AND_LIST_OPTIONS $PARSE_AND_LIST_OPTIONS_RELOC_OVERFLOW"
++PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_RELOC_OVERFLOW"
+diff --git a/ld/ld.texinfo b/ld/ld.texinfo
+index b2b99ab..d3d8dc6 100644
+--- a/ld/ld.texinfo
++++ b/ld/ld.texinfo
+@@ -1213,6 +1213,11 @@ This option overrides linker backend default.  It can be used to avoid
+ dynamic relocations against undefined weak symbols in executable.
+ Supported for i386 and x86-64.
+ 
++@item noreloc-overflow
++Disable relocation overflow check.  This can be used to disable
++relocation overflow check if there will be no dynamic relocation
++overflow at run-time.  Supported for x86_64.
++
+ @item call-nop=prefix-addr
+ @itemx call-nop=prefix-nop
+ @itemx call-nop=suffix-nop
+diff --git a/ld/testsuite/ld-x86-64/pr19807-1.s b/ld/testsuite/ld-x86-64/pr19807-1.s
+new file mode 100644
+index 0000000..0870f6a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-1.s
+@@ -0,0 +1,8 @@
++	.globl  _start
++	.type	_start, @function
++_start:
++	movq	$foo, %rax
++	.size	_start, .-_start
++	.data
++foo:
++	.quad	0
+diff --git a/ld/testsuite/ld-x86-64/pr19807-1a.d b/ld/testsuite/ld-x86-64/pr19807-1a.d
+new file mode 100644
+index 0000000..f3c5390
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-1a.d
+@@ -0,0 +1,13 @@
++#source: pr19807-1.s
++#as: --64
++#ld: -pie -melf_x86_64 -z noreloc-overflow
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 ([0-9a-f]{2} ){4}	mov    \$0x[a-f0-9]+,%rax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19807-1b.d b/ld/testsuite/ld-x86-64/pr19807-1b.d
+new file mode 100644
+index 0000000..6af4985
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-1b.d
+@@ -0,0 +1,13 @@
++#source: pr19807-1.s
++#as: --x32
++#ld: -pie -melf32_x86_64 -z noreloc-overflow
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 ([0-9a-f]{2} ){4}	mov    \$0x[a-f0-9]+,%rax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19807-2.s b/ld/testsuite/ld-x86-64/pr19807-2.s
+new file mode 100644
+index 0000000..2b309f2
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-2.s
+@@ -0,0 +1,8 @@
++	.globl  _start
++	.type	_start, @function
++_start:
++	movl	$foo, %eax
++	.size	_start, .-_start
++	.data
++foo:
++	.quad	0
+diff --git a/ld/testsuite/ld-x86-64/pr19807-2a.d b/ld/testsuite/ld-x86-64/pr19807-2a.d
+new file mode 100644
+index 0000000..1357d72
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-2a.d
+@@ -0,0 +1,4 @@
++#source: pr19807-2.s
++#as: --64
++#ld: -pie -melf_x86_64
++#error: .*relocation R_X86_64_32 against `.data' can not be used when making a shared object; recompile with -fPIC
+diff --git a/ld/testsuite/ld-x86-64/pr19807-2b.d b/ld/testsuite/ld-x86-64/pr19807-2b.d
+new file mode 100644
+index 0000000..a781b30
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-2b.d
+@@ -0,0 +1,8 @@
++#source: pr19807-2.s
++#as: --x32
++#ld: -pie -melf32_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_RELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr19807-2c.d b/ld/testsuite/ld-x86-64/pr19807-2c.d
+new file mode 100644
+index 0000000..83ac641
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-2c.d
+@@ -0,0 +1,13 @@
++#source: pr19807-2.s
++#as: --x32
++#ld: -pie -melf32_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	b8 ([0-9a-f]{2} ){4}      	mov    \$0x[a-f0-9]+,%eax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19807-2d.d b/ld/testsuite/ld-x86-64/pr19807-2d.d
+new file mode 100644
+index 0000000..1171283
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-2d.d
+@@ -0,0 +1,8 @@
++#source: pr19807-2.s
++#as: --64
++#ld: -pie -melf_x86_64 -z noreloc-overflow
++#readelf: -r --wide
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++    Offset             Info             Type               Symbol's Value  Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_RELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr19807-2e.d b/ld/testsuite/ld-x86-64/pr19807-2e.d
+new file mode 100644
+index 0000000..f26616a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19807-2e.d
+@@ -0,0 +1,13 @@
++#source: pr19807-2.s
++#as: --64
++#ld: -pie -melf_x86_64 -z noreloc-overflow
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	b8 ([0-9a-f]{2} ){4}      	mov    \$0x[a-f0-9]+,%eax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
+index 49f9fa3..8f29761 100644
+--- a/ld/testsuite/ld-x86-64/x86-64.exp
++++ b/ld/testsuite/ld-x86-64/x86-64.exp
+@@ -247,6 +247,13 @@ run_dump_test "largecomm-1e"
+ run_dump_test "largecomm-1f"
+ run_dump_test "pr19539a"
+ run_dump_test "pr19539b"
++run_dump_test "pr19807-1a"
++run_dump_test "pr19807-1b"
++run_dump_test "pr19807-2a"
++run_dump_test "pr19807-2b"
++run_dump_test "pr19807-2c"
++run_dump_test "pr19807-2d"
++run_dump_test "pr19807-2e"
+ 
+ if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
+     return
+-- 
+2.5.0
+
