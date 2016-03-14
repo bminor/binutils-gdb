@@ -1,3 +1,7 @@
+2016-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in2.h: Regenerated.
+
 2016-03-11  Dan Gissel  <dgisselq@ieee.org>
 
 	PR 19713
