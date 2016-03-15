@@ -415,7 +415,6 @@ arc_elf_print_private_bfd_data (bfd *abfd, void * ptr)
 
   switch (flags & EF_ARC_MACH_MSK)
     {
-    case EF_ARC_CPU_GENERIC : fprintf (file, " -mcpu=generic"); break;
     case EF_ARC_CPU_ARCV2HS : fprintf (file, " -mcpu=ARCv2HS");    break;
     case EF_ARC_CPU_ARCV2EM : fprintf (file, " -mcpu=ARCv2EM");    break;
     case E_ARC_MACH_ARC600  : fprintf (file, " -mcpu=ARC600");     break;
@@ -647,34 +646,25 @@ static void
 arc_elf_final_write_processing (bfd * abfd,
 				bfd_boolean linker ATTRIBUTE_UNUSED)
 {
-  unsigned long val;
   unsigned long emf;
 
   switch (bfd_get_mach (abfd))
     {
     case bfd_mach_arc_arc600:
-      val = E_ARC_MACH_ARC600;
       emf = EM_ARC_COMPACT;
       break;
     case bfd_mach_arc_arc601:
-      val = E_ARC_MACH_ARC601;
       emf = EM_ARC_COMPACT;
       break;
     case bfd_mach_arc_arc700:
-      val = E_ARC_MACH_ARC700;
       emf = EM_ARC_COMPACT;
       break;
     case bfd_mach_arc_arcv2:
-      val = EF_ARC_CPU_GENERIC;
       emf = EM_ARC_COMPACT2;
-      /* TODO: Check validity of this.  It can also be ARCV2EM here.
-	 Previous version sets the e_machine here.  */
       break;
     default:
       abort ();
     }
-  if ((elf_elfheader (abfd)->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_GENERIC)
-    elf_elfheader (abfd)->e_flags |= val;
 
   elf_elfheader (abfd)->e_machine = emf;
 

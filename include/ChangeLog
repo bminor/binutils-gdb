@@ -1,5 +1,9 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* elf/arc.h (EF_ARC_CPU_GENERIC): Delete.  Update related comment.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* elf/arc.h (EF_ARC_MACH): Delete.
 	(EF_ARC_MACH_MSK): Remove out of date comment.
 

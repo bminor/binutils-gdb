@@ -1,5 +1,12 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* elf32-arc.c (arc_elf_print_private_bfd_data): Remove use of
+	EF_ARC_CPU_GENERIC.
+	(arc_elf_final_write_processing): Don't bother setting cpu field
+	in e_flags, this will have been set elsewhere.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* elf32-arc.c (arc_elf_final_write_processing): Switch to using
 	EF_ARC_MACH_MSK.
 

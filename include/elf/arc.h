@@ -43,13 +43,11 @@ END_RELOC_NUMBERS (R_ARC_max)
 #define EF_ARC_OSABI_MSK 0x00000f00
 #define EF_ARC_ALL_MSK	 (EF_ARC_MACH_MSK | EF_ARC_OSABI_MSK)
 
-/* Various CPU types.  */
+/* Various CPU types.  These numbers are exposed in the ELF header flags
+   (e_flags field), and so must never change.  */
 #define E_ARC_MACH_ARC600	0x00000002
 #define E_ARC_MACH_ARC601	0x00000004
 #define E_ARC_MACH_ARC700	0x00000003
-
-/* Processor specific flags for the ELF header e_flags field.  */
-#define EF_ARC_CPU_GENERIC      0x00000000
 #define EF_ARC_CPU_ARCV2EM      0x00000005
 #define EF_ARC_CPU_ARCV2HS      0x00000006
 

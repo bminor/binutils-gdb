@@ -573,7 +573,7 @@ md_number_to_chars_midend (char *buf, valueT val, int n)
 static void
 arc_select_cpu (const char *arg)
 {
-  int cpu_flags = EF_ARC_CPU_GENERIC;
+  int cpu_flags = 0;
   int i;
 
   for (i = 0; cpu_types[i].name; ++i)
@@ -591,9 +591,8 @@ arc_select_cpu (const char *arg)
 
   if (!cpu_types[i].name)
     as_fatal (_("unknown architecture: %s\n"), arg);
-
-  if (cpu_flags != EF_ARC_CPU_GENERIC)
-    arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
+  gas_assert (cpu_flags != 0);
+  arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
 }
 
 /* Here ends all the ARCompact extension instruction assembling
