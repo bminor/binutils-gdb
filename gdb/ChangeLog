@@ -1,6 +1,16 @@
 2016-03-15  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19676
+	* linux-thread-db.c (try_thread_db_load_1): Leave
+	info->td_ta_thr_iter_p NULL iff debugging a live process and we
+	have /proc access.
+	(find_new_threads_once): Assert that we have a non-NULL
+	info->td_ta_thr_iter_p instead of checking whether the target has
+	execution.
+
+2016-03-15  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19676
 	* infrun.c (displaced_step_prepare): Also disable displaced
 	stepping on NOT_SUPPORTED_ERROR.
 	* linux-tdep.c (linux_displaced_step_location): If reading auxv
