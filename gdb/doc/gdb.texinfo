@@ -12878,6 +12878,13 @@ Collect all local variables.
 Collect the return address.  This is helpful if you want to see more
 of a backtrace.
 
+@emph{Note:} The return address location can not always be reliability
+determined up front, and the wrong address / registers may end up
+collected instead.  On some architectures the reliability is higher
+for tracepoints at function entry, while on others it's the opposite.
+When this happens, backtracing will stop because the return address is
+found unavailable (unless another collect rule happened to match it).
+
 @item $_probe_argc
 Collects the number of arguments from the static probe at which the
 tracepoint is located.

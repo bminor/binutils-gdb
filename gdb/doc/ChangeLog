@@ -1,3 +1,10 @@
+2016-03-15  Pedro Alves  <palves@redhat.com>
+	    Andreas Arnez  <arnez@linux.vnet.ibm.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.texinfo (Tracepoint Actions): Document possible
+	unreliability of '$_ret'.
+
 2016-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Symbols): Document new 'maint info line-table'
