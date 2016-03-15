@@ -1,5 +1,11 @@
 2016-03-15  Doug Evans  <dje@google.com>
 
+	* features/aarch64-core.xml (cpsr_flags): New flags type.
+	(cpsr): Use it.
+	* features/aarch64.c: Regenerate.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
 	* features/i386/32bit-core.xml (i386_eflags): Remove "end" spec.
 	* features/i386/32bit-sse.xml (i386_eflags): Ditto.
 	* features/i386/64bit-core.xml (i386_eflags): Ditto.
