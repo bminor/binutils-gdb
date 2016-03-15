@@ -13,9 +13,10 @@
 	* features/i386/x32-core.xml (i386_eflags): Ditto.
 
 2016-03-15  Doug Evans  <dje@google.com>
+	    Wei-cheng Wang  <cole945@gmail.com>
 
 	Extend flags to support multibit and enum bitfields.
-	NEWS: Document new features.
+	* NEWS: Document new features.
 	* c-typeprint.c (c_type_print_varspec_prefix): Handle TYPE_CODE_FLAGS.
 	(c_type_print_varspec_suffix, c_type_print_base): Ditto.
 	* gdbtypes.c (arch_flags_type): Don't assume all fields are one bit.
