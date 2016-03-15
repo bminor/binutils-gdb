@@ -1,5 +1,13 @@
 2016-03-15  Doug Evans  <dje@google.com>
 
+	* features/i386/32bit-core.xml (i386_eflags): Remove "end" spec.
+	* features/i386/32bit-sse.xml (i386_eflags): Ditto.
+	* features/i386/64bit-core.xml (i386_eflags): Ditto.
+	* features/i386/64bit-sse.xml (i386_eflags): Ditto.
+	* features/i386/x32-core.xml (i386_eflags): Ditto.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
 	Extend flags to support multibit and enum bitfields.
 	NEWS: Document new features.
 	* c-typeprint.c (c_type_print_varspec_prefix): Handle TYPE_CODE_FLAGS.
