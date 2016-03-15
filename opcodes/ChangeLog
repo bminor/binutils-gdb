@@ -1,5 +1,20 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arc-nps400-tbl.h: New file.
+	* arc-opc.c: Add top level comment.
+	(insert_nps_3bit_dst): New function.
+	(extract_nps_3bit_dst): New function.
+	(insert_nps_3bit_src2): New function.
+	(extract_nps_3bit_src2): New function.
+	(insert_nps_bitop_size): New function.
+	(extract_nps_bitop_size): New function.
+	(arc_flag_operands): Add nps400 entries.
+	(arc_flag_classes): Add nps400 entries.
+	(arc_operands): Add nps400 entries.
+	(arc_opcodes): Add nps400 include.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arc-opc.c (arc_flag_classes): Convert all flag classes to use
 	the new class enum values.
 

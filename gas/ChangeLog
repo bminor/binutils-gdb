@@ -1,5 +1,12 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/gas/arc/nps400-0.d: New file.
+	* testsuite/gas/arc/nps400-0.s: New file.
+	* testsuite/gas/arc/nps400-1.d: New file.
+	* testsuite/gas/arc/nps400-1.s: New file.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-arc.c (find_opcode_match): Move lnflg, and i
 	declarations to start of block.  Reset code on all flags before
 	attempting to match them.  Handle multiple hits on the same flag.

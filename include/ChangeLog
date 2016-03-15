@@ -1,5 +1,9 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* opcodes/arc.h (insn_class_t): Add BITOP type.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* opcode/arc.h (flag_class_t): Remove all old flag classes, add 3
 	new classes instead.
 

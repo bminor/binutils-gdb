@@ -46,6 +46,7 @@ typedef enum
     KERNEL,
     LOGICAL,
     MEMORY,
+    BITOP,
   } insn_class_t;
 
 /* Instruction Subclass.  */
