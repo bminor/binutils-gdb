@@ -1,6 +1,18 @@
 2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19827
+	* elf32-i386.c (elf_i386_check_relocs): Bind defined symbol
+	locally in PIE.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
 	2016-01-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19539
