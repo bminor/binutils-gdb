@@ -1,5 +1,17 @@
 2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19827
+	* testsuite/ld-i386/i386.exp: Run PR ld/19827 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr19827.rd: New file.
+	* testsuite/ld-i386/pr19827a.S: Likewise.
+	* testsuite/ld-i386/pr19827b.S: Likewise.
+	* testsuite/ld-x86-64/pr19827.rd: Likewise.
+	* testsuite/ld-x86-64/pr19827a.S: Likewise.
+	* testsuite/ld-x86-64/pr19827b.S: Likewise.
+
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19807
 	* Makefile.am (ELF_X86_DEPS): Add
 	$(srcdir)/emulparams/reloc_overflow.sh.
