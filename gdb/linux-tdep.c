@@ -2426,7 +2426,8 @@ linux_displaced_step_location (struct gdbarch *gdbarch)
      location.  The auxiliary vector gets us the PowerPC-side entry
      point address instead.  */
   if (target_auxv_search (&current_target, AT_ENTRY, &addr) <= 0)
-    error (_("Cannot find AT_ENTRY auxiliary vector entry."));
+    throw_error (NOT_SUPPORTED_ERROR,
+		 _("Cannot find AT_ENTRY auxiliary vector entry."));
 
   /* Make certain that the address points at real code, and not a
      function descriptor.  */
