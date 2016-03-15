@@ -25,8 +25,13 @@
 #include "xml-support.h"
 #include "xml-tdesc.h"
 #include "osabi.h"
-
 #include "filenames.h"
+
+/* Maximum sizes.
+   This is just to catch obviously wrong values.  */
+#define MAX_FIELD_SIZE 65536
+#define MAX_FIELD_BITSIZE (MAX_FIELD_SIZE * TARGET_CHAR_BIT)
+#define MAX_VECTOR_SIZE 65536
 
 #if !defined(HAVE_LIBEXPAT)
 
@@ -259,8 +264,14 @@ tdesc_start_struct (struct gdb_xml_parser *parser,
   attr = xml_find_attribute (attributes, "size");
   if (attr != NULL)
     {
-      int size = (int) * (ULONGEST *) attr->value;
+      ULONGEST size = * (ULONGEST *) attr->value;
 
+      if (size > MAX_FIELD_SIZE)
+	{
+	  gdb_xml_error (parser,
+			 _("Struct size %s is larger than maximum (%d)"),
+			 pulongest (size), MAX_FIELD_SIZE);
+	}
       tdesc_set_struct_size (type, size);
       data->current_type_size = size;
     }
@@ -273,11 +284,17 @@ tdesc_start_flags (struct gdb_xml_parser *parser,
 {
   struct tdesc_parsing_data *data = (struct tdesc_parsing_data *) user_data;
   char *id = (char *) xml_find_attribute (attributes, "id")->value;
-  int length = (int) * (ULONGEST *)
+  ULONGEST size = * (ULONGEST *)
     xml_find_attribute (attributes, "size")->value;
   struct tdesc_type *type;
 
-  type = tdesc_create_flags (data->current_feature, id, length);
+  if (size > MAX_FIELD_SIZE)
+    {
+      gdb_xml_error (parser,
+		     _("Flags size %s is larger than maximum (%d)"),
+		     pulongest (size), MAX_FIELD_SIZE);
+    }
+  type = tdesc_create_flags (data->current_feature, id, size);
 
   data->current_type = type;
   data->current_type_size = 0;
@@ -308,13 +325,33 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 
   attr = xml_find_attribute (attributes, "start");
   if (attr != NULL)
-    start = * (ULONGEST *) attr->value;
+    {
+      ULONGEST ul_start = * (ULONGEST *) attr->value;
+
+      if (ul_start > MAX_FIELD_BITSIZE)
+	{
+	  gdb_xml_error (parser,
+			 _("Field start %s is larger than maximum (%d)"),
+			 pulongest (ul_start), MAX_FIELD_BITSIZE);
+	}
+      start = ul_start;
+    }
   else
     start = -1;
 
   attr = xml_find_attribute (attributes, "end");
   if (attr != NULL)
-    end = * (ULONGEST *) attr->value;
+    {
+      ULONGEST ul_end = * (ULONGEST *) attr->value;
+
+      if (ul_end > MAX_FIELD_BITSIZE)
+	{
+	  gdb_xml_error (parser,
+			 _("Field end %s is larger than maximum (%d)"),
+			 pulongest (ul_end), MAX_FIELD_BITSIZE);
+	}
+      end = ul_end;
+    }
   else
     end = -1;
 
@@ -389,11 +426,18 @@ tdesc_start_vector (struct gdb_xml_parser *parser,
   struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
   struct tdesc_type *field_type;
   char *id, *field_type_id;
-  int count;
+  ULONGEST count;
 
   id = (char *) attrs[0].value;
   field_type_id = (char *) attrs[1].value;
   count = * (ULONGEST *) attrs[2].value;
+
+  if (count > MAX_VECTOR_SIZE)
+    {
+      gdb_xml_error (parser,
+		     _("Vector size %s is larger than maximum (%d)"),
+		     pulongest (count), MAX_VECTOR_SIZE);
+    }
 
   field_type = tdesc_named_type (data->current_feature, field_type_id);
   if (field_type == NULL)

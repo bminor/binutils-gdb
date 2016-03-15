@@ -150,14 +150,14 @@ typedef struct tdesc_type
     struct
     {
       VEC(tdesc_type_field) *fields;
-      LONGEST size;
+      int size;
     } u;
 
     /* Flags type.  */
     struct
     {
       VEC(tdesc_type_flag) *flags;
-      LONGEST size;
+      int size;
     } f;
   } u;
 } *tdesc_type_p;
@@ -1340,9 +1340,10 @@ tdesc_create_struct (struct tdesc_feature *feature, const char *name)
    suffice.  */
 
 void
-tdesc_set_struct_size (struct tdesc_type *type, LONGEST size)
+tdesc_set_struct_size (struct tdesc_type *type, int size)
 {
   gdb_assert (type->kind == TDESC_TYPE_STRUCT);
+  gdb_assert (size > 0);
   type->u.u.size = size;
 }
 
@@ -1360,9 +1361,11 @@ tdesc_create_union (struct tdesc_feature *feature, const char *name)
 
 struct tdesc_type *
 tdesc_create_flags (struct tdesc_feature *feature, const char *name,
-		    LONGEST size)
+		    int size)
 {
   struct tdesc_type *type = XCNEW (struct tdesc_type);
+
+  gdb_assert (size > 0);
 
   type->name = xstrdup (name);
   type->kind = TDESC_TYPE_FLAGS;

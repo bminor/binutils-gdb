@@ -1,5 +1,20 @@
 2016-03-15  Doug Evans  <dje@google.com>
 
+	* target-descriptions.c (struct tdesc_type) <u.u.size>: Change type
+	from LONGEST to int.
+	(struct tdesc_type) <u.f.size>: Ditto.
+	(tdesc_set_struct_size): Change type of "size" arg from LONGEST
+	to int.  Add assertion size > 0.
+	(tdesc_create_flags): Ditto.
+	* target-descriptions.h (tdesc_set_struct_size): Update.
+	(tdesc_create_flags): Update.
+	* xml-tdesc.c (MAX_FIELD_SIZE, MAX_FIELD_BITSIZE): New macros.
+	(MAX_VECTOR_SIZE): New macro.
+	(tdesc_start_struct): Catch conversion errors from LONGEST to int.
+	(tdesc_start_flags, tdesc_start_field, tdesc_start_vector): Ditto.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
 	* target-descriptions.c (maint_print_c_tdesc_cmd): Use "type" for
 	TYPE_CODE_FLAGS instead of "field_type", for consistency.
 	* features/i386/amd64-avx-linux.c: Regenerate.
