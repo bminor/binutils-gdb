@@ -1,3 +1,14 @@
+2016-03-15  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoints/18303
+	* cp-namespace.c (cp_lookup_bare_symbol): Change assertion to
+	look for "::" instead of simply ":".
+	(cp_search_static_and_baseclasses): Return null_block_symbol for
+	malformed input.
+	Remove assertions.
+	* cp-support.c (cp_find_first_component_aux): Do not return
+	a prefix length for ':' unless the next character is also ':'.
+
 2016-03-15  Doug Evans  <dje@google.com>
 
 	* features/aarch64-core.xml (cpsr_flags): New flags type.
