@@ -247,6 +247,13 @@ run_dump_test "largecomm-1e"
 run_dump_test "largecomm-1f"
 run_dump_test "pr19539a"
 run_dump_test "pr19539b"
+run_dump_test "pr19807-1a"
+run_dump_test "pr19807-1b"
+run_dump_test "pr19807-2a"
+run_dump_test "pr19807-2b"
+run_dump_test "pr19807-2c"
+run_dump_test "pr19807-2d"
+run_dump_test "pr19807-2e"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return

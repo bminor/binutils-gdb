@@ -446,6 +446,9 @@ struct bfd_link_info
   /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
   unsigned int nointerp: 1;
 
+  /* TRUE if we shouldn't check relocation overflow.  */
+  unsigned int no_reloc_overflow_check: 1;
+
   /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
   unsigned int call_nop_as_suffix : 1;
 

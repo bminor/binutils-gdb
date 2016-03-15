@@ -1213,6 +1213,11 @@ This option overrides linker backend default.  It can be used to avoid
 dynamic relocations against undefined weak symbols in executable.
 Supported for i386 and x86-64.
 
+@item noreloc-overflow
+Disable relocation overflow check.  This can be used to disable
+relocation overflow check if there will be no dynamic relocation
+overflow at run-time.  Supported for x86_64.
+
 @item call-nop=prefix-addr
 @itemx call-nop=prefix-nop
 @itemx call-nop=suffix-nop
