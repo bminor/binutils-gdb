@@ -1,3 +1,32 @@
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Use "type" for
+	TYPE_CODE_FLAGS instead of "field_type", for consistency.
+	* features/i386/amd64-avx-linux.c: Regenerate.
+	* features/i386/amd64-avx.c: Regenerate.
+	* features/i386/amd64-avx512-linux.c: Regenerate.
+	* features/i386/amd64-avx512.c: Regenerate.
+	* features/i386/amd64-linux.c: Regenerate.
+	* features/i386/amd64-mpx-linux.c: Regenerate.
+	* features/i386/amd64-mpx.c: Regenerate.
+	* features/i386/amd64.c: Regenerate.
+	* features/i386/i386-avx-linux.c: Regenerate.
+	* features/i386/i386-avx.c: Regenerate.
+	* features/i386/i386-avx512-linux.c: Regenerate.
+	* features/i386/i386-avx512.c: Regenerate.
+	* features/i386/i386-linux.c: Regenerate.
+	* features/i386/i386-mmx-linux.c: Regenerate.
+	* features/i386/i386-mmx.c: Regenerate.
+	* features/i386/i386-mpx-linux.c: Regenerate.
+	* features/i386/i386-mpx.c: Regenerate.
+	* features/i386/i386.c: Regenerate.
+	* features/i386/x32-avx-linux.c: Regenerate.
+	* features/i386/x32-avx.c: Regenerate.
+	* features/i386/x32-avx512-linux.c: Regenerate.
+	* features/i386/x32-avx512.c: Regenerate.
+	* features/i386/x32-linux.c: Regenerate.
+	* features/i386/x32.c: Regenerate.
+
 2016-03-15  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19676

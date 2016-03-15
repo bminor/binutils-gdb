@@ -1683,9 +1683,11 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
 	      printed_field_type = 1;
 	    }
 
-	  if ((type->kind == TDESC_TYPE_UNION
-	      || type->kind == TDESC_TYPE_STRUCT)
-	      && VEC_length (tdesc_type_field, type->u.u.fields) > 0)
+	  if (((type->kind == TDESC_TYPE_UNION
+		|| type->kind == TDESC_TYPE_STRUCT)
+	       && VEC_length (tdesc_type_field, type->u.u.fields) > 0)
+	      || (type->kind == TDESC_TYPE_FLAGS
+		  && VEC_length (tdesc_type_flag, type->u.f.flags) > 0))
 	    {
 	      printf_unfiltered ("  struct tdesc_type *type;\n");
 	      printed_desc_type = 1;
@@ -1803,14 +1805,14 @@ feature = tdesc_create_feature (result, \"%s\");\n",
 	      break;
 	    case TDESC_TYPE_FLAGS:
 	      printf_unfiltered
-		("  field_type = tdesc_create_flags (feature, \"%s\", %d);\n",
+		("  type = tdesc_create_flags (feature, \"%s\", %d);\n",
 		 type->name, (int) type->u.f.size);
 	      for (ix3 = 0;
 		   VEC_iterate (tdesc_type_flag, type->u.f.flags, ix3,
 				flag);
 		   ix3++)
 		printf_unfiltered
-		  ("  tdesc_add_flag (field_type, %d, \"%s\");\n",
+		  ("  tdesc_add_flag (type, %d, \"%s\");\n",
 		   flag->start, flag->name);
 	      break;
 	    default:
