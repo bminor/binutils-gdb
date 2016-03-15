@@ -47,8 +47,9 @@ static const bfd_arch_info_type arch_info_struct[] =
   ARC (bfd_mach_arc_arc601, "ARC601", FALSE, &arch_info_struct[3]),
   ARC (bfd_mach_arc_arc700, "ARC700", FALSE, &arch_info_struct[4]),
   ARC (bfd_mach_arc_arc700, "A7",     FALSE, &arch_info_struct[5]),
-  ARC (bfd_mach_arc_arcv2,  "ARCv2",  FALSE, &arch_info_struct[6]),
-  ARC (bfd_mach_arc_arcv2,  "EM",     FALSE, &arch_info_struct[7]),
+  ARC (bfd_mach_arc_nps400, "NPS400", FALSE, &arch_info_struct[6]),
+  ARC (bfd_mach_arc_arcv2,  "ARCv2",  FALSE, &arch_info_struct[7]),
+  ARC (bfd_mach_arc_arcv2,  "EM",     FALSE, &arch_info_struct[8]),
   ARC (bfd_mach_arc_arcv2,  "HS",     FALSE, NULL),
 };
 

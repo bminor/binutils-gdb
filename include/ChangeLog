@@ -1,5 +1,10 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* elf/arc.h (E_ARC_MACH_NPS400): Define.
+	* opcode/arc.h (ARC_OPCODE_NPS400): Define.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* elf/arc.h (EF_ARC_CPU_GENERIC): Delete.  Update related comment.
 
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>

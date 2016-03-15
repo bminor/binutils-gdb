@@ -1,5 +1,9 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* readelf.c (decode_ARC_machine_flags): Handle nps400.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* readelf.c (get_machine_flags): Move arc processing into...
 	(decode_ARC_machine_flags): ... new function.  Remove use of
 	EF_ARC_CPU_GENERIC, change default case from "generic arc" to

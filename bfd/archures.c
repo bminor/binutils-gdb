@@ -359,6 +359,7 @@ DESCRIPTION
 .#define bfd_mach_arc_arc601    4
 .#define bfd_mach_arc_arc700    3
 .#define bfd_mach_arc_arcv2     5
+.#define bfd_mach_arc_nps400    6
 . bfd_arch_m32c,     {* Renesas M16C/M32C.  *}
 .#define bfd_mach_m16c        0x75
 .#define bfd_mach_m32c        0x78

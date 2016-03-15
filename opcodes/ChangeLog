@@ -1,5 +1,9 @@
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arc-dis.c (print_insn_arc): Handle nps400.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arc-opc.c (BASE): Delete.
 
 2016-03-18  Nick Clifton  <nickc@redhat.com>

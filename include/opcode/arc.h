@@ -132,6 +132,7 @@ extern const unsigned arc_num_opcodes;
 #define ARC_OPCODE_ARC700   0x0002  /* ARC 700 specific insns.  */
 #define ARC_OPCODE_ARCv2EM  0x0004  /* ARCv2 EM specific insns.  */
 #define ARC_OPCODE_ARCv2HS  0x0008  /* ARCv2 HS specific insns.  */
+#define ARC_OPCODE_NPS400   0x0010  /* NPS400 specific insns.  */
 
 /* CPU extensions.  */
 #define ARC_EA       0x0001
