@@ -1,3 +1,8 @@
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/inline-data-1.d: Add target restriction.
+	* testsuite/gas/arc/inline-data-2.d: New file.
+
 2016-03-21  Nick Clifton  <nickc@redhat.com>
 
 	* atof-generic.c: Replace use of alloca with call to xmalloc.
