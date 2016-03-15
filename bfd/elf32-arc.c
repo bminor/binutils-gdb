@@ -673,7 +673,7 @@ arc_elf_final_write_processing (bfd * abfd,
     default:
       abort ();
     }
-  if ((elf_elfheader (abfd)->e_flags & EF_ARC_MACH) == EF_ARC_CPU_GENERIC)
+  if ((elf_elfheader (abfd)->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_GENERIC)
     elf_elfheader (abfd)->e_flags |= val;
 
   elf_elfheader (abfd)->e_machine = emf;
