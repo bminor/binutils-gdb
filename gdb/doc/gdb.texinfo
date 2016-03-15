@@ -12878,7 +12878,7 @@ Collect all local variables.
 Collect the return address.  This is helpful if you want to see more
 of a backtrace.
 
-@emph{Note:} The return address location can not always be reliability
+@emph{Note:} The return address location can not always be reliably
 determined up front, and the wrong address / registers may end up
 collected instead.  On some architectures the reliability is higher
 for tracepoints at function entry, while on others it's the opposite.

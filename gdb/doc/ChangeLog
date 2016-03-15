@@ -1,4 +1,8 @@
 2016-03-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Tracepoint Actions): Fix typo.
+
+2016-03-15  Pedro Alves  <palves@redhat.com>
 	    Andreas Arnez  <arnez@linux.vnet.ibm.com>
 	    Marcin Kościelnicki  <koriakin@0x04.net>
 
