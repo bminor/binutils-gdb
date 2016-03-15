@@ -40359,6 +40359,7 @@ target descriptions.  @xref{Expat}.
 * Target Description Format::       The contents of a target description.
 * Predefined Target Types::         Standard types available for target
                                     descriptions.
+* Enum Target Types::               How to define enum target types.
 * Standard Target Features::        Features @value{GDBN} knows about.
 @end menu
 
@@ -40559,7 +40560,8 @@ Any register's value is a collection of bits which @value{GDBN} must
 interpret.  The default interpretation is a two's complement integer,
 but other types can be requested by name in the register description.
 Some predefined types are provided by @value{GDBN} (@pxref{Predefined
-Target Types}), and the description can define additional composite types.
+Target Types}), and the description can define additional composite
+and enum types.
 
 Each type element must have an @samp{id} attribute, which gives
 a unique (within the containing @samp{<feature>}) name to the type.
@@ -40589,24 +40591,15 @@ each of which has a @var{name} and a @var{type}:
 @end smallexample
 
 @cindex <struct>
+@cindex <flags>
 If a register's value is composed from several separate values, define
-it with a structure type.  There are two forms of the @samp{<struct>}
-element; a @samp{<struct>} element must either contain only bitfields
-or contain no bitfields.  If the structure contains only bitfields,
-its total size in bytes must be specified, each bitfield must have an
-explicit start and end, and bitfields are automatically assigned an
-integer type.  The field's @var{start} should be less than or
-equal to its @var{end}, and zero represents the least significant bit.
+it with either a structure type or a flags type.
+A flags type may only contain bitfields.
+A structure type may either contain only bitfields or contain no bitfields.
+If the value contains only bitfields, its total size in bytes must be
+specified.
 
-@smallexample
-<struct id="@var{id}" size="@var{size}">
-  <field name="@var{name}" start="@var{start}" end="@var{end}"/>
-  @dots{}
-</struct>
-@end smallexample
-
-If the structure contains no bitfields, then each field has an
-explicit type, and no implicit padding is added.
+Non-bitfield values have a @var{name} and @var{type}.
 
 @smallexample
 <struct id="@var{id}">
@@ -40615,19 +40608,66 @@ explicit type, and no implicit padding is added.
 </struct>
 @end smallexample
 
-@cindex <flags>
-If a register's value is a series of single-bit flags, define it with
-a flags type.  The @samp{<flags>} element has an explicit @var{size}
-and contains one or more @samp{<field>} elements.  Each field has a
-@var{name}, a @var{start}, and an @var{end}.  Only single-bit flags
-are supported.
+Both @var{name} and @var{type} values are required.
+No implicit padding is added.
+
+Bitfield values have a @var{name}, @var{start}, @var{end} and @var{type}.
+
+@smallexample
+<struct id="@var{id}" size="@var{size}">
+  <field name="@var{name}" start="@var{start}" end="@var{end}" type="@var{type}"/>
+  @dots{}
+</struct>
+@end smallexample
 
 @smallexample
 <flags id="@var{id}" size="@var{size}">
-  <field name="@var{name}" start="@var{start}" end="@var{end}"/>
+  <field name="@var{name}" start="@var{start}" end="@var{end}" type="@var{type}"/>
   @dots{}
 </flags>
 @end smallexample
+
+The @var{name} value is required.
+Bitfield values may be named with the empty string, @samp{""},
+in which case the field is ``filler'' and its value is not printed.
+Not all bits need to be specified, so ``filler'' fields are optional.
+
+The @var{start} value is required, and @var{end} and @var{type}
+are optional.
+The field's @var{start} must be less than or equal to its @var{end},
+and zero represents the least significant bit.
+The default value of @var{end} is @var{start}, a single bit field.
+
+The default value of @var{type} depends on whether the
+@var{end} was specified.  If @var{end} is specified then the default
+value of @var{type} is an unsigned integer.  If @var{end} is unspecified
+then the default value of @var{type} is @code{bool}.
+
+Which to choose?  Structures or flags?
+
+Registers defined with @samp{flags} have these advantages over
+defining them with @samp{struct}:
+
+@itemize @bullet
+@item
+Arithmetic may be performed on them as if they were integers.
+@item
+They are printed in a more readable fashion.
+@end itemize
+
+Registers defined with @samp{struct} have one advantage over
+defining them with @samp{flags}:
+
+@itemize @bullet
+@item
+One can fetch individual fields like in @samp{C}.
+
+@smallexample
+(gdb) print $my_struct_reg.field3
+$1 = 42
+@end smallexample
+
+@end itemize
 
 @subsection Registers
 @cindex <reg>
@@ -40697,6 +40737,9 @@ types.  The currently supported types are:
 
 @table @code
 
+@item bool
+Boolean type, occupying a single bit.
+
 @item int8
 @itemx int16
 @itemx int32
@@ -40738,6 +40781,44 @@ The 10-byte extended precision format used by x87 registers.
 32bit @sc{mxcsr} register used by x86.
 
 @end table
+
+@node Enum Target Types
+@section Enum Target Types
+@cindex target descriptions, enum types
+
+Enum target types are useful in @samp{struct} and @samp{flags}
+register descriptions.  @xref{Target Description Format}.
+
+Enum types have a name, size and a list of name/value pairs.
+
+@smallexample
+<enum id="@var{id}" size="@var{size}">
+  <evalue name="@var{name}" value="@var{value}"/>
+  @dots{}
+</enum>
+@end smallexample
+
+Enums must be defined before they are used.
+
+@smallexample
+<enum id="levels_type" size="4">
+  <evalue name="low" value="0"/>
+  <evalue name="high" value="1"/>
+</enum>
+<flags id="flags_type" size="4">
+  <field name="X" start="0"/>
+  <field name="LEVEL" start="1" end="1" type="levels_type"/>
+</flags>
+<reg name="flags" bitsize="32" type="flags_type"/>
+@end smallexample
+
+Given that description, a value of 3 for the @samp{flags} register
+would be printed as:
+
+@smallexample
+(gdb) info register flags
+flags 0x3 [ X LEVEL=high ]
+@end smallexample
 
 @node Standard Target Features
 @section Standard Target Features

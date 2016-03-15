@@ -4715,38 +4715,55 @@ arch_complex_type (struct gdbarch *gdbarch,
 struct type *
 arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
 {
-  int nfields = length * TARGET_CHAR_BIT;
+  int max_nfields = length * TARGET_CHAR_BIT;
   struct type *type;
 
   type = arch_type (gdbarch, TYPE_CODE_FLAGS, length, name);
   TYPE_UNSIGNED (type) = 1;
-  TYPE_NFIELDS (type) = nfields;
+  TYPE_NFIELDS (type) = 0;
+  /* Pre-allocate enough space assuming every field is one bit.  */
   TYPE_FIELDS (type)
-    = (struct field *) TYPE_ZALLOC (type, nfields * sizeof (struct field));
+    = (struct field *) TYPE_ZALLOC (type, max_nfields * sizeof (struct field));
 
   return type;
 }
 
 /* Add field to TYPE_CODE_FLAGS type TYPE to indicate the bit at
+   position BITPOS is called NAME.  Pass NAME as "" for fields that
+   should not be printed.  */
+
+void
+append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
+			 struct type *field_type, char *name)
+{
+  int type_bitsize = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+  int field_nr = TYPE_NFIELDS (type);
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLAGS);
+  gdb_assert (TYPE_NFIELDS (type) + 1 <= type_bitsize);
+  gdb_assert (start_bitpos >= 0 && start_bitpos < type_bitsize);
+  gdb_assert (nr_bits >= 1 && nr_bits <= type_bitsize);
+  gdb_assert (name != NULL);
+
+  TYPE_FIELD_NAME (type, field_nr) = xstrdup (name);
+  TYPE_FIELD_TYPE (type, field_nr) = field_type;
+  SET_FIELD_BITPOS (TYPE_FIELD (type, field_nr), start_bitpos);
+  TYPE_FIELD_BITSIZE (type, field_nr) = nr_bits;
+  ++TYPE_NFIELDS (type);
+}
+
+/* Special version of append_flags_type_field to add a flag field.
+   Add field to TYPE_CODE_FLAGS type TYPE to indicate the bit at
    position BITPOS is called NAME.  */
 
 void
 append_flags_type_flag (struct type *type, int bitpos, char *name)
 {
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLAGS);
-  gdb_assert (bitpos < TYPE_NFIELDS (type));
-  gdb_assert (bitpos >= 0);
+  struct gdbarch *gdbarch = get_type_arch (type);
 
-  if (name)
-    {
-      TYPE_FIELD_NAME (type, bitpos) = xstrdup (name);
-      SET_FIELD_BITPOS (TYPE_FIELD (type, bitpos), bitpos);
-    }
-  else
-    {
-      /* Don't show this field to the user.  */
-      SET_FIELD_BITPOS (TYPE_FIELD (type, bitpos), -1);
-    }
+  append_flags_type_field (type, bitpos, 1,
+			   builtin_type (gdbarch)->builtin_bool,
+			   name);
 }
 
 /* Allocate a TYPE_CODE_STRUCT or TYPE_CODE_UNION type structure (as

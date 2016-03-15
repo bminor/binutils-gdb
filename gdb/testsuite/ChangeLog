@@ -1,5 +1,11 @@
 2016-03-15  Doug Evans  <dje@google.com>
 
+	* gdb.xml/extra-regs.xml: Add enum, mixed_flags values.
+	* gdb.xml/tdesc-regs.exp (load_description): New arg xml_file.
+	All callers updated.  Add tests for enums, mixed flags register.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
 	* gdb.base/skip.c (main): Call test_skip_file_and_function.
 	* gdb.base/skip.exp: Remove hand calling test_skip_file_and_function.
 

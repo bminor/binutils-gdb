@@ -1,5 +1,50 @@
 2016-03-15  Doug Evans  <dje@google.com>
 
+	Extend flags to support multibit and enum bitfields.
+	NEWS: Document new features.
+	* c-typeprint.c (c_type_print_varspec_prefix): Handle TYPE_CODE_FLAGS.
+	(c_type_print_varspec_suffix, c_type_print_base): Ditto.
+	* gdbtypes.c (arch_flags_type): Don't assume all fields are one bit.
+	(append_flags_type_field): New function.
+	(append_flags_type_flag): Call it.
+	* gdbtypes.h (append_flags_type_field): Declare.
+	* target-descriptions.c (struct tdesc_type_flag): Delete.
+	(enum tdesc_type_kind) <TDESC_TYPE_BOOL>: New enum value.
+	(enum tdesc_type_kind) <TDESC_TYPE_ENUM>: Ditto.
+	(struct tdesc_type) <u.f>: Delete.
+	(tdesc_predefined_types): Add "bool".
+	(tdesc_predefined_type): New function.
+	(tdesc_gdb_type): Handle TDESC_TYPE_BOOL, TDESC_TYPE_ENUM.
+	Update TDESC_TYPE_FLAGS support.
+	(tdesc_free_type): Handle TDESC_TYPE_ENUM.  Update TDESC_TYPE_FLAGS.
+	(tdesc_create_flags): Update.
+	(tdesc_create_enum): New function.
+	(tdesc_add_field): Initialize start,end to -1.
+	(tdesc_add_typed_bitfield): New function.
+	(tdesc_add_bitfield): Call it.
+	(tdesc_add_flag): Allow TDESC_TYPE_STRUCT.  Update.
+	(tdesc_add_enum_value): New function.
+	(maint_print_c_tdesc_cmd): Fold TDESC_TYPE_FLAGS support into
+	TDESC_TYPE_STRUCT.  Handle TDESC_TYPE_ENUM.
+	* target-descriptions.h (tdesc_create_enum): Declare.
+	(tdesc_add_typed_bitfield, tdesc_add_enum_value): Declare.
+	* valprint.c (generic_val_print_enum_1): New function.
+	(generic_val_print_enum): Call it.
+	(val_print_type_code_flags): Make static.  Handle multibit bitfields
+	and enum bitfields.
+	* valprint.h (val_print_type_code_flags): Delete.
+	* xml-tdesc.c (struct tdesc_parsing_data) <current_type_is_flags>:
+	Delete.  All uses removed.
+	(tdesc_start_enum): New function.
+	(tdesc_start_field): Handle multibit and enum bitfields.
+	(tdesc_start_enum_value): New function.
+	(enum_value_attributes, enum_children, enum_attributes): New static
+	globals.
+	(feature_children): Add "enum".
+	* features/gdb-target.dtd (enum, evalue): New elements.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
 	* target-descriptions.c (struct tdesc_type) <u.u.size>: Change type
 	from LONGEST to int.
 	(struct tdesc_type) <u.f.size>: Ditto.

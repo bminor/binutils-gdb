@@ -1,3 +1,11 @@
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Target Descriptions): New menu item "Enum Target Types".
+	(Target Description Format): Mention enum types.  Update docs on
+	flags types.
+	(Predefined Target Types): Add "bool".
+	(Enum Target Types): New node.
+
 2016-03-15  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Tracepoint Actions): Fix typo.

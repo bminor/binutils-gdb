@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.11
 
+* GDB now supports multibit bitfields and enums in target register
+  descriptions.
+
 * New Python-based convenience function $_as_string(val), which returns
   the textual representation of a value.  This function is especially
   useful to obtain the text label of an enum value.
