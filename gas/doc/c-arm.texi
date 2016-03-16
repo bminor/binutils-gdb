@@ -127,6 +127,7 @@ recognized:
 @code{cortex-r4f},
 @code{cortex-r5},
 @code{cortex-r7},
+@code{cortex-r8},
 @code{cortex-m7},
 @code{cortex-m4},
 @code{cortex-m3},

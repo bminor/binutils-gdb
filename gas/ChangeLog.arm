@@ -1,3 +1,8 @@
+2016-03-07  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add cortex-r8.
+	* doc/c-arm.texi: Add cortex-r8.
+
 2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (arm_ext_dsp): New feature for Thumb DSP
