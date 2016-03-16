@@ -1,3 +1,13 @@
+2016-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (emit_expr_with_reloc): Add code check a bignum with
+	nbytes == 1.
+	* config/rx/rx-parse.y (rx_intop): Accept bignum values for sizes
+	other than 32-bits.
+	* testsuite/gas/elf/bignum.s: New test source file.
+	* testsuite/gas/elf/bignum.d: New test driver file.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+
 2016-03-15  Ulrich Drepper  <drepper@gmail.com>
 
 	* doc/c-i386.texi (Register Naming): Update to details of the

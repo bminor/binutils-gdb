@@ -226,9 +226,10 @@ if { [is_elf_format] } then {
 
     run_dump_test "strtab"
 
-load_lib gas-dg.exp
-dg-init
-dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn-*.s]] "" ""
-dg-finish
+    run_dump_test "bignums"
     
+    load_lib gas-dg.exp
+    dg-init
+    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn-*.s]] "" ""
+    dg-finish
 }
