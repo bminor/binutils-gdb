@@ -1,3 +1,7 @@
+2016-03-16  Doug Evans  <dje@google.com>
+
+	* xml-tdesc.c (tdesc_start_enum): Fix c++ build.
+
 2016-03-16  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-linux-tdep.c (arm_linux_init_abi): Fix
