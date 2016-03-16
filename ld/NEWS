@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Support for -z noreloc-overflow in the x86-64 ELF linker to disable
+  relocation overflow check.
+
 * Add -z common/-z nocommon options for ELF targets to control whether to
   convert common symbols to the STT_COMMON type during a relocatable link.
 

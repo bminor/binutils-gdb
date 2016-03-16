@@ -1,3 +1,38 @@
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19827
+	* testsuite/ld-i386/i386.exp: Run PR ld/19827 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr19827.rd: New file.
+	* testsuite/ld-i386/pr19827a.S: Likewise.
+	* testsuite/ld-i386/pr19827b.S: Likewise.
+	* testsuite/ld-x86-64/pr19827.rd: Likewise.
+	* testsuite/ld-x86-64/pr19827a.S: Likewise.
+	* testsuite/ld-x86-64/pr19827b.S: Likewise.
+
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19807
+	* Makefile.am (ELF_X86_DEPS): Add
+	$(srcdir)/emulparams/reloc_overflow.sh.
+	* Makefile.in: Regenerated.
+	* NEWS: Mention -z noreloc-overflow.
+	* ld.texinfo: Document -z noreloc-overflow.
+	* emulparams/elf32_x86_64.sh: Source
+	${srcdir}/emulparams/reloc_overflow.sh.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/reloc_overflow.sh: New file.
+	* testsuite/ld-x86-64/pr19807-1.s: New file.
+	* testsuite/ld-x86-64/pr19807-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2.s: Likewise.
+	* testsuite/ld-x86-64/pr19807-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2b.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2c.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2d.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2e.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/19807 tests.
+
 2016-03-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19539

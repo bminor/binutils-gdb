@@ -4411,7 +4411,8 @@ emit_expr_with_reloc (expressionS *exp,
       if ((get & mask) != 0
 	  && ((get & mask) != mask
 	      || (get & hibit) == 0))
-	{		/* Leading bits contain both 0s & 1s.  */
+	{
+	  /* Leading bits contain both 0s & 1s.  */
 #if defined (BFD64) && BFD_HOST_64BIT_LONG_LONG
 #ifndef __MSVCRT__
 	  as_warn (_("value 0x%llx truncated to 0x%llx"),
@@ -4437,16 +4438,34 @@ emit_expr_with_reloc (expressionS *exp,
       if (nbytes < size)
 	{
 	  int i = nbytes / CHARS_PER_LITTLENUM;
+
 	  if (i != 0)
 	    {
 	      LITTLENUM_TYPE sign = 0;
 	      if ((generic_bignum[--i]
 		   & (1 << (LITTLENUM_NUMBER_OF_BITS - 1))) != 0)
 		sign = ~(LITTLENUM_TYPE) 0;
+
 	      while (++i < exp->X_add_number)
 		if (generic_bignum[i] != sign)
 		  break;
 	    }
+	  else if (nbytes == 1)
+	    {
+	      /* We have nbytes == 1 and CHARS_PER_LITTLENUM == 2 (probably).
+		 Check that bits 8.. of generic_bignum[0] match bit 7
+		 and that they match all of generic_bignum[1..exp->X_add_number].  */
+	      LITTLENUM_TYPE sign = (generic_bignum[0] & (1 << 7)) ? -1 : 0;
+	      LITTLENUM_TYPE himask = LITTLENUM_MASK & ~ 0xFF;
+
+	      if ((generic_bignum[0] & himask) == (sign & himask))
+		{
+		  while (++i < exp->X_add_number)
+		    if (generic_bignum[i] != sign)
+		      break;
+		}
+	    }
+
 	  if (i < exp->X_add_number)
 	    as_warn (_("bignum truncated to %d bytes"), nbytes);
 	  size = nbytes;

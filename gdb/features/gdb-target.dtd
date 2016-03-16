@@ -45,6 +45,11 @@
 	id		CDATA	#REQUIRED
 	size		CDATA	#REQUIRED>
 
+<!ELEMENT enum		(evalue+)>
+<!ATTLIST enum
+	id		CDATA	#REQUIRED
+	size		CDATA	#REQUIRED>
+
 <!ELEMENT struct	(field+)>
 <!ATTLIST struct
 	id		CDATA	#REQUIRED
@@ -60,6 +65,11 @@
 	type		CDATA	#IMPLIED
 	start		CDATA	#IMPLIED
 	end		CDATA	#IMPLIED>
+
+<!ELEMENT evalue	EMPTY>
+<!ATTLIST evalue
+	name		CDATA	#REQUIRED
+	value		CDATA	#REQUIRED>
 
 <!ENTITY % xinclude SYSTEM "xinclude.dtd">
 %xinclude;

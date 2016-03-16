@@ -1704,9 +1704,12 @@ struct field *append_composite_type_field_raw (struct type *t, char *name,
 
 /* Helper functions to construct a bit flags type.  An initially empty
    type is created using arch_flag_type().  Flags are then added using
-   append_flag_type_flag().  */
+   append_flag_type_field() and append_flag_type_flag().  */
 extern struct type *arch_flags_type (struct gdbarch *gdbarch,
 				     char *name, int length);
+extern void append_flags_type_field (struct type *type,
+				     int start_bitpos, int nr_bits,
+				     struct type *field_type, char *name);
 extern void append_flags_type_flag (struct type *type, int bitpos, char *name);
 
 extern void make_vector_type (struct type *array_type);

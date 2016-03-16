@@ -98,6 +98,10 @@ static void set_output_radix (char *, int, struct cmd_list_element *);
 
 static void set_output_radix_1 (int, unsigned);
 
+static void val_print_type_code_flags (struct type *type,
+				       const gdb_byte *valaddr,
+				       struct ui_file *stream);
+
 void _initialize_valprint (void);
 
 #define PRINT_MAX_DEFAULT 200	/* Start print_max off at this value.  */
@@ -526,28 +530,17 @@ generic_val_print_ref (struct type *type, const gdb_byte *valaddr,
     }
 }
 
-/* generic_val_print helper for TYPE_CODE_ENUM.  */
+/* Helper function for generic_val_print_enum.
+   This is also used to print enums in TYPE_CODE_FLAGS values.  */
 
 static void
-generic_val_print_enum (struct type *type, const gdb_byte *valaddr,
-			int embedded_offset, struct ui_file *stream,
-			const struct value *original_value,
-			const struct value_print_options *options)
+generic_val_print_enum_1 (struct type *type, LONGEST val,
+			  struct ui_file *stream)
 {
   unsigned int i;
   unsigned int len;
-  LONGEST val;
-  struct gdbarch *gdbarch = get_type_arch (type);
-  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
 
-  if (options->format)
-    {
-      val_print_scalar_formatted (type, valaddr, embedded_offset,
-				  original_value, options, 0, stream);
-      return;
-    }
   len = TYPE_NFIELDS (type);
-  val = unpack_long (type, valaddr + embedded_offset * unit_size);
   for (i = 0; i < len; i++)
     {
       QUIT;
@@ -595,6 +588,29 @@ generic_val_print_enum (struct type *type, const gdb_byte *valaddr,
     }
   else
     print_longest (stream, 'd', 0, val);
+}
+
+/* generic_val_print helper for TYPE_CODE_ENUM.  */
+
+static void
+generic_val_print_enum (struct type *type, const gdb_byte *valaddr,
+			int embedded_offset, struct ui_file *stream,
+			const struct value *original_value,
+			const struct value_print_options *options)
+{
+  LONGEST val;
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+
+  if (options->format)
+    {
+      val_print_scalar_formatted (type, valaddr, embedded_offset,
+				  original_value, options, 0, stream);
+      return;
+    }
+  val = unpack_long (type, valaddr + embedded_offset * unit_size);
+
+  generic_val_print_enum_1 (type, val, stream);
 }
 
 /* generic_val_print helper for TYPE_CODE_FLAGS.  */
@@ -1162,26 +1178,51 @@ val_print_type_code_int (struct type *type, const gdb_byte *valaddr,
     }
 }
 
-void
+static void
 val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 			   struct ui_file *stream)
 {
   ULONGEST val = unpack_long (type, valaddr);
-  int bitpos, nfields = TYPE_NFIELDS (type);
+  int field, nfields = TYPE_NFIELDS (type);
+  struct gdbarch *gdbarch = get_type_arch (type);
+  struct type *bool_type = builtin_type (gdbarch)->builtin_bool;
 
-  fputs_filtered ("[ ", stream);
-  for (bitpos = 0; bitpos < nfields; bitpos++)
+  fputs_filtered ("[", stream);
+  for (field = 0; field < nfields; field++)
     {
-      if (TYPE_FIELD_BITPOS (type, bitpos) != -1
-	  && (val & ((ULONGEST)1 << bitpos)))
+      if (TYPE_FIELD_NAME (type, field)[0] != '\0')
 	{
-	  if (TYPE_FIELD_NAME (type, bitpos))
-	    fprintf_filtered (stream, "%s ", TYPE_FIELD_NAME (type, bitpos));
+	  struct type *field_type = TYPE_FIELD_TYPE (type, field);
+
+	  if (field_type == bool_type
+	      /* We require boolean types here to be one bit wide.  This is a
+		 problematic place to notify the user of an internal error
+		 though.  Instead just fall through and print the field as an
+		 int.  */
+	      && TYPE_FIELD_BITSIZE (type, field) == 1)
+	    {
+	      if (val & ((ULONGEST)1 << TYPE_FIELD_BITPOS (type, field)))
+		fprintf_filtered (stream, " %s",
+				  TYPE_FIELD_NAME (type, field));
+	    }
 	  else
-	    fprintf_filtered (stream, "#%d ", bitpos);
+	    {
+	      unsigned field_len = TYPE_FIELD_BITSIZE (type, field);
+	      ULONGEST field_val
+		= val >> (TYPE_FIELD_BITPOS (type, field) - field_len + 1);
+
+	      if (field_len < sizeof (ULONGEST) * TARGET_CHAR_BIT)
+		field_val &= ((ULONGEST) 1 << field_len) - 1;
+	      fprintf_filtered (stream, " %s=",
+				TYPE_FIELD_NAME (type, field));
+	      if (TYPE_CODE (field_type) == TYPE_CODE_ENUM)
+		generic_val_print_enum_1 (field_type, field_val, stream);
+	      else
+		print_longest (stream, 'd', 0, field_val);
+	    }
 	}
     }
-  fputs_filtered ("]", stream);
+  fputs_filtered (" ]", stream);
 }
 
 /* Print a scalar of data of type TYPE, pointed to in GDB by VALADDR,

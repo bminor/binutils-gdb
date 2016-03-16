@@ -1501,7 +1501,7 @@ typedef struct bfd_section
       information.  */
   bfd_vma lma;
 
-  /* The size of the section in octets, as it will be output.
+  /* The size of the section in *octets*, as it will be output.
      Contains a value even if the section has no contents (e.g., the
      size of <<.bss>>).  */
   bfd_size_type size;

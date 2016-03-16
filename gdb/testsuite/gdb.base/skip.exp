@@ -281,17 +281,15 @@ with_test_prefix "step using -rfu for baz" {
 # Test -fi + -fu.
 
 with_test_prefix "step using -fi + -fu" {
-    if ![runto_main] {
-	fail "Can't run to main"
+    gdb_test_no_output "skip delete"
+
+    if ![runto test_skip_file_and_function no-message] {
+	fail "Can't run to test_skip_file_and_function"
 	return
     }
 
-    gdb_test_no_output "skip delete"
     gdb_test "skip -fi skip1.c -fu test_skip" \
 	"Function test_skip in file skip1.c will be skipped when stepping\."
-    gdb_breakpoint "test_skip_file_and_function"
-    gdb_breakpoint "end_test_skip_file_and_function"
-    gdb_test "call test_skip_file_and_function ()" "silently stop."
     # Verify we can step into skip.c:test_skip but not skip1.c:test_skip.
     gdb_test "step" "test_skip \\(\\) at.*" "step 1"
     gdb_test "step" "test_skip_file_and_function \\(\\) at.*" "step 2"; # Return from test_skip()

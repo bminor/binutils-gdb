@@ -1973,8 +1973,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* Let's help debug shared library creation.  These relocs
 	     cannot be used in shared libs.  Don't error out for
 	     sections we don't care about, such as debug sections or
-	     non-constant sections.  */
-	  if (bfd_link_pic (info)
+	     non-constant sections, or when relocation overflow check
+	     is disabled.  */
+	  if (!info->no_reloc_overflow_check
+	      && bfd_link_pic (info)
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
@@ -2071,7 +2073,8 @@ do_size:
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (! IS_X86_64_PCREL_TYPE (r_type)
 		   || (h != NULL
-		       && (! SYMBOLIC_BIND (info, h)
+		       && (! (bfd_link_pie (info)
+			      || SYMBOLIC_BIND (info, h))
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
@@ -4828,8 +4831,8 @@ direct:
 	      else if (h != NULL
 		       && h->dynindx != -1
 		       && (IS_X86_64_PCREL_TYPE (r_type)
-			   || ! bfd_link_pic (info)
-			   || ! SYMBOLIC_BIND (info, h)
+			   || !(bfd_link_executable (info)
+				|| SYMBOLIC_BIND (info, h))
 			   || ! h->def_regular))
 		{
 		  if ((r_type != R_X86_64_PC64 && r_type != R_X86_64_64)
@@ -4842,8 +4845,12 @@ direct:
 		}
 	      else
 		{
-		  /* This symbol is local, or marked to become local.  */
-		  if (r_type == htab->pointer_r_type)
+		  /* This symbol is local, or marked to become local.
+		     When relocation overflow check is disabled, we
+		     convert R_X86_64_32 to dynamic R_X86_64_RELATIVE.  */
+		  if (r_type == htab->pointer_r_type
+		      || (r_type == R_X86_64_32
+			  && info->no_reloc_overflow_check))
 		    {
 		      relocate = TRUE;
 		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);

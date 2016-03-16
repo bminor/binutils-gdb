@@ -15,14 +15,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int myfunction (void) { return 0; }
+int
+myfunction (int aa)
+{
+  int i;
+
+  i = aa + 42;
+  return i;    /* set breakpoint here */
+}
 
 int
 main (void)
-{  
+{
   int a;
 
-  a = myfunction ();
+  a = myfunction (a);
 
  here:
   return a;
