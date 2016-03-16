@@ -52,6 +52,10 @@
 	(do_t_mov_cmp): Likewise.
 	(do_t_add_sub): Protect against bad relocations usage.
 	(do_t_mov_cmp): Likewise.
+	* testsuite/gas/arm/adds-thumb1-reloc-local-armv7-m.s: New.
+	* testsuite/gas/arm/adds-thumb1-reloc-local-armv7-m.d: New.
+	* testsuite/gas/arm/movs-thumb1-reloc-local-armv7-m.s: New.
+	* testsuite/gas/arm/movs-thumb1-reloc-local-armv7-m.d: New.
 
 2016-03-09  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
@@ -566,6 +570,9 @@
 	* config/tc-arc.h (TARGET_USE_CFIPOP): Define
 	(tc_cfi_frame_initial_instructions): Likewise.
 	(tc_regname_to_dw2regnum): Likewise.
+	* testsuite/gas/cfi/cfi-arc-1.d: New file.
+	* testsuite/gas/cfi/cfi-arc-1.s: Likewise.
+	* testsuite/gas/cfi/cfi.exp: Allow running tests for arc.
 
 2016-02-16  Trevor Saunders  <tbsaunde@tbsaunde.org>
 
