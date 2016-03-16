@@ -1,3 +1,33 @@
+2016-03-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (N_S_32): New.
+	(N_F_16_32): Likewise.
+	(N_SUF_32): Support N_F16.
+	(N_IF_32): Likewise.
+	(neon_dyadic_misc): Likewise.
+	(do_neon_cmp): Likewise.
+	(do_neon_cmp_inv): Likewise.
+	(do_neon_mul): Likewise.
+	(do_neon_fcmp_absolute): Likewise.
+	(do_neon_step): Likewise.
+	(do_neon_abs_neg): Likewise.
+	(CVT_FLAVOR_VAR): Likewise.
+	(do_neon_cvt_1): Likewise.
+	(do_neon_recip_est): Likewise.
+	(do_vmaxnm): Likewise.
+	(do_vrint_1): Likewise.
+	(neon_check_type): Check architecture support for FP16 extension.
+	(insns): Update comments.
+	* testsuite/gas/arm/armv8-2-fp16-simd.s: New test source.
+	* testsuite/gas/arm/armv8-2-fp16-simd.d: New testcase for arm mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-thumb.d: Likewise for thumb mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning.d: New rejection test for
+	arm mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning-thumb.d: Likewise for
+	thumb mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning.l: New expected rejection
+	error file.
+
 2016-03-16  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (emit_expr_with_reloc): Add code check a bignum with

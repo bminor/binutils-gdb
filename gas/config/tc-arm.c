@@ -13443,9 +13443,11 @@ enum neon_type_mask
 #define N_SU_ALL   (N_S8 | N_S16 | N_S32 | N_S64 | N_U8 | N_U16 | N_U32 | N_U64)
 #define N_SU_32    (N_S8 | N_S16 | N_S32 | N_U8 | N_U16 | N_U32)
 #define N_SU_16_64 (N_S16 | N_S32 | N_S64 | N_U16 | N_U32 | N_U64)
-#define N_SUF_32   (N_SU_32 | N_F32)
+#define N_S_32     (N_S8 | N_S16 | N_S32)
+#define N_F_16_32  (N_F16 | N_F32)
+#define N_SUF_32   (N_SU_32 | N_F_16_32)
 #define N_I_ALL    (N_I8 | N_I16 | N_I32 | N_I64)
-#define N_IF_32    (N_I8 | N_I16 | N_I32 | N_F32)
+#define N_IF_32    (N_I8 | N_I16 | N_I32 | N_F16 | N_F32)
 #define N_F_ALL    (N_F16 | N_F32 | N_F64)
 
 /* Pass this as the first type argument to neon_check_type to ignore types
@@ -13915,6 +13917,15 @@ neon_check_type (unsigned els, enum neon_shape ns, ...)
 		  k_type = g_type;
 		  k_size = g_size;
 		  key_allowed = thisarg & ~N_KEY;
+
+		  /* Check architecture constraint on FP16 extension.  */
+		  if (k_size == 16
+		      && k_type == NT_float
+		      && ! ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16))
+		    {
+		      inst.error = _(BAD_FP16);
+		      return badtype;
+		    }
 		}
 	    }
 	  else
@@ -14726,7 +14737,7 @@ neon_dyadic_misc (enum neon_el_type ubit_meaning, unsigned types,
   if (et.type == NT_float)
     {
       NEON_ENCODE (FLOAT, inst);
-      neon_three_same (neon_quad (rs), 0, -1);
+      neon_three_same (neon_quad (rs), 0, et.size == 16 ? (int) et.size : -1);
     }
   else
     {
@@ -14887,13 +14898,13 @@ neon_compare (unsigned regtypes, unsigned immtypes, int invert)
 static void
 do_neon_cmp (void)
 {
-  neon_compare (N_SUF_32, N_S8 | N_S16 | N_S32 | N_F32, FALSE);
+  neon_compare (N_SUF_32, N_S_32 | N_F_16_32, FALSE);
 }
 
 static void
 do_neon_cmp_inv (void)
 {
-  neon_compare (N_SUF_32, N_S8 | N_S16 | N_S32 | N_F32, TRUE);
+  neon_compare (N_SUF_32, N_S_32 | N_F_16_32, TRUE);
 }
 
 static void
@@ -15021,7 +15032,7 @@ do_neon_mul (void)
   if (inst.operands[2].isscalar)
     do_neon_mac_maybe_scalar ();
   else
-    neon_dyadic_misc (NT_poly, N_I8 | N_I16 | N_I32 | N_F32 | N_P8, 0);
+    neon_dyadic_misc (NT_poly, N_I8 | N_I16 | N_I32 | N_F16 | N_F32 | N_P8, 0);
 }
 
 static void
@@ -15082,9 +15093,10 @@ static void
 do_neon_fcmp_absolute (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
-  neon_check_type (3, rs, N_EQK, N_EQK, N_F32 | N_KEY);
+  struct neon_type_el et = neon_check_type (3, rs, N_EQK, N_EQK,
+					    N_F_16_32 | N_KEY);
   /* Size field comes from bit mask.  */
-  neon_three_same (neon_quad (rs), 1, -1);
+  neon_three_same (neon_quad (rs), 1, et.size == 16 ? (int) et.size : -1);
 }
 
 static void
@@ -15098,8 +15110,9 @@ static void
 do_neon_step (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
-  neon_check_type (3, rs, N_EQK, N_EQK, N_F32 | N_KEY);
-  neon_three_same (neon_quad (rs), 0, -1);
+  struct neon_type_el et = neon_check_type (3, rs, N_EQK, N_EQK,
+					    N_F_16_32 | N_KEY);
+  neon_three_same (neon_quad (rs), 0, et.size == 16 ? (int) et.size : -1);
 }
 
 static void
@@ -15115,7 +15128,7 @@ do_neon_abs_neg (void)
     return;
 
   rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
-  et = neon_check_type (2, rs, N_EQK, N_S8 | N_S16 | N_S32 | N_F32 | N_KEY);
+  et = neon_check_type (2, rs, N_EQK, N_S_32 | N_F_16_32 | N_KEY);
 
   inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
   inst.instruction |= HI1 (inst.operands[0].reg) << 22;
@@ -15324,6 +15337,10 @@ do_neon_shll (void)
   CVT_VAR (f32_s32, N_F32, N_S32, whole_reg,   "fsltos", "fsitos", NULL)      \
   CVT_VAR (f32_u32, N_F32, N_U32, whole_reg,   "fultos", "fuitos", NULL)      \
   /* Half-precision conversions.  */					      \
+  CVT_VAR (s16_f16, N_S16, N_F16 | N_KEY, whole_reg, NULL, NULL, NULL)	      \
+  CVT_VAR (u16_f16, N_U16, N_F16 | N_KEY, whole_reg, NULL, NULL, NULL)	      \
+  CVT_VAR (f16_s16, N_F16 | N_KEY, N_S16, whole_reg, NULL, NULL, NULL)	      \
+  CVT_VAR (f16_u16, N_F16 | N_KEY, N_U16, whole_reg, NULL, NULL, NULL)	      \
   CVT_VAR (f32_f16, N_F32, N_F16, whole_reg,   NULL,     NULL,     NULL)      \
   CVT_VAR (f16_f32, N_F16, N_F32, whole_reg,   NULL,     NULL,     NULL)      \
   /* New VCVT instructions introduced by ARMv8.2 fp16 extension.	      \
@@ -15556,10 +15573,15 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 					  NS_NULL);
   enum neon_cvt_flavour flavour = get_neon_cvt_flavour (rs);
 
+  if (flavour == neon_cvt_flavour_invalid)
+    return;
+
   /* PR11109: Handle round-to-zero for VCVT conversions.  */
   if (mode == neon_cvt_mode_z
       && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_arch_vfp_v2)
-      && (flavour == neon_cvt_flavour_s32_f32
+      && (flavour == neon_cvt_flavour_s16_f16
+	  || flavour == neon_cvt_flavour_u16_f16
+	  || flavour == neon_cvt_flavour_s32_f32
 	  || flavour == neon_cvt_flavour_u32_f32
 	  || flavour == neon_cvt_flavour_s32_f64
 	  || flavour == neon_cvt_flavour_u32_f64)
@@ -15598,7 +15620,8 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
     case NS_QQI:
       {
 	unsigned immbits;
-	unsigned enctab[] = { 0x0000100, 0x1000100, 0x0, 0x1000000 };
+	unsigned enctab[] = {0x0000100, 0x1000100, 0x0, 0x1000000,
+			     0x0000100, 0x1000100, 0x0, 0x1000000};
 
 	if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
 	  return;
@@ -15607,7 +15630,6 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	   integer conversion.  */
 	if (inst.operands[2].present && inst.operands[2].imm == 0)
 	  goto int_encode;
-       immbits = 32 - inst.operands[2].imm;
 	NEON_ENCODE (IMMED, inst);
 	if (flavour != neon_cvt_flavour_invalid)
 	  inst.instruction |= enctab[flavour];
@@ -15617,7 +15639,19 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	inst.instruction |= HI1 (inst.operands[1].reg) << 5;
 	inst.instruction |= neon_quad (rs) << 6;
 	inst.instruction |= 1 << 21;
-	inst.instruction |= immbits << 16;
+	if (flavour < neon_cvt_flavour_s16_f16)
+	  {
+	    inst.instruction |= 1 << 21;
+	    immbits = 32 - inst.operands[2].imm;
+	    inst.instruction |= immbits << 16;
+	  }
+	else
+	  {
+	    inst.instruction |= 3 << 20;
+	    immbits = 16 - inst.operands[2].imm;
+	    inst.instruction |= immbits << 16;
+	    inst.instruction &= ~(1 << 9);
+	  }
 
 	neon_dp_fixup (&inst);
       }
@@ -15638,8 +15672,14 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	  inst.instruction |= LOW4 (inst.operands[1].reg);
 	  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
 	  inst.instruction |= neon_quad (rs) << 6;
-	  inst.instruction |= (flavour == neon_cvt_flavour_u32_f32) << 7;
+	  inst.instruction |= (flavour == neon_cvt_flavour_u16_f16
+			       || flavour == neon_cvt_flavour_u32_f32) << 7;
 	  inst.instruction |= mode << 8;
+	  if (flavour == neon_cvt_flavour_u16_f16
+	      || flavour == neon_cvt_flavour_s16_f16)
+	    /* Mask off the original size bits and reencode them.  */
+	    inst.instruction = ((inst.instruction & 0xfff3ffff) | (1 << 18));
+
 	  if (thumb_mode)
 	    inst.instruction |= 0xfc000000;
 	  else
@@ -15649,7 +15689,8 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	{
     int_encode:
 	  {
-	    unsigned enctab[] = { 0x100, 0x180, 0x0, 0x080 };
+	    unsigned enctab[] = { 0x100, 0x180, 0x0, 0x080,
+				  0x100, 0x180, 0x0, 0x080};
 
 	    NEON_ENCODE (INTEGER, inst);
 
@@ -15664,7 +15705,12 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	    inst.instruction |= LOW4 (inst.operands[1].reg);
 	    inst.instruction |= HI1 (inst.operands[1].reg) << 5;
 	    inst.instruction |= neon_quad (rs) << 6;
-	    inst.instruction |= 2 << 18;
+	    if (flavour >= neon_cvt_flavour_s16_f16
+		&& flavour <= neon_cvt_flavour_f16_u16)
+	      /* Half precision.  */
+	      inst.instruction |= 1 << 18;
+	    else
+	      inst.instruction |= 2 << 18;
 
 	    neon_dp_fixup (&inst);
 	  }
@@ -16487,7 +16533,7 @@ do_neon_recip_est (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
   struct neon_type_el et = neon_check_type (2, rs,
-    N_EQK | N_FLT, N_F32 | N_U32 | N_KEY);
+    N_EQK | N_FLT, N_F_16_32 | N_U32 | N_KEY);
   inst.instruction |= (et.type == NT_float) << 8;
   neon_two_same (neon_quad (rs), 1, et.size);
 }
@@ -17002,7 +17048,7 @@ do_vmaxnm (void)
   if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
     return;
 
-  neon_dyadic_misc (NT_untyped, N_F32, 0);
+  neon_dyadic_misc (NT_untyped, N_F_16_32, 0);
 }
 
 static void
@@ -17058,7 +17104,7 @@ do_vrint_1 (enum neon_cvt_mode mode)
     {
       /* Neon encodings (or something broken...).  */
       inst.error = NULL;
-      et = neon_check_type (2, rs, N_EQK, N_F32 | N_KEY);
+      et = neon_check_type (2, rs, N_EQK, N_F_16_32 | N_KEY);
 
       if (et.type == NT_invtype)
 	return;
@@ -17074,6 +17120,10 @@ do_vrint_1 (enum neon_cvt_mode mode)
       inst.instruction |= LOW4 (inst.operands[1].reg);
       inst.instruction |= HI1 (inst.operands[1].reg) << 5;
       inst.instruction |= neon_quad (rs) << 6;
+      /* Mask off the original size bits and reencode them.  */
+      inst.instruction = ((inst.instruction & 0xfff3ffff)
+			  | neon_logbits (et.size) << 18);
+
       switch (mode)
 	{
 	case neon_cvt_mode_z: inst.instruction |= 3 << 7; break;
@@ -20315,7 +20365,7 @@ static const struct asm_opcode insns[] =
  NUF(vbitq,     1200110, 3, (RNQ,  RNQ,  RNQ),  neon_bitfield),
  NUF(vbif,      1300110, 3, (RNDQ, RNDQ, RNDQ), neon_bitfield),
  NUF(vbifq,     1300110, 3, (RNQ,  RNQ,  RNQ),  neon_bitfield),
-  /* Int and float variants, types S8 S16 S32 U8 U16 U32 F32.  */
+  /* Int and float variants, types S8 S16 S32 U8 U16 U32 F16 F32.  */
  nUF(vabd,      _vabd,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
  nUF(vabdq,     _vabd,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
  nUF(vmax,      _vmax,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
@@ -20478,7 +20528,7 @@ static const struct asm_opcode insns[] =
  NUF(vpadalq,   1b00600, 2, (RNQ,  RNQ),      neon_pair_long),
  NUF(vpaddl,    1b00200, 2, (RNDQ, RNDQ),     neon_pair_long),
  NUF(vpaddlq,   1b00200, 2, (RNQ,  RNQ),      neon_pair_long),
-  /* Reciprocal estimates. Types U32 F32.  */
+  /* Reciprocal estimates.  Types U32 F16 F32.  */
  NUF(vrecpe,    1b30400, 2, (RNDQ, RNDQ),     neon_recip_est),
  NUF(vrecpeq,   1b30400, 2, (RNQ,  RNQ),      neon_recip_est),
  NUF(vrsqrte,   1b30480, 2, (RNDQ, RNDQ),     neon_recip_est),

@@ -1,3 +1,7 @@
+2016-03-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (neon_opcodes): Support new FP16 instructions.
+
 2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* mcore-opc.h: Add const qualifiers.
