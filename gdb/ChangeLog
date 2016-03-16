@@ -1,3 +1,11 @@
+2016-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_init_abi): Fix
+	arm_linux_record_tdep.arg1, arm_linux_record_tdep.arg2 and
+	arm_linux_record_tdep.arg3.  Set arm_linux_record_tdep.arg4,
+	arm_linux_record_tdep.arg5, arm_linux_record_tdep.arg6, and
+	arm_linux_record_tdep.arg7.
+
 2016-03-15  Keith Seitz  <keiths@redhat.com>
 
 	PR breakpoints/18303

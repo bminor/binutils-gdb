@@ -1646,10 +1646,13 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.fcntl_F_SETLK64 = 13;
   arm_linux_record_tdep.fcntl_F_SETLKW64 = 14;
 
-  arm_linux_record_tdep.arg1 = ARM_A1_REGNUM + 1;
-  arm_linux_record_tdep.arg2 = ARM_A1_REGNUM + 2;
-  arm_linux_record_tdep.arg3 = ARM_A1_REGNUM + 3;
+  arm_linux_record_tdep.arg1 = ARM_A1_REGNUM;
+  arm_linux_record_tdep.arg2 = ARM_A1_REGNUM + 1;
+  arm_linux_record_tdep.arg3 = ARM_A1_REGNUM + 2;
   arm_linux_record_tdep.arg4 = ARM_A1_REGNUM + 3;
+  arm_linux_record_tdep.arg5 = ARM_A1_REGNUM + 4;
+  arm_linux_record_tdep.arg6 = ARM_A1_REGNUM + 5;
+  arm_linux_record_tdep.arg7 = ARM_A1_REGNUM + 6;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
