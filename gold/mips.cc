@@ -2976,7 +2976,7 @@ class Mips_classify_reloc<sh_type_, 32, big_endian> :
   put_r_info(Reltype_write* new_reloc, Reltype* reloc, unsigned int r_sym)
   {
     unsigned int r_type = elfcpp::elf_r_type<32>(reloc->get_r_info());
-    new_reloc->put_r_info(elfcpp::elf_r_info<64>(r_sym, r_type));
+    new_reloc->put_r_info(elfcpp::elf_r_info<32>(r_sym, r_type));
   }
 
   // Write the r_addend field to a new reloc.

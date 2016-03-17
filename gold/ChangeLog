@@ -1,3 +1,8 @@
+2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_classify_reloc::put_r_info): Call 32bit version of
+	elf_r_info.
+
 2016-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/plugin_layout_with_alignment.cc: Renamed to ..
