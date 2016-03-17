@@ -1,5 +1,11 @@
 2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* syscalls/s390-linux.xml: Add NUMA syscalls and new syscalls up
+	to 374.
+	* syscalls/s390x-linux.xml: Likewise.
+
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* linux-record.c (record_mem_at_reg): New helper function.
 	(record_linux_system_call): Exploit new helper function where
 	applicable.
