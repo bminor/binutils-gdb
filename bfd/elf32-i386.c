@@ -1830,7 +1830,8 @@ do_size:
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (r_type != R_386_PC32
 		   || (h != NULL
-		       && (! SYMBOLIC_BIND (info, h)
+		       && (! (bfd_link_pie (info)
+			      || SYMBOLIC_BIND (info, h))
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
@@ -4289,8 +4290,8 @@ r_386_got32:
 	      else if (h != NULL
 		       && h->dynindx != -1
 		       && (r_type == R_386_PC32
-			   || !bfd_link_pic (info)
-			   || !SYMBOLIC_BIND (info, h)
+			   || !(bfd_link_executable (info)
+				|| SYMBOLIC_BIND (info, h))
 			   || !h->def_regular))
 		outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 	      else
