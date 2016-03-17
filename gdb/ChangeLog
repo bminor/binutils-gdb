@@ -1,3 +1,18 @@
+2016-03-17  Pedro Alves  <palves@redhat.com>
+	    Don Breazeal  <donb@codesourcery.com>
+
+	PR remote/19496
+	* infcmd.c (notice_new_inferior): Use the 'leave_running' argument
+	instead of checking the 'non_stop' global.
+	* remote.c (remote_add_thread): New parameter 'executing'.  Use it
+	to set the new thread's executing state.
+	(remote_notice_new_inferior): Rename parameter 'running' to
+	'executing'.  Always set the thread state to THREAD_RUNNING in
+	non-stop mode, and to THREAD_STOPPED in all-stop mode.  Pass
+	EXECUTING to remote_add_thread and notice_new_inferior.
+	(remote_update_thread_list): Update to pass executing state, not
+	running state.
+
 2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* syscalls/s390-linux.xml: Add NUMA syscalls and new syscalls up
