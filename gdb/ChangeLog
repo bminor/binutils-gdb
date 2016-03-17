@@ -1,5 +1,11 @@
 2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* linux-record.c (record_mem_at_reg): New helper function.
+	(record_linux_system_call): Exploit new helper function where
+	applicable.
+
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* linux-record.c: Fix whitespace issues; tabify, remove trailing
 	spaces.
 
