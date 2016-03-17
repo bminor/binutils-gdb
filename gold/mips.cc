@@ -2246,6 +2246,11 @@ class Mips_output_data_la25_stub : public Output_section_data
   create_stub_symbol(Mips_symbol<size>* sym, Symbol_table* symtab,
                      Target_mips<size, big_endian>* target, uint64_t symsize);
 
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _(".LA25.stubs")); }
+
   // Write out the LA25 stub section.
   void
   do_write(Output_file*);

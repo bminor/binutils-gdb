@@ -1,5 +1,10 @@
 2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
 
+	* mips.cc (class Mips_output_data_la25_stub): Add
+	do_print_to_mapfile function.
+
+2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
 	* mips.cc (Mips_classify_reloc::put_r_info): Call 32bit version of
 	elf_r_info.
 
