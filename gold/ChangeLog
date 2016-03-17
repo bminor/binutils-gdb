@@ -1,5 +1,100 @@
 2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
 
+	* mips.cc (enum Special_relocation_symbol): New enum type.
+	(is_readonly_section): New function.
+	(eh_reloc): Likewise.
+	(Mips_got_entry::is_section_symbol_): New member.
+	(Mips_got_entry::is_section_symbol): New method.
+	(Mips_got_info::record_local_got_symbol): Add is_section_symbol
+	argument.
+	(Mips_relobj::mips_elf_options_section_name): New method.
+	(Mips_output_data_got::record_local_got_symbol): Add
+	is_section_symbol argument, and pass it to
+	Mips_got_info::record_local_got_symbol.
+	(Mips_output_data_got::got_offset): Add addend argument, and pass
+	it to Relobj::local_got_offset.
+	(struct Mips_output_reloc_writer): New type.
+	(class Mips_output_data_reloc): New class.
+	(Mips_output_data_plt::Reloc_section): Change type to
+	Mips_output_data_reloc.
+	(Target_mips::Reloc_section): Likewise.
+	(Mips_reloc_types::get_r_addend): Remove unsigned from return type.
+	(Mips_classify_reloc::get_r_type2): New method.
+	(Mips_classify_reloc::get_r_type3): Likewise.
+	(Mips_classify_reloc::get_r_ssym): Likewise.
+	(Target_mips::Reloca_section): Remove.
+	(Relocate::should_apply_static_reloc): Rename from
+	should_apply_r_mips_32_reloc.
+	(Target_mips::copy_reloc): Replace Reltype parameter with r_type
+	and r_offset.
+	(Mips_relocate_functions::Valtype): New type.
+	(Mips_relocate_functions::Valtype64): New type.
+	(Mips_relocate_functions::check_overflow): New method.
+	(Mips_relocate_functions::mips_reloc_unshuffle): Move to public
+	interface.
+	(Mips_relocate_functions::mips_reloc_shuffle): Likewise.
+	(Mips_relocate_functions::rel16): Add support for resolving
+	relocations for Mips64.
+	(Mips_relocate_functions::rel32): Likewise.
+	(Mips_relocate_functions::reljalr): Likewise.
+	(Mips_relocate_functions::relpc32): Likewise.
+	(Mips_relocate_functions::rel26): Likewise.
+	(Mips_relocate_functions::relpc16): Likewise.
+	(Mips_relocate_functions::relmicromips_pc7_s1): Likewise.
+	(Mips_relocate_functions::relmicromips_pc10_s1): Likewise.
+	(Mips_relocate_functions::relmicromips_pc16_s1): Likewise.
+	(Mips_relocate_functions::do_relhi16): Likewise.
+	(Mips_relocate_functions::do_relgot16_local): Likewise.
+	(Mips_relocate_functions::rello16): Likewise.
+	(Mips_relocate_functions::relgot): Likewise.
+	(Mips_relocate_functions::relgotpage): Likewise.
+	(Mips_relocate_functions::relgotofst): Likewise.
+	(Mips_relocate_functions::relgot_hi16): Likewise.
+	(Mips_relocate_functions::relgot_lo16): Likewise.
+	(Mips_relocate_functions::relgprel): Likewise.
+	(Mips_relocate_functions::relgprel32): Likewise.
+	(Mips_relocate_functions::tlsrelhi16): Likewise.
+	(Mips_relocate_functions::tlsrello16): Likewise.
+	(Mips_relocate_functions::tlsrel32): Likewise.
+	(Mips_relocate_functions::relsub): Likewise.
+	(Mips_relocate_functions::releh): New method.
+	(Mips_relocate_functions::rel64): Likewise.
+	(Mips_got_info::record_local_got_symbol): Add is_section_symbol and
+	pass it to Mips_got_entry.
+	(Mips_got_info::add_local_entries): Pass addend argument
+	to code functions, and for STT_SECTION symbols call
+	add_symbolless_local_addend.
+	(Mips_got_info::add_tls_entries): Pass addend argument to code
+	functions.
+	(Mips_relobj::do_read_symbols): Read gp value that was used to
+	create object.
+	(Mips_output_data_plt::plt_entry): Remove opcode from l[wd]
+	instruction. Opcode for instruction will be selected later.
+	(Target_mips::gc_process_relocs): Add case for SHT_RELA.
+	(Target_mips::scan_relocatable_relocs): Likewise.
+	(Target_mips::emit_relocs_scan): Likewise.
+	(Target_mips::relocate_relocs): Likewise.
+	(Target_mips::do_finalize_sections): Skip objects for merging
+	processor specific flags in which all input sections will be
+	discarded.
+	(mips_get_size_for_reloc): Add case for R_MIPS_EH.
+	(Target_mips::Scan::get_reference_flags): Likewise.
+	(Target_mips::relocate_special_relocatable): Call rel26 method with
+	calculate_only and calculated_value arguments.
+	(Target_mips::Scan::local): Add case for R_MIPS_EH. Don't create a
+	dynamic relocation against a readonly sections, and pass
+	is_section_symbol to Mips_got_info::record_local_got_symbol.
+	(Target_mips::Scan::global): Add case for R_MIPS_EH. Don't create a
+	dynamic relocation against a readonly sections, and pass r_type
+	and r_offset to Target_mips::copy_reloc.
+	(Target_mips::Relocate::relocate): Add support for resolving
+	relocations for Mips64.
+	(Target_mips::mips_info): Add case for Mips64 default dynamic
+	linker name.
+	(Target_selector_mips): Correct emulation names.
+
+2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
 	* mips.cc (class Mips_output_data_la25_stub): Add
 	do_print_to_mapfile function.
 
