@@ -1,5 +1,10 @@
 2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* linux-record.c: Fix whitespace issues; tabify, remove trailing
+	spaces.
+
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* linux-record.c (record_linux_system_call): Add missing return
 	statements to handling of pipe and pipe2 syscalls.
 
