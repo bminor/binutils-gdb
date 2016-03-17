@@ -354,6 +354,7 @@ record_linux_system_call (enum gdb_syscall syscall,
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
 					 tdep->size_int * 2))
+        return -1;
       break;
 
     case gdb_sys_times:
@@ -2312,6 +2313,7 @@ Do you want to stop the program?"),
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
 					 tdep->size_int * 2))
+        return -1;
       break;
 
     case gdb_sys_inotify_init1:

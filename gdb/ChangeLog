@@ -1,3 +1,8 @@
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-record.c (record_linux_system_call): Add missing return
+	statements to handling of pipe and pipe2 syscalls.
+
 2016-03-16  Doug Evans  <dje@google.com>
 
 	* xml-tdesc.c (tdesc_start_enum): Fix c++ build.
