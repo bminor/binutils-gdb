@@ -1632,7 +1632,9 @@ spu_software_single_step (struct frame_info *frame)
   pc = get_frame_pc (frame);
 
   if (target_read_memory (pc, buf, 4))
-    return 1;
+    throw_error (MEMORY_ERROR, _("Could not read instruction at %s."),
+		 paddress (gdbarch, pc));
+
   insn = extract_unsigned_integer (buf, 4, byte_order);
 
   /* Get local store limit.  */
