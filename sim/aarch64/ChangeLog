@@ -7,6 +7,7 @@
 	(GET_VEC_ELEMENT): Fix off by one error checking for an invalid
 	element index.
 	(SET_VEC_ELEMENT): Likewise.
+	(GET_VEC_ELEMENT): And fix thinko using macro arguments.
 
 	* memory.c: Trace memory reads when --trace-memory is enabled.
 	Remove float and double load and store functions.

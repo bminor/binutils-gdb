@@ -345,7 +345,7 @@ aarch64_set_FP_long_double (sim_cpu *cpu, VReg reg, FRegister a)
 #define GET_VEC_ELEMENT(REG, ELEMENT, FIELD)	   \
   do						   \
     {						   \
-      if (element >= ARRAY_SIZE (cpu->fr[0].FIELD)) \
+      if (ELEMENT >= ARRAY_SIZE (cpu->fr[0].FIELD)) \
 	{								\
 	  TRACE_REGISTER (cpu, \
 			  "Internal SIM error: invalid element number: %d ",\
