@@ -1,5 +1,12 @@
 2016-03-18  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (linux_resume_one_lwp_throw): Set 'signal' to
+	0 if signal is enqueued.  Remove 'signal' from one debugging
+	message.  Move one debugging message to some lines below.
+	Remove code setting 'signal' to 0.
+
+2016-03-18  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (linux_low_filter_event): Remove redundant
 	WIFSTOPPED check together with linux_wstatus_maybe_breakpoint.
 

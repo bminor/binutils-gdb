@@ -4164,25 +4164,25 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	  || lwp->pending_signals != NULL
 	  || lwp->bp_reinsert != 0
 	  || fast_tp_collecting))
-    enqueue_pending_signal (lwp, signal, info);
+    {
+      enqueue_pending_signal (lwp, signal, info);
+
+      /* Postpone any pending signal.  It was enqueued above.  */
+      signal = 0;
+    }
 
   if (lwp->status_pending_p)
     {
       if (debug_threads)
-	debug_printf ("Not resuming lwp %ld (%s, signal %d, stop %s);"
+	debug_printf ("Not resuming lwp %ld (%s, stop %s);"
 		      " has pending status\n",
-		      lwpid_of (thread), step ? "step" : "continue", signal,
+		      lwpid_of (thread), step ? "step" : "continue",
 		      lwp->stop_expected ? "expected" : "not expected");
       return;
     }
 
   saved_thread = current_thread;
   current_thread = thread;
-
-  if (debug_threads)
-    debug_printf ("Resuming lwp %ld (%s, signal %d, stop %s)\n",
-		  lwpid_of (thread), step ? "step" : "continue", signal,
-		  lwp->stop_expected ? "expected" : "not expected");
 
   /* This bit needs some thinking about.  If we get a signal that
      we must report while a single-step reinsert is still pending,
@@ -4213,9 +4213,6 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 
 	  step = 1;
 	}
-
-      /* Postpone any pending signal.  It was enqueued above.  */
-      signal = 0;
     }
 
   if (fast_tp_collecting == 1)
@@ -4224,9 +4221,6 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	debug_printf ("lwp %ld wants to get out of fast tracepoint jump pad"
 		      " (exit-jump-pad-bkpt)\n",
 		      lwpid_of (thread));
-
-      /* Postpone any pending signal.  It was enqueued above.  */
-      signal = 0;
     }
   else if (fast_tp_collecting == 2)
     {
@@ -4243,9 +4237,6 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 			  "moving out of jump pad single-stepping"
 			  " not implemented on this target");
 	}
-
-      /* Postpone any pending signal.  It was enqueued above.  */
-      signal = 0;
     }
 
   /* If we have while-stepping actions in this thread set it stepping.
@@ -4299,6 +4290,11 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
       free (*p_sig);
       *p_sig = NULL;
     }
+
+  if (debug_threads)
+    debug_printf ("Resuming lwp %ld (%s, signal %d, stop %s)\n",
+		  lwpid_of (thread), step ? "step" : "continue", signal,
+		  lwp->stop_expected ? "expected" : "not expected");
 
   if (the_low_target.prepare_to_resume != NULL)
     the_low_target.prepare_to_resume (lwp);
