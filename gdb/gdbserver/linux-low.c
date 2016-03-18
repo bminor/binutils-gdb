@@ -2443,7 +2443,7 @@ linux_low_filter_event (int lwpid, int wstat)
 	}
     }
 
-  if (WIFSTOPPED (wstat) && linux_wstatus_maybe_breakpoint (wstat))
+  if (linux_wstatus_maybe_breakpoint (wstat))
     {
       if (save_stop_reason (child))
 	have_stop_pc = 1;
