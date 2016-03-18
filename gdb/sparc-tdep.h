@@ -198,8 +198,6 @@ extern int
 
 
 
-extern int sparc_software_single_step (struct frame_info *frame);
-
 extern void sparc_supply_rwindow (struct regcache *regcache,
 				  CORE_ADDR sp, int regnum);
 extern void sparc_collect_rwindow (const struct regcache *regcache,

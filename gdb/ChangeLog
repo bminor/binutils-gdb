@@ -1,5 +1,10 @@
 2016-03-18  Yao Qi  <yao.qi@linaro.org>
 
+	* sparc-tdep.c (sparc_software_single_step): Make it static.
+	* sparc-tdep.h (sparc_software_single_step): Remove declaration.
+
+2016-03-18  Yao Qi  <yao.qi@linaro.org>
+
 	* spu-tdep.c (spu_software_single_step): Throw error when
 	target_read_memory fails.
 
