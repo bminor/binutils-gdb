@@ -1,3 +1,19 @@
+2016-03-18  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_relobj::is_n64_): Remove.
+	(Target_mips::ei_class_): Likewise.
+	(Mips_relobj::is_newabi): Call methods.
+	(Mips_relobj::is_n64): Change checking for N64 ABI.
+	(Target_mips::is_output_n64): Likewise.
+	(Target_mips::merge_processor_specific_flags): Remove ei_class
+	argument, and remove comparing ei_class.
+	(Target_mips::do_adjust_elf_header): Remove setting EI_CLASS field
+	of the ELF header.
+	(Target_mips::do_finalize_sections): Don't pass ei_class argument
+	to merge_processor_specific_flags.
+	(Target_mips::elf_mips_abi_name): Remove ei_class argument, and
+	change checking for N64 ABI.
+
 2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
 
 	* mips.cc (enum Special_relocation_symbol): New enum type.

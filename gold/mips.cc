@@ -1537,7 +1537,6 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
   {
     this->is_pic_ = (ehdr.get_e_flags() & elfcpp::EF_MIPS_PIC) != 0;
     this->is_n32_ = elfcpp::abi_n32(ehdr.get_e_flags());
-    this->is_n64_ = elfcpp::abi_64(ehdr.get_e_ident()[elfcpp::EI_CLASS]);
   }
 
   ~Mips_relobj()
@@ -1694,12 +1693,12 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
   // Return whether the object uses N64 ABI.
   bool
   is_n64() const
-  { return this->is_n64_; }
+  { return size == 64; }
 
   // Return whether the object uses NewABI conventions.
   bool
   is_newabi() const
-  { return this->is_n32_ || this->is_n64_; }
+  { return this->is_n32() || this->is_n64(); }
 
   // Return Mips_got_info for this object.
   Mips_got_info<size, big_endian>*
@@ -1848,8 +1847,6 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
   bool is_pic_ : 1;
   // Whether the object uses N32 ABI.
   bool is_n32_ : 1;
-  // Whether the object uses N64 ABI.
-  bool is_n64_ : 1;
   // The Mips_got_info for this object.
   Mips_got_info<size, big_endian>* got_info_;
 
@@ -3202,8 +3199,8 @@ class Target_mips : public Sized_target<size, big_endian>
     : Sized_target<size, big_endian>(info), got_(NULL), gp_(NULL), plt_(NULL),
       got_plt_(NULL), rel_dyn_(NULL), copy_relocs_(),
       dyn_relocs_(), la25_stub_(NULL), mips_mach_extensions_(),
-      mips_stubs_(NULL), ei_class_(0), mach_(0), layout_(NULL),
-      got16_addends_(), entry_symbol_is_compressed_(false), insn32_(false)
+      mips_stubs_(NULL), mach_(0), layout_(NULL), got16_addends_(),
+      entry_symbol_is_compressed_(false), insn32_(false)
   {
     this->add_machine_extensions();
   }
@@ -3485,14 +3482,10 @@ class Target_mips : public Sized_target<size, big_endian>
     return elfcpp::abi_n32(this->processor_specific_flags());
   }
 
-  // Whether the output uses N64 ABI.  This is valid only after
-  // merge_processor_specific_flags() is called.
+  // Whether the output uses N64 ABI.
   bool
   is_output_n64() const
-  {
-    gold_assert(this->are_processor_specific_flags_set());
-    return elfcpp::abi_64(this->ei_class_);
-  }
+  { return size == 64; }
 
   // Whether the output uses NEWABI.  This is valid only after
   // merge_processor_specific_flags() is called.
@@ -3860,8 +3853,7 @@ class Target_mips : public Sized_target<size, big_endian>
 
   // Merge processor specific flags.
   void
-  merge_processor_specific_flags(const std::string&, elfcpp::Elf_Word,
-                                 unsigned char, bool);
+  merge_processor_specific_flags(const std::string&, elfcpp::Elf_Word, bool);
 
   // True if we are linking for CPUs that are faster if JAL is converted to BAL.
   static inline bool
@@ -3940,7 +3932,7 @@ class Target_mips : public Sized_target<size, big_endian>
   set_gp(Layout*, Symbol_table*);
 
   const char*
-  elf_mips_abi_name(elfcpp::Elf_Word e_flags, unsigned char ei_class);
+  elf_mips_abi_name(elfcpp::Elf_Word e_flags);
   const char*
   elf_mips_mach_name(elfcpp::Elf_Word e_flags);
 
@@ -4053,7 +4045,6 @@ class Target_mips : public Sized_target<size, big_endian>
   // .MIPS.stubs
   Mips_output_data_mips_stubs<size, big_endian>* mips_stubs_;
 
-  unsigned char ei_class_;
   unsigned int mach_;
   Layout* layout_;
 
@@ -8352,14 +8343,12 @@ Target_mips<size, big_endian>::mips_mach_extends(unsigned int base,
 template<int size, bool big_endian>
 void
 Target_mips<size, big_endian>::merge_processor_specific_flags(
-    const std::string& name, elfcpp::Elf_Word in_flags,
-    unsigned char in_ei_class, bool dyn_obj)
+    const std::string& name, elfcpp::Elf_Word in_flags, bool dyn_obj)
 {
   // If flags are not set yet, just copy them.
   if (!this->are_processor_specific_flags_set())
     {
       this->set_processor_specific_flags(in_flags);
-      this->ei_class_ = in_ei_class;
       this->mach_ = this->elf_mips_mach(in_flags);
       return;
     }
@@ -8441,19 +8430,16 @@ Target_mips<size, big_endian>::merge_processor_specific_flags(
   old_flags &= (~(elfcpp::EF_MIPS_ARCH | elfcpp::EF_MIPS_MACH
                 | elfcpp::EF_MIPS_32BITMODE));
 
-  // Compare ABIs.  The 64-bit ABI does not use EF_MIPS_ABI. But, it does set
-  // EI_CLASS differently from any 32-bit ABI.
-  if ((new_flags & elfcpp::EF_MIPS_ABI) != (old_flags & elfcpp::EF_MIPS_ABI)
-      || (in_ei_class != this->ei_class_))
+  // Compare ABIs.
+  if ((new_flags & elfcpp::EF_MIPS_ABI) != (old_flags & elfcpp::EF_MIPS_ABI))
     {
       // Only error if both are set (to different values).
-      if (((new_flags & elfcpp::EF_MIPS_ABI)
+      if ((new_flags & elfcpp::EF_MIPS_ABI)
            && (old_flags & elfcpp::EF_MIPS_ABI))
-          || (in_ei_class != this->ei_class_))
         gold_error(_("%s: ABI mismatch: linking %s module with "
                      "previous %s modules"), name.c_str(),
-                   this->elf_mips_abi_name(in_flags, in_ei_class),
-                   this->elf_mips_abi_name(merged_flags, this->ei_class_));
+                   this->elf_mips_abi_name(in_flags),
+                   this->elf_mips_abi_name(merged_flags));
 
       new_flags &= ~elfcpp::EF_MIPS_ABI;
       old_flags &= ~elfcpp::EF_MIPS_ABI;
@@ -8501,16 +8487,13 @@ Target_mips<size, big_endian>::do_adjust_elf_header(
 {
   gold_assert(len == elfcpp::Elf_sizes<size>::ehdr_size);
 
+  if (!this->entry_symbol_is_compressed_)
+    return;
+
   elfcpp::Ehdr<size, big_endian> ehdr(view);
-  unsigned char e_ident[elfcpp::EI_NIDENT];
-  memcpy(e_ident, ehdr.get_e_ident(), elfcpp::EI_NIDENT);
-
-  e_ident[elfcpp::EI_CLASS] = this->ei_class_;
-
   elfcpp::Ehdr_write<size, big_endian> oehdr(view);
-  oehdr.put_e_ident(e_ident);
-  if (this->entry_symbol_is_compressed_)
-    oehdr.put_e_entry(ehdr.get_e_entry() + 1);
+
+  oehdr.put_e_entry(ehdr.get_e_entry() + 1);
 }
 
 // do_make_elf_object to override the same function in the base class.
@@ -8625,7 +8608,6 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
 
           elfcpp::Ehdr<size, big_endian> ehdr(pehdr);
           elfcpp::Elf_Word in_flags = ehdr.get_e_flags();
-          unsigned char ei_class = ehdr.get_e_ident()[elfcpp::EI_CLASS];
           // If all input sections will be discarded, don't use this object
           // file for merging processor specific flags.
           bool should_merge_processor_specific_flags = false;
@@ -8639,7 +8621,7 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
 
           if (should_merge_processor_specific_flags)
             this->merge_processor_specific_flags(relobj->name(), in_flags,
-                                                 ei_class, false);
+                                                 false);
         }
     }
 
@@ -8657,10 +8639,8 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
 
       elfcpp::Ehdr<size, big_endian> ehdr(pehdr);
       elfcpp::Elf_Word in_flags = ehdr.get_e_flags();
-      unsigned char ei_class = ehdr.get_e_ident()[elfcpp::EI_CLASS];
 
-      this->merge_processor_specific_flags(dynobj->name(), in_flags, ei_class,
-                                           true);
+      this->merge_processor_specific_flags(dynobj->name(), in_flags, true);
     }
 
   // Merge .reginfo contents of input objects.
@@ -11238,15 +11218,14 @@ Target_mips<size, big_endian>::Scan::unsupported_reloc_global(
 // Return printable name for ABI.
 template<int size, bool big_endian>
 const char*
-Target_mips<size, big_endian>::elf_mips_abi_name(elfcpp::Elf_Word e_flags,
-                                                 unsigned char ei_class)
+Target_mips<size, big_endian>::elf_mips_abi_name(elfcpp::Elf_Word e_flags)
 {
   switch (e_flags & elfcpp::EF_MIPS_ABI)
     {
     case 0:
       if ((e_flags & elfcpp::EF_MIPS_ABI2) != 0)
         return "N32";
-      else if (elfcpp::abi_64(ei_class))
+      else if (size == 64)
         return "64";
       else
         return "none";

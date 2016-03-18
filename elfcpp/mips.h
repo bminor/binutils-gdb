@@ -339,11 +339,6 @@ bool
 abi_n32(elfcpp::Elf_Word e_flags)
 { return (e_flags & elfcpp::EF_MIPS_ABI2) != 0; }
 
-// Whether the ABI is N64.
-bool
-abi_64(unsigned char ei_class)
-{ return ei_class == elfcpp::ELFCLASS64; }
-
 // Whether the file has microMIPS code.
 bool
 is_micromips(elfcpp::Elf_Word e_flags)
