@@ -4118,6 +4118,16 @@ single_step (struct lwp_info* lwp)
   return step;
 }
 
+/* The signal can be delivered to the inferior if we are not trying to
+   reinsert a breakpoint and not trying to finish a fast tracepoint
+   collect.  */
+
+static int
+lwp_signal_can_be_delivered (struct lwp_info *lwp)
+{
+  return (lwp->bp_reinsert == 0 && !lwp->collecting_fast_tracepoint);
+}
+
 /* Resume execution of LWP.  If STEP is nonzero, single-step it.  If
    SIGNAL is nonzero, give it that signal.  */
 
@@ -4157,13 +4167,12 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
     }
 
   /* If we have pending signals or status, and a new signal, enqueue the
-     signal.  Also enqueue the signal if we are waiting to reinsert a
-     breakpoint; it will be picked up again below.  */
+     signal.  Also enqueue the signal if it can't be delivered to the
+     inferior right now.  */
   if (signal != 0
       && (lwp->status_pending_p
 	  || lwp->pending_signals != NULL
-	  || lwp->bp_reinsert != 0
-	  || fast_tp_collecting))
+	  || !lwp_signal_can_be_delivered (lwp)))
     {
       enqueue_pending_signal (lwp, signal, info);
 
@@ -4269,12 +4278,9 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	}
     }
 
-  /* If we have pending signals, consume one unless we are trying to
-     reinsert a breakpoint or we're trying to finish a fast tracepoint
-     collect.  */
-  if (lwp->pending_signals != NULL
-      && lwp->bp_reinsert == 0
-      && fast_tp_collecting == 0)
+  /* If we have pending signals, consume one if it can be delivered to
+     the inferior.  */
+  if (lwp->pending_signals != NULL && lwp_signal_can_be_delivered (lwp))
     {
       struct pending_signals **p_sig;
 

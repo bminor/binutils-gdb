@@ -1,5 +1,10 @@
 2016-03-18  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (lwp_signal_can_be_delivered): New function.
+	(linux_resume_one_lwp_throw): Use lwp_signal_can_be_delivered.
+
+2016-03-18  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (linux_resume_one_lwp_throw): Set 'signal' to
 	0 if signal is enqueued.  Remove 'signal' from one debugging
 	message.  Move one debugging message to some lines below.
