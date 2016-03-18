@@ -9,7 +9,7 @@
 
 Decoded dump of debug contents of section .debug_line:
 
-CU: .*:
+.*:
 File name                            Line number    Starting address
 per-function-debugline.s                      39                   0
 

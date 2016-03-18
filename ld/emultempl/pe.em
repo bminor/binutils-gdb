@@ -563,7 +563,6 @@ set_entry_point (void)
     }
   else
     {
-
       for (i = 0; v[i].entry; i++)
         if (v[i].value == pe_subsystem)
           break;

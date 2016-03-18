@@ -895,6 +895,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
   for (i = 0; i < NE; i++)
     {
       char *name;
+
       name = xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
       if (pe_details->underscored
  	  && (*pe_def_file->exports[i].internal_name != '@'))
@@ -2790,7 +2791,44 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
       /* Don't add PRIVATE entries to import lib.  */
       if (pe_def_file->exports[i].flag_private)
 	continue;
+
       def->exports[i].internal_name = def->exports[i].name;
+
+      /* PR 19803: If a symbol has been discard due to garbage
+	 collection then do not create any exports for it.  */
+      {
+	struct coff_link_hash_entry *h;
+
+	h = coff_link_hash_lookup (coff_hash_table (info), internal,
+				   FALSE, FALSE, FALSE);
+	if (h != NULL
+	    /* If the symbol is hidden and undefined then it
+	       has been swept up by garbage collection.  */
+	    && h->symbol_class == C_HIDDEN
+	    && h->root.u.def.section == bfd_und_section_ptr)
+	  continue;
+
+	/* If necessary, check with an underscore prefix as well.  */
+	if (pe_details->underscored && internal[0] != '@')
+	  {
+	    char *name;
+
+	    name = xmalloc (strlen (internal) + 2);
+	    sprintf (name, "_%s", internal);
+
+	    h = coff_link_hash_lookup (coff_hash_table (info), name,
+				       FALSE, FALSE, FALSE);
+	    free (name);
+
+	    if (h != NULL
+		/* If the symbol is hidden and undefined then it
+		   has been swept up by garbage collection.  */
+		&& h->symbol_class == C_HIDDEN
+		&& h->root.u.def.section == bfd_und_section_ptr)
+	      continue;
+	  }
+      }
+
       n = make_one (def->exports + i, outarch,
 		    ! (def->exports + i)->flag_data);
       n->archive_next = head;
