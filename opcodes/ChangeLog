@@ -1,3 +1,9 @@
+2016-03-18  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19721
+	* aarch64-tbl.h (aarch64_opcode_table): Fix type of second operand
+	of MOV insn that aliases an ORR insn.
+
 2016-03-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* arm-dis.c (neon_opcodes): Support new FP16 instructions.

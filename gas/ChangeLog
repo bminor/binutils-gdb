@@ -1,5 +1,9 @@
 2016-03-18  Nick Clifton  <nickc@redhat.com>
 
+	PR target/19721
+	* testsuite/gas/aarch64/pr19721.s: New test source file.
+	* testsuite/gas/aarch64/pr19721.d: New test driver file.
+
 	* doc/as.texinfo: Place the target specific command line options
 	into their own man page section.
 
