@@ -273,12 +273,35 @@ incrementally to the architecture being compiled for.
 This directive switches to the @code{.bss} section.
 
 @c CCCCCCCCCCCCCCCCCCCCCCCCCC
+
+@cindex @code{.cpu} directive, AArch64
+@item .cpu @var{name}
+Set the target processor.  Valid values for @var{name} are the same as
+those accepted by the @option{-mcpu=} command line option.
+
 @c DDDDDDDDDDDDDDDDDDDDDDDDDD
+
+@cindex @code{.dword} directive, AArch64
+@item .dword @var{expressions}
+The @code{.dword} directive produces 64 bit values.
+
 @c EEEEEEEEEEEEEEEEEEEEEEEEEE
+
+@cindex @code{.even} directive, AArch64
+@item .even
+The @code{.even} directive aligns the output on the next even byte
+boundary.
+
 @c FFFFFFFFFFFFFFFFFFFFFFFFFF
 @c GGGGGGGGGGGGGGGGGGGGGGGGGG
 @c HHHHHHHHHHHHHHHHHHHHHHHHHH
 @c IIIIIIIIIIIIIIIIIIIIIIIIII
+
+@cindex @code{.inst} directive, AArch64
+@item .inst @var{expressions}
+Inserts the expressions into the output as if they were instructions,
+rather than data.
+
 @c JJJJJJJJJJJJJJJJJJJJJJJJJJ
 @c KKKKKKKKKKKKKKKKKKKKKKKKKK
 @c LLLLLLLLLLLLLLLLLLLLLLLLLL
@@ -324,6 +347,18 @@ example:
 
 @c TTTTTTTTTTTTTTTTTTTTTTTTTT
 
+@cindex @code{.tlsdescadd} directive, AArch64
+@item   @code{.tlsdescadd}
+Emits a TLSDESC_ADD reloc on the next instruction.
+
+@cindex @code{.tlsdesccall} directive, AArch64
+@item   @code{.tlsdesccall}
+Emits a TLSDESC_CALL reloc on the next instruction.
+
+@cindex @code{.tlsdescldr} directive, AArch64
+@item   @code{.tlsdescldr}
+Emits a TLSDESC_LDR reloc on the next instruction.
+
 @c UUUUUUUUUUUUUUUUUUUUUUUUUU
 
 @cindex @code{.unreq} directive, AArch64
@@ -344,12 +379,14 @@ should only be done if it is really necessary.
 
 @c WWWWWWWWWWWWWWWWWWWWWWWWWW
 @c XXXXXXXXXXXXXXXXXXXXXXXXXX
-@c YYYYYYYYYYYYYYYYYYYYYYYYYY
-@c ZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 @cindex @code{.xword} directive, AArch64
-@item .xword
-The @code{.xword} directive produces 64 bit values.
+@item .xword @var{expressions}
+The @code{.xword} directive produces 64 bit values.  This is the same
+as the @code{.dword} directive.
+
+@c YYYYYYYYYYYYYYYYYYYYYYYYYY
+@c ZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 @end table
 
