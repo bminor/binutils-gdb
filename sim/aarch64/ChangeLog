@@ -4,6 +4,10 @@
 	Print hex equivalents of floats and doubles.
 	Check element number against array size when accessing vector
 	registers.
+	(GET_VEC_ELEMENT): Fix off by one error checking for an invalid
+	element index.
+	(SET_VEC_ELEMENT): Likewise.
+
 	* memory.c: Trace memory reads when --trace-memory is enabled.
 	Remove float and double load and store functions.
 	* memory.h (aarch64_get_mem_float): Delete prototype.
