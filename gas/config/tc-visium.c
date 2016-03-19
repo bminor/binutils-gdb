@@ -861,7 +861,7 @@ md_atof (int type, char *litP, int *sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Bad call to MD_ATOF()");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
