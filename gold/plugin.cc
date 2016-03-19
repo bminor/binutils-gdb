@@ -22,11 +22,15 @@
 
 #include "gold.h"
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
 #include <string>
 #include <vector>
+#include <fcntl.h>
+#include <unistd.h>
+#include "libiberty.h"
 
 #ifdef ENABLE_PLUGINS
 #ifdef HAVE_DLFCN_H
@@ -171,7 +175,8 @@ get_input_section_size(const struct ld_plugin_section section,
 
 #endif // ENABLE_PLUGINS
 
-static Pluginobj* make_sized_plugin_object(Input_file* input_file,
+static Pluginobj* make_sized_plugin_object(const std::string& filename,
+					   Input_file* input_file,
                                            off_t offset, off_t filesize);
 
 // Plugin methods.
@@ -437,6 +442,208 @@ class Plugin_rescan : public Task
   Task_token* next_blocker_;
 };
 
+// Plugin_recorder logs plugin actions and saves intermediate files
+// for later replay.
+
+class Plugin_recorder
+{
+ public:
+  Plugin_recorder() : file_count_(0), tempdir_(NULL), logfile_(NULL)
+  { }
+
+  bool
+  init();
+
+  void
+  claimed_file(const std::string& obj_name, off_t offset, off_t filesize,
+	       const std::string& plugin_name);
+
+  void
+  unclaimed_file(const std::string& obj_name, off_t offset, off_t filesize);
+
+  void
+  replacement_file(const char* name, bool is_lib);
+
+  void
+  record_symbols(const Object* obj, int nsyms,
+		 const struct ld_plugin_symbol* syms);
+
+  void
+  finish()
+  { ::fclose(this->logfile_); }
+
+ private:
+  unsigned int file_count_;
+  const char* tempdir_;
+  FILE* logfile_;
+};
+
+bool
+Plugin_recorder::init()
+{
+  // Create a temporary directory where we can stash the log and
+  // copies of replacement files.
+  char dir_template[] = "gold-recording-XXXXXX";
+  if (mkdtemp(dir_template) == NULL)
+    return false;
+
+  size_t len = strlen(dir_template) + 1;
+  char* tempdir = new char[len];
+  strncpy(tempdir, dir_template, len);
+
+  // Create the log file.
+  std::string logname(tempdir);
+  logname.append("/log");
+  FILE* logfile = ::fopen(logname.c_str(), "w");
+  if (logfile == NULL)
+    return false;
+
+  this->tempdir_ = tempdir;
+  this->logfile_ = logfile;
+
+  gold_info(_("%s: recording to %s\n"), program_name, this->tempdir_);
+
+  return true;
+}
+
+void
+Plugin_recorder::claimed_file(const std::string& obj_name,
+			      off_t offset,
+			      off_t filesize,
+			      const std::string& plugin_name)
+{
+  fprintf(this->logfile_, "PLUGIN: %s\n", plugin_name.c_str());
+  fprintf(this->logfile_, "CLAIMED: %s", obj_name.c_str());
+  if (offset > 0)
+    fprintf(this->logfile_, " @%ld", static_cast<long>(offset));
+  fprintf(this->logfile_, " %ld\n", static_cast<long>(filesize));
+}
+
+void
+Plugin_recorder::unclaimed_file(const std::string& obj_name,
+				off_t offset,
+				off_t filesize)
+{
+  fprintf(this->logfile_, "UNCLAIMED: %s", obj_name.c_str());
+  if (offset > 0)
+    fprintf(this->logfile_, " @%ld", static_cast<long>(offset));
+  fprintf(this->logfile_, " %ld\n", static_cast<long>(filesize));
+}
+
+static bool
+copy_file(const char* inname, const char* outname)
+{
+  static char buf[4096];
+  int in = ::open(inname, O_RDONLY);
+  if (in < 0)
+    {
+      gold_warning(_("%s: can't open (%s)\n"), inname, strerror(errno));
+      return false;
+    }
+  int out = ::open(outname, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+  if (out < 0)
+    {
+      gold_warning(_("%s: can't create (%s)\n"), outname, strerror(errno));
+      ::close(in);
+      return false;
+    }
+  ssize_t len;
+  while ((len = ::read(in, buf, sizeof(buf))) > 0)
+    ::write(out, buf, len);
+  ::close(in);
+  ::close(out);
+  return true;
+}
+
+void
+Plugin_recorder::replacement_file(const char* name, bool is_lib)
+{
+  fprintf(this->logfile_, "REPLACEMENT: %s", name);
+  if (is_lib)
+    fprintf(this->logfile_, "(lib)");
+  else
+    {
+      char counter[10];
+      const char* basename = lbasename(name);
+      snprintf(counter, sizeof(counter), "%05d", this->file_count_);
+      ++this->file_count_;
+      std::string outname(this->tempdir_);
+      outname.append("/");
+      outname.append(counter);
+      outname.append("-");
+      outname.append(basename);
+      if (copy_file(name, outname.c_str()))
+        fprintf(this->logfile_, " -> %s", outname.c_str());
+    }
+  fprintf(this->logfile_, "\n");
+}
+
+void
+Plugin_recorder::record_symbols(const Object* obj, int nsyms,
+				const struct ld_plugin_symbol* syms)
+{
+  fprintf(this->logfile_, "SYMBOLS: %d %s\n", nsyms, obj->name().c_str());
+  for (int i = 0; i < nsyms; ++i)
+    {
+      const struct ld_plugin_symbol* isym = &syms[i];
+
+      const char* def;
+      switch (isym->def)
+        {
+        case LDPK_DEF:
+          def = "D";
+          break;
+        case LDPK_WEAKDEF:
+          def = "WD";
+          break;
+        case LDPK_UNDEF:
+          def = "U";
+          break;
+        case LDPK_WEAKUNDEF:
+          def = "WU";
+          break;
+        case LDPK_COMMON:
+          def = "C";
+          break;
+        default:
+          def = "?";
+          break;
+        }
+
+      char vis;
+      switch (isym->visibility)
+        {
+        case LDPV_PROTECTED:
+          vis = 'P';
+          break;
+        case LDPV_INTERNAL:
+          vis = 'I';
+          break;
+        case LDPV_HIDDEN:
+          vis = 'H';
+          break;
+        case LDPV_DEFAULT:
+          vis = 'D';
+          break;
+        default:
+          vis = '?';
+          break;
+        }
+
+      fprintf(this->logfile_, " %5d: %-2s %c %s", i, def, vis, isym->name);
+      if (isym->version != NULL && isym->version[0] != '\0')
+	fprintf(this->logfile_, "@%s", isym->version);
+      if (isym->comdat_key != NULL && isym->comdat_key[0] != '\0')
+	{
+	  if (strcmp(isym->name, isym->comdat_key) == 0)
+	    fprintf(this->logfile_, " [comdat]");
+	  else
+	    fprintf(this->logfile_, " [comdat: %s]", isym->comdat_key);
+	}
+      fprintf(this->logfile_, "\n");
+    }
+}
+
 // Plugin_manager methods.
 
 Plugin_manager::~Plugin_manager()
@@ -452,6 +659,7 @@ Plugin_manager::~Plugin_manager()
     delete *obj;
   this->objects_.clear();
   delete this->lock_;
+  delete this->recorder_;
 }
 
 // Load all plugin libraries.
@@ -460,6 +668,13 @@ void
 Plugin_manager::load_plugins(Layout* layout)
 {
   this->layout_ = layout;
+
+  if (parameters->options().plugin_record())
+    {
+      this->recorder_ = new Plugin_recorder();
+      this->recorder_->init();
+    }
+
   for (this->current_ = this->plugins_.begin();
        this->current_ != this->plugins_.end();
        ++this->current_)
@@ -499,6 +714,15 @@ Plugin_manager::claim_file(Input_file* input_file, off_t offset,
 	  this->any_claimed_ = true;
 	  this->in_claim_file_handler_ = false;
 
+          if (this->recorder_ != NULL)
+            {
+	      const std::string& objname = (elf_object == NULL
+					    ? input_file->filename()
+					    : elf_object->name());
+	      this->recorder_->claimed_file(objname,
+					    offset, filesize,
+					    (*this->current_)->filename());
+            }
           if (this->objects_.size() > handle
               && this->objects_[handle]->pluginobj() != NULL)
             return this->objects_[handle]->pluginobj();
@@ -511,6 +735,10 @@ Plugin_manager::claim_file(Input_file* input_file, off_t offset,
     }
 
   this->in_claim_file_handler_ = false;
+
+  if (this->recorder_ != NULL)
+    this->recorder_->unclaimed_file(input_file->filename(), offset, filesize);
+
   return NULL;
 }
 
@@ -752,15 +980,23 @@ Plugin_manager::make_plugin_object(unsigned int handle)
       && this->objects_[handle]->pluginobj() != NULL)
     return NULL;
 
-  Pluginobj* obj = make_sized_plugin_object(this->input_file_,
+  const std::string* filename = &this->input_file_->filename();
+
+  // If the elf object for this file was pushed into the objects_ vector,
+  // use its filename, then delete it to make room for the Pluginobj as
+  // this file is claimed.
+  if (this->objects_.size() != handle)
+    {
+      filename = &this->objects_.back()->name();
+      this->objects_.pop_back();
+    }
+
+  Pluginobj* obj = make_sized_plugin_object(*filename,
+					    this->input_file_,
                                             this->plugin_input_file_.offset,
                                             this->plugin_input_file_.filesize);
 
 
-  // If the elf object for this file was pushed into the objects_ vector, delete
-  // it to make room for the Pluginobj as this file is claimed.
-  if (this->objects_.size() != handle)
-    this->objects_.pop_back();
 
   this->objects_.push_back(obj);
   return obj;
@@ -880,6 +1116,10 @@ Plugin_manager::add_input_file(const char* pathname, bool is_lib)
   if (parameters->incremental())
     gold_error(_("input files added by plug-ins in --incremental mode not "
 		 "supported yet"));
+
+  if (this->recorder_ != NULL)
+    this->recorder_->replacement_file(pathname, is_lib);
+
   this->workqueue_->queue_soon(new Read_symbols(this->input_objects_,
                                                 this->symtab_,
                                                 this->layout_,
@@ -1084,6 +1324,10 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   unsigned char symbuf[sym_size];
   elfcpp::Sym<size, big_endian> sym(symbuf);
   elfcpp::Sym_write<size, big_endian> osym(symbuf);
+
+  Plugin_recorder* recorder = parameters->options().plugins()->recorder();
+  if (recorder != NULL)
+    recorder->record_symbols(this, this->nsyms_, this->syms_);
 
   this->symbols_.resize(this->nsyms_);
 
@@ -1397,7 +1641,11 @@ class Plugin_finish : public Task
   void
   run(Workqueue*)
   {
+    Plugin_manager* plugins = parameters->options().plugins();
+    gold_assert(plugins != NULL);
     // We could call early cleanup handlers here.
+    if (plugins->recorder())
+      plugins->recorder()->finish();
   }
 
   std::string
@@ -1908,7 +2156,8 @@ unique_segment_for_sections(const char* segment_name,
 // Allocate a Pluginobj object of the appropriate size and endianness.
 
 static Pluginobj*
-make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
+make_sized_plugin_object(const std::string& filename,
+			 Input_file* input_file, off_t offset, off_t filesize)
 {
   Pluginobj* obj = NULL;
 
@@ -1919,42 +2168,42 @@ make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
     {
       if (target.is_big_endian())
 #ifdef HAVE_TARGET_32_BIG
-        obj = new Sized_pluginobj<32, true>(input_file->filename(),
-                                            input_file, offset, filesize);
+        obj = new Sized_pluginobj<32, true>(filename, input_file,
+					    offset, filesize);
 #else
         gold_error(_("%s: not configured to support "
 		     "32-bit big-endian object"),
-		   input_file->filename().c_str());
+		   filename.c_str());
 #endif
       else
 #ifdef HAVE_TARGET_32_LITTLE
-        obj = new Sized_pluginobj<32, false>(input_file->filename(),
-                                             input_file, offset, filesize);
+        obj = new Sized_pluginobj<32, false>(filename, input_file,
+                                             offset, filesize);
 #else
         gold_error(_("%s: not configured to support "
 		     "32-bit little-endian object"),
-		   input_file->filename().c_str());
+		   filename.c_str());
 #endif
     }
   else if (target.get_size() == 64)
     {
       if (target.is_big_endian())
 #ifdef HAVE_TARGET_64_BIG
-        obj = new Sized_pluginobj<64, true>(input_file->filename(),
-                                            input_file, offset, filesize);
+        obj = new Sized_pluginobj<64, true>(filename, input_file,
+                                            offset, filesize);
 #else
         gold_error(_("%s: not configured to support "
 		     "64-bit big-endian object"),
-		   input_file->filename().c_str());
+		   filename.c_str());
 #endif
       else
 #ifdef HAVE_TARGET_64_LITTLE
-        obj = new Sized_pluginobj<64, false>(input_file->filename(),
-                                             input_file, offset, filesize);
+        obj = new Sized_pluginobj<64, false>(filename, input_file,
+                                             offset, filesize);
 #else
         gold_error(_("%s: not configured to support "
 		     "64-bit little-endian object"),
-		   input_file->filename().c_str());
+		   filename.c_str());
 #endif
     }
 

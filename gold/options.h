@@ -1015,6 +1015,9 @@ class General_options
 		 N_("Load a plugin library"), N_("PLUGIN"));
   DEFINE_special(plugin_opt, options::TWO_DASHES, '\0',
 		 N_("Pass an option to the plugin"), N_("OPTION"));
+  DEFINE_bool(plugin_record, options::TWO_DASHES, '\0', false,
+	      N_("Record actions and intermediate files when using plugins"),
+	      NULL);
 #endif
 
   DEFINE_bool(posix_fallocate, options::TWO_DASHES, '\0', true,
