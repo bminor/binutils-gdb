@@ -13104,7 +13104,7 @@ copy_expr (expressionS *dst, const expressionS *src)
 
 struct rename_section_struct
 {
-  char *old_name;
+  const char *old_name;
   char *new_name;
   struct rename_section_struct *next;
 };
@@ -13177,7 +13177,7 @@ build_section_rename (const char *arg)
 
 
 char *
-xtensa_section_rename (char *name)
+xtensa_section_rename (const char *name)
 {
   struct rename_section_struct *r = section_rename;
 
@@ -13187,5 +13187,5 @@ xtensa_section_rename (char *name)
 	return r->new_name;
     }
 
-  return name;
+  return (char *) name;
 }

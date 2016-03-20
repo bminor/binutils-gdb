@@ -1,5 +1,12 @@
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-xtensa.c (struct rename_section_struct): Make old_name
+	const.
+	(xtensa_section_rename): Make argument type const char *.
+	* config/tc-xtensa.h (xtensa_section_rename): Adjust.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-i960.c (parse_ldconst): Cast to char * when assigning to
 	args[0].
 
