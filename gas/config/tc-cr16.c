@@ -2195,7 +2195,7 @@ adjust_if_needed (ins *insn ATTRIBUTE_UNUSED)
    Returns 1 upon success, 0 upon failure.  */
 
 static int
-assemble_insn (char *mnemonic, ins *insn)
+assemble_insn (const char *mnemonic, ins *insn)
 {
   /* Type of each operand in the current template.  */
   argtype cur_type[MAX_OPERANDS];
@@ -2487,6 +2487,35 @@ print_insn (ins *insn)
     }
 }
 
+/* Actually assemble an instruction.  */
+
+static void
+cr16_assemble (const char *op, char *param)
+{
+  ins cr16_ins;
+
+  /* Find the instruction.  */
+  instruction = (const inst *) hash_find (cr16_inst_hash, op);
+  if (instruction == NULL)
+    {
+      as_bad (_("Unknown opcode: `%s'"), op);
+      return;
+    }
+
+  /* Tie dwarf2 debug info to the address at the start of the insn.  */
+  dwarf2_emit_insn (0);
+
+  /* Parse the instruction's operands.  */
+  parse_insn (&cr16_ins, param);
+
+  /* Assemble the instruction - return upon failure.  */
+  if (assemble_insn (op, &cr16_ins) == 0)
+    return;
+
+  /* Print the instruction.  */
+  print_insn (&cr16_ins);
+}
+
 /* This is the guts of the machine-dependent assembler.  OP points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
@@ -2509,10 +2538,11 @@ md_assemble (char *op)
   if (is_bcc_insn (op))
     {
       strcpy (param1, get_b_cc (op));
-      op = "b";
       strcat (param1,",");
       strcat (param1, param);
       param = (char *) &param1;
+      cr16_assemble ("b", param);
+      return;
     }
 
   /* Checking the cinv options and adjust the mnemonic by removing the
@@ -2538,32 +2568,14 @@ md_assemble (char *op)
           && ((&cr16_ins)->arg[0].constant >= 0))
         {
            if (streq ("lshb", op))
-             op = "ashub";
+             cr16_assemble ("ashub", param);
            else if (streq ("lshd", op))
-             op = "ashud";
+             cr16_assemble ("ashud", param);
            else
-             op = "ashuw";
+             cr16_assemble ("ashuw", param);
+	   return;
         }
     }
 
-  /* Find the instruction.  */
-  instruction = (const inst *) hash_find (cr16_inst_hash, op);
-  if (instruction == NULL)
-    {
-      as_bad (_("Unknown opcode: `%s'"), op);
-      return;
-    }
-
-  /* Tie dwarf2 debug info to the address at the start of the insn.  */
-  dwarf2_emit_insn (0);
-
-  /* Parse the instruction's operands.  */
-  parse_insn (&cr16_ins, param);
-
-  /* Assemble the instruction - return upon failure.  */
-  if (assemble_insn (op, &cr16_ins) == 0)
-    return;
-
-  /* Print the instruction.  */
-  print_insn (&cr16_ins);
+  cr16_assemble (op, param);
 }

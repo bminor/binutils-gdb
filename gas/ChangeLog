@@ -1,5 +1,10 @@
 2016-03-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-cr16.c (cr16_assemble): New function.
+	(md_assemble): Call cr16_assemble.
+
+2016-03-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* as.c (parse_args): Adjust.
 	* as.h (flag_size_check): Rename to flag_allow_nonconst_size.
 	* config/obj-elf.c (elf_frob_symbol): Adjust.
