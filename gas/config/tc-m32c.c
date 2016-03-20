@@ -200,7 +200,7 @@ m32c_md_end (void)
       /* Pad with nops for objdump.  */
       n_nops = (32 - ((insn_size) % 32)) / 8;
       for (i = 1; i <= n_nops; i++)
-	md_assemble ("nop");
+	md_assemble ((char *) "nop");
     }
 }
 
@@ -317,11 +317,11 @@ m32c_indirect_operand (char *str)
       }
 
   if (indirection[1] != none && indirection[2] != none)
-    md_assemble ("src-dest-indirect");
+    md_assemble ((char *) "src-dest-indirect");
   else if (indirection[1] != none)
-    md_assemble ("src-indirect");
+    md_assemble ((char *) "src-indirect");
   else if (indirection[2] != none)
-    md_assemble ("dest-indirect");
+    md_assemble ((char *) "dest-indirect");
 
   md_assemble (new_str);
   free (new_str);

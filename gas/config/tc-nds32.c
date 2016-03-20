@@ -2202,8 +2202,8 @@ do_pseudo_b (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
     {
       md_assemblef ("sethi $ta,hi20(%s)", arg_label);
       md_assemblef ("ori $ta,$ta,lo12(%s)", arg_label);
-      md_assemble  ("add $ta,$ta,$gp");
-      md_assemble  ("jr $ta");
+      md_assemble  ((char *) "add $ta,$ta,$gp");
+      md_assemble  ((char *) "jr $ta");
     }
   else
     {
@@ -2223,8 +2223,8 @@ do_pseudo_bal (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
     {
       md_assemblef ("sethi $ta,hi20(%s)", arg_label);
       md_assemblef ("ori $ta,$ta,lo12(%s)", arg_label);
-      md_assemble  ("add $ta,$ta,$gp");
-      md_assemble ("jral $ta");
+      md_assemble  ((char *) "add $ta,$ta,$gp");
+      md_assemble ((char *) "jral $ta");
     }
   else
     {
@@ -2483,7 +2483,7 @@ do_pseudo_ls_bhw (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
 	  /* lw */
 	  md_assemblef ("sethi $ta,hi20(%s)", argv[1]);
 	  md_assemblef ("ori $ta,$ta,lo12(%s)", argv[1]);
-	  md_assemble ("lw $ta,[$gp+$ta]");	/* Load address word.  */
+	  md_assemble ((char *) "lw $ta,[$gp+$ta]");	/* Load address word.  */
 	  if (addend < 0x10000 && addend >= -0x10000)
 	    {
 	      md_assemblef ("%c%c%si %s,[$ta+(%d)]", ls, size, sign, argv[0], addend);

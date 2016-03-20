@@ -1,5 +1,14 @@
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-m32c.c (m32c_md_end): cast the argument to md_assemble to
+	char *.
+	(m32c_indirect_operand): Likewise.
+	* config/tc-nds32.c (do_pseudo_b): Likewise.
+	(do_pseudo_bal): Likewise.
+	(do_pseudo_ls_bhw): Likewise.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* as.c (parse_args): Cast literal to char * when assigning to optarg.
 
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
