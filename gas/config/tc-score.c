@@ -334,7 +334,7 @@ enum s3_insn_type_for_dependency
 
 struct s3_insn_to_dependency
 {
-  char *insn_name;
+  const char *insn_name;
   enum s3_insn_type_for_dependency type;
 };
 
@@ -6344,14 +6344,15 @@ s3_build_dependency_insn_hsh (void)
       const struct s3_insn_to_dependency *tmp = s3_insn_to_dependency_table + i;
       size_t len = strlen (tmp->insn_name);
       struct s3_insn_to_dependency *new_i2n;
+      char *buf;
 
       new_i2n = (struct s3_insn_to_dependency *)
 	obstack_alloc (&dependency_obstack,
 		       sizeof (struct s3_insn_to_dependency));
-      new_i2n->insn_name = (char *) obstack_alloc (&dependency_obstack,
-                                                   len + 1);
+      buf = (char *) obstack_alloc (&dependency_obstack, len + 1);
 
-      strcpy (new_i2n->insn_name, tmp->insn_name);
+      strcpy (buf, tmp->insn_name);
+      new_i2n->insn_name = buf;
       new_i2n->type = tmp->type;
       hash_insert (s3_dependency_insn_hsh, new_i2n->insn_name,
                    (void *) new_i2n);

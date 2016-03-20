@@ -191,7 +191,7 @@ enum s7_insn_type_for_dependency
 
 struct s7_insn_to_dependency
 {
-  char *insn_name;
+  const char *insn_name;
   enum s7_insn_type_for_dependency type;
 };
 
@@ -5121,14 +5121,15 @@ s7_build_dependency_insn_hsh (void)
       const struct s7_insn_to_dependency *tmp = s7_insn_to_dependency_table + i;
       size_t len = strlen (tmp->insn_name);
       struct s7_insn_to_dependency *new_i2d;
+      char *insn_name;
 
       new_i2d = (struct s7_insn_to_dependency *)
           obstack_alloc (&dependency_obstack,
                          sizeof (struct s7_insn_to_dependency));
-      new_i2d->insn_name = (char *) obstack_alloc (&dependency_obstack,
-                                                   len + 1);
+      insn_name = (char *) obstack_alloc (&dependency_obstack, len + 1);
 
-      strcpy (new_i2d->insn_name, tmp->insn_name);
+      strcpy (insn_name, tmp->insn_name);
+      new_i2d->insn_name = insn_name;
       new_i2d->type = tmp->type;
       hash_insert (s7_dependency_insn_hsh, new_i2d->insn_name,
                    (void *) new_i2d);

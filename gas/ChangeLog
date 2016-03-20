@@ -1,5 +1,27 @@
 2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-h8300.c (h8300_elf_section): Add const qualifiers.
+	* config/tc-ia64.c (obj_elf_vms_common): Likewise.
+	* config/tc-m68hc11.c (md_begin): Likewise.
+	(print_opcode_list): Likewise.
+	* config/tc-msp430.c (msp430_section): Likewise.
+	* config/tc-score.c (struct s3_insn_to_dependency): Likewise.
+	(s3_build_dependency_insn_hsh): Likewise.
+	* config/tc-score7.c (struct s7_insn_to_dependency): Likewise.
+	(s7_build_dependency_insn_hsh): Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c (tic54x_set_default_include): Likewise.
+	(subsym_get_arg): Likewise.
+	* config/tc-xtensa.c (struct suffix_reloc_map): Likewise.
+	(get_directive): Likewise.
+	(cache_literal_section): Likewise.
+	* config/xtensa-relax.c: Likewise.
+	* symbols.c (symbol_create): Likewise.
+	(local_symbol_make): Likewise.
+	(symbol_relc_make_expr): Likewise.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-pdp11.c (md_assemble): Remove useless if and assignment to
 	str.
 

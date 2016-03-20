@@ -1239,7 +1239,7 @@ tic4x_inst_insert (const tic4x_inst_t *inst)
 
 /* Make a new instruction template.  */
 static tic4x_inst_t *
-tic4x_inst_make (const char *name, unsigned long opcode, char *args)
+tic4x_inst_make (const char *name, unsigned long opcode, const char *args)
 {
   static tic4x_inst_t *insts = NULL;
   static char *names = NULL;

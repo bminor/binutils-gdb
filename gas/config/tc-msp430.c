@@ -1497,7 +1497,7 @@ static void
 msp430_section (int arg)
 {
   char * saved_ilp = input_line_pointer;
-  char * name = obj_elf_section_name ();
+  const char * name = obj_elf_section_name ();
 
   msp430_make_init_symbols (name);
 

@@ -66,7 +66,7 @@ struct obstack notes;
 const char * an_external_name;
 #endif
 
-static char *save_symbol_name (const char *);
+static const char *save_symbol_name (const char *);
 static void fb_label_init (void);
 static long dollar_label_instance (long);
 static long fb_label_instance (long);
@@ -101,7 +101,7 @@ symbol_new (const char *name, segT segment, valueT valu, fragS *frag)
 /* Save a symbol name on a permanent obstack, and convert it according
    to the object file format.  */
 
-static char *
+static const char *
 save_symbol_name (const char *name)
 {
   size_t name_length;
@@ -132,7 +132,7 @@ symbol_create (const char *name, /* It is copied, the caller can destroy/modify.
 	       valueT valu,	/* Symbol value.  */
 	       fragS *frag	/* Associated fragment.  */)
 {
-  char *preserved_copy_of_name;
+  const char *preserved_copy_of_name;
   symbolS *symbolP;
 
   preserved_copy_of_name = save_symbol_name (name);
@@ -190,7 +190,7 @@ static unsigned long local_symbol_conversion_count;
 struct local_symbol *
 local_symbol_make (const char *name, segT section, valueT val, fragS *frag)
 {
-  char *name_copy;
+  const char *name_copy;
   struct local_symbol *ret;
 
   ++local_symbol_count;
@@ -3109,7 +3109,7 @@ symbol_relc_make_value (offsetT val)
 char *
 symbol_relc_make_expr (expressionS * exp)
 {
-  char * opstr = NULL; /* Operator prefix string.  */
+  const char * opstr = NULL; /* Operator prefix string.  */
   int    arity = 0;    /* Arity of this operator.  */
   char * operands[3];  /* Up to three operands.  */
   char * concat_string = NULL;

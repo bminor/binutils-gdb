@@ -361,7 +361,7 @@ op_placement_info_table op_placement_table;
 
 struct suffix_reloc_map
 {
-  char *suffix;
+  const char *suffix;
   int length;
   bfd_reloc_code_real_type reloc;
   unsigned char operator;
@@ -1244,7 +1244,7 @@ get_directive (directiveE *directive, bfd_boolean *negated)
 {
   int len;
   unsigned i;
-  char *directive_string;
+  const char *directive_string;
 
   if (strncmp (input_line_pointer, "no-", 3) != 0)
     *negated = FALSE;
@@ -2269,7 +2269,7 @@ xg_arg_is_constant (char *arg, offsetT *valp)
 
 
 static void
-xg_replace_opname (char **popname, char *newop)
+xg_replace_opname (char **popname, const char *newop)
 {
   free (*popname);
   *popname = (char *) xmalloc (strlen (newop) + 1);
@@ -2439,8 +2439,8 @@ xtensa_translate_old_userreg_ops (char **popname)
 
 
 static int
-xtensa_translate_zero_immed (char *old_op,
-			     char *new_op,
+xtensa_translate_zero_immed (const char *old_op,
+			     const char *new_op,
 			     char **popname,
 			     int *pnum_args,
 			     char **arg_strings)
@@ -11518,7 +11518,8 @@ static segT
 cache_literal_section (bfd_boolean use_abs_literals)
 {
   const char *text_name, *group_name = 0;
-  char *base_name, *name, *suffix;
+  const char *base_name, *suffix;
+  char *name;
   segT *pcached;
   segT seg, current_section;
   int current_subsec;

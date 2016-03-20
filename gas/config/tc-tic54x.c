@@ -1865,7 +1865,7 @@ tic54x_clink (int ignored ATTRIBUTE_UNUSED)
 static void
 tic54x_set_default_include (int dot)
 {
-  char *dir = ".";
+  const char *dir = ".";
   char *tmp = NULL;
 
   if (!dot)
@@ -2906,7 +2906,7 @@ math_tanh (float arg1, float ignore ATTRIBUTE_UNUSED)
 /* Built-in substitution symbol functions and math functions.  */
 typedef struct
 {
-  char *name;
+  const char *name;
   int (*proc) (char *, char *);
   int nargs;
 } subsym_proc_entry;
@@ -2930,7 +2930,7 @@ static const subsym_proc_entry subsym_procs[] =
 
 typedef struct
 {
-  char *name;
+  const char *name;
   float (*proc) (float, float);
   int nargs;
   int int_return;
@@ -4290,7 +4290,7 @@ tic54x_parse_parallel_insn_lastline (tic54x_insn *insn, char *line)
    replacement on the value.  */
 
 static char *
-subsym_get_arg (char *line, char *terminators, char **str, int nosub)
+subsym_get_arg (char *line, const char *terminators, char **str, int nosub)
 {
   char *ptr = line;
   char *endp;
@@ -4322,7 +4322,7 @@ subsym_get_arg (char *line, char *terminators, char **str, int nosub)
     }
   else
     {
-      char *term = terminators;
+      const char *term = terminators;
       char *value = NULL;
 
       while (*ptr && *ptr != *term)

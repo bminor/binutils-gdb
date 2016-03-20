@@ -603,7 +603,7 @@ cmp_opcode (struct m68hc11_opcode *op1, struct m68hc11_opcode *op2)
 void
 md_begin (void)
 {
-  char *prev_name = "";
+  const char *prev_name = "";
   struct m68hc11_opcode *opcodes;
   struct m68hc11_opcode_def *opc = 0;
   int i, j;
@@ -964,7 +964,7 @@ static void
 print_opcode_list (void)
 {
   int i;
-  char *prev_name = "";
+  const char *prev_name = "";
   struct m68hc11_opcode *opcodes;
   int example = flag_print_opcodes == 2;
 

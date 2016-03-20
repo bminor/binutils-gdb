@@ -134,7 +134,7 @@
 /* Description of a single i80960 instruction */
 struct i960_opcode {
 	long opcode;	/* 32 bits, constant fields filled in, rest zeroed */
-	char *name;	/* Assembler mnemonic				   */
+	const char *name;	/* Assembler mnemonic				   */
 	short iclass;	/* Class: see #defines below			   */
 	char format;	/* REG, COBR, CTRL, MEMn, COJ, FBRA, or CALLJ	   */
 	char num_ops;	/* Number of operands				   */

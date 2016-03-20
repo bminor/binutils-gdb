@@ -1,3 +1,8 @@
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* opcode/i960.h: Add const qualifiers.
+	* opcode/tic4x.h (struct tic4x_inst): Likewise.
+
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* opcodes/arc.h (insn_class_t): Add BITOP type.

@@ -152,7 +152,7 @@ h8300_elf_section (int push)
   static const char * known_data_sections [] = { ".rodata", ".tdata", ".tbss" };
   static const char * known_data_prefixes [] = { ".debug", ".zdebug", ".gnu.warning" };
   char * saved_ilp = input_line_pointer;
-  char * name;
+  const char * name;
 
   name = obj_elf_section_name ();
   if (name == NULL)

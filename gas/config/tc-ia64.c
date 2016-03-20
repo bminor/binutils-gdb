@@ -1045,7 +1045,7 @@ ia64_cons_align (int nbytes)
 static void
 obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
 {
-  char *sec_name;
+  const char *sec_name;
   char *sym_name;
   char c;
   offsetT size;
