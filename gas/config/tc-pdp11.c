@@ -697,8 +697,6 @@ md_assemble (char *instruction_string)
     {
     case PDP11_OPCODE_NO_OPS:
       str = skip_whitespace (str);
-      if (*str == 0)
-	str = "";
       break;
 
     case PDP11_OPCODE_IMM3:

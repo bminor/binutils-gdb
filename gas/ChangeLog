@@ -1,5 +1,10 @@
 2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-pdp11.c (md_assemble): Remove useless if and assignment to
+	str.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-sparc.c (sparc_regname_to_dw2regnum): Replace strchr ()
 	call with a switch.
 
