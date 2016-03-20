@@ -549,7 +549,7 @@ copy_file(const char* inname, const char* outname)
     }
   ssize_t len;
   while ((len = ::read(in, buf, sizeof(buf))) > 0)
-    ::write(out, buf, len);
+    static_cast<void>(::write(out, buf, len));
   ::close(in);
   ::close(out);
   return true;
@@ -669,6 +669,7 @@ Plugin_manager::load_plugins(Layout* layout)
 {
   this->layout_ = layout;
 
+#ifdef ENABLE_PLUGINS
   if (parameters->options().plugin_record())
     {
       this->recorder_ = new Plugin_recorder();
@@ -679,6 +680,7 @@ Plugin_manager::load_plugins(Layout* layout)
        this->current_ != this->plugins_.end();
        ++this->current_)
     (*this->current_)->load();
+#endif // ENABLE_PLUGINS
 }
 
 // Call the plugin claim-file handlers in turn to see if any claim the file.
