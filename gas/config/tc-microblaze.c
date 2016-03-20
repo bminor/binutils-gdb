@@ -840,8 +840,8 @@ parse_cons_expression_microblaze (expressionS *exp, int size)
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
 
-static char * str_microblaze_ro_anchor = "RO";
-static char * str_microblaze_rw_anchor = "RW";
+static const char * str_microblaze_ro_anchor = "RO";
+static const char * str_microblaze_rw_anchor = "RW";
 
 static bfd_boolean
 check_spl_reg (unsigned * reg)
@@ -1014,7 +1014,7 @@ md_assemble (char * str)
 
       if (exp.X_op != O_constant)
 	{
-          char *opc;
+          const char *opc;
 	  relax_substateT subtype;
 
           if (streq (name, "lmi"))
@@ -1039,7 +1039,7 @@ md_assemble (char * str)
 			     subtype,   /* PC-relative or not.  */
 			     exp.X_add_symbol,
 			     exp.X_add_number,
-			     opc);
+			     (char *) opc);
 	  immed = 0;
         }
       else
