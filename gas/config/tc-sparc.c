@@ -4829,18 +4829,25 @@ sparc_cfi_frame_initial_instructions (void)
 int
 sparc_regname_to_dw2regnum (char *regname)
 {
-  char *p, *q;
+  char *q;
+  int i;
 
   if (!regname[0])
     return -1;
 
-  q = "goli";
-  p = strchr (q, regname[0]);
-  if (p)
+  switch (regname[0])
+    {
+    case 'g': i = 0; break;
+    case 'o': i = 1; break;
+    case 'l': i = 2; break;
+    case 'i': i = 3; break;
+    default: i = -1; break;
+    }
+  if (i != -1)
     {
       if (regname[1] < '0' || regname[1] > '8' || regname[2])
 	return -1;
-      return (p - q) * 8 + regname[1] - '0';
+      return i * 8 + regname[1] - '0';
     }
   if (regname[0] == 's' && regname[1] == 'p' && !regname[2])
     return 14;
@@ -4851,7 +4858,7 @@ sparc_regname_to_dw2regnum (char *regname)
       unsigned int regnum;
 
       regnum = strtoul (regname + 1, &q, 10);
-      if (p == q || *q)
+      if (q == NULL || *q)
         return -1;
       if (regnum >= ((regname[0] == 'f'
 		      && SPARC_OPCODE_ARCH_V9_P (max_architecture))

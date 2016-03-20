@@ -1,5 +1,10 @@
 2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-sparc.c (sparc_regname_to_dw2regnum): Replace strchr ()
+	call with a switch.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-ia64.c (ia64_do_align): Remove.
 	(ia64_cons_align): Call do_align () directly.
 	(dot_proc): Likewise.
