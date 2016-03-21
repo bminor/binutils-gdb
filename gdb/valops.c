@@ -3417,7 +3417,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		     constructor.  There is no ambiguity in this case.
 		     We are careful here to allow artificial methods
 		     if they are the unique result.  */
-		  if (TYPE_FN_FIELD_ARTIFICIAL (f, ii))
+		  if (TYPE_FN_FIELD_ARTIFICIAL (f, ii)
+		      || TYPE_FN_FIELD_DUPLICATE (f, ii))
 		    {
 		      if (j == -1)
 			j = ii;
@@ -3426,7 +3427,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
 		  /* Desired method is ambiguous if more than one
 		     method is defined.  */
-		  if (j != -1 && !TYPE_FN_FIELD_ARTIFICIAL (f, j))
+		  if (j != -1 && !TYPE_FN_FIELD_ARTIFICIAL (f, j)
+		      && !TYPE_FN_FIELD_DUPLICATE (f, j))
 		    error (_("non-unique member `%s' requires "
 			     "type instantiation"), name);
 

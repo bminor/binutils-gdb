@@ -1168,8 +1168,9 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		    || is_destructor_name (physname)
 		    || method_name[0] == '~';
 
-		  /* Do not print out artificial methods.  */
-		  if (TYPE_FN_FIELD_ARTIFICIAL (f, j))
+		  /* Do not print out artificial or "duplicate" methods.  */
+		  if (TYPE_FN_FIELD_ARTIFICIAL (f, j)
+		      || TYPE_FN_FIELD_DUPLICATE (f, j))
 		    continue;
 
 		  inner_cleanup = make_cleanup (null_cleanup, NULL);

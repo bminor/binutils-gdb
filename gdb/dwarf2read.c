@@ -77,6 +77,15 @@
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
+static struct partial_die_info *
+find_partial_die_in_comp_unit (sect_offset offset, struct dwarf2_cu *cu);
+
+static struct fn_field
+new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
+	      struct die_info *type_die, struct dwarf2_cu *type_cu,
+	      struct type *type, const char *fieldname,
+	      int fnl_idx, int field_idx);
+
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
@@ -1317,6 +1326,11 @@ struct fnfieldlist
 {
   const char *name;
   int length;
+
+  /* Number of additional fnfield slots to allocate for ctor/dtor
+     aliases.  */
+  int addl_fnfields;
+
   struct nextfnfield *head;
 };
 
@@ -1644,7 +1658,7 @@ static struct using_direct **using_directives (enum language);
 
 static void read_import_statement (struct die_info *die, struct dwarf2_cu *);
 
-static int read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu);
+static int read_imported_decl (struct die_info *die, struct dwarf2_cu *cu);
 
 static struct type *read_module_type (struct die_info *die,
 				      struct dwarf2_cu *cu);
@@ -8320,7 +8334,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_imported_declaration:
       cu->processing_has_namespace_info = 1;
-      if (read_namespace_alias (die, cu))
+      if (read_imported_decl (die, cu))
 	break;
       /* The declaration is not a global namespace alias: fall through.  */
     case DW_TAG_imported_module:
@@ -8813,24 +8827,64 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
   return retval;
 }
 
-/* Inspect DIE in CU for a namespace alias.  If one exists, record
+/* Add a ctor or dtor method or alias to PARENT_TYPE.
+
+   NAME_DIE/NAME_CU is the DIE/CU that contains the name of this xtor.
+   TYPE_DIE/TYPE_CU is the DIE/CU that contains the method to which the
+   name is aliased and may (both) be NULL to indicate
+   that it is the same as NAME_DIE/CU, i.e., not aliased.  */
+
+static void
+add_xtor_field (struct type *parent_type,
+		struct die_info *name_die, struct dwarf2_cu *name_cu,
+		struct die_info *type_die, struct dwarf2_cu *type_cu,
+		const char *name)
+{
+  int i;
+
+  for (i = 0; i < TYPE_NFN_FIELDS (parent_type); ++i)
+    {
+      struct fn_field *methods = TYPE_FN_FIELDLIST1 (parent_type, i);
+
+      if (streq (TYPE_FN_FIELDLIST_NAME (parent_type, i), name))
+	{
+	  short idx;
+
+	  /* Add a new fnfield.  Memory for this was pre-allocated
+	     when we saw the constructor definition in the parent
+	     type.  See struct fnfieldlist.addl_fnfields.  */
+	  idx = (TYPE_FN_FIELDLIST_LENGTH (parent_type, i))++;
+	  methods[idx] = new_fn_field (name_die, name_cu, type_die, type_cu,
+				       parent_type, name, idx, i);
+
+	  /* If this is an aliased xtor, mark it as a duplicate so that
+	     it will be ignored during symbol searches and type printing.  */
+	  if (name_die != type_die)
+	    TYPE_FN_FIELD_DUPLICATE (methods, idx) = 1;
+
+	  return;
+	}
+    }
+}
+
+/* Inspect DIE in CU for a namespace or symbol  alias.  If one exists, record
    a new symbol for it.
 
-   Returns 1 if a namespace alias was recorded, 0 otherwise.  */
+   Returns 1 if an alias was recorded, 0 otherwise.  */
 
 static int
-read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
+read_imported_decl (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *attr;
 
-  /* If the die does not have a name, this is not a namespace
-     alias.  */
+  /* If the die does not have a name, this is not an alias.  */
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr != NULL)
     {
       int num;
       struct die_info *d = die;
       struct dwarf2_cu *imported_cu = cu;
+      const char *name = dwarf2_name (die, cu);
 
       /* If the compiler has nested DW_AT_imported_declaration DIEs,
 	 keep inspecting DIEs until we hit the underlying import.  */
@@ -8866,6 +8920,68 @@ read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
 		 a symbol for it whose type is the aliased namespace.  */
 	      new_symbol (die, type, cu);
 	      return 1;
+	    }
+	  else
+	    {
+	      const char *linkage_name = dw2_linkage_name (die, cu);
+
+	      /* Handle imported (aka "aliased") constructors and
+		 destructors.  */
+	      if (linkage_name != NULL)
+		{
+		  enum ctor_kinds ctor_kind;
+		  enum dtor_kinds dtor_kind = (enum dtor_kinds) 0;
+
+		  ctor_kind = is_constructor_name (linkage_name);
+		  if (ctor_kind == 0)
+		    dtor_kind = is_destructor_name (linkage_name);
+
+		  /* GCC outputs imported_declaration for C1 constructors
+		     and D1 destructors which alias to the C4/D4/unified
+		     ctor/dtor listed in the parent class's DIE tree.
+		     Deal with those here.  */
+		  if (ctor_kind !=  0 || dtor_kind != 0)
+		    {
+		      struct die_info *imported_die, *spec_die, *parent_die;
+		      struct die_info *type_die;
+		      struct dwarf2_cu *imported_cu, *spec_cu, *parent_cu;
+		      struct dwarf2_cu *type_cu;
+		      struct type *parent_type;
+
+		      /* If there is a specification DIE, use that as the
+			 parent DIE.  */
+		      imported_cu = cu;
+		      imported_die = follow_die_ref (die, attr, &imported_cu);
+		      if (imported_die == NULL)
+			return 0;
+
+		      spec_cu = imported_cu;
+		      spec_die = die_specification (imported_die, &spec_cu);
+		      if (spec_die != NULL)
+			{
+			  parent_die = spec_die->parent;
+			  parent_cu = spec_cu;
+			  type_die = spec_die;
+			  type_cu = spec_cu;
+			}
+		      else
+			{
+			  parent_die = imported_die->parent;
+			  parent_cu = imported_cu;
+			  type_die = imported_die;
+			  type_cu = imported_cu;
+			}
+		      parent_type
+			= get_die_type_at_offset (parent_die->offset,
+						  parent_cu->per_cu);
+		      if (parent_type != NULL)
+			{
+			  add_xtor_field (parent_type, die, cu,
+					  type_die, type_cu, name);
+			  return 1;
+			}
+		    }
+		}
 	    }
 	}
     }
@@ -11342,6 +11458,51 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
   do_cleanups (cleanups);
 }
 
+/* If DIE represents a constructor or destructor, add an alias
+   to the parent type's fieldlist.  */
+
+static void
+possibly_add_new_xtor_method (const char *name, struct die_info *die,
+			      struct dwarf2_cu *cu)
+{
+  const char *linkage_name = dw2_linkage_name (die, cu);
+  enum ctor_kinds ctor_kind;
+
+  if (linkage_name == NULL || cu->language != language_cplus)
+    return;
+
+  ctor_kind = is_constructor_name (linkage_name);
+  if (ctor_kind == 0)
+    {
+      enum dtor_kinds dtor_kind = is_destructor_name (linkage_name);
+
+      if (dtor_kind == 0)
+	return;
+    }
+
+  if (dwarf2_attr (die, DW_AT_specification, cu))
+    {
+      struct dwarf2_cu *spec_cu = cu;
+      struct die_info *spec_die = die_specification (die, &spec_cu);
+      const char *spec_linkage_name
+	= dw2_linkage_name (spec_die, spec_cu);
+
+      if (streq (linkage_name, spec_linkage_name))
+	return;
+
+      if (spec_die->parent != NULL)
+	{
+	  int i;
+	  struct type *parent_type;
+
+	  parent_type
+	    = get_die_type_at_offset (spec_die->parent->offset, cu->per_cu);
+
+	  add_xtor_field (parent_type, die, cu, NULL, NULL, name);
+	}
+    }
+}
+
 static void
 read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -11352,7 +11513,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   CORE_ADDR highpc;
   struct die_info *child_die;
   struct attribute *attr, *call_line, *call_file;
-  const char *name;
+  const char *name, *linkage_name;
   CORE_ADDR baseaddr;
   struct block *block;
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
@@ -11515,6 +11676,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      (templ_func->n_template_arguments * sizeof (struct symbol *)));
       VEC_free (symbolp, template_args);
     }
+
+  possibly_add_new_xtor_method (name, die, cu);
 
   /* In C++, we can have functions nested inside functions (e.g., when
      a function declares a class that has methods).  This means that
@@ -12788,7 +12951,16 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
   const char *fieldname;
   const char *type_name;
   int len;
+  const char *linkage_name;
 
+  /* If there is a linkage name, use it to determine if this DIE represents
+     a constructor.  */
+  linkage_name = dw2_linkage_name (die, cu);
+  if (linkage_name != NULL)
+    return is_constructor_name (linkage_name) != 0;
+
+  /* Many older versions of GCC do not output DW_AT_linkage_name for
+     constructors.  In that case, fallback to a heuristic test.  */
   if (die->parent == NULL)
     return 0;
 
@@ -12814,6 +12986,13 @@ static int
 dwarf2_is_destructor (struct die_info *die, struct dwarf2_cu *cu)
 {
   const char *fieldname;
+  const char *linkage_name;
+
+  /* If there is a linkage name, use it to determine if this DIE represents
+     a destructor.  */
+  linkage_name = dw2_linkage_name (die, cu);
+  if (linkage_name != NULL)
+    return is_destructor_name (linkage_name) != 0;
 
   if (die->parent == NULL)
     return 0;
@@ -12827,21 +13006,230 @@ dwarf2_is_destructor (struct die_info *die, struct dwarf2_cu *cu)
   return (fieldname != NULL && *fieldname == '~');
 }
 
+/* Create a new fn_field which may represent an alias to an existing
+   field (if a constructor or destructor).  TYPE_DIE and TYPE_CU
+   may be NULL, in which case they default to NAME_DIE and NAME_CU,
+   i.e., not an aliased method.  */
+
+static struct fn_field
+new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
+	      struct die_info *type_die, struct dwarf2_cu *type_cu,
+	      struct type *type, const char *fieldname,
+	      int fnl_idx, int field_idx)
+{
+  struct fn_field fnfield;
+  struct objfile *objfile;
+  struct attribute *attr;
+  struct type *this_type;
+  enum dwarf_access_attribute accessibility;
+
+  memset (&fnfield, 0, sizeof (fnfield));
+
+  if (type_die == NULL)
+    type_die = name_die;
+  if (type_cu == NULL)
+    type_cu = name_cu;
+
+  objfile = type_cu->objfile;
+
+  /* Delay processing of the physname until later.  */
+  if (type_cu->language == language_cplus || type_cu->language == language_java)
+    {
+      add_to_method_list (type, field_idx, fnl_idx, fieldname,
+			  name_die, name_cu);
+    }
+  else
+    {
+      const char *physname = dwarf2_physname (fieldname, name_die, name_cu);
+      fnfield.physname = physname ? physname : "";
+    }
+
+  fnfield.type = alloc_type (objfile);
+  this_type = read_type_die (type_die, type_cu);
+  if (this_type && TYPE_CODE (this_type) == TYPE_CODE_FUNC)
+    {
+      int nparams = TYPE_NFIELDS (this_type);
+
+      /* TYPE is the domain of this method, and THIS_TYPE is the type
+	   of the method itself (TYPE_CODE_METHOD).  */
+      smash_to_method_type (fnfield.type, type,
+			    TYPE_TARGET_TYPE (this_type),
+			    TYPE_FIELDS (this_type),
+			    TYPE_NFIELDS (this_type),
+			    TYPE_VARARGS (this_type));
+
+      /* Handle static member functions.
+         Dwarf2 has no clean way to discern C++ static and non-static
+         member functions.  G++ helps GDB by marking the first
+         parameter for non-static member functions (which is the this
+         pointer) as artificial.  We obtain this information from
+         read_subroutine_type via TYPE_FIELD_ARTIFICIAL.  */
+      if (nparams == 0 || TYPE_FIELD_ARTIFICIAL (this_type, 0) == 0)
+	fnfield.voffset = VOFFSET_STATIC;
+    }
+  else
+    complaint (&symfile_complaints, _("member function type missing for '%s'"),
+	       dwarf2_full_name (fieldname, name_die, name_cu));
+
+  /* Get fcontext from DW_AT_containing_type if present.  */
+  if (dwarf2_attr (type_die, DW_AT_containing_type, type_cu) != NULL)
+    fnfield.fcontext = die_containing_type (type_die, type_cu);
+
+  /* dwarf2 doesn't have stubbed physical names, so the setting of is_const and
+     is_volatile is irrelevant, as it is needed by gdb_mangle_name only.  */
+
+  /* Get accessibility.  */
+  attr = dwarf2_attr (type_die, DW_AT_accessibility, type_cu);
+  if (attr)
+    accessibility = (enum dwarf_access_attribute) DW_UNSND (attr);
+  else
+    accessibility = dwarf2_default_access_attribute (type_die, type_cu);
+  switch (accessibility)
+    {
+    case DW_ACCESS_private:
+      fnfield.is_private = 1;
+      break;
+    case DW_ACCESS_protected:
+      fnfield.is_protected = 1;
+      break;
+    }
+
+  /* Check for artificial methods.  */
+  attr = dwarf2_attr (type_die, DW_AT_artificial, type_cu);
+  if (attr && DW_UNSND (attr) != 0)
+    fnfield.is_artificial = 1;
+
+  fnfield.is_constructor = dwarf2_is_constructor (name_die, type_cu);
+  if (fnfield.is_constructor)
+    {
+      const char *linkage_name;
+
+      linkage_name = dw2_linkage_name (name_die, name_cu);
+      if (linkage_name == NULL)
+	fnfield.cdtor_type.ctor_kind = unknown_ctor;
+      else
+	{
+	  fnfield.cdtor_type.ctor_kind = is_constructor_name (linkage_name);
+	  gdb_assert (fnfield.cdtor_type.ctor_kind != 0);
+	}
+    }
+  else
+    {
+      fnfield.is_destructor = dwarf2_is_destructor (name_die, name_cu);
+      if (fnfield.is_destructor)
+	{
+	  const char *linkage_name;
+
+	  /* The linkage name can be NULL coming from objfiles created by the
+	     GCC compile plug-in.  This special case should be handled by
+	     dwarf2_add_member_fn.  */
+	  linkage_name = dw2_linkage_name (name_die, name_cu);
+	  if (linkage_name == NULL)
+	    fnfield.cdtor_type.dtor_kind = unknown_dtor;
+	  else
+	    {
+	      fnfield.cdtor_type.dtor_kind = is_destructor_name (linkage_name);
+	      gdb_assert (fnfield.cdtor_type.dtor_kind != 0);
+	    }
+	}
+    }
+
+  /* Get index in virtual function table if it is a virtual member
+     function.  For older versions of GCC, this is an offset in the
+     appropriate virtual table, as specified by DW_AT_containing_type.
+     For everyone else, it is an expression to be evaluated relative
+     to the object address.  */
+
+  attr = dwarf2_attr (type_die, DW_AT_vtable_elem_location, type_cu);
+  if (attr)
+    {
+      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0)
+        {
+	  if (DW_BLOCK (attr)->data[0] == DW_OP_constu)
+	    {
+	      /* Old-style GCC.  */
+	      fnfield.voffset = decode_locdesc (DW_BLOCK (attr), type_cu) + 2;
+	    }
+	  else if (DW_BLOCK (attr)->data[0] == DW_OP_deref
+		   || (DW_BLOCK (attr)->size > 1
+		       && DW_BLOCK (attr)->data[0] == DW_OP_deref_size
+		       && DW_BLOCK (attr)->data[1] == type_cu->header.addr_size))
+	    {
+	      struct dwarf_block blk;
+	      int offset;
+
+	      offset = (DW_BLOCK (attr)->data[0] == DW_OP_deref
+			? 1 : 2);
+	      blk.size = DW_BLOCK (attr)->size - offset;
+	      blk.data = DW_BLOCK (attr)->data + offset;
+	      fnfield.voffset = decode_locdesc (DW_BLOCK (attr), type_cu);
+	      if ((fnfield.voffset % type_cu->header.addr_size) != 0)
+		dwarf2_complex_location_expr_complaint ();
+	      else
+		fnfield.voffset /= type_cu->header.addr_size;
+	      fnfield.voffset += 2;
+	    }
+	  else
+	    dwarf2_complex_location_expr_complaint ();
+
+	  if (!fnfield.fcontext)
+	    {
+	      /* If there is no `this' field and no DW_AT_containing_type,
+		 we cannot actually find a base class context for the
+		 vtable!  */
+	      if (TYPE_NFIELDS (this_type) == 0
+		  || !TYPE_FIELD_ARTIFICIAL (this_type, 0))
+		{
+		  complaint (&symfile_complaints,
+			     _("cannot determine context for virtual member "
+			       "function \"%s\" (offset %d)"),
+			     fieldname, type_die->offset.sect_off);
+		}
+	      else
+		{
+		  fnfield.fcontext
+		    = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (this_type, 0));
+		}
+	    }
+	}
+      else if (attr_form_is_section_offset (attr))
+        {
+	  dwarf2_complex_location_expr_complaint ();
+        }
+      else
+        {
+	  dwarf2_invalid_attrib_class_complaint ("DW_AT_vtable_elem_location",
+						 fieldname);
+        }
+    }
+  else
+    {
+      attr = dwarf2_attr (type_die, DW_AT_virtuality, type_cu);
+      if (attr && DW_UNSND (attr))
+	{
+	  /* GCC does this, as of 2008-08-25; PR debug/37237.  */
+	  complaint (&symfile_complaints,
+		     _("Member function \"%s\" (offset %d) is virtual "
+		       "but the vtable offset is not specified"),
+		     fieldname, type_die->offset.sect_off);
+	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+	  TYPE_CPLUS_DYNAMIC (type) = 1;
+	}
+    }
+
+  return fnfield;
+}
+
 /* Add a member function to the proper fieldlist.  */
 
 static void
 dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 		      struct type *type, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
-  struct attribute *attr;
   struct fnfieldlist *flp;
   int i;
-  struct fn_field *fnp;
-  const char *fieldname;
+  const char *fieldname, *linkage_name;
   struct nextfnfield *new_fnfield;
-  struct type *this_type;
-  enum dwarf_access_attribute accessibility;
 
   if (cu->language == language_ada)
     error (_("unexpected member function in Ada type"));
@@ -12876,6 +13264,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
       flp->name = fieldname;
       flp->length = 0;
       flp->head = NULL;
+      flp->addl_fnfields = 0;
       i = fip->nfnfields++;
     }
 
@@ -12889,184 +13278,20 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   flp->length++;
 
   /* Fill in the member function field info.  */
-  fnp = &new_fnfield->fnfield;
-
-  /* Delay processing of the physname until later.  */
-  if (cu->language == language_cplus || cu->language == language_java)
+  new_fnfield->fnfield = new_fn_field (die, cu, NULL, NULL, type, fieldname,
+				       flp->length - 1, i);
+  /* Reserve additional fnfields for aliased constructors and destructors.  */
+  if (new_fnfield->fnfield.is_constructor)
     {
-      add_to_method_list (type, i, flp->length - 1, fieldname,
-			  die, cu);
+      /* Reserve two additional fields for C1 and C2 aliases.  */
+      /* [We could do this only when we see the C4/unified ctor,
+	 but it is safest to always do this.]  */
+      flp->addl_fnfields += 2;
     }
-  else
+  else if (new_fnfield->fnfield.is_destructor)
     {
-      const char *physname = dwarf2_physname (fieldname, die, cu);
-      fnp->physname = physname ? physname : "";
-    }
-
-  fnp->type = alloc_type (objfile);
-  this_type = read_type_die (die, cu);
-  if (this_type && TYPE_CODE (this_type) == TYPE_CODE_FUNC)
-    {
-      int nparams = TYPE_NFIELDS (this_type);
-
-      /* TYPE is the domain of this method, and THIS_TYPE is the type
-	   of the method itself (TYPE_CODE_METHOD).  */
-      smash_to_method_type (fnp->type, type,
-			    TYPE_TARGET_TYPE (this_type),
-			    TYPE_FIELDS (this_type),
-			    TYPE_NFIELDS (this_type),
-			    TYPE_VARARGS (this_type));
-
-      /* Handle static member functions.
-         Dwarf2 has no clean way to discern C++ static and non-static
-         member functions.  G++ helps GDB by marking the first
-         parameter for non-static member functions (which is the this
-         pointer) as artificial.  We obtain this information from
-         read_subroutine_type via TYPE_FIELD_ARTIFICIAL.  */
-      if (nparams == 0 || TYPE_FIELD_ARTIFICIAL (this_type, 0) == 0)
-	fnp->voffset = VOFFSET_STATIC;
-    }
-  else
-    complaint (&symfile_complaints, _("member function type missing for '%s'"),
-	       dwarf2_full_name (fieldname, die, cu));
-
-  /* Get fcontext from DW_AT_containing_type if present.  */
-  if (dwarf2_attr (die, DW_AT_containing_type, cu) != NULL)
-    fnp->fcontext = die_containing_type (die, cu);
-
-  /* dwarf2 doesn't have stubbed physical names, so the setting of is_const and
-     is_volatile is irrelevant, as it is needed by gdb_mangle_name only.  */
-
-  /* Get accessibility.  */
-  attr = dwarf2_attr (die, DW_AT_accessibility, cu);
-  if (attr)
-    accessibility = (enum dwarf_access_attribute) DW_UNSND (attr);
-  else
-    accessibility = dwarf2_default_access_attribute (die, cu);
-  switch (accessibility)
-    {
-    case DW_ACCESS_private:
-      fnp->is_private = 1;
-      break;
-    case DW_ACCESS_protected:
-      fnp->is_protected = 1;
-      break;
-    }
-
-  /* Check for artificial methods.  */
-  attr = dwarf2_attr (die, DW_AT_artificial, cu);
-  if (attr && DW_UNSND (attr) != 0)
-    fnp->is_artificial = 1;
-
-  fnp->is_constructor = dwarf2_is_constructor (die, cu);
-  if (fnp->is_constructor)
-    {
-      const char *linkage_name;
-
-      linkage_name = dw2_linkage_name (die, cu);
-      if (linkage_name != NULL)
-	{
-	  fnp->cdtor_type.ctor_kind = is_constructor_name (linkage_name);
-	  gdb_assert (fnp->cdtor_type.ctor_kind != 0);
-	}
-    }
-  else
-    {
-      fnp->is_destructor = dwarf2_is_destructor (die, cu);
-      if (fnp->is_destructor)
-	{
-	  const char *linkage_name;
-
-	  linkage_name = dw2_linkage_name (die, cu);
-	  if (linkage_name != NULL)
-	    {
-	      fnp->cdtor_type.dtor_kind = is_destructor_name (linkage_name);
-	      gdb_assert (fnp->cdtor_type.dtor_kind != 0);
-	    }
-	}
-    }
-
-  /* Get index in virtual function table if it is a virtual member
-     function.  For older versions of GCC, this is an offset in the
-     appropriate virtual table, as specified by DW_AT_containing_type.
-     For everyone else, it is an expression to be evaluated relative
-     to the object address.  */
-
-  attr = dwarf2_attr (die, DW_AT_vtable_elem_location, cu);
-  if (attr)
-    {
-      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0)
-        {
-	  if (DW_BLOCK (attr)->data[0] == DW_OP_constu)
-	    {
-	      /* Old-style GCC.  */
-	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu) + 2;
-	    }
-	  else if (DW_BLOCK (attr)->data[0] == DW_OP_deref
-		   || (DW_BLOCK (attr)->size > 1
-		       && DW_BLOCK (attr)->data[0] == DW_OP_deref_size
-		       && DW_BLOCK (attr)->data[1] == cu->header.addr_size))
-	    {
-	      struct dwarf_block blk;
-	      int offset;
-
-	      offset = (DW_BLOCK (attr)->data[0] == DW_OP_deref
-			? 1 : 2);
-	      blk.size = DW_BLOCK (attr)->size - offset;
-	      blk.data = DW_BLOCK (attr)->data + offset;
-	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu);
-	      if ((fnp->voffset % cu->header.addr_size) != 0)
-		dwarf2_complex_location_expr_complaint ();
-	      else
-		fnp->voffset /= cu->header.addr_size;
-	      fnp->voffset += 2;
-	    }
-	  else
-	    dwarf2_complex_location_expr_complaint ();
-
-	  if (!fnp->fcontext)
-	    {
-	      /* If there is no `this' field and no DW_AT_containing_type,
-		 we cannot actually find a base class context for the
-		 vtable!  */
-	      if (TYPE_NFIELDS (this_type) == 0
-		  || !TYPE_FIELD_ARTIFICIAL (this_type, 0))
-		{
-		  complaint (&symfile_complaints,
-			     _("cannot determine context for virtual member "
-			       "function \"%s\" (offset %d)"),
-			     fieldname, die->offset.sect_off);
-		}
-	      else
-		{
-		  fnp->fcontext
-		    = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (this_type, 0));
-		}
-	    }
-	}
-      else if (attr_form_is_section_offset (attr))
-        {
-	  dwarf2_complex_location_expr_complaint ();
-        }
-      else
-        {
-	  dwarf2_invalid_attrib_class_complaint ("DW_AT_vtable_elem_location",
-						 fieldname);
-        }
-    }
-  else
-    {
-      attr = dwarf2_attr (die, DW_AT_virtuality, cu);
-      if (attr && DW_UNSND (attr))
-	{
-	  /* GCC does this, as of 2008-08-25; PR debug/37237.  */
-	  complaint (&symfile_complaints,
-		     _("Member function \"%s\" (offset %d) is virtual "
-		       "but the vtable offset is not specified"),
-		     fieldname, die->offset.sect_off);
-	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
-	  TYPE_CPLUS_DYNAMIC (type) = 1;
-	}
+      /* Reserve three additional fields for D0, D1, and D2 aliases.  */
+      flp->addl_fnfields += 3;
     }
 }
 
@@ -13090,12 +13315,13 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
     {
       struct nextfnfield *nfp = flp->head;
       struct fn_fieldlist *fn_flp = &TYPE_FN_FIELDLIST (type, i);
-      int k;
+      int k, num;
 
       TYPE_FN_FIELDLIST_NAME (type, i) = flp->name;
       TYPE_FN_FIELDLIST_LENGTH (type, i) = flp->length;
+      num = flp->length + flp->addl_fnfields;
       fn_flp->fn_fields = (struct fn_field *)
-	TYPE_ALLOC (type, sizeof (struct fn_field) * flp->length);
+	TYPE_ALLOC (type, sizeof (struct fn_field) * num);
       for (k = flp->length; (k--, nfp); nfp = nfp->next)
 	fn_flp->fn_fields[k] = nfp->fnfield;
     }

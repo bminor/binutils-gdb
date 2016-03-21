@@ -1430,7 +1430,7 @@ gnuv3_is_destructor_name (const char *mangled_name)
     kind = complete_object_dtor;
     break;
   case gnu_v3_base_object_dtor:
-    kind = complete_object_dtor;
+    kind = base_object_dtor;
     break;
   case gnu_v3_unified_dtor:
     kind = unified_dtor;

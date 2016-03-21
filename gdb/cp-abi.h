@@ -53,7 +53,10 @@ enum ctor_kinds {
   unified_ctor,
 
   /* Deprecated?  */
-  object_ctor_group
+  object_ctor_group,
+
+  /* Unknown constructor, e.g., no linkage name.  */
+  unknown_ctor
 };
 
 /* Return non-zero iff NAME is the mangled name of a constructor.
@@ -82,7 +85,10 @@ enum dtor_kinds {
   unified_dtor,
 
   /* Deprecated?  */
-  object_dtor_group
+  object_dtor_group,
+
+  /* Unknown destructor, e.g., no linkage name.  */
+  unknown_dtor
 };
   
 /* Return non-zero iff NAME is the mangled name of a destructor.

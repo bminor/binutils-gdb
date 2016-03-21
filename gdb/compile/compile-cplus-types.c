@@ -31,7 +31,12 @@
 #include "block.h"
 #include "gdbcmd.h"
 
+/* Define to enable debugging messages for context handling.  */
 #define CONTEXT_DEBUG 0
+
+/* Define to enable debugging for ctor/dtor definitions during
+   type conversion.  */
+#define DEBUG_XTOR 0
 
 /* A "type" to indicate that convert_cplus_type should not attempt to
    cache its resultant type.  This is used, for example, when defining
@@ -961,7 +966,6 @@ operator_hash (const char *op)
       break;
     }
 
-  //printf ("hash for %s is %x\n", op, hash);
   return hash;
 }
 
@@ -983,7 +987,6 @@ is_binary_method (const struct type *type)
 
 /* See compile-internal.h.  */
 
-#define DEBUG_XTOR 0
 const char *
 maybe_canonicalize_special_function (const char *field_name,
 				     const struct fn_field *method_field,
@@ -999,6 +1002,10 @@ maybe_canonicalize_special_function (const char *field_name,
     {
       if (method_field->is_constructor)
 	{
+#if DEBUG_XTOR
+	  printf ("*** CONSTRUCTOR %s: ", field_name);
+#endif
+#if CAUSES_ICE
 	  switch (method_field->cdtor_type.ctor_kind)
 	    {
 	    case complete_object_ctor:
@@ -1006,35 +1013,56 @@ maybe_canonicalize_special_function (const char *field_name,
 	      printf ("complete_object_ctor (C1)\n");
 #endif
 	      return "C1";
+
 	    case base_object_ctor:
 #if DEBUG_XTOR
 	      printf ("base_object_ctor (C2)\n");
 #endif
 	      return "C2";
+
 	    case complete_object_allocating_ctor:
+	      *ignore = 1;
 #if DEBUG_XTOR
-	      printf ("complete_object_allocating_ctor (C1)\n");
+	      printf ("complete_object_allocating_ctor -- ignored\n");
 #endif
-	      return "C1";
+	      return field_name; /* C?  */
+
 	    case unified_ctor:
 #if DEBUG_XTOR
-	      printf ("unified_ctor (C4 -- ignore)\n");
+	      printf ("unified_ctor (C4) -- ignored\n");
 #endif
 	      *ignore = 1;
 	      return field_name; /* C4  */
+
 	    case object_ctor_group:
 #if DEBUG_XTOR
-	      printf ("object_ctor_group (C? -- ignore)\n");
+	      printf ("object_ctor_group -- ignored\n");
 #endif
 	      *ignore = 1;
-	      return field_name; /* C1 ??  */
+	      return field_name; /* C?  */
+
+	    case unknown_ctor:
+#if DEBUG_XTOR
+	      printf ("unknown_ctr -- ignored\n");
+#endif
+	      *ignore = 1;
+	      return field_name; /* unknown  */
 
 	    default:
 	      gdb_assert_not_reached ("unknown constructor kind");
 	    }
+#else
+#if DEBUG_XTOR
+	  printf ("DISABLED -- ignored\n");
+#endif
+	  *ignore = 1;
+#endif /* CAUSES_ICE  */
 	}
-      else if (method_field->is_destructor)
+      else  if (method_field->is_destructor)
 	{
+#if DEBUG_XTOR
+	  printf ("*** DESTRUCTOR %s: ", field_name);
+#endif
 	  switch (method_field->cdtor_type.dtor_kind)
 	    {
 	    case deleting_dtor:
@@ -1042,28 +1070,39 @@ maybe_canonicalize_special_function (const char *field_name,
 	      printf ("deleting_dtor (D0)\n");
 #endif
 	      return "D0";
+
 	    case complete_object_dtor:
 #if DEBUG_XTOR
 	      printf ("complete_object_dtor (D1)\n");
 #endif
 	      return "D1";
+
 	    case base_object_dtor:
 #if DEBUG_XTOR
 	      printf ("base_object_dtor (D2)\n");
 #endif
 	      return "D2";
+
 	    case unified_dtor:
 #if DEBUG_XTOR
-	      printf ("unified_dtor (D4 -- ignore)\n");
+	      printf ("unified_dtor (D4) -- ignored\n");
 #endif
 	      *ignore = 1;
 	      return field_name; /* D4  */
+
 	    case object_dtor_group:
 #if DEBUG_XTOR
-	      printf ("object_dtor_group (D? -- ignore)\n");
+	      printf ("object_dtor_group (D?) -- ignored\n");
 #endif
 	      *ignore = 1;
-	      return field_name; /* D1 ??  */
+	      return field_name; /* D?  */
+
+	    case unknown_dtor:
+#if DEBUG_XTOR
+	      printf ("unknown_dtor -- ignored\n");
+#endif
+	      *ignore = 1;
+	      return field_name; /* unknown  */
 
 	    default:
 	      gdb_assert_not_reached ("unknown destructor kind");
@@ -1115,7 +1154,6 @@ maybe_canonicalize_special_function (const char *field_name,
       strcpy (*outname, "li");
       strncat (*outname, field_name, end - field_name);
       (*outname)[len] = '\0';
-      //printf ("GOT LITERAL OPERATOR: %s\n", *outname);
       return "li";
     }
 
@@ -1292,12 +1330,8 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 						      methods[j].type,
 						      &special_name,
 						      &ignore);
-	  /* !!keiths: I don't know if this is really necessary...  */
 	  if (ignore)
-	    {
-	      //printf ("ignoring method %s\n", methods[j].physname);
-	      continue;
-	    }
+	    continue;
 
 	  back_to = make_cleanup (null_cleanup, NULL);
 
@@ -1307,10 +1341,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	      name = special_name;
 	    }
 	  if (name != overloaded_name)
-	    {
-	      //printf ("SPECIAL FUNCTION %s\n", name);
-	      sym_kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
-	    }
+	    sym_kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
 	  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, j),
 			       get_current_search_block (), VAR_DOMAIN, NULL);
 
