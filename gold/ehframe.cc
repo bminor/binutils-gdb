@@ -992,13 +992,68 @@ Eh_frame::read_fde(Sized_relobj_file<size, big_endian>* object,
     return false;
   Cie* cie = pcie->second;
 
+  int pc_size = 0;
+  switch (cie->fde_encoding() & 7)
+    {
+    case elfcpp::DW_EH_PE_udata2:
+      pc_size = 2;
+      break;
+    case elfcpp::DW_EH_PE_udata4:
+      pc_size = 4;
+      break;
+    case elfcpp::DW_EH_PE_udata8:
+      gold_assert(size == 64);
+      pc_size = 8;
+      break;
+    case elfcpp::DW_EH_PE_absptr:
+      pc_size = size == 32 ? 4 : 8;
+      break;
+    default:
+      // All other cases were rejected in Eh_frame::read_cie.
+      gold_unreachable();
+    }
+
   // The FDE should start with a reloc to the start of the code which
   // it describes.
   if (relocs->advance(pfde - pcontents) > 0)
     return false;
-
   if (relocs->next_offset() != pfde - pcontents)
-    return false;
+    {
+      // In an object produced by a relocatable link, gold may have
+      // discarded a COMDAT group in the previous link, but not the
+      // corresponding FDEs. In that case, gold will have discarded
+      // the relocations, so the FDE will have a non-relocatable zero
+      // (regardless of whether the PC encoding is absolute, pc-relative,
+      // or data-relative) instead of a pointer to the start of the code.
+
+      uint64_t pc_value = 0;
+      switch (pc_size)
+	{
+	case 2:
+	  pc_value = elfcpp::Swap<16, big_endian>::readval(pfde);
+	  break;
+	case 4:
+	  pc_value = elfcpp::Swap<32, big_endian>::readval(pfde);
+	  break;
+	case 8:
+	  pc_value = elfcpp::Swap_unaligned<64, big_endian>::readval(pfde);
+	  break;
+	default:
+	  gold_unreachable();
+	}
+
+      if (pc_value == 0)
+	{
+	  // This FDE applies to a discarded function.  We
+	  // can discard this FDE.
+	  object->add_merge_mapping(this, shndx, (pfde - 8) - pcontents,
+				    pfdeend - (pfde - 8), -1);
+	  return true;
+	}
+
+      // Otherwise, reject the FDE.
+      return false;
+    }
 
   unsigned int symndx = relocs->next_symndx();
   if (symndx == -1U)
@@ -1031,23 +1086,18 @@ Eh_frame::read_fde(Sized_relobj_file<size, big_endian>* object,
   // FDE corresponds to a function that was discarded during optimization
   // (too late to discard the corresponding FDE).
   uint64_t address_range = 0;
-  int pc_size = cie->fde_encoding() & 7;
-  if (pc_size == elfcpp::DW_EH_PE_absptr)
-    pc_size = size == 32 ? elfcpp::DW_EH_PE_udata4 : elfcpp::DW_EH_PE_udata8;
   switch (pc_size)
     {
-    case elfcpp::DW_EH_PE_udata2:
+    case 2:
       address_range = elfcpp::Swap<16, big_endian>::readval(pfde + 2);
       break;
-    case elfcpp::DW_EH_PE_udata4:
+    case 4:
       address_range = elfcpp::Swap<32, big_endian>::readval(pfde + 4);
       break;
-    case elfcpp::DW_EH_PE_udata8:
-      gold_assert(size == 64);
+    case 8:
       address_range = elfcpp::Swap_unaligned<64, big_endian>::readval(pfde + 8);
       break;
     default:
-      // All other cases were rejected in Eh_frame::read_cie.
       gold_unreachable();
     }
 

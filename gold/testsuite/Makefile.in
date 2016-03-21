@@ -72,7 +72,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.sh weak_plt.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test_2.sh two_file_shared.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = incremental_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
@@ -95,6 +96,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test_2.sects \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = incremental_test \
@@ -119,6 +121,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test_2.sects \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libweak_undef_2.a
@@ -4496,6 +4499,8 @@ icf_sht_rel_addend_test.sh.log: icf_sht_rel_addend_test.sh
 	@p='icf_sht_rel_addend_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 merge_string_literals.sh.log: merge_string_literals.sh
 	@p='merge_string_literals.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+eh_test_2.sh.log: eh_test_2.sh
+	@p='eh_test_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_shared.sh.log: two_file_shared.sh
 	@p='two_file_shared.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 weak_plt.sh.log: weak_plt.sh
@@ -5295,6 +5300,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test: eh_test_a.o eh_test_b.o  gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK_S) -Bgcctestdir/ eh_test_a.o eh_test_b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test_r.o: eh_test_a.o eh_test_b.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ eh_test_a.o eh_test_b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test_2: eh_test_r.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK_S) -Bgcctestdir/ -Wl,--eh-frame-hdr eh_test_r.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test_2.sects: eh_test_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW $< >$@ 2>/dev/null
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@basic_static_test: basic_test.o gcctestdir/ld
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -static basic_test.o
 

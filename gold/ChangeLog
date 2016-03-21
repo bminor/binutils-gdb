@@ -1,3 +1,13 @@
+2016-03-20  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19002
+	* ehframe.cc (Eh_frame::read_fde): Check for dropped functions.
+	* testsuite/Makefile.am (eh_test_2): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/eh_test_2.sh: New test script.
+	* testsuite/eh_test_a.cc (bar): Make it comdat.
+	* testsuite/eh_test_b.cc (bar): Add a duplicate copy.
+
 2016-03-18  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
 
 	* mips.cc (Mips_relobj::is_n64_): Remove.
