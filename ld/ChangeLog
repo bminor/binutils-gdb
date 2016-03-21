@@ -1,3 +1,9 @@
+2016-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/msp430.em: Replace use of alloca with call to xmalloc.
+	* plugin.c: Likewise.
+	* pe-dll.c: Likewise.
+
 2016-03-18  Awson  <kyrab@mail.ru>
 
 	PR 19531

@@ -322,7 +322,6 @@ tic54x_asg (int x ATTRIBUTE_UNUSED)
   int c;
   char *name;
   char *str;
-  char *tmp;
   int quoted = *input_line_pointer == '"';
 
   ILLEGAL_WITHIN_STRUCT ();
@@ -360,12 +359,8 @@ tic54x_asg (int x ATTRIBUTE_UNUSED)
       return;
     }
 
-  tmp = xmalloc (strlen (str) + 1);
-  strcpy (tmp, str);
-  str = tmp;
-  tmp = xmalloc (strlen (name) + 1);
-  strcpy (tmp, name);
-  name = tmp;
+  str = xstrdup (str);
+  name = xstrdup (name);
   subsym_create_or_replace (name, str);
   (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
@@ -549,21 +544,16 @@ stag_add_field_symbols (struct stag *stag,
 			symbolS *rootsym,
 			const char *root_stag_name)
 {
-  char prefix[strlen (path) + 2];
+  char * prefix;
   struct stag_field *field = stag->field;
 
   /* Construct a symbol for every field contained within this structure
      including fields within structure fields.  */
-  strcpy (prefix, path);
-  if (*path)
-    strcat (prefix, ".");
+  prefix = concat (path, *path ? "." : "", NULL);
 
   while (field != NULL)
     {
-      int len = strlen (prefix) + strlen (field->name) + 2;
-      char *name = xmalloc (len);
-      strcpy (name, prefix);
-      strcat (name, field->name);
+      char *name = concat (prefix, field->name, NULL);
 
       if (rootsym == NULL)
 	{
@@ -577,12 +567,10 @@ stag_add_field_symbols (struct stag *stag,
 	}
       else
 	{
-	  char *replacement = xmalloc (strlen (name)
-				       + strlen (stag->name) + 2);
-	  strcpy (replacement, S_GET_NAME (rootsym));
-	  strcat (replacement, "+");
-	  strcat (replacement, root_stag_name);
-	  strcat (replacement, name + strlen (S_GET_NAME (rootsym)));
+	  char *replacement;
+
+	  replacement = concat (S_GET_NAME (rootsym), "+", root_stag_name,
+				name + strlen (S_GET_NAME (rootsym)), NULL);
 	  hash_insert (subsym_hash[0], name, replacement);
 	}
 
@@ -593,7 +581,9 @@ stag_add_field_symbols (struct stag *stag,
 				field->offset,
 				rootsym, root_stag_name);
       field = field->next;
+      free (name);
     }
+  free (prefix);
 }
 
 /* Keep track of stag fields so that when structures are nested we can add the
@@ -695,11 +685,12 @@ tic54x_struct (int arg)
     }
   else
     {
-      char label[strlen (S_GET_NAME (line_label)) + 1];
-      strcpy (label, S_GET_NAME (line_label));
-      current_stag->sym = symbol_new (label, absolute_section,
+      char * label = xstrdup (S_GET_NAME (line_label));
+      current_stag->sym = symbol_new (label,
+				      absolute_section,
 				      (valueT) abs_section_offset,
 				      &zero_address_frag);
+      free (label);
     }
   current_stag->name = S_GET_NAME (current_stag->sym);
   SF_SET_LOCAL (current_stag->sym);
@@ -803,9 +794,9 @@ tic54x_tag (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      char label[strlen (S_GET_NAME (line_label)) + 1];
+      char * label;
 
-      strcpy (label, S_GET_NAME (line_label));
+      label = xstrdup (S_GET_NAME (line_label));
       if (current_stag != NULL)
 	stag_add_field (current_stag, label,
 			abs_section_offset - S_GET_VALUE (current_stag->sym),
@@ -818,11 +809,13 @@ tic54x_tag (int ignore ATTRIBUTE_UNUSED)
 	    {
 	      as_bad (_(".tag target '%s' undefined"), label);
 	      ignore_rest_of_line ();
+	      free (label);
 	      return;
 	    }
 	  stag_add_field_symbols (stag, S_GET_NAME (sym),
 				  S_GET_VALUE (stag->sym), sym, stag->name);
 	}
+      free (label);
     }
 
   /* Bump by the struct size, but only if we're within a .struct section.  */
@@ -933,12 +926,13 @@ tic54x_struct_field (int type)
     }
   else
     {
-      char label[strlen (S_GET_NAME (line_label) + 1)];
+      char * label;
 
-      strcpy (label, S_GET_NAME (line_label));
+      label = xstrdup (S_GET_NAME (line_label));
       stag_add_field (current_stag, label,
 		      abs_section_offset - S_GET_VALUE (current_stag->sym),
 		      NULL);
+      free (label);
     }
 
   if (current_stag->is_union)
@@ -4528,7 +4522,7 @@ subsym_substitute (char *line, int forced)
 	      if (value == NULL)
 		{
 		  char digit[11];
-		  char *namecopy = strcpy (xmalloc (strlen (name) + 1), name);
+		  char *namecopy = xstrdup (name);
 
 		  value = strcpy (xmalloc (strlen (name) + sizeof (digit) + 1),
 				  name);
@@ -4653,7 +4647,7 @@ subsym_substitute (char *line, int forced)
 		 substitutions are performed, or a substitution that has been
 		 previously made is encountered again.
 
-		 put the symbol into the recursion hash table so we only
+		 Put the symbol into the recursion hash table so we only
 		 try to replace a symbol once.  */
 	      if (recurse)
 		{

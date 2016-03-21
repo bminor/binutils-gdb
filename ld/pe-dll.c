@@ -894,17 +894,17 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
   for (i = 0; i < NE; i++)
     {
+      char *int_name = pe_def_file->exports[i].internal_name;
       char *name;
 
-      name = xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
-      if (pe_details->underscored
- 	  && (*pe_def_file->exports[i].internal_name != '@'))
+      name = xmalloc (strlen (int_name) + 2);
+      if (pe_details->underscored && int_name[0] != '@')
 	{
 	  *name = '_';
-	  strcpy (name + 1, pe_def_file->exports[i].internal_name);
+	  strcpy (name + 1, int_name);
 	}
       else
-	strcpy (name, pe_def_file->exports[i].internal_name);
+	strcpy (name, int_name);
 
       blhe = bfd_link_hash_lookup (info->hash,
 				   name,
@@ -940,7 +940,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	 but we must take care not to be fooled when the user wants to export
 	 a symbol that actually really has a dot in it, so we only check
 	 for them here, after real defined symbols have already been matched.  */
-      else if (strchr (pe_def_file->exports[i].internal_name, '.'))
+      else if (strchr (int_name, '.'))
 	{
 	  count_exported++;
 	  if (!pe_def_file->exports[i].flag_noname)
@@ -961,20 +961,20 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	{
 	  /* xgettext:c-format */
 	  einfo (_("%XCannot export %s: symbol not defined\n"),
-		 pe_def_file->exports[i].internal_name);
+		 int_name);
 	}
       else if (blhe)
 	{
 	  /* xgettext:c-format */
 	  einfo (_("%XCannot export %s: symbol wrong type (%d vs %d)\n"),
-		 pe_def_file->exports[i].internal_name,
+		 int_name,
 		 blhe->type, bfd_link_hash_defined);
 	}
       else
 	{
 	  /* xgettext:c-format */
 	  einfo (_("%XCannot export %s: symbol not found\n"),
-		 pe_def_file->exports[i].internal_name);
+		 int_name);
 	}
       free (name);
     }
@@ -2884,7 +2884,7 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
   struct bfd_link_hash_entry *h = NULL;
   struct key_value *kv;
   struct key_value key;
-  char *at, *lname = (char *) alloca (strlen (name) + 3);
+  char *at, *lname = xmalloc (strlen (name) + 3);
 
   strcpy (lname, name);
 
@@ -2900,10 +2900,12 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
     {
       h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
       if (h->type == bfd_link_hash_undefined)
-        return h;
+        goto return_h;
     }
+
   if (lname[0] == '?')
-    return NULL;
+    goto return_NULL;
+
   if (at || lname[0] == '@')
     {
       if (lname[0] == '@')
@@ -2919,7 +2921,7 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
 	    {
 	      h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
 	      if (h->type == bfd_link_hash_undefined)
-		return h;
+		goto return_h;
 	    }
 	}
       if (at)
@@ -2931,9 +2933,9 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
 	{
 	  h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
 	  if (h->type == bfd_link_hash_undefined)
-	    return h;
+	    goto return_h;
 	}
-      return NULL;
+      goto return_NULL;
     }
 
   strcat (lname, "@");
@@ -2945,7 +2947,7 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
     {
       h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
       if (h->type == bfd_link_hash_undefined)
-	return h;
+	goto return_h;
     }
 
   if (lname[0] == '_' && pe_details->underscored)
@@ -2964,10 +2966,14 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
     {
       h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
       if (h->type == bfd_link_hash_undefined)
-        return h;
+        goto return_h;
     }
 
-  return NULL;
+ return_NULL:
+  h = NULL;
+ return_h:
+  free (lname);
+  return h;
 }
 
 static bfd_boolean

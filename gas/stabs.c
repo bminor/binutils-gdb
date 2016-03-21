@@ -500,9 +500,9 @@ stabs_generate_asm_file (void)
       char *dir2;
 
       dir = remap_debug_filename (getpwd ());
-      dir2 = (char *) alloca (strlen (dir) + 2);
-      sprintf (dir2, "%s%s", dir, "/");
+      dir2 = concat (dir, "/", NULL);
       generate_asm_file (N_SO, dir2);
+      free (dir2);
       xfree ((char *) dir);
     }
   generate_asm_file (N_SO, file);
@@ -635,13 +635,13 @@ stabs_generate_asm_lineno (void)
 
   if (in_dot_func_p)
     {
-      buf = (char *) alloca (100 + strlen (current_function_label));
+      buf = (char *) xmalloc (100 + strlen (current_function_label));
       sprintf (buf, "%d,0,%d,%s-%s\n", N_SLINE, lineno,
 	       sym, current_function_label);
     }
   else
     {
-      buf = (char *) alloca (100);
+      buf = (char *) xmalloc (100);
       sprintf (buf, "%d,0,%d,%s\n", N_SLINE, lineno, sym);
     }
   input_line_pointer = buf;
@@ -650,6 +650,7 @@ stabs_generate_asm_lineno (void)
 
   input_line_pointer = hold;
   outputting_stabs_line_debug = 0;
+  free (buf);
 }
 
 /* Emit a function stab.

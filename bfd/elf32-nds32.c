@@ -2300,7 +2300,7 @@ nds32_insertion_sort (void *base, size_t nmemb, size_t size,
 {
   char *ptr = (char *) base;
   int i, j;
-  char *tmp = alloca (size);
+  char *tmp = xmalloc (size);
 
   /* If i is less than j, i is inserted before j.
 
@@ -2324,6 +2324,7 @@ nds32_insertion_sort (void *base, size_t nmemb, size_t size,
       memmove (ptr + (j + 1) * size, ptr + j * size, (i - j) * size);
       memcpy (ptr + j * size, tmp, size);
     }
+  free (tmp);
 }
 
 /* Sort relocation by r_offset.

@@ -1804,7 +1804,7 @@ bfd_sym_print_type_information_table_entry (bfd *abfd,
 
   fprintf (f, "\n            ");
 
-  buf = alloca (entry->physical_size);
+  buf = malloc (entry->physical_size);
   if (buf == NULL)
     {
       fprintf (f, "[ERROR]\n");
@@ -1813,11 +1813,13 @@ bfd_sym_print_type_information_table_entry (bfd *abfd,
   if (bfd_seek (abfd, entry->offset, SEEK_SET) < 0)
     {
       fprintf (f, "[ERROR]\n");
+      free (buf);
       return;
     }
   if (bfd_bread (buf, entry->physical_size, abfd) != entry->physical_size)
     {
       fprintf (f, "[ERROR]\n");
+      free (buf);
       return;
     }
 
@@ -1837,6 +1839,7 @@ bfd_sym_print_type_information_table_entry (bfd *abfd,
 
   if (offset != entry->physical_size)
     fprintf (f, "\n            [parser used %lu bytes instead of %lu]", offset, entry->physical_size);
+  free (buf);
 }
 
 void

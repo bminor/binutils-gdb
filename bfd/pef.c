@@ -217,7 +217,7 @@ bfd_pef_print_symbol (bfd *abfd,
       fprintf (file, " %-5s %s", symbol->section->name, symbol->name);
       if (CONST_STRNEQ (symbol->name, "__traceback_"))
 	{
-	  unsigned char *buf = alloca (symbol->udata.i);
+	  unsigned char *buf = xmalloc (symbol->udata.i);
 	  size_t offset = symbol->value + 4;
 	  size_t len = symbol->udata.i;
 	  int ret;
@@ -227,6 +227,7 @@ bfd_pef_print_symbol (bfd *abfd,
 					       len, 0, NULL, file);
 	  if (ret < 0)
 	    fprintf (file, " [ERROR]");
+	  free (buf);
 	}
     }
 }

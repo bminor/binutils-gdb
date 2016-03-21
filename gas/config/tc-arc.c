@@ -2894,7 +2894,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
     case OPTION_MCPU:
       {
 	int i;
-	char *s = alloca (strlen (arg) + 1);
+	char *s = xmalloc (strlen (arg) + 1);
 
 	{
 	  char *t = s;
@@ -2907,7 +2907,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 
 	for (i = 0; cpu_types[i].name; ++i)
 	  {
-	    if (!strcmp (cpu_types[i].name, s))
+	    if (strcmp (cpu_types[i].name, s) == 0)
 	      {
 		arc_target      = cpu_types[i].flags;
 		arc_target_name = cpu_types[i].name;
@@ -2921,9 +2921,8 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 	  }
 
 	if (!cpu_types[i].name)
-	  {
-	    as_fatal (_("unknown architecture: %s\n"), arg);
-	  }
+	  as_fatal (_("unknown architecture: %s\n"), arg);
+	free (s);
 	break;
       }
 

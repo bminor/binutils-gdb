@@ -2292,7 +2292,6 @@ build_relax (sh_opcode_info *opcode, sh_operand_info *op)
 static char *
 insert_loop_bounds (char *output, sh_operand_info *operand)
 {
-  char *name;
   symbolS *end_sym;
 
   /* Since the low byte of the opcode will be overwritten by the reloc, we
@@ -2305,6 +2304,7 @@ insert_loop_bounds (char *output, sh_operand_info *operand)
   if (sh_relax)
     {
       static int count = 0;
+      char name[11];
 
       /* If the last loop insn is a two-byte-insn, it is in danger of being
 	 swapped with the insn after it.  To prevent this, create a new
@@ -2313,7 +2313,6 @@ insert_loop_bounds (char *output, sh_operand_info *operand)
 	 right in the middle, but four byte insns are not swapped anyways.  */
       /* A REPEAT takes 6 bytes.  The SH has a 32 bit address space.
 	 Hence a 9 digit number should be enough to count all REPEATs.  */
-      name = alloca (11);
       sprintf (name, "_R%x", count++ & 0x3fffffff);
       end_sym = symbol_new (name, undefined_section, 0, &zero_address_frag);
       /* Make this a local symbol.  */

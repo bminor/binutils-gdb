@@ -3566,7 +3566,6 @@ start_unwind_section (const segT text_seg, int sec_index)
   char *sec_name;
   const char *prefix = special_section_name [sec_index];
   const char *suffix;
-  size_t prefix_len, suffix_len, sec_name_len;
 
   sec_text_name = segment_name (text_seg);
   text_name = sec_text_name;
@@ -3590,20 +3589,13 @@ start_unwind_section (const segT text_seg, int sec_index)
       suffix += sizeof (".gnu.linkonce.t.") - 1;
     }
 
-  prefix_len = strlen (prefix);
-  suffix_len = strlen (suffix);
-  sec_name_len = prefix_len + suffix_len;
-  sec_name = alloca (sec_name_len + 1);
-  memcpy (sec_name, prefix, prefix_len);
-  memcpy (sec_name + prefix_len, suffix, suffix_len);
-  sec_name [sec_name_len] = '\0';
+  sec_name = concat (prefix, suffix, NULL);
 
   /* Handle COMDAT group.  */
   if ((text_seg->flags & SEC_LINK_ONCE) != 0
       && (elf_section_flags (text_seg) & SHF_GROUP) != 0)
     {
       char *section;
-      size_t len, group_name_len;
       const char *group_name = elf_group_name (text_seg);
 
       if (group_name == NULL)
@@ -3611,22 +3603,14 @@ start_unwind_section (const segT text_seg, int sec_index)
 	  as_bad (_("Group section `%s' has no group signature"),
 		  sec_text_name);
 	  ignore_rest_of_line ();
+	  free (sec_name);
 	  return;
 	}
-      /* We have to construct a fake section directive. */
-      group_name_len = strlen (group_name);
-      len = (sec_name_len
-	     + 16			/* ,"aG",@progbits,  */
-	     + group_name_len		/* ,group_name  */
-	     + 7);			/* ,comdat  */
 
-      section = alloca (len + 1);
-      memcpy (section, sec_name, sec_name_len);
-      memcpy (section + sec_name_len, ",\"aG\",@progbits,", 16);
-      memcpy (section + sec_name_len + 16, group_name, group_name_len);
-      memcpy (section + len - 7, ",comdat", 7);
-      section [len] = '\0';
+      /* We have to construct a fake section directive.  */
+      section = concat (sec_name, ",\"aG\",@progbits,", group_name, ",comdat", NULL);
       set_section (section);
+      free (section);
     }
   else
     {
@@ -3636,6 +3620,7 @@ start_unwind_section (const segT text_seg, int sec_index)
     }
 
   elf_linked_to_section (now_seg) = text_seg;
+  free (sec_name);
 }
 
 static void
@@ -8078,8 +8063,7 @@ ia64_parse_name (char *name, expressionS *e, char *nextcharP)
 	}
     }
 
-  end = alloca (strlen (name) + 1);
-  strcpy (end, name);
+  end = xstrdup (name);
   name = ia64_canonicalize_symbol_name (end);
   if ((dr = hash_find (md.dynreg_hash, name)))
     {
@@ -8089,8 +8073,10 @@ ia64_parse_name (char *name, expressionS *e, char *nextcharP)
 	 bits.  */
       e->X_op = O_register;
       e->X_add_number = dr->base | (dr->num_regs << 16);
+      free (end);
       return 1;
     }
+  free (end);
   return 0;
 }
 

@@ -73,19 +73,13 @@ const char *
 remap_debug_filename (const char *filename)
 {
   debug_prefix_map *map;
-  char *s;
-  const char *name;
-  size_t name_len;
 
   for (map = debug_prefix_maps; map; map = map->next)
     if (filename_ncmp (filename, map->old_prefix, map->old_len) == 0)
-      break;
-  if (!map)
-    return xstrdup (filename);
-  name = filename + map->old_len;
-  name_len = strlen (name) + 1;
-  s = (char *) alloca (name_len + map->new_len);
-  memcpy (s, map->new_prefix, map->new_len);
-  memcpy (s + map->new_len, name, name_len);
-  return xstrdup (s);
+      {
+	const char *name = filename + map->old_len;
+	return concat (map->new_prefix, name, NULL);
+      }
+	
+  return xstrdup (filename);
 }

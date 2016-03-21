@@ -1,3 +1,17 @@
+2016-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* warning.m4 (GCC_WARN_CFLAGS): Add -Wstack-usage=262144
+	* configure: Regenerate.
+	* elf32-m68hc1x.c (elf32_m68hc11_relocate_section): Replace use of
+	alloca with call to xmalloc.
+	* elf32-nds32.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* pef.c: Likewise.
+	* pei-x86_64.c: Likewise.
+	* som.c: Likewise.
+	* xsym.c: Likewise.
+
 2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19827

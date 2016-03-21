@@ -743,34 +743,40 @@ symbol_find (const char *name)
 symbolS *
 symbol_find_noref (const char *name, int noref)
 {
+  symbolS * result;
+  char * copy = NULL;
+
 #ifdef tc_canonicalize_symbol_name
   {
-    char *copy;
-    size_t len = strlen (name) + 1;
-
-    copy = (char *) alloca (len);
-    memcpy (copy, name, len);
+    copy = xstrdup (name);
     name = tc_canonicalize_symbol_name (copy);
   }
 #endif
 
   if (! symbols_case_sensitive)
     {
-      char *copy;
       const char *orig;
+      char *copy2 = NULL;
       unsigned char c;
 
       orig = name;
-      name = copy = (char *) alloca (strlen (name) + 1);
+      if (copy != NULL)
+	copy2 = copy;
+      name = copy = xmalloc (strlen (name) + 1);
 
       while ((c = *orig++) != '\0')
-	{
-	  *copy++ = TOUPPER (c);
-	}
+	*copy++ = TOUPPER (c);
       *copy = '\0';
+
+      if (copy2 != NULL)
+	free (copy2);
+      copy = (char *) name;
     }
 
-  return symbol_find_exact_noref (name, noref);
+  result = symbol_find_exact_noref (name, noref);
+  if (copy != NULL)
+    free (copy);
+  return result;
 }
 
 /* Once upon a time, symbols were kept in a singly linked list.  At

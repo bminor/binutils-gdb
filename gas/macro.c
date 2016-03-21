@@ -1250,13 +1250,14 @@ check_macro (const char *line, sb *expand,
   if (is_name_ender (*s))
     ++s;
 
-  copy = (char *) alloca (s - line + 1);
+  copy = (char *) xmalloc (s - line + 1);
   memcpy (copy, line, s - line);
   copy[s - line] = '\0';
   for (cls = copy; *cls != '\0'; cls ++)
     *cls = TOLOWER (*cls);
 
   macro = (macro_entry *) hash_find (macro_hash, copy);
+  free (copy);
 
   if (macro == NULL)
     return 0;
@@ -1288,7 +1289,7 @@ delete_macro (const char *name)
   macro_entry *macro;
 
   len = strlen (name);
-  copy = (char *) alloca (len + 1);
+  copy = (char *) xmalloc (len + 1);
   for (i = 0; i < len; ++i)
     copy[i] = TOLOWER (name[i]);
   copy[i] = '\0';
@@ -1303,6 +1304,7 @@ delete_macro (const char *name)
     }
   else
     as_warn (_("Attempt to purge non-existant macro `%s'"), copy);
+  free (copy);
 }
 
 /* Handle the MRI IRP and IRPC pseudo-ops.  These are handled as a

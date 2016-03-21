@@ -26,7 +26,7 @@
 #include "elf/hppa.h"
 #include "libhppa.h"
 #include "elf64-hppa.h"
-
+#include "libiberty.h"
 
 #define ARCH_SIZE	       64
 
@@ -1094,20 +1094,18 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 	      char *new_name;
 	      struct elf_link_hash_entry *nh;
 
-	      new_name = alloca (strlen (eh->root.root.string) + 2);
-	      new_name[0] = '.';
-	      strcpy (new_name + 1, eh->root.root.string);
+	      new_name = concat (".", eh->root.root.string, NULL);
 
 	      nh = elf_link_hash_lookup (elf_hash_table (x->info),
 					 new_name, TRUE, TRUE, TRUE);
 
+	      free (new_name);
 	      nh->root.type = eh->root.type;
 	      nh->root.u.def.value = eh->root.u.def.value;
 	      nh->root.u.def.section = eh->root.u.def.section;
 
 	      if (! bfd_elf_link_record_dynamic_symbol (x->info, nh))
 		return FALSE;
-
 	     }
 	  hh->opd_offset = x->ofs;
 	  x->ofs += OPD_ENTRY_SIZE;
@@ -2205,9 +2203,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 	  char *new_name;
 	  struct elf_link_hash_entry *nh;
 
-	  new_name = alloca (strlen (eh->root.root.string) + 2);
-	  new_name[0] = '.';
-	  strcpy (new_name + 1, eh->root.root.string);
+	  new_name = concat (".", eh->root.root.string, NULL);
 
 	  nh = elf_link_hash_lookup (elf_hash_table (info),
 				     new_name, TRUE, TRUE, FALSE);
@@ -2216,6 +2212,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 	     symbol index.  */
 	  if (nh)
 	    dynindx = nh->dynindx;
+	  free (new_name);
 	}
 
       rel.r_addend = 0;

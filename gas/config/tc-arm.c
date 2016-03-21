@@ -2255,7 +2255,7 @@ create_register_alias (char * newname, char *p)
   nlen = strlen (newname);
 #endif
 
-  nbuf = (char *) alloca (nlen + 1);
+  nbuf = xmalloc (nlen + 1);
   memcpy (nbuf, newname, nlen);
   nbuf[nlen] = '\0';
 
@@ -2279,7 +2279,10 @@ create_register_alias (char * newname, char *p)
 	     the artificial FOO alias because it has already been created by the
 	     first .req.  */
 	  if (insert_reg_alias (nbuf, old->number, old->type) == NULL)
-	    return TRUE;
+	    {
+	      free (nbuf);
+	      return TRUE;
+	    }
 	}
 
       for (p = nbuf; *p; p++)
@@ -2289,6 +2292,7 @@ create_register_alias (char * newname, char *p)
 	insert_reg_alias (nbuf, old->number, old->type);
     }
 
+  free (nbuf);
   return TRUE;
 }
 
@@ -2416,7 +2420,7 @@ create_neon_reg_alias (char *newname, char *p)
   namelen = strlen (newname);
 #endif
 
-  namebuf = (char *) alloca (namelen + 1);
+  namebuf = xmalloc (namelen + 1);
   strncpy (namebuf, newname, namelen);
   namebuf[namelen] = '\0';
 
@@ -2439,6 +2443,7 @@ create_neon_reg_alias (char *newname, char *p)
     insert_neon_reg_alias (namebuf, basereg->number, basetype,
 			   typeinfo.defined != 0 ? &typeinfo : NULL);
 
+  free (namebuf);
   return TRUE;
 }
 
@@ -2754,8 +2759,9 @@ find_real_start (symbolS * symbolP)
   if (S_IS_LOCAL (symbolP) || name[0] == '.')
     return symbolP;
 
-  real_start = ACONCAT ((STUB_NAME, name, NULL));
+  real_start = concat (STUB_NAME, name, NULL);
   new_target = symbol_find (real_start);
+  free (real_start);
 
   if (new_target == NULL)
     {
@@ -3529,7 +3535,8 @@ s_arm_elf_cons (int nbytes)
 		     XXX Surely there is a cleaner way to do this.  */
 		  char *p = input_line_pointer;
 		  int offset;
-		  char *save_buf = (char *) alloca (input_line_pointer - base);
+		  char *save_buf = xmalloc (input_line_pointer - base);
+
 		  memcpy (save_buf, base, input_line_pointer - base);
 		  memmove (base + (input_line_pointer - before_reloc),
 			   base, before_reloc - base);
@@ -3543,6 +3550,7 @@ s_arm_elf_cons (int nbytes)
 		  memset (p, 0, nbytes);
 		  fix_new_exp (frag_now, p - frag_now->fr_literal + offset,
 			       size, &exp, 0, (enum bfd_reloc_code_real) reloc);
+		  free (save_buf);
 		}
 	    }
 	}
@@ -14852,13 +14860,15 @@ do_neon_addsub_if_i (void)
 static void
 neon_exchange_operands (void)
 {
-  void *scratch = alloca (sizeof (inst.operands[0]));
   if (inst.operands[1].present)
     {
+      void *scratch = xmalloc (sizeof (inst.operands[0]));
+
       /* Swap operands[1] and operands[2].  */
       memcpy (scratch, &inst.operands[1], sizeof (inst.operands[0]));
       inst.operands[1] = inst.operands[2];
       memcpy (&inst.operands[2], scratch, sizeof (inst.operands[0]));
+      free (scratch);
     }
   else
     {

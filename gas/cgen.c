@@ -891,7 +891,6 @@ gas_cgen_md_apply_fix (fixP, valP, seg)
       const CGEN_OPERAND *operand = cgen_operand_lookup_by_num (cd, opindex);
       const char *errmsg;
       bfd_reloc_code_real_type reloc_type;
-      CGEN_FIELDS *fields = alloca (CGEN_CPU_SIZEOF_FIELDS (cd));
       const CGEN_INSN *insn = fixP->fx_cgen.insn;
 #ifdef OBJ_COMPLEX_RELC
       int start;
@@ -927,6 +926,8 @@ gas_cgen_md_apply_fix (fixP, valP, seg)
 	     finish the job.  Testing for pcrel is a temporary hack.  */
 	  || fixP->fx_pcrel)
 	{
+	  CGEN_FIELDS *fields = xmalloc (CGEN_CPU_SIZEOF_FIELDS (cd));
+
 	  CGEN_CPU_SET_FIELDS_BITSIZE (cd) (fields, CGEN_INSN_BITSIZE (insn));
 	  CGEN_CPU_SET_VMA_OPERAND (cd) (cd, opindex, fields, (bfd_vma) value);
 
@@ -950,6 +951,8 @@ gas_cgen_md_apply_fix (fixP, valP, seg)
 #endif
 	  if (errmsg)
 	    as_bad_where (fixP->fx_file, fixP->fx_line, "%s", errmsg);
+
+	  free (fields);
 	}
 
       if (fixP->fx_done)

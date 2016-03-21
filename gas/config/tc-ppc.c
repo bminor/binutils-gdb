@@ -3523,7 +3523,7 @@ ppc_macro (char *str, const struct powerpc_macro *macro)
     }
 
   /* Put the string together.  */
-  complete = s = (char *) alloca (len + 1);
+  complete = s = (char *) xmalloc (len + 1);
   format = macro->format;
   while (*format != '\0')
     {
@@ -3541,6 +3541,7 @@ ppc_macro (char *str, const struct powerpc_macro *macro)
 
   /* Assemble the constructed instruction.  */
   md_assemble (complete);
+  free (complete);
 }
 
 #ifdef OBJ_ELF

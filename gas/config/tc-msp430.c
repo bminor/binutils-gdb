@@ -698,7 +698,7 @@ static unsigned int silicon_errata_warn = 0;
 static void
 msp430_set_arch (int option)
 {
-  char *str = (char *) alloca (32);	/* 32 for good measure.  */
+  char str[32];	/* 32 for good measure.  */
 
   input_line_pointer = extract_word (input_line_pointer, str, 32);
 
