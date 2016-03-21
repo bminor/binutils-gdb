@@ -10288,6 +10288,88 @@ arm_record_data_proc_imm (insn_decode_record *arm_insn_r)
   return 0;
 }
 
+static int
+arm_record_media (insn_decode_record *arm_insn_r)
+{
+  uint32_t record_buf[8];
+
+  switch (bits (arm_insn_r->arm_insn, 22, 24))
+    {
+    case 0:
+      /* Parallel addition and subtraction, signed */
+    case 1:
+      /* Parallel addition and subtraction, unsigned */
+    case 2:
+    case 3:
+      /* Packing, unpacking, saturation and reversal */
+      {
+	int rd = bits (arm_insn_r->arm_insn, 12, 15);
+
+	record_buf[arm_insn_r->reg_rec_count++] = rd;
+      }
+      break;
+
+    case 4:
+    case 5:
+      /* Signed multiplies */
+      {
+	int rd = bits (arm_insn_r->arm_insn, 16, 19);
+	unsigned int op1 = bits (arm_insn_r->arm_insn, 20, 22);
+
+	record_buf[arm_insn_r->reg_rec_count++] = rd;
+	if (op1 == 0x0)
+	  record_buf[arm_insn_r->reg_rec_count++] = ARM_PS_REGNUM;
+	else if (op1 == 0x4)
+	  record_buf[arm_insn_r->reg_rec_count++]
+	    = bits (arm_insn_r->arm_insn, 12, 15);
+      }
+      break;
+
+    case 6:
+      {
+	if (bit (arm_insn_r->arm_insn, 21)
+	    && bits (arm_insn_r->arm_insn, 5, 6) == 0x2)
+	  {
+	    /* SBFX */
+	    record_buf[arm_insn_r->reg_rec_count++]
+	      = bits (arm_insn_r->arm_insn, 12, 15);
+	  }
+	else if (bits (arm_insn_r->arm_insn, 20, 21) == 0x0
+		 && bits (arm_insn_r->arm_insn, 5, 7) == 0x0)
+	  {
+	    /* USAD8 and USADA8 */
+	    record_buf[arm_insn_r->reg_rec_count++]
+	      = bits (arm_insn_r->arm_insn, 16, 19);
+	  }
+      }
+      break;
+
+    case 7:
+      {
+	if (bits (arm_insn_r->arm_insn, 20, 21) == 0x3
+	    && bits (arm_insn_r->arm_insn, 5, 7) == 0x7)
+	  {
+	    /* Permanently UNDEFINED */
+	    return -1;
+	  }
+	else
+	  {
+	    /* BFC, BFI and UBFX */
+	    record_buf[arm_insn_r->reg_rec_count++]
+	      = bits (arm_insn_r->arm_insn, 12, 15);
+	  }
+      }
+      break;
+
+    default:
+      return -1;
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+
+  return 0;
+}
+
 /* Handle ARM mode instructions with opcode 010.  */
 
 static int
@@ -10393,6 +10475,9 @@ arm_record_ld_st_reg_offset (insn_decode_record *arm_insn_r)
 
   LONGEST s_word;
   ULONGEST u_regval[2];
+
+  if (bit (arm_insn_r->arm_insn, 4))
+    return arm_record_media (arm_insn_r);
 
   arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 21, 24);
   arm_insn_r->decode = bits (arm_insn_r->arm_insn, 4, 7);

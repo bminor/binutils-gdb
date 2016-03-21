@@ -1,5 +1,10 @@
 2016-03-21  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-tdep.c (arm_record_media): New.
+	(arm_record_ld_st_reg_offset): Call arm_record_media.
+
+2016-03-21  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-linux-tdep.c (arm_canonicalize_syscall): Canonicalize
 	more syscalls.
 
