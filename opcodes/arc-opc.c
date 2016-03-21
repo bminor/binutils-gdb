@@ -741,6 +741,103 @@ extract_nps_bitop_size (unsigned insn ATTRIBUTE_UNUSED,
   return ((insn >> 10) & 0x1f) + 1;
 }
 
+static unsigned
+insert_nps_bitop_size_2b (unsigned insn ATTRIBUTE_UNUSED,
+                          int value ATTRIBUTE_UNUSED,
+                          const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 1:
+      value = 0;
+      break;
+    case 2:
+      value = 1;
+      break;
+    case 4:
+      value = 2;
+      break;
+    case 8:
+      value = 3;
+      break;
+    default:
+      value = 0;
+      *errmsg = _("Invalid size, should be 1, 2, 4, or 8.");
+      break;
+    }
+
+  insn |= value << 10;
+  return insn;
+}
+
+static int
+extract_nps_bitop_size_2b (unsigned insn ATTRIBUTE_UNUSED,
+                           bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return  1 << ((insn >> 10) & 0x3);
+}
+
+static unsigned
+insert_nps_bitop_uimm8 (unsigned insn ATTRIBUTE_UNUSED,
+                        int value ATTRIBUTE_UNUSED,
+                        const char **errmsg ATTRIBUTE_UNUSED)
+{
+  insn |= ((value >> 5) & 7) << 12;
+  insn |= (value & 0x1f);
+  return insn;
+}
+
+static int
+extract_nps_bitop_uimm8 (unsigned insn ATTRIBUTE_UNUSED,
+                         bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (((insn >> 12) & 0x7) << 5) | (insn & 0x1f);
+}
+
+static unsigned
+insert_nps_rflt_uimm6 (unsigned insn ATTRIBUTE_UNUSED,
+                       int value ATTRIBUTE_UNUSED,
+                       const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 1:
+    case 2:
+    case 4:
+      break;
+
+    default:
+      *errmsg = _("invalid immediate, must be 1, 2, or 4");
+      value = 0;
+    }
+
+  insn |= (value << 6);
+  return insn;
+}
+
+static int
+extract_nps_rflt_uimm6 (unsigned insn ATTRIBUTE_UNUSED,
+                         bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (insn >> 6) & 0x3f;
+}
+
+static unsigned
+insert_nps_dst_pos_and_size (unsigned insn ATTRIBUTE_UNUSED,
+                             int value ATTRIBUTE_UNUSED,
+                             const char **errmsg ATTRIBUTE_UNUSED)
+{
+  insn |= ((value & 0x1f) | (((32 - value - 1) & 0x1f) << 10));
+  return insn;
+}
+
+static int
+extract_nps_dst_pos_and_size (unsigned insn ATTRIBUTE_UNUSED,
+                              bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (insn & 0x1f);
+}
+
 /* Include the generic extract/insert functions.  Order is important
    as some of the functions present in the .h may be disabled via
    defines.  */
@@ -903,6 +1000,9 @@ const struct arc_flag_operand arc_flag_operands[] =
 
 #define F_NPS_FLAG (F_NPS_CL + 1)
   { "f", 1, 1, 20, 1 },
+
+#define F_NPS_R     (F_NPS_FLAG + 1)
+  { "r",  1, 1, 15, 1 },
 };
 
 const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
@@ -981,6 +1081,9 @@ const struct arc_flag_class arc_flag_classes[] =
 
 #define C_NPS_F     (C_NPS_CL + 1)
   { F_CLASS_OPTIONAL, { F_NPS_FLAG, F_NULL}},
+
+#define C_NPS_R     (C_NPS_F + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_R, F_NULL}},
 };
 
 /* The operands table.
@@ -1323,10 +1426,22 @@ const struct arc_operand arc_operands[] =
   { 5, 0, 0, ARC_OPERAND_UNSIGNED, 0, 0 },
 
 #define NPS_BITOP_SIZE		(NPS_BITOP_SRC_POS + 1)
-  { 5, 10, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_size, extract_nps_bitop_size },
+  { 5, 10, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop_size, extract_nps_bitop_size },
 
-#define NPS_UIMM16		(NPS_BITOP_SIZE + 1)
+#define NPS_BITOP_DST_POS_SZ    (NPS_BITOP_SIZE + 1)
+  { 5, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_dst_pos_and_size, extract_nps_dst_pos_and_size },
+
+#define NPS_BITOP_SIZE_2B	(NPS_BITOP_DST_POS_SZ + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop_size_2b, extract_nps_bitop_size_2b },
+
+#define NPS_BITOP_UIMM8		(NPS_BITOP_SIZE_2B + 1)
+  { 8, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_uimm8, extract_nps_bitop_uimm8 },
+
+#define NPS_UIMM16		(NPS_BITOP_UIMM8 + 1)
   { 16, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_RFLT_UIMM6		(NPS_UIMM16 + 1)
+  { 6, 6, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_rflt_uimm6, extract_nps_rflt_uimm6 },
 };
 
 const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);

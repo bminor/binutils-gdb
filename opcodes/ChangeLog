@@ -1,3 +1,15 @@
+2016-04-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add movbi, decode1, fbset, fbclear, encode0,
+	encode1, rflt, crc16, and crc32 instructions.
+	* arc-opc.c (arc_flag_operands): Add F_NPS_R.
+	(arc_flag_classes): Add C_NPS_R.
+	(insert_nps_bitop_size_2b): New function.
+	(extract_nps_bitop_size_2b): Likewise.
+	(insert_nps_bitop_uimm8): Likewise.
+	(extract_nps_bitop_uimm8): Likewise.
+	(arc_operands): Add new operand entries.
+
 2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
 
         * arc-regs.h: Add a new subclass field.  Add double assist
