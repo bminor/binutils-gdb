@@ -6699,6 +6699,23 @@ lang_list_remove_tail (lang_statement_list_type *destlist,
 }
 #endif /* ENABLE_PLUGINS */
 
+/* Add NAME to the list of garbage collection entry points.  */
+
+void
+lang_add_gc_name (const char * name)
+{
+  struct bfd_sym_chain *sym;
+
+  if (name == NULL)
+    return;
+
+  sym = (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
+
+  sym->next = link_info.gc_sym_list;
+  sym->name = name;
+  link_info.gc_sym_list = sym;
+}
+
 void
 lang_process (void)
 {
@@ -6781,6 +6798,9 @@ lang_process (void)
     }
 #endif /* ENABLE_PLUGINS */
 
+  /* Make sure that nobody has tried to add a symbol to this list before now.  */
+  ASSERT (link_info.gc_sym_list == NULL);
+
   link_info.gc_sym_list = &entry_symbol;
 
   if (entry_symbol.name == NULL)
@@ -6790,37 +6810,16 @@ lang_process (void)
       /* entry_symbol is normally initialied by a ENTRY definition in the
 	 linker script or the -e command line option.  But if neither of
 	 these have been used, the target specific backend may still have
-	 provided an entry symbol via a call to lang_default_entry()o.
+	 provided an entry symbol via a call to lang_default_entry().
 	 Unfortunately this value will not be processed until lang_end()
 	 is called, long after this function has finished.  So detect this
 	 case here and add the target's entry symbol to the list of starting
 	 points for garbage collection resolution.  */
-      if (entry_symbol_default != NULL)
-	{
-	  struct bfd_sym_chain *sym
-	    = (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
-	  sym->next = link_info.gc_sym_list;
-	  sym->name = entry_symbol_default;
-	  link_info.gc_sym_list = sym;
-	}
+      lang_add_gc_name (entry_symbol_default);
     }
 
- if (link_info.init_function != NULL)
-    {
-      struct bfd_sym_chain *sym
-	= (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
-      sym->next = link_info.gc_sym_list;
-      sym->name = link_info.init_function;
-      link_info.gc_sym_list = sym;
-    }
-  if (link_info.fini_function != NULL)
-    {
-      struct bfd_sym_chain *sym
-	= (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
-      sym->next = link_info.gc_sym_list;
-      sym->name = link_info.fini_function;
-      link_info.gc_sym_list = sym;
-    }
+  lang_add_gc_name (link_info.init_function);
+  lang_add_gc_name (link_info.fini_function);
 
   ldemul_after_open ();
   if (config.map_file != NULL)

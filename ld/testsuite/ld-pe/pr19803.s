@@ -8,7 +8,6 @@ DllMainCRTStartup:
 	nop
 
 	.section .rdata,"dr"
-        .globl  _testval
 _testval:
         .long   1
         .long   2

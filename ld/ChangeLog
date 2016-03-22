@@ -1,5 +1,18 @@
 2016-03-22  Nick Clifton  <nickc@redhat.com>
 
+	PR ld/19803
+	* ldlang.c (lang_add_gc_name): New function.  Adds the provided
+	symbol name to the list of gc symbols.
+	(lang_process): Call lang_add_gc_name with entry_symbol_default if
+	entry_symbol.name is NULL.  Use lang_add_gc_name to add the init
+	and fini function names.
+	* pe-dll.c (process_def_file_and_drectve): Add exported names to
+	the gc symbol list.
+	* testsuite/ld-pe/pr19803.s: Do not export _testval symbol.
+	* testsuite/ld-pe/pr19803.d: Tweak expected output.
+
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
 	* configure: Regenerate.
 
 2016-03-21  Nick Clifton  <nickc@redhat.com>
