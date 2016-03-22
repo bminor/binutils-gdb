@@ -1,5 +1,9 @@
 2016-03-22  Alan Modra  <amodra@gmail.com>
 
+	* write.c (record_alignment): Revert 2016-02-18 change.
+
+2016-03-22  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-alpha.c (load_expression): Replace alloca with xmalloc.
 	(emit_jsrjmp, tc_gen_reloc): Likewise.
 	* config/tc-i370.c (i370_macro): Likewise.
