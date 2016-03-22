@@ -1,5 +1,8 @@
 2016-03-22  Nick Clifton  <nickc@redhat.com>
 
+	* peXXigen.c (_bfd_XXi_write_codeview_record): Fix possible
+	unbounded stack use.
+
 	* warning.m4 (GCC_WARN_CFLAGS): Only add -Wstack-usage if using a
 	sufficiently recent version of GCC.
 	* configure: Regenerate.
