@@ -1,5 +1,8 @@
 2016-03-22  Nick Clifton  <nickc@redhat.com>
 
+	* cpu-v850_rh850.c (arch_info_struct): Restore v850-rh850 as an
+	architecture name for backwards compatibility.
+
 	* peXXigen.c (_bfd_XXi_write_codeview_record): Fix possible
 	unbounded stack use.
 
