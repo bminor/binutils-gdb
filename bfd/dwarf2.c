@@ -1003,7 +1003,7 @@ read_attribute_value (struct attribute *  attr,
   struct dwarf_block *blk;
   bfd_size_type amt;
 
-  if (info_ptr >= info_ptr_end)
+  if (info_ptr >= info_ptr_end && form != DW_FORM_flag_present)
     {
       (*_bfd_error_handler) (_("Dwarf Error: Info pointer extends beyond end of attributes"));
       bfd_set_error (bfd_error_bad_value);

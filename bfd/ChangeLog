@@ -1,3 +1,9 @@
+2016-03-22  Alan Modra  <amodra@gmail.com>
+
+	PR 19850
+	* dwarf2.c (read_attribute_value): Skip info_ptr check for
+	DW_FORM_flag_present.
+
 2016-03-22  Nick Clifton  <nickc@redhat.com>
 
 	* cpu-v850_rh850.c (arch_info_struct): Restore v850-rh850 as an
