@@ -1867,7 +1867,7 @@ i370_macro (char *str, const struct i370_macro *macro)
     }
 
   /* Put the string together.  */
-  complete = s = alloca (len + 1);
+  complete = s = xmalloc (len + 1);
   format = macro->format;
   while (*format != '\0')
     {
@@ -1885,6 +1885,7 @@ i370_macro (char *str, const struct i370_macro *macro)
 
   /* Assemble the constructed instruction.  */
   md_assemble (complete);
+  free (complete);
 }
 
 /* This routine is called for each instruction to be assembled.  */
