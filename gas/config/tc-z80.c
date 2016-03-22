@@ -163,7 +163,7 @@ static symbolS * zero;
 
 struct reg_entry
 {
-  char* name;
+  const char* name;
   int number;
 };
 #define R_STACKABLE (0x80)
@@ -408,7 +408,7 @@ typedef const char * (asfunc)(char, char, const char*);
 
 typedef struct _table_t
 {
-  char* name;
+  const char* name;
   char prefix;
   char opcode;
   asfunc * fp;

@@ -1,3 +1,311 @@
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/nps400-0.d: New file.
+	* testsuite/gas/arc/nps400-0.s: New file.
+	* testsuite/gas/arc/nps400-1.d: New file.
+	* testsuite/gas/arc/nps400-1.s: New file.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (find_opcode_match): Move lnflg, and i
+	declarations to start of block.  Reset code on all flags before
+	attempting to match them.  Handle multiple hits on the same flag.
+	Handle flag class.
+	* testsuite/gas/arc/asm-errors.d: New file.
+	* testsuite/gas/arc/asm-errors.err: New file.
+	* testsuite/gas/arc/asm-errors.s: New file.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (cpu_types): Add nps400 entry.
+	(check_zol): Handle nps400.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_select_cpu): Remove use of
+	EF_ARC_CPU_GENERIC.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_target): Delay initialisation until
+	arc_select_cpu.
+	(arc_target_name): Likewise.
+	(arc_features): Likewise.
+	(arc_mach_type): Likewise.
+	(cpu_types): Remove "all" entry.
+	(arc_select_cpu): New function, most of the content is from...
+	(md_parse_option): ... here.  Call new arc_select_cpu.
+	(md_begin): Call arc_select_cpu if needed, default is now arc700.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/inline-data-1.d: Add target restriction.
+	* testsuite/gas/arc/inline-data-2.d: New file.
+
+2016-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* atof-generic.c: Replace use of alloca with call to xmalloc.
+	* cgen.c: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* macro.c: Likewise.
+	* remap.c: Likewise.
+	* stabs.c: Likewise.
+	* symbols.c: Likewise.
+	* config/obj-elf.c: Likewise.
+	* config/tc-aarch64.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-avr.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-nds32.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/te-vms.c: Likewise.
+	* configure: Regenerate.
+
+2016-03-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* tc-i386.c (f32_1): Change type to unsigned char[].
+	(f32_2): Likewise.
+	(f32_3): Likewise.
+	(f32_4): Likewise.
+	(f32_5): Likewise.
+	(f32_6): Likewise.
+	(f32_7): Likewise.
+	(f32_8): Likewise.
+	(f32_9): Likewise.
+	(f32_10): Likewise.
+	(f32_11): Likewise.
+	(f32_12): Likewise.
+	(f32_13): Likewise.
+	(f32_14): Likewise.
+	(f16_3): Likewise.
+	(f16_4): Likewise.
+	(f16_5): Likewise.
+	(f16_6): Likewise.
+	(f16_7): Likewise.
+	(f16_8): Likewise.
+	(jump_31): Likewise.
+	(f32_patt): Likewise.
+	(f16_patt): Likewise.
+	(alt_3): Likewise.
+	(alt_4): Likewise.
+	(alt_5): Likewise.
+	(alt_6): Likewise.
+	(alt_7): Likewise.
+	(alt_8): Likewise.
+	(alt_9): Likewise.
+	(alt_10): Likewise.
+	(alt_patt): Likewise.
+
+2016-03-18  Nick Clifton  <nickc@redhat.com>
+
+	* doc/c-aarch64.texi (AArch64 Directives): Add descriptions of
+	.cpu, .dword, .even, .inst. .tlsdescadd, .tlsdesccall,
+	.tlsdescldr and .xword directives.
+
+	PR target/19721
+	* testsuite/gas/aarch64/pr19721.s: New test source file.
+	* testsuite/gas/aarch64/pr19721.d: New test driver file.
+
+	* doc/as.texinfo: Place the target specific command line options
+	into their own man page section.
+
+2016-03-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (N_S_32): New.
+	(N_F_16_32): Likewise.
+	(N_SUF_32): Support N_F16.
+	(N_IF_32): Likewise.
+	(neon_dyadic_misc): Likewise.
+	(do_neon_cmp): Likewise.
+	(do_neon_cmp_inv): Likewise.
+	(do_neon_mul): Likewise.
+	(do_neon_fcmp_absolute): Likewise.
+	(do_neon_step): Likewise.
+	(do_neon_abs_neg): Likewise.
+	(CVT_FLAVOR_VAR): Likewise.
+	(do_neon_cvt_1): Likewise.
+	(do_neon_recip_est): Likewise.
+	(do_vmaxnm): Likewise.
+	(do_vrint_1): Likewise.
+	(neon_check_type): Check architecture support for FP16 extension.
+	(insns): Update comments.
+	* testsuite/gas/arm/armv8-2-fp16-simd.s: New test source.
+	* testsuite/gas/arm/armv8-2-fp16-simd.d: New testcase for arm mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-thumb.d: Likewise for thumb mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning.d: New rejection test for
+	arm mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning-thumb.d: Likewise for
+	thumb mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning.l: New expected rejection
+	error file.
+
+2016-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (emit_expr_with_reloc): Add code check a bignum with
+	nbytes == 1.
+	* config/rx/rx-parse.y (rx_intop): Accept bignum values for sizes
+	other than 32-bits.
+	* testsuite/gas/elf/bignum.s: New test source file.
+	* testsuite/gas/elf/bignum.d: New test driver file.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+
+2016-03-15  Ulrich Drepper  <drepper@gmail.com>
+
+	* doc/c-i386.texi (Register Naming): Update to details of the
+        latest architecture version.
+
+2016-03-10  Mickael Guene  <mickael.guene@st.com>
+
+	PR gas/19744
+	* config/tc-arm.c (do_arit): Protect against bad relocations usage.
+	(do_mov): Likewise.
+	(do_t_add_sub): Allow pcrop relocations for Thumb-2 targets.
+	(do_t_mov_cmp): Likewise.
+	(do_t_add_sub): Protect against bad relocations usage.
+	(do_t_mov_cmp): Likewise.
+	* testsuite/gas/arm/adds-thumb1-reloc-local-armv7-m.s: New.
+	* testsuite/gas/arm/adds-thumb1-reloc-local-armv7-m.d: New.
+	* testsuite/gas/arm/movs-thumb1-reloc-local-armv7-m.s: New.
+	* testsuite/gas/arm/movs-thumb1-reloc-local-armv7-m.d: New.
+
+2016-03-09  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-arm.c (neon_alignment_bit): Rename do_align to
+	do_alignment.
+	(do_neon_ld_st_lane): Likewise.
+	(do_neon_ld_dup): Likewise.
+
+2016-03-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/inline-data-1.d: New file.
+	* testsuite/gas/arc/inline-data-1.s: New file.
+
+2016-03-07  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add cortex-r8.
+	* doc/c-arm.texi: Add cortex-r8.
+
+2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-arc.c: Add const qualifiers.
+	* config/tc-h8300.c (md_begin): Likewise.
+	* config/tc-ia64.c (print_prmask): Likewise.
+	* config/tc-msp430.c (msp430_operands): Likewise.
+	* config/tc-nds32.c (struct suffix_name): Likewise.
+	(struct nds32_parse_option_table): Likewise.
+	(struct nds32_set_option_table): Likewise.
+	(do_pseudo_pushpopm): Likewise.
+	(do_pseudo_pushpop_stack): Likewise.
+	(nds32_relax_relocs): Likewise.
+	(nds32_flag): Likewise.
+	(struct nds32_hint_map): Likewise.
+	(nds32_find_reloc_table): Likewise.
+	(nds32_match_hint_insn): Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sh.c (get_specific): Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic4x.c (tic4x_inst_add): Likewise.
+	(tic4x_indirect_parse): Likewise.
+	* config/tc-vax.c (vax_cons): Likewise.
+	* config/tc-z80.c (struct reg_entry): Likewise.
+	* config/tc-epiphany.c (md_assemble): Adjust.
+	(epiphany_assemble): New function.
+	(epiphany_elf_section_rtn): Call do_align directly.
+	(epiphany_elf_section_text): Likewise.
+	* config/tc-ip2k.c (ip2k_elf_section_rtn): Likewise.
+	(ip2k_elf_section_text): Likewise.
+	* read.c (do_align): Make it not static.
+	* read.h (do_align): New prototype.
+
+2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (aeabi_set_public_attributes): Emit attribute
+	for ARMv8.1 AdvSIMD use.
+	* testsuite/gas/arm/attr-march-armv8-a+rdma.d: New.
+	* testsuite/gas/arm/attr-march-armv8_1-a+simd.d: New.
+
+2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/gas/tc-arm.c (fpu_neon_ext_v8_1): Restrict to the ARMv8.1 RDMA
+	feature.
+	(record_feature_use): New.
+	(mark_feature_used): Use record_feature_use.
+	(do_neon_qrdmlah): New.
+	(insns): Use do_neon_qrdmlah for vqrdmlah and vqrdmlsh and
+	variants.
+	(arm_extensions): Put into alphabetical order.  Re-indent "simd"
+	and "rdma" entries.  Fix the incorrect merge value for "+rdma".
+	* testsuite/gas/arm/armv8-a+rdma-warning.d: New.
+	* testsuite/gas/arm/armv8-a+rdma.d: Add assembler command line options.
+	Make source file explicit.
+	* testsuite/gas/arm/armv8-a+rdma.l: New.
+	* testsuite/gas/arm/armv8-a+rdma.s: Remove .arch and .arch_extension
+	directives.  Fix white-space.
+	* testsuite/gas/arm/armv8_1-a+simd.d: New.
+
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/x86_64-intel.d: Adjusted for COFF.
+
+2016-02-29  Cupertino Miranda  <cmiranda@synopsys.com>
+	    Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
+
+        * config/tc-arc.c (arc_extra_reloc): Change size to 0.
+        (tc_arc_fix_adjustable): Changed default return value to 1.
+        * testsuite/gas/arc/j.d: Updated expected symbol
+        * testsuite/gas/arc/jl.d: Likewise
+        * testsuite/gas/arc/relax-avoid1.d: Likewise
+        * testsuite/gas/arc/st.d: Likewise
+
+2016-02-29  Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
+
+	* config/tc-arc.c: Enable code density instructions for ARC EM.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19645
+	* NEWS: Mention --enable-elf-stt-common and --elf-stt-common=
+	for ELF assemblers.
+	* as.c (flag_use_elf_stt_common): New.
+	(show_usage): Add --elf-stt-common=.
+	(option_values): Add OPTION_ELF_STT_COMMON.
+	(std_longopts): Add --elf-stt-common=.
+	(parse_args): Handle --elf-stt-common=.
+	* as.h (flag_use_elf_stt_common): New.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* configure.ac: Add --enable-elf-stt-common and define
+	DEFAULT_GENERATE_ELF_STT_COMMON.
+	* gas/write.c (write_object_file): Set BFD_CONVERT_ELF_COMMON
+	and BFD_USE_ELF_STT_COMMON if flag_use_elf_stt_common is set.
+	* doc/as.texinfo: Document --elf-stt-common=.
+	* testsuite/gas/elf/common3.s: New file.
+	* testsuite/gas/elf/common3a.d: Likewise.
+	* testsuite/gas/elf/common3b.d: Likewise.
+	* testsuite/gas/elf/common4.s: Likewise.
+	* testsuite/gas/elf/common4a.d: Likewise.
+	* testsuite/gas/elf/common4b.d: Likewise.
+	* testsuite/gas/i386/dw2-compress-3b.d: Likewise.
+	* testsuite/gas/i386/dw2-compressed-3b.d: Likewise.
+	* testsuite/gas/elf/elf.exp: Run common3a, common3b, common4a
+	and common4b.
+	* testsuite/gas/i386/dw2-compress-3.d: Renamed to ...
+	* testsuite/gas/i386/dw2-compress-3a.d: This.  Pass
+	--elf-stt-common=no to as.
+	* testsuite/gas/i386/dw2-compressed-3.d: Renamed to ...
+	* testsuite/gas/i386/dw2-compressed-3a.d: This.  Pass
+	--elf-stt-common=no to as.
+	* testsuite/gas/i386/i386.exp: Run dw2-compress-3a,
+	dw2-compress-3b, dw2-compressed-3a and dw2-compressed-3b instead
+	of dw2-compress-3 and dw2-compressed-3.
+
 2016-02-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* as.c (select_emulation_mode): Add const qualifiers.
@@ -380,6 +688,9 @@
 	* config/tc-arc.h (TARGET_USE_CFIPOP): Define
 	(tc_cfi_frame_initial_instructions): Likewise.
 	(tc_regname_to_dw2regnum): Likewise.
+	* testsuite/gas/cfi/cfi-arc-1.d: New file.
+	* testsuite/gas/cfi/cfi-arc-1.s: Likewise.
+	* testsuite/gas/cfi/cfi.exp: Allow running tests for arc.
 
 2016-02-16  Trevor Saunders  <tbsaunde@tbsaunde.org>
 

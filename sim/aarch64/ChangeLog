@@ -1,3 +1,46 @@
+2016-03-18  Nick Clifton  <nickc@redhat.com>
+
+	* cpustate.c: Remove spurious spaces from TRACE strings.
+	Print hex equivalents of floats and doubles.
+	Check element number against array size when accessing vector
+	registers.
+	(GET_VEC_ELEMENT): Fix off by one error checking for an invalid
+	element index.
+	(SET_VEC_ELEMENT): Likewise.
+	(GET_VEC_ELEMENT): And fix thinko using macro arguments.
+
+	* memory.c: Trace memory reads when --trace-memory is enabled.
+	Remove float and double load and store functions.
+	* memory.h (aarch64_get_mem_float): Delete prototype.
+	(aarch64_get_mem_double): Likewise.
+	(aarch64_set_mem_float): Likewise.
+	(aarch64_set_mem_double): Likewise.
+	* simulator (IS_SET): Always return either 0 or 1.
+	(IS_CLEAR): Likewise.
+	(fldrs_pcrel): Load and store floats using 32-bit memory accesses
+	and doubles using 64-bit memory accesses.
+	(fldrd_pcrel, fldrs_wb, fldrs_abs, fldrs_scale_ext): Likewise.
+	(fldrd_wb, fldrd_abs, fsturs, fsturd, fldurs, fldurd): Likewise.
+	(fstrs_abs, fstrs_wb, fstrs_scale_ext, fstrd_abs): Likewise.
+	(fstrd_wb, fstrd_scale_ext, store_pair_float): Likewise.
+	(store_pair_double, load_pair_float, load_pair_double): Likewise.
+	(do_vec_MUL_by_element): New function.
+	(do_vec_op2): Call do_vec_MUL_by_element.
+	(do_scalar_NEG): New function.
+	(do_double_add): Call do_scalar_NEG.
+
+2016-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (set_flags_for_sub32): Correct type of signbit.
+	(CondCompare): Swap interpretation of bit 30.
+	(DO_ADDP): Delete macro.
+	(do_vec_ADDP): Copy source registers before starting to update
+	destination register.
+	(do_vec_FADDP): Likewise.
+	(do_vec_load_store): Fix computation of sizeof_operation.
+	(rbit64): Fix type of constant.
+	(aarch64_step): When displaying insn value, display all 32 bits.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

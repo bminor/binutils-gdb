@@ -1,3 +1,240 @@
+2016-03-20  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19002
+	* ehframe.cc (Eh_frame::read_fde): Check for dropped functions.
+	* testsuite/Makefile.am (eh_test_2): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/eh_test_2.sh: New test script.
+	* testsuite/eh_test_a.cc (bar): Make it comdat.
+	* testsuite/eh_test_b.cc (bar): Add a duplicate copy.
+
+2016-03-18  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_relobj::is_n64_): Remove.
+	(Target_mips::ei_class_): Likewise.
+	(Mips_relobj::is_newabi): Call methods.
+	(Mips_relobj::is_n64): Change checking for N64 ABI.
+	(Target_mips::is_output_n64): Likewise.
+	(Target_mips::merge_processor_specific_flags): Remove ei_class
+	argument, and remove comparing ei_class.
+	(Target_mips::do_adjust_elf_header): Remove setting EI_CLASS field
+	of the ELF header.
+	(Target_mips::do_finalize_sections): Don't pass ei_class argument
+	to merge_processor_specific_flags.
+	(Target_mips::elf_mips_abi_name): Remove ei_class argument, and
+	change checking for N64 ABI.
+
+2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* mips.cc (enum Special_relocation_symbol): New enum type.
+	(is_readonly_section): New function.
+	(eh_reloc): Likewise.
+	(Mips_got_entry::is_section_symbol_): New member.
+	(Mips_got_entry::is_section_symbol): New method.
+	(Mips_got_info::record_local_got_symbol): Add is_section_symbol
+	argument.
+	(Mips_relobj::mips_elf_options_section_name): New method.
+	(Mips_output_data_got::record_local_got_symbol): Add
+	is_section_symbol argument, and pass it to
+	Mips_got_info::record_local_got_symbol.
+	(Mips_output_data_got::got_offset): Add addend argument, and pass
+	it to Relobj::local_got_offset.
+	(struct Mips_output_reloc_writer): New type.
+	(class Mips_output_data_reloc): New class.
+	(Mips_output_data_plt::Reloc_section): Change type to
+	Mips_output_data_reloc.
+	(Target_mips::Reloc_section): Likewise.
+	(Mips_reloc_types::get_r_addend): Remove unsigned from return type.
+	(Mips_classify_reloc::get_r_type2): New method.
+	(Mips_classify_reloc::get_r_type3): Likewise.
+	(Mips_classify_reloc::get_r_ssym): Likewise.
+	(Target_mips::Reloca_section): Remove.
+	(Relocate::should_apply_static_reloc): Rename from
+	should_apply_r_mips_32_reloc.
+	(Target_mips::copy_reloc): Replace Reltype parameter with r_type
+	and r_offset.
+	(Mips_relocate_functions::Valtype): New type.
+	(Mips_relocate_functions::Valtype64): New type.
+	(Mips_relocate_functions::check_overflow): New method.
+	(Mips_relocate_functions::mips_reloc_unshuffle): Move to public
+	interface.
+	(Mips_relocate_functions::mips_reloc_shuffle): Likewise.
+	(Mips_relocate_functions::rel16): Add support for resolving
+	relocations for Mips64.
+	(Mips_relocate_functions::rel32): Likewise.
+	(Mips_relocate_functions::reljalr): Likewise.
+	(Mips_relocate_functions::relpc32): Likewise.
+	(Mips_relocate_functions::rel26): Likewise.
+	(Mips_relocate_functions::relpc16): Likewise.
+	(Mips_relocate_functions::relmicromips_pc7_s1): Likewise.
+	(Mips_relocate_functions::relmicromips_pc10_s1): Likewise.
+	(Mips_relocate_functions::relmicromips_pc16_s1): Likewise.
+	(Mips_relocate_functions::do_relhi16): Likewise.
+	(Mips_relocate_functions::do_relgot16_local): Likewise.
+	(Mips_relocate_functions::rello16): Likewise.
+	(Mips_relocate_functions::relgot): Likewise.
+	(Mips_relocate_functions::relgotpage): Likewise.
+	(Mips_relocate_functions::relgotofst): Likewise.
+	(Mips_relocate_functions::relgot_hi16): Likewise.
+	(Mips_relocate_functions::relgot_lo16): Likewise.
+	(Mips_relocate_functions::relgprel): Likewise.
+	(Mips_relocate_functions::relgprel32): Likewise.
+	(Mips_relocate_functions::tlsrelhi16): Likewise.
+	(Mips_relocate_functions::tlsrello16): Likewise.
+	(Mips_relocate_functions::tlsrel32): Likewise.
+	(Mips_relocate_functions::relsub): Likewise.
+	(Mips_relocate_functions::releh): New method.
+	(Mips_relocate_functions::rel64): Likewise.
+	(Mips_got_info::record_local_got_symbol): Add is_section_symbol and
+	pass it to Mips_got_entry.
+	(Mips_got_info::add_local_entries): Pass addend argument
+	to code functions, and for STT_SECTION symbols call
+	add_symbolless_local_addend.
+	(Mips_got_info::add_tls_entries): Pass addend argument to code
+	functions.
+	(Mips_relobj::do_read_symbols): Read gp value that was used to
+	create object.
+	(Mips_output_data_plt::plt_entry): Remove opcode from l[wd]
+	instruction. Opcode for instruction will be selected later.
+	(Target_mips::gc_process_relocs): Add case for SHT_RELA.
+	(Target_mips::scan_relocatable_relocs): Likewise.
+	(Target_mips::emit_relocs_scan): Likewise.
+	(Target_mips::relocate_relocs): Likewise.
+	(Target_mips::do_finalize_sections): Skip objects for merging
+	processor specific flags in which all input sections will be
+	discarded.
+	(mips_get_size_for_reloc): Add case for R_MIPS_EH.
+	(Target_mips::Scan::get_reference_flags): Likewise.
+	(Target_mips::relocate_special_relocatable): Call rel26 method with
+	calculate_only and calculated_value arguments.
+	(Target_mips::Scan::local): Add case for R_MIPS_EH. Don't create a
+	dynamic relocation against a readonly sections, and pass
+	is_section_symbol to Mips_got_info::record_local_got_symbol.
+	(Target_mips::Scan::global): Add case for R_MIPS_EH. Don't create a
+	dynamic relocation against a readonly sections, and pass r_type
+	and r_offset to Target_mips::copy_reloc.
+	(Target_mips::Relocate::relocate): Add support for resolving
+	relocations for Mips64.
+	(Target_mips::mips_info): Add case for Mips64 default dynamic
+	linker name.
+	(Target_selector_mips): Correct emulation names.
+
+2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* mips.cc (class Mips_output_data_la25_stub): Add
+	do_print_to_mapfile function.
+
+2016-03-17  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_classify_reloc::put_r_info): Call 32bit version of
+	elf_r_info.
+
+2016-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/plugin_layout_with_alignment.cc: Renamed to ..
+	* testsuite/plugin_layout_with_alignment.c: This.
+	* testsuite/Makefile.am (plugin_layout_with_alignment.o): Updated.
+	(plugin_layout_with_alignment): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+
+        PR 19751
+	* testsuite/Makefile.am (retain_symbols_file_test): Remove check
+	for constructor.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/dynamic_list.sh: Likewise.
+	* testsuite/retain_symbols_file_test.sh: Likewise.
+
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+
+        PR 19751
+        * arm.cc (Reloc_stub::Key::name): Add unused attribute.
+        * dirsearch.cc (Dir_caches::~Dir_caches): Likewise.
+
+2016-03-08  Cary Coutant  <ccoutant@gmail.com>
+            Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* output.cc (Output_reloc_writer): New type.
+	(Output_data_reloc_base::do_write): Move implementation to template
+	in output.h and replace with invocation of template.
+	* output.h (Output_file): Move to top of file.
+	(Output_reloc::get_symbol_index): Move to public interface.
+	(Output_reloc::get_address): Likewise.
+	(Output_data_reloc_base::do_write_generic): New function template.
+
+2016-03-04  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19019
+	PR gold/19763
+	* symtab.cc: Instantiate Sized_symbol::init_constant and
+	Sized_symbol::init_undefined.
+
+2016-03-03  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19019
+	* layout.h (Layout::add_target_specific_dynamic_tag): New function.
+	* layout.cc (Layout::add_target_specific_dynamic_tag): New function.
+	* mips.cc (Target_mips::make_symbol): Adjust function signature.
+	* sparc.cc (Target_sparc::Target_sparc): Initialize register_syms_.
+	(Target_sparc::do_is_defined_by_abi): Remove test for
+	STT_SPARC_REGISTER.
+	(Target_sparc::Register_symbol): New struct type.
+	(Target_sparc::register_syms_): New data member.
+	(Target_sparc<64, true>::sparc_info): Set has_make_symbol to true.
+	(Target_sparc::make_symbol): New function.
+	(Target_sparc::do_finalize_sections): Add register symbols and new
+	dynamic table entries.
+	* symtab.h (Sized_symbol::init_undefined): Add value parameter.
+	(Symbol_table::add_target_global_symbol): New function.
+	(Symbol_table::target_symbols_): New data member.
+	* symtab.cc (Sized_symbol::init_undefined): Add value parameter.
+	(Symbol_table::Symbol_table): Initialize target_symbols_.
+	(Symbol_table::add_from_object): Pass additional parameters to
+	Target::make_symbol.
+	(Symbol_table::define_special_symbol): Likewise.
+	(Symbol_table::add_undefined_symbol_from_command_line): Pass 0 for
+	undefined symbol value.
+	(Symbol_table::set_dynsym_indexes): Process target-specific symbols.
+	(Symbol_table::sized_finalize): Likewise.
+	(Symbol_table::sized_write_globals): Likewise.
+	* target.h (Sized_target::make_symbol): Add name, st_type, object,
+	st_shndx, and value parameters.
+
+2016-03-03  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* plugin.cc (do_should_include_member): Ignore LDPK_UNDEF and
+	LDPK_WEAKUNDEF symbols.
+
+2016-03-03  Than McIntosh  <thanm@google.com>
+
+	* plugin.cc (Plugin::load): Include hooks for get_input_section_size
+	and get_input_section_alignment in transfer vector.
+	(get_input_section_alignment): New function.
+	(get_input_section_size): New function.
+	* testsuite/Makefile.am: Add plugin_layout_with_alignment.sh test.
+	* testsuite/Makefile.in: [Regenerate.]
+	* testsuite/plugin_section_alignment.cc: New test file.
+	* testsuite/plugin_layout_with_alignment.cc: New test file.
+	* testsuite/plugin_layout_with_alignment.sh: New test file.
+
+2016-03-03  Evgenii Stepanov  <eugenis@google.com>
+
+	* plugin.h (Pluginobj::get_symbol_resolution_info): Add version
+	parameter.
+	* plugin.cc (get_symbols_v3): New function.
+	(Plugin::load): Add LDPT_GET_SYMBOLS_V3.
+	(Pluginobj::get_symbol_resolution_info): Return LDPS_NO_SYMS when using
+	new version.
+
+2016-02-26  Egor Kochetov  <egor.kochetov@intel.com>
+	    Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19735
+	* ehframe.h (Cie::fde_encoding): New method.
+	* ehframe.cc (Eh_frame::read_fde): Discard FDEs for zero-length
+	address ranges.
+
 2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/Makefile.am (x86_64_mov_to_lea5.o): Pass

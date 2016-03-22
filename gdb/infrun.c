@@ -1894,7 +1894,8 @@ displaced_step_prepare (ptid_t ptid)
     {
       struct displaced_step_inferior_state *displaced_state;
 
-      if (ex.error != MEMORY_ERROR)
+      if (ex.error != MEMORY_ERROR
+	  && ex.error != NOT_SUPPORTED_ERROR)
 	throw_exception (ex);
 
       if (debug_infrun)

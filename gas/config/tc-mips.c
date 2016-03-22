@@ -2420,9 +2420,8 @@ set_insn_error_ss (int argnum, const char *msg, const char *s1, const char *s2)
 static void
 report_insn_error (const char *str)
 {
-  const char *msg;
+  const char *msg = concat (insn_error.msg, " `%s'", NULL);
 
-  msg = ACONCAT ((insn_error.msg, " `%s'", NULL));
   switch (insn_error.format)
     {
     case ERR_FMT_PLAIN:
@@ -2437,6 +2436,8 @@ report_insn_error (const char *str)
       as_bad (msg, insn_error.u.ss[0], insn_error.u.ss[1], str);
       break;
     }
+
+  free ((char *) msg);
 }
 
 /* Initialize vr4120_conflicts.  There is a bit of duplication here:
@@ -13530,14 +13531,14 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
   struct mips_opcode *insn;
 
   /* Make a copy of the instruction so that we can fiddle with it.  */
-  name = alloca (length + 1);
+  name = xmalloc (length + 1);
   memcpy (name, start, length);
   name[length] = '\0';
 
   /* Look up the instruction as-is.  */
   insn = (struct mips_opcode *) hash_find (hash, name);
   if (insn)
-    return insn;
+    goto end;
 
   dot = strchr (name, '.');
   if (dot && dot[1])
@@ -13552,7 +13553,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
 	  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0)
 	    {
 	      *opcode_extra |= mask << mips_vu0_channel_mask.lsb;
-	      return insn;
+	      goto end;
 	    }
 	}
     }
@@ -13577,12 +13578,15 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
 	  if (insn)
 	    {
 	      forced_insn_length = suffix;
-	      return insn;
+	      goto end;
 	    }
 	}
     }
 
-  return NULL;
+  insn = NULL;
+ end:
+  free (name);
+  return insn;
 }
 
 /* Assemble an instruction into its binary format.  If the instruction

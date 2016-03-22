@@ -1,3 +1,71 @@
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* readelf.c (decode_ARC_machine_flags): Handle nps400.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* readelf.c (get_machine_flags): Move arc processing into...
+	(decode_ARC_machine_flags): ... new function.  Remove use of
+	EF_ARC_CPU_GENERIC, change default case from "generic arc" to
+	"unknown arc".  Merged ABI printing between two machine types.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/binutils-all/objdump.exp (cpus_expected): Add ARC700
+	to the architecture list.
+
+2016-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* dlltool.c: Replace use of alloca with call to xmalloc.
+	* dllwrap.c: Likewise.
+	* nlmconv.c: Likewise.
+	* objdump.c: Likewise.
+	* resrc.c: Likewise.
+	* winduni.c: Likewise.
+	* configure: Regenerate.
+
+2016-03-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/19775
+	* testsuite/binutils-all/ar.exp (proc empty_archive): New proc.
+	Run the new proc.
+	* testsuite/binutils-all/empty: New, empty, file.
+
+2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* readelf.c (arm_attry_tag_FP_arch): Add "NEON for ARMv8.1".
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19645
+	* NEWS: Mention --elf-stt-common= for objcopy.
+	* doc/binutils.texi: Document --elf-stt-common= for objcopy.
+	* objcopy.c (do_elf_stt_common): New.
+	(command_line_switch): Add OPTION_ELF_STT_COMMON.
+	(copy_options): Add --elf-stt-common=.
+	(copy_usage): Add --elf-stt-common=.
+	(copy_object): Also check do_elf_stt_common for ELF targets.
+	(copy_file): Handle do_elf_stt_common.
+	(copy_main): Handle OPTION_ELF_STT_COMMON.
+	* readelf.c (apply_relocations): Support STT_COMMON.
+	* testsuite/binutils-all/common-1.s: New file.
+	* testsuite/binutils-all/common-1a.d: Likewise.
+	* testsuite/binutils-all/common-1b.d: Likewise.
+	* testsuite/binutils-all/common-1c.d: Likewise.
+	* testsuite/binutils-all/common-1d.d: Likewise.
+	* testsuite/binutils-all/common-1e.d: Likewise.
+	* testsuite/binutils-all/common-1f.d: Likewise.
+	* testsuite/binutils-all/common-2.s: Likewise.
+	* testsuite/binutils-all/common-2a.d: Likewise.
+	* testsuite/binutils-all/common-2b.d: Likewise.
+	* testsuite/binutils-all/common-2c.d: Likewise.
+	* testsuite/binutils-all/common-2d.d: Likewise.
+	* testsuite/binutils-all/common-2e.d: Likewise.
+	* testsuite/binutils-all/common-2f.d: Likewise.
+	* testsuite/binutils-all/objcopy.exp
+	(objcopy_test_elf_common_symbols): New proc.
+	Run objcopy_test_elf_common_symbols for ELF targets
+
 2016-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19647

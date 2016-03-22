@@ -525,8 +525,10 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
 
   if ((info->dynamic_data
        && (h->type == STT_OBJECT
+	   || h->type == STT_COMMON
 	   || (sym != NULL
-	       && ELF_ST_TYPE (sym->st_info) == STT_OBJECT)))
+	       && (ELF_ST_TYPE (sym->st_info) == STT_OBJECT
+		   || ELF_ST_TYPE (sym->st_info) == STT_COMMON))))
       || (d != NULL
 	  && h->root.type == bfd_link_hash_new
 	  && (*d->match) (&d->head, NULL, h->root.root.string)))
@@ -1484,13 +1486,16 @@ _bfd_elf_merge_symbol (bfd *abfd,
      represent variables; this can cause confusion in principle, but
      any such confusion would seem to indicate an erroneous program or
      shared library.  We also permit a common symbol in a regular
-     object to override a weak symbol in a shared object.  */
+     object to override a weak symbol in a shared object.  A common
+     symbol in executable also overrides a symbol in a shared object.  */
 
   if (newdyn
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
-	      && (newweak || newfunc))))
+	      && (newweak
+		  || newfunc
+		  || (!olddyn && bfd_link_executable (info))))))
     {
       *override = TRUE;
       newdef = FALSE;
@@ -3616,8 +3621,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 make a shared library.  */
       if (!just_syms
 	  && (bfd_link_pic (info)
-	      || info->export_dynamic
-	      || info->dynamic)
+	      || (!bfd_link_relocatable (info)
+		  && (info->export_dynamic || info->dynamic)))
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
@@ -7746,10 +7751,15 @@ resolve_symbol (const char *name,
   return FALSE;
 }
 
+/* Looks up NAME in SECTIONS.  If found sets RESULT to NAME's address (in
+   bytes) and returns TRUE, otherwise returns FALSE.  Accepts pseudo-section
+   names like "foo.end" which is the end address of section "foo".  */
+   
 static bfd_boolean
 resolve_section (const char *name,
 		 asection *sections,
-		 bfd_vma *result)
+		 bfd_vma *result,
+		 bfd * abfd)
 {
   asection *curr;
   unsigned int len;
@@ -7762,6 +7772,7 @@ resolve_section (const char *name,
       }
 
   /* Hmm. still haven't found it. try pseudo-section names.  */
+  /* FIXME: This could be coded more efficiently...  */
   for (curr = sections; curr; curr = curr->next)
     {
       len = strlen (curr->name);
@@ -7772,7 +7783,7 @@ resolve_section (const char *name,
 	{
 	  if (strncmp (".end", name + len, 4) == 0)
 	    {
-	      *result = curr->vma + curr->size;
+	      *result = curr->vma + curr->size / bfd_octets_per_byte (abfd);
 	      return TRUE;
 	    }
 
@@ -7854,7 +7865,7 @@ eval_symbol (bfd_vma *result,
 
       if (symbol_is_section)
 	{
-	  if (!resolve_section (symbuf, flinfo->output_bfd->sections, result)
+	  if (!resolve_section (symbuf, flinfo->output_bfd->sections, result, input_bfd)
 	      && !resolve_symbol (symbuf, input_bfd, flinfo, result,
 				  isymbuf, locsymcount))
 	    {
@@ -7867,7 +7878,7 @@ eval_symbol (bfd_vma *result,
 	  if (!resolve_symbol (symbuf, input_bfd, flinfo, result,
 			       isymbuf, locsymcount)
 	      && !resolve_section (symbuf, flinfo->output_bfd->sections,
-				   result))
+				   result, input_bfd))
 	    {
 	      undefined_reference ("symbol", symbuf);
 	      return FALSE;
@@ -8091,8 +8102,8 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   else
     shift = (8 * wordsz) - (start + len);
 
-  /* FIXME: octets_per_byte.  */
-  x = get_value (wordsz, chunksz, input_bfd, contents + rel->r_offset);
+  x = get_value (wordsz, chunksz, input_bfd,
+		 contents + rel->r_offset * bfd_octets_per_byte (input_bfd));
 
 #ifdef DEBUG
   printf ("Doing complex reloc: "
@@ -8124,8 +8135,8 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  (unsigned long) relocation, (unsigned long) (mask << shift),
 	  (unsigned long) ((relocation & mask) << shift), (unsigned long) x);
 #endif
-  /* FIXME: octets_per_byte.  */
-  put_value (wordsz, chunksz, input_bfd, x, contents + rel->r_offset);
+  put_value (wordsz, chunksz, input_bfd, x,
+	     contents + rel->r_offset * bfd_octets_per_byte (input_bfd));
   return r;
 }
 
@@ -9038,6 +9049,28 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
   return FALSE;
 }
 
+/* Convert ELF common symbol TYPE.  */
+
+static int
+elf_link_convert_common_type (struct bfd_link_info *info, int type)
+{
+  /* Commom symbol can only appear in relocatable link.  */
+  if (!bfd_link_relocatable (info))
+    abort ();
+  switch (info->elf_stt_common)
+    {
+    case unchanged:
+      break;
+    case elf_stt_common:
+      type = STT_COMMON;
+      break;
+    case no_elf_stt_common:
+      type = STT_OBJECT;
+      break;
+    }
+  return type;
+}
+
 /* Add an external symbol to the symbol table.  This is called from
    the hash table traversal routine.  When generating a shared object,
    we go through the symbol table twice.  The first time we output
@@ -9057,6 +9090,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   const struct elf_backend_data *bed;
   long indx;
   int ret;
+  unsigned int type;
   /* A symbol is bound locally if it is forced local or it is locally
      defined, hidden versioned, not referenced by shared library and
      not exported when linking executable.  */
@@ -9191,35 +9225,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
     strip = TRUE;
 
+  type = h->type;
+
   /* If we're stripping it, and it's not a dynamic symbol, there's
      nothing else to do.   However, if it is a forced local symbol or
      an ifunc symbol we need to give the backend finish_dynamic_symbol
      function a chance to make it dynamic.  */
   if (strip
       && h->dynindx == -1
-      && h->type != STT_GNU_IFUNC
+      && type != STT_GNU_IFUNC
       && !h->forced_local)
     return TRUE;
 
   sym.st_value = 0;
   sym.st_size = h->size;
   sym.st_other = h->other;
-  if (local_bind)
-    {
-      sym.st_info = ELF_ST_INFO (STB_LOCAL, h->type);
-      /* Turn off visibility on local symbol.  */
-      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
-    }
-  /* Set STB_GNU_UNIQUE only if symbol is defined in regular object.  */
-  else if (h->unique_global && h->def_regular)
-    sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, h->type);
-  else if (h->root.type == bfd_link_hash_undefweak
-	   || h->root.type == bfd_link_hash_defweak)
-    sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
-  else
-    sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);
-  sym.st_target_internal = h->target_internal;
-
   switch (h->root.type)
     {
     default:
@@ -9294,6 +9314,42 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       return TRUE;
     }
 
+  if (type == STT_COMMON || type == STT_OBJECT)
+    switch (h->root.type)
+      {
+      case bfd_link_hash_common:
+	type = elf_link_convert_common_type (flinfo->info, type);
+	break;
+      case bfd_link_hash_defined:
+      case bfd_link_hash_defweak:
+	if (bed->common_definition (&sym))
+	  type = elf_link_convert_common_type (flinfo->info, type);
+	else
+	  type = STT_OBJECT;
+	break;
+      case bfd_link_hash_undefined:
+      case bfd_link_hash_undefweak:
+	break;
+      default:
+	abort ();
+      }
+
+  if (local_bind)
+    {
+      sym.st_info = ELF_ST_INFO (STB_LOCAL, type);
+      /* Turn off visibility on local symbol.  */
+      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
+    }
+  /* Set STB_GNU_UNIQUE only if symbol is defined in regular object.  */
+  else if (h->unique_global && h->def_regular)
+    sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, type);
+  else if (h->root.type == bfd_link_hash_undefweak
+	   || h->root.type == bfd_link_hash_defweak)
+    sym.st_info = ELF_ST_INFO (STB_WEAK, type);
+  else
+    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
+  sym.st_target_internal = h->target_internal;
+
   /* Give the processor backend a chance to tweak the symbol value,
      and also to finish up anything that needs to be done for this
      symbol.  FIXME: Not calling elf_backend_finish_dynamic_symbol for
@@ -9330,7 +9386,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  || ELF_ST_BIND (sym.st_info) == STB_WEAK))
     {
       int bindtype;
-      unsigned int type = ELF_ST_TYPE (sym.st_info);
+      type = ELF_ST_TYPE (sym.st_info);
 
       /* Turn an undefined IFUNC symbol into a normal FUNC symbol. */
       if (type == STT_GNU_IFUNC)
@@ -10485,11 +10541,13 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  break;
 	default:
 	  {
-	    /* FIXME: octets_per_byte.  */
 	    if (! (o->flags & SEC_EXCLUDE))
 	      {
 		file_ptr offset = (file_ptr) o->output_offset;
 		bfd_size_type todo = o->size;
+
+		offset *= bfd_octets_per_byte (output_bfd);
+
 		if ((o->flags & SEC_ELF_REVERSE_COPY))
 		  {
 		    /* Reverse-copy input section to output.  */
@@ -10653,8 +10711,11 @@ elf_reloc_link_order (bfd *output_bfd,
 	    }
 	  break;
 	}
+
       ok = bfd_set_section_contents (output_bfd, output_section, buf,
-				     link_order->offset, size);
+				     link_order->offset
+				     * bfd_octets_per_byte (output_bfd),
+				     size);
       free (buf);
       if (! ok)
 	return FALSE;
@@ -10836,9 +10897,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
     {
       s = sections[n]->u.indirect.section;
       offset &= ~(bfd_vma) 0 << s->alignment_power;
-      s->output_offset = offset;
+      s->output_offset = offset / bfd_octets_per_byte (abfd);
       sections[n]->offset = offset;
-      /* FIXME: octets_per_byte.  */
       offset += sections[n]->size;
     }
 
@@ -11898,10 +11958,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    continue;
 	  if (strcmp (o->name, ".dynstr") != 0)
 	    {
-	      /* FIXME: octets_per_byte.  */
 	      if (! bfd_set_section_contents (abfd, o->output_section,
 					      o->contents,
-					      (file_ptr) o->output_offset,
+					      (file_ptr) o->output_offset
+					      * bfd_octets_per_byte (abfd),
 					      o->size))
 		goto error_return;
 	    }

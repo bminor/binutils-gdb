@@ -66,8 +66,8 @@ replace_bits16 (unsigned insn, int value ATTRIBUTE_UNUSED)
 ATTRIBUTE_UNUSED static unsigned
 replace_bits24 (unsigned insn, int value ATTRIBUTE_UNUSED)
 {
-  insn = insn & ~0xffffff;
-  insn |= ((value >> 0) & 0xffffff) << 0;
+  insn = insn & ~0xffffff00;
+  insn |= ((value >> 0) & 0xffffff) << 8;
 
   return insn;
 }

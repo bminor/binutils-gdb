@@ -37,6 +37,7 @@
 #include "gdbcmd.h"		/* for dont_repeat() */
 #include "annotate.h"
 #include "maint.h"
+#include "buffer.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -48,7 +49,6 @@
 static void rl_callback_read_char_wrapper (gdb_client_data client_data);
 static void command_line_handler (char *rl);
 static void change_line_handler (void);
-static void command_handler (char *command);
 static char *top_level_prompt (void);
 
 /* Signal handlers.  */
@@ -107,10 +107,6 @@ void (*call_readline) (gdb_client_data);
    loop as default engine, and event-top.c is merged into top.c.  */
 int async_command_editing_p;
 
-/* This is the annotation suffix that will be used when the
-   annotation_level is 2.  */
-char *async_annotation_suffix;
-
 /* This is used to display the notification of the completion of an
    asynchronous execution command.  */
 int exec_done_display_p = 0;
@@ -142,20 +138,6 @@ static struct async_signal_handler *sigfpe_token;
 static struct async_signal_handler *sigtstp_token;
 #endif
 static struct async_signal_handler *async_sigterm_token;
-
-/* Structure to save a partially entered command.  This is used when
-   the user types '\' at the end of a command line.  This is necessary
-   because each line of input is handled by a different call to
-   command_line_handler, and normally there is no state retained
-   between different calls.  */
-static int more_to_come = 0;
-
-struct readline_input_state
-  {
-    char *linebuffer;
-    char *linebuffer_ptr;
-  }
-readline_input_state;
 
 /* This hook is called by rl_callback_read_char_wrapper after each
    character is processed.  */
@@ -189,9 +171,9 @@ cli_command_loop (void *data)
 /* Change the function to be invoked every time there is a character
    ready on stdin.  This is used when the user sets the editing off,
    therefore bypassing readline, and letting gdb handle the input
-   itself, via gdb_readline2.  Also it is used in the opposite case in
-   which the user sets editing on again, by restoring readline
-   handling of the input.  */
+   itself, via gdb_readline_no_editing_callback.  Also it is used in
+   the opposite case in which the user sets editing on again, by
+   restoring readline handling of the input.  */
 static void
 change_line_handler (void)
 {
@@ -209,9 +191,9 @@ change_line_handler (void)
     }
   else
     {
-      /* Turn off editing by using gdb_readline2.  */
+      /* Turn off editing by using gdb_readline_no_editing_callback.  */
       gdb_rl_callback_handler_remove ();
-      call_readline = gdb_readline2;
+      call_readline = gdb_readline_no_editing_callback;
 
       /* Set up the command handler as well, in case we are called as
          first thing from .gdbinit.  */
@@ -363,55 +345,52 @@ display_gdb_prompt (const char *new_prompt)
 static char *
 top_level_prompt (void)
 {
-  char *prefix;
-  char *prompt = NULL;
-  char *suffix;
-  char *composed_prompt;
-  size_t prompt_length;
+  char *prompt;
 
   /* Give observers a chance of changing the prompt.  E.g., the python
      `gdb.prompt_hook' is installed as an observer.  */
   observer_notify_before_prompt (get_prompt ());
 
-  prompt = xstrdup (get_prompt ());
+  prompt = get_prompt ();
 
   if (annotation_level >= 2)
     {
       /* Prefix needs to have new line at end.  */
-      prefix = (char *) alloca (strlen (async_annotation_suffix) + 10);
-      strcpy (prefix, "\n\032\032pre-");
-      strcat (prefix, async_annotation_suffix);
-      strcat (prefix, "\n");
+      const char prefix[] = "\n\032\032pre-prompt\n";
 
       /* Suffix needs to have a new line at end and \032 \032 at
 	 beginning.  */
-      suffix = (char *) alloca (strlen (async_annotation_suffix) + 6);
-      strcpy (suffix, "\n\032\032");
-      strcat (suffix, async_annotation_suffix);
-      strcat (suffix, "\n");
-    }
-  else
-    {
-      prefix = "";
-      suffix = "";
+      const char suffix[] = "\n\032\032prompt\n";
+
+      return concat (prefix, prompt, suffix, NULL);
     }
 
-  prompt_length = strlen (prefix) + strlen (prompt) + strlen (suffix);
-  composed_prompt = (char *) xmalloc (prompt_length + 1);
-
-  strcpy (composed_prompt, prefix);
-  strcat (composed_prompt, prompt);
-  strcat (composed_prompt, suffix);
-
-  xfree (prompt);
-
-  return composed_prompt;
+  return xstrdup (prompt);
 }
 
-/* When there is an event ready on the stdin file desriptor, instead
+/* Get a pointer to the command line buffer.  This is used to
+   construct a whole line of input from partial input.  */
+
+static struct buffer *
+get_command_line_buffer (void)
+{
+  static struct buffer line_buffer;
+  static int line_buffer_initialized;
+
+  if (!line_buffer_initialized)
+    {
+      buffer_init (&line_buffer);
+      line_buffer_initialized = 1;
+    }
+
+  return &line_buffer;
+}
+
+/* When there is an event ready on the stdin file descriptor, instead
    of calling readline directly throught the callback function, or
-   instead of calling gdb_readline2, give gdb a chance to detect
-   errors and do something.  */
+   instead of calling gdb_readline_no_editing_callback, give gdb a
+   chance to detect errors and do something.  */
+
 void
 stdin_event_handler (int error, gdb_client_data client_data)
 {
@@ -460,156 +439,122 @@ async_disable_stdin (void)
 }
 
 
-/* Handles a gdb command.  This function is called by
-   command_line_handler, which has processed one or more input lines
-   into COMMAND.  */
-/* NOTE: 1999-04-30 This is the asynchronous version of the command_loop
-   function.  The command_loop function will be obsolete when we
-   switch to use the event loop at every execution of gdb.  */
-static void
+/* Handle a gdb command line.  This function is called when
+   handle_line_of_input has concatenated one or more input lines into
+   a whole command.  */
+
+void
 command_handler (char *command)
 {
   struct cleanup *stat_chain;
+  char *c;
 
   clear_quit_flag ();
   if (instream == stdin)
     reinitialize_more_filter ();
 
-  /* If readline returned a NULL command, it means that the connection
-     with the terminal is gone.  This happens at the end of a
-     testsuite run, after Expect has hung up but GDB is still alive.
-     In such a case, we just quit gdb killing the inferior program
-     too.  */
-  if (command == 0)
-    {
-      printf_unfiltered ("quit\n");
-      execute_command ("quit", stdin == instream);
-    }
-
   stat_chain = make_command_stats_cleanup (1);
 
-  execute_command (command, instream == stdin);
+  /* Do not execute commented lines.  */
+  for (c = command; *c == ' ' || *c == '\t'; c++)
+    ;
+  if (c[0] != '#')
+    {
+      execute_command (command, instream == stdin);
 
-  /* Do any commands attached to breakpoint we stopped at.  */
-  bpstat_do_actions ();
+      /* Do any commands attached to breakpoint we stopped at.  */
+      bpstat_do_actions ();
+    }
 
   do_cleanups (stat_chain);
 }
 
-/* Handle a complete line of input.  This is called by the callback
-   mechanism within the readline library.  Deal with incomplete
-   commands as well, by saving the partial input in a global
-   buffer.  */
+/* Append RL, an input line returned by readline or one of its
+   emulations, to CMD_LINE_BUFFER.  Returns the command line if we
+   have a whole command line ready to be processed by the command
+   interpreter or NULL if the command line isn't complete yet (input
+   line ends in a backslash).  Takes ownership of RL.  */
 
-/* NOTE: 1999-04-30 This is the asynchronous version of the
-   command_line_input function; command_line_input will become
-   obsolete once we use the event loop as the default mechanism in
-   GDB.  */
-static void
-command_line_handler (char *rl)
+static char *
+command_line_append_input_line (struct buffer *cmd_line_buffer, char *rl)
 {
-  static char *linebuffer = 0;
-  static unsigned linelength = 0;
-  char *p;
+  char *cmd;
+  size_t len;
+
+  len = strlen (rl);
+
+  if (len > 0 && rl[len - 1] == '\\')
+    {
+      /* Don't copy the backslash and wait for more.  */
+      buffer_grow (cmd_line_buffer, rl, len - 1);
+      cmd = NULL;
+    }
+  else
+    {
+      /* Copy whole line including terminating null, and we're
+	 done.  */
+      buffer_grow (cmd_line_buffer, rl, len + 1);
+      cmd = cmd_line_buffer->buffer;
+    }
+
+  /* Allocated in readline.  */
+  xfree (rl);
+
+  return cmd;
+}
+
+/* Handle a line of input coming from readline.
+
+   If the read line ends with a continuation character (backslash),
+   save the partial input in CMD_LINE_BUFFER (except the backslash),
+   and return NULL.  Otherwise, save the partial input and return a
+   pointer to CMD_LINE_BUFFER's buffer (null terminated), indicating a
+   whole command line is ready to be executed.
+
+   Returns EOF on end of file.
+
+   If REPEAT, handle command repetitions:
+
+     - If the input command line is NOT empty, the command returned is
+       copied into the global 'saved_command_line' var so that it can
+       be repeated later.
+
+     - OTOH, if the input command line IS empty, return the previously
+       saved command instead of the empty input line.
+*/
+
+char *
+handle_line_of_input (struct buffer *cmd_line_buffer,
+		      char *rl, int repeat, char *annotation_suffix)
+{
   char *p1;
-  char *nline;
-  int repeat = (instream == stdin);
+  char *cmd;
+
+  if (rl == NULL)
+    return (char *) EOF;
+
+  cmd = command_line_append_input_line (cmd_line_buffer, rl);
+  if (cmd == NULL)
+    return NULL;
+
+  /* We have a complete command line now.  Prepare for the next
+     command, but leave ownership of memory to the buffer .  */
+  cmd_line_buffer->used_size = 0;
 
   if (annotation_level > 1 && instream == stdin)
     {
       printf_unfiltered (("\n\032\032post-"));
-      puts_unfiltered (async_annotation_suffix);
+      puts_unfiltered (annotation_suffix);
       printf_unfiltered (("\n"));
     }
 
-  if (linebuffer == 0)
+#define SERVER_COMMAND_PREFIX "server "
+  if (startswith (cmd, SERVER_COMMAND_PREFIX))
     {
-      linelength = 80;
-      linebuffer = (char *) xmalloc (linelength);
-      linebuffer[0] = '\0';
-    }
-
-  p = linebuffer;
-
-  if (more_to_come)
-    {
-      strcpy (linebuffer, readline_input_state.linebuffer);
-      p = readline_input_state.linebuffer_ptr;
-      xfree (readline_input_state.linebuffer);
-      more_to_come = 0;
-    }
-
-#ifdef STOP_SIGNAL
-  if (job_control)
-    signal (STOP_SIGNAL, handle_stop_sig);
-#endif
-
-  /* Make sure that all output has been output.  Some machines may let
-     you get away with leaving out some of the gdb_flush, but not
-     all.  */
-  wrap_here ("");
-  gdb_flush (gdb_stdout);
-  gdb_flush (gdb_stderr);
-
-  if (source_file_name != NULL)
-    ++source_line_number;
-
-  /* If we are in this case, then command_handler will call quit 
-     and exit from gdb.  */
-  if (!rl || rl == (char *) EOF)
-    {
-      command_handler (0);
-      return;			/* Lint.  */
-    }
-  if (strlen (rl) + 1 + (p - linebuffer) > linelength)
-    {
-      linelength = strlen (rl) + 1 + (p - linebuffer);
-      nline = (char *) xrealloc (linebuffer, linelength);
-      p += nline - linebuffer;
-      linebuffer = nline;
-    }
-  p1 = rl;
-  /* Copy line.  Don't copy null at end.  (Leaves line alone
-     if this was just a newline).  */
-  while (*p1)
-    *p++ = *p1++;
-
-  xfree (rl);			/* Allocated in readline.  */
-
-  if (p > linebuffer && *(p - 1) == '\\')
-    {
-      *p = '\0';
-      p--;			/* Put on top of '\'.  */
-
-      readline_input_state.linebuffer = xstrdup (linebuffer);
-      readline_input_state.linebuffer_ptr = p;
-
-      /* We will not invoke a execute_command if there is more
-	 input expected to complete the command.  So, we need to
-	 print an empty prompt here.  */
-      more_to_come = 1;
-      display_gdb_prompt ("");
-      return;
-    }
-
-#ifdef STOP_SIGNAL
-  if (job_control)
-    signal (STOP_SIGNAL, SIG_DFL);
-#endif
-
-#define SERVER_COMMAND_LENGTH 7
-  server_command =
-    (p - linebuffer > SERVER_COMMAND_LENGTH)
-    && strncmp (linebuffer, "server ", SERVER_COMMAND_LENGTH) == 0;
-  if (server_command)
-    {
-      /* Note that we don't set `line'.  Between this and the check in
-         dont_repeat, this insures that repeating will still do the
-         right thing.  */
-      *p = '\0';
-      command_handler (linebuffer + SERVER_COMMAND_LENGTH);
-      display_gdb_prompt (0);
-      return;
+      /* Note that we don't set `saved_command_line'.  Between this
+         and the check in dont_repeat, this insures that repeating
+         will still do the right thing.  */
+      return cmd + strlen (SERVER_COMMAND_PREFIX);
     }
 
   /* Do history expansion if that is wished.  */
@@ -619,10 +564,11 @@ command_line_handler (char *rl)
       char *history_value;
       int expanded;
 
-      *p = '\0';		/* Insert null now.  */
-      expanded = history_expand (linebuffer, &history_value);
+      expanded = history_expand (cmd, &history_value);
       if (expanded)
 	{
+	  size_t len;
+
 	  /* Print the changes.  */
 	  printf_unfiltered ("%s\n", history_value);
 
@@ -630,88 +576,96 @@ command_line_handler (char *rl)
 	  if (expanded < 0)
 	    {
 	      xfree (history_value);
-	      return;
+	      return cmd;
 	    }
-	  if (strlen (history_value) > linelength)
-	    {
-	      linelength = strlen (history_value) + 1;
-	      linebuffer = (char *) xrealloc (linebuffer, linelength);
-	    }
-	  strcpy (linebuffer, history_value);
-	  p = linebuffer + strlen (linebuffer);
+
+	  /* history_expand returns an allocated string.  Just replace
+	     our buffer with it.  */
+	  len = strlen (history_value);
+	  xfree (buffer_finish (cmd_line_buffer));
+	  cmd_line_buffer->buffer = history_value;
+	  cmd_line_buffer->buffer_size = len + 1;
+	  cmd = history_value;
 	}
-      xfree (history_value);
     }
 
   /* If we just got an empty line, and that is supposed to repeat the
-     previous command, return the value in the global buffer.  */
-  if (repeat && p == linebuffer && *p != '\\')
-    {
-      command_handler (saved_command_line);
-      display_gdb_prompt (0);
-      return;
-    }
+     previous command, return the previously saved command.  */
+  for (p1 = cmd; *p1 == ' ' || *p1 == '\t'; p1++)
+    ;
+  if (repeat && *p1 == '\0')
+    return saved_command_line;
 
-  for (p1 = linebuffer; *p1 == ' ' || *p1 == '\t'; p1++);
-  if (repeat && !*p1)
-    {
-      command_handler (saved_command_line);
-      display_gdb_prompt (0);
-      return;
-    }
-
-  *p = 0;
-
-  /* Add line to history if appropriate.  */
-  if (*linebuffer && input_from_terminal_p ())
-    gdb_add_history (linebuffer);
-
-  /* Note: lines consisting solely of comments are added to the command
-     history.  This is useful when you type a command, and then
-     realize you don't want to execute it quite yet.  You can comment
-     out the command and then later fetch it from the value history
-     and remove the '#'.  The kill ring is probably better, but some
-     people are in the habit of commenting things out.  */
-  if (*p1 == '#')
-    *p1 = '\0';			/* Found a comment.  */
+  /* Add command to history if appropriate.  Note: lines consisting
+     solely of comments are also added to the command history.  This
+     is useful when you type a command, and then realize you don't
+     want to execute it quite yet.  You can comment out the command
+     and then later fetch it from the value history and remove the
+     '#'.  The kill ring is probably better, but some people are in
+     the habit of commenting things out.  */
+  if (*cmd != '\0' && input_from_terminal_p ())
+    gdb_add_history (cmd);
 
   /* Save into global buffer if appropriate.  */
   if (repeat)
     {
-      if (linelength > saved_command_line_size)
-	{
-	  saved_command_line
-	    = (char *) xrealloc (saved_command_line, linelength);
-	  saved_command_line_size = linelength;
-	}
-      strcpy (saved_command_line, linebuffer);
-      if (!more_to_come)
-	{
-	  command_handler (saved_command_line);
-	  display_gdb_prompt (0);
-	}
-      return;
+      xfree (saved_command_line);
+      saved_command_line = xstrdup (cmd);
+      return saved_command_line;
     }
+  else
+    return cmd;
+}
 
-  command_handler (linebuffer);
-  display_gdb_prompt (0);
-  return;
+/* Handle a complete line of input.  This is called by the callback
+   mechanism within the readline library.  Deal with incomplete
+   commands as well, by saving the partial input in a global
+   buffer.
+
+   NOTE: This is the asynchronous version of the command_line_input
+   function.  */
+
+void
+command_line_handler (char *rl)
+{
+  struct buffer *line_buffer = get_command_line_buffer ();
+  char *cmd;
+
+  cmd = handle_line_of_input (line_buffer, rl, instream == stdin, "prompt");
+  if (cmd == (char *) EOF)
+    {
+      /* stdin closed.  The connection with the terminal is gone.
+	 This happens at the end of a testsuite run, after Expect has
+	 hung up but GDB is still alive.  In such a case, we just quit
+	 gdb killing the inferior program too.  */
+      printf_unfiltered ("quit\n");
+      execute_command ("quit", stdin == instream);
+    }
+  else if (cmd == NULL)
+    {
+      /* We don't have a full line yet.  Print an empty prompt.  */
+      display_gdb_prompt ("");
+    }
+  else
+    {
+      command_handler (cmd);
+      display_gdb_prompt (0);
+    }
 }
 
 /* Does reading of input from terminal w/o the editing features
-   provided by the readline library.  */
+   provided by the readline library.  Calls the line input handler
+   once we have a whole input line.  */
 
-/* NOTE: 1999-04-30 Asynchronous version of gdb_readline; gdb_readline
-   will become obsolete when the event loop is made the default
-   execution for gdb.  */
 void
-gdb_readline2 (gdb_client_data client_data)
+gdb_readline_no_editing_callback (gdb_client_data client_data)
 {
   int c;
   char *result;
-  int input_index = 0;
-  int result_size = 80;
+  struct buffer line_buffer;
   static int done_once = 0;
+
+  buffer_init (&line_buffer);
 
   /* Unbuffer the input stream, so that, later on, the calls to fgetc
      fetch only one char at the time from the stream.  The fgetc's will
@@ -725,14 +679,13 @@ gdb_readline2 (gdb_client_data client_data)
       done_once = 1;
     }
 
-  result = (char *) xmalloc (result_size);
-
   /* We still need the while loop here, even though it would seem
-     obvious to invoke gdb_readline2 at every character entered.  If
-     not using the readline library, the terminal is in cooked mode,
-     which sends the characters all at once.  Poll will notice that the
-     input fd has changed state only after enter is pressed.  At this
-     point we still need to fetch all the chars entered.  */
+     obvious to invoke gdb_readline_no_editing_callback at every
+     character entered.  If not using the readline library, the
+     terminal is in cooked mode, which sends the characters all at
+     once.  Poll will notice that the input fd has changed state only
+     after enter is pressed.  At this point we still need to fetch all
+     the chars entered.  */
 
   while (1)
     {
@@ -742,32 +695,31 @@ gdb_readline2 (gdb_client_data client_data)
 
       if (c == EOF)
 	{
-	  if (input_index > 0)
-	    /* The last line does not end with a newline.  Return it,
-	       and if we are called again fgetc will still return EOF
-	       and we'll return NULL then.  */
-	    break;
-	  xfree (result);
+	  if (line_buffer.used_size > 0)
+	    {
+	      /* The last line does not end with a newline.  Return it, and
+		 if we are called again fgetc will still return EOF and
+		 we'll return NULL then.  */
+	      break;
+	    }
+	  xfree (buffer_finish (&line_buffer));
 	  (*input_handler) (0);
 	  return;
 	}
 
       if (c == '\n')
 	{
-	  if (input_index > 0 && result[input_index - 1] == '\r')
-	    input_index--;
+	  if (line_buffer.used_size > 0
+	      && line_buffer.buffer[line_buffer.used_size - 1] == '\r')
+	    line_buffer.used_size--;
 	  break;
 	}
 
-      result[input_index++] = c;
-      while (input_index >= result_size)
-	{
-	  result_size *= 2;
-	  result = (char *) xrealloc (result, result_size);
-	}
+      buffer_grow_char (&line_buffer, c);
     }
 
-  result[input_index++] = '\0';
+  buffer_grow_char (&line_buffer, '\0');
+  result = buffer_finish (&line_buffer);
   (*input_handler) (result);
 }
 
@@ -1055,7 +1007,7 @@ gdb_setup_readline (void)
   else
     {
       async_command_editing_p = 0;
-      call_readline = gdb_readline2;
+      call_readline = gdb_readline_no_editing_callback;
     }
   
   /* When readline has read an end-of-line character, it passes the

@@ -1241,7 +1241,7 @@ create_register_alias (char *newname, char *p)
   nlen = strlen (newname);
 #endif
 
-  nbuf = alloca (nlen + 1);
+  nbuf = xmalloc (nlen + 1);
   memcpy (nbuf, newname, nlen);
   nbuf[nlen] = '\0';
 
@@ -1265,7 +1265,10 @@ create_register_alias (char *newname, char *p)
 	     the artificial FOO alias because it has already been created by the
 	     first .req.  */
 	  if (insert_reg_alias (nbuf, old->number, old->type) == NULL)
-	    return TRUE;
+	    {
+	      free (nbuf);
+	      return TRUE;
+	    }
 	}
 
       for (p = nbuf; *p; p++)
@@ -1275,6 +1278,7 @@ create_register_alias (char *newname, char *p)
 	insert_reg_alias (nbuf, old->number, old->type);
     }
 
+  free (nbuf);
   return TRUE;
 }
 

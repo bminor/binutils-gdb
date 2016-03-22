@@ -949,6 +949,90 @@ block_depth (struct block *block)
 }
 
 
+/* Used by MAINTENANCE_INFO_LINE_TABLES to print the information about a
+   single line table.  */
+
+static int
+maintenance_print_one_line_table (struct symtab *symtab, void *data)
+{
+  struct linetable *linetable;
+  struct objfile *objfile;
+
+  objfile = symtab->compunit_symtab->objfile;
+  printf_filtered (_("objfile: %s ((struct objfile *) %s)\n"),
+		   objfile_name (objfile),
+		   host_address_to_string (objfile));
+  printf_filtered (_("compunit_symtab: ((struct compunit_symtab *) %s)\n"),
+		   host_address_to_string (symtab->compunit_symtab));
+  printf_filtered (_("symtab: %s ((struct symtab *) %s)\n"),
+		   symtab_to_fullname (symtab),
+		   host_address_to_string (symtab));
+  linetable = SYMTAB_LINETABLE (symtab);
+  printf_filtered (_("linetable: ((struct linetable *) %s):\n"),
+		   host_address_to_string (linetable));
+
+  if (linetable == NULL)
+    printf_filtered (_("No line table.\n"));
+  else if (linetable->nitems <= 0)
+    printf_filtered (_("Line table has no lines.\n"));
+  else
+    {
+      int i;
+
+      /* Leave space for 6 digits of index and line number.  After that the
+	 tables will just not format as well.  */
+      printf_filtered (_("%-6s %6s %s\n"),
+		       _("INDEX"), _("LINE"), _("ADDRESS"));
+
+      for (i = 0; i < linetable->nitems; ++i)
+	{
+	  struct linetable_entry *item;
+	  struct cleanup *row_cleanup;
+
+	  item = &linetable->item [i];
+	  printf_filtered (_("%-6d %6d %s\n"), i, item->line,
+			   core_addr_to_string (item->pc));
+	}
+    }
+
+  return 0;
+}
+
+/* Implement the 'maint info line-table' command.  */
+
+static void
+maintenance_info_line_tables (char *regexp, int from_tty)
+{
+  struct program_space *pspace;
+  struct objfile *objfile;
+
+  dont_repeat ();
+
+  if (regexp != NULL)
+    re_comp (regexp);
+
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
+    {
+      struct compunit_symtab *cust;
+      struct symtab *symtab;
+
+      ALL_OBJFILE_COMPUNITS (objfile, cust)
+	{
+	  ALL_COMPUNIT_FILETABS (cust, symtab)
+	    {
+	      QUIT;
+
+	      if (regexp == NULL
+		  || re_exec (symtab_to_filename_for_display (symtab)))
+		maintenance_print_one_line_table (symtab, NULL);
+	    }
+	}
+    }
+}
+
+
+
 /* Do early runtime initializations.  */
 
 void
@@ -980,6 +1064,12 @@ List the full symbol tables for all object files.\n\
 This does not include information about individual symbols, blocks, or\n\
 linetables --- just the symbol table structures themselves.\n\
 With an argument REGEXP, list the symbol tables with matching names."),
+	   &maintenanceinfolist);
+
+  add_cmd ("line-table", class_maintenance, maintenance_info_line_tables, _("\
+List the contents of all line tables, from all symbol tables.\n\
+With an argument REGEXP, list just the line tables for the symbol\n\
+tables with matching names."),
 	   &maintenanceinfolist);
 
   add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,

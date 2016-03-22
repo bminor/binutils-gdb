@@ -1,3 +1,465 @@
+2016-03-21  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_record_media): New.
+	(arm_record_ld_st_reg_offset): Call arm_record_media.
+
+2016-03-21  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_canonicalize_syscall): Canonicalize
+	more syscalls.
+
+2016-03-18  Yao Qi  <yao.qi@linaro.org>
+
+	* sparc-tdep.c (sparc_software_single_step): Make it static.
+	* sparc-tdep.h (sparc_software_single_step): Remove declaration.
+
+2016-03-18  Yao Qi  <yao.qi@linaro.org>
+
+	* spu-tdep.c (spu_software_single_step): Throw error when
+	target_read_memory fails.
+
+2016-03-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-thread-db.c (check_pid_namespace_match): Extend the message.
+
+2016-03-17  Pedro Alves  <palves@redhat.com>
+	    Don Breazeal  <donb@codesourcery.com>
+
+	PR remote/19496
+	* infcmd.c (notice_new_inferior): Use the 'leave_running' argument
+	instead of checking the 'non_stop' global.
+	* remote.c (remote_add_thread): New parameter 'executing'.  Use it
+	to set the new thread's executing state.
+	(remote_notice_new_inferior): Rename parameter 'running' to
+	'executing'.  Always set the thread state to THREAD_RUNNING in
+	non-stop mode, and to THREAD_STOPPED in all-stop mode.  Pass
+	EXECUTING to remote_add_thread and notice_new_inferior.
+	(remote_update_thread_list): Update to pass executing state, not
+	running state.
+
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* syscalls/s390-linux.xml: Add NUMA syscalls and new syscalls up
+	to 374.
+	* syscalls/s390x-linux.xml: Likewise.
+
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-record.c (record_mem_at_reg): New helper function.
+	(record_linux_system_call): Exploit new helper function where
+	applicable.
+
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-record.c: Fix whitespace issues; tabify, remove trailing
+	spaces.
+
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-record.c (record_linux_system_call): Add missing return
+	statements to handling of pipe and pipe2 syscalls.
+
+2016-03-16  Doug Evans  <dje@google.com>
+
+	* xml-tdesc.c (tdesc_start_enum): Fix c++ build.
+
+2016-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_init_abi): Fix
+	arm_linux_record_tdep.arg1, arm_linux_record_tdep.arg2 and
+	arm_linux_record_tdep.arg3.  Set arm_linux_record_tdep.arg4,
+	arm_linux_record_tdep.arg5, arm_linux_record_tdep.arg6, and
+	arm_linux_record_tdep.arg7.
+
+2016-03-15  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoints/18303
+	* cp-namespace.c (cp_lookup_bare_symbol): Change assertion to
+	look for "::" instead of simply ":".
+	(cp_search_static_and_baseclasses): Return null_block_symbol for
+	malformed input.
+	Remove assertions.
+	* cp-support.c (cp_find_first_component_aux): Do not return
+	a prefix length for ':' unless the next character is also ':'.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* features/aarch64-core.xml (cpsr_flags): New flags type.
+	(cpsr): Use it.
+	* features/aarch64.c: Regenerate.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* features/i386/32bit-core.xml (i386_eflags): Remove "end" spec.
+	* features/i386/32bit-sse.xml (i386_eflags): Ditto.
+	* features/i386/64bit-core.xml (i386_eflags): Ditto.
+	* features/i386/64bit-sse.xml (i386_eflags): Ditto.
+	* features/i386/x32-core.xml (i386_eflags): Ditto.
+
+2016-03-15  Doug Evans  <dje@google.com>
+	    Wei-cheng Wang  <cole945@gmail.com>
+
+	Extend flags to support multibit and enum bitfields.
+	* NEWS: Document new features.
+	* c-typeprint.c (c_type_print_varspec_prefix): Handle TYPE_CODE_FLAGS.
+	(c_type_print_varspec_suffix, c_type_print_base): Ditto.
+	* gdbtypes.c (arch_flags_type): Don't assume all fields are one bit.
+	(append_flags_type_field): New function.
+	(append_flags_type_flag): Call it.
+	* gdbtypes.h (append_flags_type_field): Declare.
+	* target-descriptions.c (struct tdesc_type_flag): Delete.
+	(enum tdesc_type_kind) <TDESC_TYPE_BOOL>: New enum value.
+	(enum tdesc_type_kind) <TDESC_TYPE_ENUM>: Ditto.
+	(struct tdesc_type) <u.f>: Delete.
+	(tdesc_predefined_types): Add "bool".
+	(tdesc_predefined_type): New function.
+	(tdesc_gdb_type): Handle TDESC_TYPE_BOOL, TDESC_TYPE_ENUM.
+	Update TDESC_TYPE_FLAGS support.
+	(tdesc_free_type): Handle TDESC_TYPE_ENUM.  Update TDESC_TYPE_FLAGS.
+	(tdesc_create_flags): Update.
+	(tdesc_create_enum): New function.
+	(tdesc_add_field): Initialize start,end to -1.
+	(tdesc_add_typed_bitfield): New function.
+	(tdesc_add_bitfield): Call it.
+	(tdesc_add_flag): Allow TDESC_TYPE_STRUCT.  Update.
+	(tdesc_add_enum_value): New function.
+	(maint_print_c_tdesc_cmd): Fold TDESC_TYPE_FLAGS support into
+	TDESC_TYPE_STRUCT.  Handle TDESC_TYPE_ENUM.
+	* target-descriptions.h (tdesc_create_enum): Declare.
+	(tdesc_add_typed_bitfield, tdesc_add_enum_value): Declare.
+	* valprint.c (generic_val_print_enum_1): New function.
+	(generic_val_print_enum): Call it.
+	(val_print_type_code_flags): Make static.  Handle multibit bitfields
+	and enum bitfields.
+	* valprint.h (val_print_type_code_flags): Delete.
+	* xml-tdesc.c (struct tdesc_parsing_data) <current_type_is_flags>:
+	Delete.  All uses removed.
+	(tdesc_start_enum): New function.
+	(tdesc_start_field): Handle multibit and enum bitfields.
+	(tdesc_start_enum_value): New function.
+	(enum_value_attributes, enum_children, enum_attributes): New static
+	globals.
+	(feature_children): Add "enum".
+	* features/gdb-target.dtd (enum, evalue): New elements.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* target-descriptions.c (struct tdesc_type) <u.u.size>: Change type
+	from LONGEST to int.
+	(struct tdesc_type) <u.f.size>: Ditto.
+	(tdesc_set_struct_size): Change type of "size" arg from LONGEST
+	to int.  Add assertion size > 0.
+	(tdesc_create_flags): Ditto.
+	* target-descriptions.h (tdesc_set_struct_size): Update.
+	(tdesc_create_flags): Update.
+	* xml-tdesc.c (MAX_FIELD_SIZE, MAX_FIELD_BITSIZE): New macros.
+	(MAX_VECTOR_SIZE): New macro.
+	(tdesc_start_struct): Catch conversion errors from LONGEST to int.
+	(tdesc_start_flags, tdesc_start_field, tdesc_start_vector): Ditto.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Use "type" for
+	TYPE_CODE_FLAGS instead of "field_type", for consistency.
+	* features/i386/amd64-avx-linux.c: Regenerate.
+	* features/i386/amd64-avx.c: Regenerate.
+	* features/i386/amd64-avx512-linux.c: Regenerate.
+	* features/i386/amd64-avx512.c: Regenerate.
+	* features/i386/amd64-linux.c: Regenerate.
+	* features/i386/amd64-mpx-linux.c: Regenerate.
+	* features/i386/amd64-mpx.c: Regenerate.
+	* features/i386/amd64.c: Regenerate.
+	* features/i386/i386-avx-linux.c: Regenerate.
+	* features/i386/i386-avx.c: Regenerate.
+	* features/i386/i386-avx512-linux.c: Regenerate.
+	* features/i386/i386-avx512.c: Regenerate.
+	* features/i386/i386-linux.c: Regenerate.
+	* features/i386/i386-mmx-linux.c: Regenerate.
+	* features/i386/i386-mmx.c: Regenerate.
+	* features/i386/i386-mpx-linux.c: Regenerate.
+	* features/i386/i386-mpx.c: Regenerate.
+	* features/i386/i386.c: Regenerate.
+	* features/i386/x32-avx-linux.c: Regenerate.
+	* features/i386/x32-avx.c: Regenerate.
+	* features/i386/x32-avx512-linux.c: Regenerate.
+	* features/i386/x32-avx512.c: Regenerate.
+	* features/i386/x32-linux.c: Regenerate.
+	* features/i386/x32.c: Regenerate.
+
+2016-03-15  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19676
+	* linux-thread-db.c (try_thread_db_load_1): Leave
+	info->td_ta_thr_iter_p NULL iff debugging a live process and we
+	have /proc access.
+	(find_new_threads_once): Assert that we have a non-NULL
+	info->td_ta_thr_iter_p instead of checking whether the target has
+	execution.
+
+2016-03-15  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19676
+	* infrun.c (displaced_step_prepare): Also disable displaced
+	stepping on NOT_SUPPORTED_ERROR.
+	* linux-tdep.c (linux_displaced_step_location): If reading auxv
+	fails, throw NOT_SUPPORTED_ERROR instead of generic error.
+
+2016-03-13  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390-linux-tdep.c (s390_gen_return_address): New function.
+	(s390_gdbarch_init): Fill gen_return_address hook.
+
+2016-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* symmisc.c (maintenance_info_line_tables): New function.
+	(maintenance_print_one_line_table): New function.
+	(_initialize_symmisc): Register 'maint info line-table' command.
+	* NEWS: Mention new command.
+
+2016-03-11  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390-linux-tdep.c (s390_ax_pseudo_register_collect): New function.
+	(s390_ax_pseudo_register_push_stack): New function.
+	(s390_gdbarch_init): Fill ax_pseudo_register_collect and
+	ax_pseudo_register_push_stack hooks.
+
+2016-03-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Install
+	gdb/function/as_string.py.
+	* python/lib/gdb/function/as_string.py: New file.
+	* NEWS: Mention the new $_as_string function.
+
+2016-03-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* target.h: Fix doc string of target_can_use_hardware_watchpoint.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (more_to_come): Delete.
+	(struct readline_input_state): Delete.
+	(readline_input_state): Delete.
+	(get_command_line_buffer): New function.
+	(command_handler): Update comments.  Don't handle NULL commands
+	here.  Do not execute commented lines.
+	(command_line_append_input_line): New function.
+	(handle_line_of_input): New function, partly based on
+	command_line_handler and command_line_input.
+	(command_line_handler): Rewrite.
+	* event-top.h (command_handler): New declaration.
+	(command_loop): Defer command execution to command_handler.
+	(command_line_input): Update comments.  Simplify, using struct
+	buffer and handle_line_of_input.
+	* top.h (struct buffer): New forward declaration.
+	(handle_line_of_input): New declaration.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (command_line_handler): Use xfree + xstrdup instead
+	of xrealloc + strcpy.
+	* main.c (captured_main): Use xstrdup instead of xmalloc plus
+	manual clear.
+	* top.c (saved_command_line): Rewrite comment.
+	(saved_command_line_size): Delete.
+	(command_line_input): Use xfree + xstrdup instead of xrealloc +
+	strcpy.
+	* top.h (saved_command_line_size): Delete declaration.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c: Include buffer.h.
+	(gdb_readline_no_editing_callback): Use struct buffer instead
+	of xrealloc.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* common/buffer.h (buffer_grow_char): New function.
+	* top.c: Include buffer.h.
+	(gdb_readline_no_editing): Rename 'prompt_arg' parameter to
+	'prompt'.  Use struct buffer instead of xrealloc.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (gdb_readline): Delete declaration.
+	* top.c (gdb_readline): Rename to ...
+	(gdb_readline_no_editing): ... this, and make static.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (prompt_for_continue): Update comments.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (async_annotation_suffix): Delete.
+	(top_level_prompt, command_line_handler): Don't use
+	'async_annotation_suffix' and simplify.
+	* event-top.h (async_annotation_suffix): Delete declaration.
+	(init_main): Remove reference to 'async_annotation_suffix'.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (gdb_readline2): Rename to ...
+	(gdb_readline_no_editing_callback): ... this.
+	(change_line_handler, stdin_event_handler)
+	(gdb_setup_readline): Adjust.
+	* event-top.h (gdb_readline2): Rename to ...
+	(gdb_readline_no_editing_callback): ... this, and move closer to
+	other readline-related declarations.
+	* mi/mi-interp.c (mi_interpreter_resume): Adjust.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* top.c (window_hook): Delete.
+	(command_loop): Remove references to window_hook.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/command-line-input.exp: New file.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* corefile.c (safe_read_memory_unsigned_integer): New function.
+	* gdbcore.h (safe_read_memory_unsigned_integer): New prototype.
+	* rs6000-tdep.c (rs6000_frame_cache): Read backchain as unsigned.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* rs6000-tdep.c: Add "ax.h" and "ax-gdb.h" includes.
+	(rs6000_gen_return_address): New function.
+	(rs6000_gdbarch_init): Wire in the above.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* rs6000-tdep.c (rs6000_ax_pseudo_register_collect): New function.
+	(rs6000_gdbarch_init): Wire in the above.
+
+2016-03-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_analyze_prologue): Ignore BRC and BRCL
+	instructions that do nothing or are conditional traps.
+
+2016-03-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_prologue_frame_unwind_cache): Store
+	frame func's PC in info->func before any other failure can occur.
+	(s390_frame_this_id): Use frame_id_build_unavailable_stack if
+	info->func has been filled out.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* osabi.c (gdb_osabi_names): Avoid spaces in osabi names.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* frv-tdep.c (frv_gdbarch_init): Handle bfd_mach_fr300.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* cris-tdep.c (cris_gdbarch_init): Return 0 if the info's byte
+	order is BFD_ENDIAN_BIG or if the cris version is unsupported.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* doublest.c: Extend comments.
+	(floatformat_to_doublest, floatformat_from_doublest): Copy the
+	floatformat's total size, not the host type's size.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* doublest.c (floatformat_totalsize_bytes): New function.
+	(floatformat_from_type): Assert that the type's length is at least
+	as long as the floatformat's totalsize.
+	* doublest.h (floatformat_totalsize_bytes): New declaration.
+	* gdbtypes.c (arch_float_type): Assert that the type's length is
+	at least as long as the floatformat's totalsize.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* hppa-linux-tdep.c (hppa_linux_init_abi): Set the long double
+	format to floatformats_ieee_double.
+
+2016-03-07  Pedro Alves  <palves@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Check whether info.abfd is NULL
+	before calling bfd_get_flavour.
+
+2016-03-05  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* avr-tdep.c (AVR_LAST_ARG_REGNUM): Define.
+	(avr_push_dummy_call): Correct last needed argument register.
+	Write MSB of argument into register and subsequent bytes into
+	other registers in decreasing order.
+
+2016-03-04  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_record_vdata_transfer_insn): Simplify the
+	condition check.  Record the right D register number.
+
+2016-03-04  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_record_extension_space): Remove code
+	printing "Process record does not support".
+	(arm_record_data_proc_misc_ld_str): Likewise.
+	(decode_insn): Call arm_record_extension_space if condition
+	is 0xf.  Call arm_record_unsupported_insn if ret isn't
+	ARM_RECORD_SUCCESS.  Use 'ret' instead of 'insn_id' to hold
+	the value of thumb2_record_decode_insn_handler.
+
+2016-03-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* features/feature_to_c.sh: Print the help when passing no
+	argument.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* MAINTAINERS (Write After Approval): Add Bernhard Heckel.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* dwarf2read.c (new_symbol_full): Fix detection of gfortran compilers.
+
+2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_backchain_frame_unwind_cache): Avoid
+	exception when attempting to access the inferior's backchain.
+
+2016-02-29  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-tdep.c (aarch64_canonicalize_syscall): Support
+	eventfd2, eventfd2, dup3, inotify_init1, fallocate and pipe2.
+	Return gdb_sys_epoll_create1 instead of gdb_sys_epoll_create
+	for aarch64_sys_epoll_create1.
+
+2016-02-29  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-record.h (enum gdb_syscall) <gdb_sys_fallocate>: New.
+	<gdb_sys_eventfd2, gdb_sys_epoll_create1, gdb_sys_dup3>: New.
+	<gdb_sys_pipe2, gdb_sys_inotify_init1>: New.
+	* linux-record.c (record_linux_system_call): Handle them.
+
+2016-02-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-namespace.c (d_lookup_symbol_imports): Avoid recursive lookups from
+	cyclic imports.
+
+2016-02-26  Keith Seitz  <keiths@redhat.com>
+
+	* rs6000-tdep.c (rs6000_frame_cache): Explicitly cast return result
+	to avoid invalid conversion from void *.
+
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_record_exreg_ld_st_insn): Set 'single_reg'
+	per bit 8.  Check bit 20 instead of bit 4 for VMOV
+	instruction.  Record D registers for instructions changing
+	S registers.  Change of the order of length and address
+	in record_buf_mem array.
+
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_record_ld_st_reg_offset): Fix the register
+	number of Rd.
+
 2016-02-25  Doug Evans  <dje@google.com>
 
 	* remote-m32r-sdi.c (recv_char_data): Initialize val to avoid

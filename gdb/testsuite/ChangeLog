@@ -1,3 +1,244 @@
+2016-03-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-multiarch.exp: Use standard_testfile instead of
+	maintaining separate logic for constructing the output path.
+
+2016-03-16  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.threads/forking-threads-plus-breakpoint.c (thread_forks):
+	Retry fork and waitpid on interrupted system call errors.
+	* gdb.threads/forking-threads-plus-breakpoint.exp (do_test):
+	Use with_timeout_factor to increase timeout by factor of 10.
+
+2016-03-15  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.cp/scope-err.cc: New test program.
+	* gdb.cp/scope-err.exp: New test script.
+	* gdb.linespec/ls-errs.c (myfunction): Expanded to have multiple
+	lines and "set breakpoint here" comment.
+	* gdb.linespec/ls-errs.exp: Added C++ testing and new test case.
+	Fixed some whitespace and format issues.
+	* gdb.mi/mi-linespec-err-cp.cc: New test program.
+	* gdb.mi/mi-linespec-err-cp.exp: New test script.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* gdb.xml/extra-regs.xml: Add enum, mixed_flags values.
+	* gdb.xml/tdesc-regs.exp (load_description): New arg xml_file.
+	All callers updated.  Add tests for enums, mixed flags register.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* gdb.base/skip.c (main): Call test_skip_file_and_function.
+	* gdb.base/skip.exp: Remove hand calling test_skip_file_and_function.
+
+2016-03-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/default.exp: Add $_as_string to the list of expected
+	convenience functions.
+
+2016-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint.exp: New tests for 'maint info line-table'.
+
+2016-03-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-as-string.exp: New file.
+	* gdb.python/py-as-string.c: New file.
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-into-signal.exp: Adjust to "Program received
+	signal" -> "Thread NN received signal" output change.
+	* gdb.threads/ia64-sigill.exp: Likewise.
+	* gdb.threads/linux-dp.exp: Likewise.
+	* gdb.threads/manythreads.exp: Likewise.
+	* gdb.threads/pending-step.exp: Likewise.
+	* gdb.threads/print-threads.exp: Likewise.
+	* gdb.threads/sigstep-threads.exp: Likewise.
+	* gdb.threads/staticthreads.exp: Likewise.
+	* gdb.threads/tls.exp: Likewise.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/ftrace.exp: Set arg0exp for ppc.
+	* gdb.trace/mi-trace-unavailable.exp: Set pcnum for ppc.
+	* gdb.trace/pending.exp: Accept leading dot before function name.
+	* gdb.trace/trace-common.h: Add fast tracepoint dummy insn for ppc.
+	* lib/trace-support.exp: Set registers for ppc.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/entry-values.exp: Link ${binfile}1.o to ${binfile}1 and
+	use it for disassembly; accept .main in addition to main in backtrace.
+
+2016-03-09  Wei-cheng Wang  <cole945@gmail.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/actions.c (gdb_recursion_test_fp): New typedef.
+	(gdb_recursion_test_ptr): New global variable.
+	(gdb_recursion_test): Call gdb_recursion_test_ptr instead of
+	gdb_recursion_test.
+	(gdb_c_test): Ditto.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/change-loc.exp: Don't depend on tracepoint location
+	ordering.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/unavailable-dwarf-piece.c (foo): Add foo_start_lbl label.
+	(bar): Add bar_start_lbl label.
+	* gdb.trace/unavailable-dwarf-piece.exp: Use foo/bar_start_lbl instead
+	of foo/bar for emitting DWARF and tracing.
+
+2016-03-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* analyze-racy-logs.py: Set executable bit.
+
+2016-03-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (DEFAULT_RACY_ITER): New variable.
+	(CHECK_TARGET_TMP): Likewise.
+	(check-single-racy): New rule.
+	(check-parallel-racy): Likewise.
+	(TEST_TARGETS): Adjust rule to account for RACY_ITER.
+	(do-check-parallel-racy): New rule.
+	(check-racy/%.exp): Likewise.
+	* README (Racy testcases): New section.
+	* analyze-racy-logs.py: New file.
+
+2016-03-03  Doug Evans  <dje@google.com>
+
+	* gdb.base/skip.exp: Use with_test_prefix.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/step-over-syscall.exp (step_over_syscall): Kfail.
+	Invoke step_over_syscall "clone" and break_cond_on_syscall
+	"clone".
+	* gdb.base/step-over-clone.c: New file.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/step-over-syscall.exp (disp_step_cross_syscall): Fix
+	code format.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-fork.c: Rename to ...
+	* gdb.base/step-over-fork.c: ... it.  New file.
+	* gdb.base/disp-step-vfork.c: Rename to ...
+	* gdb.base/step-over-vfork.c: ... it.  New file.
+	* gdb.base/disp-step-syscall.exp: Rename to ...
+	* gdb.base/step-over-syscall.exp: ... it.  New file.
+	(disp_step_cross_syscall): Rename to ...
+	(step_over_syscall): ... it.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp (break_cond_on_syscall): New.
+	If target supports condition evaluation on target, invoke
+	break_cond_on_syscall for fork and vfork.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp: Don't invoke
+	support_displaced_stepping.
+	(disp_step_cross_syscall): Test with displaced stepping off and
+	on if supported.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp (check_pc_after_cross_syscall): New
+	proc.
+	(setup): New proc.
+	(disp_step_cross_syscall): Move code to check_pc_after_cross_syscall
+	and setup.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-history.exp: Remove breakpoint.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-history.exp: Lookup array elements and printing exceeds timeout.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.cp/vla-cxx.cc: Insert dummy assignment as anchor for an breakpoint.
+
+2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.mi/vla.f90: Nullify pointer after declaration.
+
+2016-03-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/ftrace-lock.c: Include <unistd.h>.
+
+2016-03-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/watchpoint-fork-child.c: Include "watchpoint-fork.h"
+	before anything else.
+	* gdb.threads/watchpoint-fork-mt.c: Likewise.  Don't define
+	_GNU_SOURCE here.
+	* gdb.threads/watchpoint-fork-st.c: Include "watchpoint-fork.h"
+	before anything else.
+	* gdb.threads/watchpoint-fork.h: Define _GNU_SOURCE.
+
+2016-03-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/catch-fork-kill.c: Include <sys/wait.h>.
+
+2016-03-01  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/arm-disp-step.exp: Use standard_testfile and
+	prepare_for_testing.
+
+2016-03-01  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/arm-neon.exp: Pass quiet to prepare_for_testing.
+
+2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-tdbregs.exp: Use prepare_for_testing instead of
+	manually constructing the output path.
+
+2016-03-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-stackless.S: New.
+	* gdb.arch/s390-stackless.exp: New.
+
+2016-02-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/circular.c: New file.
+	* gdb.dlang/circular.exp: New file.
+
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/insn-reverse.c [__arm__] (ext_reg_load): New.
+	[__arm__] (ext_reg_mov, ext_reg_push_pop): New.
+	(testcases): Update.
+
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/aarch64.c: Rename to ...
+	* gdb.reverse/insn-reverse.c: ... it.
+	* gdb.reverse/aarch64.exp: Rename to ...
+	* gdb.reverse/insn-reverse.exp: ... it.
+
+2016-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/aarch64.c: [__aarch64__] Include arm_neon.h.
+	(testcase_ftype): New.
+	(testcases): New array.
+	(n_testcases): New.
+	(main): Call each element in testcases.
+	* gdb.reverse/aarch64.exp: Remove is_aarch64_target check.
+	(read_testcase): New.
+	Do the tests in a loop.
+
 2016-02-25  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/branches.c: Remove.

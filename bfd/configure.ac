@@ -103,26 +103,6 @@ AC_ARG_WITH(separate-debug-dir,
 [DEBUGDIR="${withval}"])
 AC_SUBST(DEBUGDIR)
 
-# Check to see if we should allow the generation of
-# symbols with the ELF standard's STT_COMMON type.
-AC_ARG_ENABLE(elf-stt-common,
-[  --enable-elf-stt-common Allow the generation of ELF symbols with the STT_COMMON type],
-[case "${enableval}" in
-  yes) want_elf_stt_common=true ;;
-  no)  want_elf_stt_common=false ;;
-  *)   AC_MSG_ERROR(bad value ${enableval} for ELF STT_COMMON option) ;;
- esac],
-# We have to choose a default behaviour.  For native builds we could
-# test whether the loader supports the STT_COMMON type, but that would
-# mean that built binaries could not be exported to older systems where
-# the loader does not support it. So by default we always choose to
-# disable this feature.
-  want_elf_stt_common=false)dnl
-if test $want_elf_stt_common = true; then
-  AC_DEFINE(USE_STT_COMMON, 1,
-    [Define if we may generate symbols with ELF's STT_COMMON type])
-fi
-
 ACX_PKGVERSION([GNU Binutils])
 ACX_BUGURL([http://www.sourceware.org/bugzilla/])
 

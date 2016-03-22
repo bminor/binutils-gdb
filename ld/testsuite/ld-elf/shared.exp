@@ -524,6 +524,21 @@ if { [istarget *-*-linux*]
 	    {} \
 	    "libpr2404b.a" \
 	] \
+	[list \
+	    "Build pr19579a.o" \
+	    "" "-fPIE" \
+	    {pr19579a.c} \
+	    {} \
+	    "libpr19579a.a" \
+	] \
+	[list \
+	    "Build libpr19579.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    {pr19579b.c} \
+	    {} \
+	    "libpr19579.so" \
+	] \
     ]
     run_ld_link_exec_tests [] [list \
 	[list \
@@ -580,5 +595,78 @@ if { [istarget *-*-linux*]
 	    "pass.out" \
 	    "-O2 -fPIC -I../bfd" \
 	] \
+	[list \
+	    "Run pr19579" \
+	    "-pie -z text tmpdir/pr19579a.o tmpdir/libpr19579.so" \
+	    "" \
+	    {dummy.c} \
+	    "pr19579" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
     ]
 }
+
+proc mix_pic_and_non_pic {xfails cflags ldflags} {
+    set testname "Mixing PIC and non-PIC"
+    if { ![ string match "" $cflags$ldflags] } {
+	set testname "$testname ($cflags $ldflags)"
+    }
+
+    run_cc_link_tests [list \
+	[list \
+	    "Build libpr19719a.so" \
+	    "-shared -Wl,-soname,libpr19719.so" \
+	    "-fPIC" \
+	    { pr19719d.c } \
+	    {} \
+	    "libpr19719a.so" \
+	] \
+	[list \
+	    "Build libpr19719b.so" \
+	    "-shared -Wl,-soname,libpr19719.so" \
+	    "-fPIC" \
+	    { dummy.c } \
+	    {} \
+	    "libpr19719b.so" \
+	] \
+	[list \
+	    "Build pr19073b.o" \
+	    "-r -nostdlib" \
+	    "-fPIC" \
+	    { pr19719b.c } \
+	    {} \
+	    "libpr19719b.o" \
+	] \
+    ]
+
+    exec cp tmpdir/libpr19719b.so tmpdir/libpr19719.so
+
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run pr19719" \
+	    "$ldflags tmpdir/libpr19719b.o tmpdir/libpr19719.so -R tmpdir" \
+	    "" \
+	    { pr19719a.c pr19719c.c } \
+	    "pr19719" \
+	    "pass.out" \
+	    "$cflags" \
+	] \
+    ]
+
+    exec cp tmpdir/libpr19719a.so tmpdir/libpr19719.so
+
+    foreach targ $xfails {
+	setup_xfail $targ
+    }
+
+    set exec_output [run_host_cmd tmpdir/pr19719 ""]
+    if {![string match "PASS" $exec_output]} {
+	fail $testname
+    } else {
+	pass $testname
+    }
+}
+
+mix_pic_and_non_pic [list "arm*-*-*" "aarch64*-*-*"] "" ""
+mix_pic_and_non_pic [] "-fPIE" "-pie"

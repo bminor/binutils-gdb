@@ -47,7 +47,7 @@ gdb_test_multiple "continue" "$test" {
     -re "Breakpoint .*, .*sem_post .*$gdb_prompt " {
 	pass "$test"
     }
-    -re "Program received signal .*$gdb_prompt " {
+    -re " received signal .*$gdb_prompt " {
 	kfail gdb/1328 "$test"
     }
 }

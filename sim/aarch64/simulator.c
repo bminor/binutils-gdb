@@ -36,8 +36,8 @@
 #define SP_OK 1
 
 #define TST(_flag)   (aarch64_test_CPSR_bit (cpu, _flag))
-#define IS_SET(_X)   ( TST (( _X )))
-#define IS_CLEAR(_X) (!TST (( _X )))
+#define IS_SET(_X)   (TST (( _X )) ? 1 : 0)
+#define IS_CLEAR(_X) (TST (( _X )) ? 0 : 1)
 
 #define HALT_UNALLOC							\
   do									\
@@ -460,9 +460,9 @@ fldrs_pcrel (sim_cpu *cpu, int32_t offset)
 {
   unsigned int rd = uimm (aarch64_get_instr (cpu), 4, 0);
 
-  aarch64_set_FP_float (cpu, rd,
-			aarch64_get_mem_float
-			(cpu, aarch64_get_PC (cpu) + offset * 4));
+  aarch64_set_vec_u32 (cpu, rd, 0,
+		       aarch64_get_mem_u32
+		       (cpu, aarch64_get_PC (cpu) + offset * 4));
 }
 
 /* double pc-relative load  */
@@ -471,9 +471,9 @@ fldrd_pcrel (sim_cpu *cpu, int32_t offset)
 {
   unsigned int st = uimm (aarch64_get_instr (cpu), 4, 0);
 
-  aarch64_set_FP_double (cpu, st,
-			 aarch64_get_mem_double
-			 (cpu, aarch64_get_PC (cpu) + offset * 4));
+  aarch64_set_vec_u64 (cpu, st, 0,
+		       aarch64_get_mem_u64
+		       (cpu, aarch64_get_PC (cpu) + offset * 4));
 }
 
 /* long double pc-relative load.  */
@@ -545,7 +545,7 @@ fldrs_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_FP_float (cpu, st, aarch64_get_mem_float (cpu, address));
+  aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_mem_u32 (cpu, address));
   if (wb == Post)
     address += offset;
 
@@ -560,10 +560,9 @@ fldrs_abs (sim_cpu *cpu, uint32_t offset)
   unsigned st = uimm (aarch64_get_instr (cpu), 4, 0);
   unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
 
-  aarch64_set_FP_float (cpu, st,
-			aarch64_get_mem_float
-			(cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
-			 + SCALE (offset, 32)));
+  aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_mem_u32
+		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
+			+ SCALE (offset, 32)));
 }
 
 /* Load 32 bit scaled or unscaled zero- or sign-extended
@@ -578,9 +577,8 @@ fldrs_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement = OPT_SCALE (extended, 32, scaling);
 
-  aarch64_set_FP_float (cpu, st,
-			aarch64_get_mem_float
-			(cpu, address + displacement));
+  aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_mem_u32
+		       (cpu, address + displacement));
 }
 
 /* Load 64 bit unscaled signed 9 bit with pre- or post-writeback.  */
@@ -594,7 +592,7 @@ fldrd_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_FP_double (cpu, st, aarch64_get_mem_double (cpu, address));
+  aarch64_set_vec_u64 (cpu, st, 0, aarch64_get_mem_u64 (cpu, address));
 
   if (wb == Post)
     address += offset;
@@ -611,7 +609,7 @@ fldrd_abs (sim_cpu *cpu, uint32_t offset)
   unsigned st = uimm (aarch64_get_instr (cpu), 4, 0);
   uint64_t address = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 64);
 
-  aarch64_set_FP_double (cpu, st, aarch64_get_mem_double (cpu, address));
+  aarch64_set_vec_u64 (cpu, st, 0, aarch64_get_mem_u64 (cpu, address));
 }
 
 /* Load 64 bit scaled or unscaled zero- or sign-extended 32-bit register offset.  */
@@ -1625,7 +1623,7 @@ set_flags_for_sub32 (sim_cpu *cpu, uint32_t value1, uint32_t value2)
 {
   uint32_t result = value1 - value2;
   uint32_t flags = 0;
-  uint32_t signbit = 1ULL << 31;
+  uint32_t signbit = 1U << 31;
 
   if (result == 0)
     flags |= Z;
@@ -2322,7 +2320,7 @@ static void
 sbc32 (sim_cpu *cpu)
 {
   unsigned rm = uimm (aarch64_get_instr (cpu), 20, 16);
-  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
+  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5); /* ngc iff rn == 31.  */
   unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
 
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
@@ -2454,7 +2452,7 @@ static void
 CondCompare (sim_cpu *cpu) /* aka: ccmp and ccmn  */
 {
   /* instr[31]    = size : 0 ==> 32 bit, 1 ==> 64 bit
-     instr[30]    = compare with positive (0) or negative value (1)
+     instr[30]    = compare with positive (1) or negative value (0)
      instr[29,21] = 1 1101 0010
      instr[20,16] = Rm or const
      instr[15,12] = cond
@@ -2477,7 +2475,7 @@ CondCompare (sim_cpu *cpu) /* aka: ccmp and ccmn  */
       return;
     }
 
-  negate = uimm (aarch64_get_instr (cpu), 30, 30) ? -1 : 1;
+  negate = uimm (aarch64_get_instr (cpu), 30, 30) ? 1 : -1;
   rm = uimm (aarch64_get_instr (cpu), 20, 16);
   rn = uimm (aarch64_get_instr (cpu),  9,  5);
 
@@ -5089,21 +5087,6 @@ do_vec_sub_long (sim_cpu *cpu)
     }
 }
 
-#define DO_ADDP(FN)							\
-  do									\
-    {									\
-      for (i = 0; i < range; i++)					\
-	{								\
-	  aarch64_set_vec_##FN (cpu, vd, i,				\
-				aarch64_get_vec_##FN (cpu, vn, i * 2)	\
-				+ aarch64_get_vec_##FN (cpu, vn, i * 2 + 1)); \
-	  aarch64_set_vec_##FN (cpu, vd, i + range,			\
-				aarch64_get_vec_##FN (cpu, vm, i * 2)	\
-				+ aarch64_get_vec_##FN (cpu, vm, i * 2 + 1)); \
-	}								\
-      }									\
-    while (0)
-
 static void
 do_vec_ADDP (sim_cpu *cpu)
 {
@@ -5117,6 +5100,8 @@ do_vec_ADDP (sim_cpu *cpu)
      instr[9,5]   = Vn
      instr[4,0]   = V dest.  */
 
+  FRegister copy_vn;
+  FRegister copy_vm;
   unsigned full = uimm (aarch64_get_instr (cpu), 30, 30);
   unsigned size = uimm (aarch64_get_instr (cpu), 23, 22);
   unsigned vm = uimm (aarch64_get_instr (cpu), 20, 16);
@@ -5128,28 +5113,50 @@ do_vec_ADDP (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x2F);
 
+  /* Make copies of the source registers in case vd == vn/vm.  */
+  copy_vn = cpu->fr[vn];
+  copy_vm = cpu->fr[vm];
+
   switch (size)
     {
     case 0:
       range = full ? 8 : 4;
-      DO_ADDP (u8);
+      for (i = 0; i < range; i++)
+	{
+	  aarch64_set_vec_u8 (cpu, vd, i,
+			      copy_vn.b[i * 2] + copy_vn.b[i * 2 + 1]);
+	  aarch64_set_vec_u8 (cpu, vd, i + range,
+			      copy_vm.b[i * 2] + copy_vm.b[i * 2 + 1]);
+	}
       return;
 
     case 1:
       range = full ? 4 : 2;
-      DO_ADDP (u16);
+      for (i = 0; i < range; i++)
+	{
+	  aarch64_set_vec_u16 (cpu, vd, i,
+			       copy_vn.h[i * 2] + copy_vn.h[i * 2 + 1]);
+	  aarch64_set_vec_u16 (cpu, vd, i + range,
+			       copy_vm.h[i * 2] + copy_vm.h[i * 2 + 1]);
+	}
       return;
 
     case 2:
       range = full ? 2 : 1;
-      DO_ADDP (u32);
+      for (i = 0; i < range; i++)
+	{
+	  aarch64_set_vec_u32 (cpu, vd, i,
+			       copy_vn.w[i * 2] + copy_vn.w[i * 2 + 1]);
+	  aarch64_set_vec_u32 (cpu, vd, i + range,
+			       copy_vm.w[i * 2] + copy_vm.w[i * 2 + 1]);
+	}
       return;
 
     case 3:
       if (! full)
 	HALT_UNALLOC;
-      range = 1;
-      DO_ADDP (u64);
+      aarch64_set_vec_u64 (cpu, vd, 0, copy_vn.v[0] + copy_vn.v[1]);
+      aarch64_set_vec_u64 (cpu, vd, 1, copy_vm.v[0] + copy_vm.v[1]);
       return;
 
     default:
@@ -5667,6 +5674,83 @@ do_vec_SSHR_USHR (sim_cpu *cpu)
 }
 
 static void
+do_vec_MUL_by_element (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = half/full
+     instr[29,24] = 00 1111
+     instr[23,22] = size
+     instr[21]    = L
+     instr[20]    = M
+     instr[19,16] = m
+     instr[15,12] = 1000
+     instr[11]    = H
+     instr[10]    = 0
+     instr[9,5]   = Vn
+     instr[4,0]   = Vd  */
+
+  unsigned full     = uimm (aarch64_get_instr (cpu), 30, 30);
+  unsigned L        = uimm (aarch64_get_instr (cpu), 21, 21);
+  unsigned H        = uimm (aarch64_get_instr (cpu), 11, 11);
+  unsigned vn       = uimm (aarch64_get_instr (cpu), 9, 5);
+  unsigned vd       = uimm (aarch64_get_instr (cpu), 4, 0);
+  unsigned size     = uimm (aarch64_get_instr (cpu), 23, 22);
+  unsigned index;
+  unsigned vm;
+  unsigned e;
+
+  NYI_assert (29, 24, 0x0F);
+  NYI_assert (15, 12, 0x8);
+  NYI_assert (10, 10, 0);
+
+  switch (size)
+    {
+    case 1:
+      {
+	/* 16 bit products.  */
+	uint16_t product;
+	uint16_t element1;
+	uint16_t element2;
+
+	index = (H << 2) | (L << 1) | uimm (aarch64_get_instr (cpu), 20, 20);
+	vm = uimm (aarch64_get_instr (cpu), 19, 16);
+	element2 = aarch64_get_vec_u16 (cpu, vm, index);
+
+	for (e = 0; e < (full ? 8 : 4); e ++)
+	  {
+	    element1 = aarch64_get_vec_u16 (cpu, vn, e);
+	    product  = element1 * element2;
+	    aarch64_set_vec_u16 (cpu, vd, e, product);
+	  }
+      }
+      break;
+
+    case 2:
+      {
+	/* 32 bit products.  */
+	uint32_t product;
+	uint32_t element1;
+	uint32_t element2;
+
+	index = (H << 1) | L;
+	vm = uimm (aarch64_get_instr (cpu), 20, 16);
+	element2 = aarch64_get_vec_u32 (cpu, vm, index);
+
+	for (e = 0; e < (full ? 4 : 2); e ++)
+	  {
+	    element1 = aarch64_get_vec_u32 (cpu, vn, e);
+	    product  = element1 * element2;
+	    aarch64_set_vec_u32 (cpu, vd, e, product);
+	  }
+      }
+      break;
+
+    default:
+      HALT_UNALLOC;
+    }
+}
+
+static void
 do_vec_op2 (sim_cpu *cpu)
 {
   /* instr[31]    = 0
@@ -5676,19 +5760,30 @@ do_vec_op2 (sim_cpu *cpu)
      instr[22,16] = element size & index
      instr[15,10] = sub-opcode
      instr[9,5]   = Vm
-     instr[4.0]   = Vd  */
+     instr[4,0]   = Vd  */
 
   NYI_assert (29, 24, 0x0F);
 
   if (uimm (aarch64_get_instr (cpu), 23, 23) != 0)
-    HALT_NYI;
-
-  switch (uimm (aarch64_get_instr (cpu), 15, 10))
     {
-    case 0x01: do_vec_SSHR_USHR (cpu); return;
-    case 0x15: do_vec_SHL (cpu); return;
-    case 0x29: do_vec_xtl (cpu); return;
-    default:   HALT_NYI;
+      switch (uimm (aarch64_get_instr (cpu), 15, 10))
+	{
+	case 0x20:
+	case 0x22: do_vec_MUL_by_element (cpu); return;
+	default:   HALT_NYI;
+	}
+    }
+  else
+    {
+      switch (uimm (aarch64_get_instr (cpu), 15, 10))
+	{
+	case 0x01: do_vec_SSHR_USHR (cpu); return;
+	case 0x15: do_vec_SHL (cpu); return;
+	case 0x20:
+	case 0x22: do_vec_MUL_by_element (cpu); return;
+	case 0x29: do_vec_xtl (cpu); return;
+	default:   HALT_NYI;
+	}
     }
 }
 
@@ -6054,28 +6149,43 @@ do_vec_FADDP (sim_cpu *cpu)
 
   if (uimm (aarch64_get_instr (cpu), 22, 22))
     {
+      /* Extract values before adding them incase vd == vn/vm.  */
+      double tmp1 = aarch64_get_vec_double (cpu, vn, 0);
+      double tmp2 = aarch64_get_vec_double (cpu, vn, 1);
+      double tmp3 = aarch64_get_vec_double (cpu, vm, 0);
+      double tmp4 = aarch64_get_vec_double (cpu, vm, 1);
+
       if (! full)
 	HALT_UNALLOC;
 
-      aarch64_set_vec_double (cpu, vd, 0, aarch64_get_vec_double (cpu, vn, 0)
-			      + aarch64_get_vec_double (cpu, vn, 1));
-      aarch64_set_vec_double (cpu, vd, 1, aarch64_get_vec_double (cpu, vm, 0)
-			      + aarch64_get_vec_double (cpu, vm, 1));
+      aarch64_set_vec_double (cpu, vd, 0, tmp1 + tmp2);
+      aarch64_set_vec_double (cpu, vd, 1, tmp3 + tmp4);
     }
   else
     {
-      aarch64_set_vec_float (cpu, vd, 0, aarch64_get_vec_float (cpu, vn, 0)
-			     + aarch64_get_vec_float (cpu, vn, 1));
+      /* Extract values before adding them incase vd == vn/vm.  */
+      float tmp1 = aarch64_get_vec_float (cpu, vn, 0);
+      float tmp2 = aarch64_get_vec_float (cpu, vn, 1);
+      float tmp5 = aarch64_get_vec_float (cpu, vm, 0);
+      float tmp6 = aarch64_get_vec_float (cpu, vm, 1);
+
       if (full)
-	aarch64_set_vec_float (cpu, vd, 1, aarch64_get_vec_float (cpu, vn, 2)
-			       + aarch64_get_vec_float (cpu, vn, 3));
-      aarch64_set_vec_float (cpu, vd, full ? 2 : 1,
-			     aarch64_get_vec_float (cpu, vm, 0)
-			     + aarch64_get_vec_float (cpu, vm, 1));
-      if (full)
-	aarch64_set_vec_float (cpu, vd, 3,
-			       aarch64_get_vec_float (cpu, vm, 2)
-			       + aarch64_get_vec_float (cpu, vm, 3));
+	{
+	  float tmp3 = aarch64_get_vec_float (cpu, vn, 2);
+	  float tmp4 = aarch64_get_vec_float (cpu, vn, 3);
+	  float tmp7 = aarch64_get_vec_float (cpu, vm, 2);
+	  float tmp8 = aarch64_get_vec_float (cpu, vm, 3);
+
+	  aarch64_set_vec_float (cpu, vd, 0, tmp1 + tmp2);
+	  aarch64_set_vec_float (cpu, vd, 1, tmp3 + tmp4);
+	  aarch64_set_vec_float (cpu, vd, 2, tmp5 + tmp6);
+	  aarch64_set_vec_float (cpu, vd, 3, tmp7 + tmp8);
+	}
+      else
+	{
+	  aarch64_set_vec_float (cpu, vd, 0, tmp1 + tmp2);
+	  aarch64_set_vec_float (cpu, vd, 1, tmp5 + tmp6);
+	}
     }
 }
 
@@ -6807,8 +6917,8 @@ fsturs (sim_cpu *cpu, int32_t offset)
   unsigned int rn = uimm (aarch64_get_instr (cpu), 9, 5);
   unsigned int st = uimm (aarch64_get_instr (cpu), 4, 0);
 
-  aarch64_set_mem_float (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
-			 aarch64_get_FP_float (cpu, rn));
+  aarch64_set_mem_u32 (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
+		       aarch64_get_vec_u32 (cpu, rn, 0));
 }
 
 /* Store 64 bit unscaled signed 9 bit.  */
@@ -6818,8 +6928,8 @@ fsturd (sim_cpu *cpu, int32_t offset)
   unsigned int rn = uimm (aarch64_get_instr (cpu), 9, 5);
   unsigned int st = uimm (aarch64_get_instr (cpu), 4, 0);
 
-  aarch64_set_mem_double (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
-			  aarch64_get_FP_double (cpu, rn));
+  aarch64_set_mem_u64 (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
+		       aarch64_get_vec_u64 (cpu, rn, 0));
 }
 
 /* Store 128 bit unscaled signed 9 bit.  */
@@ -6961,8 +7071,8 @@ fldurs (sim_cpu *cpu, int32_t offset)
   unsigned int rn = uimm (aarch64_get_instr (cpu), 9, 5);
   unsigned int st = uimm (aarch64_get_instr (cpu), 4, 0);
 
-  aarch64_set_FP_float (cpu, st, aarch64_get_mem_float
-			(cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset));
+  aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_mem_u32
+		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset));
 }
 
 /* Load 64 bit unscaled signed 9 bit.  */
@@ -6972,8 +7082,8 @@ fldurd (sim_cpu *cpu, int32_t offset)
   unsigned int rn = uimm (aarch64_get_instr (cpu), 9, 5);
   unsigned int st = uimm (aarch64_get_instr (cpu), 4, 0);
 
-  aarch64_set_FP_double (cpu, st, aarch64_get_mem_double
-			 (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset));
+  aarch64_set_vec_u64 (cpu, st, 0, aarch64_get_mem_u64
+		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset));
 }
 
 /* Load 128 bit unscaled signed 9 bit.  */
@@ -8166,6 +8276,25 @@ do_scalar_MOV (sim_cpu *cpu)
 }
 
 static void
+do_scalar_NEG (sim_cpu *cpu)
+{
+  /* instr [31,24] = 0111 1110
+     instr [23,22] = 11
+     instr [21,10] = 1000 0010 1110
+     instr [9, 5]  = Rn
+     instr [4, 0]  = Rd.  */
+
+  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
+  unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
+
+  NYI_assert (31, 24, 0x7E);
+  NYI_assert (21, 10, 0x82E);
+  NYI_assert (23, 22, 3);
+
+  aarch64_set_vec_u64 (cpu, rd, 0, - aarch64_get_vec_u64 (cpu, rn, 0));
+}
+
+static void
 do_double_add (sim_cpu *cpu)
 {
   /* instr [28,25] = 1111.  */
@@ -8204,6 +8333,7 @@ do_double_add (sim_cpu *cpu)
 	case 0x35: do_scalar_FABD (cpu); return;
 	case 0x39: do_scalar_FCM (cpu); return;
 	case 0x3B: do_scalar_FCM (cpu); return;
+	case 0x2E: do_scalar_NEG (cpu); return;
 	default:
 	  HALT_NYI;
 	}
@@ -9440,10 +9570,10 @@ fstrs_abs (sim_cpu *cpu, uint32_t offset)
   unsigned st = uimm (aarch64_get_instr (cpu), 4, 0);
   unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
 
-  aarch64_set_mem_float
+  aarch64_set_mem_u32
     (cpu,
      aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 32),
-     aarch64_get_FP_float (cpu, st));
+     aarch64_get_vec_u32 (cpu, st, 0));
 }
 
 /* 32 bit store unscaled signed 9 bit with pre- or post-writeback.  */
@@ -9458,7 +9588,7 @@ fstrs_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_mem_float (cpu, address, aarch64_get_FP_float (cpu, st));
+  aarch64_set_mem_u32 (cpu, address, aarch64_get_vec_u32 (cpu, st, 0));
 
   if (wb == Post)
     address += offset;
@@ -9481,8 +9611,8 @@ fstrs_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
 			       extension);
   uint64_t  displacement = OPT_SCALE (extended, 32, scaling);
 
-  aarch64_set_mem_float
-    (cpu, address + displacement, aarch64_get_FP_float (cpu, st));
+  aarch64_set_mem_u32
+    (cpu, address + displacement, aarch64_get_vec_u32 (cpu, st, 0));
 }
 
 /* 64 bit store scaled unsigned 12 bit.  */
@@ -9492,10 +9622,10 @@ fstrd_abs (sim_cpu *cpu, uint32_t offset)
   unsigned st = uimm (aarch64_get_instr (cpu), 4, 0);
   unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
 
-  aarch64_set_mem_double
+  aarch64_set_mem_u64
     (cpu,
      aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 64),
-     aarch64_get_FP_double (cpu, st));
+     aarch64_get_vec_u64 (cpu, st, 0));
 }
 
 /* 64 bit store unscaled signed 9 bit with pre- or post-writeback.  */
@@ -9510,7 +9640,7 @@ fstrd_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_mem_double (cpu, address, aarch64_get_FP_double (cpu, st));
+  aarch64_set_mem_u64 (cpu, address, aarch64_get_vec_u64 (cpu, st, 0));
 
   if (wb == Post)
     address += offset;
@@ -9533,8 +9663,8 @@ fstrd_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
 			       extension);
   uint64_t  displacement = OPT_SCALE (extended, 64, scaling);
 
-  aarch64_set_mem_double
-    (cpu, address + displacement, aarch64_get_FP_double (cpu, st));
+  aarch64_set_mem_u64
+    (cpu, address + displacement, aarch64_get_vec_u64 (cpu, st, 0));
 }
 
 /* 128 bit store scaled unsigned 12 bit.  */
@@ -10069,8 +10199,8 @@ store_pair_float (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_mem_float (cpu, address,     aarch64_get_FP_float (cpu, rm));
-  aarch64_set_mem_float (cpu, address + 4, aarch64_get_FP_float (cpu, rn));
+  aarch64_set_mem_u32 (cpu, address,     aarch64_get_vec_u32 (cpu, rm, 0));
+  aarch64_set_mem_u32 (cpu, address + 4, aarch64_get_vec_u32 (cpu, rn, 0));
 
   if (wb == Post)
     address += offset;
@@ -10092,8 +10222,8 @@ store_pair_double (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_mem_double (cpu, address,     aarch64_get_FP_double (cpu, rm));
-  aarch64_set_mem_double (cpu, address + 8, aarch64_get_FP_double (cpu, rn));
+  aarch64_set_mem_u64 (cpu, address,     aarch64_get_vec_u64 (cpu, rm, 0));
+  aarch64_set_mem_u64 (cpu, address + 8, aarch64_get_vec_u64 (cpu, rn, 0));
 
   if (wb == Post)
     address += offset;
@@ -10144,8 +10274,8 @@ load_pair_float (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_FP_float (cpu, rm, aarch64_get_mem_float (cpu, address));
-  aarch64_set_FP_float (cpu, rn, aarch64_get_mem_float (cpu, address + 4));
+  aarch64_set_vec_u32 (cpu, rm, 0, aarch64_get_mem_u32 (cpu, address));
+  aarch64_set_vec_u32 (cpu, rn, 0, aarch64_get_mem_u32 (cpu, address + 4));
 
   if (wb == Post)
     address += offset;
@@ -10170,8 +10300,8 @@ load_pair_double (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_FP_double (cpu, rm, aarch64_get_mem_double (cpu, address));
-  aarch64_set_FP_double (cpu, rn, aarch64_get_mem_double (cpu, address + 8));
+  aarch64_set_vec_u64 (cpu, rm, 0, aarch64_get_mem_u64 (cpu, address));
+  aarch64_set_vec_u64 (cpu, rn, 0, aarch64_get_mem_u64 (cpu, address + 8));
 
   if (wb == Post)
     address += offset;
@@ -10937,11 +11067,24 @@ do_vec_load_store (sim_cpu *cpu)
 	      sizeof_operation <<= uimm (aarch64_get_instr (cpu), 11, 10);
 	      break;
 
-	    case 2:
-	    case 6:
-	    case 10:
 	    case 7:
-	      sizeof_operation = 2 << uimm (aarch64_get_instr (cpu), 11, 10);
+	      /* One register, immediate offset variant.  */
+	      sizeof_operation = 8;
+	      break;
+	      
+	    case 10:
+	      /* Two registers, immediate offset variant.  */
+	      sizeof_operation = 16;
+	      break;
+
+	    case 6:
+	      /* Three registers, immediate offset variant.  */
+	      sizeof_operation = 24;
+	      break;
+
+	    case 2:
+	      /* Four registers, immediate offset variant.  */
+	      sizeof_operation = 32;
 	      break;
 
 	    default:
@@ -11421,7 +11564,7 @@ rbit64 (sim_cpu *cpu)
   for (i = 0; i < 64; i++)
     {
       result <<= 1;
-      result |= (value & 1L);
+      result |= (value & 1UL);
       value >>= 1;
     }
   aarch64_set_reg_u64 (cpu, rd, NO_SP, result);
@@ -13019,7 +13162,7 @@ aarch64_step (sim_cpu *cpu)
   aarch64_set_next_PC (cpu, pc + 4);
   aarch64_get_instr (cpu) = aarch64_get_mem_u32 (cpu, pc);
 
-  TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %x", pc,
+  TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %08x", pc,
 	      aarch64_get_instr (cpu));
   TRACE_DISASM (cpu, pc);
 

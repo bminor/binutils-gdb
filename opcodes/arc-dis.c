@@ -132,6 +132,10 @@ print_insn_arc (bfd_vma memaddr,
 
   switch (info->mach)
     {
+    case bfd_mach_arc_nps400:
+      isa_mask = ARC_OPCODE_ARC700 | ARC_OPCODE_NPS400;
+      break;
+
     case bfd_mach_arc_arc700:
       isa_mask = ARC_OPCODE_ARC700;
       break;

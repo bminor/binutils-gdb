@@ -1037,8 +1037,13 @@ cp_find_first_component_aux (const char *name, int permissive)
 	      return strlen (name);
 	    }
 	case '\0':
-	case ':':
 	  return index;
+	case ':':
+	  /* ':' marks a component iff the next character is also a ':'.
+	     Otherwise it is probably malformed input.  */
+	  if (name[index + 1] == ':')
+	    return index;
+	  break;
 	case 'o':
 	  /* Operator names can screw up the recursion.  */
 	  if (operator_possible

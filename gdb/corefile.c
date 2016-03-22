@@ -306,6 +306,24 @@ safe_read_memory_integer (CORE_ADDR memaddr, int len,
   return 1;
 }
 
+/* Read memory at MEMADDR of length LEN and put the contents in
+   RETURN_VALUE.  Return 0 if MEMADDR couldn't be read and non-zero
+   if successful.  */
+
+int
+safe_read_memory_unsigned_integer (CORE_ADDR memaddr, int len,
+				   enum bfd_endian byte_order,
+				   ULONGEST *return_value)
+{
+  gdb_byte buf[sizeof (ULONGEST)];
+
+  if (target_read_memory (memaddr, buf, len))
+    return 0;
+
+  *return_value = extract_unsigned_integer (buf, len, byte_order);
+  return 1;
+}
+
 LONGEST
 read_memory_integer (CORE_ADDR memaddr, int len,
 		     enum bfd_endian byte_order)

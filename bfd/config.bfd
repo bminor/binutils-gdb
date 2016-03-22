@@ -53,6 +53,7 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
+ i370-* | \
  sh5*-*-* | sh64*-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
@@ -176,7 +177,7 @@ case "${targ}" in
     targ_archs="$targ_archs bfd_i386_arch bfd_powerpc_arch bfd_rs6000_arch"
     want64=true
     ;;
-  aarch64-*-elf)
+  aarch64-*-elf | aarch64-*-rtems*)
     targ_defvec=aarch64_elf64_le_vec
     targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
     want64=true
@@ -541,6 +542,7 @@ case "${targ}" in
     targ_defvec=i370_elf32_vec
     targ_selvecs="i370_elf32_vec"
     ;;
+
   i[3-7]86-*-sco3.2v5*coff)
     targ_defvec=i386_coff_vec
     targ_selvecs=i386_elf32_vec
@@ -687,7 +689,7 @@ case "${targ}" in
     targ_selvecs="i386_elf32_vec iamcu_elf32_vec l1om_elf64_vec k1om_elf64_vec"
     want64=true
     ;;
-  x86_64-*-elf*)
+  x86_64-*-elf* | x86_64-*-rtems*)
     targ_defvec=x86_64_elf64_vec
     targ_selvecs="i386_elf32_vec iamcu_elf32_vec x86_64_elf32_vec l1om_elf64_vec k1om_elf64_vec"
     want64=true

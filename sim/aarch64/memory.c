@@ -46,7 +46,12 @@ mem_error (sim_cpu *cpu, const char *message, uint64_t addr)
   RETURN_TYPE								\
   aarch64_get_mem_##NAME (sim_cpu *cpu, uint64_t address)		\
   {									\
-    return (RETURN_TYPE) sim_core_read_##N (cpu, 0, read_map, address); \
+    RETURN_TYPE val = (RETURN_TYPE) sim_core_read_##N (cpu, 0, read_map, address); \
+    TRACE_MEMORY (cpu,							\
+		  "read of %" PRIx64 " (%d bytes) from %" PRIx64,	\
+		  (uint64_t) val, N, address);				\
+									\
+    return val;								\
   }
 
 /* A variant of the FETCH_FUNC macro that uses unaligned reads.
@@ -56,7 +61,12 @@ mem_error (sim_cpu *cpu, const char *message, uint64_t addr)
   RETURN_TYPE								\
   aarch64_get_mem_##NAME (sim_cpu *cpu, uint64_t address)		\
   {									\
-    return (RETURN_TYPE) sim_core_read_unaligned_8 (cpu, 0, read_map, address); \
+    RETURN_TYPE val = (RETURN_TYPE) sim_core_read_unaligned_8 (cpu, 0, read_map, address); \
+    TRACE_MEMORY (cpu,							\
+		  "read of %" PRIx64 " (%d bytes) from %" PRIx64 " (unaligned double)",	\
+		  (uint64_t) val, N, address);				\
+									\
+    return val;								\
   }
 
 FETCH_FUNC_U (uint64_t, uint64_t, u64)
@@ -67,8 +77,6 @@ FETCH_FUNC (uint32_t,   uint16_t, u16, 2)
 FETCH_FUNC (int32_t,     int16_t, s16, 2)
 FETCH_FUNC (uint32_t,    uint8_t, u8, 1)
 FETCH_FUNC (int32_t,      int8_t, s8, 1)
-FETCH_FUNC (float,         float, float, 4)
-FETCH_FUNC_U (double,     double, double)
 
 void
 aarch64_get_mem_long_double (sim_cpu *cpu, uint64_t address, FRegister *a)
@@ -110,8 +118,6 @@ STORE_FUNC (uint16_t,   u16, 2)
 STORE_FUNC (int16_t,    s16, 2)
 STORE_FUNC (uint8_t,    u8, 1)
 STORE_FUNC (int8_t,     s8, 1)
-STORE_FUNC (float,      float, 4)
-STORE_FUNC_U (double,   double)
 
 void
 aarch64_set_mem_long_double (sim_cpu *cpu, uint64_t address, FRegister a)

@@ -7470,12 +7470,16 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	}
       else if (bfd_is_com_section (syms[idx]->section))
 	{
-#ifdef USE_STT_COMMON
-	  if (type == STT_OBJECT)
-	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_COMMON);
-	  else
-#endif
-	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
+	  if (type != STT_TLS)
+	    {
+	      if ((abfd->flags & BFD_CONVERT_ELF_COMMON))
+		type = ((abfd->flags & BFD_USE_ELF_STT_COMMON)
+			? STT_COMMON : STT_OBJECT);
+	      else
+		type = ((flags & BSF_ELF_COMMON) != 0
+			? STT_COMMON : STT_OBJECT);
+	    }
+	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	}
       else if (bfd_is_und_section (syms[idx]->section))
 	sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)
@@ -10460,6 +10464,12 @@ _bfd_elf_rel_local_sym (bfd *abfd,
 				     sym->st_value + addend);
 }
 
+/* Adjust an address within a section.  Given OFFSET within SEC, return
+   the new offset within the section, based upon changes made to the
+   section.  Returns -1 if the offset is now invalid.
+   The offset (in abnd out) is in target sized bytes, however big a
+   byte may be.  */
+
 bfd_vma
 _bfd_elf_section_offset (bfd *abfd,
 			 struct bfd_link_info *info,
@@ -10473,12 +10483,17 @@ _bfd_elf_section_offset (bfd *abfd,
 				       offset);
     case SEC_INFO_TYPE_EH_FRAME:
       return _bfd_elf_eh_frame_section_offset (abfd, info, sec, offset);
+
     default:
       if ((sec->flags & SEC_ELF_REVERSE_COPY) != 0)
 	{
+	  /* Reverse the offset.  */
 	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 	  bfd_size_type address_size = bed->s->arch_size / 8;
-	  offset = sec->size - offset - address_size;
+
+	  /* address_size and sec->size are in octets.  Convert
+	     to bytes before subtracting the original offset.  */
+	  offset = (sec->size - address_size) / bfd_octets_per_byte (abfd) - offset;
 	}
       return offset;
     }

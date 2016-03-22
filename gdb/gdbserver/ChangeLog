@@ -1,3 +1,45 @@
+2016-03-18  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (lwp_signal_can_be_delivered): New function.
+	(linux_resume_one_lwp_throw): Use lwp_signal_can_be_delivered.
+
+2016-03-18  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_resume_one_lwp_throw): Set 'signal' to
+	0 if signal is enqueued.  Remove 'signal' from one debugging
+	message.  Move one debugging message to some lines below.
+	Remove code setting 'signal' to 0.
+
+2016-03-18  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_low_filter_event): Remove redundant
+	WIFSTOPPED check together with linux_wstatus_maybe_breakpoint.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-ppc-low.c (ppc_supports_tracepoints): New function.
+	(struct linux_target_ops): Wire in the above.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c: Update comments to start_step_over.
+
+2016-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	PR server/19736
+	* linux-low.c (handle_extended_wait): Set child suspended
+	if event_lwp->bp_reinsert isn't zero.
+
+2016-03-02  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_resume_one_lwp_throw): Replace code with
+	enqueue_pending_signal.
+
+2016-03-02  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (cmd_qtstart): Only set ipa_tdesc_idx if agent
+	is actually loaded.
+
 2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* linux-s390-low.c (s390_num_regs_3264): Define on 31-bit too.

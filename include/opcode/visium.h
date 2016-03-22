@@ -100,7 +100,7 @@ enum visium_opcode_arch_val
 
 struct reg_entry
 {
-  char *name;
+  const char *name;
   unsigned char code;
 };
 
@@ -164,7 +164,7 @@ static const struct reg_entry fp_reg_table[] ATTRIBUTE_UNUSED =
 
 static const struct cc_entry
 {
-  char *name;
+  const char *name;
   int code;
 } cc_table [] ATTRIBUTE_UNUSED =
 {
@@ -224,7 +224,7 @@ enum addressing_mode
 
 static const struct opcode_entry
 {
-  char *mnem;
+  const char *mnem;
   enum addressing_mode mode;
   unsigned code;
   char flags;

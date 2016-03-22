@@ -46,6 +46,7 @@ typedef enum
     KERNEL,
     LOGICAL,
     MEMORY,
+    BITOP,
   } insn_class_t;
 
 /* Instruction Subclass.  */
@@ -72,15 +73,15 @@ typedef enum
 /* Flags class.  */
 typedef enum
   {
-    FNONE,
-    CND,  /* Conditional flags.  */
-    WBM,  /* Write-back modes.  */
-    FLG,  /* F Flag.  */
-    SBP,  /* Static branch prediction.  */
-    DLY,  /* Delay slot.  */
-    DIF,  /* Bypass caches.  */
-    SGX,  /* Sign extend modes.  */
-    SZM   /* Data size modes.  */
+    F_CLASS_NONE,
+
+    /* At most one flag from the set of flags can appear in the
+       instruction.  */
+    F_CLASS_OPTIONAL,
+
+    /* Exactly one from from the set of flags must appear in the
+       instruction.  */
+    F_CLASS_REQUIRED,
   } flag_class_t;
 
 /* The opcode table is an array of struct arc_opcode.  */
@@ -132,6 +133,7 @@ extern const unsigned arc_num_opcodes;
 #define ARC_OPCODE_ARC700   0x0002  /* ARC 700 specific insns.  */
 #define ARC_OPCODE_ARCv2EM  0x0004  /* ARCv2 EM specific insns.  */
 #define ARC_OPCODE_ARCv2HS  0x0008  /* ARCv2 HS specific insns.  */
+#define ARC_OPCODE_NPS400   0x0010  /* NPS400 specific insns.  */
 
 /* CPU extensions.  */
 #define ARC_EA       0x0001
@@ -170,11 +172,6 @@ extern const unsigned arc_num_opcodes;
 /* V1 specific.  */
 #define ARC_XMAC     0x1000
 #define ARC_CRC      0x1000
-
-/* Base architecture -- all cpus.  */
-#define ARC_OPCODE_BASE				\
-  (ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700	\
-   | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS)
 
 /* A macro to check for short instructions.  */
 #define ARC_SHORT(mask)				\

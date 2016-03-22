@@ -1946,25 +1946,32 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       return os;
     }
 
+  flags = s->flags;
+  if (!bfd_link_relocatable (&link_info))
+    {
+      nexts = s;
+      while ((nexts = bfd_get_next_section_by_name (nexts->owner, nexts))
+	     != NULL)
+	if (nexts->output_section == NULL
+	    && (nexts->flags & SEC_EXCLUDE) == 0
+	    && ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
+	    && (nexts->owner->flags & DYNAMIC) == 0
+	    && nexts->owner->usrdata != NULL
+	    && !(((lang_input_statement_type *) nexts->owner->usrdata)
+		 ->flags.just_syms)
+	    && _bfd_elf_match_sections_by_type (nexts->owner, nexts,
+						s->owner, s))
+	  flags = (((flags ^ SEC_READONLY)
+		    | (nexts->flags ^ SEC_READONLY))
+		   ^ SEC_READONLY);
+    }
+
   /* Decide which segment the section should go in based on the
      section name and section flags.  We put loadable .note sections
      right after the .interp section, so that the PT_NOTE segment is
      stored right after the program headers where the OS can read it
      in the first page.  */
 
-  flags = s->flags;
-  nexts = s;
-  while ((nexts = bfd_get_next_section_by_name (nexts->owner, nexts)) != NULL)
-    if (nexts->output_section == NULL
-	&& (nexts->flags & SEC_EXCLUDE) == 0
-	&& ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
-	&& (nexts->owner->flags & DYNAMIC) == 0
-	&& nexts->owner->usrdata != NULL
-	&& !(((lang_input_statement_type *) nexts->owner->usrdata)
-	     ->flags.just_syms)
-	&& _bfd_elf_match_sections_by_type (nexts->owner, nexts, s->owner, s))
-      flags = (((flags ^ SEC_READONLY) | (nexts->flags ^ SEC_READONLY))
-	       ^ SEC_READONLY);
   place = NULL;
   if ((flags & (SEC_ALLOC | SEC_DEBUGGING)) == 0)
     place = &hold[orphan_nonalloc];
@@ -2421,6 +2428,10 @@ fragment <<EOF
 	link_info.relro = TRUE;
       else if (strcmp (optarg, "norelro") == 0)
 	link_info.relro = FALSE;
+      else if (strcmp (optarg, "common") == 0)
+	link_info.elf_stt_common = elf_stt_common;
+      else if (strcmp (optarg, "nocommon") == 0)
+	link_info.elf_stt_common = no_elf_stt_common;
       else if (strcmp (optarg, "text") == 0)
 	link_info.error_textrel = TRUE;
       else if (strcmp (optarg, "notext") == 0)

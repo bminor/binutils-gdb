@@ -96,6 +96,10 @@ int debug_memory = 0;
 /* Enable verbose mode.  */
 int verbose = 0;
 
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
+int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
+#endif
+
 /* Keep the output file.  */
 static int keep_it = 0;
 
@@ -300,6 +304,9 @@ Options:\n\
   --size-check=[error|warning]\n\
 			  ELF .size directive check (default --size-check=error)\n"));
   fprintf (stream, _("\
+  --elf-stt-common=[no|yes]\n\
+                          generate ELF common symbols with STT_COMMON type\n"));
+  fprintf (stream, _("\
   --sectname-subst        enable section name substitution sequences\n"));
 #endif
   fprintf (stream, _("\
@@ -464,6 +471,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_EXECSTACK,
       OPTION_NOEXECSTACK,
       OPTION_SIZE_CHECK,
+      OPTION_ELF_STT_COMMON,
       OPTION_SECTNAME_SUBST,
       OPTION_ALTERNATE,
       OPTION_AL,
@@ -499,6 +507,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"execstack", no_argument, NULL, OPTION_EXECSTACK}
     ,{"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK}
     ,{"size-check", required_argument, NULL, OPTION_SIZE_CHECK}
+    ,{"elf-stt-common", required_argument, NULL, OPTION_ELF_STT_COMMON}
     ,{"sectname-subst", no_argument, NULL, OPTION_SECTNAME_SUBST}
 #endif
     ,{"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
@@ -866,6 +875,16 @@ This program has absolutely no warranty.\n"));
 	    flag_size_check = size_check_warning;
 	  else
 	    as_fatal (_("Invalid --size-check= option: `%s'"), optarg);
+	  break;
+
+	case OPTION_ELF_STT_COMMON:
+	  if (strcasecmp (optarg, "no") == 0)
+	    flag_use_elf_stt_common = 0;
+	  else if (strcasecmp (optarg, "yes") == 0)
+	    flag_use_elf_stt_common = 1;
+	  else
+	    as_fatal (_("Invalid --elf-stt-common= option: `%s'"),
+		      optarg);
 	  break;
 
 	case OPTION_SECTNAME_SUBST:

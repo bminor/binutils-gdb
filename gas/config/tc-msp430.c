@@ -698,7 +698,7 @@ static unsigned int silicon_errata_warn = 0;
 static void
 msp430_set_arch (int option)
 {
-  char *str = (char *) alloca (32);	/* 32 for good measure.  */
+  char str[32];	/* 32 for good measure.  */
 
   input_line_pointer = extract_word (input_line_pointer, str, 32);
 
@@ -2542,7 +2542,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
      support it for compatibility purposes.  */
   if (addr_op && opcode->fmt >= 0)
     {
-      char * old_name = opcode->name;
+      const char * old_name = opcode->name;
       char real_name[32];
 
       sprintf (real_name, "%sa", old_name);

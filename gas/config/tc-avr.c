@@ -562,7 +562,7 @@ md_parse_option (int c, char *arg)
     case OPTION_MMCU:
       {
 	int i;
-	char *s = alloca (strlen (arg) + 1);
+	char *s = xmalloc (strlen (arg) + 1);
 
 	{
 	  char *t = s;
@@ -577,6 +577,7 @@ md_parse_option (int c, char *arg)
 	  if (strcmp (mcu_types[i].name, s) == 0)
 	    break;
 
+	free (s);
 	if (!mcu_types[i].name)
 	  {
 	    show_mcu_list (stderr);
@@ -587,12 +588,12 @@ md_parse_option (int c, char *arg)
 	   type - this for allows passing -mmcu=... via gcc ASM_SPEC as well
 	   as .arch ... in the asm output at the same time.  */
 	if (avr_mcu == &default_mcu || avr_mcu->mach == mcu_types[i].mach)
-      {
-        specified_mcu.name = mcu_types[i].name;
-        specified_mcu.isa  |= mcu_types[i].isa;
-        specified_mcu.mach = mcu_types[i].mach;
-        avr_mcu = &specified_mcu;
-      }
+	  {
+	    specified_mcu.name = mcu_types[i].name;
+	    specified_mcu.isa  |= mcu_types[i].isa;
+	    specified_mcu.mach = mcu_types[i].mach;
+	    avr_mcu = &specified_mcu;
+	  }
 	else
 	  as_fatal (_("redefinition of mcu type `%s' to `%s'"),
 		    avr_mcu->name, mcu_types[i].name);

@@ -471,6 +471,26 @@ gdb_test "maint" \
     "\"maintenance\" must be followed by the name of a maintenance command\\.\r\nList.*unambiguous\\..*" \
     "maint w/o args"
 
+gdb_test "maint info line-table" \
+    "symtab: \[^\n\r\]+${srcfile}.*\\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX.*LINE.*ADDRESS.*" \
+    "maint info line-table w/o a file name"
+
+gdb_test "maint info line-table ${srcfile}" \
+    "symtab: \[^\n\r\]+${srcfile}.*INDEX.*LINE.*ADDRESS.*" \
+    "maint info line-table with filename of current symtab"
+
+gdb_test_no_output "maint info line-table ${srcfile2}" \
+    "maint info line-table with filename of symtab that is not currently expanded"
+
+gdb_test_no_output "maint expand-symtabs"
+
+gdb_test "maint info line-table ${srcfile2}" \
+    "symtab: \[^\n\r\]+${srcfile2}.*INDEX.*LINE.*ADDRESS.*" \
+    "maint info line-table with filename of symtab that is not current"
+
+gdb_test_no_output "maint info line-table xxx.c" \
+    "maint info line-table with invalid filename"
+
 set timeout $oldtimeout
 
 #============test help on maint commands

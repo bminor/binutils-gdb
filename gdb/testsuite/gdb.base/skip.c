@@ -21,12 +21,19 @@ int foo (void);
 int bar (void);
 int baz (int);
 void skip1_test_skip_file_and_function (void);
+void test_skip_file_and_function (void);
 
 int
 main ()
 {
+  int x;
+
   /* Use comma operator to sequence evaluation of bar and foo.  */
-  return baz ((bar (), foo ()));
+  x = baz ((bar (), foo ()));
+
+  test_skip_file_and_function ();
+
+  return 0;
 }
 
 int

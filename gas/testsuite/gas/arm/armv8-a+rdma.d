@@ -1,6 +1,8 @@
 #name: Valid v8-a+rdma
+#as: -march=armv8-a+rdma
 #objdump: -dr
 #skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
+#source: armv8-a+rdma.s
 
 .*: +file format .*arm.*
 

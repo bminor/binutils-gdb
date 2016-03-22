@@ -1501,7 +1501,7 @@ typedef struct bfd_section
       information.  */
   bfd_vma lma;
 
-  /* The size of the section in octets, as it will be output.
+  /* The size of the section in *octets*, as it will be output.
      Contains a value even if the section has no contents (e.g., the
      size of <<.bss>>).  */
   bfd_size_type size;
@@ -2174,6 +2174,7 @@ enum bfd_architecture
 #define bfd_mach_arc_arc601    4
 #define bfd_mach_arc_arc700    3
 #define bfd_mach_arc_arcv2     5
+#define bfd_mach_arc_nps400    6
  bfd_arch_m32c,     /* Renesas M16C/M32C.  */
 #define bfd_mach_m16c        0x75
 #define bfd_mach_m32c        0x78
@@ -6378,7 +6379,9 @@ typedef struct bfd_symbol
 
   /* Used by the linker.  */
 #define BSF_KEEP               (1 << 5)
-#define BSF_KEEP_G             (1 << 6)
+
+  /* An ELF common symbol.  */
+#define BSF_ELF_COMMON         (1 << 6)
 
   /* A weak global symbol, overridable without warnings by
      a regular global symbol of the same name.  */
@@ -6570,7 +6573,7 @@ struct bfd
   ENUM_BITFIELD (bfd_direction) direction : 2;
 
   /* Format_specific flags.  */
-  flagword flags : 18;
+  flagword flags : 20;
 
   /* Values that may appear in the flags field of a BFD.  These also
      appear in the object_flags field of the bfd_target structure, where
@@ -6650,16 +6653,23 @@ struct bfd
   /* Compress sections in this BFD with SHF_COMPRESSED from gABI.  */
 #define BFD_COMPRESS_GABI 0x20000
 
+  /* Convert ELF common symbol type to STT_COMMON or STT_OBJECT in this
+     BFD.  */
+#define BFD_CONVERT_ELF_COMMON 0x40000
+
+  /* Use the ELF STT_COMMON type in this BFD.  */
+#define BFD_USE_ELF_STT_COMMON 0x80000
+
   /* Flags bits to be saved in bfd_preserve_save.  */
 #define BFD_FLAGS_SAVED \
   (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_PLUGIN \
-   | BFD_COMPRESS_GABI)
+   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON)
 
   /* Flags bits which are for BFD use only.  */
 #define BFD_FLAGS_FOR_BFD_USE_MASK \
   (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
    | BFD_PLUGIN | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT \
-   | BFD_COMPRESS_GABI)
+   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON)
 
   /* Is the file descriptor being cached?  That is, can it be closed as
      needed, and re-opened when accessed later?  */

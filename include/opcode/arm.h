@@ -261,7 +261,7 @@
 #define ARM_ARCH_V7EM	ARM_FEATURE_CORE (ARM_AEXT_V7EM, ARM_EXT2_V6T2_V8M)
 #define ARM_ARCH_V8A	ARM_FEATURE_CORE (ARM_AEXT_V8A, ARM_AEXT2_V8A)
 #define ARM_ARCH_V8_1A	ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A,	\
-				     CRC_EXT_ARMV8)
+				     CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA)
 #define ARM_ARCH_V8_2A	ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_2A,	\
 				     CRC_EXT_ARMV8)
 #define ARM_ARCH_V8M_BASE ARM_FEATURE_CORE (ARM_AEXT_V8M_BASE, ARM_AEXT2_V8M)
@@ -321,6 +321,7 @@ typedef struct
   unsigned long coproc;
 } arm_feature_set;
 
+/* Test whether CPU and FEAT have any features in common.  */
 #define ARM_CPU_HAS_FEATURE(CPU,FEAT) \
   (((CPU).core[0] & (FEAT).core[0]) != 0 \
    || ((CPU).core[1] & (FEAT).core[1]) != 0 \

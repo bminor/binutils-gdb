@@ -1922,7 +1922,8 @@ extern const char *target_thread_name (struct thread_info *);
    TYPE isn't supported.  TYPE is one of bp_hardware_watchpoint,
    bp_read_watchpoint, bp_write_watchpoint, or bp_hardware_breakpoint.
    CNT is the number of such watchpoints used so far, including this
-   one.  OTHERTYPE is who knows what...  */
+   one.  OTHERTYPE is the number of watchpoints of other types than
+   this one used so far.  */
 
 #define target_can_use_hardware_watchpoint(TYPE,CNT,OTHERTYPE) \
  (*current_target.to_can_use_hw_breakpoint) (&current_target,  \

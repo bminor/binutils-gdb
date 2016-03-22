@@ -89,6 +89,10 @@ extern const char *floatformat_mantissa (const struct floatformat *,
 
 const struct floatformat *floatformat_from_type (const struct type *type);
 
+/* Return the floatformat's total size in host bytes.  */
+
+extern size_t floatformat_totalsize_bytes (const struct floatformat *fmt);
+
 extern DOUBLEST extract_typed_floating (const void *addr,
 					const struct type *type);
 extern void store_typed_floating (void *addr, const struct type *type,

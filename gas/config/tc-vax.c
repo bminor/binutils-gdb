@@ -3274,7 +3274,7 @@ bfd_reloc_code_real_type
 vax_cons (expressionS *exp, int size)
 {
   char *save;
-  char *vax_cons_special_reloc;
+  const char *vax_cons_special_reloc;
 
   SKIP_WHITESPACE ();
   vax_cons_special_reloc = NULL;

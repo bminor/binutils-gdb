@@ -1580,17 +1580,20 @@ mips_elf_create_stub_symbol (struct bfd_link_info *info,
 {
   struct bfd_link_hash_entry *bh;
   struct elf_link_hash_entry *elfh;
-  const char *name;
+  char *name;
+  bfd_boolean res;
 
   if (ELF_ST_IS_MICROMIPS (h->root.other))
     value |= 1;
 
   /* Create a new symbol.  */
-  name = ACONCAT ((prefix, h->root.root.root.string, NULL));
+  name = concat (prefix, h->root.root.root.string, NULL);
   bh = NULL;
-  if (!_bfd_generic_link_add_one_symbol (info, s->owner, name,
-					 BSF_LOCAL, s, value, NULL,
-					 TRUE, FALSE, &bh))
+  res = _bfd_generic_link_add_one_symbol (info, s->owner, name,
+					  BSF_LOCAL, s, value, NULL,
+					  TRUE, FALSE, &bh);
+  free (name);
+  if (! res)
     return FALSE;
 
   /* Make it a local function.  */
@@ -1612,9 +1615,10 @@ mips_elf_create_shadow_symbol (struct bfd_link_info *info,
 {
   struct bfd_link_hash_entry *bh;
   struct elf_link_hash_entry *elfh;
-  const char *name;
+  char *name;
   asection *s;
   bfd_vma value;
+  bfd_boolean res;
 
   /* Read the symbol's value.  */
   BFD_ASSERT (h->root.root.type == bfd_link_hash_defined
@@ -1623,11 +1627,13 @@ mips_elf_create_shadow_symbol (struct bfd_link_info *info,
   value = h->root.root.u.def.value;
 
   /* Create a new symbol.  */
-  name = ACONCAT ((prefix, h->root.root.root.string, NULL));
+  name = concat (prefix, h->root.root.root.string, NULL);
   bh = NULL;
-  if (!_bfd_generic_link_add_one_symbol (info, s->owner, name,
-					 BSF_LOCAL, s, value, NULL,
-					 TRUE, FALSE, &bh))
+  res = _bfd_generic_link_add_one_symbol (info, s->owner, name,
+					  BSF_LOCAL, s, value, NULL,
+					  TRUE, FALSE, &bh);
+  free (name);
+  if (! res)
     return FALSE;
 
   /* Make it local and copy the other attributes from H.  */

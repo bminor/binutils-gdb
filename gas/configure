@@ -766,6 +766,7 @@ enable_targets
 enable_checking
 enable_compressed_debug_sections
 enable_x86_relax_relocations
+enable_elf_stt_common
 enable_werror
 enable_build_warnings
 enable_nls
@@ -1418,6 +1419,8 @@ Optional Features:
                           compress debug sections by default
   --enable-x86-relax-relocations
                           generate x86 relax relocations by default
+  --enable-elf-stt-common generate ELF common symbols with STT_COMMON type by
+                          default
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support
@@ -10975,7 +10978,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10978 "configure"
+#line 10981 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11081,7 +11084,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11084 "configure"
+#line 11087 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11694,6 +11697,17 @@ if test "${enable_x86_relax_relocations+set}" = set; then :
 esac
 fi
 
+# Decide if ELF assembler should generate common symbols with the
+# STT_COMMON type.
+ac_default_elf_stt_common=unset
+# Provide a configure time option to override our default.
+# Check whether --enable-elf_stt_common was given.
+if test "${enable_elf_stt_common+set}" = set; then :
+  enableval=$enable_elf_stt_common; case "${enableval}" in
+  yes)  ac_default_elf_stt_common=1 ;;
+esac
+fi
+
 using_cgen=no
 
 
@@ -11741,7 +11755,7 @@ fi
 
 NO_WERROR=
 if test "${ERROR_ON_WARNING}" = yes ; then
-    GCC_WARN_CFLAGS="$GCC_WARN_CFLAGS -Werror"
+    GCC_WARN_CFLAGS="$GCC_WARN_CFLAGS -Werror -Wstack-usage=262144"
     NO_WERROR="-Wno-error"
 fi
 
@@ -12536,6 +12550,15 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_GENERATE_X86_RELAX_RELOCATIONS $ac_default_x86_relax_relocations
+_ACEOF
+
+
+if test ${ac_default_elf_stt_common} = unset; then
+  ac_default_elf_stt_common=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_GENERATE_ELF_STT_COMMON $ac_default_elf_stt_common
 _ACEOF
 
 

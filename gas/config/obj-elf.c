@@ -1607,7 +1607,7 @@ obj_elf_vendor_attribute (int vendor)
       if (i == 0)
 	goto bad;
 
-      name = (char *) alloca (i + 1);
+      name = xmalloc (i + 1);
       memcpy (name, s, i);
       name[i] = '\0';
 
@@ -1620,8 +1620,10 @@ obj_elf_vendor_attribute (int vendor)
 	{
 	  as_bad (_("Attribute name not recognised: %s"), name);
 	  ignore_rest_of_line ();
+	  free (name);
 	  return 0;
 	}
+      free (name);
     }
 
   type = _bfd_elf_obj_attrs_arg_type (stdoutput, vendor, tag);
@@ -2085,9 +2087,7 @@ adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (!strcmp ("str", sec->name + strlen (sec->name) - 3))
     return;
 
-  name = (char *) alloca (strlen (sec->name) + 4);
-  strcpy (name, sec->name);
-  strcat (name, "str");
+  name = concat (sec->name, "str", NULL);
   strsec = bfd_get_section_by_name (abfd, name);
   if (strsec)
     strsz = bfd_section_size (abfd, strsec);
@@ -2100,6 +2100,7 @@ adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   bfd_h_put_16 (abfd, nsyms, p + 6);
   bfd_h_put_32 (abfd, strsz, p + 8);
+  free (name);
 }
 
 #ifdef NEED_ECOFF_DEBUG

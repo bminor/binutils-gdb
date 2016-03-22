@@ -1,3 +1,60 @@
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: New file.
+	* arc-opc.c: Add top level comment.
+	(insert_nps_3bit_dst): New function.
+	(extract_nps_3bit_dst): New function.
+	(insert_nps_3bit_src2): New function.
+	(extract_nps_3bit_src2): New function.
+	(insert_nps_bitop_size): New function.
+	(extract_nps_bitop_size): New function.
+	(arc_flag_operands): Add nps400 entries.
+	(arc_flag_classes): Add nps400 entries.
+	(arc_operands): Add nps400 entries.
+	(arc_opcodes): Add nps400 include.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (arc_flag_classes): Convert all flag classes to use
+	the new class enum values.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-dis.c (print_insn_arc): Handle nps400.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (BASE): Delete.
+
+2016-03-18  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19721
+	* aarch64-tbl.h (aarch64_opcode_table): Fix type of second operand
+	of MOV insn that aliases an ORR insn.
+
+2016-03-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (neon_opcodes): Support new FP16 instructions.
+
+2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* mcore-opc.h: Add const qualifiers.
+	* microblaze-opc.h (struct op_code_struct): Likewise.
+	* sh-opc.h: Likewise.
+	* tic4x-dis.c (tic4x_print_indirect): Likewise.
+	(tic4x_print_op): Likewise.
+
+2016-03-02  Alan Modra  <amodra@gmail.com>
+
+	* or1k-desc.h: Regenerate.
+	* fr30-ibld.c: Regenerate.
+	* rl78-decode.c: Regenerate.
+
+2016-03-01  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19747
+	* rl78-dis.c (print_insn_rl78_common): Fix typo.
+
 2016-02-24  Renlin Li  <renlin.li@arm.com>
 
 	* arm-dis.c (coprocessor_opcodes): Add fp16 instruction entries.

@@ -75,8 +75,8 @@ proc interrupt_and_wait { message } {
 	}
 	-re "$gdb_prompt $" {
 	    # Note that with this regex order, if GDB emits [New
-	    # Thread ...] output between "Program received signal" and
-	    # the prompt, the "received signal" regex won't match.
+	    # Thread ...] output between "Thread NNN received signal"
+	    # and the prompt, the "received signal" regex won't match.
 	    # That's good, as if we see that happening, it's a
 	    # regression.
 	    #
@@ -151,7 +151,7 @@ remote_expect host 1 {
   -re "\\\[\[^\]\]* exited\\\]\r\n" {
     exp_continue -continue_timer
   }
-  -re "Program received signal SIGINT.*$gdb_prompt $" {
+  -re " received signal SIGINT.*$gdb_prompt $" {
     if { $failed == 0 } {
       fail "check for duplicate SIGINT"
     }

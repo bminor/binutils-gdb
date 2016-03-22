@@ -94,113 +94,125 @@ if ![runto_main] {
     fail "Can't run to main"
     return
 }
+
 gdb_test "step" ".*" "step in the main"
 gdb_test "bt" "\\s*\\#0\\s+main.*" "step after all ignored"
 
 # Now remove skip.c from the skiplist.  Our first step should take us
 # into foo(), and our second step should take us to the next line in main().
 
-gdb_test "skip delete 1"
-# Check that entry 1 is missing from |info skip|
-gdb_test "info skip" \
-    "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
+with_test_prefix "step after deleting 1" {
+    gdb_test "skip delete 1"
+    # Check that entry 1 is missing from |info skip|
+    gdb_test "info skip" \
+	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
 3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
 4\\s+y\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
-    "info skip (delete 1)"
+	"info skip (delete 1)"
 
-if ![runto_main] {
-    fail "Can't run to main"
-    return
+    if ![runto_main] {
+	fail "Can't run to main"
+	return
+    }
+
+    gdb_test "step" "foo \\(\\) at.*" "step 1"
+    gdb_test "step" ".*" "step 2" ; # Return from foo()
+    gdb_test "step" "main \\(\\) at.*" "step 3"
 }
-set test "step after deleting 1"
-gdb_test "step" "foo \\(\\) at.*" "$test (1)"
-gdb_test "step" ".*" "$test (2)" ; # Return from foo()
-gdb_test "step" "main \\(\\) at.*" "$test (3)"
 
 # Now disable the skiplist entry for  skip1.c.  We should now
 # step into foo(), then into bar(), but not into baz().
 
-gdb_test "skip disable 3"
-# Is entry 3 disabled in |info skip|?
-gdb_test "info skip 3" \
-    "3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
-    "info skip shows entry as disabled"
+with_test_prefix "step after disabling 3" {
+    gdb_test "skip disable 3"
+    # Is entry 3 disabled in |info skip|?
+    gdb_test "info skip 3" \
+	"3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
+	"info skip shows entry as disabled"
 
-if ![runto_main] {
-    fail "Can't run to main"
-    return
+    if ![runto_main] {
+	fail "Can't run to main"
+	return
+    }
+
+    gdb_test "step" "bar \\(\\) at.*" "step 1"
+    gdb_test "step" ".*" "step 2"; # Return from foo()
+    gdb_test "step" "foo \\(\\) at.*" "step 3"
+    gdb_test "step" ".*" "step 4"; # Return from bar()
+    gdb_test "step" "main \\(\\) at.*" "step 5"
 }
-set test "step after disabling 3"
-gdb_test "step" "bar \\(\\) at.*" "$test (1)"
-gdb_test "step" ".*" "$test (2)"; # Return from foo()
-gdb_test "step" "foo \\(\\) at.*" "$test (3)"
-gdb_test "step" ".*" "$test (4)"; # Return from bar()
-gdb_test "step" "main \\(\\) at.*" "$test (5)"
 
 # Enable skiplist entry 3 and make sure we step over it like before.
 
-gdb_test "skip enable 3"
-# Is entry 3 enabled in |info skip|?
-gdb_test "info skip 3" \
-    "3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
-    "info skip shows entry as enabled"
-if ![runto_main] {
-    fail "Can't run to main"
-    return
-}
-set test "step after enable 3"
-gdb_test "step" "foo \\(\\) at.*" "$test (1)"
-gdb_test "step" ".*" "$test (2)"; # Return from foo()
-gdb_test "step" "main \\(\\) at.*" "$test (3)"
+with_test_prefix "step after enable 3" {
+    gdb_test "skip enable 3"
+    # Is entry 3 enabled in |info skip|?
+    gdb_test "info skip 3" \
+	"3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
+	"info skip shows entry as enabled"
 
-gdb_test "skip disable"
-gdb_test "info skip" \
-    "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
+    if ![runto_main] {
+	fail "Can't run to main"
+	return
+    }
+
+    gdb_test "step" "foo \\(\\) at.*" "step 1"
+    gdb_test "step" ".*" "step 2"; # Return from foo()
+    gdb_test "step" "main \\(\\) at.*" "step 3"
+}
+
+# Admin tests (disable,enable,delete).
+
+with_test_prefix "admin" {
+    gdb_test "skip disable"
+    gdb_test "info skip" \
+	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 2\\s+n\\s+n\\s+<none>\\s+n\\s+main\\s*
 3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
 4\\s+n\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
-    "info skip after disabling all"
+	"info skip after disabling all"
 
-gdb_test "skip enable"
-gdb_test "info skip" \
-    "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
+    gdb_test "skip enable"
+    gdb_test "info skip" \
+	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
 3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
 4\\s+y\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
-    "info skip after enabling all"
+	"info skip after enabling all"
 
-gdb_test "skip disable 4 2-3"
-gdb_test "info skip" \
-    "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
+    gdb_test "skip disable 4 2-3"
+    gdb_test "info skip" \
+	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 2\\s+n\\s+n\\s+<none>\\s+n\\s+main\\s*
 3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
 4\\s+n\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
-    "info skip after disabling 4 2-3"
+	"info skip after disabling 4 2-3"
 
-gdb_test "skip enable 2-3"
-gdb_test "info skip" \
-    "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
+    gdb_test "skip enable 2-3"
+    gdb_test "info skip" \
+	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
 3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
 4\\s+n\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
-    "info skip after enabling 2-3"
+	"info skip after enabling 2-3"
 
-gdb_test "info skip 2-3" \
-    "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
+    gdb_test "info skip 2-3" \
+	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
 3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
-    "info skip 2-3"
+	"info skip 2-3"
 
-gdb_test "skip delete 2 3"
-gdb_test "info skip" \
-    "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
+    gdb_test "skip delete 2 3"
+    gdb_test "info skip" \
+	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 4\\s+n\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
-    "info skip after deleting 2 3"
+	"info skip after deleting 2 3"
 
-gdb_test "skip delete"
-gdb_test "info skip" "Not skipping any files or functions\." \
-    "info skip after deleting all"
+    gdb_test "skip delete"
+    gdb_test "info skip" "Not skipping any files or functions\." \
+	"info skip after deleting all"
+}
 
 # Now test skip -fi, etc.
 
@@ -210,75 +222,78 @@ gdb_test "skip -gfi sk*1.c" "File\\(s\\) sk\\*1.c will be skipped when stepping\
 gdb_test "skip -fu baz" "Function baz will be skipped when stepping\."
 gdb_test "skip -rfu ^b.z$" "Function\\(s\\) \\^b\\.z\\$ will be skipped when stepping."
 
-if ![runto_main] {
-    fail "Can't run to main"
-    return
+with_test_prefix "step using -fi" {
+    if ![runto_main] {
+	fail "Can't run to main"
+	return
+    }
+
+    gdb_test_no_output "skip disable"
+    gdb_test_no_output "skip enable 5"
+    gdb_test "step" "foo \\(\\) at.*" "step 1"
+    gdb_test "step" ".*" "step 2"; # Return from foo()
+    gdb_test "step" "main \\(\\) at.*" "step 3"
 }
 
-set test "step using -fi"
-gdb_test_no_output "skip disable"
-gdb_test_no_output "skip enable 5"
-gdb_test "step" "foo \\(\\) at.*" "$test (1)"
-gdb_test "step" ".*" "$test (2)"; # Return from foo()
-gdb_test "step" "main \\(\\) at.*" "$test (3)"
+with_test_prefix "step using -gfi" {
+    if ![runto_main] {
+	fail "Can't run to main"
+	return
+    }
 
-if ![runto_main] {
-    fail "Can't run to main"
-    return
+    gdb_test_no_output "skip disable"
+    gdb_test_no_output "skip enable 6"
+    gdb_test "step" "foo \\(\\) at.*" "step 1"
+    gdb_test "step" ".*" "step 2"; # Return from foo()
+    gdb_test "step" "main \\(\\) at.*" "step 3"
 }
 
-set test "step using -gfi"
-gdb_test_no_output "skip disable"
-gdb_test_no_output "skip enable 6"
-gdb_test "step" "foo \\(\\) at.*" "$test (1)"
-gdb_test "step" ".*" "$test (2)"; # Return from foo()
-gdb_test "step" "main \\(\\) at.*" "$test (3)"
+with_test_prefix "step using -fu for baz" {
+    if ![runto_main] {
+	fail "Can't run to main"
+	return
+    }
 
-if ![runto_main] {
-    fail "Can't run to main"
-    return
+    gdb_test_no_output "skip disable"
+    gdb_test_no_output "skip enable 7"
+    gdb_test "step" "bar \\(\\) at.*" "step 1"
+    gdb_test "step" ".*" "step 2"; # Return from bar()
+    gdb_test "step" "foo \\(\\) at.*" "step 3"
+    gdb_test "step" ".*" "step 4"; # Return from foo()
+    gdb_test "step" "main \\(\\) at.*" "step 5"
 }
 
-set test "step using -fu for baz"
-gdb_test_no_output "skip disable"
-gdb_test_no_output "skip enable 7"
-gdb_test "step" "bar \\(\\) at.*" "$test (1)"
-gdb_test "step" ".*" "$test (2)"; # Return from bar()
-gdb_test "step" "foo \\(\\) at.*" "$test (3)"
-gdb_test "step" ".*" "$test (4)"; # Return from foo()
-gdb_test "step" "main \\(\\) at.*" "$test (5)"
+with_test_prefix "step using -rfu for baz" {
+    if ![runto_main] {
+	fail "Can't run to main"
+	return
+    }
 
-if ![runto_main] {
-    fail "Can't run to main"
-    return
+    gdb_test_no_output "skip disable"
+    gdb_test_no_output "skip enable 8"
+    gdb_test "step" "bar \\(\\) at.*" "step 1"
+    gdb_test "step" ".*" "step 2"; # Return from bar()
+    gdb_test "step" "foo \\(\\) at.*" "step 3"
+    gdb_test "step" ".*" "step 4"; # Return from foo()
+    gdb_test "step" "main \\(\\) at.*" "step 5"
 }
-
-set test "step using -rfu for baz"
-gdb_test_no_output "skip disable"
-gdb_test_no_output "skip enable 8"
-gdb_test "step" "bar \\(\\) at.*" "$test (1)"
-gdb_test "step" ".*" "$test (2)"; # Return from bar()
-gdb_test "step" "foo \\(\\) at.*" "$test (3)"
-gdb_test "step" ".*" "$test (4)"; # Return from foo()
-gdb_test "step" "main \\(\\) at.*" "$test (5)"
 
 # Test -fi + -fu.
 
-if ![runto_main] {
-    fail "Can't run to main"
-    return
-}
+with_test_prefix "step using -fi + -fu" {
+    gdb_test_no_output "skip delete"
 
-set test "step using -fi + -fu"
-gdb_test_no_output "skip delete"
-gdb_test "skip -fi skip1.c -fu test_skip" \
-    "Function test_skip in file skip1.c will be skipped when stepping\."
-gdb_breakpoint "test_skip_file_and_function"
-gdb_breakpoint "end_test_skip_file_and_function"
-gdb_test "call test_skip_file_and_function ()" "silently stop."
-# Verify we can step into skip.c:test_skip but not skip1.c:test_skip.
-gdb_test "step" "test_skip \\(\\) at.*" "$test (1)"
-gdb_test "step" "test_skip_file_and_function \\(\\) at.*" "$test (2)"; # Return from test_skip()
-gdb_test "step" "skip1_test_skip_file_and_function \\(\\) at.*" "$test (4)"
-gdb_test "step" ".*" "$test (5)"; # Skip over test_skip()
-gdb_test "step" "test_skip_file_and_function \\(\\) at.*" "$test (6)"; # Return from skip1_test_skip_file_and_function()
+    if ![runto test_skip_file_and_function no-message] {
+	fail "Can't run to test_skip_file_and_function"
+	return
+    }
+
+    gdb_test "skip -fi skip1.c -fu test_skip" \
+	"Function test_skip in file skip1.c will be skipped when stepping\."
+    # Verify we can step into skip.c:test_skip but not skip1.c:test_skip.
+    gdb_test "step" "test_skip \\(\\) at.*" "step 1"
+    gdb_test "step" "test_skip_file_and_function \\(\\) at.*" "step 2"; # Return from test_skip()
+    gdb_test "step" "skip1_test_skip_file_and_function \\(\\) at.*" "step 3"
+    gdb_test "step" ".*" "step 4"; # Skip over test_skip()
+    gdb_test "step" "test_skip_file_and_function \\(\\) at.*" "step 5"; # Return from skip1_test_skip_file_and_function()
+}

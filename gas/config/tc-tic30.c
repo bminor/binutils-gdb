@@ -31,7 +31,7 @@
 /* Put here all non-digit non-letter characters that may occur in an
    operand.  */
 static char operand_special_chars[] = "%$-+(,)*._~/<>&^!:[@]";
-static char *ordinal_names[] =
+static const char *ordinal_names[] =
 {
   N_("first"), N_("second"), N_("third"), N_("fourth"), N_("fifth")
 };
@@ -399,7 +399,6 @@ static operand *
 tic30_operand (char *token)
 {
   unsigned int count;
-  char ind_buffer[strlen (token)];
   operand *current_op;
 
   debug ("In tic30_operand with %s\n", token);
@@ -463,6 +462,9 @@ tic30_operand (char *token)
       int disp_number = 0;
       int buffer_posn = 1;
       ind_addr_type *ind_addr_op;
+      char * ind_buffer;
+
+      ind_buffer = xmalloc (strlen (token));
 
       debug ("Found indirect reference\n");
       ind_buffer[0] = *token;
@@ -480,11 +482,13 @@ tic30_operand (char *token)
 	      if (found_ar)
 		{
 		  as_bad (_("More than one AR register found in indirect reference"));
+		  free (ind_buffer);
 		  return NULL;
 		}
 	      if (*(token + count + 1) < '0' || *(token + count + 1) > '7')
 		{
 		  as_bad (_("Illegal AR register in indirect reference"));
+		  free (ind_buffer);
 		  return NULL;
 		}
 	      ar_number = *(token + count + 1) - '0';
@@ -505,6 +509,7 @@ tic30_operand (char *token)
 		  if (found_disp)
 		    {
 		      as_bad (_("More than one displacement found in indirect reference"));
+		      free (ind_buffer);
 		      return NULL;
 		    }
 		  count++;
@@ -513,6 +518,7 @@ tic30_operand (char *token)
 		      if (!is_digit_char (*(token + count)))
 			{
 			  as_bad (_("Invalid displacement in indirect reference"));
+			  free (ind_buffer);
 			  return NULL;
 			}
 		      disp[disp_posn++] = *(token + (count++));
@@ -530,6 +536,7 @@ tic30_operand (char *token)
       if (!found_ar)
 	{
 	  as_bad (_("AR register not found in indirect reference"));
+	  free (ind_buffer);
 	  return NULL;
 	}
 
@@ -546,18 +553,21 @@ tic30_operand (char *token)
 	    {
 	      /* Maybe an implied displacement of 1 again.  */
 	      as_bad (_("required displacement wasn't given in indirect reference"));
-	      return 0;
+	      free (ind_buffer);
+	      return NULL;
 	    }
 	}
       else
 	{
 	  as_bad (_("illegal indirect reference"));
+	  free (ind_buffer);
 	  return NULL;
 	}
 
       if (found_disp && (disp_number < 0 || disp_number > 255))
 	{
 	  as_bad (_("displacement must be an unsigned 8-bit number"));
+	  free (ind_buffer);
 	  return NULL;
 	}
 
@@ -565,6 +575,7 @@ tic30_operand (char *token)
       current_op->indirect.disp = disp_number;
       current_op->indirect.ARnum = ar_number;
       current_op->op_type = Indirect;
+      free (ind_buffer);
     }
   else
     {

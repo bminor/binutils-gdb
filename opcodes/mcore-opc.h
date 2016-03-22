@@ -33,7 +33,7 @@ mcore_opclass;
 
 typedef struct inst
 {
-  char *         name;
+  const char *   name;
   mcore_opclass  opclass;
   unsigned char  transfer;
   unsigned short inst;

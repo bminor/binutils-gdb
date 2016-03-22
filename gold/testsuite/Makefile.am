@@ -388,6 +388,16 @@ eh_test_b.o: eh_test_b.cc
 eh_test: eh_test_a.o eh_test_b.o  gcctestdir/ld
 	$(CXXLINK_S) -Bgcctestdir/ eh_test_a.o eh_test_b.o
 
+check_SCRIPTS += eh_test_2.sh
+check_DATA += eh_test_2.sects
+MOSTLYCLEANFILES += eh_test_2.sects
+eh_test_r.o: eh_test_a.o eh_test_b.o gcctestdir/ld
+	gcctestdir/ld -r -o $@ eh_test_a.o eh_test_b.o
+eh_test_2: eh_test_r.o gcctestdir/ld
+	$(CXXLINK_S) -Bgcctestdir/ -Wl,--eh-frame-hdr eh_test_r.o
+eh_test_2.sects: eh_test_2
+	$(TEST_READELF) -SW $< >$@ 2>/dev/null
+
 if HAVE_STATIC
 check_PROGRAMS += basic_static_test
 basic_static_test: basic_test.o gcctestdir/ld
@@ -1368,6 +1378,8 @@ check_PROGRAMS += flagstest_compress_debug_sections
 check_DATA += flagstest_compress_debug_sections.stdout \
 	      flagstest_compress_debug_sections.cmp \
 	      flagstest_compress_debug_sections.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections.check \
+		    flagstest_compress_debug_sections.cmp
 flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
@@ -1402,6 +1414,8 @@ check_PROGRAMS += flagstest_compress_debug_sections_gnu
 check_DATA += flagstest_compress_debug_sections_gnu.stdout \
 	      flagstest_compress_debug_sections_gnu.cmp \
 	      flagstest_compress_debug_sections_gnu.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections_gnu.check \
+		    flagstest_compress_debug_sections_gnu.cmp
 flagstest_compress_debug_sections_gnu: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gnu
 	test -s $@
@@ -1427,6 +1441,8 @@ check_PROGRAMS += flagstest_compress_debug_sections_gabi
 check_DATA += flagstest_compress_debug_sections_gabi.stdout \
 	      flagstest_compress_debug_sections_gabi.cmp \
 	      flagstest_compress_debug_sections_gabi.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections_gabi.cmp \
+		    flagstest_compress_debug_sections_gabi.check
 flagstest_compress_debug_sections_gabi: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gabi
 	test -s $@
@@ -2021,6 +2037,22 @@ plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 	rm -f $@
 	$(TEST_AR) crT $@ $^
 
+
+check_PROGRAMS += plugin_test_start_lib
+check_SCRIPTS += plugin_test_start_lib.sh
+check_DATA += plugin_test_start_lib.err
+MOSTLYCLEANFILES += plugin_test_start_lib.err
+plugin_test_start_lib: unused.o plugin_start_lib_test.o plugin_start_lib_test_2.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_start_lib_test.o \
+		-Wl,--start-lib plugin_start_lib_test_2.syms -Wl,--end-lib 2>plugin_test_start_lib.err
+plugin_test_start_lib.err: plugin_test_start_lib
+	@touch plugin_test_start_lib.err
+
+
+plugin_start_lib_test_2.syms: plugin_start_lib_test_2.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+
+
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c
@@ -2084,6 +2116,21 @@ plugin_section_order.so: plugin_section_order.o
 	$(LINK) -Bgcctestdir/ -shared plugin_section_order.o
 plugin_section_order.o: plugin_section_order.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
+
+check_SCRIPTS += plugin_layout_with_alignment.sh
+check_DATA += plugin_layout_with_alignment.stdout
+MOSTLYCLEANFILES += plugin_layout_with_alignment
+plugin_layout_with_alignment.o: plugin_layout_with_alignment.c
+	$(COMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
+plugin_layout_with_alignment: plugin_layout_with_alignment.o plugin_section_alignment.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_section_alignment.so" plugin_layout_with_alignment.o
+plugin_layout_with_alignment.stdout: plugin_layout_with_alignment
+	$(TEST_NM) -n --synthetic plugin_layout_with_alignment > plugin_layout_with_alignment.stdout
+
+plugin_section_alignment.so: plugin_section_alignment.o
+	$(CXXLINK) -Bgcctestdir/ -shared plugin_section_alignment.o
+plugin_section_alignment.o: plugin_section_alignment.cc
+	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
 
 endif PLUGINS
 
@@ -2177,7 +2224,6 @@ MOSTLYCLEANFILES += retain_symbols_file_test retain_symbols_file_test.in \
 retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
 	echo 'main' > retain_symbols_file_test.in
 	echo 't1' >> retain_symbols_file_test.in
-	echo '_ZN4t16bC1Ev' >> retain_symbols_file_test.in
 	echo '_ZNK4t20a3getEv' >> retain_symbols_file_test.in
 	echo '_Z3t18v' >> retain_symbols_file_test.in
 	echo '__tcf_0' >> retain_symbols_file_test.in
@@ -2526,7 +2572,7 @@ memory_test.stdout: memory_test
 # Test INCLUDE directives in linker scripts.
 # The binary isn't runnable, so we just check that we can build it without errors.
 check_DATA += memory_test_2
-MOSTLYCLEANFILES += memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
+MOSTLYCLEANFILES += memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t memory_test_2
 memory_test_inc_1.t: $(srcdir)/memory_test_inc_1.t.src
 	cp $< $@
 memory_test_inc_2.t: $(srcdir)/memory_test_inc_2.t.src
@@ -2552,7 +2598,7 @@ gdb_index_test_1.stdout: gdb_index_test_1
 # Test that --gdb-index functions correctly with compressed debug sections.
 check_SCRIPTS += gdb_index_test_2.sh
 check_DATA += gdb_index_test_2.stdout
-MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2
+MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2 gdb_index_test_2_gabi
 gdb_index_test_cdebug.o: gdb_index_test.cc
 	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections -c -o $@ $<
 gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld

@@ -2271,6 +2271,76 @@ get_machine_name (unsigned e_machine)
 }
 
 static void
+decode_ARC_machine_flags (unsigned e_flags, unsigned e_machine, char buf[])
+{
+  /* ARC has two machine types EM_ARC_COMPACT and EM_ARC_COMPACT2.  Some
+     other compilers don't a specific architecture type in the e_flags, and
+     instead use EM_ARC_COMPACT for old ARC600, ARC601, and ARC700
+     architectures, and switch to EM_ARC_COMPACT2 for newer ARCEM and ARCHS
+     architectures.
+
+     Th GNU tools follows this use of EM_ARC_COMPACT and EM_ARC_COMPACT2,
+     but also sets a specific architecture type in the e_flags field.
+
+     However, when decoding the flags we don't worry if we see an
+     unexpected pairing, for example EM_ARC_COMPACT machine type, with
+     ARCEM architecture type.  */
+
+  switch (e_flags & EF_ARC_MACH_MSK)
+    {
+      /* We only expect these to occur for EM_ARC_COMPACT2.  */
+    case EF_ARC_CPU_ARCV2EM:
+      strcat (buf, ", ARC EM");
+      break;
+    case EF_ARC_CPU_ARCV2HS:
+      strcat (buf, ", ARC HS");
+      break;
+
+      /* We only expect these to occur for EM_ARC_COMPACT.  */
+    case E_ARC_MACH_ARC600:
+      strcat (buf, ", ARC600");
+      break;
+    case E_ARC_MACH_ARC601:
+      strcat (buf, ", ARC601");
+      break;
+    case E_ARC_MACH_ARC700:
+      strcat (buf, ", ARC700");
+      break;
+    case E_ARC_MACH_NPS400:
+      strcat (buf, ", NPS400");
+      break;
+
+      /* The only times we should end up here are (a) A corrupt ELF, (b) A
+         new ELF with new architecture being read by an old version of
+         readelf, or (c) An ELF built with non-GNU compiler that does not
+         set the architecture in the e_flags.  */
+    default:
+      if (e_machine == EM_ARC_COMPACT)
+        strcat (buf, ", Unknown ARCompact");
+      else
+        strcat (buf, ", Unknown ARC");
+      break;
+    }
+
+  switch (e_flags & EF_ARC_OSABI_MSK)
+    {
+    case E_ARC_OSABI_ORIG:
+      strcat (buf, ", (ABI:legacy)");
+      break;
+    case E_ARC_OSABI_V2:
+      strcat (buf, ", (ABI:v2)");
+      break;
+      /* Only upstream 3.9+ kernels will support ARCv2 ISA.  */
+    case E_ARC_OSABI_V3:
+      strcat (buf, ", v3 no-legacy-syscalls ABI");
+      break;
+    default:
+      strcat (buf, ", unrecognised ARC OSABI flag");
+      break;
+    }
+}
+
+static void
 decode_ARM_machine_flags (unsigned e_flags, char buf[])
 {
   unsigned eabi;
@@ -2768,81 +2838,9 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  break;
 
 	case EM_ARC_COMPACT2:
-	  switch (e_flags & EF_ARC_MACH_MSK)
-	    {
-	    case EF_ARC_CPU_ARCV2EM:
-	      strcat (buf, ", ARC EM");
-	      break;
-	    case EF_ARC_CPU_ARCV2HS:
-	      strcat (buf, ", ARC HS");
-	      break;
-	    case EF_ARC_CPU_GENERIC:
-	      strcat (buf, ", ARC generic");
-	      break;
-	    case E_ARC_MACH_ARC600:
-	      strcat (buf, ", ARC600");
-	      break;
-	    case E_ARC_MACH_ARC601:
-	      strcat (buf, ", ARC601");
-	      break;
-	    case E_ARC_MACH_ARC700:
-	      strcat (buf, ", ARC700");
-	      break;
-	    default:
-	      strcat (buf, ", unrecognized cpu flag for ARCv2");
-	      break;
-	    }
-	  switch (e_flags & EF_ARC_OSABI_MSK)
-	    {
-	    case E_ARC_OSABI_ORIG:
-	      strcat (buf, ", (ABI:legacy)");
-	      break;
-	    case E_ARC_OSABI_V2:
-	      strcat (buf, ", (ABI:v2)");
-	      break;
-	      /* Only upstream 3.9+ kernels will support ARCv2 ISA.  */
-	    case E_ARC_OSABI_V3:
-	      strcat (buf, ", v3 no-legacy-syscalls ABI");
-	      break;
-	    default:
-	      strcat (buf, ", unrecognised ARC OSABI flag");
-	      break;
-	    }
-	  break;
-
 	case EM_ARC_COMPACT:
-	  switch (e_flags & EF_ARC_MACH_MSK)
-	    {
-	    case E_ARC_MACH_ARC600:
-	      strcat (buf, ", ARC 600");
-	      break;
-	    case E_ARC_MACH_ARC601:
-	      strcat (buf, ", ARC 601");
-	      break;
-	    case E_ARC_MACH_ARC700:
-	      strcat (buf, ", ARC 700");
-	      break;
-	    default:
-	      strcat (buf, ", Generic ARCompact");
-	      break;
-	    }
-	  switch (e_flags & EF_ARC_OSABI_MSK)
-	    {
-	    case E_ARC_OSABI_ORIG:
-	      strcat (buf, ", legacy syscall ABI");
-	      break;
-	    case E_ARC_OSABI_V2:
-	      /* For 3.2+ Linux kernels which use asm-generic
-		 hdrs.  */
-	      strcat (buf, ", v2 syscall ABI");
-	      break;
-	    case E_ARC_OSABI_V3:
-	      /* Upstream 3.9+ kernels which don't use any legacy
-		 syscalls.  */
-	      strcat (buf, ", v3 no-legacy-syscalls ABI");
-	      break;
-	    }
-	  break;
+          decode_ARC_machine_flags (e_flags, e_machine, buf);
+          break;
 
 	case EM_ARM:
 	  decode_ARM_machine_flags (e_flags, buf);
@@ -11982,6 +11980,7 @@ apply_relocations (void *                     file,
 	     referencing a global array.  For an example of this see
 	     the _clz.o binary in libgcc.a.  */
 	  if (sym != symtab
+	      && ELF_ST_TYPE (sym->st_info) != STT_COMMON
 	      && ELF_ST_TYPE (sym->st_info) > STT_SECTION)
 	    {
 	      warn (_("skipping unexpected symbol type %s in %ld'th relocation in section %s\n"),
@@ -12774,7 +12773,8 @@ static const char * arm_attr_tag_FP_arch[] =
    "FP for ARMv8", "FPv5/FP-D16 for ARMv8"};
 static const char * arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1", "WMMXv2"};
 static const char * arm_attr_tag_Advanced_SIMD_arch[] =
-  {"No", "NEONv1", "NEONv1 with Fused-MAC", "NEON for ARMv8"};
+  {"No", "NEONv1", "NEONv1 with Fused-MAC", "NEON for ARMv8",
+   "NEON for ARMv8.1"};
 static const char * arm_attr_tag_PCS_config[] =
   {"None", "Bare platform", "Linux application", "Linux DSO", "PalmOS 2004",
    "PalmOS (reserved)", "SymbianOS 2004", "SymbianOS (reserved)"};

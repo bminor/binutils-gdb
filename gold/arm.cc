@@ -597,7 +597,7 @@ class Reloc_stub : public Stub
 
     // Name of key.  This is mainly for debugging.
     std::string
-    name() const;
+    name() const ATTRIBUTE_UNUSED;
 
    private:
     // Stub type.

@@ -518,6 +518,7 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      some discussions to support 128-bit long double, but it requires some
      more work in gcc and glibc first.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, hppa_linux_iterate_over_regset_sections);

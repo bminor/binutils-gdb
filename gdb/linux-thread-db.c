@@ -564,17 +564,12 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   /* These are essential.  */
   CHK (TDB_VERBOSE_DLSYM (info, td_ta_map_lwp2thr));
-  CHK (TDB_VERBOSE_DLSYM (info, td_ta_thr_iter));
   CHK (TDB_VERBOSE_DLSYM (info, td_thr_validate));
   CHK (TDB_VERBOSE_DLSYM (info, td_thr_get_info));
 
   /* These are not essential.  */
   TDB_DLSYM (info, td_thr_tls_get_addr);
   TDB_DLSYM (info, td_thr_tlsbase);
-
-#undef TDB_VERBOSE_DLSYM
-#undef TDB_DLSYM
-#undef CHK
 
   /* It's best to avoid td_ta_thr_iter if possible.  That walks data
      structures in the inferior's address space that may be corrupted,
@@ -587,6 +582,15 @@ try_thread_db_load_1 (struct thread_db_info *info)
      currently on core targets, as it uses ptrace directly.  */
   if (target_has_execution
       && linux_proc_task_list_dir_exists (ptid_get_pid (inferior_ptid)))
+    info->td_ta_thr_iter_p = NULL;
+  else
+    CHK (TDB_VERBOSE_DLSYM (info, td_ta_thr_iter));
+
+#undef TDB_VERBOSE_DLSYM
+#undef TDB_DLSYM
+#undef CHK
+
+  if (info->td_ta_thr_iter_p == NULL)
     {
       struct lwp_info *lp;
       int pid = ptid_get_pid (inferior_ptid);
@@ -1020,7 +1024,8 @@ check_pid_namespace_match (void)
 	{
 	  warning (_ ("Target and debugger are in different PID "
 		      "namespaces; thread lists and other data are "
-		      "likely unreliable"));
+		      "likely unreliable.  "
+		      "Connect to gdbserver inside the container."));
 	}
     }
 }
@@ -1246,7 +1251,7 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
   data.new_threads = 0;
 
   /* See comment in thread_db_update_thread_list.  */
-  gdb_assert (!target_has_execution);
+  gdb_assert (info->td_ta_thr_iter_p != NULL);
 
   TRY
     {

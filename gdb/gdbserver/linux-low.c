@@ -529,8 +529,11 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  child_thr->last_status.kind = TARGET_WAITKIND_STOPPED;
 
 	  /* If we're suspending all threads, leave this one suspended
-	     too.  */
-	  if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS)
+	     too.  If the fork/clone parent is stepping over a breakpoint,
+	     all other threads have been suspended already.  Leave the
+	     child suspended too.  */
+	  if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
+	      || event_lwp->bp_reinsert != 0)
 	    {
 	      if (debug_threads)
 		debug_printf ("HEW: leaving child suspended\n");
@@ -583,9 +586,12 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	 before calling linux_resume_one_lwp.  */
       new_lwp->stopped = 1;
 
-     /* If we're suspending all threads, leave this one suspended
-	too.  */
-      if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS)
+      /* If we're suspending all threads, leave this one suspended
+	 too.  If the fork/clone parent is stepping over a breakpoint,
+	 all other threads have been suspended already.  Leave the
+	 child suspended too.  */
+      if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
+	  || event_lwp->bp_reinsert != 0)
 	new_lwp->suspended = 1;
 
       /* Normally we will get the pending SIGSTOP.  But in some cases
@@ -2437,7 +2443,7 @@ linux_low_filter_event (int lwpid, int wstat)
 	}
     }
 
-  if (WIFSTOPPED (wstat) && linux_wstatus_maybe_breakpoint (wstat))
+  if (linux_wstatus_maybe_breakpoint (wstat))
     {
       if (save_stop_reason (child))
 	have_stop_pc = 1;
@@ -4112,6 +4118,16 @@ single_step (struct lwp_info* lwp)
   return step;
 }
 
+/* The signal can be delivered to the inferior if we are not trying to
+   reinsert a breakpoint and not trying to finish a fast tracepoint
+   collect.  */
+
+static int
+lwp_signal_can_be_delivered (struct lwp_info *lwp)
+{
+  return (lwp->bp_reinsert == 0 && !lwp->collecting_fast_tracepoint);
+}
+
 /* Resume execution of LWP.  If STEP is nonzero, single-step it.  If
    SIGNAL is nonzero, give it that signal.  */
 
@@ -4151,42 +4167,31 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
     }
 
   /* If we have pending signals or status, and a new signal, enqueue the
-     signal.  Also enqueue the signal if we are waiting to reinsert a
-     breakpoint; it will be picked up again below.  */
+     signal.  Also enqueue the signal if it can't be delivered to the
+     inferior right now.  */
   if (signal != 0
       && (lwp->status_pending_p
 	  || lwp->pending_signals != NULL
-	  || lwp->bp_reinsert != 0
-	  || fast_tp_collecting))
+	  || !lwp_signal_can_be_delivered (lwp)))
     {
-      struct pending_signals *p_sig = XNEW (struct pending_signals);
+      enqueue_pending_signal (lwp, signal, info);
 
-      p_sig->prev = lwp->pending_signals;
-      p_sig->signal = signal;
-      if (info == NULL)
-	memset (&p_sig->info, 0, sizeof (siginfo_t));
-      else
-	memcpy (&p_sig->info, info, sizeof (siginfo_t));
-      lwp->pending_signals = p_sig;
+      /* Postpone any pending signal.  It was enqueued above.  */
+      signal = 0;
     }
 
   if (lwp->status_pending_p)
     {
       if (debug_threads)
-	debug_printf ("Not resuming lwp %ld (%s, signal %d, stop %s);"
+	debug_printf ("Not resuming lwp %ld (%s, stop %s);"
 		      " has pending status\n",
-		      lwpid_of (thread), step ? "step" : "continue", signal,
+		      lwpid_of (thread), step ? "step" : "continue",
 		      lwp->stop_expected ? "expected" : "not expected");
       return;
     }
 
   saved_thread = current_thread;
   current_thread = thread;
-
-  if (debug_threads)
-    debug_printf ("Resuming lwp %ld (%s, signal %d, stop %s)\n",
-		  lwpid_of (thread), step ? "step" : "continue", signal,
-		  lwp->stop_expected ? "expected" : "not expected");
 
   /* This bit needs some thinking about.  If we get a signal that
      we must report while a single-step reinsert is still pending,
@@ -4217,9 +4222,6 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 
 	  step = 1;
 	}
-
-      /* Postpone any pending signal.  It was enqueued above.  */
-      signal = 0;
     }
 
   if (fast_tp_collecting == 1)
@@ -4228,9 +4230,6 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	debug_printf ("lwp %ld wants to get out of fast tracepoint jump pad"
 		      " (exit-jump-pad-bkpt)\n",
 		      lwpid_of (thread));
-
-      /* Postpone any pending signal.  It was enqueued above.  */
-      signal = 0;
     }
   else if (fast_tp_collecting == 2)
     {
@@ -4247,9 +4246,6 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 			  "moving out of jump pad single-stepping"
 			  " not implemented on this target");
 	}
-
-      /* Postpone any pending signal.  It was enqueued above.  */
-      signal = 0;
     }
 
   /* If we have while-stepping actions in this thread set it stepping.
@@ -4282,12 +4278,9 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	}
     }
 
-  /* If we have pending signals, consume one unless we are trying to
-     reinsert a breakpoint or we're trying to finish a fast tracepoint
-     collect.  */
-  if (lwp->pending_signals != NULL
-      && lwp->bp_reinsert == 0
-      && fast_tp_collecting == 0)
+  /* If we have pending signals, consume one if it can be delivered to
+     the inferior.  */
+  if (lwp->pending_signals != NULL && lwp_signal_can_be_delivered (lwp))
     {
       struct pending_signals **p_sig;
 
@@ -4303,6 +4296,11 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
       free (*p_sig);
       *p_sig = NULL;
     }
+
+  if (debug_threads)
+    debug_printf ("Resuming lwp %ld (%s, signal %d, stop %s)\n",
+		  lwpid_of (thread), step ? "step" : "continue", signal,
+		  lwp->stop_expected ? "expected" : "not expected");
 
   if (the_low_target.prepare_to_resume != NULL)
     the_low_target.prepare_to_resume (lwp);
@@ -4629,18 +4627,10 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
    of the way.  If we let other threads run while we do that, they may
    pass by the breakpoint location and miss hitting it.  To avoid
    that, a step-over momentarily stops all threads while LWP is
-   single-stepped while the breakpoint is temporarily uninserted from
-   the inferior.  When the single-step finishes, we reinsert the
-   breakpoint, and let all threads that are supposed to be running,
-   run again.
-
-   On targets that don't support hardware single-step, we don't
-   currently support full software single-stepping.  Instead, we only
-   support stepping over the thread event breakpoint, by asking the
-   low target where to place a reinsert breakpoint.  Since this
-   routine assumes the breakpoint being stepped over is a thread event
-   breakpoint, it usually assumes the return address of the current
-   function is a good enough place to set the reinsert breakpoint.  */
+   single-stepped by either hardware or software while the breakpoint
+   is temporarily uninserted from the inferior.  When the single-step
+   finishes, we reinsert the breakpoint, and let all threads that are
+   supposed to be running, run again.  */
 
 static int
 start_step_over (struct lwp_info *lwp)

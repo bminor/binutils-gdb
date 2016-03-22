@@ -71,7 +71,7 @@ struct nds32_relocs_pattern
 /* Suffix name and relocation.  */
 struct suffix_name
 {
-  char *suffix;
+  const char *suffix;
   short unsigned int reloc;
   int pic;
 };
@@ -1912,16 +1912,16 @@ size_t md_longopts_size = sizeof (md_longopts);
 struct nds32_parse_option_table
 {
   const char *name;		/* Option string.  */
-  char *help;			/* Help description.  */
-  int (*func) (char *arg);	/* How to parse it.  */
+  const char *help;			/* Help description.  */
+  int (*func) (const char *arg);	/* How to parse it.  */
 };
 
 
 /* The value `-1' represents this option has *NOT* been set.  */
 #ifdef NDS32_DEFAULT_ARCH_NAME
-static char* nds32_arch_name = NDS32_DEFAULT_ARCH_NAME;
+static const char* nds32_arch_name = NDS32_DEFAULT_ARCH_NAME;
 #else
-static char* nds32_arch_name = "v3";
+static const char* nds32_arch_name = "v3";
 #endif
 static int nds32_baseline = -1;
 static int nds32_gpr16 = -1;
@@ -1934,10 +1934,10 @@ static int nds32_abi = -1;
 static int nds32_elf_flags = 0;
 static int nds32_fpu_com = 0;
 
-static int nds32_parse_arch (char *str);
-static int nds32_parse_baseline (char *str);
-static int nds32_parse_freg (char *str);
-static int nds32_parse_abi (char *str);
+static int nds32_parse_arch (const char *str);
+static int nds32_parse_baseline (const char *str);
+static int nds32_parse_freg (const char *str);
+static int nds32_parse_abi (const char *str);
 
 static struct nds32_parse_option_table parse_opts [] =
 {
@@ -1975,7 +1975,7 @@ static int nds32_relax_all = 1;
 struct nds32_set_option_table
 {
   const char *name;		/* Option string.  */
-  char *help;			/* Help description.  */
+  const char *help;			/* Help description.  */
   int *var;			/* Variable to be set.  */
   int value;			/* Value to set.  */
 };
@@ -2174,7 +2174,7 @@ builtin_addend (const char *s, char *x ATTRIBUTE_UNUSED)
 }
 
 static void
-md_assemblef (char *format, ...)
+md_assemblef (const char *format, ...)
 {
   /* FIXME: hope this is long enough.  */
   char line[1024];
@@ -2189,7 +2189,7 @@ md_assemblef (char *format, ...)
 }
 
 /* Some prototypes here, since some op may use another op.  */
-static void do_pseudo_li_internal (char *rt, int imm32s);
+static void do_pseudo_li_internal (const char *rt, int imm32s);
 static void do_pseudo_move_reg_internal (char *dst, char *src);
 
 static void
@@ -2385,7 +2385,7 @@ do_pseudo_la (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_li_internal (char *rt, int imm32s)
+do_pseudo_li_internal (const char *rt, int imm32s)
 {
   if (enable_16bit && imm32s <= 0xf && imm32s >= -0x10)
     md_assemblef ("movi55 %s,%d", rt, imm32s);
@@ -2627,7 +2627,7 @@ do_pseudo_pushpopm (int argc, char *argv[], int pv ATTRIBUTE_UNUSED)
   /* SMW.{b | a}{i | d}{m?} Rb, [Ra], Re, Enable4 */
   int rb, re, ra, en4;
   int i;
-  char *opc = "pushpopm";
+  const char *opc = "pushpopm";
 
   if (argc == 3)
     as_bad ("'pushm/popm $ra5, $rb5, $label' is deprecated.  "
@@ -2722,7 +2722,7 @@ do_pseudo_pushpop_stack (int argc, char *argv[], int pv)
   int rb, re;
   int en4;
   int last_arg_index;
-  char *opc = (pv == 0) ? "smw.adm" : "lmw.bim";
+  const char *opc = (pv == 0) ? "smw.adm" : "lmw.bim";
 
   rb = re = 0;
 
@@ -3047,7 +3047,7 @@ end:
    Thus, if the value of option has been set, keep the value the way it is.  */
 
 static int
-nds32_parse_arch (char *str)
+nds32_parse_arch (const char *str)
 {
   static const struct nds32_arch
   {
@@ -3097,7 +3097,7 @@ nds32_parse_arch (char *str)
 /* This function parses "baseline" specified.  */
 
 static int
-nds32_parse_baseline (char *str)
+nds32_parse_baseline (const char *str)
 {
   if (strcmp (str, "v3") == 0)
     nds32_baseline = ISA_V3;
@@ -3118,7 +3118,7 @@ nds32_parse_baseline (char *str)
 /* This function parses "fpu-freg" specified.  */
 
 static int
-nds32_parse_freg (char *str)
+nds32_parse_freg (const char *str)
 {
   if (strcmp (str, "2") == 0)
     nds32_freg = E_NDS32_FPU_REG_32SP_16DP;
@@ -3141,7 +3141,7 @@ nds32_parse_freg (char *str)
 /* This function parse "abi=" specified.  */
 
 static int
-nds32_parse_abi (char *str)
+nds32_parse_abi (const char *str)
 {
   if (strcmp (str, "v2") == 0)
     nds32_abi = E_NDS_ABI_AABI;
@@ -3557,7 +3557,7 @@ nds32_relax_relocs (int relax)
   char saved_char;
   char *name;
   int i;
-  char *subtype_relax[] =
+  const char *subtype_relax[] =
     {"", "", "ex9", "ifc"};
 
   name = input_line_pointer;
@@ -3783,7 +3783,7 @@ nds32_flag (int ignore ATTRIBUTE_UNUSED)
   char *name;
   char saved_char;
   int i;
-  char *possible_flags[] = { "verbatim" };
+  const char *possible_flags[] = { "verbatim" };
 
   /* Skip whitespaces.  */
   name = input_line_pointer;
@@ -4591,7 +4591,7 @@ enum nds32_insn_type
 struct nds32_hint_map
 {
   bfd_reloc_code_real_type hi_type;
-  char *opc;
+  const char *opc;
   enum nds32_relax_hint_type hint_type;
   enum nds32_br_range range;
   enum nds32_insn_type insn_list;
@@ -4688,7 +4688,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
   unsigned int opcode, seq_size;
   enum nds32_br_range range;
   struct nds32_relocs_pattern *pattern, *hi_pattern = NULL;
-  char *opc = NULL;
+  const char *opc = NULL;
   relax_info_t *relax_info = NULL;
   nds32_relax_fixup_info_t *fixup_info, *hint_fixup;
   enum nds32_relax_hint_type hint_type = NDS32_RELAX_HINT_NONE;
@@ -4697,7 +4697,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
   enum nds32_insn_type relax_type = 0;
   struct nds32_hint_map *map_ptr = hint_map;
   unsigned int i;
-  char *check_insn[] =
+  const char *check_insn[] =
     { "bnes38", "beqs38", "bnez38", "bnezs8", "beqz38", "beqzs8" };
 
   /* TODO: PLT GOT.  */
@@ -4859,7 +4859,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
 static bfd_boolean
 nds32_match_hint_insn (struct nds32_opcode *opcode, uint32_t seq)
 {
-  char *check_insn[] =
+  const char *check_insn[] =
     { "bnes38", "beqs38", "bnez38", "bnezs8", "beqz38", "beqzs8" };
   uint32_t insn = opcode->value;
   unsigned int i;
@@ -5141,6 +5141,7 @@ void
 md_assemble (char *str)
 {
   struct nds32_asm_insn insn;
+  expressionS expr;
   char *out;
   struct nds32_pseudo_opcode *popcode;
   const struct nds32_field *fld = NULL;
@@ -5176,7 +5177,7 @@ md_assemble (char *str)
     }
 
   label_exist = 0;
-  insn.info = (expressionS *) alloca (sizeof (expressionS));
+  insn.info = & expr;
   asm_desc.result = NASM_OK;
   nds32_assemble (&asm_desc, &insn, str);
 

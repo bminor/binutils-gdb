@@ -17,14 +17,14 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
+#include "watchpoint-fork.h"
+
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <assert.h>
 #include <signal.h>
 #include <stdio.h>
-
-#include "watchpoint-fork.h"
 
 /* `pid_t' may not be available.  */
 

@@ -231,7 +231,9 @@ CODE_FRAGMENT
 .
 .  {* Used by the linker.  *}
 .#define BSF_KEEP		(1 << 5)
-.#define BSF_KEEP_G		(1 << 6)
+.
+.  {* An ELF common symbol.  *}
+.#define BSF_ELF_COMMON		(1 << 6)
 .
 .  {* A weak global symbol, overridable without warnings by
 .     a regular global symbol of the same name.  *}
@@ -1081,11 +1083,13 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		  return FALSE;
 		}
 
-	      val = bfd_get_32 (abfd, info->stabs + r->address);
+	      val = bfd_get_32 (abfd, info->stabs
+				+ r->address * bfd_octets_per_byte (abfd));
 	      val &= r->howto->src_mask;
 	      sym = *r->sym_ptr_ptr;
 	      val += sym->value + sym->section->vma + r->addend;
-	      bfd_put_32 (abfd, (bfd_vma) val, info->stabs + r->address);
+	      bfd_put_32 (abfd, (bfd_vma) val, info->stabs
+			  + r->address * bfd_octets_per_byte (abfd));
 	    }
 	}
 

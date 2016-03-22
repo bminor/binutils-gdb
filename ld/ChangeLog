@@ -1,3 +1,442 @@
+2016-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/msp430.em: Replace use of alloca with call to xmalloc.
+	* plugin.c: Likewise.
+	* pe-dll.c: Likewise.
+
+2016-03-18  Awson  <kyrab@mail.ru>
+
+	PR 19531
+	* scripttempl/pe.sc (.rdata_runtime_pseudo_reloc): Always KEEP
+	this section.
+	* scripttempl/pep.sc (.rdata_runtime_pseudo_reloc): Likewise.
+
+2016-03-18  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-avr/gc-section-debugline.d: Relax regex check for CU.
+
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19827
+	* testsuite/ld-i386/i386.exp: Run PR ld/19827 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr19827.rd: New file.
+	* testsuite/ld-i386/pr19827a.S: Likewise.
+	* testsuite/ld-i386/pr19827b.S: Likewise.
+	* testsuite/ld-x86-64/pr19827.rd: Likewise.
+	* testsuite/ld-x86-64/pr19827a.S: Likewise.
+	* testsuite/ld-x86-64/pr19827b.S: Likewise.
+
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19807
+	* Makefile.am (ELF_X86_DEPS): Add
+	$(srcdir)/emulparams/reloc_overflow.sh.
+	* Makefile.in: Regenerated.
+	* NEWS: Mention -z noreloc-overflow.
+	* ld.texinfo: Document -z noreloc-overflow.
+	* emulparams/elf32_x86_64.sh: Source
+	${srcdir}/emulparams/reloc_overflow.sh.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/reloc_overflow.sh: New file.
+	* testsuite/ld-x86-64/pr19807-1.s: New file.
+	* testsuite/ld-x86-64/pr19807-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2.s: Likewise.
+	* testsuite/ld-x86-64/pr19807-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2b.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2c.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2d.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2e.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/19807 tests.
+
+2016-03-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19539
+	* testsuite/ld-i386/i386.exp: Run pr19539.
+	* testsuite/ld-i386/pr19539.d: New file.
+	* testsuite/ld-i386/pr19539.s: Likewise.
+	* testsuite/ld-i386/pr19539.t: Likewise.
+	* testsuite/ld-x86-64/pr19539.s: Likewise.
+	* testsuite/ld-x86-64/pr19539.t: Likewise.
+	* testsuite/ld-x86-64/pr19539a.d: Likewise.
+	* testsuite/ld-x86-64/pr19539b.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr19539a and pr19539b.
+
+2016-03-10  Mickael Guene  <mickael.guene@st.com>
+
+	PR gas/19744
+	* testsuite/ld-arm/arm-elf.exp: New tests.
+	* testsuite/ld-arm/thumb1-adds-armv7-m.s: New.
+	* testsuite/ld-arm/thumb1-movs-armv7-m.s: New.
+
+2016-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc (.rodata): Remove spurious LONG(0).
+
+2016-03-09  Pedro Alves  <palves@redhat.com>
+
+	* scripttempl/v850.sc: Use "v850:old-gcc-abi" as OUTPUT_ARCH.
+	* scripttempl/v850_rh850.sc: Use "v850:rh850" as OUTPUT_ARCH.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19789
+	* testsuite/ld-elf/pr19789.d: New file.
+	* testsuite/ld-elf/pr19789.s: Likewise.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19784
+	* testsuite/ld-i386/i386.exp: Remove pr19636-2e-nacl test.
+	* testsuite/ld-i386/pr19636-2e-nacl.d: Moved to ...
+	* testsuite/ld-i386/pr19636-2e.d: Here.  Remove notarget.
+	* testsuite/ld-ifunc/ifunc.exp: Run PR ld/19784 tests.
+	* testsuite/ld-ifunc/pass.out: New file.
+	* testsuite/ld-ifunc/pr19784a.c: Likewise.
+	* testsuite/ld-ifunc/pr19784b.c: Likewise.
+	* testsuite/ld-ifunc/pr19784c.c: Likewise.
+
+2016-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19774
+	* testsuite/ld-ifunc/ifunc.exp: Link tmpdir/pr18808a.o before
+	tmpdir/libpr18808.so.  Link tmpdir/pr18841a.o before
+	tmpdir/libpr18841b.so and tmpdir/libpr18841c.so.  Test
+	--as-needed for pr18841c.
+
+2016-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19774
+	* testsuite/ld-i386/i386.exp: Link tmpdir/pr18900.o before
+	tmpdir/pr18900.so and test --as-needed.  Link tmpdir/gotpc1.o
+	before tmpdir/got1d.so and test --as-needed.
+	* testsuite/ld-x86-64/x86-64.exp: Link tmpdir/pr18900.o before
+	tmpdir/pr18900.so and test --as-needed.
+
+2016-03-07  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/implicit_got_section_1.s: New test source file.
+	* testsuite/ld-aarch64/implicit_got_section_1.d: New test expected
+	result.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new test.
+
+2016-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Link tmpdir/copyreloc-main.o
+	before tmpdir/copyreloc-lib.so and test --as-needed.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	* testsuite/ld-elf/pr19579a.c: New file.
+	* testsuite/ld-elf/pr19579b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/19579 test.
+
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19162.d: Skip hppa-*-*.
+
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): Add xfails.
+	Xfail mix_pic_and_non_pic on "arm*-*-*" "aarch64*-*-*".
+
+2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19739
+	* emultempl/mmo.em (mmo_place_orphan): Don't merge flags of other
+	input sections for relocatable link.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19739
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	merge flags of other input sections for relocatable link.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-plugin/lto.exp: Update PR ld/12365 test for GCC 6.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19162.d: Skip arc target.
+
+2016-02-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19162
+	* testsuite/ld-elf/pr19162.d: New file.
+	* testsuite/ld-elf/pr19162a.s: Likwise.
+	* testsuite/ld-elf/pr19162b.s: Likwise.
+
+2016-02-29 Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-elf/merge.d: Removed xfail for ARC.
+	* testsuite/ld-elf/merge2.d: Likewise.
+	* testsuite/ld-elf/merge3.d: Likewise.
+
+2016-02-29  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+
+	* scripttempl/arclinux.sc: Force .tdata and .tbss to always be
+	generated.
+
+2016-02-26  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new testcases.
+	* testsuite/ld-aarch64/emit-relocs-270.d: Update to use new boundary.
+	* testsuite/ld-aarch64/emit-relocs-271.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-272.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-270-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-270-overflow.s: New.
+	* testsuite/ld-aarch64/emit-relocs-271-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-271-overflow.s: New.
+	* testsuite/ld-aarch64/emit-relocs-272-overflow.d: New.
+	* testsuite/ld-aarch64/emit-relocs-272-overflow.s: New.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19609
+	* testsuite/ld-i386/got1.dd: Updated.
+	* testsuite/ld-i386/lea1c.d: Likewise.
+	* testsuite/ld-i386/load1-nacl.d: Likewise.
+	* testsuite/ld-i386/load1.d: Likewise.
+	* testsuite/ld-i386/load4b.d: Likewise.
+	* testsuite/ld-i386/load5b.d: Likewise.
+	* testsuite/ld-i386/mov1b.d: Likewise.
+	* testsuite/ld-x86-64/mov1b.d: Likewise.
+	* testsuite/ld-x86-64/mov1d.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-21-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-21-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-22-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-22-x86-64.d: Likewise.
+	* testsuite/ld-x86-64/gotpcrel1.dd: Likewise.
+	* testsuite/ld-x86-64/lea1a.d: Likewise.
+	* testsuite/ld-x86-64/lea1b.d: Likewise.
+	* testsuite/ld-x86-64/lea1c.d: Likewise.
+	* testsuite/ld-x86-64/lea1d.d: Likewise.
+	* testsuite/ld-x86-64/lea1e.d: Likewise.
+	* testsuite/ld-x86-64/lea1f.d: Likewise.
+	* testsuite/ld-x86-64/mov1b.d: Likewise.
+	* testsuite/ld-x86-64/mov1d.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-3b.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-4b.d: Likewise.
+	* testsuite/ld-x86-64/lea1.s: Add tests for 32-bit registers.
+	* testsuite/ld-i386/pr19609-1.s: New file.
+	* testsuite/ld-i386/pr19609-1a.d: Likewise.
+	* testsuite/ld-i386/pr19609-1b.d: Likewise.
+	* testsuite/ld-i386/pr19609-1c.d: Likewise.
+	* testsuite/ld-i386/pr19609-1d.d: Likewise.
+	* testsuite/ld-i386/pr19609-1e.d: Likewise.
+	* testsuite/ld-i386/pr19609-1f.d: Likewise.
+	* testsuite/ld-i386/pr19609-1g.d: Likewise.
+	* testsuite/ld-i386/pr19609-1h.d: Likewise.
+	* testsuite/ld-i386/pr19609-1i.d: Likewise.
+	* testsuite/ld-i386/pr19609-2.s: Likewise.
+	* testsuite/ld-i386/pr19609-2a.d: Likewise.
+	* testsuite/ld-i386/pr19609-2b.d: Likewise.
+	* testsuite/ld-i386/pr19609-2c.d: Likewise.
+	* testsuite/ld-i386/undefweak.s: Likewise.
+	* testsuite/ld-i386/undefweaka.d: Likewise.
+	* testsuite/ld-i386/undefweakb.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-3c.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-3d.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1.s: Likewise.
+	* testsuite/ld-x86-64/pr19609-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1c.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1d.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1e.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1f.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1g.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1h.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1i.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1j.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1k.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1l.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-1m.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-2.s: Likewise.
+	* testsuite/ld-x86-64/pr19609-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-2b.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-2c.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-2d.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-3.s: Likewise.
+	* testsuite/ld-x86-64/pr19609-3a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-3b.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-4.s: Likewise.
+	* testsuite/ld-x86-64/pr19609-4a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-4b.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-4c.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-4d.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-4e.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-5.s: Likewise.
+	* testsuite/ld-x86-64/pr19609-5a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-5b.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-5c.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-5d.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-5e.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-6.s: Likewise.
+	* testsuite/ld-x86-64/pr19609-6a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-6b.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-6c.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-6d.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-7.s: Likewise.
+	* testsuite/ld-x86-64/pr19609-7a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-7b.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-7c.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-7d.d: Likewise.
+	* testsuite/ld-i386/i386.exp: Run undefweak tests and tests for
+	PR ld/19609.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr13082-3c, pr13082-3d
+	and tests for PR ld/19609.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19645
+	* NEWS: Mention -z common/-z nocommon for ELF targets.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Handle
+	-z common and -z nocommon.
+	* ld.texinfo: Document -z common/-z nocommon.
+	* lexsup.c (elf_shlib_list_options): Add -z common/-z nocommon.
+	* testsuite/ld-elf/tls_common.exp: Test --elf-stt-common=no and
+	--elf-stt-common=yes with assembler.
+	* testsuite/ld-elfcomm/common-1.s: New file.
+	* testsuite/ld-elfcomm/common-1a.d: Likewise.
+	* testsuite/ld-elfcomm/common-1b.d: Likewise.
+	* testsuite/ld-elfcomm/common-1c.d: Likewise.
+	* testsuite/ld-elfcomm/common-1d.d: Likewise.
+	* testsuite/ld-elfcomm/common-1e.d: Likewise.
+	* testsuite/ld-elfcomm/common-1f.d: Likewise.
+	* testsuite/ld-elfcomm/common-2.s: Likewise.
+	* testsuite/ld-elfcomm/common-2a.d: Likewise.
+	* testsuite/ld-elfcomm/common-2b.d: Likewise.
+	* testsuite/ld-elfcomm/common-2c.d: Likewise.
+	* testsuite/ld-elfcomm/common-2d.d: Likewise.
+	* testsuite/ld-elfcomm/common-2e.d: Likewise.
+	* testsuite/ld-elfcomm/common-2f.d: Likewise.
+	* testsuite/ld-elfcomm/common-3a.rd: Likewise.
+	* testsuite/ld-elfcomm/common-3b.rd: Likewise.
+	* testsuite/ld-i386/pr19645.d: Likewise.
+	* testsuite/ld-i386/pr19645.s: Likewise.
+	* testsuite/ld-x86-64/largecomm-1.s: Likewise.
+	* testsuite/ld-x86-64/largecomm-1a.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1b.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1c.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1d.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1e.d: Likewise.
+	* testsuite/ld-x86-64/largecomm-1f.d: Likewise.
+	* testsuite/ld-x86-64/pr19645.d: Likewise.
+	* testsuite/ld-x86-64/pr19645.s: Likewise.
+	* testsuite/ld-elfcomm/elfcomm.exp: Test --elf-stt-common=yes
+	with assembler.
+	(assembler_generates_commons): Removed.
+	Run -z common/-z nocommon tests.  Run *.d tests.
+	* testsuite/ld-i386/i386.exp: Run pr19645.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-x86-64/dwarfreloc.exp: Test --elf-stt-common with
+	assembler.  Test STT_COMMON with readelf.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19636
+	PR ld/19704
+	PR ld/19719
+	* Makefile.am (ELF_X86_DEPS): Add dynamic_undefined_weak.sh.
+	* Makefile.in: Regenerated.
+	* NEWS: Mention -z nodynamic-undefined-weak.
+	* ld.texinfo: Document -z nodynamic-undefined-weak.
+	* ldmain.c (main): Initialize dynamic_undefined_weak to -1.
+	* emulparams/dynamic_undefined_weak.sh: New file.
+	* emulparams/elf32_x86_64.sh: Source dynamic_undefined_weak.sh.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_i386_be.sh: Likewise.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_i386_vxworks.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/extern_protected_data.sh (PARSE_AND_LIST_OPTIONS):
+	Append.
+	(PARSE_AND_LIST_ARGS_CASE_Z): Likewise.
+	* testsuite/ld-elf/pr19719a.c: New file.
+	* testsuite/ld-elf/pr19719b.c: Likewise.
+	* testsuite/ld-elf/pr19719c.c: Likewise.
+	* testsuite/ld-elf/pr19719d.c: Likewise.
+	* testsuite/ld-i386/pr19636-1.s: Likewise.
+	* testsuite/ld-i386/pr19636-1a.d: Likewise.
+	* testsuite/ld-i386/pr19636-1b.d: Likewise.
+	* testsuite/ld-i386/pr19636-1c.d: Likewise.
+	* testsuite/ld-i386/pr19636-1d-nacl.d: Likewise.
+	* testsuite/ld-i386/pr19636-1d.d: Likewise.
+	* testsuite/ld-i386/pr19636-1e.d: Likewise.
+	* testsuite/ld-i386/pr19636-1f.d: Likewise.
+	* testsuite/ld-i386/pr19636-1g.d: Likewise.
+	* testsuite/ld-i386/pr19636-1h.d: Likewise.
+	* testsuite/ld-i386/pr19636-1i.d: Likewise.
+	* testsuite/ld-i386/pr19636-2.s: Likewise.
+	* testsuite/ld-i386/pr19636-2a.d: Likewise.
+	* testsuite/ld-i386/pr19636-2b.d: Likewise.
+	* testsuite/ld-i386/pr19636-2c-nacl.d: Likewise.
+	* testsuite/ld-i386/pr19636-2c.d: Likewise.
+	* testsuite/ld-i386/pr19636-2d-nacl.d: Likewise.
+	* testsuite/ld-i386/pr19636-2d.d: Likewise.
+	* testsuite/ld-i386/pr19636-2e-nacl.d: Likewise.
+	* testsuite/ld-i386/pr19636-2e.d: Likewise.
+	* testsuite/ld-i386/pr19636-3.s: Likewise.
+	* testsuite/ld-i386/pr19636-3a.d: Likewise.
+	* testsuite/ld-i386/pr19636-3b.d: Likewise.
+	* testsuite/ld-i386/pr19636-3c.d: Likewise.
+	* testsuite/ld-i386/pr19636-3d.d: Likewise.
+	* testsuite/ld-i386/pr19636-3e.d: Likewise.
+	* testsuite/ld-i386/pr19636-3f.d: Likewise.
+	* testsuite/ld-i386/pr19636-3g.d: Likewise.
+	* testsuite/ld-i386/pr19636-4.s: Likewise.
+	* testsuite/ld-i386/pr19636-4a.d: Likewise.
+	* testsuite/ld-i386/pr19636-4b.d: Likewise.
+	* testsuite/ld-i386/pr19636-4c.d: Likewise.
+	* testsuite/ld-i386/pr19636-4d.d: Likewise.
+	* testsuite/ld-i386/pr19704.out: Likewise.
+	* testsuite/ld-i386/pr19704a.c: Likewise.
+	* testsuite/ld-i386/pr19704b.c: Likewise.
+	* testsuite/ld-x86-64/pr19636-1.s: Likewise.
+	* testsuite/ld-x86-64/pr19636-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1c.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1d.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1e.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1f.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1g.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2.s: Likewise.
+	* testsuite/ld-x86-64/pr19636-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2b.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2c.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2d-nacl.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2d.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2e.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2f.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2g.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2h.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2i.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-3.s: Likewise.
+	* testsuite/ld-x86-64/pr19636-3a.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-3b.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-3c.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-3d.d: Likewise.
+	* testsuite/ld-x86-64/pr19704.out: Likewise.
+	* testsuite/ld-x86-64/pr19704a.c: Likewise.
+	* testsuite/ld-x86-64/pr19704b.c: Likewise.
+	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): New.
+	Run mix_pic_and_non_pic.
+	* testsuite/ld-i386/i386.exp (undefined_weak): New.
+	Run undefined_weak and PR ld/19636 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-x86-64/pr13082-3b.d: Updated.
+	* testsuite/ld-x86-64/pr13082-4b.d: Likewise.
+
 2016-02-25  Nick Clifton  <nickc@redhat.com>
 
 	* ld.h (struct ld_config_type): Remove specified_data_size field.

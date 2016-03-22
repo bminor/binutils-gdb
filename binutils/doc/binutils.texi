@@ -1131,6 +1131,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--decompress-debug-sections}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
+        [@option{--elf-stt-common=@var{val}}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]
         [@option{--help}] [@option{--info}]
@@ -1885,6 +1886,14 @@ renamed.
 @item --decompress-debug-sections
 Decompress DWARF debug sections using zlib.  The original section
 names of the compressed sections are restored.
+
+@item --elf-stt-common=yes
+@itemx --elf-stt-common=no
+For ELF files, these options control whether common symbols should be
+converted to the @code{STT_COMMON} or @code{STT_OBJECT} type.
+@option{--elf-stt-common=yes} converts common symbol type to
+@code{STT_COMMON}. @option{--elf-stt-common=no} converts common symbol
+type to @code{STT_OBJECT}.
 
 @item -V
 @itemx --version
