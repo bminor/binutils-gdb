@@ -317,8 +317,13 @@ read_uleb128 (unsigned char * data,
 #define SAFE_BYTE_GET(VAL, PTR, AMOUNT, END)	\
   do						\
     {						\
-      int dummy [sizeof (VAL) < (AMOUNT) ? -1 : 1] ATTRIBUTE_UNUSED ; \
       unsigned int amount = (AMOUNT);		\
+      if (sizeof (VAL) < amount)		\
+	{					\
+	  error (_("internal error: attempt to read %d bytes of data in to %d sized variable"),\
+		 amount, (int) sizeof (VAL));	\
+	  amount = sizeof (VAL);		\
+	}					\
       if (((PTR) + amount) >= (END))		\
 	{					\
 	  if ((PTR) < (END))			\

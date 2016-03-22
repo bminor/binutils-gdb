@@ -1,5 +1,9 @@
 2016-03-22  Nick Clifton  <nickc@redhat.com>
 
+	PR 19851
+	* dwarf.c (SAFE_BYTE_GET): Replace local dynamic array allocation
+	with run time size check.
+
 	* configure: Regenerate.
 
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
