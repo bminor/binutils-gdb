@@ -44,11 +44,12 @@
 #include "features/i386/amd64-avx-linux.c"
 #include "features/i386/amd64-mpx-linux.c"
 #include "features/i386/amd64-avx-mpx-linux.c"
+#include "features/i386/amd64-avx-avx512-linux.c"
 #include "features/i386/amd64-avx-mpx-avx512-linux.c"
 
 #include "features/i386/x32-linux.c"
 #include "features/i386/x32-avx-linux.c"
-#include "features/i386/x32-avx-mpx-avx512-linux.c"
+#include "features/i386/x32-avx-avx512-linux.c"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
@@ -1586,19 +1587,26 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
   switch (xcr0 & X86_XSTATE_ALL_MASK)
     {
     case X86_XSTATE_AVX_MPX_AVX512_MASK:
-    case X86_XSTATE_AVX_AVX512_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
-	return tdesc_x32_avx_mpx_avx512_linux;
+	  /* No MPX on x32, fallback to AVX-AVX512.  */
+	return tdesc_x32_avx_avx512_linux;
       else
 	return tdesc_amd64_avx_mpx_avx512_linux;
+    case X86_XSTATE_AVX_AVX512_MASK:
+      if (gdbarch_ptr_bit (gdbarch) == 32)
+	return tdesc_x32_avx_avx512_linux;
+      else
+	return tdesc_amd64_avx_avx512_linux;
     case X86_XSTATE_MPX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
-	return tdesc_x32_avx_linux;  /* No x32 MPX falling back to AVX.  */
+	  /* No MPX on x32, fallback to AVX-AVX512.  */
+	return tdesc_x32_avx_linux;
       else
 	return tdesc_amd64_mpx_linux;
     case X86_XSTATE_AVX_MPX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
-	return tdesc_x32_avx_linux;  /* No x32 MPX falling back to AVX.  */
+	  /* No MPX on x32, fallback to AVX-AVX512.  */
+	return tdesc_x32_avx_linux;
       else
 	return tdesc_amd64_avx_mpx_linux;
     case X86_XSTATE_AVX_MASK:
@@ -2296,9 +2304,10 @@ _initialize_amd64_linux_tdep (void)
   initialize_tdesc_amd64_avx_linux ();
   initialize_tdesc_amd64_mpx_linux ();
   initialize_tdesc_amd64_avx_mpx_linux ();
+  initialize_tdesc_amd64_avx_avx512_linux ();
   initialize_tdesc_amd64_avx_mpx_avx512_linux ();
 
   initialize_tdesc_x32_linux ();
   initialize_tdesc_x32_avx_linux ();
-  initialize_tdesc_x32_avx_mpx_avx512_linux ();
+  initialize_tdesc_x32_avx_avx512_linux ();
 }

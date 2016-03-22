@@ -1,7 +1,7 @@
 # THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
-# Generated from: i386/x32-avx-mpx-avx512.xml
-name:x32_avx_mpx_avx512
-xmltarget:x32-avx-mpx-avx512.xml
+# Generated from: i386/amd64-avx-avx512-linux.xml
+name:amd64_avx_avx512_linux
+xmltarget:amd64-avx-avx512-linux.xml
 expedite:rbp,rsp,rip
 64:rax
 64:rbx
@@ -60,6 +60,9 @@ expedite:rbp,rsp,rip
 128:xmm14
 128:xmm15
 32:mxcsr
+64:orig_rax
+64:fs_base
+64:gs_base
 128:ymm0h
 128:ymm1h
 128:ymm2h
@@ -76,12 +79,6 @@ expedite:rbp,rsp,rip
 128:ymm13h
 128:ymm14h
 128:ymm15h
-128:bnd0raw
-128:bnd1raw
-128:bnd2raw
-128:bnd3raw
-64:bndcfgu
-64:bndstatus
 128:xmm16
 128:xmm17
 128:xmm18

@@ -46,11 +46,12 @@
 #include "features/i386/amd64-avx.c"
 #include "features/i386/amd64-mpx.c"
 #include "features/i386/amd64-avx-mpx.c"
+#include "features/i386/amd64-avx-avx512.c"
 #include "features/i386/amd64-avx-mpx-avx512.c"
 
 #include "features/i386/x32.c"
 #include "features/i386/x32-avx.c"
-#include "features/i386/x32-avx-mpx-avx512.c"
+#include "features/i386/x32-avx-avx512.c"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -3203,8 +3204,9 @@ amd64_target_description (uint64_t xcr0)
   switch (xcr0 & X86_XSTATE_ALL_MASK)
     {
     case X86_XSTATE_AVX_MPX_AVX512_MASK:
-    case X86_XSTATE_AVX_AVX512_MASK:
       return tdesc_amd64_avx_mpx_avx512;
+    case X86_XSTATE_AVX_AVX512_MASK:
+      return tdesc_amd64_avx_avx512;
     case X86_XSTATE_MPX_MASK:
       return tdesc_amd64_mpx;
     case X86_XSTATE_AVX_MPX_MASK:
@@ -3226,11 +3228,12 @@ _initialize_amd64_tdep (void)
   initialize_tdesc_amd64_avx ();
   initialize_tdesc_amd64_mpx ();
   initialize_tdesc_amd64_avx_mpx ();
+  initialize_tdesc_amd64_avx_avx512 ();
   initialize_tdesc_amd64_avx_mpx_avx512 ();
 
   initialize_tdesc_x32 ();
   initialize_tdesc_x32_avx ();
-  initialize_tdesc_x32_avx_mpx_avx512 ();
+  initialize_tdesc_x32_avx_avx512 ();
 }
 
 

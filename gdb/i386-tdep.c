@@ -54,6 +54,7 @@
 #include "features/i386/i386-avx.c"
 #include "features/i386/i386-mpx.c"
 #include "features/i386/i386-avx-mpx.c"
+#include "features/i386/i386-avx-avx512.c"
 #include "features/i386/i386-avx-mpx-avx512.c"
 #include "features/i386/i386-mmx.c"
 
@@ -8232,7 +8233,7 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
       if (!feature_avx)
 	return 0;
 
-      tdep->xcr0 = X86_XSTATE_AVX_MPX_AVX512_MASK;
+      tdep->xcr0 = X86_XSTATE_AVX_AVX512_MASK;
 
       /* It may have been set by OSABI initialization function.  */
       if (tdep->k0_regnum < 0)
@@ -8708,8 +8709,9 @@ i386_target_description (uint64_t xcr0)
   switch (xcr0 & X86_XSTATE_ALL_MASK)
     {
     case X86_XSTATE_AVX_MPX_AVX512_MASK:
-    case X86_XSTATE_AVX_AVX512_MASK:
       return tdesc_i386_avx_mpx_avx512;
+    case X86_XSTATE_AVX_AVX512_MASK:
+      return tdesc_i386_avx_avx512;
     case X86_XSTATE_AVX_MPX_MASK:
       return tdesc_i386_avx_mpx;
     case X86_XSTATE_MPX_MASK:
@@ -9051,6 +9053,7 @@ Show Intel Memory Protection Extensions specific variables."),
   initialize_tdesc_i386_avx ();
   initialize_tdesc_i386_mpx ();
   initialize_tdesc_i386_avx_mpx ();
+  initialize_tdesc_i386_avx_avx512 ();
   initialize_tdesc_i386_avx_mpx_avx512 ();
 
   /* Tell remote stub that we support XML target description.  */
