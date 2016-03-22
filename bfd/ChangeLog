@@ -1,3 +1,8 @@
+2016-03-22  Alan Modra  <amodra@gmail.com>
+
+	PR 19851
+	* plugin.c (try_load_plugin): Avoid -Wstack-usage warning.
+
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* archures.c (bfd_mach_arc_nps400): Define.

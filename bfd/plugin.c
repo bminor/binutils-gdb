@@ -206,8 +206,7 @@ static int
 try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
 {
   void *plugin_handle;
-  int tv_size = 4;
-  struct ld_plugin_tv tv[tv_size];
+  struct ld_plugin_tv tv[4];
   int i;
   ld_plugin_onload onload;
   enum ld_plugin_status status;
