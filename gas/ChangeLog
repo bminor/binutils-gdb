@@ -1,3 +1,7 @@
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/gas/arc/nps400-0.d: New file.

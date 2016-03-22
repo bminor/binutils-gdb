@@ -1,3 +1,7 @@
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+
 2016-03-21  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/msp430.em: Replace use of alloca with call to xmalloc.

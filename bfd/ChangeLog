@@ -1,3 +1,9 @@
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* warning.m4 (GCC_WARN_CFLAGS): Only add -Wstack-usage if using a
+	sufficiently recent version of GCC.
+	* configure: Regenerate.
+
 2016-03-22  Alan Modra  <amodra@gmail.com>
 
 	PR 19851
