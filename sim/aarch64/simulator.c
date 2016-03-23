@@ -60,6 +60,11 @@
 		  "Unimplemented instruction detected at sim line %d,"	\
 		  " exe addr %" PRIx64,					\
 		  __LINE__, aarch64_get_PC (cpu));			\
+      if (! TRACE_ANY_P (cpu))						\
+	{								\
+	  fprintf (stderr, "SIM Error: Unimplemented instruction: ");	\
+	  trace_disasm (CPU_STATE (cpu), cpu, aarch64_get_PC (cpu));	\
+	}								\
       sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu),\
 		       sim_stopped, SIM_SIGABRT);			\
     }									\
@@ -73,13 +78,8 @@
     }									\
   while (0)
 
-#define HALT_UNREACHABLE						\
-  do									\
-    {									\
-      TRACE_EVENTS (cpu, "ISE: unreachable code point");		\
-      sim_engine_abort (NULL, cpu, aarch64_get_PC (cpu), "Internal Error"); \
-    }									\
-  while (0)
+/* Space saver macro.  */
+#define INSTR(HIGH, LOW) uimm (aarch64_get_instr (cpu), (HIGH), (LOW))
 
 /* Helper functions used by expandLogicalImmediate.  */
 
@@ -553,16 +553,60 @@ fldrs_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
     aarch64_set_reg_u64 (cpu, rn, SP_OK, address);
 }
 
+/* Load 8 bit with unsigned 12 bit offset.  */
+static void
+fldrb_abs (sim_cpu *cpu, uint32_t offset)
+{
+  unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
+  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
+  uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset;
+
+  aarch64_set_vec_u8 (cpu, rd, 0, aarch64_get_mem_u32 (cpu, addr));
+}
+
+/* Load 16 bit scaled unsigned 12 bit.  */
+static void
+fldrh_abs (sim_cpu *cpu, uint32_t offset)
+{
+  unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
+  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
+  uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 16);
+
+  aarch64_set_vec_u16 (cpu, rd, 0, aarch64_get_mem_u16 (cpu, addr));
+}
+
 /* Load 32 bit scaled unsigned 12 bit.  */
 static void
 fldrs_abs (sim_cpu *cpu, uint32_t offset)
 {
-  unsigned st = uimm (aarch64_get_instr (cpu), 4, 0);
+  unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
   unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
+  uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 32);
 
-  aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_mem_u32
-		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
-			+ SCALE (offset, 32)));
+  aarch64_set_vec_u32 (cpu, rd, 0, aarch64_get_mem_u32 (cpu, addr));
+}
+
+/* Load 64 bit scaled unsigned 12 bit.  */
+static void
+fldrd_abs (sim_cpu *cpu, uint32_t offset)
+{
+  unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
+  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
+  uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 64);
+
+  aarch64_set_vec_u64 (cpu, rd, 0, aarch64_get_mem_u64 (cpu, addr));
+}
+
+/* Load 128 bit scaled unsigned 12 bit.  */
+static void
+fldrq_abs (sim_cpu *cpu, uint32_t offset)
+{
+  unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
+  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
+  uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 128);
+
+  aarch64_set_vec_u64 (cpu, rd, 0, aarch64_get_mem_u64 (cpu, addr));
+  aarch64_set_vec_u64 (cpu, rd, 1, aarch64_get_mem_u64 (cpu, addr + 8));
 }
 
 /* Load 32 bit scaled or unscaled zero- or sign-extended
@@ -601,17 +645,6 @@ fldrd_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
     aarch64_set_reg_u64 (cpu, rn, SP_OK, address);
 }
 
-/* Load 64 bit scaled unsigned 12 bit.  */
-static void
-fldrd_abs (sim_cpu *cpu, uint32_t offset)
-{
-  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
-  unsigned st = uimm (aarch64_get_instr (cpu), 4, 0);
-  uint64_t address = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 64);
-
-  aarch64_set_vec_u64 (cpu, st, 0, aarch64_get_mem_u64 (cpu, address));
-}
-
 /* Load 64 bit scaled or unscaled zero- or sign-extended 32-bit register offset.  */
 static void
 fldrd_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
@@ -643,19 +676,6 @@ fldrq_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
 
   if (wb != NoWriteBack)
     aarch64_set_reg_u64 (cpu, rn, SP_OK, address);
-}
-
-/* Load 128 bit scaled unsigned 12 bit.  */
-static void
-fldrq_abs (sim_cpu *cpu, uint32_t offset)
-{
-  FRegister a;
-  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
-  unsigned st = uimm (aarch64_get_instr (cpu), 4, 0);
-  uint64_t address = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 128);
-
-  aarch64_get_mem_long_double (cpu, address, & a);
-  aarch64_set_FP_long_double (cpu, st, a);
 }
 
 /* Load 128 bit scaled or unscaled zero- or sign-extended 32-bit register offset  */
@@ -1456,8 +1476,6 @@ ldxr (sim_cpu *cpu)
     case 3:
       aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u64 (cpu, address));
       break;
-    default:
-      HALT_UNALLOC;
     }
 }
 
@@ -1477,7 +1495,6 @@ stxr (sim_cpu *cpu)
     case 1: aarch64_set_mem_u16 (cpu, address, data); break;
     case 2: aarch64_set_mem_u32 (cpu, address, data); break;
     case 3: aarch64_set_mem_u64 (cpu, address, data); break;
-    default: HALT_UNALLOC;
     }
 
   aarch64_set_reg_u64 (cpu, rs, NO_SP, 0); /* Always exclusive...  */
@@ -2155,8 +2172,6 @@ dexAddSubtractImmediate (sim_cpu *cpu)
     case 5: adds64 (cpu, imm); break;
     case 6: sub64 (cpu, imm); break;
     case 7: subs64 (cpu, imm); break;
-    default:
-      HALT_UNALLOC;
     }
 }
 
@@ -2201,8 +2216,6 @@ dexAddSubtractShiftedRegister (sim_cpu *cpu)
     case 5: adds64_shift (cpu, shiftType, count); break;
     case 6: sub64_shift  (cpu, shiftType, count); break;
     case 7: subs64_shift (cpu, shiftType, count); break;
-    default:
-      HALT_UNALLOC;
     }
 }
 
@@ -2246,7 +2259,6 @@ dexAddSubtractExtendedRegister (sim_cpu *cpu)
     case 5: adds64_ext (cpu, extensionType, shift); break;
     case 6: sub64_ext  (cpu, extensionType, shift); break;
     case 7: subs64_ext (cpu, extensionType, shift); break;
-    default: HALT_UNALLOC;
     }
 }
 
@@ -2408,7 +2420,6 @@ dexAddSubtractWithCarry (sim_cpu *cpu)
     case 5: adcs64 (cpu); break;
     case 6: sbc64 (cpu); break;
     case 7: sbcs64 (cpu); break;
-    default: HALT_UNALLOC;
     }
 }
 
@@ -2780,9 +2791,6 @@ do_vec_TRN (sim_cpu *cpu)
       aarch64_set_vec_u64 (cpu, vd, 1,
 			   aarch64_get_vec_u64 (cpu, second ? vn : vm, 1));
       break;
-
-    default:
-      HALT_UNALLOC;
     }
 }
 
@@ -3333,9 +3341,6 @@ do_vec_ADDV (sim_cpu *cpu)
       val += aarch64_get_vec_u64 (cpu, vm, 1);
       aarch64_set_reg_u64 (cpu, rd, NO_SP, val);
       return;
-
-    default:
-      HALT_UNREACHABLE;
     }
 }
 
@@ -3474,7 +3479,6 @@ do_vec_mull (sim_cpu *cpu)
       return;
 
     case 3:
-    default:
       HALT_NYI;
     }
 }
@@ -3597,9 +3601,6 @@ do_vec_add (sim_cpu *cpu)
 			   aarch64_get_vec_u64 (cpu, vn, 1)
 			   + aarch64_get_vec_u64 (cpu, vm, 1));
       return;
-
-    default:
-      HALT_UNREACHABLE;
     }
 }
 
@@ -3658,7 +3659,6 @@ do_vec_mul (sim_cpu *cpu)
 	}
       return;
 
-    default:
     case 3:
       HALT_UNALLOC;
     }
@@ -3722,7 +3722,6 @@ do_vec_MLA (sim_cpu *cpu)
 	}
       return;
 
-    default:
     case 3:
       HALT_UNALLOC;
     }
@@ -4090,9 +4089,6 @@ do_vec_XTN (sim_cpu *cpu)
 	for (i = 0; i < 2; i++)
 	  aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u64 (cpu, vs, i));
       return;
-
-    default:
-      HALT_UNALLOC;
     }
 }
 
@@ -4144,7 +4140,6 @@ do_vec_maxv (sim_cpu *cpu)
 	    for (i = 1; i < (full ? 4 : 2); i++)
 	      smax = max (smax, aarch64_get_vec_s32 (cpu, vs, i));
 	    break;
-	  default:
 	  case 3:
 	    HALT_UNALLOC;
 	  }
@@ -4172,7 +4167,7 @@ do_vec_maxv (sim_cpu *cpu)
 	    for (i = 1; i < (full ? 4 : 2); i++)
 	      smin = min (smin, aarch64_get_vec_s32 (cpu, vs, i));
 	    break;
-	  default:
+
 	  case 3:
 	    HALT_UNALLOC;
 	  }
@@ -4200,7 +4195,7 @@ do_vec_maxv (sim_cpu *cpu)
 	    for (i = 1; i < (full ? 4 : 2); i++)
 	      umax = max (umax, aarch64_get_vec_u32 (cpu, vs, i));
 	    break;
-	  default:
+
 	  case 3:
 	    HALT_UNALLOC;
 	  }
@@ -4228,16 +4223,13 @@ do_vec_maxv (sim_cpu *cpu)
 	    for (i = 1; i < (full ? 4 : 2); i++)
 	      umin = min (umin, aarch64_get_vec_u32 (cpu, vs, i));
 	    break;
-	  default:
+
 	  case 3:
 	    HALT_UNALLOC;
 	  }
 	aarch64_set_reg_u64 (cpu, rd, NO_SP, umin);
 	return;
       }
-
-    default:
-      HALT_UNALLOC;
     }
 }
 
@@ -4446,8 +4438,6 @@ do_vec_SCVTF (sim_cpu *cpu)
 				 aarch64_get_vec_##SOURCE##64 (cpu, vm, i) \
 				 ? -1ULL : 0);				\
 	  return;							\
-	default:							\
-	HALT_UNALLOC;							\
 	}								\
     }									\
   while (0)
@@ -4483,8 +4473,6 @@ do_vec_SCVTF (sim_cpu *cpu)
 				 aarch64_get_vec_##SOURCE##64 (cpu, vn, i) \
 				 CMP 0 ? -1ULL : 0);			\
 	  return;							\
-	default:							\
-	  HALT_UNALLOC;							\
 	}								\
     }									\
   while (0)
@@ -4655,6 +4643,7 @@ do_vec_SSHL (sim_cpu *cpu)
   unsigned vn = uimm (aarch64_get_instr (cpu), 9, 5);
   unsigned vd = uimm (aarch64_get_instr (cpu), 4, 0);
   unsigned i;
+  signed int shift;
 
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 21, 1);
@@ -4666,32 +4655,57 @@ do_vec_SSHL (sim_cpu *cpu)
     {
     case 0:
       for (i = 0; i < (full ? 16 : 8); i++)
-	aarch64_set_vec_s8 (cpu, vd, i, aarch64_get_vec_s8 (cpu, vn, i)
-			    << aarch64_get_vec_s8 (cpu, vm, i));
+	{
+	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  if (shift >= 0)
+	    aarch64_set_vec_s8 (cpu, vd, i, aarch64_get_vec_s8 (cpu, vn, i)
+				<< shift);
+	  else
+	    aarch64_set_vec_s8 (cpu, vd, i, aarch64_get_vec_s8 (cpu, vn, i)
+				>> - shift);
+	}
       return;
 
     case 1:
       for (i = 0; i < (full ? 8 : 4); i++)
-	aarch64_set_vec_s16 (cpu, vd, i, aarch64_get_vec_s16 (cpu, vn, i)
-			     << aarch64_get_vec_s16 (cpu, vm, i));
+	{
+	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  if (shift >= 0)
+	    aarch64_set_vec_s16 (cpu, vd, i, aarch64_get_vec_s16 (cpu, vn, i)
+				 << shift);
+	  else
+	    aarch64_set_vec_s16 (cpu, vd, i, aarch64_get_vec_s16 (cpu, vn, i)
+				 >> - shift);
+	}
       return;
 
     case 2:
       for (i = 0; i < (full ? 4 : 2); i++)
-	aarch64_set_vec_s32 (cpu, vd, i, aarch64_get_vec_s32 (cpu, vn, i)
-			     << aarch64_get_vec_s32 (cpu, vm, i));
+	{
+	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  if (shift >= 0)
+	    aarch64_set_vec_s32 (cpu, vd, i, aarch64_get_vec_s32 (cpu, vn, i)
+				 << shift);
+	  else
+	    aarch64_set_vec_s32 (cpu, vd, i, aarch64_get_vec_s32 (cpu, vn, i)
+				 >> - shift);
+	}
       return;
 
     case 3:
       if (! full)
 	HALT_UNALLOC;
       for (i = 0; i < 2; i++)
-	aarch64_set_vec_s64 (cpu, vd, i, aarch64_get_vec_s64 (cpu, vn, i)
-			     << aarch64_get_vec_s64 (cpu, vm, i));
+	{
+	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  if (shift >= 0)
+	    aarch64_set_vec_s64 (cpu, vd, i, aarch64_get_vec_s64 (cpu, vn, i)
+				 << shift);
+	  else
+	    aarch64_set_vec_s64 (cpu, vd, i, aarch64_get_vec_s64 (cpu, vn, i)
+				 >> - shift);
+	}
       return;
-
-    default:
-      HALT_NYI;
     }
 }
 
@@ -4713,6 +4727,7 @@ do_vec_USHL (sim_cpu *cpu)
   unsigned vn = uimm (aarch64_get_instr (cpu), 9, 5);
   unsigned vd = uimm (aarch64_get_instr (cpu), 4, 0);
   unsigned i;
+  signed int shift;
 
   NYI_assert (29, 24, 0x2E);
   NYI_assert (15, 10, 0x11);
@@ -4720,33 +4735,58 @@ do_vec_USHL (sim_cpu *cpu)
   switch (uimm (aarch64_get_instr (cpu), 23, 22))
     {
     case 0:
-      for (i = 0; i < (full ? 16 : 8); i++)
-	aarch64_set_vec_u8 (cpu, vd, i, aarch64_get_vec_u8 (cpu, vn, i)
-			    << aarch64_get_vec_u8 (cpu, vm, i));
+	for (i = 0; i < (full ? 16 : 8); i++)
+	  {
+	    shift = aarch64_get_vec_s8 (cpu, vm, i);
+	    if (shift >= 0)
+	      aarch64_set_vec_u8 (cpu, vd, i, aarch64_get_vec_u8 (cpu, vn, i)
+				  << shift);
+	    else
+	      aarch64_set_vec_u8 (cpu, vd, i, aarch64_get_vec_u8 (cpu, vn, i)
+				  >> - shift);
+	  }
       return;
 
     case 1:
       for (i = 0; i < (full ? 8 : 4); i++)
-	aarch64_set_vec_u16 (cpu, vd, i, aarch64_get_vec_u16 (cpu, vn, i)
-			     << aarch64_get_vec_u16 (cpu, vm, i));
+	{
+	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  if (shift >= 0)
+	    aarch64_set_vec_u16 (cpu, vd, i, aarch64_get_vec_u16 (cpu, vn, i)
+				 << shift);
+	  else
+	    aarch64_set_vec_u16 (cpu, vd, i, aarch64_get_vec_u16 (cpu, vn, i)
+				 >> - shift);
+	}
       return;
 
     case 2:
       for (i = 0; i < (full ? 4 : 2); i++)
-	aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vn, i)
-			     << aarch64_get_vec_u32 (cpu, vm, i));
+	{
+	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  if (shift >= 0)
+	    aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vn, i)
+				 << shift);
+	  else
+	    aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vn, i)
+				 >> - shift);
+	}
       return;
 
     case 3:
       if (! full)
 	HALT_UNALLOC;
       for (i = 0; i < 2; i++)
-	aarch64_set_vec_u64 (cpu, vd, i, aarch64_get_vec_u64 (cpu, vn, i)
-			     << aarch64_get_vec_u64 (cpu, vm, i));
+	{
+	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  if (shift >= 0)
+	    aarch64_set_vec_u64 (cpu, vd, i, aarch64_get_vec_u64 (cpu, vn, i)
+				 << shift);
+	  else
+	    aarch64_set_vec_u64 (cpu, vd, i, aarch64_get_vec_u64 (cpu, vn, i)
+				 >> - shift);
+	}
       return;
-
-    default:
-      HALT_NYI;
     }
 }
 
@@ -4848,7 +4888,6 @@ do_vec_max (sim_cpu *cpu)
 				 : aarch64_get_vec_u32 (cpu, vm, i));
 	  return;
 
-	default:
 	case 3:
 	  HALT_UNALLOC;
 	}
@@ -4884,7 +4923,6 @@ do_vec_max (sim_cpu *cpu)
 				 : aarch64_get_vec_s32 (cpu, vm, i));
 	  return;
 
-	default:
 	case 3:
 	  HALT_UNALLOC;
 	}
@@ -4946,7 +4984,6 @@ do_vec_min (sim_cpu *cpu)
 				 : aarch64_get_vec_u32 (cpu, vm, i));
 	  return;
 
-	default:
 	case 3:
 	  HALT_UNALLOC;
 	}
@@ -4982,7 +5019,6 @@ do_vec_min (sim_cpu *cpu)
 				 : aarch64_get_vec_s32 (cpu, vm, i));
 	  return;
 
-	default:
 	case 3:
 	  HALT_UNALLOC;
 	}
@@ -5158,9 +5194,6 @@ do_vec_ADDP (sim_cpu *cpu)
       aarch64_set_vec_u64 (cpu, vd, 0, copy_vn.v[0] + copy_vn.v[1]);
       aarch64_set_vec_u64 (cpu, vd, 1, copy_vm.v[0] + copy_vm.v[1]);
       return;
-
-    default:
-      HALT_NYI;
     }
 }
 
@@ -5489,9 +5522,6 @@ do_vec_xtl (sim_cpu *cpu)
 	      (cpu, vd, i, aarch64_get_vec_u8 (cpu, vs, i + bias) << shift);
 	}
       return;
-
-    default:
-      HALT_NYI;
     }
 }
 
@@ -5507,7 +5537,7 @@ do_vec_SHL (sim_cpu *cpu)
      instr [4, 0]  = Vd.  */
 
   int shift;
-  int full = uimm (aarch64_get_instr (cpu), 30, 30);
+  int full    = uimm (aarch64_get_instr (cpu), 30, 30);
   unsigned vs = uimm (aarch64_get_instr (cpu), 9, 5);
   unsigned vd = uimm (aarch64_get_instr (cpu), 4, 0);
   unsigned i;
@@ -5517,7 +5547,7 @@ do_vec_SHL (sim_cpu *cpu)
 
   if (uimm (aarch64_get_instr (cpu), 22, 22))
     {
-      shift = uimm (aarch64_get_instr (cpu), 21, 16) - 1;
+      shift = uimm (aarch64_get_instr (cpu), 21, 16);
 
       if (full == 0)
 	HALT_UNALLOC;
@@ -5533,7 +5563,7 @@ do_vec_SHL (sim_cpu *cpu)
 
   if (uimm (aarch64_get_instr (cpu), 21, 21))
     {
-      shift = uimm (aarch64_get_instr (cpu), 20, 16) - 1;
+      shift = uimm (aarch64_get_instr (cpu), 20, 16);
 
       for (i = 0; i < (full ? 4 : 2); i++)
 	{
@@ -5546,7 +5576,7 @@ do_vec_SHL (sim_cpu *cpu)
 
   if (uimm (aarch64_get_instr (cpu), 20, 20))
     {
-      shift = uimm (aarch64_get_instr (cpu), 19, 16) - 1;
+      shift = uimm (aarch64_get_instr (cpu), 19, 16);
 
       for (i = 0; i < (full ? 8 : 4); i++)
 	{
@@ -5560,7 +5590,7 @@ do_vec_SHL (sim_cpu *cpu)
   if (uimm (aarch64_get_instr (cpu), 19, 19) == 0)
     HALT_UNALLOC;
 
-  shift = uimm (aarch64_get_instr (cpu), 18, 16) - 1;
+  shift = uimm (aarch64_get_instr (cpu), 18, 16);
 
   for (i = 0; i < (full ? 16 : 8); i++)
     {
@@ -5575,17 +5605,17 @@ do_vec_SSHR_USHR (sim_cpu *cpu)
   /* instr [31]    = 0
      instr [30]    = half(0)/full(1)
      instr [29]    = signed(0)/unsigned(1)
-     instr [28,23] = 01 1110
+     instr [28,23] = 0 1111 0
      instr [22,16] = size and shift amount
      instr [15,10] = 0000 01
      instr [9, 5]  = Vs
      instr [4, 0]  = Vd.  */
 
-  int shift;
-  int full = uimm (aarch64_get_instr (cpu), 30, 30);
-  int sign = uimm (aarch64_get_instr (cpu), 29, 29);
-  unsigned vs = uimm (aarch64_get_instr (cpu), 9, 5);
-  unsigned vd = uimm (aarch64_get_instr (cpu), 4, 0);
+  int full       = INSTR (30, 30);
+  int sign       = ! INSTR (29, 29);
+  unsigned shift = INSTR (22, 16);
+  unsigned vs    = INSTR (9, 5);
+  unsigned vd    = INSTR (4, 0);
   unsigned i;
 
   NYI_assert (28, 23, 0x1E);
@@ -5593,7 +5623,7 @@ do_vec_SSHR_USHR (sim_cpu *cpu)
 
   if (uimm (aarch64_get_instr (cpu), 22, 22))
     {
-      shift = uimm (aarch64_get_instr (cpu), 21, 16);
+      shift = 128 - shift;
 
       if (full == 0)
 	HALT_UNALLOC;
@@ -5616,7 +5646,7 @@ do_vec_SSHR_USHR (sim_cpu *cpu)
 
   if (uimm (aarch64_get_instr (cpu), 21, 21))
     {
-      shift = uimm (aarch64_get_instr (cpu), 20, 16);
+      shift = 64 - shift;
 
       if (sign)
 	for (i = 0; i < (full ? 4 : 2); i++)
@@ -5636,7 +5666,7 @@ do_vec_SSHR_USHR (sim_cpu *cpu)
 
   if (uimm (aarch64_get_instr (cpu), 20, 20))
     {
-      shift = uimm (aarch64_get_instr (cpu), 19, 16);
+      shift = 32 - shift;
 
       if (sign)
 	for (i = 0; i < (full ? 8 : 4); i++)
@@ -5657,7 +5687,7 @@ do_vec_SSHR_USHR (sim_cpu *cpu)
   if (uimm (aarch64_get_instr (cpu), 19, 19) == 0)
     HALT_UNALLOC;
 
-  shift = uimm (aarch64_get_instr (cpu), 18, 16);
+  shift = 16 - shift;
 
   if (sign)
     for (i = 0; i < (full ? 16 : 8); i++)
@@ -5829,9 +5859,6 @@ do_vec_neg (sim_cpu *cpu)
       for (i = 0; i < 2; i++)
 	aarch64_set_vec_s64 (cpu, vd, i, - aarch64_get_vec_s64 (cpu, vs, i));
       return;
-
-    default:
-      HALT_UNREACHABLE;
     }
 }
 
@@ -5985,9 +6012,6 @@ do_vec_SUB (sim_cpu *cpu)
 			     aarch64_get_vec_s64 (cpu, vn, i)
 			     - aarch64_get_vec_s64 (cpu, vm, i));
       return;
-
-    default:
-      HALT_UNREACHABLE;
     }
 }
 
@@ -6266,9 +6290,7 @@ do_vec_NOT (sim_cpu *cpu)
 {
   /* instr[31]    = 0
      instr[30]    = half (0)/full (1)
-     instr[29,21] = 10 1110 001
-     instr[20,16] = 0 0000
-     instr[15,10] = 0101 10
+     instr[29,10] = 10 1110 0010 0000 0101 10
      instr[9,5]   = Vn
      instr[4.0]   = Vd.  */
 
@@ -6281,6 +6303,68 @@ do_vec_NOT (sim_cpu *cpu)
 
   for (i = 0; i < (full ? 16 : 8); i++)
     aarch64_set_vec_u8 (cpu, vd, i, ~ aarch64_get_vec_u8 (cpu, vn, i));
+}
+
+static unsigned int
+clz (uint64_t val, unsigned size)
+{
+  uint64_t mask = 1;
+  int      count;
+
+  mask <<= (size - 1);
+  count = 0;
+  do
+    {
+      if (val & mask)
+	break;
+      mask >>= 1;
+      count ++;
+    }
+  while (mask);
+
+  return count;
+}
+
+static void
+do_vec_CLZ (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = half (0)/full (1)
+     instr[29,24] = 10 1110
+     instr[23,22] = size
+     instr[21,10] = 10 0000 0100 10
+     instr[9,5]   = Vn
+     instr[4.0]   = Vd.  */
+
+  unsigned vn = INSTR (9, 5);
+  unsigned vd = INSTR (4, 0);
+  unsigned i;
+  int      full = INSTR (30,30);
+
+  NYI_assert (29, 24, 0x2E);
+  NYI_assert (21, 10, 0x812);
+
+  switch (INSTR (23, 22))
+    {
+    case 0:
+      for (i = 0; i < (full ? 16 : 8); i++)
+	aarch64_set_vec_u8 (cpu, vd, i, clz (aarch64_get_vec_u8 (cpu, vn, i), 8));
+      break;
+    case 1:
+      for (i = 0; i < (full ? 8 : 4); i++)
+	aarch64_set_vec_u16 (cpu, vd, i, clz (aarch64_get_vec_u16 (cpu, vn, i), 16));
+      break;
+    case 2:
+      for (i = 0; i < (full ? 4 : 2); i++)
+	aarch64_set_vec_u32 (cpu, vd, i, clz (aarch64_get_vec_u32 (cpu, vn, i), 32));
+      break;
+    case 3:
+      if (! full)
+	HALT_UNALLOC;
+      aarch64_set_vec_u64 (cpu, vd, 0, clz (aarch64_get_vec_u64 (cpu, vn, 0), 64));
+      aarch64_set_vec_u64 (cpu, vd, 1, clz (aarch64_get_vec_u64 (cpu, vn, 1), 64));
+      break;
+    }
 }
 
 static void
@@ -6411,6 +6495,7 @@ dexAdvSIMD0 (sim_cpu *cpu)
 
 	    case 0x08: do_vec_sub_long (cpu); return;
 	    case 0x11: do_vec_USHL (cpu); return;
+	    case 0x12: do_vec_CLZ (cpu); return;
 	    case 0x16: do_vec_NOT (cpu); return;
 	    case 0x19: do_vec_max (cpu); return;
 	    case 0x1B: do_vec_min (cpu); return;
@@ -6441,7 +6526,8 @@ dexAdvSIMD0 (sim_cpu *cpu)
 	    case 0x3A:
 	      do_vec_compare (cpu); return;
 
-	    default: break;
+	    default:
+	      break;
 	    }
 	}
 
@@ -6632,7 +6718,57 @@ dexSimpleFPFixedConvert (sim_cpu *cpu)
 static void
 dexSimpleFPCondCompare (sim_cpu *cpu)
 {
-  HALT_NYI;
+  /* instr [31,23] = 0001 1110 0
+     instr [22]    = type
+     instr [21]    = 1
+     instr [20,16] = Rm
+     instr [15,12] = condition
+     instr [11,10] = 01
+     instr [9,5]   = Rn
+     instr [4]     = 0
+     instr [3,0]   = nzcv  */
+
+  unsigned rm = INSTR (20, 16);
+  unsigned rn = INSTR (9, 5);
+
+  NYI_assert (31, 23, 0x3C);
+  NYI_assert (11, 10, 0x1);
+  NYI_assert (4,  4,  0);
+
+  if (! testConditionCode (cpu, INSTR (15, 12)))
+    {
+      aarch64_set_CPSR (cpu, INSTR (3, 0));
+      return;
+    }
+
+  if (INSTR (22, 22))
+    {
+      /* Double precision.  */
+      double val1 = aarch64_get_vec_double (cpu, rn, 0);
+      double val2 = aarch64_get_vec_double (cpu, rm, 0);
+
+      /* FIXME: Check for NaNs.  */
+      if (val1 == val2)
+	aarch64_set_CPSR (cpu, (Z | C));
+      else if (val1 < val2)
+	aarch64_set_CPSR (cpu, N);
+      else /* val1 > val2 */
+	aarch64_set_CPSR (cpu, C);
+    }
+  else
+    {
+      /* Single precision.  */
+      float val1 = aarch64_get_vec_float (cpu, rn, 0);
+      float val2 = aarch64_get_vec_float (cpu, rm, 0);
+      
+      /* FIXME: Check for NaNs.  */
+      if (val1 == val2)
+	aarch64_set_CPSR (cpu, (Z | C));
+      else if (val1 < val2)
+	aarch64_set_CPSR (cpu, N);
+      else /* val1 > val2 */
+	aarch64_set_CPSR (cpu, C);
+    }
 }
 
 /* 2 sources.  */
@@ -7312,6 +7448,53 @@ do_FRINT (sim_cpu *cpu)
     }
 }
 
+/* Convert half to float.  */
+static void
+do_FCVT_half_to_single (sim_cpu * cpu)
+{
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 10, 0x7B890);
+
+  aarch64_set_FP_float (cpu, rd, (float) aarch64_get_FP_half  (cpu, rn));
+}
+
+/* Convert half to float.  */
+static void
+do_FCVT_half_to_double (sim_cpu * cpu)
+{
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 10, 0x7B8B0);
+  
+  aarch64_set_FP_double (cpu, rd, (double) aarch64_get_FP_half  (cpu, rn));
+}
+
+static void
+do_FCVT_single_to_half (sim_cpu * cpu)
+{
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 10, 0x788F0);
+
+  aarch64_set_FP_half (cpu, rd, aarch64_get_FP_float  (cpu, rn));
+}
+
+/* Convert half to float.  */
+static void
+do_FCVT_double_to_half (sim_cpu * cpu)
+{
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 10, 0x798F0);
+  
+  aarch64_set_FP_half (cpu, rd, (float) aarch64_get_FP_double  (cpu, rn));
+}
+
 static void
 dexSimpleFPDataProc1Source (sim_cpu *cpu)
 {
@@ -7349,10 +7532,13 @@ dexSimpleFPDataProc1Source (sim_cpu *cpu)
 
   if (type == 3)
     {
-      if (opcode == 4 || opcode == 5)
-	HALT_NYI;
+      if (opcode == 4)
+	do_FCVT_half_to_single (cpu);
+      else if (opcode == 5)
+	do_FCVT_half_to_double (cpu);
       else
 	HALT_UNALLOC;
+      return;
     }
 
   if (type == 2)
@@ -7411,7 +7597,13 @@ dexSimpleFPDataProc1Source (sim_cpu *cpu)
        do_FRINT (cpu);
        return;
 
-    case 7:		/* FCVT double/single to half precision.  */
+    case 7:
+      if (INSTR (22, 22))
+	do_FCVT_double_to_half (cpu);
+      else
+	do_FCVT_single_to_half (cpu);
+      return;
+
     case 13:
       HALT_NYI;
 
@@ -7769,8 +7961,6 @@ dexSimpleFPIntegerConvert (sim_cpu *cpu)
 	case 1: scvtd32 (cpu); return;
 	case 2: scvtf (cpu); return;
 	case 3: scvtd (cpu); return;
-	default:
-	  HALT_UNREACHABLE;
 	}
 
     case 6:			/* FMOV GR, Vec.  */
@@ -7796,7 +7986,6 @@ dexSimpleFPIntegerConvert (sim_cpu *cpu)
 	case 1: fcvtszd32 (cpu); return;
 	case 2: fcvtszs (cpu); return;
 	case 3: fcvtszd (cpu); return;
-	default: HALT_UNREACHABLE;
 	}
 
     case 25: do_fcvtzu (cpu); return;
@@ -7996,7 +8185,6 @@ dexSimpleFPCompare (sim_cpu *cpu)
     case 5: fcmpzd (cpu); return;
     case 6: fcmped (cpu); return;
     case 7: fcmpzed (cpu); return;
-    default: HALT_UNREACHABLE;
     }
 }
 
@@ -8092,9 +8280,9 @@ do_scalar_USHR (sim_cpu *cpu)
      instr [9, 5]  = Rn
      instr [4, 0]  = Rd.  */
 
-  unsigned amount = 128 - uimm (aarch64_get_instr (cpu), 22, 16);
-  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
-  unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
+  unsigned amount = 128 - INSTR (22, 16);
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
 
   NYI_assert (31, 23, 0x0FE);
   NYI_assert (15, 10, 0x01);
@@ -8104,26 +8292,64 @@ do_scalar_USHR (sim_cpu *cpu)
 }
 
 static void
-do_scalar_SHL (sim_cpu *cpu)
+do_scalar_SSHL (sim_cpu *cpu)
 {
-  /* instr [31,23] = 0111 1101 0
-     instr [22,16] = shift amount
-     instr [15,10] = 0101 01
+  /* instr [31,21] = 0101 1110 111
+     instr [20,16] = Rm
+     instr [15,10] = 0100 01
      instr [9, 5]  = Rn
      instr [4, 0]  = Rd.  */
 
-  unsigned amount = uimm (aarch64_get_instr (cpu), 22, 16) - 64;
-  unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
-  unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
+  unsigned rm = INSTR (20, 16);
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  signed int shift = aarch64_get_vec_s8 (cpu, rm, 0);
+
+  NYI_assert (31, 21, 0x2F7);
+  NYI_assert (15, 10, 0x11);
+
+  if (shift >= 0)
+    aarch64_set_vec_s64 (cpu, rd, 0,
+			 aarch64_get_vec_s64 (cpu, rn, 0) << shift);
+  else
+    aarch64_set_vec_s64 (cpu, rd, 0,
+			 aarch64_get_vec_s64 (cpu, rn, 0) >> - shift);    
+}
+
+static void
+do_scalar_shift (sim_cpu *cpu)
+{
+  /* instr [31,23] = 0101 1111 0
+     instr [22,16] = shift amount
+     instr [15,10] = 0101 01   [SHL]
+     instr [15,10] = 0000 01   [SSHR]
+     instr [9, 5]  = Rn
+     instr [4, 0]  = Rd.  */
+
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  unsigned amount;
 
   NYI_assert (31, 23, 0x0BE);
-  NYI_assert (15, 10, 0x15);
 
-  if (uimm (aarch64_get_instr (cpu), 22, 22) == 0)
+  if (INSTR (22, 22) == 0)
     HALT_UNALLOC;
 
-  aarch64_set_vec_u64 (cpu, rd, 0,
-		       aarch64_get_vec_u64 (cpu, rn, 0) << amount);
+  switch (INSTR (15, 10))
+    {
+    case 0x01: /* SSHR */
+      amount = 128 - INSTR (22, 16);
+      aarch64_set_vec_s64 (cpu, rd, 0,
+			   aarch64_get_vec_s64 (cpu, rn, 0) >> amount);
+      return;
+    case 0x15: /* SHL */
+      amount = INSTR (22, 16) - 64;
+      aarch64_set_vec_u64 (cpu, rd, 0,
+			   aarch64_get_vec_u64 (cpu, rn, 0) << amount);
+      return;
+    default:
+      HALT_NYI;
+    }
 }
 
 /* FCMEQ FCMGT FCMGE.  */
@@ -8278,32 +8504,73 @@ do_scalar_MOV (sim_cpu *cpu)
 static void
 do_scalar_NEG (sim_cpu *cpu)
 {
-  /* instr [31,24] = 0111 1110
-     instr [23,22] = 11
-     instr [21,10] = 1000 0010 1110
+  /* instr [31,10] = 0111 1110 1110 0000 1011 10
      instr [9, 5]  = Rn
      instr [4, 0]  = Rd.  */
 
   unsigned rn = uimm (aarch64_get_instr (cpu), 9, 5);
   unsigned rd = uimm (aarch64_get_instr (cpu), 4, 0);
 
-  NYI_assert (31, 24, 0x7E);
-  NYI_assert (21, 10, 0x82E);
-  NYI_assert (23, 22, 3);
+  NYI_assert (31, 10, 0x1FB82E);
 
   aarch64_set_vec_u64 (cpu, rd, 0, - aarch64_get_vec_u64 (cpu, rn, 0));
 }
 
 static void
+do_scalar_USHL (sim_cpu *cpu)
+{
+  /* instr [31,21] = 0111 1110 111
+     instr [20,16] = Rm
+     instr [15,10] = 0100 01
+     instr [9, 5]  = Rn
+     instr [4, 0]  = Rd.  */
+
+  unsigned rm = INSTR (20, 16);
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  signed int shift = aarch64_get_vec_s8 (cpu, rm, 0);
+
+  NYI_assert (31, 21, 0x3F7);
+  NYI_assert (15, 10, 0x11);
+
+  if (shift >= 0)
+    aarch64_set_vec_u64 (cpu, rd, 0, aarch64_get_vec_u64 (cpu, rn, 0) << shift);
+  else
+    aarch64_set_vec_u64 (cpu, rd, 0, aarch64_get_vec_u64 (cpu, rn, 0) >> - shift);
+}
+
+static void
 do_double_add (sim_cpu *cpu)
 {
-  /* instr [28,25] = 1111.  */
+  /* instr [31,21] = 0101 1110 111
+     instr [20,16] = Fn
+     instr [15,10] = 1000 01
+     instr [9,5]   = Fm
+     instr [4,0]   = Fd.  */
   unsigned Fd;
   unsigned Fm;
   unsigned Fn;
   double val1;
   double val2;
 
+  NYI_assert (31, 21, 0x2F7);
+  NYI_assert (15, 10, 0x21);
+
+  Fd = INSTR (4, 0);
+  Fm = INSTR (9, 5);
+  Fn = INSTR (20, 16);
+
+  val1 = aarch64_get_FP_double (cpu, Fm);
+  val2 = aarch64_get_FP_double (cpu, Fn);
+
+  aarch64_set_FP_double (cpu, Fd, val1 + val2);
+}
+
+static void
+do_scalar_vec (sim_cpu *cpu)
+{
+  /* instr [30] = 1.  */
+  /* instr [28,25] = 1111.  */
   switch (uimm (aarch64_get_instr (cpu), 31, 23))
     {
     case 0xBC:
@@ -8315,7 +8582,7 @@ do_double_add (sim_cpu *cpu)
 	}
       break;
 
-    case 0xBE: do_scalar_SHL (cpu); return;
+    case 0xBE: do_scalar_shift (cpu); return;
 
     case 0xFC:
       switch (uimm (aarch64_get_instr (cpu), 15, 10))
@@ -8330,36 +8597,29 @@ do_double_add (sim_cpu *cpu)
       switch (uimm (aarch64_get_instr (cpu), 15, 10))
 	{
 	case 0x0D: do_scalar_CMGT (cpu); return;
+	case 0x11: do_scalar_USHL (cpu); return;
+	case 0x2E: do_scalar_NEG (cpu); return;
 	case 0x35: do_scalar_FABD (cpu); return;
 	case 0x39: do_scalar_FCM (cpu); return;
 	case 0x3B: do_scalar_FCM (cpu); return;
-	case 0x2E: do_scalar_NEG (cpu); return;
 	default:
 	  HALT_NYI;
 	}
 
     case 0xFE: do_scalar_USHR (cpu); return;
+
+    case 0xBD:
+      switch (INSTR (15, 10))
+	{
+	case 0x21: do_double_add (cpu); return;
+	case 0x11: do_scalar_SSHL (cpu); return;
+	default:
+	  HALT_NYI;
+	}
+      
     default:
-      break;
+      HALT_NYI;
     }
-
-  /* instr [31,21] = 0101 1110 111
-     instr [20,16] = Fn
-     instr [15,10] = 1000 01
-     instr [9,5]   = Fm
-     instr [4,0]   = Fd.  */
-  if (uimm (aarch64_get_instr (cpu), 31, 21) != 0x2F7
-      || uimm (aarch64_get_instr (cpu), 15, 10) != 0x21)
-    HALT_NYI;
-
-  Fd = uimm (aarch64_get_instr (cpu), 4, 0);
-  Fm = uimm (aarch64_get_instr (cpu), 9, 5);
-  Fn = uimm (aarch64_get_instr (cpu), 20, 16);
-
-  val1 = aarch64_get_FP_double (cpu, Fm);
-  val2 = aarch64_get_FP_double (cpu, Fn);
-
-  aarch64_set_FP_double (cpu, Fd, val1 + val2);
 }
 
 static void
@@ -8367,10 +8627,10 @@ dexAdvSIMD1 (sim_cpu *cpu)
 {
   /* instr [28,25] = 1 111.  */
 
-  /* we are currently only interested in the basic
+  /* We are currently only interested in the basic
      scalar fp routines which all have bit 30 = 0.  */
   if (uimm (aarch64_get_instr (cpu), 30, 30))
-    do_double_add (cpu);
+    do_scalar_vec (cpu);
 
   /* instr[24] is set for FP data processing 3-source and clear for
      all other basic scalar fp instruction groups.  */
@@ -9886,13 +10146,14 @@ dexLoadRegisterOffset (sim_cpu *cpu)
 static void
 dexLoadUnsignedImmediate (sim_cpu *cpu)
 {
-  /* assert instr[29,24] == 111_01
+  /* instr[29,24] == 111_01
      instr[31,30] = size
-     instr[26] = V
+     instr[26]    = V
      instr[23,22] = opc
      instr[21,10] = uimm12 : unsigned immediate offset
-     instr[9,5] = rn may be SP.  */
-  /* unsigned rt = uimm (aarch64_get_instr (cpu), 4, 0); */
+     instr[9,5]   = rn may be SP.
+     instr[4,0]   = rt.  */
+  
   uint32_t V = uimm (aarch64_get_instr (cpu), 26,26);
   uint32_t dispatch = ( (uimm (aarch64_get_instr (cpu), 31, 30) << 2)
 		       | uimm (aarch64_get_instr (cpu), 23, 22));
@@ -9928,19 +10189,17 @@ dexLoadUnsignedImmediate (sim_cpu *cpu)
   /* FReg operations.  */
   switch (dispatch)
     {
-    case 3:  fldrq_abs (cpu, imm); return;
-    case 9:  fldrs_abs (cpu, imm); return;
-    case 13: fldrd_abs (cpu, imm); return;
-
     case 0:  fstrb_abs (cpu, imm); return;
-    case 2:  fstrq_abs (cpu, imm); return;
     case 4:  fstrh_abs (cpu, imm); return;
     case 8:  fstrs_abs (cpu, imm); return;
     case 12: fstrd_abs (cpu, imm); return;
+    case 2:  fstrq_abs (cpu, imm); return;
 
-    case 1: /* LDR 8 bit FP.  */
-    case 5: /* LDR 8 bit FP.  */
-      HALT_NYI;
+    case 1:  fldrb_abs (cpu, imm); return;
+    case 5:  fldrh_abs (cpu, imm); return;
+    case 9:  fldrs_abs (cpu, imm); return;
+    case 13: fldrd_abs (cpu, imm); return;
+    case 3:  fldrq_abs (cpu, imm); return;
 
     default:
     case 6:
@@ -10443,9 +10702,6 @@ vec_load (sim_cpu *cpu, uint64_t address, unsigned N)
 	  aarch64_set_vec_u64 (cpu, vec_reg (vd, i), 0,
 			       aarch64_get_mem_u64 (cpu, address + i * 8));
       return;
-
-    default:
-      HALT_UNREACHABLE;
     }
 }
 
@@ -10512,9 +10768,6 @@ LD1_1 (sim_cpu *cpu, uint64_t address)
 	aarch64_set_vec_u64 (cpu, vd, i,
 			     aarch64_get_mem_u64 (cpu, address + i * 8));
       return;
-
-    default:
-      HALT_UNREACHABLE;
     }
 }
 
@@ -10610,9 +10863,6 @@ vec_store (sim_cpu *cpu, uint64_t address, unsigned N)
 	    (cpu, address + i * 8,
 	     aarch64_get_vec_u64 (cpu, vec_reg (vd, i), 0));
       return;
-
-    default:
-      HALT_UNREACHABLE;
     }
 }
 
@@ -10671,9 +10921,6 @@ ST1_1 (sim_cpu *cpu, uint64_t address)
 	aarch64_set_mem_u64 (cpu, address + i * 8,
 			     aarch64_get_vec_u64 (cpu, vd, i));
       return;
-
-    default:
-      HALT_UNREACHABLE;
     }
 }
 
@@ -12909,9 +13156,7 @@ dexExcpnGen (sim_cpu *cpu)
     HALT_UNALLOC;
 }
 
-/* Stub for accessing system registers.
-   We implement support for the DCZID register since this is used
-   by the C library's memset function.  */
+/* Stub for accessing system registers.  */
 
 static uint64_t
 system_get (sim_cpu *cpu, unsigned op0, unsigned op1, unsigned crn,
@@ -12920,16 +13165,52 @@ system_get (sim_cpu *cpu, unsigned op0, unsigned op1, unsigned crn,
   if (crn == 0 && op1 == 3 && crm == 0 && op2 == 7)
     /* DCZID_EL0 - the Data Cache Zero ID register.
        We do not support DC ZVA at the moment, so
-       we return a value with the disable bit set.  */
+       we return a value with the disable bit set.
+       We implement support for the DCZID register since
+       it is used by the C library's memset function.  */
     return ((uint64_t) 1) << 4;
+
+  if (crn == 0 && op1 == 3 && crm == 0 && op2 == 1)
+    /* Cache Type Register.  */
+    return 0x80008000UL;
+
+  if (crn == 13 && op1 == 3 && crm == 0 && op2 == 2)
+    /* TPIDR_EL0 - thread pointer id.  */
+    return aarch64_get_thread_id (cpu);
+
+  if (op1 == 3 && crm == 4 && op2 == 0)
+    return aarch64_get_FPCR (cpu);
+
+  if (op1 == 3 && crm == 4 && op2 == 1)
+    return aarch64_get_FPSR (cpu);
+
+  else if (op1 == 3 && crm == 2 && op2 == 0)
+    return aarch64_get_CPSR (cpu);
 
   HALT_NYI;
 }
 
 static void
+system_set (sim_cpu *cpu, unsigned op0, unsigned op1, unsigned crn,
+	    unsigned crm, unsigned op2, uint64_t val)
+{
+  if (op1 == 3 && crm == 4 && op2 == 0)
+    aarch64_set_FPCR (cpu, val);
+
+  else if (op1 == 3 && crm == 4 && op2 == 1)
+    aarch64_set_FPSR (cpu, val);
+
+  else if (op1 == 3 && crm == 2 && op2 == 0)
+    aarch64_set_CPSR (cpu, val);
+
+  else
+    HALT_NYI;
+}
+			       
+static void
 do_mrs (sim_cpu *cpu)
 {
-  /* instr[31:20] = 1101 01010 0011
+  /* instr[31:20] = 1101 0101 0001 1
      instr[19]    = op0
      instr[18,16] = op1
      instr[15,12] = CRn
@@ -12947,6 +13228,82 @@ do_mrs (sim_cpu *cpu)
 		       system_get (cpu, sys_op0, sys_op1, sys_crn, sys_crm, sys_op2));
 }
 
+static void
+do_MSR_immediate (sim_cpu *cpu)
+{
+  /* instr[31:19] = 1101 0101 0000 0
+     instr[18,16] = op1
+     instr[15,12] = 0100
+     instr[11,8]  = CRm
+     instr[7,5]   = op2
+     instr[4,0]   = 1 1111  */
+
+  unsigned op1 = uimm (aarch64_get_instr (cpu), 18, 16);
+  /*unsigned crm = uimm (aarch64_get_instr (cpu), 11, 8);*/
+  unsigned op2 = uimm (aarch64_get_instr (cpu), 7, 5);
+
+  NYI_assert (31, 19, 0x1AA0);
+  NYI_assert (15, 12, 0x4);
+  NYI_assert (4,  0,  0x1F);
+
+  if (op1 == 0)
+    {
+      if (op2 == 5)
+	HALT_NYI; /* set SPSel.  */
+      else
+	HALT_UNALLOC;
+    }
+  else if (op1 == 3)
+    {
+      if (op2 == 6)
+	HALT_NYI; /* set DAIFset.  */
+      else if (op2 == 7)
+	HALT_NYI; /* set DAIFclr.  */
+      else
+	HALT_UNALLOC;
+    }
+  else
+    HALT_UNALLOC;
+}
+
+static void
+do_MSR_reg (sim_cpu *cpu)
+{
+  /* instr[31:20] = 1101 0101 0001
+     instr[19]    = op0
+     instr[18,16] = op1
+     instr[15,12] = CRn
+     instr[11,8]  = CRm
+     instr[7,5]   = op2
+     instr[4,0]   = Rt  */
+
+  unsigned sys_op0 = uimm (aarch64_get_instr (cpu), 19, 19) + 2;
+  unsigned sys_op1 = uimm (aarch64_get_instr (cpu), 18, 16);
+  unsigned sys_crn = uimm (aarch64_get_instr (cpu), 15, 12);
+  unsigned sys_crm = uimm (aarch64_get_instr (cpu), 11, 8);
+  unsigned sys_op2 = uimm (aarch64_get_instr (cpu), 7, 5);
+  unsigned rt = uimm (aarch64_get_instr (cpu), 4, 0);
+
+  NYI_assert (31, 20, 0xD51);
+  
+  system_set (cpu, sys_op0, sys_op1, sys_crn, sys_crm, sys_op2,
+	      aarch64_get_reg_u64 (cpu, rt, NO_SP));
+}
+
+static void
+do_SYS (sim_cpu * cpu)
+{
+  /* instr[31,19] = 1101 0101 0000 1
+     instr[18,16] = op1
+     instr[15,12] = CRn
+     instr[11,8]  = CRm
+     instr[7,5]   = op2
+     instr[4,0]   = Rt  */
+  NYI_assert (31, 19, 0x1AA1);
+
+  /* FIXME: For now we just silently accept system ops.  */
+}
+			       
 static void
 dexSystem (sim_cpu *cpu)
 {
@@ -12977,11 +13334,10 @@ dexSystem (sim_cpu *cpu)
               11 ==> All, 00 ==> All (domain == FullSystem).  */
 
   unsigned rt = uimm (aarch64_get_instr (cpu), 4, 0);
-  uint32_t l_op0_op1_crn = uimm (aarch64_get_instr (cpu), 21, 12);
 
   NYI_assert (31, 22, 0x354);
 
-  switch (l_op0_op1_crn)
+  switch (INSTR (21, 12))
     {
     case 0x032:
       if (rt == 0x1F)
@@ -13010,31 +13366,27 @@ dexSystem (sim_cpu *cpu)
 	  case 4: dsb (cpu); return;
 	  case 5: dmb (cpu); return;
 	  case 6: isb (cpu); return;
-	  case 7:
 	  default: HALT_UNALLOC;
 	}
       }
 
     case 0x3B0:
-      /* MRS Wt, sys-reg.  */
-      do_mrs (cpu);
-      return;
-
     case 0x3B4:
     case 0x3BD:
-      /* MRS Xt, sys-reg.  */
       do_mrs (cpu);
       return;
 
     case 0x0B7:
-      /* DC <type>, x<n>.  */
-      HALT_NYI;
+      do_SYS (cpu); /* DC is an alias of SYS.  */
       return;
 
     default:
-      /* if (uimm (aarch64_get_instr (cpu), 21, 20) == 0x1)
-         MRS Xt, sys-reg.  */
-      HALT_NYI;
+      if (uimm (aarch64_get_instr (cpu), 21, 20) == 0x1)
+	do_MSR_reg (cpu);
+      else if (INSTR (21, 19) == 0 && INSTR (15, 12) == 0x4)
+	do_MSR_immediate (cpu);
+      else
+	HALT_NYI;
       return;
     }
 }

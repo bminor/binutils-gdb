@@ -1,3 +1,58 @@
+2016-03-23  Nick Clifton  <nickc@redhat.com>
+
+	* cpustate.c (aarch64_get_FP_half): New function.  Read a vector
+	register as a half precision floating point number.
+	(aarch64_set_FP_half): New function.  Similar, but for setting
+	a half precision register.
+	(aarch64_get_thread_id): New function.  Returns the value of the
+	CPU's TPIDR register.
+	(aarch64_get_FPCR): New function.  Returns the value of the CPU's
+	floating point control register.
+	(aarch64_set_FPCR): New function.  Set the value of the CPU's FPCR
+	register.
+	* cpustate.h: Add prototypes for new functions.
+	* sim-main.h (struct _sim_cpu): Add FPCR and tpidr fields.
+	* memory.c: Use unaligned core access functions for all memory
+	reads and writes.
+	* simulator.c (HALT_NYI): Generate an error message if tracing
+	will not tell the user why the simulator is halting.
+	(HALT_UNREACHABLE): Delete.  Delete (unneeded) uses of the macro.
+	(INSTR): New time-saver macro.
+	(fldrb_abs): New function.  Loads an 8-bit value using a scaled
+	offset.
+	(fldrh_abs): New function.  Likewise for 16-bit values.
+	(do_vec_SSHL): Allow for negative shift values.
+	(do_vec_USHL): Likewise.
+	(do_vec_SHL): Correct computation of shift amount.
+	(do_vec_SSHR_USHR): Correct decision of signed vs unsigned
+	shifts and computation of shift value.
+	(clz): New function.  Counts leading zero bits.
+	(do_vec_CLZ): New function.  Implements CLZ (vector).
+	(do_vec_MOV_element): Call do_vec_CLZ.
+	(dexSimpleFPCondCompare): Implement.
+	(do_FCVT_half_to_single): New function.  Implements one of the
+	FCVT operations.
+	(do_FCVT_half_to_double): New function.  Likewise.
+	(do_FCVT_single_to_half): New function.  Likewise.
+	(do_FCVT_double_to_half): New function.  Likewise.
+	(dexSimpleFPDataProc1Source): Call new FCVT functions.
+	(do_scalar_SHL): Handle negative shifts.
+	(do_scalar_shift): Handle SSHR.
+	(do_scalar_USHL): New function.
+	(do_double_add): Simplify to just performing a double precision
+	add operation.  Move remaining code into...
+	(do_scalar_vec): ... New function.
+	(dexLoadUnsignedImmediate): Call new fldrb_abs and fldrh_abs
+	functions.
+	(system_get): Add support for TPIDR, CTR, FPCR, FPSR and CPSR
+	registers.
+	(system_set): New function.
+	(do_MSR_immediate): New function.  Stub for now.
+	(do_MSR_reg): New function.  Likewise. Partially implements MSR
+	instruction.
+	(do_SYS): New function.  Stub for now,
+	(dexSystem): Call new functions.
+
 2016-03-18  Nick Clifton  <nickc@redhat.com>
 
 	* cpustate.c: Remove spurious spaces from TRACE strings.

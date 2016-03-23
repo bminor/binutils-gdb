@@ -278,6 +278,21 @@ aarch64_clear_CPSR_bit (sim_cpu *cpu, FlagMask bit)
 }
 
 float
+aarch64_get_FP_half (sim_cpu *cpu, VReg reg)
+{
+  union
+  {
+    uint16_t h[2];
+    float    f;
+  } u;
+
+  u.h[0] = cpu->fr[reg].h[0];
+  u.h[1] = 0;
+  return u.f;
+}
+
+
+float
 aarch64_get_FP_float (sim_cpu *cpu, VReg reg)
 {
   return cpu->fr[reg].s;
@@ -295,6 +310,21 @@ aarch64_get_FP_long_double (sim_cpu *cpu, VReg reg, FRegister *a)
   a->v[0] = cpu->fr[reg].v[0];
   a->v[1] = cpu->fr[reg].v[1];
 }
+
+void
+aarch64_set_FP_half (sim_cpu *cpu, VReg reg, float val)
+{
+  union
+  {
+    uint16_t h[2];
+    float    f;
+  } u;
+
+  u.f = val;
+  cpu->fr[reg].h[0] = u.h[0];
+  cpu->fr[reg].h[1] = 0;
+}
+
 
 void
 aarch64_set_FP_float (sim_cpu *cpu, VReg reg, float val)
@@ -540,4 +570,25 @@ int
 aarch64_test_FPSR_bit (sim_cpu *cpu, FPSRMask flag)
 {
   return cpu->FPSR & flag;
+}
+
+uint64_t
+aarch64_get_thread_id (sim_cpu * cpu)
+{
+  return cpu->tpidr;
+}
+
+uint32_t
+aarch64_get_FPCR (sim_cpu * cpu)
+{
+  return cpu->FPCR;
+}
+
+void
+aarch64_set_FPCR (sim_cpu * cpu, uint32_t val)
+{
+  if (cpu->FPCR != val)
+    TRACE_REGISTER (cpu,
+		    "FPCR changes from %x to %x", cpu->FPCR, val);
+  cpu->FPCR = val;
 }

@@ -168,10 +168,10 @@ typedef union FRegisterValue
   float        s;
   double       d;
 
-  uint64_t    v[2];
-  uint32_t    w[4];
-  uint16_t    h[8];
-  uint8_t     b[16];
+  uint64_t     v[2];
+  uint32_t     w[4];
+  uint16_t     h[8];
+  uint8_t      b[16];
 
   int64_t      V[2];
   int32_t      W[4];
@@ -194,10 +194,10 @@ typedef union FRegisterValue
 
 typedef enum FlagIdx
 {
-  V_IDX,
-  C_IDX,
-  Z_IDX,
-  N_IDX
+  V_IDX = 0,
+  C_IDX = 1,
+  Z_IDX = 2,
+  N_IDX = 3
 } FlagIdx;
 
 typedef enum FlagMask
@@ -216,7 +216,7 @@ typedef uint32_t FlagsRegister;
 
    This register includes IDC, IXC, UFC, OFC, DZC, IOC and QC bits,
    and the floating point N, Z, C, V bits but the latter are unused in
-   aarch64 mode. the sim ignores QC for now.
+   aarch64 mode.  The sim ignores QC for now.
 
    Bit positions are as per the ARMv7 FPSCR register
 
@@ -272,9 +272,12 @@ extern void        aarch64_set_reg_u64 (sim_cpu *, GReg, int, uint64_t);
 extern void        aarch64_set_reg_s64 (sim_cpu *, GReg, int, int64_t);
 
 /* FP Register access functions.  */
+extern float       aarch64_get_FP_half   (sim_cpu *, VReg);
 extern float       aarch64_get_FP_float  (sim_cpu *, VReg);
 extern double      aarch64_get_FP_double (sim_cpu *, VReg);
 extern void        aarch64_get_FP_long_double (sim_cpu *, VReg, FRegister *);
+
+extern void        aarch64_set_FP_half   (sim_cpu *, VReg, float);
 extern void        aarch64_set_FP_float  (sim_cpu *, VReg, float);
 extern void        aarch64_set_FP_double (sim_cpu *, VReg, double);
 extern void        aarch64_set_FP_long_double (sim_cpu *, VReg, FRegister);
@@ -329,5 +332,10 @@ extern float       aarch64_get_vec_float  (sim_cpu *, VReg, unsigned);
 extern double      aarch64_get_vec_double (sim_cpu *, VReg, unsigned);
 extern void        aarch64_set_vec_float  (sim_cpu *, VReg, unsigned, float);
 extern void        aarch64_set_vec_double (sim_cpu *, VReg, unsigned, double);
+
+/* System register accessors.  */
+extern uint64_t	   aarch64_get_thread_id (sim_cpu *);
+extern uint32_t	   aarch64_get_FPCR (sim_cpu *);
+extern void	   aarch64_set_FPCR (sim_cpu *, uint32_t);
 
 #endif /* _CPU_STATE_H  */
