@@ -605,10 +605,6 @@ m:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # indicates if the target needs software single step.  An ISA method to
 # implement it.
 #
-# FIXME/cagney/2001-01-18: This should be replaced with something that inserts
-# breakpoints using the breakpoint system instead of blatting memory directly
-# (as with rs6000).
-#
 # FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
 # target can single step.  If not, then implement single step using breakpoints.
 #
