@@ -918,7 +918,7 @@ obj_elf_section_word (char *str, size_t len, int *type)
 }
 
 /* Get name of section.  */
-char *
+const char *
 obj_elf_section_name (void)
 {
   char *name;
@@ -984,7 +984,8 @@ obj_elf_section_name (void)
 void
 obj_elf_section (int push)
 {
-  char *name, *group_name, *beg;
+  const char *name, *group_name;
+  char *beg;
   int type, dummy;
   bfd_vma attr;
   int entsize;

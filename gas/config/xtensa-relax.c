@@ -1024,7 +1024,7 @@ parse_special_fn (const char *name,
 		  const char **fn_name_p,
 		  const char **arg_name_p)
 {
-  char *p_start;
+  const char *p_start;
   const char *p_end;
 
   p_start = strchr (name, '(');

@@ -25586,7 +25586,7 @@ struct arm_long_option_table
 };
 
 static bfd_boolean
-arm_parse_extension (char *str, const arm_feature_set **opt_p)
+arm_parse_extension (const char *str, const arm_feature_set **opt_p)
 {
   arm_feature_set *ext_set = (arm_feature_set *)
       xmalloc (sizeof (arm_feature_set));
@@ -25606,7 +25606,7 @@ arm_parse_extension (char *str, const arm_feature_set **opt_p)
 
   while (str != NULL && *str != 0)
     {
-      char *ext;
+      const char *ext;
       size_t len;
 
       if (*str != '+')
@@ -25712,7 +25712,7 @@ static bfd_boolean
 arm_parse_cpu (char *str)
 {
   const struct arm_cpu_option_table *opt;
-  char *ext = strchr (str, '+');
+  const char *ext = strchr (str, '+');
   size_t len;
 
   if (ext != NULL)
@@ -25762,7 +25762,7 @@ static bfd_boolean
 arm_parse_arch (char *str)
 {
   const struct arm_arch_option_table *opt;
-  char *ext = strchr (str, '+');
+  const char *ext = strchr (str, '+');
   size_t len;
 
   if (ext != NULL)

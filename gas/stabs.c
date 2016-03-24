@@ -545,7 +545,7 @@ generate_asm_file (int type, const char *file)
 
   while (tmp < file_endp)
     {
-      char *bslash = strchr (tmp, '\\');
+      const char *bslash = strchr (tmp, '\\');
       size_t len = (bslash) ? (size_t) (bslash - tmp + 1) : strlen (tmp);
 
       /* Double all backslashes, since demand_copy_C_string (used by

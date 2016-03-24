@@ -1,3 +1,17 @@
+2016-03-28  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/obj-elf.c (obj_elf_section_name): Return const char *.
+	* config/obj-elf.h (obj_elf_section_name): Adjust.
+	* config/tc-aarch64.c (aarch64_parse_features): Likewise.
+	(aarch64_parse_cpu): Likewise.
+	(aarch64_parse_arch): Likewise.
+	* config/tc-arm.c (arm_parse_extension): Likewise.
+	(arm_parse_cpu): Likewise.
+	(arm_parse_arch): Likewise.
+	* config/tc-nds32.c: Likewise.
+	* config/xtensa-relax.c (parse_special_fn): Likewise.
+	* stabs.c (generate_asm_file): Likewise.
+
 2016-03-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-cr16.c (cr16_assemble): New function.

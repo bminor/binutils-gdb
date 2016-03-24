@@ -7830,7 +7830,7 @@ struct aarch64_long_option_table
 };
 
 static int
-aarch64_parse_features (char *str, const aarch64_feature_set **opt_p,
+aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
 			bfd_boolean ext_only)
 {
   /* We insist on extensions being added before being removed.  We achieve
@@ -7847,7 +7847,7 @@ aarch64_parse_features (char *str, const aarch64_feature_set **opt_p,
   while (str != NULL && *str != 0)
     {
       const struct aarch64_option_cpu_value_table *opt;
-      char *ext = NULL;
+      const char *ext = NULL;
       int optlen;
 
       if (!ext_only)
@@ -7920,7 +7920,7 @@ static int
 aarch64_parse_cpu (char *str)
 {
   const struct aarch64_cpu_option_table *opt;
-  char *ext = strchr (str, '+');
+  const char *ext = strchr (str, '+');
   size_t optlen;
 
   if (ext != NULL)
@@ -7952,7 +7952,7 @@ static int
 aarch64_parse_arch (char *str)
 {
   const struct aarch64_arch_option_table *opt;
-  char *ext = strchr (str, '+');
+  const char *ext = strchr (str, '+');
   size_t optlen;
 
   if (ext != NULL)

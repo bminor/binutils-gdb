@@ -2986,7 +2986,7 @@ nds32_init_nds32_pseudo_opcodes (void)
 }
 
 static struct nds32_pseudo_opcode *
-nds32_lookup_pseudo_opcode (char *str)
+nds32_lookup_pseudo_opcode (const char *str)
 {
   int i = 0;
   /* Assume pseudo-opcode are less than 16-char in length.  */
@@ -4138,7 +4138,7 @@ nds32_elf_save_pseudo_pattern (fixS* fixP, struct nds32_opcode *opcode,
 /* Check X_md to transform relocation.  */
 
 static fixS*
-nds32_elf_record_fixup_exp (fragS *fragP, char *str,
+nds32_elf_record_fixup_exp (fragS *fragP, const char *str,
 			    const struct nds32_field *fld,
 			    expressionS *pexp, char* out,
 			    struct nds32_asm_insn *insn)
@@ -5102,7 +5102,7 @@ restore:
 /* Check instruction if it can be used for the baseline.  */
 
 static bfd_boolean
-nds32_check_insn_available (struct nds32_asm_insn insn, char *str)
+nds32_check_insn_available (struct nds32_asm_insn insn, const char *str)
 {
   int attr = insn.attr & ATTR_ALL;
   static int baseline_isa = 0;
