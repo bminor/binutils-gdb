@@ -1841,22 +1841,22 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 			  ++s;
 			}
 
-		      if (current_architecture >= SPARC_OPCODE_ARCH_V9)
-			{
-			  if (num < 16 || 31 < num)
-			    {
-			      error_message = _(": asr number must be between 16 and 31");
-			      goto error;
-			    }
-			}
-		      else
-			{
-			  if (num < 0 || 31 < num)
-			    {
-			      error_message = _(": asr number must be between 0 and 31");
-			      goto error;
-			    }
-			}
+                      /* We used to check here for the asr number to
+                         be between 16 and 31 in V9 and later, as
+                         mandated by the section C.1.1 "Register
+                         Names" in the SPARC spec.  However, we
+                         decided to remove this restriction as a) it
+                         introduces problems when new V9 asr registers
+                         are introduced, b) the Solaris assembler
+                         doesn't implement this restriction and c) the
+                         restriction will go away in future revisions
+                         of the Oracle SPARC Architecture.  */
+
+                      if (num < 0 || 31 < num)
+                        {
+                          error_message = _(": asr number must be between 0 and 31");
+                          goto error;
+                        }
 
 		      opcode |= (*args == 'M' ? RS1 (num) : RD (num));
 		      continue;
