@@ -1,3 +1,9 @@
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-dis.c (arc_insn_length): New function.
+	(print_insn_arc): Use arc_insn_length, change insnLen to unsigned.
+	(find_format): Change insnLen parameter to unsigned.
+
 2016-04-13  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19937
