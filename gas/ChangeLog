@@ -1,5 +1,10 @@
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-i960.c (parse_ldconst): Cast to char * when assigning to
+	args[0].
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-m32c.c (m32c_md_end): cast the argument to md_assemble to
 	char *.
 	(m32c_indirect_operand): Likewise.

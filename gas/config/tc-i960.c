@@ -1246,7 +1246,7 @@ parse_ldconst (char *arg[])	/* See above.  */
     {
     default:
       /* We're dependent on one or more symbols -- use "lda".  */
-      arg[0] = "lda";
+      arg[0] = (char *) "lda";
       break;
 
     case O_constant:
@@ -1263,26 +1263,26 @@ parse_ldconst (char *arg[])	/* See above.  */
                 lda xxx,<reg>.  */
       n = offs (e);
       if ((0 <= n) && (n <= 31))
-	arg[0] = "mov";
+	arg[0] = (char *) "mov";
       else if ((-31 <= n) && (n <= -1))
 	{
-	  arg[0] = "subo";
+	  arg[0] = (char *) "subo";
 	  arg[3] = arg[2];
 	  sprintf (buf, "%d", -n);
 	  arg[1] = buf;
-	  arg[2] = "0";
+	  arg[2] = (char *) "0";
 	}
       else if ((32 <= n) && (n <= 62))
 	{
-	  arg[0] = "addo";
+	  arg[0] = (char *) "addo";
 	  arg[3] = arg[2];
-	  arg[1] = "31";
+	  arg[1] = (char *) "31";
 	  sprintf (buf, "%d", n - 31);
 	  arg[2] = buf;
 	}
       else if ((shift = shift_ok (n)) != 0)
 	{
-	  arg[0] = "shlo";
+	  arg[0] = (char *) "shlo";
 	  arg[3] = arg[2];
 	  sprintf (buf, "%d", shift);
 	  arg[1] = buf;
@@ -1290,7 +1290,7 @@ parse_ldconst (char *arg[])	/* See above.  */
 	  arg[2] = buf2;
 	}
       else
-	arg[0] = "lda";
+	arg[0] = (char *) "lda";
       break;
 
     case O_illegal:
