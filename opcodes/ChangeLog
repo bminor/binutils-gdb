@@ -1,3 +1,8 @@
+2016-03-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-opc.c (sparc_opcodes): Reorder entries for `rd' in order
+	to get a proper diagnostic when an invalid ASR register is used.
+
 2016-03-22  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
