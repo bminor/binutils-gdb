@@ -1,3 +1,9 @@
+2016-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -Wstack-usage warnings.
+	* aarch64-dis.c (print_operands): Substitute size.
+	* aarch64-opc.c (print_register_offset_address): Substitute tblen.
+
 2016-03-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (sparc_opcodes): Reorder entries for `rd' in order
