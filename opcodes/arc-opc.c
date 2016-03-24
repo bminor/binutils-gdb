@@ -1311,10 +1311,10 @@ const struct arc_operand arc_operands[] =
   { 3, 21, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_src2, extract_nps_3bit_src2 },
 
 #define NPS_R_DST	(NPS_R_SRC2_3B + 1)
-  { 6, 21, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, NULL, NULL },
+  { 6, 21, 0, ARC_OPERAND_IR, NULL, NULL },
 
 #define NPS_R_SRC1	(NPS_R_DST + 1)
-  { 6, 21, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_NCHK, NULL, NULL },
+  { 6, 21, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, NULL, NULL },
 
 #define NPS_BITOP_DST_POS	(NPS_R_SRC1 + 1)
   { 5, 5, 0, ARC_OPERAND_UNSIGNED, 0, 0 },
