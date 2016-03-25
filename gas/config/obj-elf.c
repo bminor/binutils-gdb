@@ -2165,7 +2165,7 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	S_SET_SIZE (symp, size->X_add_number);
       else
 	{
-	  if (flag_size_check == size_check_error)
+	  if (!flag_allow_nonconst_size)
 	    as_bad (_(".size expression for %s "
 		      "does not evaluate to a constant"), S_GET_NAME (symp));
 	  else

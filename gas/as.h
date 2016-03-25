@@ -585,12 +585,7 @@ COMMON const char *        found_comment_file;
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 /* If .size directive failure should be error or warning.  */
-COMMON enum
-  {
-    size_check_error = 0,
-    size_check_warning
-  }
-flag_size_check;
+COMMON int flag_allow_nonconst_size;
 
 /* If we should generate ELF common symbols with the STT_COMMON type.  */
 extern int flag_use_elf_stt_common;
