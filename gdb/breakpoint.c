@@ -3727,7 +3727,7 @@ create_exception_master_breakpoint (struct sym_search_scope *search_scope)
 	{
 	  struct bound_minimal_symbol debug_hook;
 
-	  debug_hook = lookup_minimal_symbol (func_name, NULL, objfile);
+	  debug_hook = lookup_minimal_symbol_text (func_name, objfile);
 	  if (debug_hook.minsym == NULL)
 	    {
 	      bp_objfile_data->exception_msym.minsym = &msym_not_found;
