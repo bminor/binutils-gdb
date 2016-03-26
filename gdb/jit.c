@@ -42,6 +42,10 @@
 #include "readline/tilde.h"
 #include "completer.h"
 
+typedef struct objfile *objfile_p;
+
+DEF_VEC_P(objfile_p);
+
 static const char *jit_reader_dir = NULL;
 
 static const struct objfile_data *jit_objfile_data;
@@ -267,6 +271,9 @@ struct jit_program_space_data
      set.  */
 
   struct breakpoint *jit_breakpoint;
+
+  /* VEC of JIT objfiles sorted by entry address.  */
+  VEC(objfile_p) *jit_objfiles;
 };
 
 /* Per-objfile structure recording the addresses in the program space.
@@ -306,16 +313,50 @@ get_jit_objfile_data (struct objfile *objf)
   return objf_data;
 }
 
+static int
+jit_objfiles_lessthan (struct objfile *objf1, struct objfile *objf2)
+{
+  struct jit_objfile_data *objf_data1 = get_jit_objfile_data (objf1);
+  struct jit_objfile_data *objf_data2 = get_jit_objfile_data (objf2);
+
+  return objf_data1->addr < objf_data2->addr;
+}
+
+static int
+jit_objfiles_compar (const void *key, const void *o)
+{
+  CORE_ADDR entry_addr = *(CORE_ADDR *) key;
+  struct objfile **objf = (struct objfile **) o;
+  struct jit_objfile_data *objf_data = get_jit_objfile_data (*objf);
+
+  if (entry_addr < objf_data->addr)
+    return -1;
+  else if (entry_addr > objf_data->addr)
+    return 1;
+  else
+    return 0;
+}
+
+static struct jit_program_space_data *get_jit_program_space_data (void);
+
 /* Remember OBJFILE has been created for struct jit_code_entry located
    at inferior address ENTRY.  */
 
 static void
 add_objfile_entry (struct objfile *objfile, CORE_ADDR entry)
 {
+  struct jit_program_space_data *ps_data;
   struct jit_objfile_data *objf_data;
+  int i;
 
   objf_data = get_jit_objfile_data (objfile);
   objf_data->addr = entry;
+
+  ps_data = get_jit_program_space_data ();
+
+  i = VEC_lower_bound (objfile_p, ps_data->jit_objfiles,
+		       objfile, jit_objfiles_lessthan);
+  VEC_safe_insert (objfile_p, ps_data->jit_objfiles, i, objfile);
 }
 
 /* Return jit_program_space_data for current program space.  Allocate
@@ -983,32 +1024,64 @@ jit_register_code (struct gdbarch *gdbarch,
     jit_bfd_try_read_symtab (code_entry, entry_addr, gdbarch);
 }
 
+static int jit_find_objf_with_entry_addr (CORE_ADDR entry_addr);
+
 /* This function unregisters JITed code and frees the corresponding
    objfile.  */
 
 static void
-jit_unregister_code (struct objfile *objfile)
+jit_unregister_code (struct gdbarch *gdbarch, CORE_ADDR entry_addr)
 {
-  free_objfile (objfile);
+  struct jit_program_space_data *ps_data;
+  struct objfile *removed;
+  int i;
+
+  ps_data = get_jit_program_space_data ();
+
+  i = jit_find_objf_with_entry_addr (entry_addr);
+  if (i < 0)
+    {
+      printf_unfiltered (_("Unable to find JITed code "
+			   "entry at address: %s\n"),
+			 paddress (gdbarch, entry_addr));
+      return;
+    }
+
+  removed = VEC_ordered_remove (objfile_p, ps_data->jit_objfiles, i);
+  free_objfile (removed);
 }
 
-/* Look up the objfile with this code entry address.  */
+/* Look up the objfile with this code entry address in the VEC of jit
+   objfiles.  Returns the VEC index if found, -1 otherwise.  */
 
-static struct objfile *
+static int
 jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
 {
+  struct jit_program_space_data *ps_data;
+  struct jit_objfile_data *objf_data;
+  struct objfile **base;
+  size_t nmemb;
+  struct objfile **found;
   struct objfile *objf;
 
-  ALL_OBJFILES (objf)
-    {
-      struct jit_objfile_data *objf_data;
+  ps_data = get_jit_program_space_data ();
 
-      objf_data
-	= (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
-      if (objf_data != NULL && objf_data->addr == entry_addr)
-        return objf;
-    }
-  return NULL;
+  base = VEC_address (objfile_p, ps_data->jit_objfiles);
+  nmemb = VEC_length (objfile_p, ps_data->jit_objfiles);
+
+  if (nmemb == 0)
+    return -1;
+
+  found = (struct objfile **) bsearch (&entry_addr, base, nmemb,
+				       sizeof (*base),
+				       jit_objfiles_compar);
+  if (found == NULL)
+    return -1;
+
+  objf = *found;
+  objf_data = get_jit_objfile_data (objf);
+  gdb_assert (objf_data->addr == entry_addr);
+  return found - base;
 }
 
 /* This is called when a breakpoint is deleted.  It updates the
@@ -1375,7 +1448,7 @@ jit_inferior_init (struct gdbarch *gdbarch)
 
       /* This hook may be called many times during setup, so make sure we don't
          add the same symbol file twice.  */
-      if (jit_find_objf_with_entry_addr (cur_entry_addr) != NULL)
+      if (jit_find_objf_with_entry_addr (cur_entry_addr) >= 0)
         continue;
 
       jit_register_code (gdbarch, cur_entry_addr, &cur_entry);
@@ -1424,7 +1497,7 @@ jit_inferior_exit_hook (struct inferior *inf)
 	= (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
 
       if (objf_data != NULL && objf_data->addr != 0)
-	jit_unregister_code (objf);
+	jit_unregister_code (get_objfile_arch (objf), objf_data->addr);
     }
 }
 
@@ -1452,14 +1525,7 @@ jit_event_handler (struct gdbarch *gdbarch)
       jit_register_code (gdbarch, entry_addr, &code_entry);
       break;
     case JIT_UNREGISTER:
-      objf = jit_find_objf_with_entry_addr (entry_addr);
-      if (objf == NULL)
-	printf_unfiltered (_("Unable to find JITed code "
-			     "entry at address: %s\n"),
-			   paddress (gdbarch, entry_addr));
-      else
-        jit_unregister_code (objf);
-
+      jit_unregister_code (gdbarch, entry_addr);
       break;
     default:
       error (_("Unknown action_flag value in JIT descriptor!"));
