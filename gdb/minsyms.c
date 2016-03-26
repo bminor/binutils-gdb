@@ -139,6 +139,46 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
     }
 }
 
+/* Traverse through all search objfiles.  */
+#define ALL_SEARCH_OBJFILES(SEARCH, ITER)		       \
+  for (ITER = all_search_objfiles_init (SEARCH);	       \
+       ITER != NULL;					       \
+       ITER = all_search_objfiles_next (SEARCH, ITER))	       \
+
+/* Iterator on PARENT and every separate debug objfile of PARENT.
+   The usage pattern is:
+     for (iter = search;
+          iter;
+          iter = all_search_objfiles_next (search, iter))
+       ...
+*/
+
+static struct objfile *
+all_search_objfiles_init (struct objfile *search)
+{
+  if (search == NULL)
+    {
+      return object_files;
+    }
+  else
+    {
+      return search;
+    }
+}
+
+static struct objfile *
+all_search_objfiles_next (struct objfile *search, struct objfile *iter)
+{
+  if (search == NULL)
+    {
+      return iter->next;
+    }
+  else
+    {
+      return objfile_separate_debug_iterate (search, iter);
+    }
+}
+
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
    the search to that objfile.  If SFILE is non-NULL, the only file-scope
@@ -190,14 +230,10 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	}
     }
 
-  for (objfile = object_files;
-       objfile != NULL && found_symbol.minsym == NULL;
-       objfile = objfile->next)
+  ALL_SEARCH_OBJFILES (objf, objfile)
     {
       struct minimal_symbol *msymbol;
 
-      if (objf == NULL || objf == objfile
-	  || objf == objfile->separate_debug_objfile_backlink)
 	{
 	  /* Do two passes: the first over the ordinary hash table,
 	     and the second over the demangled hash table.  */
@@ -274,6 +310,9 @@ lookup_minimal_symbol (const char *name, const char *sfile,
                         break;
                       }
 		    }
+
+		if (found_symbol.minsym != NULL)
+		  break;
 
                 /* Find the next symbol on the hash chain.  */
                 if (pass == 1)
@@ -392,46 +431,35 @@ struct bound_minimal_symbol
 lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 {
   struct objfile *objfile;
-  struct minimal_symbol *msymbol;
-  struct bound_minimal_symbol found_symbol = { NULL, NULL };
   struct bound_minimal_symbol found_file_symbol = { NULL, NULL };
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  for (objfile = object_files;
-       objfile != NULL && found_symbol.minsym == NULL;
-       objfile = objfile->next)
+  ALL_SEARCH_OBJFILES (objf, objfile)
     {
-      if (objf == NULL || objf == objfile
-	  || objf == objfile->separate_debug_objfile_backlink)
+      struct minimal_symbol *msymbol;
+
+      for (msymbol = objfile->per_bfd->msymbol_hash[hash];
+	   msymbol != NULL;
+	   msymbol = msymbol->hash_next)
 	{
-	  for (msymbol = objfile->per_bfd->msymbol_hash[hash];
-	       msymbol != NULL && found_symbol.minsym == NULL;
-	       msymbol = msymbol->hash_next)
+	  if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0
+	      && (MSYMBOL_TYPE (msymbol) == mst_text
+		  || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
+		  || MSYMBOL_TYPE (msymbol) == mst_file_text))
 	    {
-	      if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
-		  (MSYMBOL_TYPE (msymbol) == mst_text
-		   || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
-		   || MSYMBOL_TYPE (msymbol) == mst_file_text))
+	      switch (MSYMBOL_TYPE (msymbol))
 		{
-		  switch (MSYMBOL_TYPE (msymbol))
-		    {
-		    case mst_file_text:
-		      found_file_symbol.minsym = msymbol;
-		      found_file_symbol.objfile = objfile;
-		      break;
-		    default:
-		      found_symbol.minsym = msymbol;
-		      found_symbol.objfile = objfile;
-		      break;
-		    }
+		case mst_file_text:
+		  found_file_symbol.minsym = msymbol;
+		  found_file_symbol.objfile = objfile;
+		default:
+		  /* External symbols are best.  */
+		  return (struct bound_minimal_symbol) { msymbol, objfile };
 		}
 	    }
 	}
     }
-  /* External symbols are best.  */
-  if (found_symbol.minsym)
-    return found_symbol;
 
   /* File-local symbols are next best.  */
   return found_file_symbol;
@@ -448,21 +476,15 @@ lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  for (objfile = object_files;
-       objfile != NULL;
-       objfile = objfile->next)
+  ALL_SEARCH_OBJFILES (objf, objfile)
     {
-      if (objf == NULL || objf == objfile
-	  || objf == objfile->separate_debug_objfile_backlink)
+      for (msymbol = objfile->per_bfd->msymbol_hash[hash];
+	   msymbol != NULL;
+	   msymbol = msymbol->hash_next)
 	{
-	  for (msymbol = objfile->per_bfd->msymbol_hash[hash];
-	       msymbol != NULL;
-	       msymbol = msymbol->hash_next)
-	    {
-	      if (MSYMBOL_VALUE_ADDRESS (objfile, msymbol) == pc
-		  && strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0)
-		return msymbol;
-	    }
+	  if (MSYMBOL_VALUE_ADDRESS (objfile, msymbol) == pc
+	      && strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0)
+	    return msymbol;
 	}
     }
 
@@ -481,24 +503,18 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  for (objfile = object_files;
-       objfile != NULL;
-       objfile = objfile->next)
+  ALL_SEARCH_OBJFILES (objf, objfile)
     {
-      if (objf == NULL || objf == objfile
-	  || objf == objfile->separate_debug_objfile_backlink)
+      for (msymbol = objfile->per_bfd->msymbol_hash[hash];
+	   msymbol != NULL;
+	   msymbol = msymbol->hash_next)
 	{
-	  for (msymbol = objfile->per_bfd->msymbol_hash[hash];
-	       msymbol != NULL;
-	       msymbol = msymbol->hash_next)
+	  if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
+	      MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
 	    {
-	      if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
-		  MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
-		{
-		  found_symbol.objfile = objfile;
-		  found_symbol.minsym = msymbol;
-		  return found_symbol;
-		}
+	      found_symbol.objfile = objfile;
+	      found_symbol.minsym = msymbol;
+	      return found_symbol;
 	    }
 	}
     }
