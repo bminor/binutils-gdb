@@ -53,6 +53,8 @@
 #include "gdb_bfd.h"
 #include "btrace.h"
 
+static void add_tail_objfile (struct objfile *objfile);
+
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
 
@@ -424,20 +426,7 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
   objfile->sect_index_bss = -1;
   objfile->sect_index_rodata = -1;
 
-  /* Add this file onto the tail of the linked list of other such files.  */
-
-  objfile->next = NULL;
-  if (object_files == NULL)
-    object_files = objfile;
-  else
-    {
-      struct objfile *last_one;
-
-      for (last_one = object_files;
-	   last_one->next;
-	   last_one = last_one->next);
-      last_one->next = objfile;
-    }
+  add_tail_objfile (objfile);
 
   /* Save passed in flag bits.  */
   objfile->flags |= flags;
@@ -522,60 +511,78 @@ objfile_separate_debug_iterate (const struct objfile *parent,
   return NULL;
 }
 
-/* Put one object file before a specified on in the global list.
+/* Put one object file before a specified one in the global list.
    This can be used to make sure an object file is destroyed before
    another when using ALL_OBJFILES_SAFE to free all objfiles.  */
-void
+
+static void
 put_objfile_before (struct objfile *objfile, struct objfile *before_this)
 {
   struct objfile **objp;
 
+  gdb_assert (objfile != NULL && before_this != NULL);
+  gdb_assert (objfile != before_this);
+
   unlink_objfile (objfile);
-  
-  for (objp = &object_files; *objp != NULL; objp = &((*objp)->next))
-    {
-      if (*objp == before_this)
-	{
-	  objfile->next = *objp;
-	  *objp = objfile;
-	  return;
-	}
-    }
-  
-  internal_error (__FILE__, __LINE__,
-		  _("put_objfile_before: before objfile not in list"));
+
+  objfile->next = before_this;
+  objfile->prev = before_this->prev;
+
+  if (before_this == objfile->pspace->objfiles)
+    objfile->pspace->objfiles = objfile;
+  else
+    before_this->prev->next = objfile;
+
+  if (objfile == objfile->pspace->objfiles_tail)
+    objfile->pspace->objfiles_tail = before_this;
+
+  before_this->prev = objfile;
 }
 
-/* Unlink OBJFILE from the list of known objfiles, if it is found in the
-   list.
+/* Add this file onto the tail of the linked list of other such
+   files.  */
 
-   It is not a bug, or error, to call this function if OBJFILE is not known
-   to be in the current list.  This is done in the case of mapped objfiles,
-   for example, just to ensure that the mapped objfile doesn't appear twice
-   in the list.  Since the list is threaded, linking in a mapped objfile
-   twice would create a circular list.
+static void
+add_tail_objfile (struct objfile *objfile)
+{
+  gdb_assert (objfile != NULL);
 
-   If OBJFILE turns out to be in the list, we zap it's NEXT pointer after
-   unlinking it, just to ensure that we have completely severed any linkages
-   between the OBJFILE and the list.  */
+  if (objfile->pspace->objfiles == NULL)
+    {
+      objfile->pspace->objfiles = objfile;
+      objfile->pspace->objfiles_tail = objfile;
+    }
+  else
+    {
+      struct objfile *last_one = objfile->pspace->objfiles_tail;
+
+      gdb_assert (objfile != last_one);
+
+      last_one->next = objfile;
+      objfile->prev = last_one;
+
+      objfile->pspace->objfiles_tail = objfile;
+    }
+}
+
+/* Unlink OBJFILE from the list of known objfiles.  OBJFILE must be in
+   the list.  */
 
 void
 unlink_objfile (struct objfile *objfile)
 {
-  struct objfile **objpp;
+  if (objfile->prev == NULL)
+    objfile->pspace->objfiles = objfile->next;
+  else
+    objfile->prev->next = objfile->next;
 
-  for (objpp = &object_files; *objpp != NULL; objpp = &((*objpp)->next))
-    {
-      if (*objpp == objfile)
-	{
-	  *objpp = (*objpp)->next;
-	  objfile->next = NULL;
-	  return;
-	}
-    }
+  if (objfile->next == NULL)
+    objfile->pspace->objfiles_tail = objfile->prev;
+  else
+    objfile->next->prev = objfile->prev;
 
-  internal_error (__FILE__, __LINE__,
-		  _("unlink_objfile: objfile already unlinked"));
+  objfile->prev = NULL;
+  objfile->next = NULL;
 }
 
 /* Add OBJFILE as a separate debug objfile of PARENT.  */

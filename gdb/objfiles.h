@@ -272,11 +272,14 @@ struct objfile_per_bfd_storage
 
 struct objfile
 {
-  /* All struct objfile's are chained together by their next pointers.
-     The program space field "objfiles"  (frequently referenced via
-     the macro "object_files") points to the first link in this chain.  */
+  /* All struct objfile's are chained together by their prev/next
+     pointers.  The program space field "objfiles" (frequently
+     referenced via the macro "object_files") points to the first link
+     in this chain, and the "objfiles_tail" field points to the last
+     link in this chain.  */
 
   struct objfile *next;
+  struct objfile *prev;
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
@@ -510,8 +513,6 @@ extern void terminate_minimal_symbol_table (struct objfile *objfile);
 
 extern struct objfile *objfile_separate_debug_iterate (const struct objfile *,
                                                        const struct objfile *);
-
-extern void put_objfile_before (struct objfile *, struct objfile *);
 
 extern void add_separate_debug_objfile (struct objfile *, struct objfile *);
 

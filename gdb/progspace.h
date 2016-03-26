@@ -183,9 +183,10 @@ struct program_space
        (e.g. the argument to the "symbol-file" or "file" command).  */
     struct objfile *symfile_object_file;
 
-    /* All known objfiles are kept in a linked list.  This points to
-       the head of this list.  */
+    /* All known objfiles are kept in a doubly linked list.  These
+       point to the head and tail of this list.  */
     struct objfile *objfiles;
+    struct objfile *objfiles_tail;
 
     /* The set of target sections matching the sections mapped into
        this program space.  Managed by both exec_ops and solib.c.  */
