@@ -1,3 +1,11 @@
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-aarch64.c (aarch64_handle_align): Make the type of some
+	variables unsigned char[].
+	* config/tc-alpha.c (alpha_handle_align): Likewise.
+	* config/tc-arm.c (arm_handle_align): Likewise.
+	* config/tc-z80.c: Likewise.
+
 2016-03-30  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19880

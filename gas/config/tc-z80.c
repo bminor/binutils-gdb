@@ -409,8 +409,8 @@ typedef const char * (asfunc)(char, char, const char*);
 typedef struct _table_t
 {
   const char* name;
-  char prefix;
-  char opcode;
+  unsigned char prefix;
+  unsigned char opcode;
   asfunc * fp;
 } table_t;
 

@@ -6322,7 +6322,7 @@ aarch64_handle_align (fragS * fragP)
 {
   /* NOP = d503201f */
   /* AArch64 instructions are always little-endian.  */
-  static char const aarch64_noop[4] = { 0x1f, 0x20, 0x03, 0xd5 };
+  static unsigned char const aarch64_noop[4] = { 0x1f, 0x20, 0x03, 0xd5 };
 
   int bytes, fix, noop_size;
   char *p;

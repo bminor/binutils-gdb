@@ -5366,8 +5366,8 @@ alpha_elf_section_flags (flagword flags, bfd_vma attr, int type ATTRIBUTE_UNUSED
 void
 alpha_handle_align (fragS *fragp)
 {
-  static char const unop[4] = { 0x00, 0x00, 0xfe, 0x2f };
-  static char const nopunop[8] =
+  static unsigned char const unop[4] = { 0x00, 0x00, 0xfe, 0x2f };
+  static unsigned char const nopunop[8] =
   {
     0x1f, 0x04, 0xff, 0x47,
     0x00, 0x00, 0xfe, 0x2f

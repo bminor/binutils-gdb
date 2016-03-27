@@ -21518,7 +21518,7 @@ md_section_align (segT	 segment ATTRIBUTE_UNUSED,
 void
 arm_handle_align (fragS * fragP)
 {
-  static char const arm_noop[2][2][4] =
+  static unsigned char const arm_noop[2][2][4] =
     {
       {  /* ARMv1 */
 	{0x00, 0x00, 0xa0, 0xe1},  /* LE */
@@ -21529,7 +21529,7 @@ arm_handle_align (fragS * fragP)
 	{0xe3, 0x20, 0xf0, 0x00},  /* BE */
       },
     };
-  static char const thumb_noop[2][2][2] =
+  static unsigned char const thumb_noop[2][2][2] =
     {
       {  /* Thumb-1 */
 	{0xc0, 0x46},  /* LE */
@@ -21540,7 +21540,7 @@ arm_handle_align (fragS * fragP)
 	{0xbf, 0x00}   /* BE */
       }
     };
-  static char const wide_thumb_noop[2][4] =
+  static unsigned char const wide_thumb_noop[2][4] =
     {  /* Wide Thumb-2 */
       {0xaf, 0xf3, 0x00, 0x80},  /* LE */
       {0xf3, 0xaf, 0x80, 0x00},  /* BE */
@@ -21548,8 +21548,8 @@ arm_handle_align (fragS * fragP)
 
   unsigned bytes, fix, noop_size;
   char * p;
-  const char * noop;
-  const char *narrow_noop = NULL;
+  const unsigned char * noop;
+  const unsigned char *narrow_noop = NULL;
 #ifdef OBJ_ELF
   enum mstate state;
 #endif
