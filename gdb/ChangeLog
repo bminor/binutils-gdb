@@ -1,3 +1,8 @@
+2016-03-29  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.c (xtensa_frame_cache): Change op1 type to LONGEST.
+	Use safe_read_memory_integer instead of read_memory_integer.
+
 2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* NEWS: Mention support for tracepoints on s390*-linux.

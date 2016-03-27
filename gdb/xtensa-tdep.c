@@ -1285,7 +1285,7 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   if (windowed)
     {
-      char op1;
+      LONGEST op1;
 
       /* Get WINDOWBASE, WINDOWSTART, and PS registers.  */
       wb = get_frame_register_unsigned (this_frame, 
@@ -1293,8 +1293,8 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
       ws = get_frame_register_unsigned (this_frame,
 					gdbarch_tdep (gdbarch)->ws_regnum);
 
-      op1 = read_memory_integer (pc, 1, byte_order);
-      if (XTENSA_IS_ENTRY (gdbarch, op1))
+      if (safe_read_memory_integer (pc, 1, byte_order, &op1)
+	  && XTENSA_IS_ENTRY (gdbarch, op1))
 	{
 	  int callinc = CALLINC (ps);
 	  ra = get_frame_register_unsigned
