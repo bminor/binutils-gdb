@@ -279,9 +279,7 @@ md_apply_fix (fixS *fixP,
 }
 
 long
-md_chars_to_number (con, nbytes)
-     unsigned char con[];	/* Low order byte 1st.  */
-     int nbytes;		/* Number of bytes in the input.  */
+md_chars_to_number (unsigned char *con, int nbytes)
 {
   /* On a PDP-11, 0x1234 is stored as "\x12\x34", and
      0x12345678 is stored as "\x56\x78\x12\x34". It's

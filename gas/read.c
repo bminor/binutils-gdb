@@ -4593,9 +4593,7 @@ emit_expr_fix (expressionS *exp, unsigned int nbytes, fragS *frag, char *p,
    BITFIELD_CONS_EXPRESSIONS.  */
 
 static void
-parse_bitfield_cons (exp, nbytes)
-     expressionS *exp;
-     unsigned int nbytes;
+parse_bitfield_cons (expressionS *exp, unsigned int nbytes)
 {
   unsigned int bits_available = BITS_PER_CHAR * nbytes;
   char *hold = input_line_pointer;
@@ -4780,9 +4778,7 @@ parse_mri_cons (expressionS *exp, unsigned int nbytes)
    To use this for a target, define REPEAT_CONS_EXPRESSIONS.  */
 
 static void
-parse_repeat_cons (exp, nbytes)
-     expressionS *exp;
-     unsigned int nbytes;
+parse_repeat_cons (expressionS *exp, unsigned int nbytes)
 {
   expressionS count;
   int i;

@@ -57,9 +57,7 @@ CGEN_CPU_DESC gas_cgen_cpu_desc;
    ??? Not currently used.  */
 
 void
-cgen_asm_record_register (name, number)
-     char *name;
-     int number;
+cgen_asm_record_register (char *name, int number)
 {
   /* Use symbol_create here instead of symbol_new so we don't try to
      output registers into the object file's symbol table.  */
@@ -102,10 +100,7 @@ gas_cgen_init_parse ()
 /* Queue a fixup.  */
 
 static void
-queue_fixup (opindex, opinfo, expP)
-     int           opindex;
-     int           opinfo;
-     expressionS * expP;
+queue_fixup (int opindex, int opinfo, expressionS *expP)
 {
   /* We need to generate a fixup for this expression.  */
   if (num_fixups >= GAS_CGEN_MAX_FIXUPS)
@@ -168,8 +163,7 @@ gas_cgen_initialize_saved_fixups_array ()
 }
 
 void
-gas_cgen_save_fixups (i)
-     int i;
+gas_cgen_save_fixups (int i)
 {
   if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
     {
@@ -184,8 +178,7 @@ gas_cgen_save_fixups (i)
 }
 
 void
-gas_cgen_restore_fixups (i)
-     int i;
+gas_cgen_restore_fixups (int i)
 {
   if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
     {
@@ -200,8 +193,7 @@ gas_cgen_restore_fixups (i)
 }
 
 void
-gas_cgen_swap_fixups (i)
-     int i;
+gas_cgen_swap_fixups (int i)
 {
   if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
     {
@@ -247,15 +239,9 @@ gas_cgen_swap_fixups (i)
    operand type.  We pick a BFD reloc type in md_apply_fix.  */
 
 fixS *
-gas_cgen_record_fixup (frag, where, insn, length, operand, opinfo, symbol, offset)
-     fragS *              frag;
-     int                  where;
-     const CGEN_INSN *    insn;
-     int                  length;
-     const CGEN_OPERAND * operand;
-     int                  opinfo;
-     symbolS *            symbol;
-     offsetT              offset;
+gas_cgen_record_fixup (fragS *frag, int where, const CGEN_INSN *insn,
+		       int length, const CGEN_OPERAND *operand, int opinfo,
+		       symbolS *symbol, offsetT offset)
 {
   fixS *fixP;
 
@@ -288,14 +274,9 @@ gas_cgen_record_fixup (frag, where, insn, length, operand, opinfo, symbol, offse
    operand type.  We pick a BFD reloc type in md_apply_fix.  */
 
 fixS *
-gas_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
-     fragS *              frag;
-     int                  where;
-     const CGEN_INSN *    insn;
-     int                  length;
-     const CGEN_OPERAND * operand;
-     int                  opinfo;
-     expressionS *        exp;
+gas_cgen_record_fixup_exp (fragS *frag, int where, const CGEN_INSN *insn,
+			   int length, const CGEN_OPERAND *operand, int opinfo,
+			   expressionS *exp)
 {
   fixS *fixP;
 
@@ -344,19 +325,11 @@ static int expr_jmp_buf_p;
    The resulting value is stored in VALUEP.  */
 
 const char *
-gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
-
-#ifdef OBJ_COMPLEX_RELC
-     CGEN_CPU_DESC cd;
-#else
-     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
-#endif
-     enum cgen_parse_operand_type want;
-     const char **strP;
-     int opindex;
-     int opinfo;
-     enum cgen_parse_operand_result *resultP;
-     bfd_vma *valueP;
+gas_cgen_parse_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+		       	enum cgen_parse_operand_type want, const char **strP,
+		       	int opindex, int opinfo,
+		       	enum cgen_parse_operand_result *resultP,
+		       	bfd_vma *valueP)
 {
 #ifdef __STDC__
   /* These are volatile to survive the setjmp.  */
@@ -525,8 +498,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
    ??? This could be done differently by adding code to `expression'.  */
 
 void
-gas_cgen_md_operand (expressionP)
-     expressionS *expressionP ATTRIBUTE_UNUSED;
+gas_cgen_md_operand (expressionS *expressionP ATTRIBUTE_UNUSED)
 {
   /* Don't longjmp if we're not called from within cgen_parse_operand().  */
   if (expr_jmp_buf_p)
@@ -541,12 +513,8 @@ gas_cgen_md_operand (expressionP)
    The "result" is stored in RESULT if non-NULL.  */
 
 void
-gas_cgen_finish_insn (insn, buf, length, relax_p, result)
-     const CGEN_INSN *insn;
-     CGEN_INSN_BYTES_PTR buf;
-     unsigned int length;
-     int relax_p;
-     finished_insnS *result;
+gas_cgen_finish_insn (const CGEN_INSN *insn, CGEN_INSN_BYTES_PTR buf,
+		      unsigned int length, int relax_p, finished_insnS *result)
 {
   int i;
   int relax_operand;
@@ -868,10 +836,7 @@ make_right_shifted_expr (expressionS * exp,
    should handle them all.  */
 
 void
-gas_cgen_md_apply_fix (fixP, valP, seg)
-     fixS *   fixP;
-     valueT * valP;
-     segT     seg ATTRIBUTE_UNUSED;
+gas_cgen_md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
   valueT value = * valP;
@@ -1042,9 +1007,7 @@ gas_cgen_pcrel_r_type (bfd_reloc_code_real_type r)
    FIXME: To what extent can we get all relevant targets to use this?  */
 
 arelent *
-gas_cgen_tc_gen_reloc (section, fixP)
-     asection * section ATTRIBUTE_UNUSED;
-     fixS *     fixP;
+gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 {
   bfd_reloc_code_real_type r_type = fixP->fx_r_type;
   arelent *reloc;

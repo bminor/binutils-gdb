@@ -1,5 +1,14 @@
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* cgen.c: Modernize the way functions declare arguments.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* literal.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-aarch64.c (aarch64_handle_align): Make the type of some
 	variables unsigned char[].
 	* config/tc-alpha.c (alpha_handle_align): Likewise.

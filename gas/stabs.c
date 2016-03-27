@@ -134,10 +134,7 @@ get_stab_string_offset (const char *string, const char *stabstr_secname)
 
 /* Here instead of obj-aout.c because other formats use it too.  */
 void
-aout_process_stab (what, string, type, other, desc)
-     int what;
-     const char *string;
-     int type, other, desc;
+aout_process_stab (int what, const char *string, int type, int other, int desc)
 {
   /* Put the stab information in the symbol table.  */
   symbolS *symbol;
@@ -451,8 +448,7 @@ s_xstab (int what)
 /* Frob invented at RMS' request. Set the n_desc of a symbol.  */
 
 void
-s_desc (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_desc (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char c;

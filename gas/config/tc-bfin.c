@@ -791,9 +791,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 
 /* Round up a section size to the appropriate boundary.  */
 valueT
-md_section_align (segment, size)
-     segT segment;
-     valueT size;
+md_section_align (segT segment, valueT size)
 {
   int boundary = bfd_get_section_alignment (stdoutput, segment);
   return ((size + (1 << boundary) - 1) & -(1 << boundary));
@@ -811,9 +809,7 @@ md_atof (int type, char * litP, int * sizeP)
    then it is done here.  */
 
 arelent *
-tc_gen_reloc (seg, fixp)
-     asection *seg ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
@@ -844,9 +840,7 @@ tc_gen_reloc (seg, fixp)
     given a PC relative reloc.  */
 
 long
-md_pcrel_from_section (fixP, sec)
-     fixS *fixP;
-     segT sec;
+md_pcrel_from_section (fixS *fixP, segT sec)
 {
   if (fixP->fx_addsy != (symbolS *) NULL
       && (!S_IS_DEFINED (fixP->fx_addsy)
