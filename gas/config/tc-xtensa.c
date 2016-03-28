@@ -2274,8 +2274,7 @@ static void
 xg_replace_opname (char **popname, const char *newop)
 {
   free (*popname);
-  *popname = (char *) xmalloc (strlen (newop) + 1);
-  strcpy (*popname, newop);
+  *popname = xstrdup (newop);
 }
 
 
@@ -2370,8 +2369,7 @@ xg_translate_sysreg_op (char **popname, int *pnum_args, char **arg_strings)
   /* Another special case for "WSR.INTSET"....  */
   if (is_write && !is_user && !strcasecmp ("interrupt", sr_name))
     sr_name = "intset";
-  new_opname = (char *) xmalloc (strlen (sr_name) + 6);
-  sprintf (new_opname, "%s.%s", *popname, sr_name);
+  new_opname = concat (*popname, ".", sr_name, (char *) NULL);
   free (*popname);
   *popname = new_opname;
 
@@ -2495,8 +2493,7 @@ xg_translate_idioms (char **popname, int *pnum_args, char **arg_strings)
 	  if (xg_check_num_args (pnum_args, 2, opname, arg_strings))
 	    return -1;
 	  xg_replace_opname (popname, (has_underbar ? "_or" : "or"));
-	  arg_strings[2] = (char *) xmalloc (strlen (arg_strings[1]) + 1);
-	  strcpy (arg_strings[2], arg_strings[1]);
+	  arg_strings[2] = xstrdup (arg_strings[1]);
 	  *pnum_args = 3;
 	}
       return 0;
@@ -2536,12 +2533,9 @@ xg_translate_idioms (char **popname, int *pnum_args, char **arg_strings)
 	  if (xg_check_num_args (pnum_args, 0, opname, arg_strings))
 	    return -1;
 	  xg_replace_opname (popname, (has_underbar ? "_or" : "or"));
-	  arg_strings[0] = (char *) xmalloc (3);
-	  arg_strings[1] = (char *) xmalloc (3);
-	  arg_strings[2] = (char *) xmalloc (3);
-	  strcpy (arg_strings[0], "a1");
-	  strcpy (arg_strings[1], "a1");
-	  strcpy (arg_strings[2], "a1");
+	  arg_strings[0] = xstrdup ("a1");
+	  arg_strings[1] = xstrdup ("a1");
+	  arg_strings[2] = xstrdup ("a1");
 	  *pnum_args = 3;
 	}
       return 0;
@@ -5501,9 +5495,7 @@ md_assemble (char *str)
 
   /* Split off the opcode.  */
   opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_/0123456789.");
-  opname = xmalloc (opnamelen + 1);
-  memcpy (opname, str, opnamelen);
-  opname[opnamelen] = '\0';
+  opname = xstrndup (str, opnamelen);
 
   num_args = tokenize_arguments (arg_strings, str + opnamelen);
   if (num_args == -1)
@@ -11559,19 +11551,14 @@ cache_literal_section (bfd_boolean use_abs_literals)
   base_name = use_abs_literals ? ".lit4" : ".literal";
   if (group_name)
     {
-      name = xmalloc (strlen (base_name) + strlen (group_name) + 2);
-      sprintf (name, "%s.%s", base_name, group_name);
+      name = concat (base_name, ".", group_name, (char *) NULL);
     }
   else if (strncmp (text_name, ".gnu.linkonce.", linkonce_len) == 0)
     {
       suffix = strchr (text_name + linkonce_len, '.');
 
-      name = xmalloc (linkonce_len + strlen (base_name) + 1
-		      + (suffix ? strlen (suffix) : 0));
-      strcpy (name, ".gnu.linkonce");
-      strcat (name, base_name);
-      if (suffix)
-	strcat (name, suffix);
+      name = concat (".gnu.linkonce", base_name, suffix ? suffix : "",
+		     (char *) NULL);
       linkonce = TRUE;
     }
   else

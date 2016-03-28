@@ -407,8 +407,7 @@ tic54x_eval (int x ATTRIBUTE_UNUSED)
       return;
     }
   c = get_symbol_name (&name);	/* Get terminator.  */
-  tmp = xmalloc (strlen (name) + 1);
-  name = strcpy (tmp, name);
+  name = xstrdup (name);
   (void) restore_line_pointer (c);
 
   if (!ISALPHA (*name))
@@ -426,8 +425,7 @@ tic54x_eval (int x ATTRIBUTE_UNUSED)
      But since there's not written rule as to when, don't even bother trying
      to match their behavior.  */
   sprintf (valuestr, "%d", value);
-  tmp = xmalloc (strlen (valuestr) + 1);
-  strcpy (tmp, valuestr);
+  tmp = xstrdup (valuestr);
   subsym_create_or_replace (name, tmp);
 
   demand_empty_rest_of_line ();
@@ -598,7 +596,7 @@ stag_add_field (struct stag *parent,
   struct stag_field *sfield = xmalloc (sizeof (struct stag_field));
 
   memset (sfield, 0, sizeof (*sfield));
-  sfield->name = strcpy (xmalloc (strlen (name) + 1), name);
+  sfield->name = xstrdup (name);
   sfield->offset = offset;
   sfield->bitfield_offset = parent->current_bitfield_offset;
   sfield->stag = stag;
@@ -1361,8 +1359,7 @@ tic54x_usect (int x ATTRIBUTE_UNUSED)
   current_subseg = now_subseg;	/* Save current subseg.  */
 
   c = get_symbol_name (&section_name);	/* Get terminator.  */
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xstrdup (section_name);
   c = restore_line_pointer (c);
   
   if (c == ',')
@@ -1831,8 +1828,7 @@ tic54x_clink (int ignored ATTRIBUTE_UNUSED)
 	;
       know (input_line_pointer[-1] == '\"');
       input_line_pointer[-1] = 0;
-      name = xmalloc (input_line_pointer - section_name + 1);
-      strcpy (name, section_name);
+      name = xstrdup (section_name);
 
       seg = bfd_get_section_by_name (stdoutput, name);
       if (seg == NULL)
@@ -1874,7 +1870,7 @@ tic54x_set_default_include (int dot)
       unsigned lineno;
 
       curfile = as_where (&lineno);
-      dir = strcpy (xmalloc (strlen (curfile) + 1), curfile);
+      dir = xstrdup (curfile);
       tmp = strrchr (dir, '/');
     }
   if (tmp != NULL)
@@ -1931,7 +1927,7 @@ tic54x_include (int ignored ATTRIBUTE_UNUSED)
 	++input_line_pointer;
       c = *input_line_pointer;
       *input_line_pointer = '\0';
-      filename = strcpy (xmalloc (strlen (filename) + 1), filename);
+      filename = xstrdup (filename);
       *input_line_pointer = c;
       demand_empty_rest_of_line ();
     }
@@ -1968,7 +1964,7 @@ tic54x_message (int type)
 	++input_line_pointer;
       c = *input_line_pointer;
       *input_line_pointer = 0;
-      msg = strcpy (xmalloc (strlen (msg) + 1), msg);
+      msg = xstrdup (msg);
       *input_line_pointer = c;
     }
 
@@ -2135,8 +2131,7 @@ tic54x_sblock (int ignore ATTRIBUTE_UNUSED)
 	  char *section_name;
 
 	  c = get_symbol_name (&section_name);
-	  name = xmalloc (strlen (section_name) + 1);
-	  strcpy (name, section_name);
+	  name = xstrdup (section_name);
 	  (void) restore_line_pointer (c);
 	}
 
@@ -2249,7 +2244,7 @@ tic54x_var (int ignore ATTRIBUTE_UNUSED)
 	}
       c = get_symbol_name (&name);
       /* .var symbols start out with a null string.  */
-      name = strcpy (xmalloc (strlen (name) + 1), name);
+      name = xstrdup (name);
       hash_insert (subsym_hash[macro_level], name, empty);
       c = restore_line_pointer (c);
       if (c == ',')
@@ -2617,8 +2612,7 @@ subsym_ismember (char *sym, char *list)
       return 0;
     }
 
-  ptr = elem = xmalloc (strlen (listv) + 1);
-  strcpy (elem, listv);
+  ptr = elem = xstrdup (listv);
   while (*ptr && *ptr != ',')
     ++ptr;
   *ptr++ = 0;
@@ -4411,8 +4405,7 @@ subsym_substitute (char *line, int forced)
   char *tmp;
 
   /* Work with a copy of the input line.  */
-  replacement = xmalloc (strlen (line) + 1);
-  strcpy (replacement, line);
+  replacement = xstrdup (line);
 
   ptr = head = replacement;
 
@@ -4667,8 +4660,7 @@ subsym_substitute (char *line, int forced)
 			 kinda indicates that forced substitution is not
 			 supposed to be recursive, but I'm not sure.  */
 		      unsigned beg, len = 1; /* default to a single char */
-		      char *newval = strcpy (xmalloc (strlen (value) + 1),
-					     value);
+		      char *newval = xstrdup (value);
 
 		      savedp = input_line_pointer;
 		      input_line_pointer = tail + 1;

@@ -7300,8 +7300,7 @@ pa_space (int unused ATTRIBUTE_UNUSED)
       print_errors = 1;
       input_line_pointer = save_s;
       c = get_symbol_name (&name);
-      space_name = xmalloc (strlen (name) + 1);
-      strcpy (space_name, name);
+      space_name = xstrdup (name);
       (void) restore_line_pointer (c);
 
       sd_chain = pa_parse_space_stmt (space_name, 1);
@@ -7365,8 +7364,7 @@ pa_subspace (int create_new)
   else
     {
       c = get_symbol_name (&name);
-      ss_name = xmalloc (strlen (name) + 1);
-      strcpy (ss_name, name);
+      ss_name = xstrdup (name);
       (void) restore_line_pointer (c);
 
       /* Load default values.  */
@@ -7725,8 +7723,7 @@ create_new_space (char *name,
     as_fatal (_("Out of memory: could not allocate new space chain entry: %s\n"),
 	      name);
 
-  SPACE_NAME (chain_entry) = xmalloc (strlen (name) + 1);
-  strcpy (SPACE_NAME (chain_entry), name);
+  SPACE_NAME (chain_entry) = xstrdup (name);
   SPACE_DEFINED (chain_entry) = defined;
   SPACE_USER_DEFINED (chain_entry) = user_defined;
   SPACE_SPNUM (chain_entry) = spnum;
@@ -7812,8 +7809,7 @@ create_new_subspace (sd_chain_struct *space,
   if (!chain_entry)
     as_fatal (_("Out of memory: could not allocate new subspace chain entry: %s\n"), name);
 
-  SUBSPACE_NAME (chain_entry) = xmalloc (strlen (name) + 1);
-  strcpy (SUBSPACE_NAME (chain_entry), name);
+  SUBSPACE_NAME (chain_entry) = xstrdup (name);
 
   /* Initialize subspace_defined.  When we hit a .subspace directive
      we'll set it to 1 which "locks-in" the subspace attributes.  */

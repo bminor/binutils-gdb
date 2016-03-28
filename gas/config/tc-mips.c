@@ -13531,9 +13531,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
   struct mips_opcode *insn;
 
   /* Make a copy of the instruction so that we can fiddle with it.  */
-  name = xmalloc (length + 1);
-  memcpy (name, start, length);
-  name[length] = '\0';
+  name = xstrndup (start, length);
 
   /* Look up the instruction as-is.  */
   insn = (struct mips_opcode *) hash_find (hash, name);

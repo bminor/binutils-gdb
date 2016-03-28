@@ -713,7 +713,6 @@ tic4x_asg (int x ATTRIBUTE_UNUSED)
   char c;
   char *name;
   char *str;
-  char *tmp;
 
   SKIP_WHITESPACE ();
   str = input_line_pointer;
@@ -728,12 +727,8 @@ tic4x_asg (int x ATTRIBUTE_UNUSED)
     }
   *input_line_pointer++ = '\0';
   c = get_symbol_name (&name);	/* Get terminator.  */
-  tmp = xmalloc (strlen (str) + 1);
-  strcpy (tmp, str);
-  str = tmp;
-  tmp = xmalloc (strlen (name) + 1);
-  strcpy (tmp, name);
-  name = tmp;
+  str = xstrdup (str);
+  name = xstrdup (name);
   if (hash_find (tic4x_asg_hash, name))
     hash_replace (tic4x_asg_hash, name, (void *) str);
   else
