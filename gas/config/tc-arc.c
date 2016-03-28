@@ -1078,7 +1078,7 @@ tokenize_flags (const char *str,
 	    goto err;
 
 	  flgnamelen = strspn (input_line_pointer, "abcdefghilmnopqrstvwxz");
-	  if (flgnamelen > MAX_FLAG_NAME_LENGHT)
+	  if (flgnamelen > MAX_FLAG_NAME_LENGTH)
 	    goto err;
 
 	  memcpy (flags->name, input_line_pointer, flgnamelen);

@@ -210,12 +210,12 @@ extern int tc_arc_regname_to_dw2regnum (char *regname);
 #define NOP_OPCODE_S   0x000078E0
 #define NOP_OPCODE_L   0x264A7000 /* mov 0,0.  */
 
-#define MAX_FLAG_NAME_LENGHT 3
+#define MAX_FLAG_NAME_LENGTH 3
 
 struct arc_flags
 {
   /* Name of the parsed flag.  */
-  char name[MAX_FLAG_NAME_LENGHT + 1];
+  char name[MAX_FLAG_NAME_LENGTH + 1];
 
   /* The code of the parsed flag.  Valid when is not zero.  */
   unsigned char code;

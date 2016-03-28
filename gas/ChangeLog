@@ -1,3 +1,10 @@
+2016-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.h (MAX_FLAG_NAME_LENGHT): Rename to...
+	(MAX_FLAG_NAME_LENGTH): ...this.
+	(struct arc_flags): Update to use MAX_FLAG_NAME_LENGTH.
+	* config/tc-arc.c (tokenize_flags): Likewise.
+
 2016-04-01  Alan Modra  <amodra@gmail.com>
 
 	* cgen.c (weak_operand_overflow_check): Return const char*.
