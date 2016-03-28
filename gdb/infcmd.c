@@ -458,7 +458,14 @@ post_create_inferior (struct target_ops *target, int from_tty)
 	  /* If the solist is global across processes, there's no need to
 	     refetch it here.  */
 	  if (!gdbarch_has_global_solist (target_gdbarch ()))
-	    solib_add (NULL, 0, target, auto_solib_add);
+	    {
+	      symfile_add_flags add_flags = 0;
+
+	      if (!auto_solib_add)
+		add_flags |= SYMFILE_NO_READ;
+
+	      solib_add (NULL, add_flags, target);
+	    }
 	}
     }
 

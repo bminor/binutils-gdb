@@ -23,6 +23,7 @@
 /* This file requires that you first include "bfd.h".  */
 #include "symtab.h"
 #include "probe.h"
+#include "common/enum-flags.h"
 
 /* Opaque declarations.  */
 struct target_section;
@@ -448,7 +449,7 @@ extern void add_filename_language (const char *ext, enum language lang);
 /* This enum encodes bit-flags passed as ADD_FLAGS parameter to
    symbol_file_add, etc.  */
 
-enum symfile_add_flags
+enum symfile_add_flag
   {
     /* Be chatty about what you are doing.  */
     SYMFILE_VERBOSE = 1 << 1,
@@ -464,6 +465,7 @@ enum symfile_add_flags
        symbols are read when the objfile is created.  */
     SYMFILE_NO_READ = 1 << 4
   };
+DEF_ENUM_FLAGS_TYPE (enum symfile_add_flag, symfile_add_flags);
 
 extern struct objfile *symbol_file_add (const char *, int,
 					struct section_addr_info *, int);

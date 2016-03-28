@@ -1145,7 +1145,7 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
 
   /* Cause frv_current_sos() to be run if it hasn't been already.  */
   if (main_lm_addr == 0)
-    solib_add (0, 0, 0, 1);
+    solib_add (0, 0, 0);
 
   /* frv_current_sos() will set main_lm_addr for the main executable.  */
   if (objfile == symfile_objfile)
