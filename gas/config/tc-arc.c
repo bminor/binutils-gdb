@@ -1506,6 +1506,38 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 		  ++ntok;
 		  break;
 
+		case O_symbol:
+		  {
+		    const char *p;
+		    size_t len;
+		    const struct arc_aux_reg *auxr;
+		    unsigned j;
+
+		    if (opcode->class != AUXREG)
+		      goto de_fault;
+		    p = S_GET_NAME (tok[tokidx].X_add_symbol);
+		    len = strlen (p);
+
+		    auxr = &arc_aux_regs[0];
+		    for (j = 0; j < arc_num_aux_regs; j++, auxr++)
+		      if (len == auxr->length
+			  && strcasecmp (auxr->name, p) == 0
+                          && ((auxr->subclass == NONE)
+                              || check_cpu_feature (auxr->subclass)))
+			{
+			  /* We modify the token array here, safe in the
+			     knowledge, that if this was the wrong choice
+			     then the original contents will be restored
+			     from BKTOK.  */
+			  tok[tokidx].X_op = O_constant;
+			  tok[tokidx].X_add_number = auxr->address;
+			  break;
+			}
+
+		    if (tok[tokidx].X_op != O_constant)
+		      goto de_fault;
+		  }
+		  /* Fall-through */
 		case O_constant:
 		  /* Check the range.  */
 		  if (operand->bits != 32
@@ -1578,6 +1610,7 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 		      break;
 		    }
 		default:
+		de_fault:
 		  if (operand->default_reloc == 0)
 		    goto match_failed; /* The operand needs relocation.  */
 
@@ -1970,50 +2003,6 @@ find_special_case (const char *opname,
   return opcode;
 }
 
-static void
-preprocess_operands (const struct arc_opcode *opcode,
-		     expressionS *tok,
-		     int ntok)
-{
-  int i;
-  size_t len;
-  const char *p;
-  unsigned j;
-  const struct arc_aux_reg *auxr;
-
-  for (i = 0; i < ntok; i++)
-    {
-      switch (tok[i].X_op)
-	{
-	case O_illegal:
-	case O_absent:
-	  break; /* Throw and error.  */
-
-	case O_symbol:
-	  if (opcode->class != AUXREG)
-	    break;
-	  /* Convert the symbol to a constant if possible.  */
-	  p = S_GET_NAME (tok[i].X_add_symbol);
-	  len = strlen (p);
-
-	  auxr = &arc_aux_regs[0];
-	  for (j = 0; j < arc_num_aux_regs; j++, auxr++)
-	    if (len == auxr->length
-		&& (strcasecmp (auxr->name, p) == 0)
-		&& ((auxr->subclass == NONE)
-		    || check_cpu_feature (auxr->subclass)))
-	      {
-		tok[i].X_op = O_constant;
-		tok[i].X_add_number = auxr->address;
-		break;
-	      }
-	  break;
-	default:
-	  break;
-	}
-    }
-}
-
 /* Given an opcode name, pre-tockenized set of argumenst and the
    opcode flags, take it all the way through emission.  */
 
@@ -2040,8 +2029,6 @@ assemble_tokens (const char *opname,
       pr_debug ("%s:%d: assemble_tokens: %s trying opcode 0x%08X\n",
 		frag_now->fr_file, frag_now->fr_line, opcode->name,
 		opcode->opcode);
-
-      preprocess_operands (opcode, tok, ntok);
 
       found_something = TRUE;
       opcode = find_opcode_match (opcode, tok, &ntok, pflags, nflgs, &cpumatch);

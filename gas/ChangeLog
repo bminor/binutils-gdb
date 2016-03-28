@@ -1,3 +1,10 @@
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (find_opcode_match): Handle O_symbol case, add
+	new de_fault label.
+	(preprocess_operands): Delete.
+	(assemble_tokens): Remove call to preprocess_operands.
+
 2016-04-07  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19910
