@@ -937,7 +937,7 @@ note_reloc2 (INSTR_T code, const char *symbol, int reloc, int value, int pcrel)
 INSTR_T
 gencode (unsigned long x)
 {
-  INSTR_T cell = obstack_alloc (&mempool, sizeof (struct bfin_insn));
+  INSTR_T cell = XOBNEW (&mempool, struct bfin_insn);
   memset (cell, 0, sizeof (struct bfin_insn));
   cell->value = (x);
   return cell;

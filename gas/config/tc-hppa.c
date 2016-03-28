@@ -1194,7 +1194,7 @@ fix_new_hppa (fragS *frag,
 	      int unwind_bits ATTRIBUTE_UNUSED)
 {
   fixS *new_fix;
-  struct hppa_fix_struct *hppa_fix = obstack_alloc (&notes, sizeof (struct hppa_fix_struct));
+  struct hppa_fix_struct *hppa_fix = XOBNEW (&notes, struct hppa_fix_struct);
 
   if (exp != NULL)
     new_fix = fix_new_exp (frag, where, size, exp, pcrel, r_type);
@@ -8556,7 +8556,7 @@ pa_vtable_entry (int ignore ATTRIBUTE_UNUSED)
 
   if (new_fix)
     {
-      struct hppa_fix_struct * hppa_fix = obstack_alloc (&notes, sizeof (struct hppa_fix_struct));
+      struct hppa_fix_struct * hppa_fix = XOBNEW (&notes, struct hppa_fix_struct);
 
       hppa_fix->fx_r_type = R_HPPA;
       hppa_fix->fx_r_field = e_fsel;
@@ -8577,7 +8577,7 @@ pa_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
 
   if (new_fix)
     {
-      struct hppa_fix_struct * hppa_fix = obstack_alloc (&notes, sizeof (struct hppa_fix_struct));
+      struct hppa_fix_struct * hppa_fix = XOBNEW (&notes, struct hppa_fix_struct);
 
       hppa_fix->fx_r_type = R_HPPA;
       hppa_fix->fx_r_field = e_fsel;

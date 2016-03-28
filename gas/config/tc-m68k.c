@@ -4615,7 +4615,7 @@ md_begin (void)
   obstack_begin (&robyn, 4000);
   for (i = 0; i < m68k_numopcodes; i++)
     {
-      hack = slak = obstack_alloc (&robyn, sizeof (struct m68k_incant));
+      hack = slak = XOBNEW (&robyn, struct m68k_incant);
       do
 	{
 	  ins = m68k_sorted_opcodes[i];
@@ -4645,7 +4645,7 @@ md_begin (void)
 	  if (i + 1 != m68k_numopcodes
 	      && !strcmp (ins->name, m68k_sorted_opcodes[i + 1]->name))
 	    {
-	      slak->m_next = obstack_alloc (&robyn, sizeof (struct m68k_incant));
+	      slak->m_next = XOBNEW (&robyn, struct m68k_incant);
 	      i++;
 	    }
 	  else
@@ -4762,7 +4762,7 @@ md_begin (void)
 
     while (mote_pseudo_table[n].poc_name)
       {
-	hack = obstack_alloc (&robyn, sizeof (struct m68k_incant));
+	hack = XOBNEW (&robyn, struct m68k_incant);
 	hash_insert (op_hash,
 		     mote_pseudo_table[n].poc_name, (char *) hack);
 	hack->m_operands = 0;
