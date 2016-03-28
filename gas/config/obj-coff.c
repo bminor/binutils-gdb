@@ -592,7 +592,6 @@ obj_coff_def (int what ATTRIBUTE_UNUSED)
   char name_end;		/* Char after the end of name.  */
   char *symbol_name;		/* Name of the debug symbol.  */
   char *symbol_name_copy;	/* Temporary copy of the name.  */
-  unsigned int symbol_name_length;
 
   if (def_symbol_in_progress != NULL)
     {
@@ -604,9 +603,7 @@ obj_coff_def (int what ATTRIBUTE_UNUSED)
   SKIP_WHITESPACES ();
 
   name_end = get_symbol_name (&symbol_name);
-  symbol_name_length = strlen (symbol_name);
-  symbol_name_copy = xmalloc (symbol_name_length + 1);
-  strcpy (symbol_name_copy, symbol_name);
+  symbol_name_copy = xstrdup (symbol_name);
 #ifdef tc_canonicalize_symbol_name
   symbol_name_copy = tc_canonicalize_symbol_name (symbol_name_copy);
 #endif
@@ -1083,11 +1080,7 @@ weak_is_altname (const char * name)
 static const char *
 weak_name2altname (const char * name)
 {
-  char *alt_name;
-
-  alt_name = xmalloc (sizeof (weak_altprefix) + strlen (name));
-  strcpy (alt_name, weak_altprefix);
-  return strcat (alt_name, name);
+  return concat (weak_altprefix, name, (char *) NULL);
 }
 
 /* Return the name of the weak symbol corresponding to an
@@ -1115,11 +1108,7 @@ weak_uniquify (const char * name)
 #endif
   gas_assert (weak_is_altname (name));
 
-  ret = xmalloc (strlen (name) + strlen (unique) + 2);
-  strcpy (ret, name);
-  strcat (ret, ".");
-  strcat (ret, unique);
-  return ret;
+  return concat (name, ".", unique, (char *) NULL);
 }
 
 void
@@ -1562,8 +1551,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
     }
 
   c = get_symbol_name (&section_name);
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xmemdup0 (section_name, input_line_pointer - section_name);
   *input_line_pointer = c;
   SKIP_WHITESPACE_AFTER_NAME ();
 
@@ -1820,9 +1808,7 @@ obj_coff_init_stab_section (segT seg)
   /* Zero it out.  */
   memset (p, 0, 12);
   file = as_where ((unsigned int *) NULL);
-  stabstr_name = xmalloc (strlen (seg->name) + 4);
-  strcpy (stabstr_name, seg->name);
-  strcat (stabstr_name, "str");
+  stabstr_name = concat (seg->name, "str", (char *) NULL);
   stroff = get_stab_string_offset (file, stabstr_name);
   know (stroff == 1);
   md_number_to_chars (p, stroff, 4);

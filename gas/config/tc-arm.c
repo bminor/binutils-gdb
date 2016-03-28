@@ -2267,9 +2267,7 @@ create_register_alias (char * newname, char *p)
   nlen = strlen (newname);
 #endif
 
-  nbuf = xmalloc (nlen + 1);
-  memcpy (nbuf, newname, nlen);
-  nbuf[nlen] = '\0';
+  nbuf = xmemdup0 (newname, nlen);
 
   /* Create aliases under the new name as stated; an all-lowercase
      version of the new name; and an all-uppercase version of the new
@@ -2432,9 +2430,7 @@ create_neon_reg_alias (char *newname, char *p)
   namelen = strlen (newname);
 #endif
 
-  namebuf = xmalloc (namelen + 1);
-  strncpy (namebuf, newname, namelen);
-  namebuf[namelen] = '\0';
+  namebuf = xmemdup0 (newname, namelen);
 
   insert_neon_reg_alias (namebuf, basereg->number, basetype,
 			 typeinfo.defined != 0 ? &typeinfo : NULL);
@@ -21901,10 +21897,7 @@ start_unwind_section (const segT text_seg, int idx)
   const char * prefix;
   const char * prefix_once;
   const char * group_name;
-  size_t prefix_len;
-  size_t text_len;
   char * sec_name;
-  size_t sec_name_len;
   int type;
   int flags;
   int linkonce;
@@ -21933,13 +21926,7 @@ start_unwind_section (const segT text_seg, int idx)
       text_name += strlen (".gnu.linkonce.t.");
     }
 
-  prefix_len = strlen (prefix);
-  text_len = strlen (text_name);
-  sec_name_len = prefix_len + text_len;
-  sec_name = (char *) xmalloc (sec_name_len + 1);
-  memcpy (sec_name, prefix, prefix_len);
-  memcpy (sec_name + prefix_len, text_name, text_len);
-  sec_name[prefix_len + text_len] = '\0';
+  sec_name = concat (prefix, text_name, (char *) NULL);
 
   flags = SHF_ALLOC;
   linkonce = 0;

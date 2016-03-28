@@ -949,9 +949,7 @@ obj_elf_section_name (void)
 	  return NULL;
 	}
 
-      name = (char *) xmalloc (end - input_line_pointer + 1);
-      memcpy (name, input_line_pointer, end - input_line_pointer);
-      name[end - input_line_pointer] = '\0';
+      name = xmemdup0 (input_line_pointer, end - input_line_pointer);
 
       while (flag_sectname_subst)
         {
@@ -2060,9 +2058,7 @@ obj_elf_init_stab_section (segT seg)
   /* Zero it out.  */
   memset (p, 0, 12);
   file = as_where (NULL);
-  stabstr_name = (char *) xmalloc (strlen (segment_name (seg)) + 4);
-  strcpy (stabstr_name, segment_name (seg));
-  strcat (stabstr_name, "str");
+  stabstr_name = concat (segment_name (seg), "str", (char *) NULL);
   stroff = get_stab_string_offset (file, stabstr_name);
   know (stroff == 1 || (stroff == 0 && file[0] == '\0'));
   md_number_to_chars (p, stroff, 4);

@@ -820,9 +820,7 @@ enter_opname_n (const char *name, int len)
 	return op->opname;
     }
   op = (opname_e *) xmalloc (sizeof (opname_e));
-  op->opname = (char *) xmalloc (len + 1);
-  strncpy (op->opname, name, len);
-  op->opname[len] = '\0';
+  op->opname = xmemdup0 (name, len);
   return op->opname;
 }
 
@@ -1127,9 +1125,7 @@ split_string (split_rec *rec,
       else
 	{
 	  len = p - q;
-	  rec->vec[i] = (char *) xmalloc (sizeof (char) * (len + 1));
-	  strncpy (rec->vec[i], q, len);
-	  rec->vec[i][len] = '\0';
+	  rec->vec[i] = xmemdup0 (q, len);
 	  p++;
 	}
 

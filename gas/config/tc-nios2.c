@@ -3159,10 +3159,7 @@ nios2_modify_arg (char **parsed_args, const char *modifier,
 {
   char *tmp = parsed_args[ndx];
 
-  parsed_args[ndx]
-    = (char *) malloc (strlen (parsed_args[ndx]) + strlen (modifier) + 1);
-  strcpy (parsed_args[ndx], tmp);
-  strcat (parsed_args[ndx], modifier);
+  parsed_args[ndx] = concat (tmp, modifier, (char *) NULL);
 }
 
 /* Modify parsed_args[ndx] by negating that argument.  */
@@ -3172,13 +3169,7 @@ nios2_negate_arg (char **parsed_args, const char *modifier ATTRIBUTE_UNUSED,
 {
   char *tmp = parsed_args[ndx];
 
-  parsed_args[ndx]
-    = (char *) malloc (strlen ("~(") + strlen (parsed_args[ndx]) +
-		       strlen (")+1") + 1);
-
-  strcpy (parsed_args[ndx], "~(");
-  strcat (parsed_args[ndx], tmp);
-  strcat (parsed_args[ndx], ")+1");
+  parsed_args[ndx] = concat ("~(", tmp, ")+1", (char *) NULL);
 }
 
 /* The function nios2_swap_args swaps the pointers at indices index_1 and

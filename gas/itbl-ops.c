@@ -857,9 +857,7 @@ alloc_entry (e_processor processor, e_type type,
   if (e)
     {
       memset (e, 0, sizeof (struct itbl_entry));
-      e->name = (char *) malloc (sizeof (strlen (name)) + 1);
-      if (e->name)
-	strcpy (e->name, name);
+      e->name = xstrdup (name);
       e->processor = processor;
       e->type = type;
       e->value = value;

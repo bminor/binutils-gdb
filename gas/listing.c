@@ -234,11 +234,8 @@ listing_message (const char *name, const char *message)
 {
   if (listing_tail != (list_info_type *) NULL)
     {
-      unsigned int l = strlen (name) + strlen (message) + 1;
-      char *n = (char *) xmalloc (l);
+      char *n = concat (name, message, (char *) NULL);
       struct list_message *lm = XNEW (struct list_message);
-      strcpy (n, name);
-      strcat (n, message);
       lm->message = n;
       lm->next = NULL;
 
@@ -1555,9 +1552,7 @@ listing_title (int depth)
 	  if (listing)
 	    {
 	      length = input_line_pointer - start;
-	      ttl = (char *) xmalloc (length + 1);
-	      memcpy (ttl, start, length);
-	      ttl[length] = 0;
+	      ttl = xmemdup0 (start, length);
 	      listing_tail->edict = depth ? EDICT_SBTTL : EDICT_TITLE;
 	      listing_tail->edict_arg = ttl;
 	    }

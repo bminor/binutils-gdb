@@ -515,9 +515,7 @@ get_filenum (const char *filename, unsigned int num)
 	      dirs = XRESIZEVEC (char *, dirs, dirs_allocated);
 	    }
 
-	  dirs[dir] = (char *) xmalloc (dir_len + 1);
-	  memcpy (dirs[dir], filename, dir_len);
-	  dirs[dir][dir_len] = '\0';
+	  dirs[dir] = xmemdup0 (filename, dir_len);
 	  dirs_in_use = dir + 1;
 	}
     }
@@ -1297,11 +1295,7 @@ process_entries (segT seg, struct line_entry *e)
       sec_name = bfd_get_section_name (stdoutput, seg);
       if (strcmp (sec_name, ".text") != 0)
 	{
-	  unsigned int len;
-
-	  len = strlen (sec_name);
-	  name = xmalloc (len + 11 + 2);
-	  sprintf (name, ".debug_line%s", sec_name);
+	  name = concat (".debug_line", sec_name, (char *) NULL);
 	  subseg_set (subseg_get (name, FALSE), 0);
 	}
       else

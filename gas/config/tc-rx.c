@@ -531,10 +531,7 @@ rx_section (int ignore)
 
       if (*p != '"' && *p != '#')
 	{
-	  char * name = (char *) xmalloc (len + 1);
-
-	  strncpy (name, input_line_pointer, len);
-	  name[len] = 0;
+	  char *name = xmemdup0 (input_line_pointer, len);
 
 	  input_line_pointer = p;
 	  parse_rx_section (name);

@@ -206,16 +206,7 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
       /* There is no normal BFD section name for this section.  Create one.
          The name created doesn't really matter as it will never be written
          on disk.  */
-      size_t seglen = strlen (segname);
-      size_t sectlen = strlen (sectname);
-      char *n;
-
-      n = xmalloc (seglen + 1 + sectlen + 1);
-      memcpy (n, segname, seglen);
-      n[seglen] = '.';
-      memcpy (n + seglen + 1, sectname, sectlen);
-      n[seglen + 1 + sectlen] = 0;
-      name = n;
+      name = concat (segname, ".", sectname, (char *) NULL);
       if (specified_mask & SECT_TYPE_SPECIFIED)
 	sectype = usectype;
       else

@@ -3273,8 +3273,7 @@ sh64_consume_datalabel (const char *name, expressionS *exp,
 	    {
 	      symbolS *dl_symp;
 	      const char * sname = S_GET_NAME (symp);
-	      char *dl_name
-		= xmalloc (strlen (sname) + sizeof (DATALABEL_SUFFIX));
+	      char *dl_name = concat (sname, DATALABEL_SUFFIX, (char *) NULL);
 
 	      /* Now we copy the datalabel-qualified symbol into a symbol
 		 with the same name, but with " DL" appended.  We mark the
@@ -3282,8 +3281,6 @@ sh64_consume_datalabel (const char *name, expressionS *exp,
 		 the main symbol, so we don't have to inspect all symbol
 		 names.  Note that use of "datalabel" is not expected to
 		 be a common case.  */
-	      strcpy (dl_name, sname);
-	      strcat (dl_name, DATALABEL_SUFFIX);
 
 	      /* A FAKE_LABEL_NAME marks "$" or ".".  There can be any
 		 number of them and all have the same (faked) name; we

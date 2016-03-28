@@ -273,9 +273,7 @@ evax_shorten_name (char *id)
     }
 
   /* We only need worry about krunching the base symbol.  */
-  base_id = xmalloc (suffix_dotdot - prefix_dotdot + 1);
-  strncpy (base_id, &id[prefix_dotdot], suffix_dotdot - prefix_dotdot);
-  base_id [suffix_dotdot - prefix_dotdot] = 0;
+  base_id = xmemdup0 (&id[prefix_dotdot], suffix_dotdot - prefix_dotdot);
 
   if (strlen (base_id) > MAX_LABEL_LENGTH)
     {
@@ -299,8 +297,7 @@ evax_shorten_name (char *id)
 	strcat (new_id, suffix);
 
       /* Save it on the heap and return.  */
-      return_id = xmalloc (strlen (new_id) + 1);
-      strcpy (return_id, new_id);
+      return_id = xstrdup (new_id);
 
       return return_id;
     }

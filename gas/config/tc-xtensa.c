@@ -1594,10 +1594,7 @@ xtensa_literal_prefix (void)
 		"abcdefghijklmnopqrstuvwxyz_/0123456789.$");
 
   /* Get a null-terminated copy of the name.  */
-  name = xmalloc (len + 1);
-  gas_assert (name);
-  strncpy (name, input_line_pointer, len);
-  name[len] = 0;
+  name = xmemdup0 (input_line_pointer, len);
 
   /* Skip the name in the input line.  */
   input_line_pointer += len;
@@ -2239,8 +2236,7 @@ xg_reverse_shift_count (char **cnt_argp)
   cnt_arg = *cnt_argp;
 
   /* replace the argument with "31-(argument)" */
-  new_arg = (char *) xmalloc (strlen (cnt_arg) + 6);
-  sprintf (new_arg, "31-(%s)", cnt_arg);
+  new_arg = concat ("31-(", cnt_argp, ")", (char *) NULL);
 
   free (cnt_arg);
   *cnt_argp = new_arg;

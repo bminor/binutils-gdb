@@ -1155,11 +1155,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      SKIP_WHITESPACE ();
 	      c = get_symbol_name (& name);
 
-	      buf = (char *) xmalloc (strlen (name) + 10);
-	      if (start)
-		sprintf (buf, ".startof.%s", name);
-	      else
-		sprintf (buf, ".sizeof.%s", name);
+	      buf = concat (start ? ".startof." : ".sizeof.", name,
+			    (char *) NULL);
 	      symbolP = symbol_make (buf);
 	      free (buf);
 
@@ -1301,11 +1298,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
 
 	      c = get_symbol_name (& name);
 
-	      buf = (char *) xmalloc (strlen (name) + 10);
-	      if (start)
-		sprintf (buf, ".startof.%s", name);
-	      else
-		sprintf (buf, ".sizeof.%s", name);
+	      buf = concat (start ? ".startof." : ".sizeof.", name,
+			    (char *) NULL);
 	      symbolP = symbol_make (buf);
 	      free (buf);
 

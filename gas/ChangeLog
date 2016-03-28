@@ -1,3 +1,49 @@
+2016-05-13  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/obj-coff.c (obj_coff_def): Simplify string copying.
+	(weak_name2altname): Likewise.
+	(weak_uniquify): Likewise.
+	(obj_coff_section): Likewise.
+	(obj_coff_init_stab_section): Likewise.
+	* config/obj-elf.c (obj_elf_section_name): Likewise.
+	(obj_elf_init_stab_section): Likewise.
+	* config/obj-evax.c (evax_shorten_name): Likewise.
+	* config/obj-macho.c (obj_mach_o_make_or_get_sect): Likewise.
+	* config/tc-aarch64.c (create_register_alias): Likewise.
+	* config/tc-alpha.c (load_expression): Likewise.
+	(s_alpha_file): Likewise.
+	(s_alpha_section_name): Likewise.
+	(tc_gen_reloc): Likewise.
+	* config/tc-arc.c (md_assemble): Likewise.
+	* config/tc-arm.c (create_neon_reg_alias): Likewise.
+	(start_unwind_section): Likewise.
+	* config/tc-hppa.c (pa_build_unwind_subspace): Likewise.
+	(hppa_elf_mark_end_of_function): Likewise.
+	* config/tc-nios2.c (nios2_modify_arg): Likewise.
+	(nios2_negate_arg): Likewise.
+	* config/tc-rx.c (rx_section): Likewise.
+	* config/tc-sh64.c (sh64_consume_datalabel): Likewise.
+	* config/tc-tic30.c (tic30_find_parallel_insn): Likewise.
+	* config/tc-tic54x.c (tic54x_include): Likewise.
+	(tic54x_macro_info): Likewise.
+	(subsym_get_arg): Likewise.
+	(subsym_substitute): Likewise.
+	(tic54x_start_line_hook): Likewise.
+	* config/tc-xtensa.c (xtensa_literal_prefix): Likewise.
+	(xg_reverse_shift_count): Likewise.
+	* config/xtensa-relax.c (enter_opname_n): Likewise.
+	(split_string): Likewise.
+	* dwarf2dbg.c (get_filenum): Likewise.
+	(process_entries): Likewise.
+	* expr.c (operand): Likewise.
+	* itbl-ops.c (alloc_entry): Likewise.
+	* listing.c (listing_message): Likewise.
+	(listing_title): Likewise.
+	* macro.c (check_macro): Likewise.
+	* stabs.c (s_xstab): Likewise.
+	* symbols.c (symbol_relc_make_expr): Likewise.
+	* write.c (compress_debug): Likewise.
+
 2016-05-12  Nick Clifton  <nickc@redhat.com>
 
 	PR target/20068

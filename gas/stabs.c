@@ -429,9 +429,7 @@ s_xstab (int what)
      the stab section name.  */
   if (saved_secname == 0 || strcmp (saved_secname, stab_secname))
     {
-      stabstr_secname = (char *) xmalloc (strlen (stab_secname) + 4);
-      strcpy (stabstr_secname, stab_secname);
-      strcat (stabstr_secname, "str");
+      stabstr_secname = concat (stab_secname, "str", (char *) NULL);
       if (saved_secname)
 	{
 	  free (saved_secname);

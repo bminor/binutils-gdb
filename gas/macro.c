@@ -1250,9 +1250,7 @@ check_macro (const char *line, sb *expand,
   if (is_name_ender (*s))
     ++s;
 
-  copy = (char *) xmalloc (s - line + 1);
-  memcpy (copy, line, s - line);
-  copy[s - line] = '\0';
+  copy = xmemdup0 (line, s - line);
   for (cls = copy; *cls != '\0'; cls ++)
     *cls = TOLOWER (*cls);
 
