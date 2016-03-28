@@ -308,6 +308,16 @@ static struct arc_last_insn
   bfd_boolean has_delay_slot;
 } arc_last_insns[2];
 
+/* Structure to hold an entry in ARC_OPCODE_HASH.  */
+struct arc_opcode_hash_entry
+{
+  /* The number of pointers in the OPCODE list.  */
+  size_t count;
+
+  /* Points to a list of opcode pointers.  */
+  const struct arc_opcode **opcode;
+};
+
 /* Forward declaration.  */
 static void assemble_insn
   (const struct arc_opcode *, const expressionS *, int,
@@ -553,6 +563,29 @@ symbolS * GOT_symbol = 0;
 static bfd_boolean assembling_insn = FALSE;
 
 /* Functions implementation.  */
+
+/* Return a pointer to the first entry in ARC_OPCODE_HASH that matches
+   NAME, or NULL if there are no matching entries.  */
+
+static const struct arc_opcode *
+arc_find_opcode (const char *name)
+{
+  const struct arc_opcode_hash_entry *entry;
+  const struct arc_opcode *opcode;
+
+  entry = hash_find (arc_opcode_hash, name);
+  if (entry != NULL)
+    {
+      if (entry->count > 1)
+        as_fatal (_("unable to lookup `%s', too many opcode chains"),
+                  name);
+      opcode = *entry->opcode;
+    }
+  else
+    opcode = NULL;
+
+  return opcode;
+}
 
 /* Like md_number_to_chars but used for limms.  The 4-byte limm value,
    is encoded as 'middle-endian' for a little-endian target.  FIXME!
@@ -1932,8 +1965,7 @@ find_special_case_pseudo (const char *opname,
       break;
     }
 
-  return (const struct arc_opcode *)
-    hash_find (arc_opcode_hash,	pseudo_insn->mnemonic_r);
+  return arc_find_opcode (pseudo_insn->mnemonic_r);
 }
 
 static const struct arc_opcode *
@@ -1969,9 +2001,7 @@ find_special_case_flag (const char *opname,
 	  flaglen = strlen (flagnm);
 	  if (strcmp (opname + oplen, flagnm) == 0)
 	    {
-	      opcode = (const struct arc_opcode *)
-		hash_find (arc_opcode_hash,
-			   arc_flag_special_opcode->name);
+              opcode = arc_find_opcode (arc_flag_special_opcode->name);
 
 	      if (*nflgs + 1 > MAX_INSN_FLGS)
 		break;
@@ -2019,7 +2049,7 @@ assemble_tokens (const char *opname,
   int cpumatch = 1;
 
   /* Search opcodes.  */
-  opcode = (const struct arc_opcode *) hash_find (arc_opcode_hash, opname);
+  opcode = arc_find_opcode (opname);
 
   /* Couldn't find opcode conventional way, try special cases.  */
   if (!opcode)
@@ -2164,12 +2194,28 @@ md_begin (void)
   for (i = 0; i < arc_num_opcodes;)
     {
       const char *name, *retval;
+      struct arc_opcode_hash_entry *entry;
 
       name = arc_opcodes[i].name;
-      retval = hash_insert (arc_opcode_hash, name, (void *) &arc_opcodes[i]);
-      if (retval)
-	as_fatal (_("internal error: can't hash opcode '%s': %s"),
-		  name, retval);
+
+      entry = hash_find (arc_opcode_hash, name);
+      if (entry == NULL)
+        {
+          entry = xmalloc (sizeof (*entry));
+          entry->count = 0;
+          entry->opcode = NULL;
+
+          retval = hash_insert (arc_opcode_hash, name, (void *) entry);
+          if (retval)
+            as_fatal (_("internal error: can't hash opcode '%s': %s"),
+                      name, retval);
+        }
+
+      entry->opcode = xrealloc (entry->opcode,
+                                sizeof (const struct arc_opcode *)
+                                * entry->count + 1);
+      entry->opcode [entry->count] = &arc_opcodes[i];
+      entry->count++;
 
       while (++i < arc_num_opcodes
 	     && (arc_opcodes[i].name == name
