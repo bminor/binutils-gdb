@@ -1,5 +1,14 @@
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-arc.c (struct arc_opcode_hash_entry_iterator): New
+	structure.
+	(arc_opcode_hash_entry_iterator_init): New function.
+	(arc_opcode_hash_entry_iterator_next): New function.
+	(find_opcode_match): Iterate over all arc_opcode entries
+	referenced by the arc_opcode_hash_entry passed in as a parameter.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-arc.c (arc_find_opcode): Now returns
 	arc_opcode_hash_entry pointer.
 	(find_opcode_match): Update argument type, extract arc_opcode from

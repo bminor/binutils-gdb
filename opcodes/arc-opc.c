@@ -1453,7 +1453,37 @@ const unsigned arc_NToperand = FKT_NT;
 
    The format of the opcode table is:
 
-   NAME OPCODE MASK CPU CLASS SUBCLASS { OPERANDS } { FLAGS }.  */
+   NAME OPCODE MASK CPU CLASS SUBCLASS { OPERANDS } { FLAGS }.
+
+   The table is organised such that, where possible, all instructions with
+   the same mnemonic are together in a block.  When the assembler searches
+   for a suitable instruction the entries are checked in table order, so
+   more specific, or specialised cases should appear earlier in the table.
+
+   As an example, consider two instructions 'add a,b,u6' and 'add
+   a,b,limm'.  The first takes a 6-bit immediate that is encoded within the
+   32-bit instruction, while the second takes a 32-bit immediate that is
+   encoded in a follow-on 32-bit, making the total instruction length
+   64-bits.  In this case the u6 variant must appear first in the table, as
+   all u6 immediates could also be encoded using the 'limm' extension,
+   however, we want to use the shorter instruction wherever possible.
+
+   It is possible though to split instructions with the same mnemonic into
+   multiple groups.  However, the instructions are still checked in table
+   order, even across groups.  The only time that instructions with the
+   same mnemonic should be split into different groups is when different
+   variants of the instruction appear in different architectures, in which
+   case, grouping all instructions from a particular architecture together
+   might be preferable to merging the instruction into the main instruction
+   table.
+
+   An example of this split instruction groups can be found with the 'sync'
+   instruction.  The core arc architecture provides a 'sync' instruction,
+   while the nps instruction set extension provides 'sync.rd' and
+   'sync.wr'.  The rd/wr flags are instruction flags, not part of the
+   mnemonic, so we end up with two groups for the sync instruction, the
+   first within the core arc instruction table, and the second within the
+   nps extension instructions.  */
 const struct arc_opcode arc_opcodes[] =
 {
 #include "arc-tbl.h"

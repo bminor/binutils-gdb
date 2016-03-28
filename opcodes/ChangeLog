@@ -1,3 +1,7 @@
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (arc_opcodes): Extend comment to discus table layout.
+
 2016-04-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-nps400-tbl.h: Add movbi, decode1, fbset, fbclear, encode0,

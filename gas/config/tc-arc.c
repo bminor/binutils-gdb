@@ -318,6 +318,17 @@ struct arc_opcode_hash_entry
   const struct arc_opcode **opcode;
 };
 
+/* Structure used for iterating through an arc_opcode_hash_entry.  */
+struct arc_opcode_hash_entry_iterator
+{
+  /* Index into the OPCODE element of the arc_opcode_hash_entry.  */
+  size_t index;
+
+  /* The specific ARC_OPCODE from the ARC_OPCODES table that was last
+     returned by this iterator.  */
+  const struct arc_opcode *opcode;
+};
+
 /* Forward declaration.  */
 static void assemble_insn
   (const struct arc_opcode *, const expressionS *, int,
@@ -575,6 +586,47 @@ arc_find_opcode (const char *name)
 
   entry = hash_find (arc_opcode_hash, name);
   return entry;
+}
+
+/* Initialise the iterator ITER.  */
+
+static void
+arc_opcode_hash_entry_iterator_init (struct arc_opcode_hash_entry_iterator *iter)
+{
+  iter->index = 0;
+  iter->opcode = NULL;
+}
+
+/* Return the next ARC_OPCODE from ENTRY, using ITER to hold state between
+   calls to this function.  Return NULL when all ARC_OPCODE entries have
+   been returned.  */
+
+static const struct arc_opcode *
+arc_opcode_hash_entry_iterator_next (const struct arc_opcode_hash_entry *entry,
+				     struct arc_opcode_hash_entry_iterator *iter)
+{
+  if (iter->opcode == NULL && iter->index == 0)
+    {
+      gas_assert (entry->count > 0);
+      iter->opcode = entry->opcode[iter->index];
+    }
+  else if (iter->opcode != NULL)
+    {
+      const char *old_name = iter->opcode->name;
+
+      iter->opcode++;
+      if ((iter->opcode - arc_opcodes >= (int) arc_num_opcodes)
+	  || (strcmp (old_name, iter->opcode->name) != 0))
+	{
+	  iter->index++;
+	  if (iter->index == entry->count)
+	    iter->opcode = NULL;
+	  else
+	    iter->opcode = entry->opcode[iter->index];
+	}
+    }
+
+  return iter->opcode;
 }
 
 /* Like md_number_to_chars but used for limms.  The 4-byte limm value,
@@ -1406,23 +1458,22 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		   int nflgs,
 		   int *pcpumatch)
 {
-  const struct arc_opcode *first_opcode = entry->opcode[0];
-  const struct arc_opcode *opcode = first_opcode;
+  const struct arc_opcode *opcode;
+  struct arc_opcode_hash_entry_iterator iter;
   int ntok = *pntok;
   int got_cpu_match = 0;
   expressionS bktok[MAX_INSN_ARGS];
   int bkntok;
   expressionS emptyE;
 
-  gas_assert (entry->count > 0);
-  if (entry->count > 1)
-    as_fatal (_("unable to lookup `%s', too many opcode chains"),
-	      first_opcode->name);
+  arc_opcode_hash_entry_iterator_init (&iter);
   memset (&emptyE, 0, sizeof (emptyE));
   memcpy (bktok, tok, MAX_INSN_ARGS * sizeof (*tok));
   bkntok = ntok;
 
-  do
+  for (opcode = arc_opcode_hash_entry_iterator_next (entry, &iter);
+       opcode != NULL;
+       opcode = arc_opcode_hash_entry_iterator_next (entry, &iter))
     {
       const unsigned char *opidx;
       const unsigned char *flgidx;
@@ -1743,8 +1794,6 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
       memcpy (tok, bktok, MAX_INSN_ARGS * sizeof (*tok));
       ntok = bkntok;
     }
-  while (++opcode - arc_opcodes < (int) arc_num_opcodes
-	 && !strcmp (opcode->name, first_opcode->name));
 
   if (*pcpumatch)
     *pcpumatch = got_cpu_match;
@@ -2054,9 +2103,8 @@ assemble_tokens (const char *opname,
     {
       const struct arc_opcode *opcode;
 
-      pr_debug ("%s:%d: assemble_tokens: %s trying opcode 0x%08X\n",
-		frag_now->fr_file, frag_now->fr_line, opcode->name,
-		opcode->opcode);
+      pr_debug ("%s:%d: assemble_tokens: %s\n",
+		frag_now->fr_file, frag_now->fr_line, opname);
       found_something = TRUE;
       opcode = find_opcode_match (entry, tok, &ntok, pflags,
 				  nflgs, &cpumatch);
