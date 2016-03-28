@@ -564,27 +564,17 @@ static bfd_boolean assembling_insn = FALSE;
 
 /* Functions implementation.  */
 
-/* Return a pointer to the first entry in ARC_OPCODE_HASH that matches
-   NAME, or NULL if there are no matching entries.  */
+/* Return a pointer to ARC_OPCODE_HASH_ENTRY that identifies all
+   ARC_OPCODE entries in ARC_OPCODE_HASH that match NAME, or NULL if there
+   are no matching entries in ARC_OPCODE_HASH.  */
 
-static const struct arc_opcode *
+static const struct arc_opcode_hash_entry *
 arc_find_opcode (const char *name)
 {
   const struct arc_opcode_hash_entry *entry;
-  const struct arc_opcode *opcode;
 
   entry = hash_find (arc_opcode_hash, name);
-  if (entry != NULL)
-    {
-      if (entry->count > 1)
-        as_fatal (_("unable to lookup `%s', too many opcode chains"),
-                  name);
-      opcode = *entry->opcode;
-    }
-  else
-    opcode = NULL;
-
-  return opcode;
+  return entry;
 }
 
 /* Like md_number_to_chars but used for limms.  The 4-byte limm value,
@@ -1409,13 +1399,14 @@ check_cpu_feature (insn_subclass_t sc)
    syntax match.  */
 
 static const struct arc_opcode *
-find_opcode_match (const struct arc_opcode *first_opcode,
+find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		   expressionS *tok,
 		   int *pntok,
 		   struct arc_flags *first_pflag,
 		   int nflgs,
 		   int *pcpumatch)
 {
+  const struct arc_opcode *first_opcode = entry->opcode[0];
   const struct arc_opcode *opcode = first_opcode;
   int ntok = *pntok;
   int got_cpu_match = 0;
@@ -1423,6 +1414,10 @@ find_opcode_match (const struct arc_opcode *first_opcode,
   int bkntok;
   expressionS emptyE;
 
+  gas_assert (entry->count > 0);
+  if (entry->count > 1)
+    as_fatal (_("unable to lookup `%s', too many opcode chains"),
+	      first_opcode->name);
   memset (&emptyE, 0, sizeof (emptyE));
   memcpy (bktok, tok, MAX_INSN_ARGS * sizeof (*tok));
   bkntok = ntok;
@@ -1873,7 +1868,7 @@ find_pseudo_insn (const char *opname,
 
 /* Assumes the expressionS *tok is of sufficient size.  */
 
-static const struct arc_opcode *
+static const struct arc_opcode_hash_entry *
 find_special_case_pseudo (const char *opname,
 			  int *ntok,
 			  expressionS *tok,
@@ -1968,7 +1963,7 @@ find_special_case_pseudo (const char *opname,
   return arc_find_opcode (pseudo_insn->mnemonic_r);
 }
 
-static const struct arc_opcode *
+static const struct arc_opcode_hash_entry *
 find_special_case_flag (const char *opname,
 			int *nflgs,
 			struct arc_flags *pflags)
@@ -1978,7 +1973,7 @@ find_special_case_flag (const char *opname,
   unsigned flag_idx, flag_arr_idx;
   size_t flaglen, oplen;
   const struct arc_flag_special *arc_flag_special_opcode;
-  const struct arc_opcode *opcode;
+  const struct arc_opcode_hash_entry *entry;
 
   /* Search for special case instruction.  */
   for (i = 0; i < arc_num_flag_special; i++)
@@ -2001,14 +1996,14 @@ find_special_case_flag (const char *opname,
 	  flaglen = strlen (flagnm);
 	  if (strcmp (opname + oplen, flagnm) == 0)
 	    {
-              opcode = arc_find_opcode (arc_flag_special_opcode->name);
+              entry = arc_find_opcode (arc_flag_special_opcode->name);
 
 	      if (*nflgs + 1 > MAX_INSN_FLGS)
 		break;
 	      memcpy (pflags[*nflgs].name, flagnm, flaglen);
 	      pflags[*nflgs].name[flaglen] = '\0';
 	      (*nflgs)++;
-	      return opcode;
+	      return entry;
 	    }
 	}
     }
@@ -2017,21 +2012,21 @@ find_special_case_flag (const char *opname,
 
 /* Used to find special case opcode.  */
 
-static const struct arc_opcode *
+static const struct arc_opcode_hash_entry *
 find_special_case (const char *opname,
 		   int *nflgs,
 		   struct arc_flags *pflags,
 		   expressionS *tok,
 		   int *ntok)
 {
-  const struct arc_opcode *opcode;
+  const struct arc_opcode_hash_entry *entry;
 
-  opcode = find_special_case_pseudo (opname, ntok, tok, nflgs, pflags);
+  entry = find_special_case_pseudo (opname, ntok, tok, nflgs, pflags);
 
-  if (opcode == NULL)
-    opcode = find_special_case_flag (opname, nflgs, pflags);
+  if (entry == NULL)
+    entry = find_special_case_flag (opname, nflgs, pflags);
 
-  return opcode;
+  return entry;
 }
 
 /* Given an opcode name, pre-tockenized set of argumenst and the
@@ -2045,27 +2040,30 @@ assemble_tokens (const char *opname,
 		 int nflgs)
 {
   bfd_boolean found_something = FALSE;
-  const struct arc_opcode *opcode;
+  const struct arc_opcode_hash_entry *entry;
   int cpumatch = 1;
 
   /* Search opcodes.  */
-  opcode = arc_find_opcode (opname);
+  entry = arc_find_opcode (opname);
 
   /* Couldn't find opcode conventional way, try special cases.  */
-  if (!opcode)
-    opcode = find_special_case (opname, &nflgs, pflags, tok, &ntok);
+  if (entry == NULL)
+    entry = find_special_case (opname, &nflgs, pflags, tok, &ntok);
 
-  if (opcode)
+  if (entry != NULL)
     {
+      const struct arc_opcode *opcode;
+
       pr_debug ("%s:%d: assemble_tokens: %s trying opcode 0x%08X\n",
 		frag_now->fr_file, frag_now->fr_line, opcode->name,
 		opcode->opcode);
-
       found_something = TRUE;
-      opcode = find_opcode_match (opcode, tok, &ntok, pflags, nflgs, &cpumatch);
-      if (opcode)
+      opcode = find_opcode_match (entry, tok, &ntok, pflags,
+				  nflgs, &cpumatch);
+      if (opcode != NULL)
 	{
 	  struct arc_insn insn;
+
 	  assemble_insn (opcode, tok, ntok, pflags, nflgs, &insn);
 	  emit_insn (&insn);
 	  return;

@@ -1,5 +1,18 @@
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-arc.c (arc_find_opcode): Now returns
+	arc_opcode_hash_entry pointer.
+	(find_opcode_match): Update argument type, extract arc_opcode from
+	incoming arc_opcode_hash_entry.
+	(find_special_case_pseudo): Update return type.
+	(find_special_case_flag): Update return type.
+	(find_special_case): Update return type.
+	(assemble_tokens): Lookup arc_opcode_hash_entry based on
+	instruction mnemonic, then use find_opcode_match to identify
+	specific arc_opcode.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-arc.c (struct arc_opcode_hash_entry): New structure.
 	(arc_find_opcode): New function.
 	(find_special_case_pseudo): Use arc_find_opcode.
