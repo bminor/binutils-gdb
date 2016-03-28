@@ -1080,7 +1080,8 @@ tokenize_flags (const char *str,
 	  if (num_flags >= nflg)
 	    goto err;
 
-	  flgnamelen = strspn (input_line_pointer, "abcdefghilmnopqrstvwxz");
+	  flgnamelen = strspn (input_line_pointer,
+			       "abcdefghijklmnopqrstuvwxyz0123456789");
 	  if (flgnamelen > MAX_FLAG_NAME_LENGTH)
 	    goto err;
 

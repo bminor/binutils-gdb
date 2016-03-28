@@ -1,5 +1,10 @@
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-arc.c (tokenize_flags): Allow greater range of
+	characters into flag names.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-arc.c (find_opcode_match): Handle O_symbol case, add
 	new de_fault label.
 	(preprocess_operands): Delete.
