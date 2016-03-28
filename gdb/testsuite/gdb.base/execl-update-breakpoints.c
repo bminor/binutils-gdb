@@ -36,6 +36,8 @@ main (int argc, char **argv)
   memcpy (bin, argv[0], len + 1);
   if (bin[len - 1] == '1')
     bin[len - 1] = '2';
+  else
+    exit (1);
 
   execl (bin, bin, (char *) NULL);
   perror ("execl failed");
