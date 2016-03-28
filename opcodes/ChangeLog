@@ -1,5 +1,11 @@
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arc-nps400-tbl.h: Add schd, sync, and hwschd instructions.
+	* arc-opc.c (arc_flag_operands): Add new flags.
+	(arc_flag_classes): Add new classes.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arc-opc.c (arc_opcodes): Extend comment to discus table layout.
 
 2016-04-05  Andrew Burgess  <andrew.burgess@embecosm.com>

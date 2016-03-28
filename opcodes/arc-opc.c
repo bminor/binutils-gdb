@@ -1003,6 +1003,37 @@ const struct arc_flag_operand arc_flag_operands[] =
 
 #define F_NPS_R     (F_NPS_FLAG + 1)
   { "r",  1, 1, 15, 1 },
+
+#define F_NPS_RW     (F_NPS_R + 1)
+  { "rw", 0, 1, 7, 1 },
+
+#define F_NPS_RD     (F_NPS_RW + 1)
+  { "rd", 1, 1, 7, 1 },
+
+#define F_NPS_WFT     (F_NPS_RD + 1)
+  { "wft", 0, 0, 0, 1 },
+
+#define F_NPS_IE1     (F_NPS_WFT + 1)
+  { "ie1", 1, 2, 8, 1 },
+
+#define F_NPS_IE2     (F_NPS_IE1 + 1)
+  { "ie2", 2, 2, 8, 1 },
+
+#define F_NPS_IE12     (F_NPS_IE2 + 1)
+  { "ie12", 3, 2, 8, 1 },
+
+#define F_NPS_SYNC_RD     (F_NPS_IE12 + 1)
+  { "rd", 0, 1, 6, 1 },
+
+#define F_NPS_SYNC_WR     (F_NPS_SYNC_RD + 1)
+  { "wr", 1, 1, 6, 1 },
+
+#define F_NPS_HWS_OFF     (F_NPS_SYNC_WR + 1)
+  { "off", 0, 0, 0, 1 },
+
+#define F_NPS_HWS_RESTORE     (F_NPS_HWS_OFF + 1)
+  { "restore", 0, 0, 0, 1 },
+
 };
 
 const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
@@ -1084,6 +1115,25 @@ const struct arc_flag_class arc_flag_classes[] =
 
 #define C_NPS_R     (C_NPS_F + 1)
   { F_CLASS_OPTIONAL, { F_NPS_R, F_NULL}},
+
+#define C_NPS_SCHD_RW     (C_NPS_R + 1)
+  { F_CLASS_REQUIRED, { F_NPS_RW, F_NPS_RD, F_NULL}},
+
+#define C_NPS_SCHD_TRIG     (C_NPS_SCHD_RW + 1)
+  { F_CLASS_REQUIRED, { F_NPS_WFT, F_NULL}},
+
+#define C_NPS_SCHD_IE     (C_NPS_SCHD_TRIG + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_IE1, F_NPS_IE2, F_NPS_IE12, F_NULL}},
+
+#define C_NPS_SYNC     (C_NPS_SCHD_IE + 1)
+  { F_CLASS_REQUIRED, { F_NPS_SYNC_RD, F_NPS_SYNC_WR, F_NULL}},
+
+#define C_NPS_HWS_OFF     (C_NPS_SYNC + 1)
+  { F_CLASS_REQUIRED, { F_NPS_HWS_OFF, F_NULL}},
+
+#define C_NPS_HWS_RESTORE     (C_NPS_HWS_OFF + 1)
+  { F_CLASS_REQUIRED, { F_NPS_HWS_RESTORE, F_NULL}},
+
 };
 
 /* The operands table.

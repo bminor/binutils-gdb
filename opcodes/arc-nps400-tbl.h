@@ -123,3 +123,20 @@
 
 /* crc32<.r> 0,limm,u6		00111 110 01 110100 R 111 uuuuuu 111110 */
 { "crc32", 0x3e74703e, 0xffff703f, ARC_OPCODE_NPS400, BITOP, NONE, { ZA, LIMM, UIMM6_20 }, { C_NPS_R }},
+
+/****                  Pipeline Control Instructions                  ****/
+
+/* schd<.rw|.rd> */
+{ "schd", 0x3e6f7004, 0xffffff7f, ARC_OPCODE_NPS400, CONTROL, NONE, { 0 }, { C_NPS_SCHD_RW }},
+
+/* schd.wft.<.ie1|.ie2|.ie12> */
+{ "schd", 0x3e6f7044, 0xfffffcff, ARC_OPCODE_NPS400, CONTROL, NONE, { 0 }, { C_NPS_SCHD_TRIG, C_NPS_SCHD_IE }},
+
+/* sync<.rd|.wr> */
+{ "sync", 0x3e6f703f, 0xffffffbf, ARC_OPCODE_NPS400, CONTROL, NONE, { 0 }, { C_NPS_SYNC }},
+
+/* hwscd.off B */
+{ "hwschd", 0x386f00bf, 0xf8ff8fff, ARC_OPCODE_NPS400, CONTROL, NONE, { RB }, { C_NPS_HWS_OFF }},
+
+/* hwscd.restore 0,C */
+{ "hwschd", 0x3e6f7003, 0xfffff03f, ARC_OPCODE_NPS400, CONTROL, NONE, { ZA, RC }, { C_NPS_HWS_RESTORE }},

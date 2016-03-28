@@ -1,5 +1,11 @@
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-arc.h (MAX_FLAG_NAME_LENGTH): Increase to 7.
+	* testsuite/gas/arc/nps400-2.d: New file.
+	* testsuite/gas/arc/nps400-2.s: New file.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-arc.c (struct arc_opcode_hash_entry_iterator): New
 	structure.
 	(arc_opcode_hash_entry_iterator_init): New function.
