@@ -1,5 +1,10 @@
 2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/xtensa-relax.h: Move typedefs of enums to the enums
+	definition.
+
+2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-ns32k.c (bit_fix_new): Replace obstack-alloc with XOBNEW
 	macro.
 
