@@ -110,7 +110,7 @@
 #define MAX_TAG_CPU_ARCH	TAG_CPU_ARCH_V8M_MAIN
 /* Pseudo-architecture to allow objects to be compatible with the subset of
    armv4t and armv6-m.  This value should never be stored in object files.  */
-#define TAG_CPU_ARCH_V4T_PLUS_V6_M 15
+#define TAG_CPU_ARCH_V4T_PLUS_V6_M (MAX_TAG_CPU_ARCH + 1)
 
 /* Relocation types.  */
 

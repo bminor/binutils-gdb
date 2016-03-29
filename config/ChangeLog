@@ -1,3 +1,8 @@
+2016-01-18  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/19481
+	* override.m4 (AC_PROG_LEX): Define.
+
 2015-08-24  Yaakov Selkowitz  <yselkowi@redhat.com>
 
 	* iconv.m4 (AM_ICONV_LINK): Use in-tree libiconv when present.

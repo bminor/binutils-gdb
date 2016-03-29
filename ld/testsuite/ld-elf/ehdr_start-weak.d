@@ -4,7 +4,6 @@
 #target: *-*-linux* *-*-gnu* *-*-nacl*
 #xfail: frv-*-*
 
-#failif
 #...
-.* __ehdr_start
-#...
+\s+[wU] __ehdr_start
+#pass

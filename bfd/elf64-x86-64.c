@@ -2723,12 +2723,14 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	}
       else
 	{
+	  eh->plt_got.offset = (bfd_vma) -1;
 	  h->plt.offset = (bfd_vma) -1;
 	  h->needs_plt = 0;
 	}
     }
   else
     {
+      eh->plt_got.offset = (bfd_vma) -1;
       h->plt.offset = (bfd_vma) -1;
       h->needs_plt = 0;
     }
@@ -3190,35 +3192,43 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	}
       else
 	{
-	  asection *asect;
-	  bfd_size_type size;
+	  bfd_signed_vma distance;
 
 	  /* At this point, we don't know the load addresses of TSEC
 	     section nor SEC section.  We estimate the distrance between
-	     SEC and TSEC.  */
-	  size = 0;
-	  for (asect = sec->output_section;
-	       asect != NULL && asect != tsec->output_section;
-	       asect = asect->next)
+	     SEC and TSEC.  We store the estimated distances in the
+	     compressed_size field of the output section, which is only
+	     used to decompress the compressed input section.  */
+	  if (sec->output_section->compressed_size == 0)
 	    {
-	      asection *i;
-	      for (i = asect->output_section->map_head.s;
-		   i != NULL;
-		   i = i->map_head.s)
+	      asection *asect;
+	      bfd_size_type size = 0;
+	      for (asect = link_info->output_bfd->sections;
+		   asect != NULL;
+		   asect = asect->next)
 		{
-		  size = align_power (size, i->alignment_power);
-		  size += i->size;
+		  asection *i;
+		  for (i = asect->map_head.s;
+		       i != NULL;
+		       i = i->map_head.s)
+		    {
+		      size = align_power (size, i->alignment_power);
+		      size += i->size;
+		    }
+		  asect->compressed_size = size;
 		}
 	    }
 
 	  /* Don't convert GOTPCREL relocations if TSEC isn't placed
 	     after SEC.  */
-	  if (asect == NULL)
+	  distance = (tsec->output_section->compressed_size
+		      - sec->output_section->compressed_size);
+	  if (distance < 0)
 	    continue;
 
 	  /* Take PT_GNU_RELRO segment into account by adding
 	     maxpagesize.  */
-	  if ((toff + size + maxpagesize - roff + 0x80000000)
+	  if ((toff + distance + maxpagesize - roff + 0x80000000)
 	      > 0xffffffff)
 	    continue;
 	}

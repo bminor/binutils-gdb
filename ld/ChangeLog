@@ -1,3 +1,172 @@
+2016-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	* testsuite/ld-elf/pr19579a.c: New file.
+	* testsuite/ld-elf/pr19579b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/19579 test.
+
+2016-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19739
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	merge flags of other input sections for relocatable link.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
+2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-plugin/lto.exp: Update PR ld/12365 test for GCC 6.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19698
+	* testsuite/ld-elf/pr19698.d: New file.
+	* testsuite/ld-elf/pr19698.s: Likewise.
+	* testsuite/ld-elf/pr19698.t: Likewise.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19553
+	* testsuite/ld-elf/indirect.exp: Run tests for PR ld/19553.
+	* testsuite/ld-elf/pr19553.map: New file.
+	* testsuite/ld-elf/pr19553.map: Likewise.
+	* testsuite/ld-elf/pr19553a.c: Likewise.
+	* testsuite/ld-elf/pr19553b.c: Likewise.
+	* testsuite/ld-elf/pr19553b.out: Likewise.
+	* testsuite/ld-elf/pr19553c.c: Likewise.
+	* testsuite/ld-elf/pr19553c.out: Likewise.
+	* testsuite/ld-elf/pr19553d.c: Likewise.
+	* testsuite/ld-elf/pr19553d.out: Likewise.
+
+2016-02-25  Jiong Wang  <jiong.wang@arm.com>
+
+	Backport from master
+	2016-01-20  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/farcall-section.d: Delete.
+	* testsuite/ld-aarch64/farcall-section.s: Delete.
+	* testsuite/ld-aarch64/farcall-b-section.d: New expectation file.
+	* testsuite/ld-aarch64/farcall-bl-section.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-section.s: New testcase.
+	* testsuite/ld-aarch64/farcall-bl-section.s: Likewise.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Likewise.
+
+2016-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19615
+	* ld.texinfo: Document -Bsymbolic and -Bsymbolic-functions for
+	PIE.
+	* lexsup.c (parse_args): Enable -Bsymbolic and
+	-Bsymbolic-functions for PIE.
+	* testsuite/ld-i386/i386.exp: Run pr19615.
+	* testsuite/ld-i386/pr19615.d: New file.
+	* testsuite/ld-i386/pr19615.s: Likewise.
+	* testsuite/ld-x86-64/pr19615.d: Likewise.
+	* testsuite/ld-x86-64/pr19615.s: Likewise.
+
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19520
+	* testsuite/ld-i386/branch1.d: Pass -mrelax-relocations=yes to as.
+	* testsuite/ld-i386/call1.d: Likewise.
+	* testsuite/ld-i386/call2.d: Likewise.
+	* testsuite/ld-i386/call3a.d: Likewise.
+	* testsuite/ld-i386/call3b.d: Likewise.
+	* testsuite/ld-i386/call3c.d: Likewise.
+	* testsuite/ld-i386/call3d.d: Likewise.
+	* testsuite/ld-i386/call3e.d: Likewise.
+	* testsuite/ld-i386/call3f.d: Likewise.
+	* testsuite/ld-i386/call3g.d: Likewise.
+	* testsuite/ld-i386/call3h.d: Likewise.
+	* testsuite/ld-i386/jmp1.d: Likewise.
+	* testsuite/ld-i386/jmp2.d: Likewise.
+	* testsuite/ld-i386/lea1c.d: Likewise.
+	* testsuite/ld-i386/load1.d: Likewise.
+	* testsuite/ld-i386/load2.d: Likewise.
+	* testsuite/ld-i386/load3.d: Likewise.
+	* testsuite/ld-i386/load4a.d: Likewise.
+	* testsuite/ld-i386/load5a.d: Likewise.
+	* testsuite/ld-i386/mov2b.d: Likewise.
+	* testsuite/ld-i386/mov3.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-21-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-22-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-5r-local-x86-64.d: Likewise.
+	* testsuite/ld-x86-64/call1a.d: Likewise.
+	* testsuite/ld-x86-64/call1b.d: Likewise.
+	* testsuite/ld-x86-64/call1c.d: Likewise.
+	* testsuite/ld-x86-64/call1d.d: Likewise.
+	* testsuite/ld-x86-64/call1e.d: Likewise.
+	* testsuite/ld-x86-64/call1f.d: Likewise.
+	* testsuite/ld-x86-64/call1h.d: Likewise.
+	* testsuite/ld-x86-64/call1i.d: Likewise.
+	* testsuite/ld-x86-64/load1a.d: Likewise.
+	* testsuite/ld-x86-64/load1b.d: Likewise.
+	* testsuite/ld-i386/got1a.S: Load GOT into %ecx and use it.
+	* testsuite/ld-i386/got1.dd: Updated.
+	* testsuite/ld-i386/got1d.S (1): Removed.
+	* testsuite/ld-i386/i386.exp: Add -Wa,-mrelax-relocations=yes.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18591
+	* testsuite/ld-x86-64/pr18591.d: New file.
+	* testsuite/ld-x86-64/pr18591.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr18591.
+
+2016-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19533
+	* configure.ac (compressed_debug_sections): Replace == with =.
+	* configure: Regenerated.
+
+2016-01-25  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2016-01-25  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2016-01-18  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2016-01-11  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	PR ld/18199
+	* plugin.c (plugin_get_ir_dummy_bfd): Use srctemplate as the
+	template when calling bfd_create if it does not use the BFD
+	plugin target vector.
+
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
@@ -74,7 +243,7 @@
 	decide placement.
 
 2015-10-27  Laurent Alfonsi <laurent.alfonsi@st.com>
-            Christophe Monat <christophe.monat@st.com>
+	    Christophe Monat <christophe.monat@st.com>
 
 	* ld.texinfo: Add description of the STM32L4xx erratum
 	workaround.
@@ -114,7 +283,7 @@
 
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* ld/ld.texinfo: Document "-z call-nop=PADDING" option.
+	* ld.texinfo: Document "-z call-nop=PADDING" option.
 	* emulparams/call_nop.sh: New file.
 	* emulparams/elf_i386_be.sh: Source
 	${srcdir}/emulparams/call_nop.sh.
@@ -150,7 +319,7 @@
 
 2015-10-15  Simon Dardis  <Simon.Dardis@imgtec.com>
 
-	* ld/ldexp.c: (try_copy_symbol_flags): New. Factored out from...
+	* ldexp.c: (try_copy_symbol_flags): New. Factored out from...
 	(exp_fold_tree_1): Here.  Cope with ternary operator in
 	assignments.  Use new helper.
 
@@ -293,7 +462,7 @@
 2015-09-09  James Bowman  <james.bowman@ftdichip.com>
 
 	* scripttempl/ft32.sc: default linker script RAM and
-        FLASH size symbols
+	FLASH size symbols
 
 2015-09-09  Nick Clifton  <nickc@redhat.com>
 
@@ -344,58 +513,58 @@
 
 2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* ld/ldctor.c: Replace shared, executable, relocatable and pie
+	* ldctor.c: Replace shared, executable, relocatable and pie
 	fields with bfd_link_executable, bfd_link_dll,
 	bfd_link_relocatable, bfd_link_pic and bfd_link_pie.
-	* ld/ldemul.c: Likewise.
-	* ld/ldfile.c: Likewise.
-	* ld/ldlang.c: Likewise.
-	* ld/ldmain.c: Likewise.
-	* ld/ldwrite.c: Likewise.
-	* ld/lexsup.c: Likewise.
-	* ld/pe-dll.c: Likewise.
-	* ld/plugin.c: Likewise.
-	* ld/emultempl/aarch64elf.em: Likewise.
-	* ld/emultempl/aix.em: Likewise.
-	* ld/emultempl/alphaelf.em: Likewise.
-	* ld/emultempl/armcoff.em: Likewise.
-	* ld/emultempl/armelf.em: Likewise.
-	* ld/emultempl/avrelf.em: Likewise.
-	* ld/emultempl/beos.em: Likewise.
-	* ld/emultempl/cr16elf.em: Likewise.
-	* ld/emultempl/elf-generic.em: Likewise.
-	* ld/emultempl/elf32.em: Likewise.
-	* ld/emultempl/genelf.em: Likewise.
-	* ld/emultempl/generic.em: Likewise.
-	* ld/emultempl/gld960.em: Likewise.
-	* ld/emultempl/gld960c.em: Likewise.
-	* ld/emultempl/hppaelf.em: Likewise.
-	* ld/emultempl/irix.em: Likewise.
-	* ld/emultempl/linux.em: Likewise.
-	* ld/emultempl/lnk960.em: Likewise.
-	* ld/emultempl/m68hc1xelf.em: Likewise.
-	* ld/emultempl/m68kcoff.em: Likewise.
-	* ld/emultempl/m68kelf.em: Likewise.
-	* ld/emultempl/metagelf.em: Likewise.
-	* ld/emultempl/mipself.em: Likewise.
-	* ld/emultempl/mmo.em: Likewise.
-	* ld/emultempl/msp430.em: Likewise.
-	* ld/emultempl/nds32elf.em: Likewise.
-	* ld/emultempl/needrelax.em: Likewise.
-	* ld/emultempl/nios2elf.em: Likewise.
-	* ld/emultempl/pe.em: Likewise.
-	* ld/emultempl/pep.em: Likewise.
-	* ld/emultempl/ppc32elf.em: Likewise.
-	* ld/emultempl/ppc64elf.em: Likewise.
-	* ld/emultempl/sh64elf.em: Likewise.
-	* ld/emultempl/solaris2.em: Likewise.
-	* ld/emultempl/spuelf.em: Likewise.
-	* ld/emultempl/sunos.em: Likewise.
-	* ld/emultempl/tic6xdsbt.em: Likewise.
-	* ld/emultempl/ticoff.em: Likewise.
-	* ld/emultempl/v850elf.em: Likewise.
-	* ld/emultempl/vms.em: Likewise.
-	* ld/emultempl/vxworks.em: Likewise.
+	* ldemul.c: Likewise.
+	* ldfile.c: Likewise.
+	* ldlang.c: Likewise.
+	* ldmain.c: Likewise.
+	* ldwrite.c: Likewise.
+	* lexsup.c: Likewise.
+	* pe-dll.c: Likewise.
+	* plugin.c: Likewise.
+	* emultempl/aarch64elf.em: Likewise.
+	* emultempl/aix.em: Likewise.
+	* emultempl/alphaelf.em: Likewise.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/avrelf.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/cr16elf.em: Likewise.
+	* emultempl/elf-generic.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/genelf.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/irix.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/m68kelf.em: Likewise.
+	* emultempl/metagelf.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/msp430.em: Likewise.
+	* emultempl/nds32elf.em: Likewise.
+	* emultempl/needrelax.em: Likewise.
+	* emultempl/nios2elf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/sh64elf.em: Likewise.
+	* emultempl/solaris2.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/v850elf.em: Likewise.
+	* emultempl/vms.em: Likewise.
+	* emultempl/vxworks.em: Likewise.
 
 2015-08-18  Alan Modra  <amodra@gmail.com>
 

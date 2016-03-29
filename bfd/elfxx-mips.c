@@ -15013,9 +15013,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
-
-  return TRUE;
+  return _bfd_elf_merge_object_attributes (ibfd, obfd);
 }
 
 /* Merge backend specific data from an object file to the output

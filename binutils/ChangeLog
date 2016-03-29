@@ -1,3 +1,29 @@
+2016-03-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/19775
+	* testsuite/binutils-all/ar.exp (proc empty_archive): New proc.
+	Run the new proc.
+	* testsuite/binutils-all/empty: New, empty, file.
+
+2016-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/binutils.texi: Fix a typo.
+
+2016-01-25  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2016-01-25  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2016-01-18  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
@@ -230,12 +256,12 @@
 
 2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
-	 PR binutils/18656
-	 * objcopy.c (setup_section): Call bfd_convert_section_size
-	 to get the output section size.
-	 (copy_section): Get the section size from the output section
-	 and call bfd_get_full_section_contents to convert section
-	 contents for output.
+	PR binutils/18656
+	* objcopy.c (setup_section): Call bfd_convert_section_size
+	to get the output section size.
+	(copy_section): Get the section size from the output section
+	and call bfd_get_full_section_contents to convert section
+	contents for output.
 
 2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 

@@ -1434,7 +1434,7 @@ insert_fxm (unsigned long insn,
       /* A value of -1 means we used the one operand form of
 	 mfcr which is valid.  */
       if (value != -1)
-        *errmsg = _("ignoring invalid mfcr mask");
+        *errmsg = _("invalid mfcr mask");
       value = 0;
     }
 
@@ -4742,8 +4742,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"tlbilxva",	XTO(31,18,3),	XTO_MASK, E500MC|PPCA2,	PPCNONE,	{RA0, RB}},
 {"tlbilx",	X(31,18),	X_MASK,   E500MC|PPCA2,	PPCNONE,	{T, RA0, RB}},
 
-{"mfcr",	XFXM(31,19,0,0), XFXFXM_MASK, POWER4,	PPCNONE,	{RT, FXM4}},
-{"mfcr",	XFXM(31,19,0,0), XRARB_MASK, COM|PPCVLE, POWER4,	{RT}},
+{"mfcr",	XFXM(31,19,0,0), XFXFXM_MASK, COM|PPCVLE, PPCNONE,	{RT, FXM4}},
 {"mfocrf",	XFXM(31,19,0,1), XFXFXM_MASK, COM|PPCVLE, PPCNONE,	{RT, FXM}},
 
 {"lwarx",	X(31,20),	XEH_MASK,    PPC|PPCVLE, PPCNONE,	{RT, RA0, RB, EH}},
@@ -6497,7 +6496,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"xsdivsp",	XX3(60,24),	XX3_MASK,    PPCVSX2,	PPCNONE,	{XT6, XA6, XB6}},
 {"xsmsubmsp",	XX3(60,25),	XX3_MASK,    PPCVSX2,	PPCNONE,	{XT6, XA6, XB6}},
 {"xxperm",	XX3(60,26),	XX3_MASK,    PPCVSX3,	PPCNONE,	{XT6, XA6, XB6}},
-{"xscmpnedp",	XX3(60,27),	XX3_MASK,    PPCVSX3,	PPCNONE,	{XT6, XA6, XB6}},
 {"xsadddp",	XX3(60,32),	XX3_MASK,    PPCVSX,	PPCNONE,	{XT6, XA6, XB6}},
 {"xsmaddadp",	XX3(60,33),	XX3_MASK,    PPCVSX,	PPCNONE,	{XT6, XA6, XB6}},
 {"xscmpudp",	XX3(60,35),	XX3BF_MASK,  PPCVSX,	PPCNONE,	{BF, XA6, XB6}},
@@ -6552,8 +6550,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"xvmsubmsp",	XX3(60,89),	XX3_MASK,    PPCVSX,	PPCNONE,	{XT6, XA6, XB6}},
 {"xxspltib",	X(60,360),	XX1_MASK|3<<19, PPCVSX3,PPCNONE,	{XT6, IMM8}},
 {"xxinsertw",	XX2(60,181),	XX2UIM4_MASK,PPCVSX3,	PPCNONE,	{XT6, XB6, UIMM4}},
-{"xvcmpnesp",	XX3RC(60,91,0), XX3_MASK,    PPCVSX3,	PPCNONE,	{XT6, XA6, XB6}},
-{"xvcmpnesp.",	XX3RC(60,91,1), XX3_MASK,    PPCVSX3,	PPCNONE,	{XT6, XA6, XB6}},
 {"xvcvsxwsp",	XX2(60,184),	XX2_MASK,    PPCVSX,	PPCNONE,	{XT6, XB6}},
 {"xvrspim",	XX2(60,185),	XX2_MASK,    PPCVSX,	PPCNONE,	{XT6, XB6}},
 {"xvtdivsp",	XX3(60,93),	XX3BF_MASK,  PPCVSX,	PPCNONE,	{BF, XA6, XB6}},
@@ -6582,8 +6578,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"xvrdpic",	XX2(60,235),	XX2_MASK,    PPCVSX,	PPCNONE,	{XT6, XB6}},
 {"xvdivdp",	XX3(60,120),	XX3_MASK,    PPCVSX,	PPCNONE,	{XT6, XA6, XB6}},
 {"xvmsubmdp",	XX3(60,121),	XX3_MASK,    PPCVSX,	PPCNONE,	{XT6, XA6, XB6}},
-{"xvcmpnedp",	XX3RC(60,123,0), XX3_MASK,   PPCVSX3,	PPCNONE,	{XT6, XA6, XB6}},
-{"xvcmpnedp.",	XX3RC(60,123,1), XX3_MASK,   PPCVSX3,	PPCNONE,	{XT6, XA6, XB6}},
 {"xvcvsxwdp",	XX2(60,248),	XX2_MASK,    PPCVSX,	PPCNONE,	{XT6, XB6}},
 {"xvrdpim",	XX2(60,249),	XX2_MASK,    PPCVSX,	PPCNONE,	{XT6, XB6}},
 {"xvtdivdp",	XX3(60,125),	XX3BF_MASK,  PPCVSX,	PPCNONE,	{BF, XA6, XB6}},

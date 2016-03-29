@@ -1,5 +1,42 @@
-2015-12-02  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+2016-02-26  Alan Modra  <amodra@gmail.com>
 
+	Apply from master.
+	2015-12-12  Alan Modra  <amodra@gmail.com>
+	PR 19359
+	* ppc-opc.c (insert_fxm): Remove "ignored" from error message.
+	(powerpc_opcodes): Remove single-operand mfcr.
+
+2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (print_insn): Parenthesize expression to prevent
+	truncated addresses.
+	(OP_J): Likewise.
+
+2016-01-25  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2016-01-25  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2016-01-12  Peter Bergner <bergner@vnet.ibm.com>
+
+	Apply from master.
+	2016-01-11  Peter Bergner <bergner@vnet.ibm.com>
+	* ppc-opc.c <xscmpnedp>: Delete.
+	<xvcmpnedp>: Likewise.
+	<xvcmpnedp.>: Likewise.
+	<xvcmpnesp>: Likewise.
+	<xvcmpnesp.>: Likewise.
+
+2015-12-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Apply from master
+	2015-12-02  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 	* arm-dis.c (arm_opcodes): <ldaexh>: Fix typo...
 	<ldah>: ... to this.
 
@@ -794,7 +831,7 @@
 
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* opcodes/i386-opc.tbl (call): Remove Disp16|Disp32 from 64-bit
+	* i386-opc.tbl (call): Remove Disp16|Disp32 from 64-bit
 	direct branch.
 	(jmp): Likewise.
 	* i386-tbl.h: Regenerated.

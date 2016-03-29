@@ -3445,10 +3445,23 @@ create_ifunc_sections (struct bfd_link_info *info)
 static bfd_boolean
 using_thumb_only (struct elf32_arm_link_hash_table *globals)
 {
+  int arch;
   int profile = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
 					  Tag_CPU_arch_profile);
 
-  return profile == 'M';
+  if (profile)
+    return profile == 'M';
+
+  arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  if (arch == TAG_CPU_ARCH_V6_M
+      || arch == TAG_CPU_ARCH_V6S_M
+      || arch == TAG_CPU_ARCH_V7E_M
+      || arch == TAG_CPU_ARCH_V8M_BASE
+      || arch == TAG_CPU_ARCH_V8M_MAIN)
+    return TRUE;
+
+  return FALSE;
 }
 
 /* Determine if we're dealing with a Thumb-2 object.  */
@@ -12194,7 +12207,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       -1,		/* V7E_M.  */
       -1,		/* V8.  */
       -1,
-      T(V8M_BASE),	/* V8-M BASELINE.  */
+      T(V8M_BASE)	/* V8-M BASELINE.  */
     };
   const int v8m_mainline[] =
     {
@@ -12215,7 +12228,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       -1,		/* V8.  */
       -1,
       T(V8M_MAIN),	/* V8-M BASELINE.  */
-      T(V8M_MAIN),	/* V8-M MAINLINE.  */
+      T(V8M_MAIN)	/* V8-M MAINLINE.  */
     };
   const int v4t_plus_v6_m[] =
     {
@@ -12234,9 +12247,10 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V6S_M),		/* V6S_M.  */
       T(V7E_M),		/* V7E_M.  */
       T(V8),		/* V8.  */
-      T(V4T_PLUS_V6_M),	/* V4T plus V6_M.  */
-      -1,		/* V8-M BASELINE.  */
-      -1		/* V8-M MAINLINE.  */
+      -1,		/* Unused.  */
+      T(V8M_BASE),	/* V8-M BASELINE.  */
+      T(V8M_MAIN),	/* V8-M MAINLINE.  */
+      T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
   const int *comb[] =
     {
@@ -12247,9 +12261,11 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       v6s_m,
       v7e_m,
       v8,
-      v4t_plus_v6_m, /* Pseudo-architecture.  */
+      NULL,
       v8m_baseline,
       v8m_mainline,
+      /* Pseudo-architecture.  */
+      v4t_plus_v6_m
     };
 
   /* Check we've not got a higher architecture than we know about.  */
@@ -12280,7 +12296,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
   if (tagh <= TAG_CPU_ARCH_V6KZ)
     return result;
 
-  result = comb[tagh - T(V6T2)][tagl];
+  result = comb[tagh - T(V6T2)] ? comb[tagh - T(V6T2)][tagl] : -1;
 
   /* Use Tag_CPU_arch == V4T and Tag_also_compatible_with (Tag_CPU_arch V6_M)
      as the canonical version.  */
@@ -15434,6 +15450,8 @@ elf32_arm_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
       return reloc_class_plt;
     case R_ARM_COPY:
       return reloc_class_copy;
+    case R_ARM_IRELATIVE:
+      return reloc_class_ifunc;
     default:
       return reloc_class_normal;
     }

@@ -1,3 +1,59 @@
+2016-01-19  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/pr18735.d: Allow for extra symbols between
+	foo@FOO and bar@@FOO.
+
+2016-01-18  Nick Clifton  <nickc@redhat.com>
+
+	* ld-plugin/plugin.exp: Skip plugin tests if the linker is not
+	configured to support plugins.
+
+2016-01-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19421
+	PR ld/4317
+	* ld-aarch64/gc-tls-relocs.d: Revert 2015-02-19 changes.
+	* ld-cris/locref2.d: Likewise.
+	* ld-elf/ehdr_start-weak.d: Likewise.
+	* ld-elf/group1.d: Likewise.
+	* ld-i386/compressed1.d: Likewise.
+	* ld-ia64/error1.d: Likewise.
+	* ld-ia64/error2.d: Likewise.
+	* ld-ia64/error3.d: Likewise.
+	* ld-mips-elf/pic-and-nonpic-1.nd: Likewise.
+	* ld-mmix/undef-3.d: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+	* ld-x86-64/compressed1.d: Likewise.
+	* ld-x86-64/pie1.d: Likewise.
+
+2016-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/elf.exp (-Bymsolic-functions): Expect to fail
+	for MIPS targets.
+
+	* ld-scripts/script.exp (extract_symbol_test): Expect to
+	fail for MIPS targets.
+
+	* ld-scripts/rgn-at11.d: Expect this test to fail for
+	MIPS targets.
+
+2016-01-11  Jiong Wang  <jiong.wang@arm.com>
+
+	Apply from master
+
+	2016-01-08  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/19368
+	* ld-arm/ifunc-3.rd: Update expected result.
+	* ld-arm/ifunc-4.rd: Likewise.
+	* ld-arm/ifunc-9.rd: Likewise.
+	* ld-arm/ifunc-10.rd: Likewise.
+	* ld-arm/ifunc-12.rd: Likewise.
+	* ld-arm/ifunc-13.rd: Likewise.
+
 2015-12-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/i386.exp: Run mov2a and mov2b.
@@ -61,12 +117,12 @@
 	* ld-x86-64/plt-main3.rd: Also check GOTPCRELX.
 
 2015-10-29  Catherine Moore  <clm@codesourcery.com>
-    
-    	* ld-mips-elf/mips16-fp-stub-1.s: New.
-    	* ld-mips-elf/mips16-fp-stub-2.s: New.
-    	* ld-mips-elf/mips16-fp-stub.d: New.
-    	* ld-mips-elf/mips-elf.exp: Run new tests.
-    	* ld-mips-elf/mips16-intermix.d: Update expected output.
+
+	* ld-mips-elf/mips16-fp-stub-1.s: New.
+	* ld-mips-elf/mips16-fp-stub-2.s: New.
+	* ld-mips-elf/mips16-fp-stub.d: New.
+	* ld-mips-elf/mips-elf.exp: Run new tests.
+	* ld-mips-elf/mips16-intermix.d: Update expected output.
 
 2015-10-28  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -77,7 +133,7 @@
 	* ld-x86-64/pr19162b.s: Likewise.
 
 2015-10-27  Laurent Alfonsi <laurent.alfonsi@st.com>
-            Christophe Monat <christophe.monat@st.com>
+	    Christophe Monat <christophe.monat@st.com>
 
 	* ld-arm/arm-elf.exp (armelftests_common): Add STM32L4XX
 	tests.
@@ -1013,7 +1069,6 @@
 
 2015-05-28  Catherine Moore  <clm@codesourcery.com>
 
-	ld/testsuite/
 	* ld-mips-elf/compact-eh.ld: New linker script.
 	* ld-mips-elf/compact-eh1.d: New.
 	* ld-mips-elf/compact-eh1.s: New.

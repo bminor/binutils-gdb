@@ -17793,13 +17793,14 @@ in_it_block (void)
   return now_it.state != OUTSIDE_IT_BLOCK;
 }
 
-/* Given an OPCODE that is valid in at least one architecture that is not a
-   superset of ARMv6t2, returns whether it only has wide encoding(s).  */
+/* Whether OPCODE only has T32 encoding.  Since this function is only used by
+   t32_insn_ok, OPCODE enabled by v6t2 extension bit do not need to be listed
+   here, hence the "known" in the function name.  */
 
 static bfd_boolean
-non_v6t2_wide_only_insn (const struct asm_opcode *opcode)
+known_t32_only_insn (const struct asm_opcode *opcode)
 {
-  /* Wide instruction that have always been in Thumb-1 ISA.  */
+  /* Original Thumb-1 wide instruction.  */
   if (opcode->tencode == do_t_blx
       || opcode->tencode == do_t_branch23
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_msr)
@@ -17820,9 +17821,9 @@ non_v6t2_wide_only_insn (const struct asm_opcode *opcode)
    in ARCH.  */
 
 static bfd_boolean
-wide_insn_ok (arm_feature_set arch, const struct asm_opcode *opcode)
+t32_insn_ok (arm_feature_set arch, const struct asm_opcode *opcode)
 {
-  if (non_v6t2_wide_only_insn (opcode))
+  if (known_t32_only_insn (opcode))
     return TRUE;
 
   /* Instruction with narrow and wide encoding added to ARMv8-M.  Availability
@@ -17910,7 +17911,7 @@ md_assemble (char *str)
 	 Only instructions with narrow and wide variants need to be handled
 	 but selecting all non wide-only instructions is easier.  */
       if (!ARM_CPU_HAS_FEATURE (variant, arm_ext_v6t2)
-	  && !wide_insn_ok (variant, opcode))
+	  && !t32_insn_ok (variant, opcode))
 	{
 	  if (inst.size_req == 0)
 	    inst.size_req = 2;
@@ -17964,7 +17965,7 @@ md_assemble (char *str)
 	variant = arm_arch_none;
       else
 	variant = cpu_variant;
-      if (inst.size == 4 && !wide_insn_ok (variant, opcode))
+      if (inst.size == 4 && !t32_insn_ok (variant, opcode))
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 				arm_ext_v6t2);
 
@@ -25656,28 +25657,29 @@ aeabi_set_public_attributes (void)
      actually used.  Perhaps we should separate out the specified
      and implicit cases.  Avoid taking this path for -march=all by
      checking for contradictory v7-A / v7-M features.  */
-  if (arch == 10
+  if (arch == TAG_CPU_ARCH_V7
       && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v6_dsp))
     {
-      arch = 13;
+      arch = TAG_CPU_ARCH_V7E_M;
       arm_arch = (arm_feature_set) ARM_ARCH_V7EM;
     }
 
   ARM_CLEAR_FEATURE (tmp, flags, arm_arch_v8m_base);
-  if (arch == 16 && ARM_CPU_HAS_FEATURE (tmp, arm_arch_any))
+  if (arch == TAG_CPU_ARCH_V8M_BASE && ARM_CPU_HAS_FEATURE (tmp, arm_arch_any))
     {
-      arch = 17;
+      arch = TAG_CPU_ARCH_V8M_MAIN;
       arm_arch = (arm_feature_set) ARM_ARCH_V8M_MAIN;
     }
 
   /* In cpu_arch_ver ARMv8-A is before ARMv8-M for atomics to be detected as
      coming from ARMv8-A.  However, since ARMv8-A has more instructions than
      ARMv8-M, -march=all must be detected as ARMv8-A.  */
-  if (arch == 17 && ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
+  if (arch == TAG_CPU_ARCH_V8M_MAIN
+      && ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
     {
-      arch = 14;
+      arch = TAG_CPU_ARCH_V8;
       arm_arch = (arm_feature_set) ARM_ARCH_V8A;
     }
 

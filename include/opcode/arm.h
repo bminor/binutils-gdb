@@ -33,8 +33,7 @@
 #define ARM_EXT_V5J	 0x00000800	/* Jazelle extension.	   */
 #define ARM_EXT_V6       0x00001000     /* ARM V6.                 */
 #define ARM_EXT_V6K      0x00002000     /* ARM V6K.                */
-/*			 0x00004000	   Was ARM V6Z.            */
-#define ARM_EXT_V8	 0x00004000     /* is now ARMv8 w/o atomics.  */
+#define ARM_EXT_V8	 0x00004000     /* ARMv8 w/o atomics.      */
 #define ARM_EXT_V6T2	 0x00008000	/* Thumb-2.                */
 #define ARM_EXT_DIV	 0x00010000	/* Integer division.       */
 /* The 'M' in Arm V7M stands for Microcontroller.
@@ -258,7 +257,8 @@
 #define ARM_ARCH_V7M	ARM_FEATURE_CORE (ARM_AEXT_V7M, ARM_EXT2_V6T2_V8M)
 #define ARM_ARCH_V7EM	ARM_FEATURE_CORE (ARM_AEXT_V7EM, ARM_EXT2_V6T2_V8M)
 #define ARM_ARCH_V8A	ARM_FEATURE_CORE (ARM_AEXT_V8A, ARM_AEXT2_V8A)
-#define ARM_ARCH_V8_1A	ARM_FEATURE_CORE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A)
+#define ARM_ARCH_V8_1A	ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A,	\
+				     CRC_EXT_ARMV8)
 #define ARM_ARCH_V8M_BASE ARM_FEATURE_CORE (ARM_AEXT_V8M_BASE, ARM_AEXT2_V8M)
 #define ARM_ARCH_V8M_MAIN ARM_FEATURE_CORE (ARM_AEXT_V8M_MAIN, ARM_AEXT2_V8M)
 

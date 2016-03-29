@@ -4,7 +4,6 @@
 #readelf: -s --wide
 #warning: \A[^\n]*\.o[^\n]*In function `_start':\n[^\n]*: undefined reference to `foo'\Z
 
-#failif
 #...
  +[0-9]+: +[0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +UND foo
-#...
+#pass

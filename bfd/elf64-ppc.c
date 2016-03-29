@@ -4344,14 +4344,20 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 
   htab = ppc_hash_table (info);
 
-  /* Create .sfpr for code to save and restore fp regs.  */
   flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
 	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-  htab->sfpr = bfd_make_section_anyway_with_flags (dynobj, ".sfpr",
-						   flags);
-  if (htab->sfpr == NULL
-      || ! bfd_set_section_alignment (dynobj, htab->sfpr, 2))
-    return FALSE;
+  if (htab->params->save_restore_funcs)
+    {
+      /* Create .sfpr for code to save and restore fp regs.  */
+      htab->sfpr = bfd_make_section_anyway_with_flags (dynobj, ".sfpr",
+						       flags);
+      if (htab->sfpr == NULL
+	  || ! bfd_set_section_alignment (dynobj, htab->sfpr, 2))
+	return FALSE;
+    }
+
+  if (bfd_link_relocatable (info))
+    return TRUE;
 
   /* Create .glink for lazy dynamic linking support.  */
   htab->glink = bfd_make_section_anyway_with_flags (dynobj, ".glink",
@@ -4428,9 +4434,6 @@ ppc64_elf_init_stub_bfd (struct bfd_link_info *info,
     return FALSE;
   htab->elf.dynobj = params->stub_bfd;
   htab->params = params;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
 
   return create_linkage_sections (htab->elf.dynobj, info);
 }
@@ -6665,7 +6668,7 @@ sfpr_define (struct bfd_link_info *info,
       sym[len + 0] = i / 10 + '0';
       sym[len + 1] = i % 10 + '0';
       h = (struct ppc_link_hash_entry *)
-	elf_link_hash_lookup (&htab->elf, sym, FALSE, FALSE, TRUE);
+	elf_link_hash_lookup (&htab->elf, sym, writing, TRUE, TRUE);
       if (stub_sec != NULL)
 	{
 	  if (h != NULL
@@ -6706,6 +6709,7 @@ sfpr_define (struct bfd_link_info *info,
 	      h->elf.root.u.def.value = htab->sfpr->size;
 	      h->elf.type = STT_FUNC;
 	      h->elf.def_regular = 1;
+	      h->elf.non_elf = 0;
 	      _bfd_elf_link_hash_hide_symbol (info, &h->elf, TRUE);
 	      writing = TRUE;
 	      if (htab->sfpr->contents == NULL)
@@ -7050,14 +7054,28 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
-  unsigned int i;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return FALSE;
 
-  if (!bfd_link_relocatable (info)
-      && htab->elf.hgot != NULL)
+  /* Provide any missing _save* and _rest* functions.  */
+  if (htab->sfpr != NULL)
+    {
+      unsigned int i;
+
+      htab->sfpr->size = 0;
+      for (i = 0; i < ARRAY_SIZE (save_res_funcs); i++)
+	if (!sfpr_define (info, &save_res_funcs[i], NULL))
+	  return FALSE;
+      if (htab->sfpr->size == 0)
+	htab->sfpr->flags |= SEC_EXCLUDE;
+    }
+
+  if (bfd_link_relocatable (info))
+    return TRUE;
+
+  if (htab->elf.hgot != NULL)
     {
       _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, TRUE);
       /* Make .TOC. defined so as to prevent it being made dynamic.
@@ -7076,21 +7094,7 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 			       | STV_HIDDEN);
     }
 
-  if (htab->sfpr == NULL)
-    /* We don't have any relocs.  */
-    return TRUE;
-
-  /* Provide any missing _save* and _rest* functions.  */
-  htab->sfpr->size = 0;
-  if (htab->params->save_restore_funcs)
-    for (i = 0; i < ARRAY_SIZE (save_res_funcs); i++)
-      if (!sfpr_define (info, &save_res_funcs[i], NULL))
-	return FALSE;
-
   elf_link_hash_traverse (&htab->elf, func_desc_adjust, info);
-
-  if (htab->sfpr->size == 0)
-    htab->sfpr->flags |= SEC_EXCLUDE;
 
   return TRUE;
 }

@@ -42,16 +42,11 @@ vsx3:
 	xscmpgtdp    2,26,34
 	xscmpgedp    5,26,20
 	xxperm       44,10,43
-	xscmpnedp    5,21,34
 	xxpermr      41,20,5
 	xscmpexpdp   4,18,55
 	xxextractuw  23,37,3
 	xxspltib     54,235
 	xxinsertw    15,30,4
-	xvcmpnesp    39,40,15
-	xvcmpnesp.   0,55,50
-	xvcmpnedp    60,12,46
-	xvcmpnedp.   36,21,25
 	xsmaxcdp     12,11,7
 	xsmincdp     32,25,24
 	xsmaxjdp     25,53,12

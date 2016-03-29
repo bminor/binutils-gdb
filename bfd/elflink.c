@@ -555,6 +555,19 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
   if (h == NULL)
     return provide;
 
+  if (h->versioned == unknown)
+    {
+      /* Set versioned if symbol version is unknown.  */
+      char *version = strrchr (name, ELF_VER_CHR);
+      if (version)
+	{
+	  if (version > name && version[-1] != ELF_VER_CHR)
+	    h->versioned = versioned_hidden;
+	  else
+	    h->versioned = versioned;
+	}
+    }
+
   switch (h->root.type)
     {
     case bfd_link_hash_defined:
@@ -1472,13 +1485,16 @@ _bfd_elf_merge_symbol (bfd *abfd,
      represent variables; this can cause confusion in principle, but
      any such confusion would seem to indicate an erroneous program or
      shared library.  We also permit a common symbol in a regular
-     object to override a weak symbol in a shared object.  */
+     object to override a weak symbol in a shared object.  A common
+     symbol in executable also overrides a symbol in a shared object.  */
 
   if (newdyn
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
-	      && (newweak || newfunc))))
+	      && (newweak
+		  || newfunc
+		  || (!olddyn && bfd_link_executable (info))))))
     {
       *override = TRUE;
       newdef = FALSE;
@@ -4562,8 +4578,10 @@ error_free_dyn:
 		break;
 	      }
 
-	  /* Don't add DT_NEEDED for references from the dummy bfd.  */
+	  /* Don't add DT_NEEDED for references from the dummy bfd nor
+	     for unmatched symbol.  */
 	  if (!add_needed
+	      && matched
 	      && definition
 	      && ((dynsym
 		   && h->ref_regular_nonweak
@@ -9145,9 +9163,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      a regular file, or that we have been told to strip.  However, if
      h->indx is set to -2, the symbol is used by a reloc and we must
      output it.  */
-  strip = FALSE;
   if (h->indx == -2)
-    ;
+    strip = FALSE;
   else if ((h->def_dynamic
 	    || h->ref_dynamic
 	    || h->root.type == bfd_link_hash_new)
@@ -9173,11 +9190,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	   && h->root.u.undef.abfd != NULL
 	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
     strip = TRUE;
+  else
+    strip = FALSE;
 
   /* If we're stripping it, and it's not a dynamic symbol, there's
-     nothing else to do.   However, if it is a forced local symbol or
-     an ifunc symbol we need to give the backend finish_dynamic_symbol
-     function a chance to make it dynamic.  */
+     nothing else to do unless it is a forced local symbol or a
+     STT_GNU_IFUNC symbol.  */
   if (strip
       && h->dynindx == -1
       && h->type != STT_GNU_IFUNC
@@ -9457,18 +9475,9 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	}
     }
 
-  /* If the symbol is undefined, and we didn't output it to .dynsym,
-     strip it from .symtab too.  Obviously we can't do this for
-     relocatable output or when needed for --emit-relocs.  */
-  else if (input_sec == bfd_und_section_ptr
-	   && h->indx != -2
-	   && !bfd_link_relocatable (flinfo->info))
-    return TRUE;
-  /* Also strip others that we couldn't earlier due to dynamic symbol
-     processing.  */
-  if (strip)
-    return TRUE;
-  if ((input_sec->flags & SEC_EXCLUDE) != 0)
+  /* If we're stripping it, then it was just a dynamic symbol, and
+     there's nothing else to do.  */
+  if (strip || (input_sec->flags & SEC_EXCLUDE) != 0)
     return TRUE;
 
   /* Output a FILE symbol so that following locals are not associated
@@ -9718,9 +9727,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 
       *ppsection = isec;
 
-      /* Don't output the first, undefined, symbol.  In fact, don't
-	 output any undefined local symbol.  */
-      if (isec == bfd_und_section_ptr)
+      /* Don't output the first, undefined, symbol.  */
+      if (ppsection == flinfo->sections)
 	continue;
 
       if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
