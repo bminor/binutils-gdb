@@ -1,5 +1,16 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf32-arm.c (enum elf32_arm_stub_type): New max_stub_type
+	enumerator.
+	(arm_stub_sym_claimed): New function.
+	(elf32_arm_create_stub): Use veneered symbol name and section if
+	veneer needs to claim its symbol, and keep logic unchanged otherwise.
+	(arm_stub_claim_sym): New function.
+	(arm_map_one_stub): Call arm_stub_claim_sym if veneer needs to claim
+	veneered symbol, otherwise create local symbol as before.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* elf32-arm.c (elf32_arm_size_stubs): Use new macros
 	ARM_GET_SYM_BRANCH_TYPE and ARM_SET_SYM_BRANCH_TYPE to respectively get
 	and set branch type of a symbol.
