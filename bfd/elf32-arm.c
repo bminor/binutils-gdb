@@ -4076,6 +4076,7 @@ elf32_arm_get_stub_entry (const asection *input_section,
      Stub names need to include a section id, as there may well be
      more than one stub used to reach say, printf, and we need to
      distinguish between them.  */
+  BFD_ASSERT (input_section->id <= htab->top_id);
   id_sec = htab->stub_group[input_section->id].link_sec;
 
   if (h != NULL && h->stub_cache != NULL
@@ -4233,6 +4234,7 @@ elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
     }
   else
     {
+      BFD_ASSERT (section->id <= htab->top_id);
       link_sec = htab->stub_group[section->id].link_sec;
       BFD_ASSERT (link_sec != NULL);
       stub_sec_p = &htab->stub_group[section->id].stub_sec;
@@ -5342,6 +5344,7 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
     {
       BFD_ASSERT (irela);
       BFD_ASSERT (section);
+      BFD_ASSERT (section->id <= htab->top_id);
 
       /* Support for grouping stub sections.  */
       id_sec = htab->stub_group[section->id].link_sec;

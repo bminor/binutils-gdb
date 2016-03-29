@@ -1,5 +1,12 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf32-arm.c (elf32_arm_get_stub_entry): Assert that we don't access
+	passed the end of htab->stub_group array.
+	(elf32_arm_create_or_find_stub_sec): Likewise.
+	(elf32_arm_create_stub): Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add a new parameter for
 	the input import library bfd.
 	* bfd-in2.h: Regenerate.
