@@ -114,7 +114,7 @@
 
 /* Extension instruction declarations.  */
 EXTINSN2OP ("dsp_fp_flt2i",  ARC_OPCODE_ARCv2EM, FLOAT, QUARKSE, 7, 43)
-EXTINSN2OP ("dsp_fp_isflt",  ARC_OPCODE_ARCv2EM, FLOAT, QUARKSE, 7, 44)
+EXTINSN2OP ("dsp_fp_i2flt",  ARC_OPCODE_ARCv2EM, FLOAT, QUARKSE, 7, 44)
 EXTINSN2OP ("dsp_fp_sqrt",   ARC_OPCODE_ARCv2EM, FLOAT, QUARKSE, 7, 45)
 
 EXTINSN3OP ("dsp_fp_div", ARC_OPCODE_ARCv2EM, FLOAT, QUARKSE, 7, 42)
