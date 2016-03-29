@@ -346,8 +346,9 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
 	  || (bfd_size_type) ((size_t) nmemb) != nmemb))
     {
       if (reason)
-	error (_("Size truncation prevents reading 0x%llx elements of size 0x%llx for %s\n"),
-	       (unsigned long long) nmemb, (unsigned long long) size, reason);
+	error (_("Size truncation prevents reading 0x%" BFD_VMA_FMT "x"
+		 " elements of size 0x%" BFD_VMA_FMT "x for %s\n"),
+	       nmemb, size, reason);
       return NULL;
     }
 
@@ -355,8 +356,9 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
   if (amt < nmemb)
     {
       if (reason)
-	error (_("Size overflow prevents reading 0x%llx elements of size 0x%llx for %s\n"),
-	       (unsigned long long) nmemb, (unsigned long long) size, reason);
+	error (_("Size overflow prevents reading 0x%" BFD_VMA_FMT "x"
+		 " elements of size 0x%" BFD_VMA_FMT "x for %s\n"),
+	       nmemb, size, reason);
       return NULL;
     }
 
@@ -366,8 +368,9 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
       || offset + archive_file_offset + amt > current_file_size)
     {
       if (reason)
-	error (_("Reading 0x%llx bytes extends past end of file for %s\n"),
-	       (unsigned long long) amt, reason);
+	error (_("Reading 0x%" BFD_VMA_FMT "x"
+		 " bytes extends past end of file for %s\n"),
+	       amt, reason);
       return NULL;
     }
 
@@ -375,7 +378,7 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
     {
       if (reason)
 	error (_("Unable to seek to 0x%lx for %s\n"),
-	       (unsigned long) archive_file_offset + offset, reason);
+	       archive_file_offset + offset, reason);
       return NULL;
     }
 
@@ -390,8 +393,9 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
       if (mvar == NULL)
 	{
 	  if (reason)
-	    error (_("Out of memory allocating 0x%llx bytes for %s\n"),
-		   (unsigned long long) amt, reason);
+	    error (_("Out of memory allocating 0x%" BFD_VMA_FMT "x"
+		     " bytes for %s\n"),
+		   amt, reason);
 	  return NULL;
 	}
 
@@ -401,8 +405,8 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
   if (fread (mvar, (size_t) size, (size_t) nmemb, file) != nmemb)
     {
       if (reason)
-	error (_("Unable to read in 0x%llx bytes of %s\n"),
-	       (unsigned long long) amt, reason);
+	error (_("Unable to read in 0x%" BFD_VMA_FMT "x bytes of %s\n"),
+	       amt, reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -10393,8 +10397,9 @@ get_dynamic_data (FILE * file, bfd_size_type number, unsigned int ent_size)
   if (sizeof (size_t) < sizeof (bfd_size_type)
       && (bfd_size_type) ((size_t) number) != number)
     {
-      error (_("Size truncation prevents reading %llu elements of size %u\n"),
-	     (unsigned long long) number, ent_size);
+      error (_("Size truncation prevents reading %" BFD_VMA_FMT "u"
+	       " elements of size %u\n"),
+	     number, ent_size);
       return NULL;
     }
 
@@ -10402,23 +10407,23 @@ get_dynamic_data (FILE * file, bfd_size_type number, unsigned int ent_size)
      attempting to allocate memory when the read is bound to fail.  */
   if (ent_size * number > current_file_size)
     {
-      error (_("Invalid number of dynamic entries: %llu\n"),
-	     (unsigned long long) number);
+      error (_("Invalid number of dynamic entries: %" BFD_VMA_FMT "u\n"),
+	     number);
       return NULL;
     }
 
   e_data = (unsigned char *) cmalloc ((size_t) number, ent_size);
   if (e_data == NULL)
     {
-      error (_("Out of memory reading %llu dynamic entries\n"),
-	     (unsigned long long) number);
+      error (_("Out of memory reading %" BFD_VMA_FMT "u dynamic entries\n"),
+	     number);
       return NULL;
     }
 
   if (fread (e_data, ent_size, (size_t) number, file) != number)
     {
-      error (_("Unable to read in %llu bytes of dynamic data\n"),
-	     (unsigned long long) (number * ent_size));
+      error (_("Unable to read in %" BFD_VMA_FMT "u bytes of dynamic data\n"),
+	     number * ent_size);
       free (e_data);
       return NULL;
     }
@@ -10426,8 +10431,9 @@ get_dynamic_data (FILE * file, bfd_size_type number, unsigned int ent_size)
   i_data = (bfd_vma *) cmalloc ((size_t) number, sizeof (*i_data));
   if (i_data == NULL)
     {
-      error (_("Out of memory allocating space for %llu dynamic entries\n"),
-	     (unsigned long long) number);
+      error (_("Out of memory allocating space for %" BFD_VMA_FMT "u"
+	       " dynamic entries\n"),
+	     number);
       free (e_data);
       return NULL;
     }
