@@ -1,5 +1,10 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf32-arm.c (elf32_arm_create_stub): New function.
+	(elf32_arm_size_stubs): Use elf32_arm_create_stub for stub creation.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* elf32-arm.c (struct elf32_arm_stub_hash_entry): Delete target_addend
 	field and add source_value.
 	(struct a8_erratum_fix): Delete addend field and add target_offset.

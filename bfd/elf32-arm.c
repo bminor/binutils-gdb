@@ -5044,6 +5044,103 @@ cortex_a8_erratum_scan (bfd *input_bfd,
   return FALSE;
 }
 
+/* Create or update a stub entry depending on whether the stub can already be
+   found in HTAB.  The stub is identified by:
+   - its type STUB_TYPE
+   - its source branch (note that several can share the same stub) whose
+     section and relocation (if any) are given by SECTION and IRELA
+     respectively
+   - its target symbol whose input section, hash, name, value and branch type
+     are given in SYM_SEC, HASH, SYM_NAME, SYM_VALUE and BRANCH_TYPE
+     respectively
+
+   If found, the value of the stub's target symbol is updated from SYM_VALUE
+   and *NEW_STUB is set to FALSE.  Otherwise, *NEW_STUB is set to
+   TRUE and the stub entry is initialized.
+
+   Returns whether the stub could be successfully created or updated, or FALSE
+   if an error occured.  */
+
+static bfd_boolean
+elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
+		       enum elf32_arm_stub_type stub_type, asection *section,
+		       Elf_Internal_Rela *irela, asection *sym_sec,
+		       struct elf32_arm_link_hash_entry *hash, char *sym_name,
+		       bfd_vma sym_value, enum arm_st_branch_type branch_type,
+		       bfd_boolean *new_stub)
+{
+  const asection *id_sec;
+  char *stub_name;
+  struct elf32_arm_stub_hash_entry *stub_entry;
+  unsigned int r_type;
+
+  BFD_ASSERT (stub_type != arm_stub_none);
+  *new_stub = FALSE;
+
+  BFD_ASSERT (irela);
+  BFD_ASSERT (section);
+
+  /* Support for grouping stub sections.  */
+  id_sec = htab->stub_group[section->id].link_sec;
+
+  /* Get the name of this stub.  */
+  stub_name = elf32_arm_stub_name (id_sec, sym_sec, hash, irela, stub_type);
+  if (!stub_name)
+    return FALSE;
+
+  stub_entry = arm_stub_hash_lookup (&htab->stub_hash_table, stub_name, FALSE,
+				     FALSE);
+  /* The proper stub has already been created, just update its value.  */
+  if (stub_entry != NULL)
+    {
+      free (stub_name);
+      stub_entry->target_value = sym_value;
+      return TRUE;
+    }
+
+  stub_entry = elf32_arm_add_stub (stub_name, section, htab);
+  if (stub_entry == NULL)
+    {
+      free (stub_name);
+      return FALSE;
+    }
+
+  stub_entry->target_value = sym_value;
+  stub_entry->target_section = sym_sec;
+  stub_entry->stub_type = stub_type;
+  stub_entry->h = hash;
+  stub_entry->branch_type = branch_type;
+
+  if (sym_name == NULL)
+    sym_name = "unnamed";
+  stub_entry->output_name = (char *)
+    bfd_alloc (htab->stub_bfd, sizeof (THUMB2ARM_GLUE_ENTRY_NAME)
+				+ strlen (sym_name));
+  if (stub_entry->output_name == NULL)
+    {
+      free (stub_name);
+      return FALSE;
+    }
+
+  /* For historical reasons, use the existing names for ARM-to-Thumb and
+     Thumb-to-ARM stubs.  */
+  r_type = ELF32_R_TYPE (irela->r_info);
+  if ((r_type == (unsigned int) R_ARM_THM_CALL
+      || r_type == (unsigned int) R_ARM_THM_JUMP24
+      || r_type == (unsigned int) R_ARM_THM_JUMP19)
+      && branch_type == ST_BRANCH_TO_ARM)
+    sprintf (stub_entry->output_name, THUMB2ARM_GLUE_ENTRY_NAME, sym_name);
+  else if ((r_type == (unsigned int) R_ARM_CALL
+	     || r_type == (unsigned int) R_ARM_JUMP24)
+	    && branch_type == ST_BRANCH_TO_THUMB)
+    sprintf (stub_entry->output_name, ARM2THUMB_GLUE_ENTRY_NAME, sym_name);
+  else
+    sprintf (stub_entry->output_name, STUB_ENTRY_NAME, sym_name);
+
+  *new_stub = TRUE;
+  return TRUE;
+}
+
 /* Determine and set the size of the stub section for a final link.
 
    The basic idea here is to examine all the relocations looking for
@@ -5187,14 +5284,11 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		{
 		  unsigned int r_type, r_indx;
 		  enum elf32_arm_stub_type stub_type;
-		  struct elf32_arm_stub_hash_entry *stub_entry;
 		  asection *sym_sec;
 		  bfd_vma sym_value;
 		  bfd_vma destination;
 		  struct elf32_arm_link_hash_entry *hash;
 		  const char *sym_name;
-		  char *stub_name;
-		  const asection *id_sec;
 		  unsigned char st_type;
 		  enum arm_st_branch_type branch_type;
 		  bfd_boolean created_stub = FALSE;
@@ -5377,6 +5471,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
 		  do
 		    {
+		      bfd_boolean new_stub;
+
 		      /* Determine what (if any) linker stub is needed.  */
 		      stub_type = arm_type_of_stub (info, section, irela,
 						    st_type, &branch_type,
@@ -5385,74 +5481,21 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      if (stub_type == arm_stub_none)
 			break;
 
-		      /* Support for grouping stub sections.  */
-		      id_sec = htab->stub_group[section->id].link_sec;
-
-		      /* Get the name of this stub.  */
-		      stub_name = elf32_arm_stub_name (id_sec, sym_sec, hash,
-						       irela, stub_type);
-		      if (!stub_name)
-			goto error_ret_free_internal;
-
 		      /* We've either created a stub for this reloc already,
 			 or we are about to.  */
-		      created_stub = TRUE;
+		      created_stub =
+			elf32_arm_create_stub (htab, stub_type, section, irela,
+					       sym_sec, hash,
+					       (char *) sym_name, sym_value,
+					       branch_type, &new_stub);
 
-		      stub_entry = arm_stub_hash_lookup
-				     (&htab->stub_hash_table, stub_name,
-				      FALSE, FALSE);
-		      if (stub_entry != NULL)
+		      if (!created_stub || !new_stub)
 			{
-			  /* The proper stub has already been created.  */
-			  free (stub_name);
-			  stub_entry->target_value = sym_value;
-			  break;
+			  if (!created_stub)
+			    goto error_ret_free_internal;
 			}
-
-		      stub_entry = elf32_arm_add_stub (stub_name, section,
-						       htab);
-		      if (stub_entry == NULL)
-			{
-			  free (stub_name);
-			  goto error_ret_free_internal;
-			}
-
-		      stub_entry->target_value = sym_value;
-		      stub_entry->target_section = sym_sec;
-		      stub_entry->stub_type = stub_type;
-		      stub_entry->h = hash;
-		      stub_entry->branch_type = branch_type;
-
-		      if (sym_name == NULL)
-			sym_name = "unnamed";
-		      stub_entry->output_name = (char *)
-			  bfd_alloc (htab->stub_bfd,
-				     sizeof (THUMB2ARM_GLUE_ENTRY_NAME)
-				     + strlen (sym_name));
-		      if (stub_entry->output_name == NULL)
-			{
-			  free (stub_name);
-			  goto error_ret_free_internal;
-			}
-
-		      /* For historical reasons, use the existing names for
-			 ARM-to-Thumb and Thumb-to-ARM stubs.  */
-		      if ((r_type == (unsigned int) R_ARM_THM_CALL
-			   || r_type == (unsigned int) R_ARM_THM_JUMP24
-                           || r_type == (unsigned int) R_ARM_THM_JUMP19)
-			  && branch_type == ST_BRANCH_TO_ARM)
-			sprintf (stub_entry->output_name,
-				 THUMB2ARM_GLUE_ENTRY_NAME, sym_name);
-		      else if ((r_type == (unsigned int) R_ARM_CALL
-			       || r_type == (unsigned int) R_ARM_JUMP24)
-			       && branch_type == ST_BRANCH_TO_THUMB)
-			sprintf (stub_entry->output_name,
-				 ARM2THUMB_GLUE_ENTRY_NAME, sym_name);
 		      else
-			sprintf (stub_entry->output_name, STUB_ENTRY_NAME,
-				 sym_name);
-
-		      stub_changed = TRUE;
+			stub_changed = TRUE;
 		    }
 		  while (0);
 
