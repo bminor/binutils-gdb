@@ -1,5 +1,25 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf32-arm.c (struct elf32_arm_stub_hash_entry): Delete target_addend
+	field and add source_value.
+	(struct a8_erratum_fix): Delete addend field and add target_offset.
+	(stub_hash_newfunc): Initialize source_value field amd remove
+	initialization for target_addend.
+	(arm_build_one_stub): Stop special casing Thumb relocations: promote
+	the else to being always executed, moving the
+	arm_stub_a8_veneer_b_cond specific code in it.  Remove
+	stub_entry->target_addend from points_to computation.
+	(cortex_a8_erratum_scan): Store in a8_erratum_fix structure the offset
+	to target symbol from start of section rather than the offset from the
+	stub address.
+	(elf32_arm_size_stubs): Set stub_entry's source_value and target_value
+	fields from struct a8_erratum_fix's offset and target_offset
+	respectively.
+	(make_branch_to_a8_stub): Rename target variable to loc.  Compute
+	veneered_insn_loc and loc using stub_entry's source_value.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	(elf32_arm_merge_eabi_attributes): Add merging logic for
 	Tag_DSP_extension.
 

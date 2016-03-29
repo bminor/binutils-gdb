@@ -2608,8 +2608,12 @@ struct elf32_arm_stub_hash_entry
   bfd_vma target_value;
   asection *target_section;
 
-  /* Offset to apply to relocation referencing target_value.  */
-  bfd_vma target_addend;
+  /* Same as above but for the source of the branch to the stub.  Used for
+     Cortex-A8 erratum workaround to patch it to branch to the stub.  As
+     such, source section does not need to be recorded since Cortex-A8 erratum
+     workaround stubs are only generated when both source and target are in the
+     same section.  */
+  bfd_vma source_value;
 
   /* The instruction which caused this stub to be generated (only valid for
      Cortex-A8 erratum workaround stubs at present).  */
@@ -2777,7 +2781,7 @@ struct a8_erratum_fix
   bfd *input_bfd;
   asection *section;
   bfd_vma offset;
-  bfd_vma addend;
+  bfd_vma target_offset;
   unsigned long orig_insn;
   char *stub_name;
   enum elf32_arm_stub_type stub_type;
@@ -3354,9 +3358,9 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
       eh = (struct elf32_arm_stub_hash_entry *) entry;
       eh->stub_sec = NULL;
       eh->stub_offset = 0;
+      eh->source_value = 0;
       eh->target_value = 0;
       eh->target_section = NULL;
-      eh->target_addend = 0;
       eh->orig_insn = 0;
       eh->stub_type = arm_stub_none;
       eh->stub_size = 0;
@@ -4388,65 +4392,36 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   BFD_ASSERT (nrelocs != 0 && nrelocs <= MAXRELOCS);
 
   for (i = 0; i < nrelocs; i++)
-    if (template_sequence[stub_reloc_idx[i]].r_type == R_ARM_THM_JUMP24
-	|| template_sequence[stub_reloc_idx[i]].r_type == R_ARM_THM_JUMP19
-	|| template_sequence[stub_reloc_idx[i]].r_type == R_ARM_THM_CALL
-	|| template_sequence[stub_reloc_idx[i]].r_type == R_ARM_THM_XPC22)
-      {
-	Elf_Internal_Rela rel;
-	bfd_boolean unresolved_reloc;
-	char *error_message;
-	enum arm_st_branch_type branch_type
-	  = (template_sequence[stub_reloc_idx[i]].r_type != R_ARM_THM_XPC22
-	     ? ST_BRANCH_TO_THUMB : ST_BRANCH_TO_ARM);
-	bfd_vma points_to = sym_value + stub_entry->target_addend;
+    {
+      Elf_Internal_Rela rel;
+      bfd_boolean unresolved_reloc;
+      char *error_message;
+      bfd_vma points_to =
+	sym_value + template_sequence[stub_reloc_idx[i]].reloc_addend;
 
-	rel.r_offset = stub_entry->stub_offset + stub_reloc_offset[i];
-	rel.r_info = ELF32_R_INFO (0,
-				   template_sequence[stub_reloc_idx[i]].r_type);
-	rel.r_addend = template_sequence[stub_reloc_idx[i]].reloc_addend;
+      rel.r_offset = stub_entry->stub_offset + stub_reloc_offset[i];
+      rel.r_info = ELF32_R_INFO (0,
+				 template_sequence[stub_reloc_idx[i]].r_type);
+      rel.r_addend = 0;
 
-	if (stub_entry->stub_type == arm_stub_a8_veneer_b_cond && i == 0)
-	  /* The first relocation in the elf32_arm_stub_a8_veneer_b_cond[]
-	     template should refer back to the instruction after the original
-	     branch.  */
-	  points_to = sym_value;
+      if (stub_entry->stub_type == arm_stub_a8_veneer_b_cond && i == 0)
+	/* The first relocation in the elf32_arm_stub_a8_veneer_b_cond[]
+	   template should refer back to the instruction after the original
+	   branch.  We use target_section as Cortex-A8 erratum workaround stubs
+	   are only generated when both source and target are in the same
+	   section.  */
+	points_to = stub_entry->target_section->output_section->vma
+		    + stub_entry->target_section->output_offset
+		    + stub_entry->source_value;
 
-	/* There may be unintended consequences if this is not true.  */
-	BFD_ASSERT (stub_entry->h == NULL);
-
-	/* Note: _bfd_final_link_relocate doesn't handle these relocations
-	   properly.  We should probably use this function unconditionally,
-	   rather than only for certain relocations listed in the enclosing
-	   conditional, for the sake of consistency.  */
-	elf32_arm_final_link_relocate (elf32_arm_howto_from_type
-	    (template_sequence[stub_reloc_idx[i]].r_type),
-	  stub_bfd, info->output_bfd, stub_sec, stub_sec->contents, &rel,
-	  points_to, info, stub_entry->target_section, "", STT_FUNC,
-	  branch_type, (struct elf_link_hash_entry *) stub_entry->h,
-	  &unresolved_reloc, &error_message);
-      }
-    else
-      {
-	Elf_Internal_Rela rel;
-	bfd_boolean unresolved_reloc;
-	char *error_message;
-	bfd_vma points_to = sym_value + stub_entry->target_addend
-	  + template_sequence[stub_reloc_idx[i]].reloc_addend;
-
-	rel.r_offset = stub_entry->stub_offset + stub_reloc_offset[i];
-	rel.r_info = ELF32_R_INFO (0,
-				   template_sequence[stub_reloc_idx[i]].r_type);
-	rel.r_addend = 0;
-
-	elf32_arm_final_link_relocate (elf32_arm_howto_from_type
-	    (template_sequence[stub_reloc_idx[i]].r_type),
-	  stub_bfd, info->output_bfd, stub_sec, stub_sec->contents, &rel,
-	  points_to, info, stub_entry->target_section, "", STT_FUNC,
-	  stub_entry->branch_type,
-	  (struct elf_link_hash_entry *) stub_entry->h, &unresolved_reloc,
-	  &error_message);
-      }
+      elf32_arm_final_link_relocate (elf32_arm_howto_from_type
+	  (template_sequence[stub_reloc_idx[i]].r_type),
+	   stub_bfd, info->output_bfd, stub_sec, stub_sec->contents, &rel,
+	   points_to, info, stub_entry->target_section, "", STT_FUNC,
+	   stub_entry->branch_type,
+	   (struct elf_link_hash_entry *) stub_entry->h, &unresolved_reloc,
+	   &error_message);
+    }
 
   return TRUE;
 #undef MAXRELOCS
@@ -5039,7 +5014,8 @@ cortex_a8_erratum_scan (bfd *input_bfd,
 			  a8_fixes[num_a8_fixes].input_bfd = input_bfd;
 			  a8_fixes[num_a8_fixes].section = section;
 			  a8_fixes[num_a8_fixes].offset = i;
-			  a8_fixes[num_a8_fixes].addend = offset;
+			  a8_fixes[num_a8_fixes].target_offset =
+			    target - base_vma;
 			  a8_fixes[num_a8_fixes].orig_insn = insn;
 			  a8_fixes[num_a8_fixes].stub_name = stub_name;
 			  a8_fixes[num_a8_fixes].stub_type = stub_type;
@@ -5612,9 +5588,9 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	  stub_entry->stub_offset = 0;
 	  stub_entry->id_sec = link_sec;
 	  stub_entry->stub_type = a8_fixes[i].stub_type;
+	  stub_entry->source_value = a8_fixes[i].offset;
 	  stub_entry->target_section = a8_fixes[i].section;
-	  stub_entry->target_value = a8_fixes[i].offset;
-	  stub_entry->target_addend = a8_fixes[i].addend;
+	  stub_entry->target_value = a8_fixes[i].target_offset;
 	  stub_entry->orig_insn = a8_fixes[i].orig_insn;
 	  stub_entry->branch_type = a8_fixes[i].branch_type;
 
@@ -16137,7 +16113,7 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
   bfd_vma veneered_insn_loc, veneer_entry_loc;
   bfd_signed_vma branch_offset;
   bfd *abfd;
-  unsigned int target;
+  unsigned int loc;
 
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
   data = (struct a8_branch_to_stub_data *) in_arg;
@@ -16148,9 +16124,11 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
 
   contents = data->contents;
 
+  /* We use target_section as Cortex-A8 erratum workaround stubs are only
+     generated when both source and target are in the same section.  */
   veneered_insn_loc = stub_entry->target_section->output_section->vma
 		      + stub_entry->target_section->output_offset
-		      + stub_entry->target_value;
+		      + stub_entry->source_value;
 
   veneer_entry_loc = stub_entry->stub_sec->output_section->vma
 		     + stub_entry->stub_sec->output_offset
@@ -16162,7 +16140,7 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
   branch_offset = veneer_entry_loc - veneered_insn_loc - 4;
 
   abfd = stub_entry->target_section->owner;
-  target = stub_entry->target_value;
+  loc = stub_entry->source_value;
 
   /* We attempt to avoid this condition by setting stubs_always_after_branch
      in elf32_arm_size_stubs if we've enabled the Cortex-A8 erratum workaround.
@@ -16223,8 +16201,8 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
       return FALSE;
     }
 
-  bfd_put_16 (abfd, (branch_insn >> 16) & 0xffff, &contents[target]);
-  bfd_put_16 (abfd, branch_insn & 0xffff, &contents[target + 2]);
+  bfd_put_16 (abfd, (branch_insn >> 16) & 0xffff, &contents[loc]);
+  bfd_put_16 (abfd, branch_insn & 0xffff, &contents[loc + 2]);
 
   return TRUE;
 }
