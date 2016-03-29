@@ -1,3 +1,7 @@
+2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* NEWS: Mention support for tracepoints on s390*-linux.
+
 2016-03-29  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb/value.c (value_actual_type): Fix formatting issue.
