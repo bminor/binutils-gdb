@@ -457,11 +457,13 @@ iterate_over_some_symtabs (const char *name,
    DATA.  If CALLBACK returns true, the search stops.  */
 
 void
-iterate_over_symtabs (const char *name,
+iterate_over_symtabs (struct sym_search_scope *search_scope,
+		      const char *name,
 		      int (*callback) (struct symtab *symtab,
 				       void *data),
 		      void *data)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
   char *real_path = NULL;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
@@ -475,7 +477,7 @@ iterate_over_symtabs (const char *name,
       gdb_assert (IS_ABSOLUTE_PATH (real_path));
     }
 
-  ALL_OBJFILES (objfile)
+  ALL_SEARCH_SCOPE_OBJFILES (search_scope, pspace, objfile)
   {
     if (iterate_over_some_symtabs (name, real_path, callback, data,
 				   objfile->compunit_symtabs, NULL))
@@ -488,7 +490,7 @@ iterate_over_symtabs (const char *name,
   /* Same search rules as above apply here, but now we look thru the
      psymtabs.  */
 
-  ALL_OBJFILES (objfile)
+  ALL_SEARCH_SCOPE_OBJFILES (search_scope, pspace, objfile)
   {
     if (objfile->sf
 	&& objfile->sf->qf->map_symtabs_matching_filename (objfile,
@@ -523,8 +525,10 @@ struct symtab *
 lookup_symtab (const char *name)
 {
   struct symtab *result = NULL;
+  struct sym_search_scope search_scope = null_search_scope ();
 
-  iterate_over_symtabs (name, lookup_symtab_callback, &result);
+  search_scope.pspace = current_program_space;
+  iterate_over_symtabs (&search_scope, name, lookup_symtab_callback, &result);
   return result;
 }
 

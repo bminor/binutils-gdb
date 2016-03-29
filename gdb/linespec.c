@@ -3266,15 +3266,7 @@ collect_symtabs_from_filename (const char *file,
 					NULL);
   cleanups = make_cleanup_htab_delete (collector.symtab_table);
 
-  /* Find that file's data.  */
-  ALL_SEARCH_PSPACES (search_scope->pspace, pspace)
-    {
-      if (pspace->executing_startup)
-	continue;
-
-      set_current_program_space (pspace);
-      iterate_over_symtabs (file, add_symtabs_to_list, &collector);
-    }
+  iterate_over_symtabs (search_scope, file, add_symtabs_to_list, &collector);
 
   do_cleanups (cleanups);
   return collector.symtabs;

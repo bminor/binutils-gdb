@@ -1638,7 +1638,8 @@ int iterate_over_some_symtabs (const char *name,
 			       struct compunit_symtab *first,
 			       struct compunit_symtab *after_last);
 
-void iterate_over_symtabs (const char *name,
+void iterate_over_symtabs (struct sym_search_scope *search_scope,
+			   const char *name,
 			   int (*callback) (struct symtab *symtab,
 					    void *data),
 			   void *data);
