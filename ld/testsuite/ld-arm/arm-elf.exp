@@ -597,6 +597,33 @@ set armeabitests_nonacl {
      {{objdump -d jump-reloc-veneers-long.d}}
      "jump-reloc-veneers-long"}
 
+    {"Secure gateway veneers: no .gnu.sgstubs section" "" ""
+     "-march=armv8-m.base -mthumb"
+     {cmse-veneers.s}
+     {{ld cmse-veneers-no-gnu_sgstubs.out}}
+     "cmse-veneers-no-gnu_sgstubs"}
+    {"Secure gateway veneers: wrong entry functions" "" ""
+     "-march=armv7-m -mthumb --defsym CHECK_ERRORS=1"
+     {cmse-veneers.s}
+     {{ld cmse-veneers-wrong-entryfct.out}}
+     "cmse-veneers-wrong-entryfct"}
+    {"Secure gateway veneers (ARMv8-M Baseline)"
+     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000" ""
+     "-march=armv8-m.base -mthumb"
+     {cmse-veneers.s}
+     {{objdump {-d -j .gnu.sgstubs} cmse-veneers.d}
+      {objdump {-h -j .gnu.sgstubs} cmse-veneers.sd}
+      {nm {} cmse-veneers.rd}}
+     "cmse-veneers-baseline"}
+    {"Secure gateway veneers (ARMv8-M Mainline)"
+     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000" ""
+     "-march=armv8-m.main -mthumb"
+     {cmse-veneers.s}
+     {{objdump {-d -j .gnu.sgstubs} cmse-veneers.d}
+      {objdump {-h -j .gnu.sgstubs} cmse-veneers.sd}
+      {nm {} cmse-veneers.rd}}
+     "cmse-veneers-mainline"}
+
     {"R_ARM_THM_JUMP19 Relocation veneers: Short"
      "--section-start destsect=0x000108002 --section-start .text=0x8000" ""
      "-march=armv7-m -mthumb"

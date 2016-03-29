@@ -1,5 +1,14 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* ld-arm/cmse-veneers.s: New file.
+	* ld-arm/cmse-veneers.d: Likewise.
+	* ld-arm/cmse-veneers.rd: Likewise.
+	* ld-arm/cmse-veneers.sd: Likewise.
+	* ld-arm/cmse-veneers-no-gnu_sgstubs.out: Likewise.
+	* ld-arm/cmse-veneers-wrong-entryfct.out: Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* ld-arm/arm-elf.exp (EABI attribute merging 10 (DSP)): New test.
 	* ld-arm/attr-merge-10b-dsp.s: New file.
 	* ld-arm/attr-merge-10-dsp.attr: Likewise.

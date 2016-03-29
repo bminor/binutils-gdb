@@ -6810,6 +6810,12 @@ The @samp{--long-plt} option enables the use of 16 byte PLT entries
 which support up to 4Gb of code.  The default is to use 12 byte PLT
 entries which only support 512Mb of code.
 
+@cindex Placement of SG veneers
+All SG veneers are placed in the special output section @code{.gnu.sgstubs}.
+Its start address must be set, either with the command line option
+@samp{--section-start} or in a linker script, to indicate where to place these
+veneers in memory.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

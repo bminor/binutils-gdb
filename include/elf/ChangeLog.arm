@@ -1,5 +1,10 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm.h (ARM_GET_SYM_CMSE_SPCL): Define macro.
+	(ARM_SET_SYM_CMSE_SPCL): Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm.h (ARM_SYM_BRANCH_TYPE): Replace by ...
 	(ARM_GET_SYM_BRANCH_TYPE): ... this ...
 	(ARM_SET_SYM_BRANCH_TYPE): ... and this.

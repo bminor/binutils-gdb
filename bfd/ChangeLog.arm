@@ -1,5 +1,31 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf32-arm.c (CMSE_PREFIX): Define macro.
+	(elf32_arm_stub_cmse_branch_thumb_only): Define stub sequence.
+	(cmse_branch_thumb_only): Declare stub.
+	(struct elf32_arm_link_hash_table): Define cmse_stub_sec field.
+	(elf32_arm_get_plt_info): Add globals parameter.  Use it to return
+	FALSE if there is no PLT.
+	(arm_type_of_stub): Adapt to new elf32_arm_get_plt_info signature.
+	(elf32_arm_final_link_relocate): Likewise.
+	(elf32_arm_gc_sweep_hook): Likewise.
+	(arm_stub_is_thumb): Add case for arm_stub_cmse_branch_thumb_only.
+	(arm_dedicated_stub_output_section_required): Likewise.
+	(arm_dedicated_stub_output_section_required_alignment): Likewise.
+	(arm_stub_dedicated_output_section_name): Likewise.
+	(arm_stub_dedicated_input_section_ptr): Likewise and remove
+	ATTRIBUTE_UNUSED for htab parameter.
+	(arm_stub_required_alignment): Likewise.
+	(arm_stub_sym_claimed): Likewise.
+	(arm_dedicated_stub_section_padding): Likewise.
+	(cmse_scan): New function.
+	(elf32_arm_size_stubs): Call cmse_scan for ARM M profile targets.
+	Set stub_changed to TRUE if such veneers were created.
+	(elf32_arm_swap_symbol_in): Add detection code for CMSE special
+	symbols.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* elf32-arm.c (arm_dedicated_stub_section_padding): New function.
 	(elf32_arm_size_stubs): Declare stub_type in a more outer scope and
 	account for padding for stub section requiring one.

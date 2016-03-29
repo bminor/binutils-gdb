@@ -1,5 +1,14 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* ld.texinfo (Placement of SG veneers): New concept entry.
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway veneers: no .gnu.sgstubs section): New test.
+	(Secure gateway veneers: wrong entry functions): Likewise.
+	(Secure gateway veneers (ARMv8-M Baseline)): Likewise.
+	(Secure gateway veneers (ARMv8-M Mainline)): Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* emultempl/armelf.em (arm_elf_before_allocation): Call
 	bfd_elf32_arm_keep_private_stub_output_sections before generic
 	before_allocation function.

@@ -361,4 +361,11 @@ enum arm_st_branch_type {
 #define ARM_SET_SYM_BRANCH_TYPE(SYM_TARGET_INTERNAL,TYPE) \
   ((SYM_TARGET_INTERNAL) = ((SYM_TARGET_INTERNAL) & ~3) | ((TYPE) & 3))
 
+/* Get or set whether a symbol is a special symbol of an entry function of CMSE
+   secure code.  */
+#define ARM_GET_SYM_CMSE_SPCL(SYM_TARGET_INTERNAL) \
+  (((SYM_TARGET_INTERNAL) >> 2) & 1)
+#define ARM_SET_SYM_CMSE_SPCL(SYM_TARGET_INTERNAL) \
+  (SYM_TARGET_INTERNAL) |= 4
+
 #endif /* _ELF_ARM_H */
