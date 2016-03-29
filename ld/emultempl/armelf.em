@@ -70,6 +70,10 @@ arm_elf_before_allocation (void)
   /* Auto-select Cortex-A8 erratum fix if it wasn't explicitly specified.  */
   bfd_elf32_arm_set_cortex_a8_fix (link_info.output_bfd, &link_info);
 
+  /* Ensure the output sections of veneers needing a dedicated one is not
+     removed.  */
+  bfd_elf32_arm_keep_private_stub_output_sections (&link_info);
+
   /* We should be able to set the size of the interworking stub section.  We
      can't do it until later if we have dynamic sections, though.  */
   if (elf_hash_table (&link_info)->dynobj == NULL)

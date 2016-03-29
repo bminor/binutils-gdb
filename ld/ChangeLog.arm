@@ -1,5 +1,11 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* emultempl/armelf.em (arm_elf_before_allocation): Call
+	bfd_elf32_arm_keep_private_stub_output_sections before generic
+	before_allocation function.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	(gld${EMULATION_NAME}_finish): Use ARM_GET_SYM_BRANCH_TYPE to get
 	branch type of a symbol.
 
