@@ -1,5 +1,18 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* bfd-in.h (elf32_arm_size_stubs): Add an output section parameter.
+	* bfd-in2.h: Regenerated.
+	* elf32-arm.c (struct elf32_arm_link_hash_table): Add an output section
+	parameter to add_stub_section callback.
+	(elf32_arm_create_or_find_stub_sec): Get output section from link_sec
+	and pass it down to add_stub_section.
+	(elf32_arm_add_stub): Set section to stub_sec if NULL before using it
+	for error message.
+	(elf32_arm_size_stubs): Add output section parameter to
+	add_stub_section function pointer parameter.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* elf32-arm.c (elf32_arm_create_stub): New function.
 	(elf32_arm_size_stubs): Use elf32_arm_create_stub for stub creation.
 

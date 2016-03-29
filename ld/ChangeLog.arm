@@ -1,0 +1,6 @@
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* emultempl/armelf.em (elf32_arm_add_stub_section): Add output_section
+	parameter and rename input_section parameter to after_input_section.
+	Append input stub section to the output section if after_input_section
+	is NULL.

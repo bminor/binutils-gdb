@@ -190,12 +190,12 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 
 static asection *
 elf32_arm_add_stub_section (const char * stub_sec_name,
-			    asection *   input_section,
+			    asection *   output_section,
+			    asection *   after_input_section,
 			    unsigned int alignment_power)
 {
   asection *stub_sec;
   flagword flags;
-  asection *output_section;
   lang_output_section_statement_type *os;
   struct hook_stub_info info;
 
@@ -208,18 +208,34 @@ elf32_arm_add_stub_section (const char * stub_sec_name,
 
   bfd_set_section_alignment (stub_file->the_bfd, stub_sec, alignment_power);
 
-  output_section = input_section->output_section;
   os = lang_output_section_get (output_section);
 
-  info.input_section = input_section;
+  info.input_section = after_input_section;
   lang_list_init (&info.add);
   lang_add_section (&info.add, stub_sec, NULL, os);
 
   if (info.add.head == NULL)
     goto err_ret;
 
-  if (hook_in_stub (&info, &os->children.head))
-    return stub_sec;
+  if (after_input_section == NULL)
+    {
+      lang_statement_union_type **lp = &os->children.head;
+      lang_statement_union_type *l, *lprev = NULL;
+
+      for (; (l = *lp) != NULL; lp = &l->header.next, lprev = l);
+
+      if (lprev)
+	lprev->header.next = info.add.head;
+      else
+	os->children.head = info.add.head;
+
+      return stub_sec;
+    }
+  else
+    {
+      if (hook_in_stub (&info, &os->children.head))
+	return stub_sec;
+    }
 
  err_ret:
   einfo ("%X%P: can not make stub section: %E\n");
