@@ -3,6 +3,14 @@
 	Revert
 	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (insns): Add ARMv8-M security extensions
+	instructions.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Revert
+	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c
 	(struct arm_option_extension_value_table): Make allowed_archs an array
 	with 2 entries.

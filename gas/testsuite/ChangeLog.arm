@@ -3,6 +3,16 @@
 	Revert
 	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* gas/arm/any-cmse.d: Likewise.
+	* gas/arm/archv8m-cmse.s: New file.
+	* gas/arm/archv8m-cmse-base.d: Likewise.
+	* gas/arm/archv8m-cmse-main.d: Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Revert
+	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* gas/arm/arch7em-bad.d: Rename to ...
 	* gas/arm/arch7em-bad-1.d: This.
 	* gas/arm/arch7em-bad-2.d: New file.

@@ -1,3 +1,13 @@
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Revert
+	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (thumb_opcodes): Add entries for narrow ARMv8-M security
+	extensions instructions.
+	(thumb32_opcodes): Add entries for wide ARMv8-M security extensions
+	instructions.
+
 2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (thumb_opcodes): Add entries for narrow ARMv8-M security
