@@ -1,3 +1,11 @@
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Revert
+	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (display_arm_attribute): Add output for Tag_DSP_extension.
+	(arm_attr_public_tags): Define DSP_extension attribute.
+
 2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* readelf.c (display_arm_attribute): Add output for Tag_DSP_extension.

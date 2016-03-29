@@ -12764,8 +12764,6 @@ static const char * arm_attr_tag_FP_HP_extension[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_ABI_FP_16bit_format[] =
   {"None", "IEEE 754", "Alternative Format"};
-static const char * arm_attr_tag_DSP_extension[] =
-  {"Follow architecture", "Allowed"};
 static const char * arm_attr_tag_MPextension_use[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_DIV_use[] =
@@ -12816,7 +12814,6 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(38, ABI_FP_16bit_format),
   LOOKUP(42, MPextension_use),
   LOOKUP(44, DIV_use),
-  LOOKUP(46, DSP_extension),
   {64, "nodefaults", 0, NULL},
   {65, "also_compatible_with", 0, NULL},
   LOOKUP(66, T2EE_use),

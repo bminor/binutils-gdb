@@ -1,3 +1,11 @@
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Revert
+	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	(elf32_arm_merge_eabi_attributes): Add merging logic for
+	Tag_DSP_extension.
+
 2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	(elf32_arm_merge_eabi_attributes): Add merging logic for

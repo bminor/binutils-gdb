@@ -379,9 +379,6 @@ set armeabitests_common {
      {"EABI attribute merging 10" "-r" "" "" {attr-merge-10a.s attr-merge-10b.s}
       {{readelf -A attr-merge-10.attr}}
       "attr-merge-10"}
-     {"EABI attribute merging 10 (DSP)" "-r" "" "" {attr-merge-10a.s attr-merge-10b-dsp.s}
-      {{readelf -A attr-merge-10-dsp.attr}}
-      "attr-merge-10-dsp"}
      {"EABI attribute arch merging 1" "-r" "" "" {arch-v6k.s arch-v6t2.s}
       {{readelf -A attr-merge-arch-1.attr}}
       "attr-merge-arch-1"}

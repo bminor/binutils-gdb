@@ -1,3 +1,10 @@
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Revert
+	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (Tag_DSP_extension): Define.
+
 2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm.h (Tag_DSP_extension): Define.
