@@ -4402,6 +4402,24 @@ arm_stub_sym_claimed (enum elf32_arm_stub_type stub_type)
   abort ();  /* Should be unreachable.  */
 }
 
+/* Returns the padding needed for the dedicated section used stubs of type
+   STUB_TYPE.  */
+
+static int
+arm_dedicated_stub_section_padding (enum elf32_arm_stub_type stub_type)
+{
+  if (stub_type >= max_stub_type)
+    abort ();  /* Should be unreachable.  */
+
+  switch (stub_type)
+    {
+    default:
+      return 0;
+    }
+
+  abort ();  /* Should be unreachable.  */
+}
+
 static bfd_boolean
 arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 		    void * in_arg)
@@ -5378,6 +5396,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
       bfd *input_bfd;
       unsigned int bfd_indx;
       asection *stub_sec;
+      enum elf32_arm_stub_type stub_type;
       bfd_boolean stub_changed = FALSE;
       unsigned prev_num_a8_fixes = num_a8_fixes;
 
@@ -5433,7 +5452,6 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	      for (; irela < irelaend; irela++)
 		{
 		  unsigned int r_type, r_indx;
-		  enum elf32_arm_stub_type stub_type;
 		  asection *sym_sec;
 		  bfd_vma sym_value;
 		  bfd_vma destination;
@@ -5733,7 +5751,27 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	  stub_sec->size = 0;
 	}
 
+      /* Compute stub section size, considering padding.  */
       bfd_hash_traverse (&htab->stub_hash_table, arm_size_one_stub, htab);
+      for (stub_type = arm_stub_none + 1; stub_type < max_stub_type;
+	   stub_type++)
+	{
+	  int size, padding;
+	  asection **stub_sec_p;
+
+	  padding = arm_dedicated_stub_section_padding (stub_type);
+	  stub_sec_p = arm_dedicated_stub_input_section_ptr (htab, stub_type);
+	  /* Skip if no stub input section or no stub section padding
+	     required.  */
+	  if ((stub_sec_p != NULL && *stub_sec_p == NULL) || padding == 0)
+	    continue;
+	  /* Stub section padding required but no dedicated section.  */
+	  BFD_ASSERT (stub_sec_p);
+
+	  size = (*stub_sec_p)->size;
+	  size = (size + padding - 1) & ~(padding - 1);
+	  (*stub_sec_p)->size = size;
+	}
 
       /* Add Cortex-A8 erratum veneers to stub section sizes too.  */
       if (htab->fix_cortex_a8)
@@ -5841,7 +5879,8 @@ elf32_arm_build_stubs (struct bfd_link_info *info)
       if (!strstr (stub_sec->name, STUB_SUFFIX))
 	continue;
 
-      /* Allocate memory to hold the linker stubs.  */
+      /* Allocate memory to hold the linker stubs.  Zeroing the stub sections
+	 must at least be done for stub section requiring padding.  */
       size = stub_sec->size;
       stub_sec->contents = (unsigned char *) bfd_zalloc (htab->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)

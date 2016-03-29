@@ -1,5 +1,13 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf32-arm.c (arm_dedicated_stub_section_padding): New function.
+	(elf32_arm_size_stubs): Declare stub_type in a more outer scope and
+	account for padding for stub section requiring one.
+	(elf32_arm_build_stubs): Add comment to stress the importance of
+	zeroing veneer section content.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* bfd-in.h (bfd_elf32_arm_keep_private_stub_output_sections): Declare
 	bfd hook.
 	* bfd-in2.h: Regenerate.
