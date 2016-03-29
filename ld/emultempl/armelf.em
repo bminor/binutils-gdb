@@ -437,7 +437,8 @@ gld${EMULATION_NAME}_finish (void)
       h = bfd_link_hash_lookup (link_info.hash, entry_symbol.name,
 				FALSE, FALSE, TRUE);
       eh = (struct elf_link_hash_entry *)h;
-      if (!h || eh->target_internal != ST_BRANCH_TO_THUMB)
+      if (!h || ARM_GET_SYM_BRANCH_TYPE (eh->target_internal)
+		!= ST_BRANCH_TO_THUMB)
 	return;
     }
 

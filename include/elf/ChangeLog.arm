@@ -1,5 +1,11 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm.h (ARM_SYM_BRANCH_TYPE): Replace by ...
+	(ARM_GET_SYM_BRANCH_TYPE): ... this ...
+	(ARM_SET_SYM_BRANCH_TYPE): ... and this.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm.h (Tag_DSP_extension): Define.
 
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>

@@ -1,5 +1,11 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm-dis.c (get_sym_code_type): Use ARM_GET_SYM_BRANCH_TYPE to get
+	branch type of a symbol.
+	(print_insn): Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm-dis.c (coprocessor_opcodes): Add entries for VFP ARMv8-M
 	Mainline Security Extensions instructions.
 	(thumb_opcodes): Add entries for narrow ARMv8-M Security

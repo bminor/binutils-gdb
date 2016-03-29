@@ -1,5 +1,18 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf32-arm.c (elf32_arm_size_stubs): Use new macros
+	ARM_GET_SYM_BRANCH_TYPE and ARM_SET_SYM_BRANCH_TYPE to respectively get
+	and set branch type of a symbol.
+	(bfd_elf32_arm_process_before_allocation): Likewise.
+	(elf32_arm_relocate_section): Likewise and fix identation along the
+	way.
+	(allocate_dynrelocs_for_symbol): Likewise.
+	(elf32_arm_finish_dynamic_symbol): Likewise.
+	(elf32_arm_swap_symbol_in): Likewise.
+	(elf32_arm_swap_symbol_out): Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* bfd-in.h (elf32_arm_size_stubs): Add an output section parameter.
 	* bfd-in2.h: Regenerated.
 	* elf32-arm.c (struct elf32_arm_link_hash_table): Add an output section

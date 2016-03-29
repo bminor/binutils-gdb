@@ -1,5 +1,10 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (arm_adjust_symtab): Use ARM_SET_SYM_BRANCH_TYPE to
+	set branch type of a symbol.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (arm_ext_dsp): New feature for Thumb DSP
 	instructions.
 	(arm_extensions): Add dsp extension for ARMv8-M Mainline.

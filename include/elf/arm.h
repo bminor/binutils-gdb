@@ -356,7 +356,9 @@ enum arm_st_branch_type {
   ST_BRANCH_UNKNOWN
 };
 
-#define ARM_SYM_BRANCH_TYPE(SYM) \
-  ((enum arm_st_branch_type) (SYM)->st_target_internal)
+#define ARM_GET_SYM_BRANCH_TYPE(SYM_TARGET_INTERNAL) \
+  ((enum arm_st_branch_type) ((SYM_TARGET_INTERNAL) & 3))
+#define ARM_SET_SYM_BRANCH_TYPE(SYM_TARGET_INTERNAL,TYPE) \
+  ((SYM_TARGET_INTERNAL) = ((SYM_TARGET_INTERNAL) & ~3) | ((TYPE) & 3))
 
 #endif /* _ELF_ARM_H */
