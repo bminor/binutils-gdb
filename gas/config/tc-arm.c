@@ -24971,12 +24971,16 @@ struct arm_option_extension_value_table
   size_t name_len;
   const arm_feature_set merge_value;
   const arm_feature_set clear_value;
-  const arm_feature_set allowed_archs;
+  /* List of architectures for which an extension is available.  ARM_ARCH_NONE
+     indicates that an extension is available for all architectures while
+     ARM_ANY marks an empty entry.  */
+  const arm_feature_set allowed_archs[2];
 };
 
 /* The following table must be in alphabetical order with a NULL last entry.
    */
-#define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, AA }
+#define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, { AA, ARM_ANY } }
+#define ARM_EXT_OPT2(N, M, C, AA1, AA2) { N, sizeof (N) - 1, M, C, {AA1, AA2} }
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
   ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
@@ -24986,18 +24990,20 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8, ARM_FEATURE_COPROC (FPU_VFP_ARMV8),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
-  ARM_EXT_OPT ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
+  ARM_EXT_OPT2 ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7R)),
   ARM_EXT_OPT ("iwmmxt",ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT),
-			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT), ARM_ANY),
+			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT), ARM_ARCH_NONE),
   ARM_EXT_OPT ("iwmmxt2", ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2),
-			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2), ARM_ANY),
+			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2), ARM_ARCH_NONE),
   ARM_EXT_OPT ("maverick", ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK),
-			ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK), ARM_ANY),
-  ARM_EXT_OPT ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
+			ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK), ARM_ARCH_NONE),
+  ARM_EXT_OPT2 ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7R)),
   ARM_EXT_OPT ("simd",   FPU_ARCH_NEON_VFP_ARMV8,
 			ARM_FEATURE_COPROC (FPU_NEON_ARMV8),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
@@ -25007,9 +25013,10 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("pan",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
 			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_PAN, 0),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
-  ARM_EXT_OPT ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
+  ARM_EXT_OPT2 ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V7A)),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V6K),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
   ARM_EXT_OPT ("virt",	ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT | ARM_EXT_ADIV
 				     | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT),
@@ -25018,8 +25025,8 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("xscale",ARM_FEATURE_COPROC (ARM_CEXT_XSCALE),
-			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ANY),
-  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }
+			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ARCH_NONE),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, { ARM_ARCH_NONE, ARM_ARCH_NONE } }
 };
 #undef ARM_EXT_OPT
 
@@ -25126,6 +25133,7 @@ arm_parse_extension (char *str, const arm_feature_set **opt_p)
      or removing it (0) and only allowing it to change in the order
      -1 -> 1 -> 0.  */
   const struct arm_option_extension_value_table * opt = NULL;
+  const arm_feature_set arm_any = ARM_ANY;
   int adding_value = -1;
 
   /* Copy the feature set, so that we can modify it.  */
@@ -25190,8 +25198,18 @@ arm_parse_extension (char *str, const arm_feature_set **opt_p)
       for (; opt->name != NULL; opt++)
 	if (opt->name_len == len && strncmp (opt->name, str, len) == 0)
 	  {
+	    int i, nb_allowed_archs =
+	      sizeof (opt->allowed_archs) / sizeof (opt->allowed_archs[0]);
 	    /* Check we can apply the extension to this architecture.  */
-	    if (!ARM_CPU_HAS_FEATURE (*ext_set, opt->allowed_archs))
+	    for (i = 0; i < nb_allowed_archs; i++)
+	      {
+		/* Empty entry.  */
+		if (ARM_FEATURE_EQUAL (opt->allowed_archs[i], arm_any))
+		  continue;
+		if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], *ext_set))
+		  break;
+	      }
+	    if (i == nb_allowed_archs)
 	      {
 		as_bad (_("extension does not apply to the base architecture"));
 		return FALSE;
@@ -25945,6 +25963,7 @@ static void
 s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 {
   const struct arm_option_extension_value_table *opt;
+  const arm_feature_set arm_any = ARM_ANY;
   char saved_char;
   char *name;
   int adding_value = 1;
@@ -25965,7 +25984,18 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
   for (opt = arm_extensions; opt->name != NULL; opt++)
     if (streq (opt->name, name))
       {
-	if (!ARM_CPU_HAS_FEATURE (*mcpu_cpu_opt, opt->allowed_archs))
+	int i, nb_allowed_archs =
+	  sizeof (opt->allowed_archs) / sizeof (opt->allowed_archs[i]);
+	for (i = 0; i < nb_allowed_archs; i++)
+	  {
+	    /* Empty entry.  */
+	    if (ARM_FEATURE_EQUAL (opt->allowed_archs[i], arm_any))
+	      continue;
+	    if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], *mcpu_cpu_opt))
+	      break;
+	  }
+
+	if (i == nb_allowed_archs)
 	  {
 	    as_bad (_("architectural extension `%s' is not allowed for the "
 		      "current base architecture"), name);

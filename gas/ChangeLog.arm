@@ -1,5 +1,19 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c
+	(struct arm_option_extension_value_table): Make allowed_archs an array
+	with 2 entries.
+	(ARM_EXT_OPT): Adapt to only fill the first entry of allowed_archs.
+	(ARM_EXT_OPT2): New macro filling the two entries of allowed_archs.
+	(arm_extensions): Use separate entries in allowed_archs when several
+	archs are allowed to use an extension and change ARCH_ANY in
+	ARM_ARCH_NONE in allowed_archs.
+	(arm_parse_extension): Check that, for each allowed_archs entry, all
+	bits are set in the current architecture, ignoring ARM_ANY entries.
+	(s_arm_arch_extension): Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (arm_ext_m): Add feature bit ARM_EXT2_V8M_MAIN.
 	(arm_ext_v8m_main): New feature set for bit ARM_EXT2_V8M_MAIN.
 	(arm_ext_v8m_m_only): New feature set for instructions in ARMv8-M not
