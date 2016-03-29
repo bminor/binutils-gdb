@@ -6816,6 +6816,13 @@ Its start address must be set, either with the command line option
 @samp{--section-start} or in a linker script, to indicate where to place these
 veneers in memory.
 
+@kindex --cmse-implib
+@cindex Secure gateway import library
+The @samp{--cmse-implib} option requests that the import libraries
+specified by the @samp{--out-implib} and @samp{--in-implib} options are
+secure gateway import libraries, suitable for linking a non-secure
+executable against secure code as per ARMv8-M Security Extensions.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

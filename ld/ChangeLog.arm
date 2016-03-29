@@ -1,5 +1,17 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* emultempl/armelf.em (cmse_implib): Declare and define this new
+	static variable.
+	(arm_elf_create_output_section_statements): Add new cmse_implib
+	parameter.
+	(OPTION_CMSE_IMPLIB): Define macro.
+	(PARSE_AND_LIST_LONGOPTS): Add entry for new --cmse-implib switch.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_CMSE_IMPLIB case.
+	* ld.texinfo (--cmse-implib): Document new option.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Open import
 	library file for writing and initialize implib_bfd field of link_info
 	structure.

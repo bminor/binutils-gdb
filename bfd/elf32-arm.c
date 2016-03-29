@@ -3064,6 +3064,10 @@ struct elf32_arm_link_hash_table
   /* True if the target uses REL relocations.  */
   int use_rel;
 
+  /* Nonzero if import library must be a secure gateway import library
+     as per ARMv8-M Security Extensions.  */
+  int cmse_implib;
+
   /* The index of the next unused R_ARM_TLS_DESC slot in .rel.plt.  */
   bfd_vma next_tls_desc_index;
 
@@ -8117,7 +8121,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
 				 bfd_arm_stm32l4xx_fix stm32l4xx_fix,
 				 int no_enum_warn, int no_wchar_warn,
 				 int pic_veneer, int fix_cortex_a8,
-				 int fix_arm1176)
+				 int fix_arm1176, int cmse_implib)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -8144,6 +8148,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
   globals->pic_veneer = pic_veneer;
   globals->fix_cortex_a8 = fix_cortex_a8;
   globals->fix_arm1176 = fix_arm1176;
+  globals->cmse_implib = cmse_implib;
 
   BFD_ASSERT (is_arm_elf (output_bfd));
   elf_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
@@ -16560,6 +16565,95 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
   return TRUE;
 }
 
+/* Filter normal symbols of CMSE entry functions of ABFD to include in
+   the import library.  All SYMCOUNT symbols of ABFD can be examined
+   from their pointers in SYMS.  Pointers of symbols to keep should be
+   stored continuously at the beginning of that array.
+
+   Returns the number of symbols to keep.  */
+
+static unsigned int
+elf32_arm_filter_cmse_symbols (bfd *abfd ATTRIBUTE_UNUSED,
+			       struct bfd_link_info *info,
+			       asymbol **syms, long symcount)
+{
+  size_t maxnamelen;
+  char *cmse_name;
+  long src_count, dst_count = 0;
+  struct elf32_arm_link_hash_table *htab;
+
+  htab = elf32_arm_hash_table (info);
+  if (!htab->stub_bfd || !htab->stub_bfd->sections)
+    symcount = 0;
+
+  maxnamelen = 128;
+  cmse_name = (char *) bfd_malloc (maxnamelen);
+  for (src_count = 0; src_count < symcount; src_count++)
+    {
+      struct elf32_arm_link_hash_entry *cmse_hash;
+      asymbol *sym;
+      flagword flags;
+      char *name;
+      size_t namelen;
+
+      sym = syms[src_count];
+      flags = sym->flags;
+      name = (char *) bfd_asymbol_name (sym);
+
+      if ((flags & BSF_FUNCTION) != BSF_FUNCTION)
+	continue;
+      if (!(flags & (BSF_GLOBAL | BSF_WEAK)))
+	continue;
+
+      namelen = strlen (name) + sizeof (CMSE_PREFIX) + 1;
+      if (namelen > maxnamelen)
+	{
+	  cmse_name = (char *)
+	    bfd_realloc (cmse_name, namelen);
+	  maxnamelen = namelen;
+	}
+      snprintf (cmse_name, maxnamelen, "%s%s", CMSE_PREFIX, name);
+      cmse_hash = (struct elf32_arm_link_hash_entry *)
+	elf_link_hash_lookup (&(htab)->root, cmse_name, FALSE, FALSE, TRUE);
+
+      if (!cmse_hash
+	  || (cmse_hash->root.root.type != bfd_link_hash_defined
+	      && cmse_hash->root.root.type != bfd_link_hash_defweak)
+	  || cmse_hash->root.type != STT_FUNC)
+	continue;
+
+      if (!ARM_GET_SYM_CMSE_SPCL (cmse_hash->root.target_internal))
+	continue;
+
+      syms[dst_count++] = sym;
+    }
+  free (cmse_name);
+
+  syms[dst_count] = NULL;
+
+  return dst_count;
+}
+
+/* Filter symbols of ABFD to include in the import library.  All
+   SYMCOUNT symbols of ABFD can be examined from their pointers in
+   SYMS.  Pointers of symbols to keep should be stored continuously at
+   the beginning of that array.
+
+   Returns the number of symbols to keep.  */
+
+static unsigned int
+elf32_arm_filter_implib_symbols (bfd *abfd ATTRIBUTE_UNUSED,
+				 struct bfd_link_info *info,
+				 asymbol **syms, long symcount)
+{
+  struct elf32_arm_link_hash_table *globals = elf32_arm_hash_table (info);
+
+  if (globals->cmse_implib)
+    return elf32_arm_filter_cmse_symbols (abfd, info, syms, symcount);
+  else
+    return _bfd_elf_filter_global_symbols (abfd, info, syms, symcount);
+}
+
 /* Allocate target specific section data.  */
 
 static bfd_boolean
@@ -18270,6 +18364,7 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 #define elf_backend_modify_segment_map		elf32_arm_modify_segment_map
 #define elf_backend_additional_program_headers  elf32_arm_additional_program_headers
 #define elf_backend_output_arch_local_syms      elf32_arm_output_arch_local_syms
+#define elf_backend_filter_implib_symbols	elf32_arm_filter_implib_symbols
 #define elf_backend_begin_write_processing      elf32_arm_begin_write_processing
 #define elf_backend_add_symbol_hook		elf32_arm_add_symbol_hook
 

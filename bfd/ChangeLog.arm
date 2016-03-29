@@ -1,5 +1,18 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add one parameter.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (struct elf32_arm_link_hash_table): Declare new
+	cmse_implib field.
+	(bfd_elf32_arm_set_target_relocs): Add new parameter to initialize
+	cmse_implib field in struct elf32_arm_link_hash_table.
+	(elf32_arm_filter_cmse_symbols): New function.
+	(elf32_arm_filter_implib_symbols): Likewise.
+	(elf_backend_filter_implib_symbols): Define to
+	elf32_arm_filter_implib_symbols.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* elf-bfd.h (elf_backend_filter_implib_symbols): Declare backend hook.
 	(_bfd_elf_filter_global_symbols): Declare.
 	* elf.c (_bfd_elf_filter_global_symbols): New function.

@@ -42,6 +42,7 @@ static int no_wchar_size_warning = 0;
 static int pic_veneer = 0;
 static int merge_exidx_entries = -1;
 static int fix_arm1176 = 1;
+static int cmse_implib = 0;
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -504,7 +505,7 @@ arm_elf_create_output_section_statements (void)
 				   no_enum_size_warning,
 				   no_wchar_size_warning,
 				   pic_veneer, fix_cortex_a8,
-				   fix_arm1176);
+				   fix_arm1176, cmse_implib);
 
   stub_file = lang_add_input_file ("linker stubs",
  				   lang_input_file_is_fake_enum,
@@ -573,6 +574,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_FIX_ARM1176		318
 #define OPTION_LONG_PLT			319
 #define OPTION_STM32L4XX_FIX		320
+#define OPTION_CMSE_IMPLIB		321
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -599,6 +601,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "fix-arm1176", no_argument, NULL, OPTION_FIX_ARM1176 },
   { "no-fix-arm1176", no_argument, NULL, OPTION_NO_FIX_ARM1176 },
   { "long-plt", no_argument, NULL, OPTION_LONG_PLT },
+  { "cmse-implib", no_argument, NULL, OPTION_CMSE_IMPLIB },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -619,6 +622,8 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --pic-veneer                Always generate PIC interworking veneers\n"));
   fprintf (file, _("  --long-plt                  Generate long .plt entries\n"
            "                              to handle large .plt/.got displacements\n"));
+  fprintf (file, _("  --cmse-implib               Make import library to be a secure gateway import\n"
+                   "                                library as per ARMv8-M Security Extensions\n"));
   fprintf (file, _("\
   --stub-group-size=N         Maximum size of a group of input sections that\n\
                                can be handled by one stub section.  A negative\n\
@@ -738,6 +743,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
    case OPTION_LONG_PLT:
       bfd_elf32_arm_use_long_plt ();
+      break;
+
+   case OPTION_CMSE_IMPLIB:
+      cmse_implib = 1;
       break;
 '
 

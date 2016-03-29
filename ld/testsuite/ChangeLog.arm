@@ -1,5 +1,14 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway import library generation): New test.
+	(Secure gateway import library generation: errors): Likewise.
+	* testsuite/ld-arm/cmse-implib.s: New file.
+	* testsuite/ld-arm/cmse-implib-errors.out: Likewise.
+	* testsuite/ld-arm/cmse-implib.rd: Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* ld-elf/elf.exp (Generate empty import library): New test.
 	(Generate import library): Likewise.
 	* ld-elf/implib.s: Likewise.

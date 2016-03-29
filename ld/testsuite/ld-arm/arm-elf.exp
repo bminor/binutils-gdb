@@ -623,6 +623,18 @@ set armeabitests_nonacl {
       {objdump {-h -j .gnu.sgstubs} cmse-veneers.sd}
       {nm {} cmse-veneers.rd}}
      "cmse-veneers-mainline"}
+    {"Secure gateway import library generation: errors"
+     "--section-start .gnu.sgstubs=0x20000 --out-implib=tmpdir/cmse-implib.lib --cmse-implib" ""
+     "-march=armv8-m.base -mthumb --defsym CHECK_ERRORS=1"
+     {cmse-implib.s}
+     {{ld cmse-implib-errors.out}}
+     "cmse-implib"}
+    {"Secure gateway import library generation"
+     "--section-start .gnu.sgstubs=0x20000 --out-implib=tmpdir/cmse-implib.lib --cmse-implib" ""
+     "-march=armv8-m.base -mthumb"
+     {cmse-implib.s}
+     {{readelf {-s tmpdir/cmse-implib.lib} cmse-implib.rd}}
+     "cmse-implib"}
 
     {"R_ARM_THM_JUMP19 Relocation veneers: Short"
      "--section-start destsect=0x000108002 --section-start .text=0x8000" ""
