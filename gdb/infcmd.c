@@ -459,7 +459,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 	     refetch it here.  */
 	  if (!gdbarch_has_global_solist (target_gdbarch ()))
 	    {
-	      symfile_add_flags add_flags = 0;
+	      symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
 	      if (!auto_solib_add)
 		add_flags |= SYMFILE_NO_READ;

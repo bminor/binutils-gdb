@@ -2254,7 +2254,7 @@ enable_break (struct svr4_info *info, int from_tty)
   asection *interp_sect;
   char *interp_name;
   CORE_ADDR sym_addr;
-  symfile_add_flags add_flags = 0;
+  symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
   if (from_tty)
     add_flags |= SYMFILE_VERBOSE;

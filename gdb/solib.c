@@ -1437,7 +1437,7 @@ reload_shared_libraries (char *ignored, int from_tty,
 			 struct cmd_list_element *e)
 {
   const struct target_so_ops *ops;
-  symfile_add_flags add_flags = 0;
+  symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
   if (!auto_solib_add)
     add_flags |= SYMFILE_NO_READ;
