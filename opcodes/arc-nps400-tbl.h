@@ -140,3 +140,15 @@
 
 /* hwscd.restore 0,C */
 { "hwschd", 0x3e6f7003, 0xfffff03f, ARC_OPCODE_NPS400, CONTROL, NONE, { ZA, RC }, { C_NPS_HWS_RESTORE }},
+
+/****      Load / Store From (0x57f00000 + Offset) Instructions       ****/
+
+#define XLDST_LIKE(NAME,SUBOP2)                                          \
+  { NAME, (0x58000000 | (SUBOP2 << 16)), 0xf81f0000, ARC_OPCODE_NPS400, MEMORY, NONE, { NPS_R_DST, BRAKET, NPS_XLDST_UIMM16, BRAKETdup }, { 0 }},
+
+XLDST_LIKE("xldb", 0x8)
+XLDST_LIKE("xldw", 0x9)
+XLDST_LIKE("xld", 0xa)
+XLDST_LIKE("xstb", 0xc)
+XLDST_LIKE("xstw", 0xd)
+XLDST_LIKE("xst", 0xe)

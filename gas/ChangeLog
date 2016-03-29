@@ -1,5 +1,10 @@
 2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/gas/arc/nps400-3.d: New file.
+	* testsuite/gas/arc/nps400-3.s: New file.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/gas/arc/add_s-err.s: Update target pattern.
 	* testsuite/gas/arc/warn.s: Likewise.
 	* testsuite/gas/elf/elf.exp: Run test for arc.

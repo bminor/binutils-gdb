@@ -26,6 +26,7 @@
 #include "elf/arc.h"
 #include "libiberty.h"
 #include "opcode/arc-func.h"
+#include "opcode/arc.h"
 #include "arc-plt.h"
 
 #ifdef DEBUG
@@ -722,6 +723,8 @@ struct arc_relocation_data
   bfd_signed_vma  got_symbol_vma;
 
   bfd_boolean	  should_relocate;
+
+  const char *    symbol_name;
 };
 
 static void
@@ -786,6 +789,52 @@ middle_endian_convert (bfd_vma insn, bfd_boolean do_it)
 	((insn & 0xffff) << 16);
     }
   return insn;
+}
+
+/* This function is called for relocations that are otherwise marked as NOT
+   requiring overflow checks.  In here we perform non-standard checks of
+   the relocation value.  */
+
+static inline bfd_reloc_status_type
+arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
+                             bfd_signed_vma relocation,
+			     struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  switch (reloc_data.howto->type)
+    {
+    case R_ARC_NPS_CMEM16:
+      if (((relocation >> 16) & 0xffff) != NPS_CMEM_HIGH_VALUE)
+        {
+          if (reloc_data.reloc_addend == 0)
+            (*_bfd_error_handler)
+              (_("%B(%A+0x%lx): CMEM relocation to `%s' is invalid, "
+                 "16 MSB should be 0x%04x (value is 0x%lx)"),
+               reloc_data.input_section->owner,
+               reloc_data.input_section,
+               reloc_data.reloc_offset,
+               reloc_data.symbol_name,
+               NPS_CMEM_HIGH_VALUE,
+               (relocation));
+          else
+            (*_bfd_error_handler)
+              (_("%B(%A+0x%lx): CMEM relocation to `%s+0x%lx' is invalid, "
+                 "16 MSB should be 0x%04x (value is 0x%lx)"),
+               reloc_data.input_section->owner,
+               reloc_data.input_section,
+               reloc_data.reloc_offset,
+               reloc_data.symbol_name,
+               reloc_data.reloc_addend,
+               NPS_CMEM_HIGH_VALUE,
+               (relocation));
+          return bfd_reloc_overflow;
+        }
+      break;
+
+    default:
+      break;
+    }
+
+  return bfd_reloc_ok;
 }
 
 #define ME(reloc) (reloc)
@@ -896,6 +945,7 @@ arc_do_relocation (bfd_byte * contents,
   bfd_vma orig_insn ATTRIBUTE_UNUSED;
   bfd * abfd = reloc_data.input_section->owner;
   struct elf_link_hash_table *htab ATTRIBUTE_UNUSED = elf_hash_table (info);
+  bfd_reloc_status_type flag;
 
   if (reloc_data.should_relocate == FALSE)
     return bfd_reloc_ok;
@@ -936,34 +986,34 @@ arc_do_relocation (bfd_byte * contents,
 
   /* Check for relocation overflow.  */
   if (reloc_data.howto->complain_on_overflow != complain_overflow_dont)
-    {
-      bfd_reloc_status_type flag;
-      flag = bfd_check_overflow (reloc_data.howto->complain_on_overflow,
-				 reloc_data.howto->bitsize,
-				 reloc_data.howto->rightshift,
-				 bfd_arch_bits_per_address (abfd),
-				 relocation);
+    flag = bfd_check_overflow (reloc_data.howto->complain_on_overflow,
+                               reloc_data.howto->bitsize,
+                               reloc_data.howto->rightshift,
+                               bfd_arch_bits_per_address (abfd),
+                               relocation);
+  else
+    flag = arc_special_overflow_checks (reloc_data, relocation, info);
 
 #undef  DEBUG_ARC_RELOC
 #define DEBUG_ARC_RELOC(A) debug_arc_reloc (A)
-      if (flag != bfd_reloc_ok)
-	{
-	  PR_DEBUG ( "Relocation overflows !!!!\n");
+  if (flag != bfd_reloc_ok)
+    {
+      PR_DEBUG ( "Relocation overflows !!!!\n");
 
-	  DEBUG_ARC_RELOC (reloc_data);
+      DEBUG_ARC_RELOC (reloc_data);
 
-	  PR_DEBUG (
-		  "Relocation value = signed -> %d, unsigned -> %u"
-		  ", hex -> (0x%08x)\n",
-		  (int) relocation,
-		  (unsigned int) relocation,
-		  (unsigned int) relocation);
-	  return flag;
-	}
+      PR_DEBUG (
+                "Relocation value = signed -> %d, unsigned -> %u"
+                ", hex -> (0x%08x)\n",
+                (int) relocation,
+                (unsigned int) relocation,
+                (unsigned int) relocation);
+      return flag;
     }
 #undef  DEBUG_ARC_RELOC
 #define DEBUG_ARC_RELOC(A)
 
+  /* Write updated instruction back to memory.  */
   switch (reloc_data.howto->size)
     {
       case 2:
@@ -1168,6 +1218,10 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 
 	  reloc_data.sym_value = sym->st_value;
 	  reloc_data.sym_section = sec;
+	  reloc_data.symbol_name =
+            bfd_elf_string_from_elf_section (input_bfd,
+                                             symtab_hdr->sh_link,
+                                             sym->st_name);
 
 	  /* Mergeable section handling.  */
 	  if ((sec->flags & SEC_MERGE)
@@ -1284,6 +1338,7 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
 	  BFD_ASSERT ((h->dynindx == -1) >= (h->forced_local != 0));
+	  reloc_data.symbol_name = h->root.root.string;
 	  /* If we have encountered a definition for this symbol.  */
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)

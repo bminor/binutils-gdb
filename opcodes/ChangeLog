@@ -1,5 +1,13 @@
 2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arc-nps400-tbl.h: Add xldb, xldw, xld, xstb, xstw, and xst
+	instructions.
+	* arc-opc.c (insert_nps_cmem_uimm16): New function.
+	(extract_nps_cmem_uimm16): New function.
+	(arc_operands): Add NPS_XLDST_UIMM16 operand.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arc-dis.c (arc_insn_length): New function.
 	(print_insn_arc): Use arc_insn_length, change insnLen to unsigned.
 	(find_format): Change insnLen parameter to unsigned.

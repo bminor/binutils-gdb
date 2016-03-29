@@ -838,6 +838,25 @@ extract_nps_dst_pos_and_size (unsigned insn ATTRIBUTE_UNUSED,
   return (insn & 0x1f);
 }
 
+static unsigned
+insert_nps_cmem_uimm16 (unsigned insn ATTRIBUTE_UNUSED,
+                        int value ATTRIBUTE_UNUSED,
+                        const char **errmsg ATTRIBUTE_UNUSED)
+{
+  int top = (value >> 16) & 0xffff;
+  if (top != 0x0 && top != NPS_CMEM_HIGH_VALUE)
+    *errmsg = _("invalid value for CMEM ld/st immediate");
+  insn |= (value & 0xffff);
+  return insn;
+}
+
+static int
+extract_nps_cmem_uimm16 (unsigned insn ATTRIBUTE_UNUSED,
+                         bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (NPS_CMEM_HIGH_VALUE << 16) | (insn & 0xffff);
+}
+
 /* Include the generic extract/insert functions.  Order is important
    as some of the functions present in the .h may be disabled via
    defines.  */
@@ -1498,6 +1517,9 @@ const struct arc_operand arc_operands[] =
 
 #define NPS_RFLT_UIMM6		(NPS_UIMM16 + 1)
   { 6, 6, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_rflt_uimm6, extract_nps_rflt_uimm6 },
+
+#define NPS_XLDST_UIMM16	(NPS_RFLT_UIMM6 + 1)
+  { 16, 0, BFD_RELOC_ARC_NPS_CMEM16, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_cmem_uimm16, extract_nps_cmem_uimm16 },
 };
 
 const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);

@@ -490,3 +490,10 @@ ARC_RELOC_HOWTO(ARC_S21H_PCREL_PLT, 77, \
                 replace_disp21h, \
                 signed, \
                 ( ME ( ( ( ( L + A ) - P ) >> 1 ) ) ))
+
+ARC_RELOC_HOWTO(ARC_NPS_CMEM16, 78, \
+                2, \
+                16, \
+                replace_bits16, \
+                dont, \
+                ( S + A ))

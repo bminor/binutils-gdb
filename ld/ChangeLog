@@ -1,3 +1,11 @@
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-arc/arc.exp: New file.
+	* testsuite/ld-arc/nps-1.s: New file.
+	* testsuite/ld-arc/nps-1a.d: New file.
+	* testsuite/ld-arc/nps-1b.d: New file.
+	* testsuite/ld-arc/nps-1b.err: New file.
+
 2016-04-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 19457

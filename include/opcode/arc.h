@@ -437,6 +437,9 @@ extern const unsigned arc_num_aux_regs;
 extern const struct arc_opcode arc_relax_opcodes[];
 extern const unsigned arc_num_relax_opcodes;
 
+/* Macro used for generating one class of NPS instructions.  */
+#define NPS_CMEM_HIGH_VALUE 0x57f0
+
 /* Macros to help generating regular pattern instructions.  */
 #define FIELDA(word) (word & 0x3F)
 #define FIELDB(word) (((word & 0x07) << 24) | (((word >> 3) & 0x07) << 12))
