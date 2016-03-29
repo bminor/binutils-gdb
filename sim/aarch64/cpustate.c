@@ -470,25 +470,25 @@ aarch64_get_vec_double (sim_cpu *cpu, VReg reg, unsigned element)
   while (0)
 
 void
-aarch64_set_vec_u64 (sim_cpu * cpu, VReg reg, unsigned element, uint64_t val)
+aarch64_set_vec_u64 (sim_cpu *cpu, VReg reg, unsigned element, uint64_t val)
 {
   SET_VEC_ELEMENT (reg, element, val, v, "%16lx");
 }
 
 void
-aarch64_set_vec_u32 (sim_cpu * cpu, VReg reg, unsigned element, uint32_t val)
+aarch64_set_vec_u32 (sim_cpu *cpu, VReg reg, unsigned element, uint32_t val)
 {
   SET_VEC_ELEMENT (reg, element, val, w, "%8x");
 }
 
 void
-aarch64_set_vec_u16 (sim_cpu * cpu, VReg reg, unsigned element, uint16_t val)
+aarch64_set_vec_u16 (sim_cpu *cpu, VReg reg, unsigned element, uint16_t val)
 {
   SET_VEC_ELEMENT (reg, element, val, h, "%4x");
 }
 
 void
-aarch64_set_vec_u8 (sim_cpu * cpu, VReg reg, unsigned element, uint8_t val)
+aarch64_set_vec_u8 (sim_cpu *cpu, VReg reg, unsigned element, uint8_t val)
 {
   SET_VEC_ELEMENT (reg, element, val, b, "%x");
 }
@@ -573,19 +573,19 @@ aarch64_test_FPSR_bit (sim_cpu *cpu, FPSRMask flag)
 }
 
 uint64_t
-aarch64_get_thread_id (sim_cpu * cpu)
+aarch64_get_thread_id (sim_cpu *cpu)
 {
   return cpu->tpidr;
 }
 
 uint32_t
-aarch64_get_FPCR (sim_cpu * cpu)
+aarch64_get_FPCR (sim_cpu *cpu)
 {
   return cpu->FPCR;
 }
 
 void
-aarch64_set_FPCR (sim_cpu * cpu, uint32_t val)
+aarch64_set_FPCR (sim_cpu *cpu, uint32_t val)
 {
   if (cpu->FPCR != val)
     TRACE_REGISTER (cpu,
