@@ -126,6 +126,22 @@ foreach t $test_list {
     run_dump_test [file rootname $t]
 }
 
+# Check that the --out-implib option work correctly.
+run_ld_link_tests {
+    {"Generate empty import library"
+     "--out-implib=tmpdir/implib.lib" ""
+     "--defsym NO_GLOBAL=1"
+     {implib.s}
+     {{ld empty-implib.out}}
+     "implib"}
+    {"Generate import library"
+     "-Tdata=0x1000 --out-implib=tmpdir/implib.lib" ""
+     ""
+     {implib.s}
+     {{readelf {-s tmpdir/implib.lib} implib.rd}}
+     "implib"}
+}
+
 if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {

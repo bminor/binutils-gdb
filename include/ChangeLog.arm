@@ -1,0 +1,4 @@
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* bfdlink.h (struct bfd_link_info): Declare new ldscript_def and
+	out_implib_bfd fields.

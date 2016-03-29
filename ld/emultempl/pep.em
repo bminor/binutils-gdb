@@ -153,7 +153,6 @@ static const char *emit_build_id;
 #ifdef DLL_SUPPORT
 static int    pep_enable_stdcall_fixup = 1; /* 0=disable 1=enable (default).  */
 static char * pep_out_def_filename = NULL;
-static char * pep_implib_filename = NULL;
 static int    pep_enable_auto_image_base = 0;
 static char * pep_dll_search_prefix = NULL;
 #endif
@@ -217,7 +216,6 @@ enum options
   OPTION_STDCALL_ALIASES,
   OPTION_ENABLE_STDCALL_FIXUP,
   OPTION_DISABLE_STDCALL_FIXUP,
-  OPTION_IMPLIB_FILENAME,
   OPTION_WARN_DUPLICATE_EXPORTS,
   OPTION_IMP_COMPAT,
   OPTION_ENABLE_AUTO_IMAGE_BASE,
@@ -296,7 +294,6 @@ gld${EMULATION_NAME}_add_options
     {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
     {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
     {"disable-stdcall-fixup", no_argument, NULL, OPTION_DISABLE_STDCALL_FIXUP},
-    {"out-implib", required_argument, NULL, OPTION_IMPLIB_FILENAME},
     {"warn-duplicate-exports", no_argument, NULL, OPTION_WARN_DUPLICATE_EXPORTS},
     /* getopt() allows abbreviations, so we do this to stop it from
        treating -c as an abbreviation for these --compat-implib.  */
@@ -427,7 +424,6 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("                                     export, place into import library instead.\n"));
   fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
-  fprintf (file, _("  --out-implib <file>                Generate import library\n"));
   fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
   fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports.\n"));
   fprintf (file, _("  --compat-implib                    Create backward compatible import libs;\n\
@@ -760,9 +756,6 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_DISABLE_STDCALL_FIXUP:
       pep_enable_stdcall_fixup = 0;
-      break;
-    case OPTION_IMPLIB_FILENAME:
-      pep_implib_filename = xstrdup (optarg);
       break;
     case OPTION_WARN_DUPLICATE_EXPORTS:
       pep_dll_warn_dup_exports = 1;
@@ -1851,8 +1844,9 @@ gld_${EMULATION_NAME}_finish (void)
 	  && pep_def_file->num_exports != 0))
     {
       pep_dll_fill_sections (link_info.output_bfd, &link_info);
-      if (pep_implib_filename)
-	pep_dll_generate_implib (pep_def_file, pep_implib_filename, &link_info);
+      if (command_line.out_implib_filename)
+	pep_dll_generate_implib (pep_def_file,
+				 command_line.out_implib_filename, &link_info);
     }
 
   if (pep_out_def_filename)

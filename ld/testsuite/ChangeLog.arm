@@ -1,5 +1,13 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* ld-elf/elf.exp (Generate empty import library): New test.
+	(Generate import library): Likewise.
+	* ld-elf/implib.s: Likewise.
+	* ld-elf/implib.rd: New file.
+	* ld-elf/empty-implib.out: Likewise
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* ld-arm/cmse-veneers.s: New file.
 	* ld-arm/cmse-veneers.d: Likewise.
 	* ld-arm/cmse-veneers.rd: Likewise.

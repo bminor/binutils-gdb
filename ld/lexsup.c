@@ -164,6 +164,8 @@ static const struct ld_option ld_options[] =
     'o', N_("FILE"), N_("Set output file name"), EXACTLY_TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
     'O', NULL, N_("Optimize output file"), ONE_DASH },
+  { {"out-implib", required_argument, NULL, OPTION_OUT_IMPLIB},
+    '\0', N_("FILE"), N_("Generate import library"), TWO_DASHES },
 #ifdef ENABLE_PLUGINS
   { {"plugin", required_argument, NULL, OPTION_PLUGIN},
     '\0', N_("PLUGIN"), N_("Load named plugin"), ONE_DASH },
@@ -1003,6 +1005,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_OFORMAT:
 	  lang_add_output_format (optarg, NULL, NULL, 0);
+	  break;
+	case OPTION_OUT_IMPLIB:
+	  command_line.out_implib_filename = xstrdup (optarg);
 	  break;
 	case OPTION_PRINT_SYSROOT:
 	  if (*ld_sysroot)

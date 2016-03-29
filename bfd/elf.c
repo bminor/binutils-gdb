@@ -3676,6 +3676,43 @@ sym_is_global (bfd *abfd, asymbol *sym)
 	  || bfd_is_com_section (bfd_get_section (sym)));
 }
 
+/* Filter global symbols of ABFD to include in the import library.  All
+   SYMCOUNT symbols of ABFD can be examined from their pointers in
+   SYMS.  Pointers of symbols to keep should be stored continuously at
+   the beginning of that array.
+
+   Returns the number of symbols to keep.  */
+
+unsigned int
+_bfd_elf_filter_global_symbols (bfd *abfd, struct bfd_link_info *info,
+				asymbol **syms, long symcount)
+{
+  long src_count, dst_count = 0;
+
+  for (src_count = 0; src_count < symcount; src_count++)
+    {
+      asymbol *sym = syms[src_count];
+      char *name = (char *) bfd_asymbol_name (sym);
+      struct bfd_link_hash_entry *h;
+
+      if (!sym_is_global (abfd, sym))
+	continue;
+
+      h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, FALSE);
+      if (h->type != bfd_link_hash_defined && h->type != bfd_link_hash_defweak)
+	continue;
+
+      if (h->linker_def || h->ldscript_def)
+	continue;
+
+      syms[dst_count++] = sym;
+    }
+
+  syms[dst_count] = NULL;
+
+  return dst_count;
+}
+
 /* Don't output section symbols for sections that are not going to be
    output, that are duplicates or there is no BFD section.  */
 

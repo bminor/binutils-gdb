@@ -1,5 +1,34 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Open import
+	library file for writing and initialize implib_bfd field of link_info
+	structure.
+	* emultempl/pe.em (pe_implib_filename): Remove variable declaration.
+	(OPTION_IMPLIB_FILENAME): Remove macro definition.
+	(gld${EMULATION_NAME}_add_options): Remove --out-implib option.
+	(gld_${EMULATION_NAME}_list_options): Likewise.
+	(gld${EMULATION_NAME}_handle_option): Likewise.
+	(gld_${EMULATION_NAME}_finish): Use command_line.out_implib_filename
+	instead of pe_implib_filename.
+	* emultempl/pep.em (pep_implib_filename): Remove variable declaration.
+	(OPTION_IMPLIB_FILENAME): Remove enumerator.
+	(gld${EMULATION_NAME}_add_options): Remove --out-implib option.
+	(gld_${EMULATION_NAME}_list_options): Likewise.
+	(gld${EMULATION_NAME}_handle_option): Likewise.
+	(gld_${EMULATION_NAME}_finish): Use command_line.out_implib_filename
+	instead of pep_implib_filename.
+	* ld.h (args_type): Declare new out_implib_filename field.
+	* ld.texinfo (--out-implib): Move documentation to arch-independent
+	part and rephrase to apply to ELF targets.
+	* ldexp.c (exp_fold_tree_1): Set ldscript_def field to 1 for symbols
+	defined in linker scripts.
+	* ldlex.h (enum option_values): Declare new OPTION_OUT_IMPLIB
+	enumerator.
+	* lexsup.c (ld_options): Add entry for new --out-implib switch.
+	(parse_args): Handle OPTION_OUT_IMPLIB case.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* ld.texinfo (Placement of SG veneers): New concept entry.
 	* testsuite/ld-arm/arm-elf.exp
 	(Secure gateway veneers: no .gnu.sgstubs section): New test.
