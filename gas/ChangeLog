@@ -1,3 +1,11 @@
+2016-03-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-bfin.c (gencode): Use XOBNEW obstack_alloc () wrapper.
+	* config/tc-hppa.c (fix_new_hppa): Likewise.
+	(pa_vtable_entry): Likewise.
+	(pa_vtable_inherit): Likewise.
+	* config/tc-m68k.c (md_begin): Likewise.
+
 2016-03-28  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/obj-elf.c (obj_elf_section_name): Return const char *.
