@@ -6823,6 +6823,18 @@ specified by the @samp{--out-implib} and @samp{--in-implib} options are
 secure gateway import libraries, suitable for linking a non-secure
 executable against secure code as per ARMv8-M Security Extensions.
 
+@kindex --in-implib=@var{file}
+@cindex Input import library
+The @samp{--in-implib=file} specifies an input import library whose symbols
+must keep the same address in the executable being produced.  A warning is
+given if no @samp{--out-implib} is given but new symbols have been introduced
+in the executable that should be listed in its import library.  Otherwise, if
+@samp{--out-implib} is specified, the symbols are silently added to the output
+import library.  A warning is also given if some symbols present in the input
+import library have disappeared from the executable.  This option is only
+effective for Secure Gateway import libraries, ie. when @samp{--cmse-implib} is
+specified.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

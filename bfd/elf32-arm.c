@@ -3068,6 +3068,10 @@ struct elf32_arm_link_hash_table
      as per ARMv8-M Security Extensions.  */
   int cmse_implib;
 
+  /* The import library whose symbols' address must remain stable in
+     the import library generated.  */
+  bfd *in_implib_bfd;
+
   /* The index of the next unused R_ARM_TLS_DESC slot in .rel.plt.  */
   bfd_vma next_tls_desc_index;
 
@@ -3128,6 +3132,10 @@ struct elf32_arm_link_hash_table
 
   /* Input stub section holding secure gateway veneers.  */
   asection *cmse_stub_sec;
+
+  /* Offset in cmse_stub_sec where new SG veneers (not in input import library)
+     start to be allocated.  */
+  bfd_vma new_cmse_stub_offset;
 
   /* Number of elements in stub_group.  */
   unsigned int top_id;
@@ -3380,7 +3388,7 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
       /* Initialize the local fields.  */
       eh = (struct elf32_arm_stub_hash_entry *) entry;
       eh->stub_sec = NULL;
-      eh->stub_offset = 0;
+      eh->stub_offset = (bfd_vma) -1;
       eh->source_value = 0;
       eh->target_value = 0;
       eh->target_section = NULL;
@@ -3388,7 +3396,7 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
       eh->stub_type = arm_stub_none;
       eh->stub_size = 0;
       eh->stub_template = NULL;
-      eh->stub_template_size = 0;
+      eh->stub_template_size = -1;
       eh->h = NULL;
       eh->id_sec = NULL;
       eh->output_name = NULL;
@@ -4299,7 +4307,7 @@ elf32_arm_add_stub (const char *stub_name, asection *section,
     }
 
   stub_entry->stub_sec = stub_sec;
-  stub_entry->stub_offset = 0;
+  stub_entry->stub_offset = (bfd_vma) -1;
   stub_entry->id_sec = link_sec;
 
   return stub_entry;
@@ -4463,6 +4471,46 @@ arm_dedicated_stub_section_padding (enum elf32_arm_stub_type stub_type)
   abort ();  /* Should be unreachable.  */
 }
 
+/* If veneers of type STUB_TYPE should go in a dedicated output section,
+   returns the address of the hash table field in HTAB holding the offset at
+   which new veneers should be layed out in the stub section.  */
+
+static bfd_vma*
+arm_new_stubs_start_offset_ptr (struct elf32_arm_link_hash_table *htab,
+				enum elf32_arm_stub_type stub_type)
+{
+  switch (stub_type)
+    {
+    case arm_stub_a8_veneer_b_cond:
+    case arm_stub_a8_veneer_b:
+    case arm_stub_a8_veneer_bl:
+    case arm_stub_long_branch_any_any:
+    case arm_stub_long_branch_v4t_arm_thumb:
+    case arm_stub_long_branch_thumb_only:
+    case arm_stub_long_branch_v4t_thumb_thumb:
+    case arm_stub_long_branch_v4t_thumb_arm:
+    case arm_stub_short_branch_v4t_thumb_arm:
+    case arm_stub_long_branch_any_arm_pic:
+    case arm_stub_long_branch_any_thumb_pic:
+    case arm_stub_long_branch_v4t_thumb_thumb_pic:
+    case arm_stub_long_branch_v4t_arm_thumb_pic:
+    case arm_stub_long_branch_v4t_thumb_arm_pic:
+    case arm_stub_long_branch_thumb_only_pic:
+    case arm_stub_long_branch_any_tls_pic:
+    case arm_stub_long_branch_v4t_thumb_tls_pic:
+    case arm_stub_a8_veneer_blx:
+    case arm_stub_long_branch_arm_nacl:
+    case arm_stub_long_branch_arm_nacl_pic:
+      return NULL;
+
+    case arm_stub_cmse_branch_thumb_only:
+      return &htab->new_cmse_stub_offset;
+
+    default:
+      abort ();  /* Should be unreachable.  */
+    }
+}
+
 static bfd_boolean
 arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 		    void * in_arg)
@@ -4482,6 +4530,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   int stub_reloc_idx[MAXRELOCS] = {-1, -1};
   int stub_reloc_offset[MAXRELOCS] = {0, 0};
   int nrelocs = 0;
+  int just_allocated = 0;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
@@ -4498,8 +4547,12 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
     /* We have to do less-strictly-aligned fixes last.  */
     return TRUE;
 
-  /* Make a note of the offset within the stubs for this entry.  */
-  stub_entry->stub_offset = stub_sec->size;
+  /* Assign a slot at the end of section if none assigned yet.  */
+  if (stub_entry->stub_offset == (bfd_vma) -1)
+    {
+      stub_entry->stub_offset = stub_sec->size;
+      just_allocated = 1;
+    }
   loc = stub_sec->contents + stub_entry->stub_offset;
 
   stub_bfd = stub_sec->owner;
@@ -4573,7 +4626,8 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	}
     }
 
-  stub_sec->size += size;
+  if (just_allocated)
+    stub_sec->size += size;
 
   /* Stub size has already been computed in arm_size_one_stub. Check
      consistency.  */
@@ -4585,7 +4639,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 
   /* Assume there is at least one and at most MAXRELOCS entries to relocate
      in each stub.  */
-  BFD_ASSERT (nrelocs != 0 && nrelocs <= MAXRELOCS);
+  BFD_ASSERT (size == 0 || (nrelocs != 0 && nrelocs <= MAXRELOCS));
 
   for (i = 0; i < nrelocs; i++)
     {
@@ -4687,9 +4741,17 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
   size = find_stub_size_and_template (stub_entry->stub_type, &template_sequence,
 				      &template_size);
 
-  stub_entry->stub_size = size;
-  stub_entry->stub_template = template_sequence;
-  stub_entry->stub_template_size = template_size;
+  /* Initialized to -1.  Null size indicates a zeroed out veneer.  */
+  if (stub_entry->stub_template_size)
+    {
+      stub_entry->stub_size = size;
+      stub_entry->stub_template = template_sequence;
+      stub_entry->stub_template_size = template_size;
+    }
+
+  /* Already accounted for.  */
+  if (stub_entry->stub_offset != (bfd_vma) -1)
+    return TRUE;
 
   size = (size + 7) & ~7;
   stub_entry->stub_sec->size += size;
@@ -5254,10 +5316,10 @@ cortex_a8_erratum_scan (bfd *input_bfd,
    and *NEW_STUB is set to FALSE.  Otherwise, *NEW_STUB is set to
    TRUE and the stub entry is initialized.
 
-   Returns whether the stub could be successfully created or updated, or FALSE
-   if an error occured.  */
+   Returns the stub that was created or updated, or NULL if an error
+   occured.  */
 
-static bfd_boolean
+static struct elf32_arm_stub_hash_entry *
 elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
 		       enum elf32_arm_stub_type stub_type, asection *section,
 		       Elf_Internal_Rela *irela, asection *sym_sec,
@@ -5288,7 +5350,7 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
       stub_name = elf32_arm_stub_name (id_sec, sym_sec, hash, irela,
 				       stub_type);
       if (!stub_name)
-	return FALSE;
+	return NULL;
     }
 
   stub_entry = arm_stub_hash_lookup (&htab->stub_hash_table, stub_name, FALSE,
@@ -5299,7 +5361,7 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
       if (!sym_claimed)
 	free (stub_name);
       stub_entry->target_value = sym_value;
-      return TRUE;
+      return stub_entry;
     }
 
   stub_entry = elf32_arm_add_stub (stub_name, section, htab, stub_type);
@@ -5307,7 +5369,7 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
     {
       if (!sym_claimed)
 	free (stub_name);
-      return FALSE;
+      return NULL;
     }
 
   stub_entry->target_value = sym_value;
@@ -5328,7 +5390,7 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
       if (stub_entry->output_name == NULL)
 	{
 	  free (stub_name);
-	  return FALSE;
+	  return NULL;
 	}
 
       /* For historical reasons, use the existing names for ARM-to-Thumb and
@@ -5348,7 +5410,7 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
     }
 
   *new_stub = TRUE;
-  return TRUE;
+  return stub_entry;
 }
 
 /* Scan symbols in INPUT_BFD to identify secure entry functions needing a
@@ -5365,14 +5427,15 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
 
    OUT_ATTR gives the output attributes, SYM_HASHES the symbol index to hash
    entry mapping while HTAB gives the name to hash entry mapping.
+   *CMSE_STUB_CREATED is increased by the number of secure gateway veneer
+   created.
 
-   If any secure gateway veneer is created, *STUB_CHANGED is set to TRUE.  The
-   return value gives whether a stub failed to be allocated.  */
+   The return value gives whether a stub failed to be allocated.  */
 
 static bfd_boolean
 cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
 	   obj_attribute *out_attr, struct elf_link_hash_entry **sym_hashes,
-	   bfd_boolean *stub_changed)
+	   int *cmse_stub_created)
 {
   const struct elf_backend_data *bed;
   Elf_Internal_Shdr *symtab_hdr;
@@ -5383,7 +5446,8 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
   char *sym_name, *lsym_name;
   bfd_vma sym_value;
   asection *section;
-  bfd_boolean is_v8m, new_stub, created_stub, cmse_invalid, ret = TRUE;
+  struct elf32_arm_stub_hash_entry *stub_entry;
+  bfd_boolean is_v8m, new_stub, cmse_invalid, ret = TRUE;
 
   bed = get_elf_backend_data (input_bfd);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -5524,22 +5588,289 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
       if (!ret)
 	continue;
       branch_type = ARM_GET_SYM_BRANCH_TYPE (hash->root.target_internal);
-      created_stub
+      stub_entry
 	= elf32_arm_create_stub (htab, arm_stub_cmse_branch_thumb_only,
 				 NULL, NULL, section, hash, sym_name,
 				 sym_value, branch_type, &new_stub);
 
-      if (!created_stub)
+      if (stub_entry == NULL)
 	 ret = FALSE;
       else
 	{
 	  BFD_ASSERT (new_stub);
-	  *stub_changed = TRUE;
+	  (*cmse_stub_created)++;
 	}
     }
 
   if (!symtab_hdr->contents)
     free (local_syms);
+  return ret;
+}
+
+/* Return whether a symbol identified by its linker HASH entry is an entry
+   function, ie can be called from non secure code without using a veneer.  */
+
+static bfd_boolean
+cmse_entry_fct_p (struct elf32_arm_link_hash_entry *hash)
+{
+  uint32_t first_insn;
+  asection *section;
+  file_ptr offset;
+  bfd *abfd;
+
+  /* Defined symbol of function type.  */
+  if (hash->root.root.type != bfd_link_hash_defined
+      && hash->root.root.type != bfd_link_hash_defweak)
+    return FALSE;
+  if (hash->root.type != STT_FUNC)
+    return FALSE;
+
+  /* Read first instruction.  */
+  section = hash->root.root.u.def.section;
+  abfd = section->owner;
+  offset = hash->root.root.u.def.value - section->vma;
+  if (!bfd_get_section_contents (abfd, section, &first_insn, offset,
+				 sizeof (first_insn)))
+    return FALSE;
+
+  /* Start by SG instruction.  */
+  return first_insn == 0xe97fe97f;
+}
+
+/* Output the name (in symbol table) of the veneer GEN_ENTRY if it is a new
+   secure gateway veneers (ie. the veneers was not in the input import library)
+   and there is no output import library (GEN_INFO->out_implib_bfd is NULL.  */
+
+static bfd_boolean
+arm_list_new_cmse_stub (struct bfd_hash_entry *gen_entry, void *gen_info)
+{
+  struct elf32_arm_stub_hash_entry *stub_entry;
+  struct bfd_link_info *info;
+
+  /* Massage our args to the form they really have.  */
+  stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
+  info = (struct bfd_link_info *) gen_info;
+
+  if (info->out_implib_bfd)
+    return TRUE;
+
+  if (stub_entry->stub_type != arm_stub_cmse_branch_thumb_only)
+    return TRUE;
+
+  if (stub_entry->stub_offset == (bfd_vma) -1)
+    (*_bfd_error_handler) ("  %s", stub_entry->output_name);
+
+  return TRUE;
+}
+
+/* Set offset of secure gateway veneers so that their address remain identical
+   to the one in the input import library referred by HTAB->in_implib_bfd.  A
+   warning is issued for veneers that disappeared (present in input import
+   library but absent from the executable being linked) or if new veneers
+   appeared and there is no output import library (INFO->out_implib_bfd is NULL
+   and *CMSE_STUB_CREATED is bigger than the number of secure gateway veneers
+   found in the input import library.
+
+   The function returns whether an error occured.  If no error occured,
+   *CMSE_STUB_CREATED gives the number of SG veneers created by both cmse_scan
+   and this function and HTAB->new_cmse_stub_offset is set to the biggest
+   veneer observed set for new veneers to be layed out after.  */
+
+static bfd_boolean
+set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
+				  struct elf32_arm_link_hash_table *htab,
+				  int *cmse_stub_created)
+{
+  long symsize;
+  char *sym_name;
+  flagword flags;
+  long i, symcount;
+  bfd *in_implib_bfd;
+  asection *stub_out_sec;
+  bfd_boolean ret = TRUE;
+  Elf_Internal_Sym *intsym;
+  const char *out_sec_name;
+  bfd_size_type cmse_stub_size;
+  asymbol **sympp = NULL, *sym;
+  struct elf32_arm_link_hash_entry *hash;
+  const insn_sequence *cmse_stub_template;
+  struct elf32_arm_stub_hash_entry *stub_entry;
+  int cmse_stub_template_size, new_cmse_stubs_created = *cmse_stub_created;
+  bfd_vma veneer_value, stub_offset, next_cmse_stub_offset;
+  bfd_vma cmse_stub_array_start = (bfd_vma) -1, cmse_stub_sec_vma = 0;
+
+  /* No input secure gateway import library.  */
+  if (!htab->in_implib_bfd)
+    return TRUE;
+  else if (!htab->cmse_implib)
+    return FALSE;
+
+  /* Get symbol table size.  */
+  in_implib_bfd = htab->in_implib_bfd;
+  symsize = bfd_get_symtab_upper_bound (in_implib_bfd);
+  if (symsize < 0)
+    return FALSE;
+
+  /* Read in the input secure gateway import library's symbol table.  */
+  sympp = (asymbol **) xmalloc (symsize);
+  symcount = bfd_canonicalize_symtab (in_implib_bfd, sympp);
+  if (symcount < 0)
+    {
+      ret = FALSE;
+      goto free_sym_buf;
+    }
+
+  htab->new_cmse_stub_offset = 0;
+  cmse_stub_size =
+    find_stub_size_and_template (arm_stub_cmse_branch_thumb_only,
+				 &cmse_stub_template,
+				 &cmse_stub_template_size);
+  out_sec_name =
+    arm_dedicated_stub_output_section_name (arm_stub_cmse_branch_thumb_only);
+  stub_out_sec =
+    bfd_get_section_by_name (htab->obfd, out_sec_name);
+  if (stub_out_sec != NULL)
+    cmse_stub_sec_vma = stub_out_sec->vma;
+
+  /* Set addresses of veneers mentionned in input secure gateway import
+     library's symbol table.  */
+  for (i = 0; i < symcount; i++)
+    {
+      sym = sympp[i];
+      flags = sym->flags;
+      sym_name = (char *) bfd_asymbol_name (sym);
+      intsym = &((elf_symbol_type *) sym)->internal_elf_sym;
+
+      if (sym->section != bfd_abs_section_ptr
+	  || !(flags & (BSF_GLOBAL | BSF_WEAK))
+	  || (flags & BSF_FUNCTION) != BSF_FUNCTION
+	  || (ARM_GET_SYM_BRANCH_TYPE (intsym->st_target_internal)
+	      != ST_BRANCH_TO_THUMB))
+	{
+	  (*_bfd_error_handler) (_("%B: invalid import library entry: `%s'."),
+				 in_implib_bfd, sym_name);
+	  (*_bfd_error_handler) (_("Symbol should be absolute, global and "
+				   "refer to Thumb functions."));
+	  ret = FALSE;
+	  continue;
+	}
+
+      veneer_value = bfd_asymbol_value (sym);
+      stub_offset = veneer_value - cmse_stub_sec_vma;
+      stub_entry = arm_stub_hash_lookup (&htab->stub_hash_table, sym_name,
+					 FALSE, FALSE);
+      hash = (struct elf32_arm_link_hash_entry *)
+	elf_link_hash_lookup (&(htab)->root, sym_name, FALSE, FALSE, TRUE);
+
+      /* Stub entry should have been created by cmse_scan or the symbol be of
+	 a secure function callable from non secure code.  */
+      if (!stub_entry && !hash)
+	{
+	  bfd_boolean new_stub;
+
+	  (*_bfd_error_handler)
+	    (_("Entry function `%s' disappeared from secure code."), sym_name);
+	  hash = (struct elf32_arm_link_hash_entry *)
+	    elf_link_hash_lookup (&(htab)->root, sym_name, TRUE, TRUE, TRUE);
+	  stub_entry
+	    = elf32_arm_create_stub (htab, arm_stub_cmse_branch_thumb_only,
+				     NULL, NULL, bfd_abs_section_ptr, hash,
+				     sym_name, veneer_value,
+				     ST_BRANCH_TO_THUMB, &new_stub);
+	  if (stub_entry == NULL)
+	    ret = FALSE;
+	  else
+	  {
+	    BFD_ASSERT (new_stub);
+	    new_cmse_stubs_created++;
+	    (*cmse_stub_created)++;
+	  }
+	  stub_entry->stub_template_size = stub_entry->stub_size = 0;
+	  stub_entry->stub_offset = stub_offset;
+	}
+      /* Symbol found is not callable from non secure code.  */
+      else if (!stub_entry)
+	{
+	  if (!cmse_entry_fct_p (hash))
+	    {
+	      (*_bfd_error_handler) (_("`%s' refers to a non entry function."),
+				     sym_name);
+	      ret = FALSE;
+	    }
+	  continue;
+	}
+      else
+	{
+	  /* Only stub for SG veneers should have been created.  */
+	  BFD_ASSERT (stub_entry->stub_type == arm_stub_cmse_branch_thumb_only);
+
+	  /* Check visibility hasn't changed.  */
+	  if (!!(flags & BSF_GLOBAL)
+	      != (hash->root.root.type == bfd_link_hash_defined))
+	    (*_bfd_error_handler)
+	      (_("%B: visibility of symbol `%s' has changed."), in_implib_bfd,
+	       sym_name);
+
+	  stub_entry->stub_offset = stub_offset;
+	}
+
+      /* Size should match that of a SG veneer.  */
+      if (intsym->st_size != cmse_stub_size)
+	{
+	  (*_bfd_error_handler) (_("%B: incorrect size for symbol `%s'."),
+				 in_implib_bfd, sym_name);
+	  ret = FALSE;
+	}
+
+      /* Previous veneer address is before current SG veneer section.  */
+      if (veneer_value < cmse_stub_sec_vma)
+	{
+	  /* Avoid offset underflow.  */
+	  if (stub_entry)
+	    stub_entry->stub_offset = 0;
+	  stub_offset = 0;
+	  ret = FALSE;
+	}
+
+      /* Complain if stub offset not a multiple of stub size.  */
+      if (stub_offset % cmse_stub_size)
+	{
+	  (*_bfd_error_handler)
+	    (_("Offset of veneer for entry function `%s' not a multiple of "
+	       "its size."), sym_name);
+	  ret = FALSE;
+	}
+
+      if (!ret)
+	continue;
+
+      new_cmse_stubs_created--;
+      if (veneer_value < cmse_stub_array_start)
+	cmse_stub_array_start = veneer_value;
+      next_cmse_stub_offset = stub_offset + ((cmse_stub_size + 7) & ~7);
+      if (next_cmse_stub_offset > htab->new_cmse_stub_offset)
+	htab->new_cmse_stub_offset = next_cmse_stub_offset;
+    }
+
+  if (!info->out_implib_bfd && new_cmse_stubs_created != 0)
+    {
+      BFD_ASSERT (new_cmse_stubs_created > 0);
+      (*_bfd_error_handler)
+	(_("new entry function(s) introduced but no output import library "
+	   "specified:"));
+      bfd_hash_traverse (&htab->stub_hash_table, arm_list_new_cmse_stub, info);
+    }
+
+  if (cmse_stub_array_start != cmse_stub_sec_vma)
+    {
+      (*_bfd_error_handler)
+	(_("Start address of `%s' is different from previous link."),
+	 out_sec_name);
+      ret = FALSE;
+    }
+
+free_sym_buf:
+  free (sympp);
   return ret;
 }
 
@@ -5559,7 +5890,9 @@ elf32_arm_size_stubs (bfd *output_bfd,
 						      unsigned int),
 		      void (*layout_sections_again) (void))
 {
+  bfd_boolean ret = TRUE;
   obj_attribute *out_attr;
+  int cmse_stub_created = 0;
   bfd_size_type stub_group_size;
   bfd_boolean m_profile, stubs_always_after_branch, first_veneer_scan = TRUE;
   struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
@@ -5592,6 +5925,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
   out_attr = elf_known_obj_attributes_proc (output_bfd);
   m_profile = out_attr[Tag_CPU_arch_profile].i == 'M';
+
   /* The Cortex-A8 erratum fix depends on stubs not being in the same 4K page
      as the first half of a 32-bit branch straddling two 4K pages.  This is a
      crude way of enforcing that.  */
@@ -5665,8 +5999,11 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
 	      sym_hashes = elf_sym_hashes (input_bfd);
 	      if (!cmse_scan (input_bfd, htab, out_attr, sym_hashes,
-			      &stub_changed))
+			      &cmse_stub_created))
 		goto error_ret_free_local;
+
+	      if (cmse_stub_created != 0)
+		stub_changed = TRUE;
 	    }
 
 	  /* Walk over each section attached to the input bfd.  */
@@ -5892,6 +6229,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		  do
 		    {
 		      bfd_boolean new_stub;
+		      struct elf32_arm_stub_hash_entry *stub_entry;
 
 		      /* Determine what (if any) linker stub is needed.  */
 		      stub_type = arm_type_of_stub (info, section, irela,
@@ -5903,12 +6241,13 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
 		      /* We've either created a stub for this reloc already,
 			 or we are about to.  */
-		      created_stub =
+		      stub_entry =
 			elf32_arm_create_stub (htab, stub_type, section, irela,
 					       sym_sec, hash,
 					       (char *) sym_name, sym_value,
 					       branch_type, &new_stub);
 
+		      created_stub = stub_entry != NULL;
 		      if (!created_stub || !new_stub)
 			{
 			  if (!created_stub)
@@ -5982,6 +6321,11 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	    }
 	}
 
+      if (first_veneer_scan
+	  && !set_cmse_veneer_addr_from_implib (info, htab,
+						&cmse_stub_created))
+	ret = FALSE;
+
       if (prev_num_a8_fixes != num_a8_fixes)
 	stub_changed = TRUE;
 
@@ -5999,6 +6343,23 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	    continue;
 
 	  stub_sec->size = 0;
+	}
+
+      /* Append new SG veneers after those in input import library.  */
+      for (stub_type = arm_stub_none + 1; stub_type < max_stub_type;
+	   stub_type++)
+	{
+	  bfd_vma *start_offset_p;
+	  asection **stub_sec_p;
+
+	  start_offset_p = arm_new_stubs_start_offset_ptr (htab, stub_type);
+	  stub_sec_p = arm_dedicated_stub_input_section_ptr (htab, stub_type);
+	  if (start_offset_p == NULL)
+	    continue;
+
+	  BFD_ASSERT (stub_sec_p != NULL);
+	  if (*stub_sec_p != NULL)
+	    (*stub_sec_p)->size = *start_offset_p;
 	}
 
       /* Compute stub section size, considering padding.  */
@@ -6069,7 +6430,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	    }
 
 	  stub_entry->stub_sec = stub_sec;
-	  stub_entry->stub_offset = 0;
+	  stub_entry->stub_offset = (bfd_vma) -1;
 	  stub_entry->id_sec = link_sec;
 	  stub_entry->stub_type = a8_fixes[i].stub_type;
 	  stub_entry->source_value = a8_fixes[i].offset;
@@ -6097,7 +6458,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
       htab->a8_erratum_fixes = NULL;
       htab->num_a8_erratum_fixes = 0;
     }
-  return TRUE;
+  return ret;
 
  error_ret_free_local:
   return FALSE;
@@ -6114,6 +6475,7 @@ elf32_arm_build_stubs (struct bfd_link_info *info)
 {
   asection *stub_sec;
   struct bfd_hash_table *table;
+  enum elf32_arm_stub_type stub_type;
   struct elf32_arm_link_hash_table *htab;
 
   htab = elf32_arm_hash_table (info);
@@ -6131,12 +6493,31 @@ elf32_arm_build_stubs (struct bfd_link_info *info)
 	continue;
 
       /* Allocate memory to hold the linker stubs.  Zeroing the stub sections
-	 must at least be done for stub section requiring padding.  */
+	 must at least be done for stub section requiring padding and for SG
+	 veneers to ensure that a non secure code branching to a removed SG
+	 veneer causes an error.  */
       size = stub_sec->size;
       stub_sec->contents = (unsigned char *) bfd_zalloc (htab->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)
 	return FALSE;
+
       stub_sec->size = 0;
+    }
+
+  /* Append new SG veneers after those in input import library.  */
+  for (stub_type = arm_stub_none + 1; stub_type < max_stub_type; stub_type++)
+    {
+      bfd_vma *start_offset_p;
+      asection **stub_sec_p;
+
+      start_offset_p = arm_new_stubs_start_offset_ptr (htab, stub_type);
+      stub_sec_p = arm_dedicated_stub_input_section_ptr (htab, stub_type);
+      if (start_offset_p == NULL)
+	continue;
+
+      BFD_ASSERT (stub_sec_p != NULL);
+      if (*stub_sec_p != NULL)
+	(*stub_sec_p)->size = *start_offset_p;
     }
 
   /* Build the stubs as directed by the stub hash table.  */
@@ -8121,7 +8502,8 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
 				 bfd_arm_stm32l4xx_fix stm32l4xx_fix,
 				 int no_enum_warn, int no_wchar_warn,
 				 int pic_veneer, int fix_cortex_a8,
-				 int fix_arm1176, int cmse_implib)
+				 int fix_arm1176, int cmse_implib,
+				 bfd *in_implib_bfd)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -8149,6 +8531,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
   globals->fix_cortex_a8 = fix_cortex_a8;
   globals->fix_arm1176 = fix_arm1176;
   globals->cmse_implib = cmse_implib;
+  globals->in_implib_bfd = in_implib_bfd;
 
   BFD_ASSERT (is_arm_elf (output_bfd));
   elf_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;

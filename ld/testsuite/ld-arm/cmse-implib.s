@@ -20,12 +20,29 @@ __acle_se_\name:
 .endm
 
 	@ Valid setups for veneer generation
+.if (VER >= 2)
+	entry exported_entry_veneer1, global
+.endif
+.if (VER != 4)
 	entry exported_entry_veneer2, global
+.else
+	entry exported_entry_veneer2, weak
+.endif
+.if (VER != 2)
 	entry exported_entry_veneer3, global
+.endif
+.if (VER > 1)
+	entry exported_entry_veneer4, global
+.endif
 
 	@ Valid setup for entry function without veneer generation
 	entry exported_entry_fct1, global, sg
+.if (VER != 4)
 	entry exported_entry_fct2, global, sg
+.else
+	@ Invalid setup for entry function without veneer generation
+	entry exported_entry_fct2, global, nop
+.endif
 
 	@ Normal symbol not exported to SG import library
 	.align	2

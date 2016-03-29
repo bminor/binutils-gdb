@@ -1,5 +1,33 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* emultempl/armelf.em (in_implib_filename): Declare and initialize new
+	variable.
+	(arm_elf_create_output_section_statements): Open import input library
+	file for writing and pass resulting in_implib_bfd to
+	bfd_elf32_arm_set_target_relocs.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_IN_IMPLIB option.
+	(PARSE_AND_LIST_LONGOPTS): Define --in-implib option.
+	(PARSE_AND_LIST_OPTIONS): Add help message for --in-implib option.
+	(PARSE_AND_LIST_ARGS_CASES): Handle new OPTION_IN_IMPLIB case.
+	* ld.texinfo (--cmse-implib): Update to mention --in-implib.
+	(--in-implib): Document new option.
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway import library generation): add --defsym VER=1 to gas
+	CLI.
+	(Secure gateway import library generation: errors): Likewise.
+	(Input secure gateway import library): New test.
+	(Input secure gateway import library: no output import library):
+	Likewise.
+	(Input secure gateway import library: earlier stub section base):
+	Likewise.
+	(Input secure gateway import library: later stub section base):
+	Likewise.
+	(Input secure gateway import library: veneer comeback): Likewise.
+	(Input secure gateway import library: entry function change):
+	Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* emultempl/armelf.em (cmse_implib): Declare and define this new
 	static variable.
 	(arm_elf_create_output_section_statements): Add new cmse_implib

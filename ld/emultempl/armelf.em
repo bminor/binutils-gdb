@@ -43,6 +43,7 @@ static int pic_veneer = 0;
 static int merge_exidx_entries = -1;
 static int fix_arm1176 = 1;
 static int cmse_implib = 0;
+static char *in_implib_filename = NULL;
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -488,6 +489,8 @@ gld${EMULATION_NAME}_finish (void)
 static void
 arm_elf_create_output_section_statements (void)
 {
+  bfd *in_implib_bfd;
+
   if (strstr (bfd_get_target (link_info.output_bfd), "arm") == NULL)
     {
       /* The arm backend needs special fields in the output hash structure.
@@ -498,6 +501,20 @@ arm_elf_create_output_section_statements (void)
       return;
     }
 
+  if (in_implib_filename)
+    {
+      in_implib_bfd = bfd_openr (in_implib_filename,
+				 bfd_get_target (link_info.output_bfd));
+
+      if (in_implib_bfd == NULL)
+	einfo ("%F%s: Can't open: %E\n", in_implib_filename);
+
+      if (!bfd_check_format (in_implib_bfd, bfd_object))
+	einfo ("%F%s: Not a relocatable file: %E\n", in_implib_filename);
+    }
+  else
+    in_implib_bfd = NULL;
+
   bfd_elf32_arm_set_target_relocs (link_info.output_bfd, &link_info,
 				   target1_is_rel,
 				   target2_type, fix_v4bx, use_blx,
@@ -505,7 +522,7 @@ arm_elf_create_output_section_statements (void)
 				   no_enum_size_warning,
 				   no_wchar_size_warning,
 				   pic_veneer, fix_cortex_a8,
-				   fix_arm1176, cmse_implib);
+				   fix_arm1176, cmse_implib, in_implib_bfd);
 
   stub_file = lang_add_input_file ("linker stubs",
  				   lang_input_file_is_fake_enum,
@@ -575,6 +592,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_LONG_PLT			319
 #define OPTION_STM32L4XX_FIX		320
 #define OPTION_CMSE_IMPLIB		321
+#define OPTION_IN_IMPLIB		322
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -602,6 +620,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "no-fix-arm1176", no_argument, NULL, OPTION_NO_FIX_ARM1176 },
   { "long-plt", no_argument, NULL, OPTION_LONG_PLT },
   { "cmse-implib", no_argument, NULL, OPTION_CMSE_IMPLIB },
+  { "in-implib", required_argument, NULL, OPTION_IN_IMPLIB },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -624,6 +643,8 @@ PARSE_AND_LIST_OPTIONS='
            "                              to handle large .plt/.got displacements\n"));
   fprintf (file, _("  --cmse-implib               Make import library to be a secure gateway import\n"
                    "                                library as per ARMv8-M Security Extensions\n"));
+  fprintf (file, _("  --in-implib                 Import library whose symbols address must\n"
+                   "                                remain stable\n"));
   fprintf (file, _("\
   --stub-group-size=N         Maximum size of a group of input sections that\n\
                                can be handled by one stub section.  A negative\n\
@@ -747,6 +768,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
    case OPTION_CMSE_IMPLIB:
       cmse_implib = 1;
+      break;
+
+   case OPTION_IN_IMPLIB:
+      in_implib_filename = optarg;
       break;
 '
 

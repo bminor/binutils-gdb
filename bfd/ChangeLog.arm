@@ -1,5 +1,43 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add a new parameter for
+	the input import library bfd.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (struct elf32_arm_link_hash_table): New in_implib_bfd
+	and new_cmse_stub_offset fields.
+	(stub_hash_newfunc): Initialize stub_offset and stub_template_size to
+	-1.
+	(elf32_arm_add_stub): Likewise for stub_offset.
+	(arm_new_stubs_start_offset_ptr): New function.
+	(arm_build_one_stub): Only allocate a stub_offset if it is -1.  Allow
+	empty veneers to have zero relocations.
+	(arm_size_one_stub): Only initialize stub size and template
+	information for non empty veneers.  Do not update veneer section size
+	if veneer already has an offset.
+	(elf32_arm_create_stub): Return the stub entry pointer or NULL instead
+	of a boolean indicating success or failure.
+	(cmse_scan): Change stub_changed parameter into an integer pointer
+	parameter cmse_stub_created to count the number of stub created and
+	adapt to change of return value in elf32_arm_create_stub.
+	(cmse_entry_fct_p): New function.
+	(arm_list_new_cmse_stub): Likewise.
+	(set_cmse_veneer_addr_from_implib): Likewise.
+	(elf32_arm_size_stubs): Define cmse_stub_created, pass its address to
+	cmse_scan instead of that of cmse_stub_changed to compute the number
+	of stub created and use it to initialize stub_changed.  Call
+	set_cmse_veneer_addr_from_implib after all cmse_scan.  Adapt to change
+	of return value in elf32_arm_create_stub.  Use
+	arm_stub_section_start_offset () if not NULL to initialize size of
+	secure gateway veneers section.  Initialize stub_offset of Cortex-A8
+	erratum fix to -1.  Use ret to hold return value.
+	(elf32_arm_build_stubs): Use arm_stub_section_start_offset () if not
+	NULL to initialize size of secure gateway veneers section.  Adapt
+	comment to stress the importance of zeroing veneer section content.
+	(bfd_elf32_arm_set_target_relocs): Add new in_implib_bfd parameter to
+	initialize eponymous field in struct elf32_arm_link_hash_table.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add one parameter.
 	* bfd-in2.h: Regenerate.
 	* elf32-arm.c (struct elf32_arm_link_hash_table): Declare new
