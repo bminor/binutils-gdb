@@ -4457,7 +4457,13 @@ elf32_bfinfdpic_finish_dynamic_sections (bfd *output_bfd,
   if (bfinfdpic_got_section (info))
     {
       BFD_ASSERT (bfinfdpic_gotrel_section (info)->size
-		  == (bfinfdpic_gotrel_section (info)->reloc_count
+		  /* PR 17334: It appears that the GOT section can end up
+		     being bigger than the number of relocs.  Presumably
+		     because some relocs have been deleted.  A test case has
+		     yet to be generated for verify this, but in the meantime
+		     the test below has been changed from == to >= so that
+		     applications can continue to be built.  */
+		  >= (bfinfdpic_gotrel_section (info)->reloc_count
 		      * sizeof (Elf32_External_Rel)));
 
       if (bfinfdpic_gotfixup_section (info))

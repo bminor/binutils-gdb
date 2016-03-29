@@ -1,3 +1,10 @@
+2016-03-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 17334
+	* elf32-bfin.c (elf32_bfinfdpic_finish_dynamic_sections): Relax
+	assertion on the size of the got section to allow it to be bigger
+	than the number of relocs.
+
 2016-03-29  Toni Spets  <toni.spets@iki.fi>
 
 	PR 19878
