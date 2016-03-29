@@ -1,0 +1,4 @@
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (ARM_CPU_HAS_FEATURE): Add comment.
+	(ARM_FSET_CPU_SUBSET): Define macro.

@@ -1,0 +1,4 @@
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld-arm/attr-merge-10b-dsp.s: New file.
+	* ld-arm/attr-merge-10-dsp.attr: Likewise.
