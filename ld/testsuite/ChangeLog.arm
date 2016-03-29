@@ -1,5 +1,11 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* ld-arm/arm-elf.exp (EABI attribute merging 10 (DSP)): New test.
+	* ld-arm/attr-merge-10b-dsp.s: New file.
+	* ld-arm/attr-merge-10-dsp.attr: Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	Revert
 	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 

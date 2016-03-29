@@ -220,6 +220,9 @@ static const arm_feature_set arm_ext_v6t2_v8m =
 /* Instructions shared between ARMv8-A and ARMv8-M.  */
 static const arm_feature_set arm_ext_atomics =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_ATOMICS);
+/* DSP instructions Tag_DSP_extension refers to.  */
+static const arm_feature_set arm_ext_dsp =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V5E | ARM_EXT_V5ExP | ARM_EXT_V6_DSP);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
@@ -24988,6 +24991,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 			 ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("dsp",	ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
+			ARM_FEATURE_CORE (ARM_EXT_V7M, ARM_EXT2_V8M)),
   ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8, ARM_FEATURE_COPROC (FPU_VFP_ARMV8),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT2 ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
@@ -25623,6 +25629,7 @@ aeabi_set_public_attributes (void)
   char profile;
   int virt_sec = 0;
   int fp16_optional = 0;
+  arm_feature_set arm_arch = ARM_ARCH_NONE;
   arm_feature_set flags;
   arm_feature_set tmp;
   arm_feature_set arm_arch_v8m_base = ARM_ARCH_V8M_BASE;
@@ -25662,6 +25669,7 @@ aeabi_set_public_attributes (void)
       if (ARM_CPU_HAS_FEATURE (tmp, p->flags))
 	{
 	  arch = p->val;
+	  arm_arch = p->flags;
 	  ARM_CLEAR_FEATURE (tmp, tmp, p->flags);
 	}
     }
@@ -25678,18 +25686,27 @@ aeabi_set_public_attributes (void)
       && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v6_dsp))
-    arch = TAG_CPU_ARCH_V7E_M;
+    {
+      arch = TAG_CPU_ARCH_V7E_M;
+      arm_arch = (arm_feature_set) ARM_ARCH_V7EM;
+    }
 
   ARM_CLEAR_FEATURE (tmp, flags, arm_arch_v8m_base);
   if (arch == TAG_CPU_ARCH_V8M_BASE && ARM_CPU_HAS_FEATURE (tmp, arm_arch_any))
-    arch = TAG_CPU_ARCH_V8M_MAIN;
+    {
+      arch = TAG_CPU_ARCH_V8M_MAIN;
+      arm_arch = (arm_feature_set) ARM_ARCH_V8M_MAIN;
+    }
 
   /* In cpu_arch_ver ARMv8-A is before ARMv8-M for atomics to be detected as
      coming from ARMv8-A.  However, since ARMv8-A has more instructions than
      ARMv8-M, -march=all must be detected as ARMv8-A.  */
   if (arch == TAG_CPU_ARCH_V8M_MAIN
       && ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
-    arch = TAG_CPU_ARCH_V8;
+    {
+      arch = TAG_CPU_ARCH_V8;
+      arm_arch = (arm_feature_set) ARM_ARCH_V8A;
+    }
 
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])
@@ -25726,6 +25743,17 @@ aeabi_set_public_attributes (void)
 
   if (profile != '\0')
     aeabi_set_attribute_int (Tag_CPU_arch_profile, profile);
+
+  /* Tag_DSP_extension.  */
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_dsp))
+    {
+      arm_feature_set ext;
+
+      /* DSP instructions not in architecture.  */
+      ARM_CLEAR_FEATURE (ext, flags, arm_arch);
+      if (ARM_CPU_HAS_FEATURE (ext, arm_ext_dsp))
+	aeabi_set_attribute_int (Tag_DSP_extension, 1);
+    }
 
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v1)
@@ -26120,6 +26148,7 @@ arm_convert_symbolic_attribute (const char *name)
       T (Tag_conformance),
       T (Tag_T2EE_use),
       T (Tag_Virtualization_use),
+      T (Tag_DSP_extension),
       /* We deliberately do not include Tag_MPextension_use_legacy.  */
 #undef T
     };

@@ -1,5 +1,18 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* gas/arm/arch7em-bad.d: Rename to ...
+	* gas/arm/arch7em-bad-1.d: This.
+	* gas/arm/arch7em-bad-2.d: New file.
+	* gas/arm/arch7em-bad-3.d: Likewise.
+	* gas/arm/archv8m-main-dsp-1.d: Likewise.
+	* gas/arm/archv8m-main-dsp-2.d: Likewise.
+	* gas/arm/archv8m-main-dsp-3.d: Likewise.
+	* gas/arm/archv8m-main-dsp-4.d: Likewise.
+	* gas/arm/archv8m-main-dsp-5.d: Likewise.
+	* gas/arm/attr-march-armv8m.main.dsp.d: Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* gas/arm/archv8m-cmse.s: New file.
 	* gas/arm/archv8m-cmse-main.s: Likewise..
 	* gas/arm/archv8m-cmse-msr.s: Likewise.

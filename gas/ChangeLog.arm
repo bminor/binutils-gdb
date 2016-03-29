@@ -1,5 +1,15 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (arm_ext_dsp): New feature for Thumb DSP
+	instructions.
+	(arm_extensions): Add dsp extension for ARMv8-M Mainline.
+	(aeabi_set_public_attributes): Memorize the feature bits of the
+	architecture selected for Tag_CPU_arch.  Use it to set
+	Tag_DSP_extension to 1 for ARMv8-M Mainline with DSP extension.
+	(arm_convert_symbolic_attribute): Define Tag_DSP_extension.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c
 	(struct arm_option_extension_value_table): Make allowed_archs an array
 	with 2 entries.

@@ -305,6 +305,7 @@ enum
   Tag_MPextension_use,
   Tag_undefined_43,
   Tag_DIV_use,
+  Tag_DSP_extension = 46,
   Tag_nodefaults = 64,
   Tag_also_compatible_with,
   Tag_T2EE_use,
