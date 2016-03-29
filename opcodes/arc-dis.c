@@ -59,9 +59,6 @@ static const char * const regnames[64] =
 #define BITS(word,s,e)  (((word) << (sizeof (word) * 8 - 1 - e)) >>	\
 			 (s + (sizeof (word) * 8 - 1 - e)))
 #define OPCODE(word)	(BITS ((word), 27, 31))
-#define FIELDA(word)	(BITS ((word), 21, 26))
-#define FIELDB(word)	(BITS ((word), 15, 20))
-#define FIELDC(word)	(BITS ((word),  9, 14))
 
 #define OPCODE_AC(word)   (BITS ((word), 11, 15))
 

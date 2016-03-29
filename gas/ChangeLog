@@ -1,3 +1,10 @@
+2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * testsuite/gas/arc/ext2op.d: New file.
+        * testsuite/gas/arc/ext2op.s: Likewise.
+        * testsuite/gas/arc/ext3op.d: Likewise.
+        * testsuite/gas/arc/ext3op.s: Likewise.
+
 2016-03-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-aarch64.c (struct aarch64_long_option_table): Ad const

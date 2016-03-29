@@ -64,6 +64,7 @@ typedef enum
     MPY7E,
     MPY8E,
     MPY9E,
+    QUARKSE,
     SHFT1,
     SHFT2,
     SWAP,
@@ -414,5 +415,76 @@ extern const unsigned arc_num_aux_regs;
 
 extern const struct arc_opcode arc_relax_opcodes[];
 extern const unsigned arc_num_relax_opcodes;
+
+/* Macros to help generating regular pattern instructions.  */
+#define FIELDA(word) (word & 0x3F)
+#define FIELDB(word) (((word & 0x07) << 24) | (((word >> 3) & 0x07) << 12))
+#define FIELDC(word) ((word & 0x3F) << 6)
+#define FIELDF	     (0x01 << 15)
+#define FIELDQ	     (0x1F)
+
+#define INSN3OP(MOP,SOP)	(((MOP & 0x1F) << 27) | ((SOP & 0x3F) << 16))
+#define INSN2OPX(MOP,SOP1,SOP2) (INSN3OP (MOP,SOP1) | (SOP2 & 0x3F))
+#define INSN2OP(MOP,SOP)	(INSN2OPX (MOP,0x2F,SOP))
+
+#define INSN3OP_ABC(MOP,SOP)  (INSN3OP (MOP,SOP))
+#define INSN3OP_ALC(MOP,SOP)  (INSN3OP (MOP,SOP) | FIELDB (62))
+#define INSN3OP_ABL(MOP,SOP)  (INSN3OP (MOP,SOP) | FIELDC (62))
+#define INSN3OP_ALL(MOP,SOP)  (INSN3OP (MOP,SOP) | FIELDB (62) | FIELDC (62))
+#define INSN3OP_0BC(MOP,SOP)  (INSN3OP (MOP,SOP) | FIELDA (62))
+#define INSN3OP_0LC(MOP,SOP)  (INSN3OP (MOP,SOP) | FIELDA (62) | FIELDB (62))
+#define INSN3OP_0BL(MOP,SOP)  (INSN3OP (MOP,SOP) | FIELDA (62) | FIELDC (62))
+#define INSN3OP_0LL(MOP,SOP)					\
+  (INSN3OP (MOP,SOP) | FIELDA (62) | FIELDB (62) | FIELDC (62))
+#define INSN3OP_ABU(MOP,SOP)  (INSN3OP (MOP,SOP) | (0x01 << 22))
+#define INSN3OP_ALU(MOP,SOP)  (INSN3OP (MOP,SOP) | (0x01 << 22) | FIELDB (62))
+#define INSN3OP_0BU(MOP,SOP)  (INSN3OP (MOP,SOP) | FIELDA (62) | (0x01 << 22))
+#define INSN3OP_0LU(MOP,SOP)					\
+  (INSN3OP (MOP,SOP) | FIELDA (62) | (0x01 << 22) | FIELDB (62))
+#define INSN3OP_BBS(MOP,SOP)  (INSN3OP (MOP,SOP) | (0x02 << 22))
+#define INSN3OP_0LS(MOP,SOP)  (INSN3OP (MOP,SOP) | (0x02 << 22) | FIELDB (62))
+#define INSN3OP_CBBC(MOP,SOP) (INSN3OP (MOP,SOP) | (0x03 << 22))
+#define INSN3OP_CBBL(MOP,SOP) (INSN3OP (MOP,SOP) | (0x03 << 22) | FIELDC (62))
+#define INSN3OP_C0LC(MOP,SOP) (INSN3OP (MOP,SOP) | (0x03 << 22) | FIELDB (62))
+#define INSN3OP_C0LL(MOP,SOP)					\
+  (INSN3OP (MOP,SOP) | (0x03 << 22) | FIELDC (62) | FIELDB (62))
+#define INSN3OP_CBBU(MOP,SOP) (INSN3OP (MOP,SOP) | (0x03 << 22) | (0x01 << 5))
+#define INSN3OP_C0LU(MOP,SOP)					\
+  (INSN3OP (MOP,SOP) | (0x03 << 22) | (0x01 << 5) | FIELDB (62))
+
+#define MINSN3OP_ABC  (~(FIELDF | FIELDA (63) | FIELDB (63) | FIELDC (63)))
+#define MINSN3OP_ALC  (~(FIELDF | FIELDA (63) | FIELDC (63)))
+#define MINSN3OP_ABL  (~(FIELDF | FIELDA (63) | FIELDB (63)))
+#define MINSN3OP_ALL  (~(FIELDF | FIELDA (63)))
+#define MINSN3OP_0BC  (~(FIELDF | FIELDB (63) | FIELDC (63)))
+#define MINSN3OP_0LC  (~(FIELDF | FIELDC (63)))
+#define MINSN3OP_0BL  (~(FIELDF | FIELDB (63)))
+#define MINSN3OP_0LL  (~(FIELDF))
+#define MINSN3OP_ABU  (~(FIELDF | FIELDA (63) | FIELDB (63) | FIELDC (63)))
+#define MINSN3OP_ALU  (~(FIELDF | FIELDA (63) | FIELDC (63)))
+#define MINSN3OP_0BU  (~(FIELDF | FIELDB (63) | FIELDC (63)))
+#define MINSN3OP_0LU  (~(FIELDF | FIELDC (63)))
+#define MINSN3OP_BBS  (~(FIELDF | FIELDA (63) | FIELDB (63) | FIELDC (63)))
+#define MINSN3OP_0LS  (~(FIELDF | FIELDA (63) | FIELDC (63)))
+#define MINSN3OP_CBBC (~(FIELDF | FIELDQ | FIELDB (63) | FIELDC (63)))
+#define MINSN3OP_CBBL (~(FIELDF | FIELDQ | FIELDB (63)))
+#define MINSN3OP_C0LC (~(FIELDF | FIELDQ | FIELDC (63)))
+#define MINSN3OP_C0LL (~(FIELDF | FIELDQ))
+#define MINSN3OP_CBBU (~(FIELDF | FIELDQ | FIELDB (63) | FIELDC (63)))
+#define MINSN3OP_C0LU (~(FIELDF | FIELDQ | FIELDC (63)))
+
+#define INSN2OP_BC(MOP,SOP) (INSN2OP (MOP,SOP))
+#define INSN2OP_BL(MOP,SOP) (INSN2OP (MOP,SOP) | FIELDC (62))
+#define INSN2OP_0C(MOP,SOP) (INSN2OP (MOP,SOP) | FIELDB (62))
+#define INSN2OP_0L(MOP,SOP) (INSN2OP (MOP,SOP) | FIELDB (62)  | FIELDC (62))
+#define INSN2OP_BU(MOP,SOP) (INSN2OP (MOP,SOP) | (0x01 << 22))
+#define INSN2OP_0U(MOP,SOP) (INSN2OP (MOP,SOP) | (0x01 << 22) | FIELDB (62))
+
+#define MINSN2OP_BC  (~(FIELDF | FIELDB (63) | FIELDC (63)))
+#define MINSN2OP_BL  (~(FIELDF | FIELDB (63)))
+#define MINSN2OP_0C  (~(FIELDF | FIELDC (63)))
+#define MINSN2OP_0L  (~(FIELDF))
+#define MINSN2OP_BU  (~(FIELDF | FIELDB (63) | FIELDC (63)))
+#define MINSN2OP_0U  (~(FIELDF | FIELDC (63)))
 
 #endif /* OPCODE_ARC_H */

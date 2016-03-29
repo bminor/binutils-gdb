@@ -1,3 +1,10 @@
+2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * arc-tbl.h (invld07): Remove.
+        * arc-ext-tbl.h: New file.
+        * arc-dis.c (FIELDA, FIELDB, FIELDC): Remove.
+        * arc-opc.c (arc_opcodes): Add ext-tbl include.
+
 2016-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix -Wstack-usage warnings.
