@@ -1,5 +1,11 @@
 2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
 
+        * testsuite/gas/all/gas.exp: Don't xfail on ARC.
+        * testsuite/gas/elf/elf.exp: Likewise.
+        * testsuite/gas/all/redef3.d: Allow execution for ARC.
+
+2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
+
         * testsuite/gas/arc/warn.exp: Fix matching pattern.
 
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
