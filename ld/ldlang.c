@@ -5068,7 +5068,7 @@ lang_size_sections_1
 		   create overlapping LMAs.  */
 		if (dot < last->vma
 		    && os->bfd_section->size != 0
-		    && dot + os->bfd_section->size <= last->vma)
+		    && dot + TO_ADDR (os->bfd_section->size) <= last->vma)
 		  {
 		    /* If dot moved backwards then leave lma equal to
 		       vma.  This is the old default lma, which might

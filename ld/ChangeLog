@@ -1,5 +1,10 @@
 2016-03-30  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (lang_size_sections_1): Correct code detecting a
+	backward non-overlapping move.
+
+2016-03-30  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.c (IS_TBSS): New macro, extracted from..
 	(IGNORE_SECTION): ..here.
 	(lang_size_sections_1): Use IS_TBSS and IGNORE_SECTION.
