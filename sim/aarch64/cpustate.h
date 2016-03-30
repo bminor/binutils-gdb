@@ -269,7 +269,9 @@ extern uint32_t    aarch64_get_reg_u8  (sim_cpu *, GReg, int);
 extern int32_t     aarch64_get_reg_s8  (sim_cpu *, GReg, int);
 
 extern void        aarch64_set_reg_u64 (sim_cpu *, GReg, int, uint64_t);
+extern void        aarch64_set_reg_u32 (sim_cpu *, GReg, int, uint32_t);
 extern void        aarch64_set_reg_s64 (sim_cpu *, GReg, int, int64_t);
+extern void        aarch64_set_reg_s32 (sim_cpu *, GReg, int, int32_t);
 
 /* FP Register access functions.  */
 extern float       aarch64_get_FP_half   (sim_cpu *, VReg);

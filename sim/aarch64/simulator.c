@@ -497,7 +497,7 @@ fldrq_pcrel (sim_cpu *cpu, int32_t offset)
 
 /* This can be used to optionally scale a register derived offset
    by applying the requisite shift as indicated by the Scaling
-   argument. the second argument is either Byte, Short, Word
+   argument.  The second argument is either Byte, Short, Word
    or Long. The third argument is either Scaled or Unscaled.
    N.B. when _Scaling is Scaled the shift gets ANDed with
    all 1s while when it is Unscaled it gets ANDed with 0.  */
@@ -891,6 +891,7 @@ ldrsb_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
   uint64_t address;
+  int64_t val;
 
   if (rn == rt && wb != NoWriteBack)
     HALT_UNALLOC;
@@ -900,7 +901,8 @@ ldrsb_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_s8 (cpu, address));
+  val = aarch64_get_mem_s8 (cpu, address);
+  aarch64_set_reg_s64 (cpu, rt, NO_SP, val);
 
   if (wb == Post)
     address += offset;
@@ -930,7 +932,7 @@ ldrsb_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t displacement = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 				 extension);
   /* There is no scaling required for a byte load.  */
-  aarch64_set_reg_u64 (cpu, rt, NO_SP,
+  aarch64_set_reg_s64 (cpu, rt, NO_SP,
 		       aarch64_get_mem_s8 (cpu, address + displacement));
 }
 
@@ -940,11 +942,12 @@ ldrh32_abs (sim_cpu *cpu, uint32_t offset)
 {
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
+  uint32_t val;
 
   /* The target register may not be SP but the source may be.  */
-  aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u16
-		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
-			+ SCALE (offset, 16)));
+  val = aarch64_get_mem_u16 (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
+			     + SCALE (offset, 16));
+  aarch64_set_reg_u32 (cpu, rt, NO_SP, val);
 }
 
 /* 32 bit load zero-extended short unscaled signed 9 bit
@@ -964,7 +967,7 @@ ldrh32_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u16 (cpu, address));
+  aarch64_set_reg_u32 (cpu, rt, NO_SP, aarch64_get_mem_u16 (cpu, address));
 
   if (wb == Post)
     address += offset;
@@ -987,7 +990,7 @@ ldrh32_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement =  OPT_SCALE (extended, 16, scaling);
 
-  aarch64_set_reg_u64 (cpu, rt, NO_SP,
+  aarch64_set_reg_u32 (cpu, rt, NO_SP,
 		       aarch64_get_mem_u16 (cpu, address + displacement));
 }
 
@@ -997,12 +1000,12 @@ ldrsh32_abs (sim_cpu *cpu, uint32_t offset)
 {
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
+  int32_t val;
 
   /* The target register may not be SP but the source may be.  */
-  aarch64_set_reg_u64 (cpu, rt, NO_SP, (uint32_t) aarch64_get_mem_s16
-		       (cpu,
-			aarch64_get_reg_u64 (cpu, rn, SP_OK)
-			+ SCALE (offset, 16)));
+  val = aarch64_get_mem_s16 (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
+			     + SCALE (offset, 16));
+  aarch64_set_reg_s32 (cpu, rt, NO_SP, val);
 }
 
 /* 32 bit load sign-extended short unscaled signed 9 bit
@@ -1022,8 +1025,8 @@ ldrsh32_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_reg_u64 (cpu, rt, NO_SP,
-		       (uint32_t) aarch64_get_mem_s16 (cpu, address));
+  aarch64_set_reg_s32 (cpu, rt, NO_SP,
+		       (int32_t) aarch64_get_mem_s16 (cpu, address));
 
   if (wb == Post)
     address += offset;
@@ -1046,8 +1049,8 @@ ldrsh32_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement =  OPT_SCALE (extended, 16, scaling);
 
-  aarch64_set_reg_u64 (cpu, rt, NO_SP,
-		       (uint32_t) aarch64_get_mem_s16
+  aarch64_set_reg_s32 (cpu, rt, NO_SP,
+		       (int32_t) aarch64_get_mem_s16
 		       (cpu, address + displacement));
 }
 
@@ -1057,11 +1060,12 @@ ldrsh_abs (sim_cpu *cpu, uint32_t offset)
 {
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
+  int64_t val;
 
   /* The target register may not be SP but the source may be.  */
-  aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_s16
-		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
-			+ SCALE (offset, 16)));
+  val = aarch64_get_mem_s16  (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
+			      + SCALE (offset, 16));
+  aarch64_set_reg_s64 (cpu, rt, NO_SP, val);
 }
 
 /* 64 bit load sign-extended short unscaled signed 9 bit
@@ -1072,6 +1076,7 @@ ldrsh64_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
   uint64_t address;
+  int64_t val;
 
   if (rn == rt && wb != NoWriteBack)
     HALT_UNALLOC;
@@ -1081,7 +1086,8 @@ ldrsh64_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
-  aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_s16 (cpu, address));
+  val = aarch64_get_mem_s16 (cpu, address);
+  aarch64_set_reg_s64 (cpu, rt, NO_SP, val);
 
   if (wb == Post)
     address += offset;
@@ -1098,14 +1104,16 @@ ldrsh_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   unsigned rm = INSTR (20, 16);
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
+
   /* rn may reference SP, rm and rt must reference ZR  */
 
   uint64_t address = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement = OPT_SCALE (extended, 16, scaling);
+  int64_t val;
 
-  aarch64_set_reg_u64 (cpu, rt, NO_SP,
-		       aarch64_get_mem_s16 (cpu, address + displacement));
+  val = aarch64_get_mem_s16 (cpu, address + displacement);
+  aarch64_set_reg_s64 (cpu, rt, NO_SP, val);
 }
 
 /* 64 bit load sign-extended 32 bit scaled unsigned 12 bit.  */
@@ -1114,11 +1122,12 @@ ldrsw_abs (sim_cpu *cpu, uint32_t offset)
 {
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
+  int64_t val;
 
+  val = aarch64_get_mem_s32 (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
+			     + SCALE (offset, 32));
   /* The target register may not be SP but the source may be.  */
-  return aarch64_set_reg_s64 (cpu, rt, NO_SP, aarch64_get_mem_s32
-			      (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
-			       + SCALE (offset, 32)));
+  return aarch64_set_reg_s64 (cpu, rt, NO_SP, val);
 }
 
 /* 64 bit load sign-extended 32 bit unscaled signed 9 bit
@@ -1513,8 +1522,7 @@ dexLoadLiteral (sim_cpu *cpu)
      instr[23, 5] == simm19  */
 
   /* unsigned rt = INSTR (4, 0);  */
-  uint32_t dispatch = ( (INSTR (31, 30) << 1)
-			| INSTR (26, 26));
+  uint32_t dispatch = (INSTR (31, 30) << 1) | INSTR (26, 26);
   int32_t imm = simm32 (aarch64_get_instr (cpu), 23, 5);
 
   switch (dispatch)
@@ -3105,8 +3113,7 @@ do_vec_MOV_immediate (sim_cpu *cpu)
 
   int full     = INSTR (30, 30);
   unsigned vd  = INSTR (4, 0);
-  unsigned val = INSTR (18, 16) << 5
-    | INSTR (9, 5);
+  unsigned val = (INSTR (18, 16) << 5) | INSTR (9, 5);
   unsigned i;
 
   NYI_assert (29, 19, 0x1E0);
@@ -3173,8 +3180,7 @@ do_vec_MVNI (sim_cpu *cpu)
 
   int full     = INSTR (30, 30);
   unsigned vd  = INSTR (4, 0);
-  unsigned val = INSTR (18, 16) << 5
-    | INSTR (9, 5);
+  unsigned val = (INSTR (18, 16) << 5) | INSTR (9, 5);
   unsigned i;
 
   NYI_assert (29, 19, 0x5E0);
@@ -3217,9 +3223,9 @@ do_vec_MVNI (sim_cpu *cpu)
 
 	for (i = 0; i < 8; i++)
 	  if (val & (1 << i))
-	    mask |= (0xF << (i * 4));
+	    mask |= (0xFFUL << (i * 8));
 	aarch64_set_vec_u64 (cpu, vd, 0, mask);
-	aarch64_set_vec_u64 (cpu, vd, 1, 0);
+	aarch64_set_vec_u64 (cpu, vd, 1, mask);
 	return;
       }
 
@@ -3402,6 +3408,21 @@ do_vec_ins_2 (sim_cpu *cpu)
     }
 }
 
+#define DO_VEC_WIDENING_MUL(N, DST_TYPE, READ_TYPE, WRITE_TYPE)	  \
+  do								  \
+    {								  \
+      DST_TYPE a[N], b[N];					  \
+								  \
+      for (i = 0; i < (N); i++)					  \
+	{							  \
+	  a[i] = aarch64_get_vec_##READ_TYPE (cpu, vn, i + bias); \
+	  b[i] = aarch64_get_vec_##READ_TYPE (cpu, vm, i + bias); \
+	}							  \
+      for (i = 0; i < (N); i++)					  \
+	aarch64_set_vec_##WRITE_TYPE (cpu, vd, i, a[i] * b[i]);	  \
+    }								  \
+  while (0)
+
 static void
 do_vec_mull (sim_cpu *cpu)
 {
@@ -3426,53 +3447,35 @@ do_vec_mull (sim_cpu *cpu)
   NYI_assert (28, 24, 0x0E);
   NYI_assert (15, 10, 0x30);
 
+  /* NB: Read source values before writing results, in case
+     the source and destination vectors are the same.  */
   switch (INSTR (23, 22))
     {
     case 0:
       if (bias)
 	bias = 8;
       if (unsign)
-	for (i = 0; i < 8; i++)
-	  aarch64_set_vec_u16 (cpu, vd, i,
-			       aarch64_get_vec_u8 (cpu, vn, i + bias)
-			       * aarch64_get_vec_u8 (cpu, vm, i + bias));
+	DO_VEC_WIDENING_MUL (8, uint16_t, u8, u16);
       else
-	for (i = 0; i < 8; i++)
-	  aarch64_set_vec_s16 (cpu, vd, i,
-			       aarch64_get_vec_s8 (cpu, vn, i + bias)
-			       * aarch64_get_vec_s8 (cpu, vm, i + bias));
+	DO_VEC_WIDENING_MUL (8, int16_t, s8, s16);
       return;
 
     case 1:
       if (bias)
 	bias = 4;
       if (unsign)
-	for (i = 0; i < 4; i++)
-	  aarch64_set_vec_u32 (cpu, vd, i,
-			       aarch64_get_vec_u16 (cpu, vn, i + bias)
-			       * aarch64_get_vec_u16 (cpu, vm, i + bias));
+	DO_VEC_WIDENING_MUL (4, uint32_t, u16, u32);
       else
-	for (i = 0; i < 4; i++)
-	  aarch64_set_vec_s32 (cpu, vd, i,
-			       aarch64_get_vec_s16 (cpu, vn, i + bias)
-			       * aarch64_get_vec_s16 (cpu, vm, i + bias));
+	DO_VEC_WIDENING_MUL (4, int32_t, s16, s32);
       return;
 
     case 2:
       if (bias)
 	bias = 2;
       if (unsign)
-	for (i = 0; i < 2; i++)
-	  aarch64_set_vec_u64 (cpu, vd, i,
-			       (uint64_t) aarch64_get_vec_u32 (cpu, vn,
-							       i + bias)
-			       * (uint64_t) aarch64_get_vec_u32 (cpu, vm,
-								 i + bias));
+	DO_VEC_WIDENING_MUL (2, uint64_t, u32, u64);
       else
-	for (i = 0; i < 2; i++)
-	  aarch64_set_vec_s64 (cpu, vd, i,
-			       aarch64_get_vec_s32 (cpu, vn, i + bias)
-			       * aarch64_get_vec_s32 (cpu, vm, i + bias));
+	DO_VEC_WIDENING_MUL (2, int64_t, s32, s64);
       return;
 
     case 3:
@@ -3619,6 +3622,7 @@ do_vec_mul (sim_cpu *cpu)
   unsigned vd = INSTR (4, 0);
   unsigned i;
   int      full = INSTR (30, 30);
+  int      bias = 0;
 
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 21, 1);
@@ -3627,33 +3631,15 @@ do_vec_mul (sim_cpu *cpu)
   switch (INSTR (23, 22))
     {
     case 0:
-      for (i = 0; i < (full ? 16 : 8); i++)
-	{
-	  uint16_t val = aarch64_get_vec_u8 (cpu, vn, i);
-	  val *= aarch64_get_vec_u8 (cpu, vm, i);
-
-	  aarch64_set_vec_u16 (cpu, vd, i, val);
-	}
+      DO_VEC_WIDENING_MUL (full ? 16 : 8, uint16_t, u8, u16);
       return;
 
     case 1:
-      for (i = 0; i < (full ? 8 : 4); i++)
-	{
-	  uint32_t val = aarch64_get_vec_u16 (cpu, vn, i);
-	  val *= aarch64_get_vec_u16 (cpu, vm, i);
-
-	  aarch64_set_vec_u32 (cpu, vd, i, val);
-	}
+      DO_VEC_WIDENING_MUL (full ? 8 : 4, uint32_t, u16, u32);
       return;
 
     case 2:
-      for (i = 0; i < (full ? 4 : 2); i++)
-	{
-	  uint64_t val = aarch64_get_vec_u32 (cpu, vn, i);
-	  val *= aarch64_get_vec_u32 (cpu, vm, i);
-
-	  aarch64_set_vec_u64 (cpu, vd, i, val);
-	}
+      DO_VEC_WIDENING_MUL (full ? 4 : 2, uint64_t, u32, u64);
       return;
 
     case 3:
@@ -3687,36 +3673,60 @@ do_vec_MLA (sim_cpu *cpu)
   switch (INSTR (23, 22))
     {
     case 0:
-      for (i = 0; i < (full ? 16 : 8); i++)
-	{
-	  uint16_t val = aarch64_get_vec_u8 (cpu, vn, i);
-	  val *= aarch64_get_vec_u8 (cpu, vm, i);
-	  val += aarch64_get_vec_u8 (cpu, vd, i);
+      {
+	uint16_t a[16], b[16];
 
-	  aarch64_set_vec_u16 (cpu, vd, i, val);
-	}
+	for (i = 0; i < (full ? 16 : 8); i++)
+	  {
+	    a[i] = aarch64_get_vec_u8 (cpu, vn, i);
+	    b[i] = aarch64_get_vec_u8 (cpu, vm, i);
+	  }
+	
+	for (i = 0; i < (full ? 16 : 8); i++)
+	  {
+	    uint16_t v = aarch64_get_vec_u8 (cpu, vd, i);
+
+	    aarch64_set_vec_u16 (cpu, vd, i, v + (a[i] * b[i]));
+	  }
+      }
       return;
 
     case 1:
-      for (i = 0; i < (full ? 8 : 4); i++)
-	{
-	  uint32_t val = aarch64_get_vec_u16 (cpu, vn, i);
-	  val *= aarch64_get_vec_u16 (cpu, vm, i);
-	  val += aarch64_get_vec_u16 (cpu, vd, i);
+      {
+	uint32_t a[8], b[8];
 
-	  aarch64_set_vec_u32 (cpu, vd, i, val);
-	}
+	for (i = 0; i < (full ? 8 : 4); i++)
+	  {
+	    a[i] = aarch64_get_vec_u16 (cpu, vn, i);
+	    b[i] = aarch64_get_vec_u16 (cpu, vm, i);
+	  }
+	
+	for (i = 0; i < (full ? 8 : 4); i++)
+	  {
+	    uint32_t v = aarch64_get_vec_u16 (cpu, vd, i);
+
+	    aarch64_set_vec_u32 (cpu, vd, i, v + (a[i] * b[i]));
+	  }
+      }
       return;
 
     case 2:
-      for (i = 0; i < (full ? 4 : 2); i++)
-	{
-	  uint64_t val = aarch64_get_vec_u32 (cpu, vn, i);
-	  val *= aarch64_get_vec_u32 (cpu, vm, i);
-	  val += aarch64_get_vec_u32 (cpu, vd, i);
+      {
+	uint64_t a[4], b[4];
 
-	  aarch64_set_vec_u64 (cpu, vd, i, val);
-	}
+	for (i = 0; i < (full ? 4 : 2); i++)
+	  {
+	    a[i] = aarch64_get_vec_u32 (cpu, vn, i);
+	    b[i] = aarch64_get_vec_u32 (cpu, vm, i);
+	  }
+	
+	for (i = 0; i < (full ? 4 : 2); i++)
+	  {
+	    uint64_t v = aarch64_get_vec_u32 (cpu, vd, i);
+
+	    aarch64_set_vec_u64 (cpu, vd, i, v + (a[i] * b[i]));
+	  }
+      }
       return;
 
     case 3:
@@ -4114,8 +4124,7 @@ do_vec_maxv (sim_cpu *cpu)
   NYI_assert (20, 17, 8);
   NYI_assert (15, 10, 0x2A);
 
-  switch ((INSTR (29, 29) << 1)
-	  | INSTR (16, 16))
+  switch ((INSTR (29, 29) << 1) | INSTR (16, 16))
     {
     case 0: /* SMAXV.  */
        {
@@ -4576,8 +4585,7 @@ do_vec_compare (sim_cpu *cpu)
   if (INSTR (14, 14))
     {
       /* A floating point compare.  */
-      unsigned decode = (INSTR (29, 29) << 5)
-	| (INSTR (23, 23) << 4)
+      unsigned decode = (INSTR (29, 29) << 5) | (INSTR (23, 23) << 4)
 	| INSTR (13, 10);
 
       NYI_assert (15, 15, 1);
@@ -4599,8 +4607,7 @@ do_vec_compare (sim_cpu *cpu)
     }
   else
     {
-      unsigned decode = (INSTR (29, 29) << 6)
-	| INSTR (15, 10);
+      unsigned decode = (INSTR (29, 29) << 6) | INSTR (15, 10);
 
       switch (decode)
 	{
@@ -4666,7 +4673,7 @@ do_vec_SSHL (sim_cpu *cpu)
     case 1:
       for (i = 0; i < (full ? 8 : 4); i++)
 	{
-	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  shift = aarch64_get_vec_s8 (cpu, vm, i * 2);
 	  if (shift >= 0)
 	    aarch64_set_vec_s16 (cpu, vd, i, aarch64_get_vec_s16 (cpu, vn, i)
 				 << shift);
@@ -4679,7 +4686,7 @@ do_vec_SSHL (sim_cpu *cpu)
     case 2:
       for (i = 0; i < (full ? 4 : 2); i++)
 	{
-	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  shift = aarch64_get_vec_s8 (cpu, vm, i * 4);
 	  if (shift >= 0)
 	    aarch64_set_vec_s32 (cpu, vd, i, aarch64_get_vec_s32 (cpu, vn, i)
 				 << shift);
@@ -4694,7 +4701,7 @@ do_vec_SSHL (sim_cpu *cpu)
 	HALT_UNALLOC;
       for (i = 0; i < 2; i++)
 	{
-	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  shift = aarch64_get_vec_s8 (cpu, vm, i * 8);
 	  if (shift >= 0)
 	    aarch64_set_vec_s64 (cpu, vd, i, aarch64_get_vec_s64 (cpu, vn, i)
 				 << shift);
@@ -4747,7 +4754,7 @@ do_vec_USHL (sim_cpu *cpu)
     case 1:
       for (i = 0; i < (full ? 8 : 4); i++)
 	{
-	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  shift = aarch64_get_vec_s8 (cpu, vm, i * 2);
 	  if (shift >= 0)
 	    aarch64_set_vec_u16 (cpu, vd, i, aarch64_get_vec_u16 (cpu, vn, i)
 				 << shift);
@@ -4760,7 +4767,7 @@ do_vec_USHL (sim_cpu *cpu)
     case 2:
       for (i = 0; i < (full ? 4 : 2); i++)
 	{
-	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  shift = aarch64_get_vec_s8 (cpu, vm, i * 4);
 	  if (shift >= 0)
 	    aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vn, i)
 				 << shift);
@@ -4775,7 +4782,7 @@ do_vec_USHL (sim_cpu *cpu)
 	HALT_UNALLOC;
       for (i = 0; i < 2; i++)
 	{
-	  shift = aarch64_get_vec_s8 (cpu, vm, i);
+	  shift = aarch64_get_vec_s8 (cpu, vm, i * 8);
 	  if (shift >= 0)
 	    aarch64_set_vec_u64 (cpu, vd, i, aarch64_get_vec_u64 (cpu, vn, i)
 				 << shift);
@@ -5463,29 +5470,39 @@ do_vec_xtl (sim_cpu *cpu)
     case 0: /* SXTL, SSHLL.  */
       if (INSTR (21, 21))
 	{
+	  int64_t val1, val2;
+
 	  shift = INSTR (20, 16);
-	  aarch64_set_vec_s64
-	    (cpu, vd, 0, aarch64_get_vec_s32 (cpu, vs, bias) << shift);
-	  aarch64_set_vec_s64
-	    (cpu, vd, 1, aarch64_get_vec_s32 (cpu, vs, bias + 1) << shift);
+	  /* Get the source values before setting the destination values
+	     in case the source and destination are the same.  */
+	  val1 = aarch64_get_vec_s32 (cpu, vs, bias) << shift;
+	  val2 = aarch64_get_vec_s32 (cpu, vs, bias + 1) << shift;
+	  aarch64_set_vec_s64 (cpu, vd, 0, val1);
+	  aarch64_set_vec_s64 (cpu, vd, 1, val2);
 	}
       else if (INSTR (20, 20))
 	{
+	  int32_t v[4];
+	  int32_t v1,v2,v3,v4;
+
 	  shift = INSTR (19, 16);
 	  bias *= 2;
 	  for (i = 0; i < 4; i++)
-	    aarch64_set_vec_s32
-	      (cpu, vd, i, aarch64_get_vec_s16 (cpu, vs, i + bias) << shift);
+	    v[i] = aarch64_get_vec_s16 (cpu, vs, bias + i) << shift;
+	  for (i = 0; i < 4; i++)
+	    aarch64_set_vec_s32 (cpu, vd, i, v[i]);
 	}
       else
 	{
+	  int16_t v[8];
 	  NYI_assert (19, 19, 1);
 
 	  shift = INSTR (18, 16);
 	  bias *= 3;
 	  for (i = 0; i < 8; i++)
-	    aarch64_set_vec_s16
-	      (cpu, vd, i, aarch64_get_vec_s8 (cpu, vs, i + bias) << shift);
+	    v[i] = aarch64_get_vec_s8 (cpu, vs, i + bias) << shift;
+	  for (i = 0; i < 8; i++)
+	    aarch64_set_vec_s16 (cpu, vd, i, v[i]);
 	}
       return;
 
@@ -5494,29 +5511,34 @@ do_vec_xtl (sim_cpu *cpu)
     case 1: /* UXTL, USHLL.  */
       if (INSTR (21, 21))
 	{
+	  uint64_t v1, v2;
 	  shift = INSTR (20, 16);
-	  aarch64_set_vec_u64
-	    (cpu, vd, 0, aarch64_get_vec_u32 (cpu, vs, bias) << shift);
-	  aarch64_set_vec_u64
-	    (cpu, vd, 1, aarch64_get_vec_u32 (cpu, vs, bias + 1) << shift);
+	  v1 = aarch64_get_vec_u32 (cpu, vs, bias) << shift;
+	  v2 = aarch64_get_vec_u32 (cpu, vs, bias + 1) << shift;
+	  aarch64_set_vec_u64 (cpu, vd, 0, v1);
+	  aarch64_set_vec_u64 (cpu, vd, 1, v2);
 	}
       else if (INSTR (20, 20))
 	{
+	  uint32_t v[4];
 	  shift = INSTR (19, 16);
 	  bias *= 2;
 	  for (i = 0; i < 4; i++)
-	    aarch64_set_vec_u32
-	      (cpu, vd, i, aarch64_get_vec_u16 (cpu, vs, i + bias) << shift);
+	    v[i] = aarch64_get_vec_u16 (cpu, vs, i + bias) << shift;
+	  for (i = 0; i < 4; i++)
+	    aarch64_set_vec_u32 (cpu, vd, i, v[i]);
 	}
       else
 	{
+	  uint16_t v[8];
 	  NYI_assert (19, 19, 1);
 
 	  shift = INSTR (18, 16);
 	  bias *= 3;
 	  for (i = 0; i < 8; i++)
-	    aarch64_set_vec_u16
-	      (cpu, vd, i, aarch64_get_vec_u8 (cpu, vs, i + bias) << shift);
+	    v[i] = aarch64_get_vec_u8 (cpu, vs, i + bias) << shift;
+	  for (i = 0; i < 8; i++)
+	    aarch64_set_vec_u16 (cpu, vd, i, v[i]);
 	}
       return;
     }
@@ -5923,8 +5945,7 @@ do_vec_mls_indexed (sim_cpu *cpu)
 	if (vm > 15)
 	  HALT_NYI;
 
-	elem = (INSTR (21, 20) << 1)
-	  | INSTR (11, 11);
+	elem = (INSTR (21, 20) << 1) | INSTR (11, 11);
 	val = aarch64_get_vec_u16 (cpu, vm, elem);
 
 	for (i = 0; i < (full ? 8 : 4); i++)
@@ -5936,8 +5957,7 @@ do_vec_mls_indexed (sim_cpu *cpu)
 
     case 2:
       {
-	unsigned elem = (INSTR (21, 21) << 1)
-	  | INSTR (11, 11);
+	unsigned elem = (INSTR (21, 21) << 1) | INSTR (11, 11);
 	uint64_t val = aarch64_get_vec_u32 (cpu, vm, elem);
 
 	for (i = 0; i < (full ? 4 : 2); i++)
@@ -6681,11 +6701,9 @@ dexSimpleFPDataProc3Source (sim_cpu *cpu)
      instr[21]    ==> o1 : 0 ==> unnegated, 1 ==> negated
      instr[15]    ==> o2 : 0 ==> ADD, 1 ==> SUB  */
 
-  uint32_t M_S = (INSTR (31, 31) << 1)
-    | INSTR (29, 29);
+  uint32_t M_S = (INSTR (31, 31) << 1) | INSTR (29, 29);
   /* dispatch on combined type:o1:o2.  */
-  uint32_t dispatch = (INSTR (23, 21) << 1)
-    | INSTR (15, 15);
+  uint32_t dispatch = (INSTR (23, 21) << 1) | INSTR (15, 15);
 
   if (M_S != 0)
     HALT_UNALLOC;
@@ -6966,8 +6984,7 @@ dexSimpleFPDataProc2Source (sim_cpu *cpu)
      instr[9,5]   = Vn
      instr[4,0]   = Vd  */
 
-  uint32_t M_S = (INSTR (31, 31) << 1)
-    | INSTR (29, 29);
+  uint32_t M_S = (INSTR (31, 31) << 1) | INSTR (29, 29);
   uint32_t type = INSTR (23, 22);
   /* Dispatch on opcode.  */
   uint32_t dispatch = INSTR (15, 12);
@@ -7457,7 +7474,7 @@ do_FCVT_half_to_single (sim_cpu *cpu)
   aarch64_set_FP_float (cpu, rd, (float) aarch64_get_FP_half  (cpu, rn));
 }
 
-/* Convert half to float.  */
+/* Convert half to double.  */
 static void
 do_FCVT_half_to_double (sim_cpu *cpu)
 {
@@ -7480,7 +7497,7 @@ do_FCVT_single_to_half (sim_cpu *cpu)
   aarch64_set_FP_half (cpu, rd, aarch64_get_FP_float  (cpu, rn));
 }
 
-/* Convert half to float.  */
+/* Convert double to half.  */
 static void
 do_FCVT_double_to_half (sim_cpu *cpu)
 {
@@ -7519,8 +7536,7 @@ dexSimpleFPDataProc1Source (sim_cpu *cpu)
                                000101 ==> FCVT (half-to-double)
 			       instr[14,10] = 10000.  */
 
-  uint32_t M_S = (INSTR (31, 31) << 1)
-    | INSTR (29, 29);
+  uint32_t M_S = (INSTR (31, 31) << 1) | INSTR (29, 29);
   uint32_t type   = INSTR (23, 22);
   uint32_t opcode = INSTR (20, 15);
 
@@ -8151,8 +8167,7 @@ dexSimpleFPCompare (sim_cpu *cpu)
                               01000 ==> FCMPZ, 11000 ==> FCMPEZ,
                               ow ==> UNALLOC  */
   uint32_t dispatch;
-  uint32_t M_S = (INSTR (31, 31) << 1)
-    | INSTR (29, 29);
+  uint32_t M_S = (INSTR (31, 31) << 1) | INSTR (29, 29);
   uint32_t type = INSTR (23, 22);
   uint32_t op = INSTR (15, 14);
   uint32_t op2_2_0 = INSTR (2, 0);
@@ -8188,9 +8203,9 @@ dexSimpleFPCompare (sim_cpu *cpu)
 static void
 do_scalar_FADDP (sim_cpu *cpu)
 {
-  /* instr [31,23] = 011111100
+  /* instr [31,23] = 0111 1110 0
      instr [22]    = single(0)/double(1)
-     instr [21,10] = 1100 0011 0110
+     instr [21,10] = 11 0000 1101 10
      instr [9,5]   = Fn
      instr [4,0]   = Fd.  */
 
@@ -8369,9 +8384,7 @@ do_scalar_FCM (sim_cpu *cpu)
   unsigned rm = INSTR (20, 16);
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
-  unsigned EUac = (INSTR (23, 23) << 2)
-    | (INSTR (29, 29) << 1)
-    | INSTR (11, 11);
+  unsigned EUac = (INSTR (23, 23) << 2) | (INSTR (29, 29) << 1) | INSTR (11, 11);
   unsigned result;
   float val1;
   float val2;
@@ -8564,6 +8577,35 @@ do_double_add (sim_cpu *cpu)
 }
 
 static void
+do_scalar_UCVTF (sim_cpu *cpu)
+{
+  /* instr [31,23] = 0111 1110 0
+     instr [22]    = single(0)/double(1)
+     instr [21,10] = 10 0001 1101 10
+     instr [9,5]   = rn
+     instr [4,0]   = rd.  */
+
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 23, 0x0FC);
+  NYI_assert (21, 10, 0x876);
+
+  if (INSTR (22, 22))
+    {
+      uint64_t val = aarch64_get_vec_u64 (cpu, rn, 0);
+
+      aarch64_set_vec_double (cpu, rd, 0, (double) val);
+    }
+  else
+    {
+      uint32_t val = aarch64_get_vec_u32 (cpu, rn, 0);
+
+      aarch64_set_vec_float (cpu, rd, 0, (float) val);
+    }
+}
+
+static void
 do_scalar_vec (sim_cpu *cpu)
 {
   /* instr [30] = 1.  */
@@ -8584,7 +8626,13 @@ do_scalar_vec (sim_cpu *cpu)
     case 0xFC:
       switch (INSTR (15, 10))
 	{
-	case 0x36: do_scalar_FADDP (cpu); return;
+	case 0x36:
+	  switch (INSTR (21, 16))
+	    {
+	    case 0x30: do_scalar_FADDP (cpu); return;
+	    case 0x21: do_scalar_UCVTF (cpu); return;
+	    }
+	  HALT_NYI;
 	case 0x39: do_scalar_FCM (cpu); return;
 	case 0x3B: do_scalar_FCM (cpu); return;
 	}
@@ -9626,8 +9674,7 @@ dexLoadUnscaledImmediate (sim_cpu *cpu)
      instr[9,5] = rn may be SP.  */
   /* unsigned rt = INSTR (4, 0);  */
   uint32_t V = INSTR (26, 26);
-  uint32_t dispatch = ( (INSTR (31, 30) << 2)
-			| INSTR (23, 22));
+  uint32_t dispatch = ((INSTR (31, 30) << 2) | INSTR (23, 22));
   int32_t imm = simm32 (aarch64_get_instr (cpu), 20, 12);
 
   if (!V)
@@ -9783,7 +9830,7 @@ fstrb_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   uint64_t  address = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   int64_t   extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 			       extension);
-  uint64_t  displacement = OPT_SCALE (extended, 32, scaling);
+  uint64_t  displacement = scaling == Scaled ? extended : 0;
 
   aarch64_set_mem_u8
     (cpu, address + displacement, aarch64_get_vec_u8 (cpu, st, 0));
@@ -9814,7 +9861,7 @@ fstrh_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   uint64_t  address = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   int64_t   extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 			       extension);
-  uint64_t  displacement = OPT_SCALE (extended, 32, scaling);
+  uint64_t  displacement = OPT_SCALE (extended, 16, scaling);
 
   aarch64_set_mem_u16
     (cpu, address + displacement, aarch64_get_vec_u16 (cpu, st, 0));
@@ -10152,8 +10199,7 @@ dexLoadUnsignedImmediate (sim_cpu *cpu)
      instr[4,0]   = rt.  */
 
   uint32_t V = INSTR (26,26);
-  uint32_t dispatch = ( (INSTR (31, 30) << 2)
-		       | INSTR (23, 22));
+  uint32_t dispatch = ((INSTR (31, 30) << 2) | INSTR (23, 22));
   uint32_t imm = INSTR (21, 10);
 
   if (!V)
@@ -10245,8 +10291,7 @@ dexLoadOther (sim_cpu *cpu)
       return;
     }
 
-  dispatch = ( (INSTR (21, 21) << 2)
-	      | INSTR (11, 10));
+  dispatch = ((INSTR (21, 21) << 2) | INSTR (11, 10));
   switch (dispatch)
     {
     case 0: dexLoadUnscaledImmediate (cpu); return;
@@ -10308,9 +10353,9 @@ store_pair_u64 (sim_cpu *cpu, int32_t offset, WriteBack wb)
     address += offset;
 
   aarch64_set_mem_u64 (cpu, address,
-		       aarch64_get_reg_u64 (cpu, rm, SP_OK));
+		       aarch64_get_reg_u64 (cpu, rm, NO_SP));
   aarch64_set_mem_u64 (cpu, address + 8,
-		       aarch64_get_reg_u64 (cpu, rn, SP_OK));
+		       aarch64_get_reg_u64 (cpu, rn, NO_SP));
 
   if (wb == Post)
     address += offset;
@@ -10327,7 +10372,7 @@ load_pair_u32 (sim_cpu *cpu, int32_t offset, WriteBack wb)
   unsigned rm = INSTR (4, 0);
   uint64_t address = aarch64_get_reg_u64 (cpu, rd, SP_OK);
 
-  /* treat this as unalloc to make sure we don't do it.  */
+  /* Treat this as unalloc to make sure we don't do it.  */
   if (rn == rm)
     HALT_UNALLOC;
 
@@ -10413,8 +10458,7 @@ dex_load_store_pair_gr (sim_cpu *cpu)
      instr[ 9, 5] = Rd
      instr[ 4, 0] = Rm.  */
 
-  uint32_t dispatch = ((INSTR (31, 30) << 3)
-			| INSTR (24, 22));
+  uint32_t dispatch = ((INSTR (31, 30) << 3) | INSTR (24, 22));
   int32_t offset = simm32 (aarch64_get_instr (cpu), 21, 15);
 
   switch (dispatch)
@@ -10607,8 +10651,7 @@ dex_load_store_pair_fp (sim_cpu *cpu)
      instr[ 9, 5] = Rd
      instr[ 4, 0] = Rm  */
 
-  uint32_t dispatch = ((INSTR (31, 30) << 3)
-			| INSTR (24, 22));
+  uint32_t dispatch = ((INSTR (31, 30) << 3) | INSTR (24, 22));
   int32_t offset = simm32 (aarch64_get_instr (cpu), 21, 15);
 
   switch (dispatch)
@@ -10980,8 +11023,7 @@ do_vec_LDnR (sim_cpu *cpu, uint64_t address)
   NYI_assert (15, 14, 3);
   NYI_assert (12, 12, 0);
 
-  switch ((INSTR (13, 13) << 1)
-	  | INSTR (21, 21))
+  switch ((INSTR (13, 13) << 1) | INSTR (21, 21))
     {
     case 0: /* LD1R.  */
       switch (size)
@@ -11274,8 +11316,7 @@ do_vec_load_store (sim_cpu *cpu)
   uint64_t address;
   int type;
 
-  if (INSTR (31, 31) != 0
-      || INSTR (29, 25) != 0x06)
+  if (INSTR (31, 31) != 0 || INSTR (29, 25) != 0x06)
     HALT_NYI;
 
   type = INSTR (15, 12);
@@ -12817,8 +12858,7 @@ dexTestBranchImmediate (sim_cpu *cpu)
      instr[18,5]  = simm14 : signed offset counted in words
      instr[4,0]   = uimm5  */
 
-  uint32_t pos = ((INSTR (31, 31) << 4)
-		  | INSTR (23,19));
+  uint32_t pos = ((INSTR (31, 31) << 4) | INSTR (23, 19));
   int32_t offset = simm32 (aarch64_get_instr (cpu), 18, 5) << 2;
 
   NYI_assert (30, 25, 0x1b);

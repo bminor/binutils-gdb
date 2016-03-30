@@ -87,6 +87,46 @@ aarch64_get_reg_s32 (sim_cpu *cpu, GReg reg, int r31_is_sp)
   return cpu->gr[reg_num(reg)].s32;
 }
 
+void
+aarch64_set_reg_s32 (sim_cpu *cpu, GReg reg, int r31_is_sp, int32_t val)
+{
+  if (reg == R31 && ! r31_is_sp)
+    {
+      TRACE_REGISTER (cpu, "GR[31] NOT CHANGED!");
+      return;
+    }
+
+  if (val != cpu->gr[reg].s32)
+    TRACE_REGISTER (cpu, "GR[%2d] changes from %8x to %8x",
+		    reg, cpu->gr[reg].s32, val);
+
+  /* The ARM ARM states that (C1.2.4):
+        When the data size is 32 bits, the lower 32 bits of the
+	register are used and the upper 32 bits are ignored on
+	a read and cleared to zero on a write.
+     We simulate this by first clearing the whole 64-bits and
+     then writing to the 32-bit value in the GRegister union.  */
+  cpu->gr[reg].s64 = 0;
+  cpu->gr[reg].s32 = val;
+}
+
+void
+aarch64_set_reg_u32 (sim_cpu *cpu, GReg reg, int r31_is_sp, uint32_t val)
+{
+  if (reg == R31 && ! r31_is_sp)
+    {
+      TRACE_REGISTER (cpu, "GR[31] NOT CHANGED!");
+      return;
+    }
+
+  if (val != cpu->gr[reg].u32)
+    TRACE_REGISTER (cpu, "GR[%2d] changes from %8x to %8x",
+		    reg, cpu->gr[reg].u32, val);
+
+  cpu->gr[reg].u64 = 0;
+  cpu->gr[reg].u32 = val;
+}
+
 uint32_t
 aarch64_get_reg_u16 (sim_cpu *cpu, GReg reg, int r31_is_sp)
 {
@@ -286,8 +326,8 @@ aarch64_get_FP_half (sim_cpu *cpu, VReg reg)
     float    f;
   } u;
 
-  u.h[0] = cpu->fr[reg].h[0];
-  u.h[1] = 0;
+  u.h[0] = 0;
+  u.h[1] = cpu->fr[reg].h[0];
   return u.f;
 }
 
@@ -321,7 +361,7 @@ aarch64_set_FP_half (sim_cpu *cpu, VReg reg, float val)
   } u;
 
   u.f = val;
-  cpu->fr[reg].h[0] = u.h[0];
+  cpu->fr[reg].h[0] = u.h[1];
   cpu->fr[reg].h[1] = 0;
 }
 
@@ -448,12 +488,12 @@ aarch64_get_vec_double (sim_cpu *cpu, VReg reg, unsigned element)
 }
 
 
-#define SET_VEC_ELEMENT(REG, ELEMENT, VAL, FIELD, PRINTER)	\
-  do						   		\
-    {								\
+#define SET_VEC_ELEMENT(REG, ELEMENT, VAL, FIELD, PRINTER)		\
+  do									\
+    {									\
       if (ELEMENT >= ARRAY_SIZE (cpu->fr[0].FIELD))			\
 	{								\
-	  TRACE_REGISTER (cpu, \
+	  TRACE_REGISTER (cpu,						\
 			  "Internal SIM error: invalid element number: %d ",\
 			  ELEMENT);					\
 	  sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu), \
@@ -464,9 +504,9 @@ aarch64_get_vec_double (sim_cpu *cpu, VReg reg, unsigned element)
 			"VR[%2d]." #FIELD " [%d] changes from " PRINTER \
 			" to " PRINTER , REG,				\
 			ELEMENT, cpu->fr[REG].FIELD [ELEMENT], VAL);	\
-      \
-      cpu->fr[REG].FIELD [ELEMENT] = VAL;     \
-    }					      \
+									\
+      cpu->fr[REG].FIELD [ELEMENT] = VAL;				\
+    }									\
   while (0)
 
 void

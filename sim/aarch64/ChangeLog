@@ -1,3 +1,35 @@
+2016-03-30  Nick Clifton  <nickc@redhat.com>
+
+	* cpustate.c (aarch64_set_reg_s32): New function.
+	(aarch64_set_reg_u32): New function.
+	(aarch64_get_FP_half): Place half precision value into the correct
+	slot of the union.
+	(aarch64_set_FP_half): Likewise.
+	* cpustate.h: Add prototypes for aarch64_set_reg_s32 and
+	aarch64_set_reg_u32.
+	* memory.c (FETCH_FUNC): Cast the read value to the access type
+	before converting it to the return type.  Rename to FETCH_FUNC64.
+	(FETCH_FUNC32): New macro.  Duplicates FETCH_FUNC64 but for 32-bit
+	accesses.  Use for 32-bit memory access functions.
+	* simulator.c (ldrsb_wb): Use sign extension not zero extension.
+	(ldrb_scale_ext, ldrsh32_abs, ldrsh32_wb): Likewise.
+	(ldrsh32_scale_ext, ldrsh_abs, ldrsh64_wb): Likewise.
+	(ldrsh_scale_ext, ldrsw_abs): Likewise.
+	(ldrh32_abs): Store 32 bit value not 64-bits.
+	(ldrh32_wb, ldrh32_scale_ext): Likewise.
+	(do_vec_MOV_immediate): Fix computation of val.
+	(do_vec_MVNI): Likewise.
+	(DO_VEC_WIDENING_MUL): New macro.
+	(do_vec_mull): Use new macro.
+	(do_vec_mul): Use new macro.
+	(do_vec_MLA): Read values before writing.
+	(do_vec_xtl): Likewise.
+	(do_vec_SSHL): Select correct shift value.
+	(do_vec_USHL): Likewise.
+	(do_scalar_UCVTF): New function.
+	(do_scalar_vec): Call new function.
+	(store_pair_u64): Treat reads of SP as reads of XZR.
+
 2016-03-29  Nick Clifton  <nickc@redhat.com>
 
 	* cpustate.c: Remove space after asterisk in function parameters.

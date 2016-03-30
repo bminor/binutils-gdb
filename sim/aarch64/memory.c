@@ -42,28 +42,41 @@ mem_error (sim_cpu *cpu, const char *message, uint64_t addr)
   TRACE_MEMORY (cpu, "ERROR: %s: %" PRIx64, message, addr);
 }
 
-/* FIXME: Aarch64 requires aligned memory access if SCTRLR_ELx.A is set,
+/* FIXME: AArch64 requires aligned memory access if SCTRLR_ELx.A is set,
    but we are not implementing that here.  */
-#define FETCH_FUNC(RETURN_TYPE, ACCESS_TYPE, NAME, N)			\
+#define FETCH_FUNC64(RETURN_TYPE, ACCESS_TYPE, NAME, N)			\
   RETURN_TYPE								\
   aarch64_get_mem_##NAME (sim_cpu *cpu, uint64_t address)		\
   {									\
-    RETURN_TYPE val = (RETURN_TYPE) sim_core_read_unaligned_##N (cpu, 0, read_map, address); \
-    TRACE_MEMORY (cpu,							\
-		  "read of %" PRIx64 " (%d bytes) from %" PRIx64,	\
-		  (uint64_t) val, N, address);				\
+    RETURN_TYPE val = (RETURN_TYPE) (ACCESS_TYPE)			\
+      sim_core_read_unaligned_##N (cpu, 0, read_map, address);		\
+    TRACE_MEMORY (cpu, "read of %" PRIx64 " (%d bytes) from %" PRIx64,	\
+		  val, N, address);					\
 									\
     return val;								\
   }
 
-FETCH_FUNC (uint64_t, uint64_t, u64, 8)
-FETCH_FUNC (int64_t,   int64_t, s64, 8)
-FETCH_FUNC (uint32_t, uint32_t, u32, 4)
-FETCH_FUNC (int32_t,   int32_t, s32, 4)
-FETCH_FUNC (uint32_t, uint16_t, u16, 2)
-FETCH_FUNC (int32_t,   int16_t, s16, 2)
-FETCH_FUNC (uint32_t,  uint8_t, u8, 1)
-FETCH_FUNC (int32_t,    int8_t, s8, 1)
+FETCH_FUNC64 (uint64_t, uint64_t, u64, 8)
+FETCH_FUNC64 (int64_t,   int64_t, s64, 8)
+
+#define FETCH_FUNC32(RETURN_TYPE, ACCESS_TYPE, NAME, N)			\
+  RETURN_TYPE								\
+  aarch64_get_mem_##NAME (sim_cpu *cpu, uint64_t address)		\
+  {									\
+    RETURN_TYPE val = (RETURN_TYPE) (ACCESS_TYPE)			\
+      sim_core_read_unaligned_##N (cpu, 0, read_map, address);		\
+    TRACE_MEMORY (cpu, "read of %8x (%d bytes) from %" PRIx64,		\
+		  val, N, address);					\
+									\
+    return val;								\
+  }
+
+FETCH_FUNC32 (uint32_t, uint32_t, u32, 4)
+FETCH_FUNC32 (int32_t,   int32_t, s32, 4)
+FETCH_FUNC32 (uint32_t, uint16_t, u16, 2)
+FETCH_FUNC32 (int32_t,   int16_t, s16, 2)
+FETCH_FUNC32 (uint32_t,  uint8_t, u8, 1)
+FETCH_FUNC32 (int32_t,    int8_t, s8, 1)
 
 void
 aarch64_get_mem_long_double (sim_cpu *cpu, uint64_t address, FRegister *a)
