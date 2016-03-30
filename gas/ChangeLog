@@ -1,3 +1,7 @@
+2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * testsuite/gas/arc/warn.exp: Fix matching pattern.
+
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
         * testsuite/gas/arc/ext2op.d: New file.
