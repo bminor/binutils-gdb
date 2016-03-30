@@ -68,6 +68,7 @@ static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
 static struct unique_sections *unique_section_list;
 static struct asneeded_minfo *asneeded_list_head;
+static bfd_boolean maybe_overlays = FALSE;
 
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
@@ -4677,17 +4678,39 @@ size_input_section
   return dot;
 }
 
+struct check_sec
+{
+  asection *sec;
+  bfd_boolean warned;
+};
+
 static int
 sort_sections_by_lma (const void *arg1, const void *arg2)
 {
-  const asection *sec1 = *(const asection **) arg1;
-  const asection *sec2 = *(const asection **) arg2;
+  const asection *sec1 = ((const struct check_sec *) arg1)->sec;
+  const asection *sec2 = ((const struct check_sec *) arg2)->sec;
 
-  if (bfd_section_lma (sec1->owner, sec1)
-      < bfd_section_lma (sec2->owner, sec2))
+  if (sec1->lma < sec2->lma)
     return -1;
-  else if (bfd_section_lma (sec1->owner, sec1)
-	   > bfd_section_lma (sec2->owner, sec2))
+  else if (sec1->lma > sec2->lma)
+    return 1;
+  else if (sec1->id < sec2->id)
+    return -1;
+  else if (sec1->id > sec2->id)
+    return 1;
+
+  return 0;
+}
+
+static int
+sort_sections_by_vma (const void *arg1, const void *arg2)
+{
+  const asection *sec1 = ((const struct check_sec *) arg1)->sec;
+  const asection *sec2 = ((const struct check_sec *) arg2)->sec;
+
+  if (sec1->vma < sec2->vma)
+    return -1;
+  else if (sec1->vma > sec2->vma)
     return 1;
   else if (sec1->id < sec2->id)
     return -1;
@@ -4712,66 +4735,90 @@ static void
 lang_check_section_addresses (void)
 {
   asection *s, *p;
-  asection **sections, **spp;
-  unsigned int count;
+  struct check_sec *sections;
+  size_t i, count;
   bfd_vma s_start;
   bfd_vma s_end;
-  bfd_vma p_start;
-  bfd_vma p_end;
-  bfd_size_type amt;
+  bfd_vma p_start = 0;
+  bfd_vma p_end = 0;
   lang_memory_region_type *m;
 
   if (bfd_count_sections (link_info.output_bfd) <= 1)
     return;
 
-  amt = bfd_count_sections (link_info.output_bfd) * sizeof (asection *);
-  sections = (asection **) xmalloc (amt);
+  count = bfd_count_sections (link_info.output_bfd);
+  sections = XNEWVEC (struct check_sec, count);
 
   /* Scan all sections in the output list.  */
   count = 0;
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
     {
-      /* Only consider loadable sections with real contents.  */
-      if (!(s->flags & SEC_LOAD)
-	  || !(s->flags & SEC_ALLOC)
+      if (IGNORE_SECTION (s)
 	  || s->size == 0)
 	continue;
 
-      sections[count] = s;
+      sections[count].sec = s;
+      sections[count].warned = FALSE;
       count++;
     }
 
   if (count <= 1)
     return;
 
-  qsort (sections, (size_t) count, sizeof (asection *),
-	 sort_sections_by_lma);
+  qsort (sections, count, sizeof (*sections), sort_sections_by_lma);
 
-  spp = sections;
-  s = *spp++;
-  s_start = s->lma;
-  s_end = s_start + TO_ADDR (s->size) - 1;
-  for (count--; count; count--)
+  /* First check sections LMAs.  There should be no overlap of LMAs on
+     loadable sections, even with overlays.  */
+  for (p = NULL, i = 0; i < count; i++)
     {
-      /* We must check the sections' LMA addresses not their VMA
-	 addresses because overlay sections can have overlapping VMAs
-	 but they must have distinct LMAs.  */
-      p = s;
-      p_start = s_start;
-      p_end = s_end;
-      s = *spp++;
-      s_start = s->lma;
-      s_end = s_start + TO_ADDR (s->size) - 1;
+      s = sections[i].sec;
+      if ((s->flags & SEC_LOAD) != 0)
+	{
+	  s_start = s->lma;
+	  s_end = s_start + TO_ADDR (s->size) - 1;
 
-      /* Look for an overlap.  We have sorted sections by lma, so we
-	 know that s_start >= p_start.  Besides the obvious case of
-	 overlap when the current section starts before the previous
-	 one ends, we also must have overlap if the previous section
-	 wraps around the address space.  */
-      if (s_start <= p_end
-	  || p_end < p_start)
-	einfo (_("%X%P: section %s loaded at [%V,%V] overlaps section %s loaded at [%V,%V]\n"),
-	       s->name, s_start, s_end, p->name, p_start, p_end);
+	  /* Look for an overlap.  We have sorted sections by lma, so
+	     we know that s_start >= p_start.  Besides the obvious
+	     case of overlap when the current section starts before
+	     the previous one ends, we also must have overlap if the
+	     previous section wraps around the address space.  */
+	  if (p != NULL
+	      && (s_start <= p_end
+		  || p_end < p_start))
+	    {
+	      einfo (_("%X%P: section %s LMA [%V,%V]"
+		       " overlaps section %s LMA [%V,%V]\n"),
+		     s->name, s_start, s_end, p->name, p_start, p_end);
+	      sections[i].warned = TRUE;
+	    }
+	  p = s;
+	  p_start = s_start;
+	  p_end = s_end;
+	}
+    }
+
+  /* Now check sections VMAs if no overlays were detected.  */
+  if (!maybe_overlays)
+    {
+      qsort (sections, count, sizeof (*sections), sort_sections_by_vma);
+
+      for (p = NULL, i = 0; i < count; i++)
+	{
+	  s = sections[i].sec;
+	  s_start = s->vma;
+	  s_end = s_start + TO_ADDR (s->size) - 1;
+
+	  if (p != NULL
+	      && !sections[i].warned
+	      && (s_start <= p_end
+		  || p_end < p_start))
+	    einfo (_("%X%P: section %s VMA [%V,%V]"
+		     " overlaps section %s VMA [%V,%V]\n"),
+		   s->name, s_start, s_end, p->name, p_start, p_end);
+	  p = s;
+	  p_start = s_start;
+	  p_end = s_end;
+	}
     }
 
   free (sections);
@@ -5101,6 +5148,18 @@ lang_size_sections_1
 
 	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
 	      break;
+
+	    if (r->last_os != NULL
+		&& !IGNORE_SECTION (os->bfd_section)
+		&& os->bfd_section->size != 0)
+	      {
+		asection *last;
+
+		last = r->last_os->output_section_statement.bfd_section;
+		if (dot + TO_ADDR (os->bfd_section->size) > last->vma
+		    && dot < last->vma + TO_ADDR (last->size))
+		  maybe_overlays = TRUE;
+	      }
 
 	    /* Keep track of normal sections using the default
 	       lma region.  We use this to set the lma for

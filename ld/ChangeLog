@@ -1,5 +1,16 @@
 2016-03-30  Alan Modra  <amodra@gmail.com>
 
+	PR 18452
+	* ldlang.c (maybe_overlays): New static var.
+	(lang_size_sections_1): Set it here.
+	(struct check_sec): New.
+	(sort_sections_by_lma): Adjust for array of structs.
+	(sort_sections_by_vma): New function.
+	(lang_check_section_addresses): Check both LMA and VMA for overlap.
+	* testsuite/ld-scripts/rgn-over7.d: Adjust.
+
+2016-03-30  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.c (lang_size_sections_1): Correct code detecting a
 	backward non-overlapping move.
 
