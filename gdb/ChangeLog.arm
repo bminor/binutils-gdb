@@ -1,3 +1,8 @@
+2016-03-29  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+    Backport from mainline
+    2015-07-17  Yao Qi  <yao.qi@linaro.org>
+    * remote.c (get_current_thread): Initialise ptid to null_ptid.
+    (add_current_inferior_and_thread): Don't initialise ptid.
 2016-02-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
     Backport from mainline
     2016-02-04  Yao Qi  <yao.qi@linaro.org>
