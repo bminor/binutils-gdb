@@ -1,3 +1,8 @@
+2016-03-30  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* elf32-avr.c (avr_elf32_load_records_from_section): Free
+	internal_relocs only if they aren't cached.
+
 2016-03-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 17334
