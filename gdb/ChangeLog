@@ -1,3 +1,12 @@
+2016-03-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_stack_frame_destroyed_p): Rename it ...
+	(arm_stack_frame_destroyed_p_1): ... here.  Don't call
+	arm_pc_is_thumb.
+	(arm_stack_frame_destroyed_p): Call
+	thumb_stack_frame_destroyed_p and
+	arm_stack_frame_destroyed_p_1.
+
 2016-03-30  Doug Evans  <dje@google.com>
 
 	* python/py-utils.c (host_string_to_python_string): New function.

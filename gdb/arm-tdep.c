@@ -3124,18 +3124,13 @@ thumb_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return found_stack_adjust;
 }
 
-/* Implement the stack_frame_destroyed_p gdbarch method.  */
-
 static int
-arm_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+arm_stack_frame_destroyed_p_1 (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int insn;
   int found_return;
   CORE_ADDR func_start, func_end;
-
-  if (arm_pc_is_thumb (gdbarch, pc))
-    return thumb_stack_frame_destroyed_p (gdbarch, pc);
 
   if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
     return 0;
@@ -3178,6 +3173,16 @@ arm_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
+
+static int
+arm_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  if (arm_pc_is_thumb (gdbarch, pc))
+    return thumb_stack_frame_destroyed_p (gdbarch, pc);
+  else
+    return arm_stack_frame_destroyed_p_1 (gdbarch, pc);
+}
 
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The code below implements a FILO (stack) to do this.  */
