@@ -12516,7 +12516,7 @@ do_t_push_pop (void)
   if (inst.size_req != 4 && (mask & ~0xff) == 0)
     inst.instruction = THUMB_OP16 (inst.instruction) | mask;
   else if (inst.size_req != 4
-	   && (mask & ~0xff) == (1 << (inst.instruction == T_MNEM_push
+	   && (mask & ~0xff) == (1U << (inst.instruction == T_MNEM_push
 				       ? REG_LR : REG_PC)))
     {
       inst.instruction = THUMB_OP16 (inst.instruction);

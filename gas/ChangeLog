@@ -1,3 +1,9 @@
+2016-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19880
+	* config/tc-arm.c (do_t_push_pop): Cast bitmask to unsigned before
+	shifting.
+
 2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
 
         * testsuite/gas/all/gas.exp: Don't xfail on ARC.
