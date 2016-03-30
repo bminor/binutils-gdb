@@ -1,3 +1,10 @@
+2016-03-30  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/until-precsave.exp: Match function name only.
+	* gdb.reverse/until-reverse.c (main): Don't call fprintf nor printf.
+	Move malloc to a condition block.
+	* gdb.reverse/until-reverse.exp: Match function name only.
+
 2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/ftrace.exp: Set arg0exp for s390.
