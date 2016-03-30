@@ -1,3 +1,10 @@
+2016-03-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/lib/ld-lib.exp (run_dump_test): Fix check of return
+	value from regexp_diff.
+	* testsuite/ld-elf/orphan-5.l: Fix expected output.
+	* testsuite/ld-elf/orphan-6.l: Likewise.
+
 2016-03-30  Alan Modra  <amodra@gmail.com>
 
 	PR 18452
