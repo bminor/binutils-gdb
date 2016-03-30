@@ -2669,6 +2669,112 @@ struct frame_unwind arm_exidx_unwind = {
   arm_exidx_unwind_sniffer
 };
 
+static struct arm_prologue_cache *
+arm_make_epilogue_frame_cache (struct frame_info *this_frame)
+{
+  struct arm_prologue_cache *cache;
+  CORE_ADDR sp;
+  int reg;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+
+  /* Still rely on the offset calculated from prologue.  */
+  arm_scan_prologue (this_frame, cache);
+
+  /* Since we are in epilogue, the SP has been restored.  */
+  cache->prev_sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+
+  /* Calculate actual addresses of saved registers using offsets
+     determined by arm_scan_prologue.  */
+  for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
+    if (trad_frame_addr_p (cache->saved_regs, reg))
+      cache->saved_regs[reg].addr += cache->prev_sp;
+
+  return cache;
+}
+
+/* Implementation of function hook 'this_id' in
+   'struct frame_uwnind' for epilogue unwinder.  */
+
+static void
+arm_epilogue_frame_this_id (struct frame_info *this_frame,
+			    void **this_cache,
+			    struct frame_id *this_id)
+{
+  struct arm_prologue_cache *cache;
+  CORE_ADDR pc, func;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_make_epilogue_frame_cache (this_frame);
+  cache = (struct arm_prologue_cache *) *this_cache;
+
+  /* Use function start address as part of the frame ID.  If we cannot
+     identify the start address (due to missing symbol information),
+     fall back to just using the current PC.  */
+  pc = get_frame_pc (this_frame);
+  func = get_frame_func (this_frame);
+  if (func == NULL)
+    func = pc;
+
+  (*this_id) = frame_id_build (cache->prev_sp, pc);
+}
+
+/* Implementation of function hook 'prev_register' in
+   'struct frame_uwnind' for epilogue unwinder.  */
+
+static struct value *
+arm_epilogue_frame_prev_register (struct frame_info *this_frame,
+				  void **this_cache, int regnum)
+{
+  struct arm_prologue_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_make_epilogue_frame_cache (this_frame);
+  cache = (struct arm_prologue_cache *) *this_cache;
+
+  return arm_prologue_prev_register (this_frame, this_cache, regnum);
+}
+
+static int arm_stack_frame_destroyed_p_1 (struct gdbarch *gdbarch,
+					  CORE_ADDR pc);
+static int thumb_stack_frame_destroyed_p (struct gdbarch *gdbarch,
+					  CORE_ADDR pc);
+
+/* Implementation of function hook 'sniffer' in
+   'struct frame_uwnind' for epilogue unwinder.  */
+
+static int
+arm_epilogue_frame_sniffer (const struct frame_unwind *self,
+			    struct frame_info *this_frame,
+			    void **this_prologue_cache)
+{
+  if (frame_relative_level (this_frame) == 0)
+    {
+      struct gdbarch *gdbarch = get_frame_arch (this_frame);
+      CORE_ADDR pc = get_frame_pc (this_frame);
+
+      if (arm_frame_is_thumb (this_frame))
+	return thumb_stack_frame_destroyed_p (gdbarch, pc);
+      else
+	return arm_stack_frame_destroyed_p_1 (gdbarch, pc);
+    }
+  else
+    return 0;
+}
+
+/* Frame unwinder from epilogue.  */
+
+static const struct frame_unwind arm_epilogue_frame_unwind =
+{
+  NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
+  arm_epilogue_frame_this_id,
+  arm_epilogue_frame_prev_register,
+  NULL,
+  arm_epilogue_frame_sniffer,
+};
+
 /* Recognize GCC's trampoline for thumb call-indirect.  If we are in a
    trampoline, return the target PC.  Otherwise return 0.
 
@@ -9285,6 +9391,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_unwinder (gdbarch, &arm_stub_unwind);
   dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &arm_exidx_unwind);
+  frame_unwind_append_unwinder (gdbarch, &arm_epilogue_frame_unwind);
   frame_unwind_append_unwinder (gdbarch, &arm_prologue_unwind);
 
   /* Now we have tuned the configuration, set a few final things,
