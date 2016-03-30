@@ -4697,10 +4697,11 @@ sort_sections_by_lma (const void *arg1, const void *arg2)
   return 0;
 }
 
+#define IS_TBSS(s) \
+  ((s->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == SEC_THREAD_LOCAL)
+
 #define IGNORE_SECTION(s) \
-  ((s->flags & SEC_ALLOC) == 0				\
-   || ((s->flags & SEC_THREAD_LOCAL) != 0		\
-	&& (s->flags & SEC_LOAD) == 0))
+  ((s->flags & SEC_ALLOC) == 0 || IS_TBSS (s))
 
 /* Check to see if any allocated sections overlap with other allocated
    sections.  This can happen if a linker script specifies the output
@@ -5109,9 +5110,7 @@ lang_size_sections_1
 	       To avoid warnings about dot moving backwards when using
 	       -Ttext, don't start tracking sections until we find one
 	       of non-zero size or with lma set differently to vma.  */
-	    if (((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
-		 || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0)
-		&& (os->bfd_section->flags & SEC_ALLOC) != 0
+	    if (!IGNORE_SECTION (os->bfd_section)
 		&& (os->bfd_section->size != 0
 		    || (r->last_os == NULL
 			&& os->bfd_section->vma != os->bfd_section->lma)
@@ -5123,8 +5122,7 @@ lang_size_sections_1
 	      r->last_os = s;
 
 	    /* .tbss sections effectively have zero size.  */
-	    if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
-		|| (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
+	    if (!IS_TBSS (os->bfd_section)
 		|| bfd_link_relocatable (&link_info))
 	      dotdelta = TO_ADDR (os->bfd_section->size);
 	    else
@@ -5466,8 +5464,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	    bfd_vma start, end, bump;
 
 	    end = start = sec->vma;
-	    if ((sec->flags & SEC_HAS_CONTENTS) != 0
-		|| (sec->flags & SEC_THREAD_LOCAL) == 0)
+	    if (!IS_TBSS (sec))
 	      end += sec->size;
 	    bump = desired_end - end;
 	    /* We'd like to increase START by BUMP, but we must heed
@@ -5563,8 +5560,7 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 				       os, os->fill, dot, found_end);
 
 		/* .tbss sections effectively have zero size.  */
-		if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
-		    || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
+		if (!IS_TBSS (os->bfd_section)
 		    || bfd_link_relocatable (&link_info))
 		  dot += TO_ADDR (os->bfd_section->size);
 
