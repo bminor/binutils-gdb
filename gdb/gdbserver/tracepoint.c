@@ -2783,7 +2783,7 @@ cmd_qtenable_disable (char *own_buf, int enable)
 	      write_enn (own_buf);
 	      return;
 	    }
-	  
+
 	  ret = write_inferior_integer (obj_addr, enable);
 	  done_accessing_memory ();
 	  
