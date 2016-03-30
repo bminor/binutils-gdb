@@ -1,3 +1,12 @@
+2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * arc-regs.h (IC_RAM_ADDRESS, IC_TAG, IC_WP, IC_DATA, CONTROL0)
+        (AX2, AY2, MX2, MY2, AY0, AY1, DC_RAM_ADDR, DC_TAG, CONTROL1)
+        (RTT): Remove duplicate.
+        (LCDINSTR, LCDDATA, LCDSTAT, CC_*, PCT_COUNT*, PCT_SNAP*)
+        (PCT_CONFIG*): Remove.
+        (D1L, D1H, D2H, D2L): Define.
+
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
         * arc-ext-tbl.h (dsp_fp_i2flt): Fix typo.
