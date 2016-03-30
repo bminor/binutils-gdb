@@ -1,3 +1,11 @@
+2016-03-30  Doug Evans  <dje@google.com>
+
+	* python/py-utils.c (host_string_to_python_string): New function.
+	* python/python-internal.h (host_string_to_python_string): Declare it.
+	* python/py-*.c (*): Update all calls to
+	PyString_Decode (str, strlen (str), host_charset (), NULL);
+	to use host_string_to_python_string instead.
+
 2016-03-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* remote.c (remote_check_symbols): Allocate own buffer for reply.

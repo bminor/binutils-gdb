@@ -516,7 +516,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
 
 	if (! str)
 	  str = "";
-	return PyString_Decode (str, strlen (str), host_charset (), NULL);
+	return host_string_to_python_string (str);
       }
 
     case var_boolean:
@@ -706,7 +706,7 @@ gdbpy_solib_name (PyObject *self, PyObject *args)
 
   soname = solib_name_from_address (current_program_space, pc);
   if (soname)
-    str_obj = PyString_Decode (soname, strlen (soname), host_charset (), NULL);
+    str_obj = host_string_to_python_string (soname);
   else
     {
       str_obj = Py_None;
