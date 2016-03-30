@@ -2714,7 +2714,7 @@ arm_epilogue_frame_this_id (struct frame_info *this_frame,
      fall back to just using the current PC.  */
   pc = get_frame_pc (this_frame);
   func = get_frame_func (this_frame);
-  if (func == NULL)
+  if (func == 0)
     func = pc;
 
   (*this_id) = frame_id_build (cache->prev_sp, pc);

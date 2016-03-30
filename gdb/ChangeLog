@@ -1,5 +1,10 @@
 2016-03-30  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-tdep.c (arm_epilogue_frame_this_id): Check 'func' against
+	0 rather than NULL.
+
+2016-03-30  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-tdep.c: (arm_make_epilogue_frame_cache): New function.
 	(arm_epilogue_frame_this_id): New function.
 	(arm_epilogue_frame_prev_register): New function.
