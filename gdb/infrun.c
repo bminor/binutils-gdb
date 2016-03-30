@@ -5669,8 +5669,6 @@ finish_step_over (struct execution_control_state *ecs)
 static void
 handle_signal_stop (struct execution_control_state *ecs)
 {
-  struct frame_info *frame;
-  struct gdbarch *gdbarch;
   int stopped_by_watchpoint;
   enum stop_kind stop_soon;
   int random_signal;
@@ -5778,10 +5776,6 @@ handle_signal_stop (struct execution_control_state *ecs)
 	deprecated_context_hook (ptid_to_global_thread_id (ecs->ptid));
     }
 
-  /* At this point, get hold of the now-current thread's frame.  */
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
-
   /* Pull the single step breakpoints out of the target.  */
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
     {
@@ -5835,7 +5829,7 @@ handle_signal_stop (struct execution_control_state *ecs)
      it in a moment.  */
   if (stopped_by_watchpoint
       && (target_have_steppable_watchpoint
-	  || gdbarch_have_nonsteppable_watchpoint (gdbarch)))
+	  || gdbarch_have_nonsteppable_watchpoint (get_regcache_arch (get_current_regcache ()))))
     {
       /* At this point, we are stopped at an instruction which has
          attempted to write to a piece of memory under control of
@@ -5899,27 +5893,25 @@ handle_signal_stop (struct execution_control_state *ecs)
 	 user had set a breakpoint on that inlined code, the missing
 	 skip_inline_frames call would break things.  Fortunately
 	 that's an extremely unlikely scenario.  */
+#if 0
       if (!pc_at_non_inline_function (aspace, stop_pc, &ecs->ws)
 	  && !(ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
 	       && ecs->event_thread->control.trap_expected
 	       && pc_at_non_inline_function (aspace,
 					     ecs->event_thread->prev_pc,
 					     &ecs->ws)))
-	{
-	  skip_inline_frames (ecs->ptid);
-
-	  /* Re-fetch current thread's frame in case that invalidated
-	     the frame cache.  */
-	  frame = get_current_frame ();
-	  gdbarch = get_frame_arch (frame);
-	}
+	skip_inline_frames (ecs->ptid);
+#endif
     }
 
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
       && ecs->event_thread->control.trap_expected
-      && gdbarch_single_step_through_delay_p (gdbarch)
+      && gdbarch_single_step_through_delay_p (get_regcache_arch (get_current_regcache ()))
       && currently_stepping (ecs->event_thread))
     {
+      struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
+      struct frame_info *frame = get_current_frame ();
+
       /* We're trying to step off a breakpoint.  Turns out that we're
 	 also on an instruction that needs to be stepped multiple
 	 times before it's been fully executing.  E.g., architectures
@@ -6007,6 +5999,9 @@ handle_signal_stop (struct execution_control_state *ecs)
      been removed.  */
   if (random_signal && target_stopped_by_sw_breakpoint ())
     {
+      struct regcache *regcache = get_current_regcache ();
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
       if (program_breakpoint_here_p (gdbarch, stop_pc))
 	{
 	  struct regcache *regcache;
@@ -6112,6 +6107,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  && ecs->event_thread->control.trap_expected
 	  && ecs->event_thread->control.step_resume_breakpoint == NULL)
 	{
+	  struct frame_info *frame = get_current_frame ();
 	  int was_in_line;
 
 	  /* We were just starting a new sequence, attempting to
@@ -6166,11 +6162,14 @@ handle_signal_stop (struct execution_control_state *ecs)
 
       if (ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_0
 	  && (pc_in_thread_step_range (stop_pc, ecs->event_thread)
-	      || ecs->event_thread->control.step_range_end == 1)
-	  && frame_id_eq (get_stack_frame_id (frame),
-			  ecs->event_thread->control.step_stack_frame_id)
-	  && ecs->event_thread->control.step_resume_breakpoint == NULL)
+	      || ecs->event_thread->control.step_range_end == 1))
 	{
+	  struct frame_info *frame = get_current_frame ();
+
+	  if (frame_id_eq (get_stack_frame_id (frame),
+			   ecs->event_thread->control.step_stack_frame_id)
+	      && ecs->event_thread->control.step_resume_breakpoint == NULL)
+	    {
 	  /* The inferior is about to take a signal that will take it
 	     out of the single step range.  Set a breakpoint at the
 	     current PC (which is presumably where the signal handler
@@ -6192,6 +6191,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  ecs->event_thread->control.trap_expected = 0;
 	  keep_going (ecs);
 	  return;
+	    }
 	}
 
       /* Note: step_resume_breakpoint may be non-NULL.  This occures
@@ -6225,15 +6225,10 @@ static void
 process_event_stop_test (struct execution_control_state *ecs)
 {
   struct symtab_and_line stop_pc_sal;
-  struct frame_info *frame;
-  struct gdbarch *gdbarch;
   CORE_ADDR jmp_buf_pc;
   struct bpstat_what what;
 
   /* Handle cases caused by hitting a breakpoint.  */
-
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
 
   what = bpstat_what (ecs->event_thread->control.stop_bpstat);
 
@@ -6245,12 +6240,6 @@ process_event_stop_test (struct execution_control_state *ecs)
   /* A few breakpoint types have callbacks associated (e.g.,
      bp_jit_event).  Run them now.  */
   bpstat_run_callbacks (ecs->event_thread->control.stop_bpstat);
-
-  /* If we hit an internal event that triggers symbol changes, the
-     current frame will be invalidated within bpstat_what (e.g., if we
-     hit an internal solib event).  Re-fetch it.  */
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
 
   switch (what.main_action)
     {
@@ -6268,6 +6257,8 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (what.is_longjmp)
 	{
 	  struct value *arg_value;
+	  struct frame_info *frame = get_current_frame ();
+	  struct gdbarch *gdbarch = get_frame_arch (frame);
 
 	  /* If we set the longjmp breakpoint via a SystemTap probe,
 	     then use it to extract the arguments.  The destination PC
@@ -6294,7 +6285,11 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  insert_longjmp_resume_breakpoint (gdbarch, jmp_buf_pc);
 	}
       else
-	check_exception_resume (ecs, frame);
+	{
+	  struct frame_info *frame = get_current_frame ();
+
+	  check_exception_resume (ecs, frame);
+	}
       keep_going (ecs);
       return;
 
@@ -6394,7 +6389,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  keep_going (ecs);
 	  return;
 	}
-      fill_in_stop_func (gdbarch, ecs);
+      fill_in_stop_func (get_regcache_arch (get_current_regcache ()), ecs);
       if (stop_pc == ecs->stop_func_start
 	  && execution_direction == EXEC_REVERSE)
 	{
@@ -6511,12 +6506,9 @@ process_event_stop_test (struct execution_control_state *ecs)
       return;
     }
 
-  /* Re-fetch current thread's frame in case the code above caused
-     the frame cache to be re-initialized, making our FRAME variable
-     a dangling pointer.  */
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
-  fill_in_stop_func (gdbarch, ecs);
+  skip_inline_frames (ecs->ptid);
+
+  fill_in_stop_func (get_regcache_arch (get_current_regcache ()), ecs);
 
   /* If stepping through a line, keep going if still within it.
 
@@ -6530,9 +6522,11 @@ process_event_stop_test (struct execution_control_state *ecs)
 
   if (pc_in_thread_step_range (stop_pc, ecs->event_thread)
       && (execution_direction != EXEC_REVERSE
-	  || frame_id_eq (get_frame_id (frame),
+	  || frame_id_eq (get_frame_id (get_current_frame ()),
 			  ecs->event_thread->control.step_frame_id)))
     {
+      struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
+
       if (debug_infrun)
 	fprintf_unfiltered
 	  (gdb_stdlog, "infrun: stepping inside range [%s-%s]\n",
@@ -6575,6 +6569,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       && ecs->event_thread->control.step_over_calls == STEP_OVER_UNDEBUGGABLE
       && in_solib_dynsym_resolve_code (stop_pc))
     {
+      struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
       CORE_ADDR pc_after_resolver =
 	gdbarch_skip_solib_resolver (gdbarch, stop_pc);
 
@@ -6590,7 +6585,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	  init_sal (&sr_sal);
 	  sr_sal.pc = pc_after_resolver;
-	  sr_sal.pspace = get_frame_program_space (frame);
+	  sr_sal.pspace = current_program_space;
 
 	  insert_step_resume_breakpoint_at_sal (gdbarch,
 						sr_sal, null_frame_id);
@@ -6603,7 +6598,7 @@ process_event_stop_test (struct execution_control_state *ecs)
   if (ecs->event_thread->control.step_range_end != 1
       && (ecs->event_thread->control.step_over_calls == STEP_OVER_UNDEBUGGABLE
 	  || ecs->event_thread->control.step_over_calls == STEP_OVER_ALL)
-      && get_frame_type (frame) == SIGTRAMP_FRAME)
+      && get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME)
     {
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog,
@@ -6622,12 +6617,14 @@ process_event_stop_test (struct execution_control_state *ecs)
   /* macro/2012-04-25: This needs to come before the subroutine
      call check below as on some targets return trampolines look
      like subroutine calls (MIPS16 return thunks).  */
-  if (gdbarch_in_solib_return_trampoline (gdbarch,
+  if (gdbarch_in_solib_return_trampoline (get_regcache_arch (get_current_regcache ()),
 					  stop_pc, ecs->stop_func_name)
       && ecs->event_thread->control.step_over_calls != STEP_OVER_NONE)
     {
       /* Determine where this trampoline returns.  */
       CORE_ADDR real_stop_pc;
+      struct frame_info *frame = get_current_frame ();
+      struct gdbarch *gdbarch = get_frame_arch (frame);
 
       real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
 
@@ -6676,7 +6673,7 @@ process_event_stop_test (struct execution_control_state *ecs)
      initial outermost frame, before sp was valid, would
      have code_addr == &_start.  See the comment in frame_id_eq
      for more.  */
-  if (!frame_id_eq (get_stack_frame_id (frame),
+  if (!frame_id_eq (get_stack_frame_id (get_current_frame ()),
 		    ecs->event_thread->control.step_stack_frame_id)
       && (frame_id_eq (frame_unwind_caller_id (get_current_frame ()),
 		       ecs->event_thread->control.step_stack_frame_id)
@@ -6686,6 +6683,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 		  != find_pc_function (stop_pc)))))
     {
       CORE_ADDR real_stop_pc;
+      struct frame_info *frame = get_current_frame ();
+      struct gdbarch *gdbarch = get_frame_arch (frame);
 
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into subroutine\n");
@@ -6848,6 +6847,9 @@ process_event_stop_test (struct execution_control_state *ecs)
   if (execution_direction == EXEC_REVERSE
       && ecs->event_thread->control.step_over_calls != STEP_OVER_NONE)
     {
+      struct frame_info *frame = get_current_frame ();
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+
       if (gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc)
 	  || (ecs->stop_func_start == 0
 	      && in_solib_dynsym_resolve_code (stop_pc)))
@@ -6886,6 +6888,9 @@ process_event_stop_test (struct execution_control_state *ecs)
       && ecs->stop_func_name == NULL
       && stop_pc_sal.line == 0)
     {
+      struct frame_info *frame = get_current_frame ();
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog,
 			     "infrun: stepped into undebuggable function\n");
@@ -7030,7 +7035,12 @@ process_event_stop_test (struct execution_control_state *ecs)
   ecs->event_thread->control.step_range_start = stop_pc_sal.pc;
   ecs->event_thread->control.step_range_end = stop_pc_sal.end;
   ecs->event_thread->control.may_range_step = 1;
-  set_step_info (frame, stop_pc_sal);
+
+  {
+      struct frame_info *frame = get_current_frame ();
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      set_step_info (frame, stop_pc_sal);
+  }
 
   if (debug_infrun)
      fprintf_unfiltered (gdb_stdlog, "infrun: keep going\n");
@@ -7691,6 +7701,20 @@ check_exception_resume (struct execution_control_state *ecs,
   END_CATCH
 }
 
+static int
+target_waitkind_has_frames (enum target_waitkind kind)
+{
+  switch (kind)
+    {
+    case TARGET_WAITKIND_SIGNALLED:
+    case TARGET_WAITKIND_EXITED:
+    case TARGET_WAITKIND_NO_RESUMED:
+      return 0;
+    default:
+      return 1;
+    }
+}
+
 static void
 stop_waiting (struct execution_control_state *ecs)
 {
@@ -7706,6 +7730,9 @@ stop_waiting (struct execution_control_state *ecs)
      threads now that we're presenting the stop to the user.  */
   if (!non_stop && target_is_non_stop_p ())
     stop_all_threads ();
+
+  if (target_waitkind_has_frames (ecs->ws.kind))
+    skip_inline_frames (ecs->ptid);
 }
 
 /* Like keep_going, but passes the signal to the inferior, even if the

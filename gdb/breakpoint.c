@@ -5815,8 +5815,7 @@ handle_jit_event (void)
      breakpoint_re_set.  */
   target_terminal_ours_for_output ();
 
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
+  gdbarch = get_regcache_arch (get_current_regcache ());
 
   jit_event_handler (gdbarch);
 

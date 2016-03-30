@@ -309,6 +309,9 @@ skip_inline_frames (ptid_t ptid)
   int skip_count = 0;
   struct inline_state *state;
 
+  if (find_inline_frame_state (ptid) != NULL)
+    return;
+
   /* This function is called right after reinitializing the frame
      cache.  We try not to do more unwinding than absolutely
      necessary, for performance.  */
