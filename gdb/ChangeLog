@@ -23,11 +23,6 @@
 
 	* gdb/value.c (value_actual_type): Fix formatting issue.
 
-2016-03-24  Yao Qi  <yao.qi@linaro.org>
-
-	* gdb.reverse/break-reverse.exp: Add quotation mark in the
-	test message.
-
 2016-03-23  Yao Qi  <yao.qi@linaro.org>
 
 	* gdbarch.sh (software_single_step): Remove comments.
@@ -346,10 +341,6 @@
 
 	* top.c (window_hook): Delete.
 	(command_loop): Remove references to window_hook.
-
-2016-03-09  Pedro Alves  <palves@redhat.com>
-
-	* gdb.base/command-line-input.exp: New file.
 
 2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
 
