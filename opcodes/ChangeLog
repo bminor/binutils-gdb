@@ -1,3 +1,7 @@
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add dctcp, dcip, dcet, and dcacl instructions.
+
 2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in: Regenerated with automake 1.11.6.

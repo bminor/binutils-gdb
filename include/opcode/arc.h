@@ -47,6 +47,8 @@ typedef enum
     LOGICAL,
     MEMORY,
     BITOP,
+    NET,
+    ACL,
   } insn_class_t;
 
 /* Instruction Subclass.  */

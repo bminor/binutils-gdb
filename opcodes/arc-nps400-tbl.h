@@ -124,6 +124,25 @@
 /* crc32<.r> 0,limm,u6		00111 110 01 110100 R 111 uuuuuu 111110 */
 { "crc32", 0x3e74703e, 0xffff703f, ARC_OPCODE_NPS400, BITOP, NONE, { ZA, LIMM, UIMM6_20 }, { C_NPS_R }},
 
+/****                  Protocol Decoder Instructions                  ****/
+
+/* dctcp b,c  00111bbb001011110bbbcccccc000000 */
+{ "dctcp", 0x382f0000, 0xf8ff803f, ARC_OPCODE_NPS400, NET, NONE, { RB, RC }, { 0 }},
+
+/* dcip a,b,c  00111bbb001011110bbbccccccaaaaaa */
+{ "dcip", 0x38290000, 0xf8ff8000, ARC_OPCODE_NPS400, NET, NONE, { RA, RB, RC }, { 0 }},
+
+/* dcet b,c  00111bbb001011110bbbcccccc000010 */
+{ "dcet", 0x382f0002, 0xf8ff803f, ARC_OPCODE_NPS400, NET, NONE, { RB, RC }, { 0 }},
+
+/* dcet a,b,c  00111bbb001000000bbbccccccaaaaaa */
+{ "dcet", 0x38200000, 0xf8ff8000, ARC_OPCODE_NPS400, NET, NONE, { RA, RB, RC }, { 0 }},
+
+/****                        ACL Instructions                         ****/
+
+/* dcacl<.f> a,b,c  00111bbb001001010bbbccccccaaaaaa */
+{ "dcacl", 0x38250000, 0xf8ff0000, ARC_OPCODE_NPS400, ACL, NONE, { RA, RB, RC }, { C_F }},
+
 /****                  Pipeline Control Instructions                  ****/
 
 /* schd<.rw|.rd> */
