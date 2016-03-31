@@ -51,6 +51,11 @@ maint info line-table REGEXP
   target rockhopper	NEC RockHopper variant of PMON
   target lsi		LSI variant of PMO
 
+* Support for tracepoints and fast tracepoints on powerpc-linux,
+  powerpc64-linux, and powerpc64le-linux was added in GDBserver,
+  including JIT compiling fast tracepoint's conditional expression
+  bytecode into native code.
+
 *** Changes in GDB 7.11
 
 * GDB now supports debugging kernel-based threads on FreeBSD.
