@@ -49,7 +49,13 @@
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
 #endif
 
-/* Locals variables.  */
+/* Convert between addresses in bytes and sizes in octets.
+   For currently supported targets, octets_per_byte is always a power
+   of two, so we can use shifts.  */
+#define TO_ADDR(X) ((X) >> opb_shift)
+#define TO_SIZE(X) ((X) << opb_shift)
+
+/* Local variables.  */
 static struct obstack stat_obstack;
 static struct obstack map_obstack;
 
@@ -68,6 +74,7 @@ static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
 static struct unique_sections *unique_section_list;
 static struct asneeded_minfo *asneeded_list_head;
+static unsigned int opb_shift = 0;
 static bfd_boolean maybe_overlays = FALSE;
 
 /* Forward declarations.  */
@@ -1887,7 +1894,7 @@ lang_insert_orphan (asection *s,
 	 before sizing dynamic sections.  */
       dot = os->bfd_section->vma;
       exp_fold_tree (start_assign->exp, os->bfd_section, &dot);
-      dot += s->size;
+      dot += TO_ADDR (s->size);
       exp_fold_tree (stop_assign->exp, os->bfd_section, &dot);
     }
 
@@ -3209,15 +3216,6 @@ ldlang_open_output (lang_statement_union_type *statement)
     }
 }
 
-/* Convert between addresses in bytes and sizes in octets.
-   For currently supported targets, octets_per_byte is always a power
-   of two, so we can use shifts.  */
-#define TO_ADDR(X) ((X) >> opb_shift)
-#define TO_SIZE(X) ((X) << opb_shift)
-
-/* Support the above.  */
-static unsigned int opb_shift = 0;
-
 static void
 init_opb (void)
 {
@@ -4225,7 +4223,7 @@ print_input_section (asection *i, bfd_boolean is_discarded)
 	size = 0;
     }
 
-  minfo ("0x%V %W %B\n", addr, TO_ADDR (size), i->owner);
+  minfo ("0x%V %W %B\n", addr, size, i->owner);
 
   if (size != i->rawsize && i->rawsize != 0)
     {
@@ -5132,7 +5130,7 @@ lang_size_sections_1
 		    /* If this is an overlay, set the current lma to that
 		       at the end of the previous section.  */
 		    if (os->sectype == overlay_section)
-		      lma = last->lma + last->size;
+		      lma = last->lma + TO_ADDR (last->size);
 
 		    /* Otherwise, keep the same lma to vma relationship
 		       as the previous section.  */
@@ -5524,7 +5522,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 
 	    end = start = sec->vma;
 	    if (!IS_TBSS (sec))
-	      end += sec->size;
+	      end += TO_ADDR (sec->size);
 	    bump = desired_end - end;
 	    /* We'd like to increase START by BUMP, but we must heed
 	       alignment so the increase might be less than optimum.  */

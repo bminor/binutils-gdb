@@ -1,3 +1,12 @@
+2016-03-31  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (TO_ADDR, TO_SIZE, opb_shift): Move earlier in file.
+	(lang_insert_orphan): Use TO_ADDR in __stop sym calculation.
+	(print_input_section): Don't use TO_ADDR when printing section
+	size.
+	(lang_size_sections_1): Use TO_ADDR in overlay lma calculation.
+	(lang_size_sections): Use TO_ADDR in relro end calculation.
+
 2016-03-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/lib/ld-lib.exp (run_dump_test): Fix check of return
