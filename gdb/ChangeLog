@@ -1,3 +1,12 @@
+2016-03-31  Yichao Yu  <yyc1992@gmail.com>
+
+	PR gdb/19858
+	* jit.c (jit_breakpoint_re_set_internal): Return 0 if we already
+	got the breakpoint at the right address.
+	(jit_inferior_created): New function.
+	(_initialize_jit): Install jit_inferior_created as
+	inferior_created observer.
+
 2016-03-31  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* NEWS: Mention support for tracepoints on powerpc*-linux.
