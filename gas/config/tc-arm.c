@@ -10971,7 +10971,7 @@ do_t_branch (void)
 {
   int opcode;
   int cond;
-  int reloc;
+  bfd_reloc_code_real_type reloc;
 
   cond = inst.cond;
   set_it_insn_type (IF_INSIDE_IT_LAST_INSN);

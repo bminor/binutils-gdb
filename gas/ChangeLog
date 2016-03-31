@@ -1,5 +1,10 @@
 2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-arm.c (do_t_branch): Change the type of reloc to
+	bfd_reloc_code_real_type.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/bfin-parse.y (current_inputline): Remove definition.
 	* config/tc-bfin.c (md_assemble): Simplify use of current_inputline.
 
