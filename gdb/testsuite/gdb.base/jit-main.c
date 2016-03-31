@@ -27,6 +27,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 /* ElfW is coming from linux. On other platforms it does not exist.
    Let us define it here. */
@@ -116,9 +117,21 @@ update_locations (const void *const addr, int idx)
     }
 }
 
+/* Defined by the .exp file if testing attach.  */
+#ifndef ATTACH
+#define ATTACH 0
+#endif
+
 #ifndef MAIN
 #define MAIN main
 #endif
+
+/* Used to spin waiting for GDB.  */
+volatile int wait_for_gdb = ATTACH;
+#define WAIT_FOR_GDB while (wait_for_gdb)
+
+/* The current process's PID.  GDB retrieves this.  */
+int mypid;
 
 int
 MAIN (int argc, char *argv[])
@@ -126,6 +139,10 @@ MAIN (int argc, char *argv[])
   /* These variables are here so they can easily be set from jit.exp.  */
   const char *libname = NULL;
   int count = 0;
+
+  alarm (300);
+
+  mypid = getpid ();
 
   count = count;  /* gdb break here 0  */
 
@@ -190,7 +207,7 @@ MAIN (int argc, char *argv[])
           __jit_debug_register_code ();
         }
 
-      i = 0;  /* gdb break here 1 */
+      WAIT_FOR_GDB; i = 0;  /* gdb break here 1 */
 
       /* Now unregister them all in reverse order.  */
       while (__jit_debug_descriptor.relevant_entry != NULL)
@@ -215,5 +232,5 @@ MAIN (int argc, char *argv[])
           free (entry);
         }
     }
-  return 0;  /* gdb break here 2  */
+  WAIT_FOR_GDB; return 0;  /* gdb break here 2  */
 }

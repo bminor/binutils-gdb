@@ -1,6 +1,21 @@
 2016-03-31  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19858
+	* gdb.base/jit-main.c: Include unistd.h.
+	(ATTACH): Define to 0 if not already defined.
+	(wait_for_gdb, mypid): New globals.
+	(WAIT_FOR_GDB): New macro.
+	(MAIN): Set an alarm.  Store the process's pid.  Wait for GDB at
+	some breakpoint locations.
+	* gdb.base/jit.exp (clean_reattach, continue_to_test_location):
+	New procedures.
+	(one_jit_test): Add REATTACH parameter, and handle it.  Use
+	continue_to_test_location.
+	(top level): Test attach, and adjusts calls to one_jit_test.
+
+2016-03-31  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19858
 	* gdb.base/jit.exp (compile_jit_test): Add intro comment.  Add
 	BINSUFFIX parameter, and handle it.
 	(top level): Adjust calls compile_jit_test.
