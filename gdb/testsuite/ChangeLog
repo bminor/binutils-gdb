@@ -1,3 +1,10 @@
+2016-03-31  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19858
+	* gdb.base/jit.exp (compile_jit_test): Add intro comment.  Add
+	BINSUFFIX parameter, and handle it.
+	(top level): Adjust calls compile_jit_test.
+
 2016-03-31  Catalin Udma  <catalin.udma@freescale.com>
 
 	PR python/19743
