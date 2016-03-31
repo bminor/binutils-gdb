@@ -1611,6 +1611,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 			     from BKTOK.  */
 			  tok[tokidx].X_op = O_constant;
 			  tok[tokidx].X_add_number = auxr->address;
+			  ARC_SET_FLAG (tok[i].X_add_symbol, ARC_FLAG_AUX);
 			  break;
 			}
 
@@ -3856,4 +3857,23 @@ tc_arc_regname_to_dw2regnum (char *regname)
     return S_GET_VALUE (sym);
 
   return -1;
+}
+
+/* Adjust the symbol table.  Delete found AUX register symbols.  */
+
+void
+arc_adjust_symtab (void)
+{
+  symbolS * sym;
+
+  for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
+    {
+      /* I've created a symbol during parsing process.  Now, remove
+	 the symbol as it is found to be an AUX register.  */
+      if (ARC_GET_FLAG (sym) & ARC_FLAG_AUX)
+	symbol_remove (sym, &symbol_rootP, &symbol_lastP);
+    }
+
+  /* Now do generic ELF adjustments.  */
+  elf_adjust_symtab ();
 }

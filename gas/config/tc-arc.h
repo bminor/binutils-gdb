@@ -163,6 +163,8 @@ extern long md_pcrel_from_section (struct fix *, segT);
 
 /* The symbol is a ZOL's end loop label.  */
 #define ARC_FLAG_ZOL      (1 << 0)
+/* The symbol is an AUX register.  */
+#define ARC_FLAG_AUX      (1 << 1)
 
 /* We use this hook to check the validity of the last to instructions
    of a ZOL.  */
@@ -185,6 +187,10 @@ extern long md_pcrel_from_section (struct fix *, segT);
 /* Adjust non PC-rel values at relaxation time.  */
 #define TC_PCREL_ADJUST(F) arc_pcrel_adjust (F)
 
+/* Adjust symbol table.  */
+#define obj_adjust_symtab() arc_adjust_symtab ()
+
+extern void arc_adjust_symtab (void);
 extern int arc_pcrel_adjust (fragS *);
 extern bfd_boolean arc_parse_name (const char *, struct expressionS *);
 extern int tc_arc_fix_adjustable (struct fix *);

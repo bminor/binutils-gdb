@@ -1,3 +1,12 @@
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (preprocess_operands): Mark AUX symbol.
+	(arc_adjust_symtab): New function.
+	* config/tc-arc.h (ARC_FLAG_AUX): Define.
+	(obj_adjust_symtab): Likewise.
+	* testsuite/gas/arc/taux.d: New file.
+	* testsuite/gas/arc/taux.s: Likewise.
+
 2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (s_option): Sanitize `.option picX'
