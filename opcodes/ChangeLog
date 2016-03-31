@@ -1,4 +1,4 @@
-2016-03-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+2016-03-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-opc.c (arc_operands): Fix operand flags for NPS_R_DST, and
 	NPS_R_SRC1.
