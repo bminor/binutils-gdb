@@ -1,3 +1,9 @@
+2016-03-31  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (M32R/SDI): Delete node.
+	(MIPS Embedded): Remove references to the MIPS remote debugging
+	protocol, PMON and variants, and the associated commands.
+
 2016-03-15  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Target Descriptions): New menu item "Enum Target Types".

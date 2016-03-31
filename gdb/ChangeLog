@@ -1,3 +1,20 @@
+2016-03-31  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that support for "target m32rsdi", "target mips",
+	"target pmon", "target ddb", "target rockhopper", and "target lsi"
+	was removed.
+	* Makefile.in (ALL_TARGET_OBS): Remove remote-m32r-sdi.o and
+	remote-mips.o.
+	(ALLDEPFILES): Remove remote-m32r-sdi.c and remote-mips.c.
+	* configure.tgt: Remove all references to remote-m32r-sdi.o and
+	remote-mips.o.
+	* mips-tdep.c (deprecated_mips_set_processor_regs_hack): Delete
+	function.
+	* mips-tdep.h (deprecated_mips_set_processor_regs_hack): Delete
+	declaration.
+	* remote-m32r-sdi.c, remote-mips.c: Delete files.
+	* symfile.c (generic_load, generic_load): Remove comments.
+
 2016-03-30  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_epilogue_frame_this_id): Check 'func' against
