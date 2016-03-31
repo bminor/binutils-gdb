@@ -1026,7 +1026,7 @@ jit_breakpoint_deleted (struct breakpoint *b)
 }
 
 /* (Re-)Initialize the jit breakpoint if necessary.
-   Return 0 on success.  */
+   Return 0 if the jit breakpoint has been successfully initialized.  */
 
 static int
 jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
@@ -1070,7 +1070,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
 			paddress (gdbarch, addr));
 
   if (ps_data->cached_code_address == addr)
-    return 1;
+    return 0;
 
   /* Delete the old breakpoint.  */
   if (ps_data->jit_breakpoint != NULL)
@@ -1367,6 +1367,14 @@ jit_inferior_init (struct gdbarch *gdbarch)
     }
 }
 
+/* inferior_created observer.  */
+
+static void
+jit_inferior_created (struct target_ops *ops, int from_tty)
+{
+  jit_inferior_created_hook ();
+}
+
 /* Exported routine to call when an inferior has been created.  */
 
 void
@@ -1496,6 +1504,7 @@ _initialize_jit (void)
 			     show_jit_debug,
 			     &setdebuglist, &showdebuglist);
 
+  observer_attach_inferior_created (jit_inferior_created);
   observer_attach_inferior_exit (jit_inferior_exit_hook);
   observer_attach_breakpoint_deleted (jit_breakpoint_deleted);
 
