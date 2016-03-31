@@ -24,18 +24,19 @@ if {[get_compiler_info]} {
     return 1
 }
 
-#
-# test running programs
-#
+# Compile the testcase program and library.  BINSUFFIX is the suffix
+# to append to the program and library filenames, to make them unique
+# between invocations.  OPTIONS is passed to gdb_compile when
+# compiling the program.
 
-proc compile_jit_test {testname options} {
+proc compile_jit_test {testname binsuffix options} {
     global testfile srcfile binfile srcdir subdir
     global solib_testfile solib_srcfile solib_binfile solib_binfile_test_msg
     global solib_binfile_target
 
     set testfile jit-main
     set srcfile ${testfile}.c
-    set binfile [standard_output_file $testfile]
+    set binfile [standard_output_file $testfile$binsuffix]
     if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	      executable [concat debug $options]] != "" } {
 	untested $testname
@@ -44,8 +45,8 @@ proc compile_jit_test {testname options} {
 
     set solib_testfile "jit-solib"
     set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
-    set solib_binfile [standard_output_file ${solib_testfile}.so]
-    set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}.so"
+    set solib_binfile [standard_output_file ${solib_testfile}$binsuffix.so]
+    set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}$binsuffix.so"
 
     # Note: compiling without debug info: the library goes through
     # symbol renaming by munging on its symbol table, and that
@@ -109,7 +110,7 @@ proc one_jit_test {count match_str} {
     }
 }
 
-if {[compile_jit_test jit.exp {}] < 0} {
+if {[compile_jit_test jit.exp "" {}] < 0} {
     return
 }
 one_jit_test 1 "${hex}  jit_function_0000"
@@ -117,7 +118,7 @@ one_jit_test 2 "${hex}  jit_function_0000\[\r\n\]+${hex}  jit_function_0001"
 
 with_test_prefix PIE {
     if {[compile_jit_test "jit.exp PIE tests" \
-	     {additional_flags=-fPIE ldflags=-pie}] < 0} {
+	     "-pie" {additional_flags=-fPIE ldflags=-pie}] < 0} {
 	return
     }
 
