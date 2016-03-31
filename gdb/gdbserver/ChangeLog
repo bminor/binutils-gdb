@@ -1,3 +1,12 @@
+2016-03-31  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (gdb_collect_ptr): Remove const qualifier.
+	(get_raw_reg_ptr): Likewise.
+	(get_trace_state_variable_value_ptr): Likewise.
+	(set_trace_state_variable_value_ptr): Likewise.
+	(initialize_tracepoint): Cast alloc_jump_pad_buffer result to
+	char *.
+
 2016-03-31  Wei-cheng Wang  <cole945@gmail.com>
 	    Marcin Kościelnicki  <koriakin@0x04.net>
 

@@ -5903,11 +5903,11 @@ typedef LONGEST (*get_trace_state_variable_value_ptr_type) (int);
 typedef void (*set_trace_state_variable_value_ptr_type) (int, LONGEST);
 
 EXTERN_C_PUSH
-IP_AGENT_EXPORT_VAR const gdb_collect_ptr_type gdb_collect_ptr = gdb_collect;
-IP_AGENT_EXPORT_VAR const get_raw_reg_ptr_type get_raw_reg_ptr = get_raw_reg;
-IP_AGENT_EXPORT_VAR const get_trace_state_variable_value_ptr_type
+IP_AGENT_EXPORT_VAR gdb_collect_ptr_type gdb_collect_ptr = gdb_collect;
+IP_AGENT_EXPORT_VAR get_raw_reg_ptr_type get_raw_reg_ptr = get_raw_reg;
+IP_AGENT_EXPORT_VAR get_trace_state_variable_value_ptr_type
   get_trace_state_variable_value_ptr = get_trace_state_variable_value;
-IP_AGENT_EXPORT_VAR const set_trace_state_variable_value_ptr_type
+IP_AGENT_EXPORT_VAR set_trace_state_variable_value_ptr_type
   set_trace_state_variable_value_ptr = set_trace_state_variable_value;
 EXTERN_C_POP
 
@@ -7440,7 +7440,7 @@ initialize_tracepoint (void)
     jump_pad_size = pagesize * SCRATCH_BUFFER_NPAGES;
 
     gdb_tp_heap_buffer = (char *) xmalloc (5 * 1024 * 1024);
-    gdb_jump_pad_buffer = alloc_jump_pad_buffer (jump_pad_size);
+    gdb_jump_pad_buffer = (char *) alloc_jump_pad_buffer (jump_pad_size);
     if (gdb_jump_pad_buffer == NULL)
       perror_with_name ("mmap");
     gdb_jump_pad_buffer_end = gdb_jump_pad_buffer + jump_pad_size;
