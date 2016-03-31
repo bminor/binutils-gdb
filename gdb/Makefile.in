@@ -1360,6 +1360,7 @@ init.c: $(INIT_FILES)
 	    -e '/version.[co]$$/d' \
 	    -e '/^[a-z0-9A-Z_]*_[SU].[co]$$/d' \
 	    -e '/[a-z0-9A-Z_]*-exp.tab.[co]$$/d' \
+	    -e 's/-exp\.o$$/-exp.y/' \
 	    -e 's/\.[co]$$/.c/' \
 	    -e 's,signals\.c,common/signals\.c,' \
 	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
