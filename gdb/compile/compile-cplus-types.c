@@ -896,7 +896,6 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 
 	  CPOPS ("new_field %s, gcc_type = %lld\n", field_name, field_type);
 	  CPCALL (new_field, context,
-		  comp_type,
 		  field_name,
 		  field_type,
 		  bitsize,
@@ -1533,7 +1532,7 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
 
   /* All finished.  */
   CPOPS ("finish_record_or_union %s (%lld)\n", name, result);
-  CPCALL (finish_record_or_union, context, result, TYPE_LENGTH (type));
+  CPCALL (finish_record_or_union, context, TYPE_LENGTH (type));
 
   /* Pop all scopes.  */
   if (need_new_context)

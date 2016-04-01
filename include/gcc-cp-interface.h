@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-4
+  GCC_CP_FE_VERSION_0 = 0xffffffff-5
 };
 
 /* Qualifiers.  */
@@ -79,6 +79,52 @@ struct gcc_vbase_array
   char /* bool */ *virtualp;
 };
 
+/* Opaque typedef for type declarations.  They are used for template
+   arguments, defaults for type template parameters, and types used to
+   build type-conversion expressions.  */
+
+typedef unsigned long long gcc_typedecl;
+
+/* Opaque typedef for unbound class templates.  They are used for
+   template arguments, and defaults for template template
+   parameters.  */
+
+typedef unsigned long long gcc_utempl;
+
+/* Opaque typedef for expressions.  They are used for template
+   arguments, defaults for non-type template parameters, and defaults
+   for function arguments.  */
+
+typedef unsigned long long gcc_expr;
+
+/* FIXME: do we need to support argument packs?  */
+
+typedef enum
+  { GCC_CP_TPARG_VALUE, GCC_CP_TPARG_CLASS,
+    GCC_CP_TPARG_TEMPL, GCC_CP_TPARG_PACK }
+gcc_cp_template_arg_kind;
+
+typedef union
+{ gcc_expr value; gcc_typedecl type; gcc_utempl templ; gcc_typedecl pack; }
+gcc_cp_template_arg;
+
+/* An array of template arguments.  */
+
+struct gcc_cp_template_args
+{
+  /* Number of elements.  */
+
+  int n_elements;
+
+  /* kind[i] indicates what kind of template argument type[i] is.  */
+
+  char /* gcc_cp_template_arg_kind */ *kinds;
+
+  /* The template arguments.  */
+
+  gcc_cp_template_arg *elements;
+};
+
 /* This enumerates the kinds of decls that GDB can create.  */
 
 enum gcc_cp_symbol_kind
@@ -98,6 +144,11 @@ enum gcc_cp_symbol_kind
   /* A label.  */
 
   GCC_CP_SYMBOL_LABEL,
+
+  /* A class, or, in a template parameter list scope, a declaration of
+     a template class, closing the parameter list.  */
+
+  GCC_CP_SYMBOL_CLASS,
 
   GCC_CP_SYMBOL_MASK = 15,
   GCC_CP_FLAG_BASE,

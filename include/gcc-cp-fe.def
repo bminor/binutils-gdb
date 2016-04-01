@@ -204,6 +204,203 @@ GCC_METHOD2 (gcc_type, build_pointer_to_member_type,
 	     gcc_type,			   /* Argument CLASS_TYPE.  */
 	     gcc_type) 			   /* Argument MEMBER_TYPE.  */
 
+/* Start a template parameter list, so that subsequent
+   build_template_typename_parm and build_template_value_parm calls
+   create template parameters in the list.  The list is closed by a
+   new_decl call with GCC_CP_SYMBOL_FUNCTION or GCC_CP_SYMBOL_CLASS,
+   that, when the scope is a template parameter list, closes the
+   parameter list and declares a template function or a template class
+   with the parameter list.  */
+
+GCC_METHOD0 (int, start_new_template_decl)
+
+/* Return the declaration associated with the named type.  It is the
+   declaration, rather than the type proper, that has to be passed as
+   a template parameter.  */
+
+GCC_METHOD1 (gcc_typedecl, type_decl,
+	     gcc_type)            /* Argument TYPE.  */
+
+/* Build a typename template-parameter (e.g., the T in template
+   <typename T = X>).  Either PACK_P should be nonzero, to indicate an
+   argument pack (the last argument in a variadic template argument
+   list, as in template <typename... T>), or DEFAULT_TYPE may be
+   non-NULL to set the default type argument (e.g. X) for the template
+   parameter.  FILENAME and LINE_NUMBER may specify the source
+   location in which the template parameter was declared.  */
+
+GCC_METHOD5 (gcc_typedecl, new_template_typename_parm,
+	     const char *,			      /* Argument ID.  */
+	     int /* bool */,			  /* Argument PACK_P.  */
+	     gcc_typedecl,		    /* Argument DEFAULT_TYPE.  */
+	     const char *,			/* Argument FILENAME.  */
+	     unsigned int)		     /* Argument LINE_NUMBER.  */
+
+/* Build a template template-parameter (e.g., the T in template
+   <template <[...]> class T = X>).  DEFAULT_TEMPL may be non-NULL to
+   set the default type-template argument (e.g. X) for the template
+   template parameter.  FILENAME and LINE_NUMBER may specify the
+   source location in which the template parameter was declared.  */
+
+GCC_METHOD5 (gcc_utempl, new_template_template_parm,
+	     const char *,			      /* Argument ID.  */
+	     int /* bool */,			  /* Argument PACK_P.  */
+	     gcc_utempl,		   /* Argument DEFAULT_TEMPL.  */
+	     const char *,			/* Argument FILENAME.  */
+	     unsigned int)		     /* Argument LINE_NUMBER.  */
+
+/* Build a value template-parameter (e.g., the V in template <typename
+   T, T V> or in template <int V = X>).  DEFAULT_VALUE may be non-NULL
+   to set the default value argument for the template parameter (e.g.,
+   X).  FILENAME and LINE_NUMBER may specify the source location in
+   which the template parameter was declared.  */
+
+GCC_METHOD5 (gcc_decl, new_template_value_parm,
+	     gcc_typedecl,		  	    /* Argument TYPE.  */
+	     const char *,			      /* Argument ID.  */
+	     gcc_expr,			   /* Argument DEFAULT_VALUE.  */
+	     const char *,			/* Argument FILENAME.  */
+	     unsigned int)		     /* Argument LINE_NUMBER.  */
+
+/* Build a template-dependent typename (e.g., typename T::bar or
+   typename T::template bart<X>).  ENCLOSING_TYPE should be the
+   template-dependent nested name specifier (e.g., T), ID should be
+   the name of the member of the ENCLOSING_TYPE (e.g., bar or bart),
+   and TARGS should be non-NULL and specify the template arguments
+   (e.g. <X>) iff ID is to name a class template.
+
+   In this and other calls, a template-dependent nested name specifier
+   may be a template class parameter (new_template_typename_parm), a
+   specialization (returned by new_dependent_typespec) of a template
+   template parameter (returned by new_template_template_parm) or a
+   member type thereof (returned by new_dependent_typename
+   itself).  */
+
+GCC_METHOD3 (gcc_typedecl, new_dependent_typename,
+	     gcc_typedecl,		  /* Argument ENCLOSING_TYPE.  */
+	     const char *,			      /* Argument ID.  */
+	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
+
+/* Build a template-dependent class template (e.g., T::template bart).
+   ENCLOSING_TYPE should be the template-dependent nested name
+   specifier (e.g., T), ID should be the name of the class template
+   member of the ENCLOSING_TYPE (e.g., bart).  */
+
+GCC_METHOD2 (gcc_utempl, new_dependent_class_template,
+	     gcc_typedecl,		  /* Argument ENCLOSING_TYPE.  */
+	     const char *)			      /* Argument ID.  */
+
+/* Build a template-dependent template type specialization (e.g.,
+   T<A>).  TEMPLATE_DECL should be a template template parameter
+   (e.g., the T in template <template <[...]> class T = X>), and TARGS
+   should specify the template arguments (e.g. <A>).  */
+
+GCC_METHOD2 (gcc_typedecl, new_dependent_typespec,
+	     gcc_utempl,		   /* Argument TEMPLATE_DECL.  */
+	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
+
+/* Build a template-dependent value expression (e.g., T::val or
+   T::template f<X>).  ENCLOSING_TYPE should be the template-dependent
+   nested name specifier (e.g., T), ID should be the name of the
+   member of the ENCLOSING_TYPE (e.g., val or f), and TARGS should
+   list template arguments (e.g. <X>) when f is to name a template
+   function, or be NULL otherwise.  */
+
+GCC_METHOD3 (gcc_decl, new_dependent_value_expr,
+	     gcc_typedecl,		  /* Argument ENCLOSING_TYPE.  */
+	     const char *,			      /* Argument ID.  */
+	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
+
+/* Build a gcc_expr for the value VALUE in type TYPE.  */
+
+GCC_METHOD2 (gcc_expr, literal_expr,
+	     gcc_type,		  /* Argument TYPE.  */
+	     unsigned long)	  /* Argument VALUE.  */
+
+/* Build a gcc_expr that denotes DECL, the declaration of a variable
+   or function in namespace scope, or of a static member variable or
+   function.  */
+
+GCC_METHOD1 (gcc_expr, decl_expr,
+	     gcc_decl)		  /* Argument DECL.  */
+
+/* Build a gcc_expr that denotes the unary operation UNARY_OP applied
+   to the gcc_expr OPERAND.  */
+
+GCC_METHOD2 (gcc_expr, unary_value_expr,
+	     const char *,	  /* Argument UNARY_OP.  */
+	     gcc_expr)		  /* Argument OPERAND.  */
+
+/* Build a gcc_expr that denotes the binary operation BINARY_OP
+   applied to gcc_exprs OPERAND1 and OPERAND2.  */
+
+GCC_METHOD3 (gcc_expr, binary_value_expr,
+	     const char *,	  /* Argument BINARY_OP.  */
+	     gcc_expr,		  /* Argument OPERAND1.  */
+	     gcc_expr)		  /* Argument OPERAND2.  */
+
+/* Build a gcc_expr that denotes the ternary operation TERNARY_OP
+   applied to gcc_exprs OPERAND1, OPERAND2 and OPERAND3.  */
+
+GCC_METHOD4 (gcc_expr, ternary_value_expr,
+	     const char *,	  /* Argument TERNARY_OP.  */
+	     gcc_expr,		  /* Argument OPERAND1.  */
+	     gcc_expr,		  /* Argument OPERAND2.  */
+	     gcc_expr)		  /* Argument OPERAND3.  */
+
+/* Build a gcc_expr that denotes the unary operation UNARY_OP applied
+   to the gcc_type OPERAND, e.g., sizeof.  */
+
+GCC_METHOD2 (gcc_expr, unary_type_expr,
+	     const char *,	  /* Argument UNARY_OP.  */
+	     gcc_type)		  /* Argument OPERAND.  */
+
+/* Build a gcc_expr that denotes the binary operation BINARY_OP
+   applied to gcc_type OPERAND1 and gcc_expr OPERAND2.  Use this for
+   all kinds of type casts, and to form a pointer-to-member.  */
+
+GCC_METHOD3 (gcc_expr, type_value_expr,
+	     const char *,	  /* Argument BINARY_OP.  */
+	     gcc_type,		  /* Argument OPERAND1.  */
+	     gcc_expr)		  /* Argument OPERAND2.  */
+
+/* FIXME: function call operations?  ctor/dtor?  new/delete?  */
+
+/* Return the type of the gcc_expr OPERAND.
+   Use this for decltype.  */
+
+GCC_METHOD1 (gcc_typedecl, expr_type,
+	     gcc_expr)		  /* Argument OPERAND.  */
+
+/* Introduce a specialization of a template function.
+
+   TEMPLATE_DECL is the template function, and TARGS are the arguments
+   for the specialization.  ADDRESS is the address of the
+   specialization.  FILENAME and LINE_NUMBER specify the source
+   location associated with the template function specialization.  */
+
+GCC_METHOD5 (gcc_decl, specialize_function_template,
+	     gcc_decl,			   /* Argument TEMPLATE_DECL.  */
+	     const struct gcc_cp_template_args *,  /* Argument TARGS.  */
+	     gcc_address,			 /* Argument ADDRESS.  */
+	     const char *,	      /* Argument FILENAME.  */
+	     unsigned int)	      /* Argument LINE_NUMBER.  */
+
+/* Start defining a specialization of a template class, and enter its
+   own binding level.  Initially it has no fields.
+
+   TEMPLATE_DECL is the template class, and TARGS are the arguments
+   for the specialization.  BASE_CLASSES indicate the base classes of
+   class NAME.  FILENAME and LINE_NUMBER specify the source location
+   associated with the template class specialization.  */
+
+GCC_METHOD5 (gcc_type, start_specialize_class_template,
+	     gcc_decl,			   /* Argument TEMPLATE_DECL.  */
+	     const struct gcc_cp_template_args *,  /* Argument TARGS.  */
+	     const struct gcc_vbase_array *,/* Argument BASE_CLASSES.  */
+	     const char *,	      /* Argument FILENAME.  */
+	     unsigned int)	      /* Argument LINE_NUMBER.  */
+
 /* Create a new 'class' (or 'struct') type, record it in the current
    binding level, and enter its own binding level.  Initially it has
    no fields.
@@ -232,14 +429,14 @@ GCC_METHOD3 (gcc_type, start_new_union_type,
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
-/* Add a non-static data member to a struct or union type.  FIELD_NAME
-   is the field's name.  FIELD_TYPE is the type of the field.  BITSIZE
-   and BITPOS indicate where in the struct the field occurs.
+/* Add a non-static data member to the most-recently-started
+   unfinished struct or union type.  FIELD_NAME is the field's name.
+   FIELD_TYPE is the type of the field.  BITSIZE and BITPOS indicate
+   where in the struct the field occurs.
 
    FIXME: how about mutable data members?  */
 
-GCC_METHOD5 (int /* bool */, new_field,
-	     gcc_type,			   /* Argument RECORD_OR_UNION_TYPE. */
+GCC_METHOD4 (int /* bool */, new_field,
 	     const char *,		   /* Argument FIELD_NAME.  */
 	     gcc_type,			   /* Argument FIELD_TYPE.  */
 	     unsigned long,		   /* Argument BITSIZE.  */
@@ -250,8 +447,7 @@ GCC_METHOD5 (int /* bool */, new_field,
    cleanups in GCC, and pops to the binding level that was in effect
    before the matching build_class_type or build_union_type.  */
 
-GCC_METHOD2 (int /* bool */, finish_record_or_union,
-	     gcc_type,			   /* Argument RECORD_OR_UNION_TYPE. */
+GCC_METHOD1 (int /* bool */, finish_record_or_union,
 	     unsigned long)		   /* Argument SIZE_IN_BYTES.  */
 
 /* Create a new 'enum' type, and record it in the current binding
@@ -267,8 +463,8 @@ GCC_METHOD5 (gcc_type, start_new_enum_type,
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
-/* Add a new constant to an enum type.  NAME is the constant's
-   name and VALUE is its value.  */
+/* Add a new constant to an enum type.  NAME is the constant's name
+   and VALUE is its value.  */
 
 GCC_METHOD3 (int /* bool */, build_add_enum_constant,
 	     gcc_type,		       /* Argument ENUM_TYPE.  */
@@ -351,6 +547,13 @@ GCC_METHOD0 (gcc_type, bool_type)
 GCC_METHOD2 (gcc_type, build_array_type,
 	     gcc_type,			  /* Argument ELEMENT_TYPE.  */
 	     int)			  /* Argument NUM_ELEMENTS.  */
+
+/* Create a new array type.  NUM_ELEMENTS is a template-dependent
+   expression.  */
+
+GCC_METHOD2 (gcc_type, build_dependent_array_type,
+	     gcc_type,			  /* Argument ELEMENT_TYPE.  */
+	     gcc_expr)			  /* Argument NUM_ELEMENTS.  */
 
 /* Create a new variably-sized array type.  UPPER_BOUND_NAME is the
    name of a local variable that holds the upper bound of the array;
