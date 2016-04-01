@@ -1,5 +1,9 @@
 2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* opcode/arc.h (MAX_INSN_ARGS): Increase 6 to 8.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* opcode/arc.h (insn_class_t): Add NET and ACL class.
 
 2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>

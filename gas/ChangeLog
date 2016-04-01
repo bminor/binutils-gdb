@@ -1,5 +1,10 @@
 2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/gas/arc/nps400-6.d: New file.
+	* testsuite/gas/arc/nps400-6.s: New file.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/gas/arc/nps400-4.d: New file.
 	* testsuite/gas/arc/nps400-4.s: New file.
 	* testsuite/gas/arc/nps400-5.d: New file.

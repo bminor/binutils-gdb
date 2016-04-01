@@ -25,7 +25,7 @@
 #define OPCODE_ARC_H
 
 #ifndef MAX_INSN_ARGS
-#define MAX_INSN_ARGS	     6
+#define MAX_INSN_ARGS	     8
 #endif
 
 #ifndef MAX_INSN_FLGS
