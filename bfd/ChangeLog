@@ -1,3 +1,9 @@
+2016-04-01  Alan Modra  <amodra@gmail.com>
+
+	PR 19886
+	* elflink.c (on_needed_list): Recursively check needed status.
+	(elf_link_add_object_symbols): Adjust.
+
 2016-03-30  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* elf32-avr.c (avr_elf32_load_records_from_section): Free
