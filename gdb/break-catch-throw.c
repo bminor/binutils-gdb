@@ -212,7 +212,12 @@ re_set_exception_catchpoint (struct breakpoint *self,
   struct cleanup *cleanup;
   enum exception_event_kind kind = classify_exception_breakpoint (self);
   struct event_location *location;
+  struct sym_search_scope pspace_scope = null_search_scope ();
   struct program_space *filter_pspace = search_scope->pspace;
+
+  /* Re-set in the whole pspace for now.  */
+  pspace_scope.pspace = search_scope->pspace;
+  search_scope = &pspace_scope;
 
   /* We first try to use the probe interface.  */
   TRY
@@ -236,7 +241,7 @@ re_set_exception_catchpoint (struct breakpoint *self,
 	    = ASTRDUP (exception_functions[kind].function);
 	  location = new_explicit_location (&explicit_loc);
 	  cleanup = make_cleanup_delete_event_location (location);
-	  self->ops->decode_location (self, location, filter_pspace, &sals);
+	  self->ops->decode_location (self, location, search_scope, &sals);
 	  do_cleanups (cleanup);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
@@ -251,7 +256,7 @@ re_set_exception_catchpoint (struct breakpoint *self,
   END_CATCH
 
   cleanup = make_cleanup (xfree, sals.sals);
-  update_breakpoint_locations (self, filter_pspace, sals, sals_end);
+  update_breakpoint_locations (self, search_scope, sals, sals_end);
   do_cleanups (cleanup);
 }
 

@@ -963,6 +963,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   CORE_ADDR resolved_address, resolved_pc;
   struct symtab_and_line sal;
   struct symtabs_and_lines sals, sals_end;
+  struct sym_search_scope search_scope = null_search_scope ();
 
   gdb_assert (b->type == bp_gnu_ifunc_resolver_return);
 
@@ -1010,7 +1011,8 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   sals_end.nelts = 0;
 
   b->type = bp_breakpoint;
-  update_breakpoint_locations (b, current_program_space, sals, sals_end);
+  search_scope.pspace = current_program_space;
+  update_breakpoint_locations (b, &search_scope, sals, sals_end);
 }
 
 /* A helper function for elf_symfile_read that reads the minimal

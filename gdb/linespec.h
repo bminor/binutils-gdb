@@ -97,7 +97,7 @@ extern struct cleanup *
 
 extern struct symtabs_and_lines
 	decode_line_1 (const struct event_location *location, int flags,
-		       struct program_space *search_pspace,
+		       struct sym_search_scope *search_scope,
 		       struct symtab *default_symtab, int default_line);
 
 /* Parse LOCATION and return results.  This is the "full"
@@ -140,7 +140,7 @@ extern struct symtabs_and_lines
    filtered out.  */
 
 extern void decode_line_full (const struct event_location *location, int flags,
-			      struct program_space *search_pspace,
+			      struct sym_search_scope *search_scope,
 			      struct symtab *default_symtab, int default_line,
 			      struct linespec_result *canonical,
 			      const char *select_mode,

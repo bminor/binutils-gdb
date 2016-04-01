@@ -624,7 +624,7 @@ struct breakpoint_ops
      This function is called inside `location_to_sals'.  */
   void (*decode_location) (struct breakpoint *b,
 			   const struct event_location *location,
-			   struct program_space *search_pspace,
+			   struct sym_search_scope *search_scope,
 			   struct symtabs_and_lines *sals);
 
   /* Return true if this breakpoint explains a signal.  See
@@ -1219,7 +1219,7 @@ extern void init_bp_location (struct bp_location *loc,
 			      struct breakpoint *owner);
 
 extern void update_breakpoint_locations (struct breakpoint *b,
-					 struct program_space *filter_pspace,
+					 struct sym_search_scope *search_scope,
 					 struct symtabs_and_lines sals,
 					 struct symtabs_and_lines sals_end);
 

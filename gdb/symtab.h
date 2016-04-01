@@ -1453,6 +1453,11 @@ struct symtab_and_line
   /* XXX If PROBE is not NULL, then this is the objfile in which the probe
      originated.  */
   struct objfile *objfile;
+
+  /* If this SAL originated from a minsym, this is it.  */
+  struct minimal_symbol *msymbol;
+  /* If this SAL originated from a symbol, this is it.  */
+  struct symbol *symbol;
 };
 
 extern void init_sal (struct symtab_and_line *sal);
@@ -1663,5 +1668,8 @@ struct symbol *allocate_symbol (struct objfile *);
 void initialize_objfile_symbol (struct symbol *);
 
 struct template_symbol *allocate_template_symbol (struct objfile *);
+
+void validate_sals (struct symtabs_and_lines *result,
+		    struct sym_search_scope *search_scope);
 
 #endif /* !defined(SYMTAB_H) */

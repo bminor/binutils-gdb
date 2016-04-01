@@ -12368,7 +12368,9 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
 
   /* Iterate over all the catchpoint's locations, and parse an
      expression for each.  */
-  for (bl = c->base.loc; bl != NULL; bl = bl->next)
+  for (bl = c->base.loc;
+       bl != NULL && bp_location_matches_search_scope (bl, search_scope);
+       bl = bl->next)
     {
       struct ada_catchpoint_location *ada_loc
 	= (struct ada_catchpoint_location *) bl;

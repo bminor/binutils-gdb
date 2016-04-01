@@ -126,7 +126,7 @@ static void create_breakpoints_sal_default (struct gdbarch *,
 
 static void decode_location_default (struct breakpoint *b,
 				     const struct event_location *location,
-				     struct program_space *search_pspace,
+				     struct sym_search_scope *search_scope,
 				     struct symtabs_and_lines *sals);
 
 static void clear_command (char *, int);
@@ -13051,7 +13051,7 @@ base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 base_breakpoint_decode_location (struct breakpoint *b,
 				 const struct event_location *location,
-				 struct program_space *filter_pspace,
+				 struct sym_search_scope *search_scope,
 				 struct symtabs_and_lines *sals)
 {
   internal_error_pure_virtual_called ();
@@ -13301,10 +13301,10 @@ bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 bkpt_decode_location (struct breakpoint *b,
 		      const struct event_location *location,
-		      struct program_space *search_pspace,
+		      struct sym_search_scope *search_scope,
 		      struct symtabs_and_lines *sals)
 {
-  decode_location_default (b, location, search_pspace, sals);
+  decode_location_default (b, location, search_scope, sals);
 }
 
 /* Virtual table for internal breakpoints.  */
@@ -13501,10 +13501,10 @@ bkpt_probe_create_sals_from_location (const struct event_location *location,
 static void
 bkpt_probe_decode_location (struct breakpoint *b,
 			    const struct event_location *location,
-			    struct program_space *search_pspace,
+			    struct sym_search_scope *search_scope,
 			    struct symtabs_and_lines *sals)
 {
-  *sals = parse_probes (location, search_pspace, NULL);
+  *sals = parse_probes (location, search_scope->pspace, NULL);
   if (!sals->sals)
     error (_("probe not found"));
 }
@@ -13626,10 +13626,10 @@ tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 tracepoint_decode_location (struct breakpoint *b,
 			    const struct event_location *location,
-			    struct program_space *search_pspace,
+			    struct sym_search_scope *search_scope,
 			    struct symtabs_and_lines *sals)
 {
-  decode_location_default (b, location, search_pspace, sals);
+  decode_location_default (b, location, search_scope, sals);
 }
 
 struct breakpoint_ops tracepoint_breakpoint_ops;
@@ -13650,11 +13650,11 @@ tracepoint_probe_create_sals_from_location
 static void
 tracepoint_probe_decode_location (struct breakpoint *b,
 				  const struct event_location *location,
-				  struct program_space *search_pspace,
+				  struct sym_search_scope *search_scope,
 				  struct symtabs_and_lines *sals)
 {
   /* We use the same method for breakpoint on probes.  */
-  bkpt_probe_decode_location (b, location, search_pspace, sals);
+  bkpt_probe_decode_location (b, location, search_scope, sals);
 }
 
 static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
@@ -13819,7 +13819,7 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 strace_marker_decode_location (struct breakpoint *b,
 			       const struct event_location *location,
-			       struct program_space *search_pspace,
+			       struct sym_search_scope *search_scope,
 			       struct symtabs_and_lines *sals)
 {
   struct tracepoint *tp = (struct tracepoint *) b;
@@ -14067,13 +14067,13 @@ bp_location_matches_search_scope (struct bp_location *bl,
    considered.  */
 
 static int
-all_locations_are_pending (struct breakpoint *b, struct program_space *pspace)
+all_locations_are_pending (struct breakpoint *b,
+			   struct sym_search_scope *search_scope)
 {
   struct bp_location *loc;
 
   for (loc = b->loc; loc != NULL; loc = loc->next)
-    if ((pspace == NULL
-	 || loc->pspace == pspace)
+    if (bp_location_matches_search_scope (loc, search_scope)
 	&& !loc->shlib_disabled
 	&& !loc->pspace->executing_startup)
       return 0;
@@ -14279,19 +14279,84 @@ locations_are_equal (struct bp_location *a, struct bp_location *b)
   return 1;
 }
 
+static int
+msymbol_name_is (struct minimal_symbol *msymbol, const char *function_name)
+{
+  int (*cmp) (const char *, const char *);
+
+  cmp = (case_sensitivity == case_sensitive_on ? strcmp : strcasecmp);
+  if (cmp (MSYMBOL_LINKAGE_NAME (msymbol), function_name) == 0)
+    return 1;
+
+  if (MSYMBOL_MATCHES_SEARCH_NAME (msymbol, function_name))
+    return 1;
+
+  return 0;
+}
+
+static int
+should_hoist_location (struct bp_location *bl,
+		       struct symtabs_and_lines new_sals,
+		       struct sym_search_scope *search_scope)
+{
+  if (bp_location_matches_search_scope (bl, search_scope))
+    return 1;
+
+  /* If the search scope is restricted to an objfile, we may still
+     want to hoist out locations of other objfiles of the search
+     pspace.  */
+  if (search_scope->objfile != NULL
+      && search_scope->pspace == bl->pspace)
+    {
+      /* We've now resolved the location.  Remove previously pending
+	 ones.  */
+      if (bl->shlib_disabled)
+	return 1;
+
+      /* If we had a plt symbol set on another objfile, and we now
+	 found the matching text symbol, we'll no longer need the plt
+	 symbol location.  */
+      if (bl->sal.msymbol != NULL
+	  && MSYMBOL_TYPE (bl->sal.msymbol) == mst_solib_trampoline
+	  && bl->function_name != NULL)
+	{
+	  int i;
+
+	  for (i = 0; i < new_sals.nelts; i++)
+	    {
+	      struct symbol *symbol = new_sals.sals[i].symbol;
+	      struct minimal_symbol *msymbol = new_sals.sals[i].msymbol;
+
+	      if (symbol != NULL
+		  && SYMBOL_CLASS (symbol) == LOC_BLOCK
+		  && strcmp (SYMBOL_LINKAGE_NAME (symbol), bl->function_name))
+		return 1;
+
+	      if (msymbol != NULL
+		  && msymbol_name_is (msymbol, bl->function_name))
+		return 1;
+	    }
+	}
+    }
+
+  return 0;
+}
+
 /* Split all locations of B that are bound to PSPACE out of B's
    location list to a separate list and return that list's head.  If
    PSPACE is NULL, hoist out all locations of B.  */
 
 static struct bp_location *
-hoist_existing_locations (struct breakpoint *b, struct program_space *pspace)
+hoist_existing_locations (struct breakpoint *b,
+			  struct symtabs_and_lines new_sals,
+			  struct sym_search_scope *search_scope)
 {
   struct bp_location head;
   struct bp_location *i = b->loc;
   struct bp_location **i_link = &b->loc;
   struct bp_location *hoisted = &head;
 
-  if (pspace == NULL)
+  if (search_scope->pspace == NULL)
     {
       i = b->loc;
       b->loc = NULL;
@@ -14302,7 +14367,7 @@ hoist_existing_locations (struct breakpoint *b, struct program_space *pspace)
 
   while (i != NULL)
     {
-      if (i->pspace == pspace)
+      if (should_hoist_location (i, new_sals, search_scope))
 	{
 	  *i_link = i->next;
 	  i->next = NULL;
@@ -14325,7 +14390,7 @@ hoist_existing_locations (struct breakpoint *b, struct program_space *pspace)
 
 void
 update_breakpoint_locations (struct breakpoint *b,
-			     struct program_space *filter_pspace,
+			     struct sym_search_scope *search_scope,
 			     struct symtabs_and_lines sals,
 			     struct symtabs_and_lines sals_end)
 {
@@ -14349,14 +14414,36 @@ update_breakpoint_locations (struct breakpoint *b,
      We'd like to retain the location, so that when the library is
      loaded again, we don't loose the enabled/disabled status of the
      individual locations.  */
-  if (all_locations_are_pending (b, filter_pspace) && sals.nelts == 0)
+  if (all_locations_are_pending (b, search_scope) && sals.nelts == 0)
     return;
 
-  existing_locations = hoist_existing_locations (b, filter_pspace);
+  existing_locations = hoist_existing_locations (b, sals, search_scope);
 
   for (i = 0; i < sals.nelts; ++i)
     {
       struct bp_location *new_loc;
+      struct symtab_and_line *sal = &sals.sals[i];
+      struct minimal_symbol *msymbol = sal->msymbol;
+
+      /* If we found a new location, then we no longer need the one
+	 previously set on a plt symbol (usually in the main
+	 executable).  */
+      if (msymbol != NULL
+	  && MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
+	{
+	  struct bp_location *bl;
+
+	  for (bl = b->loc; bl != NULL; bl = bl->next)
+	    {
+	      if (bl->pspace == sal->pspace
+		  && bl->function_name != NULL
+		  && msymbol_name_is (msymbol, bl->function_name))
+		break;
+	    }
+
+	  if (bl != NULL)
+	    continue;
+	}
 
       switch_to_program_space_and_thread (sals.sals[i].pspace);
 
@@ -14441,7 +14528,7 @@ update_breakpoint_locations (struct breakpoint *b,
 
 static struct symtabs_and_lines
 location_to_sals (struct breakpoint *b, struct event_location *location,
-		  struct program_space *search_pspace, int *found)
+		  struct sym_search_scope *search_scope, int *found)
 {
   struct symtabs_and_lines sals = {0};
   struct gdb_exception exception = exception_none;
@@ -14450,7 +14537,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 
   TRY
     {
-      b->ops->decode_location (b, location, search_pspace, &sals);
+      b->ops->decode_location (b, location, search_scope, &sals);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
@@ -14468,8 +14555,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
       if (e.error == NOT_FOUND_ERROR
 	  && (b->condition_not_parsed
 	      || (b->loc != NULL
-		  && search_pspace != NULL
-		  && b->loc->pspace != search_pspace)
+		  && !bp_location_matches_search_scope (b->loc, search_scope))
 	      || (b->loc && b->loc->shlib_disabled)
 	      || (b->loc && b->loc->pspace->executing_startup)
 	      || b->enable_state == bp_disabled))
@@ -14488,6 +14574,8 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 	}
     }
   END_CATCH
+
+  validate_sals (&sals, search_scope);
 
   if (exception.reason == 0 || exception.error != NOT_FOUND_ERROR)
     {
@@ -14539,19 +14627,32 @@ breakpoint_re_set_default (struct breakpoint *b,
   struct symtabs_and_lines sals, sals_end;
   struct symtabs_and_lines expanded = {0};
   struct symtabs_and_lines expanded_end = {0};
-  struct program_space *filter_pspace = search_scope->pspace;
+  struct sym_search_scope pspace_search_scope;
 
-  sals = location_to_sals (b, b->location, filter_pspace, &found);
+  /* These require arbitrary expressions and symbol lookups.  Punt on
+     resetting locations of specific objfiles, and let the parsers see
+     the whole program space.  */
+  if (search_scope->objfile != NULL
+      && event_location_type (b->location) == ADDRESS_LOCATION)
+    {
+      pspace_search_scope = null_search_scope ();
+      pspace_search_scope.pspace = search_scope->pspace;
+      search_scope = &pspace_search_scope;
+    }
+
+  sals = location_to_sals (b, b->location, search_scope, &found);
   if (found)
     {
       make_cleanup (xfree, sals.sals);
       expanded = sals;
     }
 
+  validate_sals (&expanded, search_scope);
+
   if (b->location_range_end != NULL)
     {
-      sals_end = location_to_sals (b, b->location_range_end,
-				   filter_pspace, &found);
+      sals_end = location_to_sals (b, b->location_range_end, search_scope,
+				   &found);
       if (found)
 	{
 	  make_cleanup (xfree, sals_end.sals);
@@ -14559,7 +14660,7 @@ breakpoint_re_set_default (struct breakpoint *b,
 	}
     }
 
-  update_breakpoint_locations (b, filter_pspace, expanded, expanded_end);
+  update_breakpoint_locations (b, search_scope, expanded, expanded_end);
 }
 
 /* Default method for creating SALs from an address string.  It basically
@@ -14603,13 +14704,13 @@ create_breakpoints_sal_default (struct gdbarch *gdbarch,
 static void
 decode_location_default (struct breakpoint *b,
 			 const struct event_location *location,
-			 struct program_space *search_pspace,
+			 struct sym_search_scope *search_scope,
 			 struct symtabs_and_lines *sals)
 {
   struct linespec_result canonical;
 
   init_linespec_result (&canonical);
-  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, search_pspace,
+  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, search_scope,
 		    (struct symtab *) NULL, 0,
 		    &canonical, multiple_symbols_all,
 		    b->filter);
