@@ -1613,7 +1613,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
 
   CPOPS ("int_type %d %d\n", TYPE_UNSIGNED (type), TYPE_LENGTH (type));
   int_type = CPCALL (int_type, context,
-		     TYPE_UNSIGNED (type), TYPE_LENGTH (type));
+		     TYPE_UNSIGNED (type), TYPE_LENGTH (type), NULL);
   CPOPS ("\tgcc_type = %lld\n", int_type);
 
   CPOPS ("start_new_enum_type %s\n", name);
@@ -1720,7 +1720,8 @@ ccp_convert_int (struct compile_cplus_instance *context, struct type *type)
       result = CPCALL (char_type, context);
     }
   else
-    result = CPCALL (int_type, context, TYPE_UNSIGNED (type), TYPE_LENGTH (type));
+    result = CPCALL (int_type, context, TYPE_UNSIGNED (type), TYPE_LENGTH (type),
+		     TYPE_NAME (type));
   CPOPS ("\tgcc_type = %lld\n", result);
   return result;
 }
@@ -1733,7 +1734,7 @@ ccp_convert_float (struct compile_cplus_instance *context, struct type *type)
   gcc_type result;
 
   CPOPS ("float_type %s\n", TYPE_SAFE_NAME (type));
-  result = CPCALL (float_type, context, TYPE_LENGTH (type));
+  result = CPCALL (float_type, context, TYPE_LENGTH (type), TYPE_NAME (type));
   CPOPS ("\tgcc_type = %lld\n", result);
   return result;
 }

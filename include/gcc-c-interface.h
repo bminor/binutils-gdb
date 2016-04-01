@@ -41,7 +41,7 @@ struct gcc_c_context;
 
 enum gcc_c_api_version
 {
-  GCC_C_FE_VERSION_0 = 1
+  GCC_C_FE_VERSION_0 = 2
 };
 
 /* Qualifiers.  */

@@ -517,21 +517,27 @@ GCC_METHOD4 (gcc_type, build_method_type,
 
 // FIXME: add default expressions for function arguments?
 
-/* Return an integer type with the given properties.  */
+/* Return an integer type with the given properties.  If BUILTIN_NAME
+   is non-NULL, it must name a builtin integral type with the given
+   signedness and size, and that is the type that will be returned.  */
 
-GCC_METHOD2 (gcc_type, int_type,
+GCC_METHOD3 (gcc_type, int_type,
 	     int /* bool */,		   /* Argument IS_UNSIGNED.  */
-	     unsigned long)                /* Argument SIZE_IN_BYTES.  */
+	     unsigned long,                /* Argument SIZE_IN_BYTES.  */
+	     const char *)		   /* Argument BUILTIN_NAME.  */
 
 /* Return the 'char' type, a distinct type from both 'signed char' and
    'unsigned char' returned by int_type.  */
 
 GCC_METHOD0 (gcc_type, char_type)
 
-/* Return a floating point type with the given properties.  */
+/* Return a floating point type with the given properties.  If BUILTIN_NAME
+   is non-NULL, it must name a builtin integral type with the given
+   signedness and size, and that is the type that will be returned.  */
 
-GCC_METHOD1 (gcc_type, float_type,
-	     unsigned long)			/* Argument SIZE_IN_BYTES.  */
+GCC_METHOD2 (gcc_type, float_type,
+	     unsigned long,                /* Argument SIZE_IN_BYTES.  */
+	     const char *)		   /* Argument BUILTIN_NAME.  */
 
 /* Return the 'void' type.  */
 

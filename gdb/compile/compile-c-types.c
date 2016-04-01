@@ -208,7 +208,8 @@ convert_enum (struct compile_c_instance *context, struct type *type)
 
   int_type = ctx->c_ops->int_type (ctx,
 				   TYPE_UNSIGNED (type),
-				   TYPE_LENGTH (type));
+				   TYPE_LENGTH (type),
+				   NULL);
 
   result = ctx->c_ops->build_enum_type (ctx, int_type);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
@@ -263,7 +264,8 @@ convert_int (struct compile_c_instance *context, struct type *type)
     }
   return C_CTX (context)->c_ops->int_type (C_CTX (context),
 					   TYPE_UNSIGNED (type),
-					   TYPE_LENGTH (type));
+					   TYPE_LENGTH (type),
+					   TYPE_NAME (type));
 }
 
 /* Convert a floating-point type to its gcc representation.  */
@@ -272,7 +274,8 @@ static gcc_type
 convert_float (struct compile_c_instance *context, struct type *type)
 {
   return C_CTX (context)->c_ops->float_type (C_CTX (context),
-					     TYPE_LENGTH (type));
+					     TYPE_LENGTH (type),
+					     TYPE_NAME (type));
 }
 
 /* Convert the 'void' type to its gcc representation.  */
