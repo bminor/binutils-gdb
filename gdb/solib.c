@@ -1000,7 +1000,6 @@ solib_add (const char *pattern, symfile_add_flags add_flags,
   {
     int any_matches = 0;
     int loaded_any_symbols = 0;
-    symfile_add_flags flags = add_flags | SYMFILE_DEFER_BP_RESET;
 
     for (gdb = so_list_head; gdb; gdb = gdb->next)
       if (! pattern || re_exec (gdb->so_name))
@@ -1026,14 +1025,10 @@ solib_add (const char *pattern, symfile_add_flags add_flags,
 		    printf_unfiltered (_("Symbols already loaded for %s\n"),
 				       gdb->so_name);
 		}
-	      else if (solib_read_symbols (gdb, flags))
+	      else if (solib_read_symbols (gdb, add_flags))
 		loaded_any_symbols = 1;
 	    }
 	}
-
-    if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0
-	&& loaded_any_symbols)
-      breakpoint_re_set_program_space (current_program_space);
 
     if (from_tty && pattern && ! any_matches)
       printf_unfiltered
