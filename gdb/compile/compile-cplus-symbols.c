@@ -708,7 +708,9 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
     {
       struct symbol *sym;
 
-      /* We only need global functions here.  */
+      /* FIXME: We used to only need global functions here, but we may
+	 now be asked for other symbols.  IDENTIFIER is a mangled
+	 name.  -lxo */
       sym = lookup_symbol (identifier, NULL, VAR_DOMAIN, NULL).symbol;
       if (sym != NULL && SYMBOL_CLASS (sym) == LOC_BLOCK)
 	{

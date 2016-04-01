@@ -432,13 +432,12 @@ GCC_METHOD3 (gcc_type, start_new_union_type,
 /* Add a non-static data member to the most-recently-started
    unfinished struct or union type.  FIELD_NAME is the field's name.
    FIELD_TYPE is the type of the field.  BITSIZE and BITPOS indicate
-   where in the struct the field occurs.
+   where in the struct the field occurs.  */
 
-   FIXME: how about mutable data members?  */
-
-GCC_METHOD4 (int /* bool */, new_field,
+GCC_METHOD5 (int /* bool */, new_field,
 	     const char *,		   /* Argument FIELD_NAME.  */
 	     gcc_type,			   /* Argument FIELD_TYPE.  */
+	     enum gcc_cp_field_flags,	   /* Argument FIELD_FLAGS.  */
 	     unsigned long,		   /* Argument BITSIZE.  */
 	     unsigned long)		   /* Argument BITPOS.  */
 
@@ -480,14 +479,27 @@ GCC_METHOD1 (int /* bool */, finish_enum_type,
 /* Create a new function type.  RETURN_TYPE is the type returned by
    the function, and ARGUMENT_TYPES is a vector, of length NARGS, of
    the argument types.  IS_VARARGS is true if the function is
-   varargs.
-
-   FIXME: default arguments?  */
+   varargs.  */
 
 GCC_METHOD3 (gcc_type, build_function_type,
 	     gcc_type,			   /* Argument RETURN_TYPE.  */
 	     const struct gcc_type_array *,/* Argument ARGUMENT_TYPES.  */
 	     int /* bool */)		   /* Argument IS_VARARGS.  */
+
+/* Create a modified version of a function type that has default
+   values for some of its arguments.  The returned type should ONLY be
+   used to define functions or methods, never to declare parameters,
+   variables, types or the like.
+
+   DEFAULTS must have at most as many N_ELEMENTS as there are
+   arguments without default values in FUNCTION_TYPE.  Say, if
+   FUNCTION_TYPE has an argument list such as (T1, T2, T3, T4 = V0)
+   and DEFAULTS has 2 elements (V1, V2), the returned type will have
+   the following argument list: (T1, T2 = V1, T3 = V2, T4 = V0). */
+
+GCC_METHOD2 (gcc_type, add_function_default_args,
+	     gcc_type,			   /* Argument FUNCTION_TYPE.  */
+	     const struct gcc_cp_function_default_args *)/* DEFAULTS.  */
 
 /* Create a variant of a function type with an exception
    specification.  FUNCTION_TYPE is a function or method type.
@@ -546,6 +558,14 @@ GCC_METHOD0 (gcc_type, void_type)
 /* Return the 'bool' type.  */
 
 GCC_METHOD0 (gcc_type, bool_type)
+
+/* Return the std::nullptr_t type.  */
+
+GCC_METHOD0 (gcc_type, get_nullptr_type)
+
+/* Return the nullptr constant.  */
+
+GCC_METHOD0 (gcc_expr, get_nullptr_constant)
 
 /* Create a new array type.  If NUM_ELEMENTS is -1, then the array
    is assumed to have an unknown length.  */

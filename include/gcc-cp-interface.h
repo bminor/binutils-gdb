@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-6
+  GCC_CP_FE_VERSION_0 = 0xffffffff-7
 };
 
 /* Qualifiers.  */
@@ -123,6 +123,19 @@ struct gcc_cp_template_args
   /* The template arguments.  */
 
   gcc_cp_template_arg *elements;
+};
+
+/* An array of default function arguments.  */
+
+struct gcc_cp_function_default_args
+{
+  /* Number of elements.  */
+
+  int n_elements;
+
+  /* The default values.  */
+
+  gcc_expr *elements;
 };
 
 /* This enumerates the kinds of decls that GDB can create.  */
@@ -234,6 +247,18 @@ enum gcc_cp_symbol_kind
   GCC_CP_FLAG_MASK = (GCC_CP_FLAG_MASK_FUNCTION | GCC_CP_FLAG_MASK_VARIABLE)
 };
 
+/* This bitfield names flags that can be associated with non-static
+   data members of structs and classes.  */
+
+enum gcc_cp_field_flags
+{
+  /* Use this when no flags are present.  */
+  GCC_CP_FIELD_NORMAL = 0,
+
+  /* This indicates the field is declared as mutable.  */
+  GCC_CP_FIELD_MUTABLE = 1
+};
+
 /* This enumerates the types of symbols that GCC might request from
    GDB.  */
 
@@ -287,15 +312,20 @@ struct gcc_cp_fe_vtable
      The binding oracle is called whenever the C++ parser needs to
      look up a symbol.  This gives the caller a chance to lazily
      instantiate symbols using other parts of the gcc_cp_fe_interface
-     API.
+     API.  The symbol is looked up without a scope, and the oracle
+     must supply a definition for ALL namespace-scoped definitions
+     bound to the symbol.
 
      The address oracle is called whenever the C++ parser needs to
-     look up a symbol.  This is only called for symbols not provided
-     by the symbol oracle -- that is, just built-in functions where
-     GCC provides the declaration.
+     look up a symbol.  This may be called for symbols not provided by
+     the symbol oracle, such as built-in functions where GCC provides
+     the declaration; other internal symbols, such as those related
+     with thunks, rtti, and virtual tables are likely to be queried
+     through this interface too.  The identifier is a mangled symbol
+     name.
 
      DATUM is an arbitrary piece of data that is passed back verbatim
-     to the callbakcs in requests.  */
+     to the callbacks in requests.  */
 
   void (*set_callbacks) (struct gcc_cp_context *self,
 			 gcc_cp_oracle_function *binding_oracle,

@@ -890,6 +890,11 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 	{
 	  /* !!keiths: I am guessing this is insufficient... */
 	  unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
+	  enum gcc_cp_field_flags field_flags = GCC_CP_FIELD_NORMAL;
+	  /* FIXME:
+	     if (field-is-mutable-p (type, i))
+	       field_flags |= GCC_CP_FIELD_MUTABLE;
+	     -lxo */
 
 	  if (bitsize == 0)
 	    bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
@@ -898,6 +903,7 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 	  CPCALL (new_field, context,
 		  field_name,
 		  field_type,
+		  field_flags,
 		  bitsize,
 		  TYPE_FIELD_BITPOS (type, i));
 	}
@@ -1694,6 +1700,9 @@ ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
 	    = convert_cplus_type (context, TYPE_FIELD_TYPE (type, i));
 	}
     }
+
+  /* FIXME: add default args, exception specs and, once support is
+     added, attributes.  -lxo */
 
   /* We omit setting the argument types to `void' to be a little flexible
      with some minsyms like printf (compile-cplus.exp has examples).  */
