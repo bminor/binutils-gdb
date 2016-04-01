@@ -1,3 +1,9 @@
+2016-04-01  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/19820
+	* eval.c (evaluate_subexp_standard): Allow TYPE_CODE_ENUM to be
+        the type of BINOP_REPEAT's second operand.
+
 2016-03-31  Yichao Yu  <yyc1992@gmail.com>
 
 	PR gdb/19858

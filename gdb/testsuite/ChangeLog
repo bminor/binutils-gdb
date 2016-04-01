@@ -1,3 +1,8 @@
+2016-04-01  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/19820
+	* gdb.base/printcmds.exp: Add artificial arrays tests.
+
 2016-03-31  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19858
