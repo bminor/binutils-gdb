@@ -24,7 +24,7 @@
 
 extern const pseudo_typeS md_pseudo_table[];
 
-char * md_atof (int, char *, int *);
+const char * md_atof (int, char *, int *);
 int    md_parse_option (int, const char *);
 void   md_show_usage (FILE *);
 void   md_assemble (char *);

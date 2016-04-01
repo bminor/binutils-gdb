@@ -578,7 +578,7 @@ static void assemble_insn (const struct alpha_opcode *, const expressionS *, int
 static void emit_insn (struct alpha_insn *);
 static void assemble_tokens (const char *, const expressionS *, int, int);
 #ifdef OBJ_EVAX
-static char *s_alpha_section_name (void);
+static const char *s_alpha_section_name (void);
 static symbolS *add_to_link_pool (symbolS *, offsetT);
 #endif
 
@@ -3552,7 +3552,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
          The symbol is effectively an alias for the section name.  */
 
       segT sec;
-      char *sec_name;
+      const char *sec_name;
       symbolS *sec_symbol;
       segT current_seg = now_seg;
       subsegT current_subseg = now_subseg;
@@ -4184,7 +4184,7 @@ alpha_cfi_frame_initial_instructions (void)
 #ifdef OBJ_EVAX
 
 /* Get name of section.  */
-static char *
+static const char *
 s_alpha_section_name (void)
 {
   char *name;
@@ -4292,13 +4292,14 @@ s_alpha_section_word (char *str, size_t len)
 
 #define EVAX_SECTION_COUNT 5
 
-static char *section_name[EVAX_SECTION_COUNT + 1] =
+static const char *section_name[EVAX_SECTION_COUNT + 1] =
   { "NULL", ".rdata", ".comm", ".link", ".ctors", ".dtors" };
 
 static void
 s_alpha_section (int secid)
 {
-  char *name, *beg;
+  const char *name;
+  char *beg;
   segT sec;
   flagword vms_flags = 0;
   symbolS *symbol;
@@ -5340,7 +5341,7 @@ select_gp_value (void)
 /* Map 's' to SHF_ALPHA_GPREL.  */
 
 bfd_vma
-alpha_elf_section_letter (int letter, char **ptr_msg)
+alpha_elf_section_letter (int letter, const char **ptr_msg)
 {
   if (letter == 's')
     return SHF_ALPHA_GPREL;
@@ -5579,10 +5580,10 @@ md_section_align (segT seg, valueT size)
    of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  extern char *vax_md_atof (int, char *, int *);
+  extern const char *vax_md_atof (int, char *, int *);
 
   switch (type)
     {

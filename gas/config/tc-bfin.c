@@ -798,7 +798,7 @@ md_section_align (segT segment, valueT size)
 }
 
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, FALSE);

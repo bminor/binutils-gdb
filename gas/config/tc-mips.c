@@ -3042,7 +3042,8 @@ mips_parse_base_start (char *s)
 static char *
 mips_parse_argument_token (char *s, char float_format)
 {
-  char *end, *save_in, *err;
+  char *end, *save_in;
+  const char *err;
   unsigned int regno1, regno2, channels;
   struct mips_operand_token token;
 
@@ -13996,7 +13997,7 @@ my_getExpression (expressionS *ep, char *str)
   input_line_pointer = save_in;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);

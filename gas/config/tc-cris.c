@@ -3591,7 +3591,7 @@ cris_get_reloc_suffix (char **cPP, bfd_reloc_code_real_type *relocp,
    code as assembly code, but if they do, they should be able enough to
    find out the correct bit patterns and use them.  */
 
-char *
+const char *
 md_atof (int type ATTRIBUTE_UNUSED, char *litp ATTRIBUTE_UNUSED,
 	 int *sizep ATTRIBUTE_UNUSED)
 {

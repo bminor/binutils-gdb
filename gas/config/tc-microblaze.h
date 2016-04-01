@@ -100,7 +100,6 @@ extern const struct relax_type md_relax_table[];
 extern void      md_begin            (void);
 extern void      md_assemble         (char *);
 extern symbolS * md_undefined_symbol (char *);
-extern char *    md_atof             (int, char *, int *);
 extern void      md_show_usage       (FILE *);
 extern void      md_convert_frag               (bfd *, segT, fragS *);
 extern void      md_operand                    (expressionS *);

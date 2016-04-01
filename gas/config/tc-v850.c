@@ -1372,7 +1372,7 @@ skip_white_space (void)
    and so on upwards.  System registers are considered to be very
    high numbers.  */
 
-static char *
+static const char *
 parse_register_list (unsigned long *insn,
 		     const struct v850_operand *operand)
 {
@@ -1670,7 +1670,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
   return 0;
 }
 
-char *
+const char *
 md_atof (int type, char *litp, int *sizep)
 {
   return ieee_md_atof (type, litp, sizep, FALSE);

@@ -856,7 +856,7 @@ set_section (char *name)
 /* Map 's' to SHF_IA_64_SHORT.  */
 
 bfd_vma
-ia64_elf_section_letter (int letter, char **ptr_msg)
+ia64_elf_section_letter (int letter, const char **ptr_msg)
 {
   if (letter == 's')
     return SHF_IA_64_SHORT;
@@ -11576,7 +11576,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED, fixS *fixp)
 
 #define MAX_LITTLENUMS 5
 
-char *
+const char *
 md_atof (int type, char *lit, int *size)
 {
   LITTLENUM_TYPE words[MAX_LITTLENUMS];

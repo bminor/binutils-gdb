@@ -724,7 +724,7 @@ md_operand (expressionS * exp)
     gas_cgen_md_operand (exp);
 }
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);

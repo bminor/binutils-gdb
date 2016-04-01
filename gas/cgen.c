@@ -37,7 +37,7 @@ static unsigned long gas_cgen_encode_addend
    const unsigned long, const unsigned long, const unsigned long, \
    const unsigned long);
 
-static char * weak_operand_overflow_check
+static const char * weak_operand_overflow_check
   (const expressionS *, const CGEN_OPERAND *);
 
 static void queue_fixup_recursively
@@ -748,7 +748,7 @@ gas_cgen_encode_addend (const unsigned long start,    /* in bits */
    overflow, so signal it by returning an error string. Any other case is
    ambiguous, so we assume it's OK and return NULL.  */
 
-static char *
+static const char *
 weak_operand_overflow_check (const expressionS *  exp,
 			     const CGEN_OPERAND * operand)
 {

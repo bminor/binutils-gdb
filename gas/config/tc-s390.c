@@ -2034,7 +2034,7 @@ s390_machinemode (int ignore ATTRIBUTE_UNUSED)
 
 #undef MAX_HISTORY
 
-char *
+const char *
 md_atof (int type, char *litp, int *sizep)
 {
   return ieee_md_atof (type, litp, sizep, TRUE);

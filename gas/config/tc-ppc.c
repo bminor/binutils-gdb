@@ -6069,7 +6069,7 @@ ppc_frob_section (asection *sec)
 
 #endif /* OBJ_XCOFF */
 
-char *
+const char *
 md_atof (int type, char *litp, int *sizep)
 {
   return ieee_md_atof (type, litp, sizep, target_big_endian);

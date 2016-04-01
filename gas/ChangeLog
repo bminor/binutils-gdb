@@ -1,3 +1,114 @@
+2016-04-01  Alan Modra  <amodra@gmail.com>
+
+	* cgen.c (weak_operand_overflow_check): Return const char*.
+	* messages.c (as_internal_value_out_of_range): Formatting.
+	(as_warn_value_out_of_range): Consify prefix param.
+	(as_bad_value_out_of_range): Likewise.
+	* read.c (s_errwarn): Constify msg..
+	(s_float_space, float_cons): ..and err.
+	* as.h (as_warn_value_out_of_range, as_bad_value_out_of_range,
+	ieee_md_atof, vax_md_atof): Update prototypes.
+	* tc.h (md_atof): Update prototype.
+	* config/atof-ieee.c (ieee_md_atof): Return const char*.
+	* config/atof-vax.c (vax_md_atof): Likewise.
+	* config/obj-elf.c (obj_elf_parse_section_letters): Constify bad_msg.
+	* config/tc-aarch64.c (md_atof): Return const char*.
+	* config/tc-alpha.c (s_alpha_section_name): Likewise.
+	(s_alpha_comm): Constify sec_name.
+	(section_name): Constify.
+	(s_alpha_section): Consify name..
+	(alpha_elf_section_letter): ..and ptr_msg param..
+	(md_atof): ..and return.
+	* config/tc-alpha.h (alpha_elf_section_letter): Update prototype.
+	* config/tc-arc.c (md_atof): Return const char*.
+	* config/tc-arm.c (md_atof): Likewise.
+	* config/tc-avr.c (md_atof): Likewise.
+	* config/tc-bfin.c (md_atof): Likewise.
+	* config/tc-cr16.c (md_atof): Likewise.
+	* config/tc-cris.c (md_atof): Likewise.
+	* config/tc-crx.c (md_atof): Likewise.
+	* config/tc-d10v.c (md_atof): Likewise.
+	* config/tc-d30v.c (md_atof): Likewise.
+	* config/tc-dlx.c (md_atof): Likewise.
+	* config/tc-epiphany.c (md_atof): Likewise.
+	* config/tc-fr30.c (md_atof): Likewise.
+	* config/tc-frv.c (md_atof): Likewise.
+	* config/tc-ft32.c (md_atof): Likewise.
+	* config/tc-h8300.c (md_atof): Likewise.
+	* config/tc-hppa.c (struct default_subspace_dict): Constify name.
+	(struct default_space_dict): Likewise.
+	(create_new_space): Constify name param.
+	(create_new_subspace): Likewise.
+	(is_defined_space, is_defined_subspace): Likewise.
+	(pa_parse_space_stmt): Constify space_name param.
+	(md_atof): Return const char*.
+	(pa_spaces_begin): Constify name.
+	* config/tc-i370.c (md_atof): Return const char*.
+	* config/tc-i386.c (md_atof): Likewise.
+	(x86_64_section_letter): Constify ptr_msg param.
+	* config/tc-i386.h (x86_64_section_letter): Update prototype.
+	* config/tc-i860.c (struct i860_it): Constify error.
+	(md_atof): Return const char*.
+	* config/tc-i960.c (md_atof): Likewise.
+	* config/tc-ia64.c (md_atof): Likewise.
+	(ia64_elf_section_letter): Constify ptr_msg param.
+	* config/tc-ia64.h (ia64_elf_section_letter): Update prototype.
+	* config/tc-ip2k.c (md_atof): Return const char*.
+	* config/tc-iq2000.c (md_atof): Likewise.
+	* config/tc-lm32.c (md_atof): Likewise.
+	* config/tc-m32c.c (md_atof): Likewise.
+	* config/tc-m32r.c (md_atof): Likewise.
+	* config/tc-m68hc11.c (md_atof): Likewise.
+	* config/tc-m68k.c (md_atof): Likewise.
+	* config/tc-mcore.c (md_atof): Likewise.
+	* config/tc-mep.c (md_atof): Likewise.
+	(mep_elf_section_letter): Constify ptr_msg param.
+	* config/tc-mep.h (mep_elf_section_letter): Update prototype.
+	* config/tc-metag.c (md_atof): Return const char*.
+	* config/tc-microblaze.c (md_atof): Likewise.
+	* config/tc-microblaze.h (md_atof): Delete prototype.
+	* config/tc-mips.c (mips_parse_argument_token): Constify err.
+	(md_atof): Return const char*.
+	* config/tc-mmix.c (md_atof): Likewise.
+	* config/tc-mn10200.c (md_atof): Likewise.
+	* config/tc-mn10300.c (md_atof): Likewise.
+	* config/tc-moxie.c (md_atof): Likewise.
+	* config/tc-msp430.c (md_atof): Likewise.
+	* config/tc-mt.c (md_atof): Likewise.
+	* config/tc-nds32.c (md_atof): Likewise.
+	* config/tc-nios2.c (md_atof): Likewise.
+	(nios2_elf_section_letter): Constify ptr_msg param.
+	* config/tc-nios2.h (nios2_elf_section_letter): Update prototype.
+	* config/tc-ns32k.c (md_atof): Return const char*.
+	* config/tc-or1k.c (md_atof): Likewise.
+	* config/tc-pdp11.c (struct pdp11_code): Constify error.
+	(md_atof): Return const char*.
+	* config/tc-pj.c (md_atof): Likewise.
+	* config/tc-ppc.c (md_atof): Likewise.
+	* config/tc-rl78.c (md_atof): Likewise.
+	* config/tc-rx.c (md_atof): Likewise.
+	* config/tc-s390.c (md_atof): Likewise.
+	* config/tc-score.c (s3_atof, md_atof): Likewise.
+	* config/tc-sh.c (md_atof): Likewise.
+	* config/tc-sparc.c (struct sparc_it): Constify error.
+	(md_atof): Return const char*.
+	* config/tc-spu.c (md_atof): Likewise.
+	* config/tc-tic30.c (md_atof): Likewise.
+	* config/tc-tic4x.c (md_atof): Likewise.
+	* config/tc-tic54x.c (md_atof): Likewise.
+	* config/tc-tic6x.c (md_atof): Likewise.
+	* config/tc-tilegx.c (md_atof): Likewise.
+	* config/tc-tilepro.c (md_atof): Likewise.
+	* config/tc-v850.c (parse_register_list, md_atof): Likewise.
+	* config/tc-vax.c (md_atof): Likewise.
+	* config/tc-visium.c (md_atof): Likewise.
+	* config/tc-xc16x.c (md_atof): Likewise.
+	* config/tc-xgate.c (md_atof): Likewise.
+	* config/tc-xstormy16.c (md_atof): Likewise.
+	* config/tc-xtensa.c (md_atof): Likewise.
+	* config/tc-z80.c (md_atof): Likewise.
+	* config/tc-z8k.c (md_atof): Likewise.
+
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-xtensa.c (struct rename_section_struct): Make old_name

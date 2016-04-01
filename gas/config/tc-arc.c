@@ -2848,7 +2848,7 @@ md_undefined_symbol (char *name)
    of LITTLENUMS emitted is stored in *sizeP.  An error message is
    returned, or NULL on OK.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);

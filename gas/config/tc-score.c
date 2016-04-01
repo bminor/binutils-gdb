@@ -61,7 +61,7 @@ static void s3_assemble (char *str);
 static void s3_operand (expressionS *);
 static void s3_begin (void);
 static void s3_number_to_chars (char *buf, valueT val, int n);
-static char *s3_atof (int type, char *litP, int *sizeP);
+static const char *s3_atof (int type, char *litP, int *sizeP);
 static void s3_frag_check (fragS * fragp ATTRIBUTE_UNUSED);
 static void s3_validate_fix (fixS *fixP);
 static int s3_force_relocation (struct fix *fixp);
@@ -6657,7 +6657,7 @@ s3_md_chars_to_number (char *buf, int n)
   return result;
 }
 
-static char *
+static const char *
 s3_atof (int type, char *litP, int *sizeP)
 {
   int prec;
@@ -7542,7 +7542,7 @@ md_number_to_chars (char *buf, valueT val, int n)
    within the words.  For example, (double) 1.1 in big endian mode is
    the byte sequence 3f f1 99 99 99 99 99 9a, and in little endian mode is
    the byte sequence 99 99 f1 3f 9a 99 99 99.  */
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   if (score3)

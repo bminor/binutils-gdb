@@ -716,7 +716,7 @@ get_imm (const char *param, struct spu_insn *insn, int arg)
   return param;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);

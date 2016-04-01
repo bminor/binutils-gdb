@@ -1077,7 +1077,7 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
 
    ??? The format of 12 byte floats is uncertain according to gcc's arm.h.  */
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   int prec;

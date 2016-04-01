@@ -2136,7 +2136,7 @@ s_errwarn (int err)
      self-contained message, one that can be passed like the
      demand_copy_C_string return value, and with no assumption on the
      location of the name of the directive within the message.  */
-  char *msg
+  const char *msg
     = (err ? _(".error directive invoked in source file")
        : _(".warning directive invoked in source file"));
 
@@ -3541,7 +3541,7 @@ s_float_space (int float_type)
     }
   else
     {
-      char *err;
+      const char *err;
 
       err = md_atof (float_type, temp, &flen);
       know (flen <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
@@ -4920,7 +4920,7 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
 {
   char *p;
   int length;			/* Number of chars in an object.  */
-  char *err;		/* Error from scanning floating literal.  */
+  const char *err;		/* Error from scanning floating literal.  */
   char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
 
   if (is_it_end_of_statement ())

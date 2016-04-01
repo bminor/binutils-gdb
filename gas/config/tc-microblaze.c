@@ -1758,7 +1758,7 @@ md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
 /* Turn a string in input_line_pointer into a floating point constant of type
    type, and store the appropriate bytes in *litP.  The number of LITTLENUMS
    emitted is stored in *sizeP.  An error message is returned, or NULL on OK.*/
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   int prec;

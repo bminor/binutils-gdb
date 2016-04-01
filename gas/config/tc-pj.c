@@ -313,7 +313,7 @@ md_assemble (char *str)
     as_bad (_("Something forgot to clean up\n"));
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);

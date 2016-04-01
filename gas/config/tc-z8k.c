@@ -1285,7 +1285,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 
 /* Various routines to kill one day.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);

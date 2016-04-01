@@ -815,7 +815,8 @@ obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *is_clone)
 	    }
 	default:
 	  {
-	    char *bad_msg = _("unrecognized .section attribute: want a,e,w,x,M,S,G,T or number");
+	    const char *bad_msg = _("unrecognized .section attribute:"
+				    " want a,e,w,x,M,S,G,T or number");
 #ifdef md_elf_section_letter
 	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr != (bfd_vma) -1)

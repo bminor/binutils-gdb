@@ -6064,7 +6064,7 @@ md_number_to_chars (char *buf, valueT val, int n)
 /* This function is called to convert an ASCII string into a floating point
    value in format used by the CPU.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   int i;

@@ -30,7 +30,7 @@ extern int flonum_gen2vax (int, FLONUM_TYPE * f, LITTLENUM_TYPE *);
 /* A representation for PDP-11 machine code.  */
 struct pdp11_code
 {
-  char *error;
+  const char *error;
   int code;
   int additional;	/* Is there an additional word?  */
   int word;		/* Additional word, if any.  */
@@ -649,7 +649,7 @@ md_assemble (char *instruction_string)
   struct pdp11_code insn, op1, op2;
   int error;
   int size;
-  char *err = NULL;
+  const char *err = NULL;
   char *str;
   char *p;
   char c;
@@ -1442,7 +1442,7 @@ pseudo_even (int c ATTRIBUTE_UNUSED)
   record_alignment (now_seg, alignment);
 }
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return vax_md_atof (type, litP, sizeP);

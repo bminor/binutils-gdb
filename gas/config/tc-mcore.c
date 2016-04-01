@@ -1616,7 +1616,7 @@ md_mcore_end (void)
 
 /* Various routines to kill one day.  */
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);

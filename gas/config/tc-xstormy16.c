@@ -596,7 +596,7 @@ md_number_to_chars (char * buf, valueT val, int n)
   number_to_chars_littleendian (buf, val, n);
 }
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, FALSE);

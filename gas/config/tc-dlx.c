@@ -974,7 +974,7 @@ md_assemble (char *str)
    but I'm not sure.  Dlx will not use it anyway, so I just leave it
    here for now.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);

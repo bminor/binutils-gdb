@@ -2352,7 +2352,7 @@ i370_tc (int ignore ATTRIBUTE_UNUSED)
     }
 }
 
-char *
+const char *
 md_atof (int type, char *litp, int *sizep)
 {
   /* 360/370/390 have two float formats: an old, funky 360 single-precision

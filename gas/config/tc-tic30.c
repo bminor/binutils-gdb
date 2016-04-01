@@ -1218,7 +1218,7 @@ md_pcrel_from (fixS *fixP)
   return fixP->fx_where - fixP->fx_size + (INSN_SIZE * offset);
 }
 
-char *
+const char *
 md_atof (int what_statement_type,
 	 char *literalP,
 	 int *sizeP)

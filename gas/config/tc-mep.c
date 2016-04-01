@@ -2039,7 +2039,7 @@ md_number_to_chars (char *buf, valueT val, int n)
     number_to_chars_littleendian (buf, val, n);
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);
@@ -2080,7 +2080,7 @@ mep_fix_adjustable (fixS *fixP)
 }
 
 bfd_vma
-mep_elf_section_letter (int letter, char **ptrmsg)
+mep_elf_section_letter (int letter, const char **ptrmsg)
 {
   if (letter == 'v')
     return SHF_MEP_VLIW;

@@ -4879,7 +4879,7 @@ m68k_mri_mode_change (int on)
     }
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);

@@ -2272,7 +2272,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
    emitted is stored in *sizeP .  An error message is returned, or NULL on
    OK.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   if (type == 'r')

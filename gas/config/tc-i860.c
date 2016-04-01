@@ -53,7 +53,7 @@ static char reg_prefix;
 
 struct i860_it
 {
-  char *error;
+  const char *error;
   unsigned long opcode;
   enum expand_type expand;
   struct i860_fi
@@ -1010,7 +1010,7 @@ i860_get_expression (char *str)
   return 0;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);

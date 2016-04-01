@@ -9378,7 +9378,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   md_number_to_chars (p, value, fixP->fx_size);
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   /* This outputs the LITTLENUMs in REVERSE order;
@@ -10781,7 +10781,7 @@ tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 /* For ELF on x86-64, add support for SHF_X86_64_LARGE.  */
 
 bfd_vma
-x86_64_section_letter (int letter, char **ptr_msg)
+x86_64_section_letter (int letter, const char **ptr_msg)
 {
   if (flag_code == CODE_64BIT)
     {

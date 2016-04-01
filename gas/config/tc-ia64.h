@@ -110,7 +110,7 @@ extern void ia64_cons_fix_new (fragS *, int, int, expressionS *,
 			       bfd_reloc_code_real_type);
 extern void ia64_validate_fix (struct fix *);
 extern char * ia64_canonicalize_symbol_name (char *);
-extern bfd_vma ia64_elf_section_letter (int, char **);
+extern bfd_vma ia64_elf_section_letter (int, const char **);
 extern flagword ia64_elf_section_flags (flagword, bfd_vma, int);
 extern int ia64_elf_section_type (const char *, size_t);
 extern long ia64_pcrel_from_section (struct fix *, segT);

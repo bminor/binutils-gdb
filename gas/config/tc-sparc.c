@@ -200,7 +200,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 struct sparc_it
   {
-    char *error;
+    const char *error;
     unsigned long opcode;
     struct nlist *nlistp;
     expressionS exp;
@@ -3234,7 +3234,7 @@ output_insn (const struct sparc_opcode *insn, struct sparc_it *theinsn)
 #endif
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);

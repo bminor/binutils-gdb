@@ -384,7 +384,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
   return NULL;
 }
 
-char *
+const char *
 md_atof (int type ATTRIBUTE_UNUSED, char *litP ATTRIBUTE_UNUSED,
 	 int *sizeP ATTRIBUTE_UNUSED)
 {

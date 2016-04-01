@@ -350,7 +350,7 @@ typedef struct space_dictionary_chain sd_chain_struct;
 struct default_subspace_dict
   {
     /* Name of the subspace.  */
-    char *name;
+    const char *name;
 
     /* FIXME.  Is this still needed?  */
     char defined;
@@ -403,7 +403,7 @@ struct default_subspace_dict
 struct default_space_dict
   {
     /* Name of the space.  */
-    char *name;
+    const char *name;
 
     /* Space number.  It is possible to identify spaces within
        assembly code numerically!  */
@@ -503,27 +503,27 @@ static void pa_align (int);
 static void pa_space (int);
 static void pa_spnum (int);
 static void pa_subspace (int);
-static sd_chain_struct *create_new_space (char *, int, int,
-						  int, int, int,
-						  asection *, int);
+static sd_chain_struct *create_new_space (const char *, int, int,
+					  int, int, int,
+					  asection *, int);
 static ssd_chain_struct *create_new_subspace (sd_chain_struct *,
-						      char *, int, int,
-						      int, int, int, int,
-						      int, int, int, int,
-						      int, asection *);
+					      const char *, int, int,
+					      int, int, int, int,
+					      int, int, int, int,
+					      int, asection *);
 static ssd_chain_struct *update_subspace (sd_chain_struct *,
-						  char *, int, int, int,
-						  int, int, int, int,
-						  int, int, int, int,
-						  asection *);
-static sd_chain_struct *is_defined_space (char *);
-static ssd_chain_struct *is_defined_subspace (char *);
+					  char *, int, int, int,
+					  int, int, int, int,
+					  int, int, int, int,
+					  asection *);
+static sd_chain_struct *is_defined_space (const char *);
+static ssd_chain_struct *is_defined_subspace (const char *);
 static sd_chain_struct *pa_segment_to_space (asection *);
 static ssd_chain_struct *pa_subsegment_to_subspace (asection *,
 							    subsegT);
 static sd_chain_struct *pa_find_space_by_number (int);
 static unsigned int pa_subspace_start (sd_chain_struct *, int);
-static sd_chain_struct *pa_parse_space_stmt (char *, int);
+static sd_chain_struct *pa_parse_space_stmt (const char *, int);
 #endif
 
 /* File and globally scoped variable declarations.  */
@@ -1319,7 +1319,7 @@ pa_parse_nullif (char **s)
   return nullif;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);
@@ -7080,7 +7080,7 @@ pa_check_current_space_and_subspace (void)
    by the parameters to the .SPACE directive.  */
 
 static sd_chain_struct *
-pa_parse_space_stmt (char *space_name, int create_flag)
+pa_parse_space_stmt (const char *space_name, int create_flag)
 {
   char *name, *ptemp, c;
   char loadable, defined, private, sort;
@@ -7590,7 +7590,7 @@ pa_spaces_begin (void)
   i = 0;
   while (pa_def_spaces[i].name)
     {
-      char *name;
+      const char *name;
 
       /* Pick the right name to use for the new section.  */
       name = pa_def_spaces[i].name;
@@ -7606,7 +7606,7 @@ pa_spaces_begin (void)
   i = 0;
   while (pa_def_subspaces[i].name)
     {
-      char *name;
+      const char *name;
       int applicable, subsegment;
       asection *segment = NULL;
       sd_chain_struct *space;
@@ -7707,7 +7707,7 @@ pa_spaces_begin (void)
    by the given parameters.  */
 
 static sd_chain_struct *
-create_new_space (char *name,
+create_new_space (const char *name,
 		  int spnum,
 		  int loadable ATTRIBUTE_UNUSED,
 		  int defined,
@@ -7789,7 +7789,7 @@ create_new_space (char *name,
 
 static ssd_chain_struct *
 create_new_subspace (sd_chain_struct *space,
-		     char *name,
+		     const char *name,
 		     int loadable ATTRIBUTE_UNUSED,
 		     int code_only ATTRIBUTE_UNUSED,
 		     int comdat,
@@ -7893,7 +7893,7 @@ update_subspace (sd_chain_struct *space,
    NULL if no such space exists.  */
 
 static sd_chain_struct *
-is_defined_space (char *name)
+is_defined_space (const char *name)
 {
   sd_chain_struct *chain_pointer;
 
@@ -7942,7 +7942,7 @@ pa_segment_to_space (asection *seg)
    own subspace.  */
 
 static ssd_chain_struct *
-is_defined_subspace (char *name)
+is_defined_subspace (const char *name)
 {
   sd_chain_struct *space_chain;
   ssd_chain_struct *subspace_chain;

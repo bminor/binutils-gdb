@@ -710,7 +710,7 @@ extern const char FLT_CHARS[];
 
    An error message is returned, or a NULL pointer if everything went OK.  */
 
-char *
+const char *
 ieee_md_atof (int type,
 	      char *litP,
 	      int *sizeP,

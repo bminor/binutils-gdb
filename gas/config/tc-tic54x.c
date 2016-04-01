@@ -5062,7 +5062,7 @@ tic54x_parse_name (char *name ATTRIBUTE_UNUSED,
   return 0;
 }
 
-char *
+const char *
 md_atof (int type, char *literalP, int *sizeP)
 {
   /* Target data is little-endian, but floats are stored
