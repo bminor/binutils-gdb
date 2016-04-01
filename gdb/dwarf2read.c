@@ -19940,9 +19940,12 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
   if (!DW_STRING_IS_CANONICAL (attr))
     {
-      DW_STRING (attr)
-	= dwarf2_canonicalize_name (DW_STRING (attr), cu,
-				    &cu->objfile->per_bfd->storage_obstack);
+      if (die->tag != DW_TAG_base_type)
+	{
+	  DW_STRING (attr)
+	    = dwarf2_canonicalize_name (DW_STRING (attr), cu,
+					&cu->objfile->per_bfd->storage_obstack);
+	}
       DW_STRING_IS_CANONICAL (attr) = 1;
     }
   return DW_STRING (attr);
