@@ -54,30 +54,47 @@ struct addrmap *addrmap_create_mutable (struct obstack *obstack);
    let the caller construct more complicated operations from that,
    along with some others for traversal?
 
-   It turns out this is the mutation operation we want to use all the
-   time, at least for now.  Our immediate use for address maps is to
-   represent lexical blocks whose address ranges are not contiguous.
-   We walk the tree of lexical blocks present in the debug info, and
-   only create 'struct block' objects after we've traversed all a
-   block's children.  If a lexical block declares no local variables
-   (and isn't the lexical block for a function's body), we omit it
-   from GDB's data structures entirely.
+   It turns out this is the mutation operation we want to use most of
+   the time.  One use for address maps is to represent lexical blocks
+   whose address ranges are not contiguous.  We walk the tree of
+   lexical blocks present in the debug info, and only create 'struct
+   block' objects after we've traversed all a block's children.  If a
+   lexical block declares no local variables (and isn't the lexical
+   block for a function's body), we omit it from GDB's data structures
+   entirely.
 
    However, this means that we don't decide to create a block (and
    thus record it in the address map) until after we've traversed its
    children.  If we do decide to create the block, we do so at a time
    when all its children have already been recorded in the map.  So
    this operation --- change only those addresses left unset --- is
-   actually the operation we want to use every time.
+   actually the operation we want to use then.
 
-   It seems simpler to let the code which operates on the
-   representation directly deal with the hair of implementing these
-   semantics than to provide an interface which allows it to be
-   implemented efficiently, but doesn't reveal too much of the
-   representation.  */
+   If you need more flexibility, use addrmap_set instead.  */
 void addrmap_set_empty (struct addrmap *map,
                         CORE_ADDR start, CORE_ADDR end_inclusive,
                         void *obj);
+
+/* The type of the CALLBACK parameter of addrmap_subregion_update.
+   CB_DATA is the CB_DATA argument passed to addrmap_subregion_update.
+   CURR_VAL is the current value of a region.  */
+typedef void *(addrmap_subregion_update_callback_ftype) (void *cb_data,
+							 void *curr_val);
+
+/* In the mutable address map MAP, create a new region for addresses
+   from START to END_INCLUSIVE.  Then for each transition/subregion
+   within the new region, call CALLBACK with the existing value, and
+   replace the value with the one the callback returns.  Contiguous
+   subregions with the same value are compacted afterwards.
+
+   As the name suggests, END_INCLUSIVE is inclusive.  This convention
+   is unusual, but it allows callers to accurately specify ranges that
+   abut the top of the address space, and ranges that cover the entire
+   address space.  */
+void addrmap_subregion_update (struct addrmap *map,
+			       CORE_ADDR start, CORE_ADDR end_inclusive,
+			       addrmap_subregion_update_callback_ftype *cb,
+			       void *cb_data);
 
 /* Return the object associated with ADDR in MAP.  */
 void *addrmap_find (struct addrmap *map, CORE_ADDR addr);

@@ -135,13 +135,13 @@ struct obj_section
 
 /* The memory address of section S (vma + offset).  */
 #define obj_section_addr(s)				      		\
-  (bfd_get_section_vma ((s)->objfile->obfd, s->the_bfd_section)		\
+  (bfd_get_section_vma ((s)->objfile->obfd, (s)->the_bfd_section)	\
    + obj_section_offset (s))
 
 /* The one-passed-the-end memory address of section S
    (vma + size + offset).  */
 #define obj_section_endaddr(s)						\
-  (bfd_get_section_vma ((s)->objfile->obfd, s->the_bfd_section)		\
+  (bfd_get_section_vma ((s)->objfile->obfd, (s)->the_bfd_section)	\
    + bfd_get_section_size ((s)->the_bfd_section)			\
    + obj_section_offset (s))
 
@@ -489,6 +489,11 @@ struct objfile
 
 #define OBJF_NOT_FILENAME (1 << 6)
 
+/* ORIGINAL_NAME and OBFD->FILENAME correspond to text description unrelated to
+   filesystem names.  It can be for example "<image in memory>".  */
+
+#define OBJF_IN_SECTIONS_MAP (1 << 7)
+
 /* Declarations for functions defined in objfiles.c */
 
 extern struct objfile *allocate_objfile (bfd *, const char *name, int);
@@ -536,8 +541,6 @@ extern int have_full_symbols (void);
 extern void objfile_set_sym_fns (struct objfile *objfile,
 				 const struct sym_fns *sf);
 
-extern void objfiles_changed (void);
-
 extern int is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile);
 
 /* Return true if ADDRESS maps into one of the sections of a
@@ -574,22 +577,6 @@ in_plt_section (CORE_ADDR pc)
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
 DECLARE_REGISTRY(objfile);
-
-/* In normal use, the section map will be rebuilt by find_pc_section
-   if objfiles have been added, removed or relocated since it was last
-   called.  Calling inhibit_section_map_updates will inhibit this
-   behavior until resume_section_map_updates is called.  If you call
-   inhibit_section_map_updates you must ensure that every call to
-   find_pc_section in the inhibited region relates to a section that
-   is already in the section map and has not since been removed or
-   relocated.  */
-extern void inhibit_section_map_updates (struct program_space *pspace);
-
-/* Resume automatically rebuilding the section map as required.  */
-extern void resume_section_map_updates (struct program_space *pspace);
-
-/* Version of the above suitable for use as a cleanup.  */
-extern void resume_section_map_updates_cleanup (void *arg);
 
 extern void default_iterate_over_objfiles_in_search_order
   (struct gdbarch *gdbarch,
@@ -761,5 +748,8 @@ extern void objfile_register_static_link
 
 extern const struct dynamic_prop *objfile_lookup_static_link
   (struct objfile *objfile, const struct block *block);
+
+extern void obj_section_map_add_objfile (struct objfile *obj);
+extern void obj_section_map_remove_objfile (struct objfile *obj);
 
 #endif /* !defined (OBJFILES_H) */

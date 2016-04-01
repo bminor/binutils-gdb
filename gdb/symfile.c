@@ -1098,6 +1098,8 @@ syms_from_objfile (struct objfile *objfile,
 static void
 finish_new_objfile (struct objfile *objfile, int add_flags)
 {
+  obj_section_map_add_objfile (objfile);
+
   /* If this is the main symbol file we have to clean up all users of the
      old main symbol file.  Otherwise it is sufficient to fixup all the
      breakpoints that may have been redefined by this symbol file.  */
@@ -2503,6 +2505,14 @@ reread_symbols (void)
 	  printf_unfiltered (_("`%s' has changed; re-reading symbols.\n"),
 			     objfile_name (objfile));
 
+	  /* Remove these before wiping them and before removing
+	     separate debug info files (the address map relies on
+	     those).  */
+	  obj_section_map_remove_objfile (objfile);
+	  /* In case we delete the objfile through a cleanup, don't
+	     try removing these again from the address map.  */
+	  objfile->sections = NULL;
+
 	  /* There are various functions like symbol_file_add,
 	     symfile_bfd_open, syms_from_objfile, etc., which might
 	     appear to do what we want.  But they have various other
@@ -2639,6 +2649,8 @@ reread_symbols (void)
 		  SIZEOF_N_SECTION_OFFSETS (num_offsets));
 	  objfile->num_sections = num_offsets;
 
+	  obj_section_map_add_objfile (objfile);
+
 	  /* What the hell is sym_new_init for, anyway?  The concept of
 	     distinguishing between the main file and additional files
 	     in this way seems rather dubious.  */
@@ -2684,9 +2696,6 @@ reread_symbols (void)
   if (new_objfiles)
     {
       int ix;
-
-      /* Notify objfiles that we've modified objfile sections.  */
-      objfiles_changed ();
 
       clear_symtab_users (0);
 

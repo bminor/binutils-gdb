@@ -29,9 +29,10 @@
    implementation.  */
 struct addrmap_funcs
 {
-  void (*set_empty) (struct addrmap *self,
-                     CORE_ADDR start, CORE_ADDR end_inclusive,
-                     void *obj);
+  void (*subregion_update) (struct addrmap *self,
+			    CORE_ADDR start, CORE_ADDR end_inclusive,
+			    addrmap_subregion_update_callback_ftype *cb,
+			    void *cb_data);
   void *(*find) (struct addrmap *self, CORE_ADDR addr);
   struct addrmap *(*create_fixed) (struct addrmap *self,
                                    struct obstack *obstack);
@@ -47,11 +48,12 @@ struct addrmap
 
 
 void
-addrmap_set_empty (struct addrmap *map,
-                   CORE_ADDR start, CORE_ADDR end_inclusive,
-                   void *obj)
+addrmap_subregion_update (struct addrmap *map,
+			  CORE_ADDR start, CORE_ADDR end_inclusive,
+			  addrmap_subregion_update_callback_ftype *cb,
+			  void *cb_data)
 {
-  map->funcs->set_empty (map, start, end_inclusive, obj);
+  map->funcs->subregion_update (map, start, end_inclusive, cb, cb_data);
 }
 
 
@@ -83,6 +85,37 @@ addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn, void *data)
 {
   return map->funcs->foreach (map, fn, data);
 }
+
+
+
+/* addmap_subregion_update callback for addrmap_set_empty.  Sets all
+   regions that are currently mapped to NULL to CB_DATA instead.  */
+
+static void *
+addrmap_set_empty_callback (void *cb_data, void *curr_obj)
+{
+  if (curr_obj == NULL)
+    return cb_data;
+  return curr_obj;
+}
+
+/* See addrmap.h.  */
+
+void
+addrmap_set_empty (struct addrmap *self,
+		   CORE_ADDR start, CORE_ADDR end_inclusive,
+		   void *obj)
+{
+  /* If we're being asked to set all empty portions of the given
+     address range to empty, then probably the caller is confused.
+     (If that turns out to be useful in some cases, then we can change
+     this to simply return, since overriding NULL with NULL is a
+     no-op.)  */
+  gdb_assert (obj != NULL);
+
+  addrmap_subregion_update (self, start, end_inclusive,
+			    addrmap_set_empty_callback, obj);
+}
 
 /* Fixed address maps.  */
 
@@ -113,12 +146,13 @@ struct addrmap_fixed
 
 
 static void
-addrmap_fixed_set_empty (struct addrmap *self,
-                   CORE_ADDR start, CORE_ADDR end_inclusive,
-                   void *obj)
+addrmap_fixed_subregion_update (struct addrmap *self,
+				CORE_ADDR start, CORE_ADDR end_inclusive,
+				addrmap_subregion_update_callback_ftype *cb,
+				void *cb_data)
 {
   internal_error (__FILE__, __LINE__,
-                  "addrmap_fixed_set_empty: "
+                  "addrmap_fixed_subregion_update: "
                   "fixed addrmaps can't be changed\n");
 }
 
@@ -197,7 +231,7 @@ addrmap_fixed_foreach (struct addrmap *self, addrmap_foreach_fn fn,
 
 static const struct addrmap_funcs addrmap_fixed_funcs =
 {
-  addrmap_fixed_set_empty,
+  addrmap_fixed_subregion_update,
   addrmap_fixed_find,
   addrmap_fixed_create_fixed,
   addrmap_fixed_relocate,
@@ -330,20 +364,14 @@ force_transition (struct addrmap_mutable *self, CORE_ADDR addr)
 
 
 static void
-addrmap_mutable_set_empty (struct addrmap *self,
-                           CORE_ADDR start, CORE_ADDR end_inclusive,
-                           void *obj)
+addrmap_mutable_subregion_update (struct addrmap *self,
+				  CORE_ADDR start, CORE_ADDR end_inclusive,
+				  addrmap_subregion_update_callback_ftype *cb,
+				  void *cb_data)
 {
   struct addrmap_mutable *map = (struct addrmap_mutable *) self;
   splay_tree_node n, next;
   void *prior_value;
-
-  /* If we're being asked to set all empty portions of the given
-     address range to empty, then probably the caller is confused.
-     (If that turns out to be useful in some cases, then we can change
-     this to simply return, since overriding NULL with NULL is a
-     no-op.)  */
-  gdb_assert (obj);
 
   /* We take a two-pass approach, for simplicity.
      - Establish transitions where we think we might need them.
@@ -360,8 +388,11 @@ addrmap_mutable_set_empty (struct addrmap *self,
        n && addrmap_node_key (n) <= end_inclusive;
        n = addrmap_splay_tree_successor (map, addrmap_node_key (n)))
     {
-      if (! addrmap_node_value (n))
-        addrmap_node_set_value (n, obj);
+      void *value;
+
+      value = addrmap_node_value (n);
+      value = cb (cb_data, value);
+      addrmap_node_set_value (n, value);
     }
 
   /* Walk the area again, removing transitions from any value to
@@ -386,12 +417,15 @@ addrmap_mutable_set_empty (struct addrmap *self,
 static void *
 addrmap_mutable_find (struct addrmap *self, CORE_ADDR addr)
 {
-  /* Not needed yet.  */
-  internal_error (__FILE__, __LINE__,
-                  _("addrmap_find is not implemented yet "
-                    "for mutable addrmaps"));
-}
+  struct addrmap_mutable *map = (struct addrmap_mutable *) self;
 
+  splay_tree_node n
+    = addrmap_splay_tree_lookup (map, addr);
+
+  if (n == NULL)
+    n = addrmap_splay_tree_predecessor (map, addr);
+  return n != NULL ? addrmap_node_value (n) : NULL;
+}
 
 /* A function to pass to splay_tree_foreach to count the number of nodes
    in the tree.  */
@@ -504,7 +538,7 @@ addrmap_mutable_foreach (struct addrmap *self, addrmap_foreach_fn fn,
 
 static const struct addrmap_funcs addrmap_mutable_funcs =
 {
-  addrmap_mutable_set_empty,
+  addrmap_mutable_subregion_update,
   addrmap_mutable_find,
   addrmap_mutable_create_fixed,
   addrmap_mutable_relocate,

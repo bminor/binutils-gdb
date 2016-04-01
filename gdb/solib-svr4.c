@@ -1947,20 +1947,6 @@ svr4_handle_solib_event (void)
       return;
     }
 
-  /* evaluate_probe_argument looks up symbols in the dynamic linker
-     using find_pc_section.  find_pc_section is accelerated by a cache
-     called the section map.  The section map is invalidated every
-     time a shared library is loaded or unloaded, and if the inferior
-     is generating a lot of shared library events then the section map
-     will be updated every time svr4_handle_solib_event is called.
-     We called find_pc_section in svr4_create_solib_event_breakpoints,
-     so we can guarantee that the dynamic linker's sections are in the
-     section map.  We can therefore inhibit section map updates across
-     these calls to evaluate_probe_argument and save a lot of time.  */
-  inhibit_section_map_updates (current_program_space);
-  usm_chain = make_cleanup (resume_section_map_updates_cleanup,
-			    current_program_space);
-
   TRY
     {
       val = evaluate_probe_argument (pa->probe, 1, frame);
@@ -2020,9 +2006,6 @@ svr4_handle_solib_event (void)
       if (lm == 0)
 	action = FULL_RELOAD;
     }
-
-  /* Resume section map updates.  */
-  do_cleanups (usm_chain);
 
   if (action == UPDATE_OR_RELOAD)
     {
