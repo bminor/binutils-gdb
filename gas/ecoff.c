@@ -4850,7 +4850,7 @@ allocate_scope (void)
 
 #else
 
-  ptr = (scope_t *) xmalloc (sizeof (scope_t));
+  ptr = XNEW (scope_t);
 
 #endif
 
@@ -4899,7 +4899,7 @@ allocate_vlinks (void)
 
 #else
 
-  ptr = (vlinks_t *) xmalloc (sizeof (vlinks_t));
+  ptr = XNEW (vlinks_t);
 
 #endif
 
@@ -4933,7 +4933,7 @@ allocate_shash (void)
 
 #else
 
-  ptr = (shash_t *) xmalloc (sizeof (shash_t));
+  ptr = XNEW (shash_t);
 
 #endif
 
@@ -4967,7 +4967,7 @@ allocate_thash (void)
 
 #else
 
-  ptr = (thash_t *) xmalloc (sizeof (thash_t));
+  ptr = XNEW (thash_t);
 
 #endif
 
@@ -5007,7 +5007,7 @@ allocate_tag (void)
 
 #else
 
-  ptr = (tag_t *) xmalloc (sizeof (tag_t));
+  ptr = XNEW (tag_t);
 
 #endif
 
@@ -5056,7 +5056,7 @@ allocate_forward (void)
 
 #else
 
-  ptr = (forward_t *) xmalloc (sizeof (forward_t));
+  ptr = XNEW (forward_t);
 
 #endif
 
@@ -5096,7 +5096,7 @@ allocate_thead (void)
 
 #else
 
-  ptr = (thead_t *) xmalloc (sizeof (thead_t));
+  ptr = XNEW (thead_t);
 
 #endif
 
@@ -5143,7 +5143,7 @@ allocate_lineno_list (void)
 
 #else
 
-  ptr = (lineno_list_t *) xmalloc (sizeof (lineno_list_t));
+  ptr = XNEW (lineno_list_t);
 
 #endif
 

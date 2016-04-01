@@ -2348,7 +2348,7 @@ m68k_ip (char *instring)
 	      const struct m68k_cpu *cpu;
 	      int any = 0;
 	      size_t space = 400;
-	      char *buf = xmalloc (space + 1);
+	      char *buf = XNEWVEC (char, space + 1);
 	      size_t len;
 	      int paren = 1;
 
@@ -4599,10 +4599,7 @@ md_begin (void)
   /* First sort the opcode table into alphabetical order to seperate
      the order that the assembler wants to see the opcodes from the
      order that the disassembler wants to see them.  */
-  m68k_sorted_opcodes = xmalloc (m68k_numopcodes * sizeof (* m68k_sorted_opcodes));
-  if (!m68k_sorted_opcodes)
-    as_fatal (_("Internal Error:  Can't allocate m68k_sorted_opcodes of size %d"),
-	      m68k_numopcodes * ((int) sizeof (* m68k_sorted_opcodes)));
+  m68k_sorted_opcodes = XNEWVEC (const struct m68k_opcode *, m68k_numopcodes);
 
   for (i = m68k_numopcodes; i--;)
     m68k_sorted_opcodes[i] = m68k_opcodes + i;

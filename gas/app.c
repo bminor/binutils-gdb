@@ -249,7 +249,7 @@ app_push (void)
 {
   struct app_save *saved;
 
-  saved = (struct app_save *) xmalloc (sizeof (*saved));
+  saved = XNEW (struct app_save);
   saved->state = state;
   saved->old_state = old_state;
   saved->out_string = out_string;

@@ -502,7 +502,7 @@ rl78_frag_init (fragS * fragP)
 {
   if (rl78_bytes.n_relax || rl78_bytes.link_relax)
     {
-      fragP->tc_frag_data = malloc (sizeof (rl78_bytesT));
+      fragP->tc_frag_data = XNEW (rl78_bytesT);
       memcpy (fragP->tc_frag_data, & rl78_bytes, sizeof (rl78_bytesT));
     }
   else

@@ -762,7 +762,7 @@ symbol_find_noref (const char *name, int noref)
       orig = name;
       if (copy != NULL)
 	copy2 = copy;
-      name = copy = xmalloc (strlen (name) + 1);
+      name = copy = XNEWVEC (char, strlen (name) + 1);
 
       while ((c = *orig++) != '\0')
 	*copy++ = TOUPPER (c);
@@ -1634,8 +1634,8 @@ define_dollar_label (long label)
 
   if (dollar_labels == NULL)
     {
-      dollar_labels = (long *) xmalloc (DOLLAR_LABEL_BUMP_BY * sizeof (long));
-      dollar_label_instances = (long *) xmalloc (DOLLAR_LABEL_BUMP_BY * sizeof (long));
+      dollar_labels = XNEWVEC (long, DOLLAR_LABEL_BUMP_BY);
+      dollar_label_instances = XNEWVEC (long, DOLLAR_LABEL_BUMP_BY);
       dollar_label_defines = (char *) xmalloc (DOLLAR_LABEL_BUMP_BY);
       dollar_label_max = DOLLAR_LABEL_BUMP_BY;
       dollar_label_count = 0;
@@ -1643,10 +1643,9 @@ define_dollar_label (long label)
   else if (dollar_label_count == dollar_label_max)
     {
       dollar_label_max += DOLLAR_LABEL_BUMP_BY;
-      dollar_labels = (long *) xrealloc ((char *) dollar_labels,
-					 dollar_label_max * sizeof (long));
-      dollar_label_instances = (long *) xrealloc ((char *) dollar_label_instances,
-					  dollar_label_max * sizeof (long));
+      dollar_labels = XRESIZEVEC (long, dollar_labels, dollar_label_max);
+      dollar_label_instances = XRESIZEVEC (long, dollar_label_instances,
+					  dollar_label_max);
       dollar_label_defines = (char *) xrealloc (dollar_label_defines, dollar_label_max);
     }				/* if we needed to grow  */
 
@@ -1776,8 +1775,8 @@ fb_label_instance_inc (long label)
 
   if (fb_labels == NULL)
     {
-      fb_labels = (long *) xmalloc (FB_LABEL_BUMP_BY * sizeof (long));
-      fb_label_instances = (long *) xmalloc (FB_LABEL_BUMP_BY * sizeof (long));
+      fb_labels = XNEWVEC (long, FB_LABEL_BUMP_BY);
+      fb_label_instances = XNEWVEC (long, FB_LABEL_BUMP_BY);
       fb_label_max = FB_LABEL_BUMP_BY;
       fb_label_count = FB_LABEL_SPECIAL;
 
@@ -1785,10 +1784,8 @@ fb_label_instance_inc (long label)
   else if (fb_label_count == fb_label_max)
     {
       fb_label_max += FB_LABEL_BUMP_BY;
-      fb_labels = (long *) xrealloc ((char *) fb_labels,
-				     fb_label_max * sizeof (long));
-      fb_label_instances = (long *) xrealloc ((char *) fb_label_instances,
-					      fb_label_max * sizeof (long));
+      fb_labels = XRESIZEVEC (long, fb_labels, fb_label_max);
+      fb_label_instances = XRESIZEVEC (long, fb_label_instances, fb_label_max);
     }				/* if we needed to grow  */
 
   fb_labels[fb_label_count] = label;
@@ -3093,7 +3090,7 @@ symbol_relc_make_sym (symbolS * sym)
 char *
 symbol_relc_make_value (offsetT val)
 {
-  char * terminal = xmalloc (28);  /* Enough for long long.  */
+  char * terminal = XNEWVEC (char, 28);  /* Enough for long long.  */
 
   terminal[0] = '#';
   bfd_sprintf_vma (stdoutput, terminal + 1, val);

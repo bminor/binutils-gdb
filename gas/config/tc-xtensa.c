@@ -1067,7 +1067,7 @@ xtensa_add_insn_label (symbolS *sym)
   sym_list *l;
 
   if (!free_insn_labels)
-    l = (sym_list *) xmalloc (sizeof (sym_list));
+    l = XNEW (sym_list);
   else
     {
       l = free_insn_labels;
@@ -1167,7 +1167,7 @@ directive_push (directiveE directive, bfd_boolean negated, const void *datum)
 {
   const char *file;
   unsigned int line;
-  state_stackS *stack = (state_stackS *) xmalloc (sizeof (state_stackS));
+  state_stackS *stack = XNEW (state_stackS);
 
   file = as_where (&line);
 
@@ -1323,7 +1323,7 @@ xtensa_begin_directive (int ignore ATTRIBUTE_UNUSED)
 	  insn_labels = NULL;
 	}
       as_warn (_(".begin literal is deprecated; use .literal instead"));
-      state = (emit_state *) xmalloc (sizeof (emit_state));
+      state = XNEW (emit_state);
       xtensa_switch_to_literal_fragment (state);
       directive_push (directive_literal, negated, state);
       break;
@@ -1342,7 +1342,7 @@ xtensa_begin_directive (int ignore ATTRIBUTE_UNUSED)
 
       /* Allocate the literal state for this section and push
 	 onto the directive stack.  */
-      ls = xmalloc (sizeof (lit_state));
+      ls = XNEW (lit_state);
       gas_assert (ls);
 
       *ls = default_lit_sections;
@@ -2026,7 +2026,7 @@ tokenize_arguments (char **args, char *str)
 	    arg_end += 1;
 
 	  arg_len = arg_end - input_line_pointer;
-	  arg = (char *) xmalloc ((saw_colon ? 1 : 0) + arg_len + 1);
+	  arg = XNEWVEC (char, (saw_colon ? 1 : 0) + arg_len + 1);
 	  args[num_args] = arg;
 
 	  if (saw_colon)
@@ -4125,7 +4125,7 @@ xtensa_add_literal_sym (symbolS *sym)
 {
   sym_list *l;
 
-  l = (sym_list *) xmalloc (sizeof (sym_list));
+  l = XNEW (sym_list);
   l->sym = sym;
   l->next = literal_syms;
   literal_syms = l;
@@ -6095,8 +6095,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -6141,7 +6141,7 @@ new_resource_table (void *data,
 		    opcode_funcUnit_use_stage_func ousf)
 {
   int i;
-  resource_table *rt = (resource_table *) xmalloc (sizeof (resource_table));
+  resource_table *rt = XNEW (resource_table);
   rt->data = data;
   rt->cycles = cycles;
   rt->allocated_cycles = cycles;
@@ -6183,11 +6183,9 @@ resize_resource_table (resource_table *rt, int cycles)
   old_cycles = rt->allocated_cycles;
   rt->allocated_cycles = cycles;
 
-  rt->units = xrealloc (rt->units,
-			rt->allocated_cycles * sizeof (unsigned char *));
+  rt->units = XRESIZEVEC (unsigned char *, rt->units, rt->allocated_cycles);
   for (i = 0; i < old_cycles; i++)
-    rt->units[i] = xrealloc (rt->units[i],
-			     rt->num_units * sizeof (unsigned char));
+    rt->units[i] = XRESIZEVEC (unsigned char, rt->units[i], rt->num_units);
   for (i = old_cycles; i < cycles; i++)
     rt->units[i] = xcalloc (rt->num_units, sizeof (unsigned char));
 }
@@ -6967,7 +6965,7 @@ emit_single_op (TInsn *orig_insn)
 	case ITYPE_LABEL:
 	  {
 	    static int relaxed_sym_idx = 0;
-	    char *label = xmalloc (strlen (FAKE_LABEL_NAME) + 12);
+	    char *label = XNEWVEC (char, strlen (FAKE_LABEL_NAME) + 12);
 	    sprintf (label, "%s_rl_%x", FAKE_LABEL_NAME, relaxed_sym_idx++);
 	    colon (label);
 	    gas_assert (label_sym == NULL);
@@ -7456,7 +7454,7 @@ xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
       trampoline_buf = xtensa_insnbuf_alloc (xtensa_default_isa);
       trampoline_slotbuf = xtensa_insnbuf_alloc (xtensa_default_isa);
     }
-  tf = (struct trampoline_frag *)xmalloc(sizeof (struct trampoline_frag));
+  tf = XNEW (struct trampoline_frag);
   tf->next = ts->trampoline_list.next;
   ts->trampoline_list.next = tf;
   tf->needs_jump_around = needs_jump_around;
@@ -7621,7 +7619,7 @@ xtensa_maybe_create_literal_pool_frag (bfd_boolean create,
       fragP = frag_now;
     }
 
-  lpf = (struct litpool_frag *)xmalloc(sizeof (struct litpool_frag));
+  lpf = XNEW (struct litpool_frag);
   /* Insert at tail of circular list.  */
   lpf->addr = 0;
   lps->frag_list.prev->next = lpf;
@@ -8638,7 +8636,7 @@ xtensa_add_config_info (void)
   info_sec = subseg_new (".xtensa.info", 0);
   bfd_set_section_flags (stdoutput, info_sec, SEC_HAS_CONTENTS | SEC_READONLY);
 
-  data = xmalloc (100);
+  data = XNEWVEC (char, 100);
   sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
 	   XSHAL_USE_ABSOLUTE_LITERALS, XSHAL_ABI);
   sz = strlen (data) + 1;
@@ -9092,8 +9090,7 @@ static void xtensa_realloc_fixup_cache (fixup_cacheS *cache, unsigned add)
   if (cache->n_fixups + add > cache->n_max)
     {
       cache->n_max = (cache->n_fixups + add) * 2;
-      cache->fixups = xrealloc (cache->fixups,
-				sizeof (*cache->fixups) * cache->n_max);
+      cache->fixups = XRESIZEVEC (cached_fixupS, cache->fixups, cache->n_max);
     }
 }
 
@@ -10942,7 +10939,7 @@ get_subseg_info (segT seg, subsegT subseg)
 static subseg_map *
 add_subseg_info (segT seg, subsegT subseg)
 {
-  subseg_map *subseg_e = (subseg_map *) xmalloc (sizeof (subseg_map));
+  subseg_map *subseg_e = XNEW (subseg_map);
   memset (subseg_e, 0, sizeof (subseg_map));
   subseg_e->seg = seg;
   subseg_e->subseg = subseg;
@@ -11600,7 +11597,7 @@ cache_literal_section (bfd_boolean use_abs_literals)
       if (! use_abs_literals)
 	{
 	  /* Add the newly created literal segment to the list.  */
-	  seg_list *n = (seg_list *) xmalloc (sizeof (seg_list));
+	  seg_list *n = XNEW (seg_list);
 	  n->seg = seg;
 	  n->next = literal_head->next;
 	  literal_head->next = n;
@@ -11977,8 +11974,7 @@ add_xt_block_frags (segT sec,
 		}
 	      if (*xt_block == NULL)
 		{
-		  xtensa_block_info *new_block = (xtensa_block_info *)
-		    xmalloc (sizeof (xtensa_block_info));
+		  xtensa_block_info *new_block = XNEW (xtensa_block_info);
 		  new_block->sec = sec;
 		  new_block->offset = fragP->fr_address;
 		  new_block->size = fragP->fr_fix;
@@ -12235,8 +12231,7 @@ add_xt_prop_frags (segT sec,
 		  xtensa_block_info *new_block;
 		  if ((*xt_block) != NULL)
 		    xt_block = &(*xt_block)->next;
-		  new_block = (xtensa_block_info *)
-		    xmalloc (sizeof (xtensa_block_info));
+		  new_block = XNEW (xtensa_block_info);
 		  *new_block = tmp_block;
 		  *xt_block = new_block;
 		}
@@ -12261,8 +12256,7 @@ init_op_placement_info_table (void)
   int slot;
   int num_opcodes = xtensa_isa_num_opcodes (isa);
 
-  op_placement_table = (op_placement_info_table)
-    xmalloc (sizeof (op_placement_info) * num_opcodes);
+  op_placement_table = XNEWVEC (op_placement_info, num_opcodes);
   gas_assert (xtensa_isa_num_formats (isa) < MAX_FORMATS);
 
   for (opcode = 0; opcode < num_opcodes; opcode++)
@@ -13166,8 +13160,7 @@ build_section_rename (const char *arg)
 	}
 
       /* Now add it.  */
-      r = (struct rename_section_struct *)
-	xmalloc (sizeof (struct rename_section_struct));
+      r = XNEW (struct rename_section_struct);
       r->old_name = xstrdup (old_name);
       r->new_name = xstrdup (new_name);
       r->next = section_rename;

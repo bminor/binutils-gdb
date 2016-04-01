@@ -162,7 +162,7 @@ md_begin (void)
   for (idx = 0; md_pseudo_table[idx].poc_name; idx++)
     {
       opcode_entry_type *fake_opcode;
-      fake_opcode = (opcode_entry_type *) malloc (sizeof (opcode_entry_type));
+      fake_opcode = XNEW (opcode_entry_type);
       fake_opcode->name = md_pseudo_table[idx].poc_name;
       fake_opcode->func = (void *) (md_pseudo_table + idx);
       fake_opcode->opcode = 250;
@@ -1357,8 +1357,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
 {
   arelent *reloc;
 
-  reloc = xmalloc (sizeof (*reloc));
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->addend = fixp->fx_offset;

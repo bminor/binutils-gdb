@@ -1355,9 +1355,9 @@ tc_gen_reloc (asection *section, fixS *fixp)
   gas_assert (hppa_fixp != 0);
   gas_assert (section != 0);
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   /* Allow fixup_segment to recognize hand-written pc-relative relocations.
@@ -1388,8 +1388,8 @@ tc_gen_reloc (asection *section, fixS *fixp)
   for (n_relocs = 0; codes[n_relocs]; n_relocs++)
     ;
 
-  relocs = xmalloc (sizeof (arelent *) * n_relocs + 1);
-  reloc = xmalloc (sizeof (arelent) * n_relocs);
+  relocs = XNEWVEC (arelent *, n_relocs + 1);
+  reloc = XNEWVEC (arelent, n_relocs);
   for (i = 0; i < n_relocs; i++)
     relocs[i] = &reloc[i];
 
@@ -1447,7 +1447,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  break;
 	}
 
-      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      reloc->sym_ptr_ptr = XNEW (asymbol *);
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->howto = bfd_reloc_type_lookup (stdoutput,
 					    (bfd_reloc_code_real_type) code);
@@ -1463,7 +1463,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
     {
       code = *codes[i];
 
-      relocs[i]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      relocs[i]->sym_ptr_ptr = XNEW (asymbol *);
       *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       relocs[i]->howto =
 	bfd_reloc_type_lookup (stdoutput,
@@ -1484,14 +1484,14 @@ tc_gen_reloc (asection *section, fixS *fixp)
 				     (bfd_reloc_code_real_type) *codes[0]);
 	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[0]->addend = 0;
-	  relocs[1]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  relocs[1]->sym_ptr_ptr = XNEW (asymbol *);
 	  *relocs[1]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  relocs[1]->howto
 	    = bfd_reloc_type_lookup (stdoutput,
 				     (bfd_reloc_code_real_type) *codes[1]);
 	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[1]->addend = 0;
-	  relocs[2]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  relocs[2]->sym_ptr_ptr = XNEW (asymbol *);
 	  *relocs[2]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 	  relocs[2]->howto
 	    = bfd_reloc_type_lookup (stdoutput,
@@ -1546,7 +1546,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	case R_N0SEL:
 	case R_N1SEL:
 	  /* There is no symbol or addend associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  relocs[i]->sym_ptr_ptr = XNEW (asymbol *);
 	  *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = 0;
 	  break;
@@ -1555,7 +1555,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	case R_ENTRY:
 	case R_EXIT:
 	  /* There is no symbol associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  relocs[i]->sym_ptr_ptr = XNEW (asymbol *);
 	  *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = fixp->fx_offset;
 	  break;
@@ -6925,7 +6925,7 @@ pa_proc (int unused ATTRIBUTE_UNUSED)
   within_procedure = TRUE;
 
   /* Create another call_info structure.  */
-  call_info = xmalloc (sizeof (struct call_info));
+  call_info = XNEW (struct call_info);
 
   if (!call_info)
     as_fatal (_("Cannot allocate unwind descriptor\n"));
@@ -7718,11 +7718,7 @@ create_new_space (const char *name,
 {
   sd_chain_struct *chain_entry;
 
-  chain_entry = xmalloc (sizeof (sd_chain_struct));
-  if (!chain_entry)
-    as_fatal (_("Out of memory: could not allocate new space chain entry: %s\n"),
-	      name);
-
+  chain_entry = XNEW (sd_chain_struct);
   SPACE_NAME (chain_entry) = xstrdup (name);
   SPACE_DEFINED (chain_entry) = defined;
   SPACE_USER_DEFINED (chain_entry) = user_defined;
@@ -7805,10 +7801,7 @@ create_new_subspace (sd_chain_struct *space,
 {
   ssd_chain_struct *chain_entry;
 
-  chain_entry = xmalloc (sizeof (ssd_chain_struct));
-  if (!chain_entry)
-    as_fatal (_("Out of memory: could not allocate new subspace chain entry: %s\n"), name);
-
+  chain_entry = XNEW (ssd_chain_struct);
   SUBSPACE_NAME (chain_entry) = xstrdup (name);
 
   /* Initialize subspace_defined.  When we hit a .subspace directive

@@ -171,7 +171,7 @@ static void
 fake_opcode (const char *name,
 	     void (*func) (struct pj_opc_info_t *, char *))
 {
-  pj_opc_info_t * fake = xmalloc (sizeof (pj_opc_info_t));
+  pj_opc_info_t * fake = XNEW (pj_opc_info_t);
 
   fake->opcode = -1;
   fake->opcode_next = -1;
@@ -472,8 +472,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   arelent *rel;
   bfd_reloc_code_real_type r_type;
 
-  rel = xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
 

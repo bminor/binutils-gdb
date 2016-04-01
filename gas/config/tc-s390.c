@@ -1032,7 +1032,7 @@ s390_lit_suffix (char **str_p, expressionS *exp_p, elf_suffix_type suffix)
 	}
       else
 	{
-	  lpe = (struct s390_lpe *) xmalloc (sizeof (struct s390_lpe));
+	  lpe = XNEW (struct s390_lpe);
 	}
 
       lpe->ex = *exp_p;
@@ -1879,7 +1879,7 @@ static void
 s390_machine (int ignore ATTRIBUTE_UNUSED)
 {
   char *cpu_string;
-  static struct
+  static struct cpu_history
   {
     unsigned int cpu;
     unsigned int flags;
@@ -1923,7 +1923,7 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
       if (strcmp (cpu_string, "push") == 0)
 	{
 	  if (cpu_history == NULL)
-	    cpu_history = xmalloc (MAX_HISTORY * sizeof (*cpu_history));
+	    cpu_history = XNEWVEC (struct cpu_history, MAX_HISTORY);
 
 	  if (curr_hist >= MAX_HISTORY)
 	    as_bad (_(".machine stack overflow"));
@@ -1995,7 +1995,7 @@ s390_machinemode (int ignore ATTRIBUTE_UNUSED)
       if (strcmp (mode_string, "push") == 0)
 	{
 	  if (mode_history == NULL)
-	    mode_history = xmalloc (MAX_HISTORY * sizeof (*mode_history));
+	    mode_history = XNEWVEC (unsigned int, MAX_HISTORY);
 
 	  if (curr_hist >= MAX_HISTORY)
 	    as_bad (_(".machinemode stack overflow"));
@@ -2548,8 +2548,8 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	code = BFD_RELOC_390_GOTPCDBL;
     }
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);

@@ -4051,9 +4051,7 @@ add_operand_error_record (const operand_error_record* new_record)
       /* Get one empty record.  */
       if (free_opnd_error_record_nodes == NULL)
 	{
-	  record = xmalloc (sizeof (operand_error_record));
-	  if (record == NULL)
-	    abort ();
+	  record = XNEW (operand_error_record);
 	}
       else
 	{
@@ -6102,8 +6100,7 @@ md_assemble (char *str)
 	         store the instruction information for the future fix-up.  */
 	      struct aarch64_inst *copy;
 	      gas_assert (inst.reloc.type != BFD_RELOC_UNUSED);
-	      if ((copy = xmalloc (sizeof (struct aarch64_inst))) == NULL)
-		abort ();
+	      copy = XNEW (struct aarch64_inst);
 	      memcpy (copy, &inst.base, sizeof (struct aarch64_inst));
 	      output_inst (copy);
 	    }
@@ -7198,9 +7195,9 @@ tc_gen_reloc (asection * section, fixS * fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -7541,8 +7538,7 @@ get_upper_str (const char *str)
 {
   char *ret;
   size_t len = strlen (str);
-  if ((ret = xmalloc (len + 1)) == NULL)
-    abort ();
+  ret = XNEWVEC (char, len + 1);
   convert_to_upper (ret, str, len);
   return ret;
 }
@@ -7838,7 +7834,7 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
      adding an extension (1) or removing it (0) and only allowing it to
      change in the order -1 -> 1 -> 0.  */
   int adding_value = -1;
-  aarch64_feature_set *ext_set = xmalloc (sizeof (aarch64_feature_set));
+  aarch64_feature_set *ext_set = XNEW (aarch64_feature_set);
 
   /* Copy the feature set, so that we can modify it.  */
   *ext_set = **opt_p;

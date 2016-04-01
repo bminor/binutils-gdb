@@ -4123,7 +4123,7 @@ nds32_elf_save_pseudo_pattern (fixS* fixP, struct nds32_opcode *opcode,
 			       fragS *fragP)
 {
   if (!reloc_ptr)
-    reloc_ptr = malloc (sizeof (struct nds32_relocs_pattern));
+    reloc_ptr = XNEW (struct nds32_relocs_pattern);
   reloc_ptr->seg = now_seg;
   reloc_ptr->sym = sym;
   reloc_ptr->frag = fragP;

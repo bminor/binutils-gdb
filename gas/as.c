@@ -747,7 +747,7 @@ This program has absolutely no warranty.\n"));
 		break;
 	      }
 
-	    n = xmalloc (sizeof * n);
+	    n = XNEW (struct itbl_file_list);
 	    n->next = itbl_files;
 	    n->name = optarg;
 	    itbl_files = n;

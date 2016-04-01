@@ -7414,8 +7414,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  if (hi_fixup == 0
 	      || !fixup_has_matching_lo_p (hi_fixup->fixp))
 	    {
-	      hi_fixup = ((struct mips_hi_fixup *)
-			  xmalloc (sizeof (struct mips_hi_fixup)));
+	      hi_fixup = XNEW (struct mips_hi_fixup);
 	      hi_fixup->next = mips_hi_fixup_list;
 	      mips_hi_fixup_list = hi_fixup;
 	    }
@@ -15681,7 +15680,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     {
       struct mips_option_stack *s;
 
-      s = (struct mips_option_stack *) xmalloc (sizeof *s);
+      s = XNEW (struct mips_option_stack);
       s->next = mips_opts_stack;
       s->options = mips_opts;
       mips_opts_stack = s;
@@ -17170,8 +17169,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   bfd_reloc_code_real_type code;
 
   memset (retval, 0, sizeof(retval));
-  reloc = retval[0] = (arelent *) xcalloc (1, sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = retval[0] = XCNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -17888,7 +17887,7 @@ mips_record_label (symbolS *sym)
   struct insn_label_list *l;
 
   if (free_insn_labels == NULL)
-    l = (struct insn_label_list *) xmalloc (sizeof *l);
+    l = XNEW (struct insn_label_list);
   else
     {
       l = free_insn_labels;
@@ -18369,7 +18368,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
   if (p && cur_proc_ptr)
     {
       OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (p);
-      expressionS *exp = xmalloc (sizeof (expressionS));
+      expressionS *exp = XNEW (expressionS);
 
       obj->size = exp;
       exp->X_op = O_subtract;

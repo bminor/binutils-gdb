@@ -798,7 +798,8 @@ check_got (int * got_type, int * got_len)
   for (new_pointer = past_got; !is_end_of_line[(unsigned char) *new_pointer++];)
     ;
   second = new_pointer - past_got;
-  tmpbuf = xmalloc (first + second + 2); /* One extra byte for ' ' and one for NUL.  */
+  /* One extra byte for ' ' and one for NUL.  */
+  tmpbuf = XNEWVEC (char, first + second + 2);
   memcpy (tmpbuf, input_line_pointer, first);
   tmpbuf[first] = ' '; /* @GOTOFF is replaced with a single space.  */
   memcpy (tmpbuf + first + 1, past_got, second);

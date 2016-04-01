@@ -6273,8 +6273,8 @@ s3_insert_reg (const struct s3_reg_entry *r, struct hash_control *htab)
 {
   int i = 0;
   int len = strlen (r->name) + 2;
-  char *buf = xmalloc (len);
-  char *buf2 = xmalloc (len);
+  char *buf = XNEWVEC (char, len);
+  char *buf2 = XNEWVEC (char, len);
 
   strcpy (buf + i, r->name);
   for (i = 0; buf[i]; i++)
@@ -7400,10 +7400,10 @@ s3_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
   bfd_reloc_code_real_type code;
   const char *type;
 
-  reloc = retval[0] = xmalloc (sizeof (arelent));
+  reloc = retval[0] = XNEW (arelent);
   retval[1] = NULL;
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->addend = fixp->fx_offset;
@@ -7431,9 +7431,9 @@ s3_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
       newval |= (((off >> 14) & 0x3) << 16);
       s3_md_number_to_chars (buf, newval, s3_INSN_SIZE);
 
-      retval[1] = xmalloc (sizeof (arelent));
+      retval[1] = XNEW (arelent);
       retval[2] = NULL;
-      retval[1]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      retval[1]->sym_ptr_ptr = XNEW (asymbol *);
       *retval[1]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       retval[1]->address = (reloc->address + s3_RELAX_RELOC2 (fixp->fx_frag->fr_subtype));
 

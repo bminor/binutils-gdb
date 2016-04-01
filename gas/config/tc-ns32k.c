@@ -1908,7 +1908,7 @@ md_begin (void)
     }
 
   /* Some private space please!  */
-  freeptr_static = (char *) malloc (PRIVATE_SIZE);
+  freeptr_static = XNEWVEC (char, PRIVATE_SIZE);
 }
 
 /* Turn the string pointed to by litP into a floating point constant
@@ -2228,8 +2228,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   code = reloc (fixp->fx_size, fixp->fx_pcrel, fix_im_disp (fixp));
 
-  rel = xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   if (fixp->fx_pcrel)

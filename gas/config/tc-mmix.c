@@ -3775,7 +3775,7 @@ mmix_frob_file (void)
 
       if (gregs == NULL)
 	{
-	  gregs = xmalloc (sizeof (*gregs));
+	  gregs = XNEW (struct mmix_symbol_gregs);
 	  gregs->n_gregs = 0;
 	  symbol_set_tc (sym, &gregs);
 	  all_greg_symbols[n_greg_symbols++] = gregs;

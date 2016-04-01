@@ -2623,7 +2623,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 {
   arelent * reloc;
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
   /* HACK: Is this right?  */
   fixP->fx_r_type = tc_bfd_fix2rtype (fixP);
@@ -2640,7 +2640,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 
   gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   reloc->addend = fixP->fx_addnumber;

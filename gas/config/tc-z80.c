@@ -2058,8 +2058,8 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED , fixS *fixp)
       return NULL;
     }
 
-  reloc               = xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr  = xmalloc (sizeof (asymbol *));
+  reloc               = XNEW (arelent);
+  reloc->sym_ptr_ptr  = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address      = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto        = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);

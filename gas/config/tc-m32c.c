@@ -267,7 +267,7 @@ m32c_indirect_operand (char *str)
 
   operand = 1;
   ns_len = strlen (str);
-  new_str = (char*) xmalloc (ns_len);
+  new_str = XNEWVEC (char, ns_len);
   ns = new_str;
   ns_end = ns + ns_len;
 
@@ -1064,9 +1064,9 @@ tc_gen_reloc (asection *sec, fixS *fx)
     {
       arelent * reloc;
 
-      reloc = xmalloc (sizeof (* reloc));
+      reloc = XNEW (arelent);
 
-      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      reloc->sym_ptr_ptr = XNEW (asymbol *);
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fx->fx_addsy);
       reloc->address = fx->fx_frag->fr_address + fx->fx_where;
       reloc->howto = bfd_reloc_type_lookup (stdoutput, fx->fx_r_type);

@@ -276,7 +276,7 @@ file_info (const char *file_name)
     }
 
   /* Make new entry.  */
-  p = (file_info_type *) xmalloc (sizeof (file_info_type));
+  p = XNEW (file_info_type);
   p->next = file_info_head;
   file_info_head = p;
   p->filename = xstrdup (file_name);
@@ -334,7 +334,7 @@ listing_newline (char *ps)
 	  && !(last_file && file && filename_cmp (file, last_file)))
 	return;
 
-      new_i = (list_info_type *) xmalloc (sizeof (list_info_type));
+      new_i = XNEW (list_info_type);
 
       /* Detect if we are reading from stdin by examining the file
 	 name returned by as_where().
@@ -396,7 +396,7 @@ listing_newline (char *ps)
     }
   else
     {
-      new_i = (list_info_type *) xmalloc (sizeof (list_info_type));
+      new_i = XNEW (list_info_type);
       new_i->line_contents = ps;
     }
 

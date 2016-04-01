@@ -233,7 +233,7 @@ iq2000_add_macro (const char *  name,
   sb macro_name;
   const char *namestr;
 
-  macro = xmalloc (sizeof (macro_entry));
+  macro = XNEW (macro_entry);
   sb_new (& macro->sub);
   sb_new (& macro_name);
 
@@ -253,7 +253,7 @@ iq2000_add_macro (const char *  name,
 	{
 	  formal_entry *formal;
 
-	  formal = xmalloc (sizeof (formal_entry));
+	  formal = XNEW (formal_entry);
 
 	  sb_new (& formal->name);
 	  sb_new (& formal->def);
@@ -535,7 +535,7 @@ iq2000_record_hi16 (int    reloc_type,
 
   gas_assert (reloc_type == BFD_RELOC_HI16);
 
-  hi_fixup = xmalloc (sizeof * hi_fixup);
+  hi_fixup = XNEW (struct iq2000_hi_fixup);
   hi_fixup->fixp = fixP;
   hi_fixup->seg  = now_seg;
   hi_fixup->next = iq2000_hi_fixup_list;

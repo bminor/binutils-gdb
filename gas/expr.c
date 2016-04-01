@@ -106,7 +106,7 @@ make_expr_symbol (expressionS *expressionP)
   if (expressionP->X_op == O_constant)
     resolve_symbol_value (symbolP);
 
-  n = (struct expr_symbol_line *) xmalloc (sizeof *n);
+  n = XNEW (struct expr_symbol_line);
   n->sym = symbolP;
   n->file = as_where (&n->line);
   n->next = expr_symbol_lines;

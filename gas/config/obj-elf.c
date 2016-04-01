@@ -568,7 +568,7 @@ obj_elf_change_section (const char *name,
   if (push)
     {
       struct section_stack *elt;
-      elt = (struct section_stack *) xmalloc (sizeof (struct section_stack));
+      elt = XNEW (struct section_stack);
       elt->next = section_stack;
       elt->seg = now_seg;
       elt->prev_seg = previous_section;
@@ -1730,7 +1730,7 @@ elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
   if (srcelf->size)
     {
       if (destelf->size == NULL)
-	destelf->size = (expressionS *) xmalloc (sizeof (expressionS));
+	destelf->size = XNEW (expressionS);
       *destelf->size = *srcelf->size;
     }
   else
@@ -1847,8 +1847,7 @@ obj_elf_size (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      symbol_get_obj (sym)->size =
-          (expressionS *) xmalloc (sizeof (expressionS));
+      symbol_get_obj (sym)->size = XNEW (expressionS);
       *symbol_get_obj (sym)->size = exp;
     }
   demand_empty_rest_of_line ();
@@ -2339,7 +2338,7 @@ build_group_lists (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
   list->num_group += 1;
 
   /* Add index to hash.  */
-  idx_ptr = (unsigned int *) xmalloc (sizeof (unsigned int));
+  idx_ptr = XNEW (unsigned int);
   *idx_ptr = i;
   hash_insert (list->indexes, group_name, idx_ptr);
 }

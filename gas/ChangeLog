@@ -1,5 +1,128 @@
 2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* app.c (app_push): use XNEW macro.
+	* as.c: Likewise.
+	* config/obj-elf.c (obj_elf_change_section): Likewise.
+	(elf_copy_symbol_attributes): Likewise.
+	(obj_elf_size): Likewise.
+	(build_group_lists): Likewise.
+	* config/tc-aarch64.c (add_operand_error_record): Likewise.
+	(md_assemble): Likewise.
+	(tc_gen_reloc): Likewise.
+	(get_upper_str): Likewise.
+	(aarch64_parse_features): Likewise.
+	* config/tc-arm.c (insert_reg_alias): Likewise.
+	(insert_neon_reg_alias): Likewise.
+	(find_or_make_literal_pool): Likewise.
+	(s_arm_elf_cons): Likewise.
+	(add_unwind_opcode): Likewise.
+	(arm_parse_extension): Likewise.
+	* config/tc-avr.c (create_record_for_frag): Likewise.
+	* config/tc-crx.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-dlx.c (s_proc): Likewise.
+	* config/tc-ft32.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c (pa_proc): Likewise.
+	(create_new_space): Likewise.
+	(create_new_subspace): Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-iq2000.c (iq2000_add_macro): Likewise.
+	(iq2000_record_hi16): Likewise.
+	* config/tc-m32c.c (m32c_indirect_operand): Likewise.
+	* config/tc-m32r.c (debug_sym): Likewise.
+	(m32r_record_hi16): Likewise.
+	* config/tc-m68k.c (m68k_ip): Likewise.
+	(md_begin): Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-microblaze.c (check_got): Likewise.
+	* config/tc-mips.c (append_insn): Likewise.
+	(s_mipsset): Likewise.
+	(mips_record_label): Likewise.
+	(s_mips_end): Likewise.
+	* config/tc-mmix.c (mmix_frob_file): Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-moxie.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-nds32.c (nds32_elf_save_pseudo_pattern): Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-or1k.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* config/tc-pj.c (fake_opcode): Likewise.
+	* config/tc-ppc.c (ppc_apuinfo_section_add): Likewise.
+	(ppc_macro): Likewise.
+	(ppc_dwsect): Likewise.
+	(ppc_machine): Likewise.
+	* config/tc-rl78.c (rl78_frag_init): Likewise.
+	* config/tc-rx.c (rx_frag_init): Likewise.
+	* config/tc-s390.c (s390_lit_suffix): Likewise.
+	(s390_machine): Likewise.
+	(s390_machinemode): Likewise.
+	* config/tc-score.c (s3_insert_reg): Likewise.
+	(s3_gen_reloc): Likewise.
+	* config/tc-score7.c (s7_insert_reg): Likewise.
+	(s7_gen_reloc): Likewise.
+	* config/tc-tic30.c (tic30_operand): Likewise.
+	* config/tc-tic4x.c (tic4x_inst_make): Likewise.
+	* config/tc-tic54x.c (stag_add_field): Likewise.
+	(tic54x_struct): Likewise.
+	(tic54x_space): Likewise.
+	(tic54x_field): Likewise.
+	(tic54x_mlib): Likewise.
+	(subsym_substitute): Likewise.
+	* config/tc-tic6x.c (tic6x_frob_label): Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-xc16x.c: Likewise.
+	* config/tc-xtensa.c (xtensa_add_insn_label): Likewise.
+	(directive_push): Likewise.
+	(xtensa_begin_directive): Likewise.
+	(tokenize_arguments): Likewise.
+	(xtensa_add_literal_sym): Likewise.
+	(new_resource_table): Likewise.
+	(resize_resource_table): Likewise.
+	(emit_single_op): Likewise.
+	(xtensa_create_trampoline_frag): Likewise.
+	(xtensa_maybe_create_literal_pool_frag): Likewise.
+	(xtensa_add_config_info): Likewise.
+	(xtensa_realloc_fixup_cache): Likewise.
+	(add_subseg_info): Likewise.
+	(cache_literal_section): Likewise.
+	(add_xt_block_frags): Likewise.
+	(add_xt_prop_frags): Likewise.
+	(init_op_placement_info_table): Likewise.
+	(build_section_rename): Likewise.
+	* config/tc-z80.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* depend.c (register_dependency): Likewise.
+	* dwarf2dbg.c (get_line_subseg): Likewise.
+	(dwarf2_gen_line_info_1): Likewise.
+	(get_filenum): Likewise.
+	* ecoff.c (allocate_scope): Likewise.
+	(allocate_vlinks): Likewise.
+	(allocate_shash): Likewise.
+	(allocate_thash): Likewise.
+	(allocate_tag): Likewise.
+	(allocate_forward): Likewise.
+	(allocate_thead): Likewise.
+	(allocate_lineno_list): Likewise.
+	* expr.c (make_expr_symbol): Likewise.
+	* hash.c (hash_new_sized): Likewise.
+	* input-file.c (input_file_push): Likewise.
+	* listing.c (file_info): Likewise.
+	(listing_newline): Likewise.
+	* macro.c (new_formal): Likewise.
+	(define_macro): Likewise.
+	* remap.c (add_debug_prefix_map): Likewise.
+	* symbols.c (symbol_find_noref): Likewise.
+	(define_dollar_label): Likewise.
+	(fb_label_instance_inc): Likewise.
+	(symbol_relc_make_value): Likewise.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/obj-elf.c (obj_elf_vendor_attribute): Use xstrdup.
 	* config/tc-ppc.c (ppc_frob_file_before_adjust): Likewise.
 	(ppc_znop): Likewise.

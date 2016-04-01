@@ -402,8 +402,7 @@ tic30_operand (char *token)
   operand *current_op;
 
   debug ("In tic30_operand with %s\n", token);
-  current_op = malloc (sizeof (* current_op));
-  memset (current_op, '\0', sizeof (operand));
+  current_op = XCNEW (operand);
 
   if (*token == DIRECT_REFERENCE)
     {
@@ -464,7 +463,7 @@ tic30_operand (char *token)
       ind_addr_type *ind_addr_op;
       char * ind_buffer;
 
-      ind_buffer = xmalloc (strlen (token));
+      ind_buffer = XNEWVEC (char, strlen (token));
 
       debug ("Found indirect reference\n");
       ind_buffer[0] = *token;
@@ -1391,9 +1390,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 #undef MAP
 #undef F
 
-  rel = xmalloc (sizeof (* rel));
+  rel = XNEW (arelent);
   gas_assert (rel != 0);
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   rel->address = fixP->fx_frag->fr_address + fixP->fx_where;
   rel->addend = 0;

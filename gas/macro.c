@@ -471,7 +471,7 @@ new_formal (void)
 {
   formal_entry *formal;
 
-  formal = (formal_entry *) xmalloc (sizeof (formal_entry));
+  formal = XNEW (formal_entry);
 
   sb_new (&formal->name);
   sb_new (&formal->def);
@@ -655,7 +655,7 @@ define_macro (size_t idx, sb *in, sb *label,
   sb name;
   const char *error = NULL;
 
-  macro = (macro_entry *) xmalloc (sizeof (macro_entry));
+  macro = XNEW (macro_entry);
   sb_new (&macro->sub);
   sb_new (&name);
   macro->file = file;

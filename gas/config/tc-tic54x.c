@@ -593,9 +593,8 @@ stag_add_field (struct stag *parent,
 		bfd_vma offset,
 		struct stag *stag)
 {
-  struct stag_field *sfield = xmalloc (sizeof (struct stag_field));
+  struct stag_field *sfield = XCNEW (struct stag_field);
 
-  memset (sfield, 0, sizeof (*sfield));
   sfield->name = xstrdup (name);
   sfield->offset = offset;
   sfield->bitfield_offset = parent->current_bitfield_offset;
@@ -656,8 +655,7 @@ tic54x_struct (int arg)
   if (current_stag)
     {
       /* Nesting, link to outer one.  */
-      current_stag->inner = (struct stag *) xmalloc (sizeof (struct stag));
-      memset (current_stag->inner, 0, sizeof (struct stag));
+      current_stag->inner = XCNEW (struct stag);
       current_stag->inner->outer = current_stag;
       current_stag = current_stag->inner;
       if (start_offset)
@@ -666,8 +664,7 @@ tic54x_struct (int arg)
     }
   else
     {
-      current_stag = (struct stag *) xmalloc (sizeof (struct stag));
-      memset (current_stag, 0, sizeof (struct stag));
+      current_stag = XCNEW (struct stag);
       abs_section_offset = start_offset;
     }
   current_stag->is_union = is_union;
@@ -1236,7 +1233,7 @@ tic54x_space (int arg)
      partial allocation has not been completed yet.  */
   if (expn.X_op != O_constant || frag_bit_offset (frag_now, now_seg) == -1)
     {
-      struct bit_info *bi = xmalloc (sizeof (struct bit_info));
+      struct bit_info *bi = XNEW (struct bit_info);
 
       bi->seg = now_seg;
       bi->type = bes;
@@ -1744,7 +1741,7 @@ tic54x_field (int ignore ATTRIBUTE_UNUSED)
 	  fragS *alloc_frag = bit_offset_frag (frag_now, now_seg);
 	  if (bit_offset == -1)
 	    {
-	      struct bit_info *bi = xmalloc (sizeof (struct bit_info));
+	      struct bit_info *bi = XNEW (struct bit_info);
 	      /* We don't know the previous offset at this time, so store the
 		 info we need and figure it out later.  */
 	      expressionS size_exp;
@@ -2299,7 +2296,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 
   tic54x_set_default_include (0);
-  path = xmalloc ((unsigned long) len + include_dir_maxlen + 5);
+  path = XNEWVEC (char, (unsigned long) len + include_dir_maxlen + 5);
 
   for (i = 0; i < include_dir_count; i++)
     {
@@ -2348,7 +2345,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
     {
       /* Get a size at least as big as the archive member.  */
       bfd_size_type size = bfd_get_size (mbfd);
-      char *buf = xmalloc (size);
+      char *buf = XNEWVEC (char, size);
       char *fname = tmpnam (NULL);
       FILE *ftmp;
 
@@ -4563,7 +4560,7 @@ subsym_substitute (char *line, int forced)
 		      farg2 = (float) strtod (ptr, &ptr);
 		    }
 		  fresult = (*math_entry->proc) (farg1, farg2);
-		  value = xmalloc (128);
+		  value = XNEWVEC (char, 128);
 		  if (math_entry->int_return)
 		    sprintf (value, "%d", (int) fresult);
 		  else
@@ -4624,7 +4621,7 @@ subsym_substitute (char *line, int forced)
 		      break;
 		    }
 		  val = (*entry->proc) (arg1, arg2);
-		  value = xmalloc (64);
+		  value = XNEWVEC (char, 64);
 		  sprintf (value, "%d", val);
 		}
 	      /* Fix things up to replace the entire expression, not just the
@@ -5077,8 +5074,8 @@ tc_gen_reloc (asection *section, fixS *fixP)
   bfd_reloc_code_real_type code = fixP->fx_r_type;
   asymbol *sym = symbol_get_bfdsym (fixP->fx_addsy);
 
-  rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = sym;
   /* We assume that all rel->address are host byte offsets.  */
   rel->address = fixP->fx_frag->fr_address + fixP->fx_where;

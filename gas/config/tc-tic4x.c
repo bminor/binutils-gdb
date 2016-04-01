@@ -1241,10 +1241,9 @@ tic4x_inst_make (const char *name, unsigned long opcode, const char *args)
   if (insts == NULL)
     {
       /* Allocate memory to store name strings.  */
-      names = (char *) xmalloc (sizeof (char) * 8192);
+      names = XNEWVEC (char, 8192);
       /* Allocate memory for additional insts.  */
-      insts = (tic4x_inst_t *)
-	xmalloc (sizeof (tic4x_inst_t) * 1024);
+      insts = XNEWVEC (tic4x_inst_t, 1024);
     }
   insts[iindex].name = names;
   insts[iindex].opcode = opcode;
@@ -3011,9 +3010,9 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixP)
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   reloc->address /= OCTETS_PER_BYTE;

@@ -1616,9 +1616,9 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
       return NULL;
     }
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
@@ -2069,8 +2069,7 @@ create_record_for_frag (segT sec, fragS *fragP)
 {
   struct avr_property_record_link *prop_rec_link;
 
-  prop_rec_link = xmalloc (sizeof (struct avr_property_record_link));
-  memset (prop_rec_link, 0, sizeof (*prop_rec_link));
+  prop_rec_link = XCNEW (struct avr_property_record_link);
   gas_assert (fragP->fr_next != NULL);
 
   if (fragP->tc_frag_data.is_org)

@@ -2180,7 +2180,7 @@ insert_reg_alias (char *str, unsigned number, int type)
     }
 
   name = xstrdup (str);
-  new_reg = (struct reg_entry *) xmalloc (sizeof (struct reg_entry));
+  new_reg = XNEW (struct reg_entry);
 
   new_reg->name = name;
   new_reg->number = number;
@@ -2208,8 +2208,7 @@ insert_neon_reg_alias (char *str, int number, int type,
 
   if (atype)
     {
-      reg->neon = (struct neon_typed_alias *)
-	  xmalloc (sizeof (struct neon_typed_alias));
+      reg->neon = XNEW (struct neon_typed_alias);
       *reg->neon = *atype;
     }
 }
@@ -3138,7 +3137,7 @@ find_or_make_literal_pool (void)
   if (pool == NULL)
     {
       /* Create a new pool.  */
-      pool = (literal_pool *) xmalloc (sizeof (* pool));
+      pool = XNEW (literal_pool);
       if (! pool)
 	return NULL;
 
@@ -3535,7 +3534,7 @@ s_arm_elf_cons (int nbytes)
 		     XXX Surely there is a cleaner way to do this.  */
 		  char *p = input_line_pointer;
 		  int offset;
-		  char *save_buf = xmalloc (input_line_pointer - base);
+		  char *save_buf = XNEWVEC (char, input_line_pointer - base);
 
 		  memcpy (save_buf, base, input_line_pointer - base);
 		  memmove (base + (input_line_pointer - before_reloc),
@@ -21760,10 +21759,10 @@ add_unwind_opcode (valueT op, int length)
     {
       unwind.opcode_alloc += ARM_OPCODE_CHUNK_SIZE;
       if (unwind.opcodes)
-	unwind.opcodes = (unsigned char *) xrealloc (unwind.opcodes,
-						     unwind.opcode_alloc);
+	unwind.opcodes = XRESIZEVEC (unsigned char, unwind.opcodes,
+				     unwind.opcode_alloc);
       else
-	unwind.opcodes = (unsigned char *) xmalloc (unwind.opcode_alloc);
+	unwind.opcodes = XNEWVEC (unsigned char, unwind.opcode_alloc);
     }
   while (length > 0)
     {
@@ -24012,9 +24011,9 @@ tc_gen_reloc (asection *section, fixS *fixp)
   arelent * reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -25588,8 +25587,7 @@ struct arm_long_option_table
 static bfd_boolean
 arm_parse_extension (const char *str, const arm_feature_set **opt_p)
 {
-  arm_feature_set *ext_set = (arm_feature_set *)
-      xmalloc (sizeof (arm_feature_set));
+  arm_feature_set *ext_set = XNEW (arm_feature_set);
 
   /* We insist on extensions being specified in alphabetical order, and with
      extensions being added before being removed.  We achieve this by having

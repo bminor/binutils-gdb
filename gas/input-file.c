@@ -81,7 +81,7 @@ input_file_push (void)
 {
   struct saved_file *saved;
 
-  saved = (struct saved_file *) xmalloc (sizeof *saved);
+  saved = XNEW (struct saved_file);
 
   saved->f_in = f_in;
   saved->file_name = file_name;
