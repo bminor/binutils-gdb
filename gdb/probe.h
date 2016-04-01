@@ -21,6 +21,7 @@
 #define PROBE_H 1
 
 struct event_location;
+struct sym_search_scope;
 
 #include "gdb_vecs.h"
 
@@ -228,7 +229,7 @@ struct bound_probe
    symtabs_and_lines object and updates LOC or throws an error.  */
 
 extern struct symtabs_and_lines parse_probes (const struct event_location *loc,
-					      struct program_space *pspace,
+					      struct sym_search_scope *search_scope,
 					      struct linespec_result *canon);
 
 /* Helper function to register the proper probe_ops to a newly created probe.

@@ -13492,8 +13492,9 @@ bkpt_probe_create_sals_from_location (const struct event_location *location,
 				      enum bptype type_wanted)
 {
   struct linespec_sals lsal;
+  struct sym_search_scope search_scope = null_search_scope ();
 
-  lsal.sals = parse_probes (location, NULL, canonical);
+  lsal.sals = parse_probes (location, &search_scope, canonical);
   lsal.canonical = xstrdup (event_location_to_string (canonical->location));
   VEC_safe_push (linespec_sals, canonical->sals, &lsal);
 }
@@ -13504,7 +13505,7 @@ bkpt_probe_decode_location (struct breakpoint *b,
 			    struct sym_search_scope *search_scope,
 			    struct symtabs_and_lines *sals)
 {
-  *sals = parse_probes (location, search_scope->pspace, NULL);
+  *sals = parse_probes (location, search_scope, NULL);
   if (!sals->sals)
     error (_("probe not found"));
 }

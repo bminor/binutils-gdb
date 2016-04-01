@@ -212,12 +212,7 @@ re_set_exception_catchpoint (struct breakpoint *self,
   struct cleanup *cleanup;
   enum exception_event_kind kind = classify_exception_breakpoint (self);
   struct event_location *location;
-  struct sym_search_scope pspace_scope = null_search_scope ();
-  struct program_space *filter_pspace = search_scope->pspace;
-
-  /* Re-set in the whole pspace for now.  */
-  pspace_scope.pspace = search_scope->pspace;
-  search_scope = &pspace_scope;
+  struct sym_search_scope pspace_search_scope;
 
   /* We first try to use the probe interface.  */
   TRY
@@ -225,13 +220,28 @@ re_set_exception_catchpoint (struct breakpoint *self,
       location
 	= new_probe_location (exception_functions[kind].probe);
       cleanup = make_cleanup_delete_event_location (location);
-      sals = parse_probes (location, filter_pspace, NULL);
+      sals = parse_probes (location, search_scope, NULL);
       do_cleanups (cleanup);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
       /* Using the probe interface failed.  Let's fallback to the normal
 	 catchpoint mode.  */
+
+      /* However, we may have already found a probe in another
+	 objfile.  In that case, leave it be.  */
+      if (search_scope->objfile != NULL)
+	{
+	  struct bp_location *l;
+
+	  for (l = self->loc; l != NULL; l = l->next)
+	    {
+	      if (l->pspace == search_scope->pspace
+		  && l->sal.probe != NULL)
+		return;
+	    }
+	}
+
       TRY
 	{
 	  struct explicit_location explicit_loc;
@@ -254,6 +264,22 @@ re_set_exception_catchpoint (struct breakpoint *self,
       END_CATCH
     }
   END_CATCH
+
+  /* If we found a probe, remove all by-symbol locations
+     (__cxa_begin_catch, etc.) we may have found earlier on other
+     objfiles of the same progspace.  E.g., if you set a catchpoint
+     before the program is running, we'll find __cxa_begin_catch@plt
+     in the main executable.  Then when the program starts, we'll find
+     the real __cxa_begin_catch text minsym in
+     /usr/lib/debug/usr/lib64/libstdc++.so.debug, and then only later
+     will we find the probe when /lib64/libstdc++.so.6 is finally
+     loaded.  */
+  if (sals.nelts == 1 && sals.sals[0].probe != NULL && search_scope->objfile != NULL)
+    {
+      pspace_search_scope = null_search_scope ();
+      pspace_search_scope.pspace = search_scope->pspace;
+      search_scope = &pspace_search_scope;
+    }
 
   cleanup = make_cleanup (xfree, sals.sals);
   update_breakpoint_locations (self, search_scope, sals, sals_end);
