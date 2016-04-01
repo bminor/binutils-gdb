@@ -20,6 +20,7 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#include "opcode/arc.h"
 
 /* By convention, you should define this macro in the `.h' file.  For
    example, `tc-m68k.h' defines `TC_M68K'.  You might have to use this
@@ -220,14 +221,6 @@ struct arc_flags
   /* The code of the parsed flag.  Valid when is not zero.  */
   unsigned char code;
 };
-
-#ifndef MAX_INSN_ARGS
-#define MAX_INSN_ARGS	     6
-#endif
-
-#ifndef MAX_INSN_FLGS
-#define MAX_INSN_FLGS	     3
-#endif
 
 extern const relax_typeS md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table

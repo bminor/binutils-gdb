@@ -1,3 +1,9 @@
+2016-04-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.h: Include 'opcode/arc.h'.
+	(MAX_INSN_ARGS): Delete.
+	(MAX_INSN_FLGS): Delete.
+
 2016-04-04  Alan Modra  <amodra@gmail.com>
 
 	PR 19498
