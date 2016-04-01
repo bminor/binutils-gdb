@@ -139,26 +139,12 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
     }
 }
 
-/* Traverse through all search objfiles.  */
-#define ALL_SEARCH_OBJFILES(SEARCH, ITER)		       \
-  for (ITER = all_search_objfiles_init (SEARCH);	       \
-       ITER != NULL;					       \
-       ITER = all_search_objfiles_next (SEARCH, ITER))	       \
-
-/* Iterator on PARENT and every separate debug objfile of PARENT.
-   The usage pattern is:
-     for (iter = search;
-          iter;
-          iter = all_search_objfiles_next (search, iter))
-       ...
-*/
-
-static struct objfile *
-all_search_objfiles_init (struct objfile *search)
+struct objfile *
+all_search_objfiles_init (struct program_space *pspace, struct objfile *search)
 {
   if (search == NULL)
     {
-      return object_files;
+      return pspace->objfiles;
     }
   else
     {
@@ -166,7 +152,7 @@ all_search_objfiles_init (struct objfile *search)
     }
 }
 
-static struct objfile *
+struct objfile *
 all_search_objfiles_next (struct objfile *search, struct objfile *iter)
 {
   if (search == NULL)
@@ -230,7 +216,7 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	}
     }
 
-  ALL_SEARCH_OBJFILES (objf, objfile)
+  ALL_SEARCH_OBJFILES (current_program_space, objf, objfile)
     {
       struct minimal_symbol *msymbol;
 
@@ -435,7 +421,7 @@ lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  ALL_SEARCH_OBJFILES (objf, objfile)
+  ALL_SEARCH_OBJFILES (current_program_space, objf, objfile)
     {
       struct minimal_symbol *msymbol;
 
@@ -476,7 +462,7 @@ lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  ALL_SEARCH_OBJFILES (objf, objfile)
+  ALL_SEARCH_OBJFILES (current_program_space, objf, objfile)
     {
       for (msymbol = objfile->per_bfd->msymbol_hash[hash];
 	   msymbol != NULL;
@@ -503,7 +489,7 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  ALL_SEARCH_OBJFILES (objf, objfile)
+  ALL_SEARCH_OBJFILES (current_program_space, objf, objfile)
     {
       for (msymbol = objfile->per_bfd->msymbol_hash[hash];
 	   msymbol != NULL;

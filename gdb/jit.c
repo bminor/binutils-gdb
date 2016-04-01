@@ -1162,7 +1162,9 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
 
   /* Put a breakpoint in the registration symbol.  */
   ps_data->cached_code_address = addr;
-  ps_data->jit_breakpoint = create_jit_event_breakpoint (gdbarch, addr);
+  ps_data->jit_breakpoint = create_jit_event_breakpoint (gdbarch,
+							 ps_data->objfile,
+							 addr);
 
   return 0;
 }

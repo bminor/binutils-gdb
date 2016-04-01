@@ -1033,7 +1033,7 @@ solib_add (const char *pattern, symfile_add_flags add_flags,
 
     if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0
 	&& loaded_any_symbols)
-      breakpoint_re_set ();
+      breakpoint_re_set_program_space (current_program_space);
 
     if (from_tty && pattern && ! any_matches)
       printf_unfiltered
@@ -1478,7 +1478,7 @@ reload_shared_libraries (char *ignored, int from_tty,
 
   solib_add (NULL, add_flags, NULL);
 
-  breakpoint_re_set ();
+  breakpoint_re_set_program_space (current_program_space);
 
   /* We may have loaded or unloaded debug info for some (or all)
      shared libraries.  However, frames may still reference them.  For

@@ -971,7 +971,7 @@ objfile_relocate (struct objfile *objfile,
 
   /* Relocate breakpoints as necessary, after things are relocated.  */
   if (changed)
-    breakpoint_re_set ();
+    breakpoint_re_set_objfile (objfile);
 }
 
 /* Rebase (add to the offsets) OBJFILE by SLIDE.  SEPARATE_DEBUG_OBJFILE is
@@ -1010,7 +1010,7 @@ objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
 
   /* Relocate breakpoints as necessary, after things are relocated.  */
   if (changed)
-    breakpoint_re_set ();
+    breakpoint_re_set_objfile (objfile);
 }
 
 /* Return non-zero if OBJFILE has partial symbols.  */

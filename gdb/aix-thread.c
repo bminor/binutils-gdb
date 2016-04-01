@@ -912,7 +912,8 @@ pd_enable (void)
   if (ms.minsym == NULL)
     return;
   pd_brk_addr = BMSYMBOL_VALUE_ADDRESS (ms);
-  if (!create_thread_event_breakpoint (target_gdbarch (), pd_brk_addr))
+  if (!create_thread_event_breakpoint (target_gdbarch (),
+				       ms.objfile, pd_brk_addr))
     return;
 
   /* Prepare for thread debugging.  */

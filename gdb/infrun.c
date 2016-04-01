@@ -862,7 +862,7 @@ follow_inferior_reset_breakpoints (void)
      were never set in the child, but only in the parent.  This makes
      sure the inserted breakpoints match the breakpoint list.  */
 
-  breakpoint_re_set ();
+  breakpoint_re_set_program_space (current_program_space);
   insert_breakpoints ();
 }
 
@@ -1240,7 +1240,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   jit_inferior_created_hook ();
 
-  breakpoint_re_set ();
+  breakpoint_re_set_program_space (current_program_space);
 
   /* Reinsert all breakpoints.  (Those which were symbolic have
      been reset to the proper address in the new a.out, thanks

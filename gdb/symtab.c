@@ -3171,6 +3171,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
       }
 
+  if (msymbol.minsym != NULL)
+    val.objfile = msymbol.objfile;
 
   cust = find_pc_sect_compunit_symtab (pc, section);
   if (cust == NULL)
@@ -3270,6 +3272,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       val.symtab = best_symtab;
       val.line = best->line;
       val.pc = best->pc;
+      val.objfile = SYMTAB_OBJFILE (best_symtab);
       if (best_end && (!alt || best_end < alt->pc))
 	val.end = best_end;
       else if (alt)
@@ -3613,6 +3616,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       sal.pspace = current_program_space;
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
       sal.section = section;
+      sal.objfile = section->objfile;
     }
 
   if (funfirstline)

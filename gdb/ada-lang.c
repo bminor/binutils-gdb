@@ -12346,7 +12346,8 @@ struct ada_catchpoint
    catchpoint's locations, and store them for later evaluation.  */
 
 static void
-create_excep_cond_exprs (struct ada_catchpoint *c)
+create_excep_cond_exprs (struct ada_catchpoint *c,
+			 struct sym_search_scope *search_scope)
 {
   struct cleanup *old_chain;
   struct bp_location *bl;
@@ -12437,17 +12438,18 @@ allocate_location_exception (enum ada_exception_catchpoint_kind ex,
    exception catchpoint kinds.  */
 
 static void
-re_set_exception (enum ada_exception_catchpoint_kind ex, struct breakpoint *b)
+re_set_exception (enum ada_exception_catchpoint_kind ex, struct breakpoint *b,
+		  struct sym_search_scope *search_scope)
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
 
   /* Call the base class's method.  This updates the catchpoint's
      locations.  */
-  bkpt_breakpoint_ops.re_set (b);
+  bkpt_breakpoint_ops.re_set (b, search_scope);
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
-  create_excep_cond_exprs (c);
+  create_excep_cond_exprs (c, search_scope);
 }
 
 /* Returns true if we should stop for this breakpoint hit.  If the
@@ -12720,9 +12722,10 @@ allocate_location_catch_exception (struct breakpoint *self)
 }
 
 static void
-re_set_catch_exception (struct breakpoint *b)
+re_set_catch_exception (struct breakpoint *b,
+			struct sym_search_scope *search_scope)
 {
-  re_set_exception (ada_catch_exception, b);
+  re_set_exception (ada_catch_exception, b, search_scope);
 }
 
 static void
@@ -12772,9 +12775,10 @@ allocate_location_catch_exception_unhandled (struct breakpoint *self)
 }
 
 static void
-re_set_catch_exception_unhandled (struct breakpoint *b)
+re_set_catch_exception_unhandled (struct breakpoint *b,
+				  struct sym_search_scope *search_scope)
 {
-  re_set_exception (ada_catch_exception_unhandled, b);
+  re_set_exception (ada_catch_exception_unhandled, b, search_scope);
 }
 
 static void
@@ -12826,9 +12830,10 @@ allocate_location_catch_assert (struct breakpoint *self)
 }
 
 static void
-re_set_catch_assert (struct breakpoint *b)
+re_set_catch_assert (struct breakpoint *b,
+		     struct sym_search_scope *search_scope)
 {
-  re_set_exception (ada_catch_assert, b);
+  re_set_exception (ada_catch_assert, b, search_scope);
 }
 
 static void
@@ -13142,12 +13147,14 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
   const struct breakpoint_ops *ops = NULL;
   struct symtab_and_line sal
     = ada_exception_sal (ex_kind, excep_string, &addr_string, &ops);
+  struct sym_search_scope search_scope = null_search_scope ();
 
   c = XNEW (struct ada_catchpoint);
   init_ada_exception_breakpoint (&c->base, gdbarch, sal, addr_string,
 				 ops, tempflag, disabled, from_tty);
   c->excep_string = excep_string;
-  create_excep_cond_exprs (c);
+  search_scope.pspace = current_program_space;
+  create_excep_cond_exprs (c, &search_scope);
   if (cond_string != NULL)
     set_breakpoint_condition (&c->base, cond_string, from_tty);
   install_breakpoint (0, &c->base, 1);

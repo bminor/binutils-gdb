@@ -497,6 +497,24 @@ enum search_domain
 
 extern const char *search_domain_name (enum search_domain);
 
+struct sym_search_scope
+{
+  /* If not NULL, the search is restricted to just this program
+     space.  */
+  struct program_space *pspace;
+
+  /* If not NULL, the search is restricted to just this objfile.  */
+  struct objfile *objfile;
+};
+
+static inline struct sym_search_scope
+null_search_scope (void)
+{
+  return (struct sym_search_scope) { NULL, NULL };
+}
+
+
+
 /* An address-class says where to find the value of a symbol.  */
 
 enum address_class
@@ -1432,7 +1450,7 @@ struct symtab_and_line
 
   /* The probe associated with this symtab_and_line.  */
   struct probe *probe;
-  /* If PROBE is not NULL, then this is the objfile in which the probe
+  /* XXX If PROBE is not NULL, then this is the objfile in which the probe
      originated.  */
   struct objfile *objfile;
 };

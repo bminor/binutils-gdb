@@ -233,6 +233,41 @@ extern struct program_space *current_program_space;
 #define ALL_PSPACES(pspace) \
   for ((pspace) = program_spaces; (pspace) != NULL; (pspace) = (pspace)->next)
 
+/* Traverse through all search program spaces.  */
+#define ALL_SEARCH_PSPACES(SEARCH, ITER)		       \
+  for (ITER = all_search_program_spaces_init (SEARCH);	       \
+       ITER != NULL;					       \
+       ITER = all_search_program_spaces_next (SEARCH, ITER))    \
+
+static inline struct program_space *
+all_search_program_spaces_init (struct program_space *search)
+{
+  if (search == NULL)
+    return program_spaces;
+  else
+    return search;
+}
+
+static inline struct program_space *
+all_search_program_spaces_next (struct program_space *search,
+				struct program_space *iter)
+{
+  if (search == NULL)
+    return iter->next;
+  else
+    return NULL;
+}
+
+static inline int
+search_pspace_matches_pspace (struct program_space *search,
+			      struct program_space *pspace)
+{
+  if (search == NULL)
+    return 1;
+  else
+    return search == pspace;
+}
+
 /* Add a new empty program space, and assign ASPACE to it.  Returns the
    pointer to the new object.  */
 extern struct program_space *add_program_space (struct address_space *aspace);

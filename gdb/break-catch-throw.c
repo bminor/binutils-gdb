@@ -204,14 +204,15 @@ check_status_exception_catchpoint (struct bpstats *bs)
 /* Implement the 're_set' method.  */
 
 static void
-re_set_exception_catchpoint (struct breakpoint *self)
+re_set_exception_catchpoint (struct breakpoint *self,
+			     struct sym_search_scope *search_scope)
 {
   struct symtabs_and_lines sals = {0};
   struct symtabs_and_lines sals_end = {0};
   struct cleanup *cleanup;
   enum exception_event_kind kind = classify_exception_breakpoint (self);
   struct event_location *location;
-  struct program_space *filter_pspace = current_program_space;
+  struct program_space *filter_pspace = search_scope->pspace;
 
   /* We first try to use the probe interface.  */
   TRY
@@ -396,6 +397,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
   struct exception_catchpoint *cp;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   regex_t *pattern = NULL;
+  struct sym_search_scope search_scope = null_search_scope ();
 
   if (except_rx != NULL)
     {
@@ -418,7 +420,8 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
   cp->exception_rx = except_rx;
   cp->pattern = pattern;
 
-  re_set_exception_catchpoint (&cp->base);
+  search_scope.pspace = current_program_space;
+  re_set_exception_catchpoint (&cp->base, &search_scope);
 
   install_breakpoint (0, &cp->base, 1);
   discard_cleanups (cleanup);

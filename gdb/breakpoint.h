@@ -449,7 +449,7 @@ struct bp_location
   CORE_ADDR related_address;
 
   /* If the location comes from a probe point, this is the probe associated
-     with it.  */
+     with it.  XXX */
   struct bound_probe probe;
 
   char *function_name;
@@ -482,6 +482,10 @@ struct bp_location
      to find the corresponding source file name.  */
 
   struct symtab *symtab;
+
+  struct objfile *objfile;
+
+  struct symtab_and_line sal;
 };
 
 /* The possible return values for print_bpstat, print_it_normal,
@@ -520,7 +524,8 @@ struct breakpoint_ops
   /* Reevaluate a breakpoint.  This is necessary after symbols change
      (e.g., an executable or DSO was loaded, or the inferior just
      started).  */
-  void (*re_set) (struct breakpoint *self);
+  void (*re_set) (struct breakpoint *self,
+		  struct sym_search_scope *search_scope);
 
   /* Insert the breakpoint or watchpoint or activate the catchpoint.
      Return 0 for success, 1 if the breakpoint, watchpoint or
@@ -1218,7 +1223,13 @@ extern void update_breakpoint_locations (struct breakpoint *b,
 					 struct symtabs_and_lines sals,
 					 struct symtabs_and_lines sals_end);
 
-extern void breakpoint_re_set (void);
+extern int bp_location_matches_search_scope
+  (struct bp_location *bl,
+   struct sym_search_scope *search_scope);
+
+extern void breakpoint_re_set_objfile (struct objfile *objfile);
+
+extern void breakpoint_re_set_program_space (struct program_space *pspace);
 
 extern void breakpoint_re_set_thread (struct breakpoint *);
 
@@ -1490,9 +1501,11 @@ extern void breakpoint_set_task (struct breakpoint *b, int task);
 extern void mark_breakpoints_out (void);
 
 extern struct breakpoint *create_jit_event_breakpoint (struct gdbarch *,
+						       struct objfile *objfile,
                                                        CORE_ADDR);
 
 extern struct breakpoint *create_solib_event_breakpoint (struct gdbarch *,
+							 struct objfile *objfile,
 							 CORE_ADDR);
 
 /* Create an solib event breakpoint at ADDRESS in the current program
@@ -1500,9 +1513,10 @@ extern struct breakpoint *create_solib_event_breakpoint (struct gdbarch *,
    breakpoint on success.  Deletes the new breakpoint and returns NULL
    if inserting the breakpoint fails.  */
 extern struct breakpoint *create_and_insert_solib_event_breakpoint
-  (struct gdbarch *gdbarch, CORE_ADDR address);
+  (struct gdbarch *gdbarch, struct objfile *objfile, CORE_ADDR address);
 
 extern struct breakpoint *create_thread_event_breakpoint (struct gdbarch *,
+							  struct objfile *,
 							  CORE_ADDR);
 
 extern void remove_jit_event_breakpoints (void);

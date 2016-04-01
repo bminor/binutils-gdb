@@ -753,4 +753,28 @@ extern const struct dynamic_prop *objfile_lookup_static_link
 extern void obj_section_map_add_objfile (struct objfile *obj);
 extern void obj_section_map_remove_objfile (struct objfile *obj);
 
+/* Traverse through all search objfiles.  */
+#define ALL_SEARCH_OBJFILES(SEARCH_PSPACE, SEARCH_OBJF, OBJF_ITER)	\
+  for ((OBJF_ITER) = all_search_objfiles_init (SEARCH_PSPACE, SEARCH_OBJF); \
+       (OBJF_ITER) != NULL;						\
+       OBJF_ITER = all_search_objfiles_next (SEARCH_OBJF, OBJF_ITER))	\
+
+/* Traverse through all SEARCH_SCOPE objfiles.  */
+#define ALL_SEARCH_SCOPE_OBJFILES(SEARCH_SCOPE, PSPACE_ITER, OBJF_ITER)	\
+  ALL_SEARCH_PSPACES ((SEARCH_SCOPE)->pspace, PSPACE_ITER)		\
+    ALL_SEARCH_OBJFILES (PSPACE_ITER, (SEARCH_SCOPE)->objfile, OBJF_ITER) \
+
+/* Iterator on PARENT and every separate debug objfile of PARENT.
+   The usage pattern is:
+     for (iter = search;
+          iter;
+          iter = all_search_objfiles_next (search, iter))
+       ...
+*/
+
+struct objfile *all_search_objfiles_init (struct program_space *pspace,
+					  struct objfile *search);
+struct objfile *all_search_objfiles_next (struct objfile *search,
+					  struct objfile *iter);
+
 #endif /* !defined (OBJFILES_H) */

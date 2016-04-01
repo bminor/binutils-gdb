@@ -479,7 +479,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
      breakpoint_re_set is never called.  Call it now so that software
      watchpoints get a chance to be promoted to hardware watchpoints
      if the now pushed target supports hardware watchpoints.  */
-  breakpoint_re_set ();
+  breakpoint_re_set_program_space (current_program_space);
 
   observer_notify_inferior_created (target, from_tty);
 }

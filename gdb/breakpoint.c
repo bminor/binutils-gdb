@@ -108,9 +108,8 @@ static void map_breakpoint_numbers (char *, void (*) (struct breakpoint *,
 
 static void ignore_command (char *, int);
 
-static int breakpoint_re_set_one (void *);
-
-static void breakpoint_re_set_default (struct breakpoint *);
+static void breakpoint_re_set_default (struct breakpoint *b,
+				       struct sym_search_scope *search_scope);
 
 static void
   create_sals_from_location_default (const struct event_location *location,
@@ -3341,6 +3340,7 @@ set_breakpoint_number (int internal, struct breakpoint *b)
 
 static struct breakpoint *
 create_internal_breakpoint (struct gdbarch *gdbarch,
+			    struct objfile *objfile,
 			    CORE_ADDR address, enum bptype type,
 			    const struct breakpoint_ops *ops)
 {
@@ -3352,6 +3352,7 @@ create_internal_breakpoint (struct gdbarch *gdbarch,
   sal.pc = address;
   sal.section = find_pc_overlay (sal.pc);
   sal.pspace = current_program_space;
+  sal.objfile = objfile;
 
   b = set_raw_breakpoint (gdbarch, sal, type, ops);
   b->number = internal_breakpoint_number--;
@@ -3439,12 +3440,13 @@ free_breakpoint_probes (struct objfile *obj, void *data)
 }
 
 static void
-create_overlay_event_breakpoint (void)
+create_overlay_event_breakpoint (struct sym_search_scope *search_scope)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
   const char *const func_name = "_ovly_debug_event";
 
-  ALL_OBJFILES (objfile)
+  ALL_SEARCH_SCOPE_OBJFILES (search_scope, pspace, objfile)
     {
       struct breakpoint *b;
       struct breakpoint_objfile_data *bp_objfile_data;
@@ -3471,8 +3473,8 @@ create_overlay_event_breakpoint (void)
 	}
 
       addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->overlay_msym);
-      b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
-                                      bp_overlay_event,
+      b = create_internal_breakpoint (get_objfile_arch (objfile), objfile,
+				      addr, bp_overlay_event,
 				      &internal_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
@@ -3492,20 +3494,12 @@ create_overlay_event_breakpoint (void)
 }
 
 static void
-create_longjmp_master_breakpoint (void)
+create_longjmp_master_breakpoint (struct sym_search_scope *search_scope)
 {
   struct program_space *pspace;
-  struct cleanup *old_chain;
+  struct objfile *objfile;
 
-  old_chain = save_current_program_space ();
-
-  ALL_PSPACES (pspace)
-  {
-    struct objfile *objfile;
-
-    set_current_program_space (pspace);
-
-    ALL_OBJFILES (objfile)
+  ALL_SEARCH_SCOPE_OBJFILES (search_scope, pspace, objfile)
     {
       int i;
       struct gdbarch *gdbarch;
@@ -3551,7 +3545,7 @@ create_longjmp_master_breakpoint (void)
 	    {
 	      struct breakpoint *b;
 
-	      b = create_internal_breakpoint (gdbarch,
+	      b = create_internal_breakpoint (gdbarch, objfile,
 					      get_probe_address (probe,
 								 objfile),
 					      bp_longjmp_master,
@@ -3593,7 +3587,8 @@ create_longjmp_master_breakpoint (void)
 	    }
 
 	  addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
-	  b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
+	  b = create_internal_breakpoint (gdbarch, objfile,
+					  addr, bp_longjmp_master,
 					  &internal_breakpoint_ops);
 	  initialize_explicit_location (&explicit_loc);
 	  explicit_loc.function_name = ASTRDUP (func_name);
@@ -3601,33 +3596,23 @@ create_longjmp_master_breakpoint (void)
 	  b->enable_state = bp_disabled;
 	}
     }
-  }
-
-  do_cleanups (old_chain);
 }
 
 /* Create a master std::terminate breakpoint.  */
+
 static void
-create_std_terminate_master_breakpoint (void)
+create_std_terminate_master_breakpoint (struct sym_search_scope *search_scope)
 {
   struct program_space *pspace;
-  struct cleanup *old_chain;
+  struct objfile *objfile;
   const char *const func_name = "std::terminate()";
 
-  old_chain = save_current_program_space ();
-
-  ALL_PSPACES (pspace)
-  {
-    struct objfile *objfile;
-    CORE_ADDR addr;
-
-    set_current_program_space (pspace);
-
-    ALL_OBJFILES (objfile)
+  ALL_SEARCH_SCOPE_OBJFILES (search_scope, pspace, objfile)
     {
       struct breakpoint *b;
       struct breakpoint_objfile_data *bp_objfile_data;
       struct explicit_location explicit_loc;
+      CORE_ADDR addr;
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3650,7 +3635,8 @@ create_std_terminate_master_breakpoint (void)
 	}
 
       addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->terminate_msym);
-      b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
+      b = create_internal_breakpoint (get_objfile_arch (objfile),
+				      objfile, addr,
                                       bp_std_terminate_master,
 				      &internal_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
@@ -3658,20 +3644,18 @@ create_std_terminate_master_breakpoint (void)
       b->location = new_explicit_location (&explicit_loc);
       b->enable_state = bp_disabled;
     }
-  }
-
-  do_cleanups (old_chain);
 }
 
 /* Install a master breakpoint on the unwinder's debug hook.  */
 
 static void
-create_exception_master_breakpoint (void)
+create_exception_master_breakpoint (struct sym_search_scope *search_scope)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
   const char *const func_name = "_Unwind_DebugHook";
 
-  ALL_OBJFILES (objfile)
+  ALL_SEARCH_SCOPE_OBJFILES (search_scope, pspace, objfile)
     {
       struct breakpoint *b;
       struct gdbarch *gdbarch;
@@ -3719,7 +3703,7 @@ create_exception_master_breakpoint (void)
 	    {
 	      struct breakpoint *b;
 
-	      b = create_internal_breakpoint (gdbarch,
+	      b = create_internal_breakpoint (gdbarch, objfile,
 					      get_probe_address (probe,
 								 objfile),
 					      bp_exception_master,
@@ -3756,7 +3740,8 @@ create_exception_master_breakpoint (void)
       addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
       addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
 						 &current_target);
-      b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
+      b = create_internal_breakpoint (gdbarch, objfile,
+				      addr, bp_exception_master,
 				      &internal_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
@@ -7810,11 +7795,13 @@ delete_std_terminate_breakpoint (void)
 }
 
 struct breakpoint *
-create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
+create_thread_event_breakpoint (struct gdbarch *gdbarch,
+				struct objfile *objfile,
+				CORE_ADDR address)
 {
   struct breakpoint *b;
 
-  b = create_internal_breakpoint (gdbarch, address, bp_thread_event,
+  b = create_internal_breakpoint (gdbarch, objfile, address, bp_thread_event,
 				  &internal_breakpoint_ops);
 
   b->enable_state = bp_enabled;
@@ -7835,9 +7822,10 @@ struct lang_and_radix
 /* Create a breakpoint for JIT code registration and unregistration.  */
 
 struct breakpoint *
-create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
+create_jit_event_breakpoint (struct gdbarch *gdbarch, struct objfile *objfile,
+			     CORE_ADDR address)
 {
-  return create_internal_breakpoint (gdbarch, address, bp_jit_event,
+  return create_internal_breakpoint (gdbarch, objfile, address, bp_jit_event,
 				     &internal_breakpoint_ops);
 }
 
@@ -7883,33 +7871,40 @@ remove_solib_event_breakpoints_at_next_stop (void)
    INSERT_MODE to pass through to update_global_location_list.  */
 
 static struct breakpoint *
-create_solib_event_breakpoint_1 (struct gdbarch *gdbarch, CORE_ADDR address,
+create_solib_event_breakpoint_1 (struct gdbarch *gdbarch,
+				 struct objfile *objfile,
+				 CORE_ADDR address,
 				 enum ugll_insert_mode insert_mode)
 {
   struct breakpoint *b;
 
-  b = create_internal_breakpoint (gdbarch, address, bp_shlib_event,
+  b = create_internal_breakpoint (gdbarch, objfile, address, bp_shlib_event,
 				  &internal_breakpoint_ops);
   update_global_location_list_nothrow (insert_mode);
   return b;
 }
 
 struct breakpoint *
-create_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
+create_solib_event_breakpoint (struct gdbarch *gdbarch,
+			       struct objfile *objfile,
+			       CORE_ADDR address)
 {
-  return create_solib_event_breakpoint_1 (gdbarch, address, UGLL_MAY_INSERT);
+  return create_solib_event_breakpoint_1 (gdbarch, objfile,
+					  address, UGLL_MAY_INSERT);
 }
 
 /* See breakpoint.h.  */
 
 struct breakpoint *
-create_and_insert_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
+create_and_insert_solib_event_breakpoint (struct gdbarch *gdbarch,
+					  struct objfile *objfile,
+					  CORE_ADDR address)
 {
   struct breakpoint *b;
 
   /* Explicitly tell update_global_location_list to insert
      locations.  */
-  b = create_solib_event_breakpoint_1 (gdbarch, address, UGLL_INSERT);
+  b = create_solib_event_breakpoint_1 (gdbarch, objfile, address, UGLL_INSERT);
   if (!b->loc->inserted)
     {
       delete_breakpoint (b);
@@ -8904,7 +8899,7 @@ void
 enable_breakpoints_after_startup (void)
 {
   current_program_space->executing_startup = 0;
-  breakpoint_re_set ();
+  breakpoint_re_set_program_space (current_program_space);
 }
 
 /* Create a new single-step breakpoint for thread THREAD, with no
@@ -9069,6 +9064,8 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->requested_address = sal->pc;
   loc->address = adjusted_address;
   loc->pspace = sal->pspace;
+  loc->objfile = sal->objfile;
+  loc->sal = *sal;
   loc->probe.probe = sal->probe;
   loc->probe.objfile = sal->objfile;
   gdb_assert (loc->pspace != NULL);
@@ -10662,7 +10659,7 @@ dtor_watchpoint (struct breakpoint *self)
 /* Implement the "re_set" breakpoint_ops method for watchpoints.  */
 
 static void
-re_set_watchpoint (struct breakpoint *b)
+re_set_watchpoint (struct breakpoint *b, struct sym_search_scope *search_scope)
 {
   struct watchpoint *w = (struct watchpoint *) b;
 
@@ -11343,6 +11340,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	{
  	  scope_breakpoint
 	    = create_internal_breakpoint (frame_unwind_caller_arch (frame),
+					  NULL,
 					  frame_unwind_caller_pc (frame),
 					  bp_watchpoint_scope,
 					  &momentary_breakpoint_ops);
@@ -12945,7 +12943,8 @@ base_breakpoint_allocate_location (struct breakpoint *self)
 }
 
 static void
-base_breakpoint_re_set (struct breakpoint *b)
+base_breakpoint_re_set (struct breakpoint *b,
+			struct sym_search_scope *search_scope)
 {
   /* Nothing to re-set. */
 }
@@ -13052,7 +13051,7 @@ base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 base_breakpoint_decode_location (struct breakpoint *b,
 				 const struct event_location *location,
-				 struct program_space *search_pspace,
+				 struct program_space *filter_pspace,
 				 struct symtabs_and_lines *sals)
 {
   internal_error_pure_virtual_called ();
@@ -13100,7 +13099,7 @@ struct breakpoint_ops base_breakpoint_ops =
 /* Default breakpoint_ops methods.  */
 
 static void
-bkpt_re_set (struct breakpoint *b)
+bkpt_re_set (struct breakpoint *b, struct sym_search_scope *search_scope)
 {
   /* FIXME: is this still reachable?  */
   if (breakpoint_event_location_empty_p (b))
@@ -13110,7 +13109,7 @@ bkpt_re_set (struct breakpoint *b)
       return;
     }
 
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (b, search_scope);
 }
 
 static int
@@ -13311,7 +13310,8 @@ bkpt_decode_location (struct breakpoint *b,
 /* Virtual table for internal breakpoints.  */
 
 static void
-internal_bkpt_re_set (struct breakpoint *b)
+internal_bkpt_re_set (struct breakpoint *b,
+		      struct sym_search_scope *search_scope)
 {
   switch (b->type)
     {
@@ -13321,7 +13321,9 @@ internal_bkpt_re_set (struct breakpoint *b)
     case bp_longjmp_master:
     case bp_std_terminate_master:
     case bp_exception_master:
-      delete_breakpoint (b);
+      gdb_assert (b->loc != NULL && b->loc->next == NULL);
+      if (bp_location_matches_search_scope (b->loc, search_scope))
+	delete_breakpoint (b);
       break;
 
       /* This breakpoint is special, it's set up when the inferior
@@ -13408,7 +13410,8 @@ internal_bkpt_print_mention (struct breakpoint *b)
 /* Virtual table for momentary breakpoints  */
 
 static void
-momentary_bkpt_re_set (struct breakpoint *b)
+momentary_bkpt_re_set (struct breakpoint *b,
+		       struct sym_search_scope *search_scope)
 {
   /* Keep temporary breakpoints, which can be encountered when we step
      over a dlopen call and solib_add is resetting the breakpoints.
@@ -13509,9 +13512,9 @@ bkpt_probe_decode_location (struct breakpoint *b,
 /* The breakpoint_ops structure to be used in tracepoints.  */
 
 static void
-tracepoint_re_set (struct breakpoint *b)
+tracepoint_re_set (struct breakpoint *b, struct sym_search_scope *search_scope)
 {
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (b, search_scope);
 }
 
 static int
@@ -13659,9 +13662,9 @@ static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
 /* Dprintf breakpoint_ops methods.  */
 
 static void
-dprintf_re_set (struct breakpoint *b)
+dprintf_re_set (struct breakpoint *b, struct sym_search_scope *search_scope)
 {
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (b, search_scope);
 
   /* extra_string should never be non-NULL for dprintf.  */
   gdb_assert (b->extra_string != NULL);
@@ -14032,6 +14035,31 @@ delete_command (char *arg, int from_tty)
     }
   else
     map_breakpoint_numbers (arg, do_map_delete_breakpoint, NULL);
+}
+
+int
+bp_location_matches_search_scope (struct bp_location *bl,
+				  struct sym_search_scope *search_scope)
+{
+  struct objfile *objfile;
+
+  if (search_scope->pspace == NULL)
+    return 1;
+
+  if (bl->pspace != search_scope->pspace)
+    return 0;
+
+  if (search_scope->objfile == NULL)
+    return 1;
+
+  ALL_SEARCH_OBJFILES (search_scope->pspace,
+		       search_scope->objfile, objfile)
+    {
+      if (objfile == bl->objfile)
+	return 1;
+    }
+
+  return 0;
 }
 
 /* Return true if all locations of B bound to PSPACE are pending.  If
@@ -14504,13 +14532,14 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
    locations.  */
 
 static void
-breakpoint_re_set_default (struct breakpoint *b)
+breakpoint_re_set_default (struct breakpoint *b,
+			   struct sym_search_scope *search_scope)
 {
   int found;
   struct symtabs_and_lines sals, sals_end;
   struct symtabs_and_lines expanded = {0};
   struct symtabs_and_lines expanded_end = {0};
-  struct program_space *filter_pspace = current_program_space;
+  struct program_space *filter_pspace = search_scope->pspace;
 
   sals = location_to_sals (b, b->location, filter_pspace, &found);
   if (found)
@@ -14618,23 +14647,22 @@ prepare_re_set_context (struct breakpoint *b)
    Unused in this case.  */
 
 static int
-breakpoint_re_set_one (void *bint)
+breakpoint_re_set_one (struct breakpoint *b, struct sym_search_scope *search_scope)
 {
   /* Get past catch_errs.  */
-  struct breakpoint *b = (struct breakpoint *) bint;
   struct cleanup *cleanups;
 
   cleanups = prepare_re_set_context (b);
-  b->ops->re_set (b);
+  b->ops->re_set (b, search_scope);
   do_cleanups (cleanups);
   return 0;
 }
 
-/* Re-set breakpoint locations for the current program space.
-   Locations bound to other program spaces are left untouched.  */
+/* Re-set breakpoint locations that match SEARCH_SCOPE.  Other
+   locations are left untouched.  */
 
-void
-breakpoint_re_set (void)
+static void
+breakpoint_re_set (struct sym_search_scope *search_scope)
 {
   struct breakpoint *b, *b_tmp;
   enum language save_language;
@@ -14651,14 +14679,20 @@ breakpoint_re_set (void)
      hadn't been re-set yet, and thus may have stale locations.  */
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
-  {
-    /* Format possible error msg.  */
-    char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
-				b->number);
-    struct cleanup *cleanups = make_cleanup (xfree, message);
-    catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
-    do_cleanups (cleanups);
-  }
+    {
+      TRY
+	{
+	  breakpoint_re_set_one (b, search_scope);
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_fprintf (gdb_stderr, ex,
+			     _("Error in re-setting breakpoint %d: "),
+			     b->number);
+	}
+      END_CATCH
+    }
+
   set_language (save_language);
   input_radix = save_input_radix;
 
@@ -14666,14 +14700,34 @@ breakpoint_re_set (void)
 
   do_cleanups (old_chain);
 
-  create_overlay_event_breakpoint ();
-  create_longjmp_master_breakpoint ();
-  create_std_terminate_master_breakpoint ();
-  create_exception_master_breakpoint ();
+  create_overlay_event_breakpoint (search_scope);
+  create_longjmp_master_breakpoint (search_scope);
+  create_std_terminate_master_breakpoint (search_scope);
+  create_exception_master_breakpoint (search_scope);
 
   /* Now we can insert.  */
   update_global_location_list (UGLL_MAY_INSERT);
 }
+
+void
+breakpoint_re_set_program_space (struct program_space *pspace)
+{
+  struct sym_search_scope search_scope = null_search_scope ();
+
+  search_scope.pspace = current_program_space;
+  breakpoint_re_set (&search_scope);
+}
+
+void
+breakpoint_re_set_objfile (struct objfile *objfile)
+{
+  struct sym_search_scope search_scope = null_search_scope ();
+
+  search_scope.pspace = objfile->pspace;
+  search_scope.objfile = objfile;
+  breakpoint_re_set (&search_scope);
+}
+
 
 /* Reset the thread number of this breakpoint:
 
@@ -15983,8 +16037,12 @@ breakpoint_free_objfile (struct objfile *objfile)
   struct bp_location **locp, *loc;
 
   ALL_BP_LOCATIONS (loc, locp)
-    if (loc->symtab != NULL && SYMTAB_OBJFILE (loc->symtab) == objfile)
-      loc->symtab = NULL;
+    {
+      if (loc->symtab != NULL && SYMTAB_OBJFILE (loc->symtab) == objfile)
+	loc->symtab = NULL;
+      if (loc->objfile == objfile)
+	loc->objfile = NULL;
+    }
 }
 
 void
