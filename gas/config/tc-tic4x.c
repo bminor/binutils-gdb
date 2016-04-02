@@ -964,8 +964,7 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
   if (c == '"')
     c = * ++ input_line_pointer;
   input_line_pointer++;		/* Skip null symbol terminator.  */
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xstrdup (section_name);
 
   /* TI C from version 5.0 allows a section name to contain a
      subsection name as well. The subsection name is separated by a
@@ -1075,8 +1074,7 @@ tic4x_usect (int x ATTRIBUTE_UNUSED)
   if (c == '"')
     c = * ++ input_line_pointer;
   input_line_pointer++;		/* Skip null symbol terminator.  */
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xstrdup (section_name);
 
   if (c == ',')
     input_line_pointer =

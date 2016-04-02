@@ -1609,9 +1609,7 @@ obj_elf_vendor_attribute (int vendor)
       if (i == 0)
 	goto bad;
 
-      name = xmalloc (i + 1);
-      memcpy (name, s, i);
-      name[i] = '\0';
+      name = xstrndup (s, i);
 
 #ifndef CONVERT_SYMBOLIC_ATTRIBUTE
 #define CONVERT_SYMBOLIC_ATTRIBUTE(a) -1

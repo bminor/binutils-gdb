@@ -1,5 +1,16 @@
 2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/obj-elf.c (obj_elf_vendor_attribute): Use xstrdup.
+	* config/tc-ppc.c (ppc_frob_file_before_adjust): Likewise.
+	(ppc_znop): Likewise.
+	(ppc_pe_section): Likewise.
+	(ppc_frob_symbol): Likewise.
+	* config/tc-tic30.c (tic30_operand): Likewise.
+	* config/tc-tic4x.c (tic4x_sect): Likewise.
+	(tic4x_usect): Likewise.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-alpha.c: Const qualify FLT_CHARS.
 	* config/atof-ieee.c: Remove declarations of FLT_CHARS and EXP_CHARS.
 	* config/tc-cris.h: Likewise.

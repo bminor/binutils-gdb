@@ -604,9 +604,7 @@ tic30_operand (char *token)
 	      segT retval;
 
 	      debug ("Probably a label: %s\n", token);
-	      current_op->immediate.label = malloc (strlen (token) + 1);
-	      strcpy (current_op->immediate.label, token);
-	      current_op->immediate.label[strlen (token)] = '\0';
+	      current_op->immediate.label = xstrdup (token);
 	      save_input_line_pointer = input_line_pointer;
 	      input_line_pointer = token;
 
@@ -634,9 +632,7 @@ tic30_operand (char *token)
 	      for (count = 0; count < strlen (token); count++)
 		if (*(token + count) == '.')
 		  current_op->immediate.decimal_found = 1;
-	      current_op->immediate.label = malloc (strlen (token) + 1);
-	      strcpy (current_op->immediate.label, token);
-	      current_op->immediate.label[strlen (token)] = '\0';
+	      current_op->immediate.label = xstrdup (token);
 	      current_op->immediate.f_number = (float) atof (token);
 	      current_op->immediate.s_number = (int) atoi (token);
 	      current_op->immediate.u_number = (unsigned int) atoi (token);

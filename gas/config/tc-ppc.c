@@ -2390,7 +2390,6 @@ ppc_frob_file_before_adjust (void)
       const char *name;
       char *dotname;
       symbolS *dotsym;
-      size_t len;
 
       name = S_GET_NAME (symp);
       if (name[0] == '.')
@@ -2400,10 +2399,7 @@ ppc_frob_file_before_adjust (void)
 	  || S_IS_DEFINED (symp))
 	continue;
 
-      len = strlen (name) + 1;
-      dotname = xmalloc (len + 1);
-      dotname[0] = '.';
-      memcpy (dotname + 1, name, len);
+      dotname = concat (".", name, (char *) NULL);
       dotsym = symbol_find_noref (dotname, 1);
       free (dotname);
       if (dotsym != NULL && (symbol_used_p (dotsym)
@@ -5195,8 +5191,7 @@ ppc_znop (int ignore ATTRIBUTE_UNUSED)
   /* Strip out the symbol name.  */
   c = get_symbol_name (&symbol_name);
 
-  name = xmalloc (input_line_pointer - symbol_name + 1);
-  strcpy (name, symbol_name);
+  name = xstrdup (symbol_name);
 
   sym = symbol_find_or_make (name);
 
@@ -5370,8 +5365,7 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
 
   c = get_symbol_name (&section_name);
 
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xstrdup (section_name);
 
   *input_line_pointer = c;
 
@@ -5768,9 +5762,7 @@ ppc_frob_symbol (symbolS *sym)
 	  char *snew;
 
 	  len = s - name;
-	  snew = xmalloc (len + 1);
-	  memcpy (snew, name, len);
-	  snew[len] = '\0';
+	  snew = xstrndup (name, len);
 
 	  S_SET_NAME (sym, snew);
 	}
