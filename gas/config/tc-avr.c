@@ -562,22 +562,11 @@ md_parse_option (int c, const char *arg)
     case OPTION_MMCU:
       {
 	int i;
-	char *s = xmalloc (strlen (arg) + 1);
-
-	{
-	  char *t = s;
-	  const char *arg1 = arg;
-
-	  do
-	    *t = TOLOWER (*arg1++);
-	  while (*t++);
-	}
 
 	for (i = 0; mcu_types[i].name; ++i)
-	  if (strcmp (mcu_types[i].name, s) == 0)
+	  if (strcasecmp (mcu_types[i].name, arg) == 0)
 	    break;
 
-	free (s);
 	if (!mcu_types[i].name)
 	  {
 	    show_mcu_list (stderr);

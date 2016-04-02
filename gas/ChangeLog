@@ -1,3 +1,8 @@
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-avr.c (md_parse_option): Use strcasecmp () to compare
+	strings.
+
 2016-04-02  Alan Modra  <amodra@gmail.com>
 
 	PR 19896
