@@ -1,3 +1,9 @@
+2016-04-02  Alan Modra  <amodra@gmail.com>
+
+	PR 19896
+	* read.c (assign_symbol): Consume rest of line after an error
+	rather than continuing to process the line.
+
 2016-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.h (MAX_FLAG_NAME_LENGHT): Rename to...

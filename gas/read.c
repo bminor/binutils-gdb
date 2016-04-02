@@ -3255,7 +3255,9 @@ assign_symbol (char *name, int mode)
 	  && !S_CAN_BE_REDEFINED (symbolP))
 	{
 	  as_bad (_("symbol `%s' is already defined"), name);
-	  symbolP = symbol_clone (symbolP, 0);
+	  ignore_rest_of_line ();
+	  input_line_pointer--;
+	  return;
 	}
       /* If the symbol is volatile, copy the symbol and replace the
 	 original with the copy, so that previous uses of the symbol will
