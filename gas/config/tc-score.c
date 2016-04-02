@@ -7398,7 +7398,7 @@ s3_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
   static arelent *retval[MAX_RELOC_EXPANSION + 1];  /* MAX_RELOC_EXPANSION equals 2.  */
   arelent *reloc;
   bfd_reloc_code_real_type code;
-  char *type;
+  const char *type;
 
   reloc = retval[0] = xmalloc (sizeof (arelent));
   retval[1] = NULL;
