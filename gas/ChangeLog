@@ -1,5 +1,15 @@
 2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-alpha.c: Const qualify FLT_CHARS.
+	* config/atof-ieee.c: Remove declarations of FLT_CHARS and EXP_CHARS.
+	* config/tc-cris.h: Likewise.
+	* expr.c: Likewise.
+	* config/tc-mmix.c (md_atof): Adjust comment.
+	* config/tc-mmix.h: Stop defining FLT_CHARS and EXP_CHARS as macros.
+	* tc.h: Declare FLT_CHARS and EXP_CHARS.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-score.c (s3_gen_reloc): Add const qualifiers.
 	* config/tc-score7.c (s7_gen_reloc): Likewise.
 

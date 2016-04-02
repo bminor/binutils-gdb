@@ -75,3 +75,6 @@ extern arelent *tc_gen_reloc (asection *, fixS *);
 #else
 extern arelent **tc_gen_reloc (asection *, fixS *);
 #endif
+
+extern const char FLT_CHARS[];
+extern const char EXP_CHARS[];

@@ -46,8 +46,6 @@ static void clean_up_expression (expressionS * expressionP);
 static segT operand (expressionS *, enum expr_mode);
 static operatorT operatorf (int *);
 
-extern const char EXP_CHARS[], FLT_CHARS[];
-
 /* We keep a mapping of expression symbols to file positions, so that
    we can provide better error messages.  */
 

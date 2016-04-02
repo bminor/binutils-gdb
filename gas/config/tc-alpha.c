@@ -241,7 +241,7 @@ const char EXP_CHARS[] = "eE";
 /* Characters which mean that a number is a floating point constant,
    as in 0d1.0.  */
 /* XXX: Do all of these really get used on the alpha??  */
-char FLT_CHARS[] = "rRsSfFdDxXpP";
+const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 #ifdef OBJ_EVAX
 const char *md_shortopts = "Fm:g+1h:HG:";
