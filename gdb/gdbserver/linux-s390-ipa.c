@@ -22,6 +22,7 @@
 #include <sys/mman.h>
 #include "tracepoint.h"
 #include "linux-s390-tdesc.h"
+#include <elf.h>
 #ifdef HAVE_GETAUXVAL
 #include <sys/auxv.h>
 #endif

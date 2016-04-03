@@ -1,3 +1,9 @@
+2016-04-03  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-aarch64-ipa.c: Add <elf.h> include.
+	* linux-ppc-ipa.c: Add <elf.h> include.
+	* linux-s390-ipa.c: Add <elf.h> include.
+
 2016-03-31  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* tracepoint.c (gdb_collect_ptr): Remove const qualifier.
