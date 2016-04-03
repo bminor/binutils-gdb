@@ -1,5 +1,10 @@
 2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-score.c (s3_gen_reloc): Add const qualifiers.
+	* config/tc-score7.c (s7_gen_reloc): Likewise.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-arm.c (do_t_branch): Change the type of reloc to
 	bfd_reloc_code_real_type.
 
