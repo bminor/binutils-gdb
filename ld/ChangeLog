@@ -1,3 +1,13 @@
+2016-04-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 19803
+	* emultempl/pe.em (change_undef): New function.  Encapsulates
+	duplicated code in pe_fixup_stdcalls and adds the newly defined
+	sym to the gc root list.
+	(pe_fixup_stdcall): Use the new function.
+	* pe-dll.c (process_def_file_and_drectve); Add alias of exported
+	symbol to gc root list.
+
 2016-03-31  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (TO_ADDR, TO_SIZE, opb_shift): Move earlier in file.
