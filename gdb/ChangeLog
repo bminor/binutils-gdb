@@ -1,3 +1,8 @@
+2016-04-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-decode.c (help_cmd_list): Fix function doc and remove
+	trailing spaces.
+
 2016-04-01  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/19820
