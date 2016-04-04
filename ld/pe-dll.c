@@ -905,6 +905,9 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	{
 	  *name = '_';
 	  strcpy (name + 1, int_name);
+
+	  /* PR 19803: The alias must be preserved as well.  */
+	  lang_add_gc_name (xstrdup (name));
 	}
       else
 	strcpy (name, int_name);

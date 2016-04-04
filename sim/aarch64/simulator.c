@@ -5322,6 +5322,90 @@ do_vec_FCVTZS (sim_cpu *cpu)
 }
 
 static void
+do_vec_REV64 (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = full/half
+     instr[29,24] = 00 1110 
+     instr[23,22] = size
+     instr[21,10] = 10 0000 0000 10
+     instr[9,5]   = Rn
+     instr[4,0]   = Rd.  */
+
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  unsigned size = INSTR (23, 22);
+  unsigned full = INSTR (30, 30);
+  unsigned i;
+  FRegister val;
+
+  NYI_assert (29, 24, 0x0E);
+  NYI_assert (21, 10, 0x802);
+
+  switch (size)
+    {
+    case 0:
+      for (i = 0; i < (full ? 16 : 8); i++)
+	val.b[i ^ 0x7] = aarch64_get_vec_u8 (cpu, rn, i);
+      break;
+
+    case 1:
+      for (i = 0; i < (full ? 8 : 4); i++)
+	val.h[i ^ 0x3] = aarch64_get_vec_u16 (cpu, rn, i);
+      break;
+
+    case 2:
+      for (i = 0; i < (full ? 4 : 2); i++)
+	val.w[i ^ 0x1] = aarch64_get_vec_u32 (cpu, rn, i);
+      break;
+      
+    case 3:
+      HALT_UNALLOC;
+    }
+
+  aarch64_set_vec_u64 (cpu, rd, 0, val.v[0]);
+  if (full)
+    aarch64_set_vec_u64 (cpu, rd, 1, val.v[1]);
+}
+
+static void
+do_vec_REV16 (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = full/half
+     instr[29,24] = 00 1110 
+     instr[23,22] = size
+     instr[21,10] = 10 0000 0001 10
+     instr[9,5]   = Rn
+     instr[4,0]   = Rd.  */
+
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  unsigned size = INSTR (23, 22);
+  unsigned full = INSTR (30, 30);
+  unsigned i;
+  FRegister val;
+
+  NYI_assert (29, 24, 0x0E);
+  NYI_assert (21, 10, 0x806);
+
+  switch (size)
+    {
+    case 0:
+      for (i = 0; i < (full ? 16 : 8); i++)
+	val.b[i ^ 0x1] = aarch64_get_vec_u8 (cpu, rn, i);
+      break;
+
+    default:
+      HALT_UNALLOC;
+    }
+
+  aarch64_set_vec_u64 (cpu, rd, 0, val.v[0]);
+  if (full)
+    aarch64_set_vec_u64 (cpu, rd, 1, val.v[1]);
+}
+
+static void
 do_vec_op1 (sim_cpu *cpu)
 {
   /* instr[31]    = 0
@@ -5389,6 +5473,9 @@ do_vec_op1 (sim_cpu *cpu)
 
   switch (INSTR (15, 10))
     {
+    case 0x02: do_vec_REV64 (cpu); return;
+    case 0x06: do_vec_REV16 (cpu); return;
+
     case 0x07:
       switch (INSTR (23, 21))
 	{
@@ -6442,6 +6529,89 @@ do_vec_MOV_element (sim_cpu *cpu)
 }
 
 static void
+do_vec_REV32 (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = full/half
+     instr[29,24] = 10 1110 
+     instr[23,22] = size
+     instr[21,10] = 10 0000 0000 10
+     instr[9,5]   = Rn
+     instr[4,0]   = Rd.  */
+
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  unsigned size = INSTR (23, 22);
+  unsigned full = INSTR (30, 30);
+  unsigned i;
+  FRegister val;
+
+  NYI_assert (29, 24, 0x2E);
+  NYI_assert (21, 10, 0x802);
+
+  switch (size)
+    {
+    case 0:
+      for (i = 0; i < (full ? 16 : 8); i++)
+	val.b[i ^ 0x3] = aarch64_get_vec_u8 (cpu, rn, i);
+      break;
+
+    case 1:
+      for (i = 0; i < (full ? 8 : 4); i++)
+	val.h[i ^ 0x1] = aarch64_get_vec_u16 (cpu, rn, i);
+      break;
+
+    default:
+      HALT_UNALLOC;
+    }
+
+  aarch64_set_vec_u64 (cpu, rd, 0, val.v[0]);
+  if (full)
+    aarch64_set_vec_u64 (cpu, rd, 1, val.v[1]);
+}
+
+static void
+do_vec_EXT (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = full/half
+     instr[29,21] = 10 1110 000
+     instr[20,16] = Vm
+     instr[15]    = 0
+     instr[14,11] = source index
+     instr[10]    = 0
+     instr[9,5]   = Vn
+     instr[4.0]   = Vd.  */
+
+  unsigned vm = INSTR (20, 16);
+  unsigned vn = INSTR (9, 5);
+  unsigned vd = INSTR (4, 0);
+  unsigned src_index = INSTR (14, 11);
+  unsigned full = INSTR (30, 30);
+  unsigned i;
+  unsigned j;
+  FRegister val;
+
+  NYI_assert (31, 21, 0x370);
+  NYI_assert (15, 15, 0);
+  NYI_assert (10, 10, 0);
+
+  if (!full && (src_index & 0x8))
+    HALT_UNALLOC;
+
+  j = 0;
+
+  for (i = src_index; i < (full ? 16 : 8); i++)
+    val.b[j ++] = aarch64_get_vec_u8 (cpu, vn, i);
+  for (i = 0; i < src_index; i++)
+    val.b[j ++] = aarch64_get_vec_u8 (cpu, vm, i);
+
+  aarch64_set_vec_u64 (cpu, vd, 0, val.v[0]);
+  if (full)
+    aarch64_set_vec_u64 (cpu, vd, 1, val.v[1]);
+}
+
+static void
 dexAdvSIMD0 (sim_cpu *cpu)
 {
   /* instr [28,25] = 0 111.  */
@@ -6484,22 +6654,15 @@ dexAdvSIMD0 (sim_cpu *cpu)
     case 0x0E: do_vec_op1 (cpu); return;
     case 0x0F: do_vec_op2 (cpu); return;
 
-    case 0x2f:
-      switch (INSTR (15, 10))
-	{
-	case 0x01: do_vec_SSHR_USHR (cpu); return;
-	case 0x10:
-	case 0x12: do_vec_mls_indexed (cpu); return;
-	case 0x29: do_vec_xtl (cpu); return;
-	default:
-	  HALT_NYI;
-	}
-
     case 0x2E:
       if (INSTR (21, 21) == 1)
 	{
 	  switch (INSTR (15, 10))
 	    {
+	    case 0x02:
+	      do_vec_REV32 (cpu);
+	      return;
+
 	    case 0x07:
 	      switch (INSTR (23, 22))
 		{
@@ -6550,7 +6713,10 @@ dexAdvSIMD0 (sim_cpu *cpu)
 
       if (INSTR (31, 21) == 0x370)
 	{
-	  do_vec_MOV_element (cpu);
+	  if (INSTR (10, 10))
+	    do_vec_MOV_element (cpu);
+	  else
+	    do_vec_EXT (cpu);
 	  return;
 	}
 
@@ -6567,6 +6733,17 @@ dexAdvSIMD0 (sim_cpu *cpu)
 	  break;
 	}
       break;
+
+    case 0x2f:
+      switch (INSTR (15, 10))
+	{
+	case 0x01: do_vec_SSHR_USHR (cpu); return;
+	case 0x10:
+	case 0x12: do_vec_mls_indexed (cpu); return;
+	case 0x29: do_vec_xtl (cpu); return;
+	default:
+	  HALT_NYI;
+	}
 
     default:
       break;

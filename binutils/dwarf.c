@@ -4910,7 +4910,12 @@ display_debug_aranges (struct dwarf_section *section,
 
       if (arange.ar_version != 2 && arange.ar_version != 3)
 	{
-	  warn (_("Only DWARF 2 and 3 aranges are currently supported.\n"));
+	  /* PR 19872: A version number of 0 probably means that there is
+	     padding at the end of the .debug_aranges section.  Gold puts
+	     it there when performing an incremental link, for example.
+	     So do not generate a warning in this case.  */
+	  if (arange.ar_version)
+	    warn (_("Only DWARF 2 and 3 aranges are currently supported.\n"));
 	  break;
 	}
 

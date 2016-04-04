@@ -1,3 +1,9 @@
+2016-04-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 19872
+	* dwarf2.c (parse_comp_unit): Skip warning about unrecognised
+	version number if the version is zero.
+
 2016-04-01  Alan Modra  <amodra@gmail.com>
 
 	PR 19886
