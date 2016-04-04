@@ -1,3 +1,9 @@
+2016-04-04  Alan Modra  <amodra@gmail.com>
+
+	PR 19498
+	* symbols.c (resolve_symbol_value): Clear sy_resolving on exit
+	from function on all paths that set sy_resolving.
+
 2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* app.c (app_push): use XNEW macro.

@@ -1262,7 +1262,10 @@ resolve_symbol_value (symbolS *symp)
 
 	  resolved = symbol_resolved_p (add_symbol);
 	  if (S_IS_WEAKREFR (symp))
-	    goto exit_dont_set_value;
+	    {
+	      symp->sy_flags.sy_resolving = 0;
+	      goto exit_dont_set_value;
+	    }
 	  break;
 
 	case O_uminus:
