@@ -1,5 +1,30 @@
 2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* testsuite/gas/arc/textinsn-errors.d: New File.
+	* testsuite/gas/arc/textinsn-errors.err: Likewise.
+	* testsuite/gas/arc/textinsn-errors.s: Likewise.
+	* testsuite/gas/arc/textinsn2op.d: Likewise.
+	* testsuite/gas/arc/textinsn2op.s: Likewise.
+	* testsuite/gas/arc/textinsn2op01.d: Likewise.
+	* testsuite/gas/arc/textinsn2op01.s: Likewise.
+	* testsuite/gas/arc/textinsn3op.d: Likewise.
+	* testsuite/gas/arc/textinsn3op.s: Likewise.
+	* doc/c-arc.texi (ARC Directives): Add .extInstruction
+	documentation.
+	* config/tc-arc.c (arcext_section): New variable.
+	(arc_extinsn): New function.
+	(md_pseudo_table): Add .extInstruction pseudo op.
+	(attributes_t): New type.
+	(suffixclass, syntaxclass, syntaxclassmod): New constant
+	structures.
+	(find_opcode_match): Remove arc_num_opcodes.
+	(md_begin): Likewise.
+	(tokenize_extinsn): New function.
+	(arc_set_ext_seg): Likewise.
+	(create_extinst_section): Likewise.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* config/tc-arc.c (preprocess_operands): Mark AUX symbol.
 	(arc_adjust_symtab): New function.
 	* config/tc-arc.h (ARC_FLAG_AUX): Define.

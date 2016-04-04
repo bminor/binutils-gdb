@@ -320,7 +320,7 @@ machine directives:
 @table @code
 
 @cindex @code{lcomm} directive
-@item .lcomm @var{symbol} , @var{length}[, @var{alignment}]
+@item .lcomm @var{symbol}, @var{length}[, @var{alignment}]
 Reserve @var{length} (an absolute expression) bytes for a local common
 denoted by @var{symbol}.  The section and value of @var{symbol} are
 those of the new local common.  The addresses are allocated in the bss
@@ -336,11 +336,11 @@ largest power of two less than or equal to the size of the symbol, up
 to a maximum of 16.
 
 @cindex @code{lcommon} directive
-@item .lcommon @var{symbol} , @var{length}[, @var{alignment}]
+@item .lcommon @var{symbol}, @var{length}[, @var{alignment}]
 The same as @code{lcomm} directive.
 
-@cindex @code{cpu} directive, ARC
-@cindex @code{cpu} directive, ARC
+@cindex @code{cpu} directive
+@item .cpu @var{cpu}
 The @code{.cpu} directive must be followed by the desired core
 version.  Permitted values for CPU are:
 @table @code
@@ -361,6 +361,93 @@ Assemble for the ARC HS instruction set.
 Note: the @code{.cpu} directive overrides the command line option
 @code{-mcpu=@var{cpu}}; a warning is emitted when the version is not
 consistent between the two.
+
+@item .extInstruction @var{name}, @var{opcode}, @var{subopcode}, @var{suffixclass}, @var{syntaxclass}
+@cindex @code{extInstruction} directive
+ARC allows the user to specify extension instructions.  These
+extension instructions are not macros; the assembler creates encodings
+for use of these instructions according to the specification by the
+user.
+
+The first argument, @var{name}, gives the name of the instruction.
+
+The second argument, @var{opcode}, is the opcode to be used (bits 31:27
+in the encoding).
+
+The third argument, @var{subopcode}, is the sub-opcode to be used, but
+the correct value also depends on the fifth argument,
+@var{syntaxclass}
+
+The fourth argument, @var{suffixclass}, determines the kinds of
+suffixes to be allowed.  Valid values are:
+@table @code
+@item SUFFIX_NONE
+No suffixes are permitted;
+
+@item SUFFIX_COND
+Conditional suffixes are permitted;
+
+@item SUFFIX_FLAG
+Flag setting suffixes are permitted.
+
+@item SUFFIX_COND|SUFFIX_FLAG
+Both conditional and flag setting suffices are permitted.
+
+@end table
+
+The fifth and final argument, @var{syntaxclass}, determines the syntax
+class for the instruction.  It can have the following values:
+@table @code
+@item SYNTAX_2OP
+Two Operand Instruction;
+
+@item SYNTAX_3OP
+Three Operand Instruction.
+@end table
+
+The syntax class may be followed by @samp{|} and one of the following
+modifiers.
+@table @code
+
+@item OP1_MUST_BE_IMM
+Modifies syntax class @code{SYNTAX_3OP}, specifying that the first
+operand of a three-operand instruction must be an immediate (i.e., the
+result is discarded).  This is usually used to set the flags using
+specific instructions and not retain results.
+
+@item OP1_IMM_IMPLIED
+Modifies syntax class @code{SYNTAX_20P}, specifying that there is an
+implied immediate destination operand which does not appear in the
+syntax.
+
+For example, if the source code contains an instruction like:
+@example
+inst r1,r2
+@end example
+the first argument is an implied immediate (that is, the result is
+discarded).  This is the same as though the source code were: inst
+0,r1,r2.
+
+@end table
+
+For example, defining a 64-bit multiplier with immediate operands:
+@example
+	.extInstruction  mp64, 0x07, 0x2d, SUFFIX_COND|SUFFIX_FLAG,
+			 SYNTAX_3OP|OP1_MUST_BE_IMM
+@end example
+which specifies an extension instruction named @code{mp64} with 3
+operands.  It sets the flags and can be used with a condition code,
+for which the first operand is an immediate, i.e. equivalent to
+discarding the result of the operation.
+
+A two operands instruction variant would be:
+@example
+	.extInstruction mul64, 0x07, 0x2d, SUFFIX_COND,
+	SYNTAX_2OP|OP1_IMM_IMPLIED
+@end example
+which describes a two operand instruction with an implicit first
+immediate operand.  The result of this operation would be discarded.
+
 @end table
 
 @node ARC Modifiers
