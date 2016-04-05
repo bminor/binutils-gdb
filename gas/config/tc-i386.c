@@ -4575,7 +4575,9 @@ check_VecOperands (const insn_template *t)
 	    && i.op[op].disps->X_op == O_constant)
 	  {
 	    offsetT value = i.op[op].disps->X_add_number;
-	    int vec_disp8_ok = fits_in_vec_disp8 (value);
+	    int vec_disp8_ok
+	      = (i.disp_encoding != disp_encoding_32bit
+		 && fits_in_vec_disp8 (value));
 	    if (t->operand_types [op].bitfield.vec_disp8)
 	      {
 		if (vec_disp8_ok)
