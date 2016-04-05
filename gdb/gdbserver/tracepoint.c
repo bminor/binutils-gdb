@@ -216,34 +216,6 @@ static struct ipa_sym_addresses ipa_sym_addrs;
 
 static int read_inferior_integer (CORE_ADDR symaddr, int *val);
 
-#if !defined HAVE_GETAUXVAL && defined IN_PROCESS_AGENT
-/* Retrieve the value of TYPE from the auxiliary vector.  If TYPE is not
-   found, 0 is returned.  This function is provided if glibc is too old.  */
-
-unsigned long
-getauxval (unsigned long type)
-{
-  unsigned long data[2];
-  FILE *f = fopen ("/proc/self/auxv", "r");
-  unsigned long value = 0;
-
-  if (f == NULL)
-    return 0;
-
-  while (fread (data, sizeof (data), 1, f) > 0)
-    {
-      if (data[0] == type)
-	{
-	  value = data[1];
-	  break;
-	}
-    }
-
-  fclose (f);
-  return value;
-}
-#endif
-
 /* Returns true if both the in-process agent library and the static
    tracepoints libraries are loaded in the inferior, and agent has
    capability on static tracepoints.  */
@@ -7394,6 +7366,34 @@ initialize_tracepoint_ftlib (void)
 
   gdb_agent_init ();
 }
+
+#ifndef HAVE_GETAUXVAL
+/* Retrieve the value of TYPE from the auxiliary vector.  If TYPE is not
+   found, 0 is returned.  This function is provided if glibc is too old.  */
+
+unsigned long
+getauxval (unsigned long type)
+{
+  unsigned long data[2];
+  FILE *f = fopen ("/proc/self/auxv", "r");
+  unsigned long value = 0;
+
+  if (f == NULL)
+    return 0;
+
+  while (fread (data, sizeof (data), 1, f) > 0)
+    {
+      if (data[0] == type)
+	{
+	  value = data[1];
+	  break;
+	}
+    }
+
+  fclose (f);
+  return value;
+}
+#endif
 
 #endif /* IN_PROCESS_AGENT */
 
