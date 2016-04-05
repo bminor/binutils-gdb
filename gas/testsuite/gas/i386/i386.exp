@@ -443,6 +443,7 @@ if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
     run_list_test "reg-bad" ""
     run_list_test "space1" "-al"
     run_dump_test rept
+    run_dump_test pr19498
     if [is_elf_format] then {
 	run_list_test_stdin "list-1" "-al"
 	run_list_test_stdin "list-2" "-al"
