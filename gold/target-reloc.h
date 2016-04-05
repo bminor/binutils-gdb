@@ -186,8 +186,10 @@ issue_undefined_symbol_error(const Symbol* sym)
   if (sym->is_weak_undefined())
     return false;
 
-  // We don't report symbols defined in discarded sections.
-  if (sym->is_defined_in_discarded_section())
+  // We don't report symbols defined in discarded sections,
+  // unless they're placeholder symbols that should have been
+  // provided by a plugin.
+  if (sym->is_defined_in_discarded_section() && !sym->is_placeholder())
     return false;
 
   // If the target defines this symbol, don't report it here.

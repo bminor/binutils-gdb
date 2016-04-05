@@ -2202,8 +2202,8 @@ do_pseudo_b (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
     {
       md_assemblef ("sethi $ta,hi20(%s)", arg_label);
       md_assemblef ("ori $ta,$ta,lo12(%s)", arg_label);
-      md_assemble  ("add $ta,$ta,$gp");
-      md_assemble  ("jr $ta");
+      md_assemble  ((char *) "add $ta,$ta,$gp");
+      md_assemble  ((char *) "jr $ta");
     }
   else
     {
@@ -2223,8 +2223,8 @@ do_pseudo_bal (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
     {
       md_assemblef ("sethi $ta,hi20(%s)", arg_label);
       md_assemblef ("ori $ta,$ta,lo12(%s)", arg_label);
-      md_assemble  ("add $ta,$ta,$gp");
-      md_assemble ("jral $ta");
+      md_assemble  ((char *) "add $ta,$ta,$gp");
+      md_assemble ((char *) "jral $ta");
     }
   else
     {
@@ -2483,7 +2483,7 @@ do_pseudo_ls_bhw (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
 	  /* lw */
 	  md_assemblef ("sethi $ta,hi20(%s)", argv[1]);
 	  md_assemblef ("ori $ta,$ta,lo12(%s)", argv[1]);
-	  md_assemble ("lw $ta,[$gp+$ta]");	/* Load address word.  */
+	  md_assemble ((char *) "lw $ta,[$gp+$ta]");	/* Load address word.  */
 	  if (addend < 0x10000 && addend >= -0x10000)
 	    {
 	      md_assemblef ("%c%c%si %s,[$ta+(%d)]", ls, size, sign, argv[0], addend);
@@ -2986,7 +2986,7 @@ nds32_init_nds32_pseudo_opcodes (void)
 }
 
 static struct nds32_pseudo_opcode *
-nds32_lookup_pseudo_opcode (char *str)
+nds32_lookup_pseudo_opcode (const char *str)
 {
   int i = 0;
   /* Assume pseudo-opcode are less than 16-char in length.  */
@@ -3189,7 +3189,7 @@ nds32_all_ext (void)
    recognized.  This will be handled by the generic code.  */
 
 int
-nds32_parse_option (int c, char *arg)
+nds32_parse_option (int c, const char *arg)
 {
   struct nds32_parse_option_table *coarse_tune;
   struct nds32_set_option_table *fine_tune;
@@ -4123,7 +4123,7 @@ nds32_elf_save_pseudo_pattern (fixS* fixP, struct nds32_opcode *opcode,
 			       fragS *fragP)
 {
   if (!reloc_ptr)
-    reloc_ptr = malloc (sizeof (struct nds32_relocs_pattern));
+    reloc_ptr = XNEW (struct nds32_relocs_pattern);
   reloc_ptr->seg = now_seg;
   reloc_ptr->sym = sym;
   reloc_ptr->frag = fragP;
@@ -4138,7 +4138,7 @@ nds32_elf_save_pseudo_pattern (fixS* fixP, struct nds32_opcode *opcode,
 /* Check X_md to transform relocation.  */
 
 static fixS*
-nds32_elf_record_fixup_exp (fragS *fragP, char *str,
+nds32_elf_record_fixup_exp (fragS *fragP, const char *str,
 			    const struct nds32_field *fld,
 			    expressionS *pexp, char* out,
 			    struct nds32_asm_insn *insn)
@@ -5102,7 +5102,7 @@ restore:
 /* Check instruction if it can be used for the baseline.  */
 
 static bfd_boolean
-nds32_check_insn_available (struct nds32_asm_insn insn, char *str)
+nds32_check_insn_available (struct nds32_asm_insn insn, const char *str)
 {
   int attr = insn.attr & ATTR_ALL;
   static int baseline_isa = 0;
@@ -5141,6 +5141,7 @@ void
 md_assemble (char *str)
 {
   struct nds32_asm_insn insn;
+  expressionS expr;
   char *out;
   struct nds32_pseudo_opcode *popcode;
   const struct nds32_field *fld = NULL;
@@ -5176,7 +5177,7 @@ md_assemble (char *str)
     }
 
   label_exist = 0;
-  insn.info = (expressionS *) alloca (sizeof (expressionS));
+  insn.info = & expr;
   asm_desc.result = NASM_OK;
   nds32_assemble (&asm_desc, &insn, str);
 
@@ -6063,7 +6064,7 @@ md_number_to_chars (char *buf, valueT val, int n)
 /* This function is called to convert an ASCII string into a floating point
    value in format used by the CPU.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   int i;

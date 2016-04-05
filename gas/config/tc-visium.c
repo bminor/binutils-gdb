@@ -282,12 +282,12 @@ struct visium_long_option_table
 {
   const char *option;			/* Substring to match.  */
   const char *help;			/* Help information.  */
-  int (*func) (char *subopt);	/* Function to decode sub-option.  */
+  int (*func) (const char *subopt);	/* Function to decode sub-option.  */
   const char *deprecated;		/* If non-null, print this message.  */
 };
 
 static int
-visium_parse_arch (char *str)
+visium_parse_arch (const char *str)
 {
   struct visium_arch_option_table *opt;
 
@@ -317,7 +317,7 @@ static struct visium_long_option_table visium_long_opts[] =
 };
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   struct visium_option_table *opt;
   struct visium_long_option_table *lopt;
@@ -826,7 +826,7 @@ md_begin (void)
 /* Equal to MAX_PRECISION in atof-ieee.c.  */
 #define MAX_LITTLENUMS 6
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   int i, prec;
@@ -861,7 +861,7 @@ md_atof (int type, char *litP, int *sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Bad call to MD_ATOF()");
     }
 
   t = atof_ieee (input_line_pointer, type, words);

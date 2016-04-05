@@ -21852,7 +21852,6 @@ acceptable commands.
 
 @menu
 * ARM::                         ARM
-* M32R/SDI::                    Renesas M32R/SDI
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
@@ -21959,43 +21958,6 @@ The default value is @code{all}.
 @end table
 @end table
 
-@node M32R/SDI
-@subsection Renesas M32R/SDI
-
-The following commands are available for M32R/SDI:
-
-@table @code
-@item sdireset
-@kindex sdireset
-@cindex reset SDI connection, M32R
-This command resets the SDI connection.
-
-@item sdistatus
-@kindex sdistatus
-This command shows the SDI connection status.
-
-@item debug_chaos
-@kindex debug_chaos
-@cindex M32R/Chaos debugging
-Instructs the remote that M32R/Chaos debugging is to be used.
-
-@item use_debug_dma
-@kindex use_debug_dma
-Instructs the remote to use the DEBUG_DMA method of accessing memory.
-
-@item use_mon_code
-@kindex use_mon_code
-Instructs the remote to use the MON_CODE method of accessing memory.
-
-@item use_ib_break
-@kindex use_ib_break
-Instructs the remote to set breakpoints by IB break.
-
-@item use_dbt_break
-@kindex use_dbt_break
-Instructs the remote to set breakpoints by DBT.
-@end table
-
 @node M68K
 @subsection M68k
 
@@ -22042,59 +22004,8 @@ Show MicroBlaze-specific debugging level.
 @node MIPS Embedded
 @subsection @acronym{MIPS} Embedded
 
-@cindex @acronym{MIPS} boards
-@value{GDBN} can use the @acronym{MIPS} remote debugging protocol to talk to a
-@acronym{MIPS} board attached to a serial line.  This is available when
-you configure @value{GDBN} with @samp{--target=mips-elf}.
-
-@need 1000
-Use these @value{GDBN} commands to specify the connection to your target board:
-
-@table @code
-@item target mips @var{port}
-@kindex target mips @var{port}
-To run a program on the board, start up @code{@value{GDBP}} with the
-name of your program as the argument.  To connect to the board, use the
-command @samp{target mips @var{port}}, where @var{port} is the name of
-the serial port connected to the board.  If the program has not already
-been downloaded to the board, you may use the @code{load} command to
-download it.  You can then use all the usual @value{GDBN} commands.
-
-For example, this sequence connects to the target board through a serial
-port, and loads and runs a program called @var{prog} through the
-debugger:
-
-@smallexample
-host$ @value{GDBP} @var{prog}
-@value{GDBN} is free software and @dots{}
-(@value{GDBP}) target mips /dev/ttyb
-(@value{GDBP}) load @var{prog}
-(@value{GDBP}) run
-@end smallexample
-
-@item target mips @var{hostname}:@var{portnumber}
-On some @value{GDBN} host configurations, you can specify a TCP
-connection (for instance, to a serial line managed by a terminal
-concentrator) instead of a serial port, using the syntax
-@samp{@var{hostname}:@var{portnumber}}.
-
-@item target pmon @var{port}
-@kindex target pmon @var{port}
-PMON ROM monitor.
-
-@item target ddb @var{port}
-@kindex target ddb @var{port}
-NEC's DDB variant of PMON for Vr4300.
-
-@item target lsi @var{port}
-@kindex target lsi @var{port}
-LSI variant of PMON.
-
-@end table
-
-
 @noindent
-@value{GDBN} also supports these special commands for @acronym{MIPS} targets:
+@value{GDBN} supports these special commands for @acronym{MIPS} targets:
 
 @table @code
 @item set mipsfpu double
@@ -22124,78 +22035,6 @@ and @samp{set mipsfpu off} will select no floating point.
 
 As usual, you can inquire about the @code{mipsfpu} variable with
 @samp{show mipsfpu}.
-
-@item set timeout @var{seconds}
-@itemx set retransmit-timeout @var{seconds}
-@itemx show timeout
-@itemx show retransmit-timeout
-@cindex @code{timeout}, @acronym{MIPS} protocol
-@cindex @code{retransmit-timeout}, @acronym{MIPS} protocol
-@kindex set timeout
-@kindex show timeout
-@kindex set retransmit-timeout
-@kindex show retransmit-timeout
-You can control the timeout used while waiting for a packet, in the @acronym{MIPS}
-remote protocol, with the @code{set timeout @var{seconds}} command.  The
-default is 5 seconds.  Similarly, you can control the timeout used while
-waiting for an acknowledgment of a packet with the @code{set
-retransmit-timeout @var{seconds}} command.  The default is 3 seconds.
-You can inspect both values with @code{show timeout} and @code{show
-retransmit-timeout}.  (These commands are @emph{only} available when
-@value{GDBN} is configured for @samp{--target=mips-elf}.)
-
-The timeout set by @code{set timeout} does not apply when @value{GDBN}
-is waiting for your program to stop.  In that case, @value{GDBN} waits
-forever because it has no way of knowing how long the program is going
-to run before stopping.
-
-@item set syn-garbage-limit @var{num}
-@kindex set syn-garbage-limit@r{, @acronym{MIPS} remote}
-@cindex synchronize with remote @acronym{MIPS} target
-Limit the maximum number of characters @value{GDBN} should ignore when
-it tries to synchronize with the remote target.  The default is 10
-characters.  Setting the limit to -1 means there's no limit.
-
-@item show syn-garbage-limit
-@kindex show syn-garbage-limit@r{, @acronym{MIPS} remote}
-Show the current limit on the number of characters to ignore when
-trying to synchronize with the remote system.
-
-@item set monitor-prompt @var{prompt}
-@kindex set monitor-prompt@r{, @acronym{MIPS} remote}
-@cindex remote monitor prompt
-Tell @value{GDBN} to expect the specified @var{prompt} string from the
-remote monitor.  The default depends on the target:
-@table @asis
-@item pmon target
-@samp{PMON}
-@item ddb target
-@samp{NEC010}
-@item lsi target
-@samp{PMON>}
-@end table
-
-@item show monitor-prompt
-@kindex show monitor-prompt@r{, @acronym{MIPS} remote}
-Show the current strings @value{GDBN} expects as the prompt from the
-remote monitor.
-
-@item set monitor-warnings
-@kindex set monitor-warnings@r{, @acronym{MIPS} remote}
-Enable or disable monitor warnings about hardware breakpoints.  This
-has effect only for the @code{lsi} target.  When on, @value{GDBN} will
-display warning messages whose codes are returned by the @code{lsi}
-PMON monitor for breakpoint commands.
-
-@item show monitor-warnings
-@kindex show monitor-warnings@r{, @acronym{MIPS} remote}
-Show the current setting of printing monitor warnings.
-
-@item pmon @var{command}
-@kindex pmon@r{, @acronym{MIPS} remote}
-@cindex send PMON command
-This command allows sending an arbitrary @var{command} string to the
-monitor.  The monitor must be in debug mode for this to work.
 @end table
 
 @node PowerPC Embedded

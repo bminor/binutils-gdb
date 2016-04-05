@@ -245,7 +245,7 @@ s_proc (int end_p)
 	  if (leading_char)
 	    {
 	      unsigned len = strlen (name) + 1;
-	      label = xmalloc (len + 1);
+	      label = XNEWVEC (char, len + 1);
 	      label[0] = leading_char;
 	      memcpy (label + 1, name, len);
 	    }
@@ -930,7 +930,7 @@ md_assemble (char *str)
       switch (fixP->fx_r_type)
 	{
 	case RELOC_DLX_REL26:
-	  bitP = malloc (sizeof (bit_fixS));
+	  bitP = XNEW (bit_fixS);
 	  bitP->fx_bit_size = 26;
 	  bitP->fx_bit_offset = 25;
 	  bitP->fx_bit_base = the_insn.opcode & 0xFC000000;
@@ -942,7 +942,7 @@ md_assemble (char *str)
 	  break;
 	case RELOC_DLX_LO16:
 	case RELOC_DLX_REL16:
-	  bitP = malloc (sizeof (bit_fixS));
+	  bitP = XNEW (bit_fixS);
 	  bitP->fx_bit_size = 16;
 	  bitP->fx_bit_offset = 15;
 	  bitP->fx_bit_base = the_insn.opcode & 0xFFFF0000;
@@ -953,7 +953,7 @@ md_assemble (char *str)
 	  fixP->fx_bit_fixP = bitP;
 	  break;
 	case RELOC_DLX_HI16:
-	  bitP = malloc (sizeof (bit_fixS));
+	  bitP = XNEW (bit_fixS);
 	  bitP->fx_bit_size = 16;
 	  bitP->fx_bit_offset = 15;
 	  bitP->fx_bit_base = the_insn.opcode & 0xFFFF0000;
@@ -974,7 +974,7 @@ md_assemble (char *str)
    but I'm not sure.  Dlx will not use it anyway, so I just leave it
    here for now.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);
@@ -1076,7 +1076,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c     ATTRIBUTE_UNUSED,
-		 char *arg ATTRIBUTE_UNUSED)
+		 const char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -1187,7 +1187,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
 {
   arelent * reloc;
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
 
   if (reloc->howto == NULL)
@@ -1201,7 +1201,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
 
   gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
 

@@ -2547,7 +2547,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"and", 0xa000000, 0x7f200000, log_shift, 0, CORE, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_SF},
   {"bic", 0xa200000, 0x7f200000, log_shift, 0, CORE, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_SF},
   {"orr", 0x2a000000, 0x7f200000, log_shift, 0, CORE, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_HAS_ALIAS | F_SF},
-  {"mov", 0x2a0003e0, 0x7f2003e0, log_shift, 0, CORE, OP2 (Rd, Rm), QL_I2SAMER, F_ALIAS | F_SF},
+  {"mov", 0x2a0003e0, 0x7f2003e0, log_shift, 0, CORE, OP2 (Rd, Rm_SFT), QL_I2SAMER, F_ALIAS | F_SF},
   {"uxtw", 0x2a0003e0, 0x7f2003e0, log_shift, OP_UXTW, CORE, OP2 (Rd, Rm), QL_I2SAMEW, F_ALIAS | F_PSEUDO},
   {"orn", 0x2a200000, 0x7f200000, log_shift, 0, CORE, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_HAS_ALIAS | F_SF},
   {"mvn", 0x2a2003e0, 0x7f2003e0, log_shift, 0, CORE, OP2 (Rd, Rm_SFT), QL_I2SAMER, F_ALIAS | F_SF},

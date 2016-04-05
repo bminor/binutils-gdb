@@ -1348,6 +1348,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
   unsigned int linenumber;
   unsigned int discriminator;
   bfd_boolean reloc;
+  char *path = NULL;
 
   if (! with_line_numbers && ! with_source_code)
     return;
@@ -1368,20 +1369,21 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
     {
       char *path_up;
       const char *fname = filename;
-      char *path = (char *) alloca (prefix_length + PATH_MAX + 1);
+
+      path = xmalloc (prefix_length + PATH_MAX + 1);
 
       if (prefix_length)
 	memcpy (path, prefix, prefix_length);
       path_up = path + prefix_length;
 
       /* Build relocated filename, stripping off leading directories
-	 from the initial filename if requested. */
+	 from the initial filename if requested.  */
       if (prefix_strip > 0)
 	{
 	  int level = 0;
 	  const char *s;
 
-	  /* Skip selected directory levels. */
+	  /* Skip selected directory levels.  */
 	  for (s = fname + 1; *s != '\0' && level < prefix_strip; s++)
 	    if (IS_DIR_SEPARATOR(*s))
 	      {
@@ -1390,7 +1392,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	      }
 	}
 
-      /* Update complete filename. */
+      /* Update complete filename.  */
       strncpy (path_up, fname, PATH_MAX);
       path_up[PATH_MAX] = '\0';
 
@@ -1469,6 +1471,9 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 
   if (discriminator != prev_discriminator)
     prev_discriminator = discriminator;
+
+  if (path)
+    free (path);
 }
 
 /* Pseudo FILE object for strings.  */

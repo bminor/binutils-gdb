@@ -115,18 +115,20 @@ proc do_test { cond_bp_target detach_on_fork displaced } {
     set fork_count 0
     set ok 0
 
-    set test "inferior 1 exited"
-    gdb_test_multiple "" $test {
-	-re "Inferior 1 \(\[^\r\n\]+\) exited normally" {
-	    set ok 1
-	    pass $test
-	}
-	-re "Inferior $decimal \(\[^\r\n\]+\) exited normally" {
-	    incr fork_count
-	    if {$fork_count <= 100} {
-		exp_continue
-	    } else {
-		fail "$test (too many forks)"
+    with_timeout_factor 10 {
+        set test "inferior 1 exited"
+        gdb_test_multiple "" $test {
+	    -re "Inferior 1 \(\[^\r\n\]+\) exited normally" {
+	        set ok 1
+	        pass $test
+	    }
+	    -re "Inferior $decimal \(\[^\r\n\]+\) exited normally" {
+	        incr fork_count
+	        if {$fork_count <= 100} {
+		    exp_continue
+	        } else {
+		    fail "$test (too many forks)"
+	        }
 	    }
 	}
     }

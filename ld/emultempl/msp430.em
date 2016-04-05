@@ -171,6 +171,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
   char * lower_name;
   char * upper_name;
   char * name;
+  char * buf = NULL;
   lang_output_section_statement_type * lower;
   lang_output_section_statement_type * upper;
   lang_output_section_statement_type * os;
@@ -197,15 +198,15 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
      only use the part of the name before the second dot.  */
   if (strchr (secname + 1, '.') != NULL)
     {
-      name = ACONCAT ((secname, NULL));
+      buf = name = xstrdup (secname);
 
       * strchr (name + 1, '.') = 0;
     }
   else
     name = (char *) secname;
   
-  lower_name = ACONCAT ((".lower", name, NULL));
-  upper_name = ACONCAT ((".upper", name, NULL));
+  lower_name = concat (".lower", name, NULL);
+  upper_name = concat (".upper", name, NULL);
 
   /* Find the corresponding lower and upper sections.  */
   lower = lang_output_section_find (lower_name);
@@ -220,7 +221,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
       if (upper == NULL)
         {
           einfo ("%P: error: no section named %s or %s in linker script\n", lower_name, upper_name);
-	  return NULL;
+	  goto end;
 	}
     }
   else if (upper == NULL)
@@ -255,6 +256,11 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
     }
 
   lang_add_section (& os->children, s, NULL, os);
+ end:
+  free (upper_name);
+  free (lower_name);
+  if (buf)
+    free (buf);
   return os;
 }
 EOF

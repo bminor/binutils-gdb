@@ -308,8 +308,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
 {
   arelent * reloc;
 
-  reloc = xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr  = xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr  = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   reloc->addend = fixP->fx_offset;
@@ -451,7 +451,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, fragS *fragP)
    GAS does not understand.  */
 
 int
-md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c ATTRIBUTE_UNUSED, const char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -464,7 +464,7 @@ md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
   return;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);

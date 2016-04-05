@@ -1616,7 +1616,7 @@ md_mcore_end (void)
 
 /* Various routines to kill one day.  */
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
@@ -1650,7 +1650,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char * arg)
+md_parse_option (int c, const char * arg)
 {
   switch (c)
     {
@@ -2183,8 +2183,8 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
       break;
   }
 
-  rel = xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   /* Always pass the addend along!  */

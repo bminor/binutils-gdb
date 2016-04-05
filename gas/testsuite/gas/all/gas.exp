@@ -152,7 +152,7 @@ case $target_triplet in {
 	run_dump_test redef
 	# These targets fail redef2 because they disallow redefined
 	# symbols on relocs.
-	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "arc*-*-*"
+	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"
 	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"

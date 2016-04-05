@@ -19,7 +19,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+#include <sys/mman.h>
 #include "tracepoint.h"
+#include <elf.h>
+#ifdef HAVE_GETAUXVAL
+#include <sys/auxv.h>
+#endif
 
 /* Defined in auto-generated file aarch64.c.  */
 void init_registers_aarch64 (void);
@@ -133,8 +138,8 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
 		     + (aarch64_ft_collect_regmap[i] * FT_CR_SIZE));
 }
 
-IP_AGENT_EXPORT_FUNC ULONGEST
-gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
+ULONGEST
+get_raw_reg (const unsigned char *raw_regs, int regnum)
 {
   if (regnum >= AARCH64_NUM_FT_COLLECT_GREGS)
     return 0;
@@ -151,6 +156,52 @@ const struct target_desc *
 get_ipa_tdesc (int idx)
 {
   return tdesc_aarch64;
+}
+
+/* Allocate buffer for the jump pads.  The branch instruction has a reach
+   of +/- 128MiB, and the executable is loaded at 0x400000 (4MiB).
+   To maximize the area of executable that can use tracepoints, try
+   allocating at 0x400000 - size initially, decreasing until we hit
+   a free area.  */
+
+void *
+alloc_jump_pad_buffer (size_t size)
+{
+  uintptr_t addr;
+  uintptr_t exec_base = getauxval (AT_PHDR);
+  int pagesize;
+  void *res;
+
+  if (exec_base == 0)
+    exec_base = 0x400000;
+
+  pagesize = sysconf (_SC_PAGE_SIZE);
+  if (pagesize == -1)
+    perror_with_name ("sysconf");
+
+  addr = exec_base - size;
+
+  /* size should already be page-aligned, but this can't hurt.  */
+  addr &= ~(pagesize - 1);
+
+  /* Search for a free area.  If we hit 0, we're out of luck.  */
+  for (; addr; addr -= pagesize)
+    {
+      /* No MAP_FIXED - we don't want to zap someone's mapping.  */
+      res = mmap ((void *) addr, size,
+		  PROT_READ | PROT_WRITE | PROT_EXEC,
+		  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+      /* If we got what we wanted, return.  */
+      if ((uintptr_t) res == addr)
+	return res;
+
+      /* If we got a mapping, but at a wrong address, undo it.  */
+      if (res != MAP_FAILED)
+	munmap (res, size);
+    }
+
+  return NULL;
 }
 
 void

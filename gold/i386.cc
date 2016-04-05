@@ -2394,6 +2394,23 @@ Target_i386::Scan::global(Symbol_table* symtab,
       break;
 
     case elfcpp::R_386_GOTOFF:
+      // A GOT-relative reference must resolve locally.
+      if (!gsym->is_defined())
+        gold_error(_("%s: relocation R_386_GOTOFF against undefined symbol %s"
+		     " cannot be used when making a shared object"),
+		   object->name().c_str(), gsym->name());
+      else if (gsym->is_from_dynobj())
+        gold_error(_("%s: relocation R_386_GOTOFF against external symbol %s"
+		     " cannot be used when making a shared object"),
+		   object->name().c_str(), gsym->name());
+      else if (gsym->is_preemptible())
+        gold_error(_("%s: relocation R_386_GOTOFF against preemptible symbol %s"
+		     " cannot be used when making a shared object"),
+		   object->name().c_str(), gsym->name());
+      // We need a GOT section.
+      target->got_section(symtab, layout);
+      break;
+
     case elfcpp::R_386_GOTPC:
       // We need a GOT section.
       target->got_section(symtab, layout);

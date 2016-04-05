@@ -67,7 +67,7 @@ register_dependency (const char *filename)
 	return;
     }
 
-  dep = (struct dependency *) xmalloc (sizeof (struct dependency));
+  dep = XNEW (struct dependency);
   dep->file = xstrdup (filename);
   dep->next = dep_chain;
   dep_chain = dep;

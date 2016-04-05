@@ -48,7 +48,7 @@ gdb_test "break bar" \
 
 gdb_test "break $end_location" \
     "Breakpoint $decimal at .* line $end_location\." \
-    set breakpoint at end of main"
+    "set breakpoint at end of main"
 
 gdb_continue_to_breakpoint "foo" ".*$srcfile:$foo_location.*"
 gdb_continue_to_breakpoint "bar" ".*$srcfile:$bar_location.*"

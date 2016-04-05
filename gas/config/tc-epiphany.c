@@ -116,7 +116,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 const char * md_shortopts = "";
 
 int
-md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
+md_parse_option (int c ATTRIBUTE_UNUSED, const char * arg ATTRIBUTE_UNUSED)
 {
   return 0;	/* No target-specific options.  */
 }
@@ -1012,7 +1012,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *insn ATTRIBUTE_UNUSED,
 /* Equal to MAX_PRECISION in atof-ieee.c.  */
 #define MAX_LITTLENUMS 6
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, FALSE);

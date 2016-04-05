@@ -322,7 +322,6 @@ tic54x_asg (int x ATTRIBUTE_UNUSED)
   int c;
   char *name;
   char *str;
-  char *tmp;
   int quoted = *input_line_pointer == '"';
 
   ILLEGAL_WITHIN_STRUCT ();
@@ -360,12 +359,8 @@ tic54x_asg (int x ATTRIBUTE_UNUSED)
       return;
     }
 
-  tmp = xmalloc (strlen (str) + 1);
-  strcpy (tmp, str);
-  str = tmp;
-  tmp = xmalloc (strlen (name) + 1);
-  strcpy (tmp, name);
-  name = tmp;
+  str = xstrdup (str);
+  name = xstrdup (name);
   subsym_create_or_replace (name, str);
   (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
@@ -412,8 +407,7 @@ tic54x_eval (int x ATTRIBUTE_UNUSED)
       return;
     }
   c = get_symbol_name (&name);	/* Get terminator.  */
-  tmp = xmalloc (strlen (name) + 1);
-  name = strcpy (tmp, name);
+  name = xstrdup (name);
   (void) restore_line_pointer (c);
 
   if (!ISALPHA (*name))
@@ -431,8 +425,7 @@ tic54x_eval (int x ATTRIBUTE_UNUSED)
      But since there's not written rule as to when, don't even bother trying
      to match their behavior.  */
   sprintf (valuestr, "%d", value);
-  tmp = xmalloc (strlen (valuestr) + 1);
-  strcpy (tmp, valuestr);
+  tmp = xstrdup (valuestr);
   subsym_create_or_replace (name, tmp);
 
   demand_empty_rest_of_line ();
@@ -549,21 +542,16 @@ stag_add_field_symbols (struct stag *stag,
 			symbolS *rootsym,
 			const char *root_stag_name)
 {
-  char prefix[strlen (path) + 2];
+  char * prefix;
   struct stag_field *field = stag->field;
 
   /* Construct a symbol for every field contained within this structure
      including fields within structure fields.  */
-  strcpy (prefix, path);
-  if (*path)
-    strcat (prefix, ".");
+  prefix = concat (path, *path ? "." : "", NULL);
 
   while (field != NULL)
     {
-      int len = strlen (prefix) + strlen (field->name) + 2;
-      char *name = xmalloc (len);
-      strcpy (name, prefix);
-      strcat (name, field->name);
+      char *name = concat (prefix, field->name, NULL);
 
       if (rootsym == NULL)
 	{
@@ -577,12 +565,10 @@ stag_add_field_symbols (struct stag *stag,
 	}
       else
 	{
-	  char *replacement = xmalloc (strlen (name)
-				       + strlen (stag->name) + 2);
-	  strcpy (replacement, S_GET_NAME (rootsym));
-	  strcat (replacement, "+");
-	  strcat (replacement, root_stag_name);
-	  strcat (replacement, name + strlen (S_GET_NAME (rootsym)));
+	  char *replacement;
+
+	  replacement = concat (S_GET_NAME (rootsym), "+", root_stag_name,
+				name + strlen (S_GET_NAME (rootsym)), NULL);
 	  hash_insert (subsym_hash[0], name, replacement);
 	}
 
@@ -593,7 +579,9 @@ stag_add_field_symbols (struct stag *stag,
 				field->offset,
 				rootsym, root_stag_name);
       field = field->next;
+      free (name);
     }
+  free (prefix);
 }
 
 /* Keep track of stag fields so that when structures are nested we can add the
@@ -605,10 +593,9 @@ stag_add_field (struct stag *parent,
 		bfd_vma offset,
 		struct stag *stag)
 {
-  struct stag_field *sfield = xmalloc (sizeof (struct stag_field));
+  struct stag_field *sfield = XCNEW (struct stag_field);
 
-  memset (sfield, 0, sizeof (*sfield));
-  sfield->name = strcpy (xmalloc (strlen (name) + 1), name);
+  sfield->name = xstrdup (name);
   sfield->offset = offset;
   sfield->bitfield_offset = parent->current_bitfield_offset;
   sfield->stag = stag;
@@ -668,8 +655,7 @@ tic54x_struct (int arg)
   if (current_stag)
     {
       /* Nesting, link to outer one.  */
-      current_stag->inner = (struct stag *) xmalloc (sizeof (struct stag));
-      memset (current_stag->inner, 0, sizeof (struct stag));
+      current_stag->inner = XCNEW (struct stag);
       current_stag->inner->outer = current_stag;
       current_stag = current_stag->inner;
       if (start_offset)
@@ -678,8 +664,7 @@ tic54x_struct (int arg)
     }
   else
     {
-      current_stag = (struct stag *) xmalloc (sizeof (struct stag));
-      memset (current_stag, 0, sizeof (struct stag));
+      current_stag = XCNEW (struct stag);
       abs_section_offset = start_offset;
     }
   current_stag->is_union = is_union;
@@ -695,11 +680,12 @@ tic54x_struct (int arg)
     }
   else
     {
-      char label[strlen (S_GET_NAME (line_label)) + 1];
-      strcpy (label, S_GET_NAME (line_label));
-      current_stag->sym = symbol_new (label, absolute_section,
+      char * label = xstrdup (S_GET_NAME (line_label));
+      current_stag->sym = symbol_new (label,
+				      absolute_section,
 				      (valueT) abs_section_offset,
 				      &zero_address_frag);
+      free (label);
     }
   current_stag->name = S_GET_NAME (current_stag->sym);
   SF_SET_LOCAL (current_stag->sym);
@@ -803,9 +789,9 @@ tic54x_tag (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      char label[strlen (S_GET_NAME (line_label)) + 1];
+      char * label;
 
-      strcpy (label, S_GET_NAME (line_label));
+      label = xstrdup (S_GET_NAME (line_label));
       if (current_stag != NULL)
 	stag_add_field (current_stag, label,
 			abs_section_offset - S_GET_VALUE (current_stag->sym),
@@ -818,11 +804,13 @@ tic54x_tag (int ignore ATTRIBUTE_UNUSED)
 	    {
 	      as_bad (_(".tag target '%s' undefined"), label);
 	      ignore_rest_of_line ();
+	      free (label);
 	      return;
 	    }
 	  stag_add_field_symbols (stag, S_GET_NAME (sym),
 				  S_GET_VALUE (stag->sym), sym, stag->name);
 	}
+      free (label);
     }
 
   /* Bump by the struct size, but only if we're within a .struct section.  */
@@ -933,12 +921,13 @@ tic54x_struct_field (int type)
     }
   else
     {
-      char label[strlen (S_GET_NAME (line_label) + 1)];
+      char * label;
 
-      strcpy (label, S_GET_NAME (line_label));
+      label = xstrdup (S_GET_NAME (line_label));
       stag_add_field (current_stag, label,
 		      abs_section_offset - S_GET_VALUE (current_stag->sym),
 		      NULL);
+      free (label);
     }
 
   if (current_stag->is_union)
@@ -1244,7 +1233,7 @@ tic54x_space (int arg)
      partial allocation has not been completed yet.  */
   if (expn.X_op != O_constant || frag_bit_offset (frag_now, now_seg) == -1)
     {
-      struct bit_info *bi = xmalloc (sizeof (struct bit_info));
+      struct bit_info *bi = XNEW (struct bit_info);
 
       bi->seg = now_seg;
       bi->type = bes;
@@ -1367,8 +1356,7 @@ tic54x_usect (int x ATTRIBUTE_UNUSED)
   current_subseg = now_subseg;	/* Save current subseg.  */
 
   c = get_symbol_name (&section_name);	/* Get terminator.  */
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xstrdup (section_name);
   c = restore_line_pointer (c);
   
   if (c == ',')
@@ -1753,7 +1741,7 @@ tic54x_field (int ignore ATTRIBUTE_UNUSED)
 	  fragS *alloc_frag = bit_offset_frag (frag_now, now_seg);
 	  if (bit_offset == -1)
 	    {
-	      struct bit_info *bi = xmalloc (sizeof (struct bit_info));
+	      struct bit_info *bi = XNEW (struct bit_info);
 	      /* We don't know the previous offset at this time, so store the
 		 info we need and figure it out later.  */
 	      expressionS size_exp;
@@ -1837,8 +1825,7 @@ tic54x_clink (int ignored ATTRIBUTE_UNUSED)
 	;
       know (input_line_pointer[-1] == '\"');
       input_line_pointer[-1] = 0;
-      name = xmalloc (input_line_pointer - section_name + 1);
-      strcpy (name, section_name);
+      name = xstrdup (section_name);
 
       seg = bfd_get_section_by_name (stdoutput, name);
       if (seg == NULL)
@@ -1871,7 +1858,7 @@ tic54x_clink (int ignored ATTRIBUTE_UNUSED)
 static void
 tic54x_set_default_include (int dot)
 {
-  char *dir = ".";
+  const char *dir = ".";
   char *tmp = NULL;
 
   if (!dot)
@@ -1880,7 +1867,7 @@ tic54x_set_default_include (int dot)
       unsigned lineno;
 
       curfile = as_where (&lineno);
-      dir = strcpy (xmalloc (strlen (curfile) + 1), curfile);
+      dir = xstrdup (curfile);
       tmp = strrchr (dir, '/');
     }
   if (tmp != NULL)
@@ -1937,7 +1924,7 @@ tic54x_include (int ignored ATTRIBUTE_UNUSED)
 	++input_line_pointer;
       c = *input_line_pointer;
       *input_line_pointer = '\0';
-      filename = strcpy (xmalloc (strlen (filename) + 1), filename);
+      filename = xstrdup (filename);
       *input_line_pointer = c;
       demand_empty_rest_of_line ();
     }
@@ -1974,7 +1961,7 @@ tic54x_message (int type)
 	++input_line_pointer;
       c = *input_line_pointer;
       *input_line_pointer = 0;
-      msg = strcpy (xmalloc (strlen (msg) + 1), msg);
+      msg = xstrdup (msg);
       *input_line_pointer = c;
     }
 
@@ -2141,8 +2128,7 @@ tic54x_sblock (int ignore ATTRIBUTE_UNUSED)
 	  char *section_name;
 
 	  c = get_symbol_name (&section_name);
-	  name = xmalloc (strlen (section_name) + 1);
-	  strcpy (name, section_name);
+	  name = xstrdup (section_name);
 	  (void) restore_line_pointer (c);
 	}
 
@@ -2255,7 +2241,7 @@ tic54x_var (int ignore ATTRIBUTE_UNUSED)
 	}
       c = get_symbol_name (&name);
       /* .var symbols start out with a null string.  */
-      name = strcpy (xmalloc (strlen (name) + 1), name);
+      name = xstrdup (name);
       hash_insert (subsym_hash[macro_level], name, empty);
       c = restore_line_pointer (c);
       if (c == ',')
@@ -2310,7 +2296,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 
   tic54x_set_default_include (0);
-  path = xmalloc ((unsigned long) len + include_dir_maxlen + 5);
+  path = XNEWVEC (char, (unsigned long) len + include_dir_maxlen + 5);
 
   for (i = 0; i < include_dir_count; i++)
     {
@@ -2359,7 +2345,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
     {
       /* Get a size at least as big as the archive member.  */
       bfd_size_type size = bfd_get_size (mbfd);
-      char *buf = xmalloc (size);
+      char *buf = XNEWVEC (char, size);
       char *fname = tmpnam (NULL);
       FILE *ftmp;
 
@@ -2467,7 +2453,7 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -2496,7 +2482,7 @@ md_parse_option (int c, char *arg)
       break;
     case OPTION_STDERR_TO_FILE:
       {
-	char *filename = arg;
+	const char *filename = arg;
 	FILE *fp = fopen (filename, "w+");
 
 	if (fp == NULL)
@@ -2623,8 +2609,7 @@ subsym_ismember (char *sym, char *list)
       return 0;
     }
 
-  ptr = elem = xmalloc (strlen (listv) + 1);
-  strcpy (elem, listv);
+  ptr = elem = xstrdup (listv);
   while (*ptr && *ptr != ',')
     ++ptr;
   *ptr++ = 0;
@@ -2912,7 +2897,7 @@ math_tanh (float arg1, float ignore ATTRIBUTE_UNUSED)
 /* Built-in substitution symbol functions and math functions.  */
 typedef struct
 {
-  char *name;
+  const char *name;
   int (*proc) (char *, char *);
   int nargs;
 } subsym_proc_entry;
@@ -2936,7 +2921,7 @@ static const subsym_proc_entry subsym_procs[] =
 
 typedef struct
 {
-  char *name;
+  const char *name;
   float (*proc) (float, float);
   int nargs;
   int int_return;
@@ -4296,7 +4281,7 @@ tic54x_parse_parallel_insn_lastline (tic54x_insn *insn, char *line)
    replacement on the value.  */
 
 static char *
-subsym_get_arg (char *line, char *terminators, char **str, int nosub)
+subsym_get_arg (char *line, const char *terminators, char **str, int nosub)
 {
   char *ptr = line;
   char *endp;
@@ -4328,7 +4313,7 @@ subsym_get_arg (char *line, char *terminators, char **str, int nosub)
     }
   else
     {
-      char *term = terminators;
+      const char *term = terminators;
       char *value = NULL;
 
       while (*ptr && *ptr != *term)
@@ -4417,8 +4402,7 @@ subsym_substitute (char *line, int forced)
   char *tmp;
 
   /* Work with a copy of the input line.  */
-  replacement = xmalloc (strlen (line) + 1);
-  strcpy (replacement, line);
+  replacement = xstrdup (line);
 
   ptr = head = replacement;
 
@@ -4528,7 +4512,7 @@ subsym_substitute (char *line, int forced)
 	      if (value == NULL)
 		{
 		  char digit[11];
-		  char *namecopy = strcpy (xmalloc (strlen (name) + 1), name);
+		  char *namecopy = xstrdup (name);
 
 		  value = strcpy (xmalloc (strlen (name) + sizeof (digit) + 1),
 				  name);
@@ -4576,7 +4560,7 @@ subsym_substitute (char *line, int forced)
 		      farg2 = (float) strtod (ptr, &ptr);
 		    }
 		  fresult = (*math_entry->proc) (farg1, farg2);
-		  value = xmalloc (128);
+		  value = XNEWVEC (char, 128);
 		  if (math_entry->int_return)
 		    sprintf (value, "%d", (int) fresult);
 		  else
@@ -4637,7 +4621,7 @@ subsym_substitute (char *line, int forced)
 		      break;
 		    }
 		  val = (*entry->proc) (arg1, arg2);
-		  value = xmalloc (64);
+		  value = XNEWVEC (char, 64);
 		  sprintf (value, "%d", val);
 		}
 	      /* Fix things up to replace the entire expression, not just the
@@ -4653,7 +4637,7 @@ subsym_substitute (char *line, int forced)
 		 substitutions are performed, or a substitution that has been
 		 previously made is encountered again.
 
-		 put the symbol into the recursion hash table so we only
+		 Put the symbol into the recursion hash table so we only
 		 try to replace a symbol once.  */
 	      if (recurse)
 		{
@@ -4673,8 +4657,7 @@ subsym_substitute (char *line, int forced)
 			 kinda indicates that forced substitution is not
 			 supposed to be recursive, but I'm not sure.  */
 		      unsigned beg, len = 1; /* default to a single char */
-		      char *newval = strcpy (xmalloc (strlen (value) + 1),
-					     value);
+		      char *newval = xstrdup (value);
 
 		      savedp = input_line_pointer;
 		      input_line_pointer = tail + 1;
@@ -5076,7 +5059,7 @@ tic54x_parse_name (char *name ATTRIBUTE_UNUSED,
   return 0;
 }
 
-char *
+const char *
 md_atof (int type, char *literalP, int *sizeP)
 {
   /* Target data is little-endian, but floats are stored
@@ -5091,8 +5074,8 @@ tc_gen_reloc (asection *section, fixS *fixP)
   bfd_reloc_code_real_type code = fixP->fx_r_type;
   asymbol *sym = symbol_get_bfdsym (fixP->fx_addsy);
 
-  rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = sym;
   /* We assume that all rel->address are host byte offsets.  */
   rel->address = fixP->fx_frag->fr_address + fixP->fx_where;

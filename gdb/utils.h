@@ -93,6 +93,9 @@ extern struct cleanup *make_cleanup_restore_uinteger (unsigned int *variable);
 struct target_ops;
 extern struct cleanup *make_cleanup_unpush_target (struct target_ops *ops);
 
+
+extern struct cleanup *
+  make_cleanup_restore_ui_out (struct ui_out **variable);
 extern struct cleanup *
   make_cleanup_restore_ui_file (struct ui_file **variable);
 

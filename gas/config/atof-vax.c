@@ -387,7 +387,7 @@ flonum_gen2vax (int format_letter,	/* One of 'd' 'f' 'g' 'h'.  */
 
 #define MAXIMUM_NUMBER_OF_LITTLENUMS  8 	/* For .hfloats.  */
 
-char *
+const char *
 vax_md_atof (int what_statement_type,
 	     char *literalP,
 	     int *sizeP)

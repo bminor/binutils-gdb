@@ -693,4 +693,7 @@ lang_ld_feature (char *);
 extern void
 lang_print_memory_usage (void);
 
+extern void
+lang_add_gc_name (const char *);
+
 #endif

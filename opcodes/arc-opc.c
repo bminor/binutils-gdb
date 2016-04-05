@@ -26,6 +26,12 @@
 #include "opintl.h"
 #include "libiberty.h"
 
+/* ARC NPS400 Support: The ARC NPS400 core is an ARC700 with some custom
+   instructions.  Support for this target is available when binutils is
+   configured and built for the 'arc*-mellanox-*-*' target.  As far as
+   possible all ARC NPS400 features are built into all ARC target builds as
+   this reduces the chances that regressions might creep in.  */
+
 /* Insert RB register into a 32-bit opcode.  */
 static unsigned
 insert_rb (unsigned insn,
@@ -637,13 +643,108 @@ extract_g_s (unsigned insn ATTRIBUTE_UNUSED,
   return value;
 }
 
+/* ARC NPS400 Support: See comment near head of file.  */
+static unsigned
+insert_nps_3bit_dst (unsigned insn ATTRIBUTE_UNUSED,
+                     int value ATTRIBUTE_UNUSED,
+                     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+      insn |= value << 24;
+      break;
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+      insn |= (value - 8) << 24;
+      break;
+    default:
+      *errmsg = _("Register must be either r0-r3 or r12-r15.");
+      break;
+    }
+  return insn;
+}
+
+static int
+extract_nps_3bit_dst (unsigned insn ATTRIBUTE_UNUSED,
+                      bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value = (insn >> 24) & 0x07;
+  if (value > 3)
+    return (value + 8);
+  else
+    return value;
+}
+
+static unsigned
+insert_nps_3bit_src2 (unsigned insn ATTRIBUTE_UNUSED,
+                      int value ATTRIBUTE_UNUSED,
+                      const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+      insn |= value << 21;
+      break;
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+      insn |= (value - 8) << 21;
+      break;
+    default:
+      *errmsg = _("Register must be either r0-r3 or r12-r15.");
+      break;
+    }
+  return insn;
+}
+
+static int
+extract_nps_3bit_src2 (unsigned insn ATTRIBUTE_UNUSED,
+                       bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value = (insn >> 21) & 0x07;
+  if (value > 3)
+    return (value + 8);
+  else
+    return value;
+}
+
+static unsigned
+insert_nps_bitop_size (unsigned insn ATTRIBUTE_UNUSED,
+                      int value ATTRIBUTE_UNUSED,
+                      const char **errmsg ATTRIBUTE_UNUSED)
+{
+  if (value < 1 || value > 32)
+    {
+      *errmsg = _("Invalid bit size, should be between 1 and 32 inclusive.");
+      return insn;
+    }
+
+  --value;
+  insn |= ((value & 0x1f) << 10);
+  return insn;
+}
+
+static int
+extract_nps_bitop_size (unsigned insn ATTRIBUTE_UNUSED,
+                       bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn >> 10) & 0x1f) + 1;
+}
+
 /* Include the generic extract/insert functions.  Order is important
    as some of the functions present in the .h may be disabled via
    defines.  */
 #include "arc-fxi.h"
-
-/* Abbreviations for instruction subsets.  */
-#define BASE			ARC_OPCODE_BASE
 
 /* The flag operands table.
 
@@ -795,6 +896,13 @@ const struct arc_flag_operand arc_flag_operands[] =
   /* Fake Flags.  */
 #define F_NE   (F_H17 + 1)
   { "ne", 0, 0, 0, 1 },
+
+  /* ARC NPS400 Support: See comment near head of file.  */
+#define F_NPS_CL (F_NE + 1)
+  { "cl", 0, 0, 0, 1 },
+
+#define F_NPS_FLAG (F_NPS_CL + 1)
+  { "f", 1, 1, 20, 1 },
 };
 
 const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
@@ -806,65 +914,73 @@ const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
 const struct arc_flag_class arc_flag_classes[] =
 {
 #define C_EMPTY     0
-  { FNONE, { F_NULL } },
+  { F_CLASS_NONE, { F_NULL } },
 
 #define C_CC	    (C_EMPTY + 1)
-  { CND, { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL, F_NOTZERO,
-	   F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS, F_CARRY, F_CARRYSET,
-	   F_LOWER, F_CARRYCLR, F_NOTCARRY, F_HIGHER, F_OVERFLOWSET,
-	   F_OVERFLOW, F_NOTOVERFLOW, F_OVERFLOWCLR, F_GT, F_GE, F_LT,
-	   F_LE, F_HI, F_LS, F_PNZ, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL,
+			F_NOTZERO, F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS,
+			F_CARRY, F_CARRYSET, F_LOWER, F_CARRYCLR,
+			F_NOTCARRY, F_HIGHER, F_OVERFLOWSET, F_OVERFLOW,
+			F_NOTOVERFLOW, F_OVERFLOWCLR, F_GT, F_GE, F_LT,
+			F_LE, F_HI, F_LS, F_PNZ, F_NULL } },
 
 #define C_AA_ADDR3  (C_CC + 1)
 #define C_AA27	    (C_CC + 1)
-  { WBM, { F_A3, F_AW3, F_AB3, F_AS3, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_A3, F_AW3, F_AB3, F_AS3, F_NULL } },
 #define C_AA_ADDR9  (C_AA_ADDR3 + 1)
 #define C_AA21	     (C_AA_ADDR3 + 1)
-  { WBM, { F_A9, F_AW9, F_AB9, F_AS9, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_A9, F_AW9, F_AB9, F_AS9, F_NULL } },
 #define C_AA_ADDR22 (C_AA_ADDR9 + 1)
 #define C_AA8	   (C_AA_ADDR9 + 1)
-  { WBM, { F_A22, F_AW22, F_AB22, F_AS22, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_A22, F_AW22, F_AB22, F_AS22, F_NULL } },
 
 #define C_F	    (C_AA_ADDR22 + 1)
-  { FLG, { F_FLAG, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_FLAG, F_NULL } },
 #define C_FHARD	    (C_F + 1)
-  { FLG, { F_FFAKE, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_FFAKE, F_NULL } },
 
 #define C_T	    (C_FHARD + 1)
-  { SBP, { F_NT, F_T, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_NT, F_T, F_NULL } },
 #define C_D	    (C_T + 1)
-  { DLY, { F_ND, F_D, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_ND, F_D, F_NULL } },
 
 #define C_DHARD	    (C_D + 1)
-  { DLY, { F_DFAKE, F_NULL } },
+  { F_CLASS_OPTIONAL, { F_DFAKE, F_NULL } },
 
 #define C_DI20	    (C_DHARD + 1)
-  { DIF, { F_DI11, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_DI11, F_NULL }},
 #define C_DI16	    (C_DI20 + 1)
-  { DIF, { F_DI15, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_DI15, F_NULL }},
 #define C_DI26	    (C_DI16 + 1)
-  { DIF, { F_DI5, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_DI5, F_NULL }},
 
 #define C_X25	    (C_DI26 + 1)
-  { SGX, { F_SIGN6, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_SIGN6, F_NULL }},
 #define C_X15	   (C_X25 + 1)
-  { SGX, { F_SIGN16, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_SIGN16, F_NULL }},
 #define C_XHARD	   (C_X15 + 1)
 #define C_X	   (C_X15 + 1)
-  { SGX, { F_SIGNX, F_NULL }},
+  { F_CLASS_OPTIONAL, { F_SIGNX, F_NULL }},
 
 #define C_ZZ13	      (C_X + 1)
-  { SZM, { F_SIZEB17, F_SIZEW17, F_H17, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_SIZEB17, F_SIZEW17, F_H17, F_NULL}},
 #define C_ZZ23	      (C_ZZ13 + 1)
-  { SZM, { F_SIZEB7, F_SIZEW7, F_H7, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_SIZEB7, F_SIZEW7, F_H7, F_NULL}},
 #define C_ZZ29	      (C_ZZ23 + 1)
-  { SZM, { F_SIZEB1, F_SIZEW1, F_H1, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_SIZEB1, F_SIZEW1, F_H1, F_NULL}},
 
 #define C_AS	    (C_ZZ29 + 1)
-  { SZM, { F_ASFAKE, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_ASFAKE, F_NULL}},
 
 #define C_NE	    (C_AS + 1)
-  { CND, { F_NE, F_NULL}},
+  { F_CLASS_OPTIONAL, { F_NE, F_NULL}},
+
+  /* ARC NPS400 Support: See comment near head of file.  */
+#define C_NPS_CL     (C_NE + 1)
+  { F_CLASS_REQUIRED, { F_NPS_CL, F_NULL}},
+
+#define C_NPS_F     (C_NPS_CL + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_FLAG, F_NULL}},
 };
 
 /* The operands table.
@@ -1183,6 +1299,34 @@ const struct arc_operand arc_operands[] =
   /* UIMM6_5_S mask = 0000011111100000.  */
 #define UIMM6_5_S	(W6 + 1)
   {6, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm6_5_s, extract_uimm6_5_s},
+
+  /* ARC NPS400 Support: See comment near head of file.  */
+#define NPS_R_DST_3B	(UIMM6_5_S + 1)
+  { 3, 24, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_dst, extract_nps_3bit_dst },
+
+#define NPS_R_SRC1_3B	(NPS_R_DST_3B + 1)
+  { 3, 24, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_NCHK, insert_nps_3bit_dst, extract_nps_3bit_dst },
+
+#define NPS_R_SRC2_3B	(NPS_R_SRC1_3B + 1)
+  { 3, 21, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_src2, extract_nps_3bit_src2 },
+
+#define NPS_R_DST	(NPS_R_SRC2_3B + 1)
+  { 6, 21, 0, ARC_OPERAND_IR, NULL, NULL },
+
+#define NPS_R_SRC1	(NPS_R_DST + 1)
+  { 6, 21, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, NULL, NULL },
+
+#define NPS_BITOP_DST_POS	(NPS_R_SRC1 + 1)
+  { 5, 5, 0, ARC_OPERAND_UNSIGNED, 0, 0 },
+
+#define NPS_BITOP_SRC_POS	(NPS_BITOP_DST_POS + 1)
+  { 5, 0, 0, ARC_OPERAND_UNSIGNED, 0, 0 },
+
+#define NPS_BITOP_SIZE		(NPS_BITOP_SRC_POS + 1)
+  { 5, 10, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_size, extract_nps_bitop_size },
+
+#define NPS_UIMM16		(NPS_BITOP_SIZE + 1)
+  { 16, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
 };
 
 const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);
@@ -1198,6 +1342,8 @@ const unsigned arc_NToperand = FKT_NT;
 const struct arc_opcode arc_opcodes[] =
 {
 #include "arc-tbl.h"
+#include "arc-nps400-tbl.h"
+#include "arc-ext-tbl.h"
 };
 
 const unsigned arc_num_opcodes = ARRAY_SIZE (arc_opcodes);

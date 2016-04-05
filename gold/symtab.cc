@@ -865,6 +865,9 @@ Symbol_table::define_default_version(Sized_symbol<size>* sym,
       // other is defined in a shared object, then they are different
       // symbols.
 
+      // If the two symbols are from different shared objects,
+      // they are different symbols.
+
       // Otherwise, we just resolve the symbols as though they were
       // the same.
 
@@ -876,6 +879,10 @@ Symbol_table::define_default_version(Sized_symbol<size>* sym,
       else if (pdef->second->visibility() != elfcpp::STV_DEFAULT
 	       && sym->is_from_dynobj())
 	;
+      else if (pdef->second->is_from_dynobj()
+	       && sym->is_from_dynobj()
+	       && pdef->second->object() != sym->object())
+        ;
       else
 	{
 	  const Sized_symbol<size>* symdef;

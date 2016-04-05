@@ -2903,11 +2903,7 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
 
   old_chain = make_cleanup (null_cleanup, NULL);
 
-  /* If in non-stop, leave threads as running as they were.  If
-     they're stopped for some reason other than us telling it to, the
-     target reports a signal != GDB_SIGNAL_0.  We don't try to
-     resume threads with such a stop signal.  */
-  mode = non_stop ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
+  mode = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
     make_cleanup_restore_current_thread ();
@@ -2943,7 +2939,6 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
       return;
     }
 
-  mode = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
   attach_post_wait ("" /* args */, from_tty, mode);
 
   do_cleanups (old_chain);

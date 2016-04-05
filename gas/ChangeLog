@@ -1,3 +1,734 @@
+2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19498
+	* testsuite/gas/i386/i386.exp: Run pr19498.
+	* testsuite/gas/i386/pr19498.d: New file.
+	* testsuite/gas/i386/pr19498.s: Likewise.
+
+2016-04-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.h: Include 'opcode/arc.h'.
+	(MAX_INSN_ARGS): Delete.
+	(MAX_INSN_FLGS): Delete.
+
+2016-04-04  Alan Modra  <amodra@gmail.com>
+
+	PR 19498
+	* symbols.c (resolve_symbol_value): Clear sy_resolving on exit
+	from function on all paths that set sy_resolving.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* app.c (app_push): use XNEW macro.
+	* as.c: Likewise.
+	* config/obj-elf.c (obj_elf_change_section): Likewise.
+	(elf_copy_symbol_attributes): Likewise.
+	(obj_elf_size): Likewise.
+	(build_group_lists): Likewise.
+	* config/tc-aarch64.c (add_operand_error_record): Likewise.
+	(md_assemble): Likewise.
+	(tc_gen_reloc): Likewise.
+	(get_upper_str): Likewise.
+	(aarch64_parse_features): Likewise.
+	* config/tc-arm.c (insert_reg_alias): Likewise.
+	(insert_neon_reg_alias): Likewise.
+	(find_or_make_literal_pool): Likewise.
+	(s_arm_elf_cons): Likewise.
+	(add_unwind_opcode): Likewise.
+	(arm_parse_extension): Likewise.
+	* config/tc-avr.c (create_record_for_frag): Likewise.
+	* config/tc-crx.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-dlx.c (s_proc): Likewise.
+	* config/tc-ft32.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c (pa_proc): Likewise.
+	(create_new_space): Likewise.
+	(create_new_subspace): Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-iq2000.c (iq2000_add_macro): Likewise.
+	(iq2000_record_hi16): Likewise.
+	* config/tc-m32c.c (m32c_indirect_operand): Likewise.
+	* config/tc-m32r.c (debug_sym): Likewise.
+	(m32r_record_hi16): Likewise.
+	* config/tc-m68k.c (m68k_ip): Likewise.
+	(md_begin): Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-microblaze.c (check_got): Likewise.
+	* config/tc-mips.c (append_insn): Likewise.
+	(s_mipsset): Likewise.
+	(mips_record_label): Likewise.
+	(s_mips_end): Likewise.
+	* config/tc-mmix.c (mmix_frob_file): Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-moxie.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-nds32.c (nds32_elf_save_pseudo_pattern): Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-or1k.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* config/tc-pj.c (fake_opcode): Likewise.
+	* config/tc-ppc.c (ppc_apuinfo_section_add): Likewise.
+	(ppc_macro): Likewise.
+	(ppc_dwsect): Likewise.
+	(ppc_machine): Likewise.
+	* config/tc-rl78.c (rl78_frag_init): Likewise.
+	* config/tc-rx.c (rx_frag_init): Likewise.
+	* config/tc-s390.c (s390_lit_suffix): Likewise.
+	(s390_machine): Likewise.
+	(s390_machinemode): Likewise.
+	* config/tc-score.c (s3_insert_reg): Likewise.
+	(s3_gen_reloc): Likewise.
+	* config/tc-score7.c (s7_insert_reg): Likewise.
+	(s7_gen_reloc): Likewise.
+	* config/tc-tic30.c (tic30_operand): Likewise.
+	* config/tc-tic4x.c (tic4x_inst_make): Likewise.
+	* config/tc-tic54x.c (stag_add_field): Likewise.
+	(tic54x_struct): Likewise.
+	(tic54x_space): Likewise.
+	(tic54x_field): Likewise.
+	(tic54x_mlib): Likewise.
+	(subsym_substitute): Likewise.
+	* config/tc-tic6x.c (tic6x_frob_label): Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-xc16x.c: Likewise.
+	* config/tc-xtensa.c (xtensa_add_insn_label): Likewise.
+	(directive_push): Likewise.
+	(xtensa_begin_directive): Likewise.
+	(tokenize_arguments): Likewise.
+	(xtensa_add_literal_sym): Likewise.
+	(new_resource_table): Likewise.
+	(resize_resource_table): Likewise.
+	(emit_single_op): Likewise.
+	(xtensa_create_trampoline_frag): Likewise.
+	(xtensa_maybe_create_literal_pool_frag): Likewise.
+	(xtensa_add_config_info): Likewise.
+	(xtensa_realloc_fixup_cache): Likewise.
+	(add_subseg_info): Likewise.
+	(cache_literal_section): Likewise.
+	(add_xt_block_frags): Likewise.
+	(add_xt_prop_frags): Likewise.
+	(init_op_placement_info_table): Likewise.
+	(build_section_rename): Likewise.
+	* config/tc-z80.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* depend.c (register_dependency): Likewise.
+	* dwarf2dbg.c (get_line_subseg): Likewise.
+	(dwarf2_gen_line_info_1): Likewise.
+	(get_filenum): Likewise.
+	* ecoff.c (allocate_scope): Likewise.
+	(allocate_vlinks): Likewise.
+	(allocate_shash): Likewise.
+	(allocate_thash): Likewise.
+	(allocate_tag): Likewise.
+	(allocate_forward): Likewise.
+	(allocate_thead): Likewise.
+	(allocate_lineno_list): Likewise.
+	* expr.c (make_expr_symbol): Likewise.
+	* hash.c (hash_new_sized): Likewise.
+	* input-file.c (input_file_push): Likewise.
+	* listing.c (file_info): Likewise.
+	(listing_newline): Likewise.
+	* macro.c (new_formal): Likewise.
+	(define_macro): Likewise.
+	* remap.c (add_debug_prefix_map): Likewise.
+	* symbols.c (symbol_find_noref): Likewise.
+	(define_dollar_label): Likewise.
+	(fb_label_instance_inc): Likewise.
+	(symbol_relc_make_value): Likewise.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/obj-elf.c (obj_elf_vendor_attribute): Use xstrdup.
+	* config/tc-ppc.c (ppc_frob_file_before_adjust): Likewise.
+	(ppc_znop): Likewise.
+	(ppc_pe_section): Likewise.
+	(ppc_frob_symbol): Likewise.
+	* config/tc-tic30.c (tic30_operand): Likewise.
+	* config/tc-tic4x.c (tic4x_sect): Likewise.
+	(tic4x_usect): Likewise.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-alpha.c: Const qualify FLT_CHARS.
+	* config/atof-ieee.c: Remove declarations of FLT_CHARS and EXP_CHARS.
+	* config/tc-cris.h: Likewise.
+	* expr.c: Likewise.
+	* config/tc-mmix.c (md_atof): Adjust comment.
+	* config/tc-mmix.h: Stop defining FLT_CHARS and EXP_CHARS as macros.
+	* tc.h: Declare FLT_CHARS and EXP_CHARS.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-score.c (s3_gen_reloc): Add const qualifiers.
+	* config/tc-score7.c (s7_gen_reloc): Likewise.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-arm.c (do_t_branch): Change the type of reloc to
+	bfd_reloc_code_real_type.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/bfin-parse.y (current_inputline): Remove definition.
+	* config/tc-bfin.c (md_assemble): Simplify use of current_inputline.
+
+2016-04-03  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-avr.c (md_parse_option): Use strcasecmp () to compare
+	strings.
+
+2016-04-02  Alan Modra  <amodra@gmail.com>
+
+	PR 19896
+	* read.c (assign_symbol): Consume rest of line after an error
+	rather than continuing to process the line.
+
+2016-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.h (MAX_FLAG_NAME_LENGHT): Rename to...
+	(MAX_FLAG_NAME_LENGTH): ...this.
+	(struct arc_flags): Update to use MAX_FLAG_NAME_LENGTH.
+	* config/tc-arc.c (tokenize_flags): Likewise.
+
+2016-04-01  Alan Modra  <amodra@gmail.com>
+
+	* cgen.c (weak_operand_overflow_check): Return const char*.
+	* messages.c (as_internal_value_out_of_range): Formatting.
+	(as_warn_value_out_of_range): Consify prefix param.
+	(as_bad_value_out_of_range): Likewise.
+	* read.c (s_errwarn): Constify msg..
+	(s_float_space, float_cons): ..and err.
+	* as.h (as_warn_value_out_of_range, as_bad_value_out_of_range,
+	ieee_md_atof, vax_md_atof): Update prototypes.
+	* tc.h (md_atof): Update prototype.
+	* config/atof-ieee.c (ieee_md_atof): Return const char*.
+	* config/atof-vax.c (vax_md_atof): Likewise.
+	* config/obj-elf.c (obj_elf_parse_section_letters): Constify bad_msg.
+	* config/tc-aarch64.c (md_atof): Return const char*.
+	* config/tc-alpha.c (s_alpha_section_name): Likewise.
+	(s_alpha_comm): Constify sec_name.
+	(section_name): Constify.
+	(s_alpha_section): Consify name..
+	(alpha_elf_section_letter): ..and ptr_msg param..
+	(md_atof): ..and return.
+	* config/tc-alpha.h (alpha_elf_section_letter): Update prototype.
+	* config/tc-arc.c (md_atof): Return const char*.
+	* config/tc-arm.c (md_atof): Likewise.
+	* config/tc-avr.c (md_atof): Likewise.
+	* config/tc-bfin.c (md_atof): Likewise.
+	* config/tc-cr16.c (md_atof): Likewise.
+	* config/tc-cris.c (md_atof): Likewise.
+	* config/tc-crx.c (md_atof): Likewise.
+	* config/tc-d10v.c (md_atof): Likewise.
+	* config/tc-d30v.c (md_atof): Likewise.
+	* config/tc-dlx.c (md_atof): Likewise.
+	* config/tc-epiphany.c (md_atof): Likewise.
+	* config/tc-fr30.c (md_atof): Likewise.
+	* config/tc-frv.c (md_atof): Likewise.
+	* config/tc-ft32.c (md_atof): Likewise.
+	* config/tc-h8300.c (md_atof): Likewise.
+	* config/tc-hppa.c (struct default_subspace_dict): Constify name.
+	(struct default_space_dict): Likewise.
+	(create_new_space): Constify name param.
+	(create_new_subspace): Likewise.
+	(is_defined_space, is_defined_subspace): Likewise.
+	(pa_parse_space_stmt): Constify space_name param.
+	(md_atof): Return const char*.
+	(pa_spaces_begin): Constify name.
+	* config/tc-i370.c (md_atof): Return const char*.
+	* config/tc-i386.c (md_atof): Likewise.
+	(x86_64_section_letter): Constify ptr_msg param.
+	* config/tc-i386.h (x86_64_section_letter): Update prototype.
+	* config/tc-i860.c (struct i860_it): Constify error.
+	(md_atof): Return const char*.
+	* config/tc-i960.c (md_atof): Likewise.
+	* config/tc-ia64.c (md_atof): Likewise.
+	(ia64_elf_section_letter): Constify ptr_msg param.
+	* config/tc-ia64.h (ia64_elf_section_letter): Update prototype.
+	* config/tc-ip2k.c (md_atof): Return const char*.
+	* config/tc-iq2000.c (md_atof): Likewise.
+	* config/tc-lm32.c (md_atof): Likewise.
+	* config/tc-m32c.c (md_atof): Likewise.
+	* config/tc-m32r.c (md_atof): Likewise.
+	* config/tc-m68hc11.c (md_atof): Likewise.
+	* config/tc-m68k.c (md_atof): Likewise.
+	* config/tc-mcore.c (md_atof): Likewise.
+	* config/tc-mep.c (md_atof): Likewise.
+	(mep_elf_section_letter): Constify ptr_msg param.
+	* config/tc-mep.h (mep_elf_section_letter): Update prototype.
+	* config/tc-metag.c (md_atof): Return const char*.
+	* config/tc-microblaze.c (md_atof): Likewise.
+	* config/tc-microblaze.h (md_atof): Delete prototype.
+	* config/tc-mips.c (mips_parse_argument_token): Constify err.
+	(md_atof): Return const char*.
+	* config/tc-mmix.c (md_atof): Likewise.
+	* config/tc-mn10200.c (md_atof): Likewise.
+	* config/tc-mn10300.c (md_atof): Likewise.
+	* config/tc-moxie.c (md_atof): Likewise.
+	* config/tc-msp430.c (md_atof): Likewise.
+	* config/tc-mt.c (md_atof): Likewise.
+	* config/tc-nds32.c (md_atof): Likewise.
+	* config/tc-nios2.c (md_atof): Likewise.
+	(nios2_elf_section_letter): Constify ptr_msg param.
+	* config/tc-nios2.h (nios2_elf_section_letter): Update prototype.
+	* config/tc-ns32k.c (md_atof): Return const char*.
+	* config/tc-or1k.c (md_atof): Likewise.
+	* config/tc-pdp11.c (struct pdp11_code): Constify error.
+	(md_atof): Return const char*.
+	* config/tc-pj.c (md_atof): Likewise.
+	* config/tc-ppc.c (md_atof): Likewise.
+	* config/tc-rl78.c (md_atof): Likewise.
+	* config/tc-rx.c (md_atof): Likewise.
+	* config/tc-s390.c (md_atof): Likewise.
+	* config/tc-score.c (s3_atof, md_atof): Likewise.
+	* config/tc-sh.c (md_atof): Likewise.
+	* config/tc-sparc.c (struct sparc_it): Constify error.
+	(md_atof): Return const char*.
+	* config/tc-spu.c (md_atof): Likewise.
+	* config/tc-tic30.c (md_atof): Likewise.
+	* config/tc-tic4x.c (md_atof): Likewise.
+	* config/tc-tic54x.c (md_atof): Likewise.
+	* config/tc-tic6x.c (md_atof): Likewise.
+	* config/tc-tilegx.c (md_atof): Likewise.
+	* config/tc-tilepro.c (md_atof): Likewise.
+	* config/tc-v850.c (parse_register_list, md_atof): Likewise.
+	* config/tc-vax.c (md_atof): Likewise.
+	* config/tc-visium.c (md_atof): Likewise.
+	* config/tc-xc16x.c (md_atof): Likewise.
+	* config/tc-xgate.c (md_atof): Likewise.
+	* config/tc-xstormy16.c (md_atof): Likewise.
+	* config/tc-xtensa.c (md_atof): Likewise.
+	* config/tc-z80.c (md_atof): Likewise.
+	* config/tc-z8k.c (md_atof): Likewise.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-xtensa.c (struct rename_section_struct): Make old_name
+	const.
+	(xtensa_section_rename): Make argument type const char *.
+	* config/tc-xtensa.h (xtensa_section_rename): Adjust.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-i960.c (parse_ldconst): Cast to char * when assigning to
+	args[0].
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-m32c.c (m32c_md_end): cast the argument to md_assemble to
+	char *.
+	(m32c_indirect_operand): Likewise.
+	* config/tc-nds32.c (do_pseudo_b): Likewise.
+	(do_pseudo_bal): Likewise.
+	(do_pseudo_ls_bhw): Likewise.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* as.c (parse_args): Cast literal to char * when assigning to optarg.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-ia64.c (md_assemble): Add temporary variable to pass to
+	get_symbol_name ().
+	* config/tc-sparc.c (s_register): Cast a literal to char * in
+	assignment.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-i960.c (parse_expr): Cast to char * when assigning to
+	input_line_pointer.
+	* config/tc-m32r.c (expand_debug_syms): Likewise.
+	* config/tc-msp430.c (msp430_dstoperand): Likewise.
+	* config/tc-z80.c (md_begin): Likewise.
+	* stabs.c (stabs_generate_asm_func): Likewise.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* cgen.c: Modernize the way functions declare arguments.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* literal.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-aarch64.c (aarch64_handle_align): Make the type of some
+	variables unsigned char[].
+	* config/tc-alpha.c (alpha_handle_align): Likewise.
+	* config/tc-arm.c (arm_handle_align): Likewise.
+	* config/tc-z80.c: Likewise.
+
+2016-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19880
+	* config/tc-arm.c (do_t_push_pop): Cast bitmask to unsigned before
+	shifting.
+
+2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * testsuite/gas/all/gas.exp: Don't xfail on ARC.
+        * testsuite/gas/elf/elf.exp: Likewise.
+        * testsuite/gas/all/redef3.d: Allow execution for ARC.
+
+2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * testsuite/gas/arc/warn.exp: Fix matching pattern.
+
+2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * testsuite/gas/arc/ext2op.d: New file.
+        * testsuite/gas/arc/ext2op.s: Likewise.
+        * testsuite/gas/arc/ext3op.d: Likewise.
+        * testsuite/gas/arc/ext3op.s: Likewise.
+
+2016-03-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-aarch64.c (struct aarch64_long_option_table): Ad const
+	qualifier.
+	* config/tc-alpha.c (md_parse_option): Likewise.
+	* config/tc-arc.c (md_parse_option): Likewise.
+	* config/tc-arm.c (struct arm_long_option_table): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-avr.c (md_parse_option): Likewise.
+	* config/tc-bfin.c (md_parse_option): Likewise.
+	* config/tc-cr16.c (md_parse_option): Likewise.
+	* config/tc-cris.c (s_cris_arch): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-crx.c (md_parse_option): Likewise.
+	* config/tc-d10v.c (md_parse_option): Likewise.
+	* config/tc-d30v.c (md_parse_option): Likewise.
+	* config/tc-dlx.c (md_parse_option): Likewise.
+	* config/tc-epiphany.c (md_parse_option): Likewise.
+	* config/tc-fr30.c (md_parse_option): Likewise.
+	* config/tc-frv.c (md_parse_option): Likewise.
+	* config/tc-ft32.c (md_parse_option): Likewise.
+	* config/tc-h8300.c (md_parse_option): Likewise.
+	* config/tc-hppa.c (md_parse_option): Likewise.
+	* config/tc-i370.c (md_parse_option): Likewise.
+	* config/tc-i386.c (md_parse_option): Likewise.
+	* config/tc-i860.c (md_parse_option): Likewise.
+	* config/tc-i960.c (md_parse_option): Likewise.
+	* config/tc-ia64.c (md_parse_option): Likewise.
+	* config/tc-ip2k.c (md_parse_option): Likewise.
+	* config/tc-iq2000.c (md_parse_option): Likewise.
+	* config/tc-lm32.c (md_parse_option): Likewise.
+	* config/tc-m32c.c (md_parse_option): Likewise.
+	* config/tc-m32r.c (md_parse_option): Likewise.
+	* config/tc-m68hc11.c (md_parse_option): Likewise.
+	* config/tc-m68k.c (md_parse_option): Likewise.
+	* config/tc-mcore.c (md_parse_option): Likewise.
+	* config/tc-mep.c (md_parse_option): Likewise.
+	* config/tc-metag.c (struct metag_long_option): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-microblaze.c (md_parse_option): Likewise.
+	* config/tc-microblaze.h (md_parse_option): Remove prototype.
+	* config/tc-mips.c (md_parse_option): Adjust.
+	* config/tc-mmix.c (md_parse_option): Likewise.
+	* config/tc-mn10200.c (md_parse_option): Likewise.
+	* config/tc-mn10300.c (md_parse_option): Likewise.
+	* config/tc-moxie.c (md_parse_option): Likewise.
+	* config/tc-msp430.c (md_parse_option): Likewise.
+	* config/tc-mt.c (md_parse_option): Likewise.
+		* config/tc-nds32.c (md_parse_option): Likewise.
+		* config/tc-nds32.h (nds32_parse_option): Likewise.
+	* config/tc-nios2.c (md_parse_option): Likewise.
+	* config/tc-ns32k.c (md_parse_option): Likewise.
+	* config/tc-or1k.c (md_parse_option): Likewise.
+	* config/tc-pdp11.c (md_parse_option): Likewise.
+	* config/tc-pj.c (md_parse_option): Likewise.
+	* config/tc-ppc.c (md_parse_option): Likewise.
+	* config/tc-rl78.c (md_parse_option): Likewise.
+	* config/tc-rx.c (md_parse_option): Likewise.
+	* config/tc-s390.c (s390_parse_cpu): Likewise.
+	* config/tc-score.c (md_parse_option): Likewise.
+	* config/tc-sh.c (md_parse_option): Likewise.
+	* config/tc-sparc.c (md_parse_option): Likewise.
+	* config/tc-spu.c (md_parse_option): Likewise.
+	* config/tc-tic30.c (md_parse_option): Likewise.
+	* config/tc-tic4x.c (md_parse_option): Likewise.
+	* config/tc-tic54x.c (md_parse_option): Likewise.
+	* config/tc-tic6x.c (md_parse_option): Likewise.
+	* config/tc-tilegx.c (md_parse_option): Likewise.
+	* config/tc-tilepro.c (md_parse_option): Likewise.
+	* config/tc-v850.c (md_parse_option): Likewise.
+	* config/tc-vax.c (md_parse_option): Likewise.
+	* config/tc-visium.c (struct visium_long_option_table): Likewise.
+	* config/tc-xc16x.c (md_parse_option): Likewise.
+	* config/tc-xgate.c (md_parse_option): Likewise.
+	* config/tc-xstormy16.c (md_parse_option): Likewise.
+	* config/tc-xtensa.c (md_parse_option): Likewise.
+	* config/tc-z80.c (md_parse_option): Likewise.
+	* config/tc-z8k.c (md_parse_option): Likewise.
+	* tc.h (md_parse_option): Likewise.
+
+2016-03-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-bfin.c (gencode): Use XOBNEW obstack_alloc () wrapper.
+	* config/tc-hppa.c (fix_new_hppa): Likewise.
+	(pa_vtable_entry): Likewise.
+	(pa_vtable_inherit): Likewise.
+	* config/tc-m68k.c (md_begin): Likewise.
+
+2016-03-28  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/obj-elf.c (obj_elf_section_name): Return const char *.
+	* config/obj-elf.h (obj_elf_section_name): Adjust.
+	* config/tc-aarch64.c (aarch64_parse_features): Likewise.
+	(aarch64_parse_cpu): Likewise.
+	(aarch64_parse_arch): Likewise.
+	* config/tc-arm.c (arm_parse_extension): Likewise.
+	(arm_parse_cpu): Likewise.
+	(arm_parse_arch): Likewise.
+	* config/tc-nds32.c: Likewise.
+	* config/xtensa-relax.c (parse_special_fn): Likewise.
+	* stabs.c (generate_asm_file): Likewise.
+
+2016-03-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-cr16.c (cr16_assemble): New function.
+	(md_assemble): Call cr16_assemble.
+
+2016-03-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* as.c (parse_args): Adjust.
+	* as.h (flag_size_check): Rename to flag_allow_nonconst_size.
+	* config/obj-elf.c (elf_frob_symbol): Adjust.
+
+2016-03-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Remove the V9 restriction on ASR
+	registers to be in the 16..31 range.
+
+2016-03-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-microblaze.c (md_assemble): Cast opc to char * when calling
+	frag_var ().
+
+2016-03-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-visium.c (md_atof): Localize the string returned on
+	failure.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-h8300.c (h8300_elf_section): Add const qualifiers.
+	* config/tc-ia64.c (obj_elf_vms_common): Likewise.
+	* config/tc-m68hc11.c (md_begin): Likewise.
+	(print_opcode_list): Likewise.
+	* config/tc-msp430.c (msp430_section): Likewise.
+	* config/tc-score.c (struct s3_insn_to_dependency): Likewise.
+	(s3_build_dependency_insn_hsh): Likewise.
+	* config/tc-score7.c (struct s7_insn_to_dependency): Likewise.
+	(s7_build_dependency_insn_hsh): Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c (tic54x_set_default_include): Likewise.
+	(subsym_get_arg): Likewise.
+	* config/tc-xtensa.c (struct suffix_reloc_map): Likewise.
+	(get_directive): Likewise.
+	(cache_literal_section): Likewise.
+	* config/xtensa-relax.c: Likewise.
+	* symbols.c (symbol_create): Likewise.
+	(local_symbol_make): Likewise.
+	(symbol_relc_make_expr): Likewise.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-pdp11.c (md_assemble): Remove useless if and assignment to
+	str.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-sparc.c (sparc_regname_to_dw2regnum): Replace strchr ()
+	call with a switch.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-ia64.c (ia64_do_align): Remove.
+	(ia64_cons_align): Call do_align () directly.
+	(dot_proc): Likewise.
+	(stmt_float_cons): Likewise.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* listing.c (listing_message): Use XNEW style allocation macros.
+	* read.c (read_a_source_file): Likewise.
+	(read_symbol_name): Likewise.
+	(s_mri_common): Likewise.
+	(assign_symbol): Likewise.
+	(s_reloc): Likewise.
+	(emit_expr_with_reloc): Likewise.
+	(s_incbin): Likewise.
+	(s_include): Likewise.
+	* sb.c (sb_build): Likewise.
+	(sb_check): Likewise.
+
+2016-03-22  Alan Modra  <amodra@gmail.com>
+
+	* write.c (record_alignment): Revert 2016-02-18 change.
+
+2016-03-22  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-alpha.c (load_expression): Replace alloca with xmalloc.
+	(emit_jsrjmp, tc_gen_reloc): Likewise.
+	* config/tc-i370.c (i370_macro): Likewise.
+
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/nps400-0.d: New file.
+	* testsuite/gas/arc/nps400-0.s: New file.
+	* testsuite/gas/arc/nps400-1.d: New file.
+	* testsuite/gas/arc/nps400-1.s: New file.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (find_opcode_match): Move lnflg, and i
+	declarations to start of block.  Reset code on all flags before
+	attempting to match them.  Handle multiple hits on the same flag.
+	Handle flag class.
+	* testsuite/gas/arc/asm-errors.d: New file.
+	* testsuite/gas/arc/asm-errors.err: New file.
+	* testsuite/gas/arc/asm-errors.s: New file.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (cpu_types): Add nps400 entry.
+	(check_zol): Handle nps400.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_select_cpu): Remove use of
+	EF_ARC_CPU_GENERIC.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_target): Delay initialisation until
+	arc_select_cpu.
+	(arc_target_name): Likewise.
+	(arc_features): Likewise.
+	(arc_mach_type): Likewise.
+	(cpu_types): Remove "all" entry.
+	(arc_select_cpu): New function, most of the content is from...
+	(md_parse_option): ... here.  Call new arc_select_cpu.
+	(md_begin): Call arc_select_cpu if needed, default is now arc700.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/inline-data-1.d: Add target restriction.
+	* testsuite/gas/arc/inline-data-2.d: New file.
+
+2016-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* atof-generic.c: Replace use of alloca with call to xmalloc.
+	* cgen.c: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* macro.c: Likewise.
+	* remap.c: Likewise.
+	* stabs.c: Likewise.
+	* symbols.c: Likewise.
+	* config/obj-elf.c: Likewise.
+	* config/tc-aarch64.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-avr.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-nds32.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/te-vms.c: Likewise.
+	* configure: Regenerate.
+
+2016-03-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* tc-i386.c (f32_1): Change type to unsigned char[].
+	(f32_2): Likewise.
+	(f32_3): Likewise.
+	(f32_4): Likewise.
+	(f32_5): Likewise.
+	(f32_6): Likewise.
+	(f32_7): Likewise.
+	(f32_8): Likewise.
+	(f32_9): Likewise.
+	(f32_10): Likewise.
+	(f32_11): Likewise.
+	(f32_12): Likewise.
+	(f32_13): Likewise.
+	(f32_14): Likewise.
+	(f16_3): Likewise.
+	(f16_4): Likewise.
+	(f16_5): Likewise.
+	(f16_6): Likewise.
+	(f16_7): Likewise.
+	(f16_8): Likewise.
+	(jump_31): Likewise.
+	(f32_patt): Likewise.
+	(f16_patt): Likewise.
+	(alt_3): Likewise.
+	(alt_4): Likewise.
+	(alt_5): Likewise.
+	(alt_6): Likewise.
+	(alt_7): Likewise.
+	(alt_8): Likewise.
+	(alt_9): Likewise.
+	(alt_10): Likewise.
+	(alt_patt): Likewise.
+
+2016-03-18  Nick Clifton  <nickc@redhat.com>
+
+	* doc/c-aarch64.texi (AArch64 Directives): Add descriptions of
+	.cpu, .dword, .even, .inst. .tlsdescadd, .tlsdesccall,
+	.tlsdescldr and .xword directives.
+
+	PR target/19721
+	* testsuite/gas/aarch64/pr19721.s: New test source file.
+	* testsuite/gas/aarch64/pr19721.d: New test driver file.
+
+	* doc/as.texinfo: Place the target specific command line options
+	into their own man page section.
+
+2016-03-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (N_S_32): New.
+	(N_F_16_32): Likewise.
+	(N_SUF_32): Support N_F16.
+	(N_IF_32): Likewise.
+	(neon_dyadic_misc): Likewise.
+	(do_neon_cmp): Likewise.
+	(do_neon_cmp_inv): Likewise.
+	(do_neon_mul): Likewise.
+	(do_neon_fcmp_absolute): Likewise.
+	(do_neon_step): Likewise.
+	(do_neon_abs_neg): Likewise.
+	(CVT_FLAVOR_VAR): Likewise.
+	(do_neon_cvt_1): Likewise.
+	(do_neon_recip_est): Likewise.
+	(do_vmaxnm): Likewise.
+	(do_vrint_1): Likewise.
+	(neon_check_type): Check architecture support for FP16 extension.
+	(insns): Update comments.
+	* testsuite/gas/arm/armv8-2-fp16-simd.s: New test source.
+	* testsuite/gas/arm/armv8-2-fp16-simd.d: New testcase for arm mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-thumb.d: Likewise for thumb mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning.d: New rejection test for
+	arm mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning-thumb.d: Likewise for
+	thumb mode.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning.l: New expected rejection
+	error file.
+
 2016-03-16  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (emit_expr_with_reloc): Add code check a bignum with
@@ -22,6 +753,10 @@
 	(do_t_mov_cmp): Likewise.
 	(do_t_add_sub): Protect against bad relocations usage.
 	(do_t_mov_cmp): Likewise.
+	* testsuite/gas/arm/adds-thumb1-reloc-local-armv7-m.s: New.
+	* testsuite/gas/arm/adds-thumb1-reloc-local-armv7-m.d: New.
+	* testsuite/gas/arm/movs-thumb1-reloc-local-armv7-m.s: New.
+	* testsuite/gas/arm/movs-thumb1-reloc-local-armv7-m.d: New.
 
 2016-03-09  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
@@ -536,6 +1271,9 @@
 	* config/tc-arc.h (TARGET_USE_CFIPOP): Define
 	(tc_cfi_frame_initial_instructions): Likewise.
 	(tc_regname_to_dw2regnum): Likewise.
+	* testsuite/gas/cfi/cfi-arc-1.d: New file.
+	* testsuite/gas/cfi/cfi-arc-1.s: Likewise.
+	* testsuite/gas/cfi/cfi.exp: Allow running tests for arc.
 
 2016-02-16  Trevor Saunders  <tbsaunde@tbsaunde.org>
 

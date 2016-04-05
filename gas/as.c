@@ -621,7 +621,7 @@ parse_args (int * pargc, char *** pargv)
 
 	case 1:			/* File name.  */
 	  if (!strcmp (optarg, "-"))
-	    optarg = "";
+	    optarg = (char *) "";
 	  new_argv[new_argc++] = optarg;
 	  new_argv[new_argc] = NULL;
 	  break;
@@ -747,7 +747,7 @@ This program has absolutely no warranty.\n"));
 		break;
 	      }
 
-	    n = xmalloc (sizeof * n);
+	    n = XNEW (struct itbl_file_list);
 	    n->next = itbl_files;
 	    n->name = optarg;
 	    itbl_files = n;
@@ -870,9 +870,9 @@ This program has absolutely no warranty.\n"));
 
 	case OPTION_SIZE_CHECK:
 	  if (strcasecmp (optarg, "error") == 0)
-	    flag_size_check = size_check_error;
+	    flag_allow_nonconst_size = FALSE;
 	  else if (strcasecmp (optarg, "warning") == 0)
-	    flag_size_check = size_check_warning;
+	    flag_allow_nonconst_size = TRUE;
 	  else
 	    as_fatal (_("Invalid --size-check= option: `%s'"), optarg);
 	  break;

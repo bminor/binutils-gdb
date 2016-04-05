@@ -573,7 +573,7 @@ my_get_expression (expressionS * ep, char **str, int prefix_mode,
    of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
@@ -1241,7 +1241,7 @@ create_register_alias (char *newname, char *p)
   nlen = strlen (newname);
 #endif
 
-  nbuf = alloca (nlen + 1);
+  nbuf = xmalloc (nlen + 1);
   memcpy (nbuf, newname, nlen);
   nbuf[nlen] = '\0';
 
@@ -1265,7 +1265,10 @@ create_register_alias (char *newname, char *p)
 	     the artificial FOO alias because it has already been created by the
 	     first .req.  */
 	  if (insert_reg_alias (nbuf, old->number, old->type) == NULL)
-	    return TRUE;
+	    {
+	      free (nbuf);
+	      return TRUE;
+	    }
 	}
 
       for (p = nbuf; *p; p++)
@@ -1275,6 +1278,7 @@ create_register_alias (char *newname, char *p)
 	insert_reg_alias (nbuf, old->number, old->type);
     }
 
+  free (nbuf);
   return TRUE;
 }
 
@@ -4047,9 +4051,7 @@ add_operand_error_record (const operand_error_record* new_record)
       /* Get one empty record.  */
       if (free_opnd_error_record_nodes == NULL)
 	{
-	  record = xmalloc (sizeof (operand_error_record));
-	  if (record == NULL)
-	    abort ();
+	  record = XNEW (operand_error_record);
 	}
       else
 	{
@@ -6098,8 +6100,7 @@ md_assemble (char *str)
 	         store the instruction information for the future fix-up.  */
 	      struct aarch64_inst *copy;
 	      gas_assert (inst.reloc.type != BFD_RELOC_UNUSED);
-	      if ((copy = xmalloc (sizeof (struct aarch64_inst))) == NULL)
-		abort ();
+	      copy = XNEW (struct aarch64_inst);
 	      memcpy (copy, &inst.base, sizeof (struct aarch64_inst));
 	      output_inst (copy);
 	    }
@@ -6318,7 +6319,7 @@ aarch64_handle_align (fragS * fragP)
 {
   /* NOP = d503201f */
   /* AArch64 instructions are always little-endian.  */
-  static char const aarch64_noop[4] = { 0x1f, 0x20, 0x03, 0xd5 };
+  static unsigned char const aarch64_noop[4] = { 0x1f, 0x20, 0x03, 0xd5 };
 
   int bytes, fix, noop_size;
   char *p;
@@ -7194,9 +7195,9 @@ tc_gen_reloc (asection * section, fixS * fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -7537,8 +7538,7 @@ get_upper_str (const char *str)
 {
   char *ret;
   size_t len = strlen (str);
-  if ((ret = xmalloc (len + 1)) == NULL)
-    abort ();
+  ret = XNEWVEC (char, len + 1);
   convert_to_upper (ret, str, len);
   return ret;
 }
@@ -7821,12 +7821,12 @@ struct aarch64_long_option_table
 {
   const char *option;			/* Substring to match.  */
   const char *help;			/* Help information.  */
-  int (*func) (char *subopt);	/* Function to decode sub-option.  */
+  int (*func) (const char *subopt);	/* Function to decode sub-option.  */
   char *deprecated;		/* If non-null, print this message.  */
 };
 
 static int
-aarch64_parse_features (char *str, const aarch64_feature_set **opt_p,
+aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
 			bfd_boolean ext_only)
 {
   /* We insist on extensions being added before being removed.  We achieve
@@ -7834,7 +7834,7 @@ aarch64_parse_features (char *str, const aarch64_feature_set **opt_p,
      adding an extension (1) or removing it (0) and only allowing it to
      change in the order -1 -> 1 -> 0.  */
   int adding_value = -1;
-  aarch64_feature_set *ext_set = xmalloc (sizeof (aarch64_feature_set));
+  aarch64_feature_set *ext_set = XNEW (aarch64_feature_set);
 
   /* Copy the feature set, so that we can modify it.  */
   *ext_set = **opt_p;
@@ -7843,7 +7843,7 @@ aarch64_parse_features (char *str, const aarch64_feature_set **opt_p,
   while (str != NULL && *str != 0)
     {
       const struct aarch64_option_cpu_value_table *opt;
-      char *ext = NULL;
+      const char *ext = NULL;
       int optlen;
 
       if (!ext_only)
@@ -7913,10 +7913,10 @@ aarch64_parse_features (char *str, const aarch64_feature_set **opt_p,
 }
 
 static int
-aarch64_parse_cpu (char *str)
+aarch64_parse_cpu (const char *str)
 {
   const struct aarch64_cpu_option_table *opt;
-  char *ext = strchr (str, '+');
+  const char *ext = strchr (str, '+');
   size_t optlen;
 
   if (ext != NULL)
@@ -7945,10 +7945,10 @@ aarch64_parse_cpu (char *str)
 }
 
 static int
-aarch64_parse_arch (char *str)
+aarch64_parse_arch (const char *str)
 {
   const struct aarch64_arch_option_table *opt;
-  char *ext = strchr (str, '+');
+  const char *ext = strchr (str, '+');
   size_t optlen;
 
   if (ext != NULL)
@@ -7990,7 +7990,7 @@ static const struct aarch64_option_abi_value_table aarch64_abis[] = {
 };
 
 static int
-aarch64_parse_abi (char *str)
+aarch64_parse_abi (const char *str)
 {
   const struct aarch64_option_abi_value_table *opt;
   size_t optlen = strlen (str);
@@ -8025,7 +8025,7 @@ static struct aarch64_long_option_table aarch64_long_opts[] = {
 };
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   struct aarch64_option_table *opt;
   struct aarch64_long_option_table *lopt;

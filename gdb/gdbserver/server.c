@@ -119,7 +119,7 @@ int disable_packet_qfThreadInfo;
 static struct target_waitstatus last_status;
 static ptid_t last_ptid;
 
-static char *own_buf;
+char *own_buf;
 static unsigned char *mem_buf;
 
 /* A sub-class of 'struct notif_event' for stop, holding information
@@ -2935,7 +2935,7 @@ handle_v_kill (char *own_buf)
 }
 
 /* Handle all of the extended 'v' packets.  */
-static void
+void
 handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 {
   if (!disable_packet_vCont)

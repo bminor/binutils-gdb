@@ -1065,95 +1065,95 @@ i386_align_code (fragS *fragP, int count)
   /* Various efficient no-op patterns for aligning code labels.
      Note: Don't try to assemble the instructions in the comments.
      0L and 0w are not legal.  */
-  static const char f32_1[] =
+  static const unsigned char f32_1[] =
     {0x90};					/* nop			*/
-  static const char f32_2[] =
+  static const unsigned char f32_2[] =
     {0x66,0x90};				/* xchg %ax,%ax */
-  static const char f32_3[] =
+  static const unsigned char f32_3[] =
     {0x8d,0x76,0x00};				/* leal 0(%esi),%esi	*/
-  static const char f32_4[] =
+  static const unsigned char f32_4[] =
     {0x8d,0x74,0x26,0x00};			/* leal 0(%esi,1),%esi	*/
-  static const char f32_5[] =
+  static const unsigned char f32_5[] =
     {0x90,					/* nop			*/
      0x8d,0x74,0x26,0x00};			/* leal 0(%esi,1),%esi	*/
-  static const char f32_6[] =
+  static const unsigned char f32_6[] =
     {0x8d,0xb6,0x00,0x00,0x00,0x00};		/* leal 0L(%esi),%esi	*/
-  static const char f32_7[] =
+  static const unsigned char f32_7[] =
     {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
-  static const char f32_8[] =
+  static const unsigned char f32_8[] =
     {0x90,					/* nop			*/
      0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
-  static const char f32_9[] =
+  static const unsigned char f32_9[] =
     {0x89,0xf6,					/* movl %esi,%esi	*/
      0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const char f32_10[] =
+  static const unsigned char f32_10[] =
     {0x8d,0x76,0x00,				/* leal 0(%esi),%esi	*/
      0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const char f32_11[] =
+  static const unsigned char f32_11[] =
     {0x8d,0x74,0x26,0x00,			/* leal 0(%esi,1),%esi	*/
      0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const char f32_12[] =
+  static const unsigned char f32_12[] =
     {0x8d,0xb6,0x00,0x00,0x00,0x00,		/* leal 0L(%esi),%esi	*/
      0x8d,0xbf,0x00,0x00,0x00,0x00};		/* leal 0L(%edi),%edi	*/
-  static const char f32_13[] =
+  static const unsigned char f32_13[] =
     {0x8d,0xb6,0x00,0x00,0x00,0x00,		/* leal 0L(%esi),%esi	*/
      0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const char f32_14[] =
+  static const unsigned char f32_14[] =
     {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00,	/* leal 0L(%esi,1),%esi */
      0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const char f16_3[] =
+  static const unsigned char f16_3[] =
     {0x8d,0x74,0x00};				/* lea 0(%esi),%esi	*/
-  static const char f16_4[] =
+  static const unsigned char f16_4[] =
     {0x8d,0xb4,0x00,0x00};			/* lea 0w(%si),%si	*/
-  static const char f16_5[] =
+  static const unsigned char f16_5[] =
     {0x90,					/* nop			*/
      0x8d,0xb4,0x00,0x00};			/* lea 0w(%si),%si	*/
-  static const char f16_6[] =
+  static const unsigned char f16_6[] =
     {0x89,0xf6,					/* mov %si,%si		*/
      0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
-  static const char f16_7[] =
+  static const unsigned char f16_7[] =
     {0x8d,0x74,0x00,				/* lea 0(%si),%si	*/
      0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
-  static const char f16_8[] =
+  static const unsigned char f16_8[] =
     {0x8d,0xb4,0x00,0x00,			/* lea 0w(%si),%si	*/
      0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
-  static const char jump_31[] =
+  static const unsigned char jump_31[] =
     {0xeb,0x1d,0x90,0x90,0x90,0x90,0x90,	/* jmp .+31; lotsa nops	*/
      0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
      0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
      0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
-  static const char *const f32_patt[] = {
+  static const unsigned char *const f32_patt[] = {
     f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8,
     f32_9, f32_10, f32_11, f32_12, f32_13, f32_14
   };
-  static const char *const f16_patt[] = {
+  static const unsigned char *const f16_patt[] = {
     f32_1, f32_2, f16_3, f16_4, f16_5, f16_6, f16_7, f16_8
   };
   /* nopl (%[re]ax) */
-  static const char alt_3[] =
+  static const unsigned char alt_3[] =
     {0x0f,0x1f,0x00};
   /* nopl 0(%[re]ax) */
-  static const char alt_4[] =
+  static const unsigned char alt_4[] =
     {0x0f,0x1f,0x40,0x00};
   /* nopl 0(%[re]ax,%[re]ax,1) */
-  static const char alt_5[] =
+  static const unsigned char alt_5[] =
     {0x0f,0x1f,0x44,0x00,0x00};
   /* nopw 0(%[re]ax,%[re]ax,1) */
-  static const char alt_6[] =
+  static const unsigned char alt_6[] =
     {0x66,0x0f,0x1f,0x44,0x00,0x00};
   /* nopl 0L(%[re]ax) */
-  static const char alt_7[] =
+  static const unsigned char alt_7[] =
     {0x0f,0x1f,0x80,0x00,0x00,0x00,0x00};
   /* nopl 0L(%[re]ax,%[re]ax,1) */
-  static const char alt_8[] =
+  static const unsigned char alt_8[] =
     {0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
   /* nopw 0L(%[re]ax,%[re]ax,1) */
-  static const char alt_9[] =
+  static const unsigned char alt_9[] =
     {0x66,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
   /* nopw %cs:0L(%[re]ax,%[re]ax,1) */
-  static const char alt_10[] =
+  static const unsigned char alt_10[] =
     {0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
-  static const char *const alt_patt[] = {
+  static const unsigned char *const alt_patt[] = {
     f32_1, f32_2, alt_3, alt_4, alt_5, alt_6, alt_7, alt_8,
     alt_9, alt_10
   };
@@ -1191,7 +1191,7 @@ i386_align_code (fragS *fragP, int count)
     }
   else
     {
-      const char *const *patt = NULL;
+      const unsigned char *const *patt = NULL;
 
       if (fragP->tc_frag_data.isa == PROCESSOR_UNKNOWN)
 	{
@@ -4575,7 +4575,9 @@ check_VecOperands (const insn_template *t)
 	    && i.op[op].disps->X_op == O_constant)
 	  {
 	    offsetT value = i.op[op].disps->X_add_number;
-	    int vec_disp8_ok = fits_in_vec_disp8 (value);
+	    int vec_disp8_ok
+	      = (i.disp_encoding != disp_encoding_32bit
+		 && fits_in_vec_disp8 (value));
 	    if (t->operand_types [op].bitfield.vec_disp8)
 	      {
 		if (vec_disp8_ok)
@@ -9378,7 +9380,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   md_number_to_chars (p, value, fixP->fx_size);
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   /* This outputs the LITTLENUMs in REVERSE order;
@@ -9698,7 +9700,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   unsigned int j;
   char *arch, *next;
@@ -10781,7 +10783,7 @@ tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 /* For ELF on x86-64, add support for SHF_X86_64_LARGE.  */
 
 bfd_vma
-x86_64_section_letter (int letter, char **ptr_msg)
+x86_64_section_letter (int letter, const char **ptr_msg)
 {
   if (flag_code == CODE_64BIT)
     {

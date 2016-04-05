@@ -72,7 +72,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.sh weak_plt.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test_2.sh two_file_shared.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = incremental_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
@@ -95,6 +96,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test_2.sects \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = incremental_test \
@@ -119,6 +121,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test_2.sects \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libweak_undef_2.a
@@ -449,6 +452,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 
 # Test that symbols known in the IR file but not in the replacement file
 # produce an unresolved symbol error.
+
+# As above, but check COMDAT case, where a non-IR file contains a duplicate
+# of a COMDAT group in an IR file.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_39 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err \
@@ -458,6 +464,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.o.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9b.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib.err
@@ -472,6 +479,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	two_file_test_1c.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9b.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_thin.a \
@@ -4496,6 +4504,8 @@ icf_sht_rel_addend_test.sh.log: icf_sht_rel_addend_test.sh
 	@p='icf_sht_rel_addend_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 merge_string_literals.sh.log: merge_string_literals.sh
 	@p='merge_string_literals.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+eh_test_2.sh.log: eh_test_2.sh
+	@p='eh_test_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_shared.sh.log: two_file_shared.sh
 	@p='two_file_shared.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 weak_plt.sh.log: weak_plt.sh
@@ -5295,6 +5305,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test: eh_test_a.o eh_test_b.o  gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK_S) -Bgcctestdir/ eh_test_a.o eh_test_b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test_r.o: eh_test_a.o eh_test_b.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ eh_test_a.o eh_test_b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test_2: eh_test_r.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK_S) -Bgcctestdir/ -Wl,--eh-frame-hdr eh_test_r.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@eh_test_2.sects: eh_test_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW $< >$@ 2>/dev/null
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@basic_static_test: basic_test.o gcctestdir/ld
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -static basic_test.o
 
@@ -6078,6 +6094,20 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	mv -f $@.tmp $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1c.o: two_file_test_1.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	cp two_file_test_1.o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_9b.err: plugin_test_9b_ir.o.syms plugin_test_9b_ir.o plugin_test_9b_elf.o gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9b -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_ZN1A5printEv" plugin_test_9b_ir.o plugin_test_9b_elf.o "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9b -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_ZN1A5printEv" plugin_test_9b_ir.o plugin_test_9b_elf.o 2>$@; then \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	  echo 1>&2 "Link of plugin_test_9b should have failed"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	  rm -f $@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	  exit 1; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	fi
+# Make a .syms file that claims to define a method in class A in a COMDAT group.
+# The real plugin_test_9b_ir.o will be compiled without the -D, and will not
+# define any methods in class A.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_9b_ir.o.syms: plugin_test_9b_ir_witha.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_9b_ir_witha.o: plugin_test_9b_ir.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXCOMPILE) -c -DUSE_CLASS_A -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_10: plugin_common_test_1.o.syms plugin_common_test_2.o  gcctestdir/ld plugin_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.o.syms plugin_common_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_10.sections: plugin_test_10

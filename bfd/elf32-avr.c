@@ -4068,11 +4068,13 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
     }
 
   free (contents);
-  free (internal_relocs);
+  if (elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
   return r_list;
 
  load_failed:
-  free (internal_relocs);
+  if (elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
   free (contents);
   free (r_list);
   return NULL;

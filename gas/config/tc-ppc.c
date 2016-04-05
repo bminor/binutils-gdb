@@ -1078,7 +1078,7 @@ const struct option md_longopts[] = {
 const size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   ppc_cpu_t new_cpu;
 
@@ -2390,7 +2390,6 @@ ppc_frob_file_before_adjust (void)
       const char *name;
       char *dotname;
       symbolS *dotsym;
-      size_t len;
 
       name = S_GET_NAME (symp);
       if (name[0] == '.')
@@ -2400,10 +2399,7 @@ ppc_frob_file_before_adjust (void)
 	  || S_IS_DEFINED (symp))
 	continue;
 
-      len = strlen (name) + 1;
-      dotname = xmalloc (len + 1);
-      dotname[0] = '.';
-      memcpy (dotname + 1, name, len);
+      dotname = concat (".", name, (char *) NULL);
       dotsym = symbol_find_noref (dotname, 1);
       free (dotname);
       if (dotsym != NULL && (symbol_used_p (dotsym)
@@ -2573,14 +2569,13 @@ ppc_apuinfo_section_add (unsigned int apu, unsigned int version)
       if (ppc_apuinfo_num_alloc == 0)
 	{
 	  ppc_apuinfo_num_alloc = 4;
-	  ppc_apuinfo_list = (unsigned long *)
-	      xmalloc (sizeof (unsigned long) * ppc_apuinfo_num_alloc);
+	  ppc_apuinfo_list = XNEWVEC (unsigned long, ppc_apuinfo_num_alloc);
 	}
       else
 	{
 	  ppc_apuinfo_num_alloc += 4;
-	  ppc_apuinfo_list = (unsigned long *) xrealloc (ppc_apuinfo_list,
-	      sizeof (unsigned long) * ppc_apuinfo_num_alloc);
+	  ppc_apuinfo_list = XRESIZEVEC (unsigned long, ppc_apuinfo_list,
+					 ppc_apuinfo_num_alloc);
 	}
     }
   ppc_apuinfo_list[ppc_apuinfo_num++] = APUID (apu, version);
@@ -3523,7 +3518,7 @@ ppc_macro (char *str, const struct powerpc_macro *macro)
     }
 
   /* Put the string together.  */
-  complete = s = (char *) alloca (len + 1);
+  complete = s = XNEWVEC (char, len + 1);
   format = macro->format;
   while (*format != '\0')
     {
@@ -3541,6 +3536,7 @@ ppc_macro (char *str, const struct powerpc_macro *macro)
 
   /* Assemble the constructed instruction.  */
   md_assemble (complete);
+  free (complete);
 }
 
 #ifdef OBJ_ELF
@@ -4013,8 +4009,7 @@ ppc_dwsect (int ignore ATTRIBUTE_UNUSED)
   else
     {
       /* Create a new dw subsection.  */
-      subseg = (struct dw_subsection *)
-        xmalloc (sizeof (struct dw_subsection));
+      subseg = XNEW (struct dw_subsection);
 
       if (opt_label == NULL)
         {
@@ -4967,7 +4962,7 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
       if (strcmp (cpu_string, "push") == 0)
 	{
 	  if (cpu_history == NULL)
-	    cpu_history = xmalloc (MAX_HISTORY * sizeof (*cpu_history));
+	    cpu_history = XNEWVEC (ppc_cpu_t, MAX_HISTORY);
 
 	  if (curr_hist >= MAX_HISTORY)
 	    as_bad (_(".machine stack overflow"));
@@ -5194,8 +5189,7 @@ ppc_znop (int ignore ATTRIBUTE_UNUSED)
   /* Strip out the symbol name.  */
   c = get_symbol_name (&symbol_name);
 
-  name = xmalloc (input_line_pointer - symbol_name + 1);
-  strcpy (name, symbol_name);
+  name = xstrdup (symbol_name);
 
   sym = symbol_find_or_make (name);
 
@@ -5369,8 +5363,7 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
 
   c = get_symbol_name (&section_name);
 
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xstrdup (section_name);
 
   *input_line_pointer = c;
 
@@ -5767,9 +5760,7 @@ ppc_frob_symbol (symbolS *sym)
 	  char *snew;
 
 	  len = s - name;
-	  snew = xmalloc (len + 1);
-	  memcpy (snew, name, len);
-	  snew[len] = '\0';
+	  snew = xstrndup (name, len);
 
 	  S_SET_NAME (sym, snew);
 	}
@@ -6068,7 +6059,7 @@ ppc_frob_section (asection *sec)
 
 #endif /* OBJ_XCOFF */
 
-char *
+const char *
 md_atof (int type, char *litp, int *sizep)
 {
   return ieee_md_atof (type, litp, sizep, target_big_endian);
@@ -7140,9 +7131,9 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);

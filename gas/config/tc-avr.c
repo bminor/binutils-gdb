@@ -555,26 +555,16 @@ avr_set_arch (int dummy ATTRIBUTE_UNUSED)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
     case OPTION_MMCU:
       {
 	int i;
-	char *s = alloca (strlen (arg) + 1);
-
-	{
-	  char *t = s;
-	  char *arg1 = arg;
-
-	  do
-	    *t = TOLOWER (*arg1++);
-	  while (*t++);
-	}
 
 	for (i = 0; mcu_types[i].name; ++i)
-	  if (strcmp (mcu_types[i].name, s) == 0)
+	  if (strcasecmp (mcu_types[i].name, arg) == 0)
 	    break;
 
 	if (!mcu_types[i].name)
@@ -587,12 +577,12 @@ md_parse_option (int c, char *arg)
 	   type - this for allows passing -mmcu=... via gcc ASM_SPEC as well
 	   as .arch ... in the asm output at the same time.  */
 	if (avr_mcu == &default_mcu || avr_mcu->mach == mcu_types[i].mach)
-      {
-        specified_mcu.name = mcu_types[i].name;
-        specified_mcu.isa  |= mcu_types[i].isa;
-        specified_mcu.mach = mcu_types[i].mach;
-        avr_mcu = &specified_mcu;
-      }
+	  {
+	    specified_mcu.name = mcu_types[i].name;
+	    specified_mcu.isa  |= mcu_types[i].isa;
+	    specified_mcu.mach = mcu_types[i].mach;
+	    avr_mcu = &specified_mcu;
+	  }
 	else
 	  as_fatal (_("redefinition of mcu type `%s' to `%s'"),
 		    avr_mcu->name, mcu_types[i].name);
@@ -627,7 +617,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
   return NULL;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, FALSE);
@@ -1626,9 +1616,9 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
       return NULL;
     }
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
@@ -2079,8 +2069,7 @@ create_record_for_frag (segT sec, fragS *fragP)
 {
   struct avr_property_record_link *prop_rec_link;
 
-  prop_rec_link = xmalloc (sizeof (struct avr_property_record_link));
-  memset (prop_rec_link, 0, sizeof (*prop_rec_link));
+  prop_rec_link = XCNEW (struct avr_property_record_link);
   gas_assert (fragP->fr_next != NULL);
 
   if (fragP->tc_frag_data.is_org)

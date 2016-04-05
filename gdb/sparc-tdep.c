@@ -1605,7 +1605,7 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
   return 0;
 }
 
-int
+static int
 sparc_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *arch = get_frame_arch (frame);

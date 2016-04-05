@@ -193,14 +193,14 @@ struct option md_longopts[] =
 
 size_t md_longopts_size = sizeof(md_longopts);
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {

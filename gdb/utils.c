@@ -345,6 +345,35 @@ make_cleanup_htab_delete (htab_t htab)
   return make_cleanup (do_htab_delete_cleanup, htab);
 }
 
+struct restore_ui_out_closure
+{
+  struct ui_out **variable;
+  struct ui_out *value;
+};
+
+static void
+do_restore_ui_out (void *p)
+{
+  struct restore_ui_out_closure *closure
+    = (struct restore_ui_out_closure *) p;
+
+  *(closure->variable) = closure->value;
+}
+
+/* Remember the current value of *VARIABLE and make it restored when
+   the cleanup is run.  */
+
+struct cleanup *
+make_cleanup_restore_ui_out (struct ui_out **variable)
+{
+  struct restore_ui_out_closure *c = XNEW (struct restore_ui_out_closure);
+
+  c->variable = variable;
+  c->value = *variable;
+
+  return make_cleanup_dtor (do_restore_ui_out, (void *) c, xfree);
+}
+
 struct restore_ui_file_closure
 {
   struct ui_file **variable;

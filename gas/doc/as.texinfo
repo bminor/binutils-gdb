@@ -246,8 +246,10 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--target-help}] [@var{target-options}]
  [@b{--}|@var{files} @dots{}]
 @c
+@c man end
 @c Target dependent options are listed below.  Keep the list sorted.
 @c Add an empty line for separation.
+@c man begin TARGET
 @ifset AARCH64
 
 @emph{Target AArch64 options:}

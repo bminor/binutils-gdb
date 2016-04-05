@@ -198,6 +198,9 @@ Errors::undefined_symbol(const Symbol* sym, const std::string& location)
     gold_info(_("%s: the vtable symbol may be undefined because "
 		"the class is missing its key function"),
 	      program_name);
+  if (sym->is_placeholder())
+    gold_info(_("%s: the symbol should have been defined by a plugin"),
+	      program_name);
 }
 
 // Issue a debugging message.

@@ -311,12 +311,12 @@ static void assemble_insn
    const struct arc_flags *, int, struct arc_insn *);
 
 /* The cpu for which we are generating code.  */
-static unsigned arc_target = ARC_OPCODE_BASE;
-static const char *arc_target_name = "<all>";
-static unsigned arc_features = 0x00;
+static unsigned arc_target;
+static const char *arc_target_name;
+static unsigned arc_features;
 
 /* The default architecture.  */
-static int arc_mach_type = bfd_mach_arc_arcv2;
+static int arc_mach_type;
 
 /* Non-zero if the cpu type has been explicitly specified.  */
 static int mach_type_specified_p = 0;
@@ -342,12 +342,12 @@ static const struct cpu_type
     E_ARC_MACH_ARC600,  0x00},
   { "arc700", ARC_OPCODE_ARC700,  bfd_mach_arc_arc700,
     E_ARC_MACH_ARC700,  0x00},
+  { "nps400", ARC_OPCODE_ARC700 | ARC_OPCODE_NPS400, bfd_mach_arc_nps400,
+    E_ARC_MACH_NPS400,  0x00},
   { "arcem",  ARC_OPCODE_ARCv2EM, bfd_mach_arc_arcv2,
     EF_ARC_CPU_ARCV2EM, ARC_CD},
   { "archs",  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,
     EF_ARC_CPU_ARCV2HS, ARC_CD},
-  { "all",    ARC_OPCODE_BASE,    bfd_mach_arc_arcv2,
-    0x00, 0x00 },
   { 0, 0, 0, 0, 0 }
 };
 
@@ -567,6 +567,34 @@ md_number_to_chars_midend (char *buf, valueT val, int n)
     {
       md_number_to_chars (buf, val, n);
     }
+}
+
+/* Select an appropriate entry from CPU_TYPES based on ARG and initialise
+   the relevant static global variables.  */
+
+static void
+arc_select_cpu (const char *arg)
+{
+  int cpu_flags = 0;
+  int i;
+
+  for (i = 0; cpu_types[i].name; ++i)
+    {
+      if (!strcasecmp (cpu_types[i].name, arg))
+        {
+          arc_target = cpu_types[i].flags;
+          arc_target_name = cpu_types[i].name;
+          arc_features = cpu_types[i].features;
+          arc_mach_type = cpu_types[i].mach;
+          cpu_flags = cpu_types[i].eflags;
+          break;
+        }
+    }
+
+  if (!cpu_types[i].name)
+    as_fatal (_("unknown architecture: %s\n"), arg);
+  gas_assert (cpu_flags != 0);
+  arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
 }
 
 /* Here ends all the ARCompact extension instruction assembling
@@ -1050,7 +1078,7 @@ tokenize_flags (const char *str,
 	    goto err;
 
 	  flgnamelen = strspn (input_line_pointer, "abcdefghilmnopqrstvwxz");
-	  if (flgnamelen > MAX_FLAG_NAME_LENGHT)
+	  if (flgnamelen > MAX_FLAG_NAME_LENGTH)
 	    goto err;
 
 	  memcpy (flags->name, input_line_pointer, flgnamelen);
@@ -1342,7 +1370,7 @@ find_opcode_match (const struct arc_opcode *first_opcode,
     {
       const unsigned char *opidx;
       const unsigned char *flgidx;
-      int tokidx = 0;
+      int tokidx = 0, lnflg, i;
       const expressionS *t = &emptyE;
 
       pr_debug ("%s:%d: find_opcode_match: trying opcode 0x%08X ",
@@ -1568,20 +1596,23 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 	}
       pr_debug ("opr ");
 
-      /* Check the flags.  Iterate over the valid flag classes.  */
-      int lnflg = nflgs;
+      /* Setup ready for flag parsing.  */
+      lnflg = nflgs;
+      for (i = 0; i < nflgs; i++)
+        first_pflag [i].code = 0;
 
-      for (flgidx = opcode->flags; *flgidx && lnflg; ++flgidx)
+      /* Check the flags.  Iterate over the valid flag classes.  */
+      for (flgidx = opcode->flags; *flgidx; ++flgidx)
 	{
 	  /* Get a valid flag class.  */
 	  const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
 	  const unsigned *flgopridx;
+	  int cl_matches = 0;
 
 	  for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
 	    {
 	      const struct arc_flag_operand *flg_operand;
 	      struct arc_flags *pflag = first_pflag;
-	      int i;
 
 	      flg_operand = &arc_flag_operands[*flgopridx];
 	      for (i = 0; i < nflgs; i++, pflag++)
@@ -1589,13 +1620,20 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 		  /* Match against the parsed flags.  */
 		  if (!strcmp (flg_operand->name, pflag->name))
 		    {
-		      /*TODO: Check if it is duplicated.  */
+		      if (pflag->code != 0)
+			goto match_failed;
+		      cl_matches++;
 		      pflag->code = *flgopridx;
 		      lnflg--;
 		      break; /* goto next flag class and parsed flag.  */
 		    }
 		}
 	    }
+
+	  if (cl_flags->class == F_CLASS_REQUIRED && cl_matches == 0)
+	    goto match_failed;
+	  if (cl_flags->class == F_CLASS_OPTIONAL && cl_matches > 1)
+	    goto match_failed;
 	}
       /* Did I check all the parsed flags?  */
       if (lnflg)
@@ -2087,6 +2125,9 @@ void
 md_begin (void)
 {
   unsigned int i;
+
+  if (!mach_type_specified_p)
+    arc_select_cpu ("arc700");
 
   /* The endianness can be chosen "at the factory".  */
   target_big_endian = byte_order == BIG_ENDIAN;
@@ -2807,7 +2848,7 @@ md_undefined_symbol (char *name)
    of LITTLENUMS emitted is stored in *sizeP.  An error message is
    returned, or NULL on OK.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
@@ -2872,10 +2913,8 @@ arc_parse_name (const char *name,
    arc700, av2em, av2hs.  */
 
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
-  int cpu_flags = EF_ARC_CPU_GENERIC;
-
   switch (c)
     {
     case OPTION_ARC600:
@@ -2893,37 +2932,8 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_MCPU:
       {
-	int i;
-	char *s = alloca (strlen (arg) + 1);
-
-	{
-	  char *t = s;
-	  char *arg1 = arg;
-
-	  do
-	    *t = TOLOWER (*arg1++);
-	  while (*t++);
-	}
-
-	for (i = 0; cpu_types[i].name; ++i)
-	  {
-	    if (!strcmp (cpu_types[i].name, s))
-	      {
-		arc_target      = cpu_types[i].flags;
-		arc_target_name = cpu_types[i].name;
-		arc_features    = cpu_types[i].features;
-		arc_mach_type   = cpu_types[i].mach;
-		cpu_flags       = cpu_types[i].eflags;
-
-		mach_type_specified_p = 1;
-		break;
-	      }
-	  }
-
-	if (!cpu_types[i].name)
-	  {
-	    as_fatal (_("unknown architecture: %s\n"), arg);
-	  }
+        arc_select_cpu (arg);
+        mach_type_specified_p = 1;
 	break;
       }
 
@@ -2976,9 +2986,6 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
     default:
       return 0;
     }
-
-  if (cpu_flags != EF_ARC_CPU_GENERIC)
-    arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
 
   return 1;
 }
@@ -3660,6 +3667,7 @@ check_zol (symbolS *s)
 end of the ZOL label @%s"), S_GET_NAME (s));
 
       /* Fall through.  */
+    case bfd_mach_arc_nps400:
     case bfd_mach_arc_arc700:
       if (arc_last_insns[0].has_delay_slot)
 	as_bad (_("An illegal use of delay slot detected at the end of the ZOL label @%s"),

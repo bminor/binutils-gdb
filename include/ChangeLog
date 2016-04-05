@@ -1,3 +1,52 @@
+2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * opcode/arc.h (insn_subclass_t): Add QUARKSE subclass.
+        (FIELDA, FIELDB, FIELDC, FIELDF, FIELDQ, INSN3OP, INSN2OP)
+        (INSN2OP, INSN3OP_ABC, INSN3OP_ALC, INSN3OP_ABL, INSN3OP_ALL)
+        (INSN3OP_0BC, INSN3OP_0LC, INSN3OP_0BL, INSN3OP_0LL, INSN3OP_ABU)
+        (INSN3OP_ALU, INSN3OP_0BU, INSN3OP_0LU, INSN3OP_BBS, INSN3OP_0LS)
+        (INSN3OP_CBBC, INSN3OP_CBBL, INSN3OP_C0LC, INSN3OP_C0LL)
+        (INSN3OP_CBBU, INSN3OP_C0LU, MINSN3OP_ABC, MINSN3OP_ALC)
+        (MINSN3OP_ABL, MINSN3OP_ALL, MINSN3OP_0BC, MINSN3OP_0LC)
+        (MINSN3OP_0BL, MINSN3OP_0LL, MINSN3OP_ABU, MINSN3OP_ALU)
+        (MINSN3OP_0BU, MINSN3OP_0LU, MINSN3OP_BBS, MINSN3OP_0LS)
+        (MINSN3OP_CBBC, MINSN3OP_CBBL, MINSN3OP_C0LC, MINSN3OP_C0LL)
+        (MINSN3OP_CBBU, MINSN3OP_C0LU, INSN2OP_BC, INSN2OP_BL, INSN2OP_0C)
+        (INSN2OP_0L INSN2OP_BU, INSN2OP_0U, MINSN2OP_BC, MINSN2OP_BL)
+        (MINSN2OP_0C, MINSN2OP_0L, MINSN2OP_BU, MINSN2OP_0U): Define.
+
+2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* opcode/i960.h: Add const qualifiers.
+	* opcode/tic4x.h (struct tic4x_inst): Likewise.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcodes/arc.h (insn_class_t): Add BITOP type.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h (flag_class_t): Remove all old flag classes, add 3
+	new classes instead.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/arc.h (E_ARC_MACH_NPS400): Define.
+	* opcode/arc.h (ARC_OPCODE_NPS400): Define.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/arc.h (EF_ARC_CPU_GENERIC): Delete.  Update related comment.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/arc.h (EF_ARC_MACH): Delete.
+	(EF_ARC_MACH_MSK): Remove out of date comment.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h (ARC_OPCODE_BASE): Delete.
+
 2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19807

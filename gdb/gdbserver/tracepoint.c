@@ -108,7 +108,7 @@ trace_vdebug (const char *fmt, ...)
 # define gdb_trampoline_buffer_end IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer_end)
 # define gdb_trampoline_buffer_error IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer_error)
 # define collecting IPA_SYM_EXPORTED_NAME (collecting)
-# define gdb_collect IPA_SYM_EXPORTED_NAME (gdb_collect)
+# define gdb_collect_ptr IPA_SYM_EXPORTED_NAME (gdb_collect_ptr)
 # define stop_tracing IPA_SYM_EXPORTED_NAME (stop_tracing)
 # define flush_trace_buffer IPA_SYM_EXPORTED_NAME (flush_trace_buffer)
 # define about_to_request_buffer_space IPA_SYM_EXPORTED_NAME (about_to_request_buffer_space)
@@ -126,11 +126,11 @@ trace_vdebug (const char *fmt, ...)
 # define traceframe_write_count IPA_SYM_EXPORTED_NAME (traceframe_write_count)
 # define traceframes_created IPA_SYM_EXPORTED_NAME (traceframes_created)
 # define trace_state_variables IPA_SYM_EXPORTED_NAME (trace_state_variables)
-# define get_raw_reg IPA_SYM_EXPORTED_NAME (get_raw_reg)
-# define get_trace_state_variable_value \
-  IPA_SYM_EXPORTED_NAME (get_trace_state_variable_value)
-# define set_trace_state_variable_value \
-  IPA_SYM_EXPORTED_NAME (set_trace_state_variable_value)
+# define get_raw_reg_ptr IPA_SYM_EXPORTED_NAME (get_raw_reg_ptr)
+# define get_trace_state_variable_value_ptr \
+  IPA_SYM_EXPORTED_NAME (get_trace_state_variable_value_ptr)
+# define set_trace_state_variable_value_ptr \
+  IPA_SYM_EXPORTED_NAME (set_trace_state_variable_value_ptr)
 # define ust_loaded IPA_SYM_EXPORTED_NAME (ust_loaded)
 # define helper_thread_id IPA_SYM_EXPORTED_NAME (helper_thread_id)
 # define cmd_buf IPA_SYM_EXPORTED_NAME (cmd_buf)
@@ -150,7 +150,7 @@ struct ipa_sym_addresses
   CORE_ADDR addr_gdb_trampoline_buffer_end;
   CORE_ADDR addr_gdb_trampoline_buffer_error;
   CORE_ADDR addr_collecting;
-  CORE_ADDR addr_gdb_collect;
+  CORE_ADDR addr_gdb_collect_ptr;
   CORE_ADDR addr_stop_tracing;
   CORE_ADDR addr_flush_trace_buffer;
   CORE_ADDR addr_about_to_request_buffer_space;
@@ -168,9 +168,9 @@ struct ipa_sym_addresses
   CORE_ADDR addr_traceframe_write_count;
   CORE_ADDR addr_traceframes_created;
   CORE_ADDR addr_trace_state_variables;
-  CORE_ADDR addr_get_raw_reg;
-  CORE_ADDR addr_get_trace_state_variable_value;
-  CORE_ADDR addr_set_trace_state_variable_value;
+  CORE_ADDR addr_get_raw_reg_ptr;
+  CORE_ADDR addr_get_trace_state_variable_value_ptr;
+  CORE_ADDR addr_set_trace_state_variable_value_ptr;
   CORE_ADDR addr_ust_loaded;
   CORE_ADDR addr_ipa_tdesc_idx;
 };
@@ -187,7 +187,7 @@ static struct
   IPA_SYM(gdb_trampoline_buffer_end),
   IPA_SYM(gdb_trampoline_buffer_error),
   IPA_SYM(collecting),
-  IPA_SYM(gdb_collect),
+  IPA_SYM(gdb_collect_ptr),
   IPA_SYM(stop_tracing),
   IPA_SYM(flush_trace_buffer),
   IPA_SYM(about_to_request_buffer_space),
@@ -205,9 +205,9 @@ static struct
   IPA_SYM(traceframe_write_count),
   IPA_SYM(traceframes_created),
   IPA_SYM(trace_state_variables),
-  IPA_SYM(get_raw_reg),
-  IPA_SYM(get_trace_state_variable_value),
-  IPA_SYM(set_trace_state_variable_value),
+  IPA_SYM(get_raw_reg_ptr),
+  IPA_SYM(get_trace_state_variable_value_ptr),
+  IPA_SYM(set_trace_state_variable_value_ptr),
   IPA_SYM(ust_loaded),
   IPA_SYM(ipa_tdesc_idx),
 };
@@ -215,6 +215,34 @@ static struct
 static struct ipa_sym_addresses ipa_sym_addrs;
 
 static int read_inferior_integer (CORE_ADDR symaddr, int *val);
+
+#if !defined HAVE_GETAUXVAL && defined IN_PROCESS_AGENT
+/* Retrieve the value of TYPE from the auxiliary vector.  If TYPE is not
+   found, 0 is returned.  This function is provided if glibc is too old.  */
+
+unsigned long
+getauxval (unsigned long type)
+{
+  unsigned long data[2];
+  FILE *f = fopen ("/proc/self/auxv", "r");
+  unsigned long value = 0;
+
+  if (f == NULL)
+    return 0;
+
+  while (fread (data, sizeof (data), 1, f) > 0)
+    {
+      if (data[0] == type)
+	{
+	  value = data[1];
+	  break;
+	}
+    }
+
+  fclose (f);
+  return value;
+}
+#endif
 
 /* Returns true if both the in-process agent library and the static
    tracepoints libraries are loaded in the inferior, and agent has
@@ -2783,7 +2811,7 @@ cmd_qtenable_disable (char *own_buf, int enable)
 	      write_enn (own_buf);
 	      return;
 	    }
-	  
+
 	  ret = write_inferior_integer (obj_addr, enable);
 	  done_accessing_memory ();
 	  
@@ -3068,6 +3096,7 @@ install_fast_tracepoint (struct tracepoint *tpoint, char *errbuf)
 {
   CORE_ADDR jentry, jump_entry;
   CORE_ADDR trampoline;
+  CORE_ADDR collect;
   ULONGEST trampoline_size;
   int err = 0;
   /* The jump to the jump pad of the last fast tracepoint
@@ -3082,6 +3111,13 @@ install_fast_tracepoint (struct tracepoint *tpoint, char *errbuf)
       return 0;
     }
 
+  if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_collect_ptr,
+				  &collect))
+    {
+      error ("error extracting gdb_collect_ptr");
+      return 1;
+    }
+
   jentry = jump_entry = get_jump_space_head ();
 
   trampoline = 0;
@@ -3090,7 +3126,7 @@ install_fast_tracepoint (struct tracepoint *tpoint, char *errbuf)
   /* Install the jump pad.  */
   err = install_fast_tracepoint_jump_pad (tpoint->obj_addr_on_target,
 					  tpoint->address,
-					  ipa_sym_addrs.addr_gdb_collect,
+					  collect,
 					  ipa_sym_addrs.addr_collecting,
 					  tpoint->orig_size,
 					  &jentry,
@@ -5856,6 +5892,25 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
     }
 }
 
+/* These global variables points to the corresponding functions.  This is
+   necessary on powerpc64, where asking for function symbol address from gdb
+   results in returning the actual code pointer, instead of the descriptor
+   pointer.  */
+
+typedef void (*gdb_collect_ptr_type) (struct tracepoint *, unsigned char *);
+typedef ULONGEST (*get_raw_reg_ptr_type) (const unsigned char *, int);
+typedef LONGEST (*get_trace_state_variable_value_ptr_type) (int);
+typedef void (*set_trace_state_variable_value_ptr_type) (int, LONGEST);
+
+EXTERN_C_PUSH
+IP_AGENT_EXPORT_VAR gdb_collect_ptr_type gdb_collect_ptr = gdb_collect;
+IP_AGENT_EXPORT_VAR get_raw_reg_ptr_type get_raw_reg_ptr = get_raw_reg;
+IP_AGENT_EXPORT_VAR get_trace_state_variable_value_ptr_type
+  get_trace_state_variable_value_ptr = get_trace_state_variable_value;
+IP_AGENT_EXPORT_VAR set_trace_state_variable_value_ptr_type
+  set_trace_state_variable_value_ptr = set_trace_state_variable_value;
+EXTERN_C_POP
+
 #endif
 
 #ifndef IN_PROCESS_AGENT
@@ -5863,19 +5918,39 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
 CORE_ADDR
 get_raw_reg_func_addr (void)
 {
-  return ipa_sym_addrs.addr_get_raw_reg;
+  CORE_ADDR res;
+  if (read_inferior_data_pointer (ipa_sym_addrs.addr_get_raw_reg_ptr, &res))
+    {
+      error ("error extracting get_raw_reg_ptr");
+      return 0;
+    }
+  return res;
 }
 
 CORE_ADDR
 get_get_tsv_func_addr (void)
 {
-  return ipa_sym_addrs.addr_get_trace_state_variable_value;
+  CORE_ADDR res;
+  if (read_inferior_data_pointer (
+	ipa_sym_addrs.addr_get_trace_state_variable_value_ptr, &res))
+    {
+      error ("error extracting get_trace_state_variable_value_ptr");
+      return 0;
+    }
+  return res;
 }
 
 CORE_ADDR
 get_set_tsv_func_addr (void)
 {
-  return ipa_sym_addrs.addr_set_trace_state_variable_value;
+  CORE_ADDR res;
+  if (read_inferior_data_pointer (
+	ipa_sym_addrs.addr_set_trace_state_variable_value_ptr, &res))
+    {
+      error ("error extracting set_trace_state_variable_value_ptr");
+      return 0;
+    }
+  return res;
 }
 
 static void
@@ -7353,35 +7428,22 @@ initialize_tracepoint (void)
 
 #ifdef IN_PROCESS_AGENT
   {
-    uintptr_t addr;
     int pagesize;
+    size_t jump_pad_size;
 
     pagesize = sysconf (_SC_PAGE_SIZE);
     if (pagesize == -1)
       perror_with_name ("sysconf");
 
-    gdb_tp_heap_buffer = (char *) xmalloc (5 * 1024 * 1024);
-
 #define SCRATCH_BUFFER_NPAGES 20
 
-    /* Allocate scratch buffer aligned on a page boundary, at a low
-       address (close to the main executable's code).  */
-    for (addr = pagesize; addr != 0; addr += pagesize)
-      {
-	gdb_jump_pad_buffer
-	  = (char *) mmap ((void *) addr,
-			   pagesize * SCRATCH_BUFFER_NPAGES,
-			   PROT_READ | PROT_WRITE | PROT_EXEC,
-			   MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-			   -1, 0);
-	if (gdb_jump_pad_buffer != MAP_FAILED)
-	  break;
-      }
+    jump_pad_size = pagesize * SCRATCH_BUFFER_NPAGES;
 
-    if (addr == 0)
+    gdb_tp_heap_buffer = (char *) xmalloc (5 * 1024 * 1024);
+    gdb_jump_pad_buffer = (char *) alloc_jump_pad_buffer (jump_pad_size);
+    if (gdb_jump_pad_buffer == NULL)
       perror_with_name ("mmap");
-
-    gdb_jump_pad_buffer_end = gdb_jump_pad_buffer + pagesize * SCRATCH_BUFFER_NPAGES;
+    gdb_jump_pad_buffer_end = gdb_jump_pad_buffer + jump_pad_size;
   }
 
   gdb_trampoline_buffer = gdb_trampoline_buffer_end = 0;

@@ -19,6 +19,6 @@
 if [istarget arc*-*-*] {
     load_lib gas-dg.exp
     dg-init
-    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/*warn*.s $srcdir/$subdir/*err*.s]] "" ""
+    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/*warn*.s $srcdir/$subdir/*err.s]] "" ""
     dg-finish
 }

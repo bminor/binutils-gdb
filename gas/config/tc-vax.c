@@ -2210,7 +2210,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -2388,8 +2388,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #undef F
 #undef MAP
 
-  reloc = xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 #ifndef OBJ_ELF
@@ -3403,7 +3403,7 @@ vax_cons_fix_new (fragS *frag, int where, unsigned int nbytes, expressionS *exp,
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
 }
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return vax_md_atof (type, litP, sizeP);

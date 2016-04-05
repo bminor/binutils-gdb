@@ -220,12 +220,12 @@ md_show_usage (FILE * stream)
 
 int
 md_parse_option (int c ATTRIBUTE_UNUSED,
-		 char *arg ATTRIBUTE_UNUSED)
+		 const char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, FALSE);
@@ -294,8 +294,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	}
     }
 
-  rel = xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   rel->addend = fixp->fx_offset;

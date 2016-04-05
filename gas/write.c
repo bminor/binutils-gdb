@@ -360,9 +360,6 @@ record_alignment (/* Segment to which alignment pertains.  */
   if (seg == absolute_section)
     return;
 
-  if (align <= OCTETS_PER_BYTE_POWER)
-    return;
-
   if (align > bfd_get_section_alignment (stdoutput, seg))
     bfd_set_section_alignment (stdoutput, seg, align);
 }

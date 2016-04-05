@@ -300,8 +300,8 @@ tdesc_start_enum (struct gdb_xml_parser *parser,
 		  const struct gdb_xml_element *element,
 		  void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct tdesc_parsing_data *data = user_data;
-  char *id = xml_find_attribute (attributes, "id")->value;
+  struct tdesc_parsing_data *data = (struct tdesc_parsing_data *) user_data;
+  char *id = (char *) xml_find_attribute (attributes, "id")->value;
   int size = * (ULONGEST *)
     xml_find_attribute (attributes, "size")->value;
   struct tdesc_type *type;

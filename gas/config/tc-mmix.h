@@ -32,12 +32,6 @@ extern const char mmix_comment_chars[];
 extern const char mmix_symbol_chars[];
 #define tc_symbol_chars mmix_symbol_chars
 
-extern const char mmix_exp_chars[];
-#define EXP_CHARS mmix_exp_chars
-
-extern const char mmix_flt_chars[];
-#define FLT_CHARS mmix_flt_chars
-
 /* "@" is a synonym for ".".  */
 #define LEX_AT (LEX_BEGIN_NAME)
 

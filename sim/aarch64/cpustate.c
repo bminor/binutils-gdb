@@ -34,13 +34,13 @@ aarch64_set_reg_u64 (sim_cpu *cpu, GReg reg, int r31_is_sp, uint64_t val)
 {
   if (reg == R31 && ! r31_is_sp)
     {
-      TRACE_REGISTER (cpu, "  GR[31] NOT CHANGED!");
+      TRACE_REGISTER (cpu, "GR[31] NOT CHANGED!");
       return;
     }
 
   if (val != cpu->gr[reg].u64)
     TRACE_REGISTER (cpu,
-		    "  GR[%2d] changes from %16" PRIx64 " to %16" PRIx64,
+		    "GR[%2d] changes from %16" PRIx64 " to %16" PRIx64,
 		    reg, cpu->gr[reg].u64, val);
 
   cpu->gr[reg].u64 = val;
@@ -51,13 +51,13 @@ aarch64_set_reg_s64 (sim_cpu *cpu, GReg reg, int r31_is_sp, int64_t val)
 {
   if (reg == R31 && ! r31_is_sp)
     {
-      TRACE_REGISTER (cpu, "  GR[31] NOT CHANGED!");
+      TRACE_REGISTER (cpu, "GR[31] NOT CHANGED!");
       return;
     }
 
   if (val != cpu->gr[reg].s64)
     TRACE_REGISTER (cpu,
-		    "  GR[%2d] changes from %16" PRIx64 " to %16" PRIx64,
+		    "GR[%2d] changes from %16" PRIx64 " to %16" PRIx64,
 		    reg, cpu->gr[reg].s64, val);
 
   cpu->gr[reg].s64 = val;
@@ -85,6 +85,46 @@ int32_t
 aarch64_get_reg_s32 (sim_cpu *cpu, GReg reg, int r31_is_sp)
 {
   return cpu->gr[reg_num(reg)].s32;
+}
+
+void
+aarch64_set_reg_s32 (sim_cpu *cpu, GReg reg, int r31_is_sp, int32_t val)
+{
+  if (reg == R31 && ! r31_is_sp)
+    {
+      TRACE_REGISTER (cpu, "GR[31] NOT CHANGED!");
+      return;
+    }
+
+  if (val != cpu->gr[reg].s32)
+    TRACE_REGISTER (cpu, "GR[%2d] changes from %8x to %8x",
+		    reg, cpu->gr[reg].s32, val);
+
+  /* The ARM ARM states that (C1.2.4):
+        When the data size is 32 bits, the lower 32 bits of the
+	register are used and the upper 32 bits are ignored on
+	a read and cleared to zero on a write.
+     We simulate this by first clearing the whole 64-bits and
+     then writing to the 32-bit value in the GRegister union.  */
+  cpu->gr[reg].s64 = 0;
+  cpu->gr[reg].s32 = val;
+}
+
+void
+aarch64_set_reg_u32 (sim_cpu *cpu, GReg reg, int r31_is_sp, uint32_t val)
+{
+  if (reg == R31 && ! r31_is_sp)
+    {
+      TRACE_REGISTER (cpu, "GR[31] NOT CHANGED!");
+      return;
+    }
+
+  if (val != cpu->gr[reg].u32)
+    TRACE_REGISTER (cpu, "GR[%2d] changes from %8x to %8x",
+		    reg, cpu->gr[reg].u32, val);
+
+  cpu->gr[reg].u64 = 0;
+  cpu->gr[reg].u32 = val;
 }
 
 uint32_t
@@ -128,7 +168,7 @@ aarch64_set_next_PC (sim_cpu *cpu, uint64_t next)
 {
   if (next != cpu->nextpc + 4)
     TRACE_REGISTER (cpu,
-		    "  NextPC changes from %16" PRIx64 " to %16" PRIx64,
+		    "NextPC changes from %16" PRIx64 " to %16" PRIx64,
 		    cpu->nextpc, next);
 
   cpu->nextpc = next;
@@ -139,7 +179,7 @@ aarch64_set_next_PC_by_offset (sim_cpu *cpu, int64_t offset)
 {
   if (cpu->pc + offset != cpu->nextpc + 4)
     TRACE_REGISTER (cpu,
-		    "  NextPC changes from %16" PRIx64 " to %16" PRIx64,
+		    "NextPC changes from %16" PRIx64 " to %16" PRIx64,
 		    cpu->nextpc, cpu->pc + offset);
 
   cpu->nextpc = cpu->pc + offset;
@@ -163,7 +203,7 @@ aarch64_save_LR (sim_cpu *cpu)
 {
   if (cpu->gr[LR].u64 != cpu->nextpc)
     TRACE_REGISTER (cpu,
-		    "  LR    changes from %16" PRIx64 " to %16" PRIx64,
+		    "LR    changes from %16" PRIx64 " to %16" PRIx64,
 		    cpu->gr[LR].u64, cpu->nextpc);
 
   cpu->gr[LR].u64 = cpu->nextpc;
@@ -209,11 +249,11 @@ aarch64_set_CPSR (sim_cpu *cpu, uint32_t new_flags)
     {
       if (cpu->CPSR != new_flags)
 	TRACE_REGISTER (cpu,
-			"  CPSR changes from %s to %s",
+			"CPSR changes from %s to %s",
 			decode_cpsr (cpu->CPSR), decode_cpsr (new_flags));
       else
 	TRACE_REGISTER (cpu,
-			"  CPSR stays at %s", decode_cpsr (cpu->CPSR));
+			"CPSR stays at %s", decode_cpsr (cpu->CPSR));
     }
 
   cpu->CPSR = new_flags & CPSR_ALL_FLAGS;
@@ -238,7 +278,7 @@ aarch64_set_CPSR_bits (sim_cpu *cpu, uint32_t mask, uint32_t value)
 
   if (old_flags != cpu->CPSR)
     TRACE_REGISTER (cpu,
-		    "  CPSR changes from %s to %s",
+		    "CPSR changes from %s to %s",
 		    decode_cpsr (old_flags), decode_cpsr (cpu->CPSR));
 }
 
@@ -259,7 +299,7 @@ aarch64_set_CPSR_bit (sim_cpu *cpu, FlagMask bit)
 
   if (old_flags != cpu->CPSR)
     TRACE_REGISTER (cpu,
-		    "  CPSR changes from %s to %s",
+		    "CPSR changes from %s to %s",
 		    decode_cpsr (old_flags), decode_cpsr (cpu->CPSR));
 }
 
@@ -273,9 +313,24 @@ aarch64_clear_CPSR_bit (sim_cpu *cpu, FlagMask bit)
 
   if (old_flags != cpu->CPSR)
     TRACE_REGISTER (cpu,
-		    "  CPSR changes from %s to %s",
+		    "CPSR changes from %s to %s",
 		    decode_cpsr (old_flags), decode_cpsr (cpu->CPSR));
 }
+
+float
+aarch64_get_FP_half (sim_cpu *cpu, VReg reg)
+{
+  union
+  {
+    uint16_t h[2];
+    float    f;
+  } u;
+
+  u.h[0] = 0;
+  u.h[1] = cpu->fr[reg].h[0];
+  return u.f;
+}
+
 
 float
 aarch64_get_FP_float (sim_cpu *cpu, VReg reg)
@@ -297,12 +352,32 @@ aarch64_get_FP_long_double (sim_cpu *cpu, VReg reg, FRegister *a)
 }
 
 void
+aarch64_set_FP_half (sim_cpu *cpu, VReg reg, float val)
+{
+  union
+  {
+    uint16_t h[2];
+    float    f;
+  } u;
+
+  u.f = val;
+  cpu->fr[reg].h[0] = u.h[1];
+  cpu->fr[reg].h[1] = 0;
+}
+
+
+void
 aarch64_set_FP_float (sim_cpu *cpu, VReg reg, float val)
 {
   if (val != cpu->fr[reg].s)
-    TRACE_REGISTER (cpu,
-		    "  FR[%d] changes from %f to %f",
-		    reg, cpu->fr[reg].s, val);
+    {
+      FRegister v;
+
+      v.s = val;
+      TRACE_REGISTER (cpu,
+		      "FR[%d].s changes from %f to %f [hex: %0lx]",
+		      reg, cpu->fr[reg].s, val, v.v[0]);
+    }
 
   cpu->fr[reg].s = val;
 }
@@ -311,10 +386,14 @@ void
 aarch64_set_FP_double (sim_cpu *cpu, VReg reg, double val)
 {
   if (val != cpu->fr[reg].d)
-    TRACE_REGISTER (cpu,
-		    "  FR[%d] changes from %f to %f",
-		    reg, cpu->fr[reg].d, val);
+    {
+      FRegister v;
 
+      v.d = val;
+      TRACE_REGISTER (cpu,
+		      "FR[%d].d changes from %f to %f [hex: %0lx]",
+		      reg, cpu->fr[reg].d, val, v.v[0]);
+    }
   cpu->fr[reg].d = val;
 }
 
@@ -324,7 +403,7 @@ aarch64_set_FP_long_double (sim_cpu *cpu, VReg reg, FRegister a)
   if (cpu->fr[reg].v[0] != a.v[0]
       || cpu->fr[reg].v[1] != a.v[1])
     TRACE_REGISTER (cpu,
-		    "  FR[%d] changes from [%0lx %0lx] to [%lx %lx] ",
+		    "FR[%d].q changes from [%0lx %0lx] to [%0lx %0lx] ",
 		    reg,
 		    cpu->fr[reg].v[0], cpu->fr[reg].v[1],
 		    a.v[0], a.v[1]);
@@ -333,82 +412,161 @@ aarch64_set_FP_long_double (sim_cpu *cpu, VReg reg, FRegister a)
   cpu->fr[reg].v[1] = a.v[1];
 }
 
+#define GET_VEC_ELEMENT(REG, ELEMENT, FIELD)	   \
+  do						   \
+    {						   \
+      if (ELEMENT >= ARRAY_SIZE (cpu->fr[0].FIELD)) \
+	{								\
+	  TRACE_REGISTER (cpu, \
+			  "Internal SIM error: invalid element number: %d ",\
+			  ELEMENT);					\
+	  sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu), \
+			   sim_stopped, SIM_SIGBUS);			\
+	}								\
+      return cpu->fr[REG].FIELD [ELEMENT];				\
+    }									\
+  while (0)
+
 uint64_t
 aarch64_get_vec_u64 (sim_cpu *cpu, VReg reg, unsigned element)
 {
-  return cpu->fr[reg].v[element];
+  GET_VEC_ELEMENT (reg, element, v);
 }
 
 uint32_t
-aarch64_get_vec_u32 (sim_cpu *cpu, VReg regno, unsigned element)
+aarch64_get_vec_u32 (sim_cpu *cpu, VReg reg, unsigned element)
 {
-  return cpu->fr[regno].w[element];
+  GET_VEC_ELEMENT (reg, element, w);
 }
 
 uint16_t
-aarch64_get_vec_u16 (sim_cpu *cpu, VReg regno, unsigned element)
+aarch64_get_vec_u16 (sim_cpu *cpu, VReg reg, unsigned element)
 {
-  return cpu->fr[regno].h[element];
+  GET_VEC_ELEMENT (reg, element, h);
 }
 
 uint8_t
-aarch64_get_vec_u8 (sim_cpu *cpu, VReg regno, unsigned element)
+aarch64_get_vec_u8 (sim_cpu *cpu, VReg reg, unsigned element)
 {
-  return cpu->fr[regno].b[element];
+  GET_VEC_ELEMENT (reg, element, b);
+}
+
+int64_t
+aarch64_get_vec_s64 (sim_cpu *cpu, VReg reg, unsigned element)
+{
+  GET_VEC_ELEMENT (reg, element, V);
+}
+
+int32_t
+aarch64_get_vec_s32 (sim_cpu *cpu, VReg reg, unsigned element)
+{
+  GET_VEC_ELEMENT (reg, element, W);
+}
+
+int16_t
+aarch64_get_vec_s16 (sim_cpu *cpu, VReg reg, unsigned element)
+{
+  GET_VEC_ELEMENT (reg, element, H);
+}
+
+int8_t
+aarch64_get_vec_s8 (sim_cpu *cpu, VReg reg, unsigned element)
+{
+  GET_VEC_ELEMENT (reg, element, B);
+}
+
+float
+aarch64_get_vec_float (sim_cpu *cpu, VReg reg, unsigned element)
+{
+  GET_VEC_ELEMENT (reg, element, S);
+}
+
+double
+aarch64_get_vec_double (sim_cpu *cpu, VReg reg, unsigned element)
+{
+  GET_VEC_ELEMENT (reg, element, D);
+}
+
+
+#define SET_VEC_ELEMENT(REG, ELEMENT, VAL, FIELD, PRINTER)		\
+  do									\
+    {									\
+      if (ELEMENT >= ARRAY_SIZE (cpu->fr[0].FIELD))			\
+	{								\
+	  TRACE_REGISTER (cpu,						\
+			  "Internal SIM error: invalid element number: %d ",\
+			  ELEMENT);					\
+	  sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu), \
+			   sim_stopped, SIM_SIGBUS);			\
+	}								\
+      if (VAL != cpu->fr[REG].FIELD [ELEMENT])				\
+	TRACE_REGISTER (cpu,						\
+			"VR[%2d]." #FIELD " [%d] changes from " PRINTER \
+			" to " PRINTER , REG,				\
+			ELEMENT, cpu->fr[REG].FIELD [ELEMENT], VAL);	\
+									\
+      cpu->fr[REG].FIELD [ELEMENT] = VAL;				\
+    }									\
+  while (0)
+
+void
+aarch64_set_vec_u64 (sim_cpu *cpu, VReg reg, unsigned element, uint64_t val)
+{
+  SET_VEC_ELEMENT (reg, element, val, v, "%16lx");
 }
 
 void
-aarch64_set_vec_u64 (sim_cpu *  cpu,
-		     VReg       regno,
-		     unsigned   element,
-		     uint64_t   value)
+aarch64_set_vec_u32 (sim_cpu *cpu, VReg reg, unsigned element, uint32_t val)
 {
-  if (value != cpu->fr[regno].v[element])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<long>[%d] changes from %16" PRIx64
-		    " to %16" PRIx64,
-		    regno, element, cpu->fr[regno].v[element], value);
-
-  cpu->fr[regno].v[element] = value;
+  SET_VEC_ELEMENT (reg, element, val, w, "%8x");
 }
 
 void
-aarch64_set_vec_u32 (sim_cpu *  cpu,
-		     VReg       regno,
-		     unsigned   element,
-		     uint32_t   value)
+aarch64_set_vec_u16 (sim_cpu *cpu, VReg reg, unsigned element, uint16_t val)
 {
-  if (value != cpu->fr[regno].w[element])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<word>[%d] changes from %8x to %8x",
-		    regno, element, cpu->fr[regno].w[element], value);
-
-  cpu->fr[regno].w[element] = value;
+  SET_VEC_ELEMENT (reg, element, val, h, "%4x");
 }
 
 void
-aarch64_set_vec_u16 (sim_cpu *  cpu,
-		     VReg       regno,
-		     unsigned   element,
-		     uint16_t   value)
+aarch64_set_vec_u8 (sim_cpu *cpu, VReg reg, unsigned element, uint8_t val)
 {
-  if (value != cpu->fr[regno].h[element])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<half>[%d] changes from %4x to %4x",
-		    regno, element, cpu->fr[regno].h[element], value);
-
-  cpu->fr[regno].h[element] = value;
+  SET_VEC_ELEMENT (reg, element, val, b, "%x");
 }
 
 void
-aarch64_set_vec_u8 (sim_cpu *cpu, VReg regno, unsigned element, uint8_t value)
+aarch64_set_vec_s64 (sim_cpu *cpu, VReg reg, unsigned element, int64_t val)
 {
-  if (value != cpu->fr[regno].b[element])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<byte>[%d] changes from %x to %x",
-		    regno, element, cpu->fr[regno].b[element], value);
+  SET_VEC_ELEMENT (reg, element, val, V, "%16lx");
+}
 
-  cpu->fr[regno].b[element] = value;
+void
+aarch64_set_vec_s32 (sim_cpu *cpu, VReg reg, unsigned element, int32_t val)
+{
+  SET_VEC_ELEMENT (reg, element, val, W, "%8x");
+}
+
+void
+aarch64_set_vec_s16 (sim_cpu *cpu, VReg reg, unsigned element, int16_t val)
+{
+  SET_VEC_ELEMENT (reg, element, val, H, "%4x");
+}
+
+void
+aarch64_set_vec_s8 (sim_cpu *cpu, VReg reg, unsigned element, int8_t val)
+{
+  SET_VEC_ELEMENT (reg, element, val, B, "%x");
+}
+
+void
+aarch64_set_vec_float (sim_cpu *cpu, VReg reg, unsigned element, float val)
+{
+  SET_VEC_ELEMENT (reg, element, val, S, "%f");
+}
+
+void
+aarch64_set_vec_double (sim_cpu *cpu, VReg reg, unsigned element, double val)
+{
+  SET_VEC_ELEMENT (reg, element, val, D, "%f");
 }
 
 void
@@ -416,7 +574,7 @@ aarch64_set_FPSR (sim_cpu *cpu, uint32_t value)
 {
   if (cpu->FPSR != value)
     TRACE_REGISTER (cpu,
-		    "  FPSR changes from %x to %x", cpu->FPSR, value);
+		    "FPSR changes from %x to %x", cpu->FPSR, value);
 
   cpu->FPSR = value & FPSR_ALL_FPSRS;
 }
@@ -438,7 +596,7 @@ aarch64_set_FPSR_bits (sim_cpu *cpu, uint32_t mask, uint32_t value)
 
   if (cpu->FPSR != old_FPSR)
     TRACE_REGISTER (cpu,
-		    "  FPSR changes from %x to %x", old_FPSR, cpu->FPSR);
+		    "FPSR changes from %x to %x", old_FPSR, cpu->FPSR);
 }
 
 uint32_t
@@ -454,104 +612,23 @@ aarch64_test_FPSR_bit (sim_cpu *cpu, FPSRMask flag)
   return cpu->FPSR & flag;
 }
 
-float
-aarch64_get_vec_float (sim_cpu *cpu, VReg v, unsigned e)
+uint64_t
+aarch64_get_thread_id (sim_cpu *cpu)
 {
-  return cpu->fr[v].S[e];
+  return cpu->tpidr;
 }
 
-double
-aarch64_get_vec_double (sim_cpu *cpu, VReg v, unsigned e)
+uint32_t
+aarch64_get_FPCR (sim_cpu *cpu)
 {
-  return cpu->fr[v].D[e];
-}
-
-void
-aarch64_set_vec_float (sim_cpu *cpu, VReg v, unsigned e, float f)
-{
-  if (f != cpu->fr[v].S[e])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<float>[%d] changes from %f to %f",
-		    v, e, cpu->fr[v].S[e], f);
-
-  cpu->fr[v].S[e] = f;
+  return cpu->FPCR;
 }
 
 void
-aarch64_set_vec_double (sim_cpu *cpu, VReg v, unsigned e, double d)
+aarch64_set_FPCR (sim_cpu *cpu, uint32_t val)
 {
-  if (d != cpu->fr[v].D[e])
+  if (cpu->FPCR != val)
     TRACE_REGISTER (cpu,
-		    "  VR[%2d].<double>[%d] changes from %f to %f",
-		    v, e, cpu->fr[v].D[e], d);
-
-  cpu->fr[v].D[e] = d;
-}
-
-int64_t
-aarch64_get_vec_s64 (sim_cpu *cpu, VReg regno, unsigned element)
-{
-  return cpu->fr[regno].V[element];
-}
-
-int32_t
-aarch64_get_vec_s32 (sim_cpu *cpu, VReg regno, unsigned element)
-{
-  return cpu->fr[regno].W[element];
-}
-
-int16_t
-aarch64_get_vec_s16 (sim_cpu *cpu, VReg regno, unsigned element)
-{
-  return cpu->fr[regno].H[element];
-}
-
-int8_t
-aarch64_get_vec_s8 (sim_cpu *cpu, VReg regno, unsigned element)
-{
-  return cpu->fr[regno].B[element];
-}
-
-void
-aarch64_set_vec_s64 (sim_cpu *cpu, VReg regno, unsigned element, int64_t value)
-{
-  if (value != cpu->fr[regno].V[element])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<long>[%d] changes from %16" PRIx64 " to %16" PRIx64,
-		    regno, element, cpu->fr[regno].V[element], value);
-
-  cpu->fr[regno].V[element] = value;
-}
-
-void
-aarch64_set_vec_s32 (sim_cpu *cpu, VReg regno, unsigned element, int32_t value)
-{
-  if (value != cpu->fr[regno].W[element])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<word>[%d] changes from %8x to %8x",
-		    regno, element, cpu->fr[regno].W[element], value);
-
-  cpu->fr[regno].W[element] = value;
-}
-
-void
-aarch64_set_vec_s16 (sim_cpu *cpu, VReg regno, unsigned element, int16_t value)
-{
-  if (value != cpu->fr[regno].H[element])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<half>[%d] changes from %4x to %4x",
-		    regno, element, cpu->fr[regno].H[element], value);
-
-  cpu->fr[regno].H[element] = value;
-}
-
-void
-aarch64_set_vec_s8 (sim_cpu *cpu, VReg regno, unsigned element, int8_t value)
-{
-  if (value != cpu->fr[regno].B[element])
-    TRACE_REGISTER (cpu,
-		    "  VR[%2d].<byte>[%d] changes from %x to %x",
-		    regno, element, cpu->fr[regno].B[element], value);
-
-  cpu->fr[regno].B[element] = value;
+		    "FPCR changes from %x to %x", cpu->FPCR, val);
+  cpu->FPCR = val;
 }

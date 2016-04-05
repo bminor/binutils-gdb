@@ -82,6 +82,8 @@ extern int disable_packet_Tthread;
 extern int disable_packet_qC;
 extern int disable_packet_qfThreadInfo;
 
+extern char *own_buf;
+
 extern int run_once;
 extern int multi_process;
 extern int report_fork_events;
@@ -113,6 +115,8 @@ typedef int gdb_fildes_t;
 #include "event-loop.h"
 
 /* Functions from server.c.  */
+extern void handle_v_requests (char *own_buf, int packet_len,
+			       int *new_packet_len);
 extern int handle_serial_event (int err, gdb_client_data client_data);
 extern int handle_target_event (int err, gdb_client_data client_data);
 

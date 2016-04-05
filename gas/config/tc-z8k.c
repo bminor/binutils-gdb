@@ -162,7 +162,7 @@ md_begin (void)
   for (idx = 0; md_pseudo_table[idx].poc_name; idx++)
     {
       opcode_entry_type *fake_opcode;
-      fake_opcode = (opcode_entry_type *) malloc (sizeof (opcode_entry_type));
+      fake_opcode = XNEW (opcode_entry_type);
       fake_opcode->name = md_pseudo_table[idx].poc_name;
       fake_opcode->func = (void *) (md_pseudo_table + idx);
       fake_opcode->opcode = 250;
@@ -1285,7 +1285,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 
 /* Various routines to kill one day.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);
@@ -1303,7 +1303,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -1357,8 +1357,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
 {
   arelent *reloc;
 
-  reloc = xmalloc (sizeof (*reloc));
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->addend = fixp->fx_offset;

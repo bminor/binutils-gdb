@@ -825,21 +825,23 @@ message (int level, const char *format, ...)
       break;
     case LDPL_WARNING:
       {
-	char *newfmt = ACONCAT (("%P: warning: ", format, "\n",
-				 (const char *) NULL));
+	char *newfmt = concat ("%P: warning: ", format, "\n",
+			       (const char *) NULL);
 	vfinfo (stdout, newfmt, args, TRUE);
+	free (newfmt);
       }
       break;
     case LDPL_FATAL:
     case LDPL_ERROR:
     default:
       {
-	char *newfmt = ACONCAT ((level == LDPL_FATAL ? "%P%F" : "%P%X",
-				 ": error: ", format, "\n",
-				 (const char *) NULL));
+	char *newfmt = concat (level == LDPL_FATAL ? "%P%F" : "%P%X",
+			       ": error: ", format, "\n",
+			       (const char *) NULL);
 	fflush (stdout);
 	vfinfo (stderr, newfmt, args, TRUE);
 	fflush (stderr);
+	free (newfmt);
       }
       break;
     }

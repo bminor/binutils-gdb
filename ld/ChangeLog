@@ -1,3 +1,92 @@
+2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19827
+	* testsuite/ld-i386/pr19827-nacl.rd: New file.
+	* testsuite/ld-x86-64/pr19827-nacl.rd: Likewise.
+
+2016-04-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 19803
+	* emultempl/pe.em (change_undef): New function.  Encapsulates
+	duplicated code in pe_fixup_stdcalls and adds the newly defined
+	sym to the gc root list.
+	(pe_fixup_stdcall): Use the new function.
+	* pe-dll.c (process_def_file_and_drectve); Add alias of exported
+	symbol to gc root list.
+
+2016-03-31  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (TO_ADDR, TO_SIZE, opb_shift): Move earlier in file.
+	(lang_insert_orphan): Use TO_ADDR in __stop sym calculation.
+	(print_input_section): Don't use TO_ADDR when printing section
+	size.
+	(lang_size_sections_1): Use TO_ADDR in overlay lma calculation.
+	(lang_size_sections): Use TO_ADDR in relro end calculation.
+
+2016-03-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/lib/ld-lib.exp (run_dump_test): Fix check of return
+	value from regexp_diff.
+	* testsuite/ld-elf/orphan-5.l: Fix expected output.
+	* testsuite/ld-elf/orphan-6.l: Likewise.
+
+2016-03-30  Alan Modra  <amodra@gmail.com>
+
+	PR 18452
+	* ldlang.c (maybe_overlays): New static var.
+	(lang_size_sections_1): Set it here.
+	(struct check_sec): New.
+	(sort_sections_by_lma): Adjust for array of structs.
+	(sort_sections_by_vma): New function.
+	(lang_check_section_addresses): Check both LMA and VMA for overlap.
+	* testsuite/ld-scripts/rgn-over7.d: Adjust.
+
+2016-03-30  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_size_sections_1): Correct code detecting a
+	backward non-overlapping move.
+
+2016-03-30  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (IS_TBSS): New macro, extracted from..
+	(IGNORE_SECTION): ..here.
+	(lang_size_sections_1): Use IS_TBSS and IGNORE_SECTION.
+	(lang_size_sections, lang_do_assignments_1): Use IS_TBSS.
+
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19803
+	* ldlang.c (lang_add_gc_name): New function.  Adds the provided
+	symbol name to the list of gc symbols.
+	(lang_process): Call lang_add_gc_name with entry_symbol_default if
+	entry_symbol.name is NULL.  Use lang_add_gc_name to add the init
+	and fini function names.
+	* pe-dll.c (process_def_file_and_drectve): Add exported names to
+	the gc symbol list.
+	* testsuite/ld-pe/pr19803.s: Do not export _testval symbol.
+	* testsuite/ld-pe/pr19803.d: Tweak expected output.
+
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+
+2016-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/msp430.em: Replace use of alloca with call to xmalloc.
+	* plugin.c: Likewise.
+	* pe-dll.c: Likewise.
+
+2016-03-18  Awson  <kyrab@mail.ru>
+
+	PR 19531
+	* scripttempl/pe.sc (.rdata_runtime_pseudo_reloc): Always KEEP
+	this section.
+	* scripttempl/pep.sc (.rdata_runtime_pseudo_reloc): Likewise.
+
+2016-03-18  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-avr/gc-section-debugline.d: Relax regex check for CU.
+
 2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19827

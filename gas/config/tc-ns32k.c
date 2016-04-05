@@ -1908,7 +1908,7 @@ md_begin (void)
     }
 
   /* Some private space please!  */
-  freeptr_static = (char *) malloc (PRIVATE_SIZE);
+  freeptr_static = XNEWVEC (char, PRIVATE_SIZE);
 }
 
 /* Turn the string pointed to by litP into a floating point constant
@@ -1916,7 +1916,7 @@ md_begin (void)
    LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, FALSE);
@@ -2123,7 +2123,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -2228,8 +2228,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   code = reloc (fixp->fx_size, fixp->fx_pcrel, fix_im_disp (fixp));
 
-  rel = xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   if (fixp->fx_pcrel)

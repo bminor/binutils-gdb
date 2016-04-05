@@ -92,7 +92,7 @@ extern long nios2_relax_frag (segT segment, fragS * fragP, long stretch);
 
 /* Processor-specific section directives.  */
 #define md_elf_section_letter		nios2_elf_section_letter
-extern int nios2_elf_section_letter (int, char **);
+extern int nios2_elf_section_letter (int, const char **);
 #define md_elf_section_flags		nios2_elf_section_flags
 extern flagword nios2_elf_section_flags (flagword, int, int);
 #endif

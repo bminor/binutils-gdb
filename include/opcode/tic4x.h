@@ -226,7 +226,7 @@ struct tic4x_inst
   const char *  name;
   unsigned long opcode;
   unsigned long opmask;
-  char *        args;
+  const char *        args;
   unsigned long oplevel;
 };
 

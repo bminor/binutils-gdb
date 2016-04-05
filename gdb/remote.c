@@ -1801,7 +1801,7 @@ remote_add_inferior (int fake_pid_p, int pid, int attached,
    according to RUNNING.  */
 
 static void
-remote_add_thread (ptid_t ptid, int running)
+remote_add_thread (ptid_t ptid, int running, int executing)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -1816,7 +1816,7 @@ remote_add_thread (ptid_t ptid, int running)
   else
     add_thread (ptid);
 
-  set_executing (ptid, running);
+  set_executing (ptid, executing);
   set_running (ptid, running);
 }
 
@@ -1824,11 +1824,17 @@ remote_add_thread (ptid_t ptid, int running)
    It may be the first time we hear about such thread, so take the
    opportunity to add it to GDB's thread list.  In case this is the
    first time we're noticing its corresponding inferior, add it to
-   GDB's inferior list as well.  */
+   GDB's inferior list as well.  EXECUTING indicates whether the
+   thread is (internally) executing or stopped.  */
 
 static void
-remote_notice_new_inferior (ptid_t currthread, int running)
+remote_notice_new_inferior (ptid_t currthread, int executing)
 {
+  /* In non-stop mode, we assume new found threads are (externally)
+     running until proven otherwise with a stop reply.  In all-stop,
+     we can only get here if all threads are stopped.  */
+  int running = target_is_non_stop_p () ? 1 : 0;
+
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
 
@@ -1836,7 +1842,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
     {
       /* We're seeing an event on a thread id we knew had exited.
 	 This has to be a new thread reusing the old id.  Add it.  */
-      remote_add_thread (currthread, running);
+      remote_add_thread (currthread, running, executing);
       return;
     }
 
@@ -1857,7 +1863,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	    thread_change_ptid (inferior_ptid, currthread);
 	  else
 	    {
-	      remote_add_thread (currthread, running);
+	      remote_add_thread (currthread, running, executing);
 	      inferior_ptid = currthread;
 	    }
 	  return;
@@ -1888,7 +1894,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	}
 
       /* This is really a new thread.  Add it.  */
-      remote_add_thread (currthread, running);
+      remote_add_thread (currthread, running, executing);
 
       /* If we found a new inferior, let the common code do whatever
 	 it needs to with it (e.g., read shared libraries, insert
@@ -1899,7 +1905,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	  struct remote_state *rs = get_remote_state ();
 
 	  if (!rs->starting_up)
-	    notice_new_inferior (currthread, running, 0);
+	    notice_new_inferior (currthread, executing, 0);
 	}
     }
 }
@@ -3259,12 +3265,12 @@ remote_update_thread_list (struct target_ops *ops)
 	    {
 	      struct private_thread_info *info;
 	      /* In non-stop mode, we assume new found threads are
-		 running until proven otherwise with a stop reply.  In
-		 all-stop, we can only get here if all threads are
+		 executing until proven otherwise with a stop reply.
+		 In all-stop, we can only get here if all threads are
 		 stopped.  */
-	      int running = target_is_non_stop_p () ? 1 : 0;
+	      int executing = target_is_non_stop_p () ? 1 : 0;
 
-	      remote_notice_new_inferior (item->ptid, running);
+	      remote_notice_new_inferior (item->ptid, executing);
 
 	      info = demand_private_info (item->ptid);
 	      info->core = item->core;
@@ -4329,6 +4335,7 @@ remote_check_symbols (void)
   struct remote_state *rs = get_remote_state ();
   char *msg, *reply, *tmp;
   int end;
+  long reply_size;
   struct cleanup *old_chain;
 
   /* The remote side has no concept of inferiors that aren't running
@@ -4350,13 +4357,15 @@ remote_check_symbols (void)
      because we need both at the same time.  */
   msg = (char *) xmalloc (get_remote_packet_size ());
   old_chain = make_cleanup (xfree, msg);
+  reply = (char *) xmalloc (get_remote_packet_size ());
+  make_cleanup (free_current_contents, &reply);
+  reply_size = get_remote_packet_size ();
 
   /* Invite target to request symbol lookups.  */
 
   putpkt ("qSymbol::");
-  getpkt (&rs->buf, &rs->buf_size, 0);
-  packet_ok (rs->buf, &remote_protocol_packets[PACKET_qSymbol]);
-  reply = rs->buf;
+  getpkt (&reply, &reply_size, 0);
+  packet_ok (reply, &remote_protocol_packets[PACKET_qSymbol]);
 
   while (startswith (reply, "qSymbol:"))
     {
@@ -4384,8 +4393,7 @@ remote_check_symbols (void)
 	}
   
       putpkt (msg);
-      getpkt (&rs->buf, &rs->buf_size, 0);
-      reply = rs->buf;
+      getpkt (&reply, &reply_size, 0);
     }
 
   do_cleanups (old_chain);

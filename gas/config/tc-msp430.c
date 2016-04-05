@@ -698,7 +698,7 @@ static unsigned int silicon_errata_warn = 0;
 static void
 msp430_set_arch (int option)
 {
-  char *str = (char *) alloca (32);	/* 32 for good measure.  */
+  char str[32];	/* 32 for good measure.  */
 
   input_line_pointer = extract_word (input_line_pointer, str, 32);
 
@@ -1329,7 +1329,7 @@ msp430_mcu_data [] =
 };  
 
 int
-md_parse_option (int c, char * arg)
+md_parse_option (int c, const char * arg)
 {
   switch (c)
     {
@@ -1497,7 +1497,7 @@ static void
 msp430_section (int arg)
 {
   char * saved_ilp = input_line_pointer;
-  char * name = obj_elf_section_name ();
+  const char * name = obj_elf_section_name ();
 
   msp430_make_init_symbols (name);
 
@@ -1630,7 +1630,7 @@ extract_cmd (char * from, char * to, int limit)
   return from;
 }
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, FALSE);
@@ -2156,7 +2156,7 @@ msp430_dstoperand (struct msp430_operand_s * op,
 
   if (op->am == 2)
     {
-      char *__tl = "0";
+      char *__tl = (char *) "0";
 
       op->mode = OP_EXP;
       op->am = 1;
@@ -4164,7 +4164,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
   static arelent * relocs[MAX_RELOC_EXPANSION + 1];
   arelent *reloc;
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 
@@ -4215,7 +4215,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	  && ! S_IS_GAS_LOCAL (fixp->fx_addsy)
 	  && ! S_IS_GAS_LOCAL (fixp->fx_subsy))
 	{
-	  arelent * reloc2 = xmalloc (sizeof * reloc);
+	  arelent * reloc2 = XNEW (arelent);
 
 	  relocs[0] = reloc2;
 	  relocs[1] = reloc;
@@ -4229,7 +4229,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	    reloc2->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	  else
 	    {
-	      reloc2->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	      reloc2->sym_ptr_ptr = XNEW (asymbol *);
 	      *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 	    }
 
@@ -4241,7 +4241,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	    }
 	  else
 	    {
-	      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	      reloc->sym_ptr_ptr = XNEW (asymbol *);
 	      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	    }
 
@@ -4298,7 +4298,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	  return & no_relocs;
 	}
 #endif
-      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      reloc->sym_ptr_ptr = XNEW (asymbol *);
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->addend = fixp->fx_offset;
 

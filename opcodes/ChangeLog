@@ -1,3 +1,86 @@
+2016-03-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (arc_operands): Fix operand flags for NPS_R_DST, and
+	NPS_R_SRC1.
+
+2016-03-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add a header comment, and fix some whitespace
+	issues.  No functional changes.
+
+2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * arc-regs.h (IC_RAM_ADDRESS, IC_TAG, IC_WP, IC_DATA, CONTROL0)
+        (AX2, AY2, MX2, MY2, AY0, AY1, DC_RAM_ADDR, DC_TAG, CONTROL1)
+        (RTT): Remove duplicate.
+        (LCDINSTR, LCDDATA, LCDSTAT, CC_*, PCT_COUNT*, PCT_SNAP*)
+        (PCT_CONFIG*): Remove.
+        (D1L, D1H, D2H, D2L): Define.
+
+2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * arc-ext-tbl.h (dsp_fp_i2flt): Fix typo.
+
+2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * arc-tbl.h (invld07): Remove.
+        * arc-ext-tbl.h: New file.
+        * arc-dis.c (FIELDA, FIELDB, FIELDC): Remove.
+        * arc-opc.c (arc_opcodes): Add ext-tbl include.
+
+2016-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -Wstack-usage warnings.
+	* aarch64-dis.c (print_operands): Substitute size.
+	* aarch64-opc.c (print_register_offset_address): Substitute tblen.
+
+2016-03-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-opc.c (sparc_opcodes): Reorder entries for `rd' in order
+	to get a proper diagnostic when an invalid ASR register is used.
+
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: New file.
+	* arc-opc.c: Add top level comment.
+	(insert_nps_3bit_dst): New function.
+	(extract_nps_3bit_dst): New function.
+	(insert_nps_3bit_src2): New function.
+	(extract_nps_3bit_src2): New function.
+	(insert_nps_bitop_size): New function.
+	(extract_nps_bitop_size): New function.
+	(arc_flag_operands): Add nps400 entries.
+	(arc_flag_classes): Add nps400 entries.
+	(arc_operands): Add nps400 entries.
+	(arc_opcodes): Add nps400 include.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (arc_flag_classes): Convert all flag classes to use
+	the new class enum values.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-dis.c (print_insn_arc): Handle nps400.
+
+2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (BASE): Delete.
+
+2016-03-18  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19721
+	* aarch64-tbl.h (aarch64_opcode_table): Fix type of second operand
+	of MOV insn that aliases an ORR insn.
+
+2016-03-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (neon_opcodes): Support new FP16 instructions.
+
 2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* mcore-opc.h: Add const qualifiers.

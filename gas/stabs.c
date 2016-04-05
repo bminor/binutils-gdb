@@ -134,10 +134,7 @@ get_stab_string_offset (const char *string, const char *stabstr_secname)
 
 /* Here instead of obj-aout.c because other formats use it too.  */
 void
-aout_process_stab (what, string, type, other, desc)
-     int what;
-     const char *string;
-     int type, other, desc;
+aout_process_stab (int what, const char *string, int type, int other, int desc)
 {
   /* Put the stab information in the symbol table.  */
   symbolS *symbol;
@@ -451,8 +448,7 @@ s_xstab (int what)
 /* Frob invented at RMS' request. Set the n_desc of a symbol.  */
 
 void
-s_desc (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_desc (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char c;
@@ -500,9 +496,9 @@ stabs_generate_asm_file (void)
       char *dir2;
 
       dir = remap_debug_filename (getpwd ());
-      dir2 = (char *) alloca (strlen (dir) + 2);
-      sprintf (dir2, "%s%s", dir, "/");
+      dir2 = concat (dir, "/", NULL);
       generate_asm_file (N_SO, dir2);
+      free (dir2);
       xfree ((char *) dir);
     }
   generate_asm_file (N_SO, file);
@@ -545,7 +541,7 @@ generate_asm_file (int type, const char *file)
 
   while (tmp < file_endp)
     {
-      char *bslash = strchr (tmp, '\\');
+      const char *bslash = strchr (tmp, '\\');
       size_t len = (bslash) ? (size_t) (bslash - tmp + 1) : strlen (tmp);
 
       /* Double all backslashes, since demand_copy_C_string (used by
@@ -635,13 +631,13 @@ stabs_generate_asm_lineno (void)
 
   if (in_dot_func_p)
     {
-      buf = (char *) alloca (100 + strlen (current_function_label));
+      buf = (char *) xmalloc (100 + strlen (current_function_label));
       sprintf (buf, "%d,0,%d,%s-%s\n", N_SLINE, lineno,
 	       sym, current_function_label);
     }
   else
     {
-      buf = (char *) alloca (100);
+      buf = (char *) xmalloc (100);
       sprintf (buf, "%d,0,%d,%s\n", N_SLINE, lineno, sym);
     }
   input_line_pointer = buf;
@@ -650,6 +646,7 @@ stabs_generate_asm_lineno (void)
 
   input_line_pointer = hold;
   outputting_stabs_line_debug = 0;
+  free (buf);
 }
 
 /* Emit a function stab.
@@ -665,7 +662,7 @@ stabs_generate_asm_func (const char *funcname, const char *startlabname)
 
   if (! void_emitted_p)
     {
-      input_line_pointer = "\"void:t1=1\",128,0,0,0";
+      input_line_pointer = (char *) "\"void:t1=1\",128,0,0,0";
       s_stab ('s');
       void_emitted_p = 1;
     }
