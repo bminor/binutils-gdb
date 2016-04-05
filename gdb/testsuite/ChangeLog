@@ -1,3 +1,9 @@
+2016-04-05  Catalin Udma  <catalin.udma@freescale.com>
+
+	* gdb.python/py-mi-objfile-gdb.py: Use "list main" command.
+	* gdb.python/py-mi-objfile.exp: Match "list main" output
+	in console format.
+
 2016-04-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.arch/ftrace-insn-reloc.exp: Check for IPA basename instead of
