@@ -1,5 +1,10 @@
 2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* elf32-arc.c (plt_do_relocs_for_symbol): Changed.
+	(relocate_plt_for_entry): Likewise.
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* elf32-arc.c (elf_arc_check_relocs): Changed
 
 2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
