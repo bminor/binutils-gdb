@@ -1054,11 +1054,11 @@ const struct arc_operand arc_operands[] =
 #define R3		(R2 + 1)
 #define R3_S		(R2 + 1)
   { 2, 0, 0, ARC_OPERAND_IR, insert_r3, extract_r3 },
-#define SP		(R3 + 1)
+#define RSP		(R3 + 1)
 #define SP_S		(R3 + 1)
   { 5, 0, 0, ARC_OPERAND_IR, insert_sp, extract_sp },
-#define SPdup		(SP + 1)
-#define SP_Sdup		(SP + 1)
+#define SPdup		(RSP + 1)
+#define SP_Sdup		(RSP + 1)
   { 5, 0, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_sp, extract_sp },
 #define GP		(SPdup + 1)
 #define GP_S		(SPdup + 1)
@@ -1496,8 +1496,8 @@ const unsigned arc_num_pseudo_insn =
 const struct arc_aux_reg arc_aux_regs[] =
 {
 #undef DEF
-#define DEF(ADDR, NAME)				\
-  { ADDR, #NAME, sizeof (#NAME)-1 },
+#define DEF(ADDR, SUBCLASS, NAME)		\
+  { ADDR, SUBCLASS, #NAME, sizeof (#NAME)-1 },
 
 #include "arc-regs.h"
 

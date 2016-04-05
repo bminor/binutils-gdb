@@ -93,7 +93,10 @@ enum arc_rlx_types
 
 #define regno(x)		((x) & 0x3F)
 #define is_ir_num(x)		(((x) & ~0x3F) == 0)
-#define is_code_density_p(op)   (((op)->subclass == CD1 || (op)->subclass == CD2))
+#define is_code_density_p(sc)   (((sc) == CD1 || (sc) == CD2))
+#define is_spfp_p(op)           (((sc) == SPX))
+#define is_dpfp_p(op)           (((sc) == DPX))
+#define is_fpuda_p(op)          (((sc) == DPA))
 #define is_br_jmp_insn_p(op)    (((op)->class == BRANCH || (op)->class == JUMP))
 #define is_kernel_insn_p(op)    (((op)->class == KERNEL))
 
@@ -1344,6 +1347,30 @@ allocate_tok (expressionS *tok, int ntok, int cidx)
   return allocate_tok (tok, ntok - 1, cidx);
 }
 
+/* Check if an particular ARC feature is enabled.  */
+
+static bfd_boolean
+check_cpu_feature (insn_subclass_t sc)
+{
+  if (!(arc_features & ARC_CD)
+      && is_code_density_p (sc))
+    return FALSE;
+
+  if (!(arc_features & ARC_SPFP)
+      && is_spfp_p (sc))
+    return FALSE;
+
+  if (!(arc_features & ARC_DPFP)
+      && is_dpfp_p (sc))
+    return FALSE;
+
+  if (!(arc_features & ARC_FPUDA)
+      && is_fpuda_p (sc))
+    return FALSE;
+
+  return TRUE;
+}
+
 /* Search forward through all variants of an opcode looking for a
    syntax match.  */
 
@@ -1381,7 +1408,7 @@ find_opcode_match (const struct arc_opcode *first_opcode,
       if (!(opcode->cpu & arc_target))
 	goto match_failed;
 
-      if (is_code_density_p (opcode) && !(arc_features & ARC_CD))
+      if (!check_cpu_feature (opcode->subclass))
 	goto match_failed;
 
       got_cpu_match = 1;
@@ -1972,7 +1999,9 @@ preprocess_operands (const struct arc_opcode *opcode,
 	  auxr = &arc_aux_regs[0];
 	  for (j = 0; j < arc_num_aux_regs; j++, auxr++)
 	    if (len == auxr->length
-		&& strcasecmp (auxr->name, p) == 0)
+		&& (strcasecmp (auxr->name, p) == 0)
+		&& ((auxr->subclass == NONE)
+		    || check_cpu_feature (auxr->subclass)))
 	      {
 		tok[i].X_op = O_constant;
 		tok[i].X_add_number = auxr->address;
@@ -2951,6 +2980,8 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
       /* This option has an effect only on ARC EM.  */
       if (arc_target & ARC_OPCODE_ARCv2EM)
 	arc_features |= ARC_CD;
+      else
+	as_warn (_("Code density option invalid for selected CPU"));
       break;
 
     case OPTION_RELAX:
@@ -2967,8 +2998,17 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
     case OPTION_EA:
     case OPTION_MUL64:
     case OPTION_SIMD:
+      /* Dummy options are accepted but have no effect.  */
+      break;
+
     case OPTION_SPFP:
+      arc_features |= ARC_SPFP;
+      break;
+
     case OPTION_DPFP:
+      arc_features |= ARC_DPFP;
+      break;
+
     case OPTION_XMAC_D16:
     case OPTION_XMAC_24:
     case OPTION_DSP_PACKA:
@@ -2979,8 +3019,15 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
     case OPTION_LOCK:
     case OPTION_SWAPE:
     case OPTION_RTSC:
-    case OPTION_FPUDA:
       /* Dummy options are accepted but have no effect.  */
+      break;
+
+    case OPTION_FPUDA:
+      /* This option has an effect only on ARC EM.  */
+      if (arc_target & ARC_OPCODE_ARCv2EM)
+	arc_features |= ARC_FPUDA;
+      else
+	as_warn (_("FPUDA invalid for selected CPU"));
       break;
 
     default:
