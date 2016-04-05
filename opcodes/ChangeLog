@@ -1,3 +1,7 @@
+2016-04-05  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c: Support FP16 vmul, vmla, vmls (by scalar).
+
 2016-03-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-opc.c (arc_operands): Fix operand flags for NPS_R_DST, and

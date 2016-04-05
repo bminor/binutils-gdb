@@ -222,3 +222,28 @@ func:
 
 	# neon_fcmp_imm0
 	f16_dq_fcmp_imm0 14, 2
+
+	.macro f16_d_by_scalar op reg0 reg1 reg2 idx
+		\op d\reg0, d\reg1, d\reg2[\idx]
+	.endm
+
+	.macro f16_q_by_scalar op reg0 reg1 reg2 idx
+		\op q\reg0, q\reg1, d\reg2[\idx]
+	.endm
+
+	.macro f16_dq_fmacmaybe_by_scalar reg0 reg1 reg2 idx
+	.irp op, vmla.f16, vmls.f16
+		\op d\reg0, d\reg1, d\reg2[\idx]
+		\op q\reg0, q\reg1, d\reg2[\idx]
+	.endr
+	.endm
+
+	# neon_mul (by scalar)
+	f16_d_by_scalar vmul.f16 7 0 1 0
+	f16_d_by_scalar vmul.f16 4 8 6 2
+	f16_q_by_scalar vmul.f16 2 8 0 1
+	f16_q_by_scalar vmul.f16 2 8 7 3
+
+	# neon_mac_maybe_scalar (by scalar)
+	f16_dq_fmacmaybe_by_scalar 2 4 1 0
+	f16_dq_fmacmaybe_by_scalar 1 8 7 3

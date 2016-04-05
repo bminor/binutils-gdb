@@ -145,3 +145,15 @@ Disassembly of section .text:
  214:	f3f5c5c4 	vcle.f16	q14, q2, #0
  218:	f3b5e602 	vclt.f16	d14, d2, #0
  21c:	f3f5c644 	vclt.f16	q14, q2, #0
+ 220:	f2907941 	vmul.f16	d7, d0, d1\[0\]
+ 224:	f2984966 	vmul.f16	d4, d8, d6\[2\]
+ 228:	f39049c8 	vmul.f16	q2, q8, d0\[1\]
+ 22c:	f39049ef 	vmul.f16	q2, q8, d7\[3\]
+ 230:	f2942141 	vmla.f16	d2, d4, d1\[0\]
+ 234:	f3984141 	vmla.f16	q2, q4, d1\[0\]
+ 238:	f2942541 	vmls.f16	d2, d4, d1\[0\]
+ 23c:	f3984541 	vmls.f16	q2, q4, d1\[0\]
+ 240:	f298116f 	vmla.f16	d1, d8, d7\[3\]
+ 244:	f39021ef 	vmla.f16	q1, q8, d7\[3\]
+ 248:	f298156f 	vmls.f16	d1, d8, d7\[3\]
+ 24c:	f39025ef 	vmls.f16	q1, q8, d7\[3\]
