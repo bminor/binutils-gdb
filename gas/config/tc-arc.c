@@ -3363,6 +3363,10 @@ assemble_insn (const struct arc_opcode *opcode,
 	  switch (t->X_md)
 	    {
 	    case O_plt:
+	      if (opcode->class == JUMP)
+		as_bad_where (frag_now->fr_file, frag_now->fr_line,
+			      _("Unable to use @plt relocatio for insn %s"),
+			      opcode->name);
 	      needGOTSymbol = TRUE;
 	      reloc = find_reloc ("plt", opcode->name,
 				  pflags, nflg,
@@ -3376,7 +3380,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	      break;
 	    case O_pcl:
 	      reloc = ARC_RELOC_TABLE (t->X_md)->reloc;
-	      if (ARC_SHORT (opcode->mask))
+	      if (ARC_SHORT (opcode->mask) || opcode->class == JUMP)
 		as_bad_where (frag_now->fr_file, frag_now->fr_line,
 			      _("Unable to use @pcl relocation for insn %s"),
 			      opcode->name);
