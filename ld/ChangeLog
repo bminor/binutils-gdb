@@ -1,3 +1,21 @@
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-discard/extern.d: Removed xfail for ARC.
+	* testsuite/ld-discard/start.d: Likewise.
+	* testsuite/ld-discard/static.d: Likewise.
+	* testsuite/ld-elf/group1.d: Likewise.
+	* testsuite/ld-elf/group3b.d: Likewise.
+	* testsuite/ld-elf/orphan-region.d: Likewise.
+	* testsuite/ld-elf/orphan.d: Likewise.
+	* testsuite/ld-elf/orphan3.d: Likewise.
+	* testsuite/ld-elf/pr349.d: Likewise.
+	* testsuite/ld-elf/warn1.d: Likewise.
+	* testsuite/ld-elf/warn2.d: Likewise.
+	* testsuite/ld-elf/warn3.d: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Add __SDATA_BEGIN__ symbol
+	through linker flags.
+	* testsuite/ld-srec/srec.exp: Set as xfail.
+
 2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19827
