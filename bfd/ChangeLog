@@ -1,3 +1,12 @@
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (name_for_global_symbol): Added assert to check for
+	symbol index.
+	(elf_arc_relocate_section): Added and changed asserts, validating
+	the synamic symbol index.
+	(elf_arc_finish_dynamic_symbol): Do not fill the dynamic
+	relocation if symbol has dynindx set to -1.
+
 2016-04-05  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elflink.c (elf_link_add_object_symbols): Always turn hidden
