@@ -1,5 +1,17 @@
 2016-04-05  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.trace/ftrace-lock.exp: Check for IPA basename instead of
+	absolute.
+	* gdb.trace/ftrace.exp: Likewise.
+	* lib/gdb.exp (gdb_compile): Set rpath $ORIGIN for non-remote
+	targets as well.
+	(gdb_compile_shlib): Set SONAME for non-remote targets as well.
+	(gdb_load_shlibs): Copy libraries to test directory when testing
+	natively.  Only set solib-search-path if testing remotely.
+	* lib/mi-support.exp (mi_load_shlibs): Likewise.
+
+2016-04-05  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.base/jit-so.exp: Use gdb_remote_download instead of
 	gdb_download.  Use it even if the target is not remote.
 	* gdb.base/jit.exp (compile_jit_test): Likewise.

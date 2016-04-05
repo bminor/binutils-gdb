@@ -64,7 +64,7 @@ if ![runto_main] {
     return -1
 }
 
-if { [gdb_test "info sharedlibrary" ".*${libipa}.*" "IPA loaded"] != 0 } {
+if { [gdb_test "info sharedlibrary" ".*[file tail ${libipa}].*" "IPA loaded"] != 0 } {
     untested "Could not find IPA lib loaded"
     return 1
 }
