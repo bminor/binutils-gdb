@@ -1,3 +1,23 @@
+2016-04-05  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/19908
+	* testsuite/ld-cris/tls-e-20.d: Adjust for hidden symbol
+	handling fix.
+	* testsuite/ld-cris/tls-e-20a.d: Likewise.
+	* testsuite/ld-cris/tls-e-21.d: Likewise.
+	* testsuite/ld-cris/tls-e-23.d: Likewise.
+	* testsuite/ld-cris/tls-e-80.d: Likewise.
+	* testsuite/ld-cris/tls-gd-3h.d: Likewise.
+	* testsuite/ld-cris/tls-leie-19.d: Likewise.
+	* testsuite/ld-mips-elf/export-class-ref-lib.sd: New test.
+	* testsuite/ld-mips-elf/export-hidden-ref.sd: New test.
+	* testsuite/ld-mips-elf/export-internal-ref.sd: New test.
+	* testsuite/ld-mips-elf/export-protected-ref.sd: New test.
+	* testsuite/ld-mips-elf/export-class-ref-f0.s: New test source.
+	* testsuite/ld-mips-elf/export-class-ref-f1.s: New test source.
+	* testsuite/ld-mips-elf/export-class-ref-f2.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* testsuite/ld-discard/extern.d: Removed xfail for ARC.

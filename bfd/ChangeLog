@@ -1,3 +1,9 @@
+2016-04-05  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (elf_link_add_object_symbols): Always turn hidden
+	and internal symbols which have a dynamic index into local
+	ones.
+
 2016-04-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 19872
