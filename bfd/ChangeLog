@@ -1,5 +1,9 @@
 2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* elf32-arc.c (elf_arc_check_relocs): Changed
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* elf32-arc.c (name_for_global_symbol): Changed assert.
 	(get_replace_function): Created.:
 	(struct arc_relocation_data): Changed to signed types.

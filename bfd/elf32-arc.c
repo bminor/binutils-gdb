@@ -1735,7 +1735,8 @@ elf_arc_check_relocs (bfd *		         abfd,
 	       non-readonly sections.  */
 	    if (bfd_link_dll (info) && !bfd_link_pie (info)
 		&& (sec->flags & SEC_ALLOC) != 0
-		&& (sec->flags & SEC_READONLY) != 0)
+		&& (sec->flags & SEC_READONLY) == 0
+		&& (sec->flags & SEC_CODE) != 0)
 	      {
 		const char *name;
 		if (h)
