@@ -4183,34 +4183,42 @@ proc gdb_touch_execfile { binfile } {
     }
 }
 
-# Like remote_download but provides a gdb-specific behavior.  If DEST
-# is "host", and the host is not remote, and TOFILE is not specified,
-# then the [file tail] of FROMFILE is passed through
-# standard_output_file to compute the destination.
+# Like remote_download but provides a gdb-specific behavior.
+#
+# If the destination board is remote, the local file FROMFILE is transferred as
+# usual with remote_download to TOFILE on the remote board.  The destination
+# filename is added to the CLEANFILES global, so it can be cleaned up at the
+# end of the test.
+#
+# If the destination board is local, the destination path TOFILE is passed
+# through standard_output_file, and FROMFILE is copied there.
+#
+# In both cases, if TOFILE is omitted, it defaults to the [file tail] of
+# FROMFILE.
 
 proc gdb_remote_download {dest fromfile {tofile {}}} {
-    if {$dest == "host" && ![is_remote host] && $tofile == ""} {
-	set tofile [standard_output_file [file tail $fromfile]]
+    # If TOFILE is not given, default to the same filename as FROMFILE.
+    if {[string length $tofile] == 0} {
+	set tofile [file tail $fromfile]
     }
 
-    if { $tofile == "" } {
-	return [remote_download $dest $fromfile]
+    if {[is_remote $dest]} {
+	# When the DEST is remote, we simply send the file to DEST.
+	global cleanfiles
+
+	set destname [remote_download $dest $fromfile $tofile]
+	lappend cleanfiles $destname
+
+	return $destname
     } else {
-	return [remote_download $dest $fromfile $tofile]
+	# When the DEST is local, we copy the file to the test directory
+	# (where the executable is), except if that's already where it is.
+	set tofile [standard_output_file $tofile]
+
+	file copy -force $fromfile $tofile
+
+	return $tofile
     }
-}
-
-# gdb_download
-#
-# Copy a file to the remote target and return its target filename.
-# Schedule the file to be deleted at the end of this test.
-
-proc gdb_download { filename } {
-    global cleanfiles
-
-    set destname [remote_download target $filename]
-    lappend cleanfiles $destname
-    return $destname
 }
 
 # gdb_load_shlibs LIB...
@@ -4223,7 +4231,7 @@ proc gdb_load_shlibs { args } {
     }
 
     foreach file $args {
-	gdb_download [shlib_target_file $file]
+	gdb_remote_download target [shlib_target_file $file]
     }
 
     # Even if the target supplies full paths for shared libraries,

@@ -1960,7 +1960,7 @@ proc mi_load_shlibs { args } {
     }
 
     foreach file $args {
-	gdb_download [shlib_target_file $file]
+	gdb_remote_download target [shlib_target_file $file]
     }
 
     # Even if the target supplies full paths for shared libraries,

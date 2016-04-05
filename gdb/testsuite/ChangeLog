@@ -1,3 +1,20 @@
+2016-04-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/jit-so.exp: Use gdb_remote_download instead of
+	gdb_download.  Use it even if the target is not remote.
+	* gdb.base/jit.exp (compile_jit_test): Likewise.
+	* lib/gdb.exp (gdb_remote_download): Copy files to the standard
+	output directory if the destination board is local, otherwise use
+	the standard remote_download from DejaGnu.
+	(gdb_download): Remove.
+	(gdb_load_shlibs): Use gdb_remote_download instead of
+	gdb_download.
+	* lib/gdbserver-support.exp (gdbserver_download_current_prog):
+	Use gdb_remote_download instead of gdb_download.  Use it even if
+	the target is not remote.
+	* lib/mi-support.exp (mi_load_shlibs): Use gdb_remote_download
+	instead of gdb_download.
+
 2016-04-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.mi/mi-breakpoint-changed.exp: Add some with_test_prefix.

@@ -176,11 +176,7 @@ proc gdbserver_download_current_prog { } {
     if { $reuse == 0 } {
 	set gdbserver_host_exec $host_exec
 	set gdbserver_host_mtime [file mtime $host_exec]
-	if [is_remote target] {
-	    set gdbserver_server_exec [gdb_download $host_exec]
-	} else {
-	    set gdbserver_server_exec $host_exec
-	}
+	set gdbserver_server_exec [gdb_remote_download target $host_exec]
     }
 
     return $gdbserver_server_exec
