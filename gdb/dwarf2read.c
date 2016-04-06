@@ -77,15 +77,6 @@
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
-static struct partial_die_info *
-find_partial_die_in_comp_unit (sect_offset offset, struct dwarf2_cu *cu);
-
-static struct fn_field
-new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
-	      struct die_info *type_die, struct dwarf2_cu *type_cu,
-	      struct type *type, const char *fieldname,
-	      int fnl_idx, int field_idx);
-
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
@@ -1761,6 +1752,12 @@ static void read_signatured_type (struct signatured_type *);
 static int attr_to_dynamic_prop (const struct attribute *attr,
 				 struct die_info *die, struct dwarf2_cu *cu,
 				 struct dynamic_prop *prop);
+
+static struct fn_field new_fn_field
+  (struct die_info *name_die, struct dwarf2_cu *name_cu,
+   struct die_info *type_die, struct dwarf2_cu *type_cu,
+   struct type *type, const char *fieldname,
+   int fnl_idx, int field_idx);
 
 /* memory allocation interface */
 
