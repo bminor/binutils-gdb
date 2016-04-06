@@ -1,3 +1,8 @@
+2016-04-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.threads/dlopen-libpthread.exp: Set binfile_lib using
+	standard_output_file.  Remove unused binfile variable.
+
 2016-04-05  Catalin Udma  <catalin.udma@freescale.com>
 
 	* gdb.python/py-mi-objfile-gdb.py: Use "list main" command.
