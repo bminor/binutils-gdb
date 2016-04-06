@@ -1205,7 +1205,8 @@ value_actual_type (struct value *value, int resolve_simple_types,
       if ((TYPE_CODE (result) == TYPE_CODE_PTR
 	   || TYPE_CODE (result) == TYPE_CODE_REF)
 	  && TYPE_CODE (check_typedef (TYPE_TARGET_TYPE (result)))
-	     == TYPE_CODE_STRUCT)
+	     == TYPE_CODE_STRUCT
+	  && !value_optimized_out (value))
         {
           struct type *real_type;
 
@@ -1433,7 +1434,17 @@ value_optimized_out (struct value *value)
   /* We can only know if a value is optimized out once we have tried to
      fetch it.  */
   if (VEC_empty (range_s, value->optimized_out) && value->lazy)
-    value_fetch_lazy (value);
+    {
+      TRY
+	{
+	  value_fetch_lazy (value);
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  /* Fall back to checking value->optimized_out.  */
+	}
+      END_CATCH
+    }
 
   return !VEC_empty (range_s, value->optimized_out);
 }
