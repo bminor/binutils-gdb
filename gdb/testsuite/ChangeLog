@@ -1,3 +1,8 @@
+2016-04-06  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.dwarf2/dw2-opt-structptr.c: New test program.
+	* gdb.dwarf2/dw2-opt-structptr.exp: New test script.
+
 2016-04-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.threads/dlopen-libpthread.exp: Set binfile_lib using
