@@ -1048,12 +1048,13 @@ const struct arc_flag_class arc_flag_classes[] =
   { F_CLASS_NONE, { F_NULL } },
 
 #define C_CC	    (C_EMPTY + 1)
-  { F_CLASS_OPTIONAL, { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL,
-			F_NOTZERO, F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS,
-			F_CARRY, F_CARRYSET, F_LOWER, F_CARRYCLR,
-			F_NOTCARRY, F_HIGHER, F_OVERFLOWSET, F_OVERFLOW,
-			F_NOTOVERFLOW, F_OVERFLOWCLR, F_GT, F_GE, F_LT,
-			F_LE, F_HI, F_LS, F_PNZ, F_NULL } },
+  { F_CLASS_OPTIONAL | F_CLASS_EXTEND,
+    { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL,
+      F_NOTZERO, F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS,
+      F_CARRY, F_CARRYSET, F_LOWER, F_CARRYCLR,
+      F_NOTCARRY, F_HIGHER, F_OVERFLOWSET, F_OVERFLOW,
+      F_NOTOVERFLOW, F_OVERFLOWCLR, F_GT, F_GE, F_LT,
+      F_LE, F_HI, F_LS, F_PNZ, F_NULL } },
 
 #define C_AA_ADDR3  (C_CC + 1)
 #define C_AA27	    (C_CC + 1)
@@ -1729,8 +1730,8 @@ const unsigned arc_num_pseudo_insn =
 const struct arc_aux_reg arc_aux_regs[] =
 {
 #undef DEF
-#define DEF(ADDR, SUBCLASS, NAME)		\
-  { ADDR, SUBCLASS, #NAME, sizeof (#NAME)-1 },
+#define DEF(ADDR, CPU, SUBCLASS, NAME)		\
+  { ADDR, CPU, SUBCLASS, #NAME, sizeof (#NAME)-1 },
 
 #include "arc-regs.h"
 

@@ -372,7 +372,7 @@ const char *
 arcExtMap_coreRegName (int regnum)
 {
   if (regnum < FIRST_EXTENSION_CORE_REGISTER
-      || regnum > LAST_EXTENSION_CONDITION_CODE)
+      || regnum > LAST_EXTENSION_CORE_REGISTER)
     return NULL;
   return arc_extension_map.
     coreRegisters[regnum - FIRST_EXTENSION_CORE_REGISTER].name;
@@ -384,7 +384,7 @@ enum ExtReadWrite
 arcExtMap_coreReadWrite (int regnum)
 {
   if (regnum < FIRST_EXTENSION_CORE_REGISTER
-      || regnum > LAST_EXTENSION_CONDITION_CODE)
+      || regnum > LAST_EXTENSION_CORE_REGISTER)
     return REG_INVALID;
   return arc_extension_map.
     coreRegisters[regnum - FIRST_EXTENSION_CORE_REGISTER].rw;
@@ -493,8 +493,9 @@ dump_ARC_extmap (void)
 	struct ExtCoreRegister reg = arc_extension_map.coreRegisters[i];
 
 	if (reg.name)
-	    printf ("CORE: %s %d %s\n", reg.name, reg.number,
-		    ExtReadWrite_image (reg.rw));
+	  printf ("CORE: 0x%04x %s %s\n", reg.number,
+		  ExtReadWrite_image (reg.rw),
+		  reg.name);
     }
 
     for (i = 0; i < NUM_EXT_COND; i++)

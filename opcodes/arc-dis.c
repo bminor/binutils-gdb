@@ -172,12 +172,19 @@ find_format (const struct arc_opcode *arc_table,
 	const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
 	const unsigned *flgopridx;
 	int foundA = 0, foundB = 0;
+	unsigned int value;
 
+	/* Check first the extensions.  */
+	if (cl_flags->class & F_CLASS_EXTEND)
+	  {
+	    value = (insn[0] & 0x1F);
+	    if (arcExtMap_condCodeName (value))
+	      continue;
+	  }
 	for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
 	  {
 	    const struct arc_flag_operand *flg_operand =
 	      &arc_flag_operands[*flgopridx];
-	    unsigned int value;
 
 	    value = (insn[0] >> flg_operand->shift)
 	      & ((1 << flg_operand->bits) - 1);
@@ -203,6 +210,105 @@ find_format (const struct arc_opcode *arc_table,
   return NULL;
 }
 
+static void
+print_flags (const struct arc_opcode *opcode,
+	     unsigned *insn,
+	     struct disassemble_info *info)
+{
+  const unsigned char *flgidx;
+  unsigned int value;
+
+  /* Now extract and print the flags.  */
+  for (flgidx = opcode->flags; *flgidx; flgidx++)
+    {
+      /* Get a valid flag class.  */
+      const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
+      const unsigned *flgopridx;
+
+      /* Check first the extensions.  */
+      if (cl_flags->class & F_CLASS_EXTEND)
+	{
+	  const char *name;
+	  value = (insn[0] & 0x1F);
+
+	  name = arcExtMap_condCodeName (value);
+	  if (name)
+	    {
+	      (*info->fprintf_func) (info->stream, ".%s", name);
+	      continue;
+	    }
+	}
+
+      for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
+	{
+	  const struct arc_flag_operand *flg_operand =
+	    &arc_flag_operands[*flgopridx];
+
+	  if (!flg_operand->favail)
+	    continue;
+
+	  value = (insn[0] >> flg_operand->shift)
+	    & ((1 << flg_operand->bits) - 1);
+	  if (value == flg_operand->code)
+	    {
+	       /* FIXME!: print correctly nt/t flag.  */
+	      if (!special_flag_p (opcode->name, flg_operand->name))
+		(*info->fprintf_func) (info->stream, ".");
+	      else if (info->insn_type == dis_dref)
+		{
+		  switch (flg_operand->name[0])
+		    {
+		    case 'b':
+		      info->data_size = 1;
+		      break;
+		    case 'h':
+		    case 'w':
+		      info->data_size = 2;
+		      break;
+		    default:
+		      info->data_size = 4;
+		      break;
+		    }
+		}
+	      (*info->fprintf_func) (info->stream, "%s", flg_operand->name);
+	    }
+
+	  if (flg_operand->name[0] == 'd'
+	      && flg_operand->name[1] == 0)
+	    info->branch_delay_insns = 1;
+	}
+    }
+}
+
+static const char *
+get_auxreg (const struct arc_opcode *opcode,
+	    int value,
+	    unsigned isa_mask)
+{
+  const char *name;
+  unsigned int i;
+  const struct arc_aux_reg *auxr = &arc_aux_regs[0];
+
+  if (opcode->class != AUXREG)
+    return NULL;
+
+  name = arcExtMap_auxRegName (value);
+  if (name)
+    return name;
+
+  for (i = 0; i < arc_num_aux_regs; i++, auxr++)
+    {
+      if (!(auxr->cpu & isa_mask))
+	continue;
+
+      if (auxr->subclass != NONE)
+	return NULL;
+
+      if (auxr->address == value)
+	return auxr->name;
+    }
+  return NULL;
+}
 /* Disassemble ARC instructions.  */
 
 static int
@@ -216,7 +322,6 @@ print_insn_arc (bfd_vma memaddr,
   unsigned insn[2] = { 0, 0 };
   unsigned isa_mask;
   const unsigned char *opidx;
-  const unsigned char *flgidx;
   const struct arc_opcode *opcode;
   const extInstruction_t *einsn;
   bfd_boolean need_comma;
@@ -411,51 +516,7 @@ print_insn_arc (bfd_vma memaddr,
 
   pr_debug ("%s: 0x%08x\n", opcode->name, opcode->opcode);
 
-  /* Now extract and print the flags.  */
-  for (flgidx = opcode->flags; *flgidx; flgidx++)
-    {
-      /* Get a valid flag class.  */
-      const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
-      const unsigned *flgopridx;
-
-      for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
-	{
-	  const struct arc_flag_operand *flg_operand = &arc_flag_operands[*flgopridx];
-	  unsigned int value;
-
-	  if (!flg_operand->favail)
-	    continue;
-
-	  value = (insn[0] >> flg_operand->shift) & ((1 << flg_operand->bits) - 1);
-	  if (value == flg_operand->code)
-	    {
-	       /* FIXME!: print correctly nt/t flag.  */
-	      if (!special_flag_p (opcode->name, flg_operand->name))
-		(*info->fprintf_func) (info->stream, ".");
-	      else if (info->insn_type == dis_dref)
-		{
-		  switch (flg_operand->name[0])
-		    {
-		    case 'b':
-		      info->data_size = 1;
-		      break;
-		    case 'h':
-		    case 'w':
-		      info->data_size = 2;
-		      break;
-		    default:
-		      info->data_size = 4;
-		      break;
-		    }
-		}
-	      (*info->fprintf_func) (info->stream, "%s", flg_operand->name);
-	    }
-
-	  if (flg_operand->name[0] == 'd'
-	      && flg_operand->name[1] == 0)
-	    info->branch_delay_insns = 1;
-	}
-    }
+  print_flags (opcode, insn, info);
 
   if (opcode->operands[0] != 0)
     (*info->fprintf_func) (info->stream, "\t");
@@ -535,17 +596,33 @@ print_insn_arc (bfd_vma memaddr,
       /* Print the operand as directed by the flags.  */
       if (operand->flags & ARC_OPERAND_IR)
 	{
+	  const char *rname;
+
 	  assert (value >=0 && value < 64);
-	  (*info->fprintf_func) (info->stream, "%s", regnames[value]);
+	  rname = arcExtMap_coreRegName (value);
+	  if (!rname)
+	    rname = regnames[value];
+	  (*info->fprintf_func) (info->stream, "%s", rname);
 	  if (operand->flags & ARC_OPERAND_TRUNCATE)
-	    (*info->fprintf_func) (info->stream, "%s", regnames[value+1]);
+	    {
+	      rname = arcExtMap_coreRegName (value + 1);
+	      if (!rname)
+		rname = regnames[value + 1];
+	      (*info->fprintf_func) (info->stream, "%s", rname);
+	    }
 	}
       else if (operand->flags & ARC_OPERAND_LIMM)
 	{
-	  (*info->fprintf_func) (info->stream, "%#x", insn[1]);
-	  if (info->insn_type == dis_branch
-	      || info->insn_type == dis_jsr)
-	    info->target = (bfd_vma) insn[1];
+	  const char *rname = get_auxreg (opcode, insn[1], isa_mask);
+	  if (rname && open_braket)
+	    (*info->fprintf_func) (info->stream, "%s", rname);
+	  else
+	    {
+	      (*info->fprintf_func) (info->stream, "%#x", insn[1]);
+	      if (info->insn_type == dis_branch
+		  || info->insn_type == dis_jsr)
+		info->target = (bfd_vma) insn[1];
+	    }
 	}
       else if (operand->flags & ARC_OPERAND_PCREL)
 	{
@@ -557,16 +634,30 @@ print_insn_arc (bfd_vma memaddr,
 	  info->target = (bfd_vma) (memaddr & ~3) + value;
 	}
       else if (operand->flags & ARC_OPERAND_SIGNED)
-	(*info->fprintf_func) (info->stream, "%d", value);
+	{
+	  const char *rname = get_auxreg (opcode, value, isa_mask);
+	  if (rname && open_braket)
+	    (*info->fprintf_func) (info->stream, "%s", rname);
+	  else
+	    (*info->fprintf_func) (info->stream, "%d", value);
+	}
       else
-	if (operand->flags & ARC_OPERAND_TRUNCATE
-	    && !(operand->flags & ARC_OPERAND_ALIGNED32)
-	    && !(operand->flags & ARC_OPERAND_ALIGNED16)
-	    && value > 0 && value <= 14)
-	  (*info->fprintf_func) (info->stream, "r13-%s",
-				 regnames[13 + value - 1]);
-	else
-	  (*info->fprintf_func) (info->stream, "%#x", value);
+	{
+	  if (operand->flags & ARC_OPERAND_TRUNCATE
+	      && !(operand->flags & ARC_OPERAND_ALIGNED32)
+	      && !(operand->flags & ARC_OPERAND_ALIGNED16)
+	      && value > 0 && value <= 14)
+	    (*info->fprintf_func) (info->stream, "r13-%s",
+				   regnames[13 + value - 1]);
+	  else
+	    {
+	      const char *rname = get_auxreg (opcode, value, isa_mask);
+	      if (rname && open_braket)
+		(*info->fprintf_func) (info->stream, "%s", rname);
+	      else
+		(*info->fprintf_func) (info->stream, "%#x", value);
+	    }
+	}
 
       need_comma = TRUE;
 

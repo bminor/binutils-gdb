@@ -1,5 +1,16 @@
 2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* opcode/arc.h (flag_class_t): Update.
+	(ARC_OPCODE_NONE): Define.
+	(ARC_OPCODE_ARCALL): Likewise.
+	(ARC_OPCODE_ARCFPX): Likewise.
+	(ARC_REGISTER_READONLY): Likewise.
+	(ARC_REGISTER_WRITEONLY): Likewise.
+	(ARC_REGISTER_NOSHORT_CUT): Likewise.
+	(arc_aux_reg): Add cpu.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* opcode/arc.h (arc_num_opcodes): Remove.
 	(ARC_SYNTAX_3OP, ARC_SYNTAX_2OP, ARC_OP1_MUST_BE_IMM)
 	(ARC_OP1_IMM_IMPLIED, ARC_SUFFIX_NONE, ARC_SUFFIX_COND)

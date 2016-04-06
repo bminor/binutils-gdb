@@ -140,6 +140,7 @@ static void arc_lcomm (int);
 static void arc_option (int);
 static void arc_extra_reloc (int);
 static void arc_extinsn (int);
+static void arc_extcorereg (int);
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -151,7 +152,10 @@ const pseudo_typeS md_pseudo_table[] =
   { "lcommon", arc_lcomm, 0 },
   { "cpu",     arc_option, 0 },
 
-  { "extinstruction", arc_extinsn, 0 },
+  { "extinstruction",  arc_extinsn, 0 },
+  { "extcoreregister", arc_extcorereg, EXT_CORE_REGISTER },
+  { "extauxregister",  arc_extcorereg, EXT_AUX_REGISTER },
+  { "extcondcode",     arc_extcorereg, EXT_COND_CODE },
 
   { "tls_gd_ld",   arc_extra_reloc, BFD_RELOC_ARC_TLS_GD_LD },
   { "tls_gd_call", arc_extra_reloc, BFD_RELOC_ARC_TLS_GD_CALL },
@@ -343,6 +347,21 @@ static const attributes_t syntaxclassmod[] =
   { "OP1_MUST_BE_IMM" , 15, ARC_OP1_MUST_BE_IMM }
 };
 
+/* Extension register type.  */
+typedef struct
+{
+  char *name;
+  int  number;
+  int  imode;
+} extRegister_t;
+
+/* A structure to hold the additional conditional codes.  */
+static struct
+{
+  struct arc_flag_operand *arc_ext_condcode;
+  int size;
+} ext_condcode = { NULL, 0 };
+
 /* Structure to hold an entry in ARC_OPCODE_HASH.  */
 struct arc_opcode_hash_entry
 {
@@ -385,6 +404,9 @@ static struct hash_control *arc_opcode_hash;
 
 /* The hash table of register symbols.  */
 static struct hash_control *arc_reg_hash;
+
+/* The hash table of aux register symbols.  */
+static struct hash_control *arc_aux_hash;
 
 /* A table of CPU names and opcode sets.  */
 static const struct cpu_type
@@ -1658,31 +1680,23 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		case O_symbol:
 		  {
 		    const char *p;
-		    size_t len;
 		    const struct arc_aux_reg *auxr;
-		    unsigned j;
 
 		    if (opcode->class != AUXREG)
 		      goto de_fault;
 		    p = S_GET_NAME (tok[tokidx].X_add_symbol);
-		    len = strlen (p);
 
-		    auxr = &arc_aux_regs[0];
-		    for (j = 0; j < arc_num_aux_regs; j++, auxr++)
-		      if (len == auxr->length
-			  && strcasecmp (auxr->name, p) == 0
-                          && ((auxr->subclass == NONE)
-                              || check_cpu_feature (auxr->subclass)))
-			{
-			  /* We modify the token array here, safe in the
-			     knowledge, that if this was the wrong choice
-			     then the original contents will be restored
-			     from BKTOK.  */
-			  tok[tokidx].X_op = O_constant;
-			  tok[tokidx].X_add_number = auxr->address;
-			  ARC_SET_FLAG (tok[tokidx].X_add_symbol, ARC_FLAG_AUX);
-			  break;
-			}
+		    auxr = hash_find (arc_aux_hash, p);
+		    if (auxr)
+		      {
+			/* We modify the token array here, safe in the
+			   knowledge, that if this was the wrong
+			   choice then the original contents will be
+			   restored from BKTOK.  */
+			tok[tokidx].X_op = O_constant;
+			tok[tokidx].X_add_number = auxr->address;
+			ARC_SET_FLAG (tok[tokidx].X_add_symbol, ARC_FLAG_AUX);
+		      }
 
 		    if (tok[tokidx].X_op != O_constant)
 		      goto de_fault;
@@ -1809,7 +1823,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
       /* Setup ready for flag parsing.  */
       lnflg = nflgs;
       for (i = 0; i < nflgs; i++)
-        first_pflag [i].code = 0;
+	first_pflag[i].flgp = NULL;
 
       /* Check the flags.  Iterate over the valid flag classes.  */
       for (flgidx = opcode->flags; *flgidx; ++flgidx)
@@ -1818,31 +1832,57 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	  const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
 	  const unsigned *flgopridx;
 	  int cl_matches = 0;
+	  struct arc_flags *pflag = NULL;
+
+	  /* Check for extension conditional codes.  */
+	  if (ext_condcode.arc_ext_condcode
+	      && cl_flags->class & F_CLASS_EXTEND)
+	    {
+	      struct arc_flag_operand *pf = ext_condcode.arc_ext_condcode;
+	      while (pf->name)
+		{
+		  pflag = first_pflag;
+		  for (i = 0; i < nflgs; i++, pflag++)
+		    {
+		      if (!strcmp (pf->name, pflag->name))
+			{
+			  if (pflag->flgp != NULL)
+			    goto match_failed;
+			  /* Found it.  */
+			  cl_matches++;
+			  pflag->flgp = pf;
+			  lnflg--;
+			  break;
+			}
+		    }
+		  pf++;
+		}
+	    }
 
 	  for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
 	    {
 	      const struct arc_flag_operand *flg_operand;
-	      struct arc_flags *pflag = first_pflag;
 
+	      pflag = first_pflag;
 	      flg_operand = &arc_flag_operands[*flgopridx];
 	      for (i = 0; i < nflgs; i++, pflag++)
 		{
 		  /* Match against the parsed flags.  */
 		  if (!strcmp (flg_operand->name, pflag->name))
 		    {
-		      if (pflag->code != 0)
+		      if (pflag->flgp != NULL)
 			goto match_failed;
 		      cl_matches++;
-		      pflag->code = *flgopridx;
+		      pflag->flgp = (struct arc_flag_operand *) flg_operand;
 		      lnflg--;
 		      break; /* goto next flag class and parsed flag.  */
 		    }
 		}
 	    }
 
-	  if (cl_flags->class == F_CLASS_REQUIRED && cl_matches == 0)
+	  if ((cl_flags->class & F_CLASS_REQUIRED) && cl_matches == 0)
 	    goto match_failed;
-	  if (cl_flags->class == F_CLASS_OPTIONAL && cl_matches > 1)
+	  if ((cl_flags->class & F_CLASS_OPTIONAL) && cl_matches > 1)
 	    goto match_failed;
 	}
       /* Did I check all the parsed flags?  */
@@ -2345,6 +2385,30 @@ md_begin (void)
 
   /* Initialize the last instructions.  */
   memset (&arc_last_insns[0], 0, sizeof (arc_last_insns));
+
+  /* Aux register declaration.  */
+  arc_aux_hash = hash_new ();
+  if (arc_aux_hash == NULL)
+    as_fatal (_("Virtual memory exhausted"));
+
+  const struct arc_aux_reg *auxr = &arc_aux_regs[0];
+  unsigned int i;
+  for (i = 0; i < arc_num_aux_regs; i++, auxr++)
+    {
+      const char *retval;
+
+      if (!(auxr->cpu & arc_target))
+	continue;
+
+      if ((auxr->subclass != NONE)
+	  && !check_cpu_feature (auxr->subclass))
+	continue;
+
+      retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
+      if (retval)
+	as_fatal (_("internal error: can't hash aux register '%s': %s"),
+		  auxr->name, retval);
+    }
 }
 
 /* Write a value out to the object file, using the appropriate
@@ -3631,8 +3695,7 @@ assemble_insn (const struct arc_opcode *opcode,
   /* Handle flags.  */
   for (i = 0; i < nflg; i++)
     {
-      const struct arc_flag_operand *flg_operand =
-	&arc_flag_operands[pflags[i].code];
+      const struct arc_flag_operand *flg_operand = pflags[i].flgp;
 
       /* Check if the instruction has a delay slot.  */
       if (!strcmp (flg_operand->name, "d"))
@@ -4192,6 +4255,249 @@ arc_extinsn (int ignore ATTRIBUTE_UNUSED)
   arc_insert_opcode ((const struct arc_opcode *) arc_ext_opcodes);
 
   create_extinst_section (&einsn);
+}
+
+static void
+tokenize_extregister (extRegister_t *ereg, int opertype)
+{
+  char *name;
+  char *mode;
+  char c;
+  char *p;
+  int number, imode = 0;
+  bfd_boolean isCore_p = (opertype == EXT_CORE_REGISTER) ? TRUE : FALSE;
+  bfd_boolean isReg_p  = (opertype == EXT_CORE_REGISTER
+			  || opertype == EXT_AUX_REGISTER) ? TRUE : FALSE;
+
+  /* 1st: get register name.  */
+  SKIP_WHITESPACE ();
+  p = input_line_pointer;
+  c = get_symbol_name (&p);
+
+  name = xstrdup (p);
+  restore_line_pointer (c);
+
+  /* 2nd: get register number.  */
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("expected comma after register name"));
+      ignore_rest_of_line ();
+      free (name);
+      return;
+    }
+  input_line_pointer++;
+  number = get_absolute_expression ();
+
+  if (number < 0)
+    {
+      as_bad (_("negative operand number %d"), number);
+      ignore_rest_of_line ();
+      free (name);
+      return;
+    }
+
+  if (isReg_p)
+    {
+      /* 3rd: get register mode.  */
+      SKIP_WHITESPACE ();
+
+      if (*input_line_pointer != ',')
+	{
+	  as_bad (_("expected comma after register number"));
+	  ignore_rest_of_line ();
+	  free (name);
+	  return;
+	}
+
+      input_line_pointer++;
+      mode = input_line_pointer;
+
+      if (!strncmp (mode, "r|w", 3))
+	{
+	  imode = 0;
+	  input_line_pointer += 3;
+	}
+      else if (!strncmp (mode, "r", 1))
+	{
+	  imode = ARC_REGISTER_READONLY;
+	  input_line_pointer += 1;
+	}
+      else if (strncmp (mode, "w", 1))
+	{
+	  as_bad (_("invalid mode"));
+	  ignore_rest_of_line ();
+	  free (name);
+	  return;
+	}
+      else
+	{
+	  imode = ARC_REGISTER_WRITEONLY;
+	  input_line_pointer += 1;
+	}
+    }
+
+  if (isCore_p)
+    {
+      /* 4th: get core register shortcut.  */
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer != ',')
+	{
+	  as_bad (_("expected comma after register mode"));
+	  ignore_rest_of_line ();
+	  free (name);
+	  return;
+	}
+
+      input_line_pointer++;
+
+      if (!strncmp (input_line_pointer, "cannot_shortcut", 15))
+	{
+	  imode |= ARC_REGISTER_NOSHORT_CUT;
+	  input_line_pointer += 15;
+	}
+      else if (strncmp (input_line_pointer, "can_shortcut", 12))
+	{
+	  as_bad (_("shortcut designator invalid"));
+	  ignore_rest_of_line ();
+	  free (name);
+	  return;
+	}
+      else
+	{
+	  input_line_pointer += 12;
+	}
+    }
+  demand_empty_rest_of_line ();
+
+  ereg->name = name;
+  ereg->number = number;
+  ereg->imode  = imode;
+}
+
+/* Create an extension register/condition description in the arc
+   extension section of the output file.
+
+   The structure for an instruction is like this:
+   [0]: Length of the record.
+   [1]: Type of the record.
+
+   For core regs and condition codes:
+   [2]: Value.
+   [3]+ Name.
+
+   For auxilirary registers:
+   [2..5]: Value.
+   [6]+ Name
+
+   The sequence is terminated by an empty entry.  */
+
+static void
+create_extcore_section (extRegister_t *ereg, int opertype)
+{
+  segT old_sec   = now_seg;
+  int old_subsec = now_subseg;
+  char *p;
+  int name_len   = strlen (ereg->name);
+
+  arc_set_ext_seg ();
+
+  switch (opertype)
+    {
+    case EXT_COND_CODE:
+    case EXT_CORE_REGISTER:
+      p = frag_more (1);
+      *p = 3 + name_len + 1;
+      p = frag_more (1);
+      *p = opertype;
+      p = frag_more (1);
+      *p = ereg->number;
+      break;
+    case EXT_AUX_REGISTER:
+      p = frag_more (1);
+      *p = 6 + name_len + 1;
+      p = frag_more (1);
+      *p = EXT_AUX_REGISTER;
+      p = frag_more (1);
+      *p = (ereg->number >> 24) & 0xff;
+      p = frag_more (1);
+      *p = (ereg->number >> 16) & 0xff;
+      p = frag_more (1);
+      *p = (ereg->number >>  8) & 0xff;
+      p = frag_more (1);
+      *p = (ereg->number)       & 0xff;
+      break;
+    default:
+      break;
+    }
+
+  p = frag_more (name_len + 1);
+  strcpy (p, ereg->name);
+
+  subseg_set (old_sec, old_subsec);
+}
+
+/* Handler .extCoreRegister pseudo-op.  */
+
+static void
+arc_extcorereg (int opertype)
+{
+  extRegister_t ereg;
+  struct arc_aux_reg *auxr;
+  const char *retval;
+  struct arc_flag_operand *ccode;
+
+  memset (&ereg, 0, sizeof (ereg));
+  tokenize_extregister (&ereg, opertype);
+
+  switch (opertype)
+    {
+    case EXT_CORE_REGISTER:
+      /* Core register.  */
+      if (ereg.number > 60)
+	as_bad (_("core register %s value (%d) too large"), ereg.name,
+		ereg.number);
+      declare_register (ereg.name, ereg.number);
+      break;
+    case EXT_AUX_REGISTER:
+      /* Auxiliary register.  */
+      auxr = xmalloc (sizeof (struct arc_aux_reg));
+      auxr->name = ereg.name;
+      auxr->cpu = arc_target;
+      auxr->subclass = NONE;
+      auxr->address = ereg.number;
+      retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
+      if (retval)
+	as_fatal (_("internal error: can't hash aux register '%s': %s"),
+		  auxr->name, retval);
+      break;
+    case EXT_COND_CODE:
+      /* Condition code.  */
+      if (ereg.number > 31)
+	as_bad (_("condition code %s value (%d) too large"), ereg.name,
+		ereg.number);
+      ext_condcode.size ++;
+      ext_condcode.arc_ext_condcode =
+	xrealloc (ext_condcode.arc_ext_condcode,
+		  (ext_condcode.size + 1) * sizeof (struct arc_flag_operand));
+      if (ext_condcode.arc_ext_condcode == NULL)
+	as_fatal (_("Virtual memory exhausted"));
+
+      ccode = ext_condcode.arc_ext_condcode + ext_condcode.size - 1;
+      ccode->name   = ereg.name;
+      ccode->code   = ereg.number;
+      ccode->bits   = 5;
+      ccode->shift  = 0;
+      ccode->favail = 0; /* not used.  */
+      ccode++;
+      memset (ccode, 0, sizeof (struct arc_flag_operand));
+      break;
+    default:
+      as_bad (_("Unknown extension"));
+      break;
+    }
+  create_extcore_section (&ereg, opertype);
 }
 
 /* Local variables:

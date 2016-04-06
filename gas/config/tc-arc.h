@@ -224,8 +224,8 @@ struct arc_flags
   /* Name of the parsed flag.  */
   char name[MAX_FLAG_NAME_LENGTH + 1];
 
-  /* The code of the parsed flag.  Valid when is not zero.  */
-  unsigned char code;
+  /* Pointer to arc flags.  */
+  struct arc_flag_operand *flgp;
 };
 
 extern const relax_typeS md_relax_table[];

@@ -77,15 +77,19 @@ typedef enum
 /* Flags class.  */
 typedef enum
   {
-    F_CLASS_NONE,
+    F_CLASS_NONE = 0,
 
     /* At most one flag from the set of flags can appear in the
        instruction.  */
-    F_CLASS_OPTIONAL,
+    F_CLASS_OPTIONAL = (1 << 0),
 
     /* Exactly one from from the set of flags must appear in the
        instruction.  */
-    F_CLASS_REQUIRED,
+    F_CLASS_REQUIRED = (1 << 1),
+
+    /* The conditional code can be extended over the standard variants
+       via .extCondCode pseudo-op.  */
+    F_CLASS_EXTEND = (1 << 2)
   } flag_class_t;
 
 /* The opcode table is an array of struct arc_opcode.  */
@@ -132,11 +136,17 @@ struct arc_opcode
 extern const struct arc_opcode arc_opcodes[];
 
 /* CPU Availability.  */
+#define ARC_OPCODE_NONE     0x0000
 #define ARC_OPCODE_ARC600   0x0001  /* ARC 600 specific insns.  */
 #define ARC_OPCODE_ARC700   0x0002  /* ARC 700 specific insns.  */
 #define ARC_OPCODE_ARCv2EM  0x0004  /* ARCv2 EM specific insns.  */
 #define ARC_OPCODE_ARCv2HS  0x0008  /* ARCv2 HS specific insns.  */
 #define ARC_OPCODE_NPS400   0x0010  /* NPS400 specific insns.  */
+
+/* CPU combi.  */
+#define ARC_OPCODE_ARCALL  (ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700	\
+			    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS)
+#define ARC_OPCODE_ARCFPX  (ARC_OPCODE_ARC700 | ARC_OPCODE_ARCv2EM)
 
 /* CPU extensions.  */
 #define ARC_EA       0x0001
@@ -406,6 +416,11 @@ struct arc_aux_reg
   /* Register address.  */
   int address;
 
+  /* One bit flags for the opcode.  These are primarily used to
+     indicate specific processors and environments support the
+     instructions.  */
+  unsigned cpu;
+
   /* AUX register subclass.  */
   insn_subclass_t subclass;
 
@@ -503,6 +518,9 @@ extern const unsigned arc_num_relax_opcodes;
 #define ARC_SUFFIX_COND		(1 << 1)
 #define ARC_SUFFIX_FLAG		(1 << 2)
 
+#define ARC_REGISTER_READONLY    (1 << 0)
+#define ARC_REGISTER_WRITEONLY   (1 << 1)
+#define ARC_REGISTER_NOSHORT_CUT (1 << 2)
 
 /* Constants needed to initialize extension instructions.  */
 extern const unsigned char flags_none[MAX_INSN_FLGS + 1];

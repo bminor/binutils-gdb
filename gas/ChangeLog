@@ -1,5 +1,33 @@
 2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* testsuite/gas/arc/textauxregister.d: New file.
+	* testsuite/gas/arc/textauxregister.s: Likewise.
+	* testsuite/gas/arc/textcondcode.d: Likewise.
+	* testsuite/gas/arc/textcondcode.s: Likewise.
+	* testsuite/gas/arc/textcoreregister.d: Likewise.
+	* testsuite/gas/arc/textcoreregister.s: Likewise.
+	* testsuite/gas/arc/textpseudoop.d: Likewise.
+	* testsuite/gas/arc/textpseudoop.s: Likewise.
+	* testsuite/gas/arc/ld2.d: Update test.
+	* testsuite/gas/arc/st.d: Likewise.
+	* testsuite/gas/arc/taux.d: Likewise.
+	* doc/c-arc.texi (ARC Directives): Add .extCondCode,
+	.extCoreRegister and .extAuxRegister documentation.
+	* config/tc-arc.c (arc_extcorereg): New function.
+	(md_pseudo_table): Add .extCondCode, .extCoreRegister and
+	.extAuxRegister pseudo-ops.
+	(extRegister_t): New type.
+	(ext_condcode, arc_aux_hash): New global variable.
+	(find_opcode_match): Check for extensions.
+	(preprocess_operands): Likewise.
+	(md_begin): Add aux registers in a hash.
+	(assemble_insn): Update use arc_flags member.
+	(tokenize_extregister): New function.
+	(create_extcore_section): Likewise.
+	* config/tc-arc.h (arc_flags): Delete code, add flgp.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* testsuite/gas/arc/noargs_a7.d: New file.
 	* testsuite/gas/arc/noargs_a7.s: Likewise.
 	* testsuite/gas/arc/noargs_hs.d: Likewise.
