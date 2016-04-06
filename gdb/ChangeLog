@@ -1,4 +1,8 @@
 2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c: Revert check-in by a mistake in the previous commit.
+
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* exec.c (exec_file_locate_attach): Print warning for unsupported
