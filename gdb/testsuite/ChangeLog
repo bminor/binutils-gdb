@@ -1,3 +1,8 @@
+2016-04-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.arch/ftrace-insn-reloc.exp: Check for IPA basename instead of
+	absolute.
+
 2016-04-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.trace/ftrace-lock.exp: Check for IPA basename instead of
