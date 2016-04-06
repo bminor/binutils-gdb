@@ -2471,6 +2471,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
   bfd_boolean addr_op;
   const char * error_message;
   static signed int repeat_count = 0;
+  static bfd_boolean prev_insn_is_nop = FALSE;
   bfd_boolean fix_emitted;
 
   /* Opcode is the one from opcodes table
@@ -2670,7 +2671,24 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       switch (opcode->insn_opnumb)
 	{
 	case 0:
-	  if (is_opcode ("eint") || is_opcode ("dint"))
+	  if (is_opcode ("eint"))
+	    {
+	      if (! prev_insn_is_nop)
+		{
+		  if (gen_interrupt_nops)
+		    {
+		      frag = frag_more (2);
+		      bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
+		      dwarf2_emit_insn (2);
+
+		      if (warn_interrupt_nops)
+			as_warn (_("inserting a NOP before EINT"));
+		    }
+		  else if (warn_interrupt_nops)
+		    as_warn (_("a NOP might be needed before the EINT"));
+		}
+	    }
+	  else if (is_opcode ("dint"))
 	    check_for_nop |= NOP_CHECK_INTERRUPT;
 
 	  /* Set/clear bits instructions.  */
@@ -3857,6 +3875,11 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       as_bad (_("Illegal instruction or not implemented opcode."));
     }
 
+  if (is_opcode ("nop"))
+    prev_insn_is_nop = TRUE;
+  else
+    prev_insn_is_nop = FALSE;
+	    
   input_line_pointer = line;
   return 0;
 }
