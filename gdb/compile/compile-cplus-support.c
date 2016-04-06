@@ -189,6 +189,23 @@ add_code_header (enum compile_i_scope_types type, struct ui_file *buf)
 			") {\n",
 			buf);
       break;
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
+      fputs_unfiltered (
+			"#include <cstring>\n"
+			"void "
+			GCC_FE_WRAPPER_FUNCTION
+			" (struct "
+			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+			" *"
+			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+			", "
+			COMPILE_I_PRINT_OUT_ARG_TYPE
+			" "
+			COMPILE_I_PRINT_OUT_ARG
+			") {\n",
+			buf);
+      break;
     case COMPILE_I_RAW_SCOPE:
       break;
     default:
@@ -206,6 +223,8 @@ add_code_footer (enum compile_i_scope_types type, struct ui_file *buf)
   switch (type)
     {
     case COMPILE_I_SIMPLE_SCOPE:
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
       fputs_unfiltered ("}\n", buf);
       break;
     case COMPILE_I_RAW_SCOPE:
@@ -320,8 +339,6 @@ cplus_compute_program (struct compile_instance *inst,
   buf = mem_fileopen ();
   cleanup = make_cleanup_ui_file_delete (buf);
 
-  write_macro_definitions (expr_block, expr_pc, buf);
-
   /* Do not generate local variable information for "raw"
      compilations.  In this case we aren't emitting our own function
      and the user's code may only refer to globals.  */
@@ -368,12 +385,15 @@ cplus_compute_program (struct compile_instance *inst,
 
   add_code_header (inst->scope, buf);
 
-  if (inst->scope == COMPILE_I_SIMPLE_SCOPE)
+  if (inst->scope == COMPILE_I_SIMPLE_SCOPE
+      || inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+      || inst->scope == COMPILE_I_PRINT_VALUE_SCOPE)
     {
       ui_file_put (var_stream, ui_file_write_for_put, buf);
       fputs_unfiltered ("#pragma GCC user_expression\n", buf);
     }
 
+  write_macro_definitions (expr_block, expr_pc, buf);
   /* The user expression has to be in its own scope, so that "extern"
      works properly.  Otherwise gcc thinks that the "extern"
      declaration is in the same scope as the declaration provided by
@@ -382,7 +402,26 @@ cplus_compute_program (struct compile_instance *inst,
     fputs_unfiltered ("{\n", buf);
 
   fputs_unfiltered ("#line 1 \"gdb command line\"\n", buf);
-  fputs_unfiltered (input, buf);
+
+  switch (inst->scope)
+    {
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
+      fprintf_unfiltered (buf,
+"auto " COMPILE_I_EXPR_VAL " = %s;\n"
+"__attribute__((used)) auto " COMPILE_I_EXPR_PTR_TYPE "= &%s;\n"
+"std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s" COMPILE_I_EXPR_VAL ","
+	 "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));"
+			  , input, input,
+			  (inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+			   ? "&" : ""));
+      break;
+    default:
+      fputs_unfiltered (input, buf);
+      break;
+    }
+
+  /* fputs_unfiltered (input, buf); */
   fputs_unfiltered ("\n", buf);
 
   /* For larger user expressions the automatic semicolons may be
