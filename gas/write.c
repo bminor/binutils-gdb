@@ -1234,7 +1234,7 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	rp = &r->next;
     }
 
-  relocs = (arelent **) xcalloc (n, sizeof (arelent *));
+  relocs = XCNEWVEC (arelent *, n);
 
   n = 0;
   r = my_reloc_list;

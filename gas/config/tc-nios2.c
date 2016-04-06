@@ -1482,7 +1482,7 @@ static nios2_insn_relocS *
 nios2_insn_reloc_new (bfd_reloc_code_real_type reloc_type, unsigned int pcrel)
 {
   nios2_insn_relocS *retval;
-  retval = (nios2_insn_relocS *) malloc (sizeof (nios2_insn_relocS));
+  retval = XNEW (nios2_insn_relocS);
   if (retval == NULL)
     {
       as_bad (_("can't create relocation"));
@@ -3854,8 +3854,8 @@ nios2_frob_symbol (symbolS *symp)
 arelent *
 tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
-  arelent *reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  arelent *reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;

@@ -439,7 +439,7 @@ shmedia_frob_section_type (asection *sec)
       sec_elf_data = sh64_elf_section_data (sec)->sh64_info;
       if (sec_elf_data == NULL)
 	{
-	  sec_elf_data = xcalloc (1, sizeof (*sec_elf_data));
+	  sec_elf_data = XCNEW (struct sh64_section_data);
 	  sh64_elf_section_data (sec)->sh64_info = sec_elf_data;
 	}
 

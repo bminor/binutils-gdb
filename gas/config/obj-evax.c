@@ -86,8 +86,7 @@ evax_symbol_new_hook (symbolS *sym)
 {
   struct evax_private_udata_struct *udata;
 
-  udata = (struct evax_private_udata_struct *)
-    xmalloc (sizeof (struct evax_private_udata_struct));
+  udata = XNEW (struct evax_private_udata_struct);
 
   udata->bsym = symbol_get_bfdsym (sym);
   udata->enbsym = NULL;

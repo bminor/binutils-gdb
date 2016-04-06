@@ -299,7 +299,7 @@ append_insns_as_macros (void)
 {
   struct ITBL_OPCODE_STRUCT *new_opcodes, *o;
   struct itbl_entry *e, **es;
-  int n, size, new_size, new_num_opcodes;
+  int n, size, new_num_opcodes;
 #ifdef USE_MACROS
   int id;
 #endif
@@ -320,12 +320,9 @@ append_insns_as_macros (void)
   ASSERT (size >= 0);
   DBG (("I get=%d\n", size / sizeof (ITBL_OPCODES[0])));
 
-  new_size = sizeof (struct ITBL_OPCODE_STRUCT) * new_num_opcodes;
-  ASSERT (new_size > size);
-
   /* FIXME since ITBL_OPCODES culd be a static table,
 		we can't realloc or delete the old memory.  */
-  new_opcodes = (struct ITBL_OPCODE_STRUCT *) malloc (new_size);
+  new_opcodes = XNEWVEC (struct ITBL_OPCODE_STRUCT, new_num_opcodes);
   if (!new_opcodes)
     {
       printf (_("Unable to allocate memory for new instructions\n"));
@@ -853,7 +850,7 @@ alloc_entry (e_processor processor, e_type type,
   struct itbl_entry *e, **es;
   if (!name)
     return 0;
-  e = (struct itbl_entry *) malloc (sizeof (struct itbl_entry));
+  e = XNEW (struct itbl_entry);
   if (e)
     {
       memset (e, 0, sizeof (struct itbl_entry));
@@ -875,7 +872,7 @@ alloc_field (e_type type, int sbit, int ebit,
 	     unsigned long flags)
 {
   struct itbl_field *f;
-  f = (struct itbl_field *) malloc (sizeof (struct itbl_field));
+  f = XNEW (struct itbl_field);
   if (f)
     {
       memset (f, 0, sizeof (struct itbl_field));

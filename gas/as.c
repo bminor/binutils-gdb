@@ -569,7 +569,7 @@ parse_args (int * pargc, char *** pargv)
   old_argv = *pargv;
 
   /* Initialize a new argv that contains no options.  */
-  new_argv = (char **) xmalloc (sizeof (char *) * (old_argc + 1));
+  new_argv = XNEWVEC (char *, old_argc + 1);
   new_argv[0] = old_argv[0];
   new_argc = 1;
   new_argv[new_argc] = NULL;
@@ -726,7 +726,7 @@ This program has absolutely no warranty.\n"));
 	      as_fatal (_("bad defsym; format is --defsym name=value"));
 	    *s++ = '\0';
 	    i = bfd_scan_vma (s, (const char **) NULL, 0);
-	    n = (struct defsym_list *) xmalloc (sizeof *n);
+	    n = XNEW (struct defsym_list);
 	    n->next = defsyms;
 	    n->name = optarg;
 	    n->value = i;

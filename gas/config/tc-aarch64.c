@@ -1187,7 +1187,7 @@ insert_reg_alias (char *str, int number, aarch64_reg_type type)
     }
 
   name = xstrdup (str);
-  new = xmalloc (sizeof (reg_entry));
+  new = XNEW (reg_entry);
 
   new->name = name;
   new->number = number;
@@ -1575,7 +1575,7 @@ find_or_make_literal_pool (int size)
   if (pool == NULL)
     {
       /* Create a new pool.  */
-      pool = xmalloc (sizeof (*pool));
+      pool = XNEW (literal_pool);
       if (!pool)
 	return NULL;
 
@@ -1652,7 +1652,8 @@ add_to_lit_pool (expressionS *exp, int size)
 	{
 	  /* PR 16688: Bignums are held in a single global array.  We must
 	     copy and preserve that value now, before it is overwritten.  */
-	  pool->literals[entry].bignum = xmalloc (CHARS_PER_LITTLENUM * exp->X_add_number);
+	  pool->literals[entry].bignum = XNEWVEC (LITTLENUM_TYPE,
+						  exp->X_add_number);
 	  memcpy (pool->literals[entry].bignum, generic_bignum,
 		  CHARS_PER_LITTLENUM * exp->X_add_number);
 	}
@@ -7505,7 +7506,7 @@ fill_instruction_hash_table (void)
       templates *templ, *new_templ;
       templ = hash_find (aarch64_ops_hsh, opcode->name);
 
-      new_templ = (templates *) xmalloc (sizeof (templates));
+      new_templ = XNEW (templates);
       new_templ->opcode = opcode;
       new_templ->next = NULL;
 

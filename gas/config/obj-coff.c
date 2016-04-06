@@ -77,10 +77,8 @@ stack_init (unsigned long chunk_size,
 {
   stack *st;
 
-  st = malloc (sizeof (* st));
-  if (!st)
-    return NULL;
-  st->data = malloc (chunk_size);
+  st = XNEW (stack);
+  st->data = XNEWVEC (char, chunk_size);
   if (!st->data)
     {
       free (st);
@@ -99,8 +97,7 @@ stack_push (stack *st, char *element)
   if (st->pointer + st->element_size >= st->size)
     {
       st->size += st->chunk_size;
-      if ((st->data = xrealloc (st->data, st->size)) == NULL)
-	return NULL;
+      st->data = XRESIZEVEC (char, st->data, st->size);
     }
   memcpy (st->data + st->pointer, element, st->element_size);
   st->pointer += st->element_size;
@@ -383,7 +380,7 @@ void
 coff_obj_symbol_new_hook (symbolS *symbolP)
 {
   long   sz = (OBJ_COFF_MAX_AUXENTRIES + 1) * sizeof (combined_entry_type);
-  char * s  = xmalloc (sz);
+  char * s  = XNEWVEC (char, sz);
 
   memset (s, 0, sz);
   coffsymbol (symbol_get_bfdsym (symbolP))->native = (combined_entry_type *) s;
@@ -403,10 +400,11 @@ coff_obj_symbol_new_hook (symbolS *symbolP)
 void
 coff_obj_symbol_clone_hook (symbolS *newsymP, symbolS *orgsymP)
 {
-  long sz = (OBJ_COFF_MAX_AUXENTRIES + 1) * sizeof (combined_entry_type);
-  combined_entry_type * s = xmalloc (sz);
+  long elts = OBJ_COFF_MAX_AUXENTRIES + 1;
+  combined_entry_type * s = XNEWVEC (combined_entry_type, elts);
 
-  memcpy (s, coffsymbol (symbol_get_bfdsym (orgsymP))->native, sz);
+  memcpy (s, coffsymbol (symbol_get_bfdsym (orgsymP))->native,
+	  elts * sizeof (combined_entry_type));
   coffsymbol (symbol_get_bfdsym (newsymP))->native = s;
 
   SF_SET (newsymP, SF_GET (orgsymP));
@@ -423,7 +421,7 @@ int coff_n_line_nos;
 static void
 add_lineno (fragS * frag, addressT offset, int num)
 {
-  struct line_no * new_line = xmalloc (sizeof (* new_line));
+  struct line_no * new_line = XNEW (struct line_no);
 
   if (!current_lineno_sym)
     abort ();
@@ -1444,7 +1442,7 @@ coff_frob_symbol (symbolS *symp, int *punt)
       /* We need i entries for line numbers, plus 1 for the first
 	 entry which BFD will override, plus 1 for the last zero
 	 entry (a marker for BFD).  */
-      l = xmalloc ((i + 2) * sizeof (* l));
+      l = XNEWVEC (alent, (i + 2));
       coffsymbol (symbol_get_bfdsym (symp))->lineno = l;
       l[i + 1].line_number = 0;
       l[i + 1].u.sym = NULL;

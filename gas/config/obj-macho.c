@@ -1195,8 +1195,7 @@ obj_mach_o_indirect_symbol (int arg ATTRIBUTE_UNUSED)
 	     indirect, it is promoted to a 'real' one.  Fetching the bfd sym
 	     achieves this.  */
 	  symbol_get_bfdsym (sym);
-	  isym = (obj_mach_o_indirect_sym *)
-			xmalloc (sizeof (obj_mach_o_indirect_sym));
+	  isym = XNEW (obj_mach_o_indirect_sym);
 
 	  /* Just record the data for now, we will validate it when we
 	     compute the output in obj_mach_o_set_indirect_symbols.  */

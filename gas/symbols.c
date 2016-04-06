@@ -1639,7 +1639,7 @@ define_dollar_label (long label)
     {
       dollar_labels = XNEWVEC (long, DOLLAR_LABEL_BUMP_BY);
       dollar_label_instances = XNEWVEC (long, DOLLAR_LABEL_BUMP_BY);
-      dollar_label_defines = (char *) xmalloc (DOLLAR_LABEL_BUMP_BY);
+      dollar_label_defines = XNEWVEC (char, DOLLAR_LABEL_BUMP_BY);
       dollar_label_max = DOLLAR_LABEL_BUMP_BY;
       dollar_label_count = 0;
     }
@@ -1649,7 +1649,8 @@ define_dollar_label (long label)
       dollar_labels = XRESIZEVEC (long, dollar_labels, dollar_label_max);
       dollar_label_instances = XRESIZEVEC (long, dollar_label_instances,
 					  dollar_label_max);
-      dollar_label_defines = (char *) xrealloc (dollar_label_defines, dollar_label_max);
+      dollar_label_defines = XRESIZEVEC (char, dollar_label_defines,
+					 dollar_label_max);
     }				/* if we needed to grow  */
 
   dollar_labels[dollar_label_count] = label;
@@ -3075,11 +3076,11 @@ symbol_relc_make_sym (symbolS * sym)
   sname_len = strlen (sname);
   typetag = symbol_section_p (sym) ? 'S' : 's';
 
-  terminal = xmalloc (1 /* S or s */
-		      + 8 /* sname_len in decimal */
-		      + 1 /* _ spacer */
-		      + sname_len /* name itself */
-		      + 1 /* \0 */ );
+  terminal = XNEWVEC (char, (1 /* S or s */
+			     + 8 /* sname_len in decimal */
+			     + 1 /* _ spacer */
+			     + sname_len /* name itself */
+			     + 1 /* \0 */ ));
 
   sprintf (terminal, "%c%d:%s", typetag, sname_len, sname);
   return terminal;

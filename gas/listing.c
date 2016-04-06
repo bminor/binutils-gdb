@@ -347,7 +347,7 @@ listing_newline (char *ps)
       if (strcmp (file, _("{standard input}")) == 0
 	  && input_line_pointer != NULL)
 	{
-	  char *copy;
+	  char *copy, *src, *dest;
 	  int len;
 	  int seen_quote = 0;
 	  int seen_slash = 0;
@@ -367,24 +367,21 @@ listing_newline (char *ps)
 
 	  len = copy - input_line_pointer + 1;
 
-	  copy = (char *) xmalloc (len);
+	  copy = XNEWVEC (char, len);
 
-	  if (copy != NULL)
+	  src = input_line_pointer;
+	  dest = copy;
+
+	  while (--len)
 	    {
-	      char *src = input_line_pointer;
-	      char *dest = copy;
+	      unsigned char c = *src++;
 
-	      while (--len)
-		{
-		  unsigned char c = *src++;
-
-		  /* Omit control characters in the listing.  */
-		  if (!ISCNTRL (c))
-		    *dest++ = c;
-		}
-
-	      *dest = 0;
+	      /* Omit control characters in the listing.  */
+	      if (!ISCNTRL (c))
+		*dest++ = c;
 	    }
+
+	  *dest = 0;
 
 	  new_i->line_contents = copy;
 	}
@@ -1200,8 +1197,8 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
   int show_listing = 1;
   unsigned int width;
 
-  buffer = (char *) xmalloc (listing_rhs_width);
-  data_buffer = (char *) xmalloc (MAX_BYTES);
+  buffer = XNEWVEC (char, listing_rhs_width);
+  data_buffer = XNEWVEC (char, MAX_BYTES);
   eject = 1;
   list = head->next;
 

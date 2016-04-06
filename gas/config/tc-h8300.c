@@ -252,8 +252,7 @@ md_begin (void)
 
   nopcodes = sizeof (h8_opcodes) / sizeof (struct h8_opcode);
 
-  h8_instructions = (struct h8_instruction *)
-    xmalloc (nopcodes * sizeof (struct h8_instruction));
+  h8_instructions = XNEWVEC (struct h8_instruction, nopcodes);
 
   pi = h8_instructions;
   p1 = h8_opcodes;
@@ -273,7 +272,7 @@ md_begin (void)
 	break;
       /* Strip off any . part when inserting the opcode and only enter
 	 unique codes into the hash table.  */
-      dst = buffer = malloc (strlen (src) + 1);
+      dst = buffer = XNEWVEC (char, strlen (src) + 1);
       while (*src)
 	{
 	  if (*src == '.')

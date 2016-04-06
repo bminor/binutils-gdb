@@ -1765,7 +1765,7 @@ preprocess_reglist (char *param, int *allocated)
 
   while (*paramP++ != '{');
 
-  new_param = (char *)xcalloc (MAX_INST_LEN, sizeof (char));
+  new_param = XCNEWVEC (char, MAX_INST_LEN);
   *allocated = 1;
   strncpy (new_param, param, paramP - param - 1);
 

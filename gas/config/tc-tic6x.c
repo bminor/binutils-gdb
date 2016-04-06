@@ -201,7 +201,7 @@ static tic6x_unwind_info *tic6x_get_unwind (void)
   if (unwind)
     return unwind;
 
-  unwind = (tic6x_unwind_info *)xmalloc (sizeof (tic6x_unwind_info));
+  unwind =XNEW (tic6x_unwind_info);
   seg_info (now_seg)->tc_segment_info_data.unwind = unwind;
   memset (unwind, 0, sizeof (*unwind));
   return unwind;
@@ -4642,7 +4642,7 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
   prefix_len = strlen (prefix);
   text_len = strlen (text_name);
   sec_name_len = prefix_len + text_len;
-  sec_name = (char *) xmalloc (sec_name_len + 1);
+  sec_name = XNEWVEC (char, sec_name_len + 1);
   memcpy (sec_name, prefix, prefix_len);
   memcpy (sec_name + prefix_len, text_name, text_len);
   sec_name[prefix_len + text_len] = '\0';

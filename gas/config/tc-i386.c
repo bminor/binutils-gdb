@@ -2513,7 +2513,7 @@ md_begin (void)
 
     /* Setup for loop.  */
     optab = i386_optab;
-    core_optab = (templates *) xmalloc (sizeof (templates));
+    core_optab = XNEW (templates);
     core_optab->start = optab;
 
     while (1)
@@ -2536,7 +2536,7 @@ md_begin (void)
 	      }
 	    if (optab->name == NULL)
 	      break;
-	    core_optab = (templates *) xmalloc (sizeof (templates));
+	    core_optab = XNEW (templates);
 	    core_optab->start = optab;
 	  }
       }
@@ -7607,7 +7607,7 @@ lex_got (enum bfd_reloc_code_real *rel,
 
 	      /* Allocate and copy string.  The trailing NUL shouldn't
 		 be necessary, but be safe.  */
-	      tmpbuf = (char *) xmalloc (first + second + 2);
+	      tmpbuf = XNEWVEC (char, first + second + 2);
 	      memcpy (tmpbuf, input_line_pointer, first);
 	      if (second != 0 && *past_reloc != ' ')
 		/* Replace the relocation token with ' ', so that
@@ -7715,7 +7715,7 @@ lex_got (enum bfd_reloc_code_real *rel ATTRIBUTE_UNUSED,
 
 	      /* Allocate and copy string.  The trailing NUL shouldn't
 		 be necessary, but be safe.  */
-	      tmpbuf = (char *) xmalloc (first + second + 2);
+	      tmpbuf = XNEWVEC (char, first + second + 2);
 	      memcpy (tmpbuf, input_line_pointer, first);
 	      if (second != 0 && *past_reloc != ' ')
 		/* Replace the relocation token with ' ', so that
@@ -9797,7 +9797,7 @@ md_parse_option (int c, const char *arg)
 	char *n, *t;
 	const char *s;
 
-	n = (char *) xmalloc (strlen (i386_comment_chars) + 1);
+	n = XNEWVEC (char, strlen (i386_comment_chars) + 1);
 	t = n;
 	for (s = i386_comment_chars; *s != '\0'; s++)
 	  if (*s != '/')
@@ -10603,8 +10603,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       code = BFD_RELOC_X86_64_GOTPC64;
     }
 
-  rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;

@@ -3709,14 +3709,14 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
   relocs = hash_find (nds32_hint_hash, name);
   if (relocs == NULL)
     {
-      relocs = malloc (sizeof (struct nds32_relocs_pattern));
+      relocs = XNEW (struct nds32_relocs_pattern);
       hash_insert (nds32_hint_hash, name, relocs);
     }
   else
     {
       while (relocs->next)
 	relocs=relocs->next;
-      relocs->next = malloc (sizeof (struct nds32_relocs_pattern));
+      relocs->next = XNEW (struct nds32_relocs_pattern);
       relocs = relocs->next;
     }
 
@@ -3729,7 +3729,7 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
   /* It has to build this list because there are maybe more than one
      instructions relative to the same instruction.  It to connect to
      next instruction after md_assemble.  */
-  new = malloc (sizeof (struct nds32_relocs_group));
+  new = XNEW (struct nds32_relocs_group);
   new->pattern = relocs;
   new->next = NULL;
   group = nds32_relax_hint_current;
@@ -6602,9 +6602,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
 

@@ -639,7 +639,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	{
 	  size_t dir_len = strlen (dirs[files[filenum].dir]);
 	  size_t file_len = strlen (files[filenum].filename);
-	  char *cp = (char *) xmalloc (dir_len + 1 + file_len + 1);
+	  char *cp = XNEWVEC (char, dir_len + 1 + file_len + 1);
 
 	  memcpy (cp, dirs[files[filenum].dir], dir_len);
 	  INSERT_DIR_SEPARATOR (cp, dir_len);

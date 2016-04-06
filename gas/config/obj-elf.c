@@ -959,7 +959,7 @@ obj_elf_section_name (void)
 	      int oldlen = strlen (name);
 	      int substlen = strlen (now_seg->name);
 	      int newlen = oldlen - 2 + substlen;
-	      char *newname = (char *) xmalloc (newlen + 1);
+	      char *newname = XNEWVEC (char, newlen + 1);
 	      int headlen = subst - name;
 	      memcpy (newname, name, headlen);
 	      strcpy (newname + headlen, now_seg->name);
@@ -2324,10 +2324,8 @@ build_group_lists (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
   if ((i & 127) == 0)
     {
       unsigned int newsize = i + 128;
-      list->head = (asection **) xrealloc (list->head,
-                                           newsize * sizeof (*list->head));
-      list->elt_count = (unsigned int *)
-          xrealloc (list->elt_count, newsize * sizeof (*list->elt_count));
+      list->head = XRESIZEVEC (asection *, list->head, newsize);
+      list->elt_count = XRESIZEVEC (unsigned int, list->elt_count, newsize);
     }
   list->head[i] = sec;
   list->elt_count[i] = 1;

@@ -112,9 +112,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 

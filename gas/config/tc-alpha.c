@@ -1384,7 +1384,7 @@ load_expression (int targreg,
 		    ptr1 = strstr (symname, "..") + 2;
 		    if (ptr1 > ptr2)
 		      ptr1 = symname;
-		    ensymname = (char *) xmalloc (ptr2 - ptr1 + 5);
+		    ensymname = XNEWVEC (char, ptr2 - ptr1 + 5);
 		    memcpy (ensymname, ptr1, ptr2 - ptr1);
 		    memcpy (ensymname + (ptr2 - ptr1), "..en", 5);
 
@@ -2881,7 +2881,7 @@ emit_jsrjmp (const expressionS *tok,
       char *ensymname;
 
       /* Build the entry name as 'NAME..en'.  */
-      ensymname = (char *) xmalloc (symlen + 5);
+      ensymname = XNEWVEC (char, symlen + 5);
       memcpy (ensymname, symname, symlen);
       memcpy (ensymname + symlen, "..en", 5);
 
@@ -3733,8 +3733,7 @@ s_alpha_ent (int dummy ATTRIBUTE_UNUSED)
 	  sym = symbol_find_or_make (name);
 	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 
-	  cur_frame_data = (struct alpha_elf_frame_data *)
-              calloc (1, sizeof (*cur_frame_data));
+	  cur_frame_data = XCNEW (struct alpha_elf_frame_data);
 	  cur_frame_data->func_sym = sym;
 
 	  /* Provide sensible defaults.  */
@@ -3789,7 +3788,7 @@ s_alpha_end (int dummy ATTRIBUTE_UNUSED)
 	  if (sym && cur_frame_data)
 	    {
 	      OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (sym);
-	      expressionS *exp = (expressionS *) xmalloc (sizeof (expressionS));
+	      expressionS *exp = XNEW (expressionS);
 
 	      obj->size = exp;
 	      exp->X_op = O_subtract;
@@ -4712,8 +4711,7 @@ s_alpha_linkage (int ignore ATTRIBUTE_UNUSED)
 	  (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
 
       /* Create a linkage element.  */
-      linkage_fixup = (struct alpha_linkage_fixups *)
-	xmalloc (sizeof (struct alpha_linkage_fixups));
+      linkage_fixup = XNEW (struct alpha_linkage_fixups);
       linkage_fixup->fixp = fixp;
       linkage_fixup->next = NULL;
       linkage_fixup->label = alpha_insn_label;
@@ -5439,7 +5437,7 @@ md_begin (void)
 
       if ((slash = strchr (name, '/')) != NULL)
 	{
-	  char *p = (char *) xmalloc (strlen (name));
+	  char *p = XNEWVEC (char, strlen (name));
 
 	  memcpy (p, name, slash - name);
 	  strcpy (p + (slash - name), slash + 1);
@@ -6220,8 +6218,8 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (* reloc));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -6296,8 +6294,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 	  pname = symbol_get_bfdsym (sym)->name;
 	}
 
-      udata = (struct evax_private_udata_struct *)
-	xmalloc (sizeof (struct evax_private_udata_struct));
+      udata = XNEW (struct evax_private_udata_struct);
       udata->enbsym = symbol_get_bfdsym (fixp->fx_addsy);
       udata->bsym = symbol_get_bfdsym (fixp->tc_fix_data.info->psym);
       udata->origname = (char *)pname;

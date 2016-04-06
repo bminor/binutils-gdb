@@ -3959,9 +3959,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
       return 0;
     }
 
-  relP = (arelent *) xmalloc (sizeof (arelent));
+  relP = XNEW (arelent);
   gas_assert (relP != 0);
-  relP->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  relP->sym_ptr_ptr = XNEW (asymbol *);
   *relP->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   relP->address = fixP->fx_frag->fr_address + fixP->fx_where;
 

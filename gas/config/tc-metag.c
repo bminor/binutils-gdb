@@ -6331,7 +6331,7 @@ create_mnemonic_htab (void)
       insn_templates **slot = NULL;
       insn_templates *new_entry;
 
-      new_entry = xmalloc (sizeof (insn_templates));
+      new_entry = XNEW (insn_templates);
 
       new_entry->template = template;
       new_entry->next = NULL;
@@ -7006,8 +7006,8 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc		      = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr  = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc		      = XNEW (arelent);
+  reloc->sym_ptr_ptr  = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address      = fixp->fx_frag->fr_address + fixp->fx_where;
 

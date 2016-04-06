@@ -2424,7 +2424,7 @@ xtensa_translate_old_userreg_ops (char **popname)
 
   /* Translate the opcode.  */
   sr_name = xtensa_sysreg_name (isa, sr);
-  new_opname = (char *) xmalloc (strlen (sr_name) + 6);
+  new_opname = XNEWVEC (char, strlen (sr_name) + 6);
   sprintf (new_opname, "%s%cur.%s", (has_underbar ? "_" : ""),
 	   opname[0], sr_name);
   free (*popname);
@@ -6147,9 +6147,9 @@ new_resource_table (void *data,
   rt->opcode_unit_use = ouuf;
   rt->opcode_unit_stage = ousf;
 
-  rt->units = (unsigned char **) xcalloc (cycles, sizeof (unsigned char *));
+  rt->units = XCNEWVEC (unsigned char *, cycles);
   for (i = 0; i < cycles; i++)
-    rt->units[i] = (unsigned char *) xcalloc (nu, sizeof (unsigned char));
+    rt->units[i] = XCNEWVEC (unsigned char, nu);
 
   return rt;
 }
@@ -6183,7 +6183,7 @@ resize_resource_table (resource_table *rt, int cycles)
   for (i = 0; i < old_cycles; i++)
     rt->units[i] = XRESIZEVEC (unsigned char, rt->units[i], rt->num_units);
   for (i = old_cycles; i < cycles; i++)
-    rt->units[i] = xcalloc (rt->num_units, sizeof (unsigned char));
+    rt->units[i] = XCNEWVEC (unsigned char, rt->num_units);
 }
 
 
@@ -7434,7 +7434,7 @@ xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
 
   if (ts == NULL)
     {
-      ts = (struct trampoline_seg *)xcalloc(sizeof (struct trampoline_seg), 1);
+      ts = XCNEW(struct trampoline_seg);
       ts->next = trampoline_seg_list.next;
       trampoline_seg_list.next = ts;
       ts->seg = now_seg;
@@ -7549,7 +7549,7 @@ xtensa_maybe_create_literal_pool_frag (bfd_boolean create,
 
   if (lps == NULL)
     {
-      lps = (struct litpool_seg *)xcalloc (sizeof (struct litpool_seg), 1);
+      lps = XCNEW (struct litpool_seg);
       lps->next = litpool_seg_list.next;
       litpool_seg_list.next = lps;
       lps->seg = now_seg;
@@ -11564,7 +11564,7 @@ cache_literal_section (bfd_boolean use_abs_literals)
 	      || strncmp (text_name, ".text", 5) == 0))
 	len -= 5;
 
-      name = xmalloc (len + strlen (base_name) + 1);
+      name = XNEWVEC (char, len + strlen (base_name) + 1);
       if (strncmp (text_name, ".text", 5) == 0)
 	{
 	  strcpy (name, base_name);
