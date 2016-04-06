@@ -1496,6 +1496,15 @@ enum {
 
 static struct packet_config remote_protocol_packets[PACKET_MAX];
 
+/* gdbserver < 7.7 (before its fix from 2013-12-11) did reply to any
+   unknown 'v' packet with string "OK".  "OK" gets interpreted by GDB
+   as a reply to known packet.  For packet "vFile:setfs:" it is an
+   invalid reply and GDB would return error in
+   remote_hostio_set_filesystem, making remote files access impossible.
+   If this variable is non-zero it means the remote gdbserver is buggy
+   and any not yet detected packets are assumed as unsupported.  */
+static int unknown_v_replies_ok;
+
 /* Returns the packet's corresponding "set remote foo-packet" command
    state.  See struct packet_config for more details.  */
 
@@ -1519,6 +1528,9 @@ packet_config_support (struct packet_config *config)
     case AUTO_BOOLEAN_FALSE:
       return PACKET_DISABLE;
     case AUTO_BOOLEAN_AUTO:
+      if (unknown_v_replies_ok && config->name != NULL
+	  && config->name[0] == 'v')
+	return PACKET_DISABLE;
       return config->support;
     default:
       gdb_assert_not_reached (_("bad switch"));
@@ -4022,6 +4034,21 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   /* If the stub wants to get a QAllow, compose one and send it.  */
   if (packet_support (PACKET_QAllow) != PACKET_DISABLE)
     remote_set_permissions (target);
+
+  /* See unknown_v_replies_ok description.  */
+  {
+    const char v_mustreplyempty[] = "vMustReplyEmpty";
+
+    putpkt (v_mustreplyempty);
+    getpkt (&rs->buf, &rs->buf_size, 0);
+    if (strcmp (rs->buf, "OK") == 0)
+      unknown_v_replies_ok = 1;
+    else if (strcmp (rs->buf, "") == 0)
+      unknown_v_replies_ok = 0;
+    else
+      error (_("Remote replied unexpectedly to '%s': %s"), v_mustreplyempty,
+	     rs->buf);
+  }
 
   /* Next, we possibly activate noack mode.
 
