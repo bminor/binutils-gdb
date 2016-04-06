@@ -1,3 +1,11 @@
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-arc.c (tls_got_entries): Add 'TLS_GOT_' prefix to all
+	entries.
+	(elf_arc_relocate_section): Update enum uses.
+	(elf_arc_check_relocs): Likewise.
+	(elf_arc_finish_dynamic_symbol): Likewise.
+
 2016-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_copy_private_bfd_data): Replace "link" with
