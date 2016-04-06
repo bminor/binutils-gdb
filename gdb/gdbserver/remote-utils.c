@@ -1462,7 +1462,7 @@ clear_symbol_cache (struct sym_cache **symcache_p)
 int
 look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
 {
-  char own_buf[266], *p, *q;
+  char *p, *q;
   int len;
   struct sym_cache *sym;
   struct process_info *proc;
@@ -1497,23 +1497,37 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
   /* We ought to handle pretty much any packet at this point while we
      wait for the qSymbol "response".  That requires re-entering the
      main loop.  For now, this is an adequate approximation; allow
-     GDB to read from memory while it figures out the address of the
-     symbol.  */
-  while (own_buf[0] == 'm')
+     GDB to read from memory and handle 'v' packets (for vFile transfers)
+     while it figures out the address of the symbol.  */
+  while (1)
     {
-      CORE_ADDR mem_addr;
-      unsigned char *mem_buf;
-      unsigned int mem_len;
+      if (own_buf[0] == 'm')
+	{
+	  CORE_ADDR mem_addr;
+	  unsigned char *mem_buf;
+	  unsigned int mem_len;
 
-      decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
-      mem_buf = (unsigned char *) xmalloc (mem_len);
-      if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
-	bin2hex (mem_buf, own_buf, mem_len);
+	  decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
+	  mem_buf = (unsigned char *) xmalloc (mem_len);
+	  if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
+	    bin2hex (mem_buf, own_buf, mem_len);
+	  else
+	    write_enn (own_buf);
+	  free (mem_buf);
+	  if (putpkt (own_buf) < 0)
+	    return -1;
+	}
+      else if (own_buf[0] == 'v')
+	{
+	  int new_len = -1;
+	  handle_v_requests (own_buf, len, &new_len);
+	  if (new_len != -1)
+	    putpkt_binary (own_buf, new_len);
+	  else
+	    putpkt (own_buf);
+	}
       else
-	write_enn (own_buf);
-      free (mem_buf);
-      if (putpkt (own_buf) < 0)
-	return -1;
+	break;
       len = getpkt (own_buf);
       if (len < 0)
 	return -1;
@@ -1561,7 +1575,6 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
 int
 relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 {
-  char own_buf[266];
   int len;
   ULONGEST written = 0;
 

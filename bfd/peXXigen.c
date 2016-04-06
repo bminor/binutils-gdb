@@ -62,6 +62,7 @@
 #include "libbfd.h"
 #include "coff/internal.h"
 #include "bfdver.h"
+#include "libiberty.h"
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif
@@ -1195,13 +1196,15 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
 unsigned int
 _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinfo)
 {
-  unsigned int size = sizeof (CV_INFO_PDB70) + 1;
+  const bfd_size_type size = sizeof (CV_INFO_PDB70) + 1;
+  bfd_size_type written;
   CV_INFO_PDB70 *cvinfo70;
-  char buffer[size];
+  char * buffer;
 
   if (bfd_seek (abfd, where, SEEK_SET) != 0)
     return 0;
 
+  buffer = xmalloc (size);
   cvinfo70 = (CV_INFO_PDB70 *) buffer;
   H_PUT_32 (abfd, CVINFO_PDB70_CVSIGNATURE, cvinfo70->CvSignature);
 
@@ -1215,10 +1218,11 @@ _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinf
   H_PUT_32 (abfd, cvinfo->Age, cvinfo70->Age);
   cvinfo70->PdbFileName[0] = '\0';
 
-  if (bfd_bwrite (buffer, size, abfd) != size)
-    return 0;
+  written = bfd_bwrite (buffer, size, abfd);
 
-  return size;
+  free (buffer);
+
+  return written == size ? size : 0;
 }
 
 static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =

@@ -879,7 +879,7 @@ read_a_source_file (const char *name)
 		      /* Copy it for safe keeping.  Also give an indication of
 			 how much macro nesting is involved at this point.  */
 		      len = s - input_line_pointer;
-		      copy = (char *) xmalloc (len + macro_nest + 2);
+		      copy = XNEWVEC (char, len + macro_nest + 2);
 		      memset (copy, '>', macro_nest);
 		      copy[macro_nest] = ' ';
 		      memcpy (copy + macro_nest + 1, input_line_pointer, len);
@@ -1271,7 +1271,7 @@ read_a_source_file (const char *name)
 		     that goes with this #APP  There is one.  The specs
 		     guarantee it...  */
 		  tmp_len = buffer_limit - s;
-		  tmp_buf = (char *) xmalloc (tmp_len + 1);
+		  tmp_buf = XNEWVEC (char, tmp_len + 1);
 		  memcpy (tmp_buf, s, tmp_len);
 		  do
 		    {
@@ -1287,7 +1287,7 @@ read_a_source_file (const char *name)
 		      else
 			num = buffer_limit - buffer;
 
-		      tmp_buf = (char *) xrealloc (tmp_buf, tmp_len + num);
+		      tmp_buf = XRESIZEVEC (char, tmp_buf, tmp_len + num);
 		      memcpy (tmp_buf + tmp_len, buffer, num);
 		      tmp_len += num;
 		    }
@@ -1308,7 +1308,7 @@ read_a_source_file (const char *name)
 	      scrub_string_end = ends;
 
 	      new_length = ends - s;
-	      new_buf = (char *) xmalloc (new_length);
+	      new_buf = XNEWVEC (char, new_length);
 	      new_tmp = new_buf;
 	      for (;;)
 		{
@@ -1324,7 +1324,7 @@ read_a_source_file (const char *name)
 		      break;
 		    }
 
-		  new_buf = (char *) xrealloc (new_buf, new_length + 100);
+		  new_buf = XRESIZEVEC (char, new_buf, new_length + 100);
 		  new_tmp = new_buf + new_length;
 		  new_length += 100;
 		}
@@ -1657,7 +1657,7 @@ read_symbol_name (void)
       char * name_end;
       unsigned int C;
 
-      start = name = xmalloc (len + 1);
+      start = name = XNEWVEC (char, len + 1);
 
       name_end = name + SYM_NAME_CHUNK_LEN;
 
@@ -1669,7 +1669,7 @@ read_symbol_name (void)
 
 	      sofar = name - start;
 	      len += SYM_NAME_CHUNK_LEN;
-	      start = xrealloc (start, len + 1);
+	      start = XRESIZEVEC (char, start, len + 1);
 	      name_end = start + len;
 	      name = start + sofar;
 	    }
@@ -1697,7 +1697,7 @@ read_symbol_name (void)
 	;
 
       len = (input_line_pointer - name) - 1;
-      start = xmalloc (len + 1);
+      start = XNEWVEC (char, len + 1);
 
       memcpy (start, name, len);
       start[len] = 0;
@@ -1850,9 +1850,8 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
 
       if (line_label != NULL)
 	{
-	  alc = (char *) xmalloc (strlen (S_GET_NAME (line_label))
-				  + (input_line_pointer - name)
-				  + 1);
+	  alc = XNEWVEC (char, strlen (S_GET_NAME (line_label))
+			 + (input_line_pointer - name) + 1);
 	  sprintf (alc, "%s%s", name, S_GET_NAME (line_label));
 	  name = alc;
 	}
@@ -2137,7 +2136,7 @@ s_errwarn (int err)
      self-contained message, one that can be passed like the
      demand_copy_C_string return value, and with no assumption on the
      location of the name of the directive within the message.  */
-  char *msg
+  const char *msg
     = (err ? _(".error directive invoked in source file")
        : _(".warning directive invoked in source file"));
 
@@ -3238,7 +3237,7 @@ assign_symbol (char *name, int mode)
       if (listing & LISTING_SYMBOLS)
 	{
 	  extern struct list_info_struct *listing_tail;
-	  fragS *dummy_frag = (fragS *) xcalloc (1, sizeof (fragS));
+	  fragS *dummy_frag = XCNEW (fragS);
 	  dummy_frag->line = listing_tail;
 	  dummy_frag->fr_symbol = symbolP;
 	  symbol_set_frag (symbolP, dummy_frag);
@@ -3256,7 +3255,9 @@ assign_symbol (char *name, int mode)
 	  && !S_CAN_BE_REDEFINED (symbolP))
 	{
 	  as_bad (_("symbol `%s' is already defined"), name);
-	  symbolP = symbol_clone (symbolP, 0);
+	  ignore_rest_of_line ();
+	  input_line_pointer--;
+	  return;
 	}
       /* If the symbol is volatile, copy the symbol and replace the
 	 original with the copy, so that previous uses of the symbol will
@@ -3542,7 +3543,7 @@ s_float_space (int float_type)
     }
   else
     {
-      char *err;
+      const char *err;
 
       err = md_atof (float_type, temp, &flen);
       know (flen <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
@@ -4067,7 +4068,7 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
     { "64", BFD_RELOC_64 }
   };
 
-  reloc = (struct reloc_list *) xmalloc (sizeof (*reloc));
+  reloc = XNEW (struct reloc_list);
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -4347,7 +4348,7 @@ emit_expr_with_reloc (expressionS *exp,
     {
       struct broken_word *x;
 
-      x = (struct broken_word *) xmalloc (sizeof (struct broken_word));
+      x = XNEW (struct broken_word);
       x->next_broken_word = broken_words;
       broken_words = x;
       x->seg = now_seg;
@@ -4594,9 +4595,7 @@ emit_expr_fix (expressionS *exp, unsigned int nbytes, fragS *frag, char *p,
    BITFIELD_CONS_EXPRESSIONS.  */
 
 static void
-parse_bitfield_cons (exp, nbytes)
-     expressionS *exp;
-     unsigned int nbytes;
+parse_bitfield_cons (expressionS *exp, unsigned int nbytes)
 {
   unsigned int bits_available = BITS_PER_CHAR * nbytes;
   char *hold = input_line_pointer;
@@ -4781,9 +4780,7 @@ parse_mri_cons (expressionS *exp, unsigned int nbytes)
    To use this for a target, define REPEAT_CONS_EXPRESSIONS.  */
 
 static void
-parse_repeat_cons (exp, nbytes)
-     expressionS *exp;
-     unsigned int nbytes;
+parse_repeat_cons (expressionS *exp, unsigned int nbytes)
 {
   expressionS count;
   int i;
@@ -4925,7 +4922,7 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
 {
   char *p;
   int length;			/* Number of chars in an object.  */
-  char *err;		/* Error from scanning floating literal.  */
+  const char *err;		/* Error from scanning floating literal.  */
   char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
 
   if (is_it_end_of_statement ())
@@ -5858,7 +5855,7 @@ s_incbin (int x ATTRIBUTE_UNUSED)
     {
       int i;
 
-      path = (char *) xmalloc ((unsigned long) len + include_dir_maxlen + 5);
+      path = XNEWVEC (char, (unsigned long) len + include_dir_maxlen + 5);
 
       for (i = 0; i < include_dir_count; i++)
 	{
@@ -5961,8 +5958,8 @@ s_include (int arg ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
-  path = (char *) xmalloc ((unsigned long) i
-			   + include_dir_maxlen + 5 /* slop */ );
+  path = XNEWVEC (char, (unsigned long) i
+		  + include_dir_maxlen + 5 /* slop */ );
 
   for (i = 0; i < include_dir_count; i++)
     {

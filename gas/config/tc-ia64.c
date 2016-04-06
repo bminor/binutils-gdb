@@ -856,7 +856,7 @@ set_section (char *name)
 /* Map 's' to SHF_IA_64_SHORT.  */
 
 bfd_vma
-ia64_elf_section_letter (int letter, char **ptr_msg)
+ia64_elf_section_letter (int letter, const char **ptr_msg)
 {
   if (letter == 's')
     return SHF_IA_64_SHORT;
@@ -1025,25 +1025,16 @@ ia64_flush_insns (void)
     as_bad (_("qualifying predicate not followed by instruction"));
 }
 
-static void
-ia64_do_align (int nbytes)
-{
-  char *saved_input_line_pointer = input_line_pointer;
-
-  input_line_pointer = "";
-  s_align_bytes (nbytes);
-  input_line_pointer = saved_input_line_pointer;
-}
-
 void
 ia64_cons_align (int nbytes)
 {
   if (md.auto_align)
     {
-      char *saved_input_line_pointer = input_line_pointer;
-      input_line_pointer = "";
-      s_align_bytes (nbytes);
-      input_line_pointer = saved_input_line_pointer;
+      int log;
+      for (log = 0; (nbytes & 1) != 1; nbytes >>= 1)
+	log++;
+
+      do_align (log, NULL, 0, 0);
     }
 }
 
@@ -1054,7 +1045,7 @@ ia64_cons_align (int nbytes)
 static void
 obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
 {
-  char *sec_name;
+  const char *sec_name;
   char *sym_name;
   char c;
   offsetT size;
@@ -4290,7 +4281,7 @@ dot_proc (int dummy ATTRIBUTE_UNUSED)
     }
   last_pending->next = NULL;
   demand_empty_rest_of_line ();
-  ia64_do_align (16);
+  do_align (4, NULL, 0, 0);
 
   unwind.prologue = 0;
   unwind.prologue_count = 0;
@@ -4843,20 +4834,20 @@ stmt_float_cons (int kind)
   switch (kind)
     {
     case 'd':
-      alignment = 8;
+      alignment = 3;
       break;
 
     case 'x':
     case 'X':
-      alignment = 16;
+      alignment = 4;
       break;
 
     case 'f':
     default:
-      alignment = 4;
+      alignment = 2;
       break;
     }
-  ia64_do_align (alignment);
+  do_align (alignment, NULL, 0, 0);
   float_cons (kind);
 }
 
@@ -6990,7 +6981,7 @@ emit_one_bundle (void)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
 
   switch (c)
@@ -10676,7 +10667,8 @@ check_dv (struct ia64_opcode *idesc)
 void
 md_assemble (char *str)
 {
-  char *saved_input_line_pointer, *mnemonic;
+  char *saved_input_line_pointer, *temp;
+  const char *mnemonic;
   const struct pseudo_opcode *pdesc;
   struct ia64_opcode *idesc;
   unsigned char qp_regno;
@@ -10688,7 +10680,8 @@ md_assemble (char *str)
 
   /* extract the opcode (mnemonic):  */
 
-  ch = get_symbol_name (&mnemonic);
+  ch = get_symbol_name (&temp);
+  mnemonic = temp;
   pdesc = (struct pseudo_opcode *) hash_find (md.pseudo_hash, mnemonic);
   if (pdesc)
     {
@@ -11558,8 +11551,8 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc = xmalloc (sizeof (*reloc));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->addend = fixp->fx_offset;
@@ -11583,7 +11576,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED, fixS *fixp)
 
 #define MAX_LITTLENUMS 5
 
-char *
+const char *
 md_atof (int type, char *lit, int *size)
 {
   LITTLENUM_TYPE words[MAX_LITTLENUMS];

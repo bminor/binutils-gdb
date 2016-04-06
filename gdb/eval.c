@@ -2427,7 +2427,8 @@ evaluate_subexp_standard (struct type *expect_type,
       if (noside == EVAL_SKIP)
 	goto nosideret;
       type = check_typedef (value_type (arg2));
-      if (TYPE_CODE (type) != TYPE_CODE_INT)
+      if (TYPE_CODE (type) != TYPE_CODE_INT
+          && TYPE_CODE (type) != TYPE_CODE_ENUM)
 	error (_("Non-integral right operand for \"@\" operator."));
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{

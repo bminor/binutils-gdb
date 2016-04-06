@@ -358,7 +358,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -1867,7 +1867,7 @@ i370_macro (char *str, const struct i370_macro *macro)
     }
 
   /* Put the string together.  */
-  complete = s = alloca (len + 1);
+  complete = s = xmalloc (len + 1);
   format = macro->format;
   while (*format != '\0')
     {
@@ -1885,6 +1885,7 @@ i370_macro (char *str, const struct i370_macro *macro)
 
   /* Assemble the constructed instruction.  */
   md_assemble (complete);
+  free (complete);
 }
 
 /* This routine is called for each instruction to be assembled.  */
@@ -2351,7 +2352,7 @@ i370_tc (int ignore ATTRIBUTE_UNUSED)
     }
 }
 
-char *
+const char *
 md_atof (int type, char *litp, int *sizep)
 {
   /* 360/370/390 have two float formats: an old, funky 360 single-precision

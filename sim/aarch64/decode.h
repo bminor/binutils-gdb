@@ -177,20 +177,6 @@ pickbits64 (uint64_t val, int hi, int lo)
   return pick64 (val, hi, lo) >> lo;
 }
 
-/* Decode registers, immediates and constants of various types.  */
-
-static inline GReg
-greg (uint32_t val, int lo)
-{
-  return (GReg) pickbits32 (val, lo + 4, lo);
-}
-
-static inline VReg
-vreg (uint32_t val, int lo)
-{
-  return (VReg) pickbits32 (val, lo + 4, lo);
-}
-
 static inline uint32_t
 uimm (uint32_t val, int hi, int lo)
 {
@@ -221,36 +207,6 @@ simm64 (uint64_t val, int hi, int lo)
 
   x.u = val << (63 - hi);
   return x.n >> (63 - hi + lo);
-}
-
-static inline Shift
-shift (uint32_t val, int lo)
-{
-  return (Shift) pickbits32 (val, lo + 1, lo);
-}
-
-static inline Extension
-extension (uint32_t val, int lo)
-{
-  return (Extension) pickbits32 (val, lo + 2, lo);
-}
-
-static inline Scaling
-scaling (uint32_t val, int lo)
-{
-  return (Scaling) pickbits32 (val, lo, lo);
-}
-
-static inline WriteBack
-writeback (uint32_t val, int lo)
-{
-  return (WriteBack) pickbits32 (val, lo, lo);
-}
-
-static inline CondCode
-condcode (uint32_t val, int lo)
-{
-  return (CondCode) pickbits32 (val, lo + 3, lo);
 }
 
 /* Operation decode.

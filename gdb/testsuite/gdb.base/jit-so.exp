@@ -61,11 +61,7 @@ if { [gdb_compile_shlib ${solib_srcfile} ${solib_binfile} {}] != "" } {
     return -1
 }
 
-if {[is_remote target]} {
-    set solib_binfile_target [gdb_download ${solib_binfile}]
-} else {
-    set solib_binfile_target $solib_binfile
-}
+set solib_binfile_target [gdb_remote_download target ${solib_binfile}]
 
 proc one_jit_test {count match_str} {
     with_test_prefix "one_jit_test-$count" {

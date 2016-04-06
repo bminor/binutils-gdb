@@ -160,7 +160,6 @@ static Expr_Node *unary  (Expr_Op_Type, Expr_Node *);
 
 static void notethat (const char *, ...);
 
-char *current_inputline;
 extern char *yytext;
 int yyerror (const char *);
 

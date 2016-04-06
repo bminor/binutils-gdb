@@ -4575,7 +4575,9 @@ check_VecOperands (const insn_template *t)
 	    && i.op[op].disps->X_op == O_constant)
 	  {
 	    offsetT value = i.op[op].disps->X_add_number;
-	    int vec_disp8_ok = fits_in_vec_disp8 (value);
+	    int vec_disp8_ok
+	      = (i.disp_encoding != disp_encoding_32bit
+		 && fits_in_vec_disp8 (value));
 	    if (t->operand_types [op].bitfield.vec_disp8)
 	      {
 		if (vec_disp8_ok)
@@ -9378,7 +9380,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   md_number_to_chars (p, value, fixP->fx_size);
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   /* This outputs the LITTLENUMs in REVERSE order;
@@ -9698,7 +9700,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   unsigned int j;
   char *arch, *next;
@@ -10781,7 +10783,7 @@ tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 /* For ELF on x86-64, add support for SHF_X86_64_LARGE.  */
 
 bfd_vma
-x86_64_section_letter (int letter, char **ptr_msg)
+x86_64_section_letter (int letter, const char **ptr_msg)
 {
   if (flag_code == CODE_64BIT)
     {

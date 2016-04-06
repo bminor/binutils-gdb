@@ -200,7 +200,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 struct sparc_it
   {
-    char *error;
+    const char *error;
     unsigned long opcode;
     struct nlist *nlistp;
     expressionS exp;
@@ -490,7 +490,7 @@ struct option md_longopts[] = {
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   /* We don't get a chance to initialize anything before we're called,
      so handle that now.  */
@@ -1841,22 +1841,22 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 			  ++s;
 			}
 
-		      if (current_architecture >= SPARC_OPCODE_ARCH_V9)
-			{
-			  if (num < 16 || 31 < num)
-			    {
-			      error_message = _(": asr number must be between 16 and 31");
-			      goto error;
-			    }
-			}
-		      else
-			{
-			  if (num < 0 || 31 < num)
-			    {
-			      error_message = _(": asr number must be between 0 and 31");
-			      goto error;
-			    }
-			}
+                      /* We used to check here for the asr number to
+                         be between 16 and 31 in V9 and later, as
+                         mandated by the section C.1.1 "Register
+                         Names" in the SPARC spec.  However, we
+                         decided to remove this restriction as a) it
+                         introduces problems when new V9 asr registers
+                         are introduced, b) the Solaris assembler
+                         doesn't implement this restriction and c) the
+                         restriction will go away in future revisions
+                         of the Oracle SPARC Architecture.  */
+
+                      if (num < 0 || 31 < num)
+                        {
+                          error_message = _(": asr number must be between 0 and 31");
+                          goto error;
+                        }
 
 		      opcode |= (*args == 'M' ? RS1 (num) : RD (num));
 		      continue;
@@ -3234,7 +3234,7 @@ output_insn (const struct sparc_opcode *insn, struct sparc_it *theinsn)
 #endif
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
@@ -4413,7 +4413,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
       if (regname[0] == 'i')
 	regname = NULL;
       else
-	regname = "";
+	regname = (char *) "";
     }
   else
     {
@@ -4829,18 +4829,25 @@ sparc_cfi_frame_initial_instructions (void)
 int
 sparc_regname_to_dw2regnum (char *regname)
 {
-  char *p, *q;
+  char *q;
+  int i;
 
   if (!regname[0])
     return -1;
 
-  q = "goli";
-  p = strchr (q, regname[0]);
-  if (p)
+  switch (regname[0])
+    {
+    case 'g': i = 0; break;
+    case 'o': i = 1; break;
+    case 'l': i = 2; break;
+    case 'i': i = 3; break;
+    default: i = -1; break;
+    }
+  if (i != -1)
     {
       if (regname[1] < '0' || regname[1] > '8' || regname[2])
 	return -1;
-      return (p - q) * 8 + regname[1] - '0';
+      return i * 8 + regname[1] - '0';
     }
   if (regname[0] == 's' && regname[1] == 'p' && !regname[2])
     return 14;
@@ -4851,7 +4858,7 @@ sparc_regname_to_dw2regnum (char *regname)
       unsigned int regnum;
 
       regnum = strtoul (regname + 1, &q, 10);
-      if (p == q || *q)
+      if (q == NULL || *q)
         return -1;
       if (regnum >= ((regname[0] == 'f'
 		      && SPARC_OPCODE_ARCH_V9_P (max_architecture))

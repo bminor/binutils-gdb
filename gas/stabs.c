@@ -134,10 +134,7 @@ get_stab_string_offset (const char *string, const char *stabstr_secname)
 
 /* Here instead of obj-aout.c because other formats use it too.  */
 void
-aout_process_stab (what, string, type, other, desc)
-     int what;
-     const char *string;
-     int type, other, desc;
+aout_process_stab (int what, const char *string, int type, int other, int desc)
 {
   /* Put the stab information in the symbol table.  */
   symbolS *symbol;
@@ -451,8 +448,7 @@ s_xstab (int what)
 /* Frob invented at RMS' request. Set the n_desc of a symbol.  */
 
 void
-s_desc (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_desc (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char c;
@@ -545,7 +541,7 @@ generate_asm_file (int type, const char *file)
 
   while (tmp < file_endp)
     {
-      char *bslash = strchr (tmp, '\\');
+      const char *bslash = strchr (tmp, '\\');
       size_t len = (bslash) ? (size_t) (bslash - tmp + 1) : strlen (tmp);
 
       /* Double all backslashes, since demand_copy_C_string (used by
@@ -666,7 +662,7 @@ stabs_generate_asm_func (const char *funcname, const char *startlabname)
 
   if (! void_emitted_p)
     {
-      input_line_pointer = "\"void:t1=1\",128,0,0,0";
+      input_line_pointer = (char *) "\"void:t1=1\",128,0,0,0";
       s_stab ('s');
       void_emitted_p = 1;
     }

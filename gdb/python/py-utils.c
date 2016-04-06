@@ -221,6 +221,14 @@ python_string_to_host_string (PyObject *obj)
   return result;
 }
 
+/* Convert a host string to a python string.  */
+
+PyObject *
+host_string_to_python_string (const char *str)
+{
+  return PyString_Decode (str, strlen (str), host_charset (), NULL);
+}
+
 /* Return true if OBJ is a Python string or unicode object, false
    otherwise.  */
 

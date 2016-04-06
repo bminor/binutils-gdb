@@ -327,7 +327,7 @@ IPA_LIB=libinproctrace.so
 
 $(IPA_LIB): $(IPA_OBJS) ${ADD_DEPS} ${CDEPS}
 	rm -f $(IPA_LIB)
-	$(CC_LD) -shared -fPIC -Wl,--no-undefined $(INTERNAL_CFLAGS) \
+	$(CC_LD) -shared -fPIC -Wl,--soname=$(IPA_LIB) -Wl,--no-undefined $(INTERNAL_CFLAGS) \
 	$(INTERNAL_LDFLAGS) -o $(IPA_LIB) ${IPA_OBJS} -ldl -pthread
 
 # Put the proper machine-specific files first, so M-. on a machine
@@ -529,6 +529,102 @@ linux-aarch64-ipa.o: linux-aarch64-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 aarch64-ipa.o: aarch64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+linux-s390-ipa.o: linux-s390-ipa.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-linux32-ipa.o: s390-linux32.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-linux32v1-ipa.o: s390-linux32v1.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-linux32v2-ipa.o: s390-linux32v2.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-linux64-ipa.o: s390-linux64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-linux64v1-ipa.o: s390-linux64v1.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-linux64v2-ipa.o: s390-linux64v2.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-te-linux64-ipa.o: s390-te-linux64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-vx-linux64-ipa.o: s390-vx-linux64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390-tevx-linux64-ipa.o: s390-tevx-linux64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390x-linux64-ipa.o: s390x-linux64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390x-linux64v1-ipa.o: s390x-linux64v1.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390x-linux64v2-ipa.o: s390x-linux64v2.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390x-te-linux64-ipa.o: s390x-te-linux64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390x-vx-linux64-ipa.o: s390x-vx-linux64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+s390x-tevx-linux64-ipa.o: s390x-tevx-linux64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+linux-ppc-ipa.o: linux-ppc-ipa.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-32l-ipa.o: powerpc-32l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-altivec32l-ipa.o: powerpc-altivec32l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-cell32l-ipa.o: powerpc-cell32l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-vsx32l-ipa.o: powerpc-vsx32l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-isa205-32l-ipa.o: powerpc-isa205-32l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-isa205-altivec32l-ipa.o: powerpc-isa205-altivec32l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-isa205-vsx32l-ipa.o: powerpc-isa205-vsx32l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-e500l-ipa.o: powerpc-e500l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-64l-ipa.o: powerpc-64l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-altivec64l-ipa.o: powerpc-altivec64l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-cell64l-ipa.o: powerpc-cell64l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-vsx64l-ipa.o: powerpc-vsx64l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-isa205-64l-ipa.o: powerpc-isa205-64l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-isa205-altivec64l-ipa.o: powerpc-isa205-altivec64l.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+powerpc-isa205-vsx64l-ipa.o: powerpc-isa205-vsx64l.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 tdesc-ipa.o: tdesc.c

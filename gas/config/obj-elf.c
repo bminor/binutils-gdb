@@ -568,7 +568,7 @@ obj_elf_change_section (const char *name,
   if (push)
     {
       struct section_stack *elt;
-      elt = (struct section_stack *) xmalloc (sizeof (struct section_stack));
+      elt = XNEW (struct section_stack);
       elt->next = section_stack;
       elt->seg = now_seg;
       elt->prev_seg = previous_section;
@@ -815,7 +815,8 @@ obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *is_clone)
 	    }
 	default:
 	  {
-	    char *bad_msg = _("unrecognized .section attribute: want a,e,w,x,M,S,G,T or number");
+	    const char *bad_msg = _("unrecognized .section attribute:"
+				    " want a,e,w,x,M,S,G,T or number");
 #ifdef md_elf_section_letter
 	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr != (bfd_vma) -1)
@@ -918,7 +919,7 @@ obj_elf_section_word (char *str, size_t len, int *type)
 }
 
 /* Get name of section.  */
-char *
+const char *
 obj_elf_section_name (void)
 {
   char *name;
@@ -984,7 +985,8 @@ obj_elf_section_name (void)
 void
 obj_elf_section (int push)
 {
-  char *name, *group_name, *beg;
+  const char *name, *group_name;
+  char *beg;
   int type, dummy;
   bfd_vma attr;
   int entsize;
@@ -1607,9 +1609,7 @@ obj_elf_vendor_attribute (int vendor)
       if (i == 0)
 	goto bad;
 
-      name = xmalloc (i + 1);
-      memcpy (name, s, i);
-      name[i] = '\0';
+      name = xstrndup (s, i);
 
 #ifndef CONVERT_SYMBOLIC_ATTRIBUTE
 #define CONVERT_SYMBOLIC_ATTRIBUTE(a) -1
@@ -1730,7 +1730,7 @@ elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
   if (srcelf->size)
     {
       if (destelf->size == NULL)
-	destelf->size = (expressionS *) xmalloc (sizeof (expressionS));
+	destelf->size = XNEW (expressionS);
       *destelf->size = *srcelf->size;
     }
   else
@@ -1847,8 +1847,7 @@ obj_elf_size (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      symbol_get_obj (sym)->size =
-          (expressionS *) xmalloc (sizeof (expressionS));
+      symbol_get_obj (sym)->size = XNEW (expressionS);
       *symbol_get_obj (sym)->size = exp;
     }
   demand_empty_rest_of_line ();
@@ -2165,7 +2164,7 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	S_SET_SIZE (symp, size->X_add_number);
       else
 	{
-	  if (flag_size_check == size_check_error)
+	  if (!flag_allow_nonconst_size)
 	    as_bad (_(".size expression for %s "
 		      "does not evaluate to a constant"), S_GET_NAME (symp));
 	  else
@@ -2339,7 +2338,7 @@ build_group_lists (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
   list->num_group += 1;
 
   /* Add index to hash.  */
-  idx_ptr = (unsigned int *) xmalloc (sizeof (unsigned int));
+  idx_ptr = XNEW (unsigned int);
   *idx_ptr = i;
   hash_insert (list->indexes, group_name, idx_ptr);
 }

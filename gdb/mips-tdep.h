@@ -144,9 +144,6 @@ enum
   MIPS_LAST_EMBED_REGNUM = 89	/* Last one.  */
 };
 
-/* Defined in mips-tdep.c and used in remote-mips.c.  */
-extern void deprecated_mips_set_processor_regs_hack (void);
-
 /* Instruction sizes and other useful constants.  */
 enum
 {

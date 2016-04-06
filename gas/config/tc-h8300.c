@@ -152,7 +152,7 @@ h8300_elf_section (int push)
   static const char * known_data_sections [] = { ".rodata", ".tdata", ".tbss" };
   static const char * known_data_prefixes [] = { ".debug", ".zdebug", ".gnu.warning" };
   char * saved_ilp = input_line_pointer;
-  char * name;
+  const char * name;
 
   name = obj_elf_section_name ();
   if (name == NULL)
@@ -2101,7 +2101,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 
 /* Various routines to kill one day.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);
@@ -2197,7 +2197,7 @@ const struct mach_func mach_table[] =
 };
 
 int
-md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c ATTRIBUTE_UNUSED, const char *arg ATTRIBUTE_UNUSED)
 {
   unsigned int i;
   switch (c)
@@ -2335,8 +2335,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	}
     }
 
-  rel = xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   rel->addend = fixp->fx_offset;

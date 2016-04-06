@@ -2142,8 +2142,6 @@ generic_load (const char *args, int from_tty)
   ui_out_text (uiout, ", load size ");
   ui_out_field_fmt (uiout, "load-size", "%lu", total_progress.data_count);
   ui_out_text (uiout, "\n");
-  /* We were doing this in remote-mips.c, I suspect it is right
-     for other targets too.  */
   regcache_write_pc (get_current_regcache (), entry);
 
   /* Reset breakpoints, now that we have changed the load image.  For
@@ -2155,12 +2153,6 @@ generic_load (const char *args, int from_tty)
      memory.  */
 
   breakpoint_re_set ();
-
-  /* FIXME: are we supposed to call symbol_file_add or not?  According
-     to a comment from remote-mips.c (where a call to symbol_file_add
-     was commented out), making the call confuses GDB if more than one
-     file is loaded in.  Some targets do (e.g., remote-vx.c) but
-     others don't (or didn't - perhaps they have all been deleted).  */
 
   print_transfer_performance (gdb_stdout, total_progress.data_count,
 			      total_progress.write_count,

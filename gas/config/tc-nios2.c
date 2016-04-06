@@ -264,7 +264,7 @@ md_number_to_chars (char *buf, valueT val, int n)
    of type TYPE, and store the appropriate bytes in *LITP.  The number
    of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
@@ -3540,7 +3540,7 @@ nios2_use_arch (const char *arch)
 /* The following functions are called by machine-independent parts of
    the assembler. */
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
@@ -3980,7 +3980,7 @@ nios2_cons_align (int size)
 /* Map 's' to SHF_NIOS2_GPREL.  */
 /* This is from the Alpha code tc-alpha.c.  */
 int
-nios2_elf_section_letter (int letter, char **ptr_msg)
+nios2_elf_section_letter (int letter, const char **ptr_msg)
 {
   if (letter == 's')
     return SHF_NIOS2_GPREL;

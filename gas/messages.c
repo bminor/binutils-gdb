@@ -342,13 +342,13 @@ sprint_value (char *buf, valueT val)
 #define HEX_MIN_THRESHOLD	-(HEX_MAX_THRESHOLD)
 
 static void
-as_internal_value_out_of_range (const char *  prefix,
-				offsetT       val,
-				offsetT       min,
-				offsetT       max,
-				const char *        file,
-				unsigned      line,
-				int           bad)
+as_internal_value_out_of_range (const char *prefix,
+				offsetT val,
+				offsetT min,
+				offsetT max,
+				const char *file,
+				unsigned line,
+				int bad)
 {
   const char * err;
 
@@ -414,22 +414,22 @@ as_internal_value_out_of_range (const char *  prefix,
 }
 
 void
-as_warn_value_out_of_range (char *   prefix,
-			   offsetT  value,
-			   offsetT  min,
-			   offsetT  max,
-			   const char *   file,
+as_warn_value_out_of_range (const char *prefix,
+			   offsetT value,
+			   offsetT min,
+			   offsetT max,
+			   const char *file,
 			   unsigned line)
 {
   as_internal_value_out_of_range (prefix, value, min, max, file, line, 0);
 }
 
 void
-as_bad_value_out_of_range (char *   prefix,
-			   offsetT  value,
-			   offsetT  min,
-			   offsetT  max,
-			   const char *   file,
+as_bad_value_out_of_range (const char *prefix,
+			   offsetT value,
+			   offsetT min,
+			   offsetT max,
+			   const char *file,
 			   unsigned line)
 {
   as_internal_value_out_of_range (prefix, value, min, max, file, line, 1);

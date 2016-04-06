@@ -369,6 +369,9 @@ setup_xfail "mips*-*-irix5*" "mips*-*-irix6*" "mips*-*-linux*"
 # linkers do.
 setup_xfail "*-*-aix*" "*-*-xcoff*"
 
+# The S-record linker is not supported for ARC.
+setup_xfail "arc-*-*"
+
 # The S-record linker doesn't build ARM/Thumb stubs.
 setup_xfail "arm-*-coff"
 setup_xfail "arm-*-pe*"

@@ -87,6 +87,46 @@ aarch64_get_reg_s32 (sim_cpu *cpu, GReg reg, int r31_is_sp)
   return cpu->gr[reg_num(reg)].s32;
 }
 
+void
+aarch64_set_reg_s32 (sim_cpu *cpu, GReg reg, int r31_is_sp, int32_t val)
+{
+  if (reg == R31 && ! r31_is_sp)
+    {
+      TRACE_REGISTER (cpu, "GR[31] NOT CHANGED!");
+      return;
+    }
+
+  if (val != cpu->gr[reg].s32)
+    TRACE_REGISTER (cpu, "GR[%2d] changes from %8x to %8x",
+		    reg, cpu->gr[reg].s32, val);
+
+  /* The ARM ARM states that (C1.2.4):
+        When the data size is 32 bits, the lower 32 bits of the
+	register are used and the upper 32 bits are ignored on
+	a read and cleared to zero on a write.
+     We simulate this by first clearing the whole 64-bits and
+     then writing to the 32-bit value in the GRegister union.  */
+  cpu->gr[reg].s64 = 0;
+  cpu->gr[reg].s32 = val;
+}
+
+void
+aarch64_set_reg_u32 (sim_cpu *cpu, GReg reg, int r31_is_sp, uint32_t val)
+{
+  if (reg == R31 && ! r31_is_sp)
+    {
+      TRACE_REGISTER (cpu, "GR[31] NOT CHANGED!");
+      return;
+    }
+
+  if (val != cpu->gr[reg].u32)
+    TRACE_REGISTER (cpu, "GR[%2d] changes from %8x to %8x",
+		    reg, cpu->gr[reg].u32, val);
+
+  cpu->gr[reg].u64 = 0;
+  cpu->gr[reg].u32 = val;
+}
+
 uint32_t
 aarch64_get_reg_u16 (sim_cpu *cpu, GReg reg, int r31_is_sp)
 {
@@ -278,6 +318,21 @@ aarch64_clear_CPSR_bit (sim_cpu *cpu, FlagMask bit)
 }
 
 float
+aarch64_get_FP_half (sim_cpu *cpu, VReg reg)
+{
+  union
+  {
+    uint16_t h[2];
+    float    f;
+  } u;
+
+  u.h[0] = 0;
+  u.h[1] = cpu->fr[reg].h[0];
+  return u.f;
+}
+
+
+float
 aarch64_get_FP_float (sim_cpu *cpu, VReg reg)
 {
   return cpu->fr[reg].s;
@@ -295,6 +350,21 @@ aarch64_get_FP_long_double (sim_cpu *cpu, VReg reg, FRegister *a)
   a->v[0] = cpu->fr[reg].v[0];
   a->v[1] = cpu->fr[reg].v[1];
 }
+
+void
+aarch64_set_FP_half (sim_cpu *cpu, VReg reg, float val)
+{
+  union
+  {
+    uint16_t h[2];
+    float    f;
+  } u;
+
+  u.f = val;
+  cpu->fr[reg].h[0] = u.h[1];
+  cpu->fr[reg].h[1] = 0;
+}
+
 
 void
 aarch64_set_FP_float (sim_cpu *cpu, VReg reg, float val)
@@ -418,12 +488,12 @@ aarch64_get_vec_double (sim_cpu *cpu, VReg reg, unsigned element)
 }
 
 
-#define SET_VEC_ELEMENT(REG, ELEMENT, VAL, FIELD, PRINTER)	\
-  do						   		\
-    {								\
+#define SET_VEC_ELEMENT(REG, ELEMENT, VAL, FIELD, PRINTER)		\
+  do									\
+    {									\
       if (ELEMENT >= ARRAY_SIZE (cpu->fr[0].FIELD))			\
 	{								\
-	  TRACE_REGISTER (cpu, \
+	  TRACE_REGISTER (cpu,						\
 			  "Internal SIM error: invalid element number: %d ",\
 			  ELEMENT);					\
 	  sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu), \
@@ -434,31 +504,31 @@ aarch64_get_vec_double (sim_cpu *cpu, VReg reg, unsigned element)
 			"VR[%2d]." #FIELD " [%d] changes from " PRINTER \
 			" to " PRINTER , REG,				\
 			ELEMENT, cpu->fr[REG].FIELD [ELEMENT], VAL);	\
-      \
-      cpu->fr[REG].FIELD [ELEMENT] = VAL;     \
-    }					      \
+									\
+      cpu->fr[REG].FIELD [ELEMENT] = VAL;				\
+    }									\
   while (0)
 
 void
-aarch64_set_vec_u64 (sim_cpu * cpu, VReg reg, unsigned element, uint64_t val)
+aarch64_set_vec_u64 (sim_cpu *cpu, VReg reg, unsigned element, uint64_t val)
 {
   SET_VEC_ELEMENT (reg, element, val, v, "%16lx");
 }
 
 void
-aarch64_set_vec_u32 (sim_cpu * cpu, VReg reg, unsigned element, uint32_t val)
+aarch64_set_vec_u32 (sim_cpu *cpu, VReg reg, unsigned element, uint32_t val)
 {
   SET_VEC_ELEMENT (reg, element, val, w, "%8x");
 }
 
 void
-aarch64_set_vec_u16 (sim_cpu * cpu, VReg reg, unsigned element, uint16_t val)
+aarch64_set_vec_u16 (sim_cpu *cpu, VReg reg, unsigned element, uint16_t val)
 {
   SET_VEC_ELEMENT (reg, element, val, h, "%4x");
 }
 
 void
-aarch64_set_vec_u8 (sim_cpu * cpu, VReg reg, unsigned element, uint8_t val)
+aarch64_set_vec_u8 (sim_cpu *cpu, VReg reg, unsigned element, uint8_t val)
 {
   SET_VEC_ELEMENT (reg, element, val, b, "%x");
 }
@@ -540,4 +610,25 @@ int
 aarch64_test_FPSR_bit (sim_cpu *cpu, FPSRMask flag)
 {
   return cpu->FPSR & flag;
+}
+
+uint64_t
+aarch64_get_thread_id (sim_cpu *cpu)
+{
+  return cpu->tpidr;
+}
+
+uint32_t
+aarch64_get_FPCR (sim_cpu *cpu)
+{
+  return cpu->FPCR;
+}
+
+void
+aarch64_set_FPCR (sim_cpu *cpu, uint32_t val)
+{
+  if (cpu->FPCR != val)
+    TRACE_REGISTER (cpu,
+		    "FPCR changes from %x to %x", cpu->FPCR, val);
+  cpu->FPCR = val;
 }

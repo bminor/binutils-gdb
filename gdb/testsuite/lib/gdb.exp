@@ -3369,12 +3369,10 @@ proc gdb_compile {source dest type options} {
         }
     }
 
-    # We typically link to shared libraries using an absolute path, and
-    # that's how they are found at runtime.  If we are going to
-    # dynamically load one by basename, we must specify rpath.  If we
-    # are using a remote host, DejaGNU will link to the shared library
-    # using a relative path, so again we must specify an rpath.
-    if { $shlib_load || ($shlib_found && [is_remote target]) } {
+    # Because we link with libraries using their basename, we may need
+    # (depending on the platform) to set a special rpath value, to allow
+    # the executable to find the libraries it depends on.
+    if { $shlib_load || $shlib_found } {
 	if { ([istarget "*-*-mingw*"]
 	      || [istarget *-*-cygwin*]
 	      || [istarget *-*-pe*]) } {
@@ -3585,14 +3583,16 @@ proc gdb_compile_shlib {sources dest options} {
 		set name ${dest}
 	    }
 	    lappend link_options "additional_flags=-Wl,--out-implib,${name}.a"
-	} elseif [is_remote target] {
-	    # By default, we do not set the soname.  This causes the linker
-	    # on ELF systems to create a DT_NEEDED entry in the executable
-	    # refering to the full path name of the library.  This is a
-	    # problem in remote testing if the library is in a different
-	    # directory there.  To fix this, we set a soname of just the
-	    # base filename for the library, and add an appropriate -rpath
-	    # to the main executable (in gdb_compile).
+	} else {
+	    # Set the soname of the library.  This causes the linker on ELF
+	    # systems to create the DT_NEEDED entry in the executable referring
+	    # to the soname of the library, and not its absolute path.  This
+	    # (using the absolute path) would be problem when testing on a
+	    # remote target.
+	    #
+	    # In conjunction with setting the soname, we add the special
+	    # rpath=$ORIGIN value when building the executable, so that it's
+	    # able to find the library in its own directory.
 	    set destbase [file tail $dest]
 	    lappend link_options "additional_flags=-Wl,-soname,$destbase"
 	}
@@ -4183,34 +4183,42 @@ proc gdb_touch_execfile { binfile } {
     }
 }
 
-# Like remote_download but provides a gdb-specific behavior.  If DEST
-# is "host", and the host is not remote, and TOFILE is not specified,
-# then the [file tail] of FROMFILE is passed through
-# standard_output_file to compute the destination.
+# Like remote_download but provides a gdb-specific behavior.
+#
+# If the destination board is remote, the local file FROMFILE is transferred as
+# usual with remote_download to TOFILE on the remote board.  The destination
+# filename is added to the CLEANFILES global, so it can be cleaned up at the
+# end of the test.
+#
+# If the destination board is local, the destination path TOFILE is passed
+# through standard_output_file, and FROMFILE is copied there.
+#
+# In both cases, if TOFILE is omitted, it defaults to the [file tail] of
+# FROMFILE.
 
 proc gdb_remote_download {dest fromfile {tofile {}}} {
-    if {$dest == "host" && ![is_remote host] && $tofile == ""} {
-	set tofile [standard_output_file [file tail $fromfile]]
+    # If TOFILE is not given, default to the same filename as FROMFILE.
+    if {[string length $tofile] == 0} {
+	set tofile [file tail $fromfile]
     }
 
-    if { $tofile == "" } {
-	return [remote_download $dest $fromfile]
+    if {[is_remote $dest]} {
+	# When the DEST is remote, we simply send the file to DEST.
+	global cleanfiles
+
+	set destname [remote_download $dest $fromfile $tofile]
+	lappend cleanfiles $destname
+
+	return $destname
     } else {
-	return [remote_download $dest $fromfile $tofile]
+	# When the DEST is local, we copy the file to the test directory
+	# (where the executable is), except if that's already where it is.
+	set tofile [standard_output_file $tofile]
+
+	file copy -force $fromfile $tofile
+
+	return $tofile
     }
-}
-
-# gdb_download
-#
-# Copy a file to the remote target and return its target filename.
-# Schedule the file to be deleted at the end of this test.
-
-proc gdb_download { filename } {
-    global cleanfiles
-
-    set destname [remote_download target $filename]
-    lappend cleanfiles $destname
-    return $destname
 }
 
 # gdb_load_shlibs LIB...
@@ -4218,17 +4226,19 @@ proc gdb_download { filename } {
 # Copy the listed libraries to the target.
 
 proc gdb_load_shlibs { args } {
-    if {![is_remote target]} {
-	return
-    }
-
     foreach file $args {
-	gdb_download [shlib_target_file $file]
+	gdb_remote_download target [shlib_target_file $file]
     }
 
-    # Even if the target supplies full paths for shared libraries,
-    # they may not be paths for this system.
-    gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "" ""
+    if {[is_remote target]} {
+	# If the target is remote, we need to tell gdb where to find the
+	# libraries.
+	#
+	# We could set this even when not testing remotely, but a user
+	# generally won't set it unless necessary.  In order to make the tests
+	# more like the real-life scenarios, we don't set it for local testing.
+	gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "" ""
+    }
 }
 
 #

@@ -350,7 +350,7 @@ typedef struct space_dictionary_chain sd_chain_struct;
 struct default_subspace_dict
   {
     /* Name of the subspace.  */
-    char *name;
+    const char *name;
 
     /* FIXME.  Is this still needed?  */
     char defined;
@@ -403,7 +403,7 @@ struct default_subspace_dict
 struct default_space_dict
   {
     /* Name of the space.  */
-    char *name;
+    const char *name;
 
     /* Space number.  It is possible to identify spaces within
        assembly code numerically!  */
@@ -503,27 +503,27 @@ static void pa_align (int);
 static void pa_space (int);
 static void pa_spnum (int);
 static void pa_subspace (int);
-static sd_chain_struct *create_new_space (char *, int, int,
-						  int, int, int,
-						  asection *, int);
+static sd_chain_struct *create_new_space (const char *, int, int,
+					  int, int, int,
+					  asection *, int);
 static ssd_chain_struct *create_new_subspace (sd_chain_struct *,
-						      char *, int, int,
-						      int, int, int, int,
-						      int, int, int, int,
-						      int, asection *);
+					      const char *, int, int,
+					      int, int, int, int,
+					      int, int, int, int,
+					      int, asection *);
 static ssd_chain_struct *update_subspace (sd_chain_struct *,
-						  char *, int, int, int,
-						  int, int, int, int,
-						  int, int, int, int,
-						  asection *);
-static sd_chain_struct *is_defined_space (char *);
-static ssd_chain_struct *is_defined_subspace (char *);
+					  char *, int, int, int,
+					  int, int, int, int,
+					  int, int, int, int,
+					  asection *);
+static sd_chain_struct *is_defined_space (const char *);
+static ssd_chain_struct *is_defined_subspace (const char *);
 static sd_chain_struct *pa_segment_to_space (asection *);
 static ssd_chain_struct *pa_subsegment_to_subspace (asection *,
 							    subsegT);
 static sd_chain_struct *pa_find_space_by_number (int);
 static unsigned int pa_subspace_start (sd_chain_struct *, int);
-static sd_chain_struct *pa_parse_space_stmt (char *, int);
+static sd_chain_struct *pa_parse_space_stmt (const char *, int);
 #endif
 
 /* File and globally scoped variable declarations.  */
@@ -1194,7 +1194,7 @@ fix_new_hppa (fragS *frag,
 	      int unwind_bits ATTRIBUTE_UNUSED)
 {
   fixS *new_fix;
-  struct hppa_fix_struct *hppa_fix = obstack_alloc (&notes, sizeof (struct hppa_fix_struct));
+  struct hppa_fix_struct *hppa_fix = XOBNEW (&notes, struct hppa_fix_struct);
 
   if (exp != NULL)
     new_fix = fix_new_exp (frag, where, size, exp, pcrel, r_type);
@@ -1319,7 +1319,7 @@ pa_parse_nullif (char **s)
   return nullif;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);
@@ -1355,9 +1355,9 @@ tc_gen_reloc (asection *section, fixS *fixp)
   gas_assert (hppa_fixp != 0);
   gas_assert (section != 0);
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   /* Allow fixup_segment to recognize hand-written pc-relative relocations.
@@ -1388,8 +1388,8 @@ tc_gen_reloc (asection *section, fixS *fixp)
   for (n_relocs = 0; codes[n_relocs]; n_relocs++)
     ;
 
-  relocs = xmalloc (sizeof (arelent *) * n_relocs + 1);
-  reloc = xmalloc (sizeof (arelent) * n_relocs);
+  relocs = XNEWVEC (arelent *, n_relocs + 1);
+  reloc = XNEWVEC (arelent, n_relocs);
   for (i = 0; i < n_relocs; i++)
     relocs[i] = &reloc[i];
 
@@ -1447,7 +1447,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  break;
 	}
 
-      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      reloc->sym_ptr_ptr = XNEW (asymbol *);
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->howto = bfd_reloc_type_lookup (stdoutput,
 					    (bfd_reloc_code_real_type) code);
@@ -1463,7 +1463,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
     {
       code = *codes[i];
 
-      relocs[i]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      relocs[i]->sym_ptr_ptr = XNEW (asymbol *);
       *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       relocs[i]->howto =
 	bfd_reloc_type_lookup (stdoutput,
@@ -1484,14 +1484,14 @@ tc_gen_reloc (asection *section, fixS *fixp)
 				     (bfd_reloc_code_real_type) *codes[0]);
 	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[0]->addend = 0;
-	  relocs[1]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  relocs[1]->sym_ptr_ptr = XNEW (asymbol *);
 	  *relocs[1]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  relocs[1]->howto
 	    = bfd_reloc_type_lookup (stdoutput,
 				     (bfd_reloc_code_real_type) *codes[1]);
 	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[1]->addend = 0;
-	  relocs[2]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  relocs[2]->sym_ptr_ptr = XNEW (asymbol *);
 	  *relocs[2]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 	  relocs[2]->howto
 	    = bfd_reloc_type_lookup (stdoutput,
@@ -1546,7 +1546,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	case R_N0SEL:
 	case R_N1SEL:
 	  /* There is no symbol or addend associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  relocs[i]->sym_ptr_ptr = XNEW (asymbol *);
 	  *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = 0;
 	  break;
@@ -1555,7 +1555,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	case R_ENTRY:
 	case R_EXIT:
 	  /* There is no symbol associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  relocs[i]->sym_ptr_ptr = XNEW (asymbol *);
 	  *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = fixp->fx_offset;
 	  break;
@@ -1653,7 +1653,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
@@ -6925,7 +6925,7 @@ pa_proc (int unused ATTRIBUTE_UNUSED)
   within_procedure = TRUE;
 
   /* Create another call_info structure.  */
-  call_info = xmalloc (sizeof (struct call_info));
+  call_info = XNEW (struct call_info);
 
   if (!call_info)
     as_fatal (_("Cannot allocate unwind descriptor\n"));
@@ -7080,7 +7080,7 @@ pa_check_current_space_and_subspace (void)
    by the parameters to the .SPACE directive.  */
 
 static sd_chain_struct *
-pa_parse_space_stmt (char *space_name, int create_flag)
+pa_parse_space_stmt (const char *space_name, int create_flag)
 {
   char *name, *ptemp, c;
   char loadable, defined, private, sort;
@@ -7300,8 +7300,7 @@ pa_space (int unused ATTRIBUTE_UNUSED)
       print_errors = 1;
       input_line_pointer = save_s;
       c = get_symbol_name (&name);
-      space_name = xmalloc (strlen (name) + 1);
-      strcpy (space_name, name);
+      space_name = xstrdup (name);
       (void) restore_line_pointer (c);
 
       sd_chain = pa_parse_space_stmt (space_name, 1);
@@ -7365,8 +7364,7 @@ pa_subspace (int create_new)
   else
     {
       c = get_symbol_name (&name);
-      ss_name = xmalloc (strlen (name) + 1);
-      strcpy (ss_name, name);
+      ss_name = xstrdup (name);
       (void) restore_line_pointer (c);
 
       /* Load default values.  */
@@ -7592,7 +7590,7 @@ pa_spaces_begin (void)
   i = 0;
   while (pa_def_spaces[i].name)
     {
-      char *name;
+      const char *name;
 
       /* Pick the right name to use for the new section.  */
       name = pa_def_spaces[i].name;
@@ -7608,7 +7606,7 @@ pa_spaces_begin (void)
   i = 0;
   while (pa_def_subspaces[i].name)
     {
-      char *name;
+      const char *name;
       int applicable, subsegment;
       asection *segment = NULL;
       sd_chain_struct *space;
@@ -7709,7 +7707,7 @@ pa_spaces_begin (void)
    by the given parameters.  */
 
 static sd_chain_struct *
-create_new_space (char *name,
+create_new_space (const char *name,
 		  int spnum,
 		  int loadable ATTRIBUTE_UNUSED,
 		  int defined,
@@ -7720,13 +7718,8 @@ create_new_space (char *name,
 {
   sd_chain_struct *chain_entry;
 
-  chain_entry = xmalloc (sizeof (sd_chain_struct));
-  if (!chain_entry)
-    as_fatal (_("Out of memory: could not allocate new space chain entry: %s\n"),
-	      name);
-
-  SPACE_NAME (chain_entry) = xmalloc (strlen (name) + 1);
-  strcpy (SPACE_NAME (chain_entry), name);
+  chain_entry = XNEW (sd_chain_struct);
+  SPACE_NAME (chain_entry) = xstrdup (name);
   SPACE_DEFINED (chain_entry) = defined;
   SPACE_USER_DEFINED (chain_entry) = user_defined;
   SPACE_SPNUM (chain_entry) = spnum;
@@ -7792,7 +7785,7 @@ create_new_space (char *name,
 
 static ssd_chain_struct *
 create_new_subspace (sd_chain_struct *space,
-		     char *name,
+		     const char *name,
 		     int loadable ATTRIBUTE_UNUSED,
 		     int code_only ATTRIBUTE_UNUSED,
 		     int comdat,
@@ -7808,12 +7801,8 @@ create_new_subspace (sd_chain_struct *space,
 {
   ssd_chain_struct *chain_entry;
 
-  chain_entry = xmalloc (sizeof (ssd_chain_struct));
-  if (!chain_entry)
-    as_fatal (_("Out of memory: could not allocate new subspace chain entry: %s\n"), name);
-
-  SUBSPACE_NAME (chain_entry) = xmalloc (strlen (name) + 1);
-  strcpy (SUBSPACE_NAME (chain_entry), name);
+  chain_entry = XNEW (ssd_chain_struct);
+  SUBSPACE_NAME (chain_entry) = xstrdup (name);
 
   /* Initialize subspace_defined.  When we hit a .subspace directive
      we'll set it to 1 which "locks-in" the subspace attributes.  */
@@ -7897,7 +7886,7 @@ update_subspace (sd_chain_struct *space,
    NULL if no such space exists.  */
 
 static sd_chain_struct *
-is_defined_space (char *name)
+is_defined_space (const char *name)
 {
   sd_chain_struct *chain_pointer;
 
@@ -7946,7 +7935,7 @@ pa_segment_to_space (asection *seg)
    own subspace.  */
 
 static ssd_chain_struct *
-is_defined_subspace (char *name)
+is_defined_subspace (const char *name)
 {
   sd_chain_struct *space_chain;
   ssd_chain_struct *subspace_chain;
@@ -8556,7 +8545,7 @@ pa_vtable_entry (int ignore ATTRIBUTE_UNUSED)
 
   if (new_fix)
     {
-      struct hppa_fix_struct * hppa_fix = obstack_alloc (&notes, sizeof (struct hppa_fix_struct));
+      struct hppa_fix_struct * hppa_fix = XOBNEW (&notes, struct hppa_fix_struct);
 
       hppa_fix->fx_r_type = R_HPPA;
       hppa_fix->fx_r_field = e_fsel;
@@ -8577,7 +8566,7 @@ pa_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
 
   if (new_fix)
     {
-      struct hppa_fix_struct * hppa_fix = obstack_alloc (&notes, sizeof (struct hppa_fix_struct));
+      struct hppa_fix_struct * hppa_fix = XOBNEW (&notes, struct hppa_fix_struct);
 
       hppa_fix->fx_r_type = R_HPPA;
       hppa_fix->fx_r_field = e_fsel;

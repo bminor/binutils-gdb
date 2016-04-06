@@ -64,6 +64,7 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     _rel.r_addend = ADDEND;						\
     _rel.r_offset = (_htab->s##SECTION)->output_section->vma		\
       + (_htab->s##SECTION)->output_offset + OFFSET;			\
+    BFD_ASSERT ((long) SYM_IDX != -1);					\
     _rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);				\
     bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
   }
@@ -374,6 +375,29 @@ static const struct arc_reloc_map arc_reloc_map[] =
 };
 #undef ARC_RELOC_HOWTO
 
+typedef ATTRIBUTE_UNUSED bfd_vma (*replace_func) (unsigned, int ATTRIBUTE_UNUSED);
+
+#define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
+  case TYPE: \
+    func = (void *) RELOC_FUNCTION; \
+    break;
+static replace_func
+get_replace_function (bfd *abfd, unsigned int r_type)
+{
+  void *func = NULL;
+
+  switch (r_type)
+    {
+      #include "elf/arc-reloc.def"
+    }
+
+  if (func == replace_bits24 && bfd_big_endian (abfd))
+    return (replace_func) replace_bits24_be;
+
+  return (replace_func) func;
+}
+#undef ARC_RELOC_HOWTO
+
 static reloc_howto_type *
 arc_elf32_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 				 bfd_reloc_code_real_type code)
@@ -682,20 +706,20 @@ arc_elf_final_write_processing (bfd * abfd,
 
 struct arc_relocation_data
 {
-  bfd_vma	  reloc_offset;
-  bfd_vma	  reloc_addend;
-  bfd_vma	  got_offset_value;
+  bfd_signed_vma  reloc_offset;
+  bfd_signed_vma  reloc_addend;
+  bfd_signed_vma  got_offset_value;
 
-  bfd_vma	  sym_value;
+  bfd_signed_vma  sym_value;
   asection *	  sym_section;
 
   reloc_howto_type *howto;
 
   asection *	  input_section;
 
-  bfd_vma	  sdata_begin_symbol_vma;
+  bfd_signed_vma  sdata_begin_symbol_vma;
   bfd_boolean	  sdata_begin_symbol_vma_set;
-  bfd_vma	  got_symbol_vma;
+  bfd_signed_vma  got_symbol_vma;
 
   bfd_boolean	  should_relocate;
 };
@@ -769,16 +793,14 @@ middle_endian_convert (bfd_vma insn, bfd_boolean do_it)
 #define IS_ME(FORMULA,BFD) ((strstr (FORMULA, "ME") != NULL) \
 			    && (!bfd_big_endian (BFD)))
 
-#define S (reloc_data.sym_value						\
+#define S ((bfd_signed_vma) (reloc_data.sym_value			\
 	   + (reloc_data.sym_section->output_section != NULL ?		\
 	      (reloc_data.sym_section->output_offset			\
-	       + reloc_data.sym_section->output_section->vma) : 0)	\
-	   )
-#define L (reloc_data.sym_value						\
+	       + reloc_data.sym_section->output_section->vma) : 0)))
+#define L ((bfd_signed_vma) (reloc_data.sym_value			\
 	   + (reloc_data.sym_section->output_section != NULL ?		\
 	      (reloc_data.sym_section->output_offset			\
-	      + reloc_data.sym_section->output_section->vma) : 0)	\
-	  )
+	      + reloc_data.sym_section->output_section->vma) : 0)))
 #define A (reloc_data.reloc_addend)
 #define B (0)
 #define G (reloc_data.got_offset_value)
@@ -788,33 +810,32 @@ middle_endian_convert (bfd_vma insn, bfd_boolean do_it)
 #define MES (0)
 	/* P: relative offset to PCL The offset should be to the
 	  current location aligned to 32 bits.  */
-#define P (								\
+#define P ((bfd_signed_vma) (						\
 	   (								\
 	    (reloc_data.input_section->output_section != NULL ?		\
 	     reloc_data.input_section->output_section->vma : 0)		\
 	    + reloc_data.input_section->output_offset			\
-	    + (reloc_data.reloc_offset - (bitsize >= 32 ? 4 : 0))	\
-	    ) & ~0x3)
-#define PDATA ( \
+	    + (reloc_data.reloc_offset - (bitsize >= 32 ? 4 : 0)))	\
+	   & ~0x3))
+#define PDATA ((bfd_signed_vma) ( \
 	    (reloc_data.input_section->output_section->vma \
 	     + reloc_data.input_section->output_offset \
-	     + (reloc_data.reloc_offset) \
-	    ))
-#define SECTSTAR (reloc_data.input_section->output_offset)
-#define SECTSTART (reloc_data.input_section->output_offset)
-#define _SDA_BASE_ (reloc_data.sdata_begin_symbol_vma)
-#define TLS_REL ((elf_hash_table (info))->tls_sec->output_section->vma)
-#define _SDA_BASE_ (reloc_data.sdata_begin_symbol_vma)
+	     + (reloc_data.reloc_offset))))
+#define SECTSTART (bfd_signed_vma) (reloc_data.input_section->output_offset)
+#define _SDA_BASE_ (bfd_signed_vma) (reloc_data.sdata_begin_symbol_vma)
+#define TLS_REL (bfd_signed_vma) \
+  ((elf_hash_table (info))->tls_sec->output_section->vma)
 #define TLS_TBSS (8)
 #define TCB_SIZE (8)
 
 #define none (0)
 
-#define PRINT_DEBUG_RELOC_INFO_BEFORE(FORMULA) \
+#define PRINT_DEBUG_RELOC_INFO_BEFORE(FORMULA, TYPE) \
     {\
       asection *sym_section = reloc_data.sym_section; \
       asection *input_section = reloc_data.input_section; \
-      ARC_DEBUG ("FORMULA = " #FORMULA "\n"); \
+      ARC_DEBUG ("RELOC_TYPE = " TYPE "\n"); \
+      ARC_DEBUG ("FORMULA = " FORMULA "\n"); \
       ARC_DEBUG ("S = 0x%x\n", S); \
       ARC_DEBUG ("A = 0x%x\n", A); \
       ARC_DEBUG ("L = 0x%x\n", L); \
@@ -855,11 +876,11 @@ middle_endian_convert (bfd_vma insn, bfd_boolean do_it)
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
   case R_##TYPE: \
     { \
-      bfd_vma bitsize ATTRIBUTE_UNUSED = BITSIZE; \
+      bfd_signed_vma bitsize ATTRIBUTE_UNUSED = BITSIZE; \
       relocation = FORMULA  ; \
-      PRINT_DEBUG_RELOC_INFO_BEFORE(FORMULA) \
+      PRINT_DEBUG_RELOC_INFO_BEFORE (#FORMULA, #TYPE); \
       insn = middle_endian_convert (insn, IS_ME (#FORMULA, abfd)); \
-      insn = RELOC_FUNCTION (insn, relocation); \
+      insn = (* get_replace_function (abfd, TYPE)) (insn, relocation); \
       insn = middle_endian_convert (insn, IS_ME (#FORMULA, abfd)); \
       PRINT_DEBUG_RELOC_INFO_AFTER \
     } \
@@ -870,7 +891,7 @@ arc_do_relocation (bfd_byte * contents,
 		   struct arc_relocation_data reloc_data,
 		   struct bfd_link_info *info)
 {
-  bfd_vma relocation = 0;
+  bfd_signed_vma relocation = 0;
   bfd_vma insn;
   bfd_vma orig_insn ATTRIBUTE_UNUSED;
   bfd * abfd = reloc_data.input_section->owner;
@@ -1495,11 +1516,13 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		else if (r_type == R_ARC_PC32
 			 || r_type == R_ARC_32_PCREL)
 		  {
-		    BFD_ASSERT (h != NULL && h->dynindx != -1);
+		    BFD_ASSERT (h != NULL);
 		    if ((input_section->flags & SEC_ALLOC) != 0)
 		      relocate = FALSE;
 		    else
 		      relocate = TRUE;
+
+		    BFD_ASSERT (h->dynindx != -1);
 		    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 		  }
 		else
@@ -1535,6 +1558,8 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 			  relocate = FALSE;
 			else
 			  relocate = TRUE;
+
+			BFD_ASSERT (h->dynindx != -1);
 			outrel.r_info = ELF32_R_INFO (h->dynindx, R_ARC_32);
 		      }
 		  }
@@ -1710,7 +1735,8 @@ elf_arc_check_relocs (bfd *		         abfd,
 	       non-readonly sections.  */
 	    if (bfd_link_dll (info) && !bfd_link_pie (info)
 		&& (sec->flags & SEC_ALLOC) != 0
-		&& (sec->flags & SEC_READONLY) != 0)
+		&& (sec->flags & SEC_READONLY) == 0
+		&& (sec->flags & SEC_CODE) != 0)
 	      {
 		const char *name;
 		if (h)
@@ -1934,7 +1960,7 @@ plt_do_relocs_for_symbol (bfd *abfd,
 
       /* TODO: being ME is not a property of the relocation but of the
 	 section of which is applying the relocation. */
-      if (IS_MIDDLE_ENDIAN (reloc->symbol) || bfd_big_endian (abfd))
+      if (IS_MIDDLE_ENDIAN (reloc->symbol) && !bfd_big_endian (abfd))
 	{
 	  relocation =
 	      ((relocation & 0xffff0000) >> 16) |
@@ -1978,9 +2004,19 @@ GOT_ENTRY_OFFSET = 0x%x, GOT_ENTRY_VMA = 0x%x, for symbol %s\n",
 	     + got_offset,
 	     h->root.root.string);
 
-  memcpy (htab->splt->contents + h->plt.offset,
-	  plt_data->elem,
-	  plt_data->elem_size);
+
+  {
+    bfd_vma i = 0;
+    uint16_t *ptr = (uint16_t *) plt_data->elem;
+    for (i = 0; i < plt_data->elem_size/2; i++)
+      {
+	uint16_t data = ptr[i];
+	bfd_put_16 (output_bfd,
+		    (bfd_vma) data,
+		    htab->splt->contents + h->plt.offset + (i*2));
+      }
+  }
+
   plt_do_relocs_for_symbol (output_bfd, htab,
 			    plt_data->elem_relocs,
 			    h->plt.offset,
@@ -2001,6 +2037,8 @@ GOT_ENTRY_OFFSET = 0x%x, GOT_ENTRY_VMA = 0x%x, for symbol %s\n",
 		    + htab->sgotplt->output_offset
 		    + got_offset);
     rel.r_addend = 0;
+
+    BFD_ASSERT (h->dynindx != -1);
     rel.r_info = ELF32_R_INFO (h->dynindx, R_ARC_JMP_SLOT);
 
     loc = htab->srelplt->contents;
@@ -2016,8 +2054,17 @@ relocate_plt_for_entry (bfd *abfd,
   struct plt_version_t *plt_data = arc_get_plt_version (info);
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
-  memcpy (htab->splt->contents, plt_data->entry,
-	  plt_data->entry_size);
+  {
+    bfd_vma i = 0;
+    uint16_t *ptr = (uint16_t *) plt_data->entry;
+    for (i = 0; i < plt_data->entry_size/2; i++)
+      {
+	uint16_t data = ptr[i];
+	bfd_put_16 (abfd,
+		    (bfd_vma) data,
+		    htab->splt->contents + (i*2));
+      }
+  }
   PLT_DO_RELOCS_FOR_ENTRY (abfd, htab, plt_data->entry_relocs);
 }
 
@@ -2199,7 +2246,10 @@ elf_arc_finish_dynamic_symbol (bfd * output_bfd,
 		{
 		  ADD_RELA (output_bfd, got, got_offset, 0, R_ARC_RELATIVE, 0);
 		}
-	      else
+	      /* Do not fully understand the side effects of this condition.
+		 The relocation space might still being reserved.  Perhaps
+		 I should clear its value.  */
+	      else if (h->dynindx != -1)
 		{
 		  ADD_RELA (output_bfd, got, got_offset, h->dynindx,
 			  R_ARC_GLOB_DAT, 0);
@@ -2274,6 +2324,8 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
       Elf_Internal_Rela rel;
       rel.r_addend = 0;
       rel.r_offset = rel_offset;
+
+      BFD_ASSERT (h->dynindx != -1);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_ARC_COPY);
 
       bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);

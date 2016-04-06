@@ -2015,6 +2015,25 @@ MOSTLYCLEANFILES += two_file_test_1c.o
 two_file_test_1c.o: two_file_test_1.o
 	cp two_file_test_1.o $@
 
+# As above, but check COMDAT case, where a non-IR file contains a duplicate
+# of a COMDAT group in an IR file.
+check_DATA += plugin_test_9b.err
+MOSTLYCLEANFILES += plugin_test_9b.err
+plugin_test_9b.err: plugin_test_9b_ir.o.syms plugin_test_9b_ir.o plugin_test_9b_elf.o gcctestdir/ld plugin_test.so
+	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9b -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_ZN1A5printEv" plugin_test_9b_ir.o plugin_test_9b_elf.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9b -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_ZN1A5printEv" plugin_test_9b_ir.o plugin_test_9b_elf.o 2>$@; then \
+	  echo 1>&2 "Link of plugin_test_9b should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+# Make a .syms file that claims to define a method in class A in a COMDAT group.
+# The real plugin_test_9b_ir.o will be compiled without the -D, and will not
+# define any methods in class A.
+plugin_test_9b_ir.o.syms: plugin_test_9b_ir_witha.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_test_9b_ir_witha.o: plugin_test_9b_ir.cc
+	$(CXXCOMPILE) -c -DUSE_CLASS_A -o $@ $<
+
 check_PROGRAMS += plugin_test_10
 check_SCRIPTS += plugin_test_10.sh
 check_DATA += plugin_test_10.sections

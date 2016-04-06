@@ -156,7 +156,7 @@ static int emulate_apuasm;
 static int use_dd2 = 1;
 
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
@@ -716,7 +716,7 @@ get_imm (const char *param, struct spu_insn *insn, int arg)
   return param;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);

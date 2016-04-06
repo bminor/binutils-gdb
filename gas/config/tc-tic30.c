@@ -402,8 +402,7 @@ tic30_operand (char *token)
   operand *current_op;
 
   debug ("In tic30_operand with %s\n", token);
-  current_op = malloc (sizeof (* current_op));
-  memset (current_op, '\0', sizeof (operand));
+  current_op = XCNEW (operand);
 
   if (*token == DIRECT_REFERENCE)
     {
@@ -464,7 +463,7 @@ tic30_operand (char *token)
       ind_addr_type *ind_addr_op;
       char * ind_buffer;
 
-      ind_buffer = xmalloc (strlen (token));
+      ind_buffer = XNEWVEC (char, strlen (token));
 
       debug ("Found indirect reference\n");
       ind_buffer[0] = *token;
@@ -604,9 +603,7 @@ tic30_operand (char *token)
 	      segT retval;
 
 	      debug ("Probably a label: %s\n", token);
-	      current_op->immediate.label = malloc (strlen (token) + 1);
-	      strcpy (current_op->immediate.label, token);
-	      current_op->immediate.label[strlen (token)] = '\0';
+	      current_op->immediate.label = xstrdup (token);
 	      save_input_line_pointer = input_line_pointer;
 	      input_line_pointer = token;
 
@@ -634,9 +631,7 @@ tic30_operand (char *token)
 	      for (count = 0; count < strlen (token); count++)
 		if (*(token + count) == '.')
 		  current_op->immediate.decimal_found = 1;
-	      current_op->immediate.label = malloc (strlen (token) + 1);
-	      strcpy (current_op->immediate.label, token);
-	      current_op->immediate.label[strlen (token)] = '\0';
+	      current_op->immediate.label = xstrdup (token);
 	      current_op->immediate.f_number = (float) atof (token);
 	      current_op->immediate.s_number = (int) atoi (token);
 	      current_op->immediate.u_number = (unsigned int) atoi (token);
@@ -1163,7 +1158,7 @@ md_apply_fix (fixS *fixP,
 
 int
 md_parse_option (int c ATTRIBUTE_UNUSED,
-		 char *arg ATTRIBUTE_UNUSED)
+		 const char *arg ATTRIBUTE_UNUSED)
 {
   debug ("In md_parse_option()\n");
   return 0;
@@ -1218,7 +1213,7 @@ md_pcrel_from (fixS *fixP)
   return fixP->fx_where - fixP->fx_size + (INSN_SIZE * offset);
 }
 
-char *
+const char *
 md_atof (int what_statement_type,
 	 char *literalP,
 	 int *sizeP)
@@ -1395,9 +1390,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 #undef MAP
 #undef F
 
-  rel = xmalloc (sizeof (* rel));
+  rel = XNEW (arelent);
   gas_assert (rel != 0);
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   rel->address = fixP->fx_frag->fr_address + fixP->fx_where;
   rel->addend = 0;

@@ -1077,7 +1077,7 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
 
    ??? The format of 12 byte floats is uncertain according to gcc's arm.h.  */
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   int prec;
@@ -2180,7 +2180,7 @@ insert_reg_alias (char *str, unsigned number, int type)
     }
 
   name = xstrdup (str);
-  new_reg = (struct reg_entry *) xmalloc (sizeof (struct reg_entry));
+  new_reg = XNEW (struct reg_entry);
 
   new_reg->name = name;
   new_reg->number = number;
@@ -2208,8 +2208,7 @@ insert_neon_reg_alias (char *str, int number, int type,
 
   if (atype)
     {
-      reg->neon = (struct neon_typed_alias *)
-	  xmalloc (sizeof (struct neon_typed_alias));
+      reg->neon = XNEW (struct neon_typed_alias);
       *reg->neon = *atype;
     }
 }
@@ -3138,7 +3137,7 @@ find_or_make_literal_pool (void)
   if (pool == NULL)
     {
       /* Create a new pool.  */
-      pool = (literal_pool *) xmalloc (sizeof (* pool));
+      pool = XNEW (literal_pool);
       if (! pool)
 	return NULL;
 
@@ -3535,7 +3534,7 @@ s_arm_elf_cons (int nbytes)
 		     XXX Surely there is a cleaner way to do this.  */
 		  char *p = input_line_pointer;
 		  int offset;
-		  char *save_buf = xmalloc (input_line_pointer - base);
+		  char *save_buf = XNEWVEC (char, input_line_pointer - base);
 
 		  memcpy (save_buf, base, input_line_pointer - base);
 		  memmove (base + (input_line_pointer - before_reloc),
@@ -10971,7 +10970,7 @@ do_t_branch (void)
 {
   int opcode;
   int cond;
-  int reloc;
+  bfd_reloc_code_real_type reloc;
 
   cond = inst.cond;
   set_it_insn_type (IF_INSIDE_IT_LAST_INSN);
@@ -12516,7 +12515,7 @@ do_t_push_pop (void)
   if (inst.size_req != 4 && (mask & ~0xff) == 0)
     inst.instruction = THUMB_OP16 (inst.instruction) | mask;
   else if (inst.size_req != 4
-	   && (mask & ~0xff) == (1 << (inst.instruction == T_MNEM_push
+	   && (mask & ~0xff) == (1U << (inst.instruction == T_MNEM_push
 				       ? REG_LR : REG_PC)))
     {
       inst.instruction = THUMB_OP16 (inst.instruction);
@@ -14993,7 +14992,7 @@ do_neon_mac_maybe_scalar (void)
     {
       enum neon_shape rs = neon_select_shape (NS_DDS, NS_QQS, NS_NULL);
       struct neon_type_el et = neon_check_type (3, rs,
-	N_EQK, N_EQK, N_I16 | N_I32 | N_F32 | N_KEY);
+	N_EQK, N_EQK, N_I16 | N_I32 | N_F_16_32 | N_KEY);
       NEON_ENCODE (SCALAR, inst);
       neon_mul_mac (et, neon_quad (rs));
     }
@@ -21518,7 +21517,7 @@ md_section_align (segT	 segment ATTRIBUTE_UNUSED,
 void
 arm_handle_align (fragS * fragP)
 {
-  static char const arm_noop[2][2][4] =
+  static unsigned char const arm_noop[2][2][4] =
     {
       {  /* ARMv1 */
 	{0x00, 0x00, 0xa0, 0xe1},  /* LE */
@@ -21529,7 +21528,7 @@ arm_handle_align (fragS * fragP)
 	{0xe3, 0x20, 0xf0, 0x00},  /* BE */
       },
     };
-  static char const thumb_noop[2][2][2] =
+  static unsigned char const thumb_noop[2][2][2] =
     {
       {  /* Thumb-1 */
 	{0xc0, 0x46},  /* LE */
@@ -21540,7 +21539,7 @@ arm_handle_align (fragS * fragP)
 	{0xbf, 0x00}   /* BE */
       }
     };
-  static char const wide_thumb_noop[2][4] =
+  static unsigned char const wide_thumb_noop[2][4] =
     {  /* Wide Thumb-2 */
       {0xaf, 0xf3, 0x00, 0x80},  /* LE */
       {0xf3, 0xaf, 0x80, 0x00},  /* BE */
@@ -21548,8 +21547,8 @@ arm_handle_align (fragS * fragP)
 
   unsigned bytes, fix, noop_size;
   char * p;
-  const char * noop;
-  const char *narrow_noop = NULL;
+  const unsigned char * noop;
+  const unsigned char *narrow_noop = NULL;
 #ifdef OBJ_ELF
   enum mstate state;
 #endif
@@ -21760,10 +21759,10 @@ add_unwind_opcode (valueT op, int length)
     {
       unwind.opcode_alloc += ARM_OPCODE_CHUNK_SIZE;
       if (unwind.opcodes)
-	unwind.opcodes = (unsigned char *) xrealloc (unwind.opcodes,
-						     unwind.opcode_alloc);
+	unwind.opcodes = XRESIZEVEC (unsigned char, unwind.opcodes,
+				     unwind.opcode_alloc);
       else
-	unwind.opcodes = (unsigned char *) xmalloc (unwind.opcode_alloc);
+	unwind.opcodes = XNEWVEC (unsigned char, unwind.opcode_alloc);
     }
   while (length > 0)
     {
@@ -24012,9 +24011,9 @@ tc_gen_reloc (asection *section, fixS *fixp)
   arelent * reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -25581,15 +25580,14 @@ struct arm_long_option_table
 {
   const char * option;		/* Substring to match.	*/
   const char * help;			/* Help information.  */
-  int (* func) (char * subopt);	/* Function to decode sub-option.  */
+  int (* func) (const char * subopt);	/* Function to decode sub-option.  */
   const char * deprecated;		/* If non-null, print this message.  */
 };
 
 static bfd_boolean
-arm_parse_extension (char *str, const arm_feature_set **opt_p)
+arm_parse_extension (const char *str, const arm_feature_set **opt_p)
 {
-  arm_feature_set *ext_set = (arm_feature_set *)
-      xmalloc (sizeof (arm_feature_set));
+  arm_feature_set *ext_set = XNEW (arm_feature_set);
 
   /* We insist on extensions being specified in alphabetical order, and with
      extensions being added before being removed.  We achieve this by having
@@ -25606,7 +25604,7 @@ arm_parse_extension (char *str, const arm_feature_set **opt_p)
 
   while (str != NULL && *str != 0)
     {
-      char *ext;
+      const char *ext;
       size_t len;
 
       if (*str != '+')
@@ -25709,10 +25707,10 @@ arm_parse_extension (char *str, const arm_feature_set **opt_p)
 }
 
 static bfd_boolean
-arm_parse_cpu (char *str)
+arm_parse_cpu (const char *str)
 {
   const struct arm_cpu_option_table *opt;
-  char *ext = strchr (str, '+');
+  const char *ext = strchr (str, '+');
   size_t len;
 
   if (ext != NULL)
@@ -25759,10 +25757,10 @@ arm_parse_cpu (char *str)
 }
 
 static bfd_boolean
-arm_parse_arch (char *str)
+arm_parse_arch (const char *str)
 {
   const struct arm_arch_option_table *opt;
-  char *ext = strchr (str, '+');
+  const char *ext = strchr (str, '+');
   size_t len;
 
   if (ext != NULL)
@@ -25794,7 +25792,7 @@ arm_parse_arch (char *str)
 }
 
 static bfd_boolean
-arm_parse_fpu (char * str)
+arm_parse_fpu (const char * str)
 {
   const struct arm_option_fpu_value_table * opt;
 
@@ -25810,7 +25808,7 @@ arm_parse_fpu (char * str)
 }
 
 static bfd_boolean
-arm_parse_float_abi (char * str)
+arm_parse_float_abi (const char * str)
 {
   const struct arm_option_value_table * opt;
 
@@ -25827,7 +25825,7 @@ arm_parse_float_abi (char * str)
 
 #ifdef OBJ_ELF
 static bfd_boolean
-arm_parse_eabi (char * str)
+arm_parse_eabi (const char * str)
 {
   const struct arm_option_value_table *opt;
 
@@ -25843,7 +25841,7 @@ arm_parse_eabi (char * str)
 #endif
 
 static bfd_boolean
-arm_parse_it_mode (char * str)
+arm_parse_it_mode (const char * str)
 {
   bfd_boolean ret = TRUE;
 
@@ -25866,7 +25864,7 @@ arm_parse_it_mode (char * str)
 }
 
 static bfd_boolean
-arm_ccs_mode (char * unused ATTRIBUTE_UNUSED)
+arm_ccs_mode (const char * unused ATTRIBUTE_UNUSED)
 {
   codecomposer_syntax = TRUE;
   arm_comment_chars[0] = ';';
@@ -25896,7 +25894,7 @@ struct arm_long_option_table arm_long_opts[] =
 };
 
 int
-md_parse_option (int c, char * arg)
+md_parse_option (int c, const char * arg)
 {
   struct arm_option_table *opt;
   const struct arm_legacy_option_table *fopt;

@@ -37,11 +37,13 @@ struct _sim_cpu
 
   uint64_t     pc;
   uint32_t     CPSR;
-  uint32_t     FPSR;
+  uint32_t     FPSR; /* Floating point Status register.  */
+  uint32_t     FPCR; /* Floating point Control register.  */
 
   uint64_t     nextpc;
-
   uint32_t     instr;
+
+  uint64_t     tpidr;  /* Thread pointer id.  */
 
   sim_cpu_base base;
 };

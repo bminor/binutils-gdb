@@ -262,7 +262,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 static int g_switch_value = 8;
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -337,7 +337,7 @@ md_parse_option (int c, char *arg)
 
     case OPTION_CPU:
       {
-	char *p;
+	const char *p;
 	int cpu_flags = EF_FRV_CPU_GENERIC;
 
 	/* Identify the processor type */
@@ -1513,7 +1513,7 @@ frv_md_number_to_chars (char *buf, valueT val, int n)
   number_to_chars_bigendian (buf, val, n);
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);

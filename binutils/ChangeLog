@@ -1,3 +1,22 @@
+2016-04-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 19872
+	* dwarf.c (display_debug_aranges): Skip warning about unrecognised
+	version number if the version is zero.
+
+2016-03-29  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_data): Use BFD_VMA_FMT to print bfd_size_type vars.
+	(get_dynamic_data): Likewise.
+
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	PR 19851
+	* dwarf.c (SAFE_BYTE_GET): Replace local dynamic array allocation
+	with run time size check.
+
+	* configure: Regenerate.
+
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* readelf.c (decode_ARC_machine_flags): Handle nps400.

@@ -1,3 +1,119 @@
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c: Revert check-in by a mistake in the previous commit.
+
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* exec.c (exec_file_locate_attach): Print warning for unsupported
+	target_pid_to_exec_file.
+	* symfile-mem.c (add_vsyscall_page): Remove the "file" command
+	message part.
+
+2016-04-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-decode.c (help_cmd_list): Fix function doc and remove
+	trailing spaces.
+
+2016-04-01  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/19820
+	* eval.c (evaluate_subexp_standard): Allow TYPE_CODE_ENUM to be
+        the type of BINOP_REPEAT's second operand.
+
+2016-03-31  Yichao Yu  <yyc1992@gmail.com>
+
+	PR gdb/19858
+	* jit.c (jit_breakpoint_re_set_internal): Return 0 if we already
+	got the breakpoint at the right address.
+	(jit_inferior_created): New function.
+	(_initialize_jit): Install jit_inferior_created as
+	inferior_created observer.
+
+2016-03-31  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* NEWS: Mention support for tracepoints on powerpc*-linux.
+
+2016-03-31  Catalin Udma  <catalin.udma@freescale.com>
+
+	PR python/19743
+	* python/python.c (execute_gdb_command): Use console uiout
+	when executing gdb command.
+	* utils.c (restore_ui_out_closure): New structure.
+	(do_restore_ui_out): New function.
+	(make_cleanup_restore_ui_out): Likewise.
+	* utils.h (make_cleanup_restore_ui_out): Declare.
+
+2016-03-31  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that support for "target m32rsdi", "target mips",
+	"target pmon", "target ddb", "target rockhopper", and "target lsi"
+	was removed.
+	* Makefile.in (ALL_TARGET_OBS): Remove remote-m32r-sdi.o and
+	remote-mips.o.
+	(ALLDEPFILES): Remove remote-m32r-sdi.c and remote-mips.c.
+	* configure.tgt: Remove all references to remote-m32r-sdi.o and
+	remote-mips.o.
+	* mips-tdep.c (deprecated_mips_set_processor_regs_hack): Delete
+	function.
+	* mips-tdep.h (deprecated_mips_set_processor_regs_hack): Delete
+	declaration.
+	* remote-m32r-sdi.c, remote-mips.c: Delete files.
+	* symfile.c (generic_load, generic_load): Remove comments.
+
+2016-03-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_epilogue_frame_this_id): Check 'func' against
+	0 rather than NULL.
+
+2016-03-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c: (arm_make_epilogue_frame_cache): New function.
+	(arm_epilogue_frame_this_id): New function.
+	(arm_epilogue_frame_prev_register): New function.
+	(arm_epilogue_frame_sniffer): New function.
+	(arm_epilogue_frame_unwind): New.
+	(arm_gdbarch_init): Append unwinder arm_epilogue_frame_unwind.
+
+2016-03-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_stack_frame_destroyed_p): Rename it ...
+	(arm_stack_frame_destroyed_p_1): ... here.  Don't call
+	arm_pc_is_thumb.
+	(arm_stack_frame_destroyed_p): Call
+	thumb_stack_frame_destroyed_p and
+	arm_stack_frame_destroyed_p_1.
+
+2016-03-30  Doug Evans  <dje@google.com>
+
+	* python/py-utils.c (host_string_to_python_string): New function.
+	* python/python-internal.h (host_string_to_python_string): Declare it.
+	* python/py-*.c (*): Update all calls to
+	PyString_Decode (str, strlen (str), host_charset (), NULL);
+	to use host_string_to_python_string instead.
+
+2016-03-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* remote.c (remote_check_symbols): Allocate own buffer for reply.
+
+2016-03-29  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.c (xtensa_frame_cache): Change op1 type to LONGEST.
+	Use safe_read_memory_integer instead of read_memory_integer.
+
+2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* NEWS: Mention support for tracepoints on s390*-linux.
+
+2016-03-29  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb/value.c (value_actual_type): Fix formatting issue.
+
+2016-03-23  Yao Qi  <yao.qi@linaro.org>
+
+	* gdbarch.sh (software_single_step): Remove comments.
+	* gdbarch.h: Regenerated.
+
 2016-03-21  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_record_media): New.
@@ -311,10 +427,6 @@
 
 	* top.c (window_hook): Delete.
 	(command_loop): Remove references to window_hook.
-
-2016-03-09  Pedro Alves  <palves@redhat.com>
-
-	* gdb.base/command-line-input.exp: New file.
 
 2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
 

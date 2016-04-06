@@ -37,6 +37,25 @@ skip -rfunction regular-expression
 maint info line-table REGEXP
   Display the contents of GDB's internal line table data struture.
 
+* Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
+  was added in GDBserver, including JIT compiling fast tracepoint's
+  conditional expression bytecode into native code.
+
+* Support for various remote target protocols and ROM monitors has
+  been removed:
+
+  target m32rsdi	Remote M32R debugging over SDI
+  target mips		MIPS remote debugging protocol
+  target pmon		PMON ROM monitor
+  target ddb		NEC's DDB variant of PMON for Vr4300
+  target rockhopper	NEC RockHopper variant of PMON
+  target lsi		LSI variant of PMO
+
+* Support for tracepoints and fast tracepoints on powerpc-linux,
+  powerpc64-linux, and powerpc64le-linux was added in GDBserver,
+  including JIT compiling fast tracepoint's conditional expression
+  bytecode into native code.
+
 *** Changes in GDB 7.11
 
 * GDB now supports debugging kernel-based threads on FreeBSD.

@@ -40,6 +40,10 @@ if [is_amd64_regs_target] {
     set fpreg "r31"
     set spreg "r1"
     set pcreg "pc"
+} elseif { [istarget "s390*-*-*"] } {
+    set fpreg "r11"
+    set spreg "r15"
+    set pcreg "pc"
 } else {
     set fpreg "fp"
     set spreg "sp"

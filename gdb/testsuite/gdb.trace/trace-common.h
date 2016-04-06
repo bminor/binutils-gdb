@@ -48,6 +48,14 @@ x86_trace_dummy ()
        "    nop\n" \
        )
 
+#elif (defined __s390__)
+
+#define FAST_TRACEPOINT_LABEL(name) \
+  asm ("    .global " SYMBOL(name) "\n" \
+       SYMBOL(name) ":\n" \
+       "    mvc 0(8, %r15), 0(%r15)\n" \
+       )
+
 #else
 
 #error "unsupported architecture for trace tests"

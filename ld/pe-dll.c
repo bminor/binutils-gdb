@@ -897,11 +897,17 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
       char *int_name = pe_def_file->exports[i].internal_name;
       char *name;
 
+      /* PR 19803: Make sure that any exported symbol does not get garbage collected.  */
+      lang_add_gc_name (int_name);
+
       name = xmalloc (strlen (int_name) + 2);
       if (pe_details->underscored && int_name[0] != '@')
 	{
 	  *name = '_';
 	  strcpy (name + 1, int_name);
+
+	  /* PR 19803: The alias must be preserved as well.  */
+	  lang_add_gc_name (xstrdup (name));
 	}
       else
 	strcpy (name, int_name);

@@ -3245,12 +3245,26 @@ elf_add_dt_needed_tag (bfd *abfd,
   return 0;
 }
 
+/* Return true if SONAME is on the needed list between NEEDED and STOP
+   (or the end of list if STOP is NULL), and needed by a library that
+   will be loaded.  */
+
 static bfd_boolean
-on_needed_list (const char *soname, struct bfd_link_needed_list *needed)
+on_needed_list (const char *soname,
+		struct bfd_link_needed_list *needed,
+		struct bfd_link_needed_list *stop)
 {
-  for (; needed != NULL; needed = needed->next)
-    if ((elf_dyn_lib_class (needed->by) & DYN_AS_NEEDED) == 0
-	&& strcmp (soname, needed->name) == 0)
+  struct bfd_link_needed_list *look;
+  for (look = needed; look != stop; look = look->next)
+    if (strcmp (soname, look->name) == 0
+	&& ((elf_dyn_lib_class (look->by) & DYN_AS_NEEDED) == 0
+	    /* If needed by a library that itself is not directly
+	       needed, recursively check whether that library is
+	       indirectly needed.  Since we add DT_NEEDED entries to
+	       the end of the list, library dependencies appear after
+	       the library.  Therefore search prior to the current
+	       LOOK, preventing possible infinite recursion.  */
+	    || on_needed_list (elf_dt_name (look->by), needed, look)))
       return TRUE;
 
   return FALSE;
@@ -4569,7 +4583,7 @@ error_free_dyn:
 		    goto error_free_vers;
 		}
 	    }
-	  else if (dynsym && h->dynindx != -1)
+	  else if (h->dynindx != -1)
 	    /* If the symbol already has a dynamic index, but
 	       visibility says it should not be visible, turn it into
 	       a local symbol.  */
@@ -4593,7 +4607,8 @@ error_free_dyn:
 		       || (old_bfd->flags & BFD_PLUGIN) == 0))
 		  || (h->ref_dynamic_nonweak
 		      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
-		      && !on_needed_list (elf_dt_name (abfd), htab->needed))))
+		      && !on_needed_list (elf_dt_name (abfd),
+					  htab->needed, NULL))))
 	    {
 	      int ret;
 	      const char *soname = elf_dt_name (abfd);

@@ -1,3 +1,31 @@
+2016-03-30  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/16979
+	* symtab.cc (Symbol_table::define_default_version): Check for case
+	where symbols are both in different shared objects.
+
+2016-03-27  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/16111
+	* i386.cc (Target_i386): Add check for fully-resolved symbol for
+	R_386_GOTOFF.
+
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+
+2016-03-21  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19842
+	* errors.cc (Errors::undefined_symbol): Add info message when
+	symbol should have been provided by a plugin.
+	* target-reloc.h (issue_undefined_symbol_error): Check for
+	placeholder symbols defined in discarded sections.
+	* testsuite/Makefile.am (plugin_test_9b): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_test_9b_elf.cc: New test source file.
+	* testsuite/plugin_test_9b_ir.cc: New test source file.
+
 2016-03-20  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/19002

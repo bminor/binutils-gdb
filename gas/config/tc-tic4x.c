@@ -713,7 +713,6 @@ tic4x_asg (int x ATTRIBUTE_UNUSED)
   char c;
   char *name;
   char *str;
-  char *tmp;
 
   SKIP_WHITESPACE ();
   str = input_line_pointer;
@@ -728,12 +727,8 @@ tic4x_asg (int x ATTRIBUTE_UNUSED)
     }
   *input_line_pointer++ = '\0';
   c = get_symbol_name (&name);	/* Get terminator.  */
-  tmp = xmalloc (strlen (str) + 1);
-  strcpy (tmp, str);
-  str = tmp;
-  tmp = xmalloc (strlen (name) + 1);
-  strcpy (tmp, name);
-  name = tmp;
+  str = xstrdup (str);
+  name = xstrdup (name);
   if (hash_find (tic4x_asg_hash, name))
     hash_replace (tic4x_asg_hash, name, (void *) str);
   else
@@ -969,8 +964,7 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
   if (c == '"')
     c = * ++ input_line_pointer;
   input_line_pointer++;		/* Skip null symbol terminator.  */
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xstrdup (section_name);
 
   /* TI C from version 5.0 allows a section name to contain a
      subsection name as well. The subsection name is separated by a
@@ -1080,8 +1074,7 @@ tic4x_usect (int x ATTRIBUTE_UNUSED)
   if (c == '"')
     c = * ++ input_line_pointer;
   input_line_pointer++;		/* Skip null symbol terminator.  */
-  name = xmalloc (input_line_pointer - section_name + 1);
-  strcpy (name, section_name);
+  name = xstrdup (section_name);
 
   if (c == ',')
     input_line_pointer =
@@ -1239,7 +1232,7 @@ tic4x_inst_insert (const tic4x_inst_t *inst)
 
 /* Make a new instruction template.  */
 static tic4x_inst_t *
-tic4x_inst_make (const char *name, unsigned long opcode, char *args)
+tic4x_inst_make (const char *name, unsigned long opcode, const char *args)
 {
   static tic4x_inst_t *insts = NULL;
   static char *names = NULL;
@@ -1248,10 +1241,9 @@ tic4x_inst_make (const char *name, unsigned long opcode, char *args)
   if (insts == NULL)
     {
       /* Allocate memory to store name strings.  */
-      names = (char *) xmalloc (sizeof (char) * 8192);
+      names = XNEWVEC (char, 8192);
       /* Allocate memory for additional insts.  */
-      insts = (tic4x_inst_t *)
-	xmalloc (sizeof (tic4x_inst_t) * 1024);
+      insts = XNEWVEC (tic4x_inst_t, 1024);
     }
   insts[iindex].name = names;
   insts[iindex].opcode = opcode;
@@ -2552,7 +2544,7 @@ tic4x_cleanup (void)
    of chars emitted is stored in *sizeP.  An error message is
    returned, or NULL on OK.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
@@ -2710,7 +2702,7 @@ md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
 
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -3018,9 +3010,9 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixP)
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   reloc->address /= OCTETS_PER_BYTE;

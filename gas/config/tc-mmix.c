@@ -395,9 +395,9 @@ const char line_comment_chars[] = "*#";
 
 const char line_separator_chars[] = ";";
 
-const char mmix_exp_chars[] = "eE";
+const char EXP_CHARS[] = "eE";
 
-const char mmix_flt_chars[] = "rf";
+const char FLT_CHARS[] = "rf";
 
 
 /* Fill in the offset-related part of GETA or Bcc.  */
@@ -640,7 +640,7 @@ get_putget_operands (struct mmix_opcode *insn, char *operands,
 /* Handle MMIX-specific option.  */
 
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
@@ -2272,12 +2272,12 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
    emitted is stored in *sizeP .  An error message is returned, or NULL on
    OK.  */
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   if (type == 'r')
     type = 'f';
-  /* FIXME: Having 'f' in mmix_flt_chars (and here) makes it
+  /* FIXME: Having 'f' in FLT_CHARS (and here) makes it
      problematic to also have a forward reference in an expression.
      The testsuite wants it, and it's customary.
      We'll deal with the real problems when they come; we share the
@@ -3775,7 +3775,7 @@ mmix_frob_file (void)
 
       if (gregs == NULL)
 	{
-	  gregs = xmalloc (sizeof (*gregs));
+	  gregs = XNEW (struct mmix_symbol_gregs);
 	  gregs->n_gregs = 0;
 	  symbol_set_tc (sym, &gregs);
 	  all_greg_symbols[n_greg_symbols++] = gregs;

@@ -722,7 +722,6 @@ ALL_TARGET_OBS = \
 	sol2-tdep.o \
 	solib-frv.o solib-svr4.o \
 	solib-darwin.o solib-dsbt.o \
-	remote-m32r-sdi.o remote-mips.o \
 	xcoffread.o \
 	symfile-mem.o \
 	windows-tdep.o \
@@ -1739,7 +1738,6 @@ ALLDEPFILES = \
 	ppcobsd-nat.c ppcobsd-tdep.c \
 	procfs.c \
 	ravenscar-thread.c \
-	remote-m32r-sdi.c remote-mips.c \
 	remote-sim.c \
 	dcache.c \
 	rl78-tdep.c \

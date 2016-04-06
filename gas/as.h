@@ -477,15 +477,15 @@ void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
 void   sprint_value (char *, addressT);
 int    had_errors (void);
 int    had_warnings (void);
-void   as_warn_value_out_of_range (char *, offsetT, offsetT, offsetT,
+void   as_warn_value_out_of_range (const char *, offsetT, offsetT, offsetT,
 				   const char *, unsigned);
-void   as_bad_value_out_of_range (char *, offsetT, offsetT, offsetT,
+void   as_bad_value_out_of_range (const char *, offsetT, offsetT, offsetT,
 				  const char *, unsigned);
 void   print_version_id (void);
 char * app_push (void);
 char * atof_ieee (char *, int, LITTLENUM_TYPE *);
-char * ieee_md_atof (int, char *, int *, bfd_boolean);
-char * vax_md_atof (int, char *, int *);
+const char * ieee_md_atof (int, char *, int *, bfd_boolean);
+const char * vax_md_atof (int, char *, int *);
 char * input_scrub_include_file (const char *, char *);
 void   input_scrub_insert_line (const char *);
 void   input_scrub_insert_file (char *);
@@ -585,12 +585,7 @@ COMMON const char *        found_comment_file;
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 /* If .size directive failure should be error or warning.  */
-COMMON enum
-  {
-    size_check_error = 0,
-    size_check_warning
-  }
-flag_size_check;
+COMMON int flag_allow_nonconst_size;
 
 /* If we should generate ELF common symbols with the STT_COMMON type.  */
 extern int flag_use_elf_stt_common;

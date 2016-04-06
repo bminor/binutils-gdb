@@ -43,11 +43,7 @@
 #ifdef NEED_LITERAL_POOL
 
 valueT
-add_to_literal_pool (sym, addend, sec, size)
-     symbolS *sym;
-     valueT addend;
-     segT sec;
-     int size;
+add_to_literal_pool (symbolS *sym, valueT addend, segT sec, int size)
 {
   segT current_section = now_seg;
   int current_subsec = now_subseg;

@@ -1,3 +1,96 @@
+2016-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Move error_ret_free_local to be
+	a fall through from error_ret_free_internal.  Free local_syms in
+	error_ret_free_local if allocated from bfd_elf_get_elf_syms ().
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (plt_do_relocs_for_symbol): Changed.
+	(relocate_plt_for_entry): Likewise.
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_check_relocs): Changed
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (name_for_global_symbol): Changed assert.
+	(get_replace_function): Created.:
+	(struct arc_relocation_data): Changed to signed types.
+	(defines S, L, P, PDATA): Casted to signed type.
+	(defines SECTSTART, _SDA_BASE_, TLS_REL): Likewise.
+	(PRINT_DEBUG_RELOC_INFO_BEFORE): Changed.
+	(arc_do_relocation): Changed.
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (name_for_global_symbol): Added assert to check for
+	symbol index.
+	(elf_arc_relocate_section): Added and changed asserts, validating
+	the synamic symbol index.
+	(elf_arc_finish_dynamic_symbol): Do not fill the dynamic
+	relocation if symbol has dynindx set to -1.
+
+2016-04-05  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (elf_link_add_object_symbols): Always turn hidden
+	and internal symbols which have a dynamic index into local
+	ones.
+
+2016-04-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 19872
+	* dwarf2.c (parse_comp_unit): Skip warning about unrecognised
+	version number if the version is zero.
+
+2016-04-01  Alan Modra  <amodra@gmail.com>
+
+	PR 19886
+	* elflink.c (on_needed_list): Recursively check needed status.
+	(elf_link_add_object_symbols): Adjust.
+
+2016-03-30  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* elf32-avr.c (avr_elf32_load_records_from_section): Free
+	internal_relocs only if they aren't cached.
+
+2016-03-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 17334
+	* elf32-bfin.c (elf32_bfinfdpic_finish_dynamic_sections): Relax
+	assertion on the size of the got section to allow it to be bigger
+	than the number of relocs.
+
+2016-03-29  Toni Spets  <toni.spets@iki.fi>
+
+	PR 19878
+	* coffcode.h (coff_write_object_contents): Revert accidental
+	2014-11-10 change.
+
+2016-03-22  Alan Modra  <amodra@gmail.com>
+
+	PR 19850
+	* dwarf2.c (read_attribute_value): Skip info_ptr check for
+	DW_FORM_flag_present.
+
+2016-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* cpu-v850_rh850.c (arch_info_struct): Restore v850-rh850 as an
+	architecture name for backwards compatibility.
+
+	* peXXigen.c (_bfd_XXi_write_codeview_record): Fix possible
+	unbounded stack use.
+
+	* warning.m4 (GCC_WARN_CFLAGS): Only add -Wstack-usage if using a
+	sufficiently recent version of GCC.
+	* configure: Regenerate.
+
+2016-03-22  Alan Modra  <amodra@gmail.com>
+
+	PR 19851
+	* plugin.c (try_load_plugin): Avoid -Wstack-usage warning.
+
 2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* archures.c (bfd_mach_arc_nps400): Define.
