@@ -409,10 +409,9 @@ cplus_compute_program (struct compile_instance *inst,
     case COMPILE_I_PRINT_VALUE_SCOPE:
       fprintf_unfiltered (buf,
 "auto " COMPILE_I_EXPR_VAL " = %s;\n"
-"__attribute__((used)) auto " COMPILE_I_EXPR_PTR_TYPE "= &%s;\n"
-"std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s" COMPILE_I_EXPR_VAL ","
-	 "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));"
-			  , input, input,
+"decltype (%s) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
+"std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s" COMPILE_I_EXPR_VAL "," "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));"
+			  ,input, input,
 			  (inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
 			   ? "&" : ""));
       break;
