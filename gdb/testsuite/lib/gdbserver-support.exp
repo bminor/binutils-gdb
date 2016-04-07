@@ -155,6 +155,10 @@ proc gdbserver_download_current_prog { } {
     global gdbserver_server_exec
     global last_loaded_file
 
+    if { ![info exists last_loaded_file] } {
+	return ""
+    }
+
     set host_exec $last_loaded_file
 
     # If we already downloaded a file to the target, see if we can reuse it.

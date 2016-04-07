@@ -1,3 +1,10 @@
+2016-04-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/solib-list.exp: Don't use gdb_load.  Instead pass the
+	interpreter filename as argument to gdbserver_spawn.
+	* lib/gdbserver-support.exp (gdbserver_download_current_prog):
+	Return empty if $last_loaded_file does not exist.
+
 2016-04-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with gcc-4.8.5-4.el7.x86_64.

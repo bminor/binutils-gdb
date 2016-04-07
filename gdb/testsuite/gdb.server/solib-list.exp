@@ -57,7 +57,6 @@ foreach nonstop { 0 1 } { with_test_prefix "non-stop $nonstop" {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${interp_system}
     gdb_load_shlibs ${binfile}
     gdb_load_shlibs ${binlibfile}
 
@@ -72,8 +71,12 @@ foreach nonstop { 0 1 } { with_test_prefix "non-stop $nonstop" {
     # But GDB having symbols from the main executable it would try to use
     # displaced-stepping buffer at unmapped that time address _start.
     gdb_test "set displaced-stepping off"
-	
-    set res [gdbserver_spawn ${binfile}]
+
+    # Note we pass ${interp_system}, the program gdbserver spawns, as
+    # argument here, instead of using gdb_load, because we don't want
+    # to download the interpreter to the target (it's already there)
+    # or to the test output directory.
+    set res [gdbserver_spawn "${interp_system} ${binfile}"]
     set gdbserver_protocol [lindex $res 0]
     set gdbserver_gdbport [lindex $res 1]
 
