@@ -1,9 +1,8 @@
-gas/
 2016-04-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * config/tc-arc.c (arc_option): Prepare string for automatic
-        translation.
-        (declare_register): Likewise.
+	* config/tc-arc.c (arc_option): Prepare string for automatic
+	translation.
+	(declare_register): Likewise.
 
 2016-04-06  James Greenhalgh  <james.greenhalgh@arm.com>
 
@@ -52,16 +51,16 @@ gas/
 
 2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * config/tc-arc.c (is_code_density_p): Compare directly the
-        subclass field.
-        (is_spfp_p, is_dpfp_p, is_spfp_p): Define.
-        (check_cpu_feature): New function.
-        (find_opcode_match): Use check_cpu_feature function.
-        (preprocess_operands): Likewise.
-        (md_parse_option): Use mfpuda, mdpfp, mspfp options.
-        * testsuite/gas/arc/tdpfp.d: New file.
-        * testsuite/gas/arc/tfpuda.d: Likewise.
-        * testsuite/gas/arc/tfpx.s: Likewise.
+	* config/tc-arc.c (is_code_density_p): Compare directly the
+	subclass field.
+	(is_spfp_p, is_dpfp_p, is_spfp_p): Define.
+	(check_cpu_feature): New function.
+	(find_opcode_match): Use check_cpu_feature function.
+	(preprocess_operands): Likewise.
+	(md_parse_option): Use mfpuda, mdpfp, mspfp options.
+	* testsuite/gas/arc/tdpfp.d: New file.
+	* testsuite/gas/arc/tfpuda.d: Likewise.
+	* testsuite/gas/arc/tfpx.s: Likewise.
 
 2016-04-05  Jiong Wang  <jiong.wang@arm.com>
 
@@ -72,16 +71,17 @@ gas/
 	* testsuite/gas/arm/armv8-2-fp16-simd-warning.l: New warning results.
 	* testsuite/gas/arm/simd_by_scalar_low_regbank.s: New test source.
 	* testsuite/gas/arm/simd_by_scalar_low_regbank.d: New testcase.
-	* testsuite/gas/arm/simd_by_scalar_low_regbank_thumb.d: Likewise for Thumb.
+	* testsuite/gas/arm/simd_by_scalar_low_regbank_thumb.d: Likewise
+	for Thumb.
 	* testsuite/gas/arm/simd_by_scalar_low_regbank.l: New warning results.
 
 2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * config/tc-arc.c (assemble_insn): Prohibit pc-rel relocations for
+	* config/tc-arc.c (assemble_insn): Prohibit pc-rel relocations for
 	JUMP instructions type.
-        * testsuite/gas/arc/relocs-errors.d: New file.
-        * testsuite/gas/arc/relocs-errors.err: Likewise.
-        * testsuite/gas/arc/relocs-errors.s: Likewise.
+	* testsuite/gas/arc/relocs-errors.d: New file.
+	* testsuite/gas/arc/relocs-errors.err: Likewise.
+	* testsuite/gas/arc/relocs-errors.s: Likewise.
 
 2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -456,20 +456,20 @@ gas/
 
 2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * testsuite/gas/all/gas.exp: Don't xfail on ARC.
-        * testsuite/gas/elf/elf.exp: Likewise.
-        * testsuite/gas/all/redef3.d: Allow execution for ARC.
+	* testsuite/gas/all/gas.exp: Don't xfail on ARC.
+	* testsuite/gas/elf/elf.exp: Likewise.
+	* testsuite/gas/all/redef3.d: Allow execution for ARC.
 
 2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * testsuite/gas/arc/warn.exp: Fix matching pattern.
+	* testsuite/gas/arc/warn.exp: Fix matching pattern.
 
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * testsuite/gas/arc/ext2op.d: New file.
-        * testsuite/gas/arc/ext2op.s: Likewise.
-        * testsuite/gas/arc/ext3op.d: Likewise.
-        * testsuite/gas/arc/ext3op.s: Likewise.
+	* testsuite/gas/arc/ext2op.d: New file.
+	* testsuite/gas/arc/ext2op.s: Likewise.
+	* testsuite/gas/arc/ext3op.d: Likewise.
+	* testsuite/gas/arc/ext3op.s: Likewise.
 
 2016-03-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
@@ -827,7 +827,7 @@ gas/
 2016-03-15  Ulrich Drepper  <drepper@gmail.com>
 
 	* doc/c-i386.texi (Register Naming): Update to details of the
-        latest architecture version.
+	latest architecture version.
 
 2016-03-10  Mickael Guene  <mickael.guene@st.com>
 
@@ -925,12 +925,12 @@ gas/
 2016-02-29  Cupertino Miranda  <cmiranda@synopsys.com>
 	    Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
 
-        * config/tc-arc.c (arc_extra_reloc): Change size to 0.
-        (tc_arc_fix_adjustable): Changed default return value to 1.
-        * testsuite/gas/arc/j.d: Updated expected symbol
-        * testsuite/gas/arc/jl.d: Likewise
-        * testsuite/gas/arc/relax-avoid1.d: Likewise
-        * testsuite/gas/arc/st.d: Likewise
+	* config/tc-arc.c (arc_extra_reloc): Change size to 0.
+	(tc_arc_fix_adjustable): Changed default return value to 1.
+	* testsuite/gas/arc/j.d: Updated expected symbol
+	* testsuite/gas/arc/jl.d: Likewise
+	* testsuite/gas/arc/relax-avoid1.d: Likewise
+	* testsuite/gas/arc/st.d: Likewise
 
 2016-02-29  Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
 
@@ -1120,7 +1120,7 @@ gas/
 
 2016-02-24  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
-    * doc/c-arm.texi (ARM Options): Document cortex-a17.
+	* doc/c-arm.texi (ARM Options): Document cortex-a17.
 
 2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -1228,7 +1228,7 @@ gas/
 	* input-file.h (input_file_open): Adjust.
 	* input-scrub.c (logical_input_file): change type to const char *.
 	(physical_input_file): Likewise.
-       	(struct input_save): Adjust.
+	(struct input_save): Adjust.
 	(input_scrub_push): Adjust.
 	(input_scrub_begin): Adjust.
 	(as_where): Adjust.
@@ -1309,7 +1309,7 @@ gas/
 	and string const char *.
 	* read.c (_bfd_rel): Make type of name const char *.
 	* app.c (out_string): Change type to const char *.
-       	(struct app_save::out_string): Likewise.
+	(struct app_save::out_string): Likewise.
 
 2016-02-18  Dan Gisselquist  <dgisselq@verizon.net>
 	    Nick Clifton  <nickc@redhat.com>
@@ -1503,7 +1503,7 @@ gas/
 
 2016-02-03  Kevin Buettner  <kevinb@redhat.com>
 
-    	* config/tc-msp430.h (DWARF2_ADDR_SIZE): Set to 4.
+	* config/tc-msp430.h (DWARF2_ADDR_SIZE): Set to 4.
 
 2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -1585,10 +1585,9 @@ gas/
 
 2016-01-26  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * config/tc-arc.c (md_apply_fix): Allow addendum.
-        (arc_reloc_op): Allow complex expressions for tpoff.
-        (md_apply_fix): Handle resolved TLS local symbol.
-
+	* config/tc-arc.c (md_apply_fix): Allow addendum.
+	(arc_reloc_op): Allow complex expressions for tpoff.
+	(md_apply_fix): Handle resolved TLS local symbol.
 	* testsuite/gas/arc/tls-relocs1.d: New file.
 	* testsuite/gas/arc/tls-relocs1.s: Likewise.
 
