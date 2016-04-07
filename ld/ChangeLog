@@ -1,3 +1,12 @@
+2016-04-08  Dan Gisselquist  <dgisselq@ieee.org>
+
+	* ldlang.c (print_output_section_statement): Show minfo size
+	in target machine address units.
+	(print_reloc_statement): Likewise.
+	(print_padding_statement): Likewise.
+	(print_data_statement): Likewise.  Ensure minimum print_dot
+	increment of one address unit.
+
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* emulparams/arc-endianness.sh: Make little endian default choice.

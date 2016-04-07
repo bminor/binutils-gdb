@@ -4001,7 +4001,7 @@ print_output_section_statement
 	      ++len;
 	    }
 
-	  minfo ("0x%V %W", section->vma, section->size);
+	  minfo ("0x%V %W", section->vma, TO_ADDR (section->size));
 
 	  if (section->vma != section->lma)
 	    minfo (_(" load address 0x%V"), section->lma);
@@ -4311,7 +4311,9 @@ print_data_statement (lang_data_statement_type *data)
       break;
     }
 
-  minfo ("0x%V %W %s 0x%v", addr, size, name, data->value);
+  if (size < TO_SIZE ((unsigned) 1))
+    size = TO_SIZE ((unsigned) 1);
+  minfo ("0x%V %W %s 0x%v", addr, TO_ADDR (size), name, data->value);
 
   if (data->exp->type.node_class != etree_value)
     {
@@ -4354,7 +4356,7 @@ print_reloc_statement (lang_reloc_statement_type *reloc)
 
   size = bfd_get_reloc_size (reloc->howto);
 
-  minfo ("0x%V %W RELOC %s ", addr, size, reloc->howto->name);
+  minfo ("0x%V %W RELOC %s ", addr, TO_ADDR (size), reloc->howto->name);
 
   if (reloc->name != NULL)
     minfo ("%s+", reloc->name);
@@ -4387,7 +4389,7 @@ print_padding_statement (lang_padding_statement_type *s)
   addr = s->output_offset;
   if (s->output_section != NULL)
     addr += s->output_section->vma;
-  minfo ("0x%V %W ", addr, (bfd_vma) s->size);
+  minfo ("0x%V %W ", addr, TO_ADDR (s->size));
 
   if (s->fill->size != 0)
     {
