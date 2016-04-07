@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 standard_testfile ".f90"
+load_lib "fortran.exp"
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
     {debug f90 quiet}] } {
@@ -27,6 +28,12 @@ if ![runto_main] {
     untested "could not run to main"
     return -1
 }
+
+# Depending on the compiler being used, the type names can be printed differently.
+set int [fortran_int4]
+set real [fortran_real4]
+set complex [fortran_complex4]
+set logical [fortran_logical4]
 
 gdb_breakpoint [gdb_get_line_number "vlas-allocated"]
 gdb_continue_to_breakpoint "vlas-allocated"
@@ -48,13 +55,13 @@ gdb_test "print l" " = \\.TRUE\\." "charactervla allocated"
 
 gdb_breakpoint [gdb_get_line_number "vlas-initialized"]
 gdb_continue_to_breakpoint "vlas-initialized"
-gdb_test "ptype intvla" "type = integer\\\(kind=4\\\) \\\(11,22,33\\\)" \
+gdb_test "ptype intvla" "type = $int \\\(11,22,33\\\)" \
   "ptype intvla"
-gdb_test "ptype realvla" "type = real\\\(kind=4\\\) \\\(11,22,33\\\)" \
+gdb_test "ptype realvla" "type = $real \\\(11,22,33\\\)" \
   "ptype realvla"
-gdb_test "ptype complexvla" "type = complex\\\(kind=4\\\) \\\(11,22,33\\\)" \
+gdb_test "ptype complexvla" "type = $complex \\\(11,22,33\\\)" \
   "ptype complexvla"
-gdb_test "ptype logicalvla" "type = logical\\\(kind=4\\\) \\\(11,22,33\\\)" \
+gdb_test "ptype logicalvla" "type = $logical \\\(11,22,33\\\)" \
   "ptype logicalvla"
 gdb_test "ptype charactervla" "type = character\\\*1 \\\(11,22,33\\\)" \
   "ptype charactervla"
