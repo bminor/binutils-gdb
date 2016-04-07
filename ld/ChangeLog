@@ -1,3 +1,9 @@
+2016-04-07  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc (.MSP430.attributes): Fix typo in
+	section name.
+	* scripttempl/elf32msp430_3.sc (.MSP430.attributes): Likewise.
+
 2016-04-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* emulparams/arc-endianness.sh: New file.
