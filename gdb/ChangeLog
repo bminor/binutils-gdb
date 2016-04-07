@@ -1,3 +1,8 @@
+2016-04-07  Yao Qi  <yao.qi@linaro.org>
+
+	* record-full.c (record_full_insert_breakpoint): Set
+	bp_tgt->reqstd_address and bp_tgt->placed_size.
+
 2016-04-06  Don Breazeal  <donb@codesourcery.com>
 
 	* value.c (value_actual_type): Don't try to get rtti type
