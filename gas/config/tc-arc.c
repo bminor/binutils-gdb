@@ -732,14 +732,14 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 	  md_parse_option (OPTION_MCPU, "archs");
 	}
       else
-	as_fatal ("could not find the architecture");
+	as_fatal (_("could not find the architecture"));
 
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
-	as_fatal ("could not set architecture and machine");
+	as_fatal (_("could not set architecture and machine"));
     }
   else
     if (arc_mach_type != mach)
-      as_warn ("Command-line value overrides \".cpu\" directive");
+      as_warn (_("Command-line value overrides \".cpu\" directive"));
 
   restore_line_pointer (c);
   demand_empty_rest_of_line ();
@@ -747,7 +747,7 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 
  bad_cpu:
   restore_line_pointer (c);
-  as_bad ("invalid identifier for \".cpu\"");
+  as_bad (_("invalid identifier for \".cpu\""));
   ignore_rest_of_line ();
 }
 
@@ -2111,7 +2111,7 @@ declare_register (const char *name, int number)
 
   err = hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
   if (err)
-    as_fatal ("Inserting \"%s\" into register table failed: %s",
+    as_fatal (_("Inserting \"%s\" into register table failed: %s"),
 	      name, err);
 }
 
