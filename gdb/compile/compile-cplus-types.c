@@ -1989,11 +1989,27 @@ new_cplus_compile_instance (struct gcc_cp_context *fe)
   result->base.fe = &fe->base;
   result->base.destroy = delete_instance;
   result->base.gcc_target_options = ("-std=gnu++11"
+				     /* We don't need this any more,
+					the user expression function
+					is regarded as a friend of
+					every class, so that GDB users
+					get to access private and
+					protected members.
+
 				     " -fno-access-control"
+
+				     */
 				     /* Otherwise the .o file may need
 					"_Unwind_Resume" and
-					"__gcc_personality_v0".  */
-				     " -fno-exceptions");
+					"__gcc_personality_v0".
+
+					??? Why would that be a
+					problem? -lxo
+
+				     " -fno-exceptions"
+
+				     */
+				     );
 
   result->type_map = htab_create_alloc (10, hash_type_map_instance,
 					eq_type_map_instance,
