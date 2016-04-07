@@ -1,3 +1,8 @@
+2016-04-06  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* doc/c-aarch64.texi (Architecture Extensions): Add entry for LSE.
+	Correct entry for RDMA.  Alpha sort entries.
+
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.c (tokenize_flags): Allow greater range of
