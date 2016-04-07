@@ -508,6 +508,13 @@ integer_constant (int radix, expressionS *expressionP)
       && input_line_pointer - 1 == suffix)
     c = *input_line_pointer++;
 
+#ifndef tc_allow_U_suffix
+#define tc_allow_U_suffix 1
+#endif
+  /* PR 19910: Look for, and ignore, a U suffix to the number.  */
+  if (tc_allow_U_suffix && (c == 'U' || c == 'u'))
+    c = * input_line_pointer++;
+
   if (small)
     {
       /* Here with number, in correct radix. c is the next char.
@@ -950,7 +957,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
       /* expression () will pass trailing whitespace.  */
       if ((c == '(' && *input_line_pointer != ')')
 	  || (c == '[' && *input_line_pointer != ']'))
-	as_bad (_("missing '%c'"), c == '(' ? ')' : ']');
+	{
+	  if (* input_line_pointer)
+	    as_bad (_("found '%c', expected: '%c'"),
+		    * input_line_pointer, c == '(' ? ')' : ']');
+	  else
+	    as_bad (_("missing '%c'"), c == '(' ? ')' : ']');
+	}	    
       else
 	input_line_pointer++;
       SKIP_WHITESPACE ();

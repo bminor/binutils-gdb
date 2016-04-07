@@ -1,3 +1,19 @@
+2016-04-07  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19910
+	* config/tc-sparc.c (sparc_ip): Report an error if the expression
+	inside a %-macro could not be fully parsed.
+	* expr.c (integer_constant): Accept and ignore U suffixes to
+	integers.
+	(operand): When a missing closing parenthesis is encountered,
+	report the character that was found instead.
+	* testsuite/gas/mips/tls-ill.l: Update expected error message.
+	* testsuite/gas/sparc/pr19910-1.d: New test driver.
+	* testsuite/gas/sparc/pr19910-1.s: New test.
+	* testsuite/gas/sparc/pr19910-2.l: Expected error output.
+	* testsuite/gas/sparc/pr19910-2.s: New test.
+	* testsuite/gas/sparc/sparc.exp: Run the new tests.
+
 2016-04-06  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (msp430_operands): Check for a NOP preceding
