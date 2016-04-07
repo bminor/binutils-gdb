@@ -1650,6 +1650,7 @@ record_full_insert_breakpoint (struct target_ops *ops,
 {
   struct record_full_breakpoint *bp;
   int in_target_beneath = 0;
+  int ix;
 
   if (!RECORD_FULL_IS_REPLAY)
     {
@@ -1679,6 +1680,22 @@ record_full_insert_breakpoint (struct target_ops *ops,
 
       bp_tgt->placed_address = addr;
       bp_tgt->placed_size = bplen;
+    }
+
+  /* Use the existing entries if found in order to avoid duplication
+     in record_full_breakpoints.  */
+
+  for (ix = 0;
+       VEC_iterate (record_full_breakpoint_p,
+		    record_full_breakpoints, ix, bp);
+       ++ix)
+    {
+      if (bp->addr == bp_tgt->placed_address
+	  && bp->address_space == bp_tgt->placed_address_space)
+	{
+	  gdb_assert (bp->in_target_beneath == in_target_beneath);
+	  return 0;
+	}
     }
 
   bp = XNEW (struct record_full_breakpoint);

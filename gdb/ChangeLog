@@ -1,5 +1,11 @@
 2016-04-07  Yao Qi  <yao.qi@linaro.org>
 
+	* record-full.c (record_full_insert_breakpoint): Return
+	early if entry on the address is found in
+	record_full_breakpoints.
+
+2016-04-07  Yao Qi  <yao.qi@linaro.org>
+
 	* record-full.c (record_full_insert_breakpoint): Set
 	bp_tgt->reqstd_address and bp_tgt->placed_size.
 
