@@ -1,3 +1,8 @@
+2016-04-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/next-reverse-bkpt-over-sr.exp: Match the breakpoint
+	number instead of the comments on some line.
+
 2016-04-06  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.dwarf2/dw2-opt-structptr.c: New test program.
