@@ -1,4 +1,10 @@
-2015-04-07  Pedro Alves  <palves@redhat.com>
+2016-04-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/gdbhistsize-history.exp: Save and unset GDBHISTFILE and
+	GDBHISTSIZE prior to the tests.
+	* gdb.base/gdbinit-history.exp: Likewise.
+
+2016-04-07  Pedro Alves  <palves@redhat.com>
 
 	* gdb.compile/compile.exp: Use gdb_compile with "shlib=" option
 	instead of build_executable.  Use gdb_load_shlibs.
