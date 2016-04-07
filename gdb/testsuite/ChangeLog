@@ -1,5 +1,10 @@
 2016-04-07  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.reverse/finish-reverse-bkpt.exp: Use temporary breakpoint.
+	Execute "si" command.
+
+2016-04-07  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.reverse/next-reverse-bkpt-over-sr.exp: Match the breakpoint
 	number instead of the comments on some line.
 
