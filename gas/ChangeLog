@@ -1,3 +1,9 @@
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/add_s-err.s: Update target pattern.
+	* testsuite/gas/arc/warn.s: Likewise.
+	* testsuite/gas/elf/elf.exp: Run test for arc.
+
 2016-04-14  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19938
