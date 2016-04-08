@@ -25,7 +25,7 @@
    namespace.  A namespace named NAME is created in the current scope,
    if needed.  */
 
-GCC_METHOD1 (int, push_namespace,
+GCC_METHOD1 (int /* bool */, push_namespace,
 	     const char *)	      /* Argument NAME.  */
 
 // FIXME: inline namespaces, anyone?
@@ -33,7 +33,7 @@ GCC_METHOD1 (int, push_namespace,
 /* Pop the namespace last entered with push_namespace, restoring the
    binding level in effect before the matching push_namespace.  */
 
-GCC_METHOD0 (int, pop_namespace)
+GCC_METHOD0 (int /* bool */, pop_namespace)
 
 /* Return the NAMESPACE_DECL, TYPE_DECL or FUNCTION_DECL of the
    current binding level.  */
@@ -183,6 +183,13 @@ GCC_METHOD7 (gcc_decl, new_decl,
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
+/* Declare DECL as a friend of the current class scope.  DECL may be a
+   function or a class, be they template generics, template
+   specializations or not templates.  */
+
+GCC_METHOD1 (int /* bool */, new_friend,
+	     gcc_decl)		      /* Argument DECL.  */
+
 /* Return the type of a pointer to a given base type.  */
 
 GCC_METHOD1 (gcc_type, build_pointer_type,
@@ -212,7 +219,7 @@ GCC_METHOD2 (gcc_type, build_pointer_to_member_type,
    parameter list and declares a template function or a template class
    with the parameter list.  */
 
-GCC_METHOD0 (int, start_new_template_decl)
+GCC_METHOD0 (int /* bool */, start_new_template_decl)
 
 /* Return the declaration associated with the named type.  It is the
    declaration, rather than the type proper, that has to be passed as
@@ -409,8 +416,9 @@ GCC_METHOD5 (gcc_type, start_specialize_class_template,
    class NAME.  FILENAME and LINE_NUMBER specify the source location
    associated with the class.  */
 
-GCC_METHOD4 (gcc_type, start_new_class_type,
+GCC_METHOD5 (gcc_type, start_new_class_type,
 	     const char *,	      /* Argument NAME.  */
+	     enum gcc_cp_symbol_kind, /* Argument FLAGS.  */
 	     const struct gcc_vbase_array *,/* Argument BASE_CLASSES.  */
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
@@ -424,8 +432,9 @@ GCC_METHOD4 (gcc_type, start_new_class_type,
    NAME is the union name.  FILENAME and LINE_NUMBER specify its
    source location.  */
 
-GCC_METHOD3 (gcc_type, start_new_union_type,
+GCC_METHOD4 (gcc_type, start_new_union_type,
 	     const char *,	      /* Argument NAME.  */
+	     enum gcc_cp_symbol_kind, /* Argument FLAGS.  */
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
@@ -437,7 +446,7 @@ GCC_METHOD3 (gcc_type, start_new_union_type,
 GCC_METHOD5 (int /* bool */, new_field,
 	     const char *,		   /* Argument FIELD_NAME.  */
 	     gcc_type,			   /* Argument FIELD_TYPE.  */
-	     enum gcc_cp_field_flags,	   /* Argument FIELD_FLAGS.  */
+	     enum gcc_cp_symbol_kind,	   /* Argument FIELD_FLAGS.  */
 	     unsigned long,		   /* Argument BITSIZE.  */
 	     unsigned long)		   /* Argument BITPOS.  */
 
@@ -458,7 +467,7 @@ GCC_METHOD1 (int /* bool */, finish_record_or_union,
 GCC_METHOD5 (gcc_type, start_new_enum_type,
 	     const char *,	      /* Argument NAME.  */
 	     gcc_type,		      /* Argument UNDERLYING_INT_TYPE. */
-	     int /* bool */,	      /* Argument SCOPED_ENUM_P.  */
+	     enum gcc_cp_symbol_kind, /* Argument FLAGS.  */
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 

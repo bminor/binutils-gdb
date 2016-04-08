@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-7
+  GCC_CP_FE_VERSION_0 = 0xffffffff-8
 };
 
 /* Qualifiers.  */
@@ -59,24 +59,6 @@ enum gcc_cp_ref_qualifiers {
   GCC_CP_REF_QUAL_NONE = 0,
   GCC_CP_REF_QUAL_LVALUE = 1,
   GCC_CP_REF_QUAL_RVALUE = 2
-};
-
-/* An array of types used for creating lists of base classes.  */
-
-struct gcc_vbase_array
-{
-  /* Number of elements.  */
-
-  int n_elements;
-
-  /* The base classes.  */
-
-  gcc_type *elements;
-
-  /* Indicate virtual base classes.
-     Take elements[i] as a virtual base class iff virtualp[i].  */
-
-  char /* bool */ *virtualp;
 };
 
 /* Opaque typedef for type declarations.  They are used for template
@@ -158,13 +140,38 @@ enum gcc_cp_symbol_kind
 
   GCC_CP_SYMBOL_LABEL,
 
-  /* A class, or, in a template parameter list scope, a declaration of
-     a template class, closing the parameter list.  */
+  /* A class (forward declared in new_decl, or introduced in
+     start_new_class_type), or, in a template parameter list scope, a
+     declaration of a template class, closing the parameter list.  */
 
   GCC_CP_SYMBOL_CLASS,
 
+  /* A union being introduced with start_new_union_type.  */
+  GCC_CP_SYMBOL_UNION,
+
+  /* An enumeration type being introduced with start_new_enum_type.  */
+  GCC_CP_SYMBOL_ENUM,
+
+  /* A nonstatic data member being introduced with new_field.  */
+  GCC_CP_SYMBOL_FIELD,
+
+  /* A base class in a gcc_vbase_array.  */
+  GCC_CP_SYMBOL_BASECLASS,
+
   GCC_CP_SYMBOL_MASK = 15,
-  GCC_CP_FLAG_BASE,
+
+  /* When defining a class member, at least one of the
+     GCC_CP_ACCESS_MASK bits must be set; when defining a namespace-
+     or union-scoped symbol, none of them must be set.  */
+
+  GCC_CP_ACCESS_PRIVATE,
+  GCC_CP_ACCESS_PUBLIC = GCC_CP_ACCESS_PRIVATE << 1,
+  GCC_CP_ACCESS_MASK = (GCC_CP_ACCESS_PUBLIC
+			       | GCC_CP_ACCESS_PRIVATE),
+  GCC_CP_ACCESS_PROTECTED = GCC_CP_ACCESS_MASK,
+  GCC_CP_ACCESS_NONE = 0,
+
+  GCC_CP_FLAG_BASE = GCC_CP_ACCESS_PRIVATE << 2,
 
   /* Flags to be used along with GCC_CP_SYMBOL_FUNCTION:  */
 
@@ -244,20 +251,95 @@ enum gcc_cp_symbol_kind
   GCC_CP_FLAG_MASK_VARIABLE = (((GCC_CP_FLAG_END_VARIABLE - 1) << 1)
 			       - GCC_CP_FLAG_BASE),
 
-  GCC_CP_FLAG_MASK = (GCC_CP_FLAG_MASK_FUNCTION | GCC_CP_FLAG_MASK_VARIABLE)
-};
+  /* Flags to be used when defining nonstatic data members of classes
+     with new_field.  */
 
-/* This bitfield names flags that can be associated with non-static
-   data members of structs and classes.  */
-
-enum gcc_cp_field_flags
-{
   /* Use this when no flags are present.  */
-  GCC_CP_FIELD_NORMAL = 0,
+  GCC_CP_FLAG_FIELD_NOFLAG = 0,
 
   /* This indicates the field is declared as mutable.  */
-  GCC_CP_FIELD_MUTABLE = 1
+  GCC_CP_FLAG_FIELD_MUTABLE = GCC_CP_FLAG_BASE,
+
+  GCC_CP_FLAG_END_FIELD,
+  GCC_CP_FLAG_MASK_FIELD = (((GCC_CP_FLAG_END_FIELD - 1) << 1)
+			    - GCC_CP_FLAG_BASE),
+
+  /* Flags to be used when defining an enum with
+     start_new_enum_type.  */
+
+  /* This indicates an enum type without any flags.  */
+  GCC_CP_FLAG_ENUM_NOFLAG = 0,
+
+  /* This indicates a scoped enum type.  */
+  GCC_CP_FLAG_ENUM_SCOPED = GCC_CP_FLAG_BASE,
+
+  GCC_CP_FLAG_END_ENUM,
+  GCC_CP_FLAG_MASK_ENUM = (((GCC_CP_FLAG_END_ENUM - 1) << 1)
+			       - GCC_CP_FLAG_BASE),
+
+
+  /* Flags to be used when introducing a class with
+     start_new_class_type, or a class template with new_decl.  */
+
+  /* This indicates an enum type without any flags.  */
+  GCC_CP_FLAG_CLASS_NOFLAG = 0,
+
+  /* This indicates the class is actually a struct.  This has no
+     effect whatsoever on access control in this interface, since all
+     class members must have explicit access control bits set, but it
+     may affect error messages.  */
+  GCC_CP_FLAG_CLASS_IS_STRUCT = GCC_CP_FLAG_BASE,
+
+  GCC_CP_FLAG_END_CLASS,
+  GCC_CP_FLAG_MASK_CLASS = (((GCC_CP_FLAG_END_CLASS - 1) << 1)
+			       - GCC_CP_FLAG_BASE),
+
+
+  /* Flags to be used when introducing a virtual base class in a
+     gcc_vbase_array.  */
+
+  /* This indicates an enum type without any flags.  */
+  GCC_CP_FLAG_BASECLASS_NOFLAG = 0,
+
+  /* This indicates the class is actually a struct.  This has no
+     effect whatsoever on access control in this interface, since all
+     class members must have explicit access control bits set, but it
+     may affect error messages.  */
+  GCC_CP_FLAG_BASECLASS_VIRTUAL = GCC_CP_FLAG_BASE,
+
+  GCC_CP_FLAG_END_BASECLASS,
+  GCC_CP_FLAG_MASK_BASECLASS = (((GCC_CP_FLAG_END_BASECLASS - 1) << 1)
+				- GCC_CP_FLAG_BASE),
+
+
+  GCC_CP_FLAG_MASK = (GCC_CP_FLAG_MASK_FUNCTION
+		      | GCC_CP_FLAG_MASK_VARIABLE
+		      | GCC_CP_FLAG_MASK_FIELD
+		      | GCC_CP_FLAG_MASK_ENUM
+		      | GCC_CP_FLAG_MASK_CLASS
+		      | GCC_CP_FLAG_MASK_BASECLASS
+		      )
 };
+
+
+/* An array of types used for creating lists of base classes.  */
+
+struct gcc_vbase_array
+{
+  /* Number of elements.  */
+
+  int n_elements;
+
+  /* The base classes.  */
+
+  gcc_type *elements;
+
+  /* Flags for each base class.  Used to indicate access control and
+     virtualness.  */
+
+  enum gcc_cp_symbol_kind *flags;
+};
+
 
 /* This enumerates the types of symbols that GCC might request from
    GDB.  */

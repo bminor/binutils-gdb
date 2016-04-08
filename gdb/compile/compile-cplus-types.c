@@ -466,7 +466,7 @@ ccp_push_processing_context (struct compile_cplus_instance *context,
 	    ns = NULL;
 	  else
 	    ns = copy_stoken (&scope->name);
-	  CPOPS ("push_namesapce %s\n", ns);
+	  CPOPS ("push_namespace %s\n", ns);
 	  CPCALL (push_namespace, context, ns);
 	  xfree (ns);
 	}
@@ -770,16 +770,27 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
   else
     name = NULL;
 
+  /* FIXME: I moved this call before the context switching so that
+     need_new_context would work as a heuristics for namespace-scoped
+     types, but it ends up defining anonymous enum types and constants
+     in the wrong context, so it can't stay here.  */
+  typedef_type = convert_cplus_type (context, check_typedef (type));
+
   need_new_context = ccp_need_new_context (pctx);
   if (need_new_context)
     ccp_push_processing_context (context, pctx);
 
-  typedef_type = convert_cplus_type (context, check_typedef (type));
-
   CPOPS ("new_decl typedef %s, gcc_type = %lld\n", name, typedef_type);
   CPCALL (new_decl, context,
 	  name,
-	  GCC_CP_SYMBOL_TYPEDEF,
+	  GCC_CP_SYMBOL_TYPEDEF
+	  | (need_new_context /* FIXME: is this the right way to tell
+				 whether this is a namespace-scoped or
+				 nested typedef?  -lxo */
+	     ? GCC_CP_ACCESS_NONE
+	     /* FIXME: use correct access flag for the member typedef.
+		-lxo */
+	     : GCC_CP_ACCESS_PUBLIC),
 	  typedef_type,
 	  0,
 	  0,
@@ -845,7 +856,10 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 		       field_name, core_addr_to_string (physaddr));
 		CPCALL (new_decl, context,
 			field_name,
-			GCC_CP_SYMBOL_VARIABLE,
+			GCC_CP_SYMBOL_VARIABLE
+			/* FIXME: use correct access flag for the
+			   static data member.  -lxo */
+			| GCC_CP_ACCESS_PUBLIC,
 			field_type,
 			NULL,
 			physaddr,
@@ -872,7 +886,10 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 		       field_name, core_addr_to_string (physaddr));
 		CPCALL (new_decl, context,
 			field_name,
-			GCC_CP_SYMBOL_VARIABLE,
+			GCC_CP_SYMBOL_VARIABLE
+			/* FIXME: use correct access flag for the
+			   static data member.  -lxo */
+			| GCC_CP_ACCESS_PUBLIC,
 			field_type,
 			NULL,
 			physaddr,
@@ -890,11 +907,15 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 	{
 	  /* !!keiths: I am guessing this is insufficient... */
 	  unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
-	  enum gcc_cp_field_flags field_flags = GCC_CP_FIELD_NORMAL;
+	  enum gcc_cp_symbol_kind field_flags = GCC_CP_SYMBOL_FIELD
+	    /* FIXME: use correct access flag for the field.  -lxo */
+	    | GCC_CP_ACCESS_PUBLIC
 	  /* FIXME:
-	     if (field-is-mutable-p (type, i))
-	       field_flags |= GCC_CP_FIELD_MUTABLE;
+	    | (field-is-mutable-p (type, i)
+	       ? GCC_CP_FLAG_FIELD_MUTABLE
+	       : GCC_CP_FLAG_FIELD_NOFLAG)
 	     -lxo */
+	    ;
 
 	  if (bitsize == 0)
 	    bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
@@ -1345,10 +1366,14 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	      make_cleanup (xfree, special_name);
 	      name = special_name;
 	    }
+
 	  if (name != overloaded_name)
 	    sym_kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
 	  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, j),
 			       get_current_search_block (), VAR_DOMAIN, NULL);
+
+	  /* FIXME: use correct access flag for the class member.  -lxo */
+	  sym_kind |= GCC_CP_ACCESS_PUBLIC;
 
 	  if (sym.symbol == NULL)
 	    {
@@ -1363,6 +1388,9 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 		  CPCALL (new_decl, context,
 			  name,
 			  (sym_kind
+			   /* FIXME: use correct access flag for the
+			      virtual member function.  -lxo */
+			   | GCC_CP_ACCESS_PUBLIC
 			   | GCC_CP_FLAG_VIRTUAL_FUNCTION
 			   | GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION),
 			  method_type,
@@ -1499,30 +1527,58 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
       if (num_baseclasses > 0)
 	{
 	  bases.elements = XNEWVEC (gcc_type, num_baseclasses);
+	  bases.flags = XNEWVEC (enum gcc_cp_symbol_kind, num_baseclasses);
 	  bases.n_elements = num_baseclasses;
-	  bases.virtualp = (char *) xcalloc (num_baseclasses, sizeof (char));
 	  for (i = 0; i < num_baseclasses; ++i)
 	    {
 	      struct type *base_type = TYPE_BASECLASS (type, i);
 
-	      if (BASETYPE_VIA_VIRTUAL (type, i))
-		bases.virtualp[i] = 1;
+	      bases.flags[i] = GCC_CP_SYMBOL_BASECLASS
+		/* FIXME: use correct access flag for the base class.
+		   -lxo */
+		| GCC_CP_ACCESS_PUBLIC
+		| (BASETYPE_VIA_VIRTUAL (type, i)
+		   ? GCC_CP_FLAG_BASECLASS_VIRTUAL
+		   : GCC_CP_FLAG_BASECLASS_NOFLAG);
 	      bases.elements[i] = convert_cplus_type (context, base_type);
 	    }
 	}
 
       CPOPS ("start_new_class_type %s\n", name);
-      result = CPCALL (start_new_class_type, context,
-		       name, &bases, filename, line);
+      result = CPCALL (start_new_class_type, context, name,
+		       GCC_CP_SYMBOL_CLASS
+		       | (need_new_context /* FIXME: is this the right
+					      way to tell whether this
+					      is a namespace-scoped or
+					      nested type?  -lxo */
+			  ? GCC_CP_ACCESS_NONE
+			  /* FIXME: use correct access flag for the
+			     nested class.  -lxo */
+			  : GCC_CP_ACCESS_PUBLIC)
+		       /* FIXME:
+			 (is-the-class-a-struct-p (type)
+			  ? GCC_CP_FLAG_CLASS_IS_STRUCT
+			  : GCC_CP_FLAG_CLASS_NOFLAG)  -lxo  */,
+		       &bases, filename, line);
       CPOPS ("\tgcc_type = %lld\n", result);
-      xfree (bases.virtualp);
+      xfree (bases.flags);
       xfree (bases.elements);
     }
   else
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
       CPOPS ("start_new_union_type %s\n", name);
-      result = CPCALL (start_new_union_type, context, name, filename, line);
+      result = CPCALL (start_new_union_type, context, name,
+		       GCC_CP_SYMBOL_UNION
+		       | (need_new_context /* FIXME: is this the right
+					      way to tell whether this
+					      is a namespace-scoped or
+					      nested type?  -lxo */
+			  ? GCC_CP_ACCESS_NONE
+			  /* FIXME: use correct access flag for the
+			     nested union.  -lxo */
+			  : GCC_CP_ACCESS_PUBLIC),
+		       filename, line);
       CPOPS ("\tgcc_type = %lld\n", result);
     }
   insert_type (context, type, result);
@@ -1535,6 +1591,8 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
 
   /* Add members.  */
   ccp_convert_struct_or_union_members (context, type, result);
+
+  /* FIXME: add friend declarations.  -lxo  */
 
   /* All finished.  */
   CPOPS ("finish_record_or_union %s (%lld)\n", name, result);
@@ -1616,6 +1674,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
 
   // FIXME: drop any namespaces and enclosing class names, if any. -lxo
   /* !!keiths: Why?  Drop or push, just like convert_struct_or_union?  */
+  // Drop them from "name", if they're there at all.
 
   CPOPS ("int_type %d %d\n", TYPE_UNSIGNED (type), TYPE_LENGTH (type));
   int_type = CPCALL (int_type, context,
@@ -1624,7 +1683,20 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
 
   CPOPS ("start_new_enum_type %s\n", name);
   result = CPCALL (start_new_enum_type, context,
-		   name, int_type, scoped_enum_p, filename, line);
+		   name, int_type,
+		   GCC_CP_SYMBOL_ENUM
+		   | (need_new_context /* FIXME: is this the right
+					  way to tell whether this
+					  is a namespace-scoped or
+					  nested type?  -lxo */
+		      ? GCC_CP_ACCESS_NONE
+		      /* FIXME: use correct access flag for the nested
+			 enum.  -lxo */
+		      : GCC_CP_ACCESS_PUBLIC)
+		   | (scoped_enum_p
+		      ? GCC_CP_FLAG_ENUM_SCOPED
+		      : GCC_CP_FLAG_ENUM_NOFLAG),
+		   filename, line);
   CPOPS ("\tgcc_type = %lld\n", result);
 
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
@@ -1846,7 +1918,7 @@ ccp_convert_namespace (struct compile_cplus_instance *context,
   if (need_new_context)
     ccp_push_processing_context (context, pctx);
 
-  CPOPS ("push_namesapce %s\n", name);
+  CPOPS ("push_namespace %s\n", name);
   CPCALL (push_namespace, context, name);
 
   CPOPS ("pop_namespace %s\n", name);
