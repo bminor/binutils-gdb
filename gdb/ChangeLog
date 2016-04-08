@@ -1,3 +1,34 @@
+2016-04-08  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* value.c (value_next): Make pass-by-reference parameters const-correct.
+	(value_parent): Likewise.
+	(value_enclosing_type): Likewise.
+	(value_lazy): Likewise.
+	(value_stack): Likewise.
+	(value_embedded_offset): Likewise.
+	(value_pointed_to_offset): Likewise.
+	(value_raw_address): Likewise.
+	(deprecated_value_modifiable): Likewise.
+	(value_free_to_mark): Likewise.
+	(value_release_to_mark): Likewise.
+	(internalvar_name): Likewise.
+	(readjust_indirect_value_type): Likewise.
+	(value_initialized): Likewise.
+	* value.h (value_next): Likewise.
+	(value_parent): Likewise.
+	(value_enclosing_type): Likewise.
+	(value_lazy): Likewise.
+	(value_stack): Likewise.
+	(value_embedded_offset): Likewise.
+	(value_pointed_to_offset): Likewise.
+	(value_raw_address): Likewise.
+	(deprecated_value_modifiable): Likewise.
+	(value_free_to_mark): Likewise.
+	(value_release_to_mark): Likewise.
+	(internalvar_name): Likewise.
+	(readjust_indirect_value_type): Likewise.
+	(value_initialized): Likewise.
+
 2016-04-07  Yao Qi  <yao.qi@linaro.org>
 
 	* record-full.c (record_full_insert_breakpoint): Return
