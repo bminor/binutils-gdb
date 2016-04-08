@@ -1,3 +1,22 @@
+2016-04-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (relaxed_branch_length): Use the long
+	sequence where the distance cannot be determined.
+	(relaxed_micromips_32bit_branch_length): Likewise.
+	* testsuite/gas/mips/branch-extern-1.d: New test.
+	* testsuite/gas/mips/branch-extern-2.d: New test.
+	* testsuite/gas/mips/branch-extern-3.d: New test.
+	* testsuite/gas/mips/branch-extern-4.d: New test.
+	* testsuite/gas/mips/branch-extern.l: New stderr output.
+	* testsuite/gas/mips/branch-extern.s: New test source.
+	* testsuite/gas/mips/branch-section-1.d: New test.
+	* testsuite/gas/mips/branch-section-2.d: New test.
+	* testsuite/gas/mips/branch-section-3.d: New test.
+	* testsuite/gas/mips/branch-section-4.d: New test.
+	* testsuite/gas/mips/branch-section.l: New stderr output.
+	* testsuite/gas/mips/branch-section.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/textauxregister.d: New file.
