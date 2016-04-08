@@ -1,3 +1,9 @@
+2016-04-08  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19910
+	* testsuite/gas/sparc/pr19910-1.d: Adjust regexps to work with
+	COFF and AOUT sparc targets.
+
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.h (MAX_FLAG_NAME_LENGTH): Increase to 7.
