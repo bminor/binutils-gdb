@@ -1,3 +1,8 @@
+2016-04-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with gcc-4.8.5-4.el7.x86_64.
+	* gdb.base/jit-main.c: Use exit after usage.
+
 2016-04-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/gdbhistsize-history.exp: Save and unset GDBHISTFILE and
