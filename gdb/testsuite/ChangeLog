@@ -1,3 +1,10 @@
+2016-04-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.server/solib-list.exp: Remove is_remote check.
+	Pass shlib= to gdb_compile.  Don't link shared library with
+	-soname.  Call gdb_remote_download instead of gdb_load_shlibs.
+	Run binary filename through "readlink -f" on the target.
+
 2016-04-08  Pedro Alves  <palves@redhat.com>
 
 	* gdb.server/solib-list.exp: Don't use gdb_load.  Instead pass the
