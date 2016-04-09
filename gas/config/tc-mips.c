@@ -3862,11 +3862,11 @@ mips_check_options (struct mips_set_options *opts, bfd_boolean abi_checks)
     as_bad (_("`nooddspreg` cannot be used with a 64-bit ABI"));
 
   if (opts->micromips == 1 && opts->mips16 == 1)
-    as_bad (_("`mips16' cannot be used with `micromips'"));
+    as_bad (_("`%s' cannot be used with `%s'"), "mips16", "micromips");
   else if (ISA_IS_R6 (opts->isa)
 	   && (opts->micromips == 1
 	       || opts->mips16 == 1))
-    as_fatal (_("`%s' can not be used with `%s'"),
+    as_fatal (_("`%s' cannot be used with `%s'"),
 	      opts->micromips ? "micromips" : "mips16",
 	      mips_cpu_info_from_isa (opts->isa)->name);
 
