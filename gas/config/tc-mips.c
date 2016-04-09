@@ -15472,7 +15472,7 @@ s_option (int x ATTRIBUTE_UNUSED)
     {
       /* FIXME: What does this mean?  */
     }
-  else if (strncmp (opt, "pic", 3) == 0)
+  else if (strncmp (opt, "pic", 3) == 0 && ISDIGIT (opt[3]) && opt[4] == '\0')
     {
       int i;
 

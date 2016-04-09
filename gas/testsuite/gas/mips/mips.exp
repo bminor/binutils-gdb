@@ -1474,6 +1474,9 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "li-d"
 
+    run_dump_test "option-pic-1"
+    run_list_test "option-pic-2" "" \
+	"MIPS invalid PIC option"
     run_list_test "option-pic-vxworks-1" "-mvxworks-pic" \
 	"MIPS invalid PIC option in VxWorks PIC"
     run_list_test "option-pic-vxworks-2" "-mvxworks-pic" \
