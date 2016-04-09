@@ -6733,11 +6733,11 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
       /* Parameter must be 16 bit. */
       && (*reloc_type == BFD_RELOC_16_PCREL_S2)
       /* Branch to same segment. */
-      && (S_GET_SEGMENT(address_expr->X_add_symbol) == now_seg)
+      && (S_GET_SEGMENT (address_expr->X_add_symbol) == now_seg)
       /* Branch to same code fragment. */
-      && (symbol_get_frag(address_expr->X_add_symbol) == frag_now)
+      && (symbol_get_frag (address_expr->X_add_symbol) == frag_now)
       /* Can only calculate branch offset if value is known. */
-      && symbol_constant_p(address_expr->X_add_symbol)
+      && symbol_constant_p (address_expr->X_add_symbol)
       /* Check if branch is really conditional. */
       && !((ip->insn_opcode & 0xffff0000) == 0x10000000   /* beq $0,$0 */
 	|| (ip->insn_opcode & 0xffff0000) == 0x04010000   /* bgez $0 */
@@ -6746,7 +6746,7 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
       int distance;
       /* Check if loop is shorter than 6 instructions including
          branch and delay slot.  */
-      distance = frag_now_fix() - S_GET_VALUE(address_expr->X_add_symbol);
+      distance = frag_now_fix () - S_GET_VALUE (address_expr->X_add_symbol);
       if (distance <= 20)
         {
           int i;
@@ -6758,7 +6758,7 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
           for (i = 0; i < (distance / 4); i++)
             {
               if ((history[i].cleared_p)
-                  || delayed_branch_p(&history[i]))
+                  || delayed_branch_p (&history[i]))
                 {
                   rv = TRUE;
                   break;

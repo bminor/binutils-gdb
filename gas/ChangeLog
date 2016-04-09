@@ -1,5 +1,9 @@
 2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (can_swap_branch_p): Correct call formatting.
+
+2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* messages.c (as_bad): Fix a typo in description.
 
 2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
