@@ -1,3 +1,8 @@
+2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_check_options): Use `opts->isa'
+	consistently.
+
 2016-04-08  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19910
