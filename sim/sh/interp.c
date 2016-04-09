@@ -722,7 +722,7 @@ do { \
 #if defined(__GO32__)
 int sim_memory_size = 19;
 #else
-int sim_memory_size = 24;
+int sim_memory_size = 30;
 #endif
 
 static int sim_profile_size = 17;
@@ -2477,10 +2477,10 @@ parse_and_set_memory_size (SIM_DESC sd, const char *str)
   int n;
 
   n = strtol (str, NULL, 10);
-  if (n > 0 && n <= 24)
+  if (n > 0 && n <= 31)
     sim_memory_size = n;
   else
-    sim_io_printf (sd, "Bad memory size %d; must be 1 to 24, inclusive\n", n);
+    sim_io_printf (sd, "Bad memory size %d; must be 1 to 31, inclusive\n", n);
 }
 
 SIM_RC
