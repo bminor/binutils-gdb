@@ -15477,15 +15477,17 @@ s_option (int x ATTRIBUTE_UNUSED)
       int i;
 
       i = atoi (opt + 3);
-      if (i == 0)
+      if (i != 0 && i != 2)
+	as_bad (_(".option pic%d not supported"), i);
+      else if (mips_pic == VXWORKS_PIC)
+	as_bad (_(".option pic%d not supported in VxWorks PIC mode"), i);
+      else if (i == 0)
 	mips_pic = NO_PIC;
       else if (i == 2)
 	{
 	  mips_pic = SVR4_PIC;
 	  mips_abicalls = TRUE;
 	}
-      else
-	as_bad (_(".option pic%d not supported"), i);
 
       if (mips_pic == SVR4_PIC)
 	{
