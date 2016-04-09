@@ -583,6 +583,11 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "branch-extern-2"
     run_dump_test "branch-extern-3"
     run_dump_test "branch-extern-4"
+    run_dump_test "branch-weak-1"
+    run_dump_test "branch-weak-2"
+    run_dump_test "branch-weak-3"
+    run_dump_test "branch-weak-4"
+    run_dump_test "branch-weak-5"
 
     run_dump_test "compact-eh-eb-1"
     run_dump_test "compact-eh-eb-2"

@@ -1,4 +1,20 @@
 2016-04-13  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config/tc-mips.c (relaxed_branch_length): Use the long
+	sequence where the target is a weak symbol.
+	(relaxed_micromips_32bit_branch_length): Likewise.
+	(relaxed_micromips_16bit_branch_length): Likewise.
+	* testsuite/gas/mips/branch-weak-1.d: New test.
+	* testsuite/gas/mips/branch-weak-2.d: New test.
+	* testsuite/gas/mips/branch-weak-3.d: New test.
+	* testsuite/gas/mips/branch-weak-4.d: New test.
+	* testsuite/gas/mips/branch-weak-5.d: New test.
+	* testsuite/gas/mips/branch-weak.l: New stderr output.
+	* testsuite/gas/mips/branch-weak.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-04-13  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (relaxed_branch_length): Use the long
 	sequence where the distance cannot be determined.
