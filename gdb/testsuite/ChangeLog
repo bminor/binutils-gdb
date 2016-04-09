@@ -1,3 +1,9 @@
+2016-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-mi-events-gdb.py (signal_stop_handler): Add
+	parentheses to print.
+	(continue_handler): Likewise.
+
 2016-04-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.server/solib-list.exp: Remove is_remote check.
