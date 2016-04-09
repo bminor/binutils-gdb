@@ -75,49 +75,38 @@ GCC_METHOD0 (gcc_decl, get_current_binding_level)
    to create the method type out of the class type and the function
    type.
 
-   For constructors, destructors and operator functions, set
-   GCC_CP_FLAG_SPECIAL_FUNCTION in SYM_KIND, in addition to any other
-   applicable flags, and pass as NAME a string starting with the
-   two-character mangling for the constructor or destructor variant
-   (C1, C2, D0, D1, or D2, see below) or for the operator name: "ps"
-   for unary plus, "mL" for multiply and assign, *=; etc.  Use "cv"
-   for type converstion operators (the target type portion may be
-   omitted, as it is taken from the return type in SYM_TYPE).  For
-   operator"", use "li" followed by the identifier (the mangled name
-   mandates digits specifying the length of the identifier; if
+   For operator functions, set GCC_CP_FLAG_SPECIAL_FUNCTION in
+   SYM_KIND, in addition to any other applicable flags, and pass as
+   NAME a string starting with the two-character mangling for operator
+   name: "ps" for unary plus, "mL" for multiply and assign, *=; etc.
+   Use "cv" for type converstion operators (the target type portion
+   may be omitted, as it is taken from the return type in SYM_TYPE).
+   For operator"", use "li" followed by the identifier (the mangled
+   name mandates digits specifying the length of the identifier; if
    present, they determine the end of the identifier, otherwise, the
    identifier extents to the end of the string, so that "li3_Kme" and
    "li_Km" are equivalent).
 
-   Constructors and destructors need special care, since for each
-   constructor prototype defined in the sources, two symbols are
-   defined in the object code: C1 initializes an instance of the class
-   (rather than of derived classes), including virtual base classes,
-   whereas C2 initializes a sub-object (of the given class type) of an
-   instance of some derived class (or a full object that doesn't have
-   any virtual base classes); for the destructor of each class, there
-   may be up to three variants (not counting virtual thunks): D0 and
-   D1 destruct an instance of the class, including virtual base
-   classes, but only the former calls operator delete to release the
-   object's storage at the end; D2 destructs a sub-object (of the
-   given class type) of an instance of a derived class (or a full
-   object that doesn't have any virtual base classes).  new_decl
-   expects to be called once for each constructor and destructor
-   variant; the first time it sees a constructor or destructor with a
-   given prototype, it will create the member declaration and all
-   appropriate variants; then, and at subsequent calls for other
-   variants, it will select the artificial clone declaration for the
-   chosen variant, and set up the address or substitution name for
-   that variant only.
+   Constructors and destructors need special care, because for each
+   constructor and destructor there may be multiple clones defined
+   internally by the compiler.  With new_decl, you can introduce the
+   base declaration of a constructor or a destructor, setting
+   GCC_CP_FLAG_SPECIAL_FUNCTION the flag and using names starting with
+   capital "C" or "D", respectively, followed by a digit (see below),
+   a blank, or NUL ('\0').  DO NOT supply an ADDRESS or a
+   SUBSTITUTION_NAME to new_decl, it would be meaningless (and
+   rejected) for the base declaration; use define_cdtor_clone to
+   introduce the address of each clone.  For constructor templates,
+   declare the template with new_decl, and then, for each
+   specialization, introduce it with specialize_function_template, and
+   then define the addresses of each of its clones with
+   define_cdtor_clone.
 
    NAMEs for GCC_CP_FLAG_SPECIAL_FUNCTION:
 
      NAME    meaning
-     C1      in-charge constructor
-     C2      not-in-charge constructor
-     D0      deleting destructor
-     D1      in-charge destructor
-     D2      not-in-charge destructor
+     C?      constructor base declaration (? may be 1, 2, 4, blank or NUL)
+     D?      destructor base declaration (? may be 0, 1, 2, 4, blank or NUL)
      nw      operator new
      na      operator new[]
      dl      operator delete
@@ -182,6 +171,43 @@ GCC_METHOD7 (gcc_decl, new_decl,
 	     gcc_address,	      /* Argument ADDRESS.  */
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
+
+/* Supply the ADDRESS of one of the multiple clones of constructor or
+   destructor CDTOR.  The clone is selected using the following
+   name mangling conventions:
+
+     C1      in-charge constructor
+     C2      not-in-charge constructor
+     C4      unified constructor
+     D0      deleting destructor
+     D1      in-charge destructor
+     D2      not-in-charge destructor
+     D4      unified destructor
+
+   The following information is not necessary to use the API.
+
+   C1 initializes an instance of the class (rather than of derived
+   classes), including virtual base classes, whereas C2 initializes a
+   sub-object (of the given class type) of an instance of some derived
+   class (or a full object that doesn't have any virtual base
+   classes).
+
+   D0 and D1 destruct an instance of the class, including virtual base
+   classes, but only the former calls operator delete to release the
+   object's storage at the end; D2 destructs a sub-object (of the
+   given class type) of an instance of a derived class (or a full
+   object that doesn't have any virtual base classes).
+
+   The [CD]4 manglings (and symbol definitions) are non-standard, but
+   GCC uses them in some cases: rather than assuming they are
+   in-charge or not-in-charge, they test the implicit argument that
+   the others ignore to tell how to behave.  These are defined in very
+   rare cases of virtual inheritance and cdtor prototypes.  */
+
+GCC_METHOD3 (gcc_decl, define_cdtor_clone,
+	     const char *,	      /* Argument NAME.  */
+	     gcc_decl,		      /* Argument CDTOR.  */
+	     gcc_address)	      /* Argument ADDRESS.  */
 
 /* Declare DECL as a friend of the current class scope.  DECL may be a
    function or a class, be they template generics, template

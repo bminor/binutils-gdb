@@ -1368,7 +1368,9 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	    }
 
 	  if (name != overloaded_name)
-	    sym_kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
+	    {
+	      sym_kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
+	    }	      
 	  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, j),
 			       get_current_search_block (), VAR_DOMAIN, NULL);
 
@@ -1442,6 +1444,28 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 
 	  /* !!keiths: Is this sufficient?  */
 	  address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
+
+	  /* FIXME: for cdtors, we must call new_decl with a zero
+	     address, if we haven't created the base declaration
+	     yet, and then define_cdtor_clone with the address of
+	     each clone.  When we leave the address out, GCC uses
+	     the address oracle.  -lxo  */
+	  if ((sym_kind & GCC_CP_FLAG_SPECIAL_FUNCTION)
+	      && (name[0] == 'C' || name[0] == 'D'))
+	    {
+	      address = 0;
+	      /* FIXME: We should declare only one cdtor for each
+		 clone set with "C" or "D" as the name, with address
+		 zero, then define each address with
+		 define_cdtor_clone.  Until this is implemented,
+		 declare only one of these, and let the address oracle
+		 take care of the addresses.  -lxo */
+	      if (name[1] != '2' && name[1] != '4')
+		{
+		  do_cleanups (back_to);
+		  continue;
+		}
+	    }
 
 	  CPOPS ("new_decl%s method %s at %s\n", kind, name,
 		 core_addr_to_string (address));
