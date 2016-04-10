@@ -1,8 +1,3 @@
-2016-04-09  Oleg Endo  <olegendo@gcc.gnu.org>
-
-	* sh/interp.c (sim_memory_size): Default init to 30.
-	(parse_and_set_memory_size): Adjust upper bound to 31.
-
 2016-02-03  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* MAINTAINERS (Past sim maintainers): Add Thiemo Seufer.
