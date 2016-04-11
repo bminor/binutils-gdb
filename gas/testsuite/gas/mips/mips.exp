@@ -513,6 +513,11 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "vxworks1-xgot"
     run_dump_test "vxworks1-el"
     run_dump_test "vxworks1-xgot-el"
+
+    run_list_test "option-pic-vxworks-1" "-mvxworks-pic" \
+	"MIPS invalid PIC option in VxWorks PIC"
+    run_list_test "option-pic-vxworks-2" "-mvxworks-pic" \
+	"MIPS invalid switch to SVR4 PIC from VxWorks PIC"
 } elseif { [istarget mips*-*-*] } {
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] \
 		     || [istarget mipsisa32-*-linux*] || [istarget mipsisa32el-*-linux*]]
@@ -1468,6 +1473,14 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test "module-check-warn" "-32"
 
     run_dump_test "li-d"
+
+    run_dump_test "option-pic-1"
+    run_list_test "option-pic-2" "" \
+	"MIPS invalid PIC option"
+    run_list_test "option-pic-vxworks-1" "-mvxworks-pic" \
+	"MIPS invalid PIC option in VxWorks PIC"
+    run_list_test "option-pic-vxworks-2" "-mvxworks-pic" \
+	"MIPS invalid switch to SVR4 PIC from VxWorks PIC"
 
     run_dump_test_arches "r6"		[mips_arch_list_matching mips32r6]
     if $has_newabi {

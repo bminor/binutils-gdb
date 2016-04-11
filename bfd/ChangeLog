@@ -1,3 +1,43 @@
+2016-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Move error_ret_free_local to be
+	a fall through from error_ret_free_internal.  Free local_syms in
+	error_ret_free_local if allocated from bfd_elf_get_elf_syms ().
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (plt_do_relocs_for_symbol): Changed.
+	(relocate_plt_for_entry): Likewise.
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_check_relocs): Changed
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (name_for_global_symbol): Changed assert.
+	(get_replace_function): Created.:
+	(struct arc_relocation_data): Changed to signed types.
+	(defines S, L, P, PDATA): Casted to signed type.
+	(defines SECTSTART, _SDA_BASE_, TLS_REL): Likewise.
+	(PRINT_DEBUG_RELOC_INFO_BEFORE): Changed.
+	(arc_do_relocation): Changed.
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (name_for_global_symbol): Added assert to check for
+	symbol index.
+	(elf_arc_relocate_section): Added and changed asserts, validating
+	the synamic symbol index.
+	(elf_arc_finish_dynamic_symbol): Do not fill the dynamic
+	relocation if symbol has dynindx set to -1.
+
+2016-04-05  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (elf_link_add_object_symbols): Always turn hidden
+	and internal symbols which have a dynamic index into local
+	ones.
+
 2016-04-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 19872

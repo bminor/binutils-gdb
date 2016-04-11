@@ -93,7 +93,7 @@ struct value;
    put into the value history or exposed to Python are taken off this
    list.  */
 
-struct value *value_next (struct value *);
+struct value *value_next (const struct value *);
 
 /* Type of the value.  */
 
@@ -126,7 +126,7 @@ extern void set_value_bitpos (struct value *, int bit);
    single read from the target when displaying multiple
    bitfields.  */
 
-struct value *value_parent (struct value *);
+struct value *value_parent (const struct value *);
 extern void set_value_parent (struct value *value, struct value *parent);
 
 /* Describes offset of a value within lval of a structure in bytes.
@@ -142,7 +142,7 @@ extern void set_value_offset (struct value *, int offset);
    relevant if lval != not_lval.''.  Shouldn't the value instead be
    not_lval and be done with it?  */
 
-extern int deprecated_value_modifiable (struct value *value);
+extern int deprecated_value_modifiable (const struct value *value);
 
 /* If a value represents a C++ object, then the `type' field gives the
    object's compile-time type.  If the object actually belongs to some
@@ -185,7 +185,7 @@ extern int deprecated_value_modifiable (struct value *value);
    `type', and `embedded_offset' is zero, so everything works
    normally.  */
 
-extern struct type *value_enclosing_type (struct value *);
+extern struct type *value_enclosing_type (const struct value *);
 extern void set_value_enclosing_type (struct value *val,
 				      struct type *new_type);
 
@@ -205,9 +205,9 @@ extern struct type *value_actual_type (struct value *value,
 				       int resolve_simple_types,
 				       int *real_type_found);
 
-extern int value_pointed_to_offset (struct value *value);
+extern int value_pointed_to_offset (const struct value *value);
 extern void set_value_pointed_to_offset (struct value *value, int val);
-extern int value_embedded_offset (struct value *value);
+extern int value_embedded_offset (const struct value *value);
 extern void set_value_embedded_offset (struct value *value, int val);
 
 /* For lval_computed values, this structure holds functions used to
@@ -312,10 +312,10 @@ extern void *value_computed_closure (const struct value *value);
    element.  If you ever change the way lazy flag is set and reset, be
    sure to consider this use as well!  */
 
-extern int value_lazy (struct value *);
+extern int value_lazy (const struct value *);
 extern void set_value_lazy (struct value *value, int val);
 
-extern int value_stack (struct value *);
+extern int value_stack (const struct value *);
 extern void set_value_stack (struct value *value, int val);
 
 /* Throw an error complaining that the value has been optimized
@@ -398,7 +398,7 @@ extern void mark_value_bits_optimized_out (struct value *value,
 /* Set or return field indicating whether a variable is initialized or
    not, based on debugging information supplied by the compiler.
    1 = initialized; 0 = uninitialized.  */
-extern int value_initialized (struct value *);
+extern int value_initialized (const struct value *);
 extern void set_value_initialized (struct value *, int);
 
 /* Set COMPONENT's location as appropriate for a component of WHOLE
@@ -425,7 +425,7 @@ extern CORE_ADDR value_address (const struct value *);
 
 /* Like value_address, except the result does not include value's
    offset.  */
-extern CORE_ADDR value_raw_address (struct value *);
+extern CORE_ADDR value_raw_address (const struct value *);
 
 /* Set the address of a value.  */
 extern void set_value_address (struct value *, CORE_ADDR);
@@ -458,8 +458,8 @@ extern struct value *coerce_ref_if_computed (const struct value *arg);
 
 extern struct value * readjust_indirect_value_type (struct value *value,
 						    struct type *enc_type,
-						    struct type *original_type,
-						    struct value *original_val);
+						    const struct type *original_type,
+						    const struct value *original_val);
 
 /* Convert a REF to the object referenced.  */
 
@@ -694,7 +694,7 @@ extern struct value *allocate_repeat_value (struct type *type, int count);
 
 extern struct value *value_mark (void);
 
-extern void value_free_to_mark (struct value *mark);
+extern void value_free_to_mark (const struct value *mark);
 
 extern struct value *value_cstring (const char *ptr, ssize_t len,
 				    struct type *char_type);
@@ -1006,7 +1006,7 @@ extern void value_print_array_elements (struct value *val,
 					struct ui_file *stream, int format,
 					enum val_prettyformat pretty);
 
-extern struct value *value_release_to_mark (struct value *mark);
+extern struct value *value_release_to_mark (const struct value *mark);
 
 extern void val_print (struct type *type, const gdb_byte *valaddr,
 		       int embedded_offset, CORE_ADDR address,
@@ -1034,7 +1034,7 @@ extern void print_variable_and_value (const char *name,
 extern void typedef_print (struct type *type, struct symbol *news,
 			   struct ui_file *stream);
 
-extern char *internalvar_name (struct internalvar *var);
+extern char *internalvar_name (const struct internalvar *var);
 
 extern void preserve_values (struct objfile *);
 

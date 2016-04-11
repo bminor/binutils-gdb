@@ -32,7 +32,13 @@ if { [is_remote host] } {
 proc test_histsize_history_setting { histsize size { env_var "GDBHISTSIZE" } } {
     global env
 
-    save_vars { env($env_var) } {
+    save_vars { env(GDBHISTFILE) env(GDBHISTSIZE) env($env_var) } {
+	# These environment variables take precedence over whatever
+	# history size is set in .gdbinit.  Make sure the former is not
+	# set.
+	unset -nocomplain env(GDBHISTFILE)
+	unset -nocomplain env(GDBHISTSIZE)
+
 	set env($env_var) $histsize
 
 	with_test_prefix "histsize=$histsize" {

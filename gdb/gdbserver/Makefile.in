@@ -327,7 +327,7 @@ IPA_LIB=libinproctrace.so
 
 $(IPA_LIB): $(IPA_OBJS) ${ADD_DEPS} ${CDEPS}
 	rm -f $(IPA_LIB)
-	$(CC_LD) -shared -fPIC -Wl,--no-undefined $(INTERNAL_CFLAGS) \
+	$(CC_LD) -shared -fPIC -Wl,--soname=$(IPA_LIB) -Wl,--no-undefined $(INTERNAL_CFLAGS) \
 	$(INTERNAL_LDFLAGS) -o $(IPA_LIB) ${IPA_OBJS} -ldl -pthread
 
 # Put the proper machine-specific files first, so M-. on a machine

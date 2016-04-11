@@ -405,11 +405,11 @@ static op tab[] =
   },
 
   { "", "nm", "dmuls.l <REG_M>,<REG_N>", "0011nnnnmmmm1101",
-    "dmul (1/*signed*/, R[n], R[m]);",
+    "dmul_s (R[n], R[m]);",
   },
 
   { "", "nm", "dmulu.l <REG_M>,<REG_N>", "0011nnnnmmmm0101",
-    "dmul (0/*unsigned*/, R[n], R[m]);",
+    "dmul_u (R[n], R[m]);",
   },
 
   { "n", "n", "dt <REG_N>", "0100nnnn00010000",

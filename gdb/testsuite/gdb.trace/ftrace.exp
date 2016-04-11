@@ -213,7 +213,7 @@ proc test_ftrace_condition { condexp var list } \
 
 gdb_reinitialize_dir $srcdir/$subdir
 
-if { [gdb_test "info sharedlibrary" ".*${libipa}.*" "IPA loaded"] != 0 } {
+if { [gdb_test "info sharedlibrary" ".*[file tail ${libipa}].*" "IPA loaded"] != 0 } {
     untested "Could not find IPA lib loaded"
     return 1
 }

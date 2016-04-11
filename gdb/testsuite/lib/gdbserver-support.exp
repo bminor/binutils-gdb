@@ -155,6 +155,10 @@ proc gdbserver_download_current_prog { } {
     global gdbserver_server_exec
     global last_loaded_file
 
+    if { ![info exists last_loaded_file] } {
+	return ""
+    }
+
     set host_exec $last_loaded_file
 
     # If we already downloaded a file to the target, see if we can reuse it.
@@ -176,11 +180,7 @@ proc gdbserver_download_current_prog { } {
     if { $reuse == 0 } {
 	set gdbserver_host_exec $host_exec
 	set gdbserver_host_mtime [file mtime $host_exec]
-	if [is_remote target] {
-	    set gdbserver_server_exec [gdb_download $host_exec]
-	} else {
-	    set gdbserver_server_exec $host_exec
-	}
+	set gdbserver_server_exec [gdb_remote_download target $host_exec]
     }
 
     return $gdbserver_server_exec

@@ -1,3 +1,14 @@
+22016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * opcode/arc.h (DPA, DPX, SPX): New subclass enums.
+        (ARC_FPUDA): Define.
+        (arc_aux_reg): Add new field.
+
+016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* opcode/arc-func.h (replace_bits24): Changed.
+	(replace_bits24_be): Created.
+
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
         * opcode/arc.h (insn_subclass_t): Add QUARKSE subclass.

@@ -5294,7 +5294,13 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		    error_ret_free_internal:
 		      if (elf_section_data (section)->relocs == NULL)
 			free (internal_relocs);
-		      goto error_ret_free_local;
+		    /* Fall through.  */
+		    error_ret_free_local:
+		      if (local_syms != NULL
+			  && (symtab_hdr->contents
+			      != (unsigned char *) local_syms))
+			free (local_syms);
+		      return FALSE;
 		    }
 
 		  hash = NULL;
@@ -5700,9 +5706,6 @@ elf32_arm_size_stubs (bfd *output_bfd,
       htab->num_a8_erratum_fixes = 0;
     }
   return TRUE;
-
- error_ret_free_local:
-  return FALSE;
 }
 
 /* Build all the stubs associated with the current output file.  The

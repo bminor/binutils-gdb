@@ -741,6 +741,103 @@ extract_nps_bitop_size (unsigned insn ATTRIBUTE_UNUSED,
   return ((insn >> 10) & 0x1f) + 1;
 }
 
+static unsigned
+insert_nps_bitop_size_2b (unsigned insn ATTRIBUTE_UNUSED,
+                          int value ATTRIBUTE_UNUSED,
+                          const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 1:
+      value = 0;
+      break;
+    case 2:
+      value = 1;
+      break;
+    case 4:
+      value = 2;
+      break;
+    case 8:
+      value = 3;
+      break;
+    default:
+      value = 0;
+      *errmsg = _("Invalid size, should be 1, 2, 4, or 8.");
+      break;
+    }
+
+  insn |= value << 10;
+  return insn;
+}
+
+static int
+extract_nps_bitop_size_2b (unsigned insn ATTRIBUTE_UNUSED,
+                           bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return  1 << ((insn >> 10) & 0x3);
+}
+
+static unsigned
+insert_nps_bitop_uimm8 (unsigned insn ATTRIBUTE_UNUSED,
+                        int value ATTRIBUTE_UNUSED,
+                        const char **errmsg ATTRIBUTE_UNUSED)
+{
+  insn |= ((value >> 5) & 7) << 12;
+  insn |= (value & 0x1f);
+  return insn;
+}
+
+static int
+extract_nps_bitop_uimm8 (unsigned insn ATTRIBUTE_UNUSED,
+                         bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (((insn >> 12) & 0x7) << 5) | (insn & 0x1f);
+}
+
+static unsigned
+insert_nps_rflt_uimm6 (unsigned insn ATTRIBUTE_UNUSED,
+                       int value ATTRIBUTE_UNUSED,
+                       const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 1:
+    case 2:
+    case 4:
+      break;
+
+    default:
+      *errmsg = _("invalid immediate, must be 1, 2, or 4");
+      value = 0;
+    }
+
+  insn |= (value << 6);
+  return insn;
+}
+
+static int
+extract_nps_rflt_uimm6 (unsigned insn ATTRIBUTE_UNUSED,
+                         bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (insn >> 6) & 0x3f;
+}
+
+static unsigned
+insert_nps_dst_pos_and_size (unsigned insn ATTRIBUTE_UNUSED,
+                             int value ATTRIBUTE_UNUSED,
+                             const char **errmsg ATTRIBUTE_UNUSED)
+{
+  insn |= ((value & 0x1f) | (((32 - value - 1) & 0x1f) << 10));
+  return insn;
+}
+
+static int
+extract_nps_dst_pos_and_size (unsigned insn ATTRIBUTE_UNUSED,
+                              bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (insn & 0x1f);
+}
+
 /* Include the generic extract/insert functions.  Order is important
    as some of the functions present in the .h may be disabled via
    defines.  */
@@ -903,6 +1000,40 @@ const struct arc_flag_operand arc_flag_operands[] =
 
 #define F_NPS_FLAG (F_NPS_CL + 1)
   { "f", 1, 1, 20, 1 },
+
+#define F_NPS_R     (F_NPS_FLAG + 1)
+  { "r",  1, 1, 15, 1 },
+
+#define F_NPS_RW     (F_NPS_R + 1)
+  { "rw", 0, 1, 7, 1 },
+
+#define F_NPS_RD     (F_NPS_RW + 1)
+  { "rd", 1, 1, 7, 1 },
+
+#define F_NPS_WFT     (F_NPS_RD + 1)
+  { "wft", 0, 0, 0, 1 },
+
+#define F_NPS_IE1     (F_NPS_WFT + 1)
+  { "ie1", 1, 2, 8, 1 },
+
+#define F_NPS_IE2     (F_NPS_IE1 + 1)
+  { "ie2", 2, 2, 8, 1 },
+
+#define F_NPS_IE12     (F_NPS_IE2 + 1)
+  { "ie12", 3, 2, 8, 1 },
+
+#define F_NPS_SYNC_RD     (F_NPS_IE12 + 1)
+  { "rd", 0, 1, 6, 1 },
+
+#define F_NPS_SYNC_WR     (F_NPS_SYNC_RD + 1)
+  { "wr", 1, 1, 6, 1 },
+
+#define F_NPS_HWS_OFF     (F_NPS_SYNC_WR + 1)
+  { "off", 0, 0, 0, 1 },
+
+#define F_NPS_HWS_RESTORE     (F_NPS_HWS_OFF + 1)
+  { "restore", 0, 0, 0, 1 },
+
 };
 
 const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
@@ -981,6 +1112,28 @@ const struct arc_flag_class arc_flag_classes[] =
 
 #define C_NPS_F     (C_NPS_CL + 1)
   { F_CLASS_OPTIONAL, { F_NPS_FLAG, F_NULL}},
+
+#define C_NPS_R     (C_NPS_F + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_R, F_NULL}},
+
+#define C_NPS_SCHD_RW     (C_NPS_R + 1)
+  { F_CLASS_REQUIRED, { F_NPS_RW, F_NPS_RD, F_NULL}},
+
+#define C_NPS_SCHD_TRIG     (C_NPS_SCHD_RW + 1)
+  { F_CLASS_REQUIRED, { F_NPS_WFT, F_NULL}},
+
+#define C_NPS_SCHD_IE     (C_NPS_SCHD_TRIG + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_IE1, F_NPS_IE2, F_NPS_IE12, F_NULL}},
+
+#define C_NPS_SYNC     (C_NPS_SCHD_IE + 1)
+  { F_CLASS_REQUIRED, { F_NPS_SYNC_RD, F_NPS_SYNC_WR, F_NULL}},
+
+#define C_NPS_HWS_OFF     (C_NPS_SYNC + 1)
+  { F_CLASS_REQUIRED, { F_NPS_HWS_OFF, F_NULL}},
+
+#define C_NPS_HWS_RESTORE     (C_NPS_HWS_OFF + 1)
+  { F_CLASS_REQUIRED, { F_NPS_HWS_RESTORE, F_NULL}},
+
 };
 
 /* The operands table.
@@ -1054,11 +1207,11 @@ const struct arc_operand arc_operands[] =
 #define R3		(R2 + 1)
 #define R3_S		(R2 + 1)
   { 2, 0, 0, ARC_OPERAND_IR, insert_r3, extract_r3 },
-#define SP		(R3 + 1)
+#define RSP		(R3 + 1)
 #define SP_S		(R3 + 1)
   { 5, 0, 0, ARC_OPERAND_IR, insert_sp, extract_sp },
-#define SPdup		(SP + 1)
-#define SP_Sdup		(SP + 1)
+#define SPdup		(RSP + 1)
+#define SP_Sdup		(RSP + 1)
   { 5, 0, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_sp, extract_sp },
 #define GP		(SPdup + 1)
 #define GP_S		(SPdup + 1)
@@ -1323,10 +1476,22 @@ const struct arc_operand arc_operands[] =
   { 5, 0, 0, ARC_OPERAND_UNSIGNED, 0, 0 },
 
 #define NPS_BITOP_SIZE		(NPS_BITOP_SRC_POS + 1)
-  { 5, 10, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_size, extract_nps_bitop_size },
+  { 5, 10, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop_size, extract_nps_bitop_size },
 
-#define NPS_UIMM16		(NPS_BITOP_SIZE + 1)
+#define NPS_BITOP_DST_POS_SZ    (NPS_BITOP_SIZE + 1)
+  { 5, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_dst_pos_and_size, extract_nps_dst_pos_and_size },
+
+#define NPS_BITOP_SIZE_2B	(NPS_BITOP_DST_POS_SZ + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop_size_2b, extract_nps_bitop_size_2b },
+
+#define NPS_BITOP_UIMM8		(NPS_BITOP_SIZE_2B + 1)
+  { 8, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_uimm8, extract_nps_bitop_uimm8 },
+
+#define NPS_UIMM16		(NPS_BITOP_UIMM8 + 1)
   { 16, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_RFLT_UIMM6		(NPS_UIMM16 + 1)
+  { 6, 6, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_rflt_uimm6, extract_nps_rflt_uimm6 },
 };
 
 const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);
@@ -1338,7 +1503,37 @@ const unsigned arc_NToperand = FKT_NT;
 
    The format of the opcode table is:
 
-   NAME OPCODE MASK CPU CLASS SUBCLASS { OPERANDS } { FLAGS }.  */
+   NAME OPCODE MASK CPU CLASS SUBCLASS { OPERANDS } { FLAGS }.
+
+   The table is organised such that, where possible, all instructions with
+   the same mnemonic are together in a block.  When the assembler searches
+   for a suitable instruction the entries are checked in table order, so
+   more specific, or specialised cases should appear earlier in the table.
+
+   As an example, consider two instructions 'add a,b,u6' and 'add
+   a,b,limm'.  The first takes a 6-bit immediate that is encoded within the
+   32-bit instruction, while the second takes a 32-bit immediate that is
+   encoded in a follow-on 32-bit, making the total instruction length
+   64-bits.  In this case the u6 variant must appear first in the table, as
+   all u6 immediates could also be encoded using the 'limm' extension,
+   however, we want to use the shorter instruction wherever possible.
+
+   It is possible though to split instructions with the same mnemonic into
+   multiple groups.  However, the instructions are still checked in table
+   order, even across groups.  The only time that instructions with the
+   same mnemonic should be split into different groups is when different
+   variants of the instruction appear in different architectures, in which
+   case, grouping all instructions from a particular architecture together
+   might be preferable to merging the instruction into the main instruction
+   table.
+
+   An example of this split instruction groups can be found with the 'sync'
+   instruction.  The core arc architecture provides a 'sync' instruction,
+   while the nps instruction set extension provides 'sync.rd' and
+   'sync.wr'.  The rd/wr flags are instruction flags, not part of the
+   mnemonic, so we end up with two groups for the sync instruction, the
+   first within the core arc instruction table, and the second within the
+   nps extension instructions.  */
 const struct arc_opcode arc_opcodes[] =
 {
 #include "arc-tbl.h"
@@ -1496,8 +1691,8 @@ const unsigned arc_num_pseudo_insn =
 const struct arc_aux_reg arc_aux_regs[] =
 {
 #undef DEF
-#define DEF(ADDR, NAME)				\
-  { ADDR, #NAME, sizeof (#NAME)-1 },
+#define DEF(ADDR, SUBCLASS, NAME)		\
+  { ADDR, SUBCLASS, #NAME, sizeof (#NAME)-1 },
 
 #include "arc-regs.h"
 

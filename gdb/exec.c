@@ -151,7 +151,13 @@ exec_file_locate_attach (int pid, int from_tty)
   /* Try to determine a filename from the process itself.  */
   exec_file = target_pid_to_exec_file (pid);
   if (exec_file == NULL)
-    return;
+    {
+      warning (_("No executable has been specified and target does not "
+		 "support\n"
+		 "determining executable automatically.  "
+		 "Try using the \"file\" command."));
+      return;
+    }
 
   /* If gdb_sysroot is not empty and the discovered filename
      is absolute then prefix the filename with gdb_sysroot.  */

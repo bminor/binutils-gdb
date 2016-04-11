@@ -66,13 +66,28 @@ replace_bits16 (unsigned insn, int value ATTRIBUTE_UNUSED)
 ATTRIBUTE_UNUSED static unsigned
 replace_bits24 (unsigned insn, int value ATTRIBUTE_UNUSED)
 {
+  insn = insn & ~0xffffff;
+  insn |= ((value >> 0) & 0xffffff) << 0;
+
+  return insn;
+}
+
+#endif /* REPLACE_bits24 */
+
+/* Special 24 bit replace for big endian.  */
+/* mask  = 111111111111111111111111.  */
+#ifndef REPLACE_bits24_be
+#define REPLACE_bits24_be
+ATTRIBUTE_UNUSED static unsigned
+replace_bits24_be (unsigned insn, int value ATTRIBUTE_UNUSED)
+{
   insn = insn & ~0xffffff00;
   insn |= ((value >> 0) & 0xffffff) << 8;
 
   return insn;
 }
 
-#endif /* REPLACE_bits24 */
+#endif /* REPLACE_bits24_be */
 
 /* mask  = 11111111111111111111111111111111.  */
 #ifndef REPLACE_word32

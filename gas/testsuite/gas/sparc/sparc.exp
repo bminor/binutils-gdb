@@ -97,6 +97,9 @@ if [istarget sparc*-*-*] {
     run_dump_test "natural-32"
 
     run_list_test "pr4587" ""
+
+    run_dump_test "pr19910-1"
+    run_list_test "pr19910-2"
 }
 
 if [istarget sparc-*-vxworks*] {

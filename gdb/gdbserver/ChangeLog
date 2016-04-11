@@ -1,3 +1,11 @@
+2016-04-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in ($(IPA_LIB)): Set SONAME of the IPA lib.
+
+2016-04-05  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (getauxval): Move to #ifdef IN_PROCESS_AGENT.
+
 2016-04-03  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* linux-aarch64-ipa.c: Add <elf.h> include.

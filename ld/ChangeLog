@@ -1,3 +1,104 @@
+2016-04-09  Oleg Endo  <olegendo@gcc.gnu.org>
+
+	* emulparams/shelf.sh: Set stack area to 0x3FFFFF00.
+
+2016-04-08  Alan Modra  <amodra@gmail.com>
+
+	PR 18452
+	* ldlang.c (maybe_overlays): Delete.
+	(lang_size_sections_1): Remove code setting maybe_overlays.
+	(lang_check_section_addresses): Instead detect overlays by
+	exact match of section VMAs here.  Fix memory leak.
+
+2016-04-08  Dan Gisselquist  <dgisselq@ieee.org>
+
+	* ldlang.c (print_output_section_statement): Show minfo size
+	in target machine address units.
+	(print_reloc_statement): Likewise.
+	(print_padding_statement): Likewise.
+	(print_data_statement): Likewise.  Ensure minimum print_dot
+	increment of one address unit.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* emulparams/arc-endianness.sh: Make little endian default choice.
+
+2016-04-07  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc (.MSP430.attributes): Fix typo in
+	section name.
+	* scripttempl/elf32msp430_3.sc (.MSP430.attributes): Likewise.
+
+2016-04-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* emulparams/arc-endianness.sh: New file.
+	* emulparams/arcebelf.sh: Deleted.
+	* emulparams/arcebelf_prof.sh: Deleted.
+	* emulparams/arceblinux.sh: Deleted.
+	* emulparams/arceblinux_prof.sh: Deleted.
+	* emulparams/arcelf.sh: Include arc-endinness.sh.
+	* emulparams/arcelf_prof.sh: Include arc-endinness.sh.
+	* emulparams/arclinux.sh: Include arc-endinness.sh.
+	* emulparams/arclinux_prof.sh: Include arc-endinness.sh.
+	* emulparams/arcv2elf.sh: Include arc-endinness.sh.
+	* emulparams/arcv2elfx.sh: Include arc-endinness.sh.
+	* testsuite/ld-elf/compressed1d.d: Update pattern for big and
+	little endian arc targets.
+	* testsuite/ld-elf/eh-frame-hdr.d: Likewise.
+	* testsuite/ld-elf/group1.d: Likewise.
+	* testsuite/ld-elf/group3b.d: Likewise.
+	* testsuite/ld-elf/group8a.d: Likewise.
+	* testsuite/ld-elf/group8b.d: Likewise.
+	* testsuite/ld-elf/group9a.d: Likewise.
+	* testsuite/ld-elf/group9b.d: Likewise.
+	* testsuite/ld-elf/linkonce2.d: Likewise.
+	* testsuite/ld-elf/pr12851.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/pr19162.d: Likewise.
+	* testsuite/ld-elf/sec64k.exp: Likewise.
+	* testsuite/lib/ld-lib.exp: Likewise.
+
+2016-04-05  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/19908
+	* testsuite/ld-cris/tls-e-20.d: Adjust for hidden symbol
+	handling fix.
+	* testsuite/ld-cris/tls-e-20a.d: Likewise.
+	* testsuite/ld-cris/tls-e-21.d: Likewise.
+	* testsuite/ld-cris/tls-e-23.d: Likewise.
+	* testsuite/ld-cris/tls-e-80.d: Likewise.
+	* testsuite/ld-cris/tls-gd-3h.d: Likewise.
+	* testsuite/ld-cris/tls-leie-19.d: Likewise.
+	* testsuite/ld-mips-elf/export-class-ref-lib.sd: New test.
+	* testsuite/ld-mips-elf/export-hidden-ref.sd: New test.
+	* testsuite/ld-mips-elf/export-internal-ref.sd: New test.
+	* testsuite/ld-mips-elf/export-protected-ref.sd: New test.
+	* testsuite/ld-mips-elf/export-class-ref-f0.s: New test source.
+	* testsuite/ld-mips-elf/export-class-ref-f1.s: New test source.
+	* testsuite/ld-mips-elf/export-class-ref-f2.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-discard/extern.d: Removed xfail for ARC.
+	* testsuite/ld-discard/start.d: Likewise.
+	* testsuite/ld-discard/static.d: Likewise.
+	* testsuite/ld-elf/group1.d: Likewise.
+	* testsuite/ld-elf/group3b.d: Likewise.
+	* testsuite/ld-elf/orphan-region.d: Likewise.
+	* testsuite/ld-elf/orphan.d: Likewise.
+	* testsuite/ld-elf/orphan3.d: Likewise.
+	* testsuite/ld-elf/pr349.d: Likewise.
+	* testsuite/ld-elf/warn1.d: Likewise.
+	* testsuite/ld-elf/warn2.d: Likewise.
+	* testsuite/ld-elf/warn3.d: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Add __SDATA_BEGIN__ symbol
+	through linker flags.
+	* testsuite/ld-srec/srec.exp: Set as xfail.
+
 2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19827

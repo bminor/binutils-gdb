@@ -1093,7 +1093,7 @@ allocate_optimized_out_value (struct type *type)
 /* Accessor methods.  */
 
 struct value *
-value_next (struct value *value)
+value_next (const struct value *value)
 {
   return value->next;
 }
@@ -1143,7 +1143,7 @@ set_value_bitsize (struct value *value, int bit)
 }
 
 struct value *
-value_parent (struct value *value)
+value_parent (const struct value *value)
 {
   return value->parent;
 }
@@ -1179,7 +1179,7 @@ value_contents_all_raw (struct value *value)
 }
 
 struct type *
-value_enclosing_type (struct value *value)
+value_enclosing_type (const struct value *value)
 {
   return value->enclosing_type;
 }
@@ -1205,7 +1205,8 @@ value_actual_type (struct value *value, int resolve_simple_types,
       if ((TYPE_CODE (result) == TYPE_CODE_PTR
 	   || TYPE_CODE (result) == TYPE_CODE_REF)
 	  && TYPE_CODE (check_typedef (TYPE_TARGET_TYPE (result)))
-	     == TYPE_CODE_STRUCT)
+	     == TYPE_CODE_STRUCT
+	  && !value_optimized_out (value))
         {
           struct type *real_type;
 
@@ -1387,7 +1388,7 @@ value_contents_copy (struct value *dst, int dst_offset,
 }
 
 int
-value_lazy (struct value *value)
+value_lazy (const struct value *value)
 {
   return value->lazy;
 }
@@ -1399,7 +1400,7 @@ set_value_lazy (struct value *value, int val)
 }
 
 int
-value_stack (struct value *value)
+value_stack (const struct value *value)
 {
   return value->stack;
 }
@@ -1433,7 +1434,17 @@ value_optimized_out (struct value *value)
   /* We can only know if a value is optimized out once we have tried to
      fetch it.  */
   if (VEC_empty (range_s, value->optimized_out) && value->lazy)
-    value_fetch_lazy (value);
+    {
+      TRY
+	{
+	  value_fetch_lazy (value);
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  /* Fall back to checking value->optimized_out.  */
+	}
+      END_CATCH
+    }
 
   return !VEC_empty (range_s, value->optimized_out);
 }
@@ -1470,7 +1481,7 @@ value_bits_synthetic_pointer (const struct value *value,
 }
 
 int
-value_embedded_offset (struct value *value)
+value_embedded_offset (const struct value *value)
 {
   return value->embedded_offset;
 }
@@ -1482,7 +1493,7 @@ set_value_embedded_offset (struct value *value, int val)
 }
 
 int
-value_pointed_to_offset (struct value *value)
+value_pointed_to_offset (const struct value *value)
 {
   return value->pointed_to_offset;
 }
@@ -1535,7 +1546,7 @@ value_address (const struct value *value)
 }
 
 CORE_ADDR
-value_raw_address (struct value *value)
+value_raw_address (const struct value *value)
 {
   if (value->lval == lval_internalvar
       || value->lval == lval_internalvar_component
@@ -1572,7 +1583,7 @@ deprecated_value_regnum_hack (struct value *value)
 }
 
 int
-deprecated_value_modifiable (struct value *value)
+deprecated_value_modifiable (const struct value *value)
 {
   return value->modifiable;
 }
@@ -1633,7 +1644,7 @@ value_free (struct value *val)
 /* Free all values allocated since MARK was obtained by value_mark
    (except for those released).  */
 void
-value_free_to_mark (struct value *mark)
+value_free_to_mark (const struct value *mark)
 {
   struct value *val;
   struct value *next;
@@ -1725,7 +1736,7 @@ release_value_or_incref (struct value *val)
 
 /* Release all values up to mark  */
 struct value *
-value_release_to_mark (struct value *mark)
+value_release_to_mark (const struct value *mark)
 {
   struct value *val;
   struct value *next;
@@ -2489,7 +2500,7 @@ clear_internalvar (struct internalvar *var)
 }
 
 char *
-internalvar_name (struct internalvar *var)
+internalvar_name (const struct internalvar *var)
 {
   return var->name;
 }
@@ -3761,8 +3772,8 @@ coerce_ref_if_computed (const struct value *arg)
 
 struct value *
 readjust_indirect_value_type (struct value *value, struct type *enc_type,
-			      struct type *original_type,
-			      struct value *original_value)
+			      const struct type *original_type,
+			      const struct value *original_value)
 {
   /* Re-adjust type.  */
   deprecated_set_value_type (value, TYPE_TARGET_TYPE (original_type));
@@ -3867,7 +3878,7 @@ set_value_initialized (struct value *val, int status)
 /* Return the initialized field in a value struct.  */
 
 int
-value_initialized (struct value *val)
+value_initialized (const struct value *val)
 {
   return val->initialized;
 }

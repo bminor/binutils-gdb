@@ -1,3 +1,38 @@
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add schd, sync, and hwschd instructions.
+	* arc-opc.c (arc_flag_operands): Add new flags.
+	(arc_flag_classes): Add new classes.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (arc_opcodes): Extend comment to discus table layout.
+
+2016-04-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add movbi, decode1, fbset, fbclear, encode0,
+	encode1, rflt, crc16, and crc32 instructions.
+	* arc-opc.c (arc_flag_operands): Add F_NPS_R.
+	(arc_flag_classes): Add C_NPS_R.
+	(insert_nps_bitop_size_2b): New function.
+	(extract_nps_bitop_size_2b): Likewise.
+	(insert_nps_bitop_uimm8): Likewise.
+	(extract_nps_bitop_uimm8): Likewise.
+	(arc_operands): Add new operand entries.
+
+2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * arc-regs.h: Add a new subclass field.  Add double assist
+        accumulator register values.
+        * arc-tbl.h: Use DPA subclass to mark the double assist
+        instructions.  Use DPX/SPX subclas to mark the FPX instructions.
+        * arc-opc.c (RSP): Define instead of SP.
+        (arc_aux_regs): Add the subclass field.
+
+2016-04-05  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c: Support FP16 vmul, vmla, vmls (by scalar).
+
 2016-03-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-opc.c (arc_operands): Fix operand flags for NPS_R_DST, and

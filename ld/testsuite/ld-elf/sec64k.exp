@@ -29,7 +29,7 @@ if ![is_elf_format] {
 
 # Targets using the generic linker backend don't sort section symbols
 # before local symbols, so don't bother testing them.
-if { [istarget "arc-*-*"]
+if { [istarget "arc*-*-*"]
      || [istarget "d30v-*-*"]
      || [istarget "dlx-*-*"]
      || [istarget "i960-*-*"]

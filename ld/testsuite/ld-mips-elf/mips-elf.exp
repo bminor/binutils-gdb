@@ -899,3 +899,31 @@ if { $linux_gnu } {
 	    n32 -1 1 umips
     }
 }
+
+# PR ld/19908 export class tests.
+if { $linux_gnu } {
+    run_ld_link_tests [list \
+	[list "Shared library for MIPS export class symbol reference tests" \
+	      "$abi_ldflags(o32) -shared" "" \
+	      "$abi_asflags(o32)" \
+	      { export-class-ref-f2.s } \
+	      { { readelf --dyn-syms export-class-ref-lib.sd } } \
+	      "export-class-ref-lib.so"]]
+    foreach { class flag } { internal 1 hidden 2 protected 3 } {
+	run_ld_link_tests [list \
+	    [list "MIPS $class symbol reference test 1" \
+		  "$abi_ldflags(o32) -e f0" "tmpdir/export-class-ref-lib.so" \
+		  "$abi_asflags(o32) --defsym defv=$flag" \
+		  { export-class-ref-f0.s export-class-ref-f1.s } \
+		  [list [list readelf --dyn-syms export-$class-ref.sd] \
+			[list readelf --dyn-syms export-local-ref.sd]] \
+		  "export-$class-ref"] \
+	    [list "MIPS $class symbol reference test 2" \
+		  "$abi_ldflags(o32) -e f0" "tmpdir/export-class-ref-lib.so" \
+		  "$abi_asflags(o32) --defsym defv=$flag --defsym refv=$flag" \
+		  { export-class-ref-f0.s export-class-ref-f1.s } \
+		  [list [list readelf --dyn-syms export-$class-ref.sd] \
+			[list readelf --dyn-syms export-local-ref.sd]] \
+		  "export-$class-ref"]]
+    }
+}

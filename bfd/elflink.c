@@ -4583,7 +4583,7 @@ error_free_dyn:
 		    goto error_free_vers;
 		}
 	    }
-	  else if (dynsym && h->dynindx != -1)
+	  else if (h->dynindx != -1)
 	    /* If the symbol already has a dynamic index, but
 	       visibility says it should not be visible, turn it into
 	       a local symbol.  */

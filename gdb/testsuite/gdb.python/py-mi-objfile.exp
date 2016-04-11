@@ -53,5 +53,6 @@ if [is_remote host] {
 
 # PR 18833.  This will cause an unpatched gdb to crash.
 mi_gdb_test "-file-exec-and-symbols ${filename}" \
-    ".*\\^done,line=.*${srcfile}\"" \
+    ".*main \\(.*void\\).*\
+    return 0;.*\\^done" \
     "file-exec-and-symbols operation"

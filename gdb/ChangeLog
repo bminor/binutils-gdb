@@ -1,3 +1,74 @@
+2016-04-08  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* value.c (value_next): Make pass-by-reference parameters const-correct.
+	(value_parent): Likewise.
+	(value_enclosing_type): Likewise.
+	(value_lazy): Likewise.
+	(value_stack): Likewise.
+	(value_embedded_offset): Likewise.
+	(value_pointed_to_offset): Likewise.
+	(value_raw_address): Likewise.
+	(deprecated_value_modifiable): Likewise.
+	(value_free_to_mark): Likewise.
+	(value_release_to_mark): Likewise.
+	(internalvar_name): Likewise.
+	(readjust_indirect_value_type): Likewise.
+	(value_initialized): Likewise.
+	* value.h (value_next): Likewise.
+	(value_parent): Likewise.
+	(value_enclosing_type): Likewise.
+	(value_lazy): Likewise.
+	(value_stack): Likewise.
+	(value_embedded_offset): Likewise.
+	(value_pointed_to_offset): Likewise.
+	(value_raw_address): Likewise.
+	(deprecated_value_modifiable): Likewise.
+	(value_free_to_mark): Likewise.
+	(value_release_to_mark): Likewise.
+	(internalvar_name): Likewise.
+	(readjust_indirect_value_type): Likewise.
+	(value_initialized): Likewise.
+
+2016-04-07  Yao Qi  <yao.qi@linaro.org>
+
+	* record-full.c (record_full_insert_breakpoint): Return
+	early if entry on the address is found in
+	record_full_breakpoints.
+
+2016-04-07  Yao Qi  <yao.qi@linaro.org>
+
+	* record-full.c (record_full_insert_breakpoint): Set
+	bp_tgt->reqstd_address and bp_tgt->placed_size.
+
+2016-04-06  Don Breazeal  <donb@codesourcery.com>
+
+	* value.c (value_actual_type): Don't try to get rtti type
+	of the value if it has been optimized out.
+	(value_optimized_out): If a memory access error occurs,
+	just check vaue->optimized_out.
+
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert the previous commit adding unknown_v_replies_ok.
+
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c (struct remote_state): New field unknown_v_replies_ok.
+	(packet_config_support): Read it.
+	(remote_start_remote): Set it.
+
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c: Revert check-in by a mistake in the previous commit.
+
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* exec.c (exec_file_locate_attach): Print warning for unsupported
+	target_pid_to_exec_file.
+	* symfile-mem.c (add_vsyscall_page): Remove the "file" command
+	message part.
+
 2016-04-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli/cli-decode.c (help_cmd_list): Fix function doc and remove
