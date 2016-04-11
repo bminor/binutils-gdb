@@ -1417,7 +1417,7 @@ index 8009ba7..54330f8 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index 9fca810..778c846 100644
+index 1947efc..dc41cf2 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -1438,17 +1438,17 @@ index 9fca810..778c846 100644
  #ifndef offsetof
  #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
  #endif
-@@ -76,6 +80,9 @@ static struct unique_sections *unique_section_list;
+@@ -75,6 +79,9 @@ static lang_statement_list_type **stat_save_ptr = &stat_save[0];
+ static struct unique_sections *unique_section_list;
  static struct asneeded_minfo *asneeded_list_head;
  static unsigned int opb_shift = 0;
- static bfd_boolean maybe_overlays = FALSE;
 +static cmdline_list_type cmdline_object_only_file_list;
 +static cmdline_list_type cmdline_object_only_archive_list;
 +static cmdline_list_type cmdline_temp_object_only_list;
  
  /* Forward declarations.  */
  static void exp_init_os (etree_type *);
-@@ -94,6 +101,10 @@ static void lang_do_version_exports_section (void);
+@@ -93,6 +100,10 @@ static void lang_do_version_exports_section (void);
  static void lang_finalize_version_expr_head
    (struct bfd_elf_version_expr_head *);
  static void lang_do_memory_regions (void);
@@ -1459,7 +1459,7 @@ index 9fca810..778c846 100644
  
  /* Exported variables.  */
  const char *output_target;
-@@ -1227,14 +1238,17 @@ output_section_statement_table_free (void)
+@@ -1226,14 +1237,17 @@ output_section_statement_table_free (void)
  /* Build enough state so that the parser can build its tree.  */
  
  void
@@ -1479,7 +1479,7 @@ index 9fca810..778c846 100644
    lang_list_init (stat_ptr);
  
    lang_list_init (&input_file_chain);
-@@ -2851,6 +2865,12 @@ load_symbols (lang_input_statement_type *entry,
+@@ -2850,6 +2864,12 @@ load_symbols (lang_input_statement_type *entry,
  		  loaded = FALSE;
  		}
  
@@ -1492,7 +1492,7 @@ index 9fca810..778c846 100644
  	      subsbfd = member;
  	      if (!(*link_info.callbacks
  		    ->add_archive_element) (&link_info, member,
-@@ -6849,7 +6869,38 @@ lang_process (void)
+@@ -6858,7 +6878,38 @@ lang_process (void)
  	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
  	}
      }
@@ -1531,7 +1531,7 @@ index 9fca810..778c846 100644
  
    /* Make sure that nobody has tried to add a symbol to this list before now.  */
    ASSERT (link_info.gc_sym_list == NULL);
-@@ -8347,3 +8398,965 @@ lang_print_memory_usage (void)
+@@ -8356,3 +8407,965 @@ lang_print_memory_usage (void)
        printf ("    %6.2f%%\n", percent);
      }
  }
