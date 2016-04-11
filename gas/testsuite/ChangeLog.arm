@@ -65,3 +65,43 @@
 	* gas/arm/archv8m-cmse.s: New file.
 	* gas/arm/archv8m-cmse-base.d: Likewise.
 	* gas/arm/archv8m-cmse-main.d: Likewise.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gas/arm/archv8m-base.d: New file.
+	* gas/arm/attr-march-armv8m.base.d: Likewise.
+	* gas/arm/armv8m.base-idiv.d: Likewise.
+	* gas/arm/any-armv8m.d: Adapt to deal with ARMv8-M Baseline.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gas/arm/archv8m.s: New file.
+	* gas/arm/archv8m-main.d: Likewise.
+	* gas/arm/attr-march-armv8m.main.d: Likewise.
+	* gas/arm/any-armv8m.s: Likewise.
+	* gas/arm/any-armv8m.d: Likewise.
+
+2016-12-17  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* gas/arm/automatic-bw.d: New.
+	* gas/arm/automatic-bw.s: New.
+	* gas/arm/automatic-cbz.d: New.
+	* gas/arm/automatic-cbz.s: New.
+	* gas/arm/automatic-clrex.d: New.
+	* gas/arm/automatic-clrex.s: New.
+	* gas/arm/automatic-lda.d: New.
+	* gas/arm/automatic-lda.s: New.
+	* gas/arm/automatic-ldaex.d: New.
+	* gas/arm/automatic-ldaex.s: New.
+	* gas/arm/automatic-ldaexb.d: New.
+	* gas/arm/automatic-ldaexb.s: New.
+	* gas/arm/automatic-ldrex.d: New.
+	* gas/arm/automatic-ldrex.s: New.
+	* gas/arm/automatic-ldrexd.d: New.
+	* gas/arm/automatic-ldrexd.s: New.
+	* gas/arm/automatic-movw.d: New.
+	* gas/arm/automatic-movw.s: New.
+	* gas/arm/automatic-sdiv.d: New.
+	* gas/arm/automatic-sdiv.s: New.
+	* gas/arm/automatic-strexb.d: New.
+	* gas/arm/automatic-strexb.s: New.

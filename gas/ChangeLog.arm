@@ -78,10 +78,25 @@
 	Mainline with DSP extension.
 	(arm_convert_symbolic_attribute): Define Tag_DSP_extension.
 
-2016-03-07  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+2016-03-29  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add cortex-r8.
 	* doc/c-arm.texi: Add cortex-r8.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Merge ARMv8-M support code from master as part of merge commit
+	2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+        * config/tc-arm.c (non_v6t2_wide_only_insn): Rename into ...
+	(t1_isa_t32_only_insn): This.  Clarify what instructions are catched by
+	the first conditional block.
+	(wide_insn_ok): Rename into ...
+	(t32_insn_ok): This.
+	(aeabi_set_public_attributes): Use TAG_CPU_ARCH_V7 instead of 10,
+	TAG_CPU_ARCH_V7E_M instead of 13, TAG_CPU_ARCH_V8 instead of 14,
+	TAG_CPU_ARCH_V8M_BASE instead of 16 and TAG_CPU_ARCH_V8M_MAIN instead
+	of 17.
 
 2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
@@ -110,3 +125,58 @@
 
 	* config/tc-arm.c (insns): Add ARMv8-M security extensions
 	instructions.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_ext_v6t2_v8m): New feature for instructions
+	shared between ARMv6T2 and ARMv8-M.
+	(move_or_literal_pool): Check mov.w/mvn and movw availability against
+	arm_ext_v6t2 and arm_ext_v6t2_v8m respectively instead of checking
+	arm_arch_t2.
+	(do_t_branch): Error out for wide conditional branch instructions if
+	targetting ARMv8-M Baseline.
+	(non_v6t2_wide_only_insn): Add the logic for new wide-only instructions
+	in ARMv8-M Baseline.
+	(wide_insn_ok): New function.
+	(md_assemble): Use wide_insn_ok instead of non_v6t2_wide_only_insn and
+	adapt error message for unsupported wide instruction to ARMv8-M
+	Baseline.
+	(insns): Reorganize instructions shared by ARMv8-M Baseline and
+	ARMv6t2 architecture.
+	(arm_cpus): Set feature bit ARM_EXT2_V6T2_V8M for marvell-pj4 and
+	marvell-whitney cores.
+	(arm_archs): Define armv8-m.base architecture.
+	(cpu_arch_ver): Define ARM_ARCH_V8M_BASE architecture version.
+	(aeabi_set_public_attributes): Add logic to set Tag_CPU_arch to 17 for
+	ARMv8-M Mainline.  Set Tag_DIV_use for ARMv8-M Baseline as well.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_ext_m): Include ARMv8-M.
+	(arm_ext_v8m): New feature for ARMv8-M.
+	(arm_ext_atomics): New feature for ARMv8 atomics.
+	(do_tt): New encoding function for TT* instructions.
+	(insns): Add new entries for ARMv8-M specific instructions and
+	reorganize the ones shared by ARMv8-M Mainline and ARMv8-A.
+	(arm_archs): Define armv8-m.main architecture.
+	(cpu_arch_ver): Define ARM_ARCH_V8M_MAIN architecture version and
+	clarify the ordering rule.
+	(aeabi_set_public_attributes): Add logic to keep setting Tag_CPU_arch
+	to ARMv8-A for -march=all.  Also set Tag_CPU_arch_profile to 'A' if
+	extension bit for atomic instructions is set, unless it is ARMv8-M.
+	Set Tag_THUMB_ISA_use to 3 for ARMv8-M.  Set Tag_DIV_use to 0 for
+	ARMv8-M Mainline.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (move_or_literal_pool): Check mov.w, mvm and movw
+	availability against arm_ext_v6t2 instead of checking arm_arch_t2,
+	fixing comments along the way.
+	(handle_it_state): Check arm_ext_v6t2 instead of arm_arch_t2 to
+	generate IT instruction.
+	(non_v6t2_wide_only_insn): New function.
+	(md_assemble): Use above new function to check for invalid wide
+	instruction for CPU Thumb ISA and to determine what Thumb extension
+	bit is necessary for that instruction.
+	(md_apply_fix): Use arm_ext_v6t2 instead of arm_arch_t2 to decide if
+	branch is out of range.

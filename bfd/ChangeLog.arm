@@ -188,7 +188,7 @@
 
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
-	(elf32_arm_merge_eabi_attributes): Add merging logic for
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Add merging logic for
 	Tag_DSP_extension.
 
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
@@ -196,10 +196,30 @@
 	Revert
 	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
-	(elf32_arm_merge_eabi_attributes): Add merging logic for
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Add merging logic for
 	Tag_DSP_extension.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Merge ARMv8-M support code from master as part of merge commit
+	2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (using_thumb_only): Test again against specific
+	Tag_CPU_arch value in case Tag_CPU_arch_profile is empty.
+	(tag_cpu_arch_combine): Remove comma for last entry of each table.
+	Adjust v4t_plus_v6_m and comb array to account for new
+	TAG_CPU_ARCH_V4T_PLUS_V6_M value.  Deal with NULL values in comb
+	array.
 
 2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	(elf32_arm_merge_eabi_attributes): Add merging logic for
 	Tag_DSP_extension.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (using_thumb_only): Only check that profile is 'M'.
+	(tag_cpu_arch_combine): Define v8m_baseline and v8m_mainline and update
+	v4t_plus_v6_m and comb to deal with ARMv8-M Tag_CPU_arch merging logic.
+	(elf32_arm_merge_eabi_attributes): Add Tag_CPU_name values for
+	ARMv8-M.

@@ -15,3 +15,15 @@
 
 	* readelf.c (display_arm_attribute): Add output for Tag_DSP_extension.
 	(arm_attr_public_tags): Define DSP_extension attribute.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Add ARMv8-M Baseline Tag_CPU_arch
+	value.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Add ARMv8-M Mainline Tag_CPU_arch
+	value.
+	(arm_attr_tag_THUMB_ISA_use): Add ARMv8-M Mainline Tag_THUMB_ISA_use
+	value.

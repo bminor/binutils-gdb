@@ -31,3 +31,16 @@
 	extensions instructions.
 	(thumb32_opcodes): Add entries for wide ARMv8-M security extensions
 	instructions.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+        * arm-dis.c (arm_opcodes): Guard movw, movt cbz, cbnz, clrex, ldrex,
+        ldrexb, ldrexh, strex, strexb, strexh shared by ARMv6T2 and ARMv8-M by
+        ARM_EXT2_V6T2_V8M instead of ARM_EXT_V6T2.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (arm_opcodes): Guard lda, ldab, ldaex, ldaexb, ldaexh, stl,
+	stlb, stlh, stlex, stlexb and stlexh by ARM_EXT2_ATOMICS instead of
+	ARM_EXT_V8.
+	(thumb32_opcodes): Add entries for wide ARMv8-M instructions.

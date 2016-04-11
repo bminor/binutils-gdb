@@ -20,6 +20,23 @@
 
 	* arm.h (Tag_DSP_extension): Define.
 
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Merge ARMv8-M support code from master as part of merge commit
+	2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (TAG_CPU_ARCH_V4T_PLUS_V6_M): set back to MAX_TAG_CPU_ARCH + 1.
+
 2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm.h (Tag_DSP_extension): Define.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (TAG_CPU_ARCH_V8M_BASE): Declare.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (TAG_CPU_ARCH_V8M_MAIN): Declare.
+	(MAX_TAG_CPU_ARCH): Define to TAG_CPU_ARCH_V8M_MAIN.
+	(TAG_CPU_ARCH_V4T_PLUS_V6_M): Define to unused value 15.

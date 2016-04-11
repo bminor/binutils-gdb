@@ -53,3 +53,21 @@
 
 	* ld-arm/attr-merge-10b-dsp.s: New file.
 	* ld-arm/attr-merge-10-dsp.attr: Likewise.
+
+2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld-arm/arm-elf.exp (armeabitests_common): Run new tests
+	"Thumb-Thumb farcall v8-M", "EABI attribute merging 8",
+	"EABI attribute merging 9" and "EABI attribute merging 10".
+	(Thumb-Thumb farcall v8-M): Renamed to ...
+	(Thumb-Thumb farcall v8-M Mainline): This.
+	(Thumb-Thumb farcall v8-M Baseline): New test.
+	* ld-arm/attr-merge-8a.s: New file.
+	* ld-arm/attr-merge-8b.s: Likewise.
+	* ld-arm/attr-merge-8.attr: Likewise.
+	* ld-arm/attr-merge-9a.s: Likewise.
+	* ld-arm/attr-merge-9b.s: Likewise.
+	* ld-arm/attr-merge-9.out: Likewise.
+	* ld-arm/attr-merge-10a.s: Likewise.
+	* ld-arm/attr-merge-10b.s: Likewise.
+	* ld-arm/attr-merge-10.attr: Likewise.
