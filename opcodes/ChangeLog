@@ -1,3 +1,8 @@
+2016-04-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (print_mips16_insn_arg): Mask unused extended
+	instruction bits out.
+
 2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-nps400-tbl.h: Add schd, sync, and hwschd instructions.
