@@ -1,0 +1,220 @@
+From b9e99a0be4ba956203e5f2e172d936e1e5f23d88 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Mon, 11 Apr 2016 09:21:27 -0700
+Subject: [PATCH] Properly handle dynamic reloc against normal symbol
+
+We shouldn't issue an error for read-only segment with dynamic IFUNC
+relocations when dynamic relocations are against normal symbols.
+
+bfd/
+
+	PR ld/19939
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Set
+	readonly_dynrelocs_against_ifunc to TRUE if dynamic reloc applies
+	to read-only section.
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Issue an error
+	for read-only segment with dynamic IFUNC relocations only if
+	readonly_dynrelocs_against_ifunc is TRUE.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Likewise.
+
+include/
+
+	PR ld/19939
+	* bfdlink.h (bfd_link_info): Add readonly_dynrelocs_against_ifunc.
+
+ld/
+
+	PR ld/19939
+	* testsuite/ld-i386/i386.exp: Run PR ld/19939 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr19939.s: New file.
+	* testsuite/ld-i386/pr19939a.d: Likewise.
+	* testsuite/ld-i386/pr19939b.d: Likewise.
+	* testsuite/ld-x86-64/pr19939.s: Likewise.
+	* testsuite/ld-x86-64/pr19939a.d: Likewise.
+	* testsuite/ld-x86-64/pr19939b.d: Likewise.
+---
+ bfd/elf-ifunc.c                   | 3 +++
+ bfd/elf32-i386.c                  | 3 +--
+ bfd/elf64-x86-64.c                | 3 +--
+ include/bfdlink.h                 | 4 ++++
+ ld/testsuite/ld-i386/i386.exp     | 2 ++
+ ld/testsuite/ld-i386/pr19939.s    | 9 +++++++++
+ ld/testsuite/ld-i386/pr19939a.d   | 4 ++++
+ ld/testsuite/ld-i386/pr19939b.d   | 8 ++++++++
+ ld/testsuite/ld-x86-64/pr19939.s  | 9 +++++++++
+ ld/testsuite/ld-x86-64/pr19939a.d | 4 ++++
+ ld/testsuite/ld-x86-64/pr19939b.d | 8 ++++++++
+ ld/testsuite/ld-x86-64/x86-64.exp | 2 ++
+ 12 files changed, 55 insertions(+), 4 deletions(-)
+ create mode 100644 ld/testsuite/ld-i386/pr19939.s
+ create mode 100644 ld/testsuite/ld-i386/pr19939a.d
+ create mode 100644 ld/testsuite/ld-i386/pr19939b.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19939.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr19939a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19939b.d
+
+diff --git a/bfd/elf-ifunc.c b/bfd/elf-ifunc.c
+index 1368a8e..23ae3c4 100644
+--- a/bfd/elf-ifunc.c
++++ b/bfd/elf-ifunc.c
+@@ -231,6 +231,9 @@ keep:
+       bfd_size_type count = 0;
+       do
+ 	{
++	  asection *s = p->sec->output_section;
++	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
++	    info->readonly_dynrelocs_against_ifunc = TRUE;
+ 	  count += p->count;
+ 	  p = p->next;
+ 	}
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index 1ebb615..c00f4d9 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -3553,8 +3553,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+ 
+ 	  if ((info->flags & DF_TEXTREL) != 0)
+ 	    {
+-	      if ((elf_tdata (output_bfd)->has_gnu_symbols
+-		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
++	      if (info->readonly_dynrelocs_against_ifunc)
+ 		{
+ 		  info->callbacks->einfo
+ 		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index dc7738a..b083265 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -3899,8 +3899,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
+ 
+ 	  if ((info->flags & DF_TEXTREL) != 0)
+ 	    {
+-	      if ((elf_tdata (output_bfd)->has_gnu_symbols
+-		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
++	      if (info->readonly_dynrelocs_against_ifunc)
+ 		{
+ 		  info->callbacks->einfo
+ 		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
+diff --git a/include/bfdlink.h b/include/bfdlink.h
+index a285f6d..5cd3bbe 100644
+--- a/include/bfdlink.h
++++ b/include/bfdlink.h
+@@ -452,6 +452,10 @@ struct bfd_link_info
+   /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
+   unsigned int call_nop_as_suffix : 1;
+ 
++  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
++     to read-only sections.  */
++  unsigned int readonly_dynrelocs_against_ifunc: 1;
++
+   /* The 1-byte NOP for x86 call instruction.  */
+   char call_nop_byte;
+ 
+diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
+index 2b7a09e..c6708ca 100644
+--- a/ld/testsuite/ld-i386/i386.exp
++++ b/ld/testsuite/ld-i386/i386.exp
+@@ -390,6 +390,8 @@ run_dump_test "pr17935-1"
+ run_dump_test "pr17935-2"
+ run_dump_test "pr18801"
+ run_dump_test "pr18815"
++run_dump_test "pr19939a"
++run_dump_test "pr19939b"
+ 
+ proc undefined_weak {cflags ldflags} {
+     set testname "Undefined weak symbol"
+diff --git a/ld/testsuite/ld-i386/pr19939.s b/ld/testsuite/ld-i386/pr19939.s
+new file mode 100644
+index 0000000..fdd1c04
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19939.s
+@@ -0,0 +1,9 @@
++	.text
++selector:
++	movl	foo@GOT(%eax), %eax
++	mov	$bar, %ebx
++	ret
++	.type   selector, %gnu_indirect_function
++	.globl	bar
++bar:
++	jmp	selector@PLT
+diff --git a/ld/testsuite/ld-i386/pr19939a.d b/ld/testsuite/ld-i386/pr19939a.d
+new file mode 100644
+index 0000000..5883cae
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19939a.d
+@@ -0,0 +1,4 @@
++#source: pr19939.s
++#as: --32
++#ld: -melf_i386 -shared -z defs
++#error: undefined reference to `foo'
+diff --git a/ld/testsuite/ld-i386/pr19939b.d b/ld/testsuite/ld-i386/pr19939b.d
+new file mode 100644
+index 0000000..5124ae1
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19939b.d
+@@ -0,0 +1,8 @@
++#source: pr19939.s
++#as: --32
++#ld: -melf_i386 -shared
++#readelf: -d --wide
++
++#...
++.*\(TEXTREL\).*
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19939.s b/ld/testsuite/ld-x86-64/pr19939.s
+new file mode 100644
+index 0000000..7eadaaa
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19939.s
+@@ -0,0 +1,9 @@
++	.text
++selector:
++	movq	foo@GOTPCREL(%rip), %rax
++	movabs	$bar, %rbx
++	ret
++	.type   selector, %gnu_indirect_function
++	.globl	bar
++bar:
++	jmp	selector@PLT
+diff --git a/ld/testsuite/ld-x86-64/pr19939a.d b/ld/testsuite/ld-x86-64/pr19939a.d
+new file mode 100644
+index 0000000..af5b976
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19939a.d
+@@ -0,0 +1,4 @@
++#source: pr19939.s
++#as: --64
++#ld: -melf_x86_64 -shared -z defs
++#error: undefined reference to `foo'
+diff --git a/ld/testsuite/ld-x86-64/pr19939b.d b/ld/testsuite/ld-x86-64/pr19939b.d
+new file mode 100644
+index 0000000..2616151
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19939b.d
+@@ -0,0 +1,8 @@
++#source: pr19939.s
++#as: --64
++#ld: -melf_x86_64 -shared
++#readelf: -d --wide
++
++#...
++.*\(TEXTREL\).*
++#pass
+diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
+index 603ef37..8abccd4 100644
+--- a/ld/testsuite/ld-x86-64/x86-64.exp
++++ b/ld/testsuite/ld-x86-64/x86-64.exp
+@@ -438,6 +438,8 @@ run_dump_test "pr19609-7a"
+ run_dump_test "pr19609-7b"
+ run_dump_test "pr19609-7c"
+ run_dump_test "pr19609-7d"
++run_dump_test "pr19939a"
++run_dump_test "pr19939b"
+ 
+ proc undefined_weak {cflags ldflags} {
+     set testname "Undefined weak symbol"
+-- 
+2.5.5
+
