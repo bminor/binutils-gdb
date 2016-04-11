@@ -502,7 +502,32 @@ compute_frame_id (struct frame_info *fi)
   /* Find THIS frame's ID.  */
   /* Default to outermost if no ID is found.  */
   fi->this_id.value = outer_frame_id;
-  fi->unwind->this_id (fi, &fi->prologue_cache, &fi->this_id.value);
+
+  TRY
+    {
+      fi->unwind->this_id (fi, &fi->prologue_cache, &fi->this_id.value);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	{
+	  CORE_ADDR pc;
+
+	  /* Use function start address as part of the frame ID.  If we
+	     can't find the start address (due to missing symbol
+	     information), faill back to just using the current PC.  If
+	     PC isn't available, we can't construct any meaningful frame
+	     ID, so do nothing here, and the frame id is
+	     outer_frame_id.  */
+	  if ((get_frame_func_if_available (fi, &pc) && pc != 0)
+	      || get_frame_pc_if_available (fi, &pc))
+	    fi->this_id.value = frame_id_build_unavailable_stack (pc);
+	}
+      else
+	throw_exception (ex);
+    }
+  END_CATCH
+
   gdb_assert (frame_id_p (fi->this_id.value));
   fi->this_id.p = 1;
   if (frame_debug)
@@ -1189,8 +1214,25 @@ frame_unwind_register_value (struct frame_info *frame, int regnum)
   if (frame->unwind == NULL)
     frame_unwind_find_by_frame (frame, &frame->prologue_cache);
 
-  /* Ask this frame to unwind its register.  */
-  value = frame->unwind->prev_register (frame, &frame->prologue_cache, regnum);
+  TRY
+    {
+      /* Ask this frame to unwind its register.  */
+      value = frame->unwind->prev_register (frame, &frame->prologue_cache,
+					    regnum);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	{
+	  value = frame_unwind_got_register (frame, regnum, regnum);
+	  set_value_lazy (value, 0);
+	  mark_value_bytes_unavailable (value, 0,
+					TYPE_LENGTH (value_type (value)));
+	}
+      else
+	throw_exception (ex);
+    }
+  END_CATCH
 
   if (frame_debug)
     {
@@ -1985,9 +2027,20 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
 
   /* Check that this frame is unwindable.  If it isn't, don't try to
      unwind to the prev frame.  */
-  this_frame->stop_reason
-    = this_frame->unwind->stop_reason (this_frame,
-				       &this_frame->prologue_cache);
+  TRY
+    {
+      this_frame->stop_reason
+	= this_frame->unwind->stop_reason (this_frame,
+					   &this_frame->prologue_cache);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	this_frame->stop_reason = UNWIND_UNAVAILABLE;
+      else
+	throw_exception (ex);
+    }
+  END_CATCH
 
   if (this_frame->stop_reason != UNWIND_NO_REASON)
     {
@@ -2569,11 +2622,23 @@ get_frame_locals_address (struct frame_info *fi)
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
     fi->base = frame_base_find_by_frame (fi);
-  /* Sneaky: If the low-level unwind and high-level base code share a
-     common unwinder, let them share the prologue cache.  */
-  if (fi->base->unwind == fi->unwind)
-    return fi->base->this_locals (fi, &fi->prologue_cache);
-  return fi->base->this_locals (fi, &fi->base_cache);
+
+  TRY
+    {
+      /* Sneaky: If the low-level unwind and high-level base code share a
+	 common unwinder, let them share the prologue cache.  */
+      if (fi->base->unwind == fi->unwind)
+	return fi->base->this_locals (fi, &fi->prologue_cache);
+      return fi->base->this_locals (fi, &fi->base_cache);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
+  END_CATCH
+
+  return 0;
 }
 
 CORE_ADDR
@@ -2584,11 +2649,23 @@ get_frame_args_address (struct frame_info *fi)
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
     fi->base = frame_base_find_by_frame (fi);
-  /* Sneaky: If the low-level unwind and high-level base code share a
-     common unwinder, let them share the prologue cache.  */
-  if (fi->base->unwind == fi->unwind)
-    return fi->base->this_args (fi, &fi->prologue_cache);
-  return fi->base->this_args (fi, &fi->base_cache);
+
+  TRY
+    {
+      /* Sneaky: If the low-level unwind and high-level base code share a
+	 common unwinder, let them share the prologue cache.  */
+      if (fi->base->unwind == fi->unwind)
+	return fi->base->this_args (fi, &fi->prologue_cache);
+      return fi->base->this_args (fi, &fi->base_cache);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
+  END_CATCH
+
+  return 0;
 }
 
 /* Return true if the frame unwinder for frame FI is UNWINDER; false
