@@ -131,6 +131,11 @@ extern char *debug_file_directory;
    take a long time, and which ought to be interruptible, checks this
    flag using the QUIT macro.
 
+   In addition to setting a flag, the SIGINT handler also marks a
+   select/poll-able file descriptor as read-ready.  That is used by
+   interruptible_select in order to support interrupting blocking I/O
+   in a race-free manner.
+
    These functions use the extension_language_ops API to allow extension
    language(s) and GDB SIGINT handling to coexist seamlessly.  */
 
@@ -158,6 +163,12 @@ extern void maybe_quit (void);
    repeated Ctrl-C requests were issued, and choose to close the
    connection.  */
 #define QUIT maybe_quit ()
+
+/* Set the serial event associated with the quit flag.  */
+extern void quit_serial_event_set (void);
+
+/* Clear the serial event associated with the quit flag.  */
+extern void quit_serial_event_clear (void);
 
 /* * Languages represented in the symbol table and elsewhere.
    This should probably be in language.h, but since enum's can't

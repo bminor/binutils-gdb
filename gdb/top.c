@@ -613,10 +613,10 @@ gdb_readline_no_editing (const char *prompt)
       QUIT;
 
       /* Wait until at least one byte of data is available.  Control-C
-	 can interrupt gdb_select, but not fgetc.  */
+	 can interrupt interruptible_select, but not fgetc.  */
       FD_ZERO (&readfds);
       FD_SET (fd, &readfds);
-      if (gdb_select (fd + 1, &readfds, NULL, NULL, NULL) == -1)
+      if (interruptible_select (fd + 1, &readfds, NULL, NULL, NULL) == -1)
 	{
 	  if (errno == EINTR)
 	    {

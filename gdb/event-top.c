@@ -38,6 +38,8 @@
 #include "annotate.h"
 #include "maint.h"
 #include "buffer.h"
+#include "ser-event.h"
+#include "gdb_select.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -733,6 +735,12 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 }
 
 
+/* The serial event associated with the QUIT flag.  set_quit_flag sets
+   this, and check_quit_flag clears it.  Used by interruptible_select
+   to be able to do interruptible I/O with no race with the SIGINT
+   handler.  */
+static struct serial_event *quit_serial_event;
+
 /* Initialization of signal handlers and tokens.  There is a function
    handle_sig* for each of the signals GDB cares about.  Specifically:
    SIGINT, SIGFPE, SIGQUIT, SIGTSTP, SIGHUP, SIGWINCH.  These
@@ -749,6 +757,8 @@ void
 async_init_signals (void)
 {
   initialize_async_signal_handlers ();
+
+  quit_serial_event = make_serial_event ();
 
   signal (SIGINT, handle_sigint);
   sigint_token =
@@ -794,8 +804,33 @@ async_init_signals (void)
 #endif
 }
 
-/* Tell the event loop what to do if SIGINT is received.
-   See event-signal.c.  */
+/* See defs.h.  */
+
+void
+quit_serial_event_set (void)
+{
+  serial_event_set (quit_serial_event);
+}
+
+/* See defs.h.  */
+
+void
+quit_serial_event_clear (void)
+{
+  serial_event_clear (quit_serial_event);
+}
+
+/* Return the selectable file descriptor of the serial event
+   associated with the quit flag.  */
+
+static int
+quit_serial_event_fd (void)
+{
+  return serial_event_fd (quit_serial_event);
+}
+
+/* Handle a SIGINT.  */
+
 void
 handle_sigint (int sig)
 {
@@ -817,6 +852,42 @@ handle_sigint (int sig)
      finish first, which is unacceptable.  If immediate quit is not set,
      we process SIGINT the next time through the loop, which is fine.  */
   gdb_call_async_signal_handler (sigint_token, immediate_quit);
+}
+
+/* See gdb_select.h.  */
+
+int
+interruptible_select (int n,
+		      fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
+		      struct timeval *timeout)
+{
+  fd_set my_readfds;
+  int fd;
+  int res;
+
+  if (readfds == NULL)
+    {
+      readfds = &my_readfds;
+      FD_ZERO (&my_readfds);
+    }
+
+  fd = quit_serial_event_fd ();
+  FD_SET (fd, readfds);
+  if (n <= fd)
+    n = fd + 1;
+
+  do
+    {
+      res = gdb_select (n, readfds, writefds, exceptfds, timeout);
+    }
+  while (res == -1 && errno == EINTR);
+
+  if (res == 1 && FD_ISSET (fd, readfds))
+    {
+      errno = EINTR;
+      return -1;
+    }
+  return res;
 }
 
 /* Handle GDB exit upon receiving SIGTERM if target_can_async_p ().  */

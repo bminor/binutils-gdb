@@ -1,5 +1,23 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* defs.h: Extend QUIT-related comments to mention
+	interruptible_select.
+	(quit_serial_event_set, quit_serial_event_clear): Declare.
+	* event-top.c: Include "ser-event.h" and "gdb_select.h".
+	(quit_serial_event): New global.
+	(async_init_signals): Make quit_serial_event.
+	(quit_serial_event_set, quit_serial_event_clear)
+	(quit_serial_event_fd, interruptible_select): New functions.
+	* extension.c (set_quit_flag): Set the quit serial event.
+	(check_quit_flag): Clear the quit serial event.
+	* gdb_select.h (interruptible_select): New declaration.
+	* guile/scm-ports.c (ioscm_input_waiting): Use
+	interruptible_select instead of gdb_select.
+	* top.c (gdb_readline_no_editing): Likewise.
+	* ui-file.c (stdio_file_read): Likewise.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* event-loop.c: Include "ser-event.h".
 	(async_signal_handlers_serial_event): New global.
 	(async_signals_handler, initialize_async_signal_handlers): New

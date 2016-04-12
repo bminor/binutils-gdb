@@ -828,7 +828,16 @@ set_quit_flag (void)
       && active_ext_lang->ops->set_quit_flag != NULL)
     active_ext_lang->ops->set_quit_flag (active_ext_lang);
   else
-    quit_flag = 1;
+    {
+      quit_flag = 1;
+
+      /* Now wake up the event loop, or any interruptible_select.  Do
+	 this after setting the flag, because signals on Windows
+	 actually run on a separate thread, and thus otherwise the
+	 main code could be woken up and find quit_flag still
+	 clear.  */
+      quit_serial_event_set ();
+    }
 }
 
 /* Return true if the quit flag has been set, false otherwise.
@@ -852,6 +861,10 @@ check_quit_flag (void)
   /* This is written in a particular way to avoid races.  */
   if (quit_flag)
     {
+      /* No longer need to wake up the event loop or any
+	 interruptible_select.  The caller handles the quit
+	 request.  */
+      quit_serial_event_clear ();
       quit_flag = 0;
       result = 1;
     }
