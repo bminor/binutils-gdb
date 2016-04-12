@@ -396,8 +396,8 @@ static unsigned arc_features;
 /* The default architecture.  */
 static int arc_mach_type;
 
-/* Non-zero if the cpu type has been explicitly specified.  */
-static int mach_type_specified_p = 0;
+/* TRUE if the cpu type has been explicitly specified.  */
+static bfd_boolean mach_type_specified_p = FALSE;
 
 /* The hash table of instruction opcodes.  */
 static struct hash_control *arc_opcode_hash;
@@ -902,6 +902,9 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
 	as_fatal (_("could not set architecture and machine"));
+
+      /* Set elf header flags.  */
+      bfd_set_private_flags (stdoutput, arc_eflag);
     }
   else
     if (arc_mach_type != mach)
@@ -3156,7 +3159,7 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
     case OPTION_MCPU:
       {
         arc_select_cpu (arg);
-        mach_type_specified_p = 1;
+        mach_type_specified_p = TRUE;
 	break;
       }
 

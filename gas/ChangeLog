@@ -1,3 +1,10 @@
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (mach_type_specified_p): Change type to
+	bfd_boolean.
+	(arc_option): Set private flags when parsing cpu pseudo-op.
+	(md_parse_option): Set mach_type_specified_p to TRUE.
+
 2016-04-13  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19937
