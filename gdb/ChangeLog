@@ -1,5 +1,31 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/19828
+	* gnu-nat.c (inf_validate_task_sc): Don't call
+	target_terminal_ours / target_terminal_inferior around query.
+	* i386-tdep.c (i386_record_lea_modrm, i386_process_record): Don't
+	call target_terminal_ours / target_terminal_inferior around
+	yquery.
+	* linux-record.c (record_linux_system_call): Don't call
+	target_terminal_ours / target_terminal_inferior around yquery.
+	* nto-procfs.c (interrupt_query): Don't call target_terminal_ours
+	/ target_terminal_inferior around query.
+	* record-full.c (record_full_check_insn_num): Remove
+	'set_terminal' parameter.  Don't call target_terminal_ours /
+	target_terminal_inferior around query.
+	(record_full_message, record_full_registers_change)
+	(record_full_xfer_partial): Adjust.
+	* remote.c (interrupt_query): Don't call target_terminal_ours /
+	target_terminal_inferior around query.
+	* utils.c (defaulted_query): Install cleanup to restore target
+	terminal.  Put target_terminal_ours_for_output in effect while
+	defaulted producing, and target_terminal_ours in in effect while
+	handling input.
+	(prompt_for_continue): Install cleanup to restore target terminal.
+	Put target_terminal_ours in in effect while handling input.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* utils.c (defaulted_query, prompt_for_continue): Free temporary
 	strings with cleanups, instead of xfree.
 

@@ -254,17 +254,10 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_exit:
-      {
-	int q;
-
-	target_terminal_ours ();
-	q = yquery (_("The next instruction is syscall exit.  "
-		      "It will make the program exit.  "
-		      "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
-      }
+      if (yquery (_("The next instruction is syscall exit.  "
+		    "It will make the program exit.  "
+		    "Do you want to stop the program?")))
+	return 1;
       break;
 
     case gdb_sys_fork:
@@ -663,17 +656,10 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_reboot:
-      {
-	int q;
-
-	target_terminal_ours ();
-	q = yquery (_("The next instruction is syscall reboot.  "
-		      "It will restart the computer.  "
-		      "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
-      }
+      if (yquery (_("The next instruction is syscall reboot.  "
+		    "It will restart the computer.  "
+		    "Do you want to stop the program?")))
+	return 1;
       break;
 
     case gdb_old_readdir:
@@ -693,17 +679,12 @@ record_linux_system_call (enum gdb_syscall syscall,
 	regcache_raw_read_unsigned (regcache, tdep->arg2, &len);
 	if (record_full_memory_query)
 	  {
-	    int q;
-
-	    target_terminal_ours ();
-	    q = yquery (_("\
+	    if (yquery (_("\
 The next instruction is syscall munmap.\n\
 It will free the memory addr = 0x%s len = %u.\n\
 It will make record target cannot record some memory change.\n\
 Do you want to stop the program?"),
-			OUTPUT_REG (tmpulongest, tdep->arg1), (int) len);
-	    target_terminal_inferior ();
-	    if (q)
+			OUTPUT_REG (tmpulongest, tdep->arg1), (int) len))
 	      return 1;
 	  }
       }
@@ -1764,17 +1745,10 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_exit_group:
-      {
-	int q;
-
-	target_terminal_ours ();
-	q = yquery (_("The next instruction is syscall exit_group.  "
-		      "It will make the program exit.  "
-		      "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
-      }
+      if (yquery (_("The next instruction is syscall exit_group.  "
+		    "It will make the program exit.  "
+		    "Do you want to stop the program?")))
+	return 1;
       break;
 
     case gdb_sys_lookup_dcookie:

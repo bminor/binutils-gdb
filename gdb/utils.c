@@ -1274,12 +1274,15 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   if (!confirm || server_command)
     return def_value;
 
+  old_chain = make_cleanup_restore_target_terminal ();
+
   /* If input isn't coming from the user directly, just say what
      question we're asking, and then answer the default automatically.  This
      way, important error messages don't get lost when talking to GDB
      over a pipe.  */
   if (! input_from_terminal_p ())
     {
+      target_terminal_ours_for_output ();
       wrap_here ("");
       vfprintf_filtered (gdb_stdout, ctlstr, args);
 
@@ -1288,15 +1291,18 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 		       y_string, n_string, def_answer);
       gdb_flush (gdb_stdout);
 
+      do_cleanups (old_chain);
       return def_value;
     }
 
   if (deprecated_query_hook)
     {
-      return deprecated_query_hook (ctlstr, args);
-    }
+      int res;
 
-  old_chain = make_cleanup (null_cleanup, NULL);
+      res = deprecated_query_hook (ctlstr, args);
+      do_cleanups (old_chain);
+      return res;
+    }
 
   /* Format the question outside of the loop, to avoid reusing args.  */
   question = xstrvprintf (ctlstr, args);
@@ -1309,6 +1315,9 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
   /* Used for calculating time spend waiting for user.  */
   gettimeofday (&prompt_started, NULL);
+
+  /* We'll need to handle input.  */
+  target_terminal_ours ();
 
   while (1)
     {
@@ -1881,6 +1890,7 @@ prompt_for_continue (void)
   reinitialize_more_filter ();
 
   /* We'll need to handle input.  */
+  make_cleanup_restore_target_terminal ();
   target_terminal_ours ();
 
   /* Call gdb_readline_wrapper, not readline, in order to keep an
