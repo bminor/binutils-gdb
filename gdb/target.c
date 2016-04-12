@@ -3378,14 +3378,6 @@ default_target_pass_ctrlc (struct target_ops *ops)
   target_interrupt (inferior_ptid);
 }
 
-/* See target.h.  */
-
-void
-target_check_pending_interrupt (void)
-{
-  (*current_target.to_check_pending_interrupt) (&current_target);
-}
-
 /* See target/target.h.  */
 
 void

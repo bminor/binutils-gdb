@@ -1,5 +1,13 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* target.c (target_check_pending_interrupt): Delete.
+	* target.h (struct target_ops) <to_check_pending_interrupt>:
+	Remove method.
+	(target_check_pending_interrupt): Remove declaration.
+	* target-delegates.c: Regenerate.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* defs.h: Update comments on SIGINT handling.
 	(immediate_quit): Delete declaration.
 	* event-loop.c (call_async_signal_handler): Delete.
