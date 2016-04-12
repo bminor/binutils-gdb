@@ -1,5 +1,11 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* utils.c (vwarning, internal_vproblem): Use
+	make_cleanup_restore_target_terminal and
+	target_terminal_ours_for_output.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* infcmd.c (post_create_inferior, prepare_one_step): Use
 	target_terminal_ours_for_output instead of target_terminal_ours.
 

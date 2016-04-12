@@ -532,8 +532,13 @@ vwarning (const char *string, va_list args)
     (*deprecated_warning_hook) (string, args);
   else
     {
+      struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+
       if (target_supports_terminal_ours ())
-	target_terminal_ours ();
+	{
+	  make_cleanup_restore_target_terminal ();
+	  target_terminal_ours_for_output ();
+	}
       if (filtered_printing_initialized ())
 	wrap_here ("");		/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
@@ -541,6 +546,8 @@ vwarning (const char *string, va_list args)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
       vfprintf_unfiltered (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
+
+      do_cleanups (old_chain);
     }
 }
 
@@ -738,7 +745,10 @@ internal_vproblem (struct internal_problem *problem,
 
   /* Try to get the message out and at the start of a new line.  */
   if (target_supports_terminal_ours ())
-    target_terminal_ours ();
+    {
+      make_cleanup_restore_target_terminal ();
+      target_terminal_ours_for_output ();
+    }
   if (filtered_printing_initialized ())
     begin_line ();
 
