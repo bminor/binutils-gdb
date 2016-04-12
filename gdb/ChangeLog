@@ -1,5 +1,25 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* defs.h: Update comments on SIGINT handling.
+	(immediate_quit): Delete declaration.
+	* event-loop.c (call_async_signal_handler): Delete.
+	* event-loop.h (call_async_signal_handler): Delete declaration.
+	(mark_async_signal_handler): Update comments.
+	(gdb_call_async_signal_handler): Delete declaration.
+	* event-top.c (handle_sigint): Call mark_async_signal_handler
+	instead of gdb_call_async_signal_handler.
+	* exceptions.c (prepare_to_throw_exception): Remove reference to
+	immediate_quit.
+	(exception_fprintf): Remove comments about immediate_quit.
+	* mingw-hdep.c (sigint_event, sigint_handler): Delete.
+	(gdb_select): Don't wait on sigint_event.
+	(gdb_call_async_signal_handler): Delete.
+	(_initialize_mingw_hdep): Delete.
+	* posix-hdep.c (gdb_call_async_signal_handler): Delete.
+	* utils.c (immediate_quit): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* defs.h (quit_handler_ftype, quit_handler)
 	(make_cleanup_override_quit_handler, default_quit_handler): New.
 	(QUIT): Adjust comments.

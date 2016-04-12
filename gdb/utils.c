@@ -109,19 +109,6 @@ static int debug_timestamp = 0;
 
 int job_control;
 
-/* Nonzero means quit immediately if Control-C is typed now, rather
-   than waiting until QUIT is executed.  Be careful in setting this;
-   code which executes with immediate_quit set has to be very careful
-   about being able to deal with being interrupted at any time.  It is
-   almost always better to use QUIT; the only exception I can think of
-   is being able to quit out of a system call (using EINTR loses if
-   the SIGINT happens between the previous QUIT and the system call).
-   To immediately quit in the case in which a SIGINT happens between
-   the previous QUIT and setting immediate_quit (desirable anytime we
-   expect to block), call QUIT after setting immediate_quit.  */
-
-int immediate_quit;
-
 /* Nonzero means that strings with character values >0x7F should be printed
    as octal escapes.  Zero means just print the value (e.g. it's an
    international character, and the terminal or window can cope.)  */

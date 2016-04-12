@@ -125,11 +125,10 @@ extern char *python_libdir;
 /* * Search path for separate debug files.  */
 extern char *debug_file_directory;
 
-/* GDB has two methods for handling SIGINT.  When immediate_quit is
-   nonzero, a SIGINT results in an immediate longjmp out of the signal
-   handler.  Otherwise, SIGINT simply sets a flag; code that might
-   take a long time, and which ought to be interruptible, checks this
-   flag using the QUIT macro.
+/* GDB's SIGINT handler basically sets a flag; code that might take a
+   long time before it gets back to the event loop, and which ought to
+   be interruptible, checks this flag using the QUIT macro, which, if
+   GDB has the terminal, throws a quit exception.
 
    In addition to setting a flag, the SIGINT handler also marks a
    select/poll-able file descriptor as read-ready.  That is used by
@@ -175,8 +174,6 @@ extern void default_quit_handler (void);
 
 /* Flag that function quit should call quit_force.  */
 extern volatile int sync_quit_force_run;
-
-extern int immediate_quit;
 
 extern void quit (void);
 

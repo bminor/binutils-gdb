@@ -30,7 +30,6 @@
 void
 prepare_to_throw_exception (void)
 {
-  immediate_quit = 0;
 }
 
 static void
@@ -148,12 +147,7 @@ exception_fprintf (struct ui_file *file, struct gdb_exception e,
    returned by catch_exceptions().  It is an internal_error() for
    FUNC() to return a negative value.
 
-   See exceptions.h for further usage details.
-
-   Must not be called with immediate_quit in effect (bad things might
-   happen, say we got a signal in the middle of a memcpy to quit_return).
-   This is an OK restriction; with very few exceptions immediate_quit can
-   be replaced by judicious use of QUIT.  */
+   See exceptions.h for further usage details.  */
 
 /* MAYBE: cagney/1999-11-05: catch_errors() in conjunction with
    error() et al. could maintain a set of flags that indicate the

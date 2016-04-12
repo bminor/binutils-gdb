@@ -901,18 +901,11 @@ handle_sigint (int sig)
      it may be quite a while before we get back to the event loop.  So
      set quit_flag to 1 here.  Then if QUIT is called before we get to
      the event loop, we will unwind as expected.  */
-
   set_quit_flag ();
 
-  /* If immediate_quit is set, we go ahead and process the SIGINT right
-     away, even if we usually would defer this to the event loop.  The
-     assumption here is that it is safe to process ^C immediately if
-     immediate_quit is set.  If we didn't, SIGINT would be really
-     processed only the next time through the event loop.  To get to
-     that point, though, the command that we want to interrupt needs to
-     finish first, which is unacceptable.  If immediate quit is not set,
-     we process SIGINT the next time through the loop, which is fine.  */
-  gdb_call_async_signal_handler (sigint_token, immediate_quit);
+  /* In case nothing calls QUIT before the event loop is reached, the
+     event loop handles it.  */
+  mark_async_signal_handler (sigint_token);
 }
 
 /* See gdb_select.h.  */
