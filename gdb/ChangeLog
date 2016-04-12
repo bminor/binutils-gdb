@@ -1,3 +1,10 @@
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* top.c: Include "gdb_select.h".
+	(gdb_readline_no_editing): Wait for input with gdb_select instead
+	of blocking in fgetc.
+	(command_line_input): Don't set immediate_quit.
+
 2016-04-08  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* value.c (value_next): Make pass-by-reference parameters const-correct.
