@@ -1865,9 +1865,6 @@ prompt_for_continue (void)
      beyond the end of the screen.  */
   reinitialize_more_filter ();
 
-  immediate_quit++;
-  QUIT;
-
   /* We'll need to handle input.  */
   target_terminal_ours ();
 
@@ -1895,7 +1892,6 @@ prompt_for_continue (void)
 	throw_quit ("Quit");
       xfree (ignore);
     }
-  immediate_quit--;
 
   /* Now we have to do this again, so that GDB will know that it doesn't
      need to save the ---Type <return>--- line at the top of the screen.  */

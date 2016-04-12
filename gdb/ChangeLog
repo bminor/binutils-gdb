@@ -1,5 +1,10 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (stdin_event_handler): Call QUIT;
+	(prompt_for_continue): Don't run with immediate_quit set.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* tui/tui-io.c (tui_redisplay_readline): Check
 	gdb_in_secondary_prompt_p instead of immediate_quit.
 	* tui/tui.c: Include top.h.

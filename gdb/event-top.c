@@ -403,6 +403,15 @@ stdin_event_handler (int error, gdb_client_data client_data)
     }
   else
     {
+    /* This makes sure a ^C immediately followed by further input is
+       always processed in that order.  E.g,. with input like
+       "^Cprint 1\n", the SIGINT handler runs, marks the async signal
+       handler, and then select/poll may return with stdin ready,
+       instead of -1/EINTR.  The
+       gdb.base/double-prompt-target-event-error.exp test exercises
+       this.  */
+      QUIT;
+
       do
 	{
 	  call_stdin_event_handler_again_p = 0;
