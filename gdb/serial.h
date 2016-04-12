@@ -248,7 +248,6 @@ struct serial
     int timeout_remaining;	/* (ser-unix.c termio{,s} only), we
 				   still need to wait for this many
 				   more seconds.  */
-    char *name;			/* The name of the device or host */
     struct serial *next;	/* Pointer to the next `struct serial *' */
     int debug_p;		/* Trace this serial devices operation.  */
     int async_state;		/* Async internal state.  */

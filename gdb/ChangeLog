@@ -1,5 +1,11 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* serial.c (serial_open, serial_fdopen_ops, do_serial_close):
+	Remove references to name.
+	* serial.h (struct serial) <name>: Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* remote-fileio.c (sigint_fileio_token, remote_fio_no_longjmp):
 	Delete.
 	(async_remote_fileio_interrupt): Delete.

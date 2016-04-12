@@ -226,7 +226,6 @@ serial_open (const char *name)
       return NULL;
     }
 
-  scb->name = xstrdup (name);
   scb->next = scb_base;
   scb->debug_p = 0;
   scb->async_state = 0;
@@ -271,7 +270,6 @@ serial_fdopen_ops (const int fd, const struct serial_ops *ops)
   scb->error_fd = -1;
   scb->refcnt = 1;
 
-  scb->name = NULL;
   scb->next = scb_base;
   scb->debug_p = 0;
   scb->async_state = 0;
@@ -314,9 +312,6 @@ do_serial_close (struct serial *scb, int really_close)
 
   if (really_close)
     scb->ops->close (scb);
-
-  if (scb->name)
-    xfree (scb->name);
 
   /* For serial_is_open.  */
   scb->bufp = NULL;
