@@ -1002,21 +1002,11 @@ when debugging using remote targets."),
 int
 ser_unix_read_prim (struct serial *scb, size_t count)
 {
-  int status;
-
-  while (1)
-    {
-      status = read (scb->fd, scb->buf, count);
-      if (status != -1 || errno != EINTR)
-	break;
-    }
-  return status;
+  return read (scb->fd, scb->buf, count);
 }
 
 int
 ser_unix_write_prim (struct serial *scb, const void *buf, size_t len)
 {
-  /* ??? Historically, GDB has not retried calls to "write" that
-     result in EINTR.  */
   return write (scb->fd, buf, len);
 }

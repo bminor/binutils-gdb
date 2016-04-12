@@ -164,7 +164,13 @@ fd_event (int error, void *context)
          pull characters out of the buffer.  See also
          generic_readchar().  */
       int nr;
-      nr = scb->ops->read_prim (scb, BUFSIZ);
+
+      do
+	{
+	  nr = scb->ops->read_prim (scb, BUFSIZ);
+	}
+      while (nr < 0 && errno == EINTR);
+
       if (nr == 0)
 	{
 	  scb->bufcnt = SERIAL_EOF;
@@ -358,7 +364,11 @@ do_ser_base_readchar (struct serial *scb, int timeout)
   if (status < 0)
     return status;
 
-  status = scb->ops->read_prim (scb, BUFSIZ);
+  do
+    {
+      status = scb->ops->read_prim (scb, BUFSIZ);
+    }
+  while (status < 0 && errno == EINTR);
 
   if (status <= 0)
     {
@@ -448,7 +458,11 @@ ser_base_write (struct serial *scb, const void *buf, size_t count)
       cc = scb->ops->write_prim (scb, str, count);
 
       if (cc < 0)
-	return 1;
+	{
+	  if (errno == EINTR)
+	    continue;
+	  return 1;
+	}
       count -= cc;
       str += cc;
     }
