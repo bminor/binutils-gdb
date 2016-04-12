@@ -1,5 +1,13 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* tui/tui-hooks.c (tui_target_has_run): Delete.
+	(tui_about_to_proceed): Delete.
+	(tui_about_to_proceed_observer): Delete.
+	(tui_install_hooks, tui_remove_hooks): Don't install/remove an
+	about_to_proceed observer.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* mi/mi-interp.c (mi_new_thread): Put
 	target_terminal_ours_for_output in effect while outputting.
 	(mi_thread_exit): Use target_terminal_ours_for_output instead of
