@@ -283,7 +283,21 @@ read_command_file (FILE *stream)
 
   cleanups = make_cleanup (do_restore_instream_cleanup, instream);
   instream = stream;
-  command_loop ();
+
+  /* Read commands from `instream' and execute them until end of file
+     or error reading instream.  */
+
+  while (instream != NULL && !feof (instream))
+    {
+      char *command;
+
+      /* Get a command-line.  This calls the readline package.  */
+      command = command_line_input (NULL, 0, NULL);
+      if (command == NULL)
+	break;
+      command_handler (command);
+    }
+
   do_cleanups (cleanups);
 }
 
@@ -528,25 +542,6 @@ execute_command_to_string (char *p, int from_tty)
   return retval;
 }
 
-/* Read commands from `instream' and execute them
-   until end of file or error reading instream.  */
-
-void
-command_loop (void)
-{
-  while (instream && !feof (instream))
-    {
-      char *command;
-
-      /* Get a command-line.  This calls the readline package.  */
-      command = command_line_input (instream == stdin ?
-				    get_prompt () : (char *) NULL,
-				    instream == stdin, "prompt");
-      if (command == NULL)
-	return;
-      command_handler (command);
-    }
-}
 
 /* When nonzero, cause dont_repeat to do nothing.  This should only be
    set via prevent_dont_repeat.  */

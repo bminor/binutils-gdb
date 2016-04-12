@@ -1,5 +1,10 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* top.c (read_command_file): Inline command_loop here.
+	(command_loop): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* top.c: Include "gdb_select.h".
 	(gdb_readline_no_editing): Wait for input with gdb_select instead
 	of blocking in fgetc.
