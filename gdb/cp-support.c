@@ -1601,7 +1601,9 @@ gdb_demangle (const char *name, int options)
 				    "demangler-warning", short_msg);
 	      make_cleanup (xfree, long_msg);
 
-	      target_terminal_ours ();
+	      make_cleanup_restore_target_terminal ();
+	      target_terminal_ours_for_output ();
+
 	      begin_line ();
 	      if (core_dump_allowed)
 		fprintf_unfiltered (gdb_stderr,

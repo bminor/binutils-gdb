@@ -1,5 +1,11 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* cp-support.c (gdb_demangle): Use target_terminal_ours_for_output
+	instead of target_terminal_ours, and restore target terminal with
+	a cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (type_as_string, type_as_string_and_cleanup): New
 	functions.
 	(ada_lookup_struct_elt_type): Use type_as_string_and_cleanup.
