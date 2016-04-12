@@ -35,6 +35,7 @@
 #include "cli/cli-utils.h"
 #include <ctype.h>
 #include "location.h"
+#include "ser-event.h"
 
 /* Declared constants and enum for python stack printing.  */
 static const char python_excp_none[] = "none";
@@ -929,26 +930,25 @@ static struct gdbpy_event *gdbpy_event_list;
 /* The final link of the event list.  */
 static struct gdbpy_event **gdbpy_event_list_end;
 
-/* We use a file handler, and not an async handler, so that we can
-   wake up the main thread even when it is blocked in poll().  */
-static struct serial *gdbpy_event_fds[2];
+/* So that we can wake up the main thread even when it is blocked in
+   poll().  */
+static struct serial_event *gdbpy_serial_event;
 
 /* The file handler callback.  This reads from the internal pipe, and
    then processes the Python event queue.  This will always be run in
    the main gdb thread.  */
 
 static void
-gdbpy_run_events (struct serial *scb, void *context)
+gdbpy_run_events (int error, gdb_client_data client_data)
 {
   struct cleanup *cleanup;
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
 
-  /* Flush the fd.  Do this before flushing the events list, so that
-     any new event post afterwards is sure to re-awake the event
+  /* Clear the event fd.  Do this before flushing the events list, so
+     that any new event post afterwards is sure to re-awake the event
      loop.  */
-  while (serial_readchar (gdbpy_event_fds[0], 0) >= 0)
-    ;
+  serial_event_clear (gdbpy_serial_event);
 
   while (gdbpy_event_list)
     {
@@ -1006,12 +1006,7 @@ gdbpy_post_event (PyObject *self, PyObject *args)
 
   /* Wake up gdb when needed.  */
   if (wakeup)
-    {
-      char c = 'q';		/* Anything. */
-
-      if (serial_write (gdbpy_event_fds[1], &c, 1))
-        return PyErr_SetFromErrno (PyExc_IOError);
-    }
+    serial_event_set (gdbpy_serial_event);
 
   Py_RETURN_NONE;
 }
@@ -1020,11 +1015,11 @@ gdbpy_post_event (PyObject *self, PyObject *args)
 static int
 gdbpy_initialize_events (void)
 {
-  if (serial_pipe (gdbpy_event_fds) == 0)
-    {
-      gdbpy_event_list_end = &gdbpy_event_list;
-      serial_async (gdbpy_event_fds[0], gdbpy_run_events, NULL);
-    }
+  gdbpy_event_list_end = &gdbpy_event_list;
+
+  gdbpy_serial_event = make_serial_event ();
+  add_file_handler (serial_event_fd (gdbpy_serial_event),
+		    gdbpy_run_events, NULL);
 
   return 0;
 }

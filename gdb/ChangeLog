@@ -1,5 +1,16 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* python/python.c: Include "ser-event.h".
+	(gdbpy_event_fds): Delete.
+	(gdbpy_serial_event): New.
+	(gdbpy_run_events): Change prototype.  Use serial_event_clear
+	instead of serial_readchar.
+	(gdbpy_post_event): Use serial_event_set instead of serial_write.
+	(gdbpy_initialize_events): Use make_serial_event instead of
+	serial_pipe.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* defs.h: Extend QUIT-related comments to mention
 	interruptible_select.
 	(quit_serial_event_set, quit_serial_event_clear): Declare.
