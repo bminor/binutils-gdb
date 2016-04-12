@@ -1,5 +1,10 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.h (GDB_XCPT_TRY): Update comment.
+	[__cplusplus] (GDB_XCPT): Define as GDB_XCPT_TRY.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.c (struct catcher) <buf>: Now a
 	'jmp_buf' instead of SIGJMP_BUF.
 	(exceptions_state_mc_init): Change return type to 'jmp_buf'.
