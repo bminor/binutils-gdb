@@ -30,7 +30,6 @@
 void
 prepare_to_throw_exception (void)
 {
-  clear_quit_flag ();
   immediate_quit = 0;
 }
 

@@ -1,5 +1,10 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* exceptions.c (prepare_to_throw_exception): Don't clear the quit
+	flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (command_handler): Don't call clear_quit_flag.
 
 2016-04-12  Pedro Alves  <palves@redhat.com>
