@@ -316,7 +316,7 @@ extern int gdbpy_auto_load_enabled (const struct extension_language_defn *);
 extern enum ext_lang_rc gdbpy_apply_val_pretty_printer
   (const struct extension_language_defn *,
    struct type *type, const gdb_byte *valaddr,
-   int embedded_offset, CORE_ADDR address,
+   LONGEST embedded_offset, CORE_ADDR address,
    struct ui_file *stream, int recurse,
    const struct value *val,
    const struct value_print_options *options,

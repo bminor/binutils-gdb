@@ -835,8 +835,8 @@ void
 read_frame_register_value (struct value *value, struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  int offset = 0;
-  int reg_offset = value_offset (value);
+  LONGEST offset = 0;
+  LONGEST reg_offset = value_offset (value);
   int regnum = VALUE_REGNUM (value);
   int len = type_length_units (check_typedef (value_type (value)));
 

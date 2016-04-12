@@ -1900,7 +1900,8 @@ evaluate_subexp_standard (struct type *expect_type,
       {
         struct type *type = value_type (arg1);
         struct type *real_type;
-        int full, top, using_enc;
+        int full, using_enc;
+        LONGEST top;
 	struct value_print_options opts;
 
 	get_user_print_options (&opts);

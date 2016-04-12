@@ -72,7 +72,7 @@ extern void
 				    const struct type_print_options *);
 
 extern void pascal_object_print_value_fields (struct type *, const gdb_byte *,
-					      int,
+					      LONGEST,
 					      CORE_ADDR, struct ui_file *,
 					      int,
 					      const struct value *,

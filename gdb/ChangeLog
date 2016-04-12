@@ -1,3 +1,44 @@
+2016-06-24  David Taylor  <dtaylor@emc.com>
+
+	PR gdb/17520 Structure offset wrong when 1/4 GB or greater.
+	* c-lang.h: Change all parameters, variables, and struct or union
+	members used as struct or union fie3ld offsets from int to
+	LONGEST.
+	* c-valprint.c: Likewise.
+	* cp-abi.c: Likewise.
+	* cp-abi.h: Likewise.
+	* cp-valprint.c: Likewise.
+	* d-valprint.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* eval.c: Likewise.
+	* extension-priv.h: Likewise.
+	* extension.c: Likewise.
+	* extension.h: Likewise.
+	* findvar.c: Likewise.
+	* gdbtypes.h: Likewise.
+	* gnu-v2-abi.c: Likewise.
+	* gnu-v3-abi.c: Likewise.
+	* go-valprint.c: Likewise.
+	* guile/guile-internal.h: Likewise.
+	* guile/scm-pretty-print.c: Likewise.
+	* jv-valprint.c Likewise.
+	* opencl-lang.c: Likewise.
+	* p-lang.h: Likewise.
+	* python/py-prettyprint.c: Likewise.
+	* python/python-internal.h: Likewise.
+	* spu-tdep.c: Likewise.
+	* typeprint.c: Likewise.
+	* valarith.c: Likewise.
+	* valops.c: Likewise.
+	* valprint.c: Likewise.
+	* valprint.h: Likewise.
+	* value.c: Likewise.
+	* value.h: Likewise.
+	* p-valprint.c: Likewise.
+	* c-typeprint.c (c_type_print_base): When printing offset, use
+	plongest, not %d.
+	* gdbtypes.c (recursive_dump_type): Ditto.
+
 2016-06-24  David Taylor  <david.taylor@emc.com>
 
 	* MAINTAINERS (Write After Approval): Add David Taylor.

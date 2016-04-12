@@ -1,3 +1,8 @@
+2016-06-24  David Taylor  <dtaylor@emc.com>
+
+	* gdb.base/offsets.exp: New file.
+	* gdb.base/offsets.c: New file.
+
 2016-06-23  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/16483:
