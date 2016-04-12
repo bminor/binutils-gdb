@@ -1,5 +1,18 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.c (struct catcher) <buf>: Now a
+	'jmp_buf' instead of SIGJMP_BUF.
+	(exceptions_state_mc_init): Change return type to 'jmp_buf'.
+	(throw_exception): Use longjmp instead of SIGLONGJMP.
+	* common/common-exceptions.h: Include <setjmp.h> instead of
+	"gdb_setjmp.h".
+	(exceptions_state_mc_init): Change return type to 'jmp_buf'.
+	[GDB_XCPT == GDB_XCPT_SJMP] (TRY): Use setjmp instead of
+	SIGSETJMP.
+	* cp-support.c: Include "gdb_setjmp.h".
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.c (exception_rethrow): Remove
 	prepare_to_throw_exception call.
 	* common/common-exceptions.h (prepare_to_throw_exception): Delete

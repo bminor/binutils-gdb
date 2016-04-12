@@ -20,7 +20,7 @@
 #ifndef COMMON_EXCEPTIONS_H
 #define COMMON_EXCEPTIONS_H
 
-#include "gdb_setjmp.h"
+#include <setjmp.h>
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be less than zero.  enum value 0 is reserved for internal use
@@ -142,7 +142,7 @@ struct gdb_exception
    macros defined below.  */
 
 #if GDB_XCPT == GDB_XCPT_SJMP
-extern SIGJMP_BUF *exceptions_state_mc_init (void);
+extern jmp_buf *exceptions_state_mc_init (void);
 extern int exceptions_state_mc_action_iter (void);
 extern int exceptions_state_mc_action_iter_1 (void);
 extern int exceptions_state_mc_catch (struct gdb_exception *, int);
@@ -181,9 +181,9 @@ extern void exception_rethrow (void);
 
 #define TRY \
      { \
-       SIGJMP_BUF *buf = \
+       jmp_buf *buf = \
 	 exceptions_state_mc_init (); \
-       SIGSETJMP (*buf); \
+       setjmp (*buf); \
      } \
      while (exceptions_state_mc_action_iter ()) \
        while (exceptions_state_mc_action_iter_1 ())

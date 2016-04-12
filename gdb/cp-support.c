@@ -34,7 +34,7 @@
 #include "cp-abi.h"
 #include "namespace.h"
 #include <signal.h>
-
+#include "gdb_setjmp.h"
 #include "safe-ctype.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
