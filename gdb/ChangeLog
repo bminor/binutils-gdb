@@ -1,5 +1,24 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* remote-fileio.c (sigint_fileio_token, remote_fio_no_longjmp):
+	Delete.
+	(async_remote_fileio_interrupt): Delete.
+	(remote_fileio_ctrl_c_signal_handler): Don't call the async signal
+	handler.  Instead just always set the ctrl_c flag.
+	(remote_fileio_reply): Clear remote_fio_ctrl_c_flag before
+	re-enabling the SIGINT handler.
+	(remote_fileio_func_open, remote_fileio_func_close)
+	(remote_fileio_func_read, remote_fileio_func_write)
+	(remote_fileio_func_lseek, remote_fileio_func_rename)
+	(remote_fileio_func_unlink, remote_fileio_func_stat)
+	(remote_fileio_func_fstat, remote_fileio_func_gettimeofday)
+	(remote_fileio_func_isatty, remote_fileio_func_system)
+	(remote_fileio_request): Remove references to
+	remote_fio_no_longjmp.
+	(initialize_remote_fileio): Don't create an async signal handler.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (stdin_event_handler): Call QUIT;
 	(prompt_for_continue): Don't run with immediate_quit set.
 

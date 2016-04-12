@@ -48,8 +48,6 @@ static struct {
 
 static int remote_fio_system_call_allowed = 0;
 
-static struct async_signal_handler *sigint_fileio_token;
-
 static int
 remote_fileio_init_fd_map (void)
 {
@@ -301,7 +299,6 @@ remote_fileio_to_fio_timeval (struct timeval *tv, struct fio_timeval *ftv)
 }
 
 static int remote_fio_ctrl_c_flag = 0;
-static int remote_fio_no_longjmp = 0;
 
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
 static struct sigaction remote_fio_sa;
@@ -347,19 +344,10 @@ remote_fileio_sig_exit (void)
 }
 
 static void
-async_remote_fileio_interrupt (gdb_client_data arg)
-{
-  quit ();
-}
-
-static void
 remote_fileio_ctrl_c_signal_handler (int signo)
 {
-  remote_fileio_sig_set (SIG_IGN);
-  remote_fio_ctrl_c_flag = 1;
-  if (!remote_fio_no_longjmp)
-    gdb_call_async_signal_handler (sigint_fileio_token, 1);
   remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
+  remote_fio_ctrl_c_flag = 1;
 }
 
 static void
@@ -388,6 +376,7 @@ remote_fileio_reply (int retcode, int error)
       if (remote_fio_ctrl_c_flag)
         strcat (buf, ",C");
     }
+  remote_fio_ctrl_c_flag = 0;
   remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
   putpkt (buf);
 }
@@ -475,7 +464,6 @@ remote_fileio_func_open (char *buf)
 	}
     }
 
-  remote_fio_no_longjmp = 1;
   fd = gdb_open_cloexec (pathname, flags, mode);
   if (fd < 0)
     {
@@ -506,7 +494,6 @@ remote_fileio_func_close (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   if (fd != FIO_FD_CONSOLE_IN && fd != FIO_FD_CONSOLE_OUT && close (fd))
     remote_fileio_return_errno (-1);
   remote_fileio_close_target_fd ((int) num);
@@ -564,7 +551,6 @@ remote_fileio_func_read (char *buf)
 	  buffer = (gdb_byte *) xmalloc (16384);
 	  if (remaining_buf)
 	    {
-	      remote_fio_no_longjmp = 1;
 	      if (remaining_length > length)
 		{
 		  memcpy (buffer, remaining_buf, length);
@@ -595,7 +581,6 @@ remote_fileio_func_read (char *buf)
 		 safe margin, in case the limit depends on system
 		 resources or version.  */
 	      ret = ui_file_read (gdb_stdtargin, (char *) buffer, 16383);
-	      remote_fio_no_longjmp = 1;
 	      if (ret > 0 && (size_t)ret > length)
 		{
 		  remaining_buf = (char *) xmalloc (ret - length);
@@ -614,7 +599,6 @@ remote_fileio_func_read (char *buf)
 	   Therefore a complete solution must check how many bytes have been
 	   read on EINTR to return a more reliable value to the target */
 	old_offset = lseek (fd, 0, SEEK_CUR);
-	remote_fio_no_longjmp = 1;
 	ret = read (fd, buffer, length);
 	if (ret < 0 && errno == EINTR)
 	  {
@@ -687,7 +671,6 @@ remote_fileio_func_write (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   switch (fd)
     {
       case FIO_FD_CONSOLE_IN:
@@ -761,7 +744,6 @@ remote_fileio_func_lseek (char *buf)
       return;
     }
   
-  remote_fio_no_longjmp = 1;
   ret = lseek (fd, offset, flag);
 
   if (ret == (off_t) -1)
@@ -819,7 +801,6 @@ remote_fileio_func_rename (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = rename (oldpath, newpath);
 
   if (ret == -1)
@@ -895,7 +876,6 @@ remote_fileio_func_unlink (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = unlink (pathname);
 
   if (ret == -1)
@@ -937,7 +917,6 @@ remote_fileio_func_stat (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = stat (pathname, &st);
 
   if (ret == -1)
@@ -997,7 +976,6 @@ remote_fileio_func_fstat (char *buf)
     }
   ptrval = (CORE_ADDR) lnum;
 
-  remote_fio_no_longjmp = 1;
   if (fd == FIO_FD_CONSOLE_IN || fd == FIO_FD_CONSOLE_OUT)
     {
       host_to_fileio_uint (1, fst.fst_dev);
@@ -1073,7 +1051,6 @@ remote_fileio_func_gettimeofday (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = gettimeofday (&tv, NULL);
 
   if (ret == -1)
@@ -1108,7 +1085,6 @@ remote_fileio_func_isatty (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  remote_fio_no_longjmp = 1;
   fd = remote_fileio_map_fd ((int) target_fd);
   remote_fileio_return_success (fd == FIO_FD_CONSOLE_IN ||
   				fd == FIO_FD_CONSOLE_OUT ? 1 : 0);
@@ -1152,7 +1128,6 @@ remote_fileio_func_system (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = system (cmdline);
 
   if (!length)
@@ -1244,13 +1219,11 @@ remote_fileio_request (char *buf, int ctrlc_pending_p)
 	 asynchronously earlier, take this opportunity to send the
 	 Ctrl-C synchronously.  */
       remote_fio_ctrl_c_flag = 1;
-      remote_fio_no_longjmp = 0;
       remote_fileio_reply (-1, FILEIO_EINTR);
     }
   else
     {
       remote_fio_ctrl_c_flag = 0;
-      remote_fio_no_longjmp = 0;
 
       ex = catch_exceptions (current_uiout,
 			     do_remote_fileio_request, (void *)buf,
@@ -1366,9 +1339,6 @@ void
 initialize_remote_fileio (struct cmd_list_element *remote_set_cmdlist,
 			  struct cmd_list_element *remote_show_cmdlist)
 {
-  sigint_fileio_token =
-    create_async_signal_handler (async_remote_fileio_interrupt, NULL);
-
   add_cmd ("system-call-allowed", no_class,
 	   set_system_call_allowed,
 	   _("Set if the host system(3) call is allowed for the target."),
