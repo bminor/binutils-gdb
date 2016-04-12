@@ -1,3 +1,8 @@
+2016-04-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/lib/ld-lib.exp (run_dump_test): Initialise
+	check_ld(terminal).
+
 2016-04-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19774
