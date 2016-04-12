@@ -1,3 +1,7 @@
+2016-04-12  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/ftrace.exp (proc): Change test prefix from "ond" to "cond".
+
 2016-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.python/py-mi-events-gdb.py (signal_stop_handler): Add
