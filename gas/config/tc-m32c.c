@@ -475,7 +475,7 @@ enum {
   M32C_MACRO_ADJNZ_3,
   M32C_MACRO_ADJNZ_4,
   M32C_MACRO_ADJNZ_5,
-} M32C_Macros;
+};
 
 static struct {
   int insn;

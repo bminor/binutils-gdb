@@ -1,3 +1,8 @@
+2016-04-14  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-m32c.c (M32C_Macros): Remove.
+	* config/tc-msp430.c (option_numbers): Likewise.
+
 2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/gas/arc/nps400-3.d: New file.
