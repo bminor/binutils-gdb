@@ -1,5 +1,13 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* tui/tui-io.c (tui_redisplay_readline): Check
+	gdb_in_secondary_prompt_p instead of immediate_quit.
+	* tui/tui.c: Include top.h.
+	(tui_rl_startup_hook): Check gdb_in_secondary_prompt_p instead of
+	immediate_quit.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* top.c (read_command_file): Inline command_loop here.
 	(command_loop): Delete.
 
