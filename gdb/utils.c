@@ -1241,6 +1241,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
   struct timeval prompt_started, prompt_ended, prompt_delta;
+  struct cleanup *old_chain;
 
   /* Set up according to which answer is the default.  */
   if (defchar == '\0')
@@ -1295,13 +1296,16 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       return deprecated_query_hook (ctlstr, args);
     }
 
+  old_chain = make_cleanup (null_cleanup, NULL);
+
   /* Format the question outside of the loop, to avoid reusing args.  */
   question = xstrvprintf (ctlstr, args);
+  make_cleanup (xfree, question);
   prompt = xstrprintf (_("%s%s(%s or %s) %s"),
 		      annotation_level > 1 ? "\n\032\032pre-query\n" : "",
 		      question, y_string, n_string,
 		      annotation_level > 1 ? "\n\032\032query\n" : "");
-  xfree (question);
+  make_cleanup (xfree, prompt);
 
   /* Used for calculating time spend waiting for user.  */
   gettimeofday (&prompt_started, NULL);
@@ -1352,9 +1356,9 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   timeval_add (&prompt_for_continue_wait_time,
                &prompt_for_continue_wait_time, &prompt_delta);
 
-  xfree (prompt);
   if (annotation_level > 1)
     printf_filtered (("\n\032\032post-query\n"));
+  do_cleanups (old_chain);
   return retval;
 }
 
@@ -1859,6 +1863,7 @@ prompt_for_continue (void)
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
   struct timeval prompt_started, prompt_ended, prompt_delta;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   gettimeofday (&prompt_started, NULL);
 
@@ -1881,6 +1886,7 @@ prompt_for_continue (void)
   /* Call gdb_readline_wrapper, not readline, in order to keep an
      event loop running.  */
   ignore = gdb_readline_wrapper (cont_prompt);
+  make_cleanup (xfree, ignore);
 
   /* Add time spend in this routine to prompt_for_continue_wait_time.  */
   gettimeofday (&prompt_ended, NULL);
@@ -1891,7 +1897,7 @@ prompt_for_continue (void)
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032post-prompt-for-continue\n"));
 
-  if (ignore)
+  if (ignore != NULL)
     {
       char *p = ignore;
 
@@ -1900,7 +1906,6 @@ prompt_for_continue (void)
       if (p[0] == 'q')
 	/* Do not call quit here; there is no possibility of SIGINT.  */
 	throw_quit ("Quit");
-      xfree (ignore);
     }
 
   /* Now we have to do this again, so that GDB will know that it doesn't
@@ -1908,6 +1913,8 @@ prompt_for_continue (void)
   reinitialize_more_filter ();
 
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
+
+  do_cleanups (old_chain);
 }
 
 /* Initalize timer to keep track of how long we waited for the user.  */

@@ -1,5 +1,10 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* utils.c (defaulted_query, prompt_for_continue): Free temporary
+	strings with cleanups, instead of xfree.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* utils.c (vwarning, internal_vproblem): Use
 	make_cleanup_restore_target_terminal and
 	target_terminal_ours_for_output.
