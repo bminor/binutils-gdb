@@ -1,5 +1,16 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_pass_ctrlc): New function.
+	(init_remote_ops): Install it.
+	* target.c (target_terminal_inferior): Pass pending Ctrl-C to the
+	target.
+	(target_pass_ctrlc, default_target_pass_ctrlc): New functions.
+	* target.h (struct target_ops) <to_pass_ctrlc>: New method.
+	(target_pass_ctrlc, default_target_pass_ctrlc): New declarations.
+	* target-delegates.c: Regenerate.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* infcmd.c (interrupt_target_1): Call target_stop is in non-stop
 	mode.
 	* linux-nat.c (linux_nat_interrupt): Delete.

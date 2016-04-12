@@ -645,6 +645,8 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_interrupt) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
+    void (*to_pass_ctrlc) (struct target_ops *)
+      TARGET_DEFAULT_FUNC (default_target_pass_ctrlc);
     void (*to_check_pending_interrupt) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     void (*to_rcmd) (struct target_ops *,
@@ -1715,6 +1717,17 @@ extern void target_stop (ptid_t ptid);
    should act like SIGINT).  This function is asynchronous.  */
 
 extern void target_interrupt (ptid_t ptid);
+
+/* Pass a ^C, as determined to have been pressed by checking the quit
+   flag, to the target.  Normally calls target_interrupt, but remote
+   targets may take the opportunity to detect the remote side is not
+   responding and offer to disconnect.  */
+
+extern void target_pass_ctrlc (void);
+
+/* The default target_ops::to_pass_ctrlc implementation.  Simply calls
+   target_interrupt.  */
+extern void default_target_pass_ctrlc (struct target_ops *ops);
 
 /* Some targets install their own SIGINT handler while the target is
    running.  This method is called from the QUIT macro to give such

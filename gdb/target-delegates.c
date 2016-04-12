@@ -1608,6 +1608,23 @@ debug_interrupt (struct target_ops *self, ptid_t arg1)
 }
 
 static void
+delegate_pass_ctrlc (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_pass_ctrlc (self);
+}
+
+static void
+debug_pass_ctrlc (struct target_ops *self)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_pass_ctrlc (...)\n", debug_target.to_shortname);
+  debug_target.to_pass_ctrlc (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_pass_ctrlc (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+static void
 delegate_check_pending_interrupt (struct target_ops *self)
 {
   self = self->beneath;
@@ -4194,6 +4211,8 @@ install_delegators (struct target_ops *ops)
     ops->to_stop = delegate_stop;
   if (ops->to_interrupt == NULL)
     ops->to_interrupt = delegate_interrupt;
+  if (ops->to_pass_ctrlc == NULL)
+    ops->to_pass_ctrlc = delegate_pass_ctrlc;
   if (ops->to_check_pending_interrupt == NULL)
     ops->to_check_pending_interrupt = delegate_check_pending_interrupt;
   if (ops->to_rcmd == NULL)
@@ -4442,6 +4461,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_thread_name = tdefault_thread_name;
   ops->to_stop = tdefault_stop;
   ops->to_interrupt = tdefault_interrupt;
+  ops->to_pass_ctrlc = default_target_pass_ctrlc;
   ops->to_check_pending_interrupt = tdefault_check_pending_interrupt;
   ops->to_rcmd = default_rcmd;
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
@@ -4598,6 +4618,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_thread_name = debug_thread_name;
   ops->to_stop = debug_stop;
   ops->to_interrupt = debug_interrupt;
+  ops->to_pass_ctrlc = debug_pass_ctrlc;
   ops->to_check_pending_interrupt = debug_check_pending_interrupt;
   ops->to_rcmd = debug_rcmd;
   ops->to_pid_to_exec_file = debug_pid_to_exec_file;

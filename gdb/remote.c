@@ -5875,6 +5875,27 @@ remote_interrupt (struct target_ops *self, ptid_t ptid)
     remote_interrupt_as ();
 }
 
+/* Implement the to_pass_ctrlc function for the remote targets.  */
+
+static void
+remote_pass_ctrlc (struct target_ops *self)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (remote_debug)
+    fprintf_unfiltered (gdb_stdlog, "remote_pass_ctrlc called\n");
+
+  /* If we're starting up, we're not fully synced yet.  Quit
+     immediately.  */
+  if (rs->starting_up)
+    quit ();
+  /* If ^C has already been sent once, offer to disconnect.  */
+  else if (rs->ctrlc_pending_p)
+    interrupt_query ();
+  else
+    target_interrupt (inferior_ptid);
+}
+
 /* Ask the user what to do when an interrupt is received.  */
 
 static void
@@ -13056,6 +13077,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_get_ada_task_ptid = remote_get_ada_task_ptid;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_interrupt = remote_interrupt;
+  remote_ops.to_pass_ctrlc = remote_pass_ctrlc;
   remote_ops.to_check_pending_interrupt = remote_check_pending_interrupt;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
