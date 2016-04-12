@@ -1,5 +1,9 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (command_handler): Don't call clear_quit_flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* remote-sim.c (gdb_os_poll_quit): Don't call clear_quit_flag.
 	* remote.c (remote_wait_as): Don't call clear_quit_flag.
 

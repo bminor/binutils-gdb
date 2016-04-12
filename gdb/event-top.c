@@ -460,7 +460,6 @@ command_handler (char *command)
   struct cleanup *stat_chain;
   char *c;
 
-  clear_quit_flag ();
   if (instream == stdin)
     reinitialize_more_filter ();
 
