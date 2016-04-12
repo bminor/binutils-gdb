@@ -1,5 +1,18 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* event-loop.c: Include "ser-event.h".
+	(async_signal_handlers_serial_event): New global.
+	(async_signals_handler, initialize_async_signal_handlers): New
+	functions.
+	(mark_async_signal_handler): Set
+	async_signal_handlers_serial_event.
+	(invoke_async_signal_handlers): Clear
+	async_signal_handlers_serial_event.
+	* event-top.c (async_init_signals): Call
+	initialize_async_signal_handlers.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SFILES): Add ser-event.c.
 	(HFILES_NO_SRCDIR): Add ser-event.h.
 	(COMMON_OBS): Add ser-event.o.

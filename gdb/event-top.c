@@ -748,6 +748,8 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 void
 async_init_signals (void)
 {
+  initialize_async_signal_handlers ();
+
   signal (SIGINT, handle_sigint);
   sigint_token =
     create_async_signal_handler (async_request_quit, NULL);
