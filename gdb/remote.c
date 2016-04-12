@@ -6937,10 +6937,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  /* If the user hit C-c before this packet, or between packets,
 	     pretend that it was hit right here.  */
 	  if (check_quit_flag ())
-	    {
-	      clear_quit_flag ();
-	      sync_remote_interrupt (SIGINT);
-	    }
+	    sync_remote_interrupt (SIGINT);
 	}
 
       /* FIXME: cagney/1999-09-27: If we're in async mode we should
