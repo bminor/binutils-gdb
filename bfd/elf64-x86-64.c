@@ -900,6 +900,10 @@ struct elf_x86_64_link_hash_table
   bfd_vma next_jump_slot_index;
   /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
   bfd_vma next_irelative_index;
+
+  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
+     to read-only sections.  */
+  bfd_boolean readonly_dynrelocs_against_ifunc;
 };
 
 /* Get the x86-64 ELF linker hash table from a link_info structure.  */
@@ -2659,6 +2663,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     {
       if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 					      &eh->dyn_relocs,
+					      &htab->readonly_dynrelocs_against_ifunc,
 					      plt_entry_size,
 					      plt_entry_size,
 					      GOT_ENTRY_SIZE))
@@ -3899,8 +3904,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
-	      if ((elf_tdata (output_bfd)->has_gnu_symbols
-		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
+	      if (htab->readonly_dynrelocs_against_ifunc)
 		{
 		  info->callbacks->einfo
 		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));

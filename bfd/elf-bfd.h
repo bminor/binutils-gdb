@@ -2490,7 +2490,8 @@ extern bfd_boolean _bfd_elf_create_ifunc_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_allocate_ifunc_dyn_relocs
   (struct bfd_link_info *, struct elf_link_hash_entry *,
-   struct elf_dyn_relocs **, unsigned int, unsigned int, unsigned int);
+   struct elf_dyn_relocs **, bfd_boolean *, unsigned int,
+   unsigned int, unsigned int);
 extern long _bfd_elf_ifunc_get_synthetic_symtab
   (bfd *, long, asymbol **, long, asymbol **, asymbol **, asection *,
    bfd_vma *(*) (bfd *, asymbol **, asection *, asection *));

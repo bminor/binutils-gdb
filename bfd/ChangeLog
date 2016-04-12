@@ -1,3 +1,26 @@
+2016-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19939
+	* elf-bfd.h (_bfd_elf_allocate_ifunc_dyn_relocs): Add a pointer
+	to bfd_boolean.
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Updated.
+	Set *readonly_dynrelocs_against_ifunc_p to TRUE if dynamic reloc
+	applies to read-only section.
+	* elf32-i386.c (elf_i386_link_hash_table): Add
+	readonly_dynrelocs_against_ifunc.
+	(elf_i386_allocate_dynrelocs): Updated.
+	(elf_i386_size_dynamic_sections): Issue an error for read-only
+	segment with dynamic IFUNC relocations only if
+	readonly_dynrelocs_against_ifunc is TRUE.
+	* elf64-x86-64.c (elf_x86_64_link_hash_table): Add
+	readonly_dynrelocs_against_ifunc.
+	(elf_x86_64_allocate_dynrelocs): Updated.
+	(elf_x86_64_size_dynamic_sections): Issue an error for read-only
+	segment with dynamic IFUNC relocations only if
+	readonly_dynrelocs_against_ifunc is TRUE.
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_ifunc_dynrelocs):
+	Updated.
+
 2016-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Move error_ret_free_local to be

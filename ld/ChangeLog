@@ -1,3 +1,15 @@
+2016-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19939
+	* testsuite/ld-i386/i386.exp: Run PR ld/19939 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr19939.s: New file.
+	* testsuite/ld-i386/pr19939a.d: Likewise.
+	* testsuite/ld-i386/pr19939b.d: Likewise.
+	* testsuite/ld-x86-64/pr19939.s: Likewise.
+	* testsuite/ld-x86-64/pr19939a.d: Likewise.
+	* testsuite/ld-x86-64/pr19939b.d: Likewise.
+
 2016-04-09  Oleg Endo  <olegendo@gcc.gnu.org>
 
 	* emulparams/shelf.sh: Set stack area to 0x3FFFFF00.

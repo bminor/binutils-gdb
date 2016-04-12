@@ -878,6 +878,10 @@ struct elf_i386_link_hash_table
 
   /* The index of the next unused R_386_IRELATIVE slot in .rel.plt.  */
   bfd_vma next_irelative_index;
+
+  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
+     to read-only sections.  */
+  bfd_boolean readonly_dynrelocs_against_ifunc;
 };
 
 /* Get the i386 ELF linker hash table from a link_info structure.  */
@@ -2442,7 +2446,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
-                                               plt_entry_size,
+					       &htab->readonly_dynrelocs_against_ifunc,
+					       plt_entry_size,
 					       plt_entry_size, 4);
   /* Don't create the PLT entry if there are only function pointer
      relocations which can be resolved at run-time.  */
@@ -3553,8 +3558,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
-	      if ((elf_tdata (output_bfd)->has_gnu_symbols
-		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
+	      if (htab->readonly_dynrelocs_against_ifunc)
 		{
 		  info->callbacks->einfo
 		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
