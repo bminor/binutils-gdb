@@ -1,5 +1,11 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* exceptions.c (print_flush): Use target_terminal_ours_for_output
+	instead of target_terminal_ours, and restore target terminal with
+	a cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* cp-support.c (gdb_demangle): Use target_terminal_ours_for_output
 	instead of target_terminal_ours, and restore target terminal with
 	a cleanup.

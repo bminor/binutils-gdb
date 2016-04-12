@@ -37,12 +37,16 @@ static void
 print_flush (void)
 {
   struct serial *gdb_stdout_serial;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   if (deprecated_error_begin_hook)
     deprecated_error_begin_hook ();
 
   if (target_supports_terminal_ours ())
-    target_terminal_ours ();
+    {
+      make_cleanup_restore_target_terminal ();
+      target_terminal_ours_for_output ();
+    }
 
   /* We want all output to appear now, before we print the error.  We
      have 3 levels of buffering we have to flush (it's possible that
@@ -66,6 +70,8 @@ print_flush (void)
     }
 
   annotate_error_begin ();
+
+  do_cleanups (old_chain);
 }
 
 static void
