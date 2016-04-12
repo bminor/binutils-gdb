@@ -34,6 +34,9 @@ struct ui_file;
 
 typedef void *serial_ttystate;
 struct serial;
+struct serial_ops;
+
+/* Create a new serial for OPS.  The new serial is not opened.  */
 
 /* Try to open NAME.  Returns a new `struct serial *' on success, NULL
    on failure.  The new serial object has a reference count of 1.
@@ -43,6 +46,10 @@ struct serial;
    necessary.  */
 
 extern struct serial *serial_open (const char *name);
+
+/* Open a new serial stream using OPS.  */
+
+extern struct serial *serial_open_ops (const struct serial_ops *ops);
 
 /* Returns true if SCB is open.  */
 

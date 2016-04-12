@@ -1,5 +1,19 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (SFILES): Add ser-event.c.
+	(HFILES_NO_SRCDIR): Add ser-event.h.
+	(COMMON_OBS): Add ser-event.o.
+	* ser-event.c, ser-event.h: New files.
+	* serial.c (new_serial): New function, factored out from
+	(serial_fdopen_ops): ... this.
+	(serial_open_ops_1): New function, factored out from
+	(serial_open): ... this.
+	(serial_open_ops): New function.
+	* serial.h (struct serial): Forware declare.
+	(serial_open_ops): New declaration.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* serial.c (serial_open, serial_fdopen_ops, do_serial_close):
 	Remove references to name.
 	* serial.h (struct serial) <name>: Delete.
