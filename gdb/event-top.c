@@ -828,6 +828,68 @@ quit_serial_event_fd (void)
   return serial_event_fd (quit_serial_event);
 }
 
+/* See defs.h.  */
+
+void
+default_quit_handler (void)
+{
+  if (check_quit_flag ())
+    {
+      if (target_terminal_is_ours ())
+	quit ();
+      else
+	target_pass_ctrlc ();
+    }
+}
+
+/* See defs.h.  */
+quit_handler_ftype *quit_handler = default_quit_handler;
+
+/* Data for make_cleanup_override_quit_handler.  Wrap the previous
+   handler pointer in a data struct because it's not portable to cast
+   a function pointer to a data pointer, which is what make_cleanup
+   expects.  */
+struct quit_handler_cleanup_data
+{
+  /* The previous quit handler.  */
+  quit_handler_ftype *prev_handler;
+};
+
+/* Cleanup call that restores the previous quit handler.  */
+
+static void
+restore_quit_handler (void *arg)
+{
+  struct quit_handler_cleanup_data *data
+    = (struct quit_handler_cleanup_data *) arg;
+
+  quit_handler = data->prev_handler;
+}
+
+/* Destructor for the quit handler cleanup.  */
+
+static void
+restore_quit_handler_dtor (void *arg)
+{
+  xfree (arg);
+}
+
+/* See defs.h.  */
+
+struct cleanup *
+make_cleanup_override_quit_handler (quit_handler_ftype *new_quit_handler)
+{
+  struct cleanup *old_chain;
+  struct quit_handler_cleanup_data *data;
+
+  data = XNEW (struct quit_handler_cleanup_data);
+  data->prev_handler = quit_handler;
+  old_chain = make_cleanup_dtor (restore_quit_handler, data,
+				 restore_quit_handler_dtor);
+  quit_handler = new_quit_handler;
+  return old_chain;
+}
+
 /* Handle a SIGINT.  */
 
 void
@@ -921,9 +983,7 @@ async_request_quit (gdb_client_data arg)
      back here, that means that an exception was thrown to unwind the
      current command before we got back to the event loop.  So there
      is no reason to call quit again here.  */
-
-  if (check_quit_flag ())
-    quit ();
+  QUIT;
 }
 
 #ifdef SIGQUIT

@@ -97,13 +97,9 @@ static char *remote_exec_file_var;
 enum { REMOTE_ALIGN_WRITES = 16 };
 
 /* Prototypes for local functions.  */
-static void async_cleanup_sigint_signal_handler (void *dummy);
 static int getpkt_sane (char **buf, long *sizeof_buf, int forever);
 static int getpkt_or_notif_sane (char **buf, long *sizeof_buf,
 				 int forever, int *is_notif);
-
-static void async_handle_remote_sigint (int);
-static void async_handle_remote_sigint_twice (int);
 
 static void remote_files_info (struct target_ops *ignore);
 
@@ -140,8 +136,6 @@ static int remote_is_async_p (struct target_ops *);
 static void remote_async (struct target_ops *ops, int enable);
 
 static void remote_thread_events (struct target_ops *ops, int enable);
-
-static void sync_remote_interrupt_twice (int signo);
 
 static void interrupt_query (void);
 
@@ -240,6 +234,8 @@ static void remote_btrace_reset (void);
 static int stop_reply_queue_length (void);
 
 static void readahead_cache_invalidate (void);
+
+static void remote_unpush_and_throw (void);
 
 /* For "remote".  */
 
@@ -362,6 +358,14 @@ struct remote_state
   /* Nonzero if the user has pressed Ctrl-C, but the target hasn't
      responded to that.  */
   int ctrlc_pending_p;
+
+  /* True if we saw a Ctrl-C while reading or writing from/to the
+     remote descriptor.  At that point it is not safe to send a remote
+     interrupt packet, so we instead remember we saw the Ctrl-C and
+     process it once we're done with sending/receiving the current
+     packet, which should be shortly.  If however that takes too long,
+     and the user presses Ctrl-C again, we offer to disconnect.  */
+  int got_ctrlc_during_io;
 
   /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
      remote_open knows that we don't have a file open when the program
@@ -1688,10 +1692,6 @@ remote_remove_exec_catchpoint (struct target_ops *ops, int pid)
 {
   return 0;
 }
-
-/* Tokens for use by the asynchronous signal handlers for SIGINT.  */
-static struct async_signal_handler *async_sigint_remote_twice_token;
-static struct async_signal_handler *async_sigint_remote_token;
 
 
 /* Asynchronous signal handle registered as event loop source for
@@ -3497,8 +3497,7 @@ remote_close (struct target_ops *self)
   if (rs->remote_desc == NULL)
     return; /* already closed */
 
-  /* Make sure we leave stdin registered in the event loop, and we
-     don't leave the async SIGINT signal handler installed.  */
+  /* Make sure we leave stdin registered in the event loop.  */
   remote_terminal_ours (self);
 
   serial_close (rs->remote_desc);
@@ -3994,6 +3993,8 @@ process_initial_stop_replies (int from_tty)
     set_last_target_status (inferior_ptid, thread->suspend.waitstatus);
 }
 
+/* Start the remote connection and sync state.  */
+
 static void
 remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 {
@@ -4001,18 +4002,21 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   struct packet_config *noack_config;
   char *wait_status = NULL;
 
-  immediate_quit++;		/* Allow user to interrupt it.  */
+  /* Signal other parts that we're going through the initial setup,
+     and so things may not be stable yet.  E.g., we don't try to
+     install tracepoints until we've relocated symbols.  Also, a
+     Ctrl-C before we're connected and synced up can't interrupt the
+     target.  Instead, it offers to drop the (potentially wedged)
+     connection.  */
+  rs->starting_up = 1;
+
   QUIT;
 
   if (interrupt_on_connect)
     send_interrupt_sequence ();
 
   /* Ack any packet which the remote side has already sent.  */
-  serial_write (rs->remote_desc, "+", 1);
-
-  /* Signal other parts that we're going through the initial setup,
-     and so things may not be stable yet.  */
-  rs->starting_up = 1;
+  remote_serial_write ("+", 1);
 
   /* The first packet we send to the target is the optional "supported
      packets" request.  If the target can answer this, it will tell us
@@ -4197,7 +4201,6 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       strcpy (rs->buf, wait_status);
       rs->cached_wait_status = 1;
 
-      immediate_quit--;
       start_remote (from_tty); /* Initialize gdb process mechanisms.  */
     }
   else
@@ -4833,6 +4836,58 @@ remote_query_supported (void)
       }
 }
 
+/* Serial QUIT handler for the remote serial descriptor.
+
+   Defers handling a Ctrl-C until we're done with the current
+   command/response packet sequence, unless:
+
+   - We're setting up the connection.  Don't send a remote interrupt
+     request, as we're not fully synced yet.  Quit immediately
+     instead.
+
+   - The target has been resumed in the foreground
+     (target_terminal_is_ours is false) with a synchronous resume
+     packet, and we're blocked waiting for the stop reply, thus a
+     Ctrl-C should be immediately sent to the target.
+
+   - We get a second Ctrl-C while still within the same serial read or
+     write.  In that case the serial is seemingly wedged --- offer to
+     quit/disconnect.
+
+   - We see a second Ctrl-C without target response, after having
+     previously interrupted the target.  In that case the target/stub
+     is probably wedged --- offer to quit/disconnect.
+*/
+
+static void
+remote_serial_quit_handler (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (check_quit_flag ())
+    {
+      /* If we're starting up, we're not fully synced yet.  Quit
+	 immediately.  */
+      if (rs->starting_up)
+	quit ();
+      else if (rs->got_ctrlc_during_io)
+	{
+	  if (query (_("The target is not responding to GDB commands.\n"
+		       "Stop debugging it? ")))
+	    remote_unpush_and_throw ();
+	}
+      /* If ^C has already been sent once, offer to disconnect.  */
+      else if (!target_terminal_is_ours () && rs->ctrlc_pending_p)
+	interrupt_query ();
+      /* All-stop protocol, and blocked waiting for stop reply.  Send
+	 an interrupt request.  */
+      else if (!target_terminal_is_ours () && rs->waiting_for_stop_reply)
+	target_interrupt (inferior_ptid);
+      else
+	rs->got_ctrlc_during_io = 1;
+    }
+}
+
 /* Remove any of the remote.c targets from target stack.  Upper targets depend
    on it so remove them first.  */
 
@@ -4840,6 +4895,13 @@ static void
 remote_unpush_target (void)
 {
   pop_all_targets_at_and_above (process_stratum);
+}
+
+static void
+remote_unpush_and_throw (void)
+{
+  remote_unpush_target ();
+  throw_error (TARGET_CLOSE_ERROR, _("Disconnected from target."));
 }
 
 static void
@@ -4931,6 +4993,7 @@ remote_open_1 (const char *name, int from_tty,
   rs->extended = extended_p;
   rs->waiting_for_stop_reply = 0;
   rs->ctrlc_pending_p = 0;
+  rs->got_ctrlc_during_io = 0;
 
   rs->general_thread = not_sent_ptid;
   rs->continue_thread = not_sent_ptid;
@@ -4942,11 +5005,11 @@ remote_open_1 (const char *name, int from_tty,
 
   readahead_cache_invalidate ();
 
+  /* Start out by owning the terminal.  */
+  remote_async_terminal_ours_p = 1;
+
   if (target_async_permitted)
     {
-      /* With this target we start out by owning the terminal.  */
-      remote_async_terminal_ours_p = 1;
-
       /* FIXME: cagney/1999-09-23: During the initial connection it is
 	 assumed that the target is already ready and able to respond to
 	 requests.  Unfortunately remote_start_remote() eventually calls
@@ -5637,108 +5700,6 @@ remote_resume (struct target_ops *ops,
 }
 
 
-/* Set up the signal handler for SIGINT, while the target is
-   executing, ovewriting the 'regular' SIGINT signal handler.  */
-static void
-async_initialize_sigint_signal_handler (void)
-{
-  signal (SIGINT, async_handle_remote_sigint);
-}
-
-/* Signal handler for SIGINT, while the target is executing.  */
-static void
-async_handle_remote_sigint (int sig)
-{
-  signal (sig, async_handle_remote_sigint_twice);
-  /* Note we need to go through gdb_call_async_signal_handler in order
-     to wake up the event loop on Windows.  */
-  gdb_call_async_signal_handler (async_sigint_remote_token, 0);
-}
-
-/* Signal handler for SIGINT, installed after SIGINT has already been
-   sent once.  It will take effect the second time that the user sends
-   a ^C.  */
-static void
-async_handle_remote_sigint_twice (int sig)
-{
-  signal (sig, async_handle_remote_sigint);
-  /* See note in async_handle_remote_sigint.  */
-  gdb_call_async_signal_handler (async_sigint_remote_twice_token, 0);
-}
-
-/* Implementation of to_check_pending_interrupt.  */
-
-static void
-remote_check_pending_interrupt (struct target_ops *self)
-{
-  struct async_signal_handler *token = async_sigint_remote_twice_token;
-
-  if (async_signal_handler_is_marked (token))
-    {
-      clear_async_signal_handler (token);
-      call_async_signal_handler (token);
-    }
-}
-
-/* Perform the real interruption of the target execution, in response
-   to a ^C.  */
-static void
-async_remote_interrupt (gdb_client_data arg)
-{
-  if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "async_remote_interrupt called\n");
-
-  target_interrupt (inferior_ptid);
-}
-
-/* Perform interrupt, if the first attempt did not succeed.  Just give
-   up on the target alltogether.  */
-static void
-async_remote_interrupt_twice (gdb_client_data arg)
-{
-  if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "async_remote_interrupt_twice called\n");
-
-  interrupt_query ();
-}
-
-/* Reinstall the usual SIGINT handlers, after the target has
-   stopped.  */
-static void
-async_cleanup_sigint_signal_handler (void *dummy)
-{
-  signal (SIGINT, handle_sigint);
-}
-
-/* Send ^C to target to halt it.  Target will respond, and send us a
-   packet.  */
-static void (*ofunc) (int);
-
-/* The command line interface's interrupt routine.  This function is installed
-   as a signal handler for SIGINT.  The first time a user requests an
-   interrupt, we call remote_interrupt to send a break or ^C.  If there is no
-   response from the target (it didn't stop when the user requested it),
-   we ask the user if he'd like to detach from the target.  */
-
-static void
-sync_remote_interrupt (int signo)
-{
-  /* If this doesn't work, try more severe steps.  */
-  signal (signo, sync_remote_interrupt_twice);
-
-  gdb_call_async_signal_handler (async_sigint_remote_token, 1);
-}
-
-/* The user typed ^C twice.  */
-
-static void
-sync_remote_interrupt_twice (int signo)
-{
-  signal (signo, ofunc);
-  gdb_call_async_signal_handler (async_sigint_remote_twice_token, 1);
-  signal (signo, sync_remote_interrupt);
-}
-
 /* Non-stop version of target_stop.  Uses `vCont;t' to stop a remote
    thread, all threads of a remote process, or all threads of all
    processes.  */
@@ -5928,10 +5889,6 @@ interrupt_query (void)
 static void
 remote_terminal_inferior (struct target_ops *self)
 {
-  if (!target_async_permitted)
-    /* Nothing to do.  */
-    return;
-
   /* FIXME: cagney/1999-09-27: Make calls to target_terminal_*()
      idempotent.  The event-loop GDB talking to an asynchronous target
      with a synchronous command calls this function from both
@@ -5942,7 +5899,6 @@ remote_terminal_inferior (struct target_ops *self)
     return;
   delete_file_handler (input_fd);
   remote_async_terminal_ours_p = 0;
-  async_initialize_sigint_signal_handler ();
   /* NOTE: At this point we could also register our selves as the
      recipient of all input.  Any characters typed could then be
      passed on down to the target.  */
@@ -5951,14 +5907,9 @@ remote_terminal_inferior (struct target_ops *self)
 static void
 remote_terminal_ours (struct target_ops *self)
 {
-  if (!target_async_permitted)
-    /* Nothing to do.  */
-    return;
-
   /* See FIXME in remote_terminal_inferior.  */
   if (remote_async_terminal_ours_p)
     return;
-  async_cleanup_sigint_signal_handler (NULL);
   add_file_handler (input_fd, stdin_event_handler, 0);
   remote_async_terminal_ours_p = 1;
 }
@@ -6929,24 +6880,12 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  return minus_one_ptid;
 	}
 
-      if (!target_is_async_p ())
-	{
-	  ofunc = signal (SIGINT, sync_remote_interrupt);
-	  /* If the user hit C-c before this packet, or between packets,
-	     pretend that it was hit right here.  */
-	  if (check_quit_flag ())
-	    sync_remote_interrupt (SIGINT);
-	}
-
       /* FIXME: cagney/1999-09-27: If we're in async mode we should
 	 _never_ wait for ever -> test on target_is_async_p().
 	 However, before we do that we need to ensure that the caller
 	 knows how to take the target into/out of async mode.  */
       ret = getpkt_or_notif_sane (&rs->buf, &rs->buf_size,
 				  forever, &is_notif);
-
-      if (!target_is_async_p ())
-	signal (SIGINT, ofunc);
 
       /* GDB gets a notification.  Return to core as this event is
 	 not interesting.  */
@@ -8165,15 +8104,28 @@ unpush_and_perror (const char *string)
 	       safe_strerror (saved_errno));
 }
 
-/* Read a single character from the remote end.  */
+/* Read a single character from the remote end.  The current quit
+   handler is overridden to avoid quitting in the middle of packet
+   sequence, as that would break communication with the remote server.
+   See remote_serial_quit_handler for more detail.  */
 
 static int
 readchar (int timeout)
 {
   int ch;
   struct remote_state *rs = get_remote_state ();
+  struct cleanup *old_chain;
+
+  old_chain = make_cleanup_override_quit_handler (remote_serial_quit_handler);
+
+  rs->got_ctrlc_during_io = 0;
 
   ch = serial_readchar (rs->remote_desc, timeout);
+
+  if (rs->got_ctrlc_during_io)
+    set_quit_flag ();
+
+  do_cleanups (old_chain);
 
   if (ch >= 0)
     return ch;
@@ -8195,18 +8147,31 @@ readchar (int timeout)
 }
 
 /* Wrapper for serial_write that closes the target and throws if
-   writing fails.  */
+   writing fails.  The current quit handler is overridden to avoid
+   quitting in the middle of packet sequence, as that would break
+   communication with the remote server.  See
+   remote_serial_quit_handler for more detail.  */
 
 static void
 remote_serial_write (const char *str, int len)
 {
   struct remote_state *rs = get_remote_state ();
+  struct cleanup *old_chain;
+
+  old_chain = make_cleanup_override_quit_handler (remote_serial_quit_handler);
+
+  rs->got_ctrlc_during_io = 0;
 
   if (serial_write (rs->remote_desc, str, len))
     {
       unpush_and_perror (_("Remote communication error.  "
 			   "Target disconnected."));
     }
+
+  if (rs->got_ctrlc_during_io)
+    set_quit_flag ();
+
+  do_cleanups (old_chain);
 }
 
 /* Send the command in *BUF to the remote machine, and read the reply
@@ -8731,7 +8696,6 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 
 	      if (forever)	/* Watchdog went off?  Kill the target.  */
 		{
-		  QUIT;
 		  remote_unpush_target ();
 		  throw_error (TARGET_CLOSE_ERROR,
 			       _("Watchdog timeout has expired.  "
@@ -13072,7 +13036,6 @@ Specify the serial device it is connected to\n\
   remote_ops.to_stop = remote_stop;
   remote_ops.to_interrupt = remote_interrupt;
   remote_ops.to_pass_ctrlc = remote_pass_ctrlc;
-  remote_ops.to_check_pending_interrupt = remote_check_pending_interrupt;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;
@@ -13472,12 +13435,6 @@ _initialize_remote (void)
   /* We're no longer interested in notification events of an inferior
      when it exits.  */
   observer_attach_inferior_exit (discard_pending_stop_replies);
-
-  /* Set up signal handlers.  */
-  async_sigint_remote_token =
-    create_async_signal_handler (async_remote_interrupt, NULL);
-  async_sigint_remote_twice_token =
-    create_async_signal_handler (async_remote_interrupt_twice, NULL);
 
 #if 0
   init_remote_threadtests ();

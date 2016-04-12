@@ -145,6 +145,34 @@ extern int check_quit_flag (void);
 /* * Set the quit flag.  */
 extern void set_quit_flag (void);
 
+/* The current quit handler (and its type).  This is called from the
+   QUIT macro.  See default_quit_handler below for default behavior.
+   Parts of GDB temporarily override this to e.g., completely suppress
+   Ctrl-C because it would not be safe to throw.  E.g., normally, you
+   wouldn't want to quit between a RSP command and its response, as
+   that would break the communication with the target, but you may
+   still want to intercept the Ctrl-C and offer to disconnect if the
+   user presses Ctrl-C multiple times while the target is stuck
+   waiting for the wedged remote stub.  */
+typedef void (quit_handler_ftype) (void);
+extern quit_handler_ftype *quit_handler;
+
+/* Override the current quit handler.  Sets NEW_QUIT_HANDLER as
+   current quit handler, and installs a cleanup that when run restores
+   the previous quit handler.  */
+struct cleanup *
+  make_cleanup_override_quit_handler (quit_handler_ftype *new_quit_handler);
+
+/* The default quit handler.  Checks whether Ctrl-C was pressed, and
+   if so:
+
+     - If GDB owns the terminal, throws a quit exception.
+
+     - If GDB does not own the terminal, forwards the Ctrl-C to the
+       target.
+*/
+extern void default_quit_handler (void);
+
 /* Flag that function quit should call quit_force.  */
 extern volatile int sync_quit_force_run;
 
@@ -156,10 +184,8 @@ extern void quit (void);
 
 extern void maybe_quit (void);
 
-/* Check whether a Ctrl-C was typed, and if so, call quit.  The target
-   is given a chance to process the Ctrl-C.  E.g., it may detect that
-   repeated Ctrl-C requests were issued, and choose to close the
-   connection.  */
+/* Check whether a Ctrl-C was typed, and if so, call the current quit
+   handler.  */
 #define QUIT maybe_quit ()
 
 /* Set the serial event associated with the quit flag.  */

@@ -1,5 +1,53 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* defs.h (quit_handler_ftype, quit_handler)
+	(make_cleanup_override_quit_handler, default_quit_handler): New.
+	(QUIT): Adjust comments.
+	* event-top.c (default_quit_handler): New function.
+	(quit_handler): New global.
+	(struct quit_handler_cleanup_data): New.
+	(restore_quit_handler, restore_quit_handler_dtor)
+	(make_cleanup_override_quit_handler): New.
+	(async_request_quit): Call QUIT.
+	* remote.c (struct remote_state) <got_ctrlc_during_io>: New field.
+	(async_sigint_remote_twice_token, async_sigint_remote_token):
+	Delete.
+	(remote_close): Update comments.
+	(remote_start_remote): Don't set immediate_quit.  Set starting_up
+	earlier.
+	(remote_serial_quit_handler, remote_unpush_and_throw): New
+	functions.
+	(remote_open_1): Clear got_ctrlc_during_io.  Set
+	remote_async_terminal_ours_p unconditionally.
+	(async_initialize_sigint_signal_handler)
+	(async_handle_remote_sigint, async_handle_remote_sigint_twice)
+	(remote_check_pending_interrupt, async_remote_interrupt)
+	(async_remote_interrupt_twice)
+	(async_cleanup_sigint_signal_handler, ofunc)
+	(sync_remote_interrupt, sync_remote_interrupt_twice): Delete.
+	(remote_terminal_inferior, remote_terminal_ours): Remove async
+	checks.
+	(remote_wait_as): Don't install a SIGINT handler in sync mode.
+	(readchar, remote_serial_write): Override the quit handler with
+	remote_serial_quit_handler.
+	(getpkt_or_notif_sane_1): Don't call QUIT.
+	(initialize_remote_ops): Don't install
+	remote_check_pending_interrupt.
+	(_initialize_remote): Don't create async_sigint_remote_token and
+	async_sigint_remote_twice_token.
+	* ser-base.c (ser_base_wait_for): Call QUIT and use
+	interruptible_select.
+	(ser_base_write): Call QUIT.
+	* ser-go32.c (dos_readchar, dos_write): Call QUIT.
+	* ser-unix.c (wait_for): Don't use VTIME.  Always take the
+	gdb_select path, but call QUIT and interruptible_select.
+	* utils.c (maybe_quit): Call the current quit handler.  Don't call
+	target_check_pending_interrupt.
+	(defaulted_query, prompt_for_continue): Override the quit handler
+	with the default quit handler.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* tui/tui-hooks.c (tui_target_has_run): Delete.
 	(tui_about_to_proceed): Delete.
 	(tui_about_to_proceed_observer): Delete.

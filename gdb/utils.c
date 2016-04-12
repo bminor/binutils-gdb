@@ -1086,11 +1086,13 @@ quit (void)
 void
 maybe_quit (void)
 {
-  if (check_quit_flag () || sync_quit_force_run)
+  if (sync_quit_force_run)
     quit ();
+
+  quit_handler ();
+
   if (deprecated_interactive_hook)
     deprecated_interactive_hook ();
-  target_check_pending_interrupt ();
 }
 
 
@@ -1318,6 +1320,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
   /* We'll need to handle input.  */
   target_terminal_ours ();
+  make_cleanup_override_quit_handler (default_quit_handler);
 
   while (1)
     {
@@ -1892,6 +1895,7 @@ prompt_for_continue (void)
   /* We'll need to handle input.  */
   make_cleanup_restore_target_terminal ();
   target_terminal_ours ();
+  make_cleanup_override_quit_handler (default_quit_handler);
 
   /* Call gdb_readline_wrapper, not readline, in order to keep an
      event loop running.  */
