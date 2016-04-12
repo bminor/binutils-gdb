@@ -248,7 +248,6 @@ exception_rethrow (void)
 {
   /* Run this scope's cleanups before re-throwing to the next
      outermost scope.  */
-  prepare_to_throw_exception ();
   do_cleanups (all_cleanups ());
   throw;
 }
@@ -268,8 +267,6 @@ gdb_exception_sliced_copy (struct gdb_exception *to, const struct gdb_exception 
 void
 throw_exception (struct gdb_exception exception)
 {
-  prepare_to_throw_exception ();
-
   do_cleanups (all_cleanups ());
 
 #if GDB_XCPT == GDB_XCPT_SJMP

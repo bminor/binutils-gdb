@@ -1,3 +1,7 @@
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (prepare_to_throw_exception): Delete.
+
 2016-04-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.in ($(IPA_LIB)): Set SONAME of the IPA lib.

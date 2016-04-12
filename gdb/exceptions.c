@@ -27,11 +27,6 @@
 #include "serial.h"
 #include "gdbthread.h"
 
-void
-prepare_to_throw_exception (void)
-{
-}
-
 static void
 print_flush (void)
 {

@@ -1,5 +1,13 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.c (exception_rethrow): Remove
+	prepare_to_throw_exception call.
+	* common/common-exceptions.h (prepare_to_throw_exception): Delete
+	declaration.
+	* exceptions.c (prepare_to_throw_exception): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* target.c (target_check_pending_interrupt): Delete.
 	* target.h (struct target_ops) <to_check_pending_interrupt>:
 	Remove method.

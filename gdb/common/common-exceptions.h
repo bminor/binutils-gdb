@@ -270,12 +270,6 @@ struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
 
 /* *INDENT-ON* */
 
-/* Hook to allow client-specific actions to be performed prior to
-   throwing an exception.  This function must be provided by the
-   client, and will be called before any cleanups are run.  */
-
-extern void prepare_to_throw_exception (void);
-
 /* Throw an exception (as described by "struct gdb_exception").  Will
    execute a LONG JUMP to the inner most containing exception handler
    established using catch_exceptions() (or similar).
