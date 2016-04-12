@@ -3013,7 +3013,11 @@ interrupt_target_1 (int all_threads)
     ptid = minus_one_ptid;
   else
     ptid = inferior_ptid;
-  target_interrupt (ptid);
+
+  if (non_stop)
+    target_stop (ptid);
+  else
+    target_interrupt (ptid);
 
   /* Tag the thread as having been explicitly requested to stop, so
      other parts of gdb know not to resume this thread automatically,

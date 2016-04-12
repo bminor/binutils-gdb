@@ -5813,10 +5813,10 @@ remote_interrupt_as (void)
 
 /* Non-stop version of target_interrupt.  Uses `vCtrlC' to interrupt
    the remote target.  It is undefined which thread of which process
-   reports the interrupt.  Returns true if the packet is supported by
-   the server, false otherwise.  */
+   reports the interrupt.  Throws an error if the packet is not
+   supported by the server.  */
 
-static int
+static void
 remote_interrupt_ns (void)
 {
   struct remote_state *rs = get_remote_state ();
@@ -5835,12 +5835,10 @@ remote_interrupt_ns (void)
     case PACKET_OK:
       break;
     case PACKET_UNKNOWN:
-      return 0;
+      error (_("No support for interrupting the remote target."));
     case PACKET_ERROR:
       error (_("Interrupting target failed: %s"), rs->buf);
     }
-
-  return 1;
 }
 
 /* Implement the to_stop function for the remote targets.  */
@@ -5866,30 +5864,15 @@ remote_stop (struct target_ops *self, ptid_t ptid)
 static void
 remote_interrupt (struct target_ops *self, ptid_t ptid)
 {
+  struct remote_state *rs = get_remote_state ();
+
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
 
-  if (non_stop)
-    {
-      /* In non-stop mode, we always stop with no signal instead.  */
-      remote_stop_ns (ptid);
-    }
+  if (target_is_non_stop_p ())
+    remote_interrupt_ns ();
   else
-    {
-      /* In all-stop, we emulate ^C-ing the remote target's
-	 terminal.  */
-      if (target_is_non_stop_p ())
-	{
-	  if (!remote_interrupt_ns ())
-	    {
-	      /* No support for ^C-ing the remote target.  Stop it
-		 (with no signal) instead.  */
-	      remote_stop_ns (ptid);
-	    }
-	}
-      else
-	remote_interrupt_as ();
-    }
+    remote_interrupt_as ();
 }
 
 /* Ask the user what to do when an interrupt is received.  */

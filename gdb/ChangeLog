@@ -1,5 +1,15 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* infcmd.c (interrupt_target_1): Call target_stop is in non-stop
+	mode.
+	* linux-nat.c (linux_nat_interrupt): Delete.
+	(linux_nat_add_target): Don't install linux_nat_interrupt.
+	* remote.c (remote_interrupt_ns): Change return type to void.
+	Throw error if interrupting the target is not supported.
+	(remote_interrupt): Don't call the remote_stop_ns/remote_stop_as.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* defs.h (clear_quit_flag): Remove declaration.
 	* extension-priv.h (struct extension_language_ops)
 	<clear_quit_flag>: Remove field and update comments.
