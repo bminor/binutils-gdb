@@ -1,5 +1,23 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* mi/mi-interp.c (mi_new_thread): Put
+	target_terminal_ours_for_output in effect while outputting.
+	(mi_thread_exit): Use target_terminal_ours_for_output instead of
+	target_terminal_ours.
+	(mi_record_changed, mi_inferior_added, mi_inferior_appeared)
+	(mi_inferior_exit, mi_inferior_removed, mi_traceframe_changed)
+	(mi_tsv_created, mi_tsv_deleted, mi_tsv_modified)
+	(mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified, mi_solib_loaded, mi_solib_unloaded)
+	(mi_command_param_changed, mi_memory_changed)
+	(report_initial_inferior): Use target_terminal_ours_for_output
+	instead of target_terminal_ours.  Restore terminal settings.
+	* mi/mi-main.c (mi_execute_command): Use
+	target_terminal_ours_for_output instead of target_terminal_ours.
+	Restore terminal settings.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/19828
 	* gnu-nat.c (inf_validate_task_sc): Don't call
 	target_terminal_ours / target_terminal_inferior around query.
