@@ -1,5 +1,15 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* defs.h (clear_quit_flag): Remove declaration.
+	* extension-priv.h (struct extension_language_ops)
+	<clear_quit_flag>: Remove field and update comments.
+	* extension.c (clear_quit_flag): Delete.
+	* guile/guile.c (guile_extension_ops): Adjust.
+	* python/python.c (python_extension_ops): Adjust.
+	(gdbpy_clear_quit_flag): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* main.c (captured_main): Don't clear the quit flag.
 
 2016-04-12  Pedro Alves  <palves@redhat.com>

@@ -139,8 +139,6 @@ extern char *debug_file_directory;
    These functions use the extension_language_ops API to allow extension
    language(s) and GDB SIGINT handling to coexist seamlessly.  */
 
-/* * Clear the quit flag.  */
-extern void clear_quit_flag (void);
 /* * Evaluate to non-zero if the quit flag is set, zero otherwise.  This
    will clear the quit flag as a side effect.  */
 extern int check_quit_flag (void);

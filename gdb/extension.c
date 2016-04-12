@@ -794,25 +794,6 @@ restore_active_ext_lang (struct active_ext_lang_state *previous)
   xfree (previous);
 }
 
-/* Clear the quit flag.
-   The flag is cleared in all extension languages,
-   not just the currently active one.  */
-
-void
-clear_quit_flag (void)
-{
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
-    {
-      if (extlang->ops->clear_quit_flag != NULL)
-	extlang->ops->clear_quit_flag (extlang);
-    }
-
-  quit_flag = 0;
-}
-
 /* Set the quit flag.
    This only sets the flag in the currently active extension language.
    If the currently active extension language does not have cooperative

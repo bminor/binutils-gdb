@@ -155,7 +155,6 @@ const struct extension_language_ops guile_extension_ops =
   gdbscm_breakpoint_cond_says_stop,
 
   NULL, /* gdbscm_check_quit_flag, */
-  NULL, /* gdbscm_clear_quit_flag, */
   NULL, /* gdbscm_set_quit_flag, */
 };
 

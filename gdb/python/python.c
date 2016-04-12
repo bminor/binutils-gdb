@@ -146,7 +146,6 @@ static enum ext_lang_rc gdbpy_apply_type_printers
    const struct ext_lang_type_printers *, struct type *, char **);
 static void gdbpy_free_type_printers (const struct extension_language_defn *,
 				      struct ext_lang_type_printers *);
-static void gdbpy_clear_quit_flag (const struct extension_language_defn *);
 static void gdbpy_set_quit_flag (const struct extension_language_defn *);
 static int gdbpy_check_quit_flag (const struct extension_language_defn *);
 static enum ext_lang_rc gdbpy_before_prompt_hook
@@ -184,7 +183,6 @@ const struct extension_language_ops python_extension_ops =
   gdbpy_breakpoint_has_cond,
   gdbpy_breakpoint_cond_says_stop,
 
-  gdbpy_clear_quit_flag,
   gdbpy_set_quit_flag,
   gdbpy_check_quit_flag,
 
@@ -268,15 +266,6 @@ ensure_python_env (struct gdbarch *gdbarch,
   PyErr_Fetch (&env->error_type, &env->error_value, &env->error_traceback);
 
   return make_cleanup (restore_python_env, env);
-}
-
-/* Clear the quit flag.  */
-
-static void
-gdbpy_clear_quit_flag (const struct extension_language_defn *extlang)
-{
-  /* This clears the flag as a side effect.  */
-  PyOS_InterruptOccurred ();
 }
 
 /* Set the quit flag.  */
