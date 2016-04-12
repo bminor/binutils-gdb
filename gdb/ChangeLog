@@ -1,5 +1,11 @@
 2016-04-12  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (type_as_string, type_as_string_and_cleanup): New
+	functions.
+	(ada_lookup_struct_elt_type): Use type_as_string_and_cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
 	* ser-base.c (fd_event): Retry read_prim on EINTR.
 	(do_ser_base_readchar): Retry read_prim on EINTR.
 	(ser_base_write): Retry write_prim on EINTR.
