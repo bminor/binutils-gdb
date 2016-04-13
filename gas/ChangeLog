@@ -1,3 +1,10 @@
+2016-04-13  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19937
+	* testsuite/gas/v850/pr19937.s: New test.
+	* testsuite/gas/v850/pr19937.d: New test control file.
+	* testsuite/gas/v850/basic.exp: Run the new test.
+
 2016-04-13  Maciej W. Rozycki  <macro@imgtec.com>
 	    Andrew Bennett  <andrew.bennett@imgtec.com>
 
