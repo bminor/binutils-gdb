@@ -98,7 +98,7 @@ typedef enum
 } relax_optionT;
 
 /* Struct contains all assembler options set with .set.  */
-struct
+static struct
 {
   /* .set noat -> noat = 1 allows assembly code to use at without warning
      and macro expansions generate a warning.

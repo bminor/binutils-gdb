@@ -207,7 +207,7 @@ ppc_cpu_t sticky = 0;
 unsigned int ppc_abiversion = 0;
 
 /* Flags set on encountering toc relocs.  */
-enum {
+static enum {
   has_large_toc_reloc = 1,
   has_small_toc_reloc = 2
 } toc_reloc_types;

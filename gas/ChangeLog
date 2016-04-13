@@ -1,5 +1,11 @@
 2016-04-14  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-nios2.c (nios2_as_options): Make file static.
+	* config/tc-ppc.c (toc_reloc_ypes): Likewise.
+	* config/tc-sparc.c (native_op_table): Likewise.
+
+2016-04-14  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-m32c.c (M32C_Macros): Remove.
 	* config/tc-msp430.c (option_numbers): Likewise.
 
