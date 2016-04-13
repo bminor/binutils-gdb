@@ -1,3 +1,8 @@
+2016-04-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* boards/gdbserver-base.exp (${board}_download): Copy source file to
+	standard output directory.
+
 2016-04-13  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* gdb.trace/trace-condition.exp (foreach): Fix emit_sub testcase.
