@@ -1,3 +1,7 @@
+2016-04-13  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/instruction_history.c (loop): Add declaration.
+
 2016-04-12  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* gdb.trace/ftrace.exp (proc): Change test prefix from "ond" to "cond".
