@@ -1,3 +1,9 @@
+2016-04-26  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf32-rx.c (rx_set_section_contents): Avoid arithmetic on void *.
+	* mmo.c (mmo_get_section_contents): Likewise.
+	(mmo_set_section_contents): Likewise.
+
 2016-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_link_hash_table): Update comments for

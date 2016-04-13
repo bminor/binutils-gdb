@@ -2120,7 +2120,7 @@ mmo_get_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
 
       memcpy (location, loc, chunk_size);
 
-      location += chunk_size;
+      location = (bfd_byte *) location + chunk_size;
       bytes_to_do -= chunk_size;
       offset += chunk_size;
     }
@@ -2657,7 +2657,7 @@ mmo_set_section_contents (bfd *abfd ATTRIBUTE_UNUSED, sec_ptr sec,
 
       memcpy (loc, location, chunk_size);
 
-      location += chunk_size;
+      location = (bfd_byte *) location + chunk_size;
       bytes_to_do -= chunk_size;
       offset += chunk_size;
     }
