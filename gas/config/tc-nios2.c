@@ -3910,7 +3910,7 @@ md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
 
 /* Called just before the assembler exits.  */
 void
-md_end ()
+md_end (void)
 {
   /* FIXME - not yet implemented */
 }

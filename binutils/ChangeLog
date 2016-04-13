@@ -1,3 +1,7 @@
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* resres.c: Likewise.
+
 2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in: Regenerated with automake 1.11.6.

@@ -1,3 +1,13 @@
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* cgen.c: Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-metag.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-rl78.c: Likewise.
+
 2016-04-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* doc/c-arc.texi (ARC Options): Add nps400 to list of valus for

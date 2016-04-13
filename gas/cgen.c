@@ -92,7 +92,7 @@ static int num_fixups;
    ??? May wish to make this static and delete calls in md_assemble.  */
 
 void
-gas_cgen_init_parse ()
+gas_cgen_init_parse (void)
 {
   num_fixups = 0;
 }
@@ -154,7 +154,7 @@ struct saved_fixups
 static struct saved_fixups stored_fixups[MAX_SAVED_FIXUP_CHAINS];
 
 void
-gas_cgen_initialize_saved_fixups_array ()
+gas_cgen_initialize_saved_fixups_array (void)
 {
   int i = 0;
 
@@ -1047,7 +1047,7 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
    Called after gas_cgen_cpu_desc has been created.  */
 
 void
-gas_cgen_begin ()
+gas_cgen_begin (void)
 {
   if (flag_signed_overflow_ok)
     cgen_set_signed_overflow_ok (gas_cgen_cpu_desc);

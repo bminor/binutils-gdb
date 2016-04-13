@@ -2114,9 +2114,7 @@ static asymbol *mmix_elf_reg_section_symbol_ptr;
 /* Handle the special section numbers that a symbol may use.  */
 
 void
-mmix_elf_symbol_processing (abfd, asym)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asymbol *asym;
+mmix_elf_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *asym)
 {
   elf_symbol_type *elfsym;
 
@@ -2491,9 +2489,8 @@ bpo_reloc_request_sort_fn (const void * p1, const void * p2)
    from base-plus-offset relocs.  */
 
 void
-mmix_dump_bpo_gregs (link_info, pf)
-     struct bfd_link_info *link_info;
-     bfd_error_handler_type pf;
+mmix_dump_bpo_gregs (struct bfd_link_info *link_info,
+		     bfd_error_handler_type pf)
 {
   bfd *bpo_greg_owner;
   asection *bpo_gregs_section;

@@ -1,5 +1,12 @@
 2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* cache.c: Update old style function definitions.
+	* elf32-m68k.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* stab-syms.c: Likewise.
+
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* elf32-arm.c (put_thumb2_insn): Change argument type to bfd_byte *.
 
 2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>

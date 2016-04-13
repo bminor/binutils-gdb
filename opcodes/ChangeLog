@@ -1,3 +1,26 @@
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* alpha-dis.c: Regenerate.
+	* crx-dis.c: Likewise.
+	* disassemble.c: Likewise.
+	* epiphany-opc.c: Likewise.
+	* fr30-opc.c: Likewise.
+	* frv-opc.c: Likewise.
+	* ip2k-opc.c: Likewise.
+	* iq2000-opc.c: Likewise.
+	* lm32-opc.c: Likewise.
+	* lm32-opinst.c: Likewise.
+	* m32c-opc.c: Likewise.
+	* m32r-opc.c: Likewise.
+	* m32r-opinst.c: Likewise.
+	* mep-opc.c: Likewise.
+	* mt-opc.c: Likewise.
+	* or1k-opc.c: Likewise.
+	* or1k-opinst.c: Likewise.
+	* tic80-opc.c: Likewise.
+	* xc16x-opc.c: Likewise.
+	* xstormy16-opc.c: Likewise.
+
 2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-nps400-tbl.h: Add addb, subb, adcb, sbcb, andb, xorb, orb,

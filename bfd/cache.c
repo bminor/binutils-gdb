@@ -566,7 +566,7 @@ RETURNS
 */
 
 bfd_boolean
-bfd_cache_close_all ()
+bfd_cache_close_all (void)
 {
   bfd_boolean ret = TRUE;
 
