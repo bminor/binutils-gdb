@@ -754,6 +754,46 @@ ccp_convert_array (struct compile_cplus_instance *context, struct type *type)
     }
 }
 
+/* Get the access flag for the NUM'th field of TYPE.  */
+
+static enum gcc_cp_symbol_kind
+get_field_access_flag (const struct type *type, int num)
+{
+  if (TYPE_FIELD_PROTECTED (type, num))
+    return GCC_CP_ACCESS_PROTECTED;
+  else if (TYPE_FIELD_PRIVATE (type, num))
+    return GCC_CP_ACCESS_PRIVATE;
+
+  /* GDB assumes everything else is public.  */
+  return GCC_CP_ACCESS_PUBLIC;
+}
+
+/* Get the access flag for the NUM'th method of TYPE's FNI'th
+   fieldlist.  */
+
+static enum gcc_cp_symbol_kind
+get_method_access_flag (const struct type *type, int fni, int num)
+{
+  const struct fn_field *methods;
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
+
+  /* If this type was not declared a class, everything is public.  */
+  if (!TYPE_DECLARED_CLASS (type))
+    return GCC_CP_ACCESS_PUBLIC;
+
+  /* Otherwise, read accessibility from the fn_field.  */
+  methods = TYPE_FN_FIELDLIST1 (type, fni);
+  if (TYPE_FN_FIELD_PUBLIC (methods, num))
+    return GCC_CP_ACCESS_PUBLIC;
+  else if (TYPE_FN_FIELD_PROTECTED (methods, num))
+    return GCC_CP_ACCESS_PROTECTED;
+  else if (TYPE_FN_FIELD_PRIVATE (methods, num))
+    return GCC_CP_ACCESS_PRIVATE;
+
+  gdb_assert_not_reached ("unhandled method access specifier");
+}
+
 /* Convert a typedef of TYPE.  */
 
 static gcc_type
@@ -874,10 +914,8 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 		       field_name, core_addr_to_string (physaddr));
 		CPCALL (new_decl, context,
 			field_name,
-			GCC_CP_SYMBOL_VARIABLE
-			/* FIXME: use correct access flag for the
-			   static data member.  -lxo */
-			| GCC_CP_ACCESS_PUBLIC,
+			(GCC_CP_SYMBOL_VARIABLE
+			 | get_field_access_flag (type, i)),
 			field_type,
 			NULL,
 			physaddr,
@@ -909,10 +947,8 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 		  }
 		CPCALL (new_decl, context,
 			field_name,
-			GCC_CP_SYMBOL_VARIABLE
-			/* FIXME: use correct access flag for the
-			   static data member.  -lxo */
-			| GCC_CP_ACCESS_PUBLIC,
+			(GCC_CP_SYMBOL_VARIABLE
+			 | get_field_access_flag (type, i)),
 			field_type,
 			NULL,
 			physaddr,
@@ -931,8 +967,7 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 	  /* !!keiths: I am guessing this is insufficient... */
 	  unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
 	  enum gcc_cp_symbol_kind field_flags = GCC_CP_SYMBOL_FIELD
-	    /* FIXME: use correct access flag for the field.  -lxo */
-	    | GCC_CP_ACCESS_PUBLIC
+	    | get_field_access_flag (type, i)
 	  /* FIXME:
 	    | (field-is-mutable-p (type, i)
 	       ? GCC_CP_FLAG_FIELD_MUTABLE
@@ -1404,9 +1439,6 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, j),
 			       get_current_search_block (), VAR_DOMAIN, NULL);
 
-	  /* FIXME: use correct access flag for the class member.  -lxo */
-	  sym_kind |= GCC_CP_ACCESS_PUBLIC;
-
 	  if (sym.symbol == NULL)
 	    {
 	      if (TYPE_FN_FIELD_VIRTUAL_P (methods, j))
@@ -1424,9 +1456,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 		  CPCALL (new_decl, context,
 			  name,
 			  (sym_kind
-			   /* FIXME: use correct access flag for the
-			      virtual member function.  -lxo */
-			   | GCC_CP_ACCESS_PUBLIC
+			   | get_method_access_flag (type, i, j)
 			   | GCC_CP_FLAG_VIRTUAL_FUNCTION
 			   | GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION),
 			  method_type,
@@ -1508,7 +1538,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	    }
 	  CPCALL (new_decl, context,
 		  name,
-		  sym_kind,
+		  sym_kind | get_method_access_flag (type, i, j),
 		  method_type,
 		  NULL,
 		  address,
@@ -1595,9 +1625,7 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
 	      struct type *base_type = TYPE_BASECLASS (type, i);
 
 	      bases.flags[i] = GCC_CP_SYMBOL_BASECLASS
-		/* FIXME: use correct access flag for the base class.
-		   -lxo */
-		| GCC_CP_ACCESS_PUBLIC
+		| get_field_access_flag (type, i)
 		| (BASETYPE_VIA_VIRTUAL (type, i)
 		   ? GCC_CP_FLAG_BASECLASS_VIRTUAL
 		   : GCC_CP_FLAG_BASECLASS_NOFLAG);

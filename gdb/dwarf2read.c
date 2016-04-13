@@ -13083,6 +13083,9 @@ new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
     accessibility = dwarf2_default_access_attribute (type_die, type_cu);
   switch (accessibility)
     {
+    case DW_ACCESS_public:
+      fnfield.is_public = 1;
+      break;
     case DW_ACCESS_private:
       fnfield.is_private = 1;
       break;
