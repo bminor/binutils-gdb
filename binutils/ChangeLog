@@ -1,3 +1,11 @@
+2016-04-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf.h (init_dwarf_regnames_s390): Declare.
+	* dwarf.c (dwarf_regnames_s390): New.
+	(init_dwarf_regnames_s390): New.
+	(init_dwarf_regnames): Call it.
+	* objdump.c (dump_dwarf): Likewise.
+
 2016-04-11  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/binutils-all/mips/mips16-undecoded.d: New test.
