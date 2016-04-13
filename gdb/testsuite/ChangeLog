@@ -1,5 +1,9 @@
 2016-04-13  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* lib/gdb.exp (gdb_remote_download): Fix and extend comment.
+
+2016-04-13  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* boards/gdbserver-base.exp (${board}_download): Copy source file to
 	standard output directory.
 
