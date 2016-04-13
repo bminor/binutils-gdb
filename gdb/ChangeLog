@@ -1,3 +1,15 @@
+2016-04-13  Pedro Alves  <palves@redhat.com>
+
+	PR remote/19840
+	* remote.c (struct remote_state) <last_resume_exec_dir>: New
+	field.
+	(new_remote_state): Default last_resume_exec_dir to EXEC_FORWARD.
+	(remote_open_1): Reset last_resume_exec_dir to EXEC_FORWARD.
+	(remote_resume): Store the last execution direction.
+	(remote_execution_direction): New function.
+	(init_remote_ops): Install it as to_execution_direction target_ops
+	method.
+
 2016-03-31  Yichao Yu  <yyc1992@gmail.com>
 
 	PR gdb/19858
