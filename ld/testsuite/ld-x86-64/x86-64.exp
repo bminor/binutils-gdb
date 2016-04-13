@@ -491,26 +491,33 @@ if { [isnative] && [which $CC] != 0 } {
 	    "pr17689now.so" \
 	] \
 	[list \
-	    "Build pr17689 with PIE without -fPIE" \
-	    "tmpdir/pr17689.so -pie" \
+	    "Build pr17689b.o" \
+	    "" \
 	    "" \
 	    { pr17689b.S } \
+	    {} \
+	] \
+	[list \
+	    "Build pr17689 with PIE without -fPIE" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie" \
+	    "" \
+	    { dummy.s } \
 	    {{readelf {-Wr} pr17689.rd}} \
 	    "pr17689" \
 	] \
 	[list \
 	    "Build pr17689 with PIE -z now without -fPIE" \
-	    "tmpdir/pr17689.so -pie -Wl,-z,now" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie -Wl,-z,now" \
 	    "" \
-	    { pr17689b.S } \
+	    { dummy.s } \
 	    {{readelf {-Wr} pr17689now.rd}} \
 	    "pr17689now" \
 	] \
 	[list \
 	    "Build pr17827 with PIE without -fPIE" \
-	    "tmpdir/pr17689.so -pie" \
+	    "-Wl,--as-needed tmpdir/pr17689b.o tmpdir/pr17689.so -pie" \
 	    "" \
-	    { pr17689b.S } \
+	    { dummy.s } \
 	    {{readelf {-Wr} pr17827.rd}} \
 	    "pr17827" \
 	] \
@@ -563,10 +570,18 @@ if { [isnative] && [which $CC] != 0 } {
 	    "gotpcrel1d.so" \
 	] \
 	[list \
-	    "Build gotpcrel1" \
-	    "tmpdir/gotpcrel1d.so" \
-	    "-Wa,-mrelax-relocations=yes" \
+	    "Build libgotpcrel1.a" \
+	    "" \
+	    "" \
 	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
+	    "" \
+	    "libgotpcrel1.a" \
+	] \
+	[list \
+	    "Build gotpcrel1" \
+	    "-Wl,--as-needed tmpdir/gotpcrel1a.o tmpdir/gotpcrel1b.o tmpdir/gotpcrel1c.o tmpdir/gotpcrel1d.so" \
+	    "-Wa,-mrelax-relocations=yes" \
+	    { dummy.s } \
 	    {{objdump {-dw} gotpcrel1.dd}} \
 	    "gotpcrel1" \
 	] \
@@ -618,17 +633,17 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run pr17689 with PIE without -fPIE" \
-	    "tmpdir/pr17689.so -pie" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie" \
 	    "" \
-	    { pr17689b.S } \
+	    { dummy.s } \
 	    "pr17689" \
 	    "pr17689.out" \
 	] \
 	[list \
 	    "Run pr17689 with PIE -z now without -fPIE" \
-	    "tmpdir/pr17689.so -pie -z now" \
+	    "--as-needed tmpdir/pr17689b.o tmpdir/pr17689.so -pie -z now" \
 	    "" \
-	    { pr17689b.S } \
+	    { dummy.s } \
 	    "pr17689now" \
 	    "pr17689.out" \
 	] \

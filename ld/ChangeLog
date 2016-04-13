@@ -1,6 +1,13 @@
 2016-06-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2016-04-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19774
+	* testsuite/ld-x86-64/x86-64.exp: Link tmpdir/pr17689b.o before
+	tmpdir/pr17689.so, fix gotpcrel1 test and add more --as-needed
+	tests.
+
 	2016-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19774
