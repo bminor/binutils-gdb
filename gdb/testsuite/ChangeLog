@@ -1,3 +1,7 @@
+2016-04-13  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/trace-condition.exp (foreach): Fix emit_sub testcase.
+
 2016-04-13  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/instruction_history.c (loop): Add declaration.
