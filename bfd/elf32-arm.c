@@ -4241,7 +4241,7 @@ put_thumb_insn (struct elf32_arm_link_hash_table * htab,
 
 static void
 put_thumb2_insn (struct elf32_arm_link_hash_table * htab,
-		 bfd * output_bfd, bfd_vma val, void * ptr)
+		 bfd * output_bfd, bfd_vma val, bfd_byte * ptr)
 {
   /* T2 instructions are 16-bit streamed.  */
   if (htab->byteswap_code != bfd_little_endian (output_bfd))
