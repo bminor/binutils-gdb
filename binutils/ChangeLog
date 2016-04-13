@@ -1,3 +1,17 @@
+2016-04-13  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19983
+	* readelf.c (get_solaris_section_type): New function: Returns the
+	name of Solaris specific section types.
+	(get_solaris_dynamic_type): New function: Return the name of
+	Solaris specific dynamic types.
+	(get_dynamic_type): Use get_solaris_dynamic_type.
+	(get_section_type_name): Use get_solaris_section_type.
+	(get_solaris_symbol_visibility): New function: Returns Solaris
+	specific symbol visibilities.
+	(print_dynamic_symbol): Use get_solaris_symbol_visibility.
+	(process_symbol_table): Likewise.
+
 2016-04-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* dwarf.h (init_dwarf_regnames_s390): Declare.
