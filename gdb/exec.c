@@ -135,6 +135,25 @@ exec_file_clear (int from_tty)
     printf_unfiltered (_("No executable file now.\n"));
 }
 
+/* Returns non-zero if exceptions E1 and E2 are equal.  Returns zero
+   otherwise.  */
+
+static int
+exception_print_same (struct gdb_exception e1, struct gdb_exception e2)
+{
+  const char *msg1 = e1.message;
+  const char *msg2 = e2.message;
+
+  if (msg1 == NULL)
+    msg1 = "";
+  if (msg2 == NULL)
+    msg2 = "";
+
+  return (e1.reason == e2.reason
+	  && e1.error == e2.error
+	  && strcmp (e1.message, e2.message) == 0);
+}
+
 /* See gdbcore.h.  */
 
 void
@@ -142,6 +161,7 @@ exec_file_locate_attach (int pid, int from_tty)
 {
   char *exec_file, *full_exec_path = NULL;
   struct cleanup *old_chain;
+  struct gdb_exception prev_err = exception_none;
 
   /* Do nothing if we already have an executable filename.  */
   exec_file = (char *) get_exec_file (0);
@@ -181,9 +201,45 @@ exec_file_locate_attach (int pid, int from_tty)
     }
 
   old_chain = make_cleanup (xfree, full_exec_path);
+  make_cleanup (free_current_contents, &prev_err.message);
 
-  exec_file_attach (full_exec_path, from_tty);
-  symbol_file_add_main (full_exec_path, from_tty);
+  /* exec_file_attach and symbol_file_add_main may throw an error if the file
+     cannot be opened either locally or remotely.
+
+     This happens for example, when the file is first found in the local
+     sysroot (above), and then disappears (a TOCTOU race), or when it doesn't
+     exist in the target filesystem, or when the file does exist, but
+     is not readable.
+
+     Even without a symbol file, the remote-based debugging session should
+     continue normally instead of ending abruptly.  Hence we catch thrown
+     errors/exceptions in the following code.  */
+  TRY
+    {
+      exec_file_attach (full_exec_path, from_tty);
+    }
+  CATCH (err, RETURN_MASK_ERROR)
+    {
+      if (err.message != NULL)
+	warning ("%s", err.message);
+
+      prev_err = err;
+
+      /* Save message so it doesn't get trashed by the catch below.  */
+      prev_err.message = xstrdup (err.message);
+    }
+  END_CATCH
+
+  TRY
+    {
+      symbol_file_add_main (full_exec_path, from_tty);
+    }
+  CATCH (err, RETURN_MASK_ERROR)
+    {
+      if (!exception_print_same (prev_err, err))
+	warning ("%s", err.message);
+    }
+  END_CATCH
 
   do_cleanups (old_chain);
 }

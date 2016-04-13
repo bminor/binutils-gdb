@@ -1,3 +1,9 @@
+2016-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* exec.c (exec_file_locate_attach): Guard a couple functions
+	that can throw errors.
+	(exception_print_same): New helper function.
+
 2016-04-13  Pedro Alves  <palves@redhat.com>
 
 	PR remote/19840
