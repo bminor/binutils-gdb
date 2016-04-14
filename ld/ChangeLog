@@ -1,3 +1,9 @@
+2016-04-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 19457
+	* testsuite/ld-scripts/script.exp (extract_symbol_test): Add
+	exceptions for Mingw and Cygwin.
+
 2016-04-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/lib/ld-lib.exp (run_dump_test): Initialise
