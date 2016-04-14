@@ -645,8 +645,8 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_interrupt) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_check_pending_interrupt) (struct target_ops *)
-      TARGET_DEFAULT_IGNORE ();
+    void (*to_pass_ctrlc) (struct target_ops *)
+      TARGET_DEFAULT_FUNC (default_target_pass_ctrlc);
     void (*to_rcmd) (struct target_ops *,
 		     const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
@@ -1716,13 +1716,16 @@ extern void target_stop (ptid_t ptid);
 
 extern void target_interrupt (ptid_t ptid);
 
-/* Some targets install their own SIGINT handler while the target is
-   running.  This method is called from the QUIT macro to give such
-   targets a chance to process a Ctrl-C.  The target may e.g., choose
-   to interrupt the (potentially) long running operation, or give up
-   waiting and disconnect.  */
+/* Pass a ^C, as determined to have been pressed by checking the quit
+   flag, to the target.  Normally calls target_interrupt, but remote
+   targets may take the opportunity to detect the remote side is not
+   responding and offer to disconnect.  */
 
-extern void target_check_pending_interrupt (void);
+extern void target_pass_ctrlc (void);
+
+/* The default target_ops::to_pass_ctrlc implementation.  Simply calls
+   target_interrupt.  */
+extern void default_target_pass_ctrlc (struct target_ops *ops);
 
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is

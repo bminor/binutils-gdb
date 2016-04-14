@@ -8249,6 +8249,7 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
       && h->def_regular)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 					       &eh->dyn_relocs,
+					       NULL,
 					       htab->plt_entry_size,
 					       htab->plt_header_size,
 					       GOT_ENTRY_SIZE);

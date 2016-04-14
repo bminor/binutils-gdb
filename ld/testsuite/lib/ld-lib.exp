@@ -875,6 +875,7 @@ proc run_dump_test { name {extra_options {}} } {
     }
 
     set check_ld(source) ""
+    set check_ld(terminal) 0
     if { $opts(error) != "" \
          || $opts(warning) != "" \
          || $opts(error_output) != "" \

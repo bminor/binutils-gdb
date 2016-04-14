@@ -22,4 +22,5 @@ if ![istarget mips*-*-*] {
 if [is_elf_format] {
     run_dump_test "mixed-mips16"
     run_dump_test "mixed-micromips"
+    run_dump_test "mips16-undecoded"
 }

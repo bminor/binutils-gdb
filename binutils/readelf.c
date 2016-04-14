@@ -1851,6 +1851,34 @@ get_ia64_dynamic_type (unsigned long type)
 }
 
 static const char *
+get_solaris_section_type (unsigned long type)
+{
+  switch (type)
+    {
+    case 0x6fffffee: return "SUNW_ancillary";
+    case 0x6fffffef: return "SUNW_capchain";
+    case 0x6ffffff0: return "SUNW_capinfo";
+    case 0x6ffffff1: return "SUNW_symsort";
+    case 0x6ffffff2: return "SUNW_tlssort";
+    case 0x6ffffff3: return "SUNW_LDYNSYM";
+    case 0x6ffffff4: return "SUNW_dof";
+    case 0x6ffffff5: return "SUNW_cap";
+    case 0x6ffffff6: return "SUNW_SIGNATURE";
+    case 0x6ffffff7: return "SUNW_ANNOTATE";
+    case 0x6ffffff8: return "SUNW_DEBUGSTR";
+    case 0x6ffffff9: return "SUNW_DEBUG";
+    case 0x6ffffffa: return "SUNW_move";
+    case 0x6ffffffb: return "SUNW_COMDAT";
+    case 0x6ffffffc: return "SUNW_syminfo";
+    case 0x6ffffffd: return "SUNW_verdef";
+    case 0x6ffffffe: return "SUNW_verneed";
+    case 0x6fffffff: return "SUNW_versym";
+    case 0x70000000: return "SPARC_GOTDATA";
+    default: return NULL;
+    }
+}
+
+static const char *
 get_alpha_dynamic_type (unsigned long type)
 {
   switch (type)
@@ -1901,6 +1929,43 @@ get_nios2_dynamic_type (unsigned long type)
     case DT_NIOS2_GP: return "NIOS2_GP";
     default:
       return NULL;
+    }
+}
+
+static const char *
+get_solaris_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case 0x6000000d: return "SUNW_AUXILIARY";
+    case 0x6000000e: return "SUNW_RTLDINF";
+    case 0x6000000f: return "SUNW_FILTER";
+    case 0x60000010: return "SUNW_CAP";
+    case 0x60000011: return "SUNW_SYMTAB";
+    case 0x60000012: return "SUNW_SYMSZ";
+    case 0x60000013: return "SUNW_SORTENT";
+    case 0x60000014: return "SUNW_SYMSORT";
+    case 0x60000015: return "SUNW_SYMSORTSZ";
+    case 0x60000016: return "SUNW_TLSSORT";
+    case 0x60000017: return "SUNW_TLSSORTSZ";
+    case 0x60000018: return "SUNW_CAPINFO";
+    case 0x60000019: return "SUNW_STRPAD";
+    case 0x6000001a: return "SUNW_CAPCHAIN";
+    case 0x6000001b: return "SUNW_LDMACH";
+    case 0x6000001d: return "SUNW_CAPCHAINENT";
+    case 0x6000001f: return "SUNW_CAPCHAINSZ";
+    case 0x60000021: return "SUNW_PARENT";
+    case 0x60000023: return "SUNW_ASLR";
+    case 0x60000025: return "SUNW_RELAX";
+    case 0x60000029: return "SUNW_NXHEAP";
+    case 0x6000002b: return "SUNW_NXSTACK";
+
+    case 0x70000001: return "SPARC_REGISTER";
+    case 0x7ffffffd: return "AUXILIARY";
+    case 0x7ffffffe: return "USED";
+    case 0x7fffffff: return "FILTER";
+
+    default: return NULL;      
     }
 }
 
@@ -2022,7 +2087,10 @@ get_dynamic_type (unsigned long type)
 	      result = get_nios2_dynamic_type (type);
 	      break;
 	    default:
-	      result = NULL;
+	      if (elf_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
+		result = get_solaris_dynamic_type (type);
+	      else
+		result = NULL;
 	      break;
 	    }
 
@@ -2046,7 +2114,10 @@ get_dynamic_type (unsigned long type)
 	      result = get_ia64_dynamic_type (type);
 	      break;
 	    default:
-	      result = NULL;
+	      if (elf_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
+		result = get_solaris_dynamic_type (type);
+	      else
+		result = NULL;
 	      break;
 	    }
 
@@ -3981,7 +4052,10 @@ get_section_type_name (unsigned int sh_type)
 	      result = get_ia64_section_type_name (sh_type);
 	      break;
 	    default:
-	      result = NULL;
+	      if (elf_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
+		result = get_solaris_section_type (sh_type);
+	      else
+		result = NULL;
 	      break;
 	    }
 
@@ -6013,7 +6087,7 @@ process_section_headers (FILE * file)
       printf (_("Key to Flags:\n\
   W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n\
   L (link order), O (extra OS processing required), G (group), T (TLS),\n\
-  C (compressed), x (unknown), o (OS specific), E (exclude),\n"));
+  C (compressed), x (unknown), o (OS specific), E (exclude),\n  "));
       if (elf_header.e_machine == EM_X86_64
 	  || elf_header.e_machine == EM_L1OM
 	  || elf_header.e_machine == EM_K1OM)
@@ -10209,6 +10283,18 @@ get_symbol_visibility (unsigned int visibility)
 }
 
 static const char *
+get_solaris_symbol_visibility (unsigned int visibility)
+{
+  switch (visibility)
+    {
+    case 4: return "EXPORTED";
+    case 5: return "SINGLETON";
+    case 6: return "ELIMINATE";
+    default: return get_symbol_visibility (visibility);
+    }
+}
+
+static const char *
 get_mips_symbol_other (unsigned int other)
 {
   switch (other)
@@ -10331,6 +10417,7 @@ get_symbol_other (unsigned int other)
       result = get_ppc64_symbol_other (other);
       break;
     default:
+      result = NULL;
       break;
     }
 
@@ -10471,13 +10558,22 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
 
   printf (" %-7s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
   printf (" %-6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
-  printf (" %-7s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
-  /* Check to see if any other bits in the st_other field are set.
-     Note - displaying this information disrupts the layout of the
-     table being generated, but for the moment this case is very
-     rare.  */
-  if (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other))
-    printf (" [%s] ", get_symbol_other (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other)));
+
+  if (elf_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
+    printf (" %-7s",  get_solaris_symbol_visibility (psym->st_other));
+  else
+    {
+      unsigned int vis = ELF_ST_VISIBILITY (psym->st_other);
+
+      printf (" %-7s",  get_symbol_visibility (vis));
+      /* Check to see if any other bits in the st_other field are set.
+	 Note - displaying this information disrupts the layout of the
+	 table being generated, but for the moment this case is very
+	 rare.  */
+      if (psym->st_other ^ vis)
+	printf (" [%s] ", get_symbol_other (psym->st_other ^ vis));
+    }
+
   printf (" %3.3s ", get_symbol_index_type (psym->st_shndx));
   if (VALID_DYNAMIC_NAME (psym->st_name))
     print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
@@ -10956,12 +11052,19 @@ process_symbol_table (FILE * file)
 	      print_vma (psym->st_size, DEC_5);
 	      printf (" %-7s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
 	      printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
-	      printf (" %-7s", get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
-	      /* Check to see if any other bits in the st_other field are set.
-	         Note - displaying this information disrupts the layout of the
-	         table being generated, but for the moment this case is very rare.  */
-	      if (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other))
-		printf (" [%s] ", get_symbol_other (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other)));
+	      if (elf_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
+		printf (" %-7s",  get_solaris_symbol_visibility (psym->st_other));
+	      else
+		{
+		  unsigned int vis = ELF_ST_VISIBILITY (psym->st_other);
+
+		  printf (" %-7s", get_symbol_visibility (vis));
+		  /* Check to see if any other bits in the st_other field are set.
+		     Note - displaying this information disrupts the layout of the
+		     table being generated, but for the moment this case is very rare.  */
+		  if (psym->st_other ^ vis)
+		    printf (" [%s] ", get_symbol_other (psym->st_other ^ vis));
+		}
 	      printf (" %4s ", get_symbol_index_type (psym->st_shndx));
 	      print_symbol (25, psym->st_name < strtab_size
 			    ? strtab + psym->st_name : _("<corrupt>"));

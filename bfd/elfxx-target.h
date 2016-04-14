@@ -123,6 +123,9 @@
 #ifndef elf_backend_stack_align
 #define elf_backend_stack_align 16
 #endif
+#ifndef elf_backend_strtab_flags
+#define elf_backend_strtab_flags 0
+#endif
 
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
@@ -679,6 +682,10 @@
 #define elf_backend_get_reloc_section _bfd_elf_get_reloc_section
 #endif
 
+#ifndef elf_backend_set_special_section_info_and_link
+#define elf_backend_set_special_section_info_and_link NULL
+#endif
+
 #ifndef elf_backend_compact_eh_encoding
 #define elf_backend_compact_eh_encoding NULL
 #endif
@@ -786,6 +793,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_is_function_type,
   elf_backend_maybe_function_sym,
   elf_backend_get_reloc_section,
+  elf_backend_set_special_section_info_and_link,
   elf_backend_link_order_error_handler,
   elf_backend_relplt_name,
   ELF_MACHINE_ALT1,
@@ -804,6 +812,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_cant_unwind_opcode,
   elf_backend_static_tls_alignment,
   elf_backend_stack_align,
+  elf_backend_strtab_flags,
   elf_backend_collect,
   elf_backend_type_change_ok,
   elf_backend_may_use_rel_p,

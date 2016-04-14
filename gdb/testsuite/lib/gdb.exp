@@ -4211,8 +4211,13 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
 
 	return $destname
     } else {
-	# When the DEST is local, we copy the file to the test directory
-	# (where the executable is), except if that's already where it is.
+	# When the DEST is local, we copy the file to the test directory (where
+	# the executable is).
+	#
+	# Note that we pass TOFILE through standard_output_file, regardless of
+	# whether it is absolute or relative, because we don't want the tests
+	# to be able to write outside their standard output directory.
+
 	set tofile [standard_output_file $tofile]
 
 	file copy -force $fromfile $tofile

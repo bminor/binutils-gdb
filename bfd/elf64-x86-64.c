@@ -900,6 +900,10 @@ struct elf_x86_64_link_hash_table
   bfd_vma next_jump_slot_index;
   /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
   bfd_vma next_irelative_index;
+
+  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
+     to read-only sections.  */
+  bfd_boolean readonly_dynrelocs_against_ifunc;
 };
 
 /* Get the x86-64 ELF linker hash table from a link_info structure.  */
@@ -2659,6 +2663,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     {
       if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 					      &eh->dyn_relocs,
+					      &htab->readonly_dynrelocs_against_ifunc,
 					      plt_entry_size,
 					      plt_entry_size,
 					      GOT_ENTRY_SIZE))
@@ -3899,8 +3904,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
-	      if ((elf_tdata (output_bfd)->has_gnu_symbols
-		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
+	      if (htab->readonly_dynrelocs_against_ifunc)
 		{
 		  info->callbacks->einfo
 		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
@@ -6704,15 +6708,32 @@ static const struct bfd_elf_special_section
 
 /* The 64-bit static TLS arena size is rounded to the nearest 16-byte
    boundary.  */
-#undef elf_backend_static_tls_alignment
+#undef  elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment    16
 
 /* The Solaris 2 ABI requires a plt symbol on all platforms.
 
    Cf. Linker and Libraries Guide, Ch. 2, Link-Editor, Generating the Output
    File, p.63.  */
-#undef elf_backend_want_plt_sym
+#undef  elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	    1
+
+#undef  elf_backend_strtab_flags
+#define elf_backend_strtab_flags	SHF_STRINGS
+
+static bfd_boolean
+elf64_x86_64_set_special_info_link (const bfd *ibfd ATTRIBUTE_UNUSED,
+				    bfd *obfd ATTRIBUTE_UNUSED,
+				    const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+				    Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+{
+  /* PR 19938: FIXME: Need to add code for setting the sh_info
+     and sh_link fields of Solaris specific section types.  */
+  return FALSE;
+}
+
+#undef  elf_backend_set_special_section_info_and_link
+#define elf_backend_set_special_section_info_and_link elf64_x86_64_set_special_info_link
 
 #include "elf64-target.h"
 
@@ -6745,6 +6766,8 @@ elf64_x86_64_nacl_elf_object_p (bfd *abfd)
 #undef	elf_backend_static_tls_alignment
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
+#undef  elf_backend_strtab_flags
+#undef  elf_backend_set_special_section_info_and_link
 
 /* NaCl uses substantially different PLT entries for the same effects.  */
 

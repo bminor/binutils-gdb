@@ -46,7 +46,7 @@ struct catcher
 {
   enum catcher_state state;
   /* Jump buffer pointing back at the exception handler.  */
-  SIGJMP_BUF buf;
+  jmp_buf buf;
   /* Status buffer belonging to the exception handler.  */
   struct gdb_exception exception;
   struct cleanup *saved_cleanup_chain;
@@ -73,7 +73,7 @@ catcher_list_size (void)
   return size;
 }
 
-SIGJMP_BUF *
+jmp_buf *
 exceptions_state_mc_init (void)
 {
   struct catcher *new_catcher = XCNEW (struct catcher);
@@ -248,7 +248,6 @@ exception_rethrow (void)
 {
   /* Run this scope's cleanups before re-throwing to the next
      outermost scope.  */
-  prepare_to_throw_exception ();
   do_cleanups (all_cleanups ());
   throw;
 }
@@ -268,8 +267,6 @@ gdb_exception_sliced_copy (struct gdb_exception *to, const struct gdb_exception 
 void
 throw_exception (struct gdb_exception exception)
 {
-  prepare_to_throw_exception ();
-
   do_cleanups (all_cleanups ());
 
 #if GDB_XCPT == GDB_XCPT_SJMP
@@ -278,7 +275,7 @@ throw_exception (struct gdb_exception exception)
      be zero, by definition in defs.h.  */
   exceptions_state_mc (CATCH_THROWING);
   current_catcher->exception = exception;
-  SIGLONGJMP (current_catcher->buf, exception.reason);
+  longjmp (current_catcher->buf, exception.reason);
 #else
   if (exception.reason == RETURN_QUIT)
     {

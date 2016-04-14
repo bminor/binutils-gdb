@@ -505,7 +505,6 @@ captured_main (void *data)
   dirarg = (char **) xmalloc (dirsize * sizeof (*dirarg));
   ndir = 0;
 
-  clear_quit_flag ();
   saved_command_line = (char *) xstrdup ("");
   instream = stdin;
 

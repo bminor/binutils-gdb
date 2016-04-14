@@ -1048,12 +1048,13 @@ const struct arc_flag_class arc_flag_classes[] =
   { F_CLASS_NONE, { F_NULL } },
 
 #define C_CC	    (C_EMPTY + 1)
-  { F_CLASS_OPTIONAL, { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL,
-			F_NOTZERO, F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS,
-			F_CARRY, F_CARRYSET, F_LOWER, F_CARRYCLR,
-			F_NOTCARRY, F_HIGHER, F_OVERFLOWSET, F_OVERFLOW,
-			F_NOTOVERFLOW, F_OVERFLOWCLR, F_GT, F_GE, F_LT,
-			F_LE, F_HI, F_LS, F_PNZ, F_NULL } },
+  { F_CLASS_OPTIONAL | F_CLASS_EXTEND,
+    { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL,
+      F_NOTZERO, F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS,
+      F_CARRY, F_CARRYSET, F_LOWER, F_CARRYCLR,
+      F_NOTCARRY, F_HIGHER, F_OVERFLOWSET, F_OVERFLOW,
+      F_NOTOVERFLOW, F_OVERFLOWCLR, F_GT, F_GE, F_LT,
+      F_LE, F_HI, F_LS, F_PNZ, F_NULL } },
 
 #define C_AA_ADDR3  (C_CC + 1)
 #define C_AA27	    (C_CC + 1)
@@ -1135,6 +1136,11 @@ const struct arc_flag_class arc_flag_classes[] =
   { F_CLASS_REQUIRED, { F_NPS_HWS_RESTORE, F_NULL}},
 
 };
+
+const unsigned char flags_none[] = { 0 };
+const unsigned char flags_f[]    = { C_F };
+const unsigned char flags_cc[]   = { C_CC };
+const unsigned char flags_ccf[]  = { C_CC, C_F };
 
 /* The operands table.
 
@@ -1499,6 +1505,39 @@ const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);
 const unsigned arc_Toperand = FKT_T;
 const unsigned arc_NToperand = FKT_NT;
 
+const unsigned char arg_none[]		 = { 0 };
+const unsigned char arg_32bit_rarbrc[]	 = { RA, RB, RC };
+const unsigned char arg_32bit_zarbrc[]	 = { ZA, RB, RC };
+const unsigned char arg_32bit_rbrbrc[]	 = { RB, RBdup, RC };
+const unsigned char arg_32bit_rarbu6[]	 = { RA, RB, UIMM6_20 };
+const unsigned char arg_32bit_zarbu6[]	 = { ZA, RB, UIMM6_20 };
+const unsigned char arg_32bit_rbrbu6[]	 = { RB, RBdup, UIMM6_20 };
+const unsigned char arg_32bit_rbrbs12[]	 = { RB, RBdup, SIMM12_20 };
+const unsigned char arg_32bit_ralimmrc[] = { RA, LIMM, RC };
+const unsigned char arg_32bit_rarblimm[] = { RA, RB, LIMM };
+const unsigned char arg_32bit_zalimmrc[] = { ZA, LIMM, RC };
+const unsigned char arg_32bit_zarblimm[] = { ZA, RB, LIMM };
+
+const unsigned char arg_32bit_rbrblimm[] = { RB, RBdup, LIMM };
+const unsigned char arg_32bit_ralimmu6[] = { RA, LIMM, UIMM6_20 };
+const unsigned char arg_32bit_zalimmu6[] = { ZA, LIMM, UIMM6_20 };
+
+const unsigned char arg_32bit_zalimms12[]  = { ZA, LIMM, SIMM12_20 };
+const unsigned char arg_32bit_ralimmlimm[] = { RA, LIMM, LIMMdup };
+const unsigned char arg_32bit_zalimmlimm[] = { ZA, LIMM, LIMMdup };
+
+const unsigned char arg_32bit_rbrc[]   = { RB, RC };
+const unsigned char arg_32bit_zarc[]   = { ZA, RC };
+const unsigned char arg_32bit_rbu6[]   = { RB, UIMM6_20 };
+const unsigned char arg_32bit_zau6[]   = { ZA, UIMM6_20 };
+const unsigned char arg_32bit_rblimm[] = { RB, LIMM };
+const unsigned char arg_32bit_zalimm[] = { ZA, LIMM };
+
+const unsigned char arg_32bit_limmrc[]   = { LIMM, RC };
+const unsigned char arg_32bit_limmu6[]   = { LIMM, UIMM6_20 };
+const unsigned char arg_32bit_limms12[]  = { LIMM, SIMM12_20 };
+const unsigned char arg_32bit_limmlimm[] = { LIMM, LIMMdup };
+
 /* The opcode table.
 
    The format of the opcode table is:
@@ -1539,9 +1578,9 @@ const struct arc_opcode arc_opcodes[] =
 #include "arc-tbl.h"
 #include "arc-nps400-tbl.h"
 #include "arc-ext-tbl.h"
-};
 
-const unsigned arc_num_opcodes = ARRAY_SIZE (arc_opcodes);
+  { NULL, 0, 0, 0, 0, 0, { 0 }, { 0 } }
+};
 
 /* List with special cases instructions and the applicable flags.  */
 const struct arc_flag_special arc_flag_special_cases[] =
@@ -1691,8 +1730,8 @@ const unsigned arc_num_pseudo_insn =
 const struct arc_aux_reg arc_aux_regs[] =
 {
 #undef DEF
-#define DEF(ADDR, SUBCLASS, NAME)		\
-  { ADDR, SUBCLASS, #NAME, sizeof (#NAME)-1 },
+#define DEF(ADDR, CPU, SUBCLASS, NAME)		\
+  { ADDR, CPU, SUBCLASS, #NAME, sizeof (#NAME)-1 },
 
 #include "arc-regs.h"
 

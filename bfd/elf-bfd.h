@@ -1300,6 +1300,14 @@ struct elf_backend_data
   /* Return the section which RELOC_SEC applies to.  */
   asection *(*get_reloc_section) (asection *reloc_sec);
 
+  /* Called when setting the sh_link and sh_info fields of a section with a
+     type >= SHT_LOOS.  Returns TRUE if these fields were initialised in
+     OHEADER, FALSE otherwise.  IHEADER is the best guess matching section
+     from the input bfd IBFD.  */
+  bfd_boolean (*elf_backend_set_special_section_info_and_link)
+    (const bfd *ibfd, bfd *obfd, const Elf_Internal_Shdr *iheader,
+     Elf_Internal_Shdr *oheader);
+		
   /* Used to handle bad SHF_LINK_ORDER input.  */
   bfd_error_handler_type link_order_error_handler;
 
@@ -1360,6 +1368,9 @@ struct elf_backend_data
 
   /* Alignment for the PT_GNU_STACK segment. */
   unsigned stack_align;
+
+  /* Flag bits to assign to a section of type SHT_STRTAB.  */
+  unsigned long elf_strtab_flags;
 
   /* This is TRUE if the linker should act like collect and gather
      global constructors and destructors by name.  This is TRUE for
@@ -2490,7 +2501,8 @@ extern bfd_boolean _bfd_elf_create_ifunc_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_allocate_ifunc_dyn_relocs
   (struct bfd_link_info *, struct elf_link_hash_entry *,
-   struct elf_dyn_relocs **, unsigned int, unsigned int, unsigned int);
+   struct elf_dyn_relocs **, bfd_boolean *, unsigned int,
+   unsigned int, unsigned int);
 extern long _bfd_elf_ifunc_get_synthetic_symtab
   (bfd *, long, asymbol **, long, asymbol **, asymbol **, asection *,
    bfd_vma *(*) (bfd *, asymbol **, asection *, asection *));

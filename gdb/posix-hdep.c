@@ -30,16 +30,3 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 {
   return select (n, readfds, writefds, exceptfds, timeout);
 }
-
-/* Wrapper for the body of signal handlers.  Nothing special needed on
-   POSIX platforms.  */
-
-void
-gdb_call_async_signal_handler (struct async_signal_handler *handler,
-			       int immediate_p)
-{
-  if (immediate_p)
-    call_async_signal_handler (handler);
-  else
-    mark_async_signal_handler (handler);
-}

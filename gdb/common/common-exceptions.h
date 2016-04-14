@@ -20,7 +20,7 @@
 #ifndef COMMON_EXCEPTIONS_H
 #define COMMON_EXCEPTIONS_H
 
-#include "gdb_setjmp.h"
+#include <setjmp.h>
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be less than zero.  enum value 0 is reserved for internal use
@@ -122,9 +122,7 @@ struct gdb_exception
    the only mode supported when GDB is built as a C program.  */
 #define GDB_XCPT_SJMP 1
 
-/* Make GDB exceptions use try/catch behind the scenes.  Can't be made
-   the default until we stop throwing exceptions from signal
-   handlers.  */
+/* Make GDB exceptions use try/catch behind the scenes.  */
 #define GDB_XCPT_TRY 2
 
 /* Specify this mode to build with TRY/CATCH mapped directly to raw
@@ -133,8 +131,11 @@ struct gdb_exception
    spurious code between the TRY and the CATCH block.  */
 #define GDB_XCPT_RAW_TRY 3
 
-/* Always use setjmp/longmp, even in C++ mode.  */
-#define GDB_XCPT GDB_XCPT_SJMP
+#ifdef __cplusplus
+# define GDB_XCPT GDB_XCPT_TRY
+#else
+# define GDB_XCPT GDB_XCPT_SJMP
+#endif
 
 /* Functions to drive the exceptions state machine.  Though declared
    here by necessity, these functions should be considered internal to
@@ -142,7 +143,7 @@ struct gdb_exception
    macros defined below.  */
 
 #if GDB_XCPT == GDB_XCPT_SJMP
-extern SIGJMP_BUF *exceptions_state_mc_init (void);
+extern jmp_buf *exceptions_state_mc_init (void);
 extern int exceptions_state_mc_action_iter (void);
 extern int exceptions_state_mc_action_iter_1 (void);
 extern int exceptions_state_mc_catch (struct gdb_exception *, int);
@@ -181,9 +182,9 @@ extern void exception_rethrow (void);
 
 #define TRY \
      { \
-       SIGJMP_BUF *buf = \
+       jmp_buf *buf = \
 	 exceptions_state_mc_init (); \
-       SIGSETJMP (*buf); \
+       setjmp (*buf); \
      } \
      while (exceptions_state_mc_action_iter ()) \
        while (exceptions_state_mc_action_iter_1 ())
@@ -269,12 +270,6 @@ struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
 #endif /* GDB_XCPT_TRY || GDB_XCPT_RAW_TRY */
 
 /* *INDENT-ON* */
-
-/* Hook to allow client-specific actions to be performed prior to
-   throwing an exception.  This function must be provided by the
-   client, and will be called before any cleanups are run.  */
-
-extern void prepare_to_throw_exception (void);
 
 /* Throw an exception (as described by "struct gdb_exception").  Will
    execute a LONG JUMP to the inner most containing exception handler

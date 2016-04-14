@@ -77,15 +77,19 @@ typedef enum
 /* Flags class.  */
 typedef enum
   {
-    F_CLASS_NONE,
+    F_CLASS_NONE = 0,
 
     /* At most one flag from the set of flags can appear in the
        instruction.  */
-    F_CLASS_OPTIONAL,
+    F_CLASS_OPTIONAL = (1 << 0),
 
     /* Exactly one from from the set of flags must appear in the
        instruction.  */
-    F_CLASS_REQUIRED,
+    F_CLASS_REQUIRED = (1 << 1),
+
+    /* The conditional code can be extended over the standard variants
+       via .extCondCode pseudo-op.  */
+    F_CLASS_EXTEND = (1 << 2)
   } flag_class_t;
 
 /* The opcode table is an array of struct arc_opcode.  */
@@ -130,14 +134,19 @@ struct arc_opcode
    in the order in which the disassembler should consider
    instructions.  */
 extern const struct arc_opcode arc_opcodes[];
-extern const unsigned arc_num_opcodes;
 
 /* CPU Availability.  */
+#define ARC_OPCODE_NONE     0x0000
 #define ARC_OPCODE_ARC600   0x0001  /* ARC 600 specific insns.  */
 #define ARC_OPCODE_ARC700   0x0002  /* ARC 700 specific insns.  */
 #define ARC_OPCODE_ARCv2EM  0x0004  /* ARCv2 EM specific insns.  */
 #define ARC_OPCODE_ARCv2HS  0x0008  /* ARCv2 HS specific insns.  */
 #define ARC_OPCODE_NPS400   0x0010  /* NPS400 specific insns.  */
+
+/* CPU combi.  */
+#define ARC_OPCODE_ARCALL  (ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700	\
+			    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS)
+#define ARC_OPCODE_ARCFPX  (ARC_OPCODE_ARC700 | ARC_OPCODE_ARCv2EM)
 
 /* CPU extensions.  */
 #define ARC_EA       0x0001
@@ -407,6 +416,11 @@ struct arc_aux_reg
   /* Register address.  */
   int address;
 
+  /* One bit flags for the opcode.  These are primarily used to
+     indicate specific processors and environments support the
+     instructions.  */
+  unsigned cpu;
+
   /* AUX register subclass.  */
   insn_subclass_t subclass;
 
@@ -493,5 +507,58 @@ extern const unsigned arc_num_relax_opcodes;
 #define MINSN2OP_0L  (~(FIELDF))
 #define MINSN2OP_BU  (~(FIELDF | FIELDB (63) | FIELDC (63)))
 #define MINSN2OP_0U  (~(FIELDF | FIELDC (63)))
+
+/* Various constants used when defining an extension instruction.  */
+#define ARC_SYNTAX_3OP		(1 << 0)
+#define ARC_SYNTAX_2OP		(1 << 1)
+#define ARC_OP1_MUST_BE_IMM	(1 << 2)
+#define ARC_OP1_IMM_IMPLIED	(1 << 3)
+
+#define ARC_SUFFIX_NONE		(1 << 0)
+#define ARC_SUFFIX_COND		(1 << 1)
+#define ARC_SUFFIX_FLAG		(1 << 2)
+
+#define ARC_REGISTER_READONLY    (1 << 0)
+#define ARC_REGISTER_WRITEONLY   (1 << 1)
+#define ARC_REGISTER_NOSHORT_CUT (1 << 2)
+
+/* Constants needed to initialize extension instructions.  */
+extern const unsigned char flags_none[MAX_INSN_FLGS + 1];
+extern const unsigned char flags_f[MAX_INSN_FLGS + 1];
+extern const unsigned char flags_cc[MAX_INSN_FLGS + 1];
+extern const unsigned char flags_ccf[MAX_INSN_FLGS + 1];
+
+extern const unsigned char arg_none[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_rarbrc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zarbrc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_rbrbrc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_rarbu6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zarbu6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_rbrbu6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_rbrbs12[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_ralimmrc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_rarblimm[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zalimmrc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zarblimm[MAX_INSN_ARGS + 1];
+
+extern const unsigned char arg_32bit_rbrblimm[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_ralimmu6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zalimmu6[MAX_INSN_ARGS + 1];
+
+extern const unsigned char arg_32bit_zalimms12[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_ralimmlimm[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zalimmlimm[MAX_INSN_ARGS + 1];
+
+extern const unsigned char arg_32bit_rbrc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zarc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_rbu6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zau6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_rblimm[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_zalimm[MAX_INSN_ARGS + 1];
+
+extern const unsigned char arg_32bit_limmrc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_limmu6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_limms12[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_limmlimm[MAX_INSN_ARGS + 1];
 
 #endif /* OPCODE_ARC_H */

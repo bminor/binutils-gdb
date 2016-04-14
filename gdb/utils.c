@@ -109,19 +109,6 @@ static int debug_timestamp = 0;
 
 int job_control;
 
-/* Nonzero means quit immediately if Control-C is typed now, rather
-   than waiting until QUIT is executed.  Be careful in setting this;
-   code which executes with immediate_quit set has to be very careful
-   about being able to deal with being interrupted at any time.  It is
-   almost always better to use QUIT; the only exception I can think of
-   is being able to quit out of a system call (using EINTR loses if
-   the SIGINT happens between the previous QUIT and the system call).
-   To immediately quit in the case in which a SIGINT happens between
-   the previous QUIT and setting immediate_quit (desirable anytime we
-   expect to block), call QUIT after setting immediate_quit.  */
-
-int immediate_quit;
-
 /* Nonzero means that strings with character values >0x7F should be printed
    as octal escapes.  Zero means just print the value (e.g. it's an
    international character, and the terminal or window can cope.)  */
@@ -532,8 +519,13 @@ vwarning (const char *string, va_list args)
     (*deprecated_warning_hook) (string, args);
   else
     {
+      struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+
       if (target_supports_terminal_ours ())
-	target_terminal_ours ();
+	{
+	  make_cleanup_restore_target_terminal ();
+	  target_terminal_ours_for_output ();
+	}
       if (filtered_printing_initialized ())
 	wrap_here ("");		/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
@@ -541,6 +533,8 @@ vwarning (const char *string, va_list args)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
       vfprintf_unfiltered (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
+
+      do_cleanups (old_chain);
     }
 }
 
@@ -738,7 +732,10 @@ internal_vproblem (struct internal_problem *problem,
 
   /* Try to get the message out and at the start of a new line.  */
   if (target_supports_terminal_ours ())
-    target_terminal_ours ();
+    {
+      make_cleanup_restore_target_terminal ();
+      target_terminal_ours_for_output ();
+    }
   if (filtered_printing_initialized ())
     begin_line ();
 
@@ -1076,11 +1073,13 @@ quit (void)
 void
 maybe_quit (void)
 {
-  if (check_quit_flag () || sync_quit_force_run)
+  if (sync_quit_force_run)
     quit ();
+
+  quit_handler ();
+
   if (deprecated_interactive_hook)
     deprecated_interactive_hook ();
-  target_check_pending_interrupt ();
 }
 
 
@@ -1231,6 +1230,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
   struct timeval prompt_started, prompt_ended, prompt_delta;
+  struct cleanup *old_chain;
 
   /* Set up according to which answer is the default.  */
   if (defchar == '\0')
@@ -1263,12 +1263,15 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   if (!confirm || server_command)
     return def_value;
 
+  old_chain = make_cleanup_restore_target_terminal ();
+
   /* If input isn't coming from the user directly, just say what
      question we're asking, and then answer the default automatically.  This
      way, important error messages don't get lost when talking to GDB
      over a pipe.  */
   if (! input_from_terminal_p ())
     {
+      target_terminal_ours_for_output ();
       wrap_here ("");
       vfprintf_filtered (gdb_stdout, ctlstr, args);
 
@@ -1277,24 +1280,34 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 		       y_string, n_string, def_answer);
       gdb_flush (gdb_stdout);
 
+      do_cleanups (old_chain);
       return def_value;
     }
 
   if (deprecated_query_hook)
     {
-      return deprecated_query_hook (ctlstr, args);
+      int res;
+
+      res = deprecated_query_hook (ctlstr, args);
+      do_cleanups (old_chain);
+      return res;
     }
 
   /* Format the question outside of the loop, to avoid reusing args.  */
   question = xstrvprintf (ctlstr, args);
+  make_cleanup (xfree, question);
   prompt = xstrprintf (_("%s%s(%s or %s) %s"),
 		      annotation_level > 1 ? "\n\032\032pre-query\n" : "",
 		      question, y_string, n_string,
 		      annotation_level > 1 ? "\n\032\032query\n" : "");
-  xfree (question);
+  make_cleanup (xfree, prompt);
 
   /* Used for calculating time spend waiting for user.  */
   gettimeofday (&prompt_started, NULL);
+
+  /* We'll need to handle input.  */
+  target_terminal_ours ();
+  make_cleanup_override_quit_handler (default_quit_handler);
 
   while (1)
     {
@@ -1342,9 +1355,9 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   timeval_add (&prompt_for_continue_wait_time,
                &prompt_for_continue_wait_time, &prompt_delta);
 
-  xfree (prompt);
   if (annotation_level > 1)
     printf_filtered (("\n\032\032post-query\n"));
+  do_cleanups (old_chain);
   return retval;
 }
 
@@ -1849,6 +1862,7 @@ prompt_for_continue (void)
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
   struct timeval prompt_started, prompt_ended, prompt_delta;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   gettimeofday (&prompt_started, NULL);
 
@@ -1865,15 +1879,15 @@ prompt_for_continue (void)
      beyond the end of the screen.  */
   reinitialize_more_filter ();
 
-  immediate_quit++;
-  QUIT;
-
   /* We'll need to handle input.  */
+  make_cleanup_restore_target_terminal ();
   target_terminal_ours ();
+  make_cleanup_override_quit_handler (default_quit_handler);
 
   /* Call gdb_readline_wrapper, not readline, in order to keep an
      event loop running.  */
   ignore = gdb_readline_wrapper (cont_prompt);
+  make_cleanup (xfree, ignore);
 
   /* Add time spend in this routine to prompt_for_continue_wait_time.  */
   gettimeofday (&prompt_ended, NULL);
@@ -1884,7 +1898,7 @@ prompt_for_continue (void)
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032post-prompt-for-continue\n"));
 
-  if (ignore)
+  if (ignore != NULL)
     {
       char *p = ignore;
 
@@ -1893,15 +1907,15 @@ prompt_for_continue (void)
       if (p[0] == 'q')
 	/* Do not call quit here; there is no possibility of SIGINT.  */
 	throw_quit ("Quit");
-      xfree (ignore);
     }
-  immediate_quit--;
 
   /* Now we have to do this again, so that GDB will know that it doesn't
      need to save the ---Type <return>--- line at the top of the screen.  */
   reinitialize_more_filter ();
 
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
+
+  do_cleanups (old_chain);
 }
 
 /* Initalize timer to keep track of how long we waited for the user.  */

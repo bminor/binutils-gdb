@@ -1,30 +1,58 @@
-22016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * opcode/arc.h (DPA, DPX, SPX): New subclass enums.
-        (ARC_FPUDA): Define.
-        (arc_aux_reg): Add new field.
+	* opcode/arc.h (flag_class_t): Update.
+	(ARC_OPCODE_NONE): Define.
+	(ARC_OPCODE_ARCALL): Likewise.
+	(ARC_OPCODE_ARCFPX): Likewise.
+	(ARC_REGISTER_READONLY): Likewise.
+	(ARC_REGISTER_WRITEONLY): Likewise.
+	(ARC_REGISTER_NOSHORT_CUT): Likewise.
+	(arc_aux_reg): Add cpu.
 
-016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (arc_num_opcodes): Remove.
+	(ARC_SYNTAX_3OP, ARC_SYNTAX_2OP, ARC_OP1_MUST_BE_IMM)
+	(ARC_OP1_IMM_IMPLIED, ARC_SUFFIX_NONE, ARC_SUFFIX_COND)
+	(ARC_SUFFIX_FLAG): Define.
+	(flags_none, flags_f, flags_cc, flags_ccf): Declare.
+	(arg_none, arg_32bit_rarbrc, arg_32bit_zarbrc, arg_32bit_rbrbrc)
+	(arg_32bit_rarbu6, arg_32bit_zarbu6, arg_32bit_rbrbu6)
+	(arg_32bit_rbrbs12, arg_32bit_ralimmrc, arg_32bit_rarblimm)
+	(arg_32bit_zalimmrc, arg_32bit_zarblimm, arg_32bit_rbrblimm)
+	(arg_32bit_ralimmu6, arg_32bit_zalimmu6, arg_32bit_zalimms12)
+	(arg_32bit_ralimmlimm, arg_32bit_zalimmlimm, arg_32bit_rbrc)
+	(arg_32bit_zarc, arg_32bit_rbu6, arg_32bit_zau6, arg_32bit_rblimm)
+	(arg_32bit_zalimm, arg_32bit_limmrc, arg_32bit_limmu6)
+	(arg_32bit_limms12, arg_32bit_limmlimm): Likewise.
+
+2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (DPA, DPX, SPX): New subclass enums.
+	(ARC_FPUDA): Define.
+	(arc_aux_reg): Add new field.
+
+2016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* opcode/arc-func.h (replace_bits24): Changed.
 	(replace_bits24_be): Created.
 
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * opcode/arc.h (insn_subclass_t): Add QUARKSE subclass.
-        (FIELDA, FIELDB, FIELDC, FIELDF, FIELDQ, INSN3OP, INSN2OP)
-        (INSN2OP, INSN3OP_ABC, INSN3OP_ALC, INSN3OP_ABL, INSN3OP_ALL)
-        (INSN3OP_0BC, INSN3OP_0LC, INSN3OP_0BL, INSN3OP_0LL, INSN3OP_ABU)
-        (INSN3OP_ALU, INSN3OP_0BU, INSN3OP_0LU, INSN3OP_BBS, INSN3OP_0LS)
-        (INSN3OP_CBBC, INSN3OP_CBBL, INSN3OP_C0LC, INSN3OP_C0LL)
-        (INSN3OP_CBBU, INSN3OP_C0LU, MINSN3OP_ABC, MINSN3OP_ALC)
-        (MINSN3OP_ABL, MINSN3OP_ALL, MINSN3OP_0BC, MINSN3OP_0LC)
-        (MINSN3OP_0BL, MINSN3OP_0LL, MINSN3OP_ABU, MINSN3OP_ALU)
-        (MINSN3OP_0BU, MINSN3OP_0LU, MINSN3OP_BBS, MINSN3OP_0LS)
-        (MINSN3OP_CBBC, MINSN3OP_CBBL, MINSN3OP_C0LC, MINSN3OP_C0LL)
-        (MINSN3OP_CBBU, MINSN3OP_C0LU, INSN2OP_BC, INSN2OP_BL, INSN2OP_0C)
-        (INSN2OP_0L INSN2OP_BU, INSN2OP_0U, MINSN2OP_BC, MINSN2OP_BL)
-        (MINSN2OP_0C, MINSN2OP_0L, MINSN2OP_BU, MINSN2OP_0U): Define.
+	* opcode/arc.h (insn_subclass_t): Add QUARKSE subclass.
+	(FIELDA, FIELDB, FIELDC, FIELDF, FIELDQ, INSN3OP, INSN2OP)
+	(INSN2OP, INSN3OP_ABC, INSN3OP_ALC, INSN3OP_ABL, INSN3OP_ALL)
+	(INSN3OP_0BC, INSN3OP_0LC, INSN3OP_0BL, INSN3OP_0LL, INSN3OP_ABU)
+	(INSN3OP_ALU, INSN3OP_0BU, INSN3OP_0LU, INSN3OP_BBS, INSN3OP_0LS)
+	(INSN3OP_CBBC, INSN3OP_CBBL, INSN3OP_C0LC, INSN3OP_C0LL)
+	(INSN3OP_CBBU, INSN3OP_C0LU, MINSN3OP_ABC, MINSN3OP_ALC)
+	(MINSN3OP_ABL, MINSN3OP_ALL, MINSN3OP_0BC, MINSN3OP_0LC)
+	(MINSN3OP_0BL, MINSN3OP_0LL, MINSN3OP_ABU, MINSN3OP_ALU)
+	(MINSN3OP_0BU, MINSN3OP_0LU, MINSN3OP_BBS, MINSN3OP_0LS)
+	(MINSN3OP_CBBC, MINSN3OP_CBBL, MINSN3OP_C0LC, MINSN3OP_C0LL)
+	(MINSN3OP_CBBU, MINSN3OP_C0LU, INSN2OP_BC, INSN2OP_BL, INSN2OP_0C)
+	(INSN2OP_0L INSN2OP_BU, INSN2OP_0U, MINSN2OP_BC, MINSN2OP_BL)
+	(MINSN2OP_0C, MINSN2OP_0L, MINSN2OP_BU, MINSN2OP_0U): Define.
 
 2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
@@ -124,8 +152,8 @@
 2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
 	    Janek van Oirschot  <jvanoirs@synopsys.com>
 
-        * opcode/arc.h (arc_opcode arc_relax_opcodes, arc_num_relax_opcodes):
-        Declare.
+	* opcode/arc.h (arc_opcode arc_relax_opcodes)
+	(arc_num_relax_opcodes): Declare.
 
 2016-02-09  Nick Clifton  <nickc@redhat.com>
 

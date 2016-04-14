@@ -1,4 +1,8 @@
 -*- text -*-
+* ARC backend accepts .extInstruction, .extCondCode, .extAuxRegister, and
+  .extCoreRegister pseudo-ops that allow an user to define custom
+  instructions, conditional codes, auxiliary and core registers.
+
 * Add a configure option --enable-elf-stt-common to decide whether ELF
   assembler should generate common symbols with the STT_COMMON type by
   default.  Default to no.

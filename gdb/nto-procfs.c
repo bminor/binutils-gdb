@@ -723,16 +723,12 @@ do_attach (ptid_t ptid)
 static void
 interrupt_query (void)
 {
-  target_terminal_ours ();
-
   if (query (_("Interrupted while waiting for the program.\n\
 Give up (and stop debugging it)? ")))
     {
       target_mourn_inferior ();
       quit ();
     }
-
-  target_terminal_inferior ();
 }
 
 /* The user typed ^C twice.  */

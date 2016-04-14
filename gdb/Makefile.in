@@ -870,7 +870,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	prologue-value.c psymtab.c \
 	regcache.c reggroups.c remote.c remote-fileio.c remote-notif.c reverse.c \
 	sentinel-frame.c \
-	serial.c ser-base.c ser-unix.c skip.c \
+	serial.c ser-base.c ser-unix.c ser-event.c skip.c \
 	solib.c solib-target.c source.c \
 	stabsread.c stack.c probe.c stap-probe.c std-regs.c \
 	symfile.c symfile-debug.c symfile-mem.c symmisc.c symtab.c \
@@ -987,7 +987,7 @@ common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
 common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h nat/amd64-linux-siginfo.h\
 nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h arch/aarch64-insn.h \
-tid-parse.h
+tid-parse.h ser-event.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1065,7 +1065,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \
 	ada-valprint.o c-valprint.o cp-valprint.o d-valprint.o f-valprint.o \
 	m2-valprint.o \
-	serial.o mdebugread.o top.o utils.o \
+	ser-event.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	user-regs.o \
 	frame.o frame-unwind.o doublest.o \

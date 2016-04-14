@@ -491,6 +491,11 @@ target_terminal_inferior (void)
      inferior's terminal modes.  */
   (*current_target.to_terminal_inferior) (&current_target);
   terminal_state = terminal_is_inferior;
+
+  /* If the user hit C-c before, pretend that it was hit right
+     here.  */
+  if (check_quit_flag ())
+    target_pass_ctrlc ();
 }
 
 /* See target.h.  */
@@ -3360,9 +3365,17 @@ target_interrupt (ptid_t ptid)
 /* See target.h.  */
 
 void
-target_check_pending_interrupt (void)
+target_pass_ctrlc (void)
 {
-  (*current_target.to_check_pending_interrupt) (&current_target);
+  (*current_target.to_pass_ctrlc) (&current_target);
+}
+
+/* See target.h.  */
+
+void
+default_target_pass_ctrlc (struct target_ops *ops)
+{
+  target_interrupt (inferior_ptid);
 }
 
 /* See target/target.h.  */

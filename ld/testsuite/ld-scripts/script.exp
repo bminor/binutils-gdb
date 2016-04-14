@@ -154,6 +154,15 @@ proc extract_symbol_test { testfile testname } {
 	    pass $testname
 	    return
 	}
+	# More PE variations...
+	[a-z]*-*-mingw* {
+	    pass $testname
+	    return
+	}
+	[a-z]*-*-cygwin$ {
+	    pass $testname
+	    return
+	}
     }
 
     set extract_syms [run_host_cmd $nm $copyfile]

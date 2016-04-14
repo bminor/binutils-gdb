@@ -1,3 +1,43 @@
+2016-04-14  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19938
+	* testsuite/binutils-all/i386/compressed-1b.d: Allow for the
+	string sections possibly having the SHF_STRINGS flag bit set.
+	* testsuite/binutils-all/i386/compressed-1c.d: Likewise.
+	* testsuite/binutils-all/readelf.s: Likewise.
+	* testsuite/binutils-all/readelf.s-64: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1b.d: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1c.d: Likewise.
+
+2016-04-13  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19938
+	* readelf.c (get_solaris_section_type): New function: Returns the
+	name of Solaris specific section types.
+	(get_solaris_dynamic_type): New function: Return the name of
+	Solaris specific dynamic types.
+	(get_dynamic_type): Use get_solaris_dynamic_type.
+	(get_section_type_name): Use get_solaris_section_type.
+	(get_solaris_symbol_visibility): New function: Returns Solaris
+	specific symbol visibilities.
+	(print_dynamic_symbol): Use get_solaris_symbol_visibility.
+	(process_symbol_table): Likewise.
+
+2016-04-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf.h (init_dwarf_regnames_s390): Declare.
+	* dwarf.c (dwarf_regnames_s390): New.
+	(init_dwarf_regnames_s390): New.
+	(init_dwarf_regnames): Call it.
+	* objdump.c (dump_dwarf): Likewise.
+
+2016-04-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips16-undecoded.d: New test.
+	* testsuite/binutils-all/mips/mips16-undecoded.s: New test
+	source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new test.
+
 2016-04-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 19872

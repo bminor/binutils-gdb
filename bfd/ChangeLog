@@ -1,3 +1,62 @@
+2016-04-14  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19938
+	* elf-bbfd.h (struct elf_backend_data): New field:
+	elf_strtab_flags.
+	New field: elf_backend_set_special_section_info_and_link
+	* elfxx-target.h (elf_backend_strtab_flags): Define if not already
+	defined.
+	(elf_backend_set_special_section_info_and_link): Define if not
+	already defined.
+	(elfNN_bed): Use elf_backend_set_special_section_info_and_link and
+	elf_backend_strtab_flags macros to initialise fields in structure.
+	* elf.c (_bfd_elf_make_section_from_shdr): Check for SHF_STRINGS
+	being set even if SHF_MERGE is not set.
+	(elf_fake_sections): Likewise.
+	(section_match): New function.  Matches two ELF sections based
+	upon fixed characteristics.
+	(find_link): New function.  Locates a section in a BFD that
+	matches a section in a different BFD.
+	(_bfd_elf_copy_private_bfd_data): Copy the sh_info and sh_link
+	fields of reserved sections.
+	(bfd_elf_compute_section_file_positions): Set the flags for the
+	.shstrtab section based upon the elf_strtab_flags field in the
+	elf_backend_data structure.
+	(swap_out_syms): Likewise for the .strtab section.
+	* elflink.c (bfd_elf_final_link): Set the flags for the
+	.strtab section based upon the elf_strtab_flags field in the
+	elf_backend_data structure.
+	* elf32-i386.c (elf32_i386_set_special_info_link): New function.
+	(elf_backend_strtab_flags): Set to SHF_STRINGS for Solaris
+	targets.
+	(elf_backend_set_special_section_info_and_link): Define for
+	Solaris targets.
+	* elf32-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+
+2016-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19939
+	* elf-bfd.h (_bfd_elf_allocate_ifunc_dyn_relocs): Add a pointer
+	to bfd_boolean.
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Updated.
+	Set *readonly_dynrelocs_against_ifunc_p to TRUE if dynamic reloc
+	applies to read-only section.
+	* elf32-i386.c (elf_i386_link_hash_table): Add
+	readonly_dynrelocs_against_ifunc.
+	(elf_i386_allocate_dynrelocs): Updated.
+	(elf_i386_size_dynamic_sections): Issue an error for read-only
+	segment with dynamic IFUNC relocations only if
+	readonly_dynrelocs_against_ifunc is TRUE.
+	* elf64-x86-64.c (elf_x86_64_link_hash_table): Add
+	readonly_dynrelocs_against_ifunc.
+	(elf_x86_64_allocate_dynrelocs): Updated.
+	(elf_x86_64_size_dynamic_sections): Issue an error for read-only
+	segment with dynamic IFUNC relocations only if
+	readonly_dynrelocs_against_ifunc is TRUE.
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_ifunc_dynrelocs):
+	Updated.
+
 2016-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Move error_ret_free_local to be

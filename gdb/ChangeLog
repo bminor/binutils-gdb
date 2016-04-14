@@ -1,3 +1,385 @@
+2016-04-14  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (alias_usage_error): New function.
+	(alias_command): Use it.
+	* ctf.c (ctf_save_metadata_header): Inline metadata_fmt local in
+	ctf_save_write_metadata call.
+
+2016-04-14  Pedro Alves  <palves@redhat.com>
+
+	* ada-typeprint.c (print_fixed_point_type): Don't pass float as
+	argument to function expecting LONGEST.
+	* value.c (unpack_long): Add casts to LONGEST.
+
+2016-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* exec.c (exec_file_locate_attach): Guard a couple functions
+	that can throw errors.
+	(exception_print_same): New helper function.
+
+2016-04-13  Pedro Alves  <palves@redhat.com>
+
+	PR remote/19840
+	* remote.c (struct remote_state) <last_resume_exec_dir>: New
+	field.
+	(new_remote_state): Default last_resume_exec_dir to EXEC_FORWARD.
+	(remote_open_1): Reset last_resume_exec_dir to EXEC_FORWARD.
+	(remote_resume): Store the last execution direction.
+	(remote_execution_direction): New function.
+	(init_remote_ops): Install it as to_execution_direction target_ops
+	method.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.h (GDB_XCPT_TRY): Update comment.
+	[__cplusplus] (GDB_XCPT): Define as GDB_XCPT_TRY.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (struct catcher) <buf>: Now a
+	'jmp_buf' instead of SIGJMP_BUF.
+	(exceptions_state_mc_init): Change return type to 'jmp_buf'.
+	(throw_exception): Use longjmp instead of SIGLONGJMP.
+	* common/common-exceptions.h: Include <setjmp.h> instead of
+	"gdb_setjmp.h".
+	(exceptions_state_mc_init): Change return type to 'jmp_buf'.
+	[GDB_XCPT == GDB_XCPT_SJMP] (TRY): Use setjmp instead of
+	SIGSETJMP.
+	* cp-support.c: Include "gdb_setjmp.h".
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (exception_rethrow): Remove
+	prepare_to_throw_exception call.
+	* common/common-exceptions.h (prepare_to_throw_exception): Delete
+	declaration.
+	* exceptions.c (prepare_to_throw_exception): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* target.c (target_check_pending_interrupt): Delete.
+	* target.h (struct target_ops) <to_check_pending_interrupt>:
+	Remove method.
+	(target_check_pending_interrupt): Remove declaration.
+	* target-delegates.c: Regenerate.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* defs.h: Update comments on SIGINT handling.
+	(immediate_quit): Delete declaration.
+	* event-loop.c (call_async_signal_handler): Delete.
+	* event-loop.h (call_async_signal_handler): Delete declaration.
+	(mark_async_signal_handler): Update comments.
+	(gdb_call_async_signal_handler): Delete declaration.
+	* event-top.c (handle_sigint): Call mark_async_signal_handler
+	instead of gdb_call_async_signal_handler.
+	* exceptions.c (prepare_to_throw_exception): Remove reference to
+	immediate_quit.
+	(exception_fprintf): Remove comments about immediate_quit.
+	* mingw-hdep.c (sigint_event, sigint_handler): Delete.
+	(gdb_select): Don't wait on sigint_event.
+	(gdb_call_async_signal_handler): Delete.
+	(_initialize_mingw_hdep): Delete.
+	* posix-hdep.c (gdb_call_async_signal_handler): Delete.
+	* utils.c (immediate_quit): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (quit_handler_ftype, quit_handler)
+	(make_cleanup_override_quit_handler, default_quit_handler): New.
+	(QUIT): Adjust comments.
+	* event-top.c (default_quit_handler): New function.
+	(quit_handler): New global.
+	(struct quit_handler_cleanup_data): New.
+	(restore_quit_handler, restore_quit_handler_dtor)
+	(make_cleanup_override_quit_handler): New.
+	(async_request_quit): Call QUIT.
+	* remote.c (struct remote_state) <got_ctrlc_during_io>: New field.
+	(async_sigint_remote_twice_token, async_sigint_remote_token):
+	Delete.
+	(remote_close): Update comments.
+	(remote_start_remote): Don't set immediate_quit.  Set starting_up
+	earlier.
+	(remote_serial_quit_handler, remote_unpush_and_throw): New
+	functions.
+	(remote_open_1): Clear got_ctrlc_during_io.  Set
+	remote_async_terminal_ours_p unconditionally.
+	(async_initialize_sigint_signal_handler)
+	(async_handle_remote_sigint, async_handle_remote_sigint_twice)
+	(remote_check_pending_interrupt, async_remote_interrupt)
+	(async_remote_interrupt_twice)
+	(async_cleanup_sigint_signal_handler, ofunc)
+	(sync_remote_interrupt, sync_remote_interrupt_twice): Delete.
+	(remote_terminal_inferior, remote_terminal_ours): Remove async
+	checks.
+	(remote_wait_as): Don't install a SIGINT handler in sync mode.
+	(readchar, remote_serial_write): Override the quit handler with
+	remote_serial_quit_handler.
+	(getpkt_or_notif_sane_1): Don't call QUIT.
+	(initialize_remote_ops): Don't install
+	remote_check_pending_interrupt.
+	(_initialize_remote): Don't create async_sigint_remote_token and
+	async_sigint_remote_twice_token.
+	* ser-base.c (ser_base_wait_for): Call QUIT and use
+	interruptible_select.
+	(ser_base_write): Call QUIT.
+	* ser-go32.c (dos_readchar, dos_write): Call QUIT.
+	* ser-unix.c (wait_for): Don't use VTIME.  Always take the
+	gdb_select path, but call QUIT and interruptible_select.
+	* utils.c (maybe_quit): Call the current quit handler.  Don't call
+	target_check_pending_interrupt.
+	(defaulted_query, prompt_for_continue): Override the quit handler
+	with the default quit handler.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-hooks.c (tui_target_has_run): Delete.
+	(tui_about_to_proceed): Delete.
+	(tui_about_to_proceed_observer): Delete.
+	(tui_install_hooks, tui_remove_hooks): Don't install/remove an
+	about_to_proceed observer.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-interp.c (mi_new_thread): Put
+	target_terminal_ours_for_output in effect while outputting.
+	(mi_thread_exit): Use target_terminal_ours_for_output instead of
+	target_terminal_ours.
+	(mi_record_changed, mi_inferior_added, mi_inferior_appeared)
+	(mi_inferior_exit, mi_inferior_removed, mi_traceframe_changed)
+	(mi_tsv_created, mi_tsv_deleted, mi_tsv_modified)
+	(mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified, mi_solib_loaded, mi_solib_unloaded)
+	(mi_command_param_changed, mi_memory_changed)
+	(report_initial_inferior): Use target_terminal_ours_for_output
+	instead of target_terminal_ours.  Restore terminal settings.
+	* mi/mi-main.c (mi_execute_command): Use
+	target_terminal_ours_for_output instead of target_terminal_ours.
+	Restore terminal settings.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* gnu-nat.c (inf_validate_task_sc): Don't call
+	target_terminal_ours / target_terminal_inferior around query.
+	* i386-tdep.c (i386_record_lea_modrm, i386_process_record): Don't
+	call target_terminal_ours / target_terminal_inferior around
+	yquery.
+	* linux-record.c (record_linux_system_call): Don't call
+	target_terminal_ours / target_terminal_inferior around yquery.
+	* nto-procfs.c (interrupt_query): Don't call target_terminal_ours
+	/ target_terminal_inferior around query.
+	* record-full.c (record_full_check_insn_num): Remove
+	'set_terminal' parameter.  Don't call target_terminal_ours /
+	target_terminal_inferior around query.
+	(record_full_message, record_full_registers_change)
+	(record_full_xfer_partial): Adjust.
+	* remote.c (interrupt_query): Don't call target_terminal_ours /
+	target_terminal_inferior around query.
+	* utils.c (defaulted_query): Install cleanup to restore target
+	terminal.  Put target_terminal_ours_for_output in effect while
+	defaulted producing, and target_terminal_ours in in effect while
+	handling input.
+	(prompt_for_continue): Install cleanup to restore target terminal.
+	Put target_terminal_ours in in effect while handling input.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (defaulted_query, prompt_for_continue): Free temporary
+	strings with cleanups, instead of xfree.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (vwarning, internal_vproblem): Use
+	make_cleanup_restore_target_terminal and
+	target_terminal_ours_for_output.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (post_create_inferior, prepare_one_step): Use
+	target_terminal_ours_for_output instead of target_terminal_ours.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (print_flush): Use target_terminal_ours_for_output
+	instead of target_terminal_ours, and restore target terminal with
+	a cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (gdb_demangle): Use target_terminal_ours_for_output
+	instead of target_terminal_ours, and restore target terminal with
+	a cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (type_as_string, type_as_string_and_cleanup): New
+	functions.
+	(ada_lookup_struct_elt_type): Use type_as_string_and_cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* ser-base.c (fd_event): Retry read_prim on EINTR.
+	(do_ser_base_readchar): Retry read_prim on EINTR.
+	(ser_base_write): Retry write_prim on EINTR.
+	* ser-unix.c (ser_unix_read_prim): Don't retry on EINTR here.
+	(ser_unix_write_prim): Remove comment.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_pass_ctrlc): New function.
+	(init_remote_ops): Install it.
+	* target.c (target_terminal_inferior): Pass pending Ctrl-C to the
+	target.
+	(target_pass_ctrlc, default_target_pass_ctrlc): New functions.
+	* target.h (struct target_ops) <to_pass_ctrlc>: New method.
+	(target_pass_ctrlc, default_target_pass_ctrlc): New declarations.
+	* target-delegates.c: Regenerate.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (interrupt_target_1): Call target_stop is in non-stop
+	mode.
+	* linux-nat.c (linux_nat_interrupt): Delete.
+	(linux_nat_add_target): Don't install linux_nat_interrupt.
+	* remote.c (remote_interrupt_ns): Change return type to void.
+	Throw error if interrupting the target is not supported.
+	(remote_interrupt): Don't call the remote_stop_ns/remote_stop_as.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (clear_quit_flag): Remove declaration.
+	* extension-priv.h (struct extension_language_ops)
+	<clear_quit_flag>: Remove field and update comments.
+	* extension.c (clear_quit_flag): Delete.
+	* guile/guile.c (guile_extension_ops): Adjust.
+	* python/python.c (python_extension_ops): Adjust.
+	(gdbpy_clear_quit_flag): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* main.c (captured_main): Don't clear the quit flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (prepare_to_throw_exception): Don't clear the quit
+	flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (command_handler): Don't call clear_quit_flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* remote-sim.c (gdb_os_poll_quit): Don't call clear_quit_flag.
+	* remote.c (remote_wait_as): Don't call clear_quit_flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* python/python.c: Include "ser-event.h".
+	(gdbpy_event_fds): Delete.
+	(gdbpy_serial_event): New.
+	(gdbpy_run_events): Change prototype.  Use serial_event_clear
+	instead of serial_readchar.
+	(gdbpy_post_event): Use serial_event_set instead of serial_write.
+	(gdbpy_initialize_events): Use make_serial_event instead of
+	serial_pipe.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* defs.h: Extend QUIT-related comments to mention
+	interruptible_select.
+	(quit_serial_event_set, quit_serial_event_clear): Declare.
+	* event-top.c: Include "ser-event.h" and "gdb_select.h".
+	(quit_serial_event): New global.
+	(async_init_signals): Make quit_serial_event.
+	(quit_serial_event_set, quit_serial_event_clear)
+	(quit_serial_event_fd, interruptible_select): New functions.
+	* extension.c (set_quit_flag): Set the quit serial event.
+	(check_quit_flag): Clear the quit serial event.
+	* gdb_select.h (interruptible_select): New declaration.
+	* guile/scm-ports.c (ioscm_input_waiting): Use
+	interruptible_select instead of gdb_select.
+	* top.c (gdb_readline_no_editing): Likewise.
+	* ui-file.c (stdio_file_read): Likewise.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c: Include "ser-event.h".
+	(async_signal_handlers_serial_event): New global.
+	(async_signals_handler, initialize_async_signal_handlers): New
+	functions.
+	(mark_async_signal_handler): Set
+	async_signal_handlers_serial_event.
+	(invoke_async_signal_handlers): Clear
+	async_signal_handlers_serial_event.
+	* event-top.c (async_init_signals): Call
+	initialize_async_signal_handlers.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add ser-event.c.
+	(HFILES_NO_SRCDIR): Add ser-event.h.
+	(COMMON_OBS): Add ser-event.o.
+	* ser-event.c, ser-event.h: New files.
+	* serial.c (new_serial): New function, factored out from
+	(serial_fdopen_ops): ... this.
+	(serial_open_ops_1): New function, factored out from
+	(serial_open): ... this.
+	(serial_open_ops): New function.
+	* serial.h (struct serial): Forware declare.
+	(serial_open_ops): New declaration.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* serial.c (serial_open, serial_fdopen_ops, do_serial_close):
+	Remove references to name.
+	* serial.h (struct serial) <name>: Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* remote-fileio.c (sigint_fileio_token, remote_fio_no_longjmp):
+	Delete.
+	(async_remote_fileio_interrupt): Delete.
+	(remote_fileio_ctrl_c_signal_handler): Don't call the async signal
+	handler.  Instead just always set the ctrl_c flag.
+	(remote_fileio_reply): Clear remote_fio_ctrl_c_flag before
+	re-enabling the SIGINT handler.
+	(remote_fileio_func_open, remote_fileio_func_close)
+	(remote_fileio_func_read, remote_fileio_func_write)
+	(remote_fileio_func_lseek, remote_fileio_func_rename)
+	(remote_fileio_func_unlink, remote_fileio_func_stat)
+	(remote_fileio_func_fstat, remote_fileio_func_gettimeofday)
+	(remote_fileio_func_isatty, remote_fileio_func_system)
+	(remote_fileio_request): Remove references to
+	remote_fio_no_longjmp.
+	(initialize_remote_fileio): Don't create an async signal handler.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (stdin_event_handler): Call QUIT;
+	(prompt_for_continue): Don't run with immediate_quit set.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-io.c (tui_redisplay_readline): Check
+	gdb_in_secondary_prompt_p instead of immediate_quit.
+	* tui/tui.c: Include top.h.
+	(tui_rl_startup_hook): Check gdb_in_secondary_prompt_p instead of
+	immediate_quit.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* top.c (read_command_file): Inline command_loop here.
+	(command_loop): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* top.c: Include "gdb_select.h".
+	(gdb_readline_no_editing): Wait for input with gdb_select instead
+	of blocking in fgetc.
+	(command_line_input): Don't set immediate_quit.
+
 2016-04-08  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* value.c (value_next): Make pass-by-reference parameters const-correct.

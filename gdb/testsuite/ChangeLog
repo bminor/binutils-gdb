@@ -1,3 +1,29 @@
+2016-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.server/connect-with-no-symbol-file.c: New file.
+	* gdb.server/connect-with-no-symbol-file.exp: New file.
+
+2016-04-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (gdb_remote_download): Fix and extend comment.
+
+2016-04-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* boards/gdbserver-base.exp (${board}_download): Copy source file to
+	standard output directory.
+
+2016-04-13  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/trace-condition.exp (foreach): Fix emit_sub testcase.
+
+2016-04-13  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/instruction_history.c (loop): Add declaration.
+
+2016-04-12  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/ftrace.exp (proc): Change test prefix from "ond" to "cond".
+
 2016-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.python/py-mi-events-gdb.py (signal_stop_handler): Add

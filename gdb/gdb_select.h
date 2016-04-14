@@ -33,4 +33,19 @@
 extern int gdb_select (int n, fd_set *readfds, fd_set *writefds,
 		       fd_set *exceptfds, struct timeval *timeout);
 
+/* Convenience wrapper around gdb_select that returns -1/EINTR if
+   set_quit_flag is set, either on entry or from a signal handler or
+   from a different thread while select is blocked.  The quit flag is
+   not cleared on exit -- the caller is responsible to check it with
+   check_quit_flag or QUIT.
+
+   Note this does NOT return -1/EINTR if any signal handler other than
+   SIGINT runs, nor if the current SIGINT handler does not call
+   set_quit_flag.  */
+extern int interruptible_select (int n,
+				 fd_set *readfds,
+				 fd_set *writefds,
+				 fd_set *exceptfds,
+				 struct timeval *timeout);
+
 #endif /* !defined(GDB_SELECT_H) */

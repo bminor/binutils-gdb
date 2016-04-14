@@ -2527,6 +2527,10 @@ dump_dwarf (bfd *abfd)
       init_dwarf_regnames_aarch64();
       break;
 
+    case bfd_arch_s390:
+      init_dwarf_regnames_s390 ();
+      break;
+
     default:
       break;
     }

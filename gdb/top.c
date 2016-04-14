@@ -51,6 +51,7 @@
 #include "filenames.h"
 #include "frame.h"
 #include "buffer.h"
+#include "gdb_select.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -282,7 +283,21 @@ read_command_file (FILE *stream)
 
   cleanups = make_cleanup (do_restore_instream_cleanup, instream);
   instream = stream;
-  command_loop ();
+
+  /* Read commands from `instream' and execute them until end of file
+     or error reading instream.  */
+
+  while (instream != NULL && !feof (instream))
+    {
+      char *command;
+
+      /* Get a command-line.  This calls the readline package.  */
+      command = command_line_input (NULL, 0, NULL);
+      if (command == NULL)
+	break;
+      command_handler (command);
+    }
+
   do_cleanups (cleanups);
 }
 
@@ -527,25 +542,6 @@ execute_command_to_string (char *p, int from_tty)
   return retval;
 }
 
-/* Read commands from `instream' and execute them
-   until end of file or error reading instream.  */
-
-void
-command_loop (void)
-{
-  while (instream && !feof (instream))
-    {
-      char *command;
-
-      /* Get a command-line.  This calls the readline package.  */
-      command = command_line_input (instream == stdin ?
-				    get_prompt () : (char *) NULL,
-				    instream == stdin, "prompt");
-      if (command == NULL)
-	return;
-      command_handler (command);
-    }
-}
 
 /* When nonzero, cause dont_repeat to do nothing.  This should only be
    set via prevent_dont_repeat.  */
@@ -592,6 +588,10 @@ static char *
 gdb_readline_no_editing (const char *prompt)
 {
   struct buffer line_buffer;
+  /* Read from stdin if we are executing a user defined command.  This
+     is the right thing for prompt_for_continue, at least.  */
+  FILE *stream = instream != NULL ? instream : stdin;
+  int fd = fileno (stream);
 
   buffer_init (&line_buffer);
 
@@ -607,10 +607,26 @@ gdb_readline_no_editing (const char *prompt)
   while (1)
     {
       int c;
+      int numfds;
+      fd_set readfds;
 
-      /* Read from stdin if we are executing a user defined command.
-         This is the right thing for prompt_for_continue, at least.  */
-      c = fgetc (instream ? instream : stdin);
+      QUIT;
+
+      /* Wait until at least one byte of data is available.  Control-C
+	 can interrupt interruptible_select, but not fgetc.  */
+      FD_ZERO (&readfds);
+      FD_SET (fd, &readfds);
+      if (interruptible_select (fd + 1, &readfds, NULL, NULL, NULL) == -1)
+	{
+	  if (errno == EINTR)
+	    {
+	      /* If this was ctrl-c, the QUIT above handles it.  */
+	      continue;
+	    }
+	  perror_with_name (("select"));
+	}
+
+      c = fgetc (stream);
 
       if (c == EOF)
 	{
@@ -1048,10 +1064,6 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
   /* Starting a new command line.  */
   cmd_line_buffer.used_size = 0;
 
-  /* Control-C quits instantly if typed while in this loop
-     since it should not wait until the user types a newline.  */
-  immediate_quit++;
-  QUIT;
 #ifdef STOP_SIGNAL
   if (job_control)
     signal (STOP_SIGNAL, handle_stop_sig);
@@ -1109,7 +1121,6 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
   if (job_control)
     signal (STOP_SIGNAL, SIG_DFL);
 #endif
-  immediate_quit--;
 
   return cmd;
 }

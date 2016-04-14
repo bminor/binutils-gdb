@@ -5464,6 +5464,30 @@ init_dwarf_regnames_aarch64 (void)
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_aarch64);
 }
 
+static const char *const dwarf_regnames_s390[] =
+{
+  /* Avoid saying "r5 (r5)", so omit the names of r0-r15.  */
+  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+  "f0",  "f2",  "f4",  "f6",  "f1",  "f3",  "f5",  "f7",
+  "f8",  "f10", "f12", "f14", "f9",  "f11", "f13", "f15",
+  "cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7",
+  "cr8", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
+  "a0",  "a1",  "a2",  "a3",  "a4",  "a5",  "a6",  "a7",
+  "a8",  "a9",  "a10", "a11", "a12", "a13", "a14", "a15",
+  "pswm", "pswa",
+  NULL, NULL,
+  "v16", "v18", "v20", "v22", "v17", "v19", "v21", "v23",
+  "v24", "v26", "v28", "v30", "v25", "v27", "v29", "v31",
+};
+
+void
+init_dwarf_regnames_s390 (void)
+{
+  dwarf_regnames = dwarf_regnames_s390;
+  dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_s390);
+}
+
 void
 init_dwarf_regnames (unsigned int e_machine)
 {
@@ -5485,6 +5509,10 @@ init_dwarf_regnames (unsigned int e_machine)
 
     case EM_AARCH64:
       init_dwarf_regnames_aarch64 ();
+      break;
+
+    case EM_S390:
+      init_dwarf_regnames_s390 ();
       break;
 
     default:

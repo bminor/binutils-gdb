@@ -11705,7 +11705,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
       /* sh_name was set in prep_headers.  */
       symstrtab_hdr->sh_type = SHT_STRTAB;
-      symstrtab_hdr->sh_flags = 0;
+      symstrtab_hdr->sh_flags = bed->elf_strtab_flags;
       symstrtab_hdr->sh_addr = 0;
       symstrtab_hdr->sh_size = _bfd_elf_strtab_size (flinfo.symstrtab);
       symstrtab_hdr->sh_entsize = 0;
