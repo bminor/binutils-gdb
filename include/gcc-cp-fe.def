@@ -209,12 +209,53 @@ GCC_METHOD3 (gcc_decl, define_cdtor_clone,
 	     gcc_decl,		      /* Argument CDTOR.  */
 	     gcc_address)	      /* Argument ADDRESS.  */
 
-/* Declare DECL as a friend of the current class scope.  DECL may be a
-   function or a class, be they template generics, template
-   specializations or not templates.  */
+/* Declare DECL as a friend of the current class scope, if TYPE is
+   NULL, or of TYPE itself otherwise.  DECL may be a function or a
+   class, be they template generics, template specializations or not
+   templates.  TYPE must be a class type (not a template generic).
 
-GCC_METHOD1 (int /* bool */, new_friend,
-	     gcc_decl)		      /* Argument DECL.  */
+   The new_friend call cannot introduce a declaration; even if the
+   friend is first declared as a friend in the source code, the
+   declaration belongs in the enclosing namespace, so it must be
+   introduced in that namespace, and the resulting declaration can
+   then be made a friend.
+
+   DECL cannot, however, be a member of a template class generic,
+   because we have no means to introduce their declarations.  This
+   interface has no notion of definitions for template generics.  As a
+   consequence, users of this interface must introduce each friend
+   template member specialization separately, i.e., instead of:
+
+     template <typename T> friend struct X<T>::M;
+
+   they must be declared as if they were:
+
+     friend struct X<onetype>::M;
+     friend struct X<anothertype>::M;
+     ... for each specialization of X.
+
+
+   Specializations of a template can have each others' members as
+   friends:
+
+     template <typename T> class foo {
+       int f();
+       template <typename U> friend int foo<U>::f();
+     };
+
+   It wouldn't always be possible to define all specializations of a
+   template class before introducing the friend declarations in their
+   expanded, per-specialization form.
+
+   In order to simplify such friend declarations, and to enable
+   incremental friend declarations as template specializations are
+   introduced, new_friend can be called after the befriended class is
+   fully defined, passing it a non-NULL TYPE argument naming the
+   befriended class type.  */
+
+GCC_METHOD2 (int /* bool */, new_friend,
+	     gcc_decl,		      /* Argument DECL.  */
+	     gcc_type)		      /* Argument TYPE.  */
 
 /* Return the type of a pointer to a given base type.  */
 
