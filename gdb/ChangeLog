@@ -1,5 +1,12 @@
 2016-04-14  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-cmds.c (alias_usage_error): New function.
+	(alias_command): Use it.
+	* ctf.c (ctf_save_metadata_header): Inline metadata_fmt local in
+	ctf_save_write_metadata call.
+
+2016-04-14  Pedro Alves  <palves@redhat.com>
+
 	* ada-typeprint.c (print_fixed_point_type): Don't pass float as
 	argument to function expecting LONGEST.
 	* value.c (unpack_long): Add casts to LONGEST.
