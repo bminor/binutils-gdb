@@ -1,3 +1,8 @@
+2016-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_copy_private_bfd_data): Replace "link" with
+	"sh_link".
+
 2016-04-14  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19938

@@ -1331,7 +1331,7 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 		{
 		  const struct elf_backend_data *bed = get_elf_backend_data (obfd);
 		  bfd_boolean changed = FALSE;
-		  unsigned int link;
+		  unsigned int sh_link;
 
 		  /* Allow the target a chance to decide how these fields should
 		     be set.  */
@@ -1347,11 +1347,12 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 		     bfd.  */
 		  if (iheader->sh_link != SHN_UNDEF)
 		    {
-		      link = find_link (obfd, iheaders[iheader->sh_link],
-					iheader->sh_link);
-		      if (link != SHN_UNDEF)
+		      sh_link = find_link (obfd,
+					   iheaders[iheader->sh_link],
+					   iheader->sh_link);
+		      if (sh_link != SHN_UNDEF)
 			{
-			  oheader->sh_link = link;
+			  oheader->sh_link = sh_link;
 			  changed = TRUE;
 			}
 		      else
@@ -1368,15 +1369,16 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 			 but if the SHF_LINK_INFO flag is set then it
 			 should be interpreted as a section index.  */
 		      if (iheader->sh_flags & SHF_INFO_LINK)
-			link = find_link (obfd, iheaders[iheader->sh_info],
-					  iheader->sh_info);
+			sh_link = find_link (obfd,
+					     iheaders[iheader->sh_info],
+					     iheader->sh_info);
 		      else
 			/* No idea what it means - just copy it.  */
-			link = iheader->sh_info;
+			sh_link = iheader->sh_info;
 			  
-		      if (link != SHN_UNDEF)
+		      if (sh_link != SHN_UNDEF)
 			{
-			  oheader->sh_info = link;
+			  oheader->sh_info = sh_link;
 			  changed = TRUE;
 			}
 		      else
