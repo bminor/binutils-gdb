@@ -1,3 +1,23 @@
+2016-04-18  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld.texinfo: Document NOCROSSREFS_TO script command.
+	* ldlang.h (struct lang_nocrossrefs): Add onlyfirst field.
+	(lang_add_nocrossref_to): New prototype.
+	* ldcref.c (check_local_sym_xref): Use onlyfirst to only look for
+	symbols defined in the first section.
+	(check_nocrossref): Likewise.
+	* ldgram.y (NOCROSSREFS_TO): New script command.
+	* ldlang.c (lang_add_nocrossref): Set onlyfirst to FALSE.
+	(lang_add_nocrossref_to): New function.
+	* ldlex.l (NOCROSSREFS_TO): New token.
+	* NEWS: Mention NOCROSSREFS_TO.
+	* testsuite/ld-scripts/cross4.t: New file.
+	* testsuite/ld-scripts/cross5.t: Likewise.
+	* testsuite/ld-scripts/cross6.t: Likewise.
+	* testsuite/ld-scripts/cross7.t: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Run 4 new NOCROSSREFS_TO
+	tests.
+
 2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in: Regenerated with automake 1.11.6.

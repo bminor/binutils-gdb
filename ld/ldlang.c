@@ -7486,10 +7486,20 @@ lang_add_nocrossref (lang_nocrossref_type *l)
   n = (struct lang_nocrossrefs *) xmalloc (sizeof *n);
   n->next = nocrossref_list;
   n->list = l;
+  n->onlyfirst = FALSE;
   nocrossref_list = n;
 
   /* Set notice_all so that we get informed about all symbols.  */
   link_info.notice_all = TRUE;
+}
+
+/* Record a section that cannot be referenced from a list of sections.  */
+
+void
+lang_add_nocrossref_to (lang_nocrossref_type *l)
+{
+  lang_add_nocrossref (l);
+  nocrossref_list->onlyfirst = TRUE;
 }
 
 /* Overlay handling.  We handle overlays with some static variables.  */
