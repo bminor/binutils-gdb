@@ -2914,12 +2914,12 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 	return extract_signed_integer (valaddr, len, byte_order);
 
     case TYPE_CODE_FLT:
-      return extract_typed_floating (valaddr, type);
+      return (LONGEST) extract_typed_floating (valaddr, type);
 
     case TYPE_CODE_DECFLOAT:
       /* libdecnumber has a function to convert from decimal to integer, but
 	 it doesn't work when the decimal number has a fractional part.  */
-      return decimal_to_doublest (valaddr, len, byte_order);
+      return (LONGEST) decimal_to_doublest (valaddr, len, byte_order);
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
