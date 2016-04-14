@@ -1,6 +1,17 @@
+2016-04-14  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19938
+	* testsuite/binutils-all/i386/compressed-1b.d: Allow for the
+	string sections possibly having the SHF_STRINGS flag bit set.
+	* testsuite/binutils-all/i386/compressed-1c.d: Likewise.
+	* testsuite/binutils-all/readelf.s: Likewise.
+	* testsuite/binutils-all/readelf.s-64: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1b.d: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1c.d: Likewise.
+
 2016-04-13  Nick Clifton  <nickc@redhat.com>
 
-	PR target/19983
+	PR target/19938
 	* readelf.c (get_solaris_section_type): New function: Returns the
 	name of Solaris specific section types.
 	(get_solaris_dynamic_type): New function: Return the name of

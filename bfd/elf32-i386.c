@@ -6051,15 +6051,93 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 
 /* The 32-bit static TLS arena size is rounded to the nearest 8-byte
    boundary.  */
-#undef elf_backend_static_tls_alignment
+#undef  elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment 8
 
 /* The Solaris 2 ABI requires a plt symbol on all platforms.
 
    Cf. Linker and Libraries Guide, Ch. 2, Link-Editor, Generating the Output
    File, p.63.  */
-#undef elf_backend_want_plt_sym
+#undef  elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	1
+
+#undef  elf_backend_strtab_flags
+#define elf_backend_strtab_flags	SHF_STRINGS
+
+static bfd_boolean
+elf32_i386_set_special_info_link (const bfd *ibfd ATTRIBUTE_UNUSED,
+				  bfd *obfd ATTRIBUTE_UNUSED,
+				  const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+				  Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+{
+  /* PR 19938: FIXME: Need to add code for setting the sh_info
+     and sh_link fields of Solaris specific section types.
+
+     Based upon Oracle Solaris 11.3 Linkers and Libraries Guide, Ch. 13,
+     Object File Format, Table 13-9  ELF sh_link and sh_info Interpretation:
+
+http://docs.oracle.com/cd/E53394_01/html/E54813/chapter6-94076.html#scrolltoc
+
+     The following values should be set:
+     
+Type                 Link                           Info
+-----------------------------------------------------------------------------
+SHT_SUNW_ancillary   The section header index of    0
+ [0x6fffffee]        the associated string table.
+	
+SHT_SUNW_capinfo     The section header index of    For a dynamic object, the
+ [0x6ffffff0]        the associated symbol table.   section header index of
+                                                    the associated
+						    SHT_SUNW_capchain table,
+						    otherwise 0.
+
+SHT_SUNW_symsort     The section header index of    0
+ [0x6ffffff1]        the associated symbol table.
+
+SHT_SUNW_tlssort     The section header index of    0
+ [0x6ffffff2]        the associated symbol table.
+	
+SHT_SUNW_LDYNSYM     The section header index of    One greater than the 
+ [0x6ffffff3]        the associated string table.   symbol table index of the
+		     This index is the same string  last local symbol, 
+		     table used by the SHT_DYNSYM   STB_LOCAL. Since
+		     section.                       SHT_SUNW_LDYNSYM only
+		                                    contains local symbols,
+						    sh_info is equivalent to
+						    the number of symbols in
+						    the table.
+
+SHT_SUNW_cap         If symbol capabilities exist,  If any capabilities refer
+ [0x6ffffff5]        the section header index of    to named strings, the
+                     the associated                 section header index of
+		     SHT_SUNW_capinfo table,        the associated string 
+			  otherwise 0.              table, otherwise 0.
+
+SHT_SUNW_move        The section header index of    0
+ [0x6ffffffa]        the associated symbol table.
+	
+SHT_SUNW_COMDAT      0                              0
+ [0x6ffffffb]
+
+SHT_SUNW_syminfo     The section header index of    The section header index
+ [0x6ffffffc]        the associated symbol table.   of the associated
+		                                    .dynamic section.
+
+SHT_SUNW_verdef      The section header index of    The number of version 
+ [0x6ffffffd]        the associated string table.   definitions within the
+		                                    section.
+
+SHT_SUNW_verneed     The section header index of    The number of version
+ [0x6ffffffe]        the associated string table.   dependencies within the
+                                                    section.
+
+SHT_SUNW_versym      The section header index of    0
+ [0x6fffffff]        the associated symbol table.  */
+  return FALSE;
+}
+
+#undef  elf_backend_set_special_section_info_and_link
+#define elf_backend_set_special_section_info_and_link elf32_i386_set_special_info_link
 
 #include "elf32-target.h"
 
@@ -6077,7 +6155,7 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 #define TARGET_LITTLE_SYM		iamcu_elf32_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-iamcu"
-#undef ELF_ARCH
+#undef  ELF_ARCH
 #define ELF_ARCH			bfd_arch_iamcu
 
 #undef	ELF_MACHINE_CODE
@@ -6095,6 +6173,9 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	    0
+
+#undef  elf_backend_strtab_flags
+#undef  elf_backend_set_special_section_info_and_link
 
 #include "elf32-target.h"
 
