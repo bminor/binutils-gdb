@@ -1,3 +1,9 @@
+2016-04-15  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-ptrace.h [__mips__] (GDB_ARCH_IS_TRAP_BRKPT): Also
+	accept TRAP_BRKPT.
+	 [__mips__] (GDB_ARCH_IS_TRAP_HWBKPT): Also accept TRAP_HWBKPT.
+
 2016-04-15  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (thumb_stack_frame_destroyed_p): Return zero if
