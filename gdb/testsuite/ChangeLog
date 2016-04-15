@@ -1,3 +1,8 @@
+2016-04-18  Bernhard Heckel <bernhard.heckel@intel.com>
+
+	* lib/compiler.c: Add Intel specific preprocessor macros.
+	* lib/compiler.cc: Likewise.
+	
 2016-04-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.server/connect-with-no-symbol-file.c: New file.

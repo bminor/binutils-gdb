@@ -44,3 +44,15 @@ set compiler_info [join {armcc __ARMCC_VERSION} -]
 #if defined (__clang__)
 set compiler_info [join {clang __clang_major__ __clang_minor__ __clang_patchlevel__} -]
 #endif
+
+#if defined (__ICC)
+set icc_major [string range __ICC 0 1]
+set icc_minor [format "%d" [string range __ICC 2 [expr {[string length __ICC] -1}]]]
+set icc_update __INTEL_COMPILER_UPDATE
+set compiler_info [join "icc $icc_major $icc_minor $icc_update" -]
+#elif defined (__ICL)
+set icc_major [string range __ICL 0 1]
+set icc_minor [format "%d" [string range __ICL 2 [expr {[string length __ICL] -1}]]]
+set icc_update __INTEL_COMPILER_UPDATE
+set compiler_info [join "icc $icc_major $icc_minor $icc_update" -]
+#endif
