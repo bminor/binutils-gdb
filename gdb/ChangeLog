@@ -1,3 +1,8 @@
+2016-04-15  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_stack_frame_destroyed_p): Return zero if
+	PC is far from the end of function.
+
 2016-04-14  Pedro Alves  <palves@redhat.com>
 
 	* cli/cli-cmds.c (alias_usage_error): New function.

@@ -3135,6 +3135,14 @@ thumb_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
     return 0;
 
+  if (func_end - pc > 4 * 4)
+    {
+      /* There shouldn't be more than four instructions in epilogue.
+	 If PC is still 16 bytes away from FUNC_END, it isn't in
+	 epilogue.  */
+      return 0;
+    }
+
   /* The epilogue is a sequence of instructions along the following lines:
 
     - add stack frame size to SP or FP
