@@ -1,3 +1,7 @@
+2016-04-15  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (toc_reloc_types): Wrap in #ifdef OBJ_ELF
+
 2016-04-14  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-nios2.c (nios2_as_options): Make file static.
