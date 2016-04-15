@@ -119,14 +119,14 @@ struct buffer;
 /* The x86 kernel gets some of the si_code values backwards, like
    this:
 
-   | what                                     | si_code    |
-   |------------------------------------------+------------|
-   | software breakpoints (int3)              | SI_KERNEL  |
-   | single-steps                             | TRAP_TRACE |
-   | single-stepping a syscall                | TRAP_BRKPT |
-   | user sent SIGTRAP                        | 0          |
-   | exec SIGTRAP (when no PTRACE_EVENT_EXEC) | 0          |
-   | hardware breakpoints/watchpoints         | TRAP_HWBPT |
+   | what                                     | si_code     |
+   |------------------------------------------+-------------|
+   | software breakpoints (int3)              | SI_KERNEL   |
+   | single-steps                             | TRAP_TRACE  |
+   | single-stepping a syscall                | TRAP_BRKPT  |
+   | user sent SIGTRAP                        | 0           |
+   | exec SIGTRAP (when no PTRACE_EVENT_EXEC) | 0           |
+   | hardware breakpoints/watchpoints         | TRAP_HWBKPT |
 
    That is, it reports SI_KERNEL for software breakpoints (and only
    for those), and TRAP_BRKPT for single-stepping a syscall...  If the
@@ -140,14 +140,32 @@ struct buffer;
    in SPU code on a Cell/B.E.  However, SI_KERNEL is never seen
    on a SIGTRAP for any other reason.
 
-   The generic Linux target code should use GDB_ARCH_IS_TRAP_BRKPT
-   instead of TRAP_BRKPT to abstract out these peculiarities.  */
+   The MIPS kernel uses SI_KERNEL for all kernel generated traps.
+   Since:
+
+     - MIPS doesn't do hardware single-step.
+     - We don't need to care about exec SIGTRAPs --- we assume
+       PTRACE_EVENT_EXEC is available.
+     - The MIPS kernel doesn't support hardware breakpoints.
+
+   on MIPS, all we need to care about is distinguishing between
+   software breakpoints and hardware watchpoints, which can be done by
+   peeking the debug registers.
+
+   The generic Linux target code should use GDB_ARCH_IS_TRAP_* instead
+   of TRAP_* to abstract out these peculiarities.  */
 #if defined __i386__ || defined __x86_64__
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL)
+# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
 #elif defined __powerpc__
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
+# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
+#elif defined __mips__
+# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL)
+# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == SI_KERNEL)
 #else
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == TRAP_BRKPT)
+# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
 #endif
 
 #ifndef TRAP_HWBKPT
