@@ -312,6 +312,16 @@
 
 2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/19909
+	* config/tc-i386.c (check_VecOperands): Try vec_disp8 encoding
+	only if i.disp_encoding != disp_encoding_32bit.
+	* gas/testsuite/gas/i386/disp32.s: Add tests for vmovdqu64.d32.
+	* gas/testsuite/gas/i386/x86-64-disp32.s: Likewise.
+	* gas/testsuite/gas/i386/disp32.d: Updated.
+	* gas/testsuite/gas/i386/x86-64-disp32.d: Likewise.
+
+2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/19498
 	* testsuite/gas/i386/i386.exp: Run pr19498.
 	* testsuite/gas/i386/pr19498.d: New file.
