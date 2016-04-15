@@ -1,5 +1,10 @@
 2016-04-15  Pedro Alves  <palves@redhat.com>
 
+	* btrace.c (pt_btrace_insn_flags): Change return type to
+	btrace_insn_flags.  Use btrace_insn_flags for local.
+
+2016-04-15  Pedro Alves  <palves@redhat.com>
+
 	* nat/linux-ptrace.h [__mips__] (GDB_ARCH_IS_TRAP_BRKPT): Also
 	accept TRAP_BRKPT.
 	 [__mips__] (GDB_ARCH_IS_TRAP_HWBKPT): Also accept TRAP_HWBKPT.
