@@ -1,3 +1,9 @@
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+	* doc/Makefile.in: Likewise.
+
 2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* reloc.c: Add BFD_RELOC_ARC_NPS_CMEM16 entry.

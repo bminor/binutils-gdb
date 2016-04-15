@@ -1,3 +1,8 @@
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+
 2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-nps400-tbl.h: Add xldb, xldw, xld, xstb, xstw, and xst

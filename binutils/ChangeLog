@@ -1,3 +1,9 @@
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+	* doc/Makefile.in: Likewise.
+
 2016-04-14  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19938
