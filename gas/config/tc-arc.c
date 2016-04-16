@@ -878,26 +878,26 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 
   if (!mach_type_specified_p)
     {
-      if ((!strcmp ("ARC600", cpu))
-	  || (!strcmp ("ARC601", cpu))
-	  || (!strcmp ("A6", cpu)))
+      if ((!strcasecmp ("ARC600", cpu))
+	  || (!strcasecmp ("ARC601", cpu))
+	  || (!strcasecmp ("A6", cpu)))
 	{
 	  md_parse_option (OPTION_MCPU, "arc600");
 	}
-      else if ((!strcmp ("ARC700", cpu))
-	       || (!strcmp ("A7", cpu)))
+      else if ((!strcasecmp ("ARC700", cpu))
+	       || (!strcasecmp ("A7", cpu)))
 	{
 	  md_parse_option (OPTION_MCPU, "arc700");
 	}
-      else if (!strcmp ("EM", cpu))
+      else if (!strcasecmp ("EM", cpu))
 	{
 	  md_parse_option (OPTION_MCPU, "arcem");
 	}
-      else if (!strcmp ("HS", cpu))
+      else if (!strcasecmp ("HS", cpu))
 	{
 	  md_parse_option (OPTION_MCPU, "archs");
 	}
-      else if (!strcmp ("NPS400", cpu))
+      else if (!strcasecmp ("NPS400", cpu))
 	{
 	  md_parse_option (OPTION_MCPU, "nps400");
 	}
