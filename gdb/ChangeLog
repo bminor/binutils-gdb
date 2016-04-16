@@ -1,3 +1,7 @@
+2016-04-16  Pedro Alves  <palves@redhat.com>
+
+	* ada-exp.y (yydefred): Define as ada_yydefred.
+
 2016-04-15  Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.c (ada_lookup_struct_elt_type): Constify 'type_str' and

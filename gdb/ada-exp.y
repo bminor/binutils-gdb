@@ -93,6 +93,7 @@
 #define yytoks	ada_toks		/* With YYDEBUG defined */
 #define yyname	ada_name		/* With YYDEBUG defined */
 #define yyrule	ada_rule		/* With YYDEBUG defined */
+#define yydefred ada_yydefred
 #define yyss	ada_yyss
 #define yysslim	ada_yysslim
 #define yyssp	ada_yyssp
