@@ -1,3 +1,9 @@
+2016-04-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	Revert prevous change.
+	* config/tc-arc.c (arc_option): Make .cpu directive
+	case-sensitive again.
+
 2016-04-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.c (arc_option): Make .cpu directive
