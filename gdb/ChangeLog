@@ -1,3 +1,8 @@
+2016-04-18  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* valops.c (value_addr): For C++ references, set the copied value's
+	enclosing_type as well.
+
 2016-04-18  Yao Qi  <yao.qi@linaro.org>
 
 	Revert:
