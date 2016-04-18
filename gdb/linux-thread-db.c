@@ -373,9 +373,6 @@ thread_from_lwp (ptid_t ptid)
 int
 thread_db_notice_clone (ptid_t parent, ptid_t child)
 {
-  td_thrhandle_t th;
-  td_thrinfo_t ti;
-  td_err_e err;
   struct thread_db_info *info;
 
   info = get_thread_db_info (ptid_get_pid (child));
@@ -1061,9 +1058,7 @@ record_thread (struct thread_db_info *info,
 	       ptid_t ptid, const td_thrhandle_t *th_p,
 	       const td_thrinfo_t *ti_p)
 {
-  td_err_e err;
   struct private_thread_info *priv;
-  int new_thread = (tp == NULL);
 
   /* A thread ID of zero may mean the thread library has not
      initialized yet.  Leave private == NULL until the thread library

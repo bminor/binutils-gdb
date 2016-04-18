@@ -177,7 +177,6 @@ pyuw_object_attribute_to_pointer (PyObject *pyo, const char *attr_name,
   if (PyObject_HasAttrString (pyo, attr_name))
     {
       PyObject *pyo_value = PyObject_GetAttrString (pyo, attr_name);
-      struct value *value;
 
       if (pyo_value != NULL && pyo_value != Py_None)
         {
@@ -201,8 +200,6 @@ unwind_infopy_str (PyObject *self)
 {
   struct ui_file *strfile = mem_fileopen ();
   unwind_info_object *unwind_info = (unwind_info_object *) self;
-  pending_frame_object *pending_frame
-      = (pending_frame_object *) (unwind_info->pending_frame);
   PyObject *result;
 
   fprintf_unfiltered (strfile, "Frame ID: ");

@@ -1165,7 +1165,6 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
   int index;
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
-  int opcode; /* Branch instruction's OPcode.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
 
   /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */

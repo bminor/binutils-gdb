@@ -1302,12 +1302,10 @@ static void
 fixup_riprel (struct gdbarch *gdbarch, struct displaced_step_closure *dsc,
 	      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const struct amd64_insn *insn_details = &dsc->insn_details;
   int modrm_offset = insn_details->modrm_offset;
   gdb_byte *insn = insn_details->raw_insn + modrm_offset;
   CORE_ADDR rip_base;
-  int32_t disp;
   int insn_length;
   int arch_tmp_regno, tmp_regno;
   ULONGEST orig_value;
@@ -1316,7 +1314,6 @@ fixup_riprel (struct gdbarch *gdbarch, struct displaced_step_closure *dsc,
   ++insn;
 
   /* Compute the rip-relative address.	*/
-  disp = extract_signed_integer (insn, sizeof (int32_t), byte_order);
   insn_length = gdb_buffered_insn_length (gdbarch, dsc->insn_buf,
 					  dsc->max_len, from);
   rip_base = from + insn_length;

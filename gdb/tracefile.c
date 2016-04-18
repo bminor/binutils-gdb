@@ -64,7 +64,6 @@ trace_save (const char *filename, struct trace_file_writer *writer,
   ULONGEST offset = 0;
 #define MAX_TRACE_UPLOAD 2000
   gdb_byte buf[MAX_TRACE_UPLOAD];
-  int written;
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
   /* If the target is to save the data to a file on its own, then just

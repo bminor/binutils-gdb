@@ -1421,7 +1421,6 @@ lookup_typename (const struct language_defn *language,
 		 const struct block *block, int noerr)
 {
   struct symbol *sym;
-  struct type *type;
 
   sym = lookup_symbol_in_language (name, block, VAR_DOMAIN,
 				   language->la_language, NULL).symbol;
@@ -1889,7 +1888,6 @@ resolve_dynamic_range (struct type *dyn_range_type,
   CORE_ADDR value;
   struct type *static_range_type, *static_target_type;
   const struct dynamic_prop *prop;
-  const struct dwarf2_locexpr_baton *baton;
   struct dynamic_prop low_bound, high_bound;
 
   gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
@@ -2431,7 +2429,6 @@ check_typedef (struct type *type)
 
   if (TYPE_TARGET_STUB (type))
     {
-      struct type *range_type;
       struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
       if (TYPE_STUB (target_type) || TYPE_TARGET_STUB (target_type))

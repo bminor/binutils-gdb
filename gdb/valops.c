@@ -2217,9 +2217,7 @@ value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
 			 const char *err)
 {
   struct type *t;
-  struct value *v;
   int i;
-  int nbases;
 
   *argp = coerce_array (*argp);
 
@@ -2472,7 +2470,6 @@ find_overload_match (struct value **args, int nargs,
   int method_oload_champ = -1;
   int src_method_oload_champ = -1;
   int ext_method_oload_champ = -1;
-  int src_and_ext_equal = 0;
 
   /* The measure for the current best match.  */
   struct badness_vector *method_badness = NULL;
@@ -2571,7 +2568,6 @@ find_overload_match (struct value **args, int nargs,
 	  switch (compare_badness (ext_method_badness, src_method_badness))
 	    {
 	      case 0: /* Src method and xmethod are equally good.  */
-		src_and_ext_equal = 1;
 		/* If src method and xmethod are equally good, then
 		   xmethod should be the winner.  Hence, fall through to the
 		   case where a xmethod is better than the source
@@ -2996,7 +2992,6 @@ find_oload_champ (struct value **args, int nargs,
 {
   int ix;
   int fn_count;
-  int xm_worker_vec_n = VEC_length (xmethod_worker_ptr, xm_worker_vec);
   /* A measure of how good an overloaded instance is.  */
   struct badness_vector *bv;
   /* Index of best overloaded function.  */

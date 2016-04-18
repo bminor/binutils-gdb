@@ -1249,7 +1249,6 @@ void
 symbol_file_add_separate (bfd *bfd, const char *name, int symfile_flags,
 			  struct objfile *objfile)
 {
-  struct objfile *new_objfile;
   struct section_addr_info *sap;
   struct cleanup *my_cleanup;
 
@@ -1259,7 +1258,7 @@ symbol_file_add_separate (bfd *bfd, const char *name, int symfile_flags,
   sap = build_section_addr_info_from_objfile (objfile);
   my_cleanup = make_cleanup_free_section_addr_info (sap);
 
-  new_objfile = symbol_file_add_with_addrs
+  symbol_file_add_with_addrs
     (bfd, name, symfile_flags, sap,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
 		       | OBJF_USERLOADED),
@@ -2383,7 +2382,6 @@ remove_symbol_file_command (char *args, int from_tty)
   struct objfile *objf = NULL;
   struct cleanup *my_cleanups;
   struct program_space *pspace = current_program_space;
-  struct gdbarch *gdbarch = get_current_arch ();
 
   dont_repeat ();
 

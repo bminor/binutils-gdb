@@ -256,7 +256,6 @@ m68k_linux_sigtramp_frame_cache (struct frame_info *this_frame,
   struct frame_id this_id;
   struct trad_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct m68k_linux_sigtramp_info info;
   gdb_byte buf[4];

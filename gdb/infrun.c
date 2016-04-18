@@ -463,8 +463,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       /* Detach new forked process?  */
       if (detach_fork)
 	{
-	  struct cleanup *old_chain;
-
 	  /* Before detaching from the child, remove all breakpoints
 	     from it.  If we forked, then this has already been taken
 	     care of by infrun.c.  If we vforked however, any
@@ -2186,7 +2184,6 @@ start_step_over (void)
 static void
 infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 {
-  struct displaced_step_request *it;
   struct displaced_step_inferior_state *displaced;
 
   if (ptid_equal (inferior_ptid, old_ptid))
@@ -2942,7 +2939,6 @@ thread_still_needs_step_over_bp (struct thread_info *tp)
 static step_over_what
 thread_still_needs_step_over (struct thread_info *tp)
 {
-  struct inferior *inf = find_inferior_ptid (tp->ptid);
   step_over_what what = 0;
 
   if (thread_still_needs_step_over_bp (tp))
@@ -4622,7 +4618,6 @@ stop_all_threads (void)
 		{
 		  enum gdb_signal sig;
 		  struct regcache *regcache;
-		  struct address_space *aspace;
 
 		  if (debug_infrun)
 		    {
@@ -5389,7 +5384,6 @@ static void
 restart_threads (struct thread_info *event_thread)
 {
   struct thread_info *tp;
-  struct thread_info *step_over = NULL;
 
   /* In case the instruction just stepped spawned a new thread.  */
   update_thread_list ();
@@ -7154,7 +7148,6 @@ static int
 keep_going_stepped_thread (struct thread_info *tp)
 {
   struct frame_info *frame;
-  struct gdbarch *gdbarch;
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
 
@@ -7197,7 +7190,6 @@ keep_going_stepped_thread (struct thread_info *tp)
 
   stop_pc = regcache_read_pc (get_thread_regcache (tp->ptid));
   frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
 
   /* If the PC of the thread we were trying to single-step has
      changed, then that thread has trapped or been signaled, but the

@@ -27,8 +27,6 @@
 void
 dicos_init_abi (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   set_solib_ops (gdbarch, &solib_target_so_ops);
 
   /* Every process, although has its own address space, sees the same

@@ -40,8 +40,6 @@ static struct PyModuleDef EventModuleDef =
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 add_new_registry (eventregistry_object **registryp, char *name)
 {
-  int result;
-
   *registryp = create_eventregistry_object ();
 
   if (*registryp == NULL)

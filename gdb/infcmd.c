@@ -1840,8 +1840,6 @@ finish_command_fsm_return_value (struct thread_fsm *self)
 static enum async_reply_reason
 finish_command_fsm_async_reply_reason (struct thread_fsm *self)
 {
-  struct finish_command_fsm *f = (struct finish_command_fsm *) self;
-
   if (execution_direction == EXEC_REVERSE)
     return EXEC_ASYNC_END_STEPPING_RANGE;
   else
@@ -2276,7 +2274,6 @@ default_print_one_register_info (struct ui_file *file,
   if (TYPE_CODE (regtype) == TYPE_CODE_FLT
       || TYPE_CODE (regtype) == TYPE_CODE_DECFLOAT)
     {
-      int j;
       struct value_print_options opts;
       const gdb_byte *valaddr = value_contents_for_printing (val);
       enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (regtype));

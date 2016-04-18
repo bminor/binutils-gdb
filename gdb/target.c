@@ -1535,8 +1535,6 @@ target_memory_map (void)
   VEC(mem_region_s) *result;
   struct mem_region *last_one, *this_one;
   int ix;
-  struct target_ops *t;
-
   result = current_target.to_memory_map (&current_target);
   if (result == NULL)
     return NULL;
@@ -2230,8 +2228,6 @@ target_preopen (int from_tty)
 void
 target_detach (const char *args, int from_tty)
 {
-  struct target_ops* t;
-  
   if (gdbarch_has_global_breakpoints (target_gdbarch ()))
     /* Don't remove global breakpoints here.  They're removed on
        disconnection from the target.  */
@@ -2289,8 +2285,6 @@ target_thread_name (struct thread_info *info)
 void
 target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
-  struct target_ops *t;
-
   target_dcache_invalidate ();
 
   current_target.to_resume (&current_target, ptid, step, signal);
@@ -2793,7 +2787,7 @@ static int lowest_closed_fd;
 static int
 acquire_fileio_fd (struct target_ops *t, int fd)
 {
-  fileio_fh_t *fh, buf;
+  fileio_fh_t *fh;
 
   gdb_assert (!is_closed_fileio_fh (fd));
 
@@ -3499,8 +3493,6 @@ target_fetch_registers (struct regcache *regcache, int regno)
 void
 target_store_registers (struct regcache *regcache, int regno)
 {
-  struct target_ops *t;
-
   if (!may_write_registers)
     error (_("Writing to registers is not allowed (regno %d)"), regno);
 

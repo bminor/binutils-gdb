@@ -2403,8 +2403,6 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 static void
 dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 {
-  bfd *sym_bfd;
-
   if (self->readin)
     {
       fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  "
@@ -2424,8 +2422,6 @@ dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 	  printf_filtered ("Reading in symbols for %s...", self->filename);
 	  gdb_flush (gdb_stdout);
 	}
-
-      sym_bfd = objfile->obfd;
 
       next_symbol_text_func = dbx_next_symbol_text;
 
@@ -2694,10 +2690,6 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
   /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this
      source file.  Used to detect the SunPRO solaris compiler.  */
   static int n_opt_found;
-
-  /* The stab type used for the definition of the last function.
-     N_STSYM or N_GSYM for SunOS4 acc; N_FUN for other compilers.  */
-  static int function_stab_type = 0;
 
   if (!block_address_function_relative)
     {
@@ -3103,8 +3095,6 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	    {
 	    case 'f':
 	    case 'F':
-	      function_stab_type = type;
-
 	      /* Deal with the SunPRO 3.0 compiler which omits the
 	         address from N_FUN symbols.  */
 	      if (type == N_FUN
@@ -3273,12 +3263,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
-  struct dbx_symfile_info *info;
   unsigned int stabsize;
-
-  /* There is already a dbx_symfile_info allocated by our caller.
-     It might even contain some info from the coff symtab to help us.  */
-  info = DBX_SYMFILE_INFO (objfile);
 
   DBX_TEXT_ADDR (objfile) = textaddr;
   DBX_TEXT_SIZE (objfile) = textsize;
@@ -3362,12 +3347,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
-  struct dbx_symfile_info *info;
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
-
-  /* There is already a dbx_symfile_info allocated by our caller.
-     It might even contain some info from the ELF symtab to help us.  */
-  info = DBX_SYMFILE_INFO (objfile);
 
   /* Find the first and last text address.  dbx_symfile_read seems to
      want this.  */

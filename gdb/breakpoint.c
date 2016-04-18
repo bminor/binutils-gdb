@@ -1604,7 +1604,6 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
   /* Left boundary, right boundary and median element of our binary
      search.  */
   unsigned bc_l, bc_r, bc;
-  size_t i;
 
   /* Find BC_L which is a leftmost element which may affect BUF
      content.  It is safe to report lower value but a failure to
@@ -1659,9 +1658,6 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
   for (bc = bc_l; bc < bp_location_count; bc++)
   {
     struct bp_location *bl = bp_location[bc];
-    CORE_ADDR bp_addr = 0;
-    int bp_size = 0;
-    int bptoffset = 0;
 
     /* bp_location array has BL->OWNER always non-NULL.  */
     if (bl->owner->type == bp_none)
@@ -4142,7 +4138,7 @@ void
 breakpoint_init_inferior (enum inf_context context)
 {
   struct breakpoint *b, *b_tmp;
-  struct bp_location *bl, **blp_tmp;
+  struct bp_location *bl;
   int ix;
   struct program_space *pspace = current_program_space;
 
@@ -4352,7 +4348,6 @@ int
 breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
-  struct bp_location *bl;
 
   ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
     {
@@ -4376,7 +4371,6 @@ software_breakpoint_inserted_here_p (struct address_space *aspace,
 				     CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
-  struct bp_location *bl;
 
   ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
     {
@@ -4399,7 +4393,6 @@ hardware_breakpoint_inserted_here_p (struct address_space *aspace,
 				     CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
-  struct bp_location *bl;
 
   ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
     {
@@ -5819,7 +5812,6 @@ struct bpstat_what
 bpstat_what (bpstat bs_head)
 {
   struct bpstat_what retval;
-  int jit_event = 0;
   bpstat bs;
 
   retval.main_action = BPSTAT_WHAT_KEEP_CHECKING;
@@ -5941,7 +5933,6 @@ bpstat_what (bpstat bs_head)
 	    }
 	  break;
 	case bp_jit_event:
-	  jit_event = 1;
 	  this_action = BPSTAT_WHAT_SINGLE;
 	  break;
 	case bp_call_dummy:
@@ -10397,7 +10388,7 @@ find_breakpoint_range_end (struct symtab_and_line sal)
 static void
 break_range_command (char *arg, int from_tty)
 {
-  char *arg_start, *addr_string_start, *addr_string_end;
+  char *arg_start, *addr_string_start;
   struct linespec_result canonical_start, canonical_end;
   int bp_count, can_use_bp, length;
   CORE_ADDR end;
@@ -15741,8 +15732,6 @@ save_breakpoints (char *filename, int from_tty,
 
     if (tp->type != bp_dprintf && tp->commands)
       {
-	struct gdb_exception exception;
-
 	fprintf_unfiltered (fp, "  commands\n");
 	
 	ui_out_redirect (current_uiout, fp);

@@ -1,3 +1,234 @@
+2016-05-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* aarch64-linux-tdep.c (aarch64_linux_sigframe_init): Remove unused
+	variables.
+	* aarch64-tdep.c (aarch64_skip_prologue): Likewise.
+	(aarch64_scan_prologue): Likewise.
+	(aarch64_prologue_prev_register): Likewise.
+	(aarch64_dwarf2_prev_register): Likewise.
+	(pass_in_v): Likewise.
+	(aarch64_push_dummy_call): Likewise.
+	(aarch64_breakpoint_from_pc): Likewise.
+	(aarch64_return_in_memory): Likewise.
+	(aarch64_return_value): Likewise.
+	(aarch64_displaced_step_b_cond): Likewise.
+	(aarch64_displaced_step_cb): Likewise.
+	(aarch64_displaced_step_tb): Likewise.
+	(aarch64_gdbarch_init): Likewise.
+	(aarch64_process_record): Likewise.
+	* alpha-mdebug-tdep.c (alpha_mdebug_init_abi): Likewise.
+	* alpha-tdep.c (_initialize_alpha_tdep): Likewise.
+	* amd64-dicos-tdep.c (amd64_dicos_init_abi): Likewise.
+	* amd64-linux-tdep.c (amd64_dtrace_parse_probe_argument): Likewise.
+	* amd64-tdep.c (fixup_riprel): Likewise.
+	* amd64-windows-tdep.c (amd64_windows_frame_decode_epilogue): Likewise.
+	(amd64_windows_frame_decode_insns): Likewise.
+	(amd64_windows_frame_cache): Likewise.
+	(amd64_windows_frame_prev_register): Likewise.
+	(amd64_windows_frame_this_id): Likewise.
+	(amd64_windows_init_abi): Likewise.
+	* arm-linux-tdep.c (arm_linux_get_syscall_number): Likewise.
+	(arm_linux_get_next_pcs_syscall_next_pc): Likewise.
+	* arm-symbian-tdep.c (arm_symbian_init_abi): Likewise.
+	* arm-tdep.c (arm_make_epilogue_frame_cache): Likewise.
+	(arm_epilogue_frame_prev_register): Likewise.
+	(arm_record_vdata_transfer_insn): Likewise.
+	(arm_record_exreg_ld_st_insn): Likewise.
+	* auto-load.c (execute_script_contents): Likewise.
+	(print_scripts): Likewise.
+	* avr-tdep.c (avr_frame_prev_register): Likewise.
+	(avr_push_dummy_call): Likewise.
+	* bfin-linux-tdep.c (bfin_linux_sigframe_init): Likewise.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* blockframe.c (find_pc_partial_function_gnu_ifunc): Likewise.
+	* break-catch-throw.c (fetch_probe_arguments): Likewise.
+	* breakpoint.c (breakpoint_xfer_memory): Likewise.
+	(breakpoint_init_inferior): Likewise.
+	(breakpoint_inserted_here_p): Likewise.
+	(software_breakpoint_inserted_here_p): Likewise.
+	(hardware_breakpoint_inserted_here_p): Likewise.
+	(bpstat_what): Likewise.
+	(break_range_command): Likewise.
+	(save_breakpoints): Likewise.
+	* coffread.c (coff_symfile_read): Likewise.
+	* cris-tdep.c (cris_push_dummy_call): Likewise.
+	(cris_scan_prologue): Likewise.
+	(cris_register_size): Likewise.
+	(_initialize_cris_tdep): Likewise.
+	* d-exp.y: Likewise.
+	* dbxread.c (dbx_read_symtab): Likewise.
+	(process_one_symbol): Likewise.
+	(coffstab_build_psymtabs): Likewise.
+	(elfstab_build_psymtabs): Likewise.
+	* dicos-tdep.c (dicos_init_abi): Likewise.
+	* disasm.c (do_mixed_source_and_assembly): Likewise.
+	(gdb_disassembly): Likewise.
+	* dtrace-probe.c (dtrace_process_dof): Likewise.
+	* dwarf2read.c (error_check_comp_unit_head): Likewise.
+	(build_type_psymtabs_1): Likewise.
+	(skip_one_die): Likewise.
+	(process_imported_unit_die): Likewise.
+	(dwarf2_physname): Likewise.
+	(read_file_scope): Likewise.
+	(setup_type_unit_groups): Likewise.
+	(create_dwo_cu_reader): Likewise.
+	(create_dwo_cu): Likewise.
+	(create_dwo_unit_in_dwp_v1): Likewise.
+	(create_dwo_unit_in_dwp_v2): Likewise.
+	(lookup_dwo_unit_in_dwp): Likewise.
+	(free_dwo_file): Likewise.
+	(check_producer): Likewise.
+	(dwarf2_add_typedef): Likewise.
+	(dwarf2_add_member_fn): Likewise.
+	(read_unsigned_leb128): Likewise.
+	(read_signed_leb128): Likewise.
+	(dwarf2_const_value): Likewise.
+	(follow_die_sig_1): Likewise.
+	(dwarf_decode_macro_bytes): Likewise.
+	* extension.c (restore_active_ext_lang): Likewise.
+	* frv-linux-tdep.c (frv_linux_sigtramp_frame_cache): Likewise.
+	* ft32-tdep.c (ft32_analyze_prologue): Likewise.
+	* gdbtypes.c (lookup_typename): Likewise.
+	(resolve_dynamic_range): Likewise.
+	(check_typedef): Likewise.
+	* h8300-tdep.c (h8300_is_argument_spill): Likewise.
+	(h8300_gdbarch_init): Likewise.
+	* hppa-tdep.c (hppa32_push_dummy_call): Likewise.
+	(hppa_frame_this_id): Likewise.
+	(_initialize_hppa_tdep): Likewise.
+	* hppanbsd-tdep.c (hppanbsd_sigtramp_cache_init): Likewise.
+	* hppaobsd-tdep.c (hppaobsd_supply_fpregset): Likewise.
+	* i386-dicos-tdep.c (i386_dicos_init_abi): Likewise.
+	* i386-tdep.c (i386_bnd_type): Likewise.
+	(i386_gdbarch_init): Likewise.
+	(i386_mpx_bd_base): Likewise.
+	* i386nbsd-tdep.c (i386nbsd_sigtramp_cache_init): Likewise.
+	* i386obsd-tdep.c (i386obsd_elf_init_abi): Likewise.
+	* ia64-tdep.c (examine_prologue): Likewise.
+	(ia64_frame_cache): Likewise.
+	(ia64_push_dummy_call): Likewise.
+	* infcmd.c (finish_command_fsm_async_reply_reason): Likewise.
+	(default_print_one_register_info): Likewise.
+	* infrun.c (infrun_thread_ptid_changed): Likewise.
+	(thread_still_needs_step_over): Likewise.
+	(stop_all_threads): Likewise.
+	(restart_threads): Likewise.
+	(keep_going_stepped_thread): Likewise.
+	* iq2000-tdep.c (iq2000_scan_prologue): Likewise.
+	* language.c (language_init_primitive_type_symbols): Likewise.
+	* linespec.c (add_sal_to_sals): Likewise.
+	* linux-nat.c (status_callback): Likewise.
+	(kill_unfollowed_fork_children): Likewise.
+	(linux_nat_kill): Likewise.
+	* linux-tdep.c (linux_fill_prpsinfo): Likewise.
+	* linux-thread-db.c (thread_db_notice_clone): Likewise.
+	(record_thread): Likewise.
+	* location.c (string_to_event_location_basic): Likewise.
+	* m32c-tdep.c (m32c_prev_register): Likewise.
+	* m32r-linux-tdep.c (m32r_linux_init_abi): Likewise.
+	* m32r-tdep.c (decode_prologue): Likewise.
+	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_cache): Likewise.
+	* machoread.c (macho_symtab_read): Likewise.
+	(macho_symfile_read): Likewise.
+	(macho_symfile_offsets): Likewise.
+	* maint.c (set_per_command_cmd): Likewise.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): Likewise.
+	(mi_cmd_stack_list_variables): Likewise.
+	* mi/mi-main.c (mi_cmd_exec_run): Likewise.
+	(output_register): Likewise.
+	(mi_cmd_execute): Likewise.
+	(mi_cmd_trace_define_variable): Likewise.
+	(print_variable_or_computed): Likewise.
+	* minsyms.c (prim_record_minimal_symbol_full): Likewise.
+	* mn10300-tdep.c (mn10300_frame_prev_register): Likewise.
+	* msp430-tdep.c (msp430_pseudo_register_write): Likewise.
+	* mt-tdep.c (mt_registers_info): Likewise.
+	* nios2-tdep.c (nios2_analyze_prologue): Likewise.
+	(nios2_push_dummy_call): Likewise.
+	(nios2_frame_unwind_cache): Likewise.
+	(nios2_stub_frame_cache): Likewise.
+	(nios2_stub_frame_sniffer): Likewise.
+	(nios2_gdbarch_init): Likewise.
+	* ppc-ravenscar-thread.c: Likewise.
+	* ppcfbsd-tdep.c (ppcfbsd_sigtramp_frame_cache): Likewise.
+	* python/py-evts.c (add_new_registry): Likewise.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Likewise.
+	(bpfinishpy_detect_out_scope_cb): Likewise.
+	* python/py-framefilter.c (py_print_value): Likewise.
+	* python/py-inferior.c (infpy_write_memory): Likewise.
+	* python/py-infevents.c (create_inferior_call_event_object): Likewise.
+	* python/py-infthread.c (thpy_get_ptid): Likewise.
+	* python/py-linetable.c (ltpy_get_pcs_for_line): Likewise.
+	(ltpy_get_all_source_lines): Likewise.
+	(ltpy_is_valid): Likewise.
+	(ltpy_iternext): Likewise.
+	* python/py-symtab.c (symtab_and_line_to_sal_object): Likewise.
+	* python/py-unwind.c (pyuw_object_attribute_to_pointer): Likewise.
+	(unwind_infopy_str): Likewise.
+	* python/py-varobj.c (py_varobj_get_iterator): Likewise.
+	* ravenscar-thread.c (ravenscar_inferior_created): Likewise.
+	* rs6000-aix-tdep.c (rs6000_push_dummy_call): Likewise.
+	* rs6000-lynx178-tdep.c (rs6000_lynx178_push_dummy_call): Likewise.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Likewise.
+	* s390-linux-tdep.c (s390_supply_tdb_regset): Likewise.
+	(s390_frame_prev_register): Likewise.
+	(s390_dwarf2_frame_init_reg): Likewise.
+	(s390_record_vr): Likewise.
+	(s390_process_record): Likewise.
+	* score-tdep.c (score_push_dummy_call): Likewise.
+	(score3_analyze_prologue): Likewise.
+	* sh-tdep.c (sh_extract_return_value_nofpu): Likewise.
+	* sh64-tdep.c (sh64_analyze_prologue): Likewise.
+	(sh64_push_dummy_call): Likewise.
+	(sh64_extract_return_value): Likewise.
+	(sh64_do_fp_register): Likewise.
+	* solib-aix.c (solib_aix_get_section_offsets): Likewise.
+	* solib-darwin.c (darwin_read_exec_load_addr_from_dyld): Likewise.
+	(darwin_solib_read_all_image_info_addr): Likewise.
+	* solib-dsbt.c (enable_break): Likewise.
+	* solib-frv.c (enable_break2): Likewise.
+	(frv_fdpic_find_canonical_descriptor): Likewise.
+	* solib-svr4.c (svr4_handle_solib_event): Likewise.
+	* sparc-tdep.c (sparc_skip_stack_check): Likewise.
+	* sparc64-linux-tdep.c (sparc64_linux_get_longjmp_target): Likewise.
+	* sparcobsd-tdep.c (sparc32obsd_init_abi): Likewise.
+	* spu-tdep.c (info_spu_dma_cmdlist): Likewise.
+	* stack.c (read_frame_local): Likewise.
+	* symfile.c (symbol_file_add_separate): Likewise.
+	(remove_symbol_file_command): Likewise.
+	* symmisc.c (maintenance_print_one_line_table): Likewise.
+	* symtab.c (symbol_cache_flush): Likewise.
+	(basic_lookup_transparent_type): Likewise.
+	(sort_search_symbols_remove_dups): Likewise.
+	* target.c (target_memory_map): Likewise.
+	(target_detach): Likewise.
+	(target_resume): Likewise.
+	(acquire_fileio_fd): Likewise.
+	(target_store_registers): Likewise.
+	* thread.c (print_thread_info_1): Likewise.
+	* tic6x-tdep.c (tic6x_analyze_prologue): Likewise.
+	* tilegx-linux-tdep.c (tilegx_linux_sigframe_init): Likewise.
+	* tilegx-tdep.c (tilegx_push_dummy_call): Likewise.
+	(tilegx_analyze_prologue): Likewise.
+	(tilegx_stack_frame_destroyed_p): Likewise.
+	(tilegx_frame_cache): Likewise.
+	* tracefile.c (trace_save): Likewise.
+	* tracepoint.c (encode_actions_and_make_cleanup): Likewise.
+	(start_tracing): Likewise.
+	(print_one_static_tracepoint_marker): Likewise.
+	* tui/tui.c (tui_enable): Likewise.
+	* valops.c (value_struct_elt_bitpos): Likewise.
+	(find_overload_match): Likewise.
+	(find_oload_champ): Likewise.
+	* value.c (value_contents_copy_raw): Likewise.
+	* windows-tdep.c (windows_get_tlb_type): Likewise.
+	* x86-linux-nat.c (x86_linux_enable_btrace): Likewise.
+	* xcoffread.c (record_minimal_symbol): Likewise.
+	(scan_xcoff_symtab): Likewise.
+	* xtensa-tdep.c (execute_code): Likewise.
+	(xtensa_gdbarch_init): Likewise.
+	(_initialize_xtensa_tdep): Likewise.
+
 2016-05-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-linux-nat.c (spu_bfd_iovec_pread): Add pointer cast for C++.

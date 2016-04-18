@@ -415,10 +415,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 static CORE_ADDR
 aarch64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  unsigned long inst;
-  CORE_ADDR skip_pc;
   CORE_ADDR func_addr, limit_pc;
-  struct symtab_and_line sal;
 
   /* See if we can determine the end of the prologue via the symbol
      table.  If so, then return either PC, or the PC after the
@@ -488,9 +485,6 @@ aarch64_scan_prologue (struct frame_info *this_frame,
   else
     {
       CORE_ADDR frame_loc;
-      LONGEST saved_fp;
-      LONGEST saved_lr;
-      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
       frame_loc = get_frame_register_unsigned (this_frame, AARCH64_FP_REGNUM);
       if (frame_loc == 0)
@@ -612,7 +606,6 @@ static struct value *
 aarch64_prologue_prev_register (struct frame_info *this_frame,
 				void **this_cache, int prev_regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct aarch64_prologue_cache *cache
     = aarch64_make_prologue_cache (this_frame, this_cache);
 
@@ -816,7 +809,6 @@ static struct value *
 aarch64_dwarf2_prev_register (struct frame_info *this_frame,
 			      void **this_cache, int regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR lr;
 
   switch (regnum)
@@ -1061,7 +1053,6 @@ pass_in_v (struct gdbarch *gdbarch,
 {
   if (info->nsrn < 8)
     {
-      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int regnum = AARCH64_V0_REGNUM + info->nsrn;
       gdb_byte reg[V_REGISTER_SIZE];
 
@@ -1181,10 +1172,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			 struct value **args, CORE_ADDR sp, int struct_return,
 			 CORE_ADDR struct_addr)
 {
-  int nstack = 0;
   int argnum;
-  int x_argreg;
-  int v_argreg;
   struct aarch64_call_info info;
   struct type *func_type;
   struct type *return_type;
@@ -1584,8 +1572,6 @@ static const gdb_byte *
 aarch64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 			    int *lenptr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   *lenptr = sizeof (aarch64_default_breakpoint);
   return aarch64_default_breakpoint;
 }
@@ -1709,9 +1695,6 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 static int
 aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 {
-  int nRc;
-  enum type_code code;
-
   type = check_typedef (type);
 
   if (is_hfa_or_hva (type))
@@ -1843,7 +1826,6 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 		      struct type *valtype, struct regcache *regcache,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
       || TYPE_CODE (valtype) == TYPE_CODE_UNION
@@ -2374,7 +2356,6 @@ aarch64_displaced_step_b_cond (const unsigned cond, const int32_t offset,
 {
   struct aarch64_displaced_step_data *dsd
     = (struct aarch64_displaced_step_data *) data;
-  int32_t new_offset = data->insn_addr - dsd->new_addr + offset;
 
   /* GDB has to fix up PC after displaced step this instruction
      differently according to the condition is true or false.  Instead
@@ -2413,7 +2394,6 @@ aarch64_displaced_step_cb (const int32_t offset, const int is_cbnz,
 {
   struct aarch64_displaced_step_data *dsd
     = (struct aarch64_displaced_step_data *) data;
-  int32_t new_offset = data->insn_addr - dsd->new_addr + offset;
 
   /* The offset is out of range for a compare and branch
      instruction.  We can use the following instructions instead:
@@ -2438,7 +2418,6 @@ aarch64_displaced_step_tb (const int32_t offset, int is_tbnz,
 {
   struct aarch64_displaced_step_data *dsd
     = (struct aarch64_displaced_step_data *) data;
-  int32_t new_offset = data->insn_addr - dsd->new_addr + offset;
 
   /* The offset is out of range for a test bit and branch
      instruction We can use the following instructions instead:
@@ -2662,7 +2641,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct tdesc_arch_data *tdesc_data = NULL;
   const struct target_desc *tdesc = info.target_desc;
   int i;
-  int have_fpa_registers = 1;
   int valid_p = 1;
   const struct tdesc_feature *feature;
   int num_regs = 0;
@@ -3762,7 +3740,6 @@ aarch64_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   uint32_t rec_no = 0;
   uint8_t insn_size = 4;
   uint32_t ret = 0;
-  ULONGEST t_bit = 0, insn_id = 0;
   gdb_byte buf[insn_size];
   insn_decode_record aarch64_record;
 

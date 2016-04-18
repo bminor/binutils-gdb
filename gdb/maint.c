@@ -958,7 +958,6 @@ static void
 set_per_command_cmd (char *args, int from_tty)
 {
   struct cmd_list_element *list;
-  size_t length;
   int val;
 
   val = parse_cli_boolean_value (args);

@@ -206,8 +206,6 @@ iq2000_scan_prologue (struct gdbarch *gdbarch,
   struct symtab_and_line sal;
   CORE_ADDR pc;
   CORE_ADDR loop_end;
-  int found_store_lr = 0;
-  int found_decr_sp = 0;
   int srcreg;
   int tgtreg;
   signed short offset;
@@ -251,7 +249,6 @@ iq2000_scan_prologue (struct gdbarch *gdbarch,
 	    cache->saved_regs[tgtreg] = -((signed short) (insn & 0xffff));
 
 	  if (tgtreg == E_LR_REGNUM)
-	    found_store_lr = 1;
 	  continue;
 	}
 
@@ -259,7 +256,6 @@ iq2000_scan_prologue (struct gdbarch *gdbarch,
 	{
 	  /* addi %1, %1, -N == addi %sp, %sp, -N */
 	  /* LEGACY -- from assembly-only port.  */
-	  found_decr_sp = 1;
 	  cache->framesize = -((signed short) (insn & 0xffff));
 	  continue;
 	}

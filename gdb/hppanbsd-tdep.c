@@ -101,8 +101,6 @@ hppanbsd_sigtramp_cache_init (const struct tramp_frame *self,
                              struct trad_frame_cache *this_cache,
                              CORE_ADDR func)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
   CORE_ADDR base;
   int *reg_offset;

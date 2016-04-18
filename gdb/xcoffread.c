@@ -930,7 +930,6 @@ record_minimal_symbol (const char *name, CORE_ADDR address,
 		       int n_scnum,
 		       struct objfile *objfile)
 {
-  int section = secnum_to_section (n_scnum, objfile);
 
   if (name[0] == '.')
     ++name;
@@ -2186,7 +2185,6 @@ scan_xcoff_symtab (struct objfile *objfile)
   const char *filestring = NULL;
 
   const char *namestring;
-  int past_first_source_file = 0;
   bfd *abfd;
   asection *bfd_sect;
   unsigned int nsyms;
