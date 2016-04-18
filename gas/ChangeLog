@@ -1,3 +1,8 @@
+2016-04-19  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* doc/as.texinfo (.cfi_remember_state, .cfi_restore_state): Improve
+	documentation.
+
 2016-04-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	Revert prevous change.
