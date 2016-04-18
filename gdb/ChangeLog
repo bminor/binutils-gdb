@@ -1,3 +1,9 @@
+2016-04-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_gdbarch_init): For GDB_OSABI_LINUX set
+	`num_regs' to 90 rather than 79.  Where a target description is
+	present adjust the setting appropriately.
+
 2016-04-21  Pedro Alves  <palves@redhat.com>
 
 	* common/common-exceptions.h (GDB_XCPT_TRY): Add comment.
