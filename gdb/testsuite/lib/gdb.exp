@@ -3553,6 +3553,9 @@ proc gdb_compile_shlib {sources dest options} {
                 lappend obj_options "additional_flags=-fpic"
             }
         }
+        "icc-*" {
+                lappend obj_options "additional_flags=-fpic"
+        }
         default {
 	    # don't know what the compiler is...
         }

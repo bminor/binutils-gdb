@@ -1,3 +1,7 @@
+2016-04-18  Benrhard Heckel <bernhard.heckel@intel.com>
+
+	* lib/gdb.exp (gdb_compile_shlib): Add flag for ICC compiler.
+
 2016-04-18  Bernhard Heckel <bernhard.heckel@intel.com>
 
 	* lib/compiler.c: Add Intel specific preprocessor macros.
