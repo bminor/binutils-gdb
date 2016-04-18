@@ -1,3 +1,8 @@
+2016-04-18  Pedro Alves  <palves@redhat.com>
+
+	* ptrace.m4 (GDB_AC_PTRACE): Don't run tests in C++ mode.
+	* configure: Regenerate.
+
 2016-04-18  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* valops.c (value_addr): For C++ references, set the copied value's

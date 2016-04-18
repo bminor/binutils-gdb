@@ -1,3 +1,7 @@
+2016-04-18  Pedro Alves  <palves@redhat.com>
+
+	* configure: Regenerate.
+
 2016-04-13  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-aarch64-low.c (aarch64_emit_add): Switch x1 and x0.
