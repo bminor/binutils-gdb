@@ -1,3 +1,7 @@
+2016-04-19  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/bad-file.exp: New file.
+
 2016-04-18  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* gdb.dwarf2/implref.exp: New file.

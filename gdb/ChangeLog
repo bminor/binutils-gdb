@@ -1,3 +1,8 @@
+2016-04-19  Doug Evans  <xdje42@gmail.com>
+
+	* source.c (is_regular_file): New arg errno_ptr.
+	All callers updated.
+
 2016-04-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* linux-record.c (record_linux_system_call): Merge handling for
