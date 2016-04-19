@@ -170,9 +170,6 @@ struct aarch64_prologue_cache
      to identify this frame.  */
   CORE_ADDR prev_sp;
 
-  /* Is the target available to read from?  */
-  int available_p;
-
   /* The frame base for this frame is just prev_sp - frame size.
      FRAMESIZE is the distance from the frame pointer to the
      initial stack pointer.  */
@@ -731,8 +728,6 @@ aarch64_make_prologue_cache_1 (struct frame_info *this_frame,
       cache->saved_regs[reg].addr += cache->prev_sp;
 
   cache->func = get_frame_func (this_frame);
-
-  cache->available_p = 1;
 }
 
 /* Allocate and fill in *THIS_CACHE with information about the prologue of
@@ -752,16 +747,7 @@ aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 
-  TRY
-    {
-      aarch64_make_prologue_cache_1 (this_frame, cache);
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
-    }
-  END_CATCH
+  aarch64_make_prologue_cache_1 (this_frame, cache);
 
   return cache;
 }
@@ -774,9 +760,6 @@ aarch64_prologue_frame_unwind_stop_reason (struct frame_info *this_frame,
 {
   struct aarch64_prologue_cache *cache
     = aarch64_make_prologue_cache (this_frame, this_cache);
-
-  if (!cache->available_p)
-    return UNWIND_UNAVAILABLE;
 
   /* Halt the backtrace at "_start".  */
   if (cache->prev_pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
@@ -799,10 +782,7 @@ aarch64_prologue_this_id (struct frame_info *this_frame,
   struct aarch64_prologue_cache *cache
     = aarch64_make_prologue_cache (this_frame, this_cache);
 
-  if (!cache->available_p)
-    *this_id = frame_id_build_unavailable_stack (cache->func);
-  else
-    *this_id = frame_id_build (cache->prev_sp, cache->func);
+  *this_id = frame_id_build (cache->prev_sp, cache->func);
 }
 
 /* Implement the "prev_register" frame_unwind method.  */
@@ -876,19 +856,9 @@ aarch64_make_stub_cache (struct frame_info *this_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 
-  TRY
-    {
-      cache->prev_sp = get_frame_register_unsigned (this_frame,
-						    AARCH64_SP_REGNUM);
-      cache->prev_pc = get_frame_pc (this_frame);
-      cache->available_p = 1;
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
-    }
-  END_CATCH
+  cache->prev_sp = get_frame_register_unsigned (this_frame,
+						AARCH64_SP_REGNUM);
+  cache->prev_pc = get_frame_pc (this_frame);
 
   return cache;
 }
@@ -902,9 +872,6 @@ aarch64_stub_frame_unwind_stop_reason (struct frame_info *this_frame,
   struct aarch64_prologue_cache *cache
     = aarch64_make_stub_cache (this_frame, this_cache);
 
-  if (!cache->available_p)
-    return UNWIND_UNAVAILABLE;
-
   return UNWIND_NO_REASON;
 }
 
@@ -917,10 +884,7 @@ aarch64_stub_this_id (struct frame_info *this_frame,
   struct aarch64_prologue_cache *cache
     = aarch64_make_stub_cache (this_frame, this_cache);
 
-  if (cache->available_p)
-    *this_id = frame_id_build (cache->prev_sp, cache->prev_pc);
-  else
-    *this_id = frame_id_build_unavailable_stack (cache->prev_pc);
+  *this_id = frame_id_build (cache->prev_sp, cache->prev_pc);
 }
 
 /* Implement the "sniffer" frame_unwind method.  */
