@@ -1,3 +1,8 @@
+2016-04-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-record.c (record_linux_system_call): Merge handling for
+	readlink/recv/read and pipe/pipe2.
+
 2016-04-14  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* features/i386/amd64-mpx-linux.xml: Remove AVX feature.
