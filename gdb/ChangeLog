@@ -1,3 +1,45 @@
+2016-04-16  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-linux-tdep.c (features/i386/amd64-avx-mpx-linux.c):
+	New include.
+	(amd64_linux_core_read_description): Add case for
+	 X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_amd64_linux_tdep): Call initialize_tdesc_amd64_avx_mpx_linux.
+	* amd64-linux-tdep.h (tdesc_amd64_avx_mpx_linux): New definition.
+	* amd64-tdep.c (features/i386/amd64-avx-mpx.c): New include.
+	(amd64_target_description): Add case for  X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_amd64_tdep): Call initialize_tdesc_amd64_avx_mpx.
+	* common/x86-xstate.h (X86_XSTATE_MPX_MASK): Remove AVX bits.
+	(X86_XSTATE_AVX_MPX_MASK): New case.
+	* features/Makefile (i386/i386-avx-mpx, i386/i386-avx-mpx-linux)
+	(i386/amd64-avx-mpx, i386/amd64-avx-mpx-linux): New rules.
+	(i386/i386-avx-mpx-expedite, i386/i386-avx-mpx-linux-expedite)
+	(i386/amd64-avx-mpx-expedite, i386/amd64-avx-mpx-linux-expedite):
+	New expedites.
+	* i386-linux-tdep.c (features/i386/i386-avx-mpx-linux.c): New
+	include.
+	(i386_linux_core_read_description): Add case
+	X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_i386_linux_tdep): Call
+	initialize_tdesc_i386_avx_mpx_linux.
+	* i386-linux-tdep.h (tdesc_i386_avx_mpx_linux): New include.
+	* i386-tdep.c (features/i386/i386-avx-mpx.c): New include.
+	(i386_target_description): Add case for X86_XSTATE_AVX_MPX_MASK.
+	* x86-linux-nat.c (x86_linux_read_description): Add case for
+	X86_XSTATE_AVX_MPX_MASK.
+	* features/i386/amd64-avx-mpx-linux.xml: New file.
+	* features/i386/i386-avx-mpx-linux.xml: New file.
+	* features/i386/i386-avx-mpx.xml: New file.
+	* features/i386/amd64-avx-mpx.xml: New file.
+	* features/i386/amd64-avx-mpx-linux.c: Generated.
+	* features/i386/amd64-avx-mpx.c: Generated.
+	* features/i386/i386-avx-mpx-linux.c: Generated.
+	* features/i386/i386-avx-mpx.c: Generated.
+	* regformats/i386/amd64-avx-mpx-linux.dat: Generated.
+	* regformats/i386/amd64-avx-mpx.dat: Generated.
+	* regformats/i386/i386-avx-mpx-linux.dat: Generated.
+	* regformats/i386/i386-avx-mpx.dat: Generated.
+
 2016-04-18  Pedro Alves  <palves@redhat.com>
 
 	* ptrace.m4 (GDB_AC_PTRACE): Don't run tests in C++ mode.

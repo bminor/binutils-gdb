@@ -260,6 +260,8 @@ get_ipa_tdesc (int idx)
       return tdesc_i386_avx_linux;
     case X86_TDESC_MPX:
       return tdesc_i386_mpx_linux;
+    case X86_TDESC_AVX_MPX:
+      return tdesc_i386_avx_mpx_linux;
     case X86_TDESC_AVX512:
       return tdesc_i386_avx512_linux;
     default:

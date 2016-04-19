@@ -53,6 +53,7 @@
 #include "features/i386/i386.c"
 #include "features/i386/i386-avx.c"
 #include "features/i386/i386-mpx.c"
+#include "features/i386/i386-avx-mpx.c"
 #include "features/i386/i386-avx512.c"
 #include "features/i386/i386-mmx.c"
 
@@ -8671,6 +8672,8 @@ i386_target_description (uint64_t xcr0)
     case X86_XSTATE_MPX_AVX512_MASK:
     case X86_XSTATE_AVX512_MASK:
       return tdesc_i386_avx512;
+    case X86_XSTATE_AVX_MPX_MASK:
+      return tdesc_i386_avx_mpx;
     case X86_XSTATE_MPX_MASK:
       return tdesc_i386_mpx;
     case X86_XSTATE_AVX_MASK:
@@ -9008,6 +9011,7 @@ Show Intel Memory Protection Extensions specific variables."),
   initialize_tdesc_i386_mmx ();
   initialize_tdesc_i386_avx ();
   initialize_tdesc_i386_mpx ();
+  initialize_tdesc_i386_avx_mpx ();
   initialize_tdesc_i386_avx512 ();
 
   /* Tell remote stub that we support XML target description.  */
