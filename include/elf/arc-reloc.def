@@ -496,4 +496,4 @@ ARC_RELOC_HOWTO(ARC_NPS_CMEM16, 78, \
                 16, \
                 replace_bits16, \
                 dont, \
-                ( S + A ))
+                ( ME ( S + A )))

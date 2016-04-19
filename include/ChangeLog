@@ -1,3 +1,7 @@
+2016-04-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/arc-reloc.def (ARC_NPS_CMEM16): Add ME modifier to formula.
+
 2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* opcode/arc.h (MAX_INSN_ARGS): Increase 6 to 8.
