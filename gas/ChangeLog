@@ -1,3 +1,9 @@
+2016-04-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/c-arc.texi (ARC Options): Add nps400 to list of valus for
+	-mcpu.  Add cross reference to .cpu directive from -mcpu option.
+	(ARC Directives): Add NPS400 to .cpu directive list.
+
 2016-04-20  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (aarch64_features): Add "ras".
