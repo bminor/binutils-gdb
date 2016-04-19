@@ -1905,7 +1905,6 @@ struct amd64_frame_cache
 {
   /* Base address.  */
   CORE_ADDR base;
-  int base_p;
   CORE_ADDR sp_offset;
   CORE_ADDR pc;
 
@@ -1927,7 +1926,6 @@ amd64_init_frame_cache (struct amd64_frame_cache *cache)
 
   /* Base address.  */
   cache->base = 0;
-  cache->base_p = 0;
   cache->sp_offset = -8;
   cache->pc = 0;
 
@@ -2560,8 +2558,6 @@ amd64_frame_cache_1 (struct frame_info *this_frame,
   for (i = 0; i < AMD64_NUM_SAVED_REGS; i++)
     if (cache->saved_regs[i] != -1)
       cache->saved_regs[i] += cache->base;
-
-  cache->base_p = 1;
 }
 
 static struct amd64_frame_cache *
@@ -2575,16 +2571,7 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
 
-  TRY
-    {
-      amd64_frame_cache_1 (this_frame, cache);
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
-    }
-  END_CATCH
+  amd64_frame_cache_1 (this_frame, cache);
 
   return cache;
 }
@@ -2595,9 +2582,6 @@ amd64_frame_unwind_stop_reason (struct frame_info *this_frame,
 {
   struct amd64_frame_cache *cache =
     amd64_frame_cache (this_frame, this_cache);
-
-  if (!cache->base_p)
-    return UNWIND_UNAVAILABLE;
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -2613,9 +2597,7 @@ amd64_frame_this_id (struct frame_info *this_frame, void **this_cache,
   struct amd64_frame_cache *cache =
     amd64_frame_cache (this_frame, this_cache);
 
-  if (!cache->base_p)
-    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
-  else if (cache->base == 0)
+  if (cache->base == 0)
     {
       /* This marks the outermost frame.  */
       return;
@@ -2693,26 +2675,15 @@ amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   cache = amd64_alloc_frame_cache ();
 
-  TRY
-    {
-      get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
-      cache->base = extract_unsigned_integer (buf, 8, byte_order) - 8;
+  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
+  cache->base = extract_unsigned_integer (buf, 8, byte_order) - 8;
 
-      addr = tdep->sigcontext_addr (this_frame);
-      gdb_assert (tdep->sc_reg_offset);
-      gdb_assert (tdep->sc_num_regs <= AMD64_NUM_SAVED_REGS);
-      for (i = 0; i < tdep->sc_num_regs; i++)
-	if (tdep->sc_reg_offset[i] != -1)
-	  cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
-
-      cache->base_p = 1;
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
-    }
-  END_CATCH
+  addr = tdep->sigcontext_addr (this_frame);
+  gdb_assert (tdep->sc_reg_offset);
+  gdb_assert (tdep->sc_num_regs <= AMD64_NUM_SAVED_REGS);
+  for (i = 0; i < tdep->sc_num_regs; i++)
+    if (tdep->sc_reg_offset[i] != -1)
+      cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
 
   *this_cache = cache;
   return cache;
@@ -2725,9 +2696,6 @@ amd64_sigtramp_frame_unwind_stop_reason (struct frame_info *this_frame,
   struct amd64_frame_cache *cache =
     amd64_sigtramp_frame_cache (this_frame, this_cache);
 
-  if (!cache->base_p)
-    return UNWIND_UNAVAILABLE;
-
   return UNWIND_NO_REASON;
 }
 
@@ -2738,9 +2706,7 @@ amd64_sigtramp_frame_this_id (struct frame_info *this_frame,
   struct amd64_frame_cache *cache =
     amd64_sigtramp_frame_cache (this_frame, this_cache);
 
-  if (!cache->base_p)
-    (*this_id) = frame_id_build_unavailable_stack (get_frame_pc (this_frame));
-  else if (cache->base == 0)
+  if (cache->base == 0)
     {
       /* This marks the outermost frame.  */
       return;
@@ -2870,30 +2836,19 @@ amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
 
-  TRY
-    {
-      /* Cache base will be %esp plus cache->sp_offset (-8).  */
-      get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
-      cache->base = extract_unsigned_integer (buf, 8,
-					      byte_order) + cache->sp_offset;
+  /* Cache base will be %esp plus cache->sp_offset (-8).  */
+  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
+  cache->base = extract_unsigned_integer (buf, 8,
+					  byte_order) + cache->sp_offset;
 
-      /* Cache pc will be the frame func.  */
-      cache->pc = get_frame_pc (this_frame);
+  /* Cache pc will be the frame func.  */
+  cache->pc = get_frame_pc (this_frame);
 
-      /* The saved %esp will be at cache->base plus 16.  */
-      cache->saved_sp = cache->base + 16;
+  /* The saved %esp will be at cache->base plus 16.  */
+  cache->saved_sp = cache->base + 16;
 
-      /* The saved %eip will be at cache->base plus 8.  */
-      cache->saved_regs[AMD64_RIP_REGNUM] = cache->base + 8;
-
-      cache->base_p = 1;
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
-    }
-  END_CATCH
+  /* The saved %eip will be at cache->base plus 8.  */
+  cache->saved_regs[AMD64_RIP_REGNUM] = cache->base + 8;
 
   return cache;
 }
@@ -2904,9 +2859,6 @@ amd64_epilogue_frame_unwind_stop_reason (struct frame_info *this_frame,
 {
   struct amd64_frame_cache *cache
     = amd64_epilogue_frame_cache (this_frame, this_cache);
-
-  if (!cache->base_p)
-    return UNWIND_UNAVAILABLE;
 
   return UNWIND_NO_REASON;
 }
@@ -2919,10 +2871,7 @@ amd64_epilogue_frame_this_id (struct frame_info *this_frame,
   struct amd64_frame_cache *cache = amd64_epilogue_frame_cache (this_frame,
 							       this_cache);
 
-  if (!cache->base_p)
-    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
-  else
-    (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static const struct frame_unwind amd64_epilogue_frame_unwind =
