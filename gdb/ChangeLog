@@ -1,3 +1,18 @@
+2016-04-14  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* features/i386/amd64-mpx-linux.xml: Remove AVX feature.
+	* features/i386/amd64-mpx.xml: Remove AVX feature.
+	* features/i386/i386-mpx-linux.xml: Remove AVX feature.
+	* features/i386/i386-mpx.xml: Remove AVX feature.
+	* features/i386/amd64-mpx-linux.c: Regenerate.
+	* features/i386/amd64-mpx.c: Regenerate.
+	* features/i386/i386-mpx-linux.c: Regenerate.
+	* features/i386/i386-mpx.c: Regenerate.
+	* regformats/i386/amd64-mpx-linux.dat: Regenerate.
+	* regformats/i386/amd64-mpx.dat: Regenerate.
+	* regformats/i386/i386-mpx-linux.dat: Regenerate.
+	* regformats/i386/i386-mpx.dat: Regenerate.
+
 2016-04-16  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* amd64-linux-tdep.c (features/i386/amd64-avx-mpx-linux.c):
