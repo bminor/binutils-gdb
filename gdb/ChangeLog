@@ -1,3 +1,7 @@
+2016-04-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* main.c (setup_alternate_signal_stack): Cast to char *.
+
 2016-04-19  Doug Evans  <xdje42@gmail.com>
 
 	* symmisc.c (dump_symtab_1, dump_symtab): Delete arg objfile.
