@@ -5,6 +5,7 @@
 
 2016-04-19  Doug Evans  <xdje42@gmail.com>
 
+	PR gdb/17911
 	* source.c (is_regular_file): New arg errno_ptr.
 	All callers updated.
 
