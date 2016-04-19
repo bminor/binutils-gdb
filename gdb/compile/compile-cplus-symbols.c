@@ -31,10 +31,8 @@
 #include "gdbtypes.h"
 #include "dwarf2loc.h"
 #include "cp-support.h"
+#include "gdbcmd.h"
 
-
-#define DEBUG 0
-#define DEBUG_ORACLE 0
 
 /* Object of this type are stored in the compiler's symbol_err_map.  */
 
@@ -49,6 +47,8 @@ struct symbol_error
 
   char *message;
 };
+
+int debug_compile_oracle = 0;
 
 /* Hash function for struct symbol_error.  */
 
@@ -229,7 +229,11 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
-	  CPOPS ("build_constant %s\n", SYMBOL_NATURAL_NAME (sym.symbol));
+	  if (debug_compile_cplus_types)
+	    {
+	      printf_unfiltered ("build_constant %s\n",
+				 SYMBOL_NATURAL_NAME (sym.symbol));
+	    }
 	  CPCALL (build_constant, context,
 		  sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
 		  SYMBOL_VALUE (sym.symbol),
@@ -356,7 +360,11 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	    }
 
 	  /* Define the decl.  */
-	  CPOPS ("new_decl %s %d %s\n", name, (int) kind, symbol_name);
+	  if (debug_compile_cplus_types)
+	    {
+	      printf_unfiltered ("new_decl %s %d %s\n", name, (int) kind,
+				 symbol_name);
+	    }
 	  decl = CPCALL (new_decl, context,
 			 name, kind, sym_type, symbol_name, addr,
 			 filename, line);
@@ -480,7 +488,8 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
     }
 
   sym_type = convert_cplus_type (context, type);
-  CPOPS ("push_namespace \"\"\n");
+  if (debug_compile_cplus_types)
+    printf_unfiltered ("push_namespace \"\"\n");
   CPCALL (push_namespace, context, "");
   // FIXME: push (and, after the call, pop) any other namespaces, if
   // any, and drop the above when defining a class member.  drop any
@@ -490,11 +499,16 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
      information for the symbol.  While we have access to the demangled
      name, we still don't know what A::B::C::D::E::F means without debug
      info, no?  */
-  CPOPS ("new_decl minsym %s %d\n", MSYMBOL_NATURAL_NAME (msym), (int) kind);
+  if (debug_compile_cplus_types)
+    {
+      printf_unfiltered ("new_decl minsym %s %d\n",
+			 MSYMBOL_NATURAL_NAME (msym), (int) kind);
+    }
   decl = CPCALL (new_decl, context,
 		 MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
 		 NULL, addr, NULL, 0);
-  CPOPS ("pop_namespace \"\"\n");
+  if (debug_compile_cplus_types)
+    printf_unfiltered ("pop_namespace \"\"\n");
   CPCALL (pop_namespace, context);
 }
 
@@ -584,10 +598,11 @@ gcc_cplus_convert_symbol (void *datum,
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
-#if DEBUG_ORACLE
-  printf ("got oracle request for %s in domain %s\n", identifier,
-	  domain_name (domain));
-#endif
+  if (debug_compile_oracle)
+    {
+      printf ("got oracle request for %s in domain %s\n", identifier,
+	      domain_name (domain));
+    }
 
   memset (&search_result, 0, sizeof (search_result));
   cleanups = make_cleanup (search_multiple_result_cleanup, &search_result);
@@ -666,7 +681,8 @@ gcc_cplus_convert_symbol (void *datum,
     }
   CATCH (e, RETURN_MASK_ALL)
     {
-      CPOPS ("error: %s\n", e.message);
+      if (debug_compile_cplus_types)
+	printf_unfiltered ("error: %s\n", e.message);
       CPCALL (error, context, e.message);
     }
   END_CATCH
@@ -676,12 +692,13 @@ gcc_cplus_convert_symbol (void *datum,
 			"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
 			identifier);
 
-#if DEBUG_ORACLE
-  if (found)
-    printf ("found type for %s!\n", identifier);
-  else
-    printf ("did not find type for %s\n", identifier);
-#endif
+  if (debug_compile_oracle)
+    {
+      if (found)
+	printf_unfiltered ("found type for %s!\n", identifier);
+      else
+	printf_unfiltered ("did not find type for %s\n", identifier);
+    }
 
   do_cleanups (cleanups);
   return;
@@ -698,9 +715,8 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
   gcc_address result = 0;
   int found = 0;
 
-#if DEBUG_ORACLE
-  printf ("got oracle request for address of %s\n", identifier);
-#endif
+  if (debug_compile_oracle)
+    printf_unfiltered ("got oracle request for address of %s\n", identifier);
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
@@ -745,7 +761,8 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      CPOPS ("error: %s\n", e.message);
+      if (debug_compile_cplus_types)
+	printf_unfiltered ("error: %s\n", e.message);
       CPCALL (error, context, e.message);
     }
   END_CATCH
@@ -755,12 +772,13 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 			"gcc_symbol_address \"%s\": failed\n",
 			identifier);
 
-#if DEBUG_ORACLE
-  if (found)
-    printf ("found address for %s!\n", identifier);
-  else
-    printf ("did not find address for %s\n", identifier);
-#endif
+  if (debug_compile_oracle)
+    {
+      if (found)
+	printf_unfiltered ("found address for %s!\n", identifier);
+      else
+	printf_unfiltered ("did not find address for %s\n", identifier);
+    }
 
   return result;
 }
@@ -994,4 +1012,21 @@ generate_cplus_for_variable_locations (struct compile_cplus_instance *compiler,
   do_cleanups (cleanup);
   discard_cleanups (outer);
   return registers_used;
+}
+
+void _initialize_compile_cplus_symbols (void);
+
+void
+_initialize_compile_cplus_symbols (void)
+{
+  add_setshow_boolean_cmd ("compile-oracle", no_class,
+			   &debug_compile_oracle, _("\
+Set debugging of compiler plug-in oracle requests."), _("\
+Show debugging of compiler plug-in oracle requests."), _("\
+When enabled debugging messages are printed for compiler plug-in\n\
+oracle requests."),
+			   NULL,
+			   NULL,
+			   &setdebuglist,
+			   &showdebuglist);
 }

@@ -36,7 +36,9 @@ extern int compile_debug;
 
 extern int debug_compile_cplus_types;
 
-#define CPOPS(...) if (debug_compile_cplus_types) printf (__VA_ARGS__)
+/* Flag to enable internal debugging for oracle requests.  */
+
+extern int debug_compile_oracle;
 
 struct block;
 
