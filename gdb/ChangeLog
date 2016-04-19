@@ -1,5 +1,10 @@
 2016-04-19  Doug Evans  <xdje42@gmail.com>
 
+	* symmisc.c (dump_symtab_1, dump_symtab): Delete arg objfile.
+	All callers updated.
+
+2016-04-19  Doug Evans  <xdje42@gmail.com>
+
 	* source.c (is_regular_file): New arg errno_ptr.
 	All callers updated.
 
