@@ -1069,7 +1069,6 @@ struct i386_frame_cache
 {
   /* Base address.  */
   CORE_ADDR base;
-  int base_p;
   LONGEST sp_offset;
   CORE_ADDR pc;
 
@@ -1094,7 +1093,6 @@ i386_alloc_frame_cache (void)
   cache = FRAME_OBSTACK_ZALLOC (struct i386_frame_cache);
 
   /* Base address.  */
-  cache->base_p = 0;
   cache->base = 0;
   cache->sp_offset = -4;
   cache->pc = 0;
@@ -1992,10 +1990,7 @@ i386_frame_cache_1 (struct frame_info *this_frame,
   get_frame_register (this_frame, I386_EBP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 4, byte_order);
   if (cache->base == 0)
-    {
-      cache->base_p = 1;
-      return;
-    }
+    return;
 
   /* For normal frames, %eip is stored at 4(%ebp).  */
   cache->saved_regs[I386_EIP_REGNUM] = 4;
@@ -2066,8 +2061,6 @@ i386_frame_cache_1 (struct frame_info *this_frame,
   for (i = 0; i < I386_NUM_SAVED_REGS; i++)
     if (cache->saved_regs[i] != -1)
       cache->saved_regs[i] += cache->base;
-
-  cache->base_p = 1;
 }
 
 static struct i386_frame_cache *
@@ -2081,16 +2074,7 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
 
-  TRY
-    {
-      i386_frame_cache_1 (this_frame, cache);
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
-    }
-  END_CATCH
+  i386_frame_cache_1 (this_frame, cache);
 
   return cache;
 }
@@ -2101,9 +2085,7 @@ i386_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct i386_frame_cache *cache = i386_frame_cache (this_frame, this_cache);
 
-  if (!cache->base_p)
-    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
-  else if (cache->base == 0)
+  if (cache->base == 0)
     {
       /* This marks the outermost frame.  */
     }
@@ -2119,9 +2101,6 @@ i386_frame_unwind_stop_reason (struct frame_info *this_frame,
 			       void **this_cache)
 {
   struct i386_frame_cache *cache = i386_frame_cache (this_frame, this_cache);
-
-  if (!cache->base_p)
-    return UNWIND_UNAVAILABLE;
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -2251,26 +2230,15 @@ i386_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
 
-  TRY
-    {
-      cache->pc = get_frame_func (this_frame);
+  cache->pc = get_frame_func (this_frame);
 
-      /* At this point the stack looks as if we just entered the
-	 function, with the return address at the top of the
-	 stack.  */
-      sp = get_frame_register_unsigned (this_frame, I386_ESP_REGNUM);
-      cache->base = sp + cache->sp_offset;
-      cache->saved_sp = cache->base + 8;
-      cache->saved_regs[I386_EIP_REGNUM] = cache->base + 4;
-
-      cache->base_p = 1;
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
-    }
-  END_CATCH
+  /* At this point the stack looks as if we just entered the
+     function, with the return address at the top of the
+     stack.  */
+  sp = get_frame_register_unsigned (this_frame, I386_ESP_REGNUM);
+  cache->base = sp + cache->sp_offset;
+  cache->saved_sp = cache->base + 8;
+  cache->saved_regs[I386_EIP_REGNUM] = cache->base + 4;
 
   return cache;
 }
@@ -2281,9 +2249,6 @@ i386_epilogue_frame_unwind_stop_reason (struct frame_info *this_frame,
 {
   struct i386_frame_cache *cache =
     i386_epilogue_frame_cache (this_frame, this_cache);
-
-  if (!cache->base_p)
-    return UNWIND_UNAVAILABLE;
 
   return UNWIND_NO_REASON;
 }
@@ -2296,10 +2261,7 @@ i386_epilogue_frame_this_id (struct frame_info *this_frame,
   struct i386_frame_cache *cache =
     i386_epilogue_frame_cache (this_frame, this_cache);
 
-  if (!cache->base_p)
-    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
-  else
-    (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static struct value *
@@ -2437,36 +2399,25 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   cache = i386_alloc_frame_cache ();
 
-  TRY
+  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
+  cache->base = extract_unsigned_integer (buf, 4, byte_order) - 4;
+
+  addr = tdep->sigcontext_addr (this_frame);
+  if (tdep->sc_reg_offset)
     {
-      get_frame_register (this_frame, I386_ESP_REGNUM, buf);
-      cache->base = extract_unsigned_integer (buf, 4, byte_order) - 4;
+      int i;
 
-      addr = tdep->sigcontext_addr (this_frame);
-      if (tdep->sc_reg_offset)
-	{
-	  int i;
+      gdb_assert (tdep->sc_num_regs <= I386_NUM_SAVED_REGS);
 
-	  gdb_assert (tdep->sc_num_regs <= I386_NUM_SAVED_REGS);
-
-	  for (i = 0; i < tdep->sc_num_regs; i++)
-	    if (tdep->sc_reg_offset[i] != -1)
-	      cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
-	}
-      else
-	{
-	  cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
-	  cache->saved_regs[I386_ESP_REGNUM] = addr + tdep->sc_sp_offset;
-	}
-
-      cache->base_p = 1;
+      for (i = 0; i < tdep->sc_num_regs; i++)
+	if (tdep->sc_reg_offset[i] != -1)
+	  cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  else
     {
-      if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
+      cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
+      cache->saved_regs[I386_ESP_REGNUM] = addr + tdep->sc_sp_offset;
     }
-  END_CATCH
 
   *this_cache = cache;
   return cache;
@@ -2479,9 +2430,6 @@ i386_sigtramp_frame_unwind_stop_reason (struct frame_info *this_frame,
   struct i386_frame_cache *cache =
     i386_sigtramp_frame_cache (this_frame, this_cache);
 
-  if (!cache->base_p)
-    return UNWIND_UNAVAILABLE;
-
   return UNWIND_NO_REASON;
 }
 
@@ -2492,13 +2440,8 @@ i386_sigtramp_frame_this_id (struct frame_info *this_frame, void **this_cache,
   struct i386_frame_cache *cache =
     i386_sigtramp_frame_cache (this_frame, this_cache);
 
-  if (!cache->base_p)
-    (*this_id) = frame_id_build_unavailable_stack (get_frame_pc (this_frame));
-  else
-    {
-      /* See the end of i386_push_dummy_call.  */
-      (*this_id) = frame_id_build (cache->base + 8, get_frame_pc (this_frame));
-    }
+  /* See the end of i386_push_dummy_call.  */
+  (*this_id) = frame_id_build (cache->base + 8, get_frame_pc (this_frame));
 }
 
 static struct value *
