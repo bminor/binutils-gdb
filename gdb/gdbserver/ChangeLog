@@ -1,3 +1,10 @@
+2016-04-20  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.c: Include "arch/arm-linux.h".
+	(arm_fill_gregset): Use ARM_CPSR_GREGNUM rather than magic
+	number 16.
+	(arm_store_gregset): Likewise.
+
 2016-04-16  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* Makefile.in (clean): Add removal for i386-avx-mpx.c,
