@@ -1,5 +1,30 @@
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* emulparams/elf32_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	New.
+	* emulparams/elf_i386.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_be.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_chaos.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_ldso.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_vxworks.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nto.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse):
+	Set check_relocs_after_open_input to TRUE if
+	CHECK_RELOCS_AFTER_OPEN_INPUT is yes.
+	(gld${EMULATION_NAME}_after_open): Call
+	_bfd_elf_link_check_relocs on all inputs if
+	check_relocs_after_open_input is TRUE.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/eh6.s: Replace .long with .dc.a on
 	my_personality_v0.
 

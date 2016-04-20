@@ -2261,6 +2261,8 @@ extern bfd_boolean bfd_elf_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
+extern bfd_boolean _bfd_elf_link_check_relocs
+  (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean bfd_elf_link_record_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);

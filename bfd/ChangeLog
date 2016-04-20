@@ -1,3 +1,10 @@
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_link_check_relocs): New.
+	* elflink.c (_bfd_elf_link_check_relocs): New function.
+	(elf_link_add_object_symbols): Call _bfd_elf_link_check_relocs
+	if check_relocs_after_open_input is FALSE.
+
 2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* cache.c: Update old style function definitions.
