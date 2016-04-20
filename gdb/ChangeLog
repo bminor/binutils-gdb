@@ -1,5 +1,9 @@
 2016-04-20  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch32-linux-nat.c: Include "arch/arm-linux.h".
+
+2016-04-20  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-linux-tdep.h (ARM_CPSR_GREGNUM): Move it to ...
 	* arch/arm-linux.h: ... here.
 
