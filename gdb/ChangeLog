@@ -1,5 +1,9 @@
 2016-04-20  Pedro Alves  <palves@redhat.com>
 
+	* darwin-nat.c (darwin_decode_message): Use gdb_signal_from_host.
+
+2016-04-20  Pedro Alves  <palves@redhat.com>
+
 	* aarch64-tdep.c (aarch64_record_load_store): Change type of
 	'reg_rm_val' local to ULONGEST.
 
