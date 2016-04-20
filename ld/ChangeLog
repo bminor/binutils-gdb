@@ -1,3 +1,10 @@
+2016-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19719
+	* testsuite/ld-x86-64/pr19719.d: New file.
+	* testsuite/ld-x86-64/pr19719.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr19719.
+
 2016-04-18  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* ld.texinfo: Document NOCROSSREFS_TO script command.
