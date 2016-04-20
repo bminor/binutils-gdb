@@ -34451,6 +34451,11 @@ that symbol is described.  The type chain produced by this command is
 a recursive definition of the data type as stored in @value{GDBN}'s
 data structures, including its flags and contained types.
 
+@kindex maint selftest
+@cindex self tests
+Run any self tests that were compiled in to @value{GDBN}.  This will
+print a message showing how many tests were run, and how many failed.
+
 @kindex maint set dwarf always-disassemble
 @kindex maint show dwarf always-disassemble
 @item maint set dwarf always-disassemble

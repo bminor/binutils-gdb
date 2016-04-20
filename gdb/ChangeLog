@@ -1,5 +1,18 @@
 2016-05-17  Tom Tromey  <tom@tromey.com>
 
+	* NEWS: Add "maint selftest" entry.
+	* selftest.h: New file.
+	* selftest.c: New file.
+	* maint.c: Include selftest.h.
+	(maintenance_selftest): New function.
+	(_initialize_maint_cmds): Add "maint selftest" command.
+	* configure.ac (GDB_SELF_TEST): Maybe define.
+	* config.in, configure: Rebuild.
+	* Makefile.in (SFILES): Add selftest.c.
+	(COMMON_OBS): Add selftest.o.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
 	* expprint.c: Include f-lang.h.
 	(print_subexp_standard, dump_subexp_body_standard): Handle
 	OP_F90_RANGE.

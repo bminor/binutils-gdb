@@ -40,6 +40,9 @@ skip -rfunction regular-expression
 maint info line-table REGEXP
   Display the contents of GDB's internal line table data struture.
 
+maint selftest
+  Run any GDB unit tests that were compiled in.
+
 * Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
   was added in GDBserver, including JIT compiling fast tracepoint's
   conditional expression bytecode into native code.

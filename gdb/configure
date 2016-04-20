@@ -16500,6 +16500,12 @@ ac_config_links="$ac_config_links $ac_config_links_1"
 $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 
 
+if $development; then
+
+$as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
+
+fi
+
 
   gdb_ac_transform=`echo "$program_transform_name" | sed -e 's/\\$\\$/\\$/g'`
   GDB_TRANSFORM_NAME=`echo gdb | sed -e "$gdb_ac_transform"`
