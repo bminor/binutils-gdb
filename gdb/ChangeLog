@@ -1,5 +1,11 @@
 2016-05-17  Tom Tromey  <tom@tromey.com>
 
+	* expprint.c: Include f-lang.h.
+	(print_subexp_standard, dump_subexp_body_standard): Handle
+	OP_F90_RANGE.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (init.c): Search .y files for initialization
 	functions.
 
