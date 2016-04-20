@@ -728,7 +728,7 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
 	{
 	  /* Either deliver a new signal or cancel the signal received.  */
 	  res = PTRACE (PT_THUPDATE, inf->pid,
-			(caddr_t)thread->gdb_port, nsignal);
+			(caddr_t) (uintptr_t) thread->gdb_port, nsignal);
 	  if (res < 0)
 	    inferior_debug (1, _("ptrace THUP: res=%d\n"), res);
 	}
