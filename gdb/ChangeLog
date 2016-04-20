@@ -1,5 +1,10 @@
 2016-04-20  Pedro Alves  <palves@redhat.com>
 
+	* build-with-cxx.m4 (GDB_AC_BUILD_WITH_CXX): Default to yes.
+	* configure: Renegerate.
+
+2016-04-20  Pedro Alves  <palves@redhat.com>
+
 	* darwin-nat.c (darwin_decode_message): Use gdb_signal_from_host.
 
 2016-04-20  Pedro Alves  <palves@redhat.com>
