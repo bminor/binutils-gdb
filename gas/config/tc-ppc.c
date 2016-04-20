@@ -206,11 +206,13 @@ ppc_cpu_t sticky = 0;
 /* Value for ELF e_flags EF_PPC64_ABI.  */
 unsigned int ppc_abiversion = 0;
 
+#ifdef OBJ_ELF
 /* Flags set on encountering toc relocs.  */
-enum {
+static enum {
   has_large_toc_reloc = 1,
   has_small_toc_reloc = 2
 } toc_reloc_types;
+#endif
 
 /* Warn on emitting data to code sections.  */
 int warn_476;

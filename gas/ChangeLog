@@ -1,3 +1,90 @@
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* cgen.c: Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-metag.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-rl78.c: Likewise.
+
+2016-04-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/c-arc.texi (ARC Options): Add nps400 to list of valus for
+	-mcpu.  Add cross reference to .cpu directive from -mcpu option.
+	(ARC Directives): Add NPS400 to .cpu directive list.
+
+2016-04-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "ras".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "ras".
+	* testsuite/gas/aarch64/armv8-ras-1.d: New.
+	* testsuite/gas/aarch64/armv8-ras-1.s: New.
+	* testsuite/gas/aarch64/illegal-ras-1.d: New.
+	* testsuite/gas/aarch64/illegal-ras-1.s: New.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/nps400-6.d: New file.
+	* testsuite/gas/arc/nps400-6.s: New file.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/nps400-4.d: New file.
+	* testsuite/gas/arc/nps400-4.s: New file.
+	* testsuite/gas/arc/nps400-5.d: New file.
+	* testsuite/gas/arc/nps400-5.s: New file.
+
+2016-04-19  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* doc/as.texinfo (.cfi_remember_state, .cfi_restore_state): Improve
+	documentation.
+
+2016-04-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	Revert prevous change.
+	* config/tc-arc.c (arc_option): Make .cpu directive
+	case-sensitive again.
+
+2016-04-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_option): Make .cpu directive
+	case-insensitive.
+
+2016-04-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_option): Allow NPS400 in .cpu directive.
+
+2016-04-15  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-mips.c (md_begin): Remove useless assignment.
+
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2016-04-15  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (toc_reloc_types): Wrap in #ifdef OBJ_ELF
+
+2016-04-14  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-nios2.c (nios2_as_options): Make file static.
+	* config/tc-ppc.c (toc_reloc_ypes): Likewise.
+	* config/tc-sparc.c (native_op_table): Likewise.
+
+2016-04-14  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-m32c.c (M32C_Macros): Remove.
+	* config/tc-msp430.c (option_numbers): Likewise.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/nps400-3.d: New file.
+	* testsuite/gas/arc/nps400-3.s: New file.
+
 2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/gas/arc/add_s-err.s: Update target pattern.
@@ -293,6 +380,16 @@
 	* testsuite/gas/arc/relocs-errors.d: New file.
 	* testsuite/gas/arc/relocs-errors.err: Likewise.
 	* testsuite/gas/arc/relocs-errors.s: Likewise.
+
+2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19909
+	* config/tc-i386.c (check_VecOperands): Try vec_disp8 encoding
+	only if i.disp_encoding != disp_encoding_32bit.
+	* gas/testsuite/gas/i386/disp32.s: Add tests for vmovdqu64.d32.
+	* gas/testsuite/gas/i386/x86-64-disp32.s: Likewise.
+	* gas/testsuite/gas/i386/disp32.d: Updated.
+	* gas/testsuite/gas/i386/x86-64-disp32.d: Likewise.
 
 2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 

@@ -428,7 +428,7 @@ static void (*super_resume) (struct target_ops *,
 static int
 resume_one_thread_cb (struct thread_info *tp, void *data)
 {
-  ptid_t *ptid = data;
+  ptid_t *ptid = (ptid_t *) data;
   int request;
 
   if (ptid_get_pid (tp->ptid) != ptid_get_pid (*ptid))
@@ -447,7 +447,7 @@ resume_one_thread_cb (struct thread_info *tp, void *data)
 static int
 resume_all_threads_cb (struct thread_info *tp, void *data)
 {
-  ptid_t *filter = data;
+  ptid_t *filter = (ptid_t *) data;
 
   if (!ptid_match (tp->ptid, *filter))
     return 0;

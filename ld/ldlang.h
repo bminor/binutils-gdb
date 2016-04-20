@@ -464,6 +464,7 @@ struct lang_nocrossrefs
 {
   struct lang_nocrossrefs *next;
   lang_nocrossref_type *list;
+  bfd_boolean onlyfirst;
 };
 
 /* This structure is used to hold a list of input section names which
@@ -653,6 +654,8 @@ extern void lang_new_phdr
   (const char *, etree_type *, bfd_boolean, bfd_boolean, etree_type *,
    etree_type *);
 extern void lang_add_nocrossref
+  (lang_nocrossref_type *);
+extern void lang_add_nocrossref_to
   (lang_nocrossref_type *);
 extern void lang_enter_overlay
   (etree_type *, etree_type *);

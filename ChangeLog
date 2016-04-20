@@ -1,3 +1,14 @@
+2016-04-19  Nick Clifton  <nickc@redhat.com>
+
+	* Import this patch from the GCC mainline:
+
+	2016-04-13  Segher Boessenkool  <segher@kernel.crashing.org>
+
+	PR bootstrap/70173
+	* Makefile.tpl (local-distclean): Delete the libcc1, gnattools,
+	and gotools directories.  Delete the stage_final file.
+	* Makefile.in: Regenerate.
+
 2016-03-17  Cary Coutant  <ccoutant@gmail.com>
 
 	* configure.ac: Add mips and s390 to the gold target check.

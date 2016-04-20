@@ -3601,21 +3601,20 @@ md_begin (void)
 
   for (i = 0; i < 32; i++)
     {
-      char regname[7];
+      char regname[6];
 
       /* R5900 VU0 floating-point register.  */
-      regname[sizeof (rename) - 1] = 0;
-      snprintf (regname, sizeof (regname) - 1, "$vf%d", i);
+      sprintf (regname, "$vf%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
 				       RTYPE_VF | i, &zero_address_frag));
 
       /* R5900 VU0 integer register.  */
-      snprintf (regname, sizeof (regname) - 1, "$vi%d", i);
+      sprintf (regname, "$vi%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
 				       RTYPE_VI | i, &zero_address_frag));
 
       /* MSA register.  */
-      snprintf (regname, sizeof (regname) - 1, "$w%d", i);
+      sprintf (regname, "$w%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
 				       RTYPE_MSA | i, &zero_address_frag));
     }

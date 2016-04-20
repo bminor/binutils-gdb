@@ -1,3 +1,103 @@
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19972
+	* testsuite/ld-elf/eh6.d: Pass -rW to readelf and check for
+	R_386_NONE or R_X86_64_NONE.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/pic1.d: New file.
+	* testsuite/ld-x86-64/pic1.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pic1.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/pie2.d: New file.
+	* testsuite/ld-x86-64/pie2.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pie2.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19969
+	* testsuite/ld-x86-64/pr19969.d: New file.
+	* testsuite/ld-x86-64/pr19969a.S: Likewise.
+	* testsuite/ld-x86-64/pr19969b.S: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr19969 tests.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	New.
+	* emulparams/elf_i386.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_be.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_chaos.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_ldso.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_vxworks.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nto.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse):
+	Set check_relocs_after_open_input to TRUE if
+	CHECK_RELOCS_AFTER_OPEN_INPUT is yes.
+	(gld${EMULATION_NAME}_after_open): Call
+	_bfd_elf_link_check_relocs on all inputs if
+	check_relocs_after_open_input is TRUE.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/eh6.s: Replace .long with .dc.a on
+	my_personality_v0.
+
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* emultempl/scoreelf.em: Likewise.
+
+2016-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19719
+	* testsuite/ld-x86-64/pr19719.d: New file.
+	* testsuite/ld-x86-64/pr19719.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr19719.
+
+2016-04-18  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld.texinfo: Document NOCROSSREFS_TO script command.
+	* ldlang.h (struct lang_nocrossrefs): Add onlyfirst field.
+	(lang_add_nocrossref_to): New prototype.
+	* ldcref.c (check_local_sym_xref): Use onlyfirst to only look for
+	symbols defined in the first section.
+	(check_nocrossref): Likewise.
+	* ldgram.y (NOCROSSREFS_TO): New script command.
+	* ldlang.c (lang_add_nocrossref): Set onlyfirst to FALSE.
+	(lang_add_nocrossref_to): New function.
+	* ldlex.l (NOCROSSREFS_TO): New token.
+	* NEWS: Mention NOCROSSREFS_TO.
+	* testsuite/ld-scripts/cross4.t: New file.
+	* testsuite/ld-scripts/cross5.t: Likewise.
+	* testsuite/ld-scripts/cross6.t: Likewise.
+	* testsuite/ld-scripts/cross7.t: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Run 4 new NOCROSSREFS_TO
+	tests.
+
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-arc/arc.exp: New file.
+	* testsuite/ld-arc/nps-1.s: New file.
+	* testsuite/ld-arc/nps-1a.d: New file.
+	* testsuite/ld-arc/nps-1b.d: New file.
+	* testsuite/ld-arc/nps-1b.err: New file.
+
 2016-04-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 19457

@@ -264,6 +264,8 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_read:
+    case gdb_sys_readlink:
+    case gdb_sys_recv:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_mem_at_reg (regcache, tdep->arg2, (int) tmpulongest))
 	return -1;
@@ -348,6 +350,7 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_pipe:
+    case gdb_sys_pipe2:
       if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_int * 2))
 	return -1;
       break;
@@ -645,12 +648,6 @@ record_linux_system_call (enum gdb_syscall syscall,
     case gdb_sys_symlink:
       break;
 
-    case gdb_sys_readlink:
-      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
-      if (record_mem_at_reg (regcache, tdep->arg2, (int) tmpulongest))
-	return -1;
-      break;
-
     case gdb_sys_uselib:
     case gdb_sys_swapon:
       break;
@@ -740,12 +737,6 @@ Do you want to stop the program?"),
 	if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
 	  return -1;
       }
-      break;
-
-    case gdb_sys_recv:
-      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
-      if (record_mem_at_reg (regcache, tdep->arg2, (int) tmpulongest))
-	return -1;
       break;
 
     case gdb_sys_recvmsg:
@@ -2033,11 +2024,6 @@ Do you want to stop the program?"),
     case gdb_sys_eventfd2:
     case gdb_sys_epoll_create1:
     case gdb_sys_dup3:
-      break;
-
-    case gdb_sys_pipe2:
-      if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_int * 2))
-	return -1;
       break;
 
     case gdb_sys_inotify_init1:

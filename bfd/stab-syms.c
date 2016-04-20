@@ -45,8 +45,7 @@
   __define_name (N_WARNING, "WARNING")
 
 const char *
-bfd_get_stab_name (code)
-     int code;
+bfd_get_stab_name (int code)
 {
   switch (code)
     {

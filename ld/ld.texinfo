@@ -3674,6 +3674,25 @@ an error and returns a non-zero exit status.  Note that the
 @code{NOCROSSREFS} command uses output section names, not input section
 names.
 
+@item NOCROSSREFS_TO(@var{tosection} @var{fromsection} @dots{})
+@kindex NOCROSSREFS_TO(@var{tosection} @var{fromsections})
+@cindex cross references
+This command may be used to tell @command{ld} to issue an error about any
+references to one section from a list of other sections.
+
+The @code{NOCROSSREFS} command is useful when ensuring that two or more
+output sections are entirely independent but there are situations where
+a one-way dependency is needed. For example, in a multi-core application
+there may be shared code that can be called from each core but for safety
+must never call back.
+
+The @code{NOCROSSREFS_TO} command takes a list of output section names.
+The first section can not be referenced from any of the other sections.
+If @command{ld} detects any references to the first section from any of
+the other sections, it reports an error and returns a non-zero exit
+status.  Note that the @code{NOCROSSREFS_TO} command uses output section
+names, not input section names.
+
 @ifclear SingleFormat
 @item OUTPUT_ARCH(@var{bfdarch})
 @kindex OUTPUT_ARCH(@var{bfdarch})

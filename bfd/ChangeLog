@@ -1,3 +1,64 @@
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19969
+	* elf64-x86-64.c (check_relocs_failed): New.
+	(elf_x86_64_need_pic): Moved before elf_x86_64_check_relocs.
+	Support relocation agaist local symbol.  Set check_relocs_failed.
+	(elf_x86_64_check_relocs): Use elf_x86_64_need_pic.  Check
+	R_X86_64_32 relocation overflow.
+	(elf_x86_64_relocate_section): Skip if check_relocs failed.
+	Update one elf_x86_64_need_pic and remove one elf_x86_64_need_pic.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Call
+	_bfd_elf_create_ifunc_sections only for STT_GNU_IFUNC symbol.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_link_check_relocs): New.
+	* elflink.c (_bfd_elf_link_check_relocs): New function.
+	(elf_link_add_object_symbols): Call _bfd_elf_link_check_relocs
+	if check_relocs_after_open_input is FALSE.
+
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* cache.c: Update old style function definitions.
+	* elf32-m68k.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* stab-syms.c: Likewise.
+
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf32-arm.c (put_thumb2_insn): Change argument type to bfd_byte *.
+
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* reloc.c: Add BFD_RELOC_ARC_NPS_CMEM16 entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-arc.c: Add 'opcode/arc.h' include.
+	(struct arc_relocation_data): Add symbol_name.
+	(arc_special_overflow_checks): New function.
+	(arc_do_relocation): Use arc_special_overflow_checks, reindent as
+	required, add an extra comment.
+	(elf_arc_relocate_section): Setup symbol_name in reloc_data.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-arc.c (tls_got_entries): Add 'TLS_GOT_' prefix to all
+	entries.
+	(elf_arc_relocate_section): Update enum uses.
+	(elf_arc_check_relocs): Likewise.
+	(elf_arc_finish_dynamic_symbol): Likewise.
+
 2016-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_copy_private_bfd_data): Replace "link" with

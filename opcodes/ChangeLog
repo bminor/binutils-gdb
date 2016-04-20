@@ -1,3 +1,67 @@
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* alpha-dis.c: Regenerate.
+	* crx-dis.c: Likewise.
+	* disassemble.c: Likewise.
+	* epiphany-opc.c: Likewise.
+	* fr30-opc.c: Likewise.
+	* frv-opc.c: Likewise.
+	* ip2k-opc.c: Likewise.
+	* iq2000-opc.c: Likewise.
+	* lm32-opc.c: Likewise.
+	* lm32-opinst.c: Likewise.
+	* m32c-opc.c: Likewise.
+	* m32r-opc.c: Likewise.
+	* m32r-opinst.c: Likewise.
+	* mep-opc.c: Likewise.
+	* mt-opc.c: Likewise.
+	* or1k-opc.c: Likewise.
+	* or1k-opinst.c: Likewise.
+	* tic80-opc.c: Likewise.
+	* xc16x-opc.c: Likewise.
+	* xstormy16-opc.c: Likewise.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add addb, subb, adcb, sbcb, andb, xorb, orb,
+	fxorb, wxorb, shlb, shrb, notb, cntbb, div, mod, divm, qcmp,
+	calcsd, and calcxd instructions.
+	* arc-opc.c (insert_nps_bitop_size): Delete.
+	(extract_nps_bitop_size): Delete.
+	(MAKE_SRC_POS_INSERT_EXTRACT_FUNCS): Define, and use.
+	(extract_nps_qcmp_m3): Define.
+	(extract_nps_qcmp_m2): Define.
+	(extract_nps_qcmp_m1): Define.
+	(arc_flag_operands): Add F_NPS_SX, F_NPS_AR, F_NPS_AL.
+	(arc_flag_classes): Add C_NPS_SX, C_NPS_AR_AL
+	(arc_operands): Add NPS_SRC2_POS, NPS_SRC1_POS, NPS_ADDB_SIZE,
+	NPS_ANDB_SIZE, NPS_FXORB_SIZ, NPS_WXORB_SIZ, NPS_R_XLDST,
+	NPS_DIV_UIMM4, NPS_QCMP_SIZE, NPS_QCMP_M1, NPS_QCMP_M2, and
+	NPS_QCMP_M3.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add dctcp, dcip, dcet, and dcacl instructions.
+
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add xldb, xldw, xld, xstb, xstw, and xst
+	instructions.
+	* arc-opc.c (insert_nps_cmem_uimm16): New function.
+	(extract_nps_cmem_uimm16): New function.
+	(arc_operands): Add NPS_XLDST_UIMM16 operand.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-dis.c (arc_insn_length): New function.
+	(print_insn_arc): Use arc_insn_length, change insnLen to unsigned.
+	(find_format): Change insnLen parameter to unsigned.
+
 2016-04-13  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19937

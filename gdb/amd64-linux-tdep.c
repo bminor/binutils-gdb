@@ -43,6 +43,7 @@
 #include "features/i386/amd64-linux.c"
 #include "features/i386/amd64-avx-linux.c"
 #include "features/i386/amd64-mpx-linux.c"
+#include "features/i386/amd64-avx-mpx-linux.c"
 #include "features/i386/amd64-avx512-linux.c"
 
 #include "features/i386/x32-linux.c"
@@ -1590,6 +1591,11 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
 	return tdesc_x32_avx_linux;  /* No x32 MPX falling back to AVX.  */
       else
 	return tdesc_amd64_mpx_linux;
+    case X86_XSTATE_AVX_MPX_MASK:
+      if (gdbarch_ptr_bit (gdbarch) == 32)
+	return tdesc_x32_avx_linux;  /* No x32 MPX falling back to AVX.  */
+      else
+	return tdesc_amd64_avx_mpx_linux;
     case X86_XSTATE_AVX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	return tdesc_x32_avx_linux;
@@ -2287,6 +2293,7 @@ _initialize_amd64_linux_tdep (void)
   initialize_tdesc_amd64_linux ();
   initialize_tdesc_amd64_avx_linux ();
   initialize_tdesc_amd64_mpx_linux ();
+  initialize_tdesc_amd64_avx_mpx_linux ();
   initialize_tdesc_amd64_avx512_linux ();
 
   initialize_tdesc_x32_linux ();

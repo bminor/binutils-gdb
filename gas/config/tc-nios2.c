@@ -98,7 +98,7 @@ typedef enum
 } relax_optionT;
 
 /* Struct contains all assembler options set with .set.  */
-struct
+static struct
 {
   /* .set noat -> noat = 1 allows assembly code to use at without warning
      and macro expansions generate a warning.
@@ -3910,7 +3910,7 @@ md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
 
 /* Called just before the assembler exits.  */
 void
-md_end ()
+md_end (void)
 {
   /* FIXME - not yet implemented */
 }

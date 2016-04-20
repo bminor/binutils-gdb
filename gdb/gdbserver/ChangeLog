@@ -1,3 +1,47 @@
+2016-04-20  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.c: Include "arch/arm-linux.h".
+	(arm_fill_gregset): Use ARM_CPSR_GREGNUM rather than magic
+	number 16.
+	(arm_store_gregset): Likewise.
+
+2016-04-16  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* Makefile.in (clean): Add removal for i386-avx-mpx.c,
+	i386-avx-mpx-linux.c, amd64-avx-mpx.c and amd64-avx-mpx-linux.c.
+	(i386-avx-mpx.c, i386-avx-mpx-linux.c, amd64-avx-mpx.c)
+	(amd64-avx-mpx-linux.c): New rules.
+	(amd64-avx-mpx-linux-ipa.o, i386-avx-mpx-linux-ipa.o): New rule.
+	* configure.srv (srv_i386_regobj): Add i386-avx-mpx.o.
+	(srv_i386_linux_regobj): Add i386-avx-mpx-linux.o.
+	(srv_amd64_regobj): Add amd64-avx-mpx.o.
+	(srv_amd64_linux_regobj): Add amd64-avx-mpx-linux.o.
+	(srv_i386_xmlfiles): Add i386/i386-avx-mpx.xml.
+	(srv_amd64_xmlfiles): Add i386/amd64-avx-mpx.xml.
+	(srv_i386_linux_xmlfiles): Add i386/i386-avx-mpx-linux.xml.
+	(srv_amd64_linux_xmlfiles): Add i386/amd64-avx-mpx-linux.xml.
+	(ipa_i386_linux_regobj): Add i386-avx-mpx-linux-ipa.o.
+	(ipa_amd64_linux_regobj): Add amd64-avx-mpx-linux-ipa.o.
+	* linux-x86-low.c (x86_linux_read_description): Add case for
+	X86_XSTATE_AVX_MPX_MASK.
+	(x86_get_ipa_tdesc_idx): Add cases for avx_mpx.
+	(initialize_low_arch): Call init_registers_amd64_avx_mpx_linux and
+	init_registers_i386_avx_mpx_linux.
+	* linux-i386-ipa.c (get_ipa_tdesc): Add case for avx_mpx.
+	(initialize_low_tracepoint): Call
+	init_registers_i386_avx_mpx_linux.
+	* linux-amd64-ipa.c (get_ipa_tdesc):  Add case for avx_mpx.
+	(initialize_low_tracepoint): Call
+	init_registers_amd64_avx_mpx_linux.
+	* linux-x86-tdesc.h (X86_TDESC_AVX_MPX): New enum value.
+	(init_registers_amd64_avx_mpx_linux, tdesc_amd64_avx_mpx_linux)
+	(init_registers_i386_avx_mpx_linux, tdesc_i386_avx_mpx_linux): New
+	declarations.
+
+2016-04-18  Pedro Alves  <palves@redhat.com>
+
+	* configure: Regenerate.
+
 2016-04-13  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-aarch64-low.c (aarch64_emit_add): Switch x1 and x0.

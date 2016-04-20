@@ -156,6 +156,8 @@ set x86_64tests {
      "--64" { dummy.s } {{readelf {-rW} pr19827.rd}} "pr19827"}
     {"Build pr19827.so" "-melf_x86_64 -shared -Bsymbolic" ""
      "--64" { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
+    {"Build pr19969.so" "-melf_x86_64 -shared" ""
+     "--64" { pr19969a.S } {} "pr19969.so"}
 }
 
 # So as to avoid rewriting every last test case here in a nacl variant,
@@ -247,6 +249,8 @@ run_dump_test "pr14215"
 run_dump_test "pr14207"
 run_dump_test "gotplt1"
 run_dump_test "pie1"
+run_dump_test "pie2"
+run_dump_test "pic1"
 run_dump_test "largecomm-1a"
 run_dump_test "largecomm-1b"
 run_dump_test "largecomm-1c"
@@ -262,6 +266,7 @@ run_dump_test "pr19807-2b"
 run_dump_test "pr19807-2c"
 run_dump_test "pr19807-2d"
 run_dump_test "pr19807-2e"
+run_dump_test "pr19969"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
@@ -440,6 +445,7 @@ run_dump_test "pr19609-7c"
 run_dump_test "pr19609-7d"
 run_dump_test "pr19939a"
 run_dump_test "pr19939b"
+run_dump_test "pr19719"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"

@@ -714,9 +714,7 @@ get_words_at_PC (bfd_vma memaddr, struct disassemble_info *info)
 /* Prints the instruction by calling print_arguments after proper matching.  */
 
 int
-print_insn_crx (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_crx (bfd_vma memaddr, struct disassemble_info *info)
 {
   int is_decoded;     /* Nonzero means instruction has a match.  */
 

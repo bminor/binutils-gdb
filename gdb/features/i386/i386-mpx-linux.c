@@ -135,16 +135,6 @@ initialize_tdesc_i386_mpx_linux (void)
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.linux");
   tdesc_create_reg (feature, "orig_eax", 41, 1, NULL, 32, "int");
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.avx");
-  tdesc_create_reg (feature, "ymm0h", 42, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm1h", 43, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm2h", 44, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm3h", 45, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm4h", 46, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm5h", 47, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm6h", 48, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm7h", 49, 1, NULL, 128, "uint128");
-
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.mpx");
   type = tdesc_create_struct (feature, "br128");
   field_type = tdesc_named_type (feature, "uint64");
@@ -176,12 +166,12 @@ initialize_tdesc_i386_mpx_linux (void)
   field_type = tdesc_named_type (feature, "_bndcfgu");
   tdesc_add_field (type, "config", field_type);
 
-  tdesc_create_reg (feature, "bnd0raw", 50, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd1raw", 51, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd2raw", 52, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd3raw", 53, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bndcfgu", 54, 1, NULL, 64, "cfgu");
-  tdesc_create_reg (feature, "bndstatus", 55, 1, NULL, 64, "status");
+  tdesc_create_reg (feature, "bnd0raw", 42, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd1raw", 43, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd2raw", 44, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd3raw", 45, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bndcfgu", 46, 1, NULL, 64, "cfgu");
+  tdesc_create_reg (feature, "bndstatus", 47, 1, NULL, 64, "status");
 
   tdesc_i386_mpx_linux = result;
 }

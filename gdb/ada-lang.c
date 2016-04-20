@@ -7649,7 +7649,7 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
       || (TYPE_CODE (type) != TYPE_CODE_STRUCT
           && TYPE_CODE (type) != TYPE_CODE_UNION))
     {
-      char *type_str;
+      const char *type_str;
 
       if (noerr)
         return NULL;
@@ -7727,7 +7727,7 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
 BadName:
   if (!noerr)
     {
-      char *name_str = name != NULL ? name : _("<null>");
+      const char *name_str = name != NULL ? name : _("<null>");
 
       error (_("Type %s has no component named %s"),
 	     type_as_string_and_cleanup (type), name_str);

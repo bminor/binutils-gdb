@@ -1,3 +1,33 @@
+2016-04-19  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/bad-file.exp: New file.
+
+2016-04-18  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* gdb.dwarf2/implref.exp: New file.
+
+2016-04-18  Bernhard Heckel <bernhard.heckel@intel.com>
+
+	* gdb.fortran/common-block.exp: Use type naming defined in lib fortran.
+	* gdb.fortran/derived-type.exp: Use type naming defined in lib fortran.
+	* gdb.fortran/multi-dim.exp: Use type naming defined in lib fortran.
+	* gdb.fortran/vla-datatypes.exp: Use type naming defined in lib fortran.
+	* gdb.fortran/vla-ptype-sub.exp: Use type naming defined in lib fortran.
+	* gdb.fortran/vla-ptype.exp: Use type naming defined in lib fortran.
+	* gdb.fortran/whatis_type.exp: Use type naming defined in lib fortran.
+	* lib/fortran.exp (fortran_int4): New procedure.
+	(fortran_real4, fortran_real8, fortran_complex4): Likewise.
+	(fortran_logical4): Likewise.
+
+2016-04-18  Benrhard Heckel <bernhard.heckel@intel.com>
+
+	* lib/gdb.exp (gdb_compile_shlib): Add flag for ICC compiler.
+
+2016-04-18  Bernhard Heckel <bernhard.heckel@intel.com>
+
+	* lib/compiler.c: Add Intel specific preprocessor macros.
+	* lib/compiler.cc: Likewise.
+	
 2016-04-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.server/connect-with-no-symbol-file.c: New file.

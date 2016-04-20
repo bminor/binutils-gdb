@@ -48,6 +48,7 @@
 #include "features/i386/i386-linux.c"
 #include "features/i386/i386-mmx-linux.c"
 #include "features/i386/i386-mpx-linux.c"
+#include "features/i386/i386-avx-mpx-linux.c"
 #include "features/i386/i386-avx-linux.c"
 #include "features/i386/i386-avx512-linux.c"
 
@@ -697,6 +698,8 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
       return tdesc_i386_avx512_linux;
     case X86_XSTATE_MPX_MASK:
       return tdesc_i386_mpx_linux;
+    case X86_XSTATE_AVX_MPX_MASK:
+      return tdesc_i386_avx_mpx_linux;
     case X86_XSTATE_AVX_MASK:
       return tdesc_i386_avx_linux;
     case X86_XSTATE_SSE_MASK:
@@ -1087,5 +1090,6 @@ _initialize_i386_linux_tdep (void)
   initialize_tdesc_i386_mmx_linux ();
   initialize_tdesc_i386_avx_linux ();
   initialize_tdesc_i386_mpx_linux ();
+  initialize_tdesc_i386_avx_mpx_linux ();
   initialize_tdesc_i386_avx512_linux ();
 }

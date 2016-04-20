@@ -4816,11 +4816,54 @@ From now on the previous value of @var{register} can't be restored anymore.
 Current value of @var{register} is the same like in the previous frame,
 i.e. no restoration needed.
 
-@subsection @code{.cfi_remember_state},
-First save all current rules for all registers by @code{.cfi_remember_state},
-then totally screw them up by subsequent @code{.cfi_*} directives and when
-everything is hopelessly bad, use @code{.cfi_restore_state} to restore
-the previous saved state.
+@subsection @code{.cfi_remember_state} and @code{.cfi_restore_state}
+@code{.cfi_remember_state} pushes the set of rules for every register onto an
+implicit stack, while @code{.cfi_restore_state} pops them off the stack and
+places them in the current row.  This is useful for situations where you have
+multiple @code{.cfi_*} directives that need to be undone due to the control
+flow of the program.  For example, we could have something like this (assuming
+the CFA is the value of @code{rbp}):
+
+@smallexample
+        je label
+        popq %rbx
+        .cfi_restore %rbx
+        popq %r12
+        .cfi_restore %r12
+        popq %rbp
+        .cfi_restore %rbp
+        .cfi_def_cfa %rsp, 8
+        ret
+label:
+        /* Do something else */
+@end smallexample
+
+Here, we want the @code{.cfi} directives to affect only the rows corresponding
+to the instructions before @code{label}.  This means we'd have to add multiple
+@code{.cfi} directives after @code{label} to recreate the original save
+locations of the registers, as well as setting the CFA back to the value of
+@code{rbp}.  This would be clumsy, and result in a larger binary size. Instead,
+we can write:
+
+@smallexample
+        je label
+        popq %rbx
+        .cfi_remember_state
+        .cfi_restore %rbx
+        popq %r12
+        .cfi_restore %r12
+        popq %rbp
+        .cfi_restore %rbp
+        .cfi_def_cfa %rsp, 8
+        ret
+label:
+        .cfi_restore_state
+        /* Do something else */
+@end smallexample
+
+That way, the rules for the instructions after @code{label} will be the same
+as before the first @code{.cfi_restore} without having to use multiple
+@code{.cfi} directives.
 
 @subsection @code{.cfi_return_column @var{register}}
 Change return column @var{register}, i.e. the return address is either

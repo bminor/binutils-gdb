@@ -131,7 +131,7 @@ rl78_prefix (int p)
 }
 
 int
-rl78_has_prefix ()
+rl78_has_prefix (void)
 {
   return rl78_bytes.n_prefix;
 }

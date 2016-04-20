@@ -3480,6 +3480,69 @@ _bfd_elf_notice_as_needed (bfd *ibfd,
   return (*info->callbacks->notice) (info, NULL, NULL, ibfd, NULL, act, 0);
 }
 
+/* Check relocations an ELF object file.  */
+
+bfd_boolean
+_bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+
+  /* If this object is the same format as the output object, and it is
+     not a shared library, then let the backend look through the
+     relocs.
+
+     This is required to build global offset table entries and to
+     arrange for dynamic relocs.  It is not required for the
+     particular common case of linking non PIC code, even when linking
+     against shared libraries, but unfortunately there is no way of
+     knowing whether an object file has been compiled PIC or not.
+     Looking through the relocs is not particularly time consuming.
+     The problem is that we must either (1) keep the relocs in memory,
+     which causes the linker to require additional runtime memory or
+     (2) read the relocs twice from the input file, which wastes time.
+     This would be a good case for using mmap.
+
+     I have no idea how to handle linking PIC code into a file of a
+     different format.  It probably can't be done.  */
+  if ((abfd->flags & DYNAMIC) == 0
+      && is_elf_hash_table (htab)
+      && bed->check_relocs != NULL
+      && elf_object_id (abfd) == elf_hash_table_id (htab)
+      && (*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
+    {
+      asection *o;
+
+      for (o = abfd->sections; o != NULL; o = o->next)
+	{
+	  Elf_Internal_Rela *internal_relocs;
+	  bfd_boolean ok;
+
+	  if ((o->flags & SEC_RELOC) == 0
+	      || o->reloc_count == 0
+	      || ((info->strip == strip_all || info->strip == strip_debugger)
+		  && (o->flags & SEC_DEBUGGING) != 0)
+	      || bfd_is_abs_section (o->output_section))
+	    continue;
+
+	  internal_relocs = _bfd_elf_link_read_relocs (abfd, o, NULL, NULL,
+						       info->keep_memory);
+	  if (internal_relocs == NULL)
+	    return FALSE;
+
+	  ok = (*bed->check_relocs) (abfd, info, o, internal_relocs);
+
+	  if (elf_section_data (o)->relocs != internal_relocs)
+	    free (internal_relocs);
+
+	  if (! ok)
+	    return FALSE;
+	}
+    }
+
+  return TRUE;
+}
+
 /* Add symbols from an ELF object file to the linker hash table.  */
 
 static bfd_boolean
@@ -4950,57 +5013,9 @@ error_free_dyn:
       && !(*bed->check_directives) (abfd, info))
     return FALSE;
 
-  /* If this object is the same format as the output object, and it is
-     not a shared library, then let the backend look through the
-     relocs.
-
-     This is required to build global offset table entries and to
-     arrange for dynamic relocs.  It is not required for the
-     particular common case of linking non PIC code, even when linking
-     against shared libraries, but unfortunately there is no way of
-     knowing whether an object file has been compiled PIC or not.
-     Looking through the relocs is not particularly time consuming.
-     The problem is that we must either (1) keep the relocs in memory,
-     which causes the linker to require additional runtime memory or
-     (2) read the relocs twice from the input file, which wastes time.
-     This would be a good case for using mmap.
-
-     I have no idea how to handle linking PIC code into a file of a
-     different format.  It probably can't be done.  */
-  if (! dynamic
-      && is_elf_hash_table (htab)
-      && bed->check_relocs != NULL
-      && elf_object_id (abfd) == elf_hash_table_id (htab)
-      && (*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
-    {
-      asection *o;
-
-      for (o = abfd->sections; o != NULL; o = o->next)
-	{
-	  Elf_Internal_Rela *internal_relocs;
-	  bfd_boolean ok;
-
-	  if ((o->flags & SEC_RELOC) == 0
-	      || o->reloc_count == 0
-	      || ((info->strip == strip_all || info->strip == strip_debugger)
-		  && (o->flags & SEC_DEBUGGING) != 0)
-	      || bfd_is_abs_section (o->output_section))
-	    continue;
-
-	  internal_relocs = _bfd_elf_link_read_relocs (abfd, o, NULL, NULL,
-						       info->keep_memory);
-	  if (internal_relocs == NULL)
-	    goto error_return;
-
-	  ok = (*bed->check_relocs) (abfd, info, o, internal_relocs);
-
-	  if (elf_section_data (o)->relocs != internal_relocs)
-	    free (internal_relocs);
-
-	  if (! ok)
-	    goto error_return;
-	}
-    }
+  if (!info->check_relocs_after_open_input
+      && !_bfd_elf_link_check_relocs (abfd, info))
+    return FALSE;
 
   /* If this is a non-traditional link, try to optimize the handling
      of the .stab/.stabstr sections.  */

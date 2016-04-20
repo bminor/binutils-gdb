@@ -1587,7 +1587,57 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define need_convert_load sec_flg0
+#define need_convert_load	sec_flg0
+#define check_relocs_failed	sec_flg1
+
+static bfd_boolean
+elf_x86_64_need_pic (bfd *input_bfd, asection *sec,
+		     struct elf_link_hash_entry *h,
+		     Elf_Internal_Shdr *symtab_hdr,
+		     Elf_Internal_Sym *isym,
+		     reloc_howto_type *howto)
+{
+  const char *v = "";
+  const char *und = "";
+  const char *pic = "";
+
+  const char *name;
+  if (h)
+    {
+      name = h->root.root.string;
+      switch (ELF_ST_VISIBILITY (h->other))
+	{
+	case STV_HIDDEN:
+	  v = _("hidden symbol ");
+	  break;
+	case STV_INTERNAL:
+	  v = _("internal symbol ");
+	  break;
+	case STV_PROTECTED:
+	  v = _("protected symbol ");
+	  break;
+	default:
+	  v = _("symbol ");
+	  pic = _("; recompile with -fPIC");
+	  break;
+	}
+
+      if (!h->def_regular && !h->def_dynamic)
+	und = _("undefined ");
+    }
+  else
+    {
+      name = bfd_elf_sym_name (input_bfd, symtab_hdr, isym, NULL);
+      pic = _("; recompile with -fPIC");
+    }
+
+  (*_bfd_error_handler) (_("%B: relocation %s against %s%s`%s' can "
+			   "not be used when making a shared object%s"),
+			 input_bfd, howto->name, und, v, name, pic);
+  bfd_set_error (bfd_error_bad_value);
+  sec->check_relocs_failed = 1;
+  return FALSE;
+}
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure
@@ -1712,10 +1762,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (h != NULL)
 	{
-	  /* Create the ifunc sections for static executables.  If we
-	     never see an indirect function symbol nor we are building
-	     a static executable, those sections will be empty and
-	     won't appear in output.  */
 	  switch (r_type)
 	    {
 	    default:
@@ -1774,7 +1820,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_X86_64_GOTPCREL64:
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
-	      if (!_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
+	      /* Create the ifunc sections for static executables.  */
+	      if (h->type == STT_GNU_IFUNC
+		  && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj,
+						      info))
 		return FALSE;
 	      break;
 	    }
@@ -1803,19 +1852,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_X86_64_TPOFF32:
 	  if (!bfd_link_executable (info) && ABI_64_P (abfd))
-	    {
-	      if (h)
-		name = h->root.root.string;
-	      else
-		name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
-					 NULL);
-	      (*_bfd_error_handler)
-		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 abfd,
-		 x86_64_elf_howto_table[r_type].name, name);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
+	    return elf_x86_64_need_pic (abfd, sec, h, symtab_hdr, isym,
+					&x86_64_elf_howto_table[r_type]);
 	  if (eh != NULL)
 	    eh->has_got_reloc = 1;
 	  break;
@@ -1974,26 +2012,20 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32S:
-	  /* Let's help debug shared library creation.  These relocs
-	     cannot be used in shared libs.  Don't error out for
+	  /* Check relocation overflow as these relocs may lead to
+	     run-time relocation overflow.  Don't error out for
 	     sections we don't care about, such as debug sections or
-	     non-constant sections, or when relocation overflow check
-	     is disabled.  */
+	     when relocation overflow check is disabled.  */
 	  if (!info->no_reloc_overflow_check
-	      && bfd_link_pic (info)
-	      && (sec->flags & SEC_ALLOC) != 0
-	      && (sec->flags & SEC_READONLY) != 0)
-	    {
-	      if (h)
-		name = h->root.root.string;
-	      else
-		name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
-	      (*_bfd_error_handler)
-		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 abfd, x86_64_elf_howto_table[r_type].name, name);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
+	      && (bfd_link_pic (info)
+		  || (bfd_link_executable (info)
+		      && h != NULL
+		      && !h->def_regular
+		      && h->def_dynamic
+		      && (sec->flags & SEC_READONLY) == 0))
+	      && (sec->flags & SEC_ALLOC) != 0)
+	    return elf_x86_64_need_pic (abfd, sec, h, symtab_hdr, isym,
+					&x86_64_elf_howto_table[r_type]);
 	  /* Fall through.  */
 
 	case R_X86_64_PC8:
@@ -4041,42 +4073,6 @@ is_32bit_relative_branch (bfd_byte *contents, bfd_vma offset)
 	      && (contents [offset - 1] & 0xf0) == 0x80));
 }
 
-static bfd_boolean
-elf_x86_64_need_pic (bfd *input_bfd, struct elf_link_hash_entry *h,
-		     reloc_howto_type *howto)
-{
-  const char *fmt;
-  const char *v;
-  const char *pic = "";
-
-  switch (ELF_ST_VISIBILITY (h->other))
-    {
-    case STV_HIDDEN:
-      v = _("hidden symbol");
-      break;
-    case STV_INTERNAL:
-      v = _("internal symbol");
-      break;
-    case STV_PROTECTED:
-      v = _("protected symbol");
-      break;
-    default:
-      v = _("symbol");
-      pic = _("; recompile with -fPIC");
-      break;
-    }
-
-  if (h->def_regular)
-    fmt = _("%B: relocation %s against %s `%s' can not be used when making a shared object%s");
-  else
-    fmt = _("%B: relocation %s against undefined %s `%s' can not be used when making a shared object%s");
-
-  (*_bfd_error_handler) (fmt, input_bfd, howto->name,
-			 v,  h->root.root.string, pic);
-  bfd_set_error (bfd_error_bad_value);
-  return FALSE;
-}
-
 /* Relocate an x86_64 ELF section.  */
 
 static bfd_boolean
@@ -4100,6 +4096,10 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   const unsigned int plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
   BFD_ASSERT (is_x86_64_elf (input_bfd));
+
+  /* Skip if check_relocs failed.  */
+  if (input_section->check_relocs_failed)
+    return FALSE;
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
@@ -4757,7 +4757,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		}
 
 	      if (fail)
-		return elf_x86_64_need_pic (input_bfd, h, howto);
+		return elf_x86_64_need_pic (input_bfd, input_section,
+					    h, NULL, NULL, howto);
 	    }
 	  /* Fall through.  */
 
@@ -4839,11 +4840,6 @@ direct:
 				|| SYMBOLIC_BIND (info, h))
 			   || ! h->def_regular))
 		{
-		  if ((r_type != R_X86_64_PC64 && r_type != R_X86_64_64)
-		      && bfd_link_executable (info)
-		      && h->root.type == bfd_link_hash_undefweak
-		      && !resolved_to_zero)
-		    return elf_x86_64_need_pic (input_bfd, h, howto);
 		  outrel.r_info = htab->r_info (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;
 		}

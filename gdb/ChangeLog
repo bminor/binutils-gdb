@@ -1,3 +1,149 @@
+2016-04-20  Doug Evans  <xdje42@gmail.com>
+
+	* symmisc.c (dump_symtab_1): Print owning compunit for identical
+	blockvectors.
+
+2016-04-20  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c: Include "arch/arm-linux.h".
+
+2016-04-20  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.h (ARM_CPSR_GREGNUM): Move it to ...
+	* arch/arm-linux.h: ... here.
+
+2016-04-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64bsd-nat.c (amd64bsd_fetch_inferior_registers): Change xstateregs
+	to void *.
+	(amd64bsd_store_inferior_registers): Likewise.
+	* fbsd-nat.c (resume_one_thread_cb): Explicitly cast data to ptid_t *.
+	(resume_all_threads_cb): Likewise.
+	* i386bsd-nat.c (i386bsd_supply_gregset): Cast gregs to char *.
+	(i386bsd_collect_gregset): Likewise.
+	(i386bsd_fetch_inferior_registers): Change xstateregs to void *.
+	(i386bsd_store_inferior_registers): Likewise.
+
+2016-04-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* main.c (setup_alternate_signal_stack): Cast to char *.
+
+2016-04-19  Doug Evans  <xdje42@gmail.com>
+
+	* symmisc.c (dump_symtab_1, dump_symtab): Delete arg objfile.
+	All callers updated.
+
+2016-04-19  Doug Evans  <xdje42@gmail.com>
+
+	PR gdb/17911
+	* source.c (is_regular_file): New arg errno_ptr.
+	All callers updated.
+
+2016-04-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-record.c (record_linux_system_call): Merge handling for
+	readlink/recv/read and pipe/pipe2.
+
+2016-04-14  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* features/i386/amd64-mpx-linux.xml: Remove AVX feature.
+	* features/i386/amd64-mpx.xml: Remove AVX feature.
+	* features/i386/i386-mpx-linux.xml: Remove AVX feature.
+	* features/i386/i386-mpx.xml: Remove AVX feature.
+	* features/i386/amd64-mpx-linux.c: Regenerate.
+	* features/i386/amd64-mpx.c: Regenerate.
+	* features/i386/i386-mpx-linux.c: Regenerate.
+	* features/i386/i386-mpx.c: Regenerate.
+	* regformats/i386/amd64-mpx-linux.dat: Regenerate.
+	* regformats/i386/amd64-mpx.dat: Regenerate.
+	* regformats/i386/i386-mpx-linux.dat: Regenerate.
+	* regformats/i386/i386-mpx.dat: Regenerate.
+
+2016-04-16  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-linux-tdep.c (features/i386/amd64-avx-mpx-linux.c):
+	New include.
+	(amd64_linux_core_read_description): Add case for
+	 X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_amd64_linux_tdep): Call initialize_tdesc_amd64_avx_mpx_linux.
+	* amd64-linux-tdep.h (tdesc_amd64_avx_mpx_linux): New definition.
+	* amd64-tdep.c (features/i386/amd64-avx-mpx.c): New include.
+	(amd64_target_description): Add case for  X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_amd64_tdep): Call initialize_tdesc_amd64_avx_mpx.
+	* common/x86-xstate.h (X86_XSTATE_MPX_MASK): Remove AVX bits.
+	(X86_XSTATE_AVX_MPX_MASK): New case.
+	* features/Makefile (i386/i386-avx-mpx, i386/i386-avx-mpx-linux)
+	(i386/amd64-avx-mpx, i386/amd64-avx-mpx-linux): New rules.
+	(i386/i386-avx-mpx-expedite, i386/i386-avx-mpx-linux-expedite)
+	(i386/amd64-avx-mpx-expedite, i386/amd64-avx-mpx-linux-expedite):
+	New expedites.
+	* i386-linux-tdep.c (features/i386/i386-avx-mpx-linux.c): New
+	include.
+	(i386_linux_core_read_description): Add case
+	X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_i386_linux_tdep): Call
+	initialize_tdesc_i386_avx_mpx_linux.
+	* i386-linux-tdep.h (tdesc_i386_avx_mpx_linux): New include.
+	* i386-tdep.c (features/i386/i386-avx-mpx.c): New include.
+	(i386_target_description): Add case for X86_XSTATE_AVX_MPX_MASK.
+	* x86-linux-nat.c (x86_linux_read_description): Add case for
+	X86_XSTATE_AVX_MPX_MASK.
+	* features/i386/amd64-avx-mpx-linux.xml: New file.
+	* features/i386/i386-avx-mpx-linux.xml: New file.
+	* features/i386/i386-avx-mpx.xml: New file.
+	* features/i386/amd64-avx-mpx.xml: New file.
+	* features/i386/amd64-avx-mpx-linux.c: Generated.
+	* features/i386/amd64-avx-mpx.c: Generated.
+	* features/i386/i386-avx-mpx-linux.c: Generated.
+	* features/i386/i386-avx-mpx.c: Generated.
+	* regformats/i386/amd64-avx-mpx-linux.dat: Generated.
+	* regformats/i386/amd64-avx-mpx.dat: Generated.
+	* regformats/i386/i386-avx-mpx-linux.dat: Generated.
+	* regformats/i386/i386-avx-mpx.dat: Generated.
+
+2016-04-18  Pedro Alves  <palves@redhat.com>
+
+	* ptrace.m4 (GDB_AC_PTRACE): Don't run tests in C++ mode.
+	* configure: Regenerate.
+
+2016-04-18  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* valops.c (value_addr): For C++ references, set the copied value's
+	enclosing_type as well.
+
+2016-04-18  Yao Qi  <yao.qi@linaro.org>
+
+	Revert:
+	2016-04-15  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_stack_frame_destroyed_p): Return zero if
+	PC is far from the end of function.
+
+2016-04-16  Pedro Alves  <palves@redhat.com>
+
+	* ada-exp.y (yydefred): Define as ada_yydefred.
+
+2016-04-15  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_lookup_struct_elt_type): Constify 'type_str' and
+	'name_str' locals.
+
+2016-04-15  Pedro Alves  <palves@redhat.com>
+
+	* btrace.c (pt_btrace_insn_flags): Change return type to
+	btrace_insn_flags.  Use btrace_insn_flags for local.
+
+2016-04-15  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-ptrace.h [__mips__] (GDB_ARCH_IS_TRAP_BRKPT): Also
+	accept TRAP_BRKPT.
+	 [__mips__] (GDB_ARCH_IS_TRAP_HWBKPT): Also accept TRAP_HWBKPT.
+
+2016-04-15  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_stack_frame_destroyed_p): Return zero if
+	PC is far from the end of function.
+
 2016-04-14  Pedro Alves  <palves@redhat.com>
 
 	* cli/cli-cmds.c (alias_usage_error): New function.

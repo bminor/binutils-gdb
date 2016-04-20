@@ -719,29 +719,6 @@ extract_nps_3bit_src2 (unsigned insn ATTRIBUTE_UNUSED,
 }
 
 static unsigned
-insert_nps_bitop_size (unsigned insn ATTRIBUTE_UNUSED,
-                      int value ATTRIBUTE_UNUSED,
-                      const char **errmsg ATTRIBUTE_UNUSED)
-{
-  if (value < 1 || value > 32)
-    {
-      *errmsg = _("Invalid bit size, should be between 1 and 32 inclusive.");
-      return insn;
-    }
-
-  --value;
-  insn |= ((value & 0x1f) << 10);
-  return insn;
-}
-
-static int
-extract_nps_bitop_size (unsigned insn ATTRIBUTE_UNUSED,
-                       bfd_boolean * invalid ATTRIBUTE_UNUSED)
-{
-  return ((insn >> 10) & 0x1f) + 1;
-}
-
-static unsigned
 insert_nps_bitop_size_2b (unsigned insn ATTRIBUTE_UNUSED,
                           int value ATTRIBUTE_UNUSED,
                           const char **errmsg ATTRIBUTE_UNUSED)
@@ -836,6 +813,158 @@ extract_nps_dst_pos_and_size (unsigned insn ATTRIBUTE_UNUSED,
                               bfd_boolean * invalid ATTRIBUTE_UNUSED)
 {
   return (insn & 0x1f);
+}
+
+static unsigned
+insert_nps_cmem_uimm16 (unsigned insn ATTRIBUTE_UNUSED,
+                        int value ATTRIBUTE_UNUSED,
+                        const char **errmsg ATTRIBUTE_UNUSED)
+{
+  int top = (value >> 16) & 0xffff;
+  if (top != 0x0 && top != NPS_CMEM_HIGH_VALUE)
+    *errmsg = _("invalid value for CMEM ld/st immediate");
+  insn |= (value & 0xffff);
+  return insn;
+}
+
+static int
+extract_nps_cmem_uimm16 (unsigned insn ATTRIBUTE_UNUSED,
+                         bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (NPS_CMEM_HIGH_VALUE << 16) | (insn & 0xffff);
+}
+
+#define MAKE_SRC_POS_INSERT_EXTRACT_FUNCS(NAME,SHIFT)         \
+static unsigned                                               \
+insert_nps_##NAME##_pos (unsigned insn ATTRIBUTE_UNUSED,      \
+                        int value ATTRIBUTE_UNUSED,           \
+                        const char **errmsg ATTRIBUTE_UNUSED) \
+{                                                             \
+ switch (value)                                               \
+   {                                                          \
+   case 0:                                                    \
+   case 8:                                                    \
+   case 16:                                                   \
+   case 24:                                                   \
+     value = value / 8;                                       \
+     break;                                                   \
+   default:                                                   \
+     *errmsg = _("Invalid position, should be 0, 8, 16, or 24.");       \
+     value = 0;                                               \
+  }                                                           \
+  insn |= (value << SHIFT);                                    \
+  return insn;                                                \
+}                                                             \
+                                                              \
+static int                                                    \
+extract_nps_##NAME##_pos (unsigned insn ATTRIBUTE_UNUSED,     \
+                          bfd_boolean * invalid ATTRIBUTE_UNUSED)     \
+{                                                                     \
+  return ((insn >> SHIFT) & 0x3) * 8;                                 \
+}
+
+MAKE_SRC_POS_INSERT_EXTRACT_FUNCS (src2, 12)
+MAKE_SRC_POS_INSERT_EXTRACT_FUNCS (src1, 10)
+
+#define MAKE_SIZE_INSERT_EXTRACT_FUNCS(NAME,LOWER,UPPER,BITS,BIAS,SHIFT)\
+static unsigned                                                         \
+insert_nps_##NAME##_size (unsigned insn ATTRIBUTE_UNUSED,               \
+                          int value ATTRIBUTE_UNUSED,                   \
+                          const char **errmsg ATTRIBUTE_UNUSED)         \
+  {                                                                     \
+    if (value < LOWER || value > 32)                                    \
+      {                                                                 \
+        *errmsg = _("Invalid size, value must be "                      \
+                    #LOWER " to " #UPPER ".");                          \
+        return insn;                                                    \
+      }                                                                 \
+    value -= BIAS;                                                      \
+    insn |= (value << SHIFT);                                           \
+    return insn;                                                        \
+  }                                                                     \
+                                                                        \
+static int                                                              \
+extract_nps_##NAME##_size (unsigned insn ATTRIBUTE_UNUSED,              \
+                           bfd_boolean * invalid ATTRIBUTE_UNUSED)      \
+{                                                                       \
+  return ((insn >> SHIFT) & ((1 << BITS) - 1)) + BIAS;                  \
+}
+
+MAKE_SIZE_INSERT_EXTRACT_FUNCS(addb,2,32,5,1,5)
+MAKE_SIZE_INSERT_EXTRACT_FUNCS(andb,1,32,5,1,5)
+MAKE_SIZE_INSERT_EXTRACT_FUNCS(fxorb,8,32,5,8,5)
+MAKE_SIZE_INSERT_EXTRACT_FUNCS(wxorb,16,32,5,16,5)
+MAKE_SIZE_INSERT_EXTRACT_FUNCS(bitop,1,32,5,1,10)
+MAKE_SIZE_INSERT_EXTRACT_FUNCS(qcmp,1,8,3,1,9)
+
+static int
+extract_nps_qcmp_m3 (unsigned insn ATTRIBUTE_UNUSED,
+                     bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int m3 = (insn >> 5) & 0xf;
+  if (m3 == 0xf)
+    *invalid = TRUE;
+  return m3;
+}
+
+static int
+extract_nps_qcmp_m2 (unsigned insn ATTRIBUTE_UNUSED,
+                     bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  bfd_boolean tmp_invalid = FALSE;
+  int m2 = (insn >> 15) & 0x1;
+  int m3 = extract_nps_qcmp_m3 (insn, &tmp_invalid);
+
+  if (m2 == 0 && m3 == 0xf)
+    *invalid = TRUE;
+  return m2;
+}
+
+static int
+extract_nps_qcmp_m1 (unsigned insn ATTRIBUTE_UNUSED,
+                     bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  bfd_boolean tmp_invalid = FALSE;
+  int m1 = (insn >> 14) & 0x1;
+  int m2 = extract_nps_qcmp_m2 (insn, &tmp_invalid);
+  int m3 = extract_nps_qcmp_m3 (insn, &tmp_invalid);
+
+  if (m1 == 0 && m2 == 0 && m3 == 0xf)
+    *invalid = TRUE;
+  return m1;
+}
+
+static unsigned
+insert_nps_calc_entry_size (unsigned insn ATTRIBUTE_UNUSED,
+                            int value ATTRIBUTE_UNUSED,
+                            const char **errmsg ATTRIBUTE_UNUSED)
+{
+  unsigned pwr;
+
+  if (value < 1 || value > 256)
+    {
+      *errmsg = _("value out of range 1 - 256");
+      return 0;
+    }
+
+  for (pwr = 0; (value & 1) == 0; value >>= 1)
+    ++pwr;
+
+  if (value != 1)
+    {
+      *errmsg = _("value must be power of 2");
+      return 0;
+    }
+
+  return insn | (pwr << 8);
+}
+
+static int
+extract_nps_calc_entry_size (unsigned insn ATTRIBUTE_UNUSED,
+                             bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  unsigned entry_size = (insn >> 8) & 0xf;
+  return 1 << entry_size;
 }
 
 /* Include the generic extract/insert functions.  Order is important
@@ -1034,6 +1163,14 @@ const struct arc_flag_operand arc_flag_operands[] =
 #define F_NPS_HWS_RESTORE     (F_NPS_HWS_OFF + 1)
   { "restore", 0, 0, 0, 1 },
 
+#define F_NPS_SX     (F_NPS_HWS_RESTORE + 1)
+  { "sx",  1, 1, 14, 1 },
+
+#define F_NPS_AR     (F_NPS_SX + 1)
+  { "ar",  0, 1, 0, 1 },
+
+#define F_NPS_AL     (F_NPS_AR + 1)
+  { "al",  1, 1, 0, 1 },
 };
 
 const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
@@ -1135,6 +1272,11 @@ const struct arc_flag_class arc_flag_classes[] =
 #define C_NPS_HWS_RESTORE     (C_NPS_HWS_OFF + 1)
   { F_CLASS_REQUIRED, { F_NPS_HWS_RESTORE, F_NULL}},
 
+#define C_NPS_SX     (C_NPS_HWS_RESTORE + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_SX, F_NULL}},
+
+#define C_NPS_AR_AL     (C_NPS_SX + 1)
+  { F_CLASS_REQUIRED, { F_NPS_AR, F_NPS_AL, F_NULL}},
 };
 
 const unsigned char flags_none[] = { 0 };
@@ -1498,6 +1640,48 @@ const struct arc_operand arc_operands[] =
 
 #define NPS_RFLT_UIMM6		(NPS_UIMM16 + 1)
   { 6, 6, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_rflt_uimm6, extract_nps_rflt_uimm6 },
+
+#define NPS_XLDST_UIMM16	(NPS_RFLT_UIMM6 + 1)
+  { 16, 0, BFD_RELOC_ARC_NPS_CMEM16, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_cmem_uimm16, extract_nps_cmem_uimm16 },
+
+#define NPS_SRC2_POS           (NPS_XLDST_UIMM16 + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_src2_pos, extract_nps_src2_pos },
+
+#define NPS_SRC1_POS           (NPS_SRC2_POS + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_src1_pos, extract_nps_src1_pos },
+
+#define NPS_ADDB_SIZE          (NPS_SRC1_POS + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_addb_size, extract_nps_addb_size },
+
+#define NPS_ANDB_SIZE          (NPS_ADDB_SIZE + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_andb_size, extract_nps_andb_size },
+
+#define NPS_FXORB_SIZE         (NPS_ANDB_SIZE + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_fxorb_size, extract_nps_fxorb_size },
+
+#define NPS_WXORB_SIZE         (NPS_FXORB_SIZE + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_wxorb_size, extract_nps_wxorb_size },
+
+#define NPS_R_XLDST    (NPS_WXORB_SIZE + 1)
+  { 6, 5, 0, ARC_OPERAND_IR, NULL, NULL },
+
+#define NPS_DIV_UIMM4    (NPS_R_XLDST + 1)
+  { 4, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_QCMP_SIZE         (NPS_DIV_UIMM4 + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_qcmp_size, extract_nps_qcmp_size },
+
+#define NPS_QCMP_M1         (NPS_QCMP_SIZE + 1)
+  { 1, 14, 0, ARC_OPERAND_UNSIGNED, NULL, extract_nps_qcmp_m1 },
+
+#define NPS_QCMP_M2         (NPS_QCMP_M1 + 1)
+  { 1, 15, 0, ARC_OPERAND_UNSIGNED, NULL, extract_nps_qcmp_m2 },
+
+#define NPS_QCMP_M3         (NPS_QCMP_M2 + 1)
+  { 4, 5, 0, ARC_OPERAND_UNSIGNED, NULL, extract_nps_qcmp_m3 },
+
+#define NPS_CALC_ENTRY_SIZE	(NPS_QCMP_M3 + 1)
+  { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_calc_entry_size, extract_nps_calc_entry_size },
 };
 
 const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);

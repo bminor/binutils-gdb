@@ -105,7 +105,7 @@ special_flag_p (const char *opname,
 /* Find proper format for the given opcode.  */
 static const struct arc_opcode *
 find_format (const struct arc_opcode *arc_table,
-	     unsigned *insn, int insnLen,
+	     unsigned *insn, unsigned int insnLen,
 	     unsigned isa_mask)
 {
   unsigned int i = 0;
@@ -309,6 +309,37 @@ get_auxreg (const struct arc_opcode *opcode,
     }
   return NULL;
 }
+
+/* Calculate the instruction length for an instruction starting with MSB
+   and LSB, the most and least significant byte.  The ISA_MASK is used to
+   filter the instructions considered to only those that are part of the
+   current architecture.
+
+   The instruction lengths are calculated from the ARC_OPCODE table, and
+   cached for later use.  */
+
+static unsigned int
+arc_insn_length (bfd_byte msb, struct disassemble_info *info)
+{
+  bfd_byte major_opcode = msb >> 3;
+
+  switch (info->mach)
+    {
+    case bfd_mach_arc_nps400:
+    case bfd_mach_arc_arc700:
+    case bfd_mach_arc_arc600:
+      return (major_opcode > 0xb) ? 2 : 4;
+      break;
+
+    case bfd_mach_arc_arcv2:
+      return (major_opcode > 0x7) ? 2 : 4;
+      break;
+
+    default:
+      abort ();
+    }
+}
+
 /* Disassemble ARC instructions.  */
 
 static int
@@ -318,7 +349,7 @@ print_insn_arc (bfd_vma memaddr,
   bfd_byte buffer[4];
   unsigned int lowbyte, highbyte;
   int status;
-  int insnLen = 0;
+  unsigned int insnLen;
   unsigned insn[2] = { 0, 0 };
   unsigned isa_mask;
   const unsigned char *opidx;
@@ -422,20 +453,19 @@ print_insn_arc (bfd_vma memaddr,
       return size;
     }
 
-  if ((((buffer[lowbyte] & 0xf8) > 0x38)
-       && ((buffer[lowbyte] & 0xf8) != 0x48))
-      || ((info->mach == bfd_mach_arc_arcv2)
-	  && ((buffer[lowbyte] & 0xF8) == 0x48)) /* FIXME! ugly.  */
-      )
+  insnLen = arc_insn_length (buffer[lowbyte], info);
+  switch (insnLen)
     {
-      /* This is a short instruction.  */
-      insnLen = 2;
+    case 2:
       insn[0] = (buffer[lowbyte] << 8) | buffer[highbyte];
-    }
-  else
-    {
-      insnLen = 4;
+      break;
 
+    default:
+      /* An unknown instruction is treated as being length 4.  This is
+         possibly not the best solution, but matches the behaviour that was
+         in place before the table based instruction length look-up was
+         introduced.  */
+    case 4:
       /* This is a long instruction: Read the remaning 2 bytes.  */
       status = (*info->read_memory_func) (memaddr + 2, &buffer[2], 2, info);
       if (status != 0)
@@ -444,6 +474,7 @@ print_insn_arc (bfd_vma memaddr,
 	  return -1;
 	}
       insn[0] = ARRANGE_ENDIAN (info, buffer);
+      break;
     }
 
   /* Set some defaults for the insn info.  */

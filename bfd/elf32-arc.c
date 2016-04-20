@@ -26,6 +26,7 @@
 #include "elf/arc.h"
 #include "libiberty.h"
 #include "opcode/arc-func.h"
+#include "opcode/arc.h"
 #include "arc-plt.h"
 
 #ifdef DEBUG
@@ -127,10 +128,10 @@ enum tls_type_e
 
 enum tls_got_entries
 {
-  NONE = 0,
-  MOD,
-  OFF,
-  MOD_AND_OFF
+  TLS_GOT_NONE = 0,
+  TLS_GOT_MOD,
+  TLS_GOT_OFF,
+  TLS_GOT_MOD_AND_OFF
 };
 
 struct got_entry
@@ -722,6 +723,8 @@ struct arc_relocation_data
   bfd_signed_vma  got_symbol_vma;
 
   bfd_boolean	  should_relocate;
+
+  const char *    symbol_name;
 };
 
 static void
@@ -786,6 +789,52 @@ middle_endian_convert (bfd_vma insn, bfd_boolean do_it)
 	((insn & 0xffff) << 16);
     }
   return insn;
+}
+
+/* This function is called for relocations that are otherwise marked as NOT
+   requiring overflow checks.  In here we perform non-standard checks of
+   the relocation value.  */
+
+static inline bfd_reloc_status_type
+arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
+                             bfd_signed_vma relocation,
+			     struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  switch (reloc_data.howto->type)
+    {
+    case R_ARC_NPS_CMEM16:
+      if (((relocation >> 16) & 0xffff) != NPS_CMEM_HIGH_VALUE)
+        {
+          if (reloc_data.reloc_addend == 0)
+            (*_bfd_error_handler)
+              (_("%B(%A+0x%lx): CMEM relocation to `%s' is invalid, "
+                 "16 MSB should be 0x%04x (value is 0x%lx)"),
+               reloc_data.input_section->owner,
+               reloc_data.input_section,
+               reloc_data.reloc_offset,
+               reloc_data.symbol_name,
+               NPS_CMEM_HIGH_VALUE,
+               (relocation));
+          else
+            (*_bfd_error_handler)
+              (_("%B(%A+0x%lx): CMEM relocation to `%s+0x%lx' is invalid, "
+                 "16 MSB should be 0x%04x (value is 0x%lx)"),
+               reloc_data.input_section->owner,
+               reloc_data.input_section,
+               reloc_data.reloc_offset,
+               reloc_data.symbol_name,
+               reloc_data.reloc_addend,
+               NPS_CMEM_HIGH_VALUE,
+               (relocation));
+          return bfd_reloc_overflow;
+        }
+      break;
+
+    default:
+      break;
+    }
+
+  return bfd_reloc_ok;
 }
 
 #define ME(reloc) (reloc)
@@ -896,6 +945,7 @@ arc_do_relocation (bfd_byte * contents,
   bfd_vma orig_insn ATTRIBUTE_UNUSED;
   bfd * abfd = reloc_data.input_section->owner;
   struct elf_link_hash_table *htab ATTRIBUTE_UNUSED = elf_hash_table (info);
+  bfd_reloc_status_type flag;
 
   if (reloc_data.should_relocate == FALSE)
     return bfd_reloc_ok;
@@ -936,34 +986,34 @@ arc_do_relocation (bfd_byte * contents,
 
   /* Check for relocation overflow.  */
   if (reloc_data.howto->complain_on_overflow != complain_overflow_dont)
-    {
-      bfd_reloc_status_type flag;
-      flag = bfd_check_overflow (reloc_data.howto->complain_on_overflow,
-				 reloc_data.howto->bitsize,
-				 reloc_data.howto->rightshift,
-				 bfd_arch_bits_per_address (abfd),
-				 relocation);
+    flag = bfd_check_overflow (reloc_data.howto->complain_on_overflow,
+                               reloc_data.howto->bitsize,
+                               reloc_data.howto->rightshift,
+                               bfd_arch_bits_per_address (abfd),
+                               relocation);
+  else
+    flag = arc_special_overflow_checks (reloc_data, relocation, info);
 
 #undef  DEBUG_ARC_RELOC
 #define DEBUG_ARC_RELOC(A) debug_arc_reloc (A)
-      if (flag != bfd_reloc_ok)
-	{
-	  PR_DEBUG ( "Relocation overflows !!!!\n");
+  if (flag != bfd_reloc_ok)
+    {
+      PR_DEBUG ( "Relocation overflows !!!!\n");
 
-	  DEBUG_ARC_RELOC (reloc_data);
+      DEBUG_ARC_RELOC (reloc_data);
 
-	  PR_DEBUG (
-		  "Relocation value = signed -> %d, unsigned -> %u"
-		  ", hex -> (0x%08x)\n",
-		  (int) relocation,
-		  (unsigned int) relocation,
-		  (unsigned int) relocation);
-	  return flag;
-	}
+      PR_DEBUG (
+                "Relocation value = signed -> %d, unsigned -> %u"
+                ", hex -> (0x%08x)\n",
+                (int) relocation,
+                (unsigned int) relocation,
+                (unsigned int) relocation);
+      return flag;
     }
 #undef  DEBUG_ARC_RELOC
 #define DEBUG_ARC_RELOC(A)
 
+  /* Write updated instruction back to memory.  */
   switch (reloc_data.howto->size)
     {
       case 2:
@@ -1168,6 +1218,10 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 
 	  reloc_data.sym_value = sym->st_value;
 	  reloc_data.sym_section = sec;
+	  reloc_data.symbol_name =
+            bfd_elf_string_from_elf_section (input_bfd,
+                                             symtab_hdr->sh_link,
+                                             sym->st_name);
 
 	  /* Mergeable section handling.  */
 	  if ((sec->flags & SEC_MERGE)
@@ -1284,6 +1338,7 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
 	  BFD_ASSERT ((h->dynindx == -1) >= (h->forced_local != 0));
+	  reloc_data.symbol_name = h->root.root.string;
 	  /* If we have encountered a definition for this symbol.  */
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
@@ -1401,7 +1456,7 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 			  bfd_put_32 (output_bfd,
 				      sym_value - sec_vma,
 				      htab->sgot->contents + entry->offset
-				      + (entry->existing_entries == MOD_AND_OFF ? 4 : 0));
+				      + (entry->existing_entries == TLS_GOT_MOD_AND_OFF ? 4 : 0));
 
 			  ARC_DEBUG ("arc_info: FIXED -> %s value = 0x%x "
 				     "@ 0x%x, for symbol %s\n",
@@ -1409,7 +1464,7 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 				      "GOT_TLS_IE"),
 				     sym_value - sec_vma,
 				     htab->sgot->contents + entry->offset
-				     + (entry->existing_entries == MOD_AND_OFF ? 4 : 0),
+				     + (entry->existing_entries == TLS_GOT_MOD_AND_OFF ? 4 : 0),
 				     h->root.root.string);
 
 			  entry->processed = TRUE;
@@ -1806,7 +1861,7 @@ elf_arc_check_relocs (bfd *		         abfd,
 						  bfd_link_pic (info),
 						  NULL);
 		  new_got_entry_to_list (&(local_got_ents[r_symndx]),
-					 GOT_NORMAL, offset, NONE);
+					 GOT_NORMAL, offset, TLS_GOT_NONE);
 		}
 	    }
 	  else
@@ -1818,7 +1873,7 @@ elf_arc_check_relocs (bfd *		         abfd,
 		  bfd_vma offset =
 		    ADD_SYMBOL_REF_SEC_AND_RELOC (got, TRUE, h);
 		  new_got_entry_to_list (&h->got.glist,
-					 GOT_NORMAL, offset, NONE);
+					 GOT_NORMAL, offset, TLS_GOT_NONE);
 		}
 	    }
 	}
@@ -1847,7 +1902,7 @@ elf_arc_check_relocs (bfd *		         abfd,
 
 	  if (type != GOT_UNKNOWN && !symbol_has_entry_of_type (*list, type))
 	    {
-	      enum tls_got_entries entries = NONE;
+	      enum tls_got_entries entries = TLS_GOT_NONE;
 	      bfd_vma offset =
 		ADD_SYMBOL_REF_SEC_AND_RELOC (got, TRUE, h);
 
@@ -1855,11 +1910,11 @@ elf_arc_check_relocs (bfd *		         abfd,
 		{
 		  bfd_vma ATTRIBUTE_UNUSED notneeded =
 		    ADD_SYMBOL_REF_SEC_AND_RELOC (got, TRUE, h);
-		  entries = MOD_AND_OFF;
+		  entries = TLS_GOT_MOD_AND_OFF;
 		}
 
-	      if (entries == NONE)
-		entries = OFF;
+	      if (entries == TLS_GOT_NONE)
+		entries = TLS_GOT_OFF;
 
 	      new_got_entry_to_list (list, type, offset, entries);
 	    }
@@ -2256,16 +2311,16 @@ elf_arc_finish_dynamic_symbol (bfd * output_bfd,
 		}
 	      list->created_dyn_relocation = TRUE;
 	    }
-	  else if (list->existing_entries != NONE)
+	  else if (list->existing_entries != TLS_GOT_NONE)
 	    {
 	      struct elf_link_hash_table *htab = elf_hash_table (info);
 	      enum tls_got_entries e = list->existing_entries;
 
 	      BFD_ASSERT (list->type != GOT_TLS_GD
-			  || list->existing_entries == MOD_AND_OFF);
+			  || list->existing_entries == TLS_GOT_MOD_AND_OFF);
 
 	      bfd_vma dynindx = h->dynindx == -1 ? 0 : h->dynindx;
-	      if (e == MOD_AND_OFF || e == MOD)
+	      if (e == TLS_GOT_MOD_AND_OFF || e == TLS_GOT_MOD)
 		{
 		  ADD_RELA (output_bfd, got, got_offset, dynindx,
 			    R_ARC_TLS_DTPMOD, 0);
@@ -2277,7 +2332,7 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
 			     + htab->sgot->output_offset + got_offset,
 			     dynindx, 0);
 		}
-	      if (e == MOD_AND_OFF || e == OFF)
+	      if (e == TLS_GOT_MOD_AND_OFF || e == TLS_GOT_OFF)
 		{
 		  bfd_vma addend = 0;
 		  if (list->type == GOT_TLS_IE)
@@ -2285,7 +2340,7 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
 					 htab->sgot->contents + got_offset);
 
 		  ADD_RELA (output_bfd, got,
-			    got_offset + (e == MOD_AND_OFF ? 4 : 0),
+			    got_offset + (e == TLS_GOT_MOD_AND_OFF ? 4 : 0),
 			    dynindx,
 			    (list->type == GOT_TLS_IE ?
 			     R_ARC_TLS_TPOFF : R_ARC_TLS_DTPOFF),

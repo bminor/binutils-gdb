@@ -25,7 +25,7 @@
 #define OPCODE_ARC_H
 
 #ifndef MAX_INSN_ARGS
-#define MAX_INSN_ARGS	     6
+#define MAX_INSN_ARGS	     8
 #endif
 
 #ifndef MAX_INSN_FLGS
@@ -47,6 +47,8 @@ typedef enum
     LOGICAL,
     MEMORY,
     BITOP,
+    NET,
+    ACL,
   } insn_class_t;
 
 /* Instruction Subclass.  */
@@ -436,6 +438,9 @@ extern const unsigned arc_num_aux_regs;
 
 extern const struct arc_opcode arc_relax_opcodes[];
 extern const unsigned arc_num_relax_opcodes;
+
+/* Macro used for generating one class of NPS instructions.  */
+#define NPS_CMEM_HIGH_VALUE 0x57f0
 
 /* Macros to help generating regular pattern instructions.  */
 #define FIELDA(word) (word & 0x3F)

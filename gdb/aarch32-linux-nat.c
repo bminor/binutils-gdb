@@ -20,6 +20,7 @@
 #include "regcache.h"
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
+#include "arch/arm-linux.h"
 
 #include "aarch32-linux-nat.h"
 

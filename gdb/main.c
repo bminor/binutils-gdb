@@ -297,7 +297,9 @@ setup_alternate_signal_stack (void)
 #ifdef HAVE_SIGALTSTACK
   stack_t ss;
 
-  ss.ss_sp = xmalloc (SIGSTKSZ);
+  /* FreeBSD versions older than 11.0 use char * for ss_sp instead of
+     void *.  This cast works with both types.  */
+  ss.ss_sp = (char *) xmalloc (SIGSTKSZ);
   ss.ss_size = SIGSTKSZ;
   ss.ss_flags = 0;
 

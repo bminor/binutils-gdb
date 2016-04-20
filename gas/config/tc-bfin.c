@@ -446,7 +446,7 @@ md_show_usage (FILE * stream)
 
 /* Perform machine-specific initializations.  */
 void
-md_begin ()
+md_begin (void)
 {
   /* Set the ELF flags if desired. */
   if (bfin_flags)

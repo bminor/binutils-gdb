@@ -897,6 +897,10 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 	{
 	  md_parse_option (OPTION_MCPU, "archs");
 	}
+      else if (!strcmp ("NPS400", cpu))
+	{
+	  md_parse_option (OPTION_MCPU, "nps400");
+	}
       else
 	as_fatal (_("could not find the architecture"));
 

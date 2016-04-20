@@ -758,7 +758,7 @@ md_show_usage (FILE *stream)
 }
 
 /* Native operand size opcode translation.  */
-struct
+static struct
   {
     const char *name;
     const char *name32;

@@ -1,3 +1,24 @@
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add check_relocs_after_open_input.
+
+2016-04-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/arc-reloc.def (ARC_NPS_CMEM16): Add ME modifier to formula.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h (MAX_INSN_ARGS): Increase 6 to 8.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h (insn_class_t): Add NET and ACL class.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/arc-reloc.def: Add ARC_NPS_CMEM16 reloc.
+	* opcode/arc.h (NPS_CMEM_HIGH_VALUE): Define.
+
 2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* opcode/arc.h (flag_class_t): Update.
