@@ -1,3 +1,8 @@
+2016-04-20  Doug Evans  <xdje42@gmail.com>
+
+	* symmisc.c (dump_symtab_1): Print owning compunit for identical
+	blockvectors.
+
 2016-04-20  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch32-linux-nat.c: Include "arch/arm-linux.h".

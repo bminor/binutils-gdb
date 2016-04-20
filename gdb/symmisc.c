@@ -377,7 +377,12 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
     }
   else
     {
-      fprintf_filtered (outfile, "\nBlockvector same as previous symtab\n\n");
+      const char *compunit_filename
+	= symtab_to_filename_for_display (COMPUNIT_FILETABS (SYMTAB_COMPUNIT (symtab)));
+
+      fprintf_filtered (outfile,
+			"\nBlockvector same as owning compunit: %s\n\n",
+			compunit_filename);
     }
 }
 
