@@ -1,5 +1,11 @@
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/pie2.d: New file.
+	* testsuite/ld-x86-64/pie2.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pie2.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19969
 	* testsuite/ld-x86-64/pr19969.d: New file.
 	* testsuite/ld-x86-64/pr19969a.S: Likewise.
