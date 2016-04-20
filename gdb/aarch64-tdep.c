@@ -3474,7 +3474,8 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
 
       if (!ld_flag)
         {
-          uint64_t reg_rm_val;
+          ULONGEST reg_rm_val;
+
           regcache_raw_read_unsigned (aarch64_insn_r->regcache,
                      bits (aarch64_insn_r->aarch64_insn, 16, 20), &reg_rm_val);
           if (bit (aarch64_insn_r->aarch64_insn, 12))
