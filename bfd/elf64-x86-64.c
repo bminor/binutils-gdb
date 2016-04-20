@@ -1712,10 +1712,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (h != NULL)
 	{
-	  /* Create the ifunc sections for static executables.  If we
-	     never see an indirect function symbol nor we are building
-	     a static executable, those sections will be empty and
-	     won't appear in output.  */
 	  switch (r_type)
 	    {
 	    default:
@@ -1774,7 +1770,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_X86_64_GOTPCREL64:
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
-	      if (!_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
+	      /* Create the ifunc sections for static executables.  */
+	      if (h->type == STT_GNU_IFUNC
+		  && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj,
+						      info))
 		return FALSE;
 	      break;
 	    }

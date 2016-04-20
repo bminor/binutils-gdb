@@ -1,5 +1,11 @@
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_check_relocs): Call
+	_bfd_elf_create_ifunc_sections only for STT_GNU_IFUNC symbol.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-bfd.h (_bfd_elf_link_check_relocs): New.
 	* elflink.c (_bfd_elf_link_check_relocs): New function.
 	(elf_link_add_object_symbols): Call _bfd_elf_link_check_relocs
