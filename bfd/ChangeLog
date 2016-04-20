@@ -1,5 +1,16 @@
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19969
+	* elf64-x86-64.c (check_relocs_failed): New.
+	(elf_x86_64_need_pic): Moved before elf_x86_64_check_relocs.
+	Support relocation agaist local symbol.  Set check_relocs_failed.
+	(elf_x86_64_check_relocs): Use elf_x86_64_need_pic.  Check
+	R_X86_64_32 relocation overflow.
+	(elf_x86_64_relocate_section): Skip if check_relocs failed.
+	Update one elf_x86_64_need_pic and remove one elf_x86_64_need_pic.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_check_relocs): Call
 	_bfd_elf_create_ifunc_sections only for STT_GNU_IFUNC symbol.
 	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.

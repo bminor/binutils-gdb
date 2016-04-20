@@ -1,5 +1,13 @@
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19969
+	* testsuite/ld-x86-64/pr19969.d: New file.
+	* testsuite/ld-x86-64/pr19969a.S: Likewise.
+	* testsuite/ld-x86-64/pr19969b.S: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr19969 tests.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* emulparams/elf32_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
 	New.
 	* emulparams/elf_i386.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
