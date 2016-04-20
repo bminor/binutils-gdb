@@ -145,6 +145,9 @@ automatically cause those extensions to be disabled.
  @tab Enable Privileged Access Never support.
 @item @code{profile} @tab ARMv8.2-A @tab No
  @tab Enable statistical profiling extensions.
+@item @code{ras} @tab ARMv8-A @tab ARMv8.2-A or later
+ @tab Enable the Reliability, Availability and Serviceability
+ extension.
 @item @code{rdma} @tab ARMv8-A @tab ARMv8.1-A or later
  @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
 @item @code{simd} @tab ARMv8-A @tab ARMv8-A or later

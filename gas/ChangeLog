@@ -1,3 +1,12 @@
+2016-04-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "ras".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "ras".
+	* testsuite/gas/aarch64/armv8-ras-1.d: New.
+	* testsuite/gas/aarch64/armv8-ras-1.s: New.
+	* testsuite/gas/aarch64/illegal-ras-1.d: New.
+	* testsuite/gas/aarch64/illegal-ras-1.s: New.
+
 2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/gas/arc/nps400-6.d: New file.
