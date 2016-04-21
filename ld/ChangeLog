@@ -1,3 +1,9 @@
+2016-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (lang_check_relocs): Use bfd_link_check_relocs in
+	prefernce to _bfd_elf_link_check_relocs.  Drop test for ELF
+	targets.  Do not stop the checks when problems are encountered.
+
 2016-04-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/cross3.t: Add commonly used data

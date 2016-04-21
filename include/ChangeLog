@@ -1,3 +1,7 @@
+2016-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* bfdlink.h: Add prototype for bfd_link_check_relocs.
+
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfdlink.h (bfd_link_info): Add check_relocs_after_open_input.

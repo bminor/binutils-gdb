@@ -4014,6 +4014,7 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 #define _bfd_xcoff_bfd_discard_group bfd_generic_discard_group
 #define _bfd_xcoff_section_already_linked _bfd_generic_section_already_linked
 #define _bfd_xcoff_bfd_define_common_symbol _bfd_xcoff_define_common_symbol
+#define _bfd_xcoff_bfd_link_check_relocs    _bfd_generic_link_check_relocs
 
 /* For dynamic symbols and relocs entry points.  */
 #define _bfd_xcoff_get_synthetic_symtab _bfd_nodynamic_get_synthetic_symtab

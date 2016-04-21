@@ -5480,6 +5480,8 @@ dummy_reloc16_extra_cases (bfd *abfd ATTRIBUTE_UNUSED,
   _bfd_generic_copy_link_hash_symbol_type
 #define coff_bfd_link_split_section  _bfd_generic_link_split_section
 
+#define coff_bfd_link_check_relocs   _bfd_generic_link_check_relocs
+
 #ifndef coff_start_final_link
 #define coff_start_final_link NULL
 #endif

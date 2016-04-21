@@ -67,6 +67,7 @@
 #define bfd_pef_bfd_final_link                      _bfd_generic_final_link
 #define bfd_pef_bfd_link_split_section              _bfd_generic_link_split_section
 #define bfd_pef_get_section_contents_in_window      _bfd_generic_get_section_contents_in_window
+#define bfd_pef_bfd_link_check_relocs               _bfd_generic_link_check_relocs
 
 static int
 bfd_pef_parse_traceback_table (bfd *abfd,

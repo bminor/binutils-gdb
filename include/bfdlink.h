@@ -226,6 +226,11 @@ extern void bfd_link_repair_undef_list
 /* Read symbols and cache symbol pointer array in outsymbols.  */
 extern bfd_boolean bfd_generic_link_read_symbols (bfd *);
 
+/* Check the relocs in the BFD.  Called after all the input
+   files have been loaded, and garbage collection has tagged
+   any unneeded sections.  */
+extern bfd_boolean bfd_link_check_relocs (bfd *,struct bfd_link_info *);
+
 struct bfd_sym_chain
 {
   struct bfd_sym_chain *next;

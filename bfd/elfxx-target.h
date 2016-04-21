@@ -287,6 +287,10 @@
 #define bfd_elfNN_bfd_link_split_section _bfd_generic_link_split_section
 #endif
 
+#ifndef bfd_elfNN_bfd_link_check_relocs
+#define bfd_elfNN_bfd_link_check_relocs  _bfd_elf_link_check_relocs
+#endif
+
 #ifndef bfd_elfNN_archive_p
 #define bfd_elfNN_archive_p bfd_generic_archive_p
 #endif
