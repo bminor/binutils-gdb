@@ -1,5 +1,10 @@
 2016-04-21  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.h (GDB_XCPT_TRY): Add comment.
+	(GDB_XCPT): Always define as GDB_XCPT_SJMP.
+
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
 	* aix-thread.c (pdc_read_data, pdc_write_data): Add cast.
 	(aix_thread_resume): Use PTRACE_TYPE_ARG5.
 	* rs6000-nat.c (rs6000_ptrace64): Use PTRACE_TYPE_ARG5.

@@ -122,7 +122,9 @@ struct gdb_exception
    the only mode supported when GDB is built as a C program.  */
 #define GDB_XCPT_SJMP 1
 
-/* Make GDB exceptions use try/catch behind the scenes.  */
+/* Make GDB exceptions use try/catch behind the scenes.  Can't be made
+   the default until we handle exceptions crossing foreign frames
+   (gdb -> readline callback -> gdb -> error).  */
 #define GDB_XCPT_TRY 2
 
 /* Specify this mode to build with TRY/CATCH mapped directly to raw
@@ -131,11 +133,8 @@ struct gdb_exception
    spurious code between the TRY and the CATCH block.  */
 #define GDB_XCPT_RAW_TRY 3
 
-#ifdef __cplusplus
-# define GDB_XCPT GDB_XCPT_TRY
-#else
-# define GDB_XCPT GDB_XCPT_SJMP
-#endif
+/* Always use setjmp/longmp, even in C++ mode.  */
+#define GDB_XCPT GDB_XCPT_SJMP
 
 /* Functions to drive the exceptions state machine.  Though declared
    here by necessity, these functions should be considered internal to
