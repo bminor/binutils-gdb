@@ -1,3 +1,12 @@
+2016-04-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/cross3.t: Add commonly used data
+	and text section names to output section statements.
+	* testsuite/ld-scripts/cross4.t: Likewise.
+	* testsuite/ld-scripts/cross5.t: Likewise.
+	* testsuite/ld-scripts/cross6.t: Likewise.
+	* testsuite/ld-scripts/cross7.t: Likewise.
+
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (lang_check_relocs): New function.
