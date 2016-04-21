@@ -20,9 +20,6 @@ patches="
 	binutils-lto-mixed.patch
 	binutils-pr12639.patch
 	binutils-secondary.patch
-	binutils-after-lang_gc_sections.patch
-	binutils-excluded-sections.patch
-	binutils-remove-gc_sweep_hook.patch
 "
 
 for p in $patches
