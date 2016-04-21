@@ -1,3 +1,10 @@
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
+	* linux-s390-low.c (s390_collect_ptrace_register)
+	(s390_supply_ptrace_register, s390_get_hwcap): Use gdb_byte * and
+	add casts.
+	(s390_check_regset): Use void * instead of gdb_byte *.
+
 2016-04-20  Pedro Alves  <palves@redhat.com>
 
 	* configure: Renegerate.
