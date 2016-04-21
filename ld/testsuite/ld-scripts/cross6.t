@@ -2,8 +2,8 @@ NOCROSSREFS_TO(.text .data)
 
 SECTIONS
 {
-  .text : { *(.text) }
-  .data : { *(.data) *(.opd) }
+  .text : { *(.text) *(.text.*) }
+  .data : { *(.data) *(.data.*) *(.sdata) *(.opd) }
   .bss : { *(.bss) *(COMMON) }
   /DISCARD/ : { *(*) }
 }

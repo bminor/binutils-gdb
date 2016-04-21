@@ -294,7 +294,7 @@ static void
 fetch_regset (struct regcache *regcache, int tid,
 	      int regset_id, int regsize, const struct regset *regset)
 {
-  gdb_byte *buf = alloca (regsize);
+  void *buf = alloca (regsize);
   struct iovec iov;
 
   iov.iov_base = buf;
@@ -318,7 +318,7 @@ static void
 store_regset (struct regcache *regcache, int tid,
 	      int regset_id, int regsize, const struct regset *regset)
 {
-  gdb_byte *buf = alloca (regsize);
+  void *buf = alloca (regsize);
   struct iovec iov;
 
   iov.iov_base = buf;
@@ -338,7 +338,7 @@ store_regset (struct regcache *regcache, int tid,
 static int
 check_regset (int tid, int regset, int regsize)
 {
-  gdb_byte *buf = alloca (regsize);
+  void *buf = alloca (regsize);
   struct iovec iov;
 
   iov.iov_base = buf;

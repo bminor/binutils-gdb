@@ -1,5 +1,17 @@
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_gc_sweep_hook): Removed.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-x86-64.c (elf_x86_64_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_link_check_relocs): Don't check relocations
+	in excluded sections
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19969
 	* elf64-x86-64.c (check_relocs_failed): New.
 	(elf_x86_64_need_pic): Moved before elf_x86_64_check_relocs.

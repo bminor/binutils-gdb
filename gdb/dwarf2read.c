@@ -10482,7 +10482,7 @@ try_open_dwop_file (const char *file_name, int is_dwp, int search_cwd)
     {
       if (*debug_file_directory != '\0')
 	search_path = concat (".", dirname_separator_string,
-			      debug_file_directory, NULL);
+			      debug_file_directory, (char *) NULL);
       else
 	search_path = xstrdup (".");
     }
@@ -10538,7 +10538,8 @@ open_dwo_file (const char *file_name, const char *comp_dir)
 
   if (comp_dir != NULL)
     {
-      char *path_to_try = concat (comp_dir, SLASH_STRING, file_name, NULL);
+      char *path_to_try = concat (comp_dir, SLASH_STRING,
+				  file_name, (char *) NULL);
 
       /* NOTE: If comp_dir is a relative path, this will also try the
 	 search path, which seems useful.  */
@@ -20871,7 +20872,7 @@ file_file_name (int file, struct line_header *lh)
 	  || lh->include_dirs == NULL)
         return xstrdup (fe->name);
       return concat (lh->include_dirs[fe->dir_index - 1], SLASH_STRING,
-		     fe->name, NULL);
+		     fe->name, (char *) NULL);
     }
   else
     {
@@ -20906,7 +20907,8 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
 
       if (IS_ABSOLUTE_PATH (relative) || comp_dir == NULL)
 	return relative;
-      return reconcat (relative, comp_dir, SLASH_STRING, relative, NULL);
+      return reconcat (relative, comp_dir, SLASH_STRING,
+		       relative, (char *) NULL);
     }
   else
     return file_file_name (file, lh);

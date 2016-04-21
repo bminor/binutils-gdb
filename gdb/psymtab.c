@@ -1224,7 +1224,8 @@ psymtab_to_fullname (struct partial_symtab *ps)
 	  if (ps->dirname == NULL || IS_ABSOLUTE_PATH (ps->filename))
 	    fullname = xstrdup (ps->filename);
 	  else
-	    fullname = concat (ps->dirname, SLASH_STRING, ps->filename, NULL);
+	    fullname = concat (ps->dirname, SLASH_STRING,
+			       ps->filename, (char *) NULL);
 
 	  back_to = make_cleanup (xfree, fullname);
 	  ps->fullname = rewrite_source_path (fullname);

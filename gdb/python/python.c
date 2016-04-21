@@ -1706,7 +1706,7 @@ message == an error message without a stack will be printed."),
      /foo/lib/pythonX.Y/...
      This must be done before calling Py_Initialize.  */
   progname = concat (ldirname (python_libdir), SLASH_STRING, "bin",
-		     SLASH_STRING, "python", NULL);
+		     SLASH_STRING, "python", (char *) NULL);
 #ifdef IS_PY3K
   oldloc = setlocale (LC_ALL, NULL);
   setlocale (LC_ALL, "");
@@ -1881,7 +1881,7 @@ gdbpy_finish_initialization (const struct extension_language_defn *extlang)
 
   /* Add the initial data-directory to sys.path.  */
 
-  gdb_pythondir = concat (gdb_datadir, SLASH_STRING, "python", NULL);
+  gdb_pythondir = concat (gdb_datadir, SLASH_STRING, "python", (char *) NULL);
   make_cleanup (xfree, gdb_pythondir);
 
   sys_path = PySys_GetObject ("path");

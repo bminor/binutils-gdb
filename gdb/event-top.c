@@ -364,7 +364,7 @@ top_level_prompt (void)
 	 beginning.  */
       const char suffix[] = "\n\032\032prompt\n";
 
-      return concat (prefix, prompt, suffix, NULL);
+      return concat (prefix, prompt, suffix, (char *) NULL);
     }
 
   return xstrdup (prompt);

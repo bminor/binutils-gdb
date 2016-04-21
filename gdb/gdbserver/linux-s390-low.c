@@ -171,7 +171,7 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 	{
 	  /* Convert 4-byte PSW mask to 8 bytes by clearing bit 12 and copying
 	     the basic addressing mode bit from the PSW address.  */
-	  char *addr = alloca (register_size (regcache->tdesc, regno ^ 1));
+	  gdb_byte *addr = (gdb_byte *) alloca (register_size (regcache->tdesc, regno ^ 1));
 	  collect_register (regcache, regno, buf);
 	  collect_register (regcache, regno ^ 1, addr);
 	  buf[1] &= ~0x8;
@@ -216,8 +216,8 @@ s390_supply_ptrace_register (struct regcache *regcache,
 	{
 	  /* Convert 8-byte PSW mask to 4 bytes by setting bit 12 and copying
 	     the basic addressing mode into the PSW address.  */
-	  char *mask = alloca (size);
-	  char *addr = alloca (register_size (regcache->tdesc, regno ^ 1));
+	  gdb_byte *mask = (gdb_byte *) alloca (size);
+	  gdb_byte *addr = (gdb_byte *) alloca (register_size (regcache->tdesc, regno ^ 1));
 	  memcpy (mask, buf, size);
 	  mask[1] |= 0x8;
 	  supply_register (regcache, regno, mask);
@@ -231,7 +231,7 @@ s390_supply_ptrace_register (struct regcache *regcache,
 	{
 	  /* Convert 8-byte PSW address to 4 bytes by truncating, but
 	     keeping the addressing mode bit (which was set from the mask).  */
-	  char *addr = alloca (size);
+	  gdb_byte *addr = (gdb_byte *) alloca (size);
 	  char amode;
 	  collect_register (regcache, regno, addr);
 	  amode = addr[0] & 0x80;
@@ -442,7 +442,7 @@ static unsigned long
 s390_get_hwcap (const struct target_desc *tdesc)
 {
   int wordsize = register_size (tdesc, 0);
-  unsigned char *data = alloca (2 * wordsize);
+  gdb_byte *data = (gdb_byte *) alloca (2 * wordsize);
   int offset = 0;
 
   while ((*the_target->read_auxv) (offset, data, 2 * wordsize) == 2 * wordsize)
@@ -469,7 +469,7 @@ s390_get_hwcap (const struct target_desc *tdesc)
 static int
 s390_check_regset (int pid, int regset, int regsize)
 {
-  gdb_byte *buf = alloca (regsize);
+  void *buf = alloca (regsize);
   struct iovec iov;
 
   iov.iov_base = buf;

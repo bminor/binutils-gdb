@@ -4965,7 +4965,7 @@ if test "${enable_build_with_cxx+set}" = set; then :
 	  as_fn_error "bad value $enableval for --enable-build-with-cxx" "$LINENO" 5 ;;
     esac
 else
-  enable_build_with_cxx=no
+  enable_build_with_cxx=yes
 fi
 
 

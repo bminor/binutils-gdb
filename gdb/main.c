@@ -232,7 +232,7 @@ get_init_files (const char **system_gdbinit,
 	      for (p = tmp_sys_gdbinit; IS_DIR_SEPARATOR (*p); ++p)
 		continue;
 	      relocated_sysgdbinit = concat (gdb_datadir, SLASH_STRING, p,
-					     NULL);
+					     (char *) NULL);
 	      xfree (tmp_sys_gdbinit);
 	    }
 	  else
@@ -560,7 +560,7 @@ captured_main (void *data)
 #ifdef WITH_PYTHON_PATH
   {
     /* For later use in helping Python find itself.  */
-    char *tmp = concat (WITH_PYTHON_PATH, SLASH_STRING, "lib", NULL);
+    char *tmp = concat (WITH_PYTHON_PATH, SLASH_STRING, "lib", (char *) NULL);
 
     python_libdir = relocate_gdb_directory (tmp, PYTHON_PATH_RELOCATABLE);
     xfree (tmp);

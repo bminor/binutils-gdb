@@ -1178,8 +1178,8 @@ symtab_to_fullname (struct symtab *s)
 	  if (SYMTAB_DIRNAME (s) == NULL || IS_ABSOLUTE_PATH (s->filename))
 	    fullname = xstrdup (s->filename);
 	  else
-	    fullname = concat (SYMTAB_DIRNAME (s), SLASH_STRING, s->filename,
-			       NULL);
+	    fullname = concat (SYMTAB_DIRNAME (s), SLASH_STRING,
+			       s->filename, (char *) NULL);
 
 	  back_to = make_cleanup (xfree, fullname);
 	  s->fullname = rewrite_source_path (fullname);

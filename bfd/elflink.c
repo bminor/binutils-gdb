@@ -3518,7 +3518,9 @@ _bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 	  Elf_Internal_Rela *internal_relocs;
 	  bfd_boolean ok;
 
+	  /* Don't check relocations in excluded sections.  */
 	  if ((o->flags & SEC_RELOC) == 0
+	      || (o->flags & SEC_EXCLUDE) != 0
 	      || o->reloc_count == 0
 	      || ((info->strip == strip_all || info->strip == strip_debugger)
 		  && (o->flags & SEC_DEBUGGING) != 0)
