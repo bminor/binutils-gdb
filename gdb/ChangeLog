@@ -1,3 +1,18 @@
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (try_open_dwop_file, open_dwo_file)
+	(file_file_name, file_full_name): Add char * cast to sentinel in
+	concat/reconcat calls.
+	* event-top.c (top_level_prompt): Likewise.
+	* guile/guile.c (initialize_scheme_side): Likewise.
+	* linux-tdep.c (linux_fill_prpsinfo): Likewise.
+	* macrotab.c (macro_source_fullname): Likewise.
+	* main.c (get_init_files, captured_main): Likewise.
+	* psymtab.c (psymtab_to_fullname): Likewise.
+	* python/python.c (_initialize_python)
+	(gdbpy_finish_initialization): Likewise.
+	* source.c (symtab_to_fullname): Likewise.
+
 2016-04-20  Pedro Alves  <palves@redhat.com>
 
 	* build-with-cxx.m4 (GDB_AC_BUILD_WITH_CXX): Default to yes.

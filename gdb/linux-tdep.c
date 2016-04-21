@@ -1789,7 +1789,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
 
   psargs = xstrdup (fname);
   if (infargs != NULL)
-    psargs = reconcat (psargs, psargs, " ", infargs, NULL);
+    psargs = reconcat (psargs, psargs, " ", infargs, (char *) NULL);
 
   make_cleanup (xfree, psargs);
 
