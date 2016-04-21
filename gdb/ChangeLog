@@ -1,5 +1,13 @@
 2016-04-21  Pedro Alves  <palves@redhat.com>
 
+	* aix-thread.c (pdc_read_data, pdc_write_data): Add cast.
+	(aix_thread_resume): Use PTRACE_TYPE_ARG5.
+	* rs6000-nat.c (rs6000_ptrace64): Use PTRACE_TYPE_ARG5.
+	(rs6000_ptrace_ldinfo): Change type of 'ldi' local to void
+	pointer, and cast return to gdb_byte pointer.
+
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
 	* s390-linux-nat.c (fetch_regset, store_regset, check_regset): Use
 	void * instead of gdb_byte *.
 
