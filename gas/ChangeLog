@@ -1,5 +1,14 @@
 2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-bfin.c (bfin_cpus): Remove sentinal.
+	(md_parse_option): Adjust.
+	* config/tc-aarch64.c (aarch64_parse_abi): Replace use of a sentinal
+	with iteration from 0 to ARRAY_SIZE.
+	* config/tc-mcore.c (md_begin): Likewise.
+	* config/tc-visium.c (visium_parse_arch): Likewise.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-tic54x.c (tic54x_set_default_include): remove argument
 							   and simplify accordingly.
 	(tic54x_include): Adjust.

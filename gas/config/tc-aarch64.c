@@ -7989,25 +7989,23 @@ struct aarch64_option_abi_value_table
 static const struct aarch64_option_abi_value_table aarch64_abis[] = {
   {"ilp32",		AARCH64_ABI_ILP32},
   {"lp64",		AARCH64_ABI_LP64},
-  {NULL,		0}
 };
 
 static int
 aarch64_parse_abi (const char *str)
 {
-  const struct aarch64_option_abi_value_table *opt;
-  size_t optlen = strlen (str);
+  unsigned int i;
 
-  if (optlen == 0)
+  if (str[0] == '\0')
     {
       as_bad (_("missing abi name `%s'"), str);
       return 0;
     }
 
-  for (opt = aarch64_abis; opt->name != NULL; opt++)
-    if (strlen (opt->name) == optlen && strncmp (str, opt->name, optlen) == 0)
+  for (i = 0; i < ARRAY_SIZE (aarch64_abis); i++)
+    if (strcmp (str, aarch64_abis[i].name) == 0)
       {
-	aarch64_abi = opt->value;
+	aarch64_abi = aarch64_abis[i].value;
 	return 1;
       }
 

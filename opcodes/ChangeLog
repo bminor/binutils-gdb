@@ -1,3 +1,8 @@
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* mcore-opc.h: Remove sentinal.
+	* mcore-dis.c (print_insn_mcore): Adjust.
+
 2016-06-23  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-opc.c: Correct description of availability of NPS400

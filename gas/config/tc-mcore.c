@@ -454,18 +454,18 @@ const pseudo_typeS md_pseudo_table[] =
 void
 md_begin (void)
 {
-  const mcore_opcode_info * opcode;
   const char * prev_name = "";
+  unsigned int i;
 
   opcode_hash_control = hash_new ();
 
   /* Insert unique names into hash table.  */
-  for (opcode = mcore_table; opcode->name; opcode ++)
+  for (i = 0; i < ARRAY_SIZE (mcore_table); i++)
     {
-      if (! streq (prev_name, opcode->name))
+      if (! streq (prev_name, mcore_table[i].name))
 	{
-	  prev_name = opcode->name;
-	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+	  prev_name = mcore_table[i].name;
+	  hash_insert (opcode_hash_control, mcore_table[i].name, (char *) &mcore_table[i]);
 	}
     }
 }
