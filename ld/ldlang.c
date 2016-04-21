@@ -6778,6 +6778,27 @@ lang_add_gc_name (const char * name)
   link_info.gc_sym_list = sym;
 }
 
+/* Check relocations.  */
+
+static void
+lang_check_relocs (void)
+{
+  if (link_info.check_relocs_after_open_input
+      && bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+    {
+      bfd *abfd;
+
+      for (abfd = link_info.input_bfds;
+	   abfd != (bfd *) NULL; abfd = abfd->link.next)
+	if (!_bfd_elf_link_check_relocs (abfd, &link_info))
+	  {
+	    /* no object output, fail return */
+	    config.make_executable = FALSE;
+	    break;
+	  }
+    }
+}
+
 void
 lang_process (void)
 {
@@ -6916,6 +6937,9 @@ lang_process (void)
 
   /* Remove unreferenced sections if asked to.  */
   lang_gc_sections ();
+
+  /* Check relocations.  */
+  lang_check_relocs ();
 
   /* Update wild statements.  */
   update_wild_statements (statement_list.head);

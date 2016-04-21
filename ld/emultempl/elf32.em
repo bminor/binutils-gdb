@@ -1026,20 +1026,6 @@ gld${EMULATION_NAME}_after_open (void)
   if (!is_elf_hash_table (htab))
     return;
 
-  if (link_info.check_relocs_after_open_input)
-    {
-      bfd *abfd;
-
-      for (abfd = link_info.input_bfds;
-	   abfd != (bfd *) NULL; abfd = abfd->link.next)
-	if (!_bfd_elf_link_check_relocs (abfd, &link_info))
-	  {
-	    /* no object output, fail return */
-	    config.make_executable = FALSE;
-	    return;
-	  }
-    }
-
   if (emit_note_gnu_build_id != NULL)
     {
       bfd *abfd;

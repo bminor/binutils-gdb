@@ -1,5 +1,12 @@
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ldlang.c (lang_check_relocs): New function.
+	(lang_process): Call lang_check_relocs after lang_gc_sections.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Don't
+	call _bfd_elf_link_check_relocs here.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19972
 	* testsuite/ld-elf/eh6.d: Pass -rW to readelf and check for
 	R_386_NONE or R_X86_64_NONE.
