@@ -2180,6 +2180,12 @@ value_struct_elt (struct value **argp, struct value **args,
       if (v)
 	return v;
 
+      /* fortran: If it is not a field it is the
+         type name of an inherited structure */
+      v = search_struct_field (name, *argp, t, 1);
+      if (v)
+	return v;
+
       /* C++: If it was not found as a data field, then try to
          return it as a pointer to a method.  */
       v = search_struct_method (name, argp, args, 0, 

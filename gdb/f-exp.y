@@ -608,8 +608,11 @@ nonempty_typelist
 		}
 	;
 
-name	:	NAME
-		{  $$ = $1.stoken; }
+name
+	:	NAME
+		{ $$ = $1.stoken; }
+	|	TYPENAME
+		{ $$ = $1.stoken; }
 	;
 
 name_not_typename :	NAME
