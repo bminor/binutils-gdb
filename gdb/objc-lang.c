@@ -360,7 +360,7 @@ const struct language_defn objc_language_defn = {
   macro_expansion_c,
   &exp_descriptor_standard,
   c_parse,
-  c_error,
+  c_yyerror,
   null_post_parser,
   c_printchar,		       /* Print a character constant */
   c_printstr,		       /* Function to print string constant */

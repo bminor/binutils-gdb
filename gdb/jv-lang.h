@@ -26,7 +26,7 @@ struct parser_state;
 
 extern int java_parse (struct parser_state *); /* Defined in jv-exp.y */
 
-extern void java_error (char *);	/* Defined in jv-exp.y */
+extern void java_yyerror (char *);	/* Defined in jv-exp.y */
 
 struct builtin_java_type
 {

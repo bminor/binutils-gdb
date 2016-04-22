@@ -1,5 +1,63 @@
 2016-04-22  Pedro Alves  <palves@redhat.com>
 
+	* ada-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* ada-lang.c (ada_language_defn): Adjust.
+	* ada-lang.h (ada_error): Rename to ...
+	(ada_yyerror): ... this.
+	* c-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Adjust.
+	* c-lang.h (c_error): Rename to ...
+	(c_yyerror): ... this.
+	* d-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* d-lang.c (d_language_defn): Adjust.
+	* d-lang.h (d_error): Rename to ...
+	(d_yyerror): ... this.
+	* f-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* f-lang.c (f_language_defn): Adjust.
+	* f-lang.h (f_error): Rename to ...
+	(f_yyerror): ... this.
+	* go-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* go-lang.c (go_language_defn): Adjust.
+	* go-lang.h (go_error): Rename to ...
+	(go_yyerror): ... this.
+	* jv-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* jv-lang.c (java_language_defn): Adjust.
+	* jv-lang.h (java_error): Rename to ...
+	(java_yyerror): ... this.
+	* m2-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* m2-lang.c (m2_language_defn): Adjust.
+	* m2-lang.h (m2_error): Rename to ...
+	(m2_yyerror): ... this.
+	* objc-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* objc-lang.c (objc_language_defn): Adjust.
+	* opencl-lang.c (opencl_language_defn): Adjust.
+	* p-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* p-lang.c (pascal_language_defn): Adjust.
+	* p-lang.h (pascal_error): Rename to ...
+	(pascal_yyerror): ... this.
+	* yy-remap.h: New file.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.h (GDB_XCPT_TRY): Remove mention of
 	the foreign frames issue.
 	[__cplusplus] (GDB_XCPT): Define as GDB_XCPT_TRY.
