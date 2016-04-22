@@ -1,3 +1,9 @@
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* valops.c (read_value_memory): New local variable 'stack'.
+	Set it to either TARGET_OBJECT_STACK_MEMORY or
+	TARGET_OBJECT_MEMORY.
+
 2016-04-22  Pedro Alves  <palves@redhat.com>
 
 	* ada-exp.y: Remove all yy symbol remappings.
