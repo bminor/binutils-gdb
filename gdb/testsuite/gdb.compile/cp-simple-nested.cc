@@ -1,4 +1,4 @@
-/* Copyright 2015 Free Software Foundation, Inc.
+/* Copyright 2015-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,11 +13,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct A
+class A
 {
-  int a_;
+public:
   A (void) : a_ (1) {}
+  int get (void);
 
+protected:
+  int a_;
+
+private:
   /* It is important to not /not/ use the nested class definition in A.
      This exercises a different path through the code.  */
   struct Inner1
@@ -34,13 +39,21 @@ struct A
 };
 
 int
-main (void)
+A::get (void)
 {
-  int var = 1234;
-  A a;
   A::Inner1 i1;
   A::Inner1::Inner2 i2;
 
-  return a.a_ + i1.a_ + i2.a_;	// break here
+  return i1.a_ + i2.a_; // break here
+}
+
+int var = 1234;
+
+int
+main (void)
+{
+  A a;
+
+  return a.get ();
 }
 

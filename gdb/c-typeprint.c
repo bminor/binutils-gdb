@@ -975,7 +975,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 
 	    fprintf_filtered (stream, "{\n");
 	    if (TYPE_NFIELDS (type) == 0 && TYPE_NFN_FIELDS (type) == 0
-		&& TYPE_TYPE_DEFN_FIELD_COUNT (type) == 0)
+		&& TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	      {
 		if (TYPE_STUB (type))
 		  fprintfi_filtered (level + 4, stream,
@@ -1303,18 +1303,15 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 
 	  /* Print typedefs defined in this class.  */
 
-	  if (TYPE_TYPE_DEFN_FIELD_COUNT (type) != 0 && flags->print_typedefs)
+	  if (TYPE_TYPEDEF_FIELD_COUNT (type) != 0 && flags->print_typedefs)
 	    {
 	      if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0)
 		fprintf_filtered (stream, "\n");
 
-	      for (i = 0; i < TYPE_TYPE_DEFN_FIELD_COUNT (type); i++)
+	      for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); i++)
 		{
-		  struct type *target = TYPE_TYPE_DEFN_FIELD_TYPE (type, i);
+		  struct type *target = TYPE_TYPEDEF_FIELD_TYPE (type, i);
 
-		  /* !!keiths: for now, maintain the status quo.  */
-		  if (TYPE_CODE (target) != TYPE_CODE_TYPEDEF)
-		    continue;
 		  /* Dereference the typedef declaration itself.  */
 		  gdb_assert (TYPE_CODE (target) == TYPE_CODE_TYPEDEF);
 		  target = TYPE_TARGET_TYPE (target);
@@ -1326,7 +1323,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		     from the template parameters or globally-known
 		     typedefs but not local typedefs.  */
 		  c_print_type (target,
-				TYPE_TYPE_DEFN_FIELD_NAME (type, i),
+				TYPE_TYPEDEF_FIELD_NAME (type, i),
 				stream, show - 1, level + 4,
 				&semi_local_flags);
 		  fprintf_filtered (stream, ";\n");

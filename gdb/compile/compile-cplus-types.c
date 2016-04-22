@@ -31,9 +31,6 @@
 #include "block.h"
 #include "gdbcmd.h"
 
-/* Define to enable debugging messages for context handling.  */
-#define CONTEXT_DEBUG 0
-
 /* Define to enable debugging for ctor/dtor definitions during
    type conversion.  */
 #define DEBUG_XTOR 0
@@ -98,6 +95,10 @@ struct type_map_instance
 /* Flag to enable internal debugging.  */
 
 int debug_compile_cplus_types = 0;
+
+/* Flag to enable internal context switching debugging.  */
+
+static int debug_compile_cplus_contexts = 0;
 
 /* Forward declarations.  */
 
@@ -357,12 +358,13 @@ ccp_need_new_context (const struct compile_cplus_context *pctx)
   struct compile_cplus_context *current
     = get_current_processing_context ();
 
-#if CONTEXT_DEBUG
-  printf ("scopes for current context, %p:\n", current);
-  debug_print_context (current);
-  printf ("comparing to scopes of %p:\n", pctx);
-  debug_print_context (pctx);
-#endif
+  if (debug_compile_cplus_contexts)
+    {
+      printf_unfiltered ("scopes for current context, %p:\n", current);
+      debug_print_context (current);
+      printf_unfiltered ("comparing to scopes of %p:\n", pctx);
+      debug_print_context (pctx);
+    }
 
   /* PCTX is "the same" as the current scope iff
      1. current is not NULL
@@ -370,9 +372,8 @@ ccp_need_new_context (const struct compile_cplus_context *pctx)
      3. scope names are the same.  */
   if (current == NULL)
     {
-#if CONTEXT_DEBUG
-      printf ("no current context -- need new context\n");
-#endif
+      if (debug_compile_cplus_contexts)
+	printf_unfiltered ("no current context -- need new context\n");
       return 1;
     }
 
@@ -380,10 +381,12 @@ ccp_need_new_context (const struct compile_cplus_context *pctx)
   new_len = VEC_length (compile_cplus_scope_def, CONTEXT_SCOPES (pctx));
   if (cur_len != new_len)
     {
-#if CONTXET_DEBUG
-      printf ("length mismatch: current %d, new %d -- need new context\n",
-	      cur_len, new_len);
-#endif
+      if (debug_compile_cplus_contexts)
+	{
+	  printf_unfiltered
+	    ("length mismatch: current %d, new %d -- need new context\n",
+	     cur_len, new_len);
+	}
       return 1;
     }
 
@@ -395,9 +398,11 @@ ccp_need_new_context (const struct compile_cplus_context *pctx)
     {
       if (cur_scope->name.length != new_scope->name.length)
 	{
-#if CONTEXT_DEBUG
-	  printf ("current scope namelen != newscope namelen -- need new context.\n");
-#endif
+	  if (debug_compile_cplus_contexts)
+	    {
+	      printf_unfiltered
+		("current scope namelen != newscope namelen -- need new context.\n");
+	    }
 	  return 1;
 	}
       else
@@ -407,23 +412,23 @@ ccp_need_new_context (const struct compile_cplus_context *pctx)
 
 	  if (strncmp (cur_name, new_name, cur_scope->name.length) != 0)
 	    {
-#if CONTEXT_DEBUG
-	      char *a = alloca (cur_scope->name.length + 1);
-	      char *b = alloca (cur_scope->name.length + 1);
+	      if (debug_compile_cplus_contexts)
+		{
+		  char *a = (char *) alloca (cur_scope->name.length + 1);
+		  char *b = (char *) alloca (cur_scope->name.length + 1);
 
-	      strncpy (a, cur_scope->name.ptr, cur_scope->name.length);
-	      strncpy (b, new_scope->name.ptr, new_scope->name.length);
-	      printf ("%s != %s -- need new context\n",
-		      cur_name, new_name);
-#endif
+		  strncpy (a, cur_scope->name.ptr, cur_scope->name.length);
+		  strncpy (b, new_scope->name.ptr, new_scope->name.length);
+		  printf_unfiltered ("%s != %s -- need new context\n",
+				     cur_name, new_name);
+		}
 	      return 1;
 	    }
 	}
     }
 
-#if CONTEXT_DEBUG
-  printf ("all scopes identical -- do NOT need new context\n");
-#endif
+  if (debug_compile_cplus_contexts)
+    printf_unfiltered ("all scopes identical -- do NOT need new context\n");
   return 0;
 }
 
@@ -569,10 +574,16 @@ new_processing_context (struct compile_cplus_instance *context,
 	  void **slot;
 	  struct type_map_instance inst, *found;
 
+	  /* !!keiths: I don't like this.  This seems like it would
+	     get us into hot water.  I think it better to return the
+	     struct type of the nested type and have the caller do that
+	     instead.  I don't think this function should cause scopes
+	     to be pushed.  That should be explicitly done by callers.  */
 	  /* The type the oracle asked about is defined inside another
 	     class(es).  Convert that type instead of defining this type.  */
 	  (void) convert_cplus_type (context,
-				     SYMBOL_TYPE (scope->bsymbol.symbol));
+				     SYMBOL_TYPE (scope->bsymbol.symbol),
+				     GCC_CP_ACCESS_NONE);
 
 	  /* If the original type (passed in to us) is defined in a nested
 	     class, the previous call will give us that type's gcc_type.
@@ -648,13 +659,34 @@ delete_processing_context (struct compile_cplus_context *pctx)
     }
 }
 
+/* Convert the access in ACCESS to a string for printing.  */
+
+static const char *
+access_to_string (enum gcc_cp_symbol_kind access)
+{
+  switch (access & GCC_CP_ACCESS_MASK)
+    {
+    case GCC_CP_ACCESS_NONE:
+      return "access_none";
+    case GCC_CP_ACCESS_PUBLIC:
+      return "access_public";
+    case GCC_CP_ACCESS_PROTECTED:
+      return "access_protected";
+    case GCC_CP_ACCESS_PRIVATE:
+      return "access_private";
+    default:
+      return "access_???";
+    }
+}
+
 /* Convert a reference type to its gcc representation.  */
 
 static gcc_type
 ccp_convert_reference (struct compile_cplus_instance *context,
 		       struct type *type)
 {
-  gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
+  gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+					GCC_CP_ACCESS_NONE);
 
   /* !!keiths: GDB does not currently do anything with rvalue references.
      [Except set the type code to TYPE_CODE_ERROR!  */
@@ -669,7 +701,8 @@ static gcc_type
 ccp_convert_pointer (struct compile_cplus_instance *context,
 		     struct type *type)
 {
-  gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
+  gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+					GCC_CP_ACCESS_NONE);
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("build_pointer_type %s\n", TYPE_SAFE_NAME (type));
@@ -684,7 +717,8 @@ ccp_convert_array (struct compile_cplus_instance *context, struct type *type)
   gcc_type element_type;
   struct type *range = TYPE_INDEX_TYPE (type);
 
-  element_type = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
+  element_type = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+				     GCC_CP_ACCESS_NONE);
 
   if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
     {
@@ -794,11 +828,13 @@ get_method_access_flag (const struct type *type, int fni, int num)
   gdb_assert_not_reached ("unhandled method access specifier");
 }
 
-/* Convert a typedef of TYPE.  */
+/* Convert a typedef of TYPE.  If not GCC_CP_ACCESS_NONE, NESTED_ACCESS
+   will define the accessibility of the typedef definition in its
+   containing class.  */
 
 static gcc_type
 ccp_convert_typedef (struct compile_cplus_instance *context,
-		     struct type *type)
+		     struct type *type, enum gcc_cp_symbol_kind nested_access)
 {
   int need_new_context;
   gcc_type typedef_type, result;
@@ -823,15 +859,19 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
   else
     name = NULL;
 
+  need_new_context = ccp_need_new_context (pctx);
+  if (need_new_context)
+    ccp_push_processing_context (context, pctx);
+
   /* FIXME: I moved this call before the context switching so that
      need_new_context would work as a heuristics for namespace-scoped
      types, but it ends up defining anonymous enum types and constants
      in the wrong context, so it can't stay here.  */
-  typedef_type = convert_cplus_type (context, check_typedef (type));
-
-  need_new_context = ccp_need_new_context (pctx);
-  if (need_new_context)
-    ccp_push_processing_context (context, pctx);
+  /* !!keiths: And I'm moving it back.  I think checking accessibility
+     should now give you what you're after.  It is not GCC_CP_ACCESS_NONE
+     if we're looking at a nested type.  */
+  typedef_type = convert_cplus_type (context, check_typedef (type),
+				     GCC_CP_ACCESS_NONE);
 
   if (debug_compile_cplus_types)
     {
@@ -840,14 +880,7 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
     }
   CPCALL (new_decl, context,
 	  name,
-	  GCC_CP_SYMBOL_TYPEDEF
-	  | (need_new_context /* FIXME: is this the right way to tell
-				 whether this is a namespace-scoped or
-				 nested typedef?  -lxo */
-	     ? GCC_CP_ACCESS_NONE
-	     /* FIXME: use correct access flag for the member typedef.
-		-lxo */
-	     : GCC_CP_ACCESS_PUBLIC),
+	  GCC_CP_SYMBOL_TYPEDEF | nested_access,
 	  typedef_type,
 	  0,
 	  0,
@@ -870,12 +903,38 @@ ccp_convert_type_defns (struct compile_cplus_instance *context,
 			struct type *type)
 {
   int i;
+  enum gcc_cp_symbol_kind accessibility;
 
-  for (i = 0; i < TYPE_TYPE_DEFN_FIELD_COUNT (type); ++i)
+  /* Convert typedefs.  */
+  for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); ++i)
     {
-      /* !!keiths: Is this "all" I need to do?? */
+      if (TYPE_TYPEDEF_FIELD_PUBLIC (type, i))
+	accessibility = GCC_CP_ACCESS_PUBLIC;
+      else if (TYPE_TYPEDEF_FIELD_PROTECTED (type, i))
+	accessibility = GCC_CP_ACCESS_PROTECTED;
+      else if (TYPE_TYPEDEF_FIELD_PRIVATE (type, i))
+	accessibility = GCC_CP_ACCESS_PRIVATE;
+      else
+	gdb_assert_not_reached ("unknown accessibility");
       (void) convert_cplus_type (context,
-				 TYPE_TYPE_DEFN_FIELD_TYPE (type, i));
+				 TYPE_TYPEDEF_FIELD_TYPE (type, i),
+				 accessibility);
+    }
+
+  /* Convert nested types.  */
+  for (i = 0; i < TYPE_NESTED_TYPES_COUNT (type); ++i)
+    {
+      if (TYPE_NESTED_TYPES_FIELD_PUBLIC (type, i))
+	accessibility = GCC_CP_ACCESS_PUBLIC;
+      else if (TYPE_NESTED_TYPES_FIELD_PROTECTED (type, i))
+	accessibility = GCC_CP_ACCESS_PROTECTED;
+      else if (TYPE_NESTED_TYPES_FIELD_PRIVATE (type, i))
+	accessibility = GCC_CP_ACCESS_PRIVATE;
+      else
+	gdb_assert_not_reached ("unknown accessibility");
+      (void) convert_cplus_type (context,
+				 TYPE_NESTED_TYPES_FIELD_TYPE (type, i),
+				 accessibility);
     }
 }
 
@@ -899,7 +958,8 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 	continue;
 
       field_type
-	= convert_cplus_type (context, TYPE_FIELD_TYPE (type, i));
+	= convert_cplus_type (context, TYPE_FIELD_TYPE (type, i),
+			      GCC_CP_ACCESS_NONE);
 
       if (field_is_static (&TYPE_FIELD (type, i)))
 	{
@@ -1006,7 +1066,7 @@ ccp_convert_method (struct compile_cplus_instance *context,
   /* Get the actual (proto)type of the method, as a function.  */
   func_type = ccp_convert_func (context, method_type, 1);
 
-  class_type = convert_cplus_type (context, parent_type);
+  class_type = convert_cplus_type (context, parent_type, GCC_CP_ACCESS_NONE);
   quals = (enum gcc_cp_qualifiers) 0; // !!keiths FIXME
   rquals = GCC_CP_REF_QUAL_NONE; // !!keiths FIXME
   if (debug_compile_cplus_types)
@@ -1550,11 +1610,14 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
     }
 }
 
-/* Convert a struct or union type to its gcc representation.  */
+/* Convert a struct or union type to its gcc representation.  If this type
+   was defined in another type, NESTED_ACCESS should indicate the
+   accessibility of this type.  */
 
 static gcc_type
 ccp_convert_struct_or_union (struct compile_cplus_instance *context,
-			     struct type *type)
+			     struct type *type,
+			     enum gcc_cp_symbol_kind nested_access)
 {
   int i, need_new_context;
   gcc_type result;
@@ -1596,15 +1659,18 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
   need_new_context = ccp_need_new_context (pctx);
   if (need_new_context)
     {
-#if CONTEXT_DEBUG
-      printf ("entering new processing scope %p\n", pctx);
-#endif
+      if (debug_compile_cplus_contexts)
+	printf_unfiltered ("entering new processing scope %p\n", pctx);
       ccp_push_processing_context (context, pctx);
     }
-#if CONTEXT_DEBUG
   else
-    printf ("staying in current scope -- scopes are identical\n");
-#endif
+    {
+      if (debug_compile_cplus_contexts)
+	{
+	  printf_unfiltered
+	    ("staying in current scope -- scopes are identical\n");
+	}
+    }
 
   /* First we create the resulting type and enter it into our hash
      table.  This lets recursive types work.  */
@@ -1629,26 +1695,18 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
 		| (BASETYPE_VIA_VIRTUAL (type, i)
 		   ? GCC_CP_FLAG_BASECLASS_VIRTUAL
 		   : GCC_CP_FLAG_BASECLASS_NOFLAG);
-	      bases.elements[i] = convert_cplus_type (context, base_type);
+	      bases.elements[i] = convert_cplus_type (context, base_type,
+						      GCC_CP_ACCESS_NONE);
 	    }
 	}
 
       if (debug_compile_cplus_types)
 	printf_unfiltered  ("start_new_class_type %s\n", name);
       result = CPCALL (start_new_class_type, context, name,
-		       GCC_CP_SYMBOL_CLASS
-		       | (need_new_context /* FIXME: is this the right
-					      way to tell whether this
-					      is a namespace-scoped or
-					      nested type?  -lxo */
-			  ? GCC_CP_ACCESS_NONE
-			  /* FIXME: use correct access flag for the
-			     nested class.  -lxo */
-			  : GCC_CP_ACCESS_PUBLIC)
-		       /* FIXME:
-			 (is-the-class-a-struct-p (type)
-			  ? GCC_CP_FLAG_CLASS_IS_STRUCT
-			  : GCC_CP_FLAG_CLASS_NOFLAG)  -lxo  */,
+		       GCC_CP_SYMBOL_CLASS | nested_access
+		       | (TYPE_DECLARED_CLASS (type)
+			  ? GCC_CP_FLAG_CLASS_NOFLAG
+			  : GCC_CP_FLAG_CLASS_IS_STRUCT),
 		       &bases, filename, line);
       if (debug_compile_cplus_types)
 	printf_unfiltered ("\tgcc_type = %lld\n", result);
@@ -1661,15 +1719,7 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
       if (debug_compile_cplus_types)
 	printf_unfiltered ("start_new_union_type %s\n", name);
       result = CPCALL (start_new_union_type, context, name,
-		       GCC_CP_SYMBOL_UNION
-		       | (need_new_context /* FIXME: is this the right
-					      way to tell whether this
-					      is a namespace-scoped or
-					      nested type?  -lxo */
-			  ? GCC_CP_ACCESS_NONE
-			  /* FIXME: use correct access flag for the
-			     nested union.  -lxo */
-			  : GCC_CP_ACCESS_PUBLIC),
+		       GCC_CP_SYMBOL_UNION | nested_access,
 		       filename, line);
       if (debug_compile_cplus_types)
 	printf_unfiltered ("\tgcc_type = %lld\n", result);
@@ -1695,15 +1745,15 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
   /* Pop all scopes.  */
   if (need_new_context)
     {
-#if CONTEXT_DEBUG
-      printf ("leaving processing scope %p\n", pctx);
-#endif
+      if (debug_compile_cplus_contexts)
+	printf_unfiltered ("leaving processing scope %p\n", pctx);
       ccp_pop_processing_context (context, pctx);
     }
-#if CONTEXT_DEBUG
   else
-    printf ("identical contexts -- not leaving context\n");
-#endif
+    {
+      if (debug_compile_cplus_contexts)
+	printf_unfiltered ("identical contexts -- not leaving context\n");
+    }
 
   delete_processing_context (pctx);
 
@@ -1711,10 +1761,13 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
   return result;
 }
 
-/* Convert an enum type to its gcc representation.  */
+/* Convert an enum type to its gcc representation.  If this type
+   was defined in another type, NESTED_ACCESS should indicate the
+   accessibility of this type.*/
 
 static gcc_type
-ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
+ccp_convert_enum (struct compile_cplus_instance *context, struct type *type,
+		  enum gcc_cp_symbol_kind nested_access)
 {
   int i, need_new_context;
   gcc_type int_type, result;
@@ -1756,15 +1809,18 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
   need_new_context = ccp_need_new_context (pctx);
   if (need_new_context)
     {
-#if CONTEXT_DEBUG
-      printf ("entering new processing scope %p\n", pctx);
-#endif
+      if (debug_compile_cplus_contexts)
+	printf_unfiltered ("entering new processing scope %p\n", pctx);
       ccp_push_processing_context (context, pctx);
     }
-#if CONTEXT_DEBUG
   else
-    printf ("staying in current scope -- scopes are identical\n");
-#endif
+    {
+      if (debug_compile_cplus_contexts)
+	{
+	  printf_unfiltered
+	    ("staying in current scope -- scopes are identical\n");
+	}
+    }
 
   // FIXME: drop any namespaces and enclosing class names, if any. -lxo
   /* !!keiths: Why?  Drop or push, just like convert_struct_or_union?  */
@@ -1780,19 +1836,12 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
   if (debug_compile_cplus_types)
     {
       printf_unfiltered ("\tgcc_type = %lld\n", int_type);
-      printf_unfiltered ("start_new_enum_type %s\n", name);
+      printf_unfiltered ("start_new_enum_type %s %s\n", name,
+			 access_to_string (nested_access));
     }
   result = CPCALL (start_new_enum_type, context,
 		   name, int_type,
-		   GCC_CP_SYMBOL_ENUM
-		   | (need_new_context /* FIXME: is this the right
-					  way to tell whether this
-					  is a namespace-scoped or
-					  nested type?  -lxo */
-		      ? GCC_CP_ACCESS_NONE
-		      /* FIXME: use correct access flag for the nested
-			 enum.  -lxo */
-		      : GCC_CP_ACCESS_PUBLIC)
+		   GCC_CP_SYMBOL_ENUM | nested_access
 		   | (scoped_enum_p
 		      ? GCC_CP_FLAG_ENUM_SCOPED
 		      : GCC_CP_FLAG_ENUM_NOFLAG),
@@ -1823,15 +1872,15 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
   /* Pop all scopes.  */
   if (need_new_context)
     {
-#if CONTEXT_DEBUG
-      printf ("leaving processing scope %p\n", pctx);
-#endif
+      if (debug_compile_cplus_contexts)
+	printf_unfiltered ("leaving processing scope %p\n", pctx);
       ccp_pop_processing_context (context, pctx);
     }
-#if CONTEXT_DEBUG
   else
-    printf ("identical contexts -- not leaving context\n");
-#endif
+    {
+      if (debug_compile_cplus_contexts)
+	printf_unfiltered ("identical contexts -- not leaving context\n");
+    }
 
   /* Delete the processing context.  */
   delete_processing_context (pctx);
@@ -1857,7 +1906,8 @@ ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
 
   /* This approach means we can't make self-referential function
      types.  Those are impossible in C, though.  */
-  return_type = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
+  return_type = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+				    GCC_CP_ACCESS_NONE);
 
   array.n_elements = TYPE_NFIELDS (type);
   array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (type));
@@ -1872,7 +1922,8 @@ ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
       else
 	{
 	  array.elements[i - artificials]
-	    = convert_cplus_type (context, TYPE_FIELD_TYPE (type, i));
+	    = convert_cplus_type (context, TYPE_FIELD_TYPE (type, i),
+				  GCC_CP_ACCESS_NONE);
 	}
     }
 
@@ -1971,7 +2022,7 @@ ccp_convert_qualified (struct compile_cplus_instance *context,
   gcc_cp_qualifiers_flags quals = (enum gcc_cp_qualifiers) 0;
   gcc_type result;
 
-  unqual_converted = convert_cplus_type (context, unqual);
+  unqual_converted = convert_cplus_type (context, unqual, GCC_CP_ACCESS_NONE);
 
   if (TYPE_CONST (type))
     quals |= GCC_CP_QUALIFIER_CONST;
@@ -1995,7 +2046,8 @@ ccp_convert_complex (struct compile_cplus_instance *context,
 		     struct type *type)
 {
   gcc_type result;
-  gcc_type base = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
+  gcc_type base = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+				      GCC_CP_ACCESS_NONE);
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("build_complex_type %s\n", TYPE_SAFE_NAME (type));
@@ -2056,11 +2108,15 @@ ccp_convert_namespace (struct compile_cplus_instance *context,
 /* A helper function which knows how to convert most types from their
    gdb representation to the corresponding gcc form.  This examines
    the TYPE and dispatches to the appropriate conversion function.  It
-   returns the gcc type.  */
+   returns the gcc type.
+
+   If the type was defined in another type, NESTED_ACCESS should indicate the
+   accessibility of this type.  */
 
 static gcc_type
 convert_type_cplus_basic (struct compile_cplus_instance *context,
-			  struct type *type)
+			  struct type *type,
+			  enum gcc_cp_symbol_kind nested_access)
 {
   /* Reference types seem to always have a const qualifier, but we
      don't want that to be propagated to the GCC type, because GCC
@@ -2090,10 +2146,10 @@ convert_type_cplus_basic (struct compile_cplus_instance *context,
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      return ccp_convert_struct_or_union (context, type);
+      return ccp_convert_struct_or_union (context, type, nested_access);
 
     case TYPE_CODE_ENUM:
-      return ccp_convert_enum (context, type);
+      return ccp_convert_enum (context, type, nested_access);
 
     case TYPE_CODE_FUNC:
       return ccp_convert_func (context, type, 0);
@@ -2122,7 +2178,7 @@ convert_type_cplus_basic (struct compile_cplus_instance *context,
       return ccp_convert_namespace (context, type);
 
     case TYPE_CODE_TYPEDEF:
-      return ccp_convert_typedef (context, type);
+      return ccp_convert_typedef (context, type, nested_access);
     }
 
   {
@@ -2140,7 +2196,7 @@ convert_type_cplus_basic (struct compile_cplus_instance *context,
 
 gcc_type
 convert_cplus_type (struct compile_cplus_instance *context,
-		    struct type *type)
+		    struct type *type, enum gcc_cp_symbol_kind nested_access)
 {
   struct type_map_instance inst, *found;
   gcc_type result;
@@ -2150,7 +2206,7 @@ convert_cplus_type (struct compile_cplus_instance *context,
   if (found != NULL)
     return found->gcc_type_handle;
 
-  result = convert_type_cplus_basic (context, type);
+  result = convert_type_cplus_basic (context, type, nested_access);
   if (result != DONT_CACHE_TYPE)
     insert_type (context, type, result);
   return result;
@@ -2229,4 +2285,16 @@ the compile commands."),
 			     NULL,
 			     &setdebuglist,
 			     &showdebuglist);
+
+  add_setshow_boolean_cmd ("compile-cplus-contexts", no_class,
+			     &debug_compile_cplus_contexts, _("\
+Set debugging of C++ compile contexts."), _("\
+Show debugging of C++ compile contexts."), _("\
+When enabled debugging messages are printed about definition contexts during\n\
+C++ type conversion for the compile commands."),
+			     NULL,
+			     NULL,
+			     &setdebuglist,
+			     &showdebuglist);
+
 }

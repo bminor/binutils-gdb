@@ -160,7 +160,8 @@ convert_one_symbol (struct compile_cplus_instance *context,
   if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = convert_cplus_type (context, SYMBOL_TYPE (sym.symbol));
+    sym_type = convert_cplus_type (context, SYMBOL_TYPE (sym.symbol),
+				   GCC_CP_ACCESS_NONE);
 
   if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
     {
@@ -487,7 +488,7 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
       break;
     }
 
-  sym_type = convert_cplus_type (context, type);
+  sym_type = convert_cplus_type (context, type, GCC_CP_ACCESS_NONE);
   if (debug_compile_cplus_types)
     printf_unfiltered ("push_namespace \"\"\n");
   CPCALL (push_namespace, context, "");

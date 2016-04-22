@@ -142,13 +142,18 @@ extern int compile_register_name_demangle (struct gdbarch *gdbarch,
 					   const char *reg_name);
 
 /* Convert a gdb type, TYPE, to a GCC type.  CONTEXT is used to do the
-   actual conversion.  The new GCC type is returned.  */
+   actual conversion.  If this type was defined in another type,
+   NESTED_ACCESS should indicate the accessibility of this type
+   (or GCC_CP_ACCESS_NONE if not a nested type).
+
+   The new GCC type is returned.  */
 
 struct type;
 extern gcc_type convert_type (struct compile_c_instance *context,
 			      struct type *type);
 extern gcc_type convert_cplus_type (struct compile_cplus_instance *context,
-				    struct type *type);
+				    struct type *type,
+				    enum gcc_cp_symbol_kind nested_access);
 
 /* A callback suitable for use as the GCC C symbol oracle.  */
 

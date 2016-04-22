@@ -115,14 +115,10 @@ recursively_update_typedef_hash (struct typedef_hash_table *table,
   if (table == NULL)
     return;
 
-  for (i = 0; i < TYPE_TYPE_DEFN_FIELD_COUNT (t); ++i)
+  for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (t); ++i)
     {
-      struct decl_field *tdef = &TYPE_TYPE_DEFN_FIELD (t, i);
+      struct decl_field *tdef = &TYPE_TYPEDEF_FIELD (t, i);
       void **slot;
-
-      /* Skip non-typedef definitions in this class.  */
-      if (TYPE_CODE (TYPE_TYPE_DEFN_FIELD_TYPE (t, i)) != TYPE_CODE_TYPEDEF)
-	continue;
 
       slot = htab_find_slot (table->table, tdef, INSERT);
       /* Only add a given typedef name once.  Really this shouldn't
