@@ -1,5 +1,10 @@
 2016-04-22  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.trace/signal.exp: Also pass if
+	$tracepoint_hits($i) > $iterations.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.trace/signal.c: New file.
 	* gdb.trace/signal.exp: New file.
 
