@@ -1,3 +1,8 @@
+2016-04-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_read_description): Use PPC_FEATURE_HAS_VSX
+	and PPC_FEATURE_HAS_ALTIVEC to check if such features are available.
+
 2016-04-22  Yao Qi  <yao.qi@linaro.org>
 
 	* valops.c (read_value_memory): New local variable 'stack'.
