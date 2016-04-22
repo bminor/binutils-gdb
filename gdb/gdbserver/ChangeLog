@@ -1,5 +1,10 @@
 2016-04-22  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch32-low.c (arm_store_gregset): Clear CPSR bits 20
+	to 23.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (lwp_signal_can_be_delivered): Don't deliver
 	signal when stepping over breakpoint with software single
 	step.
