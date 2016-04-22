@@ -213,7 +213,8 @@ _bfd_elf_link_create_dynstrtab (bfd *abfd, struct bfd_link_info *info)
 	{
 	  bfd *ibfd;
 	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
-	    if ((ibfd->flags & (DYNAMIC | BFD_PLUGIN)) == 0)
+	    if ((ibfd->flags
+		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
 	      {
 		abfd = ibfd;
 		break;

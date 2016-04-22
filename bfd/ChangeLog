@@ -1,5 +1,10 @@
 2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elflink.c (_bfd_elf_link_create_dynstrtab): Exclude linker
+	created file from dynobj.
+
+2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elflink.c (_bfd_elf_link_create_dynstrtab): Set dynobj to a
 	normal input file if possible.
 
