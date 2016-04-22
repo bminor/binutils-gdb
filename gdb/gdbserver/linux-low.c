@@ -4119,13 +4119,17 @@ single_step (struct lwp_info* lwp)
 }
 
 /* The signal can be delivered to the inferior if we are not trying to
-   reinsert a breakpoint and not trying to finish a fast tracepoint
-   collect.  */
+   reinsert a breakpoint for software single step and not trying to
+   finish a fast tracepoint collect.  Since signal can be delivered in
+   the step-over, the program may go to signal handler and trap again
+   after return from the signal handler.  We can live with the spurious
+   double traps.  */
 
 static int
 lwp_signal_can_be_delivered (struct lwp_info *lwp)
 {
-  return (lwp->bp_reinsert == 0 && !lwp->collecting_fast_tracepoint);
+  return (!(lwp->bp_reinsert != 0 && can_software_single_step ())
+	  && !lwp->collecting_fast_tracepoint);
 }
 
 /* Resume execution of LWP.  If STEP is nonzero, single-step it.  If

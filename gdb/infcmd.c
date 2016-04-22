@@ -406,7 +406,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 {
 
   /* Be sure we own the terminal in case write operations are performed.  */ 
-  target_terminal_ours ();
+  target_terminal_ours_for_output ();
 
   /* If the target hasn't taken care of this already, do it now.
      Targets which need to access registers during to_open,
@@ -1128,7 +1128,7 @@ prepare_one_step (struct step_command_fsm *sm)
 					    &tp->control.step_range_end) == 0)
 		error (_("Cannot find bounds of current function"));
 
-	      target_terminal_ours ();
+	      target_terminal_ours_for_output ();
 	      printf_filtered (_("Single stepping until exit from function %s,"
 				 "\nwhich has no line number information.\n"),
 			       name);
@@ -3013,7 +3013,11 @@ interrupt_target_1 (int all_threads)
     ptid = minus_one_ptid;
   else
     ptid = inferior_ptid;
-  target_interrupt (ptid);
+
+  if (non_stop)
+    target_stop (ptid);
+  else
+    target_interrupt (ptid);
 
   /* Tag the thread as having been explicitly requested to stop, so
      other parts of gdb know not to resume this thread automatically,

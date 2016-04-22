@@ -878,6 +878,10 @@ struct elf_i386_link_hash_table
 
   /* The index of the next unused R_386_IRELATIVE slot in .rel.plt.  */
   bfd_vma next_irelative_index;
+
+  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
+     to read-only sections.  */
+  bfd_boolean readonly_dynrelocs_against_ifunc;
 };
 
 /* Get the i386 ELF linker hash table from a link_info structure.  */
@@ -1599,10 +1603,6 @@ elf_i386_check_relocs (bfd *abfd,
       eh = (struct elf_i386_link_hash_entry *) h;
       if (h != NULL)
 	{
-	  /* Create the ifunc sections for static executables.  If we
-	     never see an indirect function symbol nor we are building
-	     a static executable, those sections will be empty and
-	     won't appear in output.  */
 	  switch (r_type)
 	    {
 	    default:
@@ -1617,7 +1617,10 @@ elf_i386_check_relocs (bfd *abfd,
 	    case R_386_GOT32X:
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
-	      if (!_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
+	      /* Create the ifunc sections for static executables.  */
+	      if (h->type == STT_GNU_IFUNC
+		  && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj,
+						      info))
 		return FALSE;
 	      break;
 	    }
@@ -2035,163 +2038,6 @@ elf_i386_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-elf_i386_gc_sweep_hook (bfd *abfd,
-			struct bfd_link_info *info,
-			asection *sec,
-			const Elf_Internal_Rela *relocs)
-{
-  struct elf_i386_link_hash_table *htab;
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  htab = elf_i386_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_symtab_hdr (abfd);
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      unsigned int r_type;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-      else
-	{
-	  /* A local symbol.  */
-	  Elf_Internal_Sym *isym;
-
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
-					abfd, r_symndx);
-
-	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
-	  if (isym != NULL
-	      && ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
-	    {
-	      h = elf_i386_get_local_sym_hash (htab, abfd, rel, FALSE);
-	      if (h == NULL)
-		abort ();
-	    }
-	}
-
-      if (h)
-	{
-	  struct elf_i386_link_hash_entry *eh;
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
-	  eh = (struct elf_i386_link_hash_entry *) h;
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	    if (p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*pp = p->next;
-		break;
-	      }
-	}
-
-      r_type = ELF32_R_TYPE (rel->r_info);
-      if (! elf_i386_tls_transition (info, abfd, sec, NULL,
-				     symtab_hdr, sym_hashes,
-				     &r_type, GOT_UNKNOWN,
-				     rel, relend, h, r_symndx))
-	return FALSE;
-
-      switch (r_type)
-	{
-	case R_386_TLS_LDM:
-	  if (htab->tls_ldm_got.refcount > 0)
-	    htab->tls_ldm_got.refcount -= 1;
-	  break;
-
-	case R_386_TLS_GD:
-	case R_386_TLS_GOTDESC:
-	case R_386_TLS_DESC_CALL:
-	case R_386_TLS_IE_32:
-	case R_386_TLS_IE:
-	case R_386_TLS_GOTIE:
-	case R_386_GOT32:
-	case R_386_GOT32X:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount -= 1;
-	      if (h->type == STT_GNU_IFUNC)
-		{
-		  if (h->plt.refcount > 0)
-		    h->plt.refcount -= 1;
-		}
-	    }
-	  else if (local_got_refcounts != NULL)
-	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	    }
-	  break;
-
-	case R_386_32:
-	case R_386_PC32:
-	case R_386_SIZE32:
-	  if (bfd_link_pic (info)
-	      && (h == NULL || h->type != STT_GNU_IFUNC))
-	    break;
-	  /* Fall through */
-
-	case R_386_PLT32:
-	  if (h != NULL)
-	    {
-	      if (h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-	      if (r_type == R_386_32
-		  && (sec->flags & SEC_READONLY) == 0)
-		{
-		  struct elf_i386_link_hash_entry *eh
-		    = (struct elf_i386_link_hash_entry *) h;
-		  if (eh->func_pointer_refcount > 0)
-		    eh->func_pointer_refcount -= 1;
-		}
-	    }
-	  break;
-
-	case R_386_GOTOFF:
-	  if (h != NULL && h->type == STT_GNU_IFUNC)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount -= 1;
-	      if (h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Remove undefined weak symbol from the dynamic symbol table if it
    is resolved to 0.   */
 
@@ -2442,7 +2288,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
-                                               plt_entry_size,
+					       &htab->readonly_dynrelocs_against_ifunc,
+					       plt_entry_size,
 					       plt_entry_size, 4);
   /* Don't create the PLT entry if there are only function pointer
      relocations which can be resolved at run-time.  */
@@ -3553,8 +3400,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
-	      if ((elf_tdata (output_bfd)->has_gnu_symbols
-		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
+	      if (htab->readonly_dynrelocs_against_ifunc)
 		{
 		  info->callbacks->einfo
 		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
@@ -5978,7 +5824,6 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define elf_backend_finish_dynamic_sections   elf_i386_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol     elf_i386_finish_dynamic_symbol
 #define elf_backend_gc_mark_hook	      elf_i386_gc_mark_hook
-#define elf_backend_gc_sweep_hook	      elf_i386_gc_sweep_hook
 #define elf_backend_grok_prstatus	      elf_i386_grok_prstatus
 #define elf_backend_grok_psinfo		      elf_i386_grok_psinfo
 #define elf_backend_reloc_type_class	      elf_i386_reloc_type_class
@@ -6047,15 +5892,93 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 
 /* The 32-bit static TLS arena size is rounded to the nearest 8-byte
    boundary.  */
-#undef elf_backend_static_tls_alignment
+#undef  elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment 8
 
 /* The Solaris 2 ABI requires a plt symbol on all platforms.
 
    Cf. Linker and Libraries Guide, Ch. 2, Link-Editor, Generating the Output
    File, p.63.  */
-#undef elf_backend_want_plt_sym
+#undef  elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	1
+
+#undef  elf_backend_strtab_flags
+#define elf_backend_strtab_flags	SHF_STRINGS
+
+static bfd_boolean
+elf32_i386_set_special_info_link (const bfd *ibfd ATTRIBUTE_UNUSED,
+				  bfd *obfd ATTRIBUTE_UNUSED,
+				  const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+				  Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+{
+  /* PR 19938: FIXME: Need to add code for setting the sh_info
+     and sh_link fields of Solaris specific section types.
+
+     Based upon Oracle Solaris 11.3 Linkers and Libraries Guide, Ch. 13,
+     Object File Format, Table 13-9  ELF sh_link and sh_info Interpretation:
+
+http://docs.oracle.com/cd/E53394_01/html/E54813/chapter6-94076.html#scrolltoc
+
+     The following values should be set:
+     
+Type                 Link                           Info
+-----------------------------------------------------------------------------
+SHT_SUNW_ancillary   The section header index of    0
+ [0x6fffffee]        the associated string table.
+	
+SHT_SUNW_capinfo     The section header index of    For a dynamic object, the
+ [0x6ffffff0]        the associated symbol table.   section header index of
+                                                    the associated
+						    SHT_SUNW_capchain table,
+						    otherwise 0.
+
+SHT_SUNW_symsort     The section header index of    0
+ [0x6ffffff1]        the associated symbol table.
+
+SHT_SUNW_tlssort     The section header index of    0
+ [0x6ffffff2]        the associated symbol table.
+	
+SHT_SUNW_LDYNSYM     The section header index of    One greater than the 
+ [0x6ffffff3]        the associated string table.   symbol table index of the
+		     This index is the same string  last local symbol, 
+		     table used by the SHT_DYNSYM   STB_LOCAL. Since
+		     section.                       SHT_SUNW_LDYNSYM only
+		                                    contains local symbols,
+						    sh_info is equivalent to
+						    the number of symbols in
+						    the table.
+
+SHT_SUNW_cap         If symbol capabilities exist,  If any capabilities refer
+ [0x6ffffff5]        the section header index of    to named strings, the
+                     the associated                 section header index of
+		     SHT_SUNW_capinfo table,        the associated string 
+			  otherwise 0.              table, otherwise 0.
+
+SHT_SUNW_move        The section header index of    0
+ [0x6ffffffa]        the associated symbol table.
+	
+SHT_SUNW_COMDAT      0                              0
+ [0x6ffffffb]
+
+SHT_SUNW_syminfo     The section header index of    The section header index
+ [0x6ffffffc]        the associated symbol table.   of the associated
+		                                    .dynamic section.
+
+SHT_SUNW_verdef      The section header index of    The number of version 
+ [0x6ffffffd]        the associated string table.   definitions within the
+		                                    section.
+
+SHT_SUNW_verneed     The section header index of    The number of version
+ [0x6ffffffe]        the associated string table.   dependencies within the
+                                                    section.
+
+SHT_SUNW_versym      The section header index of    0
+ [0x6fffffff]        the associated symbol table.  */
+  return FALSE;
+}
+
+#undef  elf_backend_set_special_section_info_and_link
+#define elf_backend_set_special_section_info_and_link elf32_i386_set_special_info_link
 
 #include "elf32-target.h"
 
@@ -6073,7 +5996,7 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 #define TARGET_LITTLE_SYM		iamcu_elf32_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-iamcu"
-#undef ELF_ARCH
+#undef  ELF_ARCH
 #define ELF_ARCH			bfd_arch_iamcu
 
 #undef	ELF_MACHINE_CODE
@@ -6091,6 +6014,9 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	    0
+
+#undef  elf_backend_strtab_flags
+#undef  elf_backend_set_special_section_info_and_link
 
 #include "elf32-target.h"
 

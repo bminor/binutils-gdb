@@ -17,6 +17,7 @@
 
 #include "server.h"
 #include "arch/arm.h"
+#include "arch/arm-linux.h"
 #include "linux-low.h"
 #include "linux-aarch32-low.h"
 
@@ -65,7 +66,7 @@ arm_fill_gregset (struct regcache *regcache, void *buf)
   for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
     collect_register (regcache, i, &regs[i]);
 
-  collect_register (regcache, ARM_PS_REGNUM, &regs[16]);
+  collect_register (regcache, ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
 }
 
 /* Supply GP registers contents, stored in BUF, to REGCACHE.  */
@@ -76,6 +77,7 @@ arm_store_gregset (struct regcache *regcache, const void *buf)
   int i;
   char zerobuf[8];
   const uint32_t *regs = (const uint32_t *) buf;
+  uint32_t cpsr = regs[ARM_CPSR_GREGNUM];
 
   memset (zerobuf, 0, 8);
   for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
@@ -84,7 +86,9 @@ arm_store_gregset (struct regcache *regcache, const void *buf)
   for (; i < ARM_PS_REGNUM; i++)
     supply_register (regcache, i, zerobuf);
 
-  supply_register (regcache, ARM_PS_REGNUM, &regs[16]);
+  /* Clear reserved bits bit 20 to bit 23.  */
+  cpsr &= 0xff0fffff;
+  supply_register (regcache, ARM_PS_REGNUM, &cpsr);
 }
 
 /* Collect NUM number of VFP registers from REGCACHE to buffer BUF.  */

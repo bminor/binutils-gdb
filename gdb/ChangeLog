@@ -1,3 +1,762 @@
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* valops.c (read_value_memory): New local variable 'stack'.
+	Set it to either TARGET_OBJECT_STACK_MEMORY or
+	TARGET_OBJECT_MEMORY.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
+	* ada-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* ada-lang.c (ada_language_defn): Adjust.
+	* ada-lang.h (ada_error): Rename to ...
+	(ada_yyerror): ... this.
+	* c-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Adjust.
+	* c-lang.h (c_error): Rename to ...
+	(c_yyerror): ... this.
+	* d-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* d-lang.c (d_language_defn): Adjust.
+	* d-lang.h (d_error): Rename to ...
+	(d_yyerror): ... this.
+	* f-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* f-lang.c (f_language_defn): Adjust.
+	* f-lang.h (f_error): Rename to ...
+	(f_yyerror): ... this.
+	* go-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* go-lang.c (go_language_defn): Adjust.
+	* go-lang.h (go_error): Rename to ...
+	(go_yyerror): ... this.
+	* jv-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* jv-lang.c (java_language_defn): Adjust.
+	* jv-lang.h (java_error): Rename to ...
+	(java_yyerror): ... this.
+	* m2-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* m2-lang.c (m2_language_defn): Adjust.
+	* m2-lang.h (m2_error): Rename to ...
+	(m2_yyerror): ... this.
+	* objc-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* objc-lang.c (objc_language_defn): Adjust.
+	* opencl-lang.c (opencl_language_defn): Adjust.
+	* p-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* p-lang.c (pascal_language_defn): Adjust.
+	* p-lang.h (pascal_error): Rename to ...
+	(pascal_yyerror): ... this.
+	* yy-remap.h: New file.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.h (GDB_XCPT_TRY): Remove mention of
+	the foreign frames issue.
+	[__cplusplus] (GDB_XCPT): Define as GDB_XCPT_TRY.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (enum catcher_state, struct catcher)
+	(current_catcher): Define in C++ mode too.
+	(exceptions_state_mc_catch): Call throw_exception_sjlj instead of
+	throw_exception.
+	(throw_exception_sjlj, throw_exception_cxx): New functions,
+	factored out from throw_exception.
+	(throw_exception): Reimplement.
+	* common/common-exceptions.h (exceptions_state_mc_init)
+	(exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1, exceptions_state_mc_catch):
+	Declare in C++ mode too.
+	(TRY): Rename to ...
+	(TRY_SJLJ): ... this.
+	(CATCH): Rename to ...
+	(CATCH_SJLJ): ... this.
+	(END_CATCH): Rename to ...
+	(END_CATCH_SJLJ): ... this.
+	[GDB_XCPT == GDB_XCPT_SJMP] (TRY, CATCH, END_CATCH): Map to SJLJ
+	equivalents.
+	(throw_exception): Update comments.
+	(throw_exception_sjlj): Declare.
+	* event-top.c (gdb_rl_callback_read_char_wrapper): Extend intro
+	comment.  Wrap body in TRY_SJLJ/CATCH_SJLJ and rethrow any
+	intercepted exception.
+	(gdb_rl_callback_handler): New function.
+	(gdb_rl_callback_handler_install): Always install
+	gdb_rl_callback_handler as readline callback.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (rl_callback_read_char_wrapper): Rename to ...
+	(gdb_rl_callback_read_char_wrapper): ... this.
+	(change_line_handler, gdb_setup_readline): Adjust.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c (aarch32_gp_regcache_supply): Clear CPSR
+	bits 20 to 23.
+
+2016-04-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINER: Remove myself as AIX Maintainer.
+
+2016-04-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_gdbarch_init): For GDB_OSABI_LINUX set
+	`num_regs' to 90 rather than 79.  Where a target description is
+	present adjust the setting appropriately.
+
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.h (GDB_XCPT_TRY): Add comment.
+	(GDB_XCPT): Always define as GDB_XCPT_SJMP.
+
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
+	* aix-thread.c (pdc_read_data, pdc_write_data): Add cast.
+	(aix_thread_resume): Use PTRACE_TYPE_ARG5.
+	* rs6000-nat.c (rs6000_ptrace64): Use PTRACE_TYPE_ARG5.
+	(rs6000_ptrace_ldinfo): Change type of 'ldi' local to void
+	pointer, and cast return to gdb_byte pointer.
+
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-nat.c (fetch_regset, store_regset, check_regset): Use
+	void * instead of gdb_byte *.
+
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (try_open_dwop_file, open_dwo_file)
+	(file_file_name, file_full_name): Add char * cast to sentinel in
+	concat/reconcat calls.
+	* event-top.c (top_level_prompt): Likewise.
+	* guile/guile.c (initialize_scheme_side): Likewise.
+	* linux-tdep.c (linux_fill_prpsinfo): Likewise.
+	* macrotab.c (macro_source_fullname): Likewise.
+	* main.c (get_init_files, captured_main): Likewise.
+	* psymtab.c (psymtab_to_fullname): Likewise.
+	* python/python.c (_initialize_python)
+	(gdbpy_finish_initialization): Likewise.
+	* source.c (symtab_to_fullname): Likewise.
+
+2016-04-20  Pedro Alves  <palves@redhat.com>
+
+	* build-with-cxx.m4 (GDB_AC_BUILD_WITH_CXX): Default to yes.
+	* configure: Renegerate.
+
+2016-04-20  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_decode_message): Use gdb_signal_from_host.
+
+2016-04-20  Pedro Alves  <palves@redhat.com>
+
+	* aarch64-tdep.c (aarch64_record_load_store): Change type of
+	'reg_rm_val' local to ULONGEST.
+
+2016-04-20  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_resume_thread): Add uintptr_t cast.
+
+2016-04-20  Doug Evans  <xdje42@gmail.com>
+
+	* symmisc.c (dump_symtab_1): Print owning compunit for identical
+	blockvectors.
+
+2016-04-20  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c: Include "arch/arm-linux.h".
+
+2016-04-20  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.h (ARM_CPSR_GREGNUM): Move it to ...
+	* arch/arm-linux.h: ... here.
+
+2016-04-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64bsd-nat.c (amd64bsd_fetch_inferior_registers): Change xstateregs
+	to void *.
+	(amd64bsd_store_inferior_registers): Likewise.
+	* fbsd-nat.c (resume_one_thread_cb): Explicitly cast data to ptid_t *.
+	(resume_all_threads_cb): Likewise.
+	* i386bsd-nat.c (i386bsd_supply_gregset): Cast gregs to char *.
+	(i386bsd_collect_gregset): Likewise.
+	(i386bsd_fetch_inferior_registers): Change xstateregs to void *.
+	(i386bsd_store_inferior_registers): Likewise.
+
+2016-04-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* main.c (setup_alternate_signal_stack): Cast to char *.
+
+2016-04-19  Doug Evans  <xdje42@gmail.com>
+
+	* symmisc.c (dump_symtab_1, dump_symtab): Delete arg objfile.
+	All callers updated.
+
+2016-04-19  Doug Evans  <xdje42@gmail.com>
+
+	PR gdb/17911
+	* source.c (is_regular_file): New arg errno_ptr.
+	All callers updated.
+
+2016-04-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-record.c (record_linux_system_call): Merge handling for
+	readlink/recv/read and pipe/pipe2.
+
+2016-04-14  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* features/i386/amd64-mpx-linux.xml: Remove AVX feature.
+	* features/i386/amd64-mpx.xml: Remove AVX feature.
+	* features/i386/i386-mpx-linux.xml: Remove AVX feature.
+	* features/i386/i386-mpx.xml: Remove AVX feature.
+	* features/i386/amd64-mpx-linux.c: Regenerate.
+	* features/i386/amd64-mpx.c: Regenerate.
+	* features/i386/i386-mpx-linux.c: Regenerate.
+	* features/i386/i386-mpx.c: Regenerate.
+	* regformats/i386/amd64-mpx-linux.dat: Regenerate.
+	* regformats/i386/amd64-mpx.dat: Regenerate.
+	* regformats/i386/i386-mpx-linux.dat: Regenerate.
+	* regformats/i386/i386-mpx.dat: Regenerate.
+
+2016-04-16  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-linux-tdep.c (features/i386/amd64-avx-mpx-linux.c):
+	New include.
+	(amd64_linux_core_read_description): Add case for
+	 X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_amd64_linux_tdep): Call initialize_tdesc_amd64_avx_mpx_linux.
+	* amd64-linux-tdep.h (tdesc_amd64_avx_mpx_linux): New definition.
+	* amd64-tdep.c (features/i386/amd64-avx-mpx.c): New include.
+	(amd64_target_description): Add case for  X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_amd64_tdep): Call initialize_tdesc_amd64_avx_mpx.
+	* common/x86-xstate.h (X86_XSTATE_MPX_MASK): Remove AVX bits.
+	(X86_XSTATE_AVX_MPX_MASK): New case.
+	* features/Makefile (i386/i386-avx-mpx, i386/i386-avx-mpx-linux)
+	(i386/amd64-avx-mpx, i386/amd64-avx-mpx-linux): New rules.
+	(i386/i386-avx-mpx-expedite, i386/i386-avx-mpx-linux-expedite)
+	(i386/amd64-avx-mpx-expedite, i386/amd64-avx-mpx-linux-expedite):
+	New expedites.
+	* i386-linux-tdep.c (features/i386/i386-avx-mpx-linux.c): New
+	include.
+	(i386_linux_core_read_description): Add case
+	X86_XSTATE_AVX_MPX_MASK.
+	(_initialize_i386_linux_tdep): Call
+	initialize_tdesc_i386_avx_mpx_linux.
+	* i386-linux-tdep.h (tdesc_i386_avx_mpx_linux): New include.
+	* i386-tdep.c (features/i386/i386-avx-mpx.c): New include.
+	(i386_target_description): Add case for X86_XSTATE_AVX_MPX_MASK.
+	* x86-linux-nat.c (x86_linux_read_description): Add case for
+	X86_XSTATE_AVX_MPX_MASK.
+	* features/i386/amd64-avx-mpx-linux.xml: New file.
+	* features/i386/i386-avx-mpx-linux.xml: New file.
+	* features/i386/i386-avx-mpx.xml: New file.
+	* features/i386/amd64-avx-mpx.xml: New file.
+	* features/i386/amd64-avx-mpx-linux.c: Generated.
+	* features/i386/amd64-avx-mpx.c: Generated.
+	* features/i386/i386-avx-mpx-linux.c: Generated.
+	* features/i386/i386-avx-mpx.c: Generated.
+	* regformats/i386/amd64-avx-mpx-linux.dat: Generated.
+	* regformats/i386/amd64-avx-mpx.dat: Generated.
+	* regformats/i386/i386-avx-mpx-linux.dat: Generated.
+	* regformats/i386/i386-avx-mpx.dat: Generated.
+
+2016-04-18  Pedro Alves  <palves@redhat.com>
+
+	* ptrace.m4 (GDB_AC_PTRACE): Don't run tests in C++ mode.
+	* configure: Regenerate.
+
+2016-04-18  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* valops.c (value_addr): For C++ references, set the copied value's
+	enclosing_type as well.
+
+2016-04-18  Yao Qi  <yao.qi@linaro.org>
+
+	Revert:
+	2016-04-15  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_stack_frame_destroyed_p): Return zero if
+	PC is far from the end of function.
+
+2016-04-16  Pedro Alves  <palves@redhat.com>
+
+	* ada-exp.y (yydefred): Define as ada_yydefred.
+
+2016-04-15  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_lookup_struct_elt_type): Constify 'type_str' and
+	'name_str' locals.
+
+2016-04-15  Pedro Alves  <palves@redhat.com>
+
+	* btrace.c (pt_btrace_insn_flags): Change return type to
+	btrace_insn_flags.  Use btrace_insn_flags for local.
+
+2016-04-15  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-ptrace.h [__mips__] (GDB_ARCH_IS_TRAP_BRKPT): Also
+	accept TRAP_BRKPT.
+	 [__mips__] (GDB_ARCH_IS_TRAP_HWBKPT): Also accept TRAP_HWBKPT.
+
+2016-04-15  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_stack_frame_destroyed_p): Return zero if
+	PC is far from the end of function.
+
+2016-04-14  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (alias_usage_error): New function.
+	(alias_command): Use it.
+	* ctf.c (ctf_save_metadata_header): Inline metadata_fmt local in
+	ctf_save_write_metadata call.
+
+2016-04-14  Pedro Alves  <palves@redhat.com>
+
+	* ada-typeprint.c (print_fixed_point_type): Don't pass float as
+	argument to function expecting LONGEST.
+	* value.c (unpack_long): Add casts to LONGEST.
+
+2016-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* exec.c (exec_file_locate_attach): Guard a couple functions
+	that can throw errors.
+	(exception_print_same): New helper function.
+
+2016-04-13  Pedro Alves  <palves@redhat.com>
+
+	PR remote/19840
+	* remote.c (struct remote_state) <last_resume_exec_dir>: New
+	field.
+	(new_remote_state): Default last_resume_exec_dir to EXEC_FORWARD.
+	(remote_open_1): Reset last_resume_exec_dir to EXEC_FORWARD.
+	(remote_resume): Store the last execution direction.
+	(remote_execution_direction): New function.
+	(init_remote_ops): Install it as to_execution_direction target_ops
+	method.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.h (GDB_XCPT_TRY): Update comment.
+	[__cplusplus] (GDB_XCPT): Define as GDB_XCPT_TRY.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (struct catcher) <buf>: Now a
+	'jmp_buf' instead of SIGJMP_BUF.
+	(exceptions_state_mc_init): Change return type to 'jmp_buf'.
+	(throw_exception): Use longjmp instead of SIGLONGJMP.
+	* common/common-exceptions.h: Include <setjmp.h> instead of
+	"gdb_setjmp.h".
+	(exceptions_state_mc_init): Change return type to 'jmp_buf'.
+	[GDB_XCPT == GDB_XCPT_SJMP] (TRY): Use setjmp instead of
+	SIGSETJMP.
+	* cp-support.c: Include "gdb_setjmp.h".
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (exception_rethrow): Remove
+	prepare_to_throw_exception call.
+	* common/common-exceptions.h (prepare_to_throw_exception): Delete
+	declaration.
+	* exceptions.c (prepare_to_throw_exception): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* target.c (target_check_pending_interrupt): Delete.
+	* target.h (struct target_ops) <to_check_pending_interrupt>:
+	Remove method.
+	(target_check_pending_interrupt): Remove declaration.
+	* target-delegates.c: Regenerate.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* defs.h: Update comments on SIGINT handling.
+	(immediate_quit): Delete declaration.
+	* event-loop.c (call_async_signal_handler): Delete.
+	* event-loop.h (call_async_signal_handler): Delete declaration.
+	(mark_async_signal_handler): Update comments.
+	(gdb_call_async_signal_handler): Delete declaration.
+	* event-top.c (handle_sigint): Call mark_async_signal_handler
+	instead of gdb_call_async_signal_handler.
+	* exceptions.c (prepare_to_throw_exception): Remove reference to
+	immediate_quit.
+	(exception_fprintf): Remove comments about immediate_quit.
+	* mingw-hdep.c (sigint_event, sigint_handler): Delete.
+	(gdb_select): Don't wait on sigint_event.
+	(gdb_call_async_signal_handler): Delete.
+	(_initialize_mingw_hdep): Delete.
+	* posix-hdep.c (gdb_call_async_signal_handler): Delete.
+	* utils.c (immediate_quit): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (quit_handler_ftype, quit_handler)
+	(make_cleanup_override_quit_handler, default_quit_handler): New.
+	(QUIT): Adjust comments.
+	* event-top.c (default_quit_handler): New function.
+	(quit_handler): New global.
+	(struct quit_handler_cleanup_data): New.
+	(restore_quit_handler, restore_quit_handler_dtor)
+	(make_cleanup_override_quit_handler): New.
+	(async_request_quit): Call QUIT.
+	* remote.c (struct remote_state) <got_ctrlc_during_io>: New field.
+	(async_sigint_remote_twice_token, async_sigint_remote_token):
+	Delete.
+	(remote_close): Update comments.
+	(remote_start_remote): Don't set immediate_quit.  Set starting_up
+	earlier.
+	(remote_serial_quit_handler, remote_unpush_and_throw): New
+	functions.
+	(remote_open_1): Clear got_ctrlc_during_io.  Set
+	remote_async_terminal_ours_p unconditionally.
+	(async_initialize_sigint_signal_handler)
+	(async_handle_remote_sigint, async_handle_remote_sigint_twice)
+	(remote_check_pending_interrupt, async_remote_interrupt)
+	(async_remote_interrupt_twice)
+	(async_cleanup_sigint_signal_handler, ofunc)
+	(sync_remote_interrupt, sync_remote_interrupt_twice): Delete.
+	(remote_terminal_inferior, remote_terminal_ours): Remove async
+	checks.
+	(remote_wait_as): Don't install a SIGINT handler in sync mode.
+	(readchar, remote_serial_write): Override the quit handler with
+	remote_serial_quit_handler.
+	(getpkt_or_notif_sane_1): Don't call QUIT.
+	(initialize_remote_ops): Don't install
+	remote_check_pending_interrupt.
+	(_initialize_remote): Don't create async_sigint_remote_token and
+	async_sigint_remote_twice_token.
+	* ser-base.c (ser_base_wait_for): Call QUIT and use
+	interruptible_select.
+	(ser_base_write): Call QUIT.
+	* ser-go32.c (dos_readchar, dos_write): Call QUIT.
+	* ser-unix.c (wait_for): Don't use VTIME.  Always take the
+	gdb_select path, but call QUIT and interruptible_select.
+	* utils.c (maybe_quit): Call the current quit handler.  Don't call
+	target_check_pending_interrupt.
+	(defaulted_query, prompt_for_continue): Override the quit handler
+	with the default quit handler.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-hooks.c (tui_target_has_run): Delete.
+	(tui_about_to_proceed): Delete.
+	(tui_about_to_proceed_observer): Delete.
+	(tui_install_hooks, tui_remove_hooks): Don't install/remove an
+	about_to_proceed observer.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-interp.c (mi_new_thread): Put
+	target_terminal_ours_for_output in effect while outputting.
+	(mi_thread_exit): Use target_terminal_ours_for_output instead of
+	target_terminal_ours.
+	(mi_record_changed, mi_inferior_added, mi_inferior_appeared)
+	(mi_inferior_exit, mi_inferior_removed, mi_traceframe_changed)
+	(mi_tsv_created, mi_tsv_deleted, mi_tsv_modified)
+	(mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified, mi_solib_loaded, mi_solib_unloaded)
+	(mi_command_param_changed, mi_memory_changed)
+	(report_initial_inferior): Use target_terminal_ours_for_output
+	instead of target_terminal_ours.  Restore terminal settings.
+	* mi/mi-main.c (mi_execute_command): Use
+	target_terminal_ours_for_output instead of target_terminal_ours.
+	Restore terminal settings.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* gnu-nat.c (inf_validate_task_sc): Don't call
+	target_terminal_ours / target_terminal_inferior around query.
+	* i386-tdep.c (i386_record_lea_modrm, i386_process_record): Don't
+	call target_terminal_ours / target_terminal_inferior around
+	yquery.
+	* linux-record.c (record_linux_system_call): Don't call
+	target_terminal_ours / target_terminal_inferior around yquery.
+	* nto-procfs.c (interrupt_query): Don't call target_terminal_ours
+	/ target_terminal_inferior around query.
+	* record-full.c (record_full_check_insn_num): Remove
+	'set_terminal' parameter.  Don't call target_terminal_ours /
+	target_terminal_inferior around query.
+	(record_full_message, record_full_registers_change)
+	(record_full_xfer_partial): Adjust.
+	* remote.c (interrupt_query): Don't call target_terminal_ours /
+	target_terminal_inferior around query.
+	* utils.c (defaulted_query): Install cleanup to restore target
+	terminal.  Put target_terminal_ours_for_output in effect while
+	defaulted producing, and target_terminal_ours in in effect while
+	handling input.
+	(prompt_for_continue): Install cleanup to restore target terminal.
+	Put target_terminal_ours in in effect while handling input.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (defaulted_query, prompt_for_continue): Free temporary
+	strings with cleanups, instead of xfree.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (vwarning, internal_vproblem): Use
+	make_cleanup_restore_target_terminal and
+	target_terminal_ours_for_output.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (post_create_inferior, prepare_one_step): Use
+	target_terminal_ours_for_output instead of target_terminal_ours.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (print_flush): Use target_terminal_ours_for_output
+	instead of target_terminal_ours, and restore target terminal with
+	a cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (gdb_demangle): Use target_terminal_ours_for_output
+	instead of target_terminal_ours, and restore target terminal with
+	a cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (type_as_string, type_as_string_and_cleanup): New
+	functions.
+	(ada_lookup_struct_elt_type): Use type_as_string_and_cleanup.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* ser-base.c (fd_event): Retry read_prim on EINTR.
+	(do_ser_base_readchar): Retry read_prim on EINTR.
+	(ser_base_write): Retry write_prim on EINTR.
+	* ser-unix.c (ser_unix_read_prim): Don't retry on EINTR here.
+	(ser_unix_write_prim): Remove comment.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_pass_ctrlc): New function.
+	(init_remote_ops): Install it.
+	* target.c (target_terminal_inferior): Pass pending Ctrl-C to the
+	target.
+	(target_pass_ctrlc, default_target_pass_ctrlc): New functions.
+	* target.h (struct target_ops) <to_pass_ctrlc>: New method.
+	(target_pass_ctrlc, default_target_pass_ctrlc): New declarations.
+	* target-delegates.c: Regenerate.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (interrupt_target_1): Call target_stop is in non-stop
+	mode.
+	* linux-nat.c (linux_nat_interrupt): Delete.
+	(linux_nat_add_target): Don't install linux_nat_interrupt.
+	* remote.c (remote_interrupt_ns): Change return type to void.
+	Throw error if interrupting the target is not supported.
+	(remote_interrupt): Don't call the remote_stop_ns/remote_stop_as.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (clear_quit_flag): Remove declaration.
+	* extension-priv.h (struct extension_language_ops)
+	<clear_quit_flag>: Remove field and update comments.
+	* extension.c (clear_quit_flag): Delete.
+	* guile/guile.c (guile_extension_ops): Adjust.
+	* python/python.c (python_extension_ops): Adjust.
+	(gdbpy_clear_quit_flag): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* main.c (captured_main): Don't clear the quit flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (prepare_to_throw_exception): Don't clear the quit
+	flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (command_handler): Don't call clear_quit_flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* remote-sim.c (gdb_os_poll_quit): Don't call clear_quit_flag.
+	* remote.c (remote_wait_as): Don't call clear_quit_flag.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* python/python.c: Include "ser-event.h".
+	(gdbpy_event_fds): Delete.
+	(gdbpy_serial_event): New.
+	(gdbpy_run_events): Change prototype.  Use serial_event_clear
+	instead of serial_readchar.
+	(gdbpy_post_event): Use serial_event_set instead of serial_write.
+	(gdbpy_initialize_events): Use make_serial_event instead of
+	serial_pipe.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* defs.h: Extend QUIT-related comments to mention
+	interruptible_select.
+	(quit_serial_event_set, quit_serial_event_clear): Declare.
+	* event-top.c: Include "ser-event.h" and "gdb_select.h".
+	(quit_serial_event): New global.
+	(async_init_signals): Make quit_serial_event.
+	(quit_serial_event_set, quit_serial_event_clear)
+	(quit_serial_event_fd, interruptible_select): New functions.
+	* extension.c (set_quit_flag): Set the quit serial event.
+	(check_quit_flag): Clear the quit serial event.
+	* gdb_select.h (interruptible_select): New declaration.
+	* guile/scm-ports.c (ioscm_input_waiting): Use
+	interruptible_select instead of gdb_select.
+	* top.c (gdb_readline_no_editing): Likewise.
+	* ui-file.c (stdio_file_read): Likewise.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c: Include "ser-event.h".
+	(async_signal_handlers_serial_event): New global.
+	(async_signals_handler, initialize_async_signal_handlers): New
+	functions.
+	(mark_async_signal_handler): Set
+	async_signal_handlers_serial_event.
+	(invoke_async_signal_handlers): Clear
+	async_signal_handlers_serial_event.
+	* event-top.c (async_init_signals): Call
+	initialize_async_signal_handlers.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add ser-event.c.
+	(HFILES_NO_SRCDIR): Add ser-event.h.
+	(COMMON_OBS): Add ser-event.o.
+	* ser-event.c, ser-event.h: New files.
+	* serial.c (new_serial): New function, factored out from
+	(serial_fdopen_ops): ... this.
+	(serial_open_ops_1): New function, factored out from
+	(serial_open): ... this.
+	(serial_open_ops): New function.
+	* serial.h (struct serial): Forware declare.
+	(serial_open_ops): New declaration.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* serial.c (serial_open, serial_fdopen_ops, do_serial_close):
+	Remove references to name.
+	* serial.h (struct serial) <name>: Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* remote-fileio.c (sigint_fileio_token, remote_fio_no_longjmp):
+	Delete.
+	(async_remote_fileio_interrupt): Delete.
+	(remote_fileio_ctrl_c_signal_handler): Don't call the async signal
+	handler.  Instead just always set the ctrl_c flag.
+	(remote_fileio_reply): Clear remote_fio_ctrl_c_flag before
+	re-enabling the SIGINT handler.
+	(remote_fileio_func_open, remote_fileio_func_close)
+	(remote_fileio_func_read, remote_fileio_func_write)
+	(remote_fileio_func_lseek, remote_fileio_func_rename)
+	(remote_fileio_func_unlink, remote_fileio_func_stat)
+	(remote_fileio_func_fstat, remote_fileio_func_gettimeofday)
+	(remote_fileio_func_isatty, remote_fileio_func_system)
+	(remote_fileio_request): Remove references to
+	remote_fio_no_longjmp.
+	(initialize_remote_fileio): Don't create an async signal handler.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (stdin_event_handler): Call QUIT;
+	(prompt_for_continue): Don't run with immediate_quit set.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-io.c (tui_redisplay_readline): Check
+	gdb_in_secondary_prompt_p instead of immediate_quit.
+	* tui/tui.c: Include top.h.
+	(tui_rl_startup_hook): Check gdb_in_secondary_prompt_p instead of
+	immediate_quit.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* top.c (read_command_file): Inline command_loop here.
+	(command_loop): Delete.
+
+2016-04-12  Pedro Alves  <palves@redhat.com>
+
+	* top.c: Include "gdb_select.h".
+	(gdb_readline_no_editing): Wait for input with gdb_select instead
+	of blocking in fgetc.
+	(command_line_input): Don't set immediate_quit.
+
+2016-04-08  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* value.c (value_next): Make pass-by-reference parameters const-correct.
+	(value_parent): Likewise.
+	(value_enclosing_type): Likewise.
+	(value_lazy): Likewise.
+	(value_stack): Likewise.
+	(value_embedded_offset): Likewise.
+	(value_pointed_to_offset): Likewise.
+	(value_raw_address): Likewise.
+	(deprecated_value_modifiable): Likewise.
+	(value_free_to_mark): Likewise.
+	(value_release_to_mark): Likewise.
+	(internalvar_name): Likewise.
+	(readjust_indirect_value_type): Likewise.
+	(value_initialized): Likewise.
+	* value.h (value_next): Likewise.
+	(value_parent): Likewise.
+	(value_enclosing_type): Likewise.
+	(value_lazy): Likewise.
+	(value_stack): Likewise.
+	(value_embedded_offset): Likewise.
+	(value_pointed_to_offset): Likewise.
+	(value_raw_address): Likewise.
+	(deprecated_value_modifiable): Likewise.
+	(value_free_to_mark): Likewise.
+	(value_release_to_mark): Likewise.
+	(internalvar_name): Likewise.
+	(readjust_indirect_value_type): Likewise.
+	(value_initialized): Likewise.
+
+2016-04-07  Yao Qi  <yao.qi@linaro.org>
+
+	* record-full.c (record_full_insert_breakpoint): Return
+	early if entry on the address is found in
+	record_full_breakpoints.
+
+2016-04-07  Yao Qi  <yao.qi@linaro.org>
+
+	* record-full.c (record_full_insert_breakpoint): Set
+	bp_tgt->reqstd_address and bp_tgt->placed_size.
+
+2016-04-06  Don Breazeal  <donb@codesourcery.com>
+
+	* value.c (value_actual_type): Don't try to get rtti type
+	of the value if it has been optimized out.
+	(value_optimized_out): If a memory access error occurs,
+	just check vaue->optimized_out.
+
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert the previous commit adding unknown_v_replies_ok.
+
+2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c (struct remote_state): New field unknown_v_replies_ok.
+	(packet_config_support): Read it.
+	(remote_start_remote): Set it.
+
 2016-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* remote.c: Revert check-in by a mistake in the previous commit.

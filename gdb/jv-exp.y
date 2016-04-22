@@ -51,65 +51,10 @@
 #define parse_type(ps) builtin_type (parse_gdbarch (ps))
 #define parse_java_type(ps) builtin_java_type (parse_gdbarch (ps))
 
-/* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
-   as well as gratuitiously global symbol names, so we can have multiple
-   yacc generated parsers in gdb.  Note that these are only the variables
-   produced by yacc.  If other parser generators (bison, byacc, etc) produce
-   additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list.  */
-
-#define	yymaxdepth java_maxdepth
-#define	yyparse	java_parse_internal
-#define	yylex	java_lex
-#define	yyerror	java_error
-#define	yylval	java_lval
-#define	yychar	java_char
-#define	yydebug	java_debug
-#define	yypact	java_pact	
-#define	yyr1	java_r1			
-#define	yyr2	java_r2			
-#define	yydef	java_def		
-#define	yychk	java_chk		
-#define	yypgo	java_pgo		
-#define	yyact	java_act		
-#define	yyexca	java_exca
-#define yyerrflag java_errflag
-#define yynerrs	java_nerrs
-#define	yyps	java_ps
-#define	yypv	java_pv
-#define	yys	java_s
-#define	yy_yys	java_yys
-#define	yystate	java_state
-#define	yytmp	java_tmp
-#define	yyv	java_v
-#define	yy_yyv	java_yyv
-#define	yyval	java_val
-#define	yylloc	java_lloc
-#define yyreds	java_reds		/* With YYDEBUG defined */
-#define yytoks	java_toks		/* With YYDEBUG defined */
-#define yyname	java_name		/* With YYDEBUG defined */
-#define yyrule	java_rule		/* With YYDEBUG defined */
-#define yylhs	java_yylhs
-#define yylen	java_yylen
-#define yydefred java_yydefred
-#define yydgoto	java_yydgoto
-#define yysindex java_yysindex
-#define yyrindex java_yyrindex
-#define yygindex java_yygindex
-#define yytable	 java_yytable
-#define yycheck	 java_yycheck
-#define yyss	java_yyss
-#define yysslim	java_yysslim
-#define yyssp	java_yyssp
-#define yystacksize java_yystacksize
-#define yyvs	java_yyvs
-#define yyvsp	java_yyvsp
-
-#ifndef YYDEBUG
-#define	YYDEBUG 1		/* Default to yydebug support */
-#endif
-
-#define YYFPRINTF parser_fprintf
+/* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
+   etc).  */
+#define GDB_YY_REMAP_PREFIX java_
+#include "yy-remap.h"
 
 /* The state of the parser, used internally when we are parsing the
    expression.  */

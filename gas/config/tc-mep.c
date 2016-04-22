@@ -465,7 +465,7 @@ mep_parse_operand (CGEN_CPU_DESC cd, enum cgen_parse_operand_type want,
 }
 
 void
-md_begin ()
+md_begin (void)
 {
   /* Initialize the `cgen' interface.  */
 
@@ -1934,7 +1934,7 @@ mep_cgen_record_fixup_exp (fragS *frag,
    tc_gen_reloc.  */
 
 void
-mep_frob_file ()
+mep_frob_file (void)
 {
   struct mep_hi_fixup * l;
 

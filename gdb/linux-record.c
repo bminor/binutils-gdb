@@ -254,23 +254,18 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_exit:
-      {
-	int q;
-
-	target_terminal_ours ();
-	q = yquery (_("The next instruction is syscall exit.  "
-		      "It will make the program exit.  "
-		      "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
-      }
+      if (yquery (_("The next instruction is syscall exit.  "
+		    "It will make the program exit.  "
+		    "Do you want to stop the program?")))
+	return 1;
       break;
 
     case gdb_sys_fork:
       break;
 
     case gdb_sys_read:
+    case gdb_sys_readlink:
+    case gdb_sys_recv:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_mem_at_reg (regcache, tdep->arg2, (int) tmpulongest))
 	return -1;
@@ -355,6 +350,7 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_pipe:
+    case gdb_sys_pipe2:
       if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_int * 2))
 	return -1;
       break;
@@ -652,28 +648,15 @@ record_linux_system_call (enum gdb_syscall syscall,
     case gdb_sys_symlink:
       break;
 
-    case gdb_sys_readlink:
-      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
-      if (record_mem_at_reg (regcache, tdep->arg2, (int) tmpulongest))
-	return -1;
-      break;
-
     case gdb_sys_uselib:
     case gdb_sys_swapon:
       break;
 
     case gdb_sys_reboot:
-      {
-	int q;
-
-	target_terminal_ours ();
-	q = yquery (_("The next instruction is syscall reboot.  "
-		      "It will restart the computer.  "
-		      "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
-      }
+      if (yquery (_("The next instruction is syscall reboot.  "
+		    "It will restart the computer.  "
+		    "Do you want to stop the program?")))
+	return 1;
       break;
 
     case gdb_old_readdir:
@@ -693,17 +676,12 @@ record_linux_system_call (enum gdb_syscall syscall,
 	regcache_raw_read_unsigned (regcache, tdep->arg2, &len);
 	if (record_full_memory_query)
 	  {
-	    int q;
-
-	    target_terminal_ours ();
-	    q = yquery (_("\
+	    if (yquery (_("\
 The next instruction is syscall munmap.\n\
 It will free the memory addr = 0x%s len = %u.\n\
 It will make record target cannot record some memory change.\n\
 Do you want to stop the program?"),
-			OUTPUT_REG (tmpulongest, tdep->arg1), (int) len);
-	    target_terminal_inferior ();
-	    if (q)
+			OUTPUT_REG (tmpulongest, tdep->arg1), (int) len))
 	      return 1;
 	  }
       }
@@ -759,12 +737,6 @@ Do you want to stop the program?"),
 	if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
 	  return -1;
       }
-      break;
-
-    case gdb_sys_recv:
-      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
-      if (record_mem_at_reg (regcache, tdep->arg2, (int) tmpulongest))
-	return -1;
       break;
 
     case gdb_sys_recvmsg:
@@ -1764,17 +1736,10 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_exit_group:
-      {
-	int q;
-
-	target_terminal_ours ();
-	q = yquery (_("The next instruction is syscall exit_group.  "
-		      "It will make the program exit.  "
-		      "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
-      }
+      if (yquery (_("The next instruction is syscall exit_group.  "
+		    "It will make the program exit.  "
+		    "Do you want to stop the program?")))
+	return 1;
       break;
 
     case gdb_sys_lookup_dcookie:
@@ -2059,11 +2024,6 @@ Do you want to stop the program?"),
     case gdb_sys_eventfd2:
     case gdb_sys_epoll_create1:
     case gdb_sys_dup3:
-      break;
-
-    case gdb_sys_pipe2:
-      if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_int * 2))
-	return -1;
       break;
 
     case gdb_sys_inotify_init1:

@@ -390,6 +390,8 @@ run_dump_test "pr17935-1"
 run_dump_test "pr17935-2"
 run_dump_test "pr18801"
 run_dump_test "pr18815"
+run_dump_test "pr19939a"
+run_dump_test "pr19939b"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"

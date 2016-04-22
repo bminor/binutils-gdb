@@ -21,6 +21,7 @@
 if { [skip_fortran_tests] } { return -1 }
 
 standard_testfile .f90
+load_lib "fortran.exp"
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug f90}]} {
     return -1
@@ -31,20 +32,18 @@ if ![runto MAIN__] then {
     continue
 }
 
-# Depending on the compiler version being used, the name of the 4-byte integer
-# and real types can be printed differently.  For instance, gfortran-4.1 uses
-# "int4" whereas gfortran-4.3 uses "int(kind=4)".
-set int4 "(int4|integer\\(kind=4\\))"
-set real4 "(real4|real\\(kind=4\\))"
+# Depending on the compiler being used, the type names can be printed differently.
+set int [fortran_int4]
+set real [fortran_real4]
 
-gdb_test "ptype p" "type = Type bar\r\n *${int4} :: c\r\n *${real4} :: d\r\n *End Type bar"
+gdb_test "ptype p" "type = Type bar\r\n *$int :: c\r\n *$real :: d\r\n *End Type bar"
 
 set test "type-printing for derived type"
 gdb_test_multiple "ptype q" $test {
-    -re "type = Type foo\r\n *${real4} :: a\r\n *Type bar\r\n *${int4} :: c\r\n *${real4} :: d\r\n *End Type bar :: x\r\n *character\\*7 :: b\r\n *End Type foo\r\n$gdb_prompt $" {
+    -re "type = Type foo\r\n *$real :: a\r\n *Type bar\r\n *$int :: c\r\n *$real :: d\r\n *End Type bar :: x\r\n *character\\*7 :: b\r\n *End Type foo\r\n$gdb_prompt $" {
 	pass $test
     }
-    -re "type = Type foo\r\n *${real4} :: a\r\n *Type bar\r\n *${int4} :: c\r\n *${real4} :: d\r\n *End Type bar :: x\r\n *character :: b\\(7\\)\r\n *End Type foo\r\n$gdb_prompt $" {
+    -re "type = Type foo\r\n *$real :: a\r\n *Type bar\r\n *$int :: c\r\n *$real :: d\r\n *End Type bar :: x\r\n *character :: b\\(7\\)\r\n *End Type foo\r\n$gdb_prompt $" {
 	# Compiler should produce string, not an array of characters.
 	setup_xfail "*-*-*"
 	fail $test

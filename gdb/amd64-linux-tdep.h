@@ -35,6 +35,7 @@
 extern struct target_desc *tdesc_amd64_linux;
 extern struct target_desc *tdesc_amd64_avx_linux;
 extern struct target_desc *tdesc_amd64_mpx_linux;
+extern struct target_desc *tdesc_amd64_avx_mpx_linux;
 extern struct target_desc *tdesc_amd64_avx512_linux;
 
 extern struct target_desc *tdesc_x32_linux;

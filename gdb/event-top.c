@@ -38,6 +38,8 @@
 #include "annotate.h"
 #include "maint.h"
 #include "buffer.h"
+#include "ser-event.h"
+#include "gdb_select.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -46,7 +48,6 @@
 /* readline defines this.  */
 #undef savestring
 
-static void rl_callback_read_char_wrapper (gdb_client_data client_data);
 static void command_line_handler (char *rl);
 static void change_line_handler (void);
 static char *top_level_prompt (void);
@@ -139,20 +140,103 @@ static struct async_signal_handler *sigtstp_token;
 #endif
 static struct async_signal_handler *async_sigterm_token;
 
-/* This hook is called by rl_callback_read_char_wrapper after each
+/* This hook is called by gdb_rl_callback_read_char_wrapper after each
    character is processed.  */
 void (*after_char_processing_hook) (void);
 
 
-/* Wrapper function for calling into the readline library.  The event
-   loop expects the callback function to have a paramter, while
-   readline expects none.  */
+/* Wrapper function for calling into the readline library.  This takes
+   care of a couple things:
+
+   - The event loop expects the callback function to have a parameter,
+     while readline expects none.
+
+   - Propagation of GDB exceptions/errors thrown from INPUT_HANDLER
+     across readline requires special handling.
+
+   On the exceptions issue:
+
+   DWARF-based unwinding cannot cross code built without -fexceptions.
+   Any exception that tries to propagate through such code will fail
+   and the result is a call to std::terminate.  While some ABIs, such
+   as x86-64, require all code to be built with exception tables,
+   others don't.
+
+   This is a problem when GDB calls some non-EH-aware C library code,
+   that calls into GDB again through a callback, and that GDB callback
+   code throws a C++ exception.  Turns out this is exactly what
+   happens with GDB's readline callback.
+
+   In such cases, we must catch and save any C++ exception that might
+   be thrown from the GDB callback before returning to the
+   non-EH-aware code.  When the non-EH-aware function itself returns
+   back to GDB, we then rethrow the original C++ exception.
+
+   In the readline case however, the right thing to do is to longjmp
+   out of the callback, rather than do a normal return -- there's no
+   way for the callback to return to readline an indication that an
+   error happened, so a normal return would have rl_callback_read_char
+   potentially continue processing further input, redisplay the
+   prompt, etc.  Instead of raw setjmp/longjmp however, we use our
+   sjlj-based TRY/CATCH mechanism, which knows to handle multiple
+   levels of active setjmp/longjmp frames, needed in order to handle
+   the readline callback recursing, as happens with e.g., secondary
+   prompts / queries, through gdb_readline_wrapper.  */
+
 static void
-rl_callback_read_char_wrapper (gdb_client_data client_data)
+gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
 {
-  rl_callback_read_char ();
-  if (after_char_processing_hook)
-    (*after_char_processing_hook) ();
+  struct gdb_exception gdb_expt = exception_none;
+
+  /* C++ exceptions can't normally be thrown across readline (unless
+     it is built with -fexceptions, but it won't by default on many
+     ABIs).  So we instead wrap the readline call with a sjlj-based
+     TRY/CATCH, and rethrow the GDB exception once back in GDB.  */
+  TRY_SJLJ
+    {
+      rl_callback_read_char ();
+      if (after_char_processing_hook)
+	(*after_char_processing_hook) ();
+    }
+  CATCH_SJLJ (ex, RETURN_MASK_ALL)
+    {
+      gdb_expt = ex;
+    }
+  END_CATCH_SJLJ
+
+  /* Rethrow using the normal EH mechanism.  */
+  if (gdb_expt.reason < 0)
+    throw_exception (gdb_expt);
+}
+
+/* GDB's readline callback handler.  Calls the current INPUT_HANDLER,
+   and propagates GDB exceptions/errors thrown from INPUT_HANDLER back
+   across readline.  See gdb_rl_callback_read_char_wrapper.  */
+
+static void
+gdb_rl_callback_handler (char *rl)
+{
+  struct gdb_exception gdb_rl_expt = exception_none;
+
+  TRY
+    {
+      input_handler (rl);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      gdb_rl_expt = ex;
+    }
+  END_CATCH
+
+  /* If we caught a GDB exception, longjmp out of the readline
+     callback.  There's no other way for the callback to signal to
+     readline that an error happened.  A normal return would have
+     readline potentially continue processing further input, redisplay
+     the prompt, etc.  (This is what GDB historically did when it was
+     a C program.)  Note that since we're long jumping, local variable
+     dtors are NOT run automatically.  */
+  if (gdb_rl_expt.reason < 0)
+    throw_exception_sjlj (gdb_rl_expt);
 }
 
 /* Initialize all the necessary variables, start the event loop,
@@ -186,7 +270,7 @@ change_line_handler (void)
   if (async_command_editing_p)
     {
       /* Turn on editing by using readline.  */
-      call_readline = rl_callback_read_char_wrapper;
+      call_readline = gdb_rl_callback_read_char_wrapper;
       input_handler = command_line_handler;
     }
   else
@@ -235,7 +319,7 @@ gdb_rl_callback_handler_install (const char *prompt)
      therefore loses input.  */
   gdb_assert (!callback_handler_installed);
 
-  rl_callback_handler_install (prompt, input_handler);
+  rl_callback_handler_install (prompt, gdb_rl_callback_handler);
   callback_handler_installed = 1;
 }
 
@@ -362,7 +446,7 @@ top_level_prompt (void)
 	 beginning.  */
       const char suffix[] = "\n\032\032prompt\n";
 
-      return concat (prefix, prompt, suffix, NULL);
+      return concat (prefix, prompt, suffix, (char *) NULL);
     }
 
   return xstrdup (prompt);
@@ -403,6 +487,15 @@ stdin_event_handler (int error, gdb_client_data client_data)
     }
   else
     {
+    /* This makes sure a ^C immediately followed by further input is
+       always processed in that order.  E.g,. with input like
+       "^Cprint 1\n", the SIGINT handler runs, marks the async signal
+       handler, and then select/poll may return with stdin ready,
+       instead of -1/EINTR.  The
+       gdb.base/double-prompt-target-event-error.exp test exercises
+       this.  */
+      QUIT;
+
       do
 	{
 	  call_stdin_event_handler_again_p = 0;
@@ -449,7 +542,6 @@ command_handler (char *command)
   struct cleanup *stat_chain;
   char *c;
 
-  clear_quit_flag ();
   if (instream == stdin)
     reinitialize_more_filter ();
 
@@ -724,6 +816,12 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 }
 
 
+/* The serial event associated with the QUIT flag.  set_quit_flag sets
+   this, and check_quit_flag clears it.  Used by interruptible_select
+   to be able to do interruptible I/O with no race with the SIGINT
+   handler.  */
+static struct serial_event *quit_serial_event;
+
 /* Initialization of signal handlers and tokens.  There is a function
    handle_sig* for each of the signals GDB cares about.  Specifically:
    SIGINT, SIGFPE, SIGQUIT, SIGTSTP, SIGHUP, SIGWINCH.  These
@@ -739,6 +837,10 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 void
 async_init_signals (void)
 {
+  initialize_async_signal_handlers ();
+
+  quit_serial_event = make_serial_event ();
+
   signal (SIGINT, handle_sigint);
   sigint_token =
     create_async_signal_handler (async_request_quit, NULL);
@@ -783,8 +885,95 @@ async_init_signals (void)
 #endif
 }
 
-/* Tell the event loop what to do if SIGINT is received.
-   See event-signal.c.  */
+/* See defs.h.  */
+
+void
+quit_serial_event_set (void)
+{
+  serial_event_set (quit_serial_event);
+}
+
+/* See defs.h.  */
+
+void
+quit_serial_event_clear (void)
+{
+  serial_event_clear (quit_serial_event);
+}
+
+/* Return the selectable file descriptor of the serial event
+   associated with the quit flag.  */
+
+static int
+quit_serial_event_fd (void)
+{
+  return serial_event_fd (quit_serial_event);
+}
+
+/* See defs.h.  */
+
+void
+default_quit_handler (void)
+{
+  if (check_quit_flag ())
+    {
+      if (target_terminal_is_ours ())
+	quit ();
+      else
+	target_pass_ctrlc ();
+    }
+}
+
+/* See defs.h.  */
+quit_handler_ftype *quit_handler = default_quit_handler;
+
+/* Data for make_cleanup_override_quit_handler.  Wrap the previous
+   handler pointer in a data struct because it's not portable to cast
+   a function pointer to a data pointer, which is what make_cleanup
+   expects.  */
+struct quit_handler_cleanup_data
+{
+  /* The previous quit handler.  */
+  quit_handler_ftype *prev_handler;
+};
+
+/* Cleanup call that restores the previous quit handler.  */
+
+static void
+restore_quit_handler (void *arg)
+{
+  struct quit_handler_cleanup_data *data
+    = (struct quit_handler_cleanup_data *) arg;
+
+  quit_handler = data->prev_handler;
+}
+
+/* Destructor for the quit handler cleanup.  */
+
+static void
+restore_quit_handler_dtor (void *arg)
+{
+  xfree (arg);
+}
+
+/* See defs.h.  */
+
+struct cleanup *
+make_cleanup_override_quit_handler (quit_handler_ftype *new_quit_handler)
+{
+  struct cleanup *old_chain;
+  struct quit_handler_cleanup_data *data;
+
+  data = XNEW (struct quit_handler_cleanup_data);
+  data->prev_handler = quit_handler;
+  old_chain = make_cleanup_dtor (restore_quit_handler, data,
+				 restore_quit_handler_dtor);
+  quit_handler = new_quit_handler;
+  return old_chain;
+}
+
+/* Handle a SIGINT.  */
+
 void
 handle_sigint (int sig)
 {
@@ -794,18 +983,47 @@ handle_sigint (int sig)
      it may be quite a while before we get back to the event loop.  So
      set quit_flag to 1 here.  Then if QUIT is called before we get to
      the event loop, we will unwind as expected.  */
-
   set_quit_flag ();
 
-  /* If immediate_quit is set, we go ahead and process the SIGINT right
-     away, even if we usually would defer this to the event loop.  The
-     assumption here is that it is safe to process ^C immediately if
-     immediate_quit is set.  If we didn't, SIGINT would be really
-     processed only the next time through the event loop.  To get to
-     that point, though, the command that we want to interrupt needs to
-     finish first, which is unacceptable.  If immediate quit is not set,
-     we process SIGINT the next time through the loop, which is fine.  */
-  gdb_call_async_signal_handler (sigint_token, immediate_quit);
+  /* In case nothing calls QUIT before the event loop is reached, the
+     event loop handles it.  */
+  mark_async_signal_handler (sigint_token);
+}
+
+/* See gdb_select.h.  */
+
+int
+interruptible_select (int n,
+		      fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
+		      struct timeval *timeout)
+{
+  fd_set my_readfds;
+  int fd;
+  int res;
+
+  if (readfds == NULL)
+    {
+      readfds = &my_readfds;
+      FD_ZERO (&my_readfds);
+    }
+
+  fd = quit_serial_event_fd ();
+  FD_SET (fd, readfds);
+  if (n <= fd)
+    n = fd + 1;
+
+  do
+    {
+      res = gdb_select (n, readfds, writefds, exceptfds, timeout);
+    }
+  while (res == -1 && errno == EINTR);
+
+  if (res == 1 && FD_ISSET (fd, readfds))
+    {
+      errno = EINTR;
+      return -1;
+    }
+  return res;
 }
 
 /* Handle GDB exit upon receiving SIGTERM if target_can_async_p ().  */
@@ -840,9 +1058,7 @@ async_request_quit (gdb_client_data arg)
      back here, that means that an exception was thrown to unwind the
      current command before we got back to the event loop.  So there
      is no reason to call quit again here.  */
-
-  if (check_quit_flag ())
-    quit ();
+  QUIT;
 }
 
 #ifdef SIGQUIT
@@ -975,8 +1191,10 @@ set_async_editing_command (char *args, int from_tty,
 }
 
 /* Set things up for readline to be invoked via the alternate
-   interface, i.e. via a callback function (rl_callback_read_char),
-   and hook up instream to the event loop.  */
+   interface, i.e. via a callback function
+   (gdb_rl_callback_read_char), and hook up instream to the event
+   loop.  */
+
 void
 gdb_setup_readline (void)
 {
@@ -1002,7 +1220,7 @@ gdb_setup_readline (void)
 	  
       /* When a character is detected on instream by select or poll,
 	 readline will be invoked via this callback function.  */
-      call_readline = rl_callback_read_char_wrapper;
+      call_readline = gdb_rl_callback_read_char_wrapper;
     }
   else
     {

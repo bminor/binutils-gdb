@@ -22,11 +22,19 @@
 set test1 "NOCROSSREFS 1"
 set test2 "NOCROSSREFS 2"
 set test3 "NOCROSSREFS 3"
+set test4 "NOCROSSREFS_TO 1"
+set test5 "NOCROSSREFS_TO 2"
+set test6 "NOCROSSREFS_TO 3"
+set test7 "NOCROSSREFS_TO 4"
 
 if { ![is_remote host] && [which $CC] == 0 } {
     untested $test1
     untested $test2
     untested $test3
+    untested $test4
+    untested $test5
+    untested $test6
+    untested $test7
     return
 }
 
@@ -156,6 +164,62 @@ if [string match "" $exec_output] then {
 } else {
     verbose -log "$exec_output"
     fail $test3
+}
+
+set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross4 -T $srcdir/$subdir/cross4.t tmpdir/cross4.o"]
+set exec_output [prune_warnings $exec_output]
+
+regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
+
+if [string match "" $exec_output] then {
+    pass $test4
+} else {
+    verbose -log "$exec_output"
+    fail $test4
+}
+
+set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross5 -T $srcdir/$subdir/cross5.t tmpdir/cross4.o"]
+set exec_output [prune_warnings $exec_output]
+
+regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
+
+if [string match "" $exec_output] then {
+    fail $test5
+} else {
+    verbose -log "$exec_output"
+    if [regexp "prohibited cross reference from .* to `.*' in" $exec_output] {
+	pass $test5
+    } else {
+	fail $test5
+    }
+}
+
+set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross6 -T $srcdir/$subdir/cross6.t tmpdir/cross3.o"]
+set exec_output [prune_warnings $exec_output]
+
+regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
+
+if [string match "" $exec_output] then {
+    pass $test6
+} else {
+    verbose -log "$exec_output"
+    fail $test6
+}
+
+set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross7 -T $srcdir/$subdir/cross7.t tmpdir/cross3.o"]
+set exec_output [prune_warnings $exec_output]
+
+regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
+
+if [string match "" $exec_output] then {
+    fail $test7
+} else {
+    verbose -log "$exec_output"
+    if [regexp "prohibited cross reference from .* to `.*' in" $exec_output] {
+	pass $test7
+    } else {
+	fail $test7
+    }
 }
 
 set CFLAGS "$old_CFLAGS"

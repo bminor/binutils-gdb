@@ -3304,3 +3304,46 @@ bfd_hide_sym_by_version (struct bfd_elf_version_tree *verdefs,
   bfd_find_version_for_sym (verdefs, sym_name, &hidden);
   return hidden;
 }
+
+/*
+FUNCTION
+	bfd_link_check_relocs
+
+SYNOPSIS
+	bfd_boolean bfd_link_check_relocs
+	  (bfd *abfd, struct bfd_link_info *info);
+
+DESCRIPTION
+	Checks the relocs in ABFD for validity.
+	Does not execute the relocs.
+	Return TRUE if everything is OK, FALSE otherwise.
+	This is the external entry point to this code.
+*/
+
+bfd_boolean
+bfd_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+{
+  return BFD_SEND (abfd, _bfd_link_check_relocs, (abfd, info));
+}
+
+/*
+FUNCTION
+	_bfd_generic_link_check_relocs
+
+SYNOPSIS
+	bfd_boolean _bfd_generic_link_check_relocs
+	  (bfd *abfd, struct bfd_link_info *info);
+
+DESCRIPTION
+        Stub function for targets that do not implement reloc checking.
+	Return TRUE.
+	This is an internal function.  It should not be called from
+	outside the BFD library.
+*/
+
+bfd_boolean
+_bfd_generic_link_check_relocs (bfd *abfd ATTRIBUTE_UNUSED,
+				struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}

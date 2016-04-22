@@ -4120,7 +4120,7 @@ save_prologue_count (unsigned long lbl, unsigned int count)
 }
 
 static void
-free_saved_prologue_counts ()
+free_saved_prologue_counts (void)
 {
   label_prologue_count *lpc = unwind.saved_prologue_counts;
   label_prologue_count *next;

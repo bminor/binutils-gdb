@@ -1,3 +1,137 @@
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* alpha-dis.c: Regenerate.
+	* crx-dis.c: Likewise.
+	* disassemble.c: Likewise.
+	* epiphany-opc.c: Likewise.
+	* fr30-opc.c: Likewise.
+	* frv-opc.c: Likewise.
+	* ip2k-opc.c: Likewise.
+	* iq2000-opc.c: Likewise.
+	* lm32-opc.c: Likewise.
+	* lm32-opinst.c: Likewise.
+	* m32c-opc.c: Likewise.
+	* m32r-opc.c: Likewise.
+	* m32r-opinst.c: Likewise.
+	* mep-opc.c: Likewise.
+	* mt-opc.c: Likewise.
+	* or1k-opc.c: Likewise.
+	* or1k-opinst.c: Likewise.
+	* tic80-opc.c: Likewise.
+	* xc16x-opc.c: Likewise.
+	* xstormy16-opc.c: Likewise.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add addb, subb, adcb, sbcb, andb, xorb, orb,
+	fxorb, wxorb, shlb, shrb, notb, cntbb, div, mod, divm, qcmp,
+	calcsd, and calcxd instructions.
+	* arc-opc.c (insert_nps_bitop_size): Delete.
+	(extract_nps_bitop_size): Delete.
+	(MAKE_SRC_POS_INSERT_EXTRACT_FUNCS): Define, and use.
+	(extract_nps_qcmp_m3): Define.
+	(extract_nps_qcmp_m2): Define.
+	(extract_nps_qcmp_m1): Define.
+	(arc_flag_operands): Add F_NPS_SX, F_NPS_AR, F_NPS_AL.
+	(arc_flag_classes): Add C_NPS_SX, C_NPS_AR_AL
+	(arc_operands): Add NPS_SRC2_POS, NPS_SRC1_POS, NPS_ADDB_SIZE,
+	NPS_ANDB_SIZE, NPS_FXORB_SIZ, NPS_WXORB_SIZ, NPS_R_XLDST,
+	NPS_DIV_UIMM4, NPS_QCMP_SIZE, NPS_QCMP_M1, NPS_QCMP_M2, and
+	NPS_QCMP_M3.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add dctcp, dcip, dcet, and dcacl instructions.
+
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add xldb, xldw, xld, xstb, xstw, and xst
+	instructions.
+	* arc-opc.c (insert_nps_cmem_uimm16): New function.
+	(extract_nps_cmem_uimm16): New function.
+	(arc_operands): Add NPS_XLDST_UIMM16 operand.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-dis.c (arc_insn_length): New function.
+	(print_insn_arc): Use arc_insn_length, change insnLen to unsigned.
+	(find_format): Change insnLen parameter to unsigned.
+
+2016-04-13  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19937
+	* v850-opc.c (v850_opcodes): Correct masks for long versions of
+	the LD.B and LD.BU instructions.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (find_format): Check for extension flags.
+	(print_flags): New function.
+	(print_insn_arc): Update for .extCondCode, .extCoreRegister and
+	.extAuxRegister.
+	* arc-ext.c (arcExtMap_coreRegName): Use
+	LAST_EXTENSION_CORE_REGISTER.
+	(arcExtMap_coreReadWrite): Likewise.
+	(dump_ARC_extmap): Update printing.
+	* arc-opc.c (arc_flag_classes): Add F_CLASS_EXTEND flag.
+	(arc_aux_regs): Add cpu field.
+	* arc-regs.h: Add cpu field, lower case name aux registers.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-tbl.h: Add rtsc, sleep with no arguments.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-opc.c (flags_none, flags_f, flags_cc, flags_ccf):
+	Initialize.
+	(arg_none, arg_32bit_rarbrc, arg_32bit_zarbrc, arg_32bit_rbrbrc)
+	(arg_32bit_rarbu6, arg_32bit_zarbu6, arg_32bit_rbrbu6)
+	(arg_32bit_rbrbs12, arg_32bit_ralimmrc, arg_32bit_rarblimm)
+	(arg_32bit_zalimmrc, arg_32bit_zarblimm, arg_32bit_rbrblimm)
+	(arg_32bit_ralimmu6, arg_32bit_zalimmu6, arg_32bit_zalimms12)
+	(arg_32bit_ralimmlimm, arg_32bit_zalimmlimm, arg_32bit_rbrc)
+	(arg_32bit_zarc, arg_32bit_rbu6, arg_32bit_zau6, arg_32bit_rblimm)
+	(arg_32bit_zalimm, arg_32bit_limmrc, arg_32bit_limmu6)
+	(arg_32bit_limms12, arg_32bit_limmlimm): Likewise.
+	(arc_opcode arc_opcodes): Null terminate the array.
+	(arc_num_opcodes): Remove.
+	* arc-ext.h (INSERT_XOP): Define.
+	(extInstruction_t): Likewise.
+	(arcExtMap_instName): Delete.
+	(arcExtMap_insn): New function.
+	(arcExtMap_genOpcode): Likewise.
+	* arc-ext.c (ExtInstruction): Remove.
+	(create_map): Zero initialize instruction fields.
+	(arcExtMap_instName): Remove.
+	(arcExtMap_insn): New function.
+	(dump_ARC_extmap): More info while debuging.
+	(arcExtMap_genOpcode): New function.
+	* arc-dis.c (find_format): New function.
+	(print_insn_arc): Use find_format.
+	(arc_get_disassembler): Enable dump_ARC_extmap only when
+	debugging.
+
+2016-04-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (print_mips16_insn_arg): Mask unused extended
+	instruction bits out.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Add schd, sync, and hwschd instructions.
+	* arc-opc.c (arc_flag_operands): Add new flags.
+	(arc_flag_classes): Add new classes.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (arc_opcodes): Extend comment to discus table layout.
+
 2016-04-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-nps400-tbl.h: Add movbi, decode1, fbset, fbclear, encode0,
@@ -12,12 +146,12 @@
 
 2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * arc-regs.h: Add a new subclass field.  Add double assist
-        accumulator register values.
-        * arc-tbl.h: Use DPA subclass to mark the double assist
-        instructions.  Use DPX/SPX subclas to mark the FPX instructions.
-        * arc-opc.c (RSP): Define instead of SP.
-        (arc_aux_regs): Add the subclass field.
+	* arc-regs.h: Add a new subclass field.  Add double assist
+	accumulator register values.
+	* arc-tbl.h: Use DPA subclass to mark the double assist
+	instructions.  Use DPX/SPX subclas to mark the FPX instructions.
+	* arc-opc.c (RSP): Define instead of SP.
+	(arc_aux_regs): Add the subclass field.
 
 2016-04-05  Jiong Wang  <jiong.wang@arm.com>
 
@@ -35,23 +169,23 @@
 
 2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * arc-regs.h (IC_RAM_ADDRESS, IC_TAG, IC_WP, IC_DATA, CONTROL0)
-        (AX2, AY2, MX2, MY2, AY0, AY1, DC_RAM_ADDR, DC_TAG, CONTROL1)
-        (RTT): Remove duplicate.
-        (LCDINSTR, LCDDATA, LCDSTAT, CC_*, PCT_COUNT*, PCT_SNAP*)
-        (PCT_CONFIG*): Remove.
-        (D1L, D1H, D2H, D2L): Define.
+	* arc-regs.h (IC_RAM_ADDRESS, IC_TAG, IC_WP, IC_DATA, CONTROL0)
+	(AX2, AY2, MX2, MY2, AY0, AY1, DC_RAM_ADDR, DC_TAG, CONTROL1)
+	(RTT): Remove duplicate.
+	(LCDINSTR, LCDDATA, LCDSTAT, CC_*, PCT_COUNT*, PCT_SNAP*)
+	(PCT_CONFIG*): Remove.
+	(D1L, D1H, D2H, D2L): Define.
 
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * arc-ext-tbl.h (dsp_fp_i2flt): Fix typo.
+	* arc-ext-tbl.h (dsp_fp_i2flt): Fix typo.
 
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * arc-tbl.h (invld07): Remove.
-        * arc-ext-tbl.h: New file.
-        * arc-dis.c (FIELDA, FIELDB, FIELDC): Remove.
-        * arc-opc.c (arc_opcodes): Add ext-tbl include.
+	* arc-tbl.h (invld07): Remove.
+	* arc-ext-tbl.h: New file.
+	* arc-dis.c (FIELDA, FIELDB, FIELDC): Remove.
+	* arc-opc.c (arc_opcodes): Add ext-tbl include.
 
 2016-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
@@ -149,8 +283,8 @@
 2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
 	    Janek van Oirschot  <jvanoirs@synopsys.com>
 
-        * arc-opc.c (arc_relax_opcodes, arc_num_relax_opcodes): New
-        variable.
+	* arc-opc.c (arc_relax_opcodes, arc_num_relax_opcodes): New
+	variable.
 
 2016-02-04  Nick Clifton  <nickc@redhat.com>
 

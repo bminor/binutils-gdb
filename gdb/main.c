@@ -232,7 +232,7 @@ get_init_files (const char **system_gdbinit,
 	      for (p = tmp_sys_gdbinit; IS_DIR_SEPARATOR (*p); ++p)
 		continue;
 	      relocated_sysgdbinit = concat (gdb_datadir, SLASH_STRING, p,
-					     NULL);
+					     (char *) NULL);
 	      xfree (tmp_sys_gdbinit);
 	    }
 	  else
@@ -297,7 +297,9 @@ setup_alternate_signal_stack (void)
 #ifdef HAVE_SIGALTSTACK
   stack_t ss;
 
-  ss.ss_sp = xmalloc (SIGSTKSZ);
+  /* FreeBSD versions older than 11.0 use char * for ss_sp instead of
+     void *.  This cast works with both types.  */
+  ss.ss_sp = (char *) xmalloc (SIGSTKSZ);
   ss.ss_size = SIGSTKSZ;
   ss.ss_flags = 0;
 
@@ -505,7 +507,6 @@ captured_main (void *data)
   dirarg = (char **) xmalloc (dirsize * sizeof (*dirarg));
   ndir = 0;
 
-  clear_quit_flag ();
   saved_command_line = (char *) xstrdup ("");
   instream = stdin;
 
@@ -559,7 +560,7 @@ captured_main (void *data)
 #ifdef WITH_PYTHON_PATH
   {
     /* For later use in helping Python find itself.  */
-    char *tmp = concat (WITH_PYTHON_PATH, SLASH_STRING, "lib", NULL);
+    char *tmp = concat (WITH_PYTHON_PATH, SLASH_STRING, "lib", (char *) NULL);
 
     python_libdir = relocate_gdb_directory (tmp, PYTHON_PATH_RELOCATABLE);
     xfree (tmp);

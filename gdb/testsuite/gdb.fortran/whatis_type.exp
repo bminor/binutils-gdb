@@ -16,6 +16,7 @@
 if { [skip_fortran_tests] } { continue }
 
 standard_testfile type.f90
+load_lib "fortran.exp"
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} \
                           ${srcfile} {debug f90}] } {
@@ -27,11 +28,15 @@ if ![runto MAIN__] {
     return
 }
 
+# Depending on the compiler being used, the type names can be printed differently.
+set int [fortran_int4]
+set real [fortran_real4]
+
 gdb_breakpoint [gdb_get_line_number "bp1"]
 gdb_continue_to_breakpoint "bp1"
 
-set t1_i "integer\\\(kind=4\\\) :: t1_i"
-set t1_r "real\\\(kind=4\\\) :: t1_r"
+set t1_i "$int :: t1_i"
+set t1_r "$real :: t1_r"
 
 gdb_test "whatis t1" \
   "type = Type t1\r\n${t1_i}\r\n${t1_r}\r\nEnd Type t1" \

@@ -92,7 +92,7 @@ size_t i386bsd_xsave_len;
 static void
 i386bsd_supply_gregset (struct regcache *regcache, const void *gregs)
 {
-  const char *regs = gregs;
+  const char *regs = (const char *) gregs;
   int regnum;
 
   for (regnum = 0; regnum < ARRAY_SIZE (i386bsd_r_reg_offset); regnum++)
@@ -112,7 +112,7 @@ static void
 i386bsd_collect_gregset (const struct regcache *regcache,
 			 void *gregs, int regnum)
 {
-  char *regs = gregs;
+  char *regs = (char *) gregs;
   int i;
 
   for (i = 0; i < ARRAY_SIZE (i386bsd_r_reg_offset); i++)
@@ -157,7 +157,7 @@ i386bsd_fetch_inferior_registers (struct target_ops *ops,
 #ifdef PT_GETXSTATE_INFO
       if (i386bsd_xsave_len != 0)
 	{
-	  char *xstateregs;
+	  void *xstateregs;
 
 	  xstateregs = alloca (i386bsd_xsave_len);
 	  if (ptrace (PT_GETXSTATE, get_ptrace_pid (inferior_ptid),
@@ -227,7 +227,7 @@ i386bsd_store_inferior_registers (struct target_ops *ops,
 #ifdef PT_GETXSTATE_INFO
       if (i386bsd_xsave_len != 0)
 	{
-	  char *xstateregs;
+	  void *xstateregs;
 
 	  xstateregs = alloca (i386bsd_xsave_len);
 	  if (ptrace (PT_GETXSTATE, get_ptrace_pid (inferior_ptid),

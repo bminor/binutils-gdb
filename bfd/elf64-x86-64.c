@@ -900,6 +900,10 @@ struct elf_x86_64_link_hash_table
   bfd_vma next_jump_slot_index;
   /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
   bfd_vma next_irelative_index;
+
+  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
+     to read-only sections.  */
+  bfd_boolean readonly_dynrelocs_against_ifunc;
 };
 
 /* Get the x86-64 ELF linker hash table from a link_info structure.  */
@@ -1583,7 +1587,57 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define need_convert_load sec_flg0
+#define need_convert_load	sec_flg0
+#define check_relocs_failed	sec_flg1
+
+static bfd_boolean
+elf_x86_64_need_pic (bfd *input_bfd, asection *sec,
+		     struct elf_link_hash_entry *h,
+		     Elf_Internal_Shdr *symtab_hdr,
+		     Elf_Internal_Sym *isym,
+		     reloc_howto_type *howto)
+{
+  const char *v = "";
+  const char *und = "";
+  const char *pic = "";
+
+  const char *name;
+  if (h)
+    {
+      name = h->root.root.string;
+      switch (ELF_ST_VISIBILITY (h->other))
+	{
+	case STV_HIDDEN:
+	  v = _("hidden symbol ");
+	  break;
+	case STV_INTERNAL:
+	  v = _("internal symbol ");
+	  break;
+	case STV_PROTECTED:
+	  v = _("protected symbol ");
+	  break;
+	default:
+	  v = _("symbol ");
+	  pic = _("; recompile with -fPIC");
+	  break;
+	}
+
+      if (!h->def_regular && !h->def_dynamic)
+	und = _("undefined ");
+    }
+  else
+    {
+      name = bfd_elf_sym_name (input_bfd, symtab_hdr, isym, NULL);
+      pic = _("; recompile with -fPIC");
+    }
+
+  (*_bfd_error_handler) (_("%B: relocation %s against %s%s`%s' can "
+			   "not be used when making a shared object%s"),
+			 input_bfd, howto->name, und, v, name, pic);
+  bfd_set_error (bfd_error_bad_value);
+  sec->check_relocs_failed = 1;
+  return FALSE;
+}
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure
@@ -1708,10 +1762,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (h != NULL)
 	{
-	  /* Create the ifunc sections for static executables.  If we
-	     never see an indirect function symbol nor we are building
-	     a static executable, those sections will be empty and
-	     won't appear in output.  */
 	  switch (r_type)
 	    {
 	    default:
@@ -1770,7 +1820,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_X86_64_GOTPCREL64:
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
-	      if (!_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
+	      /* Create the ifunc sections for static executables.  */
+	      if (h->type == STT_GNU_IFUNC
+		  && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj,
+						      info))
 		return FALSE;
 	      break;
 	    }
@@ -1799,19 +1852,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_X86_64_TPOFF32:
 	  if (!bfd_link_executable (info) && ABI_64_P (abfd))
-	    {
-	      if (h)
-		name = h->root.root.string;
-	      else
-		name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
-					 NULL);
-	      (*_bfd_error_handler)
-		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 abfd,
-		 x86_64_elf_howto_table[r_type].name, name);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
+	    return elf_x86_64_need_pic (abfd, sec, h, symtab_hdr, isym,
+					&x86_64_elf_howto_table[r_type]);
 	  if (eh != NULL)
 	    eh->has_got_reloc = 1;
 	  break;
@@ -1970,26 +2012,20 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32S:
-	  /* Let's help debug shared library creation.  These relocs
-	     cannot be used in shared libs.  Don't error out for
+	  /* Check relocation overflow as these relocs may lead to
+	     run-time relocation overflow.  Don't error out for
 	     sections we don't care about, such as debug sections or
-	     non-constant sections, or when relocation overflow check
-	     is disabled.  */
+	     when relocation overflow check is disabled.  */
 	  if (!info->no_reloc_overflow_check
-	      && bfd_link_pic (info)
-	      && (sec->flags & SEC_ALLOC) != 0
-	      && (sec->flags & SEC_READONLY) != 0)
-	    {
-	      if (h)
-		name = h->root.root.string;
-	      else
-		name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
-	      (*_bfd_error_handler)
-		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 abfd, x86_64_elf_howto_table[r_type].name, name);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
+	      && (bfd_link_pic (info)
+		  || (bfd_link_executable (info)
+		      && h != NULL
+		      && !h->def_regular
+		      && h->def_dynamic
+		      && (sec->flags & SEC_READONLY) == 0))
+	      && (sec->flags & SEC_ALLOC) != 0)
+	    return elf_x86_64_need_pic (abfd, sec, h, symtab_hdr, isym,
+					&x86_64_elf_howto_table[r_type]);
 	  /* Fall through.  */
 
 	case R_X86_64_PC8:
@@ -2236,174 +2272,6 @@ elf_x86_64_gc_mark_hook (asection *sec,
       }
 
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
-/* Update the got entry reference counts for the section being removed.	 */
-
-static bfd_boolean
-elf_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
-			  asection *sec,
-			  const Elf_Internal_Rela *relocs)
-{
-  struct elf_x86_64_link_hash_table *htab;
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  htab = elf_x86_64_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_symtab_hdr (abfd);
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  htab = elf_x86_64_hash_table (info);
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      unsigned int r_type;
-      struct elf_link_hash_entry *h = NULL;
-      bfd_boolean pointer_reloc;
-
-      r_symndx = htab->r_sym (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-      else
-	{
-	  /* A local symbol.  */
-	  Elf_Internal_Sym *isym;
-
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
-					abfd, r_symndx);
-
-	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
-	  if (isym != NULL
-	      && ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
-	    {
-	      h = elf_x86_64_get_local_sym_hash (htab, abfd, rel, FALSE);
-	      if (h == NULL)
-		abort ();
-	    }
-	}
-
-      if (h)
-	{
-	  struct elf_x86_64_link_hash_entry *eh;
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
-	  eh = (struct elf_x86_64_link_hash_entry *) h;
-
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	    if (p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*pp = p->next;
-		break;
-	      }
-	}
-
-      r_type = ELF32_R_TYPE (rel->r_info);
-      if (! elf_x86_64_tls_transition (info, abfd, sec, NULL,
-				       symtab_hdr, sym_hashes,
-				       &r_type, GOT_UNKNOWN,
-				       rel, relend, h, r_symndx))
-	return FALSE;
-
-      pointer_reloc = FALSE;
-      switch (r_type)
-	{
-	case R_X86_64_TLSLD:
-	  if (htab->tls_ld_got.refcount > 0)
-	    htab->tls_ld_got.refcount -= 1;
-	  break;
-
-	case R_X86_64_TLSGD:
-	case R_X86_64_GOTPC32_TLSDESC:
-	case R_X86_64_TLSDESC_CALL:
-	case R_X86_64_GOTTPOFF:
-	case R_X86_64_GOT32:
-	case R_X86_64_GOTPCREL:
-	case R_X86_64_GOTPCRELX:
-	case R_X86_64_REX_GOTPCRELX:
-	case R_X86_64_GOT64:
-	case R_X86_64_GOTPCREL64:
-	case R_X86_64_GOTPLT64:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount -= 1;
-	      if (h->type == STT_GNU_IFUNC)
-		{
-		  if (h->plt.refcount > 0)
-		    h->plt.refcount -= 1;
-		}
-	    }
-	  else if (local_got_refcounts != NULL)
-	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	    }
-	  break;
-
-	case R_X86_64_32:
-	case R_X86_64_32S:
-	  pointer_reloc = !ABI_64_P (abfd);
-	  goto pointer;
-
-	case R_X86_64_64:
-	  pointer_reloc = TRUE;
-	case R_X86_64_8:
-	case R_X86_64_16:
-	case R_X86_64_PC8:
-	case R_X86_64_PC16:
-	case R_X86_64_PC32:
-	case R_X86_64_PC32_BND:
-	case R_X86_64_PC64:
-	case R_X86_64_SIZE32:
-	case R_X86_64_SIZE64:
-pointer:
-	  if (bfd_link_pic (info)
-	      && (h == NULL || h->type != STT_GNU_IFUNC))
-	    break;
-	  /* Fall thru */
-
-	case R_X86_64_PLT32:
-	case R_X86_64_PLT32_BND:
-	case R_X86_64_PLTOFF64:
-	  if (h != NULL)
-	    {
-	      if (h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-	      if (pointer_reloc && (sec->flags & SEC_READONLY) == 0)
-		{
-		  struct elf_x86_64_link_hash_entry *eh
-		    = (struct elf_x86_64_link_hash_entry *) h;
-		  if (eh->func_pointer_refcount > 0)
-		    eh->func_pointer_refcount -= 1;
-		}
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
 }
 
 /* Remove undefined weak symbol from the dynamic symbol table if it
@@ -2659,6 +2527,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     {
       if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 					      &eh->dyn_relocs,
+					      &htab->readonly_dynrelocs_against_ifunc,
 					      plt_entry_size,
 					      plt_entry_size,
 					      GOT_ENTRY_SIZE))
@@ -3899,8 +3768,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
-	      if ((elf_tdata (output_bfd)->has_gnu_symbols
-		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
+	      if (htab->readonly_dynrelocs_against_ifunc)
 		{
 		  info->callbacks->einfo
 		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
@@ -4037,42 +3905,6 @@ is_32bit_relative_branch (bfd_byte *contents, bfd_vma offset)
 	      && (contents [offset - 1] & 0xf0) == 0x80));
 }
 
-static bfd_boolean
-elf_x86_64_need_pic (bfd *input_bfd, struct elf_link_hash_entry *h,
-		     reloc_howto_type *howto)
-{
-  const char *fmt;
-  const char *v;
-  const char *pic = "";
-
-  switch (ELF_ST_VISIBILITY (h->other))
-    {
-    case STV_HIDDEN:
-      v = _("hidden symbol");
-      break;
-    case STV_INTERNAL:
-      v = _("internal symbol");
-      break;
-    case STV_PROTECTED:
-      v = _("protected symbol");
-      break;
-    default:
-      v = _("symbol");
-      pic = _("; recompile with -fPIC");
-      break;
-    }
-
-  if (h->def_regular)
-    fmt = _("%B: relocation %s against %s `%s' can not be used when making a shared object%s");
-  else
-    fmt = _("%B: relocation %s against undefined %s `%s' can not be used when making a shared object%s");
-
-  (*_bfd_error_handler) (fmt, input_bfd, howto->name,
-			 v,  h->root.root.string, pic);
-  bfd_set_error (bfd_error_bad_value);
-  return FALSE;
-}
-
 /* Relocate an x86_64 ELF section.  */
 
 static bfd_boolean
@@ -4096,6 +3928,10 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   const unsigned int plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
   BFD_ASSERT (is_x86_64_elf (input_bfd));
+
+  /* Skip if check_relocs failed.  */
+  if (input_section->check_relocs_failed)
+    return FALSE;
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
@@ -4753,7 +4589,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		}
 
 	      if (fail)
-		return elf_x86_64_need_pic (input_bfd, h, howto);
+		return elf_x86_64_need_pic (input_bfd, input_section,
+					    h, NULL, NULL, howto);
 	    }
 	  /* Fall through.  */
 
@@ -4835,11 +4672,6 @@ direct:
 				|| SYMBOLIC_BIND (info, h))
 			   || ! h->def_regular))
 		{
-		  if ((r_type != R_X86_64_PC64 && r_type != R_X86_64_64)
-		      && bfd_link_executable (info)
-		      && h->root.type == bfd_link_hash_undefweak
-		      && !resolved_to_zero)
-		    return elf_x86_64_need_pic (input_bfd, h, howto);
 		  outrel.r_info = htab->r_info (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;
 		}
@@ -6613,7 +6445,6 @@ static const struct bfd_elf_special_section
 #define elf_backend_finish_dynamic_sections elf_x86_64_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol   elf_x86_64_finish_dynamic_symbol
 #define elf_backend_gc_mark_hook	    elf_x86_64_gc_mark_hook
-#define elf_backend_gc_sweep_hook	    elf_x86_64_gc_sweep_hook
 #define elf_backend_grok_prstatus	    elf_x86_64_grok_prstatus
 #define elf_backend_grok_psinfo		    elf_x86_64_grok_psinfo
 #ifdef CORE_HEADER
@@ -6704,15 +6535,32 @@ static const struct bfd_elf_special_section
 
 /* The 64-bit static TLS arena size is rounded to the nearest 16-byte
    boundary.  */
-#undef elf_backend_static_tls_alignment
+#undef  elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment    16
 
 /* The Solaris 2 ABI requires a plt symbol on all platforms.
 
    Cf. Linker and Libraries Guide, Ch. 2, Link-Editor, Generating the Output
    File, p.63.  */
-#undef elf_backend_want_plt_sym
+#undef  elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	    1
+
+#undef  elf_backend_strtab_flags
+#define elf_backend_strtab_flags	SHF_STRINGS
+
+static bfd_boolean
+elf64_x86_64_set_special_info_link (const bfd *ibfd ATTRIBUTE_UNUSED,
+				    bfd *obfd ATTRIBUTE_UNUSED,
+				    const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+				    Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+{
+  /* PR 19938: FIXME: Need to add code for setting the sh_info
+     and sh_link fields of Solaris specific section types.  */
+  return FALSE;
+}
+
+#undef  elf_backend_set_special_section_info_and_link
+#define elf_backend_set_special_section_info_and_link elf64_x86_64_set_special_info_link
 
 #include "elf64-target.h"
 
@@ -6745,6 +6593,8 @@ elf64_x86_64_nacl_elf_object_p (bfd *abfd)
 #undef	elf_backend_static_tls_alignment
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
+#undef  elf_backend_strtab_flags
+#undef  elf_backend_set_special_section_info_and_link
 
 /* NaCl uses substantially different PLT entries for the same effects.  */
 

@@ -29,6 +29,7 @@
 
 #include "opcode/arc.h"
 #include "elf/arc.h"
+#include "../opcodes/arc-ext.h"
 
 /* Defines section.  */
 
@@ -126,6 +127,9 @@ extern int target_big_endian;
 const char *arc_target_format = DEFAULT_TARGET_FORMAT;
 static int byte_order = DEFAULT_BYTE_ORDER;
 
+/* Arc extension section.  */
+static segT arcext_section;
+
 /* By default relaxation is disabled.  */
 static int relaxation_state = 0;
 
@@ -135,7 +139,8 @@ extern int arc_get_mach (char *);
 static void arc_lcomm (int);
 static void arc_option (int);
 static void arc_extra_reloc (int);
-
+static void arc_extinsn (int);
+static void arc_extcorereg (int);
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -146,6 +151,11 @@ const pseudo_typeS md_pseudo_table[] =
   { "lcomm",   arc_lcomm, 0 },
   { "lcommon", arc_lcomm, 0 },
   { "cpu",     arc_option, 0 },
+
+  { "extinstruction",  arc_extinsn, 0 },
+  { "extcoreregister", arc_extcorereg, EXT_CORE_REGISTER },
+  { "extauxregister",  arc_extcorereg, EXT_AUX_REGISTER },
+  { "extcondcode",     arc_extcorereg, EXT_COND_CODE },
 
   { "tls_gd_ld",   arc_extra_reloc, BFD_RELOC_ARC_TLS_GD_LD },
   { "tls_gd_call", arc_extra_reloc, BFD_RELOC_ARC_TLS_GD_CALL },
@@ -308,6 +318,71 @@ static struct arc_last_insn
   bfd_boolean has_delay_slot;
 } arc_last_insns[2];
 
+/* Extension instruction suffix classes.  */
+typedef struct
+{
+  const char *name;
+  int  len;
+  int  class;
+} attributes_t;
+
+static const attributes_t suffixclass[] =
+{
+  { "SUFFIX_FLAG", 11, ARC_SUFFIX_FLAG },
+  { "SUFFIX_COND", 11, ARC_SUFFIX_COND },
+  { "SUFFIX_NONE", 11, ARC_SUFFIX_NONE }
+};
+
+/* Extension instruction syntax classes.  */
+static const attributes_t syntaxclass[] =
+{
+  { "SYNTAX_3OP", 10, ARC_SYNTAX_3OP },
+  { "SYNTAX_2OP", 10, ARC_SYNTAX_2OP }
+};
+
+/* Extension instruction syntax classes modifiers.  */
+static const attributes_t syntaxclassmod[] =
+{
+  { "OP1_IMM_IMPLIED" , 15, ARC_OP1_IMM_IMPLIED },
+  { "OP1_MUST_BE_IMM" , 15, ARC_OP1_MUST_BE_IMM }
+};
+
+/* Extension register type.  */
+typedef struct
+{
+  char *name;
+  int  number;
+  int  imode;
+} extRegister_t;
+
+/* A structure to hold the additional conditional codes.  */
+static struct
+{
+  struct arc_flag_operand *arc_ext_condcode;
+  int size;
+} ext_condcode = { NULL, 0 };
+
+/* Structure to hold an entry in ARC_OPCODE_HASH.  */
+struct arc_opcode_hash_entry
+{
+  /* The number of pointers in the OPCODE list.  */
+  size_t count;
+
+  /* Points to a list of opcode pointers.  */
+  const struct arc_opcode **opcode;
+};
+
+/* Structure used for iterating through an arc_opcode_hash_entry.  */
+struct arc_opcode_hash_entry_iterator
+{
+  /* Index into the OPCODE element of the arc_opcode_hash_entry.  */
+  size_t index;
+
+  /* The specific ARC_OPCODE from the ARC_OPCODES table that was last
+     returned by this iterator.  */
+  const struct arc_opcode *opcode;
+};
+
 /* Forward declaration.  */
 static void assemble_insn
   (const struct arc_opcode *, const expressionS *, int,
@@ -321,14 +396,17 @@ static unsigned arc_features;
 /* The default architecture.  */
 static int arc_mach_type;
 
-/* Non-zero if the cpu type has been explicitly specified.  */
-static int mach_type_specified_p = 0;
+/* TRUE if the cpu type has been explicitly specified.  */
+static bfd_boolean mach_type_specified_p = FALSE;
 
 /* The hash table of instruction opcodes.  */
 static struct hash_control *arc_opcode_hash;
 
 /* The hash table of register symbols.  */
 static struct hash_control *arc_reg_hash;
+
+/* The hash table of aux register symbols.  */
+static struct hash_control *arc_aux_hash;
 
 /* A table of CPU names and opcode sets.  */
 static const struct cpu_type
@@ -554,6 +632,94 @@ static bfd_boolean assembling_insn = FALSE;
 
 /* Functions implementation.  */
 
+/* Return a pointer to ARC_OPCODE_HASH_ENTRY that identifies all
+   ARC_OPCODE entries in ARC_OPCODE_HASH that match NAME, or NULL if there
+   are no matching entries in ARC_OPCODE_HASH.  */
+
+static const struct arc_opcode_hash_entry *
+arc_find_opcode (const char *name)
+{
+  const struct arc_opcode_hash_entry *entry;
+
+  entry = hash_find (arc_opcode_hash, name);
+  return entry;
+}
+
+/* Initialise the iterator ITER.  */
+
+static void
+arc_opcode_hash_entry_iterator_init (struct arc_opcode_hash_entry_iterator *iter)
+{
+  iter->index = 0;
+  iter->opcode = NULL;
+}
+
+/* Return the next ARC_OPCODE from ENTRY, using ITER to hold state between
+   calls to this function.  Return NULL when all ARC_OPCODE entries have
+   been returned.  */
+
+static const struct arc_opcode *
+arc_opcode_hash_entry_iterator_next (const struct arc_opcode_hash_entry *entry,
+				     struct arc_opcode_hash_entry_iterator *iter)
+{
+  if (iter->opcode == NULL && iter->index == 0)
+    {
+      gas_assert (entry->count > 0);
+      iter->opcode = entry->opcode[iter->index];
+    }
+  else if (iter->opcode != NULL)
+    {
+      const char *old_name = iter->opcode->name;
+
+      iter->opcode++;
+      if (iter->opcode->name
+	  && (strcmp (old_name, iter->opcode->name) != 0))
+	{
+	  iter->index++;
+	  if (iter->index == entry->count)
+	    iter->opcode = NULL;
+	  else
+	    iter->opcode = entry->opcode[iter->index];
+	}
+    }
+
+  return iter->opcode;
+}
+
+/* Insert an opcode into opcode hash structure.  */
+
+static void
+arc_insert_opcode (const struct arc_opcode *opcode)
+{
+  const char *name, *retval;
+  struct arc_opcode_hash_entry *entry;
+  name = opcode->name;
+
+  entry = hash_find (arc_opcode_hash, name);
+  if (entry == NULL)
+    {
+      entry = xmalloc (sizeof (*entry));
+      entry->count = 0;
+      entry->opcode = NULL;
+
+      retval = hash_insert (arc_opcode_hash, name, (void *) entry);
+      if (retval)
+	as_fatal (_("internal error: can't hash opcode '%s': %s"),
+		  name, retval);
+    }
+
+  entry->opcode = xrealloc (entry->opcode,
+			    sizeof (const struct arc_opcode *)
+			    * (entry->count + 1));
+
+  if (entry->opcode == NULL)
+    as_fatal (_("Virtual memory exhausted"));
+
+  entry->opcode[entry->count] = opcode;
+  entry->count++;
+}
+
+
 /* Like md_number_to_chars but used for limms.  The 4-byte limm value,
    is encoded as 'middle-endian' for a little-endian target.  FIXME!
    this function is used for regular 4 byte instructions as well.  */
@@ -731,15 +897,22 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 	{
 	  md_parse_option (OPTION_MCPU, "archs");
 	}
+      else if (!strcmp ("NPS400", cpu))
+	{
+	  md_parse_option (OPTION_MCPU, "nps400");
+	}
       else
-	as_fatal ("could not find the architecture");
+	as_fatal (_("could not find the architecture"));
 
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
-	as_fatal ("could not set architecture and machine");
+	as_fatal (_("could not set architecture and machine"));
+
+      /* Set elf header flags.  */
+      bfd_set_private_flags (stdoutput, arc_eflag);
     }
   else
     if (arc_mach_type != mach)
-      as_warn ("Command-line value overrides \".cpu\" directive");
+      as_warn (_("Command-line value overrides \".cpu\" directive"));
 
   restore_line_pointer (c);
   demand_empty_rest_of_line ();
@@ -747,7 +920,7 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 
  bad_cpu:
   restore_line_pointer (c);
-  as_bad ("invalid identifier for \".cpu\"");
+  as_bad (_("invalid identifier for \".cpu\""));
   ignore_rest_of_line ();
 }
 
@@ -1080,7 +1253,8 @@ tokenize_flags (const char *str,
 	  if (num_flags >= nflg)
 	    goto err;
 
-	  flgnamelen = strspn (input_line_pointer, "abcdefghilmnopqrstvwxz");
+	  flgnamelen = strspn (input_line_pointer,
+			       "abcdefghijklmnopqrstuvwxyz0123456789");
 	  if (flgnamelen > MAX_FLAG_NAME_LENGTH)
 	    goto err;
 
@@ -1375,25 +1549,29 @@ check_cpu_feature (insn_subclass_t sc)
    syntax match.  */
 
 static const struct arc_opcode *
-find_opcode_match (const struct arc_opcode *first_opcode,
+find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		   expressionS *tok,
 		   int *pntok,
 		   struct arc_flags *first_pflag,
 		   int nflgs,
 		   int *pcpumatch)
 {
-  const struct arc_opcode *opcode = first_opcode;
+  const struct arc_opcode *opcode;
+  struct arc_opcode_hash_entry_iterator iter;
   int ntok = *pntok;
   int got_cpu_match = 0;
   expressionS bktok[MAX_INSN_ARGS];
   int bkntok;
   expressionS emptyE;
 
+  arc_opcode_hash_entry_iterator_init (&iter);
   memset (&emptyE, 0, sizeof (emptyE));
   memcpy (bktok, tok, MAX_INSN_ARGS * sizeof (*tok));
   bkntok = ntok;
 
-  do
+  for (opcode = arc_opcode_hash_entry_iterator_next (entry, &iter);
+       opcode != NULL;
+       opcode = arc_opcode_hash_entry_iterator_next (entry, &iter))
     {
       const unsigned char *opidx;
       const unsigned char *flgidx;
@@ -1506,6 +1684,31 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 		  ++ntok;
 		  break;
 
+		case O_symbol:
+		  {
+		    const char *p;
+		    const struct arc_aux_reg *auxr;
+
+		    if (opcode->class != AUXREG)
+		      goto de_fault;
+		    p = S_GET_NAME (tok[tokidx].X_add_symbol);
+
+		    auxr = hash_find (arc_aux_hash, p);
+		    if (auxr)
+		      {
+			/* We modify the token array here, safe in the
+			   knowledge, that if this was the wrong
+			   choice then the original contents will be
+			   restored from BKTOK.  */
+			tok[tokidx].X_op = O_constant;
+			tok[tokidx].X_add_number = auxr->address;
+			ARC_SET_FLAG (tok[tokidx].X_add_symbol, ARC_FLAG_AUX);
+		      }
+
+		    if (tok[tokidx].X_op != O_constant)
+		      goto de_fault;
+		  }
+		  /* Fall-through */
 		case O_constant:
 		  /* Check the range.  */
 		  if (operand->bits != 32
@@ -1578,6 +1781,7 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 		      break;
 		    }
 		default:
+		de_fault:
 		  if (operand->default_reloc == 0)
 		    goto match_failed; /* The operand needs relocation.  */
 
@@ -1626,7 +1830,7 @@ find_opcode_match (const struct arc_opcode *first_opcode,
       /* Setup ready for flag parsing.  */
       lnflg = nflgs;
       for (i = 0; i < nflgs; i++)
-        first_pflag [i].code = 0;
+	first_pflag[i].flgp = NULL;
 
       /* Check the flags.  Iterate over the valid flag classes.  */
       for (flgidx = opcode->flags; *flgidx; ++flgidx)
@@ -1635,31 +1839,57 @@ find_opcode_match (const struct arc_opcode *first_opcode,
 	  const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
 	  const unsigned *flgopridx;
 	  int cl_matches = 0;
+	  struct arc_flags *pflag = NULL;
+
+	  /* Check for extension conditional codes.  */
+	  if (ext_condcode.arc_ext_condcode
+	      && cl_flags->class & F_CLASS_EXTEND)
+	    {
+	      struct arc_flag_operand *pf = ext_condcode.arc_ext_condcode;
+	      while (pf->name)
+		{
+		  pflag = first_pflag;
+		  for (i = 0; i < nflgs; i++, pflag++)
+		    {
+		      if (!strcmp (pf->name, pflag->name))
+			{
+			  if (pflag->flgp != NULL)
+			    goto match_failed;
+			  /* Found it.  */
+			  cl_matches++;
+			  pflag->flgp = pf;
+			  lnflg--;
+			  break;
+			}
+		    }
+		  pf++;
+		}
+	    }
 
 	  for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
 	    {
 	      const struct arc_flag_operand *flg_operand;
-	      struct arc_flags *pflag = first_pflag;
 
+	      pflag = first_pflag;
 	      flg_operand = &arc_flag_operands[*flgopridx];
 	      for (i = 0; i < nflgs; i++, pflag++)
 		{
 		  /* Match against the parsed flags.  */
 		  if (!strcmp (flg_operand->name, pflag->name))
 		    {
-		      if (pflag->code != 0)
+		      if (pflag->flgp != NULL)
 			goto match_failed;
 		      cl_matches++;
-		      pflag->code = *flgopridx;
+		      pflag->flgp = (struct arc_flag_operand *) flg_operand;
 		      lnflg--;
 		      break; /* goto next flag class and parsed flag.  */
 		    }
 		}
 	    }
 
-	  if (cl_flags->class == F_CLASS_REQUIRED && cl_matches == 0)
+	  if ((cl_flags->class & F_CLASS_REQUIRED) && cl_matches == 0)
 	    goto match_failed;
-	  if (cl_flags->class == F_CLASS_OPTIONAL && cl_matches > 1)
+	  if ((cl_flags->class & F_CLASS_OPTIONAL) && cl_matches > 1)
 	    goto match_failed;
 	}
       /* Did I check all the parsed flags?  */
@@ -1681,8 +1911,6 @@ find_opcode_match (const struct arc_opcode *first_opcode,
       memcpy (tok, bktok, MAX_INSN_ARGS * sizeof (*tok));
       ntok = bkntok;
     }
-  while (++opcode - arc_opcodes < (int) arc_num_opcodes
-	 && !strcmp (opcode->name, first_opcode->name));
 
   if (*pcpumatch)
     *pcpumatch = got_cpu_match;
@@ -1806,7 +2034,7 @@ find_pseudo_insn (const char *opname,
 
 /* Assumes the expressionS *tok is of sufficient size.  */
 
-static const struct arc_opcode *
+static const struct arc_opcode_hash_entry *
 find_special_case_pseudo (const char *opname,
 			  int *ntok,
 			  expressionS *tok,
@@ -1898,11 +2126,10 @@ find_special_case_pseudo (const char *opname,
       break;
     }
 
-  return (const struct arc_opcode *)
-    hash_find (arc_opcode_hash,	pseudo_insn->mnemonic_r);
+  return arc_find_opcode (pseudo_insn->mnemonic_r);
 }
 
-static const struct arc_opcode *
+static const struct arc_opcode_hash_entry *
 find_special_case_flag (const char *opname,
 			int *nflgs,
 			struct arc_flags *pflags)
@@ -1912,7 +2139,7 @@ find_special_case_flag (const char *opname,
   unsigned flag_idx, flag_arr_idx;
   size_t flaglen, oplen;
   const struct arc_flag_special *arc_flag_special_opcode;
-  const struct arc_opcode *opcode;
+  const struct arc_opcode_hash_entry *entry;
 
   /* Search for special case instruction.  */
   for (i = 0; i < arc_num_flag_special; i++)
@@ -1935,16 +2162,14 @@ find_special_case_flag (const char *opname,
 	  flaglen = strlen (flagnm);
 	  if (strcmp (opname + oplen, flagnm) == 0)
 	    {
-	      opcode = (const struct arc_opcode *)
-		hash_find (arc_opcode_hash,
-			   arc_flag_special_opcode->name);
+              entry = arc_find_opcode (arc_flag_special_opcode->name);
 
 	      if (*nflgs + 1 > MAX_INSN_FLGS)
 		break;
 	      memcpy (pflags[*nflgs].name, flagnm, flaglen);
 	      pflags[*nflgs].name[flaglen] = '\0';
 	      (*nflgs)++;
-	      return opcode;
+	      return entry;
 	    }
 	}
     }
@@ -1953,65 +2178,21 @@ find_special_case_flag (const char *opname,
 
 /* Used to find special case opcode.  */
 
-static const struct arc_opcode *
+static const struct arc_opcode_hash_entry *
 find_special_case (const char *opname,
 		   int *nflgs,
 		   struct arc_flags *pflags,
 		   expressionS *tok,
 		   int *ntok)
 {
-  const struct arc_opcode *opcode;
+  const struct arc_opcode_hash_entry *entry;
 
-  opcode = find_special_case_pseudo (opname, ntok, tok, nflgs, pflags);
+  entry = find_special_case_pseudo (opname, ntok, tok, nflgs, pflags);
 
-  if (opcode == NULL)
-    opcode = find_special_case_flag (opname, nflgs, pflags);
+  if (entry == NULL)
+    entry = find_special_case_flag (opname, nflgs, pflags);
 
-  return opcode;
-}
-
-static void
-preprocess_operands (const struct arc_opcode *opcode,
-		     expressionS *tok,
-		     int ntok)
-{
-  int i;
-  size_t len;
-  const char *p;
-  unsigned j;
-  const struct arc_aux_reg *auxr;
-
-  for (i = 0; i < ntok; i++)
-    {
-      switch (tok[i].X_op)
-	{
-	case O_illegal:
-	case O_absent:
-	  break; /* Throw and error.  */
-
-	case O_symbol:
-	  if (opcode->class != AUXREG)
-	    break;
-	  /* Convert the symbol to a constant if possible.  */
-	  p = S_GET_NAME (tok[i].X_add_symbol);
-	  len = strlen (p);
-
-	  auxr = &arc_aux_regs[0];
-	  for (j = 0; j < arc_num_aux_regs; j++, auxr++)
-	    if (len == auxr->length
-		&& (strcasecmp (auxr->name, p) == 0)
-		&& ((auxr->subclass == NONE)
-		    || check_cpu_feature (auxr->subclass)))
-	      {
-		tok[i].X_op = O_constant;
-		tok[i].X_add_number = auxr->address;
-		break;
-	      }
-	  break;
-	default:
-	  break;
-	}
-    }
+  return entry;
 }
 
 /* Given an opcode name, pre-tockenized set of argumenst and the
@@ -2025,29 +2206,29 @@ assemble_tokens (const char *opname,
 		 int nflgs)
 {
   bfd_boolean found_something = FALSE;
-  const struct arc_opcode *opcode;
+  const struct arc_opcode_hash_entry *entry;
   int cpumatch = 1;
 
   /* Search opcodes.  */
-  opcode = (const struct arc_opcode *) hash_find (arc_opcode_hash, opname);
+  entry = arc_find_opcode (opname);
 
   /* Couldn't find opcode conventional way, try special cases.  */
-  if (!opcode)
-    opcode = find_special_case (opname, &nflgs, pflags, tok, &ntok);
+  if (entry == NULL)
+    entry = find_special_case (opname, &nflgs, pflags, tok, &ntok);
 
-  if (opcode)
+  if (entry != NULL)
     {
-      pr_debug ("%s:%d: assemble_tokens: %s trying opcode 0x%08X\n",
-		frag_now->fr_file, frag_now->fr_line, opcode->name,
-		opcode->opcode);
+      const struct arc_opcode *opcode;
 
-      preprocess_operands (opcode, tok, ntok);
-
+      pr_debug ("%s:%d: assemble_tokens: %s\n",
+		frag_now->fr_file, frag_now->fr_line, opname);
       found_something = TRUE;
-      opcode = find_opcode_match (opcode, tok, &ntok, pflags, nflgs, &cpumatch);
-      if (opcode)
+      opcode = find_opcode_match (entry, tok, &ntok, pflags,
+				  nflgs, &cpumatch);
+      if (opcode != NULL)
 	{
 	  struct arc_insn insn;
+
 	  assemble_insn (opcode, tok, ntok, pflags, nflgs, &insn);
 	  emit_insn (&insn);
 	  return;
@@ -2123,7 +2304,7 @@ declare_register (const char *name, int number)
 
   err = hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
   if (err)
-    as_fatal ("Inserting \"%s\" into register table failed: %s",
+    as_fatal (_("Inserting \"%s\" into register table failed: %s"),
 	      name, err);
 }
 
@@ -2153,7 +2334,7 @@ declare_register_set (void)
 void
 md_begin (void)
 {
-  unsigned int i;
+  const struct arc_opcode *opcode = arc_opcodes;
 
   if (!mach_type_specified_p)
     arc_select_cpu ("arc700");
@@ -2173,21 +2354,17 @@ md_begin (void)
     as_fatal (_("Virtual memory exhausted"));
 
   /* Initialize the hash table with the insns.  */
-  for (i = 0; i < arc_num_opcodes;)
+  do
     {
-      const char *name, *retval;
+      const char *name = opcode->name;
 
-      name = arc_opcodes[i].name;
-      retval = hash_insert (arc_opcode_hash, name, (void *) &arc_opcodes[i]);
-      if (retval)
-	as_fatal (_("internal error: can't hash opcode '%s': %s"),
-		  name, retval);
+      arc_insert_opcode (opcode);
 
-      while (++i < arc_num_opcodes
-	     && (arc_opcodes[i].name == name
-		 || !strcmp (arc_opcodes[i].name, name)))
+      while (++opcode && opcode->name
+	     && (opcode->name == name
+		 || !strcmp (opcode->name, name)))
 	continue;
-    }
+    }while (opcode->name);
 
   /* Register declaration.  */
   arc_reg_hash = hash_new ();
@@ -2215,6 +2392,30 @@ md_begin (void)
 
   /* Initialize the last instructions.  */
   memset (&arc_last_insns[0], 0, sizeof (arc_last_insns));
+
+  /* Aux register declaration.  */
+  arc_aux_hash = hash_new ();
+  if (arc_aux_hash == NULL)
+    as_fatal (_("Virtual memory exhausted"));
+
+  const struct arc_aux_reg *auxr = &arc_aux_regs[0];
+  unsigned int i;
+  for (i = 0; i < arc_num_aux_regs; i++, auxr++)
+    {
+      const char *retval;
+
+      if (!(auxr->cpu & arc_target))
+	continue;
+
+      if ((auxr->subclass != NONE)
+	  && !check_cpu_feature (auxr->subclass))
+	continue;
+
+      retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
+      if (retval)
+	as_fatal (_("internal error: can't hash aux register '%s': %s"),
+		  auxr->name, retval);
+    }
 }
 
 /* Write a value out to the object file, using the appropriate
@@ -2962,7 +3163,7 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
     case OPTION_MCPU:
       {
         arc_select_cpu (arg);
-        mach_type_specified_p = 1;
+        mach_type_specified_p = TRUE;
 	break;
       }
 
@@ -3501,8 +3702,7 @@ assemble_insn (const struct arc_opcode *opcode,
   /* Handle flags.  */
   for (i = 0; i < nflg; i++)
     {
-      const struct arc_flag_operand *flg_operand =
-	&arc_flag_operands[pflags[i].code];
+      const struct arc_flag_operand *flg_operand = pflags[i].flgp;
 
       /* Check if the instruction has a delay slot.  */
       if (!strcmp (flg_operand->name, "d"))
@@ -3777,3 +3977,537 @@ tc_arc_regname_to_dw2regnum (char *regname)
 
   return -1;
 }
+
+/* Adjust the symbol table.  Delete found AUX register symbols.  */
+
+void
+arc_adjust_symtab (void)
+{
+  symbolS * sym;
+
+  for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
+    {
+      /* I've created a symbol during parsing process.  Now, remove
+	 the symbol as it is found to be an AUX register.  */
+      if (ARC_GET_FLAG (sym) & ARC_FLAG_AUX)
+	symbol_remove (sym, &symbol_rootP, &symbol_lastP);
+    }
+
+  /* Now do generic ELF adjustments.  */
+  elf_adjust_symtab ();
+}
+
+static void
+tokenize_extinsn (extInstruction_t *einsn)
+{
+  char *p, c;
+  char *insn_name;
+  unsigned char major_opcode;
+  unsigned char sub_opcode;
+  unsigned char syntax_class = 0;
+  unsigned char syntax_class_modifiers = 0;
+  unsigned char suffix_class = 0;
+  unsigned int i;
+
+  SKIP_WHITESPACE ();
+
+  /* 1st: get instruction name.  */
+  p = input_line_pointer;
+  c = get_symbol_name (&p);
+
+  insn_name = xstrdup (p);
+  restore_line_pointer (c);
+
+  /* 2nd: get major opcode.  */
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("expected comma after instruction name"));
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+  major_opcode = get_absolute_expression ();
+
+  /* 3rd: get sub-opcode.  */
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("expected comma after major opcode"));
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+  sub_opcode = get_absolute_expression ();
+
+  /* 4th: get suffix class.  */
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("expected comma after sub opcode");
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+
+  while (1)
+    {
+      SKIP_WHITESPACE ();
+
+      for (i = 0; i < ARRAY_SIZE (suffixclass); i++)
+	{
+	  if (!strncmp (suffixclass[i].name, input_line_pointer,
+			suffixclass[i].len))
+	    {
+	      suffix_class |= suffixclass[i].class;
+	      input_line_pointer += suffixclass[i].len;
+	      break;
+	    }
+	}
+
+      if (i == ARRAY_SIZE (suffixclass))
+	{
+	  as_bad ("invalid suffix class");
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      SKIP_WHITESPACE ();
+
+      if (*input_line_pointer == '|')
+	input_line_pointer++;
+      else
+	break;
+    }
+
+  /* 5th: get syntax class and syntax class modifiers.  */
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("expected comma after suffix class");
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+
+  while (1)
+    {
+      SKIP_WHITESPACE ();
+
+      for (i = 0; i < ARRAY_SIZE (syntaxclassmod); i++)
+	{
+	  if (!strncmp (syntaxclassmod[i].name,
+			input_line_pointer,
+			syntaxclassmod[i].len))
+	    {
+	      syntax_class_modifiers |= syntaxclassmod[i].class;
+	      input_line_pointer += syntaxclassmod[i].len;
+	      break;
+	    }
+	}
+
+      if (i == ARRAY_SIZE (syntaxclassmod))
+	{
+	  for (i = 0; i < ARRAY_SIZE (syntaxclass); i++)
+	    {
+	      if (!strncmp (syntaxclass[i].name,
+			    input_line_pointer,
+			    syntaxclass[i].len))
+		{
+		  syntax_class |= syntaxclass[i].class;
+		  input_line_pointer += syntaxclass[i].len;
+		  break;
+		}
+	    }
+
+	  if (i == ARRAY_SIZE (syntaxclass))
+	    {
+	      as_bad ("missing syntax class");
+	      ignore_rest_of_line ();
+	      return;
+	    }
+	}
+
+      SKIP_WHITESPACE ();
+
+      if (*input_line_pointer == '|')
+	input_line_pointer++;
+      else
+	break;
+    }
+
+  demand_empty_rest_of_line ();
+
+  einsn->name   = insn_name;
+  einsn->major  = major_opcode;
+  einsn->minor  = sub_opcode;
+  einsn->syntax = syntax_class;
+  einsn->modsyn = syntax_class_modifiers;
+  einsn->suffix = suffix_class;
+  einsn->flags  = syntax_class
+    | (syntax_class_modifiers & ARC_OP1_IMM_IMPLIED ? 0x10 : 0);
+}
+
+/* Generate an extension section.  */
+
+static int
+arc_set_ext_seg (void)
+{
+  if (!arcext_section)
+    {
+      arcext_section = subseg_new (".arcextmap", 0);
+      bfd_set_section_flags (stdoutput, arcext_section,
+			     SEC_READONLY | SEC_HAS_CONTENTS);
+    }
+  else
+    subseg_set (arcext_section, 0);
+  return 1;
+}
+
+/* Create an extension instruction description in the arc extension
+   section of the output file.
+   The structure for an instruction is like this:
+   [0]: Length of the record.
+   [1]: Type of the record.
+
+   [2]: Major opcode.
+   [3]: Sub-opcode.
+   [4]: Syntax (flags).
+   [5]+ Name instruction.
+
+   The sequence is terminated by an empty entry.  */
+
+static void
+create_extinst_section (extInstruction_t *einsn)
+{
+
+  segT old_sec    = now_seg;
+  int old_subsec  = now_subseg;
+  char *p;
+  int name_len    = strlen (einsn->name);
+
+  arc_set_ext_seg ();
+
+  p = frag_more (1);
+  *p = 5 + name_len + 1;
+  p = frag_more (1);
+  *p = EXT_INSTRUCTION;
+  p = frag_more (1);
+  *p = einsn->major;
+  p = frag_more (1);
+  *p = einsn->minor;
+  p = frag_more (1);
+  *p = einsn->flags;
+  p = frag_more (name_len + 1);
+  strcpy (p, einsn->name);
+
+  subseg_set (old_sec, old_subsec);
+}
+
+/* Handler .extinstruction pseudo-op.  */
+
+static void
+arc_extinsn (int ignore ATTRIBUTE_UNUSED)
+{
+  extInstruction_t einsn;
+  struct arc_opcode *arc_ext_opcodes;
+  const char *errmsg = NULL;
+  unsigned char moplow, mophigh;
+
+  memset (&einsn, 0, sizeof (einsn));
+  tokenize_extinsn (&einsn);
+
+  /* Check if the name is already used.  */
+  if (arc_find_opcode (einsn.name))
+    as_warn (_("Pseudocode already used %s"), einsn.name);
+
+  /* Check the opcode ranges.  */
+  moplow = 0x05;
+  mophigh = (arc_target & (ARC_OPCODE_ARCv2EM
+			   | ARC_OPCODE_ARCv2HS)) ? 0x07 : 0x0a;
+
+  if ((einsn.major > mophigh) || (einsn.major < moplow))
+    as_fatal (_("major opcode not in range [0x%02x - 0x%02x]"), moplow, mophigh);
+
+  if ((einsn.minor > 0x3f) && (einsn.major != 0x0a)
+      && (einsn.major != 5) && (einsn.major != 9))
+    as_fatal (_("minor opcode not in range [0x00 - 0x3f]"));
+
+  switch (einsn.syntax & (ARC_SYNTAX_3OP | ARC_SYNTAX_2OP))
+    {
+    case ARC_SYNTAX_3OP:
+      if (einsn.modsyn & ARC_OP1_IMM_IMPLIED)
+	as_fatal (_("Improper use of OP1_IMM_IMPLIED"));
+      break;
+    case ARC_SYNTAX_2OP:
+      if (einsn.modsyn & ARC_OP1_MUST_BE_IMM)
+	as_fatal (_("Improper use of OP1_MUST_BE_IMM"));
+      break;
+    default:
+      break;
+    }
+
+  arc_ext_opcodes = arcExtMap_genOpcode (&einsn, arc_target, &errmsg);
+  if (arc_ext_opcodes == NULL)
+    {
+      if (errmsg)
+	as_fatal ("%s", errmsg);
+      else
+	as_fatal (_("Couldn't generate extension instruction opcodes"));
+    }
+  else if (errmsg)
+    as_warn ("%s", errmsg);
+
+  /* Insert the extension instruction.  */
+  arc_insert_opcode ((const struct arc_opcode *) arc_ext_opcodes);
+
+  create_extinst_section (&einsn);
+}
+
+static void
+tokenize_extregister (extRegister_t *ereg, int opertype)
+{
+  char *name;
+  char *mode;
+  char c;
+  char *p;
+  int number, imode = 0;
+  bfd_boolean isCore_p = (opertype == EXT_CORE_REGISTER) ? TRUE : FALSE;
+  bfd_boolean isReg_p  = (opertype == EXT_CORE_REGISTER
+			  || opertype == EXT_AUX_REGISTER) ? TRUE : FALSE;
+
+  /* 1st: get register name.  */
+  SKIP_WHITESPACE ();
+  p = input_line_pointer;
+  c = get_symbol_name (&p);
+
+  name = xstrdup (p);
+  restore_line_pointer (c);
+
+  /* 2nd: get register number.  */
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("expected comma after register name"));
+      ignore_rest_of_line ();
+      free (name);
+      return;
+    }
+  input_line_pointer++;
+  number = get_absolute_expression ();
+
+  if (number < 0)
+    {
+      as_bad (_("negative operand number %d"), number);
+      ignore_rest_of_line ();
+      free (name);
+      return;
+    }
+
+  if (isReg_p)
+    {
+      /* 3rd: get register mode.  */
+      SKIP_WHITESPACE ();
+
+      if (*input_line_pointer != ',')
+	{
+	  as_bad (_("expected comma after register number"));
+	  ignore_rest_of_line ();
+	  free (name);
+	  return;
+	}
+
+      input_line_pointer++;
+      mode = input_line_pointer;
+
+      if (!strncmp (mode, "r|w", 3))
+	{
+	  imode = 0;
+	  input_line_pointer += 3;
+	}
+      else if (!strncmp (mode, "r", 1))
+	{
+	  imode = ARC_REGISTER_READONLY;
+	  input_line_pointer += 1;
+	}
+      else if (strncmp (mode, "w", 1))
+	{
+	  as_bad (_("invalid mode"));
+	  ignore_rest_of_line ();
+	  free (name);
+	  return;
+	}
+      else
+	{
+	  imode = ARC_REGISTER_WRITEONLY;
+	  input_line_pointer += 1;
+	}
+    }
+
+  if (isCore_p)
+    {
+      /* 4th: get core register shortcut.  */
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer != ',')
+	{
+	  as_bad (_("expected comma after register mode"));
+	  ignore_rest_of_line ();
+	  free (name);
+	  return;
+	}
+
+      input_line_pointer++;
+
+      if (!strncmp (input_line_pointer, "cannot_shortcut", 15))
+	{
+	  imode |= ARC_REGISTER_NOSHORT_CUT;
+	  input_line_pointer += 15;
+	}
+      else if (strncmp (input_line_pointer, "can_shortcut", 12))
+	{
+	  as_bad (_("shortcut designator invalid"));
+	  ignore_rest_of_line ();
+	  free (name);
+	  return;
+	}
+      else
+	{
+	  input_line_pointer += 12;
+	}
+    }
+  demand_empty_rest_of_line ();
+
+  ereg->name = name;
+  ereg->number = number;
+  ereg->imode  = imode;
+}
+
+/* Create an extension register/condition description in the arc
+   extension section of the output file.
+
+   The structure for an instruction is like this:
+   [0]: Length of the record.
+   [1]: Type of the record.
+
+   For core regs and condition codes:
+   [2]: Value.
+   [3]+ Name.
+
+   For auxilirary registers:
+   [2..5]: Value.
+   [6]+ Name
+
+   The sequence is terminated by an empty entry.  */
+
+static void
+create_extcore_section (extRegister_t *ereg, int opertype)
+{
+  segT old_sec   = now_seg;
+  int old_subsec = now_subseg;
+  char *p;
+  int name_len   = strlen (ereg->name);
+
+  arc_set_ext_seg ();
+
+  switch (opertype)
+    {
+    case EXT_COND_CODE:
+    case EXT_CORE_REGISTER:
+      p = frag_more (1);
+      *p = 3 + name_len + 1;
+      p = frag_more (1);
+      *p = opertype;
+      p = frag_more (1);
+      *p = ereg->number;
+      break;
+    case EXT_AUX_REGISTER:
+      p = frag_more (1);
+      *p = 6 + name_len + 1;
+      p = frag_more (1);
+      *p = EXT_AUX_REGISTER;
+      p = frag_more (1);
+      *p = (ereg->number >> 24) & 0xff;
+      p = frag_more (1);
+      *p = (ereg->number >> 16) & 0xff;
+      p = frag_more (1);
+      *p = (ereg->number >>  8) & 0xff;
+      p = frag_more (1);
+      *p = (ereg->number)       & 0xff;
+      break;
+    default:
+      break;
+    }
+
+  p = frag_more (name_len + 1);
+  strcpy (p, ereg->name);
+
+  subseg_set (old_sec, old_subsec);
+}
+
+/* Handler .extCoreRegister pseudo-op.  */
+
+static void
+arc_extcorereg (int opertype)
+{
+  extRegister_t ereg;
+  struct arc_aux_reg *auxr;
+  const char *retval;
+  struct arc_flag_operand *ccode;
+
+  memset (&ereg, 0, sizeof (ereg));
+  tokenize_extregister (&ereg, opertype);
+
+  switch (opertype)
+    {
+    case EXT_CORE_REGISTER:
+      /* Core register.  */
+      if (ereg.number > 60)
+	as_bad (_("core register %s value (%d) too large"), ereg.name,
+		ereg.number);
+      declare_register (ereg.name, ereg.number);
+      break;
+    case EXT_AUX_REGISTER:
+      /* Auxiliary register.  */
+      auxr = xmalloc (sizeof (struct arc_aux_reg));
+      auxr->name = ereg.name;
+      auxr->cpu = arc_target;
+      auxr->subclass = NONE;
+      auxr->address = ereg.number;
+      retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
+      if (retval)
+	as_fatal (_("internal error: can't hash aux register '%s': %s"),
+		  auxr->name, retval);
+      break;
+    case EXT_COND_CODE:
+      /* Condition code.  */
+      if (ereg.number > 31)
+	as_bad (_("condition code %s value (%d) too large"), ereg.name,
+		ereg.number);
+      ext_condcode.size ++;
+      ext_condcode.arc_ext_condcode =
+	xrealloc (ext_condcode.arc_ext_condcode,
+		  (ext_condcode.size + 1) * sizeof (struct arc_flag_operand));
+      if (ext_condcode.arc_ext_condcode == NULL)
+	as_fatal (_("Virtual memory exhausted"));
+
+      ccode = ext_condcode.arc_ext_condcode + ext_condcode.size - 1;
+      ccode->name   = ereg.name;
+      ccode->code   = ereg.number;
+      ccode->bits   = 5;
+      ccode->shift  = 0;
+      ccode->favail = 0; /* not used.  */
+      ccode++;
+      memset (ccode, 0, sizeof (struct arc_flag_operand));
+      break;
+    default:
+      as_bad (_("Unknown extension"));
+      break;
+    }
+  create_extcore_section (&ereg, opertype);
+}
+
+/* Local variables:
+   eval: (c-set-style "gnu")
+   indent-tabs-mode: t
+   End:  */

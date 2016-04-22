@@ -182,6 +182,8 @@ get_ipa_tdesc (int idx)
       return tdesc_amd64_avx_linux;
     case X86_TDESC_MPX:
       return tdesc_amd64_mpx_linux;
+    case X86_TDESC_AVX_MPX:
+      return tdesc_amd64_avx_mpx_linux;
     case X86_TDESC_AVX512:
       return tdesc_amd64_avx512_linux;
     default:
@@ -213,6 +215,7 @@ initialize_low_tracepoint (void)
 {
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();
+  init_registers_amd64_avx_mpx_linux ();
   init_registers_amd64_mpx_linux ();
   init_registers_amd64_avx512_linux ();
 }

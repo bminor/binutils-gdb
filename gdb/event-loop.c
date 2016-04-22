@@ -21,6 +21,7 @@
 #include "event-loop.h"
 #include "event-top.h"
 #include "queue.h"
+#include "ser-event.h"
 
 #ifdef HAVE_POLL
 #if defined (HAVE_POLL_H)
@@ -261,6 +262,28 @@ static int gdb_wait_for_event (int);
 static int update_wait_timeout (void);
 static int poll_timers (void);
 
+
+/* This event is signalled whenever an asynchronous handler needs to
+   defer an action to the event loop.  */
+static struct serial_event *async_signal_handlers_serial_event;
+
+/* Callback registered with ASYNC_SIGNAL_HANDLERS_SERIAL_EVENT.  */
+
+static void
+async_signals_handler (int error, gdb_client_data client_data)
+{
+  /* Do nothing.  Handlers are run by invoke_async_signal_handlers
+     from instead.  */
+}
+
+void
+initialize_async_signal_handlers (void)
+{
+  async_signal_handlers_serial_event = make_serial_event ();
+
+  add_file_handler (serial_event_fd (async_signal_handlers_serial_event),
+		    async_signals_handler, NULL);
+}
 
 /* Process one high level event.  If nothing is ready at this time,
    wait for something to happen (via gdb_wait_for_event), then process
@@ -888,15 +911,6 @@ create_async_signal_handler (sig_handler_func * proc,
   return async_handler_ptr;
 }
 
-/* Call the handler from HANDLER immediately.  This function runs
-   signal handlers when returning to the event loop would be too
-   slow.  */
-void
-call_async_signal_handler (struct async_signal_handler *handler)
-{
-  (*handler->proc) (handler->client_data);
-}
-
 /* Mark the handler (ASYNC_HANDLER_PTR) as ready.  This information
    will be used when the handlers are invoked, after we have waited
    for some event.  The caller of this function is the interrupt
@@ -905,6 +919,7 @@ void
 mark_async_signal_handler (async_signal_handler * async_handler_ptr)
 {
   async_handler_ptr->ready = 1;
+  serial_event_set (async_signal_handlers_serial_event);
 }
 
 /* See event-loop.h.  */
@@ -925,13 +940,19 @@ async_signal_handler_is_marked (async_signal_handler *async_handler_ptr)
 
 /* Call all the handlers that are ready.  Returns true if any was
    indeed ready.  */
+
 static int
 invoke_async_signal_handlers (void)
 {
   async_signal_handler *async_handler_ptr;
   int any_ready = 0;
 
-  /* Invoke ready handlers.  */
+  /* We're going to handle all pending signals, so no need to wake up
+     the event loop again the next time around.  Note this must be
+     cleared _before_ calling the callbacks, to avoid races.  */
+  serial_event_clear (async_signal_handlers_serial_event);
+
+  /* Invoke all ready handlers.  */
 
   while (1)
     {

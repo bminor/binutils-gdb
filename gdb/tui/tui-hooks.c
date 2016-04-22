@@ -54,8 +54,6 @@
    "gdb_curses.h".  */
 #include "readline/readline.h"
 
-int tui_target_has_run = 0;
-
 static void
 tui_new_objfile_hook (struct objfile* objfile)
 {
@@ -107,23 +105,6 @@ static void
 tui_event_modify_breakpoint (struct breakpoint *b)
 {
   tui_update_all_breakpoint_info ();
-}
-
-/* Called when a command is about to proceed the inferior.  */
-
-static void
-tui_about_to_proceed (void)
-{
-  /* Leave tui mode (optional).  */
-#if 0
-  if (tui_active)
-    {
-      target_terminal_ours ();
-      endwin ();
-      target_terminal_inferior ();
-    }
-#endif
-  tui_target_has_run = 1;
 }
 
 /* Refresh TUI's frame and register information.  This is a hook intended to be
@@ -230,7 +211,6 @@ static struct observer *tui_bp_created_observer;
 static struct observer *tui_bp_deleted_observer;
 static struct observer *tui_bp_modified_observer;
 static struct observer *tui_inferior_exit_observer;
-static struct observer *tui_about_to_proceed_observer;
 static struct observer *tui_before_prompt_observer;
 static struct observer *tui_normal_stop_observer;
 static struct observer *tui_register_changed_observer;
@@ -255,8 +235,6 @@ tui_install_hooks (void)
     = observer_attach_breakpoint_modified (tui_event_modify_breakpoint);
   tui_inferior_exit_observer
     = observer_attach_inferior_exit (tui_inferior_exit);
-  tui_about_to_proceed_observer
-    = observer_attach_about_to_proceed (tui_about_to_proceed);
   tui_before_prompt_observer
     = observer_attach_before_prompt (tui_before_prompt);
   tui_normal_stop_observer
@@ -280,8 +258,6 @@ tui_remove_hooks (void)
   tui_bp_modified_observer = NULL;
   observer_detach_inferior_exit (tui_inferior_exit_observer);
   tui_inferior_exit_observer = NULL;
-  observer_detach_about_to_proceed (tui_about_to_proceed_observer);
-  tui_about_to_proceed_observer = NULL;
   observer_detach_before_prompt (tui_before_prompt_observer);
   tui_before_prompt_observer = NULL;
   observer_detach_normal_stop (tui_normal_stop_observer);

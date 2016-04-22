@@ -2258,7 +2258,7 @@ aarch64_emit_add (void)
   uint32_t *p = buf;
 
   p += emit_pop (p, x1);
-  p += emit_add (p, x0, x0, register_operand (x1));
+  p += emit_add (p, x0, x1, register_operand (x0));
 
   emit_ops_insns (buf, p - buf);
 }
@@ -2272,7 +2272,7 @@ aarch64_emit_sub (void)
   uint32_t *p = buf;
 
   p += emit_pop (p, x1);
-  p += emit_sub (p, x0, x0, register_operand (x1));
+  p += emit_sub (p, x0, x1, register_operand (x0));
 
   emit_ops_insns (buf, p - buf);
 }

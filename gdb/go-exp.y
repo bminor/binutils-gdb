@@ -67,59 +67,10 @@
 
 #define parse_type(ps) builtin_type (parse_gdbarch (ps))
 
-/* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
-   as well as gratuitiously global symbol names, so we can have multiple
-   yacc generated parsers in gdb.  Note that these are only the variables
-   produced by yacc.  If other parser generators (bison, byacc, etc) produce
-   additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list.  */
-
-#define	yymaxdepth go_maxdepth
-#define	yyparse	go_parse_internal
-#define	yylex	go_lex
-#define	yyerror	go_error
-#define	yylval	go_lval
-#define	yychar	go_char
-#define	yydebug	go_debug
-#define	yypact	go_pact
-#define	yyr1	go_r1
-#define	yyr2	go_r2
-#define	yydef	go_def
-#define	yychk	go_chk
-#define	yypgo	go_pgo
-#define	yyact	go_act
-#define	yyexca	go_exca
-#define yyerrflag go_errflag
-#define yynerrs	go_nerrs
-#define	yyps	go_ps
-#define	yypv	go_pv
-#define	yys	go_s
-#define	yy_yys	go_yys
-#define	yystate	go_state
-#define	yytmp	go_tmp
-#define	yyv	go_v
-#define	yy_yyv	go_yyv
-#define	yyval	go_val
-#define	yylloc	go_lloc
-#define yyreds	go_reds		/* With YYDEBUG defined */
-#define yytoks	go_toks		/* With YYDEBUG defined */
-#define yyname	go_name		/* With YYDEBUG defined */
-#define yyrule	go_rule		/* With YYDEBUG defined */
-#define yylhs	go_yylhs
-#define yylen	go_yylen
-#define yydefred go_yydefred
-#define yydgoto	go_yydgoto
-#define yysindex go_yysindex
-#define yyrindex go_yyrindex
-#define yygindex go_yygindex
-#define yytable	 go_yytable
-#define yycheck	 go_yycheck
-
-#ifndef YYDEBUG
-#define	YYDEBUG 1		/* Default to yydebug support */
-#endif
-
-#define YYFPRINTF parser_fprintf
+/* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
+   etc).  */
+#define GDB_YY_REMAP_PREFIX go_
+#include "yy-remap.h"
 
 /* The state of the parser, used internally when we are parsing the
    expression.  */

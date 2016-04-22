@@ -3721,6 +3721,7 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARC_TLS_LE_32,
   BFD_RELOC_ARC_S25W_PCREL_PLT,
   BFD_RELOC_ARC_S21H_PCREL_PLT,
+  BFD_RELOC_ARC_NPS_CMEM16,
 
 /* ADI Blackfin 16 bit immediate absolute reloc.  */
   BFD_RELOC_BFIN_16_IMM,
@@ -7412,6 +7413,7 @@ typedef struct bfd_target
   NAME##_bfd_copy_link_hash_symbol_type, \
   NAME##_bfd_final_link, \
   NAME##_bfd_link_split_section, \
+  NAME##_bfd_link_check_relocs, \
   NAME##_bfd_gc_sections, \
   NAME##_bfd_lookup_section_flags, \
   NAME##_bfd_merge_sections, \
@@ -7452,6 +7454,9 @@ typedef struct bfd_target
 
   /* Should this section be split up into smaller pieces during linking.  */
   bfd_boolean (*_bfd_link_split_section) (bfd *, struct bfd_section *);
+
+  /* Check the relocations in the bfd for validity.  */
+  bfd_boolean (* _bfd_link_check_relocs)(bfd *, struct bfd_link_info *);
 
   /* Remove sections that are not referenced from the output.  */
   bfd_boolean (*_bfd_gc_sections) (bfd *, struct bfd_link_info *);
@@ -7564,6 +7569,12 @@ struct bfd_elf_version_tree * bfd_find_version_for_sym
 
 bfd_boolean bfd_hide_sym_by_version
    (struct bfd_elf_version_tree *verdefs, const char *sym_name);
+
+bfd_boolean bfd_link_check_relocs
+   (bfd *abfd, struct bfd_link_info *info);
+
+bfd_boolean _bfd_generic_link_check_relocs
+   (bfd *abfd, struct bfd_link_info *info);
 
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents

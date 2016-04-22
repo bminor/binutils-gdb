@@ -1173,7 +1173,7 @@ const struct language_defn java_language_defn =
   macro_expansion_no,
   &exp_descriptor_java,
   java_parse,
-  java_error,
+  java_yyerror,
   null_post_parser,
   java_printchar,		/* Print a character constant */
   java_printstr,		/* Function to print string constant */

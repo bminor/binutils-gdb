@@ -134,19 +134,24 @@ automatically cause those extensions to be disabled.
  @tab Enable cryptographic extensions.  This implies @code{fp} and @code{simd}.
 @item @code{fp} @tab ARMv8-A @tab ARMv8-A or later
  @tab Enable floating-point extensions.
-@item @code{simd} @tab ARMv8-A @tab ARMv8-A or later
- @tab Enable Advanced SIMD extensions.  This implies @code{fp}.
-@item @code{pan} @tab ARMv8-A @tab ARMv8-A or later
- @tab Enable Privileged Access Never support.
-@item @code{lor} @tab ARMv8-A @tab ARMv8-A or later
- @tab Enable Limited Ordering Regions extensions.
-@item @code{rdma} @tab ARMv8-A @tab ARMv8-A or later
- @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
 @item @code{fp16} @tab ARMv8.2-A @tab ARMv8.2-A or later
  @tab Enable ARMv8.2 16-bit floating-point support.  This implies
  @code{fp}.
+@item @code{lor} @tab ARMv8-A @tab ARMv8.1-A or later
+ @tab Enable Limited Ordering Regions extensions.
+@item @code{lse} @tab ARMv8-A @tab ARMv8.1-A or later
+ @tab Enable Large System extensions.
+@item @code{pan} @tab ARMv8-A @tab ARMv8.1-A or later
+ @tab Enable Privileged Access Never support.
 @item @code{profile} @tab ARMv8.2-A @tab No
  @tab Enable statistical profiling extensions.
+@item @code{ras} @tab ARMv8-A @tab ARMv8.2-A or later
+ @tab Enable the Reliability, Availability and Serviceability
+ extension.
+@item @code{rdma} @tab ARMv8-A @tab ARMv8.1-A or later
+ @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
+@item @code{simd} @tab ARMv8-A @tab ARMv8-A or later
+ @tab Enable Advanced SIMD extensions.  This implies @code{fp}.
 @end multitable
 
 @node AArch64 Syntax

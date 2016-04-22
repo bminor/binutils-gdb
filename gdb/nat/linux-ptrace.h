@@ -140,8 +140,8 @@ struct buffer;
    in SPU code on a Cell/B.E.  However, SI_KERNEL is never seen
    on a SIGTRAP for any other reason.
 
-   The MIPS kernel uses SI_KERNEL for all kernel generated traps.
-   Since:
+   The MIPS kernel up until 4.5 used SI_KERNEL for all kernel
+   generated traps.  Since:
 
      - MIPS doesn't do hardware single-step.
      - We don't need to care about exec SIGTRAPs --- we assume
@@ -152,6 +152,9 @@ struct buffer;
    software breakpoints and hardware watchpoints, which can be done by
    peeking the debug registers.
 
+   Beginning with Linux 4.6, the MIPS port reports proper TRAP_BRKPT and
+   TRAP_HWBKPT codes, so we also match them.
+
    The generic Linux target code should use GDB_ARCH_IS_TRAP_* instead
    of TRAP_* to abstract out these peculiarities.  */
 #if defined __i386__ || defined __x86_64__
@@ -161,8 +164,8 @@ struct buffer;
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
 # define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
 #elif defined __mips__
-# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL)
-# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == SI_KERNEL)
+# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
+# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == SI_KERNEL || (X) == TRAP_HWBKPT)
 #else
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == TRAP_BRKPT)
 # define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)

@@ -63,7 +63,7 @@ DEF_ENUM_FLAGS_TYPE (enum c_string_type_values, c_string_type);
 
 extern int c_parse (struct parser_state *);
 
-extern void c_error (char *);
+extern void c_yyerror (char *);
 
 extern int c_parse_escape (const char **, struct obstack *);
 

@@ -1,3 +1,393 @@
+2016-04-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (code_option_type): New enum.
+	(parse_code_option): Return status indicating option type.
+	(s_mipsset): Update `parse_code_option' call site accordingly.
+	Always set register sizes from the ISA with ISA overrides.
+	(s_module): Update `parse_code_option' call site.
+	* testsuite/gas/mips/isa-override-1.d: New test.
+	* testsuite/gas/mips/micromips@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips1@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r3@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r5@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r6@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r3@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r5@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r6@isa-override-1.d: New test.
+	* testsuite/gas/mips/r3000@isa-override-1.d: New test.
+	* testsuite/gas/mips/r3900@isa-override-1.d: New test.
+	* testsuite/gas/mips/r5900@isa-override-1.d: New test.
+	* testsuite/gas/mips/octeon@isa-override-1.d: New test.
+	* testsuite/gas/mips/octeon3@isa-override-1.d: New test.
+	* testsuite/gas/mips/isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips1@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips2@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r2@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r3@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r5@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r6@isa-override-2.l: New list test.
+	* testsuite/gas/mips/r3000@isa-override-2.l: New list test.
+	* testsuite/gas/mips/r3900@isa-override-2.l: New list test.
+	* testsuite/gas/mips/octeon3@isa-override-2.l: New list test.
+	* testsuite/gas/mips/octeon3@isa-override-1.l: New stderr
+	output.
+	* testsuite/gas/mips/isa-override-1.s: New test source.
+	* testsuite/gas/mips/r5900@isa-override-1.s: New test source.
+	* testsuite/gas/mips/isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips1@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips2@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r2@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r3@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r5@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r6@isa-override-2.s: New test source.
+	* testsuite/gas/mips/r3000@isa-override-2.s: New test source.
+	* testsuite/gas/mips/r3900@isa-override-2.s: New test source.
+	* testsuite/gas/mips/octeon3@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* cgen.c: Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-metag.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-rl78.c: Likewise.
+
+2016-04-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/c-arc.texi (ARC Options): Add nps400 to list of valus for
+	-mcpu.  Add cross reference to .cpu directive from -mcpu option.
+	(ARC Directives): Add NPS400 to .cpu directive list.
+
+2016-04-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "ras".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "ras".
+	* testsuite/gas/aarch64/armv8-ras-1.d: New.
+	* testsuite/gas/aarch64/armv8-ras-1.s: New.
+	* testsuite/gas/aarch64/illegal-ras-1.d: New.
+	* testsuite/gas/aarch64/illegal-ras-1.s: New.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/nps400-6.d: New file.
+	* testsuite/gas/arc/nps400-6.s: New file.
+
+2016-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/nps400-4.d: New file.
+	* testsuite/gas/arc/nps400-4.s: New file.
+	* testsuite/gas/arc/nps400-5.d: New file.
+	* testsuite/gas/arc/nps400-5.s: New file.
+
+2016-04-19  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* doc/as.texinfo (.cfi_remember_state, .cfi_restore_state): Improve
+	documentation.
+
+2016-04-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	Revert prevous change.
+	* config/tc-arc.c (arc_option): Make .cpu directive
+	case-sensitive again.
+
+2016-04-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_option): Make .cpu directive
+	case-insensitive.
+
+2016-04-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_option): Allow NPS400 in .cpu directive.
+
+2016-04-15  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-mips.c (md_begin): Remove useless assignment.
+
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2016-04-15  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (toc_reloc_types): Wrap in #ifdef OBJ_ELF
+
+2016-04-14  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-nios2.c (nios2_as_options): Make file static.
+	* config/tc-ppc.c (toc_reloc_ypes): Likewise.
+	* config/tc-sparc.c (native_op_table): Likewise.
+
+2016-04-14  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-m32c.c (M32C_Macros): Remove.
+	* config/tc-msp430.c (option_numbers): Likewise.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/nps400-3.d: New file.
+	* testsuite/gas/arc/nps400-3.s: New file.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/add_s-err.s: Update target pattern.
+	* testsuite/gas/arc/warn.s: Likewise.
+	* testsuite/gas/elf/elf.exp: Run test for arc.
+
+2016-04-14  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19938
+	* testsuite/gas/i386/ilp32/x86-64-unwind.d: Allow for the string
+	sections possibly having the SHF_STRINGS flag bit set.
+	* testsuite/gas/i386/x86-64-unwind.d: Likewise.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (mach_type_specified_p): Change type to
+	bfd_boolean.
+	(arc_option): Set private flags when parsing cpu pseudo-op.
+	(md_parse_option): Set mach_type_specified_p to TRUE.
+
+2016-04-13  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19937
+	* testsuite/gas/v850/pr19937.s: New test.
+	* testsuite/gas/v850/pr19937.d: New test control file.
+	* testsuite/gas/v850/basic.exp: Run the new test.
+
+2016-04-13  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config/tc-mips.c (relaxed_branch_length): Use the long
+	sequence where the target is a weak symbol.
+	(relaxed_micromips_32bit_branch_length): Likewise.
+	(relaxed_micromips_16bit_branch_length): Likewise.
+	* testsuite/gas/mips/branch-weak-1.d: New test.
+	* testsuite/gas/mips/branch-weak-2.d: New test.
+	* testsuite/gas/mips/branch-weak-3.d: New test.
+	* testsuite/gas/mips/branch-weak-4.d: New test.
+	* testsuite/gas/mips/branch-weak-5.d: New test.
+	* testsuite/gas/mips/branch-weak.l: New stderr output.
+	* testsuite/gas/mips/branch-weak.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-04-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (relaxed_branch_length): Use the long
+	sequence where the distance cannot be determined.
+	(relaxed_micromips_32bit_branch_length): Likewise.
+	* testsuite/gas/mips/branch-extern-1.d: New test.
+	* testsuite/gas/mips/branch-extern-2.d: New test.
+	* testsuite/gas/mips/branch-extern-3.d: New test.
+	* testsuite/gas/mips/branch-extern-4.d: New test.
+	* testsuite/gas/mips/branch-extern.l: New stderr output.
+	* testsuite/gas/mips/branch-extern.s: New test source.
+	* testsuite/gas/mips/branch-section-1.d: New test.
+	* testsuite/gas/mips/branch-section-2.d: New test.
+	* testsuite/gas/mips/branch-section-3.d: New test.
+	* testsuite/gas/mips/branch-section-4.d: New test.
+	* testsuite/gas/mips/branch-section.l: New stderr output.
+	* testsuite/gas/mips/branch-section.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/textauxregister.d: New file.
+	* testsuite/gas/arc/textauxregister.s: Likewise.
+	* testsuite/gas/arc/textcondcode.d: Likewise.
+	* testsuite/gas/arc/textcondcode.s: Likewise.
+	* testsuite/gas/arc/textcoreregister.d: Likewise.
+	* testsuite/gas/arc/textcoreregister.s: Likewise.
+	* testsuite/gas/arc/textpseudoop.d: Likewise.
+	* testsuite/gas/arc/textpseudoop.s: Likewise.
+	* testsuite/gas/arc/ld2.d: Update test.
+	* testsuite/gas/arc/st.d: Likewise.
+	* testsuite/gas/arc/taux.d: Likewise.
+	* doc/c-arc.texi (ARC Directives): Add .extCondCode,
+	.extCoreRegister and .extAuxRegister documentation.
+	* config/tc-arc.c (arc_extcorereg): New function.
+	(md_pseudo_table): Add .extCondCode, .extCoreRegister and
+	.extAuxRegister pseudo-ops.
+	(extRegister_t): New type.
+	(ext_condcode, arc_aux_hash): New global variable.
+	(find_opcode_match): Check for extensions.
+	(preprocess_operands): Likewise.
+	(md_begin): Add aux registers in a hash.
+	(assemble_insn): Update use arc_flags member.
+	(tokenize_extregister): New function.
+	(create_extcore_section): Likewise.
+	* config/tc-arc.h (arc_flags): Delete code, add flgp.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/noargs_a7.d: New file.
+	* testsuite/gas/arc/noargs_a7.s: Likewise.
+	* testsuite/gas/arc/noargs_hs.d: Likewise.
+	* testsuite/gas/arc/noargs_hs.s: Likewise.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/textinsn-errors.d: New File.
+	* testsuite/gas/arc/textinsn-errors.err: Likewise.
+	* testsuite/gas/arc/textinsn-errors.s: Likewise.
+	* testsuite/gas/arc/textinsn2op.d: Likewise.
+	* testsuite/gas/arc/textinsn2op.s: Likewise.
+	* testsuite/gas/arc/textinsn2op01.d: Likewise.
+	* testsuite/gas/arc/textinsn2op01.s: Likewise.
+	* testsuite/gas/arc/textinsn3op.d: Likewise.
+	* testsuite/gas/arc/textinsn3op.s: Likewise.
+	* doc/c-arc.texi (ARC Directives): Add .extInstruction
+	documentation.
+	* config/tc-arc.c (arcext_section): New variable.
+	(arc_extinsn): New function.
+	(md_pseudo_table): Add .extInstruction pseudo op.
+	(attributes_t): New type.
+	(suffixclass, syntaxclass, syntaxclassmod): New constant
+	structures.
+	(find_opcode_match): Remove arc_num_opcodes.
+	(md_begin): Likewise.
+	(tokenize_extinsn): New function.
+	(arc_set_ext_seg): Likewise.
+	(create_extinst_section): Likewise.
+
+2016-04-12  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (preprocess_operands): Mark AUX symbol.
+	(arc_adjust_symtab): New function.
+	* config/tc-arc.h (ARC_FLAG_AUX): Define.
+	(obj_adjust_symtab): Likewise.
+	* testsuite/gas/arc/taux.d: New file.
+	* testsuite/gas/arc/taux.s: Likewise.
+
+2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (s_option): Sanitize `.option picX'
+	pseudo-op.
+	* testsuite/gas/mips/option-pic-1.d: New test.
+	* testsuite/gas/mips/option-pic-2.l: New list test.
+	* testsuite/gas/mips/option-pic-1.s: New test source.
+	* testsuite/gas/mips/option-pic-2.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (s_option): Reject `.option picX' if VxWorks
+	PIC.
+	* testsuite/gas/mips/option-pic-vxworks-1.l: New list test.
+	* testsuite/gas/mips/option-pic-vxworks-2.l: New list test.
+	* testsuite/gas/mips/option-pic-vxworks-1.s: New test source.
+	* testsuite/gas/mips/option-pic-vxworks-2.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (can_swap_branch_p): Correct call formatting.
+
+2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* messages.c (as_bad): Fix a typo in description.
+
+2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_check_options): Unify messages.
+
+2016-04-09  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_check_options): Use `opts->isa'
+	consistently.
+
+2016-04-08  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19910
+	* testsuite/gas/sparc/pr19910-1.d: Adjust regexps to work with
+	COFF and AOUT sparc targets.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.h (MAX_FLAG_NAME_LENGTH): Increase to 7.
+	* testsuite/gas/arc/nps400-2.d: New file.
+	* testsuite/gas/arc/nps400-2.s: New file.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (struct arc_opcode_hash_entry_iterator): New
+	structure.
+	(arc_opcode_hash_entry_iterator_init): New function.
+	(arc_opcode_hash_entry_iterator_next): New function.
+	(find_opcode_match): Iterate over all arc_opcode entries
+	referenced by the arc_opcode_hash_entry passed in as a parameter.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_find_opcode): Now returns
+	arc_opcode_hash_entry pointer.
+	(find_opcode_match): Update argument type, extract arc_opcode from
+	incoming arc_opcode_hash_entry.
+	(find_special_case_pseudo): Update return type.
+	(find_special_case_flag): Update return type.
+	(find_special_case): Update return type.
+	(assemble_tokens): Lookup arc_opcode_hash_entry based on
+	instruction mnemonic, then use find_opcode_match to identify
+	specific arc_opcode.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (struct arc_opcode_hash_entry): New structure.
+	(arc_find_opcode): New function.
+	(find_special_case_pseudo): Use arc_find_opcode.
+	(find_special_case_flag): Likewise.
+	(assemble_tokens): Likewise.
+	(md_begin): Build hash using struct arc_opcode_hash_entry.
+
+2016-04-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (arc_option): Prepare string for automatic
+	translation.
+	(declare_register): Likewise.
+
+2016-04-06  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* doc/c-aarch64.texi (Architecture Extensions): Add entry for LSE.
+	Correct entry for RDMA.  Alpha sort entries.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (tokenize_flags): Allow greater range of
+	characters into flag names.
+
+2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (find_opcode_match): Handle O_symbol case, add
+	new de_fault label.
+	(preprocess_operands): Delete.
+	(assemble_tokens): Remove call to preprocess_operands.
+
+2016-04-07  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19910
+	* config/tc-sparc.c (sparc_ip): Report an error if the expression
+	inside a %-macro could not be fully parsed.
+	* expr.c (integer_constant): Accept and ignore U suffixes to
+	integers.
+	(operand): When a missing closing parenthesis is encountered,
+	report the character that was found instead.
+	* testsuite/gas/mips/tls-ill.l: Update expected error message.
+	* testsuite/gas/sparc/pr19910-1.d: New test driver.
+	* testsuite/gas/sparc/pr19910-1.s: New test.
+	* testsuite/gas/sparc/pr19910-2.l: Expected error output.
+	* testsuite/gas/sparc/pr19910-2.s: New test.
+	* testsuite/gas/sparc/sparc.exp: Run the new tests.
+
 2016-04-06  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (msp430_operands): Check for a NOP preceding
@@ -12,16 +402,16 @@
 
 2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * config/tc-arc.c (is_code_density_p): Compare directly the
-        subclass field.
-        (is_spfp_p, is_dpfp_p, is_spfp_p): Define.
-        (check_cpu_feature): New function.
-        (find_opcode_match): Use check_cpu_feature function.
-        (preprocess_operands): Likewise.
-        (md_parse_option): Use mfpuda, mdpfp, mspfp options.
-        * testsuite/gas/arc/tdpfp.d: New file.
-        * testsuite/gas/arc/tfpuda.d: Likewise.
-        * testsuite/gas/arc/tfpx.s: Likewise.
+	* config/tc-arc.c (is_code_density_p): Compare directly the
+	subclass field.
+	(is_spfp_p, is_dpfp_p, is_spfp_p): Define.
+	(check_cpu_feature): New function.
+	(find_opcode_match): Use check_cpu_feature function.
+	(preprocess_operands): Likewise.
+	(md_parse_option): Use mfpuda, mdpfp, mspfp options.
+	* testsuite/gas/arc/tdpfp.d: New file.
+	* testsuite/gas/arc/tfpuda.d: Likewise.
+	* testsuite/gas/arc/tfpx.s: Likewise.
 
 2016-04-05  Jiong Wang  <jiong.wang@arm.com>
 
@@ -32,16 +422,27 @@
 	* testsuite/gas/arm/armv8-2-fp16-simd-warning.l: New warning results.
 	* testsuite/gas/arm/simd_by_scalar_low_regbank.s: New test source.
 	* testsuite/gas/arm/simd_by_scalar_low_regbank.d: New testcase.
-	* testsuite/gas/arm/simd_by_scalar_low_regbank_thumb.d: Likewise for Thumb.
+	* testsuite/gas/arm/simd_by_scalar_low_regbank_thumb.d: Likewise
+	for Thumb.
 	* testsuite/gas/arm/simd_by_scalar_low_regbank.l: New warning results.
 
 2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * config/tc-arc.c (assemble_insn): Prohibit pc-rel relocations for
+	* config/tc-arc.c (assemble_insn): Prohibit pc-rel relocations for
 	JUMP instructions type.
-        * testsuite/gas/arc/relocs-errors.d: New file.
-        * testsuite/gas/arc/relocs-errors.err: Likewise.
-        * testsuite/gas/arc/relocs-errors.s: Likewise.
+	* testsuite/gas/arc/relocs-errors.d: New file.
+	* testsuite/gas/arc/relocs-errors.err: Likewise.
+	* testsuite/gas/arc/relocs-errors.s: Likewise.
+
+2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19909
+	* config/tc-i386.c (check_VecOperands): Try vec_disp8 encoding
+	only if i.disp_encoding != disp_encoding_32bit.
+	* gas/testsuite/gas/i386/disp32.s: Add tests for vmovdqu64.d32.
+	* gas/testsuite/gas/i386/x86-64-disp32.s: Likewise.
+	* gas/testsuite/gas/i386/disp32.d: Updated.
+	* gas/testsuite/gas/i386/x86-64-disp32.d: Likewise.
 
 2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -416,20 +817,20 @@
 
 2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * testsuite/gas/all/gas.exp: Don't xfail on ARC.
-        * testsuite/gas/elf/elf.exp: Likewise.
-        * testsuite/gas/all/redef3.d: Allow execution for ARC.
+	* testsuite/gas/all/gas.exp: Don't xfail on ARC.
+	* testsuite/gas/elf/elf.exp: Likewise.
+	* testsuite/gas/all/redef3.d: Allow execution for ARC.
 
 2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * testsuite/gas/arc/warn.exp: Fix matching pattern.
+	* testsuite/gas/arc/warn.exp: Fix matching pattern.
 
 2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * testsuite/gas/arc/ext2op.d: New file.
-        * testsuite/gas/arc/ext2op.s: Likewise.
-        * testsuite/gas/arc/ext3op.d: Likewise.
-        * testsuite/gas/arc/ext3op.s: Likewise.
+	* testsuite/gas/arc/ext2op.d: New file.
+	* testsuite/gas/arc/ext2op.s: Likewise.
+	* testsuite/gas/arc/ext3op.d: Likewise.
+	* testsuite/gas/arc/ext3op.s: Likewise.
 
 2016-03-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
@@ -787,7 +1188,7 @@
 2016-03-15  Ulrich Drepper  <drepper@gmail.com>
 
 	* doc/c-i386.texi (Register Naming): Update to details of the
-        latest architecture version.
+	latest architecture version.
 
 2016-03-10  Mickael Guene  <mickael.guene@st.com>
 
@@ -885,12 +1286,12 @@
 2016-02-29  Cupertino Miranda  <cmiranda@synopsys.com>
 	    Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
 
-        * config/tc-arc.c (arc_extra_reloc): Change size to 0.
-        (tc_arc_fix_adjustable): Changed default return value to 1.
-        * testsuite/gas/arc/j.d: Updated expected symbol
-        * testsuite/gas/arc/jl.d: Likewise
-        * testsuite/gas/arc/relax-avoid1.d: Likewise
-        * testsuite/gas/arc/st.d: Likewise
+	* config/tc-arc.c (arc_extra_reloc): Change size to 0.
+	(tc_arc_fix_adjustable): Changed default return value to 1.
+	* testsuite/gas/arc/j.d: Updated expected symbol
+	* testsuite/gas/arc/jl.d: Likewise
+	* testsuite/gas/arc/relax-avoid1.d: Likewise
+	* testsuite/gas/arc/st.d: Likewise
 
 2016-02-29  Claudiu Zissulescu  <Claudiu.Zissulescu@synopsys.com>
 
@@ -1080,7 +1481,7 @@
 
 2016-02-24  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
-    * doc/c-arm.texi (ARM Options): Document cortex-a17.
+	* doc/c-arm.texi (ARM Options): Document cortex-a17.
 
 2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -1188,7 +1589,7 @@
 	* input-file.h (input_file_open): Adjust.
 	* input-scrub.c (logical_input_file): change type to const char *.
 	(physical_input_file): Likewise.
-       	(struct input_save): Adjust.
+	(struct input_save): Adjust.
 	(input_scrub_push): Adjust.
 	(input_scrub_begin): Adjust.
 	(as_where): Adjust.
@@ -1269,7 +1670,7 @@
 	and string const char *.
 	* read.c (_bfd_rel): Make type of name const char *.
 	* app.c (out_string): Change type to const char *.
-       	(struct app_save::out_string): Likewise.
+	(struct app_save::out_string): Likewise.
 
 2016-02-18  Dan Gisselquist  <dgisselq@verizon.net>
 	    Nick Clifton  <nickc@redhat.com>
@@ -1463,7 +1864,7 @@
 
 2016-02-03  Kevin Buettner  <kevinb@redhat.com>
 
-    	* config/tc-msp430.h (DWARF2_ADDR_SIZE): Set to 4.
+	* config/tc-msp430.h (DWARF2_ADDR_SIZE): Set to 4.
 
 2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -1545,10 +1946,9 @@
 
 2016-01-26  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * config/tc-arc.c (md_apply_fix): Allow addendum.
-        (arc_reloc_op): Allow complex expressions for tpoff.
-        (md_apply_fix): Handle resolved TLS local symbol.
-
+	* config/tc-arc.c (md_apply_fix): Allow addendum.
+	(arc_reloc_op): Allow complex expressions for tpoff.
+	(md_apply_fix): Handle resolved TLS local symbol.
 	* testsuite/gas/arc/tls-relocs1.d: New file.
 	* testsuite/gas/arc/tls-relocs1.s: Likewise.
 

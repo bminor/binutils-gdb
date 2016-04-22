@@ -212,7 +212,7 @@ tui_redisplay_readline (void)
      The command could call prompt_for_continue and we must not
      restore SingleKey so that the prompt and normal keymap are used.  */
   if (tui_current_key_mode == TUI_ONE_COMMAND_MODE && rl_end == 0
-      && immediate_quit == 0)
+      && !gdb_in_secondary_prompt_p ())
     tui_set_key_mode (TUI_SINGLE_KEY_MODE);
 
   if (tui_current_key_mode == TUI_SINGLE_KEY_MODE)

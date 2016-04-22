@@ -180,7 +180,7 @@ proc test_fast_tracepoints {} {
 # LIST is a list of expected values of VAR should be collected
 # based on the CONDEXP.
 proc test_ftrace_condition { condexp var list } \
-{ with_test_prefix "ond $condexp" \
+{ with_test_prefix "cond $condexp" \
 {
     global executable
     global hex

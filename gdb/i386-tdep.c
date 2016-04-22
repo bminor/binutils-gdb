@@ -53,6 +53,7 @@
 #include "features/i386/i386.c"
 #include "features/i386/i386-avx.c"
 #include "features/i386/i386-mpx.c"
+#include "features/i386/i386-avx-mpx.c"
 #include "features/i386/i386-avx512.c"
 #include "features/i386/i386-mmx.c"
 
@@ -4914,17 +4915,12 @@ i386_record_lea_modrm (struct i386_record_s *irp)
     {
       if (record_full_memory_query)
         {
-	  int q;
-
-          target_terminal_ours ();
-          q = yquery (_("\
+          if (yquery (_("\
 Process record ignores the memory change of instruction at address %s\n\
 because it can't get the value of the segment register.\n\
 Do you want to stop the program?"),
-                      paddress (gdbarch, irp->orig_addr));
-            target_terminal_inferior ();
-            if (q)
-              return -1;
+                      paddress (gdbarch, irp->orig_addr)))
+	    return -1;
         }
 
       return 0;
@@ -5805,16 +5801,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
         {
           if (record_full_memory_query)
             {
-	      int q;
-
-              target_terminal_ours ();
-              q = yquery (_("\
+              if (yquery (_("\
 Process record ignores the memory change of instruction at address %s\n\
 because it can't get the value of the segment register.\n\
 Do you want to stop the program?"),
-                          paddress (gdbarch, ir.orig_addr));
-              target_terminal_inferior ();
-              if (q)
+                          paddress (gdbarch, ir.orig_addr)))
                 return -1;
             }
 	}
@@ -6479,16 +6470,11 @@ Do you want to stop the program?"),
               /* addr += ((uint32_t) read_register (I386_ES_REGNUM)) << 4; */
               if (record_full_memory_query)
                 {
-	          int q;
-
-                  target_terminal_ours ();
-                  q = yquery (_("\
+                  if (yquery (_("\
 Process record ignores the memory change of instruction at address %s\n\
 because it can't get the value of the segment register.\n\
 Do you want to stop the program?"),
-                              paddress (gdbarch, ir.orig_addr));
-                  target_terminal_inferior ();
-                  if (q)
+                              paddress (gdbarch, ir.orig_addr)))
                     return -1;
                 }
             }
@@ -7034,17 +7020,12 @@ Do you want to stop the program?"),
 	      {
                 if (record_full_memory_query)
                   {
-	            int q;
-
-                    target_terminal_ours ();
-                    q = yquery (_("\
+                    if (yquery (_("\
 Process record ignores the memory change of instruction at address %s\n\
 because it can't get the value of the segment register.\n\
 Do you want to stop the program?"),
-                                paddress (gdbarch, ir.orig_addr));
-                    target_terminal_inferior ();
-                    if (q)
-                      return -1;
+                                paddress (gdbarch, ir.orig_addr)))
+		      return -1;
                   }
 	      }
 	    else
@@ -7091,16 +7072,11 @@ Do you want to stop the program?"),
 		{
                   if (record_full_memory_query)
                     {
-	              int q;
-
-                      target_terminal_ours ();
-                      q = yquery (_("\
+                      if (yquery (_("\
 Process record ignores the memory change of instruction at address %s\n\
 because it can't get the value of the segment register.\n\
 Do you want to stop the program?"),
-                                  paddress (gdbarch, ir.orig_addr));
-                      target_terminal_inferior ();
-                      if (q)
+                                  paddress (gdbarch, ir.orig_addr)))
                         return -1;
                     }
 		}
@@ -8696,6 +8672,8 @@ i386_target_description (uint64_t xcr0)
     case X86_XSTATE_MPX_AVX512_MASK:
     case X86_XSTATE_AVX512_MASK:
       return tdesc_i386_avx512;
+    case X86_XSTATE_AVX_MPX_MASK:
+      return tdesc_i386_avx_mpx;
     case X86_XSTATE_MPX_MASK:
       return tdesc_i386_mpx;
     case X86_XSTATE_AVX_MASK:
@@ -9033,6 +9011,7 @@ Show Intel Memory Protection Extensions specific variables."),
   initialize_tdesc_i386_mmx ();
   initialize_tdesc_i386_avx ();
   initialize_tdesc_i386_mpx ();
+  initialize_tdesc_i386_avx_mpx ();
   initialize_tdesc_i386_avx512 ();
 
   /* Tell remote stub that we support XML target description.  */

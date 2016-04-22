@@ -685,9 +685,12 @@ source_info (char *ignore, int from_tty)
 }
 
 
-/* Return True if the file NAME exists and is a regular file.  */
+/* Return True if the file NAME exists and is a regular file.
+   If the result is false then *ERRNO_PTR is set to a useful value assuming
+   we're expecting a regular file.  */
+
 static int
-is_regular_file (const char *name)
+is_regular_file (const char *name, int *errno_ptr)
 {
   struct stat st;
   const int status = stat (name, &st);
@@ -698,9 +701,21 @@ is_regular_file (const char *name)
      on obscure systems where stat does not work as expected.  */
 
   if (status != 0)
-    return (errno != ENOENT);
+    {
+      if (errno != ENOENT)
+	return 1;
+      *errno_ptr = ENOENT;
+      return 0;
+    }
 
-  return S_ISREG (st.st_mode);
+  if (S_ISREG (st.st_mode))
+    return 1;
+
+  if (S_ISDIR (st.st_mode))
+    *errno_ptr = EISDIR;
+  else
+    *errno_ptr = EINVAL;
+  return 0;
 }
 
 /* Open a file named STRING, searching path PATH (dir names sep by some char)
@@ -775,22 +790,23 @@ openp (const char *path, int opts, const char *string,
 
   if ((opts & OPF_TRY_CWD_FIRST) || IS_ABSOLUTE_PATH (string))
     {
-      int i;
+      int i, reg_file_errno;
 
-      if (is_regular_file (string))
+      if (is_regular_file (string, &reg_file_errno))
 	{
 	  filename = (char *) alloca (strlen (string) + 1);
 	  strcpy (filename, string);
 	  fd = gdb_open_cloexec (filename, mode, 0);
 	  if (fd >= 0)
 	    goto done;
+	  last_errno = errno;
 	}
       else
 	{
 	  filename = NULL;
 	  fd = -1;
+	  last_errno = reg_file_errno;
 	}
-      last_errno = errno;
 
       if (!(opts & OPF_SEARCH_IN_PATH))
 	for (i = 0; string[i]; i++)
@@ -821,6 +837,7 @@ openp (const char *path, int opts, const char *string,
   for (ix = 0; VEC_iterate (char_ptr, dir_vec, ix, dir); ++ix)
     {
       size_t len = strlen (dir);
+      int reg_file_errno;
 
       if (strcmp (dir, "$cwd") == 0)
 	{
@@ -879,13 +896,15 @@ openp (const char *path, int opts, const char *string,
       strcat (filename + len, SLASH_STRING);
       strcat (filename, string);
 
-      if (is_regular_file (filename))
+      if (is_regular_file (filename, &reg_file_errno))
 	{
 	  fd = gdb_open_cloexec (filename, mode, 0);
 	  if (fd >= 0)
 	    break;
 	  last_errno = errno;
 	}
+      else
+	last_errno = reg_file_errno;
     }
 
   do_cleanups (back_to);
@@ -1159,8 +1178,8 @@ symtab_to_fullname (struct symtab *s)
 	  if (SYMTAB_DIRNAME (s) == NULL || IS_ABSOLUTE_PATH (s->filename))
 	    fullname = xstrdup (s->filename);
 	  else
-	    fullname = concat (SYMTAB_DIRNAME (s), SLASH_STRING, s->filename,
-			       NULL);
+	    fullname = concat (SYMTAB_DIRNAME (s), SLASH_STRING,
+			       s->filename, (char *) NULL);
 
 	  back_to = make_cleanup (xfree, fullname);
 	  s->fullname = rewrite_source_path (fullname);

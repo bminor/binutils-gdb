@@ -282,9 +282,9 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 }
 
 static void
-dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
-	       struct ui_file *outfile)
+dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 {
+  struct objfile *objfile = SYMTAB_OBJFILE (symtab);
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   int i;
   struct dict_iterator iter;
@@ -377,13 +377,17 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
     }
   else
     {
-      fprintf_filtered (outfile, "\nBlockvector same as previous symtab\n\n");
+      const char *compunit_filename
+	= symtab_to_filename_for_display (COMPUNIT_FILETABS (SYMTAB_COMPUNIT (symtab)));
+
+      fprintf_filtered (outfile,
+			"\nBlockvector same as owning compunit: %s\n\n",
+			compunit_filename);
     }
 }
 
 static void
-dump_symtab (struct objfile *objfile, struct symtab *symtab,
-	     struct ui_file *outfile)
+dump_symtab (struct symtab *symtab, struct ui_file *outfile)
 {
   /* Set the current language to the language of the symtab we're dumping
      because certain routines used during dump_symtab() use the current
@@ -396,12 +400,12 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 
       saved_lang = set_language (symtab->language);
 
-      dump_symtab_1 (objfile, symtab, outfile);
+      dump_symtab_1 (symtab, outfile);
 
       set_language (saved_lang);
     }
   else
-    dump_symtab_1 (objfile, symtab, outfile);
+    dump_symtab_1 (symtab, outfile);
 }
 
 static void
@@ -449,7 +453,7 @@ maintenance_print_symbols (char *args, int from_tty)
       QUIT;
       if (symname == NULL
 	  || filename_cmp (symname, symtab_to_filename_for_display (s)) == 0)
-	dump_symtab (objfile, s, outfile);
+	dump_symtab (s, outfile);
     }
   do_cleanups (cleanups);
 }

@@ -65,7 +65,7 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
     {
       struct fpreg fpregs;
 #ifdef PT_GETXSTATE_INFO
-      char *xstateregs;
+      void *xstateregs;
 
       if (amd64bsd_xsave_len != 0)
 	{
@@ -118,7 +118,7 @@ amd64bsd_store_inferior_registers (struct target_ops *ops,
     {
       struct fpreg fpregs;
 #ifdef PT_GETXSTATE_INFO
-      char *xstateregs;
+      void *xstateregs;
 
       if (amd64bsd_xsave_len != 0)
 	{

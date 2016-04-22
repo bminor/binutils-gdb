@@ -4579,12 +4579,9 @@ elf_m68k_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
    objects, and before the final_link entry point is called.  */
 
 bfd_boolean
-bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *datasec;
-     asection *relsec;
-     char **errmsg;
+bfd_m68k_elf32_create_embedded_relocs (bfd *abfd, struct bfd_link_info *info,
+				       asection *datasec, asection *relsec,
+				       char **errmsg)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Sym *isymbuf = NULL;

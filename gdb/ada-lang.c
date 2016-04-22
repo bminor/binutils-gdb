@@ -7576,6 +7576,39 @@ ada_value_struct_elt (struct value *arg, char *name, int no_err)
 	     "a value that is not a record."));
 }
 
+/* Return a string representation of type TYPE.  Caller must free
+   result.  */
+
+static char *
+type_as_string (struct type *type)
+{
+  struct ui_file *tmp_stream = mem_fileopen ();
+  struct cleanup *old_chain;
+  char *str;
+
+  tmp_stream = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (tmp_stream);
+
+  type_print (type, "", tmp_stream, -1);
+  str = ui_file_xstrdup (tmp_stream, NULL);
+
+  do_cleanups (old_chain);
+  return str;
+}
+
+/* Return a string representation of type TYPE, and install a cleanup
+   that releases it.  */
+
+static char *
+type_as_string_and_cleanup (struct type *type)
+{
+  char *str;
+
+  str = type_as_string (type);
+  make_cleanup (xfree, str);
+  return str;
+}
+
 /* Given a type TYPE, look up the type of the component of type named NAME.
    If DISPP is non-null, add its byte displacement from the beginning of a
    structure (pointed to by a value) of type TYPE to *DISPP (does not
@@ -7616,22 +7649,15 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
       || (TYPE_CODE (type) != TYPE_CODE_STRUCT
           && TYPE_CODE (type) != TYPE_CODE_UNION))
     {
+      const char *type_str;
+
       if (noerr)
         return NULL;
-      else
-        {
-          target_terminal_ours ();
-          gdb_flush (gdb_stdout);
-	  if (type == NULL)
-	    error (_("Type (null) is not a structure or union type"));
-	  else
-	    {
-	      /* XXX: type_sprint */
-	      fprintf_unfiltered (gdb_stderr, _("Type "));
-	      type_print (type, "", gdb_stderr, -1);
-	      error (_(" is not a structure or union type"));
-	    }
-        }
+
+      type_str = (type != NULL
+		  ? type_as_string_and_cleanup (type)
+		  : _("(null)"));
+      error (_("Type %s is not a structure or union type"), type_str);
     }
 
   type = to_static_fixed_type (type);
@@ -7701,22 +7727,10 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
 BadName:
   if (!noerr)
     {
-      target_terminal_ours ();
-      gdb_flush (gdb_stdout);
-      if (name == NULL)
-        {
-	  /* XXX: type_sprint */
-	  fprintf_unfiltered (gdb_stderr, _("Type "));
-	  type_print (type, "", gdb_stderr, -1);
-	  error (_(" has no component named <null>"));
-	}
-      else
-	{
-	  /* XXX: type_sprint */
-	  fprintf_unfiltered (gdb_stderr, _("Type "));
-	  type_print (type, "", gdb_stderr, -1);
-	  error (_(" has no component named %s"), name);
-	}
+      const char *name_str = name != NULL ? name : _("<null>");
+
+      error (_("Type %s has no component named %s"),
+	     type_as_string_and_cleanup (type), name_str);
     }
 
   return NULL;
@@ -14042,7 +14056,7 @@ const struct language_defn ada_language_defn = {
   macro_expansion_no,
   &ada_exp_descriptor,
   parse,
-  ada_error,
+  ada_yyerror,
   resolve,
   ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */

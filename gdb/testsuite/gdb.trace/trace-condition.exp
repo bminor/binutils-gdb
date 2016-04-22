@@ -138,7 +138,7 @@ foreach trace_command { "trace" "ftrace" } {
 
     # Test various operations to cover as many opcodes as possible.
     test_tracepoints $trace_command "21 + 21 == 42" 10
-    test_tracepoints $trace_command "21 - 21 == 0" 10
+    test_tracepoints $trace_command "42 - 21 == 21" 10
     test_tracepoints $trace_command "21 * 2 == 42" 10
     test_tracepoints $trace_command "21 << 1 == 42" 10
     test_tracepoints $trace_command "42 >> 1 == 21" 10

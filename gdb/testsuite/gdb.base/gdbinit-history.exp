@@ -36,12 +36,13 @@ proc test_gdbinit_history_setting { home size { gdbhistsize_val "-" } } {
     global srcdir
     global subdir
 
-    save_vars { INTERNAL_GDBFLAGS env(GDBHISTSIZE) env(HOME) } {
+    save_vars { INTERNAL_GDBFLAGS env(GDBHISTFILE) env(GDBHISTSIZE) env(HOME) } {
 	set env(HOME) "$srcdir/$subdir/$home"
 
-	# The GDBHISTSIZE environment variable takes precedence over whatever
+	# These environment variables take precedence over whatever
 	# history size is set in .gdbinit.  Make sure the former is not
 	# set.
+	unset -nocomplain env(GDBHISTFILE)
 	unset -nocomplain env(GDBHISTSIZE)
 
 	if { $gdbhistsize_val != "-" } {
@@ -77,10 +78,11 @@ proc test_no_truncation_of_unlimited_history_file { } {
     global env
     global INTERNAL_GDBFLAGS
 
-    save_vars { INTERNAL_GDBFLAGS env(GDBHISTSIZE) } {
-	# The GDBHISTSIZE environment variable takes precedence over whatever
+    save_vars { INTERNAL_GDBFLAGS env(GDBHISTFILE) env(GDBHISTSIZE) } {
+	# These environment variables take precedence over whatever
 	# history size is set in .gdbinit.  Make sure the former is not
 	# set.
+	unset -nocomplain env(GDBHISTFILE)
 	unset -nocomplain env(GDBHISTSIZE)
 
 	set temp_gdbinit [standard_output_file "gdbinit-history.gdbinit"]

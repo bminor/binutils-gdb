@@ -106,6 +106,7 @@ dlerror (void)
 #define bfd_plugin_section_already_linked             _bfd_generic_section_already_linked
 #define bfd_plugin_bfd_define_common_symbol           bfd_generic_define_common_symbol
 #define bfd_plugin_bfd_copy_link_hash_symbol_type     _bfd_generic_copy_link_hash_symbol_type
+#define bfd_plugin_bfd_link_check_relocs              _bfd_generic_link_check_relocs
 
 static enum ld_plugin_status
 message (int level ATTRIBUTE_UNUSED,

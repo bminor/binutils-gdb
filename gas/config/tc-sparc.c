@@ -758,7 +758,7 @@ md_show_usage (FILE *stream)
 }
 
 /* Native operand size opcode translation.  */
-struct
+static struct
   {
     const char *name;
     const char *name32;
@@ -2626,6 +2626,11 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		    *s1 = '\0';
 		    (void) get_expression (s);
 		    *s1 = ')';
+		    if (expr_end != s1)
+		      {
+			as_bad (_("Expression inside %%%s could not be parsed"), op_arg);
+			return special_case;
+		      }
 		    s = s1 + 1;
 		    if (*s == ',' || *s == ']' || !*s)
 		      continue;

@@ -44,6 +44,7 @@
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
 #include "features/i386/amd64-mpx.c"
+#include "features/i386/amd64-avx-mpx.c"
 #include "features/i386/amd64-avx512.c"
 
 #include "features/i386/x32.c"
@@ -3163,6 +3164,8 @@ amd64_target_description (uint64_t xcr0)
       return tdesc_amd64_avx512;
     case X86_XSTATE_MPX_MASK:
       return tdesc_amd64_mpx;
+    case X86_XSTATE_AVX_MPX_MASK:
+      return tdesc_amd64_avx_mpx;
     case X86_XSTATE_AVX_MASK:
       return tdesc_amd64_avx;
     default:
@@ -3179,6 +3182,7 @@ _initialize_amd64_tdep (void)
   initialize_tdesc_amd64 ();
   initialize_tdesc_amd64_avx ();
   initialize_tdesc_amd64_mpx ();
+  initialize_tdesc_amd64_avx_mpx ();
   initialize_tdesc_amd64_avx512 ();
 
   initialize_tdesc_x32 ();

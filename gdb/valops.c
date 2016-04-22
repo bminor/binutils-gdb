@@ -961,6 +961,9 @@ read_value_memory (struct value *val, int embedded_offset,
   ULONGEST xfered_total = 0;
   struct gdbarch *arch = get_value_arch (val);
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
+  enum target_object object;
+
+  object = stack ? TARGET_OBJECT_STACK_MEMORY : TARGET_OBJECT_MEMORY;
 
   while (xfered_total < length)
     {
@@ -968,7 +971,7 @@ read_value_memory (struct value *val, int embedded_offset,
       ULONGEST xfered_partial;
 
       status = target_xfer_partial (current_target.beneath,
-				    TARGET_OBJECT_MEMORY, NULL,
+				    object, NULL,
 				    buffer + xfered_total * unit_size, NULL,
 				    memaddr + xfered_total,
 				    length - xfered_total,
@@ -1463,11 +1466,20 @@ value_addr (struct value *arg1)
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     {
       /* Copy the value, but change the type from (T&) to (T*).  We
-         keep the same location information, which is efficient, and
-         allows &(&X) to get the location containing the reference.  */
+	 keep the same location information, which is efficient, and
+	 allows &(&X) to get the location containing the reference.
+	 Do the same to its enclosing type for consistency.  */
+      struct type *type_ptr
+        = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+      struct type *enclosing_type
+        = check_typedef (value_enclosing_type (arg1));
+      struct type *enclosing_type_ptr
+        = lookup_pointer_type (TYPE_TARGET_TYPE (enclosing_type));
+
       arg2 = value_copy (arg1);
-      deprecated_set_value_type (arg2, 
-				 lookup_pointer_type (TYPE_TARGET_TYPE (type)));
+      deprecated_set_value_type (arg2, type_ptr);
+      set_value_enclosing_type (arg2, enclosing_type_ptr);
+
       return arg2;
     }
   if (TYPE_CODE (type) == TYPE_CODE_FUNC)

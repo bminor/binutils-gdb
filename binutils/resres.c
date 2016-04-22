@@ -386,8 +386,7 @@ write_res_bin (windres_bfd *wrbfd, rc_uint_type off, const rc_res_resource *res,
 
 /* Get number of bytes needed to store an id in binary format */
 static unsigned long
-get_id_size (id)
-     const rc_res_id *id;
+get_id_size (const rc_res_id *id)
 {
   if (id->named)
     return sizeof (unichar) * (id->u.n.length + 1);

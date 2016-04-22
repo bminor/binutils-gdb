@@ -157,6 +157,7 @@ msdos_set_section_contents (bfd *abfd,
 #define msdos_bfd_final_link _bfd_generic_final_link
 #define msdos_bfd_link_split_section _bfd_generic_link_split_section
 #define msdos_set_arch_mach _bfd_generic_set_arch_mach
+#define msdos_bfd_link_check_relocs _bfd_generic_link_check_relocs
 
 #define msdos_get_symtab_upper_bound _bfd_nosymbols_get_symtab_upper_bound
 #define msdos_canonicalize_symtab _bfd_nosymbols_canonicalize_symtab

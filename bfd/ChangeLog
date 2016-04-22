@@ -1,3 +1,189 @@
+2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_link_create_dynstrtab): Exclude linker
+	created file from dynobj.
+
+2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_link_create_dynstrtab): Set dynobj to a
+	normal input file if possible.
+
+2016-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* aout-adobe.c: Use _bfd_generic_link_check_relocs.
+	* aout-target.h: Likewise.
+	* aout-tic30.c: Likewise.
+	* binary.c: Likewise.
+	* bout.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coffcode.h: Likewise.
+	* i386msdos.c: Likewise.
+	* i386os9k.c: Likewise.
+	* ieee.c: Likewise.
+	* ihex.c: Likewise.
+	* libbfd-in.h: Likewise.
+	* libecoff.h: Likewise.
+	* mach-o-target.c: Likewise.
+	* mmo.c: Likewise.
+	* nlm-target.h: Likewise.
+	* oasys.c: Likewise.
+	* pef.c: Likewise.
+	* plugin.c: Likewise.
+	* ppcboot.c: Likewise.
+	* som.c: Likewise.
+	* srec.c: Likewise.
+	* tekhex.c: Likewise.
+	* versados.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* xsym.c: Likewise.
+	* elfxx-target.h: Use _bfd_elf_link_check_relocs.
+	* linker.c (bfd_link_check_relocs): New function.
+	(_bfd_generic_link_check_relocs): New function.
+	* targets.c (BFD_JUMP_TABLE_LINK): Add initialization of
+	_bfd_link_check_relocs field.
+	(struct bfd_target)L Add _bfd_link_check_relocs field.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_gc_sweep_hook): Removed.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-x86-64.c (elf_x86_64_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_link_check_relocs): Don't check relocations
+	in excluded sections
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19969
+	* elf64-x86-64.c (check_relocs_failed): New.
+	(elf_x86_64_need_pic): Moved before elf_x86_64_check_relocs.
+	Support relocation agaist local symbol.  Set check_relocs_failed.
+	(elf_x86_64_check_relocs): Use elf_x86_64_need_pic.  Check
+	R_X86_64_32 relocation overflow.
+	(elf_x86_64_relocate_section): Skip if check_relocs failed.
+	Update one elf_x86_64_need_pic and remove one elf_x86_64_need_pic.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Call
+	_bfd_elf_create_ifunc_sections only for STT_GNU_IFUNC symbol.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
+2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_link_check_relocs): New.
+	* elflink.c (_bfd_elf_link_check_relocs): New function.
+	(elf_link_add_object_symbols): Call _bfd_elf_link_check_relocs
+	if check_relocs_after_open_input is FALSE.
+
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* cache.c: Update old style function definitions.
+	* elf32-m68k.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* stab-syms.c: Likewise.
+
+2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf32-arm.c (put_thumb2_insn): Change argument type to bfd_byte *.
+
+2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated with automake 1.11.6.
+	* aclocal.m4: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* reloc.c: Add BFD_RELOC_ARC_NPS_CMEM16 entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-arc.c: Add 'opcode/arc.h' include.
+	(struct arc_relocation_data): Add symbol_name.
+	(arc_special_overflow_checks): New function.
+	(arc_do_relocation): Use arc_special_overflow_checks, reindent as
+	required, add an extra comment.
+	(elf_arc_relocate_section): Setup symbol_name in reloc_data.
+
+2016-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-arc.c (tls_got_entries): Add 'TLS_GOT_' prefix to all
+	entries.
+	(elf_arc_relocate_section): Update enum uses.
+	(elf_arc_check_relocs): Likewise.
+	(elf_arc_finish_dynamic_symbol): Likewise.
+
+2016-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_copy_private_bfd_data): Replace "link" with
+	"sh_link".
+
+2016-04-14  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19938
+	* elf-bbfd.h (struct elf_backend_data): New field:
+	elf_strtab_flags.
+	New field: elf_backend_set_special_section_info_and_link
+	* elfxx-target.h (elf_backend_strtab_flags): Define if not already
+	defined.
+	(elf_backend_set_special_section_info_and_link): Define if not
+	already defined.
+	(elfNN_bed): Use elf_backend_set_special_section_info_and_link and
+	elf_backend_strtab_flags macros to initialise fields in structure.
+	* elf.c (_bfd_elf_make_section_from_shdr): Check for SHF_STRINGS
+	being set even if SHF_MERGE is not set.
+	(elf_fake_sections): Likewise.
+	(section_match): New function.  Matches two ELF sections based
+	upon fixed characteristics.
+	(find_link): New function.  Locates a section in a BFD that
+	matches a section in a different BFD.
+	(_bfd_elf_copy_private_bfd_data): Copy the sh_info and sh_link
+	fields of reserved sections.
+	(bfd_elf_compute_section_file_positions): Set the flags for the
+	.shstrtab section based upon the elf_strtab_flags field in the
+	elf_backend_data structure.
+	(swap_out_syms): Likewise for the .strtab section.
+	* elflink.c (bfd_elf_final_link): Set the flags for the
+	.strtab section based upon the elf_strtab_flags field in the
+	elf_backend_data structure.
+	* elf32-i386.c (elf32_i386_set_special_info_link): New function.
+	(elf_backend_strtab_flags): Set to SHF_STRINGS for Solaris
+	targets.
+	(elf_backend_set_special_section_info_and_link): Define for
+	Solaris targets.
+	* elf32-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+
+2016-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19939
+	* elf-bfd.h (_bfd_elf_allocate_ifunc_dyn_relocs): Add a pointer
+	to bfd_boolean.
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Updated.
+	Set *readonly_dynrelocs_against_ifunc_p to TRUE if dynamic reloc
+	applies to read-only section.
+	* elf32-i386.c (elf_i386_link_hash_table): Add
+	readonly_dynrelocs_against_ifunc.
+	(elf_i386_allocate_dynrelocs): Updated.
+	(elf_i386_size_dynamic_sections): Issue an error for read-only
+	segment with dynamic IFUNC relocations only if
+	readonly_dynrelocs_against_ifunc is TRUE.
+	* elf64-x86-64.c (elf_x86_64_link_hash_table): Add
+	readonly_dynrelocs_against_ifunc.
+	(elf_x86_64_allocate_dynrelocs): Updated.
+	(elf_x86_64_size_dynamic_sections): Issue an error for read-only
+	segment with dynamic IFUNC relocations only if
+	readonly_dynrelocs_against_ifunc is TRUE.
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_ifunc_dynrelocs):
+	Updated.
+
 2016-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Move error_ret_free_local to be

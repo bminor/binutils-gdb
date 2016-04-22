@@ -4463,15 +4463,6 @@ linux_nat_stop (struct target_ops *self, ptid_t ptid)
 }
 
 static void
-linux_nat_interrupt (struct target_ops *self, ptid_t ptid)
-{
-  if (non_stop)
-    iterate_over_lwps (ptid, linux_nat_stop_lwp, NULL);
-  else
-    linux_ops->to_interrupt (linux_ops, ptid);
-}
-
-static void
 linux_nat_close (struct target_ops *self)
 {
   /* Unregister from the event loop.  */
@@ -4672,7 +4663,6 @@ linux_nat_add_target (struct target_ops *t)
   t->to_close = linux_nat_close;
 
   t->to_stop = linux_nat_stop;
-  t->to_interrupt = linux_nat_interrupt;
 
   t->to_supports_multi_process = linux_nat_supports_multi_process;
 

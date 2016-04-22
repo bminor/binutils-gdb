@@ -123,3 +123,94 @@
 
 /* crc32<.r> 0,limm,u6		00111 110 01 110100 R 111 uuuuuu 111110 */
 { "crc32", 0x3e74703e, 0xffff703f, ARC_OPCODE_NPS400, BITOP, NONE, { ZA, LIMM, UIMM6_20 }, { C_NPS_R }},
+
+/****                 Arithmetic & Logic Instructions                 ****/
+
+#define ADDB_LIKE(NAME,SUBOP2)                                          \
+  { NAME, (0x48000000 | SUBOP2), 0xf80f001f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC1_POS, NPS_SRC2_POS, NPS_ADDB_SIZE }, { C_NPS_F, C_NPS_SX }},
+
+ADDB_LIKE ("addb", 0)
+ADDB_LIKE ("subb", 4)
+ADDB_LIKE ("adcb", 5)
+ADDB_LIKE ("sbcb", 6)
+
+#define ANDB_LIKE(NAME,SUBOP2,SIZE_OPERAND)                             \
+  { NAME, (0x48000000 | SUBOP2), 0xf80f001f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC1_POS, NPS_SRC2_POS, SIZE_OPERAND }, { C_NPS_F }},
+
+ANDB_LIKE ("andb", 1, NPS_ANDB_SIZE)
+ANDB_LIKE ("xorb", 2, NPS_ANDB_SIZE)
+ANDB_LIKE ("orb", 3, NPS_ANDB_SIZE)
+ANDB_LIKE ("fxorb", 7, NPS_FXORB_SIZE)
+ANDB_LIKE ("wxorb", 8, NPS_WXORB_SIZE)
+ANDB_LIKE ("shlb", 0xb, NPS_ANDB_SIZE)
+ANDB_LIKE ("shrb", 0xc, NPS_ANDB_SIZE)
+
+#define NOTB_LIKE(NAME,SUBOP2)                                          \
+  { NAME, (0x48000000 | SUBOP2), 0xf80f001f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_SRC2_POS, NPS_ANDB_SIZE }, { C_NPS_F }},
+
+NOTB_LIKE ("notb", 0x9)
+NOTB_LIKE ("cntbb", 0xa)
+
+#define DIV_LIKE(NAME,DIV_MODE)                                          \
+  { NAME, (0x4800000d | DIV_MODE << 14), 0xf80fc3ff, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC1_POS, NPS_SRC2_POS, }, { C_NPS_F }}, \
+  { NAME, (0x4800020d | DIV_MODE << 14), 0xf8efc21f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_DIV_UIMM4, NPS_SRC1_POS }, { C_NPS_F }},
+
+DIV_LIKE ("div", 0x1)
+DIV_LIKE ("mod", 0x2)
+DIV_LIKE ("divm", 0x0)
+
+{ "qcmp", 0x4810000e, 0xf81f001e, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC2_POS, NPS_QCMP_SIZE, NPS_QCMP_M1, NPS_QCMP_M2, NPS_QCMP_M3 }, { C_NPS_AR_AL }},
+{ "qcmp", 0x481001ee, 0xf81f01fe, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC2_POS, NPS_QCMP_SIZE, NPS_QCMP_M1, NPS_QCMP_M2 }, { C_NPS_AR_AL }},
+{ "qcmp", 0x481001ee, 0xf81f81fe, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC2_POS, NPS_QCMP_SIZE, NPS_QCMP_M1  }, { C_NPS_AR_AL }},
+{ "qcmp", 0x481001ee, 0xf81fc1fe, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC2_POS, NPS_QCMP_SIZE  }, { C_NPS_AR_AL }},
+
+{ "calcsd", 0x48000010, 0xf80f407f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_CALC_ENTRY_SIZE }, { C_NPS_F }},
+{ "calcxd", 0x48004010, 0xf80f407f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_CALC_ENTRY_SIZE }, { C_NPS_F }},
+
+/****                  Protocol Decoder Instructions                  ****/
+
+/* dctcp b,c  00111bbb001011110bbbcccccc000000 */
+{ "dctcp", 0x382f0000, 0xf8ff803f, ARC_OPCODE_NPS400, NET, NONE, { RB, RC }, { 0 }},
+
+/* dcip a,b,c  00111bbb001011110bbbccccccaaaaaa */
+{ "dcip", 0x38290000, 0xf8ff8000, ARC_OPCODE_NPS400, NET, NONE, { RA, RB, RC }, { 0 }},
+
+/* dcet b,c  00111bbb001011110bbbcccccc000010 */
+{ "dcet", 0x382f0002, 0xf8ff803f, ARC_OPCODE_NPS400, NET, NONE, { RB, RC }, { 0 }},
+
+/* dcet a,b,c  00111bbb001000000bbbccccccaaaaaa */
+{ "dcet", 0x38200000, 0xf8ff8000, ARC_OPCODE_NPS400, NET, NONE, { RA, RB, RC }, { 0 }},
+
+/****                        ACL Instructions                         ****/
+
+/* dcacl<.f> a,b,c  00111bbb001001010bbbccccccaaaaaa */
+{ "dcacl", 0x38250000, 0xf8ff0000, ARC_OPCODE_NPS400, ACL, NONE, { RA, RB, RC }, { C_F }},
+
+/****                  Pipeline Control Instructions                  ****/
+
+/* schd<.rw|.rd> */
+{ "schd", 0x3e6f7004, 0xffffff7f, ARC_OPCODE_NPS400, CONTROL, NONE, { 0 }, { C_NPS_SCHD_RW }},
+
+/* schd.wft.<.ie1|.ie2|.ie12> */
+{ "schd", 0x3e6f7044, 0xfffffcff, ARC_OPCODE_NPS400, CONTROL, NONE, { 0 }, { C_NPS_SCHD_TRIG, C_NPS_SCHD_IE }},
+
+/* sync<.rd|.wr> */
+{ "sync", 0x3e6f703f, 0xffffffbf, ARC_OPCODE_NPS400, CONTROL, NONE, { 0 }, { C_NPS_SYNC }},
+
+/* hwscd.off B */
+{ "hwschd", 0x386f00bf, 0xf8ff8fff, ARC_OPCODE_NPS400, CONTROL, NONE, { RB }, { C_NPS_HWS_OFF }},
+
+/* hwscd.restore 0,C */
+{ "hwschd", 0x3e6f7003, 0xfffff03f, ARC_OPCODE_NPS400, CONTROL, NONE, { ZA, RC }, { C_NPS_HWS_RESTORE }},
+
+/****      Load / Store From (0x57f00000 + Offset) Instructions       ****/
+
+#define XLDST_LIKE(NAME,SUBOP2)                                          \
+  { NAME, (0x58000000 | (SUBOP2 << 16)), 0xf81f0000, ARC_OPCODE_NPS400, MEMORY, NONE, { NPS_R_DST, BRAKET, NPS_XLDST_UIMM16, BRAKETdup }, { 0 }},
+
+XLDST_LIKE("xldb", 0x8)
+XLDST_LIKE("xldw", 0x9)
+XLDST_LIKE("xld", 0xa)
+XLDST_LIKE("xstb", 0xc)
+XLDST_LIKE("xstw", 0xd)
+XLDST_LIKE("xst", 0xe)

@@ -9,6 +9,8 @@
 * Support for -z nodynamic-undefined-weak in the x86 ELF linker, which
   avoids dynamic relocations against undefined weak symbols in executable.
 
+* The NOCROSSREFSTO command was added to the linker script language.
+
 Changes in 2.26:
 
 * Add --fix-stm32l4xx-629360 to the ARM linker to enable a link-time

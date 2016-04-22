@@ -50,61 +50,10 @@
 
 #define parse_type(ps) builtin_type (parse_gdbarch (ps))
 
-/* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
-   as well as gratuitiously global symbol names, so we can have multiple
-   yacc generated parsers in gdb.  These are only the variables
-   produced by yacc.  If other parser generators (bison, byacc, etc) produce
-   additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list.  */
-
-/* NOTE: This is clumsy, especially since BISON and FLEX provide --prefix
-   options.  I presume we are maintaining it to accommodate systems
-   without BISON?  (PNH) */
-
-#define	yymaxdepth ada_maxdepth
-/* ada_parse calls this after initialization */
-#define	yyparse	ada_parse_internal
-#define	yylex	ada_lex
-#define	yyerror	ada_error
-#define	yylval	ada_lval
-#define	yychar	ada_char
-#define	yydebug	ada_debug
-#define	yypact	ada_pact
-#define	yyr1	ada_r1
-#define	yyr2	ada_r2
-#define	yydef	ada_def
-#define	yychk	ada_chk
-#define	yypgo	ada_pgo
-#define	yyact	ada_act
-#define	yyexca	ada_exca
-#define yyerrflag ada_errflag
-#define yynerrs	ada_nerrs
-#define	yyps	ada_ps
-#define	yypv	ada_pv
-#define	yys	ada_s
-#define	yy_yys	ada_yys
-#define	yystate	ada_state
-#define	yytmp	ada_tmp
-#define	yyv	ada_v
-#define	yy_yyv	ada_yyv
-#define	yyval	ada_val
-#define	yylloc	ada_lloc
-#define yyreds	ada_reds		/* With YYDEBUG defined */
-#define yytoks	ada_toks		/* With YYDEBUG defined */
-#define yyname	ada_name		/* With YYDEBUG defined */
-#define yyrule	ada_rule		/* With YYDEBUG defined */
-#define yyss	ada_yyss
-#define yysslim	ada_yysslim
-#define yyssp	ada_yyssp
-#define yystacksize ada_yystacksize
-#define yyvs	ada_yyvs
-#define yyvsp	ada_yyvsp
-
-#ifndef YYDEBUG
-#define	YYDEBUG	1		/* Default to yydebug support */
-#endif
-
-#define YYFPRINTF parser_fprintf
+/* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
+   etc).  */
+#define GDB_YY_REMAP_PREFIX ada_
+#include "yy-remap.h"
 
 struct name_info {
   struct symbol *sym;

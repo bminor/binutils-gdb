@@ -558,7 +558,7 @@ rwat_fast (unsigned char *memory, int x, int maskw, int endianw)
 static INLINE int
 riat_fast (unsigned char *insn_ptr, int endianw)
 {
-  unsigned short *p = (unsigned short *) ((size_t) insn_ptr ^ endianw);
+  unsigned short *p = (unsigned short *) ((uintptr_t) insn_ptr ^ endianw);
 
   return *p;
 }
@@ -722,7 +722,7 @@ do { \
 #if defined(__GO32__)
 int sim_memory_size = 19;
 #else
-int sim_memory_size = 24;
+int sim_memory_size = 30;
 #endif
 
 static int sim_profile_size = 17;
@@ -1185,41 +1185,19 @@ div1 (int *R, int iRn2, int iRn1/*, int T*/)
 }
 
 static void
-dmul (int sign, unsigned int rm, unsigned int rn)
+dmul_s (uint32_t rm, uint32_t rn)
 {
-  unsigned long RnL, RnH;
-  unsigned long RmL, RmH;
-  unsigned long temp0, temp1, temp2, temp3;
-  unsigned long Res2, Res1, Res0;
+  int64_t res = (int64_t)(int32_t)rm * (int64_t)(int32_t)rn;
+  MACH = (uint32_t)((uint64_t)res >> 32);
+  MACL = (uint32_t)res;
+}
 
-  RnL = rn & 0xffff;
-  RnH = (rn >> 16) & 0xffff;
-  RmL = rm & 0xffff;
-  RmH = (rm >> 16) & 0xffff;
-  temp0 = RmL * RnL;
-  temp1 = RmH * RnL;
-  temp2 = RmL * RnH;
-  temp3 = RmH * RnH;
-  Res2 = 0;
-  Res1 = temp1 + temp2;
-  if (Res1 < temp1)
-    Res2 += 0x00010000;
-  temp1 = (Res1 << 16) & 0xffff0000;
-  Res0 = temp0 + temp1;
-  if (Res0 < temp0)
-    Res2 += 1;
-  Res2 += ((Res1 >> 16) & 0xffff) + temp3;
-  
-  if (sign)
-    {
-      if (rn & 0x80000000)
-	Res2 -= rm;
-      if (rm & 0x80000000)
-	Res2 -= rn;
-    }
-
-  MACH = Res2;
-  MACL = Res0;
+static void
+dmul_u (uint32_t rm, uint32_t rn)
+{
+  uint64_t res = (uint64_t)(uint32_t)rm * (uint64_t)(uint32_t)rn;
+  MACH = (uint32_t)(res >> 32);
+  MACL = (uint32_t)res;
 }
 
 static void
@@ -2477,10 +2455,10 @@ parse_and_set_memory_size (SIM_DESC sd, const char *str)
   int n;
 
   n = strtol (str, NULL, 10);
-  if (n > 0 && n <= 24)
+  if (n > 0 && n <= 31)
     sim_memory_size = n;
   else
-    sim_io_printf (sd, "Bad memory size %d; must be 1 to 24, inclusive\n", n);
+    sim_io_printf (sd, "Bad memory size %d; must be 1 to 31, inclusive\n", n);
 }
 
 SIM_RC

@@ -1410,6 +1410,14 @@ valid_command_p (const char *command)
   return *command == '\0';
 }
 
+/* Called when "alias" was incorrectly used.  */
+
+static void
+alias_usage_error (void)
+{
+  error (_("Usage: alias [-a] [--] ALIAS = COMMAND"));
+}
+
 /* Make an alias of an existing command.  */
 
 static void
@@ -1421,10 +1429,9 @@ alias_command (char *args, int from_tty)
   char **alias_argv, **command_argv;
   dyn_string_t alias_dyn_string, command_dyn_string;
   struct cleanup *cleanup;
-  static const char usage[] = N_("Usage: alias [-a] [--] ALIAS = COMMAND");
 
   if (args == NULL || strchr (args, '=') == NULL)
-    error (_(usage));
+    alias_usage_error ();
 
   args2 = xstrdup (args);
   cleanup = make_cleanup (xfree, args2);
@@ -1453,7 +1460,7 @@ alias_command (char *args, int from_tty)
 
   if (alias_argv[0] == NULL || command_argv[0] == NULL
       || *alias_argv[0] == '\0' || *command_argv[0] == '\0')
-    error (_(usage));
+    alias_usage_error ();
 
   for (i = 0; alias_argv[i] != NULL; ++i)
     {

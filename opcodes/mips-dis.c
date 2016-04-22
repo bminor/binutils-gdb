@@ -1894,11 +1894,13 @@ print_mips16_insn_arg (struct disassemble_info *info,
 		{
 		  operand = ext_operand;
 		  if (operand->size == 16)
-		    uval |= ((extend & 0x1f) << 11) | (extend & 0x7e0);
+		    uval = (((extend & 0x1f) << 11) | (extend & 0x7e0)
+			    | (uval & 0x1f));
 		  else if (operand->size == 15)
 		    uval |= ((extend & 0xf) << 11) | (extend & 0x7f0);
 		  else
-		    uval = ((extend >> 6) & 0x1f) | (extend & 0x20);
+		    uval = ((((extend >> 6) & 0x1f) | (extend & 0x20))
+			    & ((1U << operand->size) - 1));
 		}
 	    }
 	}

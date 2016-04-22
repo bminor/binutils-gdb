@@ -875,6 +875,7 @@ proc run_dump_test { name {extra_options {}} } {
     }
 
     set check_ld(source) ""
+    set check_ld(terminal) 0
     if { $opts(error) != "" \
          || $opts(warning) != "" \
          || $opts(error_output) != "" \
@@ -1796,6 +1797,13 @@ proc check_lto_available { } {
 	    set lto_available_saved 0
 	    return 0
 	}
+	# This test will hide LTO bugs in ld.  Since GCC 4.9 adds
+	# -ffat-lto-objects, we always run LTO tests on Linux with
+	# GCC 4.9 or newer.
+	if { [istarget "*-*-linux*"] && [at_least_gcc_version 4 9] } {
+	    set lto_available_saved 1
+	    return 1
+	}
 	# Check if gcc supports -flto -fuse-linker-plugin
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
@@ -1830,6 +1838,13 @@ proc check_lto_fat_available { } {
 	    set lto_fat_available_saved 0
 	    return 0
 	}
+	# This test will hide LTO bugs in ld.  Since GCC 4.9 adds
+	# -ffat-lto-objects, we always run LTO tests on Linux with
+	# GCC 4.9 or newer.
+	if { [istarget "*-*-linux*"] && [at_least_gcc_version 4 9] } {
+	    set lto_fat_available_saved 1
+	    return 1
+	}
 	# Check if gcc supports -flto -fuse-linker-plugin
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
@@ -1863,6 +1878,13 @@ proc check_lto_shared_available { } {
         if { [which $CC] == 0 } {
 	    set lto_shared_available_saved 0
 	    return 0
+	}
+	# This test will hide LTO bugs in ld.  Since GCC 4.9 adds
+	# -ffat-lto-objects, we always run LTO tests on Linux with
+	# GCC 4.9 or newer.
+	if { [istarget "*-*-linux*"] && [at_least_gcc_version 4 9] } {
+	    set lto_shared_available_saved 1
+	    return 1
 	}
 	# Check if gcc supports -flto -fuse-linker-plugin -shared
 	set flags ""

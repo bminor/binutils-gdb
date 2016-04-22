@@ -41,7 +41,14 @@ proc ${board}_file { dest op args } {
 }
 
 proc ${board}_download { board host dest } {
-    return $host
+    # We pass DEST in standard_output_file, regardless of whether it is absolute
+    # or relative, because we don't want the tests to be able to write outside
+    # their standard output directory.
+    set dest [standard_output_file $dest]
+
+    file copy -force $host $dest
+
+    return $dest
 }
 
 proc ${board}_upload {dest srcfile args} {

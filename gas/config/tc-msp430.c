@@ -684,7 +684,7 @@ enum
 {
   OPTION_SILICON_ERRATA = OPTION_MD_BASE,
   OPTION_SILICON_ERRATA_WARN,
-} option_numbers;
+};
 
 static unsigned int silicon_errata_fix = 0;
 static unsigned int silicon_errata_warn = 0;

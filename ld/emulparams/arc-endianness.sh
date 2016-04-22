@@ -1,10 +1,11 @@
+# Select an appropriate endinaness based on the value of target.  When
+# building for all targets we select little endian, which is what the
+# '*' pattern is for.
 case ${target} in
     arceb-*)
         ARC_ENDIAN="big"
         ;;
-    arc-*)
+    arc-* | * )
         ARC_ENDIAN="little"
         ;;
-    *)
-        exit 1
 esac
