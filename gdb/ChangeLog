@@ -1,5 +1,35 @@
 2016-04-22  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.c (enum catcher_state, struct catcher)
+	(current_catcher): Define in C++ mode too.
+	(exceptions_state_mc_catch): Call throw_exception_sjlj instead of
+	throw_exception.
+	(throw_exception_sjlj, throw_exception_cxx): New functions,
+	factored out from throw_exception.
+	(throw_exception): Reimplement.
+	* common/common-exceptions.h (exceptions_state_mc_init)
+	(exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1, exceptions_state_mc_catch):
+	Declare in C++ mode too.
+	(TRY): Rename to ...
+	(TRY_SJLJ): ... this.
+	(CATCH): Rename to ...
+	(CATCH_SJLJ): ... this.
+	(END_CATCH): Rename to ...
+	(END_CATCH_SJLJ): ... this.
+	[GDB_XCPT == GDB_XCPT_SJMP] (TRY, CATCH, END_CATCH): Map to SJLJ
+	equivalents.
+	(throw_exception): Update comments.
+	(throw_exception_sjlj): Declare.
+	* event-top.c (gdb_rl_callback_read_char_wrapper): Extend intro
+	comment.  Wrap body in TRY_SJLJ/CATCH_SJLJ and rethrow any
+	intercepted exception.
+	(gdb_rl_callback_handler): New function.
+	(gdb_rl_callback_handler_install): Always install
+	gdb_rl_callback_handler as readline callback.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (rl_callback_read_char_wrapper): Rename to ...
 	(gdb_rl_callback_read_char_wrapper): ... this.
 	(change_line_handler, gdb_setup_readline): Adjust.
