@@ -48,7 +48,6 @@
 /* readline defines this.  */
 #undef savestring
 
-static void rl_callback_read_char_wrapper (gdb_client_data client_data);
 static void command_line_handler (char *rl);
 static void change_line_handler (void);
 static char *top_level_prompt (void);
@@ -141,7 +140,7 @@ static struct async_signal_handler *sigtstp_token;
 #endif
 static struct async_signal_handler *async_sigterm_token;
 
-/* This hook is called by rl_callback_read_char_wrapper after each
+/* This hook is called by gdb_rl_callback_read_char_wrapper after each
    character is processed.  */
 void (*after_char_processing_hook) (void);
 
@@ -150,7 +149,7 @@ void (*after_char_processing_hook) (void);
    loop expects the callback function to have a paramter, while
    readline expects none.  */
 static void
-rl_callback_read_char_wrapper (gdb_client_data client_data)
+gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
 {
   rl_callback_read_char ();
   if (after_char_processing_hook)
@@ -188,7 +187,7 @@ change_line_handler (void)
   if (async_command_editing_p)
     {
       /* Turn on editing by using readline.  */
-      call_readline = rl_callback_read_char_wrapper;
+      call_readline = gdb_rl_callback_read_char_wrapper;
       input_handler = command_line_handler;
     }
   else
@@ -1109,8 +1108,10 @@ set_async_editing_command (char *args, int from_tty,
 }
 
 /* Set things up for readline to be invoked via the alternate
-   interface, i.e. via a callback function (rl_callback_read_char),
-   and hook up instream to the event loop.  */
+   interface, i.e. via a callback function
+   (gdb_rl_callback_read_char), and hook up instream to the event
+   loop.  */
+
 void
 gdb_setup_readline (void)
 {
@@ -1136,7 +1137,7 @@ gdb_setup_readline (void)
 	  
       /* When a character is detected on instream by select or poll,
 	 readline will be invoked via this callback function.  */
-      call_readline = rl_callback_read_char_wrapper;
+      call_readline = gdb_rl_callback_read_char_wrapper;
     }
   else
     {
