@@ -1,3 +1,8 @@
+2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_link_create_dynstrtab): Set dynobj to a
+	normal input file if possible.
+
 2016-04-21  Nick Clifton  <nickc@redhat.com>
 
 	* aout-adobe.c: Use _bfd_generic_link_check_relocs.
