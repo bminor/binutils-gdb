@@ -1,5 +1,10 @@
 2016-04-22  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/annota1.exp: Set breakpoint on line $main_line.
+	* gdb.base/annota3.exp: Likewise.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.reverse/step-precsave.exp: Do one step and test program
 	stops in "callee" and do multiple steps until program goes out
 	of "callee".
