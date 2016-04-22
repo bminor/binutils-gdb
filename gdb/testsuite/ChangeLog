@@ -1,5 +1,12 @@
 2016-04-22  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.reverse/step-precsave.exp: Do one step and test program
+	stops in "callee" and do multiple steps until program goes out
+	of "callee".
+	* gdb.reverse/step-reverse.exp: Likewise.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.trace/signal.exp: Also pass if
 	$tracepoint_hits($i) > $iterations.
 
