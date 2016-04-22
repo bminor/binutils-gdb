@@ -1,5 +1,10 @@
 2016-04-22  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.trace/unavailable.exp (gdb_collect_globals_test_1): Match
+	more after $hex.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/annota1.exp: Set breakpoint on line $main_line.
 	* gdb.base/annota3.exp: Likewise.
 
