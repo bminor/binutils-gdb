@@ -1,5 +1,11 @@
 2016-04-22  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.h (GDB_XCPT_TRY): Remove mention of
+	the foreign frames issue.
+	[__cplusplus] (GDB_XCPT): Define as GDB_XCPT_TRY.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.c (enum catcher_state, struct catcher)
 	(current_catcher): Define in C++ mode too.
 	(exceptions_state_mc_catch): Call throw_exception_sjlj instead of
