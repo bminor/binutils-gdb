@@ -198,31 +198,11 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
 /* Create a strtab to hold the dynamic symbol names.  */
 static bfd_boolean
-_bfd_elf_link_create_dynstrtab (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_link_create_dynstrtab (struct bfd_link_info *info)
 {
   struct elf_link_hash_table *hash_table;
 
   hash_table = elf_hash_table (info);
-  if (hash_table->dynobj == NULL)
-    {
-      /* We may not set dynobj, an input file holding linker created
-	 dynamic sections to abfd, which may be a dynamic object with
-	 its own dynamic sections.  We need to find a normal input file
-	 to hold linker created sections if possible.  */
-      if ((abfd->flags & (DYNAMIC | BFD_PLUGIN)) != 0)
-	{
-	  bfd *ibfd;
-	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
-	    if ((ibfd->flags
-		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
-	      {
-		abfd = ibfd;
-		break;
-	      }
-	}
-      hash_table->dynobj = abfd;
-    }
-
   if (hash_table->dynstr == NULL)
     {
       hash_table->dynstr = _bfd_elf_strtab_init ();
@@ -253,7 +233,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (elf_hash_table (info)->dynamic_sections_created)
     return TRUE;
 
-  if (!_bfd_elf_link_create_dynstrtab (abfd, info))
+  if (!_bfd_elf_link_create_dynstrtab (info))
     return FALSE;
 
   abfd = elf_hash_table (info)->dynobj;
@@ -3206,15 +3186,14 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
    1 if a DT_NEEDED tag already exists, and 0 on success.  */
 
 static int
-elf_add_dt_needed_tag (bfd *abfd,
-		       struct bfd_link_info *info,
+elf_add_dt_needed_tag (struct bfd_link_info *info,
 		       const char *soname,
 		       bfd_boolean do_it)
 {
   struct elf_link_hash_table *hash_table;
   bfd_size_type strindex;
 
-  if (!_bfd_elf_link_create_dynstrtab (abfd, info))
+  if (!_bfd_elf_link_create_dynstrtab (info))
     return -1;
 
   hash_table = elf_hash_table (info);
@@ -3908,7 +3887,7 @@ error_free_dyn:
 	 will need to know it.  */
       elf_dt_name (abfd) = soname;
 
-      ret = elf_add_dt_needed_tag (abfd, info, soname, add_needed);
+      ret = elf_add_dt_needed_tag (info, soname, add_needed);
       if (ret < 0)
 	goto error_return;
 
@@ -4717,7 +4696,7 @@ error_free_dyn:
 		(elf_dyn_lib_class (abfd) & ~DYN_AS_NEEDED);
 
 	      add_needed = TRUE;
-	      ret = elf_add_dt_needed_tag (abfd, info, soname, add_needed);
+	      ret = elf_add_dt_needed_tag (info, soname, add_needed);
 	      if (ret < 0)
 		goto error_free_vers;
 

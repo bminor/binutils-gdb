@@ -65,6 +65,8 @@ nds32_elf_create_output_section_statements (void)
 				     ex9_export_file, ex9_import_file,
 				     update_ex9_table, ex9_limit,
 				     ex9_loop_aware, ifc_loop_aware);
+
+  gld${EMULATION_NAME}_create_output_section_statements ();
 }
 
 static void

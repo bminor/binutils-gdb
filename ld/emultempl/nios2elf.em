@@ -70,6 +70,8 @@ nios2elf_create_output_section_statements (void)
 
   stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
   ldlang_add_file (stub_file);
+
+  gld${EMULATION_NAME}_create_output_section_statements ();
 }
 
 

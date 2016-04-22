@@ -53,6 +53,8 @@ ppc_after_open_output (void)
     pagesize = config.commonpagesize;
   params.pagesize_p2 = bfd_log2 (pagesize);
   ppc_elf_link_params (&link_info, &params);
+
+  gld${EMULATION_NAME}_create_output_section_statements ();
 }
 
 EOF

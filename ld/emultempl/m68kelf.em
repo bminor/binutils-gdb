@@ -208,6 +208,8 @@ static void
 elf_m68k_create_output_section_statements (void)
 {
   bfd_elf_m68k_set_target_options (&link_info, got_handling);
+
+  gld${EMULATION_NAME}_create_output_section_statements ();
 }
 
 EOF

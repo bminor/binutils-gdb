@@ -64,6 +64,7 @@ static void gld${EMULATION_NAME}_after_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static void gld${EMULATION_NAME}_after_allocation (void);
+static void gld${EMULATION_NAME}_create_output_section_statements (void);
 static lang_output_section_statement_type *gld${EMULATION_NAME}_place_orphan
   (asection *, const char *, int);
 EOF
@@ -262,6 +263,8 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
   if (global_found != NULL)
     return;
   if (s->the_bfd == NULL)
+    return;
+  if ((s->the_bfd->flags & BFD_LINKER_CREATED) != 0)
     return;
 
   /* If this input file was an as-needed entry, and wasn't found to be
@@ -1400,6 +1403,46 @@ gld${EMULATION_NAME}_find_statement_assignment (lang_statement_union_type *s)
 
 EOF
 
+if test x"$LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS" != xgld"$EMULATION_NAME"create_output_section_statements; then
+fragment <<EOF
+
+/* Fake input file for dynamic sections.  */
+static lang_input_statement_type *dynobj;
+
+/* This is called before the input files are opened.  We create a new
+   fake input file to hold the dynamic sections.  */
+
+static void
+gld${EMULATION_NAME}_create_output_section_statements (void)
+{
+  if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
+    return;
+
+  dynobj = lang_add_input_file (" dynobj ",
+				lang_input_file_is_fake_enum,
+				NULL);
+  dynobj->the_bfd = bfd_create (" dynobj ", link_info.output_bfd);
+  if (dynobj->the_bfd == NULL
+      || !bfd_set_arch_mach (dynobj->the_bfd,
+			     bfd_get_arch (link_info.output_bfd),
+			     bfd_get_mach (link_info.output_bfd)))
+    {
+      einfo ("%F%P: can not create BFD to hold dynamic sections: %E\n");
+      return;
+    }
+
+  dynobj->the_bfd->flags |= BFD_LINKER_CREATED;
+  elf_elfheader (dynobj->the_bfd)->e_ident[EI_CLASS]
+    = (get_elf_backend_data (link_info.output_bfd)->s->arch_size == 64
+       ? ELFCLASS64 : ELFCLASS32);
+  elf_hash_table (&link_info)->dynobj = dynobj->the_bfd;
+
+  ldlang_add_file (dynobj);
+}
+
+EOF
+fi
+
 if test x"$LDEMUL_BEFORE_ALLOCATION" != xgld"$EMULATION_NAME"_before_allocation; then
   if test x"${ELF_INTERPRETER_NAME+set}" = xset; then
     ELF_INTERPRETER_SET_DEFAULT="
@@ -2515,7 +2558,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
   ${LDEMUL_FINISH-finish_default},
-  ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
+  ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-gld${EMULATION_NAME}_create_output_section_statements},
   ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
   ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},
   ${LDEMUL_SET_SYMBOLS-NULL},

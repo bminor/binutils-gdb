@@ -206,6 +206,8 @@ mips_create_output_section_statements (void)
 
   if (is_mips_elf (link_info.output_bfd))
     _bfd_mips_elf_init_stubs (&link_info, mips_add_stub_section);
+
+  gld${EMULATION_NAME}_create_output_section_statements ();
 }
 
 /* This is called after we have merged the private data of the input bfds.  */

@@ -136,6 +136,7 @@ avr_elf_create_output_section_statements (void)
 
   ldlang_add_file (stub_file);
 
+  gld${EMULATION_NAME}_create_output_section_statements ();
   return;
 
   err_ret:

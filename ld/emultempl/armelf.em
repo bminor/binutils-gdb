@@ -514,6 +514,8 @@ arm_elf_create_output_section_statements (void)
   /* Also use the stub file for stubs placed in a single output section.  */
   bfd_elf32_arm_add_glue_sections_to_bfd (stub_file->the_bfd, &link_info);
   bfd_elf32_arm_get_bfd_for_interworking (stub_file->the_bfd, &link_info);
+
+  gld${EMULATION_NAME}_create_output_section_statements ();
 }
 
 /* Avoid processing the fake stub_file in vercheck, stat_needed and

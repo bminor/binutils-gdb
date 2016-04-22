@@ -98,6 +98,8 @@ ppc_create_output_section_statements (void)
     params.save_restore_funcs = !bfd_link_relocatable (&link_info);
   if (!ppc64_elf_init_stub_bfd (&link_info, &params))
     einfo ("%F%P: can not init BFD: %E\n");
+
+  gld${EMULATION_NAME}_create_output_section_statements ();
 }
 
 /* Called after opening files but before mapping sections.  */
