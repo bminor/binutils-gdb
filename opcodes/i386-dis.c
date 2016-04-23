@@ -13327,6 +13327,13 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	p++;
     }
 
+  if (address_mode == mode_64bit && sizeof (bfd_vma) < 8)
+    {
+      (*info->fprintf_func) (info->stream,
+			     _("64-bit address is disabled"));
+      return -1;
+    }
+
   if (intel_syntax)
     {
       names64 = intel_names64;

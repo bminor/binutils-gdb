@@ -1,3 +1,10 @@
+2016-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19983
+	PR binutils/19984
+	* i386-dis.c (print_insn): Return -1 if size of bfd_vma is
+	smaller than address size.
+
 2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* alpha-dis.c: Regenerate.
