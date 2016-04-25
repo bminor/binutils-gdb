@@ -1,3 +1,9 @@
+2016-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19985
+	* configure.tgt: Include big endian PPC64 emulations with little
+	endian PPC64 targets.
+
 2016-04-25  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* scripttempl/avrtiny.sc (.text): Do not set LMA to zero.

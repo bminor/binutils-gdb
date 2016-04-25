@@ -623,10 +623,13 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
 			esac
 			case "${targ}" in
 			powerpc*le-*)
-				for z in targ_emul targ_extra_emuls targ_extra_libpath targ64_extra_emuls targ64_extra_libpath
+				# PR 19985: Include big endian emulations.
+				for z in targ_extra_emuls targ_extra_libpath targ64_extra_emuls targ64_extra_libpath
 				do
-				  eval ${z}=\"`eval echo \\$${z} | sed -e 's/ppc/lppc/g'`\"
+				  eval ${z}+=\" `eval echo \\$${z} | sed -e 's/ppc/lppc/g'`\"
 				done
+				eval targ_extra_emuls+=\" \$targ_emul\"
+			        eval targ_emul=\"`eval echo \\$targ_emul | sed -e 's/ppc/lppc/g'`\"
 			esac ;;
 powerpc-*-nto*)         targ_emul=elf32ppcnto ;;
 powerpcle-*-nto*)       targ_emul=elf32lppcnto ;;
