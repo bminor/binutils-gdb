@@ -1,3 +1,16 @@
+2016-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (should_be_inserted): Return 0 if the location's
+	owner is not single step breakpoint or single step breakpoint's
+	thread isn't the thread which is stepping past a breakpoint.
+	* gdbarch.sh (software_single_step): Update comments.
+	* gdbarch.h: Regenerated.
+	* infrun.c (struct step_over_info) <thread>: New field.
+	(set_step_over_info): New argument 'thread'.  Callers updated.
+	(clear_step_over_info): Set field thread to -1.
+	(thread_is_stepping_over_breakpoint): New function.
+	* infrun.h (thread_is_stepping_over_breakpoint): Declaration.
+
 2016-04-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* ppc-linux-nat.c (ppc_linux_read_description): Use PPC_FEATURE_HAS_VSX

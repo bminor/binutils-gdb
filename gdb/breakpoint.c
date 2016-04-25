@@ -2219,11 +2219,22 @@ should_be_inserted (struct bp_location *bl)
     return 0;
 
   /* Don't insert a breakpoint if we're trying to step past its
-     location.  */
+     location, except if the breakpoint is a single-step breakpoint,
+     and the breakpoint's thread is the thread which is stepping past
+     a breakpoint.  */
   if ((bl->loc_type == bp_loc_software_breakpoint
        || bl->loc_type == bp_loc_hardware_breakpoint)
       && stepping_past_instruction_at (bl->pspace->aspace,
-				       bl->address))
+				       bl->address)
+      /* The single-step breakpoint may be inserted at the location
+	 we're trying to step if the instruction branches to itself.
+	 However, the instruction won't be executed at all and it may
+	 break the semantics of the instruction, for example, the
+	 instruction is a conditional branch or updates some flags.
+	 We can't fix it unless GDB is able to emulate the instruction
+	 or switch to displaced stepping.  */
+      && !(bl->owner->type == bp_single_step
+	   && thread_is_stepping_over_breakpoint (bl->owner->thread)))
     {
       if (debug_infrun)
 	{

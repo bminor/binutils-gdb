@@ -650,7 +650,12 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
    target can single step.  If not, then implement single step using breakpoints.
   
    A return value of 1 means that the software_single_step breakpoints
-   were inserted; 0 means they were not. */
+   were inserted; 0 means they were not.  Multiple breakpoints may be
+   inserted for some instructions such as conditional branch.  However,
+   each implementation must always evaluate the condition and only put
+   the breakpoint at the branch destination if the condition is true, so
+   that we ensure forward progress when stepping past a conditional
+   branch to self. */
 
 extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
 
