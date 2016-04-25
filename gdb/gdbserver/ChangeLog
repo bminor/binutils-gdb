@@ -1,5 +1,11 @@
 2016-04-25  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (lwp_signal_can_be_delivered): Adjust.
+	(need_step_over_p): Return zero if the LWP has pending signals
+	can be delivered on software single step target.
+
+2016-04-25  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (reinsert_raw_breakpoint): If bp->inserted is true
 	return instead of error.
 
