@@ -105,7 +105,7 @@ static int debug_compile_cplus_contexts = 0;
 static gcc_type ccp_convert_void (struct compile_cplus_instance *,
 				  struct type *);
 
-static gcc_type ccp_convert_func (struct compile_cplus_instance *context,
+static gcc_type ccp_convert_func (struct compile_cplus_instance *instance,
 				  struct type *type, int strip_artificial);
 
 /* Allocate a new C string from the given TOKEN.  */
@@ -151,7 +151,7 @@ eq_type_map_instance (const void *a, const void *b)
    is handled.  */
 
 static void
-insert_type (struct compile_cplus_instance *context, struct type *type,
+insert_type (struct compile_cplus_instance *instance, struct type *type,
 	     gcc_type gcc_type)
 {
   struct type_map_instance inst, *add;
@@ -159,7 +159,7 @@ insert_type (struct compile_cplus_instance *context, struct type *type,
 
   inst.type = type;
   inst.gcc_type_handle = gcc_type;
-  slot = htab_find_slot (context->type_map, &inst, INSERT);
+  slot = htab_find_slot (instance->type_map, &inst, INSERT);
 
   add = (struct type_map_instance *) *slot;
 
@@ -438,7 +438,7 @@ ccp_need_new_context (const struct compile_cplus_context *pctx)
    global namespace, into CONTEXT for type conversions.  */
 
 void
-ccp_push_processing_context (struct compile_cplus_instance *context,
+ccp_push_processing_context (struct compile_cplus_instance *instance,
 			     struct compile_cplus_context *pctx)
 {
   /* Push the scope we are processing.  */
@@ -447,7 +447,7 @@ ccp_push_processing_context (struct compile_cplus_instance *context,
   /* Push the global namespace.  */
   if (debug_compile_cplus_types)
     printf_unfiltered ("push_namespace \"\"\n");
-  CPCALL (push_namespace, context, "");
+  CPCALL (push_namespace, instance, "");
 
   if (CONTEXT_SCOPES (pctx) != NULL)
     {
@@ -474,7 +474,7 @@ ccp_push_processing_context (struct compile_cplus_instance *context,
 	    ns = copy_stoken (&scope->name);
 	  if (debug_compile_cplus_types)
 	    printf_unfiltered ("push_namespace %s\n", ns);
-	  CPCALL (push_namespace, context, ns);
+	  CPCALL (push_namespace, instance, ns);
 	  xfree (ns);
 	}
     }
@@ -486,7 +486,7 @@ ccp_push_processing_context (struct compile_cplus_instance *context,
    define a type from CONTEXT.  */
 
 void
-ccp_pop_processing_context (struct compile_cplus_instance *context,
+ccp_pop_processing_context (struct compile_cplus_instance *instance,
 			    struct compile_cplus_context *pctx)
 {
   int ix;
@@ -513,7 +513,7 @@ ccp_pop_processing_context (struct compile_cplus_instance *context,
 
 	  if (debug_compile_cplus_types)
 	    printf_unfiltered ("pop_namespace %s\n", ns);
-	  CPCALL (pop_namespace, context);
+	  CPCALL (pop_namespace, instance);
 	  xfree (ns);
 	}
     }
@@ -521,7 +521,7 @@ ccp_pop_processing_context (struct compile_cplus_instance *context,
   /* Pop global namespace.  */
   if (debug_compile_cplus_types)
     printf_unfiltered ("pop_namespace \"\"\n");
-  CPCALL (pop_namespace, context);
+  CPCALL (pop_namespace, instance);
 }
 
 /* Create a new processing context for TYPE with name TYPE_NAME.
@@ -535,7 +535,7 @@ ccp_pop_processing_context (struct compile_cplus_instance *context,
    The result should be freed with delete_processing_context.  */
 
 struct compile_cplus_context *
-new_processing_context (struct compile_cplus_instance *context,
+new_processing_context (struct compile_cplus_instance *instance,
 			const char *type_name, struct type *type,
 			gcc_type *nested_type)
 {
@@ -581,7 +581,7 @@ new_processing_context (struct compile_cplus_instance *context,
 	     to be pushed.  That should be explicitly done by callers.  */
 	  /* The type the oracle asked about is defined inside another
 	     class(es).  Convert that type instead of defining this type.  */
-	  (void) convert_cplus_type (context,
+	  (void) convert_cplus_type (instance,
 				     SYMBOL_TYPE (scope->bsymbol.symbol),
 				     GCC_CP_ACCESS_NONE);
 
@@ -590,7 +590,7 @@ new_processing_context (struct compile_cplus_instance *context,
 	     Upper layers are expecting to get the original type's
 	     gcc_type!  */
 	  inst.type = type;
-	  slot = htab_find_slot (context->type_map, &inst, NO_INSERT);
+	  slot = htab_find_slot (instance->type_map, &inst, NO_INSERT);
 	  gdb_assert (*slot != NULL);
 	  found = (struct type_map_instance *) *slot;
 	  *nested_type = found->gcc_type_handle;
@@ -682,42 +682,42 @@ access_to_string (enum gcc_cp_symbol_kind access)
 /* Convert a reference type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_reference (struct compile_cplus_instance *context,
+ccp_convert_reference (struct compile_cplus_instance *instance,
 		       struct type *type)
 {
-  gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+  gcc_type target = convert_cplus_type (instance, TYPE_TARGET_TYPE (type),
 					GCC_CP_ACCESS_NONE);
 
   /* !!keiths: GDB does not currently do anything with rvalue references.
      [Except set the type code to TYPE_CODE_ERROR!  */
   if (debug_compile_cplus_types)
     printf_unfiltered ("build_reference_type %s\n", TYPE_SAFE_NAME (type));
-  return CPCALL (build_reference_type, context, target, GCC_CP_REF_QUAL_LVALUE);
+  return CPCALL (build_reference_type, instance, target, GCC_CP_REF_QUAL_LVALUE);
 }
 
 /* Convert a pointer type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_pointer (struct compile_cplus_instance *context,
+ccp_convert_pointer (struct compile_cplus_instance *instance,
 		     struct type *type)
 {
-  gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+  gcc_type target = convert_cplus_type (instance, TYPE_TARGET_TYPE (type),
 					GCC_CP_ACCESS_NONE);
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("build_pointer_type %s\n", TYPE_SAFE_NAME (type));
-  return CPCALL (build_pointer_type, context, target);
+  return CPCALL (build_pointer_type, instance, target);
 }
 
 /* Convert an array type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_array (struct compile_cplus_instance *context, struct type *type)
+ccp_convert_array (struct compile_cplus_instance *instance, struct type *type)
 {
   gcc_type element_type;
   struct type *range = TYPE_INDEX_TYPE (type);
 
-  element_type = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+  element_type = convert_cplus_type (instance, TYPE_TARGET_TYPE (type),
 				     GCC_CP_ACCESS_NONE);
 
   if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
@@ -727,7 +727,7 @@ ccp_convert_array (struct compile_cplus_instance *context, struct type *type)
 
       if (debug_compile_cplus_types)
 	printf_unfiltered ("error %s\n", s);
-      return CPCALL (error, context, s);
+      return CPCALL (error, instance, s);
     }
 
   if (TYPE_LOW_BOUND (range) != 0)
@@ -737,7 +737,7 @@ ccp_convert_array (struct compile_cplus_instance *context, struct type *type)
 
       if (debug_compile_cplus_types)
 	printf_unfiltered ("error %s\n", s);
-      return CPCALL (error, context, s);
+      return CPCALL (error, instance, s);
     }
 
   if (TYPE_HIGH_BOUND_KIND (range) == PROP_LOCEXPR
@@ -752,13 +752,13 @@ ccp_convert_array (struct compile_cplus_instance *context, struct type *type)
 
 	  if (debug_compile_cplus_types)
 	    printf_unfiltered ("error %s\n", s);
-	  return CPCALL (error, context, s);
+	  return CPCALL (error, instance, s);
 	}
 
       upper_bound = c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
       if (debug_compile_cplus_types)
 	printf_unfiltered ("build_vla_array_type\n");
-      result = CPCALL (build_vla_array_type, context,
+      result = CPCALL (build_vla_array_type, instance,
 		       element_type, upper_bound);
       xfree (upper_bound);
       return result;
@@ -779,12 +779,12 @@ ccp_convert_array (struct compile_cplus_instance *context, struct type *type)
 	{
 	  if (debug_compile_cplus_types)
 	    printf_unfiltered ("build_vector_type\n");
-	  return CPCALL (build_vector_type, context, element_type, count);
+	  return CPCALL (build_vector_type, instance, element_type, count);
 	}
 
       if (debug_compile_cplus_types)
 	printf_unfiltered ("build_array_type\n");
-      return CPCALL (build_array_type, context, element_type, count);
+      return CPCALL (build_array_type, instance, element_type, count);
     }
 }
 
@@ -833,7 +833,7 @@ get_method_access_flag (const struct type *type, int fni, int num)
    containing class.  */
 
 static gcc_type
-ccp_convert_typedef (struct compile_cplus_instance *context,
+ccp_convert_typedef (struct compile_cplus_instance *instance,
 		     struct type *type, enum gcc_cp_symbol_kind nested_access)
 {
   int need_new_context;
@@ -843,7 +843,7 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
   struct cleanup *cleanups;
 
   cleanups = make_cleanup (null_cleanup, NULL);
-  pctx = new_processing_context (context, TYPE_NAME (type), type, &result);
+  pctx = new_processing_context (instance, TYPE_NAME (type), type, &result);
   if (result != GCC_TYPE_NONE)
     {
       gdb_assert (pctx == NULL);
@@ -861,7 +861,7 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
 
   need_new_context = ccp_need_new_context (pctx);
   if (need_new_context)
-    ccp_push_processing_context (context, pctx);
+    ccp_push_processing_context (instance, pctx);
 
   /* FIXME: I moved this call before the context switching so that
      need_new_context would work as a heuristics for namespace-scoped
@@ -870,7 +870,7 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
   /* !!keiths: And I'm moving it back.  I think checking accessibility
      should now give you what you're after.  It is not GCC_CP_ACCESS_NONE
      if we're looking at a nested type.  */
-  typedef_type = convert_cplus_type (context, check_typedef (type),
+  typedef_type = convert_cplus_type (instance, check_typedef (type),
 				     GCC_CP_ACCESS_NONE);
 
   if (debug_compile_cplus_types)
@@ -878,7 +878,7 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
       printf_unfiltered ("new_decl typedef %s, gcc_type = %lld\n", name,
 			 typedef_type);
     }
-  CPCALL (new_decl, context,
+  CPCALL (new_decl, instance,
 	  name,
 	  GCC_CP_SYMBOL_TYPEDEF | nested_access,
 	  typedef_type,
@@ -889,7 +889,7 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
 	  0);
 
   if (need_new_context)
-    ccp_pop_processing_context (context, pctx);
+    ccp_pop_processing_context (instance, pctx);
 
   delete_processing_context (pctx);
   do_cleanups (cleanups);
@@ -899,7 +899,7 @@ ccp_convert_typedef (struct compile_cplus_instance *context,
 /* Convert types defined in TYPE.  */
 
 static void
-ccp_convert_type_defns (struct compile_cplus_instance *context,
+ccp_convert_type_defns (struct compile_cplus_instance *instance,
 			struct type *type)
 {
   int i;
@@ -916,7 +916,7 @@ ccp_convert_type_defns (struct compile_cplus_instance *context,
 	accessibility = GCC_CP_ACCESS_PRIVATE;
       else
 	gdb_assert_not_reached ("unknown accessibility");
-      (void) convert_cplus_type (context,
+      (void) convert_cplus_type (instance,
 				 TYPE_TYPEDEF_FIELD_TYPE (type, i),
 				 accessibility);
     }
@@ -932,7 +932,7 @@ ccp_convert_type_defns (struct compile_cplus_instance *context,
 	accessibility = GCC_CP_ACCESS_PRIVATE;
       else
 	gdb_assert_not_reached ("unknown accessibility");
-      (void) convert_cplus_type (context,
+      (void) convert_cplus_type (instance,
 				 TYPE_NESTED_TYPES_FIELD_TYPE (type, i),
 				 accessibility);
     }
@@ -942,7 +942,7 @@ ccp_convert_type_defns (struct compile_cplus_instance *context,
    with gcc_type COMP_TYPE.  */
 
 static void
-ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
+ccp_convert_struct_or_union_members (struct compile_cplus_instance *instance,
 				     struct type *type, gcc_type comp_type)
 {
   int i;
@@ -958,7 +958,7 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 	continue;
 
       field_type
-	= convert_cplus_type (context, TYPE_FIELD_TYPE (type, i),
+	= convert_cplus_type (instance, TYPE_FIELD_TYPE (type, i),
 			      GCC_CP_ACCESS_NONE);
 
       if (field_is_static (&TYPE_FIELD (type, i)))
@@ -972,7 +972,7 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 		if (debug_compile_cplus_types)
 		  printf_unfiltered ("new_decl static variable %s at %s\n",
 		       field_name, core_addr_to_string (physaddr));
-		CPCALL (new_decl, context,
+		CPCALL (new_decl, instance,
 			field_name,
 			(GCC_CP_SYMBOL_VARIABLE
 			 | get_field_access_flag (type, i)),
@@ -1005,7 +1005,7 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 		       field_name,
 		       core_addr_to_string (physaddr));
 		  }
-		CPCALL (new_decl, context,
+		CPCALL (new_decl, instance,
 			field_name,
 			(GCC_CP_SYMBOL_VARIABLE
 			 | get_field_access_flag (type, i)),
@@ -1043,7 +1043,7 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 	      printf_unfiltered ("new_field %s, gcc_type = %lld\n",
 				 field_name, field_type);
 	    }
-	  CPCALL (new_field, context,
+	  CPCALL (new_field, instance,
 		  field_name,
 		  field_type,
 		  field_flags,
@@ -1056,7 +1056,7 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *context,
 /* Convert a method type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_method (struct compile_cplus_instance *context,
+ccp_convert_method (struct compile_cplus_instance *instance,
 		    struct type *parent_type, struct type *method_type)
 {
   gcc_type result, func_type, class_type;
@@ -1064,14 +1064,14 @@ ccp_convert_method (struct compile_cplus_instance *context,
   gcc_cp_ref_qualifiers_flags rquals;
 
   /* Get the actual (proto)type of the method, as a function.  */
-  func_type = ccp_convert_func (context, method_type, 1);
+  func_type = ccp_convert_func (instance, method_type, 1);
 
-  class_type = convert_cplus_type (context, parent_type, GCC_CP_ACCESS_NONE);
+  class_type = convert_cplus_type (instance, parent_type, GCC_CP_ACCESS_NONE);
   quals = (enum gcc_cp_qualifiers) 0; // !!keiths FIXME
   rquals = GCC_CP_REF_QUAL_NONE; // !!keiths FIXME
   if (debug_compile_cplus_types)
     printf_unfiltered ("build_method_type\n");
-  result = CPCALL (build_method_type, context,
+  result = CPCALL (build_method_type, instance,
 		   class_type, func_type, quals, rquals);
   if (debug_compile_cplus_types)
     printf_unfiltered ("\tgcc_type = %lld\n", result);
@@ -1417,7 +1417,7 @@ maybe_canonicalize_special_function (const char *field_name,
    with gcc_type CLASS_TYPE.  */
 
 static void
-ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
+ccp_convert_struct_or_union_methods (struct compile_cplus_instance *instance,
 				     struct type *type, gcc_type class_type)
 {
   int i;
@@ -1444,7 +1444,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	      struct type *temp_type = TYPE_FN_FIELD_TYPE (methods, j);
 
 	      /* Convert to a function, first. */
-	      prototype = convert_cplus_type (context, temp_type);
+	      prototype = convert_cplus_type (instance, temp_type);
 
 	      if (TYPE_CONST (temp_type))
 		qual_flags |= GCC_CP_QUALIFIER_CONST;
@@ -1455,7 +1455,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 
 	      if (debug_compile_cplus_types)
 		printf_unfiltered ("build_method_type\n");
-	      CPCALL (build_method_type, context,
+	      CPCALL (build_method_type, instance,
 		      class_type, prototype, qual_flags, ref_qual_flags);
 	    }
 #else
@@ -1506,14 +1506,14 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 		  /* !!keiths: This is beyond hacky, and is really only a
 		     lame workaround for detecting pure virtual methods.  */
 		  method_type
-		    = ccp_convert_method (context, type,
+		    = ccp_convert_method (instance, type,
 					  TYPE_FN_FIELD_TYPE (methods, j));
 		  if (debug_compile_cplus_types)
 		    {
 		      printf_unfiltered ("new_decl pure virtual method %s\n",
 					 name);
 		    }
-		  CPCALL (new_decl, context,
+		  CPCALL (new_decl, instance,
 			  name,
 			  (sym_kind
 			   | get_method_access_flag (type, i, j)
@@ -1552,14 +1552,14 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	    {
 	      kind = " static";
 	      method_type
-		= ccp_convert_func (context,
+		= ccp_convert_func (instance,
 				    TYPE_FN_FIELD_TYPE (methods, j), 0);
 	    }
 	  else
 	    {
 	      kind = "";
 	      method_type
-		= ccp_convert_method (context, type,
+		= ccp_convert_method (instance, type,
 				      TYPE_FN_FIELD_TYPE (methods, j));
 
 	      if (TYPE_FN_FIELD_VIRTUAL_P (methods, j))
@@ -1596,7 +1596,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	      printf_unfiltered ("new_decl%s method %s at %s\n", kind, name,
 				 core_addr_to_string (address));
 	    }
-	  CPCALL (new_decl, context,
+	  CPCALL (new_decl, instance,
 		  name,
 		  sym_kind | get_method_access_flag (type, i, j),
 		  method_type,
@@ -1615,7 +1615,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
    accessibility of this type.  */
 
 static gcc_type
-ccp_convert_struct_or_union (struct compile_cplus_instance *context,
+ccp_convert_struct_or_union (struct compile_cplus_instance *instance,
 			     struct type *type,
 			     enum gcc_cp_symbol_kind nested_access)
 {
@@ -1631,7 +1631,7 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
   cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Create a new processing context for TYPE.  */
-  pctx = new_processing_context (context, TYPE_NAME (type), type, &result);
+  pctx = new_processing_context (instance, TYPE_NAME (type), type, &result);
   if (result != GCC_TYPE_NONE)
     {
       /* The type requested was actually defined inside another type,
@@ -1661,7 +1661,7 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
     {
       if (debug_compile_cplus_contexts)
 	printf_unfiltered ("entering new processing scope %p\n", pctx);
-      ccp_push_processing_context (context, pctx);
+      ccp_push_processing_context (instance, pctx);
     }
   else
     {
@@ -1695,14 +1695,14 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
 		| (BASETYPE_VIA_VIRTUAL (type, i)
 		   ? GCC_CP_FLAG_BASECLASS_VIRTUAL
 		   : GCC_CP_FLAG_BASECLASS_NOFLAG);
-	      bases.elements[i] = convert_cplus_type (context, base_type,
+	      bases.elements[i] = convert_cplus_type (instance, base_type,
 						      GCC_CP_ACCESS_NONE);
 	    }
 	}
 
       if (debug_compile_cplus_types)
 	printf_unfiltered  ("start_new_class_type %s\n", name);
-      result = CPCALL (start_new_class_type, context, name,
+      result = CPCALL (start_new_class_type, instance, name,
 		       GCC_CP_SYMBOL_CLASS | nested_access
 		       | (TYPE_DECLARED_CLASS (type)
 			  ? GCC_CP_FLAG_CLASS_NOFLAG
@@ -1718,36 +1718,36 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
       if (debug_compile_cplus_types)
 	printf_unfiltered ("start_new_union_type %s\n", name);
-      result = CPCALL (start_new_union_type, context, name,
+      result = CPCALL (start_new_union_type, instance, name,
 		       GCC_CP_SYMBOL_UNION | nested_access,
 		       filename, line);
       if (debug_compile_cplus_types)
 	printf_unfiltered ("\tgcc_type = %lld\n", result);
     }
-  insert_type (context, type, result);
+  insert_type (instance, type, result);
 
   /* Add definitions.  */
-  ccp_convert_type_defns (context, type);
+  ccp_convert_type_defns (instance, type);
 
   /* Add methods.  */
-  ccp_convert_struct_or_union_methods (context, type, result);
+  ccp_convert_struct_or_union_methods (instance, type, result);
 
   /* Add members.  */
-  ccp_convert_struct_or_union_members (context, type, result);
+  ccp_convert_struct_or_union_members (instance, type, result);
 
   /* FIXME: add friend declarations.  -lxo  */
 
   /* All finished.  */
   if (debug_compile_cplus_types)
     printf_unfiltered ("finish_record_or_union %s (%lld)\n", name, result);
-  CPCALL (finish_record_or_union, context, TYPE_LENGTH (type));
+  CPCALL (finish_record_or_union, instance, TYPE_LENGTH (type));
 
   /* Pop all scopes.  */
   if (need_new_context)
     {
       if (debug_compile_cplus_contexts)
 	printf_unfiltered ("leaving processing scope %p\n", pctx);
-      ccp_pop_processing_context (context, pctx);
+      ccp_pop_processing_context (instance, pctx);
     }
   else
     {
@@ -1766,7 +1766,7 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *context,
    accessibility of this type.*/
 
 static gcc_type
-ccp_convert_enum (struct compile_cplus_instance *context, struct type *type,
+ccp_convert_enum (struct compile_cplus_instance *instance, struct type *type,
 		  enum gcc_cp_symbol_kind nested_access)
 {
   int i, need_new_context;
@@ -1784,7 +1784,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type,
   cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Create a new processing context for TYPE.  */
-  pctx = new_processing_context (context, TYPE_NAME (type), type, &result);
+  pctx = new_processing_context (instance, TYPE_NAME (type), type, &result);
   if (result != GCC_TYPE_NONE)
     {
       /* The type requested was actually defined inside another type,
@@ -1811,7 +1811,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type,
     {
       if (debug_compile_cplus_contexts)
 	printf_unfiltered ("entering new processing scope %p\n", pctx);
-      ccp_push_processing_context (context, pctx);
+      ccp_push_processing_context (instance, pctx);
     }
   else
     {
@@ -1831,7 +1831,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type,
       printf_unfiltered ("int_type %d %d\n", TYPE_UNSIGNED (type),
 			 TYPE_LENGTH (type));
     }
-  int_type = CPCALL (int_type, context,
+  int_type = CPCALL (int_type, instance,
 		     TYPE_UNSIGNED (type), TYPE_LENGTH (type), NULL);
   if (debug_compile_cplus_types)
     {
@@ -1839,7 +1839,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type,
       printf_unfiltered ("start_new_enum_type %s %s\n", name,
 			 access_to_string (nested_access));
     }
-  result = CPCALL (start_new_enum_type, context,
+  result = CPCALL (start_new_enum_type, instance,
 		   name, int_type,
 		   GCC_CP_SYMBOL_ENUM | nested_access
 		   | (scoped_enum_p
@@ -1860,21 +1860,21 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type,
       if (debug_compile_cplus_types)
 	printf_unfiltered ("build_add_enum_constant %s = %ld\n", fname,
 	     TYPE_FIELD_ENUMVAL (type, i));
-      CPCALL (build_add_enum_constant, context,
+      CPCALL (build_add_enum_constant, instance,
 	      result, fname, TYPE_FIELD_ENUMVAL (type, i));
       xfree (fname);
     }
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("finish_enum_type %s (%lld)\n", name, result);
-  CPCALL (finish_enum_type, context, result);
+  CPCALL (finish_enum_type, instance, result);
 
   /* Pop all scopes.  */
   if (need_new_context)
     {
       if (debug_compile_cplus_contexts)
 	printf_unfiltered ("leaving processing scope %p\n", pctx);
-      ccp_pop_processing_context (context, pctx);
+      ccp_pop_processing_context (instance, pctx);
     }
   else
     {
@@ -1892,7 +1892,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type,
 /* Convert a function type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
+ccp_convert_func (struct compile_cplus_instance *instance, struct type *type,
 		  int strip_artificial)
 {
   int i, artificials;
@@ -1906,7 +1906,7 @@ ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
 
   /* This approach means we can't make self-referential function
      types.  Those are impossible in C, though.  */
-  return_type = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+  return_type = convert_cplus_type (instance, TYPE_TARGET_TYPE (type),
 				    GCC_CP_ACCESS_NONE);
 
   array.n_elements = TYPE_NFIELDS (type);
@@ -1922,7 +1922,7 @@ ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
       else
 	{
 	  array.elements[i - artificials]
-	    = convert_cplus_type (context, TYPE_FIELD_TYPE (type, i),
+	    = convert_cplus_type (instance, TYPE_FIELD_TYPE (type, i),
 				  GCC_CP_ACCESS_NONE);
 	}
     }
@@ -1934,7 +1934,7 @@ ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
      with some minsyms like printf (compile-cplus.exp has examples).  */
   if (debug_compile_cplus_types)
     printf_unfiltered ("build_function_type %s\n", TYPE_SAFE_NAME (type));
-  result = CPCALL (build_function_type, context,
+  result = CPCALL (build_function_type, instance,
 		   return_type, &array, is_varargs);
   xfree (array.elements);
 
@@ -1944,7 +1944,7 @@ ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
 /* Convert an integer type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_int (struct compile_cplus_instance *context, struct type *type)
+ccp_convert_int (struct compile_cplus_instance *instance, struct type *type)
 {
   gcc_type result;
 
@@ -1956,10 +1956,10 @@ ccp_convert_int (struct compile_cplus_instance *context, struct type *type)
   if (TYPE_NOSIGN (type))
     {
       gdb_assert (TYPE_LENGTH (type) == 1);
-      result = CPCALL (char_type, context);
+      result = CPCALL (char_type, instance);
     }
   else
-    result = CPCALL (int_type, context, TYPE_UNSIGNED (type), TYPE_LENGTH (type),
+    result = CPCALL (int_type, instance, TYPE_UNSIGNED (type), TYPE_LENGTH (type),
 		     TYPE_NAME (type));
   if (debug_compile_cplus_types)
     printf_unfiltered ("\tgcc_type = %lld\n", result);
@@ -1969,13 +1969,13 @@ ccp_convert_int (struct compile_cplus_instance *context, struct type *type)
 /* Convert a floating-point type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_float (struct compile_cplus_instance *context, struct type *type)
+ccp_convert_float (struct compile_cplus_instance *instance, struct type *type)
 {
   gcc_type result;
 
   if (debug_compile_cplus_types)
     printf_unfiltered  ("float_type %s\n", TYPE_SAFE_NAME (type));
-  result = CPCALL (float_type, context, TYPE_LENGTH (type), TYPE_NAME (type));
+  result = CPCALL (float_type, instance, TYPE_LENGTH (type), TYPE_NAME (type));
   if (debug_compile_cplus_types)
     printf_unfiltered ("\tgcc_type = %lld\n", result);
   return result;
@@ -1984,13 +1984,13 @@ ccp_convert_float (struct compile_cplus_instance *context, struct type *type)
 /* Convert the 'void' type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_void (struct compile_cplus_instance *context, struct type *type)
+ccp_convert_void (struct compile_cplus_instance *instance, struct type *type)
 {
   gcc_type result;
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("void_type\n");
-  result = CPCALL (void_type, context);
+  result = CPCALL (void_type, instance);
   if (debug_compile_cplus_types)
     printf_unfiltered ("\tgcc_type = %lld\n", result);
   return result;
@@ -1999,13 +1999,13 @@ ccp_convert_void (struct compile_cplus_instance *context, struct type *type)
 /* Convert a boolean type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_bool (struct compile_cplus_instance *context, struct type *type)
+ccp_convert_bool (struct compile_cplus_instance *instance, struct type *type)
 {
   gcc_type result;
 
   if (debug_compile_cplus_types)
     printf_unfiltered  ("bool_type %s\n", TYPE_SAFE_NAME (type));
-  result = CPCALL (bool_type, context);
+  result = CPCALL (bool_type, instance);
   if (debug_compile_cplus_types)
     printf_unfiltered ("\tgcc_type = %lld\n", result);
   return result;
@@ -2014,7 +2014,7 @@ ccp_convert_bool (struct compile_cplus_instance *context, struct type *type)
 /* Convert a qualified type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_qualified (struct compile_cplus_instance *context,
+ccp_convert_qualified (struct compile_cplus_instance *instance,
 		       struct type *type)
 {
   struct type *unqual = make_unqualified_type (type);
@@ -2022,7 +2022,7 @@ ccp_convert_qualified (struct compile_cplus_instance *context,
   gcc_cp_qualifiers_flags quals = (enum gcc_cp_qualifiers) 0;
   gcc_type result;
 
-  unqual_converted = convert_cplus_type (context, unqual, GCC_CP_ACCESS_NONE);
+  unqual_converted = convert_cplus_type (instance, unqual, GCC_CP_ACCESS_NONE);
 
   if (TYPE_CONST (type))
     quals |= GCC_CP_QUALIFIER_CONST;
@@ -2033,7 +2033,7 @@ ccp_convert_qualified (struct compile_cplus_instance *context,
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("build_qualified_type %s\n", TYPE_SAFE_NAME (type));
-  result = CPCALL (build_qualified_type, context, unqual_converted, quals);
+  result = CPCALL (build_qualified_type, instance, unqual_converted, quals);
   if (debug_compile_cplus_types)
     printf_unfiltered ("\tgcc_type = %lld\n", result);
   return result;
@@ -2042,16 +2042,16 @@ ccp_convert_qualified (struct compile_cplus_instance *context,
 /* Convert a complex type to its gcc representation.  */
 
 static gcc_type
-ccp_convert_complex (struct compile_cplus_instance *context,
+ccp_convert_complex (struct compile_cplus_instance *instance,
 		     struct type *type)
 {
   gcc_type result;
-  gcc_type base = convert_cplus_type (context, TYPE_TARGET_TYPE (type),
+  gcc_type base = convert_cplus_type (instance, TYPE_TARGET_TYPE (type),
 				      GCC_CP_ACCESS_NONE);
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("build_complex_type %s\n", TYPE_SAFE_NAME (type));
-  result = CPCALL (build_complex_type, context, base);
+  result = CPCALL (build_complex_type, instance, base);
   if (debug_compile_cplus_types)
     printf_unfiltered ("\tgcc_type = %lld\n", result);
   return result;
@@ -2060,7 +2060,7 @@ ccp_convert_complex (struct compile_cplus_instance *context,
 /* Convert a namespace of TYPE.  */
 
 static gcc_type
-ccp_convert_namespace (struct compile_cplus_instance *context,
+ccp_convert_namespace (struct compile_cplus_instance *instance,
 		       struct type *type)
 {
   int need_new_context;
@@ -2074,7 +2074,7 @@ ccp_convert_namespace (struct compile_cplus_instance *context,
      or something defined via namespaces all in the global namespace.  */
 
   cleanups = make_cleanup (null_cleanup, NULL);
-  pctx = new_processing_context (context, TYPE_NAME (type), type, &dummy);
+  pctx = new_processing_context (instance, TYPE_NAME (type), type, &dummy);
 
   if (TYPE_NAME (type) != NULL)
     {
@@ -2086,18 +2086,18 @@ ccp_convert_namespace (struct compile_cplus_instance *context,
 
   need_new_context = ccp_need_new_context (pctx);
   if (need_new_context)
-    ccp_push_processing_context (context, pctx);
+    ccp_push_processing_context (instance, pctx);
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("push_namespace %s\n", name);
-  CPCALL (push_namespace, context, name);
+  CPCALL (push_namespace, instance, name);
 
   if (debug_compile_cplus_types)
     printf_unfiltered ("pop_namespace %s\n", name);
-  CPCALL (pop_namespace, context);
+  CPCALL (pop_namespace, instance);
 
   if (need_new_context)
-    ccp_pop_processing_context (context, pctx);
+    ccp_pop_processing_context (instance, pctx);
 
   delete_processing_context (pctx);
   do_cleanups (cleanups);
@@ -2114,7 +2114,7 @@ ccp_convert_namespace (struct compile_cplus_instance *context,
    accessibility of this type.  */
 
 static gcc_type
-convert_type_cplus_basic (struct compile_cplus_instance *context,
+convert_type_cplus_basic (struct compile_cplus_instance *instance,
 			  struct type *type,
 			  enum gcc_cp_symbol_kind nested_access)
 {
@@ -2122,63 +2122,63 @@ convert_type_cplus_basic (struct compile_cplus_instance *context,
      don't want that to be propagated to the GCC type, because GCC
      doesn't like the reference types themselves to be qualified.  */
   if (TYPE_CODE (type) == TYPE_CODE_REF)
-    return ccp_convert_reference (context, type);
+    return ccp_convert_reference (instance, type);
 
   /* If we are converting a qualified type, first convert the
      unqualified type and then apply the qualifiers.  */
   if ((TYPE_INSTANCE_FLAGS (type) & (TYPE_INSTANCE_FLAG_CONST
 				     | TYPE_INSTANCE_FLAG_VOLATILE
 				     | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
-    return ccp_convert_qualified (context, type);
+    return ccp_convert_qualified (instance, type);
 
   switch (TYPE_CODE (type))
     {
 #if 0
     case TYPE_CODE_REF:
-      return ccp_convert_reference (context, type);
+      return ccp_convert_reference (instance, type);
 #endif
 
     case TYPE_CODE_PTR:
-      return ccp_convert_pointer (context, type);
+      return ccp_convert_pointer (instance, type);
 
     case TYPE_CODE_ARRAY:
-      return ccp_convert_array (context, type);
+      return ccp_convert_array (instance, type);
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      return ccp_convert_struct_or_union (context, type, nested_access);
+      return ccp_convert_struct_or_union (instance, type, nested_access);
 
     case TYPE_CODE_ENUM:
-      return ccp_convert_enum (context, type, nested_access);
+      return ccp_convert_enum (instance, type, nested_access);
 
     case TYPE_CODE_FUNC:
-      return ccp_convert_func (context, type, 0);
+      return ccp_convert_func (instance, type, 0);
 
 #if 0
     case TYPE_CODE_METHOD:
-      return ccp_convert_method (context, type);
+      return ccp_convert_method (instance, type);
 #endif
 
     case TYPE_CODE_INT:
-      return ccp_convert_int (context, type);
+      return ccp_convert_int (instance, type);
 
     case TYPE_CODE_FLT:
-      return ccp_convert_float (context, type);
+      return ccp_convert_float (instance, type);
 
     case TYPE_CODE_VOID:
-      return ccp_convert_void (context, type);
+      return ccp_convert_void (instance, type);
 
     case TYPE_CODE_BOOL:
-      return ccp_convert_bool (context, type);
+      return ccp_convert_bool (instance, type);
 
     case TYPE_CODE_COMPLEX:
-      return ccp_convert_complex (context, type);
+      return ccp_convert_complex (instance, type);
 
     case TYPE_CODE_NAMESPACE:
-      return ccp_convert_namespace (context, type);
+      return ccp_convert_namespace (instance, type);
 
     case TYPE_CODE_TYPEDEF:
-      return ccp_convert_typedef (context, type, nested_access);
+      return ccp_convert_typedef (instance, type, nested_access);
     }
 
   {
@@ -2187,7 +2187,7 @@ convert_type_cplus_basic (struct compile_cplus_instance *context,
 
     if (debug_compile_cplus_types)
       printf_unfiltered ("error %s\n", s);
-    return CPCALL (error, context, s);
+    return CPCALL (error, instance, s);
     xfree (s);
   }
 }
@@ -2195,20 +2195,20 @@ convert_type_cplus_basic (struct compile_cplus_instance *context,
 /* See compile-internal.h.  */
 
 gcc_type
-convert_cplus_type (struct compile_cplus_instance *context,
+convert_cplus_type (struct compile_cplus_instance *instance,
 		    struct type *type, enum gcc_cp_symbol_kind nested_access)
 {
   struct type_map_instance inst, *found;
   gcc_type result;
 
   inst.type = type;
-  found = (struct type_map_instance *) htab_find (context->type_map, &inst);
+  found = (struct type_map_instance *) htab_find (instance->type_map, &inst);
   if (found != NULL)
     return found->gcc_type_handle;
 
-  result = convert_type_cplus_basic (context, type, nested_access);
+  result = convert_type_cplus_basic (instance, type, nested_access);
   if (result != DONT_CACHE_TYPE)
-    insert_type (context, type, result);
+    insert_type (instance, type, result);
   return result;
 }
 
@@ -2219,13 +2219,13 @@ convert_cplus_type (struct compile_cplus_instance *context,
 static void
 delete_instance (struct compile_instance *c)
 {
-  struct compile_cplus_instance *context = (struct compile_cplus_instance *) c;
+  struct compile_cplus_instance *instance = (struct compile_cplus_instance *) c;
 
-  context->base.fe->ops->destroy (context->base.fe);
-  htab_delete (context->type_map);
-  if (context->symbol_err_map != NULL)
-    htab_delete (context->symbol_err_map);
-  xfree (context);
+  instance->base.fe->ops->destroy (instance->base.fe);
+  htab_delete (instance->type_map);
+  if (instance->symbol_err_map != NULL)
+    htab_delete (instance->symbol_err_map);
+  xfree (instance);
 }
 
 /* See compile-internal.h.  */

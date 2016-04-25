@@ -106,18 +106,18 @@ insert_symbol_error (htab_t hash, const struct symbol *sym, const char *text)
    arrange for it not to be emitted again.  */
 
 static void
-error_symbol_once (struct compile_cplus_instance *context,
+error_symbol_once (struct compile_cplus_instance *instance,
 		   const struct symbol *sym)
 {
   struct symbol_error search;
   struct symbol_error *err;
   char *message;
 
-  if (context->symbol_err_map == NULL)
+  if (instance->symbol_err_map == NULL)
     return;
 
   search.sym = sym;
-  err = (struct symbol_error *) htab_find (context->symbol_err_map, &search);
+  err = (struct symbol_error *) htab_find (instance->symbol_err_map, &search);
   if (err == NULL || err->message == NULL)
     return;
 
@@ -146,7 +146,7 @@ symbol_substitution_name (struct symbol *sym)
    scope.)  */
 
 static void
-convert_one_symbol (struct compile_cplus_instance *context,
+convert_one_symbol (struct compile_cplus_instance *instance,
 		    struct block_symbol sym,
 		    int is_global,
 		    int is_local)
@@ -155,12 +155,12 @@ convert_one_symbol (struct compile_cplus_instance *context,
   const char *filename = symbol_symtab (sym.symbol)->filename;
   unsigned short line = SYMBOL_LINE (sym.symbol);
 
-  error_symbol_once (context, sym.symbol);
+  error_symbol_once (instance, sym.symbol);
 
   if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = convert_cplus_type (context, SYMBOL_TYPE (sym.symbol),
+    sym_type = convert_cplus_type (instance, SYMBOL_TYPE (sym.symbol),
 				   GCC_CP_ACCESS_NONE);
 
   if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
@@ -235,7 +235,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	      printf_unfiltered ("build_constant %s\n",
 				 SYMBOL_NATURAL_NAME (sym.symbol));
 	    }
-	  CPCALL (build_constant, context,
+	  CPCALL (build_constant, instance,
 		  sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
 		  SYMBOL_VALUE (sym.symbol),
 		  filename, line);
@@ -320,7 +320,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	}
 
       /* Don't emit local variable decls for a raw expression.  */
-      if (context->base.scope != COMPILE_I_RAW_SCOPE
+      if (instance->base.scope != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
 	  int need_new_context = 0;
@@ -332,7 +332,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	    {
 	      gcc_type dummy;
 
-	      pctx = new_processing_context (context,
+	      pctx = new_processing_context (instance,
 					     SYMBOL_NATURAL_NAME (sym.symbol),
 					     SYMBOL_TYPE (sym.symbol),
 					     &dummy);
@@ -350,7 +350,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 
 	      need_new_context = ccp_need_new_context (pctx);
 	      if (need_new_context)
-		ccp_push_processing_context (context, pctx);
+		ccp_push_processing_context (instance, pctx);
 	    }
 
 	  /* Get the `raw' name of the symbol.  */
@@ -366,13 +366,13 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	      printf_unfiltered ("new_decl %s %d %s\n", name, (int) kind,
 				 symbol_name);
 	    }
-	  decl = CPCALL (new_decl, context,
+	  decl = CPCALL (new_decl, instance,
 			 name, kind, sym_type, symbol_name, addr,
 			 filename, line);
 
 	  /* Pop any processing context.  */
 	  if (need_new_context)
-	    ccp_pop_processing_context (context, pctx);
+	    ccp_pop_processing_context (instance, pctx);
 
 	  delete_processing_context (pctx);
 	}
@@ -387,7 +387,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
    itself, and DOMAIN is the domain which was searched.  */
 
 static void
-convert_symbol_sym (struct compile_cplus_instance *context,
+convert_symbol_sym (struct compile_cplus_instance *instance,
 		    const char *identifier, struct block_symbol sym,
 		    domain_enum domain)
 {
@@ -423,7 +423,7 @@ convert_symbol_sym (struct compile_cplus_instance *context,
 	    fprintf_unfiltered (gdb_stdout,
 				"gcc_convert_symbol \"%s\": global symbol\n",
 				identifier);
-	  convert_one_symbol (context, global_sym, 1, 0);
+	  convert_one_symbol (instance, global_sym, 1, 0);
 	}
     }
 
@@ -431,14 +431,14 @@ convert_symbol_sym (struct compile_cplus_instance *context,
     fprintf_unfiltered (gdb_stdout,
 			"gcc_convert_symbol \"%s\": local symbol\n",
 			identifier);
-  convert_one_symbol (context, sym, 0, is_local_symbol);
+  convert_one_symbol (instance, sym, 0, is_local_symbol);
 }
 
 /* Convert a minimal symbol to its gcc form.  CONTEXT is the compiler
    to use and BMSYM is the minimal symbol to convert.  */
 
 static void
-convert_symbol_bmsym (struct compile_cplus_instance *context,
+convert_symbol_bmsym (struct compile_cplus_instance *instance,
 		      struct bound_minimal_symbol bmsym)
 {
   struct minimal_symbol *msym = bmsym.minsym;
@@ -488,10 +488,10 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
       break;
     }
 
-  sym_type = convert_cplus_type (context, type, GCC_CP_ACCESS_NONE);
+  sym_type = convert_cplus_type (instance, type, GCC_CP_ACCESS_NONE);
   if (debug_compile_cplus_types)
     printf_unfiltered ("push_namespace \"\"\n");
-  CPCALL (push_namespace, context, "");
+  CPCALL (push_namespace, instance, "");
   // FIXME: push (and, after the call, pop) any other namespaces, if
   // any, and drop the above when defining a class member.  drop any
   // namespace and class names from before the symbol name, and any
@@ -505,19 +505,19 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
       printf_unfiltered ("new_decl minsym %s %d\n",
 			 MSYMBOL_NATURAL_NAME (msym), (int) kind);
     }
-  decl = CPCALL (new_decl, context,
+  decl = CPCALL (new_decl, instance,
 		 MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
 		 NULL, addr, NULL, 0);
   if (debug_compile_cplus_types)
     printf_unfiltered ("pop_namespace \"\"\n");
-  CPCALL (pop_namespace, context);
+  CPCALL (pop_namespace, instance);
 }
 
 /* Do a regular expression search of the symbol table for any symbol
    named NAME in the given DOMAIN.  Warning: This is INCREDIBLY slow.  */
 
 static int
-regexp_search_symbols (struct compile_cplus_instance *context,
+regexp_search_symbols (struct compile_cplus_instance *instance,
 		      const char *name, domain_enum domain)
 {
   char *regexp;
@@ -557,7 +557,7 @@ regexp_search_symbols (struct compile_cplus_instance *context,
 
 	  sym.symbol = p->symbol;
 	  sym.block = SYMBOL_BLOCK_VALUE (p->symbol);
-	  convert_symbol_sym (context, name, sym, domain);
+	  convert_symbol_sym (instance, name, sym, domain);
 	  found = 1;
 	}
       /* !!keiths: Ignore minsyms?  */
@@ -575,7 +575,7 @@ gcc_cplus_convert_symbol (void *datum,
 			  enum gcc_cp_oracle_request request,
 			  const char *identifier)
 {
-  struct compile_cplus_instance *context
+  struct compile_cplus_instance *instance
     = (struct compile_cplus_instance *) datum;
   domain_enum domain;
   int found = 0;
@@ -640,7 +640,7 @@ gcc_cplus_convert_symbol (void *datum,
 		   VEC_iterate (block_symbol_d, search_result.symbols, ix, elt);
 		   ++ix)
 		{
-		  convert_symbol_sym (context, identifier, *elt, domain);
+		  convert_symbol_sym (instance, identifier, *elt, domain);
 		}
 	      found = 1;
 	    }
@@ -650,10 +650,10 @@ gcc_cplus_convert_symbol (void *datum,
 	{
 	  struct block_symbol sym;
 
-	  sym = lookup_symbol (identifier, context->base.block, domain, NULL);
+	  sym = lookup_symbol (identifier, instance->base.block, domain, NULL);
 	  if (sym.symbol != NULL)
 	    {
-	      convert_symbol_sym (context, identifier, sym, domain);
+	      convert_symbol_sym (instance, identifier, sym, domain);
 	      found = 1;
 	    }
 	}
@@ -661,7 +661,7 @@ gcc_cplus_convert_symbol (void *datum,
       if (!found)
 	{
 	  /* Try a regexp search of the program's symbols.  */
-	  found = regexp_search_symbols (context, identifier, domain);
+	  found = regexp_search_symbols (instance, identifier, domain);
 
 	  /* One last attempt: fall back to minsyms.  */
 	  if (!found && !VEC_empty (bound_minimal_symbol_d,
@@ -674,7 +674,7 @@ gcc_cplus_convert_symbol (void *datum,
 				search_result.minimal_symbols, ix, elt);
 		   ++ix)
 		{
-		  convert_symbol_bmsym (context, *elt);
+		  convert_symbol_bmsym (instance, *elt);
 		}
 	      found = 1;
 	    }
@@ -684,7 +684,7 @@ gcc_cplus_convert_symbol (void *datum,
     {
       if (debug_compile_cplus_types)
 	printf_unfiltered ("error: %s\n", e.message);
-      CPCALL (error, context, e.message);
+      CPCALL (error, instance, e.message);
     }
   END_CATCH
 
@@ -711,7 +711,7 @@ gcc_address
 gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 			  const char *identifier)
 {
-  struct compile_cplus_instance *context
+  struct compile_cplus_instance *instance
     = (struct compile_cplus_instance *) datum;
   gcc_address result = 0;
   int found = 0;
@@ -764,7 +764,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
     {
       if (debug_compile_cplus_types)
 	printf_unfiltered ("error: %s\n", e.message);
-      CPCALL (error, context, e.message);
+      CPCALL (error, instance, e.message);
     }
   END_CATCH
 

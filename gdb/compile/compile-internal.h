@@ -141,7 +141,7 @@ extern char *compile_register_name_mangled (struct gdbarch *gdbarch,
 extern int compile_register_name_demangle (struct gdbarch *gdbarch,
 					   const char *reg_name);
 
-/* Convert a gdb type, TYPE, to a GCC type.  CONTEXT is used to do the
+/* Convert a gdb type, TYPE, to a GCC type.  INSTANCE is used to do the
    actual conversion.  If this type was defined in another type,
    NESTED_ACCESS should indicate the accessibility of this type
    (or GCC_CP_ACCESS_NONE if not a nested type).
@@ -149,9 +149,9 @@ extern int compile_register_name_demangle (struct gdbarch *gdbarch,
    The new GCC type is returned.  */
 
 struct type;
-extern gcc_type convert_type (struct compile_c_instance *context,
+extern gcc_type convert_type (struct compile_c_instance *instance,
 			      struct type *type);
-extern gcc_type convert_cplus_type (struct compile_cplus_instance *context,
+extern gcc_type convert_cplus_type (struct compile_cplus_instance *instance,
 				    struct type *type,
 				    enum gcc_cp_symbol_kind nested_access);
 
