@@ -1515,7 +1515,7 @@ reinsert_raw_breakpoint (struct raw_breakpoint *bp)
   int err;
 
   if (bp->inserted)
-    error ("Breakpoint already inserted at reinsert time.");
+    return;
 
   err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
   if (err == 0)
