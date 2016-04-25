@@ -1,3 +1,10 @@
+2016-04-25  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (set_raw_breakpoint_at): Create a raw breakpoint
+	object.  Insert it if it is not inserted yet.  Increase the
+	refcount and link it into the proc's raw breakpoint list.
+
 2016-04-25  Yao Qi  <yao.qi@linaro.org>
 
 	* breakpoint.c (should_be_inserted): Return 0 if the location's
