@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.11
 
+* Fortran: Support structures with fields of dynamic types and 
+  arrays of dynamic types.
+
 * GDB now supports multibit bitfields and enums in target register
   descriptions.
 

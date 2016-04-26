@@ -1541,8 +1541,13 @@ value_address (const struct value *value)
     return 0;
   if (value->parent != NULL)
     return value_address (value->parent) + value->offset;
-  else
-    return value->location.address + value->offset;
+  if (NULL != TYPE_DATA_LOCATION (value_type (value)))
+    {
+      gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (value_type (value)));
+      return TYPE_DATA_LOCATION_ADDR (value_type (value));
+    }
+
+  return value->location.address + value->offset;
 }
 
 CORE_ADDR
@@ -1857,6 +1862,8 @@ void
 set_value_component_location (struct value *component,
 			      const struct value *whole)
 {
+  struct type *type;
+
   gdb_assert (whole->lval != lval_xcallable);
 
   if (whole->lval == lval_internalvar)
@@ -1872,9 +1879,15 @@ set_value_component_location (struct value *component,
       if (funcs->copy_closure)
         component->location.computed.closure = funcs->copy_closure (whole);
     }
+
+  /* If type has a dynamic resolved location property
+     update it's value address.  */
+  type = value_type (whole);
+  if (NULL != TYPE_DATA_LOCATION (type)
+      && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
+    set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
 }
 
-
 /* Access to the value history.  */
 
 /* Record a new value in the value history.
@@ -2427,6 +2440,15 @@ set_internalvar (struct internalvar *var, struct value *val)
 	 call error () until new_data is installed into the var->u to avoid
 	 leaking memory.  */
       release_value (new_data.value);
+
+      /* Internal variables which are created from values with a dynamic
+         location don't need the location property of the origin anymore.
+         The resolved dynamic location is used prior then any other address
+         when accessing the value.
+         If we keep it, we would still refer to the origin value.
+         Remove the location property in case it exist.  */
+      remove_dyn_prop (DYN_PROP_DATA_LOCATION, value_type (new_data.value));
+
       break;
     }
 
@@ -3167,6 +3189,17 @@ value_primitive_field (struct value *arg1, int offset,
       v->type = type;
       v->offset = value_offset (arg1);
       v->embedded_offset = offset + value_embedded_offset (arg1) + boffset;
+    }
+  else if (NULL != TYPE_DATA_LOCATION (type))
+    {
+      /* Field is a dynamic data member.  */
+
+      gdb_assert (0 == offset);
+      /* We expect an already resolved data location.  */
+      gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (type));
+      /* For dynamic data types defer memory allocation
+         until we actual access the value.  */
+      v = allocate_value_lazy (type);
     }
   else
     {

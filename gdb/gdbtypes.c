@@ -2064,7 +2064,9 @@ resolve_dynamic_struct (struct type *type,
 
       pinfo.type = check_typedef (TYPE_FIELD_TYPE (type, i));
       pinfo.valaddr = addr_stack->valaddr;
-      pinfo.addr = addr_stack->addr;
+      pinfo.addr
+	= (addr_stack->addr
+	   + (TYPE_FIELD_BITPOS (resolved_type, i) / TARGET_CHAR_BIT));
       pinfo.next = addr_stack;
 
       TYPE_FIELD_TYPE (resolved_type, i)
@@ -2090,8 +2092,13 @@ resolve_dynamic_struct (struct type *type,
 	resolved_type_bit_length = new_bit_length;
     }
 
-  TYPE_LENGTH (resolved_type)
-    = (resolved_type_bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
+  /* The length of a type won't change for fortran, but it does for C and Ada.
+     For fortran the size of dynamic fields might change over time but not the
+     type length of the structure.  If we adapt it, we run into problems
+     when calculating the element offset for arrays of structs.  */
+  if (current_language->la_language != language_fortran)
+    TYPE_LENGTH (resolved_type)
+      = (resolved_type_bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
 
   /* The Ada language uses this field as a cache for static fixed types: reset
      it as RESOLVED_TYPE must have its own static fixed type.  */
@@ -2224,6 +2231,37 @@ add_dyn_prop (enum dynamic_prop_node_kind prop_kind, struct dynamic_prop prop,
   TYPE_DYN_PROP_LIST (type) = temp;
 }
 
+/* Remove dynamic property from TYPE in case it exists.  */
+
+void
+remove_dyn_prop (enum dynamic_prop_node_kind prop_kind,
+                 struct type *type)
+{
+  struct dynamic_prop_list *prev_node, *curr_node;
+
+  curr_node = TYPE_DYN_PROP_LIST (type);
+  prev_node = NULL;
+
+  while (NULL != curr_node)
+    {
+      if (curr_node->prop_kind == prop_kind)
+	{
+	  /* Update the linked list but don't free anything.
+	     The property was allocated on objstack and it is not known
+	     if we are on top of it.  Nevertheless, everything is released
+	     when the complete objstack is freed.  */
+	  if (NULL == prev_node)
+	    TYPE_DYN_PROP_LIST (type) = curr_node->next;
+	  else
+	    prev_node->next = curr_node->next;
+
+	  return;
+	}
+
+      prev_node = curr_node;
+      curr_node = curr_node->next;
+    }
+}
 
 /* Find the real type of TYPE.  This function returns the real type,
    after removing all layers of typedefs, and completing opaque or stub

@@ -1,3 +1,17 @@
+2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
+	    Keven Boell  <kevel.boell@intel.com>
+
+	* NEWS: Add new supported features for fortran.
+	* gdbtypes.c (remove_dyn_prop): New.
+	(resolve_dynamic_struct): Keep type length for fortran structs.
+	* gdbtypes.h: Forward declaration of new function.
+	* value.c (value_address): Return dynamic resolved location of a value.
+	(set_value_component_location): Adjust the value address
+	for single value prints.
+	(value_primitive_field): Support value types with a dynamic location.
+	(set_internalvar): Remove dynamic location property of
+	internal variables.
+
 2016-04-25  Pedro Alves  <palves@redhat.com>
 	    Yao Qi  <yao.qi@linaro.org>
 
