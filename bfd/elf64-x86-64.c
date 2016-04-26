@@ -1280,22 +1280,6 @@ elf_x86_64_check_tls_transition (bfd *abfd,
   bfd_vma offset;
   struct elf_x86_64_link_hash_table *htab;
 
-  /* Get the section contents.  */
-  if (contents == NULL)
-    {
-      if (elf_section_data (sec)->this_hdr.contents != NULL)
-	contents = elf_section_data (sec)->this_hdr.contents;
-      else
-	{
-	  /* FIXME: How to better handle error condition?  */
-	  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
-	    return FALSE;
-
-	  /* Cache the section contents for elf_link_input_bfd.  */
-	  elf_section_data (sec)->this_hdr.contents = contents;
-	}
-    }
-
   htab = elf_x86_64_hash_table (info);
   offset = rel->r_offset;
   switch (r_type)
@@ -1483,7 +1467,8 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 			   const Elf_Internal_Rela *rel,
 			   const Elf_Internal_Rela *relend,
 			   struct elf_link_hash_entry *h,
-			   unsigned long r_symndx)
+			   unsigned long r_symndx,
+			   bfd_boolean from_relocate_section)
 {
   unsigned int from_type = *r_type;
   unsigned int to_type = from_type;
@@ -1509,10 +1494,9 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	    to_type = R_X86_64_GOTTPOFF;
 	}
 
-      /* When we are called from elf_x86_64_relocate_section,
-	 CONTENTS isn't NULL and there may be additional transitions
-	 based on TLS_TYPE.  */
-      if (contents != NULL)
+      /* When we are called from elf_x86_64_relocate_section, there may
+	 be additional transitions based on TLS_TYPE.  */
+      if (from_relocate_section)
 	{
 	  unsigned int new_to_type = to_type;
 
@@ -1665,6 +1649,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
+  bfd_byte *contents;
   bfd_boolean use_plt_got;
 
   if (bfd_link_relocatable (info))
@@ -1674,6 +1659,15 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
+    {
+      sec->check_relocs_failed = 1;
+      return FALSE;
+    }
+
+  /* Get the section contents.  */
+  if (elf_section_data (sec)->this_hdr.contents != NULL)
+    contents = elf_section_data (sec)->this_hdr.contents;
+  else if (!bfd_malloc_and_get_section (abfd, sec, &contents))
     {
       sec->check_relocs_failed = 1;
       return FALSE;
@@ -1851,10 +1845,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      |= elf_gnu_symbol_ifunc;
 	}
 
-      if (! elf_x86_64_tls_transition (info, abfd, sec, NULL,
+      if (! elf_x86_64_tls_transition (info, abfd, sec, contents,
 				       symtab_hdr, sym_hashes,
 				       &r_type, GOT_UNKNOWN,
-				       rel, rel_end, h, r_symndx))
+				       rel, rel_end, h, r_symndx, FALSE))
 	goto error_return;
 
       eh = (struct elf_x86_64_link_hash_entry *) h;
@@ -2264,9 +2258,22 @@ do_size:
 	sec->need_convert_load = 1;
     }
 
+  if (elf_section_data (sec)->this_hdr.contents != contents)
+    {
+      if (!info->keep_memory)
+	free (contents);
+      else
+	{
+	  /* Cache the section contents for elf_link_input_bfd.  */
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	}
+    }
+
   return TRUE;
 
 error_return:
+  if (elf_section_data (sec)->this_hdr.contents != contents)
+    free (contents);
   sec->check_relocs_failed = 1;
   return FALSE;
 }
@@ -4808,7 +4815,7 @@ direct:
 					   input_section, contents,
 					   symtab_hdr, sym_hashes,
 					   &r_type, tls_type, rel,
-					   relend, h, r_symndx))
+					   relend, h, r_symndx, TRUE))
 	    return FALSE;
 
 	  if (r_type == R_X86_64_TPOFF32)
@@ -5195,8 +5202,8 @@ direct:
 	  if (! elf_x86_64_tls_transition (info, input_bfd,
 					   input_section, contents,
 					   symtab_hdr, sym_hashes,
-					   &r_type, GOT_UNKNOWN,
-					   rel, relend, h, r_symndx))
+					   &r_type, GOT_UNKNOWN, rel,
+					   relend, h, r_symndx, TRUE))
 	    return FALSE;
 
 	  if (r_type != R_X86_64_TLSLD)
@@ -6443,6 +6450,7 @@ static const struct bfd_elf_special_section
 #define elf_backend_rela_normal		    1
 #define elf_backend_plt_alignment           4
 #define elf_backend_extern_protected_data   1
+#define elf_backend_caches_rawsize	    1
 
 #define elf_info_to_howto		    elf_x86_64_info_to_howto
 
