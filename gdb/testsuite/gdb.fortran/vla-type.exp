@@ -60,6 +60,9 @@ gdb_test "ptype twov" \
                      "\\s+$int :: ivla1\\\(5,12,99\\\)" \
                      "\\s+$int :: ivla2\\\(9,12\\\)" \
                      "End Type two" ]
+gdb_test "print twov" " = \\\( \\\(\\\( \\\( 1, 1, 1, 1, 1\\\)\
+ \\\( 1, 1, 321, 1, 1\\\)\
+ \\\( 1, 1, 1, 1, 1\\\) .*"
 
 # Check type with attribute at beginn of type
 gdb_breakpoint [gdb_get_line_number "threev-filled"]

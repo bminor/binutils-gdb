@@ -1,3 +1,15 @@
+2016-04-26  Sanimir Agovic  <sanimir.agovic@intel.com>
+	    Keven Boell  <keven.boell@intel.com>
+	    Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* f-valprint.c (f77_create_arrayprint_offset_tbl): Remove
+	function.
+	(F77_DIM_SIZE, F77_DIM_OFFSET): Remove macro.
+	(f77_print_array_1): Use value_subscript to subscript a
+	value array.
+	(f77_print_array): Remove call to f77_create_arrayprint_offset_tbl.
+	(f_val_print): Use value_field to construct a field value.
+
 2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* valarith.c (value_address): Resolve dynamic types.
