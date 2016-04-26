@@ -1,4 +1,8 @@
 2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* valarith.c (value_address): Resolve dynamic types.
+
+2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
 	    Keven Boell  <kevel.boell@intel.com>
 
 	* NEWS: Add new supported features for fortran.

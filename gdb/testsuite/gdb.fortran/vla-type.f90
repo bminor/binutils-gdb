@@ -38,6 +38,8 @@ program vla_struct
   type(three)              :: threev
   type(four)               :: fourv
   type(five)               :: fivev
+  type(five)               :: fivearr (2)
+  type(five), allocatable  :: fivedynarr (:)
   logical                  :: l
   integer                  :: i, j
 
@@ -83,6 +85,20 @@ program vla_struct
   fivev%tone%ivla(1, 2, 3) = 123
   fivev%tone%ivla(3, 2, 1) = 321
 
-  ! dummy statement for bp
-  l = allocated(fivev%tone%ivla)                  ! fivev-filled
+  allocate (fivearr(1)%tone%ivla (2, 4, 6))        ! fivev-filled
+  allocate (fivearr(2)%tone%ivla (12, 14, 16))
+  fivearr(1)%tone%ivla(:, :, :) = 1
+  fivearr(1)%tone%ivla(2, 2, 3) = 223
+  fivearr(2)%tone%ivla(:, :, :) = 2
+  fivearr(2)%tone%ivla(6, 7, 8) = 678
+
+  allocate (fivedynarr(2))                         ! fivearr-filled
+  allocate (fivedynarr(1)%tone%ivla (2, 4, 6))
+  allocate (fivedynarr(2)%tone%ivla (12, 14, 16))
+  fivedynarr(1)%tone%ivla(:, :, :) = 1
+  fivedynarr(1)%tone%ivla(2, 2, 3) = 223
+  fivedynarr(2)%tone%ivla(:, :, :) = 2
+  fivedynarr(2)%tone%ivla(6, 7, 8) = 678
+
+  l = allocated(fivedynarr)                        ! fivedynarr-filled
 end program vla_struct
