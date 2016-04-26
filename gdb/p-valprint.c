@@ -49,7 +49,9 @@ static const struct generic_val_print_decorations p_decorations =
   " * I",
   "true",
   "false",
-  "void"
+  "void",
+  "{",
+  "}"
 };
 
 /* See val_print for a description of the various parameters of this

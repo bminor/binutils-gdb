@@ -186,6 +186,10 @@ struct generic_val_print_decorations
   /* What to print when we see TYPE_CODE_VOID.  */
 
   const char *void_name;
+
+  /* Array start and end strings.  */
+  const char *array_start;
+  const char *array_end;
 };
 
 

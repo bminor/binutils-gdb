@@ -407,10 +407,12 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 
 static void
 generic_val_print_array (struct type *type, const gdb_byte *valaddr,
-		   int embedded_offset, CORE_ADDR address,
-		   struct ui_file *stream, int recurse,
-		   const struct value *original_value,
-		   const struct value_print_options *options)
+			 int embedded_offset, CORE_ADDR address,
+			 struct ui_file *stream, int recurse,
+			 const struct value *original_value,
+			 const struct value_print_options *options,
+			 const struct
+			     generic_val_print_decorations *decorations)
 {
   struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
   struct type *elttype = check_typedef (unresolved_elttype);
@@ -427,11 +429,11 @@ generic_val_print_array (struct type *type, const gdb_byte *valaddr,
 	  print_spaces_filtered (2 + 2 * recurse, stream);
 	}
 
-      fprintf_filtered (stream, "{");
+      fputs_filtered (decorations->array_start, stream);
       val_print_array_elements (type, valaddr, embedded_offset,
 				address, stream,
 				recurse, original_value, options, 0);
-      fprintf_filtered (stream, "}");
+      fputs_filtered (decorations->array_end, stream);
     }
   else
     {
@@ -851,7 +853,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
     {
     case TYPE_CODE_ARRAY:
       generic_val_print_array (type, valaddr, embedded_offset, address, stream,
-			       recurse, original_value, options);
+			       recurse, original_value, options, decorations);
       break;
 
     case TYPE_CODE_MEMBERPTR:

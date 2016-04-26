@@ -1,5 +1,17 @@
 2016-05-17  Tom Tromey  <tom@tromey.com>
 
+	* valprint.h (struct generic_val_print_array) <array_start,
+	array_end>: New fields.
+	* valprint.c (generic_val_print_array): Add "decorations"
+	parameter.  Use "array_start", "array_end".
+	(generic_val_print) <TYPE_CODE_ARRAY>: Update.
+	* p-valprint.c (p_decorations): Update.
+	* m2-valprint.c (m2_decorations): Update.
+	* f-valprint.c (f_decorations): Update.
+	* c-valprint.c (c_decorations): Update.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
 	* NEWS: Add "maint selftest" entry.
 	* selftest.h: New file.
 	* selftest.c: New file.
