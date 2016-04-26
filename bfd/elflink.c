@@ -905,11 +905,11 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 			  elf_link_renumber_hash_table_dynsyms,
 			  &dynsymcount);
 
-  /* There is an unused NULL entry at the head of the table which
-     we must account for in our count.  We always create the dynsym
-     section, even if it is empty, with dynamic sections.  */
-  if (elf_hash_table (info)->dynamic_sections_created)
-    ++dynsymcount;
+  /* There is an unused NULL entry at the head of the table which we
+     must account for in our count even if the table is empty since it
+     is intended for the mandatory DT_SYMTAB tag (.dynsym section) in
+     .dynamic section.  */
+  dynsymcount++;
 
   elf_hash_table (info)->dynsymcount = dynsymcount;
   return dynsymcount;
@@ -6606,8 +6606,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
       /* Work out the size of the symbol version section.  */
       s = bfd_get_linker_section (dynobj, ".gnu.version");
       BFD_ASSERT (s != NULL);
-      if (dynsymcount != 0
-	  && (s->flags & SEC_EXCLUDE) == 0)
+      if ((s->flags & SEC_EXCLUDE) == 0)
 	{
 	  s->size = dynsymcount * sizeof (Elf_External_Versym);
 	  s->contents = (unsigned char *) bfd_zalloc (output_bfd, s->size);
@@ -6628,17 +6627,14 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
       BFD_ASSERT (s != NULL);
       s->size = dynsymcount * bed->s->sizeof_sym;
 
-      if (dynsymcount != 0)
-	{
-	  s->contents = (unsigned char *) bfd_alloc (output_bfd, s->size);
-	  if (s->contents == NULL)
-	    return FALSE;
+      s->contents = (unsigned char *) bfd_alloc (output_bfd, s->size);
+      if (s->contents == NULL)
+	return FALSE;
 
-	  /* The first entry in .dynsym is a dummy symbol.
-	     Clear all the section syms, in case we don't output them all.  */
-	  ++section_sym_count;
-	  memset (s->contents, 0, section_sym_count * bed->s->sizeof_sym);
-	}
+      /* The first entry in .dynsym is a dummy symbol.  Clear all the
+	 section syms, in case we don't output them all.  */
+      ++section_sym_count;
+      memset (s->contents, 0, section_sym_count * bed->s->sizeof_sym);
 
       elf_hash_table (info)->bucketcount = 0;
 

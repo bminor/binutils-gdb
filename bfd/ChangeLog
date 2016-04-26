@@ -1,3 +1,12 @@
+2016-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_link_hash_table): Update comments for
+	dynsymcount.
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Always count for
+	the unused NULL entry at the head of dynamic symbol table.
+	(bfd_elf_size_dynsym_hash_dynstr): Remove dynsymcount != 0
+	checks.
+
 2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_link_create_dynstrtab): Exclude linker
