@@ -1208,7 +1208,7 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
    from R_TYPE.  */
 
 static bfd_boolean
-elf_i386_check_tls_transition (bfd *abfd, asection *sec,
+elf_i386_check_tls_transition (asection *sec,
 			       bfd_byte *contents,
 			       Elf_Internal_Shdr *symtab_hdr,
 			       struct elf_link_hash_entry **sym_hashes,
@@ -1220,22 +1220,6 @@ elf_i386_check_tls_transition (bfd *abfd, asection *sec,
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
   bfd_vma offset;
-
-  /* Get the section contents.  */
-  if (contents == NULL)
-    {
-      if (elf_section_data (sec)->this_hdr.contents != NULL)
-	contents = elf_section_data (sec)->this_hdr.contents;
-      else
-	{
-	  /* FIXME: How to better handle error condition?  */
-	  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
-	    return FALSE;
-
-	  /* Cache the section contents for elf_link_input_bfd.  */
-	  elf_section_data (sec)->this_hdr.contents = contents;
-	}
-    }
 
   offset = rel->r_offset;
   switch (r_type)
@@ -1397,7 +1381,8 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 			 const Elf_Internal_Rela *rel,
 			 const Elf_Internal_Rela *relend,
 			 struct elf_link_hash_entry *h,
-			 unsigned long r_symndx)
+			 unsigned long r_symndx,
+			 bfd_boolean from_relocate_section)
 {
   unsigned int from_type = *r_type;
   unsigned int to_type = from_type;
@@ -1426,10 +1411,9 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	    to_type = R_386_TLS_IE_32;
 	}
 
-      /* When we are called from elf_i386_relocate_section, CONTENTS
-	 isn't NULL and there may be additional transitions based on
-	 TLS_TYPE.  */
-      if (contents != NULL)
+      /* When we are called from elf_i386_relocate_section, there may
+	 be additional transitions based on TLS_TYPE.  */
+      if (from_relocate_section)
 	{
 	  unsigned int new_to_type = to_type;
 
@@ -1473,7 +1457,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
   /* Check if the transition can be performed.  */
   if (check
-      && ! elf_i386_check_tls_transition (abfd, sec, contents,
+      && ! elf_i386_check_tls_transition (sec, contents,
 					  symtab_hdr, sym_hashes,
 					  from_type, rel, relend))
     {
@@ -1536,6 +1520,7 @@ elf_i386_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
+  bfd_byte *contents;
   bfd_boolean use_plt_got;
 
   if (bfd_link_relocatable (info))
@@ -1545,6 +1530,15 @@ elf_i386_check_relocs (bfd *abfd,
 
   htab = elf_i386_hash_table (info);
   if (htab == NULL)
+    {
+      sec->check_relocs_failed = 1;
+      return FALSE;
+    }
+
+  /* Get the section contents.  */
+  if (elf_section_data (sec)->this_hdr.contents != NULL)
+    contents = elf_section_data (sec)->this_hdr.contents;
+  else if (!bfd_malloc_and_get_section (abfd, sec, &contents))
     {
       sec->check_relocs_failed = 1;
       return FALSE;
@@ -1649,10 +1643,10 @@ elf_i386_check_relocs (bfd *abfd,
 	      |= elf_gnu_symbol_ifunc;
 	}
 
-      if (! elf_i386_tls_transition (info, abfd, sec, NULL,
+      if (! elf_i386_tls_transition (info, abfd, sec, contents,
 				     symtab_hdr, sym_hashes,
 				     &r_type, GOT_UNKNOWN,
-				     rel, rel_end, h, r_symndx))
+				     rel, rel_end, h, r_symndx, FALSE))
 	goto error_return;
 
       switch (r_type)
@@ -2029,9 +2023,22 @@ do_size:
 	sec->need_convert_load = 1;
     }
 
+  if (elf_section_data (sec)->this_hdr.contents != contents)
+    {
+      if (!info->keep_memory)
+	free (contents);
+      else
+	{
+	  /* Cache the section contents for elf_link_input_bfd.  */
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	}
+    }
+
   return TRUE;
 
 error_return:
+  if (elf_section_data (sec)->this_hdr.contents != contents)
+    free (contents);
   sec->check_relocs_failed = 1;
   return FALSE;
 }
@@ -4356,7 +4363,7 @@ r_386_got32:
 					 input_section, contents,
 					 symtab_hdr, sym_hashes,
 					 &r_type, tls_type, rel,
-					 relend, h, r_symndx))
+					 relend, h, r_symndx, TRUE))
 	    return FALSE;
 
 	  if (r_type == R_386_TLS_LE_32)
@@ -4817,7 +4824,7 @@ r_386_got32:
 					 input_section, contents,
 					 symtab_hdr, sym_hashes,
 					 &r_type, GOT_UNKNOWN, rel,
-					 relend, h, r_symndx))
+					 relend, h, r_symndx, TRUE))
 	    return FALSE;
 
 	  if (r_type != R_386_TLS_LDM)
@@ -5818,6 +5825,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_alignment	4
 #define elf_backend_extern_protected_data 1
+#define elf_backend_caches_rawsize	1
 
 /* Support RELA for objdump of prelink objects.  */
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel
