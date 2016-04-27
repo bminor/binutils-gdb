@@ -1,3 +1,8 @@
+2016-04-27  Alan Modra  <amodra@gmail.com>
+
+	* as.h (inline, __PTR_TO_INT, __INT_TO_PTR): Don't define.
+	(xmemdup0): New inline function.
+
 2016-04-22  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (code_option_type): New enum.
