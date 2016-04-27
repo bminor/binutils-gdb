@@ -1,4 +1,22 @@
 2016-05-17  Tom Tromey  <tom@tromey.com>
+	    Manish Goregaokar <manishsmail@gmail.com>
+
+	* lib/rust-support.exp: New file.
+	* lib/gdb.exp (skip_rust_tests): New proc.
+	(build_executable_from_specs): Handle rust.
+	* lib/future.exp (gdb_find_rustc): New proc.
+	(gdb_default_target_compile): Handle rust.
+	* gdb.rust/expr.exp: New file.
+	* gdb.rust/generics.exp: New file.
+	* gdb.rust/generics.rs: New file.
+	* gdb.rust/methods.exp: New file.
+	* gdb.rust/methods.rs: New file.
+	* gdb.rust/modules.exp: New file.
+	* gdb.rust/modules.rs: New file.
+	* gdb.rust/simple.exp: New file.
+	* gdb.rust/simple.rs: New file.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/default.exp (set language): Add rust.
 
