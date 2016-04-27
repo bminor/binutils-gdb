@@ -1,3 +1,8 @@
+2016-04-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/branch-to-self.exp: Skip it if gdb,nosignals
+	exists.
+
 2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* vla-type.exp: Print structure from toplevel.
