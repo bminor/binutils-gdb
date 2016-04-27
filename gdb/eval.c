@@ -406,8 +406,8 @@ value_f90_subarray (struct value *array,
   int pc = (*pos) + 1;
   LONGEST low_bound, high_bound;
   struct type *range = check_typedef (TYPE_INDEX_TYPE (value_type (array)));
-  enum f90_range_type range_type
-    = (enum f90_range_type) longest_to_int (exp->elts[pc].longconst);
+  enum range_type range_type
+    = (enum range_type) longest_to_int (exp->elts[pc].longconst);
  
   *pos += 3;
 
@@ -1810,13 +1810,13 @@ evaluate_subexp_standard (struct type *expect_type,
       switch (code)
 	{
 	case TYPE_CODE_ARRAY:
-	  if (exp->elts[*pos].opcode == OP_F90_RANGE)
+	  if (exp->elts[*pos].opcode == OP_RANGE)
 	    return value_f90_subarray (arg1, exp, pos, noside);
 	  else
 	    goto multi_f77_subscript;
 
 	case TYPE_CODE_STRING:
-	  if (exp->elts[*pos].opcode == OP_F90_RANGE)
+	  if (exp->elts[*pos].opcode == OP_RANGE)
 	    return value_f90_subarray (arg1, exp, pos, noside);
 	  else
 	    {

@@ -1,5 +1,22 @@
 2016-05-17  Tom Tromey  <tom@tromey.com>
 
+	* std-operator.def (OP_RANGE): Rename from OP_F90_RANGE.
+	* rust-lang.c: Don't include f-lang.h.
+	(rust_range, rust_compute_range, rust_subscript)
+	(rust_evaluate_subexp): Update.
+	* rust-exp.y: Don't include f-lang.h.
+	(ast_range, convert_ast_to_expression): Update.
+	* parse.c (operator_length_standard): Update.
+	* f-lang.h (enum f90_range_type): Move to expression.h.
+	* f-exp.y: Use OP_RANGE.
+	* expression.h (enum range_type): New enum; renamed from
+	f90_range_type.
+	* expprint.c: Don't include f-lang.h.
+	(print_subexp_standard, dump_subexp_body_standard): Use OP_RANGE.
+	* eval.c (value_f90_subarray, evaluate_subexp_standard): Update.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
 	* NEWS: Add Rust item.
 
 2016-05-17  Tom Tromey  <tom@tromey.com>

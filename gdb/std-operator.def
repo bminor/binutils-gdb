@@ -292,8 +292,9 @@ OP (OP_NAME)
 /* An Objective C Foundation Class NSString constant.  */
 OP (OP_OBJC_NSSTRING)
 
-/* A F90 array range operator (for "exp:exp", "exp:", ":exp" and ":").  */
-OP (OP_F90_RANGE)
+/* An array range operator (in Fortran 90, for "exp:exp", "exp:",
+   ":exp" and ":").  */
+OP (OP_RANGE)
 
 /* OP_DECFLOAT is followed by a type pointer in the next exp_element
    and a dec long constant value in the following exp_element.

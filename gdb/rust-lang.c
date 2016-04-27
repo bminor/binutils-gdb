@@ -25,7 +25,6 @@
 #include "c-lang.h"
 #include "charset.h"
 #include "cp-support.h"
-#include "f-lang.h"
 #include "gdbarch.h"
 #include "infcall.h"
 #include "objfiles.h"
@@ -1172,12 +1171,12 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   return result;
 }
 
-/* A helper for rust_evaluate_subexp that handles OP_F90_RANGE.  */
+/* A helper for rust_evaluate_subexp that handles OP_RANGE.  */
 
 static struct value *
 rust_range (struct expression *exp, int *pos, enum noside noside)
 {
-  enum f90_range_type kind;
+  enum range_type kind;
   struct value *low = NULL, *high = NULL;
   struct value *addrval, *result;
   CORE_ADDR addr;
@@ -1186,7 +1185,7 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
   struct type *temp_type;
   const char *name;
 
-  kind = (enum f90_range_type) longest_to_int (exp->elts[*pos + 1].longconst);
+  kind = (enum range_type) longest_to_int (exp->elts[*pos + 1].longconst);
   *pos += 3;
 
   if (kind == HIGH_BOUND_DEFAULT || kind == NONE_BOUND_DEFAULT)
@@ -1274,7 +1273,7 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
 static void
 rust_compute_range (struct type *type, struct value *range,
 		    LONGEST *low, LONGEST *high,
-		    enum f90_range_type *kind)
+		    enum range_type *kind)
 {
   int i;
 
@@ -1311,7 +1310,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
   struct type *rhstype;
   LONGEST low, high, high_bound;
   /* Initialized to appease the compiler.  */
-  enum f90_range_type kind = BOTH_BOUND_DEFAULT;
+  enum range_type kind = BOTH_BOUND_DEFAULT;
   int want_slice = 0;
 
   ++*pos;
@@ -1699,7 +1698,7 @@ which has only anonymous fields"),
       }
       break;
 
-    case OP_F90_RANGE:
+    case OP_RANGE:
       result = rust_range (exp, pos, noside);
       break;
 

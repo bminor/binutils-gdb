@@ -26,7 +26,6 @@
 #include "block.h"
 #include "charset.h"
 #include "cp-support.h"
-#include "f-lang.h"
 #include "gdb_obstack.h"
 #include "gdb_regex.h"
 #include "rust-lang.h"
@@ -1787,7 +1786,7 @@ ast_range (const struct rust_op *lhs, const struct rust_op *rhs)
 {
   struct rust_op *result = OBSTACK_ZALLOC (&work_obstack, struct rust_op);
 
-  result->opcode = OP_F90_RANGE;
+  result->opcode = OP_RANGE;
   result->left.op = lhs;
   result->right.op = rhs;
 
@@ -2417,9 +2416,9 @@ convert_ast_to_expression (struct parser_state *state,
       }
       break;
 
-    case OP_F90_RANGE:
+    case OP_RANGE:
       {
-	enum f90_range_type kind = BOTH_BOUND_DEFAULT;
+	enum range_type kind = BOTH_BOUND_DEFAULT;
 
 	if (operation->left.op != NULL)
 	  {
@@ -2437,9 +2436,9 @@ convert_ast_to_expression (struct parser_state *state,
 		kind = NONE_BOUND_DEFAULT;
 	      }
 	  }
-	write_exp_elt_opcode (state, OP_F90_RANGE);
+	write_exp_elt_opcode (state, OP_RANGE);
 	write_exp_elt_longcst (state, kind);
-	write_exp_elt_opcode (state, OP_F90_RANGE);
+	write_exp_elt_opcode (state, OP_RANGE);
       }
       break;
 

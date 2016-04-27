@@ -29,7 +29,6 @@
 #include "block.h"
 #include "objfiles.h"
 #include "valprint.h"
-#include "f-lang.h"
 
 #include <ctype.h>
 
@@ -560,11 +559,11 @@ print_subexp_standard (struct expression *exp, int *pos,
 	return;
       }
 
-    case OP_F90_RANGE:
+    case OP_RANGE:
       {
-	enum f90_range_type range_type;
+	enum range_type range_type;
 
-	range_type = (enum f90_range_type)
+	range_type = (enum range_type)
 	  longest_to_int (exp->elts[pc + 1].longconst);
 	*pos += 2;
 
@@ -1046,11 +1045,11 @@ dump_subexp_body_standard (struct expression *exp,
 	elt += 2;
       }
       break;
-    case OP_F90_RANGE:
+    case OP_RANGE:
       {
-	enum f90_range_type range_type;
+	enum range_type range_type;
 
-	range_type = (enum f90_range_type)
+	range_type = (enum range_type)
 	  longest_to_int (exp->elts[elt].longconst);
 	elt += 2;
 
