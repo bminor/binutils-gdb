@@ -3207,17 +3207,20 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	      for (asect = link_info->output_bfd->sections;
 		   asect != NULL;
 		   asect = asect->next)
-		{
-		  asection *i;
-		  for (i = asect->map_head.s;
-		       i != NULL;
-		       i = i->map_head.s)
-		    {
-		      size = align_power (size, i->alignment_power);
-		      size += i->size;
-		    }
-		  asect->compressed_size = size;
-		}
+		/* Skip debug sections since compressed_size is used to
+		   compress debug sections.  */
+		if ((asect->flags & SEC_DEBUGGING) == 0)
+		  {
+		    asection *i;
+		    for (i = asect->map_head.s;
+			 i != NULL;
+			 i = i->map_head.s)
+		      {
+			size = align_power (size, i->alignment_power);
+			size += i->size;
+		      }
+		    asect->compressed_size = size;
+		  }
 	    }
 
 	  /* Don't convert GOTPCREL relocations if TSEC isn't placed

@@ -3,13 +3,23 @@
 	Backport from master
 	2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/20006
+	* testsuite/ld-elfvsb/elfvsb.exp (COMPRESS_LDFLAG): New.
+	(visibility_run): Pass COMPRESS_LDFLAG to visibility_test on
+	ELF targets.
+
+2016-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/compressed1b.d: Only run for Linux/GNU targets.
 
 	2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* ld-elf/compressed1b.d: Pass --compress-debug-sections=none
-	to ld.
-	* ld-elf/compressed1c.d: Likewise.
+	* testsuite/ld-elf/compressed1b.d: Pass
+	--compress-debug-sections=none to ld.
+	* testsuite/ld-elf/compressed1c.d: Likewise.
 
 2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
