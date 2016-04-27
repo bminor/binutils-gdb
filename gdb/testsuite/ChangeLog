@@ -1,5 +1,9 @@
 2016-05-17  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/default.exp (set language): Add rust.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
 	* gdb.gdb/unittest.exp: New file.
 
 2016-05-16  Yao Qi  <yao.qi@linaro.org>

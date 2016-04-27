@@ -1,4 +1,22 @@
 2016-05-17  Tom Tromey  <tom@tromey.com>
+	    Manish Goregaokar <manishsmail@gmail.com>
+
+	* symtab.c (symbol_find_demangled_name): Handle Rust.
+	* symfile.c (init_filename_language_table): Treat ".rs" as Rust.
+	* std-operator.def (STRUCTOP_ANONYMOUS, OP_RUST_ARRAY): New
+	constants.
+	* rust-lang.h: New file.
+	* rust-lang.c: New file.
+	* rust-exp.y: New file.
+	* dwarf2read.c (read_file_scope): Add Rust producer sniffing.
+	(dwarf2_compute_name, read_func_scope, read_structure_type)
+	(read_base_type, read_subrange_type, set_cu_language)
+	(new_symbol_full, determine_prefix): Handle Rust.
+	* defs.h (enum language) <language_rust>: New constant.
+	* Makefile.in (SFILES): Add rust-exp.y, rust-lang.c.
+	(COMMON_OBS): Add rust-exp.o, rust-lang.o.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
 
 	* valprint.h (struct generic_val_print_array) <array_start,
 	array_end>: New fields.

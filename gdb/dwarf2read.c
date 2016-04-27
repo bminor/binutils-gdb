@@ -8462,7 +8462,8 @@ dwarf2_compute_name (const char *name,
   /* These are the only languages we know how to qualify names in.  */
   if (name != NULL
       && (cu->language == language_cplus || cu->language == language_java
-	  || cu->language == language_fortran || cu->language == language_d))
+	  || cu->language == language_fortran || cu->language == language_d
+	  || cu->language == language_rust))
     {
       if (die_needs_namespace (die, cu))
 	{
@@ -11475,7 +11476,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* For C++, set the block's scope.  */
   if ((cu->language == language_cplus
        || cu->language == language_fortran
-       || cu->language == language_d)
+       || cu->language == language_d
+       || cu->language == language_rust)
       && cu->processing_has_namespace_info)
     block_set_scope (block, determine_prefix (die, cu),
 		     &objfile->objfile_obstack);
@@ -13147,7 +13149,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (cu->language == language_cplus
 	  || cu->language == language_java
-	  || cu->language == language_d)
+	  || cu->language == language_d
+	  || cu->language == language_rust)
 	{
 	  const char *full_name = dwarf2_full_name (name, die, cu);
 
@@ -14776,7 +14779,8 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       case DW_ATE_unsigned_char:
 	if (cu->language == language_ada || cu->language == language_m2
 	    || cu->language == language_pascal
-	    || cu->language == language_fortran)
+	    || cu->language == language_fortran
+	    || cu->language == language_rust)
 	  code = TYPE_CODE_CHAR;
 	type_flags |= TYPE_FLAG_UNSIGNED;
 	break;
@@ -14950,6 +14954,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
     case language_d:
     case language_java:
     case language_objc:
+    case language_rust:
       low.data.const_val = 0;
       low_default_is_valid = (cu->header.version >= 4);
       break;
@@ -17038,6 +17043,10 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_ObjC:
       cu->language = language_objc;
       break;
+    case DW_LANG_Rust:
+    case DW_LANG_Rust_old:
+      cu->language = language_rust;
+      break;
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     default:
@@ -18601,7 +18610,8 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		if (cu->language == language_cplus
 		    || cu->language == language_java
 		    || cu->language == language_ada
-		    || cu->language == language_d)
+		    || cu->language == language_d
+		    || cu->language == language_rust)
 		  {
 		    /* The symbol's name is already allocated along
 		       with this objfile, so we don't need to
@@ -19274,7 +19284,8 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
   char *retval;
 
   if (cu->language != language_cplus && cu->language != language_java
-      && cu->language != language_fortran && cu->language != language_d)
+      && cu->language != language_fortran && cu->language != language_d
+      && cu->language != language_rust)
     return "";
 
   retval = anonymous_struct_prefix (die, cu);
