@@ -1,5 +1,9 @@
 2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/compressed1b.d: Only run for Linux/GNU targets.
+
+2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20006
 	* testsuite/ld-elfvsb/elfvsb.exp (COMPRESS_LDFLAG): New.
 	(visibility_run): Pass COMPRESS_LDFLAG to visibility_test on
