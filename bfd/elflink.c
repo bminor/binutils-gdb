@@ -12230,6 +12230,55 @@ _bfd_elf_gc_mark_hook (asection *sec,
   return NULL;
 }
 
+/* For undefined __start_<name> and __stop_<name> symbols, return the
+   first input section matching <name>.  Return NULL otherwise.  */
+
+asection *
+_bfd_elf_is_start_stop (const struct bfd_link_info *info,
+			struct elf_link_hash_entry *h)
+{
+  asection *s;
+  const char *sec_name;
+
+  if (h->root.type != bfd_link_hash_undefined
+      && h->root.type != bfd_link_hash_undefweak)
+    return NULL;
+
+  s = h->root.u.undef.section;
+  if (s != NULL)
+    {
+      if (s == (asection *) 0 - 1)
+	return NULL;
+      return s;
+    }
+
+  sec_name = NULL;
+  if (strncmp (h->root.root.string, "__start_", 8) == 0)
+    sec_name = h->root.root.string + 8;
+  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
+    sec_name = h->root.root.string + 7;
+
+  if (sec_name != NULL && *sec_name != '\0')
+    {
+      bfd *i;
+
+      for (i = info->input_bfds; i != NULL; i = i->link.next)
+	{
+	  s = bfd_get_section_by_name (i, sec_name);
+	  if (s != NULL)
+	    {
+	      h->root.u.undef.section = s;
+	      break;
+	    }
+	}
+    }
+
+  if (s == NULL)
+    h->root.u.undef.section = (asection *) 0 - 1;
+
+  return s;
+}
+
 /* COOKIE->rel describes a relocation against section SEC, which is
    a section we've decided to keep.  Return the section that contains
    the relocation symbol, or NULL if no section contains it.  */
@@ -12268,34 +12317,19 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
       if (h->u.weakdef != NULL)
 	h->u.weakdef->mark = 1;
 
-      if (start_stop != NULL
-	  && (h->root.type == bfd_link_hash_undefined
-	      || h->root.type == bfd_link_hash_undefweak))
+      if (start_stop != NULL)
 	{
 	  /* To work around a glibc bug, mark all XXX input sections
 	     when there is an as yet undefined reference to __start_XXX
 	     or __stop_XXX symbols.  The linker will later define such
 	     symbols for orphan input sections that have a name
 	     representable as a C identifier.  */
-	  const char *sec_name = NULL;
-	  if (strncmp (h->root.root.string, "__start_", 8) == 0)
-	    sec_name = h->root.root.string + 8;
-	  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
-	    sec_name = h->root.root.string + 7;
+	  asection *s = _bfd_elf_is_start_stop (info, h);
 
-	  if (sec_name != NULL && *sec_name != '\0')
+	  if (s != NULL)
 	    {
-	      bfd *i;
-
-	      for (i = info->input_bfds; i != NULL; i = i->link.next)
-		{
-		  asection *s = bfd_get_section_by_name (i, sec_name);
-		  if (s != NULL && !s->gc_mark)
-		    {
-		      *start_stop = TRUE;
-		      return s;
-		    }
-		}
+	      *start_stop = !s->gc_mark;
+	      return s;
 	    }
 	}
 

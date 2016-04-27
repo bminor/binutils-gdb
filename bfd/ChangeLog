@@ -1,3 +1,9 @@
+2016-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_is_start_stop): New function.
+	(_bfd_elf_gc_mark_rsec): Use it.
+	* elf-bfd.h (_bfd_elf_is_start_stop): Declare.
+
 2016-04-26  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* elf32-rx.c (rx_set_section_contents): Avoid arithmetic on void *.

@@ -1,3 +1,8 @@
+2016-04-27  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (struct bfd_link_hash_entry): Add "section" field to
+	undef.  Formatting.
+
 2016-04-21  Nick Clifton  <nickc@redhat.com>
 
 	* bfdlink.h: Add prototype for bfd_link_check_relocs.
