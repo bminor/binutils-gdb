@@ -1,4 +1,8 @@
 2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add Rust item.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
 	    Manish Goregaokar <manishsmail@gmail.com>
 
 	* symtab.c (symbol_find_demangled_name): Handle Rust.
