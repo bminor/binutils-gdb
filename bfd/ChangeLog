@@ -1,3 +1,9 @@
+2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20006
+	* elf64-x86-64.c (elf_x86_64_convert_load): Skip debug sections
+	when estimating distances between output sections.
+
 2016-04-27  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_is_start_stop): New function.
