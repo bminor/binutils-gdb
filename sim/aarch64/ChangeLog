@@ -1,3 +1,8 @@
+2016-04-27  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c: Add TRACE_DECODE statements to all emulation
+	functions.
+
 2016-03-30  Nick Clifton  <nickc@redhat.com>
 
 	* cpustate.c (aarch64_set_reg_s32): New function.

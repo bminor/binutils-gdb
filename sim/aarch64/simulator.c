@@ -265,6 +265,7 @@ ldur32 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u32
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -277,6 +278,7 @@ ldur64 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u64
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -289,6 +291,7 @@ ldurb32 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u8
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -301,6 +304,7 @@ ldursb32 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP, (uint32_t) aarch64_get_mem_s8
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -313,6 +317,7 @@ ldursb64 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_s64 (cpu, rt, NO_SP, aarch64_get_mem_s8
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -325,6 +330,7 @@ ldurh32 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, aarch64_get_mem_u16
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -337,6 +343,7 @@ ldursh32 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, (uint32_t) aarch64_get_mem_s16
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -349,6 +356,7 @@ ldursh64 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_s64 (cpu, rt, NO_SP, aarch64_get_mem_s16
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -361,6 +369,7 @@ ldursw (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, (uint32_t) aarch64_get_mem_s32
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			+ offset));
@@ -376,6 +385,7 @@ stur32 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u32 (cpu,
 		       aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset,
 		       aarch64_get_reg_u32 (cpu, rd, NO_SP));
@@ -388,6 +398,7 @@ stur64 (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u64 (cpu,
 		       aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset,
 		       aarch64_get_reg_u64 (cpu, rd, NO_SP));
@@ -400,6 +411,7 @@ sturb (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u8 (cpu,
 		      aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset,
 		      aarch64_get_reg_u8 (cpu, rd, NO_SP));
@@ -412,6 +424,7 @@ sturh (sim_cpu *cpu, int32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u16 (cpu,
 		       aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset,
 		       aarch64_get_reg_u16 (cpu, rd, NO_SP));
@@ -427,6 +440,7 @@ ldr32_pcrel (sim_cpu *cpu, int32_t offset)
 {
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_mem_u32
 		       (cpu, aarch64_get_PC (cpu) + offset * 4));
@@ -438,6 +452,7 @@ ldr_pcrel (sim_cpu *cpu, int32_t offset)
 {
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_mem_u64
 		       (cpu, aarch64_get_PC (cpu) + offset * 4));
@@ -449,6 +464,7 @@ ldrsw_pcrel (sim_cpu *cpu, int32_t offset)
 {
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_mem_s32
 		       (cpu, aarch64_get_PC (cpu) + offset * 4));
@@ -460,6 +476,7 @@ fldrs_pcrel (sim_cpu *cpu, int32_t offset)
 {
   unsigned int rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u32 (cpu, rd, 0,
 		       aarch64_get_mem_u32
 		       (cpu, aarch64_get_PC (cpu) + offset * 4));
@@ -471,6 +488,7 @@ fldrd_pcrel (sim_cpu *cpu, int32_t offset)
 {
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, st, 0,
 		       aarch64_get_mem_u64
 		       (cpu, aarch64_get_PC (cpu) + offset * 4));
@@ -484,6 +502,7 @@ fldrq_pcrel (sim_cpu *cpu, int32_t offset)
   uint64_t addr = aarch64_get_PC (cpu) + offset * 4;
   FRegister a;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_get_mem_long_double (cpu, addr, & a);
   aarch64_set_FP_long_double (cpu, st, a);
 }
@@ -545,6 +564,7 @@ fldrs_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_mem_u32 (cpu, address));
   if (wb == Post)
     address += offset;
@@ -561,6 +581,7 @@ fldrb_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u8 (cpu, rd, 0, aarch64_get_mem_u32 (cpu, addr));
 }
 
@@ -572,6 +593,7 @@ fldrh_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 16);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u16 (cpu, rd, 0, aarch64_get_mem_u16 (cpu, addr));
 }
 
@@ -583,6 +605,7 @@ fldrs_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 32);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u32 (cpu, rd, 0, aarch64_get_mem_u32 (cpu, addr));
 }
 
@@ -594,6 +617,7 @@ fldrd_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 64);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, rd, 0, aarch64_get_mem_u64 (cpu, addr));
 }
 
@@ -605,6 +629,7 @@ fldrq_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + SCALE (offset, 128);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, rd, 0, aarch64_get_mem_u64 (cpu, addr));
   aarch64_set_vec_u64 (cpu, rd, 1, aarch64_get_mem_u64 (cpu, addr + 8));
 }
@@ -621,6 +646,7 @@ fldrs_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement = OPT_SCALE (extended, 32, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_mem_u32
 		       (cpu, address + displacement));
 }
@@ -636,6 +662,7 @@ fldrd_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, st, 0, aarch64_get_mem_u64 (cpu, address));
 
   if (wb == Post)
@@ -668,6 +695,7 @@ fldrq_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_get_mem_long_double (cpu, address, & a);
   aarch64_set_FP_long_double (cpu, st, a);
 
@@ -720,6 +748,7 @@ ldr32_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be.  */
   aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u32
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
@@ -742,6 +771,7 @@ ldr32_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u32 (cpu, address));
 
   if (wb == Post)
@@ -765,6 +795,7 @@ ldr32_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement =  OPT_SCALE (extended, 32, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP,
 		       aarch64_get_mem_u32 (cpu, address + displacement));
 }
@@ -776,6 +807,7 @@ ldr_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be.  */
   aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u64
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
@@ -798,6 +830,7 @@ ldr_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u64 (cpu, address));
 
   if (wb == Post)
@@ -821,6 +854,7 @@ ldr_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement =  OPT_SCALE (extended, 64, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP,
 		       aarch64_get_mem_u64 (cpu, address + displacement));
 }
@@ -832,6 +866,7 @@ ldrb32_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be
      there is no scaling required for a byte load.  */
   aarch64_set_reg_u64 (cpu, rt, NO_SP,
@@ -855,6 +890,7 @@ ldrb32_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP, aarch64_get_mem_u8 (cpu, address));
 
   if (wb == Post)
@@ -878,6 +914,7 @@ ldrb32_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t displacement = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 				 extension);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* There is no scaling required for a byte load.  */
   aarch64_set_reg_u64 (cpu, rt, NO_SP,
 		       aarch64_get_mem_u8 (cpu, address + displacement));
@@ -901,6 +938,7 @@ ldrsb_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   val = aarch64_get_mem_s8 (cpu, address);
   aarch64_set_reg_s64 (cpu, rt, NO_SP, val);
 
@@ -931,6 +969,7 @@ ldrsb_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   uint64_t address = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   int64_t displacement = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 				 extension);
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* There is no scaling required for a byte load.  */
   aarch64_set_reg_s64 (cpu, rt, NO_SP,
 		       aarch64_get_mem_s8 (cpu, address + displacement));
@@ -944,6 +983,7 @@ ldrh32_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rt = INSTR (4, 0);
   uint32_t val;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be.  */
   val = aarch64_get_mem_u16 (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			     + SCALE (offset, 16));
@@ -967,6 +1007,7 @@ ldrh32_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u32 (cpu, rt, NO_SP, aarch64_get_mem_u16 (cpu, address));
 
   if (wb == Post)
@@ -990,6 +1031,7 @@ ldrh32_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement =  OPT_SCALE (extended, 16, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u32 (cpu, rt, NO_SP,
 		       aarch64_get_mem_u16 (cpu, address + displacement));
 }
@@ -1002,6 +1044,7 @@ ldrsh32_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rt = INSTR (4, 0);
   int32_t val;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be.  */
   val = aarch64_get_mem_s16 (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			     + SCALE (offset, 16));
@@ -1025,6 +1068,7 @@ ldrsh32_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_s32 (cpu, rt, NO_SP,
 		       (int32_t) aarch64_get_mem_s16 (cpu, address));
 
@@ -1049,6 +1093,7 @@ ldrsh32_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement =  OPT_SCALE (extended, 16, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_s32 (cpu, rt, NO_SP,
 		       (int32_t) aarch64_get_mem_s16
 		       (cpu, address + displacement));
@@ -1062,6 +1107,7 @@ ldrsh_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rt = INSTR (4, 0);
   int64_t val;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be.  */
   val = aarch64_get_mem_s16  (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			      + SCALE (offset, 16));
@@ -1081,6 +1127,7 @@ ldrsh64_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (rn == rt && wb != NoWriteBack)
     HALT_UNALLOC;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   address = aarch64_get_reg_u64 (cpu, rn, SP_OK);
 
   if (wb != Post)
@@ -1112,6 +1159,7 @@ ldrsh_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   uint64_t displacement = OPT_SCALE (extended, 16, scaling);
   int64_t val;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   val = aarch64_get_mem_s16 (cpu, address + displacement);
   aarch64_set_reg_s64 (cpu, rt, NO_SP, val);
 }
@@ -1124,6 +1172,7 @@ ldrsw_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rt = INSTR (4, 0);
   int64_t val;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   val = aarch64_get_mem_s32 (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			     + SCALE (offset, 32));
   /* The target register may not be SP but the source may be.  */
@@ -1147,6 +1196,7 @@ ldrsw_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_s64 (cpu, rt, NO_SP, aarch64_get_mem_s32 (cpu, address));
 
   if (wb == Post)
@@ -1170,6 +1220,7 @@ ldrsw_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement =  OPT_SCALE (extended, 32, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_s64 (cpu, rt, NO_SP,
 		       aarch64_get_mem_s32 (cpu, address + displacement));
 }
@@ -1184,6 +1235,7 @@ str32_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be.  */
   aarch64_set_mem_u32 (cpu, (aarch64_get_reg_u64 (cpu, rn, SP_OK)
 			     + SCALE (offset, 32)),
@@ -1205,6 +1257,7 @@ str32_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u32 (cpu, address, aarch64_get_reg_u32 (cpu, rt, NO_SP));
 
   if (wb == Post)
@@ -1227,6 +1280,7 @@ str32_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t  extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement = OPT_SCALE (extended, 32, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u32 (cpu, address + displacement,
 		       aarch64_get_reg_u64 (cpu, rt, NO_SP));
 }
@@ -1238,6 +1292,7 @@ str_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u64 (cpu,
 		       aarch64_get_reg_u64 (cpu, rn, SP_OK)
 		       + SCALE (offset, 64),
@@ -1260,6 +1315,7 @@ str_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u64 (cpu, address, aarch64_get_reg_u64 (cpu, rt, NO_SP));
 
   if (wb == Post)
@@ -1284,6 +1340,7 @@ str_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
 			       extension);
   uint64_t displacement = OPT_SCALE (extended, 64, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u64 (cpu, address + displacement,
 		       aarch64_get_reg_u64 (cpu, rt, NO_SP));
 }
@@ -1295,6 +1352,7 @@ strb_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be.
      There is no scaling required for a byte load.  */
   aarch64_set_mem_u8 (cpu,
@@ -1318,6 +1376,7 @@ strb_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u8 (cpu, address, aarch64_get_reg_u8 (cpu, rt, NO_SP));
 
   if (wb == Post)
@@ -1341,6 +1400,7 @@ strb_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t displacement = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 				 extension);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* There is no scaling required for a byte load.  */
   aarch64_set_mem_u8 (cpu, address + displacement,
 		      aarch64_get_reg_u8 (cpu, rt, NO_SP));
@@ -1353,6 +1413,7 @@ strh_abs (sim_cpu *cpu, uint32_t offset)
   unsigned rn = INSTR (9, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The target register may not be SP but the source may be.  */
   aarch64_set_mem_u16 (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK)
 		       + SCALE (offset, 16),
@@ -1375,6 +1436,7 @@ strh_wb (sim_cpu *cpu, int32_t offset, WriteBack wb)
   if (wb != Post)
     address += offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u16 (cpu, address, aarch64_get_reg_u16 (cpu, rt, NO_SP));
 
   if (wb == Post)
@@ -1398,6 +1460,7 @@ strh_scale_ext (sim_cpu *cpu, Scaling scaling, Extension extension)
   int64_t extended = extend (aarch64_get_reg_u32 (cpu, rm, NO_SP), extension);
   uint64_t displacement =  OPT_SCALE (extended, 16, scaling);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u16 (cpu, address + displacement,
 		       aarch64_get_reg_u16 (cpu, rt, NO_SP));
 }
@@ -1471,6 +1534,7 @@ ldxr (sim_cpu *cpu)
   /* int ordered = INSTR (15, 15);  */
   /* int exclusive = ! INSTR (23, 23);  */
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (size)
     {
     case 0:
@@ -1506,6 +1570,7 @@ stxr (sim_cpu *cpu)
     case 3: aarch64_set_mem_u64 (cpu, address, data); break;
     }
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rs, NO_SP, 0); /* Always exclusive...  */
 }
 
@@ -1555,6 +1620,7 @@ add32 (sim_cpu *cpu, uint32_t aimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u32 (cpu, rn, SP_OK) + aimm);
 }
@@ -1566,6 +1632,7 @@ add64 (sim_cpu *cpu, uint32_t aimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u64 (cpu, rn, SP_OK) + aimm);
 }
@@ -1738,6 +1805,7 @@ adds32 (sim_cpu *cpu, uint32_t aimm)
   /* TODO : do we need to worry about signs here?  */
   int32_t value1 = aarch64_get_reg_s32 (cpu, rn, SP_OK);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 + aimm);
   set_flags_for_add32 (cpu, value1, aimm);
 }
@@ -1751,6 +1819,7 @@ adds64 (sim_cpu *cpu, uint32_t aimm)
   uint64_t value1 = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   uint64_t value2 = aimm;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 + value2);
   set_flags_for_add64 (cpu, value1, value2);
 }
@@ -1762,6 +1831,7 @@ sub32 (sim_cpu *cpu, uint32_t aimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u32 (cpu, rn, SP_OK) - aimm);
 }
@@ -1773,6 +1843,7 @@ sub64 (sim_cpu *cpu, uint32_t aimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u64 (cpu, rn, SP_OK) - aimm);
 }
@@ -1786,6 +1857,7 @@ subs32 (sim_cpu *cpu, uint32_t aimm)
   uint32_t value1 = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   uint32_t value2 = aimm;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 - value2);
   set_flags_for_sub32 (cpu, value1, value2);
 }
@@ -1799,6 +1871,7 @@ subs64 (sim_cpu *cpu, uint32_t aimm)
   uint64_t value1 = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   uint32_t value2 = aimm;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 - value2);
   set_flags_for_sub64 (cpu, value1, value2);
 }
@@ -1869,6 +1942,7 @@ add32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u32 (cpu, rn, NO_SP)
 		       + shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP),
@@ -1883,6 +1957,7 @@ add64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u64 (cpu, rn, NO_SP)
 		       + shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP),
@@ -1901,6 +1976,7 @@ adds32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   uint32_t value2 = shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 			       shift, count);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 + value2);
   set_flags_for_add32 (cpu, value1, value2);
 }
@@ -1917,6 +1993,7 @@ adds64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   uint64_t value2 = shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP),
 			       shift, count);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 + value2);
   set_flags_for_add64 (cpu, value1, value2);
 }
@@ -1929,6 +2006,7 @@ sub32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u32 (cpu, rn, NO_SP)
 		       - shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP),
@@ -1943,6 +2021,7 @@ sub64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u64 (cpu, rn, NO_SP)
 		       - shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP),
@@ -1961,6 +2040,7 @@ subs32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   uint32_t value2 = shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 			      shift, count);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 - value2);
   set_flags_for_sub32 (cpu, value1, value2);
 }
@@ -1977,6 +2057,7 @@ subs64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   uint64_t value2 = shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP),
 			       shift, count);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 - value2);
   set_flags_for_sub64 (cpu, value1, value2);
 }
@@ -2037,6 +2118,7 @@ add32_ext (sim_cpu *cpu, Extension extension, uint32_t shift)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u32 (cpu, rn, SP_OK)
 		       + (extreg32 (cpu, rm, extension) << shift));
@@ -2051,6 +2133,7 @@ add64_ext (sim_cpu *cpu, Extension extension, uint32_t shift)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u64 (cpu, rn, SP_OK)
 		       + (extreg64 (cpu, rm, extension) << shift));
@@ -2067,6 +2150,7 @@ adds32_ext (sim_cpu *cpu, Extension extension, uint32_t shift)
   uint32_t value1 = aarch64_get_reg_u32 (cpu, rn, SP_OK);
   uint32_t value2 = extreg32 (cpu, rm, extension) << shift;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 + value2);
   set_flags_for_add32 (cpu, value1, value2);
 }
@@ -2083,6 +2167,7 @@ adds64_ext (sim_cpu *cpu, Extension extension, uint32_t shift)
   uint64_t value1 = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   uint64_t value2 = extreg64 (cpu, rm, extension) << shift;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 + value2);
   set_flags_for_add64 (cpu, value1, value2);
 }
@@ -2095,6 +2180,7 @@ sub32_ext (sim_cpu *cpu, Extension extension, uint32_t shift)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u32 (cpu, rn, SP_OK)
 		       - (extreg32 (cpu, rm, extension) << shift));
@@ -2109,6 +2195,7 @@ sub64_ext (sim_cpu *cpu, Extension extension, uint32_t shift)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u64 (cpu, rn, SP_OK)
 		       - (extreg64 (cpu, rm, extension) << shift));
@@ -2125,6 +2212,7 @@ subs32_ext (sim_cpu *cpu, Extension extension, uint32_t shift)
   uint32_t value1 = aarch64_get_reg_u32 (cpu, rn, SP_OK);
   uint32_t value2 = extreg32 (cpu, rm, extension) << shift;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 - value2);
   set_flags_for_sub32 (cpu, value1, value2);
 }
@@ -2141,6 +2229,7 @@ subs64_ext (sim_cpu *cpu, Extension extension, uint32_t shift)
   uint64_t value1 = aarch64_get_reg_u64 (cpu, rn, SP_OK);
   uint64_t value2 = extreg64 (cpu, rm, extension) << shift;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 - value2);
   set_flags_for_sub64 (cpu, value1, value2);
 }
@@ -2281,6 +2370,7 @@ adc32 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u32 (cpu, rn, NO_SP)
 		       + aarch64_get_reg_u32 (cpu, rm, NO_SP)
@@ -2295,6 +2385,7 @@ adc64 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u64 (cpu, rn, NO_SP)
 		       + aarch64_get_reg_u64 (cpu, rm, NO_SP)
@@ -2313,6 +2404,7 @@ adcs32 (sim_cpu *cpu)
   uint32_t value2 = aarch64_get_reg_u32 (cpu, rm, NO_SP);
   uint32_t carry = IS_SET (C);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 + value2 + carry);
   set_flags_for_add32 (cpu, value1, value2 + carry);
 }
@@ -2329,6 +2421,7 @@ adcs64 (sim_cpu *cpu)
   uint64_t value2 = aarch64_get_reg_u64 (cpu, rm, NO_SP);
   uint64_t carry = IS_SET (C);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 + value2 + carry);
   set_flags_for_add64 (cpu, value1, value2 + carry);
 }
@@ -2341,6 +2434,7 @@ sbc32 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5); /* ngc iff rn == 31.  */
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u32 (cpu, rn, NO_SP)
 		       - aarch64_get_reg_u32 (cpu, rm, NO_SP)
@@ -2355,6 +2449,7 @@ sbc64 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u64 (cpu, rn, NO_SP)
 		       - aarch64_get_reg_u64 (cpu, rm, NO_SP)
@@ -2374,6 +2469,7 @@ sbcs32 (sim_cpu *cpu)
   uint32_t carry  = IS_SET (C);
   uint32_t result = value1 - value2 + 1 - carry;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, result);
   set_flags_for_sub32 (cpu, value1, value2 + 1 - carry);
 }
@@ -2391,6 +2487,7 @@ sbcs64 (sim_cpu *cpu)
   uint64_t carry  = IS_SET (C);
   uint64_t result = value1 - value2 + 1 - carry;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, result);
   set_flags_for_sub64 (cpu, value1, value2 + 1 - carry);
 }
@@ -2485,6 +2582,7 @@ CondCompare (sim_cpu *cpu) /* aka: ccmp and ccmn  */
   NYI_assert (10, 10, 0);
   NYI_assert (4, 4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (! testConditionCode (cpu, INSTR (15, 12)))
     {
       aarch64_set_CPSR (cpu, INSTR (3, 0));
@@ -2537,6 +2635,7 @@ do_vec_MOV_whole_vector (sim_cpu *cpu)
   if (INSTR (20, 16) != vs)
     HALT_NYI;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (30, 30))
     aarch64_set_vec_u64 (cpu, vd, 1, aarch64_get_vec_u64 (cpu, vs, 1));
 
@@ -2560,6 +2659,7 @@ do_vec_MOV_into_scalar (sim_cpu *cpu)
   NYI_assert (29, 21, 0x070);
   NYI_assert (17, 10, 0x0F);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (20, 18))
     {
     case 0x2:
@@ -2599,6 +2699,7 @@ do_vec_INS (sim_cpu *cpu)
   NYI_assert (31, 21, 0x270);
   NYI_assert (15, 10, 0x07);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (16, 16))
     {
       index = INSTR (20, 17);
@@ -2646,6 +2747,7 @@ do_vec_DUP_vector_into_vector (sim_cpu *cpu)
   NYI_assert (29, 21, 0x070);
   NYI_assert (15, 10, 0x01);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (16, 16))
     {
       index = INSTR (20, 17);
@@ -2705,6 +2807,7 @@ do_vec_TBL (sim_cpu *cpu)
   NYI_assert (29, 21, 0x070);
   NYI_assert (12, 10, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = 0; i < (full ? 16 : 8); i++)
     {
       unsigned int selector = aarch64_get_vec_u8 (cpu, vm, i);
@@ -2750,6 +2853,7 @@ do_vec_TRN (sim_cpu *cpu)
   NYI_assert (29, 24, 0x0E);
   NYI_assert (13, 10, 0xA);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -2820,6 +2924,7 @@ do_vec_DUP_scalar_into_vector (sim_cpu *cpu)
   NYI_assert (29, 20, 0x0E0);
   NYI_assert (15, 10, 0x03);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (19, 16))
     {
     case 1:
@@ -2888,6 +2993,7 @@ do_vec_UZP (sim_cpu *cpu)
   NYI_assert (15, 15, 0);
   NYI_assert (13, 10, 6);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 23))
     {
     case 0:
@@ -2959,6 +3065,7 @@ do_vec_ZIP (sim_cpu *cpu)
   NYI_assert (15, 15, 0);
   NYI_assert (13, 10, 0xE);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 23))
     {
     case 0:
@@ -3119,6 +3226,7 @@ do_vec_MOV_immediate (sim_cpu *cpu)
   NYI_assert (29, 19, 0x1E0);
   NYI_assert (11, 10, 1);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (15, 12))
     {
     case 0x0: /* 32-bit, no shift.  */
@@ -3186,6 +3294,7 @@ do_vec_MVNI (sim_cpu *cpu)
   NYI_assert (29, 19, 0x5E0);
   NYI_assert (11, 10, 1);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (15, 12))
     {
     case 0x0: /* 32-bit, no shift.  */
@@ -3267,6 +3376,7 @@ do_vec_ABS (sim_cpu *cpu)
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 10, 0x82E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -3317,6 +3427,7 @@ do_vec_ADDV (sim_cpu *cpu)
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 10, 0xC6E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -3366,6 +3477,7 @@ do_vec_ins_2 (sim_cpu *cpu)
   NYI_assert (17, 14, 0);
   NYI_assert (12, 10, 7);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (13, 13) == 1)
     {
       if (INSTR (18, 18) == 1)
@@ -3447,6 +3559,7 @@ do_vec_mull (sim_cpu *cpu)
   NYI_assert (28, 24, 0x0E);
   NYI_assert (15, 10, 0x30);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* NB: Read source values before writing results, in case
      the source and destination vectors are the same.  */
   switch (INSTR (23, 22))
@@ -3507,6 +3620,7 @@ do_vec_fadd (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x35);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (23, 23))
     {
       if (INSTR (22, 22))
@@ -3572,6 +3686,7 @@ do_vec_add (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x21);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -3628,6 +3743,7 @@ do_vec_mul (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x27);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -3670,6 +3786,7 @@ do_vec_MLA (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x25);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -3813,6 +3930,7 @@ do_vec_FminmaxNMP (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x31);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       double (* fn)(double, double) = INSTR (23, 23)
@@ -3870,6 +3988,7 @@ do_vec_AND (sim_cpu *cpu)
   NYI_assert (29, 21, 0x071);
   NYI_assert (15, 10, 0x07);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = 0; i < (full ? 4 : 2); i++)
     aarch64_set_vec_u32 (cpu, vd, i,
 			 aarch64_get_vec_u32 (cpu, vn, i)
@@ -3896,6 +4015,7 @@ do_vec_BSL (sim_cpu *cpu)
   NYI_assert (29, 21, 0x173);
   NYI_assert (15, 10, 0x07);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = 0; i < (full ? 16 : 8); i++)
     aarch64_set_vec_u8 (cpu, vd, i,
 			(    aarch64_get_vec_u8 (cpu, vd, i)
@@ -3924,6 +4044,7 @@ do_vec_EOR (sim_cpu *cpu)
   NYI_assert (29, 21, 0x171);
   NYI_assert (15, 10, 0x07);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = 0; i < (full ? 4 : 2); i++)
     aarch64_set_vec_u32 (cpu, vd, i,
 			 aarch64_get_vec_u32 (cpu, vn, i)
@@ -3954,6 +4075,7 @@ do_vec_bit (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x07);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (test_false)
     {
       for (i = 0; i < (full ? 16 : 8); i++)
@@ -3988,6 +4110,7 @@ do_vec_ORN (sim_cpu *cpu)
   NYI_assert (29, 21, 0x077);
   NYI_assert (15, 10, 0x07);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = 0; i < (full ? 16 : 8); i++)
     aarch64_set_vec_u8 (cpu, vd, i,
 			aarch64_get_vec_u8 (cpu, vn, i)
@@ -4014,6 +4137,7 @@ do_vec_ORR (sim_cpu *cpu)
   NYI_assert (29, 21, 0x075);
   NYI_assert (15, 10, 0x07);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = 0; i < (full ? 16 : 8); i++)
     aarch64_set_vec_u8 (cpu, vd, i,
 			aarch64_get_vec_u8 (cpu, vn, i)
@@ -4040,6 +4164,7 @@ do_vec_BIC (sim_cpu *cpu)
   NYI_assert (29, 21, 0x073);
   NYI_assert (15, 10, 0x07);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = 0; i < (full ? 16 : 8); i++)
     aarch64_set_vec_u8 (cpu, vd, i,
 			aarch64_get_vec_u8 (cpu, vn, i)
@@ -4065,6 +4190,7 @@ do_vec_XTN (sim_cpu *cpu)
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 10, 0x84A);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -4124,6 +4250,7 @@ do_vec_maxv (sim_cpu *cpu)
   NYI_assert (20, 17, 8);
   NYI_assert (15, 10, 0x2A);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch ((INSTR (29, 29) << 1) | INSTR (16, 16))
     {
     case 0: /* SMAXV.  */
@@ -4259,6 +4386,7 @@ do_vec_fminmaxV (sim_cpu *cpu)
   NYI_assert (22, 14, 0x0C3);
   NYI_assert (11, 10, 2);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (23, 23))
     {
       switch (INSTR (13, 12))
@@ -4327,6 +4455,7 @@ do_vec_Fminmax (sim_cpu *cpu)
   NYI_assert (15, 14, 3);
   NYI_assert (11, 10, 1);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       double (* func)(double, double);
@@ -4384,6 +4513,7 @@ do_vec_SCVTF (sim_cpu *cpu)
   NYI_assert (29, 23, 0x1C);
   NYI_assert (21, 10, 0x876);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (size)
     {
       if (! full)
@@ -4488,7 +4618,7 @@ do_vec_SCVTF (sim_cpu *cpu)
     {									\
       if (vm != 0)							\
 	HALT_NYI;							\
-      if (INSTR (22, 22))			\
+      if (INSTR (22, 22))						\
 	{								\
 	  if (! full)							\
 	    HALT_NYI;							\
@@ -4511,7 +4641,7 @@ do_vec_SCVTF (sim_cpu *cpu)
 #define VEC_FCMP(CMP)							\
   do									\
     {									\
-      if (INSTR (22, 22))			\
+      if (INSTR (22, 22))						\
 	{								\
 	  if (! full)							\
 	    HALT_NYI;							\
@@ -4560,6 +4690,7 @@ do_vec_compare (sim_cpu *cpu)
   NYI_assert (28, 24, 0x0E);
   NYI_assert (21, 21, 1);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if ((INSTR (11, 11)
        && INSTR (14, 14))
       || ((INSTR (11, 11) == 0
@@ -4655,6 +4786,7 @@ do_vec_SSHL (sim_cpu *cpu)
 
   /* FIXME: What is a signed shift left in this context ?.  */
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -4736,6 +4868,7 @@ do_vec_USHL (sim_cpu *cpu)
   NYI_assert (29, 24, 0x2E);
   NYI_assert (15, 10, 0x11);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -4817,6 +4950,7 @@ do_vec_FMLA (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x33);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       if (! full)
@@ -4861,6 +4995,7 @@ do_vec_max (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x19);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (29, 29))
     {
       switch (INSTR (23, 22))
@@ -4957,6 +5092,7 @@ do_vec_min (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x1B);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (29, 29))
     {
       switch (INSTR (23, 22))
@@ -5057,6 +5193,7 @@ do_vec_sub_long (sim_cpu *cpu)
   if (size == 3)
     HALT_UNALLOC;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (30, 29))
     {
     case 2: /* SSUBL2.  */
@@ -5157,6 +5294,7 @@ do_vec_ADDP (sim_cpu *cpu)
   copy_vn = cpu->fr[vn];
   copy_vm = cpu->fr[vm];
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (size)
     {
     case 0:
@@ -5219,6 +5357,7 @@ do_vec_UMOV (sim_cpu *cpu)
   NYI_assert (29, 21, 0x070);
   NYI_assert (15, 10, 0x0F);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (16, 16))
     {
       /* Byte transfer.  */
@@ -5269,6 +5408,7 @@ do_vec_FABS (sim_cpu *cpu)
   NYI_assert (29, 23, 0x1D);
   NYI_assert (21, 10, 0x83E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       if (! full)
@@ -5306,6 +5446,7 @@ do_vec_FCVTZS (sim_cpu *cpu)
   NYI_assert (29, 23, 0x1D);
   NYI_assert (21, 10, 0x86E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       if (! full)
@@ -5342,6 +5483,7 @@ do_vec_REV64 (sim_cpu *cpu)
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 10, 0x802);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (size)
     {
     case 0:
@@ -5389,6 +5531,7 @@ do_vec_REV16 (sim_cpu *cpu)
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 10, 0x806);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (size)
     {
     case 0:
@@ -5550,6 +5693,7 @@ do_vec_xtl (sim_cpu *cpu)
   NYI_assert (28, 22, 0x3C);
   NYI_assert (15, 10, 0x29);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (30, 29))
     {
     case 2: /* SXTL2, SSHLL2.  */
@@ -5651,6 +5795,7 @@ do_vec_SHL (sim_cpu *cpu)
   NYI_assert (29, 23, 0x1E);
   NYI_assert (15, 10, 0x15);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       shift = INSTR (21, 16);
@@ -5727,6 +5872,7 @@ do_vec_SSHR_USHR (sim_cpu *cpu)
   NYI_assert (28, 23, 0x1E);
   NYI_assert (15, 10, 0x01);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       shift = 128 - shift;
@@ -5839,6 +5985,7 @@ do_vec_MUL_by_element (sim_cpu *cpu)
   NYI_assert (15, 12, 0x8);
   NYI_assert (10, 10, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (size)
     {
     case 1:
@@ -5942,6 +6089,7 @@ do_vec_neg (sim_cpu *cpu)
   NYI_assert (29, 24, 0x2E);
   NYI_assert (21, 10, 0x82E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -5987,6 +6135,7 @@ do_vec_sqrt (sim_cpu *cpu)
   NYI_assert (29, 23, 0x5B);
   NYI_assert (21, 10, 0x87E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22) == 0)
     for (i = 0; i < (full ? 4 : 2); i++)
       aarch64_set_vec_float (cpu, vd, i,
@@ -6022,6 +6171,7 @@ do_vec_mls_indexed (sim_cpu *cpu)
   NYI_assert (15, 12, 4);
   NYI_assert (10, 10, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 1:
@@ -6084,6 +6234,7 @@ do_vec_SUB (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x21);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -6142,6 +6293,7 @@ do_vec_MLS (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x25);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -6196,6 +6348,7 @@ do_vec_FDIV (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x3F);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       if (! full)
@@ -6236,6 +6389,7 @@ do_vec_FMUL (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x37);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       if (! full)
@@ -6275,6 +6429,7 @@ do_vec_FADDP (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x35);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       /* Extract values before adding them incase vd == vn/vm.  */
@@ -6336,6 +6491,7 @@ do_vec_FSQRT (sim_cpu *cpu)
   NYI_assert (29, 23, 0x5D);
   NYI_assert (21, 10, 0x87E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       if (! full)
@@ -6372,6 +6528,7 @@ do_vec_FNEG (sim_cpu *cpu)
   NYI_assert (29, 23, 0x5D);
   NYI_assert (21, 10, 0x83E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       if (! full)
@@ -6405,6 +6562,7 @@ do_vec_NOT (sim_cpu *cpu)
 
   NYI_assert (29, 10, 0xB8816);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = 0; i < (full ? 16 : 8); i++)
     aarch64_set_vec_u8 (cpu, vd, i, ~ aarch64_get_vec_u8 (cpu, vn, i));
 }
@@ -6448,6 +6606,7 @@ do_vec_CLZ (sim_cpu *cpu)
   NYI_assert (29, 24, 0x2E);
   NYI_assert (21, 10, 0x812);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (23, 22))
     {
     case 0:
@@ -6491,6 +6650,7 @@ do_vec_MOV_element (sim_cpu *cpu)
   NYI_assert (15, 15, 0);
   NYI_assert (10, 10, 1);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (16, 16))
     {
       /* Move a byte.  */
@@ -6549,6 +6709,7 @@ do_vec_REV32 (sim_cpu *cpu)
   NYI_assert (29, 24, 0x2E);
   NYI_assert (21, 10, 0x802);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (size)
     {
     case 0:
@@ -6601,6 +6762,7 @@ do_vec_EXT (sim_cpu *cpu)
 
   j = 0;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   for (i = src_index; i < (full ? 16 : 8); i++)
     val.b[j ++] = aarch64_get_vec_u8 (cpu, vn, i);
   for (i = 0; i < src_index; i++)
@@ -6763,6 +6925,7 @@ fmadds (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, aarch64_get_FP_float (cpu, sa)
 			+ aarch64_get_FP_float (cpu, sn)
 			* aarch64_get_FP_float (cpu, sm));
@@ -6777,6 +6940,7 @@ fmaddd (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, aarch64_get_FP_double (cpu, sa)
 			 + aarch64_get_FP_double (cpu, sn)
 			 * aarch64_get_FP_double (cpu, sm));
@@ -6791,6 +6955,7 @@ fmsubs (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, aarch64_get_FP_float (cpu, sa)
 			- aarch64_get_FP_float (cpu, sn)
 			* aarch64_get_FP_float (cpu, sm));
@@ -6805,6 +6970,7 @@ fmsubd (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, aarch64_get_FP_double (cpu, sa)
 			 - aarch64_get_FP_double (cpu, sn)
 			 * aarch64_get_FP_double (cpu, sm));
@@ -6819,6 +6985,7 @@ fnmadds (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, - aarch64_get_FP_float (cpu, sa)
 			+ (- aarch64_get_FP_float (cpu, sn))
 			* aarch64_get_FP_float (cpu, sm));
@@ -6833,6 +7000,7 @@ fnmaddd (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, - aarch64_get_FP_double (cpu, sa)
 			 + (- aarch64_get_FP_double (cpu, sn))
 			 * aarch64_get_FP_double (cpu, sm));
@@ -6847,6 +7015,7 @@ fnmsubs (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, - aarch64_get_FP_float (cpu, sa)
 			+ aarch64_get_FP_float (cpu, sn)
 			* aarch64_get_FP_float (cpu, sm));
@@ -6861,6 +7030,7 @@ fnmsubd (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, - aarch64_get_FP_double (cpu, sa)
 			 + aarch64_get_FP_double (cpu, sn)
 			 * aarch64_get_FP_double (cpu, sm));
@@ -6927,6 +7097,7 @@ dexSimpleFPCondCompare (sim_cpu *cpu)
   NYI_assert (11, 10, 0x1);
   NYI_assert (4,  4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (! testConditionCode (cpu, INSTR (15, 12)))
     {
       aarch64_set_CPSR (cpu, INSTR (3, 0));
@@ -6973,6 +7144,7 @@ fadds (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, aarch64_get_FP_float (cpu, sn)
 			+ aarch64_get_FP_float (cpu, sm));
 }
@@ -6985,6 +7157,7 @@ faddd (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, aarch64_get_FP_double (cpu, sn)
 			 + aarch64_get_FP_double (cpu, sm));
 }
@@ -6997,6 +7170,7 @@ fdivs (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, aarch64_get_FP_float (cpu, sn)
 			/ aarch64_get_FP_float (cpu, sm));
 }
@@ -7009,6 +7183,7 @@ fdivd (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, aarch64_get_FP_double (cpu, sn)
 			 / aarch64_get_FP_double (cpu, sm));
 }
@@ -7021,6 +7196,7 @@ fmuls (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, aarch64_get_FP_float (cpu, sn)
 			* aarch64_get_FP_float (cpu, sm));
 }
@@ -7033,6 +7209,7 @@ fmuld (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, aarch64_get_FP_double (cpu, sn)
 			 * aarch64_get_FP_double (cpu, sm));
 }
@@ -7045,6 +7222,7 @@ fnmuls (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, - (aarch64_get_FP_float (cpu, sn)
 				    * aarch64_get_FP_float (cpu, sm)));
 }
@@ -7057,6 +7235,7 @@ fnmuld (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, - (aarch64_get_FP_double (cpu, sn)
 				     * aarch64_get_FP_double (cpu, sm)));
 }
@@ -7069,6 +7248,7 @@ fsubs (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, aarch64_get_FP_float (cpu, sn)
 			- aarch64_get_FP_float (cpu, sm));
 }
@@ -7081,6 +7261,7 @@ fsubd (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   unsigned sd = INSTR ( 4,  0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, aarch64_get_FP_double (cpu, sn)
 			 - aarch64_get_FP_double (cpu, sm));
 }
@@ -7103,6 +7284,7 @@ do_FMINNM (sim_cpu *cpu)
   NYI_assert (31, 23, 0x03C);
   NYI_assert (15, 10, 0x1E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     aarch64_set_FP_double (cpu, sd,
 			   dminnm (aarch64_get_FP_double (cpu, sn),
@@ -7131,6 +7313,7 @@ do_FMAXNM (sim_cpu *cpu)
   NYI_assert (31, 23, 0x03C);
   NYI_assert (15, 10, 0x1A);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     aarch64_set_FP_double (cpu, sd,
 			   dmaxnm (aarch64_get_FP_double (cpu, sn),
@@ -7231,6 +7414,7 @@ dexSimpleFPCondSelect (sim_cpu *cpu)
   NYI_assert (31, 23, 0x03C);
   NYI_assert (11, 10, 0x3);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     aarch64_set_FP_double (cpu, sd, set ? sn : sm);
   else
@@ -7244,6 +7428,7 @@ fsturs (sim_cpu *cpu, int32_t offset)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u32 (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
 		       aarch64_get_vec_u32 (cpu, rn, 0));
 }
@@ -7255,6 +7440,7 @@ fsturd (sim_cpu *cpu, int32_t offset)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_mem_u64 (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
 		       aarch64_get_vec_u64 (cpu, rn, 0));
 }
@@ -7267,6 +7453,7 @@ fsturq (sim_cpu *cpu, int32_t offset)
   unsigned int st = INSTR (4, 0);
   FRegister a;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_get_FP_long_double (cpu, rn, & a);
   aarch64_set_mem_long_double (cpu,
 			       aarch64_get_reg_u64 (cpu, st, 1)
@@ -7282,6 +7469,7 @@ ffmovs (sim_cpu *cpu)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, st, aarch64_get_FP_float (cpu, rn));
 }
 
@@ -7292,6 +7480,7 @@ ffmovd (sim_cpu *cpu)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, st, aarch64_get_FP_double (cpu, rn));
 }
 
@@ -7302,6 +7491,7 @@ fgmovs (sim_cpu *cpu)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_reg_u32 (cpu, rn, NO_SP));
 }
 
@@ -7312,6 +7502,7 @@ fgmovd (sim_cpu *cpu)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, st, 0, aarch64_get_reg_u64 (cpu, rn, NO_SP));
 }
 
@@ -7322,6 +7513,7 @@ gfmovs (sim_cpu *cpu)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, st, NO_SP, aarch64_get_vec_u32 (cpu, rn, 0));
 }
 
@@ -7332,6 +7524,7 @@ gfmovd (sim_cpu *cpu)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, st, NO_SP, aarch64_get_vec_u64 (cpu, rn, 0));
 }
 
@@ -7348,6 +7541,7 @@ fmovs (sim_cpu *cpu)
   uint32_t imm = INSTR (20, 13);
   float f = fp_immediate_for_encoding_32 (imm);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, f);
 }
 
@@ -7358,6 +7552,7 @@ fmovd (sim_cpu *cpu)
   uint32_t imm = INSTR (20, 13);
   double d = fp_immediate_for_encoding_64 (imm);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, d);
 }
 
@@ -7398,6 +7593,7 @@ fldurs (sim_cpu *cpu, int32_t offset)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u32 (cpu, st, 0, aarch64_get_mem_u32
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset));
 }
@@ -7409,6 +7605,7 @@ fldurd (sim_cpu *cpu, int32_t offset)
   unsigned int rn = INSTR (9, 5);
   unsigned int st = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, st, 0, aarch64_get_mem_u64
 		       (cpu, aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset));
 }
@@ -7422,6 +7619,7 @@ fldurq (sim_cpu *cpu, int32_t offset)
   FRegister a;
   uint64_t addr = aarch64_get_reg_u64 (cpu, rn, SP_OK) + offset;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_get_mem_long_double (cpu, addr, & a);
   aarch64_set_FP_long_double (cpu, st, a);
 }
@@ -7440,6 +7638,7 @@ fabss (sim_cpu *cpu)
   unsigned sd = INSTR (4, 0);
   float value = aarch64_get_FP_float (cpu, sn);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, fabsf (value));
 }
 
@@ -7451,6 +7650,7 @@ fabcpu (sim_cpu *cpu)
   unsigned sd = INSTR (4, 0);
   double value = aarch64_get_FP_double (cpu, sn);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, fabs (value));
 }
 
@@ -7461,6 +7661,7 @@ fnegs (sim_cpu *cpu)
   unsigned sn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, - aarch64_get_FP_float (cpu, sn));
 }
 
@@ -7471,6 +7672,7 @@ fnegd (sim_cpu *cpu)
   unsigned sn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, - aarch64_get_FP_double (cpu, sn));
 }
 
@@ -7481,6 +7683,7 @@ fsqrts (sim_cpu *cpu)
   unsigned sn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, sqrt (aarch64_get_FP_float (cpu, sn)));
 }
 
@@ -7491,6 +7694,7 @@ fsqrtd (sim_cpu *cpu)
   unsigned sn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd,
 			 sqrt (aarch64_get_FP_double (cpu, sn)));
 }
@@ -7502,6 +7706,7 @@ fcvtds (sim_cpu *cpu)
   unsigned sn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, sd, (float) aarch64_get_FP_double (cpu, sn));
 }
 
@@ -7512,6 +7717,7 @@ fcvtcpu (sim_cpu *cpu)
   unsigned sn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, sd, (double) aarch64_get_FP_float (cpu, sn));
 }
 
@@ -7539,6 +7745,7 @@ do_FRINT (sim_cpu *cpu)
     /* FIXME: Add support for rmode == 6 exactness check.  */
     rmode = uimm (aarch64_get_FPSR (cpu), 23, 22);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       double val = aarch64_get_FP_double (cpu, rs);
@@ -7648,6 +7855,7 @@ do_FCVT_half_to_single (sim_cpu *cpu)
 
   NYI_assert (31, 10, 0x7B890);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float (cpu, rd, (float) aarch64_get_FP_half  (cpu, rn));
 }
 
@@ -7660,6 +7868,7 @@ do_FCVT_half_to_double (sim_cpu *cpu)
 
   NYI_assert (31, 10, 0x7B8B0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double (cpu, rd, (double) aarch64_get_FP_half  (cpu, rn));
 }
 
@@ -7671,6 +7880,7 @@ do_FCVT_single_to_half (sim_cpu *cpu)
 
   NYI_assert (31, 10, 0x788F0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_half (cpu, rd, aarch64_get_FP_float  (cpu, rn));
 }
 
@@ -7683,6 +7893,7 @@ do_FCVT_double_to_half (sim_cpu *cpu)
 
   NYI_assert (31, 10, 0x798F0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_half (cpu, rd, (float) aarch64_get_FP_double  (cpu, rn));
 }
 
@@ -7809,6 +8020,7 @@ scvtf32 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float
     (cpu, sd, (float) aarch64_get_reg_s32 (cpu, rn, NO_SP));
 }
@@ -7820,6 +8032,7 @@ scvtf (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_float
     (cpu, sd, (float) aarch64_get_reg_s64 (cpu, rn, NO_SP));
 }
@@ -7831,6 +8044,7 @@ scvtd32 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double
     (cpu, sd, (double) aarch64_get_reg_s32 (cpu, rn, NO_SP));
 }
@@ -7842,6 +8056,7 @@ scvtd (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned sd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_FP_double
     (cpu, sd, (double) aarch64_get_reg_s64 (cpu, rn, NO_SP));
 }
@@ -7912,6 +8127,7 @@ fcvtszs32 (sim_cpu *cpu)
 
   RAISE_EXCEPTIONS (f, value, FLOAT, INT);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* Avoid sign extension to 64 bit.  */
   aarch64_set_reg_u64 (cpu, rd, NO_SP, (uint32_t) value);
 }
@@ -7927,6 +8143,7 @@ fcvtszs (sim_cpu *cpu)
 
   RAISE_EXCEPTIONS (f, value, FLOAT, LONG);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_s64 (cpu, rd, NO_SP, value);
 }
 
@@ -7942,6 +8159,7 @@ fcvtszd32 (sim_cpu *cpu)
 
   RAISE_EXCEPTIONS (d, value, DOUBLE, INT);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* Avoid sign extension to 64 bit.  */
   aarch64_set_reg_u64 (cpu, rd, NO_SP, (uint32_t) value);
 }
@@ -7960,6 +8178,7 @@ fcvtszd (sim_cpu *cpu)
 
   RAISE_EXCEPTIONS (d, value, DOUBLE, LONG);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_s64 (cpu, rd, NO_SP, value);
 }
 
@@ -7985,6 +8204,7 @@ do_fcvtzu (sim_cpu *cpu)
     /* Convert to fixed point.  */
     HALT_NYI;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (31, 31))
     {
       /* Convert to unsigned 64-bit integer.  */
@@ -8061,6 +8281,7 @@ do_UCVTF (sim_cpu *cpu)
     HALT_NYI;
 
   /* FIXME: Add exception raising.  */
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (31, 31))
     {
       uint64_t value = aarch64_get_reg_u64 (cpu, rs, NO_SP);
@@ -8098,6 +8319,7 @@ float_vector_move (sim_cpu *cpu)
   if (INSTR (15, 10) != 0)
     HALT_UNALLOC;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (16, 16))
     aarch64_set_vec_u64 (cpu, rd, 1, aarch64_get_reg_u64 (cpu, rn, NO_SP));
   else
@@ -8225,6 +8447,7 @@ fcmps (sim_cpu *cpu)
   float fvalue1 = aarch64_get_FP_float (cpu, sn);
   float fvalue2 = aarch64_get_FP_float (cpu, sm);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   set_flags_for_float_compare (cpu, fvalue1, fvalue2);
 }
 
@@ -8236,6 +8459,7 @@ fcmpzs (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   float fvalue1 = aarch64_get_FP_float (cpu, sn);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   set_flags_for_float_compare (cpu, fvalue1, 0.0f);
 }
 
@@ -8249,6 +8473,7 @@ fcmpes (sim_cpu *cpu)
   float fvalue1 = aarch64_get_FP_float (cpu, sn);
   float fvalue2 = aarch64_get_FP_float (cpu, sm);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   set_flags_for_float_compare (cpu, fvalue1, fvalue2);
 }
 
@@ -8259,6 +8484,7 @@ fcmpzes (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   float fvalue1 = aarch64_get_FP_float (cpu, sn);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   set_flags_for_float_compare (cpu, fvalue1, 0.0f);
 }
 
@@ -8294,6 +8520,7 @@ fcmpd (sim_cpu *cpu)
   double dvalue1 = aarch64_get_FP_double (cpu, sn);
   double dvalue2 = aarch64_get_FP_double (cpu, sm);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   set_flags_for_double_compare (cpu, dvalue1, dvalue2);
 }
 
@@ -8305,6 +8532,7 @@ fcmpzd (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   double dvalue1 = aarch64_get_FP_double (cpu, sn);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   set_flags_for_double_compare (cpu, dvalue1, 0.0);
 }
 
@@ -8318,6 +8546,7 @@ fcmped (sim_cpu *cpu)
   double dvalue1 = aarch64_get_FP_double (cpu, sn);
   double dvalue2 = aarch64_get_FP_double (cpu, sm);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   set_flags_for_double_compare (cpu, dvalue1, dvalue2);
 }
 
@@ -8328,6 +8557,7 @@ fcmpzed (sim_cpu *cpu)
   unsigned sn = INSTR ( 9,  5);
   double dvalue1 = aarch64_get_FP_double (cpu, sn);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   set_flags_for_double_compare (cpu, dvalue1, 0.0);
 }
 
@@ -8392,6 +8622,7 @@ do_scalar_FADDP (sim_cpu *cpu)
   NYI_assert (31, 23, 0x0FC);
   NYI_assert (21, 10, 0xC36);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       double val1 = aarch64_get_vec_double (cpu, Fn, 0);
@@ -8429,6 +8660,7 @@ do_scalar_FABD (sim_cpu *cpu)
   NYI_assert (21, 21, 1);
   NYI_assert (15, 10, 0x35);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     aarch64_set_FP_double (cpu, rd,
 			   fabs (aarch64_get_FP_double (cpu, rn)
@@ -8455,6 +8687,7 @@ do_scalar_CMGT (sim_cpu *cpu)
   NYI_assert (31, 21, 0x2F7);
   NYI_assert (15, 10, 0x0D);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, rd, 0,
 		       aarch64_get_vec_u64 (cpu, rn, 0) >
 		       aarch64_get_vec_u64 (cpu, rm, 0) ? -1L : 0L);
@@ -8476,6 +8709,7 @@ do_scalar_USHR (sim_cpu *cpu)
   NYI_assert (31, 23, 0x0FE);
   NYI_assert (15, 10, 0x01);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, rd, 0,
 		       aarch64_get_vec_u64 (cpu, rn, 0) >> amount);
 }
@@ -8497,6 +8731,7 @@ do_scalar_SSHL (sim_cpu *cpu)
   NYI_assert (31, 21, 0x2F7);
   NYI_assert (15, 10, 0x11);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (shift >= 0)
     aarch64_set_vec_s64 (cpu, rd, 0,
 			 aarch64_get_vec_s64 (cpu, rn, 0) << shift);
@@ -8524,6 +8759,7 @@ do_scalar_shift (sim_cpu *cpu)
   if (INSTR (22, 22) == 0)
     HALT_UNALLOC;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (INSTR (15, 10))
     {
     case 0x01: /* SSHR */
@@ -8572,6 +8808,7 @@ do_scalar_FCM (sim_cpu *cpu)
   NYI_assert (15, 12, 0xE);
   NYI_assert (10, 10, 1);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       double val1 = aarch64_get_FP_double (cpu, rn);
@@ -8656,6 +8893,7 @@ do_scalar_MOV (sim_cpu *cpu)
   NYI_assert (31, 21, 0x2F0);
   NYI_assert (15, 10, 0x01);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (16, 16))
     {
       /* 8-bit.  */
@@ -8700,6 +8938,7 @@ do_scalar_NEG (sim_cpu *cpu)
 
   NYI_assert (31, 10, 0x1FB82E);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_vec_u64 (cpu, rd, 0, - aarch64_get_vec_u64 (cpu, rn, 0));
 }
 
@@ -8720,6 +8959,7 @@ do_scalar_USHL (sim_cpu *cpu)
   NYI_assert (31, 21, 0x3F7);
   NYI_assert (15, 10, 0x11);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (shift >= 0)
     aarch64_set_vec_u64 (cpu, rd, 0, aarch64_get_vec_u64 (cpu, rn, 0) << shift);
   else
@@ -8747,6 +8987,7 @@ do_double_add (sim_cpu *cpu)
   Fm = INSTR (9, 5);
   Fn = INSTR (20, 16);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   val1 = aarch64_get_FP_double (cpu, Fm);
   val2 = aarch64_get_FP_double (cpu, Fn);
 
@@ -8768,6 +9009,7 @@ do_scalar_UCVTF (sim_cpu *cpu)
   NYI_assert (31, 23, 0x0FC);
   NYI_assert (21, 10, 0x876);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
       uint64_t val = aarch64_get_vec_u64 (cpu, rn, 0);
@@ -8923,6 +9165,7 @@ pcadr (sim_cpu *cpu)
       address &= ~0xfff;
     }
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, address + offset);
 }
 
@@ -8952,6 +9195,7 @@ and32 (sim_cpu *cpu, uint32_t bimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u32 (cpu, rn, NO_SP) & bimm);
 }
@@ -8963,6 +9207,7 @@ and64 (sim_cpu *cpu, uint64_t bimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u64 (cpu, rn, NO_SP) & bimm);
 }
@@ -8977,6 +9222,7 @@ ands32 (sim_cpu *cpu, uint32_t bimm)
   uint32_t value1 = aarch64_get_reg_u32 (cpu, rn, NO_SP);
   uint32_t value2 = bimm;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 & value2);
   set_flags_for_binop32 (cpu, value1 & value2);
 }
@@ -8991,6 +9237,7 @@ ands64 (sim_cpu *cpu, uint64_t bimm)
   uint64_t value1 = aarch64_get_reg_u64 (cpu, rn, NO_SP);
   uint64_t value2 = bimm;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 & value2);
   set_flags_for_binop64 (cpu, value1 & value2);
 }
@@ -9002,6 +9249,7 @@ eor32 (sim_cpu *cpu, uint32_t bimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u32 (cpu, rn, NO_SP) ^ bimm);
 }
@@ -9013,6 +9261,7 @@ eor64 (sim_cpu *cpu, uint64_t bimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u64 (cpu, rn, NO_SP) ^ bimm);
 }
@@ -9024,6 +9273,7 @@ orr32 (sim_cpu *cpu, uint32_t bimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u32 (cpu, rn, NO_SP) | bimm);
 }
@@ -9035,6 +9285,7 @@ orr64 (sim_cpu *cpu, uint64_t bimm)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, SP_OK,
 		       aarch64_get_reg_u64 (cpu, rn, NO_SP) | bimm);
 }
@@ -9052,6 +9303,7 @@ and32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u32 (cpu, rn, NO_SP)
      & shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP), shift, count));
@@ -9065,6 +9317,7 @@ and64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u64 (cpu, rn, NO_SP)
      & shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP), shift, count));
@@ -9082,6 +9335,7 @@ ands32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   uint32_t value2 = shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 			       shift, count);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 & value2);
   set_flags_for_binop32 (cpu, value1 & value2);
 }
@@ -9098,6 +9352,7 @@ ands64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   uint64_t value2 = shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP),
 			       shift, count);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 & value2);
   set_flags_for_binop64 (cpu, value1 & value2);
 }
@@ -9110,6 +9365,7 @@ bic32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u32 (cpu, rn, NO_SP)
      & ~ shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP), shift, count));
@@ -9123,6 +9379,7 @@ bic64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u64 (cpu, rn, NO_SP)
      & ~ shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP), shift, count));
@@ -9140,6 +9397,7 @@ bics32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   uint32_t value2 = ~ shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP),
 				 shift, count);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 & value2);
   set_flags_for_binop32 (cpu, value1 & value2);
 }
@@ -9156,6 +9414,7 @@ bics64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   uint64_t value2 = ~ shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP),
 				 shift, count);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value1 & value2);
   set_flags_for_binop64 (cpu, value1 & value2);
 }
@@ -9168,6 +9427,7 @@ eon32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u32 (cpu, rn, NO_SP)
      ^ ~ shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP), shift, count));
@@ -9181,6 +9441,7 @@ eon64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u64 (cpu, rn, NO_SP)
      ^ ~ shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP), shift, count));
@@ -9194,6 +9455,7 @@ eor32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u32 (cpu, rn, NO_SP)
      ^ shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP), shift, count));
@@ -9207,6 +9469,7 @@ eor64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u64 (cpu, rn, NO_SP)
      ^ shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP), shift, count));
@@ -9220,6 +9483,7 @@ orr32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u32 (cpu, rn, NO_SP)
      | shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP), shift, count));
@@ -9233,6 +9497,7 @@ orr64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u64 (cpu, rn, NO_SP)
      | shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP), shift, count));
@@ -9246,6 +9511,7 @@ orn32_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u32 (cpu, rn, NO_SP)
      | ~ shifted32 (aarch64_get_reg_u32 (cpu, rm, NO_SP), shift, count));
@@ -9259,6 +9525,7 @@ orn64_shift (sim_cpu *cpu, Shift shift, uint32_t count)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, aarch64_get_reg_u64 (cpu, rn, NO_SP)
      | ~ shifted64 (aarch64_get_reg_u64 (cpu, rm, NO_SP), shift, count));
@@ -9330,6 +9597,7 @@ movz32 (sim_cpu *cpu, uint32_t val, uint32_t pos)
 {
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, val << (pos * 16));
 }
 
@@ -9339,6 +9607,7 @@ movz64 (sim_cpu *cpu, uint32_t val, uint32_t pos)
 {
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, ((uint64_t) val) << (pos * 16));
 }
 
@@ -9348,6 +9617,7 @@ movn32 (sim_cpu *cpu, uint32_t val, uint32_t pos)
 {
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, ((val << (pos * 16)) ^ 0xffffffffU));
 }
 
@@ -9357,6 +9627,7 @@ movn64 (sim_cpu *cpu, uint32_t val, uint32_t pos)
 {
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, ((((uint64_t) val) << (pos * 16))
 		      ^ 0xffffffffffffffffULL));
@@ -9371,6 +9642,7 @@ movk32 (sim_cpu *cpu, uint32_t val, uint32_t pos)
   uint32_t value = val << (pos * 16);
   uint32_t mask = ~(0xffffU << (pos * 16));
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, (value | (current & mask)));
 }
 
@@ -9383,6 +9655,7 @@ movk64 (sim_cpu *cpu, uint32_t val, uint32_t pos)
   uint64_t value = (uint64_t) val << (pos * 16);
   uint64_t mask = ~(0xffffULL << (pos * 16));
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, (value | (current & mask)));
 }
 
@@ -9474,6 +9747,7 @@ ubfm32 (sim_cpu *cpu, uint32_t r, uint32_t s)
       value >>= r - (s + 1);
     }
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   rd = INSTR (4, 0);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
 }
@@ -9508,6 +9782,7 @@ ubfm (sim_cpu *cpu, uint32_t r, uint32_t s)
       value >>= r - (s + 1);
     }
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   rd = INSTR (4, 0);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
 }
@@ -9539,6 +9814,7 @@ sbfm32 (sim_cpu *cpu, uint32_t r, uint32_t s)
       value >>= r - (s + 1);
     }
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   rd = INSTR (4, 0);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, (uint32_t) value);
 }
@@ -9564,6 +9840,7 @@ sbfm (sim_cpu *cpu, uint32_t r, uint32_t s)
       value >>= r - (s + 1);
     }
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   rd = INSTR (4, 0);
   aarch64_set_reg_s64 (cpu, rd, NO_SP, value);
 }
@@ -9618,6 +9895,7 @@ bfm32 (sim_cpu *cpu, uint32_t r, uint32_t s)
   value2 &= ~mask;
   value2 |= value;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, (aarch64_get_reg_u32 (cpu, rd, NO_SP) & ~mask) | value);
 }
@@ -9659,6 +9937,7 @@ bfm (sim_cpu *cpu, uint32_t r, uint32_t s)
       mask >>= r - (s + 1);
     }
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   rd = INSTR (4, 0);
   aarch64_set_reg_u64
     (cpu, rd, NO_SP, (aarch64_get_reg_u64 (cpu, rd, NO_SP) & ~mask) | value);
@@ -9729,6 +10008,7 @@ do_EXTR_32 (sim_cpu *cpu)
   val2 = aarch64_get_reg_u32 (cpu, rn, NO_SP);
   val2 <<= (32 - imms);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP, val1 | val2);
 }
 
@@ -12383,6 +12663,7 @@ madd32 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u32 (cpu, ra, NO_SP)
 		       + aarch64_get_reg_u32 (cpu, rn, NO_SP)
@@ -12398,10 +12679,11 @@ madd64 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u64 (cpu, ra, NO_SP)
-		       + aarch64_get_reg_u64 (cpu, rn, NO_SP)
-		       * aarch64_get_reg_u64 (cpu, rm, NO_SP));
+		       + (aarch64_get_reg_u64 (cpu, rn, NO_SP)
+			  * aarch64_get_reg_u64 (cpu, rm, NO_SP)));
 }
 
 /* 32 bit multiply and sub.  */
@@ -12413,6 +12695,7 @@ msub32 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u32 (cpu, ra, NO_SP)
 		       - aarch64_get_reg_u32 (cpu, rn, NO_SP)
@@ -12428,6 +12711,7 @@ msub64 (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       aarch64_get_reg_u64 (cpu, ra, NO_SP)
 		       - aarch64_get_reg_u64 (cpu, rn, NO_SP)
@@ -12512,7 +12796,6 @@ mul64hi (uint64_t value1, uint64_t value2)
   uint64_t value2_hi = highWordToU64 (value2);
 
   /* Cross-multiply and collect results.  */
-
   uint64_t xproductlo = value1_lo * value2_lo;
   uint64_t xproductmid1 = value1_lo * value2_hi;
   uint64_t xproductmid2 = value1_hi * value2_lo;
@@ -12587,6 +12870,7 @@ smulh (sim_cpu *cpu)
       uvalue2 = value2;
     }
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   uresult = mul64hi (uvalue1, uvalue2);
   result = uresult;
   result *= signum;
@@ -12604,6 +12888,7 @@ umaddl (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* N.B. we need to multiply the signed 32 bit values in rn, rm to
      obtain a 64 bit product.  */
   aarch64_set_reg_u64
@@ -12622,6 +12907,7 @@ umsubl (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* N.B. we need to multiply the signed 32 bit values in rn, rm to
      obtain a 64 bit product.  */
   aarch64_set_reg_u64
@@ -12644,6 +12930,7 @@ umulh (sim_cpu *cpu)
   if (ra != R31)
     HALT_UNALLOC;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rd, NO_SP,
 		       mul64hi (aarch64_get_reg_u64 (cpu, rn, NO_SP),
 				aarch64_get_reg_u64 (cpu, rm, NO_SP)));
@@ -12797,6 +13084,7 @@ static unsigned stack_depth = 0;
 static void
 bl (sim_cpu *cpu, int32_t offset)
 {
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_save_LR (cpu);
   aarch64_set_next_PC_by_offset (cpu, offset);
 
@@ -12823,6 +13111,7 @@ static void
 br (sim_cpu *cpu)
 {
   unsigned rn = INSTR (9, 5);
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_next_PC (cpu, aarch64_get_reg_u64 (cpu, rn, NO_SP));
 }
 
@@ -12832,6 +13121,7 @@ blr (sim_cpu *cpu)
 {
   unsigned rn = INSTR (9, 5);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   /* The pseudo code in the spec says we update LR before fetching.
      the value from the rn.  */
   aarch64_save_LR (cpu);
@@ -12861,6 +13151,7 @@ ret (sim_cpu *cpu)
   unsigned rn = INSTR (9, 5);
   aarch64_set_next_PC (cpu, aarch64_get_reg_u64 (cpu, rn, NO_SP));
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (TRACE_BRANCH_P (cpu))
     {
       TRACE_BRANCH (cpu,
@@ -12876,6 +13167,7 @@ ret (sim_cpu *cpu)
 static void
 nop (sim_cpu *cpu)
 {
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
 }
 
 /* Data synchronization barrier.  */
@@ -12883,6 +13175,7 @@ nop (sim_cpu *cpu)
 static void
 dsb (sim_cpu *cpu)
 {
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
 }
 
 /* Data memory barrier.  */
@@ -12890,6 +13183,7 @@ dsb (sim_cpu *cpu)
 static void
 dmb (sim_cpu *cpu)
 {
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
 }
 
 /* Instruction synchronization barrier.  */
@@ -12897,6 +13191,7 @@ dmb (sim_cpu *cpu)
 static void
 isb (sim_cpu *cpu)
 {
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
 }
 
 static void
@@ -12931,7 +13226,8 @@ dexBranchImmediate (sim_cpu *cpu)
 static void
 bcc (sim_cpu *cpu, int32_t offset, CondCode cc)
 {
-  /* the test returns TRUE if CC is met.  */
+  /* The test returns TRUE if CC is met.  */
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (testConditionCode (cpu, cc))
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
@@ -12942,6 +13238,7 @@ cbnz32 (sim_cpu *cpu, int32_t offset)
 {
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (aarch64_get_reg_u32 (cpu, rt, NO_SP) != 0)
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
@@ -12952,6 +13249,7 @@ cbnz (sim_cpu *cpu, int32_t offset)
 {
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (aarch64_get_reg_u64 (cpu, rt, NO_SP) != 0)
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
@@ -12962,6 +13260,7 @@ cbz32 (sim_cpu *cpu, int32_t offset)
 {
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (aarch64_get_reg_u32 (cpu, rt, NO_SP) == 0)
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
@@ -12972,6 +13271,7 @@ cbz (sim_cpu *cpu, int32_t offset)
 {
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (aarch64_get_reg_u64 (cpu, rt, NO_SP) == 0)
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
@@ -12982,16 +13282,18 @@ tbnz (sim_cpu *cpu, uint32_t  pos, int32_t offset)
 {
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (aarch64_get_reg_u64 (cpu, rt, NO_SP) & (1 << pos))
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
 
-/* branch on register bit test zero -- one size fits all.  */
+/* Branch on register bit test zero -- one size fits all.  */
 static void
 tbz (sim_cpu *cpu, uint32_t  pos, int32_t offset)
 {
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (!(aarch64_get_reg_u64 (cpu, rt, NO_SP) & (1 << pos)))
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
@@ -13139,6 +13441,7 @@ handle_halt (sim_cpu *cpu, uint32_t val)
 {
   uint64_t result = 0;
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (val != 0xf000)
     {
       TRACE_SYSCALL (cpu, " HLT [0x%x]", val);
@@ -13420,6 +13723,7 @@ do_mrs (sim_cpu *cpu)
   unsigned sys_op2 = INSTR (7, 5);
   unsigned rt = INSTR (4, 0);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   aarch64_set_reg_u64 (cpu, rt, NO_SP,
 		       system_get (cpu, sys_op0, sys_op1, sys_crn, sys_crm, sys_op2));
 }
@@ -13482,6 +13786,7 @@ do_MSR_reg (sim_cpu *cpu)
 
   NYI_assert (31, 20, 0xD51);
 
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   system_set (cpu, sys_op0, sys_op1, sys_crn, sys_crm, sys_op2,
 	      aarch64_get_reg_u64 (cpu, rt, NO_SP));
 }
