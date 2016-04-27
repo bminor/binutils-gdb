@@ -13385,7 +13385,8 @@ Stop debugging trace snapshots, resume @emph{live} debugging.
 Same as @samp{tfind none}.
 
 @item tfind
-No argument means find the next trace snapshot.
+No argument means find the next trace snapshot or find the first
+one if no trace snapshot is selected.
 
 @item tfind -
 Find the previous trace snapshot before the current one.  This permits

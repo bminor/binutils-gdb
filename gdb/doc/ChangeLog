@@ -1,3 +1,8 @@
+2016-04-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (tfind): Complete doc about tfind without
+	argument.
+
 2016-04-13  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* agentexpr.texi (byte): Fix zero_ext description.
