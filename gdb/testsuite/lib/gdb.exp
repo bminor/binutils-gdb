@@ -4229,11 +4229,11 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
     }
 }
 
-# gdb_load_shlibs LIB...
+# gdb_load_shlib LIB...
 #
 # Copy the listed library to the target.
 
-proc gdb_load_shlibs { file } {
+proc gdb_load_shlib { file } {
     set dest [gdb_remote_download target [shlib_target_file $file]]
 
     if {[is_remote target]} {

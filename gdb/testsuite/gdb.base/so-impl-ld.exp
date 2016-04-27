@@ -40,7 +40,7 @@ if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
 # Start with a fresh gdb
 
 clean_restart ${binfile}
-gdb_load_shlibs $lib_sl
+gdb_load_shlib $lib_sl
 
 # This program implicitly loads SOM shared libraries.
 #

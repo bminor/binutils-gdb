@@ -1,5 +1,67 @@
 2016-04-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* lib/gdb.exp (gdb_load_shlibs): Rename to...
+	(gdb_load_shlib): ... this.
+	* gdb.arch/ftrace-insn-reloc.exp: Adjust gdb_load_shlibs ->
+	gdb_load_shlib.
+	* gdb.base/catch-load.exp (one_catch_load_test): Likewise.
+	* gdb.base/ctxobj.exp: Likewise.
+	* gdb.base/dprintf-pending.exp: Likewise.
+	* gdb.base/dso2dso.exp: Likewise.
+	* gdb.base/fixsection.exp: Likewise.
+	* gdb.base/gcore-relro.exp: Likewise.
+	* gdb.base/gdb1555.exp: Likewise.
+	* gdb.base/global-var-nested-by-dso.exp: Likewise.
+	* gdb.base/gnu-ifunc.exp: Likewise.
+	* gdb.base/hbreak-in-shr-unsupported.exp: Likewise.
+	* gdb.base/jit-so.exp (one_jit_test): Likewise.
+	* gdb.base/pending.exp: Likewise.
+	* gdb.base/print-file-var.exp: Likewise.
+	* gdb.base/print-symbol-loading.exp: Likewise.
+	* gdb.base/shlib-call.exp: Likewise.
+	* gdb.base/shreloc.exp: Likewise.
+	* gdb.base/so-impl-ld.exp: Likewise.
+	* gdb.base/solib-disc.exp: Likewise.
+	* gdb.base/solib-nodir.exp: Likewise.
+	* gdb.base/solib-overlap.exp: Likewise.
+	* gdb.base/solib-symbol.exp: Likewise.
+	* gdb.base/solib-weak.exp (do_test): Likewise.
+	* gdb.base/sym-file.exp: Likewise.
+	* gdb.base/symtab-search-order.exp: Likewise.
+	* gdb.base/type-opaque.exp: Likewise.
+	* gdb.base/unload.exp: Likewise.
+	* gdb.base/watchpoint-solib.exp: Likewise.
+	* gdb.compile/compile.exp: Likewise.
+	* gdb.cp/gdb2384.exp: Likewise.
+	* gdb.cp/infcall-dlopen.exp: Likewise.
+	* gdb.cp/re-set-overloaded.exp: Likewise.
+	* gdb.fortran/library-module.exp: Likewise.
+	* gdb.opt/solib-intra-step.exp: Likewise.
+	* gdb.python/py-finish-breakpoint.exp: Likewise.
+	* gdb.python/py-shared.exp: Likewise.
+	* gdb.reverse/solib-precsave.exp: Likewise.
+	* gdb.reverse/solib-reverse.exp: Likewise.
+	* gdb.server/solib-list.exp: Likewise.
+	* gdb.threads/dlopen-libpthread.exp: Likewise.
+	* gdb.threads/tls-shared.exp: Likewise.
+	* gdb.threads/tls-so_extern.exp: Likewise.
+	* gdb.trace/change-loc.exp: Likewise.
+	* gdb.trace/ftrace-lock.exp: Likewise.
+	* gdb.trace/ftrace.exp: Likewise.
+	* gdb.trace/mi-tracepoint-changed.exp (test_reconnect): Likewise.
+	* gdb.trace/pending.exp: Likewise.
+	* gdb.trace/range-stepping.exp: Likewise.
+	* gdb.trace/strace.exp (strace_remove_socket): Likewise.
+	(strace_info_marker): Likewise.
+	(strace_probe_marker): Likewise.
+	(strace_trace_on_same_addr): Likewise.
+	(strace_trace_on_diff_addr): Likewise.
+	* gdb.trace/trace-break.exp: Likewise.
+	* gdb.trace/trace-condition.exp: Likewise.
+	* gdb.trace/trace-mt.exp: Likewise.
+
+2016-04-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* lib/gdb.exp (gdb_load_shlibs):  Accept a single argument.  Return
 	result of gdb_remote_download.
 	* gdb.base/ctxobj.exp: Split gdb_load_shlibs call.
