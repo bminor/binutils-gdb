@@ -1,3 +1,8 @@
+2016-04-27  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* c-valprint.c (c_value_print): Always convert val back to reference
+	type if we converted it to a pointer type.
+
 2016-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* configure.ac: Enhance configure check for babeltrace to reject
