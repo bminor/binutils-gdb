@@ -1531,7 +1531,6 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   unsigned int opcode;
   unsigned int modrm;
   bfd_boolean baseless;
-  Elf_Internal_Sym *isym;
   unsigned int addend;
   unsigned int nop;
   bfd_vma nop_offset;
@@ -1560,23 +1559,24 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 
   if (r_type == R_386_GOT32X && baseless && is_pic)
     {
-      /* For PIC, disallow R_386_GOT32X without a base register
-	 since we don't know what the GOT base is.   Allow
-	 R_386_GOT32 for existing object files.  */
       const char *name;
 
       if (h == NULL)
 	{
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache, abfd,
-					r_symndx);
+	  Elf_Internal_Sym *isym
+	    = bfd_sym_from_r_symndx (&htab->sym_cache, abfd, r_symndx);
 	  name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
 	}
       else
 	name = h->root.root.string;
 
+      /* For PIC, disallow R_386_GOT32X without a base register since
+	 we don't know what the GOT base is.  Allow R_386_GOT32 for
+	 existing object files.  */
       (*_bfd_error_handler)
 	(_("%B: direct GOT relocation R_386_GOT32X against `%s' without base register can not be used when making a shared object"),
 	 abfd, name);
+      bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
 
@@ -1750,8 +1750,7 @@ convert_load:
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define need_convert_load	sec_flg0
-#define check_relocs_failed	sec_flg1
+#define check_relocs_failed	sec_flg0
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
@@ -1771,6 +1770,7 @@ elf_i386_check_relocs (bfd *abfd,
   asection *sreloc;
   bfd_byte *contents;
   bfd_boolean use_plt_got;
+  bfd_boolean changed;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -1800,6 +1800,7 @@ elf_i386_check_relocs (bfd *abfd,
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
 
+  changed = FALSE;
   sreloc = NULL;
 
   rel_end = relocs + sec->reloc_count;
@@ -1926,6 +1927,40 @@ elf_i386_check_relocs (bfd *abfd,
 	  size_reloc = TRUE;
 	  goto do_size;
 
+	case R_386_GOT32:
+	case R_386_GOT32X:
+	  if (h == NULL || h->type != STT_GNU_IFUNC)
+	    {
+	      bfd_boolean converted = FALSE;
+
+	      if (!elf_i386_convert_load_reloc (abfd, symtab_hdr,
+						contents,
+						(Elf_Internal_Rela *) rel,
+						h, &converted, info))
+		goto error_return;
+
+	      if (converted)
+		{
+		  changed = TRUE;
+		  r_type = ELF32_R_TYPE (rel->r_info);
+		  switch (r_type)
+		    {
+		    default:
+		      abort ();
+		      break;
+		    case R_386_32:
+		    case R_386_PC32:
+		      break;
+		    case R_386_GOTOFF:
+		      if (eh != NULL)
+			eh->gotoff_ref = 1;
+		      goto create_got;
+		    }
+		  break;
+		}
+	    }
+	  goto do_reloc_got32;
+
 	case R_386_TLS_IE_32:
 	case R_386_TLS_IE:
 	case R_386_TLS_GOTIE:
@@ -1933,11 +1968,10 @@ elf_i386_check_relocs (bfd *abfd,
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
-	case R_386_GOT32:
-	case R_386_GOT32X:
 	case R_386_TLS_GD:
 	case R_386_TLS_GOTDESC:
 	case R_386_TLS_DESC_CALL:
+do_reloc_got32:
 	  /* This symbol requires a global offset table entry.  */
 	  {
 	    int tls_type, old_tls_type;
@@ -2266,21 +2300,25 @@ do_size:
 					     plt_got_align))
 	    goto error_return;
 	}
-
-      if ((r_type == R_386_GOT32 || r_type == R_386_GOT32X)
-	  && (h == NULL || h->type != STT_GNU_IFUNC))
-	sec->need_convert_load = 1;
     }
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!info->keep_memory)
+      if (!changed && !info->keep_memory)
 	free (contents);
       else
 	{
 	  /* Cache the section contents for elf_link_input_bfd.  */
 	  elf_section_data (sec)->this_hdr.contents = contents;
 	}
+    }
+
+  if (elf_section_data (sec)->relocs != relocs && changed)
+    {
+      /* Must cache relocations if they are changed.  */
+      if (elf_section_data (sec)->relocs != NULL)
+	abort ();
+      elf_section_data (sec)->relocs = (Elf_Internal_Rela *) relocs;
     }
 
   return TRUE;
@@ -2967,134 +3005,6 @@ elf_i386_readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* Convert load via the GOT slot to load immediate.  */
-
-static bfd_boolean
-elf_i386_convert_load (bfd *abfd, asection *sec,
-		       struct bfd_link_info *link_info)
-{
-  struct elf_i386_link_hash_table *htab;
-  Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Rela *internal_relocs;
-  Elf_Internal_Rela *irel, *irelend;
-  bfd_byte *contents;
-  bfd_boolean changed;
-  bfd_signed_vma *local_got_refcounts;
-
-  /* Don't even try to convert non-ELF outputs.  */
-  if (!is_elf_hash_table (link_info->hash))
-    return FALSE;
-
-  /* Nothing to do if there is no need or no output.  */
-  if ((sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
-      || sec->need_convert_load == 0
-      || bfd_is_abs_section (sec->output_section))
-    return TRUE;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-
-  /* Load the relocations for this section.  */
-  internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, sec, NULL, (Elf_Internal_Rela *) NULL,
-		      link_info->keep_memory));
-  if (internal_relocs == NULL)
-    return FALSE;
-
-  changed = FALSE;
-  htab = elf_i386_hash_table (link_info);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  /* Get the section contents.  */
-  if (elf_section_data (sec)->this_hdr.contents != NULL)
-    contents = elf_section_data (sec)->this_hdr.contents;
-  else
-    {
-      if (!bfd_malloc_and_get_section (abfd, sec, &contents))
-	goto error_return;
-    }
-
-  irelend = internal_relocs + sec->reloc_count;
-  for (irel = internal_relocs; irel < irelend; irel++)
-    {
-      unsigned int r_type = ELF32_R_TYPE (irel->r_info);
-      unsigned int r_symndx;
-      struct elf_link_hash_entry *h;
-      bfd_boolean converted;
-
-      if (r_type != R_386_GOT32 && r_type != R_386_GOT32X)
-	continue;
-
-      r_symndx = ELF32_R_SYM (irel->r_info);
-      if (r_symndx < symtab_hdr->sh_info)
-	h = elf_i386_get_local_sym_hash (htab, sec->owner,
-					 (const Elf_Internal_Rela *) irel,
-					 FALSE);
-      else
-	{
-	  h = elf_sym_hashes (abfd)[r_symndx - symtab_hdr->sh_info];
-	   while (h->root.type == bfd_link_hash_indirect
-		  || h->root.type == bfd_link_hash_warning)
-	     h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-
-      /* STT_GNU_IFUNC must keep GOT32 relocations.  */
-      if (h != NULL && h->type == STT_GNU_IFUNC)
-	continue;
-
-      converted = FALSE;
-      if (!elf_i386_convert_load_reloc (abfd, symtab_hdr, contents,
-					irel, h, &converted, link_info))
-	goto error_return;
-
-      if (converted)
-	{
-	  changed = converted;
-	  if (h)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount -= 1;
-	    }
-	  else
-	    {
-	      if (local_got_refcounts != NULL
-		  && local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	    }
-	}
-    }
-
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
-    {
-      if (!changed && !link_info->keep_memory)
-	free (contents);
-      else
-	{
-	  /* Cache the section contents for elf_link_input_bfd.  */
-	  elf_section_data (sec)->this_hdr.contents = contents;
-	}
-    }
-
-  if (elf_section_data (sec)->relocs != internal_relocs)
-    {
-      if (!changed)
-	free (internal_relocs);
-      else
-	elf_section_data (sec)->relocs = internal_relocs;
-    }
-
-  return TRUE;
-
- error_return:
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
-    free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
-    free (internal_relocs);
-  return FALSE;
-}
-
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -3131,9 +3041,6 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
 	  struct elf_dyn_relocs *p;
-
-	  if (!elf_i386_convert_load (ibfd, s, info))
-	    return FALSE;
 
 	  for (p = ((struct elf_dyn_relocs *)
 		     elf_section_data (s)->local_dynrel);
