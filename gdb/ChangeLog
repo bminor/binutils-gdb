@@ -1,3 +1,7 @@
+2016-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c (remote_start_remote): Detect PACKET_vFile_setfs.support.
+
 2016-04-15  Pedro Alves  <palves@redhat.com>
 
 	* nat/linux-ptrace.h [__mips__] (GDB_ARCH_IS_TRAP_BRKPT): Also
