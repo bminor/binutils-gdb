@@ -390,6 +390,7 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
 {
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   if (type == raw_bkpt_type_sw || type == raw_bkpt_type_hw)
     {
@@ -408,32 +409,39 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
   else
     bp = find_raw_breakpoint_at (where, type, kind);
 
-  if (bp != NULL)
+  if (bp == NULL)
     {
-      bp->refcount++;
-      return bp;
+      bp = XCNEW (struct raw_breakpoint);
+      bp->pc = where;
+      bp->kind = kind;
+      bp->raw_type = type;
+      make_cleanup (xfree, bp);
     }
 
-  bp = XCNEW (struct raw_breakpoint);
-  bp->pc = where;
-  bp->kind = kind;
-  bp->refcount = 1;
-  bp->raw_type = type;
-
-  *err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
-  if (*err != 0)
+  if (!bp->inserted)
     {
-      if (debug_threads)
-	debug_printf ("Failed to insert breakpoint at 0x%s (%d).\n",
-		      paddress (where), *err);
-      free (bp);
-      return NULL;
+      *err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
+      if (*err != 0)
+	{
+	  if (debug_threads)
+	    debug_printf ("Failed to insert breakpoint at 0x%s (%d).\n",
+			  paddress (where), *err);
+
+	  do_cleanups (old_chain);
+	  return NULL;
+	}
+
+      bp->inserted = 1;
     }
 
-  bp->inserted = 1;
-  /* Link the breakpoint in.  */
-  bp->next = proc->raw_breakpoints;
-  proc->raw_breakpoints = bp;
+  discard_cleanups (old_chain);
+
+  /* Link the breakpoint in, if this is the first reference.  */
+  if (++bp->refcount == 1)
+    {
+      bp->next = proc->raw_breakpoints;
+      proc->raw_breakpoints = bp;
+    }
   return bp;
 }
 
@@ -1507,7 +1515,7 @@ reinsert_raw_breakpoint (struct raw_breakpoint *bp)
   int err;
 
   if (bp->inserted)
-    error ("Breakpoint already inserted at reinsert time.");
+    return;
 
   err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
   if (err == 0)

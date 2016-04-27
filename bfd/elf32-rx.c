@@ -3548,7 +3548,7 @@ rx_set_section_contents (bfd *         abfd,
       if (! rv)
 	return rv;
 
-      location ++;
+      location = (bfd_byte *) location + 1;
       offset ++;
       count --;
       caddr ++;
@@ -3574,7 +3574,7 @@ rx_set_section_contents (bfd *         abfd,
     }
 
   count -= scount;
-  location += scount;
+  location = (bfd_byte *) location + scount;
   offset += scount;
 
   if (count > 0)
@@ -3593,7 +3593,7 @@ rx_set_section_contents (bfd *         abfd,
 	  if (! rv)
 	    return rv;
 
-	  location ++;
+	  location = (bfd_byte *) location + 1;
 	  offset ++;
 	  count --;
 	  caddr ++;

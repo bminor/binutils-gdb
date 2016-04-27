@@ -1,3 +1,37 @@
+2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20006
+	* testsuite/ld-elfvsb/elfvsb.exp (COMPRESS_LDFLAG): New.
+	(visibility_run): Pass COMPRESS_LDFLAG to visibility_test on
+	ELF targets.
+
+2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/compressed1b.d: Pass
+	--compress-debug-sections=none to ld.
+	* testsuite/ld-elf/compressed1c.d: Likewise.
+
+2016-04-27  Alan Modra  <amodra@gmail.com>
+
+	PR target/19985
+	* configure.tgt: Don't use var+=.
+
+2016-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19985
+	* configure.tgt: Include big endian PPC64 emulations with little
+	endian PPC64 targets.
+
+2016-04-25  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* scripttempl/avrtiny.sc (.text): Do not set LMA to zero.
+
+2016-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (lang_check_relocs): Use bfd_link_check_relocs in
+	prefernce to _bfd_elf_link_check_relocs.  Drop test for ELF
+	targets.  Do not stop the checks when problems are encountered.
+
 2016-04-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/cross3.t: Add commonly used data

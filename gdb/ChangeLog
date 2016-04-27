@@ -1,3 +1,203 @@
+2016-04-27  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	* c-valprint.c (c_value_print): Always convert val back to reference
+	type if we converted it to a pointer type.
+
+2016-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* configure.ac: Enhance configure check for babeltrace to reject
+	non-C++-enabled versions.
+	* configure: Regenerate.
+
+2016-04-26  Sanimir Agovic  <sanimir.agovic@intel.com>
+	    Keven Boell  <keven.boell@intel.com>
+	    Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* f-valprint.c (f77_create_arrayprint_offset_tbl): Remove
+	function.
+	(F77_DIM_SIZE, F77_DIM_OFFSET): Remove macro.
+	(f77_print_array_1): Use value_subscript to subscript a
+	value array.
+	(f77_print_array): Remove call to f77_create_arrayprint_offset_tbl.
+	(f_val_print): Use value_field to construct a field value.
+
+2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* valarith.c (value_address): Resolve dynamic types.
+
+2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
+	    Keven Boell  <kevel.boell@intel.com>
+
+	* NEWS: Add new supported features for fortran.
+	* gdbtypes.c (remove_dyn_prop): New.
+	(resolve_dynamic_struct): Keep type length for fortran structs.
+	* gdbtypes.h: Forward declaration of new function.
+	* value.c (value_address): Return dynamic resolved location of a value.
+	(set_value_component_location): Adjust the value address
+	for single value prints.
+	(value_primitive_field): Support value types with a dynamic location.
+	(set_internalvar): Remove dynamic location property of
+	internal variables.
+
+2016-04-25  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (set_raw_breakpoint_at): Create a raw breakpoint
+	object.  Insert it if it is not inserted yet.  Increase the
+	refcount and link it into the proc's raw breakpoint list.
+
+2016-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (should_be_inserted): Return 0 if the location's
+	owner is not single step breakpoint or single step breakpoint's
+	thread isn't the thread which is stepping past a breakpoint.
+	* gdbarch.sh (software_single_step): Update comments.
+	* gdbarch.h: Regenerated.
+	* infrun.c (struct step_over_info) <thread>: New field.
+	(set_step_over_info): New argument 'thread'.  Callers updated.
+	(clear_step_over_info): Set field thread to -1.
+	(thread_is_stepping_over_breakpoint): New function.
+	* infrun.h (thread_is_stepping_over_breakpoint): Declaration.
+
+2016-04-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_read_description): Use PPC_FEATURE_HAS_VSX
+	and PPC_FEATURE_HAS_ALTIVEC to check if such features are available.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* valops.c (read_value_memory): New local variable 'stack'.
+	Set it to either TARGET_OBJECT_STACK_MEMORY or
+	TARGET_OBJECT_MEMORY.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
+	* ada-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* ada-lang.c (ada_language_defn): Adjust.
+	* ada-lang.h (ada_error): Rename to ...
+	(ada_yyerror): ... this.
+	* c-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Adjust.
+	* c-lang.h (c_error): Rename to ...
+	(c_yyerror): ... this.
+	* d-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* d-lang.c (d_language_defn): Adjust.
+	* d-lang.h (d_error): Rename to ...
+	(d_yyerror): ... this.
+	* f-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* f-lang.c (f_language_defn): Adjust.
+	* f-lang.h (f_error): Rename to ...
+	(f_yyerror): ... this.
+	* go-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* go-lang.c (go_language_defn): Adjust.
+	* go-lang.h (go_error): Rename to ...
+	(go_yyerror): ... this.
+	* jv-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* jv-lang.c (java_language_defn): Adjust.
+	* jv-lang.h (java_error): Rename to ...
+	(java_yyerror): ... this.
+	* m2-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* m2-lang.c (m2_language_defn): Adjust.
+	* m2-lang.h (m2_error): Rename to ...
+	(m2_yyerror): ... this.
+	* objc-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* objc-lang.c (objc_language_defn): Adjust.
+	* opencl-lang.c (opencl_language_defn): Adjust.
+	* p-exp.y: Remove all yy symbol remappings.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include "yy-remap.h".
+	* p-lang.c (pascal_language_defn): Adjust.
+	* p-lang.h (pascal_error): Rename to ...
+	(pascal_yyerror): ... this.
+	* yy-remap.h: New file.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.h (GDB_XCPT_TRY): Remove mention of
+	the foreign frames issue.
+	[__cplusplus] (GDB_XCPT): Define as GDB_XCPT_TRY.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (enum catcher_state, struct catcher)
+	(current_catcher): Define in C++ mode too.
+	(exceptions_state_mc_catch): Call throw_exception_sjlj instead of
+	throw_exception.
+	(throw_exception_sjlj, throw_exception_cxx): New functions,
+	factored out from throw_exception.
+	(throw_exception): Reimplement.
+	* common/common-exceptions.h (exceptions_state_mc_init)
+	(exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1, exceptions_state_mc_catch):
+	Declare in C++ mode too.
+	(TRY): Rename to ...
+	(TRY_SJLJ): ... this.
+	(CATCH): Rename to ...
+	(CATCH_SJLJ): ... this.
+	(END_CATCH): Rename to ...
+	(END_CATCH_SJLJ): ... this.
+	[GDB_XCPT == GDB_XCPT_SJMP] (TRY, CATCH, END_CATCH): Map to SJLJ
+	equivalents.
+	(throw_exception): Update comments.
+	(throw_exception_sjlj): Declare.
+	* event-top.c (gdb_rl_callback_read_char_wrapper): Extend intro
+	comment.  Wrap body in TRY_SJLJ/CATCH_SJLJ and rethrow any
+	intercepted exception.
+	(gdb_rl_callback_handler): New function.
+	(gdb_rl_callback_handler_install): Always install
+	gdb_rl_callback_handler as readline callback.
+
+2016-04-22  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (rl_callback_read_char_wrapper): Rename to ...
+	(gdb_rl_callback_read_char_wrapper): ... this.
+	(change_line_handler, gdb_setup_readline): Adjust.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c (aarch32_gp_regcache_supply): Clear CPSR
+	bits 20 to 23.
+
+2016-04-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINER: Remove myself as AIX Maintainer.
+
+2016-04-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_gdbarch_init): For GDB_OSABI_LINUX set
+	`num_regs' to 90 rather than 79.  Where a target description is
+	present adjust the setting appropriately.
+
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.h (GDB_XCPT_TRY): Add comment.
+	(GDB_XCPT): Always define as GDB_XCPT_SJMP.
+
+2016-04-21  Pedro Alves  <palves@redhat.com>
+
+	* aix-thread.c (pdc_read_data, pdc_write_data): Add cast.
+	(aix_thread_resume): Use PTRACE_TYPE_ARG5.
+	* rs6000-nat.c (rs6000_ptrace64): Use PTRACE_TYPE_ARG5.
+	(rs6000_ptrace_ldinfo): Change type of 'ldi' local to void
+	pointer, and cast return to gdb_byte pointer.
+
 2016-04-21  Pedro Alves  <palves@redhat.com>
 
 	* s390-linux-nat.c (fetch_regset, store_regset, check_regset): Use

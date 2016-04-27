@@ -135,21 +135,29 @@ struct bfd_link_hash_entry
 	     automatically be non-NULL since the symbol will have been on the
 	     undefined symbol list.  */
 	  struct bfd_link_hash_entry *next;
-	  bfd *abfd;		/* BFD symbol was found in.  */
+	  /* BFD symbol was found in.  */
+	  bfd *abfd;
+	  /* For __start_<name> and __stop_<name> symbols, the first
+	     input section matching the name.  */
+	  asection *section;
 	} undef;
       /* bfd_link_hash_defined, bfd_link_hash_defweak.  */
       struct
 	{
 	  struct bfd_link_hash_entry *next;
-	  asection *section;	/* Symbol section.  */
-	  bfd_vma value;	/* Symbol value.  */
+	  /* Symbol section.  */
+	  asection *section;
+	  /* Symbol value.  */
+	  bfd_vma value;
 	} def;
       /* bfd_link_hash_indirect, bfd_link_hash_warning.  */
       struct
 	{
 	  struct bfd_link_hash_entry *next;
-	  struct bfd_link_hash_entry *link;	/* Real symbol.  */
-	  const char *warning;	/* Warning (bfd_link_hash_warning only).  */
+	  /* Real symbol.  */
+	  struct bfd_link_hash_entry *link;
+	  /* Warning message (bfd_link_hash_warning only).  */
+	  const char *warning;
 	} i;
       /* bfd_link_hash_common.  */
       struct
@@ -165,7 +173,8 @@ struct bfd_link_hash_entry
 	     the union; this structure is a major space user in the
 	     linker.  */
 	  struct bfd_link_hash_common_entry *p;
-	  bfd_size_type size;	/* Common symbol size.  */
+	  /* Common symbol size.  */
+	  bfd_size_type size;
 	} c;
     } u;
 };
@@ -225,6 +234,11 @@ extern void bfd_link_repair_undef_list
 
 /* Read symbols and cache symbol pointer array in outsymbols.  */
 extern bfd_boolean bfd_generic_link_read_symbols (bfd *);
+
+/* Check the relocs in the BFD.  Called after all the input
+   files have been loaded, and garbage collection has tagged
+   any unneeded sections.  */
+extern bfd_boolean bfd_link_check_relocs (bfd *,struct bfd_link_info *);
 
 struct bfd_sym_chain
 {

@@ -204,7 +204,24 @@ _bfd_elf_link_create_dynstrtab (bfd *abfd, struct bfd_link_info *info)
 
   hash_table = elf_hash_table (info);
   if (hash_table->dynobj == NULL)
-    hash_table->dynobj = abfd;
+    {
+      /* We may not set dynobj, an input file holding linker created
+	 dynamic sections to abfd, which may be a dynamic object with
+	 its own dynamic sections.  We need to find a normal input file
+	 to hold linker created sections if possible.  */
+      if ((abfd->flags & (DYNAMIC | BFD_PLUGIN)) != 0)
+	{
+	  bfd *ibfd;
+	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
+	    if ((ibfd->flags
+		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+	      {
+		abfd = ibfd;
+		break;
+	      }
+	}
+      hash_table->dynobj = abfd;
+    }
 
   if (hash_table->dynstr == NULL)
     {
@@ -888,11 +905,11 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 			  elf_link_renumber_hash_table_dynsyms,
 			  &dynsymcount);
 
-  /* There is an unused NULL entry at the head of the table which
-     we must account for in our count.  We always create the dynsym
-     section, even if it is empty, with dynamic sections.  */
-  if (elf_hash_table (info)->dynamic_sections_created)
-    ++dynsymcount;
+  /* There is an unused NULL entry at the head of the table which we
+     must account for in our count even if the table is empty since it
+     is intended for the mandatory DT_SYMTAB tag (.dynsym section) in
+     .dynamic section.  */
+  dynsymcount++;
 
   elf_hash_table (info)->dynsymcount = dynsymcount;
   return dynsymcount;
@@ -6589,8 +6606,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
       /* Work out the size of the symbol version section.  */
       s = bfd_get_linker_section (dynobj, ".gnu.version");
       BFD_ASSERT (s != NULL);
-      if (dynsymcount != 0
-	  && (s->flags & SEC_EXCLUDE) == 0)
+      if ((s->flags & SEC_EXCLUDE) == 0)
 	{
 	  s->size = dynsymcount * sizeof (Elf_External_Versym);
 	  s->contents = (unsigned char *) bfd_zalloc (output_bfd, s->size);
@@ -6611,17 +6627,14 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
       BFD_ASSERT (s != NULL);
       s->size = dynsymcount * bed->s->sizeof_sym;
 
-      if (dynsymcount != 0)
-	{
-	  s->contents = (unsigned char *) bfd_alloc (output_bfd, s->size);
-	  if (s->contents == NULL)
-	    return FALSE;
+      s->contents = (unsigned char *) bfd_alloc (output_bfd, s->size);
+      if (s->contents == NULL)
+	return FALSE;
 
-	  /* The first entry in .dynsym is a dummy symbol.
-	     Clear all the section syms, in case we don't output them all.  */
-	  ++section_sym_count;
-	  memset (s->contents, 0, section_sym_count * bed->s->sizeof_sym);
-	}
+      /* The first entry in .dynsym is a dummy symbol.  Clear all the
+	 section syms, in case we don't output them all.  */
+      ++section_sym_count;
+      memset (s->contents, 0, section_sym_count * bed->s->sizeof_sym);
 
       elf_hash_table (info)->bucketcount = 0;
 
@@ -12217,6 +12230,55 @@ _bfd_elf_gc_mark_hook (asection *sec,
   return NULL;
 }
 
+/* For undefined __start_<name> and __stop_<name> symbols, return the
+   first input section matching <name>.  Return NULL otherwise.  */
+
+asection *
+_bfd_elf_is_start_stop (const struct bfd_link_info *info,
+			struct elf_link_hash_entry *h)
+{
+  asection *s;
+  const char *sec_name;
+
+  if (h->root.type != bfd_link_hash_undefined
+      && h->root.type != bfd_link_hash_undefweak)
+    return NULL;
+
+  s = h->root.u.undef.section;
+  if (s != NULL)
+    {
+      if (s == (asection *) 0 - 1)
+	return NULL;
+      return s;
+    }
+
+  sec_name = NULL;
+  if (strncmp (h->root.root.string, "__start_", 8) == 0)
+    sec_name = h->root.root.string + 8;
+  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
+    sec_name = h->root.root.string + 7;
+
+  if (sec_name != NULL && *sec_name != '\0')
+    {
+      bfd *i;
+
+      for (i = info->input_bfds; i != NULL; i = i->link.next)
+	{
+	  s = bfd_get_section_by_name (i, sec_name);
+	  if (s != NULL)
+	    {
+	      h->root.u.undef.section = s;
+	      break;
+	    }
+	}
+    }
+
+  if (s == NULL)
+    h->root.u.undef.section = (asection *) 0 - 1;
+
+  return s;
+}
+
 /* COOKIE->rel describes a relocation against section SEC, which is
    a section we've decided to keep.  Return the section that contains
    the relocation symbol, or NULL if no section contains it.  */
@@ -12255,34 +12317,19 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
       if (h->u.weakdef != NULL)
 	h->u.weakdef->mark = 1;
 
-      if (start_stop != NULL
-	  && (h->root.type == bfd_link_hash_undefined
-	      || h->root.type == bfd_link_hash_undefweak))
+      if (start_stop != NULL)
 	{
 	  /* To work around a glibc bug, mark all XXX input sections
 	     when there is an as yet undefined reference to __start_XXX
 	     or __stop_XXX symbols.  The linker will later define such
 	     symbols for orphan input sections that have a name
 	     representable as a C identifier.  */
-	  const char *sec_name = NULL;
-	  if (strncmp (h->root.root.string, "__start_", 8) == 0)
-	    sec_name = h->root.root.string + 8;
-	  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
-	    sec_name = h->root.root.string + 7;
+	  asection *s = _bfd_elf_is_start_stop (info, h);
 
-	  if (sec_name != NULL && *sec_name != '\0')
+	  if (s != NULL)
 	    {
-	      bfd *i;
-
-	      for (i = info->input_bfds; i != NULL; i = i->link.next)
-		{
-		  asection *s = bfd_get_section_by_name (i, sec_name);
-		  if (s != NULL && !s->gc_mark)
-		    {
-		      *start_stop = TRUE;
-		      return s;
-		    }
-		}
+	      *start_stop = !s->gc_mark;
+	      return s;
 	    }
 	}
 

@@ -520,8 +520,8 @@ struct elf_link_hash_table
   union gotplt_union init_got_offset;
   union gotplt_union init_plt_offset;
 
-  /* The number of symbols found in the link which must be put into
-     the .dynsym section.  */
+  /* The number of symbols found in the link which is intended for the
+     mandatory DT_SYMTAB tag (.dynsym section) in .dynamic section.  */
   bfd_size_type dynsymcount;
 
   /* The string table of dynamic symbols, which becomes the .dynstr
@@ -2335,6 +2335,9 @@ extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
 
 extern bfd_boolean bfd_elf_gc_common_final_link
   (bfd *, struct bfd_link_info *);
+
+extern asection *_bfd_elf_is_start_stop
+  (const struct bfd_link_info *, struct elf_link_hash_entry *);
 
 extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);

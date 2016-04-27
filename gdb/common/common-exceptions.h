@@ -137,17 +137,19 @@ struct gdb_exception
 # define GDB_XCPT GDB_XCPT_SJMP
 #endif
 
-/* Functions to drive the exceptions state machine.  Though declared
-   here by necessity, these functions should be considered internal to
-   the exceptions subsystem and not used other than via the TRY/CATCH
-   macros defined below.  */
+/* Functions to drive the sjlj-based exceptions state machine.  Though
+   declared here by necessity, these functions should be considered
+   internal to the exceptions subsystem and not used other than via
+   the TRY/CATCH (or TRY_SJLJ/CATCH_SJLJ) macros defined below.  */
 
-#if GDB_XCPT == GDB_XCPT_SJMP
 extern jmp_buf *exceptions_state_mc_init (void);
 extern int exceptions_state_mc_action_iter (void);
 extern int exceptions_state_mc_action_iter_1 (void);
 extern int exceptions_state_mc_catch (struct gdb_exception *, int);
-#else
+
+/* Same, but for the C++ try/catch-based TRY/CATCH mechanism.  */
+
+#if GDB_XCPT != GDB_XCPT_SJMP
 extern void *exception_try_scope_entry (void);
 extern void exception_try_scope_exit (void *saved_state);
 extern void exception_rethrow (void);
@@ -176,11 +178,14 @@ extern void exception_rethrow (void);
      }
    END_CATCH
 
-  */
+  Note that the SJLJ version of the macros are actually named
+  TRY_SJLJ/CATCH_SJLJ in order to make it possible to call them even
+  when TRY/CATCH are mapped to C++ try/catch.  The SJLJ variants are
+  needed in some cases where gdb exceptions need to cross third-party
+  library code compiled without exceptions support (e.g.,
+  readline).  */
 
-#if GDB_XCPT == GDB_XCPT_SJMP
-
-#define TRY \
+#define TRY_SJLJ \
      { \
        jmp_buf *buf = \
 	 exceptions_state_mc_init (); \
@@ -189,13 +194,22 @@ extern void exception_rethrow (void);
      while (exceptions_state_mc_action_iter ()) \
        while (exceptions_state_mc_action_iter_1 ())
 
-#define CATCH(EXCEPTION, MASK)				\
+#define CATCH_SJLJ(EXCEPTION, MASK)				\
   {							\
     struct gdb_exception EXCEPTION;				\
     if (exceptions_state_mc_catch (&(EXCEPTION), MASK))
 
-#define END_CATCH				\
+#define END_CATCH_SJLJ				\
   }
+
+#if GDB_XCPT == GDB_XCPT_SJMP
+
+/* If using SJLJ-based exceptions for all exceptions, then provide
+   standard aliases.  */
+
+#define TRY TRY_SJLJ
+#define CATCH CATCH_SJLJ
+#define END_CATCH END_CATCH_SJLJ
 
 #endif /* GDB_XCPT_SJMP */
 
@@ -271,19 +285,23 @@ struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
 
 /* *INDENT-ON* */
 
-/* Throw an exception (as described by "struct gdb_exception").  Will
-   execute a LONG JUMP to the inner most containing exception handler
-   established using catch_exceptions() (or similar).
-
-   Code normally throws an exception using error() et.al.  For various
-   reaons, GDB also contains code that throws an exception directly.
-   For instance, the remote*.c targets contain CNTRL-C signal handlers
-   that propogate the QUIT event up the exception chain.  ``This could
-   be a good thing or a dangerous thing.'' -- the Existential
-   Wombat.  */
-
+/* Throw an exception (as described by "struct gdb_exception").  When
+   GDB is built as a C program, executes a LONG JUMP to the inner most
+   containing exception handler established using TRY/CATCH.  When
+   built as a C++ program, throws a C++ exception, using "throw".  */
 extern void throw_exception (struct gdb_exception exception)
      ATTRIBUTE_NORETURN;
+
+/* Throw an exception by executing a LONG JUMP to the inner most
+   containing exception handler established using TRY_SJLJ.  Works the
+   same regardless of whether GDB is built as a C program or a C++
+   program.  Necessary in some cases where we need to throw GDB
+   exceptions across third-party library code (e.g., readline).  */
+extern void throw_exception_sjlj (struct gdb_exception exception)
+     ATTRIBUTE_NORETURN;
+
+/* Convenience wrappers around throw_exception that throw GDB
+   errors.  */
 extern void throw_verror (enum errors, const char *fmt, va_list ap)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
 extern void throw_vquit (const char *fmt, va_list ap)

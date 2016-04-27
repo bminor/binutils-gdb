@@ -1826,6 +1826,9 @@ extern void add_dyn_prop
   (enum dynamic_prop_node_kind kind, struct dynamic_prop prop,
    struct type *type, struct objfile *objfile);
 
+extern void remove_dyn_prop (enum dynamic_prop_node_kind prop_kind,
+                             struct type *type);
+
 extern struct type *check_typedef (struct type *);
 
 extern void check_stub_method_group (struct type *, int);

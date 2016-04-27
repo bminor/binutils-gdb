@@ -1,3 +1,61 @@
+2016-04-27  Alan Modra  <amodra@gmail.com>
+
+	* as.h (inline, __PTR_TO_INT, __INT_TO_PTR): Don't define.
+	(xmemdup0): New inline function.
+
+2016-04-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (code_option_type): New enum.
+	(parse_code_option): Return status indicating option type.
+	(s_mipsset): Update `parse_code_option' call site accordingly.
+	Always set register sizes from the ISA with ISA overrides.
+	(s_module): Update `parse_code_option' call site.
+	* testsuite/gas/mips/isa-override-1.d: New test.
+	* testsuite/gas/mips/micromips@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips1@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r3@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r5@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r6@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r3@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r5@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r6@isa-override-1.d: New test.
+	* testsuite/gas/mips/r3000@isa-override-1.d: New test.
+	* testsuite/gas/mips/r3900@isa-override-1.d: New test.
+	* testsuite/gas/mips/r5900@isa-override-1.d: New test.
+	* testsuite/gas/mips/octeon@isa-override-1.d: New test.
+	* testsuite/gas/mips/octeon3@isa-override-1.d: New test.
+	* testsuite/gas/mips/isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips1@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips2@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r2@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r3@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r5@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r6@isa-override-2.l: New list test.
+	* testsuite/gas/mips/r3000@isa-override-2.l: New list test.
+	* testsuite/gas/mips/r3900@isa-override-2.l: New list test.
+	* testsuite/gas/mips/octeon3@isa-override-2.l: New list test.
+	* testsuite/gas/mips/octeon3@isa-override-1.l: New stderr
+	output.
+	* testsuite/gas/mips/isa-override-1.s: New test source.
+	* testsuite/gas/mips/r5900@isa-override-1.s: New test source.
+	* testsuite/gas/mips/isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips1@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips2@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r2@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r3@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r5@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r6@isa-override-2.s: New test source.
+	* testsuite/gas/mips/r3000@isa-override-2.s: New test source.
+	* testsuite/gas/mips/r3900@isa-override-2.s: New test source.
+	* testsuite/gas/mips/octeon3@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* cgen.c: Likewise.

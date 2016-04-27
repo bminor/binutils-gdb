@@ -1,3 +1,56 @@
+2016-04-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/branch-to-self.exp: Skip it if gdb,nosignals
+	exists.
+
+2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* vla-type.exp: Print structure from toplevel.
+
+2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-type.f90: Add test for static and dynamic arrays
+	of dynamic types.
+	* gdb.fortran/vla-type.exp: Add test for static and dynamic arrays
+	of dynamic types.
+
+2016-04-26  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-type.f90: New file.
+	* gdb.fortran/vla-type.exp: New file.
+
+2016-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/branch-to-self.c: New file.
+	* gdb.base/branch-to-self.exp: New file.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.trace/unavailable.exp (gdb_collect_globals_test_1): Match
+	more after $hex.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/annota1.exp: Set breakpoint on line $main_line.
+	* gdb.base/annota3.exp: Likewise.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.reverse/step-precsave.exp: Do one step and test program
+	stops in "callee" and do multiple steps until program goes out
+	of "callee".
+	* gdb.reverse/step-reverse.exp: Likewise.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.trace/signal.exp: Also pass if
+	$tracepoint_hits($i) > $iterations.
+
+2016-04-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.trace/signal.c: New file.
+	* gdb.trace/signal.exp: New file.
+
 2016-04-19  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.base/bad-file.exp: New file.

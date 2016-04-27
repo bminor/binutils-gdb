@@ -48,7 +48,6 @@
 /* readline defines this.  */
 #undef savestring
 
-static void rl_callback_read_char_wrapper (gdb_client_data client_data);
 static void command_line_handler (char *rl);
 static void change_line_handler (void);
 static char *top_level_prompt (void);
@@ -141,20 +140,103 @@ static struct async_signal_handler *sigtstp_token;
 #endif
 static struct async_signal_handler *async_sigterm_token;
 
-/* This hook is called by rl_callback_read_char_wrapper after each
+/* This hook is called by gdb_rl_callback_read_char_wrapper after each
    character is processed.  */
 void (*after_char_processing_hook) (void);
 
 
-/* Wrapper function for calling into the readline library.  The event
-   loop expects the callback function to have a paramter, while
-   readline expects none.  */
+/* Wrapper function for calling into the readline library.  This takes
+   care of a couple things:
+
+   - The event loop expects the callback function to have a parameter,
+     while readline expects none.
+
+   - Propagation of GDB exceptions/errors thrown from INPUT_HANDLER
+     across readline requires special handling.
+
+   On the exceptions issue:
+
+   DWARF-based unwinding cannot cross code built without -fexceptions.
+   Any exception that tries to propagate through such code will fail
+   and the result is a call to std::terminate.  While some ABIs, such
+   as x86-64, require all code to be built with exception tables,
+   others don't.
+
+   This is a problem when GDB calls some non-EH-aware C library code,
+   that calls into GDB again through a callback, and that GDB callback
+   code throws a C++ exception.  Turns out this is exactly what
+   happens with GDB's readline callback.
+
+   In such cases, we must catch and save any C++ exception that might
+   be thrown from the GDB callback before returning to the
+   non-EH-aware code.  When the non-EH-aware function itself returns
+   back to GDB, we then rethrow the original C++ exception.
+
+   In the readline case however, the right thing to do is to longjmp
+   out of the callback, rather than do a normal return -- there's no
+   way for the callback to return to readline an indication that an
+   error happened, so a normal return would have rl_callback_read_char
+   potentially continue processing further input, redisplay the
+   prompt, etc.  Instead of raw setjmp/longjmp however, we use our
+   sjlj-based TRY/CATCH mechanism, which knows to handle multiple
+   levels of active setjmp/longjmp frames, needed in order to handle
+   the readline callback recursing, as happens with e.g., secondary
+   prompts / queries, through gdb_readline_wrapper.  */
+
 static void
-rl_callback_read_char_wrapper (gdb_client_data client_data)
+gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
 {
-  rl_callback_read_char ();
-  if (after_char_processing_hook)
-    (*after_char_processing_hook) ();
+  struct gdb_exception gdb_expt = exception_none;
+
+  /* C++ exceptions can't normally be thrown across readline (unless
+     it is built with -fexceptions, but it won't by default on many
+     ABIs).  So we instead wrap the readline call with a sjlj-based
+     TRY/CATCH, and rethrow the GDB exception once back in GDB.  */
+  TRY_SJLJ
+    {
+      rl_callback_read_char ();
+      if (after_char_processing_hook)
+	(*after_char_processing_hook) ();
+    }
+  CATCH_SJLJ (ex, RETURN_MASK_ALL)
+    {
+      gdb_expt = ex;
+    }
+  END_CATCH_SJLJ
+
+  /* Rethrow using the normal EH mechanism.  */
+  if (gdb_expt.reason < 0)
+    throw_exception (gdb_expt);
+}
+
+/* GDB's readline callback handler.  Calls the current INPUT_HANDLER,
+   and propagates GDB exceptions/errors thrown from INPUT_HANDLER back
+   across readline.  See gdb_rl_callback_read_char_wrapper.  */
+
+static void
+gdb_rl_callback_handler (char *rl)
+{
+  struct gdb_exception gdb_rl_expt = exception_none;
+
+  TRY
+    {
+      input_handler (rl);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      gdb_rl_expt = ex;
+    }
+  END_CATCH
+
+  /* If we caught a GDB exception, longjmp out of the readline
+     callback.  There's no other way for the callback to signal to
+     readline that an error happened.  A normal return would have
+     readline potentially continue processing further input, redisplay
+     the prompt, etc.  (This is what GDB historically did when it was
+     a C program.)  Note that since we're long jumping, local variable
+     dtors are NOT run automatically.  */
+  if (gdb_rl_expt.reason < 0)
+    throw_exception_sjlj (gdb_rl_expt);
 }
 
 /* Initialize all the necessary variables, start the event loop,
@@ -188,7 +270,7 @@ change_line_handler (void)
   if (async_command_editing_p)
     {
       /* Turn on editing by using readline.  */
-      call_readline = rl_callback_read_char_wrapper;
+      call_readline = gdb_rl_callback_read_char_wrapper;
       input_handler = command_line_handler;
     }
   else
@@ -237,7 +319,7 @@ gdb_rl_callback_handler_install (const char *prompt)
      therefore loses input.  */
   gdb_assert (!callback_handler_installed);
 
-  rl_callback_handler_install (prompt, input_handler);
+  rl_callback_handler_install (prompt, gdb_rl_callback_handler);
   callback_handler_installed = 1;
 }
 
@@ -1109,8 +1191,10 @@ set_async_editing_command (char *args, int from_tty,
 }
 
 /* Set things up for readline to be invoked via the alternate
-   interface, i.e. via a callback function (rl_callback_read_char),
-   and hook up instream to the event loop.  */
+   interface, i.e. via a callback function
+   (gdb_rl_callback_read_char), and hook up instream to the event
+   loop.  */
+
 void
 gdb_setup_readline (void)
 {
@@ -1136,7 +1220,7 @@ gdb_setup_readline (void)
 	  
       /* When a character is detected on instream by select or poll,
 	 readline will be invoked via this callback function.  */
-      call_readline = rl_callback_read_char_wrapper;
+      call_readline = gdb_rl_callback_read_char_wrapper;
     }
   else
     {

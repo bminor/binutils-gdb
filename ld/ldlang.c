@@ -6783,18 +6783,19 @@ lang_add_gc_name (const char * name)
 static void
 lang_check_relocs (void)
 {
-  if (link_info.check_relocs_after_open_input
-      && bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+  if (link_info.check_relocs_after_open_input)
     {
       bfd *abfd;
 
       for (abfd = link_info.input_bfds;
 	   abfd != (bfd *) NULL; abfd = abfd->link.next)
-	if (!_bfd_elf_link_check_relocs (abfd, &link_info))
+	if (!bfd_link_check_relocs (abfd, &link_info))
 	  {
-	    /* no object output, fail return */
+	    /* No object output, fail return.  */
 	    config.make_executable = FALSE;
-	    break;
+	    /* Note: we do not abort the loop, but rather
+	       continue the scan in case there are other
+	       bad relocations to report.  */
 	  }
     }
 }

@@ -997,6 +997,10 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #define MY_bfd_link_split_section  _bfd_generic_link_split_section
 #endif
 
+#ifndef MY_bfd_link_check_relocs
+#define MY_bfd_link_check_relocs   _bfd_generic_link_check_relocs
+#endif
+
 #ifndef MY_bfd_copy_private_bfd_data
 #define MY_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
 #endif

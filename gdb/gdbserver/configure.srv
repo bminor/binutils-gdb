@@ -36,7 +36,7 @@ ipa_ppc_linux_regobj="powerpc-32l-ipa.o powerpc-altivec32l-ipa.o powerpc-cell32l
 srv_i386_32bit_xmlfiles="i386/32bit-core.xml i386/32bit-sse.xml i386/32bit-avx.xml i386/32bit-avx512.xml i386/32bit-mpx.xml"
 srv_i386_64bit_xmlfiles="i386/64bit-core.xml i386/64bit-sse.xml i386/64bit-avx.xml i386/64bit-avx512.xml i386/x32-core.xml i386/64bit-mpx.xml"
 srv_i386_xmlfiles="i386/i386.xml i386/i386-avx.xml i386/i386-avx512.xml i386/i386-mpx.xml i386/i386-avx-mpx.xml i386/i386-mmx.xml $srv_i386_32bit_xmlfiles"
-srv_amd64_xmlfiles="i386/amd64.xml i386/amd64-avx.xml i386/amd64-avx512.xml i386/x32.xml i386/x32-avx.xml i386/x32-avx512.xml i386/amd64-mpx.xml i386/amd64-mpx-avx.xml  $srv_i386_64bit_xmlfiles"
+srv_amd64_xmlfiles="i386/amd64.xml i386/amd64-avx.xml i386/amd64-avx512.xml i386/x32.xml i386/x32-avx.xml i386/x32-avx512.xml i386/amd64-mpx.xml i386/amd64-avx-mpx.xml  $srv_i386_64bit_xmlfiles"
 srv_i386_linux_xmlfiles="i386/i386-linux.xml i386/i386-avx-linux.xml i386/i386-avx512-linux.xml i386/i386-mmx-linux.xml i386/32bit-linux.xml i386/i386-mpx-linux.xml i386/i386-avx-mpx-linux.xml $srv_i386_32bit_xmlfiles"
 srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/amd64-avx-linux.xml i386/amd64-avx512-linux.xml i386/64bit-linux.xml i386/amd64-mpx-linux.xml i386/amd64-avx-mpx-linux.xml i386/x32-linux.xml i386/x32-avx-linux.xml i386/x32-avx512-linux.xml $srv_i386_64bit_xmlfiles"
 

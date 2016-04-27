@@ -9260,6 +9260,7 @@ bfd_vms_get_data (bfd *abfd)
   _bfd_nodynamic_get_dynamic_reloc_upper_bound
 #define alpha_vms_canonicalize_dynamic_reloc \
   _bfd_nodynamic_canonicalize_dynamic_reloc
+#define alpha_vms_bfd_link_check_relocs              _bfd_generic_link_check_relocs
 
 const bfd_target alpha_vms_vec =
 {

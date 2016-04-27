@@ -1296,6 +1296,9 @@ struct step_over_info
   /* The instruction being stepped over triggers a nonsteppable
      watchpoint.  If true, we'll skip inserting watchpoints.  */
   int nonsteppable_watchpoint_p;
+
+  /* The thread's global number.  */
+  int thread;
 };
 
 /* The step-over info of the location that is being stepped over.
@@ -1329,11 +1332,13 @@ static struct step_over_info step_over_info;
 
 static void
 set_step_over_info (struct address_space *aspace, CORE_ADDR address,
-		    int nonsteppable_watchpoint_p)
+		    int nonsteppable_watchpoint_p,
+		    int thread)
 {
   step_over_info.aspace = aspace;
   step_over_info.address = address;
   step_over_info.nonsteppable_watchpoint_p = nonsteppable_watchpoint_p;
+  step_over_info.thread = thread;
 }
 
 /* Called when we're not longer stepping over a breakpoint / an
@@ -1348,6 +1353,7 @@ clear_step_over_info (void)
   step_over_info.aspace = NULL;
   step_over_info.address = 0;
   step_over_info.nonsteppable_watchpoint_p = 0;
+  step_over_info.thread = -1;
 }
 
 /* See infrun.h.  */
@@ -1360,6 +1366,15 @@ stepping_past_instruction_at (struct address_space *aspace,
 	  && breakpoint_address_match (aspace, address,
 				       step_over_info.aspace,
 				       step_over_info.address));
+}
+
+/* See infrun.h.  */
+
+int
+thread_is_stepping_over_breakpoint (int thread)
+{
+  return (step_over_info.thread != -1
+	  && thread == step_over_info.thread);
 }
 
 /* See infrun.h.  */
@@ -2579,7 +2594,7 @@ resume (enum gdb_signal sig)
 	    stop_all_threads ();
 
 	  set_step_over_info (get_regcache_aspace (regcache),
-			      regcache_read_pc (regcache), 0);
+			      regcache_read_pc (regcache), 0, tp->global_num);
 
 	  step = maybe_software_singlestep (gdbarch, pc);
 
@@ -7750,10 +7765,11 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 	  && (remove_wps || !use_displaced_stepping (ecs->event_thread)))
 	{
 	  set_step_over_info (get_regcache_aspace (regcache),
-			      regcache_read_pc (regcache), remove_wps);
+			      regcache_read_pc (regcache), remove_wps,
+			      ecs->event_thread->global_num);
 	}
       else if (remove_wps)
-	set_step_over_info (NULL, 0, remove_wps);
+	set_step_over_info (NULL, 0, remove_wps, -1);
 
       /* If we now need to do an in-line step-over, we need to stop
 	 all other threads.  Note this must be done before

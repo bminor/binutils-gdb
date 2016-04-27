@@ -96,7 +96,7 @@ SECTIONS
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)	}
 
   /* Internal text space or external memory.  */
-  .text ${RELOCATING-0} : ${RELOCATING+ AT (0x0)}
+  .text ${RELOCATING-0} : 
   {
     *(.vectors)
     KEEP(*(.vectors))

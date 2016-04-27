@@ -22,8 +22,6 @@
 
 const struct gdb_exception exception_none = { (enum return_reason) 0, GDB_NO_ERROR, NULL };
 
-#if GDB_XCPT == GDB_XCPT_SJMP
-
 /* Possible catcher states.  */
 enum catcher_state {
   /* Initial state, a new catcher has just been created.  */
@@ -57,6 +55,8 @@ struct catcher
 /* Where to go for throw_exception().  */
 static struct catcher *current_catcher;
 
+#if GDB_XCPT == GDB_XCPT_SJMP
+
 /* Return length of current_catcher list.  */
 
 static int
@@ -72,6 +72,8 @@ catcher_list_size (void)
 
   return size;
 }
+
+#endif
 
 jmp_buf *
 exceptions_state_mc_init (void)
@@ -193,8 +195,8 @@ exceptions_state_mc_catch (struct gdb_exception *exception,
 	}
 
       /* The caller didn't request that the event be caught, relay the
-	 event to the next exception_catch/CATCH.  */
-      throw_exception (*exception);
+	 event to the next exception_catch/CATCH_SJLJ.  */
+      throw_exception_sjlj (*exception);
     }
 
   /* No exception was thrown.  */
@@ -213,7 +215,7 @@ exceptions_state_mc_action_iter_1 (void)
   return exceptions_state_mc (CATCH_ITER_1);
 }
 
-#else /* !GDB_XCPT_SJMP */
+#if GDB_XCPT != GDB_XCPT_SJMP
 
 /* How many nested TRY blocks we have.  See exception_messages and
    throw_it.  */
@@ -265,18 +267,27 @@ gdb_exception_sliced_copy (struct gdb_exception *to, const struct gdb_exception 
 /* Return EXCEPTION to the nearest containing catch_errors().  */
 
 void
-throw_exception (struct gdb_exception exception)
+throw_exception_sjlj (struct gdb_exception exception)
 {
   do_cleanups (all_cleanups ());
 
-#if GDB_XCPT == GDB_XCPT_SJMP
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h.  */
   exceptions_state_mc (CATCH_THROWING);
   current_catcher->exception = exception;
   longjmp (current_catcher->buf, exception.reason);
-#else
+}
+
+#if GDB_XCPT != GDB_XCPT_SJMP
+
+/* Implementation of throw_exception that uses C++ try/catch.  */
+
+static ATTRIBUTE_NORETURN void
+throw_exception_cxx (struct gdb_exception exception)
+{
+  do_cleanups (all_cleanups ());
+
   if (exception.reason == RETURN_QUIT)
     {
       gdb_exception_RETURN_MASK_QUIT ex;
@@ -293,6 +304,17 @@ throw_exception (struct gdb_exception exception)
     }
   else
     gdb_assert_not_reached ("invalid return reason");
+}
+
+#endif
+
+void
+throw_exception (struct gdb_exception exception)
+{
+#if GDB_XCPT == GDB_XCPT_SJMP
+  throw_exception_sjlj (exception);
+#else
+  throw_exception_cxx (exception);
 #endif
 }
 

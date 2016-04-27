@@ -37,7 +37,11 @@ aarch32_gp_regcache_supply (struct regcache *regcache, uint32_t *regs,
     regcache_raw_supply (regcache, regno, &regs[regno]);
 
   if (arm_apcs_32)
-    regcache_raw_supply (regcache, ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
+    {
+      /* Clear reserved bits bit 20 to bit 23.  */
+      regs[ARM_CPSR_GREGNUM] &= 0xff0fffff;
+      regcache_raw_supply (regcache, ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
+    }
   else
     regcache_raw_supply (regcache, ARM_PS_REGNUM, &regs[ARM_PC_REGNUM]);
 

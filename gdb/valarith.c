@@ -207,6 +207,14 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
         error (_("no such vector element"));
     }
 
+  if (is_dynamic_type (elt_type))
+    {
+      CORE_ADDR address;
+
+      address = value_address (array) + elt_offs;
+      elt_type = resolve_dynamic_type (elt_type, NULL, address);
+    }
+
   if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
     v = allocate_value_lazy (elt_type);
   else

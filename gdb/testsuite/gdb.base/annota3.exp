@@ -45,12 +45,12 @@ clean_restart ${binfile}
 gdb_test_no_output "set height 0"
 
 #
-# break at main
+# break in main
 #
 
 set main_line [gdb_get_line_number "break main"]
 
-gdb_test "break main" \
+gdb_test "break ${srcfile}:${main_line}" \
     "Breakpoint.*at.* file .*$srcfile, line $main_line\\." \
     "breakpoint main"
 
@@ -258,11 +258,11 @@ gdb_expect_list "delete bp 3" "$gdb_prompt$" {
 }
 
 #
-# break at main, after value is initialized. This is in preparation
+# break in main, after value is initialized. This is in preparation
 # to test the annotate output for the display command.
 #
-send_gdb "break main\n"
-gdb_expect_list "break at main" "$gdb_prompt$" [concat {
+send_gdb "break ${srcfile}:${main_line}\n"
+gdb_expect_list "break in main" "$gdb_prompt$" [concat {
     "\r\n\032\032post-prompt\r\n" } [list \
     "Breakpoint 4 at 0x\[0-9a-z\]+: file .*annota3.c, line $main_line.\r\n"]]
 

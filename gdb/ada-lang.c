@@ -14056,7 +14056,7 @@ const struct language_defn ada_language_defn = {
   macro_expansion_no,
   &ada_exp_descriptor,
   parse,
-  ada_error,
+  ada_yyerror,
   resolve,
   ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */

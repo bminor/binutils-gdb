@@ -1,3 +1,79 @@
+2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20006
+	* elf64-x86-64.c (elf_x86_64_convert_load): Skip debug sections
+	when estimating distances between output sections.
+
+2016-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_is_start_stop): New function.
+	(_bfd_elf_gc_mark_rsec): Use it.
+	* elf-bfd.h (_bfd_elf_is_start_stop): Declare.
+
+2016-04-26  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf32-rx.c (rx_set_section_contents): Avoid arithmetic on void *.
+	* mmo.c (mmo_get_section_contents): Likewise.
+	(mmo_set_section_contents): Likewise.
+
+2016-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_link_hash_table): Update comments for
+	dynsymcount.
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Always count for
+	the unused NULL entry at the head of dynamic symbol table.
+	(bfd_elf_size_dynsym_hash_dynstr): Remove dynsymcount != 0
+	checks.
+
+2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_link_create_dynstrtab): Exclude linker
+	created file from dynobj.
+
+2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_link_create_dynstrtab): Set dynobj to a
+	normal input file if possible.
+
+2016-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* aout-adobe.c: Use _bfd_generic_link_check_relocs.
+	* aout-target.h: Likewise.
+	* aout-tic30.c: Likewise.
+	* binary.c: Likewise.
+	* bout.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coffcode.h: Likewise.
+	* i386msdos.c: Likewise.
+	* i386os9k.c: Likewise.
+	* ieee.c: Likewise.
+	* ihex.c: Likewise.
+	* libbfd-in.h: Likewise.
+	* libecoff.h: Likewise.
+	* mach-o-target.c: Likewise.
+	* mmo.c: Likewise.
+	* nlm-target.h: Likewise.
+	* oasys.c: Likewise.
+	* pef.c: Likewise.
+	* plugin.c: Likewise.
+	* ppcboot.c: Likewise.
+	* som.c: Likewise.
+	* srec.c: Likewise.
+	* tekhex.c: Likewise.
+	* versados.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* xsym.c: Likewise.
+	* elfxx-target.h: Use _bfd_elf_link_check_relocs.
+	* linker.c (bfd_link_check_relocs): New function.
+	(_bfd_generic_link_check_relocs): New function.
+	* targets.c (BFD_JUMP_TABLE_LINK): Add initialization of
+	_bfd_link_check_relocs field.
+	(struct bfd_target)L Add _bfd_link_check_relocs field.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2016-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_gc_sweep_hook): Removed.

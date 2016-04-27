@@ -133,6 +133,10 @@ extern void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
 extern int stepping_past_instruction_at (struct address_space *aspace,
 					 CORE_ADDR address);
 
+/* Returns true if thread whose thread number is THREAD is stepping
+   over a breakpoint.  */
+extern int thread_is_stepping_over_breakpoint (int thread);
+
 /* Returns true if we're trying to step past an instruction that
    triggers a non-steppable watchpoint.  */
 extern int stepping_past_nonsteppable_watchpoint (void);

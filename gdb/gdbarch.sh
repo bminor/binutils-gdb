@@ -609,7 +609,12 @@ m:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # target can single step.  If not, then implement single step using breakpoints.
 #
 # A return value of 1 means that the software_single_step breakpoints
-# were inserted; 0 means they were not.
+# were inserted; 0 means they were not.  Multiple breakpoints may be
+# inserted for some instructions such as conditional branch.  However,
+# each implementation must always evaluate the condition and only put
+# the breakpoint at the branch destination if the condition is true, so
+# that we ensure forward progress when stepping past a conditional
+# branch to self.
 F:int:software_single_step:struct frame_info *frame:frame
 
 # Return non-zero if the processor is executing a delay slot and a
