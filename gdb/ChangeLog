@@ -1,3 +1,9 @@
+2016-04-27  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* configure.ac: Enhance configure check for babeltrace to reject
+	non-C++-enabled versions.
+	* configure: Regenerate.
+
 2016-04-26  Sanimir Agovic  <sanimir.agovic@intel.com>
 	    Keven Boell  <keven.boell@intel.com>
 	    Bernhard Heckel  <bernhard.heckel@intel.com>
