@@ -1,3 +1,8 @@
+2016-04-27  Alan Modra  <amodra@gmail.com>
+
+	PR target/19985
+	* configure.tgt: Don't use var+=.
+
 2016-04-25  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19985
