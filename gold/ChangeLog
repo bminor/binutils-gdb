@@ -1,3 +1,7 @@
+2016-04-28  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated Chinese (simplified) translation.
+
 2016-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in: Regenerated with automake 1.11.6.
