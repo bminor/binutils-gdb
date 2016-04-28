@@ -6930,6 +6930,8 @@ lang_process (void)
      collection in order to make sure that all symbol aliases are resolved.  */
   lang_do_assignments (lang_mark_phase_enum);
 
+  ldemul_record_link_assignments (lang_mark_phase_enum);
+
   lang_do_memory_regions();
   expld.phase = lang_first_phase_enum;
 

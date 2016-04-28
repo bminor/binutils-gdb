@@ -355,3 +355,10 @@ ldemul_extra_map_file_text (bfd *abfd, struct bfd_link_info *info, FILE *mapf)
   if (ld_emulation->extra_map_file_text)
     ld_emulation->extra_map_file_text (abfd, info, mapf);
 }
+
+void
+ldemul_record_link_assignments (lang_phase_type phase)
+{
+  if (ld_emulation->record_link_assignments)
+    ld_emulation->record_link_assignments (phase);
+}
