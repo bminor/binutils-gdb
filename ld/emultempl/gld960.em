@@ -149,6 +149,7 @@ struct ld_emulation_xfer_struct ld_gld960_emulation =
   NULL,	/* recognized file */
   NULL,	/* find_potential_libraries */
   NULL,	/* new_vers_pattern */
-  NULL	/* extra_map_file_text */
+  NULL,	/* extra_map_file_text */
+  NULL	/* do_assignments */
 };
 EOF

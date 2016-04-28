@@ -2483,6 +2483,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_recognized_file,
   gld_${EMULATION_NAME}_find_potential_libraries,
   NULL,	/* new_vers_pattern.  */
-  NULL	/* extra_map_file_text.  */
+  NULL,	/* extra_map_file_text.  */
+  NULL	/* do_assignments */
 };
 EOF

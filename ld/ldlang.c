@@ -5760,6 +5760,8 @@ lang_do_assignments (lang_phase_type phase)
   prefer_next_section = FALSE;
   expld.phase = phase;
   lang_statement_iteration++;
+  if (phase == lang_mark_phase_enum)
+    ldemul_do_assignments ();
   lang_do_assignments_1 (statement_list.head,
 			 abs_output_section, NULL, 0, &found_end);
 }

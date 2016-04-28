@@ -1330,6 +1330,7 @@ fragment <<EOF
 EOF
 fi
 
+if test x"$LDEMUL_DO_ASSIGNMENTS" != xgld"$EMULATION_NAME"_do_assignments; then
 fragment <<EOF
 
 /* Look through an expression for an assignment statement.  */
@@ -1398,7 +1399,83 @@ gld${EMULATION_NAME}_find_statement_assignment (lang_statement_union_type *s)
     gld${EMULATION_NAME}_find_exp_assignment (s->assignment_statement.exp);
 }
 
+static struct elf_link_hash_entry *ehdr_start;
+static struct bfd_link_hash_entry ehdr_start_save;
+
+static void
+gld${EMULATION_NAME}_do_assignments (void)
+{
+  if (is_elf_hash_table (link_info.hash))
+    {
+      /* If we are going to make any variable assignments, we need to
+	 let the ELF backend know about them in case the variables are
+	 referred to by dynamic objects.  */
+      lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
+
+      /* Also let the ELF backend know about __start_<name> and
+	 __stop_<name> symbols.  */
+      _bfd_elf_record_start_stop (&link_info);
+
+      /* Make __ehdr_start hidden if it has been referenced, to
+	 prevent the symbol from being dynamic.  */
+      if (!bfd_link_relocatable (&link_info))
+	{
+	  struct elf_link_hash_entry *h
+	    = elf_link_hash_lookup (elf_hash_table (&link_info),
+				    "__ehdr_start", FALSE, FALSE, TRUE);
+
+	  /* Only adjust the export class if the symbol was referenced
+	     and not defined, otherwise leave it alone.  def_regular is
+	     set by the ELF backend if __ehdr_start is defined in linker
+	     script.  */
+	  if (h != NULL
+	      && !h->def_regular
+	      && (h->root.type == bfd_link_hash_new
+		  || h->root.type == bfd_link_hash_undefined
+		  || h->root.type == bfd_link_hash_undefweak
+		  || h->root.type == bfd_link_hash_common))
+	    {
+	      _bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
+	      if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+		h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+	      /* Don't leave the symbol undefined.  Undefined hidden
+		 symbols typically won't have dynamic relocations, but
+		 we most likely will need dynamic relocations for
+		 __ehdr_start if we are building a PIE or shared
+		 library.  */
+	      ehdr_start = h;
+	      ehdr_start_save = h->root;
+	      h->root.type = bfd_link_hash_defined;
+	      h->root.u.def.section = bfd_abs_section_ptr;
+	      h->root.u.def.value = 0;
+	    }
+	}
+    }
+}
+
+static void
+gld${EMULATION_NAME}_restore_ehdr_start (void)
+{
+  if (ehdr_start != NULL)
+    {
+      /* If we twiddled __ehdr_start to defined earlier, put it back
+	 as it was.  */
+      ehdr_start->root.type = ehdr_start_save.type;
+      ehdr_start->root.u = ehdr_start_save.u;
+    }
+}
+
 EOF
+else
+fragment <<EOF
+
+static
+gld${EMULATION_NAME}_restore_ehdr_start (void)
+{
+}
+
+EOF
+fi
 
 if test x"$LDEMUL_BEFORE_ALLOCATION" != xgld"$EMULATION_NAME"_before_allocation; then
   if test x"${ELF_INTERPRETER_NAME+set}" = xset; then
@@ -1455,11 +1532,6 @@ gld${EMULATION_NAME}_append_to_separated_string (char **to, char *op_arg)
     }
 }
 
-#if defined(__GNUC__) && GCC_VERSION < 4006
-  /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
-static struct bfd_link_hash_entry ehdr_start_empty;
-#endif
-
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
 
@@ -1469,55 +1541,9 @@ gld${EMULATION_NAME}_before_allocation (void)
   const char *rpath;
   asection *sinterp;
   bfd *abfd;
-  struct elf_link_hash_entry *ehdr_start = NULL;
-#if defined(__GNUC__) && GCC_VERSION < 4006
-  /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
-  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_empty;
-#else
-  struct bfd_link_hash_entry ehdr_start_save;
-#endif
 
   if (is_elf_hash_table (link_info.hash))
-    {
-      _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
-
-      /* Make __ehdr_start hidden if it has been referenced, to
-	 prevent the symbol from being dynamic.  */
-      if (!bfd_link_relocatable (&link_info))
-       {
-         struct elf_link_hash_entry *h
-           = elf_link_hash_lookup (elf_hash_table (&link_info), "__ehdr_start",
-                                   FALSE, FALSE, TRUE);
-
-         /* Only adjust the export class if the symbol was referenced
-            and not defined, otherwise leave it alone.  */
-         if (h != NULL
-             && (h->root.type == bfd_link_hash_new
-                 || h->root.type == bfd_link_hash_undefined
-                 || h->root.type == bfd_link_hash_undefweak
-                 || h->root.type == bfd_link_hash_common))
-           {
-             _bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
-             if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
-               h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
-	     /* Don't leave the symbol undefined.  Undefined hidden
-		symbols typically won't have dynamic relocations, but
-		we most likely will need dynamic relocations for
-		__ehdr_start if we are building a PIE or shared
-		library.  */
-	     ehdr_start = h;
-	     ehdr_start_save = h->root;
-	     h->root.type = bfd_link_hash_defined;
-	     h->root.u.def.section = bfd_abs_section_ptr;
-	     h->root.u.def.value = 0;
-           }
-       }
-
-      /* If we are going to make any variable assignments, we need to
-	 let the ELF backend know about them in case the variables are
-	 referred to by dynamic objects.  */
-      lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
-    }
+    _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
 
   /* Let the ELF backend work out the sizes of any sections required
      by dynamic linking.  */
@@ -1627,13 +1653,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
   if (!bfd_elf_size_dynsym_hash_dynstr (link_info.output_bfd, &link_info))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
-  if (ehdr_start != NULL)
-    {
-      /* If we twiddled __ehdr_start to defined earlier, put it back
-	 as it was.  */
-      ehdr_start->root.type = ehdr_start_save.type;
-      ehdr_start->root.u = ehdr_start_save.u;
-    }
+  gld${EMULATION_NAME}_restore_ehdr_start ();
 }
 
 EOF
@@ -2527,6 +2547,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_RECOGNIZED_FILE-gld${EMULATION_NAME}_load_symbols},
   ${LDEMUL_FIND_POTENTIAL_LIBRARIES-NULL},
   ${LDEMUL_NEW_VERS_PATTERN-NULL},
-  ${LDEMUL_EXTRA_MAP_FILE_TEXT-NULL}
+  ${LDEMUL_EXTRA_MAP_FILE_TEXT-NULL},
+  ${LDEMUL_DO_ASSIGNMENTS-gld${EMULATION_NAME}_do_assignments},
 };
 EOF

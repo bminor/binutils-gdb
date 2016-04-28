@@ -13791,3 +13791,130 @@ elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
   BFD_ASSERT (loc + bed->s->sizeof_rel <= s->contents + s->size);
   bed->s->swap_reloc_out (abfd, rel, loc);
 }
+
+/* A linked list of __start_<name> and __stop_<name> symbols  */
+
+struct start_stop_symbol
+{
+  struct elf_link_hash_entry *h;
+  const char *sec_name;
+  struct start_stop_symbol *next;
+};
+
+struct start_stop_symbol_info
+{
+  struct start_stop_symbol *symbol_list;
+  bfd_boolean failed;
+};
+
+/* Collect __start_<name> and __stop_<name> symbols referenced by
+   regular objects.  This is called via elf_link_hash_traverse.  */
+
+static bfd_boolean
+elf_link_collect_start_stop (struct elf_link_hash_entry *h, void *data)
+{
+  if (!h->def_regular && h->ref_regular)
+    {
+      struct start_stop_symbol_info *info;
+      struct start_stop_symbol *p, **head;
+      const char *sec_name = h->root.root.string;
+
+      if (sec_name[0] == '_'
+	  && sec_name[1] == '_'
+	  && sec_name[2] == 's'
+	  && sec_name[3] == 't')
+	sec_name += 4;
+      else
+	return TRUE;
+
+      if (sec_name[0] == 'a'
+	  && sec_name[1] == 'r'
+	  && sec_name[2] == 't')
+	sec_name += 3;
+      else if (sec_name[0] == 'o'
+	       && sec_name[1] == 'p')
+	sec_name += 2;
+      else
+	return TRUE;
+
+      if (sec_name[0] == '_' && sec_name[1] != '\0')
+	sec_name += 1;
+      else
+	return TRUE;
+
+      info = (struct start_stop_symbol_info *) data;
+
+      p = (struct start_stop_symbol *) bfd_malloc (sizeof (*p));
+      if (p == NULL)
+	{
+	  info->failed = TRUE;
+	  return FALSE;
+	}
+
+      head = &info->symbol_list;
+      p->next = info->symbol_list;
+      p->h = h;
+      p->sec_name = sec_name;
+      *head = p;
+    }
+  return TRUE;
+}
+
+/* Record all __start_<name> and __stop_<name> symbols referenced by
+   regular objects.  */
+
+void
+_bfd_elf_record_start_stop (struct bfd_link_info *info)
+{
+  struct start_stop_symbol_info symbols;
+
+  /* Collect start/stop symbols.  Assuming there are fewer start/stop
+     symbols than input files, avoid scan over all input files for each
+     start/stop symbol.  */
+  symbols.symbol_list = NULL;
+  symbols.failed = FALSE;
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_link_collect_start_stop, &symbols);
+
+  if (symbols.failed)
+    info->callbacks->einfo (_("%P%X: collect start/stop symbols: %E\n"));
+  else if (symbols.symbol_list)
+    {
+      bfd *i;
+
+      for (i = info->input_bfds; i != NULL; i = i->link.next)
+	if ((i->flags
+	     & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+	  {
+	    /* Only check regular input files.  */
+	    struct start_stop_symbol *p, **pp;
+
+	    for (pp = &symbols.symbol_list; (p = *pp) != NULL; )
+	      if (bfd_get_section_by_name (i, p->sec_name) != NULL)
+		{
+		  p->h->def_regular = 1;
+		  p->h->type = STT_OBJECT;
+		  /* If it is currently defined by a dynamic object, but
+		     not by a regular object, then mark it as undefined
+		     so that the generic linker will force the correct
+		     value.  */
+		  if (p->h->def_dynamic)
+		    {
+		      p->h->root.type = bfd_link_hash_undefined;
+		      p->h->root.u.undef.abfd
+			= p->h->root.u.def.section->owner;
+		    }
+
+		  /* Remove this from the list.  */
+		  *pp = p->next;
+		  free (p);
+		}
+	      else
+		pp = &p->next;
+
+	    /* Stop when the list is empty.  */
+	    if (symbols.symbol_list == NULL)
+	      break;
+	  }
+    }
+}
