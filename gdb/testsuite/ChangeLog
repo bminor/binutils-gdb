@@ -1,5 +1,10 @@
 2016-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.trace/trace-enable-disable.exp: New file.
+	* gdb.trace/trace-enable-disable.c: New file.
+
+2016-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.arch/ftrace-insn-reloc.exp: Save gdb_load_shlib result,
 	use it in info sharedlibrary test.
 	* gdb.trace/ftrace-lock.exp: Likewise.
