@@ -2339,6 +2339,9 @@ extern bfd_boolean bfd_elf_gc_common_final_link
 extern asection *_bfd_elf_is_start_stop
   (const struct bfd_link_info *, struct elf_link_hash_entry *);
 
+extern void _bfd_elf_record_start_stop
+  (const struct bfd_link_info *);
+
 extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);
 

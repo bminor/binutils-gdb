@@ -1445,6 +1445,8 @@ gld${EMULATION_NAME}_record_link_assignments (lang_phase_type phase)
 	 let the ELF backend know about them in case the variables are
 	 referred to by dynamic objects.  */
       lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
+
+      _bfd_elf_record_start_stop (&link_info);
     }
 }
 

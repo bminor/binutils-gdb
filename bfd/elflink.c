@@ -13791,3 +13791,24 @@ elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
   BFD_ASSERT (loc + bed->s->sizeof_rel <= s->contents + s->size);
   bed->s->swap_reloc_out (abfd, rel, loc);
 }
+
+/* For undefined __start_<name> and __stop_<name> symbols, set
+   def_regular to 1.  This is called via elf_link_hash_traverse.  */
+
+static bfd_boolean
+elf_link_record_start_stop (struct elf_link_hash_entry *h, void *data)
+{
+  const struct bfd_link_info * info
+    = (const struct bfd_link_info *) data;
+  if (_bfd_elf_is_start_stop (info, h) != NULL)
+    h->def_regular = 1;
+  return TRUE;
+}
+
+void
+_bfd_elf_record_start_stop (const struct bfd_link_info * info)
+{
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_link_record_start_stop,
+			  (void *) info);
+}
