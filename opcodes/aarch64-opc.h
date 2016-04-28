@@ -390,4 +390,7 @@ get_logsz (unsigned int size)
   return ls[size - 1];
 }
 
+/* Instruction Verifiers.  */
+extern bfd_boolean verify_ldpsw (const struct aarch64_opcode *, const aarch64_insn);
+
 #endif /* OPCODES_AARCH64_OPC_H */

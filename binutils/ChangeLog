@@ -1,3 +1,9 @@
+2016-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19722
+	* testsuite/binutils-all/aarch64/illegal.s: New test.
+	* testsuite/binutils-all/aarch64/illegal.d: New test driver.
+
 2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* resres.c: Likewise.

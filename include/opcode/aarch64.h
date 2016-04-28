@@ -535,6 +535,9 @@ struct aarch64_opcode
 
   /* Flags providing information about this instruction */
   uint32_t flags;
+
+  /* If non-NULL, a function to verify that a given instruction is valid.  */
+  bfd_boolean (* verifier) (const struct aarch64_opcode *, const aarch64_insn);
 };
 
 typedef struct aarch64_opcode aarch64_opcode;
