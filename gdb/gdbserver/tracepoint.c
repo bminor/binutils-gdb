@@ -449,6 +449,12 @@ write_inferior_integer (CORE_ADDR symaddr, int val)
 }
 
 static int
+write_inferior_int8 (CORE_ADDR symaddr, int8_t val)
+{
+  return write_inferior_memory (symaddr, (unsigned char *) &val, sizeof (val));
+}
+
+static int
 write_inferior_uinteger (CORE_ADDR symaddr, unsigned int val)
 {
   return write_inferior_memory (symaddr, (unsigned char *) &val, sizeof (val));
@@ -2784,7 +2790,7 @@ cmd_qtenable_disable (char *own_buf, int enable)
 	      return;
 	    }
 
-	  ret = write_inferior_integer (obj_addr, enable);
+	  ret = write_inferior_int8 (obj_addr, enable);
 	  done_accessing_memory ();
 	  
 	  if (ret)
