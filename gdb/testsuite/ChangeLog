@@ -1,3 +1,14 @@
+2016-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.arch/ftrace-insn-reloc.exp: Save gdb_load_shlib result,
+	use it in info sharedlibrary test.
+	* gdb.trace/ftrace-lock.exp: Likewise.
+	* gdb.trace/ftrace.exp: Likewise.
+	* gdb.trace/range-stepping.exp: Likewise.
+	* gdb.trace/trace-break.exp: Likewise.
+	* gdb.trace/trace-condition.exp: Likewise.
+	* gdb.trace/trace-mt.exp: Likewise.
+
 2016-04-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* lib/gdb.exp (gdb_load_shlibs): Rename to...
