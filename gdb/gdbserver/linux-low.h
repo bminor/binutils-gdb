@@ -365,10 +365,6 @@ struct lwp_info
      a exit-jump-pad-quickly breakpoint.  This is it.  */
   struct breakpoint *exit_jump_pad_bkpt;
 
-  /* True if the LWP was seen stop at an internal breakpoint and needs
-     stepping over later when it is resumed.  */
-  int need_step_over;
-
 #ifdef USE_THREAD_DB
   int thread_known;
   /* The thread handle, used for e.g. TLS access.  Only valid if

@@ -3267,14 +3267,8 @@ linux_wait_1 (ptid_t ptid,
 
       if (bp_explains_trap)
 	{
-	  /* If we stepped or ran into an internal breakpoint, we've
-	     already handled it.  So next time we resume (from this
-	     PC), we should step over it.  */
 	  if (debug_threads)
 	    debug_printf ("Hit a gdbserver breakpoint.\n");
-
-	  if (breakpoint_here (event_child->stop_pc))
-	    event_child->need_step_over = 1;
 	}
     }
   else
@@ -4540,12 +4534,6 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
       return 0;
     }
 
-  if (!lwp->need_step_over)
-    {
-      if (debug_threads)
-	debug_printf ("Need step over [LWP %ld]? No\n", lwpid_of (thread));
-    }
-
   if (lwp->status_pending_p)
     {
       if (debug_threads)
@@ -4571,8 +4559,6 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
 		      "Old stop_pc was 0x%s, PC is now 0x%s\n",
 		      lwpid_of (thread),
 		      paddress (lwp->stop_pc), paddress (pc));
-
-      lwp->need_step_over = 0;
       return 0;
     }
 
@@ -4622,8 +4608,6 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
 	     that find_inferior stops looking.  */
 	  current_thread = saved_thread;
 
-	  /* If the step over is cancelled, this is set again.  */
-	  lwp->need_step_over = 0;
 	  return 1;
 	}
     }
