@@ -1,3 +1,10 @@
+2016-04-29  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* readelf.c (is_32bit_pcrel_reloc): Return true if reloc is 32-bit
+	PC relocation for AVR target.
+	(is_none_reloc): Return true if reloc is any of AVR diff
+	relocations.
+
 2016-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 19938

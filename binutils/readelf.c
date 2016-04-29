@@ -11489,6 +11489,7 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 static bfd_boolean
 is_32bit_abs_reloc (unsigned int reloc_type)
 {
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
   switch (elf_header.e_machine)
     {
     case EM_386:
@@ -11502,6 +11503,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 2; /* R_960_32.  */
     case EM_AARCH64:
       return reloc_type == 258; /* R_AARCH64_ABS32 */
+    case EM_ADAPTEVA_EPIPHANY:
+      return reloc_type == 3;
     case EM_ALPHA:
       return reloc_type == 1; /* R_ALPHA_REFLONG.  */
     case EM_ARC:
@@ -11514,8 +11517,6 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_AVR_OLD:
     case EM_AVR:
       return reloc_type == 1;
-    case EM_ADAPTEVA_EPIPHANY:
-      return reloc_type == 3;
     case EM_BLACKFIN:
       return reloc_type == 0x12; /* R_byte4_data.  */
     case EM_CRIS:
@@ -11674,6 +11675,7 @@ static bfd_boolean
 is_32bit_pcrel_reloc (unsigned int reloc_type)
 {
   switch (elf_header.e_machine)
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
     {
     case EM_386:
     case EM_IAMCU:
@@ -11691,6 +11693,9 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 49; /* R_ARC_32_PCREL.  */
     case EM_ARM:
       return reloc_type == 3;  /* R_ARM_REL32 */
+    case EM_AVR_OLD:
+    case EM_AVR:
+      return reloc_type == 36; /* R_AVR_32_PCREL.  */
     case EM_MICROBLAZE:
       return reloc_type == 2;  /* R_MICROBLAZE_32_PCREL.  */
     case EM_OR1K:
@@ -11831,17 +11836,18 @@ is_24bit_abs_reloc (unsigned int reloc_type)
 static bfd_boolean
 is_16bit_abs_reloc (unsigned int reloc_type)
 {
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
   switch (elf_header.e_machine)
     {
     case EM_ARC:
     case EM_ARC_COMPACT:
     case EM_ARC_COMPACT2:
       return reloc_type == 2; /* R_ARC_16.  */
+    case EM_ADAPTEVA_EPIPHANY:
+      return reloc_type == 5;
     case EM_AVR_OLD:
     case EM_AVR:
       return reloc_type == 4; /* R_AVR_16.  */
-    case EM_ADAPTEVA_EPIPHANY:
-      return reloc_type == 5;
     case EM_CYGNUS_D10V:
     case EM_D10V:
       return reloc_type == 3; /* R_D10V_16.  */
@@ -11855,6 +11861,12 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_M32C_OLD:
     case EM_M32C:
       return reloc_type == 1; /* R_M32C_16 */
+    case EM_CYGNUS_MN10200:
+    case EM_MN10200:
+      return reloc_type == 2; /* R_MN10200_16.  */
+    case EM_CYGNUS_MN10300:
+    case EM_MN10300:
+      return reloc_type == 2; /* R_MN10300_16.  */
     case EM_MSP430:
       if (uses_msp430x_relocs ())
 	return reloc_type == 2; /* R_MSP430_ABS16.  */
@@ -11870,17 +11882,11 @@ is_16bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 2; /* R_OR1K_16.  */
     case EM_TI_C6000:
       return reloc_type == 2; /* R_C6000_ABS16.  */
+    case EM_VISIUM:
+      return reloc_type == 2; /* R_VISIUM_16. */
     case EM_XC16X:
     case EM_C166:
       return reloc_type == 2; /* R_XC16C_ABS_16.  */
-    case EM_CYGNUS_MN10200:
-    case EM_MN10200:
-      return reloc_type == 2; /* R_MN10200_16.  */
-    case EM_CYGNUS_MN10300:
-    case EM_MN10300:
-      return reloc_type == 2; /* R_MN10300_16.  */
-    case EM_VISIUM:
-      return reloc_type == 2; /* R_VISIUM_16. */
     case EM_XGATE:
       return reloc_type == 3; /* R_XGATE_16.  */
     default:
@@ -11896,44 +11902,53 @@ is_none_reloc (unsigned int reloc_type)
 {
   switch (elf_header.e_machine)
     {
-    case EM_68K:     /* R_68K_NONE.  */
     case EM_386:     /* R_386_NONE.  */
-    case EM_SPARC32PLUS:
-    case EM_SPARCV9:
-    case EM_SPARC:   /* R_SPARC_NONE.  */
-    case EM_MIPS:    /* R_MIPS_NONE.  */
-    case EM_PARISC:  /* R_PARISC_NONE.  */
-    case EM_ALPHA:   /* R_ALPHA_NONE.  */
+    case EM_68K:     /* R_68K_NONE.  */
     case EM_ADAPTEVA_EPIPHANY:
-    case EM_PPC:     /* R_PPC_NONE.  */
-    case EM_PPC64:   /* R_PPC64_NONE.  */
-    case EM_ARC:     /* R_ARC_NONE.  */
-    case EM_ARC_COMPACT: /* R_ARC_NONE.  */
-    case EM_ARC_COMPACT2: /* R_ARC_NONE.  */
-    case EM_ARM:     /* R_ARM_NONE.  */
-    case EM_IA_64:   /* R_IA64_NONE.  */
-    case EM_SH:      /* R_SH_NONE.  */
-    case EM_S390_OLD:
-    case EM_S390:    /* R_390_NONE.  */
-    case EM_CRIS:    /* R_CRIS_NONE.  */
-    case EM_X86_64:  /* R_X86_64_NONE.  */
-    case EM_L1OM:    /* R_X86_64_NONE.  */
-    case EM_K1OM:    /* R_X86_64_NONE.  */
-    case EM_MN10300: /* R_MN10300_NONE.  */
-    case EM_FT32:    /* R_FT32_NONE.  */
-    case EM_MOXIE:   /* R_MOXIE_NONE.  */
-    case EM_M32R:    /* R_M32R_NONE.  */
-    case EM_TI_C6000:/* R_C6000_NONE.  */
-    case EM_TILEGX:  /* R_TILEGX_NONE.  */
-    case EM_TILEPRO: /* R_TILEPRO_NONE.  */
-    case EM_XC16X:
-    case EM_C166:    /* R_XC16X_NONE.  */
+    case EM_ALPHA:   /* R_ALPHA_NONE.  */
     case EM_ALTERA_NIOS2: /* R_NIOS2_NONE.  */
+    case EM_ARC:     /* R_ARC_NONE.  */
+    case EM_ARC_COMPACT2: /* R_ARC_NONE.  */
+    case EM_ARC_COMPACT: /* R_ARC_NONE.  */
+    case EM_ARM:     /* R_ARM_NONE.  */
+    case EM_C166:    /* R_XC16X_NONE.  */
+    case EM_CRIS:    /* R_CRIS_NONE.  */
+    case EM_FT32:    /* R_FT32_NONE.  */
+    case EM_IA_64:   /* R_IA64_NONE.  */
+    case EM_K1OM:    /* R_X86_64_NONE.  */
+    case EM_L1OM:    /* R_X86_64_NONE.  */
+    case EM_M32R:    /* R_M32R_NONE.  */
+    case EM_MIPS:    /* R_MIPS_NONE.  */
+    case EM_MN10300: /* R_MN10300_NONE.  */
+    case EM_MOXIE:   /* R_MOXIE_NONE.  */
     case EM_NIOS32:  /* R_NIOS_NONE.  */
     case EM_OR1K:    /* R_OR1K_NONE. */
+    case EM_PARISC:  /* R_PARISC_NONE.  */
+    case EM_PPC64:   /* R_PPC64_NONE.  */
+    case EM_PPC:     /* R_PPC_NONE.  */
+    case EM_S390:    /* R_390_NONE.  */
+    case EM_S390_OLD:
+    case EM_SH:      /* R_SH_NONE.  */
+    case EM_SPARC32PLUS:
+    case EM_SPARC:   /* R_SPARC_NONE.  */
+    case EM_SPARCV9:
+    case EM_TILEGX:  /* R_TILEGX_NONE.  */
+    case EM_TILEPRO: /* R_TILEPRO_NONE.  */
+    case EM_TI_C6000:/* R_C6000_NONE.  */
+    case EM_X86_64:  /* R_X86_64_NONE.  */
+    case EM_XC16X:
       return reloc_type == 0;
+
     case EM_AARCH64:
       return reloc_type == 0 || reloc_type == 256;
+    case EM_AVR_OLD:
+    case EM_AVR:
+      return (reloc_type == 0 /* R_AVR_NONE.  */
+	      || reloc_type == 30 /* R_AVR_DIFF8.  */
+	      || reloc_type == 31 /* R_AVR_DIFF16.  */
+	      || reloc_type == 32 /* R_AVR_DIFF32.  */);
+    case EM_METAG:
+      return reloc_type == 3; /* R_METAG_NONE.  */
     case EM_NDS32:
       return (reloc_type == 0       /* R_XTENSA_NONE.  */
 	      || reloc_type == 204  /* R_NDS32_DIFF8.  */
@@ -11946,8 +11961,6 @@ is_none_reloc (unsigned int reloc_type)
 	      || reloc_type == 17  /* R_XTENSA_DIFF8.  */
 	      || reloc_type == 18  /* R_XTENSA_DIFF16.  */
 	      || reloc_type == 19  /* R_XTENSA_DIFF32.  */);
-    case EM_METAG:
-      return reloc_type == 3; /* R_METAG_NONE.  */
     }
   return FALSE;
 }
