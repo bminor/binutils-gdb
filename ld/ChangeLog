@@ -1,3 +1,14 @@
+2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/default.exp (NOPIE_CFLAGS): Download source only on
+	remote host.
+	(NOPIE_LDFLAGS): Likewise.
+	* testsuite/lib/ld-lib.exp (check_lto_available): Likewise.
+	(check_lto_fat_available): Likewise.
+	(check_lto_shared_available): Likewise.
+	(check_ifunc_available): Likewise.
+	(check_ifunc_attribute_available): Likewise.
+
 2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/compressed1b.d: Only run for Linux/GNU targets.

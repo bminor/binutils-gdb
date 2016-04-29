@@ -1819,7 +1819,9 @@ proc check_lto_available { } {
 	set f [open $src "w"]
 	puts $f "int main() { return 0; }"
 	close $f
-	remote_download host $src
+	if [is_remote host] {
+	    set src [remote_download host $src]
+	}
 	set lto_available_saved [run_host_cmd_yesno "$CC" "$flags -flto -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
@@ -1860,7 +1862,9 @@ proc check_lto_fat_available { } {
 	set f [open $src "w"]
 	puts $f "int main() { return 0; }"
 	close $f
-	remote_download host $src
+	if [is_remote host] {
+	    set src [remote_download host $src]
+	}
 	set lto_fat_available_saved [run_host_cmd_yesno "$CC" "$flags -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
@@ -1901,7 +1905,9 @@ proc check_lto_shared_available { } {
 	set f [open $src "w"]
 	puts $f ""
 	close $f
-	remote_download host $src
+	if [is_remote host] {
+	    set src [remote_download host $src]
+	}
 	set lto_shared_available_saved [run_host_cmd_yesno "$CC" "$flags -shared -fPIC -flto -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
@@ -1971,7 +1977,9 @@ proc check_ifunc_available { } {
 	puts $f "void *foo (void) { return library_func1; }"
 	puts $f "__asm__(\".type library_func2, %gnu_indirect_function\");"
 	close $f
-	remote_download host $src
+	if [is_remote host] {
+	    set src [remote_download host $src]
+	}
 	set ifunc_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
 	if { $ifunc_available_saved == 1 } {
 	  set ifunc_available_saved [run_host_cmd_yesno "$output" ""]
@@ -2016,7 +2024,9 @@ proc check_ifunc_attribute_available { } {
 	puts $f "static int library_func1 (void) {return 2; }"
 	puts $f "void *foo (void) { return library_func1; }"
 	close $f
-	remote_download host $src
+	if [is_remote host] {
+	    set src [remote_download host $src]
+	}
 	set ifunc_attribute_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
 	if { $ifunc_attribute_available_saved == 1 } {
 	  set ifunc_attribute_available_saved [run_host_cmd_yesno "$output" ""]
