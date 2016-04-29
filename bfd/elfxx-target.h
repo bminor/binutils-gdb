@@ -686,8 +686,8 @@
 #define elf_backend_get_reloc_section _bfd_elf_get_reloc_section
 #endif
 
-#ifndef elf_backend_set_special_section_info_and_link
-#define elf_backend_set_special_section_info_and_link NULL
+#ifndef elf_backend_copy_special_section_fields
+#define elf_backend_copy_special_section_fields NULL
 #endif
 
 #ifndef elf_backend_compact_eh_encoding
@@ -797,7 +797,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_is_function_type,
   elf_backend_maybe_function_sym,
   elf_backend_get_reloc_section,
-  elf_backend_set_special_section_info_and_link,
+  elf_backend_copy_special_section_fields,
   elf_backend_link_order_error_handler,
   elf_backend_relplt_name,
   ELF_MACHINE_ALT1,

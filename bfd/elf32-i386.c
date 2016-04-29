@@ -5905,16 +5905,22 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 #undef  elf_backend_strtab_flags
 #define elf_backend_strtab_flags	SHF_STRINGS
 
+/* Called to set the sh_flags, sh_link and sh_info fields of OSECTION which
+   has a type >= SHT_LOOS.  Returns TRUE if these fields were initialised 
+   FALSE otherwise.  ISECTION is the best guess matching section from the
+   input bfd IBFD, but it might be NULL.  */
+
 static bfd_boolean
-elf32_i386_set_special_info_link (const bfd *ibfd ATTRIBUTE_UNUSED,
-				  bfd *obfd ATTRIBUTE_UNUSED,
-				  const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
-				  Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+elf32_i386_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
+						bfd *obfd ATTRIBUTE_UNUSED,
+						const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+						Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
 {
   /* PR 19938: FIXME: Need to add code for setting the sh_info
-     and sh_link fields of Solaris specific section types.
+     and sh_link fields of Solaris specific section types.  */
+  return FALSE;
 
-     Based upon Oracle Solaris 11.3 Linkers and Libraries Guide, Ch. 13,
+  /* Based upon Oracle Solaris 11.3 Linkers and Libraries Guide, Ch. 13,
      Object File Format, Table 13-9  ELF sh_link and sh_info Interpretation:
 
 http://docs.oracle.com/cd/E53394_01/html/E54813/chapter6-94076.html#scrolltoc
@@ -5974,11 +5980,10 @@ SHT_SUNW_verneed     The section header index of    The number of version
 
 SHT_SUNW_versym      The section header index of    0
  [0x6fffffff]        the associated symbol table.  */
-  return FALSE;
 }
 
-#undef  elf_backend_set_special_section_info_and_link
-#define elf_backend_set_special_section_info_and_link elf32_i386_set_special_info_link
+#undef  elf_backend_copy_special_section_fields
+#define elf_backend_copy_special_section_fields elf32_i386_copy_solaris_special_section_fields
 
 #include "elf32-target.h"
 
@@ -6016,7 +6021,7 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 #define elf_backend_want_plt_sym	    0
 
 #undef  elf_backend_strtab_flags
-#undef  elf_backend_set_special_section_info_and_link
+#undef  elf_backend_copy_special_section_fields
 
 #include "elf32-target.h"
 

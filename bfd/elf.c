@@ -1218,11 +1218,13 @@ bfd_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED,
    should be the same.  */
 
 static bfd_boolean
-section_match (Elf_Internal_Shdr * a, Elf_Internal_Shdr * b)
+section_match (const Elf_Internal_Shdr * a,
+	       const Elf_Internal_Shdr * b)
 {
   return
     a->sh_type         == b->sh_type
-    && a->sh_flags     == b->sh_flags
+    && (a->sh_flags & ~ SHF_INFO_LINK)
+    == (b->sh_flags & ~ SHF_INFO_LINK)
     && a->sh_addralign == b->sh_addralign
     && a->sh_size      == b->sh_size
     && a->sh_entsize   == b->sh_entsize
@@ -1236,7 +1238,7 @@ section_match (Elf_Internal_Shdr * a, Elf_Internal_Shdr * b)
    to be the correct section.  */
 
 static unsigned int
-find_link (bfd * obfd, Elf_Internal_Shdr * iheader, unsigned int hint)
+find_link (const bfd * obfd, const Elf_Internal_Shdr * iheader, const unsigned int hint)
 {
   Elf_Internal_Shdr ** oheaders = elf_elfsections (obfd);
   unsigned int i;
@@ -1257,14 +1259,110 @@ find_link (bfd * obfd, Elf_Internal_Shdr * iheader, unsigned int hint)
   return SHN_UNDEF;
 }
 
+/* PR 19938: Attempt to set the ELF section header fields of an OS or
+   Processor specific section, based upon a matching input section.
+   Returns TRUE upon success, FALSE otherwise.  */
+   
+static bfd_boolean
+copy_special_section_fields (const bfd *ibfd,
+			     bfd *obfd,
+			     const Elf_Internal_Shdr *iheader,
+			     Elf_Internal_Shdr *oheader,
+			     const unsigned int secnum)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (obfd);
+  const Elf_Internal_Shdr **iheaders = (const Elf_Internal_Shdr **) elf_elfsections (ibfd);
+  bfd_boolean changed = FALSE;
+  unsigned int sh_link;
+
+  if (oheader->sh_type == SHT_NOBITS)
+    {
+      /* This is a feature for objcopy --only-keep-debug:
+	 When a section's type is changed to NOBITS, we preserve
+	 the sh_link and sh_info fields so that they can be
+	 matched up with the original.
+
+	 Note: Strictly speaking these assignments are wrong.
+	 The sh_link and sh_info fields should point to the
+	 relevent sections in the output BFD, which may not be in
+	 the same location as they were in the input BFD.  But
+	 the whole point of this action is to preserve the
+	 original values of the sh_link and sh_info fields, so
+	 that they can be matched up with the section headers in
+	 the original file.  So strictly speaking we may be
+	 creating an invalid ELF file, but it is only for a file
+	 that just contains debug info and only for sections
+	 without any contents.  */
+      if (oheader->sh_link == 0)
+	oheader->sh_link = iheader->sh_link;
+      if (oheader->sh_info == 0)
+	oheader->sh_info = iheader->sh_info;
+      return TRUE;
+    }
+
+  /* Allow the target a chance to decide how these fields should be set.  */
+  if (bed->elf_backend_copy_special_section_fields != NULL
+      && bed->elf_backend_copy_special_section_fields
+      (ibfd, obfd, iheader, oheader))
+    return TRUE;
+
+  /* We have an iheader which might match oheader, and which has non-zero
+     sh_info and/or sh_link fields.  Attempt to follow those links and find
+     the section in the output bfd which corresponds to the linked section
+     in the input bfd.  */
+  if (iheader->sh_link != SHN_UNDEF)
+    {
+      sh_link = find_link (obfd, iheaders[iheader->sh_link], iheader->sh_link);
+      if (sh_link != SHN_UNDEF)
+	{
+	  oheader->sh_link = sh_link;
+	  changed = TRUE;
+	}
+      else
+	/* FIXME: Should we install iheader->sh_link
+	   if we could not find a match ?  */
+	(* _bfd_error_handler)
+	  (_("%B: Failed to find link section for section %d"), obfd, secnum);
+    }
+
+  if (iheader->sh_info)
+    {
+      /* The sh_info field can hold arbitrary information, but if the
+	 SHF_LINK_INFO flag is set then it should be interpreted as a
+	 section index.  */
+      if (iheader->sh_flags & SHF_INFO_LINK)
+	{
+	  sh_link = find_link (obfd, iheaders[iheader->sh_info],
+			       iheader->sh_info);
+	  if (sh_link != SHN_UNDEF)
+	    oheader->sh_flags |= SHF_INFO_LINK;
+	}
+      else
+	/* No idea what it means - just copy it.  */
+	sh_link = iheader->sh_info;
+
+      if (sh_link != SHN_UNDEF)
+	{
+	  oheader->sh_info = sh_link;
+	  changed = TRUE;
+	}
+      else
+	(* _bfd_error_handler)
+	  (_("%B: Failed to find info section for section %d"), obfd, secnum);
+    }
+
+  return changed;
+}
+  
 /* Copy the program header and other data from one object module to
    another.  */
 
 bfd_boolean
 _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  Elf_Internal_Shdr ** iheaders = elf_elfsections (ibfd);
-  Elf_Internal_Shdr ** oheaders = elf_elfsections (obfd);
+  const Elf_Internal_Shdr **iheaders = (const Elf_Internal_Shdr **) elf_elfsections (ibfd);
+  Elf_Internal_Shdr **oheaders = elf_elfsections (obfd);
+  const struct elf_backend_data *bed;
   unsigned int i;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
@@ -1283,39 +1381,84 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   elf_elfheader (obfd)->e_ident[EI_OSABI] =
     elf_elfheader (ibfd)->e_ident[EI_OSABI];
 
+  /* If set, copy the EI_ABIVERSION field.  */
+  if (elf_elfheader (ibfd)->e_ident[EI_ABIVERSION])
+    elf_elfheader (obfd)->e_ident[EI_ABIVERSION]
+      = elf_elfheader (ibfd)->e_ident[EI_ABIVERSION];
+  
   /* Copy object attributes.  */
   _bfd_elf_copy_obj_attributes (ibfd, obfd);
 
   if (iheaders == NULL || oheaders == NULL)
     return TRUE;
 
-  /* Possibly copy the sh_info and sh_link fields.  */
+  bed = get_elf_backend_data (obfd);
+
+  /* Possibly copy other fields in the section header.  */
   for (i = 1; i < elf_numsections (obfd); i++)
     {
       unsigned int j;
       Elf_Internal_Shdr * oheader = oheaders[i];
 
+      /* Ignore ordinary sections.  SHT_NOBITS sections are considered however
+	 because of a special case need for generating separate debug info
+	 files.  See below for more details.  */
       if (oheader == NULL
 	  || (oheader->sh_type != SHT_NOBITS
-	      && oheader->sh_type < SHT_LOOS)
-	  || oheader->sh_size == 0
+	      && oheader->sh_type < SHT_LOOS))
+	continue;
+
+      /* Ignore empty sections, and sections whose
+	 fields have already been initialised.  */
+      if (oheader->sh_size == 0
 	  || (oheader->sh_info != 0 && oheader->sh_link != 0))
 	continue;
 
       /* Scan for the matching section in the input bfd.
-	 FIXME: We could use something better than a linear scan here.
+	 First we try for a direct mapping between the input and output sections.  */
+      for (j = 1; j < elf_numsections (ibfd); j++)
+	{
+	  const Elf_Internal_Shdr * iheader = iheaders[j];
+
+	  if (iheader == NULL)
+	    continue;
+
+	  if (oheader->bfd_section != NULL
+	      && iheader->bfd_section != NULL
+	      && iheader->bfd_section->output_section != NULL
+	      && iheader->bfd_section->output_section == oheader->bfd_section)
+	    {
+	      /* We have found a connection from the input section to the
+		 output section.  Attempt to copy the header fields.  If
+		 this fails then do not try any further sections - there
+		 should only be a one-to-one mapping between input and output. */
+	      if (! copy_special_section_fields (ibfd, obfd, iheader, oheader, i))
+		j = elf_numsections (ibfd);
+	      break;
+	    }
+	}
+
+      if (j < elf_numsections (ibfd))
+	continue;
+
+      /* That failed.  So try to deduce the corresponding input section.
 	 Unfortunately we cannot compare names as the output string table
 	 is empty, so instead we check size, address and type.  */
       for (j = 1; j < elf_numsections (ibfd); j++)
 	{
-	  Elf_Internal_Shdr * iheader = iheaders[j];
+	  const Elf_Internal_Shdr * iheader = iheaders[j];
 
-	  /* Since --only-keep-debug turns all non-debug sections into
+	  if (iheader == NULL)
+	    continue;
+
+	  /* Try matching fields in the input section's header.
+	     Since --only-keep-debug turns all non-debug sections into
 	     SHT_NOBITS sections, the output SHT_NOBITS type matches any
 	     input type.  */
 	  if ((oheader->sh_type == SHT_NOBITS
 	       || iheader->sh_type == oheader->sh_type)
-	      && iheader->sh_flags == oheader->sh_flags
+	      && (iheader->sh_flags & ~ SHF_INFO_LINK)
+	      == (oheader->sh_flags & ~ SHF_INFO_LINK)
 	      && iheader->sh_addralign == oheader->sh_addralign
 	      && iheader->sh_entsize == oheader->sh_entsize
 	      && iheader->sh_size == oheader->sh_size
@@ -1323,98 +1466,17 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	      && (iheader->sh_info != oheader->sh_info
 		  || iheader->sh_link != oheader->sh_link))
 	    {
-	      /* PR 19938: Attempt to preserve the sh_link and sh_info fields
-		 of OS and Processor specific sections.  We try harder for
-		 these sections, because this is not just about matching
-		 stripped binaries to their originals.  */
-	      if (oheader->sh_type >= SHT_LOOS)
-		{
-		  const struct elf_backend_data *bed = get_elf_backend_data (obfd);
-		  bfd_boolean changed = FALSE;
-		  unsigned int sh_link;
-
-		  /* Allow the target a chance to decide how these fields should
-		     be set.  */
-		  if (bed->elf_backend_set_special_section_info_and_link != NULL
-		      && bed->elf_backend_set_special_section_info_and_link
-		      (ibfd, obfd, iheader, oheader))
-		    break;
-
-		  /* We have iheader which matches oheader, but which has
-		     non-zero sh_info and/or sh_link fields.  Attempt to
-		     follow those links and find the section in the output
-		     bfd which corresponds to the linked section in the input
-		     bfd.  */
-		  if (iheader->sh_link != SHN_UNDEF)
-		    {
-		      sh_link = find_link (obfd,
-					   iheaders[iheader->sh_link],
-					   iheader->sh_link);
-		      if (sh_link != SHN_UNDEF)
-			{
-			  oheader->sh_link = sh_link;
-			  changed = TRUE;
-			}
-		      else
-			/* FIXME: Should we install iheader->sh_link
-			   if we could not find a match ?  */
-			(* _bfd_error_handler)
-			  (_("%B: Failed to find link section for section %d"),
-			   obfd, i);
-		    }
-
-		  if (iheader->sh_info)
-		    {
-		      /* The sh_info field can hold arbitrary information,
-			 but if the SHF_LINK_INFO flag is set then it
-			 should be interpreted as a section index.  */
-		      if (iheader->sh_flags & SHF_INFO_LINK)
-			sh_link = find_link (obfd,
-					     iheaders[iheader->sh_info],
-					     iheader->sh_info);
-		      else
-			/* No idea what it means - just copy it.  */
-			sh_link = iheader->sh_info;
-			  
-		      if (sh_link != SHN_UNDEF)
-			{
-			  oheader->sh_info = sh_link;
-			  changed = TRUE;
-			}
-		      else
-			(* _bfd_error_handler)
-			  (_("%B: Failed to find info section for section %d"),
-			   obfd, i);
-		    }
-
-		  if (changed)
-		    break;
-		}
-	      else
-		{
-		  /* This is an feature for objcopy --only-keep-debug:
-		     When a section's type is changed to NOBITS, we preserve
-		     the sh_link and sh_info fields so that they can be
-		     matched up with the original.
-
-		     Note: Strictly speaking these assignments are wrong.
-		     The sh_link and sh_info fields should point to the
-		     relevent sections in the output BFD, which may not be in
-		     the same location as they were in the input BFD.  But
-		     the whole point of this action is to preserve the
-		     original values of the sh_link and sh_info fields, so
-		     that they can be matched up with the section headers in
-		     the original file.  So strictly speaking we may be
-		     creating an invalid ELF file, but it is only for a file
-		     that just contains debug info and only for sections
-		     without any contents.  */
-		  if (oheader->sh_link == 0)
-		    oheader->sh_link = iheader->sh_link;
-		  if (oheader->sh_info == 0)
-		    oheader->sh_info = iheader->sh_info;
-		  break;
-		}
+	      if (copy_special_section_fields (ibfd, obfd, iheader, oheader, i))
+		break;
 	    }
+	}
+
+      if (j == elf_numsections (ibfd) && oheader->sh_type >= SHT_LOOS)
+	{
+	  /* Final attempt.  Call the backend copy function
+	     with a NULL input section.  */
+	  if (bed->elf_backend_copy_special_section_fields != NULL)
+	    bed->elf_backend_copy_special_section_fields (ibfd, obfd, NULL, oheader);
 	}
     }
 

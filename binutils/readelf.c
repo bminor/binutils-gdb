@@ -3689,6 +3689,23 @@ get_tic6x_segment_type (unsigned long type)
 }
 
 static const char *
+get_solaris_segment_type (unsigned long type)
+{
+  switch (type)
+    {
+    case 0x6464e550: return "PT_SUNW_UNWIND";
+    case 0x6474e550: return "PT_SUNW_EH_FRAME";
+    case 0x6ffffff7: return "PT_LOSUNW";
+    case 0x6ffffffa: return "PT_SUNWBSS";
+    case 0x6ffffffb: return "PT_SUNWSTACK";
+    case 0x6ffffffc: return "PT_SUNWDTRACE";
+    case 0x6ffffffd: return "PT_SUNWCAP";
+    case 0x6fffffff: return "PT_HISUNW";
+    default: return NULL;
+    }
+}
+
+static const char *
 get_segment_type (unsigned long p_type)
 {
   static char buff[32];
@@ -3758,7 +3775,10 @@ get_segment_type (unsigned long p_type)
 	      result = get_ia64_segment_type (p_type);
 	      break;
 	    default:
-	      result = NULL;
+	      if (elf_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
+		result = get_solaris_segment_type (p_type);
+	      else
+		result = NULL;
 	      break;
 	    }
 

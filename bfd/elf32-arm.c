@@ -14112,11 +14112,15 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
   s = bfd_get_linker_section (dynobj, ".dynbss");
   BFD_ASSERT (s != NULL);
 
-  /* We must generate a R_ARM_COPY reloc to tell the dynamic linker to
-     copy the initial value out of the dynamic object and into the
-     runtime process image.  We need to remember the offset into the
+  /* If allowed, we must generate a R_ARM_COPY reloc to tell the dynamic
+     linker to copy the initial value out of the dynamic object and into
+     the runtime process image.  We need to remember the offset into the
      .rel(a).bss section we are going to use.  */
-  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
+  if (info->nocopyreloc == 0
+      && (h->root.u.def.section->flags & SEC_ALLOC) != 0
+      /* PR 16177: A copy is only needed if the input section is readonly.  */
+      && (h->root.u.def.section->flags & SEC_READONLY) == 0
+      && h->size != 0)
     {
       asection *srel;
 
@@ -17873,6 +17877,100 @@ elf32_arm_count_additional_relocs (asection *sec)
   return arm_data->additional_reloc_count;
 }
 
+/* Called to set the sh_flags, sh_link and sh_info fields of OSECTION which
+   has a type >= SHT_LOOS.  Returns TRUE if these fields were initialised 
+   FALSE otherwise.  ISECTION is the best guess matching section from the
+   input bfd IBFD, but it might be NULL.  */
+
+static bfd_boolean
+elf32_arm_copy_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
+				       bfd *obfd ATTRIBUTE_UNUSED,
+				       const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+				       Elf_Internal_Shdr *osection)
+{
+  switch (osection->sh_type)
+    {
+    case SHT_ARM_EXIDX:
+      {
+	Elf_Internal_Shdr **oheaders = elf_elfsections (obfd);
+	Elf_Internal_Shdr **iheaders = elf_elfsections (ibfd);
+	unsigned i = 0;
+
+	osection->sh_flags = SHF_ALLOC | SHF_LINK_ORDER;
+	osection->sh_info = 0;
+
+	/* The sh_link field must be set to the text section associated with
+	   this index section.  Unfortunately the ARM EHABI does not specify
+	   exactly how to determine this association.  Our caller does try
+	   to match up OSECTION with its corresponding input section however
+	   so that is a good first guess.  */
+	if (isection != NULL
+	    && osection->bfd_section != NULL
+	    && isection->bfd_section != NULL
+	    && isection->bfd_section->output_section != NULL
+	    && isection->bfd_section->output_section == osection->bfd_section
+	    && iheaders != NULL
+	    && isection->sh_link > 0
+	    && isection->sh_link < elf_numsections (ibfd)
+	    && iheaders[isection->sh_link]->bfd_section != NULL
+	    && iheaders[isection->sh_link]->bfd_section->output_section != NULL
+	    )
+	  {
+	    for (i = elf_numsections (obfd); i-- > 0;)
+	      if (oheaders[i]->bfd_section
+		  == iheaders[isection->sh_link]->bfd_section->output_section)
+		break;
+	  }
+	    
+	if (i == 0)
+	  {
+	    /* Failing that we have to find a matching section ourselves.  If
+	       we had the output section name available we could compare that
+	       with input section names.  Unfortunately we don't.  So instead
+	       we use a simple heuristic and look for the nearest executable
+	       section before this one.  */
+	    for (i = elf_numsections (obfd); i-- > 0;)
+	      if (oheaders[i] == osection)
+		break;
+	    if (i == 0)
+	      break;
+
+	    while (i-- > 0)
+	      if (oheaders[i]->sh_type == SHT_PROGBITS
+		  && (oheaders[i]->sh_flags & (SHF_ALLOC | SHF_EXECINSTR))
+		  == (SHF_ALLOC | SHF_EXECINSTR))
+		break;
+	  }
+
+	if (i)
+	  {
+	    osection->sh_link = i;
+	    /* If the text section was part of a group
+	       then the index section should be too.  */
+	    if (oheaders[i]->sh_flags & SHF_GROUP)
+	      osection->sh_flags |= SHF_GROUP;
+	    return TRUE;
+	  }
+      }
+      break;
+
+    case SHT_ARM_PREEMPTMAP:
+      osection->sh_flags = SHF_ALLOC;
+      break;
+
+    case SHT_ARM_ATTRIBUTES:
+    case SHT_ARM_DEBUGOVERLAY:
+    case SHT_ARM_OVERLAYSECTION:
+    default:
+      break;
+    }
+
+  return FALSE;
+}
+
+#undef  elf_backend_copy_special_section_fields
+#define elf_backend_copy_special_section_fields elf32_arm_copy_special_section_fields
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_TARGET_ID			ARM_ELF_DATA
 #define ELF_MACHINE_CODE		EM_ARM
@@ -18035,6 +18133,7 @@ elf32_arm_nacl_plt_sym_val (bfd_vma i, const asection *plt,
 #undef bfd_elf32_get_synthetic_symtab
 #undef  elf_backend_plt_sym_val
 #define elf_backend_plt_sym_val			elf32_arm_nacl_plt_sym_val
+#undef  elf_backend_copy_special_section_fields
 
 #undef	ELF_MINPAGESIZE
 #undef	ELF_COMMONPAGESIZE
@@ -18453,7 +18552,6 @@ elf32_arm_symbian_plt_sym_val (bfd_vma i, const asection *plt,
 {
   return plt->vma + 4 * ARRAY_SIZE (elf32_arm_symbian_plt_entry) * i;
 }
-
 
 #undef  elf32_bed
 #define elf32_bed elf32_arm_symbian_bed
