@@ -1066,6 +1066,17 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
+  /* Set the contents of the .interp section to the interpreter.  */
+  if (bfd_link_executable (info) && !info->nointerp)
+    {
+      asection *s = bfd_get_linker_section (dynobj, ".interp");
+      if (s == NULL)
+	abort ();
+      s->size = sizeof ELF_DYNAMIC_INTERPRETER;
+      s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+      htab->interp = s;
+    }
+
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!htab->sdynbss)
     abort ();
@@ -3088,20 +3099,6 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
     abort ();
-
-  if (htab->elf.dynamic_sections_created)
-    {
-      /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info) && !info->nointerp)
-	{
-	  s = bfd_get_linker_section (dynobj, ".interp");
-	  if (s == NULL)
-	    abort ();
-	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
-	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
-	  htab->interp = s;
-	}
-    }
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */

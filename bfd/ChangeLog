@@ -1,5 +1,14 @@
 2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Move interp
+	setting to ...
+	(elf_i386_create_dynamic_sections): Here.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Move
+	interp setting to ...
+	(elf_x86_64_create_dynamic_sections): Here.
+
+2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Take GOT_RELOC
 	and replace (EH)->has_got_reloc with GOT_RELOC.
 	(elf_i386_fixup_symbol): Pass has_got_reloc to
