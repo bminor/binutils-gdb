@@ -748,11 +748,11 @@ static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
    1. Has non-GOT/non-PLT relocations in text section.  Or
    2. Has no GOT/PLT relocation.
  */
-#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, EH) \
+#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, GOT_RELOC, EH)	\
   ((EH)->elf.root.type == bfd_link_hash_undefweak		\
    && bfd_link_executable (INFO)				\
    && (elf_x86_64_hash_table (INFO)->interp == NULL	 	\
-       || !(EH)->has_got_reloc					\
+       || !(GOT_RELOC)						\
        || (EH)->has_non_got_reloc				\
        || !(INFO)->dynamic_undefined_weak))
 
@@ -1108,6 +1108,17 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
     return FALSE;
+
+  /* Set the contents of the .interp section to the interpreter.  */
+  if (bfd_link_executable (info) && !info->nointerp)
+    {
+      asection *s = bfd_get_linker_section (dynobj, ".interp");
+      if (s == NULL)
+	abort ();
+      s->size = htab->dynamic_interpreter_size;
+      s->contents = (unsigned char *) htab->dynamic_interpreter;
+      htab->interp = s;
+    }
 
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!htab->sdynbss)
@@ -1663,7 +1674,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    {
+      sec->check_relocs_failed = 1;
+      return FALSE;
+    }
 
   use_plt_got = get_elf_x86_64_backend_data (abfd) == &elf_x86_64_arch_bed;
 
@@ -1690,7 +1704,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	{
 	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
 				 abfd, r_symndx);
-	  return FALSE;
+	  goto error_return;
 	}
 
       if (r_symndx < symtab_hdr->sh_info)
@@ -1699,7 +1713,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
-	    return FALSE;
+	    goto error_return;
 
 	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
 	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
@@ -1707,7 +1721,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      h = elf_x86_64_get_local_sym_hash (htab, abfd, rel,
 						 TRUE);
 	      if (h == NULL)
-		return FALSE;
+		goto error_return;
 
 	      /* Fake a STT_GNU_IFUNC symbol.  */
 	      h->type = STT_GNU_IFUNC;
@@ -1755,7 +1769,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     "supported in x32 mode"), abfd,
 		   x86_64_elf_howto_table[r_type].name, name);
 		bfd_set_error (bfd_error_bad_value);
-		return FALSE;
+		goto error_return;
 	      }
 	    break;
 	  }
@@ -1808,7 +1822,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 			  || !bfd_set_section_alignment (htab->elf.dynobj,
 							 htab->plt_bnd,
 							 plt_bnd_align))
-			return FALSE;
+			goto error_return;
 		    }
 		}
 
@@ -1824,7 +1838,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (h->type == STT_GNU_IFUNC
 		  && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj,
 						      info))
-		return FALSE;
+		goto error_return;
 	      break;
 	    }
 
@@ -1841,7 +1855,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 				       symtab_hdr, sym_hashes,
 				       &r_type, GOT_UNKNOWN,
 				       rel, rel_end, h, r_symndx))
-	return FALSE;
+	goto error_return;
 
       eh = (struct elf_x86_64_link_hash_entry *) h;
       switch (r_type)
@@ -1908,7 +1922,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    local_got_refcounts = ((bfd_signed_vma *)
 					   bfd_zalloc (abfd, size));
 		    if (local_got_refcounts == NULL)
-		      return FALSE;
+		      goto error_return;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
 		    elf_x86_64_local_tlsdesc_gotent (abfd)
 		      = (bfd_vma *) (local_got_refcounts + symtab_hdr->sh_info);
@@ -1942,7 +1956,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      (_("%B: '%s' accessed both as normal and thread local symbol"),
 		       abfd, name);
 		    bfd_set_error (bfd_error_bad_value);
-		    return FALSE;
+		    goto error_return;
 		  }
 	      }
 
@@ -1968,7 +1982,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		htab->elf.dynobj = abfd;
 	      if (!_bfd_elf_create_got_section (htab->elf.dynobj,
 						info))
-		return FALSE;
+		goto error_return;
 	    }
 	  break;
 
@@ -2136,7 +2150,7 @@ do_size:
 		     abfd, /*rela?*/ TRUE);
 
 		  if (sreloc == NULL)
-		    return FALSE;
+		    goto error_return;
 		}
 
 	      /* If this is a global symbol, we count the number of
@@ -2154,7 +2168,7 @@ do_size:
 		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
-		    return FALSE;
+		    goto error_return;
 
 		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		  if (s == NULL)
@@ -2174,7 +2188,7 @@ do_size:
 		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
-		    return FALSE;
+		    goto error_return;
 		  p->next = *head;
 		  *head = p;
 		  p->sec = sec;
@@ -2193,7 +2207,7 @@ do_size:
 	     Reconstruct it for later use during GC.  */
 	case R_X86_64_GNU_VTINHERIT:
 	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	    goto error_return;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
@@ -2202,7 +2216,7 @@ do_size:
 	  BFD_ASSERT (h != NULL);
 	  if (h != NULL
 	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return FALSE;
+	    goto error_return;
 	  break;
 
 	default:
@@ -2240,7 +2254,7 @@ do_size:
 	      || !bfd_set_section_alignment (htab->elf.dynobj,
 					     htab->plt_got,
 					     plt_got_align))
-	    return FALSE;
+	    goto error_return;
 	}
 
       if ((r_type == R_X86_64_GOTPCREL
@@ -2251,6 +2265,10 @@ do_size:
     }
 
   return TRUE;
+
+error_return:
+  sec->check_relocs_failed = 1;
+  return FALSE;
 }
 
 /* Return the section that should be marked against GC for a given
@@ -2283,6 +2301,7 @@ elf_x86_64_fixup_symbol (struct bfd_link_info *info,
 {
   if (h->dynindx != -1
       && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+					  elf_x86_64_hash_entry (h)->has_got_reloc,
 					  elf_x86_64_hash_entry (h)))
     {
       h->dynindx = -1;
@@ -2495,7 +2514,9 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   bed = get_elf_backend_data (info->output_bfd);
   plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
-  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
+  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+						      eh->has_got_reloc,
+						      eh);
 
   /* We can't use the GOT PLT if pointer equality is needed since
      finish_dynamic_symbol won't clear symbol value and the dynamic
@@ -3098,6 +3119,7 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	     R_X86_64_PC32.  */
 	  if ((relocx || opcode == 0x8b)
 	      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info,
+						  TRUE,
 						  elf_x86_64_hash_entry (h)))
 	    {
 	      if (opcode == 0xff)
@@ -3434,20 +3456,6 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
   dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
     abort ();
-
-  if (htab->elf.dynamic_sections_created)
-    {
-      /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info) && !info->nointerp)
-	{
-	  s = bfd_get_linker_section (dynobj, ".interp");
-	  if (s == NULL)
-	    abort ();
-	  s->size = htab->dynamic_interpreter_size;
-	  s->contents = (unsigned char *) htab->dynamic_interpreter;
-	  htab->interp = s;
-	}
-    }
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
@@ -4276,7 +4284,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	}
 
       resolved_to_zero = (eh != NULL
-			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
+			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+							      eh->has_got_reloc,
+							      eh));
 
       /* When generating a shared object, the relocations handled here are
 	 copied into the output file to be resolved at run time.  */
@@ -5396,7 +5406,9 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their
      references have value 0 at run-time.  */
-  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
+  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+						     eh->has_got_reloc,
+						     eh);
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -6552,18 +6564,18 @@ static const struct bfd_elf_special_section
 #define elf_backend_strtab_flags	SHF_STRINGS
 
 static bfd_boolean
-elf64_x86_64_set_special_info_link (const bfd *ibfd ATTRIBUTE_UNUSED,
-				    bfd *obfd ATTRIBUTE_UNUSED,
-				    const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
-				    Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+elf64_x86_64_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
+						  bfd *obfd ATTRIBUTE_UNUSED,
+						  const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+						  Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
 {
   /* PR 19938: FIXME: Need to add code for setting the sh_info
      and sh_link fields of Solaris specific section types.  */
   return FALSE;
 }
 
-#undef  elf_backend_set_special_section_info_and_link
-#define elf_backend_set_special_section_info_and_link elf64_x86_64_set_special_info_link
+#undef  elf_backend_copy_special_section_fields
+#define elf_backend_copy_special_section_fields elf64_x86_64_copy_solaris_special_section_fields
 
 #include "elf64-target.h"
 
@@ -6597,7 +6609,7 @@ elf64_x86_64_nacl_elf_object_p (bfd *abfd)
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
 #undef  elf_backend_strtab_flags
-#undef  elf_backend_set_special_section_info_and_link
+#undef  elf_backend_copy_special_section_fields
 
 /* NaCl uses substantially different PLT entries for the same effects.  */
 

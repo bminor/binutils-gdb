@@ -1300,13 +1300,15 @@ struct elf_backend_data
   /* Return the section which RELOC_SEC applies to.  */
   asection *(*get_reloc_section) (asection *reloc_sec);
 
-  /* Called when setting the sh_link and sh_info fields of a section with a
-     type >= SHT_LOOS.  Returns TRUE if these fields were initialised in
-     OHEADER, FALSE otherwise.  IHEADER is the best guess matching section
-     from the input bfd IBFD.  */
-  bfd_boolean (*elf_backend_set_special_section_info_and_link)
-    (const bfd *ibfd, bfd *obfd, const Elf_Internal_Shdr *iheader,
-     Elf_Internal_Shdr *oheader);
+  /* Called to set the sh_flags, sh_link and sh_info fields of OSECTION which
+     has a type >= SHT_LOOS.  Returns TRUE if the fields were initialised,
+     FALSE otherwise.  Can be called multiple times for a given section,
+     until it returns TRUE.  Most of the times it is called ISECTION will be
+     set to an input section that might be associated with the output section.
+     The last time that it is called, ISECTION will be set to NULL.  */
+  bfd_boolean (*elf_backend_copy_special_section_fields)
+    (const bfd *ibfd, bfd *obfd, const Elf_Internal_Shdr *isection,
+     Elf_Internal_Shdr *osection);
 		
   /* Used to handle bad SHF_LINK_ORDER input.  */
   bfd_error_handler_type link_order_error_handler;

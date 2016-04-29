@@ -4031,6 +4031,25 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   if (packet_support (PACKET_QAllow) != PACKET_DISABLE)
     remote_set_permissions (target);
 
+  /* gdbserver < 7.7 (before its fix from 2013-12-11) did reply to any
+     unknown 'v' packet with string "OK".  "OK" gets interpreted by GDB
+     as a reply to known packet.  For packet "vFile:setfs:" it is an
+     invalid reply and GDB would return error in
+     remote_hostio_set_filesystem, making remote files access impossible.
+     Disable "vFile:setfs:" in such case.  Do not disable other 'v' packets as
+     other "vFile" packets get correctly detected even on gdbserver < 7.7.  */
+  {
+    const char v_mustreplyempty[] = "vMustReplyEmpty";
+
+    putpkt (v_mustreplyempty);
+    getpkt (&rs->buf, &rs->buf_size, 0);
+    if (strcmp (rs->buf, "OK") == 0)
+      remote_protocol_packets[PACKET_vFile_setfs].support = PACKET_DISABLE;
+    else if (strcmp (rs->buf, "") != 0)
+      error (_("Remote replied unexpectedly to '%s': %s"), v_mustreplyempty,
+	     rs->buf);
+  }
+
   /* Next, we possibly activate noack mode.
 
      If the QStartNoAckMode packet configuration is set to AUTO,

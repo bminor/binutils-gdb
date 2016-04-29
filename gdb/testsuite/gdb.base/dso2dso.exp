@@ -57,7 +57,8 @@ if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable \
 }
 
 clean_restart $binfile
-gdb_load_shlibs $binfile_libdso2 $binfile_libdso1
+gdb_load_shlib $binfile_libdso2
+gdb_load_shlib $binfile_libdso1
 
 if { ![runto_main] } {
   return -1

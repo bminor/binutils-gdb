@@ -1,3 +1,73 @@
+2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Move interp
+	setting to ...
+	(elf_i386_create_dynamic_sections): Here.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Move
+	interp setting to ...
+	(elf_x86_64_create_dynamic_sections): Here.
+
+2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Take GOT_RELOC
+	and replace (EH)->has_got_reloc with GOT_RELOC.
+	(elf_i386_fixup_symbol): Pass has_got_reloc to
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_convert_load): Pass TRUE to
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	* elf64-x86-64.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Take
+	GOT_RELOC and replace (EH)->has_got_reloc with GOT_RELOC.
+	(elf_x86_64_fixup_symbol): Pass has_got_reloc to
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	(elf_x86_64_allocate_dynrelocs): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	(elf_x86_64_convert_load): Pass TRUE to
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+
+2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (check_relocs_failed): New.
+	(elf_i386_check_relocs): Set check_relocs_failed on error.
+	(elf_i386_relocate_section): Skip if check_relocs failed.
+
+2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Set
+	check_relocs_failed on error.
+
+2016-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 19938
+	* elf-bfd.h (struct elf_backend_data): Rename
+	elf_backend_set_special_section_info_and_link to
+	elf_backend_copy_special_section_fields.
+	* elfxx-target.h: Likewise.
+	* elf.c (section_match): Ignore the SHF_INFO_LINK flag when
+	comparing section flags.
+	(copy_special_section_fields): New function.
+	(_bfd_elf_copy_private_bfd_data): Copy the EI_ABIVERSION field.
+	Perform two scans over special sections.  The first one looks for
+	a direct mapping between the output section and an input section.
+	The second scan looks for a possible match based upon section
+	characteristics.
+	* elf32-arm.c (elf32_arm_copy_special_section_fields): New
+	function.  Handle setting the sh_link field of SHT_ARM_EXIDX
+	sections.
+	* elf32-i386.c (elf32_i386_set_special_info_link): Rename to
+	elf32_i386_copy_solaris_special_section_fields.
+	* elf32-sparc.c (elf32_sparc_set_special_section_info_link):
+	Rename to elf32_sparc_copy_solaris_special_section_fields.
+	* elf64-x86-64.c (elf64_x86_64_set_special_info_link): Rename to
+	elf64_x86_64_copy_solaris_special_section_fields.
+
+2016-04-28  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated Chinese (simplified) translation.
+
 2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20006

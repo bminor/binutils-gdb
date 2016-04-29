@@ -1,3 +1,26 @@
+2016-04-29  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* readelf.c (is_32bit_pcrel_reloc): Return true if reloc is 32-bit
+	PC relocation for AVR target.
+	(is_none_reloc): Return true if reloc is any of AVR diff
+	relocations.
+
+2016-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 19938
+	* readelf.c (get_solaris_segment_type): New function.
+	(get_segment_type): Call it.
+
+2016-04-28  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated Chinese (simplified) translation.
+
+2016-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19722
+	* testsuite/binutils-all/aarch64/illegal.s: New test.
+	* testsuite/binutils-all/aarch64/illegal.d: New test driver.
+
 2016-04-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* resres.c: Likewise.

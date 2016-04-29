@@ -72,7 +72,8 @@ if { [gdb_compile_shlib $lib1src $lib1_sl $lib_opts] != ""} {
 # Start with a fresh gdb.
 
 clean_restart $binfile
-gdb_load_shlibs $lib1_sl $lib2_sl
+gdb_load_shlib $lib1_sl
+gdb_load_shlib $lib2_sl
 
 # Load up the shared objects
 if ![runto_main] then {

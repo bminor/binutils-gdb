@@ -41,7 +41,7 @@ if { [gdb_compile_shlib $srcdir/$subdir/$srcfile2 $sofile {debug c++}] != ""
 }
 
 clean_restart ${binfile}
-gdb_load_shlibs ${sofile}
+gdb_load_shlib ${sofile}
 
 
 if ![runto_main] then {

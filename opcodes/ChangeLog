@@ -1,3 +1,12 @@
+2016-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19722
+	* aarch64-dis.c (aarch64_opcode_decode): Run verifier if present.
+	* aarch64-opc.c (verify_ldpsw): New function.
+	* aarch64-opc.h (verify_ldpsw): New prototype.
+	* aarch64-tbl.h: Add initialiser for verifier field.
+	(LDPSW): Set verifier to verify_ldpsw.
+
 2016-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19983

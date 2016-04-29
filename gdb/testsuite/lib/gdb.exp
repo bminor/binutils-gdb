@@ -4229,14 +4229,12 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
     }
 }
 
-# gdb_load_shlibs LIB...
+# gdb_load_shlib LIB...
 #
-# Copy the listed libraries to the target.
+# Copy the listed library to the target.
 
-proc gdb_load_shlibs { args } {
-    foreach file $args {
-	gdb_remote_download target [shlib_target_file $file]
-    }
+proc gdb_load_shlib { file } {
+    set dest [gdb_remote_download target [shlib_target_file $file]]
 
     if {[is_remote target]} {
 	# If the target is remote, we need to tell gdb where to find the
@@ -4245,8 +4243,10 @@ proc gdb_load_shlibs { args } {
 	# We could set this even when not testing remotely, but a user
 	# generally won't set it unless necessary.  In order to make the tests
 	# more like the real-life scenarios, we don't set it for local testing.
-	gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "" ""
+	gdb_test "set solib-search-path [file dirname $file]" "" ""
     }
+
+    return $dest
 }
 
 #

@@ -57,7 +57,8 @@ if { [gdb_compile_shlib ${lib1src} ${lib1} $lib_opts] != ""
 # Start with a fresh gdb.
 
 clean_restart ${binfile}
-gdb_load_shlibs $lib1 $lib2
+gdb_load_shlib $lib1
+gdb_load_shlib $lib2
 
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"

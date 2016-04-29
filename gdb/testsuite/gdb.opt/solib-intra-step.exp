@@ -41,7 +41,7 @@ if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
 }
 
 clean_restart ${binfile}
-gdb_load_shlibs $binfile_lib
+gdb_load_shlib $binfile_lib
 
 if ![runto_main] then {
   return 0

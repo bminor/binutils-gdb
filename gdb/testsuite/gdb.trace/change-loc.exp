@@ -45,8 +45,8 @@ if { [gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""
 
 clean_restart $executable
 
-gdb_load_shlibs $lib_sl1
-gdb_load_shlibs $lib_sl2
+gdb_load_shlib $lib_sl1
+gdb_load_shlib $lib_sl2
 
 if ![runto_main] {
     fail "Can't run to main to check for trace support"
@@ -354,7 +354,7 @@ tracepoint_install_in_trace_disabled "trace"
 
 # Re-compile test case with IPA.
 set libipa [get_in_proc_agent]
-gdb_load_shlibs $libipa
+gdb_load_shlib $libipa
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable \
 	  [list debug nowarnings shlib=$libipa shlib=$lib_sl1 shlib_load] ] != "" } {

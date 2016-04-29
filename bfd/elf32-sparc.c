@@ -265,18 +265,18 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 #define elf_backend_strtab_flags	SHF_STRINGS
 
 static bfd_boolean
-elf32_sparc_set_special_info_link (const bfd *ibfd ATTRIBUTE_UNUSED,
-				   bfd *obfd ATTRIBUTE_UNUSED,
-				   const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
-				   Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+elf32_sparc_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
+						 bfd *obfd ATTRIBUTE_UNUSED,
+						 const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+						 Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
 {
   /* PR 19938: FIXME: Need to add code for setting the sh_info
      and sh_link fields of Solaris specific section types.  */
   return FALSE;
 }
 
-#undef  elf_backend_set_special_section_info_and_link
-#define elf_backend_set_special_section_info_and_link elf32_sparc_set_special_info_link
+#undef  elf_backend_copy_special_section_fields
+#define elf_backend_copy_special_section_fields elf32_sparc_copy_solaris_special_section_fields
 
 #include "elf32-target.h"
 
@@ -341,7 +341,7 @@ elf32_sparc_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
   elf32_sparc_vxworks_final_write_processing
 #undef  elf_backend_static_tls_alignment
 #undef  elf_backend_strtab_flags
-#undef  elf_backend_set_special_section_info_and_link
+#undef  elf_backend_copy_special_section_fields
 
 #undef  elf32_bed
 #define elf32_bed				sparc_elf_vxworks_bed

@@ -2047,6 +2047,7 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
     {
       const aarch64_operand *opnd;
       enum aarch64_opnd type;
+
       type = opcode->operands[i];
       if (type == AARCH64_OPND_NIL)
 	break;
@@ -2057,6 +2058,13 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
 	  DEBUG_TRACE ("operand decoder FAIL at operand %d", i);
 	  goto decode_fail;
 	}
+    }
+
+  /* If the opcode has a verifier, then check it now.  */
+  if (opcode->verifier && ! opcode->verifier (opcode, code))
+    {
+      DEBUG_TRACE ("operand verifier FAIL");
+      goto decode_fail;
     }
 
   /* Match the qualifiers.  */

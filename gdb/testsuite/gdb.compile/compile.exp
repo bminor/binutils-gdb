@@ -371,7 +371,7 @@ if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile2} $libbin {debug}] != ""
 }
 
 clean_restart $binfile
-gdb_load_shlibs $libbin
+gdb_load_shlib $libbin
 
 if ![runto_main] {
     return -1

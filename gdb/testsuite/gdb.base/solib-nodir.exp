@@ -41,7 +41,7 @@ if { [get_compiler_info]
 }
 
 clean_restart $executable
-gdb_load_shlibs ${binlibfile}
+gdb_load_shlib ${binlibfile}
 
 gdb_test_no_output "set env LD_LIBRARY_PATH=:"
 gdb_test "cd ${binlibfiledir}" "Working directory [string_to_regexp ${binlibfiledir}]\\." "cd OBJDIR/${subdir}"

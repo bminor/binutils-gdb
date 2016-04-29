@@ -48,7 +48,7 @@ foreach nonstop { 0 1 } { with_test_prefix "non-stop $nonstop" {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load_shlibs ${binlibfile}
+    gdb_load_shlib ${binlibfile}
 
     set remote_binfile [gdb_remote_download target $binfile]
 

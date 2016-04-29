@@ -3417,6 +3417,34 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
 #undef C14
 #undef C15
 
+#define BIT(INSN,BT)     (((INSN) >> (BT)) & 1)
+#define BITS(INSN,HI,LO) (((INSN) >> (LO)) & ((1 << (((HI) - (LO)) + 1)) - 1))
+
+bfd_boolean
+verify_ldpsw (const struct aarch64_opcode * opcode ATTRIBUTE_UNUSED,
+	      const aarch64_insn insn)
+{
+  int t  = BITS (insn, 4, 0);
+  int n  = BITS (insn, 9, 5);
+  int t2 = BITS (insn, 14, 10);
+
+  if (BIT (insn, 23))
+    {
+      /* Write back enabled.  */
+      if ((t == n || t2 == n) && n != 31)
+	return FALSE;
+    }
+
+  if (BIT (insn, 22))
+    {
+      /* Load */
+      if (t == t2)
+	return FALSE;
+    }
+
+  return TRUE;
+}
+
 /* Include the opcode description table as well as the operand description
    table.  */
 #include "aarch64-tbl.h"

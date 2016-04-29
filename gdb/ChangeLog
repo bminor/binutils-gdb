@@ -1,3 +1,12 @@
+2016-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-decode.c (help_cmd_list): Do not list commands that
+	are deprecated.
+
+2016-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c (remote_start_remote): Detect PACKET_vFile_setfs.support.
+
 2016-04-27  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	* c-valprint.c (c_value_print): Always convert val back to reference
