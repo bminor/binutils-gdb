@@ -1,5 +1,26 @@
 2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Take GOT_RELOC
+	and replace (EH)->has_got_reloc with GOT_RELOC.
+	(elf_i386_fixup_symbol): Pass has_got_reloc to
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_convert_load): Pass TRUE to
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	* elf64-x86-64.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Take
+	GOT_RELOC and replace (EH)->has_got_reloc with GOT_RELOC.
+	(elf_x86_64_fixup_symbol): Pass has_got_reloc to
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	(elf_x86_64_allocate_dynrelocs): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	(elf_x86_64_convert_load): Pass TRUE to
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+
+2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (check_relocs_failed): New.
 	(elf_i386_check_relocs): Set check_relocs_failed on error.
 	(elf_i386_relocate_section): Skip if check_relocs failed.

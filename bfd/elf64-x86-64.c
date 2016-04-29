@@ -748,11 +748,11 @@ static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
    1. Has non-GOT/non-PLT relocations in text section.  Or
    2. Has no GOT/PLT relocation.
  */
-#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, EH) \
+#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, GOT_RELOC, EH)	\
   ((EH)->elf.root.type == bfd_link_hash_undefweak		\
    && bfd_link_executable (INFO)				\
    && (elf_x86_64_hash_table (INFO)->interp == NULL	 	\
-       || !(EH)->has_got_reloc					\
+       || !(GOT_RELOC)						\
        || (EH)->has_non_got_reloc				\
        || !(INFO)->dynamic_undefined_weak))
 
@@ -2290,6 +2290,7 @@ elf_x86_64_fixup_symbol (struct bfd_link_info *info,
 {
   if (h->dynindx != -1
       && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+					  elf_x86_64_hash_entry (h)->has_got_reloc,
 					  elf_x86_64_hash_entry (h)))
     {
       h->dynindx = -1;
@@ -2502,7 +2503,9 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   bed = get_elf_backend_data (info->output_bfd);
   plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
-  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
+  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+						      eh->has_got_reloc,
+						      eh);
 
   /* We can't use the GOT PLT if pointer equality is needed since
      finish_dynamic_symbol won't clear symbol value and the dynamic
@@ -3105,6 +3108,7 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	     R_X86_64_PC32.  */
 	  if ((relocx || opcode == 0x8b)
 	      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info,
+						  TRUE,
 						  elf_x86_64_hash_entry (h)))
 	    {
 	      if (opcode == 0xff)
@@ -4283,7 +4287,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	}
 
       resolved_to_zero = (eh != NULL
-			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
+			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+							      eh->has_got_reloc,
+							      eh));
 
       /* When generating a shared object, the relocations handled here are
 	 copied into the output file to be resolved at run time.  */
@@ -5403,7 +5409,9 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their
      references have value 0 at run-time.  */
-  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
+  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+						     eh->has_got_reloc,
+						     eh);
 
   if (h->plt.offset != (bfd_vma) -1)
     {
