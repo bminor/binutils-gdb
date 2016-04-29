@@ -1012,11 +1012,12 @@ types.  This option is only available if the toolchain has been built
 with plugin support enabled.
 
 @item --size-sort
-Sort symbols by size.  The size is computed as the difference between
-the value of the symbol and the value of the symbol with the next higher
-value.  If the @code{bsd} output format is used the size of the symbol
-is printed, rather than the value, and @samp{-S} must be used in order
-both size and value to be printed.
+Sort symbols by size.  For ELF objects symbol sizes are read from the
+ELF, for other object types the symbol sizes are computed as the
+difference between the value of the symbol and the value of the symbol
+with the next higher value.  If the @code{bsd} output format is used
+the size of the symbol is printed, rather than the value, and
+@samp{-S} must be used in order both size and value to be printed.
 
 @item --special-syms
 Display symbols which have a target-specific special meaning.  These
