@@ -1506,7 +1506,8 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define need_convert_load sec_flg0
+#define need_convert_load	sec_flg0
+#define check_relocs_failed	sec_flg1
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
@@ -1533,7 +1534,10 @@ elf_i386_check_relocs (bfd *abfd,
 
   htab = elf_i386_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    {
+      sec->check_relocs_failed = 1;
+      return FALSE;
+    }
 
   use_plt_got = (!get_elf_i386_backend_data (abfd)->is_vxworks
 		 && (get_elf_i386_backend_data (abfd)
@@ -1563,7 +1567,7 @@ elf_i386_check_relocs (bfd *abfd,
 	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
 				 abfd,
 				 r_symndx);
-	  return FALSE;
+	  goto error_return;
 	}
 
       if (r_symndx < symtab_hdr->sh_info)
@@ -1572,14 +1576,14 @@ elf_i386_check_relocs (bfd *abfd,
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
-	    return FALSE;
+	    goto error_return;
 
 	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
 	  if (ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
 	      h = elf_i386_get_local_sym_hash (htab, abfd, rel, TRUE);
 	      if (h == NULL)
-		return FALSE;
+		goto error_return;
 
 	      /* Fake a STT_GNU_IFUNC symbol.  */
 	      h->type = STT_GNU_IFUNC;
@@ -1621,7 +1625,7 @@ elf_i386_check_relocs (bfd *abfd,
 	      if (h->type == STT_GNU_IFUNC
 		  && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj,
 						      info))
-		return FALSE;
+		goto error_return;
 	      break;
 	    }
 
@@ -1638,7 +1642,7 @@ elf_i386_check_relocs (bfd *abfd,
 				     symtab_hdr, sym_hashes,
 				     &r_type, GOT_UNKNOWN,
 				     rel, rel_end, h, r_symndx))
-	return FALSE;
+	goto error_return;
 
       switch (r_type)
 	{
@@ -1729,7 +1733,7 @@ elf_i386_check_relocs (bfd *abfd,
 		    local_got_refcounts = (bfd_signed_vma *)
                         bfd_zalloc (abfd, size);
 		    if (local_got_refcounts == NULL)
-		      return FALSE;
+		      goto error_return;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
 		    elf_i386_local_tlsdesc_gotent (abfd)
 		      = (bfd_vma *) (local_got_refcounts + symtab_hdr->sh_info);
@@ -1765,7 +1769,7 @@ elf_i386_check_relocs (bfd *abfd,
 			 "thread local symbol"),
 		       abfd, name);
 		    bfd_set_error (bfd_error_bad_value);
-		    return FALSE;
+		    goto error_return;
 		  }
 	      }
 
@@ -1787,7 +1791,7 @@ elf_i386_check_relocs (bfd *abfd,
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
 	      if (!_bfd_elf_create_got_section (htab->elf.dynobj, info))
-		return FALSE;
+		goto error_return;
 	    }
 	  if (r_type != R_386_TLS_IE)
 	    {
@@ -1903,7 +1907,7 @@ do_size:
 		    (sec, htab->elf.dynobj, 2, abfd, /*rela?*/ FALSE);
 
 		  if (sreloc == NULL)
-		    return FALSE;
+		    goto error_return;
 		}
 
 	      /* If this is a global symbol, we count the number of
@@ -1923,7 +1927,7 @@ do_size:
 		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
-		    return FALSE;
+		    goto error_return;
 
 		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		  if (s == NULL)
@@ -1940,7 +1944,7 @@ do_size:
 		  p = (struct elf_dyn_relocs *) bfd_alloc (htab->elf.dynobj,
                                                            amt);
 		  if (p == NULL)
-		    return FALSE;
+		    goto error_return;
 		  p->next = *head;
 		  *head = p;
 		  p->sec = sec;
@@ -1959,7 +1963,7 @@ do_size:
 	     Reconstruct it for later use during GC.  */
 	case R_386_GNU_VTINHERIT:
 	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	    goto error_return;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
@@ -1968,7 +1972,7 @@ do_size:
 	  BFD_ASSERT (h != NULL);
 	  if (h != NULL
 	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	    goto error_return;
 	  break;
 
 	default:
@@ -2006,7 +2010,7 @@ do_size:
 	      || !bfd_set_section_alignment (htab->elf.dynobj,
 					     htab->plt_got,
 					     plt_got_align))
-	    return FALSE;
+	    goto error_return;
 	}
 
       if ((r_type == R_386_GOT32 || r_type == R_386_GOT32X)
@@ -2015,6 +2019,10 @@ do_size:
     }
 
   return TRUE;
+
+error_return:
+  sec->check_relocs_failed = 1;
+  return FALSE;
 }
 
 /* Return the section that should be marked against GC for a given
@@ -3580,6 +3588,10 @@ elf_i386_relocate_section (bfd *output_bfd,
   unsigned plt_entry_size;
 
   BFD_ASSERT (is_i386_elf (input_bfd));
+
+  /* Skip if check_relocs failed.  */
+  if (input_section->check_relocs_failed)
+    return FALSE;
 
   htab = elf_i386_hash_table (info);
   if (htab == NULL)

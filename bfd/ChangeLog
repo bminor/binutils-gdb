@@ -1,5 +1,11 @@
 2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (check_relocs_failed): New.
+	(elf_i386_check_relocs): Set check_relocs_failed on error.
+	(elf_i386_relocate_section): Skip if check_relocs failed.
+
+2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_check_relocs): Set
 	check_relocs_failed on error.
 
