@@ -1723,25 +1723,30 @@ elf_x86_64_convert_load_reloc (bfd *abfd, asection *sec,
   /* Get the symbol referred to by the reloc.  */
   if (h == NULL)
     {
-      Elf_Internal_Sym *isym
-	= bfd_sym_from_r_symndx (&htab->sym_cache, abfd, r_symndx);
+      /* Check R_X86_64_PC32 relocation overflow only if R_X86_64_PC32
+	 is required.  */
+      if (require_reloc_pc32)
+	{
+	  Elf_Internal_Sym *isym
+	    = bfd_sym_from_r_symndx (&htab->sym_cache, abfd, r_symndx);
 
-      /* Skip relocation against undefined symbols.  */
-      if (isym->st_shndx == SHN_UNDEF)
-	return TRUE;
+	  /* Skip relocation against undefined symbols.  */
+	  if (isym->st_shndx == SHN_UNDEF)
+	    return TRUE;
 
-      symtype = ELF_ST_TYPE (isym->st_info);
+	  symtype = ELF_ST_TYPE (isym->st_info);
 
-      if (isym->st_shndx == SHN_ABS)
-	tsec = bfd_abs_section_ptr;
-      else if (isym->st_shndx == SHN_COMMON)
-	tsec = bfd_com_section_ptr;
-      else if (isym->st_shndx == SHN_X86_64_LCOMMON)
-	tsec = &_bfd_elf_large_com_section;
-      else
-	tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+	  if (isym->st_shndx == SHN_ABS)
+	    tsec = bfd_abs_section_ptr;
+	  else if (isym->st_shndx == SHN_COMMON)
+	    tsec = bfd_com_section_ptr;
+	  else if (isym->st_shndx == SHN_X86_64_LCOMMON)
+	    tsec = &_bfd_elf_large_com_section;
+	  else
+	    tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 
-      toff = isym->st_value;
+	  toff = isym->st_value;
+	}
     }
   else
     {
@@ -1806,8 +1811,9 @@ elf_x86_64_convert_load_reloc (bfd *abfd, asection *sec,
 	return TRUE;
     }
 
-  /* We can only estimate relocation overflow for R_X86_64_PC32.  */
-  if (!to_reloc_pc32)
+  /* We can only estimate relocation overflow for R_X86_64_PC32.  Skip
+     R_X86_64_PC32 relocation overflow check if it isn't required.  */
+  if (!to_reloc_pc32 || !require_reloc_pc32)
     goto convert;
 
   if (tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
@@ -2046,6 +2052,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   asection *sreloc;
   bfd_byte *contents;
   bfd_boolean use_plt_got;
+  bfd_boolean changed;
+  bfd_boolean no_relax;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -2068,6 +2076,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       return FALSE;
     }
 
+  no_relax = info->disable_target_specific_optimizations > 1;
   use_plt_got = get_elf_x86_64_backend_data (abfd) == &elf_x86_64_arch_bed;
 
   symtab_hdr = &elf_symtab_hdr (abfd);
@@ -2261,21 +2270,50 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    eh->has_got_reloc = 1;
 	  break;
 
+	case R_X86_64_GOTPCREL:
+	case R_X86_64_GOTPCRELX:
+	case R_X86_64_REX_GOTPCRELX:
+	  if (!no_relax
+	      && (h == NULL || h->type != STT_GNU_IFUNC))
+	    {
+	      bfd_boolean converted = FALSE;
+	      if (!elf_x86_64_convert_load_reloc (abfd, sec, contents,
+						  (Elf_Internal_Rela *) rel,
+						  h, &converted, info))
+		goto error_return;
+
+	      if (converted)
+		{
+		  changed = TRUE;
+		  r_type = ELF32_R_TYPE (rel->r_info);
+		  switch (r_type)
+		    {
+		    default:
+		      abort ();
+		      break;
+		    case R_X86_64_32:
+		    case R_X86_64_32S:
+		    case R_X86_64_PC32:
+		      break;
+		    }
+		  break;
+		}
+	    }
+	  goto do_reloc_gotpcrel;
+
 	case R_X86_64_GOTTPOFF:
 	  if (!bfd_link_executable (info))
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
 	case R_X86_64_GOT32:
-	case R_X86_64_GOTPCREL:
-	case R_X86_64_GOTPCRELX:
-	case R_X86_64_REX_GOTPCRELX:
 	case R_X86_64_TLSGD:
 	case R_X86_64_GOT64:
 	case R_X86_64_GOTPCREL64:
 	case R_X86_64_GOTPLT64:
 	case R_X86_64_GOTPC32_TLSDESC:
 	case R_X86_64_TLSDESC_CALL:
+do_reloc_gotpcrel:
 	  /* This symbol requires a global offset table entry.	*/
 	  {
 	    int tls_type, old_tls_type;
@@ -2646,22 +2684,31 @@ do_size:
 	    goto error_return;
 	}
 
-      if ((r_type == R_X86_64_GOTPCREL
-	   || r_type == R_X86_64_GOTPCRELX
-	   || r_type == R_X86_64_REX_GOTPCRELX)
+      if (no_relax
+	  && (r_type == R_X86_64_GOTPCREL
+	      || r_type == R_X86_64_GOTPCRELX
+	      || r_type == R_X86_64_REX_GOTPCRELX)
 	  && (h == NULL || h->type != STT_GNU_IFUNC))
 	sec->need_convert_load = 1;
     }
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!info->keep_memory)
+      if (!changed && !info->keep_memory)
 	free (contents);
       else
 	{
 	  /* Cache the section contents for elf_link_input_bfd.  */
 	  elf_section_data (sec)->this_hdr.contents = contents;
 	}
+    }
+
+  if (elf_section_data (sec)->relocs != relocs && changed)
+    {
+      /* Must cache relocations if they are changed.  */
+      if (elf_section_data (sec)->relocs != NULL)
+	abort ();
+      elf_section_data (sec)->relocs = (Elf_Internal_Rela *) relocs;
     }
 
   return TRUE;
