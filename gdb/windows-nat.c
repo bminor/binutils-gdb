@@ -2702,7 +2702,7 @@ _initialize_check_for_gdb_ini (void)
     {
       char *p;
       char *oldini = (char *) alloca (strlen (homedir) +
-				      sizeof ("/gdb.ini"));
+				      sizeof ("gdb.ini") + 1);
       strcpy (oldini, homedir);
       p = strchr (oldini, '\0');
       if (p > oldini && !IS_DIR_SEPARATOR (p[-1]))
@@ -2711,9 +2711,9 @@ _initialize_check_for_gdb_ini (void)
       if (access (oldini, 0) == 0)
 	{
 	  int len = strlen (oldini);
-	  char *newini = (char *) alloca (len + 1);
+	  char *newini = (char *) alloca (len + 2);
 
-	  xsnprintf (newini, len + 1, "%.*s.gdbinit",
+	  xsnprintf (newini, len + 2, "%.*s.gdbinit",
 		     (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
 	  warning (_("obsolete '%s' found. Rename to '%s'."), oldini, newini);
 	}

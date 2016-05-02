@@ -1,3 +1,11 @@
+2016-05-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* windows-nat.c (_initialize_check_for_gdb_ini): Fix off-by-one
+	error in allocation of space for "$HOME/.gdbinit" string.  This
+	caused GDB to abort on startup whenever a '~/gdb.ini' file was
+	actually found, because xsnprintf would hit an assertion
+	violation.
+
 2016-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli/cli-decode.c (help_cmd_list): Do not list commands that
