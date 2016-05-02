@@ -1,5 +1,9 @@
 2016-05-02  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.base/detach.exp: Remove is_remote check.
+
+2016-05-02  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.base/annota-input-while-running.exp: Don't check for
 	[is_remote target].  Enable annotations after running to main.
 	Remove unused "set test..." line.
