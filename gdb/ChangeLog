@@ -1,3 +1,10 @@
+2016-05-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* symfile.c (find_pc_overlay): Add braces to avoid -Wparentheses
+	warning.
+	(find_pc_mapped_section): Likewise.
+	(list_overlays_command): Likewise.
+
 2016-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* remote.c (remote_start_remote): Detect PACKET_vFile_setfs.support.
