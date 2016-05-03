@@ -1720,11 +1720,6 @@ message == an error message without a stack will be printed."),
   oldloc = setlocale (LC_ALL, NULL);
   setlocale (LC_ALL, "");
   progsize = strlen (progname);
-  if (progsize == (size_t) -1)
-    {
-      fprintf (stderr, "Could not convert python path to string\n");
-      return;
-    }
   progname_copy = (wchar_t *) PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
   if (!progname_copy)
     {

@@ -1,3 +1,8 @@
+2016-05-03  Pedro Alves <palves@redhat.com>
+
+	* python/python.c (_initialize_python) [IS_PY3K]: Remove dead
+	code.
+
 2016-05-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* symfile.c (find_pc_overlay): Add braces to avoid -Wparentheses
