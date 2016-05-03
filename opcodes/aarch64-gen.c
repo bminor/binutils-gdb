@@ -28,6 +28,7 @@
 #include "getopt.h"
 #include "opcode/aarch64.h"
 
+#define VERIFIER(x) NULL
 #include "aarch64-tbl.h"
 
 static int debug = 0;

@@ -3420,7 +3420,7 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
 #define BIT(INSN,BT)     (((INSN) >> (BT)) & 1)
 #define BITS(INSN,HI,LO) (((INSN) >> (LO)) & ((1 << (((HI) - (LO)) + 1)) - 1))
 
-bfd_boolean
+static bfd_boolean
 verify_ldpsw (const struct aarch64_opcode * opcode ATTRIBUTE_UNUSED,
 	      const aarch64_insn insn)
 {
@@ -3447,4 +3447,5 @@ verify_ldpsw (const struct aarch64_opcode * opcode ATTRIBUTE_UNUSED,
 
 /* Include the opcode description table as well as the operand description
    table.  */
+#define VERIFIER(x) verify_##x
 #include "aarch64-tbl.h"

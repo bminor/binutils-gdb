@@ -21,6 +21,10 @@
 
 #include "aarch64-opc.h"
 
+#ifndef VERIFIER
+#error  VERIFIER must be defined.
+#endif
+
 /* Operand type.  */
 
 #define OPND(x)	AARCH64_OPND_##x
@@ -2383,13 +2387,13 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("ldp", 0x29400000, 0x7ec00000, ldstpair_off, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_SF),
   CORE_INSN ("stp", 0x2d000000, 0x3fc00000, ldstpair_off, OP3 (Ft, Ft2, ADDR_SIMM7), QL_LDST_PAIR_FP, 0),
   CORE_INSN ("ldp", 0x2d400000, 0x3fc00000, ldstpair_off, OP3 (Ft, Ft2, ADDR_SIMM7), QL_LDST_PAIR_FP, 0),
-  {"ldpsw", 0x69400000, 0xffc00000, ldstpair_off, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_X32, 0, verify_ldpsw},
+  {"ldpsw", 0x69400000, 0xffc00000, ldstpair_off, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_X32, 0, VERIFIER (ldpsw)},
   /* Load/store register pair (indexed).  */
   CORE_INSN ("stp", 0x28800000, 0x7ec00000, ldstpair_indexed, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_SF),
   CORE_INSN ("ldp", 0x28c00000, 0x7ec00000, ldstpair_indexed, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_SF),
   CORE_INSN ("stp", 0x2c800000, 0x3ec00000, ldstpair_indexed, OP3 (Ft, Ft2, ADDR_SIMM7), QL_LDST_PAIR_FP, 0),
   CORE_INSN ("ldp", 0x2cc00000, 0x3ec00000, ldstpair_indexed, OP3 (Ft, Ft2, ADDR_SIMM7), QL_LDST_PAIR_FP, 0),
-  {"ldpsw", 0x68c00000, 0xfec00000, ldstpair_indexed, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_X32, 0, verify_ldpsw},
+  {"ldpsw", 0x68c00000, 0xfec00000, ldstpair_indexed, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_X32, 0, VERIFIER (ldpsw)},
   /* Load register (literal).  */
   {"ldr",   0x18000000, 0xbf000000, loadlit, OP_LDR_LIT,   CORE, OP2 (Rt, ADDR_PCREL19),    QL_R_PCREL, F_GPRSIZE_IN_Q, NULL},
   {"ldr",   0x1c000000, 0x3f000000, loadlit, OP_LDRV_LIT,  CORE, OP2 (Ft, ADDR_PCREL19),    QL_FP_PCREL, 0, NULL},

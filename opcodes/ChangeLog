@@ -1,3 +1,11 @@
+2016-05-03  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* aarch64-gen.c (VERIFIER): Define.
+	* aarch64-opc.c (VERIFIER): Define.
+	(verify_ldpsw): Use static linkage.
+	* aarch64-opc.h (verify_ldpsw): Remove.
+	* aarch64-tbl.h: Use VERIFIER for verifiers.
+
 2016-04-28  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19722
