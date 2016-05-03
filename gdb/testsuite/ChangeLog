@@ -1,3 +1,10 @@
+2016-05-03  Yunlian Jiang <yunlian@google.com>
+	    Doug Evans  <dje@google.com>
+
+	PR symtab/19914
+	* gdb.dwarf2/dwp-sepdebug.c: New file.
+	* gdb.dwarf2/dwp-sepdebug.exp: New file.
+
 2016-05-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/detach.exp: Remove is_remote check.
