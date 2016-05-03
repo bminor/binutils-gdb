@@ -6848,6 +6848,11 @@ The @samp{--long-plt} option enables the use of 16 byte PLT entries
 which support up to 4Gb of code.  The default is to use 12 byte PLT
 entries which only support 512Mb of code.
 
+@kindex --no-apply-dynamic-relocs
+@cindex AArch64 rela addend
+The @samp{--no-apply-dynamic-relocs} option makes AArch64 linker do not apply
+link-time values for dynamic relocations.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

@@ -11,6 +11,9 @@
 
 * The NOCROSSREFSTO command was added to the linker script language.
 
+* Add --no-apply-dynamic-relocs to the AArch64 linker to do not apply link-time
+  values for dynamic relocations.
+
 Changes in 2.26:
 
 * Add --fix-stm32l4xx-629360 to the ARM linker to enable a link-time
