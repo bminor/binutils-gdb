@@ -1,3 +1,9 @@
+2016-05-03  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR 10549
+	* elfxx-mips.c (_bfd_mips_elf_add_symbol_hook): Handle
+	STB_GNU_UNIQUE.
+
 2016-05-03  Jiong Wang  <jiong.wang@arm.com>
 
 	* bfd-in.h (bfd_elf64_aarch64_set_options): Update prototype.
