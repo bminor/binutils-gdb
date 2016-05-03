@@ -1,3 +1,10 @@
+2016-05-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* symfile.c (find_pc_overlay): Add braces to avoid -Wparentheses
+	warning.
+	(find_pc_mapped_section): Likewise.
+	(list_overlays_command): Likewise.
+
 2016-05-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* windows-nat.c (_initialize_check_for_gdb_ini): Fix off-by-one
