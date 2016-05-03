@@ -5,14 +5,14 @@
 # Tommy Pettersson <ptp@lysator.liu.se>, 2001, 2002, 2004.
 # Göran Uddeborg <goeran@uddeborg.se>, 2013, 2014.
 #
-# $Revision: 1.6 $
+# $Revision: 1.7 $
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.24.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-02-10 09:42+1030\n"
-"PO-Revision-Date: 2014-11-02 22:54+0100\n"
+"PO-Revision-Date: 2016-05-02 22:20+0200\n"
 "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -8738,7 +8738,7 @@ msgstr "kan inte exekvera \"%s\": %s"
 #: resrc.c:333
 #, c-format
 msgid "Using temporary file `%s' to read preprocessor output\n"
-msgstr "Läser utdata från förbehandlaren via temporärfil \"%s\"\n"
+msgstr "Läser utdata från preprocessorn via temporärfil ”%s”\n"
 
 #: resrc.c:340
 #, c-format
@@ -8748,7 +8748,7 @@ msgstr "kan inte anropa popen \"%s\": %s"
 #: resrc.c:342
 #, c-format
 msgid "Using popen to read preprocessor output\n"
-msgstr "Läser utdata från förbehandlaren via popen\n"
+msgstr " Läser utdata från preprocessorn via popen\n"
 
 #: resrc.c:408
 #, c-format
