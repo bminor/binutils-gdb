@@ -9413,6 +9413,14 @@ else
   CONFIG_SRCS="$CONFIG_SRCS python/python.c"
 fi
 
+# Work around Python http://bugs.python.org/issue10112.  See also
+# http://bugs.python.org/issue11410, otherwise -Wl,--dynamic-list has
+# no effect.  Note that the only test after this that uses Python is
+# the -rdynamic/-Wl,--dynamic-list test, and we do want that one to be
+# run without -export-dynamic too.
+PYTHON_LIBS=`echo $PYTHON_LIBS | sed -e 's/-Xlinker -export-dynamic//'`
+
+
 
 
  if test "${have_libpython}" != no; then
@@ -13705,6 +13713,12 @@ rm -f core conftest.err conftest.$ac_objext \
      # libpythonX.Y.a would get its symbols required for
      # pythonX.Y/lib-dynload/*.so modules hidden by -Wl,--dynamic-list.
      # Problem does not happen for the recommended libpythonX.Y.so linkage.
+
+     # Note the workaround for Python
+     # http://bugs.python.org/issue10112 earlier has removed
+     # -export-dynamic from PYTHON_LIBS.  That's exactly what we want
+     # here too, as otherwise it'd make this -Wl,--dynamic-list test
+     # always pass.
      old_CFLAGS="$CFLAGS"
      CFLAGS="$CFLAGS $PYTHON_CFLAGS"
      old_LIBS="$LIBS"

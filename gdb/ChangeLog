@@ -1,5 +1,10 @@
 2016-05-03  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac (PYTHON_LIBS): Sed away "-Xlinker -export-dynamic".
+	* configure: Regenerate.
+
+2016-05-03  Pedro Alves  <palves@redhat.com>
+
 	* configure.ac (checking for the dynamic export flag): Add
 	$PYTHON_CPPFLAGS to CPPFLAGS.
 	* configure: Regenerate.
