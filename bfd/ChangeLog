@@ -1,3 +1,12 @@
+2016-05-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* bfd-in.h (bfd_elf64_aarch64_set_options): Update prototype.
+	* bfd-in2.h (bfd_elf64_aarch64_set_options): Likewise.
+	* elfnn-aarch64.c (bfd_elfNN_aarch64_set_options): Initialize
+	no_apply_dynamic_relocs.
+	(elfNN_aarch64_final_link_relocate): Apply absolute relocations even though
+	dynamic relocations generated.
+
 2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Move interp

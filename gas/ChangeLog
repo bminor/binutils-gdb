@@ -1,3 +1,8 @@
+2016-05-03  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* testsuite/gas/lns/lns.exp: Add avr to list of targets using
+	DW_LNS_fixed_advance_pc.
+
 2016-04-27  Alan Modra  <amodra@gmail.com>
 
 	* as.h (inline, __PTR_TO_INT, __INT_TO_PTR): Don't define.

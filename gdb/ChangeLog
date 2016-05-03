@@ -1,3 +1,40 @@
+2016-05-03  Pedro Alves <palves@redhat.com>
+
+	PR python/20037
+	* python/python.c (_initialize_python) [IS_PY3K]: xstrdup/xfree
+	oldloc.
+
+2016-05-03  Pedro Alves <palves@redhat.com>
+
+	* python/python.c (_initialize_python) [IS_PY3K]: Remove dead
+	code.
+
+2016-05-03  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac (PYTHON_LIBS): Sed away "-Xlinker -export-dynamic".
+	* configure: Regenerate.
+
+2016-05-03  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac (checking for the dynamic export flag): Add
+	$PYTHON_CPPFLAGS to CPPFLAGS.
+	* configure: Regenerate.
+
+2016-05-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* symfile.c (find_pc_overlay): Add braces to avoid -Wparentheses
+	warning.
+	(find_pc_mapped_section): Likewise.
+	(list_overlays_command): Likewise.
+
+2016-05-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* windows-nat.c (_initialize_check_for_gdb_ini): Fix off-by-one
+	error in allocation of space for "$HOME/.gdbinit" string.  This
+	caused GDB to abort on startup whenever a '~/gdb.ini' file was
+	actually found, because xsnprintf would hit an assertion
+	violation.
+
 2016-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli/cli-decode.c (help_cmd_list): Do not list commands that

@@ -285,6 +285,10 @@ run_dump_test "dt_textrel"
 
 run_dump_test "plt_mapping_symbol"
 
+run_dump_test "rela-abs-relative"
+run_dump_test "rela-abs-relative-be"
+run_dump_test "rela-abs-relative-opt"
+
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
     {} "copy-reloc-so.so"}

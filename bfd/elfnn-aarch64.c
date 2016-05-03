@@ -2289,6 +2289,9 @@ struct elf_aarch64_link_hash_table
   /* Enable ADRP->ADR rewrite for erratum 843419 workaround.  */
   int fix_erratum_843419_adr;
 
+  /* Don't apply link-time values for dynamic relocations.  */
+  int no_apply_dynamic_relocs;
+
   /* The number of bytes in the initial entry in the PLT.  */
   bfd_size_type plt_header_size;
 
@@ -4334,7 +4337,8 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
 			       int no_enum_warn,
 			       int no_wchar_warn, int pic_veneer,
 			       int fix_erratum_835769,
-			       int fix_erratum_843419)
+			       int fix_erratum_843419,
+			       int no_apply_dynamic_relocs)
 {
   struct elf_aarch64_link_hash_table *globals;
 
@@ -4343,6 +4347,7 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
   globals->fix_erratum_835769 = fix_erratum_835769;
   globals->fix_erratum_843419 = fix_erratum_843419;
   globals->fix_erratum_843419_adr = TRUE;
+  globals->no_apply_dynamic_relocs = no_apply_dynamic_relocs;
 
   BFD_ASSERT (is_aarch64_elf (output_bfd));
   elf_aarch64_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
@@ -5208,6 +5213,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		 relocate the text and data segments independently,
 		 so the symbol does not matter.  */
 	      symbol = 0;
+	      relocate = globals->no_apply_dynamic_relocs ? FALSE : TRUE;
 	      outrel.r_info = ELFNN_R_INFO (symbol, AARCH64_R (RELATIVE));
 	      outrel.r_addend += value;
 	    }

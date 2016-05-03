@@ -3285,19 +3285,21 @@ find_pc_overlay (CORE_ADDR pc)
   struct obj_section *osect, *best_match = NULL;
 
   if (overlay_debugging)
-    ALL_OBJSECTIONS (objfile, osect)
-      if (section_is_overlay (osect))
-      {
-	if (pc_in_mapped_range (pc, osect))
+    {
+      ALL_OBJSECTIONS (objfile, osect)
+	if (section_is_overlay (osect))
 	  {
-	    if (section_is_mapped (osect))
-	      return osect;
-	    else
+	    if (pc_in_mapped_range (pc, osect))
+	      {
+		if (section_is_mapped (osect))
+		  return osect;
+		else
+		  best_match = osect;
+	      }
+	    else if (pc_in_unmapped_range (pc, osect))
 	      best_match = osect;
 	  }
-	else if (pc_in_unmapped_range (pc, osect))
-	  best_match = osect;
-      }
+    }
   return best_match;
 }
 
@@ -3312,9 +3314,11 @@ find_pc_mapped_section (CORE_ADDR pc)
   struct obj_section *osect;
 
   if (overlay_debugging)
-    ALL_OBJSECTIONS (objfile, osect)
-      if (pc_in_mapped_range (pc, osect) && section_is_mapped (osect))
-	return osect;
+    {
+      ALL_OBJSECTIONS (objfile, osect)
+	if (pc_in_mapped_range (pc, osect) && section_is_mapped (osect))
+	  return osect;
+    }
 
   return NULL;
 }
@@ -3330,31 +3334,33 @@ list_overlays_command (char *args, int from_tty)
   struct obj_section *osect;
 
   if (overlay_debugging)
-    ALL_OBJSECTIONS (objfile, osect)
+    {
+      ALL_OBJSECTIONS (objfile, osect)
       if (section_is_mapped (osect))
-      {
-	struct gdbarch *gdbarch = get_objfile_arch (objfile);
-	const char *name;
-	bfd_vma lma, vma;
-	int size;
+	{
+	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	  const char *name;
+	  bfd_vma lma, vma;
+	  int size;
 
-	vma = bfd_section_vma (objfile->obfd, osect->the_bfd_section);
-	lma = bfd_section_lma (objfile->obfd, osect->the_bfd_section);
-	size = bfd_get_section_size (osect->the_bfd_section);
-	name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
+	  vma = bfd_section_vma (objfile->obfd, osect->the_bfd_section);
+	  lma = bfd_section_lma (objfile->obfd, osect->the_bfd_section);
+	  size = bfd_get_section_size (osect->the_bfd_section);
+	  name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
 
-	printf_filtered ("Section %s, loaded at ", name);
-	fputs_filtered (paddress (gdbarch, lma), gdb_stdout);
-	puts_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, lma + size), gdb_stdout);
-	printf_filtered (", mapped at ");
-	fputs_filtered (paddress (gdbarch, vma), gdb_stdout);
-	puts_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, vma + size), gdb_stdout);
-	puts_filtered ("\n");
+	  printf_filtered ("Section %s, loaded at ", name);
+	  fputs_filtered (paddress (gdbarch, lma), gdb_stdout);
+	  puts_filtered (" - ");
+	  fputs_filtered (paddress (gdbarch, lma + size), gdb_stdout);
+	  printf_filtered (", mapped at ");
+	  fputs_filtered (paddress (gdbarch, vma), gdb_stdout);
+	  puts_filtered (" - ");
+	  fputs_filtered (paddress (gdbarch, vma + size), gdb_stdout);
+	  puts_filtered ("\n");
 
-	nmapped++;
-      }
+	  nmapped++;
+	}
+    }
   if (nmapped == 0)
     printf_filtered (_("No sections are mapped.\n"));
 }

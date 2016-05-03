@@ -1024,6 +1024,14 @@ else
   CONFIG_OBS="$CONFIG_OBS python.o"
   CONFIG_SRCS="$CONFIG_SRCS python/python.c"
 fi
+
+# Work around Python http://bugs.python.org/issue10112.  See also
+# http://bugs.python.org/issue11410, otherwise -Wl,--dynamic-list has
+# no effect.  Note that the only test after this that uses Python is
+# the -rdynamic/-Wl,--dynamic-list test, and we do want that one to be
+# run without -export-dynamic too.
+PYTHON_LIBS=`echo $PYTHON_LIBS | sed -e 's/-Xlinker -export-dynamic//'`
+
 AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(PYTHON_LIBS)
@@ -1718,13 +1726,21 @@ if test "${gdb_native}" = yes; then
      # libpythonX.Y.a would get its symbols required for
      # pythonX.Y/lib-dynload/*.so modules hidden by -Wl,--dynamic-list.
      # Problem does not happen for the recommended libpythonX.Y.so linkage.
+
+     # Note the workaround for Python
+     # http://bugs.python.org/issue10112 earlier has removed
+     # -export-dynamic from PYTHON_LIBS.  That's exactly what we want
+     # here too, as otherwise it'd make this -Wl,--dynamic-list test
+     # always pass.
      old_CFLAGS="$CFLAGS"
      CFLAGS="$CFLAGS $PYTHON_CFLAGS"
      old_LIBS="$LIBS"
      LIBS="$LIBS $PYTHON_LIBS"
+     old_CPPFLAGS="$CPPFLAGS"
+     CPPFLAGS="$CPPFLAGS $PYTHON_CPPFLAGS"
      AC_RUN_IFELSE(
        AC_LANG_PROGRAM(
-         [#include "]${have_libpython}[/Python.h"],
+         [#include "Python.h"],
          [int err;
           Py_Initialize ();
           err = PyRun_SimpleString ("import itertools\n");
@@ -1733,6 +1749,7 @@ if test "${gdb_native}" = yes; then
        [dynamic_list=true], [], [true])
      LIBS="$old_LIBS"
      CFLAGS="$old_CFLAGS"
+     CPPFLAGS="$old_CPPFLAGS"
    fi
    LDFLAGS="$old_LDFLAGS"
 fi

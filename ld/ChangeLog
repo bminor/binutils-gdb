@@ -1,3 +1,20 @@
+2016-05-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* emultempl/aarch64elf.em (--no-apply-dynamic-relocs): New option.
+	* NEWS: Mention --no-apply-dynamic-relocs.
+	* ld.texinfo (ld and the ARM family): Document
+	--no-apply-dynamic-relocs.
+	* testsuite/ld-aarch64/rela-abs-relative.s: New test source.
+	* testsuite/ld-aarch64/rela-abs-relative.d: New expected result.
+	* testsuite/ld-aarch64/rela-abs-relative-be.d: Likewise for big-endian.
+	* estsuite/ld-aarch64/rela-abs-relative-opt.d: Likewise, but enable new
+	option.
+
+2016-05-03  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* testsuite/ld-elfcomm/elfcomm.exp: Check for shared lib support
+	before running STT_COMMON tests.
+
 2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/default.exp (NOPIE_CFLAGS): Download source only on

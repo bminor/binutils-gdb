@@ -22,11 +22,6 @@ if { ! [istarget "*-*-linux*"] } {
   return 0
 }
 
-# Are we on a target board?
-if [is_remote target] then {
-    return 0
-}
-
 standard_testfile attach.c
 set escapedbinfile  [string_to_regexp ${binfile}]
 
