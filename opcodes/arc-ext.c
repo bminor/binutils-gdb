@@ -474,12 +474,24 @@ dump_ARC_extmap (void)
 	     insn != NULL; insn = insn->next)
 	  {
 	    printf ("INST: 0x%02x 0x%02x ", insn->major, insn->minor);
-	    if (insn->flags & ARC_SYNTAX_2OP)
-	      printf ("SYNTAX_2OP");
-	    else if (insn->flags & ARC_SYNTAX_3OP)
-	      printf ("SYNTAX_3OP");
-	    else
-	      printf ("SYNTAX_UNK");
+	    switch (insn->flags & ARC_SYNTAX_MASK)
+	      {
+	      case ARC_SYNTAX_2OP:
+		printf ("SYNTAX_2OP");
+		break;
+	      case ARC_SYNTAX_3OP:
+		printf ("SYNTAX_3OP");
+		break;
+	      case ARC_SYNTAX_1OP:
+		printf ("SYNTAX_1OP");
+		break;
+	      case ARC_SYNTAX_NOP:
+		printf ("SYNTAX_NOP");
+		break;
+	      default:
+		printf ("SYNTAX_UNK");
+		break;
+	      }
 
 	    if (insn->flags & 0x10)
 	      printf ("|MODIFIER");
@@ -517,13 +529,19 @@ arcExtMap_genOpcode (const extInstruction_t *einsn,
   int count;
 
   /* Check for the class to see how many instructions we generate.  */
-  switch (einsn->flags & (ARC_SYNTAX_3OP | ARC_SYNTAX_2OP))
+  switch (einsn->flags & ARC_SYNTAX_MASK)
     {
     case ARC_SYNTAX_3OP:
       count = (einsn->modsyn & ARC_OP1_MUST_BE_IMM) ? 10 : 20;
       break;
     case ARC_SYNTAX_2OP:
       count = (einsn->flags & 0x10) ? 7 : 6;
+      break;
+    case ARC_SYNTAX_1OP:
+      count = 3;
+      break;
+    case ARC_SYNTAX_NOP:
+      count = 1;
       break;
     default:
       count = 0;
@@ -754,6 +772,35 @@ arcExtMap_genOpcode (const extInstruction_t *einsn,
       INSERT_XOP (q, einsn->name,
 		  INSN3OP_C0LL (einsn->major, einsn->minor), MINSN3OP_C0LL,
 		  arc_target, arg_32bit_zalimmlimm, lflags_ccf);
+    }
+  else if (einsn->flags & ARC_SYNTAX_1OP)
+    {
+      if (einsn->suffix & ARC_SUFFIX_COND)
+	*errmsg = "Suffix SUFFIX_COND ignored";
+
+      INSERT_XOP (q, einsn->name,
+		  INSN2OP (einsn->major, 0x3F) | FIELDB (einsn->minor),
+		  MINSN2OP_0C, arc_target, arg_32bit_rc, lflags_f);
+
+      INSERT_XOP (q, einsn->name,
+		  INSN2OP (einsn->major, 0x3F) | FIELDB (einsn->minor)
+		  | (0x01 << 22), MINSN2OP_0U, arc_target, arg_32bit_u6,
+		  lflags_f);
+
+      INSERT_XOP (q, einsn->name,
+		  INSN2OP (einsn->major, 0x3F) | FIELDB (einsn->minor)
+		  | FIELDC (62), MINSN2OP_0L, arc_target, arg_32bit_limm,
+		  lflags_f);
+
+    }
+  else if (einsn->flags & ARC_SYNTAX_NOP)
+    {
+      if (einsn->suffix & ARC_SUFFIX_COND)
+	*errmsg = "Suffix SUFFIX_COND ignored";
+
+      INSERT_XOP (q, einsn->name,
+		  INSN2OP (einsn->major, 0x3F) | FIELDB (einsn->minor)
+		  | (0x01 << 22), MINSN2OP_0L, arc_target, arg_none, lflags_f);
     }
   else
     {

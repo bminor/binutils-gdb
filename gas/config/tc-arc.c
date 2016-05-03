@@ -337,7 +337,9 @@ static const attributes_t suffixclass[] =
 static const attributes_t syntaxclass[] =
 {
   { "SYNTAX_3OP", 10, ARC_SYNTAX_3OP },
-  { "SYNTAX_2OP", 10, ARC_SYNTAX_2OP }
+  { "SYNTAX_2OP", 10, ARC_SYNTAX_2OP },
+  { "SYNTAX_1OP", 10, ARC_SYNTAX_1OP },
+  { "SYNTAX_NOP", 10, ARC_SYNTAX_NOP }
 };
 
 /* Extension instruction syntax classes modifiers.  */
@@ -4233,13 +4235,15 @@ arc_extinsn (int ignore ATTRIBUTE_UNUSED)
       && (einsn.major != 5) && (einsn.major != 9))
     as_fatal (_("minor opcode not in range [0x00 - 0x3f]"));
 
-  switch (einsn.syntax & (ARC_SYNTAX_3OP | ARC_SYNTAX_2OP))
+  switch (einsn.syntax & ARC_SYNTAX_MASK)
     {
     case ARC_SYNTAX_3OP:
       if (einsn.modsyn & ARC_OP1_IMM_IMPLIED)
 	as_fatal (_("Improper use of OP1_IMM_IMPLIED"));
       break;
     case ARC_SYNTAX_2OP:
+    case ARC_SYNTAX_1OP:
+    case ARC_SYNTAX_NOP:
       if (einsn.modsyn & ARC_OP1_MUST_BE_IMM)
 	as_fatal (_("Improper use of OP1_MUST_BE_IMM"));
       break;

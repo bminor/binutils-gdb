@@ -1,3 +1,11 @@
+2016-05-03  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (ARC_SYNTAX_1OP): Declare
+	(ARC_SYNTAX_NOP): Likewsie.
+	(ARC_OP1_MUST_BE_IMM): Update defined value.
+	(ARC_OP1_IMM_IMPLIED): Likewise.
+	(arg_32bit_rc, arg_32bit_u6, arg_32bit_limm): Declare.
+
 2016-04-28  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19722

@@ -1722,6 +1722,10 @@ const unsigned char arg_32bit_limmu6[]   = { LIMM, UIMM6_20 };
 const unsigned char arg_32bit_limms12[]  = { LIMM, SIMM12_20 };
 const unsigned char arg_32bit_limmlimm[] = { LIMM, LIMMdup };
 
+const unsigned char arg_32bit_rc[]   = { RC };
+const unsigned char arg_32bit_u6[]   = { UIMM6_20 };
+const unsigned char arg_32bit_limm[] = { LIMM };
+
 /* The opcode table.
 
    The format of the opcode table is:

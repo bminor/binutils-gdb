@@ -516,8 +516,12 @@ extern const unsigned arc_num_relax_opcodes;
 /* Various constants used when defining an extension instruction.  */
 #define ARC_SYNTAX_3OP		(1 << 0)
 #define ARC_SYNTAX_2OP		(1 << 1)
-#define ARC_OP1_MUST_BE_IMM	(1 << 2)
-#define ARC_OP1_IMM_IMPLIED	(1 << 3)
+#define ARC_SYNTAX_1OP		(1 << 2)
+#define ARC_SYNTAX_NOP		(1 << 3)
+#define ARC_SYNTAX_MASK		(0x0F)
+
+#define ARC_OP1_MUST_BE_IMM	(1 << 0)
+#define ARC_OP1_IMM_IMPLIED	(1 << 1)
 
 #define ARC_SUFFIX_NONE		(1 << 0)
 #define ARC_SUFFIX_COND		(1 << 1)
@@ -565,5 +569,9 @@ extern const unsigned char arg_32bit_limmrc[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_limmu6[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_limms12[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_limmlimm[MAX_INSN_ARGS + 1];
+
+extern const unsigned char arg_32bit_rc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_u6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_limm[MAX_INSN_ARGS + 1];
 
 #endif /* OPCODE_ARC_H */
