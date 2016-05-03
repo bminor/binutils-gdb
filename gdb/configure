@@ -13709,12 +13709,14 @@ rm -f core conftest.err conftest.$ac_objext \
      CFLAGS="$CFLAGS $PYTHON_CFLAGS"
      old_LIBS="$LIBS"
      LIBS="$LIBS $PYTHON_LIBS"
+     old_CPPFLAGS="$CPPFLAGS"
+     CPPFLAGS="$CPPFLAGS $PYTHON_CPPFLAGS"
      if test "$cross_compiling" = yes; then :
   true
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include "${have_libpython}/Python.h"
+#include "Python.h"
 int
 main ()
 {
@@ -13736,6 +13738,7 @@ fi
 
      LIBS="$old_LIBS"
      CFLAGS="$old_CFLAGS"
+     CPPFLAGS="$old_CPPFLAGS"
    fi
    LDFLAGS="$old_LDFLAGS"
 fi

@@ -1,3 +1,9 @@
+2016-05-03  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac (checking for the dynamic export flag): Add
+	$PYTHON_CPPFLAGS to CPPFLAGS.
+	* configure: Regenerate.
+
 2016-05-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* symfile.c (find_pc_overlay): Add braces to avoid -Wparentheses
