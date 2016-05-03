@@ -1,3 +1,8 @@
+2016-05-03  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* testsuite/ld-elfcomm/elfcomm.exp: Check for shared lib support
+	before running STT_COMMON tests.
+
 2016-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/default.exp (NOPIE_CFLAGS): Download source only on
