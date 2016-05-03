@@ -1,3 +1,10 @@
+2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (tokenize_arguments): Add checks for array
+	overflow.
+	* testsuite/gas/arc/asm-errors.s: Addition test line added.
+	* testsuite/gas/arc/asm-errors.err: Update expected results.
+
 2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-rx.c (struct cpu_type): Change the type of a field from

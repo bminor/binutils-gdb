@@ -1039,7 +1039,7 @@ tokenize_arguments (char *str,
 	case ']':
 	  ++input_line_pointer;
 	  --brk_lvl;
-	  if (!saw_arg)
+	  if (!saw_arg || num_args == ntok)
 	    goto err;
 	  tok->X_op = O_bracket;
 	  ++tok;
@@ -1049,7 +1049,7 @@ tokenize_arguments (char *str,
 	case '{':
 	case '[':
 	  input_line_pointer++;
-	  if (brk_lvl)
+	  if (brk_lvl || num_args == ntok)
 	    goto err;
 	  ++brk_lvl;
 	  tok->X_op = O_bracket;
@@ -1060,7 +1060,7 @@ tokenize_arguments (char *str,
 	case '@':
 	  /* We have labels, function names and relocations, all
 	     starting with @ symbol.  Sort them out.  */
-	  if (saw_arg && !saw_comma)
+	  if ((saw_arg && !saw_comma) || num_args == ntok)
 	    goto err;
 
 	  /* Parse @label.  */
@@ -1165,7 +1165,7 @@ tokenize_arguments (char *str,
 	  /* Fall through.  */
 	default:
 
-	  if (saw_arg && !saw_comma)
+	  if ((saw_arg && !saw_comma) || num_args == ntok)
 	    goto err;
 
 	  tok->X_op = O_absent;
@@ -1181,7 +1181,9 @@ tokenize_arguments (char *str,
 	normalsymbol:
 	  debug_exp (tok);
 
-	  if (tok->X_op == O_illegal || tok->X_op == O_absent)
+	  if (tok->X_op == O_illegal
+              || tok->X_op == O_absent
+              || num_args == ntok)
 	    goto err;
 
 	  saw_comma = FALSE;
