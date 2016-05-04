@@ -20,6 +20,8 @@ patches="
 	binutils-lto-mixed.patch
 	binutils-pr12639.patch
 	binutils-secondary.patch
+	binutils-cache-contents.patch
+	binutils-convert_load_reloc.patch
 "
 
 for p in $patches
