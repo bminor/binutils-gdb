@@ -2505,7 +2505,8 @@ md_pcrel_from_section (fixS *fixP,
 	}
     }
 
-  pr_debug ("pcrel from %x + %lx = %x, symbol: %s (%x)\n",
+  pr_debug ("pcrel from %"BFD_VMA_FMT"x + %lx = %"BFD_VMA_FMT"x, "
+	    "symbol: %s (%"BFD_VMA_FMT"x)\n",
 	    fixP->fx_frag->fr_address, fixP->fx_where, base,
 	    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "(null)",
 	    fixP->fx_addsy ? S_GET_VALUE (fixP->fx_addsy) : 0);
@@ -3021,7 +3022,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   dest = fragP->fr_literal + fix;
   table_entry = TC_GENERIC_RELAX_TABLE + fragP->fr_subtype;
 
-  pr_debug ("%s:%d: md_convert_frag, subtype: %d, fix: %d, var: %d\n",
+  pr_debug ("%s:%d: md_convert_frag, subtype: %d, fix: %d, "
+	    "var: %"BFD_VMA_FMT"d\n",
 	    fragP->fr_file, fragP->fr_line,
 	    fragP->fr_subtype, fix, fragP->fr_var);
 
