@@ -1,3 +1,7 @@
+2016-05-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (use_gdb_stub): New procedure.
+
 2016-05-03  Yunlian Jiang <yunlian@google.com>
 	    Doug Evans  <dje@google.com>
 
