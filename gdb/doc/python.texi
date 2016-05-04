@@ -2785,6 +2785,13 @@ containing the address where the pattern was found, or @code{None} if
 the pattern could not be found.
 @end defun
 
+@findex Inferior.thread_from_thread_handle
+@defun Inferior.thread_from_thread_handle (thread_handle)
+Return the thread object corresponding to @var{thread_handle}, a thread
+library specific data structure such as @code{pthread_t} for pthreads
+library implementations.
+@end defun
+
 @node Events In Python
 @subsubsection Events In Python
 @cindex inferior events in Python
