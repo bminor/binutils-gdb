@@ -1,5 +1,13 @@
 2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-arc.c (arc_opcode_hash_entry_iterator_next): Set
+	cached opcode to NULL when we reach a non-matching opcode.
+	* testsuite/gas/arc/asm-errors-2.d: New file.
+	* testsuite/gas/arc/asm-errors-2.err: New file.
+	* testsuite/gas/arc/asm-errors-2.s: New file.
+
+2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-arc.c (tokenize_arguments): Add checks for array
 	overflow.
 	* testsuite/gas/arc/asm-errors.s: Addition test line added.

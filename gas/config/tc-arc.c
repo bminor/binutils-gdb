@@ -674,8 +674,8 @@ arc_opcode_hash_entry_iterator_next (const struct arc_opcode_hash_entry *entry,
       const char *old_name = iter->opcode->name;
 
       iter->opcode++;
-      if (iter->opcode->name
-	  && (strcmp (old_name, iter->opcode->name) != 0))
+      if (iter->opcode->name == NULL
+	  || strcmp (old_name, iter->opcode->name) != 0)
 	{
 	  iter->index++;
 	  if (iter->index == entry->count)
