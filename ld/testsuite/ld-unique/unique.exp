@@ -42,19 +42,21 @@ if {!(([istarget "i?86-*-*"]
     return
 }
 
+run_dump_test "unique"
+
 # We need a native system.  FIXME: Strictly speaking this
 # is not true, we just need to know how to create a fully
 # linked executable, including the C and Z libraries, using
 # the linker that is under test.
 if ![isnative] {
-    verbose "UNIQUE tests not run - not a native toolchain"
+    verbose "UNIQUE compiled tests not run - not a native toolchain"
     return
 }
 
 # We need a working compiler.  (Strictly speaking this is
 # not true, we could use target specific assembler files).
 if { [which $CC] == 0 } {
-    verbose "UNIQUE tests not run - no compiler available"
+    verbose "UNIQUE compiled tests not run - no compiler available"
     return
 }
 

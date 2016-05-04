@@ -1,3 +1,9 @@
+2016-05-04  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-unique/unique.d: New test.
+	* testsuite/ld-unique/unique.exp: Run the new test.  Adjust
+	messages for compiled tests.
+
 2016-05-04  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* testsuite/ld-elf/pr18735.d: Allow other symbols.
