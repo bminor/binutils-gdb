@@ -1,3 +1,8 @@
+2016-05-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-linux-nat.c (spu_bfd_iovec_pread): Add pointer cast for C++.
+	(spu_bfd_open): Likewise.
+
 2016-05-04  Yao Qi  <yao.qi@linaro.org>
 
 	PR gdb/19947
