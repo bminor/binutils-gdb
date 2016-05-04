@@ -1,5 +1,12 @@
 2017-09-21  Kevin Buettner  <kevinb@redhat.com>
 
+	* python/py-inferior.c (gdbpy_thread_from_thread_handle): New
+	function.
+	(inferior_object_methods): Add gdbpy_thread_from_thread_handle.
+	* python/python-internal.h (thread_object_type): Declare.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
 	* target.h (struct target_ops): Add to_thread_handle_to_thread_info.
 	(target_thread_handle_to_thread_info): Declare.
 	* target.c (target_thread_handle_to_thread_info): New function.
