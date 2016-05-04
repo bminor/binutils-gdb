@@ -64,6 +64,12 @@ if [istarget sh64*-*-elf] {
     set ldflags "-e _start -mshelf32 $ldflags"
 }
 
+if [istarget avr-*-*] {
+    # Make .text start at a non-zero address, as some tests expect
+    # valid symbols to have non-zero values.
+    set ldflags "--section-start=.text=0x2 $ldflags"
+}
+
 # If we don't have g++ for the target, mark all tests as untested.
 if { ![is_remote host] && [which $CXX] == 0 } {
     foreach testitem $seltests {

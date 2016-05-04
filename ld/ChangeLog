@@ -1,3 +1,13 @@
+2016-05-04  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* testsuite/ld-elf/pr18735.d: Allow other symbols.
+	* testsuite/ld-elf/sec64k.exp: Skip 64ksec for avr.
+	* testsuite/ld-gc/pr14265.d: Allow other symbols.
+	* testsuite/ld-plugin/plugin.exp: Add PR ld/17973 to
+	plugin_tests only if check_shared_lib_support is true.
+	* testsuite/ld-selective/selective.exp: Add --section-start
+	flag for avr.
+
 2016-05-03  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR 10549
