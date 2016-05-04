@@ -1,3 +1,12 @@
+2016-05-04  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/19947
+	* corefile.c (read_memory): Rename it to ...
+	(read_memory_object): ... it.  Add parameter object.
+	(read_memory): Call read_memory_object.
+	(read_stack): Likewise.
+	(read_code): Likewise.
+
 2016-05-03  Yunlian Jiang <yunlian@google.com>
 	    Doug Evans  <dje@google.com>
 
