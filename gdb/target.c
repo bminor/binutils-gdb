@@ -2244,6 +2244,15 @@ target_thread_name (struct thread_info *info)
   return current_target.to_thread_name (&current_target, info);
 }
 
+struct thread_info *
+target_thread_handle_to_thread_info (const gdb_byte *thread_handle,
+				     int handle_len,
+				     struct inferior *inf)
+{
+  return current_target.to_thread_handle_to_thread_info
+           (&current_target, thread_handle, handle_len, inf);
+}
+
 void
 target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 {

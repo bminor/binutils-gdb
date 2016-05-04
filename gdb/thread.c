@@ -519,6 +519,7 @@ find_thread_id (struct inferior *inf, int thr_num)
 }
 
 /* Find a thread_info by matching PTID.  */
+
 struct thread_info *
 find_thread_ptid (ptid_t ptid)
 {
@@ -529,6 +530,17 @@ find_thread_ptid (ptid_t ptid)
       return tp;
 
   return NULL;
+}
+
+/* See gdbthread.h.  */
+
+struct thread_info *
+find_thread_by_handle (struct value *thread_handle, struct inferior *inf)
+{
+  return target_thread_handle_to_thread_info
+	   (value_contents_all (thread_handle),
+	    TYPE_LENGTH (value_type (thread_handle)),
+	    inf);
 }
 
 /*

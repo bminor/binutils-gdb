@@ -1,3 +1,15 @@
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* target.h (struct target_ops): Add to_thread_handle_to_thread_info.
+	(target_thread_handle_to_thread_info): Declare.
+	* target.c (target_thread_handle_to_thread_info): New function.
+	* target-delegates.c: Regenerate.
+	* gdbthread.h (find_thread_by_handle): Declare.
+	* thread.c (find_thread_by_handle): New function.
+	* linux-thread-db.c (thread_db_thread_handle_to_thread_info): New
+	function.
+	(init_thread_db_ops): Register thread_db_thread_handle_to_thread_info.
+
 2017-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* nat/linux-waitpid.c (linux_debug): Add ATTRIBUTE_PRINTF.

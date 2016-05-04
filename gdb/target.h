@@ -644,6 +644,11 @@ struct target_ops
       TARGET_DEFAULT_RETURN (NULL);
     const char *(*to_thread_name) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
+    struct thread_info *(*to_thread_handle_to_thread_info) (struct target_ops *,
+                                                            const gdb_byte *,
+							    int,
+							    struct inferior *inf)
+      TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
     void (*to_interrupt) (struct target_ops *, ptid_t)
@@ -1827,6 +1832,12 @@ extern const char *normal_pid_to_str (ptid_t ptid);
    The returned value must not be freed by the caller.  */
 
 extern const char *target_thread_name (struct thread_info *);
+
+/* Given a pointer to a thread library specific thread handle and
+   its length, return a pointer to the corresponding thread_info struct.  */
+
+extern struct thread_info *target_thread_handle_to_thread_info
+  (const gdb_byte *thread_handle, int handle_len, struct inferior *inf);
 
 /* Attempts to find the pathname of the executable file
    that was run to create a specified process.
