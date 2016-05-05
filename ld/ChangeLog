@@ -1,5 +1,13 @@
 2016-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* emulparams/elf_iamcu.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): New.
+	* emulparams/elf_k1om.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_l1om.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+
+2016-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/pr18591.d: Pass --no-relax to ld.
 
 2016-05-04  H.J. Lu  <hongjiu.lu@intel.com>
