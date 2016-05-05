@@ -1,3 +1,27 @@
+2016-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_tls_transition): Remove abfd.
+	Don't check if contents == NULL.
+	(elf_i386_tls_transition): Add from_relocate_section.  Check
+	from_relocate_section instead of contents != NULL.  Update
+	elf_i386_check_tls_transition call.
+	(elf_i386_check_relocs): Cache the section contents if
+	keep_memory is FALSE.  Pass FALSE as from_relocate_section to
+	elf_i386_tls_transition.
+	(elf_i386_relocate_section): Pass TRUE as from_relocate_section
+	to elf_i386_tls_transition.
+	(elf_backend_caches_rawsize): New.
+	* elf64-x86-64.c (elf_x86_64_check_tls_transition): Don't check
+	if contents == NULL.
+	(elf_x86_64_tls_transition): Add from_relocate_section.  Check
+	from_relocate_section instead of contents != NULL.
+	(elf_x86_64_check_relocs): Cache the section contents if
+	keep_memory is FALSE.  Pass FALSE as from_relocate_section to
+	elf_x86_64_tls_transition.
+	(elf_x86_64_relocate_section): Pass TRUE as from_relocate_section
+	to elf_x86_64_tls_transition.
+	(elf_backend_caches_rawsize): New.
+
 2016-05-03  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR 10549
