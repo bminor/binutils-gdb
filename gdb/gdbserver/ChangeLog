@@ -1,5 +1,10 @@
 2016-05-05  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-arm-low.c (get_next_pcs_read_memory_unsigned_integer):
+	Initialize res to zero.
+
+2016-05-05  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-arm-low.c (arm_sigreturn_next_pc): Change type of cpsr
 	to uint32_t.
 

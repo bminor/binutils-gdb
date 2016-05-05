@@ -262,6 +262,7 @@ get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
 {
   ULONGEST res;
 
+  res = 0;
   (*the_target->read_memory) (memaddr, (unsigned char *) &res, len);
   return res;
 }
