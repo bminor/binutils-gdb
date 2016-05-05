@@ -1,5 +1,14 @@
 2016-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_convert_load): Extract the GOT load
+	conversion to ...
+	(elf_i386_convert_load_reloc): This.  New function.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Extract the GOT load
+	conversion to ...
+	(elf_x86_64_convert_load_reloc): This.  New function.
+
+2016-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_check_tls_transition): Remove abfd.
 	Don't check if contents == NULL.
 	(elf_i386_tls_transition): Add from_relocate_section.  Check
