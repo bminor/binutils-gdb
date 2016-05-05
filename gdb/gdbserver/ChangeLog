@@ -1,3 +1,8 @@
+2016-05-05  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (arm_sigreturn_next_pc): Change type of cpsr
+	to uint32_t.
+
 2016-05-04  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
 	* spu-low.c (fetch_ppc_register): Cast PowerPC-Linux-specific value
