@@ -209,6 +209,26 @@ GCC_METHOD3 (gcc_decl, define_cdtor_clone,
 	     gcc_decl,		      /* Argument CDTOR.  */
 	     gcc_address)	      /* Argument ADDRESS.  */
 
+/* Return the type associated with the given declaration.  This is
+   most useful to obtain the type associated with a forward-declared
+   class, because it is the gcc_type, rather than the gcc_decl, that
+   has to be used to build other types, but new_decl returns a
+   gcc_decl rather than a gcc_type.  This call can in theory be used
+   to obtain the type from any other declaration; it is supposed to
+   return the same type that was supplied when the declaration was
+   created.  */
+
+GCC_METHOD1 (gcc_type, decl_type,
+	     gcc_decl)            /* Argument DECL.  */
+
+/* Return the declaration for a type.  This is most useful to be able
+   to pass a class to new_friend, since it expects a gcc_decl, but
+   start_new_class_type and start_specialize_class_template return a
+   gcc_type.  */
+
+GCC_METHOD1 (gcc_decl, type_decl,
+	     gcc_type)            /* Argument TYPE.  */
+
 /* Declare DECL as a friend of the current class scope, if TYPE is
    NULL, or of TYPE itself otherwise.  DECL may be a function or a
    class, be they template generics, template specializations or not
@@ -288,13 +308,6 @@ GCC_METHOD2 (gcc_type, build_pointer_to_member_type,
 
 GCC_METHOD0 (int /* bool */, start_new_template_decl)
 
-/* Return the declaration associated with the named type.  It is the
-   declaration, rather than the type proper, that has to be passed as
-   a template parameter.  */
-
-GCC_METHOD1 (gcc_typedecl, type_decl,
-	     gcc_type)            /* Argument TYPE.  */
-
 /* Build a typename template-parameter (e.g., the T in template
    <typename T = X>).  Either PACK_P should be nonzero, to indicate an
    argument pack (the last argument in a variadic template argument
@@ -303,10 +316,10 @@ GCC_METHOD1 (gcc_typedecl, type_decl,
    parameter.  FILENAME and LINE_NUMBER may specify the source
    location in which the template parameter was declared.  */
 
-GCC_METHOD5 (gcc_typedecl, new_template_typename_parm,
+GCC_METHOD5 (gcc_type, new_template_typename_parm,
 	     const char *,			      /* Argument ID.  */
 	     int /* bool */,			  /* Argument PACK_P.  */
-	     gcc_typedecl,		    /* Argument DEFAULT_TYPE.  */
+	     gcc_type,			    /* Argument DEFAULT_TYPE.  */
 	     const char *,			/* Argument FILENAME.  */
 	     unsigned int)		     /* Argument LINE_NUMBER.  */
 
@@ -330,7 +343,7 @@ GCC_METHOD5 (gcc_utempl, new_template_template_parm,
    which the template parameter was declared.  */
 
 GCC_METHOD5 (gcc_decl, new_template_value_parm,
-	     gcc_typedecl,		  	    /* Argument TYPE.  */
+	     gcc_type,			  	    /* Argument TYPE.  */
 	     const char *,			      /* Argument ID.  */
 	     gcc_expr,			   /* Argument DEFAULT_VALUE.  */
 	     const char *,			/* Argument FILENAME.  */
@@ -350,8 +363,8 @@ GCC_METHOD5 (gcc_decl, new_template_value_parm,
    member type thereof (returned by new_dependent_typename
    itself).  */
 
-GCC_METHOD3 (gcc_typedecl, new_dependent_typename,
-	     gcc_typedecl,		  /* Argument ENCLOSING_TYPE.  */
+GCC_METHOD3 (gcc_type, new_dependent_typename,
+	     gcc_type,			  /* Argument ENCLOSING_TYPE.  */
 	     const char *,			      /* Argument ID.  */
 	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
 
@@ -361,7 +374,7 @@ GCC_METHOD3 (gcc_typedecl, new_dependent_typename,
    member of the ENCLOSING_TYPE (e.g., bart).  */
 
 GCC_METHOD2 (gcc_utempl, new_dependent_class_template,
-	     gcc_typedecl,		  /* Argument ENCLOSING_TYPE.  */
+	     gcc_type,			  /* Argument ENCLOSING_TYPE.  */
 	     const char *)			      /* Argument ID.  */
 
 /* Build a template-dependent template type specialization (e.g.,
@@ -369,7 +382,7 @@ GCC_METHOD2 (gcc_utempl, new_dependent_class_template,
    (e.g., the T in template <template <[...]> class T = X>), and TARGS
    should specify the template arguments (e.g. <A>).  */
 
-GCC_METHOD2 (gcc_typedecl, new_dependent_typespec,
+GCC_METHOD2 (gcc_type, new_dependent_typespec,
 	     gcc_utempl,		   /* Argument TEMPLATE_DECL.  */
 	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
 
@@ -381,7 +394,7 @@ GCC_METHOD2 (gcc_typedecl, new_dependent_typespec,
    function, or be NULL otherwise.  */
 
 GCC_METHOD3 (gcc_decl, new_dependent_value_expr,
-	     gcc_typedecl,		  /* Argument ENCLOSING_TYPE.  */
+	     gcc_type,			  /* Argument ENCLOSING_TYPE.  */
 	     const char *,			      /* Argument ID.  */
 	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
 
@@ -441,9 +454,13 @@ GCC_METHOD3 (gcc_expr, type_value_expr,
 /* FIXME: function call operations?  ctor/dtor?  new/delete?  */
 
 /* Return the type of the gcc_expr OPERAND.
-   Use this for decltype.  */
+   Use this for decltype.
 
-GCC_METHOD1 (gcc_typedecl, expr_type,
+   Note: for template-dependent expressions, the result is NULL,
+   because the type is only computed when template argument
+   substitution is performed.  */
+
+GCC_METHOD1 (gcc_type, expr_type,
 	     gcc_expr)		  /* Argument OPERAND.  */
 
 /* Introduce a specialization of a template function.

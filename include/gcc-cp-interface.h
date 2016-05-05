@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-9
+  GCC_CP_FE_VERSION_0 = 0xffffffff-10
 };
 
 /* Qualifiers.  */
@@ -60,12 +60,6 @@ enum gcc_cp_ref_qualifiers {
   GCC_CP_REF_QUAL_LVALUE = 1,
   GCC_CP_REF_QUAL_RVALUE = 2
 };
-
-/* Opaque typedef for type declarations.  They are used for template
-   arguments, defaults for type template parameters, and types used to
-   build type-conversion expressions.  */
-
-typedef unsigned long long gcc_typedecl;
 
 /* Opaque typedef for unbound class templates.  They are used for
    template arguments, and defaults for template template
@@ -87,7 +81,7 @@ typedef enum
 gcc_cp_template_arg_kind;
 
 typedef union
-{ gcc_expr value; gcc_typedecl type; gcc_utempl templ; gcc_typedecl pack; }
+{ gcc_expr value; gcc_type type; gcc_utempl templ; gcc_type pack; }
 gcc_cp_template_arg;
 
 /* An array of template arguments.  */
