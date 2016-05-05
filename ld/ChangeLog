@@ -1,3 +1,7 @@
+2016-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (init_os): Pass %E to einfo when bfd_section == NULL.
+
 2016-05-04  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-unique/unique.d: New test.
