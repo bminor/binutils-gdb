@@ -15,7 +15,7 @@
 	(fetch_ppc_memory_1, store_ppc_memory_1): Likewise.
 
 2016-04-28  Par Olsson  <par.olsson@windriver.com>
-2016-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tracepoint.c (write_inferior_int8): New function.
 	(cmd_qtenable_disable): Write enable flag using
