@@ -10838,12 +10838,26 @@ open_and_init_dwp_file (void)
   struct dwp_file *dwp_file;
   char *dwp_name;
   bfd *dbfd;
-  struct cleanup *cleanups;
+  struct cleanup *cleanups = make_cleanup (null_cleanup, 0);
 
   /* Try to find first .dwp for the binary file before any symbolic links
      resolving.  */
-  dwp_name = xstrprintf ("%s.dwp", objfile->original_name);
-  cleanups = make_cleanup (xfree, dwp_name);
+
+  /* If the objfile is a debug file, find the name of the real binary
+     file and get the name of dwp file from there.  */
+  if (objfile->separate_debug_objfile_backlink != NULL)
+    {
+      struct objfile *backlink = objfile->separate_debug_objfile_backlink;
+      const char *backlink_basename = lbasename (backlink->original_name);
+      char *debug_dirname = ldirname (objfile->original_name);
+
+      make_cleanup (xfree, debug_dirname);
+      dwp_name = xstrprintf ("%s%s%s.dwp", debug_dirname,
+			     SLASH_STRING, backlink_basename);
+    }
+  else
+    dwp_name = xstrprintf ("%s.dwp", objfile->original_name);
+  make_cleanup (xfree, dwp_name);
 
   dbfd = open_dwp_file (dwp_name);
   if (dbfd == NULL

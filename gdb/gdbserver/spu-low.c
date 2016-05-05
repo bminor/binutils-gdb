@@ -76,10 +76,10 @@ fetch_ppc_register (int regno)
     char buf[8];
 
     errno = 0;
-    ptrace (PPC_PTRACE_PEEKUSR_3264, tid,
+    ptrace ((PTRACE_TYPE_ARG1) PPC_PTRACE_PEEKUSR_3264, tid,
 	    (PTRACE_TYPE_ARG3) (regno * 8), buf);
     if (errno == 0)
-      ptrace (PPC_PTRACE_PEEKUSR_3264, tid,
+      ptrace ((PTRACE_TYPE_ARG1) PPC_PTRACE_PEEKUSR_3264, tid,
 	      (PTRACE_TYPE_ARG3) (regno * 8 + 4), buf + 4);
     if (errno == 0)
       return (CORE_ADDR) *(unsigned long long *)buf;
@@ -109,7 +109,8 @@ fetch_ppc_memory_1 (int tid, CORE_ADDR memaddr, PTRACE_TYPE_RET *word)
   if (memaddr >> 32)
     {
       unsigned long long addr_8 = (unsigned long long) memaddr;
-      ptrace (PPC_PTRACE_PEEKTEXT_3264, tid, (PTRACE_TYPE_ARG3) &addr_8, word);
+      ptrace ((PTRACE_TYPE_ARG1) PPC_PTRACE_PEEKTEXT_3264, tid,
+	      (PTRACE_TYPE_ARG3) &addr_8, word);
     }
   else
 #endif
@@ -128,7 +129,8 @@ store_ppc_memory_1 (int tid, CORE_ADDR memaddr, PTRACE_TYPE_RET word)
   if (memaddr >> 32)
     {
       unsigned long long addr_8 = (unsigned long long) memaddr;
-      ptrace (PPC_PTRACE_POKEDATA_3264, tid, (PTRACE_TYPE_ARG3) &addr_8, word);
+      ptrace ((PTRACE_TYPE_ARG1) PPC_PTRACE_POKEDATA_3264, tid,
+	      (PTRACE_TYPE_ARG3) &addr_8, word);
     }
   else
 #endif

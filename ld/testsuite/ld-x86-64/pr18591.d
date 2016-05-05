@@ -1,5 +1,5 @@
 #as: --64
-#ld: -melf_x86_64 -shared -z max-page-size=0x200000
+#ld: -melf_x86_64 -shared -z max-page-size=0x200000 --no-relax
 #objdump: -dw
 
 .*: +file format .*

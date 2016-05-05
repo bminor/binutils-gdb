@@ -2204,7 +2204,7 @@ init_os (lang_output_section_statement_type *s, flagword flags)
 							 s->name, flags);
   if (s->bfd_section == NULL)
     {
-      einfo (_("%P%F: output format %s cannot represent section called %s\n"),
+      einfo (_("%P%F: output format %s cannot represent section called %s: %E\n"),
 	     link_info.output_bfd->xvec->name, s->name);
     }
   s->bfd_section->output_section = s->bfd_section;

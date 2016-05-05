@@ -1208,7 +1208,7 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
    from R_TYPE.  */
 
 static bfd_boolean
-elf_i386_check_tls_transition (bfd *abfd, asection *sec,
+elf_i386_check_tls_transition (asection *sec,
 			       bfd_byte *contents,
 			       Elf_Internal_Shdr *symtab_hdr,
 			       struct elf_link_hash_entry **sym_hashes,
@@ -1220,22 +1220,6 @@ elf_i386_check_tls_transition (bfd *abfd, asection *sec,
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
   bfd_vma offset;
-
-  /* Get the section contents.  */
-  if (contents == NULL)
-    {
-      if (elf_section_data (sec)->this_hdr.contents != NULL)
-	contents = elf_section_data (sec)->this_hdr.contents;
-      else
-	{
-	  /* FIXME: How to better handle error condition?  */
-	  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
-	    return FALSE;
-
-	  /* Cache the section contents for elf_link_input_bfd.  */
-	  elf_section_data (sec)->this_hdr.contents = contents;
-	}
-    }
 
   offset = rel->r_offset;
   switch (r_type)
@@ -1397,7 +1381,8 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 			 const Elf_Internal_Rela *rel,
 			 const Elf_Internal_Rela *relend,
 			 struct elf_link_hash_entry *h,
-			 unsigned long r_symndx)
+			 unsigned long r_symndx,
+			 bfd_boolean from_relocate_section)
 {
   unsigned int from_type = *r_type;
   unsigned int to_type = from_type;
@@ -1426,10 +1411,9 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	    to_type = R_386_TLS_IE_32;
 	}
 
-      /* When we are called from elf_i386_relocate_section, CONTENTS
-	 isn't NULL and there may be additional transitions based on
-	 TLS_TYPE.  */
-      if (contents != NULL)
+      /* When we are called from elf_i386_relocate_section, there may
+	 be additional transitions based on TLS_TYPE.  */
+      if (from_relocate_section)
 	{
 	  unsigned int new_to_type = to_type;
 
@@ -1473,7 +1457,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
   /* Check if the transition can be performed.  */
   if (check
-      && ! elf_i386_check_tls_transition (abfd, sec, contents,
+      && ! elf_i386_check_tls_transition (sec, contents,
 					  symtab_hdr, sym_hashes,
 					  from_type, rel, relend))
     {
@@ -1515,6 +1499,255 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
   return TRUE;
 }
 
+/* With the local symbol, foo, we convert
+   mov foo@GOT[(%reg1)], %reg2
+   to
+   lea foo[@GOTOFF(%reg1)], %reg2
+   and convert
+   call/jmp *foo@GOT[(%reg)]
+   to
+   nop call foo/jmp foo nop
+   When PIC is false, convert
+   test %reg1, foo@GOT[(%reg2)]
+   to
+   test $foo, %reg1
+   and convert
+   binop foo@GOT[(%reg1)], %reg2
+   to
+   binop $foo, %reg2
+   where binop is one of adc, add, and, cmp, or, sbb, sub, xor
+   instructions.  */
+
+static
+bfd_boolean
+elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
+			     bfd_byte *contents,
+			     Elf_Internal_Rela *irel,
+			     struct elf_link_hash_entry *h,
+			     bfd_boolean *converted,
+			     struct bfd_link_info *link_info)
+{
+  struct elf_i386_link_hash_table *htab;
+  unsigned int opcode;
+  unsigned int modrm;
+  bfd_boolean baseless;
+  Elf_Internal_Sym *isym;
+  unsigned int addend;
+  unsigned int nop;
+  bfd_vma nop_offset;
+  bfd_boolean is_pic;
+  bfd_boolean to_reloc_32;
+  unsigned int r_type;
+  unsigned int r_symndx;
+  bfd_vma roff = irel->r_offset;
+
+  if (roff < 2)
+    return TRUE;
+
+  /* Addend for R_386_GOT32 and R_386_GOT32X relocations must be 0.  */
+  addend = bfd_get_32 (abfd, contents + roff);
+  if (addend != 0)
+    return TRUE;
+
+  htab = elf_i386_hash_table (link_info);
+  is_pic = bfd_link_pic (link_info);
+
+  r_type = ELF32_R_TYPE (irel->r_info);
+  r_symndx = ELF32_R_SYM (irel->r_info);
+
+  modrm = bfd_get_8 (abfd, contents + roff - 1);
+  baseless = (modrm & 0xc7) == 0x5;
+
+  if (r_type == R_386_GOT32X && baseless && is_pic)
+    {
+      /* For PIC, disallow R_386_GOT32X without a base register
+	 since we don't know what the GOT base is.   Allow
+	 R_386_GOT32 for existing object files.  */
+      const char *name;
+
+      if (h == NULL)
+	{
+	  isym = bfd_sym_from_r_symndx (&htab->sym_cache, abfd,
+					r_symndx);
+	  name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
+	}
+      else
+	name = h->root.root.string;
+
+      (*_bfd_error_handler)
+	(_("%B: direct GOT relocation R_386_GOT32X against `%s' without base register can not be used when making a shared object"),
+	 abfd, name);
+      return FALSE;
+    }
+
+  opcode = bfd_get_8 (abfd, contents + roff - 2);
+
+  /* Convert mov to lea since it has been done for a while.  */
+  if (opcode != 0x8b)
+    {
+      /* Only convert R_386_GOT32X relocation for call, jmp or
+	 one of adc, add, and, cmp, or, sbb, sub, test, xor
+	 instructions.  */
+      if (r_type != R_386_GOT32X)
+	return TRUE;
+    }
+
+  /* Convert to R_386_32 if PIC is false or there is no base
+     register.  */
+  to_reloc_32 = !is_pic || baseless;
+
+  /* Try to convert R_386_GOT32 and R_386_GOT32X.  Get the symbol
+     referred to by the reloc.  */
+  if (h == NULL)
+    {
+      if (opcode == 0x0ff)
+	/* Convert "call/jmp *foo@GOT[(%reg)]".  */
+	goto convert_branch;
+      else
+	/* Convert "mov foo@GOT[(%reg1)], %reg2",
+	   "test %reg1, foo@GOT(%reg2)" and
+	   "binop foo@GOT[(%reg1)], %reg2". */
+	goto convert_load;
+    }
+
+  /* Undefined weak symbol is only bound locally in executable
+     and its reference is resolved as 0.  */
+  if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info, TRUE,
+				       elf_i386_hash_entry (h)))
+    {
+      if (opcode == 0xff)
+	{
+	  /* No direct branch to 0 for PIC.  */
+	  if (is_pic)
+	    return TRUE;
+	  else
+	    goto convert_branch;
+	}
+      else
+	{
+	  /* We can convert load of address 0 to R_386_32.  */
+	  to_reloc_32 = TRUE;
+	  goto convert_load;
+	}
+    }
+
+  if (opcode == 0xff)
+    {
+      /* We have "call/jmp *foo@GOT[(%reg)]".  */
+      if ((h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	  && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	{
+	  /* The function is locally defined.   */
+convert_branch:
+	  /* Convert R_386_GOT32X to R_386_PC32.  */
+	  if (modrm == 0x15 || (modrm & 0xf8) == 0x90)
+	    {
+	      /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
+		 is a nop prefix.  */
+	      modrm = 0xe8;
+	      nop = link_info->call_nop_byte;
+	      if (link_info->call_nop_as_suffix)
+		{
+		  nop_offset = roff + 3;
+		  irel->r_offset -= 1;
+		}
+	      else
+		nop_offset = roff - 2;
+	    }
+	  else
+	    {
+	      /* Convert to "jmp foo nop".  */
+	      modrm = 0xe9;
+	      nop = NOP_OPCODE;
+	      nop_offset = roff + 3;
+	      irel->r_offset -= 1;
+	    }
+
+	  bfd_put_8 (abfd, nop, contents + nop_offset);
+	  bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
+	  /* When converting to PC-relative relocation, we
+	     need to adjust addend by -4.  */
+	  bfd_put_32 (abfd, -4, contents + irel->r_offset);
+	  irel->r_info = ELF32_R_INFO (r_symndx, R_386_PC32);
+
+	  *converted = TRUE;
+	}
+    }
+  else
+    {
+      /* We have "mov foo@GOT[(%re1g)], %reg2",
+	 "test %reg1, foo@GOT(%reg2)" and
+	 "binop foo@GOT[(%reg1)], %reg2".
+
+	 Avoid optimizing _DYNAMIC since ld.so may use its
+	 link-time address.  */
+      if (h == htab->elf.hdynamic)
+	return TRUE;
+
+      /* def_regular is set by an assignment in a linker script in
+	 bfd_elf_record_link_assignment.  */
+      if ((h->def_regular
+	   || h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	  && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	{
+convert_load:
+	  if (opcode == 0x8b)
+	    {
+	      if (to_reloc_32)
+		{
+		  /* Convert "mov foo@GOT[(%reg1)], %reg2" to
+		     "mov $foo, %reg2" with R_386_32.  */
+		  r_type = R_386_32;
+		  modrm = 0xc0 | (modrm & 0x38) >> 3;
+		  bfd_put_8 (abfd, modrm, contents + roff - 1);
+		  opcode = 0xc7;
+		}
+	      else
+		{
+		  /* Convert "mov foo@GOT(%reg1), %reg2" to
+		     "lea foo@GOTOFF(%reg1), %reg2".  */
+		  r_type = R_386_GOTOFF;
+		  opcode = 0x8d;
+		}
+	    }
+	  else
+	    {
+	      /* Only R_386_32 is supported.  */
+	      if (!to_reloc_32)
+		return TRUE;
+
+	      if (opcode == 0x85)
+		{
+		  /* Convert "test %reg1, foo@GOT(%reg2)" to
+		     "test $foo, %reg1".  */
+		  modrm = 0xc0 | (modrm & 0x38) >> 3;
+		  opcode = 0xf7;
+		}
+	      else
+		{
+		  /* Convert "binop foo@GOT(%reg1), %reg2" to
+		     "binop $foo, %reg2".  */
+		  modrm = (0xc0
+			   | (modrm & 0x38) >> 3
+			   | (opcode & 0x3c));
+		  opcode = 0x81;
+		}
+	      bfd_put_8 (abfd, modrm, contents + roff - 1);
+	      r_type = R_386_32;
+	    }
+
+	  bfd_put_8 (abfd, opcode, contents + roff - 2);
+	  irel->r_info = ELF32_R_INFO (r_symndx, r_type);
+
+	  *converted = TRUE;
+	}
+    }
+
+  return TRUE;
+}
+
 /* Rename some of the generic section flags to better document how they
    are used here.  */
 #define need_convert_load	sec_flg0
@@ -1536,6 +1769,7 @@ elf_i386_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
+  bfd_byte *contents;
   bfd_boolean use_plt_got;
 
   if (bfd_link_relocatable (info))
@@ -1545,6 +1779,15 @@ elf_i386_check_relocs (bfd *abfd,
 
   htab = elf_i386_hash_table (info);
   if (htab == NULL)
+    {
+      sec->check_relocs_failed = 1;
+      return FALSE;
+    }
+
+  /* Get the section contents.  */
+  if (elf_section_data (sec)->this_hdr.contents != NULL)
+    contents = elf_section_data (sec)->this_hdr.contents;
+  else if (!bfd_malloc_and_get_section (abfd, sec, &contents))
     {
       sec->check_relocs_failed = 1;
       return FALSE;
@@ -1649,10 +1892,10 @@ elf_i386_check_relocs (bfd *abfd,
 	      |= elf_gnu_symbol_ifunc;
 	}
 
-      if (! elf_i386_tls_transition (info, abfd, sec, NULL,
+      if (! elf_i386_tls_transition (info, abfd, sec, contents,
 				     symtab_hdr, sym_hashes,
 				     &r_type, GOT_UNKNOWN,
-				     rel, rel_end, h, r_symndx))
+				     rel, rel_end, h, r_symndx, FALSE))
 	goto error_return;
 
       switch (r_type)
@@ -2029,9 +2272,22 @@ do_size:
 	sec->need_convert_load = 1;
     }
 
+  if (elf_section_data (sec)->this_hdr.contents != contents)
+    {
+      if (!info->keep_memory)
+	free (contents);
+      else
+	{
+	  /* Cache the section contents for elf_link_input_bfd.  */
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	}
+    }
+
   return TRUE;
 
 error_return:
+  if (elf_section_data (sec)->this_hdr.contents != contents)
+    free (contents);
   sec->check_relocs_failed = 1;
   return FALSE;
 }
@@ -2711,37 +2967,18 @@ elf_i386_readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* With the local symbol, foo, we convert
-   mov foo@GOT[(%reg1)], %reg2
-   to
-   lea foo[@GOTOFF(%reg1)], %reg2
-   and convert
-   call/jmp *foo@GOT[(%reg)]
-   to
-   nop call foo/jmp foo nop
-   When PIC is false, convert
-   test %reg1, foo@GOT[(%reg2)]
-   to
-   test $foo, %reg1
-   and convert
-   binop foo@GOT[(%reg1)], %reg2
-   to
-   binop $foo, %reg2
-   where binop is one of adc, add, and, cmp, or, sbb, sub, xor
-   instructions.  */
+/* Convert load via the GOT slot to load immediate.  */
 
 static bfd_boolean
 elf_i386_convert_load (bfd *abfd, asection *sec,
 		       struct bfd_link_info *link_info)
 {
+  struct elf_i386_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs;
   Elf_Internal_Rela *irel, *irelend;
   bfd_byte *contents;
-  struct elf_i386_link_hash_table *htab;
-  bfd_boolean changed_contents;
-  bfd_boolean changed_relocs;
-  bfd_boolean is_pic;
+  bfd_boolean changed;
   bfd_signed_vma *local_got_refcounts;
 
   /* Don't even try to convert non-ELF outputs.  */
@@ -2763,12 +3000,9 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
   if (internal_relocs == NULL)
     return FALSE;
 
+  changed = FALSE;
   htab = elf_i386_hash_table (link_info);
-  changed_contents = FALSE;
-  changed_relocs = FALSE;
   local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  is_pic = bfd_link_pic (link_info);
 
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
@@ -2783,269 +3017,48 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
   for (irel = internal_relocs; irel < irelend; irel++)
     {
       unsigned int r_type = ELF32_R_TYPE (irel->r_info);
-      unsigned int r_symndx = ELF32_R_SYM (irel->r_info);
-      unsigned int indx;
+      unsigned int r_symndx;
       struct elf_link_hash_entry *h;
-      unsigned int opcode;
-      unsigned int modrm;
-      bfd_vma roff;
-      bfd_boolean baseless;
-      Elf_Internal_Sym *isym;
-      unsigned int addend;
-      unsigned int nop;
-      bfd_vma nop_offset;
-      bfd_boolean to_reloc_32;
+      bfd_boolean converted;
 
       if (r_type != R_386_GOT32 && r_type != R_386_GOT32X)
 	continue;
 
-      roff = irel->r_offset;
-      if (roff < 2)
-	continue;
-
-      /* Addend for R_386_GOT32 and R_386_GOT32X relocations must be 0.  */
-      addend = bfd_get_32 (abfd, contents + roff);
-      if (addend != 0)
-	continue;
-
-      modrm = bfd_get_8 (abfd, contents + roff - 1);
-      baseless = (modrm & 0xc7) == 0x5;
-
-      if (r_type == R_386_GOT32X && baseless && is_pic)
-	{
-	  /* For PIC, disallow R_386_GOT32X without a base register
-	     since we don't know what the GOT base is.   Allow
-	     R_386_GOT32 for existing object files.  */
-	  const char *name;
-
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      isym = bfd_sym_from_r_symndx (&htab->sym_cache, abfd,
-					    r_symndx);
-	      name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
-	    }
-	  else
-	    {
-	      indx = r_symndx - symtab_hdr->sh_info;
-	      h = elf_sym_hashes (abfd)[indx];
-	      BFD_ASSERT (h != NULL);
-	      name = h->root.root.string;
-	    }
-
-	  (*_bfd_error_handler)
-	    (_("%B: direct GOT relocation R_386_GOT32X against `%s' without base register can not be used when making a shared object"),
-	     abfd, name);
-	  goto error_return;
-	}
-
-      opcode = bfd_get_8 (abfd, contents + roff - 2);
-
-      /* Convert mov to lea since it has been done for a while.  */
-      if (opcode != 0x8b)
-	{
-	  /* Only convert R_386_GOT32X relocation for call, jmp or
-	     one of adc, add, and, cmp, or, sbb, sub, test, xor
-	     instructions.  */
-	  if (r_type != R_386_GOT32X)
-	    continue;
-	}
-
-      /* Convert to R_386_32 if PIC is false or there is no base
-	 register.  */
-      to_reloc_32 = !is_pic || baseless;
-
-      /* Try to convert R_386_GOT32 and R_386_GOT32X.  Get the symbol
-	 referred to by the reloc.  */
+      r_symndx = ELF32_R_SYM (irel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
-	{
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
-					abfd, r_symndx);
-
-	  /* STT_GNU_IFUNC must keep GOT32 relocations.  */
-	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
-	    continue;
-
-	  h = NULL;
-	  if (opcode == 0x0ff)
-	    /* Convert "call/jmp *foo@GOT[(%reg)]".  */
-	    goto convert_branch;
-	  else
-	    /* Convert "mov foo@GOT[(%reg1)], %reg2",
-	       "test %reg1, foo@GOT(%reg2)" and
-	       "binop foo@GOT[(%reg1)], %reg2". */
-	    goto convert_load;
-	}
-
-      indx = r_symndx - symtab_hdr->sh_info;
-      h = elf_sym_hashes (abfd)[indx];
-      BFD_ASSERT (h != NULL);
-
-      while (h->root.type == bfd_link_hash_indirect
-	     || h->root.type == bfd_link_hash_warning)
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-      /* STT_GNU_IFUNC must keep GOT32 relocations.  */
-      if (h->type == STT_GNU_IFUNC)
-	continue;
-
-      /* Undefined weak symbol is only bound locally in executable
-	 and its reference is resolved as 0.  */
-      if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info, TRUE,
-					   elf_i386_hash_entry (h)))
-	{
-	  if (opcode == 0xff)
-	    {
-	      /* No direct branch to 0 for PIC.  */
-	      if (is_pic)
-		continue;
-	      else
-		goto convert_branch;
-	    }
-	  else
-	    {
-	      /* We can convert load of address 0 to R_386_32.  */
-	      to_reloc_32 = TRUE;
-	      goto convert_load;
-	    }
-	}
-
-      if (opcode == 0xff)
-	{
-	  /* We have "call/jmp *foo@GOT[(%reg)]".  */
-	  if ((h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak)
-	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
-	    {
-	      /* The function is locally defined.   */
-convert_branch:
-	      /* Convert R_386_GOT32X to R_386_PC32.  */
-	      if (modrm == 0x15 || (modrm & 0xf8) == 0x90)
-		{
-		  /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
-		     is a nop prefix.  */
-		  modrm = 0xe8;
-		  nop = link_info->call_nop_byte;
-		  if (link_info->call_nop_as_suffix)
-		    {
-		      nop_offset = roff + 3;
-		      irel->r_offset -= 1;
-		    }
-		  else
-		    nop_offset = roff - 2;
-		}
-	      else
-		{
-		  /* Convert to "jmp foo nop".  */
-		  modrm = 0xe9;
-		  nop = NOP_OPCODE;
-		  nop_offset = roff + 3;
-		  irel->r_offset -= 1;
-		}
-
-	      bfd_put_8 (abfd, nop, contents + nop_offset);
-	      bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
-	      /* When converting to PC-relative relocation, we
-		 need to adjust addend by -4.  */
-	      bfd_put_32 (abfd, -4, contents + irel->r_offset);
-	      irel->r_info = ELF32_R_INFO (r_symndx, R_386_PC32);
-
-	      if (h)
-		{
-		  if (h->got.refcount > 0)
-		    h->got.refcount -= 1;
-		}
-	      else
-		{
-		  if (local_got_refcounts != NULL
-		      && local_got_refcounts[r_symndx] > 0)
-		    local_got_refcounts[r_symndx] -= 1;
-		}
-
-	      changed_contents = TRUE;
-	      changed_relocs = TRUE;
-	    }
-	}
+	h = elf_i386_get_local_sym_hash (htab, sec->owner,
+					 (const Elf_Internal_Rela *) irel,
+					 FALSE);
       else
 	{
-	  /* We have "mov foo@GOT[(%re1g)], %reg2",
-	     "test %reg1, foo@GOT(%reg2)" and
-	     "binop foo@GOT[(%reg1)], %reg2".
+	  h = elf_sym_hashes (abfd)[r_symndx - symtab_hdr->sh_info];
+	   while (h->root.type == bfd_link_hash_indirect
+		  || h->root.type == bfd_link_hash_warning)
+	     h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
-	     Avoid optimizing _DYNAMIC since ld.so may use its
-	     link-time address.  */
-	  if (h == htab->elf.hdynamic)
-	    continue;
+      /* STT_GNU_IFUNC must keep GOT32 relocations.  */
+      if (h != NULL && h->type == STT_GNU_IFUNC)
+	continue;
 
-	  /* def_regular is set by an assignment in a linker script in
-	     bfd_elf_record_link_assignment.  */
-	  if ((h->def_regular
-	       || h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak)
-	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
+      converted = FALSE;
+      if (!elf_i386_convert_load_reloc (abfd, symtab_hdr, contents,
+					irel, h, &converted, link_info))
+	goto error_return;
+
+      if (converted)
+	{
+	  changed = converted;
+	  if (h)
 	    {
-convert_load:
-	      if (opcode == 0x8b)
-		{
-		  if (to_reloc_32)
-		    {
-		      /* Convert "mov foo@GOT[(%reg1)], %reg2" to
-			 "mov $foo, %reg2" with R_386_32.  */
-		      r_type = R_386_32;
-		      modrm = 0xc0 | (modrm & 0x38) >> 3;
-		      bfd_put_8 (abfd, modrm, contents + roff - 1);
-		      opcode = 0xc7;
-		    }
-		  else
-		    {
-		      /* Convert "mov foo@GOT(%reg1), %reg2" to
-			 "lea foo@GOTOFF(%reg1), %reg2".  */
-		      r_type = R_386_GOTOFF;
-		      opcode = 0x8d;
-		    }
-		}
-	      else
-		{
-		  /* Only R_386_32 is supported.  */
-		  if (!to_reloc_32)
-		    continue;
-
-		  if (opcode == 0x85)
-		    {
-		      /* Convert "test %reg1, foo@GOT(%reg2)" to
-			 "test $foo, %reg1".  */
-		      modrm = 0xc0 | (modrm & 0x38) >> 3;
-		      opcode = 0xf7;
-		    }
-		  else
-		    {
-		      /* Convert "binop foo@GOT(%reg1), %reg2" to
-			 "binop $foo, %reg2".  */
-		      modrm = (0xc0
-			       | (modrm & 0x38) >> 3
-			       | (opcode & 0x3c));
-		      opcode = 0x81;
-		    }
-		  bfd_put_8 (abfd, modrm, contents + roff - 1);
-		  r_type = R_386_32;
-		}
-
-	      bfd_put_8 (abfd, opcode, contents + roff - 2);
-	      irel->r_info = ELF32_R_INFO (r_symndx, r_type);
-
-	      if (h)
-		{
-		  if (h->got.refcount > 0)
-		    h->got.refcount -= 1;
-		}
-	      else
-		{
-		  if (local_got_refcounts != NULL
-		      && local_got_refcounts[r_symndx] > 0)
-		    local_got_refcounts[r_symndx] -= 1;
-		}
-
-	      changed_contents = TRUE;
-	      changed_relocs = TRUE;
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+	    }
+	  else
+	    {
+	      if (local_got_refcounts != NULL
+		  && local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
 	    }
 	}
     }
@@ -3053,7 +3066,7 @@ convert_load:
   if (contents != NULL
       && elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!changed_contents && !link_info->keep_memory)
+      if (!changed && !link_info->keep_memory)
 	free (contents);
       else
 	{
@@ -3064,7 +3077,7 @@ convert_load:
 
   if (elf_section_data (sec)->relocs != internal_relocs)
     {
-      if (!changed_relocs)
+      if (!changed)
 	free (internal_relocs);
       else
 	elf_section_data (sec)->relocs = internal_relocs;
@@ -4356,7 +4369,7 @@ r_386_got32:
 					 input_section, contents,
 					 symtab_hdr, sym_hashes,
 					 &r_type, tls_type, rel,
-					 relend, h, r_symndx))
+					 relend, h, r_symndx, TRUE))
 	    return FALSE;
 
 	  if (r_type == R_386_TLS_LE_32)
@@ -4817,7 +4830,7 @@ r_386_got32:
 					 input_section, contents,
 					 symtab_hdr, sym_hashes,
 					 &r_type, GOT_UNKNOWN, rel,
-					 relend, h, r_symndx))
+					 relend, h, r_symndx, TRUE))
 	    return FALSE;
 
 	  if (r_type != R_386_TLS_LDM)
@@ -5818,6 +5831,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_alignment	4
 #define elf_backend_extern_protected_data 1
+#define elf_backend_caches_rawsize	1
 
 /* Support RELA for objdump of prelink objects.  */
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel

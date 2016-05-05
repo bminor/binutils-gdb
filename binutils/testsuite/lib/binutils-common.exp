@@ -27,44 +27,42 @@ proc is_elf_format {} {
 	return 1;
     }
 
-    if { ![istarget *-*-sysv4*]
-	 && ![istarget *-*-unixware*]
+    if {    ![istarget *-*-eabi*]
 	 && ![istarget *-*-elf*]
-	 && ![istarget *-*-eabi*]
-	 && ![istarget *-*-rtems*]
-	 && ![istarget hppa*64*-*-hpux*]
-	 && ![istarget ia64-*-hpux*]
-	 && ![istarget *-*-linux*]
+	 && ![istarget *-*-freebsd*]
 	 && ![istarget *-*-gnu*]
-	 && ![istarget *-*-nacl*]
-	 && ![istarget frv-*-uclinux*]
-	 && ![istarget bfin-*-uclinux]
-	 && ![istarget sh*-*-uclinux*]
-	 && ![istarget tic6x*-*-uclinux*]
 	 && ![istarget *-*-irix5*]
 	 && ![istarget *-*-irix6*]
-	 && ![istarget *-*-freebsd*]
+	 && ![istarget *-*-linux*]
+	 && ![istarget *-*-nacl*]
 	 && ![istarget *-*-netbsd*]
 	 && ![istarget *-*-openbsd*]
-	 && ![istarget *-*-solaris2*] } {
+	 && ![istarget *-*-rtems*]
+	 && ![istarget *-*-solaris2*]
+	 && ![istarget *-*-sysv4*]
+	 && ![istarget *-*-unixware*]
+	 && ![istarget avr-*-*]
+	 && ![istarget bfin-*-uclinux]
+	 && ![istarget frv-*-uclinux*]
+	 && ![istarget hppa*64*-*-hpux*]
+	 && ![istarget ia64-*-hpux*]
+	 && ![istarget sh*-*-uclinux*]
+	 && ![istarget tic6x*-*-uclinux*] } {
 	return 0
     }
 
-    if { [istarget i?86-*-freebsd\[12\].*] } {
-        return 0
-    }
-
-    if { [istarget *-*-linux*aout*]
+    if {    [istarget *-*-linux*aout*]
 	 || [istarget *-*-linux*ecoff*]
 	 || [istarget *-*-linux*oldld*]
+	 || [istarget *-*-rtemscoff*]
 	 || [istarget h8500-*-rtems*]
-	 || [istarget i960-*-rtems*]
-	 || [istarget *-*-rtemscoff*] } {
+	 || [istarget i?86-*-freebsd\[12\].*]
+	 || [istarget i960-*-rtems*] } {
 	return 0
     }
 
     if { ![istarget *-*-netbsdelf*]
-	 && ([istarget *-*-netbsd*aout*]
+	 && (   [istarget *-*-netbsd*aout*]
 	     || [istarget *-*-netbsdpe*]
 	     || [istarget arm*-*-netbsd*]
 	     || [istarget sparc-*-netbsd*]
@@ -75,7 +73,7 @@ proc is_elf_format {} {
     	return 0
     }
 
-    if { [istarget arm-*-openbsd*]
+    if {    [istarget arm-*-openbsd*]
 	 || [istarget i386-*-openbsd\[0-2\].*]
 	 || [istarget i386-*-openbsd3.\[0-2\]]
 	 || [istarget m68*-*-openbsd*]

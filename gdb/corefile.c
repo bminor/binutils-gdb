@@ -237,10 +237,11 @@ memory_error (enum target_xfer_status err, CORE_ADDR memaddr)
   throw_error (exception, ("%s"), str);
 }
 
-/* Same as target_read_memory, but report an error if can't read.  */
+/* Helper function.  */
 
-void
-read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
+static void
+read_memory_object (enum target_object object, CORE_ADDR memaddr,
+		    gdb_byte *myaddr, ssize_t len)
 {
   ULONGEST xfered = 0;
 
@@ -250,7 +251,7 @@ read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
       ULONGEST xfered_len;
 
       status = target_xfer_partial (current_target.beneath,
-				    TARGET_OBJECT_MEMORY, NULL,
+				    object, NULL,
 				    myaddr + xfered, NULL,
 				    memaddr + xfered, len - xfered,
 				    &xfered_len);
@@ -264,16 +265,20 @@ read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
     }
 }
 
+/* Same as target_read_memory, but report an error if can't read.  */
+
+void
+read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
+{
+  read_memory_object (TARGET_OBJECT_MEMORY, memaddr, myaddr, len);
+}
+
 /* Same as target_read_stack, but report an error if can't read.  */
 
 void
 read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 {
-  int status;
-
-  status = target_read_stack (memaddr, myaddr, len);
-  if (status != 0)
-    memory_error (TARGET_XFER_E_IO, memaddr);
+  read_memory_object (TARGET_OBJECT_STACK_MEMORY, memaddr, myaddr, len);
 }
 
 /* Same as target_read_code, but report an error if can't read.  */
@@ -281,11 +286,7 @@ read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 void
 read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 {
-  int status;
-
-  status = target_read_code (memaddr, myaddr, len);
-  if (status != 0)
-    memory_error (TARGET_XFER_E_IO, memaddr);
+  read_memory_object (TARGET_OBJECT_CODE_MEMORY, memaddr, myaddr, len);
 }
 
 /* Read memory at MEMADDR of length LEN and put the contents in

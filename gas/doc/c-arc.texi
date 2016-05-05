@@ -485,6 +485,12 @@ Two Operand Instruction;
 
 @item SYNTAX_3OP
 Three Operand Instruction.
+
+@item SYNTAX_1OP
+One Operand Instruction.
+
+@item SYNTAX_NOP
+No Operand Instruction.
 @end table
 
 The syntax class may be followed by @samp{|} and one of the following

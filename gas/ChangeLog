@@ -1,3 +1,11 @@
+2016-05-03  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (syntaxclass): Add SYNTAX_NOP and SYNTAX_1OP.
+	(arc_extinsn): Handle new introduced syntax.
+	* testsuite/gas/arc/textinsn1op.d: New file.
+	* testsuite/gas/arc/textinsn1op.s: Likewise.
+	* doc/c-arc.texi: Document SYNTAX_NOP and SYNTAX_1OP.
+
 2016-05-03  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
 
 	* testsuite/gas/lns/lns.exp: Add avr to list of targets using

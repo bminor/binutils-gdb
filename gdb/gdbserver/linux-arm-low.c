@@ -262,6 +262,7 @@ get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
 {
   ULONGEST res;
 
+  res = 0;
   (*the_target->read_memory) (memaddr, (unsigned char *) &res, len);
   return res;
 }
@@ -763,7 +764,7 @@ arm_sigreturn_next_pc (struct regcache *regcache, int svc_number,
   /* Offset of PC register.  */
   int pc_offset = 0;
   CORE_ADDR next_pc = 0;
-  CORE_ADDR cpsr;
+  uint32_t cpsr;
 
   gdb_assert (svc_number == __NR_sigreturn || svc_number == __NR_rt_sigreturn);
 

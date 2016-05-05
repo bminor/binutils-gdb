@@ -3053,6 +3053,26 @@ proc gdb_is_target_remote {} {
     return [gdb_is_target_remote_prompt "$gdb_prompt $"]
 }
 
+# Return the effective value of use_gdb_stub.
+#
+# If the use_gdb_stub global has been set (it is set when the gdb process is
+# spawned), return that.  Otherwise, return the value of the use_gdb_stub
+# property from the board file.
+#
+# This is the preferred way of checking use_gdb_stub, since it allows to check
+# the value before the gdb has been spawned and it will return the correct value
+# even when it was overriden by the test.
+
+proc use_gdb_stub {} {
+  global use_gdb_stub
+
+  if [info exists use_gdb_stub] {
+     return $use_gdb_stub
+  }
+
+  return [target_info exists use_gdb_stub]
+}
+
 # Return 1 if the current remote target is an instance of our GDBserver, 0
 # otherwise.  Return -1 if there was an error and we can't tell.
 

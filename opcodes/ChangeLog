@@ -1,3 +1,11 @@
+2016-05-03  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-ext.c (dump_ARC_extmap): Handle SYNATX_NOP and SYNTAX_1OP.
+	(arcExtMap_genOpcode): Likewise.
+	* arc-opc.c (arg_32bit_rc): Define new variable.
+	(arg_32bit_u6): Likewise.
+	(arg_32bit_limm): Likewise.
+
 2016-05-03  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* aarch64-gen.c (VERIFIER): Define.

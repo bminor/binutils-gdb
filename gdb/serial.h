@@ -75,8 +75,8 @@ extern void serial_ref (struct serial *scb);
 
 extern void serial_unref (struct serial *scb);
 
-/* Create a pipe, and put the read end in files[0], and the write end
-   in filde[1].  Returns 0 for success, negative value for error (in
+/* Create a pipe, and put the read end in FILDES[0], and the write end
+   in FILDES[1].  Returns 0 for success, negative value for error (in
    which case errno contains the error).  */
 
 extern int gdb_pipe (int fildes[2]);

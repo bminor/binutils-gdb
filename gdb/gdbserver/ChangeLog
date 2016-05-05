@@ -1,5 +1,21 @@
+2016-05-05  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (get_next_pcs_read_memory_unsigned_integer):
+	Initialize res to zero.
+
+2016-05-05  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (arm_sigreturn_next_pc): Change type of cpsr
+	to uint32_t.
+
+2016-05-04  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	* spu-low.c (fetch_ppc_register): Cast PowerPC-Linux-specific value
+	used as first ptrace argument to PTRACE_TYPE_ARG1 for C++.
+	(fetch_ppc_memory_1, store_ppc_memory_1): Likewise.
+
 2016-04-28  Par Olsson  <par.olsson@windriver.com>
-2016-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tracepoint.c (write_inferior_int8): New function.
 	(cmd_qtenable_disable): Write enable flag using
