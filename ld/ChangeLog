@@ -1,3 +1,7 @@
+2016-05-06  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld/testsuite/ld-srec/srec.exp: Mark test as XFAIL for AVR.
+
 2016-05-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run load7.
