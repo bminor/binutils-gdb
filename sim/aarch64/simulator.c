@@ -6034,6 +6034,67 @@ do_vec_MUL_by_element (sim_cpu *cpu)
 }
 
 static void
+do_FMLA_by_element (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = half/full
+     instr[29,23] = 00 1111 1
+     instr[22]    = size
+     instr[21]    = L
+     instr[20,16] = m
+     instr[15,12] = 0001
+     instr[11]    = H
+     instr[10]    = 0
+     instr[9,5]   = Vn
+     instr[4,0]   = Vd  */
+
+  unsigned full     = INSTR (30, 30);
+  unsigned size     = INSTR (22, 22);
+  unsigned L        = INSTR (21, 21);
+  unsigned vm       = INSTR (20, 16);
+  unsigned H        = INSTR (11, 11);
+  unsigned vn       = INSTR (9, 5);
+  unsigned vd       = INSTR (4, 0);
+  unsigned e;
+
+  NYI_assert (29, 23, 0x1F);
+  NYI_assert (15, 12, 0x1);
+  NYI_assert (10, 10, 0);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+  if (size)
+    {
+      double element1, element2;
+
+      if (! full || L)
+	HALT_UNALLOC;
+
+      element2 = aarch64_get_vec_double (cpu, vm, H);
+
+      for (e = 0; e < 2; e++)
+	{
+	  element1 = aarch64_get_vec_double (cpu, vn, e);
+	  element1 *= element2;
+	  element1 += aarch64_get_vec_double (cpu, vd, e);
+	  aarch64_set_vec_double (cpu, vd, e, element1);
+	}
+    }
+  else
+    {
+      float element1;
+      float element2 = aarch64_get_vec_float (cpu, vm, (H << 1) | L);
+
+      for (e = 0; e < (full ? 4 : 2); e++)
+	{
+	  element1 = aarch64_get_vec_float (cpu, vn, e);
+	  element1 *= element2;
+	  element1 += aarch64_get_vec_float (cpu, vd, e);
+	  aarch64_set_vec_float (cpu, vd, e, element1);
+	}
+    }
+}
+
+static void
 do_vec_op2 (sim_cpu *cpu)
 {
   /* instr[31]    = 0
@@ -6051,9 +6112,18 @@ do_vec_op2 (sim_cpu *cpu)
     {
       switch (INSTR (15, 10))
 	{
+	case 0x04:
+	case 0x06:
+	  do_FMLA_by_element (cpu);
+	  return;
+
 	case 0x20:
-	case 0x22: do_vec_MUL_by_element (cpu); return;
-	default:   HALT_NYI;
+	case 0x22:
+	  do_vec_MUL_by_element (cpu);
+	  return;
+
+	default:
+	  HALT_NYI;
 	}
     }
   else

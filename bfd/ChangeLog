@@ -1,3 +1,19 @@
+2016-05-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17550
+	* elf-bfd.h (elf_link_hash_entry): Update comments for indx,
+	documenting that indx == -3 if symbol is defined in a discarded
+	section.
+	* elflink.c (elf_link_add_object_symbols): Set indx to -3 if
+	symbol is defined in a discarded section.
+	(elf_link_output_extsym): Strip a global symbol defined in a
+	discarded section.
+
+2016-05-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_backend_add_symbol_hook): Defined for Intel
+	MCU.
+
 2016-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_load): Extract the GOT load

@@ -6053,6 +6053,9 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 #undef  elf_backend_strtab_flags
 #undef  elf_backend_copy_special_section_fields
 
+#undef elf_backend_add_symbol_hook
+#define elf_backend_add_symbol_hook	elf_i386_add_symbol_hook
+
 #include "elf32-target.h"
 
 /* Restore defaults.  */

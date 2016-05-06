@@ -241,36 +241,19 @@ proc run_srec_test { test objs } {
 	set flags "$flags -Ttext 0x1000"
     }
 
-    if [istarget sh64*-*-elf] {
-        # This is what gcc passes to ld by default.
-        set flags "$flags -mshelf32"
-        # SH64 targets cannot convert format in the linker 
-        # using the -oformat command line switch.
-	setup_xfail "sh64*-*-*"
-    }
-
-    if {[istarget aarch64*-*-*]   || \
+    # ARM targets cannot convert format in the linker
+    # using the --oformat command line switch
+    if {[istarget aarch64*-*-*] || \
         [istarget arm*-*-*]} {
-        # ARM targets cannot convert format in the linker
-        # using the --oformat command line switch
 	setup_xfail "aarch64-*-*"
 	setup_xfail "aarch64_be-*-*"
 	setup_xfail "arm*-*-*"
     }
 
-    # V850 targets need libgcc.a
-    if [istarget v850*-*-elf] {
-	set objs "$objs -L ../gcc -lgcc"
-    }
-
-    # Xtensa ELF targets relax by default; S-Record linker does not
-    if [istarget xtensa*-*-*] {
-	set flags "$flags -no-relax"
-    }
-
-    # MSP430 targets always relax.
-    if [istarget msp430*-*-*] {
-	setup_xfail "msp430*-*-*"
+    # The AVR target does not correctly process
+    # relocs when output format is not ELF.
+    if [istarget avr-*-*] {
+	setup_xfail "avr-*-*"
     }
 
     # Epiphany needs some help too
@@ -292,6 +275,29 @@ proc run_srec_test { test objs } {
     if [istarget m9s12x*-*-*] {
 	set flags "$flags --defsym _start=0xc000"
 	setup_xfail "m9s12x*-*-*"
+    }
+
+    # MSP430 targets always relax.
+    if [istarget msp430*-*-*] {
+	setup_xfail "msp430*-*-*"
+    }
+
+    # SH64 targets cannot convert format in the linker 
+    # using the -oformat command line switch.
+    if [istarget sh64*-*-elf] {
+        # This is what gcc passes to ld by default.
+        set flags "$flags -mshelf32"
+	setup_xfail "sh64*-*-*"
+    }
+
+    # V850 targets need libgcc.a
+    if [istarget v850*-*-elf] {
+	set objs "$objs -L ../gcc -lgcc"
+    }
+
+    # Xtensa ELF targets relax by default; S-Record linker does not
+    if [istarget xtensa*-*-*] {
+	set flags "$flags -no-relax"
     }
 
     if { ![ld_simple_link $ld tmpdir/sr1 "$flags $objs"] \

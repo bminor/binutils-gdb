@@ -124,7 +124,8 @@ struct elf_link_hash_entry
   struct bfd_link_hash_entry root;
 
   /* Symbol index in output file.  This is initialized to -1.  It is
-     set to -2 if the symbol is used by a reloc.  */
+     set to -2 if the symbol is used by a reloc.  It is set to -3 if
+     this symbol is defined in a discarded section.  */
   long indx;
 
   /* Symbol index as a dynamic symbol.  Initialized to -1, and remains

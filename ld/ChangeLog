@@ -1,3 +1,30 @@
+2016-05-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17550
+	* testsuite/ld-elf/pr17550-1.s: New file.
+	* testsuite/ld-elf/pr17550-2.s: Likewise.
+	* testsuite/ld-elf/pr17550-3.s: Likewise.
+	* testsuite/ld-elf/pr17550-4.s: Likewise.
+	* testsuite/ld-elf/pr17550a.d: Likewise.
+	* testsuite/ld-elf/pr17550b.d: Likewise.
+	* testsuite/ld-elf/pr17550c.d: Likewise.
+	* testsuite/ld-elf/pr17550d.d: Likewise.
+
+2016-05-06  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld/testsuite/ld-srec/srec.exp: Mark test as XFAIL for AVR.
+
+2016-05-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run load7.
+	* testsuite/ld-i386/load7.d: New file.
+	* testsuite/ld-i386/load7.map: Likewise.
+	* testsuite/ld-i386/load7.s: Likewise.
+	* testsuite/ld-x86-64/load2.d: Likewise.
+	* testsuite/ld-x86-64/load2.map: Likewise.
+	* testsuite/ld-x86-64/load2.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run load2.
+
 2016-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/elf_iamcu.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): New.
