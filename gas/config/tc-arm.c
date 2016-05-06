@@ -155,10 +155,10 @@ static const arm_feature_set *object_arch = NULL;
 
 /* Constants for known architecture features.  */
 static const arm_feature_set fpu_default = FPU_DEFAULT;
-static const arm_feature_set fpu_arch_vfp_v1 = FPU_ARCH_VFP_V1;
+static const arm_feature_set fpu_arch_vfp_v1 ATTRIBUTE_UNUSED = FPU_ARCH_VFP_V1;
 static const arm_feature_set fpu_arch_vfp_v2 = FPU_ARCH_VFP_V2;
-static const arm_feature_set fpu_arch_vfp_v3 = FPU_ARCH_VFP_V3;
-static const arm_feature_set fpu_arch_neon_v1 = FPU_ARCH_NEON_V1;
+static const arm_feature_set fpu_arch_vfp_v3 ATTRIBUTE_UNUSED = FPU_ARCH_VFP_V3;
+static const arm_feature_set fpu_arch_neon_v1 ATTRIBUTE_UNUSED = FPU_ARCH_NEON_V1;
 static const arm_feature_set fpu_arch_fpa = FPU_ARCH_FPA;
 static const arm_feature_set fpu_any_hard = FPU_ANY_HARD;
 static const arm_feature_set fpu_arch_maverick = FPU_ARCH_MAVERICK;
@@ -221,7 +221,7 @@ static const arm_feature_set arm_ext_fp16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
-static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
+static const arm_feature_set arm_arch_full ATTRIBUTE_UNUSED = ARM_FEATURE (-1, -1, -1);
 static const arm_feature_set arm_arch_t2 = ARM_ARCH_THUMB2;
 static const arm_feature_set arm_arch_none = ARM_ARCH_NONE;
 static const arm_feature_set arm_arch_v6m_only = ARM_ARCH_V6M_ONLY;
@@ -1988,6 +1988,10 @@ parse_neon_el_struct_list (char **str, unsigned *pbase,
   const char *const incr_error = _("register stride must be 1 or 2");
   const char *const type_error = _("mismatched element/structure types in list");
   struct neon_typed_alias firsttype;
+  firsttype.defined = 0;
+  firsttype.eltype.type = NT_invtype;
+  firsttype.eltype.size = -1;
+  firsttype.index = -1;
 
   if (skip_past_char (&ptr, '{') == SUCCESS)
     leading_brace = 1;
