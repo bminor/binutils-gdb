@@ -1,3 +1,13 @@
+2016-05-06  Han Shen  <shenhan@google.com>
+
+	PR gold/19987.
+
+	* aarch64-reloc.def: New relocation type.
+	* aarch64.cc (AArch64_relocate_functions::Page): Changed to public.
+	(Target_aarch64::Scan::local): Add R_AARCH64_LD64_GOTPAGE_LO15.
+	(Target_aarch64::Scan::global): Add R_AARCH64_LD64_GOTPAGE_LO15.
+	(Target_aarch64::Relocate::relocate): Implement R_AARCH64_LD64_GOTPAGE_LO15.
+
 2016-04-28  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_CN.po: Updated Chinese (simplified) translation.
