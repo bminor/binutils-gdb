@@ -1883,7 +1883,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		      if (pflag->flgp != NULL)
 			goto match_failed;
 		      cl_matches++;
-		      pflag->flgp = (struct arc_flag_operand *) flg_operand;
+		      pflag->flgp = flg_operand;
 		      lnflg--;
 		      break; /* goto next flag class and parsed flag.  */
 		    }

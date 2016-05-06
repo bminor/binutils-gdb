@@ -225,7 +225,7 @@ struct arc_flags
   char name[MAX_FLAG_NAME_LENGTH + 1];
 
   /* Pointer to arc flags.  */
-  struct arc_flag_operand *flgp;
+  const struct arc_flag_operand *flgp;
 };
 
 extern const relax_typeS md_relax_table[];

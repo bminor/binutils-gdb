@@ -1,5 +1,11 @@
 2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-arc.c (find_opcode_match): Remove casting away of
+	const.
+	* config/tc-arc.h (struct arc_flags): Make flgp field const.
+
+2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-arc.c (md_pcrel_from_section): Use BFD_VMA_FMT where
 	appropriate.
 	(md_convert_frag): Likewise.
