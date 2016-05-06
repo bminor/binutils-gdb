@@ -4082,6 +4082,7 @@ error_free_dyn:
       bfd_boolean old_weak;
       bfd_boolean override;
       bfd_boolean common;
+      bfd_boolean discarded;
       unsigned int old_alignment;
       bfd *old_bfd;
       bfd_boolean matched;
@@ -4092,6 +4093,7 @@ error_free_dyn:
       sec = NULL;
       value = isym->st_value;
       common = bed->common_definition (isym);
+      discarded = FALSE;
 
       bind = ELF_ST_BIND (isym->st_info);
       switch (bind)
@@ -4142,6 +4144,7 @@ error_free_dyn:
 	      /* Symbols from discarded section are undefined.  We keep
 		 its visibility.  */
 	      sec = bfd_und_section_ptr;
+	      discarded = TRUE;
 	      isym->st_shndx = SHN_UNDEF;
 	    }
 	  else if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
@@ -4384,6 +4387,11 @@ error_free_dyn:
       while (h->root.type == bfd_link_hash_indirect
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+      /* Setting the index to -3 tells elf_link_output_extsym that
+	 this symbol is defined in a discarded section.  */
+      if (discarded)
+	h->indx = -3;
 
       *sym_hash = h;
 
@@ -9201,6 +9209,10 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	      return FALSE;
 	    }
 	}
+
+      /* Strip a global symbol defined in a discarded section.  */
+      if (h->indx == -3)
+	return TRUE;
     }
 
   /* We should also warn if a forced local symbol is referenced from
