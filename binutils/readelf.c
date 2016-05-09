@@ -5059,6 +5059,10 @@ get_32bit_section_headers (FILE * file, bfd_boolean probe)
       internal->sh_info      = BYTE_GET (shdrs[i].sh_info);
       internal->sh_addralign = BYTE_GET (shdrs[i].sh_addralign);
       internal->sh_entsize   = BYTE_GET (shdrs[i].sh_entsize);
+      if (!probe && internal->sh_link > num)
+	warn (_("Section %u has an out of range sh_link value of %u\n"), i, internal->sh_link);
+      if (!probe && internal->sh_flags & SHF_INFO_LINK && internal->sh_info > num)
+	warn (_("Section %u has an out of range sh_info value of %u\n"), i, internal->sh_info);
     }
 
   free (shdrs);
@@ -5117,6 +5121,10 @@ get_64bit_section_headers (FILE * file, bfd_boolean probe)
       internal->sh_info      = BYTE_GET (shdrs[i].sh_info);
       internal->sh_offset    = BYTE_GET (shdrs[i].sh_offset);
       internal->sh_addralign = BYTE_GET (shdrs[i].sh_addralign);
+      if (!probe && internal->sh_link > num)
+	warn (_("Section %u has an out of range sh_link value of %u\n"), i, internal->sh_link);
+      if (!probe && internal->sh_flags & SHF_INFO_LINK && internal->sh_info > num)
+	warn (_("Section %u has an out of range sh_info value of %u\n"), i, internal->sh_info);
     }
 
   free (shdrs);

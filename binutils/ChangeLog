@@ -1,3 +1,10 @@
+2016-05-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20063
+	* readelf.c (get_32bit_section_headers): Warn if an out of range
+	sh_link or sh_info field is encountered.
+	(get_64bit_section_headers): Likewise.
+
 2016-05-04  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* testsuite/lib/binutils-common.exp (is_elf_format): Add avr-*-*.

@@ -1,3 +1,9 @@
+2016-05-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20063
+	* elf.c (bfd_elf_get_elf_syms): Check for out of range sh_link
+	field before accessing sections array.
+
 2016-05-09  Christophe Monat  <christophe.monat@st.com>
 
 	PR ld/20030

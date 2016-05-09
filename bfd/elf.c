@@ -407,11 +407,17 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 
       /* Find an index section that is linked to this symtab section.  */
       for (entry = elf_symtab_shndx_list (ibfd); entry != NULL; entry = entry->next)
-	if (sections[entry->hdr.sh_link] == symtab_hdr)
-	  {
-	    shndx_hdr = & entry->hdr;
-	    break;
-	  };
+	{
+	  /* PR 20063.  */
+	  if (entry->hdr.sh_link >= elf_numsections (ibfd))
+	    continue;
+
+	  if (sections[entry->hdr.sh_link] == symtab_hdr)
+	    {
+	      shndx_hdr = & entry->hdr;
+	      break;
+	    };
+	}
 
       if (shndx_hdr == NULL)
 	{
