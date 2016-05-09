@@ -4430,8 +4430,6 @@ ppc64_elf_init_stub_bfd (struct bfd_link_info *info,
    linker created stub bfd.  This ensures that the GOT header is at
    the start of the output TOC section.  */
   htab = ppc_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
   htab->elf.dynobj = params->stub_bfd;
   htab->params = params;
 
