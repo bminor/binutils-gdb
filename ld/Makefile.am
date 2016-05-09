@@ -707,8 +707,9 @@ ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 
 ealphavms.c: $(srcdir)/emulparams/alphavms.sh \
-  $(srcdir)/emultempl/vms.em $(srcdir)/scripttempl/alphavms.sc \
-  ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/vms.em \
+  $(srcdir)/emultempl/needrelax.em \
+  $(srcdir)/scripttempl/alphavms.sc ${GEN_DEPENDS}
 
 earcv2elf.c: $(srcdir)/emulparams/arcv2elf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elfarcv2.sc ${GEN_DEPENDS}
@@ -1891,7 +1892,8 @@ eelf64_ia64_fbsd.c: $(srcdir)/emulparams/elf64_ia64_fbsd.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf64_ia64_vms.c: $(srcdir)/emulparams/elf64_ia64_vms.sh \
-  $(srcdir)/emultempl/vms.em $(srcdir)/emultempl/elf-generic.em \
+  $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/vms.em \
+  $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/ia64vms.sc ${GEN_DEPENDS}
 
 eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \

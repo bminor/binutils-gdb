@@ -1,5 +1,10 @@
 2016-05-09  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (ealphavms.c, eelf64_ia64_vms): Correct .em deps.
+	* Makefile.in: Regenerate.
+
+2016-05-09  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-scripts/pr14962-2.t: Match .text, not *.text.
 	* testsuite/ld-scripts/rgn-at5.t: Similarly, .sec not *.sec.
 	* testsuite/ld-scripts/section-match-1.t: Likewise.
