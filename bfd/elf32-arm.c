@@ -14118,8 +14118,6 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
      .rel(a).bss section we are going to use.  */
   if (info->nocopyreloc == 0
       && (h->root.u.def.section->flags & SEC_ALLOC) != 0
-      /* PR 16177: A copy is only needed if the input section is readonly.  */
-      && (h->root.u.def.section->flags & SEC_READONLY) == 0
       && h->size != 0)
     {
       asection *srel;
