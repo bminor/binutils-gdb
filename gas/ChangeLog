@@ -1,3 +1,8 @@
+2016-05-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/sparc5vis4.s: Fix mnemonic of faligndatai.
+	* testsuite/gas/sparc/sparc5vis4.d: Likewise.
+
 2016-05-04  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (fpu_arch_vfp_v1): Mark with ATTRIBUTE_UNUSED.
