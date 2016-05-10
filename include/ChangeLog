@@ -1,5 +1,9 @@
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf/arm.h (Tag_DSP_extension): Define.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm.h (ARM_FSET_CPU_SUBSET): Define macro.
 
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>

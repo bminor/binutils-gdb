@@ -12737,6 +12737,31 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		}
 	    }
 	  break;
+
+	case Tag_DSP_extension:
+	  /* No need to change output value if any of:
+	     - pre (<=) ARMv5T input architecture (do not have DSP)
+	     - M input profile not ARMv7E-M and do not have DSP.  */
+	  if (in_attr[Tag_CPU_arch].i <= 3
+	      || (in_attr[Tag_CPU_arch_profile].i == 'M'
+		  && in_attr[Tag_CPU_arch].i != 13
+		  && in_attr[i].i == 0))
+	    ; /* Do nothing.  */
+	  /* Output value should be 0 if DSP part of architecture, ie.
+	     - post (>=) ARMv5te architecture output
+	     - A, R or S profile output or ARMv7E-M output architecture.  */
+	  else if (out_attr[Tag_CPU_arch].i >= 4
+		   && (out_attr[Tag_CPU_arch_profile].i == 'A'
+		       || out_attr[Tag_CPU_arch_profile].i == 'R'
+		       || out_attr[Tag_CPU_arch_profile].i == 'S'
+		       || out_attr[Tag_CPU_arch].i == 13))
+	    out_attr[i].i = 0;
+	  /* Otherwise, DSP instructions are added and not part of output
+	     architecture.  */
+	  else
+	    out_attr[i].i = 1;
+	  break;
+
 	case Tag_FP_arch:
 	    {
 	      /* Tag_ABI_HardFP_use is handled along with Tag_FP_arch since
