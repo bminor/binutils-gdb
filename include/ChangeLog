@@ -1,5 +1,9 @@
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm.h (ARM_FSET_CPU_SUBSET): Define macro.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* opcode/arm.h (ARM_EXT2_V8M_MAIN): new feature bit.
 	(ARM_AEXT2_V8M_MAIN): New architecture extension feature set.
 	(ARM_ARCH_V8M_MAIN): Use ARM_AEXT2_V8M_MAIN instead of ARM_AEXT2_V8M
