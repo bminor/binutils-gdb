@@ -23,12 +23,16 @@
    newly-introduced decls will be bound.  An empty string identifies
    the global namespace, whereas NULL identifies an anonymous
    namespace.  A namespace named NAME is created in the current scope,
-   if needed.  */
+   if needed.
+
+   If the newly-created namespace is to be an inline namespace, after
+   push_namespace, get the nested namespace decl with
+   get_current_binding_level, pop back to the enclosing namespace,
+   call using_namespace with INLINE_P, and then push to the inline
+   namespace again.  */
 
 GCC_METHOD1 (int /* bool */, push_namespace,
 	     const char *)	      /* Argument NAME.  */
-
-// FIXME: inline namespaces, anyone?
 
 /* Pop the namespace last entered with push_namespace, restoring the
    binding level in effect before the matching push_namespace.  */
@@ -39,6 +43,49 @@ GCC_METHOD0 (int /* bool */, pop_namespace)
    current binding level.  */
 
 GCC_METHOD0 (gcc_decl, get_current_binding_level)
+
+/* Add USED_NS to the namespaces used by the current binding level.
+   Use get_current_binding_level to obtain USED_NS's gcc_decl.
+   INLINE_P indicates USED_NS was declared as an inline namespace, or
+   the presence of attribute strong in the using directive, which
+   is an older but equivalent GCC extension.  */
+
+GCC_METHOD2 (int /* bool */, using_namespace,
+	     gcc_decl,			/* Argument USED_NS.  */
+	     int /* bool */)		/* Argument INLINE_P.  */
+
+/* Introduce a namespace alias declaration, as in:
+
+   namespace foo = [... ::] bar;
+
+   After this call, namespace TARGET will be visible as ALIAS within
+   the current namespace.  Get the declaration for TARGET by calling
+   get_current_binding_level after pushing into it.  */
+
+GCC_METHOD2 (int /* bool */, new_namespace_alias,
+	     const char *,		/* Argument ALIAS.  */
+	     gcc_decl)			/* Argument TARGET.  */
+
+/* Introduce a using declaration, as in:
+
+   using foo::bar;
+
+   The TARGET decl names the qualifying scope (foo:: above) and the
+   identifier (bar), but that does not mean that only TARGET will be
+   brought into the current scope: all bindings of TARGET's identifier
+   in the qualifying scope will be brought in.
+
+   FLAGS should specify GCC_CP_SYMBOL_USING.  If the current scope is
+   a class scope, visibility flags must be supplied.
+
+   Even when TARGET is template dependent, we don't need to specify
+   whether or not it is a typename: the supplied declaration (that
+   could be a template-dependent type converted to declaration by
+   type_decl) indicates so.  */
+
+GCC_METHOD2 (int /* bool */, new_using_decl,
+	     enum gcc_cp_symbol_kind, /* Argument FLAGS.  */
+	     gcc_decl)		      /* Argument TARGET.  */
 
 /* Create a new "decl" in GCC, and bind it in the current binding
    level.  A decl is a declaration, basically a kind of symbol.
@@ -156,10 +203,6 @@ GCC_METHOD0 (gcc_decl, get_current_binding_level)
      qu      operator ?
      cv      operator <T> (conversion operator)
      li<id>  operator "" <id>
-
-   FIXME: we would benefit from a gcc_decl argument, to be able to
-   introduce using declarations, using directives and namespace
-   aliases.
 
    FIXME: How about attributes; static_assert; lambdas?  */
 
@@ -398,6 +441,9 @@ GCC_METHOD3 (gcc_decl, new_dependent_value_expr,
 	     const char *,			      /* Argument ID.  */
 	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
 
+// FIXME: the above needs to support special member function names and
+// overloaded operator names too.
+
 /* Build a gcc_expr for the value VALUE in type TYPE.  */
 
 GCC_METHOD2 (gcc_expr, literal_expr,
@@ -507,9 +553,6 @@ GCC_METHOD5 (gcc_type, start_new_class_type,
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
-// FIXME: do we need a flag to distinguish structs and classes?  This
-// would be beneficial at least for error messages.
-
 /* Create a new 'union' type, record it in the current binding level,
    and enter its own binding level.  Initially it has no fields.
 
@@ -556,9 +599,9 @@ GCC_METHOD5 (gcc_type, start_new_enum_type,
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
 /* Add a new constant to an enum type.  NAME is the constant's name
-   and VALUE is its value.  */
+   and VALUE is its value.  Returns a gcc_decl for the constant.  */
 
-GCC_METHOD3 (int /* bool */, build_add_enum_constant,
+GCC_METHOD3 (gcc_decl, build_add_enum_constant,
 	     gcc_type,		       /* Argument ENUM_TYPE.  */
 	     const char *,	       /* Argument NAME.  */
 	     unsigned long)	       /* Argument VALUE.  */
@@ -619,8 +662,6 @@ GCC_METHOD4 (gcc_type, build_method_type,
 	     gcc_type, 			   /* Argument FUNC_TYPE.  */
 	     enum gcc_cp_qualifiers,	   /* Argument QUALS.  */
 	     enum gcc_cp_ref_qualifiers)   /* Argument RQUALS.  */
-
-// FIXME: add default expressions for function arguments?
 
 /* Return an integer type with the given properties.  If BUILTIN_NAME
    is non-NULL, it must name a builtin integral type with the given

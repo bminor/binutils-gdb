@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-10
+  GCC_CP_FE_VERSION_0 = 0xffffffff-11
 };
 
 /* Qualifiers.  */
@@ -126,7 +126,7 @@ enum gcc_cp_symbol_kind
 
   GCC_CP_SYMBOL_VARIABLE,
 
-  /* A typedef.  */
+  /* A typedef, or an alias declaration (including template ones).  */
 
   GCC_CP_SYMBOL_TYPEDEF,
 
@@ -141,16 +141,27 @@ enum gcc_cp_symbol_kind
   GCC_CP_SYMBOL_CLASS,
 
   /* A union being introduced with start_new_union_type.  */
+
   GCC_CP_SYMBOL_UNION,
 
   /* An enumeration type being introduced with start_new_enum_type.  */
+
   GCC_CP_SYMBOL_ENUM,
 
   /* A nonstatic data member being introduced with new_field.  */
+
   GCC_CP_SYMBOL_FIELD,
 
   /* A base class in a gcc_vbase_array.  */
+
   GCC_CP_SYMBOL_BASECLASS,
+
+  /* A using declaration in new_using_decl.  */
+
+  GCC_CP_SYMBOL_USING,
+
+  /* Marker to check that we haven't exceeded GCC_CP_SYMBOL_MASK.  */
+  GCC_CP_SYMBOL_END,
 
   GCC_CP_SYMBOL_MASK = 15,
 
