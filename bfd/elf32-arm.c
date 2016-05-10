@@ -3163,7 +3163,8 @@ struct elf32_arm_link_hash_table
   bfd *stub_bfd;
 
   /* Linker call-backs.  */
-  asection * (*add_stub_section) (const char *, asection *, unsigned int);
+  asection * (*add_stub_section) (const char *, asection *, asection *,
+				  unsigned int);
   void (*layout_sections_again) (void);
 
   /* Array to keep track of which stub sections have been created, and
@@ -4144,6 +4145,7 @@ elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
 {
   asection *link_sec;
   asection *stub_sec;
+  asection *out_sec;
 
   link_sec = htab->stub_group[section->id].link_sec;
   BFD_ASSERT (link_sec != NULL);
@@ -4166,7 +4168,8 @@ elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
 
 	  memcpy (s_name, link_sec->name, namelen);
 	  memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
-	  stub_sec = (*htab->add_stub_section) (s_name, link_sec,
+	  out_sec = link_sec->output_section;
+	  stub_sec = (*htab->add_stub_section) (s_name, out_sec, link_sec,
 						htab->nacl_p ? 4 : 3);
 	  if (stub_sec == NULL)
 	    return NULL;
@@ -4202,6 +4205,8 @@ elf32_arm_add_stub (const char *stub_name,
 				     TRUE, FALSE);
   if (stub_entry == NULL)
     {
+      if (section == NULL)
+	section = stub_sec;
       (*_bfd_error_handler) (_("%s: cannot create stub entry %s"),
 			     section->owner,
 			     stub_name);
@@ -5216,6 +5221,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      struct bfd_link_info *info,
 		      bfd_signed_vma group_size,
 		      asection * (*add_stub_section) (const char *, asection *,
+						      asection *,
 						      unsigned int),
 		      void (*layout_sections_again) (void))
 {
