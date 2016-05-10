@@ -1,3 +1,8 @@
+2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add RDPID.
+	* doc/c-i386.texi: Document RDPID.
+
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (arm_adjust_symtab): Use ARM_SET_SYM_BRANCH_TYPE to

@@ -1,3 +1,14 @@
+2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
+
+	* i386-dis.c (prefix_table): Add RDPID instruction.
+	* i386-gen.c (cpu_flag_init): Add RDPID flag.
+	(cpu_flags): Add RDPID bitfield.
+	* i386-opc.h (enum): Add RDPID element.
+	(i386_cpu_flags): Add RDPID field.
+	* i386-opc.tbl: Add RDPID instruction.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Regenerate.
+
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (get_sym_code_type): Use ARM_GET_SYM_BRANCH_TYPE to get

@@ -4132,7 +4132,7 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_MOD_3_0FC7_REG_7 */
   {
     { "rdseed",	{ Ev }, 0 },
-    { Bad_Opcode },
+    { "rdpid",	{ Em }, 0 },
     { "rdseed",	{ Ev }, 0 },
   },
 
