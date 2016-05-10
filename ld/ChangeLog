@@ -1,3 +1,7 @@
+2016-05-10  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* ld/testsuite/ld-elf/flags1.d (xfail): Remove *-*-nacl*".
+
 2016-05-09  Christophe Monat  <christophe.monat@st.com>
 
 	PR ld/20030

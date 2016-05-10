@@ -3,7 +3,7 @@
 #objcopy_linked_file: --set-section-flags .post_text_reserve=contents,alloc,load,readonly,code
 #readelf: -S --wide
 #xfail: "dlx-*-*" "h8300-*-*" "i960-*-*" "ip2k-*-*" "m32r-*-*"
-#xfail: "moxie-*-*" "mt-*-*" "visium-*-*" "*-*-nacl*"
+#xfail: "moxie-*-*" "mt-*-*" "visium-*-*"
 #xfail: "*-*-hpux*" "hppa*64*-*-*"
 # Fails on the DLX, H8300, I960, IP2K, M32R, MOXIE, MT, VISIUM
 #  and all NaCl targets,
