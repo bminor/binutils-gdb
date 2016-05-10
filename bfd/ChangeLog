@@ -1,3 +1,10 @@
+2016-05-10  Pip Cet  <pipcet@gmail.com>
+
+	PR ld/20059
+	* elfxx-target.h (bfd_elfNN_bfd_copy_link_hash_symbol_type):
+	Define as _bfd_generic_copy_link_hash_symbol_type when using
+	generic hash table.
+
 2016-05-09  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20063
