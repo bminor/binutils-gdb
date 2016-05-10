@@ -1,4 +1,16 @@
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* arm.h (enum arm_st_branch_type): Add new ST_BRANCH_ENUM_SIZE
+	enumerator.
+	(NUM_ENUM_ARM_ST_BRANCH_TYPE_BITS): New macro.
+	(ENUM_ARM_ST_BRANCH_TYPE_BITMASK): Likewise.
+	(ARM_SYM_BRANCH_TYPE): Replace by ...
+	(ARM_GET_SYM_BRANCH_TYPE): This and ...
+	(ARM_SET_SYM_BRANCH_TYPE): This in two versions depending on whether
+	BFD_ASSERT is defined or not.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf/arm.h (Tag_DSP_extension): Define.
 

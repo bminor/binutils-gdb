@@ -6288,7 +6288,8 @@ get_sym_code_type (struct disassemble_info *info,
   /* If the symbol has function type then use that.  */
   if (type == STT_FUNC || type == STT_GNU_IFUNC)
     {
-      if (ARM_SYM_BRANCH_TYPE (&es->internal_elf_sym) == ST_BRANCH_TO_THUMB)
+      if (ARM_GET_SYM_BRANCH_TYPE (es->internal_elf_sym.st_target_internal)
+	  == ST_BRANCH_TO_THUMB)
 	*map_type = MAP_THUMB;
       else
 	*map_type = MAP_ARM;
@@ -6655,9 +6656,9 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	  es = *(elf_symbol_type **)(info->symbols);
 	  type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
-	  is_thumb = ((ARM_SYM_BRANCH_TYPE (&es->internal_elf_sym)
-		       == ST_BRANCH_TO_THUMB)
-		      || type == STT_ARM_16BIT);
+	  is_thumb =
+	    ((ARM_GET_SYM_BRANCH_TYPE (es->internal_elf_sym.st_target_internal)
+	      == ST_BRANCH_TO_THUMB) || type == STT_ARM_16BIT);
 	}
       else if (bfd_asymbol_flavour (*info->symbols)
 	       == bfd_target_mach_o_flavour)

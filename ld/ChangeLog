@@ -1,5 +1,10 @@
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Use
+	ARM_GET_SYM_BRANCH_TYPE to get branch type of a symbol.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* emultempl/armelf.em (elf32_arm_add_stub_section): Add output_section
 	parameter and rename input_section parameter to after_input_section.
 	Append input stub section to the output section if after_input_section

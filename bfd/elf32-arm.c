@@ -5465,7 +5465,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 				     + sym_sec->output_offset
 				     + sym_sec->output_section->vma);
 		      st_type = ELF_ST_TYPE (sym->st_info);
-		      branch_type = ARM_SYM_BRANCH_TYPE (sym);
+		      branch_type =
+			ARM_GET_SYM_BRANCH_TYPE (sym->st_target_internal);
 		      sym_name
 			= bfd_elf_string_from_elf_section (input_bfd,
 							   symtab_hdr->sh_link,
@@ -5540,7 +5541,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 			  goto error_ret_free_internal;
 			}
 		      st_type = hash->root.type;
-		      branch_type = hash->root.target_internal;
+		      branch_type =
+			ARM_GET_SYM_BRANCH_TYPE (hash->root.target_internal);
 		      sym_name = hash->root.root.root.string;
 		    }
 
@@ -6629,7 +6631,8 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	      /* This one is a call from arm code.  We need to look up
 		 the target of the call.  If it is a thumb target, we
 		 insert glue.  */
-	      if (h->target_internal == ST_BRANCH_TO_THUMB)
+	      if (ARM_GET_SYM_BRANCH_TYPE (h->target_internal)
+		  == ST_BRANCH_TO_THUMB)
 		record_arm_to_thumb_glue (link_info, h);
 	      break;
 
@@ -11490,28 +11493,34 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	 and we won't let anybody mess with it. Also, we have to do
 	 addend adjustments in case of a R_ARM_TLS_GOTDESC relocation
 	 both in relaxed and non-relaxed cases.  */
-     if ((elf32_arm_tls_transition (info, r_type, h) != (unsigned)r_type)
-	 || (IS_ARM_TLS_GNU_RELOC (r_type)
-	     && !((h ? elf32_arm_hash_entry (h)->tls_type :
-		   elf32_arm_local_got_tls_type (input_bfd)[r_symndx])
-		  & GOT_TLS_GDESC)))
-       {
-	 r = elf32_arm_tls_relax (globals, input_bfd, input_section,
-				  contents, rel, h == NULL);
-	 /* This may have been marked unresolved because it came from
-	    a shared library.  But we've just dealt with that.  */
-	 unresolved_reloc = 0;
-       }
-     else
-       r = bfd_reloc_continue;
+      if ((elf32_arm_tls_transition (info, r_type, h) != (unsigned)r_type)
+	  || (IS_ARM_TLS_GNU_RELOC (r_type)
+	      && !((h ? elf32_arm_hash_entry (h)->tls_type :
+		    elf32_arm_local_got_tls_type (input_bfd)[r_symndx])
+		   & GOT_TLS_GDESC)))
+	{
+	  r = elf32_arm_tls_relax (globals, input_bfd, input_section,
+				   contents, rel, h == NULL);
+	  /* This may have been marked unresolved because it came from
+	     a shared library.  But we've just dealt with that.  */
+	  unresolved_reloc = 0;
+	}
+      else
+	r = bfd_reloc_continue;
 
-     if (r == bfd_reloc_continue)
-       r = elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
-					  input_section, contents, rel,
-					  relocation, info, sec, name, sym_type,
-					  (h ? h->target_internal
-					   : ARM_SYM_BRANCH_TYPE (sym)), h,
-					  &unresolved_reloc, &error_message);
+      if (r == bfd_reloc_continue)
+	{
+	  unsigned char branch_type =
+	    h ? ARM_GET_SYM_BRANCH_TYPE (h->target_internal)
+	      : ARM_GET_SYM_BRANCH_TYPE (sym->st_target_internal);
+
+	  r = elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
+					     input_section, contents, rel,
+					     relocation, info, sec, name,
+					     sym_type, branch_type, h,
+					     &unresolved_reloc,
+					     &error_message);
+	}
 
       /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
 	 because such sections are not SEC_ALLOC and thus ld.so will
@@ -14254,7 +14263,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	      /* Make sure the function is not marked as Thumb, in case
 		 it is the target of an ABS32 relocation, which will
 		 point to the PLT entry.  */
-	      h->target_internal = ST_BRANCH_TO_ARM;
+	      ARM_SET_SYM_BRANCH_TYPE (h->target_internal, ST_BRANCH_TO_ARM);
 	    }
 
 	  /* VxWorks executables have a second set of relocations for
@@ -14402,7 +14411,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
   /* Allocate stubs for exported Thumb functions on v4t.  */
   if (!htab->use_blx && h->dynindx != -1
       && h->def_regular
-      && h->target_internal == ST_BRANCH_TO_THUMB
+      && ARM_GET_SYM_BRANCH_TYPE (h->target_internal) == ST_BRANCH_TO_THUMB
       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
     {
       struct elf_link_hash_entry * th;
@@ -14422,12 +14431,12 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
       myh = (struct elf_link_hash_entry *) bh;
       myh->type = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
       myh->forced_local = 1;
-      myh->target_internal = ST_BRANCH_TO_THUMB;
+      ARM_SET_SYM_BRANCH_TYPE (myh->target_internal, ST_BRANCH_TO_THUMB);
       eh->export_glue = myh;
       th = record_arm_to_thumb_glue (info, h);
       /* Point the symbol at the stub.  */
       h->type = ELF_ST_INFO (ELF_ST_BIND (h->type), STT_FUNC);
-      h->target_internal = ST_BRANCH_TO_ARM;
+      ARM_SET_SYM_BRANCH_TYPE (h->target_internal, ST_BRANCH_TO_ARM);
       h->root.u.def.section = th->root.u.def.section;
       h->root.u.def.value = th->root.u.def.value & ~1;
     }
@@ -15082,7 +15091,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
 	  /* At least one non-call relocation references this .iplt entry,
 	     so the .iplt entry is the function's canonical address.  */
 	  sym->st_info = ELF_ST_INFO (ELF_ST_BIND (sym->st_info), STT_FUNC);
-	  sym->st_target_internal = ST_BRANCH_TO_ARM;
+	  ARM_SET_SYM_BRANCH_TYPE (sym->st_target_internal, ST_BRANCH_TO_ARM);
 	  sym->st_shndx = (_bfd_elf_section_from_bfd_section
 			   (output_bfd, htab->root.iplt->output_section));
 	  sym->st_value = (h->plt.offset
@@ -15366,7 +15375,9 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 
 		  eh = elf_link_hash_lookup (elf_hash_table (info), name,
 					     FALSE, FALSE, TRUE);
-		  if (eh != NULL && eh->target_internal == ST_BRANCH_TO_THUMB)
+		  if (eh != NULL
+		      && ARM_GET_SYM_BRANCH_TYPE (eh->target_internal)
+			 == ST_BRANCH_TO_THUMB)
 		    {
 		      dyn.d_un.d_val |= 1;
 		      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
@@ -17542,6 +17553,7 @@ elf32_arm_swap_symbol_in (bfd * abfd,
 {
   if (!bfd_elf32_swap_symbol_in (abfd, psrc, pshn, dst))
     return FALSE;
+  dst->st_target_internal = 0;
 
   /* New EABI objects mark thumb function symbols by setting the low bit of
      the address.  */
@@ -17551,20 +17563,21 @@ elf32_arm_swap_symbol_in (bfd * abfd,
       if (dst->st_value & 1)
 	{
 	  dst->st_value &= ~(bfd_vma) 1;
-	  dst->st_target_internal = ST_BRANCH_TO_THUMB;
+	  ARM_SET_SYM_BRANCH_TYPE (dst->st_target_internal,
+				   ST_BRANCH_TO_THUMB);
 	}
       else
-	dst->st_target_internal = ST_BRANCH_TO_ARM;
+	ARM_SET_SYM_BRANCH_TYPE (dst->st_target_internal, ST_BRANCH_TO_ARM);
     }
   else if (ELF_ST_TYPE (dst->st_info) == STT_ARM_TFUNC)
     {
       dst->st_info = ELF_ST_INFO (ELF_ST_BIND (dst->st_info), STT_FUNC);
-      dst->st_target_internal = ST_BRANCH_TO_THUMB;
+      ARM_SET_SYM_BRANCH_TYPE (dst->st_target_internal, ST_BRANCH_TO_THUMB);
     }
   else if (ELF_ST_TYPE (dst->st_info) == STT_SECTION)
-    dst->st_target_internal = ST_BRANCH_LONG;
+    ARM_SET_SYM_BRANCH_TYPE (dst->st_target_internal, ST_BRANCH_LONG);
   else
-    dst->st_target_internal = ST_BRANCH_UNKNOWN;
+    ARM_SET_SYM_BRANCH_TYPE (dst->st_target_internal, ST_BRANCH_UNKNOWN);
 
   return TRUE;
 }
@@ -17584,7 +17597,7 @@ elf32_arm_swap_symbol_out (bfd *abfd,
      of the address set, as per the new EABI.  We do this unconditionally
      because objcopy does not set the elf header flags until after
      it writes out the symbol table.  */
-  if (src->st_target_internal == ST_BRANCH_TO_THUMB)
+  if (ARM_GET_SYM_BRANCH_TYPE (src->st_target_internal) == ST_BRANCH_TO_THUMB)
     {
       newsym = *src;
       if (ELF_ST_TYPE (src->st_info) != STT_GNU_IFUNC)
