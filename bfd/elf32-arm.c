@@ -2632,6 +2632,7 @@ enum elf32_arm_stub_type
 {
   arm_stub_none,
   DEF_STUBS
+  max_stub_type
 };
 #undef DEF_STUB
 
@@ -4335,6 +4336,18 @@ arm_stub_required_alignment (enum elf32_arm_stub_type stub_type)
     }
 }
 
+/* Returns whether stubs of type STUB_TYPE take over the symbol they are
+   veneering (TRUE) or have their own symbol (FALSE).  */
+
+static bfd_boolean
+arm_stub_sym_claimed (enum elf32_arm_stub_type stub_type)
+{
+  if (stub_type >= max_stub_type)
+    abort ();  /* Should be unreachable.  */
+
+  return FALSE;
+}
+
 static bfd_boolean
 arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 		    void * in_arg)
@@ -5141,27 +5154,35 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
   char *stub_name;
   struct elf32_arm_stub_hash_entry *stub_entry;
   unsigned int r_type;
+  bfd_boolean sym_claimed = arm_stub_sym_claimed (stub_type);
 
   BFD_ASSERT (stub_type != arm_stub_none);
   *new_stub = FALSE;
 
-  BFD_ASSERT (irela);
-  BFD_ASSERT (section);
+  if (sym_claimed)
+    stub_name = sym_name;
+  else
+    {
+      BFD_ASSERT (irela);
+      BFD_ASSERT (section);
 
-  /* Support for grouping stub sections.  */
-  id_sec = htab->stub_group[section->id].link_sec;
+      /* Support for grouping stub sections.  */
+      id_sec = htab->stub_group[section->id].link_sec;
 
-  /* Get the name of this stub.  */
-  stub_name = elf32_arm_stub_name (id_sec, sym_sec, hash, irela, stub_type);
-  if (!stub_name)
-    return FALSE;
+      /* Get the name of this stub.  */
+      stub_name = elf32_arm_stub_name (id_sec, sym_sec, hash, irela,
+				       stub_type);
+      if (!stub_name)
+	return FALSE;
+    }
 
   stub_entry = arm_stub_hash_lookup (&htab->stub_hash_table, stub_name, FALSE,
 				     FALSE);
   /* The proper stub has already been created, just update its value.  */
   if (stub_entry != NULL)
     {
-      free (stub_name);
+      if (!sym_claimed)
+	free (stub_name);
       stub_entry->target_value = sym_value;
       return TRUE;
     }
@@ -5169,7 +5190,8 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
   stub_entry = elf32_arm_add_stub (stub_name, section, htab);
   if (stub_entry == NULL)
     {
-      free (stub_name);
+      if (!sym_claimed)
+	free (stub_name);
       return FALSE;
     }
 
@@ -5179,31 +5201,36 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
   stub_entry->h = hash;
   stub_entry->branch_type = branch_type;
 
-  if (sym_name == NULL)
-    sym_name = "unnamed";
-  stub_entry->output_name = (char *)
-    bfd_alloc (htab->stub_bfd, sizeof (THUMB2ARM_GLUE_ENTRY_NAME)
-				+ strlen (sym_name));
-  if (stub_entry->output_name == NULL)
-    {
-      free (stub_name);
-      return FALSE;
-    }
-
-  /* For historical reasons, use the existing names for ARM-to-Thumb and
-     Thumb-to-ARM stubs.  */
-  r_type = ELF32_R_TYPE (irela->r_info);
-  if ((r_type == (unsigned int) R_ARM_THM_CALL
-      || r_type == (unsigned int) R_ARM_THM_JUMP24
-      || r_type == (unsigned int) R_ARM_THM_JUMP19)
-      && branch_type == ST_BRANCH_TO_ARM)
-    sprintf (stub_entry->output_name, THUMB2ARM_GLUE_ENTRY_NAME, sym_name);
-  else if ((r_type == (unsigned int) R_ARM_CALL
-	     || r_type == (unsigned int) R_ARM_JUMP24)
-	    && branch_type == ST_BRANCH_TO_THUMB)
-    sprintf (stub_entry->output_name, ARM2THUMB_GLUE_ENTRY_NAME, sym_name);
+  if (sym_claimed)
+    stub_entry->output_name = sym_name;
   else
-    sprintf (stub_entry->output_name, STUB_ENTRY_NAME, sym_name);
+    {
+      if (sym_name == NULL)
+	sym_name = "unnamed";
+      stub_entry->output_name = (char *)
+	bfd_alloc (htab->stub_bfd, sizeof (THUMB2ARM_GLUE_ENTRY_NAME)
+				   + strlen (sym_name));
+      if (stub_entry->output_name == NULL)
+	{
+	  free (stub_name);
+	  return FALSE;
+	}
+
+      /* For historical reasons, use the existing names for ARM-to-Thumb and
+	 Thumb-to-ARM stubs.  */
+      r_type = ELF32_R_TYPE (irela->r_info);
+      if ((r_type == (unsigned int) R_ARM_THM_CALL
+	   || r_type == (unsigned int) R_ARM_THM_JUMP24
+	   || r_type == (unsigned int) R_ARM_THM_JUMP19)
+	  && branch_type == ST_BRANCH_TO_ARM)
+	sprintf (stub_entry->output_name, THUMB2ARM_GLUE_ENTRY_NAME, sym_name);
+      else if ((r_type == (unsigned int) R_ARM_CALL
+		|| r_type == (unsigned int) R_ARM_JUMP24)
+	       && branch_type == ST_BRANCH_TO_THUMB)
+	sprintf (stub_entry->output_name, ARM2THUMB_GLUE_ENTRY_NAME, sym_name);
+      else
+	sprintf (stub_entry->output_name, STUB_ENTRY_NAME, sym_name);
+    }
 
   *new_stub = TRUE;
   return TRUE;
@@ -15861,6 +15888,20 @@ elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
 				     &h->plt, &eh->plt);
 }
 
+/* Bind a veneered symbol to its veneer identified by its hash entry
+   STUB_ENTRY.  The veneered location thus loose its symbol.  */
+
+static void
+arm_stub_claim_sym (struct elf32_arm_stub_hash_entry *stub_entry)
+{
+  struct elf32_arm_link_hash_entry *hash = stub_entry->h;
+
+  BFD_ASSERT (hash);
+  hash->root.root.u.def.section = stub_entry->stub_sec;
+  hash->root.root.u.def.value = stub_entry->stub_offset;
+  hash->root.size = stub_entry->stub_size;
+}
+
 /* Output a single local symbol for a generated stub.  */
 
 static bfd_boolean
@@ -15907,24 +15948,30 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
     return TRUE;
 
   addr = (bfd_vma) stub_entry->stub_offset;
-  stub_name = stub_entry->output_name;
-
   template_sequence = stub_entry->stub_template;
-  switch (template_sequence[0].type)
+
+  if (arm_stub_sym_claimed (stub_entry->stub_type))
+    arm_stub_claim_sym (stub_entry);
+  else
     {
-    case ARM_TYPE:
-      if (!elf32_arm_output_stub_sym (osi, stub_name, addr, stub_entry->stub_size))
-	return FALSE;
-      break;
-    case THUMB16_TYPE:
-    case THUMB32_TYPE:
-      if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1,
-				      stub_entry->stub_size))
-	return FALSE;
-      break;
-    default:
-      BFD_FAIL ();
-      return 0;
+      stub_name = stub_entry->output_name;
+      switch (template_sequence[0].type)
+	{
+	case ARM_TYPE:
+	  if (!elf32_arm_output_stub_sym (osi, stub_name, addr,
+					  stub_entry->stub_size))
+	    return FALSE;
+	  break;
+	case THUMB16_TYPE:
+	case THUMB32_TYPE:
+	  if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1,
+					  stub_entry->stub_size))
+	    return FALSE;
+	  break;
+	default:
+	  BFD_FAIL ();
+	  return 0;
+	}
     }
 
   prev_type = DATA_TYPE;
