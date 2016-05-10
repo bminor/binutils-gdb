@@ -1,3 +1,10 @@
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* opcode/arm.h (ARM_EXT2_V8M_MAIN): new feature bit.
+	(ARM_AEXT2_V8M_MAIN): New architecture extension feature set.
+	(ARM_ARCH_V8M_MAIN): Use ARM_AEXT2_V8M_MAIN instead of ARM_AEXT2_V8M
+	for the high core bits.
+
 2016-05-03  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* opcode/arc.h (ARC_SYNTAX_1OP): Declare

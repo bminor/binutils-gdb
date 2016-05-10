@@ -1,3 +1,27 @@
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_ext_m): Add feature bit ARM_EXT2_V8M_MAIN.
+	(arm_ext_v8m_main): New feature set for bit ARM_EXT2_V8M_MAIN.
+	(arm_ext_v8m_m_only): New feature set for instructions in ARMv8-M not
+	shared with a non M profile architecture.
+	(do_rn): New function.
+	(known_t32_only_insn): Check opcode against arm_ext_v8m_m_only rather
+	than arm_ext_v8m.
+	(v7m_psrs): Add ARMv8-M security extensions new special registers.
+	(insns): Add ARMv8-M Security Extensions instructions.
+	(aeabi_set_public_attributes): Use arm_ext_v8m_m_only instead of
+	arm_ext_v8m_m to decide the profile and the Thumb ISA.
+	* testsuite/gas/arm/archv8m-cmse.s: New file.
+	* testsuite/gas/arm/archv8m-cmse-main.s: Likewise..
+	* testsuite/gas/arm/archv8m-cmse-msr.s: Likewise.
+	* testsuite/gas/arm/any-cmse.d: Likewise.
+	* testsuite/gas/arm/any-cmse-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-base.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-main.d: Likewise.
+
 2016-05-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/sparc/sparc5vis4.s: Fix mnemonic of faligndatai.

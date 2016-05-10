@@ -1,3 +1,14 @@
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): Add entries for VFP ARMv8-M
+	Mainline Security Extensions instructions.
+	(thumb_opcodes): Add entries for narrow ARMv8-M Security
+	Extensions instructions.
+	(thumb32_opcodes): Add entries for wide ARMv8-M Security Extensions
+	instructions.
+	(psr_name): Add new MSP_NS and PSP_NS ARMv8-M Security Extensions
+	special registers.
+
 2016-05-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix mnemonic of faligndatai.
