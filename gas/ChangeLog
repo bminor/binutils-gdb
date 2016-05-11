@@ -1,3 +1,18 @@
+2016-05-11  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/archv8m-cmse-msr-main.d: 
+
+2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
+
+	* testsuite/gas/i386/i386.exp: Run RDPID tests.
+	* testsuite/gas/i386/prefix.d: Adjust.
+	* testsuite/gas/i386/rdpid.s: New test.
+	* testsuite/gas/i386/rdpid.d: Ditto.
+	* testsuite/gas/i386/rdpid-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-rdpid.s: Ditto.
+	* testsuite/gas/i386/x86-64-rdpid.d: Ditto.
+	* testsuite/gas/i386/x86-64-rdpid-intel.d: Ditto.
+
 2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add RDPID.

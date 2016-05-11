@@ -2,6 +2,7 @@
 #source: archv8m.s
 #as: -march=armv8-m.main+dsp
 #objdump: -dr --prefix-addresses --show-raw-insn
+#skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 
 .*: +file format .*arm.*
 
