@@ -1,3 +1,15 @@
+2016-05-11  Alan Modra  <amodra@gmail.com>
+
+	PR 20060
+	* testsuite/ld-powerpc/powerpc.exp: Run new tests.
+	* testsuite/ld-powerpc/tlsdll.s: New.
+	* testsuite/ld-powerpc/tlsdll.ver: New.
+	* testsuite/ld-powerpc/tlsdll_32.s: New.
+	* testsuite/ld-powerpc/tlsopt5.d: New.
+	* testsuite/ld-powerpc/tlsopt5.s: New.
+	* testsuite/ld-powerpc/tlsopt5_32.d: New.
+	* testsuite/ld-powerpc/tlsopt5_32.s: New.
+
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Use

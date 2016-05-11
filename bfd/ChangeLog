@@ -1,3 +1,9 @@
+2016-05-11  Alan Modra  <amodra@gmail.com>
+
+	PR 20060
+	* elf64-ppc.c (ppc64_elf_tls_setup): Clear forced_local.
+	* elf32-ppc.c (ppc_elf_tls_setup): Likewise.
+
 2016-05-10  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Remove redundant

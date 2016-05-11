@@ -8226,6 +8226,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		  tga_fd->root.type = bfd_link_hash_indirect;
 		  tga_fd->root.u.i.link = &opt_fd->root;
 		  ppc64_elf_copy_indirect_symbol (info, opt_fd, tga_fd);
+		  opt_fd->forced_local = 0;
 		  if (opt_fd->dynindx != -1)
 		    {
 		      /* Use __tls_get_addr_opt in dynamic relocations.  */
@@ -8242,6 +8243,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		      tga->root.type = bfd_link_hash_indirect;
 		      tga->root.u.i.link = &opt->root;
 		      ppc64_elf_copy_indirect_symbol (info, opt, tga);
+		      opt->forced_local = 0;
 		      _bfd_elf_link_hash_hide_symbol (info, opt,
 						      tga->forced_local);
 		      htab->tls_get_addr = (struct ppc_link_hash_entry *) opt;
