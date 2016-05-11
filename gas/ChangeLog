@@ -1,6 +1,14 @@
 2016-05-11  Nick Clifton  <nickc@redhat.com>
 
-	* gas/arm/archv8m-cmse-msr-main.d: 
+	* testsuite/gas/arm/archv8m-cmse-base.d: Skip for non-ELF ARM targets.
+	* testsuite/gas/arm/archv8m-cmse-main-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-3.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-4.d: Likewise.
 
 2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
 
