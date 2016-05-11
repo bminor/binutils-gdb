@@ -1,3 +1,8 @@
+2016-05-10  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Remove redundant
+	aarch64_tls_transition check.
+
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (enum elf32_arm_stub_type): New max_stub_type
