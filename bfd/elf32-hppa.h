@@ -36,6 +36,9 @@
 #include "libhppa.h"
 #include "elf/hppa.h"
 
+void elf32_hppa_init_stub_bfd
+  (bfd *, struct bfd_link_info *);
+
 int elf32_hppa_setup_section_lists
   (bfd *, struct bfd_link_info *);
 

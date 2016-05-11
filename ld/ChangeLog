@@ -1,5 +1,10 @@
 2016-05-11  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/hppaelf.em (hppaelf_create_output_section_statements):
+	Call elf32_hppa_init_stub_bfd.
+
+2016-05-11  Alan Modra  <amodra@gmail.com>
+
 	PR 20060
 	* testsuite/ld-powerpc/powerpc.exp: Run new tests.
 	* testsuite/ld-powerpc/tlsdll.s: New.
