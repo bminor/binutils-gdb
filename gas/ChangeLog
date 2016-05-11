@@ -1,3 +1,9 @@
+2016-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20068
+	* testsuite/gas/arm/pr20068.d: Adjust expected output to allow for
+	big endian ARM configurations.
+
 2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 
