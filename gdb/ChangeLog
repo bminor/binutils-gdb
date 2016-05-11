@@ -1,3 +1,9 @@
+2016-05-10  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* iq2000-tdep.c (iq2000_scan_prologue): Remove if that shouldn't guard
+	anything.
+	* linespec.c (add_sal_to_sals): Restore call to symtab_to_fullname.
+
 2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-tdep.c (arm_elf_make_msymbol_special): Use

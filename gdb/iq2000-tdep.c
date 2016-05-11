@@ -248,7 +248,6 @@ iq2000_scan_prologue (struct gdbarch *gdbarch,
 	  if (tgtreg >= 0 && tgtreg < E_NUM_REGS)
 	    cache->saved_regs[tgtreg] = -((signed short) (insn & 0xffff));
 
-	  if (tgtreg == E_LR_REGNUM)
 	  continue;
 	}
 

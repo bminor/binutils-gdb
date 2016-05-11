@@ -845,6 +845,8 @@ add_sal_to_sals (struct linespec_state *self,
       canonical = &self->canonical_names[sals->nelts - 1];
       if (!literal_canonical && sal->symtab)
 	{
+	  symtab_to_fullname (sal->symtab);
+
 	  /* Note that the filter doesn't have to be a valid linespec
 	     input.  We only apply the ":LINE" treatment to Ada for
 	     the time being.  */
