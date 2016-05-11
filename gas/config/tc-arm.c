@@ -3288,6 +3288,7 @@ add_to_lit_pool (unsigned int nbytes)
 		}
 
 	      pool->literals[entry] = inst.reloc.exp;
+	      pool->literals[entry].X_op = O_constant;
 	      pool->literals[entry].X_add_number = 0;
 	      pool->literals[entry++].X_md = (PADDING_SLOT << 8) | 4;
 	      pool->next_free_entry += 1;

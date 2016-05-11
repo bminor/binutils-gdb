@@ -1,5 +1,13 @@
 2016-05-11  Nick Clifton  <nickc@redhat.com>
 
+	PR target/20068
+	* config/tc-arm.c (add_to_lit_pool): Ensure that the padding added
+	to the pool uses O_constant.
+	* testsuite/gas/arm/pr20068.s: New test.
+	* testsuite/gas/arm/pr20068.d: Test driver.
+
+2016-05-11  Nick Clifton  <nickc@redhat.com>
+
 	* testsuite/gas/arm/archv8m-cmse-base.d: Skip for non-ELF ARM targets.
 	* testsuite/gas/arm/archv8m-cmse-main-1.d: Likewise.
 	* testsuite/gas/arm/archv8m-cmse-main-2.d: Likewise.
