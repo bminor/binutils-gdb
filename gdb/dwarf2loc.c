@@ -255,9 +255,15 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	}
 
       /* Otherwise, a location expression entry.
-	 If the entry is from a DWO, don't add base address: the entry is
-	 from .debug_addr which has absolute addresses.  */
-      if (! baton->from_dwo)
+	 If the entry is from a DWO, don't add base address: the entry is from
+	 .debug_addr which already has the DWARF "base address".  We still add
+	 base_offset in case we're debugging a PIE executable.  */
+      if (baton->from_dwo)
+	{
+	  low += base_offset;
+	  high += base_offset;
+	}
+      else
 	{
 	  low += base_address;
 	  high += base_address;
