@@ -1,3 +1,8 @@
+2016-05-12  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20068
+	* testsuite/gas/arm/pr20068.d: Use correct regexp syntax.
+
 2016-05-11  Nick Clifton  <nickc@redhat.com>
 
 	PR target/20068
