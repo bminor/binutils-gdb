@@ -703,9 +703,9 @@ struct elf_size_info {
 enum elf_reloc_type_class {
   reloc_class_normal,
   reloc_class_relative,
-  reloc_class_plt,
   reloc_class_copy,
-  reloc_class_ifunc
+  reloc_class_ifunc,
+  reloc_class_plt
 };
 
 struct elf_reloc_cookie
