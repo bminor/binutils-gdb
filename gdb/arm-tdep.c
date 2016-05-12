@@ -2673,7 +2673,6 @@ static struct arm_prologue_cache *
 arm_make_epilogue_frame_cache (struct frame_info *this_frame)
 {
   struct arm_prologue_cache *cache;
-  CORE_ADDR sp;
   int reg;
 
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
@@ -2727,11 +2726,8 @@ static struct value *
 arm_epilogue_frame_prev_register (struct frame_info *this_frame,
 				  void **this_cache, int regnum)
 {
-  struct arm_prologue_cache *cache;
-
   if (*this_cache == NULL)
     *this_cache = arm_make_epilogue_frame_cache (this_frame);
-  cache = (struct arm_prologue_cache *) *this_cache;
 
   return arm_prologue_prev_register (this_frame, this_cache, regnum);
 }
@@ -8542,7 +8538,9 @@ coff_sym_is_thumb (int val)
 static void
 arm_elf_make_msymbol_special(asymbol *sym, struct minimal_symbol *msym)
 {
-  if (ARM_SYM_BRANCH_TYPE (&((elf_symbol_type *)sym)->internal_elf_sym)
+  elf_symbol_type *elfsym = (elf_symbol_type *) sym;
+
+  if (ARM_GET_SYM_BRANCH_TYPE (elfsym->internal_elf_sym.st_target_internal)
       == ST_BRANCH_TO_THUMB)
     MSYMBOL_SET_SPECIAL (msym);
 }
@@ -10979,7 +10977,6 @@ arm_record_vdata_transfer_insn (insn_decode_record *arm_insn_r)
   uint32_t bits_a, bit_c, bit_l, reg_t, reg_v;
   uint32_t record_buf[4];
 
-  const int num_regs = gdbarch_num_regs (arm_insn_r->gdbarch);
   reg_t = bits (arm_insn_r->arm_insn, 12, 15);
   reg_v = bits (arm_insn_r->arm_insn, 21, 23);
   bits_a = bits (arm_insn_r->arm_insn, 21, 23);
@@ -11069,7 +11066,6 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
   ULONGEST u_regval = 0;
 
   struct regcache *reg_cache = arm_insn_r->regcache;
-  const int num_regs = gdbarch_num_regs (arm_insn_r->gdbarch);
 
   opcode = bits (arm_insn_r->arm_insn, 20, 24);
   single_reg = !bit (arm_insn_r->arm_insn, 8);

@@ -1757,7 +1757,6 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   int n_fields = 0;
   /* Cleanups.  */
   struct cleanup *c;
-  int i;
 
   gdb_assert (p != NULL);
 

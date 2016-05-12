@@ -447,7 +447,6 @@ m32r_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 static void
 m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   linux_init_abi (info, gdbarch);
 

@@ -4381,7 +4381,6 @@ error_check_comp_unit_head (struct comp_unit_head *header,
 			    struct dwarf2_section_info *section,
 			    struct dwarf2_section_info *abbrev_section)
 {
-  bfd *abfd = get_section_bfd_owner (section);
   const char *filename = get_section_file_name (section);
 
   if (header->version != 2 && header->version != 3 && header->version != 4)
@@ -6181,13 +6180,11 @@ sort_tu_by_abbrev_offset (const void *ap, const void *bp)
 static void
 build_type_psymtabs_1 (void)
 {
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct tu_stats *tu_stats = &dwarf2_per_objfile->tu_stats;
   struct cleanup *cleanups;
   struct abbrev_table *abbrev_table;
   sect_offset abbrev_offset;
   struct tu_abbrev_offset *sorted_by_abbrev;
-  struct type_unit_group **iter;
   int i;
 
   /* It's up to the caller to not call us multiple times.  */
@@ -7258,7 +7255,6 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
   struct dwarf2_cu *cu = reader->cu;
   const gdb_byte *buffer = reader->buffer;
   const gdb_byte *buffer_end = reader->buffer_end;
-  const gdb_byte *start_info_ptr = info_ptr;
   unsigned int form, i;
 
   for (i = 0; i < abbrev->num_attrs; i++)
@@ -8212,7 +8208,6 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
   if (attr != NULL)
     {
       struct dwarf2_per_cu_data *per_cu;
-      struct symtab *imported_symtab;
       sect_offset offset;
       int is_dwz;
 
@@ -8703,7 +8698,6 @@ static const char *
 dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct attribute *attr;
   const char *retval, *mangled = NULL, *canon = NULL;
   struct cleanup *back_to;
   int need_copy = 1;
@@ -9198,7 +9192,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   const char *name = NULL;
   const char *comp_dir = NULL;
   struct die_info *child_die;
-  bfd *abfd = objfile->obfd;
   CORE_ADDR baseaddr;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -9279,7 +9272,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 static void
 setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct type_unit_group *tu_group;
   int first_time;
@@ -9536,7 +9528,6 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
 		      void *datap)
 {
   struct dwarf2_cu *cu = reader->cu;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
   sect_offset offset = cu->per_cu->offset;
   struct dwarf2_section_info *section = cu->per_cu->section;
   struct create_dwo_cu_data *data = (struct create_dwo_cu_data *) datap;
@@ -9573,8 +9564,6 @@ create_dwo_cu (struct dwo_file *dwo_file)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = &dwo_file->sections.info;
-  bfd *abfd;
-  htab_t cu_htab;
   const gdb_byte *info_ptr, *end_ptr;
   struct create_dwo_cu_data create_dwo_cu_data;
   struct dwo_unit *dwo_unit;
@@ -9584,10 +9573,6 @@ create_dwo_cu (struct dwo_file *dwo_file)
 
   if (info_ptr == NULL)
     return NULL;
-
-  /* We can't set abfd until now because the section may be empty or
-     not present, in which case section->asection will be NULL.  */
-  abfd = get_section_bfd_owner (section);
 
   if (dwarf_read_debug)
     {
@@ -10029,7 +10014,6 @@ create_dwo_unit_in_dwp_v1 (struct dwp_file *dwp_file,
   struct virtual_v1_dwo_sections sections;
   void **dwo_file_slot;
   char *virtual_dwo_name;
-  struct dwarf2_section_info *cutu;
   struct cleanup *cleanups;
   int i;
 
@@ -10235,7 +10219,6 @@ create_dwo_unit_in_dwp_v2 (struct dwp_file *dwp_file,
   struct virtual_v2_dwo_sections sections;
   void **dwo_file_slot;
   char *virtual_dwo_name;
-  struct dwarf2_section_info *cutu;
   struct cleanup *cleanups;
   int i;
 
@@ -10405,7 +10388,7 @@ lookup_dwo_unit_in_dwp (struct dwp_file *dwp_file, const char *comp_dir,
   uint32_t hash2 = ((signature >> 32) & mask) | 1;
   unsigned int i;
   void **slot;
-  struct dwo_unit find_dwo_cu, *dwo_cu;
+  struct dwo_unit find_dwo_cu;
 
   memset (&find_dwo_cu, 0, sizeof (find_dwo_cu));
   find_dwo_cu.signature = signature;
@@ -11150,8 +11133,6 @@ queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *per_cu)
 static void
 free_dwo_file (struct dwo_file *dwo_file, struct objfile *objfile)
 {
-  int ix;
-  struct dwarf2_section_info *section;
 
   /* Note: dbfd is NULL for virtual DWO files.  */
   gdb_bfd_unref (dwo_file->dbfd);
@@ -12354,7 +12335,6 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 static void
 check_producer (struct dwarf2_cu *cu)
 {
-  const char *cs;
   int major, minor;
 
   if (cu->producer == NULL)
@@ -12654,11 +12634,8 @@ static void
 dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
 		    struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
   struct typedef_field_list *new_field;
-  struct attribute *attr;
   struct typedef_field *fp;
-  char *fieldname = "";
 
   /* Allocate a new field list entry and link it in.  */
   new_field = XCNEW (struct typedef_field_list);
@@ -12965,13 +12942,6 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 		       && DW_BLOCK (attr)->data[0] == DW_OP_deref_size
 		       && DW_BLOCK (attr)->data[1] == cu->header.addr_size))
 	    {
-	      struct dwarf_block blk;
-	      int offset;
-
-	      offset = (DW_BLOCK (attr)->data[0] == DW_OP_deref
-			? 1 : 2);
-	      blk.size = DW_BLOCK (attr)->size - offset;
-	      blk.data = DW_BLOCK (attr)->data + offset;
 	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu);
 	      if ((fnp->voffset % cu->header.addr_size) != 0)
 		dwarf2_complex_location_expr_complaint ();
@@ -16782,13 +16752,12 @@ read_unsigned_leb128 (bfd *abfd, const gdb_byte *buf,
 {
   ULONGEST result;
   unsigned int num_read;
-  int i, shift;
+  int shift;
   unsigned char byte;
 
   result = 0;
   shift = 0;
   num_read = 0;
-  i = 0;
   while (1)
     {
       byte = bfd_get_8 (abfd, buf);
@@ -16810,13 +16779,12 @@ read_signed_leb128 (bfd *abfd, const gdb_byte *buf,
 		    unsigned int *bytes_read_ptr)
 {
   LONGEST result;
-  int i, shift, num_read;
+  int shift, num_read;
   unsigned char byte;
 
   result = 0;
   shift = 0;
   num_read = 0;
-  i = 0;
   while (1)
     {
       byte = bfd_get_8 (abfd, buf);
@@ -18871,7 +18839,6 @@ dwarf2_const_value (const struct attribute *attr, struct symbol *sym,
 		    struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct comp_unit_head *cu_header = &cu->header;
   LONGEST value;
   const gdb_byte *bytes;
   struct dwarf2_locexpr_baton *baton;
@@ -20334,7 +20301,6 @@ static struct die_info *
 follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
 		  struct dwarf2_cu **ref_cu)
 {
-  struct objfile *objfile = (*ref_cu)->objfile;
   struct die_info temp_die;
   struct dwarf2_cu *sig_cu;
   struct die_info *die;
@@ -21517,7 +21483,6 @@ dwarf_decode_macro_bytes (bfd *abfd,
 	    void **slot;
 	    bfd *include_bfd = abfd;
 	    struct dwarf2_section_info *include_section = section;
-	    struct dwarf2_section_info alt_section;
 	    const gdb_byte *include_mac_end = mac_end;
 	    int is_dwz = section_is_dwz;
 	    const gdb_byte *new_mac_ptr;

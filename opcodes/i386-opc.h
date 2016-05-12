@@ -200,6 +200,8 @@ enum
   CpuCLZERO,
   /* OSPKE instruction required */
   CpuOSPKE,
+  /* RDPID instruction required */
+  CpuRDPID,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -311,6 +313,7 @@ typedef union i386_cpu_flags
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
+      unsigned int cpurdpid:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
       unsigned int cpuamd64:1;

@@ -5059,6 +5059,10 @@ get_32bit_section_headers (FILE * file, bfd_boolean probe)
       internal->sh_info      = BYTE_GET (shdrs[i].sh_info);
       internal->sh_addralign = BYTE_GET (shdrs[i].sh_addralign);
       internal->sh_entsize   = BYTE_GET (shdrs[i].sh_entsize);
+      if (!probe && internal->sh_link > num)
+	warn (_("Section %u has an out of range sh_link value of %u\n"), i, internal->sh_link);
+      if (!probe && internal->sh_flags & SHF_INFO_LINK && internal->sh_info > num)
+	warn (_("Section %u has an out of range sh_info value of %u\n"), i, internal->sh_info);
     }
 
   free (shdrs);
@@ -5117,6 +5121,10 @@ get_64bit_section_headers (FILE * file, bfd_boolean probe)
       internal->sh_info      = BYTE_GET (shdrs[i].sh_info);
       internal->sh_offset    = BYTE_GET (shdrs[i].sh_offset);
       internal->sh_addralign = BYTE_GET (shdrs[i].sh_addralign);
+      if (!probe && internal->sh_link > num)
+	warn (_("Section %u has an out of range sh_link value of %u\n"), i, internal->sh_link);
+      if (!probe && internal->sh_flags & SHF_INFO_LINK && internal->sh_info > num)
+	warn (_("Section %u has an out of range sh_info value of %u\n"), i, internal->sh_info);
     }
 
   free (shdrs);
@@ -12956,6 +12964,8 @@ static const char * arm_attr_tag_FP_HP_extension[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_ABI_FP_16bit_format[] =
   {"None", "IEEE 754", "Alternative Format"};
+static const char * arm_attr_tag_DSP_extension[] =
+  {"Follow architecture", "Allowed"};
 static const char * arm_attr_tag_MPextension_use[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_DIV_use[] =
@@ -13006,6 +13016,7 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(38, ABI_FP_16bit_format),
   LOOKUP(42, MPextension_use),
   LOOKUP(44, DIV_use),
+  LOOKUP(46, DSP_extension),
   {64, "nodefaults", 0, NULL},
   {65, "also_compatible_with", 0, NULL},
   LOOKUP(66, T2EE_use),
@@ -14218,6 +14229,8 @@ print_mips_ases (unsigned int mask)
     fputs ("\n\tDSP ASE", stdout);
   if (mask & AFL_ASE_DSPR2)
     fputs ("\n\tDSP R2 ASE", stdout);
+  if (mask & AFL_ASE_DSPR3)
+    fputs ("\n\tDSP R3 ASE", stdout);
   if (mask & AFL_ASE_EVA)
     fputs ("\n\tEnhanced VA Scheme", stdout);
   if (mask & AFL_ASE_MCU)

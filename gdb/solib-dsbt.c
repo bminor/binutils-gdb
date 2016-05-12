@@ -793,7 +793,6 @@ cmp_name (const asymbol *sym, const void *data)
 static int
 enable_break (void)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   asection *interp_sect;
   struct dsbt_info *info;
 
@@ -819,7 +818,6 @@ enable_break (void)
       char *buf;
       bfd *tmp_bfd = NULL;
       CORE_ADDR addr;
-      gdb_byte addr_buf[TIC6X_PTR_SIZE];
       struct int_elf32_dsbt_loadmap *ldm;
       int ret;
 

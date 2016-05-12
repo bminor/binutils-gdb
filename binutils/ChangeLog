@@ -1,3 +1,23 @@
+2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* readelf.c (print_mips_ases): Add DSPR3.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (display_arm_attribute): Add output for Tag_DSP_extension.
+	(arm_attr_public_tags): Define DSP_extension attribute.
+
+2016-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/binutils.texi (nm): Update description of --size-sort.
+
+2016-05-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20063
+	* readelf.c (get_32bit_section_headers): Warn if an out of range
+	sh_link or sh_info field is encountered.
+	(get_64bit_section_headers): Likewise.
+
 2016-05-04  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* testsuite/lib/binutils-common.exp (is_elf_format): Add avr-*-*.

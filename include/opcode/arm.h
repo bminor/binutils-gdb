@@ -62,6 +62,7 @@
 #define ARM_EXT2_ATOMICS 0x00000008	/* ARMv8 atomics.  */
 #define ARM_EXT2_V6T2_V8M 0x00000010	/* V8M Baseline from V6T2.  */
 #define ARM_EXT2_FP16_INST 0x00000020	/* ARM V8.2A FP16 instructions.  */
+#define ARM_EXT2_V8M_MAIN 0x00000040	/* ARMv8-M Mainline.  */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */
@@ -150,6 +151,7 @@
 #define ARM_AEXT_V8M_BASE (ARM_AEXT_V6SM | ARM_EXT_DIV)
 #define ARM_AEXT_V8M_MAIN ARM_AEXT_V7M
 #define ARM_AEXT2_V8M	(ARM_EXT2_V8M | ARM_EXT2_ATOMICS | ARM_EXT2_V6T2_V8M)
+#define ARM_AEXT2_V8M_MAIN (ARM_AEXT2_V8M | ARM_EXT2_V8M_MAIN)
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	ARM_FEATURE_LOW (ARM_AEXT_V5TE, ARM_CEXT_XSCALE)
@@ -265,7 +267,8 @@
 #define ARM_ARCH_V8_2A	ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_2A,	\
 				     CRC_EXT_ARMV8)
 #define ARM_ARCH_V8M_BASE ARM_FEATURE_CORE (ARM_AEXT_V8M_BASE, ARM_AEXT2_V8M)
-#define ARM_ARCH_V8M_MAIN ARM_FEATURE_CORE (ARM_AEXT_V8M_MAIN, ARM_AEXT2_V8M)
+#define ARM_ARCH_V8M_MAIN ARM_FEATURE_CORE (ARM_AEXT_V8M_MAIN, \
+					    ARM_AEXT2_V8M_MAIN)
 
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)
@@ -326,6 +329,12 @@ typedef struct
   (((CPU).core[0] & (FEAT).core[0]) != 0 \
    || ((CPU).core[1] & (FEAT).core[1]) != 0 \
    || ((CPU).coproc & (FEAT).coproc) != 0)
+
+/* Tests whether the features of A are a subset of B.  */
+#define ARM_FSET_CPU_SUBSET(A,B) \
+  (((A).core[0] & (B).core[0]) == (A).core[0] \
+   && ((A).core[1] & (B).core[1]) == (A).core[1] \
+   && ((A).coproc & (B).coproc) == (A).coproc)
 
 #define ARM_CPU_IS_ANY(CPU) \
   ((CPU).core[0] == ((arm_feature_set)ARM_ANY).core[0] \

@@ -1916,7 +1916,6 @@ svr4_handle_solib_event (void)
   struct cleanup *old_chain, *usm_chain;
   struct value *val = NULL;
   CORE_ADDR pc, debug_base, lm = 0;
-  int is_initial_ns;
   struct frame_info *frame = get_current_frame ();
 
   /* Do nothing if not using the probes interface.  */

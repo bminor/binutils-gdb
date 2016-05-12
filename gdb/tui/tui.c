@@ -398,8 +398,6 @@ gdb_getenv_term (void)
 void
 tui_enable (void)
 {
-  struct interp *interp;
-
   if (tui_active)
     return;
 

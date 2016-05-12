@@ -162,8 +162,7 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
-  ULONGEST inst, inst2;
-  LONGEST offset;
+  ULONGEST inst;
   int regnum, pushreg;
   struct bound_minimal_symbol msymbol;
   const int first_saved_reg = 13;	/* The first saved register.  */

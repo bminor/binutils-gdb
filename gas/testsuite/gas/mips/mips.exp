@@ -1153,6 +1153,7 @@ if { [istarget mips*-*-vxworks*] } {
 					    !octeon]
     run_dump_test_arches "mips32-dspr2"	[mips_arch_list_matching mips32r2 \
 					    !octeon]
+    run_dump_test_arches "mips32-dspr3"	[mips_arch_list_matching mips32r6]
     run_dump_test "mips64-dsp"
     run_dump_test "mips32-mt"
 

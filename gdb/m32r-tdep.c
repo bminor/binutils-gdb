@@ -355,9 +355,7 @@ decode_prologue (struct gdbarch *gdbarch,
 
       if ((insn & 0xf0ff) == 0x207f)
 	{			/* st reg, @-sp */
-	  int regno;
 	  framesize += 4;
-	  regno = ((insn >> 8) & 0xf);
 	  after_prologue = 0;
 	  continue;
 	}

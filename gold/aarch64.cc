@@ -5106,6 +5106,8 @@ class AArch64_relocate_functions
       static_cast<Valtype>(val | (immed << doffset)));
   }
 
+ public:
+
   // Update selected bits in text.
 
   template<int valsize>
@@ -5132,8 +5134,6 @@ class AArch64_relocate_functions
 	    ? This::STATUS_OKAY
 	    : This::STATUS_OVERFLOW);
   }
-
- public:
 
   // Construct a B insn. Note, although we group it here with other relocation
   // operation, there is actually no 'relocation' involved here.
@@ -6001,7 +6001,8 @@ Target_aarch64<size, big_endian>::Scan::local(
 
     case elfcpp::R_AARCH64_ADR_GOT_PAGE:
     case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
-      // This pair of relocations is used to access a specific GOT entry.
+    case elfcpp::R_AARCH64_LD64_GOTPAGE_LO15:
+      // The above relocations are used to access GOT entries.
       {
 	bool is_new = false;
 	// This symbol requires a GOT entry.
@@ -6326,8 +6327,9 @@ Target_aarch64<size, big_endian>::Scan::global(
 
     case elfcpp::R_AARCH64_ADR_GOT_PAGE:
     case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
+    case elfcpp::R_AARCH64_LD64_GOTPAGE_LO15:
       {
-	// This pair of relocations is used to access a specific GOT entry.
+	// The above relocations are used to access GOT entries.
 	// Note a GOT entry is an *address* to a symbol.
 	// The symbol requires a GOT entry
 	Output_data_got_aarch64<size, big_endian>* got =
@@ -7044,6 +7046,19 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
       reloc_status = Reloc::template rela_general<32>(
 	view, value, addend, reloc_property);
       break;
+
+    case elfcpp::R_AARCH64_LD64_GOTPAGE_LO15:
+      {
+	gold_assert(have_got_offset);
+	value = target->got_->address() + got_base + got_offset + addend -
+	  Reloc::Page(target->got_->address() + got_base);
+	if ((value & 7) != 0)
+	  reloc_status = Reloc::STATUS_OVERFLOW;
+	else
+	  reloc_status = Reloc::template reloc_common<32>(
+	    view, value, reloc_property);
+	break;
+      }
 
     case elfcpp::R_AARCH64_TLSGD_ADR_PAGE21:
     case elfcpp::R_AARCH64_TLSGD_ADD_LO12_NC:

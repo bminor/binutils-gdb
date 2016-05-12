@@ -1,3 +1,42 @@
+2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-dis.c (mips_arch_choices): Add ASE_DSPR3 to mips32r6 and
+	mips64r6.
+	* mips-opc.c (D34): New macro.
+	(mips_builtin_opcodes): Define bposge32c for DSPr3.
+
+2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
+
+	* i386-dis.c (prefix_table): Add RDPID instruction.
+	* i386-gen.c (cpu_flag_init): Add RDPID flag.
+	(cpu_flags): Add RDPID bitfield.
+	* i386-opc.h (enum): Add RDPID element.
+	(i386_cpu_flags): Add RDPID field.
+	* i386-opc.tbl: Add RDPID instruction.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Regenerate.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (get_sym_code_type): Use ARM_GET_SYM_BRANCH_TYPE to get
+	branch type of a symbol.
+	(print_insn): Likewise.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): Add entries for VFP ARMv8-M
+	Mainline Security Extensions instructions.
+	(thumb_opcodes): Add entries for narrow ARMv8-M Security
+	Extensions instructions.
+	(thumb32_opcodes): Add entries for wide ARMv8-M Security Extensions
+	instructions.
+	(psr_name): Add new MSP_NS and PSP_NS ARMv8-M Security Extensions
+	special registers.
+
+2016-05-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-opc.c (sparc_opcodes): Fix mnemonic of faligndatai.
+
 2016-05-03  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* arc-ext.c (dump_ARC_extmap): Handle SYNATX_NOP and SYNTAX_1OP.

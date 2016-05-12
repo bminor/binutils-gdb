@@ -774,8 +774,6 @@ set_active_ext_lang (const struct extension_language_defn *now_active)
 void
 restore_active_ext_lang (struct active_ext_lang_state *previous)
 {
-  const struct extension_language_defn *current = active_ext_lang;
-
   active_ext_lang = previous->ext_lang;
 
   if (target_terminal_is_ours ())

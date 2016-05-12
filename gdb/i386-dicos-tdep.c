@@ -24,8 +24,6 @@
 static void
 i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   dicos_init_abi (gdbarch);
 }
 

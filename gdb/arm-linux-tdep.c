@@ -827,7 +827,6 @@ arm_linux_get_syscall_number (struct gdbarch *gdbarch,
 			      ptid_t ptid)
 {
   struct regcache *regs = get_thread_regcache (ptid);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   ULONGEST pc;
   ULONGEST cpsr;
@@ -877,7 +876,6 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
   CORE_ADDR pc = regcache_read_pc (self->regcache);
   int is_thumb = arm_is_thumb (self->regcache);
   ULONGEST svc_number = 0;
-  struct gdbarch *gdbarch = get_regcache_arch (self->regcache);
 
   if (is_thumb)
     {

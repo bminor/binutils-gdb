@@ -1834,7 +1834,8 @@ SLCBCC("cbnefr", 15),
 
 { "alignaddr",	F3F(2, 0x36, 0x018), F3F(~2, ~0x36, ~0x018), "1,2,d", 0, HWCAP_VIS, 0, v9a },
 { "alignaddrl",	F3F(2, 0x36, 0x01a), F3F(~2, ~0x36, ~0x01a), "1,2,d", 0, HWCAP_VIS, 0, v9a },
-{ "faligndata",	F3F(2, 0x36, 0x048), F3F(~2, ~0x36, ~0x048), "v,B,H", 0, HWCAP_VIS, 0, v9a },
+{ "faligndata",	F3F(2, 0x36, 0x048), F3F(~2, ~0x36, ~0x048), "v,B,H", 0, HWCAP_VIS, 0, v9a }, /* faligndatag */
+{ "faligndata", F3F(2, 0x36, 0x049), F3F(~2, ~0x36, ~0x049), "v,B,5,}", 0, 0, HWCAP2_SPARC5, v9b }, /* faligndatai  */
 
 { "fzerod",	F3F(2, 0x36, 0x060), F3F(~2, ~0x36, ~0x060), "H", 0, HWCAP_VIS, 0, v9a },
 { "fzero",	F3F(2, 0x36, 0x060), F3F(~2, ~0x36, ~0x060), "H", F_ALIAS, HWCAP_VIS, 0, v9a },
@@ -2058,12 +2059,10 @@ SLCBCC("cbnefr", 15),
 { "mwait", F3(2, 0x30, 0)|RD(28), F3(~2, ~0x30, ~0)|RD(~28)|RS1_G0|ASI(~0),  "2", 0, 0, HWCAP2_MWAIT, v9b }, /* mwait r */
 { "mwait", F3(2, 0x30, 1)|RD(28), F3(~2, ~0x30, ~1)|RD(~28)|RS1_G0, "i", 0, 0, HWCAP2_MWAIT, v9b }, /* mwait imm */
 
-/* SPARC5 and VIS4.0 instructions.  */
+/* Other SPARC5 and VIS4.0 instructions.  */
 
 { "subxc",      F3(2, 0x36, 0)|OPF(0x41), F3(~2, ~0x36, ~0)|OPF(~0x41), "1,2,d", 0, 0, HWCAP2_SPARC5, v9b },
 { "subxccc",    F3(2, 0x36, 0)|OPF(0x43), F3(~2, ~0x36, ~0)|OPF(~0x43), "1,2,d", 0, 0, HWCAP2_SPARC5, v9b },
-
-{ "faligndatai", F3F(2, 0x36, 0x049), F3F(~2, ~0x36, ~0x049), "v,B,5,}", 0, 0, HWCAP2_SPARC5, v9b },
 
 { "fpadd8",     F3F(2, 0x36, 0x124), F3F(~2, ~0x36, ~0x124), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
 { "fpadds8",    F3F(2, 0x36, 0x126), F3F(~2, ~0x36, ~0x126), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },

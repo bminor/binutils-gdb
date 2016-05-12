@@ -844,7 +844,6 @@ s390_supply_tdb_regset (const struct regset *regset, struct regcache *regcache,
 {
   ULONGEST tdw;
   enum register_status ret;
-  int i;
 
   regcache_supply_regset (regset, regcache, regnum, regs, len);
   ret = regcache_cooked_read_unsigned (regcache, S390_TDB_DWORD0_REGNUM, &tdw);
@@ -2388,7 +2387,6 @@ static struct value *
 s390_frame_prev_register (struct frame_info *this_frame,
 			  void **this_prologue_cache, int regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct s390_unwind_cache *info
     = s390_frame_unwind_cache (this_frame, this_prologue_cache);
 
@@ -3035,8 +3033,6 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			    struct dwarf2_frame_state_reg *reg,
 			    struct frame_info *this_frame)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   /* The condition code (and thus PSW mask) is call-clobbered.  */
   if (regnum == S390_PSWM_REGNUM)
     reg->how = DWARF2_FRAME_REG_UNDEFINED;
@@ -3788,7 +3784,6 @@ s390_record_gpr_h (struct gdbarch *gdbarch, struct regcache *regcache, int i)
 static int
 s390_record_vr (struct gdbarch *gdbarch, struct regcache *regcache, int i)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   if (i < 16)
     {
       if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + i))
@@ -3808,7 +3803,6 @@ static int
 s390_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
                     CORE_ADDR addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   uint16_t insn[3] = {0};
   /* Instruction as bytes.  */
   uint8_t ibyte[6];

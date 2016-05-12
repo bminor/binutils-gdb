@@ -443,7 +443,6 @@ run_one_inferior (struct inferior *inf, void *arg)
 void
 mi_cmd_exec_run (char *command, char **argv, int argc)
 {
-  int i;
   int start_p = 0;
 
   /* Parse the command options.  */
@@ -1250,7 +1249,6 @@ static void
 output_register (struct frame_info *frame, int regnum, int format,
 		 int skip_unavailable)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
   struct ui_out *uiout = current_uiout;
   struct value *val = value_of_register (regnum, frame);
   struct cleanup *tuple_cleanup;
@@ -2193,7 +2191,6 @@ static void
 mi_cmd_execute (struct mi_parse *parse)
 {
   struct cleanup *cleanup;
-  enum language saved_language;
 
   cleanup = prepare_execute_command ();
 
@@ -2497,7 +2494,6 @@ print_diff (struct mi_timestamp *start, struct mi_timestamp *end)
 void
 mi_cmd_trace_define_variable (char *command, char **argv, int argc)
 {
-  struct expression *expr;
   LONGEST initval = 0;
   struct trace_state_variable *tsv;
   char *name = 0;
@@ -2697,7 +2693,6 @@ print_variable_or_computed (char *expression, enum print_values values)
   struct cleanup *old_chain;
   struct value *val;
   struct ui_file *stb;
-  struct value_print_options opts;
   struct type *type;
   struct ui_out *uiout = current_uiout;
 

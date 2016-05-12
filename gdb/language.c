@@ -1074,9 +1074,6 @@ language_init_primitive_type_symbols (struct language_arch_info *lai,
 				      struct gdbarch *gdbarch)
 {
   int n;
-  struct compunit_symtab *cust;
-  struct symtab *symtab;
-  struct block *static_block, *global_block;
 
   gdb_assert (lai->primitive_type_vector != NULL);
 

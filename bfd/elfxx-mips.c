@@ -15565,6 +15565,8 @@ print_mips_ases (FILE *file, unsigned int mask)
     fputs ("\n\tDSP ASE", file);
   if (mask & AFL_ASE_DSPR2)
     fputs ("\n\tDSP R2 ASE", file);
+  if (mask & AFL_ASE_DSPR3)
+    fputs ("\n\tDSP R3 ASE", file);
   if (mask & AFL_ASE_EVA)
     fputs ("\n\tEnhanced VA Scheme", file);
   if (mask & AFL_ASE_MCU)

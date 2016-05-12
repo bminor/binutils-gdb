@@ -201,7 +201,8 @@ static const arm_feature_set arm_ext_v7r = ARM_FEATURE_CORE_LOW (ARM_EXT_V7R);
 static const arm_feature_set arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
 static const arm_feature_set arm_ext_v8 = ARM_FEATURE_CORE_LOW (ARM_EXT_V8);
 static const arm_feature_set arm_ext_m =
-  ARM_FEATURE_CORE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M, ARM_EXT2_V8M);
+  ARM_FEATURE_CORE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M,
+		    ARM_EXT2_V8M | ARM_EXT2_V8M_MAIN);
 static const arm_feature_set arm_ext_mp = ARM_FEATURE_CORE_LOW (ARM_EXT_MP);
 static const arm_feature_set arm_ext_sec = ARM_FEATURE_CORE_LOW (ARM_EXT_SEC);
 static const arm_feature_set arm_ext_os = ARM_FEATURE_CORE_LOW (ARM_EXT_OS);
@@ -209,11 +210,19 @@ static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
 static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
 static const arm_feature_set arm_ext_pan = ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN);
 static const arm_feature_set arm_ext_v8m = ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M);
+static const arm_feature_set arm_ext_v8m_main =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M_MAIN);
+/* Instructions in ARMv8-M only found in M profile architectures.  */
+static const arm_feature_set arm_ext_v8m_m_only =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M | ARM_EXT2_V8M_MAIN);
 static const arm_feature_set arm_ext_v6t2_v8m =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V6T2_V8M);
 /* Instructions shared between ARMv8-A and ARMv8-M.  */
 static const arm_feature_set arm_ext_atomics =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_ATOMICS);
+/* DSP instructions Tag_DSP_extension refers to.  */
+static const arm_feature_set arm_ext_dsp =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V5E | ARM_EXT_V5ExP | ARM_EXT_V6_DSP);
 static const arm_feature_set arm_ext_v8_2 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A);
 /* FP16 instructions.  */
@@ -3279,6 +3288,7 @@ add_to_lit_pool (unsigned int nbytes)
 		}
 
 	      pool->literals[entry] = inst.reloc.exp;
+	      pool->literals[entry].X_op = O_constant;
 	      pool->literals[entry].X_add_number = 0;
 	      pool->literals[entry++].X_md = (PADDING_SLOT << 8) | 4;
 	      pool->next_free_entry += 1;
@@ -8175,6 +8185,12 @@ static void
 do_rd (void)
 {
   inst.instruction |= inst.operands[0].reg << 12;
+}
+
+static void
+do_rn (void)
+{
+  inst.instruction |= inst.operands[0].reg << 16;
 }
 
 static void
@@ -18189,8 +18205,8 @@ known_t32_only_insn (const struct asm_opcode *opcode)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier))
     return TRUE;
 
-  /* Wide-only instruction added to ARMv8-M.  */
-  if (ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_v8m)
+  /* Wide-only instruction added to ARMv8-M Baseline.  */
+  if (ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_v8m_m_only)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_atomics)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_v6t2_v8m)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_div))
@@ -18766,14 +18782,16 @@ static const struct asm_psr v7m_psrs[] =
   {"ipsr",	  5 }, {"IPSR",		5 },
   {"epsr",	  6 }, {"EPSR",		6 },
   {"iepsr",	  7 }, {"IEPSR",	7 },
-  {"msp",	  8 }, {"MSP",		8 },
-  {"psp",	  9 }, {"PSP",		9 },
+  {"msp",	  8 }, {"MSP",		8 }, {"msp_s",     8 }, {"MSP_S",     8 },
+  {"psp",	  9 }, {"PSP",		9 }, {"psp_s",     9 }, {"PSP_S",     9 },
   {"primask",	  16}, {"PRIMASK",	16},
   {"basepri",	  17}, {"BASEPRI",	17},
   {"basepri_max", 18}, {"BASEPRI_MAX",	18},
   {"basepri_max", 18}, {"BASEPRI_MASK",	18}, /* Typo, preserved for backwards compatibility.  */
   {"faultmask",	  19}, {"FAULTMASK",	19},
-  {"control",	  20}, {"CONTROL",	20}
+  {"control",	  20}, {"CONTROL",	20},
+  {"msp_ns",	0x88}, {"MSP_NS",     0x88},
+  {"psp_ns",	0x89}, {"PSP_NS",     0x89}
 };
 
 /* Table of all shift-in-operand names.	 */
@@ -20948,12 +20966,25 @@ static const struct asm_opcode insns[] =
  cCE("cfmadda32", e200600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
  cCE("cfmsuba32", e300600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
 
+ /* ARMv8-M instructions.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT NULL
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8m
+ TUE("sg", 0, e97fe97f, 0, (), 0, noargs),
+ TUE("blxns", 0, 4784, 1, (RRnpc), 0, t_blx),
+ TUE("bxns", 0, 4704, 1, (RRnpc), 0, t_bx),
  TUE("tt", 0, e840f000, 2, (RRnpc, RRnpc), 0, tt),
  TUE("ttt", 0, e840f040, 2, (RRnpc, RRnpc), 0, tt),
+ TUE("tta", 0, e840f080, 2, (RRnpc, RRnpc), 0, tt),
+ TUE("ttat", 0, e840f0c0, 2, (RRnpc, RRnpc), 0, tt),
+
+ /* FP for ARMv8-M Mainline.  Enabled for ARMv8-M Mainline because the
+    instructions behave as nop if no VFP is present.  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8m_main
+ TUEc("vlldm",	0,	 ec300a00, 1, (RRnpc),	rn),
+ TUEc("vlstm",	0,	 ec200a00, 1, (RRnpc),	rn),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
@@ -24664,8 +24695,8 @@ arm_adjust_symtab (void)
 	      /* If it's a .thumb_func, declare it as so,
 		 otherwise tag label as .code 16.  */
 	      if (THUMB_IS_FUNC (sym))
-		elf_sym->internal_elf_sym.st_target_internal
-		  = ST_BRANCH_TO_THUMB;
+		ARM_SET_SYM_BRANCH_TYPE (elf_sym->internal_elf_sym.st_target_internal,
+					 ST_BRANCH_TO_THUMB);
 	      else if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
 		elf_sym->internal_elf_sym.st_info =
 		  ELF_ST_INFO (bind, STT_ARM_16BIT);
@@ -25443,12 +25474,16 @@ struct arm_option_extension_value_table
   size_t name_len;
   const arm_feature_set merge_value;
   const arm_feature_set clear_value;
-  const arm_feature_set allowed_archs;
+  /* List of architectures for which an extension is available.  ARM_ARCH_NONE
+     indicates that an extension is available for all architectures while
+     ARM_ANY marks an empty entry.  */
+  const arm_feature_set allowed_archs[2];
 };
 
 /* The following table must be in alphabetical order with a NULL last entry.
    */
-#define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, AA }
+#define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, { AA, ARM_ANY } }
+#define ARM_EXT_OPT2(N, M, C, AA1, AA2) { N, sizeof (N) - 1, M, C, {AA1, AA2} }
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
   ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
@@ -25456,23 +25491,28 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 			 ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("dsp",	ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
+			ARM_FEATURE_CORE (ARM_EXT_V7M, ARM_EXT2_V8M)),
   ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8, ARM_FEATURE_COPROC (FPU_VFP_ARMV8),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("fp16",  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 			ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 			ARM_ARCH_V8_2A),
-  ARM_EXT_OPT ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
+  ARM_EXT_OPT2 ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7R)),
   ARM_EXT_OPT ("iwmmxt",ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT),
-			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT), ARM_ANY),
+			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT), ARM_ARCH_NONE),
   ARM_EXT_OPT ("iwmmxt2", ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2),
-			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2), ARM_ANY),
+			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2), ARM_ARCH_NONE),
   ARM_EXT_OPT ("maverick", ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK),
-			ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK), ARM_ANY),
-  ARM_EXT_OPT ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
+			ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK), ARM_ARCH_NONE),
+  ARM_EXT_OPT2 ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7R)),
   ARM_EXT_OPT ("os",	ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_OS),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6M)),
@@ -25482,9 +25522,10 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("rdma",  FPU_ARCH_NEON_VFP_ARMV8_1,
 			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
-  ARM_EXT_OPT ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
+  ARM_EXT_OPT2 ("sec",	ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),
-				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V7A)),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V6K),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
   ARM_EXT_OPT ("simd",  FPU_ARCH_NEON_VFP_ARMV8,
 			ARM_FEATURE_COPROC (FPU_NEON_ARMV8),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
@@ -25493,8 +25534,8 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 			ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A)),
   ARM_EXT_OPT ("xscale",ARM_FEATURE_COPROC (ARM_CEXT_XSCALE),
-			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ANY),
-  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE }
+			ARM_FEATURE_COPROC (ARM_CEXT_XSCALE), ARM_ARCH_NONE),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, { ARM_ARCH_NONE, ARM_ARCH_NONE } }
 };
 #undef ARM_EXT_OPT
 
@@ -25600,6 +25641,7 @@ arm_parse_extension (const char *str, const arm_feature_set **opt_p)
      or removing it (0) and only allowing it to change in the order
      -1 -> 1 -> 0.  */
   const struct arm_option_extension_value_table * opt = NULL;
+  const arm_feature_set arm_any = ARM_ANY;
   int adding_value = -1;
 
   /* Copy the feature set, so that we can modify it.  */
@@ -25664,8 +25706,18 @@ arm_parse_extension (const char *str, const arm_feature_set **opt_p)
       for (; opt->name != NULL; opt++)
 	if (opt->name_len == len && strncmp (opt->name, str, len) == 0)
 	  {
+	    int i, nb_allowed_archs =
+	      sizeof (opt->allowed_archs) / sizeof (opt->allowed_archs[0]);
 	    /* Check we can apply the extension to this architecture.  */
-	    if (!ARM_CPU_HAS_FEATURE (*ext_set, opt->allowed_archs))
+	    for (i = 0; i < nb_allowed_archs; i++)
+	      {
+		/* Empty entry.  */
+		if (ARM_FEATURE_EQUAL (opt->allowed_archs[i], arm_any))
+		  continue;
+		if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], *ext_set))
+		  break;
+	      }
+	    if (i == nb_allowed_archs)
 	      {
 		as_bad (_("extension does not apply to the base architecture"));
 		return FALSE;
@@ -26079,6 +26131,7 @@ aeabi_set_public_attributes (void)
   char profile;
   int virt_sec = 0;
   int fp16_optional = 0;
+  arm_feature_set arm_arch = ARM_ARCH_NONE;
   arm_feature_set flags;
   arm_feature_set tmp;
   arm_feature_set arm_arch_v8m_base = ARM_ARCH_V8M_BASE;
@@ -26118,6 +26171,7 @@ aeabi_set_public_attributes (void)
       if (ARM_CPU_HAS_FEATURE (tmp, p->flags))
 	{
 	  arch = p->val;
+	  arm_arch = p->flags;
 	  ARM_CLEAR_FEATURE (tmp, tmp, p->flags);
 	}
     }
@@ -26134,18 +26188,27 @@ aeabi_set_public_attributes (void)
       && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v6_dsp))
-    arch = TAG_CPU_ARCH_V7E_M;
+    {
+      arch = TAG_CPU_ARCH_V7E_M;
+      arm_arch = (arm_feature_set) ARM_ARCH_V7EM;
+    }
 
   ARM_CLEAR_FEATURE (tmp, flags, arm_arch_v8m_base);
   if (arch == TAG_CPU_ARCH_V8M_BASE && ARM_CPU_HAS_FEATURE (tmp, arm_arch_any))
-    arch = TAG_CPU_ARCH_V8M_MAIN;
+    {
+      arch = TAG_CPU_ARCH_V8M_MAIN;
+      arm_arch = (arm_feature_set) ARM_ARCH_V8M_MAIN;
+    }
 
   /* In cpu_arch_ver ARMv8-A is before ARMv8-M for atomics to be detected as
      coming from ARMv8-A.  However, since ARMv8-A has more instructions than
      ARMv8-M, -march=all must be detected as ARMv8-A.  */
   if (arch == TAG_CPU_ARCH_V8M_MAIN
       && ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
-    arch = TAG_CPU_ARCH_V8;
+    {
+      arch = TAG_CPU_ARCH_V8;
+      arm_arch = (arm_feature_set) ARM_ARCH_V8A;
+    }
 
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])
@@ -26171,7 +26234,7 @@ aeabi_set_public_attributes (void)
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
       || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
       || (ARM_CPU_HAS_FEATURE (flags, arm_ext_atomics)
-	  && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m)))
+	  && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m_m_only)))
     profile = 'A';
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
     profile = 'R';
@@ -26182,6 +26245,17 @@ aeabi_set_public_attributes (void)
 
   if (profile != '\0')
     aeabi_set_attribute_int (Tag_CPU_arch_profile, profile);
+
+  /* Tag_DSP_extension.  */
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_dsp))
+    {
+      arm_feature_set ext;
+
+      /* DSP instructions not in architecture.  */
+      ARM_CLEAR_FEATURE (ext, flags, arm_arch);
+      if (ARM_CPU_HAS_FEATURE (ext, arm_ext_dsp))
+	aeabi_set_attribute_int (Tag_DSP_extension, 1);
+    }
 
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v1)
@@ -26195,7 +26269,7 @@ aeabi_set_public_attributes (void)
       int thumb_isa_use;
 
       if (!ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
-	  && ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m))
+	  && ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m_m_only))
 	thumb_isa_use = 3;
       else if (ARM_CPU_HAS_FEATURE (flags, arm_arch_t2))
 	thumb_isa_use = 2;
@@ -26421,6 +26495,7 @@ static void
 s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 {
   const struct arm_option_extension_value_table *opt;
+  const arm_feature_set arm_any = ARM_ANY;
   char saved_char;
   char *name;
   int adding_value = 1;
@@ -26441,7 +26516,18 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
   for (opt = arm_extensions; opt->name != NULL; opt++)
     if (streq (opt->name, name))
       {
-	if (!ARM_CPU_HAS_FEATURE (*mcpu_cpu_opt, opt->allowed_archs))
+	int i, nb_allowed_archs =
+	  sizeof (opt->allowed_archs) / sizeof (opt->allowed_archs[i]);
+	for (i = 0; i < nb_allowed_archs; i++)
+	  {
+	    /* Empty entry.  */
+	    if (ARM_FEATURE_EQUAL (opt->allowed_archs[i], arm_any))
+	      continue;
+	    if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], *mcpu_cpu_opt))
+	      break;
+	  }
+
+	if (i == nb_allowed_archs)
 	  {
 	    as_bad (_("architectural extension `%s' is not allowed for the "
 		      "current base architecture"), name);
@@ -26566,6 +26652,7 @@ arm_convert_symbolic_attribute (const char *name)
       T (Tag_conformance),
       T (Tag_T2EE_use),
       T (Tag_Virtualization_use),
+      T (Tag_DSP_extension),
       /* We deliberately do not include Tag_MPextension_use_legacy.  */
 #undef T
     };

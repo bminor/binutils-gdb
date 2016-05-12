@@ -249,11 +249,6 @@ py_print_value (struct ui_out *out, struct value *val,
 		const struct language_defn *language)
 {
   int should_print = 0;
-  int local_indent = (4 * indent);
-
-  /* Never set an indent level for common_val_print if MI.  */
-  if (ui_out_is_mi_like_p (out))
-    local_indent = 0;
 
   /* MI does not print certain values, differentiated by type,
      depending on what ARGS_TYPE indicates.  Test type against option.

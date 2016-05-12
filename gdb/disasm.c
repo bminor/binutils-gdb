@@ -493,12 +493,8 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 			      CORE_ADDR low, CORE_ADDR high,
 			      int how_many, int flags, struct ui_file *stb)
 {
-  int newlines = 0;
   const struct linetable_entry *le, *first_le;
-  struct symtab_and_line sal;
   int i, nlines;
-  int out_of_order = 0;
-  int next_line = 0;
   int num_displayed = 0;
   print_source_lines_flags psl_flags = 0;
   struct cleanup *cleanups;
@@ -592,7 +588,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 
   while (pc < high)
     {
-      struct linetable_entry *le = NULL;
       struct symtab_and_line sal;
       CORE_ADDR end_pc;
       int start_preceding_line_to_display = 0;
@@ -804,7 +799,6 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   struct cleanup *cleanups = make_cleanup_ui_file_delete (stb);
   struct disassemble_info di = gdb_disassemble_info (gdbarch, stb);
   struct symtab *symtab;
-  struct linetable_entry *le = NULL;
   int nlines = -1;
 
   /* Assume symtab is valid for whole PC range.  */

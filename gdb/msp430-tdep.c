@@ -248,7 +248,6 @@ msp430_pseudo_register_write (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int regnum, const gdb_byte *buffer)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   if (MSP430_NUM_REGS <= regnum && regnum < MSP430_NUM_TOTAL_REGS)
 
     {

@@ -63,8 +63,6 @@ static void
 arm_symbian_init_abi (struct gdbarch_info info,
 		      struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, arm_symbian_skip_trampoline_code);
 

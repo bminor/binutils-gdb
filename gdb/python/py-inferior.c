@@ -579,8 +579,6 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
   buffer = (const gdb_byte *) pybuf.buf;
   buf_len = pybuf.len;
 #else
-  const void *vbuffer;
-
   if (! PyArg_ParseTupleAndKeywords (args, kw, "Os#|O", keywords,
 				     &addr_obj, &buffer, &buf_len,
 				     &length_obj))

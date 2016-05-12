@@ -2458,7 +2458,6 @@ status_callback (struct lwp_info *lp, void *data)
       || lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
     {
       struct regcache *regcache = get_thread_regcache (lp->ptid);
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
       CORE_ADDR pc;
       int discard = 0;
 
@@ -3562,7 +3561,6 @@ kill_unfollowed_fork_children (struct inferior *inf)
 	    ptid_t child_ptid = ws->value.related_pid;
 	    int child_pid = ptid_get_pid (child_ptid);
 	    int child_lwp = ptid_get_lwp (child_ptid);
-	    int status;
 
 	    kill_one_lwp (child_lwp);
 	    kill_wait_one_lwp (child_lwp);
@@ -3577,8 +3575,6 @@ kill_unfollowed_fork_children (struct inferior *inf)
 static void
 linux_nat_kill (struct target_ops *ops)
 {
-  struct target_waitstatus last;
-
   /* If we're stopped while forking and we haven't followed yet,
      kill the other task.  We need to do this first because the
      parent will be sleeping if this is a vfork.  */

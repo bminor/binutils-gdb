@@ -1563,7 +1563,6 @@ symbol_cache_flush (struct program_space *pspace)
   struct symbol_cache *cache
     = (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
   int pass;
-  size_t total_size;
 
   if (cache == NULL)
     return;
@@ -2905,11 +2904,7 @@ basic_lookup_transparent_type_1 (struct objfile *objfile, int block_index,
 struct type *
 basic_lookup_transparent_type (const char *name)
 {
-  struct symbol *sym;
-  struct compunit_symtab *cust;
-  const struct blockvector *bv;
   struct objfile *objfile;
-  struct block *block;
   struct type *t;
 
   /* Now search all the global symbols.  Do the symtab's first, then
@@ -4419,7 +4414,7 @@ sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
 				 struct symbol_search **new_head,
 				 struct symbol_search **new_tail)
 {
-  struct symbol_search **symbols, *symp, *old_next;
+  struct symbol_search **symbols, *symp;
   int i, j, nunique;
 
   gdb_assert (found != NULL && nfound > 0);

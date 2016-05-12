@@ -262,7 +262,6 @@ x86_linux_enable_btrace (struct target_ops *self, ptid_t ptid,
 			 const struct btrace_config *conf)
 {
   struct btrace_target_info *tinfo;
-  struct gdbarch *gdbarch;
 
   errno = 0;
   tinfo = linux_enable_btrace (ptid, conf);

@@ -1333,7 +1333,6 @@ void
 value_contents_copy_raw (struct value *dst, int dst_offset,
 			 struct value *src, int src_offset, int length)
 {
-  range_s *r;
   int src_bit_offset, dst_bit_offset, bit_length;
   struct gdbarch *arch = get_value_arch (src);
   int unit_size = gdbarch_addressable_memory_unit_size (arch);

@@ -25,8 +25,6 @@
 static void
 amd64_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   amd64_init_abi (info, gdbarch);
 
   dicos_init_abi (gdbarch);

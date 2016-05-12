@@ -861,9 +861,6 @@ sh64_analyze_prologue (struct gdbarch *gdbarch,
   int insn;
   int r0_val = 0;
   int insn_size;
-  int gdb_register_number;
-  int register_number;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   
   cache->sp_offset = 0;
@@ -1058,8 +1055,6 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int stack_offset, stack_alloc;
   int int_argreg;
-  int float_argreg;
-  int double_argreg;
   int float_arg_index = 0;
   int double_arg_index = 0;
   int argnum;
@@ -1093,8 +1088,6 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
      in eight registers available.  Loop thru args from first to last.  */
 
   int_argreg = ARG0_REGNUM;
-  float_argreg = gdbarch_fp0_regnum (gdbarch);
-  double_argreg = DR0_REGNUM;
 
   for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
     {
@@ -1225,7 +1218,6 @@ sh64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -1919,7 +1911,6 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
   unsigned char *raw_buffer;
   double flt;	/* Double extracted from raw hex data.  */
   int inv;
-  int j;
 
   /* Allocate space for the float.  */
   raw_buffer = (unsigned char *)

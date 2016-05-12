@@ -1,3 +1,136 @@
+2016-05-12  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (elf_reloc_type_class): Put reloc_class_plt last.
+
+2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* elfxx-mips.c (print_mips_ases): Add DSPR3.
+
+2016-05-11  Alan Modra  <amodra@gmail.com>
+
+	* elf32-hppa.c (elf32_hppa_init_stub_bfd): New function.
+	(elf32_hppa_check_relocs): Don't set dynobj.
+	(elf32_hppa_size_stubs): Test !SEC_LINKER_CREATED for stub sections.
+	(elf32_hppa_build_stubs): Likewise.
+	* elf32-hppa.h (elf32_hppa_init_stub_bfd): Declare.
+
+2016-05-11  Alan Modra  <amodra@gmail.com>
+
+	PR 20060
+	* elf64-ppc.c (ppc64_elf_tls_setup): Clear forced_local.
+	* elf32-ppc.c (ppc_elf_tls_setup): Likewise.
+
+2016-05-10  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Remove redundant
+	aarch64_tls_transition check.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (enum elf32_arm_stub_type): New max_stub_type
+	enumerator.
+	(arm_stub_sym_claimed): New function.
+	(elf32_arm_create_stub): Use veneered symbol name and section if
+	veneer needs to claim its symbol, and keep logic unchanged otherwise.
+	(arm_stub_claim_sym): New function.
+	(arm_map_one_stub): Call arm_stub_claim_sym if veneer needs to claim
+	veneered symbol, otherwise create local symbol as before.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Use new macros
+	ARM_GET_SYM_BRANCH_TYPE and ARM_SET_SYM_BRANCH_TYPE to respectively get
+	and set branch type of a symbol.
+	(bfd_elf32_arm_process_before_allocation): Likewise.
+	(elf32_arm_relocate_section): Likewise and fix identation along the
+	way.
+	(allocate_dynrelocs_for_symbol): Likewise.
+	(elf32_arm_finish_dynamic_symbol): Likewise.
+	(elf32_arm_swap_symbol_in): Likewise.
+	(elf32_arm_swap_symbol_out): Likewise.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* bfd-in.h (elf32_arm_size_stubs): Add an output section parameter.
+	* bfd-in2.h: Regenerated.
+	* elf32-arm.c (struct elf32_arm_link_hash_table): Add an output section
+	parameter to add_stub_section callback.
+	(elf32_arm_create_or_find_stub_sec): Get output section from link_sec
+	and pass it down to add_stub_section.
+	(elf32_arm_add_stub): Set section to stub_sec if NULL before using it
+	for error message.
+	(elf32_arm_size_stubs): Add output section parameter to
+	add_stub_section function pointer parameter.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_create_stub): New function.
+	(elf32_arm_size_stubs): Use elf32_arm_create_stub for stub creation.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (enum elf32_arm_stub_type): Delete
+	arm_stub_a8_veneer_lwm enumerator.
+	(arm_stub_a8_veneer_lwm): New unsigned constant to replace
+	aforementioned enumerator.
+	(struct elf32_arm_stub_hash_entry): Delete target_addend
+	field and add source_value.
+	(struct a8_erratum_fix): Delete addend field and add target_offset.
+	(stub_hash_newfunc): Initialize source_value field amd remove
+	initialization for target_addend.
+	(arm_build_one_stub): Stop special casing Thumb relocations: promote
+	the else to being always executed, moving the
+	arm_stub_a8_veneer_b_cond specific code in it.  Remove
+	stub_entry->target_addend from points_to computation.
+	(cortex_a8_erratum_scan): Store in a8_erratum_fix structure the offset
+	to target symbol from start of section rather than the offset from the
+	stub address.
+	(elf32_arm_size_stubs): Set stub_entry's source_value and target_value
+	fields from struct a8_erratum_fix's offset and target_offset
+	respectively.
+	(make_branch_to_a8_stub): Rename target variable to loc.  Compute
+	veneered_insn_loc and loc using stub_entry's source_value.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	(elf32_arm_merge_eabi_attributes): Add merging logic for
+	Tag_DSP_extension.
+
+2016-05-10  Pip Cet  <pipcet@gmail.com>
+
+	PR ld/20059
+	* elfxx-target.h (bfd_elfNN_bfd_copy_link_hash_symbol_type):
+	Define as _bfd_generic_copy_link_hash_symbol_type when using
+	generic hash table.
+
+2016-05-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20063
+	* elf.c (bfd_elf_get_elf_syms): Check for out of range sh_link
+	field before accessing sections array.
+
+2016-05-09  Christophe Monat  <christophe.monat@st.com>
+
+	PR ld/20030
+	* elf32-arm.c (is_thumb2_vldm): Account for T1 (DP) encoding.
+	(stm32l4xx_need_create_replacing_stub): Rename ambiguous nb_regs
+	to nb_words.
+	(create_instruction_vldmia): Add is_dp to disambiguate SP/DP
+	encoding.
+	(create_instruction_vldmdb): Likewise.
+	(stm32l4xx_create_replacing_stub_vldm): is_dp detects DP encoding,
+	uses it to re-encode.
+
+2016-05-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 19938
+	* elf32-arm.c (elf32_arm_adjust_dynamic_symbol): Revert accidental
+	commit.
+
+2016-05-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_init_stub_bfd): Remove redundant NULL check.
+
 2016-05-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17550

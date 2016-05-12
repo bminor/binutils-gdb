@@ -111,7 +111,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   static struct type *last_tlb_type = NULL;
   struct type *dword_ptr_type, *dword32_type, *void_ptr_type;
   struct type *peb_ldr_type, *peb_ldr_ptr_type;
-  struct type *peb_type, *peb_ptr_type, *list_type, *list_ptr_type;
+  struct type *peb_type, *peb_ptr_type, *list_type;
   struct type *module_list_ptr_type;
   struct type *tib_type, *seh_type, *tib_ptr_type, *seh_ptr_type;
 
@@ -129,9 +129,6 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
 
   list_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   TYPE_NAME (list_type) = xstrdup ("list");
-
-  list_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-			    TYPE_LENGTH (void_ptr_type), NULL);
 
   module_list_ptr_type = void_ptr_type;
 

@@ -1,3 +1,131 @@
+2016-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20068
+	* testsuite/gas/arm/pr20068.d: Adjust expected output to allow for
+	big endian ARM configurations.
+
+2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (options): Add OPTION_DSPR3 and
+	OPTION_NO_DSPR3.
+	(md_longopts): Likewise.
+	(md_show_usage): Add help for -mdspr3 and -mno-dspr3.
+	(mips_ases): Define availability for DSPr3.
+	(mips_ase_groups): Add ASE_DSPR3 to the DSP group.
+	(mips_convert_ase_flags): Map ASE_DSPR3 to AFL_ASE_DSPR3.
+	* doc/as.texinfo: Document -mdspr3, -mno-dspr3.  Fix -mdspr2
+	formatting.
+	* doc/c-mips.texi: Document -mdspr3, -mno-dspr3, .set dspr3 and
+	.set nodspr3.  Fix -mdspr2 formatting.
+	* testsuite/gas/mips/mips32-dspr3.d: New file.
+	* testsuite/gas/mips/mips32-dspr3.s: Likewise.
+	* testsuite/gas/mips/mips.exp: Run mips32-dspr3 test.
+
+2016-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20068
+	* config/tc-arm.c (add_to_lit_pool): Ensure that the padding added
+	to the pool uses O_constant.
+	* testsuite/gas/arm/pr20068.s: New test.
+	* testsuite/gas/arm/pr20068.d: Test driver.
+
+2016-05-11  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/arm/archv8m-cmse-base.d: Skip for non-ELF ARM targets.
+	* testsuite/gas/arm/archv8m-cmse-main-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-3.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-4.d: Likewise.
+
+2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
+
+	* testsuite/gas/i386/i386.exp: Run RDPID tests.
+	* testsuite/gas/i386/prefix.d: Adjust.
+	* testsuite/gas/i386/rdpid.s: New test.
+	* testsuite/gas/i386/rdpid.d: Ditto.
+	* testsuite/gas/i386/rdpid-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-rdpid.s: Ditto.
+	* testsuite/gas/i386/x86-64-rdpid.d: Ditto.
+	* testsuite/gas/i386/x86-64-rdpid-intel.d: Ditto.
+
+2016-05-10  Alexander Fomin  <alexander.fomin@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add RDPID.
+	* doc/c-i386.texi: Document RDPID.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_adjust_symtab): Use ARM_SET_SYM_BRANCH_TYPE to
+	set branch type of a symbol.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* NEWS: Document ARMv8-M and ARMv8-M Security and DSP Extensions.
+	* config/tc-arm.c (arm_ext_dsp): New feature for Thumb DSP
+	instructions.
+	(arm_extensions): Add dsp extension for ARMv8-M Mainline.
+	(aeabi_set_public_attributes): Memorize the feature bits of the
+	architecture selected for Tag_CPU_arch.  Use it to set
+	Tag_DSP_extension to 1 for ARMv8-M Mainline with DSP extension.
+	(arm_convert_symbolic_attribute): Define Tag_DSP_extension.
+	* testsuite/gas/arm/arch7em-bad.d: Rename to ...
+	* testsuite/gas/arm/arch7em-bad-1.d: This.
+	* testsuite/gas/arm/arch7em-bad-2.d: New file.
+	* testsuite/gas/arm/arch7em-bad-3.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-3.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-4.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-5.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv8m.main.dsp.d: Likewise.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (struct arm_option_extension_value_table): Make
+	allowed_archs an array with 2 entries.
+	(ARM_EXT_OPT): Adapt to only fill the first entry of allowed_archs.
+	(ARM_EXT_OPT2): New macro filling the two entries of allowed_archs.
+	(arm_extensions): Use separate entries in allowed_archs when several
+	archs are allowed to use an extension and change ARCH_ANY in
+	ARM_ARCH_NONE in allowed_archs.
+	(arm_parse_extension): Check that, for each allowed_archs entry, all
+	bits are set in the current architecture, ignoring ARM_ANY entries.
+	(s_arm_arch_extension): Likewise.
+
+2016-05-10  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_ext_m): Add feature bit ARM_EXT2_V8M_MAIN.
+	(arm_ext_v8m_main): New feature set for bit ARM_EXT2_V8M_MAIN.
+	(arm_ext_v8m_m_only): New feature set for instructions in ARMv8-M not
+	shared with a non M profile architecture.
+	(do_rn): New function.
+	(known_t32_only_insn): Check opcode against arm_ext_v8m_m_only rather
+	than arm_ext_v8m.
+	(v7m_psrs): Add ARMv8-M security extensions new special registers.
+	(insns): Add ARMv8-M Security Extensions instructions.
+	(aeabi_set_public_attributes): Use arm_ext_v8m_m_only instead of
+	arm_ext_v8m_m to decide the profile and the Thumb ISA.
+	* testsuite/gas/arm/archv8m-cmse.s: New file.
+	* testsuite/gas/arm/archv8m-cmse-main.s: Likewise..
+	* testsuite/gas/arm/archv8m-cmse-msr.s: Likewise.
+	* testsuite/gas/arm/any-cmse.d: Likewise.
+	* testsuite/gas/arm/any-cmse-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-base.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-main.d: Likewise.
+
+2016-05-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/sparc5vis4.s: Fix mnemonic of faligndatai.
+	* testsuite/gas/sparc/sparc5vis4.d: Likewise.
+
 2016-05-04  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (fpu_arch_vfp_v1): Mark with ATTRIBUTE_UNUSED.

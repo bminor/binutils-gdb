@@ -500,13 +500,9 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
 		      CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  gdb_byte buf[4];
   int i;
   long reg_r0, reg_r1, reg_r2;
   int total_len = 0;
-  enum bfin_abi abi = bfin_abi (gdbarch);
-  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   for (i = nargs - 1; i >= 0; i--)
     {
@@ -794,14 +790,7 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  int elf_flags;
   enum bfin_abi abi;
-
-  /* Extract the ELF flags, if available.  */
-  if (info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
-    elf_flags = elf_elfheader (info.abfd)->e_flags;
-  else
-    elf_flags = 0;
 
   abi = BFIN_ABI_FLAT;
 

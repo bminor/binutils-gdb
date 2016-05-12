@@ -517,8 +517,6 @@ static int
 enable_break2 (void)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  int success = 0;
-  char **bkpt_namep;
   asection *interp_sect;
 
   if (enable_break2_done)
@@ -975,7 +973,6 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
   const char *name;
   CORE_ADDR addr;
   CORE_ADDR got_value;
-  struct int_elf32_fdpic_loadmap *ldm = 0;
   struct symbol *sym;
 
   /* Fetch the corresponding global pointer for the entry point.  */

@@ -54,6 +54,7 @@ ARD(LDST128_ABS_LO12_NC          , STATIC ,  AARCH64    ,   Y,  -1,    0,RL_CHEC
 
 ARD(ADR_GOT_PAGE                 , STATIC ,  AARCH64    ,   Y,  -1,   32,32               ,   12,32 , Symbol::RELATIVE_REF ,                         ADRP  )
 ARD(LD64_GOT_LO12_NC             , STATIC ,  AARCH64    ,   Y,  -1,    0,RL_CHECK_ALIGN8  ,    3,11 , Symbol::ABSOLUTE_REF ,                         LDST  )
+ARD(LD64_GOTPAGE_LO15            , STATIC ,  AARCH64    ,   Y,  -1,    0,15               ,    3,14 , Symbol::RELATIVE_REF ,                         LDST  )
 // Above 2 relocs are from Table 4-14, GOT-relative instruction relocations. (Some relocs in the table are not implemented yet.)
 
 ARD(TSTBR14                      , STATIC ,  CFLOW      ,   N,  -1,   15,15               ,    2,15 , (Symbol::FUNCTION_CALL|Symbol::ABSOLUTE_REF) , TBZNZ )
