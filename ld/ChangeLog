@@ -1,3 +1,21 @@
+2016-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20070
+	* Makefile.am (noinst_LTLIBRARIES): Add libldtestplug4.la.
+	(libldtestplug4_la_SOURCES): New.
+	(libldtestplug4_la_CFLAGS): Likewise.
+	(libldtestplug4_la_LDFLAGS): Likewise.
+	* Makefile.in: Regenerated.
+	* plugin.c (get_symbols): Return resolution based on IR symbol
+	kinds for symbols defined/referenced only within IR.
+	* testplug4.c: New file.
+	* ld/testsuite/ld-plugin/pr20070.d: Likewise.
+	* ld/testsuite/ld-plugin/pr20070a.c: Likewise.
+	* ld/testsuite/ld-plugin/pr20070b.c: Likewise.
+	* testsuite/ld-plugin/plugin.exp (plugin4_name): New.
+	(plugin4_path): Likewise.
+	Add a test for ld/20070.
+
 2016-05-11  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/hppaelf.em (hppaelf_create_output_section_statements):
