@@ -1325,7 +1325,7 @@ static op_err
 check_range (long *num, int bits, int unsigned flags, int update)
 {
   uint32_t max;
-  int retval = OP_LEGAL;
+  op_err retval = OP_LEGAL;
   int bin;
   uint32_t upper_64kb = 0xffff0000;
   uint32_t value = *num;

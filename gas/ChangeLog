@@ -1,3 +1,8 @@
+2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-cr16.c (check_range): Make type of retval op_err.
+	* config/tc-crx.c: Likewise.
+
 2016-05-23  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* config/tc-arc.c (md_begin): Add XY registers.
