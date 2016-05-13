@@ -1097,7 +1097,6 @@ weak_altname2name (const char * name)
 static const char *
 weak_uniquify (const char * name)
 {
-  char *ret;
   const char * unique = "";
 
 #ifdef TE_PE

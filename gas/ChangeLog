@@ -1,3 +1,7 @@
+2016-05-13  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-coff.c (weak_uniquify): Delete unused var.
+
 2016-05-13  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* app.c (app_push): Use XNEW and related macros.
