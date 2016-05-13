@@ -1,3 +1,8 @@
+2016-05-13  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <xxspltib>: Add additional operand tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
 2016-05-13  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-coff.c (weak_uniquify): Delete unused var.
