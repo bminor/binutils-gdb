@@ -8526,6 +8526,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   struct elf_link_sort_rela *sq;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int i2e = bed->s->int_rels_per_ext_rel;
+  unsigned int opb = bfd_octets_per_byte (abfd);
   void (*swap_in) (bfd *, const bfd_byte *, Elf_Internal_Rela *);
   void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
   struct bfd_link_order *lo;
@@ -8541,7 +8542,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
       bfd_boolean use_rela_initialised = FALSE;
 
       /* This is just here to stop gcc from complaining.
-	 It's initialization checking code is not perfect.  */
+	 Its initialization checking code is not perfect.  */
       use_rela = TRUE;
 
       /* Both sections are present.  Examine the sizes
@@ -8562,8 +8563,9 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		    /* Section size is only divisible by rela.  */
 		    if (use_rela_initialised && (use_rela == FALSE))
 		      {
-			_bfd_error_handler
-			  (_("%B: Unable to sort relocs - they are in more than one size"), abfd);
+			_bfd_error_handler (_("%B: Unable to sort relocs - "
+					      "they are in more than one size"),
+					    abfd);
 			bfd_set_error (bfd_error_invalid_operation);
 			return 0;
 		      }
@@ -8579,8 +8581,9 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		/* Section size is only divisible by rel.  */
 		if (use_rela_initialised && (use_rela == TRUE))
 		  {
-		    _bfd_error_handler
-		      (_("%B: Unable to sort relocs - they are in more than one size"), abfd);
+		    _bfd_error_handler (_("%B: Unable to sort relocs - "
+					  "they are in more than one size"),
+					abfd);
 		    bfd_set_error (bfd_error_invalid_operation);
 		    return 0;
 		  }
@@ -8592,9 +8595,10 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	      }
 	    else
 	      {
-		/* The section size is not divisible by either - something is wrong.  */
-		_bfd_error_handler
-		  (_("%B: Unable to sort relocs - they are of an unknown size"), abfd);
+		/* The section size is not divisible by either -
+		   something is wrong.  */
+		_bfd_error_handler (_("%B: Unable to sort relocs - "
+				      "they are of an unknown size"), abfd);
 		bfd_set_error (bfd_error_invalid_operation);
 		return 0;
 	      }
@@ -8616,8 +8620,9 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		    /* Section size is only divisible by rela.  */
 		    if (use_rela_initialised && (use_rela == FALSE))
 		      {
-			_bfd_error_handler
-			  (_("%B: Unable to sort relocs - they are in more than one size"), abfd);
+			_bfd_error_handler (_("%B: Unable to sort relocs - "
+					      "they are in more than one size"),
+					    abfd);
 			bfd_set_error (bfd_error_invalid_operation);
 			return 0;
 		      }
@@ -8633,8 +8638,9 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		/* Section size is only divisible by rel.  */
 		if (use_rela_initialised && (use_rela == TRUE))
 		  {
-		    _bfd_error_handler
-		      (_("%B: Unable to sort relocs - they are in more than one size"), abfd);
+		    _bfd_error_handler (_("%B: Unable to sort relocs - "
+					  "they are in more than one size"),
+					abfd);
 		    bfd_set_error (bfd_error_invalid_operation);
 		    return 0;
 		  }
@@ -8646,9 +8652,10 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	      }
 	    else
 	      {
-		/* The section size is not divisible by either - something is wrong.  */
-		_bfd_error_handler
-		  (_("%B: Unable to sort relocs - they are of an unknown size"), abfd);
+		/* The section size is not divisible by either -
+		   something is wrong.  */
+		_bfd_error_handler (_("%B: Unable to sort relocs - "
+				      "they are of an unknown size"), abfd);
 		bfd_set_error (bfd_error_invalid_operation);
 		return 0;
 	      }
@@ -8724,8 +8731,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	  }
 	erel = o->contents;
 	erelend = o->contents + o->size;
-	/* FIXME: octets_per_byte.  */
-	p = sort + o->output_offset / ext_size * sort_elt;
+	p = sort + o->output_offset * opb / ext_size * sort_elt;
 
 	while (erel < erelend)
 	  {
@@ -8761,6 +8767,35 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 
   qsort (s_non_relative, count - ret, sort_elt, elf_link_sort_cmp2);
 
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+  if (htab->srelplt && htab->srelplt->output_section == dynamic_relocs)
+    {
+      /* We have plt relocs in .rela.dyn.  */
+      sq = (struct elf_link_sort_rela *) sort;
+      for (i = 0; i < count; i++)
+	if (sq[count - i - 1].type != reloc_class_plt)
+	  break;
+      if (i != 0 && htab->srelplt->size == i * ext_size)
+	{
+	  struct bfd_link_order **plo;
+	  /* Put srelplt link_order last.  This is so the output_offset
+	     set in the next loop is correct for DT_JMPREL.  */
+	  for (plo = &dynamic_relocs->map_head.link_order; *plo != NULL; )
+	    if ((*plo)->type == bfd_indirect_link_order
+		&& (*plo)->u.indirect.section == htab->srelplt)
+	      {
+		lo = *plo;
+		*plo = lo->next;
+	      }
+	    else
+	      plo = &(*plo)->next;
+	  *plo = lo;
+	  lo->next = NULL;
+	  dynamic_relocs->map_tail.link_order = lo;
+	}
+    }
+
+  p = sort;
   for (lo = dynamic_relocs->map_head.link_order; lo != NULL; lo = lo->next)
     if (lo->type == bfd_indirect_link_order)
       {
@@ -8769,8 +8804,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 
 	erel = o->contents;
 	erelend = o->contents + o->size;
-	/* FIXME: octets_per_byte.  */
-	p = sort + o->output_offset / ext_size * sort_elt;
+	o->output_offset = (p - sort) / sort_elt * ext_size / opb;
 	while (erel < erelend)
 	  {
 	    struct elf_link_sort_rela *s = (struct elf_link_sort_rela *) p;

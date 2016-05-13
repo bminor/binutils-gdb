@@ -1,3 +1,10 @@
+2016-05-13  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_sort_relocs): Wrap overlong lines.  Fix
+	octets_per_byte.  Put dynamic .rela.plt last in link orders.
+	Assign output_offset for reloc sections rather than writing
+	sorted relocs from block corresponding to output_offset.
+
 2016-05-12  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (elf_reloc_type_class): Put reloc_class_plt last.
