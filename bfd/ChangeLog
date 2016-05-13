@@ -1,3 +1,14 @@
+2016-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20093
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Don't convert
+	GOTPCREL relocation against large section.
+
+	* elflink.c (bfd_elf_final_link): Likewise.
+
 2016-05-11  Alan Modra  <amodra@gmail.com>
 
 	PR 20060

@@ -3154,6 +3154,11 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	    continue;
 	}
 
+      /* Don't convert GOTPCREL relocation against large section.  */
+      if (elf_section_data (tsec) !=  NULL
+	  && (elf_section_flags (tsec) & SHF_X86_64_LARGE) != 0)
+	continue;
+
       if (tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	{
 	  /* At this stage in linking, no SEC_MERGE symbol has been

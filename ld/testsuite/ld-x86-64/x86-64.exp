@@ -247,6 +247,8 @@ run_dump_test "pr14215"
 run_dump_test "pr14207"
 run_dump_test "gotplt1"
 run_dump_test "pie1"
+run_dump_test "pr20093-1"
+run_dump_test "pr20093-2"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
