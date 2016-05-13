@@ -1,3 +1,40 @@
+2016-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20093
+	* testsuite/ld-x86-64/pr20093-1.d: New file.
+	* testsuite/ld-x86-64/pr20093-1.s: Likewise.
+	* testsuite/ld-x86-64/pr20093-2.d: Likewise.
+	* testsuite/ld-x86-64/pr20093-2.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr20093-1 and pr20093-2.
+
+2016-05-13  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-arm/arm-elf.exp: Adjust for arm-no-rel-plt now passing.
+	Use different output file name for static app without .rel.plt.
+	* testsuite/ld-arm/arm-no-rel-plt.ld: Align .rel.dyn and .rela.dyn.
+	* testsuite/ld-arm/arm-no-rel-plt.out: Delete.
+	* testsuite/ld-arm/arm-no-rel-plt.r: New.
+	* testsuite/ld-arm/arm-static-app.d: Don't check file name.
+	* testsuite/ld-arm/arm-static-app.r: Likewise.
+
+2016-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20070
+	* Makefile.am (noinst_LTLIBRARIES): Add libldtestplug4.la.
+	(libldtestplug4_la_SOURCES): New.
+	(libldtestplug4_la_CFLAGS): Likewise.
+	(libldtestplug4_la_LDFLAGS): Likewise.
+	* Makefile.in: Regenerated.
+	* plugin.c (get_symbols): Return resolution based on IR symbol
+	kinds for symbols defined/referenced only within IR.
+	* testplug4.c: New file.
+	* ld/testsuite/ld-plugin/pr20070.d: Likewise.
+	* ld/testsuite/ld-plugin/pr20070a.c: Likewise.
+	* ld/testsuite/ld-plugin/pr20070b.c: Likewise.
+	* testsuite/ld-plugin/plugin.exp (plugin4_name): New.
+	(plugin4_path): Likewise.
+	Add a test for ld/20070.
+
 2016-05-11  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/hppaelf.em (hppaelf_create_output_section_statements):

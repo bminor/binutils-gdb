@@ -1,3 +1,52 @@
+2016-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20093
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Don't convert
+	GOTPCREL relocation against large section.
+
+2016-05-13  Alan Modra  <amodra@gmail.com>
+
+	* elf-m10300.c (_bfd_mn10300_elf_finish_dynamic_sections): Use
+	linker dynamic sections in calculating size and address of
+	dynamic tags rather than using output sections.  Remove asserts.
+	* elf32-arm.c (elf32_arm_finish_dynamic_sections): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_finish_dynamic_sections): Likewise.
+	* elf32-cris.c (elf_cris_finish_dynamic_sections): Likewise.
+	* elf32-i370.c (i370_elf_finish_dynamic_sections): Likewise.
+	* elf32-lm32.c (lm32_elf_finish_dynamic_sections): Likewise.
+	* elf32-m32r.c (m32r_elf_finish_dynamic_sections): Likewise.
+	* elf32-m68k.c (elf_m68k_finish_dynamic_sections): Likewise.
+	* elf32-metag.c (elf_metag_finish_dynamic_sections): Likewise.
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_sections): Likewise.
+	* elf32-nds32.c (nds32_elf_finish_dynamic_sections): Likewise.
+	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Likewise.
+	* elf32-or1k.c (or1k_elf_finish_dynamic_sections): Likewise.
+	* elf32-s390.c (elf_s390_finish_dynamic_sections): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_finish_dynamic_sections): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_finish_dynamic_sections): Likewise.
+	* elf32-vax.c (elf_vax_finish_dynamic_sections): Likewise.
+	* elf32-xtensa.c (elf_xtensa_finish_dynamic_sections): Likewise.
+	* elf64-alpha.c (elf64_alpha_finish_dynamic_sections): Likewise.
+	* elf64-s390.c (elf_s390_finish_dynamic_sections): Likewise.
+	* elf64-sh64.c (sh64_elf64_finish_dynamic_sections): Likewise.
+	* elflink.c (bfd_elf_final_link): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	* elfxx-sparc.c (sparc_finish_dyn): Likewise.  Adjust error message.
+	* elf32-arc.c (GET_SYMBOL_OR_SECTION): Remove ASSERT arg and
+	don't set doit.  Look up dynobj section.
+	(elf_arc_finish_dynamic_sections): Adjust GET_SYMBOL_OR_SECTION
+	invocation and dynamic tag vma calculation.  Don't test
+	boolean var == TRUE.
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_sections): Fix
+	DT_JMPREL calc.
+
+2016-05-13  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_sort_relocs): Wrap overlong lines.  Fix
+	octets_per_byte.  Put dynamic .rela.plt last in link orders.
+	Assign output_offset for reloc sections rather than writing
+	sorted relocs from block corresponding to output_offset.
+
 2016-05-12  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (elf_reloc_type_class): Put reloc_class_plt last.

@@ -2432,8 +2432,8 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
       break;
     }
 
-  rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
 
   if (code == BFD_RELOC_MICROBLAZE_32_SYM_OP_SYM)
     *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);

@@ -301,7 +301,7 @@ rx_include (int ignore)
     }
 
    current_filename = as_where (NULL);
-  f = (char *) xmalloc (strlen (current_filename) + strlen (filename) + 1);
+  f = XNEWVEC (char, strlen (current_filename) + strlen (filename) + 1);
 
   /* Check the filename.  If [@]..FILE[@] is found then replace
      this with the current assembler source filename, stripped
@@ -359,7 +359,7 @@ rx_include (int ignore)
       if (env && strlen (env) > len)
 	len = strlen (env);
 
-      path = (char *) xmalloc (strlen (f) + len + 5);
+      path = XNEWVEC (char, strlen (f) + len + 5);
 
       if (current_filename != NULL)
 	{
@@ -531,10 +531,7 @@ rx_section (int ignore)
 
       if (*p != '"' && *p != '#')
 	{
-	  char * name = (char *) xmalloc (len + 1);
-
-	  strncpy (name, input_line_pointer, len);
-	  name[len] = 0;
+	  char *name = xmemdup0 (input_line_pointer, len);
 
 	  input_line_pointer = p;
 	  parse_rx_section (name);

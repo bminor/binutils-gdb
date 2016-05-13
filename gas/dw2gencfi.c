@@ -434,11 +434,9 @@ struct frch_cfi_data
 static struct fde_entry *
 alloc_fde_entry (void)
 {
-  struct fde_entry *fde = (struct fde_entry *)
-      xcalloc (1, sizeof (struct fde_entry));
+  struct fde_entry *fde = XCNEW (struct fde_entry);
 
-  frchain_now->frch_cfi_data = (struct frch_cfi_data *)
-      xcalloc (1, sizeof (struct frch_cfi_data));
+  frchain_now->frch_cfi_data = XCNEW (struct frch_cfi_data);
   frchain_now->frch_cfi_data->cur_fde_data = fde;
   *last_fde_data = fde;
   last_fde_data = &fde->next;
@@ -467,8 +465,7 @@ static struct fde_entry *last_fde;
 static struct cfi_insn_data *
 alloc_cfi_insn_data (void)
 {
-  struct cfi_insn_data *insn = (struct cfi_insn_data *)
-      xcalloc (1, sizeof (struct cfi_insn_data));
+  struct cfi_insn_data *insn = XCNEW (struct cfi_insn_data);
   struct fde_entry *cur_fde_data = frchain_now->frch_cfi_data->cur_fde_data;
 
   *cur_fde_data->last = insn;
@@ -662,7 +659,7 @@ cfi_add_CFA_remember_state (void)
 
   cfi_add_CFA_insn (DW_CFA_remember_state);
 
-  p = (struct cfa_save_data *) xmalloc (sizeof (*p));
+  p = XNEW (struct cfa_save_data);
   p->cfa_offset = frchain_now->frch_cfi_data->cur_cfa_offset;
   p->next = frchain_now->frch_cfi_data->cfa_save_stack;
   frchain_now->frch_cfi_data->cfa_save_stack = p;
@@ -947,7 +944,7 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
   tail = &head;
   do
     {
-      e = (struct cfi_escape_data *) xmalloc (sizeof (*e));
+      e = XNEW (struct cfi_escape_data);
       do_parse_cons_expression (&e->exp, 1);
       *tail = e;
       tail = &e->next;
@@ -1387,7 +1384,7 @@ dot_cfi_fde_data (int ignored ATTRIBUTE_UNUSED)
 	  num_ops = 0;
 	  do
 	    {
-	      e = (struct cfi_escape_data *) xmalloc (sizeof (*e));
+	      e = XNEW (struct cfi_escape_data);
 	      do_parse_cons_expression (&e->exp, 1);
 	      *tail = e;
 	      tail = &e->next;
@@ -1409,7 +1406,7 @@ dot_cfi_fde_data (int ignored ATTRIBUTE_UNUSED)
 	num_ops = 3;
 
       last_fde->eh_data_size = num_ops;
-      last_fde->eh_data = (bfd_byte *) xmalloc (num_ops);
+      last_fde->eh_data =  XNEWVEC (bfd_byte, num_ops);
       num_ops = 0;
       while (head)
 	{
@@ -2093,7 +2090,7 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
     fail:;
     }
 
-  cie = (struct cie_entry *) xmalloc (sizeof (struct cie_entry));
+  cie = XNEW (struct cie_entry);
   cie->next = cie_root;
   cie_root = cie;
   SET_CUR_SEG (cie, CUR_SEG (fde));

@@ -863,8 +863,8 @@ arelent *
 tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
-  reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   if (fixp->fx_addsy)
     *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   else if (fixp->fx_subsy)

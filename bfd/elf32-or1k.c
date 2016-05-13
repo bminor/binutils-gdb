@@ -1759,20 +1759,17 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
               continue;
 
             case DT_PLTGOT:
-              s = htab->sgot->output_section;
-              BFD_ASSERT (s != NULL);
-              dyn.d_un.d_ptr = s->vma;
+              s = htab->sgotplt;
+              dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
               break;
 
             case DT_JMPREL:
-              s = htab->srelplt->output_section;
-              BFD_ASSERT (s != NULL);
-              dyn.d_un.d_ptr = s->vma;
+              s = htab->srelplt;
+              dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
               break;
 
             case DT_PLTRELSZ:
-              s = htab->srelplt->output_section;
-              BFD_ASSERT (s != NULL);
+              s = htab->srelplt;
               dyn.d_un.d_val = s->size;
               break;
 
@@ -1788,19 +1785,8 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
                  about changing the DT_RELA entry.  */
               if (htab->srelplt != NULL)
                 {
-                  /* FIXME: this calculation sometimes produces
-                     wrong result, the problem is that the dyn.d_un.d_val
-                     is not always correct, needs investigation why
-                     that happens. In the meantime, reading the
-                     ".rela.dyn" section by name seems to yield
-                     correct result.
-
-                  s = htab->srelplt->output_section;
+                  s = htab->srelplt;
                   dyn.d_un.d_val -= s->size;
-                  */
-
-                  s = bfd_get_section_by_name (output_bfd, ".rela.dyn");
-                  dyn.d_un.d_val = s ? s->size : 0;
                 }
               break;
             }

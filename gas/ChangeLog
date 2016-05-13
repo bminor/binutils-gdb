@@ -1,3 +1,192 @@
+2016-05-13  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-coff.c (weak_uniquify): Delete unused var.
+
+2016-05-13  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* app.c (app_push): Use XNEW and related macros.
+	* as.c (parse_args): Likewise.
+	* cgen.c (make_right_shifted_expr): Likewise.
+	(gas_cgen_tc_gen_reloc): Likewise.
+	* config/bfin-defs.h: Likewise.
+	* config/bfin-parse.y: Likewise.
+	* config/obj-coff.c (stack_init): Likewise.
+	(stack_push): Likewise.
+	(coff_obj_symbol_new_hook): Likewise.
+	(coff_obj_symbol_clone_hook): Likewise.
+	(add_lineno): Likewise.
+	(coff_frob_symbol): Likewise.
+	* config/obj-elf.c (obj_elf_section_name): Likewise.
+	(build_group_lists): Likewise.
+	* config/obj-evax.c (evax_symbol_new_hook): Likewise.
+	* config/obj-macho.c (obj_mach_o_indirect_symbol): Likewise.
+	* config/tc-aarch64.c (insert_reg_alias): Likewise.
+	(find_or_make_literal_pool): Likewise.
+	(add_to_lit_pool): Likewise.
+	(fill_instruction_hash_table): Likewise.
+	* config/tc-alpha.c (load_expression): Likewise.
+	(emit_jsrjmp): Likewise.
+	(s_alpha_ent): Likewise.
+	(s_alpha_end): Likewise.
+	(s_alpha_linkage): Likewise.
+	(md_begin): Likewise.
+	(tc_gen_reloc): Likewise.
+	* config/tc-arc.c (arc_insert_opcode): Likewise.
+	(arc_extcorereg): Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-cr16.c: Likewise.
+	* config/tc-cris.c: Likewise.
+	* config/tc-crx.c (preprocess_reglist): Likewise.
+	* config/tc-d10v.c: Likewise.
+	* config/tc-frv.c (frv_insert_vliw_insn): Likewise.
+	(frv_tomcat_shuffle): Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-i370.c (i370_macro): Likewise.
+	* config/tc-i386.c (lex_got): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-ia64.c (alloc_record): Likewise.
+	(set_imask): Likewise.
+	(save_prologue_count): Likewise.
+	(dot_proc): Likewise.
+	(dot_endp): Likewise.
+	(ia64_frob_label): Likewise.
+	(add_qp_imply): Likewise.
+	(add_qp_mutex): Likewise.
+	(mark_resource): Likewise.
+	(dot_alias): Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c (m68k_frob_label): Likewise.
+	(s_save): Likewise.
+	(mri_control_label): Likewise.
+	(push_mri_control): Likewise.
+	(build_mri_control_operand): Likewise.
+	(s_mri_else): Likewise.
+	(s_mri_break): Likewise.
+	(s_mri_next): Likewise.
+	(s_mri_for): Likewise.
+	(s_mri_endw): Likewise.
+	* config/tc-metag.c (create_mnemonic_htab): Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mmix.c (s_loc): Likewise.
+	* config/tc-nds32.c (nds32_relax_hint): Likewise.
+	* config/tc-nios2.c (nios2_insn_reloc_new): Likewise.
+	* config/tc-rl78.c: Likewise.
+	* config/tc-rx.c (rx_include): Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh64.c (shmedia_frob_section_type): Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-spu.c: Likewise.
+	* config/tc-tic6x.c (static tic6x_unwind_info *tic6x_get_unwind): Likewise.
+	(tic6x_start_unwind_section): Likewise.
+	* config/tc-tilegx.c: Likewise.
+	* config/tc-tilepro.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-visium.c: Likewise.
+	* config/tc-xgate.c: Likewise.
+	* config/tc-xtensa.c (xtensa_translate_old_userreg_ops): Likewise.
+	(new_resource_table): Likewise.
+	(resize_resource_table): Likewise.
+	(xtensa_create_trampoline_frag): Likewise.
+	(xtensa_maybe_create_literal_pool_frag): Likewise.
+	(cache_literal_section): Likewise.
+	* config/xtensa-relax.c (append_transition): Likewise.
+	(append_condition): Likewise.
+	(append_value_condition): Likewise.
+	(append_constant_value_condition): Likewise.
+	(append_literal_op): Likewise.
+	(append_label_op): Likewise.
+	(append_constant_op): Likewise.
+	(append_field_op): Likewise.
+	(append_user_fn_field_op): Likewise.
+	(enter_opname_n): Likewise.
+	(enter_opname): Likewise.
+	(split_string): Likewise.
+	(parse_insn_templ): Likewise.
+	(clone_req_or_option_list): Likewise.
+	(clone_req_option_list): Likewise.
+	(parse_option_cond): Likewise.
+	(parse_insn_pattern): Likewise.
+	(parse_insn_repl): Likewise.
+	(build_transition): Likewise.
+	(build_transition_table): Likewise.
+	* dw2gencfi.c (alloc_fde_entry): Likewise.
+	(alloc_cfi_insn_data): Likewise.
+	(cfi_add_CFA_remember_state): Likewise.
+	(dot_cfi_escape): Likewise.
+	(dot_cfi_fde_data): Likewise.
+	(select_cie_for_fde): Likewise.
+	* dwarf2dbg.c (dwarf2_directive_loc): Likewise.
+	* ecoff.c (ecoff_add_bytes): Likewise.
+	(ecoff_build_debug): Likewise.
+	* input-scrub.c (input_scrub_push): Likewise.
+	(input_scrub_begin): Likewise.
+	(input_scrub_next_buffer): Likewise.
+	* itbl-ops.c (append_insns_as_macros): Likewise.
+	(alloc_entry): Likewise.
+	(alloc_field): Likewise.
+	* listing.c (listing_newline): Likewise.
+	(listing_listing): Likewise.
+	* macro.c (get_any_string): Likewise.
+	(delete_macro): Likewise.
+	* stabs.c (generate_asm_file): Likewise.
+	(stabs_generate_asm_lineno): Likewise.
+	* subsegs.c (subseg_change): Likewise.
+	(subseg_get): Likewise.
+	* symbols.c (define_dollar_label): Likewise.
+	(symbol_relc_make_sym): Likewise.
+	* write.c (write_relocs): Likewise.
+
+2016-05-13  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/obj-coff.c (obj_coff_def): Simplify string copying.
+	(weak_name2altname): Likewise.
+	(weak_uniquify): Likewise.
+	(obj_coff_section): Likewise.
+	(obj_coff_init_stab_section): Likewise.
+	* config/obj-elf.c (obj_elf_section_name): Likewise.
+	(obj_elf_init_stab_section): Likewise.
+	* config/obj-evax.c (evax_shorten_name): Likewise.
+	* config/obj-macho.c (obj_mach_o_make_or_get_sect): Likewise.
+	* config/tc-aarch64.c (create_register_alias): Likewise.
+	* config/tc-alpha.c (load_expression): Likewise.
+	(s_alpha_file): Likewise.
+	(s_alpha_section_name): Likewise.
+	(tc_gen_reloc): Likewise.
+	* config/tc-arc.c (md_assemble): Likewise.
+	* config/tc-arm.c (create_neon_reg_alias): Likewise.
+	(start_unwind_section): Likewise.
+	* config/tc-hppa.c (pa_build_unwind_subspace): Likewise.
+	(hppa_elf_mark_end_of_function): Likewise.
+	* config/tc-nios2.c (nios2_modify_arg): Likewise.
+	(nios2_negate_arg): Likewise.
+	* config/tc-rx.c (rx_section): Likewise.
+	* config/tc-sh64.c (sh64_consume_datalabel): Likewise.
+	* config/tc-tic30.c (tic30_find_parallel_insn): Likewise.
+	* config/tc-tic54x.c (tic54x_include): Likewise.
+	(tic54x_macro_info): Likewise.
+	(subsym_get_arg): Likewise.
+	(subsym_substitute): Likewise.
+	(tic54x_start_line_hook): Likewise.
+	* config/tc-xtensa.c (xtensa_literal_prefix): Likewise.
+	(xg_reverse_shift_count): Likewise.
+	* config/xtensa-relax.c (enter_opname_n): Likewise.
+	(split_string): Likewise.
+	* dwarf2dbg.c (get_filenum): Likewise.
+	(process_entries): Likewise.
+	* expr.c (operand): Likewise.
+	* itbl-ops.c (alloc_entry): Likewise.
+	* listing.c (listing_message): Likewise.
+	(listing_title): Likewise.
+	* macro.c (check_macro): Likewise.
+	* stabs.c (s_xstab): Likewise.
+	* symbols.c (symbol_relc_make_expr): Likewise.
+	* write.c (compress_debug): Likewise.
+
+2016-05-12  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20068
+	* testsuite/gas/arm/pr20068.d: Use correct regexp syntax.
+
 2016-05-11  Nick Clifton  <nickc@redhat.com>
 
 	PR target/20068

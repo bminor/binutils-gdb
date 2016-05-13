@@ -1334,8 +1334,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #undef F
 #undef MAP
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 #ifndef OBJ_ELF
@@ -4786,7 +4786,7 @@ m68k_frob_label (symbolS *sym)
 {
   struct label_line *n;
 
-  n = (struct label_line *) xmalloc (sizeof *n);
+  n = XNEW (struct label_line);
   n->next = labels;
   n->label = sym;
   n->file = as_where (&n->line);
@@ -6102,7 +6102,7 @@ s_save (int ignore ATTRIBUTE_UNUSED)
 {
   struct save_opts *s;
 
-  s = (struct save_opts *) xmalloc (sizeof (struct save_opts));
+  s = XNEW (struct save_opts);
   s->abspcadd = m68k_abspcadd;
   s->symbols_case_sensitive = symbols_case_sensitive;
   s->keep_locals = flag_keep_locals;
@@ -6222,7 +6222,7 @@ mri_control_label (void)
 {
   char *n;
 
-  n = (char *) xmalloc (20);
+  n = XNEWVEC (char, 20);
   sprintf (n, "%smc%d", FAKE_LABEL_NAME, mri_control_index);
   ++mri_control_index;
   return n;
@@ -6235,7 +6235,7 @@ push_mri_control (enum mri_control_type type)
 {
   struct mri_control_info *n;
 
-  n = (struct mri_control_info *) xmalloc (sizeof (struct mri_control_info));
+  n = XNEW (struct mri_control_info);
 
   n->type = type;
   n->else_seen = 0;
@@ -6514,9 +6514,9 @@ build_mri_control_operand (int qual, int cc, char *leftstart, char *leftstop,
 
   if (leftstart != NULL)
     {
-      buf = (char *) xmalloc (20
-			      + (leftstop - leftstart)
-			      + (rightstop - rightstart));
+      buf = XNEWVEC (char, (20
+			    + (leftstop - leftstart)
+			    + (rightstop - rightstart)));
       s = buf;
       *s++ = 'c';
       *s++ = 'm';
@@ -6534,7 +6534,7 @@ build_mri_control_operand (int qual, int cc, char *leftstart, char *leftstop,
       free (buf);
     }
 
-  buf = (char *) xmalloc (20 + strlen (truelab));
+  buf = XNEWVEC (char, 20 + strlen (truelab));
   s = buf;
   *s++ = 'b';
   *s++ = cc >> 8;
@@ -6783,7 +6783,7 @@ s_mri_else (int qual)
 
   mri_control_stack->else_seen = 1;
 
-  buf = (char *) xmalloc (20 + strlen (mri_control_stack->bottom));
+  buf = XNEWVEC (char, 20 + strlen (mri_control_stack->bottom));
   q[0] = TOLOWER (qual);
   q[1] = '\0';
   sprintf (buf, "bra%s %s", q, mri_control_stack->bottom);
@@ -6854,7 +6854,7 @@ s_mri_break (int extent)
       return;
     }
 
-  buf = (char *) xmalloc (20 + strlen (n->bottom));
+  buf = XNEWVEC (char, 20 + strlen (n->bottom));
   ex[0] = TOLOWER (extent);
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->bottom);
@@ -6892,7 +6892,7 @@ s_mri_next (int extent)
       return;
     }
 
-  buf = (char *) xmalloc (20 + strlen (n->next));
+  buf = XNEWVEC (char, 20 + strlen (n->next));
   ex[0] = TOLOWER (extent);
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->next);
@@ -7066,7 +7066,7 @@ s_mri_for (int qual)
   /* We have fully parsed the FOR operands.  Now build the loop.  */
   n = push_mri_control (mri_for);
 
-  buf = (char *) xmalloc (50 + (input_line_pointer - varstart));
+  buf = XNEWVEC (char, 50 + (input_line_pointer - varstart));
 
   /* Move init,var.  */
   s = buf;
@@ -7300,7 +7300,7 @@ s_mri_endw (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  buf = (char *) xmalloc (20 + strlen (mri_control_stack->next));
+  buf = XNEWVEC (char, 20 + strlen (mri_control_stack->next));
   sprintf (buf, "bra %s", mri_control_stack->next);
   mri_assemble (buf);
   free (buf);
@@ -7581,7 +7581,7 @@ md_parse_option (int c, const char *arg)
 	char *n, *t;
 	const char *s;
 
-	n = (char *) xmalloc (strlen (m68k_comment_chars) + 1);
+	n = XNEWVEC (char, strlen (m68k_comment_chars) + 1);
 	t = n;
 	for (s = m68k_comment_chars; *s != '\0'; s++)
 	  if (*s != '|')

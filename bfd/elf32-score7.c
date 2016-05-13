@@ -3429,21 +3429,19 @@ s7_bfd_score_elf_finish_dynamic_sections (bfd *output_bfd,
           switch (dyn.d_tag)
             {
             case DT_RELENT:
-              s = score_elf_rel_dyn_section (dynobj, FALSE);
-              BFD_ASSERT (s != NULL);
               dyn.d_un.d_val = SCORE_ELF_REL_SIZE (dynobj);
               break;
 
             case DT_STRSZ:
               /* Rewrite DT_STRSZ.  */
-              dyn.d_un.d_val = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
-                    break;
+              dyn.d_un.d_val
+                = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
+              break;
 
             case DT_PLTGOT:
               name = ".got";
-              s = bfd_get_section_by_name (output_bfd, name);
-              BFD_ASSERT (s != NULL);
-              dyn.d_un.d_ptr = s->vma;
+              s = bfd_get_linker_section (dynobj, name);
+              dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
               break;
 
             case DT_SCORE_BASE_ADDRESS:
@@ -3476,9 +3474,7 @@ s7_bfd_score_elf_finish_dynamic_sections (bfd *output_bfd,
             case DT_SCORE_SYMTABNO:
               name = ".dynsym";
               elemsize = SCORE_ELF_SYM_SIZE (output_bfd);
-              s = bfd_get_section_by_name (output_bfd, name);
-              BFD_ASSERT (s != NULL);
-
+              s = bfd_get_linker_section (dynobj, name);
               dyn.d_un.d_val = s->size / elemsize;
               break;
 

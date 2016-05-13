@@ -700,7 +700,7 @@ arc_insert_opcode (const struct arc_opcode *opcode)
   entry = hash_find (arc_opcode_hash, name);
   if (entry == NULL)
     {
-      entry = xmalloc (sizeof (*entry));
+      entry = XNEW (struct arc_opcode_hash_entry);
       entry->count = 0;
       entry->opcode = NULL;
 
@@ -710,9 +710,8 @@ arc_insert_opcode (const struct arc_opcode *opcode)
 		  name, retval);
     }
 
-  entry->opcode = xrealloc (entry->opcode,
-			    sizeof (const struct arc_opcode *)
-			    * (entry->count + 1));
+  entry->opcode = XRESIZEVEC (const struct arc_opcode *, entry->opcode,
+			      entry->count + 1);
 
   if (entry->opcode == NULL)
     as_fatal (_("Virtual memory exhausted"));
@@ -2262,9 +2261,7 @@ md_assemble (char *str)
 
   /* Split off the opcode.  */
   opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123468");
-  opname = xmalloc (opnamelen + 1);
-  memcpy (opname, str, opnamelen);
-  opname[opnamelen] = '\0';
+  opname = xmemdup0 (str, opnamelen);
 
   /* Signalize we are assmbling the instructions.  */
   assembling_insn = TRUE;
@@ -2939,8 +2936,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) xmalloc (sizeof (* reloc));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
 
@@ -4473,7 +4470,7 @@ arc_extcorereg (int opertype)
       break;
     case EXT_AUX_REGISTER:
       /* Auxiliary register.  */
-      auxr = xmalloc (sizeof (struct arc_aux_reg));
+      auxr = XNEW (struct arc_aux_reg);
       auxr->name = ereg.name;
       auxr->cpu = arc_target;
       auxr->subclass = NONE;
@@ -4490,8 +4487,8 @@ arc_extcorereg (int opertype)
 		ereg.number);
       ext_condcode.size ++;
       ext_condcode.arc_ext_condcode =
-	xrealloc (ext_condcode.arc_ext_condcode,
-		  (ext_condcode.size + 1) * sizeof (struct arc_flag_operand));
+	XRESIZEVEC (struct arc_flag_operand, ext_condcode.arc_ext_condcode,
+		    ext_condcode.size + 1);
       if (ext_condcode.arc_ext_condcode == NULL)
 	as_fatal (_("Virtual memory exhausted"));
 

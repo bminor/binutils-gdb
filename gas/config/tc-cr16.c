@@ -528,8 +528,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
 	   && (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)))
      return NULL;
 
-  reloc = xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr  = xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr  = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   reloc->addend = fixP->fx_offset;

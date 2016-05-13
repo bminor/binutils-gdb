@@ -507,12 +507,12 @@ segT   subseg_get (const char *, int);
 const char *remap_debug_filename (const char *);
 void add_debug_prefix_map (const char *);
 
-static inline void *
-xmemdup0 (const void *in, size_t len)
+static inline char *
+xmemdup0 (const char *in, size_t len)
 {
   char *out = (char *) xmalloc (len + 1);
   out[len] = 0;
-  return memcpy (out, in, len);
+  return (char *) memcpy (out, in, len);
 }
 
 struct expressionS;

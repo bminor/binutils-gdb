@@ -78,7 +78,7 @@ proc build_executable_from_fission_assembler { testname executable sources optio
 	return -1
     }
 
-    set result [gdb_compile $object_file $executable executable {nodebug}]
+    set result [gdb_compile $object_file $executable executable $options]
     if { "$result" != "" } {
 	return -1
     }

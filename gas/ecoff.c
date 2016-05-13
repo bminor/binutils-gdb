@@ -3610,7 +3610,7 @@ ecoff_add_bytes (char **buf,
   if (need < PAGE_SIZE)
     need = PAGE_SIZE;
   want = (*bufend - *buf) + need;
-  *buf = (char *) xrealloc (*buf, want);
+  *buf = XRESIZEVEC (char, *buf, want);
   *bufend = *buf + want;
   return *buf + at;
 }
@@ -4691,7 +4691,7 @@ ecoff_build_debug (HDRR *hdr,
 
   /* Build the symbolic information.  */
   offset = 0;
-  buf = (char *) xmalloc (PAGE_SIZE);
+  buf = XNEWVEC (char, PAGE_SIZE);
   bufend = buf + PAGE_SIZE;
 
   /* Build the line number information.  */

@@ -613,9 +613,7 @@ md_begin (void)
   m68hc11_hash = hash_new ();
 
   /* Get a writable copy of the opcode table and sort it on the names.  */
-  opcodes = (struct m68hc11_opcode *) xmalloc (m68hc11_num_opcodes *
-					       sizeof (struct
-						       m68hc11_opcode));
+  opcodes = XNEWVEC (struct m68hc11_opcode, m68hc11_num_opcodes);
   m68hc11_sorted_opcodes = opcodes;
   num_opcodes = 0;
   for (i = 0; i < m68hc11_num_opcodes; i++)
@@ -644,8 +642,7 @@ md_begin (void)
   qsort (opcodes, num_opcodes, sizeof (struct m68hc11_opcode),
          (int (*) (const void*, const void*)) cmp_opcode);
 
-  opc = (struct m68hc11_opcode_def *)
-    xmalloc (num_opcodes * sizeof (struct m68hc11_opcode_def));
+  opc = XNEWVEC (struct m68hc11_opcode_def, num_opcodes);
   m68hc11_opcode_defs = opc--;
 
   /* Insert unique names into hash table.  The M6811 instruction set
@@ -3831,8 +3828,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   if (fixp->fx_r_type == 0)

@@ -3353,19 +3353,17 @@ m32r_elf_finish_dynamic_sections (bfd *output_bfd,
               break;
 
             case DT_PLTGOT:
-              s = htab->sgot->output_section;
+              s = htab->sgotplt;
               goto get_vma;
             case DT_JMPREL:
-              s = htab->srelplt->output_section;
+              s = htab->srelplt;
             get_vma:
-              BFD_ASSERT (s != NULL);
-              dyn.d_un.d_ptr = s->vma;
+              dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
               bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
               break;
 
             case DT_PLTRELSZ:
-              s = htab->srelplt->output_section;
-              BFD_ASSERT (s != NULL);
+              s = htab->srelplt;
 	      dyn.d_un.d_val = s->size;
               bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
               break;
@@ -3382,7 +3380,7 @@ m32r_elf_finish_dynamic_sections (bfd *output_bfd,
                  about changing the DT_RELA entry.  */
               if (htab->srelplt != NULL)
                 {
-                  s = htab->srelplt->output_section;
+                  s = htab->srelplt;
 		  dyn.d_un.d_val -= s->size;
                 }
               bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);

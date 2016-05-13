@@ -4494,7 +4494,7 @@ expr_1: expr_1 STAR expr_1
 EXPR_T
 mkexpr (int x, SYMBOL_T s)
 {
-  EXPR_T e = (EXPR_T) ALLOCATE (sizeof (struct expression_cell));
+  EXPR_T e = XNEW (struct expression_cell);
   e->value = x;
   EXPR_SYMBOL(e) = s;
   return e;

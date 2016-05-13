@@ -286,11 +286,11 @@ set armelftests_nonacl {
     {"Simple static application without .rel.plt in linker script"
 	"-T arm-no-rel-plt.ld" "" "" {arm-static-app.s}
      {{objdump -fdw arm-static-app.d} {objdump -rw arm-static-app.r}}
-     "arm-static-app"}
+     "arm-static-app-no-rel-plt"}
     {"Simple dynamic application without .rel.plt in linker script"
 	"tmpdir/arm-lib.so -T arm-no-rel-plt.ld" "" "" {arm-app.s}
-     {{ld arm-no-rel-plt.out}}
-     "arm-app"}
+     {{readelf -dr arm-no-rel-plt.r}}
+     "arm-app-no-rel-plt"}
     {"Non-pcrel function reference" "tmpdir/arm-lib.so" "" "" {arm-app-abs32.s}
      {{objdump -fdw arm-app-abs32.d} {objdump -Rw arm-app-abs32.r}}
      "arm-app-abs32"}

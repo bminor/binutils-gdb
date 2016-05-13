@@ -1,3 +1,9 @@
+2016-05-12  Doug Evans  <dje@google.com>
+
+	PR symtab/19999
+	* dwarf2loc.c (dwarf2_find_location_expression): For DWO files still
+	add base_offset.
+
 2016-05-10  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* iq2000-tdep.c (iq2000_scan_prologue): Remove if that shouldn't guard

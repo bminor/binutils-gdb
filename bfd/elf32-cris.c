@@ -2336,22 +2336,21 @@ elf_cris_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTGOT:
-	      s = bfd_get_section_by_name (output_bfd, ".got");
-	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->vma;
+	      dyn.d_un.d_ptr = sgot->output_section->vma + sgot->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_JMPREL:
 	      /* Yes, we *can* have a .plt and no .plt.rela, for instance
 		 if all symbols are found in the .got (not .got.plt).  */
-	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
-	      dyn.d_un.d_ptr = s != NULL ? s->vma : 0;
+	      s = bfd_get_linker_section (dynobj, ".rela.plt");
+	      dyn.d_un.d_ptr = s != NULL ? (s->output_section->vma
+					    + s->output_offset) : 0;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
+	      s = bfd_get_linker_section (dynobj, ".rela.plt");
 	      if (s == NULL)
 		dyn.d_un.d_val = 0;
 	      else
@@ -2367,7 +2366,7 @@ elf_cris_finish_dynamic_sections (bfd *output_bfd,
 		 linker script arranges for .rela.plt to follow all
 		 other relocation sections, we don't have to worry
 		 about changing the DT_RELA entry.  */
-	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
+	      s = bfd_get_linker_section (dynobj, ".rela.plt");
 	      if (s != NULL)
 		dyn.d_un.d_val -= s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);

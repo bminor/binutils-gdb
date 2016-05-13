@@ -15281,27 +15281,26 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	      goto get_vma_if_bpabi;
 
 	    case DT_PLTGOT:
-	      name = ".got";
+	      name = htab->symbian_p ? ".got" : ".got.plt";
 	      goto get_vma;
 	    case DT_JMPREL:
 	      name = RELOC_SECTION (htab, ".plt");
 	    get_vma:
-	      s = bfd_get_section_by_name (output_bfd, name);
+	      s = bfd_get_linker_section (dynobj, name);
 	      if (s == NULL)
 		{
-		  /* PR ld/14397: Issue an error message if a required section is missing.  */
 		  (*_bfd_error_handler)
-		    (_("error: required section '%s' not found in the linker script"), name);
+		    (_("could not find section %s"), name);
 		  bfd_set_error (bfd_error_invalid_operation);
 		  return FALSE;
 		}
 	      if (!htab->symbian_p)
-		dyn.d_un.d_ptr = s->vma;
+		dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      else
 		/* In the BPABI, tags in the PT_DYNAMIC section point
 		   at the file offset, not the memory address, for the
 		   convenience of the post linker.  */
-		dyn.d_un.d_ptr = s->filepos;
+		dyn.d_un.d_ptr = s->output_section->filepos + s->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 

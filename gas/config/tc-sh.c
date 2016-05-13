@@ -4424,8 +4424,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   arelent *rel;
   bfd_reloc_code_real_type r_type;
 
-  rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
 

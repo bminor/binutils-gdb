@@ -1932,8 +1932,7 @@ tic54x_include (int ignored ATTRIBUTE_UNUSED)
      and a .newblock.
      The included file will be inserted before the newblock, so that the
      newblock is executed after the included file is processed.  */
-  input = xmalloc (sizeof (newblock) + strlen (filename) + 4);
-  sprintf (input, "\"%s\"\n%s", filename, newblock);
+  input = concat ("\"", filename, "\"\n", newblock, (char *) NULL);
   input_scrub_insert_line (input);
 
   tic54x_clear_local_labels (0);
@@ -2518,10 +2517,8 @@ tic54x_macro_info (const macro_entry *macro)
   /* Put the formal args into the substitution symbol table.  */
   for (entry = macro->formals; entry; entry = entry->next)
     {
-      char *name = strncpy (xmalloc (entry->name.len + 1),
-			    entry->name.ptr, entry->name.len);
-      char *value = strncpy (xmalloc (entry->actual.len + 1),
-			     entry->actual.ptr, entry->actual.len);
+      char *name = xstrndup (entry->name.ptr, entry->name.len);
+      char *value = xstrndup (entry->actual.ptr, entry->actual.len);
 
       name[entry->name.len] = '\0';
       value[entry->actual.len] = '\0';
@@ -4293,9 +4290,7 @@ subsym_get_arg (char *line, const char *terminators, char **str, int nosub)
       while (ISDIGIT (*ptr))
 	++ptr;
       endp = ptr;
-      *str = xmalloc (ptr - line + 1);
-      strncpy (*str, line, ptr - line);
-      (*str)[ptr - line] = 0;
+      *str = xmemdup0 (line, ptr - line);
     }
   else if (is_string)
     {
@@ -4327,9 +4322,7 @@ subsym_get_arg (char *line, const char *terminators, char **str, int nosub)
 	    ++term;
 	}
       endp = ptr;
-      *str = xmalloc (ptr - line + 1);
-      strncpy (*str, line, ptr - line);
-      (*str)[ptr - line] = 0;
+      *str = xmemdup0 (line, ptr - line);
       /* Do simple substitution, if available.  */
       if (!nosub && (value = subsym_lookup (*str, macro_level)) != NULL)
 	*str = value;
@@ -4452,8 +4445,7 @@ subsym_substitute (char *line, int forced)
 	      continue;
 	    }
 	  *ptr++ = '\0';
-	  tmp = xmalloc (strlen (head) + 2 + strlen (ptr) + 1);
-	  sprintf (tmp, "%s==%s", head, ptr);
+	  tmp = concat (head, "==", ptr, (char *) NULL);
 	  /* Continue examining after the '=='.  */
 	  ptr = tmp + strlen (head) + 2;
 	  free (replacement);
@@ -4751,9 +4743,7 @@ tic54x_start_line_hook (void)
   endp = input_line_pointer;
   while (!is_end_of_line[(int) *endp++])
     ;
-  line = xmalloc (endp - input_line_pointer + 1);
-  strncpy (line, input_line_pointer, endp - input_line_pointer + 1);
-  line[endp - input_line_pointer] = 0;
+  line = xmemdup0 (input_line_pointer, endp - input_line_pointer);
 
   /* Scan ahead for parallel insns.  */
   parallel_on_next_line_hint = next_line_shows_parallel (endp);

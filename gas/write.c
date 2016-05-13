@@ -1234,7 +1234,7 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	rp = &r->next;
     }
 
-  relocs = (arelent **) xcalloc (n, sizeof (arelent *));
+  relocs = XCNEWVEC (arelent *, n);
 
   n = 0;
   r = my_reloc_list;
@@ -1545,10 +1545,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   gas_assert (x);
   if (!compression_header_size)
     {
-      compressed_name = (char *) xmalloc (strlen (section_name) + 2);
-      compressed_name[0] = '.';
-      compressed_name[1] = 'z';
-      strcpy (compressed_name + 2, section_name + 1);
+      compressed_name = concat (".z", section_name + 1, (char *) NULL);
       bfd_section_name (stdoutput, sec) = compressed_name;
     }
 }

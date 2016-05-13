@@ -3330,16 +3330,14 @@ elf_metag_finish_dynamic_sections (bfd *output_bfd,
 	      continue;
 
 	    case DT_PLTGOT:
-	      s = htab->sgot->output_section;
-	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->vma + htab->sgot->output_offset;
+	      s = htab->sgot;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_JMPREL:
-	      s = htab->srelplt->output_section;
-	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->vma;
+	      s = htab->srelplt;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
