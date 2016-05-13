@@ -1,5 +1,10 @@
 2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-avr.c (avr_parse_cons_expression): Replace iteration to
+	sentinal with iteration to array size.
+
+2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/xtensa-relax.h: Move typedefs of enums to the enums
 	definition.
 
