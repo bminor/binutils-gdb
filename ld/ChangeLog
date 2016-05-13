@@ -1,3 +1,13 @@
+2016-05-13  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-arm/arm-elf.exp: Adjust for arm-no-rel-plt now passing.
+	Use different output file name for static app without .rel.plt.
+	* testsuite/ld-arm/arm-no-rel-plt.ld: Align .rel.dyn and .rela.dyn.
+	* testsuite/ld-arm/arm-no-rel-plt.out: Delete.
+	* testsuite/ld-arm/arm-no-rel-plt.r: New.
+	* testsuite/ld-arm/arm-static-app.d: Don't check file name.
+	* testsuite/ld-arm/arm-static-app.r: Likewise.
+
 2016-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20070

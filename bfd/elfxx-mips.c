@@ -11466,7 +11466,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	    case DT_MIPS_SYMTABNO:
 	      name = ".dynsym";
 	      elemsize = MIPS_ELF_SYM_SIZE (output_bfd);
-	      s = bfd_get_section_by_name (output_bfd, name);
+	      s = bfd_get_linker_section (dynobj, name);
 
 	      if (s != NULL)
 		dyn.d_un.d_val = s->size / elemsize;

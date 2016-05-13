@@ -2395,19 +2395,13 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
   return TRUE;
 }
 
-#define GET_SYMBOL_OR_SECTION(TAG, SYMBOL, SECTION, ASSERT)	\
+#define GET_SYMBOL_OR_SECTION(TAG, SYMBOL, SECTION)		\
   case TAG:							\
   if (SYMBOL != NULL)						\
-    {								\
-      h = elf_link_hash_lookup (elf_hash_table (info),		\
-				SYMBOL, FALSE, FALSE, TRUE);	\
-    }								\
+    h = elf_link_hash_lookup (elf_hash_table (info),		\
+			      SYMBOL, FALSE, FALSE, TRUE);	\
   else if (SECTION != NULL)					\
-    {								\
-      s = bfd_get_section_by_name (output_bfd, SECTION);	\
-      BFD_ASSERT (s != NULL || !ASSERT);			\
-      do_it = TRUE;						\
-    }								\
+    s = bfd_get_linker_section (dynobj, SECTION);		\
   break;
 
 /* Function :  elf_arc_finish_dynamic_sections
@@ -2445,15 +2439,15 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 
 	  switch (internal_dyn.d_tag)
 	    {
-	      GET_SYMBOL_OR_SECTION (DT_INIT, "_init", NULL, TRUE)
-	      GET_SYMBOL_OR_SECTION (DT_FINI, "_fini", NULL, TRUE)
-	      GET_SYMBOL_OR_SECTION (DT_PLTGOT, NULL, ".plt", TRUE)
-	      GET_SYMBOL_OR_SECTION (DT_JMPREL, NULL, ".rela.plt", TRUE)
-	      GET_SYMBOL_OR_SECTION (DT_PLTRELSZ, NULL, ".rela.plt", TRUE)
-	      GET_SYMBOL_OR_SECTION (DT_RELASZ, NULL, ".rela.plt", FALSE)
-	      GET_SYMBOL_OR_SECTION (DT_VERSYM, NULL, ".gnu.version", TRUE)
-	      GET_SYMBOL_OR_SECTION (DT_VERDEF, NULL, ".gnu.version_d", TRUE)
-	      GET_SYMBOL_OR_SECTION (DT_VERNEED, NULL, ".gnu.version_r", TRUE)
+	      GET_SYMBOL_OR_SECTION (DT_INIT, "_init", NULL)
+	      GET_SYMBOL_OR_SECTION (DT_FINI, "_fini", NULL)
+	      GET_SYMBOL_OR_SECTION (DT_PLTGOT, NULL, ".plt")
+	      GET_SYMBOL_OR_SECTION (DT_JMPREL, NULL, ".rela.plt")
+	      GET_SYMBOL_OR_SECTION (DT_PLTRELSZ, NULL, ".rela.plt")
+	      GET_SYMBOL_OR_SECTION (DT_RELASZ, NULL, ".rela.plt")
+	      GET_SYMBOL_OR_SECTION (DT_VERSYM, NULL, ".gnu.version")
+	      GET_SYMBOL_OR_SECTION (DT_VERDEF, NULL, ".gnu.version_d")
+	      GET_SYMBOL_OR_SECTION (DT_VERNEED, NULL, ".gnu.version_r")
 	      default:
 		break;
 	    }
@@ -2490,7 +2484,8 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 		  case DT_VERSYM:
 		  case DT_VERDEF:
 		  case DT_VERNEED:
-		    internal_dyn.d_un.d_ptr = s->vma;
+		    internal_dyn.d_un.d_ptr = (s->output_section->vma
+					       + s->output_offset);
 		    do_it = TRUE;
 		    break;
 
@@ -2510,7 +2505,7 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 		}
 	    }
 
-	  if (do_it == TRUE)
+	  if (do_it)
 	    bfd_elf32_swap_dyn_out (output_bfd, &internal_dyn, dyncon);
 	}
 

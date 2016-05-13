@@ -11895,18 +11895,18 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	    case DT_PREINIT_ARRAYSZ:
 	      name = ".preinit_array";
-	      goto get_size;
+	      goto get_out_size;
 	    case DT_INIT_ARRAYSZ:
 	      name = ".init_array";
-	      goto get_size;
+	      goto get_out_size;
 	    case DT_FINI_ARRAYSZ:
 	      name = ".fini_array";
-	    get_size:
+	    get_out_size:
 	      o = bfd_get_section_by_name (abfd, name);
 	      if (o == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%B: could not find output section %s"), abfd, name);
+		    (_("could not find section %s"), name);
 		  goto error_return;
 		}
 	      if (o->size == 0)
@@ -11917,13 +11917,15 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	    case DT_PREINIT_ARRAY:
 	      name = ".preinit_array";
-	      goto get_vma;
+	      goto get_out_vma;
 	    case DT_INIT_ARRAY:
 	      name = ".init_array";
-	      goto get_vma;
+	      goto get_out_vma;
 	    case DT_FINI_ARRAY:
 	      name = ".fini_array";
-	      goto get_vma;
+	    get_out_vma:
+	      o = bfd_get_section_by_name (abfd, name);
+	      goto do_vma;
 
 	    case DT_HASH:
 	      name = ".hash";
@@ -11946,11 +11948,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    case DT_VERSYM:
 	      name = ".gnu.version";
 	    get_vma:
-	      o = bfd_get_section_by_name (abfd, name);
+	      o = bfd_get_linker_section (dynobj, name);
+	    do_vma:
 	      if (o == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%B: could not find output section %s"), abfd, name);
+		    (_("could not find section %s"), name);
 		  goto error_return;
 		}
 	      if (elf_section_data (o->output_section)->this_hdr.sh_type == SHT_NOTE)
@@ -11960,7 +11963,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		  bfd_set_error (bfd_error_nonrepresentable_section);
 		  goto error_return;
 		}
-	      dyn.d_un.d_ptr = o->vma;
+	      dyn.d_un.d_ptr = o->output_section->vma + o->output_offset;
 	      break;
 
 	    case DT_REL:
