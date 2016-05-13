@@ -267,6 +267,8 @@ run_dump_test "pr19807-2c"
 run_dump_test "pr19807-2d"
 run_dump_test "pr19807-2e"
 run_dump_test "pr19969"
+run_dump_test "pr20093-1"
+run_dump_test "pr20093-2"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return

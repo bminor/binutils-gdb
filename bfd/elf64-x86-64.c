@@ -1806,6 +1806,11 @@ elf_x86_64_convert_load_reloc (bfd *abfd, asection *sec,
 	return TRUE;
     }
 
+  /* Don't convert GOTPCREL relocation against large section.  */
+  if (elf_section_data (tsec) !=  NULL
+      && (elf_section_flags (tsec) & SHF_X86_64_LARGE) != 0)
+    return TRUE;
+
   /* We can only estimate relocation overflow for R_X86_64_PC32.  */
   if (!to_reloc_pc32)
     goto convert;

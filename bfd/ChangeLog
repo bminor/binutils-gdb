@@ -1,8 +1,14 @@
+2016-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20093
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Don't convert
+	GOTPCREL relocation against large section.
+
 2016-05-13  Alan Modra  <amodra@gmail.com>
 
 	* elf-m10300.c (_bfd_mn10300_elf_finish_dynamic_sections): Use
 	linker dynamic sections in calculating size and address of
-	* dynamic tags rather than using output sections.  Remove asserts.
+	dynamic tags rather than using output sections.  Remove asserts.
 	* elf32-arm.c (elf32_arm_finish_dynamic_sections): Likewise.
 	* elf32-cr16.c (_bfd_cr16_elf_finish_dynamic_sections): Likewise.
 	* elf32-cris.c (elf_cris_finish_dynamic_sections): Likewise.
