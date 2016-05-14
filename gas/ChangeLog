@@ -1,3 +1,10 @@
+2016-05-16  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-m68hc11.c (fixup8): Change variables type from int to
+	bfd_reloc_code_real_type where appropriate.
+	(fixup16): Likewise.
+	(fixup8_xg): Likewise.
+
 2016-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-sh64.c (shmedia_check_limits): Constify `msg'.
