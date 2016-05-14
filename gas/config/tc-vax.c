@@ -236,7 +236,7 @@ const relax_typeS md_relax_table[] =
 #undef WB
 
 void float_cons (int);
-int flonum_gen2vax (char, FLONUM_TYPE *, LITTLENUM_TYPE *);
+int flonum_gen2vax (int, FLONUM_TYPE *, LITTLENUM_TYPE *);
 
 const pseudo_typeS md_pseudo_table[] =
 {

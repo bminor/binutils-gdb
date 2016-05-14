@@ -1,5 +1,10 @@
 2016-05-16  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-vax.c (flonum_gen2vax): Adjust prototype to match
+	definition.
+
+2016-05-16  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-mn10300.c (md_begin): set linkrelax here instead of
 	defining it.
 	* config/tc-msp430.c (md_begin): Likewise.
