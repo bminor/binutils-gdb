@@ -429,20 +429,44 @@ GCC_METHOD2 (gcc_type, new_dependent_typespec,
 	     gcc_utempl,		   /* Argument TEMPLATE_DECL.  */
 	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
 
-/* Build a template-dependent value expression (e.g., T::val or
-   T::template f<X>).  ENCLOSING_TYPE should be the template-dependent
-   nested name specifier (e.g., T), ID should be the name of the
-   member of the ENCLOSING_TYPE (e.g., val or f), and TARGS should
-   list template arguments (e.g. <X>) when f is to name a template
-   function, or be NULL otherwise.  */
+/* Build a template-dependent value expression (e.g., S::val or
+   S::template mtf<X>, or unqualified f or template tf<X>).
 
-GCC_METHOD3 (gcc_decl, new_dependent_value_expr,
-	     gcc_type,			  /* Argument ENCLOSING_TYPE.  */
-	     const char *,			      /* Argument ID.  */
+   ENCLOSING_SCOPE should be a template-dependent nested name
+   specifier (e.g., T), a resolved namespace or class decl, or NULL
+   for unqualified names; ID should be the name of the member of the
+   ENCLOSING_SCOPE (e.g., val or mtf) or unqualified overloaded
+   function; and TARGS should list template arguments (e.g. <X>) when
+   mtf or tf are to name a template function, or be NULL otherwise.
+
+   Unqualified names and namespace- or class-qualified names can only
+   resolve to overloaded functions, to be used in contexts that
+   involve overload resolution that cannot be resolved because of
+   template-dependent argument or return types, such as call
+   expressions with template-dependent arguments, conversion
+   expressions to function types with template-dependent argument
+   types or the like.  Other cases of unqualified or
+   non-template-dependent-qualified names should NOT use this
+   function, and use decl_expr to convert the appropriate function or
+   object declaration to an expression.
+
+   If ID is the name of a special member function, FLAGS should be
+   GCC_CP_SYMBOL_FUNCTION|GCC_CP_FLAG_SPECIAL_FUNCTION, and ID should
+   be one of the encodings for special member functions documented in
+   new_decl.  Otherwise, FLAGS should be GCC_CP_SYMBOL_MASK, which
+   suggests the symbol kind is not known (though we know it is not a
+   type).
+
+   If ID denotes a conversion operator, CONV_TYPE should name the
+   target type of the conversion.  Otherwise, CONV_TYPE must be
+   NULL.  */
+
+GCC_METHOD5 (gcc_expr, new_dependent_value_expr,
+	     gcc_decl,			 /* Argument ENCLOSING_SCOPE.  */
+	     enum gcc_cp_symbol_kind,		   /* Argument FLAGS.  */
+	     const char *,			    /* Argument NAME.  */
+	     gcc_type,			       /* Argument CONV_TYPE.  */
 	     const struct gcc_cp_template_args *)  /* Argument TARGS.  */
-
-// FIXME: the above needs to support special member function names and
-// overloaded operator names too.
 
 /* Build a gcc_expr for the value VALUE in type TYPE.  */
 
@@ -501,6 +525,7 @@ GCC_METHOD3 (gcc_expr, type_value_expr,
 
 /* Return the type of the gcc_expr OPERAND.
    Use this for decltype.
+   For decltype (auto), pass a NULL OPERAND.
 
    Note: for template-dependent expressions, the result is NULL,
    because the type is only computed when template argument
