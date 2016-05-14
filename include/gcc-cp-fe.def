@@ -784,3 +784,12 @@ GCC_METHOD5 (int /* bool */, build_constant,
 
 GCC_METHOD1 (gcc_type, error,
 	     const char *)		 /* Argument MESSAGE.  */
+
+/* Declare a static_assert with the given CONDITION and ERRORMSG at
+   FILENAME:LINE_NUMBER.  */
+
+GCC_METHOD4 (int /* bool */, new_static_assert,
+	     gcc_expr,     /* Argument CONDITION.  */
+	     const char *, /* Argument ERRORMSG.  */
+	     const char *, /* Argument FILENAME.  */
+	     unsigned int) /* Argument LINE_NUMBER.  */
