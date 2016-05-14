@@ -1,5 +1,11 @@
 2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-dlx.c (struct machine_it): change the type of a field from
+	int to bfd_reloc_code_real_type.
+	* config/tc-tic4x.c: Likewise.
+
+2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-v850.c (v850_target_arch): change type to enum
 	bfd_architecture.
 	* config/tc-v850.h (v850_target_arch): Likewise.
