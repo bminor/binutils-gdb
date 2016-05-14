@@ -1,5 +1,10 @@
 2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-rx.c (struct cpu_type): Change the type of a field from
+	int to enum rx_cpu_types.
+
+2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-dlx.c (struct machine_it): change the type of a field from
 	int to bfd_reloc_code_real_type.
 	* config/tc-tic4x.c: Likewise.
