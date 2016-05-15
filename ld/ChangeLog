@@ -1,3 +1,7 @@
+2016-05-16  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-elf/flags1.d: Update the xfail list.
+
 2016-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-elf/flags1.d: Update for `*-*-nacl*' xfail
