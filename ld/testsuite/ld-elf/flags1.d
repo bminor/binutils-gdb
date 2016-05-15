@@ -6,7 +6,6 @@
 #xfail: "moxie-*-*" "mt-*-*" "visium-*-*"
 #xfail: "*-*-hpux*" "hppa*64*-*-*"
 # Fails on the DLX, H8300, I960, IP2K, M32R, MOXIE, MT, VISIUM
-#  and all NaCl targets,
 #  because the two sections are not merged into one segment.
 #  (There is no good reason why they have to be).
 # Fails on HPUX systems because the .type pseudo-op behaves differently.
