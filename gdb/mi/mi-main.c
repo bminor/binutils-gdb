@@ -2171,12 +2171,17 @@ mi_execute_command (const char *cmd, int from_tty)
 	  if (report_change)
 	    {
 	      struct thread_info *ti = inferior_thread ();
+	      struct cleanup *old_chain;
 
-	      target_terminal_ours ();
+	      old_chain = make_cleanup_restore_target_terminal ();
+	      target_terminal_ours_for_output ();
+
 	      fprintf_unfiltered (mi->event_channel,
 				  "thread-selected,id=\"%d\"",
 				  ti->global_num);
 	      gdb_flush (mi->event_channel);
+
+	      do_cleanups (old_chain);
 	    }
 	}
 
