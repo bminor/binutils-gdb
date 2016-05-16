@@ -1,3 +1,8 @@
+2016-05-16  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/objcopy.exp: Don't skip the `strip-10'
+	test for the V850.
+
 2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* readelf.c (print_mips_ases): Add DSPR3.

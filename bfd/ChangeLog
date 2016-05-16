@@ -1,3 +1,10 @@
+2016-05-16  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-v850.c (v850_elf_copy_notes): New function, factored out
+	from...
+	(v850_elf_copy_private_bfd_data): ... here.  Call the new
+	function and `_bfd_elf_copy_private_bfd_data'.
+
 2016-05-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20093
