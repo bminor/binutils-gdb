@@ -6277,7 +6277,7 @@ elf_x86_64_section_from_shdr (bfd *abfd, Elf_Internal_Shdr *hdr,
 
 static bfd_boolean
 elf_x86_64_add_symbol_hook (bfd *abfd,
-			    struct bfd_link_info *info,
+			    struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			    Elf_Internal_Sym *sym,
 			    const char **namep ATTRIBUTE_UNUSED,
 			    flagword *flagsp ATTRIBUTE_UNUSED,
@@ -6305,12 +6305,6 @@ elf_x86_64_add_symbol_hook (bfd *abfd,
       *valp = sym->st_size;
       return TRUE;
     }
-
-  if (ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE
-      && (abfd->flags & DYNAMIC) == 0
-      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols
-      |= elf_gnu_symbol_unique;
 
   return TRUE;
 }

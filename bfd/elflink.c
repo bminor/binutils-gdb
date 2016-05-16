@@ -4380,6 +4380,11 @@ error_free_dyn:
 	      (struct bfd_link_hash_entry **) sym_hash)))
 	goto error_free_vers;
 
+      if ((flags & BSF_GNU_UNIQUE)
+	  && (abfd->flags & DYNAMIC) == 0
+	  && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
+	elf_tdata (info->output_bfd)->has_gnu_symbols |= elf_gnu_symbol_unique;
+
       h = *sym_hash;
       /* We need to make sure that indirect symbol dynamic flags are
 	 updated.  */

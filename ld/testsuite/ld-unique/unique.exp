@@ -24,20 +24,13 @@
 # Adapted for unique checking by Mark J. Wielaard <mjw@redhat.com>
 
 
-# STB_GNU_UNIQUE support has only been implemented for the ix86, x86_64,
-# arm, mips, powerpc, and sparc so far.
-if {!(([istarget "i?86-*-*"]
-       || [istarget "x86_64-*-*"]
-       || [istarget "arm*-*-*"]
-       || [istarget "mips*-*-*"]
-       || [istarget "powerpc*-*-*"]
-       || [istarget "sparc*-*-*"])
-      && ([istarget "*-*-elf*"]
-	  || [istarget "*-*-nacl*"]
-	  || (([istarget "*-*-linux*"]
-	       || [istarget "*-*-gnu*"])
-	      && ![istarget "*-*-*aout*"]
-	      && ![istarget "*-*-*oldld*"]))) } {
+# Exclude non-ELF targets.
+if { ![is_elf_format] } {
+    return
+}
+
+# Require STB_GNU_UNIQUE support with OSABI set to GNU.
+if { ![supports_gnu_unique] } {
     verbose "UNIQUE tests not run - target does not support UNIQUE"
     return
 }

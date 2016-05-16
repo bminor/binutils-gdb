@@ -5795,27 +5795,6 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
   return _bfd_elf_hash_symbol (h);
 }
 
-/* Hook called by the linker routine which adds symbols from an object
-   file.  */
-
-static bfd_boolean
-elf_i386_add_symbol_hook (bfd * abfd,
-			  struct bfd_link_info * info,
-			  Elf_Internal_Sym * sym,
-			  const char ** namep ATTRIBUTE_UNUSED,
-			  flagword * flagsp ATTRIBUTE_UNUSED,
-			  asection ** secp ATTRIBUTE_UNUSED,
-			  bfd_vma * valp ATTRIBUTE_UNUSED)
-{
-  if (ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE
-      && (abfd->flags & DYNAMIC) == 0
-      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols
-      |= elf_gnu_symbol_unique;
-
-  return TRUE;
-}
-
 #define TARGET_LITTLE_SYM		i386_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
@@ -5863,7 +5842,6 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define elf_backend_omit_section_dynsym \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_hash_symbol		      elf_i386_hash_symbol
-#define elf_backend_add_symbol_hook           elf_i386_add_symbol_hook
 #define elf_backend_fixup_symbol	      elf_i386_fixup_symbol
 
 #include "elf32-target.h"
@@ -6052,9 +6030,6 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 
 #undef  elf_backend_strtab_flags
 #undef  elf_backend_copy_special_section_fields
-
-#undef elf_backend_add_symbol_hook
-#define elf_backend_add_symbol_hook	elf_i386_add_symbol_hook
 
 #include "elf32-target.h"
 
