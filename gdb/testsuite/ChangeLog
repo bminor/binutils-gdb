@@ -1,3 +1,8 @@
+2016-05-16  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/batch-preserve-term-settings.exp: Remove variable
+	shell_prompt.  Update shell_prompt_re.
+
 2016-05-12  Doug Evans  <dje@google.com>
 
 	PR symtab/19999
