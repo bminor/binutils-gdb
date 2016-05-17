@@ -113,6 +113,10 @@ SECTIONS
     ${RELOCATING+ *(.trampolines*)}
     ${CONSTRUCTING+ __trampolines_end = . ; }
 
+    /* avr-libc expects these data to reside in lower 64K. */
+    ${RELOCATING+ *libprintf_flt.a:*(.progmem.data)}
+    ${RELOCATING+ *libc.a:*(.progmem.data)}
+
     ${RELOCATING+ *(.progmem*)}
 
     ${RELOCATING+. = ALIGN(2);}
