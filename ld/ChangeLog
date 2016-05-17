@@ -1,4 +1,4 @@
-016-05-17  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+2016-05-17  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* scripttempl/avr.sc (text): Place .progmem.data from avr-libc
 	above .progmem*.
