@@ -89,9 +89,6 @@ const relax_typeS md_relax_table[] =
 
 };
 
-/*  Set linkrelax here to avoid fixups in most sections.  */
-int linkrelax = 1;
-
 static int current_machine;
 
 /* Fixups.  */
@@ -944,6 +941,9 @@ md_begin (void)
 
   current_machine = MN103;
 #endif
+
+  /*  Set linkrelax here to avoid fixups in most sections.  */
+  linkrelax = 1;
 }
 
 static symbolS *GOT_symbol;

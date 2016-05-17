@@ -164,7 +164,7 @@ struct m32r_hi_fixup
 
 static struct m32r_hi_fixup *m32r_hi_fixup_list;
 
-struct
+static const struct
 {
   enum bfd_architecture bfd_mach;
   int mach_flags;

@@ -942,7 +942,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The 8-bit IMM8 field in a XX1 form instruction.  */
 #define IMM8 IH + 1
-  { 0xff, 11, NULL, NULL, 0 },
+  { 0xff, 11, NULL, NULL, PPC_OPERAND_SIGNOPT },
 };
 
 const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)

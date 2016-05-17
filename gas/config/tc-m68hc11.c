@@ -1604,7 +1604,7 @@ fixup8 (expressionS *oper, int mode, int opmode)
       else
 	{
 	  fixS *fixp;
-          int reloc;
+          bfd_reloc_code_real_type reloc;
 
 	  /* Now create an 8-bit fixup.  If there was some %hi, %lo
 	     or %page modifier, generate the reloc accordingly.  */
@@ -1651,7 +1651,7 @@ fixup16 (expressionS *oper, int mode, int opmode ATTRIBUTE_UNUSED)
   else if (oper->X_op != O_register)
     {
       fixS *fixp;
-      int reloc;
+      bfd_reloc_code_real_type reloc;
 
       if ((opmode & M6811_OP_CALL_ADDR) && (mode & M6811_OP_IMM16))
         reloc = BFD_RELOC_M68HC11_LO16;
@@ -1721,7 +1721,7 @@ fixup8_xg (expressionS *oper, int mode, int opmode)
   if (oper->X_op == O_constant)
     {
       fixS *fixp;
-      int reloc;
+      bfd_reloc_code_real_type reloc;
 
       if ((opmode & M6811_OP_HIGH_ADDR) || (opmode & M6811_OP_LOW_ADDR))
         {
@@ -1762,7 +1762,7 @@ fixup8_xg (expressionS *oper, int mode, int opmode)
       else
         {
           fixS *fixp;
-          int reloc;
+          bfd_reloc_code_real_type reloc;
 
           /* Now create an 8-bit fixup.  If there was some %hi, %lo
              modifier, generate the reloc accordingly.  */

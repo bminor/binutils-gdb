@@ -1473,7 +1473,7 @@ shmedia_check_limits (offsetT *valp, bfd_reloc_code_real_type reloc,
 {
   offsetT val = *valp;
 
-  char *msg = NULL;
+  const char *msg = NULL;
 
   switch (reloc)
     {

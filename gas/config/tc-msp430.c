@@ -69,9 +69,6 @@
 int msp430_enable_relax;
 int msp430_enable_polys;
 
-/*  Set linkrelax here to avoid fixups in most sections.  */
-int linkrelax = 1;
-
 /* GCC uses the some condition codes which we'll
    implement as new polymorph instructions.
 
@@ -1647,6 +1644,9 @@ md_begin (void)
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH,
 		     target_is_430x () ? bfd_mach_msp430x : bfd_mach_msp11);
+
+  /*  Set linkrelax here to avoid fixups in most sections.  */
+  linkrelax = 1;
 }
 
 /* Returns the register number equivalent to the string T.

@@ -1060,13 +1060,8 @@ if [is_elf_format] {
     run_dump_test "strip-8"
     run_dump_test "strip-9"
     run_dump_test "strip-12"
-    # Non-EABI ARM targets will set OSABI to ARM
-    # The V850 sets the OSABI to UNIX - System V
-    if { ![istarget "*-*-hpux*"]
-	 && ![istarget "msp*-*-*"]
-	 && ![istarget "visium-*-*"]
-	 && ![istarget "v850*-*-*"]
-         && !([istarget "arm*-*-*"] && ![istarget "arm-*-*eabi*"])} {
+    # This requires STB_GNU_UNIQUE support with OSABI set to GNU.
+    if { [supports_gnu_unique] } {
 	run_dump_test "strip-10"
     }
     set extra_strip11 ""

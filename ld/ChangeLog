@@ -1,3 +1,30 @@
+016-05-17  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* scripttempl/avr.sc (text): Place .progmem.data from avr-libc
+	above .progmem*.
+	* scripttempl/avrtiny.sc (text): Likewise.
+
+2016-05-17  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-unique/unique.exp: Use `is_elf_format' and
+	`supports_gnu_unique' to qualify testing.
+
+2016-05-16  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-elf/flags1.d: Update the xfail list.
+
+2016-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-elf/flags1.d: Update for `*-*-nacl*' xfail
+	removal.
+
+2016-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20097
+	* testplug2.c (onall_symbols_read): Remove redundant sizeof
+	on EXPECTED_VIEW_LENGTH.
+	* testplug4.c (onall_symbols_read): Likewise.
+
 2016-05-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20093

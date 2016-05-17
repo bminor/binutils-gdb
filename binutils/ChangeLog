@@ -1,3 +1,15 @@
+2016-05-17  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/lib/binutils-common.exp (supports_gnu_unique): New
+	procedure.
+	* testsuite/binutils-all/objcopy.exp: Use `supports_gnu_unique'
+	with the `strip-10' test.
+
+2016-05-16  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/objcopy.exp: Don't skip the `strip-10'
+	test for the V850.
+
 2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* readelf.c (print_mips_ases): Add DSPR3.

@@ -1,3 +1,8 @@
+2016-05-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_stabilize_threads): Call unsuspend_all_lwps
+	instead of find_inferior.
+
 2016-05-05  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-arm-low.c (get_next_pcs_read_memory_unsigned_integer):

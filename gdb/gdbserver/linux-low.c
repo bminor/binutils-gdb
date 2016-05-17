@@ -2966,7 +2966,7 @@ linux_stabilize_threads (void)
 	}
     }
 
-  find_inferior (&all_threads, unsuspend_one_lwp, NULL);
+  unsuspend_all_lwps (NULL);
 
   stabilizing_threads = 0;
 

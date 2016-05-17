@@ -1,3 +1,34 @@
+2016-05-16  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-m32r.c (mach_table): Make static and const.
+
+2016-05-16  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-vax.c (flonum_gen2vax): Adjust prototype to match
+	definition.
+
+2016-05-16  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-mn10300.c (md_begin): set linkrelax here instead of
+	defining it.
+	* config/tc-msp430.c (md_begin): Likewise.
+
+2016-05-16  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-m68hc11.c (fixup8): Change variables type from int to
+	bfd_reloc_code_real_type where appropriate.
+	(fixup16): Likewise.
+	(fixup8_xg): Likewise.
+
+2016-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-sh64.c (shmedia_check_limits): Constify `msg'.
+
+2016-05-13  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <xxspltib>: Add additional operand tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
 2016-05-13  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-coff.c (weak_uniquify): Delete unused var.

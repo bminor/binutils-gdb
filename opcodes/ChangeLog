@@ -1,3 +1,7 @@
+2016-05-13  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (IMM8): Use PPC_OPERAND_SIGNOPT.
+
 2016-05-11  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* mips-dis.c (mips_arch_choices): Add ASE_DSPR3 to mips32r6 and

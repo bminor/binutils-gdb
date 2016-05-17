@@ -162,6 +162,46 @@ proc is_elf64 { binary_file } {
     return 0
 }
 
+# True if the ELF target supports STB_GNU_UNIQUE with the ELF header's
+# OSABI field set to ELFOSABI_GNU.
+#
+# This generally depends on the target OS only, however there are a
+# number of exceptions for bare metal targets as follows.  The MSP430
+# and Visium targets set OSABI to ELFOSABI_STANDALONE and cannot
+# support STB_GNU_UNIQUE.  Likewise non-EABI ARM targets set OSABI to
+# ELFOSABI_ARM, and TI C6X targets to ELFOSABI_C6000_*.  Finally
+# rather than `bfd_elf_final_link' AM33/2.0, D30V, DLX, i960, and
+# picoJava targets use `_bfd_generic_final_link', which does not
+# support STB_GNU_UNIQUE symbol binding causing assertion failures.
+#
+proc supports_gnu_unique {} {
+    if { [istarget *-*-gnu*]
+	 || [istarget *-*-linux*]
+	 || [istarget *-*-nacl*] } {
+	return 1
+    }
+    if { [istarget "arm*-*-*eabi*"] } {
+	return 1
+    }
+    if { ![istarget "*-*-elf*"] } {
+	return 0
+    }
+    if { [istarget "arm*-*-*"]
+	 || [istarget "msp430-*-*"]
+	 || [istarget "tic6x-*-*"]
+	 || [istarget "visium-*-*"] } {
+	return 0
+    }
+    if { [istarget "am33_2.0-*-*"]
+	 || [istarget "d30v-*-*"]
+	 || [istarget "dlx-*-*"]
+	 || [istarget "i960-*-*"]
+	 || [istarget "pj*-*-*"] } {
+	return 0
+    }
+    return 1
+}
+
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
 # is the expected output.  Ignore blank lines in either file.
 #

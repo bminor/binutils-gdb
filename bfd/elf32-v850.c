@@ -2428,10 +2428,10 @@ v850_elf_set_note (bfd * abfd, enum v850_notes note, unsigned int val)
   return TRUE;
 }
 
-/* Copy backend specific data from one object module to another.  */
+/* Copy a v850 note section from one object module to another.  */
 
-static bfd_boolean
-v850_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
+static void
+v850_elf_copy_notes (bfd *ibfd, bfd *obfd)
 {
   asection * onotes;
   asection * inotes;
@@ -2440,10 +2440,10 @@ v850_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
      skip the merge.  The normal input to output section
      copying will take care of everythng for us.  */
   if ((onotes = bfd_get_section_by_name (obfd, V850_NOTE_SECNAME)) == NULL)
-    return TRUE;
+    return;
 
   if ((inotes = bfd_get_section_by_name (ibfd, V850_NOTE_SECNAME)) == NULL)
-    return TRUE;
+    return;
 
   if (bfd_section_size (ibfd, inotes) == bfd_section_size (obfd, onotes))
     {
@@ -2459,8 +2459,15 @@ v850_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
       /* Copy/overwrite notes from the input to the output.  */
       memcpy (ocont, icont, bfd_section_size (obfd, onotes));
     }
+}
 
-  return TRUE;
+/* Copy backend specific data from one object module to another.  */
+
+static bfd_boolean
+v850_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  v850_elf_copy_notes (ibfd, obfd);
+  return _bfd_elf_copy_private_bfd_data (ibfd, obfd);
 }
 #define bfd_elf32_bfd_copy_private_bfd_data	v850_elf_copy_private_bfd_data
 
