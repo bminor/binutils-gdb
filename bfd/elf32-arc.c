@@ -2699,6 +2699,32 @@ elf_arc_size_dynamic_sections (bfd * output_bfd,
   return TRUE;
 }
 
+
+/* Classify dynamic relocs such that -z combreloc can reorder and combine
+   them.  */
+static enum elf_reloc_type_class
+elf32_arc_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			    const asection *rel_sec ATTRIBUTE_UNUSED,
+			    const Elf_Internal_Rela *rela)
+{
+  switch ((int) ELF32_R_TYPE (rela->r_info))
+    {
+    case R_ARC_RELATIVE:
+      return reloc_class_relative;
+    case R_ARC_JMP_SLOT:
+      return reloc_class_plt;
+    case R_ARC_COPY:
+      return reloc_class_copy;
+    /* TODO: Needed in future to support ifunc.  */
+    /*
+    case R_ARC_IRELATIVE:
+      return reloc_class_ifunc;
+    */
+    default:
+      return reloc_class_normal;
+    }
+}
+
 const struct elf_size_info arc_elf32_size_info =
 {
   sizeof (Elf32_External_Ehdr),
@@ -2800,6 +2826,8 @@ elf_arc_add_symbol_hook (bfd * abfd,
 #define elf_backend_relocate_section	     elf_arc_relocate_section
 #define elf_backend_check_relocs	     elf_arc_check_relocs
 #define elf_backend_create_dynamic_sections  _bfd_elf_create_dynamic_sections
+
+#define elf_backend_reloc_type_class		elf32_arc_reloc_type_class
 
 #define elf_backend_adjust_dynamic_symbol    elf_arc_adjust_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol    elf_arc_finish_dynamic_symbol
