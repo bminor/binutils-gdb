@@ -29,6 +29,7 @@ load_common_lib binutils-common.exp
 # Returns 0 otherwise.
 #
 proc at_least_gcc_version { major minor } {
+    global CC
 
     if {![info exists CC]} {
 	set CC [find_gcc]
