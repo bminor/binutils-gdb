@@ -1,5 +1,11 @@
 2016-05-17  Simon Marchi  <simon.marchi@ericsson.com>
 
+	PR gdb/20045
+	* mi/mi-main.c (mi_on_resume): Call target_can_async_p instead
+	of target_is_async_p.
+
+2016-05-17  Simon Marchi  <simon.marchi@ericsson.com>
+
 	PR gdb/18077
 	* mi/mi-main.c (run_one_inferior): Use run target to determine
 	whether to run async or not.
