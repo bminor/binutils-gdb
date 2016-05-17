@@ -1,3 +1,23 @@
+2016-05-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Force Thumb when
+	disassembling and stop skipping targets.
+	* testsuite/gas/arm/archv8m-cmse-msr-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-4.d: Likewise.
+	* testsuite/gas/arm/archv8m-base.d: Also allow nops after the last
+	instruction for targets that have stronger alignment requirement.
+	* testsuite/gas/arm/archv8m-cmse-base.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-1.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-2.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-3.d: Likewise.
+	* testsuite/gas/arm/archv8m-main.d: Likewise.
+	* testsuite/gas/arm/archv8m.s: Add label.
+	* testsuite/gas/arm/archv8m-cmse.s: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr.s: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-main.s: Likewise.
+
 2016-05-16  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-m32r.c (mach_table): Make static and const.

@@ -1,8 +1,7 @@
 #name: ARMv8-M Mainline with DSP instructions (Security Extensions 3)
 #source: archv8m-cmse-msr.s
 #as: -march=armv8-m.main+dsp
-#objdump: -dr --prefix-addresses --show-raw-insn
-#skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
+#objdump: -dr --prefix-addresses --show-raw-insn -M force-thumb
 
 .*: +file format .*arm.*
 

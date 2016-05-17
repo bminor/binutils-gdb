@@ -1,3 +1,4 @@
+T:
 msr   MSP, r0
 msr   MSP_S, r0
 msr   MSP_NS, r0

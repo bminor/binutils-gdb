@@ -1,6 +1,7 @@
 .thumb
 .syntax unified
 
+T:
 sg
 blxns r4
 blxns r9
