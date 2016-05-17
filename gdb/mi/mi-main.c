@@ -415,6 +415,8 @@ run_one_inferior (struct inferior *inf, void *arg)
 {
   int start_p = *(int *) arg;
   const char *run_cmd = start_p ? "start" : "run";
+  struct target_ops *run_target = find_run_target ();
+  int async_p = mi_async && run_target->to_can_async_p (run_target);
 
   if (inf->pid != 0)
     {
@@ -435,8 +437,8 @@ run_one_inferior (struct inferior *inf, void *arg)
       switch_to_thread (null_ptid);
       set_current_program_space (inf->pspace);
     }
-  mi_execute_cli_command (run_cmd, mi_async_p (),
-			  mi_async_p () ? "&" : NULL);
+  mi_execute_cli_command (run_cmd, async_p,
+			  async_p ? "&" : NULL);
   return 0;
 }
 
@@ -489,9 +491,11 @@ mi_cmd_exec_run (char *command, char **argv, int argc)
   else
     {
       const char *run_cmd = start_p ? "start" : "run";
+      struct target_ops *run_target = find_run_target ();
+      int async_p = mi_async && run_target->to_can_async_p (run_target);
 
-      mi_execute_cli_command (run_cmd, mi_async_p (),
-			      mi_async_p () ? "&" : NULL);
+      mi_execute_cli_command (run_cmd, async_p,
+			      async_p ? "&" : NULL);
     }
 }
 

@@ -1,3 +1,10 @@
+2016-05-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/18077
+	* mi/mi-main.c (run_one_inferior): Use run target to determine
+	whether to run async or not.
+	(mi_cmd_exec_run): Likewise.
+
 2016-05-16  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/20039
