@@ -998,7 +998,7 @@ mi_on_resume (ptid_t ptid)
 	 for MI3, and may be removed even earlier.  SYNC_EXECUTION is
 	 checked here because we only need to emit a prompt if a
 	 synchronous command was issued when the target is async.  */
-      if (!target_is_async_p () || sync_execution)
+      if (!target_can_async_p () || sync_execution)
 	fputs_unfiltered ("(gdb) \n", raw_stdout);
     }
   gdb_flush (raw_stdout);
