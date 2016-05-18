@@ -1,5 +1,15 @@
 2016-05-19  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/crossref.exp: Remove -mcall-aixdesc hack.
+	* testsuite/ld-scripts/cross2.t: Tweak .opd and .toc placement.
+	* testsuite/ld-scripts/cross3.t: Likewise.
+	* testsuite/ld-scripts/cross4.t: Likewise.
+	* testsuite/ld-scripts/cross5.t: Likewise.
+	* testsuite/ld-scripts/cross6.t: Likewise.
+	* testsuite/ld-scripts/cross7.t: Likewise.
+
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): Pass in
 	exe name rather than constructing testname.  Fix typo in
 	sub-test name.  Log copying.  Use -rpath rather than -R.
