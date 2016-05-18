@@ -1,3 +1,8 @@
+2016-05-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-threads-interrupt.c: New file.
+	* gdb.mi/mi-threads-interrupt.exp: New file.
+
 2016-05-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/18077
