@@ -8743,7 +8743,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
     case DT_MIPS_DELTA_SYM_NO:
     case DT_MIPS_DELTA_CLASSSYM_NO:
     case DT_MIPS_COMPACT_SIZE:
-      print_vma (entry->d_un.d_ptr, DEC);
+      print_vma (entry->d_un.d_val, DEC);
       break;
 
     default:

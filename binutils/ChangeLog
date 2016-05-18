@@ -1,3 +1,13 @@
+2016-05-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (dynamic_section_mips_val) <DT_MIPS_RLD_VERSION>
+	<DT_MIPS_LOCAL_GOTNO, DT_MIPS_CONFLICTNO, DT_MIPS_LIBLISTNO>
+	<DT_MIPS_SYMTABNO, DT_MIPS_UNREFEXTNO, DT_MIPS_HIPAGENO>
+	<DT_MIPS_DELTA_CLASS_NO, DT_MIPS_DELTA_INSTANCE_NO>
+	<DT_MIPS_DELTA_RELOC_NO, DT_MIPS_DELTA_SYM_NO>
+	<DT_MIPS_DELTA_CLASSSYM_NO, DT_MIPS_COMPACT_SIZE>: Use the
+	`d_val' rather than `d_ptr' member of the dynamic entry.
+
 2016-05-17  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/lib/binutils-common.exp (supports_gnu_unique): New
