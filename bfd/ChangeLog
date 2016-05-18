@@ -1,3 +1,7 @@
+2016-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config.bfd: Remove `am34-*-linux*' support.
+
 2016-05-19  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (allocate_dynrelocs): Allocate got and other dynamic

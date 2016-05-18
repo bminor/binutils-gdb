@@ -1,3 +1,7 @@
+2016-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* configure.tgt: Remove `am34-*-linux*' support.
+
 2016-05-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/crossref.exp: Remove -mcall-aixdesc hack.
