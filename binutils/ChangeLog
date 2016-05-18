@@ -1,3 +1,9 @@
+2016-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 20096
+	* objcopy.c (copy_relocations_in_section): Also check for the
+	symbol pointed to by sym_ptr_ptr being NULL.
+
 2016-05-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/binutils-all/mips/mixed-mips16-micromips.d: New test.
