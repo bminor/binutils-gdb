@@ -5663,6 +5663,15 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		  != 0)
 		goto error_ret_free_local;
 	    }
+
+	  if (local_syms != NULL
+	      && symtab_hdr->contents != (unsigned char *) local_syms)
+	    {
+	      if (!info->keep_memory)
+		free (local_syms);
+	      else
+		symtab_hdr->contents = (unsigned char *) local_syms;
+	    }
 	}
 
       if (prev_num_a8_fixes != num_a8_fixes)
@@ -5694,7 +5703,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 			 a8_fixes[i].section, htab);
 
 	    if (stub_sec == NULL)
-	      goto error_ret_free_local;
+	      return FALSE;
 
 	    stub_sec->size
 	      += find_stub_size_and_template (a8_fixes[i].stub_type, NULL,

@@ -1,3 +1,8 @@
+2016-05-18  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Free or cache local syms
+	for each BFD.  Don't goto error_ret_free_local from outside loop.
+
 2016-05-17  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf-s390-common.c (elf_s390_add_symbol_hook): Remove
