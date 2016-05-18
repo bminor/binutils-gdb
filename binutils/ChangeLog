@@ -1,3 +1,7 @@
+2016-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2016-05-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* readelf.c (dynamic_section_mips_val) <DT_MIPS_RLD_VERSION>
