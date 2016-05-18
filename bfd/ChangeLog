@@ -1,3 +1,90 @@
+2016-05-18  Christophe Monat  <christophe.monat@st.com>
+
+	Backport from master
+	2016-05-09  Christophe Monat  <christophe.monat@st.com>
+
+	PR ld/20030
+	* elf32-arm.c (is_thumb2_vldm): Account for T1 (DP) encoding.
+	(stm32l4xx_need_create_replacing_stub): Rename ambiguous nb_regs
+	to nb_words.
+	(create_instruction_vldmia): Add is_dp to disambiguate SP/DP
+	encoding.
+	(create_instruction_vldmdb): Likewise.
+	(stm32l4xx_create_replacing_stub_vldm): is_dp detects DP encoding,
+	uses it to re-encode.
+
+2016-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20093
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Don't convert
+	GOTPCREL relocation against large section.
+
+	* elflink.c (bfd_elf_final_link): Likewise.
+
+2016-05-11  Alan Modra  <amodra@gmail.com>
+
+	PR 20060
+	* elf64-ppc.c (ppc64_elf_tls_setup): Clear forced_local.
+	* elf32-ppc.c (ppc_elf_tls_setup): Likewise.
+
+2016-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20006
+	* elf64-x86-64.c (elf_x86_64_convert_load): Skip debug sections
+	when estimating distances between output sections.
+
+2016-03-29  Toni Spets  <toni.spets@iki.fi>
+
+	PR 19878
+	* coffcode.h (coff_write_object_contents): Revert accidental
+	2014-11-10 change.
+
+2016-03-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19827
+	* elf32-i386.c (elf_i386_check_relocs): Bind defined symbol
+	locally in PIE.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19539
+	* elf32-i386.c (elf_i386_reloc_type_class): Check relocation
+	against STT_GNU_IFUNC symbol only with dynamic symbols.
+	* elf64-x86-64.c (elf_x86_64_reloc_type_class): Likewise.
+
+2016-03-15  Nick Clifton  <nickc@redhat.com>
+
+	Backport from master:
+	2016-03-09  Leon Winter  <winter-gcc@bfw-online.de>
+
+	PR ld/19623
+	* cofflink.c (_bfd_coff_generic_relocate_section): Do not apply
+	relocations against absolute symbols.
+
+2016-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19523
+	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Set BFD_DECOMPRESS to
+	decompress debug sections.
+
 2016-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19579

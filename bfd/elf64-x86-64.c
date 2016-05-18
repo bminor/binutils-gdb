@@ -2029,7 +2029,8 @@ do_size:
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (! IS_X86_64_PCREL_TYPE (r_type)
 		   || (h != NULL
-		       && (! SYMBOLIC_BIND (info, h)
+		       && (! (bfd_link_pie (info)
+			      || SYMBOLIC_BIND (info, h))
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
@@ -3153,6 +3154,11 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	    continue;
 	}
 
+      /* Don't convert GOTPCREL relocation against large section.  */
+      if (elf_section_data (tsec) !=  NULL
+	  && (elf_section_flags (tsec) & SHF_X86_64_LARGE) != 0)
+	continue;
+
       if (tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	{
 	  /* At this stage in linking, no SEC_MERGE symbol has been
@@ -3206,17 +3212,20 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	      for (asect = link_info->output_bfd->sections;
 		   asect != NULL;
 		   asect = asect->next)
-		{
-		  asection *i;
-		  for (i = asect->map_head.s;
-		       i != NULL;
-		       i = i->map_head.s)
-		    {
-		      size = align_power (size, i->alignment_power);
-		      size += i->size;
-		    }
-		  asect->compressed_size = size;
-		}
+		/* Skip debug sections since compressed_size is used to
+		   compress debug sections.  */
+		if ((asect->flags & SEC_DEBUGGING) == 0)
+		  {
+		    asection *i;
+		    for (i = asect->map_head.s;
+			 i != NULL;
+			 i = i->map_head.s)
+		      {
+			size = align_power (size, i->alignment_power);
+			size += i->size;
+		      }
+		    asect->compressed_size = size;
+		  }
 	    }
 
 	  /* Don't convert GOTPCREL relocations if TSEC isn't placed
@@ -4641,8 +4650,8 @@ direct:
 	      else if (h != NULL
 		       && h->dynindx != -1
 		       && (IS_X86_64_PCREL_TYPE (r_type)
-			   || ! bfd_link_pic (info)
-			   || ! SYMBOLIC_BIND (info, h)
+			   || !(bfd_link_executable (info)
+				|| SYMBOLIC_BIND (info, h))
 			   || ! h->def_regular))
 		{
 		  outrel.r_info = htab->r_info (h->dynindx, r_type);
@@ -5738,19 +5747,23 @@ elf_x86_64_reloc_type_class (const struct bfd_link_info *info,
   bfd *abfd = info->output_bfd;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_x86_64_link_hash_table *htab = elf_x86_64_hash_table (info);
-  unsigned long r_symndx = htab->r_sym (rela->r_info);
-  Elf_Internal_Sym sym;
 
-  if (htab->elf.dynsym == NULL
-      || !bed->s->swap_symbol_in (abfd,
-				  (htab->elf.dynsym->contents
-				   + r_symndx * bed->s->sizeof_sym),
-				  0, &sym))
-    abort ();
+  if (htab->elf.dynsym != NULL
+      && htab->elf.dynsym->contents != NULL)
+    {
+      /* Check relocation against STT_GNU_IFUNC symbol if there are
+         dynamic symbols.  */
+      unsigned long r_symndx = htab->r_sym (rela->r_info);
+      Elf_Internal_Sym sym;
+      if (!bed->s->swap_symbol_in (abfd,
+				   (htab->elf.dynsym->contents
+				    + r_symndx * bed->s->sizeof_sym),
+				   0, &sym))
+	abort ();
 
-  /* Check relocation against STT_GNU_IFUNC symbol.  */
-  if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
-    return reloc_class_ifunc;
+      if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	return reloc_class_ifunc;
+    }
 
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {

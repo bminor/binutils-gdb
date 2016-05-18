@@ -1,3 +1,111 @@
+2016-05-18  Christophe Monat  <christophe.monat@st.com>
+
+	Backport from master
+	2016-05-09  Christophe Monat  <christophe.monat@st.com>
+	PR ld/20030
+	* testsuite/ld-arm/arm-elf.exp: Run new stm32l4xx-fix-vldm-dp
+	tests. Fix misnamed stm32l4xx-fix-all.
+	* testsuite/ld-arm/stm32l4xx-fix-vldm-dp.s: New tests for multiple
+	loads with DP registers.
+	* testsuite/ld-arm/stm32l4xx-fix-vldm-dp.d: New reference file.
+	* testsuite/ld-arm/stm32l4xx-fix-vldm.s: Add missing comment.
+	* testsuite/ld-arm/stm32l4xx-fix-all.s: Add tests for multiple
+	loads with DP registers.
+	* testsuite/ld-arm/stm32l4xx-fix-all.d: Update reference.
+
+2016-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20093
+	* testsuite/ld-x86-64/pr20093-1.d: New file.
+	* testsuite/ld-x86-64/pr20093-1.s: Likewise.
+	* testsuite/ld-x86-64/pr20093-2.d: Likewise.
+	* testsuite/ld-x86-64/pr20093-2.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr20093-1 and pr20093-2.
+
+2016-05-11  Alan Modra  <amodra@gmail.com>
+
+	PR 20060
+	* testsuite/ld-powerpc/powerpc.exp: Run new tests.
+	* testsuite/ld-powerpc/tlsdll.s: New.
+	* testsuite/ld-powerpc/tlsdll.ver: New.
+	* testsuite/ld-powerpc/tlsdll_32.s: New.
+	* testsuite/ld-powerpc/tlsopt5.d: New.
+	* testsuite/ld-powerpc/tlsopt5.s: New.
+	* testsuite/ld-powerpc/tlsopt5_32.d: New.
+	* testsuite/ld-powerpc/tlsopt5_32.s: New.
+
+2016-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20006
+	* testsuite/ld-elfvsb/elfvsb.exp (COMPRESS_LDFLAG): New.
+	(visibility_run): Pass COMPRESS_LDFLAG to visibility_test on
+	ELF targets.
+
+2016-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/compressed1b.d: Only run for Linux/GNU targets.
+
+	2016-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/compressed1b.d: Pass
+	--compress-debug-sections=none to ld.
+	* testsuite/ld-elf/compressed1c.d: Likewise.
+
+2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19827
+	* testsuite/ld-i386/pr19827-nacl.rd: New file.
+	* testsuite/ld-x86-64/pr19827-nacl.rd: Likewise.
+
+2016-03-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19827
+	* testsuite/ld-i386/i386.exp: Run PR ld/19827 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr19827.rd: New file.
+	* testsuite/ld-i386/pr19827a.S: Likewise.
+	* testsuite/ld-i386/pr19827b.S: Likewise.
+	* testsuite/ld-x86-64/pr19827.rd: Likewise.
+	* testsuite/ld-x86-64/pr19827a.S: Likewise.
+	* testsuite/ld-x86-64/pr19827b.S: Likewise.
+
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19539.d: Skip cris*-*-* targets.
+
+	2016-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19539
+	* testsuite/ld-elf/pr19539.d: New file.
+	* testsuite/ld-elf/pr19539.s: Likewise.
+	* testsuite/ld-elf/pr19539.t: Likewise.
+
+2016-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2015-12-07  Jan Beulich  <jbeulich@suse.com>
+
+	* ld-elf/gabiend.rt: Accept any alignment.
+	* ld-elf/gabinormal.rt: Likewise.
+
 2016-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master

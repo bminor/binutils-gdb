@@ -148,6 +148,14 @@ set x86_64tests {
      "--64" {pr17709a.s} {} "libpr17709.so"}
     {"PR ld/17709 (2)" "-melf_x86_64 tmpdir/libpr17709.so" ""
      "--64" {pr17709b.s} {{readelf -rW pr17709.rd}} "pr17709"}
+    {"Build pr19827a.o" "" ""
+     "--64" { pr19827a.S }}
+    {"Build pr19827b.so" "-melf_x86_64 -shared" ""
+     "--64" { pr19827b.S } {} "pr19827b.so"}
+    {"Build pr19827" "-melf_x86_64 -pie tmpdir/pr19827a.o tmpdir/pr19827b.so" ""
+     "--64" { dummy.s } {{readelf {-rW} pr19827.rd}} "pr19827"}
+    {"Build pr19827.so" "-melf_x86_64 -shared -Bsymbolic" ""
+     "--64" { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
 }
 
 # So as to avoid rewriting every last test case here in a nacl variant,
@@ -239,6 +247,8 @@ run_dump_test "pr14215"
 run_dump_test "pr14207"
 run_dump_test "gotplt1"
 run_dump_test "pie1"
+run_dump_test "pr20093-1"
+run_dump_test "pr20093-2"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
