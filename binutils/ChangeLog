@@ -1,3 +1,10 @@
+2016-05-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mixed-mips16-micromips.d: New test.
+	* testsuite/binutils-all/mips/mixed-mips16-micromips.s: New test
+	source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new test.
+
 2016-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

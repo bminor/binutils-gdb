@@ -2268,33 +2268,33 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 }
 
 /* Return 1 if a symbol associated with the location being disassembled
-   indicates a compressed (MIPS16 or microMIPS) mode.  We iterate over
-   all the symbols at the address being considered assuming if at least
-   one of them indicates code compression, then such code has been
-   genuinely produced here (other symbols could have been derived from
-   function symbols defined elsewhere or could define data).  Otherwise,
-   return 0.  */
+   indicates a compressed mode, either MIPS16 or microMIPS, according to
+   MICROMIPS_P.  We iterate over all the symbols at the address being
+   considered assuming if at least one of them indicates code compression,
+   then such code has been genuinely produced here (other symbols could
+   have been derived from function symbols defined elsewhere or could
+   define data).  Otherwise, return 0.  */
 
 static bfd_boolean
-is_compressed_mode_p (struct disassemble_info *info)
+is_compressed_mode_p (struct disassemble_info *info, bfd_boolean micromips_p)
 {
   int i;
   int l;
 
   for (i = info->symtab_pos, l = i + info->num_symbols; i < l; i++)
     if (((info->symtab[i])->flags & BSF_SYNTHETIC) != 0
-	&& ((!micromips_ase
+	&& ((!micromips_p
 	     && ELF_ST_IS_MIPS16 ((*info->symbols)->udata.i))
-	    || (micromips_ase
+	    || (micromips_p
 		&& ELF_ST_IS_MICROMIPS ((*info->symbols)->udata.i))))
       return 1;
     else if (bfd_asymbol_flavour (info->symtab[i]) == bfd_target_elf_flavour
 	      && info->symtab[i]->section == info->section)
       {
 	elf_symbol_type *symbol = (elf_symbol_type *) info->symtab[i];
-	if ((!micromips_ase
+	if ((!micromips_p
 	     && ELF_ST_IS_MIPS16 (symbol->internal_elf_sym.st_other))
-	    || (micromips_ase
+	    || (micromips_p
 		&& ELF_ST_IS_MICROMIPS (symbol->internal_elf_sym.st_other)))
 	  return 1;
       }
@@ -2313,7 +2313,6 @@ _print_insn_mips (bfd_vma memaddr,
 		  struct disassemble_info *info,
 		  enum bfd_endian endianness)
 {
-  int (*print_insn_compr) (bfd_vma, struct disassemble_info *);
   bfd_byte buffer[INSNLEN];
   int status;
 
@@ -2325,18 +2324,23 @@ _print_insn_mips (bfd_vma memaddr,
   if (info->mach == bfd_mach_mips_micromips)
     return print_insn_micromips (memaddr, info);
 
-  print_insn_compr = !micromips_ase ? print_insn_mips16 : print_insn_micromips;
-
 #if 1
   /* FIXME: If odd address, this is CLEARLY a compressed instruction.  */
   /* Only a few tools will work this way.  */
   if (memaddr & 0x01)
-    return print_insn_compr (memaddr, info);
+    {
+      if (micromips_ase)
+	return print_insn_micromips (memaddr, info);
+      else
+	return print_insn_mips16 (memaddr, info);
+    }
 #endif
 
 #if SYMTAB_AVAILABLE
-  if (is_compressed_mode_p (info))
-    return print_insn_compr (memaddr, info);
+  if (is_compressed_mode_p (info, TRUE))
+    return print_insn_micromips (memaddr, info);
+  if (is_compressed_mode_p (info, FALSE))
+    return print_insn_mips16 (memaddr, info);
 #endif
 
   status = (*info->read_memory_func) (memaddr, buffer, INSNLEN, info);
