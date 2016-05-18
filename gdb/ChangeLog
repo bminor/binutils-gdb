@@ -1,3 +1,7 @@
+2016-05-18  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_subscript): Initialize "high".
+
 2016-05-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/20045

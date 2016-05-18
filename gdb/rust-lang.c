@@ -1308,9 +1308,10 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
 {
   struct value *lhs, *rhs, *result;
   struct type *rhstype;
-  LONGEST low, high, high_bound;
+  LONGEST low, high_bound;
   /* Initialized to appease the compiler.  */
   enum range_type kind = BOTH_BOUND_DEFAULT;
+  LONGEST high = 0;
   int want_slice = 0;
 
   ++*pos;
