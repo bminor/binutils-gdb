@@ -1,3 +1,10 @@
+2016-05-18  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_insert_operand): Trim PPC_OPERAND_SIGNOPT
+	allowed negative range.
+	* testsuite/gas/ppc/power9.s: Test xxspltib of -128, not -256.
+	* testsuite/gas/ppc/power9.d: Update.
+
 2016-05-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Force Thumb when

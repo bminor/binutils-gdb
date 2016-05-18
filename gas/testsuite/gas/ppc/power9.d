@@ -140,7 +140,7 @@ Disassembly of section \.text:
 .*:	(f0 80 2a 94|94 2a 80 f0) 	xxextractuw vs4,vs5,0
 .*:	(f1 0f 92 97|97 92 0f f1) 	xxextractuw vs40,vs50,15
 .*:	(f0 80 02 d0|d0 02 80 f0) 	xxspltib vs4,0
-.*:	(f0 80 02 d0|d0 02 80 f0) 	xxspltib vs4,0
+.*:	(f0 84 02 d0|d0 02 84 f0) 	xxspltib vs4,128
 .*:	(f1 27 fa d1|d1 fa 27 f1) 	xxspltib vs41,255
 .*:	(f1 27 fa d1|d1 fa 27 f1) 	xxspltib vs41,255
 .*:	(f0 a0 32 d4|d4 32 a0 f0) 	xxinsertw vs5,vs6,0
