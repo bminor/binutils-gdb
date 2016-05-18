@@ -1,3 +1,9 @@
+2016-06-10  Tom Tromey  <tom@tromey.com>
+
+	PR rust/20110:
+	* gdb.rust/expr.exp: Add test for integer constant larger than
+	i32.
+
 2016-06-10  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* gdb.fortran/nested-funcs.exp: New.
