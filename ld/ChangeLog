@@ -1,3 +1,9 @@
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): Pass in
+	exe name rather than constructing testname.  Fix typo in
+	sub-test name.  Log copying.  Use -rpath rather than -R.
+
 2016-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/ft32.sc: Use fixed constants for memory region
