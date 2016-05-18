@@ -1,3 +1,9 @@
+2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-v850.c (v850_target_arch): change type to enum
+	bfd_architecture.
+	* config/tc-v850.h (v850_target_arch): Likewise.
+
 2016-05-18  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_insert_operand): Trim PPC_OPERAND_SIGNOPT
