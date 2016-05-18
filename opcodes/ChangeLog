@@ -1,3 +1,9 @@
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c: Formatting.
+	(NSISIGNOPT): Define.
+	(powerpc_opcodes <subis>): Use NSISIGNOPT.
+
 2016-05-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-dis.c (is_compressed_mode_p): Add `micromips_p' operand,
