@@ -1,5 +1,10 @@
 2016-05-19  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (allocate_dynrelocs): Allocate got and other dynamic
+	relocs before plt relocs.
+
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_branch_reloc): Check for NULL owner
 	before dereferencing.
 
