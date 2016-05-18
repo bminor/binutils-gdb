@@ -1719,6 +1719,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget dlx-*-*]
 	 && ![istarget epiphany-*-*]
 	 && ![istarget fr30-*-*]
+	 && ![istarget ft32-*-*]
 	 && ![istarget frv-*-*]
 	 && ![istarget h8300-*-*]
 	 && ![istarget i860-*-*]

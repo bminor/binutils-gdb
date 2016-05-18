@@ -313,7 +313,7 @@ SECTIONS
   .comment 0 : { *(.comment) }
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   .MSP430.attributes 0 :

@@ -1,3 +1,21 @@
+2016-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/ft32.sc: Use fixed constants for memory region
+	lengths.  Include DWARF debug sections.
+	(.data .bss): Do not assign locations during relocatable links.
+	* testsuite/ld-elf/compressed1d.d: Skip for FT32.
+	* testsuite/ld-elf/sec-to-seg.exp: Likewise.
+	* testsuite/ld-elf/sec64k.exp: Likewise.
+	* testsuite/ld-elf/init-fini-array.d: XFail for FT32.
+	* testsuite/ld-elf/merge.d: Likewise.
+	* testsuite/ld-elf/orphan-region.d: Likewise.
+	* testsuite/ld-elf/orphan.s: Likewise.
+	* testsuite/ld-elf/orphan3.d: Likewise.
+	* testsuite/ld-elf/pr349.d: Likewise.
+	* testsuite/ld-elf/warn2.d: Likewise.
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Note
+	that the FT32 does not support shared libraries.
+
 2016-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/lib/ld-lib.exp (at_least_gcc_version): Check
