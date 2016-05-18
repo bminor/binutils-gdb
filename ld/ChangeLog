@@ -1,3 +1,18 @@
+2016-05-18  Christophe Monat  <christophe.monat@st.com>
+
+	Backport from master
+	2016-05-09  Christophe Monat  <christophe.monat@st.com>
+	PR ld/20030
+	* testsuite/ld-arm/arm-elf.exp: Run new stm32l4xx-fix-vldm-dp
+	tests. Fix misnamed stm32l4xx-fix-all.
+	* testsuite/ld-arm/stm32l4xx-fix-vldm-dp.s: New tests for multiple
+	loads with DP registers.
+	* testsuite/ld-arm/stm32l4xx-fix-vldm-dp.d: New reference file.
+	* testsuite/ld-arm/stm32l4xx-fix-vldm.s: Add missing comment.
+	* testsuite/ld-arm/stm32l4xx-fix-all.s: Add tests for multiple
+	loads with DP registers.
+	* testsuite/ld-arm/stm32l4xx-fix-all.d: Update reference.
+
 2016-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
