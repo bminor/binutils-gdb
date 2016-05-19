@@ -1,5 +1,24 @@
 2016-05-19  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* testsuite/ld-elf/compressed1d.d: Removed from notarget.
+	* testsuite/ld-elf/group8a.d: Likewise.
+	* testsuite/ld-elf/group8b.d: Likewise.
+	* testsuite/ld-elf/group9a.d: Likewise.
+	* testsuite/ld-elf/group9b.d: Likewise.
+	* testsuite/ld-elf/pr12851.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/eh-frame-hdr.d: Removed from xfail.
+	* testsuite/ld-elf/group3b.d: Likewise.
+	* testsuite/ld-srec/srec.exp: Likewise.
+	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Mark ARC
+	as supporting gc.
+	(check_shared_lib_support): Mark ARC as supporting.
+
+2016-05-19  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* emulparams/arcelf.sh: Changed.
 	* emulparams/arclinux.sh: Likewise.
 	* scripttempl/arclinux.sc: Moved to a more standard implementation
