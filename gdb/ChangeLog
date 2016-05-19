@@ -1,3 +1,9 @@
+2016-05-23  Tom Tromey  <tom@tromey.com>
+
+	PR python/17981:
+	* python/py-breakpoint.c (gdbpy_breakpoints): Return a new tuple
+	when there are no breakpoints.
+
 2016-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19828

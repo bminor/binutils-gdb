@@ -746,13 +746,13 @@ gdbpy_breakpoints (PyObject *self, PyObject *args)
   PyObject *list, *tuple;
 
   if (bppy_live == 0)
-    Py_RETURN_NONE;
+    return PyTuple_New (0);
 
   list = PyList_New (0);
   if (!list)
     return NULL;
 
-  /* If iteratre_over_breakpoints returns non NULL it signals an error
+  /* If iterate_over_breakpoints returns non NULL it signals an error
      condition.  In that case abandon building the list and return
      NULL.  */
   if (iterate_over_breakpoints (build_bp_list, list) != NULL)
