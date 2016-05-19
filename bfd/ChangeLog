@@ -1,3 +1,12 @@
+2016-05-19  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (arc_elf_final_write_processing): Changed.
+	(debug_arc_reloc): Likewise.
+	(elf_arc_relocate_section): Likewise.
+	(elf_arc_check_relocs): Likewise.
+	(elf_arc_adjust_dynamic_symbol): Likewise.
+	(elf_arc_add_symbol_hook): Likewise.
+
 2016-05-19  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config.bfd: Remove `am34-*-linux*' support.
