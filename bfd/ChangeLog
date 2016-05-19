@@ -1,3 +1,8 @@
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_branch_reloc): Check for NULL owner
+	before dereferencing.
+
 2016-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
