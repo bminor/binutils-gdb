@@ -1,3 +1,8 @@
+2016-05-23  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (insn_subclass_t): Add COND.
+	(flag_class_t): Add F_CLASS_EXTEND.
+
 2016-05-23  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* opcode/arc.h (struct arc_opcode): Renamed attribute class to

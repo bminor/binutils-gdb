@@ -1,5 +1,17 @@
 2016-05-23  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* arc-dis.c (print_flags): Set branch_delay_insns, and insn_type
+	information.
+	(print_insn_arc): Set insn_type information.
+	* arc-opc.c (C_CC): Add F_CLASS_COND.
+	* arc-tbl.h (bbit0, bbit1): Update subclass to COND.
+	(beq_s, bge_s, bgt_s, bhi_s, bhs_s): Likewise.
+	(ble_s, blo_s, bls_s, blt_s, bne_s): Likewise.
+	(breq, breq_s, brge, brhs, brlo, brlt): Likewise.
+	(brne, brne_s, jeq_s, jne_s): Likewise.
+
+2016-05-23  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* arc-tbl.h (neg): New instruction variant.
 
 2016-05-23  Cupertino Miranda  <cmiranda@synopsys.com>

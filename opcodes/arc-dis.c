@@ -270,12 +270,21 @@ print_flags (const struct arc_opcode *opcode,
 		      break;
 		    }
 		}
+	      if (flg_operand->name[0] == 'd'
+		  && flg_operand->name[1] == 0)
+		info->branch_delay_insns = 1;
+
+	      /* Check if it is a conditional flag.  */
+	      if (cl_flags->flag_class & F_CLASS_COND)
+		{
+		  if (info->insn_type == dis_jsr)
+		    info->insn_type = dis_condjsr;
+		  else if (info->insn_type == dis_branch)
+		    info->insn_type = dis_condbranch;
+		}
+
 	      (*info->fprintf_func) (info->stream, "%s", flg_operand->name);
 	    }
-
-	  if (flg_operand->name[0] == 'd'
-	      && flg_operand->name[1] == 0)
-	    info->branch_delay_insns = 1;
 	}
     }
 }
@@ -533,9 +542,19 @@ print_insn_arc (bfd_vma memaddr,
     case JUMP:
       if (!strncmp (opcode->name, "bl", 2)
 	  || !strncmp (opcode->name, "jl", 2))
-	info->insn_type = dis_jsr;
+	{
+	  if (opcode->subclass == COND)
+	    info->insn_type = dis_condjsr;
+	  else
+	    info->insn_type = dis_jsr;
+	}
       else
-	info->insn_type = dis_branch;
+	{
+	  if (opcode->subclass == COND)
+	    info->insn_type = dis_condbranch;
+	  else
+	    info->insn_type = dis_branch;
+	}
       break;
     case MEMORY:
       info->insn_type = dis_dref; /* FIXME! DB indicates mov as memory! */

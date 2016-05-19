@@ -1185,7 +1185,7 @@ const struct arc_flag_class arc_flag_classes[] =
   { F_CLASS_NONE, { F_NULL } },
 
 #define C_CC	    (C_EMPTY + 1)
-  { F_CLASS_OPTIONAL | F_CLASS_EXTEND,
+  { F_CLASS_OPTIONAL | F_CLASS_EXTEND | F_CLASS_COND,
     { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL,
       F_NOTZERO, F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS,
       F_CARRY, F_CARRYSET, F_LOWER, F_CARRYCLR,

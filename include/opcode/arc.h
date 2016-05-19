@@ -59,6 +59,7 @@ typedef enum
     BTSCN,
     CD1,
     CD2,
+    COND,
     DIV,
     DP,
     DPA,
@@ -91,7 +92,10 @@ typedef enum
 
     /* The conditional code can be extended over the standard variants
        via .extCondCode pseudo-op.  */
-    F_CLASS_EXTEND = (1 << 2)
+    F_CLASS_EXTEND = (1 << 2),
+
+    /* Condition code flag.  */
+    F_CLASS_COND = (1 << 3)
   } flag_class_t;
 
 /* The opcode table is an array of struct arc_opcode.  */
