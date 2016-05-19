@@ -1161,28 +1161,27 @@ tic54x_sect (int arg)
     {
       char *name = NULL;
       int len;
+      /* Make sure all named initialized sections flagged properly.  If we
+         encounter instructions, we'll flag it with SEC_CODE as well.  */
+      const char *flags = ",\"w\"\n";
 
       /* If there are quotes, remove them.  */
       if (*input_line_pointer == '"')
 	{
 	  name = demand_copy_C_string (&len);
 	  demand_empty_rest_of_line ();
-	  name = strcpy (xmalloc (len + 10), name);
+	  name = concat (name, flags, (char *) NULL);
 	}
       else
 	{
 	  int c;
 
 	  c = get_symbol_name (&name);
-          len = strlen(name);
-	  name = strcpy (xmalloc (len + 10), name);
+	  name = concat (name, flags, (char *) NULL);
 	  (void) restore_line_pointer (c);
 	  demand_empty_rest_of_line ();
 	}
 
-      /* Make sure all named initialized sections flagged properly.  If we
-         encounter instructions, we'll flag it with SEC_CODE as well.  */
-      strcat (name, ",\"w\"\n");
       input_scrub_insert_line (name);
       obj_coff_section (0);
 

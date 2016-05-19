@@ -1,5 +1,9 @@
 2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-tic54x.c (tic54x_sect): simplify string creation.
+
+2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-spu.c (APUOP): Use OPCODE as an unsigned constant.
 
 2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
