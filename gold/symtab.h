@@ -870,6 +870,19 @@ class Symbol
   is_cxx_vtable() const
   { return is_prefix_of("_ZTV", this->name_); }
 
+  // Return true if this symbol is protected in a shared object.
+  // This is not the same as checking if visibility() == elfcpp::STV_PROTECTED,
+  // because the visibility_ field reflects the symbol's visibility from
+  // outside the shared object.
+  bool
+  is_protected() const
+  { return this->is_protected_; }
+
+  // Mark this symbol as protected in a shared object.
+  void
+  set_is_protected()
+  { this->is_protected_ = true; }
+
  protected:
   // Instances of this class should always be created at a specific
   // size.
@@ -1067,6 +1080,10 @@ class Symbol
   bool undef_binding_weak_ : 1;
   // True if this symbol is a predefined linker symbol (bit 34).
   bool is_predefined_ : 1;
+  // True if this symbol has protected visibility in a shared object (bit 35).
+  // The visibility_ field will be STV_DEFAULT in this case because we
+  // must treat it as such from outside the shared object.
+  bool is_protected_  : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template

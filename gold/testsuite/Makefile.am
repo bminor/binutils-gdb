@@ -848,6 +848,18 @@ copy_test_2_pic.o: copy_test_2.cc
 copy_test_2.so: gcctestdir/ld copy_test_2_pic.o
 	$(CXXLINK) -Bgcctestdir/ -shared copy_test_2_pic.o
 
+check_SCRIPTS += copy_test_protected.sh
+check_DATA += copy_test_protected.err
+MOSTLYCLEANFILES += copy_test_protected.err
+copy_test_protected.err: copy_test_protected.o copy_test_2.so gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -o copy_test_protected copy_test_protected.o copy_test_2.so -Wl,-R,. "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o copy_test_protected copy_test_protected.o copy_test_2.so -Wl,-R,. 2>$@; \
+	then \
+	  echo 1>&2 "Link of copy_test_protected should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
 if TLS
 
 check_PROGRAMS += tls_test

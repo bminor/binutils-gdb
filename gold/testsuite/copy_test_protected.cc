@@ -1,7 +1,7 @@
-// copy_test.cc -- test copy relocs for gold
+// copy_test_protected.cc -- test copy relocs for gold
 
-// Copyright (C) 2008-2016 Free Software Foundation, Inc.
-// Written by Ian Lance Taylor <iant@google.com>.
+// Copyright (C) 2016 Free Software Foundation, Inc.
+// Written by Cary Coutant <ccoutant@gmail.com>.
 
 // This file is part of gold.
 
@@ -23,25 +23,14 @@
 #include <cassert>
 #include <stdint.h>
 
-// Misalign the BSS section.
-static char c;
-
-// From copy_test_1.cc.
-extern char b;
-
 // From copy_test_2.cc.
-extern long long l;
 extern int ip; // protected visibility; may not be copied
-
-int* ipp = &ip;
 
 int
 main()
 {
-  assert(c == 0);
-  assert(b == 1);
-  assert(l == 2);
-  assert((reinterpret_cast<uintptr_t>(&l) & 0x7) == 0);
-  assert(*ipp == 3);
+  // This should produce a link-time error because we cannot
+  // create a copy relocation to a protected symbol.
+  assert(ip == 3);
   return 0;
 }

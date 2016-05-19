@@ -7766,6 +7766,7 @@ Mips_copy_relocs<sh_type, size, big_endian>::emit_entry(
   else
     this->make_copy_reloc(symtab, layout,
                           static_cast<Sized_symbol<size>*>(entry.sym_),
+                          entry.relobj_,
                           reloc_section);
 }
 

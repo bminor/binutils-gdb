@@ -1,3 +1,25 @@
+2016-05-19  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19823
+	* copy-relocs.cc (Copy_relocs::make_copy_reloc): Add object
+	parameter; check for protected symbol.
+	* copy-relocs.h (Copy_relocs::make_copy_reloc): Add object parameter.
+	* mips.cc (Mips_copy_relocs): Adjust call to make_copy_reloc.
+	* symtab.cc (Symbol::init_fields): Initialize is_protected_.
+	(Symbol_table::add_from_dynobj): Mark protected symbols.
+	* symtab.h (Symbol::is_protected): New method.
+	(Symbol::set_is_protected): New method.
+	(Symbol::is_protected_): New data member.
+
+	* testsuite/Makefile.am (copy_test_protected): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/copy_test.cc (main): Add legal reference to protected
+	symbol.
+	* testsuite/copy_test_v1.cc (main): Likewise.
+	* testsuite/copy_test_2.cc (ip): Add protected symbol.
+	* testsuite/copy_test_protected.cc: New test source file.
+	* testsuite/copy_test_protected.sh: New test script.
+
 2016-05-19  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
 
 	* mips.cc (Mips_got_entry::Mips_got_entry): Remove object argument

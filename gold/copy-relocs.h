@@ -123,6 +123,7 @@ class Copy_relocs
   // Make a new COPY reloc and emit it.
   void
   make_copy_reloc(Symbol_table*, Layout*, Sized_symbol<size>*,
+		  Sized_relobj_file<size, big_endian>* object,
 		  Output_data_reloc<sh_type, true, size, big_endian>*);
 
   // A list of relocs to be saved.
