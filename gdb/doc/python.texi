@@ -4579,6 +4579,48 @@ the class of watchpoint to create, if @var{type} is
 is assumed to be a @code{gdb.WP_WRITE} class.
 @end defun
 
+The available types are represented by constants defined in the @code{gdb}
+module:
+
+@vtable @code
+@vindex BP_BREAKPOINT
+@item gdb.BP_BREAKPOINT
+Normal code breakpoint.
+
+@vindex BP_WATCHPOINT
+@item gdb.BP_WATCHPOINT
+Watchpoint breakpoint.
+
+@vindex BP_HARDWARE_WATCHPOINT
+@item gdb.BP_HARDWARE_WATCHPOINT
+Hardware assisted watchpoint.
+
+@vindex BP_READ_WATCHPOINT
+@item gdb.BP_READ_WATCHPOINT
+Hardware assisted read watchpoint.
+
+@vindex BP_ACCESS_WATCHPOINT
+@item gdb.BP_ACCESS_WATCHPOINT
+Hardware assisted access watchpoint.
+@end vtable
+
+The available watchpoint types represented by constants are defined in the
+@code{gdb} module:
+
+@vtable @code
+@vindex WP_READ
+@item gdb.WP_READ
+Read only watchpoint.
+
+@vindex WP_WRITE
+@item gdb.WP_WRITE
+Write only watchpoint.
+
+@vindex WP_ACCESS
+@item gdb.WP_ACCESS
+Read/Write watchpoint.
+@end vtable
+
 @defun Breakpoint.stop (self)
 The @code{gdb.Breakpoint} class can be sub-classed and, in
 particular, you may choose to implement the @code{stop} method.
@@ -4612,23 +4654,6 @@ class MyBreakpoint (gdb.Breakpoint):
         return False
 @end smallexample
 @end defun
-
-The available watchpoint types represented by constants are defined in the
-@code{gdb} module:
-
-@vtable @code
-@vindex WP_READ
-@item gdb.WP_READ
-Read only watchpoint.
-
-@vindex WP_WRITE
-@item gdb.WP_WRITE
-Write only watchpoint.
-
-@vindex WP_ACCESS
-@item gdb.WP_ACCESS
-Read/Write watchpoint.
-@end vtable
 
 @defun Breakpoint.is_valid ()
 Return @code{True} if this @code{Breakpoint} object is valid,
@@ -4705,31 +4730,6 @@ function, will result in an error after the breakpoint has been hit
 (as it has been automatically deleted).  This attribute is not
 writable.
 @end defvar
-
-The available types are represented by constants defined in the @code{gdb}
-module:
-
-@vtable @code
-@vindex BP_BREAKPOINT
-@item gdb.BP_BREAKPOINT
-Normal code breakpoint.
-
-@vindex BP_WATCHPOINT
-@item gdb.BP_WATCHPOINT
-Watchpoint breakpoint.
-
-@vindex BP_HARDWARE_WATCHPOINT
-@item gdb.BP_HARDWARE_WATCHPOINT
-Hardware assisted watchpoint.
-
-@vindex BP_READ_WATCHPOINT
-@item gdb.BP_READ_WATCHPOINT
-Hardware assisted read watchpoint.
-
-@vindex BP_ACCESS_WATCHPOINT
-@item gdb.BP_ACCESS_WATCHPOINT
-Hardware assisted access watchpoint.
-@end vtable
 
 @defvar Breakpoint.hit_count
 This attribute holds the hit count for the breakpoint, an integer.

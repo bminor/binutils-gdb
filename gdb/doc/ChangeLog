@@ -1,3 +1,8 @@
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Breakpoints In Python): Move table of types and
+	table of watchpoint types earlier in node.
+
 2016-07-12  Tom Tromey  <tom@tromey.com>
 
 	PR python/19293:
