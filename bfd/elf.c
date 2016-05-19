@@ -3208,12 +3208,15 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       break;
 
     case SHT_STRTAB:
-    case SHT_INIT_ARRAY:
-    case SHT_FINI_ARRAY:
-    case SHT_PREINIT_ARRAY:
     case SHT_NOTE:
     case SHT_NOBITS:
     case SHT_PROGBITS:
+      break;
+
+    case SHT_INIT_ARRAY:
+    case SHT_FINI_ARRAY:
+    case SHT_PREINIT_ARRAY:
+      this_hdr->sh_entsize = bed->s->arch_size / 8;
       break;
 
     case SHT_HASH:

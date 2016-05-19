@@ -1,3 +1,9 @@
+2016-05-20  Alan Modra  <amodra@gmail.com>
+
+	PR gas/20118
+	* elf.c (elf_fake_sections): Set sh_entsize for SHT_INIT_ARRAY,
+	SHT_FINI_ARRAY, and SHT_PREINIT_ARRAY.
+
 2016-05-19  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* elf32-arc.c (arc_elf_final_write_processing): Changed.
