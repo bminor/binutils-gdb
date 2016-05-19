@@ -45,6 +45,8 @@ gdb_test "python print (objfile.filename)" "${testfile}" \
 gdb_test "python print (objfile.username)" "${testfile}" \
   "Get objfile user name"
 
+gdb_test_no_output "python dir(objfile)"
+
 gdb_test "python print (gdb.lookup_objfile (\"${testfile}\").filename)" \
     "${testfile}" "print lookup_objfile filename"
 gdb_test "python print (gdb.lookup_objfile (\"junk\"))" \

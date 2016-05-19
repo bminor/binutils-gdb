@@ -1,3 +1,9 @@
+2016-05-23  Tom Tromey  <tom@tromey.com>
+
+	PR python/19438, PR python/18393:
+	* python/py-objfile.c (objfpy_initialize): Initialize self->dict.
+	* python/py-progspace.c (pspy_initialize): Initialize self->dict.
+
 2016-05-23  Gary Benson  <gbenson@redhat.com>
 
 	* nat/gdb_thread_db.h (td_thr_validate_ftype): Remove typedef.

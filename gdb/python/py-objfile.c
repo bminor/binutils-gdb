@@ -196,7 +196,10 @@ static int
 objfpy_initialize (objfile_object *self)
 {
   self->objfile = NULL;
-  self->dict = NULL;
+
+  self->dict = PyDict_New ();
+  if (self->dict == NULL)
+    return 0;
 
   self->printers = PyList_New (0);
   if (self->printers == NULL)
