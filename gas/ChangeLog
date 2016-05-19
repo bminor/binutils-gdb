@@ -1,3 +1,13 @@
+2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-tic54x.c (tic54x_mmregs): Adjust.
+	(md_begin): Likewise.
+	(encode_condition): Likewise.
+	(encode_cc3): Likewise.
+	(encode_cc2): Likewise.
+	(encode_operand): Likewise.
+	(tic54x_undefined_symbol): Likewise.
+
 2016-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Update comment.  Add

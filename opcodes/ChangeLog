@@ -1,3 +1,8 @@
+2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* tic54x-dis.c (sprint_mmr): Adjust.
+	* tic54x-opc.c: Likewise.
+
 2016-05-19  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (NSISIGNOPT): Use insert_nsi and extract_nsi.

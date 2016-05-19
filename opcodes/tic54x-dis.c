@@ -530,7 +530,7 @@ sprint_mmr (disassemble_info *info ATTRIBUTE_UNUSED,
 	    char buf[],
 	    int mmr)
 {
-  symbol *reg = (symbol *) mmregs;
+  tic54x_symbol *reg = (tic54x_symbol *) mmregs;
   while (reg->name != NULL)
     {
       if (mmr == reg->value)

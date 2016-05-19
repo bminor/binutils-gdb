@@ -2012,11 +2012,11 @@ tic54x_label (int ignored ATTRIBUTE_UNUSED)
 static void
 tic54x_mmregs (int ignored ATTRIBUTE_UNUSED)
 {
-  symbol *sym;
+  tic54x_symbol *sym;
 
   ILLEGAL_WITHIN_STRUCT ();
 
-  for (sym = (symbol *) mmregs; sym->name; sym++)
+  for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
     {
       symbolS *symbolP = symbol_new (sym->name, absolute_section,
 				     (valueT) sym->value, &zero_address_frag);
@@ -2964,7 +2964,7 @@ void
 md_begin (void)
 {
   insn_template *tm;
-  symbol *sym;
+  tic54x_symbol *sym;
   const subsym_proc_entry *subsym_proc;
   const math_proc_entry *math_proc;
   const char *hash_err;
@@ -3012,7 +3012,7 @@ md_begin (void)
 		  tm->name, hash_err);
     }
   reg_hash = hash_new ();
-  for (sym = (symbol *) regs; sym->name; sym++)
+  for (sym = (tic54x_symbol *) regs; sym->name; sym++)
     {
       /* Add basic registers to the symbol table.  */
       symbolS *symbolP = symbol_new (sym->name, absolute_section,
@@ -3021,26 +3021,26 @@ md_begin (void)
       symbol_table_insert (symbolP);
       hash_err = hash_insert (reg_hash, sym->name, (char *) sym);
     }
-  for (sym = (symbol *) mmregs; sym->name; sym++)
+  for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
     hash_err = hash_insert (reg_hash, sym->name, (char *) sym);
   mmreg_hash = hash_new ();
-  for (sym = (symbol *) mmregs; sym->name; sym++)
+  for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
     hash_err = hash_insert (mmreg_hash, sym->name, (char *) sym);
 
   cc_hash = hash_new ();
-  for (sym = (symbol *) condition_codes; sym->name; sym++)
+  for (sym = (tic54x_symbol *) condition_codes; sym->name; sym++)
     hash_err = hash_insert (cc_hash, sym->name, (char *) sym);
 
   cc2_hash = hash_new ();
-  for (sym = (symbol *) cc2_codes; sym->name; sym++)
+  for (sym = (tic54x_symbol *) cc2_codes; sym->name; sym++)
     hash_err = hash_insert (cc2_hash, sym->name, (char *) sym);
 
   cc3_hash = hash_new ();
-  for (sym = (symbol *) cc3_codes; sym->name; sym++)
+  for (sym = (tic54x_symbol *) cc3_codes; sym->name; sym++)
     hash_err = hash_insert (cc3_hash, sym->name, (char *) sym);
 
   sbit_hash = hash_new ();
-  for (sym = (symbol *) status_bits; sym->name; sym++)
+  for (sym = (tic54x_symbol *) status_bits; sym->name; sym++)
     hash_err = hash_insert (sbit_hash, sym->name, (char *) sym);
 
   misc_symbol_hash = hash_new ();
@@ -3651,7 +3651,7 @@ encode_integer (tic54x_insn *insn,
 static int
 encode_condition (tic54x_insn *insn, struct opstruct *operand)
 {
-  symbol *cc = (symbol *) hash_find (cc_hash, operand->buf);
+  tic54x_symbol *cc = (tic54x_symbol *) hash_find (cc_hash, operand->buf);
   if (!cc)
     {
       as_bad (_("Unrecognized condition code \"%s\""), operand->buf);
@@ -3711,7 +3711,7 @@ encode_condition (tic54x_insn *insn, struct opstruct *operand)
 static int
 encode_cc3 (tic54x_insn *insn, struct opstruct *operand)
 {
-  symbol *cc3 = (symbol *) hash_find (cc3_hash, operand->buf);
+  tic54x_symbol *cc3 = (tic54x_symbol *) hash_find (cc3_hash, operand->buf);
   int value = cc3 ? cc3->value : operand->exp.X_add_number << 8;
 
   if ((value & 0x0300) != value)
@@ -3740,7 +3740,7 @@ encode_arx (tic54x_insn *insn, struct opstruct *operand)
 static int
 encode_cc2 (tic54x_insn *insn, struct opstruct *operand)
 {
-  symbol *cc2 = (symbol *) hash_find (cc2_hash, operand->buf);
+  tic54x_symbol *cc2 = (tic54x_symbol *) hash_find (cc2_hash, operand->buf);
 
   if (!cc2)
     {
@@ -3899,7 +3899,8 @@ encode_operand (tic54x_insn *insn, enum optype type, struct opstruct *operand)
 			     0, 65535, 0xFFFF);
     case OP_SBIT:
       {
-	symbol *sbit = (symbol *) hash_find (sbit_hash, operand->buf);
+	tic54x_symbol *sbit = (tic54x_symbol *)
+	  hash_find (sbit_hash, operand->buf);
 	int value = is_absolute (operand) ?
 	  operand->exp.X_add_number : (sbit ? sbit->value : -1);
 	int reg = 0;
@@ -3913,7 +3914,7 @@ encode_operand (tic54x_insn *insn, enum optype type, struct opstruct *operand)
 	      }
 	    /* Guess the register based on the status bit; "ovb" is the last
 	       status bit defined for st0.  */
-	    if (sbit > (symbol *) hash_find (sbit_hash, "ovb"))
+	    if (sbit > (tic54x_symbol *) hash_find (sbit_hash, "ovb"))
 	      reg = 1;
 	  }
 	if (value == -1)
@@ -5013,22 +5014,22 @@ tic54x_define_label (symbolS *sym)
 symbolS *
 tic54x_undefined_symbol (char *name)
 {
-  symbol *sym;
+  tic54x_symbol *sym;
 
   /* Not sure how to handle predefined symbols.  */
-  if ((sym = (symbol *) hash_find (cc_hash, name)) != NULL ||
-      (sym = (symbol *) hash_find (cc2_hash, name)) != NULL ||
-      (sym = (symbol *) hash_find (cc3_hash, name)) != NULL ||
-      (sym = (symbol *) hash_find (misc_symbol_hash, name)) != NULL ||
-      (sym = (symbol *) hash_find (sbit_hash, name)) != NULL)
+  if ((sym = (tic54x_symbol *) hash_find (cc_hash, name)) != NULL ||
+      (sym = (tic54x_symbol *) hash_find (cc2_hash, name)) != NULL ||
+      (sym = (tic54x_symbol *) hash_find (cc3_hash, name)) != NULL ||
+      (sym = (tic54x_symbol *) hash_find (misc_symbol_hash, name)) != NULL ||
+      (sym = (tic54x_symbol *) hash_find (sbit_hash, name)) != NULL)
     {
       return symbol_new (name, reg_section,
 			 (valueT) sym->value,
 			 &zero_address_frag);
     }
 
-  if ((sym = (symbol *) hash_find (reg_hash, name)) != NULL ||
-      (sym = (symbol *) hash_find (mmreg_hash, name)) != NULL ||
+  if ((sym = (tic54x_symbol *) hash_find (reg_hash, name)) != NULL ||
+      (sym = (tic54x_symbol *) hash_find (mmreg_hash, name)) != NULL ||
       !strcasecmp (name, "a") || !strcasecmp (name, "b"))
     {
       return symbol_new (name, reg_section,
