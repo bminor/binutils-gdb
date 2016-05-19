@@ -1,3 +1,22 @@
+2016-05-19  Andreas Schwab  <schwab@suse.de>
+
+	* ia64-libunwind-tdep.c (libunwind_descr): Add cast from void *.
+	(libunwind_frame_set_descr): Likewise.
+	(libunwind_frame_cache): Likewise.
+	(libunwind_frame_dealloc_cache): Likewise.
+	(libunwind_frame_sniffer): Likewise.
+	(libunwind_search_unwind_table): Likewise.
+	(libunwind_sigtramp_frame_sniffer): Likewise.
+	(libunwind_get_reg_special): Likewise.
+	(libunwind_load): Likewise.
+	* ia64-linux-nat.c (ia64_linux_fetch_register): Likewise.
+	(ia64_linux_store_register): Likewise.
+	(ia64_linux_xfer_partial): Likewise.
+	* ia64-tdep.c (ia64_access_reg): Likewise.
+	(ia64_access_fpreg): Likewise.
+	(ia64_access_rse_reg): Likewise.
+	(ia64_access_rse_fpreg): Likewise.
+
 2016-05-18  Tom Tromey  <tom@tromey.com>
 
 	* rust-lang.c (rust_subscript): Initialize "high".
