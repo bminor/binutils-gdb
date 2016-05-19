@@ -499,7 +499,7 @@ const struct powerpc_operand powerpc_operands[] =
   /* The NSI field in a D form instruction when we accept a wide range
      of positive values.  */
 #define NSISIGNOPT NSI + 1
-  { 0xffff, 0, NULL, NULL,
+  { 0xffff, 0, insert_nsi, extract_nsi,
     PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
 
   /* The RA field in an D, DS, DQ, X, XO, M, or MDS form instruction.  */

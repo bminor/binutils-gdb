@@ -1,5 +1,9 @@
 2016-05-19  Alan Modra  <amodra@gmail.com>
 
+	* ppc-opc.c (NSISIGNOPT): Use insert_nsi and extract_nsi.
+
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
 	* ppc-opc.c: Formatting.
 	(NSISIGNOPT): Define.
 	(powerpc_opcodes <subis>): Use NSISIGNOPT.
