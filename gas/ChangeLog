@@ -1,3 +1,8 @@
+2016-05-23  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (md_begin): Add XY registers.
+	(cpu_types): Code density is default off for ARC EM.
+
 2016-05-23  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* config/tc-arc.c (attributes_t): Renamed attribute class to
