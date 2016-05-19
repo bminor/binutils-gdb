@@ -1,5 +1,10 @@
 2016-05-19  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Reorder
+	`ft32-*-*' behind `frv-*-*'.
+
+2016-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* configure.tgt: Remove `am34-*-linux*' support.
 
 2016-05-19  Alan Modra  <amodra@gmail.com>
