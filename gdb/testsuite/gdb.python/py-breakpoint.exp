@@ -49,6 +49,8 @@ proc test_bkpt_basic { } {
 	    "<gdb.Breakpoint object at $hex>" "Check obj exists @main"
 	gdb_test "python print (blist\[0\].location)" \
 	    "main." "Check breakpoint location @main"
+	gdb_test "python print (blist\[0\].pending)" "False" \
+	    "Check pending status of main breakpoint"
 
 	set mult_line [gdb_get_line_number "Break at multiply."]
 	gdb_breakpoint ${mult_line}
@@ -267,6 +269,7 @@ proc test_watchpoints { } {
 
 	gdb_py_test_silent_cmd  "python wp1 = gdb.Breakpoint (\"result\", type=gdb.BP_WATCHPOINT, wp_class=gdb.WP_WRITE )" \
 	    "Set watchpoint" 0
+	gdb_test "python print (wp1.pending)" "False"
 	gdb_test "continue" \
 	    ".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*main.*" \
 	    "Test watchpoint write"
@@ -497,6 +500,13 @@ proc test_bkpt_address {} {
 	".*Breakpoint ($decimal)+ at .*$srcfile, line ($decimal)+\."
 }
 
+proc test_bkpt_pending {} {
+    delete_breakpoints
+    gdb_breakpoint "nosuchfunction" allow-pending
+    gdb_test "python print (gdb.breakpoints()\[0\].pending)" "True" \
+	"Check pending status of pending breakpoint"
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
@@ -506,3 +516,4 @@ test_bkpt_internal
 test_bkpt_eval_funcs
 test_bkpt_temporary
 test_bkpt_address
+test_bkpt_pending

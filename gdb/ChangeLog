@@ -1,5 +1,14 @@
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
+	PR python/17698:
+	* NEWS: Update.
+	* python/py-breakpoint.c (bppy_get_pending): New function.
+	(breakpoint_object_getset): Add entry for "pending".
+	* breakpoint.h (pending_breakpoint_p): Declare.
+	* breakpoint.c (pending_breakpoint_p): New function.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
 	* python/py-breakpoint.c (bppy_get_visibility)
 	(gdbpy_breakpoint_created): Use user_breakpoint_p.
 

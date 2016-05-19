@@ -4685,6 +4685,12 @@ first command is @code{silent}.  This is not reported by the
 @code{silent} attribute.
 @end defvar
 
+@defvar Breakpoint.pending
+This attribute is @code{True} if the breakpoint is pending, and
+@code{False} otherwise.  @xref{Set Breaks}.  This attribute is
+read-only.
+@end defvar
+
 @anchor{python_breakpoint_thread}
 @defvar Breakpoint.thread
 If the breakpoint is thread-specific, this attribute holds the

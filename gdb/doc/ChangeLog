@@ -1,5 +1,11 @@
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
+	PR python/17698:
+	* python.texi (Breakpoints In Python): Document
+	Breakpoint.pending.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
 	* python.texi (Breakpoints In Python): Move table of types and
 	table of watchpoint types earlier in node.
 

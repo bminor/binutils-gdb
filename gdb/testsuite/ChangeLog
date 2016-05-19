@@ -1,5 +1,13 @@
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
+	PR python/17698:
+	* gdb.python/py-breakpoint.exp (test_bkpt_basic): Add "pending"
+	test.
+	(test_watchpoints): Likewise.
+	(test_bkpt_pending): New proc.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
 	PR cli/18053:
 	* gdb.base/jit-so.exp (one_jit_test): Add jit-reader-load
 	completion test.

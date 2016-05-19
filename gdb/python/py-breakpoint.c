@@ -563,6 +563,24 @@ bppy_get_temporary (PyObject *self, void *closure)
   Py_RETURN_FALSE;
 }
 
+/* Python function to determine if the breakpoint is a pending
+   breakpoint.  */
+
+static PyObject *
+bppy_get_pending (PyObject *self, void *closure)
+{
+  gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
+
+  BPPY_REQUIRE_VALID (self_bp);
+
+  if (is_watchpoint (self_bp->bp))
+    Py_RETURN_FALSE;
+  if (pending_breakpoint_p (self_bp->bp))
+    Py_RETURN_TRUE;
+
+  Py_RETURN_FALSE;
+}
+
 /* Python function to get the breakpoint's number.  */
 static PyObject *
 bppy_get_number (PyObject *self, void *closure)
@@ -1054,6 +1072,8 @@ or None if no condition set."},
     "Whether the breakpoint is visible to the user."},
   { "temporary", bppy_get_temporary, NULL,
     "Whether this breakpoint is a temporary breakpoint."},
+  { "pending", bppy_get_pending, NULL,
+    "Whether this breakpoint is a pending breakpoint."},
   { NULL }  /* Sentinel.  */
 };
 
