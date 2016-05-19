@@ -1544,7 +1544,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   if (roff < 2)
     return TRUE;
 
-  /* Addend for R_386_GOT32 and R_386_GOT32X relocations must be 0.  */
+  /* Addend for R_386_GOT32X relocations must be 0.  */
   addend = bfd_get_32 (abfd, contents + roff);
   if (addend != 0)
     return TRUE;
@@ -1558,11 +1558,10 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   modrm = bfd_get_8 (abfd, contents + roff - 1);
   baseless = (modrm & 0xc7) == 0x5;
 
-  if (r_type == R_386_GOT32X && baseless && is_pic)
+  if (baseless && is_pic)
     {
       /* For PIC, disallow R_386_GOT32X without a base register
-	 since we don't know what the GOT base is.   Allow
-	 R_386_GOT32 for existing object files.  */
+	 since we don't know what the GOT base is.  */
       const char *name;
 
       if (h == NULL)
@@ -1582,22 +1581,12 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 
   opcode = bfd_get_8 (abfd, contents + roff - 2);
 
-  /* Convert mov to lea since it has been done for a while.  */
-  if (opcode != 0x8b)
-    {
-      /* Only convert R_386_GOT32X relocation for call, jmp or
-	 one of adc, add, and, cmp, or, sbb, sub, test, xor
-	 instructions.  */
-      if (r_type != R_386_GOT32X)
-	return TRUE;
-    }
-
   /* Convert to R_386_32 if PIC is false or there is no base
      register.  */
   to_reloc_32 = !is_pic || baseless;
 
-  /* Try to convert R_386_GOT32 and R_386_GOT32X.  Get the symbol
-     referred to by the reloc.  */
+  /* Try to convert R_386_GOT32X.  Get the symbol referred to by the
+     reloc.  */
   if (h == NULL)
     {
       if (opcode == 0x0ff)
@@ -3021,7 +3010,9 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       struct elf_link_hash_entry *h;
       bfd_boolean converted;
 
-      if (r_type != R_386_GOT32 && r_type != R_386_GOT32X)
+      /* Don't convert R_386_GOT32 since we can't tell if it is applied
+	 to "mov $foo@GOT, %reg" which isn't a load via GOT.  */
+      if (r_type != R_386_GOT32X)
 	continue;
 
       r_symndx = ELF32_R_SYM (irel->r_info);

@@ -1,3 +1,10 @@
+2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20117
+	* elf32-i386.c (elf_i386_convert_load_reloc): Don't check
+	R_386_GOT32X.
+	(elf_i386_convert_load): Don't convert R_386_GOT32.
+
 2016-05-20  Alan Modra  <amodra@gmail.com>
 
 	PR gas/20118

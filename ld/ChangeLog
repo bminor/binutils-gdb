@@ -1,3 +1,11 @@
+2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20117
+	* testsuite/ld-i386/i386.exp: Run pr20117.
+	* testsuite/ld-i386/pr19609-1i.d: Updated.
+	* testsuite/ld-i386/pr20117.d: New file.
+	* testsuite/ld-i386/pr20117.s: Likewise.
+
 2016-05-19  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* testsuite/ld-elf/compressed1d.d: Removed from notarget.
