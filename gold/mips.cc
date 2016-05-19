@@ -420,8 +420,8 @@ is_matching_lo16_reloc(unsigned int high_reloc, unsigned int lo16_reloc)
 //    (1) a SYMBOL + OFFSET address, where SYMBOL is local to an input object
 //          (object != NULL, symndx >= 0, tls_type != GOT_TLS_LDM)
 //    (2) a SYMBOL address, where SYMBOL is not local to an input object
-//          (object != NULL, symndx == -1)
-//    (3) a TLS LDM slot
+//          (sym != NULL, symndx == -1)
+//    (3) a TLS LDM slot (there's only one of these per GOT.)
 //          (object != NULL, symndx == 0, tls_type == GOT_TLS_LDM)
 
 template<int size, bool big_endian>
@@ -433,13 +433,12 @@ class Mips_got_entry
   Mips_got_entry(Mips_relobj<size, big_endian>* object, unsigned int symndx,
                  Mips_address addend, unsigned char tls_type,
                  unsigned int shndx, bool is_section_symbol)
-    : object_(object), symndx_(symndx), tls_type_(tls_type),
+    : addend_(addend), symndx_(symndx), tls_type_(tls_type),
       is_section_symbol_(is_section_symbol), shndx_(shndx)
-  { this->d.addend = addend; }
+  { this->d.object = object; }
 
-  Mips_got_entry(Mips_relobj<size, big_endian>* object, Mips_symbol<size>* sym,
-                 unsigned char tls_type)
-    : object_(object), symndx_(-1U), tls_type_(tls_type),
+  Mips_got_entry(Mips_symbol<size>* sym, unsigned char tls_type)
+    : addend_(0), symndx_(-1U), tls_type_(tls_type),
       is_section_symbol_(false), shndx_(-1U)
   { this->d.sym = sym; }
 
@@ -459,40 +458,36 @@ class Mips_got_entry
   {
     if (this->tls_type_ == GOT_TLS_LDM)
       return this->symndx_ + (1 << 18);
-    if (this->symndx_ != -1U)
-      {
-        uintptr_t object_id = reinterpret_cast<uintptr_t>(this->object());
-        return this->symndx_ + object_id + this->d.addend;
-      }
-    else
-      {
-        uintptr_t sym_id = reinterpret_cast<uintptr_t>(this->d.sym);
-        return this->symndx_ + sym_id;
-      }
+
+    size_t name_hash_value = gold::string_hash<char>(
+        (this->symndx_ != -1U)
+         ? this->d.object->name().c_str()
+         : this->d.sym->name());
+    size_t addend = this->addend_;
+    return name_hash_value ^ this->symndx_ ^ addend;
   }
 
   // Return whether this entry is equal to OTHER.
   bool
   equals(Mips_got_entry<size, big_endian>* other) const
   {
-    if (this->symndx_ != other->symndx_
-        || this->tls_type_ != other->tls_type_)
-      return false;
     if (this->tls_type_ == GOT_TLS_LDM)
       return true;
-    if (this->symndx_ != -1U)
-      return (this->object() == other->object()
-              && this->d.addend == other->d.addend);
-    else
-      return this->d.sym == other->d.sym;
+
+    return ((this->tls_type_ == other->tls_type_)
+             && (this->symndx_ == other->symndx_)
+             && ((this->symndx_ != -1U)
+                  ? (this->d.object == other->d.object)
+                  : (this->d.sym == other->d.sym))
+             && (this->addend_ == other->addend_));
   }
 
   // Return input object that needs this GOT entry.
   Mips_relobj<size, big_endian>*
   object() const
   {
-    gold_assert(this->object_ != NULL);
-    return this->object_;
+    gold_assert(this->symndx_ != -1U);
+    return this->d.object;
   }
 
   // Return local symbol index for local GOT entries.
@@ -506,10 +501,7 @@ class Mips_got_entry
   // Return the relocation addend for local GOT entries.
   Mips_address
   addend() const
-  {
-    gold_assert(this->symndx_ != -1U);
-    return this->d.addend;
-  }
+  { return this->addend_; }
 
   // Return global symbol for global GOT entries.
   Mips_symbol<size>*
@@ -540,16 +532,16 @@ class Mips_got_entry
   { return this->is_section_symbol_; }
 
  private:
-  // The input object that needs the GOT entry.
-  Mips_relobj<size, big_endian>* object_;
+  // The addend.
+  Mips_address addend_;
+
   // The index of the symbol if we have a local symbol; -1 otherwise.
   unsigned int symndx_;
 
   union
   {
-    // If symndx != -1, the addend of the relocation that should be added to the
-    // symbol value.
-    Mips_address addend;
+    // The input object for local symbols that needs the GOT entry.
+    Mips_relobj<size, big_endian>* object;
     // If symndx == -1, the global symbol corresponding to this GOT entry.  The
     // symbol's entry is in the local area if mips_sym->global_got_area is
     // GGA_NONE, otherwise it is in the global area.
@@ -588,6 +580,17 @@ class Mips_got_entry_eq
   operator()(Mips_got_entry<size, big_endian>* e1,
              Mips_got_entry<size, big_endian>* e2) const
   { return e1->equals(e2); }
+};
+
+// Hash for Mips_symbol.
+
+template<int size>
+class Mips_symbol_hash
+{
+ public:
+  size_t
+  operator()(Mips_symbol<size>* sym) const
+  { return sym->hash(); }
 };
 
 // Got_page_range.  This class describes a range of addends: [MIN_ADDEND,
@@ -671,6 +674,10 @@ class Mips_got_info
   // Unordered set of GOT page entries.
   typedef Unordered_set<Got_page_entry*,
       Got_page_entry_hash, Got_page_entry_eq> Got_page_entry_set;
+
+  // Unordered set of global GOT entries.
+  typedef Unordered_set<Mips_symbol<size>*, Mips_symbol_hash<size> >
+      Global_got_entry_set;
 
  public:
   Mips_got_info()
@@ -851,7 +858,7 @@ class Mips_got_info
   set_tls_ldm_offset(unsigned int tls_ldm_offset)
   { this->tls_ldm_offset_ = tls_ldm_offset; }
 
-  Unordered_set<Mips_symbol<size>*>&
+  Global_got_entry_set&
   global_got_symbols()
   { return this->global_got_symbols_; }
 
@@ -906,7 +913,7 @@ class Mips_got_info
   // The offset of TLS LDM entry for this GOT.
   unsigned int tls_ldm_offset_;
   // All symbols that have global GOT entry.
-  Unordered_set<Mips_symbol<size>*> global_got_symbols_;
+  Global_got_entry_set global_got_symbols_;
   // A hash table holding GOT entries.
   Got_entry_set got_entries_;
   // A hash table of GOT page entries.
@@ -1283,6 +1290,13 @@ class Mips_symbol : public Sized_symbol<size>
   void
   set_applied_secondary_got_fixup()
   { this->applied_secondary_got_fixup_ = true; }
+
+  // Return the hash of this symbol.
+  size_t
+  hash() const
+  {
+    return gold::string_hash<char>(this->name());
+  }
 
  private:
   // Whether the symbol needs MIPS16 fn_stub.  This is true if this symbol
@@ -2302,7 +2316,7 @@ class Mips_output_data_la25_stub : public Output_section_data
   do_write(Output_file*);
 
   // Symbols that have LA25 stubs.
-  Unordered_set<Mips_symbol<size>*> symbols_;
+  std::vector<Mips_symbol<size>*> symbols_;
 };
 
 // MIPS-specific relocation writer.
@@ -2577,6 +2591,10 @@ class Mips_output_data_mips_stubs : public Output_section_data
 {
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Mips_address;
 
+  // Unordered set of .MIPS.stubs entries.
+  typedef Unordered_set<Mips_symbol<size>*, Mips_symbol_hash<size> >
+      Mips_stubs_entry_set;
+
  public:
    Mips_output_data_mips_stubs(Target_mips<size, big_endian>* target)
      : Output_section_data(size == 32 ? 4 : 8), symbols_(), dynsym_count_(-1U),
@@ -2683,7 +2701,7 @@ class Mips_output_data_mips_stubs : public Output_section_data
   do_write(Output_file*);
 
   // .MIPS.stubs symbols
-  Unordered_set<Mips_symbol<size>*> symbols_;
+  Mips_stubs_entry_set symbols_;
   // Number of entries in dynamic symbol table.
   unsigned int dynsym_count_;
   // Whether the stub offsets are set.
@@ -5277,7 +5295,7 @@ Mips_got_info<size, big_endian>::record_global_got_symbol(
     }
 
   Mips_got_entry<size, big_endian>* entry =
-    new Mips_got_entry<size, big_endian>(object, mips_sym, tls_type);
+    new Mips_got_entry<size, big_endian>(mips_sym, tls_type);
 
   this->record_got_entry(entry, object);
 }
@@ -5290,16 +5308,14 @@ Mips_got_info<size, big_endian>::record_got_entry(
     Mips_got_entry<size, big_endian>* entry,
     Mips_relobj<size, big_endian>* object)
 {
-  if (this->got_entries_.find(entry) == this->got_entries_.end())
-    this->got_entries_.insert(entry);
+  this->got_entries_.insert(entry);
 
   // Create the GOT entry for the OBJECT's GOT.
   Mips_got_info<size, big_endian>* g = object->get_or_create_got_info();
   Mips_got_entry<size, big_endian>* entry2 =
     new Mips_got_entry<size, big_endian>(*entry);
 
-  if (g->got_entries_.find(entry2) == g->got_entries_.end())
-    g->got_entries_.insert(entry2);
+  g->got_entries_.insert(entry2);
 }
 
 // Record that OBJECT has a page relocation against symbol SYMNDX and
@@ -5573,7 +5589,7 @@ void
 Mips_got_info<size, big_endian>::add_reloc_only_entries(
     Mips_output_data_got<size, big_endian>* got)
 {
-  for (typename Unordered_set<Mips_symbol<size>*>::iterator
+  for (typename Global_got_entry_set::iterator
        p = this->global_got_symbols_.begin();
        p != this->global_got_symbols_.end();
        ++p)
@@ -5757,7 +5773,7 @@ template<int size, bool big_endian>
 void
 Mips_got_info<size, big_endian>::count_got_symbols(Symbol_table* symtab)
 {
-  for (typename Unordered_set<Mips_symbol<size>*>::iterator
+  for (typename Global_got_entry_set::iterator
        p = this->global_got_symbols_.begin();
        p != this->global_got_symbols_.end();
        ++p)
@@ -6635,7 +6651,7 @@ Mips_output_data_la25_stub<size, big_endian>::create_la25_stub(
   if (!gsym->has_la25_stub())
     {
       gsym->set_la25_stub_offset(this->symbols_.size() * 16);
-      this->symbols_.insert(gsym);
+      this->symbols_.push_back(gsym);
       this->create_stub_symbol(gsym, symtab, target, 16);
     }
 }
@@ -6679,7 +6695,7 @@ Mips_output_data_la25_stub<size, big_endian>::do_write(Output_file* of)
     convert_to_section_size_type(this->data_size());
   unsigned char* const oview = of->get_output_view(offset, oview_size);
 
-  for (typename Unordered_set<Mips_symbol<size>*>::iterator
+  for (typename std::vector<Mips_symbol<size>*>::iterator
        p = this->symbols_.begin();
        p != this->symbols_.end();
        ++p)
@@ -7478,7 +7494,7 @@ Mips_output_data_mips_stubs<size, big_endian>::set_lazy_stub_offsets()
 
   unsigned int stub_size = this->stub_size();
   unsigned int offset = 0;
-  for (typename Unordered_set<Mips_symbol<size>*>::const_iterator
+  for (typename Mips_stubs_entry_set::const_iterator
        p = this->symbols_.begin();
        p != this->symbols_.end();
        ++p, offset += stub_size)
@@ -7493,7 +7509,7 @@ template<int size, bool big_endian>
 void
 Mips_output_data_mips_stubs<size, big_endian>::set_needs_dynsym_value()
 {
-  for (typename Unordered_set<Mips_symbol<size>*>::const_iterator
+  for (typename Mips_stubs_entry_set::const_iterator
        p = this->symbols_.begin(); p != this->symbols_.end(); ++p)
     {
       Mips_symbol<size>* sym = *p;
@@ -7517,7 +7533,7 @@ Mips_output_data_mips_stubs<size, big_endian>::do_write(Output_file* of)
   bool big_stub = this->dynsym_count_ > 0x10000;
 
   unsigned char* pov = oview;
-  for (typename Unordered_set<Mips_symbol<size>*>::const_iterator
+  for (typename Mips_stubs_entry_set::const_iterator
        p = this->symbols_.begin(); p != this->symbols_.end(); ++p)
     {
       Mips_symbol<size>* sym = *p;

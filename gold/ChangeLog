@@ -1,3 +1,41 @@
+2016-05-19  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_got_entry::Mips_got_entry): Remove object argument
+	for global got symbols, and set addend to 0.
+	(Mips_got_entry::hash): Change hash algorithm.
+	(Mips_got_entry::equals): Refactor.
+	(Mips_got_entry::object): Return input object for local got symbols
+	from union d.
+	(Mips_got_entry::addend): Change return of the relocation addend.
+	(Mips_got_entry::addend_): Move from union d.
+	(Mips_got_entry::object_): Move into union d.
+	(class Mips_symbol_hash): New class.
+	(Mips_got_info::Global_got_entry_set): New type.
+	(Mips_got_info::global_got_symbols): Change return type to
+	Global_got_entry_set.
+	(Mips_got_info::global_got_symbols_): Change type to
+	Global_got_entry_set.
+	(Mips_symbol::hash): New method.
+	(Mips_output_data_la25_stub::symbols_): Change type to std::vector.
+	(Mips_output_data_mips_stubs::Mips_stubs_entry_set): New type.
+	(Mips_output_data_mips_stubs::symbols_): Change type to
+	Mips_stubs_entry_set.
+	(Mips_got_info::record_global_got_symbol): Don't pass object
+	argument when creating global got symbol.
+	(Mips_got_info::record_got_entry): Remove find before inserting
+	got entries.
+	(Mips_got_info::add_reloc_only_entries): Change type of iterator
+	to Global_got_entry_set.
+	(Mips_got_info::count_got_symbols): Likewise.
+	(Mips_output_data_la25_stub::create_la25_stub): Use push_back
+	for adding entries to symbols_.
+	(Mips_output_data_la25_stub::do_write): Change type of iterator
+	to std::vector.
+	(Mips_output_data_mips_stubs::set_lazy_stub_offsets): Change type
+	of iterator to Mips_stubs_entry_set.
+	(Mips_output_data_mips_stubs::set_needs_dynsym_value): Likewise.
+	(Mips_output_data_mips_stubs::do_write): Likewise.
+
 2016-05-06  Han Shen  <shenhan@google.com>
 
 	PR gold/19987.
