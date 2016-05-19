@@ -540,10 +540,10 @@ bppy_get_visibility (PyObject *self, void *closure)
 
   BPPY_REQUIRE_VALID (self_bp);
 
-  if (self_bp->bp->number < 0)
-    Py_RETURN_FALSE;
+  if (user_breakpoint_p (self_bp->bp))
+    Py_RETURN_TRUE;
 
-  Py_RETURN_TRUE;
+  Py_RETURN_FALSE;
 }
 
 /* Python function to determine if the breakpoint is a temporary
@@ -863,7 +863,7 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
   gdbpy_breakpoint_object *newbp;
   PyGILState_STATE state;
 
-  if (bp->number < 0 && bppy_pending_object == NULL)
+  if (!user_breakpoint_p (bp) && bppy_pending_object == NULL)
     return;
 
   if (bp->type != bp_breakpoint

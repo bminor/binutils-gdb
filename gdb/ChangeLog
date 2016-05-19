@@ -1,5 +1,10 @@
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
+	* python/py-breakpoint.c (bppy_get_visibility)
+	(gdbpy_breakpoint_created): Use user_breakpoint_p.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
 	PR cli/18053:
 	* jit.c (jit_reader_load_command): Use tilde_expand.
 	(_initialize_jit): Fix help for jit-reader-unload.  Set completer
