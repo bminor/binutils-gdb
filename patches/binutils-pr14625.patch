@@ -1,0 +1,504 @@
+From dcc9424bf9200c6e8d6ad4184f3b5633afbcff00 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Thu, 19 May 2016 13:34:11 -0700
+Subject: [PATCH] Enable 64-bit archives in ar and ranlib
+
+Since existing ld and gold support the 64-bit (MIPS) ELF archives, we
+can use the 64-bit (MIPS) ELF archives as 64-bit archives.  Since the
+plugin target is used to create archive in plugin-enabled ar, we need
+a way to enable 64-bit archives in the plugin target.  This patch adds
+--enable-64-bit-archive to bfd to enable 64-bit archives in ar and
+ranlib.  Since both 64-bit MIPS and s390 ELF targets currently use
+64-bit archives, all Linux linkers with 64-bit BFD support both 32-bit
+and 64-bit archives, 64-bit archives are enabled by default for them.
+
+Tested on Linux/x86 and Linux/x86-64 with existing ld and gold.
+
+bfd/
+
+	PR binutils/14625
+	* archive.c (bfd_slurp_armap): Replace
+	bfd_elf64_archive_slurp_armap with
+	_bfd_archive_64_bit_slurp_armap.
+	* archive64.c (bfd_elf64_archive_slurp_armap): Renamed to ...
+	(_bfd_archive_64_bit_slurp_armap): This.
+	(bfd_elf64_archive_write_armap): Renamed to ...
+	(_bfd_archive_64_bit_write_armap): This.
+	* configure.ac: Add --enable-64-bit-archive.
+	(want_64_bit_archive): New.  Set to true by default for 64-bit
+	MIPS and s390 ELF targets as well as Linux targets with 64-bit
+	bfd_vma.
+	(USE_64_BIT_ARCHIVE): New AC_DEFINE.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* elf64-mips.c (bfd_elf64_archive_functions): Removed.
+	(bfd_elf64_archive_slurp_armap): Likewise.
+	(bfd_elf64_archive_write_armap): Likewise.
+	(bfd_elf64_archive_slurp_extended_name_table): Likewise.
+	(bfd_elf64_archive_construct_extended_name_table): Likewise.
+	(bfd_elf64_archive_truncate_arname): Likewise.
+	(bfd_elf64_archive_read_ar_hdr): Likewise.
+	(bfd_elf64_archive_write_ar_hdr): Likewise.
+	(bfd_elf64_archive_openr_next_archived_file): Likewise.
+	(bfd_elf64_archive_get_elt_at_index): Likewise.
+	(bfd_elf64_archive_generic_stat_arch_elt): Likewise.
+	(bfd_elf64_archive_update_armap_timestamp): Likewise.
+	* elf64-s390.c (bfd_elf64_archive_functions): Removed.
+	(bfd_elf64_archive_slurp_armap): Likewise.
+	(bfd_elf64_archive_write_armap): Likewise.
+	(bfd_elf64_archive_slurp_extended_name_table): Likewise.
+	(bfd_elf64_archive_construct_extended_name_table): Likewise.
+	(bfd_elf64_archive_truncate_arname): Likewise.
+	(bfd_elf64_archive_read_ar_hdr): Likewise.
+	(bfd_elf64_archive_write_ar_hdr): Likewise.
+	(bfd_elf64_archive_openr_next_archived_file): Likewise.
+	(bfd_elf64_archive_get_elt_at_index): Likewise.
+	(bfd_elf64_archive_generic_stat_arch_elt): Likewise.
+	(bfd_elf64_archive_update_armap_timestamp): Likewise.
+	* elfxx-target.h (TARGET_BIG_SYM): Use _bfd_archive_64_bit on
+	BFD_JUMP_TABLE_ARCHIVE if USE_64_BIT_ARCHIVE is defined and
+	bfd_elfNN_archive_functions isn't defined.
+	(TARGET_LITTLE_SYM): Likewise.
+	* libbfd-in.h (_bfd_archive_64_bit_slurp_armap): New prototype.
+	(_bfd_archive_64_bit_write_armap): Likewise.
+	(_bfd_archive_64_bit_slurp_extended_name_table): New macro.
+	(_bfd_archive_64_bit_construct_extended_name_table): Likewise.
+	(_bfd_archive_64_bit_truncate_arname): Likewise.
+	(_bfd_archive_64_bit_read_ar_hdr): Likewise.
+	(_bfd_archive_64_bit_write_ar_hdr): Likewise.
+	(_bfd_archive_64_bit_openr_next_archived_file): Likewise.
+	(_bfd_archive_64_bit_get_elt_at_index): Likewise.
+	(_bfd_archive_64_bit_generic_stat_arch_elt): Likewise.
+	(_bfd_archive_64_bit_update_armap_timestamp): Likewise.
+	* libbfd.h: Regenerated.
+	* plugin.c (plugin_vec): Use _bfd_archive_64_bit on
+	BFD_JUMP_TABLE_ARCHIVE if USE_64_BIT_ARCHIVE is defined.
+
+binutils/
+
+	PR binutils/14625
+	* NEWS: Mention --enable-64-bit-archive.
+---
+ bfd/archive.c      |  5 ++---
+ bfd/archive64.c    | 21 +++++++++------------
+ bfd/config.in      |  3 +++
+ bfd/configure      | 45 +++++++++++++++++++++++++++++++++++++++++++--
+ bfd/configure.ac   | 36 ++++++++++++++++++++++++++++++++++++
+ bfd/elf64-mips.c   | 23 -----------------------
+ bfd/elf64-s390.c   | 15 ---------------
+ bfd/elfxx-target.h |  4 ++++
+ bfd/libbfd-in.h    | 23 +++++++++++++++++++++++
+ bfd/libbfd.h       | 23 +++++++++++++++++++++++
+ bfd/plugin.c       |  4 ++++
+ binutils/NEWS      |  3 +++
+ 12 files changed, 150 insertions(+), 55 deletions(-)
+
+diff --git a/bfd/archive.c b/bfd/archive.c
+index 53e295e..086f7c3 100644
+--- a/bfd/archive.c
++++ b/bfd/archive.c
+@@ -1144,10 +1144,9 @@ bfd_slurp_armap (bfd *abfd)
+     return do_slurp_coff_armap (abfd);
+   else if (CONST_STRNEQ (nextname, "/SYM64/         "))
+     {
+-      /* 64bit ELF (Irix 6) archive.  */
++      /* 64bit (Irix 6) archive.  */
+ #ifdef BFD64
+-      extern bfd_boolean bfd_elf64_archive_slurp_armap (bfd *);
+-      return bfd_elf64_archive_slurp_armap (abfd);
++      return _bfd_archive_64_bit_slurp_armap (abfd);
+ #else
+       bfd_set_error (bfd_error_wrong_format);
+       return FALSE;
+diff --git a/bfd/archive64.c b/bfd/archive64.c
+index 3192f40..be1ac7c 100644
+--- a/bfd/archive64.c
++++ b/bfd/archive64.c
+@@ -1,4 +1,4 @@
+-/* Support for 64-bit ELF archives.
++/* Support for 64-bit archives.
+    Copyright (C) 1996-2016 Free Software Foundation, Inc.
+    Ian Lance Taylor, Cygnus Support
+    Linker support added by Mark Mitchell, CodeSourcery, LLC.
+@@ -21,7 +21,8 @@
+    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+    MA 02110-1301, USA.  */
+ 
+-/* This file supports the 64-bit (MIPS) ELF archives.  */
++/* This file supports the 64-bit archives.  We use the same format as
++   the 64-bit (MIPS) ELF archives.  */
+ 
+ #include "sysdep.h"
+ #include "bfd.h"
+@@ -31,14 +32,10 @@
+ /* Irix 6 defines a 64bit archive map format, so that they can
+    have archives more than 4 GB in size.  */
+ 
+-bfd_boolean bfd_elf64_archive_slurp_armap (bfd *);
+-bfd_boolean bfd_elf64_archive_write_armap
+-  (bfd *, unsigned int, struct orl *, unsigned int, int);
+-
+ /* Read an Irix 6 armap.  */
+ 
+ bfd_boolean
+-bfd_elf64_archive_slurp_armap (bfd *abfd)
++_bfd_archive_64_bit_slurp_armap (bfd *abfd)
+ {
+   struct artdata *ardata = bfd_ardata (abfd);
+   char nextname[17];
+@@ -150,11 +147,11 @@ release_symdefs:
+    linker crashes.  */
+ 
+ bfd_boolean
+-bfd_elf64_archive_write_armap (bfd *arch,
+-			       unsigned int elength,
+-			       struct orl *map,
+-			       unsigned int symbol_count,
+-			       int stridx)
++_bfd_archive_64_bit_write_armap (bfd *arch,
++				 unsigned int elength,
++				 struct orl *map,
++				 unsigned int symbol_count,
++				 int stridx)
+ {
+   unsigned int ranlibsize = (symbol_count * 8) + 8;
+   unsigned int stringsize = stridx;
+diff --git a/bfd/config.in b/bfd/config.in
+index cffadbb..341afae 100644
+--- a/bfd/config.in
++++ b/bfd/config.in
+@@ -337,6 +337,9 @@
+ /* Name of host specific header file to include in trad-core.c. */
+ #undef TRAD_HEADER
+ 
++/* Define if we should use 64-bit archives. */
++#undef USE_64_BIT_ARCHIVE
++
+ /* Use b modifier when opening binary files? */
+ #undef USE_BINARY_FOPEN
+ 
+diff --git a/bfd/configure b/bfd/configure
+index f8617b9..61af105 100755
+--- a/bfd/configure
++++ b/bfd/configure
+@@ -789,6 +789,7 @@ enable_plugins
+ enable_largefile
+ enable_64_bit_bfd
+ enable_targets
++enable_64_bit_archive
+ with_mmap
+ enable_secureplt
+ enable_leading_mingw64_underscores
+@@ -1442,6 +1443,7 @@ Optional Features:
+   --disable-largefile     omit support for large files
+   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
+   --enable-targets        alternative target configurations
++  --enable-64-bit-archive use 64-bit archives
+   --enable-secureplt      Default to creating read-only plt entries
+   --enable-leading-mingw64-underscores
+                           Enable leading underscores on 64 bit mingw targets
+@@ -11425,7 +11427,7 @@ else
+   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
+   lt_status=$lt_dlunknown
+   cat > conftest.$ac_ext <<_LT_EOF
+-#line 11428 "configure"
++#line 11430 "configure"
+ #include "confdefs.h"
+ 
+ #if HAVE_DLFCN_H
+@@ -11531,7 +11533,7 @@ else
+   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
+   lt_status=$lt_dlunknown
+   cat > conftest.$ac_ext <<_LT_EOF
+-#line 11534 "configure"
++#line 11536 "configure"
+ #include "confdefs.h"
+ 
+ #if HAVE_DLFCN_H
+@@ -12129,6 +12131,19 @@ if test "${enable_targets+set}" = set; then :
+ esac
+ fi
+ 
++# Since the plugin target is used to create archive in plugin-enabled
++# ar, we need a way to enable 64-bit archives in the plugin target.
++# Check whether --enable-64_bit_archive was given.
++if test "${enable_64_bit_archive+set}" = set; then :
++  enableval=$enable_64_bit_archive; case "${enableval}" in
++  yes)  want_64_bit_archive=true  ;;
++  no)   want_64_bit_archive=false ;;
++  *)    as_fn_error "bad value ${enableval} for 64-bit-archive option" "$LINENO" 5 ;;
++esac
++else
++  want_64_bit_archive=unset
++fi
++
+ 
+ # Check whether --with-mmap was given.
+ if test "${with_mmap+set}" = set; then :
+@@ -14596,6 +14611,32 @@ else	# all_targets is true
+     selarchs=`echo $selarchs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
+ fi	# all_targets is true
+ 
++if test "x$want_64_bit_archive" = xunset; then
++  # 64-bit MIPS and s390 ELF targets use 64-bit archives.
++  case "${bfd_backends}" in
++    *elf64-mips* | *elf64-s390*)
++      want_64_bit_archive=true
++      ;;
++  esac
++
++  # Since all Linux linkers support both 32-bit and 64-bit archives,
++  # it is safe to enable 64-bit archives for Linux targets with 64-bit
++  # bfd_vma.
++  case "${target}${want64}" in
++    *linux*true)
++      want_64_bit_archive=true
++      ;;
++  esac
++fi
++
++# 64-bit archives need a 64-bit bfd_vma.
++if test "x$want_64_bit_archive" = xtrue; then
++  want64=true
++
++$as_echo "#define USE_64_BIT_ARCHIVE 1" >>confdefs.h
++
++fi
++
+ case ${host64}-${target64}-${want64} in
+   *true*)
+     wordsize=64
+diff --git a/bfd/configure.ac b/bfd/configure.ac
+index f57d4d7..d0a0888 100644
+--- a/bfd/configure.ac
++++ b/bfd/configure.ac
+@@ -68,6 +68,17 @@ AC_ARG_ENABLE(targets,
+   *)        enable_targets=$enableval ;;
+ esac])dnl
+ 
++# Since the plugin target is used to create archive in plugin-enabled
++# ar, we need a way to enable 64-bit archives in the plugin target.
++AC_ARG_ENABLE(64_bit_archive,
++	      AS_HELP_STRING([--enable-64-bit-archive],
++	      [use 64-bit archives]),
++[case "${enableval}" in
++  yes)  want_64_bit_archive=true  ;;
++  no)   want_64_bit_archive=false ;;
++  *)    AC_MSG_ERROR(bad value ${enableval} for 64-bit-archive option) ;;
++esac],[want_64_bit_archive=unset])dnl
++
+ AC_ARG_WITH(mmap,
+ [  --with-mmap             try using mmap for BFD input files if available],
+ [case "${withval}" in
+@@ -775,6 +786,31 @@ else	# all_targets is true
+     selarchs=`echo $selarchs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
+ fi	# all_targets is true
+ 
++if test "x$want_64_bit_archive" = xunset; then
++  # 64-bit MIPS and s390 ELF targets use 64-bit archives.
++  case "${bfd_backends}" in
++    *elf64-mips* | *elf64-s390*)
++      want_64_bit_archive=true
++      ;;
++  esac
++
++  # Since all Linux linkers support both 32-bit and 64-bit archives,
++  # it is safe to enable 64-bit archives for Linux targets with 64-bit
++  # bfd_vma.
++  case "${target}${want64}" in
++    *linux*true)
++      want_64_bit_archive=true
++      ;;
++  esac
++fi
++
++# 64-bit archives need a 64-bit bfd_vma.
++if test "x$want_64_bit_archive" = xtrue; then
++  want64=true
++  AC_DEFINE(USE_64_BIT_ARCHIVE, 1,
++    [Define if we should use 64-bit archives.])
++fi
++
+ case ${host64}-${target64}-${want64} in
+   *true*)
+     wordsize=64
+diff --git a/bfd/elf64-mips.c b/bfd/elf64-mips.c
+index 6bedebc..34144f0 100644
+--- a/bfd/elf64-mips.c
++++ b/bfd/elf64-mips.c
+@@ -4478,29 +4478,6 @@ const struct elf_size_info mips_elf64_size_info =
+ #define bfd_elf64_bfd_relax_section     _bfd_mips_relax_section
+ #define bfd_elf64_mkobject		_bfd_mips_elf_mkobject
+ 
+-/* MIPS ELF64 archive functions.  */
+-#define bfd_elf64_archive_functions
+-extern bfd_boolean bfd_elf64_archive_slurp_armap
+-  (bfd *);
+-extern bfd_boolean bfd_elf64_archive_write_armap
+-  (bfd *, unsigned int, struct orl *, unsigned int, int);
+-#define bfd_elf64_archive_slurp_extended_name_table \
+-			_bfd_archive_coff_slurp_extended_name_table
+-#define bfd_elf64_archive_construct_extended_name_table \
+-			_bfd_archive_coff_construct_extended_name_table
+-#define bfd_elf64_archive_truncate_arname \
+-			_bfd_archive_coff_truncate_arname
+-#define bfd_elf64_archive_read_ar_hdr	_bfd_archive_coff_read_ar_hdr
+-#define bfd_elf64_archive_write_ar_hdr	_bfd_archive_coff_write_ar_hdr
+-#define bfd_elf64_archive_openr_next_archived_file \
+-			_bfd_archive_coff_openr_next_archived_file
+-#define bfd_elf64_archive_get_elt_at_index \
+-			_bfd_archive_coff_get_elt_at_index
+-#define bfd_elf64_archive_generic_stat_arch_elt \
+-			_bfd_archive_coff_generic_stat_arch_elt
+-#define bfd_elf64_archive_update_armap_timestamp \
+-			_bfd_archive_coff_update_armap_timestamp
+-
+ /* The SGI style (n)64 NewABI.  */
+ #define TARGET_LITTLE_SYM		mips_elf64_le_vec
+ #define TARGET_LITTLE_NAME		"elf64-littlemips"
+diff --git a/bfd/elf64-s390.c b/bfd/elf64-s390.c
+index b085169..3950939 100644
+--- a/bfd/elf64-s390.c
++++ b/bfd/elf64-s390.c
+@@ -3955,19 +3955,4 @@ const struct elf_size_info s390_elf64_size_info =
+ #define bfd_elf64_mkobject		elf_s390_mkobject
+ #define elf_backend_object_p		elf_s390_object_p
+ 
+-/* Enable ELF64 archive functions.  */
+-#define bfd_elf64_archive_functions
+-extern bfd_boolean bfd_elf64_archive_slurp_armap (bfd *);
+-extern bfd_boolean bfd_elf64_archive_write_armap (bfd *, unsigned int, struct orl *, unsigned int, int);
+-
+-#define bfd_elf64_archive_slurp_extended_name_table 	_bfd_archive_coff_slurp_extended_name_table
+-#define bfd_elf64_archive_construct_extended_name_table _bfd_archive_coff_construct_extended_name_table
+-#define bfd_elf64_archive_truncate_arname 		_bfd_archive_coff_truncate_arname
+-#define bfd_elf64_archive_read_ar_hdr			_bfd_archive_coff_read_ar_hdr
+-#define bfd_elf64_archive_write_ar_hdr			_bfd_archive_coff_write_ar_hdr
+-#define bfd_elf64_archive_openr_next_archived_file 	_bfd_archive_coff_openr_next_archived_file
+-#define bfd_elf64_archive_get_elt_at_index 		_bfd_archive_coff_get_elt_at_index
+-#define bfd_elf64_archive_generic_stat_arch_elt 	_bfd_archive_coff_generic_stat_arch_elt
+-#define bfd_elf64_archive_update_armap_timestamp 	_bfd_archive_coff_update_armap_timestamp
+-
+ #include "elf64-target.h"
+diff --git a/bfd/elfxx-target.h b/bfd/elfxx-target.h
+index 0dc4f75..97aa5e6 100644
+--- a/bfd/elfxx-target.h
++++ b/bfd/elfxx-target.h
+@@ -926,6 +926,8 @@ const bfd_target TARGET_BIG_SYM =
+   BFD_JUMP_TABLE_CORE (bfd_elfNN),
+ #ifdef bfd_elfNN_archive_functions
+   BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
++#elif defined USE_64_BIT_ARCHIVE
++  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
+ #else
+   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+ #endif
+@@ -1025,6 +1027,8 @@ const bfd_target TARGET_LITTLE_SYM =
+   BFD_JUMP_TABLE_CORE (bfd_elfNN),
+ #ifdef bfd_elfNN_archive_functions
+   BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
++#elif defined USE_64_BIT_ARCHIVE
++  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
+ #else
+   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+ #endif
+diff --git a/bfd/libbfd-in.h b/bfd/libbfd-in.h
+index 5f28863..8981689 100644
+--- a/bfd/libbfd-in.h
++++ b/bfd/libbfd-in.h
+@@ -149,6 +149,29 @@ bfd_boolean bfd_slurp_bsd_armap_f2
+   (bfd *abfd);
+ #define bfd_slurp_bsd_armap bfd_slurp_armap
+ #define bfd_slurp_coff_armap bfd_slurp_armap
++bfd_boolean _bfd_archive_64_bit_slurp_armap
++  (bfd *);
++bfd_boolean _bfd_archive_64_bit_write_armap
++  (bfd *, unsigned int, struct orl *, unsigned int, int);
++#define _bfd_archive_64_bit_slurp_extended_name_table \
++  _bfd_archive_coff_slurp_extended_name_table
++#define _bfd_archive_64_bit_construct_extended_name_table \
++  _bfd_archive_coff_construct_extended_name_table
++#define _bfd_archive_64_bit_truncate_arname \
++  _bfd_archive_coff_truncate_arname
++#define _bfd_archive_64_bit_read_ar_hdr \
++  _bfd_archive_coff_read_ar_hdr
++#define _bfd_archive_64_bit_write_ar_hdr \
++  _bfd_archive_coff_write_ar_hdr
++#define _bfd_archive_64_bit_openr_next_archived_file \
++  _bfd_archive_coff_openr_next_archived_file
++#define _bfd_archive_64_bit_get_elt_at_index \
++  _bfd_archive_coff_get_elt_at_index
++#define _bfd_archive_64_bit_generic_stat_arch_elt \
++  _bfd_archive_coff_generic_stat_arch_elt
++#define _bfd_archive_64_bit_update_armap_timestamp \
++  _bfd_archive_coff_update_armap_timestamp
++
+ bfd_boolean _bfd_slurp_extended_name_table
+   (bfd *abfd);
+ extern bfd_boolean _bfd_construct_extended_name_table
+diff --git a/bfd/libbfd.h b/bfd/libbfd.h
+index 5fe45ec..0e037ab 100644
+--- a/bfd/libbfd.h
++++ b/bfd/libbfd.h
+@@ -154,6 +154,29 @@ bfd_boolean bfd_slurp_bsd_armap_f2
+   (bfd *abfd);
+ #define bfd_slurp_bsd_armap bfd_slurp_armap
+ #define bfd_slurp_coff_armap bfd_slurp_armap
++bfd_boolean _bfd_archive_64_bit_slurp_armap
++  (bfd *);
++bfd_boolean _bfd_archive_64_bit_write_armap
++  (bfd *, unsigned int, struct orl *, unsigned int, int);
++#define _bfd_archive_64_bit_slurp_extended_name_table \
++  _bfd_archive_coff_slurp_extended_name_table
++#define _bfd_archive_64_bit_construct_extended_name_table \
++  _bfd_archive_coff_construct_extended_name_table
++#define _bfd_archive_64_bit_truncate_arname \
++  _bfd_archive_coff_truncate_arname
++#define _bfd_archive_64_bit_read_ar_hdr \
++  _bfd_archive_coff_read_ar_hdr
++#define _bfd_archive_64_bit_write_ar_hdr \
++  _bfd_archive_coff_write_ar_hdr
++#define _bfd_archive_64_bit_openr_next_archived_file \
++  _bfd_archive_coff_openr_next_archived_file
++#define _bfd_archive_64_bit_get_elt_at_index \
++  _bfd_archive_coff_get_elt_at_index
++#define _bfd_archive_64_bit_generic_stat_arch_elt \
++  _bfd_archive_coff_generic_stat_arch_elt
++#define _bfd_archive_64_bit_update_armap_timestamp \
++  _bfd_archive_coff_update_armap_timestamp
++
+ bfd_boolean _bfd_slurp_extended_name_table
+   (bfd *abfd);
+ extern bfd_boolean _bfd_construct_extended_name_table
+diff --git a/bfd/plugin.c b/bfd/plugin.c
+index fd7bac0..c81a267 100644
+--- a/bfd/plugin.c
++++ b/bfd/plugin.c
+@@ -597,7 +597,11 @@ const bfd_target plugin_vec =
+   BFD_JUMP_TABLE_GENERIC (bfd_plugin),
+   BFD_JUMP_TABLE_COPY (bfd_plugin),
+   BFD_JUMP_TABLE_CORE (bfd_plugin),
++#ifdef USE_64_BIT_ARCHIVE
++  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
++#else
+   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
++#endif
+   BFD_JUMP_TABLE_SYMBOLS (bfd_plugin),
+   BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+   BFD_JUMP_TABLE_WRITE (bfd_plugin),
+diff --git a/binutils/NEWS b/binutils/NEWS
+index 712604b..d119c1e 100644
+--- a/binutils/NEWS
++++ b/binutils/NEWS
+@@ -1,5 +1,8 @@
+ -*- text -*-
+ 
++* Add a configure option, --enable-64-bit-archive, to enable 64-bit
++  archives in ar and ranlib.
++
+ * Add --elf-stt-common= option to objcopy for ELF targets to control
+   whether to convert common symbols to the STT_COMMON type.
+ 
+-- 
+2.5.5
+
