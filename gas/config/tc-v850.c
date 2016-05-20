@@ -39,7 +39,7 @@ static int machine = -1;
 
 
 /* Indiciates the target BFD architecture.  */
-int          v850_target_arch = bfd_arch_v850_rh850;
+enum bfd_architecture v850_target_arch = bfd_arch_v850_rh850;
 const char * v850_target_format = "elf32-v850-rh850";
 static flagword v850_e_flags = 0;
 

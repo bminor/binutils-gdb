@@ -862,7 +862,7 @@ operator_length_standard (const struct expression *expr, int endpos,
 {
   int oplen = 1;
   int args = 0;
-  enum f90_range_type range_type;
+  enum range_type range_type;
   int i;
 
   if (endpos < 1)
@@ -1004,9 +1004,9 @@ operator_length_standard (const struct expression *expr, int endpos,
       oplen = 2;
       break;
 
-    case OP_F90_RANGE:
+    case OP_RANGE:
       oplen = 3;
-      range_type = (enum f90_range_type)
+      range_type = (enum range_type)
 	longest_to_int (expr->elts[endpos - 2].longconst);
 
       switch (range_type)

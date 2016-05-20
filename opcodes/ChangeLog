@@ -1,3 +1,20 @@
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (NSISIGNOPT): Use insert_nsi and extract_nsi.
+
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c: Formatting.
+	(NSISIGNOPT): Define.
+	(powerpc_opcodes <subis>): Use NSISIGNOPT.
+
+2016-05-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (is_compressed_mode_p): Add `micromips_p' operand,
+	replacing references to `micromips_ase' throughout.
+	(_print_insn_mips): Don't use file-level microMIPS annotation to
+	determine the disassembly mode with the symbol table.
+
 2016-05-13  Peter Bergner <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (IMM8): Use PPC_OPERAND_SIGNOPT.

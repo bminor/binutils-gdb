@@ -26,7 +26,7 @@
 
 /* The target BFD architecture.  */
 #define TARGET_ARCH 		v850_target_arch
-extern int v850_target_arch;
+extern enum bfd_architecture v850_target_arch;
 
 /* The target BFD format.  */
 #define TARGET_FORMAT 		v850_target_format

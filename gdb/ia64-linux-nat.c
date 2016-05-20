@@ -746,7 +746,7 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
   size = register_size (gdbarch, regnum);
 
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
-  buf = alloca (size);
+  buf = (PTRACE_TYPE_RET *) alloca (size);
 
   /* Read the register contents from the inferior a chunk at a time.  */
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
@@ -804,7 +804,7 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
   size = register_size (gdbarch, regnum);
 
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
-  buf = alloca (size);
+  buf = (PTRACE_TYPE_RET *) alloca (size);
 
   /* Write the register contents into the inferior a chunk at a time.  */
   regcache_raw_collect (regcache, regnum, buf);
@@ -865,7 +865,7 @@ ia64_linux_xfer_partial (struct target_ops *ops,
       if (offset >= gate_table_size)
 	return TARGET_XFER_EOF;
 
-      tmp_buf = alloca (gate_table_size);
+      tmp_buf = (gdb_byte *) alloca (gate_table_size);
       res = syscall (__NR_getunwind, tmp_buf, gate_table_size);
       if (res < 0)
 	return TARGET_XFER_E_IO;

@@ -1,3 +1,87 @@
+2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/jalx-addend.d: New test.
+	* testsuite/ld-mips-elf/jalx-addend-n32.d: New test.
+	* testsuite/ld-mips-elf/jalx-addend-n64.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20117
+	* testsuite/ld-i386/i386.exp: Run pr20117.
+	* testsuite/ld-i386/pr19609-1i.d: Updated.
+	* testsuite/ld-i386/pr20117.d: New file.
+	* testsuite/ld-i386/pr20117.s: Likewise.
+
+2016-05-19  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-elf/compressed1d.d: Removed from notarget.
+	* testsuite/ld-elf/group8a.d: Likewise.
+	* testsuite/ld-elf/group8b.d: Likewise.
+	* testsuite/ld-elf/group9a.d: Likewise.
+	* testsuite/ld-elf/group9b.d: Likewise.
+	* testsuite/ld-elf/pr12851.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/eh-frame-hdr.d: Removed from xfail.
+	* testsuite/ld-elf/group3b.d: Likewise.
+	* testsuite/ld-srec/srec.exp: Likewise.
+	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Mark ARC
+	as supporting gc.
+	(check_shared_lib_support): Mark ARC as supporting.
+
+2016-05-19  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* emulparams/arcelf.sh: Changed.
+	* emulparams/arclinux.sh: Likewise.
+	* scripttempl/arclinux.sc: Moved to a more standard implementation
+	similar to elf.sc.
+
+2016-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Reorder
+	`ft32-*-*' behind `frv-*-*'.
+
+2016-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* configure.tgt: Remove `am34-*-linux*' support.
+
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/crossref.exp: Remove -mcall-aixdesc hack.
+	* testsuite/ld-scripts/cross2.t: Tweak .opd and .toc placement.
+	* testsuite/ld-scripts/cross3.t: Likewise.
+	* testsuite/ld-scripts/cross4.t: Likewise.
+	* testsuite/ld-scripts/cross5.t: Likewise.
+	* testsuite/ld-scripts/cross6.t: Likewise.
+	* testsuite/ld-scripts/cross7.t: Likewise.
+
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/shared.exp (mix_pic_and_non_pic): Pass in
+	exe name rather than constructing testname.  Fix typo in
+	sub-test name.  Log copying.  Use -rpath rather than -R.
+
+2016-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/ft32.sc: Use fixed constants for memory region
+	lengths.  Include DWARF debug sections.
+	(.data .bss): Do not assign locations during relocatable links.
+	* testsuite/ld-elf/compressed1d.d: Skip for FT32.
+	* testsuite/ld-elf/sec-to-seg.exp: Likewise.
+	* testsuite/ld-elf/sec64k.exp: Likewise.
+	* testsuite/ld-elf/init-fini-array.d: XFail for FT32.
+	* testsuite/ld-elf/merge.d: Likewise.
+	* testsuite/ld-elf/orphan-region.d: Likewise.
+	* testsuite/ld-elf/orphan.s: Likewise.
+	* testsuite/ld-elf/orphan3.d: Likewise.
+	* testsuite/ld-elf/pr349.d: Likewise.
+	* testsuite/ld-elf/warn2.d: Likewise.
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Note
+	that the FT32 does not support shared libraries.
+
 2016-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/lib/ld-lib.exp (at_least_gcc_version): Check

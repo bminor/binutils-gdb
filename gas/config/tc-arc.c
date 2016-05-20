@@ -674,8 +674,8 @@ arc_opcode_hash_entry_iterator_next (const struct arc_opcode_hash_entry *entry,
       const char *old_name = iter->opcode->name;
 
       iter->opcode++;
-      if (iter->opcode->name
-	  && (strcmp (old_name, iter->opcode->name) != 0))
+      if (iter->opcode->name == NULL
+	  || strcmp (old_name, iter->opcode->name) != 0)
 	{
 	  iter->index++;
 	  if (iter->index == entry->count)
@@ -1039,7 +1039,7 @@ tokenize_arguments (char *str,
 	case ']':
 	  ++input_line_pointer;
 	  --brk_lvl;
-	  if (!saw_arg)
+	  if (!saw_arg || num_args == ntok)
 	    goto err;
 	  tok->X_op = O_bracket;
 	  ++tok;
@@ -1049,7 +1049,7 @@ tokenize_arguments (char *str,
 	case '{':
 	case '[':
 	  input_line_pointer++;
-	  if (brk_lvl)
+	  if (brk_lvl || num_args == ntok)
 	    goto err;
 	  ++brk_lvl;
 	  tok->X_op = O_bracket;
@@ -1060,7 +1060,7 @@ tokenize_arguments (char *str,
 	case '@':
 	  /* We have labels, function names and relocations, all
 	     starting with @ symbol.  Sort them out.  */
-	  if (saw_arg && !saw_comma)
+	  if ((saw_arg && !saw_comma) || num_args == ntok)
 	    goto err;
 
 	  /* Parse @label.  */
@@ -1165,7 +1165,7 @@ tokenize_arguments (char *str,
 	  /* Fall through.  */
 	default:
 
-	  if (saw_arg && !saw_comma)
+	  if ((saw_arg && !saw_comma) || num_args == ntok)
 	    goto err;
 
 	  tok->X_op = O_absent;
@@ -1181,7 +1181,9 @@ tokenize_arguments (char *str,
 	normalsymbol:
 	  debug_exp (tok);
 
-	  if (tok->X_op == O_illegal || tok->X_op == O_absent)
+	  if (tok->X_op == O_illegal
+              || tok->X_op == O_absent
+              || num_args == ntok)
 	    goto err;
 
 	  saw_comma = FALSE;
@@ -1881,7 +1883,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		      if (pflag->flgp != NULL)
 			goto match_failed;
 		      cl_matches++;
-		      pflag->flgp = (struct arc_flag_operand *) flg_operand;
+		      pflag->flgp = flg_operand;
 		      lnflg--;
 		      break; /* goto next flag class and parsed flag.  */
 		    }
@@ -2503,7 +2505,8 @@ md_pcrel_from_section (fixS *fixP,
 	}
     }
 
-  pr_debug ("pcrel from %x + %lx = %x, symbol: %s (%x)\n",
+  pr_debug ("pcrel from %"BFD_VMA_FMT"x + %lx = %"BFD_VMA_FMT"x, "
+	    "symbol: %s (%"BFD_VMA_FMT"x)\n",
 	    fixP->fx_frag->fr_address, fixP->fx_where, base,
 	    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "(null)",
 	    fixP->fx_addsy ? S_GET_VALUE (fixP->fx_addsy) : 0);
@@ -3019,7 +3022,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   dest = fragP->fr_literal + fix;
   table_entry = TC_GENERIC_RELAX_TABLE + fragP->fr_subtype;
 
-  pr_debug ("%s:%d: md_convert_frag, subtype: %d, fix: %d, var: %d\n",
+  pr_debug ("%s:%d: md_convert_frag, subtype: %d, fix: %d, "
+	    "var: %"BFD_VMA_FMT"d\n",
 	    fragP->fr_file, fragP->fr_line,
 	    fragP->fr_subtype, fix, fragP->fr_var);
 

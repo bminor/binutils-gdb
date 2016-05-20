@@ -1,3 +1,53 @@
+2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_read_rel_addend): Adjust the addend for
+	microMIPS JALX.
+
+2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20117
+	* elf32-i386.c (elf_i386_convert_load_reloc): Don't check
+	R_386_GOT32X.
+	(elf_i386_convert_load): Don't convert R_386_GOT32.
+
+2016-05-20  Alan Modra  <amodra@gmail.com>
+
+	PR gas/20118
+	* elf.c (elf_fake_sections): Set sh_entsize for SHT_INIT_ARRAY,
+	SHT_FINI_ARRAY, and SHT_PREINIT_ARRAY.
+
+2016-05-19  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (arc_elf_final_write_processing): Changed.
+	(debug_arc_reloc): Likewise.
+	(elf_arc_relocate_section): Likewise.
+	(elf_arc_check_relocs): Likewise.
+	(elf_arc_adjust_dynamic_symbol): Likewise.
+	(elf_arc_add_symbol_hook): Likewise.
+
+2016-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config.bfd: Remove `am34-*-linux*' support.
+
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (allocate_dynrelocs): Allocate got and other dynamic
+	relocs before plt relocs.
+
+2016-05-19  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_branch_reloc): Check for NULL owner
+	before dereferencing.
+
+2016-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2016-05-18  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Free or cache local syms
+	for each BFD.  Don't goto error_ret_free_local from outside loop.
+
 2016-05-17  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf-s390-common.c (elf_s390_add_symbol_hook): Remove

@@ -1733,6 +1733,11 @@ proc skip_d_tests {} {
     return 0
 }
 
+# Return 1 to skip Rust tests, 0 to try them.
+proc skip_rust_tests {} {
+    return [expr {![isnative]}]
+}
+
 # Return a 1 for configurations that do not support Python scripting.
 # PROMPT_REGEXP is the expected prompt.
 
@@ -5258,6 +5263,16 @@ proc build_executable_from_specs {testname executable options args} {
 	    }
 	}
 	set ret [$func $sources_path "${binfile}" $options]
+    } elseif {[lsearch -exact $options rust] != -1} {
+	set sources_path {}
+	foreach {s local_options} $args {
+	    if { [regexp "^/" "$s"] } then {
+		lappend sources_path "$s"
+	    } else {
+		lappend sources_path "$srcdir/$subdir/$s"
+	    }
+	}
+	set ret [gdb_compile_rust $sources_path "${binfile}" $options]
     } else {
 	set objects {}
 	set i 0

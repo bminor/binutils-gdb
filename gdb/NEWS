@@ -27,6 +27,11 @@
    Bounds: [lower = 0x7fffffffc390, upper = 0x7fffffffc3a3]
    0x0000000000400d7c in upper () at i386-mpx-sigsegv.c:68
 
+* Rust language support.
+  GDB now supports debugging programs written in the Rust programming
+  language.  See https://www.rust-lang.org/ for more information about
+  Rust.
+
 * New commands
 
 skip -file file
@@ -39,6 +44,9 @@ skip -rfunction regular-expression
 
 maint info line-table REGEXP
   Display the contents of GDB's internal line table data struture.
+
+maint selftest
+  Run any GDB unit tests that were compiled in.
 
 * Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
   was added in GDBserver, including JIT compiling fast tracepoint's

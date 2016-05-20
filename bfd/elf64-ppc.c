@@ -2570,6 +2570,7 @@ ppc64_elf_branch_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
       elf_symbol_type *elfsym = (elf_symbol_type *) symbol;
 
       if (symbol->section->owner != abfd
+	  && symbol->section->owner != NULL
 	  && abiversion (symbol->section->owner) >= 2)
 	{
 	  unsigned int i;
@@ -5149,7 +5150,7 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
     }
 
   /* We need to fix the undefs list for any syms we have twiddled to
-     undef_weak.  */
+     undefweak.  */
   if (htab->twiddled_syms)
     {
       bfd_link_repair_undef_list (&htab->elf.root);
@@ -9552,71 +9553,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (htab == NULL)
     return FALSE;
 
-  if ((htab->elf.dynamic_sections_created
-       && h->dynindx != -1
-       && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
-      || h->type == STT_GNU_IFUNC)
-    {
-      struct plt_entry *pent;
-      bfd_boolean doneone = FALSE;
-      for (pent = h->plt.plist; pent != NULL; pent = pent->next)
-	if (pent->plt.refcount > 0)
-	  {
-	    if (!htab->elf.dynamic_sections_created
-		|| h->dynindx == -1)
-	      {
-		s = htab->elf.iplt;
-		pent->plt.offset = s->size;
-		s->size += PLT_ENTRY_SIZE (htab);
-		s = htab->elf.irelplt;
-	      }
-	    else
-	      {
-		/* If this is the first .plt entry, make room for the special
-		   first entry.  */
-		s = htab->elf.splt;
-		if (s->size == 0)
-		  s->size += PLT_INITIAL_ENTRY_SIZE (htab);
-
-		pent->plt.offset = s->size;
-
-		/* Make room for this entry.  */
-		s->size += PLT_ENTRY_SIZE (htab);
-
-		/* Make room for the .glink code.  */
-		s = htab->glink;
-		if (s->size == 0)
-		  s->size += GLINK_CALL_STUB_SIZE;
-		if (htab->opd_abi)
-		  {
-		    /* We need bigger stubs past index 32767.  */
-		    if (s->size >= GLINK_CALL_STUB_SIZE + 32768*2*4)
-		      s->size += 4;
-		    s->size += 2*4;
-		  }
-		else
-		  s->size += 4;
-
-		/* We also need to make an entry in the .rela.plt section.  */
-		s = htab->elf.srelplt;
-	      }
-	    s->size += sizeof (Elf64_External_Rela);
-	    doneone = TRUE;
-	  }
-	else
-	  pent->plt.offset = (bfd_vma) -1;
-      if (!doneone)
-	{
-	  h->plt.plist = NULL;
-	  h->needs_plt = 0;
-	}
-    }
-  else
-    {
-      h->plt.plist = NULL;
-      h->needs_plt = 0;
-    }
-
   eh = (struct ppc_link_hash_entry *) h;
   /* Run through the TLS GD got entries first if we're changing them
      to TPREL.  */
@@ -9686,99 +9622,165 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	allocate_got (h, info, gent);
       }
 
-  if (eh->dyn_relocs == NULL
-      || (!htab->elf.dynamic_sections_created
-	  && h->type != STT_GNU_IFUNC))
-    return TRUE;
-
-  /* In the shared -Bsymbolic case, discard space allocated for
-     dynamic pc-relative relocs against symbols which turn out to be
-     defined in regular objects.  For the normal shared case, discard
-     space for relocs that have become local due to symbol visibility
-     changes.  */
-
-  if (bfd_link_pic (info))
+  if (eh->dyn_relocs != NULL
+      && (htab->elf.dynamic_sections_created
+	  || h->type == STT_GNU_IFUNC))
     {
-      /* Relocs that use pc_count are those that appear on a call insn,
-	 or certain REL relocs (see must_be_dyn_reloc) that can be
-	 generated via assembly.  We want calls to protected symbols to
-	 resolve directly to the function rather than going via the plt.
-	 If people want function pointer comparisons to work as expected
-	 then they should avoid writing weird assembly.  */
-      if (SYMBOL_CALLS_LOCAL (info, h))
-	{
-	  struct elf_dyn_relocs **pp;
+      /* In the shared -Bsymbolic case, discard space allocated for
+	 dynamic pc-relative relocs against symbols which turn out to
+	 be defined in regular objects.  For the normal shared case,
+	 discard space for relocs that have become local due to symbol
+	 visibility changes.  */
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+      if (bfd_link_pic (info))
+	{
+	  /* Relocs that use pc_count are those that appear on a call
+	     insn, or certain REL relocs (see must_be_dyn_reloc) that
+	     can be generated via assembly.  We want calls to
+	     protected symbols to resolve directly to the function
+	     rather than going via the plt.  If people want function
+	     pointer comparisons to work as expected then they should
+	     avoid writing weird assembly.  */
+	  if (SYMBOL_CALLS_LOCAL (info, h))
 	    {
-	      p->count -= p->pc_count;
-	      p->pc_count = 0;
-	      if (p->count == 0)
-		*pp = p->next;
-	      else
-		pp = &p->next;
+	      struct elf_dyn_relocs **pp;
+
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+		{
+		  p->count -= p->pc_count;
+		  p->pc_count = 0;
+		  if (p->count == 0)
+		    *pp = p->next;
+		  else
+		    pp = &p->next;
+		}
+	    }
+
+	  /* Also discard relocs on undefined weak syms with
+	     non-default visibility.  */
+	  if (eh->dyn_relocs != NULL
+	      && h->root.type == bfd_link_hash_undefweak)
+	    {
+	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+		eh->dyn_relocs = NULL;
+
+	      /* Make sure this symbol is output as a dynamic symbol.
+		 Undefined weak syms won't yet be marked as dynamic.  */
+	      else if (h->dynindx == -1
+		       && !h->forced_local)
+		{
+		  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		    return FALSE;
+		}
 	    }
 	}
-
-      /* Also discard relocs on undefined weak syms with non-default
-	 visibility.  */
-      if (eh->dyn_relocs != NULL
-	  && h->root.type == bfd_link_hash_undefweak)
+      else if (h->type == STT_GNU_IFUNC)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (!h->non_got_ref)
 	    eh->dyn_relocs = NULL;
-
-	  /* Make sure this symbol is output as a dynamic symbol.
-	     Undefined weak syms won't yet be marked as dynamic.  */
-	  else if (h->dynindx == -1
-		   && !h->forced_local)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
-	    }
 	}
-    }
-  else if (h->type == STT_GNU_IFUNC)
-    {
-      if (!h->non_got_ref)
-	eh->dyn_relocs = NULL;
-    }
-  else if (ELIMINATE_COPY_RELOCS)
-    {
-      /* For the non-shared case, discard space for relocs against
-	 symbols which turn out to need copy relocs or are not
-	 dynamic.  */
-
-      if (!h->non_got_ref
-	  && !h->def_regular)
+      else if (ELIMINATE_COPY_RELOCS)
 	{
-	  /* Make sure this symbol is output as a dynamic symbol.
-	     Undefined weak syms won't yet be marked as dynamic.  */
-	  if (h->dynindx == -1
-	      && !h->forced_local)
+	  /* For the non-shared case, discard space for relocs against
+	     symbols which turn out to need copy relocs or are not
+	     dynamic.  */
+
+	  if (!h->non_got_ref
+	      && !h->def_regular)
 	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
+	      /* Make sure this symbol is output as a dynamic symbol.
+		 Undefined weak syms won't yet be marked as dynamic.  */
+	      if (h->dynindx == -1
+		  && !h->forced_local)
+		{
+		  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		    return FALSE;
+		}
+
+	      /* If that succeeded, we know we'll be keeping all the
+		 relocs.  */
+	      if (h->dynindx != -1)
+		goto keep;
 	    }
 
-	  /* If that succeeded, we know we'll be keeping all the
-	     relocs.  */
-	  if (h->dynindx != -1)
-	    goto keep;
+	  eh->dyn_relocs = NULL;
+
+	keep: ;
 	}
 
-      eh->dyn_relocs = NULL;
-
-    keep: ;
+      /* Finally, allocate space.  */
+      for (p = eh->dyn_relocs; p != NULL; p = p->next)
+	{
+	  asection *sreloc = elf_section_data (p->sec)->sreloc;
+	  if (eh->elf.type == STT_GNU_IFUNC)
+	    sreloc = htab->elf.irelplt;
+	  sreloc->size += p->count * sizeof (Elf64_External_Rela);
+	}
     }
 
-  /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  if ((htab->elf.dynamic_sections_created
+       && h->dynindx != -1
+       && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
+      || h->type == STT_GNU_IFUNC)
     {
-      asection *sreloc = elf_section_data (p->sec)->sreloc;
-      if (eh->elf.type == STT_GNU_IFUNC)
-	sreloc = htab->elf.irelplt;
-      sreloc->size += p->count * sizeof (Elf64_External_Rela);
+      struct plt_entry *pent;
+      bfd_boolean doneone = FALSE;
+      for (pent = h->plt.plist; pent != NULL; pent = pent->next)
+	if (pent->plt.refcount > 0)
+	  {
+	    if (!htab->elf.dynamic_sections_created
+		|| h->dynindx == -1)
+	      {
+		s = htab->elf.iplt;
+		pent->plt.offset = s->size;
+		s->size += PLT_ENTRY_SIZE (htab);
+		s = htab->elf.irelplt;
+	      }
+	    else
+	      {
+		/* If this is the first .plt entry, make room for the special
+		   first entry.  */
+		s = htab->elf.splt;
+		if (s->size == 0)
+		  s->size += PLT_INITIAL_ENTRY_SIZE (htab);
+
+		pent->plt.offset = s->size;
+
+		/* Make room for this entry.  */
+		s->size += PLT_ENTRY_SIZE (htab);
+
+		/* Make room for the .glink code.  */
+		s = htab->glink;
+		if (s->size == 0)
+		  s->size += GLINK_CALL_STUB_SIZE;
+		if (htab->opd_abi)
+		  {
+		    /* We need bigger stubs past index 32767.  */
+		    if (s->size >= GLINK_CALL_STUB_SIZE + 32768*2*4)
+		      s->size += 4;
+		    s->size += 2*4;
+		  }
+		else
+		  s->size += 4;
+
+		/* We also need to make an entry in the .rela.plt section.  */
+		s = htab->elf.srelplt;
+	      }
+	    s->size += sizeof (Elf64_External_Rela);
+	    doneone = TRUE;
+	  }
+	else
+	  pent->plt.offset = (bfd_vma) -1;
+      if (!doneone)
+	{
+	  h->plt.plist = NULL;
+	  h->needs_plt = 0;
+	}
+    }
+  else
+    {
+      h->plt.plist = NULL;
+      h->needs_plt = 0;
     }
 
   return TRUE;

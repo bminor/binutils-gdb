@@ -40,8 +40,10 @@ if { [istarget "arc*-*-*"]
     return
 }
 
-# m68hc11, m68hc12 and xgate run out of address space.
-if { [istarget "m68hc1*-*"] || [istarget "xgate-*"] } {
+# ft32, m68hc11, m68hc12 and xgate run out of address space.
+if {   [istarget "ft32-*-*"]
+    || [istarget "m68hc1*-*"]
+    || [istarget "xgate-*"] } {
     return
 }
 

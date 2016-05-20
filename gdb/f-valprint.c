@@ -203,6 +203,8 @@ static const struct generic_val_print_decorations f_decorations =
   ".TRUE.",
   ".FALSE.",
   "VOID",
+  "{",
+  "}"
 };
 
 /* See val_print for a description of the various parameters of this

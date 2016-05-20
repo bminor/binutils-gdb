@@ -1,3 +1,40 @@
+2016-05-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-threads-interrupt.c: New file.
+	* gdb.mi/mi-threads-interrupt.exp: New file.
+
+2016-05-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/18077
+	* gdb.mi/mi-async-run.exp: New file.
+	* gdb.mi/mi-async-run.c: New file.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+	    Manish Goregaokar <manishsmail@gmail.com>
+
+	* lib/rust-support.exp: New file.
+	* lib/gdb.exp (skip_rust_tests): New proc.
+	(build_executable_from_specs): Handle rust.
+	* lib/future.exp (gdb_find_rustc): New proc.
+	(gdb_default_target_compile): Handle rust.
+	* gdb.rust/expr.exp: New file.
+	* gdb.rust/generics.exp: New file.
+	* gdb.rust/generics.rs: New file.
+	* gdb.rust/methods.exp: New file.
+	* gdb.rust/methods.rs: New file.
+	* gdb.rust/modules.exp: New file.
+	* gdb.rust/modules.rs: New file.
+	* gdb.rust/simple.exp: New file.
+	* gdb.rust/simple.rs: New file.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/default.exp (set language): Add rust.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.gdb/unittest.exp: New file.
+
 2016-05-16  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/batch-preserve-term-settings.exp: Remove variable

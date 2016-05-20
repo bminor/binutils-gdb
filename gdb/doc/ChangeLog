@@ -1,3 +1,12 @@
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Supported Languages): Mention Rust.  Update menu.
+	(Rust): New node.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint selftest".
+
 2016-04-27  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.texinfo (tfind): Complete doc about tfind without

@@ -131,7 +131,7 @@ power9:
 	xxextractuw 4,5,0x0
 	xxextractuw 40,50,0xf
 	xxspltib    4,0x0
-	xxspltib    4,-256
+	xxspltib    4,-128
 	xxspltib    41,255
 	xxspltib    41,-1
 	xxinsertw   5,6,0

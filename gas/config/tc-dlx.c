@@ -52,7 +52,7 @@ struct machine_it
   int pcrel;
   int size;
   int reloc_offset;		/* Offset of reloc within insn.  */
-  int reloc;
+  bfd_reloc_code_real_type reloc;
   int HI;
   int LO;
 }

@@ -80,6 +80,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->undef_binding_set_ = false;
   this->undef_binding_weak_ = false;
   this->is_predefined_ = false;
+  this->is_protected_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
@@ -1609,6 +1610,13 @@ Symbol_table::add_from_dynobj(
 	  && res->source() == Symbol::FROM_OBJECT
 	  && res->object() == dynobj)
 	object_symbols.push_back(res);
+
+      // If the symbol has protected visibility in the dynobj,
+      // mark it as such if it was not overridden.
+      if (res->source() == Symbol::FROM_OBJECT
+          && res->object() == dynobj
+          && sym.get_st_visibility() == elfcpp::STV_PROTECTED)
+        res->set_is_protected();
 
       if (sympointers != NULL)
 	(*sympointers)[i] = res;

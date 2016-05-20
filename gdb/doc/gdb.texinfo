@@ -14399,7 +14399,7 @@ being set automatically by @value{GDBN}.
 @section Supported Languages
 
 @value{GDBN} supports C, C@t{++}, D, Go, Objective-C, Fortran, Java,
-OpenCL C, Pascal, assembly, Modula-2, and Ada.
+OpenCL C, Pascal, Rust, assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -14423,6 +14423,7 @@ language reference or tutorial.
 * OpenCL C::                    OpenCL C
 * Fortran::                     Fortran
 * Pascal::                      Pascal
+* Rust::                        Rust
 * Modula-2::                    Modula-2
 * Ada::                         Ada
 @end menu
@@ -15227,6 +15228,99 @@ syntax.
 The Pascal-specific command @code{set print pascal_static-members}
 controls whether static members of Pascal objects are displayed.
 @xref{Print Settings, pascal_static-members}.
+
+@node Rust
+@subsection Rust
+
+@value{GDBN} supports the @url{https://www.rust-lang.org/, Rust
+Programming Language}.  Type- and value-printing, and expression
+parsing, are reasonably complete.  However, there are a few
+peculiarities and holes to be aware of.
+
+@itemize @bullet
+@item
+Linespecs (@pxref{Specify Location}) are never relative to the current
+crate.  Instead, they act as if there were a global namespace of
+crates, somewhat similar to the way @code{extern crate} behaves.
+
+That is, if @value{GDBN} is stopped at a breakpoint in a function in
+crate @samp{A}, module @samp{B}, then @code{break B::f} will attempt
+to set a breakpoint in a function named @samp{f} in a crate named
+@samp{B}.
+
+As a consequence of this approach, linespecs also cannot refer to
+items using @samp{self::} or @samp{super::}.
+
+@item
+Because @value{GDBN} implements Rust name-lookup semantics in
+expressions, it will sometimes prepend the current crate to a name.
+For example, if @value{GDBN} is stopped at a breakpoint in the crate
+@samp{K}, then @code{print ::x::y} will try to find the symbol
+@samp{K::x::y}.
+
+However, since it is useful to be able to refer to other crates when
+debugging, @value{GDBN} provides the @code{extern} extension to
+circumvent this.  To use the extension, just put @code{extern} before
+a path expression to refer to the otherwise unavailable ``global''
+scope.
+
+In the above example, if you wanted to refer to the symbol @samp{y} in
+the crate @samp{x}, you would use @code{print extern x::y}.
+
+@item
+The Rust expression evaluator does not support ``statement-like''
+expressions such as @code{if} or @code{match}, or lambda expressions.
+
+@item
+Tuple expressions are not implemented.
+
+@item
+The Rust expression evaluator does not currently implement the
+@code{Drop} trait.  Objects that may be created by the evaluator will
+never be destroyed.
+
+@item
+@value{GDBN} does not implement type inference for generics.  In order
+to call generic functions or otherwise refer to generic items, you
+will have to specify the type parameters manually.
+
+@item
+@value{GDBN} currently uses the C@t{++} demangler for Rust.  In most
+cases this does not cause any problems.  However, in an expression
+context, completing a generic function name will give syntactically
+invalid results.  This happens because Rust requires the @samp{::}
+operator between the function name and its generic arguments.  For
+example, @value{GDBN} might provide a completion like
+@code{crate::f<u32>}, where the parser would require
+@code{crate::f::<u32>}.
+
+@item
+As of this writing, the Rust compiler (version 1.8) has a few holes in
+the debugging information it generates.  These holes prevent certain
+features from being implemented by @value{GDBN}:
+@itemize @bullet
+
+@item
+Method calls cannot be made via traits.
+
+@item
+Trait objects cannot be created or inspected.
+
+@item
+Operator overloading is not implemented.
+
+@item
+When debugging in a monomorphized function, you cannot use the generic
+type names.
+
+@item
+The type @code{Self} is not available.
+
+@item
+@code{use} statements are not available, so some names may not be
+available in the crate.
+@end itemize
+@end itemize
 
 @node Modula-2
 @subsection Modula-2
@@ -34450,6 +34544,11 @@ can be either a type name or a symbol.  If it is a symbol, the type of
 that symbol is described.  The type chain produced by this command is
 a recursive definition of the data type as stored in @value{GDBN}'s
 data structures, including its flags and contained types.
+
+@kindex maint selftest
+@cindex self tests
+Run any self tests that were compiled in to @value{GDBN}.  This will
+print a message showing how many tests were run, and how many failed.
 
 @kindex maint set dwarf always-disassemble
 @kindex maint show dwarf always-disassemble

@@ -6,7 +6,7 @@
 #xfail: "i370-*-*" "i860-*-*" "i960-*-*" "ip2k-*-*" "iq2000-*-*" "lm32-*-*"
 #xfail: "mcore-*-*" "mn102*-*-*" "ms1-*-*" "mep-*-*"
 #xfail: "or32-*-*" "pj-*-*" "sparc*-*-*" "tic6x-*-*" "vax-*-*" "xstormy16-*-*"
-#xfail: "xtensa*-*-*" "metag-*-*"
+#xfail: "xtensa*-*-*" "metag-*-*" "ft32-*-*"
 
 .*:     file format .*elf.*
 

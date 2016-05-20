@@ -1,3 +1,114 @@
+2016-05-19  Andreas Schwab  <schwab@suse.de>
+
+	* ia64-libunwind-tdep.c (libunwind_descr): Add cast from void *.
+	(libunwind_frame_set_descr): Likewise.
+	(libunwind_frame_cache): Likewise.
+	(libunwind_frame_dealloc_cache): Likewise.
+	(libunwind_frame_sniffer): Likewise.
+	(libunwind_search_unwind_table): Likewise.
+	(libunwind_sigtramp_frame_sniffer): Likewise.
+	(libunwind_get_reg_special): Likewise.
+	(libunwind_load): Likewise.
+	* ia64-linux-nat.c (ia64_linux_fetch_register): Likewise.
+	(ia64_linux_store_register): Likewise.
+	(ia64_linux_xfer_partial): Likewise.
+	* ia64-tdep.c (ia64_access_reg): Likewise.
+	(ia64_access_fpreg): Likewise.
+	(ia64_access_rse_reg): Likewise.
+	(ia64_access_rse_fpreg): Likewise.
+
+2016-05-18  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_subscript): Initialize "high".
+
+2016-05-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20045
+	* mi/mi-main.c (mi_on_resume): Call target_can_async_p instead
+	of target_is_async_p.
+
+2016-05-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/18077
+	* mi/mi-main.c (run_one_inferior): Use run target to determine
+	whether to run async or not.
+	(mi_cmd_exec_run): Likewise.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* std-operator.def (OP_RANGE): Rename from OP_F90_RANGE.
+	* rust-lang.c: Don't include f-lang.h.
+	(rust_range, rust_compute_range, rust_subscript)
+	(rust_evaluate_subexp): Update.
+	* rust-exp.y: Don't include f-lang.h.
+	(ast_range, convert_ast_to_expression): Update.
+	* parse.c (operator_length_standard): Update.
+	* f-lang.h (enum f90_range_type): Move to expression.h.
+	* f-exp.y: Use OP_RANGE.
+	* expression.h (enum range_type): New enum; renamed from
+	f90_range_type.
+	* expprint.c: Don't include f-lang.h.
+	(print_subexp_standard, dump_subexp_body_standard): Use OP_RANGE.
+	* eval.c (value_f90_subarray, evaluate_subexp_standard): Update.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add Rust item.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+	    Manish Goregaokar <manishsmail@gmail.com>
+
+	* symtab.c (symbol_find_demangled_name): Handle Rust.
+	* symfile.c (init_filename_language_table): Treat ".rs" as Rust.
+	* std-operator.def (STRUCTOP_ANONYMOUS, OP_RUST_ARRAY): New
+	constants.
+	* rust-lang.h: New file.
+	* rust-lang.c: New file.
+	* rust-exp.y: New file.
+	* dwarf2read.c (read_file_scope): Add Rust producer sniffing.
+	(dwarf2_compute_name, read_func_scope, read_structure_type)
+	(read_base_type, read_subrange_type, set_cu_language)
+	(new_symbol_full, determine_prefix): Handle Rust.
+	* defs.h (enum language) <language_rust>: New constant.
+	* Makefile.in (SFILES): Add rust-exp.y, rust-lang.c.
+	(COMMON_OBS): Add rust-exp.o, rust-lang.o.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* valprint.h (struct generic_val_print_array) <array_start,
+	array_end>: New fields.
+	* valprint.c (generic_val_print_array): Add "decorations"
+	parameter.  Use "array_start", "array_end".
+	(generic_val_print) <TYPE_CODE_ARRAY>: Update.
+	* p-valprint.c (p_decorations): Update.
+	* m2-valprint.c (m2_decorations): Update.
+	* f-valprint.c (f_decorations): Update.
+	* c-valprint.c (c_decorations): Update.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add "maint selftest" entry.
+	* selftest.h: New file.
+	* selftest.c: New file.
+	* maint.c: Include selftest.h.
+	(maintenance_selftest): New function.
+	(_initialize_maint_cmds): Add "maint selftest" command.
+	* configure.ac (GDB_SELF_TEST): Maybe define.
+	* config.in, configure: Rebuild.
+	* Makefile.in (SFILES): Add selftest.c.
+	(COMMON_OBS): Add selftest.o.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* expprint.c: Include f-lang.h.
+	(print_subexp_standard, dump_subexp_body_standard): Handle
+	OP_F90_RANGE.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (init.c): Search .y files for initialization
+	functions.
+
 2016-05-12  Doug Evans  <dje@google.com>
 
 	PR symtab/19999

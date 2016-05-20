@@ -694,13 +694,16 @@ arc_elf_final_write_processing (bfd * abfd,
       emf = EM_ARC_COMPACT2;
       break;
     default:
-      abort ();
+      goto DO_NOTHING;
     }
 
   elf_elfheader (abfd)->e_machine = emf;
 
   /* Record whatever is the current syscall ABI version.  */
   elf_elfheader (abfd)->e_flags |= E_ARC_OSABI_CURRENT;
+
+DO_NOTHING:
+  return;
 }
 
 #define BFD_DEBUG_PIC(...)
@@ -741,7 +744,7 @@ debug_arc_reloc (struct arc_relocation_data reloc_data)
 	   (unsigned int) reloc_data.sym_value);
   if (reloc_data.sym_section != NULL)
     {
-      PR_DEBUG ("IN IF\n");
+      PR_DEBUG (" Symbol Section:\n");
       PR_DEBUG (
 	       "  section name = %s, output_offset 0x%08x",
 	       reloc_data.sym_section->name,
@@ -752,8 +755,8 @@ debug_arc_reloc (struct arc_relocation_data reloc_data)
 		   ", output_section->vma = 0x%08x",
 		   ((unsigned int) reloc_data.sym_section->output_section->vma));
 	}
-
       PR_DEBUG ( "\n");
+      PR_DEBUG ("  file: %s\n", reloc_data.sym_section->owner->filename);
     }
   else
     {
@@ -772,6 +775,7 @@ debug_arc_reloc (struct arc_relocation_data reloc_data)
 	       (unsigned int) (reloc_data.input_section->output_section->vma +
 	       reloc_data.input_section->output_offset +
 	       reloc_data.reloc_offset));
+      PR_DEBUG ("  file: %s\n", reloc_data.input_section->owner->filename);
     }
   else
     {
@@ -1105,15 +1109,16 @@ elf_arc_relocate_section (bfd *		   output_bfd,
   struct elf_link_hash_entry ** sym_hashes;
   struct got_entry **	   local_got_ents;
   Elf_Internal_Rela *	   rel;
+  Elf_Internal_Rela *	   wrel;
   Elf_Internal_Rela *	   relend;
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   symtab_hdr = &((elf_tdata (input_bfd))->symtab_hdr);
   sym_hashes = elf_sym_hashes (input_bfd);
 
-  rel = relocs;
+  rel = wrel = relocs;
   relend = relocs + input_section->reloc_count;
-  for (; rel < relend; rel++)
+  for (; rel < relend; wrel++, rel++)
     {
       enum elf_arc_reloc_type       r_type;
       reloc_howto_type *	    howto;
@@ -1145,7 +1150,7 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-      howto = &elf_arc_howto_table[r_type];
+      howto = arc_elf_howto (r_type);
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
@@ -1180,8 +1185,6 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		  );
 		}
 	    }
-
-	  continue;
 	}
 
       h2 = elf_link_hash_lookup (elf_hash_table (info), "__SDATA_BEGIN__",
@@ -1210,18 +1213,71 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 
       if (r_symndx < symtab_hdr->sh_info) /* A local symbol.  */
 	{
-	  local_got_ents = arc_get_local_got_ents (output_bfd);
-	  struct got_entry *entry = local_got_ents[r_symndx];
-
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
+	}
+      else
+	{
+	  /* TODO: This code is repeated from below.  We should
+	     clean it and remove duplications.
+	     Sec is used check for discarded sections.
+	     Need to redesign code below.  */
+
+	  /* Get the symbol's entry in the symtab.  */
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* If we have encountered a definition for this symbol.  */
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      reloc_data.sym_value = h->root.u.def.value;
+	      sec = h->root.u.def.section;
+	    }
+	}
+
+      /* Clean relocs for symbols in discarded sections.  */
+      if (sec != NULL && discarded_section (sec))
+	{
+	  _bfd_clear_contents (howto, input_bfd, input_section,
+			       contents + rel->r_offset);
+	  rel->r_offset = rel->r_offset;
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+
+	  /* For ld -r, remove relocations in debug sections against
+	     sections defined in discarded sections.  Not done for
+	     eh_frame editing code expects to be present.  */
+	   if (bfd_link_relocatable (info)
+	       && (input_section->flags & SEC_DEBUGGING))
+	     wrel--;
+
+	  continue;
+	}
+
+      if (bfd_link_relocatable (info))
+	{
+	  if (wrel != rel)
+	    *wrel = *rel;
+	  continue;
+	}
+
+      if (r_symndx < symtab_hdr->sh_info) /* A local symbol.  */
+	{
+	  struct got_entry *entry;
+
+	  local_got_ents = arc_get_local_got_ents (output_bfd);
+	  entry = local_got_ents[r_symndx];
 
 	  reloc_data.sym_value = sym->st_value;
 	  reloc_data.sym_section = sec;
 	  reloc_data.symbol_name =
-            bfd_elf_string_from_elf_section (input_bfd,
-                                             symtab_hdr->sh_link,
-                                             sym->st_name);
+	    bfd_elf_string_from_elf_section (input_bfd,
+					     symtab_hdr->sh_link,
+					     sym->st_name);
 
 	  /* Mergeable section handling.  */
 	  if ((sec->flags & SEC_MERGE)
@@ -1337,8 +1393,10 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-	  BFD_ASSERT ((h->dynindx == -1) >= (h->forced_local != 0));
+	  /* TODO: Need to validate what was the intention.  */
+	  /* BFD_ASSERT ((h->dynindx == -1) || (h->forced_local != 0)); */
 	  reloc_data.symbol_name = h->root.root.string;
+
 	  /* If we have encountered a definition for this symbol.  */
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
@@ -1563,13 +1621,20 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		outrel.r_offset += (input_section->output_section->vma
 				    + input_section->output_offset);
 
+#define IS_ARC_PCREL_TYPE(TYPE) \
+  (   (TYPE == R_ARC_PC32) \
+   || (TYPE == R_ARC_32_PCREL))
 		if (skip)
 		  {
 		    memset (&outrel, 0, sizeof outrel);
 		    relocate = FALSE;
 		  }
-		else if (r_type == R_ARC_PC32
-			 || r_type == R_ARC_32_PCREL)
+		else if (h != NULL
+			 && h->dynindx != -1
+			 && ((IS_ARC_PCREL_TYPE (r_type))
+			 || !(bfd_link_executable (info)
+			      || SYMBOLIC_BIND (info, h))
+			 || ! h->def_regular))
 		  {
 		    BFD_ASSERT (h != NULL);
 		    if ((input_section->flags & SEC_ALLOC) != 0)
@@ -1592,31 +1657,9 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		       dynamic symbol table, and it's a regular symbol
 		       not defined in a shared object, then treat the
 		       symbol as local, resolve it now.  */
-		    if (h == NULL
-			|| ((info->symbolic || h->dynindx == -1)
-			    && h->def_regular)
-			|| h->forced_local)
-		      {
-			relocate = TRUE;
-			/* outrel.r_addend = 0; */
-			outrel.r_info = ELF32_R_INFO (0, R_ARC_RELATIVE);
-		      }
-		    else
-		      {
-			BFD_ASSERT (h->dynindx != -1);
-
-			/* This type of dynamic relocation cannot be created
-			   for code sections.  */
-			BFD_ASSERT ((input_section->flags & SEC_CODE) == 0);
-
-			if ((input_section->flags & SEC_ALLOC) != 0)
-			  relocate = FALSE;
-			else
-			  relocate = TRUE;
-
-			BFD_ASSERT (h->dynindx != -1);
-			outrel.r_info = ELF32_R_INFO (h->dynindx, R_ARC_32);
-		      }
+		    relocate = TRUE;
+		    /* outrel.r_addend = 0; */
+		    outrel.r_info = ELF32_R_INFO (0, R_ARC_RELATIVE);
 		  }
 
 		BFD_ASSERT (sreloc->contents != 0);
@@ -1761,7 +1804,7 @@ elf_arc_check_relocs (bfd *		         abfd,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-      howto = &elf_arc_howto_table[r_type];
+      howto = arc_elf_howto (r_type);
 
       if (dynobj == NULL
 	  && (is_reloc_for_GOT (howto) == TRUE
@@ -1790,8 +1833,9 @@ elf_arc_check_relocs (bfd *		         abfd,
 	       non-readonly sections.  */
 	    if (bfd_link_dll (info) && !bfd_link_pie (info)
 		&& (sec->flags & SEC_ALLOC) != 0
-		&& (sec->flags & SEC_READONLY) == 0
-		&& (sec->flags & SEC_CODE) != 0)
+		&& (sec->flags & SEC_READONLY) != 0
+		&& ((sec->flags & SEC_CODE) != 0
+		    || (sec->flags & SEC_DEBUGGING) != 0))
 	      {
 		const char *name;
 		if (h)
@@ -2134,7 +2178,6 @@ elf_arc_adjust_dynamic_symbol (struct bfd_link_info *info,
 			      struct elf_link_hash_entry *h)
 {
   asection *s;
-  unsigned int power_of_two;
   bfd *dynobj = (elf_hash_table (info))->dynobj;
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
@@ -2190,11 +2233,6 @@ elf_arc_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  /* If there are no non-GOT references, we do not need a copy
-     relocation.  */
-  if (!h->non_got_ref)
-    return TRUE;
-
   /* This is a reference to a symbol defined by a dynamic object which
      is not a function.  */
 
@@ -2202,8 +2240,20 @@ elf_arc_adjust_dynamic_symbol (struct bfd_link_info *info,
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
-  if (bfd_link_pic (info))
+  if (!bfd_link_executable (info))
     return TRUE;
+
+  /* If there are no non-GOT references, we do not need a copy
+     relocation.  */
+  if (!h->non_got_ref)
+    return TRUE;
+
+  /* If -z nocopyreloc was given, we won't generate them either.  */
+  if (info->nocopyreloc)
+    {
+      h->non_got_ref = 0;
+      return TRUE;
+    }
 
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
@@ -2215,8 +2265,8 @@ elf_arc_adjust_dynamic_symbol (struct bfd_link_info *info,
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
 
-  s = bfd_get_section_by_name (dynobj, ".dynbss");
-  BFD_ASSERT (s != NULL);
+  if (htab == NULL)
+    return FALSE;
 
   /* We must generate a R_ARC_COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
@@ -2232,28 +2282,10 @@ elf_arc_adjust_dynamic_symbol (struct bfd_link_info *info,
       h->needs_copy = 1;
     }
 
-  /* We need to figure out the alignment required for this symbol.  I
-     have no idea how ELF linkers handle this.  */
-  power_of_two = bfd_log2 (h->size);
-  if (power_of_two > 3)
-    power_of_two = 3;
+  s = bfd_get_section_by_name (dynobj, ".dynbss");
+  BFD_ASSERT (s != NULL);
 
-  /* Apply the required alignment.  */
-  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
-  if (power_of_two > bfd_get_section_alignment (dynobj, s))
-    {
-      if (! bfd_set_section_alignment (dynobj, s, power_of_two))
-	return FALSE;
-    }
-
-  /* Define the symbol as being at this point in the section.  */
-  h->root.u.def.section = s;
-  h->root.u.def.value = s->size;
-
-  /* Increment the section size to make room for the symbol.  */
-  s->size += h->size;
-
-  return TRUE;
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* Function :  elf_arc_finish_dynamic_symbol
@@ -2792,5 +2824,7 @@ elf_arc_add_symbol_hook (bfd * abfd,
 #define elf_backend_may_use_rel_p	0
 #define elf_backend_may_use_rela_p	1
 #define elf_backend_default_use_rela_p	1
+
+#define elf_backend_default_execstack	0
 
 #include "elf32-target.h"

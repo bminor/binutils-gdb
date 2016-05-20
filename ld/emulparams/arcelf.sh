@@ -18,3 +18,5 @@ ENTRY=__start
 SDATA_START_SYMBOLS='__SDATA_BEGIN__ = .;'
 OTHER_SECTIONS="/DISCARD/ : { *(.__arc_profile_*) }"
 EMBEDDED=yes
+
+GENERATE_SHLIB_SCRIPT=yes

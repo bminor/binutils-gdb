@@ -1,3 +1,87 @@
+2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19600
+	* config/tc-i386.c (md_apply_fix): Preserve addend for
+	BFD_RELOC_386_GOT32 and BFD_RELOC_X86_64_GOT32.
+	* testsuite/gas/i386/addend.d: New file.
+	* testsuite/gas/i386/addend.s: Likewise.
+	* testsuite/gas/i386/x86-64-addend.d: Likewise.
+	* testsuite/gas/i386/x86-64-addend.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run addend and x86-64-addend.
+	* testsuite/gas/i386/reloc32.d: Updated.
+
+2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (append_insn): Correct the encoding of a
+	constant argument for microMIPS JALX.
+	(tc_gen_reloc): Correct the encoding of an in-place addend for
+	microMIPS JALX.
+	* testsuite/gas/mips/jalx-addend.d: New test.
+	* testsuite/gas/mips/jalx-addend-n32.d: New test.
+	* testsuite/gas/mips/jalx-addend-n64.d: New test.
+	* testsuite/gas/mips/jalx-imm.d: New test.
+	* testsuite/gas/mips/jalx-imm-n32.d: New test.
+	* testsuite/gas/mips/jalx-imm-n64.d: New test.
+	* testsuite/gas/mips/jalx-addend.s: New test source.
+	* testsuite/gas/mips/jalx-imm.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c: Correct tab-after-space formatting mistakes
+	throughout.
+
+2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (find_opcode_match): Remove casting away of
+	const.
+	* config/tc-arc.h (struct arc_flags): Make flgp field const.
+
+2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (md_pcrel_from_section): Use BFD_VMA_FMT where
+	appropriate.
+	(md_convert_frag): Likewise.
+
+2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_opcode_hash_entry_iterator_next): Set
+	cached opcode to NULL when we reach a non-matching opcode.
+	* testsuite/gas/arc/asm-errors-2.d: New file.
+	* testsuite/gas/arc/asm-errors-2.err: New file.
+	* testsuite/gas/arc/asm-errors-2.s: New file.
+
+2016-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (tokenize_arguments): Add checks for array
+	overflow.
+	* testsuite/gas/arc/asm-errors.s: Addition test line added.
+	* testsuite/gas/arc/asm-errors.err: Update expected results.
+
+2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-rx.c (struct cpu_type): Change the type of a field from
+	int to enum rx_cpu_types.
+
+2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-dlx.c (struct machine_it): change the type of a field from
+	int to bfd_reloc_code_real_type.
+	* config/tc-tic4x.c: Likewise.
+
+2016-05-18  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-v850.c (v850_target_arch): change type to enum
+	bfd_architecture.
+	* config/tc-v850.h (v850_target_arch): Likewise.
+
+2016-05-18  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_insert_operand): Trim PPC_OPERAND_SIGNOPT
+	allowed negative range.
+	* testsuite/gas/ppc/power9.s: Test xxspltib of -128, not -256.
+	* testsuite/gas/ppc/power9.d: Update.
+
 2016-05-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Force Thumb when

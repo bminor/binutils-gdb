@@ -1787,17 +1787,15 @@ ppc_insert_operand (unsigned long insn,
 
   if ((operand->flags & PPC_OPERAND_SIGNOPT) != 0)
     {
-      /* Extend the allowed range for addis to [-65536, 65535].
-	 Similarly for some VLE high part insns.  For 64-bit it
-	 would be good to disable this for signed fields since the
+      /* Extend the allowed range for addis to [-32768, 65535].
+	 Similarly for cmpli and some VLE high part insns.  For 64-bit
+	 it would be good to disable this for signed fields since the
 	 value is sign extended into the high 32 bits of the register.
 	 If the value is, say, an address, then we might care about
 	 the high bits.  However, gcc as of 2014-06 uses unsigned
 	 values when loading the high part of 64-bit constants using
-	 lis.
-	 Use the same extended range for cmpli, to allow at least
-	 [-32768, 65535].  */
-      min = ~max & -right;
+	 lis.  */
+      min = ~(max >> 1) & -right;
     }
   else if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
     {

@@ -109,7 +109,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 struct cpu_type
 {
   const char *cpu_name;
-  int type;
+  enum rx_cpu_types type;
 };
 
 struct cpu_type  cpu_type_list[] =

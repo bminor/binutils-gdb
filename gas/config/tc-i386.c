@@ -9341,11 +9341,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	fixP->fx_done = 0;
 	return;
 
-      case BFD_RELOC_386_GOT32:
-      case BFD_RELOC_X86_64_GOT32:
-	value = 0; /* Fully resolved at runtime.  No addend.  */
-	break;
-
       case BFD_RELOC_VTABLE_INHERIT:
       case BFD_RELOC_VTABLE_ENTRY:
 	fixP->fx_done = 0;

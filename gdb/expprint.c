@@ -559,6 +559,26 @@ print_subexp_standard (struct expression *exp, int *pos,
 	return;
       }
 
+    case OP_RANGE:
+      {
+	enum range_type range_type;
+
+	range_type = (enum range_type)
+	  longest_to_int (exp->elts[pc + 1].longconst);
+	*pos += 2;
+
+	fputs_filtered ("RANGE(", stream);
+	if (range_type == HIGH_BOUND_DEFAULT
+	    || range_type == NONE_BOUND_DEFAULT)
+	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+	fputs_filtered ("..", stream);
+	if (range_type == LOW_BOUND_DEFAULT
+	    || range_type == NONE_BOUND_DEFAULT)
+	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+	fputs_filtered (")", stream);
+	return;
+      }
+
       /* Default ops */
 
     default:
@@ -1025,6 +1045,42 @@ dump_subexp_body_standard (struct expression *exp,
 	elt += 2;
       }
       break;
+    case OP_RANGE:
+      {
+	enum range_type range_type;
+
+	range_type = (enum range_type)
+	  longest_to_int (exp->elts[elt].longconst);
+	elt += 2;
+
+	switch (range_type)
+	  {
+	  case BOTH_BOUND_DEFAULT:
+	    fputs_filtered ("Range '..'", stream);
+	    break;
+	  case LOW_BOUND_DEFAULT:
+	    fputs_filtered ("Range '..EXP'", stream);
+	    break;
+	  case HIGH_BOUND_DEFAULT:
+	    fputs_filtered ("Range 'EXP..'", stream);
+	    break;
+	  case NONE_BOUND_DEFAULT:
+	    fputs_filtered ("Range 'EXP..EXP'", stream);
+	    break;
+	  default:
+	    fputs_filtered ("Invalid Range!", stream);
+	    break;
+	  }
+
+	if (range_type == HIGH_BOUND_DEFAULT
+	    || range_type == NONE_BOUND_DEFAULT)
+	  elt = dump_subexp (exp, stream, elt);
+	if (range_type == LOW_BOUND_DEFAULT
+	    || range_type == NONE_BOUND_DEFAULT)
+	  elt = dump_subexp (exp, stream, elt);
+      }
+      break;
+
     default:
     case OP_NULL:
     case MULTI_SUBSCRIPT:

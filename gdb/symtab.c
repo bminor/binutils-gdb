@@ -763,6 +763,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 	}
     }
   if (gsymbol->language == language_cplus
+      || gsymbol->language == language_rust
       || gsymbol->language == language_auto)
     {
       demangled =

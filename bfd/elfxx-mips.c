@@ -7780,16 +7780,24 @@ mips_elf_read_rel_addend (bfd *abfd, const Elf_Internal_Rela *rel,
   bfd_byte *location;
   unsigned int r_type;
   bfd_vma addend;
+  bfd_vma bytes;
 
   r_type = ELF_R_TYPE (abfd, rel->r_info);
   location = contents + rel->r_offset;
 
   /* Get the addend, which is stored in the input file.  */
   _bfd_mips_elf_reloc_unshuffle (abfd, r_type, FALSE, location);
-  addend = mips_elf_obtain_contents (howto, rel, abfd, contents);
+  bytes = mips_elf_obtain_contents (howto, rel, abfd, contents);
   _bfd_mips_elf_reloc_shuffle (abfd, r_type, FALSE, location);
 
-  return addend & howto->src_mask;
+  addend = bytes & howto->src_mask;
+
+  /* Shift is 2, unusually, for microMIPS JALX.  Adjust the addend
+     accordingly.  */
+  if (r_type == R_MICROMIPS_26_S1 && (bytes >> 26) == 0x3c)
+    addend <<= 1;
+
+  return addend;
 }
 
 /* REL is a relocation in ABFD that needs a partnering LO16 relocation

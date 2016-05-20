@@ -186,25 +186,25 @@ const struct powerpc_operand powerpc_operands[] =
      This sets the y bit of the BO field appropriately.  */
 #define BDM BDA + 1
   { 0xfffc, 0, insert_bdm, extract_bdm,
-      PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
+    PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when the - modifier is used
      and absolute address is used.  */
 #define BDMA BDM + 1
   { 0xfffc, 0, insert_bdm, extract_bdm,
-      PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
+    PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when the + modifier is used.
      This sets the y bit of the BO field appropriately.  */
 #define BDP BDMA + 1
   { 0xfffc, 0, insert_bdp, extract_bdp,
-      PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
+    PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when the + modifier is used
      and absolute addressing is used.  */
 #define BDPA BDP + 1
   { 0xfffc, 0, insert_bdp, extract_bdp,
-      PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
+    PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
 
   /* The BF field in an X or XL form instruction.  */
 #define BF BDPA + 1
@@ -414,7 +414,8 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* Power4 version for mfcr.  */
 #define FXM4 FXM + 1
-  { 0xff, 12, insert_fxm, extract_fxm, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
+  { 0xff, 12, insert_fxm, extract_fxm,
+    PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
   /* If the FXM4 operand is ommitted, use the sentinel value -1.  */
   { -1, -1, NULL, NULL, 0},
 
@@ -493,10 +494,16 @@ const struct powerpc_operand powerpc_operands[] =
      SI field, only negated.  */
 #define NSI NBI + 1
   { 0xffff, 0, insert_nsi, extract_nsi,
-      PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
+    PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
+
+  /* The NSI field in a D form instruction when we accept a wide range
+     of positive values.  */
+#define NSISIGNOPT NSI + 1
+  { 0xffff, 0, insert_nsi, extract_nsi,
+    PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
 
   /* The RA field in an D, DS, DQ, X, XO, M, or MDS form instruction.  */
-#define RA NSI + 1
+#define RA NSISIGNOPT + 1
 #define RA_MASK (0x1f << 16)
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_GPR },
 
@@ -601,7 +608,7 @@ const struct powerpc_operand powerpc_operands[] =
      SCLSCI8 field, only negated.  */
 #define SCLSCI8N SCLSCI8 + 1
   { 0xffffffff, PPC_OPSHIFT_INV, insert_sci8n, extract_sci8n,
-      PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
+    PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
 
   /* The SD field of the SD4 form instruction.  */
 #define SE_SD SCLSCI8N + 1
@@ -690,7 +697,8 @@ const struct powerpc_operand powerpc_operands[] =
   /* The TBR field in an XFX form instruction.  This is like the SPR
      field, but it is optional.  */
 #define TBR SV + 1
-  { 0x3ff, 11, insert_tbr, extract_tbr, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
+  { 0x3ff, 11, insert_tbr, extract_tbr,
+    PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
   /* If the TBR operand is ommitted, use the value 268.  */
   { -1, 268, NULL, NULL, 0},
 
@@ -874,12 +882,12 @@ const struct powerpc_operand powerpc_operands[] =
   /* The VLESIMM field in a D form instruction.  */
 #define VLESIMM URC + 1
   { 0xffff, PPC_OPSHIFT_INV, insert_vlesi, extract_vlesi,
-      PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
+    PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
 
   /* The VLENSIMM field in a D form instruction.  */
 #define VLENSIMM VLESIMM + 1
   { 0xffff, PPC_OPSHIFT_INV, insert_vlensi, extract_vlensi,
-      PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
+    PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
 
   /* The VLEUIMM field in a D form instruction.  */
 #define VLEUIMM VLENSIMM + 1
@@ -3878,7 +3886,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"liu",		OP(15),		DRA_MASK,    PWRCOM,	PPCNONE,	{RT, SISIGNOPT}},
 {"addis",	OP(15),		OP_MASK,     PPCCOM,	PPCNONE,	{RT, RA0, SISIGNOPT}},
 {"cau",		OP(15),		OP_MASK,     PWRCOM,	PPCNONE,	{RT, RA0, SISIGNOPT}},
-{"subis",	OP(15),		OP_MASK,     PPCCOM,	PPCNONE,	{RT, RA0, NSI}},
+{"subis",	OP(15),		OP_MASK,     PPCCOM,	PPCNONE,	{RT, RA0, NSISIGNOPT}},
 
 {"bdnz-",    BBO(16,BODNZ,0,0),		BBOATBI_MASK,  PPCCOM,	 PPCNONE,	{BDM}},
 {"bdnz+",    BBO(16,BODNZ,0,0),		BBOATBI_MASK,  PPCCOM,	 PPCNONE,	{BDP}},
