@@ -1,5 +1,10 @@
 2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-ia64.c (dot_rot): simplify allocations from obstacks.
+	(ia64_frob_label): Likewise.
+
+2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-cr16.c (check_range): Make type of retval op_err.
 	* config/tc-crx.c: Likewise.
 
