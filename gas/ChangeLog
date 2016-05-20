@@ -1,3 +1,9 @@
+2016-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Update comment.  Add
+	p6600 entry.
+	* doc/c-mips.texi: Document p6600 -march option.
+
 2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/19600
