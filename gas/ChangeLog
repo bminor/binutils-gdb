@@ -1,5 +1,21 @@
 2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (append_insn): Correct the encoding of a
+	constant argument for microMIPS JALX.
+	(tc_gen_reloc): Correct the encoding of an in-place addend for
+	microMIPS JALX.
+	* testsuite/gas/mips/jalx-addend.d: New test.
+	* testsuite/gas/mips/jalx-addend-n32.d: New test.
+	* testsuite/gas/mips/jalx-addend-n64.d: New test.
+	* testsuite/gas/mips/jalx-imm.d: New test.
+	* testsuite/gas/mips/jalx-imm-n32.d: New test.
+	* testsuite/gas/mips/jalx-imm-n64.d: New test.
+	* testsuite/gas/mips/jalx-addend.s: New test source.
+	* testsuite/gas/mips/jalx-imm.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c: Correct tab-after-space formatting mistakes
 	throughout.
 

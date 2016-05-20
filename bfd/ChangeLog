@@ -1,3 +1,8 @@
+2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_read_rel_addend): Adjust the addend for
+	microMIPS JALX.
+
 2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20117

@@ -1,3 +1,10 @@
+2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/jalx-addend.d: New test.
+	* testsuite/ld-mips-elf/jalx-addend-n32.d: New test.
+	* testsuite/ld-mips-elf/jalx-addend-n64.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20117

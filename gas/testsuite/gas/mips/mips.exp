@@ -794,6 +794,14 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips16-jalx"
     run_dump_test "mips-jalx"
     run_dump_test "mips-jalx-2"
+    run_dump_test "jalx-imm"
+    run_dump_test "jalx-addend"
+    if $has_newabi {
+	run_dump_test "jalx-imm-n32"
+	run_dump_test "jalx-addend-n32"
+	run_dump_test "jalx-imm-n64"
+	run_dump_test "jalx-addend-n64"
+    }
     # Check MIPS16 HI16/LO16 relocations
     run_dump_test "mips16-hilo"
     if $has_newabi {

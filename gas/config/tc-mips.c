@@ -7044,7 +7044,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  {
 	    int shift;
 
-	    shift = mips_opts.micromips ? 1 : 2;
+	    /* Shift is 2, unusually, for microMIPS JALX.  */
+	    shift = (mips_opts.micromips
+		     && strcmp (ip->insn_mo->name, "jalx") != 0) ? 1 : 2;
 	    if ((address_expr->X_add_number & ((1 << shift) - 1)) != 0)
 	      as_bad (_("jump to misaligned address (0x%lx)"),
 		      (unsigned long) address_expr->X_add_number);
@@ -17224,6 +17226,15 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       /* At this point, fx_addnumber is "symbol offset - pcrel address".
 	 Relocations want only the symbol offset.  */
       reloc->addend = fixp->fx_addnumber + reloc->address;
+    }
+  else if (HAVE_IN_PLACE_ADDENDS
+	   && fixp->fx_r_type == BFD_RELOC_MICROMIPS_JMP
+	   && (read_compressed_insn (fixp->fx_frag->fr_literal
+				     + fixp->fx_where, 4) >> 26) == 0x3c)
+    {
+      /* Shift is 2, unusually, for microMIPS JALX.  Adjust the in-place
+         addend accordingly.  */
+      reloc->addend = fixp->fx_addnumber >> 1;
     }
   else
     reloc->addend = fixp->fx_addnumber;
