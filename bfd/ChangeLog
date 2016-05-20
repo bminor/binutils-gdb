@@ -1,3 +1,17 @@
+2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Don't check R_386_GOT32
+	when setting need_convert_load.
+
+	2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20117
+	* elf32-i386.c (elf_i386_convert_load): Don't convert
+	R_386_GOT32.
+
 2016-05-18  Christophe Monat  <christophe.monat@st.com>
 
 	Backport from master

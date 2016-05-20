@@ -1,3 +1,13 @@
+2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20117
+	* testsuite/ld-i386/i386.exp: Run pr20117.
+	* testsuite/ld-i386/pr20117.d: New file.
+	* testsuite/ld-i386/pr20117.s: Likewise.
+
 2016-05-18  Christophe Monat  <christophe.monat@st.com>
 
 	Backport from master
