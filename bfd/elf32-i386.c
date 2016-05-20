@@ -2256,7 +2256,7 @@ do_size:
 	    goto error_return;
 	}
 
-      if ((r_type == R_386_GOT32 || r_type == R_386_GOT32X)
+      if (r_type == R_386_GOT32X
 	  && (h == NULL || h->type != STT_GNU_IFUNC))
 	sec->need_convert_load = 1;
     }
