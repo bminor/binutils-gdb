@@ -1,3 +1,8 @@
+2016-05-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-tdep.c (arm_elf_make_msymbol_special): A newline after variable
+	declaration.
+
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-tdep.c (arm_elf_make_msymbol_special): Use

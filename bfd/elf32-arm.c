@@ -2584,11 +2584,12 @@ enum elf32_arm_stub_type
 {
   arm_stub_none,
   DEF_STUBS
-  max_stub_type,
-  /* Note the first a8_veneer type.  */
-  arm_stub_a8_veneer_lwm = arm_stub_a8_veneer_b_cond,
+  max_stub_type
 };
 #undef DEF_STUB
+
+/* Note the first a8_veneer type.  */
+const unsigned arm_stub_a8_veneer_lwm = arm_stub_a8_veneer_b_cond;
 
 typedef struct
 {
@@ -6251,11 +6252,10 @@ elf32_arm_size_stubs (bfd *output_bfd,
 					       branch_type, &new_stub);
 
 		      created_stub = stub_entry != NULL;
-		      if (!created_stub || !new_stub)
-			{
-			  if (!created_stub)
-			    goto error_ret_free_internal;
-			}
+		      if (!created_stub)
+			goto error_ret_free_internal;
+		      else if (!new_stub)
+			break;
 		      else
 			stub_changed = TRUE;
 		    }

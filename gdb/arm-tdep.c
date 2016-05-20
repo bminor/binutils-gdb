@@ -9567,6 +9567,7 @@ static void
 arm_elf_make_msymbol_special(asymbol *sym, struct minimal_symbol *msym)
 {
   elf_symbol_type *elfsym = (elf_symbol_type *) sym;
+
   if (ARM_GET_SYM_BRANCH_TYPE (elfsym->internal_elf_sym.st_target_internal)
       == ST_BRANCH_TO_THUMB)
     MSYMBOL_SET_SPECIAL (msym);

@@ -1,3 +1,13 @@
+2016-05-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (enum arm_st_branch_type): Add ST_BRANCH_ENUM_SIZE enumerator.
+	(NUM_ENUM_ARM_ST_BRANCH_TYPE_BITS): Define macro.
+	(ENUM_ARM_ST_BRANCH_TYPE_BITMASK): Likewise.
+	(ARM_GET_SYM_BRANCH_TYPE): Use above variable to mask the bits for
+	branch type.
+	(ARM_SET_SYM_BRANCH_TYPE): Add a version with asserts used when
+	BFD_ASSERT is defined.
+
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm.h (ARM_GET_SYM_CMSE_SPCL): Define macro.

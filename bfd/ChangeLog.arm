@@ -1,3 +1,10 @@
+2016-05-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (enum elf32_arm_stub_type): Remove
+	arm_stub_a8_veneer_lwm enumerator.
+	(arm_stub_a8_veneer_lwm): New global constant.
+	(elf32_arm_size_stubs): Break if stub was only updated.
+
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (elf32_arm_get_stub_entry): Assert that we don't access

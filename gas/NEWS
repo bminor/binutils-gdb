@@ -1,4 +1,7 @@
 -*- text -*-
+* Support for the ARMv8-M architecture has been added to the ARM port.  Support
+  for the ARMv8-M Security and DSP Extensions has also been added to the ARM
+  port.
 
 * Add a configure option --enable-x86-relax-relocations to decide whether
   x86 assembler should generate relax relocations by default.  Default to
