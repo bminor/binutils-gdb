@@ -1,5 +1,13 @@
 2016-06-13  Cupertino Miranda  <cmiranda@synospsy.com>
 
+	* elf32-arc.c (arc_local_data, arc_local_data): Removed.
+	(SECTSTART): Changed.
+	(elf_arc_relocate_section): Fixed mistake in PIE related
+	condition.
+	(elf_arc_size_dynamic_sections): Changed DT_RELENT to DT_RELAENT.
+
+2016-06-13  Cupertino Miranda  <cmiranda@synospsy.com>
+
 	* elf32-arc.c (elf32_arc_reloc_type_class): Defined function to
 	enable support for "-z combreloc" and DT_RELACOUNT.
 	(elf_backend_reloc_type_class): Likewise
