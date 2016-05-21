@@ -2090,13 +2090,13 @@ nds32_start_line_hook (void)
  * Pseudo opcodes
  */
 
-typedef void (*nds32_pseudo_opcode_func) (int argc, char *argv[], int pv);
+typedef void (*nds32_pseudo_opcode_func) (int argc, char *argv[], unsigned int pv);
 struct nds32_pseudo_opcode
 {
   const char *opcode;
   int argc;
   nds32_pseudo_opcode_func proc;
-  int pseudo_val;
+  unsigned int pseudo_val;
 
   /* Some instructions are not pseudo opcode, but they might still be
      expanded or changed with other instruction combination for some
@@ -2183,7 +2183,8 @@ static void do_pseudo_li_internal (const char *rt, int imm32s);
 static void do_pseudo_move_reg_internal (char *dst, char *src);
 
 static void
-do_pseudo_b (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_b (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	     unsigned int pv ATTRIBUTE_UNUSED)
 {
   char *arg_label = argv[0];
   relaxing = TRUE;
@@ -2203,7 +2204,8 @@ do_pseudo_b (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_bal (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_bal (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	       unsigned int pv ATTRIBUTE_UNUSED)
 {
   char *arg_label = argv[0];
   relaxing = TRUE;
@@ -2224,7 +2226,8 @@ do_pseudo_bal (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_bge (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_bge (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	       unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* rt5, ra5, label */
   md_assemblef ("slt $ta,%s,%s", argv[0], argv[1]);
@@ -2232,7 +2235,8 @@ do_pseudo_bge (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_bges (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_bges (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* rt5, ra5, label */
   md_assemblef ("slts $ta,%s,%s", argv[0], argv[1]);
@@ -2240,7 +2244,8 @@ do_pseudo_bges (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED
 }
 
 static void
-do_pseudo_bgt (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_bgt (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	       unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* bgt rt5, ra5, label */
   md_assemblef ("slt $ta,%s,%s", argv[1], argv[0]);
@@ -2248,7 +2253,8 @@ do_pseudo_bgt (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_bgts (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_bgts (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* bgt rt5, ra5, label */
   md_assemblef ("slts $ta,%s,%s", argv[1], argv[0]);
@@ -2256,7 +2262,8 @@ do_pseudo_bgts (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED
 }
 
 static void
-do_pseudo_ble (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_ble (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	       unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* bgt rt5, ra5, label */
   md_assemblef ("slt $ta,%s,%s", argv[1], argv[0]);
@@ -2264,7 +2271,8 @@ do_pseudo_ble (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_bles (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_bles (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* bgt rt5, ra5, label */
   md_assemblef ("slts $ta,%s,%s", argv[1], argv[0]);
@@ -2272,7 +2280,8 @@ do_pseudo_bles (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED
 }
 
 static void
-do_pseudo_blt (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_blt (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	       unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* rt5, ra5, label */
   md_assemblef ("slt $ta,%s,%s", argv[0], argv[1]);
@@ -2280,7 +2289,8 @@ do_pseudo_blt (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_blts (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_blts (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* rt5, ra5, label */
   md_assemblef ("slts $ta,%s,%s", argv[0], argv[1]);
@@ -2288,13 +2298,15 @@ do_pseudo_blts (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED
 }
 
 static void
-do_pseudo_br (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_br (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	      unsigned int pv ATTRIBUTE_UNUSED)
 {
   md_assemblef ("jr %s", argv[0]);
 }
 
 static void
-do_pseudo_bral (int argc, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_bral (int argc, char *argv[], 
+		unsigned int pv ATTRIBUTE_UNUSED)
 {
   if (argc == 1)
     md_assemblef ("jral $lp,%s", argv[0]);
@@ -2369,7 +2381,8 @@ do_pseudo_la_internal (const char *arg_reg, char *arg_label,
 }
 
 static void
-do_pseudo_la (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_la (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	      unsigned int pv ATTRIBUTE_UNUSED)
 {
   do_pseudo_la_internal (argv[0], argv[1], argv[argc]);
 }
@@ -2391,7 +2404,8 @@ do_pseudo_li_internal (const char *rt, int imm32s)
 }
 
 static void
-do_pseudo_li (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_li (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	      unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* Validate argv[1] for constant expression.  */
   expressionS exp;
@@ -2407,7 +2421,8 @@ do_pseudo_li (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_ls_bhw (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
+do_pseudo_ls_bhw (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		  unsigned int pv)
 {
   char ls = 'r';
   char size = 'x';
@@ -2494,7 +2509,8 @@ do_pseudo_ls_bhw (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
 }
 
 static void
-do_pseudo_ls_bhwp (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
+do_pseudo_ls_bhwp (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		   unsigned int pv)
 {
   char *arg_rt = argv[0];
   char *arg_label = argv[1];
@@ -2521,7 +2537,8 @@ do_pseudo_ls_bhwp (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
 }
 
 static void
-do_pseudo_ls_bhwpc (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
+do_pseudo_ls_bhwpc (int argc ATTRIBUTE_UNUSED, char *argv[],
+		    unsigned int pv)
 {
   char *arg_rt = argv[0];
   char *arg_inc = argv[1];
@@ -2546,7 +2563,8 @@ do_pseudo_ls_bhwpc (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
 }
 
 static void
-do_pseudo_ls_bhwi (int argc ATTRIBUTE_UNUSED, char *argv[], int pv)
+do_pseudo_ls_bhwi (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		   unsigned int pv)
 {
   char ls = 'r';
   char size = 'x';
@@ -2579,7 +2597,8 @@ do_pseudo_move_reg_internal (char *dst, char *src)
 }
 
 static void
-do_pseudo_move (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_move (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		unsigned int pv ATTRIBUTE_UNUSED)
 {
   expressionS exp;
 
@@ -2598,20 +2617,23 @@ do_pseudo_move (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED
 }
 
 static void
-do_pseudo_neg (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_neg (int argc ATTRIBUTE_UNUSED, char *argv[], 
+	       unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* Instead of "subri".  */
   md_assemblef ("subri %s,%s,0", argv[0], argv[1]);
 }
 
 static void
-do_pseudo_not (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_not (int argc ATTRIBUTE_UNUSED, char *argv[],
+	       unsigned int pv ATTRIBUTE_UNUSED)
 {
   md_assemblef ("nor %s,%s,%s", argv[0], argv[1], argv[1]);
 }
 
 static void
-do_pseudo_pushpopm (int argc, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_pushpopm (int argc, char *argv[],
+		    unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* posh/pop $ra, $rb */
   /* SMW.{b | a}{i | d}{m?} Rb, [Ra], Re, Enable4 */
@@ -2673,7 +2695,8 @@ do_pseudo_pushpopm (int argc, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_pushpop (int argc, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_pushpop (int argc, char *argv[],
+		   unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* push/pop $ra5, $label=$sp */
   char *argvm[3];
@@ -2689,13 +2712,15 @@ do_pseudo_pushpop (int argc, char *argv[], int pv ATTRIBUTE_UNUSED)
 }
 
 static void
-do_pseudo_v3push (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_v3push (int argc ATTRIBUTE_UNUSED, char *argv[],
+		  unsigned int pv ATTRIBUTE_UNUSED)
 {
   md_assemblef ("push25 %s,%s", argv[0], argv[1]);
 }
 
 static void
-do_pseudo_v3pop (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_v3pop (int argc ATTRIBUTE_UNUSED, char *argv[], 
+		 unsigned int pv ATTRIBUTE_UNUSED)
 {
   md_assemblef ("pop25 %s,%s", argv[0], argv[1]);
 }
@@ -2704,7 +2729,8 @@ do_pseudo_v3pop (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSE
    pv != 0, parsing "pop.s" pseudo instruction operands.  */
 
 static void
-do_pseudo_pushpop_stack (int argc, char *argv[], int pv)
+do_pseudo_pushpop_stack (int argc, char *argv[],
+			 unsigned int pv)
 {
   /* push.s Rb,Re,{$fp $gp $lp $sp}  ==>  smw.adm Rb,[$sp],Re,Eable4  */
   /* pop.s Rb,Re,{$fp $gp $lp $sp}   ==>  lmw.bim Rb,[$sp],Re,Eable4  */
@@ -2768,7 +2794,8 @@ do_pseudo_pushpop_stack (int argc, char *argv[], int pv)
 }
 
 static void
-do_pseudo_push_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_push_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[],
+		     unsigned int pv ATTRIBUTE_UNUSED)
 {
   char size = 'x';
   /* If users omit push location, use $sp as default value.  */
@@ -2799,7 +2826,8 @@ do_pseudo_push_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_U
 }
 
 static void
-do_pseudo_pop_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_pop_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[],
+		    unsigned int pv ATTRIBUTE_UNUSED)
 {
   char size = 'x';
   /* If users omit pop location, use $sp as default value.  */
@@ -2830,7 +2858,8 @@ do_pseudo_pop_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UN
 }
 
 static void
-do_pseudo_pusha (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_pusha (int argc ATTRIBUTE_UNUSED, char *argv[],
+		 unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* If users omit push location, use $sp as default value.  */
   char location[8] = "$sp";  /* 8 is enough for register name.  */
@@ -2846,7 +2875,8 @@ do_pseudo_pusha (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSE
 }
 
 static void
-do_pseudo_pushi (int argc ATTRIBUTE_UNUSED, char *argv[], int pv ATTRIBUTE_UNUSED)
+do_pseudo_pushi (int argc ATTRIBUTE_UNUSED, char *argv[],
+		 unsigned int pv ATTRIBUTE_UNUSED)
 {
   /* If users omit push location, use $sp as default value.  */
   char location[8] = "$sp";  /* 8 is enough for register name.  */

@@ -1,5 +1,40 @@
 2016-07-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-nds32.c (struct nds32_pseudo_opcode): Make pseudo_val
+	unsigned int.
+	(do_pseudo_b): Adjust.
+	(do_pseudo_bal): Likewise.
+	(do_pseudo_bge): Likewise.
+	(do_pseudo_bges): Likewise.
+	(do_pseudo_bgt): Likewise.
+	(do_pseudo_bgts): Likewise.
+	(do_pseudo_ble): Likewise.
+	(do_pseudo_bles): Likewise.
+	(do_pseudo_blt): Likewise.
+	(do_pseudo_blts): Likewise.
+	(do_pseudo_br): Likewise.
+	(do_pseudo_bral): Likewise.
+	(do_pseudo_la): Likewise.
+	(do_pseudo_li): Likewise.
+	(do_pseudo_ls_bhw): Likewise.
+	(do_pseudo_ls_bhwp): Likewise.
+	(do_pseudo_ls_bhwpc): Likewise.
+	(do_pseudo_ls_bhwi): Likewise.
+	(do_pseudo_move): Likewise.
+	(do_pseudo_neg): Likewise.
+	(do_pseudo_not): Likewise.
+	(do_pseudo_pushpopm): Likewise.
+	(do_pseudo_pushpop): Likewise.
+	(do_pseudo_v3push): Likewise.
+	(do_pseudo_v3pop): Likewise.
+	(do_pseudo_pushpop_stack): Likewise.
+	(do_pseudo_push_bhwd): Likewise.
+	(do_pseudo_pop_bhwd): Likewise.
+	(do_pseudo_pusha): Likewise.
+	(do_pseudo_pushi): Likewise.
+
+2016-07-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-sparc.c (struct pop_entry): Make the type of reloc
 	bfd_reloc_code_real_type.
 
