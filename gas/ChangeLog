@@ -1,5 +1,11 @@
 2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-ft32.h (DEFAULT_TARGET_FORMAT): Remove.
+	(ft32_target_format): Likewise.
+	(TARGET_FORMAT): Adjust.
+
+2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-ia64.c (dot_rot): simplify allocations from obstacks.
 	(ia64_frob_label): Likewise.
 
