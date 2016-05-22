@@ -1,5 +1,9 @@
 2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-d30v.c (find_format): Change type of X_op to operatorT.
+
+2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-mmix.c (mmix_parse_predefined_name): Change type of
 	handler_charp to const char *.
 
