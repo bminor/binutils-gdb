@@ -3813,7 +3813,7 @@ int
 mmix_parse_predefined_name (char *name, expressionS *expP)
 {
   char *canon_name;
-  char *handler_charp;
+  const char *handler_charp;
   const char handler_chars[] = "DVWIOUZX";
   symbolS *symp;
 

@@ -1,5 +1,10 @@
 2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-mmix.c (mmix_parse_predefined_name): Change type of
+	handler_charp to const char *.
+
+2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-ft32.h (DEFAULT_TARGET_FORMAT): Remove.
 	(ft32_target_format): Likewise.
 	(TARGET_FORMAT): Adjust.
