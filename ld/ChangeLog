@@ -1,3 +1,10 @@
+2016-05-23  Kuba Sejdak  <jakub.sejdak@phoesys.com>
+
+	* Makefile.am: Add earmelf_phoenix.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add entry for arm-phoenix.
+	* emulparams/armelf_phoenix.sh: New file.
+
 2016-05-23  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* emultempl/armelf.em (arm_elf_before_allocation): Call

@@ -349,6 +349,10 @@ case "${targ}" in
     targ_selvecs=arm_coff_be_vec
     targ_underscore=yes
     ;;
+  arm-*-phoenix*)
+    targ_defvec=arm_elf32_le_vec
+    targ_selvecs=arm_elf32_be_vec
+    ;;
   arm-*-rtems*)
     targ_defvec=arm_elf32_le_vec
     targ_selvecs=arm_elf32_be_vec

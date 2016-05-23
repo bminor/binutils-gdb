@@ -1,3 +1,7 @@
+2016-05-23  Kuba Sejdak  <jakub.sejdak@phoesys.com>
+
+	* config.bfd: Add entry for arm-phoenix.
+
 2016-05-23  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (arm_dedicated_stub_section_padding): New function.
