@@ -339,8 +339,8 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   /* Basic data relocations.  */
 
-#if ARCH_SIZE == 64
-  HOWTO (R_AARCH64_NULL,	/* type */
+  /* Deprecated, but retained for backwards compatibility.  */
+  HOWTO64 (R_AARCH64_NULL,	/* type */
 	 0,			/* rightshift */
 	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
@@ -353,7 +353,6 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-#else
   HOWTO (R_AARCH64_NONE,	/* type */
 	 0,			/* rightshift */
 	 3,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -367,7 +366,6 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-#endif
 
   /* .xword: (S+A) */
   HOWTO64 (AARCH64_R (ABS64),	/* type */

@@ -1,3 +1,11 @@
+2016-05-23  Jim Wilson  <jim.wilson@linaro.org>
+
+	* elfnn-aarch64.c: Unconditionally enable R_AARCH64_NULL and
+	R_AARCH64_NONE.  Use HOWTO64 for R_AARCH64_NULL.
+	* relocs.c: Add BFD_RELOC_AARCH64_NULL.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+
 2016-05-23  Kuba Sejdak  <jakub.sejdak@phoesys.com>
 
 	* config.bfd: Add entry for arm-phoenix.

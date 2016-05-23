@@ -5720,6 +5720,9 @@ important as several tables in the AArch64 bfd backend are indexed
 by these enumerators; make sure they are all synced.  */
   BFD_RELOC_AARCH64_RELOC_START,
 
+/* Deprecated AArch64 null relocation code.  */
+  BFD_RELOC_AARCH64_NULL,
+
 /* AArch64 null relocation code.  */
   BFD_RELOC_AARCH64_NONE,
 
