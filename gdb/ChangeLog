@@ -1,3 +1,8 @@
+2016-05-23  Jon Boden  <jon@ubuntubsd.org>  (tiny change)
+
+	* configure.ac: Search for libutil-freebsd as alternative to libutil.
+	* configure: Re-generated.
+
 2016-05-19  Andreas Schwab  <schwab@suse.de>
 
 	* ia64-libunwind-tdep.c (libunwind_descr): Add cast from void *.

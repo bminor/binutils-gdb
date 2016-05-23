@@ -535,7 +535,8 @@ AC_SEARCH_LIBS(socketpair, socket)
 AM_ZLIB
 
 # On FreeBSD we may need libutil for kinfo_getvmmap (used by fbsd-nat.c).
-AC_SEARCH_LIBS(kinfo_getvmmap, util,
+# On GNU/kFreeBSD systems, FreeBSD libutil is renamed to libutil-freebsd.
+AC_SEARCH_LIBS(kinfo_getvmmap, util util-freebsd,
   [AC_DEFINE(HAVE_KINFO_GETVMMAP, 1,
             [Define to 1 if your system has the kinfo_getvmmap function. ])])
 
