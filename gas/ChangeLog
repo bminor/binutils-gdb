@@ -1,5 +1,11 @@
 2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-xtensa.c (struct suffix_reloc_map): Change type of field
+	operator to operatorT.
+	(map_suffix_reloc_to_operator): Change return type to operatorT.
+
+2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-d30v.c (find_format): Change type of X_op to operatorT.
 
 2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
