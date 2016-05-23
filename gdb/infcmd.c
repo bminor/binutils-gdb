@@ -1902,7 +1902,14 @@ finish_command (char *arg, int from_tty)
   if (execution_direction == EXEC_REVERSE)
     finish_backward (function);
   else
-    finish_forward (function, frame);
+    {
+      frame = skip_unwritable_frames (frame);
+
+      if (frame == NULL)
+	error (_("Cannot find the caller frame."));
+
+      finish_forward (function, frame);
+    }
 }
 
 

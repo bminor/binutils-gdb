@@ -132,6 +132,13 @@ generic_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
+int
+default_code_of_frame_writable (struct gdbarch *gdbarch,
+				struct frame_info *frame)
+{
+  return 1;
+}
+
 /* Helper functions for gdbarch_inner_than */
 
 int

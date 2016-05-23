@@ -814,4 +814,9 @@ extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 extern int frame_unwinder_is (struct frame_info *fi,
 			      const struct frame_unwind *unwinder);
 
+/* Return the first frame above FRAME or FRAME of which the code is
+   writable.  */
+
+extern struct frame_info *skip_unwritable_frames (struct frame_info *frame);
+
 #endif /* !defined (FRAME_H)  */
