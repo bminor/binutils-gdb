@@ -1,3 +1,9 @@
+2016-05-23  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* config/tc-arc.c (attributes_t): Renamed attribute class to
+	attr_class.
+	(find_opcode_match, assemble_insn, tokenize_extinsn): Changed.
+
 2016-05-23  Kuba Sejdak  <jakub.sejdak@phoesys.com>
 
 	* configuse.tgt: Add entry for arm-phoenix.

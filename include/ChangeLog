@@ -1,3 +1,9 @@
+2016-05-23  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* opcode/arc.h (struct arc_opcode): Renamed attribute class to
+	insn_class.
+	(struct arc_flag_class): Renamed attribute class to flag_class.
+
 2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* opcode/tic54x.h (struct symbol_): typedef to tic54x_symbol instead of

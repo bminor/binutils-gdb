@@ -1,3 +1,9 @@
+2016-05-23  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-dis.c (find_format, find_format, get_auxreg)
+	(print_insn_arc): Changed.
+	* arc-ext.h (INSERT_XOP): Likewise.
+
 2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* tic54x-dis.c (sprint_mmr): Adjust.
