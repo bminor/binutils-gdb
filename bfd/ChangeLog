@@ -1,3 +1,23 @@
+2016-05-23  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* bfd-in.h (bfd_elf32_arm_keep_private_stub_output_sections): Declare
+	bfd hook.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (arm_dedicated_stub_output_section_required): New
+	function.
+	(arm_dedicated_stub_output_section_required_alignment): Likewise.
+	(arm_dedicated_stub_output_section_name): Likewise.
+	(arm_dedicated_stub_input_section_ptr): Likewise.
+	(elf32_arm_create_or_find_stub_sec): Add stub type parameter and
+	function description comment. Add support for dedicated output stub
+	section to given stub types.
+	(elf32_arm_add_stub): Add a stub type parameter and pass it down to
+	elf32_arm_create_or_find_stub_sec.
+	(elf32_arm_create_stub): Pass stub type down to elf32_arm_add_stub.
+	(elf32_arm_size_stubs): Pass stub type when calling
+	elf32_arm_create_or_find_stub_sec for Cortex-A8 erratum veneers.
+	(bfd_elf32_arm_keep_private_stub_output_sections): New function.
+
 2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Don't check R_386_GOT32
