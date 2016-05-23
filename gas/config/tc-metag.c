@@ -6847,7 +6847,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 void
 metag_handle_align (fragS * fragP)
 {
-  static char const noop[4] = { 0xfe, 0xff, 0xff, 0xa0 };
+  static unsigned char const noop[4] = { 0xfe, 0xff, 0xff, 0xa0 };
   int bytes, fix;
   char *p;
 
