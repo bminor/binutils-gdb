@@ -8862,6 +8862,22 @@ arm_register_g_packet_guesses (struct gdbarch *gdbarch)
   /* Otherwise we don't have a useful guess.  */
 }
 
+/* Implement the code_of_frame_writable gdbarch method.  */
+
+static int
+arm_code_of_frame_writable (struct gdbarch *gdbarch, struct frame_info *frame)
+{
+  if (gdbarch_tdep (gdbarch)->is_m
+      && get_frame_type (frame) == SIGTRAMP_FRAME)
+    {
+      /* M-profile exception frames return to some magic PCs, where
+	 isn't writable at all.  */
+      return 0;
+    }
+  else
+    return 1;
+}
+
 
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
@@ -9311,6 +9327,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, arm_frame_align);
+
+  if (is_m)
+    set_gdbarch_code_of_frame_writable (gdbarch, arm_code_of_frame_writable);
 
   set_gdbarch_write_pc (gdbarch, arm_write_pc);
 

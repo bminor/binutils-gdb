@@ -1,3 +1,16 @@
+2016-05-23  Yao Qi  <yao.qi@arm.com>
+
+	* arch-utils.c (default_code_of_frame_writable): New function.
+	* arch-utils.h (default_code_of_frame_writable): Declare.
+	* arm-tdep.c (arm_code_of_frame_writable): New function.
+	(arm_gdbarch_init): Install gdbarch method
+	code_of_frame_writable if the target is M-profile.
+	* frame.c (skip_unwritable_frames): New function.
+	* frame.h (skip_unwritable_frames): Declare.
+	* gdbarch.sh (code_of_frame_writable): New.
+	* gdbarch.c, gdbarch.h: Re-generated.
+	* infcmd.c (finish_command): Call skip_unwritable_frames.
+
 2016-05-23  Tom Tromey  <tom@tromey.com>
 
 	PR python/19438, PR python/18393:
