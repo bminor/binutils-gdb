@@ -1,3 +1,8 @@
+2016-05-24  Tom Tromey  <tom@tromey.com>
+
+	* python/py-value.c (value_object_as_number): Add
+	nb_inplace_divide for Python 2.
+
 2016-05-23  Tom Tromey  <tom@tromey.com>
 
 	PR python/17981:

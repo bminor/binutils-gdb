@@ -1827,6 +1827,9 @@ static PyNumberMethods value_object_as_number = {
   NULL,                       /* nb_inplace_add */
   NULL,                       /* nb_inplace_subtract */
   NULL,                       /* nb_inplace_multiply */
+#ifndef IS_PY3K
+  NULL,                       /* nb_inplace_divide */
+#endif
   NULL,                       /* nb_inplace_remainder */
   NULL,                       /* nb_inplace_power */
   NULL,                       /* nb_inplace_lshift */
