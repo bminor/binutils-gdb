@@ -1,3 +1,7 @@
+2016-05-23  Kuba Sejdak  <jakub.sejdak@phoesys.com>
+
+	* configuse.tgt: Add entry for arm-phoenix.
+
 2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-tic54x.c (tic54x_sect): simplify string creation.
