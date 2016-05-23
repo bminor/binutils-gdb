@@ -1,5 +1,12 @@
 2016-06-27  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-xtensa.c (xtensa_elf_suffix): Use ARRAY_SIZE instead of a
+	sentinal element.
+	(map_suffix_reloc_to_operator): Likewise.
+	(map_operator_to_reloc): Likewise.
+
+2016-06-27  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-nds32.c (md_begin): Use ARRAY_SIZE instead of a sentinal
 	element in relax_table.
 
