@@ -158,7 +158,6 @@ struct thread_db_info
   td_ta_new_ftype *td_ta_new_p;
   td_ta_map_lwp2thr_ftype *td_ta_map_lwp2thr_p;
   td_ta_thr_iter_ftype *td_ta_thr_iter_p;
-  td_thr_validate_ftype *td_thr_validate_p;
   td_thr_get_info_ftype *td_thr_get_info_p;
   td_thr_tls_get_addr_ftype *td_thr_tls_get_addr_p;
   td_thr_tlsbase_ftype *td_thr_tlsbase_p;
@@ -561,7 +560,6 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   /* These are essential.  */
   CHK (TDB_VERBOSE_DLSYM (info, td_ta_map_lwp2thr));
-  CHK (TDB_VERBOSE_DLSYM (info, td_thr_validate));
   CHK (TDB_VERBOSE_DLSYM (info, td_thr_get_info));
 
   /* These are not essential.  */

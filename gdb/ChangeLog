@@ -1,3 +1,10 @@
+2016-05-23  Gary Benson  <gbenson@redhat.com>
+
+	* nat/gdb_thread_db.h (td_thr_validate_ftype): Remove typedef.
+	* linux-thread-db.c (struct thread_db_info) <td_thr_validate_p>:
+	Remove field.
+	(try_thread_db_load_1): Remove td_thr_validate initialization.
+
 2016-05-23  Jon Boden  <jon@ubuntubsd.org>  (tiny change)
 
 	* configure.ac: Search for libutil-freebsd as alternative to libutil.
