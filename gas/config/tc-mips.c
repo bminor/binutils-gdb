@@ -17165,9 +17165,9 @@ mips_fix_adjustable (fixS *fixp)
      There is a further restriction:
 
        5. We cannot reduce jump relocations (R_MIPS_26, R_MIPS16_26 or
-	  R_MICROMIPS_26_S1) against MIPS16 or microMIPS symbols on
-	  targets with in-place addends; the relocation field cannot
-	  encode the low bit.
+	  R_MICROMIPS_26_S1) against MIPS16 or microMIPS symbols because
+	  we need to keep the MIPS16 or microMIPS symbol for the purpose
+	  of converting JAL to JALX instructions in the linker.
 
      For simplicity, we deal with (3)-(4) by not reducing _any_ relocation
      against a MIPS16 symbol.  We deal with (5) by by not reducing any
@@ -17182,10 +17182,9 @@ mips_fix_adjustable (fixS *fixp)
      that we have for MIPS16 symbols.  */
   if (fixp->fx_subsy == NULL
       && (ELF_ST_IS_MIPS16 (S_GET_OTHER (fixp->fx_addsy))
-	  || *symbol_get_tc (fixp->fx_addsy)
-	  || (HAVE_IN_PLACE_ADDENDS
-	      && ELF_ST_IS_MICROMIPS (S_GET_OTHER (fixp->fx_addsy))
-	      && jmp_reloc_p (fixp->fx_r_type))))
+	  || (ELF_ST_IS_MICROMIPS (S_GET_OTHER (fixp->fx_addsy))
+	      && jmp_reloc_p (fixp->fx_r_type))
+	  || *symbol_get_tc (fixp->fx_addsy)))
     return 0;
 
   return 1;

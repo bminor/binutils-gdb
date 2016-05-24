@@ -1,4 +1,15 @@
 2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
+    
+	* config/tc-mips.c (mips_fix_adjustable): Also return 0 for
+	jump relocations against MIPS16 or microMIPS symbols on RELA
+	targets.
+	* testsuite/gas/mips/jalx-local.d: New test.
+	* testsuite/gas/mips/jalx-local-n32.d: New test.
+	* testsuite/gas/mips/jalx-local-n64.d: New test.
+	* testsuite/gas/mips/jalx-local.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (md_apply_fix)
 	<BFD_RELOC_MIPS16_TLS_TPREL_LO16>: Remove fall-through, adjust

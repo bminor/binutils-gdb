@@ -169,9 +169,12 @@ if { $linux_gnu } {
 }
 
 run_dump_test "jalx-addend" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "jalx-local" [list [list ld $abi_ldflags(o32)]]
 if $has_newabi {
     run_dump_test "jalx-addend-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "jalx-local-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "jalx-addend-n64" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "jalx-local-n64" [list [list ld $abi_ldflags(n64)]]
 }
 
 # Test multi-got link.  We only do this on GNU/Linux because it requires
