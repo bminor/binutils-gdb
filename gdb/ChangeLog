@@ -1,3 +1,7 @@
+2016-05-24  Yan-Ting Lin  <currygt52@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add "Yan-Ting Lin".
+
 2016-05-23  Yao Qi  <yao.qi@arm.com>
 
 	* arch-utils.c (default_code_of_frame_writable): New function.
