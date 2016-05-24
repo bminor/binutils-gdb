@@ -49,11 +49,23 @@ gdb_test "p wp%point" " = \\( coo = \\(1, 2, 1\\) \\)"
 gdb_test "p wp" " = \\( point = \\( coo = \\(1, 2, 1\\) \\), angle = 100 \\)"
 
 gdb_test "whatis wp" "type = Type waypoint"
-gdb_test "ptype wp" \
-  [multi_line "type = Type waypoint" \
+set output_pass [multi_line "type = Type, extends\\(point\\) :: waypoint" \
               "    Type point :: point" \
               "    $real :: angle" \
               "End Type waypoint"]
+set output_kfail [multi_line "type = Type waypoint" \
+              "    Type point :: point" \
+              "    $real :: angle" \
+              "End Type waypoint"]
+set test "ptype wp"
+gdb_test_multiple $test %test {
+    -re "$output_pass\r\n$gdb_prompt $" {
+      pass "$test"
+    }
+    -re "$output_kfail\r\n$gdb_prompt $" {
+      kfail "gcc/49475" "$test"
+    }
+}
 set test "ptype wp%coo"
 gdb_test_multiple "$test" "$test" {
     -re "$real \\(3\\)\r\n$gdb_prompt $" {
@@ -79,11 +91,15 @@ gdb_test "p wp_vla(1)%point" " = \\( coo = \\(10, 12, 10\\) \\)"
 gdb_test "p wp_vla(1)" " = \\( point = \\( coo = \\(10, 12, 10\\) \\), angle = 101 \\)"
 
 gdb_test "whatis wp_vla" "type = Type waypoint \\(3\\)"
-gdb_test "ptype wp_vla" \
-  [multi_line "type = Type waypoint" \
-              "    Type point :: point" \
-              "    $real :: angle" \
-              "End Type waypoint \\(3\\)"]
+set test "ptype wp_vla"
+gdb_test_multiple $test %test {
+    -re "$output_pass \\(3\\)\r\n$gdb_prompt $" {
+      pass "$test"
+    }
+    -re "$output_kfail \\(3\\)\r\n$gdb_prompt $" {
+      kfail "gcc/49475" "$test"
+    }
+}
 set test "ptype wp_vla(1)%coo"
 gdb_test_multiple "$test" "$test" {
     -re "$real \\(3\\)\r\n$gdb_prompt $" {
