@@ -14904,14 +14904,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS16_TLS_GOTTPREL:
     case BFD_RELOC_MIPS16_TLS_TPREL_HI16:
     case BFD_RELOC_MIPS16_TLS_TPREL_LO16:
-      if (!fixP->fx_addsy)
-	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("TLS relocation against a constant"));
-	  break;
-	}
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      /* fall through */
+      if (fixP->fx_addsy)
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("TLS relocation against a constant"));
+      break;
 
     case BFD_RELOC_MIPS_JMP:
     case BFD_RELOC_MIPS_SHIFT5:

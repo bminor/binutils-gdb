@@ -1,3 +1,9 @@
+2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_apply_fix)
+	<BFD_RELOC_MIPS16_TLS_TPREL_LO16>: Remove fall-through, adjust
+	code accordingly.
+
 2016-05-24  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-xtensa.c (struct suffix_reloc_map): Change type of field
