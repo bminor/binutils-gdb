@@ -677,8 +677,86 @@ linux_child_set_syscall_catchpoint (struct target_ops *self,
   return 0;
 }
 
-/* List of known LWPs.  */
+/* List of known LWPs, keyed by LWP PID.  This speeds up the common
+   case of mapping a PID returned from the kernel to our corresponding
+   lwp_info data structure.  */
+static htab_t lwp_lwpid_htab;
+
+/* Calculate a hash from a lwp_info's LWP PID.  */
+
+static hashval_t
+lwp_info_hash (const void *ap)
+{
+  const struct lwp_info *lp = (struct lwp_info *) ap;
+  pid_t pid = ptid_get_lwp (lp->ptid);
+
+  return iterative_hash_object (pid, 0);
+}
+
+/* Equality function for the lwp_info hash table.  Compares the LWP's
+   PID.  */
+
+static int
+lwp_lwpid_htab_eq (const void *a, const void *b)
+{
+  const struct lwp_info *entry = (const struct lwp_info *) a;
+  const struct lwp_info *element = (const struct lwp_info *) b;
+
+  return ptid_get_lwp (entry->ptid) == ptid_get_lwp (element->ptid);
+}
+
+/* Create the lwp_lwpid_htab hash table.  */
+
+static void
+lwp_lwpid_htab_create (void)
+{
+  lwp_lwpid_htab = htab_create (100, lwp_info_hash, lwp_lwpid_htab_eq, NULL);
+}
+
+/* Add LP to the hash table.  */
+
+static void
+lwp_lwpid_htab_add_lwp (struct lwp_info *lp)
+{
+  void **slot;
+
+  slot = htab_find_slot (lwp_lwpid_htab, lp, INSERT);
+  gdb_assert (slot != NULL && *slot == NULL);
+  *slot = lp;
+}
+
+/* Head of doubly-linked list of known LWPs.  Sorted by reverse
+   creation order.  This order is assumed in some cases.  E.g.,
+   reaping status after killing alls lwps of a process: the leader LWP
+   must be reaped last.  */
 struct lwp_info *lwp_list;
+
+/* Add LP to sorted-by-reverse-creation-order doubly-linked list.  */
+
+static void
+lwp_list_add (struct lwp_info *lp)
+{
+  lp->next = lwp_list;
+  if (lwp_list != NULL)
+    lwp_list->prev = lp;
+  lwp_list = lp;
+}
+
+/* Remove LP from sorted-by-reverse-creation-order doubly-linked
+   list.  */
+
+static void
+lwp_list_remove (struct lwp_info *lp)
+{
+  /* Remove from sorted-by-creation-order list.  */
+  if (lp->next != NULL)
+    lp->next->prev = lp->prev;
+  if (lp->prev != NULL)
+    lp->prev->next = lp->next;
+  if (lp == lwp_list)
+    lwp_list = lp->next;
+}
+
 
 
 /* Original signal mask.  */
@@ -754,31 +832,30 @@ lwp_free (struct lwp_info *lp)
   xfree (lp);
 }
 
+/* Traversal function for purge_lwp_list.  */
+
+static int
+lwp_lwpid_htab_remove_pid (void **slot, void *info)
+{
+  struct lwp_info *lp = (struct lwp_info *) *slot;
+  int pid = *(int *) info;
+
+  if (ptid_get_pid (lp->ptid) == pid)
+    {
+      htab_clear_slot (lwp_lwpid_htab, slot);
+      lwp_list_remove (lp);
+      lwp_free (lp);
+    }
+
+  return 1;
+}
+
 /* Remove all LWPs belong to PID from the lwp list.  */
 
 static void
 purge_lwp_list (int pid)
 {
-  struct lwp_info *lp, *lpprev, *lpnext;
-
-  lpprev = NULL;
-
-  for (lp = lwp_list; lp; lp = lpnext)
-    {
-      lpnext = lp->next;
-
-      if (ptid_get_pid (lp->ptid) == pid)
-	{
-	  if (lp == lwp_list)
-	    lwp_list = lp->next;
-	  else
-	    lpprev->next = lp->next;
-
-	  lwp_free (lp);
-	}
-      else
-	lpprev = lp;
-    }
+  htab_traverse_noresize (lwp_lwpid_htab, lwp_lwpid_htab_remove_pid, &pid);
 }
 
 /* Add the LWP specified by PTID to the list.  PTID is the first LWP
@@ -812,8 +889,11 @@ add_initial_lwp (ptid_t ptid)
   lp->ptid = ptid;
   lp->core = -1;
 
-  lp->next = lwp_list;
-  lwp_list = lp;
+  /* Add to sorted-by-reverse-creation-order list.  */
+  lwp_list_add (lp);
+
+  /* Add to keyed-by-pid htab.  */
+  lwp_lwpid_htab_add_lwp (lp);
 
   return lp;
 }
@@ -844,22 +924,24 @@ add_lwp (ptid_t ptid)
 static void
 delete_lwp (ptid_t ptid)
 {
-  struct lwp_info *lp, *lpprev;
+  struct lwp_info *lp;
+  void **slot;
+  struct lwp_info dummy;
 
-  lpprev = NULL;
-
-  for (lp = lwp_list; lp; lpprev = lp, lp = lp->next)
-    if (ptid_equal (lp->ptid, ptid))
-      break;
-
-  if (!lp)
+  dummy.ptid = ptid;
+  slot = htab_find_slot (lwp_lwpid_htab, &dummy, NO_INSERT);
+  if (slot == NULL)
     return;
 
-  if (lpprev)
-    lpprev->next = lp->next;
-  else
-    lwp_list = lp->next;
+  lp = *(struct lwp_info **) slot;
+  gdb_assert (lp != NULL);
 
+  htab_clear_slot (lwp_lwpid_htab, slot);
+
+  /* Remove from sorted-by-creation-order list.  */
+  lwp_list_remove (lp);
+
+  /* Release.  */
   lwp_free (lp);
 }
 
@@ -871,17 +953,16 @@ find_lwp_pid (ptid_t ptid)
 {
   struct lwp_info *lp;
   int lwp;
+  struct lwp_info dummy;
 
   if (ptid_lwp_p (ptid))
     lwp = ptid_get_lwp (ptid);
   else
     lwp = ptid_get_pid (ptid);
 
-  for (lp = lwp_list; lp; lp = lp->next)
-    if (lwp == ptid_get_lwp (lp->ptid))
-      return lp;
-
-  return NULL;
+  dummy.ptid = ptid_build (0, lwp, 0);
+  lp = (struct lwp_info *) htab_find (lwp_lwpid_htab, &dummy);
+  return lp;
 }
 
 /* See nat/linux-nat.h.  */
@@ -4861,6 +4942,8 @@ Enables printf debugging output."),
   sigdelset (&suspend_mask, SIGCHLD);
 
   sigemptyset (&blocked_mask);
+
+  lwp_lwpid_htab_create ();
 }
 
 

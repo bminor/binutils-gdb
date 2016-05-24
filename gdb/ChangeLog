@@ -1,6 +1,38 @@
 2016-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19828
+	* linux-nat.c (lwp_lwpid_htab): New htab.
+	(lwp_info_hash, lwp_lwpid_htab_eq, lwp_lwpid_htab_create)
+	(lwp_lwpid_htab_add_lwp): New functions.
+	(lwp_list): Tweak comment.
+	(lwp_list_add, lwp_list_remove, lwp_lwpid_htab_remove_pid): New
+	functions.
+	(purge_lwp_list): Rewrite, using htab_traverse_noresize.
+	(add_initial_lwp): Add lwp to htab too.  Use lwp_list_add.
+	(delete_lwp): Use lwp_list_remove.  Remove htab too.
+	(find_lwp_pid): Search in htab.
+	(_initialize_linux_nat): Call lwp_lwpid_htab_create.
+	* linux-nat.h (struct lwp_info) <prev>: New field.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-nat.c (lwp_lwpid_htab): New htab.
+	(lwp_info_hash, lwp_lwpid_htab_eq, lwp_lwpid_htab_create)
+	(lwp_lwpid_htab_add_lwp): New functions.
+	(lwp_list): Tweak comment.
+	(lwp_list_add, lwp_list_remove, lwp_lwpid_htab_remove_pid): New
+	functions.
+	(purge_lwp_list): Rewrite, using htab_traverse_noresize.
+	(add_initial_lwp): Add lwp to htab too.  Use lwp_list_add.
+	(delete_lwp): Use lwp_list_remove.  Remove htab too.
+	(find_lwp_pid): Search in htab.
+	(_initialize_linux_nat): Call lwp_lwpid_htab_create.
+	* linux-nat.h (struct lwp_info) <prev>: New field.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
 	* linux-nat.c (linux_resume_one_lwp_throw): Clear the LWP's core
 	field.
 	(linux_nat_update_thread_list): Don't fetch the core if already
