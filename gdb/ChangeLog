@@ -1,6 +1,14 @@
 2016-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19828
+	* linux-tdep.c (find_mapping_size): Delete.
+	(linux_vsyscall_range_raw): Rewrite reading from
+	/proc/PID/task/PID/maps directly instead of using
+	gdbarch_find_memory_regions.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
 	* linux-nat.c (report_thread_events): New global.
 	(linux_handle_extended_wait): Report
 	TARGET_WAITKIND_THREAD_CREATED if thread event reporting is
