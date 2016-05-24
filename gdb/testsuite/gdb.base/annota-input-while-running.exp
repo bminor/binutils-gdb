@@ -25,8 +25,8 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug] == -1} {
 # Because runto_main doesn't know how to handle the prompt with annotations,
 # run to main before we set the annotation level.
 if ![runto_main] then {
--   fail "Can't run to main"
--   return 1
+   fail "Can't run to main"
+   return 1
 }
 
 # NOTE: this prompt is OK only when the annotation level is > 1
