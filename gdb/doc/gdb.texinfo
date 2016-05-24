@@ -41562,7 +41562,7 @@ Here are some of the most frequently needed @value{GDBN} commands:
 
 @c pod2man highlights the right hand side of the @item lines.
 @table @env
-@item break [@var{file}:]@var{functiop}
+@item break [@var{file}:]@var{function}
 Set a breakpoint at @var{function} (in @var{file}).
 
 @item run [@var{arglist}]
