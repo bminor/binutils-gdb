@@ -1,3 +1,9 @@
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* gdb.threads/clone-attach-detach.c: New file.
+	* gdb.threads/clone-attach-detach.exp: New file.
+
 2016-05-24  Francis Ricci  <francisjricci@gmail.com>  (tiny patch)
 
 	* gdb.base/annota-input-while-running.exp: Fix syntax error.
