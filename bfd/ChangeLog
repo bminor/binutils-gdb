@@ -1,3 +1,8 @@
+2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section)
+	<bfd_reloc_outofrange>: Unify error reporting code.
+
 2016-05-23  Jim Wilson  <jim.wilson@linaro.org>
 
 	* elfnn-aarch64.c: Unconditionally enable R_AARCH64_NULL and

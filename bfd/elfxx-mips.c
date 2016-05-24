@@ -10259,16 +10259,13 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 
 	case bfd_reloc_outofrange:
+	  msg = NULL;
 	  if (jal_reloc_p (howto->type))
+	    msg = _("JALX to a non-word-aligned address");
+	  else if (aligned_pcrel_reloc_p (howto->type))
+	    msg = _("PC-relative load from unaligned address");
+	  if (msg)
 	    {
-	      msg = _("JALX to a non-word-aligned address");
-	      info->callbacks->warning
-		(info, msg, name, input_bfd, input_section, rel->r_offset);
-	      return FALSE;
-	    }
-	  if (aligned_pcrel_reloc_p (howto->type))
-	    {
-	      msg = _("PC-relative load from unaligned address");
 	      info->callbacks->warning
 		(info, msg, name, input_bfd, input_section, rel->r_offset);
 	      return FALSE;
