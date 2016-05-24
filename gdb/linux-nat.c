@@ -1432,6 +1432,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lp, int step,
      status.  Note that we must not throw after this is cleared,
      otherwise handle_zombie_lwp_error would get confused.  */
   lp->stopped = 0;
+  lp->core = -1;
   lp->stop_reason = TARGET_STOPPED_BY_NO_REASON;
   registers_changed_ptid (lp->ptid);
 }
@@ -3785,7 +3786,13 @@ linux_nat_update_thread_list (struct target_ops *ops)
   /* Update the processor core that each lwp/thread was last seen
      running on.  */
   ALL_LWPS (lwp)
-    lwp->core = linux_common_core_of_thread (lwp->ptid);
+    {
+      /* Avoid accessing /proc if the thread hasn't run since we last
+	 time we fetched the thread's core.  Accessing /proc becomes
+	 noticeably expensive when we have thousands of LWPs.  */
+      if (lwp->core == -1)
+	lwp->core = linux_common_core_of_thread (lwp->ptid);
+    }
 }
 
 static char *

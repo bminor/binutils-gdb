@@ -1,6 +1,14 @@
 2016-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19828
+	* linux-nat.c (linux_resume_one_lwp_throw): Clear the LWP's core
+	field.
+	(linux_nat_update_thread_list): Don't fetch the core if already
+	known.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
 	* linux-tdep.c (find_mapping_size): Delete.
 	(linux_vsyscall_range_raw): Rewrite reading from
 	/proc/PID/task/PID/maps directly instead of using
