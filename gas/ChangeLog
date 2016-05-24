@@ -1,5 +1,9 @@
 2016-06-05  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* itbl-parse.y (yyerror): Use modern argument declaration style.
+
+2016-06-05  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-sh.c (parse_reg): Change type of mode argument to
 	sh_arg_type.
 	(get_operand): Adjust.

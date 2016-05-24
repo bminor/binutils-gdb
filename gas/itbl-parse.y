@@ -450,8 +450,7 @@ value:
 %%
 
 static int
-yyerror (msg)
-     const char *msg;
+yyerror (const char *msg)
 {
   printf ("line %d: %s\n", insntbl_line, msg);
   return 0;
