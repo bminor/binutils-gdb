@@ -239,6 +239,9 @@ struct simple_pid_list
 };
 struct simple_pid_list *stopped_pids;
 
+/* Whether target_thread_events is in effect.  */
+static int report_thread_events;
+
 /* Async mode support.  */
 
 /* The read/write ends of the pipe registered as waitable file in the
@@ -1952,6 +1955,11 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 				    status_to_str (status));
 	      new_lp->status = status;
 	    }
+	  else if (report_thread_events)
+	    {
+	      new_lp->waitstatus.kind = TARGET_WAITKIND_THREAD_CREATED;
+	      new_lp->status = status;
+	    }
 
 	  return 1;
 	}
@@ -2091,13 +2099,14 @@ wait_lwp (struct lwp_info *lp)
       /* Check if the thread has exited.  */
       if (WIFEXITED (status) || WIFSIGNALED (status))
 	{
-	  if (ptid_get_pid (lp->ptid) == ptid_get_lwp (lp->ptid))
+	  if (report_thread_events
+	      || ptid_get_pid (lp->ptid) == ptid_get_lwp (lp->ptid))
 	    {
 	      if (debug_linux_nat)
-		fprintf_unfiltered (gdb_stdlog, "WL: Process %d exited.\n",
+		fprintf_unfiltered (gdb_stdlog, "WL: LWP %d exited.\n",
 				    ptid_get_pid (lp->ptid));
 
-	      /* This is the leader exiting, it means the whole
+	      /* If this is the leader exiting, it means the whole
 		 process is gone.  Store the status to report to the
 		 core.  Store it in lp->waitstatus, because lp->status
 		 would be ambiguous (W_EXITCODE(0,0) == 0).  */
@@ -2902,7 +2911,8 @@ linux_nat_filter_event (int lwpid, int status)
   /* Check if the thread has exited.  */
   if (WIFEXITED (status) || WIFSIGNALED (status))
     {
-      if (num_lwps (ptid_get_pid (lp->ptid)) > 1)
+      if (!report_thread_events
+	  && num_lwps (ptid_get_pid (lp->ptid)) > 1)
 	{
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -2922,14 +2932,8 @@ linux_nat_filter_event (int lwpid, int status)
 	 resumed.  */
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
-			    "Process %ld exited (resumed=%d)\n",
+			    "LWP %ld exited (resumed=%d)\n",
 			    ptid_get_lwp (lp->ptid), lp->resumed);
-
-      /* This was the last lwp in the process.  Since events are
-	 serialized to GDB core, we may not be able report this one
-	 right now, but GDB core and the other target layers will want
-	 to be notified about the exit code/signal, leave the status
-	 pending for the next time we're able to report it.  */
 
       /* Dead LWP's aren't expected to reported a pending sigstop.  */
       lp->signalled = 0;
@@ -3108,6 +3112,30 @@ check_zombie_leaders (void)
 	  exit_lwp (leader_lp);
 	}
     }
+}
+
+/* Convenience function that is called when the kernel reports an exit
+   event.  This decides whether to report the event to GDB as a
+   process exit event, a thread exit event, or to suppress the
+   event.  */
+
+static ptid_t
+filter_exit_event (struct lwp_info *event_child,
+		   struct target_waitstatus *ourstatus)
+{
+  ptid_t ptid = event_child->ptid;
+
+  if (num_lwps (ptid_get_pid (ptid)) > 1)
+    {
+      if (report_thread_events)
+	ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
+      else
+	ourstatus->kind = TARGET_WAITKIND_IGNORE;
+
+      exit_lwp (event_child);
+    }
+
+  return ptid;
 }
 
 static ptid_t
@@ -3338,6 +3366,9 @@ linux_nat_wait_1 (struct target_ops *ops,
     lp->core = -1;
   else
     lp->core = linux_common_core_of_thread (lp->ptid);
+
+  if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+    return filter_exit_event (lp, ourstatus);
 
   return lp->ptid;
 }
@@ -4614,6 +4645,14 @@ linux_nat_fileio_unlink (struct target_ops *self,
   return ret;
 }
 
+/* Implementation of the to_thread_events method.  */
+
+static void
+linux_nat_thread_events (struct target_ops *ops, int enable)
+{
+  report_thread_events = enable;
+}
+
 void
 linux_nat_add_target (struct target_ops *t)
 {
@@ -4646,6 +4685,7 @@ linux_nat_add_target (struct target_ops *t)
   t->to_supports_stopped_by_sw_breakpoint = linux_nat_supports_stopped_by_sw_breakpoint;
   t->to_stopped_by_hw_breakpoint = linux_nat_stopped_by_hw_breakpoint;
   t->to_supports_stopped_by_hw_breakpoint = linux_nat_supports_stopped_by_hw_breakpoint;
+  t->to_thread_events = linux_nat_thread_events;
 
   t->to_can_async_p = linux_nat_can_async_p;
   t->to_is_async_p = linux_nat_is_async_p;

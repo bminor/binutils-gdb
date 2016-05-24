@@ -1,3 +1,17 @@
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-nat.c (report_thread_events): New global.
+	(linux_handle_extended_wait): Report
+	TARGET_WAITKIND_THREAD_CREATED if thread event reporting is
+	enabled.
+	(wait_lwp, linux_nat_filter_event): Report all thread exits if
+	thread event reporting is enabled.  Remove comment.
+	(filter_exit_event): New function.
+	(linux_nat_wait_1): Use it.
+	(linux_nat_thread_events): New function.
+	(linux_nat_add_target): Install it as target_thread_events method.
+
 2016-05-24  Yan-Ting Lin  <currygt52@gmail.com>
 
 	* MAINTAINERS (Write After Approval): Add "Yan-Ting Lin".

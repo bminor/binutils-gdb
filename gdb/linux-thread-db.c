@@ -1116,12 +1116,14 @@ thread_db_wait (struct target_ops *ops,
 
   ptid = beneath->to_wait (beneath, ptid, ourstatus, options);
 
-  if (ourstatus->kind == TARGET_WAITKIND_IGNORE)
-    return ptid;
-
-  if (ourstatus->kind == TARGET_WAITKIND_EXITED
-      || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
-    return ptid;
+  switch (ourstatus->kind)
+    {
+    case TARGET_WAITKIND_IGNORE:
+    case TARGET_WAITKIND_EXITED:
+    case TARGET_WAITKIND_THREAD_EXITED:
+    case TARGET_WAITKIND_SIGNALLED:
+      return ptid;
+    }
 
   info = get_thread_db_info (ptid_get_pid (ptid));
 
