@@ -1,3 +1,9 @@
+2016-05-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* eval.c (evaluate_subexp_standard): If EVAL_AVOID_SIDE_EFFECTS
+	mode, forward the VALUE_LVAL attribute to the returned value in
+	the STRUCTOP_PTR case.
+
 2016-05-25  Tom Tromey  <tom@tromey.com>
 
 	* python/py-value.c (value_object_as_number): Use correct spelling

@@ -1,3 +1,8 @@
+2016-05-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/whatis.c: Extend the test case.
+	* gdb.base/whatis.exp: Add additional tests.
+
 2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 * gdb.fortran/type.f90: Add pointer variable.
