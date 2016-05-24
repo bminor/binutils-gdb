@@ -2964,7 +2964,7 @@ set_sig_thread_cmd (char *args, int from_tty)
     inf->signal_thread = 0;
   else
     {
-      ptid_t ptid = thread_id_to_pid (atoi (args));
+      ptid_t ptid = global_thread_id_to_ptid (atoi (args));
 
       if (ptid_equal (ptid, minus_one_ptid))
 	error (_("Thread ID %s not known.  "

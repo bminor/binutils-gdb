@@ -1,3 +1,8 @@
+2016-12-07  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gnu-nat.c (set_sig_thread_cmd): Call global_thread_id_to_ptid
+	instead of thread_id_to_pid.
+
 2016-12-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* inferior.c (inferior_command): Remove duplicate
