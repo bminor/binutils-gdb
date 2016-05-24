@@ -1,6 +1,13 @@
 2016-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19828
+	* linux-nat.c (get_pending_status): If the thread reported the
+	event to the core and it's pending, use the pending status signal
+	number.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
 	* linux-nat.c (lwp_lwpid_htab): New htab.
 	(lwp_info_hash, lwp_lwpid_htab_eq, lwp_lwpid_htab_create)
 	(lwp_lwpid_htab_add_lwp): New functions.
