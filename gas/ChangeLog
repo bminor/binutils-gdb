@@ -1,6 +1,6 @@
 2016-05-25  Chua Zheng Leong  <chuazl@comp.nus.edu.sg>
 
-	PR target/2006764
+	PR target/20067
 	* config/tc-arm.c (move_or_literal_pool): Only generate a VMOV.I64
 	instruction if supported by the currently selected fpu variant.
 	* testsuite/gas/arm/vfpv3-ldr_immediate.s: Add test of this PR.
