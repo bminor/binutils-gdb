@@ -1,3 +1,10 @@
+2016-05-25  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* gdb.threads/clone-attach-detach.c: New file.
+	* gdb.threads/clone-attach-detach.exp: New file.
+	* gdb.threads/attach-many-short-lived-threads.exp: Skip.
+
 2016-05-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.mi/mi-threads-interrupt.c: New file.

@@ -1,6 +1,12 @@
 2016-05-25  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19828
+	* linux-nat.c (attach_proc_task_lwp_callback): Mark the lwp
+	resumed, and add the thread to GDB's thread list.
+
+2016-05-25  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
 	* linux-nat.c (get_pending_status): If the thread reported the
 	event to the core and it's pending, use the pending status signal
 	number.

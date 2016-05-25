@@ -1088,6 +1088,16 @@ attach_proc_task_lwp_callback (ptid_t ptid)
 	  /* We need to wait for a stop before being able to make the
 	     next ptrace call on this LWP.  */
 	  lp->must_set_ptrace_flags = 1;
+
+	  /* So that wait collects the SIGSTOP.  */
+	  lp->resumed = 1;
+
+	  /* Also add the LWP to gdb's thread list, in case a
+	     matching libthread_db is not found (or the process uses
+	     raw clone).  */
+	  add_thread (lp->ptid);
+	  set_running (lp->ptid, 1);
+	  set_executing (lp->ptid, 1);
 	}
 
       return 1;
