@@ -288,7 +288,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 
   if ((show <= 0) && (TYPE_NAME (type) != NULL))
     {
-      fputs_filtered (TYPE_NAME (type), stream);
+      fprintfi_filtered (level, stream, "%s", TYPE_NAME (type));
       return;
     }
 

@@ -1,5 +1,10 @@
 2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
 
+	* gdb.fortran/print_type.exp: Fix expected output.
+	* gdb.fortran/whatis_type.exp: Fix expected output.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
 	* gdb.fortran/whatis_type.exp: Use multi_line.
 
 2016-05-24  Tom Tromey  <tom@tromey.com>
