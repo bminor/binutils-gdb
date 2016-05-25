@@ -1,3 +1,8 @@
+2016-05-25  Tom Tromey  <tom@tromey.com>
+
+	* python/py-value.c (value_object_as_number): Use correct spelling
+	of HAVE_LIBPYTHON2_4.
+
 2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* f-typeprint.c (f_type_print_base): Replace 0 by show.

@@ -1841,10 +1841,10 @@ static PyNumberMethods value_object_as_number = {
   valpy_divide,               /* nb_true_divide */
   NULL,			      /* nb_inplace_floor_divide */
   NULL,			      /* nb_inplace_true_divide */
-#ifndef HAVE_LIBPYTHON_2_4
+#ifndef HAVE_LIBPYTHON2_4
   /* This was added in Python 2.5.  */
   valpy_long,		      /* nb_index */
-#endif /* HAVE_LIBPYTHON_2_4 */
+#endif /* HAVE_LIBPYTHON2_4 */
 };
 
 static PyMappingMethods value_object_as_mapping = {
