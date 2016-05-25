@@ -2163,6 +2163,8 @@ gnu_create_inferior (struct target_ops *ops,
 
   startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
   inf->pending_execs = 0;
+  /* Get rid of the old shell threads.  */
+  prune_threads ();
 
   inf_validate_procinfo (inf);
   inf_update_signal_thread (inf);

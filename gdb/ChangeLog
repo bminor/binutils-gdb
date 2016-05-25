@@ -1,5 +1,8 @@
 2016-12-09  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gnu-nat.c (gnu_create_inferior): After startup_inferior, call
+	prune_threads.
+
 	* inferior.c (print_selected_inferior): Avoid PATH_MAX usage.
 
 2016-12-08  Simon Marchi  <simon.marchi@ericsson.com>
