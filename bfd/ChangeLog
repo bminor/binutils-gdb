@@ -1,5 +1,67 @@
 2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/14625
+	* archive.c (bfd_slurp_armap): Replace
+	bfd_elf64_archive_slurp_armap with
+	_bfd_archive_64_bit_slurp_armap.
+	(bsd_write_armap): Call _bfd_archive_64_bit_write_armap if
+	BFD64 is defined and the archive is too big.
+	(coff_write_armap): Likewise.
+	* archive64.c (bfd_elf64_archive_slurp_armap): Renamed to ...
+	(_bfd_archive_64_bit_slurp_armap): This.
+	(bfd_elf64_archive_write_armap): Renamed to ...
+	(_bfd_archive_64_bit_write_armap): This.
+	* configure.ac: Add --enable-64-bit-archive.
+	(want_64_bit_archive): New.  Set to true by default for 64-bit
+	MIPS and s390 ELF targets.
+	(USE_64_BIT_ARCHIVE): New AC_DEFINE.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* elf64-mips.c (bfd_elf64_archive_functions): Removed.
+	(bfd_elf64_archive_slurp_armap): Likewise.
+	(bfd_elf64_archive_write_armap): Likewise.
+	(bfd_elf64_archive_slurp_extended_name_table): Likewise.
+	(bfd_elf64_archive_construct_extended_name_table): Likewise.
+	(bfd_elf64_archive_truncate_arname): Likewise.
+	(bfd_elf64_archive_read_ar_hdr): Likewise.
+	(bfd_elf64_archive_write_ar_hdr): Likewise.
+	(bfd_elf64_archive_openr_next_archived_file): Likewise.
+	(bfd_elf64_archive_get_elt_at_index): Likewise.
+	(bfd_elf64_archive_generic_stat_arch_elt): Likewise.
+	(bfd_elf64_archive_update_armap_timestamp): Likewise.
+	* elf64-s390.c (bfd_elf64_archive_functions): Removed.
+	(bfd_elf64_archive_slurp_armap): Likewise.
+	(bfd_elf64_archive_write_armap): Likewise.
+	(bfd_elf64_archive_slurp_extended_name_table): Likewise.
+	(bfd_elf64_archive_construct_extended_name_table): Likewise.
+	(bfd_elf64_archive_truncate_arname): Likewise.
+	(bfd_elf64_archive_read_ar_hdr): Likewise.
+	(bfd_elf64_archive_write_ar_hdr): Likewise.
+	(bfd_elf64_archive_openr_next_archived_file): Likewise.
+	(bfd_elf64_archive_get_elt_at_index): Likewise.
+	(bfd_elf64_archive_generic_stat_arch_elt): Likewise.
+	(bfd_elf64_archive_update_armap_timestamp): Likewise.
+	* elfxx-target.h (TARGET_BIG_SYM): Use _bfd_archive_64_bit on
+	BFD_JUMP_TABLE_ARCHIVE if USE_64_BIT_ARCHIVE is defined and
+	bfd_elfNN_archive_functions isn't defined.
+	(TARGET_LITTLE_SYM): Likewise.
+	* libbfd-in.h (_bfd_archive_64_bit_slurp_armap): New prototype.
+	(_bfd_archive_64_bit_write_armap): Likewise.
+	(_bfd_archive_64_bit_slurp_extended_name_table): New macro.
+	(_bfd_archive_64_bit_construct_extended_name_table): Likewise.
+	(_bfd_archive_64_bit_truncate_arname): Likewise.
+	(_bfd_archive_64_bit_read_ar_hdr): Likewise.
+	(_bfd_archive_64_bit_write_ar_hdr): Likewise.
+	(_bfd_archive_64_bit_openr_next_archived_file): Likewise.
+	(_bfd_archive_64_bit_get_elt_at_index): Likewise.
+	(_bfd_archive_64_bit_generic_stat_arch_elt): Likewise.
+	(_bfd_archive_64_bit_update_armap_timestamp): Likewise.
+	* libbfd.h: Regenerated.
+	* plugin.c (plugin_vec): Use _bfd_archive_64_bit on
+	BFD_JUMP_TABLE_ARCHIVE if USE_64_BIT_ARCHIVE is defined.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20103
 	* cofflink.c (coff_link_check_archive_element): Return TRUE if
 	linker add_archive_element callback returns FALSE.

@@ -789,6 +789,7 @@ enable_plugins
 enable_largefile
 enable_64_bit_bfd
 enable_targets
+enable_64_bit_archive
 with_mmap
 enable_secureplt
 enable_leading_mingw64_underscores
@@ -1442,6 +1443,7 @@ Optional Features:
   --disable-largefile     omit support for large files
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
   --enable-targets        alternative target configurations
+  --enable-64-bit-archive force 64-bit archives
   --enable-secureplt      Default to creating read-only plt entries
   --enable-leading-mingw64-underscores
                           Enable leading underscores on 64 bit mingw targets
@@ -11425,7 +11427,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11428 "configure"
+#line 11430 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11531,7 +11533,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11534 "configure"
+#line 11536 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12127,6 +12129,17 @@ if test "${enable_targets+set}" = set; then :
   no)       enable_targets= ;;
   *)        enable_targets=$enableval ;;
 esac
+fi
+
+# Check whether --enable-64_bit_archive was given.
+if test "${enable_64_bit_archive+set}" = set; then :
+  enableval=$enable_64_bit_archive; case "${enableval}" in
+  yes)  want_64_bit_archive=true  ;;
+  no)   want_64_bit_archive=false ;;
+  *)    as_fn_error "bad value ${enableval} for 64-bit-archive option" "$LINENO" 5 ;;
+esac
+else
+  want_64_bit_archive=unset
 fi
 
 
@@ -14595,6 +14608,23 @@ else	# all_targets is true
   test -n "$selarchs" &&
     selarchs=`echo $selarchs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
 fi	# all_targets is true
+
+if test "x$want_64_bit_archive" = xunset; then
+  # 64-bit MIPS and s390 ELF targets use 64-bit archives.
+  case "${bfd_backends}" in
+    *elf64-mips* | *elf64-s390*)
+      want_64_bit_archive=true
+      ;;
+  esac
+fi
+
+# 64-bit archives need a 64-bit bfd_vma.
+if test "x$want_64_bit_archive" = xtrue; then
+  want64=true
+
+$as_echo "#define USE_64_BIT_ARCHIVE 1" >>confdefs.h
+
+fi
 
 case ${host64}-${target64}-${want64} in
   *true*)

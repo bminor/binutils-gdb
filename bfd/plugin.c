@@ -597,7 +597,11 @@ const bfd_target plugin_vec =
   BFD_JUMP_TABLE_GENERIC (bfd_plugin),
   BFD_JUMP_TABLE_COPY (bfd_plugin),
   BFD_JUMP_TABLE_CORE (bfd_plugin),
+#ifdef USE_64_BIT_ARCHIVE
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
+#else
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+#endif
   BFD_JUMP_TABLE_SYMBOLS (bfd_plugin),
   BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (bfd_plugin),
