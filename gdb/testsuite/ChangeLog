@@ -1,5 +1,12 @@
 2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
 
+	* gdb.fortran/type.f90: Add nested structures.
+	* gdb.fortran/whatis-type.exp: Whatis/ptype nested structures.
+	* gdb.fortran/derived-type.exp: Adapt expected output.
+	* gdb.fortran/vla-type.exp: Adapt expected output.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
 	* gdb.fortran/whatis_type.exp: Adapt expected output.
 
 2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>

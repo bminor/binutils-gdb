@@ -371,12 +371,12 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  fputs_filtered ("\n", stream);
 	  for (index = 0; index < TYPE_NFIELDS (type); index++)
 	    {
-	      f_type_print_base (TYPE_FIELD_TYPE (type, index), stream, show,
-				 level + 4);
+	      f_type_print_base (TYPE_FIELD_TYPE (type, index), stream,
+				 show - 1, level + 4);
 	      fputs_filtered (" :: ", stream);
 	      fputs_filtered (TYPE_FIELD_NAME (type, index), stream);
 	      f_type_print_varspec_suffix (TYPE_FIELD_TYPE (type, index),
-					   stream, 0, 0, 0, 0);
+					   stream, show - 1, 0, 0, 0);
 	      fputs_filtered ("\n", stream);
 	    }
 	  fprintfi_filtered (level, stream, "End Type ");

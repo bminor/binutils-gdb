@@ -1,5 +1,9 @@
 2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
 
+	* f-typeprint.c (f_type_print_base): Decrease show by one.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
 	* f-typeprint.c (f_type_print_base): Don't print fields when show < 0.
 
 2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
