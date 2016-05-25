@@ -1,3 +1,18 @@
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20103
+	* cofflink.c (coff_link_check_archive_element): Return TRUE if
+	linker add_archive_element callback returns FALSE.
+	* ecoff.c (ecoff_link_check_archive_element): Likewise.
+	* elf64-ia64-vms.c (elf64_vms_link_add_archive_symbols): Skip
+	archive element if linker add_archive_element callback returns
+	FALSE.
+	* elflink.c (elf_link_add_archive_symbols): Likewise.
+	* pdp11.c (aout_link_check_ar_symbols): Likewise.
+	* vms-alpha.c (alpha_vms_link_add_archive_symbols): Likewise.
+	* xcofflink.c (xcoff_link_check_dynamic_ar_symbols): Likewise.
+	(xcoff_link_check_ar_symbols): Likewise.
+
 2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_relocate_section)

@@ -2608,7 +2608,7 @@ aout_link_check_ar_symbols (bfd *abfd,
 	     However, it might be correct.  */
 	  if (!(*info->callbacks
 		->add_archive_element) (info, abfd, name, subsbfd))
-	    return FALSE;
+	    continue;
 	  *pneeded = TRUE;
 	  return TRUE;
 	}

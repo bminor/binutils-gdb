@@ -1,3 +1,16 @@
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20103
+	* ldmain.c (add_archive_element): Don't claim new IR symbols
+	after all IR symbols have been claimed.
+	* plugin.c (plugin_call_claim_file): Remove no_more_claiming
+	check.
+	* testsuite/ld-plugin/lto.exp (pr20103): New proc.
+	Run PR ld/20103 tests.
+	* testsuite/ld-plugin/pr20103a.c: New file.
+	* testsuite/ld-plugin/pr20103b.c: Likewise.
+	* testsuite/ld-plugin/pr20103c.c: Likewise.
+
 2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
     
 	* testsuite/ld-mips-elf/jalx-local.d: New test.

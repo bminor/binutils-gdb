@@ -5283,7 +5283,7 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  if (!(*info->callbacks
 		->add_archive_element) (info, element, symdef->name, &element))
-	    goto error_return;
+	    continue;
 	  if (!bfd_link_add_symbols (element, info))
 	    goto error_return;
 

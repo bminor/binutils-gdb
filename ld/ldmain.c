@@ -796,12 +796,22 @@ add_archive_element (struct bfd_link_info *info,
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
 #ifdef ENABLE_PLUGINS
-  if (link_info.lto_plugin_active && !no_more_claiming)
+  if (link_info.lto_plugin_active)
     {
       /* We must offer this archive member to the plugins to claim.  */
       plugin_maybe_claim (input);
       if (input->flags.claimed)
 	{
+	  if (no_more_claiming)
+	    {
+	      /* Don't claim new IR symbols after all IR symbols have
+		 been claimed.  */
+	      if (trace_files || verbose)
+		info_msg ("%I: no new IR symbols to claimi\n",
+			  &orig_input);
+	      input->flags.claimed = 0;
+	      return FALSE;
+	    }
 	  input->flags.claim_archive = TRUE;
 	  *subsbfd = input->the_bfd;
 	}
