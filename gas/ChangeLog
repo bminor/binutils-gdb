@@ -1,5 +1,13 @@
+2016-05-25  Chua Zheng Leong  <chuazl@comp.nus.edu.sg>
+
+	PR target/2006764
+	* config/tc-arm.c (move_or_literal_pool): Only generate a VMOV.I64
+	instruction if supported by the currently selected fpu variant.
+	* testsuite/gas/arm/vfpv3-ldr_immediate.s: Add test of this PR.
+	* testsuite/gas/arm/vfpv3-ldr_immediate.d: Update expected disassembly.
+
 2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
-    
+
 	* config/tc-mips.c (mips_fix_adjustable): Also return 0 for
 	jump relocations against MIPS16 or microMIPS symbols on RELA
 	targets.

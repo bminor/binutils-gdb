@@ -8000,7 +8000,7 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		  return TRUE;
 		}
 	    }
-	  else if (t == CONST_VEC)
+	  else if (t == CONST_VEC && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1))
 	    {
 	      int op = 0;
 	      unsigned immbits = 0;
