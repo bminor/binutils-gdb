@@ -1,5 +1,21 @@
 2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/20140
+	* config/tc-i386.c (cpu_flags_match): Require another match
+	for AVX512VL.
+	* testsuite/gas/i386/i386.exp: Run avx512vl-1, avx512vl-2,
+	x86-64-avx512vl-1 and x86-64-avx512vl-2.
+	* testsuite/gas/i386/avx512vl-1.l: New file.
+	* testsuite/gas/i386/avx512vl-1.s: Likewise.
+	* testsuite/gas/i386/avx512vl-2.l: Likewise.
+	* testsuite/gas/i386/avx512vl-2.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl-1.l: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl-1.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl-2.l: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl-2.s: Likewise.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/20141
 	* testsuite/gas/i386/i386.exp: Run x86-64-pr20141.
 	* testsuite/gas/i386/x86-64-pr20141.d: New file.

@@ -1564,6 +1564,21 @@ cpu_flags_match (const insn_template *t)
 	      else
 		match |= CPU_FLAGS_ARCH_MATCH;
 	    }
+	  else if (x.bitfield.cpuavx512vl)
+	    {
+	      /* Match AVX512VL.  */
+	      if (cpu.bitfield.cpuavx512vl)
+		{
+		  /* Need another match.  */
+		  cpu.bitfield.cpuavx512vl = 0;
+		  if (!cpu_flags_all_zero (&cpu))
+		    match |= CPU_FLAGS_32BIT_MATCH;
+		  else
+		    match |= CPU_FLAGS_ARCH_MATCH;
+		}
+	      else
+		match |= CPU_FLAGS_ARCH_MATCH;
+	    }
 	  else
 	    match |= CPU_FLAGS_32BIT_MATCH;
 	}
