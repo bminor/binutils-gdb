@@ -10266,8 +10266,9 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    msg = _("PC-relative load from unaligned address");
 	  if (msg)
 	    {
-	      info->callbacks->warning
-		(info, msg, name, input_bfd, input_section, rel->r_offset);
+	      info->callbacks->einfo
+		("%C: %s\n", input_bfd, input_section, rel->r_offset, msg);
+	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
 	  /* Fall through.  */

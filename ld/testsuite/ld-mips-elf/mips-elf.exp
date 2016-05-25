@@ -177,6 +177,26 @@ if $has_newabi {
     run_dump_test "jalx-local-n64" [list [list ld $abi_ldflags(n64)]]
 }
 
+run_dump_test "unaligned-jalx-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-mips16-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-mips16-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-mips16-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-micromips-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-micromips-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-micromips-2" [list [list ld $abi_ldflags(o32)]]
+
+run_dump_test "unaligned-lwpc-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-lwpc-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-lwpc-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-lwpc-3" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-ldpc-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-ldpc-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-ldpc-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-ldpc-3" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-ldpc-4" [list [list ld $abi_ldflags(o32)]]
+
 # Test multi-got link.  We only do this on GNU/Linux because it requires
 # the "traditional" emulations.
 if { $linux_gnu } {
