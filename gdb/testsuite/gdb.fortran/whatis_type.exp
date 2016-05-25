@@ -44,6 +44,7 @@ gdb_test "whatis t2" "type = Type t2"
 gdb_test "whatis t2v" "type = Type t2"
 gdb_test "whatis t3" "type = Type t3"
 gdb_test "whatis t3v" "type = Type t3"
+gdb_test "whatis t3p" "type = PTR TO -> \\( Type t3 \\)"
 
 gdb_test "ptype t1" \
   [multi_line "type = Type t1" \
@@ -69,3 +70,9 @@ gdb_test "ptype t3v" \
               "    $int :: t3_i" \
               "    Type t2 :: t2_n" \
               "End Type t3"]
+
+gdb_test "ptype t3p" \
+  [multi_line "type = PTR TO -> \\( Type t3" \
+              "    $int :: t3_i" \
+              "    Type t2 :: t2_n" \
+              "End Type t3 \\)"]

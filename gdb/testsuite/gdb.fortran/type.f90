@@ -33,7 +33,10 @@ program type
 
   type (t1) :: t1v
   type (t2) :: t2v
-  type (t3) :: t3v
+  type (t3), target :: t3v
+  type(t3), pointer :: t3p
+
+  nullify (t3p)
 
   t1v%t1_i = 42
   t1v%t1_r = 42.24
@@ -42,6 +45,9 @@ program type
   t2v%t1_n%t1_i = 21
   t3v%t3_i = 3
   t3v%t2_n%t2_i = 32
-  t3v%t2_n%t1_n%t1_i = 321    ! bp1
+  t3v%t2_n%t1_n%t1_i = 321
+
+  t3p => t3v
+  nullify (t3p)    ! bp1
 
 end program type
