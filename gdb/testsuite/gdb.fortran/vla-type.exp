@@ -137,7 +137,8 @@ gdb_test "next" ""
 gdb_test "ptype fivedynarr(2)" \
          [multi_line "type = Type five" \
                      "\\s+Type one :: tone" \
-                     "End Type five" ]
+                     "End Type five" ] \
+         "ptype fivedynarr(2), tone is not allocated"
 gdb_test "ptype fivedynarr(2)%tone" \
          [multi_line "type = Type one" \
                      "    $int :: ivla\\(<not allocated>\\)" \
