@@ -1,5 +1,14 @@
 2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (cpu_flag_init): Add CpuVREX to CPU_AVX512DQ_FLAGS,
+	CPU_AVX512BW_FLAGS, CPU_AVX512VL_FLAGS, CPU_AVX512IFMA_FLAGS
+	and CPU_AVX512VBMI_FLAGS.  Add CpuAVX512DQ, CpuAVX512BW,
+	CpuAVX512VL, CpuAVX512IFMA and CpuAVX512VBMI to
+	CPU_ANY_AVX_FLAGS.
+	* i386-init.h: Regenerated.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/20141
 	* i386-gen.c (cpu_flag_init): Add CpuVREX to CPU_AVX512F_FLAGS,
 	CPU_AVX512CD_FLAGS, CPU_AVX512ER_FLAGS and CPU_AVX512PF_FLAGS.
