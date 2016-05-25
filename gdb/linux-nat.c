@@ -1236,7 +1236,10 @@ get_pending_status (struct lwp_info *lp, int *status)
     {
       struct thread_info *tp = find_thread_ptid (lp->ptid);
 
-      signo = tp->suspend.stop_signal;
+      if (tp->suspend.waitstatus_pending_p)
+	signo = tp->suspend.waitstatus.value.sig;
+      else
+	signo = tp->suspend.stop_signal;
     }
   else if (!target_is_non_stop_p ())
     {
