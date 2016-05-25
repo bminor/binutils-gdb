@@ -1,5 +1,9 @@
 2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
 
+	* gdb.fortran/whatis_type.exp: Adapt expected output.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
 	* gdb.fortran/print_type.exp: Fix expected output.
 	* gdb.fortran/whatis_type.exp: Fix expected output.
 

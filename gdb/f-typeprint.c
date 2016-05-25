@@ -364,19 +364,24 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       else
 	fprintfi_filtered (level, stream, "Type ");
       fputs_filtered (TYPE_TAG_NAME (type), stream);
-      fputs_filtered ("\n", stream);
-      for (index = 0; index < TYPE_NFIELDS (type); index++)
+      /* According to the definition,
+         we only print structure elements in case show > 0.  */
+      if (show > 0)
 	{
-	  f_type_print_base (TYPE_FIELD_TYPE (type, index), stream, show,
-			     level + 4);
-	  fputs_filtered (" :: ", stream);
-	  fputs_filtered (TYPE_FIELD_NAME (type, index), stream);
-	  f_type_print_varspec_suffix (TYPE_FIELD_TYPE (type, index),
-				       stream, 0, 0, 0, 0);
 	  fputs_filtered ("\n", stream);
-	} 
-      fprintfi_filtered (level, stream, "End Type ");
-      fputs_filtered (TYPE_TAG_NAME (type), stream);
+	  for (index = 0; index < TYPE_NFIELDS (type); index++)
+	    {
+	      f_type_print_base (TYPE_FIELD_TYPE (type, index), stream, show,
+				 level + 4);
+	      fputs_filtered (" :: ", stream);
+	      fputs_filtered (TYPE_FIELD_NAME (type, index), stream);
+	      f_type_print_varspec_suffix (TYPE_FIELD_TYPE (type, index),
+					   stream, 0, 0, 0, 0);
+	      fputs_filtered ("\n", stream);
+	    }
+	  fprintfi_filtered (level, stream, "End Type ");
+	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+	}
       break;
 
     case TYPE_CODE_MODULE:
