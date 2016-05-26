@@ -281,6 +281,15 @@ objc_demangle (const char *mangled, int options)
     return NULL;	/* Not an objc mangled name.  */
 }
 
+/* la_sniff_from_mangled_name for ObjC.  */
+
+static int
+objc_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = objc_demangle (mangled, 0);
+  return *demangled != NULL;
+}
+
 /* Determine if we are currently in the Objective-C dispatch function.
    If so, get the address of the method function that the dispatcher
    would call and use that as the function to step into instead.  Also
@@ -381,6 +390,7 @@ const struct language_defn objc_language_defn = {
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   objc_demangle,		/* Language specific symbol demangler */
+  objc_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname */
   objc_op_print_tab,		/* Expression operators for printing */

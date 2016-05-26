@@ -25,6 +25,7 @@
 #include "c-lang.h"
 #include "charset.h"
 #include "cp-support.h"
+#include "demangle.h"
 #include "gdbarch.h"
 #include "infcall.h"
 #include "objfiles.h"
@@ -1988,6 +1989,17 @@ rust_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
 
 
+/* la_sniff_from_mangled_name for Rust.  */
+
+static int
+rust_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+  return *demangled != NULL;
+}
+
+
+
 static const struct exp_descriptor exp_descriptor_rust = 
 {
   rust_print_subexp,
@@ -2030,6 +2042,7 @@ static const struct language_defn rust_language_defn =
   rust_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   gdb_demangle,			/* Language specific symbol demangler */
+  rust_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */

@@ -268,7 +268,14 @@ const struct language_defn f_language_defn =
   NULL,                    	/* name_of_this */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
+
+  /* We could support demangling here to provide module namespaces
+     also for inferiors with only minimal symbol table (ELF symbols).
+     Just the mangling standard is not standardized across compilers
+     and there is no DW_AT_producer available for inferiors with only
+     the ELF symbols to check the mangling kind.  */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   f_op_print_tab,		/* expression operators for printing */
