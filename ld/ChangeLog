@@ -1,5 +1,12 @@
+2016-05-26  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20134
+	* scripttempl/elf32msp430.sc (.bss): Provide __bssstart and
+	__bsssize.
+	* scripttempl/elf32msp430_3.sc (.bss): Likewise.
+
 2016-05-25  Maciej W. Rozycki  <macro@imgtec.com>
-    
+
 	* testsuite/ld-mips-elf/unaligned-jalx-0.d: New test.
 	* testsuite/ld-mips-elf/unaligned-jalx-1.d: New test.
 	* testsuite/ld-mips-elf/unaligned-jalx-2.d: New test.

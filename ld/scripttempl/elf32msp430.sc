@@ -274,7 +274,8 @@ SECTIONS
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
     ${RELOCATING+. = ALIGN(2);}
-    ${RELOCATING+ PROVIDE (__bss_start = .) ; }
+    ${RELOCATING+ PROVIDE (__bss_start = .); }
+    ${RELOCATING+ PROVIDE (__bssstart = .); }
     *(.lower.bss.* .lower.bss)
     ${RELOCATING+. = ALIGN(2);}
     *(.bss)
@@ -282,6 +283,7 @@ SECTIONS
     *(COMMON)
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
   } ${RELOCATING+ > data}
+  ${RELOCATING+ PROVIDE (__bsssize = SIZEOF(.bss)); }
 
   .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
   {
