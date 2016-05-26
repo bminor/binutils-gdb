@@ -1,5 +1,11 @@
+2016-05-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section)
+	<bfd_reloc_outofrange>: Use the `%X%H' rather than `%C' format
+	for message.  Continue processing rather than returning failure.
+
 2016-05-25  Maciej W. Rozycki  <macro@imgtec.com>
-    
+
 	* elfxx-mips.c (_bfd_mips_elf_relocate_section)
 	<bfd_reloc_outofrange>: Call `->einfo' rather than `->warning'.
 	Call `bfd_set_error'.

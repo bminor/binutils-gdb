@@ -9,4 +9,5 @@
 
 Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> ec4a0008 	lwpc	v0,1c080020 <bar0>
+[0-9a-f]+ <[^>]*> ec4a0008 	lwpc	v0,1c080024 <bar4>
 	\.\.\.

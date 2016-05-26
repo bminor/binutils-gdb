@@ -1,3 +1,45 @@
+2016-05-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-jalx-0.d: Fold
+	`unaligned-jalx-2' here.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-0.d: Fold
+	`unaligned-jalx-mips16-2' here.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-0.d: Fold
+	`unaligned-jalx-micromips-2' here.
+	* testsuite/ld-mips-elf/unaligned-jalx-0.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-jalx-1.d: Update error
+	message.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-2.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-2.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-2.d: Remove
+	test.
+	* testsuite/ld-mips-elf/unaligned-jalx-2.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.d: Fold
+	`unaligned-lwpc-3' here.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.d: Fold
+	`unaligned-lwpc-2' here.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-lwpc-2.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-lwpc-2.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-lwpc-3.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-lwpc-3.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.d: Fold
+	`unaligned-ldpc-4' here.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.d: Update error
+	message.  Fold `unaligned-ldpc-2' and `unaligned-ldpc-3' here.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-ldpc-2.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-2.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-3.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-3.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-4.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-4.s: Remove test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Delete removed tests.
+
 2016-05-26  Nick Clifton  <nickc@redhat.com>
 
 	PR target/20134

@@ -10267,9 +10267,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (msg)
 	    {
 	      info->callbacks->einfo
-		("%C: %s\n", input_bfd, input_section, rel->r_offset, msg);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+		("%X%H: %s\n", input_bfd, input_section, rel->r_offset, msg);
+	      break;
 	    }
 	  /* Fall through.  */
 
