@@ -6,3 +6,4 @@
 	vzeroupper
 	.arch .noavx
 	vzeroupper
+	.p2align 4

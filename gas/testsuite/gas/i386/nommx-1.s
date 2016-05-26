@@ -12,3 +12,4 @@
 	pswapd	%mm1,%mm0
 	.arch .nommx
 	emms
+	.p2align 4

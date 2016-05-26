@@ -19,3 +19,4 @@ GAS LISTING .*
 [ 	]*12[ 	]+\?\?\?\? 0F0FC1BB 		pswapd	%mm1,%mm0
 [ 	]*13[ 	]+\.arch \.nommx
 [ 	]*14[ 	]+emms
+#pass

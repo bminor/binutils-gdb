@@ -11,3 +11,4 @@ GAS LISTING .*
 [ 	]*6[ 	]+\?\?\?\? C5F877   		vzeroupper
 [ 	]*7[ 	]+\.arch \.noavx
 [ 	]*8[ 	]+vzeroupper
+#pass

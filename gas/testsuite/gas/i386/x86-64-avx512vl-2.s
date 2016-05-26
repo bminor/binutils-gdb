@@ -13,3 +13,4 @@ _start:
 	vpconflictd	%xmm0, %xmm25 
 	vpconflictd	%ymm0, %ymm25 
 	vpconflictd	%zmm0, %zmm25 
+	.p2align 4

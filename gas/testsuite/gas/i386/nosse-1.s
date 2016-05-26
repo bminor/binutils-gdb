@@ -6,3 +6,4 @@
 	lfence
 	.arch .nosse
 	lfence
+	.p2align 4

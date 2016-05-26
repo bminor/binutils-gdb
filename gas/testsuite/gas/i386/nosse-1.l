@@ -11,3 +11,4 @@ GAS LISTING .*
 [ 	]*6[ 	]+\?\?\?\? 0FAEE8   		lfence
 [ 	]*7[ 	]+\.arch \.nosse
 [ 	]*8[ 	]+lfence
+#pass

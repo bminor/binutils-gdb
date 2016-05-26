@@ -25,3 +25,4 @@ GAS LISTING .*
 [ 	]*14[ 	]+C4C8
 [ 	]*15[ 	]+\?\?\?\? 62627D48 		vpconflictd	%zmm0, %zmm25 
 [ 	]*15[ 	]+C4C8
+#pass
