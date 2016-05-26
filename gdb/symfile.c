@@ -2713,26 +2713,21 @@ typedef struct
 {
   char *ext;
   enum language lang;
-}
-filename_language;
+} filename_language;
 
-static filename_language *filename_language_table;
-static int fl_table_size, fl_table_next;
+DEF_VEC_O (filename_language);
+
+static VEC (filename_language) *filename_language_table;
 
 static void
 add_filename_language (char *ext, enum language lang)
 {
-  if (fl_table_next >= fl_table_size)
-    {
-      fl_table_size += 10;
-      filename_language_table = XRESIZEVEC (filename_language,
-					    filename_language_table,
-					    fl_table_size);
-    }
+  filename_language entry;
 
-  filename_language_table[fl_table_next].ext = xstrdup (ext);
-  filename_language_table[fl_table_next].lang = lang;
-  fl_table_next++;
+  entry.ext = xstrdup (ext);
+  entry.lang = lang;
+
+  VEC_safe_push (filename_language, filename_language_table, &entry);
 }
 
 static char *ext_args;
@@ -2752,6 +2747,7 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
   int i;
   char *cp = ext_args;
   enum language lang;
+  filename_language *entry;
 
   /* First arg is filename extension, starting with '.'  */
   if (*cp != '.')
@@ -2781,11 +2777,15 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
   lang = language_enum (cp);
 
   /* Now lookup the filename extension: do we already know it?  */
-  for (i = 0; i < fl_table_next; i++)
-    if (0 == strcmp (ext_args, filename_language_table[i].ext))
-      break;
+  for (i = 0;
+       VEC_iterate (filename_language, filename_language_table, i, entry);
+       ++i)
+    {
+      if (0 == strcmp (ext_args, entry->ext))
+	break;
+    }
 
-  if (i >= fl_table_next)
+  if (entry == NULL)
     {
       /* New file extension.  */
       add_filename_language (ext_args, lang);
@@ -2798,9 +2798,9 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
       /*   query ("Really make files of type %s '%s'?", */
       /*          ext_args, language_str (lang));           */
 
-      xfree (filename_language_table[i].ext);
-      filename_language_table[i].ext = xstrdup (ext_args);
-      filename_language_table[i].lang = lang;
+      xfree (entry->ext);
+      entry->ext = xstrdup (ext_args);
+      entry->lang = lang;
     }
 }
 
@@ -2808,24 +2808,22 @@ static void
 info_ext_lang_command (char *args, int from_tty)
 {
   int i;
+  filename_language *entry;
 
   printf_filtered (_("Filename extensions and the languages they represent:"));
   printf_filtered ("\n\n");
-  for (i = 0; i < fl_table_next; i++)
-    printf_filtered ("\t%s\t- %s\n",
-		     filename_language_table[i].ext,
-		     language_str (filename_language_table[i].lang));
+  for (i = 0;
+       VEC_iterate (filename_language, filename_language_table, i, entry);
+       ++i)
+    printf_filtered ("\t%s\t- %s\n", entry->ext, language_str (entry->lang));
 }
 
 static void
 init_filename_language_table (void)
 {
-  if (fl_table_size == 0)	/* Protect against repetition.  */
+  /* Protect against repetition.  */
+  if (VEC_empty (filename_language, filename_language_table))
     {
-      fl_table_size = 20;
-      fl_table_next = 0;
-      filename_language_table = XNEWVEC (filename_language, fl_table_size);
-
       add_filename_language (".c", language_c);
       add_filename_language (".d", language_d);
       add_filename_language (".C", language_cplus);
@@ -2876,9 +2874,15 @@ deduce_language_from_filename (const char *filename)
 
   if (filename != NULL)
     if ((cp = strrchr (filename, '.')) != NULL)
-      for (i = 0; i < fl_table_next; i++)
-	if (strcmp (cp, filename_language_table[i].ext) == 0)
-	  return filename_language_table[i].lang;
+      {
+	filename_language *entry;
+
+	for (i = 0;
+	     VEC_iterate (filename_language, filename_language_table, i, entry);
+	     ++i)
+	  if (strcmp (cp, entry->ext) == 0)
+	    return entry->lang;
+      }
 
   return language_unknown;
 }

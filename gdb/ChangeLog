@@ -1,5 +1,14 @@
 2016-06-23  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (filename_language_table): Now a VEC.
+	(fl_table_size, fl_table_next): Remove.
+	(add_filename_language): Use VEC_safe_push.
+	(set_ext_lang_command, info_ext_lang_command)
+	(deduce_language_from_filename): Use VEC_iterate.
+	(init_filename_language_table): Use VEC_empty.
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (gdbpy_parameter): Now static.
 	* python/python-internal.h (gdbpy_parameter): Don't declare.
 
