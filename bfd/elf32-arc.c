@@ -2546,17 +2546,24 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
   /* Fill in the first three entries in the global offset table.  */
   if (htab->sgot)
     {
-      if (htab->sgot->size > 0 || htab->sgotplt->size > 0)
+      struct elf_link_hash_entry *h;
+      h = elf_link_hash_lookup (elf_hash_table (info), "_GLOBAL_OFFSET_TABLE_",
+				 FALSE, FALSE, TRUE);
+
+	if (h != NULL && h->root.type != bfd_link_hash_undefined
+	    && h->root.u.def.section != NULL)
 	{
+	  asection *sec = h->root.u.def.section;
+
 	  if (ds.sdyn == NULL)
 	    bfd_put_32 (output_bfd, (bfd_vma) 0,
-			htab->sgotplt->contents);
+			sec->contents);
 	  else
 	    bfd_put_32 (output_bfd,
 			ds.sdyn->output_section->vma + ds.sdyn->output_offset,
-			htab->sgotplt->contents);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgotplt->contents + 4);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgotplt->contents + 8);
+			sec->contents);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, sec->contents + 4);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, sec->contents + 8);
 	}
     }
 
