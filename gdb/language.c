@@ -575,6 +575,16 @@ add_language (const struct language_defn *lang)
     language_names[i] = languages[i]->la_name;
   language_names[i] = NULL;
 
+  /* Add the filename extensions.  */
+  if (lang->la_filename_extensions != NULL)
+    {
+      int i;
+
+      for (i = 0; lang->la_filename_extensions[i] != NULL; ++i)
+	add_filename_language (lang->la_filename_extensions[i],
+			       lang->la_language);
+    }
+
   /* Build the "help set language" docs.  */
   tmp_stream = mem_fileopen ();
 
@@ -815,6 +825,7 @@ const struct language_defn unknown_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
@@ -862,6 +873,7 @@ const struct language_defn auto_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
@@ -907,6 +919,7 @@ const struct language_defn local_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,

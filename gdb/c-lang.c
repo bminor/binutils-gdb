@@ -824,6 +824,11 @@ const struct exp_descriptor exp_descriptor_c =
   evaluate_subexp_c
 };
 
+static const char *c_extensions[] =
+{
+  ".c", NULL
+};
+
 const struct language_defn c_language_defn =
 {
   "c",				/* Language name */
@@ -833,6 +838,7 @@ const struct language_defn c_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  c_extensions,
   &exp_descriptor_c,
   c_parse,
   c_yyerror,
@@ -951,6 +957,11 @@ cplus_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_bool;
 }
 
+static const char *cplus_extensions[] =
+{
+  ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++", NULL
+};
+
 const struct language_defn cplus_language_defn =
 {
   "c++",			/* Language name */
@@ -960,6 +971,7 @@ const struct language_defn cplus_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  cplus_extensions,
   &exp_descriptor_c,
   c_parse,
   c_yyerror,
@@ -996,6 +1008,11 @@ const struct language_defn cplus_language_defn =
   LANG_MAGIC
 };
 
+static const char *asm_extensions[] =
+{
+  ".s", ".sx", ".S", NULL
+};
+
 const struct language_defn asm_language_defn =
 {
   "asm",			/* Language name */
@@ -1005,6 +1022,7 @@ const struct language_defn asm_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  asm_extensions,
   &exp_descriptor_c,
   c_parse,
   c_yyerror,
@@ -1055,6 +1073,7 @@ const struct language_defn minimal_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  NULL,
   &exp_descriptor_c,
   c_parse,
   c_yyerror,

@@ -235,6 +235,13 @@ f_make_symbol_completion_list (const char *text, const char *word,
   return default_make_symbol_completion_list_break_on (text, word, ":", code);
 }
 
+static const char *f_extensions[] =
+{
+  ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
+  ".f90", ".F90", ".f95", ".F95", ".f03", ".F03", ".f08", ".F08",
+  NULL
+};
+
 const struct language_defn f_language_defn =
 {
   "fortran",
@@ -244,6 +251,7 @@ const struct language_defn f_language_defn =
   case_sensitive_off,
   array_column_major,
   macro_expansion_no,
+  f_extensions,
   &exp_descriptor_standard,
   f_parse,			/* parser */
   f_yyerror,			/* parser error function */

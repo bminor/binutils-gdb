@@ -114,11 +114,7 @@ static int simple_read_overlay_table (void);
 
 static int simple_overlay_update_1 (struct obj_section *);
 
-static void add_filename_language (char *ext, enum language lang);
-
 static void info_ext_lang_command (char *args, int from_tty);
-
-static void init_filename_language_table (void);
 
 static void symfile_find_segment_sections (struct objfile *objfile);
 
@@ -2719,8 +2715,10 @@ DEF_VEC_O (filename_language);
 
 static VEC (filename_language) *filename_language_table;
 
-static void
-add_filename_language (char *ext, enum language lang)
+/* See symfile.h.  */
+
+void
+add_filename_language (const char *ext, enum language lang)
 {
   filename_language entry;
 
@@ -2816,54 +2814,6 @@ info_ext_lang_command (char *args, int from_tty)
        VEC_iterate (filename_language, filename_language_table, i, entry);
        ++i)
     printf_filtered ("\t%s\t- %s\n", entry->ext, language_str (entry->lang));
-}
-
-static void
-init_filename_language_table (void)
-{
-  /* Protect against repetition.  */
-  if (VEC_empty (filename_language, filename_language_table))
-    {
-      add_filename_language (".c", language_c);
-      add_filename_language (".d", language_d);
-      add_filename_language (".C", language_cplus);
-      add_filename_language (".cc", language_cplus);
-      add_filename_language (".cp", language_cplus);
-      add_filename_language (".cpp", language_cplus);
-      add_filename_language (".cxx", language_cplus);
-      add_filename_language (".c++", language_cplus);
-      add_filename_language (".java", language_java);
-      add_filename_language (".class", language_java);
-      add_filename_language (".m", language_objc);
-      add_filename_language (".f", language_fortran);
-      add_filename_language (".F", language_fortran);
-      add_filename_language (".for", language_fortran);
-      add_filename_language (".FOR", language_fortran);
-      add_filename_language (".ftn", language_fortran);
-      add_filename_language (".FTN", language_fortran);
-      add_filename_language (".fpp", language_fortran);
-      add_filename_language (".FPP", language_fortran);
-      add_filename_language (".f90", language_fortran);
-      add_filename_language (".F90", language_fortran);
-      add_filename_language (".f95", language_fortran);
-      add_filename_language (".F95", language_fortran);
-      add_filename_language (".f03", language_fortran);
-      add_filename_language (".F03", language_fortran);
-      add_filename_language (".f08", language_fortran);
-      add_filename_language (".F08", language_fortran);
-      add_filename_language (".s", language_asm);
-      add_filename_language (".sx", language_asm);
-      add_filename_language (".S", language_asm);
-      add_filename_language (".pas", language_pascal);
-      add_filename_language (".p", language_pascal);
-      add_filename_language (".pp", language_pascal);
-      add_filename_language (".adb", language_ada);
-      add_filename_language (".ads", language_ada);
-      add_filename_language (".a", language_ada);
-      add_filename_language (".ada", language_ada);
-      add_filename_language (".dg", language_ada);
-      add_filename_language (".rs", language_rust);
-    }
 }
 
 enum language
@@ -4018,7 +3968,6 @@ A load OFFSET may also be given."), &cmdlist);
 	   _("Read the overlay mapping state from the target."), &overlaylist);
 
   /* Filename extension to source language lookup table: */
-  init_filename_language_table ();
   add_setshow_string_noescape_cmd ("extension-language", class_files,
 				   &ext_args, _("\
 Set mapping between filename extension and source language."), _("\

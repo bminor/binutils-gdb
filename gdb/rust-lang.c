@@ -1998,6 +1998,11 @@ static const struct exp_descriptor exp_descriptor_rust =
   rust_evaluate_subexp
 };
 
+static const char *rust_extensions[] =
+{
+  ".rs", NULL
+};
+
 static const struct language_defn rust_language_defn =
 {
   "rust",
@@ -2007,6 +2012,7 @@ static const struct language_defn rust_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  rust_extensions,
   &exp_descriptor_rust,
   rust_parse,
   rustyyerror,

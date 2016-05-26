@@ -412,6 +412,11 @@ pascal_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_bool;
 }
 
+static const char *p_extensions[] =
+{
+  ".pas", ".p", ".pp", NULL
+};
+
 const struct language_defn pascal_language_defn =
 {
   "pascal",			/* Language name */
@@ -421,6 +426,7 @@ const struct language_defn pascal_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  p_extensions,
   &exp_descriptor_standard,
   pascal_parse,
   pascal_yyerror,

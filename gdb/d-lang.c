@@ -190,6 +190,11 @@ d_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_bool;
 }
 
+static const char *d_extensions[] =
+{
+  ".d", NULL
+};
+
 static const struct language_defn d_language_defn =
 {
   "d",
@@ -199,6 +204,7 @@ static const struct language_defn d_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  d_extensions,
   &exp_descriptor_c,
   d_parse,
   d_yyerror,

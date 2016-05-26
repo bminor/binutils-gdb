@@ -440,6 +440,11 @@ extern void clear_symtab_users (int add_flags);
 
 extern enum language deduce_language_from_filename (const char *);
 
+/* Map the filename extension EXT to the language LANG.  Any previous
+   association of EXT will be removed.  EXT will be copied by this
+   function.  */
+extern void add_filename_language (const char *ext, enum language lang);
+
 /* This enum encodes bit-flags passed as ADD_FLAGS parameter to
    symbol_file_add, etc.  */
 

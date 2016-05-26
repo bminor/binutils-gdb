@@ -1052,6 +1052,7 @@ const struct language_defn opencl_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  NULL,
   &exp_descriptor_opencl,
   c_parse,
   c_yyerror,

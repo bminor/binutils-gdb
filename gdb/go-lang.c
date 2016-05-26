@@ -565,6 +565,7 @@ static const struct language_defn go_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_c,
   go_parse,
   go_yyerror,

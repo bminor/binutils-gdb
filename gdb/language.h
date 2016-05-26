@@ -164,6 +164,13 @@ struct language_defn
     /* Style of macro expansion, if any, supported by this language.  */
     enum macro_expansion la_macro_expansion;
 
+    /* A NULL-terminated array of file extensions for this language.
+       The extension must include the ".", like ".c".  If this
+       language doesn't need to provide any filename extensions, this
+       may be NULL.  */
+
+    const char *const *la_filename_extensions;
+
     /* Definitions related to expression printing, prefixifying, and
        dumping.  */
 

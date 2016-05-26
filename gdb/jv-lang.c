@@ -1162,6 +1162,11 @@ const struct exp_descriptor exp_descriptor_java =
   evaluate_subexp_java
 };
 
+static const char *java_extensions[] =
+{
+  ".java", ".class", NULL
+};
+
 const struct language_defn java_language_defn =
 {
   "java",			/* Language name */
@@ -1171,6 +1176,7 @@ const struct language_defn java_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  java_extensions,
   &exp_descriptor_java,
   java_parse,
   java_yyerror,

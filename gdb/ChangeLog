@@ -1,5 +1,42 @@
 2016-06-23  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_extensions): New array.
+	(ada_language_defn): Use it.
+	* c-lang.c (c_extensions): New array.
+	(c_language_defn): Use it.
+	(cplus_extensions): New array.
+	(cplus_language_defn): Use it.
+	(asm_extensions): New array.
+	(asm_language_defn): Use it.
+	(minimal_language_defn): Update.
+	* d-lang.c (d_extensions): New array.
+	(d_language_defn): Use it.
+	* f-lang.c (f_extensions): New array.
+	(f_language_defn): Use it.
+	* go-lang.c (go_language_defn): Update.
+	* jv-lang.c (java_extensions): New array.
+	(java_language_defn): Use it.
+	* language.c (add_language): Call add_filename_language.
+	(unknown_language_defn, auto_language_defn, local_language_defn):
+	Update.
+	* language.h (struct language_defn) <la_filename_extensions>: New
+	field.
+	* m2-lang.c (m2_language_defn): Update.
+	* objc-lang.c (objc_extensions): New array.
+	(objc_language_defn): Use it.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* p-lang.c (p_extensions): New array.
+	(pascal_language_defn): Use it.
+	* rust-lang.c (rust_extensions): New array.
+	(rust_language_defn): Use it.
+	* symfile.c (add_filename_language): No longer static.  Make "ext"
+	const.
+	(init_filename_language_table): Remove.
+	(_initialize_symfile): Update.
+	* symfile.h (add_filename_language): Declare.
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (filename_language_table): Now a VEC.
 	(fl_table_size, fl_table_next): Remove.
 	(add_filename_language): Use VEC_safe_push.

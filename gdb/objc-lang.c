@@ -350,6 +350,11 @@ static const struct op_print objc_op_print_tab[] =
     {NULL, OP_NULL, PREC_NULL, 0}
 };
 
+static const char *objc_extensions[] =
+{
+  ".m", NULL
+};
+
 const struct language_defn objc_language_defn = {
   "objective-c",		/* Language name */
   "Objective-C",
@@ -358,6 +363,7 @@ const struct language_defn objc_language_defn = {
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  objc_extensions,
   &exp_descriptor_standard,
   c_parse,
   c_yyerror,

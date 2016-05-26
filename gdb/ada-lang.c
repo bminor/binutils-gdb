@@ -14054,6 +14054,11 @@ ada_read_var_value (struct symbol *var, const struct block *var_block,
   return default_read_var_value (var, var_block, frame);
 }
 
+static const char *ada_extensions[] =
+{
+  ".adb", ".ads", ".a", ".ada", ".dg", NULL
+};
+
 const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   "Ada",
@@ -14063,6 +14068,7 @@ const struct language_defn ada_language_defn = {
                                    that's not quite what this means.  */
   array_row_major,
   macro_expansion_no,
+  ada_extensions,
   &ada_exp_descriptor,
   parse,
   ada_yyerror,
