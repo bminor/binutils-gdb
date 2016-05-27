@@ -5773,11 +5773,6 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       {
 	unsigned int shift;
 
-	/* Make sure the target of JALX is word-aligned.  Bit 0 must be
-	   the correct ISA mode selector and bit 1 must be 0.  */
-	if (*cross_mode_jump_p && (symbol & 3) != (r_type == R_MIPS_26))
-	  return bfd_reloc_outofrange;
-
 	/* Shift is 2, unusually, for microMIPS JALX.  */
 	shift = (!*cross_mode_jump_p && r_type == R_MICROMIPS_26_S1) ? 1 : 2;
 
@@ -5787,7 +5782,14 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  value = _bfd_mips_elf_sign_extend (addend, 26 + shift);
 	else
 	  value = addend;
-	value = (value + symbol) >> shift;
+	value += symbol;
+
+	/* Make sure the target of JALX is word-aligned.  Bit 0 must be
+	   the correct ISA mode selector and bit 1 must be 0.  */
+	if (*cross_mode_jump_p && (value & 3) != (r_type == R_MIPS_26))
+	  return bfd_reloc_outofrange;
+
+	value >>= shift;
 	if (!was_local_p && h->root.root.type != bfd_link_hash_undefweak)
 	  overflowed_p = (value >> 26) != ((p + 4) >> (26 + shift));
 	value &= howto->dst_mask;

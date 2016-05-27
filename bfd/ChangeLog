@@ -1,5 +1,11 @@
 2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_calculate_relocation) <R_MIPS16_26>
+	<R_MIPS_26, R_MICROMIPS_26_S1>: Include the addend in JALX's
+	target alignment verification.
+
+2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (mips_elf_calculate_relocation): Also use the
 	section name if `bfd_elf_string_from_elf_section' returns an
 	empty string.
