@@ -535,6 +535,10 @@ static int shared = 0;
    0 if att syntax.  */
 static int intel_syntax = 0;
 
+/* 1 for Intel64 ISA,
+   0 if AMD64 ISA.  */
+static int intel64;
+
 /* 1 for intel mnemonic,
    0 if att mnemonic.  */
 static int intel_mnemonic = !SYSV386_COMPAT;
@@ -1536,6 +1540,11 @@ cpu_flags_match (const insn_template *t)
     {
       /* This instruction is available only on some archs.  */
       i386_cpu_flags cpu = cpu_arch_flags;
+
+      /* Set cpuamd64 and cpuintel64 here since they may be changed by
+	 set_cpu_arch.  */
+      cpu_arch_flags.bitfield.cpuamd64 = !intel64;
+      cpu_arch_flags.bitfield.cpuintel64 = intel64;
 
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
@@ -10107,17 +10116,11 @@ md_parse_option (int c, const char *arg)
       break;
 
     case OPTION_MAMD64:
-      cpu_arch_flags.bitfield.cpuamd64 = 1;
-      cpu_arch_flags.bitfield.cpuintel64 = 0;
-      cpu_arch_isa_flags.bitfield.cpuamd64 = 1;
-      cpu_arch_isa_flags.bitfield.cpuintel64 = 0;
+      intel64 = 0;
       break;
 
     case OPTION_MINTEL64:
-      cpu_arch_flags.bitfield.cpuamd64 = 0;
-      cpu_arch_flags.bitfield.cpuintel64 = 1;
-      cpu_arch_isa_flags.bitfield.cpuamd64 = 0;
-      cpu_arch_isa_flags.bitfield.cpuintel64 = 1;
+      intel64 = 1;
       break;
 
     default:

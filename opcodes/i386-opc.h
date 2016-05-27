@@ -211,7 +211,7 @@ enum
   /* Intel64 support required  */
   CpuIntel64,
   /* The last bitfield in i386_cpu_flags.  */
-  CpuMax = CpuNo64
+  CpuMax = CpuIntel64
 };
 
 #define CpuNumOfUints \

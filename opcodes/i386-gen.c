@@ -1379,7 +1379,16 @@ main (int argc, char **argv)
 	    srcdir, xstrerror (errno));
 
   /* Check the unused bitfield in i386_cpu_flags.  */
-#ifndef CpuUnused
+#ifdef CpuUnused
+  if (cpu_flags[ARRAY_SIZE (cpu_flags) - 2].position != CpuMax)
+    fail (_("CpuMax != %d!\n"),
+	  cpu_flags[ARRAY_SIZE (cpu_flags) - 2].position);
+
+#else
+  if (cpu_flags[ARRAY_SIZE (cpu_flags) - 1].position != CpuMax)
+    fail (_("CpuMax != %d!\n"),
+	  cpu_flags[ARRAY_SIZE (cpu_flags) - 1].position);
+
   c = CpuNumOfBits - CpuMax - 1;
   if (c)
     fail (_("%d unused bits in i386_cpu_flags.\n"), c);

@@ -1,5 +1,13 @@
 2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/20154
+	* config/tc-i386.c (intel64): New.
+	(cpu_flags_match): Set cpuamd64 and cpuintel64.
+	(md_parse_option): Set intel64 instead of cpuamd64 and
+	cpuintel64.
+
+2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (cpu_flags_match): Don't clear cpu64 nor
 	cpuno64.
 
