@@ -1541,11 +1541,6 @@ cpu_flags_match (const insn_template *t)
       /* This instruction is available only on some archs.  */
       i386_cpu_flags cpu = cpu_arch_flags;
 
-      /* Set cpuamd64 and cpuintel64 here since they may be changed by
-	 set_cpu_arch.  */
-      cpu_arch_flags.bitfield.cpuamd64 = !intel64;
-      cpu_arch_flags.bitfield.cpuintel64 = intel64;
-
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
 	{
@@ -4766,10 +4761,12 @@ match_template (void)
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)
 	continue;
 
-      /* Check AT&T/Intel syntax.   */
+      /* Check AT&T/Intel syntax and Intel64/AMD64 ISA.   */
       i.error = unsupported_syntax;
       if ((intel_syntax && t->opcode_modifier.attsyntax)
-	  || (!intel_syntax && t->opcode_modifier.intelsyntax))
+	  || (!intel_syntax && t->opcode_modifier.intelsyntax)
+	  || (intel64 && t->opcode_modifier.amd64)
+	  || (!intel64 && t->opcode_modifier.intel64))
 	continue;
 
       /* Check the suffix, except for some instructions in intel mode.  */

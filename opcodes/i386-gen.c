@@ -469,8 +469,6 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuCLZERO),
   BITFIELD (CpuOSPKE),
   BITFIELD (CpuRDPID),
-  BITFIELD (CpuAMD64),
-  BITFIELD (CpuIntel64),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif
@@ -540,6 +538,8 @@ static bitfield opcode_modifiers[] =
   BITFIELD (ATTMnemonic),
   BITFIELD (ATTSyntax),
   BITFIELD (IntelSyntax),
+  BITFIELD (AMD64),
+  BITFIELD (Intel64),
 };
 
 static bitfield operand_types[] =
@@ -1344,6 +1344,7 @@ main (int argc, char **argv)
   extern int chdir (char *);
   char *srcdir = NULL;
   int c;
+  unsigned int i, cpumax;
   FILE *table;
 
   program_name = *argv;
@@ -1378,16 +1379,19 @@ main (int argc, char **argv)
       fail (_("unable to change directory to \"%s\", errno = %s\n"),
 	    srcdir, xstrerror (errno));
 
+  /* cpu_flags isn't sorted by position.  */
+  cpumax = 0;
+  for (i = 0; i < ARRAY_SIZE (cpu_flags); i++)
+    if (cpu_flags[i].position > cpumax)
+      cpumax = cpu_flags[i].position;
+
   /* Check the unused bitfield in i386_cpu_flags.  */
 #ifdef CpuUnused
-  if (cpu_flags[ARRAY_SIZE (cpu_flags) - 2].position != CpuMax)
-    fail (_("CpuMax != %d!\n"),
-	  cpu_flags[ARRAY_SIZE (cpu_flags) - 2].position);
-
+  if ((cpumax - 1) != CpuMax)
+    fail (_("CpuMax != %d!\n"), cpumax);
 #else
-  if (cpu_flags[ARRAY_SIZE (cpu_flags) - 1].position != CpuMax)
-    fail (_("CpuMax != %d!\n"),
-	  cpu_flags[ARRAY_SIZE (cpu_flags) - 1].position);
+  if (cpumax != CpuMax)
+    fail (_("CpuMax != %d!\n"), cpumax);
 
   c = CpuNumOfBits - CpuMax - 1;
   if (c)

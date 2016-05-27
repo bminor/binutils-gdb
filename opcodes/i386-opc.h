@@ -206,12 +206,8 @@ enum
   Cpu64,
   /* Not supported in the 64bit mode  */
   CpuNo64,
-  /* AMD64 support required  */
-  CpuAMD64,
-  /* Intel64 support required  */
-  CpuIntel64,
   /* The last bitfield in i386_cpu_flags.  */
-  CpuMax = CpuIntel64
+  CpuMax = CpuNo64
 };
 
 #define CpuNumOfUints \
@@ -316,8 +312,6 @@ typedef union i386_cpu_flags
       unsigned int cpurdpid:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
-      unsigned int cpuamd64:1;
-      unsigned int cpuintel64:1;
 #ifdef CpuUnused
       unsigned int unused:(CpuNumOfBits - CpuUnused);
 #endif
@@ -558,6 +552,10 @@ enum
   ATTSyntax,
   /* Intel syntax.  */
   IntelSyntax,
+  /* AMD64.  */
+  AMD64,
+  /* Intel64.  */
+  Intel64,
   /* The last bitfield in i386_opcode_modifier.  */
   Opcode_Modifier_Max
 };
@@ -626,6 +624,8 @@ typedef struct i386_opcode_modifier
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;
   unsigned int intelsyntax:1;
+  unsigned int amd64:1;
+  unsigned int intel64:1;
 } i386_opcode_modifier;
 
 /* Position of operand_type bits.  */

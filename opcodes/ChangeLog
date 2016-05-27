@@ -1,6 +1,24 @@
 2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/20154
+	* i386-gen.c (cpu_flags): Remove CpuAMD64 and CpuIntel64.
+	(opcode_modifiers): Add AMD64 and Intel64.
+	(main): Properly verify CpuMax.
+	* i386-opc.h (CpuAMD64): Removed.
+	(CpuIntel64): Likewise.
+	(CpuMax): Set to CpuNo64.
+	(i386_cpu_flags): Remove cpuamd64 and cpuintel64.
+	(AMD64): New.
+	(Intel64): Likewise.
+	(i386_opcode_modifier): Add amd64 and intel64.
+	(i386-opc.tbl): Replace CpuAMD64/CpuIntel64 with AMD64/Intel64
+	on call and jmp.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/20154
 	* i386-gen.c (main): Fail if CpuMax is incorrect.
 	* i386-opc.h (CpuMax): Set to CpuIntel64.
 	* i386-tbl.h: Regenerated.
