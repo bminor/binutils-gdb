@@ -1537,8 +1537,6 @@ cpu_flags_match (const insn_template *t)
       /* This instruction is available only on some archs.  */
       i386_cpu_flags cpu = cpu_arch_flags;
 
-      cpu.bitfield.cpu64 = 0;
-      cpu.bitfield.cpuno64 = 0;
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
 	{

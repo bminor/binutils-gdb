@@ -1,3 +1,8 @@
+2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_flags_match): Don't clear cpu64 nor
+	cpuno64.
+
 2016-05-26  Peter Bergner <bergner@vnet.ibm.com>
 
 	* testsuite/gas/ppc/altivec3.d <vmsumudm>: Add test.
