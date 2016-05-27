@@ -1,9 +1,9 @@
 #source: init-fini-arrays.s
 #ld: -r
 #readelf: -S --wide
-#xfail: cr16-*-* crx-*-* ft32-*-* msp430-*-*
+#xfail: cr16-*-* crx-*-* msp430-*-*
 # msp430 puts the init_array and fini_array inside the .rodata section.
-# cr16, crx and ft32 use non-standard scripts with memory regions, which don't play
+# cr16 and crx use non-standard scripts with memory regions, which don't play
 #  well with unique group sections under ld -r.
 
 #...
