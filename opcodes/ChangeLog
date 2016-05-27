@@ -1,3 +1,17 @@
+2016-05-27  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20150
+	* msp430-dis.c (msp430dis_read_two_bytes): New function.
+	(msp430dis_opcode_unsigned): New function.
+	(msp430dis_opcode_signed): New function.
+	(msp430_singleoperand): Use the new opcode reading functions.
+	Only disassenmble bytes if they were successfully read.
+	(msp430_doubleoperand): Likewise.
+	(msp430_branchinstr): Likewise.
+	(msp430x_callx_instr): Likewise.
+	(print_insn_msp430): Check that it is safe to read bytes before
+	attempting disassembly.  Use the new opcode reading functions.
+
 2016-05-26  Peter Bergner <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (CY): New define.  Document it.
