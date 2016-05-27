@@ -823,6 +823,8 @@ static const arch_entry cpu_arch[] =
     CPU_287_FLAGS, 0 },
   { STRING_COMMA_LEN (".387"), PROCESSOR_UNKNOWN,
     CPU_387_FLAGS, 0 },
+  { STRING_COMMA_LEN (".687"), PROCESSOR_UNKNOWN,
+    CPU_687_FLAGS, 0 },
   { STRING_COMMA_LEN (".mmx"), PROCESSOR_UNKNOWN,
     CPU_MMX_FLAGS, 0 },
   { STRING_COMMA_LEN (".sse"), PROCESSOR_UNKNOWN,
@@ -972,9 +974,19 @@ static const arch_entry cpu_arch[] =
 static const noarch_entry cpu_noarch[] =
 {
   { STRING_COMMA_LEN ("no87"),  CPU_ANY_X87_FLAGS },
+  { STRING_COMMA_LEN ("no287"),  CPU_ANY_287_FLAGS },
+  { STRING_COMMA_LEN ("no387"),  CPU_ANY_387_FLAGS },
+  { STRING_COMMA_LEN ("no687"),  CPU_ANY_687_FLAGS },
   { STRING_COMMA_LEN ("nommx"),  CPU_ANY_MMX_FLAGS },
   { STRING_COMMA_LEN ("nosse"),  CPU_ANY_SSE_FLAGS },
+  { STRING_COMMA_LEN ("nosse2"),  CPU_ANY_SSE2_FLAGS },
+  { STRING_COMMA_LEN ("nosse3"),  CPU_ANY_SSE3_FLAGS },
+  { STRING_COMMA_LEN ("nossse3"),  CPU_ANY_SSSE3_FLAGS },
+  { STRING_COMMA_LEN ("nosse4.1"),  CPU_ANY_SSE4_1_FLAGS },
+  { STRING_COMMA_LEN ("nosse4.2"),  CPU_ANY_SSE4_2_FLAGS },
+  { STRING_COMMA_LEN ("nosse4"),  CPU_ANY_SSE4_1_FLAGS },
   { STRING_COMMA_LEN ("noavx"),  CPU_ANY_AVX_FLAGS },
+  { STRING_COMMA_LEN ("noavx2"),  CPU_ANY_AVX2_FLAGS },
 };
 
 #ifdef I386COFF
@@ -9537,17 +9549,20 @@ parse_real_register (char *reg_string, char **end_op)
       && !cpu_arch_flags.bitfield.cpu387)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpummx)
+  if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpuregmmx)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.regxmm && !cpu_arch_flags.bitfield.cpusse)
+  if (r->reg_type.bitfield.regxmm && !cpu_arch_flags.bitfield.cpuregxmm)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.regymm && !cpu_arch_flags.bitfield.cpuavx)
+  if (r->reg_type.bitfield.regymm && !cpu_arch_flags.bitfield.cpuregymm)
     return (const reg_entry *) NULL;
 
-  if ((r->reg_type.bitfield.regzmm || r->reg_type.bitfield.regmask)
-       && !cpu_arch_flags.bitfield.cpuavx512f)
+  if (r->reg_type.bitfield.regzmm && !cpu_arch_flags.bitfield.cpuregzmm)
+    return (const reg_entry *) NULL;
+
+  if (r->reg_type.bitfield.regmask
+      && !cpu_arch_flags.bitfield.cpuregmask)
     return (const reg_entry *) NULL;
 
   /* Don't allow fake index register unless allow_index_reg isn't 0. */

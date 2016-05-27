@@ -1,5 +1,34 @@
 2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/20145
+	* config/tc-i386.c (cpu_arch): Add 687.
+	(cpu_noarch): Add no287, no387, no687, nosse2, nosse3, nossse3,
+	nosse4.1, nosse4.2, nosse4 and noavx2.
+	(parse_real_register): Check cpuregmmx instead of cpummx for MMX
+	register.  Check cpuregxmm instead of cpusse for XMM register.
+	Check cpuregymm instead of cpuavx for YMM register.  Check
+	cpuregzmm/cpuregmask instead of cpuavx512f for ZMMM/mask register.
+	* doc/c-i386.texi: Mention 687, no287, no387, no687, nosse2,
+	nosse3, nossse3, nosse4.1, nosse4.2, nosse4 and noavx2.
+	* testsuite/gas/i386/arch-10-prefetchw.d (as): Add mmx.
+	* testsuite/gas/i386/arch-10.d (as): Likewise.
+	* testsuite/gas/i386/arch-11.s: Add ".arch .mmx".
+	* testsuite/gas/i386/i386.exp: Pass mmx to assembler for
+	arch-10-3 and arch-10-4.  Run no87-3, nosse-4, nosse-5, noavx-3
+	and noavx-4.
+	* testsuite/gas/i386/no87-3.l: New file.
+	* testsuite/gas/i386/no87-3.s: Likewise.
+	* testsuite/gas/i386/noavx-3.l: Likewise.
+	* testsuite/gas/i386/noavx-3.s: Likewise.
+	* testsuite/gas/i386/noavx-4.d: Likewise.
+	* testsuite/gas/i386/noavx-4.s: Likewise.
+	* testsuite/gas/i386/nosse-4.l: Likewise.
+	* testsuite/gas/i386/nosse-4.s: Likewise.
+	* testsuite/gas/i386/nosse-5.d: Likewise.
+	* testsuite/gas/i386/nosse-5.s: Likewise.
+
+2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/20154
 	* config/tc-i386.c (cpu_flags_match): Don't set cpuamd64 nor
 	cpuintel64.

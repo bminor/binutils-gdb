@@ -1,5 +1,37 @@
 2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/20145
+	* i386-gen.c (cpu_flag_init): Update CPU_XXX_FLAGS.  Remove
+	CpuMMX from CPU_SSE_FLAGS.  Remove AVX and AVX512 bits from
+	CPU_ANY_SSE_FLAGS.  Remove AVX512 bits from CPU_ANY_AVX_FLAGS.
+	Add CPU_XSAVE_FLAGS to CPU_XSAVEOPT_FLAGS, CPU_XSAVE_FLAGS and
+	CpuXSAVEC.  Add CPU_AVX_FLAGS to CpuF16C.  Remove CpuMMX from
+	CPU_AVX512F_FLAGS, CPU_AVX512CD_FLAGS, CPU_AVX512ER_FLAGS,
+	CPU_AVX512PF_FLAGS, CPU_AVX512DQ_FLAGS and CPU_AVX512BW_FLAGS.
+	Add CPU_SSE2_FLAGS to CPU_SHA_FLAGS.   Add CPU_ANY_287_FLAGS,
+	CPU_ANY_387_FLAGS, CPU_ANY_687_FLAGS, CPU_ANY_SSE2_FLAGS,
+	CPU_ANY_SSE3_FLAGS, CPU_ANY_SSSE3_FLAGS, CPU_ANY_SSE4_1_FLAGS,
+	CPU_ANY_SSE4_2_FLAGS and CPU_ANY_AVX2_FLAGS.  Enable CpuRegMMX
+	for MMX.  Enable CpuRegXMM for SSE, AVX and AVX512.  Enable
+	CpuRegYMM for AVX and AVX512VL,  Enable CpuRegZMM and
+	CpuRegMask for AVX512.
+	(cpu_flags): Add CpuRegMMX, CpuRegXMM, CpuRegYMM, CpuRegZMM
+	and CpuRegMask.
+	(set_bitfield_from_cpu_flag_init): New function.
+	(set_bitfield): Remove const on f.  Call
+	set_bitfield_from_cpu_flag_init to handle CPU_XXX_FLAGS.
+	* i386-opc.h (CpuRegMMX): New.
+	(CpuRegXMM): Likewise.
+	(CpuRegYMM): Likewise.
+	(CpuRegZMM): Likewise.
+	(CpuRegMask): Likewise.
+	(i386_cpu_flags): Add cpuregmmx, cpuregxmm, cpuregymm, cpuregzmm
+	and cpuregmask.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/20154
 	* i386-gen.c (cpu_flags): Remove CpuAMD64 and CpuIntel64.
 	(opcode_modifiers): Add AMD64 and Intel64.
