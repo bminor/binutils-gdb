@@ -1,3 +1,9 @@
+2016-05-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-many-short-lived-threads.exp (bad_dejagnu):
+	New procedure.
+	(top level): Call it, and bail out of DejaGnu is known to be bad.
+
 2016-05-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/whatis.c: Extend the test case.
