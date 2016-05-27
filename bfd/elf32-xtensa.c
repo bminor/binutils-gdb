@@ -2702,12 +2702,10 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	      r = contract_asm_expansion (contents, input_size, rel,
 					  &error_message);
 	      if (r != bfd_reloc_ok)
-		{
-		  if (!((*info->callbacks->reloc_dangerous)
-			(info, error_message, input_bfd, input_section,
-			 rel->r_offset)))
-		    return FALSE;
-		}
+		(*info->callbacks->reloc_dangerous)
+		  (info, error_message,
+		   input_bfd, input_section, rel->r_offset);
+
 	      r_type = ELF32_R_TYPE (rel->r_info);
 	    }
 
@@ -2759,12 +2757,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 		}
 	    }
 	  if (r != bfd_reloc_ok)
-	    {
-	      if (!((*info->callbacks->reloc_dangerous)
-		    (info, error_message, input_bfd, input_section,
-		     rel->r_offset)))
-		return FALSE;
-	    }
+	    (*info->callbacks->reloc_dangerous)
+	      (info, error_message,
+	       input_bfd, input_section, rel->r_offset);
 
 	  /* Done with work for relocatable link; continue with next reloc.  */
 	  continue;
@@ -2864,10 +2859,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 		    {
 		      error_message =
 			_("dynamic relocation in read-only section");
-		      if (!((*info->callbacks->reloc_dangerous)
-			    (info, error_message, input_bfd, input_section,
-			     rel->r_offset)))
-			return FALSE;
+		      (*info->callbacks->reloc_dangerous)
+			(info, error_message,
+			 input_bfd, input_section, rel->r_offset);
 		    }
 
 		  if (dynamic_symbol)
@@ -2961,10 +2955,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	      {
 		error_message =
 		  _("TLS relocation invalid without dynamic sections");
-		if (!((*info->callbacks->reloc_dangerous)
-		      (info, error_message, input_bfd, input_section,
-		       rel->r_offset)))
-		  return FALSE;
+		(*info->callbacks->reloc_dangerous)
+		  (info, error_message,
+		   input_bfd, input_section, rel->r_offset);
 	      }
 	    else
 	      {
@@ -2985,10 +2978,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 		  {
 		    error_message =
 		      _("dynamic relocation in read-only section");
-		    if (!((*info->callbacks->reloc_dangerous)
-			  (info, error_message, input_bfd, input_section,
-			   rel->r_offset)))
-		      return FALSE;
+		    (*info->callbacks->reloc_dangerous)
+		      (info, error_message,
+		       input_bfd, input_section, rel->r_offset);
 		  }
 
 		indx = h && h->dynindx != -1 ? h->dynindx : 0;
@@ -3030,12 +3022,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 		(h && elf_xtensa_hash_entry (h) == htab->tlsbase);
 	      if (! replace_tls_insn (rel, input_bfd, input_section, contents,
 				      is_ld_model, &error_message))
-		{
-		  if (!((*info->callbacks->reloc_dangerous)
-			(info, error_message, input_bfd, input_section,
-			 rel->r_offset)))
-		    return FALSE;
-		}
+		(*info->callbacks->reloc_dangerous)
+		  (info, error_message,
+		   input_bfd, input_section, rel->r_offset);
 
 	      if (r_type != R_XTENSA_TLS_ARG || is_ld_model)
 		{
@@ -3054,10 +3043,8 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	      error_message =
 		vsprint_msg ("invalid relocation for dynamic symbol", ": %s",
 			     strlen (name) + 2, name);
-	      if (!((*info->callbacks->reloc_dangerous)
-		    (info, error_message, input_bfd, input_section,
-		     rel->r_offset)))
-		return FALSE;
+	      (*info->callbacks->reloc_dangerous)
+		(info, error_message, input_bfd, input_section, rel->r_offset);
 	      continue;
 	    }
 	  break;
@@ -3105,10 +3092,8 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 					 strlen (name) + 22,
 					 name, (int) rel->r_addend);
 
-	  if (!((*info->callbacks->reloc_dangerous)
-		(info, error_message, input_bfd, input_section,
-		 rel->r_offset)))
-	    return FALSE;
+	  (*info->callbacks->reloc_dangerous)
+	    (info, error_message, input_bfd, input_section, rel->r_offset);
 	}
     }
 

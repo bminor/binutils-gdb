@@ -107,32 +107,32 @@ static char *get_emulation
   (int, char **);
 static bfd_boolean add_archive_element
   (struct bfd_link_info *, bfd *, const char *, bfd **);
-static bfd_boolean multiple_definition
+static void multiple_definition
   (struct bfd_link_info *, struct bfd_link_hash_entry *,
    bfd *, asection *, bfd_vma);
-static bfd_boolean multiple_common
+static void multiple_common
   (struct bfd_link_info *, struct bfd_link_hash_entry *,
    bfd *, enum bfd_link_hash_type, bfd_vma);
-static bfd_boolean add_to_set
+static void add_to_set
   (struct bfd_link_info *, struct bfd_link_hash_entry *,
    bfd_reloc_code_real_type, bfd *, asection *, bfd_vma);
-static bfd_boolean constructor_callback
+static void constructor_callback
   (struct bfd_link_info *, bfd_boolean, const char *, bfd *,
    asection *, bfd_vma);
-static bfd_boolean warning_callback
+static void warning_callback
   (struct bfd_link_info *, const char *, const char *, bfd *,
    asection *, bfd_vma);
 static void warning_find_reloc
   (bfd *, asection *, void *);
-static bfd_boolean undefined_symbol
+static void undefined_symbol
   (struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma,
    bfd_boolean);
-static bfd_boolean reloc_overflow
+static void reloc_overflow
   (struct bfd_link_info *, struct bfd_link_hash_entry *, const char *,
    const char *, bfd_vma, bfd *, asection *, bfd_vma);
-static bfd_boolean reloc_dangerous
+static void reloc_dangerous
   (struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma);
-static bfd_boolean unattached_reloc
+static void unattached_reloc
   (struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma);
 static bfd_boolean notice
   (struct bfd_link_info *, struct bfd_link_hash_entry *,
@@ -906,7 +906,7 @@ add_archive_element (struct bfd_link_info *info,
 /* This is called when BFD has discovered a symbol which is defined
    multiple times.  */
 
-static bfd_boolean
+static void
 multiple_definition (struct bfd_link_info *info,
 		     struct bfd_link_hash_entry *h,
 		     bfd *nbfd,
@@ -919,7 +919,7 @@ multiple_definition (struct bfd_link_info *info,
   bfd_vma oval;
 
   if (info->allow_multiple_definition)
-    return TRUE;
+    return;
 
   switch (h->type)
     {
@@ -943,7 +943,7 @@ multiple_definition (struct bfd_link_info *info,
       && bfd_is_abs_section (osec)
       && bfd_is_abs_section (nsec)
       && nval == oval)
-    return TRUE;
+    return;
 
   /* If either section has the output_section field set to
      bfd_abs_section_ptr, it means that the section is being
@@ -956,7 +956,7 @@ multiple_definition (struct bfd_link_info *info,
       || (nsec->output_section != NULL
 	  && ! bfd_is_abs_section (nsec)
 	  && bfd_is_abs_section (nsec->output_section)))
-    return TRUE;
+    return;
 
   name = h->root.string;
   if (nbfd == NULL)
@@ -976,8 +976,6 @@ multiple_definition (struct bfd_link_info *info,
       einfo (_("%P: Disabling relaxation: it will not work with multiple definitions\n"));
       DISABLE_RELAXATION;
     }
-
-  return TRUE;
 }
 
 /* This is called when there is a definition of a common symbol, or
@@ -985,7 +983,7 @@ multiple_definition (struct bfd_link_info *info,
    or when two common symbols are found.  We only do something if
    -warn-common was used.  */
 
-static bfd_boolean
+static void
 multiple_common (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		 struct bfd_link_hash_entry *h,
 		 bfd *nbfd,
@@ -998,7 +996,7 @@ multiple_common (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   bfd_vma osize;
 
   if (!config.warn_common)
-    return TRUE;
+    return;
 
   name = h->root.string;
   otype = h->type;
@@ -1066,15 +1064,13 @@ multiple_common (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	    einfo (_("%B: warning: previous common is here\n"), obfd);
 	}
     }
-
-  return TRUE;
 }
 
 /* This is called when BFD has discovered a set element.  H is the
    entry in the linker hash table for the set.  SECTION and VALUE
    represent a value which should be added to the set.  */
 
-static bfd_boolean
+static void
 add_to_set (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	    struct bfd_link_hash_entry *h,
 	    bfd_reloc_code_real_type reloc,
@@ -1087,7 +1083,7 @@ add_to_set (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	   h->root.string);
 
   if (! config.build_constructors)
-    return TRUE;
+    return;
 
   ldctor_add_set_entry (h, reloc, NULL, section, value);
 
@@ -1099,8 +1095,6 @@ add_to_set (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	 undefined symbols because we are going to define it
 	 ourselves.  */
     }
-
-  return TRUE;
 }
 
 /* This is called when BFD has discovered a constructor.  This is only
@@ -1108,7 +1102,7 @@ add_to_set (struct bfd_link_info *info ATTRIBUTE_UNUSED,
    constructors in some more clever fashion.  This is similar to
    adding an element to a set, but less general.  */
 
-static bfd_boolean
+static void
 constructor_callback (struct bfd_link_info *info,
 		      bfd_boolean constructor,
 		      const char *name,
@@ -1124,7 +1118,7 @@ constructor_callback (struct bfd_link_info *info,
     einfo (_("%P: warning: global constructor %s used\n"), name);
 
   if (! config.build_constructors)
-    return TRUE;
+    return;
 
   /* Ensure that BFD_RELOC_CTOR exists now, so that we can give a
      useful error message.  */
@@ -1154,7 +1148,6 @@ constructor_callback (struct bfd_link_info *info,
     }
 
   ldctor_add_set_entry (h, BFD_RELOC_CTOR, name, section, value);
-  return TRUE;
 }
 
 /* A structure used by warning_callback to pass information through
@@ -1189,7 +1182,7 @@ symbol_warning (const char *warning, const char *symbol, bfd *abfd)
 
 /* This is called when there is a reference to a warning symbol.  */
 
-static bfd_boolean
+static void
 warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		  const char *warning,
 		  const char *symbol,
@@ -1201,7 +1194,7 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
      have a cleaner interface, but what?  */
   if (! config.warn_multiple_gp
       && strcmp (warning, "using multiple gp values") == 0)
-    return TRUE;
+    return;
 
   if (section != NULL)
     einfo ("%C: %s%s\n", abfd, section, address, _("warning: "), warning);
@@ -1215,11 +1208,9 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       /* Search all input files for a reference to SYMBOL.  */
       for (b = info->input_bfds; b; b = b->link.next)
 	if (b != abfd && symbol_warning (warning, symbol, b))
-	  return TRUE;
+	  return;
       einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
     }
-
-  return TRUE;
 }
 
 /* This is called by warning_callback for each section.  It checks the
@@ -1273,7 +1264,7 @@ warning_find_reloc (bfd *abfd, asection *sec, void *iarg)
 
 /* This is called when an undefined symbol is found.  */
 
-static bfd_boolean
+static void
 undefined_symbol (struct bfd_link_info *info,
 		  const char *name,
 		  bfd *abfd,
@@ -1288,7 +1279,7 @@ undefined_symbol (struct bfd_link_info *info,
 
   if (info->ignore_hash != NULL
       && bfd_hash_lookup (info->ignore_hash, name, FALSE, FALSE) != NULL)
-    return TRUE;
+    return;
 
   if (config.warn_once)
     {
@@ -1355,8 +1346,6 @@ undefined_symbol (struct bfd_link_info *info,
       else if (error)
 	einfo ("%X");
     }
-
-  return TRUE;
 }
 
 /* Counter to limit the number of relocation overflow error messages
@@ -1370,7 +1359,7 @@ int overflow_cutoff_limit = 10;
 
 /* This is called when a reloc overflows.  */
 
-static bfd_boolean
+static void
 reloc_overflow (struct bfd_link_info *info,
 		struct bfd_link_hash_entry *entry,
 		const char *name,
@@ -1381,7 +1370,7 @@ reloc_overflow (struct bfd_link_info *info,
 		bfd_vma address)
 {
   if (overflow_cutoff_limit == -1)
-    return TRUE;
+    return;
 
   einfo ("%X%H:", abfd, section, address);
 
@@ -1389,7 +1378,7 @@ reloc_overflow (struct bfd_link_info *info,
       && overflow_cutoff_limit-- == 0)
     {
       einfo (_(" additional relocation overflows omitted from the output\n"));
-      return TRUE;
+      return;
     }
 
   if (entry)
@@ -1423,12 +1412,11 @@ reloc_overflow (struct bfd_link_info *info,
   if (addend != 0)
     einfo ("+%v", addend);
   einfo ("\n");
-  return TRUE;
 }
 
 /* This is called when a dangerous relocation is made.  */
 
-static bfd_boolean
+static void
 reloc_dangerous (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		 const char *message,
 		 bfd *abfd,
@@ -1437,13 +1425,12 @@ reloc_dangerous (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 {
   einfo (_("%X%H: dangerous relocation: %s\n"),
 	 abfd, section, address, message);
-  return TRUE;
 }
 
 /* This is called when a reloc is being generated attached to a symbol
    that is not being output.  */
 
-static bfd_boolean
+static void
 unattached_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		  const char *name,
 		  bfd *abfd,
@@ -1452,7 +1439,6 @@ unattached_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 {
   einfo (_("%X%H: reloc refers to symbol `%T' which is not being output\n"),
 	 abfd, section, address, name);
-  return TRUE;
 }
 
 /* This is called if link_info.notice_all is set, or when a symbol in

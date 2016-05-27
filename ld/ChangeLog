@@ -1,3 +1,10 @@
+2016-05-28  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (multiple_definition, multiple_common, add_to_set,
+	constructor_callback, warning_callback, undefined_symbol,
+	reloc_overflow, reloc_dangerous, unattached_reloc): Return void.
+	* emultempl/elf32.em: Adjust callback calls.
+
 2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/unaligned-jalx-addend-0.d: New test.

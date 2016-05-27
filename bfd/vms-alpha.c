@@ -1641,9 +1641,8 @@ _bfd_vms_get_value (bfd *abfd, const unsigned char *ascic,
     *vma = 0;
   else
     {
-      if (!(*info->callbacks->undefined_symbol)
-          (info, name, abfd, PRIV (image_section), PRIV (image_offset), TRUE))
-        abort ();
+      (*info->callbacks->undefined_symbol)
+	(info, name, abfd, PRIV (image_section), PRIV (image_offset), TRUE);
       *vma = 0;
     }
 }

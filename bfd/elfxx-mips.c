@@ -5410,17 +5410,14 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	     http://techpubs.sgi.com/library/manuals/4000/007-4658-001/pdf/007-4658-001.pdf  */
 	  symbol = 0;
 	}
-      else if ((*info->callbacks->undefined_symbol)
-	       (info, h->root.root.root.string, input_bfd,
-		input_section, relocation->r_offset,
-		(info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
-		 || ELF_ST_VISIBILITY (h->root.other)))
-	{
-	  return bfd_reloc_undefined;
-	}
       else
 	{
-	  return bfd_reloc_notsupported;
+	  (*info->callbacks->undefined_symbol)
+	    (info, h->root.root.root.string, input_bfd,
+	     input_section, relocation->r_offset,
+	     (info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
+	     || ELF_ST_VISIBILITY (h->root.other));
+	  return bfd_reloc_undefined;
 	}
 
       target_is_16_bit_code_p = ELF_ST_IS_MIPS16 (h->root.other);
@@ -10250,10 +10247,9 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  htab->small_data_overflow_reported = TRUE;
 		  (*info->callbacks->einfo) ("%P: %s\n", msg);
 		}
-	      if (! ((*info->callbacks->reloc_overflow)
-		     (info, NULL, name, howto->name, (bfd_vma) 0,
-		      input_bfd, input_section, rel->r_offset)))
-		return FALSE;
+	      (*info->callbacks->reloc_overflow)
+		(info, NULL, name, howto->name, (bfd_vma) 0,
+		 input_bfd, input_section, rel->r_offset);
 	    }
 	  break;
 
@@ -12929,25 +12925,22 @@ _bfd_elf_mips_get_relocated_section_contents
 	      switch (r)
 		{
 		case bfd_reloc_undefined:
-		  if (!((*link_info->callbacks->undefined_symbol)
-			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address, TRUE)))
-		    goto error_return;
+		  (*link_info->callbacks->undefined_symbol)
+		    (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+		     input_bfd, input_section, (*parent)->address, TRUE);
 		  break;
 		case bfd_reloc_dangerous:
 		  BFD_ASSERT (error_message != NULL);
-		  if (!((*link_info->callbacks->reloc_dangerous)
-			(link_info, error_message, input_bfd, input_section,
-			 (*parent)->address)))
-		    goto error_return;
+		  (*link_info->callbacks->reloc_dangerous)
+		    (link_info, error_message,
+		     input_bfd, input_section, (*parent)->address);
 		  break;
 		case bfd_reloc_overflow:
-		  if (!((*link_info->callbacks->reloc_overflow)
-			(link_info, NULL,
-			 bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 (*parent)->howto->name, (*parent)->addend,
-			 input_bfd, input_section, (*parent)->address)))
-		    goto error_return;
+		  (*link_info->callbacks->reloc_overflow)
+		    (link_info, NULL,
+		     bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+		     (*parent)->howto->name, (*parent)->addend,
+		     input_bfd, input_section, (*parent)->address);
 		  break;
 		case bfd_reloc_outofrange:
 		default:

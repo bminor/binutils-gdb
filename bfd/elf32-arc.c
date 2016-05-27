@@ -1462,25 +1462,19 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		{
 		  /* Fail if it is linking for PIE and the symbol is
 		     undefined.  */
-		  if (bfd_link_executable (info)
-		      && !(*info->callbacks->undefined_symbol)
-		        (info, h->root.root.string, input_bfd, input_section,
-		         rel->r_offset, TRUE))
-		    {
-		      return FALSE;
-		    }
+		  if (bfd_link_executable (info))
+		    (*info->callbacks->undefined_symbol)
+		      (info, h->root.root.string, input_bfd, input_section,
+		       rel->r_offset, TRUE);
 		  reloc_data.sym_value = h->plt.offset;
 		  reloc_data.sym_section = htab->splt;
 
 		  reloc_data.should_relocate = TRUE;
 		}
-	      else if (!bfd_link_pic (info)
-		       && !(*info->callbacks->undefined_symbol)
-		       (info, h->root.root.string, input_bfd, input_section,
-			rel->r_offset, TRUE))
-		{
-		  return FALSE;
-		}
+	      else if (!bfd_link_pic (info))
+		(*info->callbacks->undefined_symbol)
+		  (info, h->root.root.string, input_bfd, input_section,
+		   rel->r_offset, TRUE);
 	    }
 
 	  if (h->got.glist != NULL)

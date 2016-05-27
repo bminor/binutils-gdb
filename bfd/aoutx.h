@@ -3735,9 +3735,8 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 	}
       else
 	{
-	  if (! ((*flaginfo->info->callbacks->unattached_reloc)
-		 (flaginfo->info, pr->u.name, NULL, NULL, (bfd_vma) 0)))
-	    return FALSE;
+	  (*flaginfo->info->callbacks->unattached_reloc)
+	    (flaginfo->info, pr->u.name, NULL, NULL, (bfd_vma) 0);
 	  r_index = 0;
 	}
     }
@@ -3832,17 +3831,13 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 	    case bfd_reloc_outofrange:
 	      abort ();
 	    case bfd_reloc_overflow:
-	      if (! ((*flaginfo->info->callbacks->reloc_overflow)
-		     (flaginfo->info, NULL,
-		      (p->type == bfd_section_reloc_link_order
-		       ? bfd_section_name (flaginfo->output_bfd,
-					   pr->u.section)
-		       : pr->u.name),
-		      howto->name, pr->addend, NULL, NULL, (bfd_vma) 0)))
-		{
-		  free (buf);
-		  return FALSE;
-		}
+	      (*flaginfo->info->callbacks->reloc_overflow)
+		(flaginfo->info, NULL,
+		 (p->type == bfd_section_reloc_link_order
+		  ? bfd_section_name (flaginfo->output_bfd,
+				      pr->u.section)
+		  : pr->u.name),
+		 howto->name, pr->addend, NULL, NULL, (bfd_vma) 0);
 	      break;
 	    }
 	  ok = bfd_set_section_contents (flaginfo->output_bfd, o, (void *) buf,
@@ -4099,10 +4094,9 @@ aout_link_input_section_std (struct aout_final_link_info *flaginfo,
 
 			  name = strings + GET_WORD (input_bfd,
 						     syms[r_index].e_strx);
-			  if (! ((*flaginfo->info->callbacks->unattached_reloc)
-				 (flaginfo->info, name, input_bfd, input_section,
-				  r_addr)))
-			    return FALSE;
+			  (*flaginfo->info->callbacks->unattached_reloc)
+			    (flaginfo->info, name,
+			     input_bfd, input_section, r_addr);
 			  r_index = 0;
 			}
 		    }
@@ -4224,10 +4218,8 @@ aout_link_input_section_std (struct aout_final_link_info *flaginfo,
 		name = h->root.root.string;
 	      else
 		name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
-	      if (! ((*flaginfo->info->callbacks->undefined_symbol)
-		     (flaginfo->info, name, input_bfd, input_section,
-		     r_addr, TRUE)))
-		return FALSE;
+	      (*flaginfo->info->callbacks->undefined_symbol)
+		(flaginfo->info, name, input_bfd, input_section, r_addr, TRUE);
 	    }
 
 	  r = MY_final_link_relocate (howto,
@@ -4259,11 +4251,9 @@ aout_link_input_section_std (struct aout_final_link_info *flaginfo,
 		    s = aout_reloc_index_to_section (input_bfd, r_index);
 		    name = bfd_section_name (input_bfd, s);
 		  }
-		if (! ((*flaginfo->info->callbacks->reloc_overflow)
-		       (flaginfo->info, (h ? &h->root : NULL), name,
-			howto->name, (bfd_vma) 0, input_bfd,
-			input_section, r_addr)))
-		  return FALSE;
+		(*flaginfo->info->callbacks->reloc_overflow)
+		  (flaginfo->info, (h ? &h->root : NULL), name, howto->name,
+		   (bfd_vma) 0, input_bfd, input_section, r_addr);
 	      }
 	      break;
 	    }
@@ -4441,10 +4431,9 @@ aout_link_input_section_ext (struct aout_final_link_info *flaginfo,
 
 			  name = strings + GET_WORD (input_bfd,
 						     syms[r_index].e_strx);
-			  if (! ((*flaginfo->info->callbacks->unattached_reloc)
-				 (flaginfo->info, name, input_bfd, input_section,
-				  r_addr)))
-			    return FALSE;
+			  (*flaginfo->info->callbacks->unattached_reloc)
+			    (flaginfo->info, name,
+			     input_bfd, input_section, r_addr);
 			  r_index = 0;
 			}
 		    }
@@ -4631,10 +4620,8 @@ aout_link_input_section_ext (struct aout_final_link_info *flaginfo,
 		name = h->root.root.string;
 	      else
 		name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
-	      if (! ((*flaginfo->info->callbacks->undefined_symbol)
-		     (flaginfo->info, name, input_bfd, input_section,
-		     r_addr, TRUE)))
-		return FALSE;
+	      (*flaginfo->info->callbacks->undefined_symbol)
+		(flaginfo->info, name, input_bfd, input_section, r_addr, TRUE);
 	    }
 
 	  if (r_type != (unsigned int) RELOC_SPARC_REV32)
@@ -4678,11 +4665,10 @@ aout_link_input_section_ext (struct aout_final_link_info *flaginfo,
 			s = aout_reloc_index_to_section (input_bfd, r_index);
 			name = bfd_section_name (input_bfd, s);
 		      }
-		    if (! ((*flaginfo->info->callbacks->reloc_overflow)
-			   (flaginfo->info, (h ? &h->root : NULL), name,
-			    howto_table_ext[r_type].name,
-			    r_addend, input_bfd, input_section, r_addr)))
-		      return FALSE;
+		    (*flaginfo->info->callbacks->reloc_overflow)
+		      (flaginfo->info, (h ? &h->root : NULL), name,
+		       howto_table_ext[r_type].name,
+		       r_addend, input_bfd, input_section, r_addr);
 		  }
 		  break;
 		}

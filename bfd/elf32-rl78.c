@@ -295,7 +295,6 @@ rl78_info_to_howto_rela (bfd *               abfd ATTRIBUTE_UNUSED,
 
 static bfd_vma
 get_symbol_value (const char *            name,
-		  bfd_reloc_status_type * status,
 		  struct bfd_link_info *  info,
 		  bfd *                   input_bfd,
 		  asection *              input_section,
@@ -312,12 +311,8 @@ get_symbol_value (const char *            name,
       || (h->type != bfd_link_hash_defined
 	  && h->type != bfd_link_hash_defweak))
     {
-      bfd_reloc_status_type res;
-
-      res = info->callbacks->undefined_symbol
+      (*info->callbacks->undefined_symbol)
 	(info, name, input_bfd, input_section, offset, TRUE);
-      if (status)
-	* status = res;
       return 0;
     }
 
@@ -327,44 +322,36 @@ get_symbol_value (const char *            name,
 }
 
 static bfd_vma
-get_romstart (bfd_reloc_status_type * status,
-	      struct bfd_link_info *  info,
+get_romstart (struct bfd_link_info *  info,
 	      bfd *                   abfd,
 	      asection *              sec,
 	      int		      offset)
 {
   static bfd_boolean cached = FALSE;
   static bfd_vma     cached_value = 0;
-  static bfd_reloc_status_type cached_status;
 
   if (!cached)
     {
-      cached_value = get_symbol_value ("_start", & cached_status, info, abfd, sec, offset);
+      cached_value = get_symbol_value ("_start", info, abfd, sec, offset);
       cached = TRUE;
     }
-  if (status)
-    * status = cached_status;
   return cached_value;
 }
 
 static bfd_vma
-get_ramstart (bfd_reloc_status_type * status,
-	      struct bfd_link_info *  info,
+get_ramstart (struct bfd_link_info *  info,
 	      bfd *                   abfd,
 	      asection *              sec,
 	      int		      offset)
 {
   static bfd_boolean cached = FALSE;
   static bfd_vma     cached_value = 0;
-  static bfd_reloc_status_type cached_status;
 
   if (!cached)
     {
-      cached_value = get_symbol_value ("__datastart", & cached_status, info, abfd, sec, offset);
+      cached_value = get_symbol_value ("__datastart", info, abfd, sec, offset);
       cached = TRUE;
     }
-  if (status)
-    * status = cached_status;
   return cached_value;
 }
 
@@ -573,12 +560,12 @@ rl78_special_reloc (bfd *      input_bfd,
 	break;
 
     case R_RL78_OPromtop:
-      relocation = get_romstart (&r, NULL, input_bfd, input_section,
+      relocation = get_romstart (NULL, input_bfd, input_section,
 				 reloc->address);
       break;
 
     case R_RL78_OPramtop:
-      relocation = get_ramstart (&r, NULL, input_bfd, input_section,
+      relocation = get_ramstart (NULL, input_bfd, input_section,
 				 reloc->address);
       break;
     }
@@ -1068,12 +1055,12 @@ rl78_elf_relocate_section
 	  break;
 
 	case R_RL78_OPromtop:
-	  relocation = get_romstart (&r, info, input_bfd, input_section, rel->r_offset);
+	  relocation = get_romstart (info, input_bfd, input_section, rel->r_offset);
 	  (void) rl78_compute_complex_reloc (r_type, relocation, input_section);
 	  break;
 
 	case R_RL78_OPramtop:
-	  relocation = get_ramstart (&r, info, input_bfd, input_section, rel->r_offset);
+	  relocation = get_ramstart (info, input_bfd, input_section, rel->r_offset);
 	  (void) rl78_compute_complex_reloc (r_type, relocation, input_section);
 	  break;
 
@@ -1094,15 +1081,14 @@ rl78_elf_relocate_section
 	      if (r_type == R_RL78_DIR24S_PCREL)
 		msg = _("%B(%A): error: call to undefined function '%s'");
 	      else
-		r = info->callbacks->reloc_overflow
+		(*info->callbacks->reloc_overflow)
 		  (info, (h ? &h->root : NULL), name, howto->name, (bfd_vma) 0,
 		   input_bfd, input_section, rel->r_offset);
 	      break;
 
 	    case bfd_reloc_undefined:
-	      r = info->callbacks->undefined_symbol
-		(info, name, input_bfd, input_section, rel->r_offset,
-		 TRUE);
+	      (*info->callbacks->undefined_symbol)
+		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
 	      break;
 
 	    case bfd_reloc_other:
@@ -1128,9 +1114,6 @@ rl78_elf_relocate_section
 
 	  if (msg)
 	    _bfd_error_handler (msg, input_bfd, input_section, name);
-
-	  if (! r)
-	    return FALSE;
 	}
     }
 
@@ -1932,12 +1915,12 @@ rl78_offset_for_reloc (bfd *                    abfd,
 	  break;
 
 	case R_RL78_OPromtop:
-	  symval = get_romstart (NULL, info, input_bfd, input_section, rel->r_offset);
+	  symval = get_romstart (info, input_bfd, input_section, rel->r_offset);
 	  (void) rl78_compute_complex_reloc (r_type, symval, input_section);
 	  break;
 
 	case R_RL78_OPramtop:
-	  symval = get_ramstart (NULL, info, input_bfd, input_section, rel->r_offset);
+	  symval = get_ramstart (info, input_bfd, input_section, rel->r_offset);
 	  (void) rl78_compute_complex_reloc (r_type, symval, input_section);
 	  break;
 

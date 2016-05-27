@@ -3908,12 +3908,11 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 	      bfd_boolean err;
 	      err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
 		     || ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT);
-	      if (!info->callbacks->undefined_symbol (info,
-						      eh->root.root.string,
-						      input_bfd,
-						      input_section,
-						      rel->r_offset, err))
-		return FALSE;
+	      (*info->callbacks->undefined_symbol) (info,
+						    eh->root.root.string,
+						    input_bfd,
+						    input_section,
+						    rel->r_offset, err);
 	    }
 
           if (!bfd_link_relocatable (info)
@@ -3925,12 +3924,9 @@ elf64_hppa_relocate_section (bfd *output_bfd,
               if (info->unresolved_syms_in_objects == RM_IGNORE
                   && ELF_ST_VISIBILITY (eh->other) == STV_DEFAULT
                   && eh->type == STT_PARISC_MILLI)
-                {
-                  if (! info->callbacks->undefined_symbol
-                      (info, eh_name (eh), input_bfd,
-                       input_section, rel->r_offset, FALSE))
-                    return FALSE;
-                }
+		(*info->callbacks->undefined_symbol)
+		  (info, eh_name (eh), input_bfd,
+		   input_section, rel->r_offset, FALSE);
             }
 	}
 
@@ -3969,11 +3965,9 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 		      sym_name = bfd_section_name (input_bfd, sym_sec);
 		  }
 
-		if (!((*info->callbacks->reloc_overflow)
-		      (info, (eh ? &eh->root : NULL), sym_name,
-		       howto->name, (bfd_vma) 0, input_bfd,
-		       input_section, rel->r_offset)))
-		  return FALSE;
+		(*info->callbacks->reloc_overflow)
+		  (info, (eh ? &eh->root : NULL), sym_name, howto->name,
+		   (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
 	      }
 	      break;
 	    }

@@ -1,3 +1,11 @@
+2016-05-28  Alan Modra  <amodra@gmail.com>
+
+	* compile/compile-object-load.c (link_callbacks_multiple_definition,
+	link_callbacks_warning, link_callbacks_undefined_symbol,
+	link_callbacks_undefined_symbol, link_callbacks_reloc_overflow,
+	link_callbacks_reloc_dangerous,
+	link_callbacks_unattached_reloc): Return void.
+
 2016-05-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* opencl-lang.c (evaluate_subexp_opencl): If

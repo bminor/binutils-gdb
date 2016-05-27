@@ -2440,12 +2440,11 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
             }
           else if (!bfd_link_relocatable (info))
             {
-              if (! ((*info->callbacks->undefined_symbol)
-                     (info, h->root.root.root.string, input_bfd,
-                      input_section, rel->r_offset,
-                      (info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
-                      || ELF_ST_VISIBILITY (h->root.other))))
-                return bfd_reloc_undefined;
+	      (*info->callbacks->undefined_symbol)
+		(info, h->root.root.root.string, input_bfd,
+		 input_section, rel->r_offset,
+		 (info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
+		 || ELF_ST_VISIBILITY (h->root.other));
               relocation = 0;
             }
         }
@@ -2528,16 +2527,14 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
               /* If the overflowing reloc was to an undefined symbol,
                  we have already printed one error message and there
                  is no point complaining again.  */
-              if (((!h) || (h->root.root.type != bfd_link_hash_undefined))
-                  && (!((*info->callbacks->reloc_overflow)
-                        (info, NULL, name, howto->name, (bfd_vma) 0,
-                         input_bfd, input_section, rel->r_offset))))
-                return FALSE;
+              if (!h || h->root.root.type != bfd_link_hash_undefined)
+		(*info->callbacks->reloc_overflow)
+		  (info, NULL, name, howto->name, (bfd_vma) 0,
+		   input_bfd, input_section, rel->r_offset);
               break;
             case bfd_reloc_undefined:
-              if (!((*info->callbacks->undefined_symbol)
-                    (info, name, input_bfd, input_section, rel->r_offset, TRUE)))
-                return FALSE;
+	      (*info->callbacks->undefined_symbol)
+		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
               break;
 
             case bfd_reloc_outofrange:
@@ -2557,9 +2554,8 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
               /* fall through */
 
             common_error:
-              if (!((*info->callbacks->warning)
-                    (info, msg, name, input_bfd, input_section, rel->r_offset)))
-                return FALSE;
+	      (*info->callbacks->warning) (info, msg, name, input_bfd,
+					   input_section, rel->r_offset);
               break;
             }
         }
