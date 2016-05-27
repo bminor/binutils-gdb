@@ -1,3 +1,9 @@
+2016-05-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (General Query Packets): Move the description of the
+	response before the long list of the specific 'read' and 'write'
+	requests.
+
 2016-05-23  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (Basic Python): Document gdb.breakpoints return.
