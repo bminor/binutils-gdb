@@ -1,3 +1,142 @@
+2016-05-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section)
+	<bfd_reloc_outofrange>: Use the `%X%H' rather than `%C' format
+	for message.  Continue processing rather than returning failure.
+
+2016-05-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section)
+	<bfd_reloc_outofrange>: Call `->einfo' rather than `->warning'.
+	Call `bfd_set_error'.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14625
+	* archive.c (bfd_slurp_armap): Replace
+	bfd_elf64_archive_slurp_armap with
+	_bfd_archive_64_bit_slurp_armap.
+	(bsd_write_armap): Call _bfd_archive_64_bit_write_armap if
+	BFD64 is defined and the archive is too big.
+	(coff_write_armap): Likewise.
+	* archive64.c (bfd_elf64_archive_slurp_armap): Renamed to ...
+	(_bfd_archive_64_bit_slurp_armap): This.
+	(bfd_elf64_archive_write_armap): Renamed to ...
+	(_bfd_archive_64_bit_write_armap): This.
+	* configure.ac: Add --enable-64-bit-archive.
+	(want_64_bit_archive): New.  Set to true by default for 64-bit
+	MIPS and s390 ELF targets.
+	(USE_64_BIT_ARCHIVE): New AC_DEFINE.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* elf64-mips.c (bfd_elf64_archive_functions): Removed.
+	(bfd_elf64_archive_slurp_armap): Likewise.
+	(bfd_elf64_archive_write_armap): Likewise.
+	(bfd_elf64_archive_slurp_extended_name_table): Likewise.
+	(bfd_elf64_archive_construct_extended_name_table): Likewise.
+	(bfd_elf64_archive_truncate_arname): Likewise.
+	(bfd_elf64_archive_read_ar_hdr): Likewise.
+	(bfd_elf64_archive_write_ar_hdr): Likewise.
+	(bfd_elf64_archive_openr_next_archived_file): Likewise.
+	(bfd_elf64_archive_get_elt_at_index): Likewise.
+	(bfd_elf64_archive_generic_stat_arch_elt): Likewise.
+	(bfd_elf64_archive_update_armap_timestamp): Likewise.
+	* elf64-s390.c (bfd_elf64_archive_functions): Removed.
+	(bfd_elf64_archive_slurp_armap): Likewise.
+	(bfd_elf64_archive_write_armap): Likewise.
+	(bfd_elf64_archive_slurp_extended_name_table): Likewise.
+	(bfd_elf64_archive_construct_extended_name_table): Likewise.
+	(bfd_elf64_archive_truncate_arname): Likewise.
+	(bfd_elf64_archive_read_ar_hdr): Likewise.
+	(bfd_elf64_archive_write_ar_hdr): Likewise.
+	(bfd_elf64_archive_openr_next_archived_file): Likewise.
+	(bfd_elf64_archive_get_elt_at_index): Likewise.
+	(bfd_elf64_archive_generic_stat_arch_elt): Likewise.
+	(bfd_elf64_archive_update_armap_timestamp): Likewise.
+	* elfxx-target.h (TARGET_BIG_SYM): Use _bfd_archive_64_bit on
+	BFD_JUMP_TABLE_ARCHIVE if USE_64_BIT_ARCHIVE is defined and
+	bfd_elfNN_archive_functions isn't defined.
+	(TARGET_LITTLE_SYM): Likewise.
+	* libbfd-in.h (_bfd_archive_64_bit_slurp_armap): New prototype.
+	(_bfd_archive_64_bit_write_armap): Likewise.
+	(_bfd_archive_64_bit_slurp_extended_name_table): New macro.
+	(_bfd_archive_64_bit_construct_extended_name_table): Likewise.
+	(_bfd_archive_64_bit_truncate_arname): Likewise.
+	(_bfd_archive_64_bit_read_ar_hdr): Likewise.
+	(_bfd_archive_64_bit_write_ar_hdr): Likewise.
+	(_bfd_archive_64_bit_openr_next_archived_file): Likewise.
+	(_bfd_archive_64_bit_get_elt_at_index): Likewise.
+	(_bfd_archive_64_bit_generic_stat_arch_elt): Likewise.
+	(_bfd_archive_64_bit_update_armap_timestamp): Likewise.
+	* libbfd.h: Regenerated.
+	* plugin.c (plugin_vec): Use _bfd_archive_64_bit on
+	BFD_JUMP_TABLE_ARCHIVE if USE_64_BIT_ARCHIVE is defined.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20103
+	* cofflink.c (coff_link_check_archive_element): Return TRUE if
+	linker add_archive_element callback returns FALSE.
+	* ecoff.c (ecoff_link_check_archive_element): Likewise.
+	* elf64-ia64-vms.c (elf64_vms_link_add_archive_symbols): Skip
+	archive element if linker add_archive_element callback returns
+	FALSE.
+	* elflink.c (elf_link_add_archive_symbols): Likewise.
+	* pdp11.c (aout_link_check_ar_symbols): Likewise.
+	* vms-alpha.c (alpha_vms_link_add_archive_symbols): Likewise.
+	* xcofflink.c (xcoff_link_check_dynamic_ar_symbols): Likewise.
+	(xcoff_link_check_ar_symbols): Likewise.
+
+2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section)
+	<bfd_reloc_outofrange>: Unify error reporting code.
+
+2016-05-23  Jim Wilson  <jim.wilson@linaro.org>
+
+	* elfnn-aarch64.c: Unconditionally enable R_AARCH64_NULL and
+	R_AARCH64_NONE.  Use HOWTO64 for R_AARCH64_NULL.
+	* relocs.c: Add BFD_RELOC_AARCH64_NULL.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+
+2016-05-23  Kuba Sejdak  <jakub.sejdak@phoesys.com>
+
+	* config.bfd: Add entry for arm-phoenix.
+
+2016-05-23  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (arm_dedicated_stub_section_padding): New function.
+	(elf32_arm_size_stubs): Declare stub_type in a more outer scope and
+	account for padding for stub section requiring one.
+	(elf32_arm_build_stubs): Add comment to stress the importance of
+	zeroing veneer section content.
+
+2016-05-23  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* bfd-in.h (bfd_elf32_arm_keep_private_stub_output_sections): Declare
+	bfd hook.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (arm_dedicated_stub_output_section_required): New
+	function.
+	(arm_dedicated_stub_output_section_required_alignment): Likewise.
+	(arm_dedicated_stub_output_section_name): Likewise.
+	(arm_dedicated_stub_input_section_ptr): Likewise.
+	(elf32_arm_create_or_find_stub_sec): Add stub type parameter and
+	function description comment. Add support for dedicated output stub
+	section to given stub types.
+	(elf32_arm_add_stub): Add a stub type parameter and pass it down to
+	elf32_arm_create_or_find_stub_sec.
+	(elf32_arm_create_stub): Pass stub type down to elf32_arm_add_stub.
+	(elf32_arm_size_stubs): Pass stub type when calling
+	elf32_arm_create_or_find_stub_sec for Cortex-A8 erratum veneers.
+	(bfd_elf32_arm_keep_private_stub_output_sections): New function.
+
+2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Don't check R_386_GOT32
+	when setting need_convert_load.
+
 2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_read_rel_addend): Adjust the addend for

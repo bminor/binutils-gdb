@@ -98,8 +98,8 @@ enum arc_rlx_types
 #define is_spfp_p(op)           (((sc) == SPX))
 #define is_dpfp_p(op)           (((sc) == DPX))
 #define is_fpuda_p(op)          (((sc) == DPA))
-#define is_br_jmp_insn_p(op)    (((op)->class == BRANCH || (op)->class == JUMP))
-#define is_kernel_insn_p(op)    (((op)->class == KERNEL))
+#define is_br_jmp_insn_p(op)    (((op)->insn_class == BRANCH || (op)->insn_class == JUMP))
+#define is_kernel_insn_p(op)    (((op)->insn_class == KERNEL))
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -323,7 +323,7 @@ typedef struct
 {
   const char *name;
   int  len;
-  int  class;
+  int  attr_class;
 } attributes_t;
 
 static const attributes_t suffixclass[] =
@@ -428,7 +428,7 @@ static const struct cpu_type
   { "nps400", ARC_OPCODE_ARC700 | ARC_OPCODE_NPS400, bfd_mach_arc_nps400,
     E_ARC_MACH_NPS400,  0x00},
   { "arcem",  ARC_OPCODE_ARCv2EM, bfd_mach_arc_arcv2,
-    EF_ARC_CPU_ARCV2EM, ARC_CD},
+    EF_ARC_CPU_ARCV2EM, 0x00},
   { "archs",  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,
     EF_ARC_CPU_ARCV2HS, ARC_CD},
   { 0, 0, 0, 0, 0 }
@@ -1692,7 +1692,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		    const char *p;
 		    const struct arc_aux_reg *auxr;
 
-		    if (opcode->class != AUXREG)
+		    if (opcode->insn_class != AUXREG)
 		      goto de_fault;
 		    p = S_GET_NAME (tok[tokidx].X_add_symbol);
 
@@ -1846,7 +1846,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 
 	  /* Check for extension conditional codes.  */
 	  if (ext_condcode.arc_ext_condcode
-	      && cl_flags->class & F_CLASS_EXTEND)
+	      && cl_flags->flag_class & F_CLASS_EXTEND)
 	    {
 	      struct arc_flag_operand *pf = ext_condcode.arc_ext_condcode;
 	      while (pf->name)
@@ -1890,9 +1890,9 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		}
 	    }
 
-	  if ((cl_flags->class & F_CLASS_REQUIRED) && cl_matches == 0)
+	  if ((cl_flags->flag_class & F_CLASS_REQUIRED) && cl_matches == 0)
 	    goto match_failed;
-	  if ((cl_flags->class & F_CLASS_OPTIONAL) && cl_matches > 1)
+	  if ((cl_flags->flag_class & F_CLASS_OPTIONAL) && cl_matches > 1)
 	    goto match_failed;
 	}
       /* Did I check all the parsed flags?  */
@@ -2380,6 +2380,32 @@ md_begin (void)
   declare_register ("ilink1", 29);
   declare_register ("ilink2", 30);
   declare_register ("blink", 31);
+
+  /* XY memory registers.  */
+  declare_register ("x0_u0", 32);
+  declare_register ("x0_u1", 33);
+  declare_register ("x1_u0", 34);
+  declare_register ("x1_u1", 35);
+  declare_register ("x2_u0", 36);
+  declare_register ("x2_u1", 37);
+  declare_register ("x3_u0", 38);
+  declare_register ("x3_u1", 39);
+  declare_register ("y0_u0", 40);
+  declare_register ("y0_u1", 41);
+  declare_register ("y1_u0", 42);
+  declare_register ("y1_u1", 43);
+  declare_register ("y2_u0", 44);
+  declare_register ("y2_u1", 45);
+  declare_register ("y3_u0", 46);
+  declare_register ("y3_u1", 47);
+  declare_register ("x0_nu", 48);
+  declare_register ("x1_nu", 49);
+  declare_register ("x2_nu", 50);
+  declare_register ("x3_nu", 51);
+  declare_register ("y0_nu", 52);
+  declare_register ("y1_nu", 53);
+  declare_register ("y2_nu", 54);
+  declare_register ("y3_nu", 55);
 
   declare_register ("mlo", 57);
   declare_register ("mmid", 58);
@@ -3614,7 +3640,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	  switch (t->X_md)
 	    {
 	    case O_plt:
-	      if (opcode->class == JUMP)
+	      if (opcode->insn_class == JUMP)
 		as_bad_where (frag_now->fr_file, frag_now->fr_line,
 			      _("Unable to use @plt relocatio for insn %s"),
 			      opcode->name);
@@ -3631,7 +3657,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	      break;
 	    case O_pcl:
 	      reloc = ARC_RELOC_TABLE (t->X_md)->reloc;
-	      if (ARC_SHORT (opcode->mask) || opcode->class == JUMP)
+	      if (ARC_SHORT (opcode->mask) || opcode->insn_class == JUMP)
 		as_bad_where (frag_now->fr_file, frag_now->fr_line,
 			      _("Unable to use @pcl relocation for insn %s"),
 			      opcode->name);
@@ -4063,7 +4089,7 @@ tokenize_extinsn (extInstruction_t *einsn)
 	  if (!strncmp (suffixclass[i].name, input_line_pointer,
 			suffixclass[i].len))
 	    {
-	      suffix_class |= suffixclass[i].class;
+	      suffix_class |= suffixclass[i].attr_class;
 	      input_line_pointer += suffixclass[i].len;
 	      break;
 	    }
@@ -4103,7 +4129,7 @@ tokenize_extinsn (extInstruction_t *einsn)
 			input_line_pointer,
 			syntaxclassmod[i].len))
 	    {
-	      syntax_class_modifiers |= syntaxclassmod[i].class;
+	      syntax_class_modifiers |= syntaxclassmod[i].attr_class;
 	      input_line_pointer += syntaxclassmod[i].len;
 	      break;
 	    }
@@ -4117,7 +4143,7 @@ tokenize_extinsn (extInstruction_t *einsn)
 			    input_line_pointer,
 			    syntaxclass[i].len))
 		{
-		  syntax_class |= syntaxclass[i].class;
+		  syntax_class |= syntaxclass[i].attr_class;
 		  input_line_pointer += syntaxclass[i].len;
 		  break;
 		}

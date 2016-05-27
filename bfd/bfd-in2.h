@@ -910,6 +910,9 @@ extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
 extern bfd_boolean bfd_elf32_arm_add_glue_sections_to_bfd
   (bfd *, struct bfd_link_info *);
 
+extern void bfd_elf32_arm_keep_private_stub_output_sections
+  (struct bfd_link_info *);
+
 /* ELF ARM mapping symbol support.  */
 #define BFD_ARM_SPECIAL_SYM_TYPE_MAP	(1 << 0)
 #define BFD_ARM_SPECIAL_SYM_TYPE_TAG	(1 << 1)
@@ -5716,6 +5719,9 @@ relocation enumerators.  N.B. the order of the enumerators is
 important as several tables in the AArch64 bfd backend are indexed
 by these enumerators; make sure they are all synced.  */
   BFD_RELOC_AARCH64_RELOC_START,
+
+/* Deprecated AArch64 null relocation code.  */
+  BFD_RELOC_AARCH64_NULL,
 
 /* AArch64 null relocation code.  */
   BFD_RELOC_AARCH64_NONE,

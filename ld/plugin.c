@@ -1033,8 +1033,6 @@ plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed)
 {
   plugin_t *curplug = plugins_list;
   *claimed = FALSE;
-  if (no_more_claiming)
-    return 0;
   while (curplug && !*claimed)
     {
       if (curplug->claim_file_handler)

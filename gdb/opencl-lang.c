@@ -984,7 +984,7 @@ Cannot perform conditional operation on vectors with different sizes"));
 						"structure");
 
 	    if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	      v = value_zero (value_type (v), not_lval);
+	      v = value_zero (value_type (v), VALUE_LVAL (v));
 	    return v;
 	  }
       }

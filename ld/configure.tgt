@@ -103,6 +103,7 @@ arm-*-netbsd*)		targ_emul=armnbsd;
 			targ_extra_emuls="armelf armelf_nbsd armelfb_nbsd"  ;;
 arm-*-nto*)		targ_emul=armnto ;;
 arm-*-openbsd*)		targ_emul=armnbsd ;;
+arm-*-phoenix*)		targ_emul=armelf ;;
 arm-*-rtems*)		targ_emul=armelf ;;
 armeb-*-elf | armeb-*-eabi*)
 			targ_emul=armelfb ;;

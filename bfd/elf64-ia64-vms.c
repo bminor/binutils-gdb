@@ -5361,7 +5361,7 @@ elf64_vms_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	 to include it.  We don't need to check anything.  */
       if (! (*info->callbacks->add_archive_element) (info, element,
                                                      h->root.string, &element))
-	return FALSE;
+	continue;
       if (! elf64_vms_link_add_object_symbols (element, info))
 	return FALSE;
 

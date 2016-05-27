@@ -40,10 +40,10 @@ gdb_test "ptype p" "type = Type bar\r\n *$int :: c\r\n *$real :: d\r\n *End Type
 
 set test "type-printing for derived type"
 gdb_test_multiple "ptype q" $test {
-    -re "type = Type foo\r\n *$real :: a\r\n *Type bar\r\n *$int :: c\r\n *$real :: d\r\n *End Type bar :: x\r\n *character\\*7 :: b\r\n *End Type foo\r\n$gdb_prompt $" {
+    -re "type = Type foo\r\n *$real :: a\r\n *Type bar :: x\r\n *character\\*7 :: b\r\n *End Type foo\r\n$gdb_prompt $" {
 	pass $test
     }
-    -re "type = Type foo\r\n *$real :: a\r\n *Type bar\r\n *$int :: c\r\n *$real :: d\r\n *End Type bar :: x\r\n *character :: b\\(7\\)\r\n *End Type foo\r\n$gdb_prompt $" {
+    -re "type = Type foo\r\n *$real :: a\r\n *Type bar :: x\r\n *character :: b\\(7\\)\r\n *End Type foo\r\n$gdb_prompt $" {
 	# Compiler should produce string, not an array of characters.
 	setup_xfail "*-*-*"
 	fail $test

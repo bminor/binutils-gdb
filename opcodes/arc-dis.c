@@ -175,7 +175,7 @@ find_format (const struct arc_opcode *arc_table,
 	unsigned int value;
 
 	/* Check first the extensions.  */
-	if (cl_flags->class & F_CLASS_EXTEND)
+	if (cl_flags->flag_class & F_CLASS_EXTEND)
 	  {
 	    value = (insn[0] & 0x1F);
 	    if (arcExtMap_condCodeName (value))
@@ -226,7 +226,7 @@ print_flags (const struct arc_opcode *opcode,
       const unsigned *flgopridx;
 
       /* Check first the extensions.  */
-      if (cl_flags->class & F_CLASS_EXTEND)
+      if (cl_flags->flag_class & F_CLASS_EXTEND)
 	{
 	  const char *name;
 	  value = (insn[0] & 0x1F);
@@ -270,12 +270,21 @@ print_flags (const struct arc_opcode *opcode,
 		      break;
 		    }
 		}
+	      if (flg_operand->name[0] == 'd'
+		  && flg_operand->name[1] == 0)
+		info->branch_delay_insns = 1;
+
+	      /* Check if it is a conditional flag.  */
+	      if (cl_flags->flag_class & F_CLASS_COND)
+		{
+		  if (info->insn_type == dis_jsr)
+		    info->insn_type = dis_condjsr;
+		  else if (info->insn_type == dis_branch)
+		    info->insn_type = dis_condbranch;
+		}
+
 	      (*info->fprintf_func) (info->stream, "%s", flg_operand->name);
 	    }
-
-	  if (flg_operand->name[0] == 'd'
-	      && flg_operand->name[1] == 0)
-	    info->branch_delay_insns = 1;
 	}
     }
 }
@@ -289,7 +298,7 @@ get_auxreg (const struct arc_opcode *opcode,
   unsigned int i;
   const struct arc_aux_reg *auxr = &arc_aux_regs[0];
 
-  if (opcode->class != AUXREG)
+  if (opcode->insn_class != AUXREG)
     return NULL;
 
   name = arcExtMap_auxRegName (value);
@@ -527,15 +536,25 @@ print_insn_arc (bfd_vma memaddr,
   (*info->fprintf_func) (info->stream, "%s", opcode->name);
 
   /* Preselect the insn class.  */
-  switch (opcode->class)
+  switch (opcode->insn_class)
     {
     case BRANCH:
     case JUMP:
       if (!strncmp (opcode->name, "bl", 2)
 	  || !strncmp (opcode->name, "jl", 2))
-	info->insn_type = dis_jsr;
+	{
+	  if (opcode->subclass == COND)
+	    info->insn_type = dis_condjsr;
+	  else
+	    info->insn_type = dis_jsr;
+	}
       else
-	info->insn_type = dis_branch;
+	{
+	  if (opcode->subclass == COND)
+	    info->insn_type = dis_condbranch;
+	  else
+	    info->insn_type = dis_branch;
+	}
       break;
     case MEMORY:
       info->insn_type = dis_dref; /* FIXME! DB indicates mov as memory! */

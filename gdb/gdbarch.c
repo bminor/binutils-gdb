@@ -205,6 +205,7 @@ struct gdbarch
   gdbarch_push_dummy_call_ftype *push_dummy_call;
   int call_dummy_location;
   gdbarch_push_dummy_code_ftype *push_dummy_code;
+  gdbarch_code_of_frame_writable_ftype *code_of_frame_writable;
   gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
   gdbarch_print_vector_info_ftype *print_vector_info;
@@ -387,6 +388,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->deprecated_fp_regnum = -1;
   gdbarch->call_dummy_location = AT_ENTRY_POINT;
+  gdbarch->code_of_frame_writable = default_code_of_frame_writable;
   gdbarch->print_registers_info = default_print_registers_info;
   gdbarch->print_float_info = default_print_float_info;
   gdbarch->register_sim_regno = legacy_register_sim_regno;
@@ -552,6 +554,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of push_dummy_call, has predicate.  */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
   /* Skip verify of push_dummy_code, has predicate.  */
+  /* Skip verify of code_of_frame_writable, invalid_p == 0 */
   /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, invalid_p == 0 */
   /* Skip verify of print_vector_info, has predicate.  */
@@ -803,6 +806,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: char_signed = %s\n",
                       plongest (gdbarch->char_signed));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: code_of_frame_writable = <%s>\n",
+                      host_address_to_string (gdbarch->code_of_frame_writable));
   fprintf_unfiltered (file,
                       "gdbarch_dump: coff_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->coff_make_msymbol_special));
@@ -2312,6 +2318,23 @@ set_gdbarch_push_dummy_code (struct gdbarch *gdbarch,
                              gdbarch_push_dummy_code_ftype push_dummy_code)
 {
   gdbarch->push_dummy_code = push_dummy_code;
+}
+
+int
+gdbarch_code_of_frame_writable (struct gdbarch *gdbarch, struct frame_info *frame)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->code_of_frame_writable != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_code_of_frame_writable called\n");
+  return gdbarch->code_of_frame_writable (gdbarch, frame);
+}
+
+void
+set_gdbarch_code_of_frame_writable (struct gdbarch *gdbarch,
+                                    gdbarch_code_of_frame_writable_ftype code_of_frame_writable)
+{
+  gdbarch->code_of_frame_writable = code_of_frame_writable;
 }
 
 void

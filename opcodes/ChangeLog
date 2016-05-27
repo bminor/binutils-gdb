@@ -1,3 +1,128 @@
+2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/20145
+	* i386-gen.c (cpu_flag_init): Update CPU_XXX_FLAGS.  Remove
+	CpuMMX from CPU_SSE_FLAGS.  Remove AVX and AVX512 bits from
+	CPU_ANY_SSE_FLAGS.  Remove AVX512 bits from CPU_ANY_AVX_FLAGS.
+	Add CPU_XSAVE_FLAGS to CPU_XSAVEOPT_FLAGS, CPU_XSAVE_FLAGS and
+	CpuXSAVEC.  Add CPU_AVX_FLAGS to CpuF16C.  Remove CpuMMX from
+	CPU_AVX512F_FLAGS, CPU_AVX512CD_FLAGS, CPU_AVX512ER_FLAGS,
+	CPU_AVX512PF_FLAGS, CPU_AVX512DQ_FLAGS and CPU_AVX512BW_FLAGS.
+	Add CPU_SSE2_FLAGS to CPU_SHA_FLAGS.   Add CPU_ANY_287_FLAGS,
+	CPU_ANY_387_FLAGS, CPU_ANY_687_FLAGS, CPU_ANY_SSE2_FLAGS,
+	CPU_ANY_SSE3_FLAGS, CPU_ANY_SSSE3_FLAGS, CPU_ANY_SSE4_1_FLAGS,
+	CPU_ANY_SSE4_2_FLAGS and CPU_ANY_AVX2_FLAGS.  Enable CpuRegMMX
+	for MMX.  Enable CpuRegXMM for SSE, AVX and AVX512.  Enable
+	CpuRegYMM for AVX and AVX512VL,  Enable CpuRegZMM and
+	CpuRegMask for AVX512.
+	(cpu_flags): Add CpuRegMMX, CpuRegXMM, CpuRegYMM, CpuRegZMM
+	and CpuRegMask.
+	(set_bitfield_from_cpu_flag_init): New function.
+	(set_bitfield): Remove const on f.  Call
+	set_bitfield_from_cpu_flag_init to handle CPU_XXX_FLAGS.
+	* i386-opc.h (CpuRegMMX): New.
+	(CpuRegXMM): Likewise.
+	(CpuRegYMM): Likewise.
+	(CpuRegZMM): Likewise.
+	(CpuRegMask): Likewise.
+	(i386_cpu_flags): Add cpuregmmx, cpuregxmm, cpuregymm, cpuregzmm
+	and cpuregmask.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/20154
+	* i386-gen.c (cpu_flags): Remove CpuAMD64 and CpuIntel64.
+	(opcode_modifiers): Add AMD64 and Intel64.
+	(main): Properly verify CpuMax.
+	* i386-opc.h (CpuAMD64): Removed.
+	(CpuIntel64): Likewise.
+	(CpuMax): Set to CpuNo64.
+	(i386_cpu_flags): Remove cpuamd64 and cpuintel64.
+	(AMD64): New.
+	(Intel64): Likewise.
+	(i386_opcode_modifier): Add amd64 and intel64.
+	(i386-opc.tbl): Replace CpuAMD64/CpuIntel64 with AMD64/Intel64
+	on call and jmp.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/20154
+	* i386-gen.c (main): Fail if CpuMax is incorrect.
+	* i386-opc.h (CpuMax): Set to CpuIntel64.
+	* i386-tbl.h: Regenerated.
+
+2016-05-27  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20150
+	* msp430-dis.c (msp430dis_read_two_bytes): New function.
+	(msp430dis_opcode_unsigned): New function.
+	(msp430dis_opcode_signed): New function.
+	(msp430_singleoperand): Use the new opcode reading functions.
+	Only disassenmble bytes if they were successfully read.
+	(msp430_doubleoperand): Likewise.
+	(msp430_branchinstr): Likewise.
+	(msp430x_callx_instr): Likewise.
+	(print_insn_msp430): Check that it is safe to read bytes before
+	attempting disassembly.  Use the new opcode reading functions.
+
+2016-05-26  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (CY): New define.  Document it.
+	(powerpc_opcodes) <addex[.], lwzmx, vmsumudm>: New mnemonics.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CpuVREX to CPU_AVX512DQ_FLAGS,
+	CPU_AVX512BW_FLAGS, CPU_AVX512VL_FLAGS, CPU_AVX512IFMA_FLAGS
+	and CPU_AVX512VBMI_FLAGS.  Add CpuAVX512DQ, CpuAVX512BW,
+	CpuAVX512VL, CpuAVX512IFMA and CpuAVX512VBMI to
+	CPU_ANY_AVX_FLAGS.
+	* i386-init.h: Regenerated.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/20141
+	* i386-gen.c (cpu_flag_init): Add CpuVREX to CPU_AVX512F_FLAGS,
+	CPU_AVX512CD_FLAGS, CPU_AVX512ER_FLAGS and CPU_AVX512PF_FLAGS.
+	* i386-init.h: Regenerated.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Rename CPU_ANY87_FLAGS to
+	CPU_ANY_X87_FLAGS.  Add CPU_ANY_MMX_FLAGS.
+	* i386-init.h: Regenerated.
+
+2016-05-23  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (print_flags): Set branch_delay_insns, and insn_type
+	information.
+	(print_insn_arc): Set insn_type information.
+	* arc-opc.c (C_CC): Add F_CLASS_COND.
+	* arc-tbl.h (bbit0, bbit1): Update subclass to COND.
+	(beq_s, bge_s, bgt_s, bhi_s, bhs_s): Likewise.
+	(ble_s, blo_s, bls_s, blt_s, bne_s): Likewise.
+	(breq, breq_s, brge, brhs, brlo, brlt): Likewise.
+	(brne, brne_s, jeq_s, jne_s): Likewise.
+
+2016-05-23  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-tbl.h (neg): New instruction variant.
+
+2016-05-23  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-dis.c (find_format, find_format, get_auxreg)
+	(print_insn_arc): Changed.
+	* arc-ext.h (INSERT_XOP): Likewise.
+
+2016-05-23  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* tic54x-dis.c (sprint_mmr): Adjust.
+	* tic54x-opc.c: Likewise.
+
 2016-05-19  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (NSISIGNOPT): Use insert_nsi and extract_nsi.

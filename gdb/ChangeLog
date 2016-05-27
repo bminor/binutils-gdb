@@ -1,3 +1,163 @@
+2016-05-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opencl-lang.c (evaluate_subexp_opencl): If
+	EVAL_AVOID_SIDE_EFFECTS mode, forward the VALUE_LVAL attribute to
+	the returned value in the STRUCTOP_STRUCT case.
+
+2016-05-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* eval.c (evaluate_subexp_standard): If EVAL_AVOID_SIDE_EFFECTS
+	mode, forward the VALUE_LVAL attribute to the returned value in
+	the STRUCTOP_PTR case.
+
+2016-05-25  Tom Tromey  <tom@tromey.com>
+
+	* python/py-value.c (value_object_as_number): Use correct spelling
+	of HAVE_LIBPYTHON2_4.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* f-typeprint.c (f_type_print_base): Replace 0 by show.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* f-typeprint.c (f_type_print_base): Decrease show by one.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* f-typeprint.c (f_type_print_base): Don't print fields when show < 0.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* f-typeprint.c (f_type_print_base): Take print level into account.
+
+2016-05-24  Tom Tromey  <tom@tromey.com>
+
+	PR python/17386:
+	* python/py-value.c (value_object_as_number): Add
+	nb_inplace_floor_divide, nb_inplace_true_divide, nb_index.
+
+2016-05-24  Tom Tromey  <tom@tromey.com>
+
+	* python/py-value.c (value_object_as_number): Add
+	nb_inplace_divide for Python 2.
+
+2016-05-23  Tom Tromey  <tom@tromey.com>
+
+	PR python/17981:
+	* python/py-breakpoint.c (gdbpy_breakpoints): Return a new tuple
+	when there are no breakpoints.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-nat.c (attach_proc_task_lwp_callback): Mark the lwp
+	resumed, and add the thread to GDB's thread list.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-nat.c (get_pending_status): If the thread reported the
+	event to the core and it's pending, use the pending status signal
+	number.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-nat.c (lwp_lwpid_htab): New htab.
+	(lwp_info_hash, lwp_lwpid_htab_eq, lwp_lwpid_htab_create)
+	(lwp_lwpid_htab_add_lwp): New functions.
+	(lwp_list): Tweak comment.
+	(lwp_list_add, lwp_list_remove, lwp_lwpid_htab_remove_pid): New
+	functions.
+	(purge_lwp_list): Rewrite, using htab_traverse_noresize.
+	(add_initial_lwp): Add lwp to htab too.  Use lwp_list_add.
+	(delete_lwp): Use lwp_list_remove.  Remove htab too.
+	(find_lwp_pid): Search in htab.
+	(_initialize_linux_nat): Call lwp_lwpid_htab_create.
+	* linux-nat.h (struct lwp_info) <prev>: New field.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-nat.c (lwp_lwpid_htab): New htab.
+	(lwp_info_hash, lwp_lwpid_htab_eq, lwp_lwpid_htab_create)
+	(lwp_lwpid_htab_add_lwp): New functions.
+	(lwp_list): Tweak comment.
+	(lwp_list_add, lwp_list_remove, lwp_lwpid_htab_remove_pid): New
+	functions.
+	(purge_lwp_list): Rewrite, using htab_traverse_noresize.
+	(add_initial_lwp): Add lwp to htab too.  Use lwp_list_add.
+	(delete_lwp): Use lwp_list_remove.  Remove htab too.
+	(find_lwp_pid): Search in htab.
+	(_initialize_linux_nat): Call lwp_lwpid_htab_create.
+	* linux-nat.h (struct lwp_info) <prev>: New field.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-nat.c (linux_resume_one_lwp_throw): Clear the LWP's core
+	field.
+	(linux_nat_update_thread_list): Don't fetch the core if already
+	known.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-tdep.c (find_mapping_size): Delete.
+	(linux_vsyscall_range_raw): Rewrite reading from
+	/proc/PID/task/PID/maps directly instead of using
+	gdbarch_find_memory_regions.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* linux-nat.c (report_thread_events): New global.
+	(linux_handle_extended_wait): Report
+	TARGET_WAITKIND_THREAD_CREATED if thread event reporting is
+	enabled.
+	(wait_lwp, linux_nat_filter_event): Report all thread exits if
+	thread event reporting is enabled.  Remove comment.
+	(filter_exit_event): New function.
+	(linux_nat_wait_1): Use it.
+	(linux_nat_thread_events): New function.
+	(linux_nat_add_target): Install it as target_thread_events method.
+
+2016-05-24  Yan-Ting Lin  <currygt52@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add "Yan-Ting Lin".
+
+2016-05-23  Yao Qi  <yao.qi@arm.com>
+
+	* arch-utils.c (default_code_of_frame_writable): New function.
+	* arch-utils.h (default_code_of_frame_writable): Declare.
+	* arm-tdep.c (arm_code_of_frame_writable): New function.
+	(arm_gdbarch_init): Install gdbarch method
+	code_of_frame_writable if the target is M-profile.
+	* frame.c (skip_unwritable_frames): New function.
+	* frame.h (skip_unwritable_frames): Declare.
+	* gdbarch.sh (code_of_frame_writable): New.
+	* gdbarch.c, gdbarch.h: Re-generated.
+	* infcmd.c (finish_command): Call skip_unwritable_frames.
+
+2016-05-23  Tom Tromey  <tom@tromey.com>
+
+	PR python/19438, PR python/18393:
+	* python/py-objfile.c (objfpy_initialize): Initialize self->dict.
+	* python/py-progspace.c (pspy_initialize): Initialize self->dict.
+
+2016-05-23  Gary Benson  <gbenson@redhat.com>
+
+	* nat/gdb_thread_db.h (td_thr_validate_ftype): Remove typedef.
+	* linux-thread-db.c (struct thread_db_info) <td_thr_validate_p>:
+	Remove field.
+	(try_thread_db_load_1): Remove td_thr_validate initialization.
+
+2016-05-23  Jon Boden  <jon@ubuntubsd.org>  (tiny change)
+
+	* configure.ac: Search for libutil-freebsd as alternative to libutil.
+	* configure: Re-generated.
+
 2016-05-19  Andreas Schwab  <schwab@suse.de>
 
 	* ia64-libunwind-tdep.c (libunwind_descr): Add cast from void *.

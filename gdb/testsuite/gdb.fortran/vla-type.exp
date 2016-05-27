@@ -99,10 +99,12 @@ gdb_test "print fivev%tone%ivla(1, 2, 3)" " = 123"
 gdb_test "print fivev%tone%ivla(3, 2, 1)" " = 321"
 gdb_test "ptype fivev" \
          [multi_line "type = Type five" \
-                     "\\s+Type one" \
-                     "\\s+$int :: ivla\\\(10,10,10\\\)" \
-                     "\\s+End Type one :: tone" \
+                     "\\s+Type one :: tone" \
                      "End Type five" ]
+gdb_test "ptype fivev%tone" \
+         [multi_line "type = Type one" \
+                     "    $int :: ivla\\(10,10,10\\)" \
+                     "End Type one" ]
 
 # Check array of types containing a VLA
 gdb_breakpoint [gdb_get_line_number "fivearr-filled"]
@@ -114,26 +116,34 @@ gdb_test "print fivearr(2)%tone%ivla(12, 14, 16)" " = 2"
 gdb_test "print fivearr(2)%tone%ivla(6, 7, 8)" " = 678"
 gdb_test "ptype fivearr(1)" \
          [multi_line "type = Type five" \
-                     "\\s+Type one" \
-                     "\\s+$int :: ivla\\\(2,4,6\\\)" \
-                     "\\s+End Type one :: tone" \
+                     "\\s+Type one :: tone" \
                      "End Type five" ]
+gdb_test "ptype fivearr(1)%tone" \
+         [multi_line "type = Type one" \
+                     "    $int :: ivla\\(2,4,6\\)" \
+                     "End Type one" ]
 gdb_test "ptype fivearr(2)" \
          [multi_line "type = Type five" \
-                     "\\s+Type one" \
-                     "\\s+$int :: ivla\\\(12,14,16\\\)" \
-                     "\\s+End Type one :: tone" \
+                     "\\s+Type one :: tone" \
                      "End Type five" ]
+gdb_test "ptype fivearr(2)%tone" \
+         [multi_line "type = Type one" \
+                     "    $int :: ivla\\(12,14,16\\)" \
+                     "End Type one" ]
 
 # Check allocation status of dynamic array and it's dynamic members
 gdb_test "ptype fivedynarr" "type = <not allocated>"
 gdb_test "next" ""
 gdb_test "ptype fivedynarr(2)" \
          [multi_line "type = Type five" \
-                     "\\s+Type one" \
-                     "\\s+$int :: ivla\\\(<not allocated>\\\)" \
-                     "\\s+End Type one :: tone" \
-                     "End Type five" ]
+                     "\\s+Type one :: tone" \
+                     "End Type five" ] \
+         "ptype fivedynarr(2), tone is not allocated"
+gdb_test "ptype fivedynarr(2)%tone" \
+         [multi_line "type = Type one" \
+                     "    $int :: ivla\\(<not allocated>\\)" \
+                     "End Type one" ] \
+         "ptype fivedynarr(2)%tone, not allocated"
 
 # Check dynamic array of types containing a VLA
 gdb_breakpoint [gdb_get_line_number "fivedynarr-filled"]
@@ -145,13 +155,17 @@ gdb_test "print fivedynarr(2)%tone%ivla(12, 14, 16)" " = 2"
 gdb_test "print fivedynarr(2)%tone%ivla(6, 7, 8)" " = 678"
 gdb_test "ptype fivedynarr(1)" \
          [multi_line "type = Type five" \
-                     "\\s+Type one" \
-                     "\\s+$int :: ivla\\\(2,4,6\\\)" \
-                     "\\s+End Type one :: tone" \
+                     "\\s+Type one :: tone" \
                      "End Type five" ]
+gdb_test "ptype fivedynarr(1)%tone" \
+         [multi_line "type = Type one" \
+                     "    $int :: ivla\\(2,4,6\\)" \
+                     "End Type one" ]
 gdb_test "ptype fivedynarr(2)" \
          [multi_line "type = Type five" \
-                     "\\s+Type one" \
-                     "\\s+$int :: ivla\\\(12,14,16\\\)" \
-                     "\\s+End Type one :: tone" \
+                     "\\s+Type one :: tone" \
                      "End Type five" ]
+gdb_test "ptype fivedynarr(2)%tone" \
+         [multi_line "type = Type one" \
+                     "    $int :: ivla\\(12,14,16\\)" \
+                     "End Type one" ]

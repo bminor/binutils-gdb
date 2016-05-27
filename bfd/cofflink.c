@@ -212,8 +212,9 @@ coff_link_check_archive_element (bfd *abfd,
   if (h->type != bfd_link_hash_undefined)
     return TRUE;
 
+  /* Include this element?  */
   if (!(*info->callbacks->add_archive_element) (info, abfd, name, &abfd))
-    return FALSE;
+    return TRUE;
   *pneeded = TRUE;
 
   return coff_link_add_object_symbols (abfd, info);

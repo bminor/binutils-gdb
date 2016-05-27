@@ -2029,6 +2029,8 @@ finish_command (char *arg, int from_tty)
 	 entering THISFRAME.  */
       frame = skip_tailcall_frames (frame);
 
+      frame = skip_unwritable_frames (frame);
+
       if (frame == NULL)
 	error (_("Cannot find the caller frame."));
 

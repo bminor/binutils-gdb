@@ -135,6 +135,7 @@ case ${generic_target} in
 
   arm-*-aout)				fmt=aout ;;
   arm-*-coff)				fmt=coff ;;
+  arm-*-phoenix*)			fmt=elf ;;
   arm-*-rtems*)				fmt=elf ;;
   arm-*-elf)				fmt=elf ;;
   arm-*-eabi*)				fmt=elf em=armeabi ;;

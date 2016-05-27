@@ -1,3 +1,121 @@
+2016-05-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-jalx-0.d: Fold
+	`unaligned-jalx-2' here.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-0.d: Fold
+	`unaligned-jalx-mips16-2' here.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-0.d: Fold
+	`unaligned-jalx-micromips-2' here.
+	* testsuite/ld-mips-elf/unaligned-jalx-0.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-jalx-1.d: Update error
+	message.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-2.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-2.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-2.d: Remove
+	test.
+	* testsuite/ld-mips-elf/unaligned-jalx-2.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.d: Fold
+	`unaligned-lwpc-3' here.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.d: Fold
+	`unaligned-lwpc-2' here.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-lwpc-2.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-lwpc-2.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-lwpc-3.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-lwpc-3.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.d: Fold
+	`unaligned-ldpc-4' here.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.d: Update error
+	message.  Fold `unaligned-ldpc-2' and `unaligned-ldpc-3' here.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.s: Update accordingly.
+	* testsuite/ld-mips-elf/unaligned-ldpc-2.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-2.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-3.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-3.s: Remove test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-4.d: Remove test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-4.s: Remove test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Delete removed tests.
+
+2016-05-26  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20134
+	* scripttempl/elf32msp430.sc (.bss): Provide __bssstart and
+	__bsssize.
+	* scripttempl/elf32msp430_3.sc (.bss): Likewise.
+
+2016-05-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-jalx-0.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-1.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-0.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-1.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-0.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-1.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.d: New test.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.d: New test.
+	* testsuite/ld-mips-elf/unaligned-lwpc-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-lwpc-3.d: New test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.d: New test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.d: New test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-3.d: New test.
+	* testsuite/ld-mips-elf/unaligned-ldpc-4.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-0.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-jalx-1.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-jalx-2.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-insn.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-lwpc-2.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-lwpc-3.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-2.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-3.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-ldpc-4.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-syms.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20103
+	* ldmain.c (add_archive_element): Don't claim new IR symbols
+	after all IR symbols have been claimed.
+	* plugin.c (plugin_call_claim_file): Remove no_more_claiming
+	check.
+	* testsuite/ld-plugin/lto.exp (pr20103): New proc.
+	Run PR ld/20103 tests.
+	* testsuite/ld-plugin/pr20103a.c: New file.
+	* testsuite/ld-plugin/pr20103b.c: Likewise.
+	* testsuite/ld-plugin/pr20103c.c: Likewise.
+
+2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
+    
+	* testsuite/ld-mips-elf/jalx-local.d: New test.
+	* testsuite/ld-mips-elf/jalx-local-n32.d: New test.
+	* testsuite/ld-mips-elf/jalx-local-n64.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-05-23  Kuba Sejdak  <jakub.sejdak@phoesys.com>
+
+	* Makefile.am: Add earmelf_phoenix.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add entry for arm-phoenix.
+	* emulparams/armelf_phoenix.sh: New file.
+
+2016-05-23  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* emultempl/armelf.em (arm_elf_before_allocation): Call
+	bfd_elf32_arm_keep_private_stub_output_sections before generic
+	before_allocation function.
+
 2016-05-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/jalx-addend.d: New test.

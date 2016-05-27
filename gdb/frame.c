@@ -444,6 +444,19 @@ skip_artificial_frames (struct frame_info *frame)
   return frame;
 }
 
+struct frame_info *
+skip_unwritable_frames (struct frame_info *frame)
+{
+  while (gdbarch_code_of_frame_writable (get_frame_arch (frame), frame) == 0)
+    {
+      frame = get_prev_frame (frame);
+      if (frame == NULL)
+	break;
+    }
+
+  return frame;
+}
+
 /* See frame.h.  */
 
 struct frame_info *

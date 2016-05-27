@@ -4478,29 +4478,6 @@ const struct elf_size_info mips_elf64_size_info =
 #define bfd_elf64_bfd_relax_section     _bfd_mips_relax_section
 #define bfd_elf64_mkobject		_bfd_mips_elf_mkobject
 
-/* MIPS ELF64 archive functions.  */
-#define bfd_elf64_archive_functions
-extern bfd_boolean bfd_elf64_archive_slurp_armap
-  (bfd *);
-extern bfd_boolean bfd_elf64_archive_write_armap
-  (bfd *, unsigned int, struct orl *, unsigned int, int);
-#define bfd_elf64_archive_slurp_extended_name_table \
-			_bfd_archive_coff_slurp_extended_name_table
-#define bfd_elf64_archive_construct_extended_name_table \
-			_bfd_archive_coff_construct_extended_name_table
-#define bfd_elf64_archive_truncate_arname \
-			_bfd_archive_coff_truncate_arname
-#define bfd_elf64_archive_read_ar_hdr	_bfd_archive_coff_read_ar_hdr
-#define bfd_elf64_archive_write_ar_hdr	_bfd_archive_coff_write_ar_hdr
-#define bfd_elf64_archive_openr_next_archived_file \
-			_bfd_archive_coff_openr_next_archived_file
-#define bfd_elf64_archive_get_elt_at_index \
-			_bfd_archive_coff_get_elt_at_index
-#define bfd_elf64_archive_generic_stat_arch_elt \
-			_bfd_archive_coff_generic_stat_arch_elt
-#define bfd_elf64_archive_update_armap_timestamp \
-			_bfd_archive_coff_update_armap_timestamp
-
 /* The SGI style (n)64 NewABI.  */
 #define TARGET_LITTLE_SYM		mips_elf64_le_vec
 #define TARGET_LITTLE_NAME		"elf64-littlemips"

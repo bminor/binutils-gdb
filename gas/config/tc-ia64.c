@@ -4668,11 +4668,11 @@ dot_rot (int type)
 
       if (!*drpp)
 	{
-	  *drpp = obstack_alloc (&notes, sizeof (*dr));
+	  *drpp = XOBNEW (&notes, struct dynreg);
 	  memset (*drpp, 0, sizeof (*dr));
 	}
 
-      name = obstack_alloc (&notes, len + 1);
+      name = XOBNEWVEC (&notes, char, len + 1);
       memcpy (name, start, len);
       name[len] = '\0';
 
@@ -7765,7 +7765,7 @@ ia64_frob_label (struct symbol *sym)
      labels.  */
   if (defining_tag)
     {
-      fix = obstack_alloc (&notes, sizeof (*fix));
+      fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.tag_fixups;
       fix->dw2_mark_labels = FALSE;
@@ -7777,7 +7777,7 @@ ia64_frob_label (struct symbol *sym)
   if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
     {
       md.last_text_seg = now_seg;
-      fix = obstack_alloc (&notes, sizeof (*fix));
+      fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.label_fixups;
       fix->dw2_mark_labels = dwarf2_loc_mark_labels;

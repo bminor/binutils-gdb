@@ -26,7 +26,7 @@ typedef struct _symbol
 {
   const char *name;
   unsigned short value;
-} symbol;
+} tic54x_symbol;
 
 enum optype {
   OPT = 0x8000,
@@ -152,9 +152,9 @@ typedef struct _template
 extern const insn_template tic54x_unknown_opcode;
 extern const insn_template tic54x_optab[];
 extern const insn_template tic54x_paroptab[];
-extern const symbol mmregs[], regs[];
-extern const symbol condition_codes[], cc2_codes[], status_bits[];
-extern const symbol cc3_codes[];
+extern const tic54x_symbol mmregs[], regs[];
+extern const tic54x_symbol condition_codes[], cc2_codes[], status_bits[];
+extern const tic54x_symbol cc3_codes[];
 extern const char *misc_symbols[];
 struct disassemble_info;
 extern const insn_template* tic54x_get_insn (struct disassemble_info *, 

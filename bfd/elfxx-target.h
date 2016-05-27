@@ -926,6 +926,8 @@ const bfd_target TARGET_BIG_SYM =
   BFD_JUMP_TABLE_CORE (bfd_elfNN),
 #ifdef bfd_elfNN_archive_functions
   BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+#elif defined USE_64_BIT_ARCHIVE
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
 #else
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif
@@ -1025,6 +1027,8 @@ const bfd_target TARGET_LITTLE_SYM =
   BFD_JUMP_TABLE_CORE (bfd_elfNN),
 #ifdef bfd_elfNN_archive_functions
   BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+#elif defined USE_64_BIT_ARCHIVE
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
 #else
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif

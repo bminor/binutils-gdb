@@ -1,3 +1,80 @@
+2016-05-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-many-short-lived-threads.exp (bad_dejagnu):
+	New procedure.
+	(top level): Call it, and bail out of DejaGnu is known to be bad.
+
+2016-05-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/whatis.c: Extend the test case.
+	* gdb.base/whatis.exp: Add additional tests.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+* gdb.fortran/type.f90: Add pointer variable.
+* gdb.fortran/whatis_type.exp: Add whatis/ptype of pointers.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-type.exp: Fix testcase name.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-type.exp: Access elements in nested structs.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/type.f90: Add nested structures.
+	* gdb.fortran/whatis-type.exp: Whatis/ptype nested structures.
+	* gdb.fortran/derived-type.exp: Adapt expected output.
+	* gdb.fortran/vla-type.exp: Adapt expected output.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/whatis_type.exp: Adapt expected output.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/print_type.exp: Fix expected output.
+	* gdb.fortran/whatis_type.exp: Fix expected output.
+
+2016-05-25  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/whatis_type.exp: Use multi_line.
+
+2016-05-24  Tom Tromey  <tom@tromey.com>
+
+	PR python/17386:
+	* gdb.python/py-value.exp (test_value_numeric_ops): Add tests that
+	use value as an index.
+
+2016-05-23  Tom Tromey  <tom@tromey.com>
+
+	PR python/17981:
+	* gdb.python/py-breakpoint.exp (test_bkpt_basic): Add test for
+	no-breakpoint case.
+
+2016-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19828
+	* gdb.threads/clone-attach-detach.c: New file.
+	* gdb.threads/clone-attach-detach.exp: New file.
+
+2016-05-24  Francis Ricci  <francisjricci@gmail.com>  (tiny patch)
+
+	* gdb.base/annota-input-while-running.exp: Fix syntax error.
+
+2016-05-23  Tom Tromey  <tom@tromey.com>
+
+	PR python/19438, PR python/18393:
+	* gdb.python/py-progspace.exp: Add "dir" test.
+	* gdb.python/py-objfile.exp: Add "dir" test.
+
+2016-05-23  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/thumb-prologue.exp: Use standard_testfile.
+	* gdb.arch/thumb2-it.exp: Likewise.
+
 2016-05-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.mi/mi-threads-interrupt.c: New file.

@@ -485,6 +485,9 @@ M:CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, C
 v:int:call_dummy_location::::AT_ENTRY_POINT::0
 M:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr, struct regcache *regcache:sp, funaddr, args, nargs, value_type, real_pc, bp_addr, regcache
 
+# Return true if the code of FRAME is writable.
+m:int:code_of_frame_writable:struct frame_info *frame:frame::default_code_of_frame_writable::0
+
 m:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all::default_print_registers_info::0
 m:void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args::default_print_float_info::0
 M:void:print_vector_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args

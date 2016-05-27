@@ -14904,14 +14904,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS16_TLS_GOTTPREL:
     case BFD_RELOC_MIPS16_TLS_TPREL_HI16:
     case BFD_RELOC_MIPS16_TLS_TPREL_LO16:
-      if (!fixP->fx_addsy)
-	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("TLS relocation against a constant"));
-	  break;
-	}
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      /* fall through */
+      if (fixP->fx_addsy)
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("TLS relocation against a constant"));
+      break;
 
     case BFD_RELOC_MIPS_JMP:
     case BFD_RELOC_MIPS_SHIFT5:
@@ -17167,9 +17165,9 @@ mips_fix_adjustable (fixS *fixp)
      There is a further restriction:
 
        5. We cannot reduce jump relocations (R_MIPS_26, R_MIPS16_26 or
-	  R_MICROMIPS_26_S1) against MIPS16 or microMIPS symbols on
-	  targets with in-place addends; the relocation field cannot
-	  encode the low bit.
+	  R_MICROMIPS_26_S1) against MIPS16 or microMIPS symbols because
+	  we need to keep the MIPS16 or microMIPS symbol for the purpose
+	  of converting JAL to JALX instructions in the linker.
 
      For simplicity, we deal with (3)-(4) by not reducing _any_ relocation
      against a MIPS16 symbol.  We deal with (5) by by not reducing any
@@ -17184,10 +17182,9 @@ mips_fix_adjustable (fixS *fixp)
      that we have for MIPS16 symbols.  */
   if (fixp->fx_subsy == NULL
       && (ELF_ST_IS_MIPS16 (S_GET_OTHER (fixp->fx_addsy))
-	  || *symbol_get_tc (fixp->fx_addsy)
-	  || (HAVE_IN_PLACE_ADDENDS
-	      && ELF_ST_IS_MICROMIPS (S_GET_OTHER (fixp->fx_addsy))
-	      && jmp_reloc_p (fixp->fx_r_type))))
+	  || (ELF_ST_IS_MICROMIPS (S_GET_OTHER (fixp->fx_addsy))
+	      && jmp_reloc_p (fixp->fx_r_type))
+	  || *symbol_get_tc (fixp->fx_addsy)))
     return 0;
 
   return 1;
@@ -18756,8 +18753,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
      MIPS64R2 rather than MIPS64.  */
   { "xlp",	      0, 0,			ISA_MIPS64R2, CPU_XLR },
 
-  /* i6400.  */
+  /* MIPS 64 Release 6 */
   { "i6400",	      0, ASE_MSA,		ISA_MIPS64R6, CPU_MIPS64R6},
+  { "p6600",	      0, ASE_VIRT | ASE_MSA,	ISA_MIPS64R6, CPU_MIPS64R6},
 
   /* End marker */
   { NULL, 0, 0, 0, 0 }

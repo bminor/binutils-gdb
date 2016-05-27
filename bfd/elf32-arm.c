@@ -4136,68 +4136,155 @@ elf32_arm_get_stub_entry (const asection *input_section,
   return stub_entry;
 }
 
-/* Find or create a stub section.  Returns a pointer to the stub section, and
-   the section to which the stub section will be attached (in *LINK_SEC_P).
+/* Whether veneers of type STUB_TYPE require to be in a dedicated output
+   section.  */
+
+static bfd_boolean
+arm_dedicated_stub_output_section_required (enum elf32_arm_stub_type stub_type)
+{
+  if (stub_type >= max_stub_type)
+    abort ();  /* Should be unreachable.  */
+
+  return FALSE;
+}
+
+/* Required alignment (as a power of 2) for the dedicated section holding
+   veneers of type STUB_TYPE, or 0 if veneers of this type are interspersed
+   with input sections.  */
+
+static int
+arm_dedicated_stub_output_section_required_alignment
+  (enum elf32_arm_stub_type stub_type)
+{
+  if (stub_type >= max_stub_type)
+    abort ();  /* Should be unreachable.  */
+
+  BFD_ASSERT (!arm_dedicated_stub_output_section_required (stub_type));
+  return 0;
+}
+
+/* Name of the dedicated output section to put veneers of type STUB_TYPE, or
+   NULL if veneers of this type are interspersed with input sections.  */
+
+static const char *
+arm_dedicated_stub_output_section_name (enum elf32_arm_stub_type stub_type)
+{
+  if (stub_type >= max_stub_type)
+    abort ();  /* Should be unreachable.  */
+
+  BFD_ASSERT (!arm_dedicated_stub_output_section_required (stub_type));
+  return NULL;
+}
+
+/* If veneers of type STUB_TYPE should go in a dedicated output section,
+   returns the address of the hash table field in HTAB holding a pointer to the
+   corresponding input section.  Otherwise, returns NULL.  */
+
+static asection **
+arm_dedicated_stub_input_section_ptr
+  (struct elf32_arm_link_hash_table *htab ATTRIBUTE_UNUSED,
+   enum elf32_arm_stub_type stub_type)
+{
+  if (stub_type >= max_stub_type)
+    abort ();  /* Should be unreachable.  */
+
+  BFD_ASSERT (!arm_dedicated_stub_output_section_required (stub_type));
+  return NULL;
+}
+
+/* Find or create a stub section to contain a stub of type STUB_TYPE.  SECTION
+   is the section that branch into veneer and can be NULL if stub should go in
+   a dedicated output section.  Returns a pointer to the stub section, and the
+   section to which the stub section will be attached (in *LINK_SEC_P).
    LINK_SEC_P may be NULL.  */
 
 static asection *
 elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
-				   struct elf32_arm_link_hash_table *htab)
+				   struct elf32_arm_link_hash_table *htab,
+				   enum elf32_arm_stub_type stub_type)
 {
-  asection *link_sec;
-  asection *stub_sec;
-  asection *out_sec;
+  asection *link_sec, *out_sec, **stub_sec_p;
+  const char *stub_sec_prefix;
+  bfd_boolean dedicated_output_section =
+    arm_dedicated_stub_output_section_required (stub_type);
+  int align;
 
-  link_sec = htab->stub_group[section->id].link_sec;
-  BFD_ASSERT (link_sec != NULL);
-  stub_sec = htab->stub_group[section->id].stub_sec;
-
-  if (stub_sec == NULL)
+  if (dedicated_output_section)
     {
-      stub_sec = htab->stub_group[link_sec->id].stub_sec;
-      if (stub_sec == NULL)
+      bfd *output_bfd = htab->obfd;
+      const char *out_sec_name =
+	arm_dedicated_stub_output_section_name (stub_type);
+      link_sec = NULL;
+      stub_sec_p = arm_dedicated_stub_input_section_ptr (htab, stub_type);
+      stub_sec_prefix = out_sec_name;
+      align = arm_dedicated_stub_output_section_required_alignment (stub_type);
+      out_sec = bfd_get_section_by_name (output_bfd, out_sec_name);
+      if (out_sec == NULL)
 	{
-	  size_t namelen;
-	  bfd_size_type len;
-	  char *s_name;
-
-	  namelen = strlen (link_sec->name);
-	  len = namelen + sizeof (STUB_SUFFIX);
-	  s_name = (char *) bfd_alloc (htab->stub_bfd, len);
-	  if (s_name == NULL)
-	    return NULL;
-
-	  memcpy (s_name, link_sec->name, namelen);
-	  memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
-	  out_sec = link_sec->output_section;
-	  stub_sec = (*htab->add_stub_section) (s_name, out_sec, link_sec,
-						htab->nacl_p ? 4 : 3);
-	  if (stub_sec == NULL)
-	    return NULL;
-	  htab->stub_group[link_sec->id].stub_sec = stub_sec;
+	  (*_bfd_error_handler) (_("No address assigned to the veneers output "
+				   "section %s"), out_sec_name);
+	  return NULL;
 	}
-      htab->stub_group[section->id].stub_sec = stub_sec;
     }
+  else
+    {
+      link_sec = htab->stub_group[section->id].link_sec;
+      BFD_ASSERT (link_sec != NULL);
+      stub_sec_p = &htab->stub_group[section->id].stub_sec;
+      if (*stub_sec_p == NULL)
+	stub_sec_p = &htab->stub_group[link_sec->id].stub_sec;
+      stub_sec_prefix = link_sec->name;
+      out_sec = link_sec->output_section;
+      align = htab->nacl_p ? 4 : 3;
+    }
+
+  if (*stub_sec_p == NULL)
+    {
+      size_t namelen;
+      bfd_size_type len;
+      char *s_name;
+
+      namelen = strlen (stub_sec_prefix);
+      len = namelen + sizeof (STUB_SUFFIX);
+      s_name = (char *) bfd_alloc (htab->stub_bfd, len);
+      if (s_name == NULL)
+	return NULL;
+
+      memcpy (s_name, stub_sec_prefix, namelen);
+      memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
+      *stub_sec_p = (*htab->add_stub_section) (s_name, out_sec, link_sec,
+					       align);
+      if (*stub_sec_p == NULL)
+	return NULL;
+
+      out_sec->flags |= SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
+			| SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY
+			| SEC_KEEP;
+    }
+
+  if (!dedicated_output_section)
+    htab->stub_group[section->id].stub_sec = *stub_sec_p;
 
   if (link_sec_p)
     *link_sec_p = link_sec;
 
-  return stub_sec;
+  return *stub_sec_p;
 }
 
 /* Add a new stub entry to the stub hash.  Not all fields of the new
    stub entry are initialised.  */
 
 static struct elf32_arm_stub_hash_entry *
-elf32_arm_add_stub (const char *stub_name,
-		    asection *section,
-		    struct elf32_arm_link_hash_table *htab)
+elf32_arm_add_stub (const char *stub_name, asection *section,
+		    struct elf32_arm_link_hash_table *htab,
+		    enum elf32_arm_stub_type stub_type)
 {
   asection *link_sec;
   asection *stub_sec;
   struct elf32_arm_stub_hash_entry *stub_entry;
 
-  stub_sec = elf32_arm_create_or_find_stub_sec (&link_sec, section, htab);
+  stub_sec = elf32_arm_create_or_find_stub_sec (&link_sec, section, htab,
+						stub_type);
   if (stub_sec == NULL)
     return NULL;
 
@@ -4346,6 +4433,18 @@ arm_stub_sym_claimed (enum elf32_arm_stub_type stub_type)
     abort ();  /* Should be unreachable.  */
 
   return FALSE;
+}
+
+/* Returns the padding needed for the dedicated section used stubs of type
+   STUB_TYPE.  */
+
+static int
+arm_dedicated_stub_section_padding (enum elf32_arm_stub_type stub_type)
+{
+  if (stub_type >= max_stub_type)
+    abort ();  /* Should be unreachable.  */
+
+  return 0;
 }
 
 static bfd_boolean
@@ -5187,7 +5286,7 @@ elf32_arm_create_stub (struct elf32_arm_link_hash_table *htab,
       return TRUE;
     }
 
-  stub_entry = elf32_arm_add_stub (stub_name, section, htab);
+  stub_entry = elf32_arm_add_stub (stub_name, section, htab, stub_type);
   if (stub_entry == NULL)
     {
       if (!sym_claimed)
@@ -5324,6 +5423,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
       bfd *input_bfd;
       unsigned int bfd_indx;
       asection *stub_sec;
+      enum elf32_arm_stub_type stub_type;
       bfd_boolean stub_changed = FALSE;
       unsigned prev_num_a8_fixes = num_a8_fixes;
 
@@ -5379,7 +5479,6 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	      for (; irela < irelaend; irela++)
 		{
 		  unsigned int r_type, r_indx;
-		  enum elf32_arm_stub_type stub_type;
 		  asection *sym_sec;
 		  bfd_vma sym_value;
 		  bfd_vma destination;
@@ -5693,14 +5792,34 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	  stub_sec->size = 0;
 	}
 
+      /* Compute stub section size, considering padding.  */
       bfd_hash_traverse (&htab->stub_hash_table, arm_size_one_stub, htab);
+      for (stub_type = arm_stub_none + 1; stub_type < max_stub_type;
+	   stub_type++)
+	{
+	  int size, padding;
+	  asection **stub_sec_p;
+
+	  padding = arm_dedicated_stub_section_padding (stub_type);
+	  stub_sec_p = arm_dedicated_stub_input_section_ptr (htab, stub_type);
+	  /* Skip if no stub input section or no stub section padding
+	     required.  */
+	  if ((stub_sec_p != NULL && *stub_sec_p == NULL) || padding == 0)
+	    continue;
+	  /* Stub section padding required but no dedicated section.  */
+	  BFD_ASSERT (stub_sec_p);
+
+	  size = (*stub_sec_p)->size;
+	  size = (size + padding - 1) & ~(padding - 1);
+	  (*stub_sec_p)->size = size;
+	}
 
       /* Add Cortex-A8 erratum veneers to stub section sizes too.  */
       if (htab->fix_cortex_a8)
 	for (i = 0; i < num_a8_fixes; i++)
 	  {
 	    stub_sec = elf32_arm_create_or_find_stub_sec (NULL,
-			 a8_fixes[i].section, htab);
+			 a8_fixes[i].section, htab, a8_fixes[i].stub_type);
 
 	    if (stub_sec == NULL)
 	      return FALSE;
@@ -5798,7 +5917,8 @@ elf32_arm_build_stubs (struct bfd_link_info *info)
       if (!strstr (stub_sec->name, STUB_SUFFIX))
 	continue;
 
-      /* Allocate memory to hold the linker stubs.  */
+      /* Allocate memory to hold the linker stubs.  Zeroing the stub sections
+	 must at least be done for stub section requiring padding.  */
       size = stub_sec->size;
       stub_sec->contents = (unsigned char *) bfd_zalloc (htab->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)
@@ -6489,6 +6609,37 @@ bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
 
   return addglue
     && arm_make_glue_section (abfd, STM32L4XX_ERRATUM_VENEER_SECTION_NAME);
+}
+
+/* Mark output sections of veneers needing a dedicated one with SEC_KEEP.  This
+   ensures they are not marked for deletion by
+   strip_excluded_output_sections () when veneers are going to be created
+   later.  Not doing so would trigger assert on empty section size in
+   lang_size_sections_1 ().  */
+
+void
+bfd_elf32_arm_keep_private_stub_output_sections (struct bfd_link_info *info)
+{
+  enum elf32_arm_stub_type stub_type;
+
+  /* If we are only performing a partial
+     link do not bother adding the glue.  */
+  if (bfd_link_relocatable (info))
+    return;
+
+  for (stub_type = arm_stub_none + 1; stub_type < max_stub_type; stub_type++)
+    {
+      asection *out_sec;
+      const char *out_sec_name;
+
+      if (!arm_dedicated_stub_output_section_required (stub_type))
+	continue;
+
+     out_sec_name = arm_dedicated_stub_output_section_name (stub_type);
+     out_sec = bfd_get_section_by_name (info->output_bfd, out_sec_name);
+     if (out_sec != NULL)
+	out_sec->flags |= SEC_KEEP;
+    }
 }
 
 /* Select a BFD to be used to hold the sections used by the glue code.

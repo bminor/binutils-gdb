@@ -3955,19 +3955,4 @@ const struct elf_size_info s390_elf64_size_info =
 #define bfd_elf64_mkobject		elf_s390_mkobject
 #define elf_backend_object_p		elf_s390_object_p
 
-/* Enable ELF64 archive functions.  */
-#define bfd_elf64_archive_functions
-extern bfd_boolean bfd_elf64_archive_slurp_armap (bfd *);
-extern bfd_boolean bfd_elf64_archive_write_armap (bfd *, unsigned int, struct orl *, unsigned int, int);
-
-#define bfd_elf64_archive_slurp_extended_name_table 	_bfd_archive_coff_slurp_extended_name_table
-#define bfd_elf64_archive_construct_extended_name_table _bfd_archive_coff_construct_extended_name_table
-#define bfd_elf64_archive_truncate_arname 		_bfd_archive_coff_truncate_arname
-#define bfd_elf64_archive_read_ar_hdr			_bfd_archive_coff_read_ar_hdr
-#define bfd_elf64_archive_write_ar_hdr			_bfd_archive_coff_write_ar_hdr
-#define bfd_elf64_archive_openr_next_archived_file 	_bfd_archive_coff_openr_next_archived_file
-#define bfd_elf64_archive_get_elt_at_index 		_bfd_archive_coff_get_elt_at_index
-#define bfd_elf64_archive_generic_stat_arch_elt 	_bfd_archive_coff_generic_stat_arch_elt
-#define bfd_elf64_archive_update_armap_timestamp 	_bfd_archive_coff_update_armap_timestamp
-
 #include "elf64-target.h"

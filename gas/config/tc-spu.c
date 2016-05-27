@@ -26,7 +26,7 @@
 
 const struct spu_opcode spu_opcodes[] = {
 #define APUOP(TAG,MACFORMAT,OPCODE,MNEMONIC,ASMFORMAT,DEP,PIPE) \
-	{ MACFORMAT, (OPCODE) << (32-11), MNEMONIC, ASMFORMAT },
+	{ MACFORMAT, (OPCODE ## u) << (32-11), MNEMONIC, ASMFORMAT },
 #define APUOPFB(TAG,MACFORMAT,OPCODE,FB,MNEMONIC,ASMFORMAT,DEP,PIPE) \
 	{ MACFORMAT, ((OPCODE) << (32-11)) | ((FB) << (32-18)), MNEMONIC, ASMFORMAT },
 #include "opcode/spu-insns.h"

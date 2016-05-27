@@ -6776,6 +6776,10 @@ ENUMDOC
   important as several tables in the AArch64 bfd backend are indexed
   by these enumerators; make sure they are all synced.
 ENUM
+  BFD_RELOC_AARCH64_NULL
+ENUMDOC
+  Deprecated AArch64 null relocation code.
+ENUM
   BFD_RELOC_AARCH64_NONE
 ENUMDOC
   AArch64 null relocation code.

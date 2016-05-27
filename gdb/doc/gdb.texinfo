@@ -37251,9 +37251,40 @@ starting at @var{offset} bytes into the data.  The content and
 encoding of @var{annex} is specific to @var{object}; it can supply
 additional details about what data to access.
 
-Here are the specific requests of this form defined so far.  All
+Reply:
+@table @samp
+@item m @var{data}
+Data @var{data} (@pxref{Binary Data}) has been read from the
+target.  There may be more data at a higher address (although
+it is permitted to return @samp{m} even for the last valid
+block of data, as long as at least one byte of data was read).
+It is possible for @var{data} to have fewer bytes than the @var{length} in the
+request.
+
+@item l @var{data}
+Data @var{data} (@pxref{Binary Data}) has been read from the target.
+There is no more data to be read.  It is possible for @var{data} to
+have fewer bytes than the @var{length} in the request.
+
+@item l
+The @var{offset} in the request is at the end of the data.
+There is no more data to be read.
+
+@item E00
+The request was malformed, or @var{annex} was invalid.
+
+@item E @var{nn}
+The offset was invalid, or there was an error encountered reading the data.
+The @var{nn} part is a hex-encoded @code{errno} value.
+
+@item @w{}
+An empty reply indicates the @var{object} string was not recognized by
+the stub, or that the object does not support reading.
+@end table
+
+Here are the specific requests of this form defined so far.  All the
 @samp{qXfer:@var{object}:read:@dots{}} requests use the same reply
-formats, listed below.
+formats, listed above.
 
 @table @samp
 @item qXfer:auxv:read::@var{offset},@var{length}
@@ -37458,37 +37489,6 @@ Access the target's @dfn{operating system information}.
 
 @end table
 
-Reply:
-@table @samp
-@item m @var{data}
-Data @var{data} (@pxref{Binary Data}) has been read from the
-target.  There may be more data at a higher address (although
-it is permitted to return @samp{m} even for the last valid
-block of data, as long as at least one byte of data was read).
-It is possible for @var{data} to have fewer bytes than the @var{length} in the
-request.
-
-@item l @var{data}
-Data @var{data} (@pxref{Binary Data}) has been read from the target.
-There is no more data to be read.  It is possible for @var{data} to
-have fewer bytes than the @var{length} in the request.
-
-@item l
-The @var{offset} in the request is at the end of the data.
-There is no more data to be read.
-
-@item E00
-The request was malformed, or @var{annex} was invalid.
-
-@item E @var{nn}
-The offset was invalid, or there was an error encountered reading the data.
-The @var{nn} part is a hex-encoded @code{errno} value.
-
-@item @w{}
-An empty reply indicates the @var{object} string was not recognized by
-the stub, or that the object does not support reading.
-@end table
-
 @item qXfer:@var{object}:write:@var{annex}:@var{offset}:@var{data}@dots{}
 @cindex write data into object, remote request
 @anchor{qXfer write}
@@ -37499,9 +37499,27 @@ written is given by @var{data}@dots{}.  The content and encoding of @var{annex}
 is specific to @var{object}; it can supply additional details about what data
 to access.
 
-Here are the specific requests of this form defined so far.  All
+Reply:
+@table @samp
+@item @var{nn}
+@var{nn} (hex encoded) is the number of bytes written.
+This may be fewer bytes than supplied in the request.
+
+@item E00
+The request was malformed, or @var{annex} was invalid.
+
+@item E @var{nn}
+The offset was invalid, or there was an error encountered writing the data.
+The @var{nn} part is a hex-encoded @code{errno} value.
+
+@item @w{}
+An empty reply indicates the @var{object} string was not
+recognized by the stub, or that the object does not support writing.
+@end table
+
+Here are the specific requests of this form defined so far.  All the
 @samp{qXfer:@var{object}:write:@dots{}} requests use the same reply
-formats, listed below.
+formats, listed above.
 
 @table @samp
 @item qXfer:siginfo:write::@var{offset}:@var{data}@dots{}
@@ -37524,24 +37542,6 @@ in that context to be accessed.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
-@end table
-
-Reply:
-@table @samp
-@item @var{nn}
-@var{nn} (hex encoded) is the number of bytes written.
-This may be fewer bytes than supplied in the request.
-
-@item E00
-The request was malformed, or @var{annex} was invalid.
-
-@item E @var{nn}
-The offset was invalid, or there was an error encountered writing the data.
-The @var{nn} part is a hex-encoded @code{errno} value.
-
-@item @w{}
-An empty reply indicates the @var{object} string was not
-recognized by the stub, or that the object does not support writing.
 @end table
 
 @item qXfer:@var{object}:@var{operation}:@dots{}
@@ -41562,7 +41562,7 @@ Here are some of the most frequently needed @value{GDBN} commands:
 
 @c pod2man highlights the right hand side of the @item lines.
 @table @env
-@item break [@var{file}:]@var{functiop}
+@item break [@var{file}:]@var{function}
 Set a breakpoint at @var{function} (in @var{file}).
 
 @item run [@var{arglist}]

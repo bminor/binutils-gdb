@@ -364,7 +364,7 @@ struct suffix_reloc_map
   const char *suffix;
   int length;
   bfd_reloc_code_real_type reloc;
-  unsigned char operator;
+  operatorT operator;
 };
 
 #define SUFFIX_MAP(str, reloc, op) { str, sizeof (str) - 1, reloc, op }
@@ -1773,11 +1773,11 @@ xtensa_elf_suffix (char **str_p, expressionS *exp_p)
 
 
 /* Find the matching operator type.  */
-static unsigned char
+static operatorT
 map_suffix_reloc_to_operator (bfd_reloc_code_real_type reloc)
 {
   struct suffix_reloc_map *sfx;
-  unsigned char operator = (unsigned char) -1;
+  operatorT operator = O_illegal;
 
   for (sfx = &suffix_relocs[0]; sfx->suffix; sfx++)
     {
@@ -1787,7 +1787,7 @@ map_suffix_reloc_to_operator (bfd_reloc_code_real_type reloc)
 	  break;
 	}
     }
-  gas_assert (operator != (unsigned char) -1);
+  gas_assert (operator != O_illegal);
   return operator;
 }
 
