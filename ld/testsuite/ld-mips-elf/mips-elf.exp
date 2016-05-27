@@ -440,6 +440,8 @@ if { $has_newabi } {
 	    "reloc-6b"]]
 }
 
+run_dump_test "reloc-local-overflow" [list [list ld $abi_ldflags(o32)]]
+
 if {$has_newabi && $linux_gnu} {
     run_dump_test "eh-frame1-n32"
     run_dump_test "eh-frame1-n64"

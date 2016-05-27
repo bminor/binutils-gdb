@@ -1,3 +1,10 @@
+2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/reloc-local-overflow.d: New test.
+	* testsuite/ld-mips-elf/reloc-local-overflow.s: Source for the
+	new test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
 2016-05-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/unaligned-jalx-0.d: Fold

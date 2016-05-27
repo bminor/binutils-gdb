@@ -1,3 +1,9 @@
+2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Also use the
+	section name if `bfd_elf_string_from_elf_section' returns an
+	empty string.
+
 2016-05-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_relocate_section)
