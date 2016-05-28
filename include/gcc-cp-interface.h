@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-13
+  GCC_CP_FE_VERSION_0 = 0xffffffff-14
 };
 
 /* Qualifiers.  */
@@ -159,6 +159,17 @@ enum gcc_cp_symbol_kind
   /* A using declaration in new_using_decl.  */
 
   GCC_CP_SYMBOL_USING,
+
+  /* A (lambda) closure class type.  In many regards this is just like
+     a regular class, but it's not supposed to have base classes, some
+     of the member functions that are usually implicitly-defined are
+     deleted, and it should have an operator() member function that
+     holds the lambda body.  We can't instantiate objects of lambda
+     types from the snippet, but we can interact with them in such
+     ways as passing them to functions that take their types, and
+     calling their body.  */
+
+  GCC_CP_SYMBOL_LAMBDA_CLOSURE,
 
   /* Marker to check that we haven't exceeded GCC_CP_SYMBOL_MASK.  */
   GCC_CP_SYMBOL_END,

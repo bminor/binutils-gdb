@@ -1043,6 +1043,9 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *instance,
 	      printf_unfiltered ("new_field %s, gcc_type = %lld\n",
 				 field_name, field_type);
 	    }
+	  /* FIXME: We have to save the returned decl somewhere, so
+	     that we can refer to it in expressions, in context for
+	     lambdas, etc.  */
 	  CPCALL (new_field, instance,
 		  field_name,
 		  field_type,
