@@ -1,5 +1,14 @@
 2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/ld-mips-elf/unaligned-syms.s: Rename to...
+	* testsuite/ld-mips-elf/unaligned-data.s: ... this.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.d: Adjust accordingly.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.d: Likewise.
+
+2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/ld-mips-elf/jal-global-overflow-0.d: New test.
 	* testsuite/ld-mips-elf/jal-global-overflow-1.d: New test.
 	* testsuite/ld-mips-elf/jal-local-overflow-0.d: New test.
