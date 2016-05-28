@@ -1859,17 +1859,7 @@ static relax_info_t relax_table[] =
         {0, 0, 0, 0}
       } /* BR_RANGE_U4G */
     }						/* relax_fixup */
-  },
-  {
-    NULL, 					/* opcode */
-    0,						/* br_range */
-    {{0, 0, 0, FALSE}}, 			/* cond_field */
-    {{0}},					/* relax_code_seq */
-    {{{0, 0, 0, FALSE}}},			/* relax_code_condition */
-    {0}, 					/* relax_code_size */
-    {0}, 					/* relax_branch_isize */
-    {{{0, 0, 0, 0}}},				/* relax_fixup */
-  },
+  }
 };
 
 /* GAS definitions for command-line options.  */
@@ -3983,7 +3973,7 @@ void
 md_begin (void)
 {
   struct nds32_keyword *k;
-  relax_info_t *relax_info;
+  unsigned int i;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, nds32_baseline);
 
@@ -3998,8 +3988,9 @@ md_begin (void)
 
   /* Initial branch hash table.  */
   nds32_relax_info_hash = hash_new ();
-  for (relax_info = relax_table; relax_info->opcode; relax_info++)
-    hash_insert (nds32_relax_info_hash, relax_info->opcode, relax_info);
+  for (i = 0; i < ARRAY_SIZE (relax_table); i++)
+    hash_insert (nds32_relax_info_hash, relax_table[i].opcode,
+		 &relax_table[i]);
 
   /* Initial relax hint hash table.  */
   nds32_hint_hash = hash_new ();
