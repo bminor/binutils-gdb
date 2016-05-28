@@ -1,3 +1,10 @@
+2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): <R_MIPS16_26>
+	<R_MIPS_26, R_MICROMIPS_26_S1>: Drop the region bits of the
+	reloc location from calculation, treat the addend as signed with
+	local non-section symbols and enable overflow detection.
+
 2016-05-28  Alan Modra  <amodra@gmail.com>
 
 	* aoutx.h: Adjust linker callback calls throughout file,

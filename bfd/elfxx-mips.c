@@ -5247,6 +5247,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   /* TRUE if the symbol referred to by this relocation is a local
      symbol.  */
   bfd_boolean local_p, was_local_p;
+  /* TRUE if the symbol referred to by this relocation is a section
+     symbol.  */
+  bfd_boolean section_p = FALSE;
   /* TRUE if the symbol referred to by this relocation is "_gp_disp".  */
   bfd_boolean gp_disp_p = FALSE;
   /* TRUE if the symbol referred to by this relocation is
@@ -5302,12 +5305,12 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       sym = local_syms + r_symndx;
       sec = local_sections[r_symndx];
 
+      section_p = ELF_ST_TYPE (sym->st_info) == STT_SECTION;
+
       symbol = sec->output_section->vma + sec->output_offset;
-      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION
-	  || (sec->flags & SEC_MERGE))
+      if (!section_p || (sec->flags & SEC_MERGE))
 	symbol += sym->st_value;
-      if ((sec->flags & SEC_MERGE)
-	  && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+      if ((sec->flags & SEC_MERGE) && section_p)
 	{
 	  addend = _bfd_elf_rel_local_sym (abfd, sym, &sec, addend);
 	  addend -= symbol;
@@ -5773,9 +5776,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	/* Shift is 2, unusually, for microMIPS JALX.  */
 	shift = (!*cross_mode_jump_p && r_type == R_MICROMIPS_26_S1) ? 1 : 2;
 
-	if (was_local_p)
-	  value = addend | ((p + 4) & (0xfc000000 << shift));
-	else if (howto->partial_inplace)
+	if (howto->partial_inplace && !section_p)
 	  value = _bfd_mips_elf_sign_extend (addend, 26 + shift);
 	else
 	  value = addend;
@@ -5787,7 +5788,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  return bfd_reloc_outofrange;
 
 	value >>= shift;
-	if (!was_local_p && h->root.root.type != bfd_link_hash_undefweak)
+	if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
 	  overflowed_p = (value >> 26) != ((p + 4) >> (26 + shift));
 	value &= howto->dst_mask;
       }
