@@ -614,8 +614,9 @@ GCC_METHOD4 (gcc_type, start_new_union_type,
 
    NAME is the class name.  FILENAME and LINE_NUMBER specify the
    source location associated with the class.  EXTRA_SCOPE, if
-   non-NULL, must be a PARM_DECL of the current function, but if it is
-   NULL, the current scope needs not be a function.  */
+   non-NULL, must be a PARM_DECL of the current function, or a
+   FIELD_DECL of the current class.  If it is NULL, the current scope
+   needs not be a function.  */
 
 GCC_METHOD5 (gcc_type, start_new_closure_type,
 	     int,		      /* Argument DISCRIMINATOR.  */
