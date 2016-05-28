@@ -521,7 +521,18 @@ GCC_METHOD3 (gcc_expr, type_value_expr,
 	     gcc_type,		  /* Argument OPERAND1.  */
 	     gcc_expr)		  /* Argument OPERAND2.  */
 
-/* FIXME: function call operations?  ctor/dtor?  new/delete?  */
+/* Return a call expression that calls CALLABLE with arguments ARGS.
+   CALLABLE may be a function, a callable object, a pointer to
+   function, an unresolved value expression, an unresolved overload
+   set, an object expression combined with a member function overload
+   set or a pointer-to-member.  If QUALIFIED_P, CALLABLE will be
+   interpreted as a qualified name, preventing virtual function
+   dispatch.  */
+
+GCC_METHOD3 (gcc_expr, call_expr,
+	     gcc_expr,			      /* Argument CALLABLE.  */
+	     int /* bool */,		  /* Argument QUALIFIED_P.  */
+	     const struct gcc_cp_function_args *) /* Argument ARGS.  */
 
 /* Return the type of the gcc_expr OPERAND.
    Use this for decltype.
@@ -659,8 +670,8 @@ GCC_METHOD3 (gcc_type, build_function_type,
    the following argument list: (T1, T2 = V1, T3 = V2, T4 = V0). */
 
 GCC_METHOD2 (gcc_type, add_function_default_args,
-	     gcc_type,			   /* Argument FUNCTION_TYPE.  */
-	     const struct gcc_cp_function_default_args *)/* DEFAULTS.  */
+	     gcc_type,			     /* Argument FUNCTION_TYPE.  */
+	     const struct gcc_cp_function_args *) /* Argument DEFAULTS.  */
 
 /* Create a variant of a function type with an exception
    specification.  FUNCTION_TYPE is a function or method type.

@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-12
+  GCC_CP_FE_VERSION_0 = 0xffffffff-13
 };
 
 /* Qualifiers.  */
@@ -101,15 +101,15 @@ struct gcc_cp_template_args
   gcc_cp_template_arg *elements;
 };
 
-/* An array of default function arguments.  */
+/* An array of (default) function arguments.  */
 
-struct gcc_cp_function_default_args
+struct gcc_cp_function_args
 {
   /* Number of elements.  */
 
   int n_elements;
 
-  /* The default values.  */
+  /* The (default) values for each argument.  */
 
   gcc_expr *elements;
 };
