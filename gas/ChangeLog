@@ -1,3 +1,8 @@
+2016-06-05  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-nds32.c (nds32_parse_option): Make the type of ptr_arg
+	const char *.
+
 2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
 
 	PR binutils/20196
