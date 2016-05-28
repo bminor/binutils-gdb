@@ -199,6 +199,8 @@ if $has_newabi {
 					[list [list ld $abi_ldflags(n32)]]
 }
 
+run_dump_test "unaligned-branch" [list [list ld $abi_ldflags(o32)]]
+
 run_dump_test "unaligned-lwpc-0" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-lwpc-1" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-ldpc-0" [list [list ld $abi_ldflags(o32)]]

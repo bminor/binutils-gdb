@@ -1,5 +1,11 @@
 2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (b_reloc_p): New function.
+	(_bfd_mips_elf_relocate_section) <bfd_reloc_outofrange>: Handle
+	branch relocations.
+
+2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (mips_elf_calculate_relocation): <R_MIPS16_26>
 	<R_MIPS_26, R_MICROMIPS_26_S1>: Drop the region bits of the
 	reloc location from calculation, treat the addend as signed with

@@ -2216,6 +2216,15 @@ jal_reloc_p (int r_type)
 }
 
 static inline bfd_boolean
+b_reloc_p (int r_type)
+{
+  return (r_type == R_MIPS_PC26_S2
+	  || r_type == R_MIPS_PC21_S2
+	  || r_type == R_MIPS_PC16
+	  || r_type == R_MIPS_GNU_REL16_S2);
+}
+
+static inline bfd_boolean
 aligned_pcrel_reloc_p (int r_type)
 {
   return (r_type == R_MIPS_PC18_S3
@@ -10261,6 +10270,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  msg = NULL;
 	  if (jal_reloc_p (howto->type))
 	    msg = _("JALX to a non-word-aligned address");
+	  else if (b_reloc_p (howto->type))
+	    msg = _("Branch to a non-instruction-aligned address");
 	  else if (aligned_pcrel_reloc_p (howto->type))
 	    msg = _("PC-relative load from unaligned address");
 	  if (msg)
