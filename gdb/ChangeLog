@@ -1,3 +1,7 @@
+2016-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (N stop reply): Remove empty line.
+
 2016-05-28  Alan Modra  <amodra@gmail.com>
 
 	* compile/compile-object-load.c (link_callbacks_multiple_definition,
