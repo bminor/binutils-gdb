@@ -1,5 +1,9 @@
 2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-ns32k.c: Remove definition of input_line_pointer.
+
+2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-avr.c (avr_parse_cons_expression): Replace iteration to
 	sentinal with iteration to array size.
 

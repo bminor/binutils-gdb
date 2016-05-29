@@ -132,7 +132,6 @@ struct int_ins_form
 
 struct int_ins_form iif;
 expressionS exprP;
-char *input_line_pointer;
 
 /* Description of the PARTs in IIF
   object[n]:
