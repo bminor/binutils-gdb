@@ -1,5 +1,11 @@
 2016-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* NEWS (QCatchSyscalls): Remove the parameter.  Include ...
+	(QCatchSyscalls:1 in qSupported) ... this separate entry which got
+	deleted.
+
+2016-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* NEWS (N stop reply): Remove empty line.
 
 2016-05-28  Alan Modra  <amodra@gmail.com>
