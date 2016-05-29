@@ -1,3 +1,8 @@
+2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-ns32k.c (bit_fix_new): Replace obstack-alloc with XOBNEW
+	macro.
+
 2016-06-01  Graham Markall  <graham.markall@embecosm.com>
 
 	* testsuite/gas/arc/nps-400-1.s: Add rflt variants with
