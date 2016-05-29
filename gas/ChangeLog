@@ -1,3 +1,18 @@
+2016-05-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/20145
+	* config/tc-i386.c (cpu_noarch): Add noavx512f, noavx512cd,
+	noavx512er, noavx512pf, noavx512dq, noavx512bw, noavx512vl,
+	noavx512ifma and noavx512vbmi.
+	* doc/c-i386.texi: Mention noavx512f, noavx512cd, noavx512er,
+	noavx512pf, noavx512dq, noavx512bw, noavx512vl, noavx512ifma
+	and noavx512vbmi.
+	* testsuite/gas/i386/i386.exp: Run noavx512-1 and noavx512-2.
+	* testsuite/gas/i386/noavx512-1.l: New file.
+	* testsuite/gas/i386/noavx512-1.s: Likewise.
+	* testsuite/gas/i386/noavx512-2.l: Likewise.
+	* testsuite/gas/i386/noavx512-2.s: Likewise.
+
 2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/20145
