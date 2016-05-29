@@ -22,6 +22,10 @@
 #ifndef D30V_H
 #define D30V_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define NOP 0x00F00000
 
 /* Structure to hold information about predefined registers.  */
@@ -283,5 +287,9 @@ struct d30v_insn
 /* an expressionS only has one register type, so we fake it */
 /* by setting high bits to indicate type */
 #define REGISTER_MASK	0xFF
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* D30V_H */

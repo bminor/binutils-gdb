@@ -1,3 +1,8 @@
+2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* nds32-asm.h: Add extern "C".
+	* sh-opc.h: Likewise.
+
 2016-06-01  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-nps400-tbl.h: Add operands a,b,u6, 0,b,u6, and
