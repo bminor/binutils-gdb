@@ -1,5 +1,15 @@
 2016-06-05  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-sh.c (parse_reg): Change type of mode argument to
+	sh_arg_type.
+	(get_operand): Adjust.
+	(insert): Change type of how to bfd_reloc_code_real_type.
+	(insert4): Likewise.
+	* config/tc-sh64.c (shmedia_get_operand): Adjust.
+	(shmedia_parse_reg): Change type of mode to shmedia_arg_type.
+
+2016-06-05  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-nds32.c (nds32_parse_option): Make the type of ptr_arg
 	const char *.
 
