@@ -1,5 +1,12 @@
 2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* gdb.trace/trace-condition.c (marker): Adapt signature to 8 to 64
+	bits types.
+	(main): Adapt to 8 to 64 bits types.
+	* gdb.trace/trace-condition.exp: Add new tests.
+
+2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* gdb.trace/trace-condition.exp: Add emit_less_unsigned test.
 
 2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
