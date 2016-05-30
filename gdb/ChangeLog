@@ -1,5 +1,15 @@
 2016-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR c++/15231
+	* dwarf2read.c (enum pc_bounds_kind): Add PC_BOUNDS_INVALID.
+	(process_psymtab_comp_unit_reader, read_func_scope): Adjust callers.
+	(read_lexical_block_scope): Import DIEs from bare DW_TAG_lexical_block.
+	(read_call_site_scope): Adjust callers.
+	(dwarf2_get_pc_bounds): Implement pc_bounds_invalid.
+	(dwarf2_get_subprogram_pc_bounds, get_scope_pc_bounds): Adjust callers.
+
+2016-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup: dwarf2_get_pc_bounds: -1/0/+1 -> enum
 	* dwarf2read.c (enum pc_bounds_kind) New.
 	(dwarf2_get_pc_bounds): Use it in the declaration.

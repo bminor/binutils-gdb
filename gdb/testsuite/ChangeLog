@@ -1,3 +1,9 @@
+2016-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR c++/15231
+	* gdb.ada/out_of_line_in_inlined.exp: Remove xfails.
+	* gdb.dwarf2/dw2-lexical-block-bare.exp: New file.
+
 2016-05-27  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/attach-many-short-lived-threads.exp (bad_dejagnu):
