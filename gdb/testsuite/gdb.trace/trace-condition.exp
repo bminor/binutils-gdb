@@ -179,6 +179,9 @@ foreach trace_command { "trace" "ftrace" } {
     test_tracepoints $trace_command "21 < 42" 10
     test_tracepoints $trace_command "61 < 42" 0
 
+    test_tracepoints $trace_command "21U < 42U" 10
+    test_tracepoints $trace_command "61U < 42U" 0
+
     test_tracepoints $trace_command "42 <= 42" 10
     test_tracepoints $trace_command "42 <= 11" 0
 
