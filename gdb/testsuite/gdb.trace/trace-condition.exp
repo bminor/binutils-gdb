@@ -137,6 +137,12 @@ foreach trace_command { "trace" "ftrace" } {
     test_tracepoints $trace_command "anarg == 100 && globvar == 1" 1 18955_x86_64_failure
 
     # Test various operations to cover as many opcodes as possible.
+    test_tracepoints $trace_command "21 == 21" 10
+    test_tracepoints $trace_command "11 == 21" 0
+
+    test_tracepoints $trace_command "21 != 42" 10
+    test_tracepoints $trace_command "42 != 42" 0
+
     test_tracepoints $trace_command "21 + 21 == 42" 10
     test_tracepoints $trace_command "21 + 21 == 11" 0
 
