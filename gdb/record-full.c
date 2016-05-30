@@ -869,7 +869,7 @@ record_full_open (const char *name, int from_tty)
 
   record_full_init_record_breakpoints ();
 
-  observer_notify_record_changed (current_inferior (),  1);
+  observer_notify_record_changed (current_inferior (),  1, "full", NULL);
 }
 
 /* "to_close" target method.  Close the process record target.  */

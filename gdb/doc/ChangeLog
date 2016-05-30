@@ -1,3 +1,10 @@
+2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document method and
+	format fields in =record-started.
+	* observer.texi (record_changed): Add method and format
+	parameters.
+
 2016-05-27  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (General Query Packets): Move the description of the

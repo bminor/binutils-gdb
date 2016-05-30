@@ -268,7 +268,7 @@ cmd_record_stop (char *args, int from_tty)
   printf_unfiltered (_("Process record is stopped and all execution "
 		       "logs are deleted.\n"));
 
-  observer_notify_record_changed (current_inferior (), 0);
+  observer_notify_record_changed (current_inferior (), 0, NULL, NULL);
 }
 
 /* The "set record" command.  */

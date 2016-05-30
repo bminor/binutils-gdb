@@ -1,3 +1,17 @@
+2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS: Mention the new fields in =record-started.
+	* common/btrace-common.h (btrace_format_short_string): New function
+	declaration.
+	* common/btrace-common.c (btrace_format_short_string): New
+	function.
+	* mi/mi-interp.c (mi_record_changed): Output method and format
+	fields in the =record-started record.
+	* record-btrace.c (record_btrace_open): Adapt record_changed
+	notification.
+	* record-full.c (record_full_open): Likewise.
+	* record.c (cmd_record_stop): Likewise.
+
 2016-06-02  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-nat.c (handle_output_debug_string): Return type of

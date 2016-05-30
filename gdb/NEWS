@@ -67,6 +67,11 @@ maint selftest
   including JIT compiling fast tracepoint's conditional expression
   bytecode into native code.
 
+* MI async record =record-started now includes the method and format used for
+  recording.  For example:
+
+    =record-started,thread-group="i1",method="btrace",format="bts"
+
 *** Changes in GDB 7.11
 
 * GDB now supports debugging kernel-based threads on FreeBSD.

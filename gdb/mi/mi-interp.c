@@ -65,7 +65,8 @@ static void mi_on_no_history (void);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t, int silent);
-static void mi_record_changed (struct inferior*, int);
+static void mi_record_changed (struct inferior*, int, const char *,
+			       const char *);
 static void mi_inferior_added (struct inferior *inf);
 static void mi_inferior_appeared (struct inferior *inf);
 static void mi_inferior_exit (struct inferior *inf);
@@ -399,7 +400,8 @@ mi_thread_exit (struct thread_info *t, int silent)
 /* Emit notification on changing the state of record.  */
 
 static void
-mi_record_changed (struct inferior *inferior, int started)
+mi_record_changed (struct inferior *inferior, int started, const char *method,
+		   const char *format)
 {
   struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct cleanup *old_chain;
@@ -407,8 +409,23 @@ mi_record_changed (struct inferior *inferior, int started)
   old_chain = make_cleanup_restore_target_terminal ();
   target_terminal_ours_for_output ();
 
-  fprintf_unfiltered (mi->event_channel,  "record-%s,thread-group=\"i%d\"",
-		      started ? "started" : "stopped", inferior->num);
+  if (started)
+    {
+      if (format != NULL)
+	fprintf_unfiltered (
+	  mi->event_channel,
+	  "record-started,thread-group=\"i%d\",method=\"%s\",format=\"%s\"",
+	  inferior->num, method, format);
+      else
+	fprintf_unfiltered (
+	  mi->event_channel,
+	  "record-started,thread-group=\"i%d\",method=\"%s\"",
+	  inferior->num, method);
+    }
+  else
+    fprintf_unfiltered (mi->event_channel,
+			"record-stopped,thread-group=\"i%d\"", inferior->num);
+
 
   gdb_flush (mi->event_channel);
 
