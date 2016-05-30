@@ -1,3 +1,7 @@
+2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/trace-condition.exp: Add counter-case tests.
+
 2016-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR c++/15231

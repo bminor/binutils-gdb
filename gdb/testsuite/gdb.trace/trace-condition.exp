@@ -138,23 +138,61 @@ foreach trace_command { "trace" "ftrace" } {
 
     # Test various operations to cover as many opcodes as possible.
     test_tracepoints $trace_command "21 + 21 == 42" 10
+    test_tracepoints $trace_command "21 + 21 == 11" 0
+
     test_tracepoints $trace_command "42 - 21 == 21" 10
+    test_tracepoints $trace_command "42 - 21 == 11" 0
+
     test_tracepoints $trace_command "21 * 2 == 42" 10
+    test_tracepoints $trace_command "21 * 2 == 11" 0
+
     test_tracepoints $trace_command "21 << 1 == 42" 10
+    test_tracepoints $trace_command "21 << 1 == 11" 0
+
     test_tracepoints $trace_command "42 >> 1 == 21" 10
+    test_tracepoints $trace_command "42 >> 1 == 11" 0
+
     test_tracepoints $trace_command "-(21 << 1) == -42" 10
+    test_tracepoints $trace_command "-(21 << 1) == -11" 0
+
     test_tracepoints $trace_command "-42 >> 1 == -21" 10
+    test_tracepoints $trace_command "-42 >> 1 == -11" 0
+
     test_tracepoints $trace_command "(0xabababab & 0x0000ffff) == 0xabab" 10
+    test_tracepoints $trace_command "(0xabababab & 0x0000ffff) == 0xffff" 0
+
     test_tracepoints $trace_command "(0xabababab | 0x0000ffff) == 0xababffff" 10
+    test_tracepoints $trace_command "(0xabababab | 0x0000ffff) == 0xeeeedddd" 0
+
     test_tracepoints $trace_command "(0xaaaaaaaa ^ 0x55555555) == 0xffffffff" 10
+    test_tracepoints $trace_command "(0xaaaaaaaa ^ 0x55555555) == 0xaaaaaaaa" 0
+
     test_tracepoints $trace_command "~0xaaaaaaaa == 0x55555555" 10
+    test_tracepoints $trace_command "~0xaaaaaaaa == 0x11111111" 0
+
     test_tracepoints $trace_command "21 < 42" 10
+    test_tracepoints $trace_command "61 < 42" 0
+
     test_tracepoints $trace_command "42 <= 42" 10
+    test_tracepoints $trace_command "42 <= 11" 0
+
     test_tracepoints $trace_command "42 >= 42" 10
+    test_tracepoints $trace_command "11 >= 42" 0
+
     test_tracepoints $trace_command "42 > 21" 10
+    test_tracepoints $trace_command "11 > 21" 0
+
     test_tracepoints $trace_command "(21 < 42 ? 0 : 1) == 0" 10 18955_i386_failure
+    test_tracepoints $trace_command "(66 < 42 ? 0 : 1) == 0" 0 18955_i386_failure
+
     test_tracepoints $trace_command "(42 <= 42 ? 0 : 1) == 0" 10
+    test_tracepoints $trace_command "(66 <= 42 ? 0 : 1) == 0" 0
+
     test_tracepoints $trace_command "(42 >= 42 ? 0 : 1) == 0" 10
+    test_tracepoints $trace_command "(11 >= 42 ? 0 : 1) == 0" 0
+
     test_tracepoints $trace_command "(42 > 21 ? 0 : 1) == 0" 10 18955_i386_failure
+    test_tracepoints $trace_command "(11 > 21 ? 0 : 1) == 0" 0 18955_i386_failure
+
     test_tracepoints $trace_command "\$trace_timestamp >= 0" 10
 }
