@@ -171,7 +171,6 @@ extern long md_pcrel_from_section (struct fix *, segT);
 #define tc_frob_label(S)  arc_frob_label (S)
 
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
-#define DYNAMIC_STRUCT_NAME "_DYNAMIC"
 
 /* We need to take care of not having section relative fixups for the
    fixups with respect to Position Independent Code.  */
