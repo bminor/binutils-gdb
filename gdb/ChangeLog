@@ -1,3 +1,8 @@
+2016-06-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* infcmd.c (skip_finish_frames): New.
+	(finish_command): Call skip_finish_frames.
+
 2016-06-01  Yao Qi  <yao.qi@linaro.org>
 
 	PR remote/19998
