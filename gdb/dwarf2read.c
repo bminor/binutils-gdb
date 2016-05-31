@@ -1425,6 +1425,10 @@ static void add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
 static void add_partial_enumeration (struct partial_die_info *enum_pdi,
 				     struct dwarf2_cu *cu);
 
+static void add_partial_entry_point (struct partial_die_info *pdi,
+				     CORE_ADDR *lowpc, CORE_ADDR *highpc,
+				     int need_pc, struct dwarf2_cu *cu);
+
 static void add_partial_subprogram (struct partial_die_info *pdi,
 				    CORE_ADDR *lowpc, CORE_ADDR *highpc,
 				    int need_pc, struct dwarf2_cu *cu);
@@ -6911,6 +6915,25 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 
   switch (pdi->tag)
     {
+    case DW_TAG_entry_point:
+      addr = gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr);
+      /* DW_TAG_entry_point provides an additional entry_point to an
+         existing sub_program. Therefore, we inherit the "external"
+	 attribute from the sub_program to which the entry_point
+	 belongs to.  */
+      if (pdi->die_parent->is_external)
+	add_psymbol_to_list (actual_name, strlen (actual_name),
+			     built_actual_name != NULL,
+			     VAR_DOMAIN, LOC_BLOCK,
+			     &objfile->global_psymbols,
+			     addr, cu->language, objfile);
+      else
+	add_psymbol_to_list (actual_name, strlen (actual_name),
+			     built_actual_name != NULL,
+			     VAR_DOMAIN, LOC_BLOCK,
+			     &objfile->static_psymbols,
+			     addr, cu->language, objfile);
+      break;
     case DW_TAG_subprogram:
       addr = gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr);
       if (pdi->is_external || cu->language == language_ada)
@@ -7108,6 +7131,17 @@ add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
     scan_partial_symbols (pdi->die_child, lowpc, highpc, set_addrmap, cu);
 }
 
+static void
+add_partial_entry_point (struct partial_die_info *pdi,
+			 CORE_ADDR *p_lowpc, CORE_ADDR *p_highpc,
+			 int set_addrmap, struct dwarf2_cu *cu)
+{
+  if (pdi->name == NULL)
+    complaint (&symfile_complaints, _("DW_TAG_entry_point have to have a name"));
+  else
+    add_partial_symbol (pdi, cu);
+}
+
 /* Read a partial die corresponding to a subprogram and create a partial
    symbol for that subprogram.  When the CU language allows it, this
    routine also defines a partial symbol for each nested subprogram
@@ -7175,6 +7209,16 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	  if (pdi->tag == DW_TAG_subprogram
 	      || pdi->tag == DW_TAG_lexical_block)
 	    add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
+	  pdi = pdi->die_sibling;
+	}
+    }
+  else if (cu->language == language_fortran)
+    {
+      pdi = pdi->die_child;
+      while (pdi != NULL)
+	{
+	  if (pdi->tag == DW_TAG_entry_point)
+	    add_partial_entry_point (pdi, lowpc, highpc, set_addrmap, cu);
 	  pdi = pdi->die_sibling;
 	}
     }
@@ -8282,6 +8326,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_type_unit:
       read_type_unit_scope (die, cu);
       break;
+    case DW_TAG_entry_point:
     case DW_TAG_subprogram:
     case DW_TAG_inlined_subroutine:
       read_func_scope (die, cu);
@@ -12063,6 +12108,27 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
   CORE_ADDR high = 0;
   enum pc_bounds_kind ret;
 
+  if (die->tag == DW_TAG_entry_point)
+    {
+      /* Entry_point is embedded in an subprogram.  Therefore, we can use
+         the highpc from it's enveloping subprogram and get the
+         lowpc from DWARF.  */
+      if (PC_BOUNDS_INVALID == dwarf2_get_pc_bounds (die->parent, lowpc, highpc, cu, pst))
+	return PC_BOUNDS_INVALID;
+
+      attr = dwarf2_attr (die, DW_AT_low_pc, cu);
+      if (!attr)
+	{
+	  complaint (&symfile_complaints,
+		     _("DW_TAG_entry_point is missing DW_AT_low_pc"));
+	  return PC_BOUNDS_INVALID;
+	}
+      low = attr_value_as_address (attr);
+      *lowpc = low;
+
+      return PC_BOUNDS_HIGH_LOW;
+    }
+
   attr_high = dwarf2_attr (die, DW_AT_high_pc, cu);
   if (attr_high)
     {
@@ -15632,6 +15698,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  && abbrev->tag != DW_TAG_constant
 	  && abbrev->tag != DW_TAG_enumerator
 	  && abbrev->tag != DW_TAG_subprogram
+	  && abbrev->tag != DW_TAG_entry_point
 	  && abbrev->tag != DW_TAG_lexical_block
 	  && abbrev->tag != DW_TAG_variable
 	  && abbrev->tag != DW_TAG_namespace
@@ -15758,6 +15825,7 @@ load_partial_dies (const struct die_reader_specs *reader,
       if (load_all
 	  || abbrev->tag == DW_TAG_constant
 	  || abbrev->tag == DW_TAG_subprogram
+	  || abbrev->tag == DW_TAG_entry_point
 	  || abbrev->tag == DW_TAG_variable
 	  || abbrev->tag == DW_TAG_namespace
 	  || part_die->is_declaration)
@@ -15799,7 +15867,9 @@ load_partial_dies (const struct die_reader_specs *reader,
 		      || last_die->tag == DW_TAG_union_type))
 	      || (cu->language == language_ada
 		  && (last_die->tag == DW_TAG_subprogram
-		      || last_die->tag == DW_TAG_lexical_block))))
+		      || last_die->tag == DW_TAG_lexical_block))
+	      || (cu->language == language_fortran
+		  && last_die->tag == DW_TAG_subprogram)))
 	{
 	  nesting_level++;
 	  parent_die = last_die;
@@ -18440,6 +18510,20 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_LABEL;
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
+	case DW_TAG_entry_point:
+	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
+	     finish_block.  */
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
+	  /* DW_TAG_entry_point provides an additional entry_point to an
+	     existing sub_program. Therefore, we inherit the "external"
+	     attribute from the sub_program to which the entry_point
+	     belongs to.  */
+	  attr2 = dwarf2_attr (die->parent, DW_AT_external, cu);
+	  if (attr2 && (DW_UNSND (attr2) != 0))
+	    list_to_add = &global_symbols;
+	  else
+	    list_to_add = cu->list_in_scope;
+	  break;
 	case DW_TAG_subprogram:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
 	     finish_block.  */
@@ -19124,6 +19208,7 @@ read_type_die_1 (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_enumeration_type:
       this_type = read_enumeration_type (die, cu);
       break;
+    case DW_TAG_entry_point:
     case DW_TAG_subprogram:
     case DW_TAG_subroutine_type:
     case DW_TAG_inlined_subroutine:
