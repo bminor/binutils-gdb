@@ -1,3 +1,7 @@
+2016-08-24  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.h: Wrap around in extern "C".
+
 2016-08-23  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-tbl.h (V8_2_INSN): New macro.
