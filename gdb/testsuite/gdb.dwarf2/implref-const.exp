@@ -13,45 +13,62 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test C++ references marked with DW_OP_GNU_implicit_pointer.
+# Test a C++ reference marked with DW_OP_GNU_implicit_pointer.
+# The referenced value is a DW_AT_const_value.
 
-# TODO: Add more test statements after fixing bug #19893:
-# https://sourceware.org/bugzilla/show_bug.cgi?id=19893.
+if [skip_cplus_tests] {
+    continue
+}
 
 load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if {![dwarf2_support]} {
+if ![dwarf2_support] {
     return 0
 }
 
-# We'll place the output of Dwarf::assemble in implref.S.
+# We'll place the output of Dwarf::assemble in implref-const.S.
 standard_testfile main.c .S
 
-# ${testfile} is now "implref".  srcfile2 is "implref.S".
+# ${testfile} is now "implref-const".  srcfile2 is "implref-const.S".
 set executable ${testfile}
 set asm_file [standard_output_file ${srcfile2}]
 
+# We need to know the size of integer and address types in order
+# to write some of the debugging info we'd like to generate.
+#
+# For that, we ask GDB by debugging our implref-const program.
+# Any program would do, but since we already have implref-const
+# specifically for this testcase, might as well use that.
+if [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] {
+    untested ${testfile}.exp
+    return -1
+}
+
 # Create the DWARF.  We need a regular variable and a reference to it that'll
 # be marked with DW_OP_GNU_implicit_pointer.
-Dwarf::assemble $asm_file {
+Dwarf::assemble ${asm_file} {
     global srcdir subdir srcfile
 
-    cu { version 3 addr_size 4 } {
+    cu {} {
 	DW_TAG_compile_unit {
-	    {DW_AT_producer "GNU C++ 4.8.4"}
 	    {DW_AT_language @DW_LANG_C_plus_plus}
 	} {
 	    declare_labels int_label const_label variable_label ref_label
+	    set int_size [get_sizeof "int" -1]
+
+	    # gdb always assumes references are implemented as pointers.
+	    set addr_size [get_sizeof "void *" -1]
+	    set var_value 42
 
 	    int_label: DW_TAG_base_type {
-		{DW_AT_byte_size 4 DW_FORM_udata}
+		{DW_AT_byte_size ${int_size} DW_FORM_udata}
 		{DW_AT_encoding @DW_ATE_signed}
 		{DW_AT_name "int"}
 	    }
 
 	    ref_label: DW_TAG_reference_type {
-		{DW_AT_byte_size 4 DW_FORM_udata}
+		{DW_AT_byte_size ${addr_size} DW_FORM_udata}
 		{DW_AT_type :${int_label}}
 	    }
 
@@ -67,7 +84,7 @@ Dwarf::assemble $asm_file {
 		variable_label: DW_TAG_variable {
 		    {DW_AT_name "var"}
 		    {DW_AT_type :${int_label}}
-		    {DW_AT_const_value 42 DW_FORM_udata}
+		    {DW_AT_const_value ${var_value} DW_FORM_udata}
 		}
 
 		DW_TAG_variable {
@@ -80,7 +97,7 @@ Dwarf::assemble $asm_file {
     }
 }
 
-if [prepare_for_testing ${testfile}.exp ${executable} "${asm_file} ${srcfile}" {}] {
+if [prepare_for_testing ${testfile}.exp ${executable} [list ${asm_file} ${srcfile}] {}] {
     return -1
 }
 
@@ -89,10 +106,14 @@ if ![runto_main] {
     return -1
 }
 
-gdb_test "print ref" " = \\(int &\\) <synthetic pointer>" "print ref"
-gdb_test "print &ref" " = \\(int \\*\\) <synthetic pointer>" "print &ref"
+# Doing 'print ref' should show us e.g. '(int &) <synthetic pointer>: 42'.
+gdb_test "print ref" " = \\(int &\\) <synthetic pointer>: \\\d+"
+
+# The variable isn't located in memory, thus we can't take its address.
+gdb_test "print &var" "Can't take address of \"var\" which isn't an lvalue."
+gdb_test "print &ref" "Attempt to take address of value not located in memory."
 
 # gdb assumes C++ references are implemented as pointers, and print &(&ref)
 # shows us the underlying pointer's address.
 # Since in this case there's no physical pointer, gdb should tell us so.
-gdb_test "print &\(&ref\)" "Attempt to take address of value not located in memory." "print &(&ref)"
+gdb_test "print &(&ref)" "Attempt to take address of value not located in memory."
