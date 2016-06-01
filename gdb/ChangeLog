@@ -1,3 +1,78 @@
+2016-06-01  Nick Clifton  <nickc@redhat.com>
+
+	* common/common-utils.c (xmalloc_failed): New function.  Provided
+	so that the version in libiberty is not linked in.
+
+2016-06-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* infcmd.c (skip_finish_frames): New.
+	(finish_command): Call skip_finish_frames.
+
+2016-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	PR remote/19998
+	* remote-fileio.c (remote_fileio_ctrl_c_signal_handler): Call
+	quit_serial_event_set.
+
+2016-06-01  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.11.1 released.
+
+2016-05-31  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	PR c++/19893
+	* dwarf2loc.c (coerce_pieced_ref, indirect_synthetic_pointer,
+	fetch_const_value_from_synthetic_pointer): New functions.
+	(indirect_pieced_value): Move lower half to indirect_synthetic_pointer.
+	(pieced_value_funcs): Implement coerce_ref.
+	* valops.c (value_addr): Call coerce_ref for synthetic references.
+	* valprint.c (valprint_check_validity): Return true for synthetic
+	references.  Also, don't show "<synthetic pointer>" if they reference
+	addressable values.
+	(generic_val_print_ref): Handle synthetic references.  Also move some
+	code to print_ref_address.
+	(print_ref_address, get_value_addr_contents): New functions.
+
+2016-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR c++/15231
+	* dwarf2read.c (enum pc_bounds_kind): Add PC_BOUNDS_INVALID.
+	(process_psymtab_comp_unit_reader, read_func_scope): Adjust callers.
+	(read_lexical_block_scope): Import DIEs from bare DW_TAG_lexical_block.
+	(read_call_site_scope): Adjust callers.
+	(dwarf2_get_pc_bounds): Implement pc_bounds_invalid.
+	(dwarf2_get_subprogram_pc_bounds, get_scope_pc_bounds): Adjust callers.
+
+2016-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup: dwarf2_get_pc_bounds: -1/0/+1 -> enum
+	* dwarf2read.c (enum pc_bounds_kind) New.
+	(dwarf2_get_pc_bounds): Use it in the declaration.
+	(process_psymtab_comp_unit_reader): Adjust caller.  Rename has_pc_info
+	to cu_bounds_kind.
+	(read_func_scope, read_lexical_block_scope, read_call_site_scope):
+	Adjust callers.
+	(dwarf2_get_pc_bounds): Use enum pc_bounds_kind in the definition.
+	(dwarf2_get_subprogram_pc_bounds, get_scope_pc_bounds): Adjust callers.
+
+2016-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (QCatchSyscalls): Remove the parameter.  Include ...
+	(QCatchSyscalls:1 in qSupported) ... this separate entry which got
+	deleted.
+
+2016-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (N stop reply): Remove empty line.
+
+2016-05-28  Alan Modra  <amodra@gmail.com>
+
+	* compile/compile-object-load.c (link_callbacks_multiple_definition,
+	link_callbacks_warning, link_callbacks_undefined_symbol,
+	link_callbacks_undefined_symbol, link_callbacks_reloc_overflow,
+	link_callbacks_reloc_dangerous,
+	link_callbacks_unattached_reloc): Return void.
+
 2016-05-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* opencl-lang.c (evaluate_subexp_opencl): If

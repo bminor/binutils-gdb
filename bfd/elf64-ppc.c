@@ -15144,13 +15144,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			   && (h->elf.root.type == bfd_link_hash_undefweak
 			       || h->elf.root.type == bfd_link_hash_undefined)
 			   && is_branch_reloc (r_type))))
-		{
-		  if (!((*info->callbacks->reloc_overflow)
-			(info, &h->elf.root, sym_name,
-			 reloc_name, orig_rel.r_addend,
-			 input_bfd, input_section, rel->r_offset)))
-		    return FALSE;
-		}
+		info->callbacks->reloc_overflow (info, &h->elf.root,
+						 sym_name, reloc_name,
+						 orig_rel.r_addend,
+						 input_bfd, input_section,
+						 rel->r_offset);
 	    }
 	  else
 	    {

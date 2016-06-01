@@ -609,11 +609,7 @@ struct bfd_link_info
 };
 
 /* This structures holds a set of callback functions.  These are called
-   by the BFD linker routines.  Except for the info functions, the first
-   argument to each callback function is the bfd_link_info structure
-   being used and each function returns a boolean value.  If the
-   function returns FALSE, then the BFD function which called it should
-   return with a failure indication.  */
+   by the BFD linker routines.  */
 
 struct bfd_link_callbacks
 {
@@ -622,14 +618,15 @@ struct bfd_link_callbacks
      name of the symbol which caused the archive element to be pulled
      in.  This function may set *SUBSBFD to point to an alternative
      BFD from which symbols should in fact be added in place of the
-     original BFD's symbols.  */
+     original BFD's symbols.  Returns TRUE if the object should be
+     added, FALSE if it should be skipped.  */
   bfd_boolean (*add_archive_element)
     (struct bfd_link_info *, bfd *abfd, const char *name, bfd **subsbfd);
   /* A function which is called when a symbol is found with multiple
      definitions.  H is the symbol which is defined multiple times.
      NBFD is the new BFD, NSEC is the new section, and NVAL is the new
      value.  NSEC may be bfd_com_section or bfd_ind_section.  */
-  bfd_boolean (*multiple_definition)
+  void (*multiple_definition)
     (struct bfd_link_info *, struct bfd_link_hash_entry *h,
      bfd *nbfd, asection *nsec, bfd_vma nval);
   /* A function which is called when a common symbol is defined
@@ -638,7 +635,7 @@ struct bfd_link_callbacks
      symbol, one of bfd_link_hash_defined, bfd_link_hash_common, or
      bfd_link_hash_indirect.  If NTYPE is bfd_link_hash_common, NSIZE
      is the size of the new symbol.  */
-  bfd_boolean (*multiple_common)
+  void (*multiple_common)
     (struct bfd_link_info *, struct bfd_link_hash_entry *h,
      bfd *nbfd, enum bfd_link_hash_type ntype, bfd_vma nsize);
   /* A function which is called to add a symbol to a set.  ENTRY is
@@ -647,7 +644,7 @@ struct bfd_link_callbacks
      the set when generating a relocatable file, and is also used to
      get the size of the entry when generating an executable file.
      ABFD, SEC and VALUE identify the value to add to the set.  */
-  bfd_boolean (*add_to_set)
+  void (*add_to_set)
     (struct bfd_link_info *, struct bfd_link_hash_entry *entry,
      bfd_reloc_code_real_type reloc, bfd *abfd, asection *sec, bfd_vma value);
   /* A function which is called when the name of a g++ constructor or
@@ -656,7 +653,7 @@ struct bfd_link_callbacks
      destructor.  This will use BFD_RELOC_CTOR when generating a
      relocatable file.  NAME is the name of the symbol found.  ABFD,
      SECTION and VALUE are the value of the symbol.  */
-  bfd_boolean (*constructor)
+  void (*constructor)
     (struct bfd_link_info *, bfd_boolean constructor, const char *name,
      bfd *abfd, asection *sec, bfd_vma value);
   /* A function which is called to issue a linker warning.  For
@@ -666,7 +663,7 @@ struct bfd_link_callbacks
      there is none.  ABFD, SECTION and ADDRESS identify the location
      which trigerred the warning; either ABFD or SECTION or both may
      be NULL if the location is not known.  */
-  bfd_boolean (*warning)
+  void (*warning)
     (struct bfd_link_info *, const char *warning, const char *symbol,
      bfd *abfd, asection *section, bfd_vma address);
   /* A function which is called when a relocation is attempted against
@@ -674,7 +671,7 @@ struct bfd_link_callbacks
      ABFD, SECTION and ADDRESS identify the location from which the
      reference is made. IS_FATAL indicates whether an undefined symbol is
      a fatal error or not. In some cases SECTION may be NULL.  */
-  bfd_boolean (*undefined_symbol)
+  void (*undefined_symbol)
     (struct bfd_link_info *, const char *name, bfd *abfd,
      asection *section, bfd_vma address, bfd_boolean is_fatal);
   /* A function which is called when a reloc overflow occurs. ENTRY is
@@ -685,7 +682,7 @@ struct bfd_link_callbacks
      location at which the overflow occurs; if this is the result of a
      bfd_section_reloc_link_order or bfd_symbol_reloc_link_order, then
      ABFD will be NULL.  */
-  bfd_boolean (*reloc_overflow)
+  void (*reloc_overflow)
     (struct bfd_link_info *, struct bfd_link_hash_entry *entry,
      const char *name, const char *reloc_name, bfd_vma addend,
      bfd *abfd, asection *section, bfd_vma address);
@@ -695,7 +692,7 @@ struct bfd_link_callbacks
      problem occurred; if this is the result of a
      bfd_section_reloc_link_order or bfd_symbol_reloc_link_order, then
      ABFD will be NULL.  */
-  bfd_boolean (*reloc_dangerous)
+  void (*reloc_dangerous)
     (struct bfd_link_info *, const char *message,
      bfd *abfd, asection *section, bfd_vma address);
   /* A function which is called when a reloc is found to be attached
@@ -704,7 +701,7 @@ struct bfd_link_callbacks
      the reloc; if this is the result of a
      bfd_section_reloc_link_order or bfd_symbol_reloc_link_order, then
      ABFD will be NULL.  */
-  bfd_boolean (*unattached_reloc)
+  void (*unattached_reloc)
     (struct bfd_link_info *, const char *name,
      bfd *abfd, asection *section, bfd_vma address);
   /* A function which is called when a symbol in notice_hash is

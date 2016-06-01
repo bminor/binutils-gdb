@@ -757,22 +757,30 @@ class Target_s390 : public Sized_target<size, true>
   Layout *layout_;
 
   // Code sequences for -fsplit-stack matching.
-  static const unsigned char ss_code_st_r14[];
-  static const unsigned char ss_code_l_r14[];
   static const unsigned char ss_code_bras_8[];
   static const unsigned char ss_code_l_basr[];
   static const unsigned char ss_code_a_basr[];
-  static const unsigned char ss_code_ear[];
-  static const unsigned char ss_code_c[];
   static const unsigned char ss_code_larl[];
   static const unsigned char ss_code_brasl[];
   static const unsigned char ss_code_jg[];
   static const unsigned char ss_code_jgl[];
 
   // Variable code sequence matchers for -fsplit-stack.
+  bool ss_match_st_r14(unsigned char* view,
+		       section_size_type view_size,
+		       section_offset_type *offset) const;
+  bool ss_match_l_r14(unsigned char* view,
+		      section_size_type view_size,
+		      section_offset_type *offset) const;
   bool ss_match_mcount(unsigned char* view,
 		       section_size_type view_size,
 		       section_offset_type *offset) const;
+  bool ss_match_ear(unsigned char* view,
+		    section_size_type view_size,
+		    section_offset_type *offset) const;
+  bool ss_match_c(unsigned char* view,
+		  section_size_type view_size,
+		  section_offset_type *offset) const;
   bool ss_match_l(unsigned char* view,
 		  section_size_type view_size,
 		  section_offset_type *offset,
@@ -4321,30 +4329,6 @@ Target_s390<size>::do_is_call_to_non_split(const Symbol* sym,
 
 // Code sequences to match below.
 
-template<>
-const unsigned char
-Target_s390<32>::ss_code_st_r14[] = {
-  0x50, 0xe0, 0xf0, 0x04,		// st %r14, 4(%r15)
-};
-
-template<>
-const unsigned char
-Target_s390<64>::ss_code_st_r14[] = {
-  0xe3, 0xe0, 0xf0, 0x08, 0x00, 0x24	// stg %r14, 8(%r15)
-};
-
-template<>
-const unsigned char
-Target_s390<32>::ss_code_l_r14[] = {
-  0x58, 0xe0, 0xf0, 0x04,		// l %r14, 4(%r15)
-};
-
-template<>
-const unsigned char
-Target_s390<64>::ss_code_l_r14[] = {
-  0xe3, 0xe0, 0xf0, 0x08, 0x00, 0x04	// lg %r14, 8(%r15)
-};
-
 template<int size>
 const unsigned char
 Target_s390<size>::ss_code_bras_8[] = {
@@ -4366,32 +4350,6 @@ Target_s390<size>::ss_code_a_basr[] = {
   0x5a, 0xe0, 0x10, 0x00,		// a %r14, 0(%r1)
   0x5a, 0x10, 0x10, 0x04,		// a %r1, 4(%r1)
   0x0d, 0xee,				// basr %r14, %r14
-};
-
-template<>
-const unsigned char
-Target_s390<32>::ss_code_ear[] = {
-  0xb2, 0x4f, 0x00, 0x10,		// ear %r1, %a0
-};
-
-template<>
-const unsigned char
-Target_s390<64>::ss_code_ear[] = {
-  0xb2, 0x4f, 0x00, 0x10,		// ear %r1, %a0
-  0xeb, 0x11, 0x00, 0x20, 0x00, 0x0d,	// sllg %r1,%r1,32
-  0xb2, 0x4f, 0x00, 0x11,		// ear %r1, %a1
-};
-
-template<>
-const unsigned char
-Target_s390<32>::ss_code_c[] = {
-  0x59, 0xf0, 0x10, 0x20,		// c %r15, 0x20(%r1)
-};
-
-template<>
-const unsigned char
-Target_s390<64>::ss_code_c[] = {
-  0xe3, 0xf0, 0x10, 0x38, 0x00, 0x20,	// cg %r15, 0x38(%r1)
 };
 
 template<int size>
@@ -4418,6 +4376,70 @@ Target_s390<size>::ss_code_jgl[] = {
   0xc0, 0x44,				// jgl ...
 };
 
+template<>
+bool
+Target_s390<32>::ss_match_st_r14(unsigned char* view,
+				 section_size_type view_size,
+				 section_offset_type *offset) const
+{
+  static const unsigned char ss_code_st_r14[] = {
+    0x50, 0xe0, 0xf0, 0x04,		// st %r14, 4(%r15)
+  };
+  if (!this->match_view_u(view, view_size, *offset, ss_code_st_r14,
+			  sizeof ss_code_st_r14))
+    return false;
+  *offset += sizeof ss_code_st_r14;
+  return true;
+}
+
+template<>
+bool
+Target_s390<64>::ss_match_st_r14(unsigned char* view,
+				 section_size_type view_size,
+				 section_offset_type *offset) const
+{
+  static const unsigned char ss_code_st_r14[] = {
+    0xe3, 0xe0, 0xf0, 0x08, 0x00, 0x24	// stg %r14, 8(%r15)
+  };
+  if (!this->match_view_u(view, view_size, *offset, ss_code_st_r14,
+			  sizeof ss_code_st_r14))
+    return false;
+  *offset += sizeof ss_code_st_r14;
+  return true;
+}
+
+template<>
+bool
+Target_s390<32>::ss_match_l_r14(unsigned char* view,
+				section_size_type view_size,
+				section_offset_type *offset) const
+{
+  static const unsigned char ss_code_l_r14[] = {
+    0x58, 0xe0, 0xf0, 0x04,		// l %r14, 4(%r15)
+  };
+  if (!this->match_view_u(view, view_size, *offset, ss_code_l_r14,
+			  sizeof ss_code_l_r14))
+    return false;
+  *offset += sizeof ss_code_l_r14;
+  return true;
+}
+
+template<>
+bool
+Target_s390<64>::ss_match_l_r14(unsigned char* view,
+				section_size_type view_size,
+				section_offset_type *offset) const
+{
+  static const unsigned char ss_code_l_r14[] = {
+    0xe3, 0xe0, 0xf0, 0x08, 0x00, 0x04	// lg %r14, 8(%r15)
+  };
+  if (!this->match_view_u(view, view_size, *offset, ss_code_l_r14,
+			  sizeof ss_code_l_r14))
+    return false;
+  *offset += sizeof ss_code_l_r14;
+  return true;
+}
+
 template<int size>
 bool
 Target_s390<size>::ss_match_mcount(unsigned char* view,
@@ -4428,10 +4450,8 @@ Target_s390<size>::ss_match_mcount(unsigned char* view,
   section_offset_type myoff = *offset;
 
   // First, look for the store instruction saving %r14.
-  if (!this->match_view_u(view, view_size, myoff, ss_code_st_r14,
-			  sizeof ss_code_st_r14))
+  if (!this->ss_match_st_r14(view, view_size, &myoff))
     return false;
-  myoff += sizeof ss_code_st_r14;
 
   // Now, param load and the actual call.
   if (this->match_view_u(view, view_size, myoff, ss_code_larl,
@@ -4468,13 +4488,77 @@ Target_s390<size>::ss_match_mcount(unsigned char* view,
     return false;
 
   // Finally, a load bringing %r14 back.
-  if (!this->match_view_u(view, view_size, myoff, ss_code_l_r14,
-			  sizeof ss_code_l_r14))
+  if (!this->ss_match_l_r14(view, view_size, &myoff))
     return false;
-  myoff += sizeof ss_code_l_r14;
 
   // Found it.
   *offset = myoff;
+  return true;
+}
+
+template<>
+bool
+Target_s390<32>::ss_match_ear(unsigned char* view,
+				section_size_type view_size,
+				section_offset_type *offset) const
+{
+  static const unsigned char ss_code_ear[] = {
+    0xb2, 0x4f, 0x00, 0x10,		// ear %r1, %a0
+  };
+  if (!this->match_view_u(view, view_size, *offset, ss_code_ear,
+			  sizeof ss_code_ear))
+    return false;
+  *offset += sizeof ss_code_ear;
+  return true;
+}
+
+template<>
+bool
+Target_s390<64>::ss_match_ear(unsigned char* view,
+				section_size_type view_size,
+				section_offset_type *offset) const
+{
+  static const unsigned char ss_code_ear[] = {
+    0xb2, 0x4f, 0x00, 0x10,		// ear %r1, %a0
+    0xeb, 0x11, 0x00, 0x20, 0x00, 0x0d,	// sllg %r1,%r1,32
+    0xb2, 0x4f, 0x00, 0x11,		// ear %r1, %a1
+  };
+  if (!this->match_view_u(view, view_size, *offset, ss_code_ear,
+			  sizeof ss_code_ear))
+    return false;
+  *offset += sizeof ss_code_ear;
+  return true;
+}
+
+template<>
+bool
+Target_s390<32>::ss_match_c(unsigned char* view,
+				section_size_type view_size,
+				section_offset_type *offset) const
+{
+  static const unsigned char ss_code_c[] = {
+    0x59, 0xf0, 0x10, 0x20,		// c %r15, 0x20(%r1)
+  };
+  if (!this->match_view_u(view, view_size, *offset, ss_code_c,
+			  sizeof ss_code_c))
+    return false;
+  *offset += sizeof ss_code_c;
+  return true;
+}
+
+template<>
+bool
+Target_s390<64>::ss_match_c(unsigned char* view,
+				section_size_type view_size,
+				section_offset_type *offset) const
+{
+  static const unsigned char ss_code_c[] = {
+    0xe3, 0xf0, 0x10, 0x38, 0x00, 0x20,	// cg %r15, 0x38(%r1)
+  };
+  if (!this->match_view_u(view, view_size, *offset, ss_code_c,
+			  sizeof ss_code_c))
+    return false;
+  *offset += sizeof ss_code_c;
   return true;
 }
 
@@ -4652,18 +4736,14 @@ Target_s390<size>::do_calls_non_split(Relobj* object, unsigned int shndx,
   // First, figure out if there's a conditional call by looking for the
   // extract-tp, add, cmp sequence.
 
-  if (this->match_view_u(view, view_size, curoffset, ss_code_ear,
-			 sizeof ss_code_ear))
+  if (this->ss_match_ear(view, view_size, &curoffset))
     {
       // Found extract-tp, now look for an add and compare.
-      curoffset += sizeof ss_code_ear;
       conditional = true;
-      if (this->match_view_u(view, view_size, curoffset, ss_code_c,
-			     sizeof ss_code_c))
+      if (this->ss_match_c(view, view_size, &curoffset))
 	{
 	  // Found a direct compare of stack pointer with the guard,
 	  // we're done here.
-	  curoffset += sizeof ss_code_c;
 	}
       else if (this->ss_match_l(view, view_size, &curoffset, &guard_reg))
 	{

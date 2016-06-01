@@ -1101,24 +1101,19 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 	  switch (r)
 	    {
 	    case bfd_reloc_undefined:
-	      if (! ((*link_info->callbacks->undefined_symbol)
-		     (link_info, bfd_asymbol_name (*rel->sym_ptr_ptr),
-		      input_bfd, input_section, rel->address, TRUE)))
-		goto error_return;
+	      (*link_info->callbacks->undefined_symbol)
+		(link_info, bfd_asymbol_name (*rel->sym_ptr_ptr),
+		 input_bfd, input_section, rel->address, TRUE);
 	      break;
 	    case bfd_reloc_dangerous:
-	      if (! ((*link_info->callbacks->reloc_dangerous)
-		     (link_info, err, input_bfd, input_section,
-		      rel->address)))
-		goto error_return;
+	      (*link_info->callbacks->reloc_dangerous)
+		(link_info, err, input_bfd, input_section, rel->address);
 	      break;
 	    case bfd_reloc_overflow:
-	      if (! ((*link_info->callbacks->reloc_overflow)
-		     (link_info, NULL,
-		      bfd_asymbol_name (*rel->sym_ptr_ptr),
-		      rel->howto->name, rel->addend, input_bfd,
-		      input_section, rel->address)))
-		goto error_return;
+	      (*link_info->callbacks->reloc_overflow)
+		(link_info, NULL, bfd_asymbol_name (*rel->sym_ptr_ptr),
+		 rel->howto->name, rel->addend, input_bfd,
+		 input_section, rel->address);
 	      break;
 	    case bfd_reloc_outofrange:
 	    default:
@@ -1696,10 +1691,9 @@ alpha_relocate_section (bfd *output_bfd,
 			 do not have a meaningful number for the
 			 location within the section that is being
 			 relocated.  */
-		      if (! ((*info->callbacks->undefined_symbol)
-			     (info, h->root.root.string, input_bfd,
-			      input_section, (bfd_vma) 0, TRUE)))
-			return FALSE;
+		      (*info->callbacks->undefined_symbol)
+			(info, h->root.root.string, input_bfd,
+			 input_section, (bfd_vma) 0, TRUE);
 		      addend = 0;
 		    }
 		}
@@ -1712,10 +1706,9 @@ alpha_relocate_section (bfd *output_bfd,
 		      /* This symbol is not being written out.  Pass
 			 the address as 0, as with undefined_symbol,
 			 above.  */
-		      if (! ((*info->callbacks->unattached_reloc)
-			     (info, h->root.root.string, input_bfd,
-			      input_section, (bfd_vma) 0)))
-			return FALSE;
+		      (*info->callbacks->unattached_reloc)
+			(info, h->root.root.string,
+			 input_bfd, input_section, (bfd_vma) 0);
 		    }
 
 		  addend = alpha_convert_external_reloc (output_bfd, info,
@@ -1839,10 +1832,9 @@ alpha_relocate_section (bfd *output_bfd,
 		      && h->indx == -1)
 		    {
 		      /* This symbol is not being written out.  */
-		      if (! ((*info->callbacks->unattached_reloc)
-			     (info, h->root.root.string, input_bfd,
-			      input_section, r_vaddr - input_section->vma)))
-			return FALSE;
+		      (*info->callbacks->unattached_reloc)
+			(info, h->root.root.string, input_bfd,
+			 input_section, r_vaddr - input_section->vma);
 		    }
 
 		  relocation = alpha_convert_external_reloc (output_bfd,
@@ -1896,11 +1888,9 @@ alpha_relocate_section (bfd *output_bfd,
 		    }
 		  else
 		    {
-		      if (! ((*info->callbacks->undefined_symbol)
-			     (info, h->root.root.string, input_bfd,
-			      input_section,
-			      r_vaddr - input_section->vma, TRUE)))
-			return FALSE;
+		      (*info->callbacks->undefined_symbol)
+			(info, h->root.root.string, input_bfd, input_section,
+			 r_vaddr - input_section->vma, TRUE);
 		      relocation = 0;
 		    }
 		}
@@ -1942,12 +1932,10 @@ alpha_relocate_section (bfd *output_bfd,
 		    else
 		      name = bfd_section_name (input_bfd,
 					       symndx_to_section[r_symndx]);
-		    if (! ((*info->callbacks->reloc_overflow)
-			   (info, NULL, name,
-			    alpha_howto_table[r_type].name,
-			    (bfd_vma) 0, input_bfd, input_section,
-			    r_vaddr - input_section->vma)))
-		      return FALSE;
+		    (*info->callbacks->reloc_overflow)
+		      (info, NULL, name, alpha_howto_table[r_type].name,
+		       (bfd_vma) 0, input_bfd, input_section,
+		       r_vaddr - input_section->vma);
 		  }
 		  break;
 		}
@@ -1967,10 +1955,9 @@ alpha_relocate_section (bfd *output_bfd,
 
       if (gp_usedp && gp_undefined)
 	{
-	  if (! ((*info->callbacks->reloc_dangerous)
-		 (info, _("GP relative relocation used when GP not defined"),
-		  input_bfd, input_section, r_vaddr - input_section->vma)))
-	    return FALSE;
+	  (*info->callbacks->reloc_dangerous)
+	    (info, _("GP relative relocation used when GP not defined"),
+	     input_bfd, input_section, r_vaddr - input_section->vma);
 	  /* Only give the error once per link.  */
 	  gp = 4;
 	  _bfd_set_gp_value (output_bfd, gp);

@@ -1,3 +1,46 @@
+2016-05-31  Martin Galvan  <martin.galvan@tallertechnologies.com>
+
+	PR c++/19893
+	* gdb.dwarf2/implref.exp: Rename to...
+	* gdb.dwarf2/implref-const.exp: ...this.  Also add more test statements.
+	* gdb.dwarf2/implref-array.c: New file.
+	* gdb.dwarf2/implref-array.exp: Likewise.
+	* gdb.dwarf2/implref-global.c: Likewise.
+	* gdb.dwarf2/implref-global.exp: Likewise.
+	* gdb.dwarf2/implref-struct.c: Likewise.
+	* gdb.dwarf2/implref-struct.exp: Likewise.
+
+2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/trace-condition.exp: Add 64bit tests.
+
+2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/trace-condition.c (marker): Adapt signature to 8 to 64
+	bits types.
+	(main): Adapt to 8 to 64 bits types.
+	* gdb.trace/trace-condition.exp: Add new tests.
+
+2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/trace-condition.exp: Add emit_less_unsigned test.
+
+2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/ftrace.exp (test_ftrace_condition): Remove.
+	Move condition tests...
+	* gdb.trace/trace-condition.exp: Here.
+
+2016-05-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/trace-condition.exp: Add counter-case tests.
+
+2016-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR c++/15231
+	* gdb.ada/out_of_line_in_inlined.exp: Remove xfails.
+	* gdb.dwarf2/dw2-lexical-block-bare.exp: New file.
+
 2016-05-27  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/attach-many-short-lived-threads.exp (bad_dejagnu):

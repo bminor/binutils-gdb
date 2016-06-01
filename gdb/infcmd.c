@@ -1927,6 +1927,30 @@ finish_forward (struct finish_command_fsm *sm, struct frame_info *frame)
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 }
 
+/* Skip frames for "finish".  */
+
+static struct frame_info *
+skip_finish_frames (struct frame_info *frame)
+{
+  struct frame_info *start;
+
+  do
+    {
+      start = frame;
+
+      frame = skip_tailcall_frames (frame);
+      if (frame == NULL)
+	break;
+
+      frame = skip_unwritable_frames (frame);
+      if (frame == NULL)
+	break;
+    }
+  while (start != frame);
+
+  return frame;
+}
+
 /* "finish": Set a temporary breakpoint at the place the selected
    frame will return to, then continue.  */
 
@@ -2025,11 +2049,7 @@ finish_command (char *arg, int from_tty)
     finish_backward (sm);
   else
     {
-      /* Ignore TAILCALL_FRAME type frames, they were executed already before
-	 entering THISFRAME.  */
-      frame = skip_tailcall_frames (frame);
-
-      frame = skip_unwritable_frames (frame);
+      frame = skip_finish_frames (frame);
 
       if (frame == NULL)
 	error (_("Cannot find the caller frame."));

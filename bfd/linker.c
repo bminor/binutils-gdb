@@ -1544,9 +1544,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  /* We have found a definition for a symbol which was
 	     previously common.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
-	  if (! ((*info->callbacks->multiple_common)
-		 (info, h, abfd, bfd_link_hash_defined, 0)))
-	    return FALSE;
+	  (*info->callbacks->multiple_common) (info, h, abfd,
+					       bfd_link_hash_defined, 0);
 	  /* Fall through.  */
 	case DEF:
 	case DEFW:
@@ -1603,10 +1602,9 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 			if (oldtype == bfd_link_hash_defweak)
 			  abort ();
 
-			if (! ((*info->callbacks->constructor)
-			       (info, c == 'I',
-				h->root.string, abfd, section, value)))
-			  return FALSE;
+			(*info->callbacks->constructor) (info, c == 'I',
+							 h->root.string, abfd,
+							 section, value);
 		      }
 		  }
 	      }
@@ -1675,9 +1673,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	     already had a common definition.  Use the maximum of the
 	     two sizes, and use the section required by the larger symbol.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
-	  if (! ((*info->callbacks->multiple_common)
-		 (info, h, abfd, bfd_link_hash_common, value)))
-	    return FALSE;
+	  (*info->callbacks->multiple_common) (info, h, abfd,
+					       bfd_link_hash_common, value);
 	  if (value > h->u.c.size)
 	    {
 	      unsigned int power;
@@ -1715,9 +1712,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	case CREF:
 	  /* We have found a common definition for a symbol which
 	     was already defined.  */
-	  if (! ((*info->callbacks->multiple_common)
-		 (info, h, abfd, bfd_link_hash_common, value)))
-	    return FALSE;
+	  (*info->callbacks->multiple_common) (info, h, abfd,
+					       bfd_link_hash_common, value);
 	  break;
 
 	case MIND:
@@ -1728,17 +1724,15 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  /* Fall through.  */
 	case MDEF:
 	  /* Handle a multiple definition.  */
-	  if (! ((*info->callbacks->multiple_definition)
-		 (info, h, abfd, section, value)))
-	    return FALSE;
+	  (*info->callbacks->multiple_definition) (info, h,
+						   abfd, section, value);
 	  break;
 
 	case CIND:
 	  /* Create an indirect symbol from an existing common symbol.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
-	  if (! ((*info->callbacks->multiple_common)
-		 (info, h, abfd, bfd_link_hash_indirect, 0)))
-	    return FALSE;
+	  (*info->callbacks->multiple_common) (info, h, abfd,
+					       bfd_link_hash_indirect, 0);
 	  /* Fall through.  */
 	case IND:
 	  if (inh->type == bfd_link_hash_indirect
@@ -1779,9 +1773,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 
 	case SET:
 	  /* Add an entry to a set.  */
-	  if (! (*info->callbacks->add_to_set) (info, h, BFD_RELOC_CTOR,
-						abfd, section, value))
-	    return FALSE;
+	  (*info->callbacks->add_to_set) (info, h, BFD_RELOC_CTOR,
+					  abfd, section, value);
 	  break;
 
 	case WARNC:
@@ -1790,10 +1783,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  if (h->u.i.warning != NULL
 	      && (abfd->flags & BFD_PLUGIN) == 0)
 	    {
-	      if (! (*info->callbacks->warning) (info, h->u.i.warning,
-						 h->root.string, abfd,
-						 NULL, 0))
-		return FALSE;
+	      (*info->callbacks->warning) (info, h->u.i.warning,
+					   h->root.string, abfd, NULL, 0);
 	      /* Only issue a warning once.  */
 	      h->u.i.warning = NULL;
 	    }
@@ -1819,9 +1810,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	       && (h->u.undef.next != NULL || info->hash->undefs_tail == h))
 	      || h->non_ir_ref)
 	    {
-	      if (! (*info->callbacks->warning) (info, string, h->root.string,
-						 hash_entry_bfd (h), NULL, 0))
-		return FALSE;
+	      (*info->callbacks->warning) (info, string, h->root.string,
+					   hash_entry_bfd (h), NULL, 0);
 	      break;
 	    }
 	  /* Fall through.  */
@@ -2412,9 +2402,8 @@ _bfd_generic_reloc_link_order (bfd *abfd,
       if (h == NULL
 	  || ! h->written)
 	{
-	  if (! ((*info->callbacks->unattached_reloc)
-		 (info, link_order->u.reloc.p->u.name, NULL, NULL, 0)))
-	    return FALSE;
+	  (*info->callbacks->unattached_reloc)
+	    (info, link_order->u.reloc.p->u.name, NULL, NULL, 0);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -2448,17 +2437,13 @@ _bfd_generic_reloc_link_order (bfd *abfd,
 	case bfd_reloc_outofrange:
 	  abort ();
 	case bfd_reloc_overflow:
-	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, NULL,
-		  (link_order->type == bfd_section_reloc_link_order
-		   ? bfd_section_name (abfd, link_order->u.reloc.p->u.section)
-		   : link_order->u.reloc.p->u.name),
-		  r->howto->name, link_order->u.reloc.p->addend,
-		  NULL, NULL, 0)))
-	    {
-	      free (buf);
-	      return FALSE;
-	    }
+	  (*info->callbacks->reloc_overflow)
+	    (info, NULL,
+	     (link_order->type == bfd_section_reloc_link_order
+	      ? bfd_section_name (abfd, link_order->u.reloc.p->u.section)
+	      : link_order->u.reloc.p->u.name),
+	     r->howto->name, link_order->u.reloc.p->addend,
+	     NULL, NULL, 0);
 	  break;
 	}
       loc = link_order->offset * bfd_octets_per_byte (abfd);

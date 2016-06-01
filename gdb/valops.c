@@ -1465,22 +1465,28 @@ value_addr (struct value *arg1)
 
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     {
-      /* Copy the value, but change the type from (T&) to (T*).  We
-	 keep the same location information, which is efficient, and
-	 allows &(&X) to get the location containing the reference.
-	 Do the same to its enclosing type for consistency.  */
-      struct type *type_ptr
-        = lookup_pointer_type (TYPE_TARGET_TYPE (type));
-      struct type *enclosing_type
-        = check_typedef (value_enclosing_type (arg1));
-      struct type *enclosing_type_ptr
-        = lookup_pointer_type (TYPE_TARGET_TYPE (enclosing_type));
+      if (value_bits_synthetic_pointer (arg1, value_embedded_offset (arg1),
+	  TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+	arg1 = coerce_ref (arg1);
+      else
+	{
+	  /* Copy the value, but change the type from (T&) to (T*).  We
+	     keep the same location information, which is efficient, and
+	     allows &(&X) to get the location containing the reference.
+	     Do the same to its enclosing type for consistency.  */
+	  struct type *type_ptr
+	    = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+	  struct type *enclosing_type
+	    = check_typedef (value_enclosing_type (arg1));
+	  struct type *enclosing_type_ptr
+	    = lookup_pointer_type (TYPE_TARGET_TYPE (enclosing_type));
 
-      arg2 = value_copy (arg1);
-      deprecated_set_value_type (arg2, type_ptr);
-      set_value_enclosing_type (arg2, enclosing_type_ptr);
+	  arg2 = value_copy (arg1);
+	  deprecated_set_value_type (arg2, type_ptr);
+	  set_value_enclosing_type (arg2, enclosing_type_ptr);
 
-      return arg2;
+	  return arg2;
+	}
     }
   if (TYPE_CODE (type) == TYPE_CODE_FUNC)
     return value_coerce_function (arg1);

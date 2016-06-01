@@ -1,3 +1,23 @@
+2016-06-01  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-nps400-tbl.h: Add operands a,b,u6, 0,b,u6, and
+	0,b,limm to the rflt instruction.
+
+2016-05-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* sh-opc.h (ARCH_SH_HAS_DSP): Make the shifted value an unsigned
+	constant.
+
+2016-05-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/20145
+	* i386-gen.c (cpu_flag_init): Add CPU_ANY_AVX512F_FLAGS,
+	CPU_ANY_AVX512CD_FLAGS, CPU_ANY_AVX512ER_FLAGS,
+	CPU_ANY_AVX512PF_FLAGS, CPU_ANY_AVX512DQ_FLAGS,
+	CPU_ANY_AVX512BW_FLAGS, CPU_ANY_AVX512VL_FLAGS,
+	CPU_ANY_AVX512IFMA_FLAGS and CPU_ANY_AVX512VBMI_FLAGS.
+	* i386-init.h: Regenerated.
+
 2016-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/20145

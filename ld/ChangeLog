@@ -1,3 +1,61 @@
+2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-branch.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-text.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
+2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-syms.s: Rename to...
+	* testsuite/ld-mips-elf/unaligned-data.s: ... this.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.d: Adjust accordingly.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.d: Likewise.
+
+2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/jal-global-overflow-0.d: New test.
+	* testsuite/ld-mips-elf/jal-global-overflow-1.d: New test.
+	* testsuite/ld-mips-elf/jal-local-overflow-0.d: New test.
+	* testsuite/ld-mips-elf/jal-local-overflow-1.d: New test.
+	* testsuite/ld-mips-elf/jal-global-overflow.s: New test source.
+	* testsuite/ld-mips-elf/jal-local-overflow.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-05-28  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (multiple_definition, multiple_common, add_to_set,
+	constructor_callback, warning_callback, undefined_symbol,
+	reloc_overflow, reloc_dangerous, unattached_reloc): Return void.
+	* emultempl/elf32.em: Adjust callback calls.
+
+2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-0.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-1.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-mips16-0.d: New
+	test.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-mips16-1.d: New
+	test.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-micromips-0.d: New
+	test.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-micromips-1.d: New
+	test.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-0.s: New test
+	source.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-1.s: New test
+	source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/reloc-local-overflow.d: New test.
+	* testsuite/ld-mips-elf/reloc-local-overflow.s: Source for the
+	new test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
 2016-05-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/unaligned-jalx-0.d: Fold

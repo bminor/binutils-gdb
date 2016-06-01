@@ -1,3 +1,9 @@
+2016-05-31  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c: Formatting, whitespace throughout.
+	(copy_main): Init newsym->othersym.
+	(parse_symflags): Make len a size_t.  Adjust uses.
+
 2016-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14625

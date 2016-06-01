@@ -958,7 +958,6 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       bfd_vma val;
       const char * msg;
       char * buf;
-      bfd_boolean res;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1121,8 +1120,8 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
               buf = xmalloc (strlen (msg) + strlen (name) + 10);
               sprintf (buf, msg, name);
 
-              (* info->callbacks->warning)
-                (info, buf, name, input_bfd, NULL, rel->r_offset);
+	      (*info->callbacks->warning)
+		(info, buf, name, input_bfd, NULL, rel->r_offset);
 	      free (buf);
             }
 
@@ -1156,11 +1155,9 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			  "code.");
 		  buf = xmalloc (strlen (msg) + 128);
 		  sprintf (buf, msg, phys_addr);
-		  res = (*info->callbacks->warning) (info, buf, name, input_bfd,
-						     input_section, insn_addr);
+		  (*info->callbacks->warning) (info, buf, name, input_bfd,
+					       input_section, insn_addr);
 		  free (buf);
-		  if (! res)
-		    return FALSE;
 		  break;
 		}
 	    }
@@ -1176,11 +1173,9 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                        (long) (relocation + rel->r_addend),
                        insn_page, m68hc11_phys_addr (pinfo, insn_addr),
                        (long) (insn_addr));
-              res = (*info->callbacks->warning)
-		(info, buf, name, input_bfd, input_section, rel->r_offset);
+	      (*info->callbacks->warning) (info, buf, name, input_bfd,
+					   input_section, rel->r_offset);
 	      free (buf);
-	      if (! res)
-                return FALSE;
               break;
             }
 
@@ -1190,12 +1185,9 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                       "normal address space at %04lx");
               buf = xmalloc (strlen (msg) + 128);
               sprintf (buf, msg, phys_page, phys_addr, insn_addr);
-              res = (*info->callbacks->warning)
-		(info, buf, name, input_bfd, input_section, insn_addr);
+	      (*info->callbacks->warning) (info, buf, name, input_bfd,
+					   input_section, insn_addr);
 	      free (buf);
-	      if (! res)
-                return FALSE;
-
               relocation = phys_addr;
               break;
             }
@@ -1235,11 +1227,9 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                       "offset the address in your code");
                   buf = xmalloc (strlen (msg) + 128);
                   sprintf (buf, msg, phys_addr);
-                  res = (*info->callbacks->warning) (info, buf, name, input_bfd,
-						     input_section, insn_addr);
+		  (*info->callbacks->warning) (info, buf, name, input_bfd,
+					       input_section, insn_addr);
 		  free (buf);
-		  if (! res)
-                    return FALSE;
                   break;
                 }
             }
@@ -1262,17 +1252,14 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      if (!((*info->callbacks->reloc_overflow)
-		    (info, NULL, name, howto->name, (bfd_vma) 0,
-		     input_bfd, input_section, rel->r_offset)))
-		return FALSE;
+	      (*info->callbacks->reloc_overflow)
+		(info, NULL, name, howto->name, (bfd_vma) 0,
+		 input_bfd, input_section, rel->r_offset);
 	      break;
 
 	    case bfd_reloc_undefined:
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, name, input_bfd, input_section,
-		     rel->r_offset, TRUE)))
-		return FALSE;
+	      (*info->callbacks->undefined_symbol)
+		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -1292,10 +1279,8 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      /* fall through */
 
 	    common_error:
-	      if (!((*info->callbacks->warning)
-		    (info, msg, name, input_bfd, input_section,
-		     rel->r_offset)))
-		return FALSE;
+	      (*info->callbacks->warning) (info, msg, name, input_bfd,
+					   input_section, rel->r_offset);
 	      break;
 	    }
 	}

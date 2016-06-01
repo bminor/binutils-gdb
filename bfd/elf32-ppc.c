@@ -8567,13 +8567,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     at a symbol not in this object.  */
 	  if (unresolved_reloc)
 	    {
-	      if (! (*info->callbacks->undefined_symbol) (info,
-							  h->root.root.string,
-							  input_bfd,
-							  input_section,
-							  rel->r_offset,
-							  TRUE))
-		return FALSE;
+	      (*info->callbacks->undefined_symbol) (info,
+						    h->root.root.string,
+						    input_bfd,
+						    input_section,
+						    rel->r_offset,
+						    TRUE);
 	      goto copy_reloc;
 	    }
 	  break;
@@ -9509,13 +9508,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		       && (h->root.type == bfd_link_hash_undefweak
 			   || h->root.type == bfd_link_hash_undefined)
 		       && is_branch_reloc (r_type)))
-		{
-		  if (!((*info->callbacks->reloc_overflow)
-			(info, (h ? &h->root : NULL), sym_name,
-			 howto->name, rel->r_addend,
-			 input_bfd, input_section, rel->r_offset)))
-		    return FALSE;
-		}
+		info->callbacks->reloc_overflow
+		  (info, (h ? &h->root : NULL), sym_name, howto->name,
+		   rel->r_addend, input_bfd, input_section, rel->r_offset);
 	    }
 	  else
 	    {

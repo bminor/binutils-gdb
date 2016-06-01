@@ -3733,10 +3733,9 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		  && ELF_ST_VISIBILITY (eh->other) == STV_DEFAULT
 		  && eh->type == STT_PARISC_MILLI)
 		{
-		  if (! info->callbacks->undefined_symbol
-		      (info, eh_name (eh), input_bfd,
-		       input_section, rela->r_offset, FALSE))
-		    return FALSE;
+		  (*info->callbacks->undefined_symbol)
+		    (info, eh_name (eh), input_bfd,
+		     input_section, rela->r_offset, FALSE);
 		  warned_undef = TRUE;
 		}
 	    }
@@ -4311,12 +4310,9 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	    }
 	}
       else
-	{
-	  if (!((*info->callbacks->reloc_overflow)
-		(info, (hh ? &hh->eh.root : NULL), sym_name, howto->name,
-		 (bfd_vma) 0, input_bfd, input_section, rela->r_offset)))
-	    return FALSE;
-	}
+	(*info->callbacks->reloc_overflow)
+	  (info, (hh ? &hh->eh.root : NULL), sym_name, howto->name,
+	   (bfd_vma) 0, input_bfd, input_section, rela->r_offset);
     }
 
   return TRUE;

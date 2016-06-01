@@ -1481,10 +1481,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 the old symbol override the new one as normally happens with
 	 symbols defined in dynamic objects.  */
 
-      if (! ((*info->callbacks->multiple_common)
-	     (info, &h->root, abfd, bfd_link_hash_common, sym->st_size)))
-	return FALSE;
-
+      (*info->callbacks->multiple_common) (info, &h->root, abfd,
+					   bfd_link_hash_common, sym->st_size);
       if (sym->st_size > h->size)
 	h->size = sym->st_size;
 
@@ -1642,9 +1640,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
       /* It would be best if we could set the hash table entry to a
 	 common symbol, but we don't know what to use for the section
 	 or the alignment.  */
-      if (! ((*info->callbacks->multiple_common)
-	     (info, &h->root, abfd, bfd_link_hash_common, sym->st_size)))
-	return FALSE;
+      (*info->callbacks->multiple_common) (info, &h->root, abfd,
+					   bfd_link_hash_common, sym->st_size);
 
       /* If the presumed common symbol in the dynamic object is
 	 larger, pretend that the new symbol has its size.  */
@@ -9235,19 +9232,11 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  && (!h->ref_regular || flinfo->info->gc_sections)
 	  && !elf_link_check_versioned_symbol (flinfo->info, bed, h)
 	  && flinfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
-	{
-	  if (!(flinfo->info->callbacks->undefined_symbol
-		(flinfo->info, h->root.root.string,
-		 h->ref_regular ? NULL : h->root.u.undef.abfd,
-		 NULL, 0,
-		 (flinfo->info->unresolved_syms_in_shared_libs
-		  == RM_GENERATE_ERROR))))
-	    {
-	      bfd_set_error (bfd_error_bad_value);
-	      eoinfo->failed = TRUE;
-	      return FALSE;
-	    }
-	}
+	(*flinfo->info->callbacks->undefined_symbol)
+	  (flinfo->info, h->root.root.string,
+	   h->ref_regular ? NULL : h->root.u.undef.abfd,
+	   NULL, 0,
+	   flinfo->info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR);
 
       /* Strip a global symbol defined in a discarded section.  */
       if (h->indx == -3)
@@ -10761,9 +10750,8 @@ elf_reloc_link_order (bfd *output_bfd,
 	}
       else
 	{
-	  if (! ((*info->callbacks->unattached_reloc)
-		 (info, link_order->u.reloc.p->u.name, NULL, NULL, 0)))
-	    return FALSE;
+	  (*info->callbacks->unattached_reloc)
+	    (info, link_order->u.reloc.p->u.name, NULL, NULL, 0);
 	  indx = 0;
 	}
     }
@@ -10798,13 +10786,9 @@ elf_reloc_link_order (bfd *output_bfd,
 					 link_order->u.reloc.p->u.section);
 	  else
 	    sym_name = link_order->u.reloc.p->u.name;
-	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, NULL, sym_name, howto->name, addend, NULL,
-		  NULL, (bfd_vma) 0)))
-	    {
-	      free (buf);
-	      return FALSE;
-	    }
+	  (*info->callbacks->reloc_overflow) (info, NULL, sym_name,
+					      howto->name, addend, NULL, NULL,
+					      (bfd_vma) 0);
 	  break;
 	}
 

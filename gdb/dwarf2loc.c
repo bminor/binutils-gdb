@@ -2061,6 +2061,66 @@ get_frame_address_in_block_wrapper (void *baton)
   return get_frame_address_in_block ((struct frame_info *) baton);
 }
 
+/* Fetch a DW_AT_const_value through a synthetic pointer.  */
+
+static struct value *
+fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
+					  struct dwarf2_per_cu_data *per_cu,
+					  struct type *type)
+{
+  struct value *result = NULL;
+  struct obstack temp_obstack;
+  struct cleanup *cleanup;
+  const gdb_byte *bytes;
+  LONGEST len;
+
+  obstack_init (&temp_obstack);
+  cleanup = make_cleanup_obstack_free (&temp_obstack);
+  bytes = dwarf2_fetch_constant_bytes (die, per_cu, &temp_obstack, &len);
+
+  if (bytes != NULL)
+    {
+      if (byte_offset >= 0
+	  && byte_offset + TYPE_LENGTH (TYPE_TARGET_TYPE (type)) <= len)
+	{
+	  bytes += byte_offset;
+	  result = value_from_contents (TYPE_TARGET_TYPE (type), bytes);
+	}
+      else
+	invalid_synthetic_pointer ();
+    }
+  else
+    result = allocate_optimized_out_value (TYPE_TARGET_TYPE (type));
+
+  do_cleanups (cleanup);
+
+  return result;
+}
+
+/* Fetch the value pointed to by a synthetic pointer.  */
+
+static struct value *
+indirect_synthetic_pointer (sect_offset die, LONGEST byte_offset,
+			    struct dwarf2_per_cu_data *per_cu,
+			    struct frame_info *frame, struct type *type)
+{
+  /* Fetch the location expression of the DIE we're pointing to.  */
+  struct dwarf2_locexpr_baton baton
+    = dwarf2_fetch_die_loc_sect_off (die, per_cu,
+				     get_frame_address_in_block_wrapper, frame);
+
+  /* If pointed-to DIE has a DW_AT_location, evaluate it and return the
+     resulting value.  Otherwise, it may have a DW_AT_const_value instead,
+     or it may've been optimized out.  */
+  if (baton.data != NULL)
+    return dwarf2_evaluate_loc_desc_full (TYPE_TARGET_TYPE (type), frame,
+					  baton.data, baton.size, baton.per_cu,
+					  byte_offset);
+  else
+    return fetch_const_value_from_synthetic_pointer (die, byte_offset, per_cu,
+						     type);
+}
+
 /* An implementation of an lval_funcs method to indirect through a
    pointer.  This handles the synthetic pointer case when needed.  */
 
@@ -2115,6 +2175,7 @@ indirect_pieced_value (struct value *value)
       break;
     }
 
+  gdb_assert (piece != NULL);
   frame = get_selected_frame (_("No frame selected."));
 
   /* This is an offset requested by GDB, such as value subscripts.
@@ -2132,43 +2193,40 @@ indirect_pieced_value (struct value *value)
 					TYPE_LENGTH (type), byte_order);
   byte_offset += piece->v.ptr.offset;
 
-  gdb_assert (piece);
-  baton
-    = dwarf2_fetch_die_loc_sect_off (piece->v.ptr.die, c->per_cu,
-				     get_frame_address_in_block_wrapper,
-				     frame);
+  return indirect_synthetic_pointer (piece->v.ptr.die, byte_offset, c->per_cu,
+				     frame, type);
+}
 
-  if (baton.data != NULL)
-    return dwarf2_evaluate_loc_desc_full (TYPE_TARGET_TYPE (type), frame,
-					  baton.data, baton.size, baton.per_cu,
-					  byte_offset);
+/* Implementation of the coerce_ref method of lval_funcs for synthetic C++
+   references.  */
 
-  {
-    struct obstack temp_obstack;
-    struct cleanup *cleanup;
-    const gdb_byte *bytes;
-    LONGEST len;
-    struct value *result;
+static struct value *
+coerce_pieced_ref (const struct value *value)
+{
+  struct type *type = check_typedef (value_type (value));
 
-    obstack_init (&temp_obstack);
-    cleanup = make_cleanup_obstack_free (&temp_obstack);
+  if (value_bits_synthetic_pointer (value, value_embedded_offset (value),
+				    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+    {
+      const struct piece_closure *closure
+	= (struct piece_closure *) value_computed_closure (value);
+      struct frame_info *frame
+	= get_selected_frame (_("No frame selected."));
 
-    bytes = dwarf2_fetch_constant_bytes (piece->v.ptr.die, c->per_cu,
-					 &temp_obstack, &len);
-    if (bytes == NULL)
-      result = allocate_optimized_out_value (TYPE_TARGET_TYPE (type));
-    else
-      {
-	if (byte_offset < 0
-	    || byte_offset + TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > len)
-	  invalid_synthetic_pointer ();
-	bytes += byte_offset;
-	result = value_from_contents (TYPE_TARGET_TYPE (type), bytes);
-      }
+      /* gdb represents synthetic pointers as pieced values with a single
+	 piece.  */
+      gdb_assert (closure != NULL);
+      gdb_assert (closure->n_pieces == 1);
 
-    do_cleanups (cleanup);
-    return result;
-  }
+      return indirect_synthetic_pointer (closure->pieces->v.ptr.die,
+					 closure->pieces->v.ptr.offset,
+					 closure->per_cu, frame, type);
+    }
+  else
+    {
+      /* Else: not a synthetic reference; do nothing.  */
+      return NULL;
+    }
 }
 
 static void *
@@ -2206,7 +2264,7 @@ static const struct lval_funcs pieced_value_funcs = {
   read_pieced_value,
   write_pieced_value,
   indirect_pieced_value,
-  NULL,	/* coerce_ref */
+  coerce_pieced_ref,
   check_pieced_synthetic_pointer,
   copy_pieced_value_closure,
   free_pieced_value_closure

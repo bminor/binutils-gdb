@@ -1,3 +1,129 @@
+2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (b_reloc_p): New function.
+	(_bfd_mips_elf_relocate_section) <bfd_reloc_outofrange>: Handle
+	branch relocations.
+
+2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): <R_MIPS16_26>
+	<R_MIPS_26, R_MICROMIPS_26_S1>: Drop the region bits of the
+	reloc location from calculation, treat the addend as signed with
+	local non-section symbols and enable overflow detection.
+
+2016-05-28  Alan Modra  <amodra@gmail.com>
+
+	* aoutx.h: Adjust linker callback calls throughout file,
+	removing dead code.
+	* bout.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* coff-h8500.c: Likewise.
+	* coff-i960.c: Likewise.
+	* coff-mcore.c: Likewise.
+	* coff-mips.c: Likewise.
+	* coff-ppc.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-tic80.c: Likewise.
+	* coff-w65.c: Likewise.
+	* coff-z80.c: Likewise.
+	* coff-z8k.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* cofflink.c: Likewise.
+	* ecoff.c: Likewise.
+	* elf-bfd.h: Likewise.
+	* elf-m10200.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf32-arc.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-avr.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-cr16c.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-crx.c: Likewise.
+	* elf32-d10v.c: Likewise.
+	* elf32-epiphany.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-ft32.c: Likewise.
+	* elf32-h8300.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-i860.c: Likewise.
+	* elf32-ip2k.c: Likewise.
+	* elf32-iq2000.c: Likewise.
+	* elf32-lm32.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mep.c: Likewise.
+	* elf32-metag.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-moxie.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-mt.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-or1k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-spu.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-visium.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* linker.c: Likewise.
+	* pdp11.c: Likewise.
+	* pe-mips.c: Likewise.
+	* reloc.c: Likewise.
+	* reloc16.c: Likewise.
+	* simple.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* xcofflink.c: Likewise.
+	* elf32-rl78.c (get_symbol_value, get_romstart, get_ramstart): Delete
+	status param.  Adjust calls to these and linker callbacks throughout.
+	* elf32-rx.c: (get_symbol_value, get_gp, get_romstart,
+	get_ramstart): Delete status param.  Adjust calls to these and
+	linker callbacks throughout.
+
+2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation) <R_MIPS16_26>
+	<R_MIPS_26, R_MICROMIPS_26_S1>: Include the addend in JALX's
+	target alignment verification.
+
+2016-05-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Also use the
+	section name if `bfd_elf_string_from_elf_section' returns an
+	empty string.
+
 2016-05-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_relocate_section)

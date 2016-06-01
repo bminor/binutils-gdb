@@ -348,6 +348,8 @@ remote_fileio_ctrl_c_signal_handler (int signo)
 {
   remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
   remote_fio_ctrl_c_flag = 1;
+  /* Wake up interruptible_select.  */
+  quit_serial_event_set ();
 }
 
 static void

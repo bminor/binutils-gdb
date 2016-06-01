@@ -1582,7 +1582,6 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	asection *s;
 	bfd_size_type sz;
 	char *msg;
-	bfd_boolean ret;
 
 	if (is->flags.just_syms)
 	  continue;
@@ -1598,11 +1597,9 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	  einfo ("%F%B: Can't read contents of section .gnu.warning: %E\n",
 		 is->the_bfd);
 	msg[sz] = '\0';
-	ret = link_info.callbacks->warning (&link_info, msg,
-					    (const char *) NULL,
-					    is->the_bfd, (asection *) NULL,
-					    (bfd_vma) 0);
-	ASSERT (ret);
+	(*link_info.callbacks->warning) (&link_info, msg,
+					 (const char *) NULL, is->the_bfd,
+					 (asection *) NULL, (bfd_vma) 0);
 	free (msg);
 
 	/* Clobber the section size, so that we don't waste space
