@@ -34,53 +34,56 @@ Disassembly of section .text:
   64:	4814 fc00           	encode1\.f	r0,r0,0,0x20
   68:	3c2e 150a           	rflt	r10,r12,r20
   6c:	3e2e 7500 1234 5678 	rflt	r0,0x12345678,r20
-  74:	3e2e 137e           	rflt	0,r14,r13
-  78:	3e2e 72be ffff ffff 	rflt	0,0xffffffff,r10
-  80:	3d6e 0044           	rflt	r4,r5,0x1
-  84:	3e6e 7083 1234 5678 	rflt	r3,0x12345678,0x2
-  8c:	396e 013e           	rflt	0,r1,0x4
-  90:	3e6e 707e ffff ffff 	rflt	0,0xffffffff,0x1
-  98:	3a33 00c1           	crc16	r1,r2,r3
-  9c:	3e33 7144 ffff ffff 	crc16	r4,0xffffffff,r5
-  a4:	3f33 0f86 ffff ffff 	crc16	r6,r7,0xffffffff
-  ac:	3e33 7f88 ffff ffff 	crc16	r8,0xffffffff,0xffffffff
-  b4:	3933 12be           	crc16	0,r9,r10
-  b8:	3e33 72fe ffff ffff 	crc16	0,0xffffffff,r11
-  c0:	3c33 1fbe ffff ffff 	crc16	0,r12,0xffffffff
-  c8:	3e73 1fcd           	crc16	r13,r14,0x3f
-  cc:	3e73 7fcf ffff ffff 	crc16	r15,0xffffffff,0x3f
-  d4:	3873 2ffe           	crc16	0,r16,0x3f
-  d8:	3e73 7ffe ffff ffff 	crc16	0,0xffffffff,0x3f
-  e0:	3a33 80c1           	crc16\.r	r1,r2,r3
-  e4:	3e33 f144 ffff ffff 	crc16\.r	r4,0xffffffff,r5
-  ec:	3f33 8f86 ffff ffff 	crc16\.r	r6,r7,0xffffffff
-  f4:	3e33 ff88 ffff ffff 	crc16\.r	r8,0xffffffff,0xffffffff
-  fc:	3933 92be           	crc16\.r	0,r9,r10
- 100:	3e33 f2fe ffff ffff 	crc16\.r	0,0xffffffff,r11
- 108:	3c33 9fbe ffff ffff 	crc16\.r	0,r12,0xffffffff
- 110:	3e73 9fcd           	crc16\.r	r13,r14,0x3f
- 114:	3e73 ffcf ffff ffff 	crc16\.r	r15,0xffffffff,0x3f
- 11c:	3873 affe           	crc16\.r	0,r16,0x3f
- 120:	3e73 fffe ffff ffff 	crc16\.r	0,0xffffffff,0x3f
- 128:	3a34 00c1           	crc32	r1,r2,r3
- 12c:	3e34 7144 ffff ffff 	crc32	r4,0xffffffff,r5
- 134:	3f34 0f86 ffff ffff 	crc32	r6,r7,0xffffffff
- 13c:	3e34 7f88 ffff ffff 	crc32	r8,0xffffffff,0xffffffff
- 144:	3934 12be           	crc32	0,r9,r10
- 148:	3e34 72fe ffff ffff 	crc32	0,0xffffffff,r11
- 150:	3c34 1fbe ffff ffff 	crc32	0,r12,0xffffffff
- 158:	3e74 1fcd           	crc32	r13,r14,0x3f
- 15c:	3e74 7fcf ffff ffff 	crc32	r15,0xffffffff,0x3f
- 164:	3874 2ffe           	crc32	0,r16,0x3f
- 168:	3e74 7ffe ffff ffff 	crc32	0,0xffffffff,0x3f
- 170:	3a34 80c1           	crc32\.r	r1,r2,r3
- 174:	3e34 f144 ffff ffff 	crc32\.r	r4,0xffffffff,r5
- 17c:	3f34 8f86 ffff ffff 	crc32\.r	r6,r7,0xffffffff
- 184:	3e34 ff88 ffff ffff 	crc32\.r	r8,0xffffffff,0xffffffff
- 18c:	3934 92be           	crc32\.r	0,r9,r10
- 190:	3e34 f2fe ffff ffff 	crc32\.r	0,0xffffffff,r11
- 198:	3c34 9fbe ffff ffff 	crc32\.r	0,r12,0xffffffff
- 1a0:	3e74 9fcd           	crc32\.r	r13,r14,0x3f
- 1a4:	3e74 ffcf ffff ffff 	crc32\.r	r15,0xffffffff,0x3f
- 1ac:	3874 affe           	crc32\.r	0,r16,0x3f
- 1b0:	3e74 fffe ffff ffff 	crc32\.r	0,0xffffffff,0x3f
+  74:	3f2e 0f86 ffff ffff 	rflt	r6,r7,0xffffffff
+  7c:	3e2e 7f88 ffff ffff 	rflt	r8,0xffffffff,0xffffffff
+  84:	3e2e 137e           	rflt	0,r14,r13
+  88:	3e2e 72be ffff ffff 	rflt	0,0xffffffff,r10
+  90:	3c2e 1fbe ffff ffff 	rflt	0,r12,0xffffffff
+  98:	3d6e 0044           	rflt	r4,r5,0x1
+  9c:	3e6e 7083 1234 5678 	rflt	r3,0x12345678,0x2
+  a4:	396e 013e           	rflt	0,r1,0x4
+  a8:	3e6e 707e ffff ffff 	rflt	0,0xffffffff,0x1
+  b0:	3a33 00c1           	crc16	r1,r2,r3
+  b4:	3e33 7144 ffff ffff 	crc16	r4,0xffffffff,r5
+  bc:	3f33 0f86 ffff ffff 	crc16	r6,r7,0xffffffff
+  c4:	3e33 7f88 ffff ffff 	crc16	r8,0xffffffff,0xffffffff
+  cc:	3933 12be           	crc16	0,r9,r10
+  d0:	3e33 72fe ffff ffff 	crc16	0,0xffffffff,r11
+  d8:	3c33 1fbe ffff ffff 	crc16	0,r12,0xffffffff
+  e0:	3e73 1fcd           	crc16	r13,r14,0x3f
+  e4:	3e73 7fcf ffff ffff 	crc16	r15,0xffffffff,0x3f
+  ec:	3873 2ffe           	crc16	0,r16,0x3f
+  f0:	3e73 7ffe ffff ffff 	crc16	0,0xffffffff,0x3f
+  f8:	3a33 80c1           	crc16.r	r1,r2,r3
+  fc:	3e33 f144 ffff ffff 	crc16.r	r4,0xffffffff,r5
+ 104:	3f33 8f86 ffff ffff 	crc16.r	r6,r7,0xffffffff
+ 10c:	3e33 ff88 ffff ffff 	crc16.r	r8,0xffffffff,0xffffffff
+ 114:	3933 92be           	crc16.r	0,r9,r10
+ 118:	3e33 f2fe ffff ffff 	crc16.r	0,0xffffffff,r11
+ 120:	3c33 9fbe ffff ffff 	crc16.r	0,r12,0xffffffff
+ 128:	3e73 9fcd           	crc16.r	r13,r14,0x3f
+ 12c:	3e73 ffcf ffff ffff 	crc16.r	r15,0xffffffff,0x3f
+ 134:	3873 affe           	crc16.r	0,r16,0x3f
+ 138:	3e73 fffe ffff ffff 	crc16.r	0,0xffffffff,0x3f
+ 140:	3a34 00c1           	crc32	r1,r2,r3
+ 144:	3e34 7144 ffff ffff 	crc32	r4,0xffffffff,r5
+ 14c:	3f34 0f86 ffff ffff 	crc32	r6,r7,0xffffffff
+ 154:	3e34 7f88 ffff ffff 	crc32	r8,0xffffffff,0xffffffff
+ 15c:	3934 12be           	crc32	0,r9,r10
+ 160:	3e34 72fe ffff ffff 	crc32	0,0xffffffff,r11
+ 168:	3c34 1fbe ffff ffff 	crc32	0,r12,0xffffffff
+ 170:	3e74 1fcd           	crc32	r13,r14,0x3f
+ 174:	3e74 7fcf ffff ffff 	crc32	r15,0xffffffff,0x3f
+ 17c:	3874 2ffe           	crc32	0,r16,0x3f
+ 180:	3e74 7ffe ffff ffff 	crc32	0,0xffffffff,0x3f
+ 188:	3a34 80c1           	crc32.r	r1,r2,r3
+ 18c:	3e34 f144 ffff ffff 	crc32.r	r4,0xffffffff,r5
+ 194:	3f34 8f86 ffff ffff 	crc32.r	r6,r7,0xffffffff
+ 19c:	3e34 ff88 ffff ffff 	crc32.r	r8,0xffffffff,0xffffffff
+ 1a4:	3934 92be           	crc32.r	0,r9,r10
+ 1a8:	3e34 f2fe ffff ffff 	crc32.r	0,0xffffffff,r11
+ 1b0:	3c34 9fbe ffff ffff 	crc32.r	0,r12,0xffffffff
+ 1b8:	3e74 9fcd           	crc32.r	r13,r14,0x3f
+ 1bc:	3e74 ffcf ffff ffff 	crc32.r	r15,0xffffffff,0x3f
+ 1c4:	3874 affe           	crc32.r	0,r16,0x3f
+ 1c8:	3e74 fffe ffff ffff 	crc32.r	0,0xffffffff,0x3f

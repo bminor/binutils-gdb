@@ -1,3 +1,9 @@
+2016-06-01  Graham Markall  <graham.markall@embecosm.com>
+
+	* testsuite/gas/arc/nps-400-1.s: Add rflt variants with
+	operands of types a,b,u6, 0,b,u6, and 0,b,limm.
+	* testsuite/gas/arc/nps-400-1.d: Likewise.
+
 2016-05-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/20145

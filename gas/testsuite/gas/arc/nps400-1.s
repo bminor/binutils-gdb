@@ -42,8 +42,11 @@
         /* rflt */
         rflt           r10,r12,r20
         rflt           r0,0x12345678,r20
+        rflt           r6,r7,0xffffffff
+        rflt           r8,0xffffffff,0xffffffff
         rflt           0,r14,r13
         rflt           0,0xffffffff,r10
+        rflt           0,r12,0xffffffff
         rflt           r4,r5,0x1
         rflt           r3,0x12345678,0x2
         rflt           0,r1,0x4
