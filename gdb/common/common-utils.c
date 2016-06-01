@@ -100,6 +100,12 @@ xfree (void *ptr)
     free (ptr);		/* ARI: free */
 }
 
+void
+xmalloc_failed (size_t size)
+{
+  malloc_failure (size);
+}
+
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
 

@@ -1,3 +1,8 @@
+2016-06-01  Nick Clifton  <nickc@redhat.com>
+
+	* common/common-utils.c (xmalloc_failed): New function.  Provided
+	so that the version in libiberty is not linked in.
+
 2016-06-01  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* infcmd.c (skip_finish_frames): New.
