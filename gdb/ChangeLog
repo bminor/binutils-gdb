@@ -1,3 +1,9 @@
+2016-06-01  Yao Qi  <yao.qi@linaro.org>
+
+	PR remote/19998
+	* remote-fileio.c (remote_fileio_ctrl_c_signal_handler): Call
+	quit_serial_event_set.
+
 2016-06-01  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.11.1 released.
