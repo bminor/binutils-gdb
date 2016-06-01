@@ -3842,7 +3842,7 @@ value_slice_1 (struct value *array, int lowbound, int length, int call_count)
   if (call_count == 1)
     {
       range_type = TYPE_INDEX_TYPE (array_type);
-      slice_range_size = elem_count;
+      slice_range_size = ary_low_bound + elem_count - 1;
 
       /* Check if the array bounds are valid.  */
       if (get_discrete_bounds (range_type, &ary_low_bound, &ary_high_bound) < 0)
@@ -3854,7 +3854,7 @@ value_slice_1 (struct value *array, int lowbound, int length, int call_count)
   else
     {
       range_type = TYPE_INDEX_TYPE (TYPE_TARGET_TYPE (array_type));
-      slice_range_size = (ary_low_bound + row_count - 1) * (elem_count);
+      slice_range_size = ary_low_bound + (row_count * elem_count) - 1;
       ary_low_bound = TYPE_LOW_BOUND (range_type);
     }
 

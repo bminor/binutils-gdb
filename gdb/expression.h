@@ -153,13 +153,16 @@ extern void dump_raw_expression (struct expression *,
 extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
 /* In an OP_RANGE expression, either bound can be provided by the user, or not.
-   This enumeration type is to identify this.  */
+   In addition to this, the user can also specify a stride value to indicated
+   only certain elements of the array.  This enumeration type is to identify
+   this.  */
 
 enum range_type
   {
     SUBARRAY_NONE_BOUND = 0x0,		/* "( : )"  */
     SUBARRAY_LOW_BOUND = 0x1,		/* "(low:)"  */
-    SUBARRAY_HIGH_BOUND = 0x2		/* "(:high)"  */
+    SUBARRAY_HIGH_BOUND = 0x2,		/* "(:high)"  */
+    SUBARRAY_STRIDE = 0x4		/* "(::stride)"  */
   };
 
 #endif /* !defined (EXPRESSION_H) */

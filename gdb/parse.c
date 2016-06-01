@@ -1018,6 +1018,9 @@ operator_length_standard (const struct expression *expr, int endpos,
       if ((range_type & SUBARRAY_HIGH_BOUND) == SUBARRAY_HIGH_BOUND)
 	args++;
 
+      if ((range_type & SUBARRAY_STRIDE) == SUBARRAY_STRIDE)
+	args++;
+
       break;
 
     default:
