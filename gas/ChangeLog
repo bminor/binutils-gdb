@@ -1,3 +1,13 @@
+2016-06-01  Peter Bergner <bergner@vnet.ibm.com>
+
+	Backport from master
+	2016-05-26  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/altivec3.d <vmsumudm>: Add test.
+	* testsuite/gas/ppc/altivec3.s: Likewise.
+	* testsuite/gas/ppc/power9.d <addex[.], lwzmx, vmsumudm>: Add tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
 2016-05-11  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/20047

@@ -354,6 +354,8 @@ power9:
 	rmieg       30
 	ldmx        10,0,15
 	ldmx        10,3,15
+	lwzmx       11,0,16
+	lwzmx       11,3,16
 	stop
 	wait
 	wait        0
@@ -372,3 +374,10 @@ power9:
 	xsmaxcdp    35,45,55
 	xsminjdp    36,46,56
 	xsmaxjdp    37,47,57
+	vmsumudm    20,21,22,23
+	addex       11,12,13,0
+	addex       11,12,13,1
+	addex       11,12,13,2
+	addex.      21,22,23,0
+	addex.      21,22,23,1
+	addex.      21,22,23,2
