@@ -1,0 +1,632 @@
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index 3184e57..99dbbce 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -2058,9 +2058,11 @@ extern void _bfd_elf_strtab_delref
+ extern unsigned int _bfd_elf_strtab_refcount
+   (struct elf_strtab_hash *, bfd_size_type);
+ extern void _bfd_elf_strtab_clear_all_refs
+-  (struct elf_strtab_hash *tab);
+-extern void _bfd_elf_strtab_restore_size
+-  (struct elf_strtab_hash *, bfd_size_type);
++  (struct elf_strtab_hash *);
++extern void *_bfd_elf_strtab_save
++  (struct elf_strtab_hash *);
++extern void _bfd_elf_strtab_restore
++  (struct elf_strtab_hash *, void *);
+ extern bfd_size_type _bfd_elf_strtab_size
+   (struct elf_strtab_hash *);
+ extern bfd_size_type _bfd_elf_strtab_offset
+diff --git a/bfd/elf-strtab.c b/bfd/elf-strtab.c
+index ca8ac33..19b0ad8 100644
+--- a/bfd/elf-strtab.c
++++ b/bfd/elf-strtab.c
+@@ -215,16 +215,45 @@ _bfd_elf_strtab_clear_all_refs (struct elf_strtab_hash *tab)
+     tab->array[idx]->refcount = 0;
+ }
+ 
+-/* Downsizes strtab.  Entries from IDX up to the current size are
+-   removed from the array.  */
++/* Save strtab refcounts prior to adding --as-needed library.  */
++
++struct strtab_save
++{
++  bfd_size_type size;
++  unsigned int refcount[1];
++};
++
++void *
++_bfd_elf_strtab_save (struct elf_strtab_hash *tab)
++{
++  struct strtab_save *save;
++  bfd_size_type idx, size;
++
++  size = sizeof (*save) + (tab->size - 1) * sizeof (save->refcount[0]);
++  save = bfd_malloc (size);
++  if (save == NULL)
++    return save;
++
++  save->size = tab->size;
++  for (idx = 1; idx < tab->size; idx++)
++    save->refcount[idx] = tab->array[idx]->refcount;
++  return save;
++}
++
++/* Restore strtab refcounts on finding --as-needed library not needed.  */
++
+ void
+-_bfd_elf_strtab_restore_size (struct elf_strtab_hash *tab, bfd_size_type idx)
++_bfd_elf_strtab_restore (struct elf_strtab_hash *tab, void *buf)
+ {
+-  bfd_size_type curr_size = tab->size;
++  bfd_size_type idx, curr_size = tab->size;
++  struct strtab_save *save = (struct strtab_save *) buf;
+ 
+   BFD_ASSERT (tab->sec_size == 0);
+-  BFD_ASSERT (idx <= curr_size);
+-  tab->size = idx;
++  BFD_ASSERT (save->size <= curr_size);
++  tab->size = save->size;
++  for (idx = 1; idx < save->size; ++idx)
++    tab->array[idx]->refcount = save->refcount[idx];
++
+   for (; idx < curr_size; ++idx)
+     {
+       /* We don't remove entries from the hash table, just set their
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index 93e7dd2..45886fb 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -1202,21 +1202,20 @@ _bfd_elf_merge_symbol (bfd *abfd,
+   oldfunc = (h->type != STT_NOTYPE
+ 	     && bed->is_function_type (h->type));
+ 
+-  /* When we try to create a default indirect symbol from the dynamic
+-     definition with the default version, we skip it if its type and
+-     the type of existing regular definition mismatch.  */
++  /* If creating a default indirect symbol ("foo" or "foo@") from a
++     dynamic versioned definition ("foo@@") skip doing so if there is
++     an existing regular definition with a different type.  We don't
++     want, for example, a "time" variable in the executable overriding
++     a "time" function in a shared library.  */
+   if (pold_alignment == NULL
+       && newdyn
+       && newdef
+       && !olddyn
+-      && (((olddef || h->root.type == bfd_link_hash_common)
+-	   && ELF_ST_TYPE (sym->st_info) != h->type
+-	   && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+-	   && h->type != STT_NOTYPE
+-	   && !(newfunc && oldfunc))
+-	  || (olddef
+-	      && ((h->type == STT_GNU_IFUNC)
+-		  != (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)))))
++      && (olddef || h->root.type == bfd_link_hash_common)
++      && ELF_ST_TYPE (sym->st_info) != h->type
++      && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
++      && h->type != STT_NOTYPE
++      && !(newfunc && oldfunc))
+     {
+       *skip = TRUE;
+       return TRUE;
+@@ -1781,6 +1780,31 @@ _bfd_elf_add_default_symbol (bfd *abfd,
+   if (skip)
+     goto nondefault;
+ 
++  if (hi->def_regular)
++    {
++      /* If the undecorated symbol will have a version added by a
++	 script different to H, then don't indirect to/from the
++	 undecorated symbol.  This isn't ideal because we may not yet
++	 have seen symbol versions, if given by a script on the
++	 command line rather than via --version-script.  */
++      if (hi->verinfo.vertree == NULL && info->version_info != NULL)
++	{
++	  bfd_boolean hide;
++
++	  hi->verinfo.vertree
++	    = bfd_find_version_for_sym (info->version_info,
++					hi->root.root.string, &hide);
++	  if (hi->verinfo.vertree != NULL && hide)
++	    {
++	      (*bed->elf_backend_hide_symbol) (info, hi, TRUE);
++	      goto nondefault;
++	    }
++	}
++      if (hi->verinfo.vertree != NULL
++	  && strcmp (p + 1 + (p[1] == '@'), hi->verinfo.vertree->name) != 0)
++	goto nondefault;
++    }
++
+   if (! override)
+     {
+       /* Add the default symbol if not performing a relocatable link.  */
+@@ -3591,8 +3615,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
+   void *old_ent;
+   struct bfd_link_hash_entry *old_undefs = NULL;
+   struct bfd_link_hash_entry *old_undefs_tail = NULL;
+-  long old_dynsymcount = 0;
+-  bfd_size_type old_dynstr_size = 0;
++  void *old_strtab = NULL;
+   size_t tabsize = 0;
+   asection *s;
+   bfd_boolean just_syms;
+@@ -4036,8 +4059,9 @@ error_free_dyn:
+       old_table = htab->root.table.table;
+       old_size = htab->root.table.size;
+       old_count = htab->root.table.count;
+-      old_dynsymcount = htab->dynsymcount;
+-      old_dynstr_size = _bfd_elf_strtab_size (htab->dynstr);
++      old_strtab = _bfd_elf_strtab_save (htab->dynstr);
++      if (old_strtab == NULL)
++	goto error_free_vers;
+ 
+       for (i = 0; i < htab->root.table.size; i++)
+ 	{
+@@ -4762,7 +4786,9 @@ error_free_dyn:
+       memcpy (htab->root.table.table, old_tab, tabsize);
+       htab->root.undefs = old_undefs;
+       htab->root.undefs_tail = old_undefs_tail;
+-      _bfd_elf_strtab_restore_size (htab->dynstr, old_dynstr_size);
++      _bfd_elf_strtab_restore (htab->dynstr, old_strtab);
++      free (old_strtab);
++      old_strtab = NULL;
+       for (i = 0; i < htab->root.table.size; i++)
+ 	{
+ 	  struct bfd_hash_entry *p;
+@@ -4775,9 +4801,6 @@ error_free_dyn:
+ 	      h = (struct elf_link_hash_entry *) p;
+ 	      if (h->root.type == bfd_link_hash_warning)
+ 		h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	      if (h->dynindx >= old_dynsymcount
+-		  && h->dynstr_index < old_dynstr_size)
+-		_bfd_elf_strtab_delref (htab->dynstr, h->dynstr_index);
+ 
+ 	      /* Preserve the maximum alignment and size for common
+ 		 symbols even if this dynamic lib isn't on DT_NEEDED
+@@ -5099,6 +5122,8 @@ error_free_dyn:
+  error_free_vers:
+   if (old_tab != NULL)
+     free (old_tab);
++  if (old_strtab != NULL)
++    free (old_strtab);
+   if (nondeflt_vers != NULL)
+     free (nondeflt_vers);
+   if (extversym != NULL)
+@@ -9396,6 +9421,15 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+ 	 foo is used with no version, then we add an indirect symbol
+ 	 foo which points to foo@@GNU_1.2.  We ignore these symbols,
+ 	 since the indirected symbol is already in the hash table.  */
++      if (h->dynindx != -1)
++	{
++	  (*_bfd_error_handler)
++	    (_("%B: incompatible versioned symbol `%s'"),
++	     flinfo->output_bfd, h->root.root.string);
++	  bfd_set_error (bfd_error_bad_value);
++	  eoinfo->failed = TRUE;
++	  return FALSE;
++	}
+       return TRUE;
+     }
+ 
+diff --git a/ld/testsuite/ld-ifunc/ifunc.exp b/ld/testsuite/ld-ifunc/ifunc.exp
+index e860f36..71c98a0 100644
+--- a/ld/testsuite/ld-ifunc/ifunc.exp
++++ b/ld/testsuite/ld-ifunc/ifunc.exp
+@@ -350,23 +350,39 @@ if { $verbose < 1 } {
+     remote_file host delete "tmpdir/static_nonifunc_prog"
+ }
+ 
+-run_cc_link_tests [list \
++run_ld_link_tests [list \
+     [list \
+-	"Build libpr16467a.so" \
+-	"-shared -Wl,--version-script=pr16467a.map" \
++	"Build pr16467b.o pr16467c.o pr16467d.o" \
++	"" \
++	"" \
++	"" \
++	{ pr16467b.c pr16467c.c pr16467d.c } \
++	{} \
++	"" \
+ 	"-fPIC" \
++    ] \
++    [list \
++	"Build libpr16467a.so" \
++	"-shared --version-script=pr16467a.map" \
++	"" \
++	"" \
+ 	{ pr16467a.c } \
+ 	{} \
+ 	"libpr16467a.so" \
++	"-fPIC" \
+     ] \
+     [list \
+-	"Build libpr16467b.a" \
++	"Build pr16467a" \
++	"tmpdir/pr16467c.o tmpdir/pr16467b.o tmpdir/libpr16467a.so" \
+ 	"" \
+-	"-fPIC" \
+-	{ pr16467b.c } \
+-	{} \
+-	"libpr16467b.a" \
++	"" \
++	{ dummy.c } \
++	{ { ld pr16467a.l } } \
++	"pr16467a" \
+     ] \
++]
++
++run_cc_link_tests [list \
+     [list \
+ 	"Build libpr16467b.so" \
+ 	"-shared tmpdir/pr16467b.o tmpdir/libpr16467a.so \
+@@ -377,12 +393,21 @@ run_cc_link_tests [list \
+ 	"libpr16467b.so" \
+     ] \
+     [list \
+-	"Build libpr16467c.a" \
+-	"" \
+-	"" \
+-	{ pr16467c.c } \
++	"Build libpr16467d.so" \
++	"-shared tmpdir/pr16467d.o tmpdir/libpr16467a.so \
++	 -Wl,--version-script=pr16467b.map" \
++	"-fPIC" \
++	{ dummy.c } \
+ 	{} \
+-	"libpr16467c.a" \
++	"libpr16467d.so" \
++    ] \
++    [list \
++	"Build libpr20159.so" \
++	"-shared" \
++	"-fPIC" \
++	{ pr20159b.c } \
++	{} \
++	"libpr20159.so" \
+     ] \
+ ]
+ 
+@@ -432,15 +457,31 @@ run_cc_link_tests [list \
+ 
+ run_ld_link_exec_tests [] [list \
+     [list \
+-	"Run pr16467" \
++	"Run pr16467a" \
+ 	"tmpdir/pr16467c.o tmpdir/libpr16467b.so tmpdir/libpr16467a.so" \
+ 	"" \
+ 	{ dummy.c } \
+-	"pr16467" \
++	"pr16467a" \
+ 	"pr16467.out" \
+ 	"" \
+     ] \
+     [list \
++	"Run pr16467d" \
++	"tmpdir/pr16467c.o tmpdir/libpr16467d.so tmpdir/libpr16467a.so" \
++	"" \
++	{ dummy.c } \
++	"pr16467d" \
++	"pr16467.out" \
++    ] \
++    [list \
++	"Run pr20159" \
++	"tmpdir/libpr20159.so" \
++	"" \
++	{ pr20159a.c } \
++	"pr20159" \
++	"pr20159.out" \
++    ] \
++    [list \
+ 	"Run ifunc-main" \
+ 	"tmpdir/libifunc-lib.so" \
+ 	"" \
+@@ -529,6 +570,67 @@ run_cc_link_tests [list \
+ 	"" \
+ 	"" \
+     ] \
++    [list \
++	"Build pr16467e.o" \
++	"" \
++	"-fPIC" \
++	{ pr16467e.c } \
++	{} \
++    ] \
++    [list \
++	"Build libpr16467c.so" \
++	"-shared -Wl,--version-script=pr16467a.map" \
++	"-fPIC" \
++	{ pr16467f.c } \
++	{} \
++	"libpr16467c.so" \
++    ] \
++    [list \
++	"Build libpr16467e.so" \
++	"-shared tmpdir/pr16467b.o tmpdir/libpr16467c.so \
++	 -Wl,--version-script=pr16467b.map" \
++	"-fPIC" \
++	{ dummy.c } \
++	{} \
++	"libpr16467e.so" \
++    ] \
++    [list \
++	"Build libpr16467f.so" \
++	"-shared tmpdir/pr16467e.o tmpdir/libpr16467a.so \
++	 -Wl,--version-script=pr16467b.map" \
++	"-fPIC" \
++	{ dummy.c } \
++	{} \
++	"libpr16467f.so" \
++    ] \
++    [list \
++	"Build libpr20159f.so" \
++	"-shared -Wl,--version-script=pr20159f.map" \
++	"-fPIC" \
++	{ pr20159f.c } \
++	{} \
++	"libpr20159f.so" \
++    ] \
++    [list \
++	"pr20159g.o" \
++	"" \
++	"-fPIC" \
++	{ pr20159g.c } \
++    ] \
++    [list \
++	"Build libpr20159g.so" \
++	"-shared tmpdir/pr20159g.o tmpdir/libpr20159f.so" \
++	"-fPIC" \
++	{ dummy.c } \
++	{} \
++	"libpr20159g.so" \
++    ] \
++    [list \
++	"pr20159c.o pr20159d.o pr20159e.o" \
++	"" \
++	"" \
++	{ pr20159c.c pr20159d.c pr20159e.c } \
++    ] \
+ ]
+ 
+ run_ld_link_exec_tests [] [list \
+@@ -572,4 +674,40 @@ run_ld_link_exec_tests [] [list \
+ 	"pr19784b" \
+ 	"pass.out" \
+     ] \
++    [list \
++	"Run pr16467b" \
++	"tmpdir/pr16467c.o tmpdir/libpr16467e.so tmpdir/libpr16467c.so" \
++	"" \
++	{ dummy.c } \
++	"pr16467b" \
++	"pr16467.out" \
++	"" \
++    ] \
++    [list \
++	"Run pr16467c" \
++	"tmpdir/pr16467c.o tmpdir/libpr16467f.so tmpdir/libpr16467a.so" \
++	"" \
++	{ dummy.c } \
++	"pr16467c" \
++	"pass.out" \
++	"" \
++    ] \
++    [list \
++	"Run pr20159b" \
++	"tmpdir/pr20159c.o tmpdir/pr20159d.o tmpdir/libpr20159g.so tmpdir/libpr20159f.so" \
++	"" \
++	{ dummy.c } \
++	"pr20159b" \
++	"pass.out" \
++	"" \
++    ] \
++    [list \
++	"Run pr20159b" \
++	"tmpdir/pr20159c.o tmpdir/pr20159e.o tmpdir/libpr20159g.so tmpdir/libpr20159f.so" \
++	"" \
++	{ dummy.c } \
++	"pr20159b" \
++	"pass.out" \
++	"" \
++    ] \
+ ]
+diff --git a/ld/testsuite/ld-ifunc/pr16467a.l b/ld/testsuite/ld-ifunc/pr16467a.l
+new file mode 100644
+index 0000000..aaab4e1
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr16467a.l
+@@ -0,0 +1,3 @@
++#...
++.*incompatible versioned symbol `sd_get_seats@@LIBSYSTEMD_209'.*
++#pass
+diff --git a/ld/testsuite/ld-ifunc/pr16467d.c b/ld/testsuite/ld-ifunc/pr16467d.c
+new file mode 100644
+index 0000000..c8d662b
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr16467d.c
+@@ -0,0 +1,11 @@
++const char *new_sd_get_seats (void);
++__asm__ (".symver new_sd_get_seats,sd_get_seats@LIBSYSTEMD_209");
++
++const char *(*sd_get_seats_p) (void) = new_sd_get_seats;
++
++const char *sd_get_seats (void)
++{
++  if (sd_get_seats_p == &sd_get_seats)
++    return "LOOP";
++  return (*sd_get_seats_p) ();
++}
+diff --git a/ld/testsuite/ld-ifunc/pr16467e.c b/ld/testsuite/ld-ifunc/pr16467e.c
+new file mode 100644
+index 0000000..b19ecea
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr16467e.c
+@@ -0,0 +1,13 @@
++#include <string.h>
++
++__asm__(".symver new_sd_get_seats,sd_get_seats@LIBSYSTEMD_209");
++const char * new_sd_get_seats (void);
++
++const char *
++sd_get_seats (void)
++{
++  const char *p = new_sd_get_seats ();
++  if (strcmp (p, "OK") == 0)
++    return "PASS";
++  return "BAD";
++}
+diff --git a/ld/testsuite/ld-ifunc/pr16467f.c b/ld/testsuite/ld-ifunc/pr16467f.c
+new file mode 100644
+index 0000000..395e31a
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr16467f.c
+@@ -0,0 +1,13 @@
++const char *
++new_sd_get_seats (void)
++{
++  return "OK";
++}
++
++static const char *
++(*get_sd_get_seats(void)) (void)
++{
++  return new_sd_get_seats;
++}
++
++const char * sd_get_seats (void) __attribute__((ifunc("get_sd_get_seats")));
+diff --git a/ld/testsuite/ld-ifunc/pr20159.out b/ld/testsuite/ld-ifunc/pr20159.out
+new file mode 100644
+index 0000000..e69de29
+diff --git a/ld/testsuite/ld-ifunc/pr20159a.c b/ld/testsuite/ld-ifunc/pr20159a.c
+new file mode 100644
+index 0000000..3fcb051
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr20159a.c
+@@ -0,0 +1,20 @@
++#include <stdlib.h>
++#include <time.h>
++
++extern time_t libtime (void);
++
++time_t
++time (time_t *tloc)
++{
++  return 42;
++}
++
++int
++main (void)
++{
++  if (time (NULL) != 42)
++    abort ();
++  if (libtime () != 42)
++    abort ();
++  return 0;
++}
+diff --git a/ld/testsuite/ld-ifunc/pr20159b.c b/ld/testsuite/ld-ifunc/pr20159b.c
+new file mode 100644
+index 0000000..5c17004
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr20159b.c
+@@ -0,0 +1,7 @@
++#include <time.h>
++
++time_t
++libtime (void)
++{
++  return time (NULL);
++}
+diff --git a/ld/testsuite/ld-ifunc/pr20159c.c b/ld/testsuite/ld-ifunc/pr20159c.c
+new file mode 100644
+index 0000000..60f2057
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr20159c.c
+@@ -0,0 +1,7 @@
++extern void foo (void);
++int
++main( )
++{
++  foo ();
++  return 0;
++}
+diff --git a/ld/testsuite/ld-ifunc/pr20159d.c b/ld/testsuite/ld-ifunc/pr20159d.c
+new file mode 100644
+index 0000000..973dc31
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr20159d.c
+@@ -0,0 +1,7 @@
++#include <stdio.h>
++
++void
++bar (void)
++{
++  printf ("PASS\n");
++}
+diff --git a/ld/testsuite/ld-ifunc/pr20159e.c b/ld/testsuite/ld-ifunc/pr20159e.c
+new file mode 100644
+index 0000000..a291c51
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr20159e.c
+@@ -0,0 +1,15 @@
++#include <stdio.h>
++
++static void
++ok (void)
++{
++  printf ("PASS\n");
++}
++
++static void
++(*get_bar(void)) (void)
++{
++  return ok;
++}
++
++void bar (void) __attribute__((ifunc("get_bar")));
+diff --git a/ld/testsuite/ld-ifunc/pr20159f.c b/ld/testsuite/ld-ifunc/pr20159f.c
+new file mode 100644
+index 0000000..ad4c344
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr20159f.c
+@@ -0,0 +1,15 @@
++#include <stdio.h>
++
++static void
++ok (void)
++{
++  printf ("IFUNC\n");
++}
++
++static void
++(*get_bar(void)) (void)
++{
++  return ok;
++}
++
++void bar (void) __attribute__((ifunc("get_bar")));
+diff --git a/ld/testsuite/ld-ifunc/pr20159f.map b/ld/testsuite/ld-ifunc/pr20159f.map
+new file mode 100644
+index 0000000..2a94201
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr20159f.map
+@@ -0,0 +1,6 @@
++BAR {
++global:
++  bar;
++local:
++  *;
++};
+diff --git a/ld/testsuite/ld-ifunc/pr20159g.c b/ld/testsuite/ld-ifunc/pr20159g.c
+new file mode 100644
+index 0000000..dfb6a22
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/pr20159g.c
+@@ -0,0 +1,7 @@
++extern void bar ();
++
++void
++foo (void)
++{
++  bar ();
++}
