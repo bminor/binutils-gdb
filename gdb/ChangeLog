@@ -1,3 +1,18 @@
+2016-06-01  Pedro Alves  <palves@redhat.com>
+
+	* remote-fileio.c (remote_fio_ctrl_c_flag, remote_fio_sa)
+	(remote_fio_osa)
+	(remote_fio_ofunc, remote_fileio_sig_init, remote_fileio_sig_set)
+	(remote_fileio_sig_exit, remote_fileio_ctrl_c_signal_handler):
+	Delete.
+	(remote_fileio_o_quit_handler): New global.
+	(remote_fileio_quit_handler): New function.
+	(remote_fileio_reply): Check the quit flag instead of the custom
+	'remote_fio_ctrl_c_flag' flag.  Restore the quit handler instead
+	of changing the SIGINT handler.
+	(do_remote_fileio_request): Override the quit handler instead of
+	changing the SIGINT handler.
+
 2016-06-01  Nick Clifton  <nickc@redhat.com>
 
 	* common/common-utils.c (xmalloc_failed): New function.  Provided
