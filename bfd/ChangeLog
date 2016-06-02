@@ -1,3 +1,9 @@
+2017-04-02  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	(_bfd_XXi_swap_aouthdr_out): For clarity, use defines rather than
+	numbers for DataDirectory entry indicies passed to
+	add_data_entry().
+
 2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (get_program_header_size): Add a GNU_MBIND segment for
