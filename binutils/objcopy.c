@@ -1125,6 +1125,10 @@ group_signature (asection *group)
   bfd *abfd = group->owner;
   Elf_Internal_Shdr *ghdr;
 
+  /* PR 20089: An earlier error may have prevented us from loading the symbol table.  */
+  if (isympp == NULL)
+    return NULL;
+
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     return NULL;
 
