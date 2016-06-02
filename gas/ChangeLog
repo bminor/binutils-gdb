@@ -1,3 +1,7 @@
+2016-06-02  Vineet Gupta  <Vineet.Gupta1@synopsys.com>
+
+	* configure.tgt: Replace -uclibc with *.
+
 2016-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.c (parse_opcode_flags): New function.
