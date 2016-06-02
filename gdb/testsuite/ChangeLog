@@ -1,3 +1,7 @@
+2016-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-memory-changed.exp: Fix filename passed to untested.
+
 2016-05-31  Martin Galvan  <martin.galvan@tallertechnologies.com>
 
 	PR c++/19893
