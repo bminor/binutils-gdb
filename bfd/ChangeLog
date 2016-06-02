@@ -1,3 +1,11 @@
+2016-06-02  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20088
+	* cpu-arm.c (processors): Add "arm_any" type to match any ARM
+	architecture.
+	(arch_info_struct): Likewise.
+	(architectures): Likewise.
+
 2016-06-02  Vineet Gupta  <Vineet.Gupta1@synopsys.com>
 
 	* config.bfd: Replace -uclibc with *.
