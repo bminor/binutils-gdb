@@ -1,3 +1,9 @@
+2016-06-02  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (handle_output_debug_string): Return type of
+	gdb_signal_from_host() is gdb_signal, not an int.
+	(windows_get_exec_module_filename): Add pointer casts for C++.
+
 2016-06-02  Tom Tromey  <tom@tromey.com>
 
 	PR python/18984:
