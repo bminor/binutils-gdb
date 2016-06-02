@@ -1548,6 +1548,90 @@ check_cpu_feature (insn_subclass_t sc)
   return TRUE;
 }
 
+/* Parse the flags described by FIRST_PFLAG and NFLGS against the flag
+   operands in OPCODE.  Stores the matching OPCODES into the FIRST_PFLAG
+   array and returns TRUE if the flag operands all match, otherwise,
+   returns FALSE, in which case the FIRST_PFLAG array may have been
+   modified.  */
+
+static bfd_boolean
+parse_opcode_flags (const struct arc_opcode *opcode,
+                    int nflgs,
+                    struct arc_flags *first_pflag)
+{
+  int lnflg, i;
+  const unsigned char *flgidx;
+
+  lnflg = nflgs;
+  for (i = 0; i < nflgs; i++)
+    first_pflag[i].flgp = NULL;
+
+  /* Check the flags.  Iterate over the valid flag classes.  */
+  for (flgidx = opcode->flags; *flgidx; ++flgidx)
+    {
+      /* Get a valid flag class.  */
+      const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
+      const unsigned *flgopridx;
+      int cl_matches = 0;
+      struct arc_flags *pflag = NULL;
+
+      /* Check for extension conditional codes.  */
+      if (ext_condcode.arc_ext_condcode
+          && cl_flags->flag_class & F_CLASS_EXTEND)
+        {
+          struct arc_flag_operand *pf = ext_condcode.arc_ext_condcode;
+          while (pf->name)
+            {
+              pflag = first_pflag;
+              for (i = 0; i < nflgs; i++, pflag++)
+                {
+                  if (!strcmp (pf->name, pflag->name))
+                    {
+                      if (pflag->flgp != NULL)
+                        return FALSE;
+                      /* Found it.  */
+                      cl_matches++;
+                      pflag->flgp = pf;
+                      lnflg--;
+                      break;
+                    }
+                }
+              pf++;
+            }
+        }
+
+      for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
+        {
+          const struct arc_flag_operand *flg_operand;
+
+          pflag = first_pflag;
+          flg_operand = &arc_flag_operands[*flgopridx];
+          for (i = 0; i < nflgs; i++, pflag++)
+            {
+              /* Match against the parsed flags.  */
+              if (!strcmp (flg_operand->name, pflag->name))
+                {
+                  if (pflag->flgp != NULL)
+                    return FALSE;
+                  cl_matches++;
+                  pflag->flgp = flg_operand;
+                  lnflg--;
+                  break; /* goto next flag class and parsed flag.  */
+                }
+            }
+        }
+
+      if ((cl_flags->flag_class & F_CLASS_REQUIRED) && cl_matches == 0)
+        return FALSE;
+      if ((cl_flags->flag_class & F_CLASS_OPTIONAL) && cl_matches > 1)
+        return FALSE;
+    }
+
+  /* Did I check all the parsed flags?  */
+  return lnflg ? FALSE : TRUE;
+}
+
+
 /* Search forward through all variants of an opcode looking for a
    syntax match.  */
 
@@ -1577,8 +1661,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
        opcode = arc_opcode_hash_entry_iterator_next (entry, &iter))
     {
       const unsigned char *opidx;
-      const unsigned char *flgidx;
-      int tokidx = 0, lnflg, i;
+      int tokidx = 0;
       const expressionS *t = &emptyE;
 
       pr_debug ("%s:%d: find_opcode_match: trying opcode 0x%08X ",
@@ -1754,7 +1837,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 			  if (errmsg)
 			    goto match_failed;
 			}
-		      else
+		      else if (!(operand->flags & ARC_OPERAND_IGNORE))
 			goto match_failed;
 		    }
 		  break;
@@ -1831,72 +1914,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
       pr_debug ("opr ");
 
       /* Setup ready for flag parsing.  */
-      lnflg = nflgs;
-      for (i = 0; i < nflgs; i++)
-	first_pflag[i].flgp = NULL;
-
-      /* Check the flags.  Iterate over the valid flag classes.  */
-      for (flgidx = opcode->flags; *flgidx; ++flgidx)
-	{
-	  /* Get a valid flag class.  */
-	  const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
-	  const unsigned *flgopridx;
-	  int cl_matches = 0;
-	  struct arc_flags *pflag = NULL;
-
-	  /* Check for extension conditional codes.  */
-	  if (ext_condcode.arc_ext_condcode
-	      && cl_flags->flag_class & F_CLASS_EXTEND)
-	    {
-	      struct arc_flag_operand *pf = ext_condcode.arc_ext_condcode;
-	      while (pf->name)
-		{
-		  pflag = first_pflag;
-		  for (i = 0; i < nflgs; i++, pflag++)
-		    {
-		      if (!strcmp (pf->name, pflag->name))
-			{
-			  if (pflag->flgp != NULL)
-			    goto match_failed;
-			  /* Found it.  */
-			  cl_matches++;
-			  pflag->flgp = pf;
-			  lnflg--;
-			  break;
-			}
-		    }
-		  pf++;
-		}
-	    }
-
-	  for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
-	    {
-	      const struct arc_flag_operand *flg_operand;
-
-	      pflag = first_pflag;
-	      flg_operand = &arc_flag_operands[*flgopridx];
-	      for (i = 0; i < nflgs; i++, pflag++)
-		{
-		  /* Match against the parsed flags.  */
-		  if (!strcmp (flg_operand->name, pflag->name))
-		    {
-		      if (pflag->flgp != NULL)
-			goto match_failed;
-		      cl_matches++;
-		      pflag->flgp = flg_operand;
-		      lnflg--;
-		      break; /* goto next flag class and parsed flag.  */
-		    }
-		}
-	    }
-
-	  if ((cl_flags->flag_class & F_CLASS_REQUIRED) && cl_matches == 0)
-	    goto match_failed;
-	  if ((cl_flags->flag_class & F_CLASS_OPTIONAL) && cl_matches > 1)
-	    goto match_failed;
-	}
-      /* Did I check all the parsed flags?  */
-      if (lnflg)
+      if (!parse_opcode_flags (opcode, nflgs, first_pflag))
 	goto match_failed;
 
       pr_debug ("flg");
@@ -2179,6 +2197,108 @@ find_special_case_flag (const char *opname,
   return NULL;
 }
 
+/* The long instructions are not stored in a hash (there's not many of
+   them) and so there's no arc_opcode_hash_entry structure to return.  This
+   helper function for find_special_case_long_opcode takes an arc_opcode
+   result and places it into a fake arc_opcode_hash_entry that points to
+   the single arc_opcode OPCODE, which is then returned.  */
+
+static const struct arc_opcode_hash_entry *
+build_fake_opcode_hash_entry (const struct arc_opcode *opcode)
+{
+  static struct arc_opcode_hash_entry entry;
+  static struct arc_opcode tmp[2];
+  static const struct arc_opcode *ptr[2];
+
+  memcpy (&tmp[0], opcode, sizeof (struct arc_opcode));
+  memset (&tmp[1], 0, sizeof (struct arc_opcode));
+  entry.count = 1;
+  entry.opcode = ptr;
+  ptr[0] = tmp;
+  ptr[1] = NULL;
+  return &entry;
+}
+
+
+/* Used by the assembler to match the list of tokens against a long (48 or
+   64 bits) instruction.  If a matching long instruction is found, then
+   some of the tokens are consumed in this function and converted into a
+   single LIMM value, which is then added to the end of the token list,
+   where it will be consumed by a LIMM operand that exists in the base
+   opcode of the long instruction.  */
+
+static const struct arc_opcode_hash_entry *
+find_special_case_long_opcode (const char *opname,
+                               int *ntok ATTRIBUTE_UNUSED,
+                               expressionS *tok ATTRIBUTE_UNUSED,
+                               int *nflgs,
+                               struct arc_flags *pflags)
+{
+  unsigned i;
+
+  if (*ntok == MAX_INSN_ARGS)
+    return NULL;
+
+  for (i = 0; i < arc_num_long_opcodes; ++i)
+    {
+      struct arc_opcode fake_opcode;
+      const struct arc_opcode *opcode;
+      struct arc_insn insn;
+      expressionS *limm_token;
+
+      opcode = &arc_long_opcodes[i].base_opcode;
+
+      if (!(opcode->cpu & arc_target))
+        continue;
+
+      if (!check_cpu_feature (opcode->subclass))
+        continue;
+
+      if (strcmp (opname, opcode->name) != 0)
+        continue;
+
+      /* Check that the flags are a match.  */
+      if (!parse_opcode_flags (opcode, *nflgs, pflags))
+        continue;
+
+      /* Parse the LIMM operands into the LIMM template.  */
+      memset (&fake_opcode, 0, sizeof (fake_opcode));
+      fake_opcode.name = "fake limm";
+      fake_opcode.opcode = arc_long_opcodes[i].limm_template;
+      fake_opcode.mask = arc_long_opcodes[i].limm_mask;
+      fake_opcode.cpu = opcode->cpu;
+      fake_opcode.insn_class = opcode->insn_class;
+      fake_opcode.subclass = opcode->subclass;
+      memcpy (&fake_opcode.operands[0],
+              &arc_long_opcodes[i].operands,
+              MAX_INSN_ARGS);
+      /* Leave fake_opcode.flags as zero.  */
+
+      pr_debug ("Calling assemble_insn to build fake limm value\n");
+      assemble_insn (&fake_opcode, tok, *ntok,
+                     NULL, 0, &insn);
+      pr_debug ("   got limm value: 0x%x\n", insn.insn);
+
+      /* Now create a new token at the end of the token array (We know this
+         is safe as the token array is always created with enough space for
+         MAX_INSN_ARGS, and we check at the start at the start of this
+         function that we're not there yet).  This new token will
+         correspond to a LIMM operand that will be contained in the
+         base_opcode of the arc_long_opcode.  */
+      limm_token = &tok[(*ntok)];
+      (*ntok)++;
+
+      /* Modify the LIMM token to hold the constant.  */
+      limm_token->X_op = O_constant;
+      limm_token->X_add_number = insn.insn;
+
+      /* Return the base opcode.  */
+      return build_fake_opcode_hash_entry (opcode);
+    }
+
+    return NULL;
+}
+
 /* Used to find special case opcode.  */
 
 static const struct arc_opcode_hash_entry *
@@ -2194,6 +2314,9 @@ find_special_case (const char *opname,
 
   if (entry == NULL)
     entry = find_special_case_flag (opname, nflgs, pflags);
+
+  if (entry == NULL)
+    entry = find_special_case_long_opcode (opname, ntok, tok, nflgs, pflags);
 
   return entry;
 }

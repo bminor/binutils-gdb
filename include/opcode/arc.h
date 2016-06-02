@@ -25,7 +25,7 @@
 #define OPCODE_ARC_H
 
 #ifndef MAX_INSN_ARGS
-#define MAX_INSN_ARGS	     8
+#define MAX_INSN_ARGS	     16
 #endif
 
 #ifndef MAX_INSN_FLGS
@@ -135,6 +135,30 @@ struct arc_opcode
      assembly code, and are terminated by a zero.  */
   unsigned char flags[MAX_INSN_FLGS + 1];
 };
+
+/* Structure used to describe 48 and 64 bit instructions.  */
+struct arc_long_opcode
+{
+  /* The base instruction is either 16 or 32 bits, and is described like a
+     normal instruction.  */
+  struct arc_opcode base_opcode;
+
+  /* The template value for the 32-bit LIMM extension.  Used by the
+     assembler and disassembler in the same way as the 'opcode' field of
+     'struct arc_opcode'.  */
+  unsigned limm_template;
+
+  /* The mask value for the 32-bit LIMM extension.  Used by the
+     disassembler just like the 'mask' field in 'struct arc_opcode'.  */
+  unsigned limm_mask;
+
+  /* Array of operand codes similar to the 'operands' array in 'struct
+     arc_opcode'.  These operands are used to fill in the LIMM value.  */
+  unsigned char operands[MAX_INSN_ARGS + 1];
+};
+
+extern const struct arc_long_opcode arc_long_opcodes[];
+extern const unsigned arc_num_long_opcodes;
 
 /* The table itself is sorted by major opcode number, and is otherwise
    in the order in which the disassembler should consider

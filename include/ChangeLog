@@ -1,3 +1,10 @@
+2016-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h (MAX_INSN_ARGS): Increase to 16.
+	(struct arc_long_opcode): New structure.
+	(arc_long_opcodes): Declare.
+	(arc_num_long_opcodes): Declare.
+
 2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* elf/mips.h: Add extern "C".

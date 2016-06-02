@@ -682,6 +682,43 @@ extract_nps_3bit_dst (unsigned insn ATTRIBUTE_UNUSED,
 }
 
 static unsigned
+insert_nps_3bit_dst_short (unsigned insn ATTRIBUTE_UNUSED,
+                           int value ATTRIBUTE_UNUSED,
+                           const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+      insn |= value << 8;
+      break;
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+      insn |= (value - 8) << 8;
+      break;
+    default:
+      *errmsg = _("Register must be either r0-r3 or r12-r15.");
+      break;
+    }
+  return insn;
+}
+
+static int
+extract_nps_3bit_dst_short (unsigned insn ATTRIBUTE_UNUSED,
+                            bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value = (insn >> 8) & 0x07;
+  if (value > 3)
+    return (value + 8);
+  else
+    return value;
+}
+
+static unsigned
 insert_nps_3bit_src2 (unsigned insn ATTRIBUTE_UNUSED,
                       int value ATTRIBUTE_UNUSED,
                       const char **errmsg ATTRIBUTE_UNUSED)
@@ -712,6 +749,43 @@ extract_nps_3bit_src2 (unsigned insn ATTRIBUTE_UNUSED,
                        bfd_boolean * invalid ATTRIBUTE_UNUSED)
 {
   int value = (insn >> 21) & 0x07;
+  if (value > 3)
+    return (value + 8);
+  else
+    return value;
+}
+
+static unsigned
+insert_nps_3bit_src2_short (unsigned insn ATTRIBUTE_UNUSED,
+                            int value ATTRIBUTE_UNUSED,
+                            const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+      insn |= value << 5;
+      break;
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+      insn |= (value - 8) << 5;
+      break;
+    default:
+      *errmsg = _("Register must be either r0-r3 or r12-r15.");
+      break;
+    }
+  return insn;
+}
+
+static int
+extract_nps_3bit_src2_short (unsigned insn ATTRIBUTE_UNUSED,
+                             bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value = (insn >> 5) & 0x07;
   if (value > 3)
     return (value + 8);
   else
@@ -896,6 +970,8 @@ MAKE_SIZE_INSERT_EXTRACT_FUNCS(fxorb,8,32,5,8,5)
 MAKE_SIZE_INSERT_EXTRACT_FUNCS(wxorb,16,32,5,16,5)
 MAKE_SIZE_INSERT_EXTRACT_FUNCS(bitop,1,32,5,1,10)
 MAKE_SIZE_INSERT_EXTRACT_FUNCS(qcmp,1,8,3,1,9)
+MAKE_SIZE_INSERT_EXTRACT_FUNCS(bitop1,1,32,5,1,20)
+MAKE_SIZE_INSERT_EXTRACT_FUNCS(bitop2,1,32,5,1,25)
 
 static int
 extract_nps_qcmp_m3 (unsigned insn ATTRIBUTE_UNUSED,
@@ -965,6 +1041,73 @@ extract_nps_calc_entry_size (unsigned insn ATTRIBUTE_UNUSED,
 {
   unsigned entry_size = (insn >> 8) & 0xf;
   return 1 << entry_size;
+}
+
+static unsigned
+insert_nps_bitop_mod4_msb (unsigned insn ATTRIBUTE_UNUSED,
+                           int value ATTRIBUTE_UNUSED,
+                           const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x2) << 30);
+}
+
+static int
+extract_nps_bitop_mod4_msb (unsigned insn ATTRIBUTE_UNUSED,
+                            bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (insn >> 30) & 0x2;
+}
+
+static unsigned
+insert_nps_bitop_mod4_lsb (unsigned insn ATTRIBUTE_UNUSED,
+                           int value ATTRIBUTE_UNUSED,
+                           const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1) << 15);
+}
+
+static int
+extract_nps_bitop_mod4_lsb (unsigned insn ATTRIBUTE_UNUSED,
+                            bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return (insn >> 15) & 0x1;
+}
+
+static unsigned
+insert_nps_bitop_dst_pos3_pos4 (unsigned insn ATTRIBUTE_UNUSED,
+                                int value ATTRIBUTE_UNUSED,
+                                const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | (value << 10) | (value << 5);
+}
+
+static int
+extract_nps_bitop_dst_pos3_pos4 (unsigned insn ATTRIBUTE_UNUSED,
+                                 bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  if (((insn >> 10) & 0x1f) != ((insn >> 5) & 0x1f))
+    *invalid = TRUE;
+  return ((insn >> 5) & 0x1f);
+}
+
+static unsigned
+insert_nps_bitop_ins_ext (unsigned insn ATTRIBUTE_UNUSED,
+                          int value ATTRIBUTE_UNUSED,
+                          const char **errmsg ATTRIBUTE_UNUSED)
+{
+  if (value < 0 || value > 28)
+    *errmsg = _("Value must be in the range 0 to 28");
+  return insn | (value << 20);
+}
+
+static int
+extract_nps_bitop_ins_ext (unsigned insn ATTRIBUTE_UNUSED,
+                           bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value = (insn >> 20) & 0x1f;
+  if (value > 28)
+    *invalid = TRUE;
+  return value;
 }
 
 /* Include the generic extract/insert functions.  Order is important
@@ -1295,9 +1438,13 @@ const struct arc_operand arc_operands[] =
      index is used to indicate end-of-list.  */
 #define UNUSED		0
   { 0, 0, 0, 0, 0, 0 },
+
+#define IGNORED		(UNUSED + 1)
+  { 0, 0, 0, ARC_OPERAND_IGNORE | ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, 0, 0 },
+
   /* The plain integer register fields.  Used by 32 bit
      instructions.  */
-#define RA		(UNUSED + 1)
+#define RA		(IGNORED + 1)
   { 6, 0, 0, ARC_OPERAND_IR, 0, 0 },
 #define RB		(RA + 1)
   { 6, 12, 0, ARC_OPERAND_IR, insert_rb, extract_rb },
@@ -1682,6 +1829,66 @@ const struct arc_operand arc_operands[] =
 
 #define NPS_CALC_ENTRY_SIZE	(NPS_QCMP_M3 + 1)
   { 0, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_calc_entry_size, extract_nps_calc_entry_size },
+
+#define NPS_R_DST_3B_SHORT	(NPS_CALC_ENTRY_SIZE + 1)
+  { 3, 8, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_dst_short, extract_nps_3bit_dst_short },
+
+#define NPS_R_SRC1_3B_SHORT	(NPS_R_DST_3B_SHORT + 1)
+  { 3, 8, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_NCHK, insert_nps_3bit_dst_short, extract_nps_3bit_dst_short },
+
+#define NPS_R_SRC2_3B_SHORT	(NPS_R_SRC1_3B_SHORT + 1)
+  { 3, 5, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_src2_short, extract_nps_3bit_src2_short },
+
+#define NPS_BITOP_SIZE2		(NPS_R_SRC2_3B_SHORT + 1)
+  { 5, 25, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop2_size, extract_nps_bitop2_size },
+
+#define NPS_BITOP_SIZE1		(NPS_BITOP_SIZE2 + 1)
+  { 5, 20, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop1_size, extract_nps_bitop1_size },
+
+#define NPS_BITOP_DST_POS3_POS4		(NPS_BITOP_SIZE1 + 1)
+  { 5, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_dst_pos3_pos4, extract_nps_bitop_dst_pos3_pos4 },
+
+#define NPS_BITOP_DST_POS4		(NPS_BITOP_DST_POS3_POS4 + 1)
+  { 5, 10, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_DST_POS3		(NPS_BITOP_DST_POS4 + 1)
+  { 5, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_DST_POS2		(NPS_BITOP_DST_POS3 + 1)
+  { 5, 15, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_DST_POS1		(NPS_BITOP_DST_POS2 + 1)
+  { 5, 10, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_SRC_POS4		(NPS_BITOP_DST_POS1 + 1)
+  { 5, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_SRC_POS3		(NPS_BITOP_SRC_POS4 + 1)
+  { 5, 20, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_SRC_POS2		(NPS_BITOP_SRC_POS3 + 1)
+  { 5, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_SRC_POS1		(NPS_BITOP_SRC_POS2 + 1)
+  { 5, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_MOD4_MSB		(NPS_BITOP_SRC_POS1 + 1)
+  { 2, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_mod4_msb, extract_nps_bitop_mod4_msb },
+
+#define NPS_BITOP_MOD4_LSB		(NPS_BITOP_MOD4_MSB + 1)
+  { 2, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_mod4_lsb, extract_nps_bitop_mod4_lsb },
+
+#define NPS_BITOP_MOD3		(NPS_BITOP_MOD4_LSB + 1)
+  { 2, 29, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_MOD2		(NPS_BITOP_MOD3 + 1)
+  { 2, 27, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_MOD1		(NPS_BITOP_MOD2 + 1)
+  { 2, 25, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BITOP_INS_EXT	(NPS_BITOP_MOD1 + 1)
+  { 5, 20, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_ins_ext, extract_nps_bitop_ins_ext },
 };
 
 const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);
@@ -2053,3 +2260,92 @@ const struct arc_opcode arc_relax_opcodes[] =
 };
 
 const unsigned arc_num_relax_opcodes = ARRAY_SIZE (arc_relax_opcodes);
+
+/* The following instructions are all either 48 or 64 bits long, and
+   require special handling in the assembler and disassembler.
+
+   The first part of each ARC_LONG_OPCODE is the base ARC_OPCODE, this is
+   either the 16 or 32 bit base instruction, and its opcode list will
+   always end in a LIMM.
+
+   The rest of the ARC_LONG_OPCODE describes how to build the LIMM from the
+   instruction operands.  There are therefore two lists of operands for
+   each ARC_LONG_OPCODE, the second list contains operands that are merged
+   into the limm template, in the same way that a standard 32-bit
+   instruction is built.  This generated limm is then added to the list of
+   tokens that is passed to the standard instruction encoder, along with
+   the first list of operands (from the base arc_opcode).
+
+   The first list of operands then, describes how to build the base
+   instruction, and includes the 32-bit limm that was previously generated
+   as the last operand.
+
+   In most cases operands are either encoded into the base instruction or
+   into the limm.  When this happens the operand slot will be filled with
+   an operand identifier in one list, and will be IGNORED in the other
+   list, this special operand value causes the operand to be ignored,
+   without being encoded at this point.
+
+   However, in some cases, an operand is split between the base instruction
+   and the 32-bit limm, in this case the operand slot will be filled in
+   both operand lists (see mov4b for one example of this).   */
+const struct arc_long_opcode arc_long_opcodes[] =
+  {
+    /* mrgb - (48 bit instruction).  */
+    { { "mrgb", 0x5803, 0xf81f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B_SHORT, NPS_R_SRC1_3B_SHORT, NPS_R_SRC2_3B_SHORT, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, LIMM }, { 0 }},
+      0x00000000, 0x80000000, { IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_SRC_POS1, NPS_BITOP_SIZE1, NPS_BITOP_DST_POS2, NPS_BITOP_SRC_POS2, NPS_BITOP_SIZE2 }},
+
+    /* mrgb.cl - (48 bit instruction).  */
+    { { "mrgb", 0x5803, 0xf81f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B_SHORT, NPS_R_SRC1_3B_SHORT, NPS_R_SRC2_3B_SHORT, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, LIMM }, { C_NPS_CL }},
+      0x80000000, 0x80000000, { IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_SRC_POS1, NPS_BITOP_SIZE1, NPS_BITOP_DST_POS2, NPS_BITOP_SRC_POS2, NPS_BITOP_SIZE2 }},
+
+    /* mov2b - (48 bit instruction).  */
+    { { "mov2b", 0x5800, 0xf81f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B_SHORT, NPS_R_SRC1_3B_SHORT, NPS_R_SRC2_3B_SHORT,  IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, LIMM }, { 0 }},
+      0x00000000, 0x80000000, { IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_MOD1, NPS_BITOP_SRC_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_MOD2, NPS_BITOP_SRC_POS2 }},
+
+    /* mov2b.cl - (48 bit instruction).  */
+    { { "mov2b", 0x5800, 0xf81f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B_SHORT, NPS_R_SRC2_3B_SHORT,  IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, LIMM }, { C_NPS_CL }},
+      0x80000000, 0x80000000, { IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_MOD1, NPS_BITOP_SRC_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_MOD2, NPS_BITOP_SRC_POS2 }},
+
+    /* ext4 - (48 bit instruction).  */
+    { { "ext4b", 0x5801, 0xf81f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B_SHORT, NPS_R_SRC1_3B_SHORT, NPS_R_SRC2_3B_SHORT,  IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, LIMM }, { 0 }},
+      0x00000000, 0x80000000, { IGNORED, IGNORED, IGNORED, NPS_BITOP_INS_EXT, NPS_BITOP_SRC_POS1, NPS_BITOP_SRC_POS2, NPS_BITOP_DST_POS1, NPS_BITOP_DST_POS2 }},
+
+    /* ext4.cl - (48 bit instruction).  */
+    { { "ext4b", 0x5801, 0xf81f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B_SHORT, NPS_R_SRC2_3B_SHORT,  IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, LIMM }, { C_NPS_CL }},
+      0x80000000, 0x80000000, { IGNORED, IGNORED, NPS_BITOP_INS_EXT, NPS_BITOP_SRC_POS1, NPS_BITOP_SRC_POS2, NPS_BITOP_DST_POS1, NPS_BITOP_DST_POS2 }},
+
+    /* ins4 - (48 bit instruction).  */
+    { { "ins4b", 0x5802, 0xf81f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B_SHORT, NPS_R_SRC1_3B_SHORT, NPS_R_SRC2_3B_SHORT,  IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, LIMM }, { 0 }},
+      0x00000000, 0x80000000, { IGNORED, IGNORED, IGNORED, NPS_BITOP_SRC_POS1, NPS_BITOP_SRC_POS2, NPS_BITOP_DST_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_INS_EXT }},
+
+    /* ins4.cl - (48 bit instruction).  */
+    { { "ins4b", 0x5802, 0xf81f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B_SHORT, NPS_R_SRC2_3B_SHORT,  IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, LIMM }, { C_NPS_CL }},
+      0x80000000, 0x80000000, { IGNORED, IGNORED, NPS_BITOP_SRC_POS1, NPS_BITOP_SRC_POS2, NPS_BITOP_DST_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_INS_EXT }},
+
+    /* mov3b - (64 bit instruction).  */
+    { { "mov3b", 0x58100000, 0xf81f801f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS3_POS4, IGNORED, IGNORED, LIMM }, { 0 }},
+      0x80000000, 0x80000000, { IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_MOD1, NPS_BITOP_SRC_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_MOD2, NPS_BITOP_SRC_POS2, IGNORED, NPS_BITOP_MOD3, NPS_BITOP_SRC_POS3 }},
+
+    /* mov4b - (64 bit instruction).  */
+    { { "mov4b", 0x58100000, 0xf81f0000, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS3, IGNORED, IGNORED, NPS_BITOP_DST_POS4, NPS_BITOP_MOD4_LSB, NPS_BITOP_SRC_POS4, LIMM }, { 0 }},
+      0x00000000, 0x00000000, { IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_MOD1, NPS_BITOP_SRC_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_MOD2, NPS_BITOP_SRC_POS2, IGNORED, NPS_BITOP_MOD3, NPS_BITOP_SRC_POS3, IGNORED, NPS_BITOP_MOD4_MSB, IGNORED}},
+
+    /* mov3bcl - (64 bit instruction).  */
+    { { "mov3bcl", 0x58110000, 0xf81f801f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS3_POS4, IGNORED, IGNORED, LIMM }, { 0 }},
+      0x80000000, 0x80000000, { IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_MOD1, NPS_BITOP_SRC_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_MOD2, NPS_BITOP_SRC_POS2, IGNORED, NPS_BITOP_MOD3, NPS_BITOP_SRC_POS3 }},
+
+    /* mov4bcl - (64 bit instruction).  */
+    { { "mov4bcl", 0x58110000, 0xf81f0000, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS3, IGNORED, IGNORED, NPS_BITOP_DST_POS4, NPS_BITOP_MOD4_LSB, NPS_BITOP_SRC_POS4, LIMM }, { 0 }},
+      0x00000000, 0x00000000, { IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_MOD1, NPS_BITOP_SRC_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_MOD2, NPS_BITOP_SRC_POS2, IGNORED, NPS_BITOP_MOD3, NPS_BITOP_SRC_POS3, IGNORED, NPS_BITOP_MOD4_MSB, IGNORED}},
+
+    /* mov3b.cl - (64 bit instruction).  */
+    { { "mov3b", 0x58110000, 0xf81f801f, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS3_POS4, IGNORED, IGNORED, LIMM }, { C_NPS_CL }},
+      0x80000000, 0x80000000, { IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_MOD1, NPS_BITOP_SRC_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_MOD2, NPS_BITOP_SRC_POS2, IGNORED, NPS_BITOP_MOD3, NPS_BITOP_SRC_POS3 }},
+
+    /* mov4b.cl - (64 bit instruction).  */
+    { { "mov4b", 0x58110000, 0xf81f0000, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, IGNORED, NPS_BITOP_DST_POS3, IGNORED, IGNORED, NPS_BITOP_DST_POS4, NPS_BITOP_MOD4_LSB, NPS_BITOP_SRC_POS4, LIMM }, { C_NPS_CL }},
+      0x00000000, 0x00000000, { IGNORED, IGNORED, NPS_BITOP_DST_POS1, NPS_BITOP_MOD1, NPS_BITOP_SRC_POS1, NPS_BITOP_DST_POS2, NPS_BITOP_MOD2, NPS_BITOP_SRC_POS2, IGNORED, NPS_BITOP_MOD3, NPS_BITOP_SRC_POS3, IGNORED, NPS_BITOP_MOD4_MSB, IGNORED}},
+};
+
+const unsigned arc_num_long_opcodes = ARRAY_SIZE (arc_long_opcodes);

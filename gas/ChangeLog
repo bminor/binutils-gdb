@@ -1,3 +1,14 @@
+2016-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (parse_opcode_flags): New function.
+	(find_opcode_match): Move flag parsing code out to new function.
+	Ignore operands marked IGNORE.
+	(build_fake_opcode_hash_entry): New function.
+	(find_special_case_long_opcode): New function.
+	(find_special_case): Lookup long opcodes.
+	* testsuite/gas/arc/nps400-7.d: New file.
+	* testsuite/gas/arc/nps400-7.s: New file.
+
 2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-ns32k.c: Remove definition of input_line_pointer.
