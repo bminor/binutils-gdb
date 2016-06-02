@@ -1,3 +1,7 @@
+2016-06-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c: Replace data32 with data16 in comments.
+
 2016-05-31  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20159
