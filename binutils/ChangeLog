@@ -2,7 +2,7 @@
 
 	PR 20089
 	* objcopy.c (group_signature): Fail if the input symbol table has
-	not been loaded.
+	not been loaded, or if the sh_info field of the group header is 0.
 
 	* dwarf.c (display_debug_frames): Do not display any
 	interpretation if the block consists solely of DW__CFA_NOPs.
