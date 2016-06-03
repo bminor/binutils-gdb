@@ -78,6 +78,38 @@ class Output_data_got_plt_s390 : public Output_section_data_build
   Layout* layout_;
 };
 
+// A class to handle the first entry of .got when partial relro is in use.
+
+template<int size>
+class Output_data_got_dynamic_s390 : public Output_section_data_build
+{
+ public:
+  Output_data_got_dynamic_s390(Layout* layout)
+    : Output_section_data_build(size/8),
+      layout_(layout)
+  { }
+
+  Output_data_got_dynamic_s390(Layout* layout, off_t data_size)
+    : Output_section_data_build(data_size, size/8),
+      layout_(layout)
+  { }
+
+ protected:
+  // Write out the PLT data.
+  void
+  do_write(Output_file*);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, "** GOT DYNAMIC"); }
+
+ private:
+  // A pointer to the Layout class, so that we can find the .dynamic
+  // section when we write out the GOT section.
+  Layout* layout_;
+};
+
 // A class to handle the PLT data.
 
 template<int size>
@@ -90,10 +122,11 @@ class Output_data_plt_s390 : public Output_section_data
   Output_data_plt_s390(Layout* layout,
                          Output_data_got<size, true>* got,
                          Output_data_got_plt_s390<size>* got_plt,
-                         Output_data_space* got_irelative)
+                         Output_data_space* got_irelative,
+                         Output_section_data_build* got_dynamic)
     : Output_section_data(4), layout_(layout),
       irelative_rel_(NULL), got_(got), got_plt_(got_plt),
-      got_irelative_(got_irelative), count_(0),
+      got_irelative_(got_irelative), got_dynamic_(got_dynamic), count_(0),
       irelative_count_(0), free_list_()
   { this->init(layout); }
 
@@ -101,11 +134,13 @@ class Output_data_plt_s390 : public Output_section_data
                          Output_data_got<size, true>* got,
                          Output_data_got_plt_s390<size>* got_plt,
                          Output_data_space* got_irelative,
+                         Output_section_data_build* got_dynamic,
                          unsigned int plt_count)
     : Output_section_data((plt_count + 1) * plt_entry_size,
                           4, false),
       layout_(layout), irelative_rel_(NULL), got_(got),
-      got_plt_(got_plt), got_irelative_(got_irelative), count_(plt_count),
+      got_plt_(got_plt), got_irelative_(got_irelative),
+      got_dynamic_(got_dynamic), count_(plt_count),
       irelative_count_(0), free_list_()
   {
     this->init(layout);
@@ -195,7 +230,8 @@ class Output_data_plt_s390 : public Output_section_data
   void
   fill_first_plt_entry(unsigned char* pov,
 		       typename elfcpp::Elf_types<size>::Elf_Addr got_address,
-		       typename elfcpp::Elf_types<size>::Elf_Addr plt_address);
+		       typename elfcpp::Elf_types<size>::Elf_Addr plt_address,
+		       unsigned int got_plt_offset);
 
   // Fill in a normal PLT entry.  Returns the offset into the entry that
   // should be the initial GOT slot value.
@@ -238,6 +274,8 @@ class Output_data_plt_s390 : public Output_section_data
   Output_data_got_plt_s390<size>* got_plt_;
   // The part of the .got.plt section used for IRELATIVE relocs.
   Output_data_space* got_irelative_;
+  // The header of .got section.
+  Output_section_data_build* got_dynamic_;
   // The number of PLT entries.
   unsigned int count_;
   // Number of PLT entries with R_TILEGX_IRELATIVE relocs.  These
@@ -251,6 +289,7 @@ class Output_data_plt_s390 : public Output_section_data
   static const int plt_entry_size = 0x20;
   // The first entry in the PLT.
   static const unsigned char first_plt_entry_32_abs[plt_entry_size];
+  static const unsigned char first_plt_entry_32_pic12[plt_entry_size];
   static const unsigned char first_plt_entry_32_pic[plt_entry_size];
   static const unsigned char first_plt_entry_64[plt_entry_size];
   // Other entries in the PLT for an executable.
@@ -646,7 +685,7 @@ class Target_s390 : public Sized_target<size, true>
   got_address() const
   {
     gold_assert(this->got_ != NULL);
-    return this->got_plt_->address();
+    return this->got_dynamic_->address();
   }
 
   typename elfcpp::Elf_types<size>::Elf_Addr
@@ -741,6 +780,10 @@ class Target_s390 : public Sized_target<size, true>
   Output_data_got_plt_s390<size>* got_plt_;
   // The GOT section for IRELATIVE relocations.
   Output_data_space* got_irelative_;
+  // The section containing the first GOT entry (_DYNAMIC) - this is
+  // Output_data_got_dynamic_s390 if partial relro is in use, same
+  // as got_plt_ otherwise.
+  Output_section_data_build* got_dynamic_;
   // The _GLOBAL_OFFSET_TABLE_ symbol.
   Symbol* global_offset_table_;
   // The dynamic reloc section.
@@ -1247,18 +1290,18 @@ Output_data_plt_s390<size>::first_plt_entry_32_abs[plt_entry_size] =
   0x58, 0x10, 0x10, 0x08, // l %r1, 8(%r1)
   0x07, 0xf1, // br %r1
   0x00, 0x00, // padding
-  0x00, 0x00, 0x00, 0x00, // _GLOBAL_OFFSET_TABLE_ (to fill)
+  0x00, 0x00, 0x00, 0x00, // DT_GOTPLT (to fill)
   0x00, 0x00, 0x00, 0x00, // padding
 };
 
 template<int size>
 const unsigned char
-Output_data_plt_s390<size>::first_plt_entry_32_pic[plt_entry_size] =
+Output_data_plt_s390<size>::first_plt_entry_32_pic12[plt_entry_size] =
 {
   0x50, 0x10, 0xf0, 0x1c, // st %r1, 28(%r15)
-  0x58, 0x10, 0xc0, 0x04, // l %r1, 4(%r12)
+  0x58, 0x10, 0xc0, 0x00, // l %r1, DT_GOTPLT@got+4(%r12) (to fill)
   0x50, 0x10, 0xf0, 0x18, // st %r1, 24(%r15)
-  0x58, 0x10, 0xc0, 0x08, // l %r1, 8(%r12)
+  0x58, 0x10, 0xc0, 0x00, // l %r1, DT_GOTPLT@got+8(%r12) (to fill)
   0x07, 0xf1, // br %r1
   0x00, 0x00, // padding
   0x00, 0x00, 0x00, 0x00, // padding
@@ -1268,10 +1311,25 @@ Output_data_plt_s390<size>::first_plt_entry_32_pic[plt_entry_size] =
 
 template<int size>
 const unsigned char
+Output_data_plt_s390<size>::first_plt_entry_32_pic[plt_entry_size] =
+{
+  0x50, 0x10, 0xf0, 0x1c, // st %r1, 28(%r15)
+  0x0d, 0x10, // basr %r1, %r0
+  0x5a, 0x10, 0x10, 0x12, // a %r1, 18(%r1)
+  0xd2, 0x03, 0xf0, 0x18, 0x10, 0x04, // mvc 24(4,%r15), 4(%r1)
+  0x58, 0x10, 0x10, 0x08, // l %r1, 8(%r1)
+  0x07, 0xf1, // br %r1
+  0x00, 0x00, // padding
+  0x00, 0x00, 0x00, 0x00, // DT_GOTPLT - . + 18 (to fill)
+  0x00, 0x00, 0x00, 0x00, // padding
+};
+
+template<int size>
+const unsigned char
 Output_data_plt_s390<size>::first_plt_entry_64[plt_entry_size] =
 {
   0xe3, 0x10, 0xf0, 0x38, 0x00, 0x24, // stg %r1, 56(%r15)
-  0xc0, 0x10, 0x00, 0x00, 0x00, 0x00, // larl %r1, _GLOBAL_OFFSET_TABLE_ (to fill)
+  0xc0, 0x10, 0x00, 0x00, 0x00, 0x00, // larl %r1, DT_GOTPLT (to fill)
   0xd2, 0x07, 0xf0, 0x30, 0x10, 0x08, // mvc 48(8,%r15), 8(%r1)
   0xe3, 0x10, 0x10, 0x10, 0x00, 0x04, // lg %r1, 16(%r1)
   0x07, 0xf1, // br %r1
@@ -1284,22 +1342,33 @@ template<int size>
 void
 Output_data_plt_s390<size>::fill_first_plt_entry(
     unsigned char* pov,
-    typename elfcpp::Elf_types<size>::Elf_Addr got_address,
-    typename elfcpp::Elf_types<size>::Elf_Addr plt_address)
+    typename elfcpp::Elf_types<size>::Elf_Addr got_plt_address,
+    typename elfcpp::Elf_types<size>::Elf_Addr plt_address,
+    unsigned int got_plt_offset)
 {
   if (size == 64)
     {
       memcpy(pov, first_plt_entry_64, plt_entry_size);
-      S390_relocate_functions<size>::pcrela32dbl(pov + 8, got_address, (plt_address + 6));
+      S390_relocate_functions<size>::pcrela32dbl(pov + 8, got_plt_address, (plt_address + 6));
     }
   else if (!parameters->options().output_is_position_independent())
     {
       memcpy(pov, first_plt_entry_32_abs, plt_entry_size);
-      elfcpp::Swap<32, true>::writeval(pov + 24, got_address);
+      elfcpp::Swap<32, true>::writeval(pov + 24, got_plt_address);
     }
   else
     {
-      memcpy(pov, first_plt_entry_32_pic, plt_entry_size);
+      if (got_plt_offset < 0xff8)
+	{
+	  memcpy(pov, first_plt_entry_32_pic12, plt_entry_size);
+	  S390_relocate_functions<size>::rela12(pov + 6, got_plt_offset + 4);
+	  S390_relocate_functions<size>::rela12(pov + 14, got_plt_offset + 8);
+	}
+      else
+	{
+	  memcpy(pov, first_plt_entry_32_pic, plt_entry_size);
+	  elfcpp::Swap<32, true>::writeval(pov + 24, got_plt_address - (plt_address + 6));
+	}
     }
 }
 
@@ -1536,9 +1605,12 @@ Output_data_plt_s390<size>::do_write(Output_file* of)
   // which is where the GOT pointer will point, and where the
   // three reserved GOT entries are located.
   typename elfcpp::Elf_types<size>::Elf_Addr got_address
-    = this->got_plt_->address();
+    = this->got_dynamic_->address();
 
-  this->fill_first_plt_entry(pov, got_address, plt_address);
+  unsigned int got_plt_offset = this->got_plt_->address() - got_address;
+
+  this->fill_first_plt_entry(pov, this->got_plt_->address(), plt_address,
+			     got_plt_offset);
   pov += this->get_plt_entry_size();
 
   unsigned char* got_pov = got_view;
@@ -1547,7 +1619,7 @@ Output_data_plt_s390<size>::do_write(Output_file* of)
 
   unsigned int plt_offset = this->get_plt_entry_size();
   unsigned int plt_rel_offset = 0;
-  unsigned int got_offset = 3 * size / 8;
+  unsigned int got_offset = 3 * size / 8 + got_plt_offset;
   const unsigned int count = this->count_ + this->irelative_count_;
   // The first three entries in the GOT are reserved, and are written
   // by Output_data_got_plt_s390::do_write.
@@ -1590,22 +1662,43 @@ Target_s390<size>::got_section(Symbol_table* symtab, Layout* layout)
     {
       gold_assert(symtab != NULL && layout != NULL);
 
-      // When using -z now, we can treat .got as a relro section.
-      // Without -z now, it is modified after program startup by lazy
-      // PLT relocations.
-      bool is_got_relro = parameters->options().now();
-      Output_section_order got_order = (is_got_relro
-					? ORDER_RELRO_LAST
-					: ORDER_DATA);
+      bool is_got_relro, is_got_plt_relro;
+      Output_section_order got_order, got_plt_order;
+      const char *got_plt_name;
+      if (parameters->options().relro())
+	{
+	  // Partial GOT relro.
+	  is_got_relro = true;
+	  is_got_plt_relro = false;
+	  got_order = ORDER_RELRO_LAST;
+	  got_plt_order = ORDER_NON_RELRO_FIRST;
+	  got_plt_name = ".got.plt";
+	}
+      else if (parameters->options().now())
+	{
+	  // When using -z now, we can treat the whole .got as a relro section.
+	  is_got_plt_relro = is_got_relro = true;
+	  got_order = got_plt_order = ORDER_RELRO_LAST;
+	  got_plt_name = ".got";
+	}
+      else
+	{
+	  // Without -z now, it is modified after program startup by lazy
+	  // PLT relocations.
+	  is_got_plt_relro = is_got_relro = false;
+	  got_order = got_plt_order = ORDER_DATA;
+	  got_plt_name = ".got";
+	}
 
       // The old GNU linker creates a .got.plt section.  We just
       // create another set of data in the .got section.  Note that we
       // always create a PLT if we create a GOT, although the PLT
       // might be empty.
       this->got_plt_ = new Output_data_got_plt_s390<size>(layout);
-      layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+      layout->add_output_section_data(got_plt_name, elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
-				      this->got_plt_, got_order, is_got_relro);
+				      this->got_plt_, got_plt_order,
+				      is_got_plt_relro);
 
       // The first three entries are reserved.
       this->got_plt_->set_current_data_size(3 * size / 8);
@@ -1613,10 +1706,23 @@ Target_s390<size>::got_section(Symbol_table* symtab, Layout* layout)
       // If there are any IRELATIVE relocations, they get GOT entries
       // in .got.plt after the jump slot entries.
       this->got_irelative_ = new Output_data_space(size / 8, "** GOT IRELATIVE PLT");
-      layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+      layout->add_output_section_data(got_plt_name, elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
 				      this->got_irelative_,
-				      got_order, is_got_relro);
+				      got_plt_order, is_got_plt_relro);
+
+      if (parameters->options().relro())
+	{
+	  // For partial relro, we need a _DYNAMIC pointer at
+	  // _GLOBAL_OFFSET_TABLE_, not at DT_GOTPLT.
+	  this->got_dynamic_ = new Output_data_got_dynamic_s390<size>(layout);
+	  layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+					  (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
+					  this->got_dynamic_, got_order, true);
+	  this->got_dynamic_->set_current_data_size(size / 8);
+	}
+      else
+	this->got_dynamic_ = this->got_plt_;
 
       // Unlike some targets (.e.g x86), S/390 does not use separate .got and
       // .got.plt sections in output.  The output .got section contains both
@@ -1629,9 +1735,9 @@ Target_s390<size>::got_section(Symbol_table* symtab, Layout* layout)
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the GOT.
       this->global_offset_table_ =
-        symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+	symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
 				      Symbol_table::PREDEFINED,
-				      this->got_plt_,
+				      this->got_dynamic_,
 				      0, 0, elfcpp::STT_OBJECT,
 				      elfcpp::STB_LOCAL,
 				      elfcpp::STV_HIDDEN, 0,
@@ -1693,7 +1799,7 @@ Output_data_got_plt_s390<size>::do_write(Output_file* of)
   // The first entry in the GOT is the address of the .dynamic section
   // aka the PT_DYNAMIC segment.  The next two entries are reserved.
   // We saved space for them when we created the section in
-  // Target_x86_64::got_section.
+  // Target_s390::got_section.
   const off_t got_file_offset = this->offset();
   gold_assert(this->data_size() >= 3 * size / 8);
   unsigned char* const got_view =
@@ -1703,6 +1809,26 @@ Output_data_got_plt_s390<size>::do_write(Output_file* of)
   elfcpp::Swap<size, true>::writeval(got_view, dynamic_addr);
   memset(got_view + size / 8, 0, 2 * size / 8);
   of->write_output_view(got_file_offset, 3 * size / 8, got_view);
+}
+
+// Write the first reserved word of the .got section.
+
+template<int size>
+void
+Output_data_got_dynamic_s390<size>::do_write(Output_file* of)
+{
+  // The first entry in the GOT is the address of the .dynamic section
+  // aka the PT_DYNAMIC segment.  The next two entries are reserved.
+  // We saved space for them when we created the section in
+  // Target_s390::got_section.
+  const off_t got_file_offset = this->offset();
+  gold_assert(this->data_size() == size / 8);
+  unsigned char* const got_view =
+      of->get_output_view(got_file_offset, size / 8);
+  Output_section* dynamic = this->layout_->dynamic_section();
+  uint64_t dynamic_addr = dynamic == NULL ? 0 : dynamic->address();
+  elfcpp::Swap<size, true>::writeval(got_view, dynamic_addr);
+  of->write_output_view(got_file_offset, size / 8, got_view);
 }
 
 // Create the PLT section.
@@ -1722,7 +1848,8 @@ Target_s390<size>::make_plt_section(Symbol_table* symtab, Layout* layout)
       this->rela_dyn_section(layout);
 
       this->plt_ = new Output_data_plt_s390<size>(layout,
-		      this->got_, this->got_plt_, this->got_irelative_);
+		      this->got_, this->got_plt_, this->got_irelative_,
+		      this->got_dynamic_);
 
       // Add unwind information if requested.
       if (parameters->options().ld_generated_unwind_info())
@@ -1814,34 +1941,72 @@ Target_s390<size>::init_got_plt_for_update(Symbol_table* symtab,
 {
   gold_assert(this->got_ == NULL);
 
+  bool is_got_relro, is_got_plt_relro;
+  Output_section_order got_order, got_plt_order;
+  const char *got_plt_name;
+  if (parameters->options().relro())
+    {
+      // Partial GOT relro.
+      is_got_relro = true;
+      is_got_plt_relro = false;
+      got_order = ORDER_RELRO_LAST;
+      got_plt_order = ORDER_NON_RELRO_FIRST;
+      got_plt_name = ".got.plt";
+    }
+  else if (parameters->options().now())
+    {
+      // When using -z now, we can treat the whole .got as a relro section.
+      is_got_plt_relro = is_got_relro = true;
+      got_order = got_plt_order = ORDER_RELRO_LAST;
+      got_plt_name = ".got";
+    }
+  else
+    {
+      // Without -z now, it is modified after program startup by lazy
+      // PLT relocations.
+      is_got_plt_relro = is_got_relro = false;
+      got_order = got_plt_order = ORDER_DATA;
+      got_plt_name = ".got";
+    }
+
   // Add the three reserved entries.
   this->got_plt_ = new Output_data_got_plt_s390<size>(layout, (plt_count + 3) * size / 8);
-  layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				  (elfcpp::SHF_ALLOC
-				   | elfcpp::SHF_WRITE),
-				  this->got_plt_, ORDER_NON_RELRO_FIRST,
-				  false);
+  layout->add_output_section_data(got_plt_name, elfcpp::SHT_PROGBITS,
+				  (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
+				  this->got_plt_, got_plt_order,
+				  is_got_plt_relro);
 
   // If there are any IRELATIVE relocations, they get GOT entries in
   // .got.plt after the jump slot entries.
   this->got_irelative_ = new Output_data_space(0, size / 8, "** GOT IRELATIVE PLT");
-  layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+  layout->add_output_section_data(got_plt_name, elfcpp::SHT_PROGBITS,
 				  elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
 				  this->got_irelative_,
-				  ORDER_NON_RELRO_FIRST, false);
+				  got_plt_order, is_got_plt_relro);
+
+  if (parameters->options().relro())
+    {
+      // For partial relro, we need a _DYNAMIC pointer at
+      // _GLOBAL_OFFSET_TABLE_, not at DT_GOTPLT.
+      this->got_dynamic_ = new Output_data_got_dynamic_s390<size>(layout);
+      layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
+				      this->got_dynamic_, got_order, true);
+      this->got_dynamic_->set_current_data_size(size / 8);
+    }
+  else
+    this->got_dynamic_ = this->got_plt_;
 
   this->got_ = new Output_data_got<size, true>(got_count * size / 8);
   layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				  (elfcpp::SHF_ALLOC
-				   | elfcpp::SHF_WRITE),
-				  this->got_, ORDER_RELRO_LAST,
-				  true);
+				  (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
+				  this->got_, got_order, is_got_relro);
 
   // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
   this->global_offset_table_ =
     symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
 				  Symbol_table::PREDEFINED,
-				  this->got_plt_,
+				  this->got_dynamic_,
 				  0, 0, elfcpp::STT_OBJECT,
 				  elfcpp::STB_LOCAL,
 				  elfcpp::STV_HIDDEN, 0,
@@ -1849,7 +2014,8 @@ Target_s390<size>::init_got_plt_for_update(Symbol_table* symtab,
 
   // Create the PLT section.
   this->plt_ = new Output_data_plt_s390<size>(layout,
-		  this->got_, this->got_plt_, this->got_irelative_, plt_count);
+		  this->got_, this->got_plt_, this->got_irelative_,
+		  this->got_dynamic_, plt_count);
 
   // Add unwind information if requested.
   if (parameters->options().ld_generated_unwind_info())
@@ -4051,6 +4217,10 @@ Target_s390<size>::do_finalize_sections(
   if (sym != NULL)
     {
       uint64_t data_size = this->got_->current_data_size();
+      data_size += this->got_plt_->current_data_size();
+      data_size += this->got_irelative_->current_data_size();
+      if (this->got_plt_ != this->got_dynamic_)
+	data_size += this->got_dynamic_->current_data_size();
       symtab->get_sized_symbol<size>(sym)->set_symsize(data_size);
     }
 
