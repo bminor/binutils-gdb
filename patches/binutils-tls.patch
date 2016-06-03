@@ -1,0 +1,3459 @@
+From dd5b6287adc6899d84bab629383273f534d2e5cd Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Wed, 1 Jun 2016 16:57:30 -0700
+Subject: [PATCH] Support x86-64 TLS code sequences without PLT
+
+We can generate x86-64 TLS code sequences for general and local dynamic
+models without PLT, which uses indirect call via GOT:
+
+call *__tls_get_addr@GOTPCREL(%rip)
+
+instead of direct call:
+
+call __tls_get_addr[@PLT]
+
+Since direct call is 4-byte long and indirect call, is 5-byte long, the
+extra one byte must be handled properly.
+
+For general dynamic model, one 0x66 prefix before call instruction is
+removed to make room for indirect call.  For local dynamic model, we
+simply use 5-byte indirect call.
+
+TLS linker optimization is updated to recognize new instruction patterns.
+For local dynamic model to local exec model transition, we generate
+4 0x66 prefixes, instead of 3, before mov instruction in 64-bit and
+generate a 5-byte nop, instead of 4-byte, before mov instruction in
+32-bit.  Since linker may convert
+
+call *__tls_get_addr@GOTPCREL(%rip)
+
+to
+
+addr32 call __tls_get_addr
+
+when producing static executable, both patterns are recognized.
+
+bfd/
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add tls_get_addr.
+	(elf_x86_64_link_hash_newfunc): Initialize tls_get_addr to 2.
+	(elf_x86_64_check_tls_transition): Check indirect call and
+	direct call with the addr32 prefix for general and local dynamic
+	models.  Set the tls_get_addr feild.
+	(elf_x86_64_convert_load_reloc): Always use addr32 prefix for
+	indirect __tls_get_addr call via GOT.
+	(elf_x86_64_relocate_section): Handle GD->LE, GD->IE and LD->LE
+	transitions with indirect call and direct call with the addr32
+	prefix.
+
+ld/
+
+	* testsuite/ld-x86-64/pass.out: New file.
+	* testsuite/ld-x86-64/tls-def1.c: Likewise.
+	* testsuite/ld-x86-64/tls-gd1.S: Likewise.
+	* testsuite/ld-x86-64/tls-ld1.S: Likewise.
+	* testsuite/ld-x86-64/tls-main1.c: Likewise.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/ld-x86-64/tlsbin2-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.dd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.sd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.td: Likewise.
+	* testsuite/ld-x86-64/tlsbinpic2.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd10.dd: Likewise.
+	* testsuite/ld-x86-64/tlsgd10.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd11.dd: Likewise.
+	* testsuite/ld-x86-64/tlsgd11.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd12.d: Likewise.
+	* testsuite/ld-x86-64/tlsgd12.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd13.d: Likewise.
+	* testsuite/ld-x86-64/tlsgd13.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd14.dd: Likewise.
+	* testsuite/ld-x86-64/tlsgd14.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd5c.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd6c.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd9.dd: Likewise.
+	* testsuite/ld-x86-64/tlsgd9.s: Likewise.
+	* testsuite/ld-x86-64/tlsld4.dd: Likewise.
+	* testsuite/ld-x86-64/tlsld4.s: Likewise.
+	* testsuite/ld-x86-64/tlsld5.dd: Likewise.
+	* testsuite/ld-x86-64/tlsld5.s: Likewise.
+	* testsuite/ld-x86-64/tlsld6.dd: Likewise.
+	* testsuite/ld-x86-64/tlsld6.s: Likewise.
+	* testsuite/ld-x86-64/tlspic2-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.dd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.sd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.td: Likewise.
+	* testsuite/ld-x86-64/tlspic3.s: Likewise.
+	* testsuite/ld-x86-64/tlspie2.s: Likewise.
+	* testsuite/ld-x86-64/tlspie2a.d: Likewise.
+	* testsuite/ld-x86-64/tlspie2b.d: Likewise.
+	* testsuite/ld-x86-64/tlsgd5.dd: Updated.
+	* testsuite/ld-x86-64/tlsgd6.dd: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run libtlspic2.so, tlsbin2,
+	tlsgd5b, tlsgd6b, tlsld4, tlsld5, tlsld6, tlsgd9, tlsgd10,
+	tlsgd11, tlsgd14, tlsgd12, tlsgd13, tlspie2a and tlspie2b.
+---
+ bfd/elf64-x86-64.c                     | 341 ++++++++++++++++++++---------
+ ld/testsuite/ld-x86-64/pass.out        |   1 +
+ ld/testsuite/ld-x86-64/tls-def1.c      |   1 +
+ ld/testsuite/ld-x86-64/tls-gd1.S       |  55 +++++
+ ld/testsuite/ld-x86-64/tls-ld1.S       |  47 ++++
+ ld/testsuite/ld-x86-64/tls-main1.c     |  29 +++
+ ld/testsuite/ld-x86-64/tls.exp         | 125 +++++++++++
+ ld/testsuite/ld-x86-64/tlsbin2-nacl.rd | 143 +++++++++++++
+ ld/testsuite/ld-x86-64/tlsbin2.dd      | 310 +++++++++++++++++++++++++++
+ ld/testsuite/ld-x86-64/tlsbin2.rd      | 141 ++++++++++++
+ ld/testsuite/ld-x86-64/tlsbin2.sd      |  13 ++
+ ld/testsuite/ld-x86-64/tlsbin2.td      |  16 ++
+ ld/testsuite/ld-x86-64/tlsbinpic2.s    | 146 +++++++++++++
+ ld/testsuite/ld-x86-64/tlsgd10.dd      |  23 ++
+ ld/testsuite/ld-x86-64/tlsgd10.s       |  18 ++
+ ld/testsuite/ld-x86-64/tlsgd11.dd      |  14 ++
+ ld/testsuite/ld-x86-64/tlsgd11.s       |  15 ++
+ ld/testsuite/ld-x86-64/tlsgd12.d       |   4 +
+ ld/testsuite/ld-x86-64/tlsgd12.s       |   5 +
+ ld/testsuite/ld-x86-64/tlsgd13.d       |   4 +
+ ld/testsuite/ld-x86-64/tlsgd13.s       |  11 +
+ ld/testsuite/ld-x86-64/tlsgd14.dd      |  10 +
+ ld/testsuite/ld-x86-64/tlsgd14.s       |  14 ++
+ ld/testsuite/ld-x86-64/tlsgd5.dd       |   2 +-
+ ld/testsuite/ld-x86-64/tlsgd5c.s       |   8 +
+ ld/testsuite/ld-x86-64/tlsgd6.dd       |   2 +-
+ ld/testsuite/ld-x86-64/tlsgd6c.s       |   7 +
+ ld/testsuite/ld-x86-64/tlsgd9.dd       |  23 ++
+ ld/testsuite/ld-x86-64/tlsgd9.s        |  25 +++
+ ld/testsuite/ld-x86-64/tlsld4.dd       |  23 ++
+ ld/testsuite/ld-x86-64/tlsld4.s        |  27 +++
+ ld/testsuite/ld-x86-64/tlsld5.dd       |  13 ++
+ ld/testsuite/ld-x86-64/tlsld5.s        |  12 ++
+ ld/testsuite/ld-x86-64/tlsld6.dd       |  14 ++
+ ld/testsuite/ld-x86-64/tlsld6.s        |  12 ++
+ ld/testsuite/ld-x86-64/tlspic2-nacl.rd | 145 +++++++++++++
+ ld/testsuite/ld-x86-64/tlspic2.dd      | 378 +++++++++++++++++++++++++++++++++
+ ld/testsuite/ld-x86-64/tlspic2.rd      | 139 ++++++++++++
+ ld/testsuite/ld-x86-64/tlspic2.sd      |  20 ++
+ ld/testsuite/ld-x86-64/tlspic2.td      |  16 ++
+ ld/testsuite/ld-x86-64/tlspic3.s       | 290 +++++++++++++++++++++++++
+ ld/testsuite/ld-x86-64/tlspie2.s       |  58 +++++
+ ld/testsuite/ld-x86-64/tlspie2a.d      |   6 +
+ ld/testsuite/ld-x86-64/tlspie2b.d      |  28 +++
+ ld/testsuite/ld-x86-64/x86-64.exp      |  59 ++++-
+ 45 files changed, 2688 insertions(+), 105 deletions(-)
+ create mode 100644 ld/testsuite/ld-x86-64/pass.out
+ create mode 100644 ld/testsuite/ld-x86-64/tls-def1.c
+ create mode 100644 ld/testsuite/ld-x86-64/tls-gd1.S
+ create mode 100644 ld/testsuite/ld-x86-64/tls-ld1.S
+ create mode 100644 ld/testsuite/ld-x86-64/tls-main1.c
+ create mode 100644 ld/testsuite/ld-x86-64/tls.exp
+ create mode 100644 ld/testsuite/ld-x86-64/tlsbin2-nacl.rd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsbin2.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsbin2.rd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsbin2.sd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsbin2.td
+ create mode 100644 ld/testsuite/ld-x86-64/tlsbinpic2.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd10.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd10.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd11.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd11.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd12.d
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd12.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd13.d
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd13.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd14.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd14.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd5c.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd6c.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd9.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsgd9.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsld4.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsld4.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsld5.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsld5.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlsld6.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlsld6.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlspic2-nacl.rd
+ create mode 100644 ld/testsuite/ld-x86-64/tlspic2.dd
+ create mode 100644 ld/testsuite/ld-x86-64/tlspic2.rd
+ create mode 100644 ld/testsuite/ld-x86-64/tlspic2.sd
+ create mode 100644 ld/testsuite/ld-x86-64/tlspic2.td
+ create mode 100644 ld/testsuite/ld-x86-64/tlspic3.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlspie2.s
+ create mode 100644 ld/testsuite/ld-x86-64/tlspie2a.d
+ create mode 100644 ld/testsuite/ld-x86-64/tlspie2b.d
+
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index d8d4198..4e09f5e 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -796,6 +796,11 @@ struct elf_x86_64_link_hash_entry
+   /* TRUE if symbol has non-GOT/non-PLT relocations in text sections.  */
+   unsigned int has_non_got_reloc : 1;
+ 
++  /* 0: symbol isn't __tls_get_addr.
++     1: symbol is __tls_get_addr.
++     2: symbol is unknown.  */
++  unsigned int tls_get_addr : 2;
++
+   /* Reference count of C/C++ function pointer relocations in read-write
+      section which can be resolved at run-time.  */
+   bfd_signed_vma func_pointer_refcount;
+@@ -946,6 +951,7 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
+       eh->has_bnd_reloc = 0;
+       eh->has_got_reloc = 0;
+       eh->has_non_got_reloc = 0;
++      eh->tls_get_addr = 2;
+       eh->func_pointer_refcount = 0;
+       eh->plt_bnd.offset = (bfd_vma) -1;
+       eh->plt_got.offset = (bfd_vma) -1;
+@@ -1279,6 +1285,8 @@ elf_x86_64_check_tls_transition (bfd *abfd,
+   struct elf_link_hash_entry *h;
+   bfd_vma offset;
+   struct elf_x86_64_link_hash_table *htab;
++  bfd_byte *call;
++  bfd_boolean indirect_call, tls_get_addr;
+ 
+   htab = elf_x86_64_hash_table (info);
+   offset = rel->r_offset;
+@@ -1294,31 +1302,58 @@ elf_x86_64_check_tls_transition (bfd *abfd,
+ 	  /* Check transition from GD access model.  For 64bit, only
+ 		.byte 0x66; leaq foo@tlsgd(%rip), %rdi
+ 		.word 0x6666; rex64; call __tls_get_addr
++	     or
++		.byte 0x66; leaq foo@tlsgd(%rip), %rdi
++		.byte 0x66; rex64
++		call *__tls_get_addr@GOTPCREL(%rip)
++		which may be converted to
++		addr32 call __tls_get_addr
+ 	     can transit to different access model.  For 32bit, only
+ 		leaq foo@tlsgd(%rip), %rdi
+ 		.word 0x6666; rex64; call __tls_get_addr
+-	     can transit to different access model.  For largepic
++	     or
++		leaq foo@tlsgd(%rip), %rdi
++		.byte 0x66; rex64
++		call *__tls_get_addr@GOTPCREL(%rip)
++		which may be converted to
++		addr32 call __tls_get_addr
++	     can transit to different access model.  For largepic,
+ 	     we also support:
+ 	        leaq foo@tlsgd(%rip), %rdi
+ 	        movabsq $__tls_get_addr@pltoff, %rax
++	        addq $r15, %rax
++	        call *%rax
++	     or
++	        leaq foo@tlsgd(%rip), %rdi
++	        movabsq $__tls_get_addr@pltoff, %rax
+ 	        addq $rbx, %rax
+-	        call *%rax.  */
++	        call *%rax  */
+ 
+-	  static const unsigned char call[] = { 0x66, 0x66, 0x48, 0xe8 };
+ 	  static const unsigned char leaq[] = { 0x66, 0x48, 0x8d, 0x3d };
+ 
+ 	  if ((offset + 12) > sec->size)
+ 	    return FALSE;
+ 
+-	  if (memcmp (contents + offset + 4, call, 4) != 0)
++	  call = contents + offset + 4;
++	  if (call[0] != 0x66
++	      || !((call[1] == 0x48 && call[2] == 0xff)
++		   || (call[1] == 0x48
++		       && call[2] == 0x67
++		       && call[3] == 0xe8)
++		   || (call[1] == 0x66
++		       && call[2] == 0x48
++		       && call[3] == 0xe8)))
+ 	    {
+ 	      if (!ABI_64_P (abfd)
+ 		  || (offset + 19) > sec->size
+ 		  || offset < 3
+-		  || memcmp (contents + offset - 3, leaq + 1, 3) != 0
+-		  || memcmp (contents + offset + 4, "\x48\xb8", 2) != 0
+-		  || memcmp (contents + offset + 14, "\x48\x01\xd8\xff\xd0", 5)
+-		     != 0)
++		  || memcmp (call - 7, leaq + 1, 3) != 0
++		  || memcmp (call, "\x48\xb8", 2) != 0
++		  || call[11] != 0x01
++		  || call[13] != 0xff
++		  || call[14] != 0xd0
++		  || !((call[10] == 0x48 && call[12] == 0xd8)
++		       || (call[10] == 0x4c && call[12] == 0xf8)))
+ 		return FALSE;
+ 	      largepic = TRUE;
+ 	    }
+@@ -1334,18 +1369,29 @@ elf_x86_64_check_tls_transition (bfd *abfd,
+ 		  || memcmp (contents + offset - 3, leaq + 1, 3) != 0)
+ 		return FALSE;
+ 	    }
++	  indirect_call = call[2] == 0xff;
+ 	}
+       else
+ 	{
+ 	  /* Check transition from LD access model.  Only
+ 		leaq foo@tlsld(%rip), %rdi;
+ 		call __tls_get_addr
++             or
++		leaq foo@tlsld(%rip), %rdi;
++		call *__tls_get_addr@GOTPCREL(%rip)
++		which may be converted to
++		addr32 call __tls_get_addr
+ 	     can transit to different access model.  For largepic
+ 	     we also support:
+ 	        leaq foo@tlsld(%rip), %rdi
+ 	        movabsq $__tls_get_addr@pltoff, %rax
++	        addq $r15, %rax
++	        call *%rax
++	     or
++	        leaq foo@tlsld(%rip), %rdi
++	        movabsq $__tls_get_addr@pltoff, %rax
+ 	        addq $rbx, %rax
+-	        call *%rax.  */
++	        call *%rax  */
+ 
+ 	  static const unsigned char lea[] = { 0x48, 0x8d, 0x3d };
+ 
+@@ -1355,33 +1401,62 @@ elf_x86_64_check_tls_transition (bfd *abfd,
+ 	  if (memcmp (contents + offset - 3, lea, 3) != 0)
+ 	    return FALSE;
+ 
+-	  if (0xe8 != *(contents + offset + 4))
++	  call = contents + offset + 4;
++	  if (!(call[0] == 0xe8
++		|| call[0] == 0xff
++		|| (call[0] == 0x67 && call[1] == 0xe8)))
+ 	    {
+ 	      if (!ABI_64_P (abfd)
+ 		  || (offset + 19) > sec->size
+-		  || memcmp (contents + offset + 4, "\x48\xb8", 2) != 0
+-		  || memcmp (contents + offset + 14, "\x48\x01\xd8\xff\xd0", 5)
+-		     != 0)
++		  || memcmp (call, "\x48\xb8", 2) != 0
++		  || call[11] != 0x01
++		  || call[13] != 0xff
++		  || call[14] != 0xd0
++		  || !((call[10] == 0x48 && call[12] == 0xd8)
++		       || (call[10] == 0x4c && call[12] == 0xf8)))
+ 		return FALSE;
+ 	      largepic = TRUE;
+ 	    }
++	  indirect_call = call[0] == 0xff;
+ 	}
+ 
+       r_symndx = htab->r_sym (rel[1].r_info);
+       if (r_symndx < symtab_hdr->sh_info)
+ 	return FALSE;
+ 
++      tls_get_addr = FALSE;
+       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
++      if (h != NULL && h->root.root.string != NULL)
++	{
++	  struct elf_x86_64_link_hash_entry *eh
++	    = (struct elf_x86_64_link_hash_entry *) h;
++	  tls_get_addr = eh->tls_get_addr == 1;
++	  if (eh->tls_get_addr == 2)
++	    {
++	      if (strncmp (h->root.root.string, "__tls_get_addr", 14)
++		  == 0)
++		{
++		  eh->tls_get_addr = 1;
++		  tls_get_addr = TRUE;
++		}
++	      else
++		eh->tls_get_addr = 0;
++	    }
++	}
++
+       /* Use strncmp to check __tls_get_addr since __tls_get_addr
+ 	 may be versioned.  */
+-      return (h != NULL
+-	      && h->root.root.string != NULL
++      return (tls_get_addr
+ 	      && (largepic
+ 		  ? ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLTOFF64
+-		  : (ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PC32
+-		     || ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLT32))
+-	      && (strncmp (h->root.root.string,
+-			   "__tls_get_addr", 14) == 0));
++		  : ((indirect_call
++		      && (ELF32_R_TYPE (rel[1].r_info)
++			  == R_X86_64_GOTPCRELX))
++		     || (!indirect_call
++			 && ((ELF32_R_TYPE (rel[1].r_info)
++			      == R_X86_64_PC32)
++			     || (ELF32_R_TYPE (rel[1].r_info)
++				 == R_X86_64_PLT32))))));
+ 
+     case R_X86_64_GOTTPOFF:
+       /* Check transition from IE access model:
+@@ -1444,8 +1519,8 @@ elf_x86_64_check_tls_transition (bfd *abfd,
+       if (offset + 2 <= sec->size)
+ 	{
+ 	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
+-	  static const unsigned char call[] = { 0xff, 0x10 };
+-	  return memcmp (contents + offset, call, 2) == 0;
++	  call = contents + offset;
++	  return call[0] == 0xff && call[1] == 0x10;
+ 	}
+ 
+       return FALSE;
+@@ -1921,19 +1996,32 @@ convert:
+ 	}
+       else
+ 	{
++	  struct elf_x86_64_link_hash_entry *eh
++	    = (struct elf_x86_64_link_hash_entry *) h;
++
+ 	  /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
+ 	     is a nop prefix.  */
+ 	  modrm = 0xe8;
+-	  nop = link_info->call_nop_byte;
+-	  if (link_info->call_nop_as_suffix)
++	  /* To support TLS optimization, always use addr32 prefix for
++	     "call *__tls_get_addr@GOTPCREL(%rip)".  */
++	  if (eh->tls_get_addr == 1)
+ 	    {
+-	      nop_offset = irel->r_offset + 3;
+-	      disp = bfd_get_32 (abfd, contents + irel->r_offset);
+-	      irel->r_offset -= 1;
+-	      bfd_put_32 (abfd, disp, contents + irel->r_offset);
++	      nop = 0x67;
++	      nop_offset = irel->r_offset - 2;
+ 	    }
+ 	  else
+-	    nop_offset = irel->r_offset - 2;
++	    {
++	      nop = link_info->call_nop_byte;
++	      if (link_info->call_nop_as_suffix)
++		{
++		  nop_offset = irel->r_offset + 3;
++		  disp = bfd_get_32 (abfd, contents + irel->r_offset);
++		  irel->r_offset -= 1;
++		  bfd_put_32 (abfd, disp, contents + irel->r_offset);
++		}
++	      else
++		nop_offset = irel->r_offset - 2;
++	    }
+ 	}
+       bfd_put_8 (abfd, nop, contents + nop_offset);
+       bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
+@@ -4861,39 +4949,53 @@ direct:
+ 	      if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
+ 		{
+ 		  /* GD->LE transition.  For 64bit, change
+-		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
+-		     .word 0x6666; rex64; call __tls_get_addr
++			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
++			.word 0x6666; rex64; call __tls_get_addr
++		     or
++			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
++			.byte 0x66; rex64
++			call *__tls_get_addr@GOTPCREL(%rip)
++			which may be converted to
++			addr32 call __tls_get_addr
+ 		     into:
+-		     movq %fs:0, %rax
+-		     leaq foo@tpoff(%rax), %rax
++			movq %fs:0, %rax
++			leaq foo@tpoff(%rax), %rax
+ 		     For 32bit, change
+-		     leaq foo@tlsgd(%rip), %rdi
+-		     .word 0x6666; rex64; call __tls_get_addr
++			leaq foo@tlsgd(%rip), %rdi
++			.word 0x6666; rex64; call __tls_get_addr
++		     or
++			leaq foo@tlsgd(%rip), %rdi
++			.byte 0x66; rex64
++			call *__tls_get_addr@GOTPCREL(%rip)
++			which may be converted to
++			addr32 call __tls_get_addr
+ 		     into:
+-		     movl %fs:0, %eax
+-		     leaq foo@tpoff(%rax), %rax
++			movl %fs:0, %eax
++			leaq foo@tpoff(%rax), %rax
+ 		     For largepic, change:
+-		     leaq foo@tlsgd(%rip), %rdi
+-		     movabsq $__tls_get_addr@pltoff, %rax
+-		     addq %rbx, %rax
+-		     call *%rax
++			leaq foo@tlsgd(%rip), %rdi
++			movabsq $__tls_get_addr@pltoff, %rax
++			addq %r15, %rax
++			call *%rax
+ 		     into:
+-		     movq %fs:0, %rax
+-		     leaq foo@tpoff(%rax), %rax
+-		     nopw 0x0(%rax,%rax,1) */
++			movq %fs:0, %rax
++			leaq foo@tpoff(%rax), %rax
++			nopw 0x0(%rax,%rax,1)  */
+ 		  int largepic = 0;
+-		  if (ABI_64_P (output_bfd)
+-		      && contents[roff + 5] == (bfd_byte) '\xb8')
++		  if (ABI_64_P (output_bfd))
+ 		    {
+-		      memcpy (contents + roff - 3,
+-			      "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80"
+-			      "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
+-		      largepic = 1;
++		      if (contents[roff + 5] == 0xb8)
++			{
++			  memcpy (contents + roff - 3,
++				  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80"
++				  "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
++			  largepic = 1;
++			}
++		      else
++			memcpy (contents + roff - 4,
++				"\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
++				16);
+ 		    }
+-		  else if (ABI_64_P (output_bfd))
+-		    memcpy (contents + roff - 4,
+-			    "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
+-			    16);
+ 		  else
+ 		    memcpy (contents + roff - 3,
+ 			    "\x64\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
+@@ -4901,7 +5003,8 @@ direct:
+ 		  bfd_put_32 (output_bfd,
+ 			      elf_x86_64_tpoff (info, relocation),
+ 			      contents + roff + 8 + largepic);
+-		  /* Skip R_X86_64_PC32/R_X86_64_PLT32/R_X86_64_PLTOFF64.  */
++		  /* Skip R_X86_64_PC32, R_X86_64_PLT32,
++		     R_X86_64_GOTPCRELX and R_X86_64_PLTOFF64.  */
+ 		  rel++;
+ 		  wrel++;
+ 		  continue;
+@@ -5137,39 +5240,53 @@ direct:
+ 	      if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
+ 		{
+ 		  /* GD->IE transition.  For 64bit, change
+-		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
+-		     .word 0x6666; rex64; call __tls_get_addr@plt
++			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
++			.word 0x6666; rex64; call __tls_get_addr@plt
++		     or
++			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
++			.byte 0x66; rex64
++			call *__tls_get_addr@GOTPCREL(%rip
++			which may be converted to
++			addr32 call __tls_get_addr
+ 		     into:
+-		     movq %fs:0, %rax
+-		     addq foo@gottpoff(%rip), %rax
++			movq %fs:0, %rax
++			addq foo@gottpoff(%rip), %rax
+ 		     For 32bit, change
+-		     leaq foo@tlsgd(%rip), %rdi
+-		     .word 0x6666; rex64; call __tls_get_addr@plt
++			leaq foo@tlsgd(%rip), %rdi
++			.word 0x6666; rex64; call __tls_get_addr@plt
++		     or
++			leaq foo@tlsgd(%rip), %rdi
++			.byte 0x66; rex64;
++			call *__tls_get_addr@GOTPCREL(%rip)
++			which may be converted to
++			addr32 call __tls_get_addr
+ 		     into:
+-		     movl %fs:0, %eax
+-		     addq foo@gottpoff(%rip), %rax
++			movl %fs:0, %eax
++			addq foo@gottpoff(%rip), %rax
+ 		     For largepic, change:
+-		     leaq foo@tlsgd(%rip), %rdi
+-		     movabsq $__tls_get_addr@pltoff, %rax
+-		     addq %rbx, %rax
+-		     call *%rax
++			leaq foo@tlsgd(%rip), %rdi
++			movabsq $__tls_get_addr@pltoff, %rax
++			addq %r15, %rax
++			call *%rax
+ 		     into:
+-		     movq %fs:0, %rax
+-		     addq foo@gottpoff(%rax), %rax
+-		     nopw 0x0(%rax,%rax,1) */
++			movq %fs:0, %rax
++			addq foo@gottpoff(%rax), %rax
++			nopw 0x0(%rax,%rax,1)  */
+ 		  int largepic = 0;
+-		  if (ABI_64_P (output_bfd)
+-		      && contents[roff + 5] == (bfd_byte) '\xb8')
++		  if (ABI_64_P (output_bfd))
+ 		    {
+-		      memcpy (contents + roff - 3,
+-			      "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05"
+-			      "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
+-		      largepic = 1;
++		      if (contents[roff + 5] == 0xb8)
++			{
++			  memcpy (contents + roff - 3,
++				  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05"
++				  "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
++			  largepic = 1;
++			}
++		      else
++			memcpy (contents + roff - 4,
++				"\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
++				16);
+ 		    }
+-		  else if (ABI_64_P (output_bfd))
+-		    memcpy (contents + roff - 4,
+-			    "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
+-			    16);
+ 		  else
+ 		    memcpy (contents + roff - 3,
+ 			    "\x64\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
+@@ -5243,33 +5360,57 @@ direct:
+ 	  if (r_type != R_X86_64_TLSLD)
+ 	    {
+ 	      /* LD->LE transition:
+-		 leaq foo@tlsld(%rip), %rdi; call __tls_get_addr.
++			leaq foo@tlsld(%rip), %rdi; call __tls_get_addr
+ 		 For 64bit, we change it into:
+-		 .word 0x6666; .byte 0x66; movq %fs:0, %rax.
++			.word 0x6666; .byte 0x66; movq %fs:0, %rax
+ 		 For 32bit, we change it into:
+-		 nopl 0x0(%rax); movl %fs:0, %eax.
++			nopl 0x0(%rax); movl %fs:0, %eax
++		 Or
++			leaq foo@tlsld(%rip), %rdi;
++			call *__tls_get_addr@GOTPCREL(%rip)
++			which may be converted to
++			addr32 call __tls_get_addr
++		 For 64bit, we change it into:
++			.word 0x6666; .word 0x6666; movq %fs:0, %rax
++		 For 32bit, we change it into:
++			nopw 0x0(%rax); movl %fs:0, %eax
+ 		 For largepic, change:
+-		 leaq foo@tlsgd(%rip), %rdi
+-		 movabsq $__tls_get_addr@pltoff, %rax
+-		 addq %rbx, %rax
+-		 call *%rax
+-		 into:
+-		 data16 data16 data16 nopw %cs:0x0(%rax,%rax,1)
+-		 movq %fs:0, %eax */
++			leaq foo@tlsgd(%rip), %rdi
++			movabsq $__tls_get_addr@pltoff, %rax
++			addq %rbx, %rax
++			call *%rax
++		 into
++			data16 data16 data16 nopw %cs:0x0(%rax,%rax,1)
++			movq %fs:0, %eax  */
+ 
+ 	      BFD_ASSERT (r_type == R_X86_64_TPOFF32);
+-	      if (ABI_64_P (output_bfd)
+-		  && contents[rel->r_offset + 5] == (bfd_byte) '\xb8')
+-		memcpy (contents + rel->r_offset - 3,
+-			"\x66\x66\x66\x66\x2e\x0f\x1f\x84\0\0\0\0\0"
+-			"\x64\x48\x8b\x04\x25\0\0\0", 22);
+-	      else if (ABI_64_P (output_bfd))
+-		memcpy (contents + rel->r_offset - 3,
+-			"\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
++	      if (ABI_64_P (output_bfd))
++		{
++		  if (contents[rel->r_offset + 5] == 0xb8)
++		    memcpy (contents + rel->r_offset - 3,
++			    "\x66\x66\x66\x66\x2e\x0f\x1f\x84\0\0\0\0\0"
++			    "\x64\x48\x8b\x04\x25\0\0\0", 22);
++		  else if (contents[rel->r_offset + 4] == 0xff
++			   || contents[rel->r_offset + 4] == 0x67)
++		    memcpy (contents + rel->r_offset - 3,
++			    "\x66\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0",
++			    13);
++		  else
++		    memcpy (contents + rel->r_offset - 3,
++			    "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
++		}
+ 	      else
+-		memcpy (contents + rel->r_offset - 3,
+-			"\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0", 12);
+-	      /* Skip R_X86_64_PC32/R_X86_64_PLT32/R_X86_64_PLTOFF64.  */
++		{
++		  if (contents[rel->r_offset + 4] == 0xff)
++		    memcpy (contents + rel->r_offset - 3,
++			    "\x66\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0",
++			    13);
++		  else
++		    memcpy (contents + rel->r_offset - 3,
++			    "\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0", 12);
++		}
++	      /* Skip R_X86_64_PC32, R_X86_64_PLT32, R_X86_64_GOTPCRELX
++		 and R_X86_64_PLTOFF64.  */
+ 	      rel++;
+ 	      wrel++;
+ 	      continue;
+diff --git a/ld/testsuite/ld-x86-64/pass.out b/ld/testsuite/ld-x86-64/pass.out
+new file mode 100644
+index 0000000..7ef22e9
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pass.out
+@@ -0,0 +1 @@
++PASS
+diff --git a/ld/testsuite/ld-x86-64/tls-def1.c b/ld/testsuite/ld-x86-64/tls-def1.c
+new file mode 100644
+index 0000000..62470a9
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tls-def1.c
+@@ -0,0 +1 @@
++__thread int gd = 1;
+diff --git a/ld/testsuite/ld-x86-64/tls-gd1.S b/ld/testsuite/ld-x86-64/tls-gd1.S
+new file mode 100644
+index 0000000..cf56675
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tls-gd1.S
+@@ -0,0 +1,55 @@
++	.text
++	.p2align 4,,15
++	.globl	get_gd
++	.type	get_gd, @function
++get_gd:
++	subq	$8, %rsp
++#ifdef __LP64__
++	.byte	0x66
++#endif
++	leaq	gd@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	addq	$8, %rsp
++	ret
++	.size	get_gd, .-get_gd
++	.text
++	.p2align 4,,15
++	.globl	set_gd
++	.type	set_gd, @function
++set_gd:
++	pushq	%rbx
++	movl	%edi, %ebx
++#ifdef __LP64__
++	.byte	0x66
++#endif
++	leaq	gd@tlsgd(%rip), %rdi
++	.value	0x6666
++	rex64
++	call	__tls_get_addr@PLT
++	movl	%ebx, (%rax)
++	popq	%rbx
++	ret
++	.size	set_gd, .-set_gd
++	.text
++	.p2align 4,,15
++	.globl	test_gd
++	.type	test_gd, @function
++test_gd:
++	pushq	%rbx
++	movl	%edi, %ebx
++#ifdef __LP64__
++	.byte	0x66
++#endif
++	leaq	gd@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	cmpl	%ebx, (%rax)
++	popq	%rbx
++	sete	%al
++	movzbl	%al, %eax
++	ret
++	.size	test_gd, .-test_gd
++	.section	.note.GNU-stack,"",@progbits
+diff --git a/ld/testsuite/ld-x86-64/tls-ld1.S b/ld/testsuite/ld-x86-64/tls-ld1.S
+new file mode 100644
+index 0000000..a3cbc96
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tls-ld1.S
+@@ -0,0 +1,47 @@
++	.text
++	.p2align 4,,15
++	.globl	get_ld
++	.type	get_ld, @function
++get_ld:
++	subq	$8, %rsp
++	leaq	ld@tlsld(%rip), %rdi
++	call	__tls_get_addr@PLT
++	addq	$8, %rsp
++	addq	$ld@dtpoff, %rax
++	ret
++	.size	get_ld, .-get_ld
++	.text
++	.p2align 4,,15
++	.globl	set_ld
++	.type	set_ld, @function
++set_ld:
++	pushq	%rbx
++	movl	%edi, %ebx
++	leaq	ld@tlsld(%rip), %rdi
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	movl	%ebx, ld@dtpoff(%rax)
++	popq	%rbx
++	ret
++	.size	set_ld, .-set_ld
++	.text
++	.p2align 4,,15
++	.globl	test_ld
++	.type	test_ld, @function
++test_ld:
++	pushq	%rbx
++	movl	%edi, %ebx
++	leaq	ld@tlsld(%rip), %rdi
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	cmpl	%ebx, ld@dtpoff(%rax)
++	popq	%rbx
++	sete	%al
++	movzbl	%al, %eax
++	ret
++	.size	test_ld, .-test_ld
++	.section	.tbss,"awT",@nobits
++	.align 4
++	.type	ld, @object
++	.size	ld, 4
++ld:
++	.zero	4
++	.section	.note.GNU-stack,"",@progbits
+diff --git a/ld/testsuite/ld-x86-64/tls-main1.c b/ld/testsuite/ld-x86-64/tls-main1.c
+new file mode 100644
+index 0000000..5c33744
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tls-main1.c
+@@ -0,0 +1,29 @@
++#include <stdio.h>
++#include <stdlib.h>
++
++extern int * get_gd (void);
++extern void set_gd (int);
++extern int test_gd (int);
++extern int * get_ld (void);
++extern void set_ld (int);
++extern int test_ld (int);
++
++int
++main ()
++{
++  int *p;
++ 
++  p = get_gd ();
++  set_gd (3);
++  if (*p != 3 || !test_gd (3))
++    abort ();
++
++  p = get_ld ();
++  set_ld (4);
++  if (*p != 4 || !test_ld (4))
++    abort ();
++
++  printf ("PASS\n");
++
++  return 0;
++}
+diff --git a/ld/testsuite/ld-x86-64/tls.exp b/ld/testsuite/ld-x86-64/tls.exp
+new file mode 100644
+index 0000000..081385f
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tls.exp
+@@ -0,0 +1,125 @@
++# Expect script for x86-64 TLS tests.
++#   Copyright (C) 2016 Free Software Foundation, Inc.
++#
++# This file is part of the GNU Binutils.
++#
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
++# MA 02110-1301, USA.
++#
++
++# The following tests require running the executable generated by ld,
++# or enough of a build environment to create a fully linked executable.
++# This is not commonly available when testing a cross-built linker.
++if ![isnative] {
++    return
++}
++
++# Only on Linux for now.
++if ![istarget "x86_64-*-linux*"] {
++    return
++}
++
++# Check to see if the C compiler works
++if { [which $CC] == 0 } {
++    return
++}
++
++run_cc_link_tests [list \
++    [list \
++	"Build tls-def1.c tls-main1.c" \
++	"" \
++	"-fPIE" \
++	{tls-def1.c tls-main1.c} \
++    ] \
++    [list \
++	"Build tls-gd1.o tls-ld1.o" \
++	"" \
++	"-fPIC -Wa,-mrelax-relocations=yes" \
++	{tls-gd1.S tls-ld1.S} \
++    ] \
++    [list \
++	"Build libtls-1a.so" \
++	"-shared tmpdir/tls-def1.o" \
++	"" \
++	{dummy.s} \
++	{} \
++	"libtls-1a.so" \
++    ] \
++    [list \
++	"Build libtls-1b.so" \
++	"-shared tmpdir/tls-gd1.o tmpdir/tls-ld1.o" \
++	"" \
++	{dummy.s} \
++	{} \
++	"libtls-1b.so" \
++    ] \
++]
++
++run_ld_link_exec_tests [] [list \
++    [list \
++	"TLS GD/LD -> LE transition without PLT (dynamic)" \
++	"tmpdir/tls-def1.o tmpdir/tls-main1.o tmpdir/tls-gd1.o \
++	 tmpdir/tls-ld1.o" \
++	"" \
++	{ dummy.s } \
++	"tls-1a" \
++	"pass.out" \
++    ] \
++    [list \
++	"TLS GD/LD -> LE transition without PLT (PIE)" \
++	"-pie tmpdir/tls-def1.o tmpdir/tls-main1.o tmpdir/tls-gd1.o \
++	 tmpdir/tls-ld1.o" \
++	"" \
++	{ dummy.s } \
++	"tls-1b" \
++	"pass.out" \
++    ] \
++    [list \
++	"TLS GD/LD -> LE transition without PLT (static)" \
++	"-static tmpdir/tls-def1.o tmpdir/tls-main1.o tmpdir/tls-gd1.o \
++	 tmpdir/tls-ld1.o" \
++	"" \
++	{ dummy.s } \
++	"tls-1c" \
++	"pass.out" \
++    ] \
++    [list \
++	"TLS GD/LD -> IE transition without PLT" \
++	"tmpdir/tls-main1.o tmpdir/tls-gd1.o tmpdir/tls-ld1.o \
++	 tmpdir/libtls-1a.so -R tmpdir" \
++	"" \
++	{ dummy.s } \
++	"tls-1d" \
++	"pass.out" \
++    ] \
++    [list \
++	"TLS without PLT (1)" \
++	"tmpdir/tls-main1.o \
++	 tmpdir/libtls-1a.so tmpdir/libtls-1b.so -R tmpdir" \
++	"" \
++	{ dummy.s } \
++	"tls-1e" \
++	"pass.out" \
++    ] \
++    [list \
++	"TLS without PLT (2)" \
++	"tmpdir/tls-main1.o tmpdir/tls-def1.o \
++	 tmpdir/libtls-1b.so -R tmpdir" \
++	"" \
++	{ dummy.s } \
++	"tls-1f" \
++	"pass.out" \
++    ] \
++]
+diff --git a/ld/testsuite/ld-x86-64/tlsbin2-nacl.rd b/ld/testsuite/ld-x86-64/tlsbin2-nacl.rd
+new file mode 100644
+index 0000000..110927b
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsbin2-nacl.rd
+@@ -0,0 +1,143 @@
++#source: tlsbinpic2.s
++#source: tlsbin.s
++#as: --64
++#ld: -shared -melf_x86_64_nacl --no-ld-generated-unwind-info
++#readelf: -WSsrl
++#target: x86_64-*-nacl*
++
++There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
++
++Section Headers:
++ +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
++ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
++ +\[[ 0-9]+\] .text +PROGBITS +0+20000 [0-9a-f]+ 0+233 00 +AX +0 +0 +4096
++ +\[[ 0-9]+\] .interp +.*
++ +\[[ 0-9]+\] .hash +.*
++ +\[[ 0-9]+\] .dynsym +.*
++ +\[[ 0-9]+\] .dynstr +.*
++ +\[[ 0-9]+\] .rela.dyn +.*
++ +\[[ 0-9]+\] .tdata +PROGBITS +0+100303b0 [0-9a-f]+ 0+60 00 WAT +0 +0 +1
++ +\[[ 0-9]+\] .tbss +NOBITS +0+10030410 [0-9a-f]+ 0+40 00 WAT +0 +0 +1
++ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+10030410 [0-9a-f]+ 0+100 10 +WA +5 +0 +8
++ +\[[ 0-9]+\] .got +PROGBITS +0+10030510 [0-9a-f]+ 0+28 08 +WA +0 +0 +8
++ +\[[ 0-9]+\] .got.plt +PROGBITS +0+10030538 [0-9a-f]+ 0+18 08 +WA +0 +0 +8
++ +\[[ 0-9]+\] .shstrtab +.*
++ +\[[ 0-9]+\] .symtab +.*
++ +\[[ 0-9]+\] .strtab +.*
++Key to Flags:
++#...
++
++Elf file type is EXEC \(Executable file\)
++Entry point 0x2013b
++There are [0-9]+ program headers, starting at offset [0-9]+
++
++Program Headers:
++ +Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
++ +PHDR.*
++ +INTERP.*
++.*Requesting program interpreter.*
++ +LOAD +0x0+10000 0x0+20000 0x0+20000 0x0+10000 0x0+10000 R E +0x10000
++ +LOAD +0x0+ 0x0+10020000 0x0+10020000 0x0+3b0 0x0+3b0 R +0x10000
++ +LOAD +0x0+3b0 0x0+100303b0 0x0+100303b0 0x0+1a0 0x0+1a0 RW +0x10000
++ +DYNAMIC +0x0+410 0x0+10030410 0x0+10030410 0x0+100 0x0+100 RW +0x8
++ +TLS +0x0+3b0 0x0+100303b0 0x0+100303b0 0x0+60 0x0+a0 R +0x1
++
++ Section to Segment mapping:
++ +Segment Sections...
++ +00 *
++ +01 +.interp *
++ +02 +.text *
++ +03 +.interp .hash .dynsym .dynstr .rela.dyn *
++ +04 +.tdata .dynamic .got .got.plt *
++ +05 +.dynamic *
++ +06 +.tdata .tbss *
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 5 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f ]+R_X86_64_TPOFF64 +0+ sG5 \+ 0
++[0-9a-f ]+R_X86_64_TPOFF64 +0+ sG2 \+ 0
++[0-9a-f ]+R_X86_64_GLOB_DAT +0+ __tls_get_addr \+ 0
++[0-9a-f ]+R_X86_64_TPOFF64 +0+ sG6 \+ 0
++[0-9a-f ]+R_X86_64_TPOFF64 +0+ sG1 \+ 0
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
++.* NOTYPE +LOCAL +DEFAULT +UND *
++.* TLS +GLOBAL +DEFAULT +UND sG5
++.* TLS +GLOBAL +DEFAULT +UND sG2
++.* FUNC +GLOBAL +DEFAULT +UND __tls_get_addr
++.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
++.* TLS +GLOBAL +DEFAULT +UND sG6
++.* TLS +GLOBAL +DEFAULT +UND sG1
++.* NOTYPE +GLOBAL +DEFAULT +11 _edata
++.* NOTYPE +GLOBAL +DEFAULT +11 _end
++
++Symbol table '\.symtab' contains [0-9]+ entries:
++ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
++.* NOTYPE +LOCAL +DEFAULT +UND *
++.* SECTION +LOCAL +DEFAULT +1 *
++.* SECTION +LOCAL +DEFAULT +2 *
++.* SECTION +LOCAL +DEFAULT +3 *
++.* SECTION +LOCAL +DEFAULT +4 *
++.* SECTION +LOCAL +DEFAULT +5 *
++.* SECTION +LOCAL +DEFAULT +6 *
++.* SECTION +LOCAL +DEFAULT +7 *
++.* SECTION +LOCAL +DEFAULT +8 *
++.* SECTION +LOCAL +DEFAULT +9 *
++.* SECTION +LOCAL +DEFAULT +10 *
++.* SECTION +LOCAL +DEFAULT +11 *
++.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsbinpic2.o
++.* TLS +LOCAL +DEFAULT +7 sl1
++.* TLS +LOCAL +DEFAULT +7 sl2
++.* TLS +LOCAL +DEFAULT +7 sl3
++.* TLS +LOCAL +DEFAULT +7 sl4
++.* TLS +LOCAL +DEFAULT +7 sl5
++.* TLS +LOCAL +DEFAULT +7 sl6
++.* TLS +LOCAL +DEFAULT +7 sl7
++.* TLS +LOCAL +DEFAULT +7 sl8
++.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsbin.o
++.* TLS +LOCAL +DEFAULT +8 bl1
++.* TLS +LOCAL +DEFAULT +8 bl2
++.* TLS +LOCAL +DEFAULT +8 bl3
++.* TLS +LOCAL +DEFAULT +8 bl4
++.* TLS +LOCAL +DEFAULT +8 bl5
++.* TLS +LOCAL +DEFAULT +8 bl6
++.* TLS +LOCAL +DEFAULT +8 bl7
++.* TLS +LOCAL +DEFAULT +8 bl8
++.* FILE +LOCAL +DEFAULT +ABS 
++.* OBJECT +LOCAL +DEFAULT +9 _DYNAMIC
++.* OBJECT +LOCAL +DEFAULT +11 _GLOBAL_OFFSET_TABLE_
++.* TLS +GLOBAL +DEFAULT +7 sg8
++.* TLS +GLOBAL +DEFAULT +8 bg8
++.* TLS +GLOBAL +DEFAULT +8 bg6
++.* TLS +GLOBAL +DEFAULT +UND sG5
++.* TLS +GLOBAL +DEFAULT +8 bg3
++.* TLS +GLOBAL +DEFAULT +7 sg3
++.* TLS +GLOBAL +HIDDEN +7 sh3
++.* TLS +GLOBAL +DEFAULT +UND sG2
++.* TLS +GLOBAL +DEFAULT +7 sg4
++.* TLS +GLOBAL +DEFAULT +7 sg5
++.* TLS +GLOBAL +DEFAULT +8 bg5
++.* FUNC +GLOBAL +DEFAULT +UND __tls_get_addr
++.* TLS +GLOBAL +HIDDEN +7 sh7
++.* TLS +GLOBAL +HIDDEN +7 sh8
++.* TLS +GLOBAL +DEFAULT +7 sg1
++.* FUNC +GLOBAL +DEFAULT +1 _start
++.* TLS +GLOBAL +HIDDEN +7 sh4
++.* TLS +GLOBAL +DEFAULT +8 bg7
++.* TLS +GLOBAL +HIDDEN +7 sh5
++.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
++.* TLS +GLOBAL +DEFAULT +UND sG6
++.* FUNC +GLOBAL +DEFAULT +1 fn2
++.* TLS +GLOBAL +DEFAULT +7 sg2
++.* TLS +GLOBAL +DEFAULT +UND sG1
++.* TLS +GLOBAL +HIDDEN +7 sh1
++.* TLS +GLOBAL +DEFAULT +7 sg6
++.* TLS +GLOBAL +DEFAULT +7 sg7
++.* NOTYPE +GLOBAL +DEFAULT +11 _edata
++.* NOTYPE +GLOBAL +DEFAULT +11 _end
++.* TLS +GLOBAL +HIDDEN +7 sh2
++.* TLS +GLOBAL +HIDDEN +7 sh6
++.* TLS +GLOBAL +DEFAULT +8 bg2
++.* TLS +GLOBAL +DEFAULT +8 bg1
++.* TLS +GLOBAL +DEFAULT +8 bg4
+diff --git a/ld/testsuite/ld-x86-64/tlsbin2.dd b/ld/testsuite/ld-x86-64/tlsbin2.dd
+new file mode 100644
+index 0000000..a73fcef
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsbin2.dd
+@@ -0,0 +1,310 @@
++#source: tlsbinpic2.s
++#source: tlsbin.s
++#as: --64
++#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
++#objdump: -drj.text
++#target: x86_64-*-*
++
++# PT_TLS layout is:
++# Offset from   Offset from     Name
++# TCB base      TCB end
++# 0x00          -0xa0           sg1..sg8
++# 0x20          -0x80           sl1..sl8
++# 0x40          -0x60           sh1..sh8
++# 0x60          -0x40           bg1..bg8
++# 0x80          -0x20           bl1..bl8
++
++.*: +file format elf64-x86-64.*
++
++Disassembly of section .text:
++
++[0-9a-f]+ <fn2>:
++ +[0-9a-f]+:	55[ 	]+push   %rbp
++ +[0-9a-f]+:	48 89 e5[ 	]+mov    %rsp,%rbp
++#  GD -> IE because variable is not defined in executable
++ +[0-9a-f]+:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	sG1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  GD -> IE because variable is not defined in executable where
++#  the variable is referenced through IE too
++ +[0-9a-f]+:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x108>
++#				-> R_X86_64_TPOFF64	sG2
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  GD -> LE with global variable defined in executable
++ +[0-9a-f]+:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	48 8d 80 60 ff ff ff[ 	]+lea    -0xa0\(%rax\),%rax
++#							sg1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  GD -> LE with local variable defined in executable
++ +[0-9a-f]+:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	48 8d 80 80 ff ff ff[ 	]+lea    -0x80\(%rax\),%rax
++#							sl1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  GD -> LE with hidden variable defined in executable
++ +[0-9a-f]+:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	48 8d 80 a0 ff ff ff[ 	]+lea    -0x60\(%rax\),%rax
++#							sh1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  LD -> LE
++ +[0-9a-f]+:	66 66 66 66 64 48 8b[ 	]+data16 data16 data16 data16 mov %fs:0x0,%rax
++ +[0-9a-f]+:	04 25 00 00 00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 8d 90 81 ff ff ff[ 	]+lea    -0x7f\(%rax\),%rdx
++#							sl1+1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	4c 8d 88 86 ff ff ff[ 	]+lea    -0x7a\(%rax\),%r9
++#							sl2+2
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  LD -> LE against hidden variables
++ +[0-9a-f]+:	66 66 66 66 64 48 8b[ 	]+data16 data16 data16 data16 mov %fs:0x0,%rax
++ +[0-9a-f]+:	04 25 00 00 00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 8d 90 a0 ff ff ff[ 	]+lea    -0x60\(%rax\),%rdx
++#							sh1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 8d 88 a7 ff ff ff[ 	]+lea    -0x59\(%rax\),%rcx
++#							sh2+3
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE against global var
++ +[0-9a-f]+:	64 4c 8b 0c 25 00 00[ 	]+mov    %fs:0x0,%r9
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	4c 03 0d ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%r9 +# [0-9a-f]+ <_DYNAMIC\+0x108>
++#				-> R_X86_64_TPOFF64	sG2
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE -> LE against global var defined in exec
++ +[0-9a-f]+:	64 4c 8b 14 25 00 00[ 	]+mov    %fs:0x0,%r10
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	4d 8d 92 60 ff ff ff[ 	]+lea    -0xa0\(%r10\),%r10
++#							sg1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE -> LE against local var
++ +[0-9a-f]+:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 8d 80 80 ff ff ff[ 	]+lea    -0x80\(%rax\),%rax
++#							sl1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE -> LE against hidden var
++ +[0-9a-f]+:	64 48 8b 0c 25 00 00[ 	]+mov    %fs:0x0,%rcx
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 8d 89 a0 ff ff ff[ 	]+lea    -0x60\(%rcx\),%rcx
++#							sh1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  Direct access through %fs
++#  IE against global var
++ +[0-9a-f]+:	48 8b 0d ([0-9a-f]{2} ){4}[ 	]+mov    0x[0-9a-f]+\(%rip\),%rcx +# [0-9a-f]+ <_DYNAMIC\+0x100>
++#				-> R_X86_64_TPOFF64	sG5
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	64 48 8b 11[ 	]+mov    %fs:\(%rcx\),%rdx
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE->LE against local var
++ +[0-9a-f]+:	49 c7 c3 90 ff ff ff[ 	]+mov    \$0xf+90,%r11
++#							sl5
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	64 4d 8b 23[ 	]+mov    %fs:\(%r11\),%r12
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE->LE against hidden var
++ +[0-9a-f]+:	48 c7 c2 b0 ff ff ff[ 	]+mov    \$0xf+b0,%rdx
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	64 48 8b 12[ 	]+mov    %fs:\(%rdx\),%rdx
++#							sh5
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	c9[ 	]+leaveq *
++ +[0-9a-f]+:	c3[ 	]+retq *
++
++[0-9a-f]+ <_start>:
++ +[0-9a-f]+:	55[ 	]+push   %rbp
++ +[0-9a-f]+:	48 89 e5[ 	]+mov    %rsp,%rbp
++#  IE against global var
++ +[0-9a-f]+:	64 4c 8b 1c 25 00 00[ 	]+mov    %fs:0x0,%r11
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	4c 03 1d ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%r11 +# [0-9a-f]+ <_DYNAMIC\+0x118>
++#				-> R_X86_64_TPOFF64	sG6
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE -> LE against global var defined in exec
++ +[0-9a-f]+:	64 48 8b 14 25 00 00[ 	]+mov    %fs:0x0,%rdx
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 8d 92 d4 ff ff ff[ 	]+lea    -0x2c\(%rdx\),%rdx
++#							bg6
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE -> LE against local var
++ +[0-9a-f]+:	64 4c 8b 24 25 00 00[ 	]+mov    %fs:0x0,%r12
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	49 81 c4 f4 ff ff ff[ 	]+add    \$0xf+f4,%r12
++#							bl6
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  direct %fs access IE -> LE against local var
++ +[0-9a-f]+:	48 c7 c2 fc ff ff ff[ 	]+mov    \$0xf+fc,%rdx
++#							bl8
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	64 48 8b 02[ 	]+mov    %fs:\(%rdx\),%rax
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  IE -> LE against hidden but not local var
++ +[0-9a-f]+:	64 48 8b 14 25 00 00[ 	]+mov    %fs:0x0,%rdx
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 8d 92 b4 ff ff ff[ 	]+lea    -0x4c\(%rdx\),%rdx
++#							sh6
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  direct %fs access IE -> LE against hidden but not local var
++ +[0-9a-f]+:	48 c7 c2 bc ff ff ff[ 	]+mov    \$0xf+bc,%rdx
++#							sh8
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	64 48 8b 02[ 	]+mov    %fs:\(%rdx\),%rax
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  LE, global var defined in exec
++ +[0-9a-f]+:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 8d 90 64 ff ff ff[ 	]+lea    -0x9c\(%rax\),%rdx
++#							sg2
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  LE, local var, non-canonical sequence
++ +[0-9a-f]+:	49 c7 c1 e6 ff ff ff[ 	]+mov    \$0xf+e6,%r9
++#							bl2+2
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	64 48 8b 14 25 00 00[ 	]+mov    %fs:0x0,%rdx
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	4c 01 ca[ 	]+add    %r9,%rdx
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  LE, hidden var defined in exec, non-canonical sequence
++ +[0-9a-f]+:	64 48 8b 14 25 00 00[ 	]+mov    %fs:0x0,%rdx
++ +[0-9a-f]+:	00 00 *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	48 81 c2 a5 ff ff ff[ 	]+add    \$0xf+a5,%rdx
++#							sh2+1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  Direct %fs access
++#  LE, global var defined in exec
++ +[0-9a-f]+:	64 48 8b 04 25 68 ff[ 	]+mov    %fs:0xf+68,%rax
++ +[0-9a-f]+:	ff ff *
++#							sg3
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  LE, local var
++ +[0-9a-f]+:	64 4c 8b 14 25 eb ff[ 	]+mov    %fs:0xf+eb,%r10
++ +[0-9a-f]+:	ff ff *
++#							bl3+3
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  LE, hidden var defined in exec
++ +[0-9a-f]+:	64 48 8b 14 25 a9 ff[ 	]+mov    %fs:0xf+a9,%rdx
++ +[0-9a-f]+:	ff ff *
++#							sh3+1
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++ +[0-9a-f]+:	90[ 	]+nop *
++#  LE, large model
++ +[0-9a-f]+:	48 ba a5 ff ff ff ff[ 	]+movabs \$0xffffffffffffffa5,%rdx
++ +[0-9a-f]+:	ff ff ff *
++ +[0-9a-f]+:	c9[ 	]+leaveq *
++ +[0-9a-f]+:	c3[ 	]+retq *
+diff --git a/ld/testsuite/ld-x86-64/tlsbin2.rd b/ld/testsuite/ld-x86-64/tlsbin2.rd
+new file mode 100644
+index 0000000..b283648
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsbin2.rd
+@@ -0,0 +1,141 @@
++#source: tlsbinpic2.s
++#source: tlsbin.s
++#as: --64
++#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
++#readelf: -WSsrl
++#target: x86_64-*-*
++
++There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
++
++Section Headers:
++ +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
++ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
++ +\[[ 0-9]+\] .interp +.*
++ +\[[ 0-9]+\] .hash +.*
++ +\[[ 0-9]+\] .dynsym +.*
++ +\[[ 0-9]+\] .dynstr +.*
++ +\[[ 0-9]+\] .rela.dyn +.*
++ +\[[ 0-9]+\] .text +PROGBITS +0+401000 0+1000 0+233 00 +AX +0 +0 +4096
++ +\[[ 0-9]+\] .tdata +PROGBITS +0+601233 0+1233 0+60 00 WAT +0 +0 +1
++ +\[[ 0-9]+\] .tbss +NOBITS +0+601293 0+1293 0+40 00 WAT +0 +0 +1
++ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+601298 0+1298 0+100 10 +WA +4 +0 +8
++ +\[[ 0-9]+\] .got +PROGBITS +0+601398 0+1398 0+28 08 +WA +0 +0 +8
++ +\[[ 0-9]+\] .got.plt +PROGBITS +0+6013c0 0+13c0 0+18 08 +WA +0 +0 +8
++ +\[[ 0-9]+\] .shstrtab +.*
++ +\[[ 0-9]+\] .symtab +.*
++ +\[[ 0-9]+\] .strtab +.*
++Key to Flags:
++#...
++
++Elf file type is EXEC \(Executable file\)
++Entry point 0x40113b
++There are [0-9]+ program headers, starting at offset [0-9]+
++
++Program Headers:
++ +Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
++ +PHDR.*
++ +INTERP.*
++.*Requesting program interpreter.*
++ +LOAD +0x0+ 0x0+400000 0x0+400000 0x0+1233 0x0+1233 R E 0x200000
++ +LOAD +0x0+1233 0x0+601233 0x0+601233 0x0+1a5 0x0+1a5 RW +0x200000
++ +DYNAMIC +0x0+1298 0x0+601298 0x0+601298 0x0+100 0x0+100 RW +0x8
++ +TLS +0x0+1233 0x0+601233 0x0+601233 0x0+60 0x0+a0 R +0x1
++
++ Section to Segment mapping:
++ +Segment Sections...
++ +00 *
++ +01 +.interp *
++ +02 +.interp .hash .dynsym .dynstr .rela.dyn .text *
++ +03 +.tdata .dynamic .got .got.plt *
++ +04 +.dynamic *
++ +05 +.tdata .tbss *
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 5 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f ]+R_X86_64_TPOFF64 +0+ sG5 \+ 0
++[0-9a-f ]+R_X86_64_TPOFF64 +0+ sG2 \+ 0
++[0-9a-f ]+R_X86_64_GLOB_DAT +0+ __tls_get_addr \+ 0
++[0-9a-f ]+R_X86_64_TPOFF64 +0+ sG6 \+ 0
++[0-9a-f ]+R_X86_64_TPOFF64 +0+ sG1 \+ 0
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
++.* NOTYPE +LOCAL +DEFAULT +UND *
++.* TLS +GLOBAL +DEFAULT +UND sG5
++.* TLS +GLOBAL +DEFAULT +UND sG2
++.* FUNC +GLOBAL +DEFAULT +UND __tls_get_addr
++.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
++.* TLS +GLOBAL +DEFAULT +UND sG6
++.* TLS +GLOBAL +DEFAULT +UND sG1
++.* NOTYPE +GLOBAL +DEFAULT +11 _edata
++.* NOTYPE +GLOBAL +DEFAULT +11 _end
++
++Symbol table '\.symtab' contains [0-9]+ entries:
++ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
++.* NOTYPE +LOCAL +DEFAULT +UND *
++.* SECTION +LOCAL +DEFAULT +1 *
++.* SECTION +LOCAL +DEFAULT +2 *
++.* SECTION +LOCAL +DEFAULT +3 *
++.* SECTION +LOCAL +DEFAULT +4 *
++.* SECTION +LOCAL +DEFAULT +5 *
++.* SECTION +LOCAL +DEFAULT +6 *
++.* SECTION +LOCAL +DEFAULT +7 *
++.* SECTION +LOCAL +DEFAULT +8 *
++.* SECTION +LOCAL +DEFAULT +9 *
++.* SECTION +LOCAL +DEFAULT +10 *
++.* SECTION +LOCAL +DEFAULT +11 *
++.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsbinpic2.o
++.* TLS +LOCAL +DEFAULT +7 sl1
++.* TLS +LOCAL +DEFAULT +7 sl2
++.* TLS +LOCAL +DEFAULT +7 sl3
++.* TLS +LOCAL +DEFAULT +7 sl4
++.* TLS +LOCAL +DEFAULT +7 sl5
++.* TLS +LOCAL +DEFAULT +7 sl6
++.* TLS +LOCAL +DEFAULT +7 sl7
++.* TLS +LOCAL +DEFAULT +7 sl8
++.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsbin.o
++.* TLS +LOCAL +DEFAULT +8 bl1
++.* TLS +LOCAL +DEFAULT +8 bl2
++.* TLS +LOCAL +DEFAULT +8 bl3
++.* TLS +LOCAL +DEFAULT +8 bl4
++.* TLS +LOCAL +DEFAULT +8 bl5
++.* TLS +LOCAL +DEFAULT +8 bl6
++.* TLS +LOCAL +DEFAULT +8 bl7
++.* TLS +LOCAL +DEFAULT +8 bl8
++.* FILE +LOCAL +DEFAULT +ABS 
++.* OBJECT +LOCAL +DEFAULT +9 _DYNAMIC
++.* OBJECT +LOCAL +DEFAULT +11 _GLOBAL_OFFSET_TABLE_
++.* TLS +GLOBAL +DEFAULT +7 sg8
++.* TLS +GLOBAL +DEFAULT +8 bg8
++.* TLS +GLOBAL +DEFAULT +8 bg6
++.* TLS +GLOBAL +DEFAULT +UND sG5
++.* TLS +GLOBAL +DEFAULT +8 bg3
++.* TLS +GLOBAL +DEFAULT +7 sg3
++.* TLS +GLOBAL +HIDDEN +7 sh3
++.* TLS +GLOBAL +DEFAULT +UND sG2
++.* TLS +GLOBAL +DEFAULT +7 sg4
++.* TLS +GLOBAL +DEFAULT +7 sg5
++.* TLS +GLOBAL +DEFAULT +8 bg5
++.* FUNC +GLOBAL +DEFAULT +UND __tls_get_addr
++.* TLS +GLOBAL +HIDDEN +7 sh7
++.* TLS +GLOBAL +HIDDEN +7 sh8
++.* TLS +GLOBAL +DEFAULT +7 sg1
++.* FUNC +GLOBAL +DEFAULT +6 _start
++.* TLS +GLOBAL +HIDDEN +7 sh4
++.* TLS +GLOBAL +DEFAULT +8 bg7
++.* TLS +GLOBAL +HIDDEN +7 sh5
++.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
++.* TLS +GLOBAL +DEFAULT +UND sG6
++.* FUNC +GLOBAL +DEFAULT +6 fn2
++.* TLS +GLOBAL +DEFAULT +7 sg2
++.* TLS +GLOBAL +DEFAULT +UND sG1
++.* TLS +GLOBAL +HIDDEN +7 sh1
++.* TLS +GLOBAL +DEFAULT +7 sg6
++.* TLS +GLOBAL +DEFAULT +7 sg7
++.* NOTYPE +GLOBAL +DEFAULT +11 _edata
++.* NOTYPE +GLOBAL +DEFAULT +11 _end
++.* TLS +GLOBAL +HIDDEN +7 sh2
++.* TLS +GLOBAL +HIDDEN +7 sh6
++.* TLS +GLOBAL +DEFAULT +8 bg2
++.* TLS +GLOBAL +DEFAULT +8 bg1
++.* TLS +GLOBAL +DEFAULT +8 bg4
+diff --git a/ld/testsuite/ld-x86-64/tlsbin2.sd b/ld/testsuite/ld-x86-64/tlsbin2.sd
+new file mode 100644
+index 0000000..824500d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsbin2.sd
+@@ -0,0 +1,13 @@
++#source: tlsbinpic2.s
++#source: tlsbin.s
++#as: --64
++#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
++#objdump: -sj.got
++#target: x86_64-*-*
++
++.*: +file format elf64-x86-64.*
++
++Contents of section .got:
++ [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 +.*
+diff --git a/ld/testsuite/ld-x86-64/tlsbin2.td b/ld/testsuite/ld-x86-64/tlsbin2.td
+new file mode 100644
+index 0000000..ffe2ed4
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsbin2.td
+@@ -0,0 +1,16 @@
++#source: tlsbinpic2.s
++#source: tlsbin.s
++#as: --64
++#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
++#objdump: -sj.tdata
++#target: x86_64-*-*
++
++.*: +file format elf64-x86-64.*
++
++Contents of section .tdata:
++ [0-9a-f]+ 11000000 12000000 13000000 14000000  .*
++ [0-9a-f]+ 15000000 16000000 17000000 18000000  .*
++ [0-9a-f]+ 41000000 42000000 43000000 44000000  .*
++ [0-9a-f]+ 45000000 46000000 47000000 48000000  .*
++ [0-9a-f]+ 01010000 02010000 03010000 04010000  .*
++ [0-9a-f]+ 05010000 06010000 07010000 08010000  .*
+diff --git a/ld/testsuite/ld-x86-64/tlsbinpic2.s b/ld/testsuite/ld-x86-64/tlsbinpic2.s
+new file mode 100644
+index 0000000..830fb2e
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsbinpic2.s
+@@ -0,0 +1,146 @@
++	/* Force .data aligned to 4K, so that .got very likely gets at
++	   0x5021a0 (0x60 bytes .tdata and 0x140 bytes .dynamic)  */
++	.data
++	.balign	4096
++	.section ".tdata", "awT", @progbits
++	.globl sg1, sg2, sg3, sg4, sg5, sg6, sg7, sg8
++	.globl sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8
++	.hidden sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8
++sg1:	.long 17
++sg2:	.long 18
++sg3:	.long 19
++sg4:	.long 20
++sg5:	.long 21
++sg6:	.long 22
++sg7:	.long 23
++sg8:	.long 24
++sl1:	.long 65
++sl2:	.long 66
++sl3:	.long 67
++sl4:	.long 68
++sl5:	.long 69
++sl6:	.long 70
++sl7:	.long 71
++sl8:	.long 72
++sh1:	.long 257
++sh2:	.long 258
++sh3:	.long 259
++sh4:	.long 260
++sh5:	.long 261
++sh6:	.long 262
++sh7:	.long 263
++sh8:	.long 264
++	/* Force .text aligned to 4K, so it very likely gets at 0x401000.  */
++	.text
++	.balign	4096
++	.globl	fn2
++	.type	fn2,@function
++fn2:
++	pushq	%rbp
++	movq	%rsp, %rbp
++
++	/* GD -> IE because variable is not defined in executable */
++	.byte	0x66
++	leaq	sG1@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD -> IE because variable is not defined in executable where
++	   the variable is referenced through IE too */
++	.byte	0x66
++	leaq	sG2@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD -> LE with global variable defined in executable */
++	.byte	0x66
++	leaq	sg1@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD -> LE with local variable defined in executable */
++	.byte	0x66
++	leaq	sl1@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD -> LE with hidden variable defined in executable */
++	.byte	0x66
++	leaq	sh1@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* LD -> LE */
++	leaq	sl1@tlsld(%rip), %rdi
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop
++	leaq	1+sl1@dtpoff(%rax), %rdx
++	nop;nop
++	leaq	sl2@dtpoff+2(%rax), %r9
++	nop;nop;nop;nop
++
++	/* LD -> LE against hidden variables */
++	leaq	sh1@tlsld(%rip), %rdi
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop
++	leaq	sh1@dtpoff(%rax), %rdx
++	nop;nop
++	leaq	3+sh2@dtpoff(%rax), %rcx
++	nop;nop;nop;nop
++
++	/* IE against global var  */
++	movq	%fs:0, %r9
++	nop;nop
++	addq	sG2@gottpoff(%rip), %r9
++	nop;nop;nop;nop
++
++	/* IE -> LE against global var defined in exec */
++	movq	%fs:0, %r10
++	nop;nop
++	addq	sg1@gottpoff(%rip), %r10
++	nop;nop;nop;nop
++
++	/* IE -> LE against local var */
++	movq	%fs:0, %rax
++	nop;nop
++	addq	sl1@gottpoff(%rip), %rax
++	nop;nop;nop;nop
++
++	/* IE -> LE against hidden var */
++	movq	%fs:0, %rcx
++	nop;nop
++	addq	sh1@gottpoff(%rip), %rcx
++	nop;nop;nop;nop
++
++	/* Direct access through %fs  */
++
++	/* IE against global var  */
++	movq	sG5@gottpoff(%rip), %rcx
++	nop;nop
++	movq	%fs:(%rcx), %rdx
++	nop;nop;nop;nop
++
++	/* IE->LE against local var  */
++	movq	sl5@gottpoff(%rip), %r11
++	nop;nop
++	movq	%fs:(%r11), %r12
++	nop;nop;nop;nop
++
++	/* IE->LE against hidden var  */
++	movq	sh5@gottpoff(%rip), %rdx
++	nop;nop
++	movq	%fs:(%rdx), %rdx
++	nop;nop;nop;nop
++
++	leave
++	ret
+diff --git a/ld/testsuite/ld-x86-64/tlsgd10.dd b/ld/testsuite/ld-x86-64/tlsgd10.dd
+new file mode 100644
+index 0000000..448015e
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd10.dd
+@@ -0,0 +1,23 @@
++#source: tlsgd10.s
++#as: --64
++#ld: -melf_x86_64 tmpdir/tlsgd10
++#objdump: -drwj.text
++#target: x86_64-*-linux* x86_64-*-nacl*
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	49 bb ([0-9a-f]{2} ){8}	movabs \$0x[0-9a-f]+,%r11
++[ 	]*[a-f0-9]+:	41 57                	push   %r15
++[ 	]*[a-f0-9]+:	41 57                	push   %r15
++[ 	]*[a-f0-9]+:	4c 8d 3d eb ff ff ff 	lea    -0x15\(%rip\),%r15        # [0-9a-f]+ <_start>
++[ 	]*[a-f0-9]+:	4d 01 df             	add    %r11,%r15
++[ 	]*[a-f0-9]+:	64 48 8b 04 25 00 00 00 00 	mov    %fs:0x0,%rax
++[ 	]*[a-f0-9]+:	48 03 05 ([0-9a-f]{2} ){4}	add    0x[0-9a-f]+\(%rip\),%rax        # [0-9a-f]+ <_DYNAMIC\+0x140>
++[ 	]*[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++[ 	]*[a-f0-9]+:	41 5f                	pop    %r15
++[ 	]*[a-f0-9]+:	41 5f                	pop    %r15
++[ 	]*[a-f0-9]+:	c3                   	retq   
++#pass
+diff --git a/ld/testsuite/ld-x86-64/tlsgd10.s b/ld/testsuite/ld-x86-64/tlsgd10.s
+new file mode 100644
+index 0000000..5bb9823
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd10.s
+@@ -0,0 +1,18 @@
++	.text
++	.globl _start
++_start:
++1:	movabsq	$_GLOBAL_OFFSET_TABLE_-1b, %r11
++	pushq	%r15
++	pushq	%r15
++	leaq	1b(%rip), %r15
++	addq	%r11, %r15
++
++	/* GD, -mcmodel=large  */
++	leaq	foo@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++
++	popq	%r15
++	popq	%r15
++	ret
+diff --git a/ld/testsuite/ld-x86-64/tlsgd11.dd b/ld/testsuite/ld-x86-64/tlsgd11.dd
+new file mode 100644
+index 0000000..b4f3c99
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd11.dd
+@@ -0,0 +1,14 @@
++#source: tlsgd1.s
++#as: --64
++#ld: -melf_x86_64 tmpdir/tlsgd1
++#objdump: -drw
++#target: x86_64-*-linux*
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	64 48 8b 04 25 00 00 00 00 	mov    %fs:0x0,%rax
++[ 	]*[a-f0-9]+:	48 8d 80 fc ff ff ff 	lea    -0x4\(%rax\),%rax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/tlsgd11.s b/ld/testsuite/ld-x86-64/tlsgd11.s
+new file mode 100644
+index 0000000..e5f52ed
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd11.s
+@@ -0,0 +1,15 @@
++	.text
++	.globl _start
++_start:
++	.byte	0x66
++	leaq	foo@TLSGD(%rip), %rdi
++	.word	0x6666
++	rex64
++	call	__tls_get_addr
++	.globl foo
++	.section	.tdata,"awT",@progbits
++	.align 4
++	.type	foo, @object
++	.size	foo, 4
++foo:
++	.long	100
+diff --git a/ld/testsuite/ld-x86-64/tlsgd12.d b/ld/testsuite/ld-x86-64/tlsgd12.d
+new file mode 100644
+index 0000000..0c235ce
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd12.d
+@@ -0,0 +1,4 @@
++#name: TLS GD->IE transition check without PLT
++#as: --64
++#ld: -melf_x86_64
++#error: .*TLS transition from R_X86_64_TLSGD to R_X86_64_GOTTPOFF against `foo'.*failed.*
+diff --git a/ld/testsuite/ld-x86-64/tlsgd12.s b/ld/testsuite/ld-x86-64/tlsgd12.s
+new file mode 100644
+index 0000000..f583c85
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd12.s
+@@ -0,0 +1,5 @@
++	.text
++	.globl _start
++_start:
++	leaq	foo@TLSGD(%rip), %rdi
++	call	__tls_get_addr
+diff --git a/ld/testsuite/ld-x86-64/tlsgd13.d b/ld/testsuite/ld-x86-64/tlsgd13.d
+new file mode 100644
+index 0000000..d09bd65
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd13.d
+@@ -0,0 +1,4 @@
++#name: TLS GD->LE transition check without PLT
++#as: --64
++#ld: -melf_x86_64
++#error: .*TLS transition from R_X86_64_TLSGD to R_X86_64_TPOFF32 against `foo'.*failed.*
+diff --git a/ld/testsuite/ld-x86-64/tlsgd13.s b/ld/testsuite/ld-x86-64/tlsgd13.s
+new file mode 100644
+index 0000000..e1e7e60
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd13.s
+@@ -0,0 +1,11 @@
++	.text
++	.globl _start
++_start:
++	leaq	foo@TLSGD(%rip), %rdi
++	call	__tls_get_addr
++	.section	.tdata,"awT",@progbits
++	.align 4
++	.type	foo, @object
++	.size	foo, 4
++foo:
++	.long	100
+diff --git a/ld/testsuite/ld-x86-64/tlsgd14.dd b/ld/testsuite/ld-x86-64/tlsgd14.dd
+new file mode 100644
+index 0000000..b8a99c8
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd14.dd
+@@ -0,0 +1,10 @@
++#target: x86_64-*-linux*
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	64 8b 04 25 00 00 00 00 	mov    %fs:0x0,%eax
++[ 	]*[a-f0-9]+:	48 8d 80 fc ff ff ff 	lea    -0x4\(%rax\),%rax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/tlsgd14.s b/ld/testsuite/ld-x86-64/tlsgd14.s
+new file mode 100644
+index 0000000..037ce25
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd14.s
+@@ -0,0 +1,14 @@
++	.text
++	.globl _start
++_start:
++	leaq	foo@TLSGD(%rip), %rdi
++	.word	0x6666
++	rex64
++	call	__tls_get_addr
++	.globl foo
++	.section	.tdata,"awT",@progbits
++	.align 4
++	.type	foo, @object
++	.size	foo, 4
++foo:
++	.long	100
+diff --git a/ld/testsuite/ld-x86-64/tlsgd5.dd b/ld/testsuite/ld-x86-64/tlsgd5.dd
+index 64ad1cd..54cf357 100644
+--- a/ld/testsuite/ld-x86-64/tlsgd5.dd
++++ b/ld/testsuite/ld-x86-64/tlsgd5.dd
+@@ -10,5 +10,5 @@ Disassembly of section .text:
+ 
+ [a-f0-9]+ <_start>:
+ [ 	]*[a-f0-9]+:	64 48 8b 04 25 00 00 00 00 	mov    %fs:0x0,%rax
+-[ 	]*[a-f0-9]+:	48 03 05 ([0-9a-f]{2} ){4} *	add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x100>
++[ 	]*[a-f0-9]+:	48 03 05 ([0-9a-f]{2} ){4} *	add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[a-f0-9]+>
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/tlsgd5c.s b/ld/testsuite/ld-x86-64/tlsgd5c.s
+new file mode 100644
+index 0000000..1f093c8
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd5c.s
+@@ -0,0 +1,8 @@
++	.text
++	.globl _start
++_start:
++	.byte	0x66
++	leaq	foo@TLSGD(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
+diff --git a/ld/testsuite/ld-x86-64/tlsgd6.dd b/ld/testsuite/ld-x86-64/tlsgd6.dd
+index 146fbc4..2cbfda6 100644
+--- a/ld/testsuite/ld-x86-64/tlsgd6.dd
++++ b/ld/testsuite/ld-x86-64/tlsgd6.dd
+@@ -10,5 +10,5 @@ Disassembly of section .text:
+ 
+ [a-f0-9]+ <_start>:
+ [ 	]*[a-f0-9]+:	64 8b 04 25 00 00 00 00 	mov    %fs:0x0,%eax
+-[ 	]*[a-f0-9]+:	48 03 05 ([0-9a-f]{2} ){4} *	add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x80>
++[ 	]*[a-f0-9]+:	48 03 05 ([0-9a-f]{2} ){4} *	add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[a-f0-9]+>
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/tlsgd6c.s b/ld/testsuite/ld-x86-64/tlsgd6c.s
+new file mode 100644
+index 0000000..4aa9ef6
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd6c.s
+@@ -0,0 +1,7 @@
++	.text
++	.globl _start
++_start:
++	leaq	foo@TLSGD(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
+diff --git a/ld/testsuite/ld-x86-64/tlsgd9.dd b/ld/testsuite/ld-x86-64/tlsgd9.dd
+new file mode 100644
+index 0000000..ebfdf83
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd9.dd
+@@ -0,0 +1,23 @@
++#source: tlsgd9.s
++#as: --64
++#ld: -melf_x86_64 tmpdir/tlsgd9
++#objdump: -drw
++#target: x86_64-*-linux*
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	49 bb ([0-9a-f]{2} ){8}	movabs \$0x[0-9a-f]+,%r11
++[ 	]*[a-f0-9]+:	41 57                	push   %r15
++[ 	]*[a-f0-9]+:	41 57                	push   %r15
++[ 	]*[a-f0-9]+:	4c 8d 3d eb ff ff ff 	lea    -0x15\(%rip\),%r15        # [0-9a-f]+ <_start>
++[ 	]*[a-f0-9]+:	4d 01 df             	add    %r11,%r15
++[ 	]*[a-f0-9]+:	64 48 8b 04 25 00 00 00 00 	mov    %fs:0x0,%rax
++[ 	]*[a-f0-9]+:	48 8d 80 fc ff ff ff 	lea    -0x4\(%rax\),%rax
++[ 	]*[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++[ 	]*[a-f0-9]+:	41 5f                	pop    %r15
++[ 	]*[a-f0-9]+:	41 5f                	pop    %r15
++[ 	]*[a-f0-9]+:	c3                   	retq   
++#pass
+diff --git a/ld/testsuite/ld-x86-64/tlsgd9.s b/ld/testsuite/ld-x86-64/tlsgd9.s
+new file mode 100644
+index 0000000..11ce109
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsgd9.s
+@@ -0,0 +1,25 @@
++	.text
++	.globl _start
++_start:
++1:	movabsq	$_GLOBAL_OFFSET_TABLE_-1b, %r11
++	pushq	%r15
++	pushq	%r15
++	leaq	1b(%rip), %r15
++	addq	%r11, %r15
++
++	/* GD, -mcmodel=large  */
++	leaq	foo@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++
++	popq	%r15
++	popq	%r15
++	ret
++	.globl foo
++	.section	.tdata,"awT",@progbits
++	.align 4
++	.type	foo, @object
++	.size	foo, 4
++foo:
++	.long	100
+diff --git a/ld/testsuite/ld-x86-64/tlsld4.dd b/ld/testsuite/ld-x86-64/tlsld4.dd
+new file mode 100644
+index 0000000..0121cc4
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsld4.dd
+@@ -0,0 +1,23 @@
++#source: tlsld4.s
++#as: --64
++#ld: -melf_x86_64 tmpdir/tlsld4
++#objdump: -drw
++#target: x86_64-*-linux*
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	49 bb ([0-9a-f]{2} ){8}	movabs \$0x[0-9a-f]+,%r11
++[ 	]*[a-f0-9]+:	41 57                	push   %r15
++[ 	]*[a-f0-9]+:	41 57                	push   %r15
++[ 	]*[a-f0-9]+:	4c 8d 3d eb ff ff ff 	lea    -0x15\(%rip\),%r15        # [0-9a-f]+ <_start>
++[ 	]*[a-f0-9]+:	4d 01 df             	add    %r11,%r15
++[ 	]*[a-f0-9]+:	66 66 66 66 2e 0f 1f 84 00 00 00 00 00 	data16 data16 data16 nopw %cs:0x0\(%rax,%rax,1\)
++[ 	]*[a-f0-9]+:	64 48 8b 04 25 00 00 00 00 	mov    %fs:0x0,%rax
++[ 	]*[a-f0-9]+:	8b 80 fc ff ff ff    	mov    -0x4\(%rax\),%eax
++[ 	]*[a-f0-9]+:	41 5f                	pop    %r15
++[ 	]*[a-f0-9]+:	41 5f                	pop    %r15
++[ 	]*[a-f0-9]+:	c3                   	retq   
++#pass
+diff --git a/ld/testsuite/ld-x86-64/tlsld4.s b/ld/testsuite/ld-x86-64/tlsld4.s
+new file mode 100644
+index 0000000..71fe9f2
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsld4.s
+@@ -0,0 +1,27 @@
++	.text
++	.globl _start
++_start:
++1:	movabsq	$_GLOBAL_OFFSET_TABLE_-1b, %r11
++	pushq	%r15
++	pushq	%r15
++	leaq	1b(%rip), %r15
++	addq	%r11, %r15
++
++	/* LD, -mcmodel=large  */
++	leaq	foo@tlsld(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++
++	movl	foo@dtpoff(%rax), %eax
++
++	popq	%r15
++	popq	%r15
++	ret
++	.globl foo
++	.section	.tdata,"awT",@progbits
++	.align 4
++	.type	foo, @object
++	.size	foo, 4
++foo:
++	.long	100
+diff --git a/ld/testsuite/ld-x86-64/tlsld5.dd b/ld/testsuite/ld-x86-64/tlsld5.dd
+new file mode 100644
+index 0000000..600fc83
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsld5.dd
+@@ -0,0 +1,13 @@
++#source: tlsld1.s
++#as: --64
++#ld: -melf_x86_64 tmpdir/tlsld1
++#objdump: -drw
++#target: x86_64-*-linux*
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	66 66 66 66 64 48 8b 04 25 00 00 00 00 	data16 data16 data16 data16 mov %fs:0x0,%rax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/tlsld5.s b/ld/testsuite/ld-x86-64/tlsld5.s
+new file mode 100644
+index 0000000..279fde5
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsld5.s
+@@ -0,0 +1,12 @@
++	.text
++	.globl _start
++_start:
++	leaq    foo@TLSLD(%rip), %rdi
++	call    *__tls_get_addr@GOTPCREL(%rip)
++	.globl foo
++	.section	.tdata,"awT",@progbits
++	.align 4
++	.type	foo, @object
++	.size	foo, 4
++foo:
++	.long	100
+diff --git a/ld/testsuite/ld-x86-64/tlsld6.dd b/ld/testsuite/ld-x86-64/tlsld6.dd
+new file mode 100644
+index 0000000..14aa312
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsld6.dd
+@@ -0,0 +1,14 @@
++#source: tlsld2.s
++#as: --x32
++#ld: -melf32_x86_64 tmpdir/tlsld2
++#objdump: -drw
++#target: x86_64-*-linux*
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	66 0f 1f 40 00       	nopw   0x0\(%rax\)
++[ 	]*[a-f0-9]+:	64 8b 04 25 00 00 00 00 	mov    %fs:0x0,%eax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/tlsld6.s b/ld/testsuite/ld-x86-64/tlsld6.s
+new file mode 100644
+index 0000000..279fde5
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlsld6.s
+@@ -0,0 +1,12 @@
++	.text
++	.globl _start
++_start:
++	leaq    foo@TLSLD(%rip), %rdi
++	call    *__tls_get_addr@GOTPCREL(%rip)
++	.globl foo
++	.section	.tdata,"awT",@progbits
++	.align 4
++	.type	foo, @object
++	.size	foo, 4
++foo:
++	.long	100
+diff --git a/ld/testsuite/ld-x86-64/tlspic2-nacl.rd b/ld/testsuite/ld-x86-64/tlspic2-nacl.rd
+new file mode 100644
+index 0000000..1919b3f
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspic2-nacl.rd
+@@ -0,0 +1,145 @@
++#source: tlspic3.s
++#source: tlspic2.s
++#as: --64
++#ld: -shared -melf_x86_64_nacl --no-ld-generated-unwind-info
++#readelf: -WSsrl
++#target: x86_64-*-nacl*
++
++There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
++
++Section Headers:
++ +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
++ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
++ +\[[ 0-9]+\] .plt +.*
++ +\[[ 0-9]+\] .text +PROGBITS +0+1000 [0-9a-f]+ 0+31a 00 +AX +0 +0 4096
++ +\[[ 0-9]+\] .hash +.*
++ +\[[ 0-9]+\] .dynsym +.*
++ +\[[ 0-9]+\] .dynstr +.*
++ +\[[ 0-9]+\] .rela.dyn +.*
++ +\[[ 0-9]+\] .rela.plt +.*
++ +\[[ 0-9]+\] .tdata +PROGBITS +0+100104c8 [0-9a-f]+ 0+60 00 WAT +0 +0 +1
++ +\[[ 0-9]+\] .tbss +NOBITS +0+10010528 [0-9a-f]+ 0+20 00 WAT +0 +0 +1
++ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+10010528 [0-9a-f]+ 0+130 10 +WA +5 +0 +8
++ +\[[ 0-9]+\] .got +PROGBITS +0+10010658 [0-9a-f]+ 0+98 08 +WA +0 +0 +8
++ +\[[ 0-9]+\] .got.plt +PROGBITS +0+100106f0 [0-9a-f]+ 0+20 08 +WA +0 +0 +8
++ +\[[ 0-9]+\] .shstrtab +.*
++ +\[[ 0-9]+\] .symtab +.*
++ +\[[ 0-9]+\] .strtab +.*
++Key to Flags:
++#...
++
++Elf file type is DYN \(Shared object file\)
++Entry point 0x1000
++There are [0-9]+ program headers, starting at offset [0-9]+
++
++Program Headers:
++ +Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
++ +LOAD +0x0+10000 0x0+ 0x0+ 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x10000
++ +LOAD +0x0+ 0x0+10000000 0x0+10000000 0x0+4c8 0x0+4c8 R +0x10000
++ +LOAD +0x0+4c8 0x0+100104c8 0x0+100104c8 0x0+248 0x0+248 RW +0x10000
++ +DYNAMIC +0x0+528 0x0+10010528 0x0+10010528 0x0+130 0x0+130 RW +0x8
++ +TLS +0x0+4c8 0x0+100104c8 0x0+100104c8 0x0+60 0x0+80 R +0x1
++
++ Section to Segment mapping:
++ +Segment Sections...
++ +00 +.plt .text *
++ +01 +.hash .dynsym .dynstr .rela.dyn .rela.plt *
++ +02 +.tdata .dynamic .got .got.plt *
++ +03 +.dynamic *
++ +04 +.tdata .tbss *
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 15 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f ]+R_X86_64_DTPMOD64 +0
++[0-9a-f ]+R_X86_64_TPOFF64 +24
++[0-9a-f ]+R_X86_64_TPOFF64 +30
++[0-9a-f ]+R_X86_64_DTPMOD64 +0
++[0-9a-f ]+R_X86_64_DTPMOD64 +0
++[0-9a-f ]+R_X86_64_TPOFF64 +64
++[0-9a-f ]+R_X86_64_TPOFF64 +50
++[0-9a-f ]+R_X86_64_TPOFF64 +70
++[0-9a-f ]+R_X86_64_DTPMOD64 +0
++[0-9a-f ]+R_X86_64_TPOFF64 +44
++[0-9a-f ]+R_X86_64_TPOFF64 +0+10 sg5 \+ 0
++[0-9a-f ]+R_X86_64_GLOB_DAT +0+ __tls_get_addr \+ 0
++[0-9a-f ]+R_X86_64_DTPMOD64 +0+ sg1 \+ 0
++[0-9a-f ]+R_X86_64_DTPOFF64 +0+ sg1 \+ 0
++[0-9a-f ]+R_X86_64_TPOFF64 +0+4 sg2 \+ 0
++
++Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f ]+R_X86_64_JUMP_SLOT +0+ __tls_get_addr \+ 0
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
++.* NOTYPE +LOCAL +DEFAULT +UND *
++.* TLS +GLOBAL +DEFAULT +8 sg8
++.* TLS +GLOBAL +DEFAULT +8 sg3
++.* TLS +GLOBAL +DEFAULT +8 sg4
++.* TLS +GLOBAL +DEFAULT +8 sg5
++.* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
++.* TLS +GLOBAL +DEFAULT +8 sg1
++.* FUNC +GLOBAL +DEFAULT +2 fn1
++.* NOTYPE +GLOBAL +DEFAULT +12 __bss_start
++.* TLS +GLOBAL +DEFAULT +8 sg2
++.* TLS +GLOBAL +DEFAULT +8 sg6
++.* TLS +GLOBAL +DEFAULT +8 sg7
++.* NOTYPE +GLOBAL +DEFAULT +12 _edata
++.* NOTYPE +GLOBAL +DEFAULT +12 _end
++
++Symbol table '\.symtab' contains [0-9]+ entries:
++ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
++.* NOTYPE +LOCAL +DEFAULT +UND *
++.* SECTION +LOCAL +DEFAULT +1 *
++.* SECTION +LOCAL +DEFAULT +2 *
++.* SECTION +LOCAL +DEFAULT +3 *
++.* SECTION +LOCAL +DEFAULT +4 *
++.* SECTION +LOCAL +DEFAULT +5 *
++.* SECTION +LOCAL +DEFAULT +6 *
++.* SECTION +LOCAL +DEFAULT +7 *
++.* SECTION +LOCAL +DEFAULT +8 *
++.* SECTION +LOCAL +DEFAULT +9 *
++.* SECTION +LOCAL +DEFAULT +10 *
++.* SECTION +LOCAL +DEFAULT +11 *
++.* SECTION +LOCAL +DEFAULT +12 *
++.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlspic3.o
++.* TLS +LOCAL +DEFAULT +8 sl1
++.* TLS +LOCAL +DEFAULT +8 sl2
++.* TLS +LOCAL +DEFAULT +8 sl3
++.* TLS +LOCAL +DEFAULT +8 sl4
++.* TLS +LOCAL +DEFAULT +8 sl5
++.* TLS +LOCAL +DEFAULT +8 sl6
++.* TLS +LOCAL +DEFAULT +8 sl7
++.* TLS +LOCAL +DEFAULT +8 sl8
++.* FILE +LOCAL +DEFAULT +ABS 
++.* TLS +LOCAL +DEFAULT +9 sH1
++.* OBJECT +LOCAL +DEFAULT +10 _DYNAMIC
++.* TLS +LOCAL +DEFAULT +8 sh3
++.* TLS +LOCAL +DEFAULT +9 sH2
++.* TLS +LOCAL +DEFAULT +9 sH7
++.* TLS +LOCAL +DEFAULT +8 sh7
++.* TLS +LOCAL +DEFAULT +8 sh8
++.* TLS +LOCAL +DEFAULT +9 sH4
++.* TLS +LOCAL +DEFAULT +8 sh4
++.* TLS +LOCAL +DEFAULT +9 sH3
++.* TLS +LOCAL +DEFAULT +8 sh5
++.* TLS +LOCAL +DEFAULT +9 sH5
++.* TLS +LOCAL +DEFAULT +9 sH6
++.* TLS +LOCAL +DEFAULT +9 sH8
++.* TLS +LOCAL +DEFAULT +8 sh1
++.* OBJECT +LOCAL +DEFAULT +12 _GLOBAL_OFFSET_TABLE_
++.* TLS +LOCAL +DEFAULT +8 sh2
++.* TLS +LOCAL +DEFAULT +8 sh6
++.* TLS +GLOBAL +DEFAULT +8 sg8
++.* TLS +GLOBAL +DEFAULT +8 sg3
++.* TLS +GLOBAL +DEFAULT +8 sg4
++.* TLS +GLOBAL +DEFAULT +8 sg5
++.* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
++.* TLS +GLOBAL +DEFAULT +8 sg1
++.* FUNC +GLOBAL +DEFAULT +2 fn1
++.* NOTYPE +GLOBAL +DEFAULT +12 __bss_start
++.* TLS +GLOBAL +DEFAULT +8 sg2
++.* TLS +GLOBAL +DEFAULT +8 sg6
++.* TLS +GLOBAL +DEFAULT +8 sg7
++.* NOTYPE +GLOBAL +DEFAULT +12 _edata
++.* NOTYPE +GLOBAL +DEFAULT +12 _end
+diff --git a/ld/testsuite/ld-x86-64/tlspic2.dd b/ld/testsuite/ld-x86-64/tlspic2.dd
+new file mode 100644
+index 0000000..18358f1
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspic2.dd
+@@ -0,0 +1,378 @@
++#source: tlspic3.s
++#source: tlspic2.s
++#as: --64
++#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
++#objdump: -drj.text -Mintel64
++#target: x86_64-*-*
++
++.*: +file format elf64-x86-64.*
++
++Disassembly of section .text:
++
++0+1000 <fn1>:
++ +1000:	55[ 	]+push   %rbp
++ +1001:	48 89 e5[ 	]+mov    %rsp,%rbp
++ +1004:	90[ 	]+nop *
++ +1005:	90[ 	]+nop *
++ +1006:	90[ 	]+nop *
++ +1007:	90[ 	]+nop *
++#  GD
++ +1008:	66 48 8d 3d ([0-9a-f]{2} ){3}[ 	]+data16 lea 0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++ +100f:	[0-9a-f 	]+
++#				-> R_X86_64_DTPMOD64	sg1
++ +1010:	66 48 ff [0-9a-f 	]+data16 rex\.W callq \*0x[0-9a-f]+\(%rip\) +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +1017:	[0-9a-f 	]+
++ +1018:	90[ 	]+nop *
++ +1019:	90[ 	]+nop *
++ +101a:	90[ 	]+nop *
++ +101b:	90[ 	]+nop *
++#  GD -> IE because variable is referenced through IE too
++ +101c:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +1023:	00 00 *
++ +1025:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	sg2
++ +102c:	90[ 	]+nop *
++ +102d:	90[ 	]+nop *
++ +102e:	90[ 	]+nop *
++ +102f:	90[ 	]+nop *
++#  GD against local variable
++ +1030:	66 48 8d 3d ([0-9a-f]{2} ){3}[ 	]+data16 lea 0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++ +1037:	[0-9a-f 	]+
++#				-> R_X86_64_DTPMOD64	[0 0x2000000000000000]
++ +1038:	66 48 ff [0-9a-f 	]+data16 rex\.W callq \*0x[0-9a-f]+\(%rip\) +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +103f:	[0-9a-f 	]+
++ +1040:	90[ 	]+nop *
++ +1041:	90[ 	]+nop *
++ +1042:	90[ 	]+nop *
++ +1043:	90[ 	]+nop *
++#  GD -> IE against local variable referenced through IE too
++ +1044:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +104b:	00 00 *
++ +104d:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x24
++ +1054:	90[ 	]+nop *
++ +1055:	90[ 	]+nop *
++ +1056:	90[ 	]+nop *
++ +1057:	90[ 	]+nop *
++#  GD against hidden and local variable
++ +1058:	66 48 8d 3d ([0-9a-f]{2} ){3}[ 	]+data16 lea 0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++ +105f:	[0-9a-f 	]+
++#				-> R_X86_64_DTPMOD64	[0 0x4000000000000000]
++ +1060:	66 48 ff [0-9a-f 	]+data16 rex\.W callq \*0x[0-9a-f]+\(%rip\) +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +1067:	[0-9a-f 	]+
++ +1068:	90[ 	]+nop *
++ +1069:	90[ 	]+nop *
++ +106a:	90[ 	]+nop *
++ +106b:	90[ 	]+nop *
++#  GD -> IE against hidden and local variable referenced through IE too
++ +106c:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +1073:	00 00 *
++ +1075:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x44
++ +107c:	90[ 	]+nop *
++ +107d:	90[ 	]+nop *
++ +107e:	90[ 	]+nop *
++ +107f:	90[ 	]+nop *
++#  GD against hidden but not local variable
++ +1080:	66 48 8d 3d ([0-9a-f]{2} ){3}[ 	]+data16 lea 0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++ +1087:	[0-9a-f 	]+
++#				-> R_X86_64_DTPMOD64	[0 0x6000000000000000]
++ +1088:	66 48 ff [0-9a-f 	]+data16 rex\.W callq \*0x[0-9a-f]+\(%rip\) +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +108f:	[0-9a-f 	]+
++ +1090:	90[ 	]+nop *
++ +1091:	90[ 	]+nop *
++ +1092:	90[ 	]+nop *
++ +1093:	90[ 	]+nop *
++#  GD -> IE against hidden but not local variable referenced through IE too
++ +1094:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +109b:	00 00 *
++ +109d:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x64
++ +10a4:	90[ 	]+nop *
++ +10a5:	90[ 	]+nop *
++ +10a6:	90[ 	]+nop *
++ +10a7:	90[ 	]+nop *
++#  LD
++ +10a8:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
++ +10af:	ff [0-9a-f 	]+callq[ 	]+\*0x[0-9a-f]+\(%rip\) +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +10b5:	90[ 	]+nop *
++ +10b6:	48 8d 90 20 00 00 00[ 	]+lea    0x20\(%rax\),%rdx
++ +10bd:	90[ 	]+nop *
++ +10be:	90[ 	]+nop *
++ +10bf:	4c 8d 88 26 00 00 00[ 	]+lea    0x26\(%rax\),%r9
++ +10c6:	90[ 	]+nop *
++ +10c7:	90[ 	]+nop *
++ +10c8:	90[ 	]+nop *
++ +10c9:	90[ 	]+nop *
++#  LD against hidden and local variables
++ +10ca:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
++ +10d1:	ff [0-9a-f 	]+callq[ 	]+\*0x[0-9a-f]+\(%rip\) +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +10d7:	90[ 	]+nop *
++ +10d8:	48 8d 90 40 00 00 00[ 	]+lea    0x40\(%rax\),%rdx
++ +10df:	90[ 	]+nop *
++ +10e0:	90[ 	]+nop *
++ +10e1:	48 8d 88 47 00 00 00[ 	]+lea    0x47\(%rax\),%rcx
++ +10e8:	90[ 	]+nop *
++ +10e9:	90[ 	]+nop *
++ +10ea:	90[ 	]+nop *
++ +10eb:	90[ 	]+nop *
++#  LD against hidden but not local variables
++ +10ec:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
++ +10f3:	ff [0-9a-f 	]+callq[ 	]+\*0x[0-9a-f]+\(%rip\) +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +10f9:	90[ 	]+nop *
++ +10fa:	4c 8d a0 60 00 00 00[ 	]+lea    0x60\(%rax\),%r12
++ +1101:	90[ 	]+nop *
++ +1102:	90[ 	]+nop *
++ +1103:	48 8d 88 65 00 00 00[ 	]+lea    0x65\(%rax\),%rcx
++ +110a:	90[ 	]+nop *
++ +110b:	90[ 	]+nop *
++#  IE against global var
++ +110c:	64 48 8b 0c 25 00 00[ 	]+mov    %fs:0x0,%rcx
++ +1113:	00 00 *
++ +1115:	90[ 	]+nop *
++ +1116:	90[ 	]+nop *
++ +1117:	48 03 0d ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rcx +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	sg2
++ +111e:	90[ 	]+nop *
++ +111f:	90[ 	]+nop *
++ +1120:	90[ 	]+nop *
++ +1121:	90[ 	]+nop *
++#  IE against local var
++ +1122:	64 4c 8b 34 25 00 00[ 	]+mov    %fs:0x0,%r14
++ +1129:	00 00 *
++ +112b:	90[ 	]+nop *
++ +112c:	90[ 	]+nop *
++ +112d:	4c 03 35 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%r14 +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x24
++ +1134:	90[ 	]+nop *
++ +1135:	90[ 	]+nop *
++ +1136:	90[ 	]+nop *
++ +1137:	90[ 	]+nop *
++#  IE against hidden and local var
++ +1138:	64 48 8b 0c 25 00 00[ 	]+mov    %fs:0x0,%rcx
++ +113f:	00 00 *
++ +1141:	90[ 	]+nop *
++ +1142:	90[ 	]+nop *
++ +1143:	48 03 0d ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rcx +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x44
++ +114a:	90[ 	]+nop *
++ +114b:	90[ 	]+nop *
++ +114c:	90[ 	]+nop *
++ +114d:	90[ 	]+nop *
++#  IE against hidden but not local var
++ +114e:	64 48 8b 0c 25 00 00[ 	]+mov    %fs:0x0,%rcx
++ +1155:	00 00 *
++ +1157:	90[ 	]+nop *
++ +1158:	90[ 	]+nop *
++ +1159:	48 03 0d ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rcx +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x64
++ +1160:	90[ 	]+nop *
++ +1161:	90[ 	]+nop *
++ +1162:	90[ 	]+nop *
++ +1163:	90[ 	]+nop *
++#  Direct access through %fs
++#  IE against global var
++ +1164:	48 8b 0d ([0-9a-f]{2} ){4}[ 	]+mov    0x[0-9a-f]+\(%rip\),%rcx +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	sg5
++ +116b:	90[ 	]+nop *
++ +116c:	90[ 	]+nop *
++ +116d:	64 48 8b 11[ 	]+mov    %fs:\(%rcx\),%rdx
++ +1171:	90[ 	]+nop *
++ +1172:	90[ 	]+nop *
++ +1173:	90[ 	]+nop *
++ +1174:	90[ 	]+nop *
++#  IE against local var
++ +1175:	4c 8b 15 ([0-9a-f]{2} ){4}[ 	]+mov    0x[0-9a-f]+\(%rip\),%r10 +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x30
++ +117c:	90[ 	]+nop *
++ +117d:	90[ 	]+nop *
++ +117e:	64 4d 8b 22[ 	]+mov    %fs:\(%r10\),%r12
++ +1182:	90[ 	]+nop *
++ +1183:	90[ 	]+nop *
++ +1184:	90[ 	]+nop *
++ +1185:	90[ 	]+nop *
++#  IE against hidden and local var
++ +1186:	48 8b 15 ([0-9a-f]{2} ){4}[ 	]+mov    0x[0-9a-f]+\(%rip\),%rdx +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x50
++ +118d:	90[ 	]+nop *
++ +118e:	90[ 	]+nop *
++ +118f:	64 48 8b 12[ 	]+mov    %fs:\(%rdx\),%rdx
++ +1193:	90[ 	]+nop *
++ +1194:	90[ 	]+nop *
++ +1195:	90[ 	]+nop *
++ +1196:	90[ 	]+nop *
++#  IE against hidden but not local var
++ +1197:	48 8b 0d ([0-9a-f]{2} ){4}[ 	]+mov    0x[0-9a-f]+\(%rip\),%rcx +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x70
++ +119e:	90[ 	]+nop *
++ +119f:	90[ 	]+nop *
++ +11a0:	64 48 8b 11[ 	]+mov    %fs:\(%rcx\),%rdx
++ +11a4:	90[ 	]+nop *
++ +11a5:	90[ 	]+nop *
++ +11a6:	90[ 	]+nop *
++ +11a7:	90[ 	]+nop *
++ +11a8:	49 bb ([0-9a-f]{2} ){5}[ 	]+movabs \$0x[0-9a-f]+,%r11
++ +11af:	([0-9a-f]{2} ){3}
++ +11b2:	41 57[ 	]+push   %r15
++ +11b4:	41 57[ 	]+push   %r15
++ +11b6:	4c 8d 3d eb ff ff ff[ 	]+lea    -0x15\(%rip\),%r15 +# [0-9a-f]+ <fn1\+0x[0-9a-f]+>
++ +11bd:	4d 01 df[ 	]+add    %r11,%r15
++ +11c0:	90[ 	]+nop *
++ +11c1:	90[ 	]+nop *
++# -mcmodel=large sequences
++#
++#  -mcmodel=large GD
++ +11c2:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	sg1
++ +11c9:	48 b8 ([0-9a-f]{2} ){5}[ 	]+movabs \$0x[0-9a-f]+,%rax
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +11d0:	([0-9a-f]{2} ){3}
++ +11d3:	4c 01 f8[ 	]+add    %r15,%rax
++ +11d6:	ff d0[ 	]+callq  \*%rax
++ +11d8:	90[ 	]+nop *
++ +11d9:	90[ 	]+nop *
++ +11da:	90[ 	]+nop *
++ +11db:	90[ 	]+nop *
++#  -mcmodel=large GD -> IE because variable is referenced through IE too
++#				-> R_X86_64_TPOFF64	sg2
++ +11dc:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +11e3:	00 00 
++ +11e5:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	sg2
++ +11ec:	66 0f 1f 44 00 00[ 	]+nopw   0x0\(%rax,%rax,1\)
++ +11f2:	90[ 	]+nop *
++ +11f3:	90[ 	]+nop *
++ +11f4:	90[ 	]+nop *
++ +11f5:	90[ 	]+nop *
++#  -mcmodel=large GD against local variable
++ +11f6:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x2000000000000000]
++ +11fd:	48 b8 ([0-9a-f]{2} ){5}[ 	]+movabs \$0x[0-9a-f]+,%rax
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +1204:	([0-9a-f]{2} ){3}
++ +1207:	4c 01 f8[ 	]+add    %r15,%rax
++ +120a:	ff d0[ 	]+callq  \*%rax
++ +120c:	90[ 	]+nop *
++ +120d:	90[ 	]+nop *
++ +120e:	90[ 	]+nop *
++ +120f:	90[ 	]+nop *
++#  -mcmodel=large GD -> IE against local variable referenced through IE too
++ +1210:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +1217:	00 00 
++ +1219:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x24
++ +1220:	66 0f 1f 44 00 00[ 	]+nopw   0x0\(%rax,%rax,1\)
++ +1226:	90[ 	]+nop *
++ +1227:	90[ 	]+nop *
++ +1228:	90[ 	]+nop *
++ +1229:	90[ 	]+nop *
++#  -mcmodel=large GD against hidden and local variable
++ +122a:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x4000000000000000]
++ +1231:	48 b8 ([0-9a-f]{2} ){5}[ 	]+movabs \$0x[0-9a-f]+,%rax
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +1238:	([0-9a-f]{2} ){3}
++ +123b:	4c 01 f8[ 	]+add    %r15,%rax
++ +123e:	ff d0[ 	]+callq  \*%rax
++ +1240:	90[ 	]+nop *
++ +1241:	90[ 	]+nop *
++ +1242:	90[ 	]+nop *
++ +1243:	90[ 	]+nop *
++#  -mcmodel=large GD -> IE against hidden and local variable referenced through IE too
++ +1244:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +124b:	00 00 
++ +124d:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x44
++ +1254:	66 0f 1f 44 00 00[ 	]+nopw   0x0\(%rax,%rax,1\)
++ +125a:	90[ 	]+nop *
++ +125b:	90[ 	]+nop *
++ +125c:	90[ 	]+nop *
++ +125d:	90[ 	]+nop *
++#  -mcmodel=large GD against hidden but not local variable
++ +125e:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x6000000000000000]
++ +1265:	48 b8 ([0-9a-f]{2} ){5}[ 	]+movabs \$0x[0-9a-f]+,%rax
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +126c:	([0-9a-f]{2} ){3}
++ +126f:	4c 01 f8[ 	]+add    %r15,%rax
++ +1272:	ff d0[ 	]+callq  \*%rax
++ +1274:	90[ 	]+nop *
++ +1275:	90[ 	]+nop *
++ +1276:	90[ 	]+nop *
++ +1277:	90[ 	]+nop *
++#  -mcmodel=large GD -> IE against hidden but not local variable referenced through IE too
++ +1278:	64 48 8b 04 25 00 00[ 	]+mov    %fs:0x0,%rax
++ +127f:	00 00 
++ +1281:	48 03 05 ([0-9a-f]{2} ){4}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_TPOFF64	*ABS*+0x64
++ +1288:	66 0f 1f 44 00 00[ 	]+nopw   0x0\(%rax,%rax,1\)
++ +128e:	90[ 	]+nop *
++ +128f:	90[ 	]+nop *
++ +1290:	90[ 	]+nop *
++ +1291:	90[ 	]+nop *
++#  -mcmodel=large LD
++ +1292:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
++ +1299:	48 b8 ([0-9a-f]{2} ){5}[ 	]+movabs \$0x[0-9a-f]+,%rax
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +12a0:	([0-9a-f]{2} ){3}
++ +12a3:	4c 01 f8[ 	]+add    %r15,%rax
++ +12a6:	ff d0[ 	]+callq  \*%rax
++ +12a8:	90[ 	]+nop *
++ +12a9:	90[ 	]+nop *
++ +12aa:	48 8d 90 20 00 00 00[ 	]+lea    0x20\(%rax\),%rdx
++ +12b1:	90[ 	]+nop *
++ +12b2:	90[ 	]+nop *
++ +12b3:	4c 8d 88 26 00 00 00[ 	]+lea    0x26\(%rax\),%r9
++ +12ba:	90[ 	]+nop *
++ +12bb:	90[ 	]+nop *
++ +12bc:	90[ 	]+nop *
++ +12bd:	90[ 	]+nop *
++#  -mcmodel=large LD against hidden and local variables
++ +12be:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
++ +12c5:	48 b8 ([0-9a-f]{2} ){5}[ 	]+movabs \$0x[0-9a-f]+,%rax
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +12cc:	([0-9a-f]{2} ){3}
++ +12cf:	4c 01 f8[ 	]+add    %r15,%rax
++ +12d2:	ff d0[ 	]+callq  \*%rax
++ +12d4:	90[ 	]+nop *
++ +12d5:	90[ 	]+nop *
++ +12d6:	48 8d 90 40 00 00 00[ 	]+lea    0x40\(%rax\),%rdx
++ +12dd:	90[ 	]+nop *
++ +12de:	90[ 	]+nop *
++ +12df:	48 8d 88 47 00 00 00[ 	]+lea    0x47\(%rax\),%rcx
++ +12e6:	90[ 	]+nop *
++ +12e7:	90[ 	]+nop *
++ +12e8:	90[ 	]+nop *
++ +12e9:	90[ 	]+nop *
++#  -mcmodel=large LD against hidden but not local variables
++ +12ea:	48 8d 3d ([0-9a-f]{2} ){4}[ 	]+lea    0x[0-9a-f]+\(%rip\),%rdi +# [0-9a-f]+ <_DYNAMIC\+0x[0-9a-f]+>
++#				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
++ +12f1:	48 b8 ([0-9a-f]{2} ){5}[ 	]+movabs \$0x[0-9a-f]+,%rax
++#				-> R_X86_64_GLOB_DAT	__tls_get_addr
++ +12f8:	([0-9a-f]{2} ){3}
++ +12fb:	4c 01 f8[ 	]+add    %r15,%rax
++ +12fe:	ff d0[ 	]+callq  \*%rax
++ +1300:	90[ 	]+nop *
++ +1301:	90[ 	]+nop *
++ +1302:	4c 8d a0 60 00 00 00[ 	]+lea    0x60\(%rax\),%r12
++ +1309:	90[ 	]+nop *
++ +130a:	90[ 	]+nop *
++ +130b:	48 8d 88 65 00 00 00[ 	]+lea    0x65\(%rax\),%rcx
++ +1312:	90[ 	]+nop *
++ +1313:	90[ 	]+nop *
++ +1314:	41 5f[ 	]+pop    %r15
++ +1316:	41 5f[ 	]+pop    %r15
++ +1318:	c9[ 	]+leaveq 
++ +1319:	c3[ 	]+retq   
+diff --git a/ld/testsuite/ld-x86-64/tlspic2.rd b/ld/testsuite/ld-x86-64/tlspic2.rd
+new file mode 100644
+index 0000000..3c7b8c1
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspic2.rd
+@@ -0,0 +1,139 @@
++#source: tlspic3.s
++#source: tlspic2.s
++#as: --64
++#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
++#readelf: -WSsrl
++#target: x86_64-*-*
++
++There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
++
++Section Headers:
++ +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
++ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
++ +\[[ 0-9]+\] .hash +.*
++ +\[[ 0-9]+\] .dynsym +.*
++ +\[[ 0-9]+\] .dynstr +.*
++ +\[[ 0-9]+\] .rela.dyn +.*
++ +\[[ 0-9]+\] .plt +.*
++ +\[[ 0-9]+\] .plt.got +.*
++ +\[[ 0-9]+\] .text +PROGBITS +0+1000 0+1000 0+31a 00 +AX +0 +0 4096
++ +\[[ 0-9]+\] .tdata +PROGBITS +0+20131a 0+131a 0+60 00 WAT +0 +0 +1
++ +\[[ 0-9]+\] .tbss +NOBITS +0+20137a 0+137a 0+20 00 WAT +0 +0 +1
++ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+201380 0+1380 0+100 10 +WA +3 +0 +8
++ +\[[ 0-9]+\] .got +PROGBITS +0+201480 0+1480 0+98 08 +WA +0 +0 +8
++ +\[[ 0-9]+\] .got.plt +PROGBITS +0+201518 0+1518 0+18 08 +WA +0 +0 +8
++ +\[[ 0-9]+\] .shstrtab +.*
++ +\[[ 0-9]+\] .symtab +.*
++ +\[[ 0-9]+\] .strtab +.*
++Key to Flags:
++#...
++
++Elf file type is DYN \(Shared object file\)
++Entry point 0x1000
++There are [0-9]+ program headers, starting at offset [0-9]+
++
++Program Headers:
++ +Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
++ +LOAD +0x0+ 0x0+ 0x0+ 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x200000
++ +LOAD +0x0+131a 0x0+20131a 0x0+20131a 0x0+216 0x0+216 RW +0x200000
++ +DYNAMIC +0x0+1380 0x0+201380 0x0+201380 0x0+100 0x0+100 RW +0x8
++ +TLS +0x0+131a 0x0+20131a 0x0+20131a 0x0+60 0x0+80 R +0x1
++
++ Section to Segment mapping:
++ +Segment Sections...
++ +00 +.hash .dynsym .dynstr .rela.dyn .plt .plt.got .text *
++ +01 +.tdata .dynamic .got .got.plt *
++ +02 +.dynamic *
++ +03 +.tdata .tbss *
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 15 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f ]+R_X86_64_DTPMOD64 +0
++[0-9a-f ]+R_X86_64_TPOFF64 +24
++[0-9a-f ]+R_X86_64_TPOFF64 +30
++[0-9a-f ]+R_X86_64_DTPMOD64 +0
++[0-9a-f ]+R_X86_64_DTPMOD64 +0
++[0-9a-f ]+R_X86_64_TPOFF64 +64
++[0-9a-f ]+R_X86_64_TPOFF64 +50
++[0-9a-f ]+R_X86_64_TPOFF64 +70
++[0-9a-f ]+R_X86_64_DTPMOD64 +0
++[0-9a-f ]+R_X86_64_TPOFF64 +44
++[0-9a-f ]+R_X86_64_TPOFF64 +0+10 sg5 \+ 0
++[0-9a-f ]+R_X86_64_GLOB_DAT +0+ __tls_get_addr \+ 0
++[0-9a-f ]+R_X86_64_DTPMOD64 +0+ sg1 \+ 0
++[0-9a-f ]+R_X86_64_DTPOFF64 +0+ sg1 \+ 0
++[0-9a-f ]+R_X86_64_TPOFF64 +0+4 sg2 \+ 0
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
++.* NOTYPE +LOCAL +DEFAULT +UND *
++.* TLS +GLOBAL +DEFAULT +8 sg8
++.* TLS +GLOBAL +DEFAULT +8 sg3
++.* TLS +GLOBAL +DEFAULT +8 sg4
++.* TLS +GLOBAL +DEFAULT +8 sg5
++.* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
++.* TLS +GLOBAL +DEFAULT +8 sg1
++.* FUNC +GLOBAL +DEFAULT +7 fn1
++.* NOTYPE +GLOBAL +DEFAULT +12 __bss_start
++.* TLS +GLOBAL +DEFAULT +8 sg2
++.* TLS +GLOBAL +DEFAULT +8 sg6
++.* TLS +GLOBAL +DEFAULT +8 sg7
++.* NOTYPE +GLOBAL +DEFAULT +12 _edata
++.* NOTYPE +GLOBAL +DEFAULT +12 _end
++
++Symbol table '\.symtab' contains [0-9]+ entries:
++ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
++.* NOTYPE +LOCAL +DEFAULT +UND *
++.* SECTION +LOCAL +DEFAULT +1 *
++.* SECTION +LOCAL +DEFAULT +2 *
++.* SECTION +LOCAL +DEFAULT +3 *
++.* SECTION +LOCAL +DEFAULT +4 *
++.* SECTION +LOCAL +DEFAULT +5 *
++.* SECTION +LOCAL +DEFAULT +6 *
++.* SECTION +LOCAL +DEFAULT +7 *
++.* SECTION +LOCAL +DEFAULT +8 *
++.* SECTION +LOCAL +DEFAULT +9 *
++.* SECTION +LOCAL +DEFAULT +10 *
++.* SECTION +LOCAL +DEFAULT +11 *
++.* SECTION +LOCAL +DEFAULT +12 *
++.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlspic3.o
++.* TLS +LOCAL +DEFAULT +8 sl1
++.* TLS +LOCAL +DEFAULT +8 sl2
++.* TLS +LOCAL +DEFAULT +8 sl3
++.* TLS +LOCAL +DEFAULT +8 sl4
++.* TLS +LOCAL +DEFAULT +8 sl5
++.* TLS +LOCAL +DEFAULT +8 sl6
++.* TLS +LOCAL +DEFAULT +8 sl7
++.* TLS +LOCAL +DEFAULT +8 sl8
++.* FILE +LOCAL +DEFAULT +ABS 
++.* TLS +LOCAL +DEFAULT +9 sH1
++.* OBJECT +LOCAL +DEFAULT +10 _DYNAMIC
++.* TLS +LOCAL +DEFAULT +8 sh3
++.* TLS +LOCAL +DEFAULT +9 sH2
++.* TLS +LOCAL +DEFAULT +9 sH7
++.* TLS +LOCAL +DEFAULT +8 sh7
++.* TLS +LOCAL +DEFAULT +8 sh8
++.* TLS +LOCAL +DEFAULT +9 sH4
++.* TLS +LOCAL +DEFAULT +8 sh4
++.* TLS +LOCAL +DEFAULT +9 sH3
++.* TLS +LOCAL +DEFAULT +8 sh5
++.* TLS +LOCAL +DEFAULT +9 sH5
++.* TLS +LOCAL +DEFAULT +9 sH6
++.* TLS +LOCAL +DEFAULT +9 sH8
++.* TLS +LOCAL +DEFAULT +8 sh1
++.* OBJECT +LOCAL +DEFAULT +12 _GLOBAL_OFFSET_TABLE_
++.* TLS +LOCAL +DEFAULT +8 sh2
++.* TLS +LOCAL +DEFAULT +8 sh6
++.* TLS +GLOBAL +DEFAULT +8 sg8
++.* TLS +GLOBAL +DEFAULT +8 sg3
++.* TLS +GLOBAL +DEFAULT +8 sg4
++.* TLS +GLOBAL +DEFAULT +8 sg5
++.* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
++.* TLS +GLOBAL +DEFAULT +8 sg1
++.* FUNC +GLOBAL +DEFAULT +7 fn1
++.* NOTYPE +GLOBAL +DEFAULT +12 __bss_start
++.* TLS +GLOBAL +DEFAULT +8 sg2
++.* TLS +GLOBAL +DEFAULT +8 sg6
++.* TLS +GLOBAL +DEFAULT +8 sg7
++.* NOTYPE +GLOBAL +DEFAULT +12 _edata
++.* NOTYPE +GLOBAL +DEFAULT +12 _end
+diff --git a/ld/testsuite/ld-x86-64/tlspic2.sd b/ld/testsuite/ld-x86-64/tlspic2.sd
+new file mode 100644
+index 0000000..9a7dca4
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspic2.sd
+@@ -0,0 +1,20 @@
++#source: tlspic3.s
++#source: tlspic2.s
++#as: --64
++#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
++#objdump: -sj.got
++#target: x86_64-*-*
++
++.*: +file format elf64-x86-64.*
++
++Contents of section .got:
++ [0-9a-f]+ 00000000 00000000 20000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 60000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 40000000 00000000  .*
++ [0-9a-f]+ 00000000 00000000 +.*
+diff --git a/ld/testsuite/ld-x86-64/tlspic2.td b/ld/testsuite/ld-x86-64/tlspic2.td
+new file mode 100644
+index 0000000..68a0a16
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspic2.td
+@@ -0,0 +1,16 @@
++#source: tlspic3.s
++#source: tlspic2.s
++#as: --64
++#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
++#objdump: -sj.tdata
++#target: x86_64-*-*
++
++.*: +file format elf64-x86-64.*
++
++Contents of section .tdata:
++ [0-9a-f]+ 11000000 12000000 13000000 14000000  .*
++ [0-9a-f]+ 15000000 16000000 17000000 18000000  .*
++ [0-9a-f]+ 41000000 42000000 43000000 44000000  .*
++ [0-9a-f]+ 45000000 46000000 47000000 48000000  .*
++ [0-9a-f]+ 01010000 02010000 03010000 04010000  .*
++ [0-9a-f]+ 05010000 06010000 07010000 08010000  .*
+diff --git a/ld/testsuite/ld-x86-64/tlspic3.s b/ld/testsuite/ld-x86-64/tlspic3.s
+new file mode 100644
+index 0000000..daa2300
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspic3.s
+@@ -0,0 +1,290 @@
++	/* Force .data aligned to 4K, so .got very likely gets at 0x102190
++	   (0x60 bytes .tdata and 0x130 bytes .dynamic)  */
++        .data
++        .balign 4096
++	.section ".tdata", "awT", @progbits
++	.globl sg1, sg2, sg3, sg4, sg5, sg6, sg7, sg8
++	.globl sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8
++	.hidden sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8
++sg1:	.long 17
++sg2:	.long 18
++sg3:	.long 19
++sg4:	.long 20
++sg5:	.long 21
++sg6:	.long 22
++sg7:	.long 23
++sg8:	.long 24
++sl1:	.long 65
++sl2:	.long 66
++sl3:	.long 67
++sl4:	.long 68
++sl5:	.long 69
++sl6:	.long 70
++sl7:	.long 71
++sl8:	.long 72
++sh1:	.long 257
++sh2:	.long 258
++sh3:	.long 259
++sh4:	.long 260
++sh5:	.long 261
++sh6:	.long 262
++sh7:	.long 263
++sh8:	.long 264
++	/* Force .text aligned to 4K, so it very likely gets at 0x1000.  */
++	.text
++	.balign	4096
++	.globl	fn1
++	.type	fn1,@function
++fn1:
++	pushq	%rbp
++	movq	%rsp, %rbp
++	nop;nop;nop;nop
++
++	/* GD */
++	.byte	0x66
++	leaq	sg1@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD -> IE because variable is referenced through IE too */
++	.byte	0x66
++	leaq	sg2@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD against local variable */
++	.byte	0x66
++	leaq	sl1@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD -> IE against local variable referenced through IE too */
++	.byte	0x66
++	leaq	sl2@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD against hidden and local variable */
++	.byte	0x66
++	leaq	sh1@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD -> IE against hidden and local variable referenced through
++	   IE too */
++	.byte	0x66
++	leaq	sh2@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD against hidden but not local variable */
++	.byte	0x66
++	leaq	sH1@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* GD -> IE against hidden but not local variable referenced through
++	   IE too */
++	.byte	0x66
++	leaq	sH2@tlsgd(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop;nop;nop;nop
++
++	/* LD */
++	leaq	sl1@tlsld(%rip), %rdi
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop
++	leaq	sl1@dtpoff(%rax), %rdx
++	nop;nop
++	leaq	2+sl2@dtpoff(%rax), %r9
++	nop;nop;nop;nop
++
++	/* LD against hidden and local variables */
++	leaq	sh1@tlsld(%rip), %rdi
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop
++	leaq	sh1@dtpoff(%rax), %rdx
++	nop;nop
++	leaq	sh2@dtpoff+3(%rax), %rcx
++	nop;nop;nop;nop
++
++	/* LD against hidden but not local variables */
++	leaq	sH1@tlsld(%rip), %rdi
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	nop
++	leaq	sH1@dtpoff(%rax), %r12
++	nop;nop
++	leaq	sH2@dtpoff+1(%rax), %rcx
++	nop;nop
++
++	/* IE against global var  */
++	movq	%fs:0, %rcx
++	nop;nop
++	addq	sg2@gottpoff(%rip), %rcx
++	nop;nop;nop;nop
++
++	/* IE against local var  */
++	movq	%fs:0, %r14
++	nop;nop
++	addq	sl2@gottpoff(%rip), %r14
++	nop;nop;nop;nop
++
++	/* IE against hidden and local var  */
++	movq	%fs:0, %rcx
++	nop;nop
++	addq	sh2@gottpoff(%rip), %rcx
++	nop;nop;nop;nop
++
++	/* IE against hidden but not local var  */
++	movq	%fs:0, %rcx
++	nop;nop
++	addq	sH2@gottpoff(%rip), %rcx
++	nop;nop;nop;nop
++
++	/* Direct access through %fs  */
++
++	/* IE against global var  */
++	movq	sg5@gottpoff(%rip), %rcx
++	nop;nop
++	movq	%fs:(%rcx), %rdx
++	nop;nop;nop;nop
++
++	/* IE against local var  */
++	movq	sl5@gottpoff(%rip), %r10
++	nop;nop
++	movq	%fs:(%r10), %r12
++	nop;nop;nop;nop
++
++	/* IE against hidden and local var  */
++	movq	sh5@gottpoff(%rip), %rdx
++	nop;nop
++	movq	%fs:(%rdx), %rdx
++	nop;nop;nop;nop
++
++	/* IE against hidden but not local var  */
++	movq	sH5@gottpoff(%rip), %rcx
++	nop;nop
++	movq	%fs:(%rcx), %rdx
++	nop;nop;nop;nop
++
++1:	movabsq	$_GLOBAL_OFFSET_TABLE_-1b, %r11
++	pushq	%r15
++	pushq	%r15
++	leaq	1b(%rip), %r15
++	addq	%r11, %r15
++	nop;nop
++
++	/* -mcmodel=large sequences  */
++
++	/* -mcmodel=large GD  */
++	leaq	sg1@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop;nop;nop
++
++	/* -mcmodel=large GD -> IE because variable is referenced through IE too */
++	leaq	sg2@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop;nop;nop
++
++	/* -mcmodel=large GD against local variable */
++	leaq	sl1@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop;nop;nop
++
++	/* -mcmodel=large GD -> IE against local variable referenced through IE too */
++	leaq	sl2@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop;nop;nop
++
++	/* -mcmodel=large GD against hidden and local variable */
++	leaq	sh1@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop;nop;nop
++
++	/* -mcmodel=large GD -> IE against hidden and local variable referenced through
++	   IE too */
++	leaq	sh2@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop;nop;nop
++
++	/* -mcmodel=large GD against hidden but not local variable */
++	leaq	sH1@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop;nop;nop
++
++	/* -mcmodel=large GD -> IE against hidden but not local variable referenced through
++	   IE too */
++	leaq	sH2@tlsgd(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop;nop;nop
++
++	/* -mcmodel=large LD */
++	leaq	sl1@tlsld(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop
++	leaq	sl1@dtpoff(%rax), %rdx
++	nop;nop
++	leaq	2+sl2@dtpoff(%rax), %r9
++	nop;nop;nop;nop
++
++	/* -mcmodel=large LD against hidden and local variables */
++	leaq	sh1@tlsld(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop
++	leaq	sh1@dtpoff(%rax), %rdx
++	nop;nop
++	leaq	sh2@dtpoff+3(%rax), %rcx
++	nop;nop;nop;nop
++
++	/* -mcmodel=large LD against hidden but not local variables */
++	leaq	sH1@tlsld(%rip), %rdi
++	movabsq	$__tls_get_addr@pltoff, %rax
++	addq	%r15, %rax
++	call	*%rax
++	nop;nop
++	leaq	sH1@dtpoff(%rax), %r12
++	nop;nop
++	leaq	sH2@dtpoff+1(%rax), %rcx
++	nop;nop
++
++	popq	%r15
++	popq	%r15
++
++	leave
++	ret
+diff --git a/ld/testsuite/ld-x86-64/tlspie2.s b/ld/testsuite/ld-x86-64/tlspie2.s
+new file mode 100644
+index 0000000..28867a9
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspie2.s
+@@ -0,0 +1,58 @@
++	.text
++	.globl __tls_get_addr
++	.type	__tls_get_addr, @function
++__tls_get_addr:
++	ret
++	.size	__tls_get_addr, .-__tls_get_addr
++.globl _start
++	.type	_start, @function
++_start:
++	movq	foo3@GOTTPOFF(%rip), %rax
++	pushq	%rbx
++	movl	%fs:foo2@TPOFF, %ebx
++	addl	%fs:foo1@TPOFF, %ebx
++	addl	%fs:(%rax), %ebx
++	leaq	foo4@TLSLD(%rip), %rdi
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	addl	foo4@DTPOFF(%rax), %ebx
++	.byte	0x66
++	leaq	foo5@TLSGD(%rip), %rdi
++	.byte	0x66
++	rex64
++	call	*__tls_get_addr@GOTPCREL(%rip)
++	addl	(%rax), %ebx
++	movl	%ebx, %eax
++	popq	%rbx
++	ret
++	.size	_start, .-_start
++.globl foo1
++	.section	.tbss,"awT",@nobits
++	.align 4
++	.type	foo1, @object
++	.size	foo1, 4
++foo1:
++	.zero	4
++.globl foo2
++	.align 4
++	.type	foo2, @object
++	.size	foo2, 4
++foo2:
++	.zero	4
++.globl foo3
++	.align 4
++	.type	foo3, @object
++	.size	foo3, 4
++foo3:
++	.zero	4
++.globl foo4
++	.align 4
++	.type	foo4, @object
++	.size	foo4, 4
++foo4:
++	.zero	4
++.globl foo5
++	.align 4
++	.type	foo5, @object
++	.size	foo5, 4
++foo5:
++	.zero	4
+diff --git a/ld/testsuite/ld-x86-64/tlspie2a.d b/ld/testsuite/ld-x86-64/tlspie2a.d
+new file mode 100644
+index 0000000..ada385d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspie2a.d
+@@ -0,0 +1,6 @@
++#source: tlspie2.s
++#as: --64 -mrelax-relocations=yes
++#ld: -melf_x86_64 -pie
++#readelf: -r
++
++There are no relocations in this file.
+diff --git a/ld/testsuite/ld-x86-64/tlspie2b.d b/ld/testsuite/ld-x86-64/tlspie2b.d
+new file mode 100644
+index 0000000..6f96fa3
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/tlspie2b.d
+@@ -0,0 +1,28 @@
++#source: tlspie2.s
++#as: --64 -mrelax-relocations=yes
++#ld: -melf_x86_64 -pie
++#objdump: -dwr
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <__tls_get_addr>:
++[ 	]*[a-f0-9]+:	c3                   	retq   
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 f4 ff ff ff 	mov    \$0xfffffffffffffff4,%rax
++[ 	]*[a-f0-9]+:	53                   	push   %rbx
++[ 	]*[a-f0-9]+:	64 8b 1c 25 f0 ff ff ff 	mov    %fs:0xfffffffffffffff0,%ebx
++[ 	]*[a-f0-9]+:	64 03 1c 25 ec ff ff ff 	add    %fs:0xffffffffffffffec,%ebx
++[ 	]*[a-f0-9]+:	64 03 18             	add    %fs:\(%rax\),%ebx
++[ 	]*[a-f0-9]+:	66 66 66 66 64 48 8b 04 25 00 00 00 00 	data16 data16 data16 data16 mov %fs:0x0,%rax
++[ 	]*[a-f0-9]+:	03 98 f8 ff ff ff    	add    -0x8\(%rax\),%ebx
++[ 	]*[a-f0-9]+:	64 48 8b 04 25 00 00 00 00 	mov    %fs:0x0,%rax
++[ 	]*[a-f0-9]+:	48 8d 80 fc ff ff ff 	lea    -0x4\(%rax\),%rax
++[ 	]*[a-f0-9]+:	03 18                	add    \(%rax\),%ebx
++[ 	]*[a-f0-9]+:	89 d8                	mov    %ebx,%eax
++[ 	]*[a-f0-9]+:	5b                   	pop    %rbx
++[ 	]*[a-f0-9]+:	c3                   	retq   
++#pass
+diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
+index b3ceaa1..1b90482 100644
+--- a/ld/testsuite/ld-x86-64/x86-64.exp
++++ b/ld/testsuite/ld-x86-64/x86-64.exp
+@@ -55,6 +55,13 @@ set x86_64tests {
+      {{readelf -WSsrl tlspic.rd} {objdump -drj.text\ -Mintel64 tlspic.dd}
+       {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
+       "libtlspic.so"}
++    {"TLS -fpic -shared transitions with r15 as GOT base"
++     "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
++     "--64 -mrelax-relocations=yes"
++     {tlspic3.s tlspic2.s}
++     {{readelf -WSsrl tlspic2.rd} {objdump -drj.text\ -Mintel64 tlspic2.dd}
++      {objdump -sj.got tlspic2.sd} {objdump -sj.tdata tlspic2.td}}
++      "libtlspic2.so"}
+     {"TLS descriptor -fpic -shared transitions"
+      "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
+      "--64" {tlsdesc.s tlspic2.s}
+@@ -69,6 +76,12 @@ set x86_64tests {
+      {{readelf -WSsrl tlsbin.rd} {objdump -drj.text tlsbin.dd}
+       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
+       "tlsbin"}
++    {"TLS -fpic and -fno-pic exec transitions without PLT"
++     "-melf_x86_64 tmpdir/libtlslib.so --no-ld-generated-unwind-info" ""
++     "-mrelax-relocations=yes --64" {tlsbinpic2.s tlsbin.s}
++     {{readelf -WSsrl tlsbin2.rd} {objdump -drj.text tlsbin2.dd}
++      {objdump -sj.got tlsbin2.sd} {objdump -sj.tdata tlsbin2.td}}
++      "tlsbin2"}
+     {"TLS descriptor -fpic and -fno-pic exec transitions"
+      "-melf_x86_64 tmpdir/libtlslib.so --no-ld-generated-unwind-info" ""
+      "--64" {tlsbindesc.s tlsbin.s}
+@@ -114,12 +127,20 @@ set x86_64tests {
+      "--64" {tlsgd5b.s} {} "libtlsgd5.so"}
+     {"TLS GD->IE transition" "-melf_x86_64 tmpdir/libtlsgd5.so" ""
+      "--64" {tlsgd5a.s}
+-     {{objdump -dwr tlsgd5.dd}} "tlsgd5"}
++     {{objdump -dwr tlsgd5.dd}} "tlsgd5a"}
++    {"TLS GD->IE transition without PLT"
++     "-melf_x86_64 tmpdir/libtlsgd5.so" ""
++     "--64" {tlsgd5c.s}
++     {{objdump -dwr tlsgd5.dd}} "tlsgd5b"}
+     {"Helper TLS X32 GD->IE transition DSO" "-shared -melf32_x86_64" ""
+      "--x32" {tlsgd6b.s} {} "libtlsgd6.so"}
+     {"TLS X32 GD->IE transition" "-melf32_x86_64 tmpdir/libtlsgd6.so" ""
+      "--x32" {tlsgd6a.s}
+-     {{objdump -dwr tlsgd6.dd}} "tlsgd6"}
++     {{objdump -dwr tlsgd6.dd}} "tlsgd6a"}
++    {"TLS X32 GD->IE transition without PLT"
++     "-melf32_x86_64 tmpdir/libtlsgd6.so" ""
++     "--x32" {tlsgd6c.s}
++     {{objdump -dwr tlsgd6.dd}} "tlsgd6b"}
+     {"TLS X32 LD->LE transition" "-melf32_x86_64" ""
+      "--x32" {tlsld2.s}
+      {{objdump -dwr tlsld2.dd}} "tlsld2"}
+@@ -129,10 +150,38 @@ set x86_64tests {
+     {"TLS -mcmodel=large LD->LE transition" "-melf_x86_64" ""
+      "--64" {tlsld3.s}
+      {{objdump -dwr tlsld3.dd}} "tlsld3"}
++    {"TLS -mcmodel=large LD->LE transition with r15 as GOT base"
++     "-melf_x86_64" ""
++     "--64" {tlsld4.s}
++     {{objdump -dwr tlsld4.dd}} "tlsld4"}
++    {"TLS LD->LE transition without PLT"
++     "-melf_x86_64" ""
++     "--64 -mrelax-relocations=yes"
++     {tlsld5.s}
++     {{objdump -dwr tlsld5.dd}} "tlsld5"}
++    {"TLS X32 LD->LE transition without PLT" "-melf32_x86_64" ""
++     "--x32 -mrelax-relocations=yes"
++     {tlsld6.s}
++     {{objdump -dwr tlsld6.dd}} "tlsld6"}
+     {"TLS -mcmodel=large GD->IE transition" "-melf_x86_64 tmpdir/libtlsgd5.so" ""
+      "--64" {tlsgd8.s}
+      {{objdump -dwrj.text tlsgd8.dd}} "tlsgd8"}
+-
++    {"TLS -mcmodel=large GD->LE transition with r15 as GOT base"
++     "-melf_x86_64" ""
++     "--64" {tlsgd9.s}
++     {{objdump -dwr tlsgd9.dd}} "tlsgd9"}
++    {"TLS -mcmodel=large GD->IE transition with r15 as GOT base"
++     "-melf_x86_64 tmpdir/libtlsgd5.so" ""
++     "--64" {tlsgd10.s}
++     {{objdump -dwrj.text tlsgd10.dd}} "tlsgd10"}
++    {"TLS GD->LE transition without PLT"
++     "-melf_x86_64" ""
++     "--64" {tlsgd11.s}
++     {{objdump -dwr tlsgd11.dd}} "tlsgd11"}
++    {"TLS X32 GD->LE transition without PLT"
++     "-melf32_x86_64" ""
++     "--x32" {tlsgd14.s}
++     {{objdump -dwr tlsgd14.dd}} "tlsgd14"}
+      {"build 32-bit object with 33 locals" "-melf_x86_64 -e 0" "" "--32" {32bit.s} {{ ld incompatible.l }} "dummy" }
+      {"build 64-bit object" "-melf_x86_64 -e 0 --defsym foo=1" "" "--64" {64bit.s} {} "dummy" }
+      {"link mixed objects"  "-melf_x86_64 -e 0 tmpdir/32bit.o tmpdir/64bit.o" "" "" {} { { ld incompatible.l } } "mixed"}
+@@ -216,6 +265,8 @@ run_dump_test "pcrel8"
+ run_dump_test "pcrel16"
+ run_dump_test "tlsgd2"
+ run_dump_test "tlsgd3"
++run_dump_test "tlsgd12"
++run_dump_test "tlsgd13"
+ run_dump_test "tlsie2"
+ run_dump_test "tlsie3"
+ run_dump_test "hidden1"
+@@ -236,6 +287,8 @@ run_dump_test "protected7a"
+ run_dump_test "protected7b"
+ run_dump_test "tlsle1"
+ run_dump_test "tlspie1"
++run_dump_test "tlspie2a"
++run_dump_test "tlspie2b"
+ run_dump_test "unique1"
+ run_dump_test "nogot1"
+ run_dump_test "nogot2"
+-- 
+2.5.5
+

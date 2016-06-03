@@ -20,6 +20,7 @@ patches="
 	binutils-lto-mixed.patch
 	binutils-pr12639.patch
 	binutils-secondary.patch
+	binutils-tls.patch
 "
 
 for p in $patches
