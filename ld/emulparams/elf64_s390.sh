@@ -11,8 +11,11 @@ NOP=0x07070707
 TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes
+GENERATE_RELRO_SCRIPT=yes
 NO_SMALL_DATA=yes
 IREL_IN_PLT=
+SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 24 ? 24 : 0"
+test -z "$RELRO" && unset SEPARATE_GOTPLT
 
 # Treat a host that matches the target with the possible exception of "x"
 # in the name as if it were native.
