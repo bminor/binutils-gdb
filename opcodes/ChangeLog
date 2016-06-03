@@ -1,3 +1,17 @@
+2016-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* i386-dis.c (indirEv): Replace stack_v_mode with indir_v_mode.
+	(indir_v_mode): New.
+	Add comments for '&'.
+	(reg_table): Replace "{T|}" with "{&|}" on call and jmp.
+	(putop): Handle '&'.
+	(intel_operand_size): Handle indir_v_mode.
+	(OP_E_register): Likewise.
+	* i386-opc.tbl: Mark 64-bit indirect call/jmp as AMD64.  Add
+	64-bit indirect call/jmp for AMD64.
+	* i386-tbl.h: Regenerated
+
 2016-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-dis.c (struct arc_operand_iterator): New structure.

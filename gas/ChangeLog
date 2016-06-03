@@ -1,3 +1,12 @@
+2016-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* testsuite/gas/i386/i386.exp: Run x86-64-branch-4.
+	* testsuite/gas/i386/x86-64-branch.d: Updated.
+	* testsuite/gas/i386/ilp32/x86-64-branch.d: Likewise.
+	* testsuite/gas/i386/x86-64-branch-4.l: New file.
+	* testsuite/gas/i386/x86-64-branch-4.s: Likewise.
+
 2016-06-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add cortex-a73 entry.
