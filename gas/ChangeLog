@@ -1,3 +1,15 @@
+2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+
+	PR binutils/20196
+	* gas/testsuite/gas/ppc/e6500.s <lbarx, lharx, lwarx, ldarx,
+	stbcx., sthcx., stwcx., stdcx.>: Add tests.
+	* gas/testsuite/gas/ppc/e6500.d: Likewise.
+	* gas/testsuite/gas/ppc/power8.s: Likewise.
+	* gas/testsuite/gas/ppc/power8.d: Likewise.
+	* gas/testsuite/gas/ppc/power4.s <lwarx, ldarx, stwcx.,
+	stdcx.>: Add tests.
+	* gas/testsuite/gas/ppc/power4.d: Likewise.
+
 2016-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/18386

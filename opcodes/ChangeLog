@@ -1,3 +1,9 @@
+2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+
+	PR binutils/20196
+	* ppc-opc.c (powerpc_opcodes <lbarx, lharx, stbcx., sthcx.>): Enable
+	opcodes for E6500.
+
 2016-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/18386
