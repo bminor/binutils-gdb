@@ -3691,7 +3691,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 
 	      /* Put in the GOT offset as displacement value.  The 0xc000
 		 value comes from the first word of the plt entry.  Look
-		 at the elf_s390_plt_pic16_entry content.  */
+		 at the elf_s390_plt_pic12_entry content.  */
 	      bfd_put_16 (output_bfd, (bfd_vma)0xc000 | got_offset,
 			  htab->elf.splt->contents + h->plt.offset + 2);
 

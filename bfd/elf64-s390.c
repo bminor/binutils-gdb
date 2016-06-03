@@ -492,8 +492,8 @@ elf_s390_is_local_label_name (bfd *abfd, const char *name)
 
    The GOT holds the address in the PLT to be executed.
    The loader then gets:
-   24(15) =  Pointer to the structure describing the object.
-   28(15) =  Offset in symbol table
+   48(15) =  Pointer to the structure describing the object.
+   56(15) =  Offset in symbol table
    The loader  must  then find the module where the function is
    and insert the address in the GOT.
 
@@ -2479,7 +2479,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 		    PLT_ENTRY_SIZE;
 
 		  /* Offset in GOT is PLT index plus GOT headers(3)
-		     times 4, addr & GOT addr.  */
+		     times 8, addr & GOT addr.  */
 		  relocation = (plt_index + 3) * GOT_ENTRY_SIZE;
 		  if (r_type == R_390_GOTPLTENT)
 		    relocation += htab->elf.sgot->output_section->vma;
@@ -3805,7 +3805,7 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	  /* One entry for shared object struct ptr.  */
 	  bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + 8);
 	  /* One entry for _dl_runtime_resolve.  */
-	  bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + 12);
+	  bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + 16);
 	}
 
       elf_section_data (htab->elf.sgot->output_section)
