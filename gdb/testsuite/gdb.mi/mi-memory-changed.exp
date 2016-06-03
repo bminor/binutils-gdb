@@ -16,7 +16,7 @@
 standard_testfile basics.c
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable {debug nowarnings}] != "" } {
-    untested mi-record-changed.exp
+    untested ${testfile}.exp
     return -1
 }
 

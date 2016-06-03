@@ -30,6 +30,10 @@
 
 #include "elf/reloc-macros.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Relocation types.  */
 START_RELOC_NUMBERS (elf_mips_reloc_type)
   RELOC_NUMBER (R_MIPS_NONE, 0)
@@ -1311,5 +1315,9 @@ enum
   /* Using 128-bit MSA.  */
   Val_GNU_MIPS_ABI_MSA_128 = 1,
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _ELF_MIPS_H */

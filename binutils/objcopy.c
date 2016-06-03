@@ -1125,6 +1125,10 @@ group_signature (asection *group)
   bfd *abfd = group->owner;
   Elf_Internal_Shdr *ghdr;
 
+  /* PR 20089: An earlier error may have prevented us from loading the symbol table.  */
+  if (isympp == NULL)
+    return NULL;
+
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     return NULL;
 
@@ -1135,7 +1139,8 @@ group_signature (asection *group)
       Elf_Internal_Shdr *symhdr = elf_elfsections (abfd) [ghdr->sh_link];
 
       if (symhdr->sh_type == SHT_SYMTAB
-	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
+	  && ghdr->sh_info > 0
+	  && ghdr->sh_info < (symhdr->sh_size / bed->s->sizeof_sym))
 	return isympp[ghdr->sh_info - 1];
     }
   return NULL;

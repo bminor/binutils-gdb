@@ -1,7 +1,7 @@
 #source: ifunc-13a-i386.s
 #source: ifunc-13b-i386.s
 #ld: -shared -m elf_i386 -z nocombreloc
-#as: --32
+#as: --32 -mrelax-relocations=yes
 #readelf: -r --wide
 #target: x86_64-*-* i?86-*-*
 

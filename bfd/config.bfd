@@ -276,7 +276,7 @@ case "${targ}" in
     targ_defvec=am33_elf32_linux_vec
     ;;
 
-  arc*-*-elf* | arc*-*-linux-uclibc*)
+  arc*-*-elf* | arc*-*-linux*)
     targ_defvec=arc_elf32_le_vec
     targ_selvecs=arc_elf32_be_vec
     ;;

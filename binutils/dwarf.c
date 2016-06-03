@@ -5780,6 +5780,7 @@ display_debug_frames (struct dwarf_section *section,
       unsigned int encoded_ptr_size = saved_eh_addr_size;
       unsigned int offset_size;
       unsigned int initial_length_size;
+      bfd_boolean all_nops;
 
       saved_start = start;
 
@@ -6213,6 +6214,8 @@ display_debug_frames (struct dwarf_section *section,
 	  start = tmp;
 	}
 
+      all_nops = TRUE;
+
       /* Now we know what registers are used, make a second pass over
 	 the chunk, this time actually printing out the info.  */
 
@@ -6230,6 +6233,10 @@ display_debug_frames (struct dwarf_section *section,
 	  opa = op & 0x3f;
 	  if (op & 0xc0)
 	    op &= 0xc0;
+
+	  /* Make a note if something other than DW_CFA_nop happens.  */
+	  if (op != DW_CFA_nop)
+	    all_nops = FALSE;
 
 	  /* Warning: if you add any more cases to this switch, be
 	     sure to add them to the corresponding switch above.  */
@@ -6661,7 +6668,8 @@ display_debug_frames (struct dwarf_section *section,
 	    }
 	}
 
-      if (do_debug_frames_interp)
+      /* Interpret the CFA - as long as it is not completely full of NOPs.  */
+      if (do_debug_frames_interp && ! all_nops)
 	frame_display_row (fc, &need_col_headers, &max_regs);
 
       start = block_end;

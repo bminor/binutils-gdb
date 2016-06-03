@@ -78,7 +78,7 @@ alpha*-*-*vms*)		targ_emul=alphavms
 arc*-*-elf*)		targ_emul=arcelf
             		targ_extra_emuls="arcelf_prof arclinux arclinux_prof arcv2elf arcv2elfx"
             		;;
-arc*-*-linux-uclibc*)	targ_emul=arclinux
+arc*-*-linux*)		targ_emul=arclinux
 			targ_extra_emuls="arclinux_prof arcelf arcelf_prof arcv2elf arcv2elfx"
 			;;
 arm-epoc-pe)		targ_emul=arm_epoc_pe ;	targ_extra_ofiles="deffilep.o pe-dll.o" ;;

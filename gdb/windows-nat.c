@@ -864,7 +864,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	 to treat this like a real signal.  */
       char *p;
       int sig = strtol (s + sizeof (_CYGWIN_SIGNAL_STRING) - 1, &p, 0);
-      int gotasig = gdb_signal_from_host (sig);
+      gdb_signal gotasig = gdb_signal_from_host (sig);
 
       ourstatus->value.sig = gotasig;
       if (gotasig)
@@ -1894,7 +1894,7 @@ windows_get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len)
     /* Cygwin prefers that the path be in /x/y/z format, so extract
        the filename into a temporary buffer first, and then convert it
        to POSIX format into the destination buffer.  */
-    cygwin_buf_t *pathbuf = alloca (exe_name_max_len * sizeof (cygwin_buf_t));
+    cygwin_buf_t *pathbuf = (cygwin_buf_t *) alloca (exe_name_max_len * sizeof (cygwin_buf_t));
 
     len = GetModuleFileNameEx (current_process_handle,
 			       dh_buf, pathbuf, exe_name_max_len);

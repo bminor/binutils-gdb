@@ -125,6 +125,7 @@ recognized:
 @code{cortex-a53},
 @code{cortex-a57},
 @code{cortex-a72},
+@code{cortex-a73},
 @code{cortex-r4},
 @code{cortex-r4f},
 @code{cortex-r5},

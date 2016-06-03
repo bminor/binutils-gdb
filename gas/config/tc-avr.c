@@ -1731,8 +1731,6 @@ const exp_mod_data_t exp_mod_data[] =
   { "hi8",  1, BFD_RELOC_AVR_8_HI,  "`hi8' "  },
   { "hlo8", 1, BFD_RELOC_AVR_8_HLO, "`hlo8' " },
   { "hh8",  1, BFD_RELOC_AVR_8_HLO, "`hh8' "  },
-  /* End of list.  */
-  { NULL, 0, 0, NULL }
 };
 
 /* Parse special CONS expression: pm (expression) or alternatively
@@ -1742,16 +1740,17 @@ const exp_mod_data_t exp_mod_data[] =
 const exp_mod_data_t *
 avr_parse_cons_expression (expressionS *exp, int nbytes)
 {
-  const exp_mod_data_t *pexp = &exp_mod_data[0];
   char *tmp;
+  unsigned int i;
 
   tmp = input_line_pointer = skip_space (input_line_pointer);
 
   /* The first entry of exp_mod_data[] contains an entry if no
      expression modifier is present.  Skip it.  */
 
-  for (pexp++; pexp->name; pexp++)
+  for (i = 0; i < ARRAY_SIZE (exp_mod_data); i++)
     {
+      const exp_mod_data_t *pexp = &exp_mod_data[i];
       int len = strlen (pexp->name);
 
       if (nbytes == pexp->nbytes

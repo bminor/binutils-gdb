@@ -22,6 +22,10 @@
 #ifndef ELF32_NDS32_H
 #define ELF32_NDS32_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Relocation flags encoded in r_addend.  */
 
 /* Relocation flags for R_NDS32_ERLAX_ENTRY.  */
@@ -152,4 +156,9 @@ struct elf_nds32_link_hash_table
   bfd_boolean ex9_loop_aware;	/* Ignore ex9 if inside a loop.  */
   bfd_boolean ifc_loop_aware;	/* Ignore ifc if inside a loop.  */
 };
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

@@ -1,3 +1,23 @@
+2016-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h (MAX_INSN_ARGS): Increase to 16.
+	(struct arc_long_opcode): New structure.
+	(arc_long_opcodes): Declare.
+	(arc_num_long_opcodes): Declare.
+
+2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf/mips.h: Add extern "C".
+	* elf/sh.h: Likewise.
+	* opcode/d10v.h: Likewise.
+	* opcode/d30v.h: Likewise.
+	* opcode/ia64.h: Likewise.
+	* opcode/mips.h: Likewise.
+	* opcode/ppc.h: Likewise.
+	* opcode/sparc.h: Likewise.
+	* opcode/tic6x.h: Likewise.
+	* opcode/v850.h: Likewise.
+
 2016-05-28  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_callbacks): Update comments.

@@ -5254,7 +5254,7 @@ direct:
 		 addq %rbx, %rax
 		 call *%rax
 		 into:
-		 data32 data32 data32 nopw %cs:0x0(%rax,%rax,1)
+		 data16 data16 data16 nopw %cs:0x0(%rax,%rax,1)
 		 movq %fs:0, %eax */
 
 	      BFD_ASSERT (r_type == R_X86_64_TPOFF32);
@@ -6662,11 +6662,11 @@ static const bfd_byte elf_x86_64_nacl_plt0_entry[NACL_PLT_ENTRY_SIZE] =
     0x66, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw 0x0(%rax,%rax,1)	*/
 
     /* 32 bytes of nop to pad out to the standard size.  */
-    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data16 prefixes	*/
     0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
-    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data16 prefixes	*/
     0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
-    0x66,                                  /* excess data32 prefix	*/
+    0x66,                                  /* excess data16 prefix	*/
     0x90                                   /* nop */
   };
 
@@ -6678,7 +6678,7 @@ static const bfd_byte elf_x86_64_nacl_plt_entry[NACL_PLT_ENTRY_SIZE] =
     0x41, 0xff, 0xe3,             	/* jmpq *%r11			*/
 
     /* 15-byte nop sequence to pad out to the next 32-byte boundary.  */
-    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data16 prefixes	*/
     0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
 
     /* Lazy GOT entries point here (32-byte aligned).  */
@@ -6688,7 +6688,7 @@ static const bfd_byte elf_x86_64_nacl_plt_entry[NACL_PLT_ENTRY_SIZE] =
     0, 0, 0, 0,           /* replaced with offset to start of .plt0.  */
 
     /* 22 bytes of nop to pad out to the standard size.  */
-    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data16 prefixes	*/
     0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
     0x0f, 0x1f, 0x80, 0, 0, 0, 0,          /* nopl 0x0(%rax)		*/
   };

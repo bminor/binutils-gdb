@@ -1,3 +1,47 @@
+2016-06-02  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20088
+	* cpu-arm.c (processors): Add "arm_any" type to match any ARM
+	architecture.
+	(arch_info_struct): Likewise.
+	(architectures): Likewise.
+
+2016-06-02  Vineet Gupta  <Vineet.Gupta1@synopsys.com>
+
+	* config.bfd: Replace -uclibc with *.
+
+2016-06-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c: Replace data32 with data16 in comments.
+
+2016-05-31  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20159
+	PR ld/16467
+	* elflink.c (_bfd_elf_merge_symbol): Revert PR16467 change.
+	(_bfd_elf_add_default_symbol): Don't indirect to/from defined
+	symbol given a version by a script different to the version
+	of the symbol being added.
+	(elf_link_add_object_symbols): Use _bfd_elf_strtab_save and
+	_bfd_elf_strtab_restore.  Don't fudge dynstr references.
+	* elf-strtab.c (_bfd_elf_strtab_restore_size): Delete.
+	(struct strtab_save): New.
+	(_bfd_elf_strtab_save, _bfd_elf_strtab_restore): New functions.
+	* elf-bfd.h (_bfd_elf_strtab_restore_size): Delete.
+	(_bfd_elf_strtab_save, _bfd_elf_strtab_restore): Declare.
+
+2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf32-hppa.h: Add extern "C".
+	* elf32-nds32.h: Likewise.
+	* elf32-tic6x.h: Likewise.
+
+2016-06-01  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: New Serbian translation.
+	* configure.ac (ALL_LINGUAS): Add sr.
+	* configure: Regenerate.
+
 2016-05-28  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (b_reloc_p): New function.

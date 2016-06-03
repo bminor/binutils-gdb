@@ -1,3 +1,41 @@
+2016-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-dis.c (struct arc_operand_iterator): New structure.
+	(find_format_from_table): All the old content from find_format,
+	with some minor adjustments, and parameter renaming.
+	(find_format_long_instructions): New function.
+	(find_format): Rewritten.
+	(arc_insn_length): Add LSB parameter.
+	(extract_operand_value): New function.
+	(operand_iterator_next): New function.
+	(print_insn_arc): Use new functions to find opcode, and iterator
+	over operands.
+	* arc-opc.c (insert_nps_3bit_dst_short): New function.
+	(extract_nps_3bit_dst_short): New function.
+	(insert_nps_3bit_src2_short): New function.
+	(extract_nps_3bit_src2_short): New function.
+	(insert_nps_bitop1_size): New function.
+	(extract_nps_bitop1_size): New function.
+	(insert_nps_bitop2_size): New function.
+	(extract_nps_bitop2_size): New function.
+	(insert_nps_bitop_mod4_msb): New function.
+	(extract_nps_bitop_mod4_msb): New function.
+	(insert_nps_bitop_mod4_lsb): New function.
+	(extract_nps_bitop_mod4_lsb): New function.
+	(insert_nps_bitop_dst_pos3_pos4): New function.
+	(extract_nps_bitop_dst_pos3_pos4): New function.
+	(insert_nps_bitop_ins_ext): New function.
+	(extract_nps_bitop_ins_ext): New function.
+	(arc_operands): Add new operands.
+	(arc_long_opcodes): New global array.
+	(arc_num_long_opcodes): New global.
+	* arc-nps400-tbl.h: Add comments referencing arc_long_opcodes.
+
+2016-06-01  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* nds32-asm.h: Add extern "C".
+	* sh-opc.h: Likewise.
+
 2016-06-01  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-nps400-tbl.h: Add operands a,b,u6, 0,b,u6, and

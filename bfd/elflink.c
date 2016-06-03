@@ -1202,21 +1202,20 @@ _bfd_elf_merge_symbol (bfd *abfd,
   oldfunc = (h->type != STT_NOTYPE
 	     && bed->is_function_type (h->type));
 
-  /* When we try to create a default indirect symbol from the dynamic
-     definition with the default version, we skip it if its type and
-     the type of existing regular definition mismatch.  */
+  /* If creating a default indirect symbol ("foo" or "foo@") from a
+     dynamic versioned definition ("foo@@") skip doing so if there is
+     an existing regular definition with a different type.  We don't
+     want, for example, a "time" variable in the executable overriding
+     a "time" function in a shared library.  */
   if (pold_alignment == NULL
       && newdyn
       && newdef
       && !olddyn
-      && (((olddef || h->root.type == bfd_link_hash_common)
-	   && ELF_ST_TYPE (sym->st_info) != h->type
-	   && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
-	   && h->type != STT_NOTYPE
-	   && !(newfunc && oldfunc))
-	  || (olddef
-	      && ((h->type == STT_GNU_IFUNC)
-		  != (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)))))
+      && (olddef || h->root.type == bfd_link_hash_common)
+      && ELF_ST_TYPE (sym->st_info) != h->type
+      && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+      && h->type != STT_NOTYPE
+      && !(newfunc && oldfunc))
     {
       *skip = TRUE;
       return TRUE;
@@ -1780,6 +1779,31 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 
   if (skip)
     goto nondefault;
+
+  if (hi->def_regular)
+    {
+      /* If the undecorated symbol will have a version added by a
+	 script different to H, then don't indirect to/from the
+	 undecorated symbol.  This isn't ideal because we may not yet
+	 have seen symbol versions, if given by a script on the
+	 command line rather than via --version-script.  */
+      if (hi->verinfo.vertree == NULL && info->version_info != NULL)
+	{
+	  bfd_boolean hide;
+
+	  hi->verinfo.vertree
+	    = bfd_find_version_for_sym (info->version_info,
+					hi->root.root.string, &hide);
+	  if (hi->verinfo.vertree != NULL && hide)
+	    {
+	      (*bed->elf_backend_hide_symbol) (info, hi, TRUE);
+	      goto nondefault;
+	    }
+	}
+      if (hi->verinfo.vertree != NULL
+	  && strcmp (p + 1 + (p[1] == '@'), hi->verinfo.vertree->name) != 0)
+	goto nondefault;
+    }
 
   if (! override)
     {
@@ -3591,8 +3615,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   void *old_ent;
   struct bfd_link_hash_entry *old_undefs = NULL;
   struct bfd_link_hash_entry *old_undefs_tail = NULL;
-  long old_dynsymcount = 0;
-  bfd_size_type old_dynstr_size = 0;
+  void *old_strtab = NULL;
   size_t tabsize = 0;
   asection *s;
   bfd_boolean just_syms;
@@ -4036,8 +4059,9 @@ error_free_dyn:
       old_table = htab->root.table.table;
       old_size = htab->root.table.size;
       old_count = htab->root.table.count;
-      old_dynsymcount = htab->dynsymcount;
-      old_dynstr_size = _bfd_elf_strtab_size (htab->dynstr);
+      old_strtab = _bfd_elf_strtab_save (htab->dynstr);
+      if (old_strtab == NULL)
+	goto error_free_vers;
 
       for (i = 0; i < htab->root.table.size; i++)
 	{
@@ -4762,7 +4786,9 @@ error_free_dyn:
       memcpy (htab->root.table.table, old_tab, tabsize);
       htab->root.undefs = old_undefs;
       htab->root.undefs_tail = old_undefs_tail;
-      _bfd_elf_strtab_restore_size (htab->dynstr, old_dynstr_size);
+      _bfd_elf_strtab_restore (htab->dynstr, old_strtab);
+      free (old_strtab);
+      old_strtab = NULL;
       for (i = 0; i < htab->root.table.size; i++)
 	{
 	  struct bfd_hash_entry *p;
@@ -4775,9 +4801,6 @@ error_free_dyn:
 	      h = (struct elf_link_hash_entry *) p;
 	      if (h->root.type == bfd_link_hash_warning)
 		h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	      if (h->dynindx >= old_dynsymcount
-		  && h->dynstr_index < old_dynstr_size)
-		_bfd_elf_strtab_delref (htab->dynstr, h->dynstr_index);
 
 	      /* Preserve the maximum alignment and size for common
 		 symbols even if this dynamic lib isn't on DT_NEEDED
@@ -5099,6 +5122,8 @@ error_free_dyn:
  error_free_vers:
   if (old_tab != NULL)
     free (old_tab);
+  if (old_strtab != NULL)
+    free (old_strtab);
   if (nondeflt_vers != NULL)
     free (nondeflt_vers);
   if (extversym != NULL)

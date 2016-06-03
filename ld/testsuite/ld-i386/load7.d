@@ -1,4 +1,4 @@
-#as: --32
+#as: --32 -mrelax-relocations=yes
 #ld: -shared -melf_i386 --version-script load7.map
 #objdump: -dw
 

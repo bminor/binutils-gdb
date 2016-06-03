@@ -34,6 +34,21 @@
 /* encode1<.f> */
 { "encode1", 0x48048000, 0xf80f8000, ARC_OPCODE_NPS400, BITOP, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_BITOP_SRC_POS, NPS_BITOP_SIZE }, { C_NPS_F }},
 
+/* mrgb - 48 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mrgb.cl - 48 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mov2b - 48 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mov2b.cl - 48 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* ext4 - 48 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* ext4.cl - 48 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* ins4 - 48 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* ins4.cl - 48 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mov3b - 64 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mov4b - 64 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mov3bcl - 64 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mov4bcl - 64 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mov3b.cl - 64 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+/* mov4b.cl - 64 bit instruction, see arc_long_opcodes in arc-opc.c.  */
+
 /* rflt a,b,c   00111bbb00101110FBBBCCCCCCAAAAAA */
 { "rflt", 0x382e0000, 0xf8ff8000, ARC_OPCODE_NPS400, BITOP, NONE, { RA, RB, RC }, { 0 }},
 

@@ -20,6 +20,10 @@
 
 #include "bfd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum
   {
     HEX_0,
@@ -1196,5 +1200,9 @@ const sh_opcode_info sh_table[] =
 
 { 0, {0}, {0}, 0 }
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

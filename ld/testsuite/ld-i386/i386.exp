@@ -664,7 +664,7 @@ if { [isnative]
 	[list \
 	    "Build gotpc1.o" \
 	    "-r -nostdlib" \
-	    "" \
+	    "-Wa,-mrelax-relocations=yes" \
 	    { got1a.S got1b.c got1c.c } \
 	    "" \
 	    "gotpc1.o" \
@@ -672,7 +672,7 @@ if { [isnative]
 	[list \
 	    "Build gotpc1" \
 	    "-Wl,--as-needed tmpdir/gotpc1.o tmpdir/got1d.so" \
-	    "-Wa,-mrelax-relocations=yes" \
+	    "" \
 	    { dummy.s } \
 	    {{objdump {-dw} got1.dd}} \
 	    "got1" \
@@ -688,7 +688,7 @@ if { [isnative]
 	[list \
 	    "Build pr19319" \
 	    "-pie -nostdlib -nostartfiles tmpdir/pr19319.so" \
-	    "" \
+	    "-Wa,-mrelax-relocations=yes" \
 	    { pr19319b.S } \
 	    {{objdump {-dw} pr19319.dd}} \
 	    "pr19319" \
