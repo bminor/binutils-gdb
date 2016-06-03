@@ -2467,9 +2467,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 		{
 		  plt_index = h->plt.offset / PLT_ENTRY_SIZE;
 		  relocation = (plt_index * GOT_ENTRY_SIZE +
-				htab->elf.igotplt->output_offset);
-		  if (r_type == R_390_GOTPLTENT)
-		    relocation += htab->elf.igotplt->output_section->vma;
+				htab->elf.igotplt->output_offset +
+				htab->elf.igotplt->output_section->vma);
+		  if (r_type != R_390_GOTPLTENT)
+		    relocation -= htab->elf.sgot->output_section->vma;
 		}
 	      else
 		{
@@ -2480,9 +2481,11 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 		  /* Offset in GOT is PLT index plus GOT headers(3)
 		     times 8, addr & GOT addr.  */
-		  relocation = (plt_index + 3) * GOT_ENTRY_SIZE;
-		  if (r_type == R_390_GOTPLTENT)
-		    relocation += htab->elf.sgot->output_section->vma;
+		  relocation = (plt_index + 3) * GOT_ENTRY_SIZE +
+				htab->elf.sgotplt->output_offset +
+				htab->elf.sgotplt->output_section->vma;
+		  if (r_type != R_390_GOTPLTENT)
+		    relocation -= htab->elf.sgot->output_section->vma;
 		}
 	      unresolved_reloc = FALSE;
 	      break;
@@ -2631,15 +2634,16 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = base_got->output_offset + off;
+	  relocation = base_got->output_offset + off +
+		       base_got->output_section->vma;
 
 	  /* For @GOTENT the relocation is against the offset between
 	     the instruction and the symbols entry in the GOT and not
 	     between the start of the GOT and the symbols entry. We
 	     add the vma of the GOT to get the correct value.  */
-	  if (   r_type == R_390_GOTENT
-	      || r_type == R_390_GOTPLTENT)
-	    relocation += base_got->output_section->vma;
+	  if (   r_type != R_390_GOTENT
+	      && r_type != R_390_GOTPLTENT)
+	    relocation -= htab->elf.sgot->output_section->vma;
 
 	  break;
 
