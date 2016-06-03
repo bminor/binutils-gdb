@@ -630,6 +630,19 @@ static const bfd_byte elf_s390_plt_first_entry[PLT_FIRST_ENTRY_SIZE] =
 
 static const bfd_byte elf_s390_plt_pic_first_entry[PLT_FIRST_ENTRY_SIZE] =
   {
+    0x50, 0x10, 0xf0, 0x1c,                   /* st      %r1,28(%r15)      */
+    0x0d, 0x10,                               /* basr    %r1,%r0           */
+    0x5a, 0x10, 0x10, 0x12,                   /* a       %r1,18(%r1)       */
+    0xd2, 0x03, 0xf0, 0x18, 0x10, 0x04,       /* mvc     24(4,%r15),4(%r1) */
+    0x58, 0x10, 0x10, 0x08,                   /* l       %r1,8(%r1)        */
+    0x07, 0xf1,                               /* br      %r1               */
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00
+  };
+
+static const bfd_byte elf_s390_plt_pic12_first_entry[PLT_FIRST_ENTRY_SIZE] =
+  {
     0x50, 0x10, 0xf0, 0x1c,                     /* st      %r1,28(%r15)  */
     0x58, 0x10, 0xc0, 0x04,                     /* l       %r1,4(%r12)   */
     0x50, 0x10, 0xf0, 0x18,                     /* st      %r1,24(%r15)  */
@@ -2508,9 +2521,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 		{
 		  plt_index = h->plt.offset / PLT_ENTRY_SIZE;
 		  relocation = (plt_index * GOT_ENTRY_SIZE +
-				htab->elf.igotplt->output_offset);
-		  if (r_type == R_390_GOTPLTENT)
-		    relocation += htab->elf.igotplt->output_section->vma;
+				htab->elf.igotplt->output_offset +
+				htab->elf.igotplt->output_section->vma);
+		  if (r_type != R_390_GOTPLTENT)
+		    relocation -= htab->elf.sgot->output_section->vma;
 		}
 	      else
 		{
@@ -2521,9 +2535,11 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 		  /* Offset in GOT is PLT index plus GOT headers(3)
 		     times 4, addr & GOT addr.  */
-		  relocation = (plt_index + 3) * GOT_ENTRY_SIZE;
-		  if (r_type == R_390_GOTPLTENT)
-		    relocation += htab->elf.sgot->output_section->vma;
+		  relocation = (plt_index + 3) * GOT_ENTRY_SIZE +
+				htab->elf.sgotplt->output_offset +
+				htab->elf.sgotplt->output_section->vma;
+		  if (r_type != R_390_GOTPLTENT)
+		    relocation -= htab->elf.sgot->output_section->vma;
 		}
 	      unresolved_reloc = FALSE;
 
@@ -2671,15 +2687,16 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = base_got->output_offset + off;
+	  relocation = base_got->output_offset + off +
+		       base_got->output_section->vma;
 
 	  /* For @GOTENT the relocation is against the offset between
 	     the instruction and the symbols entry in the GOT and not
 	     between the start of the GOT and the symbols entry. We
 	     add the vma of the GOT to get the correct value.  */
-	  if (   r_type == R_390_GOTENT
-	      || r_type == R_390_GOTPLTENT)
-	    relocation += base_got->output_section->vma;
+	  if (   r_type != R_390_GOTENT
+	      && r_type != R_390_GOTPLTENT)
+	    relocation -= base_got->output_section->vma;
 
 	  break;
 
@@ -3492,7 +3509,9 @@ elf_s390_finish_ifunc_symbol (bfd *output_bfd,
   /* Offset into the igot.plt section.  */
   igotiplt_offset = iplt_index * GOT_ENTRY_SIZE;
   /* Offset into the got section.  */
-  got_offset = igotiplt_offset + gotplt->output_offset;
+  got_offset = igotiplt_offset + gotplt->output_offset +
+	       gotplt->output_section->vma -
+	       htab->elf.sgot->output_section->vma;
 
   /* S390 uses halfwords for relative branch calc!  */
   relative_offset = - (plt->output_offset +
@@ -3515,7 +3534,7 @@ elf_s390_finish_ifunc_symbol (bfd *output_bfd,
 
       /* Push the GOT offset field.  */
       bfd_put_32 (output_bfd,
-		  (gotplt->output_section->vma
+		  (htab->elf.sgot->output_section->vma
 		   + got_offset),
 		  plt->contents + iplt_offset + 24);
     }
@@ -3583,7 +3602,7 @@ elf_s390_finish_ifunc_symbol (bfd *output_bfd,
 	      gotplt->contents + igotiplt_offset);
 
   /* Fill in the entry in the .rela.plt section.  */
-  rela.r_offset = gotplt->output_section->vma + got_offset;
+  rela.r_offset = htab->elf.sgot->output_section->vma + got_offset;
 
   if (!h
       || h->dynindx == -1
@@ -3623,6 +3642,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
     {
       bfd_vma plt_index;
       bfd_vma got_offset;
+      bfd_vma got_plt_offset;
       Elf_Internal_Rela rela;
       bfd_byte *loc;
       bfd_vma relative_offset;
@@ -3653,7 +3673,10 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 
 	  /* Offset in GOT is PLT index plus GOT headers(3) times 4,
 	     addr & GOT addr.  */
-	  got_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
+	  got_plt_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
+	  got_offset = got_plt_offset + htab->elf.sgotplt->output_offset +
+		       htab->elf.sgotplt->output_section->vma -
+		       htab->elf.sgot->output_section->vma;
 
 	  /* S390 uses halfwords for relative branch calc!  */
 	  relative_offset = - ((PLT_FIRST_ENTRY_SIZE +
@@ -3676,8 +3699,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 
 	      /* Push the GOT offset field.  */
 	      bfd_put_32 (output_bfd,
-			  (htab->elf.sgotplt->output_section->vma
-			   + htab->elf.sgotplt->output_offset
+			  (htab->elf.sgot->output_section->vma
 			   + got_offset),
 			  htab->elf.splt->contents + h->plt.offset + 24);
 	    }
@@ -3741,11 +3763,10 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 		       + htab->elf.splt->output_offset
 		       + h->plt.offset
 		       + 12),
-		      htab->elf.sgotplt->contents + got_offset);
+		      htab->elf.sgotplt->contents + got_plt_offset);
 
 	  /* Fill in the entry in the .rela.plt section.  */
-	  rela.r_offset = (htab->elf.sgotplt->output_section->vma
-			   + htab->elf.sgotplt->output_offset
+	  rela.r_offset = (htab->elf.sgot->output_section->vma
 			   + got_offset);
 	  rela.r_info = ELF32_R_INFO (h->dynindx, R_390_JMP_SLOT);
 	  rela.r_addend = 0;
@@ -3921,6 +3942,7 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
   asection *sdyn;
   bfd *ibfd;
   unsigned int i;
+  bfd_vma got_plt_offset;
 
   htab = elf_s390_hash_table (info);
   dynobj = htab->elf.dynobj;
@@ -3971,8 +3993,33 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	  memset (htab->elf.splt->contents, 0, PLT_FIRST_ENTRY_SIZE);
 	  if (bfd_link_pic (info))
 	    {
-	      memcpy (htab->elf.splt->contents, elf_s390_plt_pic_first_entry,
-		      PLT_FIRST_ENTRY_SIZE);
+	      got_plt_offset = htab->elf.sgotplt->output_offset +
+			       htab->elf.sgotplt->output_section->vma -
+			       htab->elf.sgot->output_section->vma;
+	      if (got_plt_offset < 0xff8)
+		{
+		  memcpy (htab->elf.splt->contents,
+			  elf_s390_plt_pic12_first_entry,
+			  PLT_FIRST_ENTRY_SIZE);
+		  /* Put in the GOT offset as displacement values.  The 0xc000
+		     value comes from the first word of the plt entry.  Look
+		     at the elf_s390_plt_pic12_first_entry content.  */
+		  bfd_put_16 (output_bfd, (bfd_vma)0xc000 | (got_plt_offset + 4),
+			      htab->elf.splt->contents + 6);
+		  bfd_put_16 (output_bfd, (bfd_vma)0xc000 | (got_plt_offset + 8),
+			      htab->elf.splt->contents + 14);
+		}
+	      else
+		{
+		  memcpy (htab->elf.splt->contents,
+			  elf_s390_plt_pic_first_entry,
+			  PLT_FIRST_ENTRY_SIZE);
+		  bfd_put_32 (output_bfd,
+			      htab->elf.sgotplt->output_section->vma
+			      + htab->elf.sgotplt->output_offset
+			      - htab->elf.splt->output_section->vma - 6,
+			      htab->elf.splt->contents + 24);
+		}
 	    }
 	  else
 	    {
