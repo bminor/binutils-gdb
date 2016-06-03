@@ -1110,6 +1110,55 @@ extract_nps_bitop_ins_ext (unsigned insn ATTRIBUTE_UNUSED,
   return value;
 }
 
+#define MAKE_1BASED_INSERT_EXTRACT_FUNCS(NAME,SHIFT,UPPER,BITS)         \
+static unsigned                                                         \
+insert_nps_##NAME (unsigned insn ATTRIBUTE_UNUSED,                      \
+                   int value ATTRIBUTE_UNUSED,                          \
+                   const char **errmsg ATTRIBUTE_UNUSED)                \
+{                                                                       \
+  if (value < 1 || value > UPPER)                                       \
+    *errmsg = _("Value must be in the range 1 to " #UPPER);             \
+  if (value == UPPER)                                                   \
+    value = 0;                                                          \
+  return insn | (value << SHIFT);                                       \
+}                                                                       \
+                                                                        \
+static int                                                              \
+extract_nps_##NAME (unsigned insn ATTRIBUTE_UNUSED,                     \
+                    bfd_boolean * invalid ATTRIBUTE_UNUSED)             \
+{                                                                       \
+  int value = (insn >> SHIFT) & ((1 << BITS) - 1);                      \
+  if (value == 0)                                                       \
+    value = UPPER;                                                      \
+  return value;                                                         \
+}
+
+MAKE_1BASED_INSERT_EXTRACT_FUNCS(field_size, 6, 8, 3)
+MAKE_1BASED_INSERT_EXTRACT_FUNCS(shift_factor, 9, 8, 3)
+MAKE_1BASED_INSERT_EXTRACT_FUNCS(bits_to_scramble, 12, 8, 3)
+MAKE_1BASED_INSERT_EXTRACT_FUNCS(bdlen_max_len, 5, 256, 8)
+
+static unsigned
+insert_nps_min_hofs (unsigned insn ATTRIBUTE_UNUSED,
+                     int value ATTRIBUTE_UNUSED,
+                     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  if (value < 0 || value > 240)
+    *errmsg = _("Value must be in the range 0 to 240");
+  if ((value % 16) != 0)
+    *errmsg = _("Value must be a multiple of 16");
+  value = value / 16;
+  return insn | (value << 6);
+}
+
+static int
+extract_nps_min_hofs (unsigned insn ATTRIBUTE_UNUSED,
+                      bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value = (insn >> 6) & 0xF;
+  return value * 16;
+}
+
 /* Include the generic extract/insert functions.  Order is important
    as some of the functions present in the .h may be disabled via
    defines.  */
@@ -1314,6 +1363,15 @@ const struct arc_flag_operand arc_flag_operands[] =
 
 #define F_NPS_AL     (F_NPS_AR + 1)
   { "al",  1, 1, 0, 1 },
+
+#define F_NPS_S      (F_NPS_AL + 1)
+  { "s",   0, 0, 0, 1 },
+
+#define F_NPS_ZNCV_RD      (F_NPS_S + 1)
+  { "rd",  0, 1, 15, 1 },
+
+#define F_NPS_ZNCV_WR      (F_NPS_ZNCV_RD + 1)
+  { "wr",  1, 1, 15, 1 },
 };
 
 const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
@@ -1420,6 +1478,12 @@ const struct arc_flag_class arc_flag_classes[] =
 
 #define C_NPS_AR_AL     (C_NPS_SX + 1)
   { F_CLASS_REQUIRED, { F_NPS_AR, F_NPS_AL, F_NULL}},
+
+#define C_NPS_S    (C_NPS_AR_AL + 1)
+  { F_CLASS_REQUIRED, { F_NPS_S, F_NULL}},
+
+#define C_NPS_ZNCV    (C_NPS_S + 1)
+  { F_CLASS_REQUIRED, { F_NPS_ZNCV_RD, F_NPS_ZNCV_WR, F_NULL}},
 };
 
 const unsigned char flags_none[] = { 0 };
@@ -1785,7 +1849,10 @@ const struct arc_operand arc_operands[] =
 #define NPS_UIMM16		(NPS_BITOP_UIMM8 + 1)
   { 16, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
 
-#define NPS_RFLT_UIMM6		(NPS_UIMM16 + 1)
+#define NPS_SIMM16              (NPS_UIMM16 + 1)
+  { 16, 0, 0, ARC_OPERAND_SIGNED, NULL, NULL },
+
+#define NPS_RFLT_UIMM6		(NPS_SIMM16 + 1)
   { 6, 6, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_rflt_uimm6, extract_nps_rflt_uimm6 },
 
 #define NPS_XLDST_UIMM16	(NPS_RFLT_UIMM6 + 1)
@@ -1889,6 +1956,30 @@ const struct arc_operand arc_operands[] =
 
 #define NPS_BITOP_INS_EXT	(NPS_BITOP_MOD1 + 1)
   { 5, 20, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_ins_ext, extract_nps_bitop_ins_ext },
+
+#define NPS_FIELD_START_POS     (NPS_BITOP_INS_EXT + 1)
+  { 3, 3, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_FIELD_SIZE          (NPS_FIELD_START_POS + 1)
+  { 3, 6, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_field_size, extract_nps_field_size },
+
+#define NPS_SHIFT_FACTOR        (NPS_FIELD_SIZE + 1)
+  { 3, 9, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_shift_factor, extract_nps_shift_factor },
+
+#define NPS_BITS_TO_SCRAMBLE    (NPS_SHIFT_FACTOR + 1)
+  { 3, 12, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bits_to_scramble, extract_nps_bits_to_scramble },
+
+#define NPS_SRC2_POS_5B         (NPS_BITS_TO_SCRAMBLE + 1)
+  { 5, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_BDLEN_MAX_LEN       (NPS_SRC2_POS_5B + 1)
+  { 8, 5, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bdlen_max_len, extract_nps_bdlen_max_len },
+
+#define NPS_MIN_HOFS       (NPS_BDLEN_MAX_LEN + 1)
+  { 4, 6, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_min_hofs, extract_nps_min_hofs },
+
+#define NPS_PSBC       (NPS_MIN_HOFS + 1)
+  { 1, 11, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
 };
 
 const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);
