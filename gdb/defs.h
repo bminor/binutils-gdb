@@ -629,6 +629,25 @@ enum gdb_osabi
 extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
 #endif
 
+/* Enumerate the requirements a symbol has in order to be evaluated.
+   These are listed in order of "strength" -- a later entry subsumes
+   earlier ones.  This fine-grained distinction is important because
+   it allows for the evaluation of a TLS symbol during unwinding --
+   when unwinding one has access to registers, but not the frame
+   itself, because that is being constructed.  */
+
+enum symbol_needs_kind
+{
+  /* No special requirements -- just memory.  */
+  SYMBOL_NEEDS_NONE,
+
+  /* The symbol needs registers.  */
+  SYMBOL_NEEDS_REGISTERS,
+
+  /* The symbol needs a frame.  */
+  SYMBOL_NEEDS_FRAME
+};
+
 /* Dynamic target-system-dependent parameters for GDB.  */
 #include "gdbarch.h"
 

@@ -1,3 +1,9 @@
+2016-07-26  Tom Tromey  <tom@tromey.com>
+
+	PR python/20190:
+	* gdb.threads/tls.exp (check_thread_local): Add python symbol
+	test.
+
 2016-07-26  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/record_goto.exp: se is_amd64_regs_target for

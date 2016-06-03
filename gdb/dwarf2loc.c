@@ -2726,21 +2726,21 @@ dwarf2_compile_property_to_c (struct ui_file *stream,
 }
 
 
-/* Helper functions and baton for dwarf2_loc_desc_needs_frame.  */
+/* Helper functions and baton for dwarf2_loc_desc_get_symbol_read_needs.  */
 
-struct needs_frame_baton
+struct symbol_needs_baton
 {
-  int needs_frame;
+  enum symbol_needs_kind needs;
   struct dwarf2_per_cu_data *per_cu;
 };
 
 /* Reads from registers do require a frame.  */
 static CORE_ADDR
-needs_frame_read_addr_from_reg (void *baton, int regnum)
+symbol_needs_read_addr_from_reg (void *baton, int regnum)
 {
-  struct needs_frame_baton *nf_baton = (struct needs_frame_baton *) baton;
+  struct symbol_needs_baton *nf_baton = (struct symbol_needs_baton *) baton;
 
-  nf_baton->needs_frame = 1;
+  nf_baton->needs = SYMBOL_NEEDS_FRAME;
   return 1;
 }
 
@@ -2748,61 +2748,64 @@ needs_frame_read_addr_from_reg (void *baton, int regnum)
    Reads from registers do require a frame.  */
 
 static struct value *
-needs_frame_get_reg_value (void *baton, struct type *type, int regnum)
+symbol_needs_get_reg_value (void *baton, struct type *type, int regnum)
 {
-  struct needs_frame_baton *nf_baton = (struct needs_frame_baton *) baton;
+  struct symbol_needs_baton *nf_baton = (struct symbol_needs_baton *) baton;
 
-  nf_baton->needs_frame = 1;
+  nf_baton->needs = SYMBOL_NEEDS_FRAME;
   return value_zero (type, not_lval);
 }
 
 /* Reads from memory do not require a frame.  */
 static void
-needs_frame_read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
+symbol_needs_read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
 {
   memset (buf, 0, len);
 }
 
 /* Frame-relative accesses do require a frame.  */
 static void
-needs_frame_frame_base (void *baton, const gdb_byte **start, size_t * length)
+symbol_needs_frame_base (void *baton, const gdb_byte **start, size_t * length)
 {
   static gdb_byte lit0 = DW_OP_lit0;
-  struct needs_frame_baton *nf_baton = (struct needs_frame_baton *) baton;
+  struct symbol_needs_baton *nf_baton = (struct symbol_needs_baton *) baton;
 
   *start = &lit0;
   *length = 1;
 
-  nf_baton->needs_frame = 1;
+  nf_baton->needs = SYMBOL_NEEDS_FRAME;
 }
 
 /* CFA accesses require a frame.  */
 
 static CORE_ADDR
-needs_frame_frame_cfa (void *baton)
+symbol_needs_frame_cfa (void *baton)
 {
-  struct needs_frame_baton *nf_baton = (struct needs_frame_baton *) baton;
+  struct symbol_needs_baton *nf_baton = (struct symbol_needs_baton *) baton;
 
-  nf_baton->needs_frame = 1;
+  nf_baton->needs = SYMBOL_NEEDS_FRAME;
   return 1;
 }
 
-/* Thread-local accesses do require a frame.  */
+/* Thread-local accesses require registers, but not a frame.  */
 static CORE_ADDR
-needs_frame_tls_address (void *baton, CORE_ADDR offset)
+symbol_needs_tls_address (void *baton, CORE_ADDR offset)
 {
-  struct needs_frame_baton *nf_baton = (struct needs_frame_baton *) baton;
+  struct symbol_needs_baton *nf_baton = (struct symbol_needs_baton *) baton;
 
-  nf_baton->needs_frame = 1;
+  if (nf_baton->needs <= SYMBOL_NEEDS_REGISTERS)
+    nf_baton->needs = SYMBOL_NEEDS_REGISTERS;
   return 1;
 }
 
-/* Helper interface of per_cu_dwarf_call for dwarf2_loc_desc_needs_frame.  */
+/* Helper interface of per_cu_dwarf_call for
+   dwarf2_loc_desc_get_symbol_read_needs.  */
 
 static void
-needs_frame_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset)
+symbol_needs_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset)
 {
-  struct needs_frame_baton *nf_baton = (struct needs_frame_baton *) ctx->baton;
+  struct symbol_needs_baton *nf_baton =
+    (struct symbol_needs_baton *) ctx->baton;
 
   per_cu_dwarf_call (ctx, die_offset, nf_baton->per_cu,
 		     ctx->funcs->get_frame_pc, ctx->baton);
@@ -2815,9 +2818,10 @@ needs_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
 			     enum call_site_parameter_kind kind,
 			     union call_site_parameter_u kind_u, int deref_size)
 {
-  struct needs_frame_baton *nf_baton = (struct needs_frame_baton *) ctx->baton;
+  struct symbol_needs_baton *nf_baton =
+    (struct symbol_needs_baton *) ctx->baton;
 
-  nf_baton->needs_frame = 1;
+  nf_baton->needs = SYMBOL_NEEDS_FRAME;
 
   /* The expression may require some stub values on DWARF stack.  */
   dwarf_expr_push_address (ctx, 0, 0);
@@ -2841,38 +2845,39 @@ needs_get_obj_addr (void *baton)
   return 1;
 }
 
-/* Virtual method table for dwarf2_loc_desc_needs_frame below.  */
+/* Virtual method table for dwarf2_loc_desc_get_symbol_read_needs
+   below.  */
 
-static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
+static const struct dwarf_expr_context_funcs symbol_needs_ctx_funcs =
 {
-  needs_frame_read_addr_from_reg,
-  needs_frame_get_reg_value,
-  needs_frame_read_mem,
-  needs_frame_frame_base,
-  needs_frame_frame_cfa,
-  needs_frame_frame_cfa,	/* get_frame_pc */
-  needs_frame_tls_address,
-  needs_frame_dwarf_call,
+  symbol_needs_read_addr_from_reg,
+  symbol_needs_get_reg_value,
+  symbol_needs_read_mem,
+  symbol_needs_frame_base,
+  symbol_needs_frame_cfa,
+  symbol_needs_frame_cfa,	/* get_frame_pc */
+  symbol_needs_tls_address,
+  symbol_needs_dwarf_call,
   NULL,				/* get_base_type */
   needs_dwarf_reg_entry_value,
   needs_get_addr_index,
   needs_get_obj_addr
 };
 
-/* Return non-zero iff the location expression at DATA (length SIZE)
-   requires a frame to evaluate.  */
+/* Compute the correct symbol_needs_kind value for the location
+   expression at DATA (length SIZE).  */
 
-static int
-dwarf2_loc_desc_needs_frame (const gdb_byte *data, size_t size,
-			     struct dwarf2_per_cu_data *per_cu)
+static enum symbol_needs_kind
+dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
+				       struct dwarf2_per_cu_data *per_cu)
 {
-  struct needs_frame_baton baton;
+  struct symbol_needs_baton baton;
   struct dwarf_expr_context *ctx;
   int in_reg;
   struct cleanup *old_chain;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
 
-  baton.needs_frame = 0;
+  baton.needs = SYMBOL_NEEDS_NONE;
   baton.per_cu = per_cu;
 
   ctx = new_dwarf_expr_context ();
@@ -2884,7 +2889,7 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, size_t size,
   ctx->ref_addr_size = dwarf2_per_cu_ref_addr_size (per_cu);
   ctx->offset = dwarf2_per_cu_text_offset (per_cu);
   ctx->baton = &baton;
-  ctx->funcs = &needs_frame_ctx_funcs;
+  ctx->funcs = &symbol_needs_ctx_funcs;
 
   dwarf_expr_eval (ctx, data, size);
 
@@ -2903,7 +2908,9 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, size_t size,
 
   do_cleanups (old_chain);
 
-  return baton.needs_frame || in_reg;
+  if (in_reg)
+    baton.needs = SYMBOL_NEEDS_FRAME;
+  return baton.needs;
 }
 
 /* A helper function that throws an unimplemented error mentioning a
@@ -3736,15 +3743,17 @@ locexpr_read_variable_at_entry (struct symbol *symbol, struct frame_info *frame)
 				     dlbaton->size);
 }
 
-/* Return non-zero iff we need a frame to evaluate SYMBOL.  */
-static int
-locexpr_read_needs_frame (struct symbol *symbol)
+/* Implementation of get_symbol_read_needs from
+   symbol_computed_ops.  */
+
+static enum symbol_needs_kind
+locexpr_get_symbol_read_needs (struct symbol *symbol)
 {
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (symbol);
 
-  return dwarf2_loc_desc_needs_frame (dlbaton->data, dlbaton->size,
-				      dlbaton->per_cu);
+  return dwarf2_loc_desc_get_symbol_read_needs (dlbaton->data, dlbaton->size,
+						dlbaton->per_cu);
 }
 
 /* Return true if DATA points to the end of a piece.  END is one past
@@ -4473,7 +4482,7 @@ locexpr_generate_c_location (struct symbol *sym, struct ui_file *stream,
 const struct symbol_computed_ops dwarf2_locexpr_funcs = {
   locexpr_read_variable,
   locexpr_read_variable_at_entry,
-  locexpr_read_needs_frame,
+  locexpr_get_symbol_read_needs,
   locexpr_describe_location,
   0,	/* location_has_loclist */
   locexpr_tracepoint_var_ref,
@@ -4530,9 +4539,11 @@ loclist_read_variable_at_entry (struct symbol *symbol, struct frame_info *frame)
   return value_of_dwarf_block_entry (SYMBOL_TYPE (symbol), frame, data, size);
 }
 
-/* Return non-zero iff we need a frame to evaluate SYMBOL.  */
-static int
-loclist_read_needs_frame (struct symbol *symbol)
+/* Implementation of get_symbol_read_needs from
+   symbol_computed_ops.  */
+
+static enum symbol_needs_kind
+loclist_symbol_needs (struct symbol *symbol)
 {
   /* If there's a location list, then assume we need to have a frame
      to choose the appropriate location expression.  With tracking of
@@ -4540,7 +4551,7 @@ loclist_read_needs_frame (struct symbol *symbol)
      is disabled in GCC at the moment until we figure out how to
      represent it.  */
 
-  return 1;
+  return SYMBOL_NEEDS_FRAME;
 }
 
 /* Print a natural-language description of SYMBOL to STREAM.  This
@@ -4684,7 +4695,7 @@ loclist_generate_c_location (struct symbol *sym, struct ui_file *stream,
 const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_read_variable,
   loclist_read_variable_at_entry,
-  loclist_read_needs_frame,
+  loclist_symbol_needs,
   loclist_describe_location,
   1,	/* location_has_loclist */
   loclist_tracepoint_var_ref,

@@ -1,3 +1,28 @@
+2016-07-26  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (register_symbol_computed_impl): Update.
+	PR python/20190:
+	* value.h (symbol_read_needs): Declare.
+	(symbol_read_needs_frame): Add comment.
+	* symtab.h (struct symbol_computed_ops) <read_variable>: Update
+	comment.
+	<get_symbol_read_needs>: Rename.  Change return type.
+	* findvar.c (symbol_read_needs): New function.
+	(symbol_read_needs_frame): Rewrite.
+	(default_read_var_value): Use symbol_read_needs.
+	* dwarf2loc.c (struct symbol_needs_baton): Rename.
+	<needs>: Renamed from needs_frame.  Changed type.
+	(needs_frame_read_addr_from_reg, symbol_needs_get_reg_value)
+	(symbol_needs_read_mem, symbol_needs_frame_base)
+	(symbol_needs_frame_cfa, symbol_needs_tls_address)
+	(symbol_needs_dwarf_call): Rename.
+	(needs_dwarf_reg_entry_value): Update.
+	(symbol_needs_ctx_funcs, dwarf2_loc_desc_get_symbol_read_needs):
+	Rename and update.
+	(locexpr_get_symbol_read_needs, loclist_symbol_needs): Likewise.
+	(dwarf2_locexpr_funcs, dwarf2_loclist_funcs): Update.
+	* defs.h (enum symbol_needs_kind): New.
+
 2016-07-26  Pedro Alves  <palves@redhat.com>
 
 	* nat/linux-ptrace.c: Include "gregset.h".

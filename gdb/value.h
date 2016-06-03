@@ -672,6 +672,13 @@ extern struct value *value_of_register (int regnum, struct frame_info *frame);
 
 struct value *value_of_register_lazy (struct frame_info *frame, int regnum);
 
+/* Return the symbol's reading requirement.  */
+
+extern enum symbol_needs_kind symbol_read_needs (struct symbol *);
+
+/* Return true if the symbol needs a frame.  This is a wrapper for
+   symbol_read_needs that simply checks for SYMBOL_NEEDS_FRAME.  */
+
 extern int symbol_read_needs_frame (struct symbol *);
 
 extern struct value *read_var_value (struct symbol *var,
