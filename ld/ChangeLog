@@ -1,3 +1,21 @@
+2016-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Assemble gotpc1.o and pr19319b.o
+	with -mrelax-relocations=yes.
+	* testsuite/ld-i386/lea1a.d (as): Add -mrelax-relocations=yes.
+	* testsuite/ld-i386/lea1b.d (as): Likewise.
+	* testsuite/ld-i386/lea1d.d (as): Likewise.
+	* testsuite/ld-i386/lea1e.d (as): Likewise.
+	* testsuite/ld-i386/lea1f.d (as): Likewise.
+	* testsuite/ld-i386/load7.d (as): Likewise.
+	* testsuite/ld-i386/mov1b.d (as): Likewise.
+	* testsuite/ld-i386/pr19175.d (as): Likewise.
+	* testsuite/ld-ifunc/ifunc-13-i386.d (as): Likewise.
+	* testsuite/ld-ifunc/ifunc-21-i386.d (as): Likewise.
+	* testsuite/ld-ifunc/ifunc-22-i386.d (as): Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Assemble gotpcrel1a.o,
+	gotpcrel1b.o and gotpcrel1c.o with -mrelax-relocations=yes.
+
 2016-06-02  Vineet Gupta  <Vineet.Gupta1@synopsys.com>
 
 	* configure.tgt: Replace -uclibc with *.

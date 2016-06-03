@@ -718,18 +718,16 @@ if { [isnative] && [which $CC] != 0 } {
 	    "gotpcrel1d.so" \
 	] \
 	[list \
-	    "Build libgotpcrel1.a" \
+	    "Build gotpcrel1a.o gotpcrel1b.o gotpcrel1c.o" \
 	    "" \
-	    "" \
+	    "-Wa,-mrelax-relocations=yes" \
 	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
-	    "" \
-	    "libgotpcrel1.a" \
 	] \
 	[list \
 	    "Build gotpcrel1" \
 	    "-Wl,--as-needed tmpdir/gotpcrel1a.o tmpdir/gotpcrel1b.o tmpdir/gotpcrel1c.o tmpdir/gotpcrel1d.so" \
-	    "-Wa,-mrelax-relocations=yes" \
 	    { dummy.s } \
+	    "" \
 	    {{objdump {-dw} gotpcrel1.dd}} \
 	    "gotpcrel1" \
 	] \

@@ -1,5 +1,5 @@
 #ld: -m elf_i386
-#as: --32
+#as: --32 -mrelax-relocations=yes
 #objdump: -dw
 #target: x86_64-*-* i?86-*-*
 
