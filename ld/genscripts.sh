@@ -321,6 +321,20 @@ if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xc
   rm -f ${COMBRELOC}
+
+  if test -n "$GENERATE_RELRO_SCRIPT"; then
+    LD_FLAG=o
+    RELRO=" "
+    COMBRELOC=ldscripts/${EMULATION_NAME}.xo.tmp
+    ( echo "/* Script for -z combreloc -z relro: combine and sort reloc sections */"
+      . ${CUSTOMIZER_SCRIPT}
+      . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+    ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xo
+    rm -f ${COMBRELOC}
+    COMBRELOC=
+    unset RELRO
+  fi
+
   LD_FLAG=w
   RELRO_NOW=" "
   COMBRELOC=ldscripts/${EMULATION_NAME}.xw.tmp
@@ -351,6 +365,20 @@ if test -n "$GENERATE_SHLIB_SCRIPT"; then
       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
     ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xsc
     rm -f ${COMBRELOC}
+
+    if test -n "$GENERATE_RELRO_SCRIPT"; then
+      LD_FLAG=oshared
+      RELRO=" "
+      COMBRELOC=ldscripts/${EMULATION_NAME}.xso.tmp
+      ( echo "/* Script for --shared -z combreloc -z relro: shared library, combine & sort relocs */"
+        . ${CUSTOMIZER_SCRIPT}
+        . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+      ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xso
+      rm -f ${COMBRELOC}
+      COMBRELOC=
+      unset RELRO
+    fi
+
     LD_FLAG=wshared
     RELRO_NOW=" "
     COMBRELOC=ldscripts/${EMULATION_NAME}.xsw.tmp
@@ -383,6 +411,20 @@ if test -n "$GENERATE_PIE_SCRIPT"; then
       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
     ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xdc
     rm -f ${COMBRELOC}
+
+    if test -n "$GENERATE_RELRO_SCRIPT"; then
+      LD_FLAG=opie
+      RELRO=" "
+      COMBRELOC=ldscripts/${EMULATION_NAME}.xdo.tmp
+      ( echo "/* Script for -pie -z combreloc -z relro: position independent executable, combine & sort relocs */"
+        . ${CUSTOMIZER_SCRIPT}
+        . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+      ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xdo
+      rm -f ${COMBRELOC}
+      COMBRELOC=
+      unset RELRO
+    fi
+
     LD_FLAG=wpie
     RELRO_NOW=" "
     COMBRELOC=ldscripts/${EMULATION_NAME}.xdw.tmp
