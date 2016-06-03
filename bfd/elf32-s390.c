@@ -753,6 +753,8 @@ struct elf_s390_link_hash_table
   asection *srelbss;
   asection *irelifunc;
 
+  bfd_boolean split_got;
+
   union
   {
     bfd_signed_vma refcount;
@@ -836,6 +838,8 @@ static bfd_boolean
 create_got_section (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf_s390_link_hash_table *htab;
+  struct elf_link_hash_entry *h;
+  asection *got_section;
 
   if (! _bfd_elf_create_got_section (dynobj, info))
     return FALSE;
@@ -846,6 +850,27 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   htab->elf.srelgot = bfd_get_linker_section (dynobj, ".rela.got");
   if (!htab->elf.sgot || !htab->elf.sgotplt || !htab->elf.srelgot)
     abort ();
+
+  /* The condition here has to match linker script selection.  */
+  if (info->combreloc && info->relro && !(info->flags & DF_BIND_NOW))
+    {
+      htab->elf.sgot->size += GOT_ENTRY_SIZE;
+      got_section = htab->elf.sgot;
+      htab->split_got = TRUE;
+    }
+  else
+    {
+      got_section = htab->elf.sgotplt;
+      htab->split_got = FALSE;
+    }
+
+  /* Define the symbol _GLOBAL_OFFSET_TABLE_ at the start of the .got
+     or .got.plt section.  */
+  h = _bfd_elf_define_linkage_sym (dynobj, info, got_section,
+				   "_GLOBAL_OFFSET_TABLE_");
+  elf_hash_table (info)->hgot = h;
+  if (h == NULL)
+	return FALSE;
 
   return TRUE;
 }
@@ -4054,6 +4079,15 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
       elf_section_data (htab->elf.sgotplt->output_section)
 	->this_hdr.sh_entsize = 4;
     }
+
+  if (htab->elf.sgot && htab->split_got)
+    {
+      bfd_put_32 (output_bfd,
+		  (sdyn == NULL ? (bfd_vma) 0
+		   : sdyn->output_section->vma + sdyn->output_offset),
+		  htab->elf.sgot->contents);
+    }
+
   /* Finish dynamic symbol for local IFUNC symbols.  */
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
@@ -4156,6 +4190,8 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
+/* We create got symbol ourselves, since it may not be in .got.plt */
+#define elf_backend_want_got_sym	0
 #define elf_backend_got_header_size	12
 #define elf_backend_rela_normal		1
 
