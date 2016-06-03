@@ -1,5 +1,10 @@
 2016-06-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
+	* config/tc-aarch64.c (aarch64_cpus): Add cortex-a73 entry.
+	* doc/c-aarch64.texi (-mcpu): Document cortex-a73 value.
+
+2016-06-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
 	* config/tc-arm.c (arm_cpus): Add cortex-a73 entry.
 	* doc/c-arm.texi (-mcpu=): Document cortex-a73 value.
 

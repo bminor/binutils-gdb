@@ -7756,6 +7756,8 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 				  AARCH64_FEATURE_CRC), "Cortex-A57"},
   {"cortex-a72", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				  AARCH64_FEATURE_CRC), "Cortex-A72"},
+  {"cortex-a73", AARCH64_FEATURE (AARCH64_ARCH_V8,
+				  AARCH64_FEATURE_CRC), "Cortex-A73"},
   {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
 				"Samsung Exynos M1"},
