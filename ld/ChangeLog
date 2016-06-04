@@ -1,3 +1,66 @@
+2016-06-04  Christian Groessler  <chris@groessler.org>
+
+	* ld/testsuite/ld-z8k/0filler.s: New file.
+	* ld/testsuite/ld-z8k/branch-target.s: New file.
+	* ld/testsuite/ld-z8k/branch-target2.s: New file.
+	* ld/testsuite/ld-z8k/calr-back-8001.d: New file.
+	* ld/testsuite/ld-z8k/calr-back-8002.d: New file.
+	* ld/testsuite/ld-z8k/calr-back-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/calr-back-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/calr-forw-8001.d: New file.
+	* ld/testsuite/ld-z8k/calr-forw-8002.d: New file.
+	* ld/testsuite/ld-z8k/calr-forw-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/calr-forw-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/calr-opcode.s: New file.
+	* ld/testsuite/ld-z8k/dbjnz-forw-8001.d: New file.
+	* ld/testsuite/ld-z8k/dbjnz-forw-8002.d: New file.
+	* ld/testsuite/ld-z8k/dbjnz-forw-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/dbjnz-forw-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/dbjnz-opcode.s: New file.
+	* ld/testsuite/ld-z8k/djnz-back-8001.d: New file.
+	* ld/testsuite/ld-z8k/djnz-back-8002.d: New file.
+	* ld/testsuite/ld-z8k/djnz-back-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/djnz-back-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/djnz-forw-8001.d: New file.
+	* ld/testsuite/ld-z8k/djnz-forw-8002.d: New file.
+	* ld/testsuite/ld-z8k/djnz-forw-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/djnz-forw-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/djnz-opcode.s: New file.
+	* ld/testsuite/ld-z8k/filler.s: New file.
+	* ld/testsuite/ld-z8k/jr-back-8001.d: New file.
+	* ld/testsuite/ld-z8k/jr-back-8002.d: New file.
+	* ld/testsuite/ld-z8k/jr-back-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/jr-back-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/jr-forw-8001.d: New file.
+	* ld/testsuite/ld-z8k/jr-forw-8002.d: New file.
+	* ld/testsuite/ld-z8k/jr-forw-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/jr-forw-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/jr-opcode.s: New file.
+	* ld/testsuite/ld-z8k/ldr-back-8001.d: New file.
+	* ld/testsuite/ld-z8k/ldr-back-8002.d: New file.
+	* ld/testsuite/ld-z8k/ldr-back-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/ldr-back-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/ldr-forw-8001.d: New file.
+	* ld/testsuite/ld-z8k/ldr-forw-8002.d: New file.
+	* ld/testsuite/ld-z8k/ldr-forw-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/ldr-forw-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/ldr-opcode.s: New file.
+	* ld/testsuite/ld-z8k/ldrb-forw-8001.d: New file.
+	* ld/testsuite/ld-z8k/ldrb-forw-8002.d: New file.
+	* ld/testsuite/ld-z8k/ldrb-forw-fail-8001.d: New file.
+	* ld/testsuite/ld-z8k/ldrb-forw-fail-8002.d: New file.
+	* ld/testsuite/ld-z8k/ldrb-opcode.s: New file.
+	* ld/testsuite/ld-z8k/ldrb-opcode2.s: New file.
+	* ld/testsuite/ld-z8k/other-file.s: New file.
+	* ld/testsuite/ld-z8k/reloc.dd: New file.
+	* ld/testsuite/ld-z8k/reloc.ld: New file.
+	* ld/testsuite/ld-z8k/relocseg.dd: New file.
+	* ld/testsuite/ld-z8k/relocseg.ld: New file.
+	* ld/testsuite/ld-z8k/relocseg1.dd: New file.
+	* ld/testsuite/ld-z8k/test-ld.sh: New file.
+	* ld/testsuite/ld-z8k/this-file.s: New file.
+	* ld/testsuite/ld-z8k/z8k.exp: New file.
+
 2016-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Assemble gotpc1.o and pr19319b.o

@@ -263,7 +263,7 @@ extra_case (bfd *in_abfd,
 	if (gap & 1)
 	  abort ();
 	gap /= 2;
-	if (gap > 128 || gap < -128)
+	if (gap > 127 || gap < -128)
 	  (*link_info->callbacks->reloc_overflow)
 	    (link_info, NULL, bfd_asymbol_name (*reloc->sym_ptr_ptr),
 	     reloc->howto->name, reloc->addend, input_section->owner,
