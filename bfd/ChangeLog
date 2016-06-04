@@ -1,3 +1,7 @@
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf32-xtensa.c (xtensa_make_property_section): Remove prototype.
+
 2016-06-24  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf.c (elfcore_grok_freebsd_note): Handle NT_FREEBSD_PROCSTAT_AUXV

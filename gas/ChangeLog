@@ -1,3 +1,7 @@
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-xtensa.c (xtensa_make_property_section): Remove prototype.
+
 2016-06-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (append_insn): Use any `O_symbol' expression

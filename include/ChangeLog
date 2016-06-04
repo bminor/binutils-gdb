@@ -1,3 +1,7 @@
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf/xtensa.h (xtensa_make_property_section): New prototype.
+
 2016-06-24  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (AT_FREEBSD_EXECPATH, AT_FREEBSD_CANARY)

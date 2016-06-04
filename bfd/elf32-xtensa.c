@@ -110,7 +110,6 @@ static bfd_boolean xtensa_is_proptable_section (asection *);
 static int internal_reloc_compare (const void *, const void *);
 static int internal_reloc_matches (const void *, const void *);
 static asection *xtensa_get_property_section (asection *, const char *);
-extern asection *xtensa_make_property_section (asection *, const char *);
 static flagword xtensa_get_property_predef_flags (asection *);
 
 /* Other functions called directly by the linker.  */

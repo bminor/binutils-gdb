@@ -526,10 +526,6 @@ static void xtensa_switch_section_emit_state (emit_state *, segT, subsegT);
 static void xtensa_restore_emit_state (emit_state *);
 static segT cache_literal_section (bfd_boolean);
 
-/* Import from elf32-xtensa.c in BFD library.  */
-
-extern asection *xtensa_make_property_section (asection *, const char *);
-
 /* op_placement_info functions.  */
 
 static void init_op_placement_info_table (void);
