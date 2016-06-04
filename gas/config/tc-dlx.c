@@ -24,6 +24,8 @@
 #include "safe-ctype.h"
 #include "tc-dlx.h"
 #include "opcode/dlx.h"
+#include "elf/dlx.h"
+#include "bfd/elf32-dlx.h"
 
 /* Make it easier to clone this machine desc into another one.  */
 #define	machine_opcode      dlx_opcode

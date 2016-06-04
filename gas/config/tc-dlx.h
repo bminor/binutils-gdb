@@ -32,7 +32,6 @@
 #define LEX_DOLLAR 1
 
 extern void dlx_pop_insert         (void);
-extern int set_dlx_skip_hi16_flag  (int);
 extern int dlx_unrecognized_line   (int);
 extern bfd_boolean md_dlx_fix_adjustable  (struct fix *);
 
