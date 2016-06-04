@@ -1,3 +1,7 @@
+2016-06-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* arc-ext.h: Wrap in extern C.
+
 2016-06-21  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-dis.c (arc_insn_length): Add comment on instruction length.

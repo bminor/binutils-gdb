@@ -22,6 +22,10 @@
 
 #include "elf/reloc-macros.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if 0
 START_RELOC_NUMBERS (elf_dlx_reloc_type)
      RELOC_NUMBER (R_DLX_NONE,            0)
@@ -49,5 +53,9 @@ START_RELOC_NUMBERS (elf_dlx_reloc_type)
      RELOC_NUMBER (R_DLX_RELOC_26_PCREL,  9)
 END_RELOC_NUMBERS (R_DLX_max)
 #endif /* 0 */
+
+#ifdef __cplusplus
+     }
+#endif
 
 #endif /* _ELF_DLX_H */

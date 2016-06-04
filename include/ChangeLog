@@ -1,5 +1,11 @@
 2016-06-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* elf/dlx.h: Wrap in extern C.
+	* elf/xtensa.h: Likewise.
+	* opcode/arc.h: Likewise.
+
+2016-06-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* opcode/tilegx.h: Move TILEGX_NUM_PIPELINE_ENCODINGS into
 	tilegx_pipeline.
 
