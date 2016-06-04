@@ -482,10 +482,12 @@ GCC_METHOD2 (gcc_expr, literal_expr,
 
 /* Build a gcc_expr that denotes DECL, the declaration of a variable
    or function in namespace scope, or of a static member variable or
-   function.  */
+   function.  Use QUALIFIED_P to build the operand of unary & so as to
+   compute a pointer-to-member, rather than a regular pointer.  */
 
-GCC_METHOD1 (gcc_expr, decl_expr,
-	     gcc_decl)		  /* Argument DECL.  */
+GCC_METHOD2 (gcc_expr, decl_expr,
+	     gcc_decl,			/* Argument DECL.  */
+	     int /* bool */)		/* Argument QUALIFIED_P.  */
 
 /* Build a gcc_expr that denotes the unary operation UNARY_OP applied
    to the gcc_expr OPERAND.  */
@@ -520,12 +522,39 @@ GCC_METHOD2 (gcc_expr, unary_type_expr,
 
 /* Build a gcc_expr that denotes the binary operation BINARY_OP
    applied to gcc_type OPERAND1 and gcc_expr OPERAND2.  Use this for
-   all kinds of type casts, and to form a pointer-to-member.  */
+   all kinds of (single-argument) type casts ("dc", "sc", "cc", "rc"
+   for dynamic, static, const and reinterpret casts, respectively;
+   "cv" for functional or C-style casts).  */
 
 GCC_METHOD3 (gcc_expr, type_value_expr,
 	     const char *,	  /* Argument BINARY_OP.  */
 	     gcc_type,		  /* Argument OPERAND1.  */
 	     gcc_expr)		  /* Argument OPERAND2.  */
+
+/* Build a gcc_expr that denotes the conversion of an expression list
+   VALUES to TYPE, with ("tl") or without ("cv") braces, or a braced
+   initializer list of unspecified type (e.g., a component of another
+   braced initializer list; pass "il" for CONV_OP, and NULL for
+   TYPE).  */
+
+GCC_METHOD3 (gcc_expr, values_expr,
+	     const char *,			 /* Argument CONV_OP.  */
+	     gcc_type,				    /* Argument TYPE.  */
+	     const struct gcc_cp_function_args *) /* Argument VALUES.  */
+
+/* Build a gcc_expr that denotes a new ("nw") or new[] ("na")
+   expression of TYPE, with or without a GLOBAL_NS qualifier (prefix
+   the NEW_OP with "gs"), with or without PLACEMENT, with or without
+   INITIALIZER.  If it's not a placement new, PLACEMENT must be NULL
+   (rather than a zero-length placement arg list).  If there's no
+   specified initializer, INITIALIZER must be NULL; a zero-length arg
+   list stands for a default initializer.  */
+
+GCC_METHOD4 (gcc_expr, alloc_expr,
+	     const char *,			       /* Argument NEW_OP.  */
+	     const struct gcc_cp_function_args *,   /* Argument PLACEMENT.  */
+	     gcc_type,					 /* Argument TYPE.  */
+	     const struct gcc_cp_function_args *) /* Argument INITIALIZER.  */
 
 /* Return a call expression that calls CALLABLE with arguments ARGS.
    CALLABLE may be a function, a callable object, a pointer to
@@ -537,7 +566,7 @@ GCC_METHOD3 (gcc_expr, type_value_expr,
 
 GCC_METHOD3 (gcc_expr, call_expr,
 	     gcc_expr,			      /* Argument CALLABLE.  */
-	     int /* bool */,		  /* Argument QUALIFIED_P.  */
+	     int /* bool */,		   /* Argument QUALIFIED_P.  */
 	     const struct gcc_cp_function_args *) /* Argument ARGS.  */
 
 /* Return the type of the gcc_expr OPERAND.
