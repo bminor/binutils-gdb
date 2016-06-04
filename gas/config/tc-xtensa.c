@@ -29,6 +29,7 @@
 #include "xtensa-istack.h"
 #include "struc-symbol.h"
 #include "xtensa-config.h"
+#include "elf/xtensa.h"
 
 /* Provide default values for new configuration settings.  */
 #ifndef XSHAL_ABI
@@ -213,8 +214,6 @@ int generating_literals = 0;
 /* Required branch target alignment.  */
 #define XTENSA_PROP_BT_ALIGN_REQUIRE    0x3
 
-#define GET_XTENSA_PROP_BT_ALIGN(flag) \
-  (((unsigned) ((flag) & (XTENSA_PROP_BT_ALIGN_MASK))) >> 9)
 #define SET_XTENSA_PROP_BT_ALIGN(flag, align) \
   (((flag) & (~XTENSA_PROP_BT_ALIGN_MASK)) | \
     (((align) << 9) & XTENSA_PROP_BT_ALIGN_MASK))
@@ -235,8 +234,6 @@ int generating_literals = 0;
 
 #define XTENSA_PROP_ALIGNMENT_MASK      0x0001f000
 
-#define GET_XTENSA_PROP_ALIGNMENT(flag) \
-  (((unsigned) ((flag) & (XTENSA_PROP_ALIGNMENT_MASK))) >> 12)
 #define SET_XTENSA_PROP_ALIGNMENT(flag, align) \
   (((flag) & (~XTENSA_PROP_ALIGNMENT_MASK)) | \
     (((align) << 12) & XTENSA_PROP_ALIGNMENT_MASK))
