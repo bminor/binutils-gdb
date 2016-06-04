@@ -1,5 +1,10 @@
 2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-aarch64.c: Make the type of reg_entry::type
+	aarch_reg_type.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-bfin.c (bfin_cpus): Remove sentinal.
 	(md_parse_option): Adjust.
 	* config/tc-aarch64.c (aarch64_parse_abi): Replace use of a sentinal

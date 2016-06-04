@@ -247,15 +247,6 @@ struct reloc_entry
   bfd_reloc_code_real_type reloc;
 };
 
-/* Structure for a hash table entry for a register.  */
-typedef struct
-{
-  const char *name;
-  unsigned char number;
-  unsigned char type;
-  unsigned char builtin;
-} reg_entry;
-
 /* Macros to define the register types and masks for the purpose
    of parsing.  */
 
@@ -301,7 +292,7 @@ typedef struct
 #define MULTI_REG_TYPE(T,V)	BASIC_REG_TYPE(T)
 
 /* Register type enumerators.  */
-typedef enum
+typedef enum aarch64_reg_type_
 {
   /* A list of REG_TYPE_*.  */
   AARCH64_REG_TYPES
@@ -313,6 +304,15 @@ typedef enum
 #define REG_TYPE(T)		(1 << REG_TYPE_##T)
 #undef MULTI_REG_TYPE
 #define MULTI_REG_TYPE(T,V)	V,
+
+/* Structure for a hash table entry for a register.  */
+typedef struct
+{
+  const char *name;
+  unsigned char number;
+  ENUM_BITFIELD (aarch64_reg_type_) type : 8;
+  unsigned char builtin;
+} reg_entry;
 
 /* Values indexed by aarch64_reg_type to assist the type checking.  */
 static const unsigned reg_type_masks[] =
