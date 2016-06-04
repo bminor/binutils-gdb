@@ -4816,7 +4816,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mfvrd",	X(31,51)|1,	XX1RB_MASK|1, PPCVSX2,	PPCNONE,	{RA, VS}},
 {"eratilx",	X(31,51),	X_MASK,	     PPCA2,	PPCNONE,	{ERAT_T, RA, RB}},
 
-{"lbarx",	X(31,52),	XEH_MASK,    POWER8|PPCVLE, PPCNONE,	{RT, RA0, RB, EH}},
+{"lbarx",	X(31,52),	XEH_MASK,    POWER8|E6500|PPCVLE, PPCNONE, {RT, RA0, RB, EH}},
 
 {"ldux",	X(31,53),	X_MASK,      PPC64|PPCVLE, PPCNONE,	{RT, RAL, RB}},
 
@@ -4896,7 +4896,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mfvrwz",	X(31,115)|1,	XX1RB_MASK|1, PPCVSX2,	PPCNONE,	{RA, VS}},
 {"mfvsrwz",	X(31,115),	XX1RB_MASK,   PPCVSX2,	PPCNONE,	{RA, XS6}},
 
-{"lharx",	X(31,116),	XEH_MASK,    POWER8|PPCVLE, PPCNONE,	{RT, RA0, RB, EH}},
+{"lharx",	X(31,116),	XEH_MASK,    POWER8|E6500|PPCVLE, PPCNONE, {RT, RA0, RB, EH}},
 
 {"clf",		X(31,118),	XTO_MASK,    POWER,	PPCNONE,	{RA, RB}},
 
@@ -5946,7 +5946,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"tendall.",	XRC(31,686,1)|(1<<25), XRTRARB_MASK, PPCHTM, PPCNONE,	{0}},
 {"tend.",	XRC(31,686,1), XRTARARB_MASK, PPCHTM,	PPCNONE,	{HTM_A}},
 
-{"stbcx.",	XRC(31,694,1),	X_MASK,      POWER8,	PPCNONE,	{RS, RA0, RB}},
+{"stbcx.",	XRC(31,694,1),	X_MASK,      POWER8|E6500, PPCNONE,	{RS, RA0, RB}},
 
 {"stfsux",	X(31,695),	X_MASK,      COM,	PPCEFS,		{FRS, RAS, RB}},
 
@@ -5978,7 +5978,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"stswi",	X(31,725),	X_MASK, PPCCOM|PPCVLE,	E500|E500MC,	{RS, RA0, NB}},
 {"stsi",	X(31,725),	X_MASK,      PWRCOM,	PPCNONE,	{RS, RA0, NB}},
 
-{"sthcx.",	XRC(31,726,1),	X_MASK,      POWER8,	PPCNONE,	{RS, RA0, RB}},
+{"sthcx.",	XRC(31,726,1),	X_MASK,      POWER8|E6500, PPCNONE,	{RS, RA0, RB}},
 
 {"stfdx",	X(31,727),	X_MASK,      COM,	PPCEFS,		{FRS, RA0, RB}},
 
