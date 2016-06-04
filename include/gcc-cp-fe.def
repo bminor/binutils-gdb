@@ -490,14 +490,27 @@ GCC_METHOD2 (gcc_expr, decl_expr,
 	     int /* bool */)		/* Argument QUALIFIED_P.  */
 
 /* Build a gcc_expr that denotes the unary operation UNARY_OP applied
-   to the gcc_expr OPERAND.  */
+   to the gcc_expr OPERAND.  For non-expr operands, see
+   unary_type_expr.  Besides the UNARY_OP encodings used for operator
+   names, we support "pp_" for preincrement, and "mm_" for
+   predecrement, "nx" for noexcept, "tw" for throw, "tr" for rethrow
+   (pass NULL as the operand), "te" for typeid, "sz" for sizeof, "az"
+   for alignof, "dl" for delete, "gsdl" for ::delete, "da" for
+   delete[], "gsda" for ::delete[], "sp" for pack expansion, "sZ" for
+   sizeof...(function argument pack).  */
 
 GCC_METHOD2 (gcc_expr, unary_value_expr,
 	     const char *,	  /* Argument UNARY_OP.  */
 	     gcc_expr)		  /* Argument OPERAND.  */
 
 /* Build a gcc_expr that denotes the binary operation BINARY_OP
-   applied to gcc_exprs OPERAND1 and OPERAND2.  */
+   applied to gcc_exprs OPERAND1 and OPERAND2.  Besides the BINARY_OP
+   encodings used for operator names, we support "ds" for the operator
+   token ".*" and "dt" for the operator token ".".  When using
+   operators that take a name as their second operand ("." and "->")
+   use decl_expr to convert the gcc_decl of the member name to a
+   gcc_expr, if the member name wasn't created with
+   e.g. new_dependent_value_expr.  */
 
 GCC_METHOD3 (gcc_expr, binary_value_expr,
 	     const char *,	  /* Argument BINARY_OP.  */
@@ -505,7 +518,8 @@ GCC_METHOD3 (gcc_expr, binary_value_expr,
 	     gcc_expr)		  /* Argument OPERAND2.  */
 
 /* Build a gcc_expr that denotes the ternary operation TERNARY_OP
-   applied to gcc_exprs OPERAND1, OPERAND2 and OPERAND3.  */
+   applied to gcc_exprs OPERAND1, OPERAND2 and OPERAND3.  The only
+   supported TERNARY_OP is "qu", for the "?:" operator.  */
 
 GCC_METHOD4 (gcc_expr, ternary_value_expr,
 	     const char *,	  /* Argument TERNARY_OP.  */
@@ -514,7 +528,9 @@ GCC_METHOD4 (gcc_expr, ternary_value_expr,
 	     gcc_expr)		  /* Argument OPERAND3.  */
 
 /* Build a gcc_expr that denotes the unary operation UNARY_OP applied
-   to the gcc_type OPERAND, e.g., sizeof.  */
+   to the gcc_type OPERAND.  Supported unary operations taking types
+   are "ti" for typeid, "st" for sizeof, "at" for alignof, and "sZ"
+   for sizeof...(template argument pack).  */
 
 GCC_METHOD2 (gcc_expr, unary_type_expr,
 	     const char *,	  /* Argument UNARY_OP.  */
