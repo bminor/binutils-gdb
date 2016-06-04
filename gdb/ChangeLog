@@ -1,3 +1,10 @@
+2016-06-10  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (COMMON_OBS): Remove rust-exp.o.
+	(YYFILES): Add rust-exp.c.
+	(YYOBJ): Add rust-exp.o.
+	(local-maintainer-clean): Remove rust-exp.c.
+
 2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
 
 	* NEWS: Mention that GDB now supports a negative repeat count in
