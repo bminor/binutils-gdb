@@ -1,5 +1,12 @@
 2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-tic54x.c (tic54x_set_default_include): remove argument
+							   and simplify accordingly.
+	(tic54x_include): Adjust.
+	(tic54x_mlib): Likewise.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-xtensa.c (xtensa_make_property_section): Remove prototype.
 
 2016-06-24  Maciej W. Rozycki  <macro@imgtec.com>

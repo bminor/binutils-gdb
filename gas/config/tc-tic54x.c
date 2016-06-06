@@ -1855,20 +1855,15 @@ tic54x_clink (int ignored ATTRIBUTE_UNUSED)
    set to "." instead.  */
 
 static void
-tic54x_set_default_include (int dot)
+tic54x_set_default_include (void)
 {
-  const char *dir = ".";
-  char *tmp = NULL;
+  char *dir, *tmp = NULL;
+  const char *curfile;
+  unsigned lineno;
 
-  if (!dot)
-    {
-      const char *curfile;
-      unsigned lineno;
-
-      curfile = as_where (&lineno);
-      dir = xstrdup (curfile);
-      tmp = strrchr (dir, '/');
-    }
+  curfile = as_where (&lineno);
+  dir = xstrdup (curfile);
+  tmp = strrchr (dir, '/');
   if (tmp != NULL)
     {
       int len;
@@ -1936,7 +1931,7 @@ tic54x_include (int ignored ATTRIBUTE_UNUSED)
 
   tic54x_clear_local_labels (0);
 
-  tic54x_set_default_include (0);
+  tic54x_set_default_include ();
 
   s_include (0);
 }
@@ -2293,7 +2288,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
     }
   demand_empty_rest_of_line ();
 
-  tic54x_set_default_include (0);
+  tic54x_set_default_include ();
   path = XNEWVEC (char, (unsigned long) len + include_dir_maxlen + 5);
 
   for (i = 0; i < include_dir_count; i++)
