@@ -1,3 +1,8 @@
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
+	* corefile.c (reopen_exec_file): Only examine st.st_mtime if stat
+	succeeded.
+
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
 	PR python/15620, PR python/18620:
