@@ -1,3 +1,54 @@
+2016-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/pass.out: New file.
+	* testsuite/ld-x86-64/tls-def1.c: Likewise.
+	* testsuite/ld-x86-64/tls-gd1.S: Likewise.
+	* testsuite/ld-x86-64/tls-ld1.S: Likewise.
+	* testsuite/ld-x86-64/tls-main1.c: Likewise.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/ld-x86-64/tlsbin2-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.dd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.sd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.td: Likewise.
+	* testsuite/ld-x86-64/tlsbinpic2.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd10.dd: Likewise.
+	* testsuite/ld-x86-64/tlsgd10.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd11.dd: Likewise.
+	* testsuite/ld-x86-64/tlsgd11.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd12.d: Likewise.
+	* testsuite/ld-x86-64/tlsgd12.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd13.d: Likewise.
+	* testsuite/ld-x86-64/tlsgd13.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd14.dd: Likewise.
+	* testsuite/ld-x86-64/tlsgd14.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd5c.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd6c.s: Likewise.
+	* testsuite/ld-x86-64/tlsgd9.dd: Likewise.
+	* testsuite/ld-x86-64/tlsgd9.s: Likewise.
+	* testsuite/ld-x86-64/tlsld4.dd: Likewise.
+	* testsuite/ld-x86-64/tlsld4.s: Likewise.
+	* testsuite/ld-x86-64/tlsld5.dd: Likewise.
+	* testsuite/ld-x86-64/tlsld5.s: Likewise.
+	* testsuite/ld-x86-64/tlsld6.dd: Likewise.
+	* testsuite/ld-x86-64/tlsld6.s: Likewise.
+	* testsuite/ld-x86-64/tlspic2-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.dd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.sd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.td: Likewise.
+	* testsuite/ld-x86-64/tlspic3.s: Likewise.
+	* testsuite/ld-x86-64/tlspie2.s: Likewise.
+	* testsuite/ld-x86-64/tlspie2a.d: Likewise.
+	* testsuite/ld-x86-64/tlspie2b.d: Likewise.
+	* testsuite/ld-x86-64/tlspie2c.d: Likewise.
+	* testsuite/ld-x86-64/tlsgd5.dd: Updated.
+	* testsuite/ld-x86-64/tlsgd6.dd: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run libtlspic2.so, tlsbin2,
+	tlsgd5b, tlsgd6b, tlsld4, tlsld5, tlsld6, tlsgd9, tlsgd10,
+	tlsgd11, tlsgd14, tlsgd12, tlsgd13, tlspie2a, tlspie2b and
+	tlspie2c.
+
 2016-06-04  Christian Groessler  <chris@groessler.org>
 
 	* testsuite/ld-z8k/0filler.s: New file.

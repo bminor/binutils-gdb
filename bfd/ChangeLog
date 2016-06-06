@@ -1,3 +1,16 @@
+2016-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add tls_get_addr.
+	(elf_x86_64_link_hash_newfunc): Initialize tls_get_addr to 2.
+	(elf_x86_64_check_tls_transition): Check indirect call and
+	direct call with the addr32 prefix for general and local dynamic
+	models.  Set the tls_get_addr feild.
+	(elf_x86_64_convert_load_reloc): Always use addr32 prefix for
+	indirect __tls_get_addr call via GOT.
+	(elf_x86_64_relocate_section): Handle GD->LE, GD->IE and LD->LE
+	transitions with indirect call and direct call with the addr32
+	prefix.
+
 2016-06-04  Christian Groessler  <chris@groessler.org>
 
 	* coff-z8k.c (extra_case): Fix range check for R_JR relocation.
