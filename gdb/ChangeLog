@@ -1,5 +1,20 @@
 2016-06-10  Tom Tromey  <tom@tromey.com>
 
+	* gdbtypes.c (arch_type, arch_integer_type, arch_character_type)
+	(arch_boolean_type, arch_float_type, arch_complex_type)
+	(arch_flags_type, append_flags_type_field)
+	(append_flags_type_flag, arch_composite_type)
+	(append_composite_type_field_raw)
+	(append_composite_type_field_aligned)
+	(append_composite_type_field): Make "name" parameter const.
+	* gdbtypes.h (arch_type, arch_integer_type, arch_character_type)
+	(arch_boolean_type, arch_float_type, arch_complex_type)
+	(append_composite_type_field, append_composite_type_field_aligned)
+	(append_composite_type_field_raw, arch_flags_type)
+	(append_flags_type_field, append_flags_type_flag): Constify.
+
+2016-06-10  Tom Tromey  <tom@tromey.com>
+
 	PR rust/20110:
 	* rust-exp.y (lex_number): Don't truncate large numbers to i32.
 
