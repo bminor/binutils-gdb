@@ -1,3 +1,7 @@
+2016-07-21  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
 2016-07-21  Yao Qi  <yao.qi@linaro.org>
 
 	* mem-break.c (find_gdb_breakpoint): Cast bp to
