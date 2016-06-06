@@ -1,5 +1,11 @@
 2016-07-14  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (simple_overlay_update_1): Remove initialization
+	of "size", and commented-out code.
+	(simple_overlay_update): Likewise.
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_show_source_line): Use getcurx.
 	* tui/tui-io.c (tui_puts): Use getcurx.
 	(tui_redisplay_readline): Likewise.
