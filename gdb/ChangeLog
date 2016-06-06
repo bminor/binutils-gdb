@@ -1,5 +1,12 @@
 2016-06-29  Tom Tromey  <tom@tromey.com>
 
+	PR python/20129:
+	* python/lib/gdb/command/frame_filters.py (_do_enable_frame_filter)
+	(SetFrameFilterPriority._set_filter_priority): Use "frame_filter",
+	not "name".
+
+2016-06-29  Tom Tromey  <tom@tromey.com>
+
 	PR gdb/17210:
 	* target.c (free_memory_read_result_vector): Take a pointer to the
 	VEC as an argument.

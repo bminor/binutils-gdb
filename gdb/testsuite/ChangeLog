@@ -1,3 +1,9 @@
+2016-06-29  Tom Tromey  <tom@tromey.com>
+
+	PR python/20129:
+	* gdb.python/py-framefilter.exp: Add tests for setting priority
+	and disabling of non-existent frame filter.
+
 2016-06-29  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/catch-syscall.c [__arm__]: Set unknown_syscall to
