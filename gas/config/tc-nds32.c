@@ -3193,7 +3193,7 @@ nds32_parse_option (int c, const char *arg)
 {
   struct nds32_parse_option_table *coarse_tune;
   struct nds32_set_option_table *fine_tune;
-  char *ptr_arg = NULL;
+  const char *ptr_arg = NULL;
 
   switch (c)
     {

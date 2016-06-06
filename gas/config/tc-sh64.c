@@ -133,7 +133,8 @@ static const unsigned char shmedia_little_nop_pattern[4] =
  };
 
 static void shmedia_md_begin (void);
-static int shmedia_parse_reg (char *, int *, int *, shmedia_arg_type);
+static int shmedia_parse_reg (char *, shmedia_arg_type *, int *,
+			      shmedia_arg_type);
 static void shmedia_md_assemble (char *);
 static void shmedia_md_apply_fix (fixS *, valueT *);
 static int shmedia_md_estimate_size_before_relax (fragS *, segT);
@@ -1611,7 +1612,8 @@ shmedia_immediate_op (char *where, shmedia_operand_info *op, int pcrel,
    chars consumed.  */
 
 static int
-shmedia_parse_reg (char *src, int *mode, int *reg, shmedia_arg_type argtype)
+shmedia_parse_reg (char *src, shmedia_arg_type *mode, int *reg,
+		   shmedia_arg_type argtype)
 {
   int l0 = TOLOWER (src[0]);
   int l1 = l0 ? TOLOWER (src[1]) : 0;
@@ -2222,7 +2224,7 @@ shmedia_get_operand (char **ptr, shmedia_operand_info *op,
 		     shmedia_arg_type argtype)
 {
   char *src = *ptr;
-  int mode = -1;
+  shmedia_arg_type mode = (shmedia_arg_type) -1;
   unsigned int len;
 
   len = shmedia_parse_reg (src, &mode, &(op->reg), argtype);

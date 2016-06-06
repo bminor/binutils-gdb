@@ -796,6 +796,11 @@ struct elf_x86_64_link_hash_entry
   /* TRUE if symbol has non-GOT/non-PLT relocations in text sections.  */
   unsigned int has_non_got_reloc : 1;
 
+  /* 0: symbol isn't __tls_get_addr.
+     1: symbol is __tls_get_addr.
+     2: symbol is unknown.  */
+  unsigned int tls_get_addr : 2;
+
   /* Reference count of C/C++ function pointer relocations in read-write
      section which can be resolved at run-time.  */
   bfd_signed_vma func_pointer_refcount;
@@ -946,6 +951,7 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->has_bnd_reloc = 0;
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
+      eh->tls_get_addr = 2;
       eh->func_pointer_refcount = 0;
       eh->plt_bnd.offset = (bfd_vma) -1;
       eh->plt_got.offset = (bfd_vma) -1;
@@ -1279,6 +1285,8 @@ elf_x86_64_check_tls_transition (bfd *abfd,
   struct elf_link_hash_entry *h;
   bfd_vma offset;
   struct elf_x86_64_link_hash_table *htab;
+  bfd_byte *call;
+  bfd_boolean indirect_call, tls_get_addr;
 
   htab = elf_x86_64_hash_table (info);
   offset = rel->r_offset;
@@ -1293,32 +1301,61 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 	{
 	  /* Check transition from GD access model.  For 64bit, only
 		.byte 0x66; leaq foo@tlsgd(%rip), %rdi
-		.word 0x6666; rex64; call __tls_get_addr
+		.word 0x6666; rex64; call __tls_get_addr@PLT
+	     or
+		.byte 0x66; leaq foo@tlsgd(%rip), %rdi
+		.byte 0x66; rex64
+		call *__tls_get_addr@GOTPCREL(%rip)
+		which may be converted to
+		addr32 call __tls_get_addr
 	     can transit to different access model.  For 32bit, only
 		leaq foo@tlsgd(%rip), %rdi
-		.word 0x6666; rex64; call __tls_get_addr
-	     can transit to different access model.  For largepic
+		.word 0x6666; rex64; call __tls_get_addr@PLT
+	     or
+		leaq foo@tlsgd(%rip), %rdi
+		.byte 0x66; rex64
+		call *__tls_get_addr@GOTPCREL(%rip)
+		which may be converted to
+		addr32 call __tls_get_addr
+	     can transit to different access model.  For largepic,
 	     we also support:
 	        leaq foo@tlsgd(%rip), %rdi
 	        movabsq $__tls_get_addr@pltoff, %rax
+	        addq $r15, %rax
+	        call *%rax
+	     or
+	        leaq foo@tlsgd(%rip), %rdi
+	        movabsq $__tls_get_addr@pltoff, %rax
 	        addq $rbx, %rax
-	        call *%rax.  */
+	        call *%rax  */
 
-	  static const unsigned char call[] = { 0x66, 0x66, 0x48, 0xe8 };
 	  static const unsigned char leaq[] = { 0x66, 0x48, 0x8d, 0x3d };
 
 	  if ((offset + 12) > sec->size)
 	    return FALSE;
 
-	  if (memcmp (contents + offset + 4, call, 4) != 0)
+	  call = contents + offset + 4;
+	  if (call[0] != 0x66
+	      || !((call[1] == 0x48
+		    && call[2] == 0xff
+		    && call[3] == 0x15)
+		   || (call[1] == 0x48
+		       && call[2] == 0x67
+		       && call[3] == 0xe8)
+		   || (call[1] == 0x66
+		       && call[2] == 0x48
+		       && call[3] == 0xe8)))
 	    {
 	      if (!ABI_64_P (abfd)
 		  || (offset + 19) > sec->size
 		  || offset < 3
-		  || memcmp (contents + offset - 3, leaq + 1, 3) != 0
-		  || memcmp (contents + offset + 4, "\x48\xb8", 2) != 0
-		  || memcmp (contents + offset + 14, "\x48\x01\xd8\xff\xd0", 5)
-		     != 0)
+		  || memcmp (call - 7, leaq + 1, 3) != 0
+		  || memcmp (call, "\x48\xb8", 2) != 0
+		  || call[11] != 0x01
+		  || call[13] != 0xff
+		  || call[14] != 0xd0
+		  || !((call[10] == 0x48 && call[12] == 0xd8)
+		       || (call[10] == 0x4c && call[12] == 0xf8)))
 		return FALSE;
 	      largepic = TRUE;
 	    }
@@ -1334,18 +1371,29 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 		  || memcmp (contents + offset - 3, leaq + 1, 3) != 0)
 		return FALSE;
 	    }
+	  indirect_call = call[2] == 0xff;
 	}
       else
 	{
 	  /* Check transition from LD access model.  Only
 		leaq foo@tlsld(%rip), %rdi;
-		call __tls_get_addr
+		call __tls_get_addr@PLT
+             or
+		leaq foo@tlsld(%rip), %rdi;
+		call *__tls_get_addr@GOTPCREL(%rip)
+		which may be converted to
+		addr32 call __tls_get_addr
 	     can transit to different access model.  For largepic
 	     we also support:
 	        leaq foo@tlsld(%rip), %rdi
 	        movabsq $__tls_get_addr@pltoff, %rax
+	        addq $r15, %rax
+	        call *%rax
+	     or
+	        leaq foo@tlsld(%rip), %rdi
+	        movabsq $__tls_get_addr@pltoff, %rax
 	        addq $rbx, %rax
-	        call *%rax.  */
+	        call *%rax  */
 
 	  static const unsigned char lea[] = { 0x48, 0x8d, 0x3d };
 
@@ -1355,33 +1403,60 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 	  if (memcmp (contents + offset - 3, lea, 3) != 0)
 	    return FALSE;
 
-	  if (0xe8 != *(contents + offset + 4))
+	  call = contents + offset + 4;
+	  if (!(call[0] == 0xe8
+		|| (call[0] == 0xff && call[1] == 0x15)
+		|| (call[0] == 0x67 && call[1] == 0xe8)))
 	    {
 	      if (!ABI_64_P (abfd)
 		  || (offset + 19) > sec->size
-		  || memcmp (contents + offset + 4, "\x48\xb8", 2) != 0
-		  || memcmp (contents + offset + 14, "\x48\x01\xd8\xff\xd0", 5)
-		     != 0)
+		  || memcmp (call, "\x48\xb8", 2) != 0
+		  || call[11] != 0x01
+		  || call[13] != 0xff
+		  || call[14] != 0xd0
+		  || !((call[10] == 0x48 && call[12] == 0xd8)
+		       || (call[10] == 0x4c && call[12] == 0xf8)))
 		return FALSE;
 	      largepic = TRUE;
 	    }
+	  indirect_call = call[0] == 0xff;
 	}
 
       r_symndx = htab->r_sym (rel[1].r_info);
       if (r_symndx < symtab_hdr->sh_info)
 	return FALSE;
 
+      tls_get_addr = FALSE;
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      /* Use strncmp to check __tls_get_addr since __tls_get_addr
-	 may be versioned.  */
-      return (h != NULL
-	      && h->root.root.string != NULL
-	      && (largepic
-		  ? ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLTOFF64
-		  : (ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PC32
-		     || ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLT32))
-	      && (strncmp (h->root.root.string,
-			   "__tls_get_addr", 14) == 0));
+      if (h != NULL && h->root.root.string != NULL)
+	{
+	  struct elf_x86_64_link_hash_entry *eh
+	    = (struct elf_x86_64_link_hash_entry *) h;
+	  tls_get_addr = eh->tls_get_addr == 1;
+	  if (eh->tls_get_addr > 1)
+	    {
+	      /* Use strncmp to check __tls_get_addr since
+		 __tls_get_addr may be versioned.  */
+	      if (strncmp (h->root.root.string, "__tls_get_addr", 14)
+		  == 0)
+		{
+		  eh->tls_get_addr = 1;
+		  tls_get_addr = TRUE;
+		}
+	      else
+		eh->tls_get_addr = 0;
+	    }
+	}
+
+      if (!tls_get_addr)
+	return FALSE;
+      else if (largepic)
+	return ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLTOFF64;
+      else if (indirect_call)
+	return ELF32_R_TYPE (rel[1].r_info) == R_X86_64_GOTPCRELX;
+      else
+	return (ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PC32
+		|| ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
 
     case R_X86_64_GOTTPOFF:
       /* Check transition from IE access model:
@@ -1444,8 +1519,8 @@ elf_x86_64_check_tls_transition (bfd *abfd,
       if (offset + 2 <= sec->size)
 	{
 	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
-	  static const unsigned char call[] = { 0xff, 0x10 };
-	  return memcmp (contents + offset, call, 2) == 0;
+	  call = contents + offset;
+	  return call[0] == 0xff && call[1] == 0x10;
 	}
 
       return FALSE;
@@ -1921,19 +1996,32 @@ convert:
 	}
       else
 	{
+	  struct elf_x86_64_link_hash_entry *eh
+	    = (struct elf_x86_64_link_hash_entry *) h;
+
 	  /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
 	     is a nop prefix.  */
 	  modrm = 0xe8;
-	  nop = link_info->call_nop_byte;
-	  if (link_info->call_nop_as_suffix)
+	  /* To support TLS optimization, always use addr32 prefix for
+	     "call *__tls_get_addr@GOTPCREL(%rip)".  */
+	  if (eh && eh->tls_get_addr == 1)
 	    {
-	      nop_offset = irel->r_offset + 3;
-	      disp = bfd_get_32 (abfd, contents + irel->r_offset);
-	      irel->r_offset -= 1;
-	      bfd_put_32 (abfd, disp, contents + irel->r_offset);
+	      nop = 0x67;
+	      nop_offset = irel->r_offset - 2;
 	    }
 	  else
-	    nop_offset = irel->r_offset - 2;
+	    {
+	      nop = link_info->call_nop_byte;
+	      if (link_info->call_nop_as_suffix)
+		{
+		  nop_offset = irel->r_offset + 3;
+		  disp = bfd_get_32 (abfd, contents + irel->r_offset);
+		  irel->r_offset -= 1;
+		  bfd_put_32 (abfd, disp, contents + irel->r_offset);
+		}
+	      else
+		nop_offset = irel->r_offset - 2;
+	    }
 	}
       bfd_put_8 (abfd, nop, contents + nop_offset);
       bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
@@ -4861,39 +4949,53 @@ direct:
 	      if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
 		{
 		  /* GD->LE transition.  For 64bit, change
-		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
-		     .word 0x6666; rex64; call __tls_get_addr
+			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
+			.word 0x6666; rex64; call __tls_get_addr@PLT
+		     or
+			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
+			.byte 0x66; rex64
+			call *__tls_get_addr@GOTPCREL(%rip)
+			which may be converted to
+			addr32 call __tls_get_addr
 		     into:
-		     movq %fs:0, %rax
-		     leaq foo@tpoff(%rax), %rax
+			movq %fs:0, %rax
+			leaq foo@tpoff(%rax), %rax
 		     For 32bit, change
-		     leaq foo@tlsgd(%rip), %rdi
-		     .word 0x6666; rex64; call __tls_get_addr
+			leaq foo@tlsgd(%rip), %rdi
+			.word 0x6666; rex64; call __tls_get_addr@PLT
+		     or
+			leaq foo@tlsgd(%rip), %rdi
+			.byte 0x66; rex64
+			call *__tls_get_addr@GOTPCREL(%rip)
+			which may be converted to
+			addr32 call __tls_get_addr
 		     into:
-		     movl %fs:0, %eax
-		     leaq foo@tpoff(%rax), %rax
+			movl %fs:0, %eax
+			leaq foo@tpoff(%rax), %rax
 		     For largepic, change:
-		     leaq foo@tlsgd(%rip), %rdi
-		     movabsq $__tls_get_addr@pltoff, %rax
-		     addq %rbx, %rax
-		     call *%rax
+			leaq foo@tlsgd(%rip), %rdi
+			movabsq $__tls_get_addr@pltoff, %rax
+			addq %r15, %rax
+			call *%rax
 		     into:
-		     movq %fs:0, %rax
-		     leaq foo@tpoff(%rax), %rax
-		     nopw 0x0(%rax,%rax,1) */
+			movq %fs:0, %rax
+			leaq foo@tpoff(%rax), %rax
+			nopw 0x0(%rax,%rax,1)  */
 		  int largepic = 0;
-		  if (ABI_64_P (output_bfd)
-		      && contents[roff + 5] == (bfd_byte) '\xb8')
+		  if (ABI_64_P (output_bfd))
 		    {
-		      memcpy (contents + roff - 3,
-			      "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80"
-			      "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
-		      largepic = 1;
+		      if (contents[roff + 5] == 0xb8)
+			{
+			  memcpy (contents + roff - 3,
+				  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80"
+				  "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
+			  largepic = 1;
+			}
+		      else
+			memcpy (contents + roff - 4,
+				"\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
+				16);
 		    }
-		  else if (ABI_64_P (output_bfd))
-		    memcpy (contents + roff - 4,
-			    "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
-			    16);
 		  else
 		    memcpy (contents + roff - 3,
 			    "\x64\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
@@ -4901,7 +5003,8 @@ direct:
 		  bfd_put_32 (output_bfd,
 			      elf_x86_64_tpoff (info, relocation),
 			      contents + roff + 8 + largepic);
-		  /* Skip R_X86_64_PC32/R_X86_64_PLT32/R_X86_64_PLTOFF64.  */
+		  /* Skip R_X86_64_PC32, R_X86_64_PLT32,
+		     R_X86_64_GOTPCRELX and R_X86_64_PLTOFF64.  */
 		  rel++;
 		  wrel++;
 		  continue;
@@ -5137,39 +5240,53 @@ direct:
 	      if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
 		{
 		  /* GD->IE transition.  For 64bit, change
-		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
-		     .word 0x6666; rex64; call __tls_get_addr@plt
+			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
+			.word 0x6666; rex64; call __tls_get_addr@PLT
+		     or
+			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
+			.byte 0x66; rex64
+			call *__tls_get_addr@GOTPCREL(%rip
+			which may be converted to
+			addr32 call __tls_get_addr
 		     into:
-		     movq %fs:0, %rax
-		     addq foo@gottpoff(%rip), %rax
+			movq %fs:0, %rax
+			addq foo@gottpoff(%rip), %rax
 		     For 32bit, change
-		     leaq foo@tlsgd(%rip), %rdi
-		     .word 0x6666; rex64; call __tls_get_addr@plt
+			leaq foo@tlsgd(%rip), %rdi
+			.word 0x6666; rex64; call __tls_get_addr@PLT
+		     or
+			leaq foo@tlsgd(%rip), %rdi
+			.byte 0x66; rex64;
+			call *__tls_get_addr@GOTPCREL(%rip)
+			which may be converted to
+			addr32 call __tls_get_addr
 		     into:
-		     movl %fs:0, %eax
-		     addq foo@gottpoff(%rip), %rax
+			movl %fs:0, %eax
+			addq foo@gottpoff(%rip), %rax
 		     For largepic, change:
-		     leaq foo@tlsgd(%rip), %rdi
-		     movabsq $__tls_get_addr@pltoff, %rax
-		     addq %rbx, %rax
-		     call *%rax
+			leaq foo@tlsgd(%rip), %rdi
+			movabsq $__tls_get_addr@pltoff, %rax
+			addq %r15, %rax
+			call *%rax
 		     into:
-		     movq %fs:0, %rax
-		     addq foo@gottpoff(%rax), %rax
-		     nopw 0x0(%rax,%rax,1) */
+			movq %fs:0, %rax
+			addq foo@gottpoff(%rax), %rax
+			nopw 0x0(%rax,%rax,1)  */
 		  int largepic = 0;
-		  if (ABI_64_P (output_bfd)
-		      && contents[roff + 5] == (bfd_byte) '\xb8')
+		  if (ABI_64_P (output_bfd))
 		    {
-		      memcpy (contents + roff - 3,
-			      "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05"
-			      "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
-		      largepic = 1;
+		      if (contents[roff + 5] == 0xb8)
+			{
+			  memcpy (contents + roff - 3,
+				  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05"
+				  "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
+			  largepic = 1;
+			}
+		      else
+			memcpy (contents + roff - 4,
+				"\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
+				16);
 		    }
-		  else if (ABI_64_P (output_bfd))
-		    memcpy (contents + roff - 4,
-			    "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
-			    16);
 		  else
 		    memcpy (contents + roff - 3,
 			    "\x64\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
@@ -5243,33 +5360,58 @@ direct:
 	  if (r_type != R_X86_64_TLSLD)
 	    {
 	      /* LD->LE transition:
-		 leaq foo@tlsld(%rip), %rdi; call __tls_get_addr.
+			leaq foo@tlsld(%rip), %rdi
+			call __tls_get_addr@PLT
 		 For 64bit, we change it into:
-		 .word 0x6666; .byte 0x66; movq %fs:0, %rax.
+			.word 0x6666; .byte 0x66; movq %fs:0, %rax
 		 For 32bit, we change it into:
-		 nopl 0x0(%rax); movl %fs:0, %eax.
+			nopl 0x0(%rax); movl %fs:0, %eax
+		 Or
+			leaq foo@tlsld(%rip), %rdi;
+			call *__tls_get_addr@GOTPCREL(%rip)
+			which may be converted to
+			addr32 call __tls_get_addr
+		 For 64bit, we change it into:
+			.word 0x6666; .word 0x6666; movq %fs:0, %rax
+		 For 32bit, we change it into:
+			nopw 0x0(%rax); movl %fs:0, %eax
 		 For largepic, change:
-		 leaq foo@tlsgd(%rip), %rdi
-		 movabsq $__tls_get_addr@pltoff, %rax
-		 addq %rbx, %rax
-		 call *%rax
-		 into:
-		 data16 data16 data16 nopw %cs:0x0(%rax,%rax,1)
-		 movq %fs:0, %eax */
+			leaq foo@tlsgd(%rip), %rdi
+			movabsq $__tls_get_addr@pltoff, %rax
+			addq %rbx, %rax
+			call *%rax
+		 into
+			data16 data16 data16 nopw %cs:0x0(%rax,%rax,1)
+			movq %fs:0, %eax  */
 
 	      BFD_ASSERT (r_type == R_X86_64_TPOFF32);
-	      if (ABI_64_P (output_bfd)
-		  && contents[rel->r_offset + 5] == (bfd_byte) '\xb8')
-		memcpy (contents + rel->r_offset - 3,
-			"\x66\x66\x66\x66\x2e\x0f\x1f\x84\0\0\0\0\0"
-			"\x64\x48\x8b\x04\x25\0\0\0", 22);
-	      else if (ABI_64_P (output_bfd))
-		memcpy (contents + rel->r_offset - 3,
-			"\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
+	      if (ABI_64_P (output_bfd))
+		{
+		  if (contents[rel->r_offset + 5] == 0xb8)
+		    memcpy (contents + rel->r_offset - 3,
+			    "\x66\x66\x66\x66\x2e\x0f\x1f\x84\0\0\0\0\0"
+			    "\x64\x48\x8b\x04\x25\0\0\0", 22);
+		  else if (contents[rel->r_offset + 4] == 0xff
+			   || contents[rel->r_offset + 4] == 0x67)
+		    memcpy (contents + rel->r_offset - 3,
+			    "\x66\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0",
+			    13);
+		  else
+		    memcpy (contents + rel->r_offset - 3,
+			    "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
+		}
 	      else
-		memcpy (contents + rel->r_offset - 3,
-			"\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0", 12);
-	      /* Skip R_X86_64_PC32/R_X86_64_PLT32/R_X86_64_PLTOFF64.  */
+		{
+		  if (contents[rel->r_offset + 4] == 0xff)
+		    memcpy (contents + rel->r_offset - 3,
+			    "\x66\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0",
+			    13);
+		  else
+		    memcpy (contents + rel->r_offset - 3,
+			    "\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0", 12);
+		}
+	      /* Skip R_X86_64_PC32, R_X86_64_PLT32, R_X86_64_GOTPCRELX
+		 and R_X86_64_PLTOFF64.  */
 	      rel++;
 	      wrel++;
 	      continue;

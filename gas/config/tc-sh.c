@@ -987,7 +987,7 @@ static int reg_b;
 /* Try to parse a reg name.  Return the number of chars consumed.  */
 
 static unsigned int
-parse_reg_without_prefix (char *src, int *mode, int *reg)
+parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 {
   char l0 = TOLOWER (src[0]);
   char l1 = l0 ? TOLOWER (src[1]) : 0;
@@ -1346,7 +1346,7 @@ parse_reg_without_prefix (char *src, int *mode, int *reg)
    $-prefixed register names if enabled by the user.  */
 
 static unsigned int
-parse_reg (char *src, int *mode, int *reg)
+parse_reg (char *src, sh_arg_type *mode, int *reg)
 {
   unsigned int prefix;
   unsigned int consumed;
@@ -1411,7 +1411,7 @@ static char *
 parse_at (char *src, sh_operand_info *op)
 {
   int len;
-  int mode;
+  sh_arg_type mode;
   src++;
   if (src[0] == '@')
     {
@@ -1583,7 +1583,7 @@ static void
 get_operand (char **ptr, sh_operand_info *op)
 {
   char *src = *ptr;
-  int mode = -1;
+  sh_arg_type mode = (sh_arg_type) -1;
   unsigned int len;
 
   if (src[0] == '#')
@@ -2235,7 +2235,8 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 }
 
 static void
-insert (char *where, int how, int pcrel, sh_operand_info *op)
+insert (char *where, bfd_reloc_code_real_type how, int pcrel,
+       	sh_operand_info *op)
 {
   fix_new_exp (frag_now,
 	       where - frag_now->fr_literal,
@@ -2246,7 +2247,8 @@ insert (char *where, int how, int pcrel, sh_operand_info *op)
 }
 
 static void
-insert4 (char * where, int how, int pcrel, sh_operand_info * op)
+insert4 (char * where, bfd_reloc_code_real_type how, int pcrel,
+	 sh_operand_info * op)
 {
   fix_new_exp (frag_now,
 	       where - frag_now->fr_literal,
