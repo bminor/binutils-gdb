@@ -1171,12 +1171,8 @@ static void
 jit_dealloc_cache (struct frame_info *this_frame, void *cache)
 {
   struct jit_unwind_private *priv_data = (struct jit_unwind_private *) cache;
-  struct gdbarch *frame_arch;
-  int i;
 
   gdb_assert (priv_data->regcache != NULL);
-  frame_arch = get_frame_arch (priv_data->this_frame);
-
   regcache_xfree (priv_data->regcache);
   xfree (priv_data);
 }

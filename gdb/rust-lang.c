@@ -888,7 +888,6 @@ rust_print_type (struct type *type, const char *varstring,
 	  {
 	    fputs_filtered (TYPE_TAG_NAME (type), stream);
 	    fputs_filtered (" ", stream);
-	    len = strlen (TYPE_TAG_NAME (type));
 	  }
 	fputs_filtered ("{\n", stream);
 

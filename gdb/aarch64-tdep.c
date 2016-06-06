@@ -2981,11 +2981,10 @@ aarch64_record_data_proc_reg (insn_decode_record *aarch64_insn_r)
 static unsigned int
 aarch64_record_data_proc_imm (insn_decode_record *aarch64_insn_r)
 {
-  uint8_t reg_rd, insn_bit28, insn_bit23, insn_bits24_27, setflags;
+  uint8_t reg_rd, insn_bit23, insn_bits24_27, setflags;
   uint32_t record_buf[4];
 
   reg_rd = bits (aarch64_insn_r->aarch64_insn, 0, 4);
-  insn_bit28 = bit (aarch64_insn_r->aarch64_insn, 28);
   insn_bit23 = bit (aarch64_insn_r->aarch64_insn, 23);
   insn_bits24_27 = bits (aarch64_insn_r->aarch64_insn, 24, 27);
 

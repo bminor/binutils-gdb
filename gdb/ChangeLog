@@ -1,5 +1,26 @@
 2016-07-14  Tom Tromey  <tom@tromey.com>
 
+	* mips-tdep.c (micromips_scan_prologue): Remove "frame_addr".
+	(mips_o32_push_dummy_call): Remove "stack_used_p".
+	* aarch64-tdep.c (aarch64_record_data_proc_imm): Remove
+	"insn_bit28".
+	* rust-lang.c (rust_print_type): Remove "len".
+	* rust-exp.y (super_name): Remove "current_len".
+	* python/py-framefilter.c (py_print_type): Remove "type".
+	* mdebugread.c (parse_partial_symbols): Remove
+	"past_first_source_file".
+	<N_SO>: Remove "valu", "first_so_symnum", "prev_textlow_not_set".
+	* m2-valprint.c (m2_print_unbounded_array): Remove
+	"content_type".
+	(m2_val_print): Remove "i".
+	* linespec.c (unexpected_linespec_error): Remove "cleanup".
+	* f-valprint.c (f_val_print): Remove "i".
+	* elfread.c (elf_symtab_read): Remove "offset".
+	* dwarf2-frame.c (dwarf2_fetch_cfa_info): Remove "addr_size".
+	* jit.c (jit_dealloc_cache): Remove "i" and "frame_arch".
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
 	* arch-utils.c (default_skip_permanent_breakpoint): Remove
 	"bp_insn".
 	* disasm.c (do_assembly_only): Remove "num_displayed".

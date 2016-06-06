@@ -218,7 +218,6 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 {
   struct gdbarch *gdbarch = get_type_arch (type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  unsigned int i = 0;	/* Number of characters printed.  */
   int printed_field = 0; /* Number of fields printed.  */
   struct type *elttype;
   CORE_ADDR addr;
@@ -293,8 +292,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      if (want_space)
 		fputs_filtered (" ", stream);
-	      i = val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
-				    stream, options);
+	      val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
+				stream, options);
 	    }
 	  return;
 	}

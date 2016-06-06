@@ -211,13 +211,12 @@ py_print_type (struct ui_out *out, struct value *val)
 
   TRY
     {
-      struct type *type;
       struct ui_file *stb;
       struct cleanup *cleanup;
 
       stb = mem_fileopen ();
       cleanup = make_cleanup_ui_file_delete (stb);
-      type = check_typedef (value_type (val));
+      check_typedef (value_type (val));
       type_print (value_type (val), "", stb, -1);
       ui_out_field_stream (out, "type", stb);
       do_cleanups (cleanup);
