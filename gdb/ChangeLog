@@ -1,5 +1,9 @@
 2016-07-14  Tom Tromey  <tom@tromey.com>
 
+	* inflow.c (child_terminal_ours_1): Use ATTRIBUTE_UNUSED.
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
 	* corefile.c (reopen_exec_file): Only examine st.st_mtime if stat
 	succeeded.
 
