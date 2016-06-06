@@ -1,5 +1,17 @@
 2016-07-14  Tom Tromey  <tom@tromey.com>
 
+	* arch-utils.c (default_skip_permanent_breakpoint): Remove
+	"bp_insn".
+	* disasm.c (do_assembly_only): Remove "num_displayed".
+	* dwarf2read.c (read_abbrev_offset): Remove "length".
+	(dwarf_decode_macro_bytes) <DW_MACINFO_vendor_ext>: Remove
+	"constant".
+	* m32c-tdep.c (make_regs): Remove "r2hl", "r3hl", and "intbhl".
+	* microblaze-tdep.c (microblaze_frame_cache): Remove "func".
+	* tracefile.c (trace_save): Remove "status".
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (simple_overlay_update_1): Remove initialization
 	of "size", and commented-out code.
 	(simple_overlay_update): Likewise.

@@ -823,9 +823,6 @@ make_regs (struct gdbarch *arch)
   struct m32c_reg *sp;
   struct m32c_reg *r0hl;
   struct m32c_reg *r1hl;
-  struct m32c_reg *r2hl;
-  struct m32c_reg *r3hl;
-  struct m32c_reg *intbhl;
   struct m32c_reg *r2r0;
   struct m32c_reg *r3r1;
   struct m32c_reg *r3r1r2r0;
@@ -889,9 +886,9 @@ make_regs (struct gdbarch *arch)
 
   r0hl        = CHL (r0, tdep->int8);
   r1hl        = CHL (r1, tdep->int8);
-  r2hl        = CHL (r2, tdep->int8);
-  r3hl        = CHL (r3, tdep->int8);
-  intbhl      = CHL (intb, tdep->int16);
+  CHL (r2, tdep->int8);
+  CHL (r3, tdep->int8);
+  CHL (intb, tdep->int16);
 
   r2r0        = CCAT (r2,   r0,   tdep->int32);
   r3r1        = CCAT (r3,   r1,   tdep->int32);
