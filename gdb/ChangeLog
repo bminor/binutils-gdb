@@ -1,3 +1,7 @@
+2016-06-07  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* findvar.c (follow_static_link): Check for valid pointer.
+
 2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* NEWS: Mention the new fields in =record-started.
