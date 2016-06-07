@@ -3782,9 +3782,10 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 		  PLT_FIRST_ENTRY_SIZE);
 	  /* Fixup relative address to start of GOT */
 	  bfd_put_32 (output_bfd,
-		      (htab->elf.sgotplt->output_section->vma +
-		       htab->elf.sgotplt->output_offset
-		       - htab->elf.splt->output_section->vma - 6)/2,
+		      (htab->elf.sgotplt->output_section->vma
+		       + htab->elf.sgotplt->output_offset
+		       - htab->elf.splt->output_section->vma
+		       - htab->elf.splt->output_offset - 6)/2,
 		      htab->elf.splt->contents + 8);
 	}
       if (elf_section_data (htab->elf.splt->output_section) != NULL)

@@ -1,3 +1,9 @@
+2016-06-07  Ulrich Weigand  <ulrich.weigand@de.ibm.com>
+
+	* elf64-s390.c (elf_s390_finish_dynamic_sections): Subtract plt
+	section offset when calculation the larl operand in the first PLT
+	entry.
+
 2016-06-07  Alan Modra  <amodra@gmail.com>
 
 	* cpu-powerpc.c (powerpc_compatible): Allow bfd_mach_ppc_vle entry

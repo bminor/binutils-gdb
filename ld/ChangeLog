@@ -1,3 +1,10 @@
+2016-06-07  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* testsuite/ld-s390/pltoffset-1.dd: New test.
+	* testsuite/ld-s390/pltoffset-1.ld: New test.
+	* testsuite/ld-s390/pltoffset-1.s: New test.
+	* testsuite/ld-s390/s390.exp: Run new test.
+
 2016-06-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/apuinfo1.s: Delete nop.
