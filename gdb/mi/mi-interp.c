@@ -412,19 +412,25 @@ mi_record_changed (struct inferior *inferior, int started, const char *method,
   if (started)
     {
       if (format != NULL)
-	fprintf_unfiltered (
-	  mi->event_channel,
-	  "record-started,thread-group=\"i%d\",method=\"%s\",format=\"%s\"",
-	  inferior->num, method, format);
+	{
+	  fprintf_unfiltered (
+	    mi->event_channel,
+	    "record-started,thread-group=\"i%d\",method=\"%s\",format=\"%s\"",
+	    inferior->num, method, format);
+	}
       else
-	fprintf_unfiltered (
-	  mi->event_channel,
-	  "record-started,thread-group=\"i%d\",method=\"%s\"",
-	  inferior->num, method);
+	{
+	  fprintf_unfiltered (
+	    mi->event_channel,
+	    "record-started,thread-group=\"i%d\",method=\"%s\"",
+	    inferior->num, method);
+	}
     }
   else
-    fprintf_unfiltered (mi->event_channel,
-			"record-stopped,thread-group=\"i%d\"", inferior->num);
+    {
+      fprintf_unfiltered (mi->event_channel,
+			  "record-stopped,thread-group=\"i%d\"", inferior->num);
+    }
 
 
   gdb_flush (mi->event_channel);
