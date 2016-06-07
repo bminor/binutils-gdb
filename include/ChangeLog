@@ -1,3 +1,10 @@
+2016-06-07  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc.h (APUINFO_SECTION_NAME, APUINFO_LABEL, PPC_APUINFO_ISEL,
+	PPC_APUINFO_PMR, PPC_APUINFO_RFMCI, PPC_APUINFO_CACHELCK,
+	PPC_APUINFO_SPE, PPC_APUINFO_EFS, PPC_APUINFO_BRLOCK,
+	PPC_APUINFO_VLE: Define.
+
 2016-06-07  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* opcode/arm.h (ARM_EXT2_RAS): New.  Also align preceding

@@ -1,3 +1,9 @@
+2016-06-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/apuinfo1.s: Delete nop.
+	* testsuite/ld-powerpc/apuinfo-vle2.s: New.
+	* testsuite/ld-powerpc/powerpc.exp: Use apuinfo-vle2.s.
+
 2016-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/pass.out: New file.

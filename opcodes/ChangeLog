@@ -1,3 +1,14 @@
+2016-06-07  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_opts): Delete extraneous parentheses.  Default
+	cpu for "vle" to e500.
+	* ppc-opc.c (ALLOW8_SPRG): Remove PPC_OPCODE_VLE.
+	(NO371, PPCSPE, PPCISEL, PPCEFS, MULHW, DCBT_EO): Likewise.
+	(PPCNONE): Delete, substitute throughout.
+	(powerpc_opcodes): Remove PPCVLE from "flags".  Add to "deprecated"
+	except for major opcode 4 and 31.
+	(vle_opcodes <se_rfmci>): Add PPCRFMCI to flags.
+
 2016-06-07  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* arm-dis.c (arm_opcodes): Replace ARM_EXT_V8_2A with

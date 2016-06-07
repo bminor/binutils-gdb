@@ -1,3 +1,19 @@
+2016-06-07  Alan Modra  <amodra@gmail.com>
+
+	* cpu-powerpc.c (powerpc_compatible): Allow bfd_mach_ppc_vle entry
+	to match other 32-bit archs.
+	* elf32-ppc.c (_bfd_elf_ppc_set_arch): New function.
+	(ppc_elf_object_p): Call it.
+	(ppc_elf_special_sections): Use APUINFO_SECTION_NAME.  Fix
+	overlong line.
+	(APUINFO_SECTION_NAME, APUINFO_LABEL): Don't define here.
+	* elf64-ppc.c (ppc64_elf_object_p): Call _bfd_elf_ppc_set_arch.
+	* bfd-in.h (_bfd_elf_ppc_at_tls_transform,
+	_bfd_elf_ppc_at_tprel_transform): Move to..
+	* elf-bfd.h: ..here.
+	(_bfd_elf_ppc_set_arch): Declare.
+	* bfd-in2.h: Regenerate.
+
 2016-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add tls_get_addr.
