@@ -1,7 +1,9 @@
-#name: ARMv8.2-A
-#as: -march=armv8.2-a
+#name: ARMv8-A RAS
+#as: -march=armv8-a+ras
+#source: armv8_2-a.s
 #objdump: -dr
 #skip: *-*-pe *-wince-* *-*-coff
+
 
 .*: +file format .*arm.*
 

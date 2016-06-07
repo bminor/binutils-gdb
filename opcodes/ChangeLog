@@ -1,3 +1,8 @@
+2016-06-07  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (arm_opcodes): Replace ARM_EXT_V8_2A with
+	ARM_EXT_RAS in relevant entries.
+
 2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
 
 	PR binutils/20196

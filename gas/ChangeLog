@@ -1,3 +1,14 @@
+2016-06-07  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_ext_v8_2): Rename to arm_ext_ras.
+	(arm_ext_ras): Renamed from arm_ext_v8_2.
+	(insns): Update for arm_ext_v8_2 renaming.
+	(arm_extensions): Add "ras".
+	* doc/c-arm.texi (ARM Options): Add an entry for "ras".
+	* testsuite/gas/arm/armv8-a+ras.d: New.
+	* testsuite/gas/arm/armv8_2-a.d: Add explicit command line
+	options.
+
 2016-06-05  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* itbl-parse.y (yyerror): Use modern argument declaration style.

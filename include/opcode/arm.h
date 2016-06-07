@@ -60,9 +60,10 @@
 #define ARM_EXT2_V8_2A	 0x00000002     /* ARM V8.2A.  */
 #define ARM_EXT2_V8M	 0x00000004	/* ARM V8M.  */
 #define ARM_EXT2_ATOMICS 0x00000008	/* ARMv8 atomics.  */
-#define ARM_EXT2_V6T2_V8M 0x00000010	/* V8M Baseline from V6T2.  */
+#define ARM_EXT2_V6T2_V8M  0x00000010	/* V8M Baseline from V6T2.  */
 #define ARM_EXT2_FP16_INST 0x00000020	/* ARM V8.2A FP16 instructions.  */
-#define ARM_EXT2_V8M_MAIN 0x00000040	/* ARMv8-M Mainline.  */
+#define ARM_EXT2_V8M_MAIN  0x00000040	/* ARMv8-M Mainline.  */
+#define ARM_EXT2_RAS	 0x00000080	/* RAS extension.  */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */
@@ -147,7 +148,7 @@
    | ARM_EXT_VIRT | ARM_EXT_V8)
 #define ARM_AEXT2_V8A	(ARM_EXT2_V6T2_V8M | ARM_EXT2_ATOMICS)
 #define ARM_AEXT2_V8_1A	(ARM_AEXT2_V8A | ARM_EXT2_PAN)
-#define ARM_AEXT2_V8_2A	(ARM_AEXT2_V8_1A | ARM_EXT2_V8_2A)
+#define ARM_AEXT2_V8_2A	(ARM_AEXT2_V8_1A | ARM_EXT2_V8_2A | ARM_EXT2_RAS)
 #define ARM_AEXT_V8M_BASE (ARM_AEXT_V6SM | ARM_EXT_DIV)
 #define ARM_AEXT_V8M_MAIN ARM_AEXT_V7M
 #define ARM_AEXT2_V8M	(ARM_EXT2_V8M | ARM_EXT2_ATOMICS | ARM_EXT2_V6T2_V8M)

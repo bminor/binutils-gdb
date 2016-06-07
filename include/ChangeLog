@@ -1,3 +1,9 @@
+2016-06-07  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* opcode/arm.h (ARM_EXT2_RAS): New.  Also align preceding
+	entries.
+	(ARM_AEXT_V8_2A): Add ARM_EXT2_RAS.
+
 2016-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* opcode/arc.h (MAX_INSN_ARGS): Increase to 16.

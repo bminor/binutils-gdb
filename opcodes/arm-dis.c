@@ -1727,7 +1727,7 @@ static const struct opcode32 arm_opcodes[] =
     "%22?sumlal%20's%c\t%12-15Ru, %16-19Ru, %0-3R, %8-11R"},
 
   /* V8.2 RAS extension instructions.  */
-  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_RAS),
     0xe320f010, 0xffffffff, "esb"},
 
   /* V8 instructions.  */
@@ -2696,7 +2696,7 @@ static const struct opcode32 thumb32_opcodes[] =
     0xe840f0c0, 0xfff0f0ff, "ttat\t%8-11r, %16-19r"},
 
   /* ARM V8.2 RAS extension instructions.  */
-  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_RAS),
     0xf3af8010, 0xffffffff, "esb"},
 
   /* V8 instructions.  */
