@@ -1,3 +1,10 @@
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* reloc.c: Fixed type in ARC_SECTOFF relocations. Added ARC_SDA_12
+	relocation.
+	* bfd-in2.h: Regenerated from the previous changes.
+	* libbfd.h: Regenerated from the previous changes.
+
 2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add a new parameter for
