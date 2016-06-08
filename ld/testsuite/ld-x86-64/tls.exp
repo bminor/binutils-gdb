@@ -38,7 +38,7 @@ if { [which $CC] == 0 } {
 
 run_cc_link_tests [list \
     [list \
-	"Build tls-def1.c tls-main1.c" \
+	"Build tls-def1.o tls-main1.o" \
 	"" \
 	"-fPIE" \
 	{tls-def1.c tls-main1.c} \

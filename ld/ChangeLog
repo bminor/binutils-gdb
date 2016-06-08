@@ -1,5 +1,10 @@
 2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/tls.exp (run_cc_link_tests): Update test
+	name.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/i386.exp: Run libtlspic2.so, tlsbin2,
 	tlsgd3, tlsld2, tlsgd4, tlspie3a, tlspie3b and tlspie3c.
 	* testsuite/ld-i386/pass.out: New file.
