@@ -1,3 +1,8 @@
+2016-06-08  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/sparc.h: Add missing documentation for hyperprivileged
+	registers in rd (%) and rs1 ($).
+
 2016-06-07  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc.h (APUINFO_SECTION_NAME, APUINFO_LABEL, PPC_APUINFO_ISEL,
