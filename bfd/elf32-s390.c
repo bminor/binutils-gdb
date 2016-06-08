@@ -3958,8 +3958,7 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = htab->elf.srelplt;
-	      dyn.d_un.d_val = s->size;
+	      dyn.d_un.d_val = htab->elf.srelplt->size + htab->elf.irelplt->size;
 	      break;
 	    }
 
