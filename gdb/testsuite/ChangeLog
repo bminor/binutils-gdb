@@ -1,3 +1,25 @@
+2016-06-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/call-ar-st.exp: Report unsupported rather than xfail
+	for unsupported target features.
+	* gdb.base/call-rt-st.exp: Likewise.
+	* gdb.base/call-sc.exp: Likewise.
+	* gdb.base/call-signal-resume.exp: Likewise.
+	* gdb.base/call-strs.exp: Likewise.
+	* gdb.base/callexit.exp: Likewise.
+	* gdb.base/callfuncs.exp: Likewise.
+	* gdb.base/nodebug.exp: Likewise.
+	* gdb.base/printcmds.exp: Likewise.
+	* gdb.base/ptype.exp: Likewise.
+	* gdb.base/structs.exp: Likewise.
+	* gdb.base/unwindonsignal.exp: Likewise.
+	* gdb.cp/gdb2495.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+	* gdb.cp/virtfunc.exp: Likewise.
+	* gdb.threads/hand-call-in-threads.exp: Likewise.
+	* gdb.threads/interrupted-hand-call.exp: Likewise.
+	* gdb.threads/thread-unwindonsignal.exp: Likewise.
+
 2016-06-10  Tom Tromey  <tom@tromey.com>
 
 	PR rust/20110:

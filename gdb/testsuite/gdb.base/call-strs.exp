@@ -28,8 +28,7 @@ standard_testfile
 # Some targets can't call functions, so don't even bother with this
 # test.
 if [target_info exists gdb,cannot_call_functions] {
-    setup_xfail "*-*-*" 2416
-    fail "This target can not call functions"
+    unsupported "This target can not call functions"
     continue
 }
 
