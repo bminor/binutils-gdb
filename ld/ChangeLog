@@ -1,5 +1,37 @@
 2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/i386.exp: Run libtlspic2.so, tlsbin2,
+	tlsgd3, tlsld2, tlsgd4, tlspie3a, tlspie3b and tlspie3c.
+	* testsuite/ld-i386/pass.out: New file.
+	* testsuite/ld-i386/tls-def1.c: Likewise.
+	* testsuite/ld-i386/tls-gd1.S: Likewise.
+	* testsuite/ld-i386/tls-ld1.S: Likewise.
+	* testsuite/ld-i386/tls-main1.c: Likewise.
+	* testsuite/ld-i386/tls.exp: Likewise.
+	* testsuite/ld-i386/tlsbin2-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlsbin2.dd: Likewise.
+	* testsuite/ld-i386/tlsbin2.rd: Likewise.
+	* testsuite/ld-i386/tlsbin2.sd: Likewise.
+	* testsuite/ld-i386/tlsbin2.td: Likewise.
+	* testsuite/ld-i386/tlsbinpic2.s: Likewise.
+	* testsuite/ld-i386/tlsgd3.dd: Likewise.
+	* testsuite/ld-i386/tlsgd3.s: Likewise.
+	* testsuite/ld-i386/tlsgd4.d: Likewise.
+	* testsuite/ld-i386/tlsgd4.s: Likewise.
+	* testsuite/ld-i386/tlsld2.s: Likewise.
+	* testsuite/ld-i386/tlspic2-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlspic2.dd: Likewise.
+	* testsuite/ld-i386/tlspic2.rd: Likewise.
+	* testsuite/ld-i386/tlspic2.sd: Likewise.
+	* testsuite/ld-i386/tlspic2.td: Likewise.
+	* testsuite/ld-i386/tlspic3.s: Likewise.
+	* testsuite/ld-i386/tlspie3.s: Likewise.
+	* testsuite/ld-i386/tlspie3a.d: Likewise.
+	* testsuite/ld-i386/tlspie3b.d: Likewise.
+	* testsuite/ld-i386/tlspie3c.d: Likewise.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/no-plt-1a.rd: Support any relocation order.
 	* testsuite/ld-x86-64/no-plt-1b.rd: Likewise.
 	* testsuite/ld-x86-64/no-plt-1c.rd: Likewise.
