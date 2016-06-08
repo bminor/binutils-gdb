@@ -103,7 +103,7 @@ run_cc_link_tests [list \
 	"" \
 	{dummy.s} \
 	{{readelf -Wr no-plt-1d.rd} {objdump -dwrj.text no-plt-1d.dd}} \
-	"no-plt-1a" \
+	"no-plt-1d" \
     ] \
     [list \
 	"No PLT (PIE 1e)" \

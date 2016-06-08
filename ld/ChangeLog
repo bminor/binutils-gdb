@@ -1,5 +1,16 @@
 2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/no-plt-1a.rd: Support any relocation order.
+	* testsuite/ld-x86-64/no-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Fix a typo.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/libno-plt-1b.dd: Likewise.
 	* testsuite/ld-x86-64/libno-plt-1b.rd: Likewise.
 	* testsuite/ld-x86-64/no-plt-1a.dd: Likewise.
