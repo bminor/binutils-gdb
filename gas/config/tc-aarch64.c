@@ -4231,8 +4231,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 
   for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     {
-      const size_t size = 128;
-      char str[size];
+      char str[128];
 
       /* We regard the opcode operand info more, however we also look into
 	 the inst->operands to support the disassembling of the optional
@@ -4244,7 +4243,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 	break;
 
       /* Generate the operand string in STR.  */
-      aarch64_print_operand (str, size, 0, opcode, opnds, i, NULL, NULL);
+      aarch64_print_operand (str, sizeof (str), 0, opcode, opnds, i, NULL, NULL);
 
       /* Delimiter.  */
       if (str[0] != '\0')
@@ -4350,8 +4349,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	  size_t len = strlen (get_mnemonic_name (str));
 	  int i, qlf_idx;
 	  bfd_boolean result;
-	  const size_t size = 2048;
-	  char buf[size];
+	  char buf[2048];
 	  aarch64_inst *inst_base = &inst.base;
 	  const aarch64_opnd_qualifier_seq_t *qualifiers_list;
 
@@ -4381,7 +4379,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 
 	  /* Print the hint.  */
 	  output_info (_("   did you mean this?"));
-	  snprintf (buf, size, "\t%s", get_mnemonic_name (str));
+	  snprintf (buf, sizeof (buf), "\t%s", get_mnemonic_name (str));
 	  print_operands (buf, opcode, inst_base->operands);
 	  output_info (_("   %s"), buf);
 
@@ -4402,7 +4400,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	      if (i != qlf_idx)
 		{
 		  /* Mnemonics name.  */
-		  snprintf (buf, size, "\t%s", get_mnemonic_name (str));
+		  snprintf (buf, sizeof (buf), "\t%s", get_mnemonic_name (str));
 
 		  /* Assign the qualifiers.  */
 		  assign_qualifier_sequence (inst_base, *qualifiers_list);

@@ -1,3 +1,8 @@
+2016-06-08  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (print_operands): Substitute size.
+	(output_operand_error_record): Likewise.
+
 2016-06-07  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (PPC_APUINFO_ISEL, PPC_APUINFO_PMR,
