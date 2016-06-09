@@ -1,3 +1,11 @@
+2016-06-09  Tom Tromey  <tom@tromey.com>
+
+	PR python/19819:
+	* python/py-xmethods.c (invoke_method_name)
+	(py_get_result_type_method_name, py_invoke_method_name): Remove.
+	(gdbpy_initialize_xmethods): Don't initialize
+	py_invoke_method_name, py_get_result_type_method_name.
+
 2016-06-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* mi/mi-interp.c (mi_record_changed): Add missing braces.
