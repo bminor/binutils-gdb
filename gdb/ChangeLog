@@ -1,3 +1,13 @@
+2016-07-12  Tom Tromey  <tom@tromey.com>
+
+	PR python/19293:
+	* python/lib/gdb/command/unwinders.py (do_enable_unwinder): Call
+	gdb.invalidate_cached_frames.
+	* python/lib/gdb/unwinder.py (register_unwinder): Call
+	gdb.invalidate_cached_frames.
+	* python/python.c (gdbpy_invalidate_cached_frames): New function.
+	(python_GdbMethods): Add entry for invalidate_cached_frames.
+
 2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* cp-namespace.c (cp_lookup_bare_symbol): Initialize 

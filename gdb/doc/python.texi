@@ -3838,6 +3838,15 @@ frames, as expressed by the given @var{reason} code (an integer, see the
 @code{unwind_stop_reason} method further down in this section).
 @end defun
 
+@findex gdb.invalidate_cached_frames
+@defun gdb.invalidate_cached_frames
+@value{GDBN} internally keeps a cache of the frames that have been
+unwound.  This function invalidates this cache.
+
+This function should not generally be called by ordinary Python code.
+It is documented for the sake of completeness.
+@end defun
+
 A @code{gdb.Frame} object has the following methods:
 
 @defun Frame.is_valid ()

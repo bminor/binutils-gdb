@@ -1,3 +1,9 @@
+2016-07-12  Tom Tromey  <tom@tromey.com>
+
+	PR python/19293:
+	* python.texi (Frames In Python): Document
+	gdb.invalidate_cached_frames.
+
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Interpreters): Update intepreter-exec section,

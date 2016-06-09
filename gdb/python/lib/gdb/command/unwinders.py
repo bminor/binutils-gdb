@@ -136,6 +136,8 @@ def do_enable_unwinder(arg, flag):
         if locus_re.match(objfile.filename):
             total += do_enable_unwinder1(objfile.frame_unwinders, name_re,
                                          flag)
+    if total > 0:
+        gdb.invalidate_cached_frames()
     print("%d unwinder%s %s" % (total, "" if total == 1 else "s",
                                 "enabled" if flag else "disabled"))
 
