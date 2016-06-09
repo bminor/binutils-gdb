@@ -1,5 +1,10 @@
 2016-06-23  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (gdbpy_parameter): Now static.
+	* python/python-internal.h (gdbpy_parameter): Don't declare.
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
 	PR gdb/16483:
 	* python/lib/gdb/command/frame_filters.py
 	(InfoFrameFilter.list_frame_filters): Rename to print_list.  Print
