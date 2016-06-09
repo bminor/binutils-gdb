@@ -6130,6 +6130,9 @@ template<int size, bool big_endian>
 void
 Mips_output_data_got<size, big_endian>::do_write(Output_file* of)
 {
+  typedef Unordered_set<Mips_symbol<size>*, Mips_symbol_hash<size> >
+      Mips_stubs_entry_set;
+
   // Call parent to write out GOT.
   Output_data_got<size, big_endian>::do_write(of);
 
@@ -6142,7 +6145,7 @@ Mips_output_data_got<size, big_endian>::do_write(Output_file* of)
   this->got_view_ = oview;
 
   // Write lazy stub addresses.
-  for (typename Unordered_set<Mips_symbol<size>*>::iterator
+  for (typename Mips_stubs_entry_set::iterator
        p = this->master_got_info_->global_got_symbols().begin();
        p != this->master_got_info_->global_got_symbols().end();
        ++p)
@@ -6159,7 +6162,7 @@ Mips_output_data_got<size, big_endian>::do_write(Output_file* of)
     }
 
   // Add +1 to GGA_NONE nonzero MIPS16 and microMIPS entries.
-  for (typename Unordered_set<Mips_symbol<size>*>::iterator
+  for (typename Mips_stubs_entry_set::iterator
        p = this->master_got_info_->global_got_symbols().begin();
        p != this->master_got_info_->global_got_symbols().end();
        ++p)
