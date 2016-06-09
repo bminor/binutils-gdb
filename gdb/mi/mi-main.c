@@ -1636,7 +1636,7 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
 
   result = read_memory_robust (current_target.beneath, addr, length);
 
-  cleanups = make_cleanup (free_memory_read_result_vector, result);
+  cleanups = make_cleanup (free_memory_read_result_vector, &result);
 
   if (VEC_length (memory_read_result_s, result) == 0)
     error (_("Unable to read memory."));

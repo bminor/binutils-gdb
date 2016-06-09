@@ -1,3 +1,11 @@
+2016-06-29  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/17210:
+	* target.c (free_memory_read_result_vector): Take a pointer to the
+	VEC as an argument.
+	(read_memory_robust): Install a cleanup for "result".
+	* mi/mi-main.c (mi_cmd_data_read_memory_bytes): Update.
+
 2016-06-29  Manish Goregaokar  <manish@mozilla.com>
 
 gdb/ChangeLog:
