@@ -1,4 +1,11 @@
+2016-06-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20221
+	* testsuite/ld-avr/avr-prop-5.d: New.
+	* testsuite/ld-avr/avr-prop-5.s: New.
+
 2016-06-09  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
 	* testsuite/ld-avr/lds-mega.d: New test.
 	* testsuite/ld-avr/lds-mega.s: New test source.
 	* testsuite/ld-avr/lds-tiny.d: New test.

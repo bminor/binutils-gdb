@@ -1,3 +1,9 @@
+2016-06-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20221
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Adjust syms
+	and relocs only if shrinking occurred.
+
 2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-i386.c (elf_i386_link_hash_entry): Add tls_get_addr.
