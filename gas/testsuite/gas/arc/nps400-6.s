@@ -143,7 +143,7 @@
         bdlen.f         r1, r3, 256
         bdlen.f         r12, r13
 
-        .macro cscb_test mnem
+        .macro csma_like_test mnem
         \mnem\()        r10,r12,r20
         \mnem\()        r0,0x12345678,r20
         \mnem\()        r6,r7,0xffffffff
@@ -157,10 +157,16 @@
         \mnem\()        0,0xffffffff,0x1
         .endm
 
-        cscb_test csma
-        cscb_test csms
-        cscb_test cbba
-        cscb_test cbba.f
+        csma_like_test csma
+        csma_like_test csms
+        csma_like_test cbba
+        csma_like_test cbba.f
+        csma_like_test tr
+        csma_like_test tr.f
+        csma_like_test utf8
+        csma_like_test utf8.f
+        csma_like_test addf
+        csma_like_test addf.f
 
         .macro zncv_test mnem
         \mnem\()        r10,r12,r20
@@ -186,3 +192,19 @@
         hofs            r7, r8, 240, 0
         hofs.f          r7, r8, 0, 1
 
+        hash            r1, r2, r3, 1, 0, 0, 0
+        hash            r12, r13, r14, 32, 7, 1, 1
+
+        .macro hash_p_test mnem
+        \mnem\()        r1, r2, r3, 1, 1, 0, 0
+        \mnem\()        r12, r13, r14, 32, 8, 3, 1
+        .endm
+
+        hash_p_test hash.p0
+        hash_p_test hash.p1
+        hash_p_test hash.p2
+        hash_p_test hash.p3
+
+        e4by            r0,r1,r2,0,0,0,4
+        e4by            r7,r12,r13,1,2,3,4
+        e4by            r20,r12,r13,7,7,7,7

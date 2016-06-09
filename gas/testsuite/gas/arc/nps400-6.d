@@ -199,33 +199,112 @@ Disassembly of section .text:
  360:	3e6d f083 1234 5678 	cbba.f	r3,0x12345678,0x2
  368:	396d 813e           	cbba.f	0,r1,0x4
  36c:	3e6d f07e ffff ffff 	cbba.f	0,0xffffffff,0x1
- 374:	3c35 150a           	zncv.rd	r10,r12,r20
- 378:	3e35 7500 1234 5678 	zncv.rd	r0,0x12345678,r20
- 380:	3f35 0f86 ffff ffff 	zncv.rd	r6,r7,0xffffffff
- 388:	3e35 7f88 ffff ffff 	zncv.rd	r8,0xffffffff,0xffffffff
- 390:	3e35 137e           	zncv.rd	0,r14,r13
- 394:	3e35 72be ffff ffff 	zncv.rd	0,0xffffffff,r10
- 39c:	3c35 1fbe ffff ffff 	zncv.rd	0,r12,0xffffffff
- 3a4:	3d75 0044           	zncv.rd	r4,r5,0x1
- 3a8:	3e75 7083 1234 5678 	zncv.rd	r3,0x12345678,0x2
- 3b0:	3975 013e           	zncv.rd	0,r1,0x4
- 3b4:	3e75 707e ffff ffff 	zncv.rd	0,0xffffffff,0x1
- 3bc:	39b5 0fff           	zncv.rd	r1,r1,-1
- 3c0:	3eb5 7fff ffff ffff 	zncv.rd	0,0xffffffff,-1
- 3c8:	3c35 950a           	zncv.wr	r10,r12,r20
- 3cc:	3e35 f500 1234 5678 	zncv.wr	r0,0x12345678,r20
- 3d4:	3f35 8f86 ffff ffff 	zncv.wr	r6,r7,0xffffffff
- 3dc:	3e35 ff88 ffff ffff 	zncv.wr	r8,0xffffffff,0xffffffff
- 3e4:	3e35 937e           	zncv.wr	0,r14,r13
- 3e8:	3e35 f2be ffff ffff 	zncv.wr	0,0xffffffff,r10
- 3f0:	3c35 9fbe ffff ffff 	zncv.wr	0,r12,0xffffffff
- 3f8:	3d75 8044           	zncv.wr	r4,r5,0x1
- 3fc:	3e75 f083 1234 5678 	zncv.wr	r3,0x12345678,0x2
- 404:	3975 813e           	zncv.wr	0,r1,0x4
- 408:	3e75 f07e ffff ffff 	zncv.wr	0,0xffffffff,0x1
- 410:	39b5 8fff           	zncv.wr	r1,r1,-1
- 414:	3eb5 ffff ffff ffff 	zncv.wr	0,0xffffffff,-1
- 41c:	3a36 00c1           	hofs	r1,r2,r3
- 420:	3d36 8184           	hofs.f	r4,r5,r6
- 424:	3876 13c7           	hofs	r7,r8,0xf0,0
- 428:	3876 9807           	hofs.f	r7,r8,0,0x1
+ 374:	3c21 150a           	tr	r10,r12,r20
+ 378:	3e21 7500 1234 5678 	tr	r0,0x12345678,r20
+ 380:	3f21 0f86 ffff ffff 	tr	r6,r7,0xffffffff
+ 388:	3e21 7f88 ffff ffff 	tr	r8,0xffffffff,0xffffffff
+ 390:	3e21 137e           	tr	0,r14,r13
+ 394:	3e21 72be ffff ffff 	tr	0,0xffffffff,r10
+ 39c:	3c21 1fbe ffff ffff 	tr	0,r12,0xffffffff
+ 3a4:	3d61 0044           	tr	r4,r5,0x1
+ 3a8:	3e61 7083 1234 5678 	tr	r3,0x12345678,0x2
+ 3b0:	3961 013e           	tr	0,r1,0x4
+ 3b4:	3e61 707e ffff ffff 	tr	0,0xffffffff,0x1
+ 3bc:	3c21 950a           	tr.f	r10,r12,r20
+ 3c0:	3e21 f500 1234 5678 	tr.f	r0,0x12345678,r20
+ 3c8:	3f21 8f86 ffff ffff 	tr.f	r6,r7,0xffffffff
+ 3d0:	3e21 ff88 ffff ffff 	tr.f	r8,0xffffffff,0xffffffff
+ 3d8:	3e21 937e           	tr.f	0,r14,r13
+ 3dc:	3e21 f2be ffff ffff 	tr.f	0,0xffffffff,r10
+ 3e4:	3c21 9fbe ffff ffff 	tr.f	0,r12,0xffffffff
+ 3ec:	3d61 8044           	tr.f	r4,r5,0x1
+ 3f0:	3e61 f083 1234 5678 	tr.f	r3,0x12345678,0x2
+ 3f8:	3961 813e           	tr.f	0,r1,0x4
+ 3fc:	3e61 f07e ffff ffff 	tr.f	0,0xffffffff,0x1
+ 404:	3c22 150a           	utf8	r10,r12,r20
+ 408:	3e22 7500 1234 5678 	utf8	r0,0x12345678,r20
+ 410:	3f22 0f86 ffff ffff 	utf8	r6,r7,0xffffffff
+ 418:	3e22 7f88 ffff ffff 	utf8	r8,0xffffffff,0xffffffff
+ 420:	3e22 137e           	utf8	0,r14,r13
+ 424:	3e22 72be ffff ffff 	utf8	0,0xffffffff,r10
+ 42c:	3c22 1fbe ffff ffff 	utf8	0,r12,0xffffffff
+ 434:	3d62 0044           	utf8	r4,r5,0x1
+ 438:	3e62 7083 1234 5678 	utf8	r3,0x12345678,0x2
+ 440:	3962 013e           	utf8	0,r1,0x4
+ 444:	3e62 707e ffff ffff 	utf8	0,0xffffffff,0x1
+ 44c:	3c22 950a           	utf8.f	r10,r12,r20
+ 450:	3e22 f500 1234 5678 	utf8.f	r0,0x12345678,r20
+ 458:	3f22 8f86 ffff ffff 	utf8.f	r6,r7,0xffffffff
+ 460:	3e22 ff88 ffff ffff 	utf8.f	r8,0xffffffff,0xffffffff
+ 468:	3e22 937e           	utf8.f	0,r14,r13
+ 46c:	3e22 f2be ffff ffff 	utf8.f	0,0xffffffff,r10
+ 474:	3c22 9fbe ffff ffff 	utf8.f	0,r12,0xffffffff
+ 47c:	3d62 8044           	utf8.f	r4,r5,0x1
+ 480:	3e62 f083 1234 5678 	utf8.f	r3,0x12345678,0x2
+ 488:	3962 813e           	utf8.f	0,r1,0x4
+ 48c:	3e62 f07e ffff ffff 	utf8.f	0,0xffffffff,0x1
+ 494:	3c23 150a           	addf	r10,r12,r20
+ 498:	3e23 7500 1234 5678 	addf	r0,0x12345678,r20
+ 4a0:	3f23 0f86 ffff ffff 	addf	r6,r7,0xffffffff
+ 4a8:	3e23 7f88 ffff ffff 	addf	r8,0xffffffff,0xffffffff
+ 4b0:	3e23 137e           	addf	0,r14,r13
+ 4b4:	3e23 72be ffff ffff 	addf	0,0xffffffff,r10
+ 4bc:	3c23 1fbe ffff ffff 	addf	0,r12,0xffffffff
+ 4c4:	3d63 0044           	addf	r4,r5,0x1
+ 4c8:	3e63 7083 1234 5678 	addf	r3,0x12345678,0x2
+ 4d0:	3963 013e           	addf	0,r1,0x4
+ 4d4:	3e63 707e ffff ffff 	addf	0,0xffffffff,0x1
+ 4dc:	3c23 950a           	addf.f	r10,r12,r20
+ 4e0:	3e23 f500 1234 5678 	addf.f	r0,0x12345678,r20
+ 4e8:	3f23 8f86 ffff ffff 	addf.f	r6,r7,0xffffffff
+ 4f0:	3e23 ff88 ffff ffff 	addf.f	r8,0xffffffff,0xffffffff
+ 4f8:	3e23 937e           	addf.f	0,r14,r13
+ 4fc:	3e23 f2be ffff ffff 	addf.f	0,0xffffffff,r10
+ 504:	3c23 9fbe ffff ffff 	addf.f	0,r12,0xffffffff
+ 50c:	3d63 8044           	addf.f	r4,r5,0x1
+ 510:	3e63 f083 1234 5678 	addf.f	r3,0x12345678,0x2
+ 518:	3963 813e           	addf.f	0,r1,0x4
+ 51c:	3e63 f07e ffff ffff 	addf.f	0,0xffffffff,0x1
+ 524:	3c35 150a           	zncv.rd	r10,r12,r20
+ 528:	3e35 7500 1234 5678 	zncv.rd	r0,0x12345678,r20
+ 530:	3f35 0f86 ffff ffff 	zncv.rd	r6,r7,0xffffffff
+ 538:	3e35 7f88 ffff ffff 	zncv.rd	r8,0xffffffff,0xffffffff
+ 540:	3e35 137e           	zncv.rd	0,r14,r13
+ 544:	3e35 72be ffff ffff 	zncv.rd	0,0xffffffff,r10
+ 54c:	3c35 1fbe ffff ffff 	zncv.rd	0,r12,0xffffffff
+ 554:	3d75 0044           	zncv.rd	r4,r5,0x1
+ 558:	3e75 7083 1234 5678 	zncv.rd	r3,0x12345678,0x2
+ 560:	3975 013e           	zncv.rd	0,r1,0x4
+ 564:	3e75 707e ffff ffff 	zncv.rd	0,0xffffffff,0x1
+ 56c:	39b5 0fff           	zncv.rd	r1,r1,-1
+ 570:	3eb5 7fff ffff ffff 	zncv.rd	0,0xffffffff,-1
+ 578:	3c35 950a           	zncv.wr	r10,r12,r20
+ 57c:	3e35 f500 1234 5678 	zncv.wr	r0,0x12345678,r20
+ 584:	3f35 8f86 ffff ffff 	zncv.wr	r6,r7,0xffffffff
+ 58c:	3e35 ff88 ffff ffff 	zncv.wr	r8,0xffffffff,0xffffffff
+ 594:	3e35 937e           	zncv.wr	0,r14,r13
+ 598:	3e35 f2be ffff ffff 	zncv.wr	0,0xffffffff,r10
+ 5a0:	3c35 9fbe ffff ffff 	zncv.wr	0,r12,0xffffffff
+ 5a8:	3d75 8044           	zncv.wr	r4,r5,0x1
+ 5ac:	3e75 f083 1234 5678 	zncv.wr	r3,0x12345678,0x2
+ 5b4:	3975 813e           	zncv.wr	0,r1,0x4
+ 5b8:	3e75 f07e ffff ffff 	zncv.wr	0,0xffffffff,0x1
+ 5c0:	39b5 8fff           	zncv.wr	r1,r1,-1
+ 5c4:	3eb5 ffff ffff ffff 	zncv.wr	0,0xffffffff,-1
+ 5cc:	3a36 00c1           	hofs	r1,r2,r3
+ 5d0:	3d36 8184           	hofs.f	r4,r5,r6
+ 5d4:	3876 13c7           	hofs	r7,r8,0xf0,0
+ 5d8:	3876 9807           	hofs.f	r7,r8,0,0x1
+ 5dc:	5a78 0800           	hash	r1,r2,r3,0x1,0,0,0
+ 5e0:	5dd8 67fd           	hash	r12,r13,r14,0x20,0x7,0x1,0x1
+ 5e4:	5a79 0800           	hash.p0	r1,r2,r3,0x1,0x1,0,0
+ 5e8:	5dd9 67ff           	hash.p0	r12,r13,r14,0x20,0x8,0x3,0x1
+ 5ec:	5a7a 0800           	hash.p1	r1,r2,r3,0x1,0x1,0,0
+ 5f0:	5dda 67ff           	hash.p1	r12,r13,r14,0x20,0x8,0x3,0x1
+ 5f4:	5a7b 0800           	hash.p2	r1,r2,r3,0x1,0x1,0,0
+ 5f8:	5ddb 67ff           	hash.p2	r12,r13,r14,0x20,0x8,0x3,0x1
+ 5fc:	5a7c 0800           	hash.p3	r1,r2,r3,0x1,0x1,0,0
+ 600:	5ddc 67ff           	hash.p3	r12,r13,r14,0x20,0x8,0x3,0x1
+ 604:	595d 0000           	e4by	r0,r1,r2,0,0,0,0x4
+ 608:	5cbd 394c           	e4by	r7,r12,r13,0x1,0x2,0x3,0x4
+ 60c:	5cbd a7ff           	e4by	r20,r12,r13,0x7,0x7,0x7,0x7

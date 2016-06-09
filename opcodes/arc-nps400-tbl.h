@@ -386,6 +386,123 @@ ADDL_LIKE ("xorl", 0xE, NPS_UIMM16)
 /* dcacl<.f> a,b,c  00111bbb001001010bbbccccccaaaaaa */
 { "dcacl", 0x38250000, 0xf8ff0000, ARC_OPCODE_NPS400, ACL, NONE, { RA, RB, RC }, { C_F }},
 
+/****                        DPI Instructions                         ****/
+
+/* hash dst,src1,src2,width,perm,nonlinear,basemat */
+{ "hash", 0x58180000, 0xf81f0000, ARC_OPCODE_NPS400, DPI, NONE, { NPS_DPI_DST, NPS_DPI_SRC1_3B, NPS_R_SRC2_3B, NPS_HASH_WIDTH, NPS_HASH_PERM, NPS_HASH_NONLINEAR, NPS_HASH_BASEMAT }, { 0 }},
+
+/* hash.pN dst,src1,src2,width,len,ofs,basemat */
+
+#define HASH_P(FUNC, SUBOP2)                                            \
+  { "hash", (0x58100000 | (SUBOP2 << 16)), 0xf81f0000, ARC_OPCODE_NPS400, DPI, NONE, { NPS_DPI_DST, NPS_DPI_SRC1_3B, NPS_R_SRC2_3B, NPS_HASH_WIDTH, NPS_HASH_LEN, NPS_HASH_OFS, NPS_HASH_BASEMAT2 }, { C_NPS_P##FUNC }},
+
+HASH_P(0, 0x9)
+HASH_P(1, 0xA)
+HASH_P(2, 0xB)
+HASH_P(3, 0xC)
+
+/* tr<.f> a,b,c   00111bbb00100001FBBBCCCCCCAAAAAA */
+{ "tr", 0x38210000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, RC }, { C_F }},
+
+/* tr<.f> a,limm,c   0011111000100001F111CCCCCCAAAAAA */
+{ "tr", 0x3e217000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, RC }, { C_F }},
+
+/* tr<.f> a,b,u6   00111bbb01100001FBBBuuuuuuAAAAAA */
+{ "tr", 0x38610000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, UIMM6_20 }, { C_F }},
+
+/* tr<.f> 0,b,c   00111bbb00100001FBBBCCCCCC111110 */
+{ "tr", 0x3821003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, RC }, { C_F }},
+
+/* tr<.f> 0,limm,c   0011111000100001F111CCCCCC111110 */
+{ "tr", 0x3e21703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, RC }, { C_F }},
+
+/* tr<.f> 0,b,u6   00111bbb01100001FBBBuuuuuu111110 */
+{ "tr", 0x3861003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, UIMM6_20 }, { C_F }},
+
+/* tr<.f> 0,b,limm   00111bbb00100001FBBB111110111110 */
+{ "tr", 0x38210fbe, 0xf8ff0fff, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, LIMM }, { C_F }},
+
+/* tr<.f> a,b,limm   00111bbb00100001FBBB111110AAAAAA */
+{ "tr", 0x38210f80, 0xf8ff0fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, LIMM }, { C_F }},
+
+/* tr<.f> a,limm,limm   0011111000100001F111111110AAAAAA */
+{ "tr", 0x3e217f80, 0xffff7fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, LIMMdup }, { C_F }},
+
+/* tr<.f> a,limm,u6   0011111001100001F111uuuuuuAAAAAA */
+{ "tr", 0x3e617000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, UIMM6_20 }, { C_F }},
+
+/* tr<.f> 0,limm,u6   0011111001100001F111uuuuuu111110 */
+{ "tr", 0x3e61703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, UIMM6_20 }, { C_F }},
+
+/* utf8 a,b,c       00111bbb00100011FBBBCCCCCCAAAAAA */
+{ "utf8", 0x38220000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, RC }, { C_F }},
+
+/* utf8 a,limm,c    0011111000100011F111CCCCCCAAAAAA */
+{ "utf8", 0x3e227000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, RC }, { C_F }},
+
+/* utf8 a,b,u6      00111bbb01100011FBBBuuuuuuAAAAAA */
+{ "utf8", 0x38620000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, UIMM6_20 }, { C_F }},
+
+/* utf8 0,b,c       00111bbb00100011FBBBCCCCCC111110 */
+{ "utf8", 0x3822003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, RC }, { C_F }},
+
+/* utf8 0,limm,c    0011111000100011F111CCCCCC111110 */
+{ "utf8", 0x3e22703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, RC }, { C_F }},
+
+/* utf8 0,b,u6      00111bbb01100011FBBBuuuuuu111110 */
+{ "utf8", 0x3862003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, UIMM6_20 }, { C_F }},
+
+/* utf8 0,b,limm    00111bbb00100011FBBB111110111110 */
+{ "utf8", 0x38220fbe, 0xf8ff0fff, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, LIMM }, { C_F }},
+
+/* utf8 a,b,limm    00111bbb00100011FBBB111110AAAAAA */
+{ "utf8", 0x38220f80, 0xf8ff0fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, LIMM }, { C_F }},
+
+/* utf8 a,limm,limm 0011111000100011F111111110AAAAAA */
+{ "utf8", 0x3e227f80, 0xffff7fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, LIMMdup }, { C_F }},
+
+/* utf8 a,limm,u6   0011111001100011F111uuuuuuAAAAAA */
+{ "utf8", 0x3e627000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, UIMM6_20 }, { C_F }},
+
+/* utf8 0,limm,u6   0011111001100011F111uuuuuu111110 */
+{ "utf8", 0x3e62703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, UIMM6_20 }, { C_F }},
+
+/* e4by dst,src1,src2,index0,index1,index2,index3 */
+{ "e4by", 0x581d0000, 0xf81f0000, ARC_OPCODE_NPS400, DPI, NONE, { NPS_DPI_DST, NPS_DPI_SRC1_3B, NPS_R_SRC2_3B, NPS_E4BY_INDEX0, NPS_E4BY_INDEX1, NPS_E4BY_INDEX2, NPS_E4BY_INDEX3 }, { 0 }},
+
+/* addf<.f> a,b,c       00111bbb00100011FBBBCCCCCCAAAAAA */
+{ "addf", 0x38230000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, RC }, { C_F }},
+
+/* addf<.f> a,limm,c    0011111000100011F111CCCCCCAAAAAA */
+{ "addf", 0x3e237000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, RC }, { C_F }},
+
+/* addf<.f> a,b,u6      00111bbb01100011FBBBuuuuuuAAAAAA */
+{ "addf", 0x38630000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, UIMM6_20 }, { C_F }},
+
+/* addf<.f> 0,b,c       00111bbb00100011FBBBCCCCCC111110 */
+{ "addf", 0x3823003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, RC }, { C_F }},
+
+/* addf<.f> 0,limm,c    0011111000100011F111CCCCCC111110 */
+{ "addf", 0x3e23703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, RC }, { C_F }},
+
+/* addf<.f> 0,b,u6      00111bbb01100011FBBBuuuuuu111110 */
+{ "addf", 0x3863003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, UIMM6_20 }, { C_F }},
+
+/* addf<.f> 0,b,limm    00111bbb00100011FBBB111110111110 */
+{ "addf", 0x38230fbe, 0xf8ff0fff, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, LIMM }, { C_F }},
+
+/* addf<.f> a,b,limm    00111bbb00100011FBBB111110AAAAAA */
+{ "addf", 0x38230f80, 0xf8ff0fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, LIMM }, { C_F }},
+
+/* addf<.f> a,limm,limm 0011111000100011F111111110AAAAAA */
+{ "addf", 0x3e237f80, 0xffff7fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, LIMMdup }, { C_F }},
+
+/* addf<.f> a,limm,u6   0011111001100011F111uuuuuuAAAAAA */
+{ "addf", 0x3e637000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, UIMM6_20 }, { C_F }},
+
+/* addf<.f> 0,limm,u6   0011111001100011F111uuuuuu111110 */
+{ "addf", 0x3e63703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, UIMM6_20 }, { C_F }},
+
 /****                  Pipeline Control Instructions                  ****/
 
 /* schd<.rw|.rd> */

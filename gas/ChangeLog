@@ -1,5 +1,11 @@
 2016-06-13  Graham Markall <graham.markall@embecosm.com>
 
+	* testsuite/gas/arc/nps400-6.s: Add tests of hash, tr, utf8, e4by, and
+	addf.
+	* testsuite/gas/arc/nps400-6.d: Likewise.
+
+2016-06-13  Graham Markall <graham.markall@embecosm.com>
+
 	* testsuite/gas/arc/nps400-6.s: Add tests of calcbsd, calcbxd,
 	calckey, calcxkey, mxb, imxb, addl, subl, andl, orl, xorl, andab, orab,
 	lbdsize, bdlen, csms, csma, cbba, zncv, and hofs.
