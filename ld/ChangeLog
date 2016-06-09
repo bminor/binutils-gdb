@@ -13,6 +13,38 @@
 
 2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/libno-plt-1b.dd: New file.
+	* testsuite/ld-i386/libno-plt-1b.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1a.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1a.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1b.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1b.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1c.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1c.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1d.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1d.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1e.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1e.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1f.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1f.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1g.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1g.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1h.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1h.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1i.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1i.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1j.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1j.rd: Likewise.
+	* testsuite/ld-i386/no-plt-check1a.S: Likewise.
+	* testsuite/ld-i386/no-plt-check1b.S: Likewise.
+	* testsuite/ld-i386/no-plt-extern1a.S: Likewise.
+	* testsuite/ld-i386/no-plt-extern1b.S: Likewise.
+	* testsuite/ld-i386/no-plt-func1.c: Likewise.
+	* testsuite/ld-i386/no-plt-main1.c: Likewise.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/tls.exp (run_cc_link_tests): Update test
 	name.
 
