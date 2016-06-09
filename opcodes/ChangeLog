@@ -1,3 +1,8 @@
+2016-06-03  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* avr-dis.c (avr_operand): Add default data address space origin (0x800000)
+	 to the address and set as symbol address for LDS/ STS immediate operands.
+
 2016-06-07  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (ppc_opts): Delete extraneous parentheses.  Default

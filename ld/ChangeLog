@@ -1,3 +1,9 @@
+2016-06-09  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+	* testsuite/ld-avr/lds-mega.d: New test.
+	* testsuite/ld-avr/lds-mega.s: New test source.
+	* testsuite/ld-avr/lds-tiny.d: New test.
+	* testsuite/ld-avr/lds-tiny.s: New test source.
+
 2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/tls.exp (run_cc_link_tests): Update test
