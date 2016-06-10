@@ -26,6 +26,7 @@
 #include "common/common-utils.h"
 #include "cli/cli-utils.h"
 #include "disasm.h"
+#include "gdbthread.h"
 
 #include <ctype.h>
 
@@ -78,6 +79,16 @@ require_record_target (void)
 	     "Use one of the \"target record-<tab><tab>\" commands first."));
 
   return t;
+}
+
+/* Check that the inferior thread is not running.  Throw an error if it is.  */
+
+static void
+require_not_running (void)
+{
+  if (is_running (inferior_ptid))
+    error (_("Cannot execute this command while "
+	     "the selected thread is running."));
 }
 
 /* See record.h.  */
@@ -342,6 +353,7 @@ record_goto (const char *arg)
   insn = parse_and_eval_long (arg);
 
   require_record_target ();
+  require_not_running ();
   target_goto_record (insn);
 }
 
@@ -365,6 +377,7 @@ cmd_record_goto_begin (char *arg, int from_tty)
     error (_("Junk after argument: %s."), arg);
 
   require_record_target ();
+  require_not_running ();
   target_goto_record_begin ();
 }
 
@@ -377,6 +390,7 @@ cmd_record_goto_end (char *arg, int from_tty)
     error (_("Junk after argument: %s."), arg);
 
   require_record_target ();
+  require_not_running ();
   target_goto_record_end ();
 }
 
