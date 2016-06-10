@@ -2724,8 +2724,12 @@ record_btrace_set_replay (struct thread_info *tp,
   /* Start anew from the new replay position.  */
   record_btrace_clear_histories (btinfo);
 
-  stop_pc = regcache_read_pc (get_current_regcache ());
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
+  /* We changed the PC of TP.  Update the global state if TP is the selected
+     thread.  */
+  if (ptid_equal (tp->ptid, inferior_ptid))
+    stop_pc = regcache_read_pc (get_current_regcache ());
+
+  record_signal_goto_stop (tp);
 }
 
 /* The to_goto_record_begin method of target record-btrace.  */
