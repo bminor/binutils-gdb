@@ -27,7 +27,9 @@ test (void *arg)
   i = 0; /* bp.1 */
   for (; i < 10; ++i) global += i; /* loop */
 
-  return arg; /* bp.2 */
+  global *= 2; /* bp.2 */
+
+  return arg; /* bp.3 */
 }
 
 int
@@ -41,5 +43,5 @@ main (void)
 
   pthread_join (th, NULL);
 
-  return 0; /* bp.3 */
+  return 0;
 }

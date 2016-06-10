@@ -97,6 +97,11 @@ static struct cmd_list_element *show_record_btrace_pt_cmdlist;
     }									\
   while (0)
 
+static void record_btrace_set_replay (struct thread_info *tp,
+				      const struct btrace_insn_iterator *it);
+
+static void record_btrace_stop_replaying (struct thread_info *tp);
+
 
 /* Update the branch trace for the current thread and return a pointer to its
    thread_info.
@@ -252,9 +257,57 @@ record_btrace_stop_recording (struct target_ops *self)
 
   record_btrace_auto_disable ();
 
-  ALL_NON_EXITED_THREADS (tp)
-    if (tp->btrace.target != NULL)
-      btrace_disable (tp);
+  /* In non-stop mode, we indicate the implicit move of each replaying thread.
+     In stop-all mode, we indicate the implicit move of the selected thread if
+     it is replaying.  Other threads are silently moved.  The MI notification
+     will indicate that all threads have been stopped which should be enough to
+     indicate this implicit move to front-ends.  */
+  if (non_stop)
+    {
+      ALL_NON_EXITED_THREADS (tp)
+	if (tp->btrace.target != NULL)
+	  {
+	    if (btrace_is_replaying (tp))
+	      {
+		printf_filtered (_("Thread %s (%s) stopped replaying.\n"),
+				 print_thread_id (tp),
+				 target_pid_to_str (tp->ptid));
+		record_btrace_set_replay (tp, NULL);
+	      }
+
+	    btrace_disable (tp);
+	  }
+    }
+  else
+    {
+      int send_stopped = 0;
+
+      /* If the selected thread is replaying, we do an implicit "record goto
+	 end" to make it stop replaying and indicate this to front-ends.  This
+	 causes the updated location to be printed for the selected thread.
+
+	 If it isn't replaying, we will send an unspecific stopped notification
+	 to front-ends at the end.  This doesn't print the (unchanged) location
+	 but indicates to front-ends that other thread's locations may have
+	 changed.  */
+      tp = inferior_thread ();
+      if (tp != NULL && btrace_is_replaying (tp))
+	record_btrace_set_replay (tp, NULL);
+      else
+	send_stopped = 1;
+
+      ALL_NON_EXITED_THREADS (tp)
+	if (tp->btrace.target != NULL)
+	  {
+	    /* Stop replaying before we disable tracing to clear TP's register
+	       state in addition to the btrace state.  */
+	    record_btrace_stop_replaying (tp);
+	    btrace_disable (tp);
+	  }
+
+      if (send_stopped)
+	observer_notify_normal_stop (NULL, 0);
+    }
 }
 
 /* The to_close method of target record-btrace.  */

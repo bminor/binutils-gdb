@@ -239,7 +239,22 @@ with_test_prefix "no progress" {
 }
 
 # now that both threads stopped replaying we may resume recording
-with_test_prefix "cont to end" {
+with_test_prefix "resume recording" {
     gdb_breakpoint $bp_3
-    gdb_cont_to_bp_line "$srcfile:$bp_3" all 1
+    gdb_cont_to_bp_line "$srcfile:$bp_3" all 2
+}
+
+# when we stop recording we get notifications for replaying threads
+with_test_prefix "stop" {
+    gdb_test "thread 1" ".*"
+    gdb_test "thread apply 2 record goto begin" ".*"
+
+    gdb_test "record stop" [multi_line \
+        "Thread 2 \[^\\\r\\\n\]* stopped replaying\." \
+        "\[^\\\r\\\n\]*$srcfile:$bp_3" \
+        "$bp_3\[^\\\r\\\n\]* bp\.3 \[^\\\r\\\n\]*" \
+        "Process record is stopped and all execution logs are deleted\." \
+    ]
+
+    gdb_test "info record" "No record target is currently active\."
 }
