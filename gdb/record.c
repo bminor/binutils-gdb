@@ -343,6 +343,27 @@ cmd_record_save (char *args, int from_tty)
 /* See record.h.  */
 
 void
+record_signal_goto_stop (struct thread_info *tp)
+{
+  struct target_waitstatus ws;
+  struct cleanup *cleanup;
+
+  clear_proceed_status_thread (tp);
+
+  cleanup = make_cleanup_restore_current_thread ();
+  switch_to_thread (tp->ptid);
+
+  ws.kind = TARGET_WAITKIND_NO_RESUMED;
+  set_last_target_status (tp->ptid, ws);
+
+  observer_notify_normal_stop (NULL, 1);
+
+  do_cleanups (cleanup);
+}
+
+/* See record.h.  */
+
+void
 record_goto (const char *arg)
 {
   ULONGEST insn;

@@ -91,4 +91,7 @@ extern struct target_ops *find_record_target (void);
    it does anything.  */
 extern void record_preopen (void);
 
+/* Signal a record-goto stop of TP to front-ends.  */
+extern void record_signal_goto_stop (struct thread_info *tp);
+
 #endif /* _RECORD_H_ */
