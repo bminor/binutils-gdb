@@ -1,3 +1,13 @@
+2016-06-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-dis.c (option_use_insn_len_bits_p): New file scope
+	variable.
+	(init_disasm): Handle new command line option "insnlength".
+	(print_s390_disassembler_options): Mention new option in help
+	output.
+	(print_insn_s390): Use the encoded insn length when dumping
+	unknown instructions.
+
 2016-06-03  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
 
 	* avr-dis.c (avr_operand): Add default data address space origin (0x800000)
