@@ -2704,7 +2704,12 @@ record_btrace_set_replay (struct thread_info *tp,
   btinfo = &tp->btrace;
 
   if (it == NULL || it->function == NULL)
-    record_btrace_stop_replaying (tp);
+    {
+      if (!btrace_is_replaying (tp))
+	return;
+
+      record_btrace_stop_replaying (tp);
+    }
   else
     {
       if (btinfo->replay == NULL)

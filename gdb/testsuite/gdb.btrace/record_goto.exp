@@ -160,6 +160,9 @@ gdb_test "record instruction-history -" [multi_line \
 # check that we can go to the end of the trace
 gdb_test "record goto end" ".*main \\(\\) at record_goto.c:50.*"
 
+# check that we don't repeat the current location if we go to the end again
+gdb_test_no_output "record goto end" "goto end again"
+
 # check that we're filling up the context correctly
 gdb_test "record function-call-history /ci" [multi_line \
   "14\t      fun2\tinst 35,36" \
