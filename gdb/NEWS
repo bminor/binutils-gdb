@@ -3,6 +3,20 @@
 
 *** Changes since GDB 7.11
 
+* GDB now supports a negative repeat count in the 'x' command to examine
+  memory backward from the given address.  For example:
+
+    (gdb) bt
+    #0  Func1 (n=42, p=0x40061c "hogehoge") at main.cpp:4
+    #1  0x400580 in main (argc=1, argv=0x7fffffffe5c8) at main.cpp:8
+    (gdb) x/-5i 0x0000000000400580
+       0x40056a <main(int, char**)+8>:      mov    %edi,-0x4(%rbp)
+       0x40056d <main(int, char**)+11>:     mov    %rsi,-0x10(%rbp)
+       0x400571 <main(int, char**)+15>:     mov    $0x40061c,%esi
+       0x400576 <main(int, char**)+20>:     mov    $0x2a,%edi
+       0x40057b <main(int, char**)+25>:
+        callq  0x400536 <Func1(int, char const*)>
+
 * Fortran: Support structures with fields of dynamic types and 
   arrays of dynamic types.
 

@@ -1,3 +1,8 @@
+2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
+
+	* gdb.texinfo (Examining Memory): Document negative repeat
+	count in the 'x' command.
+
 2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Document method and

@@ -9295,7 +9295,8 @@ Several commands set convenient defaults for @var{addr}.
 @table @r
 @item @var{n}, the repeat count
 The repeat count is a decimal integer; the default is 1.  It specifies
-how much memory (counting by units @var{u}) to display.
+how much memory (counting by units @var{u}) to display.  If a negative
+number is specified, memory is examined backward from @var{addr}.
 @c This really is **decimal**; unaffected by 'set radix' as of GDB
 @c 4.1.2.
 
@@ -9350,6 +9351,10 @@ starting at address @code{0x54320}.  @samp{x/4xw $sp} prints the four
 words (@samp{w}) of memory above the stack pointer (here, @samp{$sp};
 @pxref{Registers, ,Registers}) in hexadecimal (@samp{x}).
 
+You can also specify a negative repeat count to examine memory backward
+from the given address.  For example, @samp{x/-3uh 0x54320} prints three
+halfwords (@code{h}) at @code{0x54314}, @code{0x54328}, and @code{0x5431c}.
+
 Since the letters indicating unit sizes are all distinct from the
 letters specifying output formats, you do not have to remember whether
 unit size or format comes first; either order works.  The output
@@ -9365,6 +9370,13 @@ slot instructions, if any, beyond the count specified, which immediately
 follow the last instruction that is within the count.  The command
 @code{disassemble} gives an alternative way of inspecting machine
 instructions; see @ref{Machine Code,,Source and Machine Code}.
+
+If a negative repeat count is specified for the formats @samp{s} or @samp{i},
+the command displays null-terminated strings or instructions before the given
+address as many as the absolute value of the given number.  For the @samp{i}
+format, we use line number information in the debug info to accurately locate
+instruction boundaries while disassembling backward.  If line info is not
+available, the command stops examining memory with an error message.
 
 All the defaults for the arguments to @code{x} are designed to make it
 easy to continue scanning memory with minimal specifications each time

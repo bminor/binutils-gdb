@@ -1,3 +1,8 @@
+2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
+
+	* gdb.base/examine-backward.c: New file.
+	* gdb.base/examine-backward.exp: New file.
+
 2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.mi/mi-record-changed.exp: Adjust =record-started output

@@ -1,5 +1,19 @@
 2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
 
+	* NEWS: Mention that GDB now supports a negative repeat count in
+	the 'x' command.
+	* printcmd.c (decode_format): Allow '-' in the parameter
+	"string_ptr" to accept a negative repeat count.
+	(find_instruction_backward): New function.
+	(read_memory_backward): New function.
+	(integer_is_zero): New function.
+	(find_string_backward): New function.
+	(do_examine): Use new functions to examine memory backward.
+	(_initialize_printcmd): Mention that 'x' command supports a negative
+	repeat count.
+
+2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
+
 	* MAINTAINERS (Write After Approval): Add Toshihito Kikuchi.
 
 2016-06-09  Tom Tromey  <tom@tromey.com>
