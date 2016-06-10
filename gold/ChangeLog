@@ -1,3 +1,23 @@
+2016-06-10  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_relobj::Mips_relobj): Initialize
+	has_reginfo_section_.
+	(Mips_relobj::has_reginfo_section_): New data member.
+	(Mips_relobj::has_reginfo_section): New method.
+	(class Mips_output_section_reginfo): Change base class to
+	Output_section_data, and set masks of the output .reginfo section
+	in constructor.
+	(Mips_output_section_reginfo::as_mips_output_section_reginfo):
+	Remove.
+	(Mips_output_section_reginfo::set_masks): Likewise.
+	(Mips_output_section_reginfo::set_final_data_size): Likewise.
+	(Mips_output_section_reginfo::do_print_to_mapfile): New method.
+	(Target_mips::do_make_output_section): Remove.
+	(Mips_relobj::do_read_symbols): Set has_reginfo_section_ to true
+	if the object contains a .reginfo section.
+	(Target_mips::do_finalize_sections): Create a .reginfo output
+	section if needed.
+
 2016-06-09  Artemiy Volkov  <artemiyv@acm.org>
 
 	* mips.cc (Mips_output_data_got::do_write): Add missing template

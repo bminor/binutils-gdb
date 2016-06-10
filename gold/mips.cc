@@ -1544,10 +1544,11 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
       processor_specific_flags_(0), local_symbol_is_mips16_(),
       local_symbol_is_micromips_(), mips16_stub_sections_(),
       local_non_16bit_calls_(), local_16bit_calls_(), local_mips16_fn_stubs_(),
-      local_mips16_call_stubs_(), gp_(0), got_info_(NULL),
-      section_is_mips16_fn_stub_(), section_is_mips16_call_stub_(),
-      section_is_mips16_call_fp_stub_(), pdr_shndx_(-1U), gprmask_(0),
-      cprmask1_(0), cprmask2_(0), cprmask3_(0), cprmask4_(0)
+      local_mips16_call_stubs_(), gp_(0), has_reginfo_section_(false),
+      got_info_(NULL), section_is_mips16_fn_stub_(),
+      section_is_mips16_call_stub_(), section_is_mips16_call_fp_stub_(),
+      pdr_shndx_(-1U), gprmask_(0), cprmask1_(0), cprmask2_(0), cprmask3_(0),
+      cprmask4_(0)
   {
     this->is_pic_ = (ehdr.get_e_flags() & elfcpp::EF_MIPS_PIC) != 0;
     this->is_n32_ = elfcpp::abi_n32(ehdr.get_e_flags());
@@ -1783,6 +1784,11 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
   void
   discard_mips16_stub_sections(Symbol_table* symtab);
 
+  // Return whether there is a .reginfo section.
+  bool
+  has_reginfo_section() const
+  { return this->has_reginfo_section_; }
+
   // Return gprmask from the .reginfo section of this object.
   Valtype
   gprmask() const
@@ -1861,6 +1867,8 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
   bool is_pic_ : 1;
   // Whether the object uses N32 ABI.
   bool is_n32_ : 1;
+  // Whether the object contains a .reginfo section.
+  bool has_reginfo_section_ : 1;
   // The Mips_got_info for this object.
   Mips_got_info<size, big_endian>* got_info_;
 
@@ -2713,40 +2721,25 @@ class Mips_output_data_mips_stubs : public Output_section_data
 // This class handles Mips .reginfo output section.
 
 template<int size, bool big_endian>
-class Mips_output_section_reginfo : public Output_section
+class Mips_output_section_reginfo : public Output_section_data
 {
   typedef typename elfcpp::Swap<size, big_endian>::Valtype Valtype;
 
  public:
-  Mips_output_section_reginfo(const char* name, elfcpp::Elf_Word type,
-                              elfcpp::Elf_Xword flags,
-                              Target_mips<size, big_endian>* target)
-    : Output_section(name, type, flags), target_(target), gprmask_(0),
-      cprmask1_(0), cprmask2_(0), cprmask3_(0), cprmask4_(0)
+  Mips_output_section_reginfo(Target_mips<size, big_endian>* target,
+                              Valtype gprmask, Valtype cprmask1,
+                              Valtype cprmask2, Valtype cprmask3,
+                              Valtype cprmask4)
+    : Output_section_data(24, 4, true), target_(target),
+      gprmask_(gprmask), cprmask1_(cprmask1), cprmask2_(cprmask2),
+      cprmask3_(cprmask3), cprmask4_(cprmask4)
   { }
 
-  // Downcast a base pointer to a Mips_output_section_reginfo pointer.
-  static Mips_output_section_reginfo<size, big_endian>*
-  as_mips_output_section_reginfo(Output_section* os)
-  { return static_cast<Mips_output_section_reginfo<size, big_endian>*>(os); }
-
-  // Set masks of the output .reginfo section.
-  void
-  set_masks(Valtype gprmask, Valtype cprmask1, Valtype cprmask2,
-            Valtype cprmask3, Valtype cprmask4)
-  {
-    this->gprmask_ = gprmask;
-    this->cprmask1_ = cprmask1;
-    this->cprmask2_ = cprmask2;
-    this->cprmask3_ = cprmask3;
-    this->cprmask4_ = cprmask4;
-  }
-
  protected:
-  // Set the final data size.
+  // Write to a map file.
   void
-  set_final_data_size()
-  { this->set_data_size(24); }
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _(".reginfo")); }
 
   // Write out reginfo section.
   void
@@ -3544,18 +3537,6 @@ class Target_mips : public Sized_target<size, big_endian>
   do_make_elf_object(const std::string&, Input_file*, off_t,
                      const elfcpp::Ehdr<size, !big_endian>&)
   { gold_unreachable(); }
-
-  // Make an output section.
-  Output_section*
-  do_make_output_section(const char* name, elfcpp::Elf_Word type,
-                         elfcpp::Elf_Xword flags)
-    {
-      if (type == elfcpp::SHT_MIPS_REGINFO)
-        return new Mips_output_section_reginfo<size, big_endian>(name, type,
-                                                                 flags, this);
-      else
-        return new Output_section(name, type, flags);
-    }
 
   // Adjust ELF file header.
   void
@@ -6400,6 +6381,7 @@ Mips_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
       if (shdr.get_sh_type() == elfcpp::SHT_MIPS_REGINFO)
         {
+          this->has_reginfo_section_ = true;
           // Read the gp value that was used to create this object.  We need the
           // gp value while processing relocs.  The .reginfo section is not used
           // in the 64-bit MIPS ELF ABI.
@@ -8609,6 +8591,13 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
         }
     }
 
+  Valtype gprmask = 0;
+  Valtype cprmask1 = 0;
+  Valtype cprmask2 = 0;
+  Valtype cprmask3 = 0;
+  Valtype cprmask4 = 0;
+  bool has_reginfo_section = false;
+
   // Merge processor-specific flags.
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
@@ -8616,6 +8605,17 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
     {
       Mips_relobj<size, big_endian>* relobj =
         Mips_relobj<size, big_endian>::as_mips_relobj(*p);
+
+      // Merge .reginfo contents of input objects.
+      if (relobj->has_reginfo_section())
+        {
+          has_reginfo_section = true;
+          gprmask |= relobj->gprmask();
+          cprmask1 |= relobj->cprmask1();
+          cprmask2 |= relobj->cprmask2();
+          cprmask3 |= relobj->cprmask3();
+          cprmask4 |= relobj->cprmask4();
+        }
 
       Input_file::Format format = relobj->input_file()->format();
       if (format == Input_file::FORMAT_ELF)
@@ -8663,24 +8663,26 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
       this->merge_processor_specific_flags(dynobj->name(), in_flags, true);
     }
 
-  // Merge .reginfo contents of input objects.
-  Valtype gprmask = 0;
-  Valtype cprmask1 = 0;
-  Valtype cprmask2 = 0;
-  Valtype cprmask3 = 0;
-  Valtype cprmask4 = 0;
-  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
-       p != input_objects->relobj_end();
-       ++p)
+  if (has_reginfo_section && !parameters->options().gc_sections())
     {
-      Mips_relobj<size, big_endian>* relobj =
-        Mips_relobj<size, big_endian>::as_mips_relobj(*p);
+      // Create .reginfo output section.
+      Mips_output_section_reginfo<size, big_endian>* reginfo_section =
+        new Mips_output_section_reginfo<size, big_endian>(this, gprmask,
+                                                          cprmask1, cprmask2,
+                                                          cprmask3, cprmask4);
 
-      gprmask |= relobj->gprmask();
-      cprmask1 |= relobj->cprmask1();
-      cprmask2 |= relobj->cprmask2();
-      cprmask3 |= relobj->cprmask3();
-      cprmask4 |= relobj->cprmask4();
+      Output_section* os =
+        layout->add_output_section_data(".reginfo", elfcpp::SHT_MIPS_REGINFO,
+                                        elfcpp::SHF_ALLOC, reginfo_section,
+                                        ORDER_INVALID, false);
+
+      if (!parameters->options().relocatable() && os != NULL)
+        {
+          Output_segment* reginfo_segment =
+            layout->make_output_segment(elfcpp::PT_MIPS_REGINFO,
+                                        elfcpp::PF_R);
+          reginfo_segment->add_output_section_to_nonload(os, elfcpp::PF_R);
+        }
     }
 
   if (this->plt_ != NULL)
@@ -8750,29 +8752,6 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
   // Add NULL segment.
   if (!parameters->options().relocatable())
     layout->make_output_segment(elfcpp::PT_NULL, 0);
-
-  for (Layout::Section_list::const_iterator p = layout->section_list().begin();
-       p != layout->section_list().end();
-       ++p)
-    {
-      if ((*p)->type() == elfcpp::SHT_MIPS_REGINFO)
-        {
-          Mips_output_section_reginfo<size, big_endian>* reginfo =
-            Mips_output_section_reginfo<size, big_endian>::
-              as_mips_output_section_reginfo(*p);
-
-          reginfo->set_masks(gprmask, cprmask1, cprmask2, cprmask3, cprmask4);
-
-          if (!parameters->options().relocatable())
-            {
-              Output_segment* reginfo_segment =
-                layout->make_output_segment(elfcpp::PT_MIPS_REGINFO,
-                                            elfcpp::PF_R);
-              reginfo_segment->add_output_section_to_nonload(reginfo,
-                                                             elfcpp::PF_R);
-            }
-        }
-    }
 
   // Fill in some more dynamic tags.
   // TODO(sasa): Add more dynamic tags.
