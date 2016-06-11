@@ -1,5 +1,10 @@
 2016-07-06  John Baldwin  <jhb@FreeBSD.org>
 
+	* score-tdep.c (score7_malloc_and_get_memblock): Remove check for
+	negative size.
+
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c (fbsd_is_vfork_done_pending): Fix return type.
 
 2016-07-06  Yao Qi  <yao.qi@linaro.org>
