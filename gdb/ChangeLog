@@ -1,5 +1,10 @@
 2016-07-06  John Baldwin  <jhb@FreeBSD.org>
 
+	* sh64-tdep.c (sh64_analyze_prologue): Set "uses_fp" when setting
+	the MEDIA_FP_REGNUM register.
+
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
 	* score-tdep.c (score7_malloc_and_get_memblock): Remove check for
 	negative size.
 
