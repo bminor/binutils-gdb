@@ -1,3 +1,7 @@
+2016-06-11  Alan Modra  <amodra@gmail.com>
+
+	* coff/sparc.h (COFF_ADJUST_SYM_OUT_POST): Define.
+
 2016-06-08  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* opcode/sparc.h: Add missing documentation for hyperprivileged
