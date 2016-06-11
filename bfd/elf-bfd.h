@@ -2049,14 +2049,14 @@ extern struct elf_strtab_hash * _bfd_elf_strtab_init
   (void);
 extern void _bfd_elf_strtab_free
   (struct elf_strtab_hash *);
-extern bfd_size_type _bfd_elf_strtab_add
+extern size_t _bfd_elf_strtab_add
   (struct elf_strtab_hash *, const char *, bfd_boolean);
 extern void _bfd_elf_strtab_addref
-  (struct elf_strtab_hash *, bfd_size_type);
+  (struct elf_strtab_hash *, size_t);
 extern void _bfd_elf_strtab_delref
-  (struct elf_strtab_hash *, bfd_size_type);
+  (struct elf_strtab_hash *, size_t);
 extern unsigned int _bfd_elf_strtab_refcount
-  (struct elf_strtab_hash *, bfd_size_type);
+  (struct elf_strtab_hash *, size_t);
 extern void _bfd_elf_strtab_clear_all_refs
   (struct elf_strtab_hash *);
 extern void *_bfd_elf_strtab_save
@@ -2066,7 +2066,7 @@ extern void _bfd_elf_strtab_restore
 extern bfd_size_type _bfd_elf_strtab_size
   (struct elf_strtab_hash *);
 extern bfd_size_type _bfd_elf_strtab_offset
-  (struct elf_strtab_hash *, bfd_size_type);
+  (struct elf_strtab_hash *, size_t);
 extern bfd_boolean _bfd_elf_strtab_emit
   (bfd *, struct elf_strtab_hash *);
 extern void _bfd_elf_strtab_finalize

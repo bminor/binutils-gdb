@@ -1,3 +1,39 @@
+2016-06-10  Alan Modra  <amodra@gmail.com>
+
+	* elf-strtab.c (struct strtab_save): Use size_t for "size".
+	(struct elf_strtab_hash): Likewise for "size" and "alloced".
+	(_bfd_elf_strtab_init): Formatting.
+	(_bfd_elf_strtab_add): Return size_t rather than bfd_size_type.
+	(_bfd_elf_strtab_addref): Take size_t idx param.
+	(_bfd_elf_strtab_delref, _bfd_elf_strtab_refcount): Likewise.
+	(_bfd_elf_strtab_offset): Likewise.
+	(_bfd_elf_strtab_clear_all_refs): Use size_t idx.
+	(_bfd_elf_strtab_save): Use size_t "idx" and "size" vars.
+	(_bfd_elf_strtab_restore, _bfd_elf_strtab_emit): Similarly.
+	(_bfd_elf_strtab_finalize): Similarly.
+	* elf-bfd.h (_bfd_elf_strtab_add): Update prototypes.
+	(_bfd_elf_strtab_addref, _bfd_elf_strtab_delref): Likewise.
+	(_bfd_elf_strtab_refcount, _bfd_elf_strtab_offset): Likewise.
+	* elf.c (bfd_elf_get_elf_syms): Calculate symbol buffer size
+	using bfd_size_type.
+	(bfd_section_from_shdr): Delete amt.
+	(_bfd_elf_init_reloc_shdr): Likewise.
+	(_bfd_elf_link_assign_sym_version): Likewise.
+	(assign_section_numbers): Use size_t reloc_count.
+	* elflink.c (struct elf_symbuf_head): Use size_t "count".
+	(bfd_elf_link_record_dynamic_symbol): Use size_t for some vars.
+	(elf_link_is_defined_archive_symbol): Likewise.
+	(elf_add_dt_needed_tag): Likewise.
+	(elf_finalize_dynstr): Likewise.
+	(elf_link_add_object_symbols): Likewise.
+	(bfd_elf_size_dynamic_sections): Likewise.
+	(elf_create_symbuf): Similarly.
+	(bfd_elf_match_symbols_in_sections): Likewise.
+	(elf_link_swap_symbols_out): Likewise.
+	(elf_link_check_versioned_symbol): Likewise.
+	(bfd_elf_gc_record_vtinherit): Likewise.
+	(bfd_elf_gc_common_finalize_got_offsets): Likewise.
+
 2016-06-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/20221
