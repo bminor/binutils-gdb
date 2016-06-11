@@ -2525,7 +2525,7 @@ ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
       accumSize += HOST_CHAR_BIT - unusedLS;
       if (accumSize >= HOST_CHAR_BIT)
         {
-          unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+          unpacked[unpacked_idx] = accum & ~(~0UL << HOST_CHAR_BIT);
           accumSize -= HOST_CHAR_BIT;
           accum >>= HOST_CHAR_BIT;
           unpacked_bytes_left -= 1;
@@ -2539,7 +2539,7 @@ ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
   while (unpacked_bytes_left > 0)
     {
       accum |= sign << accumSize;
-      unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+      unpacked[unpacked_idx] = accum & ~(~0UL << HOST_CHAR_BIT);
       accumSize -= HOST_CHAR_BIT;
       if (accumSize < 0)
 	accumSize = 0;
