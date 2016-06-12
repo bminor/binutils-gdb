@@ -9327,9 +9327,6 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
 	return elfcore_grok_xstatereg (abfd, note);
-      else if (note->namesz == 8
-	  && strcmp (note->namedata, "FreeBSD") == 0)
-	return elfcore_grok_xstatereg (abfd, note);
       else
 	return TRUE;
 
@@ -9485,12 +9482,6 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       return elfcore_make_note_pseudosection (abfd, ".note.linuxcore.siginfo",
 					      note);
 
-    case NT_FREEBSD_THRMISC:
-      if (note->namesz == 8
-	  && strcmp (note->namedata, "FreeBSD") == 0)
-	return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
-      else
-	return TRUE;
     }
 }
 
@@ -9549,6 +9540,134 @@ elfobj_grok_stapsdt_note (bfd *abfd, Elf_Internal_Note *note)
     {
     case NT_STAPSDT:
       return elfobj_grok_stapsdt_note_1 (abfd, note);
+
+    default:
+      return TRUE;
+    }
+}
+
+static bfd_boolean
+elfcore_grok_freebsd_psinfo (bfd *abfd, Elf_Internal_Note *note)
+{
+  size_t offset;
+
+  /* Check for version 1 in pr_version. */
+  if (bfd_h_get_32 (abfd, (bfd_byte *) note->descdata) != 1)
+    return FALSE;
+  offset = 4;
+
+  /* Skip over pr_psinfosz. */
+  switch (abfd->arch_info->bits_per_word)
+    {
+    case 32:
+      offset += 4;
+      break;
+
+    case 64:
+      offset += 4;	/* Padding before pr_psinfosz. */
+      offset += 8;
+      break;
+
+    default:
+      return FALSE;
+    }
+
+  /* pr_fname is PRFNAMESZ (16) + 1 bytes in size.  */
+  elf_tdata (abfd)->core->program
+    = _bfd_elfcore_strndup (abfd, note->descdata + offset, 17);
+  offset += 17;
+
+  /* pr_psargs is PRARGSZ (80) + 1 bytes in size.  */
+  elf_tdata (abfd)->core->command
+    = _bfd_elfcore_strndup (abfd, note->descdata + offset, 81);
+
+  return TRUE;
+}
+
+static bfd_boolean
+elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  size_t offset;
+  size_t size;
+
+  /* Check for version 1 in pr_version. */
+  if (bfd_h_get_32 (abfd, (bfd_byte *) note->descdata) != 1)
+    return FALSE;
+  offset = 4;
+
+  /* Skip over pr_statussz.  */
+  switch (abfd->arch_info->bits_per_word)
+    {
+    case 32:
+      offset += 4;
+      break;
+
+    case 64:
+      offset += 4;	/* Padding before pr_statussz. */
+      offset += 8;
+      break;
+
+    default:
+      return FALSE;
+    }
+
+  /* Extract size of pr_reg from pr_gregsetsz.  */
+  if (abfd->arch_info->bits_per_word == 32)
+    size = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
+  else
+    size = bfd_h_get_64 (abfd, (bfd_byte *) note->descdata + offset);
+
+  /* Skip over pr_gregsetsz and pr_fpregsetsz. */
+  offset += (abfd->arch_info->bits_per_word / 8) * 2;
+
+  /* Skip over pr_osreldate. */
+  offset += 4;
+
+  /* Read signal from pr_cursig. */
+  if (elf_tdata (abfd)->core->signal == 0)
+    elf_tdata (abfd)->core->signal
+      = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
+  offset += 4;
+
+  /* Read TID from pr_pid. */
+  elf_tdata (abfd)->core->lwpid
+      = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
+  offset += 4;
+
+  /* Padding before pr_reg. */
+  if (abfd->arch_info->bits_per_word == 64)
+    offset += 4;
+
+  /* Make a ".reg/999" section and a ".reg" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  size, note->descpos + offset);
+}
+
+static bfd_boolean
+elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
+{
+  switch (note->type)
+    {
+    case NT_PRSTATUS:
+      return elfcore_grok_freebsd_prstatus (abfd, note);
+
+    case NT_FPREGSET:
+      return elfcore_grok_prfpreg (abfd, note);
+
+    case NT_PRPSINFO:
+      return elfcore_grok_freebsd_psinfo (abfd, note);
+
+    case NT_FREEBSD_THRMISC:
+      if (note->namesz == 8)
+	return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
+      else
+	return TRUE;
+
+    case NT_X86_XSTATE:
+      if (note->namesz == 8)
+	return elfcore_grok_xstatereg (abfd, note);
+      else
+	return TRUE;
 
     default:
       return TRUE;
@@ -10467,6 +10586,7 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
 	    grokers[] =
 	    {
 	      GROKER_ELEMENT ("", elfcore_grok_note),
+	      GROKER_ELEMENT ("FreeBSD", elfcore_grok_freebsd_note),
 	      GROKER_ELEMENT ("NetBSD-CORE", elfcore_grok_netbsd_note),
 	      GROKER_ELEMENT ( "OpenBSD", elfcore_grok_openbsd_note),
 	      GROKER_ELEMENT ("QNX", elfcore_grok_nto_note),
