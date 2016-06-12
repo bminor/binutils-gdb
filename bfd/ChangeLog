@@ -1,3 +1,13 @@
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* elf32-i386.c (elf_i386_relocate_section): When relocating
+	R_386_GOT32, return error without a base register for PIC and
+	subtract the .got.plt section address only with a base register.
+
 2016-06-13  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	Backport from master

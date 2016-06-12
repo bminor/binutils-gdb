@@ -4120,10 +4120,38 @@ r_386_got32:
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = htab->elf.sgot->output_section->vma
-		       + htab->elf.sgot->output_offset + off
-		       - htab->elf.sgotplt->output_section->vma
-		       - htab->elf.sgotplt->output_offset;
+	  relocation = (htab->elf.sgot->output_section->vma
+			+ htab->elf.sgot->output_offset + off);
+	  if ((*(contents + rel->r_offset - 1) & 0xc7) == 0x5)
+	    {
+	      if (bfd_link_pic (info))
+		{
+		  /* For PIC, disallow R_386_GOT32 without a base
+		     register since we don't know what the GOT base
+		     is.  */
+		  const char *name;
+
+		  if (h == NULL)
+		    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+					     NULL);
+		  else
+		    name = h->root.root.string;
+
+		  (*_bfd_error_handler)
+		    (_("%B: direct GOT relocation R_386_GOT32 against `%s' without base register can not be used when making a shared object"),
+		     input_bfd, name);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+	    }
+	  else
+	    {
+	      /* Subtract the .got.plt section address only with a base
+		 register.  */
+	      relocation -= (htab->elf.sgotplt->output_section->vma
+			     + htab->elf.sgotplt->output_offset);
+	    }
+
 	  break;
 
 	case R_386_GOTOFF:
