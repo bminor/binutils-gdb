@@ -1,3 +1,10 @@
+2016-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* elf32-i386.c (elf_i386_relocate_section): When relocating
+	R_386_GOT32, return error without a base register for PIC and
+	subtract the .got.plt section address only with a base register.
+
 2016-06-10  Alan Modra  <amodra@gmail.com>
 
 	* elf-strtab.c (struct strtab_save): Use size_t for "size".
