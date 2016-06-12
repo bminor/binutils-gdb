@@ -1,7 +1,7 @@
 #objdump: -dwrj.text
 #target: x86_64-*-*
 
-.*: +file format elf64-x86-64.*
+.*: +file format elf.*-x86-64.*
 
 Disassembly of section .text:
 
@@ -24,7 +24,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	67 e8 ([0-9a-f]{2} ){4}[ 	]+addr32 callq [0-9a-f]+ <abort>
 #...
 [0-9a-f]+ <get_func>:
- +[a-f0-9]+:	48 c7 c0 ([0-9a-f]{2} ){4}[ 	]+mov    \$0x[0-9a-f]+,%rax
+ +[a-f0-9]+:	4(0|8) c7 c0 ([0-9a-f]{2} ){4}[ 	]+(rex |)mov +\$0x[0-9a-f]+,%(e|r)ax
  +[a-f0-9]+:	c3                   	retq   
 #...
 [0-9a-f]+ <call_func>:
