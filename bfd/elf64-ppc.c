@@ -2888,12 +2888,15 @@ ppc64_elf_mkobject (bfd *abfd)
 }
 
 /* Fix bad default arch selected for a 64 bit input bfd when the
-   default is 32 bit.  */
+   default is 32 bit.  Also select arch based on apuinfo.  */
 
 static bfd_boolean
 ppc64_elf_object_p (bfd *abfd)
 {
-  if (abfd->arch_info->the_default && abfd->arch_info->bits_per_word == 32)
+  if (!abfd->arch_info->the_default)
+    return TRUE;
+
+  if (abfd->arch_info->bits_per_word == 32)
     {
       Elf_Internal_Ehdr *i_ehdr = elf_elfheader (abfd);
 
@@ -2904,7 +2907,7 @@ ppc64_elf_object_p (bfd *abfd)
 	  BFD_ASSERT (abfd->arch_info->bits_per_word == 64);
 	}
     }
-  return TRUE;
+  return _bfd_elf_ppc_set_arch (abfd);
 }
 
 /* Support for core dump NOTE sections.  */

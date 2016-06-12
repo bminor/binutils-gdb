@@ -138,6 +138,14 @@ union external_auxent
 #define	AUXENT	union external_auxent
 #define	AUXESZ	20
 
+#define COFF_ADJUST_SYM_OUT_POST(ABFD, INP, EXTP)	\
+  do							\
+    {							\
+      SYMENT *extsym = (SYMENT *) (EXTP);		\
+      extsym->padding[0] = 0;				\
+      extsym->padding[1] = 0;				\
+    } while (0)
+
 #define _ETEXT	"etext"
 
 /********************** RELOCATION DIRECTIVES **********************/

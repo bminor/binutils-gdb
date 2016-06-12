@@ -1418,6 +1418,7 @@ lex_number (void)
   int match;
   int is_integer = 0;
   int could_be_decimal = 1;
+  int implicit_i32 = 0;
   char *type_name = NULL;
   struct type *type;
   int end_index;
@@ -1436,7 +1437,10 @@ lex_number (void)
       is_integer = 1;
       end_index = subexps[INT_TEXT].rm_eo;
       if (subexps[INT_TYPE].rm_so == -1)
-	type_name = "i32";
+	{
+	  type_name = "i32";
+	  implicit_i32 = 1;
+	}
       else
 	{
 	  type_index = INT_TYPE;
@@ -1478,6 +1482,7 @@ lex_number (void)
 	  end_index = subexps[0].rm_eo;
 	  type_name = "i32";
 	  could_be_decimal = 1;
+	  implicit_i32 = 1;
 	}
     }
 
@@ -1512,6 +1517,7 @@ lex_number (void)
   /* Parse the number.  */
   if (is_integer)
     {
+      uint64_t value;
       int radix = 10;
       if (number[0] == '0')
 	{
@@ -1527,7 +1533,12 @@ lex_number (void)
 	      could_be_decimal = 0;
 	    }
 	}
-      rustyylval.typed_val_int.val = strtoul (number, NULL, radix);
+
+      value = strtoul (number, NULL, radix);
+      if (implicit_i32 && value >= ((uint64_t) 1) << 31)
+	type = rust_type ("i64");
+
+      rustyylval.typed_val_int.val = value;
       rustyylval.typed_val_int.type = type;
     }
   else

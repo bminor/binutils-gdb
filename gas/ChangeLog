@@ -1,3 +1,29 @@
+2016-06-08  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (print_operands): Substitute size.
+	(output_operand_error_record): Likewise.
+
+2016-06-07  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (PPC_APUINFO_ISEL, PPC_APUINFO_PMR,
+	PPC_APUINFO_RFMCI, PPC_APUINFO_CACHELCK, PPC_APUINFO_SPE,
+	PPC_APUINFO_EFS, PPC_APUINFO_BRLOCK, PPC_APUINFO_VLE): Don't define.
+	(ppc_setup_opcodes): Check vle disables powerpc_opcodes overridden
+	by vle_opcodes, and that vle flag doesn't enable opcodes.  Don't
+	add vle_opcodes twice.
+	(ppc_cleanup): Use APUINFO_SECTION_NAME and APUINFO_LABEL.
+
+2016-06-07  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_ext_v8_2): Rename to arm_ext_ras.
+	(arm_ext_ras): Renamed from arm_ext_v8_2.
+	(insns): Update for arm_ext_v8_2 renaming.
+	(arm_extensions): Add "ras".
+	* doc/c-arm.texi (ARM Options): Add an entry for "ras".
+	* testsuite/gas/arm/armv8-a+ras.d: New.
+	* testsuite/gas/arm/armv8_2-a.d: Add explicit command line
+	options.
+
 2016-06-05  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* itbl-parse.y (yyerror): Use modern argument declaration style.

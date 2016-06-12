@@ -223,8 +223,8 @@ static const arm_feature_set arm_ext_atomics =
 /* DSP instructions Tag_DSP_extension refers to.  */
 static const arm_feature_set arm_ext_dsp =
   ARM_FEATURE_CORE_LOW (ARM_EXT_V5E | ARM_EXT_V5ExP | ARM_EXT_V6_DSP);
-static const arm_feature_set arm_ext_v8_2 =
-  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A);
+static const arm_feature_set arm_ext_ras =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_RAS);
 /* FP16 instructions.  */
 static const arm_feature_set arm_ext_fp16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
@@ -19713,9 +19713,9 @@ static const struct asm_opcode insns[] =
 
  /* ARMv8.2 RAS extension.  */
 #undef  ARM_VARIANT
-#define ARM_VARIANT   & arm_ext_v8_2
+#define ARM_VARIANT   & arm_ext_ras
 #undef  THUMB_VARIANT
-#define THUMB_VARIANT & arm_ext_v8_2
+#define THUMB_VARIANT & arm_ext_ras
  TUE ("esb", 320f010, f3af8010, 0, (), noargs,  noargs),
 
 #undef  ARM_VARIANT
@@ -25507,6 +25507,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V6M)),
   ARM_EXT_OPT ("pan",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
 			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_PAN, 0),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("ras",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_RAS),
+			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_RAS, 0),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("rdma",  FPU_ARCH_NEON_VFP_ARMV8_1,
 			ARM_FEATURE_COPROC (FPU_NEON_ARMV8 | FPU_NEON_EXT_RDMA),

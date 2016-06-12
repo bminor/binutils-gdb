@@ -435,7 +435,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   alloc_intsym = NULL;
   bed = get_elf_backend_data (ibfd);
   extsym_size = bed->s->sizeof_sym;
-  amt = symcount * extsym_size;
+  amt = (bfd_size_type) symcount * extsym_size;
   pos = symtab_hdr->sh_offset + symoffset * extsym_size;
   if (extsym_buf == NULL)
     {
@@ -454,7 +454,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
     extshndx_buf = NULL;
   else
     {
-      amt = symcount * sizeof (Elf_External_Sym_Shndx);
+      amt = (bfd_size_type) symcount * sizeof (Elf_External_Sym_Shndx);
       pos = shndx_hdr->sh_offset + symoffset * sizeof (Elf_External_Sym_Shndx);
       if (extshndx_buf == NULL)
 	{
@@ -2227,7 +2227,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	Elf_Internal_Shdr *hdr2, **p_hdr;
 	unsigned int num_sec = elf_numsections (abfd);
 	struct bfd_elf_section_data *esdt;
-	bfd_size_type amt;
 
 	if (hdr->sh_entsize
 	    != (bfd_size_type) (hdr->sh_type == SHT_REL
@@ -2320,8 +2319,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	/* PR 17512: file: 0b4f81b7.  */
 	if (*p_hdr != NULL)
 	  goto fail;
-	amt = sizeof (*hdr2);
-	hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
+	hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, sizeof (*hdr2));
 	if (hdr2 == NULL)
 	  goto fail;
 	*hdr2 = *hdr;
@@ -3021,11 +3019,9 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
 {
   Elf_Internal_Shdr *rel_hdr;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  bfd_size_type amt;
 
-  amt = sizeof (Elf_Internal_Shdr);
   BFD_ASSERT (reldata->hdr == NULL);
-  rel_hdr = bfd_zalloc (abfd, amt);
+  rel_hdr = bfd_zalloc (abfd, sizeof (*rel_hdr));
   reldata->hdr = rel_hdr;
 
   if (delay_st_name_p)
@@ -3544,7 +3540,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   /* SHT_GROUP sections are in relocatable files only.  */
   if (link_info == NULL || bfd_link_relocatable (link_info))
     {
-      bfd_size_type reloc_count = 0;
+      size_t reloc_count = 0;
 
       /* Put SHT_GROUP sections first.  */
       for (sec = abfd->sections; sec != NULL; sec = sec->next)

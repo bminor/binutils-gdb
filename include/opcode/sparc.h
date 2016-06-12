@@ -243,6 +243,8 @@ typedef struct sparc_opcode
 	9	%fcc3. (v9)
 	!	Privileged Register in rd (v9)
 	?	Privileged Register in rs1 (v9)
+	%	Hyperprivileged Register in rd (v9b)
+	$	Hyperprivileged Register in rs1 (v9b)
 	*	Prefetch function constant. (v9)
 	x	OPF field (v9 impdep).
 	0	32/64 bit immediate for set or setx (v9) insns

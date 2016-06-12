@@ -1,3 +1,78 @@
+2016-06-10  Tom Tromey  <tom@tromey.com>
+
+	* gdbtypes.c (arch_type, arch_integer_type, arch_character_type)
+	(arch_boolean_type, arch_float_type, arch_complex_type)
+	(arch_flags_type, append_flags_type_field)
+	(append_flags_type_flag, arch_composite_type)
+	(append_composite_type_field_raw)
+	(append_composite_type_field_aligned)
+	(append_composite_type_field): Make "name" parameter const.
+	* gdbtypes.h (arch_type, arch_integer_type, arch_character_type)
+	(arch_boolean_type, arch_float_type, arch_complex_type)
+	(append_composite_type_field, append_composite_type_field_aligned)
+	(append_composite_type_field_raw, arch_flags_type)
+	(append_flags_type_field, append_flags_type_flag): Constify.
+
+2016-06-10  Tom Tromey  <tom@tromey.com>
+
+	PR rust/20110:
+	* rust-exp.y (lex_number): Don't truncate large numbers to i32.
+
+2016-06-10  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (COMMON_OBS): Remove rust-exp.o.
+	(YYFILES): Add rust-exp.c.
+	(YYOBJ): Add rust-exp.o.
+	(local-maintainer-clean): Remove rust-exp.c.
+
+2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
+
+	* NEWS: Mention that GDB now supports a negative repeat count in
+	the 'x' command.
+	* printcmd.c (decode_format): Allow '-' in the parameter
+	"string_ptr" to accept a negative repeat count.
+	(find_instruction_backward): New function.
+	(read_memory_backward): New function.
+	(integer_is_zero): New function.
+	(find_string_backward): New function.
+	(do_examine): Use new functions to examine memory backward.
+	(_initialize_printcmd): Mention that 'x' command supports a negative
+	repeat count.
+
+2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
+
+	* MAINTAINERS (Write After Approval): Add Toshihito Kikuchi.
+
+2016-06-09  Tom Tromey  <tom@tromey.com>
+
+	PR python/19819:
+	* python/py-xmethods.c (invoke_method_name)
+	(py_get_result_type_method_name, py_invoke_method_name): Remove.
+	(gdbpy_initialize_xmethods): Don't initialize
+	py_invoke_method_name, py_get_result_type_method_name.
+
+2016-06-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-interp.c (mi_record_changed): Add missing braces.
+
+2016-06-07  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* findvar.c (follow_static_link): Check for valid pointer.
+
+2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS: Mention the new fields in =record-started.
+	* common/btrace-common.h (btrace_format_short_string): New function
+	declaration.
+	* common/btrace-common.c (btrace_format_short_string): New
+	function.
+	* mi/mi-interp.c (mi_record_changed): Output method and format
+	fields in the =record-started record.
+	* record-btrace.c (record_btrace_open): Adapt record_changed
+	notification.
+	* record-full.c (record_full_open): Likewise.
+	* record.c (cmd_record_stop): Likewise.
+
 2016-06-02  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-nat.c (handle_output_debug_string): Return type of

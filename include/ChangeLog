@@ -1,3 +1,25 @@
+2016-06-11  Alan Modra  <amodra@gmail.com>
+
+	* coff/sparc.h (COFF_ADJUST_SYM_OUT_POST): Define.
+
+2016-06-08  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/sparc.h: Add missing documentation for hyperprivileged
+	registers in rd (%) and rs1 ($).
+
+2016-06-07  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc.h (APUINFO_SECTION_NAME, APUINFO_LABEL, PPC_APUINFO_ISEL,
+	PPC_APUINFO_PMR, PPC_APUINFO_RFMCI, PPC_APUINFO_CACHELCK,
+	PPC_APUINFO_SPE, PPC_APUINFO_EFS, PPC_APUINFO_BRLOCK,
+	PPC_APUINFO_VLE: Define.
+
+2016-06-07  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* opcode/arm.h (ARM_EXT2_RAS): New.  Also align preceding
+	entries.
+	(ARM_AEXT_V8_2A): Add ARM_EXT2_RAS.
+
 2016-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* opcode/arc.h (MAX_INSN_ARGS): Increase to 16.

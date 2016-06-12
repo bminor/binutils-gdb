@@ -1,3 +1,146 @@
+2016-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* testsuite/ld-i386/i386.exp: Run pr20244-1a and pr20244-1b.
+	* testsuite/ld-i386/pr20244-1.s: New file.
+	* testsuite/ld-i386/pr20244-1a.d: Likewise.
+	* testsuite/ld-i386/pr20244-1b.d: Likewise.
+	* testsuite/ld-i386/pr20244-1c.d: Likewise.
+
+2016-06-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20221
+	* testsuite/ld-avr/avr-prop-5.d: New.
+	* testsuite/ld-avr/avr-prop-5.s: New.
+
+2016-06-09  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* testsuite/ld-avr/lds-mega.d: New test.
+	* testsuite/ld-avr/lds-mega.s: New test source.
+	* testsuite/ld-avr/lds-tiny.d: New test.
+	* testsuite/ld-avr/lds-tiny.s: New test source.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/libno-plt-1b.dd: New file.
+	* testsuite/ld-i386/libno-plt-1b.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1a.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1a.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1b.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1b.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1c.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1c.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1d.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1d.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1e.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1e.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1f.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1f.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1g.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1g.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1h.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1h.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1i.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1i.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1j.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1j.rd: Likewise.
+	* testsuite/ld-i386/no-plt-check1a.S: Likewise.
+	* testsuite/ld-i386/no-plt-check1b.S: Likewise.
+	* testsuite/ld-i386/no-plt-extern1a.S: Likewise.
+	* testsuite/ld-i386/no-plt-extern1b.S: Likewise.
+	* testsuite/ld-i386/no-plt-func1.c: Likewise.
+	* testsuite/ld-i386/no-plt-main1.c: Likewise.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/tls.exp (run_cc_link_tests): Update test
+	name.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run libtlspic2.so, tlsbin2,
+	tlsgd3, tlsld2, tlsgd4, tlspie3a, tlspie3b and tlspie3c.
+	* testsuite/ld-i386/pass.out: New file.
+	* testsuite/ld-i386/tls-def1.c: Likewise.
+	* testsuite/ld-i386/tls-gd1.S: Likewise.
+	* testsuite/ld-i386/tls-ld1.S: Likewise.
+	* testsuite/ld-i386/tls-main1.c: Likewise.
+	* testsuite/ld-i386/tls.exp: Likewise.
+	* testsuite/ld-i386/tlsbin2-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlsbin2.dd: Likewise.
+	* testsuite/ld-i386/tlsbin2.rd: Likewise.
+	* testsuite/ld-i386/tlsbin2.sd: Likewise.
+	* testsuite/ld-i386/tlsbin2.td: Likewise.
+	* testsuite/ld-i386/tlsbinpic2.s: Likewise.
+	* testsuite/ld-i386/tlsgd3.dd: Likewise.
+	* testsuite/ld-i386/tlsgd3.s: Likewise.
+	* testsuite/ld-i386/tlsgd4.d: Likewise.
+	* testsuite/ld-i386/tlsgd4.s: Likewise.
+	* testsuite/ld-i386/tlsld2.s: Likewise.
+	* testsuite/ld-i386/tlspic2-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlspic2.dd: Likewise.
+	* testsuite/ld-i386/tlspic2.rd: Likewise.
+	* testsuite/ld-i386/tlspic2.sd: Likewise.
+	* testsuite/ld-i386/tlspic2.td: Likewise.
+	* testsuite/ld-i386/tlspic3.s: Likewise.
+	* testsuite/ld-i386/tlspie3.s: Likewise.
+	* testsuite/ld-i386/tlspie3a.d: Likewise.
+	* testsuite/ld-i386/tlspie3b.d: Likewise.
+	* testsuite/ld-i386/tlspie3c.d: Likewise.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/no-plt-1a.rd: Support any relocation order.
+	* testsuite/ld-x86-64/no-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Fix a typo.
+
+2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/libno-plt-1b.dd: Likewise.
+	* testsuite/ld-x86-64/libno-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1a.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1a.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1b.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-check1.S: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Likewise.
+	* testsuite/ld-x86-64/no-plt-extern1.S: Likewise.
+	* testsuite/ld-x86-64/no-plt-func1.c: Likewise.
+	* testsuite/ld-x86-64/no-plt-main1.c: Likewise.
+
+2016-06-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-elf/init-fini-arrays.d: Remove `ft32-*-*' xfail.
+
+2016-06-07  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* testsuite/ld-s390/pltoffset-1.dd: New test.
+	* testsuite/ld-s390/pltoffset-1.ld: New test.
+	* testsuite/ld-s390/pltoffset-1.s: New test.
+	* testsuite/ld-s390/s390.exp: Run new test.
+
+2016-06-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/apuinfo1.s: Delete nop.
+	* testsuite/ld-powerpc/apuinfo-vle2.s: New.
+	* testsuite/ld-powerpc/powerpc.exp: Use apuinfo-vle2.s.
+
 2016-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/pass.out: New file.

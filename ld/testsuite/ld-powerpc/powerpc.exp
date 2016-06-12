@@ -104,7 +104,7 @@ set ppcelftests {
      "-a32 -me500" {apuinfo1.s apuinfo-nul.s apuinfo2.s}
      {{readelf -x2 apuinfo.rd}} "apuinfo"}
     {"APUinfo VLE section processing" "-melf32ppc" ""
-     "-a32 -me500 -mvle" {apuinfo1.s apuinfo-vle.s apuinfo2.s}
+     "-a32 -me500 -mvle" {apuinfo1.s apuinfo-vle.s apuinfo-vle2.s}
      {{readelf -x2 apuinfo-vle.rd}} "apuinfo-vle"}
     {"APUinfo NULL section processing" "-melf32ppc" ""
      "-a32 -me500" {apuinfo-nul1.s apuinfo-nul.s}

@@ -1,3 +1,77 @@
+2016-06-10  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (struct Mips_abiflags): New struct.
+	(Mips_relobj::Mips_relobj): Initialize attributes_section_data_
+	and abiflags_.
+	(Mips_relobj::~Mips_relobj): Delete object pointed by
+	attributes_section_data_.
+	(Mips_relobj::abiflags): New method.
+	(Mips_relobj::attributes_section_data): Likewise.
+	(Mips_relobj::attributes_section_data_): New data member.
+	(Mips_relobj::abiflags_): Likewise.
+	(class Mips_output_section_abiflags): New class.
+	(Target_mips::Target_mips): Initialize attributes_section_data_,
+	abiflags_ and has_abiflags_section_.
+	(Target_mips::do_should_include_section): Don't emit input
+	.MIPS.abiflags sections to output .MIPS.abiflags.
+	(Target_mips::Mips_mach): Add new enum constants.
+	(Target_mips::mips_isa_ext_mach): New method.
+	(Target_mips::mips_isa_ext): Likewise.
+	(Target_mips::update_abiflags_isa): Likewise.
+	(Target_mips::infer_abiflags): Likewise.
+	(Target_mips::create_abiflags): Likewise.
+	(Target_mips::fp_abi_string): Likewise.
+	(Target_mips::select_fp_abi): Likewise.
+	(Target_mips::merge_obj_attributes): Likewise.
+	(Target_mips::merge_obj_abiflags): Likewise.
+	(Target_mips::level_rev): Likewise.
+	(Target_mips::merge_obj_e_flags): Rename from
+	merge_processor_specific_flags. Remove dyn_obj argument,
+	call update_abiflags_isa when needed, compare NaN encodings and
+	compare FP64 state.
+	(Target_mips::add_machine_extensions): Add two machine extensions
+	and fix one.
+	(Target_mips::attributes_section_data_): New data member.
+	(Target_mips::abiflags_): Likewise.
+	(Target_mips::has_abiflags_section_): Likewise.
+	(Mips_relobj::do_read_symbols): Read .gnu.attributes and
+	.MIPS.abiflags sections if they exists.
+	(Target_mips::elf_mips_mach): Add E_MIPS_MACH_5900 and
+	E_MIPS_MACH_OCTEON3 support.
+	(Target_mips::do_adjust_elf_header): Setup EI_ABIVERSION flag.
+	(Target_mips::do_finalize_sections): Merge .gnu.attributes and
+	.MIPS.abiflags sections from input. Create these sections if
+	needed.
+	(Target_mips::elf_mips_mach_name): Add E_MIPS_MACH_5900 and
+	E_MIPS_MACH_OCTEON3 support, and change strings for
+	E_MIPS_MACH_LS2E, E_MIPS_MACH_LS2F and E_MIPS_MACH_LS3A just
+	to match bfd.
+
+2016-06-10  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_relobj::Mips_relobj): Initialize
+	has_reginfo_section_.
+	(Mips_relobj::has_reginfo_section_): New data member.
+	(Mips_relobj::has_reginfo_section): New method.
+	(class Mips_output_section_reginfo): Change base class to
+	Output_section_data, and set masks of the output .reginfo section
+	in constructor.
+	(Mips_output_section_reginfo::as_mips_output_section_reginfo):
+	Remove.
+	(Mips_output_section_reginfo::set_masks): Likewise.
+	(Mips_output_section_reginfo::set_final_data_size): Likewise.
+	(Mips_output_section_reginfo::do_print_to_mapfile): New method.
+	(Target_mips::do_make_output_section): Remove.
+	(Mips_relobj::do_read_symbols): Set has_reginfo_section_ to true
+	if the object contains a .reginfo section.
+	(Target_mips::do_finalize_sections): Create a .reginfo output
+	section if needed.
+
+2016-06-09  Artemiy Volkov  <artemiyv@acm.org>
+
+	* mips.cc (Mips_output_data_got::do_write): Add missing template
+	args via typedef.
+
 2016-05-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	PR/19960

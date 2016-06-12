@@ -4629,7 +4629,7 @@ copy_type (const struct type *type)
 
 struct type *
 arch_type (struct gdbarch *gdbarch,
-	   enum type_code code, int length, char *name)
+	   enum type_code code, int length, const char *name)
 {
   struct type *type;
 
@@ -4649,7 +4649,7 @@ arch_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_integer_type (struct gdbarch *gdbarch,
-		   int bit, int unsigned_p, char *name)
+		   int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
@@ -4668,7 +4668,7 @@ arch_integer_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_character_type (struct gdbarch *gdbarch,
-		     int bit, int unsigned_p, char *name)
+		     int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
@@ -4685,7 +4685,7 @@ arch_character_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_boolean_type (struct gdbarch *gdbarch,
-		   int bit, int unsigned_p, char *name)
+		   int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
@@ -4703,7 +4703,8 @@ arch_boolean_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_float_type (struct gdbarch *gdbarch,
-		 int bit, char *name, const struct floatformat **floatformats)
+		 int bit, const char *name,
+		 const struct floatformat **floatformats)
 {
   struct type *t;
 
@@ -4734,7 +4735,7 @@ arch_float_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_complex_type (struct gdbarch *gdbarch,
-		   char *name, struct type *target_type)
+		   const char *name, struct type *target_type)
 {
   struct type *t;
 
@@ -4748,7 +4749,7 @@ arch_complex_type (struct gdbarch *gdbarch,
    NAME is the type name.  LENGTH is the size of the flag word in bytes.  */
 
 struct type *
-arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
+arch_flags_type (struct gdbarch *gdbarch, const char *name, int length)
 {
   int max_nfields = length * TARGET_CHAR_BIT;
   struct type *type;
@@ -4769,7 +4770,7 @@ arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
 
 void
 append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
-			 struct type *field_type, char *name)
+			 struct type *field_type, const char *name)
 {
   int type_bitsize = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
   int field_nr = TYPE_NFIELDS (type);
@@ -4792,7 +4793,7 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
    position BITPOS is called NAME.  */
 
 void
-append_flags_type_flag (struct type *type, int bitpos, char *name)
+append_flags_type_flag (struct type *type, int bitpos, const char *name)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
 
@@ -4805,7 +4806,8 @@ append_flags_type_flag (struct type *type, int bitpos, char *name)
    specified by CODE) associated with GDBARCH.  NAME is the type name.  */
 
 struct type *
-arch_composite_type (struct gdbarch *gdbarch, char *name, enum type_code code)
+arch_composite_type (struct gdbarch *gdbarch, const char *name,
+		     enum type_code code)
 {
   struct type *t;
 
@@ -4821,7 +4823,7 @@ arch_composite_type (struct gdbarch *gdbarch, char *name, enum type_code code)
    the caller should do so.  Return the new field.  */
 
 struct field *
-append_composite_type_field_raw (struct type *t, char *name,
+append_composite_type_field_raw (struct type *t, const char *name,
 				 struct type *field)
 {
   struct field *f;
@@ -4840,7 +4842,7 @@ append_composite_type_field_raw (struct type *t, char *name,
    ALIGNMENT (if non-zero) specifies the minimum field alignment.  */
 
 void
-append_composite_type_field_aligned (struct type *t, char *name,
+append_composite_type_field_aligned (struct type *t, const char *name,
 				     struct type *field, int alignment)
 {
   struct field *f = append_composite_type_field_raw (t, name, field);
@@ -4880,7 +4882,7 @@ append_composite_type_field_aligned (struct type *t, char *name,
 /* Add new field with name NAME and type FIELD to composite type T.  */
 
 void
-append_composite_type_field (struct type *t, char *name,
+append_composite_type_field (struct type *t, const char *name,
 			     struct type *field)
 {
   append_composite_type_field_aligned (t, name, field, 0);

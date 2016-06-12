@@ -787,6 +787,11 @@ struct elf_i386_link_hash_entry
   /* Symbol has non-GOT/non-PLT relocations in text sections.  */
   unsigned int has_non_got_reloc : 1;
 
+  /* 0: symbol isn't ___tls_get_addr.
+     1: symbol is ___tls_get_addr.
+     2: symbol is unknown.  */
+  unsigned int tls_get_addr : 2;
+
   /* Reference count of C/C++ function pointer relocations in read-write
      section which can be resolved at run-time.  */
   bfd_signed_vma func_pointer_refcount;
@@ -922,6 +927,7 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->gotoff_ref = 0;
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
+      eh->tls_get_addr = 2;
       eh->func_pointer_refcount = 0;
       eh->plt_got.offset = (bfd_vma) -1;
       eh->tlsdesc_got = (bfd_vma) -1;
@@ -1216,10 +1222,12 @@ elf_i386_check_tls_transition (asection *sec,
 			       const Elf_Internal_Rela *rel,
 			       const Elf_Internal_Rela *relend)
 {
-  unsigned int val, type;
+  unsigned int val, type, reg;
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
   bfd_vma offset;
+  bfd_byte *call;
+  bfd_boolean indirect_call, tls_get_addr;
 
   offset = rel->r_offset;
   switch (r_type)
@@ -1229,69 +1237,130 @@ elf_i386_check_tls_transition (asection *sec,
       if (offset < 2 || (rel + 1) >= relend)
 	return FALSE;
 
-      type = bfd_get_8 (abfd, contents + offset - 2);
+      indirect_call = FALSE;
+      call = contents + offset + 4;
+      val = *(call - 5);
+      type = *(call - 6);
       if (r_type == R_386_TLS_GD)
 	{
 	  /* Check transition from GD access model.  Only
-		leal foo@tlsgd(,%reg,1), %eax; call ___tls_get_addr
-		leal foo@tlsgd(%reg), %eax; call ___tls_get_addr; nop
+		leal foo@tlsgd(,%ebx,1), %eax
+		call ___tls_get_addr@PLT
+	     or
+		leal foo@tlsgd(%ebx) %eax
+		call ___tls_get_addr@PLT
+		nop
+	     or
+		leal foo@tlsgd(%reg), %eax
+		call *___tls_get_addr@GOT(%reg)
+		which may be converted to
+		addr32 call ___tls_get_addr
 	     can transit to different access model.  */
-	  if ((offset + 10) > sec->size ||
-	      (type != 0x8d && type != 0x04))
+	  if ((offset + 10) > sec->size
+	      || (type != 0x8d && type != 0x04))
 	    return FALSE;
 
-	  val = bfd_get_8 (abfd, contents + offset - 1);
 	  if (type == 0x04)
 	    {
-	      /* leal foo@tlsgd(,%reg,1), %eax; call ___tls_get_addr */
+	      /* leal foo@tlsgd(,%ebx,1), %eax
+		 call ___tls_get_addr@PLT  */
 	      if (offset < 3)
 		return FALSE;
 
-	      if (bfd_get_8 (abfd, contents + offset - 3) != 0x8d)
-		return FALSE;
-
-	      if ((val & 0xc7) != 0x05 || val == (4 << 3))
+	      if (*(call - 7) != 0x8d
+		  || val != 0x1d
+		  || call[0] != 0xe8)
 		return FALSE;
 	    }
 	  else
 	    {
-	      /* leal foo@tlsgd(%reg), %eax; call ___tls_get_addr; nop  */
-	      if ((val & 0xf8) != 0x80 || (val & 7) == 4)
+	      /* This must be
+			leal foo@tlsgd(%ebx), %eax
+			call ___tls_get_addr@PLT
+			nop
+		 or
+			leal foo@tlsgd(%reg), %eax
+			call *___tls_get_addr@GOT(%reg)
+			which may be converted to
+			addr32 call ___tls_get_addr
+
+		 %eax can't be used as the GOT base register since it
+		 is used to pass parameter to ___tls_get_addr.  */
+	      reg = val & 7;
+	      if ((val & 0xf8) != 0x80 || reg == 4 || reg == 0)
 		return FALSE;
 
-	      if (bfd_get_8 (abfd, contents + offset + 9) != 0x90)
+	      indirect_call = call[0] == 0xff;
+	      if (!(reg == 3 && call[0] == 0xe8 && call[5] == 0x90)
+		  && !(call[0] == 0x67 && call[1] == 0xe8)
+		  && !(indirect_call
+		       && (call[1] & 0xf8) == 0x90
+		       && (call[1] & 0x7) == reg))
 		return FALSE;
 	    }
 	}
       else
 	{
 	  /* Check transition from LD access model.  Only
-		leal foo@tlsgd(%reg), %eax; call ___tls_get_addr
+		leal foo@tlsldm(%ebx), %eax
+		call ___tls_get_addr@PLT
+	     or
+		leal foo@tlsldm(%reg), %eax
+		call *___tls_get_addr@GOT(%reg)
+		which may be converted to
+		addr32 call ___tls_get_addr
 	     can transit to different access model.  */
 	  if (type != 0x8d || (offset + 9) > sec->size)
 	    return FALSE;
 
-	  val = bfd_get_8 (abfd, contents + offset - 1);
-	  if ((val & 0xf8) != 0x80 || (val & 7) == 4)
+	  /* %eax can't be used as the GOT base register since it is
+	     used to pass parameter to ___tls_get_addr.  */
+	  reg = val & 7;
+	  if ((val & 0xf8) != 0x80 || reg == 4 || reg == 0)
+	    return FALSE;
+
+	  indirect_call = call[0] == 0xff;
+	  if (!(reg == 3 && call[0] == 0xe8)
+	      && !(call[0] == 0x67 && call[1] == 0xe8)
+	      && !(indirect_call
+		   && (call[1] & 0xf8) == 0x90
+		   && (call[1] & 0x7) == reg))
 	    return FALSE;
 	}
-
-      if (bfd_get_8 (abfd, contents + offset + 4) != 0xe8)
-	return FALSE;
 
       r_symndx = ELF32_R_SYM (rel[1].r_info);
       if (r_symndx < symtab_hdr->sh_info)
 	return FALSE;
 
+      tls_get_addr = FALSE;
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      /* Use strncmp to check ___tls_get_addr since ___tls_get_addr
-	 may be versioned.  */
-      return (h != NULL
-	      && h->root.root.string != NULL
-	      && (ELF32_R_TYPE (rel[1].r_info) == R_386_PC32
-		  || ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32)
-	      && (strncmp (h->root.root.string, "___tls_get_addr",
-			   15) == 0));
+      if (h != NULL && h->root.root.string != NULL)
+	{
+	  struct elf_i386_link_hash_entry *eh
+	    = (struct elf_i386_link_hash_entry *) h;
+	  tls_get_addr = eh->tls_get_addr == 1;
+	  if (eh->tls_get_addr > 1)
+	    {
+	      /* Use strncmp to check ___tls_get_addr since
+		 ___tls_get_addr may be versioned.  */
+	      if (strncmp (h->root.root.string, "___tls_get_addr", 15)
+		  == 0)
+		{
+		  eh->tls_get_addr = 1;
+		  tls_get_addr = TRUE;
+		}
+	      else
+		eh->tls_get_addr = 0;
+	    }
+	}
+
+      if (!tls_get_addr)
+	return FALSE;
+      else if (indirect_call)
+	return (ELF32_R_TYPE (rel[1].r_info) == R_386_GOT32X);
+      else
+	return (ELF32_R_TYPE (rel[1].r_info) == R_386_PC32
+		|| ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
 
     case R_386_TLS_IE:
       /* Check transition from IE access model:
@@ -1353,13 +1422,13 @@ elf_i386_check_tls_transition (asection *sec,
 
     case R_386_TLS_DESC_CALL:
       /* Check transition from GDesc access model:
-		call *x@tlsdesc(%rax)
+		call *x@tlsdesc(%eax)
        */
       if (offset + 2 <= sec->size)
 	{
-	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
-	  static const unsigned char call[] = { 0xff, 0x10 };
-	  return memcmp (contents + offset, call, 2) == 0;
+	  /* Make sure that it's a call *x@tlsdesc(%eax).  */
+	  call = contents + offset;
+	  return call[0] == 0xff && call[1] == 0x10;
 	}
 
       return FALSE;
@@ -1632,17 +1701,30 @@ convert_branch:
 	  /* Convert R_386_GOT32X to R_386_PC32.  */
 	  if (modrm == 0x15 || (modrm & 0xf8) == 0x90)
 	    {
+	      struct elf_i386_link_hash_entry *eh
+		= (struct elf_i386_link_hash_entry *) h;
+
 	      /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
 		 is a nop prefix.  */
 	      modrm = 0xe8;
-	      nop = link_info->call_nop_byte;
-	      if (link_info->call_nop_as_suffix)
+	      /* To support TLS optimization, always use addr32 prefix
+		 for "call *___tls_get_addr@GOT(%reg)".  */
+	      if (eh && eh->tls_get_addr == 1)
 		{
-		  nop_offset = roff + 3;
-		  irel->r_offset -= 1;
+		  nop = 0x67;
+		  nop_offset = irel->r_offset - 2;
 		}
 	      else
-		nop_offset = roff - 2;
+		{
+		  nop = link_info->call_nop_byte;
+		  if (link_info->call_nop_as_suffix)
+		    {
+		      nop_offset = roff + 3;
+		      irel->r_offset -= 1;
+		    }
+		  else
+		    nop_offset = roff - 2;
+		}
 	    }
 	  else
 	    {
@@ -4126,10 +4208,38 @@ r_386_got32:
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = htab->elf.sgot->output_section->vma
-		       + htab->elf.sgot->output_offset + off
-		       - htab->elf.sgotplt->output_section->vma
-		       - htab->elf.sgotplt->output_offset;
+	  relocation = (htab->elf.sgot->output_section->vma
+			+ htab->elf.sgot->output_offset + off);
+	  if ((*(contents + rel->r_offset - 1) & 0xc7) == 0x5)
+	    {
+	      if (bfd_link_pic (info))
+		{
+		  /* For PIC, disallow R_386_GOT32 without a base
+		     register since we don't know what the GOT base
+		     is.  */
+		  const char *name;
+
+		  if (h == NULL)
+		    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+					     NULL);
+		  else
+		    name = h->root.root.string;
+
+		  (*_bfd_error_handler)
+		    (_("%B: direct GOT relocation R_386_GOT32 against `%s' without base register can not be used when making a shared object"),
+		     input_bfd, name);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+	    }
+	  else
+	    {
+	      /* Subtract the .got.plt section address only with a base
+		 register.  */
+	      relocation -= (htab->elf.sgotplt->output_section->vma
+			     + htab->elf.sgotplt->output_offset);
+	    }
+
 	  break;
 
 	case R_386_GOTOFF:
@@ -4372,30 +4482,39 @@ r_386_got32:
 		  bfd_vma roff;
 
 		  /* GD->LE transition.  */
-		  type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
+		  type = *(contents + rel->r_offset - 2);
 		  if (type == 0x04)
 		    {
-		      /* leal foo(,%reg,1), %eax; call ___tls_get_addr
-			 Change it into:
-			 movl %gs:0, %eax; subl $foo@tpoff, %eax
+		      /* Change
+				leal foo@tlsgd(,%ebx,1), %eax
+				call ___tls_get_addr@PLT
+			 into:
+				movl %gs:0, %eax
+				subl $foo@tpoff, %eax
 			 (6 byte form of subl).  */
-		      memcpy (contents + rel->r_offset - 3,
-			      "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
 		      roff = rel->r_offset + 5;
 		    }
 		  else
 		    {
-		      /* leal foo(%reg), %eax; call ___tls_get_addr; nop
-			 Change it into:
-			 movl %gs:0, %eax; subl $foo@tpoff, %eax
+		      /* Change
+				leal foo@tlsgd(%ebx), %eax
+				call ___tls_get_addr@PLT
+				nop
+			 or
+				leal foo@tlsgd(%reg), %eax
+				call *___tls_get_addr@GOT(%reg)
+				which may be converted to
+				addr32 call ___tls_get_addr
+			 into:
+				movl %gs:0, %eax; subl $foo@tpoff, %eax
 			 (6 byte form of subl).  */
-		      memcpy (contents + rel->r_offset - 2,
-			      "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
 		      roff = rel->r_offset + 6;
 		    }
+		  memcpy (contents + roff - 8,
+			  "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
 		  bfd_put_32 (output_bfd, elf_i386_tpoff (info, relocation),
 			      contents + roff);
-		  /* Skip R_386_PC32/R_386_PLT32.  */
+		  /* Skip R_386_PC32, R_386_PLT32 and R_386_GOT32X.  */
 		  rel++;
 		  wrel++;
 		  continue;
@@ -4702,21 +4821,33 @@ r_386_got32:
 	      bfd_vma roff;
 
 	      /* GD->IE transition.  */
-	      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
-	      val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
+	      type = *(contents + rel->r_offset - 2);
+	      val = *(contents + rel->r_offset - 1);
 	      if (type == 0x04)
 		{
-		  /* leal foo(,%reg,1), %eax; call ___tls_get_addr
-		     Change it into:
-		     movl %gs:0, %eax; subl $foo@gottpoff(%reg), %eax.  */
+		  /* Change
+			leal foo@tlsgd(,%ebx,1), %eax
+			call ___tls_get_addr@PLT
+		     into:
+			movl %gs:0, %eax
+			subl $foo@gottpoff(%ebx), %eax.  */
 		  val >>= 3;
 		  roff = rel->r_offset - 3;
 		}
 	      else
 		{
-		  /* leal foo(%reg), %eax; call ___tls_get_addr; nop
-		     Change it into:
-		     movl %gs:0, %eax; subl $foo@gottpoff(%reg), %eax.  */
+		  /* Change
+			leal foo@tlsgd(%ebx), %eax
+			call ___tls_get_addr@PLT
+			nop
+		     or
+			leal foo@tlsgd(%reg), %eax
+			call *___tls_get_addr@GOT(%reg)
+			which may be converted to
+			addr32 call ___tls_get_addr
+		     into:
+			movl %gs:0, %eax;
+			subl $foo@gottpoff(%reg), %eax.  */
 		  roff = rel->r_offset - 2;
 		}
 	      memcpy (contents + roff,
@@ -4735,7 +4866,7 @@ r_386_got32:
 			  - htab->elf.sgotplt->output_section->vma
 			  - htab->elf.sgotplt->output_offset,
 			  contents + roff + 8);
-	      /* Skip R_386_PLT32.  */
+	      /* Skip R_386_PLT32 and R_386_GOT32X.  */
 	      rel++;
 	      wrel++;
 	      continue;
@@ -4826,13 +4957,29 @@ r_386_got32:
 
 	  if (r_type != R_386_TLS_LDM)
 	    {
-	      /* LD->LE transition:
-		 leal foo(%reg), %eax; call ___tls_get_addr.
-		 We change it into:
-		 movl %gs:0, %eax; nop; leal 0(%esi,1), %esi.  */
+	      /* LD->LE transition.  Change
+			leal foo@tlsldm(%ebx) %eax
+			call ___tls_get_addr@PLT
+		 into:
+			movl %gs:0, %eax
+			nop
+			leal 0(%esi,1), %esi
+		 or change
+			leal foo@tlsldm(%reg) %eax
+			call *___tls_get_addr@GOT(%reg)
+			which may be converted to
+			addr32 call ___tls_get_addr
+		 into:
+			movl %gs:0, %eax
+			leal 0(%esi), %esi  */
 	      BFD_ASSERT (r_type == R_386_TLS_LE_32);
-	      memcpy (contents + rel->r_offset - 2,
-		      "\x65\xa1\0\0\0\0\x90\x8d\x74\x26", 11);
+	      if (*(contents + rel->r_offset + 4) == 0xff
+		  || *(contents + rel->r_offset + 4) == 0x67)
+		memcpy (contents + rel->r_offset - 2,
+			"\x65\xa1\0\0\0\0\x8d\xb6\0\0\0", 12);
+	      else
+		memcpy (contents + rel->r_offset - 2,
+			"\x65\xa1\0\0\0\0\x90\x8d\x74\x26", 11);
 	      /* Skip R_386_PC32/R_386_PLT32.  */
 	      rel++;
 	      wrel++;

@@ -206,6 +206,7 @@ record_btrace_open (const char *args, int from_tty)
 {
   struct cleanup *disable_chain;
   struct thread_info *tp;
+  const char *format;
 
   DEBUG ("open");
 
@@ -234,7 +235,8 @@ record_btrace_open (const char *args, int from_tty)
 				  NULL);
   record_btrace_generating_corefile = 0;
 
-  observer_notify_record_changed (current_inferior (),  1);
+  format = btrace_format_short_string (record_btrace_conf.format);
+  observer_notify_record_changed (current_inferior (), 1, "btrace", format);
 
   discard_cleanups (disable_chain);
 }

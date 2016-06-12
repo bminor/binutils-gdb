@@ -406,6 +406,8 @@ enum SHT
   SHT_MIPS_REGINFO = 0x70000006,
   // Section contains miscellaneous options.
   SHT_MIPS_OPTIONS = 0x7000000d,
+  // ABI related flags section.
+  SHT_MIPS_ABIFLAGS = 0x7000002a,
 
   // AARCH64-specific section type.
   SHT_AARCH64_ATTRIBUTES = 0x70000003,

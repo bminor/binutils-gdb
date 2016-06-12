@@ -1,3 +1,24 @@
+2016-06-10  Tom Tromey  <tom@tromey.com>
+
+	PR rust/20110:
+	* gdb.rust/expr.exp: Add test for integer constant larger than
+	i32.
+
+2016-06-10  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/nested-funcs.exp: New.
+	* gdb.fortran/nested-funcs.f90: New.
+
+2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
+
+	* gdb.base/examine-backward.c: New file.
+	* gdb.base/examine-backward.exp: New file.
+
+2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-record-changed.exp: Adjust =record-started output
+	matching.
+
 2016-06-02  Tom Tromey  <tom@tromey.com>
 
 	PR python/18984:

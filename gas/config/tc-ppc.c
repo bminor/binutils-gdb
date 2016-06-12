@@ -1048,18 +1048,6 @@ static segT ppc_current_section;
 
 #ifdef OBJ_ELF
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
-#define PPC_APUINFO_ISEL	0x40
-#define PPC_APUINFO_PMR		0x41
-#define PPC_APUINFO_RFMCI	0x42
-#define PPC_APUINFO_CACHELCK	0x43
-#define PPC_APUINFO_SPE		0x100
-#define PPC_APUINFO_EFS		0x101
-#define PPC_APUINFO_BRLOCK	0x102
-#define PPC_APUINFO_VLE		0x104
-
-/*
- * We keep a list of APUinfo
- */
 unsigned long *ppc_apuinfo_list;
 unsigned int ppc_apuinfo_num;
 unsigned int ppc_apuinfo_num_alloc;
@@ -1563,6 +1551,18 @@ ppc_setup_opcodes (void)
 		  bad_insn = TRUE;
 		}
 	    }
+	  if ((op->flags & PPC_OPCODE_VLE) != 0)
+	    {
+	      as_bad (_("%s is enabled by vle flag"), op->name);
+	      bad_insn = TRUE;
+	    }
+	  if (PPC_OP (op->opcode) != 4
+	      && PPC_OP (op->opcode) != 31
+	      && (op->deprecated & PPC_OPCODE_VLE) == 0)
+	    {
+	      as_bad (_("%s not disabled by vle flag"), op->name);
+	      bad_insn = TRUE;
+	    }
 	  bad_insn |= insn_validate (op);
 	}
 
@@ -1633,10 +1633,6 @@ ppc_setup_opcodes (void)
 	    }
 	}
     }
-
-  if ((ppc_cpu & PPC_OPCODE_VLE) != 0)
-    for (op = vle_opcodes; op < op_end; op++)
-      hash_insert (ppc_hash, op->name, (void *) op);
 
   /* Insert the macros into a hash table.  */
   ppc_macro_hash = hash_new ();
@@ -1736,7 +1732,7 @@ ppc_cleanup (void)
     unsigned int i;
 
     /* Create the .PPC.EMB.apuinfo section.  */
-    apuinfo_secp = subseg_new (".PPC.EMB.apuinfo", 0);
+    apuinfo_secp = subseg_new (APUINFO_SECTION_NAME, 0);
     bfd_set_section_flags (stdoutput,
 			   apuinfo_secp,
 			   SEC_HAS_CONTENTS | SEC_READONLY);
@@ -1751,7 +1747,7 @@ ppc_cleanup (void)
     md_number_to_chars (p, (valueT) 2, 4);
 
     p = frag_more (8);
-    strcpy (p, "APUinfo");
+    strcpy (p, APUINFO_LABEL);
 
     for (i = 0; i < ppc_apuinfo_num; i++)
       {

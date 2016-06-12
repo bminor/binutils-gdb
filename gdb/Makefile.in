@@ -1075,7 +1075,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	gnu-v2-abi.o gnu-v3-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o d-namespace.o \
 	reggroups.o \
-	rust-exp.o rust-lang.o \
+	rust-lang.o \
 	trad-frame.o \
 	tramp-frame.o \
 	solib.o solib-target.o \
@@ -1108,12 +1108,12 @@ YYFILES = c-exp.c \
 	ada-lex.c \
 	ada-exp.c \
 	jv-exp.c \
-	d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c
+	d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
 YYOBJ = c-exp.o \
 	cp-name-parser.o \
 	ada-exp.o \
 	jv-exp.o \
-	d-exp.o f-exp.o go-exp.o m2-exp.o p-exp.o
+	d-exp.o f-exp.o go-exp.o m2-exp.o p-exp.o rust-exp.o
 
 # Things which need to be built when making a distribution.
 
@@ -1485,7 +1485,7 @@ local-maintainer-clean:
 		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
 		jv-exp.tab \
-		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c
+		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)
 	rm -f nm.h config.status

@@ -2196,13 +2196,93 @@ ppc_elf_mkobject (bfd *abfd)
 				  PPC32_ELF_DATA);
 }
 
+/* When defaulting arch/mach, decode apuinfo to find a better match.  */
+
+bfd_boolean
+_bfd_elf_ppc_set_arch (bfd *abfd)
+{
+  unsigned long mach = 0;
+  asection *s;
+  unsigned char *contents;
+
+  if (abfd->arch_info->bits_per_word == 32
+      && bfd_big_endian (abfd))
+    {
+
+      for (s = abfd->sections; s != NULL; s = s->next)
+	if ((elf_section_data (s)->this_hdr.sh_flags & SHF_PPC_VLE) != 0)
+	  break;
+      if (s != NULL)
+	mach = bfd_mach_ppc_vle;
+    }
+
+  if (mach == 0)
+    {
+      s = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
+      if (s != NULL && bfd_malloc_and_get_section (abfd, s, &contents))
+	{
+	  unsigned int apuinfo_size = bfd_get_32 (abfd, contents + 4);
+	  unsigned int i;
+
+	  for (i = 20; i < apuinfo_size + 20 && i + 4 <= s->size; i += 4)
+	    {
+	      unsigned int val = bfd_get_32 (abfd, contents + i);
+	      switch (val >> 16)
+		{
+		case PPC_APUINFO_PMR:
+		case PPC_APUINFO_RFMCI:
+		  if (mach == 0)
+		    mach = bfd_mach_ppc_titan;
+		  break;
+
+		case PPC_APUINFO_ISEL:
+		case PPC_APUINFO_CACHELCK:
+		  if (mach == bfd_mach_ppc_titan)
+		    mach = bfd_mach_ppc_e500mc;
+		  break;
+
+		case PPC_APUINFO_SPE:
+		case PPC_APUINFO_EFS:
+		case PPC_APUINFO_BRLOCK:
+		  if (mach != bfd_mach_ppc_vle)
+		    mach = bfd_mach_ppc_e500;
+
+		case PPC_APUINFO_VLE:
+		  mach = bfd_mach_ppc_vle;
+		  break;
+
+		default:
+		  mach = -1ul;
+		}
+	    }
+	  free (contents);
+	}
+    }
+
+  if (mach != 0 && mach != -1ul)
+    {
+      const bfd_arch_info_type *arch;
+
+      for (arch = abfd->arch_info->next; arch; arch = arch->next)
+	if (arch->mach == mach)
+	  {
+	    abfd->arch_info = arch;
+	    break;
+	  }
+    }
+  return TRUE;
+}
+
 /* Fix bad default arch selected for a 32 bit input bfd when the
-   default is 64 bit.  */
+   default is 64 bit.  Also select arch based on apuinfo.  */
 
 static bfd_boolean
 ppc_elf_object_p (bfd *abfd)
 {
-  if (abfd->arch_info->the_default && abfd->arch_info->bits_per_word == 64)
+  if (!abfd->arch_info->the_default)
+    return TRUE;
+
+  if (abfd->arch_info->bits_per_word == 64)
     {
       Elf_Internal_Ehdr *i_ehdr = elf_elfheader (abfd);
 
@@ -2213,7 +2293,7 @@ ppc_elf_object_p (bfd *abfd)
 	  BFD_ASSERT (abfd->arch_info->bits_per_word == 32);
 	}
     }
-  return TRUE;
+  return _bfd_elf_ppc_set_arch (abfd);
 }
 
 /* Function to set whether a module needs the -mrelocatable bit set.  */
@@ -2519,16 +2599,16 @@ ppc_elf_modify_segment_map (bfd *abfd,
 
 static const struct bfd_elf_special_section ppc_elf_special_sections[] =
 {
-  { STRING_COMMA_LEN (".plt"),             0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
-  { STRING_COMMA_LEN (".sbss"),           -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".sbss2"),          -2, SHT_PROGBITS, SHF_ALLOC },
-  { STRING_COMMA_LEN (".sdata"),          -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".sdata2"),         -2, SHT_PROGBITS, SHF_ALLOC },
-  { STRING_COMMA_LEN (".tags"),            0, SHT_ORDERED,  SHF_ALLOC },
-  { STRING_COMMA_LEN (".PPC.EMB.apuinfo"), 0, SHT_NOTE,     0 },
-  { STRING_COMMA_LEN (".PPC.EMB.sbss0"),   0, SHT_PROGBITS, SHF_ALLOC },
-  { STRING_COMMA_LEN (".PPC.EMB.sdata0"),  0, SHT_PROGBITS, SHF_ALLOC },
-  { NULL,                              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".plt"), 0, SHT_NOBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".sbss"), -2, SHT_NOBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".sbss2"), -2, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".sdata"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".sdata2"), -2, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".tags"), 0, SHT_ORDERED, SHF_ALLOC },
+  { STRING_COMMA_LEN (APUINFO_SECTION_NAME), 0, SHT_NOTE, 0 },
+  { STRING_COMMA_LEN (".PPC.EMB.sbss0"), 0, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".PPC.EMB.sdata0"), 0, SHT_PROGBITS, SHF_ALLOC },
+  { NULL, 0, 0, 0, 0 }
 };
 
 /* This is what we want for new plt/got.  */
@@ -2636,9 +2716,6 @@ apuinfo_list_finish (void)
 
   head = NULL;
 }
-
-#define APUINFO_SECTION_NAME	".PPC.EMB.apuinfo"
-#define APUINFO_LABEL		"APUinfo"
 
 /* Scan the input BFDs and create a linked list of
    the APUinfo values that will need to be emitted.  */
