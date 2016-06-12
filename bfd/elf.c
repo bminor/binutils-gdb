@@ -9663,6 +9663,20 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
       else
 	return TRUE;
 
+    case NT_FREEBSD_PROCSTAT_AUXV:
+      {
+	asection *sect = bfd_make_section_anyway_with_flags (abfd, ".auxv",
+							     SEC_HAS_CONTENTS);
+
+	if (sect == NULL)
+	  return FALSE;
+	sect->size = note->descsz - 4;
+	sect->filepos = note->descpos + 4;
+	sect->alignment_power = 1 + bfd_get_arch_size (abfd) / 32;
+
+	return TRUE;
+      }
+
     case NT_X86_XSTATE:
       if (note->namesz == 8)
 	return elfcore_grok_xstatereg (abfd, note);

@@ -1,5 +1,10 @@
 2016-06-24  John Baldwin  <jhb@FreeBSD.org>
 
+	* elf.c (elfcore_grok_freebsd_note): Handle NT_FREEBSD_PROCSTAT_AUXV
+	notes.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
 	* elf.c (elfcore_grok_note): Remove handling of NT_X86_XSTATE for
 	FreeBSD.  Remove case for NT_FREEBSD_THRMISC.
 	(elfcore_grok_freebsd_psinfo): New function.
