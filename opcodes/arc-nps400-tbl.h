@@ -503,6 +503,27 @@ HASH_P(3, 0xC)
 /* addf<.f> 0,limm,u6   0011111001100011F111uuuuuu111110 */
 { "addf", 0x3e63703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, UIMM6_20 }, { C_F }},
 
+/* ldbit<.x2|.x4>.di<.cl> a,[b]       00010bbb00000000SBBB10011XAAAAAA */
+{ "ldbit", 0x10000980, 0xf8ff8980, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, RB, BRAKETdup }, { C_NPS_LDBIT_X_1, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL1 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[b,s9]    00010bbbssssssssSBBB10011XAAAAAA */
+{ "ldbit", 0x10000980, 0xf8000980, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, RB, SIMM9_8, BRAKETdup }, { C_NPS_LDBIT_X_1, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL1 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[limm]    0001011000000000011110011XAAAAAA */
+{ "ldbit", 0x16007980, 0xfffff980, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, LIMM, BRAKETdup }, { C_NPS_LDBIT_X_1, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL1 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[limm,s9] 00010110ssssssssS11110011XAAAAAA */
+{ "ldbit", 0x16007980, 0xff007980, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, LIMM, SIMM9_8, BRAKETdup }, { C_NPS_LDBIT_X_1, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL1 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[b,c]     00100bbb0011011X1BBBCCCCCCAAAAAA */
+{ "ldbit", 0x20368000, 0xf83e8000, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, RB, RC, BRAKETdup }, { C_NPS_LDBIT_X_2, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL2 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[b,limm]  00100bbb0011011X1BBB111110AAAAAA */
+{ "ldbit", 0x20368f80, 0xf83e8fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, RB, LIMM, BRAKETdup }, { C_NPS_LDBIT_X_2, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL2 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[limm,c]  001001100011011X1111CCCCCCAAAAAA */
+{ "ldbit", 0x2636f000, 0xff3ef000, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, LIMM, RC, BRAKETdup }, { C_NPS_LDBIT_X_2, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL2 }},
+
 /****                  Pipeline Control Instructions                  ****/
 
 /* schd<.rw|.rd> */

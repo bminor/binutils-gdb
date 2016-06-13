@@ -208,3 +208,21 @@
         e4by            r0,r1,r2,0,0,0,4
         e4by            r7,r12,r13,1,2,3,4
         e4by            r20,r12,r13,7,7,7,7
+
+        .macro ldbit_test mnem
+        \mnem\()        r0,[r1]
+        \mnem\()        r0,[r1,1]
+        \mnem\()        r1,[r2,-1]
+        \mnem\()        r3,[0xffffffff,1]
+        \mnem\()        r4,[0x12345678]
+        \mnem\()        r5,[r6,r7]
+        \mnem\()        r8,[r9,0xffffffff]
+        \mnem\()        r10,[0xffffffff,r11]
+        .endm
+
+        ldbit_test ldbit.di
+        ldbit_test ldbit.di.cl
+        ldbit_test ldbit.x2.di
+        ldbit_test ldbit.x2.di.cl
+        ldbit_test ldbit.x4.di
+        ldbit_test ldbit.x4.di.cl

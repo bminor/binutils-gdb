@@ -1387,6 +1387,27 @@ const struct arc_flag_operand arc_flag_operands[] =
 
 #define F_NPS_P3      (F_NPS_P2 + 1)
   { "p3", 0, 0, 0, 1 },
+
+#define F_NPS_LDBIT_DI      (F_NPS_P3 + 1)
+  { "di", 0, 0, 0, 1 },
+
+#define F_NPS_LDBIT_CL1      (F_NPS_LDBIT_DI + 1)
+  { "cl", 1, 1, 6, 1 },
+
+#define F_NPS_LDBIT_CL2      (F_NPS_LDBIT_CL1 + 1)
+  { "cl", 1, 1, 16, 1 },
+
+#define F_NPS_LDBIT_X2_1      (F_NPS_LDBIT_CL2 + 1)
+  { "x2", 1, 2, 9, 1 },
+
+#define F_NPS_LDBIT_X2_2      (F_NPS_LDBIT_X2_1 + 1)
+  { "x2", 1, 2, 22, 1 },
+
+#define F_NPS_LDBIT_X4_1      (F_NPS_LDBIT_X2_2 + 1)
+  { "x4", 2, 2, 9, 1 },
+
+#define F_NPS_LDBIT_X4_2      (F_NPS_LDBIT_X4_1 + 1)
+  { "x4", 2, 2, 22, 1 },
 };
 
 const unsigned arc_num_flag_operands = ARRAY_SIZE (arc_flag_operands);
@@ -1511,6 +1532,21 @@ const struct arc_flag_class arc_flag_classes[] =
 
 #define C_NPS_P3    (C_NPS_P2 + 1)
   { F_CLASS_REQUIRED, { F_NPS_P3, F_NULL }},
+
+#define C_NPS_LDBIT_DI    (C_NPS_P3 + 1)
+  { F_CLASS_REQUIRED, { F_NPS_LDBIT_DI, F_NULL }},
+
+#define C_NPS_LDBIT_CL1    (C_NPS_LDBIT_DI + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_LDBIT_CL1, F_NULL }},
+
+#define C_NPS_LDBIT_CL2    (C_NPS_LDBIT_CL1 + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_LDBIT_CL2, F_NULL }},
+
+#define C_NPS_LDBIT_X_1    (C_NPS_LDBIT_CL2 + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_LDBIT_X2_1, F_NPS_LDBIT_X4_1, F_NULL }},
+
+#define C_NPS_LDBIT_X_2    (C_NPS_LDBIT_X_1 + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_LDBIT_X2_2, F_NPS_LDBIT_X4_2, F_NULL }},
 };
 
 const unsigned char flags_none[] = { 0 };

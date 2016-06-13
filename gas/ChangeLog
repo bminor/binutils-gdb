@@ -1,5 +1,10 @@
 2016-06-13  Graham Markall <graham.markall@embecosm.com>
 
+	* testsuite/gas/arc/nps400-6.s: Add tests of ldbit.
+	* testsuite/gas/arc/nps400-6.d: Likewise.
+
+2016-06-13  Graham Markall <graham.markall@embecosm.com>
+
 	* testsuite/gas/arc/nps400-6.s: Add tests of hash, tr, utf8, e4by, and
 	addf.
 	* testsuite/gas/arc/nps400-6.d: Likewise.
