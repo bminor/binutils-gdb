@@ -24,6 +24,7 @@
 #include "regcache.h"
 #include "regset.h"
 #include "gdbthread.h"
+#include "xml-syscall.h"
 
 #include "elf-bfd.h"
 #include "fbsd-tdep.h"
@@ -317,6 +318,22 @@ fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
   fprint_auxv_entry (file, name, description, format, type, val);
 }
 
+/* Implement the "get_syscall_number" gdbarch method.  */
+
+static LONGEST
+fbsd_get_syscall_number (struct gdbarch *gdbarch,
+			 ptid_t ptid)
+{
+
+  /* FreeBSD doesn't use gdbarch_get_syscall_number since FreeBSD
+     native targets fetch the system call number from the
+     'pl_syscall_code' member of struct ptrace_lwpinfo in fbsd_wait.
+     However, system call catching requires this function to be
+     set.  */
+
+  internal_error (__FILE__, __LINE__, _("fbsd_get_sycall_number called"));
+}
+
 /* To be called from GDB_OSABI_FREEBSD_ELF handlers. */
 
 void
@@ -326,4 +343,8 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_thread_name (gdbarch, fbsd_core_thread_name);
   set_gdbarch_make_corefile_notes (gdbarch, fbsd_make_corefile_notes);
   set_gdbarch_print_auxv_entry (gdbarch, fbsd_print_auxv_entry);
+
+  /* `catch syscall' */
+  set_xml_syscall_file_name (gdbarch, "syscalls/freebsd.xml");
+  set_gdbarch_get_syscall_number (gdbarch, fbsd_get_syscall_number);
 }

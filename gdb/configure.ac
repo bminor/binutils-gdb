@@ -1526,6 +1526,11 @@ fi
 AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_tdname], [], [],
                  [#include <sys/ptrace.h>])
 
+# See if <sys/ptrace.h> supports syscall fields on FreeBSD.  The
+# pl_syscall_code member of `struct ptrace_lwpinfo' was added in
+# FreeBSD 10.3.
+AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_syscall_code], [], [],
+                 [#include <sys/ptrace.h>])
 
 # Detect which type of /proc is in use, such as for Solaris.
 

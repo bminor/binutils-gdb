@@ -779,6 +779,40 @@ fbsd_wait (struct target_ops *ops,
 	      return wptid;
 	    }
 #endif
+
+	  /* Note that PL_FLAG_SCE is set for any event reported while
+	     a thread is executing a system call in the kernel.  In
+	     particular, signals that interrupt a sleep in a system
+	     call will report this flag as part of their event.  Stops
+	     explicitly for system call entry and exit always use
+	     SIGTRAP, so only treat SIGTRAP events as system call
+	     entry/exit events.  */
+	  if (pl.pl_flags & (PL_FLAG_SCE | PL_FLAG_SCX)
+	      && ourstatus->value.sig == SIGTRAP)
+	    {
+#ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
+	      if (catch_syscall_enabled ())
+		{
+		  if (catching_syscall_number (pl.pl_syscall_code))
+		    {
+		      if (pl.pl_flags & PL_FLAG_SCE)
+			ourstatus->kind = TARGET_WAITKIND_SYSCALL_ENTRY;
+		      else
+			ourstatus->kind = TARGET_WAITKIND_SYSCALL_RETURN;
+		      ourstatus->value.syscall_number = pl.pl_syscall_code;
+		      return wptid;
+		    }
+		}
+#endif
+	      /* If the core isn't interested in this event, just
+		 continue the process explicitly and wait for another
+		 event.  Note that PT_SYSCALL is "sticky" on FreeBSD
+		 and once system call stops are enabled on a process
+		 it stops for all system call entries and exits.  */
+	      if (ptrace (PT_CONTINUE, pid, (caddr_t) 1, 0) == -1)
+		perror_with_name (("ptrace"));
+	      continue;
+	    }
 	}
       return wptid;
     }
@@ -889,6 +923,19 @@ fbsd_remove_exec_catchpoint (struct target_ops *self, int pid)
   return 0;
 }
 #endif
+
+#ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
+static int
+fbsd_set_syscall_catchpoint (struct target_ops *self, int pid, int needed,
+			     int any_count, int table_size, int *table)
+{
+
+  /* Ignore the arguments.  inf-ptrace.c will use PT_SYSCALL which
+     will catch all system call entries and exits.  The system calls
+     are filtered by GDB rather than the kernel.  */
+  return 0;
+}
+#endif
 #endif
 
 void
@@ -924,6 +971,9 @@ fbsd_nat_add_target (struct target_ops *t)
 #ifdef PL_FLAG_EXEC
   t->to_insert_exec_catchpoint = fbsd_insert_exec_catchpoint;
   t->to_remove_exec_catchpoint = fbsd_remove_exec_catchpoint;
+#endif
+#ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
+  t->to_set_syscall_catchpoint = fbsd_set_syscall_catchpoint;
 #endif
 #endif
   add_target (t);

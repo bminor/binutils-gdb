@@ -1,5 +1,23 @@
 2016-06-24  John Baldwin  <jhb@FreeBSD.org>
 
+	* configure.ac: Check for support for system call LWP fields on
+	FreeBSD.
+	* config.in, configure: Rebuild.
+	* data-directory/Makefile.in (SYSCALLS_FILES): Add freebsd.xml.
+	* fbsd-nat.c (fbsd_wait) [HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE]:
+	Report system call events.
+	[HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE]
+	(fbsd_set_syscall_catchpoint): New function.
+	(fbsd_nat_add_target) [HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE]:
+	Set "to_set_syscall_catchpoint" to "fbsd_set_syscall_catchpoint".
+	* fbsd-tdep.c: Include xml-syscall.h
+	(fbsd_get_syscall_number): New function.
+	(fbsd_init_abi): Set XML system call file name.
+	Add "get_syscall_number" gdbarch method.
+	* syscalls/freebsd.xml: New file.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c: Include "auxv.h".
 	(fbsd_print_auxv_entry): New function.
 	(fbsd_init_abi): Install gdbarch "print_auxv_entry" method.
