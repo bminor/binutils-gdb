@@ -1,3 +1,7 @@
+2016-06-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-mips.c (elf_mips_gnu_pcrel32): Update comment.
+
 2016-06-13  Cupertino Miranda  <cmiranda@synospsy.com>
 
 	* elf32-arc.c (elf_arc_relocate_section): Fixed condition.
