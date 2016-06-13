@@ -1,5 +1,10 @@
 2016-08-03  Tom Tromey  <tom@tromey.com>
 
+	PR python/18565:
+	* python/py-frame.c (frapy_function): Use find_frame_funname.
+
+2016-08-03  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (find_frame_funname): Avoid any possible leak in case
 	cp_remove_params can throw.
 
