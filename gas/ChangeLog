@@ -1,3 +1,13 @@
+2016-06-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c: For non-ELF based targets skip ARM feature sets
+	that are not supported.
+
+	* config/tc-arc.c (md_apply_fix): Avoid left shifting a signed
+	constant.
+	* config/tc-cr16.c (check_range): Likewise.
+	* config/tc-nios2.c (nios2_check_overflow): Likewise.
+
 2016-06-08  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (print_operands): Substitute size.

@@ -1128,7 +1128,7 @@ nios2_check_overflow (valueT fixup, reloc_howto_type *howto)
       if ((fixup & 0x80000000) > 0)
 	{
 	  /* Check for negative overflow.  */
-	  if ((signed) fixup < ((signed) ~0 << (howto->bitsize-1)))
+	  if ((signed) fixup < (signed) (~0U << (howto->bitsize - 1)))
 	    return TRUE;
 	}
       else
