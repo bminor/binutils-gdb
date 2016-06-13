@@ -1,3 +1,9 @@
+2016-06-13  Virendra Pathak  <virendra.pathak@broadcom.com>
+
+        * config/tc-aarch64.c (aarch64_cpus): Add Broadcom Vulcan.
+        * doc/c-aarch64.texi: Document that vulcan is a valid processor
+	name.
+
 2016-06-13  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c: For non-ELF based targets skip ARM feature sets

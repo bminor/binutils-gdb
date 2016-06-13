@@ -7765,6 +7765,9 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
    "Cavium ThunderX"},
+  {"vulcan", AARCH64_FEATURE (AARCH64_ARCH_V8,
+			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+  "Broadcom Vulcan"},
   /* The 'xgene-1' name is an older name for 'xgene1', which was used
      in earlier releases and is superseded by 'xgene1' in all
      tools.  */
