@@ -1,3 +1,22 @@
+2016-06-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_fix_adjustable): Don't convert RELA
+	JALR relocations on R6.
+	* testsuite/gas/mips/jal-svr4pic-local.d: New test.
+	* testsuite/gas/mips/mips1@jal-svr4pic-local.d: New test.
+	* testsuite/gas/mips/r3000@jal-svr4pic-local.d: New test.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local.d: New test.
+	* testsuite/gas/mips/jal-svr4pic-local-n32.d: New test.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local-n32.d: New
+	test.
+	* testsuite/gas/mips/jal-svr4pic-local-n64.d: New test.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local-n64.d: New
+	test.
+	* testsuite/gas/mips/jal-svr4pic-local.s: New test source.
+	* testsuite/gas/mips/jal-svr4pic-local-newabi.s: New test
+	source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-06-13  Virendra Pathak  <virendra.pathak@broadcom.com>
 
         * config/tc-aarch64.c (aarch64_cpus): Add Broadcom Vulcan.
