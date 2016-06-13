@@ -1,6 +1,22 @@
 2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* elf32-i386.c (elf_i386_relocate_section): Add the .got.plt
+	section address for R_386_GOT32/R_386_GOT32X relocations against
+	IFUNC symbols if there is no base register and return error for
+	PIC.
+
+	2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Simplify IFUNC
+	GOT32 adjustment for static executables.
+
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
 	2016-06-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20244
