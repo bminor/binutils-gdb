@@ -63,6 +63,7 @@ on the target processor.  The following processor names are recognized:
 @code{exynos-m1},
 @code{qdf24xx},
 @code{thunderx},
+@code{vulcan},
 @code{xgene1}
 and
 @code{xgene2}.

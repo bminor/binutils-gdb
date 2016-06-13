@@ -588,14 +588,10 @@ gdb_test "ptype foo" "type = char" "ptype foo typedef after second list of charf
 # requires a running process.  These call malloc, and can take a long
 # time to execute over a slow serial link, so increase the timeout.
 
-# UDI can't do this (PR 2416).  XFAIL is not suitable, because attempting
-# the operation causes a slow painful death rather than a nice simple failure.
-
 if [runto_main] then {
 
   if [target_info exists gdb,cannot_call_functions] {
-    setup_xfail "*-*-*" 2416
-    fail "This target can not call functions"
+    unsupported "This target can not call functions"
     continue
   }
 

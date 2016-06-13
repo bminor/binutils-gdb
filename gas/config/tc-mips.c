@@ -17126,16 +17126,18 @@ mips_fix_adjustable (fixS *fixp)
       && (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE) != 0)
     return 0;
 
-  /* There is no place to store an in-place offset for JALR relocations.
-     Likewise an in-range offset of limited PC-relative relocations may
+  /* There is no place to store an in-place offset for JALR relocations.  */
+  if (jalr_reloc_p (fixp->fx_r_type) && HAVE_IN_PLACE_ADDENDS)
+    return 0;
+
+  /* Likewise an in-range offset of limited PC-relative relocations may
      overflow the in-place relocatable field if recalculated against the
      start address of the symbol's containing section.
 
      Also, PC relative relocations for MIPS R6 need to be symbol rather than
      section relative to allow linker relaxations to be performed later on.  */
-  if ((HAVE_IN_PLACE_ADDENDS || ISA_IS_R6 (mips_opts.isa))
-      && (limited_pcrel_reloc_p (fixp->fx_r_type)
-	  || jalr_reloc_p (fixp->fx_r_type)))
+  if (limited_pcrel_reloc_p (fixp->fx_r_type)
+      && (HAVE_IN_PLACE_ADDENDS || ISA_IS_R6 (mips_opts.isa)))
     return 0;
 
   /* R_MIPS16_26 relocations against non-MIPS16 functions might resolve

@@ -683,8 +683,7 @@ proc test_print_string_constants {} {
     gdb_test_no_output "set print elements 50"
 
     if [target_info exists gdb,cannot_call_functions] {
-	setup_xfail "*-*-*" 2416
-	fail "This target can not call functions"
+	unsupported "This target can not call functions"
 	return
     }
 
@@ -707,8 +706,7 @@ proc test_print_string_constants {} {
 proc test_print_array_constants {} {
 
     if [target_info exists gdb,cannot_call_functions] {
-	setup_xfail "*-*-*" 2416
-	fail "This target can not call functions"
+	unsupported "This target can not call functions"
 	return
     }
 

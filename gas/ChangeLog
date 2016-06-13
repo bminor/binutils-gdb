@@ -1,3 +1,38 @@
+2016-06-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_fix_adjustable): Don't convert RELA
+	JALR relocations on R6.
+	* testsuite/gas/mips/jal-svr4pic-local.d: New test.
+	* testsuite/gas/mips/mips1@jal-svr4pic-local.d: New test.
+	* testsuite/gas/mips/r3000@jal-svr4pic-local.d: New test.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local.d: New test.
+	* testsuite/gas/mips/jal-svr4pic-local-n32.d: New test.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local-n32.d: New
+	test.
+	* testsuite/gas/mips/jal-svr4pic-local-n64.d: New test.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local-n64.d: New
+	test.
+	* testsuite/gas/mips/jal-svr4pic-local.s: New test source.
+	* testsuite/gas/mips/jal-svr4pic-local-newabi.s: New test
+	source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-06-13  Virendra Pathak  <virendra.pathak@broadcom.com>
+
+        * config/tc-aarch64.c (aarch64_cpus): Add Broadcom Vulcan.
+        * doc/c-aarch64.texi: Document that vulcan is a valid processor
+	name.
+
+2016-06-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c: For non-ELF based targets skip ARM feature sets
+	that are not supported.
+
+	* config/tc-arc.c (md_apply_fix): Avoid left shifting a signed
+	constant.
+	* config/tc-cr16.c (check_range): Likewise.
+	* config/tc-nios2.c (nios2_check_overflow): Likewise.
+
 2016-06-08  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (print_operands): Substitute size.

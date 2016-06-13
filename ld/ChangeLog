@@ -1,3 +1,32 @@
+2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* testsuite/ld-i386/i386.exp: Run pr20244-2a, pr20244-2b,
+	pr20244-2c and pr20244-2d.
+	* testsuite/ld-i386/no-plt.exp: Run pr20244-3a and pr20244-3b.
+	* testsuite/ld-i386/pr20244-2.s: New file.
+	* testsuite/ld-i386/pr20244-2a.d: Likewise.
+	* testsuite/ld-i386/pr20244-2b.d: Likewise.
+	* testsuite/ld-i386/pr20244-2c.d: Likewise.
+	* testsuite/ld-i386/pr20244-2d.d: Likewise.
+	* testsuite/ld-i386/pr20244-3a.c: Likewise.
+	* testsuite/ld-i386/pr20244-3b.S: Likewise.
+	* testsuite/ld-i386/pr20244-3c.S: Likewise.
+	* testsuite/ld-i386/pr20244-3d.S: Likewise.
+
+2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run ifunc-1a and ifunc-1b.
+	* testsuite/ld-i386/ifunc-1a.c: New file.
+	* testsuite/ld-i386/ifunc-1b.S: Likewise.
+	* testsuite/ld-i386/ifunc-1c.S: Likewise.
+	* testsuite/ld-i386/ifunc-1d.S: Likewise.
+
+2016-06-13  Cupertino Miranda  <cmiranda@synospsy.com>
+
+	* testsuite/ld-srec/srec.exp: Changed to XFAIL on both little and
+	big endian ARC targets.
+
 2016-06-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/libno-plt-1b.dd: Updated for x32.

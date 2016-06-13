@@ -161,7 +161,9 @@ static const arm_feature_set fpu_arch_vfp_v3 ATTRIBUTE_UNUSED = FPU_ARCH_VFP_V3;
 static const arm_feature_set fpu_arch_neon_v1 ATTRIBUTE_UNUSED = FPU_ARCH_NEON_V1;
 static const arm_feature_set fpu_arch_fpa = FPU_ARCH_FPA;
 static const arm_feature_set fpu_any_hard = FPU_ANY_HARD;
+#ifdef OBJ_ELF
 static const arm_feature_set fpu_arch_maverick = FPU_ARCH_MAVERICK;
+#endif
 static const arm_feature_set fpu_endian_pure = FPU_ARCH_ENDIAN_PURE;
 
 #ifdef CPU_DEFAULT
@@ -198,7 +200,9 @@ static const arm_feature_set arm_ext_div = ARM_FEATURE_CORE_LOW (ARM_EXT_DIV);
 static const arm_feature_set arm_ext_v7 = ARM_FEATURE_CORE_LOW (ARM_EXT_V7);
 static const arm_feature_set arm_ext_v7a = ARM_FEATURE_CORE_LOW (ARM_EXT_V7A);
 static const arm_feature_set arm_ext_v7r = ARM_FEATURE_CORE_LOW (ARM_EXT_V7R);
+#ifdef OBJ_ELF
 static const arm_feature_set arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
+#endif
 static const arm_feature_set arm_ext_v8 = ARM_FEATURE_CORE_LOW (ARM_EXT_V8);
 static const arm_feature_set arm_ext_m =
   ARM_FEATURE_CORE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M,
@@ -220,9 +224,11 @@ static const arm_feature_set arm_ext_v6t2_v8m =
 /* Instructions shared between ARMv8-A and ARMv8-M.  */
 static const arm_feature_set arm_ext_atomics =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_ATOMICS);
+#ifdef OBJ_ELF
 /* DSP instructions Tag_DSP_extension refers to.  */
 static const arm_feature_set arm_ext_dsp =
   ARM_FEATURE_CORE_LOW (ARM_EXT_V5E | ARM_EXT_V5ExP | ARM_EXT_V6_DSP);
+#endif
 static const arm_feature_set arm_ext_ras =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_RAS);
 /* FP16 instructions.  */
@@ -233,7 +239,9 @@ static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full ATTRIBUTE_UNUSED = ARM_FEATURE (-1, -1, -1);
 static const arm_feature_set arm_arch_t2 = ARM_ARCH_THUMB2;
 static const arm_feature_set arm_arch_none = ARM_ARCH_NONE;
+#ifdef OBJ_ELF
 static const arm_feature_set arm_arch_v6m_only = ARM_ARCH_V6M_ONLY;
+#endif
 
 static const arm_feature_set arm_cext_iwmmxt2 =
   ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2);
@@ -263,10 +271,12 @@ static const arm_feature_set fpu_neon_ext_v1 =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_V1);
 static const arm_feature_set fpu_vfp_v3_or_neon_ext =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
+#ifdef OBJ_ELF
 static const arm_feature_set fpu_vfp_fp16 =
   ARM_FEATURE_COPROC (FPU_VFP_EXT_FP16);
 static const arm_feature_set fpu_neon_ext_fma =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_FMA);
+#endif
 static const arm_feature_set fpu_vfp_ext_fma =
   ARM_FEATURE_COPROC (FPU_VFP_EXT_FMA);
 static const arm_feature_set fpu_vfp_ext_armv8 =

@@ -70,20 +70,6 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
   }
 
-struct arc_local_data
-{
-  bfd_vma	  sdata_begin_symbol_vma;
-  asection *      sdata_output_section;
-  bfd_vma	  got_symbol_vma;
-};
-
-struct arc_local_data global_arc_data =
-{
-  .sdata_begin_symbol_vma = 0,
-  .sdata_output_section = NULL,
-  .got_symbol_vma = 0,
-};
-
 struct dynamic_sections
 {
   bfd_boolean	  initialized;
@@ -874,7 +860,9 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	    (reloc_data.input_section->output_section->vma \
 	     + reloc_data.input_section->output_offset \
 	     + (reloc_data.reloc_offset))))
-#define SECTSTART (bfd_signed_vma) (reloc_data.input_section->output_offset)
+#define SECTSTART (bfd_signed_vma) (reloc_data.sym_section->output_section->vma \
+				    + reloc_data.sym_section->output_offset)
+
 #define _SDA_BASE_ (bfd_signed_vma) (reloc_data.sdata_begin_symbol_vma)
 #define TLS_REL (bfd_signed_vma) \
   ((elf_hash_table (info))->tls_sec->output_section->vma)
@@ -1588,7 +1576,7 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	  case R_ARC_32_ME:
 	  case R_ARC_PC32:
 	  case R_ARC_32_PCREL:
-	    if (bfd_link_pic (info) && !bfd_link_pie (info)
+	    if ((bfd_link_pic (info) || bfd_link_pie (info))
 		&& ((r_type != R_ARC_PC32 && r_type != R_ARC_32_PCREL)
 		    || (h != NULL
 			&& h->dynindx != -1
@@ -1682,6 +1670,17 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	}
 
       DEBUG_ARC_RELOC (reloc_data);
+
+      /* Make sure we have with a dynamic linker.  In case of GOT and PLT
+         the sym_section should point to .got or .plt respectively.  */
+      if ((is_reloc_for_GOT (howto) || is_reloc_for_PLT (howto))
+	  && reloc_data.sym_section == NULL)
+	{
+	  (*_bfd_error_handler)
+	    (_("GOT and PLT relocations cannot be fixed with a non dynamic linker."));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       if (arc_do_relocation (contents, reloc_data, info) != bfd_reloc_ok)
 	return FALSE;
@@ -1825,7 +1824,7 @@ elf_arc_check_relocs (bfd *		         abfd,
 	       and the dynamic linker can not resolve these.  However
 	       the error should not occur for e.g. debugging or
 	       non-readonly sections.  */
-	    if (bfd_link_dll (info) && !bfd_link_pie (info)
+	    if ((bfd_link_dll (info) && !bfd_link_pie (info))
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& (sec->flags & SEC_READONLY) != 0
 		&& ((sec->flags & SEC_CODE) != 0
@@ -1856,7 +1855,7 @@ elf_arc_check_relocs (bfd *		         abfd,
 	    /* FALLTHROUGH */
 	  case R_ARC_PC32:
 	  case R_ARC_32_PCREL:
-	    if (bfd_link_pic (info) && !bfd_link_pie (info)
+	    if ((bfd_link_pic (info) || bfd_link_pie (info))
 		&& ((r_type != R_ARC_PC32 && r_type != R_ARC_32_PCREL)
 		    || (h != NULL
 			&& h->dynindx != -1
@@ -2548,17 +2547,24 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
   /* Fill in the first three entries in the global offset table.  */
   if (htab->sgot)
     {
-      if (htab->sgot->size > 0 || htab->sgotplt->size > 0)
+      struct elf_link_hash_entry *h;
+      h = elf_link_hash_lookup (elf_hash_table (info), "_GLOBAL_OFFSET_TABLE_",
+				 FALSE, FALSE, TRUE);
+
+	if (h != NULL && h->root.type != bfd_link_hash_undefined
+	    && h->root.u.def.section != NULL)
 	{
+	  asection *sec = h->root.u.def.section;
+
 	  if (ds.sdyn == NULL)
 	    bfd_put_32 (output_bfd, (bfd_vma) 0,
-			htab->sgotplt->contents);
+			sec->contents);
 	  else
 	    bfd_put_32 (output_bfd,
 			ds.sdyn->output_section->vma + ds.sdyn->output_offset,
-			htab->sgotplt->contents);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgotplt->contents + 4);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgotplt->contents + 8);
+			sec->contents);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, sec->contents + 4);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, sec->contents + 8);
 	}
     }
 
@@ -2686,7 +2692,7 @@ elf_arc_size_dynamic_sections (bfd * output_bfd,
       if (relocs_exist == TRUE)
 	if (!_bfd_elf_add_dynamic_entry (info, DT_RELA, 0)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_RELASZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELENT,
+	    || !_bfd_elf_add_dynamic_entry (info, DT_RELAENT,
 					    sizeof (Elf32_External_Rela))
 	   )
 	  return FALSE;
@@ -2697,6 +2703,32 @@ elf_arc_size_dynamic_sections (bfd * output_bfd,
     }
 
   return TRUE;
+}
+
+
+/* Classify dynamic relocs such that -z combreloc can reorder and combine
+   them.  */
+static enum elf_reloc_type_class
+elf32_arc_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			    const asection *rel_sec ATTRIBUTE_UNUSED,
+			    const Elf_Internal_Rela *rela)
+{
+  switch ((int) ELF32_R_TYPE (rela->r_info))
+    {
+    case R_ARC_RELATIVE:
+      return reloc_class_relative;
+    case R_ARC_JMP_SLOT:
+      return reloc_class_plt;
+    case R_ARC_COPY:
+      return reloc_class_copy;
+    /* TODO: Needed in future to support ifunc.  */
+    /*
+    case R_ARC_IRELATIVE:
+      return reloc_class_ifunc;
+    */
+    default:
+      return reloc_class_normal;
+    }
 }
 
 const struct elf_size_info arc_elf32_size_info =
@@ -2800,6 +2832,8 @@ elf_arc_add_symbol_hook (bfd * abfd,
 #define elf_backend_relocate_section	     elf_arc_relocate_section
 #define elf_backend_check_relocs	     elf_arc_check_relocs
 #define elf_backend_create_dynamic_sections  _bfd_elf_create_dynamic_sections
+
+#define elf_backend_reloc_type_class		elf32_arc_reloc_type_class
 
 #define elf_backend_adjust_dynamic_symbol    elf_arc_adjust_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol    elf_arc_finish_dynamic_symbol

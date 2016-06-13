@@ -33,6 +33,7 @@ SECTIONS
   . = ALIGN(0x100);
   .data : { *(.data) }
   .got : { *(.got .toc) }
+  .got.plt : { *(.got.plt) }
   .bss : { *(.bss) }
 
   /* Now the real test.  */

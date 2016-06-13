@@ -1548,9 +1548,9 @@ static reloc_howto_type elf_mips_gnu_rel16_s2 =
 	 TRUE);			/* pcrel_offset */
 
 /* 32 bit pc-relative.  This was a GNU extension used by embedded-PIC.
-   It was co-opted by mips-linux for exception-handling data.  It is no
-   longer used, but should continue to be supported by the linker for
-   backward compatibility.  (GCC stopped using it in May, 2004.)  */
+   It was co-opted by mips-linux for exception-handling data.  GCC stopped
+   using it in May, 2004, then started using it again for compact unwind
+   tables.  */
 static reloc_howto_type elf_mips_gnu_pcrel32 =
   HOWTO (R_MIPS_PC32,		/* type */
 	 0,			/* rightshift */

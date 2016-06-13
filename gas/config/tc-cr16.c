@@ -2002,7 +2002,7 @@ check_range (long *num, int bits, int unsigned flags, int update)
      bits of a 32-bit negative value read in by the parser are set,
      so that the correct comparisons are made.  */
   if (value & 0x80000000)
-    value |= (-1L << 31);
+    value |= (-1UL << 31);
 
 
   /* Verify operand value is even.  */

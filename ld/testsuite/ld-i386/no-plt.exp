@@ -255,3 +255,36 @@ run_ld_link_exec_tests [] [list \
 	"pass.out" \
     ] \
 ]
+
+# Run-time tests which require working IFUNC support.
+if { [check_ifunc_available] } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr20244-3a.o pr20244-3b.o pr20244-3c.o pr20244-3d.o" \
+	    "" \
+	    "-fPIC -O2 -g" \
+	    { pr20244-3a.c pr20244-3b.S pr20244-3c.S pr20244-3d.S } \
+	] \
+    ]
+
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run pr20244-3a" \
+	    "tmpdir/pr20244-3a.o tmpdir/pr20244-3b.o \
+	     tmpdir/pr20244-3c.o tmpdir/pr20244-3d.o" \
+	    "" \
+	    { dummy.c } \
+	    "pr20244-3a" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr20244-3b" \
+	    "--static tmpdir/pr20244-3a.o tmpdir/pr20244-3b.o \
+	    tmpdir/pr20244-3c.o tmpdir/pr20244-3d.o" \
+	    "" \
+	    { dummy.c } \
+	    "pr20244-3b" \
+	    "pass.out" \
+	] \
+    ]
+}
