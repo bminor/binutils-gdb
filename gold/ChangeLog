@@ -1,3 +1,8 @@
+2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/20246
+	* testsuite/script_test_2.t: Add .got.plt after .got.
+
 2016-06-10  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
 
 	* mips.cc (struct Mips_abiflags): New struct.
