@@ -1127,6 +1127,8 @@ proc mi_detect_async {} {
 # output right after *stopped, and the second element is output
 # right after reason field.  The regex after reason should not include
 # the comma separating it from the following fields.
+# If EXTRA is a list of three elements, the first two are for the above
+# and the third element is for output right before GDB prompt.
 #
 # When we fail to match output at all, -1 is returned.  If FILE does
 # match and the target system has no debug info for FILE return 0.
@@ -1150,7 +1152,15 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set after_stopped ""
     set after_reason ""
-    if { [llength $extra] == 2 } {
+    set before_prompt ""
+    if { [llength $extra] == 3 } {
+	set after_stopped [lindex $extra 0]
+	set after_reason [lindex $extra 1]
+		if { $after_reason != "" } {
+			set after_reason "${after_reason},"
+		}
+	set before_prompt [lindex $extra 2]
+    } elseif { [llength $extra] == 2 } {
 	set after_stopped [lindex $extra 0]
 	set after_reason [lindex $extra 1]
 	set after_reason "${after_reason},"
@@ -1166,7 +1176,7 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     if { $reason == "really-no-reason" } {
 	gdb_expect {
-	    -re "\\*stopped\r\n$prompt_re" {
+	    -re "\\*stopped\r\n$before_prompt$prompt_re" {
 		pass "$test"
 	    }
 	    timeout {
@@ -1179,7 +1189,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     if { $reason == "exited-normally" } {
 
 	gdb_expect {
-	    -re "\\*stopped,reason=\"exited-normally\"\r\n$prompt_re" {
+	    -re "\\*stopped,reason=\"exited-normally\"\r\n$before_prompt$prompt_re" {
 		pass "$test"
 	    }
 	    -re ".*$mi_gdb_prompt$" {fail "continue to end (2)"}
@@ -1191,7 +1201,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     }
     if { $reason == "exited" } {
 	gdb_expect {
-	    -re "\\*stopped,reason=\"exited\",exit-code=\"\[0-7\]+\"\r\n$prompt_re" {
+	    -re "\\*stopped,reason=\"exited\",exit-code=\"\[0-7\]+\"\r\n$before_prompt$prompt_re" {
 		pass "$test"
 	    }
 	    -re ".*$mi_gdb_prompt$" {
@@ -1205,7 +1215,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     }
 
     if { $reason == "solib-event" } {
-	set pattern "\\*stopped,reason=\"solib-event\",thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re"
+	set pattern "\\*stopped,reason=\"solib-event\",thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$before_prompt$prompt_re"
 	verbose -log "mi_expect_stop: expecting: $pattern"
 	gdb_expect {
 	    -re "$pattern" {
@@ -1235,9 +1245,9 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set a $after_reason
 
-    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re"
+    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$before_prompt$prompt_re"
     gdb_expect {
-	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re" {
+	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$before_prompt$prompt_re" {
 	    pass "$test"
 	    if {[array names expect_out "2,string"] != ""} {
 		return $expect_out(2,string)
@@ -1245,7 +1255,7 @@ proc mi_expect_stop { reason func args file line extra test } {
 	    # No debug info available but $file does match.
 	    return 0
 	}
-	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$any\",args=\[\\\[\{\]$any\[\\\]\}\],file=\"$any\",fullname=\"${fullname_syntax}$any\",line=\"\[0-9\]*\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re" {
+	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$any\",args=\[\\\[\{\]$any\[\\\]\}\],file=\"$any\",fullname=\"${fullname_syntax}$any\",line=\"\[0-9\]*\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$before_prompt$prompt_re" {
 	    verbose -log "got $expect_out(buffer)"
 	    fail "$test (stopped at wrong place)"
 	    return -1
