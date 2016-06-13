@@ -2785,10 +2785,9 @@ new_stop_id (void)
   current_stop_id++;
 }
 
-/* Clear out all variables saying what to do when inferior is continued.
-   First do this, then set the ones you want, then call `proceed'.  */
+/* See infrun.h.  */
 
-static void
+void
 clear_proceed_status_thread (struct thread_info *tp)
 {
   if (debug_infrun)

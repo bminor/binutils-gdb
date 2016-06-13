@@ -80,6 +80,9 @@ extern void start_remote (int from_tty);
    step/stepi command.  */
 extern void clear_proceed_status (int step);
 
+/* Clear out the proceed status of TP.  */
+extern void clear_proceed_status_thread (struct thread_info *tp);
+
 extern void proceed (CORE_ADDR, enum gdb_signal);
 
 /* The `resume' routine should only be called in special circumstances.
