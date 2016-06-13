@@ -1,3 +1,8 @@
+2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Simplify IFUNC
+	GOT32 adjustment for static executables.
+
 2016-06-13  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf32-mips.c (elf_mips_gnu_pcrel32): Update comment.

@@ -4032,21 +4032,16 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    }
 
 		  relocation = off;
-
-		  /* Adjust for static executables.  */
-		  if (htab->elf.splt == NULL)
-		    relocation += gotplt->output_offset;
 		}
 	      else
-		{
-		  relocation = (base_got->output_section->vma
-				+ base_got->output_offset + off
-				- gotplt->output_section->vma
-				- gotplt->output_offset);
-		  /* Adjust for static executables.  */
-		  if (htab->elf.splt == NULL)
-		    relocation += gotplt->output_offset;
-		}
+		relocation = (base_got->output_section->vma
+			      + base_got->output_offset + off
+			      - gotplt->output_section->vma
+			      - gotplt->output_offset);
+
+	      /* Adjust for static executables.  */
+	      if (htab->elf.splt == NULL)
+		relocation += gotplt->output_offset;
 
 	      goto do_relocation;
 

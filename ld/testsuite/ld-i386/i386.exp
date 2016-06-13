@@ -809,6 +809,42 @@ if { [isnative]
     undefined_weak "-fPIE" "-pie -z nodynamic-undefined-weak"
 }
 
+# Must be native with the C compiler and working IFUNC support,
+if { [isnative]
+     && [check_ifunc_available]
+     && [istarget "i?86-*-*"]
+     && [which $CC] != 0 } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build ifunc-1a.o ifunc-1b.o ifunc-1c.o ifunc-1d.o" \
+	    "" \
+	    "-fPIC -O2 -g" \
+	    { ifunc-1a.c ifunc-1b.S ifunc-1c.S ifunc-1d.S } \
+	] \
+    ]
+
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run ifunc-1a" \
+	    "tmpdir/ifunc-1a.o tmpdir/ifunc-1b.o \
+	     tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
+	    "" \
+	    { dummy.c } \
+	    "ifunc-1a" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run ifunc-1b" \
+	    "--static tmpdir/ifunc-1a.o tmpdir/ifunc-1b.o \
+	    tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
+	    "" \
+	    { dummy.c } \
+	    "ifunc-1b" \
+	    "pass.out" \
+	] \
+    ]
+}
+
 if { !([istarget "i?86-*-linux*"]
        || [istarget "x86_64-*-linux*"]) } {
     return
