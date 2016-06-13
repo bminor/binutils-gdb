@@ -21,7 +21,6 @@ patches="
 	binutils-pr12639.patch
 	binutils-secondary.patch
 	binutils-pr20245.patch
-	binutils-pr20246.patch
 "
 
 for p in $patches
