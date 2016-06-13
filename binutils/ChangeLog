@@ -1,3 +1,7 @@
+2016-06-13  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (copy_main): Init newsym->othersym.
+
 2016-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
