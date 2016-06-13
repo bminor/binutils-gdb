@@ -4039,9 +4039,20 @@ elf_i386_relocate_section (bfd *output_bfd,
 			      - gotplt->output_section->vma
 			      - gotplt->output_offset);
 
-	      /* Adjust for static executables.  */
-	      if (htab->elf.splt == NULL)
-		relocation += gotplt->output_offset;
+	      if ((*(contents + rel->r_offset - 1) & 0xc7) == 0x5)
+		{
+		  if (bfd_link_pic (info))
+		    goto disallow_got32;
+
+		  /* Add the GOT base if there is no base register.  */
+		  relocation += (gotplt->output_section->vma
+				 + gotplt->output_offset);
+		}
+	      else if (htab->elf.splt == NULL)
+		{
+		  /* Adjust for static executables.  */
+		  relocation += gotplt->output_offset;
+		}
 
 	      goto do_relocation;
 
@@ -4214,6 +4225,7 @@ r_386_got32:
 		     is.  */
 		  const char *name;
 
+disallow_got32:
 		  if (h == NULL)
 		    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
 					     NULL);
@@ -4221,8 +4233,8 @@ r_386_got32:
 		    name = h->root.root.string;
 
 		  (*_bfd_error_handler)
-		    (_("%B: direct GOT relocation R_386_GOT32 against `%s' without base register can not be used when making a shared object"),
-		     input_bfd, name);
+		    (_("%B: direct GOT relocation %s against `%s' without base register can not be used when making a shared object"),
+		     input_bfd, howto->name, name);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
