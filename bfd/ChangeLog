@@ -1,5 +1,9 @@
 2016-06-13  Cupertino Miranda  <cmiranda@synospsy.com>
 
+	* elf32-arc.c (elf_arc_relocate_section): Fixed condition.
+
+2016-06-13  Cupertino Miranda  <cmiranda@synospsy.com>
+
 	* elf32-arc.c (elf_arc_finish_dynamic_sections): Changed.
 
 2016-06-13  Cupertino Miranda  <cmiranda@synospsy.com>
