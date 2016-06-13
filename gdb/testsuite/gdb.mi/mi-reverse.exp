@@ -93,6 +93,7 @@ proc test_controlled_execution_reverse {} {
     global line_callee1_head line_callee1_body line_callee1_close
     global line_main_head    line_main_body
     global line_main_hello   line_main_callme_1
+    global line_callme_body
 
     # Test exec-reverse-finish
 
@@ -166,6 +167,14 @@ proc test_controlled_execution_reverse {} {
         "" "main" "" \
         "basics.c" $line_main_body "" \
         "reverse-continue at main"
+
+    send_gdb "record goto end\n"
+    mi_expect_stop "" "callme" "\{name=\"i\",value=\"1\"\}" "basics.c" \
+        $line_callme_body { "" "" "\\^done\r\n" } "record goto end"
+
+    send_gdb "record goto begin\n"
+    mi_expect_stop "" "main" "" "basics.c" $line_main_body \
+        { "" "" "\\^done\r\n" } "record goto begin"
 }
 
 test_controlled_execution_reverse
