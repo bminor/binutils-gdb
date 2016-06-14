@@ -865,7 +865,8 @@ add_archive_element (struct bfd_link_info *info,
 	  header_printed = TRUE;
 	}
 
-      if (bfd_my_archive (abfd) == NULL)
+      if (bfd_my_archive (abfd) == NULL
+	  || bfd_is_thin_archive (bfd_my_archive (abfd)))
 	{
 	  minfo ("%s", bfd_get_filename (abfd));
 	  len = strlen (bfd_get_filename (abfd));

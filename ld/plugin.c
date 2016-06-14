@@ -1089,7 +1089,8 @@ plugin_object_p (bfd *ibfd)
 	return NULL;
     }
 
-  inarchive = bfd_my_archive (ibfd) != NULL;
+  inarchive = (bfd_my_archive (ibfd) != NULL
+	       && !bfd_is_thin_archive (bfd_my_archive (ibfd)));
   name = inarchive ? bfd_my_archive (ibfd)->filename : ibfd->filename;
   fd = open (name, O_RDONLY | O_BINARY);
 
@@ -1201,8 +1202,10 @@ plugin_maybe_claim (lang_input_statement_type *entry)
 
       /* Discard the real file's BFD and substitute the dummy one.  */
 
-      /* BFD archive handling caches elements so we can't call
-	 bfd_close for archives.  */
+      /* We can't call bfd_close on archives.  BFD archive handling
+	 caches elements, and add_archive_element keeps pointers to
+	 the_bfd and the_bfd->filename in a lang_input_statement_type
+	 linker script statement.  */
       if (entry->the_bfd->my_archive == NULL)
 	bfd_close (entry->the_bfd);
       entry->the_bfd = abfd;

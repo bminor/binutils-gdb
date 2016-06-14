@@ -1,3 +1,20 @@
+2016-06-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20241
+	* archive.c (open_nested_file): Set my_archive.
+	* bfd.c (_bfd_default_error_handler <%B>): Exclude archive file name
+	for thin archives.
+	* bfdio.c (bfd_tell): Don't adjust origin for thin archives.
+	(bfd_seek): Likewise.
+	* bfdwin.c (bfd_get_file_window): Likewise.
+	* cache.c (cache_bmmap): Likewise.
+	(bfd_cache_lookup_worker): Don't look in my_archive for thin archives.
+	* mach-o.c (bfd_mach_o_follow_dsym): Don't open my_archive for
+	thin archives.
+	* plugin.c (try_claim): Likewise.
+	* xcofflink.c (xcoff_link_add_dynamic_symbols): Use import path of
+	file within thin archive, not the archive.
+
 2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20244
