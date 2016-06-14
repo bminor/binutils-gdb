@@ -982,8 +982,9 @@ eq_vector_type_el (struct vector_type_el e1, struct vector_type_el e2)
     && e1.width == e2.width && e1.index == e2.index;
 }
 
-/* This function parses the NEON register list.  On success, it returns
-   the parsed register list information in the following encoded format:
+/* This function parses a list of vector registers of type TYPE.
+   On success, it returns the parsed register list information in the
+   following encoded format:
 
    bit   18-22   |   13-17   |   7-11    |    2-6    |   0-1
        4th regno | 3rd regno | 2nd regno | 1st regno | num_of_reg
@@ -1003,7 +1004,8 @@ eq_vector_type_el (struct vector_type_el e1, struct vector_type_el e2)
    (by reg_list_valid_p).  */
 
 static int
-parse_neon_reg_list (char **ccp, struct vector_type_el *vectype)
+parse_vector_reg_list (char **ccp, aarch64_reg_type type,
+		       struct vector_type_el *vectype)
 {
   char *str = *ccp;
   int nb_regs;
@@ -1038,7 +1040,7 @@ parse_neon_reg_list (char **ccp, struct vector_type_el *vectype)
 	  str++;		/* skip over '-' */
 	  val_range = val;
 	}
-      val = parse_typed_reg (&str, REG_TYPE_VN, NULL, &typeinfo,
+      val = parse_typed_reg (&str, type, NULL, &typeinfo,
 			     /*in_reg_list= */ TRUE);
       if (val == PARSE_FAIL)
 	{
@@ -5135,7 +5137,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_LVt:
 	case AARCH64_OPND_LVt_AL:
 	case AARCH64_OPND_LEt:
-	  if ((val = parse_neon_reg_list (&str, &vectype)) == PARSE_FAIL)
+	  if ((val = parse_vector_reg_list (&str, REG_TYPE_VN,
+					    &vectype)) == PARSE_FAIL)
 	    goto failure;
 	  if (! reg_list_valid_p (val, /* accept_alternate */ 0))
 	    {
