@@ -865,17 +865,17 @@ add_archive_element (struct bfd_link_info *info,
 	  header_printed = TRUE;
 	}
 
-      if (bfd_my_archive (abfd) == NULL
-	  || bfd_is_thin_archive (bfd_my_archive (abfd)))
+      if (abfd->my_archive == NULL
+	  || bfd_is_thin_archive (abfd->my_archive))
 	{
 	  minfo ("%s", bfd_get_filename (abfd));
 	  len = strlen (bfd_get_filename (abfd));
 	}
       else
 	{
-	  minfo ("%s(%s)", bfd_get_filename (bfd_my_archive (abfd)),
+	  minfo ("%s(%s)", bfd_get_filename (abfd->my_archive),
 		 bfd_get_filename (abfd));
-	  len = (strlen (bfd_get_filename (bfd_my_archive (abfd)))
+	  len = (strlen (bfd_get_filename (abfd->my_archive))
 		 + strlen (bfd_get_filename (abfd))
 		 + 2);
 	}

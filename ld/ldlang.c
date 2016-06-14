@@ -2499,9 +2499,9 @@ wild_sort (lang_wild_statement_type *wild,
 	     archive.  */
 
 	  if (file->the_bfd != NULL
-	      && bfd_my_archive (file->the_bfd) != NULL)
+	      && file->the_bfd->my_archive != NULL)
 	    {
-	      fn = bfd_get_filename (bfd_my_archive (file->the_bfd));
+	      fn = bfd_get_filename (file->the_bfd->my_archive);
 	      fa = TRUE;
 	    }
 	  else
@@ -2510,9 +2510,9 @@ wild_sort (lang_wild_statement_type *wild,
 	      fa = FALSE;
 	    }
 
-	  if (bfd_my_archive (ls->section->owner) != NULL)
+	  if (ls->section->owner->my_archive != NULL)
 	    {
-	      ln = bfd_get_filename (bfd_my_archive (ls->section->owner));
+	      ln = bfd_get_filename (ls->section->owner->my_archive);
 	      la = TRUE;
 	    }
 	  else

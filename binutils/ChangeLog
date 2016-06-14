@@ -1,5 +1,10 @@
 2016-06-14  Alan Modra  <amodra@gmail.com>
 
+	* ar.c: Expand uses of bfd_my_archive.
+	* size.c: Likewise.
+
+2016-06-14  Alan Modra  <amodra@gmail.com>
+
 	PR ld/20241
 	* bucomm.c (bfd_get_archive_filename): Return file name within thin
 	archive.

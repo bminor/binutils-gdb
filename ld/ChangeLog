@@ -1,5 +1,12 @@
 2016-06-14  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c: Expand uses of bfd_my_archive.
+	* ldmain.c: Likewise.
+	* ldmisc.c: Likewise.
+	* plugin.c: Likewise.
+
+2016-06-14  Alan Modra  <amodra@gmail.com>
+
 	PR ld/20241
 	* ldmain.c (add_archive_element): Just print file name of file within
 	thin archives.

@@ -1,5 +1,10 @@
 2016-06-14  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h (bfd_my_archive): Delete.
+	* bfd-in2.h: Regenerate.
+
+2016-06-14  Alan Modra  <amodra@gmail.com>
+
 	PR ld/20241
 	* archive.c (open_nested_file): Set my_archive.
 	* bfd.c (_bfd_default_error_handler <%B>): Exclude archive file name

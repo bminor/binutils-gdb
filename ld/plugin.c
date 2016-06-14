@@ -1089,9 +1089,9 @@ plugin_object_p (bfd *ibfd)
 	return NULL;
     }
 
-  inarchive = (bfd_my_archive (ibfd) != NULL
-	       && !bfd_is_thin_archive (bfd_my_archive (ibfd)));
-  name = inarchive ? bfd_my_archive (ibfd)->filename : ibfd->filename;
+  inarchive = (ibfd->my_archive != NULL
+	       && !bfd_is_thin_archive (ibfd->my_archive));
+  name = inarchive ? ibfd->my_archive->filename : ibfd->filename;
   fd = open (name, O_RDONLY | O_BINARY);
 
   if (fd < 0)
