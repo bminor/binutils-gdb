@@ -821,31 +821,6 @@ elt_size:
   return TRUE;
 }
 
-/* Parse a single type, e.g. ".8b", leading period included.
-   Only applicable to Vn registers.
-
-   Return TRUE on success; otherwise return FALSE.  */
-static bfd_boolean
-parse_neon_operand_type (struct neon_type_el *vectype, char **ccp)
-{
-  char *str = *ccp;
-
-  if (*str == '.')
-    {
-      if (! parse_neon_type_for_operand (vectype, &str))
-	{
-	  first_error (_("vector type expected"));
-	  return FALSE;
-	}
-    }
-  else
-    return FALSE;
-
-  *ccp = str;
-
-  return TRUE;
-}
-
 /* Parse a register of the type TYPE.
 
    Return PARSE_FAIL if the string pointed by *CCP is not a valid register
@@ -889,9 +864,11 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
     }
   type = reg->type;
 
-  if (type == REG_TYPE_VN
-      && parse_neon_operand_type (&parsetype, &str))
+  if (type == REG_TYPE_VN && *str == '.')
     {
+      if (!parse_neon_type_for_operand (&parsetype, &str))
+	return PARSE_FAIL;
+
       /* Register if of the form Vn.[bhsdq].  */
       is_typed_vecreg = TRUE;
 
