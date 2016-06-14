@@ -6001,9 +6001,6 @@ elf_x86_64_reloc_type_class (const struct bfd_link_info *info,
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_x86_64_link_hash_table *htab = elf_x86_64_hash_table (info);
 
-  if ((int) ELF32_R_TYPE (rela->r_info) == R_X86_64_IRELATIVE)
-    return reloc_class_ifunc;
-
   if (htab->elf.dynsym != NULL
       && htab->elf.dynsym->contents != NULL)
     {
@@ -6026,6 +6023,8 @@ elf_x86_64_reloc_type_class (const struct bfd_link_info *info,
 
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
+    case R_X86_64_IRELATIVE:
+      return reloc_class_ifunc;
     case R_X86_64_RELATIVE:
     case R_X86_64_RELATIVE64:
       return reloc_class_relative;

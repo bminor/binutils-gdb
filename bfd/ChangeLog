@@ -1,3 +1,11 @@
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_reloc_type_class): Check R_386_IRELATIVE.
+	Don't check symbol type for STN_UNDEF symbol index.
+	* elf64-x86-64.c (elf_x86_64_reloc_type_class): Check
+	R_X86_64_IRELATIVE.  Don't check symbol type for STN_UNDEF symbol
+	index.
+
 2016-06-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (using_thumb_only): Force review of arch check logic for

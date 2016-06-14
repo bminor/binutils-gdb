@@ -5562,19 +5562,24 @@ elf_i386_reloc_type_class (const struct bfd_link_info *info,
       /* Check relocation against STT_GNU_IFUNC symbol if there are
          dynamic symbols.  */
       unsigned long r_symndx = ELF32_R_SYM (rela->r_info);
-      Elf_Internal_Sym sym;
-      if (!bed->s->swap_symbol_in (abfd,
-				   (htab->dynsym->contents
-				    + r_symndx * sizeof (Elf32_External_Sym)),
-				   0, &sym))
-	abort ();
+      if (r_symndx != STN_UNDEF)
+	{
+	  Elf_Internal_Sym sym;
+	  if (!bed->s->swap_symbol_in (abfd,
+				       (htab->dynsym->contents
+					+ r_symndx * sizeof (Elf32_External_Sym)),
+				       0, &sym))
+	    abort ();
 
-      if (ELF32_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
-	return reloc_class_ifunc;
+	  if (ELF32_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	    return reloc_class_ifunc;
+	}
     }
 
   switch (ELF32_R_TYPE (rela->r_info))
     {
+    case R_386_IRELATIVE:
+      return reloc_class_ifunc;
     case R_386_RELATIVE:
       return reloc_class_relative;
     case R_386_JUMP_SLOT:
