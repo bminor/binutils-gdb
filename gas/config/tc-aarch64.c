@@ -747,7 +747,7 @@ aarch64_reg_parse_32_64 (char **ccp, int reject_sp, int reject_rz,
    8b 16b 2h 4h 8h 2s 4s 1d 2d
    b h s d q  */
 static bfd_boolean
-parse_neon_type_for_operand (struct vector_type_el *parsed_type, char **str)
+parse_vector_type_for_operand (struct vector_type_el *parsed_type, char **str)
 {
   char *ptr = *str;
   unsigned width;
@@ -866,7 +866,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
 
   if (type == REG_TYPE_VN && *str == '.')
     {
-      if (!parse_neon_type_for_operand (&parsetype, &str))
+      if (!parse_vector_type_for_operand (&parsetype, &str))
 	return PARSE_FAIL;
 
       /* Register if of the form Vn.[bhsdq].  */
