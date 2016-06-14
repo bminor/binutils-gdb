@@ -1,3 +1,17 @@
+2016-07-11  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-got.h: Moved got related structures from elf32-arc.c to
+	this file. More precisely, tls_type_e, tls_got_entries, got_entry.
+	* (arc_get_local_got_ents, got_entry_for_type, new_got_entry_to_list,
+	tls_type_for_reloc, symbol_has_entry_of_type,
+	get_got_entry_list_for_symbol, arc_got_entry_type_for_reloc,
+	ADD_SYMBOL_REF_SEC_AND_RELOC, rc_fill_got_info_for_reloc,
+	relocate_fix_got_relocs_for_got_info,
+	create_got_dynrelocs_for_single_entry,
+	create_got_dynrelocs_for_got_info): Added to file.
+	* elf32-arc.c: Removed GOT & TLS related structs and functions to
+	arc-got.h.
+
 2016-07-08  James Bowman  <james.bowman@ftdichip.com>
 
 	* elf32-ft32.c (ft32_reloc_map): Use R_FT32_32 for BFD_RELOC_32.
