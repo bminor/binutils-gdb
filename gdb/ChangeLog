@@ -1,3 +1,14 @@
+2018-05-16  Tom Tromey  <tom@tromey.com>
+
+	PR cli/19551:
+	* symfile-add-flags.h (enum symfile_add_flags)
+	<SYMFILE_NOT_FILENAME>: New constant.
+	* symfile.c (read_symbols): Use SYMFILE_NOT_FILENAME.  Get
+	objfile name from BFD.
+	(symbol_file_add_with_addrs): Check SYMFILE_NOT_FILENAME.
+	* minidebug.c (find_separate_debug_file_in_section): Put
+	".gnu_debugdata" into BFD's file name.
+
 2018-05-16  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* regcache.c (regcache_read_ftype, regcache_write_ftype):

@@ -808,8 +808,9 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 	     virtual section-as-bfd like the bfd filename containing the
 	     section.  Therefore use also non-canonical name form for the same
 	     file containing the section.  */
-	  symbol_file_add_separate (abfd.get (), objfile->original_name,
-				    add_flags, objfile);
+	  symbol_file_add_separate (abfd.get (),
+				    bfd_get_filename (abfd.get ()),
+				    add_flags | SYMFILE_NOT_FILENAME, objfile);
 	}
     }
   if ((add_flags & SYMFILE_NO_READ) == 0)
@@ -1079,6 +1080,8 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
       flags |= OBJF_READNEVER;
       add_flags |= SYMFILE_NO_READ;
     }
+  if ((add_flags & SYMFILE_NOT_FILENAME) != 0)
+    flags |= OBJF_NOT_FILENAME;
 
   /* Give user a chance to burp if we'd be
      interactively wiping out any existing symbols.  */

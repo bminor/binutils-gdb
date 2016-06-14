@@ -40,8 +40,11 @@ enum symfile_add_flag
 
     /* Do not immediately read symbols for this file.  By default,
        symbols are read when the objfile is created.  */
-    SYMFILE_NO_READ = 1 << 4
-  };
+    SYMFILE_NO_READ = 1 << 4,
+
+    /* The new objfile should be marked OBJF_NOT_FILENAME.  */
+    SYMFILE_NOT_FILENAME = 1 << 5,
+ };
 
 DEF_ENUM_FLAGS_TYPE (enum symfile_add_flag, symfile_add_flags);
 

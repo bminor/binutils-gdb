@@ -269,7 +269,10 @@ find_separate_debug_file_in_section (struct objfile *objfile)
     return NULL;
 
 #ifdef HAVE_LIBLZMA
-  abfd = gdb_bfd_openr_iovec (objfile_name (objfile), gnutarget, lzma_open,
+  std::string filename = string_printf (_(".gnu_debugdata for %s"),
+					objfile_name (objfile));
+
+  abfd = gdb_bfd_openr_iovec (filename.c_str (), gnutarget, lzma_open,
 			      section, lzma_pread, lzma_close, lzma_stat);
   if (abfd == NULL)
     return NULL;
