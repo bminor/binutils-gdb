@@ -167,7 +167,7 @@ try_claim (bfd *abfd)
 
   file.name = abfd->filename;
 
-  if (abfd->my_archive)
+  if (abfd->my_archive && !bfd_is_thin_archive (abfd->my_archive))
     {
       iobfd = abfd->my_archive;
       file.offset = abfd->origin;
@@ -185,7 +185,7 @@ try_claim (bfd *abfd)
 
   file.fd = fileno ((FILE *) iobfd->iostream);
 
-  if (!abfd->my_archive)
+  if (!abfd->my_archive || bfd_is_thin_archive (abfd->my_archive))
     {
       struct stat stat_buf;
       if (fstat (file.fd, &stat_buf))

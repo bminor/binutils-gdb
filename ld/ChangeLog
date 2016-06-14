@@ -1,3 +1,31 @@
+2016-06-14  Alan Modra  <amodra@gmail.com>
+
+	* ldbuildid.c: Formatting.
+	* ldcref.c: Formatting.
+	* ldctor.c: Formatting.
+	* ldemul.c: Formatting.
+	* ldexp.c: Formatting.
+	* ldfile.c: Formatting.
+	* ldlang.c: Formatting.
+	* ldmain.c: Formatting.
+	* ldwrite.c: Formatting.
+
+2016-06-14  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c: Expand uses of bfd_my_archive.
+	* ldmain.c: Likewise.
+	* ldmisc.c: Likewise.
+	* plugin.c: Likewise.
+
+2016-06-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20241
+	* ldmain.c (add_archive_element): Just print file name of file within
+	thin archives.
+	* ldmisc.c (vfinfo): Likewise.
+	* plugin.c (plugin_object_p): Open file within thin archives.
+	(plugin_maybe_claim): Expand comment.
+
 2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20244

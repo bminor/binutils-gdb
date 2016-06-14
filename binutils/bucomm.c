@@ -605,7 +605,8 @@ bfd_get_archive_filename (const bfd *abfd)
 
   assert (abfd != NULL);
 
-  if (!abfd->my_archive)
+  if (abfd->my_archive == NULL
+      || bfd_is_thin_archive (abfd->my_archive))
     return bfd_get_filename (abfd);
 
   needed = (strlen (bfd_get_filename (abfd->my_archive))

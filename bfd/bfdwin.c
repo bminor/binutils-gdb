@@ -144,7 +144,8 @@ bfd_get_file_window (bfd *abfd,
       int fd;
 
       /* Find the real file and the real offset into it.  */
-      while (abfd->my_archive != NULL)
+      while (abfd->my_archive != NULL
+	     && !bfd_is_thin_archive (abfd->my_archive))
 	{
 	  offset += abfd->origin;
 	  abfd = abfd->my_archive;

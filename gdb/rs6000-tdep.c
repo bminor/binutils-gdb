@@ -4631,6 +4631,7 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
 	  || at_dcsz == 0)
 	at_dcsz = 128; /* Assume 128-byte cache line size (POWER8)  */
 
+      ra = 0;
       if (PPC_RA (insn) != 0)
 	regcache_raw_read_unsigned (regcache,
 				    tdep->ppc_gp0_regnum + PPC_RA (insn), &ra);

@@ -1,3 +1,8 @@
+2016-06-14  John Baldwin  <jhb@FreeBSD.org>
+
+	* opcode/msp430-decode.h (MSP430_Size): Remove.
+	(Msp430_Opcode_Decoded): Change type of size to int.
+
 2016-06-11  Alan Modra  <amodra@gmail.com>
 
 	* coff/sparc.h (COFF_ADJUST_SYM_OUT_POST): Define.

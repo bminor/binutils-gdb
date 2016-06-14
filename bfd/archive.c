@@ -392,6 +392,7 @@ open_nested_file (const char *filename, bfd *archive)
     {
       n_bfd->lto_output = archive->lto_output;
       n_bfd->no_export = archive->no_export;
+      n_bfd->my_archive = archive;
     }
   return n_bfd;
 }

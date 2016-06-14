@@ -191,6 +191,182 @@ DIV_LIKE ("divm", 0x0)
 { "calcsd", 0x48000010, 0xf80f407f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_CALC_ENTRY_SIZE }, { C_NPS_F }},
 { "calcxd", 0x48004010, 0xf80f407f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_CALC_ENTRY_SIZE }, { C_NPS_F }},
 
+{ "calcbsd", 0x48000030, 0xf80f407f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B }, { C_NPS_F }},
+{ "calcbxd", 0x48004030, 0xf80f407f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B }, { C_NPS_F }},
+
+{ "calckey", 0x48000050, 0xf80f407f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B }, { C_NPS_F }},
+{ "calcxkey", 0x48004050, 0xf80f407f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B }, { C_NPS_F }},
+
+{ "mxb", 0x580b0000, 0xf81f8007, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_FIELD_START_POS, NPS_FIELD_SIZE, NPS_SHIFT_FACTOR }, { 0 }},
+{ "mxb", 0x580b8000, 0xf81f8007, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_FIELD_START_POS, NPS_FIELD_SIZE, NPS_SHIFT_FACTOR, NPS_BITS_TO_SCRAMBLE }, { C_NPS_S }},
+{ "imxb", 0x580b0001, 0xf81f8007, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_FIELD_START_POS, NPS_FIELD_SIZE, NPS_SHIFT_FACTOR }, { 0 }},
+{ "imxb", 0x580b8001, 0xf81f8007, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_FIELD_START_POS, NPS_FIELD_SIZE, NPS_SHIFT_FACTOR, NPS_BITS_TO_SCRAMBLE }, { C_NPS_S }},
+
+#define ADDL_LIKE(NAME,SUBOP2,SHIM)                                     \
+  { NAME, (0x48000000 | (SUBOP2 << 16)), 0xf80f0000, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST, NPS_R_SRC1, SHIM }, { C_NPS_F }},
+
+ADDL_LIKE ("addl", 0xA, NPS_SIMM16)
+ADDL_LIKE ("subl", 0xB, NPS_SIMM16)
+ADDL_LIKE ("orl", 0xC, NPS_UIMM16)
+ADDL_LIKE ("andl", 0xD, NPS_UIMM16)
+ADDL_LIKE ("xorl", 0xE, NPS_UIMM16)
+
+{ "andab", 0x48000011, 0xf80f801f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_SRC2_POS_5B, NPS_BITOP_SIZE }, { C_NPS_F } },
+{ "andab", 0x48008011, 0xf80f801f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC2_POS_5B, NPS_BITOP_SIZE }, { C_NPS_F } },
+{ "orab", 0x48000012, 0xf80f801f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_SRC2_POS_5B, NPS_BITOP_SIZE }, { C_NPS_F } },
+{ "orab", 0x48008012, 0xf80f801f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC2_POS_5B, NPS_BITOP_SIZE }, { C_NPS_F } },
+
+{ "lbdsize", 0x382f0005, 0xf8ff003f, ARC_OPCODE_NPS400, ARITH, NONE, { RB, RC }, { C_F }},
+
+{ "bdlen", 0x48000013, 0xf80fc01f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_BDLEN_MAX_LEN }, { C_NPS_F }},
+{ "bdlen", 0x48004013, 0xf80fc01f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC2_3B }, { C_NPS_F }},
+{ "bdlen", 0x48008013, 0xf80fc01f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_BDLEN_MAX_LEN }, { C_NPS_F }},
+{ "bdlen", 0x4800c013, 0xf80fc01f, ARC_OPCODE_NPS400, ARITH, NONE, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B }, { C_NPS_F }},
+
+/* csma a,b,c   00111bbb00100001FBBBCCCCCCAAAAAA */
+{ "csma", 0x382a0000, 0xf8ff8000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, RC }, { 0 }},
+
+/* csma a,limm,c   0011111000100001F111CCCCCCAAAAAA */
+{ "csma", 0x3e2a7000, 0xfffff000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, RC }, { 0 }},
+
+/* csma a,b,u6   00111bbb01100001FBBBuuuuuuAAAAAA */
+{ "csma", 0x386a0000, 0xf8ff8000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, UIMM6_20 }, { 0 }},
+
+/* csma 0,b,c   00111bbb00100001FBBBCCCCCC111110 */
+{ "csma", 0x382a003e, 0xf8ff803f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, RC }, { 0 }},
+
+/* csma 0,limm,c   0011111000100001F111CCCCCC111110 */
+{ "csma", 0x3e2a703e, 0xfffff03f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, RC }, { 0 }},
+
+/* csma 0,b,u6   00111bbb01100001FBBBuuuuuu111110 */
+{ "csma", 0x386a003e, 0xf8ff803f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, UIMM6_20 }, { 0 }},
+
+/* csma 0,b,limm   00111bbb00100001FBBB111110111110 */
+{ "csma", 0x382a0fbe, 0xf8ff8fff, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, LIMM }, { 0 }},
+
+/* csma a,b,limm   00111bbb00100001FBBB111110AAAAAA */
+{ "csma", 0x382a0f80, 0xf8ff8fc0, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, LIMM }, { 0 }},
+
+/* csma a,limm,limm    0011111000100001F111111110AAAAAA */
+{ "csma", 0x3e2a7f80, 0xffffffc0, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, LIMMdup }, { 0 }},
+
+/* csma a,limm,u6   0011111001100001F111uuuuuuAAAAAA */
+{ "csma", 0x3e6a7000, 0xfffff000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, UIMM6_20 }, { 0 }},
+
+/* csma 0,limm,u6   0011111001100001F111uuuuuu111110 */
+{ "csma", 0x3e6a703e, 0xfffff03f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, UIMM6_20 }, { 0 }},
+
+/* csms a,b,c   00111bbb00101100FBBBCCCCCCAAAAAA */
+{ "csms", 0x382c0000, 0xf8ff8000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, RC }, { 0 }},
+
+/* csma a,limm,c   0011111000101100F111CCCCCCAAAAAA */
+{ "csms", 0x3e2c7000, 0xfffff000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, RC }, { 0 }},
+
+/* csms a,b,u6   00111bbb01101100FBBBuuuuuuAAAAAA */
+{ "csms", 0x386c0000, 0xf8ff8000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, UIMM6_20 }, { 0 }},
+
+/* csms 0,b,c   00111bbb00101100FBBBCCCCCC111110 */
+{ "csms", 0x382c003e, 0xf8ff803f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, RC }, { 0 }},
+
+/* csms 0,limm,c   0011111000101100F111CCCCCC111110 */
+{ "csms", 0x3e2c703e, 0xfffff03f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, RC }, { 0 }},
+
+/* csms 0,b,u6   00111bbb01101100FBBBuuuuuu111110 */
+{ "csms", 0x386c003e, 0xf8ff803f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, UIMM6_20 }, { 0 }},
+
+/* csms 0,b,limm   00111bbb00101100FBBB111110111110 */
+{ "csms", 0x382c0fbe, 0xf8ff8fff, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, LIMM }, { 0 }},
+
+/* csms a,b,limm   00111bbb00101100FBBB111110AAAAAA */
+{ "csms", 0x382c0f80, 0xf8ff8fc0, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, LIMM }, { 0 }},
+
+/* csms a,limm,limm   0011111000101100F111111110AAAAAA */
+{ "csms", 0x3e2c7f80, 0xffffffc0, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, LIMMdup }, { 0 }},
+
+/* csms a,limm,u6   0011111001101100F111uuuuuuAAAAAA */
+{ "csms", 0x3e6c7000, 0xfffff000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, UIMM6_20 }, { 0 }},
+
+/* csms 0,limm,u6   0011111001101100F111uuuuuu111110 */
+{ "csms", 0x3e6c703e, 0xfffff03f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, UIMM6_20 }, { 0 }},
+
+/* cbba a,b,c   00111bbb00101101FBBBCCCCCCAAAAAA */
+{ "cbba", 0x382d0000, 0xf8ff0000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, RC }, { C_F }},
+
+/* cbba a,limm,c    0011111000101101F111CCCCCCAAAAAA */
+{ "cbba", 0x3e2d7000, 0xffff7000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, RC }, { C_F }},
+
+/* cbba a,b,u6   00111bbb01101101FBBBuuuuuuAAAAAA */
+{ "cbba", 0x386d0000, 0xf8ff0000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, UIMM6_20 }, { C_F }},
+
+/* cbba 0,b,c   00111bbb00101101FBBBCCCCCC111110 */
+{ "cbba", 0x382d003e, 0xf8ff003f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, RC }, { C_F }},
+
+/* cbba 0,limm,c   0011111000101101F111CCCCCC111110 */
+{ "cbba", 0x3e2d703e, 0xffff703f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, RC }, { C_F }},
+
+/* cbba 0,b,u6   00111bbb01101101FBBBuuuuuu111110 */
+{ "cbba", 0x386d003e, 0xf8ff003f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, UIMM6_20 }, { C_F }},
+
+/* cbba 0,b,limm   00111bbb00101101FBBB111110111110 */
+{ "cbba", 0x382d0fbe, 0xf8ff0fff, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, LIMM }, { C_F }},
+
+/* cbba a,b,limm   00111bbb00101101FBBB111110AAAAAA */
+{ "cbba", 0x382d0f80, 0xf8ff0fc0, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, LIMM }, { C_F }},
+
+/* cbba a,limm,limm   0011111000101101F111111110AAAAAA */
+{ "cbba", 0x3e2d7f80, 0xffff7fc0, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, LIMMdup }, { C_F }},
+
+/* cbba a,limm,u6   0011111001101101F111uuuuuuAAAAAA */
+{ "cbba", 0x3e6d7000, 0xffff7000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, UIMM6_20 }, { C_F }},
+
+/* cbba 0,limm,u6   0011111001101101F111uuuuuu111110 */
+{ "cbba", 0x3e6d703e, 0xffff703f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, UIMM6_20 }, { C_F }},
+
+/* zncv<.rd|.wr> a,b,c   00111bbb001101010BBBCCCCCCAAAAAA */
+{ "zncv", 0x38350000, 0xf8ff0000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, RC }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> a,b,u6   00111bbb011101010BBBuuuuuuAAAAAA */
+{ "zncv", 0x38750000, 0xf8ff0000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, UIMM6_20}, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> b,b,s12   00111bbb101101010BBBssssssSSSSSS */
+{ "zncv", 0x38b50000, 0xf8ff0000, ARC_OPCODE_NPS400, ARITH, NONE, { RB, RBdup, SIMM12_20 }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> a,b,limm   00111bbb001101010BBB111110AAAAAA */
+{ "zncv", 0x38350f80, 0xf8ff0fc0, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, LIMM }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> a,limm,c   00111110001101010111CCCCCCAAAAAA */
+{ "zncv", 0x3e357000, 0xffff7000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, RC }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> a,limm,u6   00111110011101010111uuuuuuAAAAAA */
+{ "zncv", 0x3e757000, 0xffff7000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, UIMM6_20 }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> a,limm,limm   00111110001101010111111110AAAAAA */
+{ "zncv", 0x3e357f80, 0xffff7fc0, ARC_OPCODE_NPS400, ARITH, NONE, { RA, LIMM, LIMMdup }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> 0,b,c 00111bbb001101010BBBCCCCCC111110 */
+{ "zncv", 0x3835003e, 0xf8ff003f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, RC }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> 0,b,u6   00111bbb011101010BBBuuuuuu111110 */
+{ "zncv", 0x3875003e, 0xf8ff003f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, UIMM6_20 }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> 0,b,limm   00111bbb001101010BBB111110111110 */
+{ "zncv", 0x38350fbe, 0xf8ff0fff, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, RB, LIMM }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> 0,limm,c   00111110001101010111CCCCCC111110 */
+{ "zncv", 0x3e35703e, 0xffff703f, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, RC }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> 0,limm,u6   00111110011101010111uuuuuu111110 */
+{ "zncv", 0x3e75703e, 0xffff7000, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, UIMM6_20 }, { C_NPS_ZNCV }},
+
+/* zncv<.rd|.wr> 0,limm,s12   00111110101101010111ssssssSSSSSS */
+{ "zncv", 0x3eb57000, 0xffff7000, ARC_OPCODE_NPS400, ARITH, NONE, { ZA, LIMM, SIMM12_20 }, { C_NPS_ZNCV }},
+
+/* hofs a,b,c */
+{ "hofs", 0x38360000, 0xf8ff0000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, RC }, { C_F }},
+
+/* hofs a,b,min_hofs,psbc */
+{ "hofs", 0x38760000, 0xf8ff0000, ARC_OPCODE_NPS400, ARITH, NONE, { RA, RB, NPS_MIN_HOFS, NPS_PSBC }, { C_F }},
+
 /****                  Protocol Decoder Instructions                  ****/
 
 /* dctcp b,c  00111bbb001011110bbbcccccc000000 */
@@ -209,6 +385,144 @@ DIV_LIKE ("divm", 0x0)
 
 /* dcacl<.f> a,b,c  00111bbb001001010bbbccccccaaaaaa */
 { "dcacl", 0x38250000, 0xf8ff0000, ARC_OPCODE_NPS400, ACL, NONE, { RA, RB, RC }, { C_F }},
+
+/****                        DPI Instructions                         ****/
+
+/* hash dst,src1,src2,width,perm,nonlinear,basemat */
+{ "hash", 0x58180000, 0xf81f0000, ARC_OPCODE_NPS400, DPI, NONE, { NPS_DPI_DST, NPS_DPI_SRC1_3B, NPS_R_SRC2_3B, NPS_HASH_WIDTH, NPS_HASH_PERM, NPS_HASH_NONLINEAR, NPS_HASH_BASEMAT }, { 0 }},
+
+/* hash.pN dst,src1,src2,width,len,ofs,basemat */
+
+#define HASH_P(FUNC, SUBOP2)                                            \
+  { "hash", (0x58100000 | (SUBOP2 << 16)), 0xf81f0000, ARC_OPCODE_NPS400, DPI, NONE, { NPS_DPI_DST, NPS_DPI_SRC1_3B, NPS_R_SRC2_3B, NPS_HASH_WIDTH, NPS_HASH_LEN, NPS_HASH_OFS, NPS_HASH_BASEMAT2 }, { C_NPS_P##FUNC }},
+
+HASH_P(0, 0x9)
+HASH_P(1, 0xA)
+HASH_P(2, 0xB)
+HASH_P(3, 0xC)
+
+/* tr<.f> a,b,c   00111bbb00100001FBBBCCCCCCAAAAAA */
+{ "tr", 0x38210000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, RC }, { C_F }},
+
+/* tr<.f> a,limm,c   0011111000100001F111CCCCCCAAAAAA */
+{ "tr", 0x3e217000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, RC }, { C_F }},
+
+/* tr<.f> a,b,u6   00111bbb01100001FBBBuuuuuuAAAAAA */
+{ "tr", 0x38610000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, UIMM6_20 }, { C_F }},
+
+/* tr<.f> 0,b,c   00111bbb00100001FBBBCCCCCC111110 */
+{ "tr", 0x3821003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, RC }, { C_F }},
+
+/* tr<.f> 0,limm,c   0011111000100001F111CCCCCC111110 */
+{ "tr", 0x3e21703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, RC }, { C_F }},
+
+/* tr<.f> 0,b,u6   00111bbb01100001FBBBuuuuuu111110 */
+{ "tr", 0x3861003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, UIMM6_20 }, { C_F }},
+
+/* tr<.f> 0,b,limm   00111bbb00100001FBBB111110111110 */
+{ "tr", 0x38210fbe, 0xf8ff0fff, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, LIMM }, { C_F }},
+
+/* tr<.f> a,b,limm   00111bbb00100001FBBB111110AAAAAA */
+{ "tr", 0x38210f80, 0xf8ff0fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, LIMM }, { C_F }},
+
+/* tr<.f> a,limm,limm   0011111000100001F111111110AAAAAA */
+{ "tr", 0x3e217f80, 0xffff7fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, LIMMdup }, { C_F }},
+
+/* tr<.f> a,limm,u6   0011111001100001F111uuuuuuAAAAAA */
+{ "tr", 0x3e617000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, UIMM6_20 }, { C_F }},
+
+/* tr<.f> 0,limm,u6   0011111001100001F111uuuuuu111110 */
+{ "tr", 0x3e61703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, UIMM6_20 }, { C_F }},
+
+/* utf8 a,b,c       00111bbb00100011FBBBCCCCCCAAAAAA */
+{ "utf8", 0x38220000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, RC }, { C_F }},
+
+/* utf8 a,limm,c    0011111000100011F111CCCCCCAAAAAA */
+{ "utf8", 0x3e227000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, RC }, { C_F }},
+
+/* utf8 a,b,u6      00111bbb01100011FBBBuuuuuuAAAAAA */
+{ "utf8", 0x38620000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, UIMM6_20 }, { C_F }},
+
+/* utf8 0,b,c       00111bbb00100011FBBBCCCCCC111110 */
+{ "utf8", 0x3822003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, RC }, { C_F }},
+
+/* utf8 0,limm,c    0011111000100011F111CCCCCC111110 */
+{ "utf8", 0x3e22703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, RC }, { C_F }},
+
+/* utf8 0,b,u6      00111bbb01100011FBBBuuuuuu111110 */
+{ "utf8", 0x3862003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, UIMM6_20 }, { C_F }},
+
+/* utf8 0,b,limm    00111bbb00100011FBBB111110111110 */
+{ "utf8", 0x38220fbe, 0xf8ff0fff, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, LIMM }, { C_F }},
+
+/* utf8 a,b,limm    00111bbb00100011FBBB111110AAAAAA */
+{ "utf8", 0x38220f80, 0xf8ff0fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, LIMM }, { C_F }},
+
+/* utf8 a,limm,limm 0011111000100011F111111110AAAAAA */
+{ "utf8", 0x3e227f80, 0xffff7fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, LIMMdup }, { C_F }},
+
+/* utf8 a,limm,u6   0011111001100011F111uuuuuuAAAAAA */
+{ "utf8", 0x3e627000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, UIMM6_20 }, { C_F }},
+
+/* utf8 0,limm,u6   0011111001100011F111uuuuuu111110 */
+{ "utf8", 0x3e62703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, UIMM6_20 }, { C_F }},
+
+/* e4by dst,src1,src2,index0,index1,index2,index3 */
+{ "e4by", 0x581d0000, 0xf81f0000, ARC_OPCODE_NPS400, DPI, NONE, { NPS_DPI_DST, NPS_DPI_SRC1_3B, NPS_R_SRC2_3B, NPS_E4BY_INDEX0, NPS_E4BY_INDEX1, NPS_E4BY_INDEX2, NPS_E4BY_INDEX3 }, { 0 }},
+
+/* addf<.f> a,b,c       00111bbb00100011FBBBCCCCCCAAAAAA */
+{ "addf", 0x38230000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, RC }, { C_F }},
+
+/* addf<.f> a,limm,c    0011111000100011F111CCCCCCAAAAAA */
+{ "addf", 0x3e237000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, RC }, { C_F }},
+
+/* addf<.f> a,b,u6      00111bbb01100011FBBBuuuuuuAAAAAA */
+{ "addf", 0x38630000, 0xf8ff0000, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, UIMM6_20 }, { C_F }},
+
+/* addf<.f> 0,b,c       00111bbb00100011FBBBCCCCCC111110 */
+{ "addf", 0x3823003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, RC }, { C_F }},
+
+/* addf<.f> 0,limm,c    0011111000100011F111CCCCCC111110 */
+{ "addf", 0x3e23703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, RC }, { C_F }},
+
+/* addf<.f> 0,b,u6      00111bbb01100011FBBBuuuuuu111110 */
+{ "addf", 0x3863003e, 0xf8ff003f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, UIMM6_20 }, { C_F }},
+
+/* addf<.f> 0,b,limm    00111bbb00100011FBBB111110111110 */
+{ "addf", 0x38230fbe, 0xf8ff0fff, ARC_OPCODE_NPS400, DPI, NONE, { ZA, RB, LIMM }, { C_F }},
+
+/* addf<.f> a,b,limm    00111bbb00100011FBBB111110AAAAAA */
+{ "addf", 0x38230f80, 0xf8ff0fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, RB, LIMM }, { C_F }},
+
+/* addf<.f> a,limm,limm 0011111000100011F111111110AAAAAA */
+{ "addf", 0x3e237f80, 0xffff7fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, LIMMdup }, { C_F }},
+
+/* addf<.f> a,limm,u6   0011111001100011F111uuuuuuAAAAAA */
+{ "addf", 0x3e637000, 0xffff7000, ARC_OPCODE_NPS400, DPI, NONE, { RA, LIMM, UIMM6_20 }, { C_F }},
+
+/* addf<.f> 0,limm,u6   0011111001100011F111uuuuuu111110 */
+{ "addf", 0x3e63703e, 0xffff703f, ARC_OPCODE_NPS400, DPI, NONE, { ZA, LIMM, UIMM6_20 }, { C_F }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[b]       00010bbb00000000SBBB10011XAAAAAA */
+{ "ldbit", 0x10000980, 0xf8ff8980, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, RB, BRAKETdup }, { C_NPS_LDBIT_X_1, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL1 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[b,s9]    00010bbbssssssssSBBB10011XAAAAAA */
+{ "ldbit", 0x10000980, 0xf8000980, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, RB, SIMM9_8, BRAKETdup }, { C_NPS_LDBIT_X_1, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL1 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[limm]    0001011000000000011110011XAAAAAA */
+{ "ldbit", 0x16007980, 0xfffff980, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, LIMM, BRAKETdup }, { C_NPS_LDBIT_X_1, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL1 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[limm,s9] 00010110ssssssssS11110011XAAAAAA */
+{ "ldbit", 0x16007980, 0xff007980, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, LIMM, SIMM9_8, BRAKETdup }, { C_NPS_LDBIT_X_1, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL1 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[b,c]     00100bbb0011011X1BBBCCCCCCAAAAAA */
+{ "ldbit", 0x20368000, 0xf83e8000, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, RB, RC, BRAKETdup }, { C_NPS_LDBIT_X_2, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL2 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[b,limm]  00100bbb0011011X1BBB111110AAAAAA */
+{ "ldbit", 0x20368f80, 0xf83e8fc0, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, RB, LIMM, BRAKETdup }, { C_NPS_LDBIT_X_2, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL2 }},
+
+/* ldbit<.x2|.x4>.di<.cl> a,[limm,c]  001001100011011X1111CCCCCCAAAAAA */
+{ "ldbit", 0x2636f000, 0xff3ef000, ARC_OPCODE_NPS400, DPI, NONE, { RA, BRAKET, LIMM, RC, BRAKETdup }, { C_NPS_LDBIT_X_2, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL2 }},
 
 /****                  Pipeline Control Instructions                  ****/
 

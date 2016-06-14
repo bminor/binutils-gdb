@@ -1,3 +1,15 @@
+2016-06-14  John Baldwin  <jhb@FreeBSD.org>
+
+	* v850-tdep.c (v850_use_struct_convention): Trim type length checks.
+
+2016-06-14  John Baldwin  <jhb@FreeBSD.org>
+
+	* tui/tui-stack.c (tui_show_frame_info): Fix type mismatch.
+
+2016-06-14  John Baldwin  <jhb@FreeBSD.org>
+
+	* rs6000-tdep.c (ppc_process_record_op31): Initialize ra.
+
 2016-06-13  Nick Clifton  <nickc@redhat.com>
 
 	* gdbtypes.c (replace_type): Fix assertion.

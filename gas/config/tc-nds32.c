@@ -5610,7 +5610,7 @@ nds32_get_align (addressT address, int align)
 {
   addressT mask, new_address;
 
-  mask = ~((~0) << align);
+  mask = ~((~0U) << align);
   new_address = (address + mask) & (~mask);
   return (new_address - address);
 }

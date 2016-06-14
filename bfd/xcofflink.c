@@ -997,7 +997,7 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
   n->next = NULL;
 
-  if (abfd->my_archive == NULL)
+  if (abfd->my_archive == NULL || bfd_is_thin_archive (abfd->my_archive))
     {
       if (!bfd_xcoff_split_import_path (abfd, abfd->filename,
 					&n->path, &n->file))

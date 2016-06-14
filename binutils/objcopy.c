@@ -221,7 +221,7 @@ static enum
 } do_debug_sections = nothing;
 
 /* Whether to generate ELF common symbols with the STT_COMMON type.  */
-static enum bfd_link_discard do_elf_stt_common = unchanged;
+static enum bfd_link_elf_stt_common do_elf_stt_common = unchanged;
 
 /* Whether to change the leading character in symbol names.  */
 static bfd_boolean change_leading_char = FALSE;

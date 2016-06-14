@@ -87,13 +87,6 @@ typedef struct
   unsigned char	       condition : 3;
 } MSP430_Opcode_Operand;
 
-typedef enum
-{
-  MSP430_Byte = 0,
-  MSP430_Word,
-  MSP430_Addr
-} MSP430_Size;
-
 /* These numerically match the bit encoding.  */
 typedef enum
 {
@@ -125,7 +118,7 @@ typedef struct
   unsigned		repeats:5;	/* Contains COUNT-1, or register number.  */
   int			n_bytes;	/* Opcode size in BYTES.  */
   char *		syntax;
-  MSP430_Size		size;		/* Operand size in BITS.  */
+  int			size;		/* Operand size in BITS.  */
   MSP430_Condition	cond;
   /* By convention, these are [0]destination, [1]source.  */
   MSP430_Opcode_Operand	op[2];

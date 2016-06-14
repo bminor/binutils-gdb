@@ -49,6 +49,7 @@ typedef enum
     BITOP,
     NET,
     ACL,
+    DPI,
   } insn_class_t;
 
 /* Instruction Subclass.  */

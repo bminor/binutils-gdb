@@ -1,3 +1,39 @@
+2016-06-13  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-nps400-tbl.h: Add ldbit instruction.
+	* arc-opc.c: Add flag classes required for ldbit.
+
+2016-06-13  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-nps400-tbl.h: Add hash, hash.p[0-3], tr, utf8, e4by, and addf
+	* arc-opc.c: Add flag classes, insert/extract functions, and operands to
+	support the above instructions.
+
+2016-06-13  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-nps400-tbl.h: Add calcbsd, calcbxd, calckey, calcxkey, mxb,
+	imxb, addl, subl, andl, orl, xorl, andab, orab, lbdsize, bdlen, csms,
+	csma, cbba, zncv, and hofs.
+	* arc-opc.c: Add flag classes, insert/extract functions, and operands to
+	support the above instructions.
+
+2016-06-06  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-nps400-tbl.h: Add andab and orab instructions.
+
+2016-06-06  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-nps400-tbl.h: Add addl-like instructions.
+
+2016-06-06  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-nps400-tbl.h: Add mxb and imxb instructions.
+
+2016-06-06  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-nps400-tbl.h: Add calcbsd, calcbxd, calckey and calcxkey
+	instructions.
+
 2016-06-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-dis.c (option_use_insn_len_bits_p): New file scope

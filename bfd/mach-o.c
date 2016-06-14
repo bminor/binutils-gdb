@@ -5708,7 +5708,7 @@ bfd_mach_o_follow_dsym (bfd *abfd)
   if (abfd == NULL || bfd_get_flavour (abfd) != bfd_target_mach_o_flavour)
     return NULL;
 
-  if (abfd->my_archive)
+  if (abfd->my_archive && !bfd_is_thin_archive (abfd->my_archive))
     base_bfd = abfd->my_archive;
   /* BFD may have been opened from a stream. */
   if (base_bfd->filename == NULL)
