@@ -2093,56 +2093,52 @@ aarch64_imm_float_p (uint32_t imm)
     && ((imm & 0x7e000000) == pattern);	/* bits 25 - 29 == ~ bit 30.  */
 }
 
-/* Like aarch64_imm_float_p but for a double-precision floating-point value.
-
-   Return TRUE if the value encoded in IMM can be expressed in the AArch64
-   8-bit signed floating-point format with 3-bit exponent and normalized 4
-   bits of precision (i.e. can be used in an FMOV instruction); return the
-   equivalent single-precision encoding in *FPWORD.
-
-   Otherwise return FALSE.  */
+/* Return TRUE if the IEEE double value encoded in IMM can be expressed
+   as an IEEE float without any loss of precision.  Store the value in
+   *FPWORD if so.  */
 
 static bfd_boolean
-aarch64_double_precision_fmovable (uint64_t imm, uint32_t *fpword)
+can_convert_double_to_float (uint64_t imm, uint32_t *fpword)
 {
   /* If a double-precision floating-point value has the following bit
-     pattern, it can be expressed in the AArch64 8-bit floating-point
-     format:
+     pattern, it can be expressed in a float:
 
-     6 66655555555 554444444...21111111111
-     3 21098765432 109876543...098765432109876543210
-     n Eeeeeeeeexx xxxx00000...000000000000000000000
+     6 66655555555 5544 44444444 33333333 33222222 22221111 111111
+     3 21098765432 1098 76543210 98765432 10987654 32109876 54321098 76543210
+     n E~~~eeeeeee ssss ssssssss ssssssss SSS00000 00000000 00000000 00000000
 
-     where n, e and each x are either 0 or 1 independently, with
-     E == ~ e.  */
+       ----------------------------->     nEeeeeee esssssss ssssssss sssssSSS
+	 if Eeee_eeee != 1111_1111
+
+     where n, e, s and S are either 0 or 1 independently and where ~ is the
+     inverse of E.  */
 
   uint32_t pattern;
   uint32_t high32 = imm >> 32;
+  uint32_t low32 = imm;
 
-  /* Lower 32 bits need to be 0s.  */
-  if ((imm & 0xffffffff) != 0)
+  /* Lower 29 bits need to be 0s.  */
+  if ((imm & 0x1fffffff) != 0)
     return FALSE;
 
   /* Prepare the pattern for 'Eeeeeeeee'.  */
   if (((high32 >> 30) & 0x1) == 0)
-    pattern = 0x3fc00000;
+    pattern = 0x38000000;
   else
     pattern = 0x40000000;
 
-  if ((high32 & 0xffff) == 0			/* bits 32 - 47 are 0.  */
-      && (high32 & 0x7fc00000) == pattern)	/* bits 54 - 61 == ~ bit 62.  */
-    {
-      /* Convert to the single-precision encoding.
-         i.e. convert
-	   n Eeeeeeeeexx xxxx00000...000000000000000000000
-	 to
-	   n Eeeeeexx xxxx0000000000000000000.  */
-      *fpword = ((high32 & 0xfe000000)			/* nEeeeee.  */
-		 | (((high32 >> 16) & 0x3f) << 19));	/* xxxxxx.  */
-      return TRUE;
-    }
-  else
+  /* Check E~~~.  */
+  if ((high32 & 0x78000000) != pattern)
     return FALSE;
+
+  /* Check Eeee_eeee != 1111_1111.  */
+  if ((high32 & 0x7ff00000) == 0x47f00000)
+    return FALSE;
+
+  *fpword = ((high32 & 0xc0000000)		/* 1 n bit and 1 E bit.  */
+	     | ((high32 << 3) & 0x3ffffff8)	/* 7 e and 20 s bits.  */
+	     | (low32 >> 29));			/* 3 S bits.  */
+  return TRUE;
 }
 
 /* Parse a floating-point immediate.  Return TRUE on success and return the
@@ -2181,7 +2177,7 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
 
       if (dp_p)
 	{
-	  if (! aarch64_double_precision_fmovable (val, &fpword))
+	  if (!can_convert_double_to_float (val, &fpword))
 	    goto invalid_fp;
 	}
       else if ((uint64_t) val > 0xffffffff)
