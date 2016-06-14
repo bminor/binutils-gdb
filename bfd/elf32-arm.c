@@ -3520,6 +3520,11 @@ using_thumb_only (struct elf32_arm_link_hash_table *globals)
 
   arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
+  /* Force return logic to be reviewed for each new architecture.  */
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
+	      || arch == TAG_CPU_ARCH_V8M_BASE
+	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+
   if (arch == TAG_CPU_ARCH_V6_M
       || arch == TAG_CPU_ARCH_V6S_M
       || arch == TAG_CPU_ARCH_V7E_M
@@ -3535,9 +3540,25 @@ using_thumb_only (struct elf32_arm_link_hash_table *globals)
 static bfd_boolean
 using_thumb2 (struct elf32_arm_link_hash_table *globals)
 {
-  int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				       Tag_CPU_arch);
-  return arch == TAG_CPU_ARCH_V6T2 || arch >= TAG_CPU_ARCH_V7;
+  int arch;
+  int thumb_isa = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+					    Tag_THUMB_ISA_use);
+
+  if (thumb_isa)
+    return thumb_isa == 2;
+
+  arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  /* Force return logic to be reviewed for each new architecture.  */
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
+	      || arch == TAG_CPU_ARCH_V8M_BASE
+	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+
+  return (arch == TAG_CPU_ARCH_V6T2
+	  || arch == TAG_CPU_ARCH_V7
+	  || arch == TAG_CPU_ARCH_V7E_M
+	  || arch == TAG_CPU_ARCH_V8
+	  || arch == TAG_CPU_ARCH_V8M_MAIN);
 }
 
 /* Create .plt, .rel(a).plt, .got, .got.plt, .rel(a).got, .dynbss, and
@@ -3742,19 +3763,16 @@ arch_has_arm_nop (struct elf32_arm_link_hash_table *globals)
 {
   const int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
 					     Tag_CPU_arch);
-  return arch == TAG_CPU_ARCH_V6T2
-	 || arch == TAG_CPU_ARCH_V6K
-	 || arch == TAG_CPU_ARCH_V7
-	 || arch == TAG_CPU_ARCH_V7E_M;
-}
 
-static bfd_boolean
-arch_has_thumb2_nop (struct elf32_arm_link_hash_table *globals)
-{
-  const int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-					     Tag_CPU_arch);
-  return (arch == TAG_CPU_ARCH_V6T2 || arch == TAG_CPU_ARCH_V7
-	  || arch == TAG_CPU_ARCH_V7E_M);
+  /* Force return logic to be reviewed for each new architecture.  */
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
+	      || arch == TAG_CPU_ARCH_V8M_BASE
+	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+
+  return (arch == TAG_CPU_ARCH_V6T2
+	  || arch == TAG_CPU_ARCH_V6K
+	  || arch == TAG_CPU_ARCH_V7
+	  || arch == TAG_CPU_ARCH_V8);
 }
 
 static bfd_boolean
@@ -8987,7 +9005,7 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
       if (!is_local)
 	/* add r0,pc; ldr r0, [r0]  */
 	insn = 0x44786800;
-      else if (arch_has_thumb2_nop (globals))
+      else if (using_thumb2 (globals))
 	/* nop.w */
 	insn = 0xf3af8000;
       else
@@ -9817,7 +9835,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if (h && h->root.type == bfd_link_hash_undefweak
 	    && plt_offset == (bfd_vma) -1)
 	  {
-	    if (arch_has_thumb2_nop (globals))
+	    if (thumb2)
 	      {
 		bfd_put_16 (input_bfd, 0xf3af, hit_data);
 		bfd_put_16 (input_bfd, 0x8000, hit_data + 2);

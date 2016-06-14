@@ -1,3 +1,16 @@
+2016-06-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (using_thumb_only): Force review of arch check logic for
+	new architecture.
+	(using_thumb2): Try Tag_THUMB_ISA_use first and check
+	for exact arch value then.  Force review of arch check logic for new
+	architecture.
+	(arch_has_arm_nop): Update and fix arch check logic.  Force review of
+	that logic for new architecture.
+	(arch_has_thumb2_nop): Remove.
+	(elf32_arm_tls_relax): Use using_thumb2 instead of above function.
+	(elf32_arm_final_link_relocate): Likewise but using thumb2.
+
 2016-06-14  Alan Modra  <amodra@gmail.com>
 
 	* bfd-in.h (bfd_my_archive): Delete.
