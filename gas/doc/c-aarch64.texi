@@ -154,6 +154,8 @@ automatically cause those extensions to be disabled.
  @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
 @item @code{simd} @tab ARMv8-A @tab ARMv8-A or later
  @tab Enable Advanced SIMD extensions.  This implies @code{fp}.
+@item @code{sve} @tab ARMv8-A @tab ARMv8-A or later
+ @tab Enable the Scalable Vector Extensions.
 @end multitable
 
 @node AArch64 Syntax

@@ -276,6 +276,17 @@ static const unsigned op_enum_table [] =
   382,
   404,
   406,
+  1162,
+  1167,
+  1160,
+  1159,
+  1163,
+  1170,
+  1172,
+  1173,
+  1169,
+  1175,
+  1174,
 };
 
 /* Given the opcode enumerator OP, return the pointer to the corresponding

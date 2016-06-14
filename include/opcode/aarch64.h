@@ -51,6 +51,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_F16	0x02000000	/* v8.2 FP16 instructions.  */
 #define AARCH64_FEATURE_RAS	0x04000000	/* RAS Extensions.  */
 #define AARCH64_FEATURE_PROFILE	0x08000000	/* Statistical Profiling.  */
+#define AARCH64_FEATURE_SVE	0x10000000	/* SVE instructions.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -586,6 +587,18 @@ enum aarch64_op
   OP_SXTL2,
   OP_UXTL,
   OP_UXTL2,
+
+  OP_MOV_P_P,
+  OP_MOV_Z_P_Z,
+  OP_MOV_Z_V,
+  OP_MOV_Z_Z,
+  OP_MOV_Z_Zi,
+  OP_MOVM_P_P_P,
+  OP_MOVS_P_P,
+  OP_MOVZS_P_P_P,
+  OP_MOVZ_P_P_P,
+  OP_NOTS_P_P_P_Z,
+  OP_NOT_P_P_P_Z,
 
   OP_TOTAL_NUM,		/* Pseudo.  */
 };

@@ -333,6 +333,9 @@ extract_field (enum aarch64_field_kind kind, aarch64_insn code,
 {
   return extract_field_2 (&fields[kind], code, mask);
 }
+
+extern aarch64_insn
+extract_fields (aarch64_insn code, aarch64_insn mask, ...);
 
 /* Inline functions selecting operand to do the encoding/decoding for a
    certain instruction bit-field.  */
