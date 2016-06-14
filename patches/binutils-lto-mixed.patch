@@ -394,10 +394,10 @@ index 0000000..5088e37
 +	(lto_run_tests): Add "LTO 4[acd]" tests.
 +	Build liblto-4.a.  Run "lto-4r-[abcd]" tests.
 diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index 7292492..8a927a8 100644
+index 2d6237c..cf2fdd6 100644
 --- a/bfd/bfd-in2.h
 +++ b/bfd/bfd-in2.h
-@@ -1098,6 +1098,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
+@@ -1090,6 +1090,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
  bfd_boolean bfd_fill_in_gnu_debuglink_section
     (bfd *abfd, struct bfd_section *sect, const char *filename);
  
@@ -407,7 +407,7 @@ index 7292492..8a927a8 100644
  /* Extracted from libbfd.c.  */
  
  /* Byte swapping macros for user section data.  */
-@@ -1666,6 +1669,9 @@ extern asection _bfd_std_section[4];
+@@ -1658,6 +1661,9 @@ extern asection _bfd_std_section[4];
  #define BFD_COM_SECTION_NAME "*COM*"
  #define BFD_IND_SECTION_NAME "*IND*"
  
@@ -417,7 +417,7 @@ index 7292492..8a927a8 100644
  /* Pointer to the common section.  */
  #define bfd_com_section_ptr (&_bfd_std_section[0])
  /* Pointer to the undefined section.  */
-@@ -6547,6 +6553,14 @@ struct bfd_build_id
+@@ -6539,6 +6545,14 @@ struct bfd_build_id
      bfd_byte data[1];
    };
  
@@ -432,7 +432,7 @@ index 7292492..8a927a8 100644
  struct bfd
  {
    /* The filename the application opened the BFD with.  */
-@@ -6724,6 +6738,9 @@ struct bfd
+@@ -6716,6 +6730,9 @@ struct bfd
    /* Set if this is a plugin output file.  */
    unsigned int lto_output : 1;
  
@@ -442,7 +442,7 @@ index 7292492..8a927a8 100644
    /* Set to dummy BFD created when claimed by a compiler plug-in
       library.  */
    bfd *plugin_dummy_bfd;
-@@ -6749,6 +6766,9 @@ struct bfd
+@@ -6741,6 +6758,9 @@ struct bfd
    /* The last section on the section list.  */
    struct bfd_section *section_last;
  
@@ -452,7 +452,7 @@ index 7292492..8a927a8 100644
    /* The number of sections.  */
    unsigned int section_count;
  
-@@ -7069,6 +7089,8 @@ bfd_boolean bfd_convert_section_contents
+@@ -7061,6 +7081,8 @@ bfd_boolean bfd_convert_section_contents
     (bfd *ibfd, asection *isec, bfd *obfd,
      bfd_byte **ptr, bfd_size_type *ptr_size);
  
@@ -462,7 +462,7 @@ index 7292492..8a927a8 100644
  symindex bfd_get_next_mapent
     (bfd *abfd, symindex previous, carsym **sym);
 diff --git a/bfd/bfd.c b/bfd/bfd.c
-index 7400c4e..d348d01 100644
+index 26143f9..40c6789 100644
 --- a/bfd/bfd.c
 +++ b/bfd/bfd.c
 @@ -57,6 +57,14 @@ CODE_FRAGMENT
@@ -500,7 +500,7 @@ index 7400c4e..d348d01 100644
  .  {* The number of sections.  *}
  .  unsigned int section_count;
  .
-@@ -2277,3 +2291,42 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
+@@ -2278,3 +2292,42 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
    *ptr_size = size;
    return TRUE;
  }
@@ -544,10 +544,10 @@ index 7400c4e..d348d01 100644
 +  return NULL;
 +}
 diff --git a/bfd/elf.c b/bfd/elf.c
-index fa4cc4c..9682050 100644
+index aaf2b53..2ef26f5 100644
 --- a/bfd/elf.c
 +++ b/bfd/elf.c
-@@ -2566,6 +2566,7 @@ static const struct bfd_elf_special_section special_sections_g[] =
+@@ -2564,6 +2564,7 @@ static const struct bfd_elf_special_section special_sections_g[] =
    { STRING_COMMA_LEN (".gnu.linkonce.b"), -2, SHT_NOBITS,      SHF_ALLOC + SHF_WRITE },
    { STRING_COMMA_LEN (".gnu.lto_"),       -1, SHT_PROGBITS,    SHF_EXCLUDE },
    { STRING_COMMA_LEN (".got"),             0, SHT_PROGBITS,    SHF_ALLOC + SHF_WRITE },
@@ -732,7 +732,7 @@ index b86bbab..e3bf284 100644
 +  return name;
 +}
 diff --git a/bfd/plugin.c b/bfd/plugin.c
-index c81a267..bfba75d 100644
+index 559fcd4..9bfecd1 100644
 --- a/bfd/plugin.c
 +++ b/bfd/plugin.c
 @@ -131,6 +131,146 @@ register_claim_file (ld_plugin_claim_file_handler handler)
@@ -985,7 +985,7 @@ index f0a66b2..fb96fe2 100644
  .#define bfd_com_section_ptr (&_bfd_std_section[0])
  .{* Pointer to the undefined section.  *}
 diff --git a/binutils/objcopy.c b/binutils/objcopy.c
-index 06fcea3..94b2983 100644
+index 76170cb..c63789d 100644
 --- a/binutils/objcopy.c
 +++ b/binutils/objcopy.c
 @@ -1117,35 +1117,6 @@ is_specified_symbol (const char *name, htab_t htab)
@@ -1363,10 +1363,10 @@ index a94e1df..cef730b 100644
 +LDEMUL_FINISH=spu_finish
  LDEMUL_CHOOSE_TARGET=gld${EMULATION_NAME}_choose_target
 diff --git a/ld/ldexp.c b/ld/ldexp.c
-index 22dd0d2..c6e4ed0 100644
+index 4e9c03f..0a64a6e 100644
 --- a/ld/ldexp.c
 +++ b/ld/ldexp.c
-@@ -1616,14 +1616,15 @@ align_n (bfd_vma value, bfd_vma align)
+@@ -1617,14 +1617,15 @@ align_n (bfd_vma value, bfd_vma align)
  }
  
  void
@@ -1387,7 +1387,7 @@ index 22dd0d2..c6e4ed0 100644
      einfo (_("%P%F: can not create hash table: %E\n"));
  }
  
-@@ -1658,7 +1659,8 @@ ldexp_finalize_syms (void)
+@@ -1659,7 +1660,8 @@ ldexp_finalize_syms (void)
  }
  
  void
@@ -1414,10 +1414,10 @@ index 0da3981..e6d4231 100644
  
  #endif
 diff --git a/ld/ldfile.c b/ld/ldfile.c
-index 8009ba7..54330f8 100644
+index e397737..307c3fe 100644
 --- a/ld/ldfile.c
 +++ b/ld/ldfile.c
-@@ -313,7 +313,9 @@ success:
+@@ -314,7 +314,9 @@ success:
        && !no_more_claiming
        && bfd_check_format (entry->the_bfd, bfd_object))
      plugin_maybe_claim (entry);
@@ -1428,7 +1428,7 @@ index 8009ba7..54330f8 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index 1cbba39..5864f9c 100644
+index b841408..5d91305 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -1490,7 +1490,7 @@ index 1cbba39..5864f9c 100644
    lang_list_init (stat_ptr);
  
    lang_list_init (&input_file_chain);
-@@ -2850,6 +2864,12 @@ load_symbols (lang_input_statement_type *entry,
+@@ -2852,6 +2866,12 @@ load_symbols (lang_input_statement_type *entry,
  		  loaded = FALSE;
  		}
  
@@ -1503,7 +1503,7 @@ index 1cbba39..5864f9c 100644
  	      subsbfd = member;
  	      if (!(*link_info.callbacks
  		    ->add_archive_element) (&link_info, member,
-@@ -6880,7 +6900,38 @@ lang_process (void)
+@@ -6886,7 +6906,38 @@ lang_process (void)
  	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
  	}
      }
@@ -1540,9 +1540,9 @@ index 1cbba39..5864f9c 100644
 +	}
 +    }
  
-   /* Make sure that nobody has tried to add a symbol to this list before now.  */
-   ASSERT (link_info.gc_sym_list == NULL);
-@@ -8391,3 +8442,965 @@ lang_print_memory_usage (void)
+   /* Make sure that nobody has tried to add a symbol to this list
+      before now.  */
+@@ -8400,3 +8451,965 @@ lang_print_memory_usage (void)
        printf ("    %6.2f%%\n", percent);
      }
  }
@@ -1621,7 +1621,7 @@ index 1cbba39..5864f9c 100644
 +  bfd *archive, *obfd, *oarchive;
 +  ufile_ptr origin = abfd->origin;
 +
-+  archive = bfd_my_archive (abfd);
++  archive = abfd->my_archive;
 +  for (c = cmdline_object_only_archive_list.head; c != NULL; c = next)
 +    {
 +      if (c->header.type != cmdline_is_bfd_enum)
@@ -1629,7 +1629,7 @@ index 1cbba39..5864f9c 100644
 +
 +      next = c->header.next;
 +      obfd = c->abfd.abfd;
-+      oarchive = bfd_my_archive (obfd);
++      oarchive = obfd->my_archive;
 +
 +      /* The list is grouped by archive file name and sorted by member
 +	 origin.  */
@@ -1666,7 +1666,7 @@ index 1cbba39..5864f9c 100644
 +      abort ();
 +    case cmdline_is_bfd_enum:
 +      abfd = (bfd *) data;
-+      archive = bfd_my_archive (abfd);
++      archive = abfd->my_archive;
 +      if (archive)
 +	break;
 +    case cmdline_is_file_enum:
@@ -1699,7 +1699,7 @@ index 1cbba39..5864f9c 100644
 +      next = c->header.next;
 +
 +      obfd = c->abfd.abfd;
-+      oarchive = bfd_my_archive (obfd);
++      oarchive = obfd->my_archive;
 +
 +      if (strcmp (archive->filename, oarchive->filename) == 0)
 +	{
@@ -1732,7 +1732,7 @@ index 1cbba39..5864f9c 100644
 +		  break;
 +		}
 +
-+	      narchive = bfd_my_archive (nbfd);
++	      narchive = nbfd->my_archive;
 +	      if (strcmp (archive->filename, narchive->filename) != 0)
 +		{
 +		  /* Insert it befor NEXT.  */
@@ -1789,7 +1789,7 @@ index 1cbba39..5864f9c 100644
 +	break;
 +      case cmdline_is_bfd_enum:
 +	abfd = c->abfd.abfd;
-+	if (bfd_my_archive (abfd))
++	if (abfd->my_archive)
 +	  abort ();
 +	lang_add_input_file (abfd->filename,
 +			     lang_input_file_is_file_enum, NULL);
@@ -1805,7 +1805,7 @@ index 1cbba39..5864f9c 100644
 +      next = c->header.next;
 +
 +      abfd = c->abfd.abfd;
-+      archive = bfd_my_archive (abfd);
++      archive = abfd->my_archive;
 +
 +      /* Add the first archive of the archive member group.  */
 +      lang_add_input_file (archive->filename,
@@ -1824,7 +1824,7 @@ index 1cbba39..5864f9c 100644
 +	  if (!next)
 +	    break;
 +	  nbfd = next->abfd.abfd;
-+	  narchive = bfd_my_archive (nbfd);
++	  narchive = nbfd->my_archive;
 +	}
 +      while (strcmp (archive->filename, narchive->filename) == 0);
 +    }
@@ -2580,7 +2580,7 @@ index cf943e4..b34e760 100644
    OPTION_DEFAULT_SCRIPT,
    OPTION_PRINT_OUTPUT_FORMAT,
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index f16e33b..788464e 100644
+index e7a8dff..fdac66c 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
 @@ -219,6 +219,9 @@ main (int argc, char **argv)
@@ -2650,7 +2650,7 @@ index f16e33b..788464e 100644
  
    /* Even if we're producing relocatable output, some non-fatal errors should
 @@ -466,6 +442,8 @@ main (int argc, char **argv)
-       if (! bfd_close (link_info.output_bfd))
+       if (!bfd_close (link_info.output_bfd))
  	einfo (_("%F%B: final close failed: %E\n"), link_info.output_bfd);
  
 +      link_info.output_bfd = NULL;
@@ -2678,7 +2678,7 @@ index f16e33b..788464e 100644
  
    ldlang_add_file (input);
  
-@@ -1481,3 +1464,38 @@ notice (struct bfd_link_info *info,
+@@ -1484,3 +1467,38 @@ notice (struct bfd_link_info *info,
  
    return TRUE;
  }
@@ -2753,7 +2753,7 @@ index 6e0f932..8ed728d 100644
  	case 'q':
  	  link_info.emitrelocations = TRUE;
 diff --git a/ld/plugin.c b/ld/plugin.c
-index c951995..5c6de21 100644
+index ebde25f..21e8886 100644
 --- a/ld/plugin.c
 +++ b/ld/plugin.c
 @@ -57,6 +57,9 @@ extern int errno;
@@ -2766,7 +2766,7 @@ index c951995..5c6de21 100644
  /* The suffix to append to the name of the real (claimed) object file
     when generating a dummy BFD to hold the IR symbols sent from the
     plugin.  For cosmetic use only; appears in maps, crefs etc.  */
-@@ -1199,6 +1202,9 @@ plugin_maybe_claim (lang_input_statement_type *entry)
+@@ -1200,6 +1203,9 @@ plugin_maybe_claim (lang_input_statement_type *entry)
      {
        bfd *abfd = entry->the_bfd->plugin_dummy_bfd;
  
@@ -2775,8 +2775,8 @@ index c951995..5c6de21 100644
 +
        /* Discard the real file's BFD and substitute the dummy one.  */
  
-       /* BFD archive handling caches elements so we can't call
-@@ -1244,14 +1250,17 @@ plugin_call_cleanup (void)
+       /* We can't call bfd_close on archives.  BFD archive handling
+@@ -1247,14 +1253,17 @@ plugin_call_cleanup (void)
      {
        if (curplug->cleanup_handler && !curplug->cleanup_done)
  	{
