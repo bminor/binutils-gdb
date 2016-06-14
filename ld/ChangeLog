@@ -1,5 +1,17 @@
 2016-06-14  Alan Modra  <amodra@gmail.com>
 
+	* ldbuildid.c: Formatting.
+	* ldcref.c: Formatting.
+	* ldctor.c: Formatting.
+	* ldemul.c: Formatting.
+	* ldexp.c: Formatting.
+	* ldfile.c: Formatting.
+	* ldlang.c: Formatting.
+	* ldmain.c: Formatting.
+	* ldwrite.c: Formatting.
+
+2016-06-14  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.c: Expand uses of bfd_my_archive.
 	* ldmain.c: Likewise.
 	* ldmisc.c: Likewise.

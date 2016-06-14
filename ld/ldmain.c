@@ -76,7 +76,7 @@ char *program_name;
 const char *ld_sysroot;
 
 /* The canonical representation of ld_sysroot.  */
-char * ld_canon_sysroot;
+char *ld_canon_sysroot;
 int ld_canon_sysroot_len;
 
 /* Set by -G argument, for targets like MIPS ELF.  */
@@ -232,7 +232,7 @@ main (int argc, char **argv)
      this permits the linker to be configured for a particular target,
      and linked against a shared BFD library which was configured for
      a different target.  The macro TARGET is defined by Makefile.  */
-  if (! bfd_set_default_target (TARGET))
+  if (!bfd_set_default_target (TARGET))
     {
       einfo (_("%X%P: can't set BFD default target to `%s': %E\n"), TARGET);
       xexit (1);
@@ -440,7 +440,7 @@ main (int argc, char **argv)
     lang_print_memory_usage ();
 #if 0
   {
-    struct bfd_link_hash_entry * h;
+    struct bfd_link_hash_entry *h;
 
     h = bfd_link_hash_lookup (link_info.hash, "__image_base__", 0,0,1);
     fprintf (stderr, "lookup = %p val %lx\n", h, h ? h->u.def.value : 1);
@@ -463,7 +463,7 @@ main (int argc, char **argv)
     }
   else
     {
-      if (! bfd_close (link_info.output_bfd))
+      if (!bfd_close (link_info.output_bfd))
 	einfo (_("%F%B: final close failed: %E\n"), link_info.output_bfd);
 
       /* If the --force-exe-suffix is enabled, and we're making an
@@ -654,8 +654,8 @@ add_ysym (const char *name)
 {
   if (link_info.notice_hash == NULL)
     {
-      link_info.notice_hash =
-          (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
+      link_info.notice_hash
+	= (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
       if (!bfd_hash_table_init_n (link_info.notice_hash,
 				  bfd_hash_newfunc,
 				  sizeof (struct bfd_hash_entry),
@@ -673,10 +673,10 @@ add_ignoresym (struct bfd_link_info *info, const char *name)
   if (info->ignore_hash == NULL)
     {
       info->ignore_hash = xmalloc (sizeof (struct bfd_hash_table));
-      if (! bfd_hash_table_init_n (info->ignore_hash,
-				   bfd_hash_newfunc,
-				   sizeof (struct bfd_hash_entry),
-				   61))
+      if (!bfd_hash_table_init_n (info->ignore_hash,
+				  bfd_hash_newfunc,
+				  sizeof (struct bfd_hash_entry),
+				  61))
 	einfo (_("%P%F: bfd_hash_table_init failed: %E\n"));
     }
 
@@ -691,8 +691,8 @@ add_wrap (const char *name)
 {
   if (link_info.wrap_hash == NULL)
     {
-      link_info.wrap_hash =
-          (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
+      link_info.wrap_hash
+	= (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
       if (!bfd_hash_table_init_n (link_info.wrap_hash,
 				  bfd_hash_newfunc,
 				  sizeof (struct bfd_hash_entry),
@@ -744,7 +744,7 @@ add_keepsyms_file (const char *filename)
 	{
 	  size_t len = 0;
 
-	  while (! ISSPACE (c) && c != EOF)
+	  while (!ISSPACE (c) && c != EOF)
 	    {
 	      buf[len] = c;
 	      ++len;
@@ -855,7 +855,7 @@ add_archive_element (struct bfd_link_info *info,
 	    }
 	}
 
-      if (! header_printed)
+      if (!header_printed)
 	{
 	  char buf[100];
 
@@ -952,10 +952,10 @@ multiple_definition (struct bfd_link_info *info,
      FIXME: It would be cleaner to somehow ignore symbols defined in
      sections which are being discarded.  */
   if ((osec->output_section != NULL
-       && ! bfd_is_abs_section (osec)
+       && !bfd_is_abs_section (osec)
        && bfd_is_abs_section (osec->output_section))
       || (nsec->output_section != NULL
-	  && ! bfd_is_abs_section (nsec)
+	  && !bfd_is_abs_section (nsec)
 	  && bfd_is_abs_section (nsec->output_section)))
     return;
 
@@ -1083,7 +1083,7 @@ add_to_set (struct bfd_link_info *info ATTRIBUTE_UNUSED,
     einfo (_("%P: warning: global constructor %s used\n"),
 	   h->root.string);
 
-  if (! config.build_constructors)
+  if (!config.build_constructors)
     return;
 
   ldctor_add_set_entry (h, reloc, NULL, section, value);
@@ -1118,7 +1118,7 @@ constructor_callback (struct bfd_link_info *info,
   if (config.warn_constructors)
     einfo (_("%P: warning: global constructor %s used\n"), name);
 
-  if (! config.build_constructors)
+  if (!config.build_constructors)
     return;
 
   /* Ensure that BFD_RELOC_CTOR exists now, so that we can give a
@@ -1193,7 +1193,7 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 {
   /* This is a hack to support warn_multiple_gp.  FIXME: This should
      have a cleaner interface, but what?  */
-  if (! config.warn_multiple_gp
+  if (!config.warn_multiple_gp
       && strcmp (warning, "using multiple gp values") == 0)
     return;
 
@@ -1203,7 +1203,7 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
     einfo ("%P: %s%s\n", _("warning: "), warning);
   else if (symbol == NULL)
     einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
-  else if (! symbol_warning (warning, symbol, abfd))
+  else if (!symbol_warning (warning, symbol, abfd))
     {
       bfd *b;
       /* Search all input files for a reference to SYMBOL.  */
@@ -1391,12 +1391,14 @@ reloc_overflow (struct bfd_link_info *info,
 	{
 	case bfd_link_hash_undefined:
 	case bfd_link_hash_undefweak:
-	  einfo (_(" relocation truncated to fit: %s against undefined symbol `%T'"),
+	  einfo (_(" relocation truncated to fit: "
+		   "%s against undefined symbol `%T'"),
 		 reloc_name, entry->root.string);
 	  break;
 	case bfd_link_hash_defined:
 	case bfd_link_hash_defweak:
-	  einfo (_(" relocation truncated to fit: %s against symbol `%T' defined in %A section in %B"),
+	  einfo (_(" relocation truncated to fit: "
+		   "%s against symbol `%T' defined in %A section in %B"),
 		 reloc_name, entry->root.string,
 		 entry->u.def.section,
 		 entry->u.def.section == bfd_abs_section_ptr
