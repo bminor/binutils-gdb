@@ -598,7 +598,9 @@ extern aarch64_opcode aarch64_opcode_table[];
 #define F_OD(X) (((X) & 0x7) << 24)
 /* Instruction has the field of 'sz'.  */
 #define F_LSE_SZ (1 << 27)
-/* Next bit is 28.  */
+/* Require an exact qualifier match, even for NIL qualifiers.  */
+#define F_STRICT (1ULL << 28)
+/* Next bit is 29.  */
 
 static inline bfd_boolean
 alias_opcode_p (const aarch64_opcode *opcode)
