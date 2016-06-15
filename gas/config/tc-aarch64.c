@@ -690,15 +690,21 @@ aarch64_check_reg_type (const reg_entry *reg, aarch64_reg_type type)
     }
 }
 
-/* Parse a register and return PARSE_FAIL if the register is not of type R_Z_SP.
-   Return the register number otherwise.  *ISREG32 is set to one if the
-   register is 32-bit wide; *ISREGZERO is set to one if the register is
-   of type Z_32 or Z_64.
+/* Try to parse a base or offset register.  ACCEPT_SP says whether {W}SP
+   should be considered valid and ACCEPT_RZ says whether zero registers
+   should be considered valid.
+
+   Return the register number on success, setting *QUALIFIER to the
+   register qualifier and *ISREGZERO to whether the register is a zero
+   register.  Return PARSE_FAIL otherwise.
+
    Note that this function does not issue any diagnostics.  */
 
 static int
-aarch64_reg_parse_32_64 (char **ccp, int reject_sp, int reject_rz,
-			 int *isreg32, int *isregzero)
+aarch64_reg_parse_32_64 (char **ccp, bfd_boolean accept_sp,
+			 bfd_boolean accept_rz,
+			 aarch64_opnd_qualifier_t *qualifier,
+			 bfd_boolean *isregzero)
 {
   char *str = *ccp;
   const reg_entry *reg = parse_reg (&str);
@@ -713,22 +719,28 @@ aarch64_reg_parse_32_64 (char **ccp, int reject_sp, int reject_rz,
     {
     case REG_TYPE_SP_32:
     case REG_TYPE_SP_64:
-      if (reject_sp)
+      if (!accept_sp)
 	return PARSE_FAIL;
-      *isreg32 = reg->type == REG_TYPE_SP_32;
-      *isregzero = 0;
+      *qualifier = (reg->type == REG_TYPE_SP_32
+		    ? AARCH64_OPND_QLF_W
+		    : AARCH64_OPND_QLF_X);
+      *isregzero = FALSE;
       break;
     case REG_TYPE_R_32:
     case REG_TYPE_R_64:
-      *isreg32 = reg->type == REG_TYPE_R_32;
-      *isregzero = 0;
+      *qualifier = (reg->type == REG_TYPE_R_32
+		    ? AARCH64_OPND_QLF_W
+		    : AARCH64_OPND_QLF_X);
+      *isregzero = FALSE;
       break;
     case REG_TYPE_Z_32:
     case REG_TYPE_Z_64:
-      if (reject_rz)
+      if (!accept_rz)
 	return PARSE_FAIL;
-      *isreg32 = reg->type == REG_TYPE_Z_32;
-      *isregzero = 1;
+      *qualifier = (reg->type == REG_TYPE_Z_32
+		    ? AARCH64_OPND_QLF_W
+		    : AARCH64_OPND_QLF_X);
+      *isregzero = TRUE;
       break;
     default:
       return PARSE_FAIL;
@@ -3033,12 +3045,13 @@ parse_shifter_operand (char **str, aarch64_opnd_info *operand,
 		       enum parse_shift_mode mode)
 {
   int reg;
-  int isreg32, isregzero;
+  aarch64_opnd_qualifier_t qualifier;
+  bfd_boolean isregzero;
   enum aarch64_operand_class opd_class
     = aarch64_get_operand_class (operand->type);
 
-  if ((reg =
-       aarch64_reg_parse_32_64 (str, 0, 0, &isreg32, &isregzero)) != PARSE_FAIL)
+  if ((reg = aarch64_reg_parse_32_64 (str, TRUE, TRUE, &qualifier,
+				      &isregzero)) != PARSE_FAIL)
     {
       if (opd_class == AARCH64_OPND_CLASS_IMMEDIATE)
 	{
@@ -3053,7 +3066,7 @@ parse_shifter_operand (char **str, aarch64_opnd_info *operand,
 	}
 
       operand->reg.regno = reg;
-      operand->qualifier = isreg32 ? AARCH64_OPND_QLF_W : AARCH64_OPND_QLF_X;
+      operand->qualifier = qualifier;
 
       /* Accept optional shift operation on register.  */
       if (! skip_past_comma (str))
@@ -3193,7 +3206,9 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 {
   char *p = *str;
   int reg;
-  int isreg32, isregzero;
+  aarch64_opnd_qualifier_t base_qualifier;
+  aarch64_opnd_qualifier_t offset_qualifier;
+  bfd_boolean isregzero;
   expressionS *exp = &inst.reloc.exp;
 
   if (! skip_past_char (&p, '['))
@@ -3271,8 +3286,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
   /* [ */
 
   /* Accept SP and reject ZR */
-  reg = aarch64_reg_parse_32_64 (&p, 0, 1, &isreg32, &isregzero);
-  if (reg == PARSE_FAIL || isreg32)
+  reg = aarch64_reg_parse_32_64 (&p, TRUE, FALSE, &base_qualifier, &isregzero);
+  if (reg == PARSE_FAIL || base_qualifier == AARCH64_OPND_QLF_W)
     {
       set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_64)));
       return FALSE;
@@ -3286,7 +3301,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
       operand->addr.preind = 1;
 
       /* Reject SP and accept ZR */
-      reg = aarch64_reg_parse_32_64 (&p, 1, 0, &isreg32, &isregzero);
+      reg = aarch64_reg_parse_32_64 (&p, FALSE, TRUE, &offset_qualifier,
+				     &isregzero);
       if (reg != PARSE_FAIL)
 	{
 	  /* [Xn,Rm  */
@@ -3309,13 +3325,13 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	      || operand->shifter.kind == AARCH64_MOD_LSL
 	      || operand->shifter.kind == AARCH64_MOD_SXTX)
 	    {
-	      if (isreg32)
+	      if (offset_qualifier == AARCH64_OPND_QLF_W)
 		{
 		  set_syntax_error (_("invalid use of 32-bit register offset"));
 		  return FALSE;
 		}
 	    }
-	  else if (!isreg32)
+	  else if (offset_qualifier == AARCH64_OPND_QLF_X)
 	    {
 	      set_syntax_error (_("invalid use of 64-bit register offset"));
 	      return FALSE;
@@ -3399,11 +3415,12 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	}
 
       if (accept_reg_post_index
-	  && (reg = aarch64_reg_parse_32_64 (&p, 1, 1, &isreg32,
+	  && (reg = aarch64_reg_parse_32_64 (&p, FALSE, FALSE,
+					     &offset_qualifier,
 					     &isregzero)) != PARSE_FAIL)
 	{
 	  /* [Xn],Xm */
-	  if (isreg32)
+	  if (offset_qualifier == AARCH64_OPND_QLF_W)
 	    {
 	      set_syntax_error (_("invalid 32-bit register offset"));
 	      return FALSE;
@@ -3723,19 +3740,16 @@ parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
       }								\
   } while (0)
 
-#define po_int_reg_or_fail(reject_sp, reject_rz) do {		\
-    val = aarch64_reg_parse_32_64 (&str, reject_sp, reject_rz,	\
-                                   &isreg32, &isregzero);	\
+#define po_int_reg_or_fail(accept_sp, accept_rz) do {		\
+    val = aarch64_reg_parse_32_64 (&str, accept_sp, accept_rz,	\
+                                   &qualifier, &isregzero);	\
     if (val == PARSE_FAIL)					\
       {								\
 	set_default_error ();					\
 	goto failure;						\
       }								\
     info->reg.regno = val;					\
-    if (isreg32)						\
-      info->qualifier = AARCH64_OPND_QLF_W;			\
-    else							\
-      info->qualifier = AARCH64_OPND_QLF_X;			\
+    info->qualifier = qualifier;				\
   } while (0)
 
 #define po_imm_nc_or_fail() do {				\
@@ -4993,10 +5007,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   for (i = 0; operands[i] != AARCH64_OPND_NIL; i++)
     {
       int64_t val;
-      int isreg32, isregzero;
+      bfd_boolean isregzero;
       int comma_skipped_p = 0;
       aarch64_reg_type rtype;
       struct vector_type_el vectype;
+      aarch64_opnd_qualifier_t qualifier;
       aarch64_opnd_info *info = &inst.base.operands[i];
 
       DEBUG_TRACE ("parse operand %d", i);
@@ -5032,12 +5047,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Ra:
 	case AARCH64_OPND_Rt_SYS:
 	case AARCH64_OPND_PAIRREG:
-	  po_int_reg_or_fail (1, 0);
+	  po_int_reg_or_fail (FALSE, TRUE);
 	  break;
 
 	case AARCH64_OPND_Rd_SP:
 	case AARCH64_OPND_Rn_SP:
-	  po_int_reg_or_fail (0, 1);
+	  po_int_reg_or_fail (TRUE, FALSE);
 	  break;
 
 	case AARCH64_OPND_Rm_EXT:
