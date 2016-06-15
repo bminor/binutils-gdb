@@ -2149,15 +2149,12 @@ elf_i386_check_relocs (bfd *abfd,
 	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
 	    eh->has_non_got_reloc = 1;
 do_relocation:
-	  /* STT_GNU_IFUNC symbol must go through PLT even if it is
-	     locally defined and undefined symbol may turn out to be
-	     a STT_GNU_IFUNC symbol later.  */
+	  /* We are called after all symbols have been resolved.  Only
+	     relocation against STT_GNU_IFUNC symbol must go through
+	     PLT.  */
 	  if (h != NULL
 	      && (bfd_link_executable (info)
-		  || ((h->type == STT_GNU_IFUNC
-		       || h->root.type == bfd_link_hash_undefweak
-		       || h->root.type == bfd_link_hash_undefined)
-		      && SYMBOLIC_BIND (info, h))))
+		  || h->type == STT_GNU_IFUNC))
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this
