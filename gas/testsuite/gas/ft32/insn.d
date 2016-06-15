@@ -13,7 +13,7 @@ Disassembly of section .text:
    8:	f0 01 00 44 	440001f0 add.l \$r0,\$r0,\$r31
    c:	40 00 11 44 	44110040 add.l \$r1,\$r2,\$r4
   10:	00 00 88 44 	44880000 add.l \$r8,\$r16,\$r0
-  14:	00 60 f0 45 	45f06000 add.l \$r31,\$r0,0 <pmlabel>
+  14:	00 60 f0 45 	45f06000 add.l \$r31,\$r0,200 <pmlabel.*>
   18:	00 c0 0f 44 	440fc000 move.l \$r0,\$r31
   1c:	10 c0 0f 44 	440fc010 add.l \$r0,\$r31,1 <pmlabel\+0x1>
   20:	f0 df 0f 44 	440fdff0 add.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
@@ -26,8 +26,8 @@ Disassembly of section .text:
   3c:	f2 01 00 44 	440001f2 sub.l \$r0,\$r0,\$r31
   40:	42 00 11 44 	44110042 sub.l \$r1,\$r2,\$r4
   44:	02 00 88 44 	44880002 sub.l \$r8,\$r16,\$r0
-  48:	02 60 f0 45 	45f06002 sub.l \$r31,\$r0,0 <pmlabel>
-  4c:	02 c0 0f 44 	440fc002 sub.l \$r0,\$r31,0 <pmlabel>
+  48:	02 60 f0 45 	45f06002 sub.l \$r31,\$r0,200 <pmlabel.*>
+  4c:	02 c0 0f 44 	440fc002 sub.l \$r0,\$r31,0 <pmlabel.*>
   50:	12 c0 0f 44 	440fc012 sub.l \$r0,\$r31,1 <pmlabel\+0x1>
   54:	f2 df 0f 44 	440fdff2 sub.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
   58:	12 80 0f 42 	420f8012 sub.s \$r0,\$r31,\$r1
@@ -39,8 +39,8 @@ Disassembly of section .text:
   70:	f4 01 00 44 	440001f4 and.l \$r0,\$r0,\$r31
   74:	44 00 11 44 	44110044 and.l \$r1,\$r2,\$r4
   78:	04 00 88 44 	44880004 and.l \$r8,\$r16,\$r0
-  7c:	04 60 f0 45 	45f06004 and.l \$r31,\$r0,0 <pmlabel>
-  80:	04 c0 0f 44 	440fc004 and.l \$r0,\$r31,0 <pmlabel>
+  7c:	04 60 f0 45 	45f06004 and.l \$r31,\$r0,200 <pmlabel.*>
+  80:	04 c0 0f 44 	440fc004 and.l \$r0,\$r31,0 <pmlabel.*>
   84:	14 c0 0f 44 	440fc014 and.l \$r0,\$r31,1 <pmlabel\+0x1>
   88:	f4 df 0f 44 	440fdff4 and.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
   8c:	14 80 0f 42 	420f8014 and.s \$r0,\$r31,\$r1
@@ -52,8 +52,8 @@ Disassembly of section .text:
   a4:	f5 01 00 44 	440001f5 or.l \$r0,\$r0,\$r31
   a8:	45 00 11 44 	44110045 or.l \$r1,\$r2,\$r4
   ac:	05 00 88 44 	44880005 or.l \$r8,\$r16,\$r0
-  b0:	05 60 f0 45 	45f06005 or.l \$r31,\$r0,0 <pmlabel>
-  b4:	05 c0 0f 44 	440fc005 or.l \$r0,\$r31,0 <pmlabel>
+  b0:	05 60 f0 45 	45f06005 or.l \$r31,\$r0,200 <pmlabel.*>
+  b4:	05 c0 0f 44 	440fc005 or.l \$r0,\$r31,0 <pmlabel.*>
   b8:	15 c0 0f 44 	440fc015 or.l \$r0,\$r31,1 <pmlabel\+0x1>
   bc:	f5 df 0f 44 	440fdff5 or.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
   c0:	15 80 0f 42 	420f8015 or.s \$r0,\$r31,\$r1
@@ -65,8 +65,8 @@ Disassembly of section .text:
   d8:	f6 01 00 44 	440001f6 xor.l \$r0,\$r0,\$r31
   dc:	46 00 11 44 	44110046 xor.l \$r1,\$r2,\$r4
   e0:	06 00 88 44 	44880006 xor.l \$r8,\$r16,\$r0
-  e4:	06 60 f0 45 	45f06006 xor.l \$r31,\$r0,0 <pmlabel>
-  e8:	06 c0 0f 44 	440fc006 xor.l \$r0,\$r31,0 <pmlabel>
+  e4:	06 60 f0 45 	45f06006 xor.l \$r31,\$r0,200 <pmlabel.*>
+  e8:	06 c0 0f 44 	440fc006 xor.l \$r0,\$r31,0 <pmlabel.*>
   ec:	16 c0 0f 44 	440fc016 xor.l \$r0,\$r31,1 <pmlabel\+0x1>
   f0:	f6 df 0f 44 	440fdff6 xor.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
   f4:	16 80 0f 42 	420f8016 xor.s \$r0,\$r31,\$r1
@@ -78,8 +78,8 @@ Disassembly of section .text:
  10c:	f7 01 00 44 	440001f7 xnor.l \$r0,\$r0,\$r31
  110:	47 00 11 44 	44110047 xnor.l \$r1,\$r2,\$r4
  114:	07 00 88 44 	44880007 xnor.l \$r8,\$r16,\$r0
- 118:	07 60 f0 45 	45f06007 xnor.l \$r31,\$r0,0 <pmlabel>
- 11c:	07 c0 0f 44 	440fc007 xnor.l \$r0,\$r31,0 <pmlabel>
+ 118:	07 60 f0 45 	45f06007 xnor.l \$r31,\$r0,200 <pmlabel.*>
+ 11c:	07 c0 0f 44 	440fc007 xnor.l \$r0,\$r31,0 <pmlabel.*>
  120:	17 c0 0f 44 	440fc017 xnor.l \$r0,\$r31,1 <pmlabel\+0x1>
  124:	f7 df 0f 44 	440fdff7 xnor.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  128:	17 80 0f 42 	420f8017 xnor.s \$r0,\$r31,\$r1
@@ -91,8 +91,8 @@ Disassembly of section .text:
  140:	f8 01 00 44 	440001f8 ashl.l \$r0,\$r0,\$r31
  144:	48 00 11 44 	44110048 ashl.l \$r1,\$r2,\$r4
  148:	08 00 88 44 	44880008 ashl.l \$r8,\$r16,\$r0
- 14c:	08 60 f0 45 	45f06008 ashl.l \$r31,\$r0,0 <pmlabel>
- 150:	08 c0 0f 44 	440fc008 ashl.l \$r0,\$r31,0 <pmlabel>
+ 14c:	08 60 f0 45 	45f06008 ashl.l \$r31,\$r0,200 <pmlabel.*>
+ 150:	08 c0 0f 44 	440fc008 ashl.l \$r0,\$r31,0 <pmlabel.*>
  154:	18 c0 0f 44 	440fc018 ashl.l \$r0,\$r31,1 <pmlabel\+0x1>
  158:	f8 df 0f 44 	440fdff8 ashl.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  15c:	18 80 0f 42 	420f8018 ashl.s \$r0,\$r31,\$r1
@@ -104,8 +104,8 @@ Disassembly of section .text:
  174:	f9 01 00 44 	440001f9 lshr.l \$r0,\$r0,\$r31
  178:	49 00 11 44 	44110049 lshr.l \$r1,\$r2,\$r4
  17c:	09 00 88 44 	44880009 lshr.l \$r8,\$r16,\$r0
- 180:	09 60 f0 45 	45f06009 lshr.l \$r31,\$r0,0 <pmlabel>
- 184:	09 c0 0f 44 	440fc009 lshr.l \$r0,\$r31,0 <pmlabel>
+ 180:	09 60 f0 45 	45f06009 lshr.l \$r31,\$r0,200 <pmlabel.*>
+ 184:	09 c0 0f 44 	440fc009 lshr.l \$r0,\$r31,0 <pmlabel.*>
  188:	19 c0 0f 44 	440fc019 lshr.l \$r0,\$r31,1 <pmlabel\+0x1>
  18c:	f9 df 0f 44 	440fdff9 lshr.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  190:	19 80 0f 42 	420f8019 lshr.s \$r0,\$r31,\$r1
@@ -117,8 +117,8 @@ Disassembly of section .text:
  1a8:	fa 01 00 44 	440001fa ashr.l \$r0,\$r0,\$r31
  1ac:	4a 00 11 44 	4411004a ashr.l \$r1,\$r2,\$r4
  1b0:	0a 00 88 44 	4488000a ashr.l \$r8,\$r16,\$r0
- 1b4:	0a 60 f0 45 	45f0600a ashr.l \$r31,\$r0,0 <pmlabel>
- 1b8:	0a c0 0f 44 	440fc00a ashr.l \$r0,\$r31,0 <pmlabel>
+ 1b4:	0a 60 f0 45 	45f0600a ashr.l \$r31,\$r0,200 <pmlabel.*>
+ 1b8:	0a c0 0f 44 	440fc00a ashr.l \$r0,\$r31,0 <pmlabel.*>
  1bc:	1a c0 0f 44 	440fc01a ashr.l \$r0,\$r31,1 <pmlabel\+0x1>
  1c0:	fa df 0f 44 	440fdffa ashr.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  1c4:	1a 80 0f 42 	420f801a ashr.s \$r0,\$r31,\$r1
@@ -130,8 +130,8 @@ Disassembly of section .text:
  1dc:	f1 01 00 44 	440001f1 ror.l \$r0,\$r0,\$r31
  1e0:	41 00 11 44 	44110041 ror.l \$r1,\$r2,\$r4
  1e4:	01 00 88 44 	44880001 ror.l \$r8,\$r16,\$r0
- 1e8:	01 60 f0 45 	45f06001 ror.l \$r31,\$r0,0 <pmlabel>
- 1ec:	01 c0 0f 44 	440fc001 ror.l \$r0,\$r31,0 <pmlabel>
+ 1e8:	01 60 f0 45 	45f06001 ror.l \$r31,\$r0,200 <pmlabel.*>
+ 1ec:	01 c0 0f 44 	440fc001 ror.l \$r0,\$r31,0 <pmlabel.*>
  1f0:	11 c0 0f 44 	440fc011 ror.l \$r0,\$r31,1 <pmlabel\+0x1>
  1f4:	f1 df 0f 44 	440fdff1 ror.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  1f8:	11 80 0f 42 	420f8011 ror.s \$r0,\$r31,\$r1
@@ -143,8 +143,8 @@ Disassembly of section .text:
  210:	f3 01 00 44 	440001f3 ldl.l \$r0,\$r0,\$r31
  214:	43 00 11 44 	44110043 ldl.l \$r1,\$r2,\$r4
  218:	03 00 88 44 	44880003 ldl.l \$r8,\$r16,\$r0
- 21c:	03 60 f0 45 	45f06003 ldl.l \$r31,\$r0,0 <pmlabel>
- 220:	03 c0 0f 44 	440fc003 ldl.l \$r0,\$r31,0 <pmlabel>
+ 21c:	03 60 f0 45 	45f06003 ldl.l \$r31,\$r0,200 <pmlabel.*>
+ 220:	03 c0 0f 44 	440fc003 ldl.l \$r0,\$r31,0 <pmlabel.*>
  224:	13 c0 0f 44 	440fc013 ldl.l \$r0,\$r31,1 <pmlabel\+0x1>
  228:	f3 df 0f 44 	440fdff3 ldl.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  22c:	13 80 0f 42 	420f8013 ldl.s \$r0,\$r31,\$r1
@@ -156,8 +156,8 @@ Disassembly of section .text:
  244:	fb 01 00 44 	440001fb bins.l \$r0,\$r0,\$r31
  248:	4b 00 11 44 	4411004b bins.l \$r1,\$r2,\$r4
  24c:	0b 00 88 44 	4488000b bins.l \$r8,\$r16,\$r0
- 250:	0b 60 f0 45 	45f0600b bins.l \$r31,\$r0,0 <pmlabel>
- 254:	0b c0 0f 44 	440fc00b bins.l \$r0,\$r31,0 <pmlabel>
+ 250:	0b 60 f0 45 	45f0600b bins.l \$r31,\$r0,200 <pmlabel.*>
+ 254:	0b c0 0f 44 	440fc00b bins.l \$r0,\$r31,0 <pmlabel.*>
  258:	1b c0 0f 44 	440fc01b bins.l \$r0,\$r31,1 <pmlabel\+0x1>
  25c:	fb df 0f 44 	440fdffb bins.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  260:	1b 80 0f 42 	420f801b bins.s \$r0,\$r31,\$r1
@@ -169,8 +169,8 @@ Disassembly of section .text:
  278:	fc 01 00 44 	440001fc bexts.l \$r0,\$r0,\$r31
  27c:	4c 00 11 44 	4411004c bexts.l \$r1,\$r2,\$r4
  280:	0c 00 88 44 	4488000c bexts.l \$r8,\$r16,\$r0
- 284:	0c 60 f0 45 	45f0600c bexts.l \$r31,\$r0,0 <pmlabel>
- 288:	0c c0 0f 44 	440fc00c bexts.l \$r0,\$r31,0 <pmlabel>
+ 284:	0c 60 f0 45 	45f0600c bexts.l \$r31,\$r0,200 <pmlabel.*>
+ 288:	0c c0 0f 44 	440fc00c bexts.l \$r0,\$r31,0 <pmlabel.*>
  28c:	1c c0 0f 44 	440fc01c bexts.l \$r0,\$r31,1 <pmlabel\+0x1>
  290:	fc df 0f 44 	440fdffc bexts.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  294:	1c 80 0f 42 	420f801c bexts.s \$r0,\$r31,\$r1
@@ -182,8 +182,8 @@ Disassembly of section .text:
  2ac:	fd 01 00 44 	440001fd bextu.l \$r0,\$r0,\$r31
  2b0:	4d 00 11 44 	4411004d bextu.l \$r1,\$r2,\$r4
  2b4:	0d 00 88 44 	4488000d bextu.l \$r8,\$r16,\$r0
- 2b8:	0d 60 f0 45 	45f0600d bextu.l \$r31,\$r0,0 <pmlabel>
- 2bc:	0d c0 0f 44 	440fc00d bextu.l \$r0,\$r31,0 <pmlabel>
+ 2b8:	0d 60 f0 45 	45f0600d bextu.l \$r31,\$r0,200 <pmlabel.*>
+ 2bc:	0d c0 0f 44 	440fc00d bextu.l \$r0,\$r31,0 <pmlabel.*>
  2c0:	1d c0 0f 44 	440fc01d bextu.l \$r0,\$r31,1 <pmlabel\+0x1>
  2c4:	fd df 0f 44 	440fdffd bextu.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  2c8:	1d 80 0f 42 	420f801d bextu.s \$r0,\$r31,\$r1
@@ -195,8 +195,8 @@ Disassembly of section .text:
  2e0:	fe 01 00 44 	440001fe flip.l \$r0,\$r0,\$r31
  2e4:	4e 00 11 44 	4411004e flip.l \$r1,\$r2,\$r4
  2e8:	0e 00 88 44 	4488000e flip.l \$r8,\$r16,\$r0
- 2ec:	0e 60 f0 45 	45f0600e flip.l \$r31,\$r0,0 <pmlabel>
- 2f0:	0e c0 0f 44 	440fc00e flip.l \$r0,\$r31,0 <pmlabel>
+ 2ec:	0e 60 f0 45 	45f0600e flip.l \$r31,\$r0,200 <pmlabel.*>
+ 2f0:	0e c0 0f 44 	440fc00e flip.l \$r0,\$r31,0 <pmlabel.*>
  2f4:	1e c0 0f 44 	440fc01e flip.l \$r0,\$r31,1 <pmlabel\+0x1>
  2f8:	fe df 0f 44 	440fdffe flip.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  2fc:	1e 80 0f 42 	420f801e flip.s \$r0,\$r31,\$r1
@@ -206,8 +206,8 @@ Disassembly of section .text:
  30c:	00 00 e0 5d 	5de00000 addcc.l \$r0,\$r0
  310:	00 80 ef 5d 	5def8000 addcc.l \$r31,\$r0
  314:	f0 01 e0 5d 	5de001f0 addcc.l \$r0,\$r31
- 318:	00 60 e0 5d 	5de06000 addcc.l \$r0,0 <pmlabel>
- 31c:	00 c0 ef 5d 	5defc000 addcc.l \$r31,0 <pmlabel>
+ 318:	00 60 e0 5d 	5de06000 addcc.l \$r0,200 <pmlabel.*>
+ 31c:	00 c0 ef 5d 	5defc000 addcc.l \$r31,0 <pmlabel.*>
  320:	10 c0 ef 5d 	5defc010 addcc.l \$r31,1 <pmlabel\+0x1>
  324:	f0 df ef 5d 	5defdff0 addcc.l \$r31,1ff <pmlabel\+0x1ff>
  328:	10 80 ef 5b 	5bef8010 addcc.s \$r31,\$r1
@@ -217,8 +217,8 @@ Disassembly of section .text:
  338:	02 00 e0 5d 	5de00002 cmp.l \$r0,\$r0
  33c:	02 80 ef 5d 	5def8002 cmp.l \$r31,\$r0
  340:	f2 01 e0 5d 	5de001f2 cmp.l \$r0,\$r31
- 344:	02 60 e0 5d 	5de06002 cmp.l \$r0,0 <pmlabel>
- 348:	02 c0 ef 5d 	5defc002 cmp.l \$r31,0 <pmlabel>
+ 344:	02 60 e0 5d 	5de06002 cmp.l \$r0,200 <pmlabel.*>
+ 348:	02 c0 ef 5d 	5defc002 cmp.l \$r31,0 <pmlabel.*>
  34c:	12 c0 ef 5d 	5defc012 cmp.l \$r31,1 <pmlabel\+0x1>
  350:	f2 df ef 5d 	5defdff2 cmp.l \$r31,1ff <pmlabel\+0x1ff>
  354:	12 80 ef 5b 	5bef8012 cmp.s \$r31,\$r1
@@ -228,8 +228,8 @@ Disassembly of section .text:
  364:	04 00 e0 5d 	5de00004 tst.l \$r0,\$r0
  368:	04 80 ef 5d 	5def8004 tst.l \$r31,\$r0
  36c:	f4 01 e0 5d 	5de001f4 tst.l \$r0,\$r31
- 370:	04 60 e0 5d 	5de06004 tst.l \$r0,0 <pmlabel>
- 374:	04 c0 ef 5d 	5defc004 tst.l \$r31,0 <pmlabel>
+ 370:	04 60 e0 5d 	5de06004 tst.l \$r0,200 <pmlabel.*>
+ 374:	04 c0 ef 5d 	5defc004 tst.l \$r31,0 <pmlabel.*>
  378:	14 c0 ef 5d 	5defc014 tst.l \$r31,1 <pmlabel\+0x1>
  37c:	f4 df ef 5d 	5defdff4 tst.l \$r31,1ff <pmlabel\+0x1ff>
  380:	14 80 ef 5b 	5bef8014 tst.s \$r31,\$r1
@@ -239,8 +239,8 @@ Disassembly of section .text:
  390:	0c 00 e0 5d 	5de0000c btst.l \$r0,\$r0
  394:	0c 80 ef 5d 	5def800c btst.l \$r31,\$r0
  398:	fc 01 e0 5d 	5de001fc btst.l \$r0,\$r31
- 39c:	0c 60 e0 5d 	5de0600c btst.l \$r0,0 <pmlabel>
- 3a0:	0c c0 ef 5d 	5defc00c btst.l \$r31,0 <pmlabel>
+ 39c:	0c 60 e0 5d 	5de0600c btst.l \$r0,200 <pmlabel.*>
+ 3a0:	0c c0 ef 5d 	5defc00c btst.l \$r31,0 <pmlabel.*>
  3a4:	1c c0 ef 5d 	5defc01c btst.l \$r31,1 <pmlabel\+0x1>
  3a8:	fc df ef 5d 	5defdffc btst.l \$r31,1ff <pmlabel\+0x1ff>
  3ac:	1c 80 ef 5b 	5bef801c btst.s \$r31,\$r1
@@ -265,27 +265,27 @@ Disassembly of section .text:
  3f8:	7f 80 0f ea 	ea0f807f exi.s \$r0,\$r31,7f <pmlabel\+0x7f>
  3fc:	80 00 f0 e9 	e9f00080 exi.b \$r31,\$r0,80 <pmlabel\+0x80>
  400:	7f 00 f0 e9 	e9f0007f exi.b \$r31,\$r0,7f <pmlabel\+0x7f>
- 404:	00 00 00 6c 	6c000000 lpm.l \$r0,0 <pmlabel>
- 408:	00 00 00 6b 	6b000000 lpm.s \$r16,0 <pmlabel>
- 40c:	00 00 f0 69 	69f00000 lpm.b \$r31,0 <pmlabel>
+ 404:	00 00 00 6c 	6c000000 lpm.l \$r0,0 <pmlabel.*>
+ 408:	00 00 00 6b 	6b000000 lpm.s \$r16,0 <pmlabel.*>
+ 40c:	00 00 f0 69 	69f00000 lpm.b \$r31,0 <pmlabel.*>
  410:	80 80 00 cc 	cc008080 lpmi.l \$r0,\$r1,80 <pmlabel\+0x80>
  414:	7f 80 00 cb 	cb00807f lpmi.s \$r16,\$r1,7f <pmlabel\+0x7f>
  418:	80 80 f0 c9 	c9f08080 lpmi.b \$r31,\$r1,80 <pmlabel\+0x80>
- 41c:	00 00 30 00 	00300000 jmp 0 <pmlabel>
+ 41c:	00 00 30 00 	00300000 jmp 0 <pmlabel.*>
  420:	00 01 30 08 	08300100 jmpi \$r16
- 424:	00 00 c8 07 	07c80000 jmpx 31,\$r28,1,0 <pmlabel>
- 428:	00 00 20 00 	00200000 jmpc nz,0 <pmlabel>
- 42c:	00 00 34 00 	00340000 call 0 <pmlabel>
+ 424:	00 00 c8 07 	07c80000 jmpx 31,\$r28,1,0 <pmlabel.*>
+ 428:	00 00 20 00 	00200000 jmpc nz,0 <pmlabel.*>
+ 42c:	00 00 34 00 	00340000 call 0 <pmlabel.*>
  430:	00 01 34 08 	08340100 calli \$r16
- 434:	00 00 cc 07 	07cc0000 callx 31,\$r28,1,0 <pmlabel>
- 438:	00 00 24 00 	00240000 callc nz,0 <pmlabel>
+ 434:	00 00 cc 07 	07cc0000 callx 31,\$r28,1,0 <pmlabel.*>
+ 438:	00 00 24 00 	00240000 callc nz,0 <pmlabel.*>
  43c:	00 00 00 84 	84000000 push.l \$r0
  440:	00 00 08 84 	84080000 push.l \$r16
  444:	00 80 0f 84 	840f8000 push.l \$r31
  448:	00 00 00 8c 	8c000000 pop.l \$r0
  44c:	00 00 00 8d 	8d000000 pop.l \$r16
  450:	00 00 f0 8d 	8df00000 pop.l \$r31
- 454:	00 00 00 94 	94000000 link \$r0,0 <pmlabel>
+ 454:	00 00 00 94 	94000000 link \$r0,0 <pmlabel.*>
  458:	ff ff 00 95 	9500ffff link \$r16,ffff <pmlabel\+0xffff>
  45c:	f9 03 f0 95 	95f003f9 link \$r31,3f9 <pmlabel\+0x3f9>
  460:	00 00 00 98 	98000000 unlink \$r0
@@ -293,18 +293,18 @@ Disassembly of section .text:
  468:	00 00 f0 99 	99f00000 unlink \$r31
  46c:	00 00 00 a0 	a0000000 return 
  470:	00 00 00 a4 	a4000000 reti 
- 474:	00 00 00 c4 	c4000000 lda.l \$r0,0 <pmlabel>
- 478:	00 00 00 c3 	c3000000 lda.s \$r16,0 <pmlabel>
- 47c:	00 00 f0 c1 	c1f00000 lda.b \$r31,0 <pmlabel>
- 480:	00 00 00 bc 	bc000000 sta.l 0 <pmlabel>,\$r0
- 484:	00 00 00 bb 	bb000000 sta.s 0 <pmlabel>,\$r16
- 488:	00 00 f0 b9 	b9f00000 sta.b 0 <pmlabel>,\$r31
- 48c:	00 00 00 3c 	3c000000 exa.l \$r0,0 <pmlabel>
- 490:	00 00 00 3b 	3b000000 exa.s \$r16,0 <pmlabel>
- 494:	00 00 f0 39 	39f00000 exa.b \$r31,0 <pmlabel>
+ 474:	00 00 00 c4 	c4000000 lda.l \$r0,0 <pmlabel.*>
+ 478:	00 00 00 c3 	c3000000 lda.s \$r16,0 <pmlabel.*>
+ 47c:	00 00 f0 c1 	c1f00000 lda.b \$r31,0 <pmlabel.*>
+ 480:	00 00 00 bc 	bc000000 sta.l 0 <pmlabel.*>,\$r0
+ 484:	00 00 00 bb 	bb000000 sta.s 0 <pmlabel.*>,\$r16
+ 488:	00 00 f0 b9 	b9f00000 sta.b 0 <pmlabel.*>,\$r31
+ 48c:	00 00 00 3c 	3c000000 exa.l \$r0,0 <pmlabel.*>
+ 490:	00 00 00 3b 	3b000000 exa.s \$r16,0 <pmlabel.*>
+ 494:	00 00 f0 39 	39f00000 exa.b \$r31,0 <pmlabel.*>
  498:	00 00 08 64 	64080000 ldk.l \$r0,80000 <pmlabel\+0x80000>
  49c:	ff ff 07 64 	6407ffff ldk.l \$r0,7ffff <pmlabel\+0x7ffff>
- 4a0:	00 00 00 64 	64000000 ldk.l \$r0,0 <pmlabel>
+ 4a0:	00 00 00 64 	64000000 ldk.l \$r0,0 <pmlabel.*>
  4a4:	00 c0 0f 44 	440fc000 move.l \$r0,\$r31
  4a8:	00 40 f0 45 	45f04000 move.l \$r31,\$r0
  4ac:	00 00 f0 f5 	f5f00000 udiv.l \$r31,\$r0,\$r0
@@ -312,8 +312,8 @@ Disassembly of section .text:
  4b4:	f0 01 00 f4 	f40001f0 udiv.l \$r0,\$r0,\$r31
  4b8:	40 00 11 f4 	f4110040 udiv.l \$r1,\$r2,\$r4
  4bc:	00 00 88 f4 	f4880000 udiv.l \$r8,\$r16,\$r0
- 4c0:	00 60 f0 f5 	f5f06000 udiv.l \$r31,\$r0,0 <pmlabel>
- 4c4:	00 c0 0f f4 	f40fc000 udiv.l \$r0,\$r31,0 <pmlabel>
+ 4c0:	00 60 f0 f5 	f5f06000 udiv.l \$r31,\$r0,200 <pmlabel.*>
+ 4c4:	00 c0 0f f4 	f40fc000 udiv.l \$r0,\$r31,0 <pmlabel.*>
  4c8:	10 c0 0f f4 	f40fc010 udiv.l \$r0,\$r31,1 <pmlabel\+0x1>
  4cc:	f0 df 0f f4 	f40fdff0 udiv.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  4d0:	10 80 0f f2 	f20f8010 udiv.s \$r0,\$r31,\$r1
@@ -325,8 +325,8 @@ Disassembly of section .text:
  4e8:	f1 01 00 f4 	f40001f1 umod.l \$r0,\$r0,\$r31
  4ec:	41 00 11 f4 	f4110041 umod.l \$r1,\$r2,\$r4
  4f0:	01 00 88 f4 	f4880001 umod.l \$r8,\$r16,\$r0
- 4f4:	01 60 f0 f5 	f5f06001 umod.l \$r31,\$r0,0 <pmlabel>
- 4f8:	01 c0 0f f4 	f40fc001 umod.l \$r0,\$r31,0 <pmlabel>
+ 4f4:	01 60 f0 f5 	f5f06001 umod.l \$r31,\$r0,200 <pmlabel.*>
+ 4f8:	01 c0 0f f4 	f40fc001 umod.l \$r0,\$r31,0 <pmlabel.*>
  4fc:	11 c0 0f f4 	f40fc011 umod.l \$r0,\$r31,1 <pmlabel\+0x1>
  500:	f1 df 0f f4 	f40fdff1 umod.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  504:	11 80 0f f2 	f20f8011 umod.s \$r0,\$r31,\$r1
@@ -338,8 +338,8 @@ Disassembly of section .text:
  51c:	f2 01 00 f4 	f40001f2 div.l \$r0,\$r0,\$r31
  520:	42 00 11 f4 	f4110042 div.l \$r1,\$r2,\$r4
  524:	02 00 88 f4 	f4880002 div.l \$r8,\$r16,\$r0
- 528:	02 60 f0 f5 	f5f06002 div.l \$r31,\$r0,0 <pmlabel>
- 52c:	02 c0 0f f4 	f40fc002 div.l \$r0,\$r31,0 <pmlabel>
+ 528:	02 60 f0 f5 	f5f06002 div.l \$r31,\$r0,200 <pmlabel.*>
+ 52c:	02 c0 0f f4 	f40fc002 div.l \$r0,\$r31,0 <pmlabel.*>
  530:	12 c0 0f f4 	f40fc012 div.l \$r0,\$r31,1 <pmlabel\+0x1>
  534:	f2 df 0f f4 	f40fdff2 div.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  538:	12 80 0f f2 	f20f8012 div.s \$r0,\$r31,\$r1
@@ -351,8 +351,8 @@ Disassembly of section .text:
  550:	f3 01 00 f4 	f40001f3 mod.l \$r0,\$r0,\$r31
  554:	43 00 11 f4 	f4110043 mod.l \$r1,\$r2,\$r4
  558:	03 00 88 f4 	f4880003 mod.l \$r8,\$r16,\$r0
- 55c:	03 60 f0 f5 	f5f06003 mod.l \$r31,\$r0,0 <pmlabel>
- 560:	03 c0 0f f4 	f40fc003 mod.l \$r0,\$r31,0 <pmlabel>
+ 55c:	03 60 f0 f5 	f5f06003 mod.l \$r31,\$r0,200 <pmlabel.*>
+ 560:	03 c0 0f f4 	f40fc003 mod.l \$r0,\$r31,0 <pmlabel.*>
  564:	13 c0 0f f4 	f40fc013 mod.l \$r0,\$r31,1 <pmlabel\+0x1>
  568:	f3 df 0f f4 	f40fdff3 mod.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  56c:	13 80 0f f2 	f20f8013 mod.s \$r0,\$r31,\$r1
@@ -364,8 +364,8 @@ Disassembly of section .text:
  584:	f4 01 00 f4 	f40001f4 strcmp.l \$r0,\$r0,\$r31
  588:	44 00 11 f4 	f4110044 strcmp.l \$r1,\$r2,\$r4
  58c:	04 00 88 f4 	f4880004 strcmp.l \$r8,\$r16,\$r0
- 590:	04 60 f0 f5 	f5f06004 strcmp.l \$r31,\$r0,0 <pmlabel>
- 594:	04 c0 0f f4 	f40fc004 strcmp.l \$r0,\$r31,0 <pmlabel>
+ 590:	04 60 f0 f5 	f5f06004 strcmp.l \$r31,\$r0,200 <pmlabel.*>
+ 594:	04 c0 0f f4 	f40fc004 strcmp.l \$r0,\$r31,0 <pmlabel.*>
  598:	14 c0 0f f4 	f40fc014 strcmp.l \$r0,\$r31,1 <pmlabel\+0x1>
  59c:	f4 df 0f f4 	f40fdff4 strcmp.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  5a0:	14 80 0f f2 	f20f8014 strcmp.s \$r0,\$r31,\$r1
@@ -377,8 +377,8 @@ Disassembly of section .text:
  5b8:	f5 01 00 f4 	f40001f5 memcpy.l \$r0,\$r0,\$r31
  5bc:	45 00 11 f4 	f4110045 memcpy.l \$r1,\$r2,\$r4
  5c0:	05 00 88 f4 	f4880005 memcpy.l \$r8,\$r16,\$r0
- 5c4:	05 60 f0 f5 	f5f06005 memcpy.l \$r31,\$r0,0 <pmlabel>
- 5c8:	05 c0 0f f4 	f40fc005 memcpy.l \$r0,\$r31,0 <pmlabel>
+ 5c4:	05 60 f0 f5 	f5f06005 memcpy.l \$r31,\$r0,200 <pmlabel.*>
+ 5c8:	05 c0 0f f4 	f40fc005 memcpy.l \$r0,\$r31,0 <pmlabel.*>
  5cc:	15 c0 0f f4 	f40fc015 memcpy.l \$r0,\$r31,1 <pmlabel\+0x1>
  5d0:	f5 df 0f f4 	f40fdff5 memcpy.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  5d4:	15 80 0f f2 	f20f8015 memcpy.s \$r0,\$r31,\$r1
@@ -390,8 +390,8 @@ Disassembly of section .text:
  5ec:	f7 01 00 f4 	f40001f7 memset.l \$r0,\$r0,\$r31
  5f0:	47 00 11 f4 	f4110047 memset.l \$r1,\$r2,\$r4
  5f4:	07 00 88 f4 	f4880007 memset.l \$r8,\$r16,\$r0
- 5f8:	07 60 f0 f5 	f5f06007 memset.l \$r31,\$r0,0 <pmlabel>
- 5fc:	07 c0 0f f4 	f40fc007 memset.l \$r0,\$r31,0 <pmlabel>
+ 5f8:	07 60 f0 f5 	f5f06007 memset.l \$r31,\$r0,200 <pmlabel.*>
+ 5fc:	07 c0 0f f4 	f40fc007 memset.l \$r0,\$r31,0 <pmlabel.*>
  600:	17 c0 0f f4 	f40fc017 memset.l \$r0,\$r31,1 <pmlabel\+0x1>
  604:	f7 df 0f f4 	f40fdff7 memset.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  608:	17 80 0f f2 	f20f8017 memset.s \$r0,\$r31,\$r1
@@ -403,8 +403,8 @@ Disassembly of section .text:
  620:	f8 01 00 f4 	f40001f8 mul.l \$r0,\$r0,\$r31
  624:	48 00 11 f4 	f4110048 mul.l \$r1,\$r2,\$r4
  628:	08 00 88 f4 	f4880008 mul.l \$r8,\$r16,\$r0
- 62c:	08 60 f0 f5 	f5f06008 mul.l \$r31,\$r0,0 <pmlabel>
- 630:	08 c0 0f f4 	f40fc008 mul.l \$r0,\$r31,0 <pmlabel>
+ 62c:	08 60 f0 f5 	f5f06008 mul.l \$r31,\$r0,200 <pmlabel.*>
+ 630:	08 c0 0f f4 	f40fc008 mul.l \$r0,\$r31,0 <pmlabel.*>
  634:	18 c0 0f f4 	f40fc018 mul.l \$r0,\$r31,1 <pmlabel\+0x1>
  638:	f8 df 0f f4 	f40fdff8 mul.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  63c:	18 80 0f f2 	f20f8018 mul.s \$r0,\$r31,\$r1
@@ -416,8 +416,8 @@ Disassembly of section .text:
  654:	f9 01 00 f4 	f40001f9 muluh.l \$r0,\$r0,\$r31
  658:	49 00 11 f4 	f4110049 muluh.l \$r1,\$r2,\$r4
  65c:	09 00 88 f4 	f4880009 muluh.l \$r8,\$r16,\$r0
- 660:	09 60 f0 f5 	f5f06009 muluh.l \$r31,\$r0,0 <pmlabel>
- 664:	09 c0 0f f4 	f40fc009 muluh.l \$r0,\$r31,0 <pmlabel>
+ 660:	09 60 f0 f5 	f5f06009 muluh.l \$r31,\$r0,200 <pmlabel.*>
+ 664:	09 c0 0f f4 	f40fc009 muluh.l \$r0,\$r31,0 <pmlabel.*>
  668:	19 c0 0f f4 	f40fc019 muluh.l \$r0,\$r31,1 <pmlabel\+0x1>
  66c:	f9 df 0f f4 	f40fdff9 muluh.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  670:	19 80 0f f2 	f20f8019 muluh.s \$r0,\$r31,\$r1
@@ -429,8 +429,8 @@ Disassembly of section .text:
  688:	fc 01 00 f4 	f40001fc streamin.l \$r0,\$r0,\$r31
  68c:	4c 00 11 f4 	f411004c streamin.l \$r1,\$r2,\$r4
  690:	0c 00 88 f4 	f488000c streamin.l \$r8,\$r16,\$r0
- 694:	0c 60 f0 f5 	f5f0600c streamin.l \$r31,\$r0,0 <pmlabel>
- 698:	0c c0 0f f4 	f40fc00c streamin.l \$r0,\$r31,0 <pmlabel>
+ 694:	0c 60 f0 f5 	f5f0600c streamin.l \$r31,\$r0,200 <pmlabel.*>
+ 698:	0c c0 0f f4 	f40fc00c streamin.l \$r0,\$r31,0 <pmlabel.*>
  69c:	1c c0 0f f4 	f40fc01c streamin.l \$r0,\$r31,1 <pmlabel\+0x1>
  6a0:	fc df 0f f4 	f40fdffc streamin.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  6a4:	1c 80 0f f2 	f20f801c streamin.s \$r0,\$r31,\$r1
@@ -442,8 +442,8 @@ Disassembly of section .text:
  6bc:	fd 01 00 f4 	f40001fd streamini.l \$r0,\$r0,\$r31
  6c0:	4d 00 11 f4 	f411004d streamini.l \$r1,\$r2,\$r4
  6c4:	0d 00 88 f4 	f488000d streamini.l \$r8,\$r16,\$r0
- 6c8:	0d 60 f0 f5 	f5f0600d streamini.l \$r31,\$r0,0 <pmlabel>
- 6cc:	0d c0 0f f4 	f40fc00d streamini.l \$r0,\$r31,0 <pmlabel>
+ 6c8:	0d 60 f0 f5 	f5f0600d streamini.l \$r31,\$r0,200 <pmlabel.*>
+ 6cc:	0d c0 0f f4 	f40fc00d streamini.l \$r0,\$r31,0 <pmlabel.*>
  6d0:	1d c0 0f f4 	f40fc01d streamini.l \$r0,\$r31,1 <pmlabel\+0x1>
  6d4:	fd df 0f f4 	f40fdffd streamini.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  6d8:	1d 80 0f f2 	f20f801d streamini.s \$r0,\$r31,\$r1
@@ -455,8 +455,8 @@ Disassembly of section .text:
  6f0:	fe 01 00 f4 	f40001fe streamout.l \$r0,\$r0,\$r31
  6f4:	4e 00 11 f4 	f411004e streamout.l \$r1,\$r2,\$r4
  6f8:	0e 00 88 f4 	f488000e streamout.l \$r8,\$r16,\$r0
- 6fc:	0e 60 f0 f5 	f5f0600e streamout.l \$r31,\$r0,0 <pmlabel>
- 700:	0e c0 0f f4 	f40fc00e streamout.l \$r0,\$r31,0 <pmlabel>
+ 6fc:	0e 60 f0 f5 	f5f0600e streamout.l \$r31,\$r0,200 <pmlabel.*>
+ 700:	0e c0 0f f4 	f40fc00e streamout.l \$r0,\$r31,0 <pmlabel.*>
  704:	1e c0 0f f4 	f40fc01e streamout.l \$r0,\$r31,1 <pmlabel\+0x1>
  708:	fe df 0f f4 	f40fdffe streamout.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  70c:	1e 80 0f f2 	f20f801e streamout.s \$r0,\$r31,\$r1
@@ -468,8 +468,8 @@ Disassembly of section .text:
  724:	ff 01 00 f4 	f40001ff streamouti.l \$r0,\$r0,\$r31
  728:	4f 00 11 f4 	f411004f streamouti.l \$r1,\$r2,\$r4
  72c:	0f 00 88 f4 	f488000f streamouti.l \$r8,\$r16,\$r0
- 730:	0f 60 f0 f5 	f5f0600f streamouti.l \$r31,\$r0,0 <pmlabel>
- 734:	0f c0 0f f4 	f40fc00f streamouti.l \$r0,\$r31,0 <pmlabel>
+ 730:	0f 60 f0 f5 	f5f0600f streamouti.l \$r31,\$r0,200 <pmlabel.*>
+ 734:	0f c0 0f f4 	f40fc00f streamouti.l \$r0,\$r31,0 <pmlabel.*>
  738:	1f c0 0f f4 	f40fc01f streamouti.l \$r0,\$r31,1 <pmlabel\+0x1>
  73c:	ff df 0f f4 	f40fdfff streamouti.l \$r0,\$r31,1ff <pmlabel\+0x1ff>
  740:	1f 80 0f f2 	f20f801f streamouti.s \$r0,\$r31,\$r1

@@ -133,6 +133,7 @@ if { [is_elf_format] } then {
     }
     case $target_triplet in {
 	{ alpha*-*-* } { }
+	{ *c54x*-*-* } { }
 	{ cr16*-*-* } { }
 	{ crx*-*-* } { }
 	{ h8300-*-* } { }
@@ -142,14 +143,14 @@ if { [is_elf_format] } then {
 	{ mn10200-*-* } { }
 	{ mn10300-*-* } { }
 	{ msp43*-*-* } { }
-	{ *c54x*-*-* } { }
+	{ rl78-*-* } { }
 	{ rx-*-* } { }
 	default {
 	    # The next test can fail if the target does not convert fixups
 	    # against ordinary symbols into relocations against section symbols.
 	    # This is usually revealed by the error message:
 	    #  symbol `sym' required but not present
-	    setup_xfail "m681*-*-*" "m68hc*-*-*"
+	    setup_xfail "m681*-*-*" "m68hc*-*-*" "xgate-*-*" "vax-*-*"
 	    run_dump_test redef
 	    run_dump_test equ-reloc
 	}
@@ -183,10 +184,13 @@ if { [is_elf_format] } then {
     # The non-eabi ARM ports sets it to ELFOSABI_ARM.
     # So for these targets we cannot include an IFUNC symbol type
     # in the symbol type test.
-    if { [istarget "*-*-hpux*"]
-	 || [istarget "visium-*-*"]
+    # The Alpha FreeBSD target does not support unique objects.
+    if {    [istarget "*-*-hpux*"]
+	 || [istarget "alpha*-*-*freebsd*"]
+	 || [istarget "arm*-*-*"]
 	 || [istarget "msp*-*-*"]
-	 || [istarget "arm*-*-*"]} then {
+	 || [istarget "visium-*-*"]
+     } then {
 	# hppa64 has a non-standard common directive
 	if { ![istarget "hppa64*-*-hpux*"] } then {
 	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 *\\\[FONTC\\\]\""

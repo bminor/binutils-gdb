@@ -11833,6 +11833,8 @@ is_24bit_abs_reloc (unsigned int reloc_type)
     case EM_CYGNUS_MN10200:
     case EM_MN10200:
       return reloc_type == 4; /* R_MN10200_24.  */
+    case EM_FT32:
+      return reloc_type == 5; /* R_FT32_20.  */
     default:
       return FALSE;
     }

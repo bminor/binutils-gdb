@@ -1,3 +1,9 @@
+2016-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* nds32-dis.c (nds32_parse_audio_ext): Change printing of integer
+	constants to match expected behaviour.
+	(nds32_parse_opcode): Likewise.  Also for whitespace.
+
 2016-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-opc.c (extract_rhv1): Extract value from insn.
