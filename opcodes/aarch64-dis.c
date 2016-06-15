@@ -145,6 +145,26 @@ extract_fields (aarch64_insn code, aarch64_insn mask, ...)
   return value;
 }
 
+/* Extract the value of all fields in SELF->fields from instruction CODE.
+   The least significant bit comes from the final field.  */
+
+static aarch64_insn
+extract_all_fields (const aarch64_operand *self, aarch64_insn code)
+{
+  aarch64_insn value;
+  unsigned int i;
+  enum aarch64_field_kind kind;
+
+  value = 0;
+  for (i = 0; i < ARRAY_SIZE (self->fields) && self->fields[i] != FLD_NIL; ++i)
+    {
+      kind = self->fields[i];
+      value <<= fields[kind].width;
+      value |= extract_field (kind, code, 0);
+    }
+  return value;
+}
+
 /* Sign-extend bit I of VALUE.  */
 static inline int32_t
 sign_extend (aarch64_insn value, unsigned i)
@@ -575,14 +595,8 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 		 const aarch64_inst *inst ATTRIBUTE_UNUSED)
 {
   int64_t imm;
-  /* Maximum of two fields to extract.  */
-  assert (self->fields[2] == FLD_NIL);
 
-  if (self->fields[1] == FLD_NIL)
-    imm = extract_field (self->fields[0], code, 0);
-  else
-    /* e.g. TBZ b5:b40.  */
-    imm = extract_fields (code, 0, 2, self->fields[0], self->fields[1]);
+  imm = extract_all_fields (self, code);
 
   if (info->type == AARCH64_OPND_FPIMM)
     info->imm.is_fp = 1;

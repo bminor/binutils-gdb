@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include <stdarg.h>
+#include "libiberty.h"
 #include "aarch64-asm.h"
 
 /* Utilities.  */
@@ -53,6 +54,25 @@ insert_fields (aarch64_insn *code, aarch64_insn value, aarch64_insn mask, ...)
       value >>= field->width;
     }
   va_end (va);
+}
+
+/* Insert a raw field value VALUE into all fields in SELF->fields.
+   The least significant bit goes in the final field.  */
+
+static void
+insert_all_fields (const aarch64_operand *self, aarch64_insn *code,
+		   aarch64_insn value)
+{
+  unsigned int i;
+  enum aarch64_field_kind kind;
+
+  for (i = ARRAY_SIZE (self->fields); i-- > 0; )
+    if (self->fields[i] != FLD_NIL)
+      {
+	kind = self->fields[i];
+	insert_field (kind, code, value, 0);
+	value >>= fields[kind].width;
+      }
 }
 
 /* Operand inserters.  */
@@ -318,17 +338,11 @@ aarch64_ins_imm (const aarch64_operand *self, const aarch64_opnd_info *info,
 		 const aarch64_inst *inst ATTRIBUTE_UNUSED)
 {
   int64_t imm;
-  /* Maximum of two fields to insert.  */
-  assert (self->fields[2] == FLD_NIL);
 
   imm = info->imm.value;
   if (operand_need_shift_by_two (self))
     imm >>= 2;
-  if (self->fields[1] == FLD_NIL)
-    insert_field (self->fields[0], code, imm, 0);
-  else
-    /* e.g. TBZ b5:b40.  */
-    insert_fields (code, imm, 0, 2, self->fields[1], self->fields[0]);
+  insert_all_fields (self, code, imm);
   return NULL;
 }
 
