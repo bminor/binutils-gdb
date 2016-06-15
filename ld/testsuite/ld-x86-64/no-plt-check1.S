@@ -10,6 +10,13 @@ check:
 	call	*get_func@GOTPCREL(%rip)
 	cmpq	func@GOTPCREL(%rip), %rax
 	jne	.L3
+#ifdef __LP64__
+	cmpq	%rax, func_p(%rip)
+#else
+	rex
+	cmpl	%eax, func_p(%rip)
+#endif
+	jne	.L3
 	call	*func@GOTPCREL(%rip)
 	cmpl	$305419896, %eax
 	jne	.L3

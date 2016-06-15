@@ -12,5 +12,11 @@ get_func:
 call_func:
 	jmp	*func@GOT
 	.size	call_func, .-call_func
-	.section	.text.unlikely
+	.globl	func_p
+	.data
+	.align 4
+	.type	func_p, @object
+	.size	func_p, 4
+func_p:
+	.long	func
 	.section	.note.GNU-stack,"",@progbits
