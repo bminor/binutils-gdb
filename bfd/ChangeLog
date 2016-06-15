@@ -1,3 +1,12 @@
+2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	Backport from master
+	2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20254
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Adjust reloc
+	offsets until reloc_toaddr.
+
 2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master

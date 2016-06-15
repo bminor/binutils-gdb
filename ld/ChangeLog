@@ -1,3 +1,12 @@
+2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	Backport from master
+	2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20254
+	* testsuite/ld-avr/avr-prop-6.d: New test.
+	* testsuite/ld-avr/avr-prop-6.s: New test.
+
 2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
