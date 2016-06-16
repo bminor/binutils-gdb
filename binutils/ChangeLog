@@ -1,3 +1,8 @@
+2016-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (is_24bit_abs_reloc): Add support for R_FT32_20
+	reloc.
+
 2016-06-14  John Baldwin  <jhb@FreeBSD.org>
 
 	* objcopy.c (do_elf_stt_common): Use correct type.

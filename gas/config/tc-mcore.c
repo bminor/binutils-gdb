@@ -1598,6 +1598,9 @@ md_assemble (char * str)
   output[0] = INST_BYTE0 (inst);
   output[1] = INST_BYTE1 (inst);
 
+#ifdef OBJ_ELF
+  dwarf2_emit_insn (2);
+#endif
   check_literals (opcode->transfer, isize);
 }
 

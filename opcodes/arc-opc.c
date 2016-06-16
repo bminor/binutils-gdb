@@ -130,7 +130,7 @@ static int
 extract_rhv1 (unsigned insn ATTRIBUTE_UNUSED,
 	      bfd_boolean * invalid ATTRIBUTE_UNUSED)
 {
-  int value = 0;
+  int value = ((insn & 0x7) << 3) | ((insn >> 5) & 0x7);
 
   return value;
 }

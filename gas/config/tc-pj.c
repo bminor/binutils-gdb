@@ -440,6 +440,10 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 	}
       break;
 
+    case BFD_RELOC_PJ_CODE_REL32:
+      fixP->fx_done = 0;
+      return;
+
     default:
       abort ();
     }

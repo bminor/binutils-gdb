@@ -13,6 +13,9 @@ Disassembly of section .text:
  +[a-f0-9]+:	83 ec 08             	sub    \$0x8,%esp
  +[a-f0-9]+:	ff 93 ([0-9a-f]{2} ){4}[ 	]+call +\*-0x[0-9a-f]+\(%ebx\)
  +[a-f0-9]+:	81 f8 ([0-9a-f]{2} ){4}[ 	]+cmp +\$0x[0-9a-f]+,%eax
+ +[a-f0-9]+:	75 39                	jne    [0-9a-f]+ <check\+0x[0-9a-f]+>
+ +[a-f0-9]+:	8b 93 ([0-9a-f]{2} ){4}[ 	]+mov +-0x[0-9a-f]+\(%ebx\),%edx
+ +[a-f0-9]+:	39 02                	cmp    %eax,\(%edx\)
  +[a-f0-9]+:	75 2f                	jne    [0-9a-f]+ <check\+0x[0-9a-f]+>
  +[a-f0-9]+:	67 e8 ([0-9a-f]{2} ){4}[ 	]+addr16 call [0-9a-f]+ <func>
  +[a-f0-9]+:	3d 78 56 34 12       	cmp    \$0x12345678,%eax

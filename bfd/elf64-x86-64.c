@@ -2143,6 +2143,15 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   if (bfd_link_relocatable (info))
     return TRUE;
 
+  /* Don't do anything special with non-loaded, non-alloced sections.
+     In particular, any relocs in such sections should not affect GOT
+     and PLT reference counting (ie. we don't allow them to create GOT
+     or PLT entries), there's no possibility or desire to optimize TLS
+     relocs, and there's not much point in propagating relocs to shared
+     libs that the dynamic linker won't relocate.  */
+  if ((sec->flags & SEC_ALLOC) == 0)
+    return TRUE;
+
   BFD_ASSERT (is_x86_64_elf (abfd));
 
   htab = elf_x86_64_hash_table (info);
@@ -2518,8 +2527,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      && h != NULL
 		      && !h->def_regular
 		      && h->def_dynamic
-		      && (sec->flags & SEC_READONLY) == 0))
-	      && (sec->flags & SEC_ALLOC) != 0)
+		      && (sec->flags & SEC_READONLY) == 0)))
 	    return elf_x86_64_need_pic (abfd, sec, h, symtab_hdr, isym,
 					&x86_64_elf_howto_table[r_type]);
 	  /* Fall through.  */
@@ -2533,15 +2541,12 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 pointer:
 	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
 	    eh->has_non_got_reloc = 1;
-	  /* STT_GNU_IFUNC symbol must go through PLT even if it is
-	     locally defined and undefined symbol may turn out to be
-	     a STT_GNU_IFUNC symbol later.  */
+	  /* We are called after all symbols have been resolved.  Only
+	     relocation against STT_GNU_IFUNC symbol must go through
+	     PLT.  */
 	  if (h != NULL
 	      && (bfd_link_executable (info)
-		  || ((h->type == STT_GNU_IFUNC
-		       || h->root.type == bfd_link_hash_undefweak
-		       || h->root.type == bfd_link_hash_undefined)
-		      && SYMBOLIC_BIND (info, h))))
+		  || h->type == STT_GNU_IFUNC))
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this
@@ -2602,7 +2607,6 @@ do_size:
 	     dynamic library if we manage to avoid copy relocs for the
 	     symbol.  */
 	  if ((bfd_link_pic (info)
-	       && (sec->flags & SEC_ALLOC) != 0
 	       && (! IS_X86_64_PCREL_TYPE (r_type)
 		   || (h != NULL
 		       && (! (bfd_link_pie (info)
@@ -2611,7 +2615,6 @@ do_size:
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !bfd_link_pic (info)
-		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
 		      || !h->def_regular)))

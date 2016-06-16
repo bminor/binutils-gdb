@@ -13,6 +13,9 @@ check:
 	call	*get_func@GOT(%ebx)
 	cmpl	func@GOT(%ebx), %eax
 	jne	.L3
+	movl	func_p@GOT(%ebx), %edx
+	cmpl	%eax, (%edx)
+	jne	.L3
 	call	*func@GOT(%ebx)
 	cmpl	$305419896, %eax
 	jne	.L3

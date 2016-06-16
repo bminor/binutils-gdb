@@ -1,3 +1,44 @@
+2016-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run pr19636-2e-nacl.
+	* testsuite/ld-i386/pr19636-2e.d: Skip for NaCl targets.
+	Remove .rel.plt section.
+	* testsuite/ld-i386/pr19636-2e-nacl.d: New file.
+
+2016-06-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/no-plt-check1a.S (check): Test static
+	function pointer.
+	* testsuite/ld-i386/no-plt-check1b.S (check): Likewise.
+	* testsuite/ld-x86-64/no-plt-check1.S (check): Likewise.
+	* testsuite/ld-i386/no-plt-extern1a.S (func_p): New.  Static
+	function pointer.
+	* testsuite/ld-i386/no-plt-extern1b.S (func_p): Likewise.
+	* testsuite/ld-x86-64/no-plt-extern1.S (func_p): Likewise.
+	* testsuite/ld-i386/no-plt-1a.dd: Updated.
+	* testsuite/ld-i386/no-plt-1b.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1c.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1d.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1e.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1f.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1g.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1h.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1i.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1j.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1a.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1b.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.dd: Likewise.
+
+2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20254
+	* testsuite/ld-avr/avr-prop-6.d: New test.
+	* testsuite/ld-avr/avr-prop-6.s: New test.
+
 2016-06-14  Alan Modra  <amodra@gmail.com>
 
 	* ldbuildid.c: Formatting.

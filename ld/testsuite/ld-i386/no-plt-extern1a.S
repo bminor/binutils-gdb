@@ -16,6 +16,13 @@ call_func:
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	jmp	*func@GOT(%eax)
 	.size	call_func, .-call_func
+	.globl	func_p
+	.section	.data.rel,"aw",@progbits
+	.align 4
+	.type	func_p, @object
+	.size	func_p, 4
+func_p:
+	.long	func
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax

@@ -393,6 +393,8 @@ md_assemble (char *str)
   output[idx++] = 0xff & (b >> 16);
   output[idx++] = 0xff & (b >> 24);
 
+  dwarf2_emit_insn (4);
+
   while (ISSPACE (*op_end))
     op_end++;
 

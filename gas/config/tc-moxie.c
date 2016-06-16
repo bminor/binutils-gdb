@@ -540,6 +540,7 @@ md_assemble (char *str)
     }
 
   md_number_to_chars (p, iword, 2);
+  dwarf2_emit_insn (2);
 
   while (ISSPACE (*op_end))
     op_end++;

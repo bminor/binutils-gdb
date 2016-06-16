@@ -1846,6 +1846,15 @@ elf_i386_check_relocs (bfd *abfd,
   if (bfd_link_relocatable (info))
     return TRUE;
 
+  /* Don't do anything special with non-loaded, non-alloced sections.
+     In particular, any relocs in such sections should not affect GOT
+     and PLT reference counting (ie. we don't allow them to create GOT
+     or PLT entries), there's no possibility or desire to optimize TLS
+     relocs, and there's not much point in propagating relocs to shared
+     libs that the dynamic linker won't relocate.  */
+  if ((sec->flags & SEC_ALLOC) == 0)
+    return TRUE;
+
   BFD_ASSERT (is_i386_elf (abfd));
 
   htab = elf_i386_hash_table (info);
@@ -2140,15 +2149,12 @@ elf_i386_check_relocs (bfd *abfd,
 	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
 	    eh->has_non_got_reloc = 1;
 do_relocation:
-	  /* STT_GNU_IFUNC symbol must go through PLT even if it is
-	     locally defined and undefined symbol may turn out to be
-	     a STT_GNU_IFUNC symbol later.  */
+	  /* We are called after all symbols have been resolved.  Only
+	     relocation against STT_GNU_IFUNC symbol must go through
+	     PLT.  */
 	  if (h != NULL
 	      && (bfd_link_executable (info)
-		  || ((h->type == STT_GNU_IFUNC
-		       || h->root.type == bfd_link_hash_undefweak
-		       || h->root.type == bfd_link_hash_undefined)
-		      && SYMBOLIC_BIND (info, h))))
+		  || h->type == STT_GNU_IFUNC))
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this
@@ -2203,7 +2209,6 @@ do_size:
 	     dynamic library if we manage to avoid copy relocs for the
 	     symbol.  */
 	  if ((bfd_link_pic (info)
-	       && (sec->flags & SEC_ALLOC) != 0
 	       && (r_type != R_386_PC32
 		   || (h != NULL
 		       && (! (bfd_link_pie (info)
@@ -2212,7 +2217,6 @@ do_size:
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !bfd_link_pic (info)
-		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
 		      || !h->def_regular)))

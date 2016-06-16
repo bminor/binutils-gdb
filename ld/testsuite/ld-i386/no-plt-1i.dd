@@ -9,7 +9,10 @@ Disassembly of section .text:
 [0-9a-f]+ <check>:
  +[a-f0-9]+:	83 ec 0c             	sub    \$0xc,%esp
  +[a-f0-9]+:	67 e8 ([0-9a-f]{2} ){4}[ 	]+addr16 call [0-9a-f]+ <get_func>
- +[a-f0-9]+:	3b 05 ([0-9a-f]{2} ){4}[ 	]+cmp +0x[0-9a-f]+,%eax
+ +[a-f0-9]+:	8b 15 ([0-9a-f]{2} ){4}[ 	]+mov +0x[a-f0-9]+,%edx
+ +[a-f0-9]+:	39 d0                	cmp    %edx,%eax
+ +[a-f0-9]+:	75 34                	jne    [0-9a-f]+ <check\+0x[0-9a-f]+>
+ +[a-f0-9]+:	39 15 ([0-9a-f]{2} ){4}[ 	]+cmp +%edx,0x[0-9a-f]+
  +[a-f0-9]+:	75 2c                	jne    [0-9a-f]+ <check\+0x[0-9a-f]+>
  +[a-f0-9]+:	ff 15 ([0-9a-f]{2} ){4}[ 	]+call +\*0x[0-9a-f]+
  +[a-f0-9]+:	3d 78 56 34 12       	cmp    \$0x12345678,%eax

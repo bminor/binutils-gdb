@@ -1,15 +1,25 @@
-2016-06-13  Graham Markall  <graham.markall@embecosm.com>
+2016-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* nds32-dis.c (nds32_parse_audio_ext): Change printing of integer
+	constants to match expected behaviour.
+	(nds32_parse_opcode): Likewise.  Also for whitespace.
+
+2016-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (extract_rhv1): Extract value from insn.
+
+2016-06-14  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-nps400-tbl.h: Add ldbit instruction.
 	* arc-opc.c: Add flag classes required for ldbit.
 
-2016-06-13  Graham Markall  <graham.markall@embecosm.com>
+2016-06-14  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-nps400-tbl.h: Add hash, hash.p[0-3], tr, utf8, e4by, and addf
 	* arc-opc.c: Add flag classes, insert/extract functions, and operands to
 	support the above instructions.
 
-2016-06-13  Graham Markall  <graham.markall@embecosm.com>
+2016-06-14  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-nps400-tbl.h: Add calcbsd, calcbxd, calckey, calcxkey, mxb,
 	imxb, addl, subl, andl, orl, xorl, andab, orab, lbdsize, bdlen, csms,

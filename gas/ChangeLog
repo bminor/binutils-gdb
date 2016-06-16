@@ -1,15 +1,78 @@
-2016-06-13  Graham Markall <graham.markall@embecosm.com>
+2016-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ft32.c (md_assemble): Call dwarf2_emit_insn with the
+	instruction size.
+	* config/tc-mcore.c (md_assemble): Likewise.
+	* config/tc-mn10200.c (md_assemble): Likewise.
+	* config/tc-moxie.c (md_assemble): Likewise.
+	* config/tc-pj.c (md_apply_fix): Handle BFD_RELOC_PJ_CODE_REL32.
+	* testsuite/gas/all/gas.exp (diff1 test): Alpha sort list of
+	exception targets.  Add alpha, hppa, microblaze and rl78 to list
+	of exceptions.
+	(forward): Add microblaze to list of exceptions.
+	(fwdexp): Add alpha to list of exceptions.
+	(redef2): Add arm-epoc-pe and rl78 to list of exceptions.
+	(redef3): Add rl78 and x86_64 cygwin to list of exceptions.
+	(do_930509a): Alpha sort list of exception targets.  Add h8300 and
+	mn10200 to list of exceptions.
+	(align2): Expect to fail for nds32.
+	(cond): Add alpha and rl78 to list of exceptions.
+	* testsuite/gas/all/none.d: Skip for ft32 and hppa.
+	* testsuite/gas/all/string.d: Skip for tic4x.
+	* testsuite/gas/alpha/alpha.exp: Note that the alpha-linuxecoff
+	target does not support ELF.
+	* testsuite/gas/arm/blx-bl-convert.dL Skip for the nto target.
+	* testsuite/gas/cfi/cfi-alpha-2.d: All extended format names.
+	* testsuite/gas/cfi/cfi.exp: Alpha sort list of targets.  Skip SH
+	tests for sh-pe and sh-rtemscoff targets.
+	* testsuite/gas/elf/elf.exp (redef): Add rl78, xgate and vax to
+	list of exceptions.
+	(type): Run the noifunc version for alpha-freebsd and visium.
+	* testsuite/gas/elf/warn-2.s: Do not expect to fail on the mcore,
+	mn10200 or moxie targets.
+	* testsuite/gas/ft32/insn.d: Update expected disassembly.
+	* testsuite/gas/i386/i386.exp (x86-64-pcrel): Skip for cygwin
+	targets.
+	* testsuite/gas/lns/lns.exp (lns-common-1): No longer skip for
+	mcore and rx targets.
+	* testsuite/gas/macros/macros.exp (dot): Add exceptions for ns32k,
+	rl78 and vax.
+	(purge): Expect to fail on the ns32k and vax.
+	* testsuite/gas/nds32/alu-2.d: Update expected disassembly.
+	* testsuite/gas/nds32/ls.d: Likewise.
+	* testsuite/gas/nds32/sys-reg.d: Likewise.
+	* testsuite/gas/nds32/usr-spe-reg.d: Likewise.
+	* testsuite/gas/pe/aligncomm-d.d: Skip for the sh.
+	* testsuite/gas/pe/section-align-3.d: Likewise.
+	* testsuite/gas/pe/section-exclude.d: Likewise.
+	* testsuite/gas/ppc/test2xcoff32.d: Pass once all the required
+	data has been seen.
+	* testsuite/gas/ppc/textalign-xcoff-001.d: Fix up regexp to allow
+	for variations in whitespace.
+	* testsuite/gas/tilepro/t_constants.d: Pass once all the required
+	data has been seen.
+	* testsuite/gas/tilepro/t_constants.s (.safe_word): New macro.
+	Installs a 32-bit value without generating warnings on 64-bit
+	hosts.
+	Use the new macro to replace the .word directives.
+
+2016-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/arc/add_s.d: New file.
+	* testsuite/gas/arc/add_s.s: New file.
+
+2016-06-14  Graham Markall <graham.markall@embecosm.com>
 
 	* testsuite/gas/arc/nps400-6.s: Add tests of ldbit.
 	* testsuite/gas/arc/nps400-6.d: Likewise.
 
-2016-06-13  Graham Markall <graham.markall@embecosm.com>
+2016-06-14  Graham Markall <graham.markall@embecosm.com>
 
 	* testsuite/gas/arc/nps400-6.s: Add tests of hash, tr, utf8, e4by, and
 	addf.
 	* testsuite/gas/arc/nps400-6.d: Likewise.
 
-2016-06-13  Graham Markall <graham.markall@embecosm.com>
+2016-06-14  Graham Markall <graham.markall@embecosm.com>
 
 	* testsuite/gas/arc/nps400-6.s: Add tests of calcbsd, calcbxd,
 	calckey, calcxkey, mxb, imxb, addl, subl, andl, orl, xorl, andab, orab,

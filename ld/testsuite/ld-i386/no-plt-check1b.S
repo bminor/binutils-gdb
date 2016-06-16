@@ -8,7 +8,10 @@
 check:
 	subl	$12, %esp
 	call	*get_func@GOT
-	cmpl	func@GOT, %eax
+	movl	func@GOT, %edx
+	cmpl	%edx, %eax
+	jne	.L3
+	cmpl	%edx, func_p
 	jne	.L3
 	call	*func@GOT
 	cmpl	$305419896, %eax
@@ -24,5 +27,4 @@ check:
 .L3:
 	call	*abort@GOT
 	.size	check, .-check
-	.text
 	.section	.note.GNU-stack,"",@progbits
