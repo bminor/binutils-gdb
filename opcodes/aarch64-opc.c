@@ -2261,9 +2261,11 @@ expand_fp_imm (int size, uint32_t imm8)
 }
 
 /* Produce the string representation of the register list operand *OPND
-   in the buffer pointed by BUF of size SIZE.  */
+   in the buffer pointed by BUF of size SIZE.  PREFIX is the part of
+   the register name that comes before the register number, such as "v".  */
 static void
-print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd)
+print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
+		     const char *prefix)
 {
   const int num_regs = opnd->reglist.num_regs;
   const int first_reg = opnd->reglist.first_regno;
@@ -2284,8 +2286,8 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd)
      more than two registers in the list, and the register numbers
      are monotonically increasing in increments of one.  */
   if (num_regs > 2 && last_reg > first_reg)
-    snprintf (buf, size, "{v%d.%s-v%d.%s}%s", first_reg, qlf_name,
-	      last_reg, qlf_name, tb);
+    snprintf (buf, size, "{%s%d.%s-%s%d.%s}%s", prefix, first_reg, qlf_name,
+	      prefix, last_reg, qlf_name, tb);
   else
     {
       const int reg0 = first_reg;
@@ -2296,20 +2298,21 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd)
       switch (num_regs)
 	{
 	case 1:
-	  snprintf (buf, size, "{v%d.%s}%s", reg0, qlf_name, tb);
+	  snprintf (buf, size, "{%s%d.%s}%s", prefix, reg0, qlf_name, tb);
 	  break;
 	case 2:
-	  snprintf (buf, size, "{v%d.%s, v%d.%s}%s", reg0, qlf_name,
-		    reg1, qlf_name, tb);
+	  snprintf (buf, size, "{%s%d.%s, %s%d.%s}%s", prefix, reg0, qlf_name,
+		    prefix, reg1, qlf_name, tb);
 	  break;
 	case 3:
-	  snprintf (buf, size, "{v%d.%s, v%d.%s, v%d.%s}%s", reg0, qlf_name,
-		    reg1, qlf_name, reg2, qlf_name, tb);
+	  snprintf (buf, size, "{%s%d.%s, %s%d.%s, %s%d.%s}%s",
+		    prefix, reg0, qlf_name, prefix, reg1, qlf_name,
+		    prefix, reg2, qlf_name, tb);
 	  break;
 	case 4:
-	  snprintf (buf, size, "{v%d.%s, v%d.%s, v%d.%s, v%d.%s}%s",
-		    reg0, qlf_name, reg1, qlf_name, reg2, qlf_name,
-		    reg3, qlf_name, tb);
+	  snprintf (buf, size, "{%s%d.%s, %s%d.%s, %s%d.%s, %s%d.%s}%s",
+		    prefix, reg0, qlf_name, prefix, reg1, qlf_name,
+		    prefix, reg2, qlf_name, prefix, reg3, qlf_name, tb);
 	  break;
 	}
     }
@@ -2513,7 +2516,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_LVt:
     case AARCH64_OPND_LVt_AL:
     case AARCH64_OPND_LEt:
-      print_register_list (buf, size, opnd);
+      print_register_list (buf, size, opnd, "v");
       break;
 
     case AARCH64_OPND_Cn:
