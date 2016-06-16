@@ -1,3 +1,20 @@
+2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+
+	Backport from master
+	2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+
+	PR binutils/20196
+	* ppc-opc.c (powerpc_opcodes <lbarx, lharx, stbcx., sthcx.>): Enable
+	opcodes for E6500.
+
+2016-06-01  Peter Bergner <bergner@vnet.ibm.com>
+
+	Backport from master
+	2016-05-26  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (CY): New define.  Document it.
+	(powerpc_opcodes) <addex[.], lwzmx, vmsumudm>: New mnemonics.
+
 2016-02-26  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.

@@ -1,3 +1,188 @@
+2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	Backport from master
+	2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20254
+	* testsuite/ld-avr/avr-prop-6.d: New test.
+	* testsuite/ld-avr/avr-prop-6.s: New test.
+
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* testsuite/ld-i386/i386.exp: Run pr20244-2a, pr20244-2b,
+	pr20244-2c and pr20244-2d.
+	* testsuite/ld-i386/no-plt.exp: Run pr20244-3a and pr20244-3b.
+	* testsuite/ld-i386/pr20244-2.s: New file.
+	* testsuite/ld-i386/pr20244-2a.d: Likewise.
+	* testsuite/ld-i386/pr20244-2b.d: Likewise.
+	* testsuite/ld-i386/pr20244-2c.d: Likewise.
+	* testsuite/ld-i386/pr20244-2d.d: Likewise.
+	* testsuite/ld-i386/pr20244-3a.c: Likewise.
+	* testsuite/ld-i386/pr20244-3b.S: Likewise.
+	* testsuite/ld-i386/pr20244-3c.S: Likewise.
+	* testsuite/ld-i386/pr20244-3d.S: Likewise.
+
+	2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run ifunc-1a and ifunc-1b.
+	* testsuite/ld-i386/ifunc-1a.c: New file.
+	* testsuite/ld-i386/ifunc-1b.S: Likewise.
+	* testsuite/ld-i386/ifunc-1c.S: Likewise.
+	* testsuite/ld-i386/ifunc-1d.S: Likewise.
+
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* testsuite/ld-i386/i386.exp: Run pr20244-1a and pr20244-1b.
+	* testsuite/ld-i386/pr20244-1.s: New file.
+	* testsuite/ld-i386/pr20244-1a.d: Likewise.
+	* testsuite/ld-i386/pr20244-1b.d: Likewise.
+	* testsuite/ld-i386/pr20244-1c.d: Likewise.
+
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/libno-plt-1b.dd: New file.
+	* testsuite/ld-i386/libno-plt-1b.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1a.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1a.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1b.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1b.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1c.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1c.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1d.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1d.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1e.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1e.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1f.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1f.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1g.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1g.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1h.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1h.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1i.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1i.rd: Likewise.
+	* testsuite/ld-i386/no-plt-1j.dd: Likewise.
+	* testsuite/ld-i386/no-plt-1j.rd: Likewise.
+	* testsuite/ld-i386/no-plt-check1a.S: Likewise.
+	* testsuite/ld-i386/no-plt-check1b.S: Likewise.
+	* testsuite/ld-i386/no-plt-extern1a.S: Likewise.
+	* testsuite/ld-i386/no-plt-extern1b.S: Likewise.
+	* testsuite/ld-i386/no-plt-func1.c: Likewise.
+	* testsuite/ld-i386/no-plt-main1.c: Likewise.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
+	* testsuite/ld-i386/pass.out Likewise.
+
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/libno-plt-1b.dd: Updated for x32.
+	* testsuite/ld-x86-64/libno-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1a.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1a.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1b.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.rd: Likewise.
+
+	2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/no-plt-1a.rd: Support any relocation order.
+	* testsuite/ld-x86-64/no-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Fix a typo.
+
+	2016-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/libno-plt-1b.dd: Likewise.
+	* testsuite/ld-x86-64/libno-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1a.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1a.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1b.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1b.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1c.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1d.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1e.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1f.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.dd: Likewise.
+	* testsuite/ld-x86-64/no-plt-1g.rd: Likewise.
+	* testsuite/ld-x86-64/no-plt-check1.S: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Likewise.
+	* testsuite/ld-x86-64/no-plt-extern1.S: Likewise.
+	* testsuite/ld-x86-64/no-plt-func1.c: Likewise.
+	* testsuite/ld-x86-64/no-plt-main1.c: Likewise.
+	* testsuite/ld-x86-64/pass.out Likewise.
+
+2016-06-13  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	Backport from master
+	2016-06-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20221
+	* testsuite/ld-avr/avr-prop-5.d: New.
+	* testsuite/ld-avr/avr-prop-5.s: New.
+
+2016-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-04-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19774
+	* testsuite/ld-x86-64/x86-64.exp: Link tmpdir/pr17689b.o before
+	tmpdir/pr17689.so, fix gotpcrel1 test and add more --as-needed
+	tests.
+
+	2016-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19774
+	* testsuite/ld-i386/i386.exp: Link tmpdir/pr18900.o before
+	tmpdir/pr18900.so and test --as-needed.  Link tmpdir/gotpc1.o
+	before tmpdir/got1d.so and test --as-needed.
+	* testsuite/ld-x86-64/x86-64.exp: Link tmpdir/pr18900.o before
+	tmpdir/pr18900.so and test --as-needed.
+
+	2016-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Link tmpdir/copyreloc-main.o
+	before tmpdir/copyreloc-lib.so and test --as-needed.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20117
+	* testsuite/ld-i386/i386.exp: Run pr20117.
+	* testsuite/ld-i386/pr20117.d: New file.
+	* testsuite/ld-i386/pr20117.s: Likewise.
+
 2016-05-18  Christophe Monat  <christophe.monat@st.com>
 
 	Backport from master

@@ -1962,7 +1962,7 @@ do_size:
 	    return FALSE;
 	}
 
-      if ((r_type == R_386_GOT32 || r_type == R_386_GOT32X)
+      if (r_type == R_386_GOT32X
 	  && (h == NULL || h->type != STT_GNU_IFUNC))
 	sec->need_convert_load = 1;
     }
@@ -2816,14 +2816,16 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       unsigned int nop;
       bfd_vma nop_offset;
 
-      if (r_type != R_386_GOT32 && r_type != R_386_GOT32X)
+      /* Don't convert R_386_GOT32 since we can't tell if it is applied
+	 to "mov $foo@GOT, %reg" which isn't a load via GOT.  */
+      if (r_type != R_386_GOT32X)
 	continue;
 
       roff = irel->r_offset;
       if (roff < 2)
 	continue;
 
-      /* Addend for R_386_GOT32 and R_386_GOT32X relocations must be 0.  */
+      /* Addend for R_386_GOT32X relocation must be 0.  */
       addend = bfd_get_32 (abfd, contents + roff);
       if (addend != 0)
 	continue;
@@ -2831,13 +2833,11 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       modrm = bfd_get_8 (abfd, contents + roff - 1);
       baseless = (modrm & 0xc7) == 0x5;
 
-      if (r_type == R_386_GOT32X
-	  && baseless
+      if (baseless
 	  && bfd_link_pic (link_info))
 	{
 	  /* For PIC, disallow R_386_GOT32X without a base register
-	     since we don't know what the GOT base is.   Allow
-	     R_386_GOT32 for existing object files.  */
+	     since we don't know what the GOT base is.  */
 	  const char *name;
 
 	  if (r_symndx < symtab_hdr->sh_info)
@@ -2865,12 +2865,6 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       /* It is OK to convert mov to lea.  */
       if (opcode != 0x8b)
 	{
-	  /* Only convert R_386_GOT32X relocation for call, jmp or
-	     one of adc, add, and, cmp, or, sbb, sub, test, xor
-	     instructions.  */
-	  if (r_type != R_386_GOT32X)
-	    continue;
-
 	  /* It is OK to convert indirect branch to direct branch.  It
 	     is OK to convert adc, add, and, cmp, or, sbb, sub, test,
 	     xor only when PIC is false.   */
@@ -2878,8 +2872,8 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
 	    continue;
 	}
 
-      /* Try to convert R_386_GOT32 and R_386_GOT32X.  Get the symbol
-	 referred to by the reloc.  */
+      /* Try to convert R_386_GOT32X.  Get the symbol referred to by
+         the reloc.  */
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
@@ -2991,8 +2985,7 @@ convert_load:
 		{
 		  /* Convert "mov foo@GOT(%reg1), %reg2" to
 		     "lea foo@GOTOFF(%reg1), %reg2".  */
-		  if (r_type == R_386_GOT32X
-		      && (baseless || !bfd_link_pic (link_info)))
+		  if (baseless || !bfd_link_pic (link_info))
 		    {
 		      r_type = R_386_32;
 		      /* For R_386_32, convert
@@ -3956,20 +3949,26 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    }
 
 		  relocation = off;
-
-		  /* Adjust for static executables.  */
-		  if (htab->elf.splt == NULL)
-		    relocation += gotplt->output_offset;
 		}
 	      else
+		relocation = (base_got->output_section->vma
+			      + base_got->output_offset + off
+			      - gotplt->output_section->vma
+			      - gotplt->output_offset);
+
+	      if ((*(contents + rel->r_offset - 1) & 0xc7) == 0x5)
 		{
-		  relocation = (base_got->output_section->vma
-				+ base_got->output_offset + off
-				- gotplt->output_section->vma
-				- gotplt->output_offset);
+		  if (bfd_link_pic (info))
+		    goto disallow_got32;
+
+		  /* Add the GOT base if there is no base register.  */
+		  relocation += (gotplt->output_section->vma
+				 + gotplt->output_offset);
+		}
+	      else if (htab->elf.splt == NULL)
+		{
 		  /* Adjust for static executables.  */
-		  if (htab->elf.splt == NULL)
-		    relocation += gotplt->output_offset;
+		  relocation += gotplt->output_offset;
 		}
 
 	      goto do_relocation;
@@ -4127,10 +4126,39 @@ r_386_got32:
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = htab->elf.sgot->output_section->vma
-		       + htab->elf.sgot->output_offset + off
-		       - htab->elf.sgotplt->output_section->vma
-		       - htab->elf.sgotplt->output_offset;
+	  relocation = (htab->elf.sgot->output_section->vma
+			+ htab->elf.sgot->output_offset + off);
+	  if ((*(contents + rel->r_offset - 1) & 0xc7) == 0x5)
+	    {
+	      if (bfd_link_pic (info))
+		{
+		  /* For PIC, disallow R_386_GOT32 without a base
+		     register since we don't know what the GOT base
+		     is.  */
+		  const char *name;
+
+disallow_got32:
+		  if (h == NULL)
+		    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+					     NULL);
+		  else
+		    name = h->root.root.string;
+
+		  (*_bfd_error_handler)
+		    (_("%B: direct GOT relocation %s against `%s' without base register can not be used when making a shared object"),
+		     input_bfd, howto->name, name);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+	    }
+	  else
+	    {
+	      /* Subtract the .got.plt section address only with a base
+		 register.  */
+	      relocation -= (htab->elf.sgotplt->output_section->vma
+			     + htab->elf.sgotplt->output_offset);
+	    }
+
 	  break;
 
 	case R_386_GOTOFF:

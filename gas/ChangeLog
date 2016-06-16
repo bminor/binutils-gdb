@@ -1,3 +1,28 @@
+2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+
+	Backport from master
+	2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+
+	PR binutils/20196
+	* gas/testsuite/gas/ppc/e6500.s <lbarx, lharx, lwarx, ldarx,
+	stbcx., sthcx., stwcx., stdcx.>: Add tests.
+	* gas/testsuite/gas/ppc/e6500.d: Likewise.
+	* gas/testsuite/gas/ppc/power8.s: Likewise.
+	* gas/testsuite/gas/ppc/power8.d: Likewise.
+	* gas/testsuite/gas/ppc/power4.s <lwarx, ldarx, stwcx.,
+	stdcx.>: Add tests.
+	* gas/testsuite/gas/ppc/power4.d: Likewise.
+
+2016-06-01  Peter Bergner <bergner@vnet.ibm.com>
+
+	Backport from master
+	2016-05-26  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/altivec3.d <vmsumudm>: Add test.
+	* testsuite/gas/ppc/altivec3.s: Likewise.
+	* testsuite/gas/ppc/power9.d <addex[.], lwzmx, vmsumudm>: Add tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
 2016-05-11  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/20047

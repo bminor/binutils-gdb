@@ -363,6 +363,8 @@ Disassembly of section \.text:
 .*:	(7c 00 f6 e4|e4 f6 00 7c) 	rmieg   r30
 .*:	(7d 40 7a 6a|6a 7a 40 7d) 	ldmx    r10,0,r15
 .*:	(7d 43 7a 6a|6a 7a 43 7d) 	ldmx    r10,r3,r15
+.*:	(7d 60 83 6a|6a 83 60 7d) 	lwzmx   r11,0,r16
+.*:	(7d 63 83 6a|6a 83 63 7d) 	lwzmx   r11,r3,r16
 .*:	(4c 00 02 e4|e4 02 00 4c) 	stop
 .*:	(7c 00 00 3c|3c 00 00 7c) 	wait    
 .*:	(7c 00 00 3c|3c 00 00 7c) 	wait    
@@ -381,4 +383,11 @@ Disassembly of section \.text:
 .*:	(f0 6d bc 07|07 bc 6d f0) 	xsmaxcdp vs35,vs45,vs55
 .*:	(f0 8e c4 c7|c7 c4 8e f0) 	xsminjdp vs36,vs46,vs56
 .*:	(f0 af cc 87|87 cc af f0) 	xsmaxjdp vs37,vs47,vs57
+.*:	(12 95 b5 e3|e3 b5 95 12) 	vmsumudm v20,v21,v22,v23
+.*:	(7d 6c 69 54|54 69 6c 7d) 	addex   r11,r12,r13,0
+.*:	(7d 6c 6b 54|54 6b 6c 7d) 	addex   r11,r12,r13,1
+.*:	(7d 6c 6d 54|54 6d 6c 7d) 	addex   r11,r12,r13,2
+.*:	(7e b6 b9 55|55 b9 b6 7e) 	addex\.  r21,r22,r23,0
+.*:	(7e b6 bb 55|55 bb b6 7e) 	addex\.  r21,r22,r23,1
+.*:	(7e b6 bd 55|55 bd b6 7e) 	addex\.  r21,r22,r23,2
 #pass

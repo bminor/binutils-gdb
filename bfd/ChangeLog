@@ -1,3 +1,77 @@
+2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	Backport from master
+	2016-06-14  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20254
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Adjust reloc
+	offsets until reloc_toaddr.
+
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* elf32-i386.c (elf_i386_relocate_section): Add the .got.plt
+	section address for R_386_GOT32/R_386_GOT32X relocations against
+	IFUNC symbols if there is no base register and return error for
+	PIC.
+
+	2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Simplify IFUNC
+	GOT32 adjustment for static executables.
+
+2016-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* elf32-i386.c (elf_i386_relocate_section): When relocating
+	R_386_GOT32, return error without a base register for PIC and
+	subtract the .got.plt section address only with a base register.
+
+2016-06-13  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	Backport from master
+	2016-06-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20221
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Adjust syms
+	and relocs only if shrinking occurred.
+
+2016-06-09  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20159
+	PR ld/16467
+	* elflink.c (_bfd_elf_merge_symbol): Revert PR16467 change.
+	(_bfd_elf_add_default_symbol): Don't indirect to/from defined
+	symbol given a version by a script different to the version
+	of the symbol being added.
+	(elf_link_add_object_symbols): Use _bfd_elf_strtab_save and
+	_bfd_elf_strtab_restore.  Don't fudge dynstr references.
+	* elf-strtab.c (_bfd_elf_strtab_restore_size): Delete.
+	(struct strtab_save): New.
+	(_bfd_elf_strtab_save, _bfd_elf_strtab_restore): New functions.
+	* elf-bfd.h (_bfd_elf_strtab_restore_size): Delete.
+	(_bfd_elf_strtab_save, _bfd_elf_strtab_restore): Declare.
+
+2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Don't check R_386_GOT32
+	when setting need_convert_load.
+
+	2016-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20117
+	* elf32-i386.c (elf_i386_convert_load): Don't convert
+	R_386_GOT32.
+
 2016-05-18  Christophe Monat  <christophe.monat@st.com>
 
 	Backport from master
