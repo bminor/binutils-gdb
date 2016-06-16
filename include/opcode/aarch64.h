@@ -244,6 +244,8 @@ enum aarch64_opnd
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
 
+  AARCH64_OPND_SVE_PATTERN,	/* SVE vector pattern enumeration.  */
+  AARCH64_OPND_SVE_PRFOP,	/* SVE prefetch operation.  */
   AARCH64_OPND_SVE_Pd,		/* SVE p0-p15 in Pd.  */
   AARCH64_OPND_SVE_Pg3,		/* SVE p0-p7 in Pg.  */
   AARCH64_OPND_SVE_Pg4_5,	/* SVE p0-p15 in Pg, bits [8,5].  */
@@ -1036,6 +1038,9 @@ aarch64_verbose (const char *, ...) __attribute__ ((format (printf, 1, 2)));
 #define DEBUG_TRACE(M, ...) ;
 #define DEBUG_TRACE_IF(C, M, ...) ;
 #endif /* DEBUG_AARCH64 */
+
+extern const char *const aarch64_sve_pattern_array[32];
+extern const char *const aarch64_sve_prfop_array[16];
 
 #ifdef __cplusplus
 }

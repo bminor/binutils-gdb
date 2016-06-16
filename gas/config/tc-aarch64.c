@@ -3634,6 +3634,52 @@ parse_adrp (char **str)
 
 /* Miscellaneous. */
 
+/* Parse a symbolic operand such as "pow2" at *STR.  ARRAY is an array
+   of SIZE tokens in which index I gives the token for field value I,
+   or is null if field value I is invalid.  REG_TYPE says which register
+   names should be treated as registers rather than as symbolic immediates.
+
+   Return true on success, moving *STR past the operand and storing the
+   field value in *VAL.  */
+
+static int
+parse_enum_string (char **str, int64_t *val, const char *const *array,
+		   size_t size, aarch64_reg_type reg_type)
+{
+  expressionS exp;
+  char *p, *q;
+  size_t i;
+
+  /* Match C-like tokens.  */
+  p = q = *str;
+  while (ISALNUM (*q))
+    q++;
+
+  for (i = 0; i < size; ++i)
+    if (array[i]
+	&& strncasecmp (array[i], p, q - p) == 0
+	&& array[i][q - p] == 0)
+      {
+	*val = i;
+	*str = q;
+	return TRUE;
+      }
+
+  if (!parse_immediate_expression (&p, &exp, reg_type))
+    return FALSE;
+
+  if (exp.X_op == O_constant
+      && (uint64_t) exp.X_add_number < size)
+    {
+      *val = exp.X_add_number;
+      *str = p;
+      return TRUE;
+    }
+
+  /* Use the default error for this operand.  */
+  return FALSE;
+}
+
 /* Parse an option for a preload instruction.  Returns the encoding for the
    option, or PARSE_FAIL.  */
 
@@ -3842,6 +3888,12 @@ parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
 #min " to "#max));						\
 	goto failure;						\
       }								\
+  } while (0)
+
+#define po_enum_or_fail(array) do {				\
+    if (!parse_enum_string (&str, &val, array,			\
+			    ARRAY_SIZE (array), imm_reg_type))	\
+      goto failure;						\
   } while (0)
 
 #define po_misc_or_fail(expr) do {				\
@@ -4857,6 +4909,8 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_WIDTH:
     case AARCH64_OPND_UIMM7:
     case AARCH64_OPND_NZCV:
+    case AARCH64_OPND_SVE_PATTERN:
+    case AARCH64_OPND_SVE_PRFOP:
       operand->imm.value = default_value;
       break;
 
@@ -5362,6 +5416,16 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_IMM:
 	case AARCH64_OPND_WIDTH:
 	  po_imm_nc_or_fail ();
+	  info->imm.value = val;
+	  break;
+
+	case AARCH64_OPND_SVE_PATTERN:
+	  po_enum_or_fail (aarch64_sve_pattern_array);
+	  info->imm.value = val;
+	  break;
+
+	case AARCH64_OPND_SVE_PRFOP:
+	  po_enum_or_fail (aarch64_sve_prfop_array);
 	  info->imm.value = val;
 	  break;
 

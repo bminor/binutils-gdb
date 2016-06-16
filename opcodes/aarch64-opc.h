@@ -106,6 +106,8 @@ enum aarch64_field_kind
   FLD_SVE_Zm_16,
   FLD_SVE_Zn,
   FLD_SVE_Zt,
+  FLD_SVE_pattern,
+  FLD_SVE_prfop,
   FLD_SVE_tszh,
 };
 

@@ -113,6 +113,8 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SYSTEM, "BARRIER_ISB", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "the ISB option name SY or an optional 4-bit unsigned immediate"},
   {AARCH64_OPND_CLASS_SYSTEM, "PRFOP", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "a prefetch operation specifier"},
   {AARCH64_OPND_CLASS_SYSTEM, "BARRIER_PSB", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "the PSB option name CSYNC"},
+  {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_PATTERN", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_pattern}, "an enumeration value such as POW2"},
+  {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_PRFOP", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_prfop}, "an enumeration value such as PLDL1KEEP"},
   {AARCH64_OPND_CLASS_PRED_REG, "SVE_Pd", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Pd}, "an SVE predicate register"},
   {AARCH64_OPND_CLASS_PRED_REG, "SVE_Pg3", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Pg3}, "an SVE predicate register"},
   {AARCH64_OPND_CLASS_PRED_REG, "SVE_Pg4_5", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Pg4_5}, "an SVE predicate register"},

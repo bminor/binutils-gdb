@@ -27,12 +27,77 @@
 #include <inttypes.h>
 
 #include "opintl.h"
+#include "libiberty.h"
 
 #include "aarch64-opc.h"
 
 #ifdef DEBUG_AARCH64
 int debug_dump = FALSE;
 #endif /* DEBUG_AARCH64 */
+
+/* The enumeration strings associated with each value of a 5-bit SVE
+   pattern operand.  A null entry indicates a reserved meaning.  */
+const char *const aarch64_sve_pattern_array[32] = {
+  /* 0-7.  */
+  "pow2",
+  "vl1",
+  "vl2",
+  "vl3",
+  "vl4",
+  "vl5",
+  "vl6",
+  "vl7",
+  /* 8-15.  */
+  "vl8",
+  "vl16",
+  "vl32",
+  "vl64",
+  "vl128",
+  "vl256",
+  0,
+  0,
+  /* 16-23.  */
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  /* 24-31.  */
+  0,
+  0,
+  0,
+  0,
+  0,
+  "mul4",
+  "mul3",
+  "all"
+};
+
+/* The enumeration strings associated with each value of a 4-bit SVE
+   prefetch operand.  A null entry indicates a reserved meaning.  */
+const char *const aarch64_sve_prfop_array[16] = {
+  /* 0-7.  */
+  "pldl1keep",
+  "pldl1strm",
+  "pldl2keep",
+  "pldl2strm",
+  "pldl3keep",
+  "pldl3strm",
+  0,
+  0,
+  /* 8-15.  */
+  "pstl1keep",
+  "pstl1strm",
+  "pstl2keep",
+  "pstl2strm",
+  "pstl3keep",
+  "pstl3strm",
+  0,
+  0
+};
 
 /* Helper functions to determine which operand to be used to encode/decode
    the size:Q fields for AdvSIMD instructions.  */
@@ -214,6 +279,8 @@ const aarch64_field fields[] =
     { 16,  5 }, /* SVE_Zm_16: SVE vector register, bits [20,16]. */
     {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
+    {  5,  5 }, /* SVE_pattern: vector pattern enumeration.  */
+    {  0,  4 }, /* SVE_prfop: prefetch operation for SVE PRF[BHWD].  */
     { 22,  2 }, /* SVE_tszh: triangular size select high, bits [23,22].  */
 };
 
@@ -2489,7 +2556,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
   const char *name = NULL;
   const aarch64_opnd_info *opnd = opnds + idx;
   enum aarch64_modifier_kind kind;
-  uint64_t addr;
+  uint64_t addr, enum_value;
 
   buf[0] = '\0';
   if (pcrel_p)
@@ -2679,6 +2746,27 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_IMMS:
     case AARCH64_OPND_FBITS:
       snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+      break;
+
+    case AARCH64_OPND_SVE_PATTERN:
+      if (optional_operand_p (opcode, idx)
+	  && opnd->imm.value == get_optional_operand_default_value (opcode))
+	break;
+      enum_value = opnd->imm.value;
+      assert (enum_value < ARRAY_SIZE (aarch64_sve_pattern_array));
+      if (aarch64_sve_pattern_array[enum_value])
+	snprintf (buf, size, "%s", aarch64_sve_pattern_array[enum_value]);
+      else
+	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+      break;
+
+    case AARCH64_OPND_SVE_PRFOP:
+      enum_value = opnd->imm.value;
+      assert (enum_value < ARRAY_SIZE (aarch64_sve_prfop_array));
+      if (aarch64_sve_prfop_array[enum_value])
+	snprintf (buf, size, "%s", aarch64_sve_prfop_array[enum_value]);
+      else
+	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
       break;
 
     case AARCH64_OPND_IMM_MOV:
