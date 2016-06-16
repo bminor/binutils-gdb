@@ -315,6 +315,9 @@ enum aarch64_opnd_qualifier
   AARCH64_OPND_QLF_V_2D,
   AARCH64_OPND_QLF_V_1Q,
 
+  AARCH64_OPND_QLF_P_Z,
+  AARCH64_OPND_QLF_P_M,
+
   /* Constraint on value.  */
   AARCH64_OPND_QLF_imm_0_7,
   AARCH64_OPND_QLF_imm_0_15,
