@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "auxv.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "regcache.h"
@@ -283,6 +284,39 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   return note_data;
 }
 
+/* Print descriptions of FreeBSD-specific AUXV entries to FILE.  */
+
+static void
+fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
+		       CORE_ADDR type, CORE_ADDR val)
+{
+  const char *name;
+  const char *description;
+  enum auxv_format format;
+
+  switch (type)
+    {
+#define _TAGNAME(tag) #tag
+#define TAGNAME(tag) _TAGNAME(AT_##tag)
+#define TAG(tag, text, kind) \
+      case AT_FREEBSD_##tag: name = TAGNAME(tag); description = text; format = kind; break
+      TAG (EXECPATH, _("Executable path"), AUXV_FORMAT_STR);
+      TAG (CANARY, _("Canary for SSP"), AUXV_FORMAT_HEX);
+      TAG (CANARYLEN, ("Length of the SSP canary"), AUXV_FORMAT_DEC);
+      TAG (OSRELDATE, _("OSRELDATE"), AUXV_FORMAT_DEC);
+      TAG (NCPUS, _("Number of CPUs"), AUXV_FORMAT_DEC);
+      TAG (PAGESIZES, _("Pagesizes"), AUXV_FORMAT_HEX);
+      TAG (PAGESIZESLEN, _("Number of pagesizes"), AUXV_FORMAT_DEC);
+      TAG (TIMEKEEP, _("Pointer to timehands"), AUXV_FORMAT_HEX);
+      TAG (STACKPROT, _("Initial stack protection"), AUXV_FORMAT_HEX);
+    default:
+      default_print_auxv_entry (gdbarch, file, type, val);
+      return;
+    }
+
+  fprint_auxv_entry (file, name, description, format, type, val);
+}
+
 /* To be called from GDB_OSABI_FREEBSD_ELF handlers. */
 
 void
@@ -291,4 +325,5 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_pid_to_str (gdbarch, fbsd_core_pid_to_str);
   set_gdbarch_core_thread_name (gdbarch, fbsd_core_thread_name);
   set_gdbarch_make_corefile_notes (gdbarch, fbsd_make_corefile_notes);
+  set_gdbarch_print_auxv_entry (gdbarch, fbsd_print_auxv_entry);
 }
