@@ -2189,6 +2189,27 @@ get_64bit_int_reg_name (int regno, int sp_reg_p)
   return int_reg[has_zr][1][regno];
 }
 
+/* Get the name of the integer offset register in OPND, using the shift type
+   to decide whether it's a word or doubleword.  */
+
+static inline const char *
+get_offset_int_reg_name (const aarch64_opnd_info *opnd)
+{
+  switch (opnd->shifter.kind)
+    {
+    case AARCH64_MOD_UXTW:
+    case AARCH64_MOD_SXTW:
+      return get_int_reg_name (opnd->addr.offset.regno, AARCH64_OPND_QLF_W, 0);
+
+    case AARCH64_MOD_LSL:
+    case AARCH64_MOD_SXTX:
+      return get_int_reg_name (opnd->addr.offset.regno, AARCH64_OPND_QLF_X, 0);
+
+    default:
+      abort ();
+    }
+}
+
 /* Types for expanding an encoded 8-bit value to a floating-point value.  */
 
 typedef union
@@ -2311,27 +2332,42 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
     }
 }
 
+/* Print the register+immediate address in OPND to BUF, which has SIZE
+   characters.  BASE is the name of the base register.  */
+
+static void
+print_immediate_offset_address (char *buf, size_t size,
+				const aarch64_opnd_info *opnd,
+				const char *base)
+{
+  if (opnd->addr.writeback)
+    {
+      if (opnd->addr.preind)
+	snprintf (buf, size, "[%s,#%d]!", base, opnd->addr.offset.imm);
+      else
+	snprintf (buf, size, "[%s],#%d", base, opnd->addr.offset.imm);
+    }
+  else
+    {
+      if (opnd->addr.offset.imm)
+	snprintf (buf, size, "[%s,#%d]", base, opnd->addr.offset.imm);
+      else
+	snprintf (buf, size, "[%s]", base);
+    }
+}
+
 /* Produce the string representation of the register offset address operand
-   *OPND in the buffer pointed by BUF of size SIZE.  */
+   *OPND in the buffer pointed by BUF of size SIZE.  BASE and OFFSET are
+   the names of the base and offset registers.  */
 static void
 print_register_offset_address (char *buf, size_t size,
-			       const aarch64_opnd_info *opnd)
+			       const aarch64_opnd_info *opnd,
+			       const char *base, const char *offset)
 {
   char tb[16];			/* Temporary buffer.  */
-  bfd_boolean lsl_p = FALSE;	/* Is LSL shift operator?  */
-  bfd_boolean wm_p = FALSE;	/* Should Rm be Wm?  */
   bfd_boolean print_extend_p = TRUE;
   bfd_boolean print_amount_p = TRUE;
   const char *shift_name = aarch64_operand_modifiers[opnd->shifter.kind].name;
-
-  switch (opnd->shifter.kind)
-    {
-    case AARCH64_MOD_UXTW: wm_p = TRUE; break;
-    case AARCH64_MOD_LSL : lsl_p = TRUE; break;
-    case AARCH64_MOD_SXTW: wm_p = TRUE; break;
-    case AARCH64_MOD_SXTX: break;
-    default: assert (0);
-    }
 
   if (!opnd->shifter.amount && (opnd->qualifier != AARCH64_OPND_QLF_S_B
 				|| !opnd->shifter.amount_present))
@@ -2341,7 +2377,7 @@ print_register_offset_address (char *buf, size_t size,
       print_amount_p = FALSE;
       /* Likewise, no need to print the shift operator LSL in such a
 	 situation.  */
-      if (lsl_p)
+      if (opnd->shifter.kind == AARCH64_MOD_LSL)
 	print_extend_p = FALSE;
     }
 
@@ -2356,12 +2392,7 @@ print_register_offset_address (char *buf, size_t size,
   else
     tb[0] = '\0';
 
-  snprintf (buf, size, "[%s,%s%s]",
-	    get_64bit_int_reg_name (opnd->addr.base_regno, 1),
-	    get_int_reg_name (opnd->addr.offset.regno,
-			      wm_p ? AARCH64_OPND_QLF_W : AARCH64_OPND_QLF_X,
-			      0 /* sp_reg_p */),
-	    tb);
+  snprintf (buf, size, "[%s,%s%s]", base, offset, tb);
 }
 
 /* Generate the string representation of the operand OPNDS[IDX] for OPCODE
@@ -2668,27 +2699,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_ADDR_REGOFF:
-      print_register_offset_address (buf, size, opnd);
+      print_register_offset_address
+	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
+	 get_offset_int_reg_name (opnd));
       break;
 
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
-      name = get_64bit_int_reg_name (opnd->addr.base_regno, 1);
-      if (opnd->addr.writeback)
-	{
-	  if (opnd->addr.preind)
-	    snprintf (buf, size, "[%s,#%d]!", name, opnd->addr.offset.imm);
-	  else
-	    snprintf (buf, size, "[%s],#%d", name, opnd->addr.offset.imm);
-	}
-      else
-	{
-	  if (opnd->addr.offset.imm)
-	    snprintf (buf, size, "[%s,#%d]", name, opnd->addr.offset.imm);
-	  else
-	    snprintf (buf, size, "[%s]", name);
-	}
+      print_immediate_offset_address
+	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1));
       break;
 
     case AARCH64_OPND_ADDR_UIMM12:
