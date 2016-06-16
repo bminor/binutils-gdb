@@ -745,6 +745,33 @@ aarch64_ins_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+/* Encode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
+   array specifies which field to use for Zn.  MM is encoded in the
+   concatenation of imm5 and SVE_tszh, with imm5 being the less
+   significant part.  */
+const char *
+aarch64_ins_sve_index (const aarch64_operand *self,
+		       const aarch64_opnd_info *info, aarch64_insn *code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  unsigned int esize = aarch64_get_qualifier_esize (info->qualifier);
+  insert_field (self->fields[0], code, info->reglane.regno, 0);
+  insert_fields (code, (info->reglane.index * 2 + 1) * esize, 0,
+		 2, FLD_imm5, FLD_SVE_tszh);
+  return NULL;
+}
+
+/* Encode {Zn.<T> - Zm.<T>}.  The fields array specifies which field
+   to use for Zn.  */
+const char *
+aarch64_ins_sve_reglist (const aarch64_operand *self,
+			 const aarch64_opnd_info *info, aarch64_insn *code,
+			 const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  insert_field (self->fields[0], code, info->reglist.first_regno, 0);
+  return NULL;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for

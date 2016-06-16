@@ -91,6 +91,22 @@ enum aarch64_field_kind
   FLD_b5,
   FLD_b40,
   FLD_scale,
+  FLD_SVE_Pd,
+  FLD_SVE_Pg3,
+  FLD_SVE_Pg4_5,
+  FLD_SVE_Pg4_10,
+  FLD_SVE_Pg4_16,
+  FLD_SVE_Pm,
+  FLD_SVE_Pn,
+  FLD_SVE_Pt,
+  FLD_SVE_Za_5,
+  FLD_SVE_Za_16,
+  FLD_SVE_Zd,
+  FLD_SVE_Zm_5,
+  FLD_SVE_Zm_16,
+  FLD_SVE_Zn,
+  FLD_SVE_Zt,
+  FLD_SVE_tszh,
 };
 
 /* Field description.  */
