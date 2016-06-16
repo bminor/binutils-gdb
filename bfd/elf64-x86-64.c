@@ -2601,20 +2601,19 @@ do_size:
 	     may need to keep relocations for symbols satisfied by a
 	     dynamic library if we manage to avoid copy relocs for the
 	     symbol.  */
-	  if ((bfd_link_pic (info)
-	       && (sec->flags & SEC_ALLOC) != 0
-	       && (! IS_X86_64_PCREL_TYPE (r_type)
-		   || (h != NULL
-		       && (! (bfd_link_pie (info)
-			      || SYMBOLIC_BIND (info, h))
-			   || h->root.type == bfd_link_hash_defweak
-			   || !h->def_regular))))
-	      || (ELIMINATE_COPY_RELOCS
-		  && !bfd_link_pic (info)
-		  && (sec->flags & SEC_ALLOC) != 0
-		  && h != NULL
-		  && (h->root.type == bfd_link_hash_defweak
-		      || !h->def_regular)))
+	  if ((sec->flags & SEC_ALLOC) != 0
+	      && ((bfd_link_pic (info)
+		   && (! IS_X86_64_PCREL_TYPE (r_type)
+		       || (h != NULL
+			   && (! (bfd_link_pie (info)
+				  || SYMBOLIC_BIND (info, h))
+			       || h->root.type == bfd_link_hash_defweak
+			       || !h->def_regular))))
+		  || (ELIMINATE_COPY_RELOCS
+		      && !bfd_link_pic (info)
+		      && h != NULL
+		      && (h->root.type == bfd_link_hash_defweak
+			  || !h->def_regular))))
 	    {
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
