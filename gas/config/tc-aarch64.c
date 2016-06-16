@@ -2912,6 +2912,7 @@ enum parse_shift_mode
   SHIFTED_LOGIC_IMM,		/* "rn{,lsl|lsr|asl|asr|ror #n}" or
 				   "#imm"  */
   SHIFTED_LSL,			/* bare "lsl #n"  */
+  SHIFTED_MUL,			/* bare "mul #n"  */
   SHIFTED_LSL_MSL,		/* "lsl|msl #n"  */
   SHIFTED_REG_OFFSET		/* [su]xtw|sxtx {#n} or lsl #n  */
 };
@@ -2953,6 +2954,13 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       return FALSE;
     }
 
+  if (kind == AARCH64_MOD_MUL
+      && mode != SHIFTED_MUL)
+    {
+      set_syntax_error (_("invalid use of 'MUL'"));
+      return FALSE;
+    }
+
   switch (mode)
     {
     case SHIFTED_LOGIC_IMM:
@@ -2975,6 +2983,14 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       if (kind != AARCH64_MOD_LSL)
 	{
 	  set_syntax_error (_("only 'LSL' shift is permitted"));
+	  return FALSE;
+	}
+      break;
+
+    case SHIFTED_MUL:
+      if (kind != AARCH64_MOD_MUL)
+	{
+	  set_syntax_error (_("only 'MUL' is permitted"));
 	  return FALSE;
 	}
       break;
@@ -3031,7 +3047,11 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       set_syntax_error (_("constant shift amount required"));
       return FALSE;
     }
-  else if (exp.X_add_number < 0 || exp.X_add_number > 63)
+  /* For parsing purposes, MUL #n has no inherent range.  The range
+     depends on the operand and will be checked by operand-specific
+     routines.  */
+  else if (kind != AARCH64_MOD_MUL
+	   && (exp.X_add_number < 0 || exp.X_add_number > 63))
     {
       set_fatal_syntax_error (_("shift amount out of range 0 to 63"));
       return FALSE;
@@ -4914,6 +4934,12 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
       operand->imm.value = default_value;
       break;
 
+    case AARCH64_OPND_SVE_PATTERN_SCALED:
+      operand->imm.value = default_value;
+      operand->shifter.kind = AARCH64_MOD_MUL;
+      operand->shifter.amount = 1;
+      break;
+
     case AARCH64_OPND_EXCEPTION:
       inst.reloc.type = BFD_RELOC_UNUSED;
       break;
@@ -5422,6 +5448,20 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_PATTERN:
 	  po_enum_or_fail (aarch64_sve_pattern_array);
 	  info->imm.value = val;
+	  break;
+
+	case AARCH64_OPND_SVE_PATTERN_SCALED:
+	  po_enum_or_fail (aarch64_sve_pattern_array);
+	  info->imm.value = val;
+	  if (skip_past_comma (&str)
+	      && !parse_shift (&str, info, SHIFTED_MUL))
+	    goto failure;
+	  if (!info->shifter.operator_present)
+	    {
+	      gas_assert (info->shifter.kind == AARCH64_MOD_NONE);
+	      info->shifter.kind = AARCH64_MOD_MUL;
+	      info->shifter.amount = 1;
+	    }
 	  break;
 
 	case AARCH64_OPND_SVE_PRFOP:

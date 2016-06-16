@@ -93,6 +93,7 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_reg_extended);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reg_shifted);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_index);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_reglist);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sve_scale);
 
 #undef AARCH64_DECL_OPD_EXTRACTOR
 

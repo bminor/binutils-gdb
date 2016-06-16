@@ -71,6 +71,7 @@ AARCH64_DECL_OPD_INSERTER (ins_reg_extended);
 AARCH64_DECL_OPD_INSERTER (ins_reg_shifted);
 AARCH64_DECL_OPD_INSERTER (ins_sve_index);
 AARCH64_DECL_OPD_INSERTER (ins_sve_reglist);
+AARCH64_DECL_OPD_INSERTER (ins_sve_scale);
 
 #undef AARCH64_DECL_OPD_INSERTER
 
