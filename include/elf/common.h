@@ -1012,6 +1012,16 @@
 #define AT_L2_CACHESHAPE  36
 #define AT_L3_CACHESHAPE  37
 
+#define AT_FREEBSD_EXECPATH     15      /* Path to the executable. */
+#define AT_FREEBSD_CANARY       16      /* Canary for SSP. */
+#define AT_FREEBSD_CANARYLEN    17      /* Length of the canary. */
+#define AT_FREEBSD_OSRELDATE    18      /* OSRELDATE. */
+#define AT_FREEBSD_NCPUS        19      /* Number of CPUs. */
+#define AT_FREEBSD_PAGESIZES    20      /* Pagesizes. */
+#define AT_FREEBSD_PAGESIZESLEN 21      /* Number of pagesizes. */
+#define AT_FREEBSD_TIMEKEEP     22      /* Pointer to timehands. */
+#define AT_FREEBSD_STACKPROT    23      /* Initial stack protection. */
+
 #define AT_SUN_UID      2000    /* Effective user ID.  */
 #define AT_SUN_RUID     2001    /* Real user ID.  */
 #define AT_SUN_GID      2002    /* Effective group ID.  */

@@ -1,3 +1,10 @@
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_EXECPATH, AT_FREEBSD_CANARY)
+	(AT_FREEBSD_CANARYLEN, AT_FREEBSD_OSRELDATE, AT_FREEBSD_NCPUS)
+	(AT_FREEBSD_PAGESIZES, AT_FREEBSD_PAGESIZESLEN)
+	(AT_FREEBSD_TIMEKEEP, AT_FREEBSD_STACKPROT): Define.
+
 2016-06-23  Graham Markall  <graham.markall@embecosm.com>
 
 	* opcode/arc.h: Make insn_class_t alphabetical again.
