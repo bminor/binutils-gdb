@@ -1,3 +1,9 @@
+2016-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Skip relocations in
+	non-loaded, non-alloced sections.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
 2016-06-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Check SEC_ALLOC before
