@@ -2058,6 +2058,23 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
 
   DEBUG_TRACE ("enter");
 
+  /* Check for cases where a source register needs to be the same as the
+     destination register.  Do this before matching qualifiers since if
+     an instruction has both invalid tying and invalid qualifiers,
+     the error about qualifiers would suggest several alternative
+     instructions that also have invalid tying.  */
+  i = inst->opcode->tied_operand;
+  if (i > 0 && (inst->operands[0].reg.regno != inst->operands[i].reg.regno))
+    {
+      if (mismatch_detail)
+	{
+	  mismatch_detail->kind = AARCH64_OPDE_UNTIED_OPERAND;
+	  mismatch_detail->index = i;
+	  mismatch_detail->error = NULL;
+	}
+      return 0;
+    }
+
   /* Match operands' qualifier.
      *INST has already had qualifier establish for some, if not all, of
      its operands; we need to find out whether these established

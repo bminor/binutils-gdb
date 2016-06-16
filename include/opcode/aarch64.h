@@ -539,6 +539,10 @@ struct aarch64_opcode
   /* Flags providing information about this instruction */
   uint32_t flags;
 
+  /* If nonzero, this operand and operand 0 are both registers and
+     are required to have the same register number.  */
+  unsigned char tied_operand;
+
   /* If non-NULL, a function to verify that a given instruction is valid.  */
   bfd_boolean (* verifier) (const struct aarch64_opcode *, const aarch64_insn);
 };
@@ -872,6 +876,10 @@ typedef struct aarch64_inst aarch64_inst;
      No syntax error, but the operands are not a valid combination, e.g.
      FMOV D0,S0
 
+   AARCH64_OPDE_UNTIED_OPERAND
+     The asm failed to use the same register for a destination operand
+     and a tied source operand.
+
    AARCH64_OPDE_OUT_OF_RANGE
      Error about some immediate value out of a valid range.
 
@@ -908,6 +916,7 @@ enum aarch64_operand_error_kind
   AARCH64_OPDE_SYNTAX_ERROR,
   AARCH64_OPDE_FATAL_SYNTAX_ERROR,
   AARCH64_OPDE_INVALID_VARIANT,
+  AARCH64_OPDE_UNTIED_OPERAND,
   AARCH64_OPDE_OUT_OF_RANGE,
   AARCH64_OPDE_UNALIGNED,
   AARCH64_OPDE_REG_LIST,

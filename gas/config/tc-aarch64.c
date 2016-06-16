@@ -4419,6 +4419,11 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	}
       break;
 
+    case AARCH64_OPDE_UNTIED_OPERAND:
+      as_bad (_("operand %d must be the same register as operand 1 -- `%s'"),
+	      detail->index + 1, str);
+      break;
+
     case AARCH64_OPDE_OUT_OF_RANGE:
       if (detail->data[0] != detail->data[1])
 	as_bad (_("%s out of range %d to %d at operand %d -- `%s'"),

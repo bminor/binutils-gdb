@@ -1393,27 +1393,27 @@ static const aarch64_feature_set aarch64_feature_stat_profile =
 #define ARMV8_2		&aarch64_feature_v8_2
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, NULL }
 #define __FP_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, OP, FP, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, OP, FP, OPS, QUALS, FLAGS, 0, NULL }
 #define SIMD_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, OP, SIMD, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, OP, SIMD, OPS, QUALS, FLAGS, 0, NULL }
 #define CRYP_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, CRYPTO, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, 0, CRYPTO, OPS, QUALS, FLAGS, 0, NULL }
 #define _CRC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, CRC, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, 0, CRC, OPS, QUALS, FLAGS, 0, NULL }
 #define _LSE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, LSE, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, 0, LSE, OPS, QUALS, FLAGS, 0, NULL }
 #define _LOR_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, LOR, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, 0, LOR, OPS, QUALS, FLAGS, 0, NULL }
 #define RDMA_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, RDMA, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, 0, RDMA, OPS, QUALS, FLAGS, 0, NULL }
 #define FF16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, FP_F16, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, 0, FP_F16, OPS, QUALS, FLAGS, 0, NULL }
 #define SF16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS)		\
-  { NAME, OPCODE, MASK, CLASS, 0, SIMD_F16, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, 0, SIMD_F16, OPS, QUALS, FLAGS, 0, NULL }
 #define V8_2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, OP, ARMV8_2, OPS, QUALS, FLAGS, NULL }
+  { NAME, OPCODE, MASK, CLASS, OP, ARMV8_2, OPS, QUALS, FLAGS, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -2389,13 +2389,13 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("ldp", 0x29400000, 0x7ec00000, ldstpair_off, 0, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_SF),
   CORE_INSN ("stp", 0x2d000000, 0x3fc00000, ldstpair_off, 0, OP3 (Ft, Ft2, ADDR_SIMM7), QL_LDST_PAIR_FP, 0),
   CORE_INSN ("ldp", 0x2d400000, 0x3fc00000, ldstpair_off, 0, OP3 (Ft, Ft2, ADDR_SIMM7), QL_LDST_PAIR_FP, 0),
-  {"ldpsw", 0x69400000, 0xffc00000, ldstpair_off, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_X32, 0, VERIFIER (ldpsw)},
+  {"ldpsw", 0x69400000, 0xffc00000, ldstpair_off, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_X32, 0, 0, VERIFIER (ldpsw)},
   /* Load/store register pair (indexed).  */
   CORE_INSN ("stp", 0x28800000, 0x7ec00000, ldstpair_indexed, 0, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_SF),
   CORE_INSN ("ldp", 0x28c00000, 0x7ec00000, ldstpair_indexed, 0, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_SF),
   CORE_INSN ("stp", 0x2c800000, 0x3ec00000, ldstpair_indexed, 0, OP3 (Ft, Ft2, ADDR_SIMM7), QL_LDST_PAIR_FP, 0),
   CORE_INSN ("ldp", 0x2cc00000, 0x3ec00000, ldstpair_indexed, 0, OP3 (Ft, Ft2, ADDR_SIMM7), QL_LDST_PAIR_FP, 0),
-  {"ldpsw", 0x68c00000, 0xfec00000, ldstpair_indexed, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_X32, 0, VERIFIER (ldpsw)},
+  {"ldpsw", 0x68c00000, 0xfec00000, ldstpair_indexed, 0, CORE, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_X32, 0, 0, VERIFIER (ldpsw)},
   /* Load register (literal).  */
   CORE_INSN ("ldr",   0x18000000, 0xbf000000, loadlit, OP_LDR_LIT,   OP2 (Rt, ADDR_PCREL19),    QL_R_PCREL, F_GPRSIZE_IN_Q),
   CORE_INSN ("ldr",   0x1c000000, 0x3f000000, loadlit, OP_LDRV_LIT,  OP2 (Ft, ADDR_PCREL19),    QL_FP_PCREL, 0),
@@ -2613,8 +2613,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("wfi", 0xd503207f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("sev", 0xd503209f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("sevl",0xd50320bf, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
-  {"esb", 0xd503221f, 0xffffffff, ic_system, 0, RAS, OP0 (), {}, F_ALIAS, NULL},
-  {"psb", 0xd503223f, 0xffffffff, ic_system, 0, STAT_PROFILE, OP1 (BARRIER_PSB), {}, F_ALIAS, NULL},
+  {"esb", 0xd503221f, 0xffffffff, ic_system, 0, RAS, OP0 (), {}, F_ALIAS, 0, NULL},
+  {"psb", 0xd503223f, 0xffffffff, ic_system, 0, STAT_PROFILE, OP1 (BARRIER_PSB), {}, F_ALIAS, 0, NULL},
   CORE_INSN ("clrex", 0xd503305f, 0xfffff0ff, ic_system, 0, OP1 (UIMM4), {}, F_OPD0_OPT | F_DEFAULT (0xF)),
   CORE_INSN ("dsb", 0xd503309f, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, 0),
   CORE_INSN ("dmb", 0xd50330bf, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, 0),
@@ -2648,7 +2648,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("bgt", 0x5400000c, 0xff00001f, condbranch, 0, OP1 (ADDR_PCREL19), QL_PCREL_NIL, F_ALIAS | F_PSEUDO),
   CORE_INSN ("ble", 0x5400000d, 0xff00001f, condbranch, 0, OP1 (ADDR_PCREL19), QL_PCREL_NIL, F_ALIAS | F_PSEUDO),
 
-  {0, 0, 0, 0, 0, 0, {}, {}, 0, NULL},
+  {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, NULL},
 };
 
 #ifdef AARCH64_OPERANDS
