@@ -1,3 +1,10 @@
+2016-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run pr19636-2e-nacl.
+	* testsuite/ld-i386/pr19636-2e.d: Skip for NaCl targets.
+	Remove .rel.plt section.
+	* testsuite/ld-i386/pr19636-2e-nacl.d: New file.
+
 2016-06-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/no-plt-check1a.S (check): Test static

@@ -1,3 +1,9 @@
+2016-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Don't check undefined
+	symbols for relocations against IFUNC symbols.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
 2016-06-16  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* elf32-s390.c (elf_s390_finish_dynamic_sections): Include
