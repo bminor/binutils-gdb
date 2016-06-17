@@ -280,6 +280,7 @@ const aarch64_field fields[] =
     { 16,  5 }, /* SVE_Zm_16: SVE vector register, bits [20,16]. */
     {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
+    {  5,  1 }, /* SVE_i1: single-bit immediate.  */
     { 16,  3 }, /* SVE_imm3: 3-bit immediate field.  */
     { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
     {  5,  5 }, /* SVE_imm5: 5-bit immediate field.  */
@@ -2178,6 +2179,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_FPIMM:
 	case AARCH64_OPND_SIMD_FPIMM:
+	case AARCH64_OPND_SVE_FPIMM8:
 	  if (opnd->imm.is_fp == 0)
 	    {
 	      set_other_error (mismatch_detail, idx,
@@ -2253,6 +2255,36 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_ASIMM:
 	  min_value = -128;
 	  goto sve_aimm;
+
+	case AARCH64_OPND_SVE_I1_HALF_ONE:
+	  assert (opnd->imm.is_fp);
+	  if (opnd->imm.value != 0x3f000000 && opnd->imm.value != 0x3f800000)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("floating-point value must be 0.5 or 1.0"));
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_I1_HALF_TWO:
+	  assert (opnd->imm.is_fp);
+	  if (opnd->imm.value != 0x3f000000 && opnd->imm.value != 0x40000000)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("floating-point value must be 0.5 or 2.0"));
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_I1_ZERO_ONE:
+	  assert (opnd->imm.is_fp);
+	  if (opnd->imm.value != 0 && opnd->imm.value != 0x3f800000)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("floating-point value must be 0.0 or 1.0"));
+	      return 0;
+	    }
+	  break;
 
 	case AARCH64_OPND_SVE_INV_LIMM:
 	  {
@@ -3105,6 +3137,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
       break;
 
+    case AARCH64_OPND_SVE_I1_HALF_ONE:
+    case AARCH64_OPND_SVE_I1_HALF_TWO:
+    case AARCH64_OPND_SVE_I1_ZERO_ONE:
+      {
+	single_conv_t c;
+	c.i = opnd->imm.value;
+	snprintf (buf, size, "#%.1f", c.f);
+	break;
+      }
+
     case AARCH64_OPND_SVE_PATTERN:
       if (optional_operand_p (opcode, idx)
 	  && opnd->imm.value == get_optional_operand_default_value (opcode))
@@ -3202,6 +3244,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_FPIMM:
     case AARCH64_OPND_SIMD_FPIMM:
+    case AARCH64_OPND_SVE_FPIMM8:
       switch (aarch64_get_qualifier_esize (opnds[0].qualifier))
 	{
 	case 2:	/* e.g. FMOV <Hd>, #<imm>.  */

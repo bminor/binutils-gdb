@@ -1028,6 +1028,51 @@ aarch64_ins_sve_shrimm (const aarch64_operand *self,
   return NULL;
 }
 
+/* Encode a single-bit immediate that selects between #0.5 and #1.0.
+   The fields array specifies which field to use.  */
+const char *
+aarch64_ins_sve_float_half_one (const aarch64_operand *self,
+				const aarch64_opnd_info *info,
+				aarch64_insn *code,
+				const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  if (info->imm.value == 0x3f000000)
+    insert_field (self->fields[0], code, 0, 0);
+  else
+    insert_field (self->fields[0], code, 1, 0);
+  return NULL;
+}
+
+/* Encode a single-bit immediate that selects between #0.5 and #2.0.
+   The fields array specifies which field to use.  */
+const char *
+aarch64_ins_sve_float_half_two (const aarch64_operand *self,
+				const aarch64_opnd_info *info,
+				aarch64_insn *code,
+				const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  if (info->imm.value == 0x3f000000)
+    insert_field (self->fields[0], code, 0, 0);
+  else
+    insert_field (self->fields[0], code, 1, 0);
+  return NULL;
+}
+
+/* Encode a single-bit immediate that selects between #0.0 and #1.0.
+   The fields array specifies which field to use.  */
+const char *
+aarch64_ins_sve_float_zero_one (const aarch64_operand *self,
+				const aarch64_opnd_info *info,
+				aarch64_insn *code,
+				const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  if (info->imm.value == 0)
+    insert_field (self->fields[0], code, 0, 0);
+  else
+    insert_field (self->fields[0], code, 1, 0);
+  return NULL;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for

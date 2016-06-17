@@ -2252,6 +2252,20 @@ can_convert_double_to_float (uint64_t imm, uint32_t *fpword)
   return TRUE;
 }
 
+/* Return true if we should treat OPERAND as a double-precision
+   floating-point operand rather than a single-precision one.  */
+static bfd_boolean
+double_precision_operand_p (const aarch64_opnd_info *operand)
+{
+  /* Check for unsuffixed SVE registers, which are allowed
+     for LDR and STR but not in instructions that require an
+     immediate.  We get better error messages if we arbitrarily
+     pick one size, parse the immediate normally, and then
+     report the match failure in the normal way.  */
+  return (operand->qualifier == AARCH64_OPND_QLF_NIL
+	  || aarch64_get_qualifier_esize (operand->qualifier) == 8);
+}
+
 /* Parse a floating-point immediate.  Return TRUE on success and return the
    value in *IMMED in the format of IEEE754 single-precision encoding.
    *CCP points to the start of the string; DP_P is TRUE when the immediate
@@ -5707,11 +5721,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_FPIMM:
 	case AARCH64_OPND_SIMD_FPIMM:
+	case AARCH64_OPND_SVE_FPIMM8:
 	  {
 	    int qfloat;
-	    bfd_boolean dp_p
-	      = (aarch64_get_qualifier_esize (inst.base.operands[0].qualifier)
-		 == 8);
+	    bfd_boolean dp_p;
+
+	    dp_p = double_precision_operand_p (&inst.base.operands[0]);
 	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type)
 		|| !aarch64_imm_float_p (qfloat))
 	      {
@@ -5721,6 +5736,26 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		goto failure;
 	      }
 	    inst.base.operands[i].imm.value = encode_imm_float_bits (qfloat);
+	    inst.base.operands[i].imm.is_fp = 1;
+	  }
+	  break;
+
+	case AARCH64_OPND_SVE_I1_HALF_ONE:
+	case AARCH64_OPND_SVE_I1_HALF_TWO:
+	case AARCH64_OPND_SVE_I1_ZERO_ONE:
+	  {
+	    int qfloat;
+	    bfd_boolean dp_p;
+
+	    dp_p = double_precision_operand_p (&inst.base.operands[0]);
+	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type))
+	      {
+		if (!error_p ())
+		  set_fatal_syntax_error (_("invalid floating-point"
+					    " constant"));
+		goto failure;
+	      }
+	    inst.base.operands[i].imm.value = qfloat;
 	    inst.base.operands[i].imm.is_fp = 1;
 	  }
 	  break;

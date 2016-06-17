@@ -1465,6 +1465,51 @@ aarch64_ext_sve_asimm (const aarch64_operand *self,
 	  && decode_sve_aimm (info, (int8_t) info->imm.value));
 }
 
+/* Decode a single-bit immediate that selects between #0.5 and #1.0.
+   The fields array specifies which field to use.  */
+int
+aarch64_ext_sve_float_half_one (const aarch64_operand *self,
+				aarch64_opnd_info *info, aarch64_insn code,
+				const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  if (extract_field (self->fields[0], code, 0))
+    info->imm.value = 0x3f800000;
+  else
+    info->imm.value = 0x3f000000;
+  info->imm.is_fp = TRUE;
+  return 1;
+}
+
+/* Decode a single-bit immediate that selects between #0.5 and #2.0.
+   The fields array specifies which field to use.  */
+int
+aarch64_ext_sve_float_half_two (const aarch64_operand *self,
+				aarch64_opnd_info *info, aarch64_insn code,
+				const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  if (extract_field (self->fields[0], code, 0))
+    info->imm.value = 0x40000000;
+  else
+    info->imm.value = 0x3f000000;
+  info->imm.is_fp = TRUE;
+  return 1;
+}
+
+/* Decode a single-bit immediate that selects between #0.0 and #1.0.
+   The fields array specifies which field to use.  */
+int
+aarch64_ext_sve_float_zero_one (const aarch64_operand *self,
+				aarch64_opnd_info *info, aarch64_insn code,
+				const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  if (extract_field (self->fields[0], code, 0))
+    info->imm.value = 0x3f800000;
+  else
+    info->imm.value = 0x0;
+  info->imm.is_fp = TRUE;
+  return 1;
+}
+
 /* Decode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less

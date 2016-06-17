@@ -2931,6 +2931,14 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a 9-bit unsigned arithmetic operand")				\
     Y(IMMEDIATE, sve_asimm, "SVE_ASIMM", 0, F(FLD_SVE_imm9),		\
       "a 9-bit signed arithmetic operand")				\
+    Y(IMMEDIATE, fpimm, "SVE_FPIMM8", 0, F(FLD_SVE_imm8),		\
+      "an 8-bit floating-point immediate")				\
+    Y(IMMEDIATE, sve_float_half_one, "SVE_I1_HALF_ONE", 0,		\
+      F(FLD_SVE_i1), "either 0.5 or 1.0")				\
+    Y(IMMEDIATE, sve_float_half_two, "SVE_I1_HALF_TWO", 0,		\
+      F(FLD_SVE_i1), "either 0.5 or 2.0")				\
+    Y(IMMEDIATE, sve_float_zero_one, "SVE_I1_ZERO_ONE", 0,		\
+      F(FLD_SVE_i1), "either 0.0 or 1.0")				\
     Y(IMMEDIATE, inv_limm, "SVE_INV_LIMM", 0,				\
       F(FLD_SVE_N,FLD_SVE_immr,FLD_SVE_imms),				\
       "an inverted 13-bit logical immediate")				\

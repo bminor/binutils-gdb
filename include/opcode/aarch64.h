@@ -292,6 +292,10 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ADDR_ZZ_UXTW,    /* SVE [Zn.<T>, Zm,<T>, UXTW #<msz>].  */
   AARCH64_OPND_SVE_AIMM,	/* SVE unsigned arithmetic immediate.  */
   AARCH64_OPND_SVE_ASIMM,	/* SVE signed arithmetic immediate.  */
+  AARCH64_OPND_SVE_FPIMM8,	/* SVE 8-bit floating-point immediate.  */
+  AARCH64_OPND_SVE_I1_HALF_ONE,	/* SVE choice between 0.5 and 1.0.  */
+  AARCH64_OPND_SVE_I1_HALF_TWO,	/* SVE choice between 0.5 and 2.0.  */
+  AARCH64_OPND_SVE_I1_ZERO_ONE,	/* SVE choice between 0.0 and 1.0.  */
   AARCH64_OPND_SVE_INV_LIMM,	/* SVE inverted logical immediate.  */
   AARCH64_OPND_SVE_LIMM,	/* SVE logical immediate.  */
   AARCH64_OPND_SVE_LIMM_MOV,	/* SVE logical immediate for MOV.  */
