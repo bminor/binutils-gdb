@@ -136,6 +136,11 @@ elf32_sparc_final_write_processing (bfd *abfd,
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1;
       break;
     case bfd_mach_sparc_v8plusb :
+    case bfd_mach_sparc_v8plusc :
+    case bfd_mach_sparc_v8plusd :
+    case bfd_mach_sparc_v8pluse :
+    case bfd_mach_sparc_v8plusv :
+    case bfd_mach_sparc_v8plusm :
       elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
       elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1

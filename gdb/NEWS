@@ -86,6 +86,10 @@ maint selftest
 
     =record-started,thread-group="i1",method="btrace",format="bts"
 
+* New targets
+
+Andes NDS32			nds32*-*-elf
+
 *** Changes in GDB 7.11
 
 * GDB now supports debugging kernel-based threads on FreeBSD.

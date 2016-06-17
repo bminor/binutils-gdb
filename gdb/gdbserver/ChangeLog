@@ -1,3 +1,42 @@
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (handle_extended_wait): Call
+	uninsert_reinsert_breakpoints for the parent process.  Remove
+	reinsert breakpoints from the child process.  Reinsert them to
+	the parent process when vfork is done.
+	* mem-break.c (uninsert_reinsert_breakpoints): New function.
+	(reinsert_reinsert_breakpoints): New function.
+	* mem-break.h (uninsert_reinsert_breakpoints): Declare
+	(reinsert_reinsert_breakpoints): Declare.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (handle_extended_wait): If the parent is doing
+	step-over, remove the reinsert breakpoints from the forked child.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (unsuspend_all_lwps): Declare.
+	(linux_low_filter_event): If thread exited, call finish_step_over.
+	If step-over is finished, unsuspend other threads.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_resume_one_lwp_throw): Assert
+	has_reinsert_breakpoints returns false.
+	* mem-break.c (delete_disabled_breakpoints): Assert
+	bp type isn't reinsert_breakpoint.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (maybe_hw_step): New function.
+	(linux_resume_one_lwp_throw): Call maybe_hw_step.
+	(finish_step_over): Switch current_thread to lwp temporarily,
+	and assert has_reinsert_breakpoints returns true.
+	(proceed_one_lwp): Call maybe_hw_step.
+	* mem-break.c (has_reinsert_breakpoints): New function.
+	* mem-break.h (has_reinsert_breakpoints): Declare.
+
 2016-06-02  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* win32-low.c (win32_create_inferior): Add pointer casts for C++.

@@ -1,3 +1,10 @@
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/sparc.h (enum sparc_opcode_arch_val): Add
+	SPARC_OPCODE_ARCH_V9C, SPARC_OPCODE_ARCH_V9D,
+	SPARC_OPCODE_ARCH_V9E, SPARC_OPCODE_ARCH_V9V and
+	SPARC_OPCODE_ARCH_V9M.
+
 2016-06-14  John Baldwin  <jhb@FreeBSD.org>
 
 	* opcode/msp430-decode.h (MSP430_Size): Remove.

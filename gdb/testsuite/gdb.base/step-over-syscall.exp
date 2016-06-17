@@ -176,9 +176,11 @@ proc step_over_syscall { syscall } {
 
 # Set a breakpoint with a condition that evals false on syscall
 # instruction.  In fact, it tests GDBserver steps over syscall
-# instruction.
+# instruction.  SYSCALL is the syscall the program calls.
+# FOLLOW_FORK is either "parent" or "child".  DETACH_ON_FORK is
+# "on" or "off".
 
-proc break_cond_on_syscall { syscall } {
+proc break_cond_on_syscall { syscall follow_fork detach_on_fork } {
     with_test_prefix "break cond on target : $syscall" {
 	set testfile "step-over-$syscall"
 
@@ -195,6 +197,8 @@ proc break_cond_on_syscall { syscall } {
 	# Delete breakpoint syscall insns to avoid interference with other syscalls.
 	delete_breakpoints
 
+	gdb_test "set follow-fork-mode $follow_fork"
+	gdb_test "set detach-on-fork $detach_on_fork"
 
 	# Create a breakpoint with a condition that evals false.
 	gdb_test "break \*$syscall_insn_addr if main == 0" \
@@ -212,9 +216,27 @@ proc break_cond_on_syscall { syscall } {
 	    gdb_test "break clone_fn if main == 0"
 	}
 
-	gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
-	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
-	    "continue to marker ($syscall)"
+	if { $syscall == "clone" } {
+	    # follow-fork and detach-on-fork only make sense to
+	    # fork and vfork.
+	    gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
+	    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+		"continue to marker"
+	} else {
+	    if { $follow_fork == "child" } {
+		gdb_test "continue" "exited normally.*" "continue to end of inf 2"
+		if { $detach_on_fork == "off" } {
+		    gdb_test "inferior 1"
+		    gdb_test "break marker" "Breakpoint.*at.*"
+		    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+			"continue to marker"
+		}
+	    } else {
+		gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
+		gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+		    "continue to marker"
+	    }
+	}
     }
 }
 
@@ -243,7 +265,22 @@ gdb_test_multiple $test $test {
 }
 
 if { $cond_bp_target } {
-    break_cond_on_syscall "fork"
-    break_cond_on_syscall "vfork"
-    break_cond_on_syscall "clone"
+
+    foreach_with_prefix detach-on-fork {"on" "off"} {
+	foreach_with_prefix follow-fork {"parent" "child"} {
+	    foreach syscall { "fork" "vfork" "clone" } {
+
+		if { $syscall == "vfork"
+		     && ${follow-fork} == "parent"
+		     && ${detach-on-fork} == "off" } {
+		    # Both vforked child process and parent process are
+		    # under GDB's control, but GDB follows the parent
+		    # process only, which can't be run until vforked child
+		    # finishes.  Skip the test in this scenario.
+		    continue
+		}
+		break_cond_on_syscall $syscall ${follow-fork} ${detach-on-fork}
+	    }
+	}
+    }
 }

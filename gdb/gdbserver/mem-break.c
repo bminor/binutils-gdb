@@ -1509,6 +1509,26 @@ uninsert_all_breakpoints (void)
       uninsert_raw_breakpoint (bp);
 }
 
+void
+uninsert_reinsert_breakpoints (void)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
+    {
+    if (bp->type == reinsert_breakpoint)
+      {
+	gdb_assert (bp->raw->inserted > 0);
+
+	/* Only uninsert the raw breakpoint if it only belongs to a
+	   reinsert breakpoint.  */
+	if (bp->raw->refcount == 1)
+	  uninsert_raw_breakpoint (bp->raw);
+      }
+    }
+}
+
 static void
 reinsert_raw_breakpoint (struct raw_breakpoint *bp)
 {
@@ -1553,6 +1573,28 @@ reinsert_breakpoints_at (CORE_ADDR pc)
     }
 }
 
+int
+has_reinsert_breakpoints (struct process_info *proc)
+{
+  struct breakpoint *bp, **bp_link;
+
+  bp = proc->breakpoints;
+  bp_link = &proc->breakpoints;
+
+  while (bp)
+    {
+      if (bp->type == reinsert_breakpoint)
+	return 1;
+      else
+	{
+	  bp_link = &bp->next;
+	  bp = *bp_link;
+	}
+    }
+
+  return 0;
+}
+
 void
 reinsert_all_breakpoints (void)
 {
@@ -1564,6 +1606,24 @@ reinsert_all_breakpoints (void)
 	 || bp->raw_type == raw_bkpt_type_hw)
 	&& !bp->inserted)
       reinsert_raw_breakpoint (bp);
+}
+
+void
+reinsert_reinsert_breakpoints (void)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
+    {
+      if (bp->type == reinsert_breakpoint)
+	{
+	  gdb_assert (bp->raw->inserted > 0);
+
+	  if (bp->raw->refcount == 1)
+	    reinsert_raw_breakpoint (bp->raw);
+	}
+    }
 }
 
 void
@@ -1718,7 +1778,12 @@ delete_disabled_breakpoints (void)
     {
       next = bp->next;
       if (bp->raw->inserted < 0)
-	delete_breakpoint_1 (proc, bp);
+	{
+	  /* If reinsert_breakpoints become disabled, that means the
+	     manipulations (insertion and removal) of them are wrong.  */
+	  gdb_assert (bp->type != reinsert_breakpoint);
+	  delete_breakpoint_1 (proc, bp);
+	}
     }
 }
 

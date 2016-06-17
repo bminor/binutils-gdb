@@ -1,3 +1,21 @@
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/step-over-syscall.exp (break_cond_on_syscall): New
+	parameters follow_fork and detach_on_fork.  Set follow-fork-mode
+	and detach-on-fork.  Adjust tests.
+	(top level): Invoke break_cond_on_syscall with combinations of
+	syscall, follow-fork-mode and detach-on-fork.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/step-over-exit.c: New.
+	* gdb.base/step-over-exit.exp: New.
+
+2016-06-17  Yan-Ting Lin  <currygt52@gmail.com>
+
+	* gdb.base/float.exp: Add target check for nds32*-*-*.
+	* gdb.xml/tdesc-regs.exp: Set core-regs for nds32*-*-*.
+
 2016-06-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/call-ar-st.exp: Report unsupported rather than xfail

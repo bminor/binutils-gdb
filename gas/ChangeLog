@@ -1,3 +1,65 @@
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (hpriv_reg_table): Add registers %hmcdper,
+	%hmcddfr and %hva_mask_nz.
+	(sparc_ip): New handling of asr/privileged/hyperprivileged
+	registers, adapted to the new form of the sparc opcodes table.
+	* testsuite/gas/sparc/rdasr.s: New file.
+	* testsuite/gas/sparc/rdasr.d: Likewise.
+	* testsuite/gas/sparc/wrasr.s: Likewise.
+	* testsuite/gas/sparc/wrasr.d: Likewise.
+	* testsuite/gas/sparc/sparc.exp (sparc_elf_setup): Add rdasr and
+	wrasr tests.
+	* testsuite/gas/sparc/rdpr.d: Use -Av9m, as some privileged
+	registers require it.
+	* testsuite/gas/sparc/wrpr.s: Complete to cover all privileged
+	registers and write instruction modalities.
+	* testsuite/gas/sparc/wrpr.d: Likewise.
+	* testsuite/gas/sparc/rdhpr.s: Likewise for hyperprivileged
+	registers.
+	* testsuite/gas/sparc/rdhpr.d: Likewise.
+	* testsuite/gas/sparc/wrhpr.s: Likewise.
+	* testsuite/gas/sparc/wrhpr.d: Likewise.
+
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_arch_table): adjust the GAS
+	architectures to use the right opcode architecture.
+	(sparc_md_end): Handle v9{c,d,e,v,m}.
+	(sparc_ip): Fix some comments.
+	* testsuite/gas/sparc/ldx_efsr.d: Fix the architecture of this
+	instruction, which is v9d.
+	* testsuite/gas/sparc/mwait.s: Remove the `rd %mwait,%g1'
+	instruction from the test, as %mwait is not readable.
+	* testsuite/gas/sparc/mwait.d: Likewise.
+	* testsuite/gas/sparc/mism-1.s: Expand to check v9b and v9e
+	mismatch architecture errors.
+	* testsuite/gas/sparc/mism-2.s: New file.
+
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (priv_reg_table): Use NULL instead of the
+	empty string to mark the end of the array.
+	(hpriv_reg_table): Likewise.
+	(v9a_asr_table): Likewise.
+	(cmp_reg_entry): Handle entries with NULL names.
+	(F_POP_V9): Define.
+	(F_POP_PCREL): Likewise.
+	(F_POP_TLS_CALL): Likewise.
+	(F_POP_POSTFIX): Likewise.
+	(struct pop_entry): New type.
+	(pop_table): New variable.
+	(enum pop_entry_type): New type.
+	(struct perc_entry): Likewise.
+	(NUM_PERC_ENTRIES): Define.
+	(perc_table): New variable.
+	(cmp_perc_entry): New function.
+	(md_begin): Sort hpriv_reg_table and v9a_asr_table, and initialize
+	perc_table.
+	(sparc_ip): Handle entries with NULL names in priv_reg_table,
+	hpriv_reg_table and v9a_asr_table.  Use perc_table to handle
+	%-pseudo-ops.
+
 2016-06-15  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-ft32.c (md_assemble): Call dwarf2_emit_insn with the

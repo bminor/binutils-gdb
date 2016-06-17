@@ -1,3 +1,25 @@
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* archures.c (bfd_mach_sparc_v8plusc): Define.
+	(bfd_mach_sparc_v9c): Likewise.
+	(bfd_mach_sparc_v8plusd): Likewise.
+	(bfd_mach_sparc_v9d): Likewise.
+	(bfd_mach_sparc_v8pluse): Likewise.
+	(bfd_mach_sparc_v9e): Likewise.
+	(bfd_mach_sparc_v8plusv): Likewise
+	(bfd_mach_sparc_v9v): Likewise.
+	(bfd_mach_sparc_v8plusm): Likewise.
+	(bfd_mach_sparc_v9m): Likewise.
+	(bfd_mach_sparc_v9_p): Adapt to v8plusm and v9m.
+	(bfd_mach_sparc_64bit_p): Likewise.
+	* bfd-in2.h: Regenerate.
+	* cpu-sparc.c (arch_info_struct): Add entries for
+	bfd_mach_sparc_v8plus{c,d,e,v,m} and bfd_mach_sparc_v9{c,d,e,v,m}.
+	* aoutx.h (machine_type): Handle bfd_mach_sparc_v8plus{c,d,e,v,m}
+	and bfd_mach_sparc_v9{c,d,e,v,m}.
+	* elf32-sparc.c (elf32_sparc_final_write_processing): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_object_p): Likewise.
+
 2016-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Don't check undefined
