@@ -273,6 +273,11 @@ const aarch64_field fields[] =
     { 16,  4 }, /* SVE_Pm: p0-p15, bits [19,16].  */
     {  5,  4 }, /* SVE_Pn: p0-p15, bits [8,5].  */
     {  0,  4 }, /* SVE_Pt: p0-p15, bits [3,0].  */
+    {  5,  5 }, /* SVE_Rm: SVE alternative position for Rm.  */
+    { 16,  5 }, /* SVE_Rn: SVE alternative position for Rn.  */
+    {  0,  5 }, /* SVE_Vd: Scalar SIMD&FP register, bits [4,0].  */
+    {  5,  5 }, /* SVE_Vm: Scalar SIMD&FP register, bits [9,5].  */
+    {  5,  5 }, /* SVE_Vn: Scalar SIMD&FP register, bits [9,5].  */
     {  5,  5 }, /* SVE_Za_5: SVE vector register, bits [9,5].  */
     { 16,  5 }, /* SVE_Za_16: SVE vector register, bits [20,16].  */
     {  0,  5 }, /* SVE_Zd: SVE vector register. bits [4,0].  */
@@ -2949,6 +2954,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Ra:
     case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_PAIRREG:
+    case AARCH64_OPND_SVE_Rm:
       /* The optional-ness of <Xt> in e.g. IC <ic_op>{, <Xt>} is determined by
 	 the <ic_op>, therefore we we use opnd->present to override the
 	 generic optional-ness information.  */
@@ -2966,6 +2972,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_Rd_SP:
     case AARCH64_OPND_Rn_SP:
+    case AARCH64_OPND_SVE_Rn_SP:
       assert (opnd->qualifier == AARCH64_OPND_QLF_W
 	      || opnd->qualifier == AARCH64_OPND_QLF_WSP
 	      || opnd->qualifier == AARCH64_OPND_QLF_X
@@ -3028,6 +3035,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Sd:
     case AARCH64_OPND_Sn:
     case AARCH64_OPND_Sm:
+    case AARCH64_OPND_SVE_VZn:
+    case AARCH64_OPND_SVE_Vd:
+    case AARCH64_OPND_SVE_Vm:
+    case AARCH64_OPND_SVE_Vn:
       snprintf (buf, size, "%s%d", aarch64_get_qualifier_name (opnd->qualifier),
 		opnd->reg.regno);
       break;

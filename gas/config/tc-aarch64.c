@@ -5344,11 +5344,13 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Ra:
 	case AARCH64_OPND_Rt_SYS:
 	case AARCH64_OPND_PAIRREG:
+	case AARCH64_OPND_SVE_Rm:
 	  po_int_reg_or_fail (FALSE, TRUE);
 	  break;
 
 	case AARCH64_OPND_Rd_SP:
 	case AARCH64_OPND_Rn_SP:
+	case AARCH64_OPND_SVE_Rn_SP:
 	  po_int_reg_or_fail (TRUE, FALSE);
 	  break;
 
@@ -5380,6 +5382,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Sd:
 	case AARCH64_OPND_Sn:
 	case AARCH64_OPND_Sm:
+	case AARCH64_OPND_SVE_VZn:
+	case AARCH64_OPND_SVE_Vd:
+	case AARCH64_OPND_SVE_Vm:
+	case AARCH64_OPND_SVE_Vn:
 	  val = aarch64_reg_parse (&str, REG_TYPE_BHSDQ, &rtype, NULL);
 	  if (val == PARSE_FAIL)
 	    {

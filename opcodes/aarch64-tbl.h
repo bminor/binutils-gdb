@@ -2970,6 +2970,10 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "an SVE predicate register")					\
     Y(PRED_REG, regno, "SVE_Pt", 0, F(FLD_SVE_Pt),			\
       "an SVE predicate register")					\
+    Y(INT_REG, regno, "SVE_Rm", 0, F(FLD_SVE_Rm),			\
+      "an integer register or zero")					\
+    Y(INT_REG, regno, "SVE_Rn_SP", OPD_F_MAYBE_SP, F(FLD_SVE_Rn),	\
+      "an integer register or SP")					\
     Y(IMMEDIATE, sve_shlimm, "SVE_SHLIMM_PRED", 0,			\
       F(FLD_SVE_tszh,FLD_SVE_imm5), "a shift-left immediate operand")	\
     Y(IMMEDIATE, sve_shlimm, "SVE_SHLIMM_UNPRED", 0,			\
@@ -2994,6 +2998,10 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "an 8-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "SVE_UIMM8_53", 0, F(FLD_imm5,FLD_imm3),		\
       "an 8-bit unsigned immediate")					\
+    Y(SIMD_REG, regno, "SVE_VZn", 0, F(FLD_SVE_Zn), "a SIMD register")	\
+    Y(SIMD_REG, regno, "SVE_Vd", 0, F(FLD_SVE_Vd), "a SIMD register")	\
+    Y(SIMD_REG, regno, "SVE_Vm", 0, F(FLD_SVE_Vm), "a SIMD register")	\
+    Y(SIMD_REG, regno, "SVE_Vn", 0, F(FLD_SVE_Vn), "a SIMD register")	\
     Y(SVE_REG, regno, "SVE_Za_5", 0, F(FLD_SVE_Za_5),			\
       "an SVE vector register")						\
     Y(SVE_REG, regno, "SVE_Za_16", 0, F(FLD_SVE_Za_16),			\

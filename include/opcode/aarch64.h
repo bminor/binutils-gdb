@@ -310,6 +310,8 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_Pm,		/* SVE p0-p15 in Pm.  */
   AARCH64_OPND_SVE_Pn,		/* SVE p0-p15 in Pn.  */
   AARCH64_OPND_SVE_Pt,		/* SVE p0-p15 in Pt.  */
+  AARCH64_OPND_SVE_Rm,		/* Integer Rm or ZR, alt. SVE position.  */
+  AARCH64_OPND_SVE_Rn_SP,	/* Integer Rn or SP, alt. SVE position.  */
   AARCH64_OPND_SVE_SHLIMM_PRED,	  /* SVE shift left amount (predicated).  */
   AARCH64_OPND_SVE_SHLIMM_UNPRED, /* SVE shift left amount (unpredicated).  */
   AARCH64_OPND_SVE_SHRIMM_PRED,	  /* SVE shift right amount (predicated).  */
@@ -322,6 +324,10 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_UIMM7,	/* SVE unsigned 7-bit immediate.  */
   AARCH64_OPND_SVE_UIMM8,	/* SVE unsigned 8-bit immediate.  */
   AARCH64_OPND_SVE_UIMM8_53,	/* SVE split unsigned 8-bit immediate.  */
+  AARCH64_OPND_SVE_VZn,		/* Scalar SIMD&FP register in Zn field.  */
+  AARCH64_OPND_SVE_Vd,		/* Scalar SIMD&FP register in Vd.  */
+  AARCH64_OPND_SVE_Vm,		/* Scalar SIMD&FP register in Vm.  */
+  AARCH64_OPND_SVE_Vn,		/* Scalar SIMD&FP register in Vn.  */
   AARCH64_OPND_SVE_Za_5,	/* SVE vector register in Za, bits [9,5].  */
   AARCH64_OPND_SVE_Za_16,	/* SVE vector register in Za, bits [20,16].  */
   AARCH64_OPND_SVE_Zd,		/* SVE vector register in Zd.  */
