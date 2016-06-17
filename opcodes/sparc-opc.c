@@ -940,32 +940,28 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "wr", F3(2, 0x30, 0)|RD(14),  F3(~2, ~0x30, ~0)|RD(~14),              "1,2,{", 0, 0, HWCAP2_SPARC5, v9m }, /* wr r,r,%mcdper */
 { "wr", F3(2, 0x30, 1)|RD(14),  F3(~2, ~0x30, ~1)|RD(~14),              "1,i,{", 0, 0, HWCAP2_SPARC5, v9m }, /* wr r,i,%mcdper */
 
-{ "wr", F3(2, 0x30, 0)|RD(16),	F3(~2, ~0x30, ~0)|RD(~16)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%pcr */
-{ "wr", F3(2, 0x30, 1)|RD(16),	F3(~2, ~0x30, ~1)|RD(~16),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%pcr */
-{ "wr", F3(2, 0x30, 0)|RD(17),	F3(~2, ~0x30, ~0)|RD(~17)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%pic */
-{ "wr", F3(2, 0x30, 1)|RD(17),	F3(~2, ~0x30, ~1)|RD(~17),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%pic */
-{ "wr", F3(2, 0x30, 0)|RD(18),	F3(~2, ~0x30, ~0)|RD(~18)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%dcr */
-{ "wr", F3(2, 0x30, 1)|RD(18),	F3(~2, ~0x30, ~1)|RD(~18),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%dcr */
-{ "wr", F3(2, 0x30, 0)|RD(19),	F3(~2, ~0x30, ~0)|RD(~19)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%gsr */
-{ "wr", F3(2, 0x30, 1)|RD(19),	F3(~2, ~0x30, ~1)|RD(~19),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%gsr */
-{ "wr", F3(2, 0x30, 0)|RD(20),	F3(~2, ~0x30, ~0)|RD(~20)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%set_softint */
-{ "wr", F3(2, 0x30, 1)|RD(20),	F3(~2, ~0x30, ~1)|RD(~20),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%set_softint */
-{ "wr", F3(2, 0x30, 0)|RD(21),	F3(~2, ~0x30, ~0)|RD(~21)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%clear_softint */
-{ "wr", F3(2, 0x30, 1)|RD(21),	F3(~2, ~0x30, ~1)|RD(~21),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%clear_softint */
-{ "wr", F3(2, 0x30, 0)|RD(22),	F3(~2, ~0x30, ~0)|RD(~22)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%softint */
-{ "wr", F3(2, 0x30, 1)|RD(22),	F3(~2, ~0x30, ~1)|RD(~22),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%softint */
-{ "wr", F3(2, 0x30, 0)|RD(23),	F3(~2, ~0x30, ~0)|RD(~23)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%tick_cmpr */
-{ "wr", F3(2, 0x30, 1)|RD(23),	F3(~2, ~0x30, ~1)|RD(~23),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%tick_cmpr */
-{ "wr", F3(2, 0x30, 0)|RD(24),	F3(~2, ~0x30, ~0)|RD(~24)|ASI(~0),	"1,2,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,r,%sys_tick */
-{ "wr", F3(2, 0x30, 1)|RD(24),	F3(~2, ~0x30, ~1)|RD(~24),		"1,i,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,i,%sys_tick */
-{ "wr", F3(2, 0x30, 0)|RD(25),	F3(~2, ~0x30, ~0)|RD(~25)|ASI(~0),	"1,2,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,r,%sys_tick_cmpr */
-{ "wr", F3(2, 0x30, 1)|RD(25),	F3(~2, ~0x30, ~1)|RD(~25),		"1,i,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,i,%sys_tick_cmpr */
-{ "wr", F3(2, 0x30, 0)|RD(26),	F3(~2, ~0x30, ~0)|RD(~26)|ASI(~0),	"1,2,_", 0, HWCAP_CBCOND, 0, v9e }, /* wr r,r,%cfr */
-{ "wr", F3(2, 0x30, 1)|RD(26),	F3(~2, ~0x30, ~1)|RD(~26),		"1,i,_", 0, HWCAP_CBCOND, 0, v9e }, /* wr r,i,%cfr */
-{ "wr", F3(2, 0x30, 0)|RD(27),	F3(~2, ~0x30, ~0)|RD(~27)|ASI(~0),	"1,2,_", 0, HWCAP_PAUSE, 0, v9e }, /* wr r,r,%pause */
-{ "wr", F3(2, 0x30, 1)|RD(27),	F3(~2, ~0x30, ~1)|RD(~27),		"1,i,_", 0, HWCAP_PAUSE, 0, v9e }, /* wr r,i,%pause */
-{ "wr",    F3(2, 0x30, 0)|RD(28), F3(~2, ~0x30, ~0)|RD(~28)|ASI(~0), "1,2,_", 0, 0, HWCAP2_MWAIT, v9m }, /* wr r,r,%mwait */
-{ "wr", F3(2, 0x30, 1)|RD(28),	F3(~2, ~0x30, ~1)|RD(~28),		"1,i,_", 0, 0, HWCAP2_MWAIT, v9m }, /* wr r,i,%mwait */
+/* Write to ASR registers 16..31, which is the range defined in SPARC
+   V9 for implementation-dependent uses.  Note that the read-only ASR
+   registers can't be used in a `wr' instruction.  */
+
+#define wrasr(asr,hwcap,hwcap2,arch) \
+{ "wr", F3(2, 0x30, 0)|RD((asr)), F3(~2, ~0x30, ~0)|RD(~(asr))|ASI(~0),	"1,2,_", 0, (hwcap), (hwcap2), (arch) }, /* wr r,r,%asr */ \
+{ "wr", F3(2, 0x30, 1)|RD((asr)), F3(~2, ~0x30, ~1)|RD(~(asr)),		"1,i,_", 0, (hwcap), (hwcap2), (arch) }, /* wr r,i,%asr */ \
+{ "wr", F3(2, 0x30, 1)|RD((asr)), F3(~2, ~0x30, ~1)|RD(~(asr)),		"i,1,_", F_ALIAS, (hwcap), (hwcap2), (arch) } /* wr i,r,%asr */
+
+wrasr (16, HWCAP_VIS, 0, v9a), /* wr ...,%pcr  */
+wrasr (17, HWCAP_VIS, 0, v9a), /* wr ...,%pic  */
+wrasr (18, HWCAP_VIS, 0, v9a), /* wr ...,%dcr  */
+wrasr (19, HWCAP_VIS, 0, v9a), /* wr ...,%gsr  */
+wrasr (20, HWCAP_VIS, 0, v9a), /* wr ...,%softint_set  */
+wrasr (21, HWCAP_VIS, 0, v9a), /* wr ...,%softint_clear  */
+wrasr (22, HWCAP_VIS, 0, v9a), /* wr ...,%softint  */
+wrasr (23, HWCAP_VIS, 0, v9a), /* wr ...,%tick_cmpr  */
+wrasr (24, HWCAP_VIS2, 0, v9b), /* wr ...,%sys_tick  */
+wrasr (25, HWCAP_VIS2, 0, v9b), /* wr ...,%sys_tick_cmpr  */
+wrasr (26, HWCAP_CBCOND, 0, v9e), /* wr ...,%cfr  */
+wrasr (27, HWCAP_PAUSE, 0, v9e),  /* wr ...,%pause  */
+wrasr (28, 0, HWCAP2_MWAIT, v9m), /* wr ...,%mwait  */
 
 { "pause", F3(2, 0x30, 1)|RD(27)|RS1(0), F3(~2, ~0x30, ~1)|RD(~27)|RS1(~0), "i", 0, HWCAP_PAUSE, 0, v9e }, /* wr %g0,i,%pause */
 
@@ -976,16 +972,22 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "rd",	F3(2, 0x28, 0)|RS1(6),		F3(~2, ~0x28, ~0)|RS1(~6)|SIMM13(~0),	"s,d", 0, 0, 0, v9 }, /* rd %fprs,r */
 { "rd", F3(2, 0x28, 0)|RS1(14),         F3(~2, ~0x28, ~0)|RS1(~14)|SIMM13(~0),  "{,d", 0, 0, HWCAP2_SPARC5, v9m }, /* rd %mcdper,r */
 
-{ "rd",	F3(2, 0x28, 0)|RS1(16),		F3(~2, ~0x28, ~0)|RS1(~16)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %pcr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(17),		F3(~2, ~0x28, ~0)|RS1(~17)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %pic,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(18),		F3(~2, ~0x28, ~0)|RS1(~18)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %dcr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(19),		F3(~2, ~0x28, ~0)|RS1(~19)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %gsr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(22),		F3(~2, ~0x28, ~0)|RS1(~22)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %softint,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(23),		F3(~2, ~0x28, ~0)|RS1(~23)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %tick_cmpr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(24),		F3(~2, ~0x28, ~0)|RS1(~24)|SIMM13(~0),	"/,d", 0, HWCAP_VIS2, 0, v9b }, /* rd %sys_tick,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(25),		F3(~2, ~0x28, ~0)|RS1(~25)|SIMM13(~0),	"/,d", 0, HWCAP_VIS2, 0, v9b }, /* rd %sys_tick_cmpr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(26),		F3(~2, ~0x28, ~0)|RS1(~26)|SIMM13(~0),	"/,d", 0, HWCAP_CBCOND, 0, v9e }, /* rd %cfr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(28),		F3(~2, ~0x28, ~0)|RS1(~28)|SIMM13(~0),	"/,d", 0, 0, HWCAP2_MWAIT, v9m }, /* rd %mwait,r */
+/* Read from ASR registers 16..31, which is the range defined in SPARC
+   V9 for implementation-dependent uses.  Note that the write-only ASR
+   registers can't be used in a `rd' instruction.  */
+
+#define rdasr(asr,hwcap,hwcap2,arch) \
+  { "rd", F3(2, 0x28, 0)|RS1((asr)),	F3(~2, ~0x28, ~0)|RS1(~(asr))|SIMM13(~0), "/,d", 0, (hwcap), (hwcap2), (arch) }
+
+rdasr (16, HWCAP_VIS,    0, v9a), /* rd %pcr,r  */
+rdasr (17, HWCAP_VIS,    0, v9a), /* rd %pic,r  */
+rdasr (18, HWCAP_VIS,    0, v9a), /* rd %dcr,r  */
+rdasr (19, HWCAP_VIS,    0, v9a), /* rd %gsr,r  */
+rdasr (22, HWCAP_VIS,    0, v9a), /* rd %softint,r  */
+rdasr (23, HWCAP_VIS,    0, v9a), /* rd %tick_cmpr,r  */
+rdasr (24, HWCAP_VIS2,   0, v9b), /* rd %sys_tick,r  */
+rdasr (25, HWCAP_VIS2,   0, v9b), /* rd %sys_tick_cmpr,r  */
+rdasr (26, HWCAP_CBCOND, 0, v9e), /* rd %cfr,r  */
 
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|SIMM13(~0),		"M,d", 0, 0, 0, v8 }, /* rd %asrX,r */
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),	"y,d", 0, 0, 0, v6 }, /* rd %y,r */
@@ -993,19 +995,93 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "rd",	F3(2, 0x2a, 0),			F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),	"w,d", 0, 0, 0, v6notv9 }, /* rd %wim,r */
 { "rd",	F3(2, 0x2b, 0),			F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", 0, 0, 0, v6notv9 }, /* rd %tbr,r */
 
-{ "rdpr",	F3(2, 0x2a, 0),		F3(~2, ~0x2a, ~0)|SIMM13(~0),	"?,d", 0, 0, 0, v9 },   /* rdpr %priv,r */
-{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0),		"1,2,!", 0, 0, 0, v9 }, /* wrpr r1,r2,%priv */
-{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|SIMM13(~0),	"1,!", 0, 0, 0, v9 },   /* wrpr r1,%priv */
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),		"1,i,!", 0, 0, 0, v9 }, /* wrpr r1,i,%priv */
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),		"i,1,!", F_ALIAS, 0, 0, v9 }, /* wrpr i,r1,%priv */
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RS1(~0),	"i,!", 0, 0, 0, v9 },   /* wrpr i,%priv */
+/* Instructions to read and write from/to privileged registers.  */
 
-{ "rdhpr",	F3(2, 0x29, 0),		F3(~2, ~0x29, ~0)|SIMM13(~0),	"$,d", 0, 0, 0, v9 },   /* rdhpr %hpriv,r */
-{ "wrhpr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0),		"1,2,%", 0, 0, 0, v9 }, /* wrhpr r1,r2,%hpriv */
-{ "wrhpr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|SIMM13(~0),	"1,%", 0, 0, 0, v9 },   /* wrhpr r1,%hpriv */
-{ "wrhpr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1),		"1,i,%", 0, 0, 0, v9 }, /* wrhpr r1,i,%hpriv */
-{ "wrhpr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1),		"i,1,%", F_ALIAS, 0, 0, v9 }, /* wrhpr i,r1,%hpriv */
-{ "wrhpr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RS1(~0),	"i,%", 0, 0, 0, v9 },   /* wrhpr i,%hpriv */
+#define rdpr(reg,hwcap,hwcap2,arch) \
+  { "rdpr", F3(2, 0x2a, 0)|RS1((reg)), F3(~2, ~0x2a, ~0)|RS1(~(reg))|SIMM13(~0),"?,d", 0, (hwcap), (hwcap2), (arch) } /* rdpr %priv,r */
+
+rdpr (0, 0, 0, v9), /* rdpr %tpc,r  */
+rdpr (1, 0, 0, v9), /* rdpr %tnpc,r  */
+rdpr (2, 0, 0, v9), /* rdpr %tstate,r  */
+rdpr (3, 0, 0, v9), /* rdpr %tt,r  */
+rdpr (4, 0, 0, v9), /* rdpr %tick,r  */
+rdpr (5, 0, 0, v9), /* rdpr %tba,r  */
+rdpr (6, 0, 0, v9), /* rdpr %pstate,r  */
+rdpr (7, 0, 0, v9), /* rdpr %tl,r  */
+rdpr (8, 0, 0, v9), /* rdpr %pil,r  */
+rdpr (9, 0, 0, v9), /* rdpr %cwp,r  */
+rdpr (10, 0, 0, v9), /* rdpr %cansave,r  */
+rdpr (11, 0, 0, v9), /* rdpr %canrestore,r  */
+rdpr (12, 0, 0, v9), /* rdpr %cleanwin,r  */
+rdpr (13, 0, 0, v9), /* rdpr %otherwin,r  */
+rdpr (14, 0, 0, v9), /* rdpr %wstate,r  */
+rdpr (15, 0, 0, v9), /* rdpr %fq,r  */
+rdpr (16, 0, 0, v9), /* rdpr %gl,r  */
+rdpr (23, 0, HWCAP2_SPARC5, v9m), /* rdpr %pmcdper,r  */
+rdpr (31, 0, 0, v9), /* rdpr %ver,r  */
+
+#define wrpr(reg,hwcap,hwcap2,arch) \
+{ "wrpr", F3(2, 0x32, 0)|RD((reg)), F3(~2, ~0x32, ~0)|RD(~(reg)), "1,2,!", 0, (hwcap), (hwcap2), (arch) }, /* wrpr r1,r2,%priv */ \
+{ "wrpr", F3(2, 0x32, 0)|RD((reg)), F3(~2, ~0x32, ~0)|RD(~(reg))|SIMM13(~0), "1,!", 0, (hwcap), (hwcap2), (arch) }, /* wrpr r1,%priv */ \
+{ "wrpr", F3(2, 0x32, 1)|RD((reg)), F3(~2, ~0x32, ~1)|RD(~(reg)), "1,i,!", 0, (hwcap), (hwcap2), (arch) }, /* wrpr r1,i,%priv */ \
+{ "wrpr", F3(2, 0x32, 1)|RD((reg)), F3(~2, ~0x32, ~1)|RD(~(reg)), "i,1,!", F_ALIAS, (hwcap), (hwcap2), (arch) }, /* wrpr i,r1,%priv */ \
+{ "wrpr", F3(2, 0x32, 1)|RD((reg)), F3(~2, ~0x32, ~1)|RD(~(reg))|RS1(~0), "i,!", 0, (hwcap), (hwcap2), (arch) } /* wrpr i,%priv */
+
+wrpr (0, 0, 0, v9), /* wrpr ...,%tpc  */
+wrpr (1, 0, 0, v9), /* wrpr ...,%tnpc  */
+wrpr (2, 0, 0, v9), /* wrpr ...,%tstate  */
+wrpr (3, 0, 0, v9), /* wrpr ...,%tt  */
+wrpr (4, 0, 0, v9), /* wrpr ...,%tick  */
+wrpr (5, 0, 0, v9), /* wrpr ...,%tba  */
+wrpr (6, 0, 0, v9), /* wrpr ...,%pstate  */
+wrpr (7, 0, 0, v9), /* wrpr ...,%tl  */
+wrpr (8, 0, 0, v9), /* wrpr ...,%pil  */
+wrpr (9, 0, 0, v9), /* wrpr ...,%cwp  */
+wrpr (10, 0, 0, v9), /* wrpr ...,%cansave  */
+wrpr (11, 0, 0, v9), /* wrpr ...,%canrestore  */
+wrpr (12, 0, 0, v9), /* wrpr ...,%cleanwin  */
+wrpr (13, 0, 0, v9), /* wrpr ...,%otherwin  */
+wrpr (14, 0, 0, v9), /* wrpr ...,%wstate  */
+wrpr (15, 0, 0, v9), /* wrpr ...,%fq  */
+wrpr (16, 0, 0, v9), /* wrpr ...,%gl  */
+wrpr (23, 0, HWCAP2_SPARC5, v9m), /* wdpr ...,%pmcdper  */
+wrpr (31, 0, 0, v9), /* wrpr ...,%ver */
+
+/* Instructions to read and write from/to hyperprivileged
+   registers.  */
+
+#define rdhpr(reg,hwcap,hwcap2,arch) \
+{ "rdhpr",	F3(2, 0x29, 0)|RS1((reg)),	F3(~2, ~0x29, ~0)|RS1(~(reg))|SIMM13(~0), "$,d", 0, (hwcap), (hwcap2), (arch) }
+
+rdhpr (0, HWCAP_VIS, 0, v9a), /* rdhpr %hpstate,r  */
+rdhpr (1, HWCAP_VIS, 0, v9a), /* rdhpr %htstate,r  */
+rdhpr (3, HWCAP_VIS, 0, v9a), /* rdhpr %hintp,r  */
+rdhpr (5, HWCAP_VIS, 0, v9a), /* rdhpr %htba,r  */
+rdhpr (6, HWCAP_VIS, 0, v9a), /* rdhpr %hver,r  */
+rdhpr (23, 0, HWCAP2_SPARC5, v9m), /* rdhpr %hmcdper,r  */
+rdhpr (24, 0, HWCAP2_SPARC5, v9m), /* rdhpr %hmcddfr,r  */
+rdhpr (27, 0, HWCAP2_SPARC5, v9m), /* rdhpr %hva_mask_nz,r  */
+rdhpr (28, HWCAP_VIS, 0, v9a), /* rdhpr %hstick_offset,r  */
+rdhpr (29, HWCAP_VIS, 0, v9a), /* rdhpar %hstick_enable,r  */
+rdhpr (31, HWCAP_VIS, 0, v9a), /* rdhpr %hstick_cmpr,r  */
+
+#define wrhpr(reg,hwcap,hwcap2,arch) \
+{ "wrhpr", F3(2, 0x33, 0)|RD((reg)), F3(~2, ~0x33, ~0)|RD(~(reg)),"1,2,%", 0, (hwcap), (hwcap2), (arch) }, /* wrhpr r1,r2,%hpriv */ \
+{ "wrhpr", F3(2, 0x33, 0)|RD((reg)), F3(~2, ~0x33, ~0)|RD(~(reg))|SIMM13(~0), "1,%", 0, (hwcap), (hwcap2), (arch) }, /* wrhpr r1,%hpriv */ \
+{ "wrhpr", F3(2, 0x33, 1)|RD((reg)), F3(~2, ~0x33, ~1)|RD(~(reg)), "1,i,%", 0, (hwcap), (hwcap2), (arch) }, /* wrhpr r1,i,%hpriv */  \
+{ "wrhpr", F3(2, 0x33, 1)|RD((reg)), F3(~2, ~0x33, ~1)|RD(~(reg)), "i,1,%", F_ALIAS, (hwcap), (hwcap2), (arch)  }, /* wrhpr i,r1,%hpriv */ \
+{ "wrhpr", F3(2, 0x33, 1)|RD((reg)), F3(~2, ~0x33, ~1)|RD(~(reg))|RS1(~0), "i,%", 0, (hwcap), (hwcap2), (arch) } /* wrhpr i,%hpriv */
+
+wrhpr (0,  HWCAP_VIS, 0, v9a), /* wrhpr ...,%hpstate  */
+wrhpr (1,  HWCAP_VIS, 0, v9a), /* wrhpr ...,%htstate  */
+wrhpr (3,  HWCAP_VIS, 0, v9a), /* wrhpr ...,%hintp  */
+wrhpr (5,  HWCAP_VIS, 0, v9a), /* wrhpr ...,%htba  */
+wrhpr (23, 0, HWCAP2_SPARC5, v9m), /* wrhpr ...,%hmcdper  */
+wrhpr (24, 0, HWCAP2_SPARC5, v9m), /* wrhpr ...,%hmcddfr  */
+wrhpr (27, 0, HWCAP2_SPARC5, v9m), /* wrhpr ...,%hva_mask_nz  */
+wrhpr (28, HWCAP_VIS, 0, v9a), /* wrhpr ...,%hstick_offset  */
+wrhpr (29, HWCAP_VIS, 0, v9a), /* wrhpr ...,%hstick_enable  */
+wrhpr (31, HWCAP_VIS, 0, v9a), /* wrhpr ...,%hstick_cmpr  */
 
 { "mov",	F3(2, 0x28, 0), F3(~2, ~0x28, ~0)|SIMM13(~0),		"M,d", F_ALIAS, 0, 0, v8 }, /* rd %asr1,r */
 { "mov",	F3(2, 0x28, 0), F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),	"y,d", F_ALIAS, 0, 0, v6 }, /* rd %y,r */

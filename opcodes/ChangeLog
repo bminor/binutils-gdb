@@ -1,5 +1,21 @@
 2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* sparc-opc.c (rdasr): New macro.
+	(wrasr): Likewise.
+	(rdpr): Likewise.
+	(wrpr): Likewise.
+	(rdhpr): Likewise.
+	(wrhpr): Likewise.
+	(sparc_opcodes): Use the macros above to fix and expand the
+	definition of read/write instructions from/to
+	asr/privileged/hyperprivileged instructions.
+	* sparc-dis.c (v9_hpriv_reg_names): Add %hmcdper, %hmcddfr and
+	%hva_mask_nz.  Prefer softint_set and softint_clear over
+	set_softint and clear_softint.
+	(print_insn_sparc): Support %ver in Rd.
+
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* sparc-opc.c (sparc_opcodes): Adjust instructions opcode
 	architecture according to the hardware capabilities they require.
 

@@ -817,6 +817,9 @@ struct priv_reg_entry hpriv_reg_table[] =
   {"hintp", 3},
   {"htba", 5},
   {"hver", 6},
+  {"hmcdper", 23},
+  {"hmcddfr", 24},
+  {"hva_mask_nz", 27},
   {"hstick_offset", 28},
   {"hstick_enable", 29},
   {"hstick_cmpr", 31},
@@ -1907,10 +1910,13 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		      error_message = _(": unrecognizable privileged register");
 		      goto error;
 		    }
-		  if (*args == '?')
-		    opcode |= (p->regnum << 14);
-		  else
-		    opcode |= (p->regnum << 25);
+                  
+                  if (((opcode >> (*args == '?' ? 14 : 25)) & 0x1f) != (unsigned) p->regnum)
+                    {
+                      error_message = _(": unrecognizable privileged register");
+                      goto error;
+                    }
+
 		  s += len;
 		  continue;
 		}
@@ -1942,11 +1948,14 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		      error_message = _(": unrecognizable hyperprivileged register");
 		      goto error;
 		    }
-		  if (*args == '$')
-		    opcode |= (p->regnum << 14);
-		  else
-		    opcode |= (p->regnum << 25);
-		  s += len;
+
+                  if (((opcode >> (*args == '$' ? 14 : 25)) & 0x1f) != (unsigned) p->regnum)
+                    {
+                      error_message = _(": unrecognizable hyperprivileged register");
+                      goto error;
+                    }
+
+                  s += len;
 		  continue;
 		}
 	      else
@@ -1977,23 +1986,13 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		      error_message = _(": unrecognizable ancillary state register");
 		      goto error;
 		    }
-		  if (*args == '/' && (p->regnum == 20 || p->regnum == 21))
-		    {
-		      error_message = _(": rd on write only ancillary state register");
-		      goto error;
-		    }
-		  if (p->regnum >= 24
-		      && (insn->architecture
-			  & SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9A)))
-		    {
-		      /* %sys_tick and %sys_tick_cmpr are v9bnotv9a */
-		      error_message = _(": unrecognizable v9a ancillary state register");
-		      goto error;
-		    }
-		  if (*args == '/')
-		    opcode |= (p->regnum << 14);
-		  else
-		    opcode |= (p->regnum << 25);
+
+                  if (((opcode >> (*args == '/' ? 14 : 25)) & 0x1f) != (unsigned) p->regnum)
+                     {
+                       error_message = _(": unrecognizable ancillary state register");
+                       goto error;
+                     }
+
 		  s += len;
 		  continue;
 		}

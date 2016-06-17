@@ -101,7 +101,7 @@ static char *v9_hpriv_reg_names[] =
   "hpstate", "htstate", "resv2", "hintp", "resv4", "htba", "hver",
   "resv7", "resv8", "resv9", "resv10", "resv11", "resv12", "resv13",
   "resv14", "resv15", "resv16", "resv17", "resv18", "resv19", "resv20",
-  "resv21", "resv22", "resv23", "resv24", "resv25", "resv26", "resv27",
+  "resv21", "resv22", "hmcdper", "hmcddfr", "resv25", "resv26", "hva_mask_nz",
   "hstick_offset", "hstick_enable", "resv30", "hstick_cmpr"
 };
 
@@ -109,7 +109,7 @@ static char *v9_hpriv_reg_names[] =
    rd and wr insns (-16).  */
 static char *v9a_asr_reg_names[] =
 {
-  "pcr", "pic", "dcr", "gsr", "set_softint", "clear_softint",
+  "pcr", "pic", "dcr", "gsr", "softint_set", "softint_clear",
   "softint", "tick_cmpr", "stick", "stick_cmpr", "cfr",
   "pause", "mwait"
 };
@@ -843,7 +843,9 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		    break;
 
 		  case '!':
-		    if (X_RD (insn) == 23)
+                    if (X_RD (insn) == 31)
+                      (*info->fprintf_func) (stream, "%%ver");
+		    else if (X_RD (insn) == 23)
 		      (*info->fprintf_func) (stream, "%%pmcdper");
 		    else if ((unsigned) X_RD (insn) < 17)
 		      (*info->fprintf_func) (stream, "%%%s",
