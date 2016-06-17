@@ -1740,7 +1740,12 @@ delete_disabled_breakpoints (void)
     {
       next = bp->next;
       if (bp->raw->inserted < 0)
-	delete_breakpoint_1 (proc, bp);
+	{
+	  /* If reinsert_breakpoints become disabled, that means the
+	     manipulations (insertion and removal) of them are wrong.  */
+	  gdb_assert (bp->type != reinsert_breakpoint);
+	  delete_breakpoint_1 (proc, bp);
+	}
     }
 }
 

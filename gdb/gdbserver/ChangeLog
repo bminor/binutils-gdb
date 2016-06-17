@@ -1,5 +1,12 @@
 2016-06-17  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (linux_resume_one_lwp_throw): Assert
+	has_reinsert_breakpoints returns false.
+	* mem-break.c (delete_disabled_breakpoints): Assert
+	bp type isn't reinsert_breakpoint.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (maybe_hw_step): New function.
 	(linux_resume_one_lwp_throw): Call maybe_hw_step.
 	(finish_step_over): Switch current_thread to lwp temporarily,

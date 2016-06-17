@@ -4237,6 +4237,12 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 
       step = maybe_hw_step (thread);
     }
+  else
+    {
+      /* If the thread isn't doing step-over, there shouldn't be any
+	 reinsert breakpoints.  */
+      gdb_assert (!has_reinsert_breakpoints (proc));
+    }
 
   if (fast_tp_collecting == 1)
     {
