@@ -1,3 +1,27 @@
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (priv_reg_table): Use NULL instead of the
+	empty string to mark the end of the array.
+	(hpriv_reg_table): Likewise.
+	(v9a_asr_table): Likewise.
+	(cmp_reg_entry): Handle entries with NULL names.
+	(F_POP_V9): Define.
+	(F_POP_PCREL): Likewise.
+	(F_POP_TLS_CALL): Likewise.
+	(F_POP_POSTFIX): Likewise.
+	(struct pop_entry): New type.
+	(pop_table): New variable.
+	(enum pop_entry_type): New type.
+	(struct perc_entry): Likewise.
+	(NUM_PERC_ENTRIES): Define.
+	(perc_table): New variable.
+	(cmp_perc_entry): New function.
+	(md_begin): Sort hpriv_reg_table and v9a_asr_table, and initialize
+	perc_table.
+	(sparc_ip): Handle entries with NULL names in priv_reg_table,
+	hpriv_reg_table and v9a_asr_table.  Use perc_table to handle
+	%-pseudo-ops.
+
 2016-06-15  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-ft32.c (md_assemble): Call dwarf2_emit_insn with the
