@@ -1,3 +1,14 @@
+2016-06-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+	    Tony Wang  <tony.wang@arm.com>
+
+	* elf32-arm.c (elf32_arm_stub_long_branch_thumb2_only): Define stub
+	sequence.
+	(stub_long_branch_thumb2_only): Define stub.
+	(arm_stub_is_thumb): Add case for arm_stub_long_branch_thumb2_only.
+	(arm_stub_long_branch_thumb2_only): Likewise.
+	(arm_type_of_stub): Use arm_stub_long_branch_thumb2_only for Thumb-2
+	capable targets.
+
 2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* archures.c (bfd_mach_sparc_v8plusc): Define.

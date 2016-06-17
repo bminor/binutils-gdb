@@ -1,3 +1,14 @@
+2016-06-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+	    Tony Wang  <tony.wang@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (Thumb-Thumb farcall M profile):
+	Assemble for ARMv6-M.
+	(Thumb2-Thumb2 farcall M profile): New testcase.
+	* testsuite/ld-arm/farcall-thumb2-thumb2-m.d: New file.
+	* testsuite/ld-arm/jump-reloc-veneers-cond-long-backward.d: Update to
+	reflect the use of Thumb-2 veneers for Thumb-2 capable targets.
+	* testsuite/ld-arm/jump-reloc-veneers-cond-long.d: Likewise.
+
 2016-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run pr19636-2e-nacl.
