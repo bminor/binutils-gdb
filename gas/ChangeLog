@@ -1,5 +1,20 @@
 2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* config/tc-sparc.c (sparc_arch_table): adjust the GAS
+	architectures to use the right opcode architecture.
+	(sparc_md_end): Handle v9{c,d,e,v,m}.
+	(sparc_ip): Fix some comments.
+	* testsuite/gas/sparc/ldx_efsr.d: Fix the architecture of this
+	instruction, which is v9d.
+	* testsuite/gas/sparc/mwait.s: Remove the `rd %mwait,%g1'
+	instruction from the test, as %mwait is not readable.
+	* testsuite/gas/sparc/mwait.d: Likewise.
+	* testsuite/gas/sparc/mism-1.s: Expand to check v9b and v9e
+	mismatch architecture errors.
+	* testsuite/gas/sparc/mism-2.s: New file.
+
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* config/tc-sparc.c (priv_reg_table): Use NULL instead of the
 	empty string to mark the end of the array.
 	(hpriv_reg_table): Likewise.

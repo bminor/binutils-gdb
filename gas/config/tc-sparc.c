@@ -264,8 +264,8 @@ static struct sparc_arch {
   { "sparcvis3",  "v9b", v9,  0, 1, HWS_VB|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC, 0 },
   { "sparcvis3r", "v9b", v9,  0, 1, HWS_VB|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC|HWCAP_FJFMAU, 0 },
 
-  { "sparc4",     "v9b", v9,  0, 1, HWS_VV, 0 },
-  { "sparc5",     "v9b", v9,  0, 1, HWS_VM, HWS2_VM },
+  { "sparc4",     "v9v", v9,  0, 1, HWS_VV, 0 },
+  { "sparc5",     "v9m", v9,  0, 1, HWS_VM, HWS2_VM },
 
   { "leon",      "leon",      leon,      32, 1, HWS_V8, 0 },
   { "sparclet",  "sparclet",  sparclet,  32, 1, HWS_V8, 0 },
@@ -275,20 +275,20 @@ static struct sparc_arch {
   { "v8plus",  "v9",  v9,  0, 1, HWCAP_V8PLUS|HWS_V9, 0 },
   { "v8plusa", "v9a", v9,  0, 1, HWCAP_V8PLUS|HWS_VA, 0 },
   { "v8plusb", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VB, 0 },
-  { "v8plusc", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VC, 0 },
-  { "v8plusd", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VD, 0 },
-  { "v8pluse", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VE, 0 },
-  { "v8plusv", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VV, 0 },
-  { "v8plusm", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VM, 0 },
+  { "v8plusc", "v9c", v9,  0, 1, HWCAP_V8PLUS|HWS_VC, 0 },
+  { "v8plusd", "v9d", v9,  0, 1, HWCAP_V8PLUS|HWS_VD, 0 },
+  { "v8pluse", "v9e", v9,  0, 1, HWCAP_V8PLUS|HWS_VE, 0 },
+  { "v8plusv", "v9v", v9,  0, 1, HWCAP_V8PLUS|HWS_VV, 0 },
+  { "v8plusm", "v9m", v9,  0, 1, HWCAP_V8PLUS|HWS_VM, 0 },
 
   { "v9",      "v9",  v9,  0, 1, HWS_V9, 0 },
   { "v9a",     "v9a", v9,  0, 1, HWS_VA, 0 },
   { "v9b",     "v9b", v9,  0, 1, HWS_VB, 0 },
-  { "v9c",     "v9b", v9,  0, 1, HWS_VC, 0 },
-  { "v9d",     "v9b", v9,  0, 1, HWS_VD, 0 },
-  { "v9e",     "v9b", v9,  0, 1, HWS_VE, 0 },
-  { "v9v",     "v9b", v9,  0, 1, HWS_VV, 0 },
-  { "v9m",     "v9b", v9,  0, 1, HWS_VM, HWS2_VM },
+  { "v9c",     "v9c", v9,  0, 1, HWS_VC, 0 },
+  { "v9d",     "v9d", v9,  0, 1, HWS_VD, 0 },
+  { "v9e",     "v9e", v9,  0, 1, HWS_VE, 0 },
+  { "v9v",     "v9v", v9,  0, 1, HWS_VV, 0 },
+  { "v9m",     "v9m", v9,  0, 1, HWS_VM, HWS2_VM },
 
   /* This exists to allow configure.tgt to pass one
      value to specify both the default machine and default word size.  */
@@ -1152,6 +1152,11 @@ sparc_md_end (void)
       {
       case SPARC_OPCODE_ARCH_V9A: mach = bfd_mach_sparc_v9a; break;
       case SPARC_OPCODE_ARCH_V9B: mach = bfd_mach_sparc_v9b; break;
+      case SPARC_OPCODE_ARCH_V9C: mach = bfd_mach_sparc_v9c; break;
+      case SPARC_OPCODE_ARCH_V9D: mach = bfd_mach_sparc_v9d; break;
+      case SPARC_OPCODE_ARCH_V9E: mach = bfd_mach_sparc_v9e; break;
+      case SPARC_OPCODE_ARCH_V9V: mach = bfd_mach_sparc_v9v; break;
+      case SPARC_OPCODE_ARCH_V9M: mach = bfd_mach_sparc_v9m; break;
       default: mach = bfd_mach_sparc_v9; break;
       }
   else
@@ -1161,6 +1166,11 @@ sparc_md_end (void)
       case SPARC_OPCODE_ARCH_V9: mach = bfd_mach_sparc_v8plus; break;
       case SPARC_OPCODE_ARCH_V9A: mach = bfd_mach_sparc_v8plusa; break;
       case SPARC_OPCODE_ARCH_V9B: mach = bfd_mach_sparc_v8plusb; break;
+      case SPARC_OPCODE_ARCH_V9C: mach = bfd_mach_sparc_v8plusc; break;
+      case SPARC_OPCODE_ARCH_V9D: mach = bfd_mach_sparc_v8plusd; break;
+      case SPARC_OPCODE_ARCH_V9E: mach = bfd_mach_sparc_v8pluse; break;
+      case SPARC_OPCODE_ARCH_V9V: mach = bfd_mach_sparc_v8plusv; break;
+      case SPARC_OPCODE_ARCH_V9M: mach = bfd_mach_sparc_v8plusm; break;
       /* The sparclite is treated like a normal sparc.  Perhaps it shouldn't
 	 be but for now it is (since that's the way it's always been
 	 treated).  */
@@ -1947,7 +1957,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 
 	    case '_':
 	    case '/':
-	      /* Parse a v9a/v9b ancillary state register.  */
+	      /* Parse a v9a or later ancillary state register.  */
 	      if (*s == '%')
 		{
 		  struct priv_reg_entry *p;
@@ -1964,7 +1974,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 
 		  if (!p->name)
 		    {
-		      error_message = _(": unrecognizable v9a or v9b ancillary state register");
+		      error_message = _(": unrecognizable ancillary state register");
 		      goto error;
 		    }
 		  if (*args == '/' && (p->regnum == 20 || p->regnum == 21))
@@ -1989,7 +1999,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		}
 	      else
 		{
-		  error_message = _(": unrecognizable v9a or v9b ancillary state register");
+		  error_message = _(": unrecognizable ancillary state register");
 		  goto error;
 		}
 

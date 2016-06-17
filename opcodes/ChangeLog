@@ -1,5 +1,10 @@
 2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* sparc-opc.c (sparc_opcodes): Adjust instructions opcode
+	architecture according to the hardware capabilities they require.
+
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* sparc-dis.c (MASK_V9): Add SPARC_OPCODE_ARCH_V9{C,D,E,V,M}.
 	(compute_arch_mask): Handle bfd_mach_sparc_v8plus{c,d,e,v,m} and
 	bfd_mach_sparc_v9{c,d,e,v,m}.
