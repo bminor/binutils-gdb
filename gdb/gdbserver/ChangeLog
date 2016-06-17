@@ -1,5 +1,11 @@
 2016-06-17  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (unsuspend_all_lwps): Declare.
+	(linux_low_filter_event): If thread exited, call finish_step_over.
+	If step-over is finished, unsuspend other threads.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (linux_resume_one_lwp_throw): Assert
 	has_reinsert_breakpoints returns false.
 	* mem-break.c (delete_disabled_breakpoints): Assert

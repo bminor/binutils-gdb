@@ -252,6 +252,7 @@ static void linux_resume_one_lwp (struct lwp_info *lwp,
 static void linux_resume (struct thread_resume *resume_info, size_t n);
 static void stop_all_lwps (int suspend, struct lwp_info *except);
 static void unstop_all_lwps (int unsuspend, struct lwp_info *except);
+static void unsuspend_all_lwps (struct lwp_info *except);
 static int linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 					  int *wstat, int options);
 static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
@@ -2357,6 +2358,13 @@ linux_low_filter_event (int lwpid, int wstat)
     {
       if (debug_threads)
 	debug_printf ("LLFE: %d exited.\n", lwpid);
+
+      if (finish_step_over (child))
+	{
+	  /* Unsuspend all other LWPs, and set them back running again.  */
+	  unsuspend_all_lwps (child);
+	}
+
       /* If there is at least one more LWP, then the exit signal was
 	 not the end of the debugged application and should be
 	 ignored, unless GDB wants to hear about thread exits.  */
