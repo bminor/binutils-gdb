@@ -1,3 +1,28 @@
+2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-dis.c (MASK_V9): Add SPARC_OPCODE_ARCH_V9{C,D,E,V,M}.
+	(compute_arch_mask): Handle bfd_mach_sparc_v8plus{c,d,e,v,m} and
+	bfd_mach_sparc_v9{c,d,e,v,m}.
+	* sparc-opc.c (MASK_V9C): Define.
+	(MASK_V9D): Likewise.
+	(MASK_V9E): Likewise.
+	(MASK_V9V): Likewise.
+	(MASK_V9M): Likewise.
+	(v6): Add MASK_V9{C,D,E,V,M}.
+	(v6notlet): Likewise.
+	(v7): Likewise.
+	(v8): Likewise.
+	(v9): Likewise.
+	(v9andleon): Likewise.
+	(v9a): Likewise.
+	(v9b): Likewise.
+	(v9c): Define.
+	(v9d): Likewise.
+	(v9e): Likewise.
+	(v9v): Likewise.
+	(v9m): Likewise.
+	(sparc_opcode_archs): Add entry for v9{c,d,e,v,m}.
+
 2016-06-15  Nick Clifton  <nickc@redhat.com>
 
 	* nds32-dis.c (nds32_parse_audio_ext): Change printing of integer

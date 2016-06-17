@@ -37,17 +37,25 @@
 #define MASK_V9		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9)
 #define MASK_V9A	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9A)
 #define MASK_V9B	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9B)
+#define MASK_V9C	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9C)
+#define MASK_V9D	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9D)
+#define MASK_V9E	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9E)
+#define MASK_V9V	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9V)
+#define MASK_V9M	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9M)
 
 /* Bit masks of architectures supporting the insn.  */
 
 #define v6		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
 			 | MASK_SPARCLET | MASK_SPARCLITE \
-			 | MASK_V9 | MASK_V9A | MASK_V9B)
+			 | MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
 /* v6 insns not supported on the sparclet.  */
 #define v6notlet	(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
-			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B)
+			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
 #define v7		(MASK_V7 | MASK_V8 | MASK_LEON | MASK_SPARCLET \
-			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B)
+			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
 /* Although not all insns are implemented in hardware, sparclite is defined
    to be a superset of v8.  Unimplemented insns trap and are then theoretically
    implemented in software.
@@ -55,16 +63,28 @@
    suggest it is.  Rather than complicating things, the sparclet assembler
    recognizes all v8 insns.  */
 #define v8		(MASK_V8 | MASK_LEON | MASK_SPARCLET | MASK_SPARCLITE \
-			 | MASK_V9 | MASK_V9A | MASK_V9B)
+			 | MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
 #define sparclet	(MASK_SPARCLET)
 /* sparclet insns supported by leon.  */
 #define letandleon	(MASK_SPARCLET | MASK_LEON)
 #define sparclite	(MASK_SPARCLITE)
-#define v9		(MASK_V9 | MASK_V9A | MASK_V9B)
+#define v9		(MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
 /* v9 insns supported by leon.  */
-#define v9andleon	(MASK_V9 | MASK_V9A | MASK_V9B | MASK_LEON)
-#define v9a		(MASK_V9A | MASK_V9B)
-#define v9b		(MASK_V9B)
+#define v9andleon	(MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_LEON)
+#define v9a		(MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
+#define v9b		(MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
+#define v9c		(MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
+#define v9d		(MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M)
+#define v9e		(MASK_V9E | MASK_V9V | MASK_V9M)
+#define v9v		(MASK_V9V | MASK_V9M)
+#define v9m		(MASK_V9M)
+
 /* v6 insns not supported by v9.  */
 #define v6notv9		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
 			 | MASK_SPARCLET | MASK_SPARCLITE)
@@ -89,6 +109,22 @@ const struct sparc_opcode_arch sparc_opcode_archs[] =
   { "v9a", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A },
   /* v9 with cheetah additions */
   { "v9b", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B },
+  /* v9 with UA2005 and T1 additions.  */
+  { "v9c", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C) },
+  /* v9 with UA2007 and T3 additions.  */
+  { "v9d", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C | MASK_V9D) },
+  /* v9 with OSA2011 and T4 additions modulus integer multiply-add.  */
+  { "v9e", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C | MASK_V9D | MASK_V9E) },
+  /* V9 with OSA2011 and T4 additions, integer multiply and Fujitsu fp
+     multiply-add.  */
+  { "v9v", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V) },
+  /* v9 with OSA2015 and M7 additions.  */
+  { "v9m", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M) },
   { NULL, 0 }
 };
 

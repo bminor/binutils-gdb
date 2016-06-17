@@ -28,7 +28,12 @@
 /* Bitmask of v9 architectures.  */
 #define MASK_V9 ((1 << SPARC_OPCODE_ARCH_V9) \
 		 | (1 << SPARC_OPCODE_ARCH_V9A) \
-		 | (1 << SPARC_OPCODE_ARCH_V9B))
+		 | (1 << SPARC_OPCODE_ARCH_V9B) \
+		 | (1 << SPARC_OPCODE_ARCH_V9C) \
+		 | (1 << SPARC_OPCODE_ARCH_V9D) \
+		 | (1 << SPARC_OPCODE_ARCH_V9E) \
+		 | (1 << SPARC_OPCODE_ARCH_V9V) \
+		 | (1 << SPARC_OPCODE_ARCH_V9M))
 /* 1 if INSN is for v9 only.  */
 #define V9_ONLY_P(insn) (! ((insn)->architecture & ~MASK_V9))
 /* 1 if INSN is for v9.  */
@@ -241,6 +246,21 @@ compute_arch_mask (unsigned long mach)
     case bfd_mach_sparc_v8plusb :
     case bfd_mach_sparc_v9b :
       return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9B);
+    case bfd_mach_sparc_v8plusc :
+    case bfd_mach_sparc_v9c :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9C);
+    case bfd_mach_sparc_v8plusd :
+    case bfd_mach_sparc_v9d :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9D);
+    case bfd_mach_sparc_v8pluse :
+    case bfd_mach_sparc_v9e :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9E);
+    case bfd_mach_sparc_v8plusv :
+    case bfd_mach_sparc_v9v :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9V);
+    case bfd_mach_sparc_v8plusm :
+    case bfd_mach_sparc_v9m :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9M);
     }
   abort ();
 }

@@ -52,6 +52,12 @@ enum sparc_opcode_arch_val
   SPARC_OPCODE_ARCH_V9,
   SPARC_OPCODE_ARCH_V9A, /* V9 with ultrasparc additions.  */
   SPARC_OPCODE_ARCH_V9B, /* V9 with ultrasparc and cheetah additions.  */
+  SPARC_OPCODE_ARCH_V9C, /* V9 with UA2005 and T1 additions.  */
+  SPARC_OPCODE_ARCH_V9D, /* V9 with UA2007 and T3 additions.  */
+  SPARC_OPCODE_ARCH_V9E, /* V9 with OSA2011 and T4 additions modulus integer multiply-add.  */
+  SPARC_OPCODE_ARCH_V9V, /* V9 with OSA2011 and T4 additions, integer
+                            multiply and Fujitsu fp multiply-add.  */
+  SPARC_OPCODE_ARCH_V9M, /* V9 with OSA2015 and M7 additions.  */
   SPARC_OPCODE_ARCH_BAD  /* Error return from sparc_opcode_lookup_arch.  */
 };
 
