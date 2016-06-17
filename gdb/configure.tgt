@@ -394,6 +394,11 @@ mt-*-*)
 	gdb_target_obs="mt-tdep.o"
 	;;
 
+nds32*-*-elf)
+	# Target: AndesTech NDS32 core
+	gdb_target_obs="nds32-tdep.o"
+	;;
+
 nios2*-*-linux*)
 	# Target: Altera Nios II running Linux
 	gdb_target_obs="nios2-tdep.o nios2-linux-tdep.o solib-svr4.o \

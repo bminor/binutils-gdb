@@ -1,3 +1,8 @@
+2016-06-17  Yan-Ting Lin  <currygt52@gmail.com>
+
+	* gdb.texinfo (Standard Target Features): Document NDS32 features.
+	(NDS32 Features): New Section.
+
 2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
 
 	* gdb.texinfo (Examining Memory): Document negative repeat

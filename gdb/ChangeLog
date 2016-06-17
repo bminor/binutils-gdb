@@ -1,3 +1,19 @@
+2016-06-17  Yan-Ting Lin  <currygt52@gmail.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add nds32-tdep.o.
+	(HFILES_NO_SRCDIR): Add nds32-tdep.h.
+	(ALLDEPFILES): Add nds32-tdep.c.
+	* NEWS: Mention new NDS32 port.
+	* configure.tgt: Add NDS32.
+	* nds32-tdep.c: New file.
+	* nds32-tdep.h: New file.
+	* features/Makefile (XMLTOC): Add nds32.xml.
+	* features/nds32-core.xml: New file.
+	* features/nds32-fpu.xml: New file.
+	* features/nds32-system.xml: New file.
+	* features/nds32.c: New file (generated).
+	* features/nds32.xml: New file.
+
 2016-06-14  John Baldwin  <jhb@FreeBSD.org>
 
 	* v850-tdep.c (v850_use_struct_convention): Trim type length checks.

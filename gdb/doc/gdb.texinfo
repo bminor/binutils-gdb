@@ -40817,6 +40817,7 @@ registers using the capitalization used in the description.
 * MicroBlaze Features::
 * MIPS Features::
 * M68K Features::
+* NDS32 Features::
 * Nios II Features::
 * PowerPC Features::
 * S/390 and System z Features::
@@ -41024,6 +41025,28 @@ This feature is optional.  If present, it should contain registers
 @samp{fp0} through @samp{fp7}, @samp{fpcontrol}, @samp{fpstatus} and
 @samp{fpiaddr}.
 @end table
+
+@node NDS32 Features
+@subsection NDS32 Features
+@cindex target descriptions, NDS32 features
+
+The @samp{org.gnu.gdb.nds32.core} feature is required for NDS32
+targets.  It should contain at least registers @samp{r0} through
+@samp{r10}, @samp{r15}, @samp{fp}, @samp{gp}, @samp{lp}, @samp{sp},
+and @samp{pc}.
+
+The @samp{org.gnu.gdb.nds32.fpu} feature is optional.  If present,
+it should contain 64-bit double-precision floating-point registers
+@samp{fd0} through @emph{fdN}, which should be @samp{fd3}, @samp{fd7},
+@samp{fd15}, or @samp{fd31} based on the FPU configuration implemented.
+
+@emph{Note:} The first sixteen 64-bit double-precision floating-point
+registers are overlapped with the thirty-two 32-bit single-precision
+floating-point registers.  The 32-bit single-precision registers, if
+not being listed explicitly, will be synthesized from halves of the
+overlapping 64-bit double-precision registers.  Listing 32-bit
+single-precision registers explicitly is deprecated, and the
+support to it could be totally removed some day.
 
 @node Nios II Features
 @subsection Nios II Features
