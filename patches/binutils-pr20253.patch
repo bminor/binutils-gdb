@@ -1,40 +1,49 @@
-From b6d1f243eaf973f74b59845ed68b096da125b29d Mon Sep 17 00:00:00 2001
+From 4a511258f87992214dd6e668e3eae0d49148ea2d Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Tue, 14 Jun 2016 09:11:03 -0700
 Subject: [PATCH] Don't generate PLT for IFUNC GOT/pointer reference
 
-PLT entry isn't needed when all references to a STT_GNU_IFUNC symbols
-are done via GOT or static function pointers.  For GOT entries, We
-generate dynamic R_*_GLOB_DAT relocations for preemptable symbols and
-R_*_IRELATIVE relocations for non-preemptable symbols to update them
-with real function address.  For static pointer pointers, we generate
-dynamic pointer relocations and store them in:
+If a backend supports it, PLT entry isn't needed when all references
+to a STT_GNU_IFUNC symbols are done via GOT or static function pointers.
+For GOT entries, We generate dynamic R_*_GLOB_DAT relocations for
+preemptable symbols and R_*_IRELATIVE relocations for non-preemptable
+symbols to update them with real function address.  For static pointer
+pointers, we generate dynamic pointer relocations and store them in:
 
 1. .rel[a].ifunc section in PIC object.
 2. .rel[a].got section in dynamic executable.
 3. .rel[a].iplt section in static executable.
 
+We don't allocate GOT entry if it isn't used.
+
 bfd/
 
 	PR ld/20253
+	* elf-bfd.h (_bfd_elf_allocate_ifunc_dyn_relocs): Add an
+	bfd_boolean argument.
 	* elf-ifunc.c (_bfd_elf_create_ifunc_sections): Replace
 	"shared object" with "PIC object" in comments.
-	(_bfd_elf_allocate_ifunc_dyn_relocs): Replace "shared object"
-	with "PIC object" in comments.  Generate dynamic relocations
-	for non-GOT references.  Make room for the special first entry
-	in PLT and allocate PLT entry only for PLT and PC-relative
-	references.  Store dynamic GOT relocations in .rel[a].iplt
-	section for static executables.  If PLT isn't used, always use
-	GOT for symbol value.
+	(_bfd_elf_allocate_ifunc_dyn_relocs): Updated.  Replace
+	"shared object" with "PIC object" in comments.  Avoid PLT if
+	requested.  Generate dynamic relocations for non-GOT references.
+	Make room for the special first entry in PLT and allocate PLT
+	entry only for PLT and PC-relative references.  Store dynamic
+	GOT relocations in .rel[a].iplt section for static executables.
+	If PLT isn't used, always use GOT for symbol value.  Don't
+	allocate GOT entry if it isn't used.
 	* elf32-i386.c (elf_i386_check_relocs): Increment PLT reference
 	count only in the code section.  Allocate dynamic pointer
 	relocation against STT_GNU_IFUNC symbol in the non-code section.
 	(elf_i386_adjust_dynamic_symbol): Increment PLT reference count
 	only for PC-relative references.
+	(elf_i386_allocate_dynrelocs): Pass TRUE to
+	_bfd_elf_allocate_ifunc_dyn_relocs.
 	(elf_i386_relocate_section): Allow R_386_GOT32/R_386_GOT32X
 	relocations against STT_GNU_IFUNC symbols without PLT.  Generate
 	dynamic pointer relocation against STT_GNU_IFUNC symbol in
 	the non-code section and store it in the proper REL section.
+	Don't allow non-pointer relocation against STT_GNU_IFUNC symbol
+	without PLT.
 	(elf_i386_finish_dynamic_symbol): Generate dynamic
 	R_386_IRELATIVE and R_386_GLOB_DAT GOT relocations against
 	STT_GNU_IFUNC symbols without PLT.
@@ -48,12 +57,15 @@ bfd/
 	relocation against STT_GNU_IFUNC symbol in the non-code section.
 	(elf_x86_64_adjust_dynamic_symbol): Increment PLT reference
 	count only for PC-relative references.
+	(elf_x86_64_allocate_dynrelocs): Pass TRUE to
+	_bfd_elf_allocate_ifunc_dyn_relocs.
 	(elf_x86_64_relocate_section): Allow R_X86_64_GOTPCREL,
 	R_X86_64_GOTPCRELX, R_X86_64_REX_GOTPCRELX and
 	R_X86_64_GOTPCREL64 relocations against STT_GNU_IFUNC symbols
 	without PLT.  Generate dynamic pointer relocation against
 	STT_GNU_IFUNC symbol in the non-code section and store it in
-	the proper RELA section.
+	the proper RELA section.  Don't allow non-pointer relocation
+	against STT_GNU_IFUNC symbol without PLT.
 	(elf_x86_64_finish_dynamic_symbol): Generate dynamic
 	R_X86_64_IRELATIVE and R_X86_64_GLOB_DAT GOT relocations against
 	STT_GNU_IFUNC symbols without PLT.
@@ -62,21 +74,24 @@ bfd/
 	(elf_x86_64_output_arch_local_syms): Handle local STT_GNU_IFUNC
 	symbols here.
 	(elf_backend_output_arch_local_syms): New.
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_ifunc_dynrelocs):
+	Pass FALSE to _bfd_elf_allocate_ifunc_dyn_relocs.
 
 ld/
 
 	PR ld/20253
-	* testsuite/ld-i386/no-plt.exp: Run PR ld/20253 tests.
+	* testsuite/ld-i386/i386.exp: Run PR ld/20253 tests.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
 	* testsuite/ld-x86-64/no-plt.exp: Likewise.
 	* testsuite/ld-i386/pr13302.d: Remove .rel.plt section.
-	* testsuite/ld-x86-64/pr13082-5a.d: Likewise.
-	* testsuite/ld-x86-64/pr13082-5b.d: Likewise.
-	* testsuite/ld-x86-64/pr13082-6a.d: Likewise.
-	* testsuite/ld-x86-64/pr13082-6b.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-13-i386.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-13-x86-64.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-15-i386.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-15-x86-64.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-5a.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-5b.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-6a.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-6b.d: Likewise.
 	* testsuite/ld-i386/pr20244-2a.d: Remove .plt section.
 	* testsuite/ld-ifunc/ifunc-21-i386.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-21-x86-64.d: Likewise.
@@ -96,6 +111,26 @@ ld/
 	* testsuite/ld-i386/pr20253-2b.S: Likewise.
 	* testsuite/ld-i386/pr20253-2c.S: Likewise.
 	* testsuite/ld-i386/pr20253-2d.S: Likewise.
+	* testsuite/ld-i386/pr20253-3.d: Likewise.
+	* testsuite/ld-i386/pr20253-3.s: Likewise.
+	* testsuite/ld-i386/pr20253-4.s: Likewise.
+	* testsuite/ld-i386/pr20253-4a.d: Likewise.
+	* testsuite/ld-i386/pr20253-4b.d: Likewise.
+	* testsuite/ld-i386/pr20253-4c.d: Likewise.
+	* testsuite/ld-i386/pr20253-5.d: Likewise.
+	* testsuite/ld-i386/pr20253-5.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-23-x86.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-23a-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-23b-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-23c-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-24-x86.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-24a-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-24b-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-24c-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-25-x86.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-25a-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-25b-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-25c-x86.d: Likewise.
 	* testsuite/ld-x86-64/pr20253-1.s: Likewise.
 	* testsuite/ld-x86-64/pr20253-1a.d: Likewise.
 	* testsuite/ld-x86-64/pr20253-1b.d: Likewise.
@@ -113,41 +148,83 @@ ld/
 	* testsuite/ld-x86-64/pr20253-2b.S: Likewise.
 	* testsuite/ld-x86-64/pr20253-2c.S: Likewise.
 	* testsuite/ld-x86-64/pr20253-2d.S: Likewise.
+	* testsuite/ld-x86-64/pr20253-3.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-3.s: Likewise.
+	* testsuite/ld-x86-64/pr20253-4.s: Likewise.
+	* testsuite/ld-x86-64/pr20253-4a.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4b.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4c.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4d.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4e.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4f.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-5.s: Likewise.
+	* testsuite/ld-x86-64/pr20253-5a.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-5b.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18a-i386.d: Remove extra IRELATIVE
+	relocation.
+	* testsuite/ld-ifunc/ifunc-18a-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18b-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18b-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18a.s: Fix a typo.
 	* testsuite/ld-x86-64/x86-64.exp: Run pr20253-1 tests.
 ---
- bfd/elf-ifunc.c                          | 145 +++++++++++------
- bfd/elf32-i386.c                         | 257 +++++++++++++++++++++----------
- bfd/elf64-x86-64.c                       | 247 +++++++++++++++++++----------
- ld/testsuite/ld-i386/no-plt.exp          |  82 ++++++++++
- ld/testsuite/ld-i386/pr13302.d           |   5 +-
+ bfd/elf-bfd.h                            |   2 +-
+ bfd/elf-ifunc.c                          | 176 ++++++++++++++-------
+ bfd/elf32-i386.c                         | 259 +++++++++++++++++++++----------
+ bfd/elf64-x86-64.c                       | 254 ++++++++++++++++++++----------
+ bfd/elfnn-aarch64.c                      |   3 +-
+ ld/testsuite/ld-i386/i386.exp            |   5 +
+ ld/testsuite/ld-i386/no-plt.exp          | 122 +++++++++++++++
+ ld/testsuite/ld-i386/pr13302.d           |   4 -
  ld/testsuite/ld-i386/pr20244-2a.d        |  33 ++--
  ld/testsuite/ld-i386/pr20244-2b.d        |   3 +-
  ld/testsuite/ld-i386/pr20244-2c.d        |   4 +-
  ld/testsuite/ld-i386/pr20253-1a.c        |   8 +
- ld/testsuite/ld-i386/pr20253-1b.S        |  48 ++++++
+ ld/testsuite/ld-i386/pr20253-1b.S        |  52 +++++++
  ld/testsuite/ld-i386/pr20253-1c.S        |  31 ++++
  ld/testsuite/ld-i386/pr20253-1d.S        |  77 +++++++++
  ld/testsuite/ld-i386/pr20253-2a.c        |   8 +
- ld/testsuite/ld-i386/pr20253-2b.S        |  35 +++++
+ ld/testsuite/ld-i386/pr20253-2b.S        |  39 +++++
  ld/testsuite/ld-i386/pr20253-2c.S        |  20 +++
  ld/testsuite/ld-i386/pr20253-2d.S        |  45 ++++++
- ld/testsuite/ld-ifunc/ifunc-13-i386.d    |   8 +-
- ld/testsuite/ld-ifunc/ifunc-13-x86-64.d  |   8 +-
+ ld/testsuite/ld-i386/pr20253-3.d         |   3 +
+ ld/testsuite/ld-i386/pr20253-3.s         |  11 ++
+ ld/testsuite/ld-i386/pr20253-4.s         |  11 ++
+ ld/testsuite/ld-i386/pr20253-4a.d        |   8 +
+ ld/testsuite/ld-i386/pr20253-4b.d        |   8 +
+ ld/testsuite/ld-i386/pr20253-4c.d        |   9 ++
+ ld/testsuite/ld-i386/pr20253-5.d         |   7 +
+ ld/testsuite/ld-i386/pr20253-5.s         |  10 ++
+ ld/testsuite/ld-ifunc/ifunc-13-i386.d    |   4 -
+ ld/testsuite/ld-ifunc/ifunc-13-x86-64.d  |   4 -
  ld/testsuite/ld-ifunc/ifunc-15-i386.d    |   4 -
  ld/testsuite/ld-ifunc/ifunc-15-x86-64.d  |   4 -
- ld/testsuite/ld-ifunc/ifunc-18a-i386.d   |   5 +-
- ld/testsuite/ld-ifunc/ifunc-18a-x86-64.d |   5 +-
- ld/testsuite/ld-ifunc/ifunc-18b-i386.d   |   5 +-
- ld/testsuite/ld-ifunc/ifunc-18b-x86-64.d |   5 +-
+ ld/testsuite/ld-ifunc/ifunc-18a-i386.d   |   1 -
+ ld/testsuite/ld-ifunc/ifunc-18a-x86-64.d |   1 -
+ ld/testsuite/ld-ifunc/ifunc-18a.s        |   2 +-
+ ld/testsuite/ld-ifunc/ifunc-18b-i386.d   |   1 -
+ ld/testsuite/ld-ifunc/ifunc-18b-x86-64.d |   1 -
  ld/testsuite/ld-ifunc/ifunc-21-i386.d    |  26 ++--
  ld/testsuite/ld-ifunc/ifunc-21-x86-64.d  |  26 ++--
  ld/testsuite/ld-ifunc/ifunc-22-i386.d    |  26 ++--
  ld/testsuite/ld-ifunc/ifunc-22-x86-64.d  |  26 ++--
- ld/testsuite/ld-x86-64/no-plt.exp        |  67 ++++++++
- ld/testsuite/ld-x86-64/pr13082-5a.d      |   7 +-
- ld/testsuite/ld-x86-64/pr13082-5b.d      |   5 +-
- ld/testsuite/ld-x86-64/pr13082-6a.d      |   5 +-
- ld/testsuite/ld-x86-64/pr13082-6b.d      |   5 +-
+ ld/testsuite/ld-ifunc/ifunc-23-x86.s     |  10 ++
+ ld/testsuite/ld-ifunc/ifunc-23a-x86.d    |   8 +
+ ld/testsuite/ld-ifunc/ifunc-23b-x86.d    |   8 +
+ ld/testsuite/ld-ifunc/ifunc-23c-x86.d    |   8 +
+ ld/testsuite/ld-ifunc/ifunc-24-x86.s     |  11 ++
+ ld/testsuite/ld-ifunc/ifunc-24a-x86.d    |   8 +
+ ld/testsuite/ld-ifunc/ifunc-24b-x86.d    |  12 ++
+ ld/testsuite/ld-ifunc/ifunc-24c-x86.d    |  12 ++
+ ld/testsuite/ld-ifunc/ifunc-25-x86.s     |  12 ++
+ ld/testsuite/ld-ifunc/ifunc-25a-x86.d    |   8 +
+ ld/testsuite/ld-ifunc/ifunc-25b-x86.d    |  12 ++
+ ld/testsuite/ld-ifunc/ifunc-25c-x86.d    |  12 ++
+ ld/testsuite/ld-x86-64/no-plt.exp        |  87 +++++++++++
+ ld/testsuite/ld-x86-64/pr13082-5a.d      |   4 -
+ ld/testsuite/ld-x86-64/pr13082-5b.d      |   4 -
+ ld/testsuite/ld-x86-64/pr13082-6a.d      |   4 -
+ ld/testsuite/ld-x86-64/pr13082-6b.d      |   4 -
  ld/testsuite/ld-x86-64/pr20253-1.s       |  18 +++
  ld/testsuite/ld-x86-64/pr20253-1a.d      |   9 ++
  ld/testsuite/ld-x86-64/pr20253-1b.d      |  25 +++
@@ -162,11 +239,23 @@ ld/
  ld/testsuite/ld-x86-64/pr20253-1k.d      |   9 ++
  ld/testsuite/ld-x86-64/pr20253-1l.d      |  25 +++
  ld/testsuite/ld-x86-64/pr20253-2a.c      |   8 +
- ld/testsuite/ld-x86-64/pr20253-2b.S      |  42 +++++
+ ld/testsuite/ld-x86-64/pr20253-2b.S      |  46 ++++++
  ld/testsuite/ld-x86-64/pr20253-2c.S      |  25 +++
  ld/testsuite/ld-x86-64/pr20253-2d.S      |  57 +++++++
- ld/testsuite/ld-x86-64/x86-64.exp        |  12 ++
- 51 files changed, 1322 insertions(+), 329 deletions(-)
+ ld/testsuite/ld-x86-64/pr20253-3.d       |   3 +
+ ld/testsuite/ld-x86-64/pr20253-3.s       |  11 ++
+ ld/testsuite/ld-x86-64/pr20253-4.s       |  11 ++
+ ld/testsuite/ld-x86-64/pr20253-4a.d      |   8 +
+ ld/testsuite/ld-x86-64/pr20253-4b.d      |   8 +
+ ld/testsuite/ld-x86-64/pr20253-4c.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr20253-4d.d      |   8 +
+ ld/testsuite/ld-x86-64/pr20253-4e.d      |   8 +
+ ld/testsuite/ld-x86-64/pr20253-4f.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr20253-5.s       |  10 ++
+ ld/testsuite/ld-x86-64/pr20253-5a.d      |   8 +
+ ld/testsuite/ld-x86-64/pr20253-5b.d      |   8 +
+ ld/testsuite/ld-x86-64/x86-64.exp        |  21 +++
+ 87 files changed, 1702 insertions(+), 340 deletions(-)
  create mode 100644 ld/testsuite/ld-i386/pr20253-1a.c
  create mode 100644 ld/testsuite/ld-i386/pr20253-1b.S
  create mode 100644 ld/testsuite/ld-i386/pr20253-1c.S
@@ -175,6 +264,26 @@ ld/
  create mode 100644 ld/testsuite/ld-i386/pr20253-2b.S
  create mode 100644 ld/testsuite/ld-i386/pr20253-2c.S
  create mode 100644 ld/testsuite/ld-i386/pr20253-2d.S
+ create mode 100644 ld/testsuite/ld-i386/pr20253-3.d
+ create mode 100644 ld/testsuite/ld-i386/pr20253-3.s
+ create mode 100644 ld/testsuite/ld-i386/pr20253-4.s
+ create mode 100644 ld/testsuite/ld-i386/pr20253-4a.d
+ create mode 100644 ld/testsuite/ld-i386/pr20253-4b.d
+ create mode 100644 ld/testsuite/ld-i386/pr20253-4c.d
+ create mode 100644 ld/testsuite/ld-i386/pr20253-5.d
+ create mode 100644 ld/testsuite/ld-i386/pr20253-5.s
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-23-x86.s
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-23a-x86.d
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-23b-x86.d
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-23c-x86.d
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-24-x86.s
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-24a-x86.d
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-24b-x86.d
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-24c-x86.d
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-25-x86.s
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-25a-x86.d
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-25b-x86.d
+ create mode 100644 ld/testsuite/ld-ifunc/ifunc-25c-x86.d
  create mode 100644 ld/testsuite/ld-x86-64/pr20253-1.s
  create mode 100644 ld/testsuite/ld-x86-64/pr20253-1a.d
  create mode 100644 ld/testsuite/ld-x86-64/pr20253-1b.d
@@ -192,9 +301,34 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/pr20253-2b.S
  create mode 100644 ld/testsuite/ld-x86-64/pr20253-2c.S
  create mode 100644 ld/testsuite/ld-x86-64/pr20253-2d.S
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-3.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-3.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-4.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-4a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-4b.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-4c.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-4d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-4e.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-4f.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-5.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-5a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr20253-5b.d
 
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index 6825530..163ef35 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -2521,7 +2521,7 @@ extern bfd_boolean _bfd_elf_create_ifunc_sections
+ extern bfd_boolean _bfd_elf_allocate_ifunc_dyn_relocs
+   (struct bfd_link_info *, struct elf_link_hash_entry *,
+    struct elf_dyn_relocs **, bfd_boolean *, unsigned int,
+-   unsigned int, unsigned int);
++   unsigned int, unsigned int, bfd_boolean);
+ extern long _bfd_elf_ifunc_get_synthetic_symtab
+   (bfd *, long, asymbol **, long, asymbol **, asymbol **, asection *,
+    bfd_vma *(*) (bfd *, asymbol **, asection *, asection *));
 diff --git a/bfd/elf-ifunc.c b/bfd/elf-ifunc.c
-index 1377fed..d1805bd 100644
+index 1377fed..09cbf4a 100644
 --- a/bfd/elf-ifunc.c
 +++ b/bfd/elf-ifunc.c
 @@ -55,7 +55,7 @@ _bfd_elf_create_ifunc_sections (bfd *abfd, struct bfd_link_info *info)
@@ -206,7 +340,17 @@ index 1377fed..d1805bd 100644
        const char *rel_sec = (bed->rela_plts_and_copies_p
  			     ? ".rela.ifunc" : ".rel.ifunc");
  
-@@ -121,13 +121,16 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
+@@ -113,7 +113,8 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
+ 				    bfd_boolean *readonly_dynrelocs_against_ifunc_p,
+ 				    unsigned int plt_entry_size,
+ 				    unsigned int plt_header_size,
+-				    unsigned int got_entry_size)
++				    unsigned int got_entry_size,
++				    bfd_boolean avoid_plt)
+ {
+   asection *plt, *gotplt, *relplt;
+   struct elf_dyn_relocs *p;
+@@ -121,13 +122,17 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
    const struct elf_backend_data *bed;
    struct elf_link_hash_table *htab;
    bfd_boolean readonly_dynrelocs_against_ifunc;
@@ -217,7 +361,9 @@ index 1377fed..d1805bd 100644
 -     be used.  Pointer equality may not work correctly.  PIE should
 -     be used if pointer equality is required here.  */
 -  if (!bfd_link_pic (info)
-+  bfd_boolean use_plt = h->plt.refcount > 0;
++  /* If AVOID_PLT is TRUE, don't use PLT if possible.  */
++  bfd_boolean use_plt = !avoid_plt || h->plt.refcount > 0;
++  bfd_boolean need_dynreloc = !use_plt || bfd_link_pic (info);
 +
 +  /* When a PIC object references a STT_GNU_IFUNC symbol defined
 +     in executable or it isn't referenced via PLT, the address of
@@ -225,12 +371,11 @@ index 1377fed..d1805bd 100644
 +     the address of its .plt slot may be used.  Pointer equality may
 +     not work correctly.  PIE or non-PLT reference should be used if
 +     pointer equality is required here.  */
-+  if (use_plt
-+      && !bfd_link_pic (info) && use_plt
++  if (!need_dynreloc
        && (h->dynindx != -1
  	  || info->export_dynamic)
        && h->pointer_equality_needed)
-@@ -144,16 +147,30 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
+@@ -144,16 +149,30 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
  
    htab = elf_hash_table (info);
  
@@ -248,8 +393,7 @@ index 1377fed..d1805bd 100644
 +     or we are building a PIC object, we must keep dynamic relocation
 +     if there is non-GOT reference and use PLT if there is PC-relative
 +     reference.  */
-+  if ((!use_plt || bfd_link_pic (info))
-+      && h->ref_regular)
++  if (need_dynreloc && h->ref_regular)
 +    {
 +      bfd_boolean keep = FALSE;
 +      for (p = *head; p != NULL; p = p->next)
@@ -262,6 +406,7 @@ index 1377fed..d1805bd 100644
 +	      {
 +		/* Must use PLT for PC-relative reference.  */
 +		use_plt = TRUE;
++		need_dynreloc = bfd_link_pic (info);
 +		break;
 +	      }
 +	  }
@@ -271,7 +416,7 @@ index 1377fed..d1805bd 100644
  
    /* Support garbage collection against STT_GNU_IFUNC symbols.  */
    if (h->plt.refcount <= 0 && h->got.refcount <= 0)
-@@ -165,7 +182,7 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
+@@ -165,7 +184,7 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
      }
  
    /* Return and discard space for dynamic relocations against it if
@@ -280,7 +425,7 @@ index 1377fed..d1805bd 100644
    if (!h->ref_regular)
      {
        if (h->plt.refcount > 0
-@@ -192,9 +209,9 @@ keep:
+@@ -192,9 +211,9 @@ keep:
        gotplt = htab->sgotplt;
        relplt = htab->srelplt;
  
@@ -293,7 +438,7 @@ index 1377fed..d1805bd 100644
  	plt->size += plt_header_size;
      }
    else
-@@ -204,25 +221,33 @@ keep:
+@@ -204,26 +223,31 @@ keep:
        relplt = htab->irelplt;
      }
  
@@ -323,9 +468,8 @@ index 1377fed..d1805bd 100644
 -     section.  */
 -  relplt->size += sizeof_reloc;
 -  relplt->reloc_count++;
-+     section if PLT is used or for static executable where dynamic
-+     relocation in GOT is stored in .rel[a].iplt section.  */
-+  if (use_plt || htab->splt == NULL)
++     section for GOTPLT relocation if PLT is used.  */
++  if (use_plt)
 +    {
 +      relplt->size += sizeof_reloc;
 +      relplt->reloc_count++;
@@ -334,13 +478,13 @@ index 1377fed..d1805bd 100644
    /* We need dynamic relocation for STT_GNU_IFUNC symbol only when
 -     there is a non-GOT reference in a shared object.  */
 -  if (!bfd_link_pic (info)
-+     there is a non-GOT reference in a shared object or PLT isn't
-+     used.  */
-+  if ((use_plt && !bfd_link_pic (info))
-       || !h->non_got_ref)
+-      || !h->non_got_ref)
++     there is a non-GOT reference in a PIC object or PLT isn't used.  */
++  if (!need_dynreloc || !h->non_got_ref)
      *head = NULL;
  
-@@ -245,7 +270,20 @@ keep:
+   readonly_dynrelocs_against_ifunc = FALSE;
+@@ -245,7 +269,20 @@ keep:
  	  p = p->next;
  	}
        while (p != NULL);
@@ -356,13 +500,13 @@ index 1377fed..d1805bd 100644
 +	htab->srelgot->size += count * sizeof_reloc;
 +      else
 +	{
-+	  htab->irelplt->size += count * sizeof_reloc;
-+	  htab->irelplt->reloc_count += count;
++	  relplt->size += count * sizeof_reloc;
++	  relplt->reloc_count += count;
 +	}
      }
  
    if (readonly_dynrelocs_against_ifunc_p)
-@@ -254,24 +292,27 @@ keep:
+@@ -254,34 +291,65 @@ keep:
    /* For STT_GNU_IFUNC symbol, .got.plt has the real function address
       and .got has the PLT entry adddress.  We will load the GOT entry
       with the PLT entry in finish_dynamic_symbol if it is used.  For
@@ -402,23 +546,50 @@ index 1377fed..d1805bd 100644
      {
        /* Use .got.plt.  */
        h->got.offset = (bfd_vma) -1;
-@@ -280,7 +321,13 @@ keep:
+     }
+   else
      {
-       h->got.offset = htab->sgot->size;
-       htab->sgot->size += got_entry_size;
+-      h->got.offset = htab->sgot->size;
+-      htab->sgot->size += got_entry_size;
 -      if (bfd_link_pic (info))
+-	htab->srelgot->size += sizeof_reloc;
 +      if (!use_plt)
 +	{
 +	  /* PLT isn't used.  */
 +	  h->plt.offset = (bfd_vma) -1;
 +	}
-+      /* Static executable doesn't use .rel[a].got section.  */
-+      if (htab->splt != NULL)
- 	htab->srelgot->size += sizeof_reloc;
++      if (h->got.refcount <= 0)
++	{
++	  /* GOT isn't need when there are only relocations for static
++	     pointers.  */
++	  h->got.offset = (bfd_vma) -1;
++	}
++      else
++	{
++	  h->got.offset = htab->sgot->size;
++	  htab->sgot->size += got_entry_size;
++	  /* Need to relocate the GOT entry in a PIC object or PLT isn't
++	     used.  Otherwise, the GOT entry will be filled with the PLT
++	     entry and dynamic GOT relocation isn't needed.  */
++	  if (need_dynreloc)
++	    {
++	      /* For non-static executable, dynamic GOT relocation is in
++		 .rel[a].got section, but for static executable, it is
++		 in .rel[a].iplt section.  */
++	      if (htab->splt != NULL)
++		htab->srelgot->size += sizeof_reloc;
++	      else
++		{
++		  relplt->size += sizeof_reloc;
++		  relplt->reloc_count++;
++		}
++	    }
++	}
      }
  
+   return TRUE;
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 2b7de33..867e888 100644
+index 2b7de33..05d3e28 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
 @@ -2165,8 +2165,11 @@ do_relocation:
@@ -481,6 +652,15 @@ index 2b7de33..867e888 100644
  	    }
  	}
  
+@@ -2643,7 +2658,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
+ 					       &htab->readonly_dynrelocs_against_ifunc,
+ 					       plt_entry_size,
+-					       plt_entry_size, 4);
++					       plt_entry_size, 4, TRUE);
+   /* Don't create the PLT entry if there are only function pointer
+      relocations which can be resolved at run-time.  */
+   else if (htab->elf.dynamic_sections_created
 @@ -3898,8 +3913,6 @@ elf_i386_relocate_section (bfd *output_bfd,
  		continue;
  	      abort ();
@@ -591,7 +771,7 @@ index 2b7de33..867e888 100644
 +	      if (r_type == R_386_32
 +		  && (input_section->flags & SEC_CODE) == 0)
 +		goto do_ifunc_pointer;
-+	      abort ();
++	      goto bad_ifunc_reloc;
 +	    }
 +
 +	  relocation = (plt->output_section->vma
@@ -600,6 +780,7 @@ index 2b7de33..867e888 100644
 +	  switch (r_type)
 +	    {
 +	    default:
++bad_ifunc_reloc:
 +	      if (h->root.root.string)
 +		name = h->root.root.string;
 +	      else
@@ -607,9 +788,8 @@ index 2b7de33..867e888 100644
 +					 NULL);
 +	      (*_bfd_error_handler)
 +		(_("%B: relocation %s against STT_GNU_IFUNC "
-+		   "symbol `%s' isn't handled by %s"), input_bfd,
-+		 elf_howto_table[r_type].name,
-+		 name, __FUNCTION__);
++		   "symbol `%s' isn't supported"), input_bfd,
++		 howto->name, name);
 +	      bfd_set_error (bfd_error_bad_value);
 +	      return FALSE;
 +
@@ -781,7 +961,7 @@ index 2b7de33..867e888 100644
  #define elf_backend_grok_prstatus	      elf_i386_grok_prstatus
  #define elf_backend_grok_psinfo		      elf_i386_grok_psinfo
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 57a3c73..4ea9702 100644
+index 57a3c73..ad1d3c0 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -2557,8 +2557,11 @@ pointer:
@@ -844,6 +1024,15 @@ index 57a3c73..4ea9702 100644
  	    }
  	}
  
+@@ -3049,7 +3064,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+ 					      &htab->readonly_dynrelocs_against_ifunc,
+ 					      plt_entry_size,
+ 					      plt_entry_size,
+-					      GOT_ENTRY_SIZE))
++					      GOT_ENTRY_SIZE, TRUE))
+ 	{
+ 	  asection *s = htab->plt_bnd;
+ 	  if (h->plt.offset != (bfd_vma) -1 && s != NULL)
 @@ -4233,8 +4248,84 @@ elf_x86_64_relocate_section (bfd *output_bfd,
  		continue;
  	      abort ();
@@ -926,12 +1115,31 @@ index 57a3c73..4ea9702 100644
 +	      if (r_type == htab->pointer_r_type
 +		  && (input_section->flags & SEC_CODE) == 0)
 +		goto do_ifunc_pointer;
-+	      abort ();
++	      goto bad_ifunc_reloc;
 +	    }
  
  	  /* STT_GNU_IFUNC symbol must go through PLT.  */
  	  if (htab->elf.splt != NULL)
-@@ -4284,6 +4375,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+@@ -4262,6 +4353,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+ 	  switch (r_type)
+ 	    {
+ 	    default:
++bad_ifunc_reloc:
+ 	      if (h->root.root.string)
+ 		name = h->root.root.string;
+ 	      else
+@@ -4269,8 +4361,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+ 					 NULL);
+ 	      (*_bfd_error_handler)
+ 		(_("%B: relocation %s against STT_GNU_IFUNC "
+-		   "symbol `%s' isn't handled by %s"), input_bfd,
+-		 howto->name, name, __FUNCTION__);
++		   "symbol `%s' isn't supported"), input_bfd,
++		 howto->name, name);
+ 	      bfd_set_error (bfd_error_bad_value);
+ 	      return FALSE;
+ 
+@@ -4284,6 +4376,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
  		goto do_relocation;
  	      /* FALLTHROUGH */
  	    case R_X86_64_64:
@@ -939,7 +1147,7 @@ index 57a3c73..4ea9702 100644
  	      if (rel->r_addend != 0)
  		{
  		  if (h->root.root.string)
-@@ -4300,8 +4392,10 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+@@ -4300,8 +4393,10 @@ elf_x86_64_relocate_section (bfd *output_bfd,
  		}
  
  	      /* Generate dynamic relcoation only when there is a
@@ -952,7 +1160,7 @@ index 57a3c73..4ea9702 100644
  		{
  		  Elf_Internal_Rela outrel;
  		  asection *sreloc;
-@@ -4335,7 +4429,16 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+@@ -4335,7 +4430,16 @@ elf_x86_64_relocate_section (bfd *output_bfd,
  		      outrel.r_addend = 0;
  		    }
  
@@ -970,7 +1178,7 @@ index 57a3c73..4ea9702 100644
  		  elf_append_rela (output_bfd, sreloc, &outrel);
  
  		  /* If this reloc is against an external symbol, we
-@@ -4352,66 +4455,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+@@ -4352,66 +4456,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
  	    case R_X86_64_PLT32:
  	    case R_X86_64_PLT32_BND:
  	      goto do_relocation;
@@ -1037,7 +1245,7 @@ index 57a3c73..4ea9702 100644
  	    }
  	}
  
-@@ -5870,6 +5913,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5870,6 +5914,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
        && !local_undefweak)
      {
        Elf_Internal_Rela rela;
@@ -1045,7 +1253,7 @@ index 57a3c73..4ea9702 100644
  
        /* This symbol has an entry in the global offset table.  Set it
  	 up.  */
-@@ -5888,7 +5932,27 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5888,7 +5933,27 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
        if (h->def_regular
  	  && h->type == STT_GNU_IFUNC)
  	{
@@ -1074,7 +1282,7 @@ index 57a3c73..4ea9702 100644
  	    {
  	      /* Generate R_X86_64_GLOB_DAT.  */
  	      goto do_glob_dat;
-@@ -5932,7 +5996,7 @@ do_glob_dat:
+@@ -5932,7 +5997,7 @@ do_glob_dat:
  	  rela.r_addend = 0;
  	}
  
@@ -1083,7 +1291,7 @@ index 57a3c73..4ea9702 100644
      }
  
    if (h->needs_copy)
-@@ -6265,11 +6329,6 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
+@@ -6265,11 +6330,6 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
      elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize
        = GOT_ENTRY_SIZE;
  
@@ -1095,7 +1303,7 @@ index 57a3c73..4ea9702 100644
    /* Fill PLT entries for undefined weak symbols in PIE.  */
    if (bfd_link_pie (info))
      bfd_hash_traverse (&info->hash->table,
-@@ -6279,6 +6338,33 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
+@@ -6279,6 +6339,33 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
    return TRUE;
  }
  
@@ -1129,7 +1337,7 @@ index 57a3c73..4ea9702 100644
  /* Return an array of PLT entry symbol values.  */
  
  static bfd_vma *
-@@ -6641,6 +6727,7 @@ static const struct bfd_elf_special_section
+@@ -6641,6 +6728,7 @@ static const struct bfd_elf_special_section
  #define elf_backend_create_dynamic_sections elf_x86_64_create_dynamic_sections
  #define elf_backend_finish_dynamic_sections elf_x86_64_finish_dynamic_sections
  #define elf_backend_finish_dynamic_symbol   elf_x86_64_finish_dynamic_symbol
@@ -1137,8 +1345,38 @@ index 57a3c73..4ea9702 100644
  #define elf_backend_gc_mark_hook	    elf_x86_64_gc_mark_hook
  #define elf_backend_grok_prstatus	    elf_x86_64_grok_prstatus
  #define elf_backend_grok_psinfo		    elf_x86_64_grok_psinfo
+diff --git a/bfd/elfnn-aarch64.c b/bfd/elfnn-aarch64.c
+index 774364a..fa66b0f 100644
+--- a/bfd/elfnn-aarch64.c
++++ b/bfd/elfnn-aarch64.c
+@@ -8238,7 +8238,8 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
+ 					       NULL,
+ 					       htab->plt_entry_size,
+ 					       htab->plt_header_size,
+-					       GOT_ENTRY_SIZE);
++					       GOT_ENTRY_SIZE,
++					       FALSE);
+   return TRUE;
+ }
+ 
+diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
+index 98f0b1c..9efe406 100644
+--- a/ld/testsuite/ld-i386/i386.exp
++++ b/ld/testsuite/ld-i386/i386.exp
+@@ -408,6 +408,11 @@ run_dump_test "pr20244-2a"
+ run_dump_test "pr20244-2b"
+ run_dump_test "pr20244-2c"
+ run_dump_test "pr20244-2d"
++run_dump_test "pr20253-3"
++run_dump_test "pr20253-4a"
++run_dump_test "pr20253-4b"
++run_dump_test "pr20253-4c"
++run_dump_test "pr20253-5"
+ 
+ if { !([istarget "i?86-*-linux*"]
+        || [istarget "i?86-*-gnu*"]
 diff --git a/ld/testsuite/ld-i386/no-plt.exp b/ld/testsuite/ld-i386/no-plt.exp
-index c4af0a9..8133866 100644
+index c4af0a9..4d1ff24 100644
 --- a/ld/testsuite/ld-i386/no-plt.exp
 +++ b/ld/testsuite/ld-i386/no-plt.exp
 @@ -265,6 +265,27 @@ if { [check_ifunc_available] } {
@@ -1169,7 +1407,7 @@ index c4af0a9..8133866 100644
      ]
  
      run_ld_link_exec_tests [] [list \
-@@ -286,5 +307,66 @@ if { [check_ifunc_available] } {
+@@ -286,5 +307,106 @@ if { [check_ifunc_available] } {
  	    "pr20244-3b" \
  	    "pass.out" \
  	] \
@@ -1217,6 +1455,26 @@ index c4af0a9..8133866 100644
 +	    "pass.out" \
 +	] \
 +	[list \
++	    "Run pr20253-1f" \
++	    "tmpdir/pr20253-1a.o \
++	     tmpdir/pr20253-1c.o tmpdir/pr20253-1d.o" \
++	    "" \
++	    { pr20253-1b.S } \
++	    "pr20253-1f" \
++	    "pass.out" \
++	    "-DCHECK_PLT" \
++	] \
++	[list \
++	    "Run pr20253-1g" \
++	    "--static tmpdir/pr20253-1a.o \
++	    tmpdir/pr20253-1c.o tmpdir/pr20253-1d.o" \
++	    "" \
++	    { pr20253-1b.S } \
++	    "pr20253-1g" \
++	    "pass.out" \
++	    "-DCHECK_PLT" \
++	] \
++	[list \
 +	    "Run pr20253-2a" \
 +	    "tmpdir/pr20253-2a.o tmpdir/pr20253-2b.o \
 +	     tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
@@ -1234,24 +1492,40 @@ index c4af0a9..8133866 100644
 +	    "pr20253-2b" \
 +	    "pass.out" \
 +	] \
++	[list \
++	    "Run pr20253-2c" \
++	    "tmpdir/pr20253-2a.o \
++	     tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
++	    "" \
++	    { pr20253-2b.S } \
++	    "pr20253-2c" \
++	    "pass.out" \
++	    "-DCHECK_PLT" \
++	] \
++	[list \
++	    "Run pr20253-2d" \
++	    "--static tmpdir/pr20253-2a.o \
++	    tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
++	    "" \
++	    { pr20253-2b.S } \
++	    "pr20253-2d" \
++	    "pass.out" \
++	    "-DCHECK_PLT" \
++	] \
      ]
  }
 diff --git a/ld/testsuite/ld-i386/pr13302.d b/ld/testsuite/ld-i386/pr13302.d
-index 35c09ae..f205126 100644
+index 35c09ae..9ab4fa5 100644
 --- a/ld/testsuite/ld-i386/pr13302.d
 +++ b/ld/testsuite/ld-i386/pr13302.d
-@@ -3,10 +3,7 @@
- #ld: -pie -melf_i386
- #readelf: -r --wide
- 
--Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
+@@ -6,7 +6,3 @@
+ Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
   Offset     Info    Type                Sym. Value  Symbol's Name
  [0-9a-f]+ +[0-9a-f]+ +R_386_IRELATIVE +
 -
 -Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
 - Offset     Info    Type                Sym. Value  Symbol's Name
- [0-9a-f]+ +[0-9a-f]+ +R_386_IRELATIVE +
+-[0-9a-f]+ +[0-9a-f]+ +R_386_IRELATIVE +
 diff --git a/ld/testsuite/ld-i386/pr20244-2a.d b/ld/testsuite/ld-i386/pr20244-2a.d
 index a04902f..ec3948e 100644
 --- a/ld/testsuite/ld-i386/pr20244-2a.d
@@ -1343,10 +1617,10 @@ index 0000000..370275a
 +}
 diff --git a/ld/testsuite/ld-i386/pr20253-1b.S b/ld/testsuite/ld-i386/pr20253-1b.S
 new file mode 100644
-index 0000000..d600bc7
+index 0000000..93c6d26
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr20253-1b.S
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,52 @@
 +	.section	.rodata.str1.1,"aMS",@progbits,1
 +.LC0:
 +	.string	"PASS"
@@ -1359,7 +1633,11 @@ index 0000000..d600bc7
 +	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 +	subl	$8, %esp
 +	call	*get_func1@GOT(%ebx)
++#ifdef CHECK_PLT
++	cmpl	$func1, %eax
++#else
 +	cmpl	func1@GOT(%ebx), %eax
++#endif
 +	jne	.L3
 +	movl	func1_p@GOT(%ebx), %edx
 +	cmpl	%eax, (%edx)
@@ -1531,10 +1809,10 @@ index 0000000..370275a
 +}
 diff --git a/ld/testsuite/ld-i386/pr20253-2b.S b/ld/testsuite/ld-i386/pr20253-2b.S
 new file mode 100644
-index 0000000..d4be99a
+index 0000000..46ab4f4
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/pr20253-2b.S
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,39 @@
 +	.section	.rodata.str1.1,"aMS",@progbits,1
 +.LC0:
 +	.string	"PASS"
@@ -1544,7 +1822,11 @@ index 0000000..d4be99a
 +check:
 +	subl	$12, %esp
 +	call	*get_func1@GOT
++#ifdef CHECK_PLT
++	movl	$func1, %edx
++#else
 +	movl	func1@GOT, %edx
++#endif
 +	cmpl	%edx, %eax
 +	jne	.L3
 +	cmpl	%edx, func1_p
@@ -1647,44 +1929,145 @@ index 0000000..7786589
 +func2_p:
 +	.long	func2
 +	.section	.note.GNU-stack,"",@progbits
+diff --git a/ld/testsuite/ld-i386/pr20253-3.d b/ld/testsuite/ld-i386/pr20253-3.d
+new file mode 100644
+index 0000000..7ce0b58
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr20253-3.d
+@@ -0,0 +1,3 @@
++#as: --32
++#ld: -melf_i386
++#error: relocation R_386_PC32 against STT_GNU_IFUNC symbol `foo' isn't supported
+diff --git a/ld/testsuite/ld-i386/pr20253-3.s b/ld/testsuite/ld-i386/pr20253-3.s
+new file mode 100644
+index 0000000..8cd25fb
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr20253-3.s
+@@ -0,0 +1,11 @@
++	.text
++	.type foo,%gnu_indirect_function
++foo:
++	ret
++	.globl _start
++_start:
++	ret
++	.globl __start
++__start:
++	.data
++	.long foo - .
+diff --git a/ld/testsuite/ld-i386/pr20253-4.s b/ld/testsuite/ld-i386/pr20253-4.s
+new file mode 100644
+index 0000000..88f0f1b
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr20253-4.s
+@@ -0,0 +1,11 @@
++	.text
++	.type foo,%gnu_indirect_function
++foo:
++	ret
++	.globl _start
++_start:
++	movl	__start@GOT(%eax), %eax
++	.globl __start
++__start:
++	.data
++	.dc.a foo
+diff --git a/ld/testsuite/ld-i386/pr20253-4a.d b/ld/testsuite/ld-i386/pr20253-4a.d
+new file mode 100644
+index 0000000..cd10080
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr20253-4a.d
+@@ -0,0 +1,8 @@
++#source: pr20253-4.s
++#as: --32 -mrelax-relocations=yes
++#ld: -melf_i386
++#readelf: -r --wide
++
++Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_IRELATIVE +
+diff --git a/ld/testsuite/ld-i386/pr20253-4b.d b/ld/testsuite/ld-i386/pr20253-4b.d
+new file mode 100644
+index 0000000..3b45f8f
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr20253-4b.d
+@@ -0,0 +1,8 @@
++#source: pr20253-4.s
++#as: --32 -mrelax-relocations=yes
++#ld: -pie -melf_i386
++#readelf: -r --wide
++
++Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_IRELATIVE +
+diff --git a/ld/testsuite/ld-i386/pr20253-4c.d b/ld/testsuite/ld-i386/pr20253-4c.d
+new file mode 100644
+index 0000000..6fa68aa
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr20253-4c.d
+@@ -0,0 +1,9 @@
++#source: pr20253-4.s
++#as: --32 -mrelax-relocations=yes
++#ld: -shared -melf_i386
++#readelf: -r --wide
++
++Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +[0-9a-f]+ +__start
++[0-9a-f]+ +[0-9a-f]+ +R_386_IRELATIVE +
+diff --git a/ld/testsuite/ld-i386/pr20253-5.d b/ld/testsuite/ld-i386/pr20253-5.d
+new file mode 100644
+index 0000000..0936d98
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr20253-5.d
+@@ -0,0 +1,7 @@
++#as: --32
++#ld: -melf_i386
++#readelf: -r --wide
++
++Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_IRELATIVE +
+diff --git a/ld/testsuite/ld-i386/pr20253-5.s b/ld/testsuite/ld-i386/pr20253-5.s
+new file mode 100644
+index 0000000..0cc1803
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr20253-5.s
+@@ -0,0 +1,10 @@
++	.text
++	.globl	_start
++	.type	_start, @function
++_start:
++	call	*func1@GOT(%eax)
++	cmp	$func1,%eax
++	.globl func1
++	.type	func1, @gnu_indirect_function
++func1:
++	ret
 diff --git a/ld/testsuite/ld-ifunc/ifunc-13-i386.d b/ld/testsuite/ld-ifunc/ifunc-13-i386.d
-index 677fa92..5f9309c 100644
+index 677fa92..8dd3fed 100644
 --- a/ld/testsuite/ld-ifunc/ifunc-13-i386.d
 +++ b/ld/testsuite/ld-ifunc/ifunc-13-i386.d
-@@ -5,10 +5,10 @@
- #readelf: -r --wide
- #target: x86_64-*-* i?86-*-*
- 
--Relocation section '.rel.ifunc' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rel.got' at offset 0x[0-9a-f]+ contains 1 entries:
+@@ -8,7 +8,3 @@
+ Relocation section '.rel.ifunc' at offset 0x[0-9a-f]+ contains 1 entries:
  [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
--[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_32[ ]+ifunc\(\)[ ]+ifunc
-+[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_GLOB_DAT[ ]+ifunc\(\)[ ]+ifunc
- 
+ [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_32[ ]+ifunc\(\)[ ]+ifunc
+-
 -Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rel.ifunc' at offset 0x[0-9a-f]+ contains 1 entries:
- [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
+-[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
 -[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_JUMP_SLOT[ ]+ifunc\(\)[ ]+ifunc
-+[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_32[ ]+ifunc\(\)[ ]+ifunc
 diff --git a/ld/testsuite/ld-ifunc/ifunc-13-x86-64.d b/ld/testsuite/ld-ifunc/ifunc-13-x86-64.d
-index b01c735..bcd4ae3 100644
+index b01c735..1a1d061 100644
 --- a/ld/testsuite/ld-ifunc/ifunc-13-x86-64.d
 +++ b/ld/testsuite/ld-ifunc/ifunc-13-x86-64.d
-@@ -5,10 +5,10 @@
- #readelf: -r --wide
- #target: x86_64-*-*
- 
--Relocation section '.rela.ifunc' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rela.got' at offset 0x[0-9a-f]+ contains 1 entries:
+@@ -8,7 +8,3 @@
+ Relocation section '.rela.ifunc' at offset 0x[0-9a-f]+ contains 1 entries:
  [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
--[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_64[ ]+ifunc\(\)[ ]+ifunc \+ 0
-+[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_GLOB_DAT[ ]+ifunc\(\)[ ]+ifunc \+ 0
- 
+ [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_64[ ]+ifunc\(\)[ ]+ifunc \+ 0
+-
 -Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rela.ifunc' at offset 0x[0-9a-f]+ contains 1 entries:
- [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
+-[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
 -[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_JUMP_SLOT[ ]+ifunc\(\)[ ]+ifunc \+ 0
-+[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_64[ ]+ifunc\(\)[ ]+ifunc \+ 0
 diff --git a/ld/testsuite/ld-ifunc/ifunc-15-i386.d b/ld/testsuite/ld-ifunc/ifunc-15-i386.d
 index c37dd51..0d44ba1 100644
 --- a/ld/testsuite/ld-ifunc/ifunc-15-i386.d
@@ -1710,81 +2093,48 @@ index a4a5cb1..8a28ec9 100644
 -[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
 -[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_JUMP_SLOT[ ]+ifunc\(\)[ ]+ifunc \+ 0
 diff --git a/ld/testsuite/ld-ifunc/ifunc-18a-i386.d b/ld/testsuite/ld-ifunc/ifunc-18a-i386.d
-index 10490b1..233df61 100644
+index 10490b1..7c392fb 100644
 --- a/ld/testsuite/ld-ifunc/ifunc-18a-i386.d
 +++ b/ld/testsuite/ld-ifunc/ifunc-18a-i386.d
-@@ -5,6 +5,10 @@
- #readelf: -r --wide
- #target: x86_64-*-* i?86-*-*
- 
-+Relocation section '.rel.got' at .*
-+[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
-+[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
-+
- Relocation section '.rel.ifunc' at .*
- [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
- [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
-@@ -12,4 +16,3 @@ Relocation section '.rel.ifunc' at .*
+@@ -12,4 +12,3 @@ Relocation section '.rel.ifunc' at .*
  Relocation section '.rel.plt' at .*
  [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
  [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
 -[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
 diff --git a/ld/testsuite/ld-ifunc/ifunc-18a-x86-64.d b/ld/testsuite/ld-ifunc/ifunc-18a-x86-64.d
-index 0d600eb..4963d28 100644
+index 0d600eb..e9d6031 100644
 --- a/ld/testsuite/ld-ifunc/ifunc-18a-x86-64.d
 +++ b/ld/testsuite/ld-ifunc/ifunc-18a-x86-64.d
-@@ -5,6 +5,10 @@
- #readelf: -r --wide
- #target: x86_64-*-*
- 
-+Relocation section '.rela.got' at .*
-+[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
-+[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_IRELATIVE[ ]+[0-9a-f]*
-+
- Relocation section '.rela.ifunc' at .*
- [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
- [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_IRELATIVE[ ]+[0-9a-f]*
-@@ -12,4 +16,3 @@ Relocation section '.rela.ifunc' at .*
+@@ -12,4 +12,3 @@ Relocation section '.rela.ifunc' at .*
  Relocation section '.rela.plt' at .*
  [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
  [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_IRELATIVE[ ]+[0-9a-f]*
 -[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_IRELATIVE[ ]+[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-18a.s b/ld/testsuite/ld-ifunc/ifunc-18a.s
+index c29c121..f68c151 100644
+--- a/ld/testsuite/ld-ifunc/ifunc-18a.s
++++ b/ld/testsuite/ld-ifunc/ifunc-18a.s
+@@ -1,5 +1,5 @@
+ 	.section .data.rel,"aw",@progbits
+-	.globl foo_ptrt
++	.globl foo_ptr
+ 	.type	foo_ptr, @object
+ foo_ptr:
+ 	.dc.a foo
 diff --git a/ld/testsuite/ld-ifunc/ifunc-18b-i386.d b/ld/testsuite/ld-ifunc/ifunc-18b-i386.d
-index a5eda94..bc3a975 100644
+index a5eda94..4b63c57 100644
 --- a/ld/testsuite/ld-ifunc/ifunc-18b-i386.d
 +++ b/ld/testsuite/ld-ifunc/ifunc-18b-i386.d
-@@ -5,6 +5,10 @@
- #readelf: -r --wide
- #target: x86_64-*-* i?86-*-*
- 
-+Relocation section '.rel.got' at .*
-+[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
-+[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
-+
- Relocation section '.rel.ifunc' at .*
- [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
- [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
-@@ -12,4 +16,3 @@ Relocation section '.rel.ifunc' at .*
+@@ -12,4 +12,3 @@ Relocation section '.rel.ifunc' at .*
  Relocation section '.rel.plt' at .*
  [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
  [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
 -[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
 diff --git a/ld/testsuite/ld-ifunc/ifunc-18b-x86-64.d b/ld/testsuite/ld-ifunc/ifunc-18b-x86-64.d
-index 8dfebfb..00a95ef 100644
+index 8dfebfb..b4ff6c3 100644
 --- a/ld/testsuite/ld-ifunc/ifunc-18b-x86-64.d
 +++ b/ld/testsuite/ld-ifunc/ifunc-18b-x86-64.d
-@@ -5,6 +5,10 @@
- #readelf: -r --wide
- #target: x86_64-*-*
- 
-+Relocation section '.rela.got' at .*
-+[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
-+[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_IRELATIVE[ ]+[0-9a-f]*
-+
- Relocation section '.rela.ifunc' at .*
- [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
- [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_IRELATIVE[ ]+[0-9a-f]*
-@@ -12,4 +16,3 @@ Relocation section '.rela.ifunc' at .*
+@@ -12,4 +12,3 @@ Relocation section '.rela.ifunc' at .*
  Relocation section '.rela.plt' at .*
  [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
  [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_IRELATIVE[ ]+[0-9a-f]*
@@ -1937,11 +2287,204 @@ index e28734e..4e3582d 100644
 +0+4000f1 <bar>:
 + +[a-f0-9]+:	c3                   	retq   
  #pass
+diff --git a/ld/testsuite/ld-ifunc/ifunc-23-x86.s b/ld/testsuite/ld-ifunc/ifunc-23-x86.s
+new file mode 100644
+index 0000000..69c2279
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-23-x86.s
+@@ -0,0 +1,10 @@
++	.type foo,%gnu_indirect_function
++foo:
++	ret
++	.globl _start
++_start:
++	ret
++	.globl __start
++__start:
++	.data
++	.dc.a foo
+diff --git a/ld/testsuite/ld-ifunc/ifunc-23a-x86.d b/ld/testsuite/ld-ifunc/ifunc-23a-x86.d
+new file mode 100644
+index 0000000..47ec5d1
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-23a-x86.d
+@@ -0,0 +1,8 @@
++#source: ifunc-23-x86.s
++#ld:
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-23b-x86.d b/ld/testsuite/ld-ifunc/ifunc-23b-x86.d
+new file mode 100644
+index 0000000..dbe2ec1
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-23b-x86.d
+@@ -0,0 +1,8 @@
++#source: ifunc-23-x86.s
++#ld: -pie
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-23c-x86.d b/ld/testsuite/ld-ifunc/ifunc-23c-x86.d
+new file mode 100644
+index 0000000..dc7e5c1
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-23c-x86.d
+@@ -0,0 +1,8 @@
++#source: ifunc-23-x86.s
++#ld: -shared
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-24-x86.s b/ld/testsuite/ld-ifunc/ifunc-24-x86.s
+new file mode 100644
+index 0000000..967cdf6
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-24-x86.s
+@@ -0,0 +1,11 @@
++	.text
++	.type foo,%gnu_indirect_function
++foo:
++	ret
++	.globl _start
++_start:
++	call	foo@PLT
++	.globl __start
++__start:
++	.data
++	.dc.a foo
+diff --git a/ld/testsuite/ld-ifunc/ifunc-24a-x86.d b/ld/testsuite/ld-ifunc/ifunc-24a-x86.d
+new file mode 100644
+index 0000000..78bd4e2
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-24a-x86.d
+@@ -0,0 +1,8 @@
++#source: ifunc-24-x86.s
++#ld:
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-24b-x86.d b/ld/testsuite/ld-ifunc/ifunc-24b-x86.d
+new file mode 100644
+index 0000000..c73b019
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-24b-x86.d
+@@ -0,0 +1,12 @@
++#source: ifunc-24-x86.s
++#ld: -pie
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
++
++Relocation section '.rel(a|).plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-24c-x86.d b/ld/testsuite/ld-ifunc/ifunc-24c-x86.d
+new file mode 100644
+index 0000000..db16754
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-24c-x86.d
+@@ -0,0 +1,12 @@
++#source: ifunc-24-x86.s
++#ld: -shared
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
++
++Relocation section '.rel(a|).plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-25-x86.s b/ld/testsuite/ld-ifunc/ifunc-25-x86.s
+new file mode 100644
+index 0000000..0549cbf
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-25-x86.s
+@@ -0,0 +1,12 @@
++	.text
++	.globl foo
++	.type foo,%gnu_indirect_function
++foo:
++	ret
++	.globl _start
++_start:
++	call	foo@PLT
++	.globl __start
++__start:
++	.data
++	.dc.a foo
+diff --git a/ld/testsuite/ld-ifunc/ifunc-25a-x86.d b/ld/testsuite/ld-ifunc/ifunc-25a-x86.d
+new file mode 100644
+index 0000000..0f37f52
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-25a-x86.d
+@@ -0,0 +1,8 @@
++#source: ifunc-25-x86.s
++#ld:
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-25b-x86.d b/ld/testsuite/ld-ifunc/ifunc-25b-x86.d
+new file mode 100644
+index 0000000..96b0ed5
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-25b-x86.d
+@@ -0,0 +1,12 @@
++#source: ifunc-25-x86.s
++#ld: -pie
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
++
++Relocation section '.rel(a|).plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)+_IRELATIVE[ ]*[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-25c-x86.d b/ld/testsuite/ld-ifunc/ifunc-25c-x86.d
+new file mode 100644
+index 0000000..f9c08dc
+--- /dev/null
++++ b/ld/testsuite/ld-ifunc/ifunc-25c-x86.d
+@@ -0,0 +1,12 @@
++#source: ifunc-25-x86.s
++#ld: -shared
++#readelf: -r --wide
++#target: x86_64-*-* i?86-*-*
++
++Relocation section '.rel(a|).dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)_(32|64) +foo\(\) +foo( \+ 0|)
++
++Relocation section '.rel(a|).plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_(386|X86_64)_JUMP_SLOT +foo\(\) +foo( \+ 0|)
 diff --git a/ld/testsuite/ld-x86-64/no-plt.exp b/ld/testsuite/ld-x86-64/no-plt.exp
-index d57ccb5..c10c533 100644
+index d57ccb5..e2bfd0e 100644
 --- a/ld/testsuite/ld-x86-64/no-plt.exp
 +++ b/ld/testsuite/ld-x86-64/no-plt.exp
-@@ -199,3 +199,70 @@ run_ld_link_exec_tests [] [list \
+@@ -199,3 +199,90 @@ run_ld_link_exec_tests [] [list \
  	"pass.out" \
      ] \
  ]
@@ -2010,73 +2553,76 @@ index d57ccb5..c10c533 100644
 +	    "pr20253-2e" \
 +	    "pass.out" \
 +	] \
++	[list \
++	    "Run pr20253-2f" \
++	    "tmpdir/pr20253-2a.o \
++	     tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
++	    "" \
++	    { pr20253-2b.S } \
++	    "pr20253-2f" \
++	    "pass.out" \
++	    "-DCHECK_PLT" \
++	] \
++	[list \
++	    "Run pr20253-2g" \
++	    "--static tmpdir/pr20253-2a.o \
++	    tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
++	    "" \
++	    { pr20253-2b.S } \
++	    "pr20253-2g" \
++	    "pass.out" \
++	    "-DCHECK_PLT" \
++	] \
 +    ]
 +}
 diff --git a/ld/testsuite/ld-x86-64/pr13082-5a.d b/ld/testsuite/ld-x86-64/pr13082-5a.d
-index 191c29e..c132696 100644
+index 191c29e..d1b100d 100644
 --- a/ld/testsuite/ld-x86-64/pr13082-5a.d
 +++ b/ld/testsuite/ld-x86-64/pr13082-5a.d
-@@ -4,10 +4,7 @@
- #ld: -shared -melf32_x86_64
- #readelf: -r --wide
- 
--Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
+@@ -7,7 +7,3 @@
+ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
   Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
  [0-9a-f]+ +[0-9a-f]+ +R_X86_64_32 +ifunc\(\)+ +ifunc \+ 0
 -
 -Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
 - Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
 -[0-9a-f]+ +[0-9a-f]+ +R_X86_64_JUMP_SLOT +ifunc\(\)+ +ifunc \+ 0
-+[0-9a-f]+ +[0-9a-f]+ +R_X86_64_GLOB_DAT +ifunc\(\)+ +ifunc \+ 0
 diff --git a/ld/testsuite/ld-x86-64/pr13082-5b.d b/ld/testsuite/ld-x86-64/pr13082-5b.d
-index 1c5a5e7..18e4ddf 100644
+index 1c5a5e7..01e403b 100644
 --- a/ld/testsuite/ld-x86-64/pr13082-5b.d
 +++ b/ld/testsuite/ld-x86-64/pr13082-5b.d
-@@ -4,10 +4,7 @@
- #ld: -pie -melf32_x86_64
- #readelf: -r --wide
- 
--Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
+@@ -7,7 +7,3 @@
+ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
   Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
  [0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
 -
 -Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
 - Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
- [0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+-[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
 diff --git a/ld/testsuite/ld-x86-64/pr13082-6a.d b/ld/testsuite/ld-x86-64/pr13082-6a.d
-index 9a1a655..50ad9f3 100644
+index 9a1a655..5914f3d 100644
 --- a/ld/testsuite/ld-x86-64/pr13082-6a.d
 +++ b/ld/testsuite/ld-x86-64/pr13082-6a.d
-@@ -4,10 +4,7 @@
- #ld: -shared -melf32_x86_64
- #readelf: -r --wide
- 
--Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
+@@ -7,7 +7,3 @@
+ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
   Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
  [0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
 -
 -Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
 - Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
- [0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+-[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
 diff --git a/ld/testsuite/ld-x86-64/pr13082-6b.d b/ld/testsuite/ld-x86-64/pr13082-6b.d
-index 792c348..1fb714d 100644
+index 792c348..6ff23ff 100644
 --- a/ld/testsuite/ld-x86-64/pr13082-6b.d
 +++ b/ld/testsuite/ld-x86-64/pr13082-6b.d
-@@ -4,10 +4,7 @@
- #ld: -pie -melf32_x86_64
- #readelf: -r --wide
- 
--Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
-+Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
+@@ -7,7 +7,3 @@
+ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
   Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
  [0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
 -
 -Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
 - Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
- [0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+-[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
 diff --git a/ld/testsuite/ld-x86-64/pr20253-1.s b/ld/testsuite/ld-x86-64/pr20253-1.s
 new file mode 100644
 index 0000000..4b9b7a4
@@ -2393,10 +2939,10 @@ index 0000000..370275a
 +}
 diff --git a/ld/testsuite/ld-x86-64/pr20253-2b.S b/ld/testsuite/ld-x86-64/pr20253-2b.S
 new file mode 100644
-index 0000000..6f94ebe
+index 0000000..9bfab0c
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr20253-2b.S
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,46 @@
 +	.section	.rodata.str1.1,"aMS",@progbits,1
 +.LC0:
 +	.string	"PASS"
@@ -2406,7 +2952,11 @@ index 0000000..6f94ebe
 +check:
 +	subq	$8, %rsp
 +	call	*get_func1@GOTPCREL(%rip)
++#ifdef CHECK_PLT
++	cmpl	$func1, %eax
++#else
 +	cmpq	func1@GOTPCREL(%rip), %rax
++#endif
 +	jne	.L3
 +	movq	func1_p@GOTPCREL(%rip), %rdx
 +#ifdef __LP64__
@@ -2533,11 +3083,184 @@ index 0000000..10aee94
 +func2_p:
 +	.dc.a	func2
 +	.section	.note.GNU-stack,"",@progbits
+diff --git a/ld/testsuite/ld-x86-64/pr20253-3.d b/ld/testsuite/ld-x86-64/pr20253-3.d
+new file mode 100644
+index 0000000..30db29c
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-3.d
+@@ -0,0 +1,3 @@
++#as: --64
++#ld: -melf_x86_64
++#error: relocation R_X86_64_PC32 against STT_GNU_IFUNC symbol `foo' isn't supported
+diff --git a/ld/testsuite/ld-x86-64/pr20253-3.s b/ld/testsuite/ld-x86-64/pr20253-3.s
+new file mode 100644
+index 0000000..8cd25fb
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-3.s
+@@ -0,0 +1,11 @@
++	.text
++	.type foo,%gnu_indirect_function
++foo:
++	ret
++	.globl _start
++_start:
++	ret
++	.globl __start
++__start:
++	.data
++	.long foo - .
+diff --git a/ld/testsuite/ld-x86-64/pr20253-4.s b/ld/testsuite/ld-x86-64/pr20253-4.s
+new file mode 100644
+index 0000000..7dc9aa3
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-4.s
+@@ -0,0 +1,11 @@
++	.text
++	.type foo,%gnu_indirect_function
++foo:
++	ret
++	.globl _start
++_start:
++	movq	__start@GOTPCREL(%rip), %rax
++	.globl __start
++__start:
++	.data
++	.dc.a foo
+diff --git a/ld/testsuite/ld-x86-64/pr20253-4a.d b/ld/testsuite/ld-x86-64/pr20253-4a.d
+new file mode 100644
+index 0000000..041c164
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-4a.d
+@@ -0,0 +1,8 @@
++#source: pr20253-4.s
++#as: --64
++#ld: -melf_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr20253-4b.d b/ld/testsuite/ld-x86-64/pr20253-4b.d
+new file mode 100644
+index 0000000..6dc95b5
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-4b.d
+@@ -0,0 +1,8 @@
++#source: pr20253-4.s
++#as: --64
++#ld: -pie -melf_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr20253-4c.d b/ld/testsuite/ld-x86-64/pr20253-4c.d
+new file mode 100644
+index 0000000..26fa0df
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-4c.d
+@@ -0,0 +1,9 @@
++#source: pr20253-4.s
++#as: --64
++#ld: -shared -melf_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_GLOB_DAT +[0-9a-f]+ +__start \+ 0
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr20253-4d.d b/ld/testsuite/ld-x86-64/pr20253-4d.d
+new file mode 100644
+index 0000000..52dd877
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-4d.d
+@@ -0,0 +1,8 @@
++#source: pr20253-4.s
++#as: --x32
++#ld: -melf32_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr20253-4e.d b/ld/testsuite/ld-x86-64/pr20253-4e.d
+new file mode 100644
+index 0000000..d9f2fa4
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-4e.d
+@@ -0,0 +1,8 @@
++#source: pr20253-4.s
++#as: --x32
++#ld: -pie -melf32_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr20253-4f.d b/ld/testsuite/ld-x86-64/pr20253-4f.d
+new file mode 100644
+index 0000000..fb3d6f8
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-4f.d
+@@ -0,0 +1,9 @@
++#source: pr20253-4.s
++#as: --x32
++#ld: -shared -melf32_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_GLOB_DAT +[0-9a-f]+ +__start \+ 0
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr20253-5.s b/ld/testsuite/ld-x86-64/pr20253-5.s
+new file mode 100644
+index 0000000..ade0e8b
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-5.s
+@@ -0,0 +1,10 @@
++	.text
++	.globl	_start
++	.type	_start, @function
++_start:
++	call	*func1@GOTPCREL(%rip)
++	cmp	$func1,%eax
++	.globl func1
++	.type	func1, @gnu_indirect_function
++func1:
++	ret
+diff --git a/ld/testsuite/ld-x86-64/pr20253-5a.d b/ld/testsuite/ld-x86-64/pr20253-5a.d
+new file mode 100644
+index 0000000..1eceda4
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-5a.d
+@@ -0,0 +1,8 @@
++#source: pr20253-5.s
++#as: --64
++#ld: -melf_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
+diff --git a/ld/testsuite/ld-x86-64/pr20253-5b.d b/ld/testsuite/ld-x86-64/pr20253-5b.d
+new file mode 100644
+index 0000000..c1cb335
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20253-5b.d
+@@ -0,0 +1,8 @@
++#source: pr20253-5.s
++#as: --x32
++#ld: -melf32_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym.* Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_IRELATIVE +[0-9a-f]+
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 7fd953b..6f8e58b 100644
+index 7fd953b..f6f89e2 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
-@@ -503,6 +503,18 @@ run_dump_test "pr19609-7d"
+@@ -503,6 +503,27 @@ run_dump_test "pr19609-7d"
  run_dump_test "pr19939a"
  run_dump_test "pr19939b"
  run_dump_test "pr19719"
@@ -2553,6 +3276,15 @@ index 7fd953b..6f8e58b 100644
 +run_dump_test "pr20253-1j"
 +run_dump_test "pr20253-1k"
 +run_dump_test "pr20253-1l"
++run_dump_test "pr20253-3"
++run_dump_test "pr20253-4a"
++run_dump_test "pr20253-4b"
++run_dump_test "pr20253-4c"
++run_dump_test "pr20253-4d"
++run_dump_test "pr20253-4e"
++run_dump_test "pr20253-4f"
++run_dump_test "pr20253-5a"
++run_dump_test "pr20253-5b"
  
  proc undefined_weak {cflags ldflags} {
      set testname "Undefined weak symbol"
