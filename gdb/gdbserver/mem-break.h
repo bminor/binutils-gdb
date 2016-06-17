@@ -158,6 +158,15 @@ void set_reinsert_breakpoint (CORE_ADDR stop_at);
 
 void delete_reinsert_breakpoints (void);
 
+/* Reinsert all reinsert breakpoints of the current process.  */
+
+void reinsert_reinsert_breakpoints (void);
+
+/* Uninsert all reinsert breakpoints of the current process.  This
+   still leaves the reinsert breakpoints in the table.  */
+
+void uninsert_reinsert_breakpoints (void);
+
 /* Reinsert breakpoints at WHERE (and change their status to
    inserted).  */
 

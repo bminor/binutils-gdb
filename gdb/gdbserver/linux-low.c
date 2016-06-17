@@ -543,6 +543,22 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 
 	  parent_proc = get_thread_process (event_thr);
 	  child_proc->attached = parent_proc->attached;
+
+	  if (event_lwp->bp_reinsert != 0
+	      && can_software_single_step ()
+	      && event == PTRACE_EVENT_VFORK)
+	    {
+	      struct thread_info *saved_thread = current_thread;
+
+	      current_thread = event_thr;
+	      /* If we leave reinsert breakpoints there, child will
+		 hit it, so uninsert reinsert breakpoints from parent
+		 (and child).  Once vfork child is done, reinsert
+		 them back to parent.  */
+	      uninsert_reinsert_breakpoints ();
+	      current_thread = saved_thread;
+	    }
+
 	  clone_all_breakpoints (&child_proc->breakpoints,
 				 &child_proc->raw_breakpoints,
 				 parent_proc->breakpoints);
@@ -570,12 +586,12 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  event_lwp->status_pending = wstat;
 
 	  /* If the parent thread is doing step-over with reinsert
-	     breakpoints, the reinsert breakpoints are still in forked
-	     child's process space and cloned to its breakpoint list
-	     from the parent's.  Remove them from the child process.  */
+	     breakpoints, the list of reinsert breakpoints are cloned
+	     from the parent's.  Remove them from the child process.
+	     In case of vfork, we'll reinsert them back once vforked
+	     child is done.  */
 	  if (event_lwp->bp_reinsert != 0
-	      && can_software_single_step ()
-	      && event == PTRACE_EVENT_FORK)
+	      && can_software_single_step ())
 	    {
 	      struct thread_info *saved_thread = current_thread;
 
@@ -638,6 +654,18 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
   else if (event == PTRACE_EVENT_VFORK_DONE)
     {
       event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
+
+      if (event_lwp->bp_reinsert != 0 && can_software_single_step ())
+	{
+	  struct thread_info *saved_thread = current_thread;
+	  struct process_info *proc = get_thread_process (event_thr);
+
+	  current_thread = event_thr;
+	  reinsert_reinsert_breakpoints ();
+	  current_thread = saved_thread;
+
+	  gdb_assert (has_reinsert_breakpoints (proc));
+	}
 
       /* Report the event.  */
       return 0;
