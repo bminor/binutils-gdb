@@ -2495,6 +2495,24 @@ linux_low_filter_event (int lwpid, int wstat)
   return child;
 }
 
+/* Return true if THREAD is doing hardware single step.  */
+
+static int
+maybe_hw_step (struct thread_info *thread)
+{
+  if (can_hardware_single_step ())
+    return 1;
+  else
+    {
+      struct process_info *proc = get_thread_process (thread);
+
+      /* GDBserver must insert reinsert breakpoint for software
+	 single step.  */
+      gdb_assert (has_reinsert_breakpoints (proc));
+      return 0;
+    }
+}
+
 /* Resume LWPs that are currently stopped without any pending status
    to report, but are resumed from the core's perspective.  */
 
@@ -4215,9 +4233,9 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 		fprintf (stderr, "BAD - reinserting and suspended(%d).\n",
 			 lwp->suspended);
 	    }
-
-	  step = 1;
 	}
+
+      step = maybe_hw_step (thread);
     }
 
   if (fast_tp_collecting == 1)
@@ -4689,8 +4707,12 @@ finish_step_over (struct lwp_info *lwp)
 {
   if (lwp->bp_reinsert != 0)
     {
+      struct thread_info *saved_thread = current_thread;
+
       if (debug_threads)
 	debug_printf ("Finished step over.\n");
+
+      current_thread = get_lwp_thread (lwp);
 
       /* Reinsert any breakpoint at LWP->BP_REINSERT.  Note that there
 	 may be no breakpoint to reinsert there by now.  */
@@ -4705,9 +4727,13 @@ finish_step_over (struct lwp_info *lwp)
 	 because we were stepping over a breakpoint, and we hold all
 	 threads but LWP stopped while doing that.  */
       if (!can_hardware_single_step ())
-	delete_reinsert_breakpoints ();
+	{
+	  gdb_assert (has_reinsert_breakpoints (current_process ()));
+	  delete_reinsert_breakpoints ();
+	}
 
       step_over_bkpt = null_ptid;
+      current_thread = saved_thread;
       return 1;
     }
   else
@@ -5029,7 +5055,8 @@ proceed_one_lwp (struct inferior_list_entry *entry, void *except)
       if (debug_threads)
 	debug_printf ("   stepping LWP %ld, reinsert set\n",
 		      lwpid_of (thread));
-      step = 1;
+
+      step = maybe_hw_step (thread);
     }
   else
     step = 0;

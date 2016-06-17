@@ -163,6 +163,10 @@ void delete_reinsert_breakpoints (void);
 
 void reinsert_breakpoints_at (CORE_ADDR where);
 
+/* Process PROC has reinsert breakpoints or not.  */
+
+int has_reinsert_breakpoints (struct process_info *proc);
+
 /* Uninsert breakpoints at WHERE (and change their status to
    uninserted).  This still leaves the breakpoints in the table.  */
 

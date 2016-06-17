@@ -1,3 +1,13 @@
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (maybe_hw_step): New function.
+	(linux_resume_one_lwp_throw): Call maybe_hw_step.
+	(finish_step_over): Switch current_thread to lwp temporarily,
+	and assert has_reinsert_breakpoints returns true.
+	(proceed_one_lwp): Call maybe_hw_step.
+	* mem-break.c (has_reinsert_breakpoints): New function.
+	* mem-break.h (has_reinsert_breakpoints): Declare.
+
 2016-06-02  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* win32-low.c (win32_create_inferior): Add pointer casts for C++.

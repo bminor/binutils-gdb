@@ -1553,6 +1553,28 @@ reinsert_breakpoints_at (CORE_ADDR pc)
     }
 }
 
+int
+has_reinsert_breakpoints (struct process_info *proc)
+{
+  struct breakpoint *bp, **bp_link;
+
+  bp = proc->breakpoints;
+  bp_link = &proc->breakpoints;
+
+  while (bp)
+    {
+      if (bp->type == reinsert_breakpoint)
+	return 1;
+      else
+	{
+	  bp_link = &bp->next;
+	  bp = *bp_link;
+	}
+    }
+
+  return 0;
+}
+
 void
 reinsert_all_breakpoints (void)
 {
