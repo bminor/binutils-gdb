@@ -1,0 +1,46 @@
+From 8cfce943e04b3a564f853352870110d4b3bf227b Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Fri, 17 Jun 2016 11:26:09 -0700
+Subject: [PATCH] Use the IR symbol table for the IR object
+
+ELF linker shouldn't skip the IR object when searching the symbol table
+of an archive element.  Instead, it should use the IR symbol table.
+
+	PR ld/18250
+	* elflink.c (elf_link_is_defined_archive_symbol): Use the IR
+	symbol table if the object has been claimed by plugin.
+---
+ bfd/elflink.c | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index 6d591de..62e8405 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -3124,15 +3124,18 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
+   if (abfd == NULL)
+     return FALSE;
+ 
+-  /* Return FALSE if the object has been claimed by plugin.  */
+-  if (abfd->plugin_format == bfd_plugin_yes)
+-    return FALSE;
+-
+   if (! bfd_check_format (abfd, bfd_object))
+     return FALSE;
+ 
+   /* Select the appropriate symbol table.  */
+-  if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
++  if (abfd->plugin_format == bfd_plugin_yes)
++    {
++      /* Use the IR symbol table if the object has been claimed by
++	 plugin.  */
++      abfd = abfd->plugin_dummy_bfd;
++      hdr = &elf_tdata (abfd)->symtab_hdr;
++    }
++  else if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
+     hdr = &elf_tdata (abfd)->symtab_hdr;
+   else
+     hdr = &elf_tdata (abfd)->dynsymtab_hdr;
+-- 
+2.5.5
+
