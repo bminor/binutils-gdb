@@ -569,6 +569,27 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  event_lwp->status_pending_p = 1;
 	  event_lwp->status_pending = wstat;
 
+	  /* If the parent thread is doing step-over with reinsert
+	     breakpoints, the reinsert breakpoints are still in forked
+	     child's process space and cloned to its breakpoint list
+	     from the parent's.  Remove them from the child process.  */
+	  if (event_lwp->bp_reinsert != 0
+	      && can_software_single_step ()
+	      && event == PTRACE_EVENT_FORK)
+	    {
+	      struct thread_info *saved_thread = current_thread;
+
+	      /* The child process is forked and stopped, so it is safe
+		 to access its memory without stopping all other threads
+		 from other processes.  */
+	      current_thread = child_thr;
+	      delete_reinsert_breakpoints ();
+	      current_thread = saved_thread;
+
+	      gdb_assert (has_reinsert_breakpoints (parent_proc));
+	      gdb_assert (!has_reinsert_breakpoints (child_proc));
+	    }
+
 	  /* Report the event.  */
 	  return 0;
 	}

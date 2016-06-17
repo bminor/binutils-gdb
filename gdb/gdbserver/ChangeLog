@@ -1,5 +1,10 @@
 2016-06-17  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (handle_extended_wait): If the parent is doing
+	step-over, remove the reinsert breakpoints from the forked child.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (unsuspend_all_lwps): Declare.
 	(linux_low_filter_event): If thread exited, call finish_step_over.
 	If step-over is finished, unsuspend other threads.
