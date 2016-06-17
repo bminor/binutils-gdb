@@ -262,3 +262,20 @@
 	fmov	d0, #-2
 	fmov	s0, 2
 	fmov	s0, -2
+
+	ldr	x0, [x1, #1, mul vl]
+	ldr	x0, [x1, x2, mul vl]
+	ldr	x0, [x1, x2, mul #1]
+	ldr	x0, [x1, x2, mul #4]
+
+	strb	w7, [x30, x0, mul]
+	strb	w7, [x30, x0, mul #1]
+	strb	w7, [x30, w0, mul]
+	strb	w7, [x30, w0, mul #2]
+
+	adds	x1, sp, 1, mul #1
+	adds	x1, sp, 2, mul #255
+	adds	x1, sp, 3, mul #256
+	orr	x0, x0, #0xff, mul #1
+	orr	x0, x0, #0xfe, mul #255
+	orr	x0, x0, #0xfc, mul #256
