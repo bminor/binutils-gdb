@@ -1,3 +1,11 @@
+2016-06-17  Sanjoy Das  <sanjoy@playingwithpointers.com>
+
+	* gdb.base/jit-reader.exp: New file.
+	* gdb.base/jithost.c: New file.
+	* gdb.base/jithost.h: New file.
+	* gdb.base/jitreader.c : New file.
+	* gdb.base/jit-protocol.h: New file.
+
 2016-06-17  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/step-over-syscall.exp (break_cond_on_syscall): New
