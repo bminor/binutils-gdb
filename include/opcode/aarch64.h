@@ -485,6 +485,18 @@ enum aarch64_insn_class
   movewide,
   pcreladdr,
   ic_system,
+  sve_cpy,
+  sve_index,
+  sve_limm,
+  sve_misc,
+  sve_movprfx,
+  sve_pred_zm,
+  sve_shift_pred,
+  sve_shift_unpred,
+  sve_size_bhs,
+  sve_size_bhsd,
+  sve_size_hsd,
+  sve_size_sd,
   testbranch,
 };
 

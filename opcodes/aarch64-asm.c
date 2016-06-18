@@ -1140,6 +1140,27 @@ encode_fcvt (aarch64_inst *inst)
   return;
 }
 
+/* Return the index in qualifiers_list that INST is using.  Should only
+   be called once the qualifiers are known to be valid.  */
+
+static int
+aarch64_get_variant (struct aarch64_inst *inst)
+{
+  int i, nops, variant;
+
+  nops = aarch64_num_of_operands (inst->opcode);
+  for (variant = 0; variant < AARCH64_MAX_QLF_SEQ_NUM; ++variant)
+    {
+      for (i = 0; i < nops; ++i)
+	if (inst->opcode->qualifiers_list[variant][i]
+	    != inst->operands[i].qualifier)
+	  break;
+      if (i == nops)
+	return variant;
+    }
+  abort ();
+}
+
 /* Do miscellaneous encodings that are not common enough to be driven by
    flags.  */
 
@@ -1316,6 +1337,65 @@ do_special_encoding (struct aarch64_inst *inst)
     do_misc_encoding (inst);
 
   DEBUG_TRACE ("exit with coding 0x%x", (uint32_t) inst->value);
+}
+
+/* Some instructions (including all SVE ones) use the instruction class
+   to describe how a qualifiers_list index is represented in the instruction
+   encoding.  If INST is such an instruction, encode the chosen qualifier
+   variant.  */
+
+static void
+aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
+{
+  switch (inst->opcode->iclass)
+    {
+    case sve_cpy:
+      insert_fields (&inst->value, aarch64_get_variant (inst),
+		     0, 2, FLD_SVE_M_14, FLD_size);
+      break;
+
+    case sve_index:
+    case sve_shift_pred:
+    case sve_shift_unpred:
+      /* For indices and shift amounts, the variant is encoded as
+	 part of the immediate.  */
+      break;
+
+    case sve_limm:
+      /* For sve_limm, the .B, .H, and .S forms are just a convenience
+	 and depend on the immediate.  They don't have a separate
+	 encoding.  */
+      break;
+
+    case sve_misc:
+      /* sve_misc instructions have only a single variant.  */
+      break;
+
+    case sve_movprfx:
+      insert_fields (&inst->value, aarch64_get_variant (inst),
+		     0, 2, FLD_SVE_M_16, FLD_size);
+      break;
+
+    case sve_pred_zm:
+      insert_field (FLD_SVE_M_4, &inst->value, aarch64_get_variant (inst), 0);
+      break;
+
+    case sve_size_bhs:
+    case sve_size_bhsd:
+      insert_field (FLD_size, &inst->value, aarch64_get_variant (inst), 0);
+      break;
+
+    case sve_size_hsd:
+      insert_field (FLD_size, &inst->value, aarch64_get_variant (inst) + 1, 0);
+      break;
+
+    case sve_size_sd:
+      insert_field (FLD_SVE_sz, &inst->value, aarch64_get_variant (inst), 0);
+      break;
+
+    default:
+      break;
+    }
 }
 
 /* Converters converting an alias opcode instruction to its real form.  */
@@ -1685,6 +1765,10 @@ aarch64_opcode_encode (const aarch64_opcode *opcode,
   /* Call opcode encoders indicated by flags.  */
   if (opcode_has_special_coder (opcode))
     do_special_encoding (inst);
+
+  /* Possibly use the instruction class to encode the chosen qualifier
+     variant.  */
+  aarch64_encode_variant_using_iclass (inst);
 
 encoding_exit:
   DEBUG_TRACE ("exit with %s", opcode->name);
