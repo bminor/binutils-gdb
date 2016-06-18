@@ -6544,7 +6544,7 @@ enum bfd_direction
 
 enum bfd_plugin_format
   {
-    bfd_plugin_uknown = 0,
+    bfd_plugin_unknown = 0,
     bfd_plugin_yes = 1,
     bfd_plugin_no = 2
   };

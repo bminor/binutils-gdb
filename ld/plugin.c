@@ -1081,7 +1081,7 @@ plugin_object_p (bfd *ibfd)
   if ((ibfd->flags & BFD_PLUGIN) != 0)
     return NULL;
 
-  if (ibfd->plugin_format != bfd_plugin_uknown)
+  if (ibfd->plugin_format != bfd_plugin_unknown)
     {
       if (ibfd->plugin_format == bfd_plugin_yes)
 	return ibfd->plugin_dummy_bfd->xvec;

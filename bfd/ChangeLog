@@ -1,5 +1,13 @@
 2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* bfd.c (bfd_plugin_format): Rename bfd_plugin_uknown to
+	bfd_plugin_unknown.
+	* bfd-in2.h: Regenerated.
+	* plugin.c (bfd_plugin_object_p): Replace bfd_plugin_uknown
+	with bfd_plugin_unknown.
+
+2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20253
 	* elf-bfd.h (_bfd_elf_allocate_ifunc_dyn_relocs): Add an
 	bfd_boolean argument.

@@ -365,7 +365,7 @@ bfd_plugin_object_p (bfd *abfd)
   if (ld_plugin_object_p)
     return ld_plugin_object_p (abfd);
 
-  if (abfd->plugin_format == bfd_plugin_uknown && !load_plugin (abfd))
+  if (abfd->plugin_format == bfd_plugin_unknown && !load_plugin (abfd))
     return NULL;
 
   return abfd->plugin_format == bfd_plugin_yes ? abfd->xvec : NULL;

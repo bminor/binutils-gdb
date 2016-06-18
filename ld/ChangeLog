@@ -1,5 +1,10 @@
 2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* plugin.c (plugin_object_p): Replace bfd_plugin_uknown
+	with bfd_plugin_unknown.
+
+2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20253
 	* testsuite/ld-i386/i386.exp: Run PR ld/20253 tests.
 	* testsuite/ld-i386/no-plt.exp: Likewise.
