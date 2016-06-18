@@ -1,3 +1,64 @@
+2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20253
+	* elf-bfd.h (_bfd_elf_allocate_ifunc_dyn_relocs): Add an
+	bfd_boolean argument.
+	* elf-ifunc.c (_bfd_elf_create_ifunc_sections): Replace
+	"shared object" with "PIC object" in comments.
+	(_bfd_elf_allocate_ifunc_dyn_relocs): Updated.  Replace
+	"shared object" with "PIC object" in comments.  Avoid PLT if
+	requested.  Generate dynamic relocations for non-GOT references.
+	Make room for the special first entry in PLT and allocate PLT
+	entry only for PLT and PC-relative references.  Store dynamic
+	GOT relocations in .rel[a].iplt section for static executables.
+	If PLT isn't used, always use GOT for symbol value.  Don't
+	allocate GOT entry if it isn't used.
+	* elf32-i386.c (elf_i386_check_relocs): Increment PLT reference
+	count only in the code section.  Allocate dynamic pointer
+	relocation against STT_GNU_IFUNC symbol in the non-code section.
+	(elf_i386_adjust_dynamic_symbol): Increment PLT reference count
+	only for PC-relative references.
+	(elf_i386_allocate_dynrelocs): Pass TRUE to
+	_bfd_elf_allocate_ifunc_dyn_relocs.
+	(elf_i386_relocate_section): Allow R_386_GOT32/R_386_GOT32X
+	relocations against STT_GNU_IFUNC symbols without PLT.  Generate
+	dynamic pointer relocation against STT_GNU_IFUNC symbol in
+	the non-code section and store it in the proper REL section.
+	Don't allow non-pointer relocation against STT_GNU_IFUNC symbol
+	without PLT.
+	(elf_i386_finish_dynamic_symbol): Generate dynamic
+	R_386_IRELATIVE and R_386_GLOB_DAT GOT relocations against
+	STT_GNU_IFUNC symbols without PLT.
+	(elf_i386_finish_dynamic_sections): Don't handle local
+	STT_GNU_IFUNC symbols here.
+	(elf_i386_output_arch_local_syms): Handle local STT_GNU_IFUNC
+	symbols here.
+	(elf_backend_output_arch_local_syms): New.
+	* elf32-x86-64.c (elf_i386_check_relocs): Increment PLT reference
+	count only in the code section.  Allocate dynamic pointer
+	relocation against STT_GNU_IFUNC symbol in the non-code section.
+	(elf_x86_64_adjust_dynamic_symbol): Increment PLT reference
+	count only for PC-relative references.
+	(elf_x86_64_allocate_dynrelocs): Pass TRUE to
+	_bfd_elf_allocate_ifunc_dyn_relocs.
+	(elf_x86_64_relocate_section): Allow R_X86_64_GOTPCREL,
+	R_X86_64_GOTPCRELX, R_X86_64_REX_GOTPCRELX and
+	R_X86_64_GOTPCREL64 relocations against STT_GNU_IFUNC symbols
+	without PLT.  Generate dynamic pointer relocation against
+	STT_GNU_IFUNC symbol in the non-code section and store it in
+	the proper RELA section.  Don't allow non-pointer relocation
+	against STT_GNU_IFUNC symbol without PLT.
+	(elf_x86_64_finish_dynamic_symbol): Generate dynamic
+	R_X86_64_IRELATIVE and R_X86_64_GLOB_DAT GOT relocations against
+	STT_GNU_IFUNC symbols without PLT.
+	(elf_x86_64_finish_dynamic_sections): Don't handle local
+	STT_GNU_IFUNC symbols here.
+	(elf_x86_64_output_arch_local_syms): Handle local STT_GNU_IFUNC
+	symbols here.
+	(elf_backend_output_arch_local_syms): New.
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_ifunc_dynrelocs):
+	Pass FALSE to _bfd_elf_allocate_ifunc_dyn_relocs.
+
 2016-06-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 	    Tony Wang  <tony.wang@arm.com>
 
