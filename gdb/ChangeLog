@@ -1,5 +1,9 @@
 2016-07-06  John Baldwin  <jhb@FreeBSD.org>
 
+	* h8300-tdep.c (h8300_print_register): Remove extraneous parentheses.
+
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
 	* ada-lang.c (ada_unpack_from_contents): Use unsigned constants with
 	left shifts.
 
