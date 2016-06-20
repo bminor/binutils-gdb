@@ -1,3 +1,9 @@
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/16483:
+	* gdb.python/py-framefilter.exp: Add "info frame-filter" test
+	before any filters are loaded.
+
 2016-06-21  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.fortran/derived-type.exp (print q): Add fields to the output.

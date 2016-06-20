@@ -1,3 +1,14 @@
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/16483:
+	* python/lib/gdb/command/frame_filters.py
+	(InfoFrameFilter.list_frame_filters): Rename to print_list.  Print
+	nothing if no filters found.  Return value indicating whether
+	filters were printed.
+	(InfoFrameFilter.print_list): Remove.
+	(InfoFrameFilter.invoke): Print message if no frame filters
+	found.
+
 2016-06-21  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* f-valprint.c (f_val_print): Add field names for printing
