@@ -3292,10 +3292,10 @@ class Target_mips : public Sized_target<size, big_endian>
  public:
   Target_mips(const Target::Target_info* info = &mips_info)
     : Sized_target<size, big_endian>(info), got_(NULL), gp_(NULL), plt_(NULL),
-      got_plt_(NULL), rel_dyn_(NULL), copy_relocs_(), dyn_relocs_(),
-      la25_stub_(NULL), mips_mach_extensions_(), mips_stubs_(NULL),
-      attributes_section_data_(NULL), abiflags_(NULL), mach_(0), layout_(NULL),
-      got16_addends_(), has_abiflags_section_(false),
+      got_plt_(NULL), rel_dyn_(NULL), rld_map_(NULL), copy_relocs_(),
+      dyn_relocs_(), la25_stub_(NULL), mips_mach_extensions_(),
+      mips_stubs_(NULL), attributes_section_data_(NULL), abiflags_(NULL),
+      mach_(0), layout_(NULL), got16_addends_(), has_abiflags_section_(false),
       entry_symbol_is_compressed_(false), insn32_(false)
   {
     this->add_machine_extensions();
@@ -4181,6 +4181,8 @@ class Target_mips : public Sized_target<size, big_endian>
   Output_data_space* got_plt_;
   // The dynamic reloc section.
   Reloc_section* rel_dyn_;
+  // The .rld_map section.
+  Output_data_zero_fill* rld_map_;
   // Relocs saved to avoid a COPY reloc.
   Mips_copy_relocs<elfcpp::SHT_REL, size, big_endian> copy_relocs_;
 
@@ -9760,8 +9762,37 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
     if (this->plt_ != NULL)
       // DT_MIPS_PLTGOT dynamic tag
       odyn->add_section_address(elfcpp::DT_MIPS_PLTGOT, this->got_plt_);
+
+    if (!parameters->options().shared())
+      {
+        this->rld_map_ = new Output_data_zero_fill(size / 8, size / 8);
+
+        layout->add_output_section_data(".rld_map", elfcpp::SHT_PROGBITS,
+                                        (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
+                                        this->rld_map_, ORDER_INVALID, false);
+
+        // __RLD_MAP will be filled in by the runtime loader to contain
+        // a pointer to the _r_debug structure.
+        Symbol* rld_map = symtab->define_in_output_data("__RLD_MAP", NULL,
+                                            Symbol_table::PREDEFINED,
+                                            this->rld_map_,
+                                            0, 0, elfcpp::STT_OBJECT,
+                                            elfcpp::STB_GLOBAL,
+                                            elfcpp::STV_DEFAULT, 0,
+                                            false, false);
+
+        rld_map->set_needs_dynsym_entry();
+
+        if (!parameters->options().pie())
+          // This member holds the absolute address of the debug pointer.
+          odyn->add_section_address(elfcpp::DT_MIPS_RLD_MAP, this->rld_map_);
+        else
+          // This member holds the offset to the debug pointer,
+          // relative to the address of the tag.
+          odyn->add_custom(elfcpp::DT_MIPS_RLD_MAP_REL);
+      }
   }
- }
+}
 
 // Get the custom dynamic tag value.
 template<int size, bool big_endian>
@@ -9797,6 +9828,16 @@ Target_mips<size, big_endian>::do_dynamic_tag_custom_value(elfcpp::DT tag) const
           return this->get_dt_mips_symtabno();
       }
 
+    case elfcpp::DT_MIPS_RLD_MAP_REL:
+      {
+        // The MIPS_RLD_MAP_REL tag stores the offset to the debug pointer,
+        // relative to the address of the tag.
+        Output_data_dynamic* const odyn = this->layout_->dynamic_data();
+        unsigned int entry_offset =
+          odyn->get_entry_offset(elfcpp::DT_MIPS_RLD_MAP_REL);
+        gold_assert(entry_offset != -1U);
+        return this->rld_map_->address() - (odyn->address() + entry_offset);
+      }
     default:
       gold_error(_("Unknown dynamic tag 0x%x"), (unsigned int)tag);
     }

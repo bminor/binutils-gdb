@@ -1,5 +1,9 @@
 2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
 
+        * elfcpp.h (DT_MIPS_RLD_MAP_REL): New enum constant.
+
+2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
 	* mips.h (R_MIPS_PC21_S2, R_MIPS_PC26_S2, R_MIPS_PC18_S3,
 	R_MIPS_PC19_S2, R_MIPS_PCHI16, R_MIPS_PCLO16): New enums for
 	Mips32r6 and Mips64r6 relocations.

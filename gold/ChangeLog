@@ -1,5 +1,19 @@
 2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
 
+        * mips.cc (Target_mips::Target_mips): Initialize rld_map_.
+        (Target_mips::rld_map_): New data member.
+        (Target_mips::do_finalize_sections): Add support for
+        DT_MIPS_RLD_MAP and DT_MIPS_RLD_MAP_REL dynamic tags,
+        .rld_map section, and __RLD_MAP symbol.
+        (Target_mips::do_dynamic_tag_custom_value): Add support for
+        DT_MIPS_RLD_MAP_REL dynamic tag.
+        * output.cc (Output_data_dynamic::get_entry_offset): New method
+        definition.
+        * output.h (Output_data_dynamic::get_entry_offset): New method
+        declaration.
+
+2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
         * mips.cc (Mips_relocate_functions::relpc16): Add unaligned check.
 
 2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
