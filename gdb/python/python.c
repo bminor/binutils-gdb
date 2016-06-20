@@ -740,7 +740,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
   if (arg != NULL)
     {
-      location = new_linespec_location (&arg);
+      location = string_to_event_location_basic (&arg, python_language);
       make_cleanup_delete_event_location (location);
     }
 

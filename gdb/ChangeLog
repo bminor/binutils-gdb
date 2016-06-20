@@ -1,3 +1,8 @@
+2016-10-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* python/python.c (gdbpy_decode_line): Call
+	string_to_event_location_basic instead of new_linespec_location.
+
 2016-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* target.c (target_supports_multi_process): New function, moved
