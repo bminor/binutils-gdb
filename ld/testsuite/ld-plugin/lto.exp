@@ -183,6 +183,21 @@ set lto_link_tests [list \
   [list "PR ld/19317 (1)" \
    "$plug_opt" "-flto $lto_no_fat" \
    {pr19317.c} {} "libpr19317.a"] \
+  [list "Build pr20276a.o" \
+   "" "-fno-lto" \
+   {pr20276a.c}] \
+  [list "Build pr20276b.o" \
+   "$plug_opt" "-flto $lto_no_fat" \
+   {pr20276b.c}] \
+  [list "Build pr20267a.o" \
+   "" "" \
+   {pr20267a.c}] \
+  [list "Build libpr20267a.a" \
+   "$plug_opt" "-flto $lto_fat" \
+   {pr20267b.c} {} "libpr20267a.a"] \
+  [list "Build libpr20267b.a" \
+   "$plug_opt" "-flto $lto_no_fat" \
+   {pr20267b.c} {} "libpr20267b.a"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {
@@ -332,6 +347,15 @@ set lto_run_tests [list \
   [list "PR ld/19317 (3)" \
    "-O2 -flto tmpdir/pr19317-r.o" "" \
    {dummy.c} "pr19317.exe" "pr19317.out" "-flto -O2" "c"] \
+  [list "Run pr20276" \
+   "-O2 -flto tmpdir/pr20276a.o tmpdir/pr20276b.o" "" \
+   {dummy.c} "pr20276" "pass.out" "-flto -O2" "c"] \
+  [list "Run pr20267a" \
+   "-O2 -flto tmpdir/pr20267a.o tmpdir/libpr20267a.a" "" \
+   {dummy.c} "pr20267a" "pass.out" "-flto -O2" "c"] \
+  [list "Run pr20267b" \
+   "-O2 -flto tmpdir/pr20267a.o tmpdir/libpr20267b.a" "" \
+   {dummy.c} "pr20267b" "pass.out" "-flto -O2" "c"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {

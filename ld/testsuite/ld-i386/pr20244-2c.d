@@ -6,5 +6,5 @@
 
 Relocation section '.rel.plt' at offset 0x74 contains 2 entries:
  Offset     Info    Type                Sym. Value  Symbol's Name
-0+80490e4  0000002a R_386_IRELATIVE       
-0+80490e0  0000002a R_386_IRELATIVE       
+0+80490ac  0000002a R_386_IRELATIVE       
+0+80490a8  0000002a R_386_IRELATIVE       

@@ -5,18 +5,20 @@
 
 .*: +file format .*
 
-#...
-0+8048090 <__start>:
-[ 	]*[a-f0-9]+:	ff 93 0c 00 00 00    	call   \*0xc\(%ebx\)
-[ 	]*[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
-[ 	]*[a-f0-9]+:	03 83 0c 00 00 00    	add    0xc\(%ebx\),%eax
-[ 	]*[a-f0-9]+:	8b 83 0c 00 00 00    	mov    0xc\(%ebx\),%eax
-[ 	]*[a-f0-9]+:	85 83 0c 00 00 00    	test   %eax,0xc\(%ebx\)
-[ 	]*[a-f0-9]+:	c7 c0 b5 80 04 08    	mov    \$0x80480b5,%eax
 
-0+80480b4 <foo>:
-[ 	]*[a-f0-9]+:	c3                   	ret    
+Disassembly of section .text:
 
-0+80480b5 <bar>:
-[ 	]*[a-f0-9]+:	c3                   	ret    
+0+804807c <__start>:
+ +[a-f0-9]+:	ff 93 fc ff ff ff    	call   \*-0x4\(%ebx\)
+ +[a-f0-9]+:	ff a3 fc ff ff ff    	jmp    \*-0x4\(%ebx\)
+ +[a-f0-9]+:	03 83 fc ff ff ff    	add    -0x4\(%ebx\),%eax
+ +[a-f0-9]+:	8b 83 fc ff ff ff    	mov    -0x4\(%ebx\),%eax
+ +[a-f0-9]+:	85 83 fc ff ff ff    	test   %eax,-0x4\(%ebx\)
+ +[a-f0-9]+:	c7 c0 a1 80 04 08    	mov    \$0x80480a1,%eax
+
+0+80480a0 <foo>:
+ +[a-f0-9]+:	c3                   	ret    
+
+0+80480a1 <bar>:
+ +[a-f0-9]+:	c3                   	ret    
 #pass

@@ -1,3 +1,131 @@
+2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20267
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Add test for
+	PR ld/20267.
+	(lto_run_tests): Likewise.
+	* testsuite/ld-plugin/pr20267a.c: New file.
+	* testsuite/ld-plugin/pr20267b.c: Likewise.
+
+2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR ld/20276
+	* plugin.c (plugin_notice): Set non_ir_ref on common symbols.
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Add test for
+	PR ld/20276.
+	(lto_run_tests): Likewise.
+	* testsuite/ld-plugin/pass.out: New file.
+	* testsuite/ld-plugin/pr20276a.c: Likewise.
+	* testsuite/ld-plugin/pr20276b.c: Likewise.
+
+2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (plugin_object_p): Replace bfd_plugin_uknown
+	with bfd_plugin_unknown.
+
+2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20253
+	* testsuite/ld-i386/i386.exp: Run PR ld/20253 tests.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Likewise.
+	* testsuite/ld-i386/pr13302.d: Remove .rel.plt section.
+	* testsuite/ld-ifunc/ifunc-13-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-13-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-15-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-15-x86-64.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-5a.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-5b.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-6a.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-6b.d: Likewise.
+	* testsuite/ld-i386/pr20244-2a.d: Remove .plt section.
+	* testsuite/ld-ifunc/ifunc-21-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-21-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-22-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-22-x86-64.d: Likewise.
+	* testsuite/ld-i386/pr20244-2b.d: Updated.
+	* testsuite/ld-i386/pr20244-2c.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18a-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18a-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18b-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18b-x86-64.d: Likewise.
+	* testsuite/ld-i386/pr20253-1a.c: New file.
+	* testsuite/ld-i386/pr20253-1b.S: Likewise.
+	* testsuite/ld-i386/pr20253-1c.S: Likewise.
+	* testsuite/ld-i386/pr20253-1d.S: Likewise.
+	* testsuite/ld-i386/pr20253-2a.c: Likewise.
+	* testsuite/ld-i386/pr20253-2b.S: Likewise.
+	* testsuite/ld-i386/pr20253-2c.S: Likewise.
+	* testsuite/ld-i386/pr20253-2d.S: Likewise.
+	* testsuite/ld-i386/pr20253-3.d: Likewise.
+	* testsuite/ld-i386/pr20253-3.s: Likewise.
+	* testsuite/ld-i386/pr20253-4.s: Likewise.
+	* testsuite/ld-i386/pr20253-4a.d: Likewise.
+	* testsuite/ld-i386/pr20253-4b.d: Likewise.
+	* testsuite/ld-i386/pr20253-4c.d: Likewise.
+	* testsuite/ld-i386/pr20253-5.d: Likewise.
+	* testsuite/ld-i386/pr20253-5.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-23-x86.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-23a-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-23b-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-23c-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-24-x86.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-24a-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-24b-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-24c-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-25-x86.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-25a-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-25b-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-25c-x86.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1.s: Likewise.
+	* testsuite/ld-x86-64/pr20253-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1c.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1d.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1e.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1f.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1g.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1h.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1i.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1j.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1k.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-1l.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-2a.c: Likewise.
+	* testsuite/ld-x86-64/pr20253-2b.S: Likewise.
+	* testsuite/ld-x86-64/pr20253-2c.S: Likewise.
+	* testsuite/ld-x86-64/pr20253-2d.S: Likewise.
+	* testsuite/ld-x86-64/pr20253-3.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-3.s: Likewise.
+	* testsuite/ld-x86-64/pr20253-4.s: Likewise.
+	* testsuite/ld-x86-64/pr20253-4a.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4b.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4c.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4d.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4e.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-4f.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-5.s: Likewise.
+	* testsuite/ld-x86-64/pr20253-5a.d: Likewise.
+	* testsuite/ld-x86-64/pr20253-5b.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18a-i386.d: Remove extra IRELATIVE
+	relocation.
+	* testsuite/ld-ifunc/ifunc-18a-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18b-i386.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18b-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-18a.s: Fix a typo.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr20253-1 tests.
+
+2016-06-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+	    Tony Wang  <tony.wang@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (Thumb-Thumb farcall M profile):
+	Assemble for ARMv6-M.
+	(Thumb2-Thumb2 farcall M profile): New testcase.
+	* testsuite/ld-arm/farcall-thumb2-thumb2-m.d: New file.
+	* testsuite/ld-arm/jump-reloc-veneers-cond-long-backward.d: Update to
+	reflect the use of Thumb-2 veneers for Thumb-2 capable targets.
+	* testsuite/ld-arm/jump-reloc-veneers-cond-long.d: Likewise.
+
 2016-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run pr19636-2e-nacl.

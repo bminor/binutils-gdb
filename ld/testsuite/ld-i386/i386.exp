@@ -408,6 +408,11 @@ run_dump_test "pr20244-2a"
 run_dump_test "pr20244-2b"
 run_dump_test "pr20244-2c"
 run_dump_test "pr20244-2d"
+run_dump_test "pr20253-3"
+run_dump_test "pr20253-4a"
+run_dump_test "pr20253-4b"
+run_dump_test "pr20253-4c"
+run_dump_test "pr20253-5"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]

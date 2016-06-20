@@ -8,7 +8,3 @@
 Relocation section '.rel.ifunc' at offset 0x[0-9a-f]+ contains 1 entries:
 [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
 [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_32[ ]+ifunc\(\)[ ]+ifunc
-
-Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
-[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
-[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_JUMP_SLOT[ ]+ifunc\(\)[ ]+ifunc

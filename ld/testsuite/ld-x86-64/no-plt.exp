@@ -199,3 +199,88 @@ run_ld_link_exec_tests [] [list \
 	"pass.out" \
     ] \
 ]
+
+# Run-time tests which require working IFUNC support.
+if { [check_ifunc_available] } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr20253-2a.o pr20253-2b.o pr20253-2c.o pr20253-2d.o" \
+	    "" \
+	    "-fPIE -O2 -g" \
+	    { pr20253-2a.c pr20253-2b.S pr20253-2c.S pr20253-2d.S } \
+	] \
+	[list \
+	    "Build libpr20253-2a.so" \
+	    "-shared tmpdir/pr20253-2b.o \
+	     tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
+	    "" \
+	    { dummy.s } \
+	    {} \
+	    "libpr20253-2a.so" \
+	] \
+    ]
+
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run pr20253-2a" \
+	    "tmpdir/pr20253-2a.o tmpdir/pr20253-2b.o \
+	     tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
+	    "" \
+	    { dummy.s } \
+	    "pr20253-2a" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr20253-2b" \
+	    "--static tmpdir/pr20253-2a.o tmpdir/pr20253-2b.o \
+	    tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
+	    "" \
+	    { dummy.s } \
+	    "pr20253-2b" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr20253-2c" \
+	    "-pie tmpdir/pr20253-2a.o tmpdir/pr20253-2b.o \
+	    tmpdir/pr20253-2c.o tmpdir/pr20253-2d.o" \
+	    "" \
+	    { dummy.s } \
+	    "pr20253-2c" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr20253-2d" \
+	    "tmpdir/pr20253-2a.o tmpdir/libpr20253-2a.so" \
+	    "" \
+	    { dummy.s } \
+	    "pr20253-2d" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr20253-2e" \
+	    "-pie tmpdir/pr20253-2a.o tmpdir/libpr20253-2a.so" \
+	    "" \
+	    { dummy.s } \
+	    "pr20253-2e" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr20253-2f" \
+	    "tmpdir/pr20253-2a.o" \
+	    "" \
+	    { pr20253-2b.S pr20253-2c.S pr20253-2d.S } \
+	    "pr20253-2f" \
+	    "pass.out" \
+	    "-DCHECK_PLT" \
+	] \
+	[list \
+	    "Run pr20253-2g" \
+	    "--static tmpdir/pr20253-2a.o" \
+	    "" \
+	    { pr20253-2b.S pr20253-2c.S pr20253-2d.S } \
+	    "pr20253-2g" \
+	    "pass.out" \
+	    "-DCHECK_PLT" \
+	] \
+    ]
+}
