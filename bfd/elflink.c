@@ -4556,7 +4556,8 @@ error_free_dyn:
 
 	      symbol_align = ffs (h->root.u.def.value) - 1;
 	      if (h->root.u.def.section->owner != NULL
-		  && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+		  && (h->root.u.def.section->owner->flags
+		       & (DYNAMIC | BFD_PLUGIN)) == 0)
 		{
 		  normal_align = h->root.u.def.section->alignment_power;
 		  if (normal_align > symbol_align)

@@ -1,3 +1,15 @@
+2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR ld/20276
+	* plugin.c (plugin_notice): Set non_ir_ref on common symbols.
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Add test for
+	PR ld/20276.
+	(lto_run_tests): Likewise.
+	* testsuite/ld-plugin/pass.out: New file.
+	* testsuite/ld-plugin/pr20276a.c: Likewise.
+	* testsuite/ld-plugin/pr20276b.c: Likewise.
+
 2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* plugin.c (plugin_object_p): Replace bfd_plugin_uknown

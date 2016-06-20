@@ -1,3 +1,9 @@
+2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20276
+	* elflink.c (elf_link_add_object_symbols): Don't check alignment
+	on symbol from plugin dummy input.
+
 2016-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd_plugin_format): Rename bfd_plugin_uknown to
