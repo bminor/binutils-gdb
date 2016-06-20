@@ -14620,7 +14620,11 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 }
 
 /* Unwinding tables are not referenced directly.  This pass marks them as
-   required if the corresponding code section is marked.  */
+   required if the corresponding code section is marked.  Similarly, ARMv8-M
+   secure entry functions can only be referenced by SG veneers which are
+   created after the GC process. They need to be marked in case they reside in
+   their own section (as would be the case if code was compiled with
+   -ffunction-sections).  */
 
 static bfd_boolean
 elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
@@ -14628,9 +14632,20 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 {
   bfd *sub;
   Elf_Internal_Shdr **elf_shdrp;
-  bfd_boolean again;
+  asection *cmse_sec;
+  obj_attribute *out_attr;
+  Elf_Internal_Shdr *symtab_hdr;
+  unsigned i, sym_count, ext_start;
+  const struct elf_backend_data *bed;
+  struct elf_link_hash_entry **sym_hashes;
+  struct elf32_arm_link_hash_entry *cmse_hash;
+  bfd_boolean again, is_v8m, first_bfd_browse = TRUE;
 
   _bfd_elf_gc_mark_extra_sections (info, gc_mark_hook);
+
+  out_attr = elf_known_obj_attributes_proc (info->output_bfd);
+  is_v8m = out_attr[Tag_CPU_arch].i >= TAG_CPU_ARCH_V8M_BASE
+	   && out_attr[Tag_CPU_arch_profile].i == 'M';
 
   /* Marking EH data may cause additional code sections to be marked,
      requiring multiple passes.  */
@@ -14662,7 +14677,34 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 		    return FALSE;
 		}
 	    }
+
+	  /* Mark section holding ARMv8-M secure entry functions.  We mark all
+	     of them so no need for a second browsing.  */
+	  if (is_v8m && first_bfd_browse)
+	    {
+	      sym_hashes = elf_sym_hashes (sub);
+	      bed = get_elf_backend_data (sub);
+	      symtab_hdr = &elf_tdata (sub)->symtab_hdr;
+	      sym_count = symtab_hdr->sh_size / bed->s->sizeof_sym;
+	      ext_start = symtab_hdr->sh_info;
+
+	      /* Scan symbols.  */
+	      for (i = ext_start; i < sym_count; i++)
+		{
+		  cmse_hash = elf32_arm_hash_entry (sym_hashes[i - ext_start]);
+
+		  /* Assume it is a special symbol.  If not, cmse_scan will
+		     warn about it and user can do something about it.  */
+		  if (ARM_GET_SYM_CMSE_SPCL (cmse_hash->root.target_internal))
+		    {
+		      cmse_sec = cmse_hash->root.root.u.def.section;
+		      if (!_bfd_elf_gc_mark (info, cmse_sec, gc_mark_hook))
+			return FALSE;
+		    }
+		}
+	    }
 	}
+      first_bfd_browse = FALSE;
     }
 
   return TRUE;

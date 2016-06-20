@@ -612,7 +612,7 @@ set armeabitests_nonacl {
      {{ld cmse-veneers-wrong-entryfct.out}}
      "cmse-veneers-wrong-entryfct"}
     {"Secure gateway veneers (ARMv8-M Baseline)"
-     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000" ""
+     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000 --gc-sections" ""
      "-march=armv8-m.base -mthumb"
      {cmse-veneers.s}
      {{objdump {-d -j .gnu.sgstubs} cmse-veneers.d}
@@ -620,7 +620,7 @@ set armeabitests_nonacl {
       {nm {} cmse-veneers.rd}}
      "cmse-veneers-baseline"}
     {"Secure gateway veneers (ARMv8-M Mainline)"
-     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000" ""
+     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000 --gc-sections" ""
      "-march=armv8-m.main -mthumb"
      {cmse-veneers.s}
      {{objdump {-d -j .gnu.sgstubs} cmse-veneers.d}

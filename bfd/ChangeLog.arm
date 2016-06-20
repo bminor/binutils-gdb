@@ -1,3 +1,8 @@
+2016-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): Mark sections holding
+	ARMv8-M secure entry functions.
+
 2016-05-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (enum elf32_arm_stub_type): Remove

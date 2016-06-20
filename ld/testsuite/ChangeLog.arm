@@ -1,22 +1,28 @@
-2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+2016-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
-	* testsuite/ld-arm/cmse-implib.s: Add input import library testing.
-	* testsuite/ld-arm/cmse-implib.rd: Update accordingly.
-	* testsuite/ld-arm/cmse-new-implib.out: New file.
-	* testsuite/ld-arm/cmse-new-implib.rd: Likewise.
-	* testsuite/ld-arm/cmse-new-implib-no-output.out: Likewise.
-	* testsuite/ld-arm/cmse-new-earlier-later-implib.out: Likewise.
-	* testsuite/ld-arm/cmse-new-comeback-implib.rd: Likewise.
-	* testsuite/ld-arm/cmse-new-wrong-implib.out: Likewise.
+	* ld-arm/arm-elf.exp (Secure gateway veneers (ARMv8-M Baseline)): Also
+	pass --gc-sections to ld.
+	(Secure gateway veneers (ARMv8-M Mainline)): Likewise.
 
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
-	* testsuite/ld-arm/arm-elf.exp
-	(Secure gateway import library generation): New test.
+	* ld-arm/cmse-implib.s: Add input import library testing.
+	* ld-arm/cmse-implib.rd: Update accordingly.
+	* ld-arm/cmse-new-implib.out: New file.
+	* ld-arm/cmse-new-implib.rd: Likewise.
+	* ld-arm/cmse-new-implib-no-output.out: Likewise.
+	* ld-arm/cmse-new-earlier-later-implib.out: Likewise.
+	* ld-arm/cmse-new-comeback-implib.rd: Likewise.
+	* ld-arm/cmse-new-wrong-implib.out: Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld-arm/arm-elf.exp (Secure gateway import library generation): New
+	test.
 	(Secure gateway import library generation: errors): Likewise.
-	* testsuite/ld-arm/cmse-implib.s: New file.
-	* testsuite/ld-arm/cmse-implib-errors.out: Likewise.
-	* testsuite/ld-arm/cmse-implib.rd: Likewise.
+	* ld-arm/cmse-implib.s: New file.
+	* ld-arm/cmse-implib-errors.out: Likewise.
+	* ld-arm/cmse-implib.rd: Likewise.
 
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
