@@ -1822,6 +1822,8 @@ template<int size>
 unsigned int
 Target_x86_64<size>::first_plt_entry_offset() const
 {
+  if (this->plt_ == NULL)
+    return 0;
   return this->plt_->first_plt_entry_offset();
 }
 
@@ -1831,6 +1833,8 @@ template<int size>
 unsigned int
 Target_x86_64<size>::plt_entry_size() const
 {
+  if (this->plt_ == NULL)
+    return 0;
   return this->plt_->get_plt_entry_size();
 }
 

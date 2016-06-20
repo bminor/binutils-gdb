@@ -1,3 +1,12 @@
+2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/20245
+	* i386.cc (Target_i386::first_plt_entry_offset): Return 0 if
+	plt_ is NULL.
+	(Target_i386::plt_entry_size): Likewise.
+	(Target_x86_64<size>::first_plt_entry_offset): Likewise.
+	(Target_x86_64<size>::plt_entry_size): Likewise.
+
 2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
 
         * mips.cc (Target_mips::Target_mips): Initialize rld_map_.
