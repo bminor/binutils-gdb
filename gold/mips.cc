@@ -4690,6 +4690,9 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
     else
       elfcpp::Swap<32, big_endian>::writeval(wv, val);
 
+    if (psymval->value(object, addend) & 3)
+      return This::STATUS_PCREL_UNALIGNED;
+
     return check_overflow<18>(x);
   }
 
