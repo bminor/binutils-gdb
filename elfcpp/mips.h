@@ -98,6 +98,12 @@ enum
   R_MIPS_TLS_TPREL_HI16 = 49,
   R_MIPS_TLS_TPREL_LO16 = 50,
   R_MIPS_GLOB_DAT = 51,
+  R_MIPS_PC21_S2 = 60,
+  R_MIPS_PC26_S2 = 61,
+  R_MIPS_PC18_S3 = 62,
+  R_MIPS_PC19_S2 = 63,
+  R_MIPS_PCHI16 = 64,
+  R_MIPS_PCLO16 = 65,
   // These relocs are used for the mips16.
   R_MIPS16_26 = 100,
   R_MIPS16_GPREL = 101,
@@ -478,6 +484,14 @@ elf_st_is_micromips(unsigned char st_other)
 bool
 abi_n32(elfcpp::Elf_Word e_flags)
 { return (e_flags & elfcpp::EF_MIPS_ABI2) != 0; }
+
+// Whether the ISA is R6.
+bool
+r6_isa(elfcpp::Elf_Word e_flags)
+{
+  return ((e_flags & elfcpp::EF_MIPS_ARCH) == elfcpp::E_MIPS_ARCH_32R6)
+           || ((e_flags & elfcpp::EF_MIPS_ARCH) == elfcpp::E_MIPS_ARCH_64R6);
+}
 
 // Whether the file has microMIPS code.
 bool
