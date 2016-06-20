@@ -1,5 +1,17 @@
 2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/18250
+	PR ld/20267
+	* elflink.c: Include plugin.h if BFD_SUPPORTS_PLUGINS is
+	defined.
+	(elf_link_is_defined_archive_symbol): Call
+	bfd_link_plugin_object_p on unknown plugin object and use the
+	IR symbol table if the input is an IR object.
+	* plugin.c (bfd_link_plugin_object_p): New function.
+	* plugin.h (bfd_link_plugin_object_p): New prototype.
+
+2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20276
 	* elflink.c (elf_link_add_object_symbols): Don't check alignment
 	on symbol from plugin dummy input.

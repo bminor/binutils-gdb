@@ -287,6 +287,16 @@ bfd_plugin_specified_p (void)
   return has_plugin > 0;
 }
 
+/* Return TRUE if ABFD can be claimed by linker LTO plugin.  */
+
+bfd_boolean
+bfd_link_plugin_object_p (bfd *abfd)
+{
+  if (ld_plugin_object_p)
+    return ld_plugin_object_p (abfd) != NULL;
+  return FALSE;
+}
+
 extern const bfd_target plugin_vec;
 
 /* Return TRUE if TARGET is a pointer to plugin_vec.  */

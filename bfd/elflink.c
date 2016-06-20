@@ -28,6 +28,9 @@
 #include "safe-ctype.h"
 #include "libiberty.h"
 #include "objalloc.h"
+#ifdef BFD_SUPPORTS_PLUGINS
+#include "plugin.h"
+#endif
 
 /* This struct is used to pass information to routines called via
    elf_link_hash_traverse which must return failure.  */
@@ -3124,15 +3127,25 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
   if (abfd == NULL)
     return FALSE;
 
-  /* Return FALSE if the object has been claimed by plugin.  */
-  if (abfd->plugin_format == bfd_plugin_yes)
-    return FALSE;
-
   if (! bfd_check_format (abfd, bfd_object))
     return FALSE;
 
-  /* Select the appropriate symbol table.  */
-  if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
+  /* Select the appropriate symbol table.  If we don't know if the
+     object file is an IR object, give linker LTO plugin a chance to
+     get the correct symbol table.  */
+  if (abfd->plugin_format == bfd_plugin_yes
+#ifdef BFD_SUPPORTS_PLUGINS
+      || (abfd->plugin_format == bfd_plugin_unknown
+	  && bfd_link_plugin_object_p (abfd))
+#endif
+      )
+    {
+      /* Use the IR symbol table if the object has been claimed by
+	 plugin.  */
+      abfd = abfd->plugin_dummy_bfd;
+      hdr = &elf_tdata (abfd)->symtab_hdr;
+    }
+  else if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
     hdr = &elf_tdata (abfd)->symtab_hdr;
   else
     hdr = &elf_tdata (abfd)->dynsymtab_hdr;

@@ -1,4 +1,13 @@
 2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20267
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Add test for
+	PR ld/20267.
+	(lto_run_tests): Likewise.
+	* testsuite/ld-plugin/pr20267a.c: New file.
+	* testsuite/ld-plugin/pr20267b.c: Likewise.
+
+2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@gmail.com>
 
 	PR ld/20276
