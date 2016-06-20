@@ -1,3 +1,8 @@
+2016-06-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_fix_adjustable): Update comment on jump
+	reloc conversion.
+
 2016-06-20  Virendra Pathak  <virendra.pathak@broadcom.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Update vulcan feature set.

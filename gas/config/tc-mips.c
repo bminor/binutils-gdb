@@ -17172,8 +17172,8 @@ mips_fix_adjustable (fixS *fixp)
 	  of converting JAL to JALX instructions in the linker.
 
      For simplicity, we deal with (3)-(4) by not reducing _any_ relocation
-     against a MIPS16 symbol.  We deal with (5) by by not reducing any
-     such relocations on REL targets.
+     against a MIPS16 symbol.  We deal with (5) by additionally leaving
+     alone any jump relocations against a microMIPS symbol.
 
      We deal with (1)-(2) by saying that, if there's a R_MIPS16_26
      relocation against some symbol R, no relocation against R may be
