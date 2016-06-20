@@ -1,5 +1,10 @@
 2016-06-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/r6-64-n32.d: Change the `name' tag.
+	* testsuite/gas/mips/r6-64-n64.d: Likewise.
+
+2016-06-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (mips_fix_adjustable): Update comment on jump
 	reloc conversion.
 
