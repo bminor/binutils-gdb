@@ -149,7 +149,7 @@ gdb_test "bt -2" \
     ".*#26.*func5.*#27.*in main \\(\\).*" \
     "bt -2 with frame-filter Reverse disabled"
 gdb_test "bt 3" \
-    ".*#0.*end_func.*#1.*in funca \\(\\).*#2.*in funcb \\(j=10\\).*" \
+    ".*#0.*end_func.*#1.*in funca \\(\\).*#2.*in funcb \\(j=10\\)\[^#\]*More stack frames follow.*" \
     "bt 3 with frame-filter Reverse disabled"
 gdb_test "bt no-filter full" \
     ".*#0.*end_func.*str = $hex \"The End\".*st2 = $hex \"Is Near\".*b = 12.*c = 5.*#1.*in funca \\(\\).*#2.*in funcb \\(j=10\\).*bar = \{a = 42, b = 84\}.*" \

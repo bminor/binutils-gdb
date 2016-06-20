@@ -1,5 +1,15 @@
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
+	PR python/16497:
+	* stack.c (backtrace_command_1): Set PRINT_MORE_FRAMES flag.  Fix
+	off-by-one in py_end computation.
+	* python/py-framefilter.c (gdbpy_apply_frame_filter): Handle
+	PRINT_MORE_FRAMES.
+	* extension.h (enum frame_filter_flags) <PRINT_MORE_FRAMES>: New
+	constant.
+
+2018-02-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (struct variant_field): New.
 	(struct nextfield) <variant>: New field.
 	(dwarf2_add_field): Handle DW_TAG_variant_part.

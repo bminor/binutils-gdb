@@ -100,6 +100,9 @@ enum frame_filter_flags
 
     /* Set this flag if frame locals are to be printed.  */
     PRINT_LOCALS = 8,
+
+    /* Set this flag if a "More frames" message is to be printed.  */
+    PRINT_MORE_FRAMES = 16,
   };
 
 /* A choice of the different frame argument printing strategies that

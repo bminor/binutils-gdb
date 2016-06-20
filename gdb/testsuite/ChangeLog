@@ -1,5 +1,10 @@
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
+	PR python/16497:
+	* gdb.python/py-framefilter.exp: Update test.
+
+2018-02-26  Tom Tromey  <tom@tromey.com>
+
 	* gdb.dwarf2/variant.c: New file.
 	* gdb.dwarf2/variant.exp: New file.
 
