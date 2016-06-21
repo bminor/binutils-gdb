@@ -1,3 +1,10 @@
+2016-06-23  Graham Markall  <graham.markall@embecosm.com>
+
+	* config/tc-arc.c (options, md_longopts, md_parse_option): Move
+	-mspfp, -mdpfp and -mfpuda out of the sections for dummy
+	options. Correct erroneous enabling of SPFP instructions when
+	using -mnps400.
+
 2016-06-22  Peter Bergner <bergner@vnet.ibm.com>
 
 	* testsuite/gas/ppc/power9.d <brd, brh, brw, mffs, mffs., mffsce,

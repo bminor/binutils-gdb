@@ -1,3 +1,7 @@
+2016-06-23  Graham Markall  <graham.markall@embecosm.com>
+
+	* opcode/arc.h: Make insn_class_t alphabetical again.
+
 2016-06-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* elf/dlx.h: Wrap in extern C.

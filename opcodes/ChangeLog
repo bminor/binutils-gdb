@@ -1,3 +1,8 @@
+2016-06-23  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-opc.c: Correct description of availability of NPS400
+	features.
+
 2016-06-22  Peter Bergner <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (RM, DRM, VXASH, VXASH_MASK, XMMF, XMMF_MASK): New defines.

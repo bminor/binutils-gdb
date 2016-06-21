@@ -27,9 +27,7 @@
 #include "libiberty.h"
 
 /* ARC NPS400 Support: The ARC NPS400 core is an ARC700 with some custom
-   instructions.  Support for this target is available when binutils is
-   configured and built for the 'arc*-mellanox-*-*' target.  As far as
-   possible all ARC NPS400 features are built into all ARC target builds as
+   instructions. All NPS400 features are built into all ARC target builds as
    this reduces the chances that regressions might creep in.  */
 
 /* Insert RB register into a 32-bit opcode.  */

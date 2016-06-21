@@ -39,10 +39,13 @@ extern "C" {
 /* Instruction Class.  */
 typedef enum
   {
+    ACL,
     ARITH,
     AUXREG,
+    BITOP,
     BRANCH,
     CONTROL,
+    DPI,
     DSP,
     FLOAT,
     INVALID,
@@ -50,10 +53,7 @@ typedef enum
     KERNEL,
     LOGICAL,
     MEMORY,
-    BITOP,
     NET,
-    ACL,
-    DPI,
   } insn_class_t;
 
 /* Instruction Subclass.  */
