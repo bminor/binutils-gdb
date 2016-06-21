@@ -518,7 +518,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
 	{
 	  /* If stdin died, we may as well kill gdb.  */
 	  printf_unfiltered (_("error detected on stdin\n"));
-	  quit_command ((char *) 0, stdin == ui->instream);
+	  quit_command ((char *) 0, 0);
 	}
       else
 	{
@@ -589,7 +589,7 @@ command_handler (char *command)
   struct cleanup *stat_chain;
   char *c;
 
-  if (ui->instream == stdin)
+  if (ui->instream == ui->stdin_stream)
     reinitialize_more_filter ();
 
   stat_chain = make_command_stats_cleanup (1);
@@ -599,7 +599,7 @@ command_handler (char *command)
     ;
   if (c[0] != '#')
     {
-      execute_command (command, ui->instream == stdin);
+      execute_command (command, ui->instream == ui->stdin_stream);
 
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions ();
@@ -667,6 +667,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
 		      char *rl, int repeat, char *annotation_suffix)
 {
   struct ui *ui = current_ui;
+  int from_tty = ui->instream == ui->stdin_stream;
   char *p1;
   char *cmd;
 
@@ -681,7 +682,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
      command, but leave ownership of memory to the buffer .  */
   cmd_line_buffer->used_size = 0;
 
-  if (annotation_level > 1 && ui->instream == stdin)
+  if (from_tty && annotation_level > 1)
     {
       printf_unfiltered (("\n\032\032post-"));
       puts_unfiltered (annotation_suffix);
@@ -698,8 +699,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
     }
 
   /* Do history expansion if that is wished.  */
-  if (history_expansion_p && ui->instream == stdin
-      && ISATTY (ui->instream))
+  if (history_expansion_p && from_tty && input_interactive_p (current_ui))
     {
       char *history_value;
       int expanded;
@@ -743,7 +743,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
      and then later fetch it from the value history and remove the
      '#'.  The kill ring is probably better, but some people are in
      the habit of commenting things out.  */
-  if (*cmd != '\0' && input_from_terminal_p ())
+  if (*cmd != '\0' && from_tty && input_interactive_p (current_ui))
     gdb_add_history (cmd);
 
   /* Save into global buffer if appropriate.  */
@@ -772,8 +772,7 @@ command_line_handler (char *rl)
   struct ui *ui = current_ui;
   char *cmd;
 
-  cmd = handle_line_of_input (line_buffer, rl, ui->instream == stdin,
-			      "prompt");
+  cmd = handle_line_of_input (line_buffer, rl, 1, "prompt");
   if (cmd == (char *) EOF)
     {
       /* stdin closed.  The connection with the terminal is gone.
@@ -781,7 +780,7 @@ command_line_handler (char *rl)
 	 hung up but GDB is still alive.  In such a case, we just quit
 	 gdb killing the inferior program too.  */
       printf_unfiltered ("quit\n");
-      execute_command ("quit", stdin == ui->instream);
+      execute_command ("quit", 1);
     }
   else if (cmd == NULL)
     {
@@ -838,7 +837,7 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
     {
       /* Read from stdin if we are executing a user defined command.
          This is the right thing for prompt_for_continue, at least.  */
-      c = fgetc (ui->instream ? ui->instream : stdin);
+      c = fgetc (ui->instream != NULL ? ui->instream : ui->stdin_stream);
 
       if (c == EOF)
 	{
@@ -1086,7 +1085,7 @@ interruptible_select (int n,
 static void
 async_sigterm_handler (gdb_client_data arg)
 {
-  quit_force (NULL, stdin == current_ui->instream);
+  quit_force (NULL, 0);
 }
 
 /* See defs.h.  */

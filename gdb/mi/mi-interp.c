@@ -286,7 +286,7 @@ mi_execute_command_wrapper (const char *cmd)
 {
   struct ui *ui = current_ui;
 
-  mi_execute_command (cmd, stdin == ui->instream);
+  mi_execute_command (cmd, ui->instream == ui->stdin_stream);
 }
 
 /* Observer for the synchronous_command_done notification.  */

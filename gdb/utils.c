@@ -1052,7 +1052,7 @@ quit (void)
   if (sync_quit_force_run)
     {
       sync_quit_force_run = 0;
-      quit_force (NULL, stdin == ui->instream);
+      quit_force (NULL, 0);
     }
 
 #ifdef __MSDOS__
@@ -1271,7 +1271,8 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
      question we're asking, and then answer the default automatically.  This
      way, important error messages don't get lost when talking to GDB
      over a pipe.  */
-  if (! input_from_terminal_p ())
+  if (current_ui->instream != current_ui->stdin_stream
+      || !input_interactive_p (current_ui))
     {
       target_terminal_ours_for_output ();
       wrap_here ("");

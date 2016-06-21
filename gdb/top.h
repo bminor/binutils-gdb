@@ -98,6 +98,9 @@ struct ui
      currently active.  */
   int secondary_prompt_depth;
 
+  /* The UI's stdin.  Set to stdin for the main UI.  */
+  FILE *stdin_stream;
+
   /* stdio stream that command input is being read from.  Set to stdin
      normally.  Set by source_command to the file we are sourcing.
      Set to NULL if we are executing a user-defined command or
@@ -111,6 +114,11 @@ struct ui
   /* The file descriptor for the input stream, so that we can register
      it with the event loop.  */
   int input_fd;
+
+  /* Whether ISATTY returns true on input_fd.  Cached here because
+     quit_force needs to know this _after_ input_fd might be
+     closed.  */
+  int input_interactive_p;
 
   /* See enum prompt_state's description.  */
   enum prompt_state prompt_state;

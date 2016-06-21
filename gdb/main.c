@@ -334,7 +334,7 @@ captured_command_loop (void *data)
      error) we try to quit.  If the quit is aborted, catch_errors()
      which called this catch the signal and restart the command
      loop.  */
-  quit_command (NULL, ui->instream == stdin);
+  quit_command (NULL, ui->instream == ui->stdin_stream);
   return 1;
 }
 

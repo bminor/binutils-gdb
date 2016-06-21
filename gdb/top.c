@@ -259,11 +259,14 @@ new_ui (FILE *instream, FILE *outstream, FILE *errstream)
   ui = XCNEW (struct ui);
 
   ui->num = ++highest_ui_num;
+  ui->stdin_stream = instream;
   ui->instream = instream;
   ui->outstream = outstream;
   ui->errstream = errstream;
 
   ui->input_fd = fileno (ui->instream);
+
+  ui->input_interactive_p = ISATTY (ui->instream);
 
   ui->m_gdb_stdin = stdio_fileopen (ui->instream);
   ui->m_gdb_stdout = stdio_fileopen (ui->outstream);
@@ -646,7 +649,7 @@ dont_repeat (void)
   /* If we aren't reading from standard input, we are saving the last
      thing read from stdin in line and don't want to delete it.  Null
      lines won't repeat here in any case.  */
-  if (ui->instream == stdin)
+  if (ui->instream == ui->stdin_stream)
     *saved_command_line = 0;
 }
 
@@ -1108,7 +1111,7 @@ gdb_safe_append_history (void)
 
    NULL is returned for end of file.
 
-   *If* the instream == stdin & stdin is a terminal, the line read is
+   *If* input is from an interactive stream (stdin), the line read is
    copied into the global 'saved_command_line' so that it can be
    repeated.
 
@@ -1123,12 +1126,13 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
   struct ui *ui = current_ui;
   const char *prompt = prompt_arg;
   char *cmd;
+  int from_tty = ui->instream == ui->stdin_stream;
 
   /* The annotation suffix must be non-NULL.  */
   if (annotation_suffix == NULL)
     annotation_suffix = "";
 
-  if (annotation_level > 1 && ui->instream == stdin)
+  if (from_tty && annotation_level > 1)
     {
       char *local_prompt;
 
@@ -1174,7 +1178,7 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
       if (source_file_name != NULL)
 	++source_line_number;
 
-      if (annotation_level > 1 && ui->instream == stdin)
+      if (from_tty && annotation_level > 1)
 	{
 	  puts_unfiltered ("\n\032\032pre-");
 	  puts_unfiltered (annotation_suffix);
@@ -1182,11 +1186,15 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
 	}
 
       /* Don't use fancy stuff if not talking to stdin.  */
-      if (deprecated_readline_hook && input_from_terminal_p ())
+      if (deprecated_readline_hook
+	  && from_tty
+	  && input_interactive_p (current_ui))
 	{
 	  rl = (*deprecated_readline_hook) (prompt);
 	}
-      else if (command_editing_p && input_from_terminal_p ())
+      else if (command_editing_p
+	       && from_tty
+	       && input_interactive_p (current_ui))
 	{
 	  rl = gdb_readline_wrapper (prompt);
 	}
@@ -1561,9 +1569,25 @@ quit_force (char *args, int from_tty)
   /* Save the history information if it is appropriate to do so.  */
   TRY
     {
-      if (write_history_p && history_filename
-	  && input_from_terminal_p ())
-	gdb_safe_append_history ();
+      if (write_history_p && history_filename)
+	{
+	  struct ui *ui;
+	  int save = 0;
+
+	  /* History is currently shared between all UIs.  If there's
+	     any UI with a terminal, save history.  */
+	  ALL_UIS (ui)
+	    {
+	      if (input_interactive_p (ui))
+		{
+		  save = 1;
+		  break;
+		}
+	    }
+
+	  if (save)
+	    gdb_safe_append_history ();
+	}
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
@@ -1585,27 +1609,36 @@ quit_force (char *args, int from_tty)
   exit (exit_code);
 }
 
-/* Returns whether GDB is running on a terminal and input is
-   currently coming from that terminal.  */
+/* The value of the "interactive-mode" setting.  */
+static enum auto_boolean interactive_mode = AUTO_BOOLEAN_AUTO;
+
+/* Implement the "show interactive-mode" option.  */
+
+static void
+show_interactive_mode (struct ui_file *file, int from_tty,
+                       struct cmd_list_element *c,
+                       const char *value)
+{
+  if (interactive_mode == AUTO_BOOLEAN_AUTO)
+    fprintf_filtered (file, "Debugger's interactive mode "
+		            "is %s (currently %s).\n",
+                      value, gdb_has_a_terminal () ? "on" : "off");
+  else
+    fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
+}
+
+/* Returns whether GDB is running on an interactive terminal.  */
 
 int
-input_from_terminal_p (void)
+input_interactive_p (struct ui *ui)
 {
-  struct ui *ui = current_ui;
-
   if (batch_flag)
     return 0;
 
-  if (gdb_has_a_terminal () && ui->instream == stdin)
-    return 1;
+  if (interactive_mode != AUTO_BOOLEAN_AUTO)
+    return interactive_mode == AUTO_BOOLEAN_TRUE;
 
-  /* If INSTREAM is unset, and we are not in a user command, we
-     must be in Insight.  That's like having a terminal, for our
-     purposes.  */
-  if (ui->instream == NULL && !in_user_command)
-    return 1;
-
-  return 0;
+  return ui->input_interactive_p;
 }
 
 static void
@@ -2013,6 +2046,20 @@ When set, GDB uses the specified path to search for data files."),
                            set_gdb_datadir, show_gdb_datadir,
                            &setlist,
                            &showlist);
+
+  add_setshow_auto_boolean_cmd ("interactive-mode", class_support,
+                                &interactive_mode, _("\
+Set whether GDB's standard input is a terminal."), _("\
+Show whether GDB's standard input is a terminal."), _("\
+If on, GDB assumes that standard input is a terminal.  In practice, it\n\
+means that GDB should wait for the user to answer queries associated to\n\
+commands entered at the command prompt.  If off, GDB assumes that standard\n\
+input is not a terminal, and uses the default answer to all queries.\n\
+If auto (the default), determine which mode to use based on the standard\n\
+input settings."),
+                        NULL,
+                        show_interactive_mode,
+                        &setlist, &showlist);
 }
 
 void

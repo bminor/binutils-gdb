@@ -935,12 +935,13 @@ read_next_line (void)
   struct ui *ui = current_ui;
   char *prompt_ptr, control_prompt[256];
   int i = 0;
+  int from_tty = ui->instream == ui->stdin_stream;
 
   if (control_level >= 254)
     error (_("Control nesting too deep!"));
 
   /* Set a prompt based on the nesting of the control commands.  */
-  if (ui->instream == stdin
+  if (from_tty
       || (ui->instream == 0 && deprecated_readline_hook != NULL))
     {
       for (i = 0; i < control_level; i++)
@@ -952,7 +953,7 @@ read_next_line (void)
   else
     prompt_ptr = NULL;
 
-  return command_line_input (prompt_ptr, ui->instream == stdin, "commands");
+  return command_line_input (prompt_ptr, from_tty, "commands");
 }
 
 /* Process one input line.  If the command is an "end", return such an
@@ -1256,7 +1257,7 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
 {
   struct command_line *head;
 
-  if (from_tty && input_from_terminal_p ())
+  if (from_tty && input_interactive_p (current_ui))
     {
       if (deprecated_readline_begin_hook)
 	{
@@ -1287,7 +1288,8 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
       do_cleanups (old_chain);
     }
 
-  if (deprecated_readline_end_hook && from_tty && input_from_terminal_p ())
+  if (from_tty && input_interactive_p (current_ui)
+      && deprecated_readline_end_hook)
     {
       (*deprecated_readline_end_hook) ();
     }
