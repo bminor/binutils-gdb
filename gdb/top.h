@@ -98,6 +98,9 @@ struct ui
      *_unfiltered.  In the very near future that restriction shall be
      removed - either call shall be unfiltered.  (cagney 1999-06-13).  */
   struct ui_file *m_gdb_stdlog;
+
+  /* The current ui_out.  */
+  struct ui_out *m_current_uiout;
 };
 
 /* The main UI.  This is the UI that is bound to stdin/stdout/stderr.

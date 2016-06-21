@@ -100,6 +100,7 @@ gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdout)
 gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdin)
 gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stderr)
 gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdlog)
+gen_ret_current_ui_field_ptr (struct ui_out *, current_uiout)
 
 /* Initialization file name for gdb.  This is host-dependent.  */
 

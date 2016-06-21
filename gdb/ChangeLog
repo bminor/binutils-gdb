@@ -1,5 +1,15 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* top.c: Call gen_ret_current_ui_field_ptr for current_uiout.
+	* top.h (struct ui) <m_current_uiout>: New field.
+	* ui-out.c (current_uiout): Delete.
+	* ui-out.h (current_uiout): Delete.
+	(current_ui_current_uiout_ptr): New declaration.
+	(current_uiout): Reimplement as wrapper around
+	current_ui_current_uiout_ptr.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* ui-out.c (default_ui_out_impl): Delete.
 	(def_uiout): Delete.
 	(current_uiout): Set to NULL.

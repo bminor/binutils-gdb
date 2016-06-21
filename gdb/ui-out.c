@@ -147,11 +147,6 @@ pop_level (struct ui_out *uiout,
   return uiout->level + 1;
 }
 
-/* FIXME: This should not be a global, but something passed down from main.c
-   or top.c.  */
-
-struct ui_out *current_uiout = NULL;
-
 /* These are the interfaces to implementation functions.  */
 
 static void uo_table_begin (struct ui_out *uiout, int nbrofcols,
