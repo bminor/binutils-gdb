@@ -11605,8 +11605,10 @@ struct until_break_fsm
   struct breakpoint *caller_breakpoint;
 };
 
-static void until_break_fsm_clean_up (struct thread_fsm *self);
-static int until_break_fsm_should_stop (struct thread_fsm *self);
+static void until_break_fsm_clean_up (struct thread_fsm *self,
+				      struct thread_info *thread);
+static int until_break_fsm_should_stop (struct thread_fsm *self,
+					struct thread_info *thread);
 static enum async_reply_reason
   until_break_fsm_async_reply_reason (struct thread_fsm *self);
 
@@ -11624,14 +11626,14 @@ static struct thread_fsm_ops until_break_fsm_ops =
 /* Allocate a new until_break_command_fsm.  */
 
 static struct until_break_fsm *
-new_until_break_fsm (int thread,
+new_until_break_fsm (struct interp *cmd_interp, int thread,
 		     struct breakpoint *location_breakpoint,
 		     struct breakpoint *caller_breakpoint)
 {
   struct until_break_fsm *sm;
 
   sm = XCNEW (struct until_break_fsm);
-  thread_fsm_ctor (&sm->thread_fsm, &until_break_fsm_ops);
+  thread_fsm_ctor (&sm->thread_fsm, &until_break_fsm_ops, cmd_interp);
 
   sm->thread = thread;
   sm->location_breakpoint = location_breakpoint;
@@ -11644,10 +11646,10 @@ new_until_break_fsm (int thread,
    until(location)/advance commands.  */
 
 static int
-until_break_fsm_should_stop (struct thread_fsm *self)
+until_break_fsm_should_stop (struct thread_fsm *self,
+			     struct thread_info *tp)
 {
   struct until_break_fsm *sm = (struct until_break_fsm *) self;
-  struct thread_info *tp = inferior_thread ();
 
   if (bpstat_find_breakpoint (tp->control.stop_bpstat,
 			      sm->location_breakpoint) != NULL
@@ -11663,7 +11665,8 @@ until_break_fsm_should_stop (struct thread_fsm *self)
    until(location)/advance commands.  */
 
 static void
-until_break_fsm_clean_up (struct thread_fsm *self)
+until_break_fsm_clean_up (struct thread_fsm *self,
+			  struct thread_info *thread)
 {
   struct until_break_fsm *sm = (struct until_break_fsm *) self;
 
@@ -11785,7 +11788,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
 						    stack_frame_id, bp_until);
   make_cleanup_delete_breakpoint (location_breakpoint);
 
-  sm = new_until_break_fsm (tp->global_num,
+  sm = new_until_break_fsm (command_interp (), tp->global_num,
 			    location_breakpoint, caller_breakpoint);
   tp->thread_fsm = &sm->thread_fsm;
 

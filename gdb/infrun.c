@@ -681,7 +681,7 @@ follow_fork (void)
   CORE_ADDR step_range_start = 0;
   CORE_ADDR step_range_end = 0;
   struct frame_id step_frame_id = { 0 };
-  struct interp *command_interp = NULL;
+  struct thread_fsm *thread_fsm = NULL;
 
   if (!non_stop)
     {
@@ -733,7 +733,7 @@ follow_fork (void)
 	    step_frame_id = tp->control.step_frame_id;
 	    exception_resume_breakpoint
 	      = clone_momentary_breakpoint (tp->control.exception_resume_breakpoint);
-	    command_interp = tp->control.command_interp;
+	    thread_fsm = tp->thread_fsm;
 
 	    /* For now, delete the parent's sr breakpoint, otherwise,
 	       parent/child sr breakpoints are considered duplicates,
@@ -745,7 +745,7 @@ follow_fork (void)
 	    tp->control.step_range_end = 0;
 	    tp->control.step_frame_id = null_frame_id;
 	    delete_exception_resume_breakpoint (tp);
-	    tp->control.command_interp = NULL;
+	    tp->thread_fsm = NULL;
 	  }
 
 	parent = inferior_ptid;
@@ -791,7 +791,7 @@ follow_fork (void)
 		    tp->control.step_frame_id = step_frame_id;
 		    tp->control.exception_resume_breakpoint
 		      = exception_resume_breakpoint;
-		    tp->control.command_interp = command_interp;
+		    tp->thread_fsm = thread_fsm;
 		  }
 		else
 		  {
@@ -2849,7 +2849,6 @@ clear_proceed_status_thread (struct thread_info *tp)
 
   tp->control.proceed_to_finish = 0;
 
-  tp->control.command_interp = NULL;
   tp->control.stepping_command = 0;
 
   /* Discard any remaining commands or status from previous stop.  */
@@ -3041,14 +3040,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   if (siggnal != GDB_SIGNAL_DEFAULT)
     tp->suspend.stop_signal = siggnal;
-
-  /* Record the interpreter that issued the execution command that
-     caused this thread to resume.  If the top level interpreter is
-     MI/async, and the execution command was a CLI command
-     (next/step/etc.), we'll want to print stop event output to the MI
-     console channel (the stepped-to line, etc.), as if the user
-     entered the execution command on a real GDB console.  */
-  tp->control.command_interp = command_interp ();
 
   resume_ptid = user_visible_resume_ptid (tp->control.stepping_command);
 
@@ -3823,7 +3814,7 @@ clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
   struct thread_info *thr = ecs->event_thread;
 
   if (thr != NULL && thr->thread_fsm != NULL)
-    thread_fsm_clean_up (thr->thread_fsm);
+    thread_fsm_clean_up (thr->thread_fsm, thr);
 
   if (!non_stop)
     {
@@ -3835,7 +3826,7 @@ clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
 	    continue;
 
 	  switch_to_thread (thr->ptid);
-	  thread_fsm_clean_up (thr->thread_fsm);
+	  thread_fsm_clean_up (thr->thread_fsm, thr);
 	}
 
       if (ecs->event_thread != NULL)
@@ -3993,7 +3984,7 @@ fetch_inferior_event (void *client_data)
 	  struct thread_fsm *thread_fsm = thr->thread_fsm;
 
 	  if (thread_fsm != NULL)
-	    should_stop = thread_fsm_should_stop (thread_fsm);
+	    should_stop = thread_fsm_should_stop (thread_fsm, thr);
 	}
 
       if (!should_stop)

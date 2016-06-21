@@ -1,5 +1,61 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (new_until_break_fsm): Add 'cmd_interp' parameter.
+	(until_break_fsm_should_stop, until_break_fsm_clean_up): Add
+	thread parameter.
+	(until_break_command): Pass command interpreter to thread fsm
+	ctor.
+	* cli/cli-interp.c (should_print_stop_to_console): Adjust.
+	* gdbthread.h (struct thread_control_state) <command_interp>:
+	Delete field.
+	* infcall.c (new_call_thread_fsm): Add 'cmd_interp' parameter.
+	Pass it down.
+	(call_thread_fsm_should_stop): Add thread parameter.
+	(call_function_by_hand_dummy): Pass command interpreter to thread
+	fsm ctor.  Pass thread pointer to fsm clean up method.
+	* infcmd.c: Include interps.h.
+	(struct step_command_fsm) <thread>: Delete field.
+	(new_step_command_fsm): Add 'cmd_interp' parameter.  Pass it down.
+	(step_command_fsm_prepare): Remove references to fsm's thread
+	field.
+	(step_1): Pass command interpreter to thread
+	fsm ctor.  Pass thread pointer to fsm clean up method.
+	(step_command_fsm_should_stop, step_command_fsm_clean_up): Add
+	thread parameter and use it.
+	(new_until_next_fsm): Add 'cmd_interp' parameter.  Pass it down.
+	(until_next_fsm_should_stop, until_next_fsm_clean_up): Add thread
+	parameter and use it.
+	(until_next_command): Pass command interpreter to thread fsm ctor.
+	(struct finish_command_fsm) <thread>: Delete field.
+	(finish_command_fsm_ops): Add NULL slot for should_notify_stop.
+	(new_finish_command_fsm): Add 'cmd_interp' parameter and pass it
+	down.  Remove thread parameter and adjust.
+	(finish_command_fsm_should_stop, finish_command_fsm_clean_up): Add
+	thread parameter and use it.
+	(finish_command): Pass command interpreter to thread fsm ctor.
+	Don't pass thread.
+	* infrun.c (follow_fork): Move thread fsm to child fork instead of
+	command interpreter, only.
+	(clear_proceed_status_thread): Remove reference to command_interp.
+	(proceed): Don't record the thread's command interpreter.
+	(clean_up_just_stopped_threads_fsms): Pass thread to fsm clean_up
+	method.
+	(fetch_inferior_event): Pass thread to fsm should_stop method.
+	* thread-fsm.c (thread_fsm_ctor): Add 'cmd_interp' parameter.
+	Store it.
+	(thread_fsm_clean_up, thread_fsm_should_stop): Add thread
+	parameter and pass it down.
+	* thread-fsm.h (struct thread_fsm) <command_interp>: New field.
+	(struct thread_fsm_ops) <clean_up, should_stop>: Add thread
+	parameter.
+	(thread_fsm_ctor): Add 'cmd_interp' parameter.
+	(thread_fsm_clean_up, thread_fsm_should_stop): Add thread
+	parameter.
+	* thread.c (thread_cancel_execution_command): Pass thread to
+	thread fsm clean_up method.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-interp.c: Include gdbthread.h and thread-fsm.h.
 	(should_print_stop_to_console): New function, factored out from
 	mi_on_normal_stop_1.
