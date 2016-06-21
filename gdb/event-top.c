@@ -437,8 +437,55 @@ top_level_prompt (void)
   return xstrdup (prompt);
 }
 
-static struct ui current_ui_;
-struct ui *current_ui = &current_ui_;
+/* The main UI.  This is the UI that is bound to stdin/stdout/stderr.
+   It always exists and is created automatically when GDB starts
+   up.  */
+static struct ui main_ui_;
+
+struct ui *current_ui = &main_ui_;
+struct ui *ui_list = &main_ui_;
+
+/* Cleanup that restores the current UI.  */
+
+static void
+restore_ui_cleanup (void *data)
+{
+  current_ui = (struct ui *) data;
+}
+
+/* See top.h.  */
+
+void
+switch_thru_all_uis_init (struct switch_thru_all_uis *state)
+{
+  state->iter = ui_list;
+  state->old_chain = make_cleanup (restore_ui_cleanup, current_ui);
+}
+
+/* See top.h.  */
+
+int
+switch_thru_all_uis_cond (struct switch_thru_all_uis *state)
+{
+  if (state->iter != NULL)
+    {
+      current_ui = state->iter;
+      return 1;
+    }
+  else
+    {
+      do_cleanups (state->old_chain);
+      return 0;
+    }
+}
+
+/* See top.h.  */
+
+void
+switch_thru_all_uis_next (struct switch_thru_all_uis *state)
+{
+  state->iter = state->iter->next;
+}
 
 /* Get a pointer to the current UI's line buffer.  This is used to
    construct a whole line of input from partial input.  */

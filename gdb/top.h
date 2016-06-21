@@ -36,6 +36,9 @@ struct tl_interp_info;
 
 struct ui
 {
+  /* Pointer to next in singly-linked list.  */
+  struct ui *next;
+
   /* The UI's command line buffer.  This is to used to accumulate
      input until we have a whole command line.  */
   struct buffer line_buffer;
@@ -83,7 +86,33 @@ struct ui
   struct ui_file *m_gdb_stdlog;
 };
 
+/* The current UI.  */
 extern struct ui *current_ui;
+
+/* The list of all UIs.  */
+extern struct ui *ui_list;
+
+/* State for SWITCH_THRU_ALL_UIS.  Declared here because it is meant
+   to be created on the stack, but should be treated as opaque.  */
+struct switch_thru_all_uis
+{
+  struct ui *iter;
+  struct cleanup *old_chain;
+};
+
+/* Functions to drive SWITCH_THRU_ALL_UIS.  Though declared here by
+   necessity, these functions should not be used other than via the
+   SWITCH_THRU_ALL_UIS macro defined below.  */
+extern void switch_thru_all_uis_init (struct switch_thru_all_uis *state);
+extern int switch_thru_all_uis_cond (struct switch_thru_all_uis *state);
+extern void switch_thru_all_uis_next (struct switch_thru_all_uis *state);
+
+  /* Traverse through all UI, and switch the current UI to the one
+     being iterated.  */
+#define SWITCH_THRU_ALL_UIS(STATE)		\
+  for (switch_thru_all_uis_init (&STATE);		\
+       switch_thru_all_uis_cond (&STATE);		\
+       switch_thru_all_uis_next (&STATE))
 
 /* From top.c.  */
 extern char *saved_command_line;

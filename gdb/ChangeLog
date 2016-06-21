@@ -1,5 +1,63 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-interp.c (cli_interp): Delete.
+	(as_cli_interp): New function.
+	(cli_on_normal_stop, cli_on_signal_received)
+	(cli_on_end_stepping_range, cli_on_signal_exited, cli_on_exited)
+	(cli_on_no_history): Send output to all CLI UIs.
+	(cli_on_sync_execution_done, cli_on_command_error): Skip output if
+	the top level interpreter is not a CLI.
+	(cli_interpreter_init): Don't set cli_interp or install observers
+	here.
+	(_initialize_cli_interp): Install observers here.
+	* event-top.c (main_ui_, ui_list): New globals.
+	(current_ui): Point to main_ui_.
+	(restore_ui_cleanup, switch_thru_all_uis_init)
+	(switch_thru_all_uis_cond, switch_thru_all_uis_next): New
+	functions.
+	* mi/mi-interp.c (as_mi_interp): New function.
+	(mi_interpreter_init): Don't install observers here.
+	(mi_on_sync_execution_done): Skip output if the top level
+	interpreter is not a MI.
+	(mi_new_thread, mi_thread_exit, mi_record_changed)
+	(mi_inferior_added, mi_inferior_appeared, mi_inferior_exit)
+	(mi_inferior_removed): Send output to all MI UIs.
+	(find_mi_interpreter, mi_interp_data): Delete.
+	(find_mi_interp): New function.
+	(mi_on_signal_received, mi_on_end_stepping_range)
+	(mi_on_signal_exited, mi_on_exited, mi_on_no_history): Send output
+	to all MI UIs.
+	(mi_on_normal_stop): Rename to ...
+	(mi_on_normal_stop_1): ... this.
+	(mi_on_normal_stop): Reimplement, sending output to all MI UIs.
+	(mi_traceframe_changed, mi_tsv_created, mi_tsv_deleted)
+	(mi_tsv_modified, mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified, mi_output_running_pid): Send output to
+	all MI UIs.
+	(mi_on_resume): Rename to ...
+	(mi_on_resume_1): ... this.  Don't handle infcalls here.
+	(mi_on_resume): Reimplement, sending output to all MI UIs.
+	(mi_solib_loaded, mi_solib_unloaded, mi_command_param_changed)
+	(mi_memory_changed): Send output to all MI UIs.
+	(report_initial_inferior): Install observers here.
+	* top.h (struct ui) <next>: New field.
+	(ui_list): Declare.
+	(struct switch_thru_all_uis): New.
+	(switch_thru_all_uis_init, switch_thru_all_uis_cond)
+	(switch_thru_all_uis_next): Declare.
+	(SWITCH_THRU_ALL_UIS): New macro.
+	* tui/tui-interp.c (tui_interp): Delete global.
+	(as_tui_interp): New function.
+	(tui_on_normal_stop, tui_on_signal_received)
+	(tui_on_end_stepping_range, tui_on_signal_exited, tui_on_exited)
+	(tui_on_no_history): Send output to all TUI UIs.
+	(tui_on_sync_execution_done, tui_on_command_error): Skip output if
+	the top level interpreter is not a TUI.
+	(tui_init): Don't set tui_interp or install observers here.
+	(_initialize_tui_interp): Install observers here.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-interp.c (cli_uiout): Delete, moved into ...
 	(struct cli_interp): ... this new structure.
 	(cli_on_normal_stop, cli_on_signal_received)

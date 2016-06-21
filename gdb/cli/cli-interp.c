@@ -33,8 +33,16 @@ struct cli_interp
   struct ui_out *cli_uiout;
 };
 
-/* The interpreter for the console interpreter.  */
-static struct interp *cli_interp;
+/* Returns the INTERP's data cast as cli_interp if INTERP is a CLI,
+   and returns NULL otherwise.  */
+
+static struct cli_interp *
+as_cli_interp (struct interp *interp)
+{
+  if (strcmp (interp_name (interp), INTERP_CONSOLE) == 0)
+    return (struct cli_interp *) interp_data (interp);
+  return NULL;
+}
 
 /* Longjmp-safe wrapper for "execute_command".  */
 static struct gdb_exception safe_execute_command (struct ui_out *uiout,
@@ -50,10 +58,17 @@ static struct gdb_exception safe_execute_command (struct ui_out *uiout,
 static void
 cli_on_normal_stop (struct bpstats *bs, int print_frame)
 {
-  if (!interp_quiet_p (cli_interp))
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
     {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
       if (print_frame)
-	print_stop_event (interp_ui_out (cli_interp));
+	print_stop_event (cli->cli_uiout);
     }
 }
 
@@ -62,8 +77,17 @@ cli_on_normal_stop (struct bpstats *bs, int print_frame)
 static void
 cli_on_signal_received (enum gdb_signal siggnal)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_signal_received_reason (interp_ui_out (cli_interp), siggnal);
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_signal_received_reason (cli->cli_uiout, siggnal);
+    }
 }
 
 /* Observer for the end_stepping_range notification.  */
@@ -71,8 +95,17 @@ cli_on_signal_received (enum gdb_signal siggnal)
 static void
 cli_on_end_stepping_range (void)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_end_stepping_range_reason (interp_ui_out (cli_interp));
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_end_stepping_range_reason (cli->cli_uiout);
+    }
 }
 
 /* Observer for the signalled notification.  */
@@ -80,8 +113,17 @@ cli_on_end_stepping_range (void)
 static void
 cli_on_signal_exited (enum gdb_signal siggnal)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_signal_exited_reason (interp_ui_out (cli_interp), siggnal);
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_signal_exited_reason (cli->cli_uiout, siggnal);
+    }
 }
 
 /* Observer for the exited notification.  */
@@ -89,8 +131,17 @@ cli_on_signal_exited (enum gdb_signal siggnal)
 static void
 cli_on_exited (int exitstatus)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_exited_reason (interp_ui_out (cli_interp), exitstatus);
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_exited_reason (cli->cli_uiout, exitstatus);
+    }
 }
 
 /* Observer for the no_history notification.  */
@@ -98,8 +149,17 @@ cli_on_exited (int exitstatus)
 static void
 cli_on_no_history (void)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_no_history_reason (interp_ui_out (cli_interp));
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_no_history_reason (cli->cli_uiout);
+    }
 }
 
 /* Observer for the sync_execution_done notification.  */
@@ -107,8 +167,12 @@ cli_on_no_history (void)
 static void
 cli_on_sync_execution_done (void)
 {
-  if (!interp_quiet_p (cli_interp))
-    display_gdb_prompt (NULL);
+  struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+  if (cli == NULL)
+    return;
+
+  display_gdb_prompt (NULL);
 }
 
 /* Observer for the command_error notification.  */
@@ -116,8 +180,12 @@ cli_on_sync_execution_done (void)
 static void
 cli_on_command_error (void)
 {
-  if (!interp_quiet_p (cli_interp))
-    display_gdb_prompt (NULL);
+  struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+  if (cli == NULL)
+    return;
+
+  display_gdb_prompt (NULL);
 }
 
 /* These implement the cli out interpreter: */
@@ -125,19 +193,6 @@ cli_on_command_error (void)
 static void *
 cli_interpreter_init (struct interp *self, int top_level)
 {
-  if (top_level)
-    cli_interp = self;
-
-  /* If changing this, remember to update tui-interp.c as well.  */
-  observer_attach_normal_stop (cli_on_normal_stop);
-  observer_attach_end_stepping_range (cli_on_end_stepping_range);
-  observer_attach_signal_received (cli_on_signal_received);
-  observer_attach_signal_exited (cli_on_signal_exited);
-  observer_attach_exited (cli_on_exited);
-  observer_attach_no_history (cli_on_no_history);
-  observer_attach_sync_execution_done (cli_on_sync_execution_done);
-  observer_attach_command_error (cli_on_command_error);
-
   return interp_data (self);
 }
 
@@ -269,4 +324,14 @@ void
 _initialize_cli_interp (void)
 {
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
+
+  /* If changing this, remember to update tui-interp.c as well.  */
+  observer_attach_normal_stop (cli_on_normal_stop);
+  observer_attach_end_stepping_range (cli_on_end_stepping_range);
+  observer_attach_signal_received (cli_on_signal_received);
+  observer_attach_signal_exited (cli_on_signal_exited);
+  observer_attach_exited (cli_on_exited);
+  observer_attach_no_history (cli_on_no_history);
+  observer_attach_sync_execution_done (cli_on_sync_execution_done);
+  observer_attach_command_error (cli_on_command_error);
 }
