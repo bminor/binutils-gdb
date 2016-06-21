@@ -963,17 +963,7 @@ captured_main (void *data)
 
   /* Install the default UI.  All the interpreters should have had a
      look at things by now.  Initialize the default interpreter.  */
-
-  {
-    /* Find it.  */
-    struct interp *interp = interp_lookup (current_ui, interpreter_p);
-
-    if (interp == NULL)
-      error (_("Interpreter `%s' unrecognized"), interpreter_p);
-    /* Install it.  */
-    if (!interp_set (interp, 1))
-      error (_("Interpreter `%s' failed to initialize."), interpreter_p);
-  }
+  set_top_level_interpreter (interpreter_p);
 
   /* FIXME: cagney/2003-02-03: The big hack (part 2 of 2) that lets
      GDB retain the old MI1 interpreter startup behavior.  Output the

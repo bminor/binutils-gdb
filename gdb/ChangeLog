@@ -1,5 +1,17 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* interps.c (set_top_level_interpreter): New function, factored
+	out from captured_main.
+	(interpreter_completer): Make extern.
+	* interps.h (set_top_level_interpreter, interpreter_completer):
+	New declarations.
+	(captured_main): Use set_top_level_interpreter.
+	* top.c [!O_NOCTTY] (O_NOCTTY): Define as 0.
+	(open_terminal_stream, new_ui_command): New functions.
+	(init_main): Install the "new-ui" command.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-script.c (read_next_line): Adjust to per-UI stdin.
 	(read_command_lines): Use input_interactive_p instead of
 	input_from_terminal_p.
