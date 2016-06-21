@@ -557,7 +557,12 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
 
   switch (info->mach)
     {
-    case bfd_mach_arc_nps400:
+    case bfd_mach_arc_arc700:
+      /* The nps400 extension set requires this special casing of the
+	 instruction length calculation.  Right now this is not causing any
+	 problems as none of the known extensions overlap in opcode space,
+	 but, if they ever do then we might need to start carrying
+	 information around in the elf about which extensions are in use.  */
       if (major_opcode == 0xb)
         {
           bfd_byte minor_opcode = lsb & 0x1f;
@@ -565,7 +570,6 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
           if (minor_opcode < 4)
             return 2;
         }
-    case bfd_mach_arc_arc700:
     case bfd_mach_arc_arc600:
       return (major_opcode > 0xb) ? 2 : 4;
       break;
@@ -719,10 +723,6 @@ print_insn_arc (bfd_vma memaddr,
 
   switch (info->mach)
     {
-    case bfd_mach_arc_nps400:
-      isa_mask = ARC_OPCODE_ARC700 | ARC_OPCODE_NPS400;
-      break;
-
     case bfd_mach_arc_arc700:
       isa_mask = ARC_OPCODE_ARC700;
       break;

@@ -1,3 +1,11 @@
+2016-06-21  Graham Markall  <graham.markall@embecosm.com>
+
+	* archures.c: Remove bfd_mach_arc_nps400.
+	* bfd-in2.h: Likewise.
+	* cpu-arc.c (arch_info_struct): Likewise.
+	* elf32-arc.c (arc_elf_object_p, arc_elf_final_write_processing):
+	Likewise.
+
 2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18250

@@ -1,3 +1,8 @@
+2016-06-21  Graham Markall  <graham.markall@embecosm.com>
+
+	* readelf.c (decode_ARC_machine_flags): Remove E_ARC_MACH_NPS400
+	case.
+
 2016-06-15  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (is_24bit_abs_reloc): Add support for R_FT32_20

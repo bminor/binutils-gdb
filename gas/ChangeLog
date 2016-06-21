@@ -1,3 +1,35 @@
+2016-06-21  Graham Markall  <graham.markall@embecosm.com>
+
+	* config/tc-arc.c (check_cpu_feature, md_parse_option):
+	Add nps400 option and feature. Add check for nps400
+	feature. Refactor existing checks to check subclass before
+	feature enablement.
+	(md_show_usage): Document flags for NPS-400 and add some other
+	undocumented flags.
+	(cpu_type): Remove nps400 CPU type entry
+	(check_zol): Remove bfd_mach_arc_nps400 case.
+	(md_show_usage): Add help on -mcpu=nps400.
+	(cpu_types): Add entry for nps400 as arc700 plus nps400 extension
+	set.
+	* doc/c-arc.texi: Document the -mnps400, -mspfp, -mdpfp, and
+	-fpuda flags.  Document -mcpu=nps400.
+	* testsuite/gas/arc/nps-400-0.d: Use -mcpu=arc700 -mnps400. Change
+	expected flags to match ARC700 instead of NPS400.
+	* testsuite/gas/arc/nps-400-1.d: Use -mcpu=arc700 -mnps400.
+	* testsuite/gas/arc/nps-400-2.d: Likewise.
+	* testsuite/gas/arc/nps-400-3.d: Likewise.
+	* testsuite/gas/arc/nps-400-4.d: Likewise.
+	* testsuite/gas/arc/nps-400-5.d: Likewise.
+	* testsuite/gas/arc/nps-400-6.d: Likewise.
+	* testsuite/gas/arc/nps-400-7.d: Likewise.
+	* testsuite/gas/arc/textinsn2op01.s: Change opcode of myinsn to
+	avoid clash with cbba instruction.
+	* testsuite/gas/arc/textinsn2op01.d: Likewise.
+	* testsuite/gas/arc/textinsn3op.d: Likewise.
+	* testsuite/gas/arc/textinsn3op.s: Likewise.
+	* testsuite/gas/arc/nps-400-0.d: Test using NPS-400 using
+	-mcpu=nps400 as an alternative to -mcpu=arc700 -mnps400 flags.
+
 2016-06-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/r6-64-n32.d: Change the `name' tag.

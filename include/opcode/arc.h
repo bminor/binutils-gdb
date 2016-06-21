@@ -70,6 +70,7 @@ typedef enum
     MPY7E,
     MPY8E,
     MPY9E,
+    NPS400,
     QUARKSE,
     SHFT1,
     SHFT2,
@@ -172,7 +173,6 @@ extern const struct arc_opcode arc_opcodes[];
 #define ARC_OPCODE_ARC700   0x0002  /* ARC 700 specific insns.  */
 #define ARC_OPCODE_ARCv2EM  0x0004  /* ARCv2 EM specific insns.  */
 #define ARC_OPCODE_ARCv2HS  0x0008  /* ARCv2 HS specific insns.  */
-#define ARC_OPCODE_NPS400   0x0010  /* NPS400 specific insns.  */
 
 /* CPU combi.  */
 #define ARC_OPCODE_ARCALL  (ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700	\
@@ -186,6 +186,7 @@ extern const struct arc_opcode arc_opcodes[];
 #define ARC_ATOMIC   0x0002    /* Mutual exclusive with LLOCK.  */
 #define ARC_MPY      0x0004
 #define ARC_MULT     0x0004
+#define ARC_NPS400   0x0008
 
 /* Floating point support.  */
 #define ARC_DPFP     0x0010

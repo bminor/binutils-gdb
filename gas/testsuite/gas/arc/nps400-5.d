@@ -1,4 +1,4 @@
-#as: -mcpu=nps400
+#as: -mcpu=arc700 -mnps400
 #objdump: -dr
 
 .*: +file format .*arc.*

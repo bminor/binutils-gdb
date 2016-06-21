@@ -56,9 +56,6 @@ Assemble for ARC 601.  Alias: @code{-mARC601}.
 @cindex @code{mARC700} command line option, ARC
 Assemble for ARC 700.  Aliases: @code{-mA7}, @code{-mARC700}.
 
-@item nps400
-Assemble for NPS400.
-
 @item arcem
 @cindex @code{mEM} command line option, ARC
 Assemble for ARC EM.  Aliases: @code{-mEM}
@@ -66,6 +63,10 @@ Assemble for ARC EM.  Aliases: @code{-mEM}
 @item archs
 @cindex @code{mHS} command line option, ARC
 Assemble for ARC HS.  Aliases: @code{-mHS}, @code{-mav2hs}.
+
+@item nps400
+@cindex @code{mnps400} command line option, ARC
+Assemble for ARC 700 with NPS-400 extended instructions.
 
 @end table
 
@@ -93,6 +94,23 @@ processors.
 Enable support for assembly-time relaxation.  The assembler will
 replace a longer version of an instruction with a shorter one,
 whenever it is possible.
+
+@cindex @code{-mnps400} command line option, ARC
+@item -mnps400
+Enable support for NPS-400 extended instructions.
+
+@cindex @code{-mspfp} command line option, ARC
+@item -mspfp
+Enable support for single-precision floating point instructions.
+
+@cindex @code{-mdpfp} command line option, ARC
+@item -mdpfp
+Enable support for double-precision floating point instructions.
+
+@cindex @code{-mfpuda} command line option, ARC
+@item -mfpuda
+Enable support for double-precision assist floating point instructions.
+Only valid for ARC EM processors.
 
 @end table
 
