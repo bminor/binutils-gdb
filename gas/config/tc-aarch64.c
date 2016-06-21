@@ -3197,12 +3197,17 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
 
    The shift/extension information, if any, will be stored in .shifter.
 
-   It is the caller's responsibility to check for addressing modes not
-   supported by the instruction, and to set inst.reloc.type.  */
+   RELOC says whether relocation operators should be accepted
+   and ACCEPT_REG_POST_INDEX says whether post-indexed register
+   addressing should be accepted.
+
+   In all other cases, it is the caller's responsibility to check whether
+   the addressing mode is supported by the instruction.  It is also the
+   caller's responsibility to set inst.reloc.type.  */
 
 static bfd_boolean
-parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
-		    int accept_reg_post_index)
+parse_address_main (char **str, aarch64_opnd_info *operand, bfd_boolean reloc,
+		    bfd_boolean accept_reg_post_index)
 {
   char *p = *str;
   int reg;
@@ -3455,19 +3460,26 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
   return TRUE;
 }
 
-/* Return TRUE on success; otherwise return FALSE.  */
+/* Parse an address that cannot contain relocation operators.
+   Look for and parse "[Xn], (Xm|#m)" as post-indexed addressing
+   if ACCEPT_REG_POST_INDEX is true.
+
+   Return TRUE on success.  */
 static bfd_boolean
 parse_address (char **str, aarch64_opnd_info *operand,
-	       int accept_reg_post_index)
+	       bfd_boolean accept_reg_post_index)
 {
-  return parse_address_main (str, operand, 0, accept_reg_post_index);
+  return parse_address_main (str, operand, FALSE, accept_reg_post_index);
 }
 
-/* Return TRUE on success; otherwise return FALSE.  */
+/* Parse an address that can contain relocation operators.  Do not
+   accept post-indexed addressing.
+
+   Return TRUE on success.  */
 static bfd_boolean
 parse_address_reloc (char **str, aarch64_opnd_info *operand)
 {
-  return parse_address_main (str, operand, 1, 0);
+  return parse_address_main (str, operand, TRUE, FALSE);
 }
 
 /* Parse an operand for a MOVZ, MOVN or MOVK instruction.
@@ -5534,7 +5546,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_ADDR_REGOFF:
 	  /* [<Xn|SP>, <R><m>{, <extend> {<amount>}}]  */
-	  po_misc_or_fail (parse_address (&str, info, 0));
+	  po_misc_or_fail (parse_address (&str, info, FALSE));
 	  if (info->addr.pcrel || !info->addr.offset.is_reg
 	      || !info->addr.preind || info->addr.postind
 	      || info->addr.writeback)
@@ -5553,7 +5565,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_ADDR_SIMM7:
-	  po_misc_or_fail (parse_address (&str, info, 0));
+	  po_misc_or_fail (parse_address (&str, info, FALSE));
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || (!info->addr.preind && !info->addr.postind))
 	    {
@@ -5609,7 +5621,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SIMD_ADDR_POST:
 	  /* [<Xn|SP>], <Xm|#<amount>>  */
-	  po_misc_or_fail (parse_address (&str, info, 1));
+	  po_misc_or_fail (parse_address (&str, info, TRUE));
 	  if (!info->addr.postind || !info->addr.writeback)
 	    {
 	      set_syntax_error (_("invalid addressing mode"));
