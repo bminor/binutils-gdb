@@ -190,6 +190,14 @@ cli_on_command_error (void)
   display_gdb_prompt (NULL);
 }
 
+/* pre_command_loop implementation.  */
+
+void
+cli_interpreter_pre_command_loop (struct interp *self)
+{
+  display_gdb_prompt (0);
+}
+
 /* These implement the cli out interpreter: */
 
 static void *
@@ -312,7 +320,7 @@ static const struct interp_procs cli_interp_procs = {
   cli_interpreter_exec,		/* exec_proc */
   cli_ui_out,			/* ui_out_proc */
   NULL,                       	/* set_logging_proc */
-  cli_command_loop,		/* command_loop_proc */
+  cli_interpreter_pre_command_loop, /* pre_command_loop_proc */
   cli_interpreter_supports_command_editing, /* supports_command_editing_proc */
 };
 

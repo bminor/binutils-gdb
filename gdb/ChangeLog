@@ -1,5 +1,29 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-interp.c (cli_interpreter_pre_command_loop): New
+	function.
+	(cli_interp_procs): Install it instead of cli_command_loop.
+	* cli/cli-interp.h (cli_interpreter_pre_command_loop): Declare.
+	* event-top.c (cli_command_loop): Delete.
+	* interps.c (interp_new): Remove reference to command_loop_proc.
+	(current_interp_command_loop): Delete.
+	(interp_pre_command_loop): New function.
+	(interp_command_loop_ftype): Delete.
+	* interps.h (interp_pre_command_loop_ftype): New typedef.
+	(struct interp_procs) <command_loop_proc>: Delele field.
+	<pre_command_loop_proc>: New field.
+	(current_interp_command_loop): Delete declaration.
+	(interp_pre_command_loop): New declaration.
+	* main.c (captured_command_loop): Call interp_pre_command_loop
+	instead of current_interp_command_loop and start an event loop.
+	* mi/mi-interp.c (mi_command_loop): Delete.
+	(mi_interpreter_pre_command_loop): New.
+	(mi_interp_procs): Update.
+	* tui/tui-interp.c (tui_interp_procs): Install
+	cli_interpreter_pre_command_loop instead of cli_command_loop.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* interps.c (current_interpreter): New function.
 	* interps.h (current_interpreter): New declaration.
 	* mi/mi-cmds.h (raw_stdout): Delete declaration.

@@ -117,9 +117,6 @@ interp_new (const char *name, const struct interp_procs *procs, void *data)
   new_interp->procs = procs;
   new_interp->inited = 0;
 
-  /* Check for required procs.  */
-  gdb_assert (procs->command_loop_proc != NULL);
-
   return new_interp;
 }
 
@@ -411,16 +408,15 @@ command_interp (void)
     return ui_interp->current_interpreter;
 }
 
-/* Run the current command interpreter's main loop.  */
+/* See interps.h.  */
+
 void
-current_interp_command_loop (void)
+interp_pre_command_loop (struct interp *interp)
 {
-  struct ui_interp_info *ui_interp = get_current_interp_info ();
-  struct interp *interp = ui_interp->current_interpreter;
+  gdb_assert (interp != NULL);
 
-  gdb_assert (ui_interp->current_interpreter != NULL);
-
-  interp->procs->command_loop_proc (interp->data);
+  if (interp->procs->pre_command_loop_proc != NULL)
+    interp->procs->pre_command_loop_proc (interp);
 }
 
 /* See interp.h  */

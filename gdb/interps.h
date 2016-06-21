@@ -46,7 +46,7 @@ typedef int (interp_resume_ftype) (void *data);
 typedef int (interp_suspend_ftype) (void *data);
 typedef struct gdb_exception (interp_exec_ftype) (void *data,
 						  const char *command);
-typedef void (interp_command_loop_ftype) (void *data);
+typedef void (interp_pre_command_loop_ftype) (struct interp *self);
 typedef struct ui_out *(interp_ui_out_ftype) (struct interp *self);
 
 typedef int (interp_set_logging_ftype) (struct interp *self, int start_log,
@@ -73,7 +73,9 @@ struct interp_procs
      disabled.  */
   interp_set_logging_ftype *set_logging_proc;
 
-  interp_command_loop_ftype *command_loop_proc;
+  /* Called before starting an event loop, to give the interpreter a
+     chance to e.g., print a prompt.  */
+  interp_pre_command_loop_ftype *pre_command_loop_proc;
 
   /* Returns true if this interpreter supports using the readline
      library; false if it uses GDB's own simplified readline
@@ -100,8 +102,6 @@ extern struct interp *interp_set_temp (const char *name);
 
 extern int current_interp_named_p (const char *name);
 
-extern void current_interp_command_loop (void);
-
 /* Call this function to give the current interpreter an opportunity
    to do any special handling of streams when logging is enabled or
    disabled.  START_LOG is 1 when logging is starting, 0 when it ends,
@@ -126,6 +126,10 @@ extern void clear_interpreter_hooks (void);
 /* Returns true if INTERP supports using the readline library; false
    if it uses GDB's own simplified form of readline.  */
 extern int interp_supports_command_editing (struct interp *interp);
+
+/* Called before starting an event loop, to give the interpreter a
+   chance to e.g., print a prompt.  */
+extern void interp_pre_command_loop (struct interp *interp);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

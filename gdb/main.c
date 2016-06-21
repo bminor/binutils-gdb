@@ -315,7 +315,12 @@ captured_command_loop (void *data)
      here on.  */
   current_ui->async = 1;
 
-  current_interp_command_loop ();
+  /* Give the interpreter a chance to print a prompt.  */
+  interp_pre_command_loop (top_level_interpreter ());
+
+  /* Now it's time to start the event loop.  */
+  start_event_loop ();
+
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
      would clean things up (restoring the cleanup chain) to the state
      they were just prior to the call.  Technically, this means that

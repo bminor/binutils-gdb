@@ -22,4 +22,6 @@ struct interp;
 
 extern int cli_interpreter_supports_command_editing (struct interp *interp);
 
+extern void cli_interpreter_pre_command_loop (struct interp *self);
+
 #endif
