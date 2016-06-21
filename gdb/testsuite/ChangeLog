@@ -1,5 +1,12 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/new-ui.exp: New file.
+	* lib/mi-support.exp (switch_gdb_spawn_id): Move to ...
+	* lib/gdb.exp (switch_gdb_spawn_id): ... here.
+	(with_spawn_id): New procedure.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* gdb.mi/mi-exec-run.exp: New file.
 
 2016-06-21  Pedro Alves  <palves@redhat.com>
