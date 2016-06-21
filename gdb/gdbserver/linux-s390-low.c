@@ -1970,7 +1970,7 @@ s390_emit_void_call_2 (CORE_ADDR fn, int arg1)
 
 /* The "emit_eq_goto" emit_ops method for s390.  */
 
-void
+static void
 s390_emit_eq_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -1990,7 +1990,7 @@ s390_emit_eq_goto (int *offset_p, int *size_p)
 
 /* The "emit_ne_goto" emit_ops method for s390.  */
 
-void
+static void
 s390_emit_ne_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2010,7 +2010,7 @@ s390_emit_ne_goto (int *offset_p, int *size_p)
 
 /* The "emit_lt_goto" emit_ops method for s390.  */
 
-void
+static void
 s390_emit_lt_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2038,7 +2038,7 @@ s390_emit_lt_goto (int *offset_p, int *size_p)
 
 /* The "emit_le_goto" emit_ops method for s390.  */
 
-void
+static void
 s390_emit_le_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2066,7 +2066,7 @@ s390_emit_le_goto (int *offset_p, int *size_p)
 
 /* The "emit_gt_goto" emit_ops method for s390.  */
 
-void
+static void
 s390_emit_gt_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2094,7 +2094,7 @@ s390_emit_gt_goto (int *offset_p, int *size_p)
 
 /* The "emit_ge_goto" emit_ops method for s390.  */
 
-void
+static void
 s390_emit_ge_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2123,7 +2123,7 @@ s390_emit_ge_goto (int *offset_p, int *size_p)
 /* The "emit_ops" structure for s390.  Named _impl to avoid name
    collision with s390_emit_ops function.  */
 
-struct emit_ops s390_emit_ops_impl =
+static struct emit_ops s390_emit_ops_impl =
   {
     s390_emit_prologue,
     s390_emit_epilogue,
@@ -2580,7 +2580,7 @@ s390x_emit_void_call_2 (CORE_ADDR fn, int arg1)
 
 /* The "emit_eq_goto" emit_ops method for s390x.  */
 
-void
+static void
 s390x_emit_eq_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2598,7 +2598,7 @@ s390x_emit_eq_goto (int *offset_p, int *size_p)
 
 /* The "emit_ne_goto" emit_ops method for s390x.  */
 
-void
+static void
 s390x_emit_ne_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2616,7 +2616,7 @@ s390x_emit_ne_goto (int *offset_p, int *size_p)
 
 /* The "emit_lt_goto" emit_ops method for s390x.  */
 
-void
+static void
 s390x_emit_lt_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2634,7 +2634,7 @@ s390x_emit_lt_goto (int *offset_p, int *size_p)
 
 /* The "emit_le_goto" emit_ops method for s390x.  */
 
-void
+static void
 s390x_emit_le_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2652,7 +2652,7 @@ s390x_emit_le_goto (int *offset_p, int *size_p)
 
 /* The "emit_gt_goto" emit_ops method for s390x.  */
 
-void
+static void
 s390x_emit_gt_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2670,7 +2670,7 @@ s390x_emit_gt_goto (int *offset_p, int *size_p)
 
 /* The "emit_ge_goto" emit_ops method for s390x.  */
 
-void
+static void
 s390x_emit_ge_goto (int *offset_p, int *size_p)
 {
   static const unsigned char buf[] = {
@@ -2688,7 +2688,7 @@ s390x_emit_ge_goto (int *offset_p, int *size_p)
 
 /* The "emit_ops" structure for s390x.  */
 
-struct emit_ops s390x_emit_ops =
+static struct emit_ops s390x_emit_ops =
   {
     s390x_emit_prologue,
     s390x_emit_epilogue,
