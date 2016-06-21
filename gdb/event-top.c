@@ -94,10 +94,6 @@ int async_command_editing_p;
    asynchronous execution command.  */
 int exec_done_display_p = 0;
 
-/* This is the file descriptor for the input stream that GDB uses to
-   read commands from.  */
-int input_fd;
-
 /* Used by the stdin event handler to compensate for missed stdin events.
    Setting this to a non-zero value inside an stdin callback makes the callback
    run again.  */
@@ -503,12 +499,16 @@ get_command_line_buffer (void)
 void
 stdin_event_handler (int error, gdb_client_data client_data)
 {
-  struct ui *ui = current_ui;
+  struct ui *ui = (struct ui *) client_data;
+
+  /* Switch to the UI whose input descriptor woke up the event
+     loop.  */
+  current_ui = ui;
 
   if (error)
     {
       printf_unfiltered (_("error detected on stdin\n"));
-      delete_file_handler (input_fd);
+      delete_file_handler (ui->input_fd);
       /* If stdin died, we may as well kill gdb.  */
       quit_command ((char *) 0, stdin == ui->instream);
     }
@@ -1270,18 +1270,11 @@ gdb_setup_readline (void)
   /* Tell readline to use the same input stream that gdb uses.  */
   rl_instream = ui->instream;
 
-  /* Get a file descriptor for the input stream, so that we can
-     register it with the event loop.  */
-  input_fd = fileno (ui->instream);
-
-  /* Now we need to create the event sources for the input file
-     descriptor.  */
-  /* At this point in time, this is the only event source that we
-     register with the even loop.  Another source is going to be the
-     target program (inferior), but that must be registered only when
-     it actually exists (I.e. after we say 'run' or after we connect
-     to a remote target.  */
-  add_file_handler (input_fd, stdin_event_handler, 0);
+  /* Now create the event source for this UI's input file descriptor.
+     Another source is going to be the target program (inferior), but
+     that must be registered only when it actually exists (I.e. after
+     we say 'run' or after we connect to a remote target.  */
+  add_file_handler (ui->input_fd, stdin_event_handler, ui);
 }
 
 /* Disable command input through the standard CLI channels.  Used in
@@ -1290,6 +1283,8 @@ gdb_setup_readline (void)
 void
 gdb_disable_readline (void)
 {
+  struct ui *ui = current_ui;
+
   /* FIXME - It is too heavyweight to delete and remake these every
      time you run an interpreter that needs readline.  It is probably
      better to have the interpreters cache these, which in turn means
@@ -1304,5 +1299,5 @@ gdb_disable_readline (void)
 #endif
 
   gdb_rl_callback_handler_remove ();
-  delete_file_handler (input_fd);
+  delete_file_handler (ui->input_fd);
 }

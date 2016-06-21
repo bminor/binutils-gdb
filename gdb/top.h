@@ -74,6 +74,10 @@ struct ui
      interacting via a GUI.  */
   FILE *instream;
 
+  /* The file descriptor for the input stream, so that we can register
+     it with the event loop.  */
+  int input_fd;
+
   /* The fields below that start with "m_" are "private".  They're
      meant to be accessed through wrapper macros that make them look
      like globals.  */

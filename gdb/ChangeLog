@@ -1,5 +1,29 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (input_fd): Delete.
+	(stdin_event_handler): Switch to the UI whose input descriptor got
+	the event.  Adjust to per-UI input_fd.
+	(gdb_setup_readline): Don't set the input_fd global.  Adjust to
+	per-UI input_fd.
+	(gdb_disable_readline): Adjust to per-UI input_fd.
+	* event-top.h (input_fd): Delete declaration.
+	* linux-nat.c (linux_nat_terminal_inferior): Don't remove input_fd
+	from the event-loop here.
+	(linux_nat_terminal_ours): Don't register input_fd in the
+	event-loop here.
+	* main.c (captured_main): Adjust to per-UI input_fd.
+	* remote.c (remote_terminal_inferior): Don't remove input_fd from
+	the event-loop here.
+	(remote_terminal_ours): Don't register input_fd in the event-loop
+	here.
+	* target.c: Include top.h and event-top.h.
+	(target_terminal_inferior): Remove input_fd from the event-loop
+	here.
+	(target_terminal_ours): Register input_fd in the event-loop.
+	* top.h (struct ui) <input_fd>: New field.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-script.c (execute_user_command, read_next_line)
 	(read_next_line): Adjust to per-UI instream.
 	* event-top.c (stdin_event_handler, command_handler)

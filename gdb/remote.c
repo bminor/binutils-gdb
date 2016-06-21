@@ -5924,7 +5924,6 @@ remote_terminal_inferior (struct target_ops *self)
      can go away.  */
   if (!remote_async_terminal_ours_p)
     return;
-  delete_file_handler (input_fd);
   remote_async_terminal_ours_p = 0;
   /* NOTE: At this point we could also register our selves as the
      recipient of all input.  Any characters typed could then be
@@ -5937,7 +5936,6 @@ remote_terminal_ours (struct target_ops *self)
   /* See FIXME in remote_terminal_inferior.  */
   if (remote_async_terminal_ours_p)
     return;
-  add_file_handler (input_fd, stdin_event_handler, 0);
   remote_async_terminal_ours_p = 1;
 }
 
