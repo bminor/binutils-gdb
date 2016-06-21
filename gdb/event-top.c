@@ -441,12 +441,11 @@ top_level_prompt (void)
   return xstrdup (prompt);
 }
 
-/* The main UI.  */
-static struct ui main_ui_;
+/* See top.h.  */
 
-struct ui *main_ui = &main_ui_;
-struct ui *current_ui = &main_ui_;
-struct ui *ui_list = &main_ui_;
+struct ui *main_ui;
+struct ui *current_ui;
+struct ui *ui_list;
 
 /* See top.h.  */
 

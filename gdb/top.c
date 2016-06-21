@@ -246,6 +246,46 @@ void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 
 void (*deprecated_context_hook) (int id);
 
+/* The highest UI number ever assigned.  */
+static int highest_ui_num;
+
+/* See top.h.  */
+
+struct ui *
+new_ui (FILE *instream, FILE *outstream, FILE *errstream)
+{
+  struct ui *ui;
+
+  ui = XCNEW (struct ui);
+
+  ui->num = ++highest_ui_num;
+  ui->instream = instream;
+  ui->outstream = outstream;
+  ui->errstream = errstream;
+
+  ui->input_fd = fileno (ui->instream);
+
+  ui->m_gdb_stdin = stdio_fileopen (ui->instream);
+  ui->m_gdb_stdout = stdio_fileopen (ui->outstream);
+  ui->m_gdb_stderr = stderr_fileopen (ui->errstream);
+  ui->m_gdb_stdlog = ui->m_gdb_stderr;
+
+  ui->prompt_state = PROMPT_NEEDED;
+
+  if (ui_list == NULL)
+    ui_list = ui;
+  else
+    {
+      struct ui *last;
+
+      for (last = ui_list; last->next != NULL; last = last->next)
+	;
+      last->next = ui;
+    }
+
+  return ui;
+}
+
 /* Handler for SIGHUP.  */
 
 #ifdef SIGHUP

@@ -1,5 +1,18 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (main_ui_): Delete.
+	(main_ui, current_ui, ui_list): No longer initialize here.
+	* main.c (captured_main): UI initialization code factored out to
+	new new_ui function.
+	(gdb_main): Wrap captured_main with TRY/CATCH instead of
+	catch_errors.
+	* top.c (highest_ui_num): New global.
+	(new_ui): New function.
+	* top.h (struct ui) <num>: New field.
+	(new_ui): New declaration.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-interp.c (cli_on_normal_stop): Bail out early if there's
 	nothing to print.  Use should_print_stop_to_console.
 	* tui/tui-interp.c (tui_on_normal_stop): Likewise.

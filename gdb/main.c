@@ -443,7 +443,6 @@ DEF_VEC_O (cmdarg_s);
 static int
 captured_main (void *data)
 {
-  struct ui *ui = current_ui;
   struct captured_main_args *context = (struct captured_main_args *) data;
   int argc = context->argc;
   char **argv = context->argv;
@@ -514,26 +513,15 @@ captured_main (void *data)
 
   saved_command_line = (char *) xstrdup ("");
 
-  ui->instream = stdin;
-  ui->outstream = stdout;
-  ui->errstream = stderr;
-
-  ui->input_fd = fileno (stdin);
-
-  ui->prompt_state = PROMPT_NEEDED;
-
 #ifdef __MINGW32__
   /* Ensure stderr is unbuffered.  A Cygwin pty or pipe is implemented
      as a Windows pipe, and Windows buffers on pipes.  */
   setvbuf (stderr, NULL, _IONBF, BUFSIZ);
 #endif
 
-  gdb_stdout = stdio_fileopen (stdout);
-  gdb_stderr = stderr_fileopen (stderr);
+  main_ui = new_ui (stdin, stdout, stderr);
+  current_ui = main_ui;
 
-  gdb_stdlog = gdb_stderr;	/* for moment */
-  gdb_stdtarg = gdb_stderr;	/* for moment */
-  gdb_stdin = stdio_fileopen (stdin);
   gdb_stdtargerr = gdb_stderr;	/* for moment */
   gdb_stdtargin = gdb_stdin;	/* for moment */
 
@@ -1174,7 +1162,16 @@ captured_main (void *data)
 int
 gdb_main (struct captured_main_args *args)
 {
-  catch_errors (captured_main, args, "", RETURN_MASK_ALL);
+  TRY
+    {
+      captured_main (args);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_print (gdb_stderr, ex);
+    }
+  END_CATCH
+
   /* The only way to end up here is by an error (normal exit is
      handled by quit_force()), hence always return an error status.  */
   return 1;
