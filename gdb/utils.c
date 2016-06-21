@@ -1047,10 +1047,12 @@ print_sys_errmsg (const char *string, int errcode)
 void
 quit (void)
 {
+  struct ui *ui = current_ui;
+
   if (sync_quit_force_run)
     {
       sync_quit_force_run = 0;
-      quit_force (NULL, stdin == instream);
+      quit_force (NULL, stdin == ui->instream);
     }
 
 #ifdef __MSDOS__

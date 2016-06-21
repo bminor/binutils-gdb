@@ -309,6 +309,8 @@ setup_alternate_signal_stack (void)
 static int
 captured_command_loop (void *data)
 {
+  struct ui *ui = current_ui;
+
   /* Top-level execution commands can be run in the background from
      here on.  */
   current_ui->async = 1;
@@ -326,7 +328,7 @@ captured_command_loop (void *data)
      error) we try to quit.  If the quit is aborted, catch_errors()
      which called this catch the signal and restart the command
      loop.  */
-  quit_command (NULL, instream == stdin);
+  quit_command (NULL, ui->instream == stdin);
   return 1;
 }
 
@@ -435,6 +437,7 @@ DEF_VEC_O (cmdarg_s);
 static int
 captured_main (void *data)
 {
+  struct ui *ui = current_ui;
   struct captured_main_args *context = (struct captured_main_args *) data;
   int argc = context->argc;
   char **argv = context->argv;
@@ -504,7 +507,7 @@ captured_main (void *data)
   ndir = 0;
 
   saved_command_line = (char *) xstrdup ("");
-  instream = stdin;
+  ui->instream = stdin;
 
 #ifdef __MINGW32__
   /* Ensure stderr is unbuffered.  A Cygwin pty or pipe is implemented

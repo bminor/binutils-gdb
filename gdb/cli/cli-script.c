@@ -352,6 +352,7 @@ do_restore_user_call_depth (void * call_depth)
 void
 execute_user_command (struct cmd_list_element *c, char *args)
 {
+  struct ui *ui = current_ui;
   struct command_line *cmdlines;
   struct cleanup *old_chain;
   enum command_control_type ret;
@@ -372,8 +373,8 @@ execute_user_command (struct cmd_list_element *c, char *args)
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
-  make_cleanup (do_restore_instream_cleanup, instream);
-  instream = (FILE *) 0;
+  make_cleanup (do_restore_instream_cleanup, ui->instream);
+  ui->instream = NULL;
 
   /* Also set the global in_user_command, so that NULL instream is
      not confused with Insight.  */
@@ -931,6 +932,7 @@ realloc_body_list (struct command_line *command, int new_length)
 static char *
 read_next_line (void)
 {
+  struct ui *ui = current_ui;
   char *prompt_ptr, control_prompt[256];
   int i = 0;
 
@@ -938,7 +940,8 @@ read_next_line (void)
     error (_("Control nesting too deep!"));
 
   /* Set a prompt based on the nesting of the control commands.  */
-  if (instream == stdin || (instream == 0 && deprecated_readline_hook != NULL))
+  if (ui->instream == stdin
+      || (ui->instream == 0 && deprecated_readline_hook != NULL))
     {
       for (i = 0; i < control_level; i++)
 	control_prompt[i] = ' ';
@@ -949,7 +952,7 @@ read_next_line (void)
   else
     prompt_ptr = NULL;
 
-  return command_line_input (prompt_ptr, instream == stdin, "commands");
+  return command_line_input (prompt_ptr, ui->instream == stdin, "commands");
 }
 
 /* Process one input line.  If the command is an "end", return such an

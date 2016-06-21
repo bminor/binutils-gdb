@@ -284,7 +284,9 @@ mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void
 mi_execute_command_wrapper (const char *cmd)
 {
-  mi_execute_command (cmd, stdin == instream);
+  struct ui *ui = current_ui;
+
+  mi_execute_command (cmd, stdin == ui->instream);
 }
 
 /* Observer for the synchronous_command_done notification.  */

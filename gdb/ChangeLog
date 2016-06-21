@@ -1,5 +1,40 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-script.c (execute_user_command, read_next_line)
+	(read_next_line): Adjust to per-UI instream.
+	* event-top.c (stdin_event_handler, command_handler)
+	(handle_line_of_input, command_line_handler)
+	(gdb_readline_no_editing_callback, async_sigterm_handler)
+	(gdb_setup_readline): Likewise.
+	* inflow.c: Include top.h.
+	(gdb_has_a_terminal, child_terminal_init_with_pgrp)
+	(gdb_save_tty_state, child_terminal_inferior)
+	(child_terminal_ours_1, copy_terminal_info): Use the main UI.
+	(initialize_stdin_serial): Adjust to per-UI instream.
+	* main.c (captured_command_loop, captured_main): Adjust to per-UI
+	instream.
+	* mi/mi-interp.c (mi_execute_command_wrapper): Likewise.
+	* python/python.c (python_interactive_command): Likewise.
+	* terminal.h (struct ui): Forward declare.
+	(initialize_stdin_serial): Add struct ui parameter.
+	* top.c (instream): Delete.
+	(do_restore_instream_cleanup, read_command_file, dont_repeat)
+	(gdb_readline_no_editing, command_line_input)
+	(input_from_terminal_p, gdb_init): Adjust to per-UI instream.
+	* top.h (struct ui) <instream>: New field.
+	(instream): Delete declaration.
+	(quit): Adjust to per-UI instream.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c: Include top.h.
+	(invoke_async_signal_handlers): Switch to the main UI.
+	* event-top.c (main_ui_): Update comment.
+	(main_ui): New global.
+	* top.h (main_ui): Declare.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-interp.c (cli_interp): Delete.
 	(as_cli_interp): New function.
 	(cli_on_normal_stop, cli_on_signal_received)

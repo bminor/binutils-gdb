@@ -1,5 +1,9 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Add new regexp.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* gdb.ada/mi_catch_ex.exp (continue_to_exception): New procedure.
 	(top level): Use it instead of mi_execute_to.
 
