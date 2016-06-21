@@ -23,7 +23,7 @@
 
 #include "defs.h"
 #include "gdb_select.h"
-#include "interps.h"
+#include "top.h"
 #include "target.h"
 #include "guile-internal.h"
 
@@ -517,8 +517,8 @@ ioscm_with_output_to_port_worker (SCM port, SCM thunk, enum oport oport,
 
   cleanups = set_batch_flag_and_make_cleanup_restore_page_info ();
 
-  make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   port_file = ioscm_file_port_new (port);
 

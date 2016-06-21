@@ -379,8 +379,8 @@ execute_user_command (struct cmd_list_element *c, char *args)
      not confused with Insight.  */
   in_user_command = 1;
 
-  make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   command_nest_depth++;
   while (cmdlines)
@@ -661,8 +661,8 @@ while_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
-  old_chain = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  old_chain = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   execute_control_command_untraced (command);
   free_command_lines (&command);
@@ -685,8 +685,8 @@ if_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
-  old_chain = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  old_chain = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   execute_control_command_untraced (command);
   free_command_lines (&command);
@@ -1688,8 +1688,8 @@ script_from_file (FILE *stream, const char *file)
   source_line_number = 0;
   source_file_name = file;
 
-  make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   {
 

@@ -560,13 +560,13 @@ run_inferior_call (struct call_thread_fsm *sm,
   ptid_t call_thread_ptid = call_thread->ptid;
   int saved_sync_execution = sync_execution;
   int was_running = call_thread->state == THREAD_RUNNING;
-  int saved_interpreter_async = interpreter_async;
+  int saved_ui_async = current_ui->async;
 
   /* Infcalls run synchronously, in the foreground.  */
   sync_execution = 1;
   /* So that we don't print the prompt prematurely in
      fetch_inferior_event.  */
-  interpreter_async = 0;
+  current_ui->async = 0;
 
   call_thread->control.in_infcall = 1;
 
@@ -601,7 +601,7 @@ run_inferior_call (struct call_thread_fsm *sm,
      again here.  In other cases, stdin will be re-enabled by
      inferior_event_handler, when an exception is thrown.  */
   sync_execution = saved_sync_execution;
-  interpreter_async = saved_interpreter_async;
+  current_ui->async = saved_ui_async;
 
   /* At this point the current thread may have changed.  Refresh
      CALL_THREAD as it could be invalid if its thread has exited.  */

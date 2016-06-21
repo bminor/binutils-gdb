@@ -407,7 +407,7 @@ maybe_wait_sync_command_done (int was_sync)
      command's list, running command hooks or similars), and we
      just ran a synchronous command that started the target, wait
      for that command to end.  */
-  if (!interpreter_async && !was_sync && sync_execution)
+  if (!current_ui->async && !was_sync && sync_execution)
     wait_sync_command_done ();
 }
 
@@ -525,8 +525,8 @@ execute_command_to_string (char *p, int from_tty)
      restoration callbacks.  */
   cleanup = set_batch_flag_and_make_cleanup_restore_page_info ();
 
-  make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   str_file = mem_fileopen ();
 

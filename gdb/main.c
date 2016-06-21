@@ -311,7 +311,7 @@ captured_command_loop (void *data)
 {
   /* Top-level execution commands can be run in the background from
      here on.  */
-  interpreter_async = 1;
+  current_ui->async = 1;
 
   current_interp_command_loop ();
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton

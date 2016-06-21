@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "interps.h"
+#include "top.h"
 #include "ui-out.h"
 #include "command.h"
 #include "cli/cli-script.h"
@@ -91,8 +91,8 @@ compile_file_command (char *arg, int from_tty)
   char *buffer;
   struct cleanup *cleanup;
 
-  cleanup = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  cleanup = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   /* Check the user did not just <enter> after command.  */
   if (arg == NULL)
@@ -133,8 +133,8 @@ compile_code_command (char *arg, int from_tty)
   struct cleanup *cleanup;
   enum compile_i_scope_types scope = COMPILE_I_SIMPLE_SCOPE;
 
-  cleanup = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  cleanup = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   if (arg != NULL && check_raw_argument (&arg))
     {
@@ -187,8 +187,8 @@ compile_print_command (char *arg_param, int from_tty)
   enum compile_i_scope_types scope = COMPILE_I_PRINT_ADDRESS_SCOPE;
   struct format_data fmt;
 
-  cleanup = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  cleanup = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   /* Passing &FMT as SCOPE_DATA is safe as do_module_cleanup will not
      touch the stale pointer if compile_object_run has already quit.  */

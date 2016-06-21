@@ -1,5 +1,50 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (bpstat_do_actions_1): Access the current UI's
+	async field instead of the interpreter_async global.
+	* cli/cli-script.c (execute_user_command, while_command)
+	(if_command, script_from_file): Likewise.
+	* compile/compile.c: Include top.h instead of interps.h.
+	(compile_file_command, compile_code_command)
+	(compile_print_command): Access the current UI's async field
+	instead of the interpreter_async global.
+	* guile/guile.c: Include top.h instead of interps.h.
+	(guile_repl_command, guile_command, gdbscm_execute_gdb_command):
+	Access the current UI's async field instead of the
+	interpreter_async global.
+	* guile/scm-ports.c: Include top.h instead of interps.h.
+	(ioscm_with_output_to_port_worker): Access the current UI's async
+	field instead of the interpreter_async global.
+	* inf-loop.c (inferior_event_handler): Likewise.
+	* infcall.c (run_inferior_call): Likewise.
+	* infrun.c (reinstall_readline_callback_handler_cleanup)
+	(fetch_inferior_event): Likewise.
+	* interps.c (interpreter_async): Delete.
+	(struct ui_interp_info): New.
+	(get_current_interp_info): New function.
+	(interp_list, current_interpreter, top_level_interpreter_ptr):
+	Delete.
+	(interp_add, interp_set, interp_lookup, interp_ui_out)
+	(current_interp_set_logging, interp_set_temp)
+	(current_interp_named_p): Adjust to per-UI interpreters.
+	(command_interpreter): Delete.
+	(command_interp, current_interp_command_loop, interp_quiet_p)
+	(interp_exec, interpreter_exec_cmd, interpreter_completer)
+	(top_level_interpreter, top_level_interpreter_data): Adjust to
+	per-UI interpreters.
+	* interps.h (interpreter_async): Delete.
+	* main.c (captured_command_loop): Access the current UI's async
+	field instead of the interpreter_async global.
+	* python/python.c (python_interactive_command, python_command)
+	(execute_gdb_command): Likewise.
+	* top.c (maybe_wait_sync_command_done, execute_command_to_string):
+	Access the current UI's async field instead of the
+	interpreter_async global.
+	* top.h (struct tl_interp_info): Forward declare.
+	(struct ui) <interp_info, async>: New fields.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* main.c (gdb_stdout, gdb_stderr, gdb_stdlog, gdb_stdin): Delete
 	globals.
 	(gen_ret_current_ui_field_ptr): New macro.  Use it to generate

@@ -23,6 +23,8 @@
 #include "buffer.h"
 #include "event-loop.h"
 
+struct tl_interp_info;
+
 /* All about a user interface instance.  Each user interface has its
    own I/O files/streams, readline state, its own top level
    interpreter (for the main UI, this is the interpreter specified
@@ -49,6 +51,19 @@ struct ui
   /* The function to invoke when a complete line of input is ready for
      processing.  */
   void (*input_handler) (char *);
+
+  /* Each UI has its own independent set of interpreters.  */
+  struct ui_interp_info *interp_info;
+
+  /* True if the UI is in async mode, false if in sync mode.  If in
+     sync mode, a synchronous execution command (e.g, "next") does not
+     return until the command is finished.  If in async mode, then
+     running a synchronous command returns right after resuming the
+     target.  Waiting for the command's completion is later done on
+     the top event loop.  For the main UI, this starts out disabled,
+     until all the explicit command line arguments (e.g., `gdb -ex
+     "start" -ex "next"') are processed.  */
+  int async;
 
   /* The fields below that start with "m_" are "private".  They're
      meant to be accessed through wrapper macros that make them look
