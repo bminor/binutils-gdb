@@ -1,5 +1,10 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention support for running interpreters on separate
+	UIs and the new new-ui command.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* interps.c (set_top_level_interpreter): New function, factored
 	out from captured_main.
 	(interpreter_completer): Make extern.

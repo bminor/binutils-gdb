@@ -24911,18 +24911,11 @@ The @sc{gdb/mi} interface included in @value{GDBN} 5.1, 5.2, and 5.3.
 @end table
 
 @cindex invoke another interpreter
-The interpreter being used by @value{GDBN} may not be dynamically
-switched at runtime.  Although possible, this could lead to a very
-precarious situation.  Consider an IDE using @sc{gdb/mi}.  If a user
-enters the command "interpreter-set console" in a console view,
-@value{GDBN} would switch to using the console interpreter, rendering
-the IDE inoperable!
 
 @kindex interpreter-exec
-Although you may only choose a single interpreter at startup, you may execute
-commands in any interpreter from the current interpreter using the appropriate
-command.  If you are running the console interpreter, simply use the
-@code{interpreter-exec} command:
+You may execute commands in any interpreter from the current
+interpreter using the appropriate command.  If you are running the
+console interpreter, simply use the @code{interpreter-exec} command:
 
 @smallexample
 interpreter-exec mi "-data-list-register-names"
@@ -24930,6 +24923,49 @@ interpreter-exec mi "-data-list-register-names"
 
 @sc{gdb/mi} has a similar command, although it is only available in versions of
 @value{GDBN} which support @sc{gdb/mi} version 2 (or greater).
+
+Note that @code{interpreter-exec} only changes the interpreter for the
+duration of the specified command.  It does not change the interpreter
+permanently.
+
+@cindex start a new independent interpreter
+
+Although you may only choose a single interpreter at startup, it is
+possible to run an independent interpreter on a specified input/output
+device (usually a tty).
+
+For example, consider a debugger GUI or IDE that wants to provide a
+@value{GDBN} console view.  It may do so by embedding a terminal
+emulator widget in its GUI, starting @value{GDBN} in the traditional
+command-line mode with stdin/stdout/stderr redirected to that
+terminal, and then creating an MI interpreter running on a specified
+input/output device.  The console interpreter created by @value{GDBN}
+at startup handles commands the user types in the terminal widget,
+while the GUI controls and synchronizes state with @value{GDBN} using
+the separate MI interpreter.
+
+To start a new secondary @dfn{user interface} running MI, use the
+@code{new-ui} command:
+
+@kindex new-ui
+@cindex new user interface
+@smallexample
+new-ui @var{interpreter} @var{tty}
+@end smallexample
+
+The @var{interpreter} parameter specifies the interpreter to run.
+This accepts the same values as the @code{interpreter-exec} command.
+For example, @samp{console}, @samp{mi}, @samp{mi2}, etc.  The
+@var{tty} parameter specifies the name of the bidirectional file the
+interpreter uses for input/output, usually the name of a
+pseudoterminal slave on Unix systems.  For example:
+
+@smallexample
+(@value{GDBP}) new-ui mi /dev/pts/9
+@end smallexample
+
+@noindent
+runs an MI interpreter on @file{/dev/pts/9}.
 
 @node TUI
 @chapter @value{GDBN} Text User Interface
