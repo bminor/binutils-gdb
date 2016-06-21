@@ -1,3 +1,17 @@
+2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_force_relocation): Use `file_mips_opts'
+	rather than `mips_opts' for the R6 ISA check.
+	(mips_fix_adjustable): Likewise.
+	* testsuite/gas/mips/pcrel-reloc-1.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-1-r6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-2.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-2-r6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-3.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-3-r6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-1.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-06-21  Graham Markall  <graham.markall@embecosm.com>
 
 	* config/tc-arc.c (check_cpu_feature, md_parse_option):

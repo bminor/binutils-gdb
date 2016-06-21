@@ -14768,7 +14768,7 @@ mips_force_relocation (fixS *fixp)
     return 1;
 
   /* We want all PC-relative relocations to be kept for R6 relaxation.  */
-  if (ISA_IS_R6 (mips_opts.isa)
+  if (ISA_IS_R6 (file_mips_opts.isa)
       && (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_21_PCREL_S2
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_26_PCREL_S2
@@ -17137,7 +17137,7 @@ mips_fix_adjustable (fixS *fixp)
      Also, PC relative relocations for MIPS R6 need to be symbol rather than
      section relative to allow linker relaxations to be performed later on.  */
   if (limited_pcrel_reloc_p (fixp->fx_r_type)
-      && (HAVE_IN_PLACE_ADDENDS || ISA_IS_R6 (mips_opts.isa)))
+      && (HAVE_IN_PLACE_ADDENDS || ISA_IS_R6 (file_mips_opts.isa)))
     return 0;
 
   /* R_MIPS16_26 relocations against non-MIPS16 functions might resolve
