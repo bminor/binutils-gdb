@@ -11,6 +11,25 @@
 
 2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (calculate_reloc) <BFD_RELOC_HI16_S_PCREL>
+	<BFD_RELOC_LO16_PCREL>: New switch cases.
+	(md_apply_fix) <BFD_RELOC_HI16_S_PCREL, BFD_RELOC_LO16_PCREL>:
+	Move switch cases along `BFD_RELOC_MIPS_JMP'.
+	<BFD_RELOC_MIPS_21_PCREL_S2, BFD_RELOC_MIPS_26_PCREL_S2>
+	<BFD_RELOC_MIPS_18_PCREL_S3, BFD_RELOC_MIPS_19_PCREL_S2>: Handle
+	the resolved case.
+	* testsuite/gas/mips/pcrel-reloc-4.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-4-r6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-5.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-5-r6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-6.l: New list test.
+	* testsuite/gas/mips/pcrel-reloc-4.s: New test source.
+	* testsuite/gas/mips/pcrel-reloc-6.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (md_apply_fix) <BFD_RELOC_MIPS_18_PCREL_S3>
 	<BFD_RELOC_MIPS_19_PCREL_S2>: Avoid null pointer dereferences
 	via `fixP->fx_addsy'.
