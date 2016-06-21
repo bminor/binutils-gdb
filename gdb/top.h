@@ -73,6 +73,10 @@ struct ui
      Set to NULL if we are executing a user-defined command or
      interacting via a GUI.  */
   FILE *instream;
+  /* Standard output stream.  */
+  FILE *outstream;
+  /* Standard error stream.  */
+  FILE *errstream;
 
   /* The file descriptor for the input stream, so that we can register
      it with the event loop.  */

@@ -1,5 +1,20 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (gdb_setup_readline): Pass the UI's outstream and
+	errstream to stdout_fileopen and stderr_fileopen.
+	* exceptions.c: Include top.h.
+	(print_flush): Open the current UI's outstream file descriptor,
+	instead of hardcoding file descriptor 1.
+	* main.c (captured_main): Save the main UI's out and error
+	streams.  Adjust stderr_fileopen call.
+	* top.h (struct ui) <outstream, errstream>: New fields.
+	* ui-file.c (stderr_fileopen): Add stream parameter.  Use it
+	instead of stderr.
+	* ui-file.h (stderr_fileopen): Add stream parameter and update
+	comment.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (input_fd): Delete.
 	(stdin_event_handler): Switch to the UI whose input descriptor got
 	the event.  Adjust to per-UI input_fd.

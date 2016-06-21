@@ -507,7 +507,11 @@ captured_main (void *data)
   ndir = 0;
 
   saved_command_line = (char *) xstrdup ("");
+
   ui->instream = stdin;
+  ui->outstream = stdout;
+  ui->errstream = stderr;
+
   ui->input_fd = fileno (stdin);
 
 #ifdef __MINGW32__
@@ -517,7 +521,7 @@ captured_main (void *data)
 #endif
 
   gdb_stdout = stdio_fileopen (stdout);
-  gdb_stderr = stderr_fileopen ();
+  gdb_stderr = stderr_fileopen (stderr);
 
   gdb_stdlog = gdb_stderr;	/* for moment */
   gdb_stdtarg = gdb_stderr;	/* for moment */
