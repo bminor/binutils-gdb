@@ -423,6 +423,16 @@ current_interp_command_loop (void)
   interp->procs->command_loop_proc (interp->data);
 }
 
+/* See interp.h  */
+
+int
+interp_supports_command_editing (struct interp *interp)
+{
+  if (interp->procs->supports_command_editing_proc != NULL)
+    return interp->procs->supports_command_editing_proc (interp);
+  return 0;
+}
+
 int
 interp_quiet_p (struct interp *interp)
 {

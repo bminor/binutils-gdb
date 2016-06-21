@@ -3812,7 +3812,7 @@ reinstall_readline_callback_handler_cleanup (void *arg)
       return;
     }
 
-  if (async_command_editing_p && !sync_execution)
+  if (current_ui->command_editing && !sync_execution)
     gdb_rl_callback_handler_reinstall ();
 }
 

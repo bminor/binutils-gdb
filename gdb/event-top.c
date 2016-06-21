@@ -48,8 +48,6 @@
 /* readline defines this.  */
 #undef savestring
 
-static void command_line_handler (char *rl);
-static void change_line_handler (void);
 static char *top_level_prompt (void);
 
 /* Signal handlers.  */
@@ -88,7 +86,7 @@ static void async_sigterm_handler (gdb_client_data arg);
    ezannoni: as of 1999-04-29 I expect that this
    variable will not be used after gdb is changed to use the event
    loop as default engine, and event-top.c is merged into top.c.  */
-int async_command_editing_p;
+int set_editing_cmd_var;
 
 /* This is used to display the notification of the completion of an
    asynchronous execution command.  */
@@ -236,34 +234,45 @@ cli_command_loop (void *data)
    therefore bypassing readline, and letting gdb handle the input
    itself, via gdb_readline_no_editing_callback.  Also it is used in
    the opposite case in which the user sets editing on again, by
-   restoring readline handling of the input.  */
-static void
-change_line_handler (void)
+   restoring readline handling of the input.
+
+   NOTE: this operates on input_fd, not instream.  If we are reading
+   commands from a file, instream will point to the file.  However, we
+   always read commands from a file with editing off.  This means that
+   the 'set editing on/off' will have effect only on the interactive
+   session.  */
+
+void
+change_line_handler (int editing)
 {
   struct ui *ui = current_ui;
 
-  /* NOTE: this operates on input_fd, not instream.  If we are reading
-     commands from a file, instream will point to the file.  However in
-     async mode, we always read commands from a file with editing
-     off.  This means that the 'set editing on/off' will have effect
-     only on the interactive session.  */
+  /* We can only have one instance of readline, so we only allow
+     editing on the main UI.  */
+  if (ui != main_ui)
+    return;
 
-  if (async_command_editing_p)
+  /* Don't try enabling editing if the interpreter doesn't support it
+     (e.g., MI).  */
+  if (!interp_supports_command_editing (top_level_interpreter ())
+      || !interp_supports_command_editing (command_interp ()))
+    return;
+
+  if (editing)
     {
+      gdb_assert (ui == main_ui);
+
       /* Turn on editing by using readline.  */
       ui->call_readline = gdb_rl_callback_read_char_wrapper;
-      ui->input_handler = command_line_handler;
     }
   else
     {
       /* Turn off editing by using gdb_readline_no_editing_callback.  */
-      gdb_rl_callback_handler_remove ();
+      if (ui->command_editing)
+	gdb_rl_callback_handler_remove ();
       ui->call_readline = gdb_readline_no_editing_callback;
-
-      /* Set up the command handler as well, in case we are called as
-         first thing from .gdbinit.  */
-      ui->input_handler = command_line_handler;
     }
+  ui->command_editing = editing;
 }
 
 /* The functions below are wrappers for rl_callback_handler_remove and
@@ -284,6 +293,8 @@ static int callback_handler_installed;
 void
 gdb_rl_callback_handler_remove (void)
 {
+  gdb_assert (current_ui == main_ui);
+
   rl_callback_handler_remove ();
   callback_handler_installed = 0;
 }
@@ -295,6 +306,8 @@ gdb_rl_callback_handler_remove (void)
 void
 gdb_rl_callback_handler_install (const char *prompt)
 {
+  gdb_assert (current_ui == main_ui);
+
   /* Calling rl_callback_handler_install resets readline's input
      buffer.  Calling this when we were already processing input
      therefore loses input.  */
@@ -309,6 +322,8 @@ gdb_rl_callback_handler_install (const char *prompt)
 void
 gdb_rl_callback_handler_reinstall (void)
 {
+  gdb_assert (current_ui == main_ui);
+
   if (!callback_handler_installed)
     {
       /* Passing NULL as prompt argument tells readline to not display
@@ -370,7 +385,8 @@ display_gdb_prompt (const char *new_prompt)
 	     the above two functions.  Calling
 	     rl_callback_handler_remove(), does the job.  */
 
-	  gdb_rl_callback_handler_remove ();
+	  if (current_ui->command_editing)
+	    gdb_rl_callback_handler_remove ();
 	  do_cleanups (old_chain);
 	  return;
 	}
@@ -383,7 +399,7 @@ display_gdb_prompt (const char *new_prompt)
   else
     actual_gdb_prompt = xstrdup (new_prompt);
 
-  if (async_command_editing_p)
+  if (current_ui->command_editing)
     {
       gdb_rl_callback_handler_remove ();
       gdb_rl_callback_handler_install (actual_gdb_prompt);
@@ -1214,21 +1230,13 @@ async_float_handler (gdb_client_data arg)
 }
 
 
-/* Called by do_setshow_command.  */
-void
-set_async_editing_command (char *args, int from_tty,
-			   struct cmd_list_element *c)
-{
-  change_line_handler ();
-}
-
 /* Set things up for readline to be invoked via the alternate
    interface, i.e. via a callback function
    (gdb_rl_callback_read_char), and hook up instream to the event
    loop.  */
 
 void
-gdb_setup_readline (void)
+gdb_setup_readline (int editing)
 {
   struct ui *ui = current_ui;
 
@@ -1243,32 +1251,28 @@ gdb_setup_readline (void)
   gdb_stdtarg = gdb_stderr; /* for moment */
   gdb_stdtargerr = gdb_stderr; /* for moment */
 
-  /* If the input stream is connected to a terminal, turn on
-     editing.  */
-  if (ISATTY (ui->instream))
+  /* If the input stream is connected to a terminal, turn on editing.
+     However, that is only allowed on the main UI, as we can only have
+     one instance of readline.  */
+  if (ISATTY (ui->instream) && editing && ui == main_ui)
     {
       /* Tell gdb that we will be using the readline library.  This
 	 could be overwritten by a command in .gdbinit like 'set
 	 editing on' or 'off'.  */
-      async_command_editing_p = 1;
-	  
+      ui->command_editing = 1;
+
       /* When a character is detected on instream by select or poll,
 	 readline will be invoked via this callback function.  */
       ui->call_readline = gdb_rl_callback_read_char_wrapper;
+
+      /* Tell readline to use the same input stream that gdb uses.  */
+      rl_instream = ui->instream;
     }
   else
     {
-      async_command_editing_p = 0;
+      ui->command_editing = 0;
       ui->call_readline = gdb_readline_no_editing_callback;
     }
-  
-  /* When readline has read an end-of-line character, it passes the
-     complete line to gdb for processing; command_line_handler is the
-     function that does this.  */
-  ui->input_handler = command_line_handler;
-
-  /* Tell readline to use the same input stream that gdb uses.  */
-  rl_instream = ui->instream;
 
   /* Now create the event source for this UI's input file descriptor.
      Another source is going to be the target program (inferior), but
@@ -1280,6 +1284,7 @@ gdb_setup_readline (void)
 /* Disable command input through the standard CLI channels.  Used in
    the suspend proc for interpreters that use the standard gdb readline
    interface, like the cli & the mi.  */
+
 void
 gdb_disable_readline (void)
 {
@@ -1298,6 +1303,7 @@ gdb_disable_readline (void)
   gdb_stdtargerr = NULL;
 #endif
 
-  gdb_rl_callback_handler_remove ();
+  if (ui->command_editing)
+    gdb_rl_callback_handler_remove ();
   delete_file_handler (ui->input_fd);
 }

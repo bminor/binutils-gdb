@@ -1,5 +1,65 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	PR mi/20034
+	* cli/cli-interp.c: Include cli-interp.h and event-top.h.
+	(cli_interpreter_resume): Pass 1 to gdb_setup_readline.  Set the
+	UI's input_handler here.
+	(cli_interpreter_supports_command_editing): New function.
+	(cli_interp_procs): Install it.
+	* cli/cli-interp.h: New file.
+	* event-top.c (async_command_editing_p): Rename to ...
+	(set_editing_cmd_var): ... this.
+	(change_line_handler): Add parameter 'editing', and use it.  Bail
+	early if the interpreter doesn't support editing.  Don't touch
+	readline state if editing is off.
+	(gdb_rl_callback_handler_remove, gdb_rl_callback_handler_install)
+	(gdb_rl_callback_handler_reinstall): Assert the current UI is the
+	main UI.
+	(display_gdb_prompt): Don't call gdb_rl_callback_handler_remove if
+	not using readline.  Check whether the current UI is using command
+	editing instead of checking the async_command_editing_p global.
+	(set_async_editing_command): Delete.
+	(gdb_setup_readline): Add 'editing' parameter.  Only allow editing
+	on the main UI.  Don't touch readline state if editing is off.
+	(gdb_disable_readline): Don't touch readline state if editing is
+	off.
+	* event-top.h (gdb_setup_readline): Add 'int' parameter.
+	(set_async_editing_command): Delete declaration.
+	(change_line_handler, command_line_handler): Declare.
+	(async_command_editing_p): Rename to ...
+	(set_editing_cmd_var): ... this.
+	* infrun.c (reinstall_readline_callback_handler_cleanup): Check
+	whether the current UI has editing enabled rather than checking
+	the async_command_editing_p global.
+	* interps.c (interp_supports_command_editing): New function.
+	* interps.h (interp_supports_command_editing_ftype): New typedef.
+	(struct interp_procs) <supports_command_editing_proc>: New field.
+	(interp_supports_command_editing): Declare.
+	* mi/mi-interp.c (mi_interpreter_resume): Pass 0 to
+	gdb_setup_readline.  Don't clear the async_command_editing_p
+	global.  Update comments.
+	* top.c (gdb_readline_wrapper_line, gdb_readline_wrapper): Check
+	whether the current UI has editing enabled rather than checking
+	the async_command_editing_p global.  Don't touch readline state if
+	editing is off.
+	(undo_terminal_modifications_before_exit): Switch to the main UI.
+	Unconditionally call gdb_disable_readline.
+	(set_editing): New function.
+	(show_async_command_editing_p): Rename to ...
+	(show_editing): ... this.  Show the state of the current UI.
+	(_initialize_top): Adjust.
+	* top.h (struct ui) <command_editing>: New field.
+	* tui/tui-interp.c: Include cli/cli-interp.h.
+	(tui_resume): Pass 1 to gdb_setup_readline.  Set the UI's
+	input_handler.
+	(tui_interp_procs): Install
+	cli_interpreter_supports_command_editing.
+	* tui/tui-io.c (tui_getc): Check whether the current UI has
+	editing enabled rather than checking the async_command_editing_p
+	global.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* top.c: Call gen_ret_current_ui_field_ptr for current_uiout.
 	* top.h (struct ui) <m_current_uiout>: New field.
 	* ui-out.c (current_uiout): Delete.

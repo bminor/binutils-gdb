@@ -159,13 +159,10 @@ mi_interpreter_resume (void *data)
 
   /* As per hack note in mi_interpreter_init, swap in the output
      channels... */
-  gdb_setup_readline ();
+  gdb_setup_readline (0);
 
-  /* These overwrite some of the initialization done in
-     _intialize_event_loop.  */
   ui->call_readline = gdb_readline_no_editing_callback;
   ui->input_handler = mi_execute_command_input_handler;
-  async_command_editing_p = 0;
   /* FIXME: This is a total hack for now.  PB's use of the MI
      implicitly relies on a bug in the async support which allows
      asynchronous commands to leak through the commmand loop.  The bug

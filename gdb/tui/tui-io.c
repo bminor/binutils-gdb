@@ -616,7 +616,7 @@ tui_getc (FILE *fp)
   if (ch == KEY_BACKSPACE)
     return '\b';
 
-  if (async_command_editing_p && key_is_start_sequence (ch))
+  if (current_ui->command_editing && key_is_start_sequence (ch))
     {
       int ch_pending;
 

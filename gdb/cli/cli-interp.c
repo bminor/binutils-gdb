@@ -18,11 +18,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "cli-interp.h"
 #include "interps.h"
 #include "event-top.h"
 #include "ui-out.h"
 #include "cli-out.h"
 #include "top.h"		/* for "execute_command" */
+#include "event-top.h"
 #include "infrun.h"
 #include "observer.h"
 
@@ -199,6 +201,7 @@ cli_interpreter_init (struct interp *self, int top_level)
 static int
 cli_interpreter_resume (void *data)
 {
+  struct ui *ui = current_ui;
   struct cli_interp *cli = (struct cli_interp *) data;
   struct ui_file *stream;
 
@@ -215,7 +218,9 @@ cli_interpreter_resume (void *data)
       stream = NULL;
     }
 
-  gdb_setup_readline ();
+  gdb_setup_readline (1);
+
+  ui->input_handler = command_line_handler;
 
   if (stream != NULL)
     cli_out_set_stream (cli->cli_uiout, gdb_stdout);
@@ -253,6 +258,12 @@ cli_interpreter_exec (void *data, const char *command_str)
   result = safe_execute_command (cli->cli_uiout, str, 1);
   cli_out_set_stream (cli->cli_uiout, old_stream);
   return result;
+}
+
+int
+cli_interpreter_supports_command_editing (struct interp *interp)
+{
+  return 1;
 }
 
 static struct gdb_exception
@@ -301,7 +312,8 @@ static const struct interp_procs cli_interp_procs = {
   cli_interpreter_exec,		/* exec_proc */
   cli_ui_out,			/* ui_out_proc */
   NULL,                       	/* set_logging_proc */
-  cli_command_loop            	/* command_loop_proc */
+  cli_command_loop,		/* command_loop_proc */
+  cli_interpreter_supports_command_editing, /* supports_command_editing_proc */
 };
 
 /* Factory for CLI interpreters.  */

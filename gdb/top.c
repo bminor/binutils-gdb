@@ -793,7 +793,7 @@ gdb_readline_wrapper_line (char *line)
      we're handling an asynchronous target event and running in the
      background, just before returning to the event loop to process
      further input (or more target events).  */
-  if (async_command_editing_p)
+  if (current_ui->command_editing)
     gdb_rl_callback_handler_remove ();
 }
 
@@ -813,7 +813,8 @@ gdb_readline_wrapper_cleanup (void *arg)
   struct gdb_readline_wrapper_cleanup *cleanup
     = (struct gdb_readline_wrapper_cleanup *) arg;
 
-  rl_already_prompted = cleanup->already_prompted_orig;
+  if (ui->command_editing)
+    rl_already_prompted = cleanup->already_prompted_orig;
 
   gdb_assert (ui->input_handler == gdb_readline_wrapper_line);
   ui->input_handler = cleanup->handler_orig;
@@ -851,7 +852,10 @@ gdb_readline_wrapper (const char *prompt)
   cleanup->handler_orig = ui->input_handler;
   ui->input_handler = gdb_readline_wrapper_line;
 
-  cleanup->already_prompted_orig = rl_already_prompted;
+  if (ui->command_editing)
+    cleanup->already_prompted_orig = rl_already_prompted;
+  else
+    cleanup->already_prompted_orig = 0;
 
   cleanup->target_is_async_orig = target_is_async_p ();
 
@@ -863,7 +867,8 @@ gdb_readline_wrapper (const char *prompt)
 
   /* Display our prompt and prevent double prompt display.  */
   display_gdb_prompt (prompt);
-  rl_already_prompted = 1;
+  if (ui->command_editing)
+    rl_already_prompted = 1;
 
   if (after_char_processing_hook)
     (*after_char_processing_hook) ();
@@ -1420,12 +1425,18 @@ quit_confirm (void)
 static void
 undo_terminal_modifications_before_exit (void)
 {
+  struct ui *saved_top_level = current_ui;
+
   target_terminal_ours ();
+
+  current_ui = main_ui;
+
 #if defined(TUI)
   tui_disable ();
 #endif
-  if (async_command_editing_p)
-    gdb_disable_readline ();
+  gdb_disable_readline ();
+
+  current_ui = saved_top_level;
 }
 
 
@@ -1739,13 +1750,24 @@ show_prompt (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Gdb's prompt is \"%s\".\n"), value);
 }
 
+/* "set editing" command.  */
+
 static void
-show_async_command_editing_p (struct ui_file *file, int from_tty,
-			      struct cmd_list_element *c, const char *value)
+set_editing (char *args, int from_tty, struct cmd_list_element *c)
+{
+  change_line_handler (set_editing_cmd_var);
+  /* Update the control variable so that MI's =cmd-param-changed event
+     shows the correct value. */
+  set_editing_cmd_var = current_ui->command_editing;
+}
+
+static void
+show_editing (struct ui_file *file, int from_tty,
+	      struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Editing of command lines as "
 			    "they are typed is %s.\n"),
-		    value);
+		    current_ui->command_editing ? _("on") : _("off"));
 }
 
 static void
@@ -1836,14 +1858,14 @@ used inside of user-defined commands that should not be repeated when\n\
 hitting return."));
 
   add_setshow_boolean_cmd ("editing", class_support,
-			   &async_command_editing_p, _("\
+			   &set_editing_cmd_var, _("\
 Set editing of command lines as they are typed."), _("\
 Show editing of command lines as they are typed."), _("\
 Use \"on\" to enable the editing, and \"off\" to disable it.\n\
 Without an argument, command line editing is enabled.  To edit, use\n\
 EMACS-like or VI-like commands like control-P or ESC."),
-			   set_async_editing_command,
-			   show_async_command_editing_p,
+			   set_editing,
+			   show_editing,
 			   &setlist, &showlist);
 
   add_setshow_boolean_cmd ("save", no_class, &write_history_p, _("\

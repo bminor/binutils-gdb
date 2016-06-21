@@ -53,6 +53,8 @@ typedef int (interp_set_logging_ftype) (struct interp *self, int start_log,
 					struct ui_file *out,
 					struct ui_file *logfile);
 
+typedef int (interp_supports_command_editing_ftype) (struct interp *self);
+
 struct interp_procs
 {
   interp_init_ftype *init_proc;
@@ -72,6 +74,11 @@ struct interp_procs
   interp_set_logging_ftype *set_logging_proc;
 
   interp_command_loop_ftype *command_loop_proc;
+
+  /* Returns true if this interpreter supports using the readline
+     library; false if it uses GDB's own simplified readline
+     emulation.  */
+  interp_supports_command_editing_ftype *supports_command_editing_proc;
 };
 
 extern struct interp *interp_new (const char *name,
@@ -112,6 +119,10 @@ extern struct interp *top_level_interpreter (void);
 extern struct interp *command_interp (void);
 
 extern void clear_interpreter_hooks (void);
+
+/* Returns true if INTERP supports using the readline library; false
+   if it uses GDB's own simplified form of readline.  */
+extern int interp_supports_command_editing (struct interp *interp);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

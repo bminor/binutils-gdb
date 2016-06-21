@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "cli/cli-interp.h"
 #include "interps.h"
 #include "top.h"
 #include "event-top.h"
@@ -219,6 +220,7 @@ tui_init (struct interp *self, int top_level)
 static int
 tui_resume (void *data)
 {
+  struct ui *ui = current_ui;
   struct ui_file *stream;
 
   /* gdb_setup_readline will change gdb_stdout.  If the TUI was
@@ -232,7 +234,9 @@ tui_resume (void *data)
       stream = NULL;
     }
 
-  gdb_setup_readline ();
+  gdb_setup_readline (1);
+
+  ui->input_handler = command_line_handler;
 
   if (stream != NULL)
     cli_out_set_stream (tui_old_uiout, gdb_stdout);
@@ -274,7 +278,8 @@ static const struct interp_procs tui_interp_procs = {
   tui_exec,
   tui_ui_out,
   NULL,
-  cli_command_loop
+  cli_command_loop,
+  cli_interpreter_supports_command_editing,
 };
 
 /* Factory for TUI interpreters.  */
