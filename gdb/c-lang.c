@@ -34,6 +34,9 @@
 #include "gdb_obstack.h"
 #include <ctype.h>
 #include "gdbcore.h"
+#include "symtab.h"
+#include "block.h"
+#include "linespec.h"		/* for find_toplevel_char  */
 
 extern void _initialize_c_language (void);
 
@@ -716,6 +719,74 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
   return evaluate_subexp_standard (expect_type, exp, pos, noside);
 }
 
+/* Compute the C++ hash for STRING0.
+
+   For dictionaries, we group like-symbols together.
+   That means that all templates with the same unparameterized names
+   must yield the same hash.  Likewise, overloaded functions must also
+   yield the same hash.
+
+   The following code deals largely with templates.  The dreaded
+   strcmp_iw already enforces overloads to be grouped.  */
+
+static unsigned int
+cplus_compute_string_hash (const char *string0)
+{
+  const char *p, *last_scope;
+
+  /* If '<' doesn't appear at all in STRING), there is no way we could
+     be dealing with a template name.  */
+  if (find_toplevel_char (string0, '<') == NULL)
+    return default_compute_string_hash (string0);
+
+  /* Locate the last qualified component of STRING0.  */
+  p = find_toplevel_string (string0, "::");
+  last_scope = NULL;
+  while (p != NULL)
+    {
+      last_scope = p;
+      p = find_toplevel_string (p + 2, "::");
+    }
+
+  /* last_scope points to the last "::".  If NULL, then no scope operator
+     was seen in STRING0, and we use the entire string.  */
+  if (last_scope == NULL)
+    last_scope = string0;
+
+  /* Find a possible template parameter list.  Valid operators will be
+     dealt with later.  */
+  p = find_toplevel_char (last_scope, '<');
+
+  /* P points to toplevel '<', but it could still be a valid operator
+     and not be a template at all.  */
+  if ((p - last_scope) > 8 && strncmp (p - 8, "operator", 8) == 0)
+    {
+      /* Skip <,=  */
+      while (strchr ("<=", *p) != NULL)
+	++p;
+
+      /* Check if this operator contains a template parameter list marker.  */
+      p = find_toplevel_char (p, '<');
+    }
+
+  /* If NULL, the string represents an operator (<, <=, <<, <<=) and is not
+     a template function itself.  */
+  if (p == NULL)
+    return default_compute_string_hash (string0);
+  else
+    {
+      unsigned int hash;
+      char *copy = ASTRDUP (string0);
+
+      copy[p - string0] = '\0';
+
+      /* It *is a template, compute the hash based only until P.  */
+      hash = default_compute_string_hash (copy);
+      /* !!keiths: Probably should snarf dict_hash/minsym_hash_iw
+	 and do this by length.  What about cp_entire_prefix_len?  */
+      return hash;
+    }
+}
 
 
 /* Table mapping opcodes into strings for printing operators
@@ -863,6 +934,7 @@ const struct language_defn c_language_defn =
   c_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  default_compute_string_hash,
   &c_varobj_ops,
   c_get_compile_context,
   c_compute_program,
@@ -990,6 +1062,7 @@ const struct language_defn cplus_language_defn =
   c_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  cplus_compute_string_hash,
   &cplus_varobj_ops,
   cplus_get_compile_context,
   cplus_compute_program,
@@ -1035,6 +1108,7 @@ const struct language_defn asm_language_defn =
   c_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  default_compute_string_hash,
   &default_varobj_ops,
   NULL,
   NULL,
@@ -1085,6 +1159,7 @@ const struct language_defn minimal_language_defn =
   c_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  default_compute_string_hash,
   &default_varobj_ops,
   NULL,
   NULL,

@@ -1556,15 +1556,25 @@ oper:	OPERATOR NEW
 			{ $$ = operator_stoken ("[]"); }
 	|	OPERATOR conversion_type_id
 			{ char *name;
+			  char *canon;
 			  long length;
 			  struct ui_file *buf = mem_fileopen ();
 
+			  /* This also needs canonicalization.  */
 			  c_print_type ($2, NULL, buf, -1, 0,
 					&type_print_raw_options);
 			  name = ui_file_xstrdup (buf, &length);
 			  ui_file_delete (buf);
-			  $$ = operator_stoken (name);
+			  canon = cp_canonicalize_string (name);
+			  if (canon != NULL)
+			    {
+			      free (name);
+			      name = canon;
+			    }
+			  canon = xstrprintf (" %s", name);
+			  $$ = operator_stoken (canon);
 			  free (name);
+			  free (canon);
 			}
 	;
 

@@ -11677,6 +11677,24 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      VEC_address (symbolp, template_args),
 	      (templ_func->n_template_arguments * sizeof (struct symbol *)));
       VEC_free (symbolp, template_args);
+      linkage_name = dw2_linkage_name (die, cu);
+      if (linkage_name != NULL)
+	{
+	  char *str;
+
+	  str = cp_strip_template_parameters (linkage_name);
+	  if (str != NULL)
+	    {
+	      /* It would be nice to assert on the return value.  Alas,
+		 the demangler could be old/outdated and unable to demangle
+		 the given linkage name.  We have to cope with that
+		 gracefully, even though a small part of me dies every time
+		 this happens.  */
+	      templ_func->search_name
+		= obstack_strdup (&objfile->objfile_obstack, str);
+	      xfree (str);
+	    }
+	}
     }
 
   possibly_add_new_xtor_method (name, die, cu);
@@ -18576,7 +18594,7 @@ dwarf2_start_symtab (struct dwarf2_cu *cu,
 		     const char *name, const char *comp_dir, CORE_ADDR low_pc)
 {
   struct compunit_symtab *cust
-    = start_symtab (cu->objfile, name, comp_dir, low_pc);
+    = start_symtab (cu->objfile, name, comp_dir, low_pc, cu->language);
 
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);

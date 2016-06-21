@@ -873,6 +873,63 @@ cp_func_name (const char *full_name)
   return ret;
 }
 
+/* See description in cp-support.h.  */
+
+char *
+cp_strip_template_parameters (const char *linkage_name)
+{
+  struct demangle_component *ret_comp;
+  struct demangle_parse_info *info;
+  void *storage = NULL;
+  char *ret, *demangled_name = NULL;
+
+  info = mangled_name_to_comp (linkage_name, DMGL_ANSI | DMGL_PARAMS,
+			       &storage, &demangled_name);
+
+  if (info == NULL)
+    return NULL;
+
+  ret_comp = info->tree;
+  ret = NULL;
+  if (ret_comp != NULL)
+    {
+      int done = 0;
+
+      while (!done)
+	{
+	  switch (ret_comp->type)
+	    {
+	    case DEMANGLE_COMPONENT_QUAL_NAME:
+	    case DEMANGLE_COMPONENT_LOCAL_NAME:
+	      ret_comp = d_right (ret_comp);
+	      break;
+	    case DEMANGLE_COMPONENT_TYPED_NAME:
+	    case DEMANGLE_COMPONENT_CONST:
+	    case DEMANGLE_COMPONENT_RESTRICT:
+	    case DEMANGLE_COMPONENT_VOLATILE:
+	    case DEMANGLE_COMPONENT_CONST_THIS:
+	    case DEMANGLE_COMPONENT_RESTRICT_THIS:
+	    case DEMANGLE_COMPONENT_VOLATILE_THIS:
+	    case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
+	      ret_comp = d_left (ret_comp);
+	      break;
+	    case DEMANGLE_COMPONENT_TEMPLATE:
+	      ret_comp = d_left (ret_comp);
+	      /* fall through */
+	    default:
+	      done = 1;
+	      break;
+	    }
+	}
+    }
+
+  ret = cp_comp_to_string (ret_comp, 10);
+  cp_demangled_name_parse_free (info);
+  xfree (storage);
+  xfree (demangled_name);
+  return ret;
+}
+
 /* DEMANGLED_NAME is the name of a function, including parameters and
    (optionally) a return type.  Return the name of the function without
    parameters or return type, or NULL if we can not parse the name.  */

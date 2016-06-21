@@ -182,6 +182,13 @@ extern int is_ada_operator (const char *string);
 
 extern const char *find_toplevel_char (const char *s, char c);
 
+/* The string equivalent of find_toplevel_char.  Returns a pointer
+   to the location of NEEDLE in HAYSTACK, ignoring any occurrences
+   inside "()" and "<>".  Returns NULL if NEEDLE was not found.  */
+
+const char *find_toplevel_string (const char *haystack,
+				  const char *needle);
+
 /* Find the end of the (first) linespec pointed to by *STRINGP.
    STRINGP will be advanced to this point.  */
 

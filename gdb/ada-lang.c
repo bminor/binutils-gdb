@@ -14084,6 +14084,7 @@ const struct language_defn ada_language_defn = {
   c_get_string,
   ada_get_symbol_name_cmp,	/* la_get_symbol_name_cmp */
   ada_iterate_over_symbols,
+  default_compute_string_hash,
   &ada_varobj_ops,
   NULL,
   NULL,

@@ -157,12 +157,12 @@ get_java_class_symtab (struct gdbarch *gdbarch)
       /* Allocate dummy STATIC_BLOCK.  */
       bl = allocate_block (&objfile->objfile_obstack);
       BLOCK_DICT (bl) = dict_create_linear (&objfile->objfile_obstack,
-					    NULL);
+					    language_java, NULL);
       BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 
       /* Allocate GLOBAL_BLOCK.  */
       bl = allocate_global_block (&objfile->objfile_obstack);
-      BLOCK_DICT (bl) = dict_create_hashed_expandable ();
+      BLOCK_DICT (bl) = dict_create_hashed_expandable (language_java);
       set_block_compunit_symtab (bl, class_symtab);
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
 
@@ -1200,6 +1200,7 @@ const struct language_defn java_language_defn =
   default_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  default_compute_string_hash,
   &java_varobj_ops,
   NULL,
   NULL,

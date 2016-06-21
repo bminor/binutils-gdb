@@ -900,6 +900,9 @@ struct template_symbol
   /* The base class.  */
   struct symbol base;
 
+  /* Search name of the template (it's name sans parameters).  */
+  char *search_name;
+
   /* The number of template arguments.  */
   int n_template_arguments;
 

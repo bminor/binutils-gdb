@@ -1082,6 +1082,7 @@ const struct language_defn opencl_language_defn =
   c_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  default_compute_string_hash,
   &default_varobj_ops,
   NULL,
   NULL,

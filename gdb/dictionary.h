@@ -35,7 +35,7 @@ struct dictionary;
 struct symbol;
 struct obstack;
 struct pending;
-
+struct language_defn;
 
 /* The creation functions for various implementations of
    dictionaries.  */
@@ -45,6 +45,7 @@ struct pending;
    initialized from SYMBOL_LIST.  */
 
 extern struct dictionary *dict_create_hashed (struct obstack *obstack,
+					      enum language language,
 					      const struct pending
 					      *symbol_list);
 
@@ -53,7 +54,8 @@ extern struct dictionary *dict_create_hashed (struct obstack *obstack,
    it, call dict_add_symbol().  Call dict_free() when you're done with
    it.  */
 
-extern struct dictionary *dict_create_hashed_expandable (void);
+extern struct dictionary *
+  dict_create_hashed_expandable (enum language language);
 
 /* Create a dictionary implemented via a fixed-size array.  All memory
    it uses is allocated on OBSTACK; the environment is initialized
@@ -61,6 +63,7 @@ extern struct dictionary *dict_create_hashed_expandable (void);
    that they're found in SYMBOL_LIST.  */
 
 extern struct dictionary *dict_create_linear (struct obstack *obstack,
+					      enum language language,
 					      const struct pending
 					      *symbol_list);
 
@@ -69,8 +72,12 @@ extern struct dictionary *dict_create_linear (struct obstack *obstack,
    it, call dict_add_symbol().  Call dict_free() when you're done with
    it.  */
 
-extern struct dictionary *dict_create_linear_expandable (void);
+extern struct dictionary *
+  dict_create_linear_expandable (enum language language);
 
+/* A default hashing function for symbols.  */
+
+extern unsigned int dict_hash (const char *string0);
 
 /* The functions providing the interface to dictionaries.  Note that
    the most common parts of the interface, namely symbol lookup, are

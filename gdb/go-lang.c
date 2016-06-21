@@ -596,6 +596,7 @@ static const struct language_defn go_language_defn =
   c_get_string,
   NULL,
   iterate_over_symbols,
+  default_compute_string_hash,
   &default_varobj_ops,
   NULL,
   NULL,

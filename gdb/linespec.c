@@ -1168,11 +1168,9 @@ find_toplevel_char (const char *s, char c)
   return 0;
 }
 
-/* The string equivalent of find_toplevel_char.  Returns a pointer
-   to the location of NEEDLE in HAYSTACK, ignoring any occurrences
-   inside "()" and "<>".  Returns NULL if NEEDLE was not found.  */
+/* See linespec.h.  */
 
-static const char *
+const char *
 find_toplevel_string (const char *haystack, const char *needle)
 {
   const char *s = haystack;
