@@ -2042,7 +2042,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	/* Echo the command on the console.  */
 	fprintf_unfiltered (gdb_stdlog, "%s\n", context->command);
 	/* Call the "console" interpreter.  */
-	argv[0] = "console";
+	argv[0] = INTERP_CONSOLE;
 	argv[1] = context->command;
 	mi_cmd_interpreter_exec ("-interpreter-exec", argv, 2);
 

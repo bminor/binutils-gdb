@@ -1,5 +1,17 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-interp.c: Include gdbthread.h and thread-fsm.h.
+	(should_print_stop_to_console): New function, factored out from
+	mi_on_normal_stop_1.
+	* cli/cli-interp.h (should_print_stop_to_console): Declare.
+	* mi/mi-interp.c (mi_on_normal_stop_1): Use
+	should_print_stop_to_console.  Pass it the current UI's console
+	interpreter.
+	* mi/mi-main.c (captured_mi_execute_command): Use the
+	INTERP_CONSOLE symbol rather than explicit "console".
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* infcmd.c (prepare_execution_command): Use
 	all_uis_on_sync_execution_starting.
 	* infrun.c (all_uis_on_sync_execution_starting): New function.

@@ -27,6 +27,8 @@
 #include "event-top.h"
 #include "infrun.h"
 #include "observer.h"
+#include "gdbthread.h"
+#include "thread-fsm.h"
 
 /* The console interpreter.  */
 struct cli_interp
@@ -50,6 +52,38 @@ as_cli_interp (struct interp *interp)
 static struct gdb_exception safe_execute_command (struct ui_out *uiout,
 						  char *command, 
 						  int from_tty);
+
+/* See cli-interp.h.
+
+   Breakpoint hits should always be mirrored to a console.  Deciding
+   what to mirror to a console wrt to breakpoints and random stops
+   gets messy real fast.  E.g., say "s" trips on a breakpoint.  We'd
+   clearly want to mirror the event to the console in this case.  But
+   what about more complicated cases like "s&; thread n; s&", and one
+   of those steps spawning a new thread, and that thread hitting a
+   breakpoint?  It's impossible in general to track whether the thread
+   had any relation to the commands that had been executed.  So we
+   just simplify and always mirror breakpoints and random events to
+   all consoles.
+
+   OTOH, we should print the source line to the console when stepping
+   or other similar commands, iff the step was started by that console
+   (or in MI's case, by a console command), but not if it was started
+   with MI's -exec-step or similar.  */
+
+int
+should_print_stop_to_console (struct interp *console_interp,
+			      struct thread_info *tp)
+{
+  if ((bpstat_what (tp->control.stop_bpstat).main_action
+       == BPSTAT_WHAT_STOP_NOISY)
+      || !(tp->thread_fsm != NULL
+	   && thread_fsm_finished_p (tp->thread_fsm))
+      || (tp->control.command_interp != NULL
+	  && tp->control.command_interp == console_interp))
+    return 1;
+  return 0;
+}
 
 /* Observers for several run control events.  If the interpreter is
    quiet (i.e., another interpreter is being run with
