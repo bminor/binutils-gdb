@@ -757,17 +757,12 @@ static char *gdb_readline_wrapper_result;
 static void (*saved_after_char_processing_hook) (void);
 
 
-/* The number of nested readline secondary prompts that are currently
-   active.  */
-
-static int gdb_secondary_prompt_depth = 0;
-
 /* See top.h.  */
 
 int
-gdb_in_secondary_prompt_p (void)
+gdb_in_secondary_prompt_p (struct ui *ui)
 {
-  return gdb_secondary_prompt_depth > 0;
+  return ui->secondary_prompt_depth > 0;
 }
 
 
@@ -828,8 +823,8 @@ gdb_readline_wrapper_cleanup (void *arg)
 
   gdb_readline_wrapper_result = NULL;
   gdb_readline_wrapper_done = 0;
-  gdb_secondary_prompt_depth--;
-  gdb_assert (gdb_secondary_prompt_depth >= 0);
+  ui->secondary_prompt_depth--;
+  gdb_assert (ui->secondary_prompt_depth >= 0);
 
   after_char_processing_hook = saved_after_char_processing_hook;
   saved_after_char_processing_hook = NULL;
@@ -859,7 +854,7 @@ gdb_readline_wrapper (const char *prompt)
 
   cleanup->target_is_async_orig = target_is_async_p ();
 
-  gdb_secondary_prompt_depth++;
+  ui->secondary_prompt_depth++;
   back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
 
   if (cleanup->target_is_async_orig)

@@ -1,5 +1,13 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* top.c (gdb_secondary_prompt_depth): Delete.
+	(gdb_in_secondary_prompt_p): Add ui parameter.  Use it.
+	(gdb_readline_wrapper_cleanup, gdb_readline_wrapper): Adjust to
+	per-UI gdb_secondary_prompt_depth.
+	* top.h (struct ui) <secondary_prompt_depth>: New field.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-interp.c (cli_interpreter_pre_command_loop): New
 	function.
 	(cli_interp_procs): Install it instead of cli_command_loop.

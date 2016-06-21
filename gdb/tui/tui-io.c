@@ -212,7 +212,7 @@ tui_redisplay_readline (void)
      The command could call prompt_for_continue and we must not
      restore SingleKey so that the prompt and normal keymap are used.  */
   if (tui_current_key_mode == TUI_ONE_COMMAND_MODE && rl_end == 0
-      && !gdb_in_secondary_prompt_p ())
+      && !gdb_in_secondary_prompt_p (current_ui))
     tui_set_key_mode (TUI_SINGLE_KEY_MODE);
 
   if (tui_current_key_mode == TUI_SINGLE_KEY_MODE)
@@ -585,7 +585,7 @@ tui_getc (FILE *fp)
          with empty lines with gdb prompt at beginning.  Instead of that,
          stay on the same line but provide a visual effect to show the
          user we recognized the command.  */
-      if (rl_end == 0 && !gdb_in_secondary_prompt_p ())
+      if (rl_end == 0 && !gdb_in_secondary_prompt_p (current_ui))
         {
 	  wmove (w, getcury (w), 0);
 

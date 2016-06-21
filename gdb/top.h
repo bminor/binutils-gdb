@@ -73,6 +73,10 @@ struct ui
      "start" -ex "next"') are processed.  */
   int async;
 
+  /* The number of nested readline secondary prompts that are
+     currently active.  */
+  int secondary_prompt_depth;
+
   /* stdio stream that command input is being read from.  Set to stdin
      normally.  Set by source_command to the file we are sourcing.
      Set to NULL if we are executing a user-defined command or
@@ -190,9 +194,10 @@ extern char *get_prompt (void);
    by gdb for its command prompt.  */
 extern void set_prompt (const char *s);
 
-/* Return 1 if the current input handler is a secondary prompt, 0 otherwise.  */
+/* Return 1 if UI's current input handler is a secondary prompt, 0
+   otherwise.  */
 
-extern int gdb_in_secondary_prompt_p (void);
+extern int gdb_in_secondary_prompt_p (struct ui *ui);
 
 /* From random places.  */
 extern int readnow_symbol_files;
