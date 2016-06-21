@@ -1,5 +1,9 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* mi/mi-interp.c (display_mi_prompt): New function.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* target.c (target_terminal_inferior): Bail out after
 	unregistering input_fd if not on the main UI.
 	(target_terminal_ours): Bail out after registering input_fd if not

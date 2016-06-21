@@ -89,6 +89,15 @@ static void mi_on_sync_execution_done (void);
 
 static int report_initial_inferior (struct inferior *inf, void *closure);
 
+/* Display the MI prompt.  */
+
+static void
+display_mi_prompt (void)
+{
+  fputs_unfiltered ("(gdb) \n", raw_stdout);
+  gdb_flush (raw_stdout);
+}
+
 /* Returns the INTERP's data cast as mi_interp if INTERP is an MI, and
    returns NULL otherwise.  */
 
@@ -300,10 +309,7 @@ mi_on_sync_execution_done (void)
   /* If MI is sync, then output the MI prompt now, indicating we're
      ready for further input.  */
   if (!mi_async_p ())
-    {
-      fputs_unfiltered ("(gdb) \n", raw_stdout);
-      gdb_flush (raw_stdout);
-    }
+    display_mi_prompt ();
 }
 
 /* mi_execute_command_wrapper wrapper suitable for INPUT_HANDLER.  */
@@ -319,10 +325,7 @@ mi_execute_command_input_handler (char *cmd)
      'synchronous_command_done' observer when the target next
      stops.  */
   if (!sync_execution)
-    {
-      fputs_unfiltered ("(gdb) \n", raw_stdout);
-      gdb_flush (raw_stdout);
-    }
+    display_mi_prompt ();
 }
 
 static void
@@ -333,8 +336,7 @@ mi_command_loop (void *data)
   sevenbit_strings = 1;
 
   /* Tell the world that we're alive.  */
-  fputs_unfiltered ("(gdb) \n", raw_stdout);
-  gdb_flush (raw_stdout);
+  display_mi_prompt ();
 
   start_event_loop ();
 }
