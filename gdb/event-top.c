@@ -437,11 +437,10 @@ top_level_prompt (void)
   return xstrdup (prompt);
 }
 
-/* The main UI.  This is the UI that is bound to stdin/stdout/stderr.
-   It always exists and is created automatically when GDB starts
-   up.  */
+/* The main UI.  */
 static struct ui main_ui_;
 
+struct ui *main_ui = &main_ui_;
 struct ui *current_ui = &main_ui_;
 struct ui *ui_list = &main_ui_;
 
