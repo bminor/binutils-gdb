@@ -92,10 +92,10 @@ static int report_initial_inferior (struct inferior *inf, void *closure);
 /* Display the MI prompt.  */
 
 static void
-display_mi_prompt (void)
+display_mi_prompt (struct mi_interp *mi)
 {
-  fputs_unfiltered ("(gdb) \n", raw_stdout);
-  gdb_flush (raw_stdout);
+  fputs_unfiltered ("(gdb) \n", mi->raw_stdout);
+  gdb_flush (mi->raw_stdout);
 }
 
 /* Returns the INTERP's data cast as mi_interp if INTERP is an MI, and
@@ -116,20 +116,18 @@ mi_interpreter_init (struct interp *interp, int top_level)
   const char *name;
   int mi_version;
 
-  /* Assign the output channel created at startup to its own global,
-     so that we can create a console channel that encapsulates and
-     prefixes all gdb_output-type bits coming from the rest of the
-     debugger.  */
-
-  raw_stdout = gdb_stdout;
+  /* Store the current output channel, so that we can create a console
+     channel that encapsulates and prefixes all gdb_output-type bits
+     coming from the rest of the debugger.  */
+  mi->raw_stdout = gdb_stdout;
 
   /* Create MI console channels, each with a different prefix so they
      can be distinguished.  */
-  mi->out = mi_console_file_new (raw_stdout, "~", '"');
-  mi->err = mi_console_file_new (raw_stdout, "&", '"');
+  mi->out = mi_console_file_new (mi->raw_stdout, "~", '"');
+  mi->err = mi_console_file_new (mi->raw_stdout, "&", '"');
   mi->log = mi->err;
-  mi->targ = mi_console_file_new (raw_stdout, "@", '"');
-  mi->event_channel = mi_console_file_new (raw_stdout, "=", 0);
+  mi->targ = mi_console_file_new (mi->raw_stdout, "@", '"');
+  mi->event_channel = mi_console_file_new (mi->raw_stdout, "=", 0);
 
   name = interp_name (interp);
   /* INTERP_MI selects the most recent released version.  "mi2" was
@@ -309,7 +307,7 @@ mi_on_sync_execution_done (void)
   /* If MI is sync, then output the MI prompt now, indicating we're
      ready for further input.  */
   if (!mi_async_p ())
-    display_mi_prompt ();
+    display_mi_prompt (mi);
 }
 
 /* mi_execute_command_wrapper wrapper suitable for INPUT_HANDLER.  */
@@ -317,6 +315,8 @@ mi_on_sync_execution_done (void)
 static void
 mi_execute_command_input_handler (char *cmd)
 {
+  struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+
   mi_execute_command_wrapper (cmd);
 
   /* Print a prompt, indicating we're ready for further input, unless
@@ -325,18 +325,20 @@ mi_execute_command_input_handler (char *cmd)
      'synchronous_command_done' observer when the target next
      stops.  */
   if (!sync_execution)
-    display_mi_prompt ();
+    display_mi_prompt (mi);
 }
 
 static void
 mi_command_loop (void *data)
 {
+  struct mi_interp *mi = (struct mi_interp *) data;
+
   /* Turn off 8 bit strings in quoted output.  Any character with the
      high bit set is printed using C's octal format.  */
   sevenbit_strings = 1;
 
   /* Tell the world that we're alive.  */
-  display_mi_prompt ();
+  display_mi_prompt (mi);
 
   start_event_loop ();
 }
@@ -682,6 +684,7 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
      using cli interpreter, be sure to use MI uiout for output,
      not the current one.  */
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   if (print_frame)
     {
@@ -723,12 +726,7 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
 	       && thread_fsm_finished_p (tp->thread_fsm))
 	  || (tp->control.command_interp != NULL
 	      && tp->control.command_interp != top_level_interpreter ()))
-	{
-	  struct mi_interp *mi
-	    = (struct mi_interp *) top_level_interpreter_data ();
-
-	  print_stop_event (mi->cli_uiout);
-	}
+	print_stop_event (mi->cli_uiout);
 
       tp = inferior_thread ();
       ui_out_field_int (mi_uiout, "thread-id", tp->global_num);
@@ -748,12 +746,12 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
 	ui_out_field_int (mi_uiout, "core", core);
     }
   
-  fputs_unfiltered ("*stopped", raw_stdout);
-  mi_out_put (mi_uiout, raw_stdout);
+  fputs_unfiltered ("*stopped", mi->raw_stdout);
+  mi_out_put (mi_uiout, mi->raw_stdout);
   mi_out_rewind (mi_uiout);
-  mi_print_timing_maybe ();
-  fputs_unfiltered ("\n", raw_stdout);
-  gdb_flush (raw_stdout);
+  mi_print_timing_maybe (mi->raw_stdout);
+  fputs_unfiltered ("\n", mi->raw_stdout);
+  gdb_flush (mi->raw_stdout);
 }
 
 static void
@@ -1079,7 +1077,7 @@ mi_output_running_pid (struct thread_info *info, void *arg)
 	continue;
 
       if (ptid_get_pid (*ptid) == ptid_get_pid (info->ptid))
-	fprintf_unfiltered (raw_stdout,
+	fprintf_unfiltered (mi->raw_stdout,
 			    "*running,thread-id=\"%d\"\n",
 			    info->global_num);
     }
@@ -1100,7 +1098,7 @@ mi_inferior_count (struct inferior *inf, void *arg)
 }
 
 static void
-mi_on_resume_1 (ptid_t ptid)
+mi_on_resume_1 (struct mi_interp *mi, ptid_t ptid)
 {
   /* To cater for older frontends, emit ^running, but do it only once
      per each command.  We do it here, since at this point we know
@@ -1112,12 +1110,12 @@ mi_on_resume_1 (ptid_t ptid)
      In future (MI3), we'll be outputting "^done" here.  */
   if (!running_result_record_printed && mi_proceeded)
     {
-      fprintf_unfiltered (raw_stdout, "%s^running\n",
+      fprintf_unfiltered (mi->raw_stdout, "%s^running\n",
 			  current_token ? current_token : "");
     }
 
   if (ptid_get_pid (ptid) == -1)
-    fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
+    fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"all\"\n");
   else if (ptid_is_pid (ptid))
     {
       int count = 0;
@@ -1128,7 +1126,7 @@ mi_on_resume_1 (ptid_t ptid)
       iterate_over_inferiors (mi_inferior_count, &count);
 
       if (count == 1)
-	fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
+	fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"all\"\n");
       else
 	iterate_over_threads (mi_output_running_pid, &ptid);
     }
@@ -1137,7 +1135,7 @@ mi_on_resume_1 (ptid_t ptid)
       struct thread_info *ti = find_thread_ptid (ptid);
 
       gdb_assert (ti);
-      fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n",
+      fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"%d\"\n",
 			  ti->global_num);
     }
 
@@ -1150,9 +1148,9 @@ mi_on_resume_1 (ptid_t ptid)
 	 checked here because we only need to emit a prompt if a
 	 synchronous command was issued when the target is async.  */
       if (!target_can_async_p () || sync_execution)
-	fputs_unfiltered ("(gdb) \n", raw_stdout);
+	fputs_unfiltered ("(gdb) \n", mi->raw_stdout);
     }
-  gdb_flush (raw_stdout);
+  gdb_flush (mi->raw_stdout);
 }
 
 static void
@@ -1181,7 +1179,7 @@ mi_on_resume (ptid_t ptid)
       old_chain = make_cleanup_restore_target_terminal ();
       target_terminal_ours_for_output ();
 
-      mi_on_resume_1 (ptid);
+      mi_on_resume_1 (mi, ptid);
 
       do_cleanups (old_chain);
     }
@@ -1391,11 +1389,6 @@ mi_ui_out (struct interp *interp)
   return mi->mi_uiout;
 }
 
-/* Save the original value of raw_stdout here when logging, so we can
-   restore correctly when done.  */
-
-static struct ui_file *saved_raw_stdout;
-
 /* Do MI-specific logging actions; save raw_stdout, and change all
    the consoles to use the supplied ui-file(s).  */
 
@@ -1418,23 +1411,23 @@ mi_set_logging (struct interp *interp, int start_log,
       if (logfile)
 	{
 	  ui_file_delete (out);
-	  out = tee_file_new (raw_stdout, 0, logfile, 0);
+	  out = tee_file_new (mi->raw_stdout, 0, logfile, 0);
 	}
 
-      saved_raw_stdout = raw_stdout;
-      raw_stdout = out;
+      mi->saved_raw_stdout = mi->raw_stdout;
+      mi->raw_stdout = out;
     }
   else
     {
-      raw_stdout = saved_raw_stdout;
-      saved_raw_stdout = NULL;
+      mi->raw_stdout = mi->saved_raw_stdout;
+      mi->saved_raw_stdout = NULL;
     }
   
-  mi_console_set_raw (mi->out, raw_stdout);
-  mi_console_set_raw (mi->err, raw_stdout);
-  mi_console_set_raw (mi->log, raw_stdout);
-  mi_console_set_raw (mi->targ, raw_stdout);
-  mi_console_set_raw (mi->event_channel, raw_stdout);
+  mi_console_set_raw (mi->out, mi->raw_stdout);
+  mi_console_set_raw (mi->err, mi->raw_stdout);
+  mi_console_set_raw (mi->log, mi->raw_stdout);
+  mi_console_set_raw (mi->targ, mi->raw_stdout);
+  mi_console_set_raw (mi->event_channel, mi->raw_stdout);
 
   return 1;
 }

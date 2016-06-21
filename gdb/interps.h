@@ -116,6 +116,9 @@ extern int current_interp_set_logging (int start_log, struct ui_file *out,
 extern void *top_level_interpreter_data (void);
 extern struct interp *top_level_interpreter (void);
 
+/* Return the current UI's current interpreter.  */
+extern struct interp *current_interpreter (void);
+
 extern struct interp *command_interp (void);
 
 extern void clear_interpreter_hooks (void);

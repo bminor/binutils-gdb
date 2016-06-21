@@ -1,5 +1,33 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* interps.c (current_interpreter): New function.
+	* interps.h (current_interpreter): New declaration.
+	* mi/mi-cmds.h (raw_stdout): Delete declaration.
+	* mi/mi-common.h (struct mi_interp) <raw_stdout,
+	saved_raw_stdout>: New field.
+	* mi/mi-interp.c (display_mi_prompt): New parameter 'mi'.  Adjust
+	to per-UI raw_stdout.
+	(mi_interpreter_init): Adjust to per-UI raw_stdout.
+	(mi_on_sync_execution_done, mi_execute_command_input_handler)
+	(mi_command_loop): Pass MI instance to display_mi_prompt.
+	(mi_on_normal_stop_1, mi_output_running_pid, mi_on_resume_1)
+	(mi_on_resume): Adjust to per-UI raw_stdout.
+	(saved_raw_stdout): Delete.
+	(mi_set_logging): Adjust to per-UI raw_stdout and
+	saved_raw_stdout.
+	* mi/mi-main.c (raw_stdout): Delete.
+	(mi_cmd_gdb_exit, captured_mi_execute_command)
+	(mi_print_exception, mi_load_progress): Adjust to per-UI
+	raw_stdout.
+	(print_diff_now, mi_print_timing_maybe): New ui_file parameter.
+	Pass it along.
+	(print_diff): New ui_file parameter.  Send output there instead of
+	raw_stdout.
+	* mi/mi-main.h (struct ui_file): Forward declare.
+	(mi_print_timing_maybe): Add ui_file parameter.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* mi/mi-interp.c (display_mi_prompt): New function.
 
 2016-06-21  Pedro Alves  <palves@redhat.com>
