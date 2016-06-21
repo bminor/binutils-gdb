@@ -238,4 +238,9 @@ extern void maybe_remove_breakpoints (void);
    ready for input).  */
 extern void all_uis_check_sync_execution_done (void);
 
+/* If a UI was in sync execution mode, and hasn't displayed the prompt
+   yet, re-disable its prompt (a synchronous execution command was
+   started or re-started).  */
+extern void all_uis_on_sync_execution_starting (void);
+
 #endif /* INFRUN_H */

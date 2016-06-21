@@ -3873,6 +3873,20 @@ all_uis_check_sync_execution_done (void)
     }
 }
 
+/* See infrun.h.  */
+
+void
+all_uis_on_sync_execution_starting (void)
+{
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      if (current_ui->prompt_state == PROMPT_NEEDED)
+	async_disable_stdin ();
+    }
+}
+
 /* A cleanup that restores the execution direction to the value saved
    in *ARG.  */
 

@@ -510,7 +510,7 @@ prepare_execution_command (struct target_ops *target, int background)
 	 simulate synchronous (fg) execution.  Note no cleanup is
 	 necessary for this.  stdin is re-enabled whenever an error
 	 reaches the top level.  */
-      async_disable_stdin ();
+      all_uis_on_sync_execution_starting ();
     }
 }
 

@@ -1,5 +1,12 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* infcmd.c (prepare_execution_command): Use
+	all_uis_on_sync_execution_starting.
+	* infrun.c (all_uis_on_sync_execution_starting): New function.
+	* infrun.h (all_uis_on_sync_execution_starting): Declare.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* annotate.c: Include top.h.
 	(async_background_execution_p): Delete.
 	(print_value_flags): Check the UI's prompt state rather then
