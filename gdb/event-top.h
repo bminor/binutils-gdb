@@ -57,8 +57,6 @@ extern void async_enable_stdin (void);
 extern int async_command_editing_p;
 extern int exec_done_display_p;
 extern struct prompts the_prompts;
-extern void (*call_readline) (void *);
-extern void (*input_handler) (char *);
 extern int input_fd;
 extern void (*after_char_processing_hook) (void);
 extern int call_stdin_event_handler_again_p;

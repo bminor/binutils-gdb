@@ -1,5 +1,32 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c: Update readline-related comments.
+	(input_handler, call_readline): Delete globals.
+	(gdb_rl_callback_handler): Call the current UI's input_handler
+	method.
+	(change_line_handler): Adjust to set current UI's properties
+	instead of globals.
+	(current_ui_, current_ui): New globals.
+	(get_command_line_buffer): Rewrite to refer to the current UI.
+	(stdin_event_handler): Adjust to call the call_readline method of
+	the current UI.
+	(gdb_readline_no_editing_callback): Adjust to call the current UI's
+	input_handler method.
+	(gdb_setup_readline): Adjust to set current UI's properties
+	instead of globals.
+	* event-top.h (call_readline, input_handler): Delete declarations.
+	* mi/mi-interp.c (mi_interpreter_resume): Adjust to set current
+	UI's properties instead of globals.
+	* top.c (gdb_readline_wrapper_cleanup): Adjust to set current UI's
+	properties instead of globals.
+	(gdb_readline_wrapper): Adjust to call and set current UI's
+	methods instead of globals.
+	* top.h: Include buffer.h and event-loop.h.
+	(struct ui): New struct.
+	(current_ui): New declaration.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_exception_name_addr_1): Add comment.
 	(print_it_exception): Select the current frame.
 

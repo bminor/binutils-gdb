@@ -20,7 +20,38 @@
 #ifndef TOP_H
 #define TOP_H
 
-struct buffer;
+#include "buffer.h"
+#include "event-loop.h"
+
+/* All about a user interface instance.  Each user interface has its
+   own I/O files/streams, readline state, its own top level
+   interpreter (for the main UI, this is the interpreter specified
+   with -i on the command line) and secondary interpreters (for
+   interpreter-exec ...), etc.  There's always one UI associated with
+   stdin/stdout/stderr, but the user can create secondary UIs, for
+   example, to create a separate MI channel on its own stdio
+   streams.  */
+
+struct ui
+{
+  /* The UI's command line buffer.  This is to used to accumulate
+     input until we have a whole command line.  */
+  struct buffer line_buffer;
+
+  /* The callback used by the event loop whenever an event is detected
+     on the UI's input file descriptor.  This function incrementally
+     builds a buffer where it accumulates the line read up to the
+     point of invocation.  In the special case in which the character
+     read is newline, the function invokes the INPUT_HANDLER callback
+     (see below).  */
+  void (*call_readline) (gdb_client_data);
+
+  /* The function to invoke when a complete line of input is ready for
+     processing.  */
+  void (*input_handler) (char *);
+};
+
+extern struct ui *current_ui;
 
 /* From top.c.  */
 extern char *saved_command_line;

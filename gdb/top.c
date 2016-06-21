@@ -794,13 +794,14 @@ struct gdb_readline_wrapper_cleanup
 static void
 gdb_readline_wrapper_cleanup (void *arg)
 {
+  struct ui *ui = current_ui;
   struct gdb_readline_wrapper_cleanup *cleanup
     = (struct gdb_readline_wrapper_cleanup *) arg;
 
   rl_already_prompted = cleanup->already_prompted_orig;
 
-  gdb_assert (input_handler == gdb_readline_wrapper_line);
-  input_handler = cleanup->handler_orig;
+  gdb_assert (ui->input_handler == gdb_readline_wrapper_line);
+  ui->input_handler = cleanup->handler_orig;
 
   /* Don't restore our input handler in readline yet.  That would make
      readline prep the terminal (putting it in raw mode), while the
@@ -826,13 +827,14 @@ gdb_readline_wrapper_cleanup (void *arg)
 char *
 gdb_readline_wrapper (const char *prompt)
 {
+  struct ui *ui = current_ui;
   struct cleanup *back_to;
   struct gdb_readline_wrapper_cleanup *cleanup;
   char *retval;
 
   cleanup = XNEW (struct gdb_readline_wrapper_cleanup);
-  cleanup->handler_orig = input_handler;
-  input_handler = gdb_readline_wrapper_line;
+  cleanup->handler_orig = ui->input_handler;
+  ui->input_handler = gdb_readline_wrapper_line;
 
   cleanup->already_prompted_orig = rl_already_prompted;
 
