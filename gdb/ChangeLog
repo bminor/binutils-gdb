@@ -1,3 +1,8 @@
+2016-06-21  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* f-valprint.c (f_val_print): Add field names for printing
+	derived types fields.
+
 2016-06-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c (s390_iterate_over_regset_sections): Fix typo

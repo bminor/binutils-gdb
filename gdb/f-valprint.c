@@ -219,6 +219,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   struct gdbarch *gdbarch = get_type_arch (type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int i = 0;	/* Number of characters printed.  */
+  int printed_field = 0; /* Number of fields printed.  */
   struct type *elttype;
   CORE_ADDR addr;
   int index;
@@ -337,15 +338,32 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  struct value *field = value_field
 	    ((struct value *)original_value, index);
 
-          val_print (value_type (field),
-		     value_contents_for_printing (field),
-		     value_embedded_offset (field),
-		     value_address (field), stream, recurse + 1,
-		     field, options, current_language);
+	  struct type *field_type = check_typedef (TYPE_FIELD_TYPE (type, index));
 
-          if (index != TYPE_NFIELDS (type) - 1)
-            fputs_filtered (", ", stream);
-        }
+
+	  if (TYPE_CODE (field_type) != TYPE_CODE_FUNC)
+	    {
+	      const char *field_name;
+
+	      if (printed_field > 0)
+		fputs_filtered (", ", stream);
+
+	      field_name = TYPE_FIELD_NAME (type, index);
+	      if (field_name != NULL)
+		{
+		  fputs_filtered (field_name, stream);
+		  fputs_filtered (" = ", stream);
+		}
+
+	      val_print (value_type (field),
+			 value_contents_for_printing (field),
+			 value_embedded_offset (field),
+			 value_address (field), stream, recurse + 1,
+			 field, options, current_language);
+
+	      ++printed_field;
+	    }
+	 }
       fprintf_filtered (stream, " )");
       break;     
 

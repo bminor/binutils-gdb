@@ -33,7 +33,7 @@ set int [fortran_int4]
 # the debugger when accessing it.
 gdb_breakpoint [gdb_get_line_number "before-allocated"]
 gdb_continue_to_breakpoint "before-allocated"
-gdb_test "print twov" " = \\\( <not allocated>, <not allocated> \\\)" \
+gdb_test "print twov" " = \\\( ivla1 = <not allocated>, ivla2 = <not allocated> \\\)" \
   "print twov before allocated"
 gdb_test "print twov%ivla1" " = <not allocated>" \
   "print twov%ivla1 before allocated"
@@ -60,7 +60,7 @@ gdb_test "ptype twov" \
                      "\\s+$int :: ivla1\\\(5,12,99\\\)" \
                      "\\s+$int :: ivla2\\\(9,12\\\)" \
                      "End Type two" ]
-gdb_test "print twov" " = \\\( \\\(\\\( \\\( 1, 1, 1, 1, 1\\\)\
+gdb_test "print twov" " = \\\( ivla1 = \\\(\\\( \\\( 1, 1, 1, 1, 1\\\)\
  \\\( 1, 1, 321, 1, 1\\\)\
  \\\( 1, 1, 1, 1, 1\\\) .*"
 
