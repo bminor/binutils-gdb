@@ -68,10 +68,6 @@ static int gdb_datadir_provided = 0;
    the possibly relocated path to python's lib directory.  */
 char *python_libdir = 0;
 
-struct ui_file *gdb_stdout;
-struct ui_file *gdb_stderr;
-struct ui_file *gdb_stdlog;
-struct ui_file *gdb_stdin;
 /* Target IO streams.  */
 struct ui_file *gdb_stdtargin;
 struct ui_file *gdb_stdtarg;

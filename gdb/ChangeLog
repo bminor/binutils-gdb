@@ -1,5 +1,18 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* main.c (gdb_stdout, gdb_stderr, gdb_stdlog, gdb_stdin): Delete
+	globals.
+	(gen_ret_current_ui_field_ptr): New macro.  Use it to generate
+	wrappers for gdb_stdout, gdb_stderr, gdb_stdlog and gdb_stdin.
+	* top.h (struct ui) <m_gdb_stdout, m_gdb_stdin, m_gdb_stderr,
+	m_gdb_stdlog>: New fields.
+	(current_ui_gdb_stdout_ptr, current_ui_gdb_stdin_ptr)
+	(current_ui_gdb_stderr_ptr, current_ui_gdb_stdlog_ptr): Declare.
+	(gdb_stdout, gdb_stdin, gdb_stderr, gdb_stdlog): Reimplement as
+	macros.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c: Update readline-related comments.
 	(input_handler, call_readline): Delete globals.
 	(gdb_rl_callback_handler): Call the current UI's input_handler

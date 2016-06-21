@@ -86,6 +86,21 @@ extern void initialize_all_files (void);
 #define DEFAULT_PROMPT	"(gdb) "
 #endif
 
+/* Generate a function that exports a pointer to a field of the
+   current UI.  */
+
+#define gen_ret_current_ui_field_ptr(type, name)	\
+type *							\
+current_ui_## name ## _ptr (void)			\
+{							\
+  return &current_ui->m_ ## name;		\
+}
+
+gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdout)
+gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdin)
+gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stderr)
+gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdlog)
+
 /* Initialization file name for gdb.  This is host-dependent.  */
 
 const char gdbinit[] = GDBINIT;

@@ -49,6 +49,23 @@ struct ui
   /* The function to invoke when a complete line of input is ready for
      processing.  */
   void (*input_handler) (char *);
+
+  /* The fields below that start with "m_" are "private".  They're
+     meant to be accessed through wrapper macros that make them look
+     like globals.  */
+
+  /* The ui_file streams.  */
+  /* Normal results */
+  struct ui_file *m_gdb_stdout;
+  /* Input stream */
+  struct ui_file *m_gdb_stdin;
+  /* Serious error notifications */
+  struct ui_file *m_gdb_stderr;
+  /* Log/debug/trace messages that should bypass normal stdout/stderr
+     filtering.  For moment, always call this stream using
+     *_unfiltered.  In the very near future that restriction shall be
+     removed - either call shall be unfiltered.  (cagney 1999-06-13).  */
+  struct ui_file *m_gdb_stdlog;
 };
 
 extern struct ui *current_ui;
