@@ -1,3 +1,11 @@
+2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_perform_relocation): Call
+	`info->callbacks->einfo' rather than `*_bfd_error_handler' and
+	use the `%X%H' format for the cross-mode jump conversion error
+	message.  Remove the full stop from the end of the message.
+	Continue processing rather than returning failure.
+
 2016-06-21  Graham Markall  <graham.markall@embecosm.com>
 
 	* archures.c: Remove bfd_mach_arc_nps400.

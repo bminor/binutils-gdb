@@ -6273,13 +6273,11 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
          convert J or JALS to JALX.  */
       if (!ok)
 	{
-	  (*_bfd_error_handler)
-	    (_("%B: %A+0x%lx: Unsupported jump between ISA modes; consider recompiling with interlinking enabled."),
-	     input_bfd,
-	     input_section,
-	     (unsigned long) relocation->r_offset);
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  info->callbacks->einfo
+	    (_("%X%H: Unsupported jump between ISA modes; "
+	       "consider recompiling with interlinking enabled\n"),
+	     input_bfd, input_section, relocation->r_offset);
+	  return TRUE;
 	}
 
       /* Make this the JALX opcode.  */

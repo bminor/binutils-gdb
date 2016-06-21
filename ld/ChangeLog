@@ -1,3 +1,10 @@
+2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mode-change-error-1a.s: Trigger an error
+	twice rather than once.
+	* testsuite/ld-mips-elf/mode-change-error-1.d: Adjust
+	accordingly.  Remove the full stop from the end of the message.
+
 2016-06-21  Graham Markall  <graham.markall@embecosm.com>
 
 	* testsuite/ld-arc/nps-1a.d: Use -mcpu=arc700 -mnps400.
