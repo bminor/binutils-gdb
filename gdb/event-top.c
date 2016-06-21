@@ -508,33 +508,45 @@ stdin_event_handler (int error, gdb_client_data client_data)
 {
   struct ui *ui = (struct ui *) client_data;
 
-  /* Switch to the UI whose input descriptor woke up the event
-     loop.  */
-  current_ui = ui;
-
   if (error)
     {
-      printf_unfiltered (_("error detected on stdin\n"));
+      /* Switch to the main UI, so diagnostics always go there.  */
+      current_ui = main_ui;
+
       delete_file_handler (ui->input_fd);
-      /* If stdin died, we may as well kill gdb.  */
-      quit_command ((char *) 0, stdin == ui->instream);
+      if (main_ui == ui)
+	{
+	  /* If stdin died, we may as well kill gdb.  */
+	  printf_unfiltered (_("error detected on stdin\n"));
+	  quit_command ((char *) 0, stdin == ui->instream);
+	}
+      else
+	{
+	  /* Simply delete the UI.  */
+	  delete_ui (ui);
+	}
     }
   else
     {
-    /* This makes sure a ^C immediately followed by further input is
-       always processed in that order.  E.g,. with input like
-       "^Cprint 1\n", the SIGINT handler runs, marks the async signal
-       handler, and then select/poll may return with stdin ready,
-       instead of -1/EINTR.  The
-       gdb.base/double-prompt-target-event-error.exp test exercises
-       this.  */
+      /* Switch to the UI whose input descriptor woke up the event
+	 loop.  */
+      current_ui = ui;
+
+      /* This makes sure a ^C immediately followed by further input is
+	 always processed in that order.  E.g,. with input like
+	 "^Cprint 1\n", the SIGINT handler runs, marks the async
+	 signal handler, and then select/poll may return with stdin
+	 ready, instead of -1/EINTR.  The
+	 gdb.base/double-prompt-target-event-error.exp test exercises
+	 this.  */
       QUIT;
 
       do
 	{
 	  call_stdin_event_handler_again_p = 0;
 	  ui->call_readline (client_data);
-	} while (call_stdin_event_handler_again_p != 0);
+	}
+      while (call_stdin_event_handler_again_p != 0);
     }
 }
 

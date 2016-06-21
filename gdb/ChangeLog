@@ -1,5 +1,11 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (stdin_event_handler): Don't quit gdb if it was a
+	secondary UI's input stream that closed.  Instead, just delete the
+	UI.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (main_ui_): Delete.
 	(main_ui, current_ui, ui_list): No longer initialize here.
 	* main.c (captured_main): UI initialization code factored out to

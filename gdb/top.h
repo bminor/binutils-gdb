@@ -175,6 +175,7 @@ extern void switch_thru_all_uis_next (struct switch_thru_all_uis *state);
 
 /* Create a new UI.  */
 extern struct ui *new_ui (FILE *instream, FILE *outstream, FILE *errstream);
+extern void delete_ui (struct ui *todel);
 
 /* Cleanup that restores the current UI.  */
 extern void restore_ui_cleanup (void *data);

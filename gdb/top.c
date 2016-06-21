@@ -286,6 +286,37 @@ new_ui (FILE *instream, FILE *outstream, FILE *errstream)
   return ui;
 }
 
+static void
+free_ui (struct ui *ui)
+{
+  ui_file_delete (ui->m_gdb_stdin);
+  ui_file_delete (ui->m_gdb_stdout);
+  ui_file_delete (ui->m_gdb_stderr);
+
+  xfree (ui);
+}
+
+void
+delete_ui (struct ui *todel)
+{
+  struct ui *ui, *uiprev;
+
+  uiprev = NULL;
+
+  for (ui = ui_list; ui != NULL; uiprev = ui, ui = ui->next)
+    if (ui == todel)
+      break;
+
+  gdb_assert (ui != NULL);
+
+  if (uiprev != NULL)
+    uiprev->next = ui->next;
+  else
+    ui_list = ui->next;
+
+  free_ui (ui);
+}
+
 /* Handler for SIGHUP.  */
 
 #ifdef SIGHUP
