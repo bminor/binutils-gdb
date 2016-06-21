@@ -1,5 +1,10 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* gdb.ada/mi_catch_ex.exp (continue_to_exception): New procedure.
+	(top level): Use it instead of mi_execute_to.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* gdb.python/py-mi-events-gdb.py (stop_handler_str)
 	(cont_handler_str): New.
 	(signal_stop_handler): Set stop_handler_str instead of printing to

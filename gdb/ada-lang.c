@@ -12183,6 +12183,8 @@ ada_unhandled_exception_name_addr_from_raise (void)
    (of any type), return the address in inferior memory where the name
    of the exception is stored, if applicable.
 
+   Assumes the selected frame is the current frame.
+
    Return zero if the address could not be computed, or if not relevant.  */
 
 static CORE_ADDR
@@ -12483,6 +12485,13 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	                                  : "\nCatchpoint ");
   ui_out_field_int (uiout, "bkptno", b->number);
   ui_out_text (uiout, ", ");
+
+  /* ada_exception_name_addr relies on the selected frame being the
+     current frame.  Need to do this here because this function may be
+     called more than once when printing a stop, and below, we'll
+     select the first frame past the Ada run-time (see
+     ada_find_printable_frame).  */
+  select_frame (get_current_frame ());
 
   switch (ex)
     {

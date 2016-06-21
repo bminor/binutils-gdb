@@ -1,3 +1,8 @@
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_exception_name_addr_1): Add comment.
+	(print_it_exception): Select the current frame.
+
 2016-06-17  Yan-Ting Lin  <currygt52@gmail.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add nds32-tdep.o.
