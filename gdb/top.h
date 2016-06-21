@@ -141,6 +141,9 @@ extern void switch_thru_all_uis_next (struct switch_thru_all_uis *state);
        switch_thru_all_uis_cond (&STATE);		\
        switch_thru_all_uis_next (&STATE))
 
+/* Cleanup that restores the current UI.  */
+extern void restore_ui_cleanup (void *data);
+
 /* From top.c.  */
 extern char *saved_command_line;
 extern int in_user_command;

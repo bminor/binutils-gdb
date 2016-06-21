@@ -3879,6 +3879,12 @@ fetch_inferior_event (void *client_data)
 
   memset (ecs, 0, sizeof (*ecs));
 
+  /* Events are always processed with the main UI as current UI.  This
+     way, warnings, debug output, etc. are always consistently sent to
+     the main console.  */
+  make_cleanup (restore_ui_cleanup, current_ui);
+  current_ui = main_ui;
+
   /* End up with readline processing input, if necessary.  */
   make_cleanup (reinstall_readline_callback_handler_cleanup, NULL);
 

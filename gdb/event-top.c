@@ -456,9 +456,9 @@ struct ui *main_ui = &main_ui_;
 struct ui *current_ui = &main_ui_;
 struct ui *ui_list = &main_ui_;
 
-/* Cleanup that restores the current UI.  */
+/* See top.h.  */
 
-static void
+void
 restore_ui_cleanup (void *data)
 {
   current_ui = (struct ui *) data;

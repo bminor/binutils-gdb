@@ -1,5 +1,11 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (restore_ui_cleanup): Make extern.
+	* infrun.c (fetch_inferior_event): Always switch to the main UI.
+	* top.h (restore_ui_cleanup): Declare.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	PR mi/20034
 	* cli/cli-interp.c: Include cli-interp.h and event-top.h.
 	(cli_interpreter_resume): Pass 1 to gdb_setup_readline.  Set the
