@@ -1,5 +1,16 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* ui-out.c (default_ui_out_impl): Delete.
+	(def_uiout): Delete.
+	(current_uiout): Set to NULL.
+	(default_table_begin, default_table_body, default_table_end)
+	(default_table_header, default_begin, default_end)
+	(default_field_int, default_field_skip, default_field_string)
+	(default_field_fmt, default_spaces, default_text, default_message)
+	(default_wrap_hint, default_flush, default_data_destroy): Delete.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (gdb_setup_readline): Pass the UI's outstream and
 	errstream to stdout_fileopen and stderr_fileopen.
 	* exceptions.c: Include top.h.
