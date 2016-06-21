@@ -1,5 +1,11 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-interp.c (cli_on_normal_stop): Bail out early if there's
+	nothing to print.  Use should_print_stop_to_console.
+	* tui/tui-interp.c (tui_on_normal_stop): Likewise.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (new_until_break_fsm): Add 'cmd_interp' parameter.
 	(until_break_fsm_should_stop, until_break_fsm_clean_up): Add
 	thread parameter.

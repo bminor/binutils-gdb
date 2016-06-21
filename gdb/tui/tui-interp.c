@@ -32,6 +32,7 @@
 #include "tui/tui-io.h"
 #include "infrun.h"
 #include "observer.h"
+#include "gdbthread.h"
 
 static struct ui_out *tui_ui_out (struct interp *self);
 
@@ -71,14 +72,20 @@ tui_on_normal_stop (struct bpstats *bs, int print_frame)
 {
   struct switch_thru_all_uis state;
 
+  if (!print_frame)
+    return;
+
   SWITCH_THRU_ALL_UIS (state)
     {
-      struct interp *tui = as_tui_interp (top_level_interpreter ());
+      struct interp *interp = top_level_interpreter ();
+      struct interp *tui = as_tui_interp (interp);
+      struct thread_info *thread;
 
       if (tui == NULL)
 	continue;
 
-      if (print_frame)
+      thread = inferior_thread ();
+      if (should_print_stop_to_console (interp, thread))
 	print_stop_event (tui_ui_out (tui));
     }
 }

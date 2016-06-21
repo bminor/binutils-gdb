@@ -95,14 +95,20 @@ cli_on_normal_stop (struct bpstats *bs, int print_frame)
 {
   struct switch_thru_all_uis state;
 
+  if (!print_frame)
+    return;
+
   SWITCH_THRU_ALL_UIS (state)
     {
-      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+      struct interp *interp = top_level_interpreter ();
+      struct cli_interp *cli = as_cli_interp (interp);
+      struct thread_info *thread;
 
       if (cli == NULL)
 	continue;
 
-      if (print_frame)
+      thread = inferior_thread ();
+      if (should_print_stop_to_console (interp, thread))
 	print_stop_event (cli->cli_uiout);
     }
 }
