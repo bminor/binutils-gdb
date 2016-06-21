@@ -1,5 +1,13 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* target.c (target_terminal_inferior): Bail out after
+	unregistering input_fd if not on the main UI.
+	(target_terminal_ours): Bail out after registering input_fd if not
+	on the main UI.
+	(target_terminal_ours_for_output): Bail out if not on the main UI.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (restore_ui_cleanup): Make extern.
 	* infrun.c (fetch_inferior_event): Always switch to the main UI.
 	* top.h (restore_ui_cleanup): Declare.

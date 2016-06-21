@@ -493,6 +493,14 @@ target_terminal_inferior (void)
      UI.  */
   delete_file_handler (ui->input_fd);
 
+  /* Since we always run the inferior in the main console (unless "set
+     inferior-tty" is in effect), when some UI other than the main one
+     calls target_terminal_inferior/target_terminal_inferior, then we
+     only register/unregister the UI's input from the event loop, but
+     leave the main UI's terminal settings as is.  */
+  if (ui != main_ui)
+    return;
+
   if (terminal_state == terminal_is_inferior)
     return;
 
@@ -519,6 +527,10 @@ target_terminal_ours (void)
      UI.  */
   add_file_handler (ui->input_fd, stdin_event_handler, ui);
 
+  /* See target_terminal_inferior.  */
+  if (ui != main_ui)
+    return;
+
   if (terminal_state == terminal_is_ours)
     return;
 
@@ -531,6 +543,12 @@ target_terminal_ours (void)
 void
 target_terminal_ours_for_output (void)
 {
+  struct ui *ui = current_ui;
+
+  /* See target_terminal_inferior.  */
+  if (ui != main_ui)
+    return;
+
   if (terminal_state != terminal_is_inferior)
     return;
   (*current_target.to_terminal_ours_for_output) (&current_target);
