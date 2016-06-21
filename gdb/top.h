@@ -25,6 +25,24 @@
 
 struct tl_interp_info;
 
+/* Prompt state.  */
+
+enum prompt_state
+{
+  /* The command line is blocked simulating synchronous execution.
+     This is used to implement the foreground execution commands
+     ('run', 'continue', etc.).  We won't display the prompt and
+     accept further commands until the execution is actually over.  */
+  PROMPT_BLOCKED,
+
+  /* The command finished; display the prompt before returning back to
+     the top level.  */
+  PROMPT_NEEDED,
+
+  /* We've displayed the prompt already, ready for input.  */
+  PROMPTED,
+};
+
 /* All about a user interface instance.  Each user interface has its
    own I/O files/streams, readline state, its own top level
    interpreter (for the main UI, this is the interpreter specified
@@ -91,6 +109,9 @@ struct ui
      it with the event loop.  */
   int input_fd;
 
+  /* See enum prompt_state's description.  */
+  enum prompt_state prompt_state;
+
   /* The fields below that start with "m_" are "private".  They're
      meant to be accessed through wrapper macros that make them look
      like globals.  */
@@ -144,6 +165,10 @@ extern void switch_thru_all_uis_next (struct switch_thru_all_uis *state);
   for (switch_thru_all_uis_init (&STATE);		\
        switch_thru_all_uis_cond (&STATE);		\
        switch_thru_all_uis_next (&STATE))
+
+/* Traverse over all UIs.  */
+#define ALL_UIS(UI)				\
+  for (UI = ui_list; UI; UI = UI->next)		\
 
 /* Cleanup that restores the current UI.  */
 extern void restore_ui_cleanup (void *data);

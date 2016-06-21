@@ -464,6 +464,10 @@ struct call_thread_fsm
   /* The called function's return value.  This is extracted from the
      target before the dummy frame is popped.  */
   struct value *return_value;
+
+  /* The top level that started the infcall (and is synchronously
+     waiting for it to end).  */
+  struct ui *waiting_ui;
 };
 
 static int call_thread_fsm_should_stop (struct thread_fsm *self);
@@ -484,7 +488,8 @@ static struct thread_fsm_ops call_thread_fsm_ops =
 /* Allocate a new call_thread_fsm object.  */
 
 static struct call_thread_fsm *
-new_call_thread_fsm (struct gdbarch *gdbarch, struct value *function,
+new_call_thread_fsm (struct ui *waiting_ui,
+		     struct gdbarch *gdbarch, struct value *function,
 		     struct type *value_type,
 		     int struct_return_p, CORE_ADDR struct_addr)
 {
@@ -499,6 +504,8 @@ new_call_thread_fsm (struct gdbarch *gdbarch, struct value *function,
   sm->return_meta_info.struct_return_p = struct_return_p;
   sm->return_meta_info.struct_addr = struct_addr;
 
+  sm->waiting_ui = waiting_ui;
+
   return sm;
 }
 
@@ -511,6 +518,8 @@ call_thread_fsm_should_stop (struct thread_fsm *self)
 
   if (stop_stack_dummy == STOP_STACK_DUMMY)
     {
+      struct cleanup *old_chain;
+
       /* Done.  */
       thread_fsm_set_finished (self);
 
@@ -520,7 +529,13 @@ call_thread_fsm_should_stop (struct thread_fsm *self)
       f->return_value = get_call_return_value (&f->return_meta_info);
 
       /* Break out of wait_sync_command_done.  */
-      async_enable_stdin ();
+      old_chain = make_cleanup (restore_ui_cleanup, current_ui);
+      current_ui = f->waiting_ui;
+      target_terminal_ours ();
+      f->waiting_ui->prompt_state = PROMPT_NEEDED;
+
+      /* This restores the previous UI.  */
+      do_cleanups (old_chain);
     }
 
   return 1;
@@ -558,12 +573,12 @@ run_inferior_call (struct call_thread_fsm *sm,
   struct gdb_exception caught_error = exception_none;
   int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
-  int saved_sync_execution = sync_execution;
+  enum prompt_state saved_prompt_state = current_ui->prompt_state;
   int was_running = call_thread->state == THREAD_RUNNING;
   int saved_ui_async = current_ui->async;
 
   /* Infcalls run synchronously, in the foreground.  */
-  sync_execution = 1;
+  current_ui->prompt_state = PROMPT_BLOCKED;
   /* So that we don't print the prompt prematurely in
      fetch_inferior_event.  */
   current_ui->async = 0;
@@ -596,11 +611,11 @@ run_inferior_call (struct call_thread_fsm *sm,
     }
   END_CATCH
 
-  /* If GDB was previously in sync execution mode, then ensure that it
-     remains so.  normal_stop calls async_enable_stdin, so reset it
-     again here.  In other cases, stdin will be re-enabled by
+  /* If GDB has the prompt blocked before, then ensure that it remains
+     so.  normal_stop calls async_enable_stdin, so reset the prompt
+     state again here.  In other cases, stdin will be re-enabled by
      inferior_event_handler, when an exception is thrown.  */
-  sync_execution = saved_sync_execution;
+  current_ui->prompt_state = saved_prompt_state;
   current_ui->async = saved_ui_async;
 
   /* At this point the current thread may have changed.  Refresh
@@ -1120,7 +1135,8 @@ call_function_by_hand_dummy (struct value *function,
        not report the stop to the user, and captures the return value
        before the dummy frame is popped.  run_inferior_call registers
        it with the thread ASAP.  */
-    sm = new_call_thread_fsm (gdbarch, function,
+    sm = new_call_thread_fsm (current_ui,
+			      gdbarch, function,
 			      values_type,
 			      struct_return || hidden_first_param_p,
 			      struct_addr);

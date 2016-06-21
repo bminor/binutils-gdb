@@ -391,7 +391,7 @@ void
 wait_sync_command_done (void)
 {
   while (gdb_do_one_event () >= 0)
-    if (!sync_execution)
+    if (current_ui->prompt_state != PROMPT_BLOCKED)
       break;
 }
 
@@ -404,7 +404,9 @@ maybe_wait_sync_command_done (int was_sync)
      command's list, running command hooks or similars), and we
      just ran a synchronous command that started the target, wait
      for that command to end.  */
-  if (!current_ui->async && !was_sync && sync_execution)
+  if (!current_ui->async
+      && !was_sync
+      && current_ui->prompt_state == PROMPT_BLOCKED)
     wait_sync_command_done ();
 }
 
@@ -441,7 +443,7 @@ execute_command (char *p, int from_tty)
     {
       const char *cmd = p;
       char *arg;
-      int was_sync = sync_execution;
+      int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
 
       line = p;
 

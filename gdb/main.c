@@ -315,8 +315,9 @@ captured_command_loop (void *data)
      here on.  */
   current_ui->async = 1;
 
-  /* Give the interpreter a chance to print a prompt.  */
-  interp_pre_command_loop (top_level_interpreter ());
+  /* Give the interpreter a chance to print a prompt, if necessary  */
+  if (ui->prompt_state != PROMPT_BLOCKED)
+    interp_pre_command_loop (top_level_interpreter ());
 
   /* Now it's time to start the event loop.  */
   start_event_loop ();
@@ -368,7 +369,7 @@ catch_command_errors (catch_command_errors_ftype *command,
 {
   TRY
     {
-      int was_sync = sync_execution;
+      int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
 
       command (arg, from_tty);
 
@@ -395,7 +396,7 @@ catch_command_errors_const (catch_command_errors_const_ftype *command,
 {
   TRY
     {
-      int was_sync = sync_execution;
+      int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
 
       command (arg, from_tty);
 
@@ -518,6 +519,8 @@ captured_main (void *data)
   ui->errstream = stderr;
 
   ui->input_fd = fileno (stdin);
+
+  ui->prompt_state = PROMPT_NEEDED;
 
 #ifdef __MINGW32__
   /* Ensure stderr is unbuffered.  A Cygwin pty or pipe is implemented

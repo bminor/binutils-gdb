@@ -482,10 +482,8 @@ target_terminal_inferior (void)
   struct ui *ui = current_ui;
 
   /* A background resume (``run&'') should leave GDB in control of the
-     terminal.  Use target_can_async_p, not target_is_async_p, since at
-     this point the target is not async yet.  However, if sync_execution
-     is not set, we know it will become async prior to resume.  */
-  if (target_can_async_p () && !sync_execution)
+     terminal.  */
+  if (ui->prompt_state != PROMPT_BLOCKED)
     return;
 
   /* Always delete the current UI's input file handler, regardless of

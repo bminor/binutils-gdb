@@ -56,6 +56,7 @@
 #include "cli/cli-utils.h"
 #include "infcall.h"
 #include "thread-fsm.h"
+#include "top.h"
 
 /* Local functions: */
 
@@ -730,7 +731,7 @@ continue_1 (int all_threads)
 
       iterate_over_threads (proceed_thread_callback, NULL);
 
-      if (sync_execution)
+      if (current_ui->prompt_state == PROMPT_BLOCKED)
 	{
 	  /* If all threads in the target were already running,
 	     proceed_thread_callback ends up never calling proceed,
@@ -774,8 +775,6 @@ continue_command (char *args, int from_tty)
   /* Find out whether we must run in the background.  */
   args = strip_bg_char (args, &async_exec);
   args_chain = make_cleanup (xfree, args);
-
-  prepare_execution_command (&current_target, async_exec);
 
   if (args != NULL)
     {
@@ -839,6 +838,17 @@ continue_command (char *args, int from_tty)
 
   /* Done with ARGS.  */
   do_cleanups (args_chain);
+
+  ERROR_NO_INFERIOR;
+  ensure_not_tfind_mode ();
+
+  if (!non_stop || !all_threads)
+    {
+      ensure_valid_thread ();
+      ensure_not_running ();
+    }
+
+  prepare_execution_command (&current_target, async_exec);
 
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
@@ -1014,11 +1024,15 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
     proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
   else
     {
+      int proceeded;
+
       /* Stepped into an inline frame.  Pretend that we've
 	 stopped.  */
       thread_fsm_clean_up (thr->thread_fsm);
-      normal_stop ();
-      inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+      proceeded = normal_stop ();
+      if (!proceeded)
+	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+      all_uis_check_sync_execution_done ();
     }
 }
 
@@ -2710,8 +2724,6 @@ attach_post_wait (char *args, int from_tty, enum attach_post_wait_mode mode)
       /* The user requested a plain `attach', so be sure to leave
 	 the inferior stopped.  */
 
-      async_enable_stdin ();
-
       /* At least the current thread is already stopped.  */
 
       /* In all-stop, by definition, all threads have to be already
@@ -2885,7 +2897,7 @@ attach_command (char *args, int from_tty)
 	 STOP_QUIETLY_NO_SIGSTOP is for.  */
       inferior->control.stop_soon = STOP_QUIETLY_NO_SIGSTOP;
 
-      /* sync_execution mode.  Wait for stop.  */
+      /* Wait for stop.  */
       a = XNEW (struct attach_command_continuation_args);
       a->args = xstrdup (args);
       a->from_tty = from_tty;

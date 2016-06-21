@@ -1,5 +1,71 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* annotate.c: Include top.h.
+	(async_background_execution_p): Delete.
+	(print_value_flags): Check the UI's prompt state rather then
+	async_background_execution_p.
+	* event-loop.c (start_event_loop): Set the prompt state to
+	PROMPT_NEEDED.
+	* event-top.c (display_gdb_prompt, async_enable_stdin)
+	(async_disable_stdin): Check the current UI's prompt state instead
+	of the sync_execution global.
+	(command_line_handler): Set the prompt state to PROMPT_NEEDED
+	before running a command, and display the prompt if still needed
+	afterwards.
+	* infcall.c (struct call_thread_fsm) <waiting_ui>: New field.
+	(new_call_thread_fsm): New parameter 'waiting_ui'.  Store it.
+	(call_thread_fsm_should_stop): Set the prompt state to
+	PROMPT_NEEDED.
+	(run_inferior_call): Adjust to temporarily set the prompt state to
+	PROMPT_BLOCKED instead of using the sync_execution global.
+	(call_function_by_hand_dummy): Pass the current UI to
+	new_call_thread_fsm.
+	* infcmd.c: Include top.h.
+	(continue_1): Check the current UI's prompt state instead of the
+	sync_execution global.
+	(continue_command): Validate global execution state before calling
+	prepare_execution_command.
+	(step_1): Call all_uis_check_sync_execution_done.
+	(attach_post_wait): Don't call async_enable_stdin here.  Remove
+	reference to sync_execution.
+	* infrun.c (sync_execution): Delete global.
+	(follow_fork_inferior)
+	(reinstall_readline_callback_handler_cleanup): Check the current
+	UI's prompt state instead of the sync_execution global.
+	(check_curr_ui_sync_execution_done)
+	(all_uis_check_sync_execution_done): New functions.
+	(fetch_inferior_event): Call all_uis_check_sync_execution_done
+	instead of trying to determine whether the global sync execution
+	changed.
+	(handle_no_resumed): Check the prompt state of all UIs.
+	(normal_stop): Emit the no unwait-for even to all PROMPT_BLOCKED
+	UIs.  Emit the "Switching to" notification to all UIs.  Enable
+	stdin in all UIs.
+	* infrun.h (sync_execution): Delete.
+	(all_uis_check_sync_execution_done): Declare.
+	* main.c (captured_command_loop): Don't call
+	interp_pre_command_loop if the prompt is blocked.
+	(catch_command_errors, catch_command_errors_const): Adjust.
+	(captured_main): Set the initial prompt state to PROMPT_NEEDED.
+	* mi/mi-interp.c (display_mi_prompt): Set the prompt state to
+	PROMPTED.
+	(mi_interpreter_resume): Don't clear sync_execution.  Remove hack
+	comment.
+	(mi_execute_command_input_handler): Set the prompt state to
+	PROMPT_NEEDED before executing the command, and only display the
+	prompt if the prompt state is PROMPT_NEEDED afterwards.
+	(mi_on_resume_1): Adjust to check the prompt state.
+	* target.c (target_terminal_inferior): Adjust to check the prompt
+	state.
+	* top.c (wait_sync_command_done, maybe_wait_sync_command_done)
+	(execute_command): Check the current UI's prompt state instead of
+	sync_execution.
+	* top.h (enum prompt_state): New.
+	(struct ui) <prompt_state>: New field.
+	(ALL_UIS): New macro.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* top.c (gdb_secondary_prompt_depth): Delete.
 	(gdb_in_secondary_prompt_p): Add ui parameter.  Use it.
 	(gdb_readline_wrapper_cleanup, gdb_readline_wrapper): Adjust to
