@@ -656,7 +656,7 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       make_cleanup_restore_ui_out (&current_uiout);
       /* Use the console interpreter uiout to have the same print format
 	for console or MI.  */
-      interp = interp_lookup ("console");
+      interp = interp_lookup (current_ui, "console");
       current_uiout = interp_ui_out (interp);
 
       prevent_dont_repeat ();

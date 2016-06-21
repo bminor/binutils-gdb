@@ -238,7 +238,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
     error (_("-interpreter-exec: "
 	     "Usage: -interpreter-exec interp command"));
 
-  interp_to_use = interp_lookup (argv[0]);
+  interp_to_use = interp_lookup (current_ui, argv[0]);
   if (interp_to_use == NULL)
     error (_("-interpreter-exec: could not find interpreter \"%s\""),
 	   argv[0]);
@@ -1242,25 +1242,35 @@ mi_set_logging (struct interp *interp, int start_log,
   return 1;
 }
 
+/* The MI interpreter's vtable.  */
+
+static const struct interp_procs mi_interp_procs =
+{
+  mi_interpreter_init,		/* init_proc */
+  mi_interpreter_resume,	/* resume_proc */
+  mi_interpreter_suspend,	/* suspend_proc */
+  mi_interpreter_exec,		/* exec_proc */
+  mi_ui_out, 			/* ui_out_proc */
+  mi_set_logging,		/* set_logging_proc */
+  mi_command_loop		/* command_loop_proc */
+};
+
+/* Factory for MI interpreters.  */
+
+static struct interp *
+mi_interp_factory (const char *name)
+{
+  return interp_new (name, &mi_interp_procs, NULL);
+}
+
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */
 
 void
 _initialize_mi_interp (void)
 {
-  static const struct interp_procs procs =
-    {
-      mi_interpreter_init,	/* init_proc */
-      mi_interpreter_resume,	/* resume_proc */
-      mi_interpreter_suspend,	/* suspend_proc */
-      mi_interpreter_exec,	/* exec_proc */
-      mi_ui_out, 		/* ui_out_proc */
-      mi_set_logging,		/* set_logging_proc */
-      mi_command_loop		/* command_loop_proc */
-    };
-
   /* The various interpreter levels.  */
-  interp_add (interp_new (INTERP_MI1, &procs));
-  interp_add (interp_new (INTERP_MI2, &procs));
-  interp_add (interp_new (INTERP_MI3, &procs));
-  interp_add (interp_new (INTERP_MI, &procs));
+  interp_factory_register (INTERP_MI1, mi_interp_factory);
+  interp_factory_register (INTERP_MI2, mi_interp_factory);
+  interp_factory_register (INTERP_MI3, mi_interp_factory);
+  interp_factory_register (INTERP_MI, mi_interp_factory);
 }

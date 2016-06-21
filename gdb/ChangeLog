@@ -1,5 +1,51 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-interp.c (cli_uiout): Delete, moved into ...
+	(struct cli_interp): ... this new structure.
+	(cli_on_normal_stop, cli_on_signal_received)
+	(cli_on_end_stepping_range, cli_on_signal_exited, cli_on_exited)
+	(cli_on_no_history): Use interp_ui_out.
+	(cli_interpreter_init): If top level, set the cli_interp global.
+	(cli_interpreter_init): Return the interp's data instead of NULL.
+	(cli_interpreter_resume, cli_interpreter_exec, cli_ui_out): Adjust
+	to cli_uiout being in the interpreter's data.
+	(cli_interp_procs): New, factored out from _initialize_cli_interp.
+	(cli_interp_factory): New function.
+	(_initialize_cli_interp): Call interp_factory_register.
+	* interps.c (get_interp_info): New, factored out from ...
+	(get_current_interp_info): ... this.
+	(interp_new): Add parameter 'data'.  Store it.
+	(struct interp_factory): New function.
+	(interp_factory_p): New typedef.  Define a VEC_P.
+	(interpreter_factories): New global.
+	(interp_factory_register): New function.
+	(interp_add): Add 'ui' parameter.  Use get_interp_info and
+	interp_lookup_existing.
+	(interp_lookup): Rename to ...
+	(interp_lookup_existing): ... this.  Add 'ui' parameter.  Don't
+	check for NULL or empty name here.
+	(interp_lookup): Add 'ui' parameter and reimplement.
+	(interp_set_temp, interpreter_exec_cmd): Adjust.
+	(interpreter_completer): Complete on registered interpreter
+	factories instead of interpreters.
+	* interps.h (interp_factory_func): New typedef.
+	(interp_factory_register): Declare.
+	(interp_new, interp_add): Adjust.
+	(interp_lookup): Declare.
+	* main.c (captured_main): Adjust.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Adjust.
+	(mi_interp_procs): New, factored out from
+	_initialize_mi_interp.
+	(mi_interp_factory): New function.
+	* python/python.c (execute_gdb_command): Adjust.
+	* tui/tui-interp.c (tui_init): If top level, set the tui_interp
+	global.
+	(tui_interp_procs): New.
+	(tui_interp_factory): New function.
+	(_initialize_tui_interp): Call interp_factory_register.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (bpstat_do_actions_1): Access the current UI's
 	async field instead of the interpreter_async global.
 	* cli/cli-script.c (execute_user_command, while_command)

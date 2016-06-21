@@ -53,16 +53,23 @@ struct ui_interp_info
   struct interp *command_interpreter;
 };
 
-/* Get the current UI's ui_interp_info object.  Never returns NULL.  */
+/* Get UI's ui_interp_info object.  Never returns NULL.  */
+
+static struct ui_interp_info *
+get_interp_info (struct ui *ui)
+{
+  if (ui->interp_info == NULL)
+    ui->interp_info = XCNEW (struct ui_interp_info);
+  return ui->interp_info;
+}
+
+/* Get the current UI's ui_interp_info object.  Never returns
+   NULL.  */
 
 static struct ui_interp_info *
 get_current_interp_info (void)
 {
-  struct ui *ui = current_ui;
-
-  if (ui->interp_info == NULL)
-    ui->interp_info = XCNEW (struct ui_interp_info);
-  return ui->interp_info;
+  return get_interp_info (current_ui);
 }
 
 struct interp
@@ -91,18 +98,21 @@ struct interp
 
 void _initialize_interpreter (void);
 
+static struct interp *interp_lookup_existing (struct ui *ui,
+					      const char *name);
+
 /* interp_new - This allocates space for a new interpreter,
    fills the fields from the inputs, and returns a pointer to the
    interpreter.  */
 struct interp *
-interp_new (const char *name, const struct interp_procs *procs)
+interp_new (const char *name, const struct interp_procs *procs, void *data)
 {
   struct interp *new_interp;
 
   new_interp = XNEW (struct interp);
 
   new_interp->name = xstrdup (name);
-  new_interp->data = NULL;
+  new_interp->data = data;
   new_interp->quiet_p = 0;
   new_interp->procs = procs;
   new_interp->inited = 0;
@@ -113,14 +123,57 @@ interp_new (const char *name, const struct interp_procs *procs)
   return new_interp;
 }
 
+/* An interpreter factory.  Maps an interpreter name to the factory
+   function that instantiates an interpreter by that name.  */
+
+struct interp_factory
+{
+  /* This is the name in "-i=INTERP" and "interpreter-exec INTERP".  */
+  const char *name;
+
+  /* The function that creates the interpreter.  */
+  interp_factory_func func;
+};
+
+typedef struct interp_factory *interp_factory_p;
+DEF_VEC_P(interp_factory_p);
+
+/* The registered interpreter factories.  */
+static VEC(interp_factory_p) *interpreter_factories = NULL;
+
+/* See interps.h.  */
+
+void
+interp_factory_register (const char *name, interp_factory_func func)
+{
+  struct interp_factory *f;
+  int ix;
+
+  /* Assert that no factory for NAME is already registered.  */
+  for (ix = 0;
+       VEC_iterate (interp_factory_p, interpreter_factories, ix, f);
+       ++ix)
+    if (strcmp (f->name, name) == 0)
+      {
+	internal_error (__FILE__, __LINE__,
+			_("interpreter factory already registered: \"%s\"\n"),
+			name);
+      }
+
+  f = XNEW (struct interp_factory);
+  f->name = name;
+  f->func = func;
+  VEC_safe_push (interp_factory_p, interpreter_factories, f);
+}
+
 /* Add interpreter INTERP to the gdb interpreter list.  The
    interpreter must not have previously been added.  */
 void
-interp_add (struct interp *interp)
+interp_add (struct ui *ui, struct interp *interp)
 {
-  struct ui_interp_info *ui_interp = get_current_interp_info ();
+  struct ui_interp_info *ui_interp = get_interp_info (ui);
 
-  gdb_assert (interp_lookup (interp->name) == NULL);
+  gdb_assert (interp_lookup_existing (ui, interp->name) == NULL);
 
   interp->next = ui_interp->interp_list;
   ui_interp->interp_list = interp;
@@ -219,17 +272,14 @@ interp_set (struct interp *interp, int top_level)
   return 1;
 }
 
-/* interp_lookup - Looks up the interpreter for NAME.  If no such
-   interpreter exists, return NULL, otherwise return a pointer to the
-   interpreter.  */
-struct interp *
-interp_lookup (const char *name)
-{
-  struct ui_interp_info *ui_interp = get_current_interp_info ();
-  struct interp *interp;
+/* Look up the interpreter for NAME.  If no such interpreter exists,
+   return NULL, otherwise return a pointer to the interpreter.  */
 
-  if (name == NULL || strlen (name) == 0)
-    return NULL;
+static struct interp *
+interp_lookup_existing (struct ui *ui, const char *name)
+{
+  struct ui_interp_info *ui_interp = get_interp_info (ui);
+  struct interp *interp;
 
   for (interp = ui_interp->interp_list;
        interp != NULL;
@@ -238,6 +288,36 @@ interp_lookup (const char *name)
       if (strcmp (interp->name, name) == 0)
 	return interp;
     }
+
+  return NULL;
+}
+
+/* See interps.h.  */
+
+struct interp *
+interp_lookup (struct ui *ui, const char *name)
+{
+  struct interp_factory *factory;
+  struct interp *interp;
+  int ix;
+
+  if (name == NULL || strlen (name) == 0)
+    return NULL;
+
+  /* Only create each interpreter once per top level.  */
+  interp = interp_lookup_existing (ui, name);
+  if (interp != NULL)
+    return interp;
+
+  for (ix = 0;
+       VEC_iterate (interp_factory_p, interpreter_factories, ix, factory);
+       ++ix)
+    if (strcmp (factory->name, name) == 0)
+      {
+	interp = factory->func (name);
+	interp_add (ui, interp);
+	return interp;
+      }
 
   return NULL;
 }
@@ -273,7 +353,7 @@ struct interp *
 interp_set_temp (const char *name)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
-  struct interp *interp = interp_lookup (name);
+  struct interp *interp = interp_lookup (current_ui, name);
   struct interp *old_interp = ui_interp->current_interpreter;
 
   if (interp)
@@ -433,7 +513,7 @@ interpreter_exec_cmd (char *args, int from_tty)
 
   old_interp = ui_interp->current_interpreter;
 
-  interp_to_use = interp_lookup (prules[0]);
+  interp_to_use = interp_lookup (current_ui, prules[0]);
   if (interp_to_use == NULL)
     error (_("Could not find interpreter \"%s\"."), prules[0]);
 
@@ -469,15 +549,15 @@ static VEC (char_ptr) *
 interpreter_completer (struct cmd_list_element *ignore,
 		       const char *text, const char *word)
 {
-  struct ui_interp_info *ui_interp = get_current_interp_info ();
+  struct interp_factory *interp;
   int textlen;
   VEC (char_ptr) *matches = NULL;
-  struct interp *interp;
+  int ix;
 
   textlen = strlen (text);
-  for (interp = ui_interp->interp_list;
-       interp != NULL;
-       interp = interp->next)
+  for (ix = 0;
+       VEC_iterate (interp_factory_p, interpreter_factories, ix, interp);
+       ++ix)
     {
       if (strncmp (interp->name, text, textlen) == 0)
 	{

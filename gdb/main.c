@@ -962,7 +962,7 @@ captured_main (void *data)
 
   {
     /* Find it.  */
-    struct interp *interp = interp_lookup (interpreter_p);
+    struct interp *interp = interp_lookup (current_ui, interpreter_p);
 
     if (interp == NULL)
       error (_("Interpreter `%s' unrecognized"), interpreter_p);

@@ -24,6 +24,16 @@
 
 struct ui_out;
 struct interp;
+struct ui;
+
+typedef struct interp *(*interp_factory_func) (const char *name);
+
+/* Each interpreter kind (CLI, MI, etc.) registers itself with a call
+   to this function, passing along its name, and a pointer to a
+   function that creates a new instance of an interpreter with that
+   name.  */
+extern void interp_factory_register (const char *name,
+				     interp_factory_func func);
 
 extern int interp_resume (struct interp *interp);
 extern int interp_suspend (struct interp *interp);
@@ -64,10 +74,18 @@ struct interp_procs
   interp_command_loop_ftype *command_loop_proc;
 };
 
-extern struct interp *interp_new (const char *name, const struct interp_procs *procs);
-extern void interp_add (struct interp *interp);
+extern struct interp *interp_new (const char *name,
+				  const struct interp_procs *procs,
+				  void *data);
+extern void interp_add (struct ui *ui, struct interp *interp);
 extern int interp_set (struct interp *interp, int top_level);
-extern struct interp *interp_lookup (const char *name);
+
+/* Look up the interpreter for NAME, creating one if none exists yet.
+   If NAME is not a interpreter type previously registered with
+   interp_factory_register, return NULL; otherwise return a pointer to
+   the interpreter.  */
+extern struct interp *interp_lookup (struct ui *ui, const char *name);
+
 extern struct ui_out *interp_ui_out (struct interp *interp);
 extern void *interp_data (struct interp *interp);
 extern const char *interp_name (struct interp *interp);
