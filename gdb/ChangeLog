@@ -1,5 +1,11 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* fork-child.c (fork_inferior): Switch the child to the main UI
+	right after vfork.  Save/restore the current UI in the parent.
+	Flush outputs of the main UI instead of the current UI.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (watchpoint_check): Send watchpoint-deleted output
 	to all UIs.
 
