@@ -1,3 +1,16 @@
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-mi-events-gdb.py (stop_handler_str)
+	(cont_handler_str): New.
+	(signal_stop_handler): Set stop_handler_str instead of printing to
+	stdout.
+	(continue_handler): Set cont_handler_str instead of printing to
+	stdout.
+	* gdb.python/py-mi-events.exp: Ues mi_execute_to instead of
+	mi_send_resuming_command.  Print stop_handler_str and
+	cont_handler_str instead of expecting the python events print
+	directly.
+
 2016-06-17  Sanjoy Das  <sanjoy@playingwithpointers.com>
 
 	* gdb.base/jit-reader.exp: New file.

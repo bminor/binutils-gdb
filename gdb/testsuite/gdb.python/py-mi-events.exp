@@ -58,14 +58,16 @@ mi_gdb_test "test-events" \
     "register events"
 
 
+set lineno [gdb_get_line_number "i++;"]
+
 # set a breakpoint into the for loop
-mi_gdb_test "break ${srcfile}:[gdb_get_line_number "i++;"]" \
+mi_gdb_test "break ${srcfile}:$lineno" \
     ".*Breakpoint $decimal at 0x\[0-9a-fA-F\]+: file .*${srcfile}.*\\\.*\\^done" \
     "set the breakpoint"
 
 
 # resume the program
-mi_send_resuming_command "exec-continue" "continue"
+mi_execute_to "exec-continue" "breakpoint-hit" "main" "" ".*$srcfile" "$lineno" { "" "disp=\"keep\"" } "continue"
 
 
 # test the python event handlers execution. The following checks are performed:
@@ -73,12 +75,13 @@ mi_send_resuming_command "exec-continue" "continue"
 # - the continue handler prints "info breakpoints" output in console format
 # - breakpoint is hit and python stop handler is executed
 # - the stop handler prints "info breakpoints" output in console format
-mi_gdb_test "" ".*continue_handler.*
-.*Num.*Type.*Disp.*Enb.*Address.*\
-.*$decimal.*breakpoint.*keep.*y.* 0x\[0-9a-fA-F\]+.*${srcfile}.*
-.*stop_handler.*
-.*Num.*Type.*Disp.*Enb.*Address.*\
-.*$decimal.*breakpoint.*keep.*y.* 0x\[0-9a-fA-F\]+.*${srcfile}.*" \
-"check python continue and stop handlers"
+
+mi_gdb_test "python print (stop_handler_str)" \
+".*stop_handler.*Num.*Type.*Disp.*Enb.*Address.*$decimal.*breakpoint.*keep.*y.* 0x\[0-9a-fA-F\]+.*${srcfile}.*" \
+"python stop handler ran"
+
+mi_gdb_test "python print (cont_handler_str)" \
+".*continue_handler.*Num.*Type.*Disp.*Enb.*Address.*$decimal.*breakpoint.*keep.*y.* 0x\[0-9a-fA-F\]+.*${srcfile}.*" \
+"python continue handler ran"
 
 mi_gdb_exit
