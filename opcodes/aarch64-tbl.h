@@ -2820,6 +2820,93 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a prefetch operation specifier")					\
     Y (SYSTEM, hint, "BARRIER_PSB", 0, F (),				\
       "the PSB option name CSYNC")					\
+    Y(ADDRESS, sve_addr_ri_u6, "SVE_ADDR_RI_U6", 0 << OPD_F_OD_LSB,	\
+      F(FLD_Rn), "an address with a 6-bit unsigned offset")		\
+    Y(ADDRESS, sve_addr_ri_u6, "SVE_ADDR_RI_U6x2", 1 << OPD_F_OD_LSB,	\
+      F(FLD_Rn),							\
+      "an address with a 6-bit unsigned offset, multiplied by 2")	\
+    Y(ADDRESS, sve_addr_ri_u6, "SVE_ADDR_RI_U6x4", 2 << OPD_F_OD_LSB,	\
+      F(FLD_Rn),							\
+      "an address with a 6-bit unsigned offset, multiplied by 4")	\
+    Y(ADDRESS, sve_addr_ri_u6, "SVE_ADDR_RI_U6x8", 3 << OPD_F_OD_LSB,	\
+      F(FLD_Rn),							\
+      "an address with a 6-bit unsigned offset, multiplied by 8")	\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RR", 0 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_Rm), "an address with a scalar register offset")	\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RR_LSL1", 1 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_Rm), "an address with a scalar register offset")	\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RR_LSL2", 2 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_Rm), "an address with a scalar register offset")	\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RR_LSL3", 3 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_Rm), "an address with a scalar register offset")	\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RX",				\
+      (0 << OPD_F_OD_LSB) | OPD_F_NO_ZR, F(FLD_Rn,FLD_Rm),		\
+      "an address with a scalar register offset")			\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RX_LSL1",			\
+      (1 << OPD_F_OD_LSB) | OPD_F_NO_ZR, F(FLD_Rn,FLD_Rm),		\
+      "an address with a scalar register offset")			\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RX_LSL2",			\
+      (2 << OPD_F_OD_LSB) | OPD_F_NO_ZR, F(FLD_Rn,FLD_Rm),		\
+      "an address with a scalar register offset")			\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RX_LSL3",			\
+      (3 << OPD_F_OD_LSB) | OPD_F_NO_ZR, F(FLD_Rn,FLD_Rm),		\
+      "an address with a scalar register offset")			\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RZ", 0 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_SVE_Zm_16),						\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RZ_LSL1", 1 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_SVE_Zm_16),						\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RZ_LSL2", 2 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_SVE_Zm_16),						\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RZ_LSL3", 3 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_SVE_Zm_16),						\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rz_xtw, "SVE_ADDR_RZ_XTW_14",			\
+      0 << OPD_F_OD_LSB, F(FLD_Rn,FLD_SVE_Zm_16,FLD_SVE_xs_14),		\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rz_xtw, "SVE_ADDR_RZ_XTW_22",			\
+      0 << OPD_F_OD_LSB, F(FLD_Rn,FLD_SVE_Zm_16,FLD_SVE_xs_22),		\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rz_xtw, "SVE_ADDR_RZ_XTW1_14",			\
+      1 << OPD_F_OD_LSB, F(FLD_Rn,FLD_SVE_Zm_16,FLD_SVE_xs_14),		\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rz_xtw, "SVE_ADDR_RZ_XTW1_22",			\
+      1 << OPD_F_OD_LSB, F(FLD_Rn,FLD_SVE_Zm_16,FLD_SVE_xs_22),		\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rz_xtw, "SVE_ADDR_RZ_XTW2_14",			\
+      2 << OPD_F_OD_LSB, F(FLD_Rn,FLD_SVE_Zm_16,FLD_SVE_xs_14),		\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rz_xtw, "SVE_ADDR_RZ_XTW2_22",			\
+      2 << OPD_F_OD_LSB, F(FLD_Rn,FLD_SVE_Zm_16,FLD_SVE_xs_22),		\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rz_xtw, "SVE_ADDR_RZ_XTW3_14",			\
+      3 << OPD_F_OD_LSB, F(FLD_Rn,FLD_SVE_Zm_16,FLD_SVE_xs_14),		\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_rz_xtw, "SVE_ADDR_RZ_XTW3_22",			\
+      3 << OPD_F_OD_LSB, F(FLD_Rn,FLD_SVE_Zm_16,FLD_SVE_xs_22),		\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_zi_u5, "SVE_ADDR_ZI_U5", 0 << OPD_F_OD_LSB,	\
+      F(FLD_SVE_Zn), "an address with a 5-bit unsigned offset")		\
+    Y(ADDRESS, sve_addr_zi_u5, "SVE_ADDR_ZI_U5x2", 1 << OPD_F_OD_LSB,	\
+      F(FLD_SVE_Zn),							\
+      "an address with a 5-bit unsigned offset, multiplied by 2")	\
+    Y(ADDRESS, sve_addr_zi_u5, "SVE_ADDR_ZI_U5x4", 2 << OPD_F_OD_LSB,	\
+      F(FLD_SVE_Zn),							\
+      "an address with a 5-bit unsigned offset, multiplied by 4")	\
+    Y(ADDRESS, sve_addr_zi_u5, "SVE_ADDR_ZI_U5x8", 3 << OPD_F_OD_LSB,	\
+      F(FLD_SVE_Zn),							\
+      "an address with a 5-bit unsigned offset, multiplied by 8")	\
+    Y(ADDRESS, sve_addr_zz_lsl, "SVE_ADDR_ZZ_LSL", 0,			\
+      F(FLD_SVE_Zn,FLD_SVE_Zm_16),					\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_zz_sxtw, "SVE_ADDR_ZZ_SXTW", 0,			\
+      F(FLD_SVE_Zn,FLD_SVE_Zm_16),					\
+      "an address with a vector register offset")			\
+    Y(ADDRESS, sve_addr_zz_uxtw, "SVE_ADDR_ZZ_UXTW", 0,			\
+      F(FLD_SVE_Zn,FLD_SVE_Zm_16),					\
+      "an address with a vector register offset")			\
     Y(IMMEDIATE, imm, "SVE_PATTERN", 0, F(FLD_SVE_pattern),		\
       "an enumeration value such as POW2")				\
     Y(IMMEDIATE, sve_scale, "SVE_PATTERN_SCALED", 0,			\

@@ -1186,6 +1186,152 @@ aarch64_ext_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return 1;
 }
 
+/* Decode an SVE address [<base>, #<offset> << <shift>], where <offset>
+   is given by the OFFSET parameter and where <shift> is SELF's operand-
+   dependent value.  fields[0] specifies the base register field <base>.  */
+static int
+aarch64_ext_sve_addr_reg_imm (const aarch64_operand *self,
+			      aarch64_opnd_info *info, aarch64_insn code,
+			      int64_t offset)
+{
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+  info->addr.offset.imm = offset * (1 << get_operand_specific_data (self));
+  info->addr.offset.is_reg = FALSE;
+  info->addr.writeback = FALSE;
+  info->addr.preind = TRUE;
+  info->shifter.operator_present = FALSE;
+  info->shifter.amount_present = FALSE;
+  return 1;
+}
+
+/* Decode an SVE address [X<n>, #<SVE_imm6> << <shift>], where <SVE_imm6>
+   is a 6-bit unsigned number and where <shift> is SELF's operand-dependent
+   value.  fields[0] specifies the base register field.  */
+int
+aarch64_ext_sve_addr_ri_u6 (const aarch64_operand *self,
+			    aarch64_opnd_info *info, aarch64_insn code,
+			    const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int offset = extract_field (FLD_SVE_imm6, code, 0);
+  return aarch64_ext_sve_addr_reg_imm (self, info, code, offset);
+}
+
+/* Decode an SVE address [X<n>, X<m>{, LSL #<shift>}], where <shift>
+   is SELF's operand-dependent value.  fields[0] specifies the base
+   register field and fields[1] specifies the offset register field.  */
+int
+aarch64_ext_sve_addr_rr_lsl (const aarch64_operand *self,
+			     aarch64_opnd_info *info, aarch64_insn code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int index;
+
+  index = extract_field (self->fields[1], code, 0);
+  if (index == 31 && (self->flags & OPD_F_NO_ZR) != 0)
+    return 0;
+
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+  info->addr.offset.regno = index;
+  info->addr.offset.is_reg = TRUE;
+  info->addr.writeback = FALSE;
+  info->addr.preind = TRUE;
+  info->shifter.kind = AARCH64_MOD_LSL;
+  info->shifter.amount = get_operand_specific_data (self);
+  info->shifter.operator_present = (info->shifter.amount != 0);
+  info->shifter.amount_present = (info->shifter.amount != 0);
+  return 1;
+}
+
+/* Decode an SVE address [X<n>, Z<m>.<T>, (S|U)XTW {#<shift>}], where
+   <shift> is SELF's operand-dependent value.  fields[0] specifies the
+   base register field, fields[1] specifies the offset register field and
+   fields[2] is a single-bit field that selects SXTW over UXTW.  */
+int
+aarch64_ext_sve_addr_rz_xtw (const aarch64_operand *self,
+			     aarch64_opnd_info *info, aarch64_insn code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+  info->addr.offset.regno = extract_field (self->fields[1], code, 0);
+  info->addr.offset.is_reg = TRUE;
+  info->addr.writeback = FALSE;
+  info->addr.preind = TRUE;
+  if (extract_field (self->fields[2], code, 0))
+    info->shifter.kind = AARCH64_MOD_SXTW;
+  else
+    info->shifter.kind = AARCH64_MOD_UXTW;
+  info->shifter.amount = get_operand_specific_data (self);
+  info->shifter.operator_present = TRUE;
+  info->shifter.amount_present = (info->shifter.amount != 0);
+  return 1;
+}
+
+/* Decode an SVE address [Z<n>.<T>, #<imm5> << <shift>], where <imm5> is a
+   5-bit unsigned number and where <shift> is SELF's operand-dependent value.
+   fields[0] specifies the base register field.  */
+int
+aarch64_ext_sve_addr_zi_u5 (const aarch64_operand *self,
+			    aarch64_opnd_info *info, aarch64_insn code,
+			    const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int offset = extract_field (FLD_imm5, code, 0);
+  return aarch64_ext_sve_addr_reg_imm (self, info, code, offset);
+}
+
+/* Decode an SVE address [Z<n>.<T>, Z<m>.<T>{, <modifier> {#<msz>}}],
+   where <modifier> is given by KIND and where <msz> is a 2-bit unsigned
+   number.  fields[0] specifies the base register field and fields[1]
+   specifies the offset register field.  */
+static int
+aarch64_ext_sve_addr_zz (const aarch64_operand *self, aarch64_opnd_info *info,
+			 aarch64_insn code, enum aarch64_modifier_kind kind)
+{
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+  info->addr.offset.regno = extract_field (self->fields[1], code, 0);
+  info->addr.offset.is_reg = TRUE;
+  info->addr.writeback = FALSE;
+  info->addr.preind = TRUE;
+  info->shifter.kind = kind;
+  info->shifter.amount = extract_field (FLD_SVE_msz, code, 0);
+  info->shifter.operator_present = (kind != AARCH64_MOD_LSL
+				    || info->shifter.amount != 0);
+  info->shifter.amount_present = (info->shifter.amount != 0);
+  return 1;
+}
+
+/* Decode an SVE address [Z<n>.<T>, Z<m>.<T>{, LSL #<msz>}], where
+   <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
+   field and fields[1] specifies the offset register field.  */
+int
+aarch64_ext_sve_addr_zz_lsl (const aarch64_operand *self,
+			     aarch64_opnd_info *info, aarch64_insn code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  return aarch64_ext_sve_addr_zz (self, info, code, AARCH64_MOD_LSL);
+}
+
+/* Decode an SVE address [Z<n>.<T>, Z<m>.<T>, SXTW {#<msz>}], where
+   <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
+   field and fields[1] specifies the offset register field.  */
+int
+aarch64_ext_sve_addr_zz_sxtw (const aarch64_operand *self,
+			      aarch64_opnd_info *info, aarch64_insn code,
+			      const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  return aarch64_ext_sve_addr_zz (self, info, code, AARCH64_MOD_SXTW);
+}
+
+/* Decode an SVE address [Z<n>.<T>, Z<m>.<T>, UXTW {#<msz>}], where
+   <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
+   field and fields[1] specifies the offset register field.  */
+int
+aarch64_ext_sve_addr_zz_uxtw (const aarch64_operand *self,
+			      aarch64_opnd_info *info, aarch64_insn code,
+			      const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  return aarch64_ext_sve_addr_zz (self, info, code, AARCH64_MOD_UXTW);
+}
+
 /* Decode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less

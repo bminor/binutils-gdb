@@ -280,9 +280,13 @@ const aarch64_field fields[] =
     {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
     { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
+    { 16,  6 }, /* SVE_imm6: 6-bit immediate field.  */
+    { 10,  2 }, /* SVE_msz: 2-bit shift amount for ADR.  */
     {  5,  5 }, /* SVE_pattern: vector pattern enumeration.  */
     {  0,  4 }, /* SVE_prfop: prefetch operation for SVE PRF[BHWD].  */
     { 22,  2 }, /* SVE_tszh: triangular size select high, bits [23,22].  */
+    { 14,  1 }, /* SVE_xs_14: UXTW/SXTW select (bit 14).  */
+    { 22,  1 }  /* SVE_xs_22: UXTW/SXTW select (bit 22).  */
 };
 
 enum aarch64_operand_class
@@ -1368,9 +1372,9 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 				  const aarch64_opcode *opcode,
 				  aarch64_operand_error *mismatch_detail)
 {
-  unsigned num;
+  unsigned num, modifiers;
   unsigned char size;
-  int64_t imm;
+  int64_t imm, min_value, max_value;
   const aarch64_opnd_info *opnd = opnds + idx;
   aarch64_opnd_qualifier_t qualifier = opnd->qualifier;
 
@@ -1661,6 +1665,113 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      return 0;
 	    }
 	  break;
+
+	case AARCH64_OPND_SVE_ADDR_RI_U6:
+	case AARCH64_OPND_SVE_ADDR_RI_U6x2:
+	case AARCH64_OPND_SVE_ADDR_RI_U6x4:
+	case AARCH64_OPND_SVE_ADDR_RI_U6x8:
+	  min_value = 0;
+	  max_value = 63;
+	sve_imm_offset:
+	  assert (!opnd->addr.offset.is_reg);
+	  assert (opnd->addr.preind);
+	  num = 1 << get_operand_specific_data (&aarch64_operands[type]);
+	  min_value *= num;
+	  max_value *= num;
+	  if (opnd->shifter.operator_present
+	      || opnd->shifter.amount_present)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("invalid addressing mode"));
+	      return 0;
+	    }
+	  if (!value_in_range_p (opnd->addr.offset.imm, min_value, max_value))
+	    {
+	      set_offset_out_of_range_error (mismatch_detail, idx,
+					     min_value, max_value);
+	      return 0;
+	    }
+	  if (!value_aligned_p (opnd->addr.offset.imm, num))
+	    {
+	      set_unaligned_error (mismatch_detail, idx, num);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_ADDR_RR:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL2:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RX:
+	case AARCH64_OPND_SVE_ADDR_RX_LSL1:
+	case AARCH64_OPND_SVE_ADDR_RX_LSL2:
+	case AARCH64_OPND_SVE_ADDR_RX_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RZ:
+	case AARCH64_OPND_SVE_ADDR_RZ_LSL1:
+	case AARCH64_OPND_SVE_ADDR_RZ_LSL2:
+	case AARCH64_OPND_SVE_ADDR_RZ_LSL3:
+	  modifiers = 1 << AARCH64_MOD_LSL;
+	sve_rr_operand:
+	  assert (opnd->addr.offset.is_reg);
+	  assert (opnd->addr.preind);
+	  if ((aarch64_operands[type].flags & OPD_F_NO_ZR) != 0
+	      && opnd->addr.offset.regno == 31)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("index register xzr is not allowed"));
+	      return 0;
+	    }
+	  if (((1 << opnd->shifter.kind) & modifiers) == 0
+	      || (opnd->shifter.amount
+		  != get_operand_specific_data (&aarch64_operands[type])))
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("invalid addressing mode"));
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW_14:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW_22:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW1_14:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW1_22:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW2_14:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW2_22:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW3_14:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW3_22:
+	  modifiers = (1 << AARCH64_MOD_SXTW) | (1 << AARCH64_MOD_UXTW);
+	  goto sve_rr_operand;
+
+	case AARCH64_OPND_SVE_ADDR_ZI_U5:
+	case AARCH64_OPND_SVE_ADDR_ZI_U5x2:
+	case AARCH64_OPND_SVE_ADDR_ZI_U5x4:
+	case AARCH64_OPND_SVE_ADDR_ZI_U5x8:
+	  min_value = 0;
+	  max_value = 31;
+	  goto sve_imm_offset;
+
+	case AARCH64_OPND_SVE_ADDR_ZZ_LSL:
+	  modifiers = 1 << AARCH64_MOD_LSL;
+	sve_zz_operand:
+	  assert (opnd->addr.offset.is_reg);
+	  assert (opnd->addr.preind);
+	  if (((1 << opnd->shifter.kind) & modifiers) == 0
+	      || opnd->shifter.amount < 0
+	      || opnd->shifter.amount > 3)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("invalid addressing mode"));
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_ADDR_ZZ_SXTW:
+	  modifiers = (1 << AARCH64_MOD_SXTW);
+	  goto sve_zz_operand;
+
+	case AARCH64_OPND_SVE_ADDR_ZZ_UXTW:
+	  modifiers = 1 << AARCH64_MOD_UXTW;
+	  goto sve_zz_operand;
 
 	default:
 	  break;
@@ -2330,6 +2441,17 @@ static const char *int_reg[2][2][32] = {
 #undef R64
 #undef R32
 };
+
+/* Names of the SVE vector registers, first with .S suffixes,
+   then with .D suffixes.  */
+
+static const char *sve_reg[2][32] = {
+#define ZS(X) "z" #X ".s"
+#define ZD(X) "z" #X ".d"
+  BANK (ZS, ZS (31)), BANK (ZD, ZD (31))
+#undef ZD
+#undef ZS
+};
 #undef BANK
 
 /* Return the integer register name.
@@ -2371,6 +2493,17 @@ get_offset_int_reg_name (const aarch64_opnd_info *opnd)
     default:
       abort ();
     }
+}
+
+/* Get the name of the SVE vector offset register in OPND, using the operand
+   qualifier to decide whether the suffix should be .S or .D.  */
+
+static inline const char *
+get_addr_sve_reg_name (int regno, aarch64_opnd_qualifier_t qualifier)
+{
+  assert (qualifier == AARCH64_OPND_QLF_S_S
+	  || qualifier == AARCH64_OPND_QLF_S_D);
+  return sve_reg[qualifier == AARCH64_OPND_QLF_S_D][regno];
 }
 
 /* Types for expanding an encoded 8-bit value to a floating-point value.  */
@@ -2948,16 +3081,63 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_ADDR_REGOFF:
+    case AARCH64_OPND_SVE_ADDR_RR:
+    case AARCH64_OPND_SVE_ADDR_RR_LSL1:
+    case AARCH64_OPND_SVE_ADDR_RR_LSL2:
+    case AARCH64_OPND_SVE_ADDR_RR_LSL3:
+    case AARCH64_OPND_SVE_ADDR_RX:
+    case AARCH64_OPND_SVE_ADDR_RX_LSL1:
+    case AARCH64_OPND_SVE_ADDR_RX_LSL2:
+    case AARCH64_OPND_SVE_ADDR_RX_LSL3:
       print_register_offset_address
 	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
 	 get_offset_int_reg_name (opnd));
       break;
 
+    case AARCH64_OPND_SVE_ADDR_RZ:
+    case AARCH64_OPND_SVE_ADDR_RZ_LSL1:
+    case AARCH64_OPND_SVE_ADDR_RZ_LSL2:
+    case AARCH64_OPND_SVE_ADDR_RZ_LSL3:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW_14:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW_22:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW1_14:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW1_22:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW2_14:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW2_22:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW3_14:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW3_22:
+      print_register_offset_address
+	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
+	 get_addr_sve_reg_name (opnd->addr.offset.regno, opnd->qualifier));
+      break;
+
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
+    case AARCH64_OPND_SVE_ADDR_RI_U6:
+    case AARCH64_OPND_SVE_ADDR_RI_U6x2:
+    case AARCH64_OPND_SVE_ADDR_RI_U6x4:
+    case AARCH64_OPND_SVE_ADDR_RI_U6x8:
       print_immediate_offset_address
 	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1));
+      break;
+
+    case AARCH64_OPND_SVE_ADDR_ZI_U5:
+    case AARCH64_OPND_SVE_ADDR_ZI_U5x2:
+    case AARCH64_OPND_SVE_ADDR_ZI_U5x4:
+    case AARCH64_OPND_SVE_ADDR_ZI_U5x8:
+      print_immediate_offset_address
+	(buf, size, opnd,
+	 get_addr_sve_reg_name (opnd->addr.base_regno, opnd->qualifier));
+      break;
+
+    case AARCH64_OPND_SVE_ADDR_ZZ_LSL:
+    case AARCH64_OPND_SVE_ADDR_ZZ_SXTW:
+    case AARCH64_OPND_SVE_ADDR_ZZ_UXTW:
+      print_register_offset_address
+	(buf, size, opnd,
+	 get_addr_sve_reg_name (opnd->addr.base_regno, opnd->qualifier),
+	 get_addr_sve_reg_name (opnd->addr.offset.regno, opnd->qualifier));
       break;
 
     case AARCH64_OPND_ADDR_UIMM12:

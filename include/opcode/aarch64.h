@@ -244,6 +244,45 @@ enum aarch64_opnd
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
 
+  AARCH64_OPND_SVE_ADDR_RI_U6,	    /* SVE [<Xn|SP>, #<uimm6>].  */
+  AARCH64_OPND_SVE_ADDR_RI_U6x2,    /* SVE [<Xn|SP>, #<uimm6>*2].  */
+  AARCH64_OPND_SVE_ADDR_RI_U6x4,    /* SVE [<Xn|SP>, #<uimm6>*4].  */
+  AARCH64_OPND_SVE_ADDR_RI_U6x8,    /* SVE [<Xn|SP>, #<uimm6>*8].  */
+  AARCH64_OPND_SVE_ADDR_RR,	    /* SVE [<Xn|SP>, <Xm|XZR>].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL1,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #1].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL2,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #2].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL3,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #3].  */
+  AARCH64_OPND_SVE_ADDR_RX,	    /* SVE [<Xn|SP>, <Xm>].  */
+  AARCH64_OPND_SVE_ADDR_RX_LSL1,    /* SVE [<Xn|SP>, <Xm>, LSL #1].  */
+  AARCH64_OPND_SVE_ADDR_RX_LSL2,    /* SVE [<Xn|SP>, <Xm>, LSL #2].  */
+  AARCH64_OPND_SVE_ADDR_RX_LSL3,    /* SVE [<Xn|SP>, <Xm>, LSL #3].  */
+  AARCH64_OPND_SVE_ADDR_RZ,	    /* SVE [<Xn|SP>, Zm.D].  */
+  AARCH64_OPND_SVE_ADDR_RZ_LSL1,    /* SVE [<Xn|SP>, Zm.D, LSL #1].  */
+  AARCH64_OPND_SVE_ADDR_RZ_LSL2,    /* SVE [<Xn|SP>, Zm.D, LSL #2].  */
+  AARCH64_OPND_SVE_ADDR_RZ_LSL3,    /* SVE [<Xn|SP>, Zm.D, LSL #3].  */
+  AARCH64_OPND_SVE_ADDR_RZ_XTW_14,  /* SVE [<Xn|SP>, Zm.<T>, (S|U)XTW].
+				       Bit 14 controls S/U choice.  */
+  AARCH64_OPND_SVE_ADDR_RZ_XTW_22,  /* SVE [<Xn|SP>, Zm.<T>, (S|U)XTW].
+				       Bit 22 controls S/U choice.  */
+  AARCH64_OPND_SVE_ADDR_RZ_XTW1_14, /* SVE [<Xn|SP>, Zm.<T>, (S|U)XTW #1].
+				       Bit 14 controls S/U choice.  */
+  AARCH64_OPND_SVE_ADDR_RZ_XTW1_22, /* SVE [<Xn|SP>, Zm.<T>, (S|U)XTW #1].
+				       Bit 22 controls S/U choice.  */
+  AARCH64_OPND_SVE_ADDR_RZ_XTW2_14, /* SVE [<Xn|SP>, Zm.<T>, (S|U)XTW #2].
+				       Bit 14 controls S/U choice.  */
+  AARCH64_OPND_SVE_ADDR_RZ_XTW2_22, /* SVE [<Xn|SP>, Zm.<T>, (S|U)XTW #2].
+				       Bit 22 controls S/U choice.  */
+  AARCH64_OPND_SVE_ADDR_RZ_XTW3_14, /* SVE [<Xn|SP>, Zm.<T>, (S|U)XTW #3].
+				       Bit 14 controls S/U choice.  */
+  AARCH64_OPND_SVE_ADDR_RZ_XTW3_22, /* SVE [<Xn|SP>, Zm.<T>, (S|U)XTW #3].
+				       Bit 22 controls S/U choice.  */
+  AARCH64_OPND_SVE_ADDR_ZI_U5,	    /* SVE [Zn.<T>, #<uimm5>].  */
+  AARCH64_OPND_SVE_ADDR_ZI_U5x2,    /* SVE [Zn.<T>, #<uimm5>*2].  */
+  AARCH64_OPND_SVE_ADDR_ZI_U5x4,    /* SVE [Zn.<T>, #<uimm5>*4].  */
+  AARCH64_OPND_SVE_ADDR_ZI_U5x8,    /* SVE [Zn.<T>, #<uimm5>*8].  */
+  AARCH64_OPND_SVE_ADDR_ZZ_LSL,     /* SVE [Zn.<T>, Zm,<T>, LSL #<msz>].  */
+  AARCH64_OPND_SVE_ADDR_ZZ_SXTW,    /* SVE [Zn.<T>, Zm,<T>, SXTW #<msz>].  */
+  AARCH64_OPND_SVE_ADDR_ZZ_UXTW,    /* SVE [Zn.<T>, Zm,<T>, UXTW #<msz>].  */
   AARCH64_OPND_SVE_PATTERN,	/* SVE vector pattern enumeration.  */
   AARCH64_OPND_SVE_PATTERN_SCALED, /* Likewise, with additional MUL factor.  */
   AARCH64_OPND_SVE_PRFOP,	/* SVE prefetch operation.  */

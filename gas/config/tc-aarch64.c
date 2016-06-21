@@ -705,7 +705,8 @@ aarch64_check_reg_type (const reg_entry *reg, aarch64_reg_type type)
 }
 
 /* Try to parse a base or offset register.  ACCEPT_SP says whether {W}SP
-   should be considered valid and ACCEPT_RZ says whether zero registers
+   should be considered valid, ACCEPT_RZ says whether zero registers
+   should be considered valid, and ACCEPT_SVE says whether SVE registers
    should be considered valid.
 
    Return the register number on success, setting *QUALIFIER to the
@@ -715,18 +716,15 @@ aarch64_check_reg_type (const reg_entry *reg, aarch64_reg_type type)
    Note that this function does not issue any diagnostics.  */
 
 static int
-aarch64_reg_parse_32_64 (char **ccp, bfd_boolean accept_sp,
-			 bfd_boolean accept_rz,
-			 aarch64_opnd_qualifier_t *qualifier,
-			 bfd_boolean *isregzero)
+aarch64_addr_reg_parse (char **ccp, bfd_boolean accept_sp,
+			bfd_boolean accept_rz, bfd_boolean accept_sve,
+			aarch64_opnd_qualifier_t *qualifier,
+			bfd_boolean *isregzero)
 {
   char *str = *ccp;
   const reg_entry *reg = parse_reg (&str);
 
   if (reg == NULL)
-    return PARSE_FAIL;
-
-  if (! aarch64_check_reg_type (reg, REG_TYPE_R_Z_SP))
     return PARSE_FAIL;
 
   switch (reg->type)
@@ -756,6 +754,23 @@ aarch64_reg_parse_32_64 (char **ccp, bfd_boolean accept_sp,
 		    : AARCH64_OPND_QLF_X);
       *isregzero = TRUE;
       break;
+    case REG_TYPE_ZN:
+      if (!accept_sve || str[0] != '.')
+	return PARSE_FAIL;
+      switch (TOLOWER (str[1]))
+	{
+	case 's':
+	  *qualifier = AARCH64_OPND_QLF_S_S;
+	  break;
+	case 'd':
+	  *qualifier = AARCH64_OPND_QLF_S_D;
+	  break;
+	default:
+	  return PARSE_FAIL;
+	}
+      str += 2;
+      *isregzero = FALSE;
+      break;
     default:
       return PARSE_FAIL;
     }
@@ -763,6 +778,26 @@ aarch64_reg_parse_32_64 (char **ccp, bfd_boolean accept_sp,
   *ccp = str;
 
   return reg->number;
+}
+
+/* Try to parse a scalar base or offset register.  ACCEPT_SP says whether
+   {W}SP should be considered valid and ACCEPT_RZ says whether zero
+   registers should be considered valid.
+
+   Return the register number on success, setting *QUALIFIER to the
+   register qualifier and *ISREGZERO to whether the register is a zero
+   register.  Return PARSE_FAIL otherwise.
+
+   Note that this function does not issue any diagnostics.  */
+
+static int
+aarch64_reg_parse_32_64 (char **ccp, bfd_boolean accept_sp,
+			 bfd_boolean accept_rz,
+			 aarch64_opnd_qualifier_t *qualifier,
+			 bfd_boolean *isregzero)
+{
+  return aarch64_addr_reg_parse (ccp, accept_sp, accept_rz, FALSE,
+				 qualifier, isregzero);
 }
 
 /* Parse the qualifier of a vector register or vector element of type
@@ -3240,8 +3275,8 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
    The A64 instruction set has the following addressing modes:
 
    Offset
-     [base]			// in SIMD ld/st structure
-     [base{,#0}]		// in ld/st exclusive
+     [base]			 // in SIMD ld/st structure
+     [base{,#0}]		 // in ld/st exclusive
      [base{,#imm}]
      [base,Xm{,LSL #imm}]
      [base,Xm,SXTX {#imm}]
@@ -3250,10 +3285,18 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
      [base,#imm]!
    Post-indexed
      [base],#imm
-     [base],Xm			// in SIMD ld/st structure
+     [base],Xm			 // in SIMD ld/st structure
    PC-relative (literal)
      label
-     =immediate
+   SVE:
+     [base,Zm.D{,LSL #imm}]
+     [base,Zm.S,(S|U)XTW {#imm}]
+     [base,Zm.D,(S|U)XTW {#imm}] // ignores top 32 bits of Zm.D elements
+     [Zn.S,#imm]
+     [Zn.D,#imm]
+     [Zn.S,Zm.S{,LSL #imm}]      // }
+     [Zn.D,Zm.D{,LSL #imm}]      // } in ADR
+     [Zn.D,Zm.D,(S|U)XTW {#imm}] // }
 
    (As a convenience, the notation "=immediate" is permitted in conjunction
    with the pc-relative literal load instructions to automatically place an
@@ -3280,26 +3323,37 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
      .pcrel=1; .preind=1; .postind=0; .writeback=0
 
    The shift/extension information, if any, will be stored in .shifter.
+   The base and offset qualifiers will be stored in *BASE_QUALIFIER and
+   *OFFSET_QUALIFIER respectively, with NIL being used if there's no
+   corresponding register.
 
    RELOC says whether relocation operators should be accepted
    and ACCEPT_REG_POST_INDEX says whether post-indexed register
    addressing should be accepted.
+
+   Likewise ACCEPT_SVE says whether the SVE addressing modes should be
+   accepted.  We use context-dependent parsing for this case because
+   (for compatibility) we should accept symbolic constants like z0 and
+   z0.s in base AArch64 code.
 
    In all other cases, it is the caller's responsibility to check whether
    the addressing mode is supported by the instruction.  It is also the
    caller's responsibility to set inst.reloc.type.  */
 
 static bfd_boolean
-parse_address_main (char **str, aarch64_opnd_info *operand, bfd_boolean reloc,
-		    bfd_boolean accept_reg_post_index)
+parse_address_main (char **str, aarch64_opnd_info *operand,
+		    aarch64_opnd_qualifier_t *base_qualifier,
+		    aarch64_opnd_qualifier_t *offset_qualifier,
+		    bfd_boolean reloc, bfd_boolean accept_reg_post_index,
+		    bfd_boolean accept_sve)
 {
   char *p = *str;
   int reg;
-  aarch64_opnd_qualifier_t base_qualifier;
-  aarch64_opnd_qualifier_t offset_qualifier;
   bfd_boolean isregzero;
   expressionS *exp = &inst.reloc.exp;
 
+  *base_qualifier = AARCH64_OPND_QLF_NIL;
+  *offset_qualifier = AARCH64_OPND_QLF_NIL;
   if (! skip_past_char (&p, '['))
     {
       /* =immediate or label.  */
@@ -3375,8 +3429,14 @@ parse_address_main (char **str, aarch64_opnd_info *operand, bfd_boolean reloc,
   /* [ */
 
   /* Accept SP and reject ZR */
-  reg = aarch64_reg_parse_32_64 (&p, TRUE, FALSE, &base_qualifier, &isregzero);
-  if (reg == PARSE_FAIL || base_qualifier == AARCH64_OPND_QLF_W)
+  reg = aarch64_addr_reg_parse (&p, TRUE, FALSE, accept_sve, base_qualifier,
+				&isregzero);
+  if (reg == PARSE_FAIL)
+    {
+      set_syntax_error (_("base register expected"));
+      return FALSE;
+    }
+  else if (*base_qualifier == AARCH64_OPND_QLF_W)
     {
       set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_64)));
       return FALSE;
@@ -3390,8 +3450,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand, bfd_boolean reloc,
       operand->addr.preind = 1;
 
       /* Reject SP and accept ZR */
-      reg = aarch64_reg_parse_32_64 (&p, FALSE, TRUE, &offset_qualifier,
-				     &isregzero);
+      reg = aarch64_addr_reg_parse (&p, FALSE, TRUE, accept_sve,
+				    offset_qualifier, &isregzero);
       if (reg != PARSE_FAIL)
 	{
 	  /* [Xn,Rm  */
@@ -3414,13 +3474,19 @@ parse_address_main (char **str, aarch64_opnd_info *operand, bfd_boolean reloc,
 	      || operand->shifter.kind == AARCH64_MOD_LSL
 	      || operand->shifter.kind == AARCH64_MOD_SXTX)
 	    {
-	      if (offset_qualifier == AARCH64_OPND_QLF_W)
+	      if (*offset_qualifier == AARCH64_OPND_QLF_W)
 		{
 		  set_syntax_error (_("invalid use of 32-bit register offset"));
 		  return FALSE;
 		}
+	      if (aarch64_get_qualifier_esize (*base_qualifier)
+		  != aarch64_get_qualifier_esize (*offset_qualifier))
+		{
+		  set_syntax_error (_("offset has different size from base"));
+		  return FALSE;
+		}
 	    }
-	  else if (offset_qualifier == AARCH64_OPND_QLF_X)
+	  else if (*offset_qualifier == AARCH64_OPND_QLF_X)
 	    {
 	      set_syntax_error (_("invalid use of 64-bit register offset"));
 	      return FALSE;
@@ -3465,12 +3531,20 @@ parse_address_main (char **str, aarch64_opnd_info *operand, bfd_boolean reloc,
 	      inst.reloc.type = entry->ldst_type;
 	      inst.reloc.pc_rel = entry->pc_rel;
 	    }
-	  else if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
+	  else
 	    {
-	      set_syntax_error (_("invalid expression in the address"));
-	      return FALSE;
+	      if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
+		{
+		  set_syntax_error (_("invalid expression in the address"));
+		  return FALSE;
+		}
+	      /* [Xn,<expr>  */
+	      if (accept_sve && exp->X_op != O_constant)
+		{
+		  set_syntax_error (_("constant offset required"));
+		  return FALSE;
+		}
 	    }
-	  /* [Xn,<expr>  */
 	}
     }
 
@@ -3505,11 +3579,11 @@ parse_address_main (char **str, aarch64_opnd_info *operand, bfd_boolean reloc,
 
       if (accept_reg_post_index
 	  && (reg = aarch64_reg_parse_32_64 (&p, FALSE, FALSE,
-					     &offset_qualifier,
+					     offset_qualifier,
 					     &isregzero)) != PARSE_FAIL)
 	{
 	  /* [Xn],Xm */
-	  if (offset_qualifier == AARCH64_OPND_QLF_W)
+	  if (*offset_qualifier == AARCH64_OPND_QLF_W)
 	    {
 	      set_syntax_error (_("invalid 32-bit register offset"));
 	      return FALSE;
@@ -3544,7 +3618,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand, bfd_boolean reloc,
   return TRUE;
 }
 
-/* Parse an address that cannot contain relocation operators.
+/* Parse a base AArch64 address, i.e. one that cannot contain SVE base
+   registers or SVE offset registers.  Do not allow relocation operators.
    Look for and parse "[Xn], (Xm|#m)" as post-indexed addressing
    if ACCEPT_REG_POST_INDEX is true.
 
@@ -3553,17 +3628,34 @@ static bfd_boolean
 parse_address (char **str, aarch64_opnd_info *operand,
 	       bfd_boolean accept_reg_post_index)
 {
-  return parse_address_main (str, operand, FALSE, accept_reg_post_index);
+  aarch64_opnd_qualifier_t base_qualifier, offset_qualifier;
+  return parse_address_main (str, operand, &base_qualifier, &offset_qualifier,
+			     FALSE, accept_reg_post_index, FALSE);
 }
 
-/* Parse an address that can contain relocation operators.  Do not
-   accept post-indexed addressing.
+/* Parse a base AArch64 address, i.e. one that cannot contain SVE base
+   registers or SVE offset registers.  Allow relocation operators but
+   disallow post-indexed addressing.
 
    Return TRUE on success.  */
 static bfd_boolean
 parse_address_reloc (char **str, aarch64_opnd_info *operand)
 {
-  return parse_address_main (str, operand, TRUE, FALSE);
+  aarch64_opnd_qualifier_t base_qualifier, offset_qualifier;
+  return parse_address_main (str, operand, &base_qualifier, &offset_qualifier,
+			     TRUE, FALSE, FALSE);
+}
+
+/* Parse an address in which SVE vector registers are allowed.
+   The arguments have the same meaning as for parse_address_main.
+   Return TRUE on success.  */
+static bfd_boolean
+parse_sve_address (char **str, aarch64_opnd_info *operand,
+		   aarch64_opnd_qualifier_t *base_qualifier,
+		   aarch64_opnd_qualifier_t *offset_qualifier)
+{
+  return parse_address_main (str, operand, base_qualifier, offset_qualifier,
+			     FALSE, FALSE, TRUE);
 }
 
 /* Parse an operand for a MOVZ, MOVN or MOVK instruction.
@@ -5174,7 +5266,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
       int comma_skipped_p = 0;
       aarch64_reg_type rtype;
       struct vector_type_el vectype;
-      aarch64_opnd_qualifier_t qualifier;
+      aarch64_opnd_qualifier_t qualifier, base_qualifier, offset_qualifier;
       aarch64_opnd_info *info = &inst.base.operands[i];
       aarch64_reg_type reg_type;
 
@@ -5793,6 +5885,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_ADDR_REGOFF:
 	  /* [<Xn|SP>, <R><m>{, <extend> {<amount>}}]  */
 	  po_misc_or_fail (parse_address (&str, info, FALSE));
+	regoff_addr:
 	  if (info->addr.pcrel || !info->addr.offset.is_reg
 	      || !info->addr.preind || info->addr.postind
 	      || info->addr.writeback)
@@ -5886,6 +5979,116 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  /* No qualifier.  */
 	  break;
+
+	case AARCH64_OPND_SVE_ADDR_RI_U6:
+	case AARCH64_OPND_SVE_ADDR_RI_U6x2:
+	case AARCH64_OPND_SVE_ADDR_RI_U6x4:
+	case AARCH64_OPND_SVE_ADDR_RI_U6x8:
+	  /* [X<n>{, #imm}]
+	     but recognizing SVE registers.  */
+	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
+					      &offset_qualifier));
+	  if (base_qualifier != AARCH64_OPND_QLF_X)
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	sve_regimm:
+	  if (info->addr.pcrel || info->addr.offset.is_reg
+	      || !info->addr.preind || info->addr.writeback)
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  gas_assert (inst.reloc.exp.X_op == O_constant);
+	  info->addr.offset.imm = inst.reloc.exp.X_add_number;
+	  break;
+
+	case AARCH64_OPND_SVE_ADDR_RR:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL2:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RX:
+	case AARCH64_OPND_SVE_ADDR_RX_LSL1:
+	case AARCH64_OPND_SVE_ADDR_RX_LSL2:
+	case AARCH64_OPND_SVE_ADDR_RX_LSL3:
+	  /* [<Xn|SP>, <R><m>{, lsl #<amount>}]
+	     but recognizing SVE registers.  */
+	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
+					      &offset_qualifier));
+	  if (base_qualifier != AARCH64_OPND_QLF_X
+	      || offset_qualifier != AARCH64_OPND_QLF_X)
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  goto regoff_addr;
+
+	case AARCH64_OPND_SVE_ADDR_RZ:
+	case AARCH64_OPND_SVE_ADDR_RZ_LSL1:
+	case AARCH64_OPND_SVE_ADDR_RZ_LSL2:
+	case AARCH64_OPND_SVE_ADDR_RZ_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW_14:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW_22:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW1_14:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW1_22:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW2_14:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW2_22:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW3_14:
+	case AARCH64_OPND_SVE_ADDR_RZ_XTW3_22:
+	  /* [<Xn|SP>, Z<m>.D{, LSL #<amount>}]
+	     [<Xn|SP>, Z<m>.<T>, <extend> {#<amount>}]  */
+	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
+					      &offset_qualifier));
+	  if (base_qualifier != AARCH64_OPND_QLF_X
+	      || (offset_qualifier != AARCH64_OPND_QLF_S_S
+		  && offset_qualifier != AARCH64_OPND_QLF_S_D))
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  info->qualifier = offset_qualifier;
+	  goto regoff_addr;
+
+	case AARCH64_OPND_SVE_ADDR_ZI_U5:
+	case AARCH64_OPND_SVE_ADDR_ZI_U5x2:
+	case AARCH64_OPND_SVE_ADDR_ZI_U5x4:
+	case AARCH64_OPND_SVE_ADDR_ZI_U5x8:
+	  /* [Z<n>.<T>{, #imm}]  */
+	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
+					      &offset_qualifier));
+	  if (base_qualifier != AARCH64_OPND_QLF_S_S
+	      && base_qualifier != AARCH64_OPND_QLF_S_D)
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  info->qualifier = base_qualifier;
+	  goto sve_regimm;
+
+	case AARCH64_OPND_SVE_ADDR_ZZ_LSL:
+	case AARCH64_OPND_SVE_ADDR_ZZ_SXTW:
+	case AARCH64_OPND_SVE_ADDR_ZZ_UXTW:
+	  /* [Z<n>.<T>, Z<m>.<T>{, LSL #<amount>}]
+	     [Z<n>.D, Z<m>.D, <extend> {#<amount>}]
+
+	     We don't reject:
+
+	     [Z<n>.S, Z<m>.S, <extend> {#<amount>}]
+
+	     here since we get better error messages by leaving it to
+	     the qualifier checking routines.  */
+	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
+					      &offset_qualifier));
+	  if ((base_qualifier != AARCH64_OPND_QLF_S_S
+	       && base_qualifier != AARCH64_OPND_QLF_S_D)
+	      || offset_qualifier != base_qualifier)
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  info->qualifier = base_qualifier;
+	  goto regoff_addr;
 
 	case AARCH64_OPND_SYSREG:
 	  if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1, 0))
