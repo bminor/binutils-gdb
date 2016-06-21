@@ -1,5 +1,12 @@
 2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (md_pcrel_from) <BFD_RELOC_MIPS_18_PCREL_S3>:
+	Calculate relocation from the containing aligned doubleword.
+	(tc_gen_reloc) <BFD_RELOC_MIPS_18_PCREL_S3>: Calculate the
+	addend from the containing aligned doubleword.
+
+2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (mips_force_relocation): Use `file_mips_opts'
 	rather than `mips_opts' for the R6 ISA check.
 	(mips_fix_adjustable): Likewise.
