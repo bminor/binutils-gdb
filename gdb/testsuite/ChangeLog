@@ -1,5 +1,16 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* gdb.mi/mi-watch.exp (test_watchpoint_creation_and_listing)
+	(test_awatch_creation_and_listing)
+	(test_rwatch_creation_and_listing, test_watchpoint_triggering):
+	Remove 'type' parameter.
+	(test_watchpoint_all): New parameter mi_mode.  Remove
+	with_test_prefix.
+	(top level): Use foreach_with_prefix, and add main/separate UI MI
+	testing axis.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* README (Testsuite Parameters): Document FORCE_SEPARATE_MI_TTY.
 	* lib/gdb.exp (default_gdb_exit): Clear inferior_spawn_id.
 	* lib/mi-support.exp (mi_uncatched_gdb_exit): Unset

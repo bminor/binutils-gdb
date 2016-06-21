@@ -1,5 +1,10 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (watchpoint_check): Send watchpoint-deleted output
+	to all UIs.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention support for running interpreters on separate
 	UIs and the new new-ui command.
 
