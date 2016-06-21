@@ -1,5 +1,22 @@
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
+	* README (Testsuite Parameters): Document FORCE_SEPARATE_MI_TTY.
+	* lib/gdb.exp (default_gdb_exit): Clear inferior_spawn_id.
+	* lib/mi-support.exp (mi_uncatched_gdb_exit): Unset
+	gdb_main_spawn_id, mi_spawn_id, unset inferior_spawn_id.
+	(gdb_main_spawn_id, mi_spawn_id): Declare and
+	comment.
+	(mi_create_inferior_pty): New procedure,
+	factored out from default_mi_gdb_start.
+	(switch_gdb_spawn_id, mi_gdb_start_separate_mi_tty): New
+	procedures.
+	(default_mi_gdb_start): Call mi_gdb_start_separate_mi_tty if the
+	separate-mi-tty option is specified, or SEPARATE_MI_TTY is set.
+	Use mi_create_inferior_pty.
+	(mi_gdb_start): Use eval to pass down args list.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
 	* gdb.opt/inline-cmds.c: Add "set mi break here" marker.
 	* gdb.opt/inline-cmds.exp: Add MI tests.
 
