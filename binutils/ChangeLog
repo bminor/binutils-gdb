@@ -1,3 +1,9 @@
+2016-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (dynamic_section_mips_val): Increase size of timebuf.
+	(process_mips_specific): Likewise.
+	(process_gnu_liblist): Likewise.
+
 2016-06-21  Graham Markall  <graham.markall@embecosm.com>
 
 	* readelf.c (decode_ARC_machine_flags): Remove E_ARC_MACH_NPS400
