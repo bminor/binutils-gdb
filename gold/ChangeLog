@@ -1,3 +1,15 @@
+2016-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20283
+	* NEWS: Mention --enable-relro.
+	* configure.ac: Add --enable-relro.
+	(DEFAULT_LD_Z_RELRO): New.  Set by --enable-relro and default
+	to 1.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* options.h (General_options::relro): Default to
+	DEFAULT_LD_Z_RELRO.
+
 2016-06-20  Cary Coutant  <ccoutant@gmail.com>
 
 	* NEWS: Add new features in 1.12.

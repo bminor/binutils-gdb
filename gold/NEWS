@@ -1,5 +1,8 @@
 Changes in 1.12:
 
+* Add a configure option --enable-relro to decide whether -z relro should
+  be enabled by default.  Default to yes.
+
 * Add support for s390, MIPS, AArch64, and TILE-Gx architectures.
 
 * Add support for STT_GNU_IFUNC symbols.

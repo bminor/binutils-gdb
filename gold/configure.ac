@@ -114,6 +114,23 @@ if test "$plugins" = "yes"; then
 fi
 AM_CONDITIONAL(PLUGINS, test "$plugins" = "yes")
 
+# Decide if -z relro should be enabled in ELF linker by default.
+ac_default_ld_z_relro=unset
+# Provide a configure time option to override our default.
+AC_ARG_ENABLE(relro,
+	      AS_HELP_STRING([--enable-relro],
+	      [enable -z relro in ELF linker by default]),
+[case "${enableval}" in
+  yes)  ac_default_ld_z_relro=1 ;;
+  no)  ac_default_ld_z_relro=0 ;;
+esac])dnl
+if test "${ac_default_ld_z_relro}" = unset; then
+  ac_default_ld_z_relro=1
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_RELRO,
+  $ac_default_ld_z_relro,
+  [Define to 1 if you want to enable -z relro in ELF linker by default.])
+
 AC_ARG_ENABLE([targets],
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in

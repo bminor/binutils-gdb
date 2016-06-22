@@ -792,6 +792,7 @@ with_sysroot
 enable_gold
 enable_threads
 enable_plugins
+enable_relro
 enable_targets
 with_lib_path
 enable_dependency_tracking
@@ -1441,6 +1442,7 @@ Optional Features:
   --enable-gold[=ARG]     build gold [ARG={default,yes,no}]
   --enable-threads        multi-threaded linking
   --enable-plugins        linker plugins
+  --enable-relro          enable -z relro in ELF linker by default
   --enable-targets        alternative target configurations
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
@@ -3351,6 +3353,25 @@ else
   PLUGINS_TRUE='#'
   PLUGINS_FALSE=
 fi
+
+
+# Decide if -z relro should be enabled in ELF linker by default.
+ac_default_ld_z_relro=unset
+# Provide a configure time option to override our default.
+# Check whether --enable-relro was given.
+if test "${enable_relro+set}" = set; then :
+  enableval=$enable_relro; case "${enableval}" in
+  yes)  ac_default_ld_z_relro=1 ;;
+  no)  ac_default_ld_z_relro=0 ;;
+esac
+fi
+if test "${ac_default_ld_z_relro}" = unset; then
+  ac_default_ld_z_relro=1
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_Z_RELRO $ac_default_ld_z_relro
+_ACEOF
 
 
 # Check whether --enable-targets was given.
