@@ -505,9 +505,11 @@ run_dump_test "undefweak-overflow" [list [list as $abi_asflags(o32)] \
 					 [list ld $abi_ldflags(o32)]]
 
 if {$has_newabi} {
-    run_dump_test "undefweak-overflow" [list [list as $abi_asflags(n32)] \
+    run_dump_test "undefweak-overflow" [list [list name (n32)] \
+					     [list as $abi_asflags(n32)] \
 					     [list ld $abi_ldflags(n32)]]
-    run_dump_test "undefweak-overflow" [list [list as $abi_asflags(n64)] \
+    run_dump_test "undefweak-overflow" [list [list name (n64)] \
+					     [list as $abi_asflags(n64)] \
 					     [list ld $abi_ldflags(n64)]]
 }
 

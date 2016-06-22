@@ -1,3 +1,8 @@
+2016-06-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips-elf.exp: Uniquely identify
+	`undefweak-overflow' tests.
+
 2016-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20283
