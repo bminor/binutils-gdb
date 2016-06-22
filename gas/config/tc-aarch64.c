@@ -2949,6 +2949,7 @@ enum parse_shift_mode
   SHIFTED_LSL,			/* bare "lsl #n"  */
   SHIFTED_MUL,			/* bare "mul #n"  */
   SHIFTED_LSL_MSL,		/* "lsl|msl #n"  */
+  SHIFTED_MUL_VL,		/* "mul vl"  */
   SHIFTED_REG_OFFSET		/* [su]xtw|sxtx {#n} or lsl #n  */
 };
 
@@ -2990,7 +2991,8 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
     }
 
   if (kind == AARCH64_MOD_MUL
-      && mode != SHIFTED_MUL)
+      && mode != SHIFTED_MUL
+      && mode != SHIFTED_MUL_VL)
     {
       set_syntax_error (_("invalid use of 'MUL'"));
       return FALSE;
@@ -3030,6 +3032,20 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	}
       break;
 
+    case SHIFTED_MUL_VL:
+      if (kind == AARCH64_MOD_MUL)
+	{
+	  skip_whitespace (p);
+	  if (strncasecmp (p, "vl", 2) == 0 && !ISALPHA (p[2]))
+	    {
+	      p += 2;
+	      kind = AARCH64_MOD_MUL_VL;
+	      break;
+	    }
+	}
+      set_syntax_error (_("only 'MUL VL' is permitted"));
+      return FALSE;
+
     case SHIFTED_REG_OFFSET:
       if (kind != AARCH64_MOD_UXTW && kind != AARCH64_MOD_LSL
 	  && kind != AARCH64_MOD_SXTW && kind != AARCH64_MOD_SXTX)
@@ -3057,7 +3073,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 
   /* Parse shift amount.  */
   exp_has_prefix = 0;
-  if (mode == SHIFTED_REG_OFFSET && *p == ']')
+  if ((mode == SHIFTED_REG_OFFSET && *p == ']') || kind == AARCH64_MOD_MUL_VL)
     exp.X_op = O_absent;
   else
     {
@@ -3068,7 +3084,11 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	}
       my_get_expression (&exp, &p, GE_NO_PREFIX, 0);
     }
-  if (exp.X_op == O_absent)
+  if (kind == AARCH64_MOD_MUL_VL)
+    /* For consistency, give MUL VL the same shift amount as an implicit
+       MUL #1.  */
+    operand->shifter.amount = 1;
+  else if (exp.X_op == O_absent)
     {
       if (aarch64_extend_operator_p (kind) == FALSE || exp_has_prefix)
 	{
@@ -3289,6 +3309,7 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
    PC-relative (literal)
      label
    SVE:
+     [base,#imm,MUL VL]
      [base,Zm.D{,LSL #imm}]
      [base,Zm.S,(S|U)XTW {#imm}]
      [base,Zm.D,(S|U)XTW {#imm}] // ignores top 32 bits of Zm.D elements
@@ -3334,7 +3355,9 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
    Likewise ACCEPT_SVE says whether the SVE addressing modes should be
    accepted.  We use context-dependent parsing for this case because
    (for compatibility) we should accept symbolic constants like z0 and
-   z0.s in base AArch64 code.
+   z0.s in base AArch64 code.  Also, the error message "only 'MUL VL'
+   is permitted" is likely to be confusing in non-SVE addresses, where
+   no immediate modifiers are permitted.
 
    In all other cases, it is the caller's responsibility to check whether
    the addressing mode is supported by the instruction.  It is also the
@@ -3544,6 +3567,10 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 		  set_syntax_error (_("constant offset required"));
 		  return FALSE;
 		}
+	      if (accept_sve && skip_past_comma (&p))
+		/* [Xn,<expr>,MUL VL  */
+		if (! parse_shift (&p, operand, SHIFTED_MUL_VL))
+		  return FALSE;
 	    }
 	}
     }
@@ -3619,9 +3646,9 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 }
 
 /* Parse a base AArch64 address, i.e. one that cannot contain SVE base
-   registers or SVE offset registers.  Do not allow relocation operators.
-   Look for and parse "[Xn], (Xm|#m)" as post-indexed addressing
-   if ACCEPT_REG_POST_INDEX is true.
+   registers, SVE offset registers, or MUL VL.  Do not allow relocation
+   operators.  Look for and parse "[Xn], (Xm|#m)" as post-indexed
+   addressing if ACCEPT_REG_POST_INDEX is true.
 
    Return TRUE on success.  */
 static bfd_boolean
@@ -3634,8 +3661,8 @@ parse_address (char **str, aarch64_opnd_info *operand,
 }
 
 /* Parse a base AArch64 address, i.e. one that cannot contain SVE base
-   registers or SVE offset registers.  Allow relocation operators but
-   disallow post-indexed addressing.
+   registers, SVE offset registers, or MUL VL.  Allow relocation operators
+   but disallow post-indexed addressing.
 
    Return TRUE on success.  */
 static bfd_boolean
@@ -3646,7 +3673,7 @@ parse_address_reloc (char **str, aarch64_opnd_info *operand)
 			     TRUE, FALSE, FALSE);
 }
 
-/* Parse an address in which SVE vector registers are allowed.
+/* Parse an address in which SVE vector registers and MUL VL are allowed.
    The arguments have the same meaning as for parse_address_main.
    Return TRUE on success.  */
 static bfd_boolean
@@ -5980,11 +6007,18 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  /* No qualifier.  */
 	  break;
 
+	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x4xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S6xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S9xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_U6:
 	case AARCH64_OPND_SVE_ADDR_RI_U6x2:
 	case AARCH64_OPND_SVE_ADDR_RI_U6x4:
 	case AARCH64_OPND_SVE_ADDR_RI_U6x8:
-	  /* [X<n>{, #imm}]
+	  /* [X<n>{, #imm, MUL VL}]
+	     [X<n>{, #imm}]
 	     but recognizing SVE registers.  */
 	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
 					      &offset_qualifier));

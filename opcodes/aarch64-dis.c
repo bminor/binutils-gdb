@@ -1186,6 +1186,78 @@ aarch64_ext_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return 1;
 }
 
+/* Decode an SVE address [<base>, #<offset>*<factor>, MUL VL],
+   where <offset> is given by the OFFSET parameter and where <factor> is
+   1 plus SELF's operand-dependent value.  fields[0] specifies the field
+   that holds <base>.  */
+static int
+aarch64_ext_sve_addr_reg_mul_vl (const aarch64_operand *self,
+				 aarch64_opnd_info *info, aarch64_insn code,
+				 int64_t offset)
+{
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+  info->addr.offset.imm = offset * (1 + get_operand_specific_data (self));
+  info->addr.offset.is_reg = FALSE;
+  info->addr.writeback = FALSE;
+  info->addr.preind = TRUE;
+  if (offset != 0)
+    info->shifter.kind = AARCH64_MOD_MUL_VL;
+  info->shifter.amount = 1;
+  info->shifter.operator_present = (info->addr.offset.imm != 0);
+  info->shifter.amount_present = FALSE;
+  return 1;
+}
+
+/* Decode an SVE address [<base>, #<simm4>*<factor>, MUL VL],
+   where <simm4> is a 4-bit signed value and where <factor> is 1 plus
+   SELF's operand-dependent value.  fields[0] specifies the field that
+   holds <base>.  <simm4> is encoded in the SVE_imm4 field.  */
+int
+aarch64_ext_sve_addr_ri_s4xvl (const aarch64_operand *self,
+			       aarch64_opnd_info *info, aarch64_insn code,
+			       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int offset;
+
+  offset = extract_field (FLD_SVE_imm4, code, 0);
+  offset = ((offset + 8) & 15) - 8;
+  return aarch64_ext_sve_addr_reg_mul_vl (self, info, code, offset);
+}
+
+/* Decode an SVE address [<base>, #<simm6>*<factor>, MUL VL],
+   where <simm6> is a 6-bit signed value and where <factor> is 1 plus
+   SELF's operand-dependent value.  fields[0] specifies the field that
+   holds <base>.  <simm6> is encoded in the SVE_imm6 field.  */
+int
+aarch64_ext_sve_addr_ri_s6xvl (const aarch64_operand *self,
+			       aarch64_opnd_info *info, aarch64_insn code,
+			       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int offset;
+
+  offset = extract_field (FLD_SVE_imm6, code, 0);
+  offset = (((offset + 32) & 63) - 32);
+  return aarch64_ext_sve_addr_reg_mul_vl (self, info, code, offset);
+}
+
+/* Decode an SVE address [<base>, #<simm9>*<factor>, MUL VL],
+   where <simm9> is a 9-bit signed value and where <factor> is 1 plus
+   SELF's operand-dependent value.  fields[0] specifies the field that
+   holds <base>.  <simm9> is encoded in the concatenation of the SVE_imm6
+   and imm3 fields, with imm3 being the less-significant part.  */
+int
+aarch64_ext_sve_addr_ri_s9xvl (const aarch64_operand *self,
+			       aarch64_opnd_info *info,
+			       aarch64_insn code,
+			       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int offset;
+
+  offset = extract_fields (code, 0, 2, FLD_SVE_imm6, FLD_imm3);
+  offset = (((offset + 256) & 511) - 256);
+  return aarch64_ext_sve_addr_reg_mul_vl (self, info, code, offset);
+}
+
 /* Decode an SVE address [<base>, #<offset> << <shift>], where <offset>
    is given by the OFFSET parameter and where <shift> is SELF's operand-
    dependent value.  fields[0] specifies the base register field <base>.  */

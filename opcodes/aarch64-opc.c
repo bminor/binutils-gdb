@@ -365,6 +365,7 @@ const struct aarch64_name_value_pair aarch64_operand_modifiers [] =
     {"sxtw", 0x6},
     {"sxtx", 0x7},
     {"mul", 0x0},
+    {"mul vl", 0x0},
     {NULL, 0},
 };
 
@@ -486,10 +487,11 @@ value_in_range_p (int64_t value, int low, int high)
   return (value >= low && value <= high) ? 1 : 0;
 }
 
+/* Return true if VALUE is a multiple of ALIGN.  */
 static inline int
 value_aligned_p (int64_t value, int align)
 {
-  return ((value & (align - 1)) == 0) ? 1 : 0;
+  return (value % align) == 0;
 }
 
 /* A signed value fits in a field.  */
@@ -1666,6 +1668,49 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x4xVL:
+	  min_value = -8;
+	  max_value = 7;
+	sve_imm_offset_vl:
+	  assert (!opnd->addr.offset.is_reg);
+	  assert (opnd->addr.preind);
+	  num = 1 + get_operand_specific_data (&aarch64_operands[type]);
+	  min_value *= num;
+	  max_value *= num;
+	  if ((opnd->addr.offset.imm != 0 && !opnd->shifter.operator_present)
+	      || (opnd->shifter.operator_present
+		  && opnd->shifter.kind != AARCH64_MOD_MUL_VL))
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("invalid addressing mode"));
+	      return 0;
+	    }
+	  if (!value_in_range_p (opnd->addr.offset.imm, min_value, max_value))
+	    {
+	      set_offset_out_of_range_error (mismatch_detail, idx,
+					     min_value, max_value);
+	      return 0;
+	    }
+	  if (!value_aligned_p (opnd->addr.offset.imm, num))
+	    {
+	      set_unaligned_error (mismatch_detail, idx, num);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_ADDR_RI_S6xVL:
+	  min_value = -32;
+	  max_value = 31;
+	  goto sve_imm_offset_vl;
+
+	case AARCH64_OPND_SVE_ADDR_RI_S9xVL:
+	  min_value = -256;
+	  max_value = 255;
+	  goto sve_imm_offset_vl;
+
 	case AARCH64_OPND_SVE_ADDR_RI_U6:
 	case AARCH64_OPND_SVE_ADDR_RI_U6x2:
 	case AARCH64_OPND_SVE_ADDR_RI_U6x4:
@@ -2645,7 +2690,13 @@ print_immediate_offset_address (char *buf, size_t size,
     }
   else
     {
-      if (opnd->addr.offset.imm)
+      if (opnd->shifter.operator_present)
+	{
+	  assert (opnd->shifter.kind == AARCH64_MOD_MUL_VL);
+	  snprintf (buf, size, "[%s,#%d,mul vl]",
+		    base, opnd->addr.offset.imm);
+	}
+      else if (opnd->addr.offset.imm)
 	snprintf (buf, size, "[%s,#%d]", base, opnd->addr.offset.imm);
       else
 	snprintf (buf, size, "[%s]", base);
@@ -3114,6 +3165,12 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
+    case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x4xVL:
+    case AARCH64_OPND_SVE_ADDR_RI_S6xVL:
+    case AARCH64_OPND_SVE_ADDR_RI_S9xVL:
     case AARCH64_OPND_SVE_ADDR_RI_U6:
     case AARCH64_OPND_SVE_ADDR_RI_U6x2:
     case AARCH64_OPND_SVE_ADDR_RI_U6x4:
