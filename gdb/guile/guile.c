@@ -27,7 +27,7 @@
 #include "cli/cli-utils.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "interps.h"
+#include "top.h"
 #include "extension-priv.h"
 #include "utils.h"
 #include "version.h"
@@ -165,8 +165,8 @@ guile_repl_command (char *arg, int from_tty)
 {
   struct cleanup *cleanup;
 
-  cleanup = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  cleanup = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   arg = skip_spaces (arg);
 
@@ -198,8 +198,8 @@ guile_command (char *arg, int from_tty)
 {
   struct cleanup *cleanup;
 
-  cleanup = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  cleanup = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   arg = skip_spaces (arg);
 
@@ -328,8 +328,8 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
     {
       struct cleanup *inner_cleanups;
 
-      inner_cleanups = make_cleanup_restore_integer (&interpreter_async);
-      interpreter_async = 0;
+      inner_cleanups = make_cleanup_restore_integer (&current_ui->async);
+      current_ui->async = 0;
 
       prevent_dont_repeat ();
       if (to_string)

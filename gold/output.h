@@ -2781,6 +2781,10 @@ class Output_data_dynamic : public Output_section_data
   add_custom(elfcpp::DT tag)
   { this->add_entry(Dynamic_entry(tag)); }
 
+  // Get a dynamic entry offset.
+  unsigned int
+  get_entry_offset(elfcpp::DT tag) const;
+
  protected:
   // Adjust the output section to set the entry size.
   void

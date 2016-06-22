@@ -352,6 +352,7 @@ do_restore_user_call_depth (void * call_depth)
 void
 execute_user_command (struct cmd_list_element *c, char *args)
 {
+  struct ui *ui = current_ui;
   struct command_line *cmdlines;
   struct cleanup *old_chain;
   enum command_control_type ret;
@@ -372,15 +373,15 @@ execute_user_command (struct cmd_list_element *c, char *args)
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
-  make_cleanup (do_restore_instream_cleanup, instream);
-  instream = (FILE *) 0;
+  make_cleanup (do_restore_instream_cleanup, ui->instream);
+  ui->instream = NULL;
 
   /* Also set the global in_user_command, so that NULL instream is
      not confused with Insight.  */
   in_user_command = 1;
 
-  make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   command_nest_depth++;
   while (cmdlines)
@@ -661,8 +662,8 @@ while_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
-  old_chain = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  old_chain = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   execute_control_command_untraced (command);
   free_command_lines (&command);
@@ -685,8 +686,8 @@ if_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
-  old_chain = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  old_chain = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   execute_control_command_untraced (command);
   free_command_lines (&command);
@@ -931,14 +932,17 @@ realloc_body_list (struct command_line *command, int new_length)
 static char *
 read_next_line (void)
 {
+  struct ui *ui = current_ui;
   char *prompt_ptr, control_prompt[256];
   int i = 0;
+  int from_tty = ui->instream == ui->stdin_stream;
 
   if (control_level >= 254)
     error (_("Control nesting too deep!"));
 
   /* Set a prompt based on the nesting of the control commands.  */
-  if (instream == stdin || (instream == 0 && deprecated_readline_hook != NULL))
+  if (from_tty
+      || (ui->instream == 0 && deprecated_readline_hook != NULL))
     {
       for (i = 0; i < control_level; i++)
 	control_prompt[i] = ' ';
@@ -949,7 +953,7 @@ read_next_line (void)
   else
     prompt_ptr = NULL;
 
-  return command_line_input (prompt_ptr, instream == stdin, "commands");
+  return command_line_input (prompt_ptr, from_tty, "commands");
 }
 
 /* Process one input line.  If the command is an "end", return such an
@@ -1253,7 +1257,7 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
 {
   struct command_line *head;
 
-  if (from_tty && input_from_terminal_p ())
+  if (from_tty && input_interactive_p (current_ui))
     {
       if (deprecated_readline_begin_hook)
 	{
@@ -1284,7 +1288,8 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
       do_cleanups (old_chain);
     }
 
-  if (deprecated_readline_end_hook && from_tty && input_from_terminal_p ())
+  if (from_tty && input_interactive_p (current_ui)
+      && deprecated_readline_end_hook)
     {
       (*deprecated_readline_end_hook) ();
     }
@@ -1688,8 +1693,8 @@ script_from_file (FILE *stream, const char *file)
   source_line_number = 0;
   source_file_name = file;
 
-  make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   {
 

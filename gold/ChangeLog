@@ -1,3 +1,89 @@
+2016-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20283
+	* NEWS: Mention --enable-relro.
+	* configure.ac: Add --enable-relro.
+	(DEFAULT_LD_Z_RELRO): New.  Set by --enable-relro and default
+	to 1.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* options.h (General_options::relro): Default to
+	DEFAULT_LD_Z_RELRO.
+
+2016-06-20  Cary Coutant  <ccoutant@gmail.com>
+
+	* NEWS: Add new features in 1.12.
+	* version.cc (version_string): Bump to 1.12.
+
+2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/20245
+	* i386.cc (Target_i386::first_plt_entry_offset): Return 0 if
+	plt_ is NULL.
+	(Target_i386::plt_entry_size): Likewise.
+	(Target_x86_64<size>::first_plt_entry_offset): Likewise.
+	(Target_x86_64<size>::plt_entry_size): Likewise.
+
+2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+        * mips.cc (Target_mips::Target_mips): Initialize rld_map_.
+        (Target_mips::rld_map_): New data member.
+        (Target_mips::do_finalize_sections): Add support for
+        DT_MIPS_RLD_MAP and DT_MIPS_RLD_MAP_REL dynamic tags,
+        .rld_map section, and __RLD_MAP symbol.
+        (Target_mips::do_dynamic_tag_custom_value): Add support for
+        DT_MIPS_RLD_MAP_REL dynamic tag.
+        * output.cc (Output_data_dynamic::get_entry_offset): New method
+        definition.
+        * output.h (Output_data_dynamic::get_entry_offset): New method
+        declaration.
+
+2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+        * mips.cc (Mips_relocate_functions::relpc16): Add unaligned check.
+
+2016-06-20  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (relocation_needs_la25_stub): Add support for relocs:
+	R_MIPS_PC21_S2 and R_MIPS_PC26_S2.
+	(hi16_reloc): Add support for R_MIPS_PCHI16 relocation.
+	(is_matching_lo16_reloc): Likewise.
+	(lo16_reloc): Add support for R_MIPS_PCLO16 relocation.
+	(Mips_output_data_plt::plt_entry_r6): New static data member for
+	R6 PLT entry.
+	(Target_mips::is_output_r6): New method.
+	(Target_mips::Mips_mach): Add new enum constants.
+	(Mips_relocate_functions::Status): Likewise.
+	(Mips_relocate_functions::pchi16_relocs): New static data member.
+	(Mips_relocate_functions::relpc21): New method.
+	(Mips_relocate_functions::relpc26): Likewise.
+	(Mips_relocate_functions::relpc18): Likewise.
+	(Mips_relocate_functions::relpc19): Likewise.
+	(Mips_relocate_functions::relpchi16): Likewise.
+	(Mips_relocate_functions::do_relpchi16): Likewise.
+	(Mips_relocate_functions::relpclo16): Likewise.
+	(Mips_output_data_plt::do_write): Add support for Mips r6 plt
+	entry.
+	(Target_mips::mips_32bit_flags): Add E_MIPS_ARCH_32R6 support.
+	(Target_mips::elf_mips_mach): Add E_MIPS_ARCH_32R6 and
+	E_MIPS_ARCH_64R6 support.
+	(Target_mips::update_abiflags_isa): Likewise.
+	(mips_get_size_for_reloc): Add support for relocs: R_MIPS_PCHI16,
+	R_MIPS_PCLO16, R_MIPS_PC21_S2, R_MIPS_PC26_S2, R_MIPS_PC18_S3 and
+	R_MIPS_PC19_S2.
+	(Target_mips::Scan::local): Add support for relocs: R_MIPS_PCHI16
+	and R_MIPS_PCLO16.
+	(Target_mips::Scan::global): Add support for relocs:
+	R_MIPS_PC21_S2 and R_MIPS_PC26_S2.
+	(Target_mips::Relocate::relocate): Call functions for resolving
+	Mips32r6 and Mips64r6 relocations, and print error message for
+	STATUS_PCREL_UNALIGNED.
+	(Target_mips::Scan::get_reference_flags): Add support for relocs:
+	R_MIPS_PCHI16, R_MIPS_PCLO16, R_MIPS_PC21_S2, R_MIPS_PC26_S2,
+	R_MIPS_PC18_S3 and R_MIPS_PC19_S2.
+	(Target_mips::elf_mips_mach_name): Add E_MIPS_ARCH_32R6 and
+	E_MIPS_ARCH_64R6 support.
+
 2016-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/20246

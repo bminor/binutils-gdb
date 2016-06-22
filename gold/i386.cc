@@ -1565,6 +1565,8 @@ Target_i386::plt_entry_count() const
 unsigned int
 Target_i386::first_plt_entry_offset() const
 {
+  if (this->plt_ == NULL)
+    return 0;
   return this->plt_->first_plt_entry_offset();
 }
 
@@ -1573,6 +1575,8 @@ Target_i386::first_plt_entry_offset() const
 unsigned int
 Target_i386::plt_entry_size() const
 {
+  if (this->plt_ == NULL)
+    return 0;
   return this->plt_->get_plt_entry_size();
 }
 

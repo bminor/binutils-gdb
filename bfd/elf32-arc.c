@@ -621,9 +621,6 @@ arc_elf_object_p (bfd * abfd)
 	  case E_ARC_MACH_ARC700:
 	    mach = bfd_mach_arc_arc700;
 	    break;
-	  case E_ARC_MACH_NPS400:
-	    mach = bfd_mach_arc_nps400;
-	    break;
 	  case EF_ARC_CPU_ARCV2HS:
 	  case EF_ARC_CPU_ARCV2EM:
 	    mach = bfd_mach_arc_arcv2;
@@ -671,9 +668,6 @@ arc_elf_final_write_processing (bfd * abfd,
       emf = EM_ARC_COMPACT;
       break;
     case bfd_mach_arc_arc700:
-      emf = EM_ARC_COMPACT;
-      break;
-    case bfd_mach_arc_nps400:
       emf = EM_ARC_COMPACT;
       break;
     case bfd_mach_arc_arcv2:

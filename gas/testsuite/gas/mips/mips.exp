@@ -1316,6 +1316,20 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "pcrel-4-64"
     }
 
+    run_dump_test "pcrel-reloc-1"
+    run_dump_test "pcrel-reloc-1-r6"
+    run_dump_test "pcrel-reloc-2"
+    run_dump_test "pcrel-reloc-2-r6"
+    run_dump_test "pcrel-reloc-3"
+    run_dump_test "pcrel-reloc-3-r6"
+    run_dump_test "pcrel-reloc-4"
+    run_dump_test "pcrel-reloc-4-r6"
+    run_dump_test "pcrel-reloc-5"
+    run_dump_test "pcrel-reloc-5-r6"
+    run_dump_test "pcrel-reloc-6"
+    run_list_test "pcrel-reloc-6" "-32 --defsym offset=4" \
+	"MIPS local PC-relative relocations 6b"
+
     run_dump_test_arches "attr-gnu-4-0" "-32" \
 				    [mips_arch_list_matching mips1]
     run_dump_test_arches "attr-gnu-4-0" "-64" \

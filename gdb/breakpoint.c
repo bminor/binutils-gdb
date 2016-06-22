@@ -4726,7 +4726,7 @@ bpstat_do_actions_1 (bpstat *bsp)
 
       if (breakpoint_proceeded)
 	{
-	  if (interpreter_async)
+	  if (current_ui->async)
 	    /* If we are in async mode, then the target might be still
 	       running, not stopped at any breakpoint, so nothing for
 	       us to do here -- just return to the event loop.  */
@@ -5233,7 +5233,7 @@ watchpoint_check (void *p)
     }
   else
     {
-      struct ui_out *uiout = current_uiout;
+      struct switch_thru_all_uis state;
 
       /* This seems like the only logical thing to do because
          if we temporarily ignored the watchpoint, then when
@@ -5248,14 +5248,20 @@ watchpoint_check (void *p)
 	 call breakpoint_ops->print_it this bp will be deleted
 	 already.  So we have no choice but print the information
 	 here.  */
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string
-	  (uiout, "reason", async_reason_lookup (EXEC_ASYNC_WATCHPOINT_SCOPE));
-      ui_out_text (uiout, "\nWatchpoint ");
-      ui_out_field_int (uiout, "wpnum", b->base.number);
-      ui_out_text (uiout,
-		   " deleted because the program has left the block in\n\
-which its expression is valid.\n");     
+
+      SWITCH_THRU_ALL_UIS (state)
+        {
+	  struct ui_out *uiout = current_uiout;
+
+	  if (ui_out_is_mi_like_p (uiout))
+	    ui_out_field_string
+	      (uiout, "reason", async_reason_lookup (EXEC_ASYNC_WATCHPOINT_SCOPE));
+	  ui_out_text (uiout, "\nWatchpoint ");
+	  ui_out_field_int (uiout, "wpnum", b->base.number);
+	  ui_out_text (uiout,
+		       " deleted because the program has left the block in\n"
+		       "which its expression is valid.\n");
+	}
 
       /* Make sure the watchpoint's commands aren't executed.  */
       decref_counted_command_line (&b->base.commands);
@@ -5423,10 +5429,18 @@ bpstat_check_watchpoint (bpstat bs)
 	      /* Can't happen.  */
 	    case 0:
 	      /* Error from catch_errors.  */
-	      printf_filtered (_("Watchpoint %d deleted.\n"), b->base.number);
-	      watchpoint_del_at_next_stop (b);
-	      /* We've already printed what needs to be printed.  */
-	      bs->print_it = print_it_done;
+	      {
+		struct switch_thru_all_uis state;
+
+		SWITCH_THRU_ALL_UIS (state)
+	          {
+		    printf_filtered (_("Watchpoint %d deleted.\n"),
+				     b->base.number);
+		  }
+		watchpoint_del_at_next_stop (b);
+		/* We've already printed what needs to be printed.  */
+		bs->print_it = print_it_done;
+	      }
 	      break;
 	    }
 	}
@@ -11605,8 +11619,10 @@ struct until_break_fsm
   struct breakpoint *caller_breakpoint;
 };
 
-static void until_break_fsm_clean_up (struct thread_fsm *self);
-static int until_break_fsm_should_stop (struct thread_fsm *self);
+static void until_break_fsm_clean_up (struct thread_fsm *self,
+				      struct thread_info *thread);
+static int until_break_fsm_should_stop (struct thread_fsm *self,
+					struct thread_info *thread);
 static enum async_reply_reason
   until_break_fsm_async_reply_reason (struct thread_fsm *self);
 
@@ -11624,14 +11640,14 @@ static struct thread_fsm_ops until_break_fsm_ops =
 /* Allocate a new until_break_command_fsm.  */
 
 static struct until_break_fsm *
-new_until_break_fsm (int thread,
+new_until_break_fsm (struct interp *cmd_interp, int thread,
 		     struct breakpoint *location_breakpoint,
 		     struct breakpoint *caller_breakpoint)
 {
   struct until_break_fsm *sm;
 
   sm = XCNEW (struct until_break_fsm);
-  thread_fsm_ctor (&sm->thread_fsm, &until_break_fsm_ops);
+  thread_fsm_ctor (&sm->thread_fsm, &until_break_fsm_ops, cmd_interp);
 
   sm->thread = thread;
   sm->location_breakpoint = location_breakpoint;
@@ -11644,10 +11660,10 @@ new_until_break_fsm (int thread,
    until(location)/advance commands.  */
 
 static int
-until_break_fsm_should_stop (struct thread_fsm *self)
+until_break_fsm_should_stop (struct thread_fsm *self,
+			     struct thread_info *tp)
 {
   struct until_break_fsm *sm = (struct until_break_fsm *) self;
-  struct thread_info *tp = inferior_thread ();
 
   if (bpstat_find_breakpoint (tp->control.stop_bpstat,
 			      sm->location_breakpoint) != NULL
@@ -11663,7 +11679,8 @@ until_break_fsm_should_stop (struct thread_fsm *self)
    until(location)/advance commands.  */
 
 static void
-until_break_fsm_clean_up (struct thread_fsm *self)
+until_break_fsm_clean_up (struct thread_fsm *self,
+			  struct thread_info *thread)
 {
   struct until_break_fsm *sm = (struct until_break_fsm *) self;
 
@@ -11785,7 +11802,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
 						    stack_frame_id, bp_until);
   make_cleanup_delete_breakpoint (location_breakpoint);
 
-  sm = new_until_break_fsm (tp->global_num,
+  sm = new_until_break_fsm (command_interp (), tp->global_num,
 			    location_breakpoint, caller_breakpoint);
   tp->thread_fsm = &sm->thread_fsm;
 

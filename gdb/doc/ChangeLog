@@ -1,3 +1,8 @@
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Interpreters): Update intepreter-exec section,
+	document new-ui and explain use case.
+
 2016-06-17  Yan-Ting Lin  <currygt52@gmail.com>
 
 	* gdb.texinfo (Standard Target Features): Document NDS32 features.

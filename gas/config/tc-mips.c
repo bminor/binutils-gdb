@@ -6972,6 +6972,7 @@ calculate_reloc (bfd_reloc_code_real_type reloc, offsetT operand,
       return TRUE;
 
     case BFD_RELOC_HI16_S:
+    case BFD_RELOC_HI16_S_PCREL:
     case BFD_RELOC_MICROMIPS_HI16_S:
     case BFD_RELOC_MIPS16_HI16_S:
       *result = ((operand + 0x8000) >> 16) & 0xffff;
@@ -6984,6 +6985,7 @@ calculate_reloc (bfd_reloc_code_real_type reloc, offsetT operand,
       return TRUE;
 
     case BFD_RELOC_LO16:
+    case BFD_RELOC_LO16_PCREL:
     case BFD_RELOC_MICROMIPS_LO16:
     case BFD_RELOC_MIPS16_LO16:
       *result = operand & 0xffff;
@@ -14606,6 +14608,11 @@ md_pcrel_from (fixS *fixP)
       /* Return the address of the delay slot.  */
       return addr + 4;
 
+    case BFD_RELOC_MIPS_18_PCREL_S3:
+      /* Return the aligned address of the doubleword containing
+         the instruction.  */
+      return addr & ~7;
+
     default:
       return addr;
     }
@@ -14768,7 +14775,7 @@ mips_force_relocation (fixS *fixp)
     return 1;
 
   /* We want all PC-relative relocations to be kept for R6 relaxation.  */
-  if (ISA_IS_R6 (mips_opts.isa)
+  if (ISA_IS_R6 (file_mips_opts.isa)
       && (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_21_PCREL_S2
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_26_PCREL_S2
@@ -14939,6 +14946,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS_GOT_LO16:
     case BFD_RELOC_MIPS_CALL_HI16:
     case BFD_RELOC_MIPS_CALL_LO16:
+    case BFD_RELOC_HI16_S_PCREL:
+    case BFD_RELOC_LO16_PCREL:
     case BFD_RELOC_MIPS16_GPREL:
     case BFD_RELOC_MIPS16_GOT16:
     case BFD_RELOC_MIPS16_CALL16:
@@ -15020,16 +15029,43 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     case BFD_RELOC_MIPS_21_PCREL_S2:
+      if ((*valP & 0x3) != 0)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch to misaligned address (%lx)"), (long) *valP);
+      if (!fixP->fx_done)
+	break;
+
+      if (*valP + 0x400000 <= 0x7fffff)
+	{
+	  insn = read_insn (buf);
+	  insn |= (*valP >> 2) & 0x1fffff;
+	  write_insn (buf, insn);
+	}
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
+      break;
+
     case BFD_RELOC_MIPS_26_PCREL_S2:
       if ((*valP & 0x3) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("branch to misaligned address (%lx)"), (long) *valP);
+      if (!fixP->fx_done)
+	break;
 
-      gas_assert (!fixP->fx_done);
+      if (*valP + 0x8000000 <= 0xfffffff)
+	{
+	  insn = read_insn (buf);
+	  insn |= (*valP >> 2) & 0x3ffffff;
+	  write_insn (buf, insn);
+	}
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
       break;
 
     case BFD_RELOC_MIPS_18_PCREL_S3:
-      if ((S_GET_VALUE (fixP->fx_addsy) & 0x7) != 0)
+      if (fixP->fx_addsy && (S_GET_VALUE (fixP->fx_addsy) & 0x7) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("PC-relative access using misaligned symbol (%lx)"),
 		      (long) S_GET_VALUE (fixP->fx_addsy));
@@ -15037,22 +15073,37 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("PC-relative access using misaligned offset (%lx)"),
 		      (long) fixP->fx_offset);
+      if (!fixP->fx_done)
+	break;
 
-      gas_assert (!fixP->fx_done);
+      if (*valP + 0x100000 <= 0x1fffff)
+	{
+	  insn = read_insn (buf);
+	  insn |= (*valP >> 3) & 0x3ffff;
+	  write_insn (buf, insn);
+	}
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("PC-relative access out of range"));
       break;
 
     case BFD_RELOC_MIPS_19_PCREL_S2:
       if ((*valP & 0x3) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("PC-relative access to misaligned address (%lx)"),
-		      (long) (S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset));
+		      (long) *valP);
+      if (!fixP->fx_done)
+	break;
 
-      gas_assert (!fixP->fx_done);
-      break;
-
-    case BFD_RELOC_HI16_S_PCREL:
-    case BFD_RELOC_LO16_PCREL:
-      gas_assert (!fixP->fx_done);
+      if (*valP + 0x100000 <= 0x1fffff)
+	{
+	  insn = read_insn (buf);
+	  insn |= (*valP >> 2) & 0x7ffff;
+	  write_insn (buf, insn);
+	}
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("PC-relative access out of range"));
       break;
 
     case BFD_RELOC_16_PCREL_S2:
@@ -17137,7 +17188,7 @@ mips_fix_adjustable (fixS *fixp)
      Also, PC relative relocations for MIPS R6 need to be symbol rather than
      section relative to allow linker relaxations to be performed later on.  */
   if (limited_pcrel_reloc_p (fixp->fx_r_type)
-      && (HAVE_IN_PLACE_ADDENDS || ISA_IS_R6 (mips_opts.isa)))
+      && (HAVE_IN_PLACE_ADDENDS || ISA_IS_R6 (file_mips_opts.isa)))
     return 0;
 
   /* R_MIPS16_26 relocations against non-MIPS16 functions might resolve
@@ -17172,8 +17223,8 @@ mips_fix_adjustable (fixS *fixp)
 	  of converting JAL to JALX instructions in the linker.
 
      For simplicity, we deal with (3)-(4) by not reducing _any_ relocation
-     against a MIPS16 symbol.  We deal with (5) by by not reducing any
-     such relocations on REL targets.
+     against a MIPS16 symbol.  We deal with (5) by additionally leaving
+     alone any jump relocations against a microMIPS symbol.
 
      We deal with (1)-(2) by saying that, if there's a R_MIPS16_26
      relocation against some symbol R, no relocation against R may be
@@ -17224,7 +17275,15 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
       /* At this point, fx_addnumber is "symbol offset - pcrel address".
 	 Relocations want only the symbol offset.  */
-      reloc->addend = fixp->fx_addnumber + reloc->address;
+      switch (fixp->fx_r_type)
+	{
+	case BFD_RELOC_MIPS_18_PCREL_S3:
+	  reloc->addend = fixp->fx_addnumber + (reloc->address & ~7);
+	  break;
+	default:
+	  reloc->addend = fixp->fx_addnumber + reloc->address;
+	  break;
+	}
     }
   else if (HAVE_IN_PLACE_ADDENDS
 	   && fixp->fx_r_type == BFD_RELOC_MICROMIPS_JMP

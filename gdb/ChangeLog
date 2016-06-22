@@ -1,3 +1,675 @@
+2016-06-21  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* f-valprint.c (f_val_print): Add field names for printing
+	derived types fields.
+
+2016-06-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_iterate_over_regset_sections): Fix typo
+	in name of last-break regset.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* fork-child.c (fork_inferior): Switch the child to the main UI
+	right after vfork.  Save/restore the current UI in the parent.
+	Flush outputs of the main UI instead of the current UI.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (watchpoint_check): Send watchpoint-deleted output
+	to all UIs.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention support for running interpreters on separate
+	UIs and the new new-ui command.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* interps.c (set_top_level_interpreter): New function, factored
+	out from captured_main.
+	(interpreter_completer): Make extern.
+	* interps.h (set_top_level_interpreter, interpreter_completer):
+	New declarations.
+	(captured_main): Use set_top_level_interpreter.
+	* top.c [!O_NOCTTY] (O_NOCTTY): Define as 0.
+	(open_terminal_stream, new_ui_command): New functions.
+	(init_main): Install the "new-ui" command.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-script.c (read_next_line): Adjust to per-UI stdin.
+	(read_command_lines): Use input_interactive_p instead of
+	input_from_terminal_p.
+	* defs.h (struct ui): Forward declare.
+	(input_from_terminal_p): Rename to ...
+	(input_interactive_p): ... this.
+	* event-top.c (stdin_event_handler): Pass 0 as from_tty argument
+	to quit_command.
+	(command_handler): Adjust to per-UI stdin.
+	(handle_line_of_input): Adjust to per-UI stdin and use
+	input_interactive_p instead of ISATTY and input_from_terminal_p.
+	(gdb_readline_no_editing_callback): Adjust to per-UI stdin.
+	(command_line_handler): Always pass true as "from_tty" parameter
+	of handle_line_of_input and execute_command.
+	(async_sigterm_handler): Pass 0 as from_tty argument to
+	quit_command.
+	* inflow.c (interactive_mode, show_interactive_mode): Moved to ...
+	(gdb_has_a_terminal): Don't check interactive_mode here.
+	(_initialize_inflow): Don't install "set interactive-mode" here.
+	* main.c (captured_command_loop): Adjust to per-UI stdin.
+	* mi/mi-interp.c (mi_execute_command_wrapper): Adjust to per-UI
+	stdin.
+	* top.c (new_ui): Save the stdin stream and whether it's a tty.
+	(dont_repeat): Adjust to per-UI stdin.
+	(command_line_input): Adjust to per-UI stdin and to use
+	input_interactive_p.
+	(quit_force): Write history if any UI supports interactive input.
+	(interactive_mode, show_interactive_mode): Move here, from
+	inflow.c.
+	(input_from_terminal_p): Rename to ...
+	(input_interactive_p): ... this, and check the "interactive_mode"
+	global instead of calling gdb_has_a_terminal.
+	(_initialize_top): Install "set interactive-mode" here.
+	* top.h (struct ui) <stdin_stream, input_interactive_p>: New
+	fields.
+	* utils.c (quit): Pass 0 as from_tty argument to quit_force.
+	(defaulted_query): Adjust to per-UI stdin and to use
+	input_interactive_p.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (stdin_event_handler): Don't quit gdb if it was a
+	secondary UI's input stream that closed.  Instead, just delete the
+	UI.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (main_ui_): Delete.
+	(main_ui, current_ui, ui_list): No longer initialize here.
+	* main.c (captured_main): UI initialization code factored out to
+	new new_ui function.
+	(gdb_main): Wrap captured_main with TRY/CATCH instead of
+	catch_errors.
+	* top.c (highest_ui_num): New global.
+	(new_ui): New function.
+	* top.h (struct ui) <num>: New field.
+	(new_ui): New declaration.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c (cli_on_normal_stop): Bail out early if there's
+	nothing to print.  Use should_print_stop_to_console.
+	* tui/tui-interp.c (tui_on_normal_stop): Likewise.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (new_until_break_fsm): Add 'cmd_interp' parameter.
+	(until_break_fsm_should_stop, until_break_fsm_clean_up): Add
+	thread parameter.
+	(until_break_command): Pass command interpreter to thread fsm
+	ctor.
+	* cli/cli-interp.c (should_print_stop_to_console): Adjust.
+	* gdbthread.h (struct thread_control_state) <command_interp>:
+	Delete field.
+	* infcall.c (new_call_thread_fsm): Add 'cmd_interp' parameter.
+	Pass it down.
+	(call_thread_fsm_should_stop): Add thread parameter.
+	(call_function_by_hand_dummy): Pass command interpreter to thread
+	fsm ctor.  Pass thread pointer to fsm clean up method.
+	* infcmd.c: Include interps.h.
+	(struct step_command_fsm) <thread>: Delete field.
+	(new_step_command_fsm): Add 'cmd_interp' parameter.  Pass it down.
+	(step_command_fsm_prepare): Remove references to fsm's thread
+	field.
+	(step_1): Pass command interpreter to thread
+	fsm ctor.  Pass thread pointer to fsm clean up method.
+	(step_command_fsm_should_stop, step_command_fsm_clean_up): Add
+	thread parameter and use it.
+	(new_until_next_fsm): Add 'cmd_interp' parameter.  Pass it down.
+	(until_next_fsm_should_stop, until_next_fsm_clean_up): Add thread
+	parameter and use it.
+	(until_next_command): Pass command interpreter to thread fsm ctor.
+	(struct finish_command_fsm) <thread>: Delete field.
+	(finish_command_fsm_ops): Add NULL slot for should_notify_stop.
+	(new_finish_command_fsm): Add 'cmd_interp' parameter and pass it
+	down.  Remove thread parameter and adjust.
+	(finish_command_fsm_should_stop, finish_command_fsm_clean_up): Add
+	thread parameter and use it.
+	(finish_command): Pass command interpreter to thread fsm ctor.
+	Don't pass thread.
+	* infrun.c (follow_fork): Move thread fsm to child fork instead of
+	command interpreter, only.
+	(clear_proceed_status_thread): Remove reference to command_interp.
+	(proceed): Don't record the thread's command interpreter.
+	(clean_up_just_stopped_threads_fsms): Pass thread to fsm clean_up
+	method.
+	(fetch_inferior_event): Pass thread to fsm should_stop method.
+	* thread-fsm.c (thread_fsm_ctor): Add 'cmd_interp' parameter.
+	Store it.
+	(thread_fsm_clean_up, thread_fsm_should_stop): Add thread
+	parameter and pass it down.
+	* thread-fsm.h (struct thread_fsm) <command_interp>: New field.
+	(struct thread_fsm_ops) <clean_up, should_stop>: Add thread
+	parameter.
+	(thread_fsm_ctor): Add 'cmd_interp' parameter.
+	(thread_fsm_clean_up, thread_fsm_should_stop): Add thread
+	parameter.
+	* thread.c (thread_cancel_execution_command): Pass thread to
+	thread fsm clean_up method.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c: Include gdbthread.h and thread-fsm.h.
+	(should_print_stop_to_console): New function, factored out from
+	mi_on_normal_stop_1.
+	* cli/cli-interp.h (should_print_stop_to_console): Declare.
+	* mi/mi-interp.c (mi_on_normal_stop_1): Use
+	should_print_stop_to_console.  Pass it the current UI's console
+	interpreter.
+	* mi/mi-main.c (captured_mi_execute_command): Use the
+	INTERP_CONSOLE symbol rather than explicit "console".
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (prepare_execution_command): Use
+	all_uis_on_sync_execution_starting.
+	* infrun.c (all_uis_on_sync_execution_starting): New function.
+	* infrun.h (all_uis_on_sync_execution_starting): Declare.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* annotate.c: Include top.h.
+	(async_background_execution_p): Delete.
+	(print_value_flags): Check the UI's prompt state rather then
+	async_background_execution_p.
+	* event-loop.c (start_event_loop): Set the prompt state to
+	PROMPT_NEEDED.
+	* event-top.c (display_gdb_prompt, async_enable_stdin)
+	(async_disable_stdin): Check the current UI's prompt state instead
+	of the sync_execution global.
+	(command_line_handler): Set the prompt state to PROMPT_NEEDED
+	before running a command, and display the prompt if still needed
+	afterwards.
+	* infcall.c (struct call_thread_fsm) <waiting_ui>: New field.
+	(new_call_thread_fsm): New parameter 'waiting_ui'.  Store it.
+	(call_thread_fsm_should_stop): Set the prompt state to
+	PROMPT_NEEDED.
+	(run_inferior_call): Adjust to temporarily set the prompt state to
+	PROMPT_BLOCKED instead of using the sync_execution global.
+	(call_function_by_hand_dummy): Pass the current UI to
+	new_call_thread_fsm.
+	* infcmd.c: Include top.h.
+	(continue_1): Check the current UI's prompt state instead of the
+	sync_execution global.
+	(continue_command): Validate global execution state before calling
+	prepare_execution_command.
+	(step_1): Call all_uis_check_sync_execution_done.
+	(attach_post_wait): Don't call async_enable_stdin here.  Remove
+	reference to sync_execution.
+	* infrun.c (sync_execution): Delete global.
+	(follow_fork_inferior)
+	(reinstall_readline_callback_handler_cleanup): Check the current
+	UI's prompt state instead of the sync_execution global.
+	(check_curr_ui_sync_execution_done)
+	(all_uis_check_sync_execution_done): New functions.
+	(fetch_inferior_event): Call all_uis_check_sync_execution_done
+	instead of trying to determine whether the global sync execution
+	changed.
+	(handle_no_resumed): Check the prompt state of all UIs.
+	(normal_stop): Emit the no unwait-for even to all PROMPT_BLOCKED
+	UIs.  Emit the "Switching to" notification to all UIs.  Enable
+	stdin in all UIs.
+	* infrun.h (sync_execution): Delete.
+	(all_uis_check_sync_execution_done): Declare.
+	* main.c (captured_command_loop): Don't call
+	interp_pre_command_loop if the prompt is blocked.
+	(catch_command_errors, catch_command_errors_const): Adjust.
+	(captured_main): Set the initial prompt state to PROMPT_NEEDED.
+	* mi/mi-interp.c (display_mi_prompt): Set the prompt state to
+	PROMPTED.
+	(mi_interpreter_resume): Don't clear sync_execution.  Remove hack
+	comment.
+	(mi_execute_command_input_handler): Set the prompt state to
+	PROMPT_NEEDED before executing the command, and only display the
+	prompt if the prompt state is PROMPT_NEEDED afterwards.
+	(mi_on_resume_1): Adjust to check the prompt state.
+	* target.c (target_terminal_inferior): Adjust to check the prompt
+	state.
+	* top.c (wait_sync_command_done, maybe_wait_sync_command_done)
+	(execute_command): Check the current UI's prompt state instead of
+	sync_execution.
+	* top.h (enum prompt_state): New.
+	(struct ui) <prompt_state>: New field.
+	(ALL_UIS): New macro.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* top.c (gdb_secondary_prompt_depth): Delete.
+	(gdb_in_secondary_prompt_p): Add ui parameter.  Use it.
+	(gdb_readline_wrapper_cleanup, gdb_readline_wrapper): Adjust to
+	per-UI gdb_secondary_prompt_depth.
+	* top.h (struct ui) <secondary_prompt_depth>: New field.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c (cli_interpreter_pre_command_loop): New
+	function.
+	(cli_interp_procs): Install it instead of cli_command_loop.
+	* cli/cli-interp.h (cli_interpreter_pre_command_loop): Declare.
+	* event-top.c (cli_command_loop): Delete.
+	* interps.c (interp_new): Remove reference to command_loop_proc.
+	(current_interp_command_loop): Delete.
+	(interp_pre_command_loop): New function.
+	(interp_command_loop_ftype): Delete.
+	* interps.h (interp_pre_command_loop_ftype): New typedef.
+	(struct interp_procs) <command_loop_proc>: Delele field.
+	<pre_command_loop_proc>: New field.
+	(current_interp_command_loop): Delete declaration.
+	(interp_pre_command_loop): New declaration.
+	* main.c (captured_command_loop): Call interp_pre_command_loop
+	instead of current_interp_command_loop and start an event loop.
+	* mi/mi-interp.c (mi_command_loop): Delete.
+	(mi_interpreter_pre_command_loop): New.
+	(mi_interp_procs): Update.
+	* tui/tui-interp.c (tui_interp_procs): Install
+	cli_interpreter_pre_command_loop instead of cli_command_loop.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* interps.c (current_interpreter): New function.
+	* interps.h (current_interpreter): New declaration.
+	* mi/mi-cmds.h (raw_stdout): Delete declaration.
+	* mi/mi-common.h (struct mi_interp) <raw_stdout,
+	saved_raw_stdout>: New field.
+	* mi/mi-interp.c (display_mi_prompt): New parameter 'mi'.  Adjust
+	to per-UI raw_stdout.
+	(mi_interpreter_init): Adjust to per-UI raw_stdout.
+	(mi_on_sync_execution_done, mi_execute_command_input_handler)
+	(mi_command_loop): Pass MI instance to display_mi_prompt.
+	(mi_on_normal_stop_1, mi_output_running_pid, mi_on_resume_1)
+	(mi_on_resume): Adjust to per-UI raw_stdout.
+	(saved_raw_stdout): Delete.
+	(mi_set_logging): Adjust to per-UI raw_stdout and
+	saved_raw_stdout.
+	* mi/mi-main.c (raw_stdout): Delete.
+	(mi_cmd_gdb_exit, captured_mi_execute_command)
+	(mi_print_exception, mi_load_progress): Adjust to per-UI
+	raw_stdout.
+	(print_diff_now, mi_print_timing_maybe): New ui_file parameter.
+	Pass it along.
+	(print_diff): New ui_file parameter.  Send output there instead of
+	raw_stdout.
+	* mi/mi-main.h (struct ui_file): Forward declare.
+	(mi_print_timing_maybe): Add ui_file parameter.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-interp.c (display_mi_prompt): New function.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* target.c (target_terminal_inferior): Bail out after
+	unregistering input_fd if not on the main UI.
+	(target_terminal_ours): Bail out after registering input_fd if not
+	on the main UI.
+	(target_terminal_ours_for_output): Bail out if not on the main UI.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (restore_ui_cleanup): Make extern.
+	* infrun.c (fetch_inferior_event): Always switch to the main UI.
+	* top.h (restore_ui_cleanup): Declare.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	PR mi/20034
+	* cli/cli-interp.c: Include cli-interp.h and event-top.h.
+	(cli_interpreter_resume): Pass 1 to gdb_setup_readline.  Set the
+	UI's input_handler here.
+	(cli_interpreter_supports_command_editing): New function.
+	(cli_interp_procs): Install it.
+	* cli/cli-interp.h: New file.
+	* event-top.c (async_command_editing_p): Rename to ...
+	(set_editing_cmd_var): ... this.
+	(change_line_handler): Add parameter 'editing', and use it.  Bail
+	early if the interpreter doesn't support editing.  Don't touch
+	readline state if editing is off.
+	(gdb_rl_callback_handler_remove, gdb_rl_callback_handler_install)
+	(gdb_rl_callback_handler_reinstall): Assert the current UI is the
+	main UI.
+	(display_gdb_prompt): Don't call gdb_rl_callback_handler_remove if
+	not using readline.  Check whether the current UI is using command
+	editing instead of checking the async_command_editing_p global.
+	(set_async_editing_command): Delete.
+	(gdb_setup_readline): Add 'editing' parameter.  Only allow editing
+	on the main UI.  Don't touch readline state if editing is off.
+	(gdb_disable_readline): Don't touch readline state if editing is
+	off.
+	* event-top.h (gdb_setup_readline): Add 'int' parameter.
+	(set_async_editing_command): Delete declaration.
+	(change_line_handler, command_line_handler): Declare.
+	(async_command_editing_p): Rename to ...
+	(set_editing_cmd_var): ... this.
+	* infrun.c (reinstall_readline_callback_handler_cleanup): Check
+	whether the current UI has editing enabled rather than checking
+	the async_command_editing_p global.
+	* interps.c (interp_supports_command_editing): New function.
+	* interps.h (interp_supports_command_editing_ftype): New typedef.
+	(struct interp_procs) <supports_command_editing_proc>: New field.
+	(interp_supports_command_editing): Declare.
+	* mi/mi-interp.c (mi_interpreter_resume): Pass 0 to
+	gdb_setup_readline.  Don't clear the async_command_editing_p
+	global.  Update comments.
+	* top.c (gdb_readline_wrapper_line, gdb_readline_wrapper): Check
+	whether the current UI has editing enabled rather than checking
+	the async_command_editing_p global.  Don't touch readline state if
+	editing is off.
+	(undo_terminal_modifications_before_exit): Switch to the main UI.
+	Unconditionally call gdb_disable_readline.
+	(set_editing): New function.
+	(show_async_command_editing_p): Rename to ...
+	(show_editing): ... this.  Show the state of the current UI.
+	(_initialize_top): Adjust.
+	* top.h (struct ui) <command_editing>: New field.
+	* tui/tui-interp.c: Include cli/cli-interp.h.
+	(tui_resume): Pass 1 to gdb_setup_readline.  Set the UI's
+	input_handler.
+	(tui_interp_procs): Install
+	cli_interpreter_supports_command_editing.
+	* tui/tui-io.c (tui_getc): Check whether the current UI has
+	editing enabled rather than checking the async_command_editing_p
+	global.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* top.c: Call gen_ret_current_ui_field_ptr for current_uiout.
+	* top.h (struct ui) <m_current_uiout>: New field.
+	* ui-out.c (current_uiout): Delete.
+	* ui-out.h (current_uiout): Delete.
+	(current_ui_current_uiout_ptr): New declaration.
+	(current_uiout): Reimplement as wrapper around
+	current_ui_current_uiout_ptr.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* ui-out.c (default_ui_out_impl): Delete.
+	(def_uiout): Delete.
+	(current_uiout): Set to NULL.
+	(default_table_begin, default_table_body, default_table_end)
+	(default_table_header, default_begin, default_end)
+	(default_field_int, default_field_skip, default_field_string)
+	(default_field_fmt, default_spaces, default_text, default_message)
+	(default_wrap_hint, default_flush, default_data_destroy): Delete.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (gdb_setup_readline): Pass the UI's outstream and
+	errstream to stdout_fileopen and stderr_fileopen.
+	* exceptions.c: Include top.h.
+	(print_flush): Open the current UI's outstream file descriptor,
+	instead of hardcoding file descriptor 1.
+	* main.c (captured_main): Save the main UI's out and error
+	streams.  Adjust stderr_fileopen call.
+	* top.h (struct ui) <outstream, errstream>: New fields.
+	* ui-file.c (stderr_fileopen): Add stream parameter.  Use it
+	instead of stderr.
+	* ui-file.h (stderr_fileopen): Add stream parameter and update
+	comment.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (input_fd): Delete.
+	(stdin_event_handler): Switch to the UI whose input descriptor got
+	the event.  Adjust to per-UI input_fd.
+	(gdb_setup_readline): Don't set the input_fd global.  Adjust to
+	per-UI input_fd.
+	(gdb_disable_readline): Adjust to per-UI input_fd.
+	* event-top.h (input_fd): Delete declaration.
+	* linux-nat.c (linux_nat_terminal_inferior): Don't remove input_fd
+	from the event-loop here.
+	(linux_nat_terminal_ours): Don't register input_fd in the
+	event-loop here.
+	* main.c (captured_main): Adjust to per-UI input_fd.
+	* remote.c (remote_terminal_inferior): Don't remove input_fd from
+	the event-loop here.
+	(remote_terminal_ours): Don't register input_fd in the event-loop
+	here.
+	* target.c: Include top.h and event-top.h.
+	(target_terminal_inferior): Remove input_fd from the event-loop
+	here.
+	(target_terminal_ours): Register input_fd in the event-loop.
+	* top.h (struct ui) <input_fd>: New field.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-script.c (execute_user_command, read_next_line)
+	(read_next_line): Adjust to per-UI instream.
+	* event-top.c (stdin_event_handler, command_handler)
+	(handle_line_of_input, command_line_handler)
+	(gdb_readline_no_editing_callback, async_sigterm_handler)
+	(gdb_setup_readline): Likewise.
+	* inflow.c: Include top.h.
+	(gdb_has_a_terminal, child_terminal_init_with_pgrp)
+	(gdb_save_tty_state, child_terminal_inferior)
+	(child_terminal_ours_1, copy_terminal_info): Use the main UI.
+	(initialize_stdin_serial): Adjust to per-UI instream.
+	* main.c (captured_command_loop, captured_main): Adjust to per-UI
+	instream.
+	* mi/mi-interp.c (mi_execute_command_wrapper): Likewise.
+	* python/python.c (python_interactive_command): Likewise.
+	* terminal.h (struct ui): Forward declare.
+	(initialize_stdin_serial): Add struct ui parameter.
+	* top.c (instream): Delete.
+	(do_restore_instream_cleanup, read_command_file, dont_repeat)
+	(gdb_readline_no_editing, command_line_input)
+	(input_from_terminal_p, gdb_init): Adjust to per-UI instream.
+	* top.h (struct ui) <instream>: New field.
+	(instream): Delete declaration.
+	(quit): Adjust to per-UI instream.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c: Include top.h.
+	(invoke_async_signal_handlers): Switch to the main UI.
+	* event-top.c (main_ui_): Update comment.
+	(main_ui): New global.
+	* top.h (main_ui): Declare.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c (cli_interp): Delete.
+	(as_cli_interp): New function.
+	(cli_on_normal_stop, cli_on_signal_received)
+	(cli_on_end_stepping_range, cli_on_signal_exited, cli_on_exited)
+	(cli_on_no_history): Send output to all CLI UIs.
+	(cli_on_sync_execution_done, cli_on_command_error): Skip output if
+	the top level interpreter is not a CLI.
+	(cli_interpreter_init): Don't set cli_interp or install observers
+	here.
+	(_initialize_cli_interp): Install observers here.
+	* event-top.c (main_ui_, ui_list): New globals.
+	(current_ui): Point to main_ui_.
+	(restore_ui_cleanup, switch_thru_all_uis_init)
+	(switch_thru_all_uis_cond, switch_thru_all_uis_next): New
+	functions.
+	* mi/mi-interp.c (as_mi_interp): New function.
+	(mi_interpreter_init): Don't install observers here.
+	(mi_on_sync_execution_done): Skip output if the top level
+	interpreter is not a MI.
+	(mi_new_thread, mi_thread_exit, mi_record_changed)
+	(mi_inferior_added, mi_inferior_appeared, mi_inferior_exit)
+	(mi_inferior_removed): Send output to all MI UIs.
+	(find_mi_interpreter, mi_interp_data): Delete.
+	(find_mi_interp): New function.
+	(mi_on_signal_received, mi_on_end_stepping_range)
+	(mi_on_signal_exited, mi_on_exited, mi_on_no_history): Send output
+	to all MI UIs.
+	(mi_on_normal_stop): Rename to ...
+	(mi_on_normal_stop_1): ... this.
+	(mi_on_normal_stop): Reimplement, sending output to all MI UIs.
+	(mi_traceframe_changed, mi_tsv_created, mi_tsv_deleted)
+	(mi_tsv_modified, mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified, mi_output_running_pid): Send output to
+	all MI UIs.
+	(mi_on_resume): Rename to ...
+	(mi_on_resume_1): ... this.  Don't handle infcalls here.
+	(mi_on_resume): Reimplement, sending output to all MI UIs.
+	(mi_solib_loaded, mi_solib_unloaded, mi_command_param_changed)
+	(mi_memory_changed): Send output to all MI UIs.
+	(report_initial_inferior): Install observers here.
+	* top.h (struct ui) <next>: New field.
+	(ui_list): Declare.
+	(struct switch_thru_all_uis): New.
+	(switch_thru_all_uis_init, switch_thru_all_uis_cond)
+	(switch_thru_all_uis_next): Declare.
+	(SWITCH_THRU_ALL_UIS): New macro.
+	* tui/tui-interp.c (tui_interp): Delete global.
+	(as_tui_interp): New function.
+	(tui_on_normal_stop, tui_on_signal_received)
+	(tui_on_end_stepping_range, tui_on_signal_exited, tui_on_exited)
+	(tui_on_no_history): Send output to all TUI UIs.
+	(tui_on_sync_execution_done, tui_on_command_error): Skip output if
+	the top level interpreter is not a TUI.
+	(tui_init): Don't set tui_interp or install observers here.
+	(_initialize_tui_interp): Install observers here.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c (cli_uiout): Delete, moved into ...
+	(struct cli_interp): ... this new structure.
+	(cli_on_normal_stop, cli_on_signal_received)
+	(cli_on_end_stepping_range, cli_on_signal_exited, cli_on_exited)
+	(cli_on_no_history): Use interp_ui_out.
+	(cli_interpreter_init): If top level, set the cli_interp global.
+	(cli_interpreter_init): Return the interp's data instead of NULL.
+	(cli_interpreter_resume, cli_interpreter_exec, cli_ui_out): Adjust
+	to cli_uiout being in the interpreter's data.
+	(cli_interp_procs): New, factored out from _initialize_cli_interp.
+	(cli_interp_factory): New function.
+	(_initialize_cli_interp): Call interp_factory_register.
+	* interps.c (get_interp_info): New, factored out from ...
+	(get_current_interp_info): ... this.
+	(interp_new): Add parameter 'data'.  Store it.
+	(struct interp_factory): New function.
+	(interp_factory_p): New typedef.  Define a VEC_P.
+	(interpreter_factories): New global.
+	(interp_factory_register): New function.
+	(interp_add): Add 'ui' parameter.  Use get_interp_info and
+	interp_lookup_existing.
+	(interp_lookup): Rename to ...
+	(interp_lookup_existing): ... this.  Add 'ui' parameter.  Don't
+	check for NULL or empty name here.
+	(interp_lookup): Add 'ui' parameter and reimplement.
+	(interp_set_temp, interpreter_exec_cmd): Adjust.
+	(interpreter_completer): Complete on registered interpreter
+	factories instead of interpreters.
+	* interps.h (interp_factory_func): New typedef.
+	(interp_factory_register): Declare.
+	(interp_new, interp_add): Adjust.
+	(interp_lookup): Declare.
+	* main.c (captured_main): Adjust.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Adjust.
+	(mi_interp_procs): New, factored out from
+	_initialize_mi_interp.
+	(mi_interp_factory): New function.
+	* python/python.c (execute_gdb_command): Adjust.
+	* tui/tui-interp.c (tui_init): If top level, set the tui_interp
+	global.
+	(tui_interp_procs): New.
+	(tui_interp_factory): New function.
+	(_initialize_tui_interp): Call interp_factory_register.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bpstat_do_actions_1): Access the current UI's
+	async field instead of the interpreter_async global.
+	* cli/cli-script.c (execute_user_command, while_command)
+	(if_command, script_from_file): Likewise.
+	* compile/compile.c: Include top.h instead of interps.h.
+	(compile_file_command, compile_code_command)
+	(compile_print_command): Access the current UI's async field
+	instead of the interpreter_async global.
+	* guile/guile.c: Include top.h instead of interps.h.
+	(guile_repl_command, guile_command, gdbscm_execute_gdb_command):
+	Access the current UI's async field instead of the
+	interpreter_async global.
+	* guile/scm-ports.c: Include top.h instead of interps.h.
+	(ioscm_with_output_to_port_worker): Access the current UI's async
+	field instead of the interpreter_async global.
+	* inf-loop.c (inferior_event_handler): Likewise.
+	* infcall.c (run_inferior_call): Likewise.
+	* infrun.c (reinstall_readline_callback_handler_cleanup)
+	(fetch_inferior_event): Likewise.
+	* interps.c (interpreter_async): Delete.
+	(struct ui_interp_info): New.
+	(get_current_interp_info): New function.
+	(interp_list, current_interpreter, top_level_interpreter_ptr):
+	Delete.
+	(interp_add, interp_set, interp_lookup, interp_ui_out)
+	(current_interp_set_logging, interp_set_temp)
+	(current_interp_named_p): Adjust to per-UI interpreters.
+	(command_interpreter): Delete.
+	(command_interp, current_interp_command_loop, interp_quiet_p)
+	(interp_exec, interpreter_exec_cmd, interpreter_completer)
+	(top_level_interpreter, top_level_interpreter_data): Adjust to
+	per-UI interpreters.
+	* interps.h (interpreter_async): Delete.
+	* main.c (captured_command_loop): Access the current UI's async
+	field instead of the interpreter_async global.
+	* python/python.c (python_interactive_command, python_command)
+	(execute_gdb_command): Likewise.
+	* top.c (maybe_wait_sync_command_done, execute_command_to_string):
+	Access the current UI's async field instead of the
+	interpreter_async global.
+	* top.h (struct tl_interp_info): Forward declare.
+	(struct ui) <interp_info, async>: New fields.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* main.c (gdb_stdout, gdb_stderr, gdb_stdlog, gdb_stdin): Delete
+	globals.
+	(gen_ret_current_ui_field_ptr): New macro.  Use it to generate
+	wrappers for gdb_stdout, gdb_stderr, gdb_stdlog and gdb_stdin.
+	* top.h (struct ui) <m_gdb_stdout, m_gdb_stdin, m_gdb_stderr,
+	m_gdb_stdlog>: New fields.
+	(current_ui_gdb_stdout_ptr, current_ui_gdb_stdin_ptr)
+	(current_ui_gdb_stderr_ptr, current_ui_gdb_stdlog_ptr): Declare.
+	(gdb_stdout, gdb_stdin, gdb_stderr, gdb_stdlog): Reimplement as
+	macros.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c: Update readline-related comments.
+	(input_handler, call_readline): Delete globals.
+	(gdb_rl_callback_handler): Call the current UI's input_handler
+	method.
+	(change_line_handler): Adjust to set current UI's properties
+	instead of globals.
+	(current_ui_, current_ui): New globals.
+	(get_command_line_buffer): Rewrite to refer to the current UI.
+	(stdin_event_handler): Adjust to call the call_readline method of
+	the current UI.
+	(gdb_readline_no_editing_callback): Adjust to call the current UI's
+	input_handler method.
+	(gdb_setup_readline): Adjust to set current UI's properties
+	instead of globals.
+	* event-top.h (call_readline, input_handler): Delete declarations.
+	* mi/mi-interp.c (mi_interpreter_resume): Adjust to set current
+	UI's properties instead of globals.
+	* top.c (gdb_readline_wrapper_cleanup): Adjust to set current UI's
+	properties instead of globals.
+	(gdb_readline_wrapper): Adjust to call and set current UI's
+	methods instead of globals.
+	* top.h: Include buffer.h and event-loop.h.
+	(struct ui): New struct.
+	(current_ui): New declaration.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_exception_name_addr_1): Add comment.
+	(print_it_exception): Select the current frame.
+
 2016-06-17  Yan-Ting Lin  <currygt52@gmail.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add nds32-tdep.o.

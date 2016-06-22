@@ -681,9 +681,9 @@ stderr_file_fputs (const char *linebuffer, struct ui_file *file)
 #endif
 
 struct ui_file *
-stderr_fileopen (void)
+stderr_fileopen (FILE *stream)
 {
-  struct ui_file *ui_file = stdio_fileopen (stderr);
+  struct ui_file *ui_file = stdio_fileopen (stream);
 
 #ifdef __MINGW32__
   /* There is no real line-buffering on Windows, see

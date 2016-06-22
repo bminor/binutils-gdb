@@ -2680,7 +2680,7 @@ do include file processing with the @code{.include} directive
 (@pxref{Include,,@code{.include}}).  You can use the @sc{gnu} C compiler driver
 to get other ``CPP'' style preprocessing by giving the input file a
 @samp{.S} suffix.  @xref{Overall Options, ,Options Controlling the Kind of
-Output, gcc.info, Using GNU CC}.
+Output, gcc.info, Using GNU CC} .
 
 Excess whitespace, comments, and character constants
 cannot be used in the portions of the input text that are not

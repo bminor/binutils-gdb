@@ -43,6 +43,8 @@
 #include "agent.h"
 #include "auxv.h"
 #include "target-debug.h"
+#include "top.h"
+#include "event-top.h"
 
 static void target_info (char *, int);
 
@@ -477,11 +479,24 @@ target_terminal_is_ours (void)
 void
 target_terminal_inferior (void)
 {
+  struct ui *ui = current_ui;
+
   /* A background resume (``run&'') should leave GDB in control of the
-     terminal.  Use target_can_async_p, not target_is_async_p, since at
-     this point the target is not async yet.  However, if sync_execution
-     is not set, we know it will become async prior to resume.  */
-  if (target_can_async_p () && !sync_execution)
+     terminal.  */
+  if (ui->prompt_state != PROMPT_BLOCKED)
+    return;
+
+  /* Always delete the current UI's input file handler, regardless of
+     terminal_state, because terminal_state is only valid for the main
+     UI.  */
+  delete_file_handler (ui->input_fd);
+
+  /* Since we always run the inferior in the main console (unless "set
+     inferior-tty" is in effect), when some UI other than the main one
+     calls target_terminal_inferior/target_terminal_inferior, then we
+     only register/unregister the UI's input from the event loop, but
+     leave the main UI's terminal settings as is.  */
+  if (ui != main_ui)
     return;
 
   if (terminal_state == terminal_is_inferior)
@@ -503,6 +518,17 @@ target_terminal_inferior (void)
 void
 target_terminal_ours (void)
 {
+  struct ui *ui = current_ui;
+
+  /* Always add the current UI's input file handler, regardless of
+     terminal_state, because terminal_state is only valid for the main
+     UI.  */
+  add_file_handler (ui->input_fd, stdin_event_handler, ui);
+
+  /* See target_terminal_inferior.  */
+  if (ui != main_ui)
+    return;
+
   if (terminal_state == terminal_is_ours)
     return;
 
@@ -515,6 +541,12 @@ target_terminal_ours (void)
 void
 target_terminal_ours_for_output (void)
 {
+  struct ui *ui = current_ui;
+
+  /* See target_terminal_inferior.  */
+  if (ui != main_ui)
+    return;
+
   if (terminal_state != terminal_is_inferior)
     return;
   (*current_target.to_terminal_ours_for_output) (&current_target);

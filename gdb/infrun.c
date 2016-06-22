@@ -152,10 +152,6 @@ show_step_stop_if_no_debug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Mode of the step operation is %s.\n"), value);
 }
 
-/* In asynchronous mode, but simulating synchronous execution.  */
-
-int sync_execution = 0;
-
 /* proceed and normal_stop use this to notify the user when the
    inferior stopped in a different thread than it had been running
    in.  */
@@ -442,7 +438,7 @@ follow_fork_inferior (int follow_child, int detach_fork)
 
   if (has_vforked
       && !non_stop /* Non-stop always resumes both branches.  */
-      && (!target_is_async_p () || sync_execution)
+      && current_ui->prompt_state == PROMPT_BLOCKED
       && !(follow_child || detach_fork || sched_multi))
     {
       /* The parent stays blocked inside the vfork syscall until the
@@ -685,7 +681,7 @@ follow_fork (void)
   CORE_ADDR step_range_start = 0;
   CORE_ADDR step_range_end = 0;
   struct frame_id step_frame_id = { 0 };
-  struct interp *command_interp = NULL;
+  struct thread_fsm *thread_fsm = NULL;
 
   if (!non_stop)
     {
@@ -737,7 +733,7 @@ follow_fork (void)
 	    step_frame_id = tp->control.step_frame_id;
 	    exception_resume_breakpoint
 	      = clone_momentary_breakpoint (tp->control.exception_resume_breakpoint);
-	    command_interp = tp->control.command_interp;
+	    thread_fsm = tp->thread_fsm;
 
 	    /* For now, delete the parent's sr breakpoint, otherwise,
 	       parent/child sr breakpoints are considered duplicates,
@@ -749,7 +745,7 @@ follow_fork (void)
 	    tp->control.step_range_end = 0;
 	    tp->control.step_frame_id = null_frame_id;
 	    delete_exception_resume_breakpoint (tp);
-	    tp->control.command_interp = NULL;
+	    tp->thread_fsm = NULL;
 	  }
 
 	parent = inferior_ptid;
@@ -795,7 +791,7 @@ follow_fork (void)
 		    tp->control.step_frame_id = step_frame_id;
 		    tp->control.exception_resume_breakpoint
 		      = exception_resume_breakpoint;
-		    tp->control.command_interp = command_interp;
+		    tp->thread_fsm = thread_fsm;
 		  }
 		else
 		  {
@@ -2853,7 +2849,6 @@ clear_proceed_status_thread (struct thread_info *tp)
 
   tp->control.proceed_to_finish = 0;
 
-  tp->control.command_interp = NULL;
   tp->control.stepping_command = 0;
 
   /* Discard any remaining commands or status from previous stop.  */
@@ -3045,14 +3040,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   if (siggnal != GDB_SIGNAL_DEFAULT)
     tp->suspend.stop_signal = siggnal;
-
-  /* Record the interpreter that issued the execution command that
-     caused this thread to resume.  If the top level interpreter is
-     MI/async, and the execution command was a CLI command
-     (next/step/etc.), we'll want to print stop event output to the MI
-     console channel (the stepped-to line, etc.), as if the user
-     entered the execution command on a real GDB console.  */
-  tp->control.command_interp = command_interp ();
 
   resume_ptid = user_visible_resume_ptid (tp->control.stepping_command);
 
@@ -3802,7 +3789,9 @@ wait_for_inferior (void)
 static void
 reinstall_readline_callback_handler_cleanup (void *arg)
 {
-  if (!interpreter_async)
+  struct ui *ui = current_ui;
+
+  if (!ui->async)
     {
       /* We're not going back to the top level event loop yet.  Don't
 	 install the readline callback, as it'd prep the terminal,
@@ -3812,7 +3801,7 @@ reinstall_readline_callback_handler_cleanup (void *arg)
       return;
     }
 
-  if (async_command_editing_p && !sync_execution)
+  if (ui->command_editing && ui->prompt_state != PROMPT_BLOCKED)
     gdb_rl_callback_handler_reinstall ();
 }
 
@@ -3825,7 +3814,7 @@ clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
   struct thread_info *thr = ecs->event_thread;
 
   if (thr != NULL && thr->thread_fsm != NULL)
-    thread_fsm_clean_up (thr->thread_fsm);
+    thread_fsm_clean_up (thr->thread_fsm, thr);
 
   if (!non_stop)
     {
@@ -3837,11 +3826,55 @@ clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
 	    continue;
 
 	  switch_to_thread (thr->ptid);
-	  thread_fsm_clean_up (thr->thread_fsm);
+	  thread_fsm_clean_up (thr->thread_fsm, thr);
 	}
 
       if (ecs->event_thread != NULL)
 	switch_to_thread (ecs->event_thread->ptid);
+    }
+}
+
+/* Helper for all_uis_check_sync_execution_done that works on the
+   current UI.  */
+
+static void
+check_curr_ui_sync_execution_done (void)
+{
+  struct ui *ui = current_ui;
+
+  if (ui->prompt_state == PROMPT_NEEDED
+      && ui->async
+      && !gdb_in_secondary_prompt_p (ui))
+    {
+      target_terminal_ours ();
+      observer_notify_sync_execution_done ();
+    }
+}
+
+/* See infrun.h.  */
+
+void
+all_uis_check_sync_execution_done (void)
+{
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      check_curr_ui_sync_execution_done ();
+    }
+}
+
+/* See infrun.h.  */
+
+void
+all_uis_on_sync_execution_starting (void)
+{
+  struct switch_thru_all_uis state;
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      if (current_ui->prompt_state == PROMPT_NEEDED)
+	async_disable_stdin ();
     }
 }
 
@@ -3872,12 +3905,17 @@ fetch_inferior_event (void *client_data)
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   struct cleanup *ts_old_chain;
-  int was_sync = sync_execution;
   enum exec_direction_kind save_exec_dir = execution_direction;
   int cmd_done = 0;
   ptid_t waiton_ptid = minus_one_ptid;
 
   memset (ecs, 0, sizeof (*ecs));
+
+  /* Events are always processed with the main UI as current UI.  This
+     way, warnings, debug output, etc. are always consistently sent to
+     the main console.  */
+  make_cleanup (restore_ui_cleanup, current_ui);
+  current_ui = main_ui;
 
   /* End up with readline processing input, if necessary.  */
   make_cleanup (reinstall_readline_callback_handler_cleanup, NULL);
@@ -3946,7 +3984,7 @@ fetch_inferior_event (void *client_data)
 	  struct thread_fsm *thread_fsm = thr->thread_fsm;
 
 	  if (thread_fsm != NULL)
-	    should_stop = thread_fsm_should_stop (thread_fsm);
+	    should_stop = thread_fsm_should_stop (thread_fsm, thr);
 	}
 
       if (!should_stop)
@@ -3986,14 +4024,12 @@ fetch_inferior_event (void *client_data)
   /* Revert thread and frame.  */
   do_cleanups (old_chain);
 
-  /* If the inferior was in sync execution mode, and now isn't,
-     restore the prompt (a synchronous execution command has finished,
-     and we're ready for input).  */
-  if (interpreter_async && was_sync && !sync_execution)
-    observer_notify_sync_execution_done ();
+  /* If a UI was in sync execution mode, and now isn't, restore its
+     prompt (a synchronous execution command has finished, and we're
+     ready for input).  */
+  all_uis_check_sync_execution_done ();
 
   if (cmd_done
-      && !was_sync
       && exec_done_display_p
       && (ptid_equal (inferior_ptid, null_ptid)
 	  || !is_running (inferior_ptid)))
@@ -4679,17 +4715,32 @@ handle_no_resumed (struct execution_control_state *ecs)
   struct inferior *inf;
   struct thread_info *thread;
 
-  if (target_can_async_p () && !sync_execution)
+  if (target_can_async_p ())
     {
-      /* There were no unwaited-for children left in the target, but,
-	 we're not synchronously waiting for events either.  Just
-	 ignore.  */
+      struct ui *ui;
+      int any_sync = 0;
 
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog,
-			    "infrun: TARGET_WAITKIND_NO_RESUMED " "(ignoring: bg)\n");
-      prepare_to_wait (ecs);
-      return 1;
+      ALL_UIS (ui)
+	{
+	  if (ui->prompt_state == PROMPT_BLOCKED)
+	    {
+	      any_sync = 1;
+	      break;
+	    }
+	}
+      if (!any_sync)
+	{
+	  /* There were no unwaited-for children left in the target, but,
+	     we're not synchronously waiting for events either.  Just
+	     ignore.  */
+
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: TARGET_WAITKIND_NO_RESUMED "
+				"(ignoring: bg)\n");
+	  prepare_to_wait (ecs);
+	  return 1;
+	}
     }
 
   /* Otherwise, if we were running a synchronous execution command, we
@@ -8188,6 +8239,7 @@ normal_stop (void)
   ptid_t last_ptid;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   ptid_t pid_ptid;
+  struct switch_thru_all_uis state;
 
   get_last_target_status (&last_ptid, &last);
 
@@ -8252,19 +8304,24 @@ normal_stop (void)
       && last.kind != TARGET_WAITKIND_EXITED
       && last.kind != TARGET_WAITKIND_NO_RESUMED)
     {
-      target_terminal_ours_for_output ();
-      printf_filtered (_("[Switching to %s]\n"),
-		       target_pid_to_str (inferior_ptid));
-      annotate_thread_changed ();
+      SWITCH_THRU_ALL_UIS (state)
+	{
+	  target_terminal_ours_for_output ();
+	  printf_filtered (_("[Switching to %s]\n"),
+			   target_pid_to_str (inferior_ptid));
+	  annotate_thread_changed ();
+	}
       previous_inferior_ptid = inferior_ptid;
     }
 
   if (last.kind == TARGET_WAITKIND_NO_RESUMED)
     {
-      gdb_assert (sync_execution || !target_can_async_p ());
-
-      target_terminal_ours_for_output ();
-      printf_filtered (_("No unwaited-for children left.\n"));
+      SWITCH_THRU_ALL_UIS (state)
+	if (current_ui->prompt_state == PROMPT_BLOCKED)
+	  {
+	    target_terminal_ours_for_output ();
+	    printf_filtered (_("No unwaited-for children left.\n"));
+	  }
     }
 
   /* Note: this depends on the update_thread_list call above.  */
@@ -8276,8 +8333,10 @@ normal_stop (void)
   if (stopped_by_random_signal)
     disable_current_display ();
 
-  target_terminal_ours ();
-  async_enable_stdin ();
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      async_enable_stdin ();
+    }
 
   /* Let the user/frontend see the threads as stopped.  */
   do_cleanups (old_chain);

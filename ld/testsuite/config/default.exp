@@ -76,6 +76,9 @@ if {[file exists tmpdir/libpath.exp]} {
     }
 }
 
+# Many ELF testcases expect that "-z relro" is off.
+set ld_elf_shared_opt "-z norelro"
+
 # The "make check" target in the Makefile passes in
 # "CC=$(CC_FOR_TARGET)".  But, if the user invokes runtest directly
 # (as when testing an installed linker), these flags may not be set.  

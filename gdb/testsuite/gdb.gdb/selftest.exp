@@ -205,6 +205,10 @@ proc do_steps_and_nexts {} {
 		set description "step over gdb_stderr initialization"
 		set command "step"
 	    }
+	    -re "ui = current_ui.*$gdb_prompt $" {
+		set description "step over top_level initialization"
+		set command "step"
+	    }
 	    -re ".*main.c.*No such file or directory.*$gdb_prompt $" {
 		setup_xfail "rs6000-*-aix3*"
 		fail "must be able to list source lines"

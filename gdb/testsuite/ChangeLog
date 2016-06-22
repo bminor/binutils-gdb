@@ -1,3 +1,87 @@
+2016-06-21  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.fortran/derived-type.exp (print q): Add fields to the output.
+	* gdb.fortran/vla-type.exp (print twov): Fix vla tests with
+	structs.
+	* gdb.fortran/derived-type-function.exp: New file.
+	* gdb.fortran/derived-type-function.f90: New file.
+
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/new-ui.exp: New file.
+	* lib/mi-support.exp (switch_gdb_spawn_id): Move to ...
+	* lib/gdb.exp (switch_gdb_spawn_id): ... here.
+	(with_spawn_id): New procedure.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-exec-run.exp: New file.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-break.exp (test_breakpoint_commands): Always expect
+	breakpoint command's output on the main UI.
+	(test_break): New procedure, factored out from calls in the top
+	level.
+	(top level): Use foreach_with_prefix to test MI as main UI and as
+	separate UI.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-watch.exp (test_watchpoint_creation_and_listing)
+	(test_awatch_creation_and_listing)
+	(test_rwatch_creation_and_listing, test_watchpoint_triggering):
+	Remove 'type' parameter.
+	(test_watchpoint_all): New parameter mi_mode.  Remove
+	with_test_prefix.
+	(top level): Use foreach_with_prefix, and add main/separate UI MI
+	testing axis.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* README (Testsuite Parameters): Document FORCE_SEPARATE_MI_TTY.
+	* lib/gdb.exp (default_gdb_exit): Clear inferior_spawn_id.
+	* lib/mi-support.exp (mi_uncatched_gdb_exit): Unset
+	gdb_main_spawn_id, mi_spawn_id, unset inferior_spawn_id.
+	(gdb_main_spawn_id, mi_spawn_id): Declare and
+	comment.
+	(mi_create_inferior_pty): New procedure,
+	factored out from default_mi_gdb_start.
+	(switch_gdb_spawn_id, mi_gdb_start_separate_mi_tty): New
+	procedures.
+	(default_mi_gdb_start): Call mi_gdb_start_separate_mi_tty if the
+	separate-mi-tty option is specified, or SEPARATE_MI_TTY is set.
+	Use mi_create_inferior_pty.
+	(mi_gdb_start): Use eval to pass down args list.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.opt/inline-cmds.c: Add "set mi break here" marker.
+	* gdb.opt/inline-cmds.exp: Add MI tests.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Add new regexp.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.ada/mi_catch_ex.exp (continue_to_exception): New procedure.
+	(top level): Use it instead of mi_execute_to.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-mi-events-gdb.py (stop_handler_str)
+	(cont_handler_str): New.
+	(signal_stop_handler): Set stop_handler_str instead of printing to
+	stdout.
+	(continue_handler): Set cont_handler_str instead of printing to
+	stdout.
+	* gdb.python/py-mi-events.exp: Ues mi_execute_to instead of
+	mi_send_resuming_command.  Print stop_handler_str and
+	cont_handler_str instead of expecting the python events print
+	directly.
+
 2016-06-17  Sanjoy Das  <sanjoy@playingwithpointers.com>
 
 	* gdb.base/jit-reader.exp: New file.

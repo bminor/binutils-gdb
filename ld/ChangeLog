@@ -1,3 +1,33 @@
+2016-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20283
+	* NEWS: Mention --enable-relro.
+	* configure.ac: Add --enable-relro.
+	(DEFAULT_LD_Z_RELRO): New.  Set by --enable-relro.
+	* configure.tgt (ac_default_ld_z_relro): Default it to 1 for
+	some Linux targets.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
+	link_info.relro to DEFAULT_LD_Z_RELRO.
+	* testsuite/config/default.exp (ld_elf_shared_opt): New.
+	* testsuite/lib/ld-lib.exp (run_dump_test): Pass
+	$ld_elf_shared_opt to ld for ELF targets with shared object
+	support.
+	(run_ld_link_tests): Likewise.
+
+2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mode-change-error-1a.s: Trigger an error
+	twice rather than once.
+	* testsuite/ld-mips-elf/mode-change-error-1.d: Adjust
+	accordingly.  Remove the full stop from the end of the message.
+
+2016-06-21  Graham Markall  <graham.markall@embecosm.com>
+
+	* testsuite/ld-arc/nps-1a.d: Use -mcpu=arc700 -mnps400.
+	* testsuite/ld-arc/nps-1b.d: Likewise.
+
 2016-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20267

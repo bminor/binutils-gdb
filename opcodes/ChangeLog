@@ -1,3 +1,13 @@
+2016-06-21  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-dis.c (arc_insn_length): Add comment on instruction length.
+	Use same method for determining	instruction length on ARC700 and
+	NPS-400.
+	(arc_insn_length, print_insn_arc): Remove bfd_mach_arc_nps400.
+	* arc-nps400-tbl.h: Make all nps400 instructions ARC700 instructions
+	with the NPS400 subclass.
+	* arc-opc.c: Likewise.
+
 2016-06-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (rdasr): New macro.

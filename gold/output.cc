@@ -1882,6 +1882,27 @@ Output_data_dynamic::do_adjust_output_section(Output_section* os)
     gold_unreachable();
 }
 
+// Get a dynamic entry offset.
+
+unsigned int
+Output_data_dynamic::get_entry_offset(elfcpp::DT tag) const
+{
+  int dyn_size;
+
+  if (parameters->target().get_size() == 32)
+    dyn_size = elfcpp::Elf_sizes<32>::dyn_size;
+  else if (parameters->target().get_size() == 64)
+    dyn_size = elfcpp::Elf_sizes<64>::dyn_size;
+  else
+    gold_unreachable();
+
+  for (size_t i = 0; i < entries_.size(); ++i)
+    if (entries_[i].tag() == tag)
+      return i * dyn_size;
+
+  return -1U;
+}
+
 // Set the final data size.
 
 void

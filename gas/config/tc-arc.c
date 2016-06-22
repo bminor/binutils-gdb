@@ -100,6 +100,7 @@ enum arc_rlx_types
 #define is_fpuda_p(op)          (((sc) == DPA))
 #define is_br_jmp_insn_p(op)    (((op)->insn_class == BRANCH || (op)->insn_class == JUMP))
 #define is_kernel_insn_p(op)    (((op)->insn_class == KERNEL))
+#define is_nps400_p(op)         (((sc) == NPS400))
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -179,6 +180,7 @@ enum options
   OPTION_MCPU,
   OPTION_CD,
   OPTION_RELAX,
+  OPTION_NPS400,
 
   /* The following options are deprecated and provided here only for
      compatibility reasons.  */
@@ -221,6 +223,7 @@ struct option md_longopts[] =
   { "mHS",		no_argument,	   NULL, OPTION_ARCHS },
   { "mcode-density",	no_argument,	   NULL, OPTION_CD },
   { "mrelax",           no_argument,       NULL, OPTION_RELAX },
+  { "mnps400",          no_argument,       NULL, OPTION_NPS400 },
 
   /* The following options are deprecated and provided here only for
      compatibility reasons.  */
@@ -425,8 +428,8 @@ static const struct cpu_type
     E_ARC_MACH_ARC600,  0x00},
   { "arc700", ARC_OPCODE_ARC700,  bfd_mach_arc_arc700,
     E_ARC_MACH_ARC700,  0x00},
-  { "nps400", ARC_OPCODE_ARC700 | ARC_OPCODE_NPS400, bfd_mach_arc_nps400,
-    E_ARC_MACH_NPS400,  0x00},
+  { "nps400", ARC_OPCODE_ARC700 , bfd_mach_arc_arc700,
+    E_ARC_MACH_ARC700,  ARC_NPS400},
   { "arcem",  ARC_OPCODE_ARCv2EM, bfd_mach_arc_arcv2,
     EF_ARC_CPU_ARCV2EM, 0x00},
   { "archs",  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,
@@ -1529,20 +1532,19 @@ allocate_tok (expressionS *tok, int ntok, int cidx)
 static bfd_boolean
 check_cpu_feature (insn_subclass_t sc)
 {
-  if (!(arc_features & ARC_CD)
-      && is_code_density_p (sc))
+  if (is_code_density_p (sc) && !(arc_features & ARC_CD))
     return FALSE;
 
-  if (!(arc_features & ARC_SPFP)
-      && is_spfp_p (sc))
+  if (is_spfp_p (sc) && !(arc_features & ARC_SPFP))
     return FALSE;
 
-  if (!(arc_features & ARC_DPFP)
-      && is_dpfp_p (sc))
+  if (is_dpfp_p (sc) && !(arc_features & ARC_DPFP))
     return FALSE;
 
-  if (!(arc_features & ARC_FPUDA)
-      && is_fpuda_p (sc))
+  if (is_fpuda_p (sc) && !(arc_features & ARC_FPUDA))
+    return FALSE;
+
+  if (is_nps400_p (sc) && !(arc_features & ARC_NPS400))
     return FALSE;
 
   return TRUE;
@@ -3341,6 +3343,9 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
       relaxation_state = 1;
       break;
 
+    case OPTION_NPS400:
+      arc_features |= ARC_NPS400;
+
     case OPTION_USER_MODE:
     case OPTION_LD_EXT_MASK:
     case OPTION_SWAP:
@@ -3396,6 +3401,18 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("ARC-specific assembler options:\n"));
 
   fprintf (stream, "  -mcpu=<cpu name>\t  assemble for CPU <cpu name>\n");
+  fprintf (stream, "  -mcpu=nps400\t\t  same as -mcpu=arc700 -mnps400\n");
+  fprintf (stream, "  -mA6/-mARC600/-mARC601  same as -mcpu=arc600\n");
+  fprintf (stream, "  -mA7/-mARC700\t\t  same as -mcpu=arc700\n");
+  fprintf (stream, "  -mEM\t\t\t  same as -mcpu=arcem\n");
+  fprintf (stream, "  -mHS\t\t\t  same as -mcpu=archs\n");
+
+  fprintf (stream, "  -mnps400\t\t  enable NPS-400 extended instructions\n");
+  fprintf (stream, "  -mspfp\t\t  enable single-precision floating point instructions\n");
+  fprintf (stream, "  -mdpfp\t\t  enable double-precision floating point instructions\n");
+  fprintf (stream, "  -mfpuda\t\t  enable double-precision assist floating "
+                   "point\n\t\t\t  instructions for ARC EM\n");
+
   fprintf (stream,
 	   "  -mcode-density\t  enable code density option for ARC EM\n");
 
@@ -3404,8 +3421,36 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -EL                     assemble code for a little-endian cpu\n"));
   fprintf (stream, _("\
-  -mrelax                  Enable relaxation\n"));
+  -mrelax                 enable relaxation\n"));
 
+  fprintf (stream, _("The following ARC-specific assembler options are "
+                     "deprecated and are accepted\nfor compatibility only:\n"));
+
+  fprintf (stream, _("  -mEA\n"
+                     "  -mbarrel-shifter\n"
+                     "  -mbarrel_shifter\n"
+                     "  -mcrc\n"
+                     "  -mdsp-packa\n"
+                     "  -mdsp_packa\n"
+                     "  -mdvbf\n"
+                     "  -mld-extension-reg-mask\n"
+                     "  -mlock\n"
+                     "  -mmac-24\n"
+                     "  -mmac-d16\n"
+                     "  -mmac_24\n"
+                     "  -mmac_d16\n"
+                     "  -mmin-max\n"
+                     "  -mmin_max\n"
+                     "  -mmul64\n"
+                     "  -mno-mpy\n"
+                     "  -mnorm\n"
+                     "  -mrtsc\n"
+                     "  -msimd\n"
+                     "  -mswap\n"
+                     "  -mswape\n"
+                     "  -mtelephony\n"
+		     "  -muser-mode-only\n"
+                     "  -mxy\n"));
 }
 
 /* Find the proper relocation for the given opcode.  */
@@ -4070,7 +4115,6 @@ check_zol (symbolS *s)
 end of the ZOL label @%s"), S_GET_NAME (s));
 
       /* Fall through.  */
-    case bfd_mach_arc_nps400:
     case bfd_mach_arc_arc700:
       if (arc_last_insns[0].has_delay_slot)
 	as_bad (_("An illegal use of delay slot detected at the end of the ZOL label @%s"),

@@ -4415,7 +4415,6 @@ linux_nat_terminal_inferior (struct target_ops *self)
   if (!async_terminal_is_ours)
     return;
 
-  delete_file_handler (input_fd);
   async_terminal_is_ours = 0;
   set_sigint_trap ();
 }
@@ -4441,7 +4440,6 @@ linux_nat_terminal_ours (struct target_ops *self)
     return;
 
   clear_sigint_trap ();
-  add_file_handler (input_fd, stdin_event_handler, 0);
   async_terminal_is_ours = 1;
 }
 

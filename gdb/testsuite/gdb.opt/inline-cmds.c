@@ -61,7 +61,7 @@ int main (void)
   int val;
 
   x = 7;
-  y = 8;
+  y = 8; /* set mi break here */
 
   result = func1 ();
   result = func2 ();

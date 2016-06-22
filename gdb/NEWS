@@ -46,6 +46,20 @@
   language.  See https://www.rust-lang.org/ for more information about
   Rust.
 
+* Support for running interpreters on specified input/output devices
+
+  GDB now supports a new mechanism that allows frontends to provide
+  fully featured GDB console views, as a better alternative to
+  building such views on top of the "-interpreter-exec console"
+  command.  See the new "new-ui" command below.  With that command,
+  frontends can now start GDB in the traditional command-line mode
+  running in an embedded terminal emulator widget, and create a
+  separate MI interpreter running on a specified i/o device.  In this
+  way, GDB handles line editing, history, tab completion, etc. in the
+  console all by itself, and the GUI uses the separate MI interpreter
+  for its own control and synchronization, invisible to the command
+  line.
+
 * New commands
 
 skip -file file
@@ -61,6 +75,10 @@ maint info line-table REGEXP
 
 maint selftest
   Run any GDB unit tests that were compiled in.
+
+new-ui INTERP TTY
+  Start a new user interface instance running INTERP as interpreter,
+  using the TTY file for input/output.
 
 * Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
   was added in GDBserver, including JIT compiling fast tracepoint's

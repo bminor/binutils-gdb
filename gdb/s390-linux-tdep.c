@@ -928,7 +928,7 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
     cb (".reg-s390-last-break", 8,
 	(gdbarch_ptr_bit (gdbarch) == 32
 	 ? &s390_last_break_regset : &s390x_last_break_regset),
-	"s930 last-break address", cb_data);
+	"s390 last-break address", cb_data);
 
   if (tdep->have_linux_v2)
     cb (".reg-s390-system-call", 4, &s390_system_call_regset,

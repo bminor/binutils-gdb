@@ -1359,7 +1359,7 @@ proc default_gdb_exit {} {
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global verbose
-    global gdb_spawn_id
+    global gdb_spawn_id inferior_spawn_id
     global inotify_log_file
 
     gdb_stop_suppressing_tests
@@ -1400,6 +1400,7 @@ proc default_gdb_exit {} {
 	remote_close host
     }
     unset gdb_spawn_id
+    unset inferior_spawn_id
 }
 
 # Load a file into the debugger.
@@ -2065,6 +2066,38 @@ proc with_target_charset { target_charset body } {
     set code [catch {uplevel 1 $body} result]
 
     gdb_test_no_output "set target-charset $saved" ""
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
+# Switch the default spawn id to SPAWN_ID, so that gdb_test,
+# mi_gdb_test etc. default to using it.
+
+proc switch_gdb_spawn_id {spawn_id} {
+    global gdb_spawn_id
+    global board board_info
+
+    set gdb_spawn_id $spawn_id
+    set board [host_info name]
+    set board_info($board,fileid) $spawn_id
+}
+
+# Run BODY with SPAWN_ID as current spawn id.
+
+proc with_spawn_id { spawn_id body } {
+    global gdb_spawn_id
+
+    set saved_spawn_id $gdb_spawn_id
+    switch_gdb_spawn_id $spawn_id
+
+    set code [catch {uplevel 1 $body} result]
+
+    switch_gdb_spawn_id $saved_spawn_id
 
     if {$code == 1} {
 	global errorInfo errorCode
