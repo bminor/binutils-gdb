@@ -99,6 +99,7 @@ if { ![do_objcopy update-1.o \
 # Check that the updated object files are as expected.
 do_compare update-1.o update-2.o
 do_compare update-1.o update-3.o
+setup_xfail "mips*-*-*" "tx39-*-*"
 do_compare update-1.o update-4.o
 
 # Check that --update-section on an unknown section will fail.

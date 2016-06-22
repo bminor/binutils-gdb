@@ -1,5 +1,39 @@
 2016-06-22  Nick Clifton  <nickc@redhat.com>
 
+	* testsuite/binutils-all/ar.exp: Skip tests for Alpha target.
+	Skip bfdtest1 tests for tic30 target.
+	* testsuite/binutils-all/arm/objdump.exp: Skip for aout arm
+	target.
+	* testsuite/binutils-all/compress.exp: Expect some tests to fail
+	on the nds32.
+	* testsuite/binutils-all/copy-3.d: Skip for go32 targets.
+	* testsuite/binutils-all/copy-4.d: Skip for AIX and linuxecoff
+	targets.
+	* testsuite/binutils-all/nm.exp: Treat beos based targets as ELF
+	targets.
+	* testsuite/binutils-all/objcopy.exp: Only run reverse bytes tests
+	if the bintest.o file was created.  Use the
+	get_standard_section_names proc to get the name of the data
+	section.
+	* testsuite/binutils-all/objdump.exp: Update regexps to allow for
+	RX section names.
+	* testsuite/binutils-all/readelf.exp: Use
+	get_standard_section_names proc to get the name of the data
+	section.
+	* testsuite/binutils-all/readelf.r: Allow for non standard text
+	section names.
+	* testsuite/binutils-all/readelf.s: Update regexps for tilepro.
+	* testsuite/binutils-all/size.exp: Allow for non standard section
+	names.
+	* testsuite/binutils-all/update-section.exp: Expect comapre 1vs4
+	to fail on mips targets.
+	* testsuite/lib/utils-lib.exp (default_binutils_run): Use
+	get_standard_section_names proc.
+	(run_dump_test): Likewise.
+	(proc get_standard_section_names): New proc.
+
+2016-06-22  Nick Clifton  <nickc@redhat.com>
+
 	* readelf.c (dynamic_section_mips_val): Increase size of timebuf.
 	(process_mips_specific): Likewise.
 	(process_gnu_liblist): Likewise.

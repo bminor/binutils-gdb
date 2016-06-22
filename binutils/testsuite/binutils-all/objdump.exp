@@ -86,7 +86,7 @@ if ![regexp $want $got] then {
 
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -h $testfile"]
 
-set want "$testfile:\[ 	\]*file format.*Sections.*\[0-9\]+\[ 	\]+\[^ 	\]*(text|TEXT|\\\$CODE\\\$)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+).*\[0-9\]+\[ 	\]+\[^ 	\]*(\\.data|DATA)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+)"
+set want "$testfile:\[ 	\]*file format.*Sections.*\[0-9\]+\[ 	\]+\[^ 	\]*(text|TEXT|P|\\\$CODE\\\$)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+).*\[0-9\]+\[ 	\]+\[^ 	\]*(\\.data|DATA|D_1)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+)"
 
 if ![regexp $want $got all text_name text_size data_name data_size] then {
     fail "objdump -h"
@@ -136,7 +136,7 @@ if {![info exists vars(text_symbol)] \
 
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -r $testfile"]
 
-set want "$testfile:\[ 	\]*file format.*RELOCATION RECORDS FOR \\\[\[^\]\]*(text|TEXT|\\\$CODE\\\$)\[^\]\]*\\\].*external_symbol"
+set want "$testfile:\[ 	\]*file format.*RELOCATION RECORDS FOR \\\[\[^\]\]*(text|TEXT|P|\\\$CODE\\\$)\[^\]\]*\\\].*external_symbol"
 
 if [regexp $want $got] then {
     pass "objdump -r"
@@ -148,7 +148,7 @@ if [regexp $want $got] then {
 
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -s $testfile"]
 
-set want "$testfile:\[ 	\]*file format.*Contents.*(text|TEXT|\\\$CODE\\\$)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000001|01000000|00000100).*Contents.*(data|DATA)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000002|02000000|00000200)"
+set want "$testfile:\[ 	\]*file format.*Contents.*(text|TEXT|P|\\\$CODE\\\$)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000001|01000000|00000100).*Contents.*(data|DATA|D_1)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000002|02000000|00000200)"
 
 if [regexp $want $got] then {
     pass "objdump -s"
@@ -265,6 +265,7 @@ if { ![is_elf_format] } then {
 	send_log "\n"
     }
 
+    setup_xfail "msp430-*-*" "nds32*-*-*"
     if { [regexp_diff objdump.out $srcdir/$subdir/dw2-ranges.W] } then {
 	fail "objdump -W for debug_ranges"
     } else {
