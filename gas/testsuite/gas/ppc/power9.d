@@ -280,6 +280,14 @@ Disassembly of section \.text:
 .*:	(7f a8 49 80|80 49 a8 7f) 	cmprb   cr7,1,r8,r9
 .*:	(7d e0 01 00|00 01 e0 7d) 	setb    r15,cr0
 .*:	(7d fc 01 00|00 01 fc 7d) 	setb    r15,cr7
+.*:	(7e 00 01 01|01 01 00 7e) 	setbool r16,lt
+.*:	(7e 01 01 01|01 01 01 7e) 	setbool r16,gt
+.*:	(7e 02 01 01|01 01 02 7e) 	setbool r16,eq
+.*:	(7e 03 01 01|01 01 03 7e) 	setbool r16,so
+.*:	(7e 1c 01 01|01 01 1c 7e) 	setbool r16,4\*cr7\+lt
+.*:	(7e 1d 01 01|01 01 1d 7e) 	setbool r16,4\*cr7\+gt
+.*:	(7e 1e 01 01|01 01 1e 7e) 	setbool r16,4\*cr7\+eq
+.*:	(7e 1f 01 01|01 01 1f 7e) 	setbool r16,4\*cr7\+so
 .*:	(7f 40 52 1a|1a 52 40 7f) 	lxvl    vs26,0,r10
 .*:	(7f 14 52 1b|1b 52 14 7f) 	lxvl    vs56,r20,r10
 .*:	(7f 60 5b 1a|1a 5b 60 7f) 	stxvl   vs27,0,r11
@@ -392,4 +400,22 @@ Disassembly of section \.text:
 .*:	(7e b6 b9 55|55 b9 b6 7e) 	addex\.  r21,r22,r23,0
 .*:	(7e b6 bb 55|55 bb b6 7e) 	addex\.  r21,r22,r23,1
 .*:	(7e b6 bd 55|55 bd b6 7e) 	addex\.  r21,r22,r23,2
+.*:	(ff 20 04 8e|8e 04 20 ff) 	mffs    f25
+.*:	(ff 20 04 8f|8f 04 20 ff) 	mffs\.   f25
+.*:	(ff 41 04 8e|8e 04 41 ff) 	mffsce  f26
+.*:	(ff 74 a4 8e|8e a4 74 ff) 	mffscdrn f27,f20
+.*:	(ff 95 04 8e|8e 04 95 ff) 	mffscdrni f28,0
+.*:	(ff 95 3c 8e|8e 3c 95 ff) 	mffscdrni f28,7
+.*:	(ff b6 ac 8e|8e ac b6 ff) 	mffscrn f29,f21
+.*:	(ff d7 04 8e|8e 04 d7 ff) 	mffscrni f30,0
+.*:	(ff d7 1c 8e|8e 1c d7 ff) 	mffscrni f30,3
+.*:	(ff f8 04 8e|8e 04 f8 ff) 	mffsl   f31
+.*:	(7e 8a 01 76|76 01 8a 7e) 	brd     r10,r20
+.*:	(7e ab 01 b6|b6 01 ab 7e) 	brh     r11,r21
+.*:	(7e cc 01 36|36 01 cc 7e) 	brw     r12,r22
+.*:	(11 6a 63 77|77 63 6a 11) 	nandxor r10,r11,r12,r13
+.*:	(12 b4 b5 f6|f6 b5 b4 12) 	xor3    r20,r21,r22,r23
+.*:	(11 6a 60 34|34 60 6a 11) 	rldixor r10,r11,0,r12
+.*:	(11 6a 66 f4|f4 66 6a 11) 	rldixor r10,r11,27,r12
+.*:	(11 6a 67 f5|f5 67 6a 11) 	rldixor r10,r11,63,r12
 #pass
