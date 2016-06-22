@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add a configure option --enable-relro to decide whether -z relro should
+  be enabled in ELF linker by default.  Default to yes for all Linux
+  targets except FRV, HPPA, IA64 and MIPS.
+
 * Support for -z noreloc-overflow in the x86-64 ELF linker to disable
   relocation overflow check.
 

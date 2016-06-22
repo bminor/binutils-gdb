@@ -882,3 +882,28 @@ alpha*-*-*)
   ;;
 
 esac
+
+case "${target}" in
+frv-*-* | hppa*-*-* | ia64-*-* | mips*-*-*)
+  # Don't enable -z relro by default since many relro tests fail on these
+  # targets:
+  # FAIL: strip -z relro (relro1)
+  # FAIL: strip -z relro -shared (relro1)
+  # FAIL: objcopy -z relro (relro1)
+  # FAIL: objcopy -z relro -shared (relro1)
+  # FAIL: objcopy -z relro (tdata1)
+  # FAIL: objcopy -shared -z relro (tdata1)
+  # FAIL: objcopy -z relro (tdata2)
+  # FAIL: objcopy -shared -z relro (tdata2)
+  # FAIL: objcopy -z relro (tdata3)
+  # FAIL: objcopy -shared -z relro (tdata3)
+  # FAIL: objcopy -shared -z relro (tbss1)
+  # FAIL: objcopy -shared -z relro (tbss2)
+  # FAIL: objcopy -shared -z relro (tbss3)
+  ;;
+*-*-linux*)
+  if test ${ac_default_ld_z_relro} = unset; then
+    ac_default_ld_z_relro=1
+  fi
+  ;;
+esac
