@@ -5531,10 +5531,14 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
 	      && hash->root.root.type != bfd_link_hash_defweak)
 	  || hash->root.type != STT_FUNC)
 	{
+	  /* Initialize here to avoid warning about use of possibly
+	     uninitialized variable.  */
+	  j = 0;
+
 	  if (!hash)
 	    {
 	      /* Searching for a normal symbol with local binding.  */
-	      for (j = 0; j < ext_start; j++)
+	      for (; j < ext_start; j++)
 		{
 		  lsym_name =
 		    bfd_elf_string_from_elf_section (input_bfd,
