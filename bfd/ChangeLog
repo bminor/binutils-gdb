@@ -1,5 +1,9 @@
 2016-07-11  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* elf32-arc.c: made PR_DEBUG always defined.
+
+2016-07-11  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* arc-got.h: Moved got related structures from elf32-arc.c to
 	this file. More precisely, tls_type_e, tls_got_entries, got_entry.
 	* (arc_get_local_got_ents, got_entry_for_type, new_got_entry_to_list,

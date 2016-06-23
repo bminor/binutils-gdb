@@ -29,11 +29,7 @@
 #include "opcode/arc.h"
 #include "arc-plt.h"
 
-#ifdef DEBUG
-# define PR_DEBUG(fmt, args...) fprintf (stderr, fmt, ##args)
-#else
-# define PR_DEBUG(fmt, args...)
-#endif
+#define PR_DEBUG(fmt, args...) fprintf (stderr, fmt, ##args)
 
 /* #define ARC_ENABLE_DEBUG 1  */
 #ifndef ARC_ENABLE_DEBUG
