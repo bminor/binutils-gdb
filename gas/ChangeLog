@@ -1,3 +1,16 @@
+2016-06-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (b_reloc_p): New function.
+	(mips_fix_adjustable): Also keep the original microMIPS symbol
+	referred from branch relocations.
+	* testsuite/gas/mips/branch-local-1.d: New test.
+	* testsuite/gas/mips/branch-local-n32-1.d: New test.
+	* testsuite/gas/mips/branch-local-n64-1.d: New test.
+	* testsuite/gas/mips/micromips@branch-misc-4-64.d: Update
+	relocations.
+	* testsuite/gas/mips/branch-local-1.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new cases.
+
 2016-06-23  Graham Markall  <graham.markall@embecosm.com>
 
 	* config/tc-arc.c (options, md_longopts, md_parse_option): Move

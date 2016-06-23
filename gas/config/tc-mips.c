@@ -4109,6 +4109,17 @@ jmp_reloc_p (bfd_reloc_code_real_type reloc)
 }
 
 static inline bfd_boolean
+b_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  return (reloc == BFD_RELOC_MIPS_26_PCREL_S2
+	  || reloc == BFD_RELOC_MIPS_21_PCREL_S2
+	  || reloc == BFD_RELOC_16_PCREL_S2
+	  || reloc == BFD_RELOC_MICROMIPS_16_PCREL_S1
+	  || reloc == BFD_RELOC_MICROMIPS_10_PCREL_S1
+	  || reloc == BFD_RELOC_MICROMIPS_7_PCREL_S1);
+}
+
+static inline bfd_boolean
 got16_reloc_p (bfd_reloc_code_real_type reloc)
 {
   return (reloc == BFD_RELOC_MIPS_GOT16 || reloc == BFD_RELOC_MIPS16_GOT16
@@ -17218,13 +17229,16 @@ mips_fix_adjustable (fixS *fixp)
      There is a further restriction:
 
        5. We cannot reduce jump relocations (R_MIPS_26, R_MIPS16_26 or
-	  R_MICROMIPS_26_S1) against MIPS16 or microMIPS symbols because
-	  we need to keep the MIPS16 or microMIPS symbol for the purpose
-	  of converting JAL to JALX instructions in the linker.
+	  R_MICROMIPS_26_S1) or branch relocations (R_MIPS_PC26_S2,
+	  R_MIPS_PC21_S2, R_MIPS_PC16, R_MICROMIPS_PC16_S1,
+	  R_MICROMIPS_PC10_S1 or R_MICROMIPS_PC7_S1) against MIPS16 or
+	  microMIPS symbols because we need to keep the MIPS16 or
+	  microMIPS symbol for the purpose of mode mismatch detection
+	  and JAL to JALX instruction conversion in the linker.
 
      For simplicity, we deal with (3)-(4) by not reducing _any_ relocation
      against a MIPS16 symbol.  We deal with (5) by additionally leaving
-     alone any jump relocations against a microMIPS symbol.
+     alone any jump and branch relocations against a microMIPS symbol.
 
      We deal with (1)-(2) by saying that, if there's a R_MIPS16_26
      relocation against some symbol R, no relocation against R may be
@@ -17236,7 +17250,8 @@ mips_fix_adjustable (fixS *fixp)
   if (fixp->fx_subsy == NULL
       && (ELF_ST_IS_MIPS16 (S_GET_OTHER (fixp->fx_addsy))
 	  || (ELF_ST_IS_MICROMIPS (S_GET_OTHER (fixp->fx_addsy))
-	      && jmp_reloc_p (fixp->fx_r_type))
+	      && (jmp_reloc_p (fixp->fx_r_type)
+		  || b_reloc_p (fixp->fx_r_type)))
 	  || *symbol_get_tc (fixp->fx_addsy)))
     return 0;
 
