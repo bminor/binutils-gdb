@@ -1595,6 +1595,7 @@ Output_section_element_input::set_section_addresses(
 
   typedef std::vector<std::vector<Input_section_info> > Matching_sections;
   size_t input_pattern_count = this->input_section_patterns_.size();
+  size_t bin_count = 1;
   bool any_patterns_with_sort = false;
   for (size_t i = 0; i < input_pattern_count; ++i)
     {
@@ -1602,9 +1603,9 @@ Output_section_element_input::set_section_addresses(
       if (isp.sort != SORT_WILDCARD_NONE)
 	any_patterns_with_sort = true;
     }
-  if (input_pattern_count == 0 || !any_patterns_with_sort)
-    input_pattern_count = 1;
-  Matching_sections matching_sections(input_pattern_count);
+  if (any_patterns_with_sort)
+    bin_count = input_pattern_count;
+  Matching_sections matching_sections(bin_count);
 
   // Look through the list of sections for this output section.  Add
   // each one which matches to one of the elements of
@@ -1661,11 +1662,11 @@ Output_section_element_input::set_section_addresses(
 		break;
 	    }
 
-	  if (i >= this->input_section_patterns_.size())
+	  if (i >= input_pattern_count)
 	    ++p;
 	  else
 	    {
-	      if (!any_patterns_with_sort)
+	      if (i >= bin_count)
 		i = 0;
 	      matching_sections[i].push_back(isi);
 	      p = input_sections->erase(p);
@@ -1679,7 +1680,7 @@ Output_section_element_input::set_section_addresses(
   // output section.
 
   uint64_t dot = *dot_value;
-  for (size_t i = 0; i < input_pattern_count; ++i)
+  for (size_t i = 0; i < bin_count; ++i)
     {
       if (matching_sections[i].empty())
 	continue;

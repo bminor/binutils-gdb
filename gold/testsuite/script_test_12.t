@@ -57,6 +57,7 @@ SECTIONS
     test_array_start = .;
     *(.x1 .x2 .x3);
     test_array_end = .;
+    *(.x4);
     }
   .bss : { *(.bss) }
 

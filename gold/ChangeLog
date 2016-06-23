@@ -1,3 +1,15 @@
+2016-06-23  Cary Coutant  <ccoutant@gmail.com>
+	    Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	PR gold/15370
+	* script-sections.cc
+	(Output_section_element_input::set_section_addresses): Keep bin_count
+	separate from input_pattern_count.
+	* testsuite/script_test_12.t: Add another section .x4.
+	* testsuite/script_test_12i.t: Likewise.
+	* testsuite/script_test_12a.c: Likewise.
+	* testsuite/script_test_12b.c: Likewise.
+
 2016-06-23  Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	* gold-threads.cc (impl_threads::Lock_impl_threads): Fix typos.
