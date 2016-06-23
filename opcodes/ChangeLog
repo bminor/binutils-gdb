@@ -1,4 +1,17 @@
-2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+2016-06-23  Peter Bergner  <bergner@vnet.ibm.com>
+
+	Apply from master.
+	2016-06-22  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (RM, DRM, VXASH, VXASH_MASK, XMMF, XMMF_MASK): New defines.
+	(powerpc_opcodes) <brd, brh, brw, mffsce, mffscdrn, mffscdrni,
+	mffscrn, mffscrni, mffsl, nandxor, rldixor, setbool,
+	xor3>: New mnemonics.
+	<setb>: Change to a VX form instruction.
+	(insert_sh6): Add support for rldixor.
+	(extract_sh6): Likewise.
+
+2016-06-03  Peter Bergner  <bergner@vnet.ibm.com>
 
 	Backport from master
 	2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
@@ -7,7 +20,7 @@
 	* ppc-opc.c (powerpc_opcodes <lbarx, lharx, stbcx., sthcx.>): Enable
 	opcodes for E6500.
 
-2016-06-01  Peter Bergner <bergner@vnet.ibm.com>
+2016-06-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	Backport from master
 	2016-05-26  Peter Bergner <bergner@vnet.ibm.com>
