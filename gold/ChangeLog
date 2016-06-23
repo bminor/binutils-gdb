@@ -1,3 +1,7 @@
+2016-06-23  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* gold-threads.cc (impl_threads::Lock_impl_threads): Fix typos.
+
 2016-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20283
