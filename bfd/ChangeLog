@@ -1,3 +1,8 @@
+2016-06-24  Alan Modra  <amodra@gmail.com>
+
+	* config.bfd: Delete mips vxworks patterns matched earlier.
+	Combine mips*-*-none with mips*-*-elf*.
+
 2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_perform_relocation): Call

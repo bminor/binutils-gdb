@@ -1,5 +1,22 @@
 2016-06-24  Alan Modra  <amodra@gmail.com>
 
+	* objcopy.c (find_section_rename): Forward declare.  Remove
+	ibfd and sec_ptr param.  Add old_name param.  Allow for NULL
+	returned_flags.  Move read of section name and flags to..
+	(setup_section): ..here.  Update find_section_rename call.
+	(filter_symbols): Rename section symbols for renamed sections.
+	(copy_object): Call filter_symbols when renamed sections.
+	* testsuite/lib/binutils-common.exp (is_bad_symtab): New.
+	* testsuite/binutils-all/update-section.exp: Revert 96037eb0
+	mips xfail.
+	* testsuite/binutils-all/objcopy.exp (copy_executable): Use
+	is_bad_symtab.
+	(localize-hidden-1): xfail if is_bad_symtab.
+	* testsuite/binutils-all/readelf.exp: Use is_bad_symtab to select
+	between mips/tmips.
+
+2016-06-24  Alan Modra  <amodra@gmail.com>
+
 	* objdump.c (struct print_file_list): Add "max_printed".
 	(try_print_file_open): Init new field.
 	(show_line): Don't show 5 context lines when redisplaying source.

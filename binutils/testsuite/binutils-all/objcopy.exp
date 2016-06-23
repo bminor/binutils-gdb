@@ -652,9 +652,11 @@ proc copy_executable { prog flags test1 test2 } {
 	    setup_xfail "*-*-*"
 	}
 
-	# This also fails for mips*-*-elf targets.  See elf32-mips.c
+	# This also fails for some mips targets.  See elf32-mips.c
 	# mips_elf_sym_is_global.
-	setup_xfail "mips*-*-elf" "tx39-*-*"
+	if { [is_bad_symtab] } then {
+	    setup_xfail "*-*-*"
+	}
 
 	setup_xfail "arm*-*-coff"
 	setup_xfail "arm*-*-pe"
@@ -1102,18 +1104,9 @@ if [is_elf_format] {
 
     # The symbol table for some MIPS targets is sorted differently than
     # the ELF canonical order, so the regexps in localize-hidden-1.d fail
-    # to match.  These tests must be matched to targets for which
-    # targ_defvec=mips_elf32_be_vec,
-    # targ_defvec=mips_elf32_le_vec,
-    # targ_defvec=mips_elf32_n_be_vec or
-    # targ_defvec=mips_elf32_n_le_vec in config.bfd.  When syncing,
-    # don't forget that earlier case-matches trump later ones.
-    if { ![istarget "mips*-sde-elf*"] && ![istarget "mips*-mti-elf*"]
-	 && ![istarget "mips*-img-elf*"]
-         && ![istarget "mips64*-*-openbsd*"] } {
-	setup_xfail "mips*-*-irix5*" "mips*-*-irix6*" "mips*-*-elf*" \
-	    "mips*-*-rtems*" "mips*-*-windiss" "mips*-*-none" \
-	    "mips*-*-openbsd*" "mips*-*-chorus*"
+    # to match.
+    if { [is_bad_symtab] } then {
+	setup_xfail "*-*-*"
     }
     run_dump_test "localize-hidden-1"
     run_dump_test "testranges"
