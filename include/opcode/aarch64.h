@@ -200,6 +200,7 @@ enum aarch64_opnd
   AARCH64_OPND_BIT_NUM,	/* Immediate.  */
   AARCH64_OPND_EXCEPTION,/* imm16 operand in exception instructions.  */
   AARCH64_OPND_CCMP_IMM,/* Immediate in conditional compare instructions.  */
+  AARCH64_OPND_SIMM5,	/* 5-bit signed immediate in the imm5 field.  */
   AARCH64_OPND_NZCV,	/* Flag bit specifier giving an alternative value for
 			   each condition flag.  */
 
@@ -289,6 +290,11 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ADDR_ZZ_LSL,     /* SVE [Zn.<T>, Zm,<T>, LSL #<msz>].  */
   AARCH64_OPND_SVE_ADDR_ZZ_SXTW,    /* SVE [Zn.<T>, Zm,<T>, SXTW #<msz>].  */
   AARCH64_OPND_SVE_ADDR_ZZ_UXTW,    /* SVE [Zn.<T>, Zm,<T>, UXTW #<msz>].  */
+  AARCH64_OPND_SVE_AIMM,	/* SVE unsigned arithmetic immediate.  */
+  AARCH64_OPND_SVE_ASIMM,	/* SVE signed arithmetic immediate.  */
+  AARCH64_OPND_SVE_INV_LIMM,	/* SVE inverted logical immediate.  */
+  AARCH64_OPND_SVE_LIMM,	/* SVE logical immediate.  */
+  AARCH64_OPND_SVE_LIMM_MOV,	/* SVE logical immediate for MOV.  */
   AARCH64_OPND_SVE_PATTERN,	/* SVE vector pattern enumeration.  */
   AARCH64_OPND_SVE_PATTERN_SCALED, /* Likewise, with additional MUL factor.  */
   AARCH64_OPND_SVE_PRFOP,	/* SVE prefetch operation.  */
@@ -300,6 +306,18 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_Pm,		/* SVE p0-p15 in Pm.  */
   AARCH64_OPND_SVE_Pn,		/* SVE p0-p15 in Pn.  */
   AARCH64_OPND_SVE_Pt,		/* SVE p0-p15 in Pt.  */
+  AARCH64_OPND_SVE_SHLIMM_PRED,	  /* SVE shift left amount (predicated).  */
+  AARCH64_OPND_SVE_SHLIMM_UNPRED, /* SVE shift left amount (unpredicated).  */
+  AARCH64_OPND_SVE_SHRIMM_PRED,	  /* SVE shift right amount (predicated).  */
+  AARCH64_OPND_SVE_SHRIMM_UNPRED, /* SVE shift right amount (unpredicated).  */
+  AARCH64_OPND_SVE_SIMM5,	/* SVE signed 5-bit immediate.  */
+  AARCH64_OPND_SVE_SIMM5B,	/* SVE secondary signed 5-bit immediate.  */
+  AARCH64_OPND_SVE_SIMM6,	/* SVE signed 6-bit immediate.  */
+  AARCH64_OPND_SVE_SIMM8,	/* SVE signed 8-bit immediate.  */
+  AARCH64_OPND_SVE_UIMM3,	/* SVE unsigned 3-bit immediate.  */
+  AARCH64_OPND_SVE_UIMM7,	/* SVE unsigned 7-bit immediate.  */
+  AARCH64_OPND_SVE_UIMM8,	/* SVE unsigned 8-bit immediate.  */
+  AARCH64_OPND_SVE_UIMM8_53,	/* SVE split unsigned 8-bit immediate.  */
   AARCH64_OPND_SVE_Za_5,	/* SVE vector register in Za, bits [9,5].  */
   AARCH64_OPND_SVE_Za_16,	/* SVE vector register in Za, bits [20,16].  */
   AARCH64_OPND_SVE_Zd,		/* SVE vector register in Zd.  */
@@ -1064,6 +1082,9 @@ aarch64_get_operand_name (enum aarch64_opnd);
 
 extern const char *
 aarch64_get_operand_desc (enum aarch64_opnd);
+
+extern bfd_boolean
+aarch64_sve_dupm_mov_immediate_p (uint64_t, int);
 
 #ifdef DEBUG_AARCH64
 extern int debug_dump;

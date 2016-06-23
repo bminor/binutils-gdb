@@ -5553,6 +5553,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_CCMP_IMM:
+	case AARCH64_OPND_SIMM5:
 	case AARCH64_OPND_FBITS:
 	case AARCH64_OPND_UIMM4:
 	case AARCH64_OPND_UIMM3_OP1:
@@ -5560,8 +5561,34 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_IMM_VLSL:
 	case AARCH64_OPND_IMM:
 	case AARCH64_OPND_WIDTH:
+	case AARCH64_OPND_SVE_INV_LIMM:
+	case AARCH64_OPND_SVE_LIMM:
+	case AARCH64_OPND_SVE_LIMM_MOV:
+	case AARCH64_OPND_SVE_SHLIMM_PRED:
+	case AARCH64_OPND_SVE_SHLIMM_UNPRED:
+	case AARCH64_OPND_SVE_SHRIMM_PRED:
+	case AARCH64_OPND_SVE_SHRIMM_UNPRED:
+	case AARCH64_OPND_SVE_SIMM5:
+	case AARCH64_OPND_SVE_SIMM5B:
+	case AARCH64_OPND_SVE_SIMM6:
+	case AARCH64_OPND_SVE_SIMM8:
+	case AARCH64_OPND_SVE_UIMM3:
+	case AARCH64_OPND_SVE_UIMM7:
+	case AARCH64_OPND_SVE_UIMM8:
+	case AARCH64_OPND_SVE_UIMM8_53:
 	  po_imm_nc_or_fail ();
 	  info->imm.value = val;
+	  break;
+
+	case AARCH64_OPND_SVE_AIMM:
+	case AARCH64_OPND_SVE_ASIMM:
+	  po_imm_nc_or_fail ();
+	  info->imm.value = val;
+	  skip_whitespace (str);
+	  if (skip_past_comma (&str))
+	    po_misc_or_fail (parse_shift (&str, info, SHIFTED_LSL));
+	  else
+	    inst.base.operands[i].shifter.kind = AARCH64_MOD_LSL;
 	  break;
 
 	case AARCH64_OPND_SVE_PATTERN:

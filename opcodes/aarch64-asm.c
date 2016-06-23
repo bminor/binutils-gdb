@@ -452,17 +452,18 @@ aarch64_ins_aimm (const aarch64_operand *self, const aarch64_opnd_info *info,
   return NULL;
 }
 
-/* Insert logical/bitmask immediate for e.g. the last operand in
-     ORR <Wd|WSP>, <Wn>, #<imm>.  */
-const char *
-aarch64_ins_limm (const aarch64_operand *self, const aarch64_opnd_info *info,
-		  aarch64_insn *code, const aarch64_inst *inst ATTRIBUTE_UNUSED)
+/* Common routine shared by aarch64_ins{,_inv}_limm.  INVERT_P says whether
+   the operand should be inverted before encoding.  */
+static const char *
+aarch64_ins_limm_1 (const aarch64_operand *self,
+		    const aarch64_opnd_info *info, aarch64_insn *code,
+		    const aarch64_inst *inst, bfd_boolean invert_p)
 {
   aarch64_insn value;
   uint64_t imm = info->imm.value;
   int esize = aarch64_get_qualifier_esize (inst->operands[0].qualifier);
 
-  if (inst->opcode->op == OP_BIC)
+  if (invert_p)
     imm = ~imm;
   if (aarch64_logical_immediate_p (imm, esize, &value) == FALSE)
     /* The constraint check should have guaranteed this wouldn't happen.  */
@@ -471,6 +472,25 @@ aarch64_ins_limm (const aarch64_operand *self, const aarch64_opnd_info *info,
   insert_fields (code, value, 0, 3, self->fields[2], self->fields[1],
 		 self->fields[0]);
   return NULL;
+}
+
+/* Insert logical/bitmask immediate for e.g. the last operand in
+     ORR <Wd|WSP>, <Wn>, #<imm>.  */
+const char *
+aarch64_ins_limm (const aarch64_operand *self, const aarch64_opnd_info *info,
+		  aarch64_insn *code, const aarch64_inst *inst)
+{
+  return aarch64_ins_limm_1 (self, info, code, inst,
+			     inst->opcode->op == OP_BIC);
+}
+
+/* Insert a logical/bitmask immediate for the BIC alias of AND (etc.).  */
+const char *
+aarch64_ins_inv_limm (const aarch64_operand *self,
+		      const aarch64_opnd_info *info, aarch64_insn *code,
+		      const aarch64_inst *inst)
+{
+  return aarch64_ins_limm_1 (self, info, code, inst, TRUE);
 }
 
 /* Encode Ft for e.g. STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}]
@@ -903,6 +923,30 @@ aarch64_ins_sve_addr_zz_uxtw (const aarch64_operand *self,
   return aarch64_ext_sve_addr_zz (self, info, code);
 }
 
+/* Encode an SVE ADD/SUB immediate.  */
+const char *
+aarch64_ins_sve_aimm (const aarch64_operand *self,
+		      const aarch64_opnd_info *info, aarch64_insn *code,
+		      const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  if (info->shifter.amount == 8)
+    insert_all_fields (self, code, (info->imm.value & 0xff) | 256);
+  else if (info->imm.value != 0 && (info->imm.value & 0xff) == 0)
+    insert_all_fields (self, code, ((info->imm.value / 256) & 0xff) | 256);
+  else
+    insert_all_fields (self, code, info->imm.value & 0xff);
+  return NULL;
+}
+
+/* Encode an SVE CPY/DUP immediate.  */
+const char *
+aarch64_ins_sve_asimm (const aarch64_operand *self,
+		       const aarch64_opnd_info *info, aarch64_insn *code,
+		       const aarch64_inst *inst)
+{
+  return aarch64_ins_sve_aimm (self, info, code, inst);
+}
+
 /* Encode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less
@@ -917,6 +961,15 @@ aarch64_ins_sve_index (const aarch64_operand *self,
   insert_fields (code, (info->reglane.index * 2 + 1) * esize, 0,
 		 2, FLD_imm5, FLD_SVE_tszh);
   return NULL;
+}
+
+/* Encode a logical/bitmask immediate for the MOV alias of SVE DUPM.  */
+const char *
+aarch64_ins_sve_limm_mov (const aarch64_operand *self,
+			  const aarch64_opnd_info *info, aarch64_insn *code,
+			  const aarch64_inst *inst)
+{
+  return aarch64_ins_limm (self, info, code, inst);
 }
 
 /* Encode {Zn.<T> - Zm.<T>}.  The fields array specifies which field
@@ -940,6 +993,38 @@ aarch64_ins_sve_scale (const aarch64_operand *self,
 {
   insert_all_fields (self, code, info->imm.value);
   insert_field (FLD_SVE_imm4, code, info->shifter.amount - 1, 0);
+  return NULL;
+}
+
+/* Encode an SVE shift left immediate.  */
+const char *
+aarch64_ins_sve_shlimm (const aarch64_operand *self,
+			const aarch64_opnd_info *info, aarch64_insn *code,
+			const aarch64_inst *inst)
+{
+  const aarch64_opnd_info *prev_operand;
+  unsigned int esize;
+
+  assert (info->idx > 0);
+  prev_operand = &inst->operands[info->idx - 1];
+  esize = aarch64_get_qualifier_esize (prev_operand->qualifier);
+  insert_all_fields (self, code, 8 * esize + info->imm.value);
+  return NULL;
+}
+
+/* Encode an SVE shift right immediate.  */
+const char *
+aarch64_ins_sve_shrimm (const aarch64_operand *self,
+			const aarch64_opnd_info *info, aarch64_insn *code,
+			const aarch64_inst *inst)
+{
+  const aarch64_opnd_info *prev_operand;
+  unsigned int esize;
+
+  assert (info->idx > 0);
+  prev_operand = &inst->operands[info->idx - 1];
+  esize = aarch64_get_qualifier_esize (prev_operand->qualifier);
+  insert_all_fields (self, code, 16 * esize - info->imm.value);
   return NULL;
 }
 

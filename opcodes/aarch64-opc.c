@@ -264,6 +264,7 @@ const aarch64_field fields[] =
     { 31,  1 },	/* b5: in the test bit and branch instructions.  */
     { 19,  5 },	/* b40: in the test bit and branch instructions.  */
     { 10,  6 },	/* scale: in the fixed-point scalar to fp converting inst.  */
+    { 17,  1 }, /* SVE_N: SVE equivalent of N.  */
     {  0,  4 }, /* SVE_Pd: p0-p15, bits [3,0].  */
     { 10,  3 }, /* SVE_Pg3: p0-p7, bits [12,10].  */
     {  5,  4 }, /* SVE_Pg4_5: p0-p15, bits [8,5].  */
@@ -279,8 +280,16 @@ const aarch64_field fields[] =
     { 16,  5 }, /* SVE_Zm_16: SVE vector register, bits [20,16]. */
     {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
+    { 16,  3 }, /* SVE_imm3: 3-bit immediate field.  */
     { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
+    {  5,  5 }, /* SVE_imm5: 5-bit immediate field.  */
+    { 16,  5 }, /* SVE_imm5b: secondary 5-bit immediate field.  */
     { 16,  6 }, /* SVE_imm6: 6-bit immediate field.  */
+    { 14,  7 }, /* SVE_imm7: 7-bit immediate field.  */
+    {  5,  8 }, /* SVE_imm8: 8-bit immediate field.  */
+    {  5,  9 }, /* SVE_imm9: 9-bit immediate field.  */
+    { 11,  6 }, /* SVE_immr: SVE equivalent of immr.  */
+    {  5,  6 }, /* SVE_imms: SVE equivalent of imms.  */
     { 10,  2 }, /* SVE_msz: 2-bit shift amount for ADR.  */
     {  5,  5 }, /* SVE_pattern: vector pattern enumeration.  */
     {  0,  4 }, /* SVE_prfop: prefetch operation for SVE PRF[BHWD].  */
@@ -1374,9 +1383,10 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 				  const aarch64_opcode *opcode,
 				  aarch64_operand_error *mismatch_detail)
 {
-  unsigned num, modifiers;
+  unsigned num, modifiers, shift;
   unsigned char size;
   int64_t imm, min_value, max_value;
+  uint64_t uvalue, mask;
   const aarch64_opnd_info *opnd = opnds + idx;
   aarch64_opnd_qualifier_t qualifier = opnd->qualifier;
 
@@ -1977,12 +1987,32 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_UIMM7:
 	case AARCH64_OPND_UIMM3_OP1:
 	case AARCH64_OPND_UIMM3_OP2:
+	case AARCH64_OPND_SVE_UIMM3:
+	case AARCH64_OPND_SVE_UIMM7:
+	case AARCH64_OPND_SVE_UIMM8:
+	case AARCH64_OPND_SVE_UIMM8_53:
 	  size = get_operand_fields_width (get_operand_from_code (type));
 	  assert (size < 32);
 	  if (!value_fit_unsigned_field_p (opnd->imm.value, size))
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0,
 					  (1 << size) - 1);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SIMM5:
+	case AARCH64_OPND_SVE_SIMM5:
+	case AARCH64_OPND_SVE_SIMM5B:
+	case AARCH64_OPND_SVE_SIMM6:
+	case AARCH64_OPND_SVE_SIMM8:
+	  size = get_operand_fields_width (get_operand_from_code (type));
+	  assert (size < 32);
+	  if (!value_fit_signed_field_p (opnd->imm.value, size))
+	    {
+	      set_imm_out_of_range_error (mismatch_detail, idx,
+					  -(1 << (size - 1)),
+					  (1 << (size - 1)) - 1);
 	      return 0;
 	    }
 	  break;
@@ -2001,6 +2031,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 
 	case AARCH64_OPND_LIMM:
+	case AARCH64_OPND_SVE_LIMM:
 	  {
 	    int esize = aarch64_get_qualifier_esize (opnds[0].qualifier);
 	    uint64_t uimm = opnd->imm.value;
@@ -2171,11 +2202,116 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SVE_AIMM:
+	  min_value = 0;
+	sve_aimm:
+	  assert (opnd->shifter.kind == AARCH64_MOD_LSL);
+	  size = aarch64_get_qualifier_esize (opnds[0].qualifier);
+	  mask = ~((uint64_t) -1 << (size * 4) << (size * 4));
+	  uvalue = opnd->imm.value;
+	  shift = opnd->shifter.amount;
+	  if (size == 1)
+	    {
+	      if (shift != 0)
+		{
+		  set_other_error (mismatch_detail, idx,
+				   _("no shift amount allowed for"
+				     " 8-bit constants"));
+		  return 0;
+		}
+	    }
+	  else
+	    {
+	      if (shift != 0 && shift != 8)
+		{
+		  set_other_error (mismatch_detail, idx,
+				   _("shift amount should be 0 or 8"));
+		  return 0;
+		}
+	      if (shift == 0 && (uvalue & 0xff) == 0)
+		{
+		  shift = 8;
+		  uvalue = (int64_t) uvalue / 256;
+		}
+	    }
+	  mask >>= shift;
+	  if ((uvalue & mask) != uvalue && (uvalue | ~mask) != uvalue)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("immediate too big for element size"));
+	      return 0;
+	    }
+	  uvalue = (uvalue - min_value) & mask;
+	  if (uvalue > 0xff)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("invalid arithmetic immediate"));
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_ASIMM:
+	  min_value = -128;
+	  goto sve_aimm;
+
+	case AARCH64_OPND_SVE_INV_LIMM:
+	  {
+	    int esize = aarch64_get_qualifier_esize (opnds[0].qualifier);
+	    uint64_t uimm = ~opnd->imm.value;
+	    if (!aarch64_logical_immediate_p (uimm, esize, NULL))
+	      {
+		set_other_error (mismatch_detail, idx,
+				 _("immediate out of range"));
+		return 0;
+	      }
+	  }
+	  break;
+
+	case AARCH64_OPND_SVE_LIMM_MOV:
+	  {
+	    int esize = aarch64_get_qualifier_esize (opnds[0].qualifier);
+	    uint64_t uimm = opnd->imm.value;
+	    if (!aarch64_logical_immediate_p (uimm, esize, NULL))
+	      {
+		set_other_error (mismatch_detail, idx,
+				 _("immediate out of range"));
+		return 0;
+	      }
+	    if (!aarch64_sve_dupm_mov_immediate_p (uimm, esize))
+	      {
+		set_other_error (mismatch_detail, idx,
+				 _("invalid replicated MOV immediate"));
+		return 0;
+	      }
+	  }
+	  break;
+
 	case AARCH64_OPND_SVE_PATTERN_SCALED:
 	  assert (opnd->shifter.kind == AARCH64_MOD_MUL);
 	  if (!value_in_range_p (opnd->shifter.amount, 1, 16))
 	    {
 	      set_multiplier_out_of_range_error (mismatch_detail, idx, 1, 16);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_SHLIMM_PRED:
+	case AARCH64_OPND_SVE_SHLIMM_UNPRED:
+	  size = aarch64_get_qualifier_esize (opnds[idx - 1].qualifier);
+	  if (!value_in_range_p (opnd->imm.value, 0, 8 * size - 1))
+	    {
+	      set_imm_out_of_range_error (mismatch_detail, idx,
+					  0, 8 * size - 1);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_SHRIMM_PRED:
+	case AARCH64_OPND_SVE_SHRIMM_UNPRED:
+	  size = aarch64_get_qualifier_esize (opnds[idx - 1].qualifier);
+	  if (!value_in_range_p (opnd->imm.value, 1, 8 * size))
+	    {
+	      set_imm_out_of_range_error (mismatch_detail, idx, 1, 8 * size);
 	      return 0;
 	    }
 	  break;
@@ -2953,6 +3089,19 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_IMMR:
     case AARCH64_OPND_IMMS:
     case AARCH64_OPND_FBITS:
+    case AARCH64_OPND_SIMM5:
+    case AARCH64_OPND_SVE_SHLIMM_PRED:
+    case AARCH64_OPND_SVE_SHLIMM_UNPRED:
+    case AARCH64_OPND_SVE_SHRIMM_PRED:
+    case AARCH64_OPND_SVE_SHRIMM_UNPRED:
+    case AARCH64_OPND_SVE_SIMM5:
+    case AARCH64_OPND_SVE_SIMM5B:
+    case AARCH64_OPND_SVE_SIMM6:
+    case AARCH64_OPND_SVE_SIMM8:
+    case AARCH64_OPND_SVE_UIMM3:
+    case AARCH64_OPND_SVE_UIMM7:
+    case AARCH64_OPND_SVE_UIMM8:
+    case AARCH64_OPND_SVE_UIMM8_53:
       snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
       break;
 
@@ -3021,6 +3170,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_LIMM:
     case AARCH64_OPND_AIMM:
     case AARCH64_OPND_HALF:
+    case AARCH64_OPND_SVE_INV_LIMM:
+    case AARCH64_OPND_SVE_LIMM:
+    case AARCH64_OPND_SVE_LIMM_MOV:
       if (opnd->shifter.amount)
 	snprintf (buf, size, "#0x%" PRIx64 ", lsl #%" PRIi64, opnd->imm.value,
 		  opnd->shifter.amount);
@@ -3037,6 +3189,15 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	snprintf (buf, size, "#0x%" PRIx64 ", %s #%" PRIi64, opnd->imm.value,
 		  aarch64_operand_modifiers[opnd->shifter.kind].name,
 		  opnd->shifter.amount);
+      break;
+
+    case AARCH64_OPND_SVE_AIMM:
+    case AARCH64_OPND_SVE_ASIMM:
+      if (opnd->shifter.amount)
+	snprintf (buf, size, "#%" PRIi64 ", lsl #%" PRIi64, opnd->imm.value,
+		  opnd->shifter.amount);
+      else
+	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
       break;
 
     case AARCH64_OPND_FPIMM:
@@ -3965,6 +4126,33 @@ verify_ldpsw (const struct aarch64_opcode * opcode ATTRIBUTE_UNUSED,
     }
 
   return TRUE;
+}
+
+/* Return true if VALUE cannot be moved into an SVE register using DUP
+   (with any element size, not just ESIZE) and if using DUPM would
+   therefore be OK.  ESIZE is the number of bytes in the immediate.  */
+
+bfd_boolean
+aarch64_sve_dupm_mov_immediate_p (uint64_t uvalue, int esize)
+{
+  int64_t svalue = uvalue;
+  uint64_t upper = (uint64_t) -1 << (esize * 4) << (esize * 4);
+
+  if ((uvalue & ~upper) != uvalue && (uvalue | upper) != uvalue)
+    return FALSE;
+  if (esize <= 4 || (uint32_t) uvalue == (uint32_t) (uvalue >> 32))
+    {
+      svalue = (int32_t) uvalue;
+      if (esize <= 2 || (uint16_t) uvalue == (uint16_t) (uvalue >> 16))
+	{
+	  svalue = (int16_t) uvalue;
+	  if (esize == 1 || (uint8_t) uvalue == (uint8_t) (uvalue >> 8))
+	    return FALSE;
+	}
+    }
+  if ((svalue & 0xff) == 0)
+    svalue /= 256;
+  return svalue < -128 || svalue >= 128;
 }
 
 /* Include the opcode description table as well as the operand description

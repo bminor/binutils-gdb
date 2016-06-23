@@ -734,31 +734,20 @@ aarch64_ext_aimm (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return 1;
 }
 
-/* Decode logical immediate for e.g. ORR <Wd|WSP>, <Wn>, #<imm>.  */
-
-int
-aarch64_ext_limm (const aarch64_operand *self ATTRIBUTE_UNUSED,
-		  aarch64_opnd_info *info, const aarch64_insn code,
-		  const aarch64_inst *inst ATTRIBUTE_UNUSED)
+/* Return true if VALUE is a valid logical immediate encoding, storing the
+   decoded value in *RESULT if so.  ESIZE is the number of bytes in the
+   decoded immediate.  */
+static int
+decode_limm (uint32_t esize, aarch64_insn value, int64_t *result)
 {
   uint64_t imm, mask;
-  uint32_t sf;
   uint32_t N, R, S;
   unsigned simd_size;
-  aarch64_insn value;
-
-  value = extract_fields (code, 0, 3, FLD_N, FLD_immr, FLD_imms);
-  assert (inst->operands[0].qualifier == AARCH64_OPND_QLF_W
-	  || inst->operands[0].qualifier == AARCH64_OPND_QLF_X);
-  sf = aarch64_get_qualifier_esize (inst->operands[0].qualifier) != 4;
 
   /* value is N:immr:imms.  */
   S = value & 0x3f;
   R = (value >> 6) & 0x3f;
   N = (value >> 12) & 0x1;
-
-  if (sf == 0 && N == 1)
-    return 0;
 
   /* The immediate value is S+1 bits to 1, left rotated by SIMDsize - R
      (in other words, right rotated by R), then replicated.  */
@@ -782,6 +771,10 @@ aarch64_ext_limm (const aarch64_operand *self ATTRIBUTE_UNUSED,
       /* Top bits are IGNORED.  */
       R &= simd_size - 1;
     }
+
+  if (simd_size > esize * 8)
+    return 0;
+
   /* NOTE: if S = simd_size - 1 we get 0xf..f which is rejected.  */
   if (S == simd_size - 1)
     return 0;
@@ -803,8 +796,35 @@ aarch64_ext_limm (const aarch64_operand *self ATTRIBUTE_UNUSED,
     default: assert (0); return 0;
     }
 
-  info->imm.value = sf ? imm : imm & 0xffffffff;
+  *result = imm & ~((uint64_t) -1 << (esize * 4) << (esize * 4));
 
+  return 1;
+}
+
+/* Decode a logical immediate for e.g. ORR <Wd|WSP>, <Wn>, #<imm>.  */
+int
+aarch64_ext_limm (const aarch64_operand *self,
+		  aarch64_opnd_info *info, const aarch64_insn code,
+		  const aarch64_inst *inst)
+{
+  uint32_t esize;
+  aarch64_insn value;
+
+  value = extract_fields (code, 0, 3, self->fields[0], self->fields[1],
+			  self->fields[2]);
+  esize = aarch64_get_qualifier_esize (inst->operands[0].qualifier);
+  return decode_limm (esize, value, &info->imm.value);
+}
+
+/* Decode a logical immediate for the BIC alias of AND (etc.).  */
+int
+aarch64_ext_inv_limm (const aarch64_operand *self,
+		      aarch64_opnd_info *info, const aarch64_insn code,
+		      const aarch64_inst *inst)
+{
+  if (!aarch64_ext_limm (self, info, code, inst))
+    return 0;
+  info->imm.value = ~info->imm.value;
   return 1;
 }
 
@@ -1404,6 +1424,47 @@ aarch64_ext_sve_addr_zz_uxtw (const aarch64_operand *self,
   return aarch64_ext_sve_addr_zz (self, info, code, AARCH64_MOD_UXTW);
 }
 
+/* Finish decoding an SVE arithmetic immediate, given that INFO already
+   has the raw field value and that the low 8 bits decode to VALUE.  */
+static int
+decode_sve_aimm (aarch64_opnd_info *info, int64_t value)
+{
+  info->shifter.kind = AARCH64_MOD_LSL;
+  info->shifter.amount = 0;
+  if (info->imm.value & 0x100)
+    {
+      if (value == 0)
+	/* Decode 0x100 as #0, LSL #8.  */
+	info->shifter.amount = 8;
+      else
+	value *= 256;
+    }
+  info->shifter.operator_present = (info->shifter.amount != 0);
+  info->shifter.amount_present = (info->shifter.amount != 0);
+  info->imm.value = value;
+  return 1;
+}
+
+/* Decode an SVE ADD/SUB immediate.  */
+int
+aarch64_ext_sve_aimm (const aarch64_operand *self,
+		      aarch64_opnd_info *info, const aarch64_insn code,
+		      const aarch64_inst *inst)
+{
+  return (aarch64_ext_imm (self, info, code, inst)
+	  && decode_sve_aimm (info, (uint8_t) info->imm.value));
+}
+
+/* Decode an SVE CPY/DUP immediate.  */
+int
+aarch64_ext_sve_asimm (const aarch64_operand *self,
+		       aarch64_opnd_info *info, const aarch64_insn code,
+		       const aarch64_inst *inst)
+{
+  return (aarch64_ext_imm (self, info, code, inst)
+	  && decode_sve_aimm (info, (int8_t) info->imm.value));
+}
+
 /* Decode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less
@@ -1423,6 +1484,17 @@ aarch64_ext_sve_index (const aarch64_operand *self,
     val /= 2;
   info->reglane.index = val / 2;
   return 1;
+}
+
+/* Decode a logical immediate for the MOV alias of SVE DUPM.  */
+int
+aarch64_ext_sve_limm_mov (const aarch64_operand *self,
+			  aarch64_opnd_info *info, const aarch64_insn code,
+			  const aarch64_inst *inst)
+{
+  int esize = aarch64_get_qualifier_esize (inst->operands[0].qualifier);
+  return (aarch64_ext_limm (self, info, code, inst)
+	  && aarch64_sve_dupm_mov_immediate_p (info->imm.value, esize));
 }
 
 /* Decode {Zn.<T> - Zm.<T>}.  The fields array specifies which field
@@ -1455,6 +1527,44 @@ aarch64_ext_sve_scale (const aarch64_operand *self,
   info->shifter.amount = val + 1;
   info->shifter.operator_present = (val != 0);
   info->shifter.amount_present = (val != 0);
+  return 1;
+}
+
+/* Return the top set bit in VALUE, which is expected to be relatively
+   small.  */
+static uint64_t
+get_top_bit (uint64_t value)
+{
+  while ((value & -value) != value)
+    value -= value & -value;
+  return value;
+}
+
+/* Decode an SVE shift-left immediate.  */
+int
+aarch64_ext_sve_shlimm (const aarch64_operand *self,
+			aarch64_opnd_info *info, const aarch64_insn code,
+			const aarch64_inst *inst)
+{
+  if (!aarch64_ext_imm (self, info, code, inst)
+      || info->imm.value == 0)
+    return 0;
+
+  info->imm.value -= get_top_bit (info->imm.value);
+  return 1;
+}
+
+/* Decode an SVE shift-right immediate.  */
+int
+aarch64_ext_sve_shrimm (const aarch64_operand *self,
+			aarch64_opnd_info *info, const aarch64_insn code,
+			const aarch64_inst *inst)
+{
+  if (!aarch64_ext_imm (self, info, code, inst)
+      || info->imm.value == 0)
+    return 0;
+
+  info->imm.value = get_top_bit (info->imm.value) * 2 - info->imm.value;
   return 1;
 }
 
