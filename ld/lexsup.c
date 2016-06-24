@@ -1754,10 +1754,17 @@ elf_shlib_list_options (FILE *file)
   fprintf (file, _("\
   -z origin                   Mark object requiring immediate $ORIGIN\n\
 				processing at runtime\n"));
+#if DEFAULT_LD_Z_RELRO
+  fprintf (file, _("\
+  -z relro                    Create RELRO program header (default)\n"));
+  fprintf (file, _("\
+  -z norelro                  Don't create RELRO program header\n"));
+#else
   fprintf (file, _("\
   -z relro                    Create RELRO program header\n"));
   fprintf (file, _("\
-  -z norelro                  Don't create RELRO program header\n"));
+  -z norelro                  Don't create RELRO program header (default)\n"));
+#endif
   fprintf (file, _("\
   -z common                   Generate common symbols with STT_COMMON type\n"));
   fprintf (file, _("\

@@ -1,3 +1,9 @@
+2016-06-24  Dilyan Palauzov <dilyan.palauzov@aegee.org>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lexsup.c (elf_shlib_list_options): Check DEFAULT_LD_Z_RELRO
+	for -z relro help message.
+
 2016-06-22  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/undefweak-overflow.d: Use wildcard
