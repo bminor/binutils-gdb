@@ -1,3 +1,9 @@
+2016-06-24  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (struct print_file_list): Add "max_printed".
+	(try_print_file_open): Init new field.
+	(show_line): Don't show 5 context lines when redisplaying source.
+
 2016-06-22  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/binutils-all/ar.exp: Skip tests for Alpha target.
