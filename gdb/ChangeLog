@@ -1,3 +1,7 @@
+2016-06-24  David Taylor  <david.taylor@emc.com>
+
+	* MAINTAINERS (Write After Approval): Add David Taylor.
+
 2016-06-24  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure.ac: Check for support for system call LWP fields on
