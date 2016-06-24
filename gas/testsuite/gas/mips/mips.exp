@@ -1335,6 +1335,37 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test "pcrel-reloc-6" "-32 --defsym offset=4" \
 	"MIPS local PC-relative relocations 6b"
 
+    run_dump_test "mips16-pcrel-relax-0"
+    run_dump_test "mips16-pcrel-relax-1"
+    run_dump_test "mips16-pcrel-relax-2"
+    run_dump_test "mips16-pcrel-relax-3"
+    run_dump_test "mips16-pcrel-reloc-0"
+    run_dump_test "mips16-pcrel-reloc-1"
+    run_dump_test "mips16-pcrel-reloc-2"
+    run_dump_test "mips16-pcrel-reloc-3"
+    run_dump_test "mips16-pcrel-reloc-4"
+    run_dump_test "mips16-pcrel-reloc-5"
+    run_dump_test "mips16-pcrel-reloc-6"
+    run_dump_test "mips16-pcrel-reloc-7"
+    run_dump_test "mips16-pcrel-addend-0"
+    run_dump_test "mips16-pcrel-addend-1"
+    run_dump_test "mips16-pcrel-addend-2"
+    run_dump_test "mips16-pcrel-addend-3"
+    run_dump_test "mips16-pcrel-absolute"
+    run_dump_test "mips16-branch-reloc-0"
+    run_dump_test "mips16-branch-reloc-1"
+    run_dump_test "mips16-branch-reloc-2"
+    run_dump_test "mips16-branch-reloc-3"
+    run_dump_test "mips16-branch-addend-0"
+    run_dump_test "mips16-branch-addend-1"
+    run_dump_test "mips16-branch-addend-2"
+    run_dump_test "mips16-branch-addend-3"
+    run_dump_test "mips16-branch-absolute"
+    run_dump_test "mips16-absolute-reloc-0"
+    run_dump_test "mips16-absolute-reloc-1"
+    run_dump_test "mips16-absolute-reloc-2"
+    run_dump_test "mips16-absolute-reloc-3"
+
     run_dump_test_arches "attr-gnu-4-0" "-32" \
 				    [mips_arch_list_matching mips1]
     run_dump_test_arches "attr-gnu-4-0" "-64" \

@@ -7307,15 +7307,31 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
   else if (mips_opts.mips16 && *reloc_type > BFD_RELOC_UNUSED)
     {
+      symbolS *symbol;
+      offsetT offset;
+
       /* We need to set up a variant frag.  */
       gas_assert (address_expr != NULL);
+      /* Pass any `O_symbol' expression unchanged as an `expr_section'
+         symbol created by `make_expr_symbol' may not get a necessary
+         external relocation produced.  */
+      if (address_expr->X_op == O_symbol)
+	{
+	  symbol = address_expr->X_add_symbol;
+	  offset = address_expr->X_add_number;
+	}
+      else
+	{
+	  symbol = make_expr_symbol (address_expr);
+	  offset = 0;
+	}
       add_relaxed_insn (ip, 4, 0,
 			RELAX_MIPS16_ENCODE
 			(*reloc_type - BFD_RELOC_UNUSED,
 			 forced_insn_length == 2, forced_insn_length == 4,
 			 delayed_branch_p (&history[0]),
 			 history[0].mips16_absolute_jump_p),
-			make_expr_symbol (address_expr), 0);
+			symbol, offset);
     }
   else if (mips_opts.mips16 && insn_length (ip) == 2)
     {
@@ -16731,12 +16747,17 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
   if (RELAX_MIPS16_USER_EXT (fragp->fr_subtype))
     return 1;
 
+  symsec = S_GET_SEGMENT (fragp->fr_symbol);
   type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
   operand = mips16_immed_operand (type, FALSE);
+  if (S_FORCE_RELOC (fragp->fr_symbol, TRUE)
+      || (operand->root.type == OP_PCREL
+	  ? sec != symsec
+	  : !bfd_is_abs_section (symsec)))
+    return 1;
 
   sym_frag = symbol_get_frag (fragp->fr_symbol);
-  val = S_GET_VALUE (fragp->fr_symbol);
-  symsec = S_GET_SEGMENT (fragp->fr_symbol);
+  val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;
 
   if (operand->root.type == OP_PCREL)
     {
@@ -16744,47 +16765,16 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
       addressT addr;
       offsetT maxtiny;
 
-      /* We won't have the section when we are called from
-         mips_relax_frag.  However, we will always have been called
-         from md_estimate_size_before_relax first.  If this is a
-         branch to a different section, we mark it as such.  If SEC is
-         NULL, and the frag is not marked, then it must be a branch to
-         the same section.  */
+      if (RELAX_MIPS16_LONG_BRANCH (fragp->fr_subtype))
+	return 1;
+
       pcrel_op = (const struct mips_pcrel_operand *) operand;
-      if (sec == NULL)
-	{
-	  if (RELAX_MIPS16_LONG_BRANCH (fragp->fr_subtype))
-	    return 1;
-	}
-      else
-	{
-	  /* Must have been called from md_estimate_size_before_relax.  */
-	  if (symsec != sec)
-	    {
-	      fragp->fr_subtype =
-		RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
 
-	      /* FIXME: We should support this, and let the linker
-                 catch branches and loads that are out of range.  */
-	      as_bad_where (fragp->fr_file, fragp->fr_line,
-			    _("unsupported PC relative reference to different section"));
-
-	      return 1;
-	    }
-	  if (fragp != sym_frag && sym_frag->fr_address == 0)
-	    /* Assume non-extended on the first relaxation pass.
-	       The address we have calculated will be bogus if this is
-	       a forward branch to another frag, as the forward frag
-	       will have fr_address == 0.  */
-	    return 0;
-	}
-
-      /* In this case, we know for sure that the symbol fragment is in
-	 the same section.  If the relax_marker of the symbol fragment
-	 differs from the relax_marker of this fragment, we have not
-	 yet adjusted the symbol fragment fr_address.  We want to add
-	 in STRETCH in order to get a better estimate of the address.
-	 This particularly matters because of the shift bits.  */
+      /* If the relax_marker of the symbol fragment differs from the
+	 relax_marker of this fragment, we have not yet adjusted the
+	 symbol fragment fr_address.  We want to add in STRETCH in
+	 order to get a better estimate of the address.  This
+	 particularly matters because of the shift bits.  */
       if (stretch != 0
 	  && sym_frag->relax_marker != fragp->relax_marker)
 	{
@@ -16844,9 +16834,8 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
       /* If any of the shifted bits are set, we must use an extended
          opcode.  If the address depends on the size of this
          instruction, this can lead to a loop, so we arrange to always
-         use an extended opcode.  We only check this when we are in
-         the main relaxation loop, when SEC is NULL.  */
-      if ((val & ((1 << operand->shift) - 1)) != 0 && sec == NULL)
+         use an extended opcode.  */
+      if ((val & ((1 << operand->shift) - 1)) != 0)
 	{
 	  fragp->fr_subtype =
 	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
@@ -16867,16 +16856,13 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 	 extended with the next value above maxtiny.  */
       maxtiny = mips_int_operand_max (operand);
       if (val == maxtiny + (1 << operand->shift)
-	  && ! RELAX_MIPS16_EXTENDED (fragp->fr_subtype)
-	  && sec == NULL)
+	  && ! RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
 	{
 	  fragp->fr_subtype =
 	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
 	  return 1;
 	}
     }
-  else if (symsec != absolute_section && sec != NULL)
-    as_bad_where (fragp->fr_file, fragp->fr_line, _("unsupported relocation"));
 
   return !mips16_immed_in_range_p (operand, BFD_RELOC_UNUSED, val);
 }
@@ -17367,7 +17353,7 @@ mips_relax_frag (asection *sec, fragS *fragp, long stretch)
   if (! RELAX_MIPS16_P (fragp->fr_subtype))
     return 0;
 
-  if (mips16_extended_frag (fragp, NULL, stretch))
+  if (mips16_extended_frag (fragp, sec, stretch))
     {
       if (RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
 	return 0;
@@ -17820,12 +17806,13 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       unsigned int user_length, length;
       unsigned long insn;
       bfd_boolean ext;
+      segT symsec;
 
       type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
       operand = mips16_immed_operand (type, FALSE);
 
       ext = RELAX_MIPS16_EXTENDED (fragp->fr_subtype);
-      val = resolve_symbol_value (fragp->fr_symbol);
+      val = resolve_symbol_value (fragp->fr_symbol) + fragp->fr_offset;
       if (operand->root.type == OP_PCREL)
 	{
 	  const struct mips_pcrel_operand *pcrel_op;
@@ -17878,8 +17865,16 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       else
 	user_length = 0;
 
-      mips16_immed (fragp->fr_file, fragp->fr_line, type,
-		    BFD_RELOC_UNUSED, val, user_length, &insn);
+      symsec = S_GET_SEGMENT (fragp->fr_symbol);
+      if (S_FORCE_RELOC (fragp->fr_symbol, TRUE)
+	  || (operand->root.type == OP_PCREL
+	      ? asec != symsec
+	      : !bfd_is_abs_section (symsec)))
+	as_bad_where (fragp->fr_file, fragp->fr_line,
+		      _("unsupported relocation"));
+      else
+	mips16_immed (fragp->fr_file, fragp->fr_line, type,
+		      BFD_RELOC_UNUSED, val, user_length, &insn);
 
       length = (ext ? 4 : 2);
       gas_assert (mips16_opcode_length (insn) == length);

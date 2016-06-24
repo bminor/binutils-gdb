@@ -1,3 +1,90 @@
+2016-06-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (append_insn): Use any `O_symbol' expression
+	unchanged with relaxed MIPS16 instructions.
+	(mips16_extended_frag): Adjust accordingly.  Return 1 right
+	away if a relocation will be required for the symbol requested.
+	Remove dead first relaxation pass code.
+	(mips_relax_frag): Pass `sec' down to `mips16_extended_frag'.
+	(md_convert_frag): Adjust symbol value calculation.  Raise an
+	error if a relocation is required for the symbol requested.
+	* testsuite/gas/mips/mips16@relax-swap3.d: Remove dump patterns,
+	add error output.
+	* testsuite/gas/mips/mips16@relax-swap3.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-relax-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-relax-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-relax-2.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-relax-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-2.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-4.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-5.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-2.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-0.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-3.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-0.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-3.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute.d: New test.
+	* testsuite/gas/mips/mips16-absolute-reloc-0.d: New test.
+	* testsuite/gas/mips/mips16-absolute-reloc-1.d: New test.
+	* testsuite/gas/mips/mips16-absolute-reloc-2.d: New test.
+	* testsuite/gas/mips/mips16-absolute-reloc-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-2.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-reloc-3.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-addend-2.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-addend-3.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-absolute.l: New error output.
+	* testsuite/gas/mips/mips16-branch-reloc-2.l: New error output.
+	* testsuite/gas/mips/mips16-branch-reloc-3.l: New error output.
+	* testsuite/gas/mips/mips16-branch-addend-2.l: New error output.
+	* testsuite/gas/mips/mips16-branch-addend-3.l: New error output.
+	* testsuite/gas/mips/mips16-branch-absolute.l: New error output.
+	* testsuite/gas/mips/mips16-absolute-reloc-2.l: New error output.
+	* testsuite/gas/mips/mips16-absolute-reloc-3.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-relax-0.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-relax-2.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-0.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-1.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-2.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-3.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-4.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-5.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-0.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-1.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-2.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-3.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-absolute.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-0.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-1.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-2.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-3.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-0.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-1.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-2.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-3.s: New test source.
+	* testsuite/gas/mips/mips16-branch-absolute.s: New test source.
+	* testsuite/gas/mips/mips16-absolute-reloc-0.s: New test source.
+	* testsuite/gas/mips/mips16-absolute-reloc-1.s: New test source.
+	* testsuite/gas/mips/mips16-absolute-reloc-2.s: New test source.
+	* testsuite/gas/mips/mips16-absolute-reloc-3.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-06-24  Alan Modra  <amodra@gmail.com>
 
 	* configure.tgt (alpha-*-openbsd*): Use em=nbsd.
