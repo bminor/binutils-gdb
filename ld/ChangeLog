@@ -1,3 +1,8 @@
+2016-06-24  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp (aarch64_choose_ilp32_emul):
+	Don't error out, always return an emulation.
+
 2016-06-24  Dilyan Palauzov <dilyan.palauzov@aegee.org>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
