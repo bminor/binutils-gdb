@@ -1,3 +1,7 @@
+2016-06-24  Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt (alpha-*-openbsd*): Use em=nbsd.
+
 2016-06-23  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (b_reloc_p): New function.

@@ -127,8 +127,7 @@ case ${generic_target} in
   alpha-*-osf*)				fmt=ecoff ;;
   alpha-*-linux*ecoff*)			fmt=ecoff ;;
   alpha-*-linux-*)			fmt=elf em=linux ;;
-  alpha-*-netbsd*)			fmt=elf em=nbsd ;;
-  alpha-*-openbsd*)			fmt=elf em=obsd ;;
+  alpha-*-netbsd* | alpha-*-openbsd*)	fmt=elf em=nbsd ;;
 
   arc-*-elf*)				fmt=elf ;;
   arc*-*-linux*)			fmt=elf bfd_gas=yes ;;
