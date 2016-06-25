@@ -1,3 +1,11 @@
+2016-06-25  Manish Goregaokar  <manish@mozilla.com>
+
+	PR gdb/20239
+	* rust-lang.c (rust_get_disr_info): Correctly interpret
+	NonZero-optimized enums of arbitrary depth.
+	(rust_print_type): Correctly print NonZero-optimized
+	enums.
+
 2016-06-24  David Taylor  <dtaylor@emc.com>
 
 	PR gdb/17520 Structure offset wrong when 1/4 GB or greater.
