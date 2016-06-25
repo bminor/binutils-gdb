@@ -1,5 +1,23 @@
 2016-07-01  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (struct fbsd_fork_child_info): Rename to ...
+	(struct fbsd_fork_info): ... this.
+	(struct fbsd_fork_info) <child>: Rename to ...
+	(struct fbsd_fork_info) <ptid>: ... this.
+	(fbsd_pending_children): Update type.
+	(fbsd_remember_child): Update type and field name.
+	(fbsd_is_child_pending): Likewise.
+	(fbsd_pending_vfork_done): New variable.
+	(fbsd_is_vfork_done_pending): New function.
+	(fbsd_next_vfork_done): New function.
+	(fbsd_resume): Don't resume processes with a pending vfork done
+	event.
+	(fbsd_wait): Report pending vfork done events.
+	(fbsd_follow_fork): Delay and record a pending vfork done event
+	for a vfork parent when detaching the child.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c (super_resume): Move earlier next to "super_wait".
 	(resume_one_thread_cb): Move below fork following helper code.
 	(resume_all_threads_cb): Likewise.
