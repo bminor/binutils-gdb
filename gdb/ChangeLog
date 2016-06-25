@@ -1,5 +1,10 @@
 2016-07-01  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (fbsd_follow_fork): Only detach child if
+	"detach_fork" is true.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
 	* x86bsd-nat.c: Include 'gdbthread.h'.
 	(x86bsd_dr_set): Set debug registers on all threads belonging to
 	the current inferior.
