@@ -281,6 +281,10 @@ fbsd_xfer_partial (struct target_ops *ops, enum target_object object,
 #ifdef PT_LWPINFO
 static int debug_fbsd_lwp;
 
+static void (*super_resume) (struct target_ops *,
+			     ptid_t,
+			     int,
+			     enum gdb_signal);
 static ptid_t (*super_wait) (struct target_ops *,
 			     ptid_t,
 			     struct target_waitstatus *,
@@ -492,70 +496,6 @@ fbsd_update_thread_list (struct target_ops *ops)
 #endif
 }
 
-static void (*super_resume) (struct target_ops *,
-			     ptid_t,
-			     int,
-			     enum gdb_signal);
-
-static int
-resume_one_thread_cb (struct thread_info *tp, void *data)
-{
-  ptid_t *ptid = (ptid_t *) data;
-  int request;
-
-  if (ptid_get_pid (tp->ptid) != ptid_get_pid (*ptid))
-    return 0;
-
-  if (ptid_get_lwp (tp->ptid) == ptid_get_lwp (*ptid))
-    request = PT_RESUME;
-  else
-    request = PT_SUSPEND;
-
-  if (ptrace (request, ptid_get_lwp (tp->ptid), NULL, 0) == -1)
-    perror_with_name (("ptrace"));
-  return 0;
-}
-
-static int
-resume_all_threads_cb (struct thread_info *tp, void *data)
-{
-  ptid_t *filter = (ptid_t *) data;
-
-  if (!ptid_match (tp->ptid, *filter))
-    return 0;
-
-  if (ptrace (PT_RESUME, ptid_get_lwp (tp->ptid), NULL, 0) == -1)
-    perror_with_name (("ptrace"));
-  return 0;
-}
-
-/* Implement the "to_resume" target_ops method.  */
-
-static void
-fbsd_resume (struct target_ops *ops,
-	     ptid_t ptid, int step, enum gdb_signal signo)
-{
-
-  if (debug_fbsd_lwp)
-    fprintf_unfiltered (gdb_stdlog,
-			"FLWP: fbsd_resume for ptid (%d, %ld, %ld)\n",
-			ptid_get_pid (ptid), ptid_get_lwp (ptid),
-			ptid_get_tid (ptid));
-  if (ptid_lwp_p (ptid))
-    {
-      /* If ptid is a specific LWP, suspend all other LWPs in the process.  */
-      iterate_over_threads (resume_one_thread_cb, &ptid);
-    }
-  else
-    {
-      /* If ptid is a wildcard, resume all matching threads (they won't run
-	 until the process is continued however).  */
-      iterate_over_threads (resume_all_threads_cb, &ptid);
-      ptid = inferior_ptid;
-    }
-  super_resume (ops, ptid, step, signo);
-}
-
 #ifdef TDP_RFPPWAIT
 /*
   To catch fork events, PT_FOLLOW_FORK is set on every traced process
@@ -637,6 +577,65 @@ fbsd_is_child_pending (pid_t pid)
   return null_ptid;
 }
 #endif
+
+static int
+resume_one_thread_cb (struct thread_info *tp, void *data)
+{
+  ptid_t *ptid = (ptid_t *) data;
+  int request;
+
+  if (ptid_get_pid (tp->ptid) != ptid_get_pid (*ptid))
+    return 0;
+
+  if (ptid_get_lwp (tp->ptid) == ptid_get_lwp (*ptid))
+    request = PT_RESUME;
+  else
+    request = PT_SUSPEND;
+
+  if (ptrace (request, ptid_get_lwp (tp->ptid), NULL, 0) == -1)
+    perror_with_name (("ptrace"));
+  return 0;
+}
+
+static int
+resume_all_threads_cb (struct thread_info *tp, void *data)
+{
+  ptid_t *filter = (ptid_t *) data;
+
+  if (!ptid_match (tp->ptid, *filter))
+    return 0;
+
+  if (ptrace (PT_RESUME, ptid_get_lwp (tp->ptid), NULL, 0) == -1)
+    perror_with_name (("ptrace"));
+  return 0;
+}
+
+/* Implement the "to_resume" target_ops method.  */
+
+static void
+fbsd_resume (struct target_ops *ops,
+	     ptid_t ptid, int step, enum gdb_signal signo)
+{
+
+  if (debug_fbsd_lwp)
+    fprintf_unfiltered (gdb_stdlog,
+			"FLWP: fbsd_resume for ptid (%d, %ld, %ld)\n",
+			ptid_get_pid (ptid), ptid_get_lwp (ptid),
+			ptid_get_tid (ptid));
+  if (ptid_lwp_p (ptid))
+    {
+      /* If ptid is a specific LWP, suspend all other LWPs in the process.  */
+      iterate_over_threads (resume_one_thread_cb, &ptid);
+    }
+  else
+    {
+      /* If ptid is a wildcard, resume all matching threads (they won't run
+	 until the process is continued however).  */
+      iterate_over_threads (resume_all_threads_cb, &ptid);
+      ptid = inferior_ptid;
+    }
+  super_resume (ops, ptid, step, signo);
+}
 
 /* Wait for the child specified by PTID to do something.  Return the
    process ID of the child, or MINUS_ONE_PTID in case of error; store

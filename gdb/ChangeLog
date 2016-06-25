@@ -1,5 +1,12 @@
 2016-07-01  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (super_resume): Move earlier next to "super_wait".
+	(resume_one_thread_cb): Move below fork following helper code.
+	(resume_all_threads_cb): Likewise.
+	(fbsd_resume): Likewise.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c (fbsd_follow_fork): Only detach child if
 	"detach_fork" is true.
 
