@@ -147,15 +147,15 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
          field is zero.  */
       while ((token = strsep (&tail, "$")) != NULL)
         {
-           if (sscanf (token, "%lu", &fieldno) != 1)
-             {
-                /* We have reached the enum name,
-                   which cannot start with a digit.  */
-                break;
-             }
+	  if (sscanf (token, "%lu", &fieldno) != 1)
+	    {
+	      /* We have reached the enum name, which cannot start
+		 with a digit.  */
+	      break;
+	    }
           if (fieldno >= TYPE_NFIELDS (member_type))
-      error (_("%s refers to field after end of member type"),
-             RUST_ENUM_PREFIX);
+	    error (_("%s refers to field after end of member type"),
+		   RUST_ENUM_PREFIX);
 
           embedded_offset += TYPE_FIELD_BITPOS (member_type, fieldno) / 8;
           member_type = TYPE_FIELD_TYPE (member_type, fieldno);
@@ -163,10 +163,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
 
       if (token >= name + strlen (TYPE_FIELD_NAME (type, 0)))
 	error (_("Invalid form for %s"), RUST_ENUM_PREFIX);
-        value = unpack_long (member_type,
-                             valaddr + embedded_offset);
-      
-
+      value = unpack_long (member_type, valaddr + embedded_offset);
 
       if (value == 0)
 	{
@@ -879,16 +876,17 @@ rust_print_type (struct type *type, const char *varstring,
 	  }
 	fputs_filtered ("{\n", stream);
 
-  if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
-       strlen (RUST_ENUM_PREFIX)) == 0) {
-    const char *zero_field = strrchr (TYPE_FIELD_NAME (type, 0), '$');
-    if (zero_field != NULL && strlen (zero_field) > 1)
-      {
-        fprintfi_filtered (level + 2, stream, "%s,\n", zero_field+1);
-        /* There is no explicit discriminant field, skip nothing.  */
-        skip_to = 0;
-      }
-  }
+	if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
+		     strlen (RUST_ENUM_PREFIX)) == 0)
+	  {
+	    const char *zero_field = strrchr (TYPE_FIELD_NAME (type, 0), '$');
+	    if (zero_field != NULL && strlen (zero_field) > 1)
+	      {
+		fprintfi_filtered (level + 2, stream, "%s,\n", zero_field + 1);
+		/* There is no explicit discriminant field, skip nothing.  */
+		skip_to = 0;
+	      }
+	  }
 
 	for (i = 0; i < TYPE_NFIELDS (type); ++i)
 	  {

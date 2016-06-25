@@ -1,3 +1,8 @@
+2016-06-25  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_get_disr_info, rust_print_type): Fix
+	formatting.
+
 2016-06-25  Manish Goregaokar  <manish@mozilla.com>
 
 	PR gdb/20239
