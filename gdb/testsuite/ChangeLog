@@ -1,3 +1,9 @@
+2016-06-25  Manish Goregaokar  <manish@mozilla.com>
+
+	PR gdb/20239
+	* gdb.rust/simple.rs: Add more tests for printing NonZero enums.
+	* gdb.rust/simple.exp: Add test expectations for new NonZero tests.
+
 2016-06-24  David Taylor  <dtaylor@emc.com>
 
 	* gdb.base/offsets.exp: New file.

@@ -38,6 +38,12 @@ enum MoreComplicated {
     Four{this: bool, is: u8, a: char, struct_: u64, variant: u32},
 }
 
+// tests the nonzero optimization, but fields are reversed
+enum NonZeroOptimized {
+    Empty,
+    Value(String),
+}
+
 fn diff2(x: i32, y: i32) -> i32 {
     x - y
 }
@@ -91,6 +97,17 @@ fn main () {
 
     let to1 = &w[..3];
     let to2 = &slice[..1];
+
+    // tests for enum optimizations
+
+    let str_some = Some("hi".to_string());
+    let str_none = None::<String>;
+    let box_some = Some(Box::new(1u8));
+    let box_none = None::<Box<u8>>;
+    let int_some = Some(1u8);
+    let int_none = None::<u8>;
+    let custom_some = NonZeroOptimized::Value("hi".into());
+    let custom_none = NonZeroOptimized::Empty;
 
     println!("{}, {}", x.0, x.1);        // set breakpoint here
     println!("{}", diff2(92, 45));
