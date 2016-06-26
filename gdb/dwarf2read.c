@@ -6695,6 +6695,9 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		{
 		  add_partial_symbol (pdi, cu);
 		}
+	      if (cu->language == language_rust && pdi->has_children)
+		scan_partial_symbols (pdi->die_child, lowpc, highpc,
+				      set_addrmap, cu);
 	      break;
 	    case DW_TAG_enumeration_type:
 	      if (!pdi->is_declaration)
@@ -8732,6 +8735,12 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
   mangled = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
   if (mangled == NULL)
     mangled = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
+
+  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
+     See https://github.com/rust-lang/rust/issues/32925.  */
+  if (cu->language == language_rust && mangled != NULL
+      && strchr (mangled, '{') != NULL)
+    mangled = NULL;
 
   /* DW_AT_linkage_name is missing in some cases - depend on what GDB
      has computed.  */
@@ -13315,8 +13324,16 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	  else if (child_die->tag == DW_TAG_subprogram)
 	    {
-	      /* C++ member function.  */
-	      dwarf2_add_member_fn (&fi, child_die, type, cu);
+	      /* Rust doesn't have member functions in the C++ sense.
+		 However, it does emit ordinary functions as children
+		 of a struct DIE.  */
+	      if (cu->language == language_rust)
+		read_func_scope (child_die, cu);
+	      else
+		{
+		  /* C++ member function.  */
+		  dwarf2_add_member_fn (&fi, child_die, type, cu);
+		}
 	    }
 	  else if (child_die->tag == DW_TAG_inheritance)
 	    {
