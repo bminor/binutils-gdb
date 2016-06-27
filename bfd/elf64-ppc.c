@@ -12185,6 +12185,13 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
   if (!group_sections (info, stub_group_size, stubs_always_before_branch))
     return FALSE;
 
+#define STUB_SHRINK_ITER 20
+  /* Loop until no stubs added.  After iteration 20 of this loop we may
+     exit on a stub section shrinking.  This is to break out of a
+     pathological case where adding stubs on one iteration decreases
+     section gaps (perhaps due to alignment), which then requires
+     fewer or smaller stubs on the next iteration.  */
+
   while (1)
     {
       bfd *input_bfd;
@@ -12566,11 +12573,11 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	   stub_sec != NULL;
 	   stub_sec = stub_sec->next)
 	if ((stub_sec->flags & SEC_LINKER_CREATED) == 0
-	    && stub_sec->rawsize != stub_sec->size)
+	    && stub_sec->rawsize != stub_sec->size
+	    && (htab->stub_iteration <= STUB_SHRINK_ITER
+		|| stub_sec->rawsize < stub_sec->size))
 	  break;
 
-      /* Exit from this loop when no stubs have been added, and no stubs
-	 have changed size.  */
       if (stub_sec == NULL
 	  && (htab->glink_eh_frame == NULL
 	      || htab->glink_eh_frame->rawsize == htab->glink_eh_frame->size))
@@ -12901,9 +12908,6 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	stub_sec->contents = bfd_zalloc (htab->params->stub_bfd, stub_sec->size);
 	if (stub_sec->contents == NULL)
 	  return FALSE;
-	/* We want to check that built size is the same as calculated
-	   size.  rawsize is a convenient location to use.  */
-	stub_sec->rawsize = stub_sec->size;
 	stub_sec->size = 0;
       }
 
@@ -13092,7 +13096,9 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
     if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
       {
 	stub_sec_count += 1;
-	if (stub_sec->rawsize != stub_sec->size)
+	if (stub_sec->rawsize != stub_sec->size
+	    && (htab->stub_iteration <= STUB_SHRINK_ITER
+		|| stub_sec->rawsize < stub_sec->size))
 	  break;
       }
 
