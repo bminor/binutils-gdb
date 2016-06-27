@@ -1,3 +1,11 @@
+2016-06-27  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20302
+	* lexsup.c (set_segment_start): If resetting the start address of
+	a section, remember to generate a new script element as well.
+	* testsuite/ld-scripts/pr20302.d: New test.
+	* testsuite/ld-scripts/scripts.exp: Run the new test.
+
 2016-06-24  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp (aarch64_choose_ilp32_emul):

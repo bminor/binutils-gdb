@@ -1686,6 +1686,7 @@ set_segment_start (const char *section, char *valstr)
     if (strcmp (seg->name, name) == 0)
       {
 	seg->value = val;
+	lang_section_start (section, exp_intop (val), seg);
 	return;
       }
   /* There was no existing value so we must create a new segment
