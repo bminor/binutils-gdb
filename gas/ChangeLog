@@ -1,3 +1,9 @@
+2016-06-27  Vineet Gupta  <vgupta@synopsys.com>
+
+	* config//tc-arc.c (tc_arc_frame_initial_instructions): Use
+	cfi_add_CFA_def_cfa to generate default CFA with offset
+	* testsuite/gas/cfi/cfi-arc-1.d: Update expected output.
+
 2016-06-27  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/20247

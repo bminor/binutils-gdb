@@ -4160,7 +4160,7 @@ void
 tc_arc_frame_initial_instructions (void)
 {
   /* Stack pointer is register 28.  */
-  cfi_add_CFA_def_cfa_register (28);
+  cfi_add_CFA_def_cfa (28, 0);
 }
 
 int
