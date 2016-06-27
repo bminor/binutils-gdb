@@ -1,5 +1,10 @@
 2016-07-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-sparc.c (struct pop_entry): Make the type of reloc
+	bfd_reloc_code_real_type.
+
+2016-07-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-sparc.c (pop_table): Remove sentinel.
 	(NUM_PERC_ENTRIES): Use ARRAY_SIZE on pop_table.
 	(md_begin): Adjust.

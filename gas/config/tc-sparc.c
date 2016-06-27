@@ -883,7 +883,7 @@ struct pop_entry
   /* The name as it appears in assembler.  */
   const char *name;
   /* The reloc this pseudo-op translates to.  */
-  int reloc;
+  bfd_reloc_code_real_type reloc;
   /* Flags.  See F_POP_* above.  */
   int flags;
 };
