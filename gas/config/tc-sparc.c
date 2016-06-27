@@ -926,8 +926,7 @@ struct pop_entry pop_table[] =
   { "tie_ldx",		BFD_RELOC_SPARC_TLS_IE_LDX, 	F_POP_POSTFIX },
   { "tie_ld",		BFD_RELOC_SPARC_TLS_IE_LD,	F_POP_POSTFIX },
   { "tie_add",		BFD_RELOC_SPARC_TLS_IE_ADD,	F_POP_POSTFIX },
-  { "gdop",	 	BFD_RELOC_SPARC_GOTDATA_OP,	F_POP_POSTFIX },
-  { NULL, 0, 0 },
+  { "gdop",	 	BFD_RELOC_SPARC_GOTDATA_OP,	F_POP_POSTFIX }
 };
 
 /* Table of %-names that can appear in a sparc assembly program.  This
@@ -962,7 +961,7 @@ struct perc_entry
   (((sizeof (priv_reg_table) / sizeof (priv_reg_table[0])) - 1)         \
    + ((sizeof (hpriv_reg_table) / sizeof (hpriv_reg_table[0])) - 1)     \
    + ((sizeof (v9a_asr_table) / sizeof (v9a_asr_table[0])) - 1)         \
-   + ((sizeof (pop_table) / sizeof (pop_table[0])) - 1) \
+   + ARRAY_SIZE (pop_table)						\
    + 1)
 
 struct perc_entry perc_table[NUM_PERC_ENTRIES];
@@ -1117,19 +1116,15 @@ md_begin (void)
       }
 
     /* Add %-pseudo-ops.  */
-    {
-      struct pop_entry *pop;
-
-      for (pop = pop_table; pop->name; pop++)
-        {
-          struct perc_entry *p = &perc_table[entry++];
-          p->type = (pop->flags & F_POP_POSTFIX
-                     ? perc_entry_post_pop : perc_entry_imm_pop);
-          p->name = pop->name;
-          p->len = strlen (pop->name);
-          p->pop = pop;
-        }
-    }
+    for (i = 0; i < ARRAY_SIZE (pop_table); i++)
+      {
+	struct perc_entry *p = &perc_table[entry++];
+	p->type = (pop_table[i].flags & F_POP_POSTFIX
+		   ? perc_entry_post_pop : perc_entry_imm_pop);
+	p->name = pop_table[i].name;
+	p->len = strlen (pop_table[i].name);
+	p->pop = &pop_table[i];
+      }
 
     /* Last entry is the centinel.  */
     perc_table[entry].type = perc_entry_none;

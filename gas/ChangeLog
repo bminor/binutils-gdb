@@ -1,5 +1,11 @@
 2016-07-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-sparc.c (pop_table): Remove sentinel.
+	(NUM_PERC_ENTRIES): Use ARRAY_SIZE on pop_table.
+	(md_begin): Adjust.
+
+2016-07-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-z8k.c (newfix): Make type of type argument
 	bfd_reloc_code_real_type.
 	(apply_fix): Likewise.
