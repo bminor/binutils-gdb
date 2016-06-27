@@ -1,3 +1,18 @@
+2016-06-27  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20247
+	* as.h (do_not_pad_sections_to_alignment): New global variable.
+	* as.c (show_usage): Add --no-pad-sections.
+	(parse_args): Likewise.
+	* write.c (size_seg): Skip padding the end of the section if
+	requested from the command line.
+	(SUB_SEGMENT_ALIGN): Likewise.
+	* doc/as.texinfo: Document the new option.
+	* NEWS: Mention the new feature.
+	* testsuite/gas/elf/section11.s: New test.
+	* testsuite/gas/elf/section11.d: New test driver.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+
 2016-06-27  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-dlx.c: Include bfd/elf32-dlx.h.
