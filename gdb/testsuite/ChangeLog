@@ -1,3 +1,9 @@
+2016-06-27  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.python/py-breakpoint-create-fail.c,
+	gdb.python/py-breakpoint-create-fail.exp,
+	gdb.python/py-breakpoint-create-fail.py: New testcase.
+
 2016-06-25  Manish Goregaokar  <manish@mozilla.com>
 
 	PR gdb/20239

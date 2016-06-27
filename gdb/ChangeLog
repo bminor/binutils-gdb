@@ -1,3 +1,8 @@
+2016-06-25  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* python/py-breakpoint.c (bppy_init): Clear bppy_pending_object
+	when there is an error during the breakpoint creation.
+
 2016-06-25  Tom Tromey  <tom@tromey.com>
 
 	* rust-lang.c (rust_get_disr_info, rust_print_type): Fix
