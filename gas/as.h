@@ -76,8 +76,8 @@
    150 isn't special; it's just an arbitrary non-ASCII char value.  */
 #define OPTION_STD_BASE 150
 /* The first getopt value for machine-dependent long options.
-   190 gives the standard options room to grow.  */
-#define OPTION_MD_BASE 190
+   290 gives the standard options room to grow.  */
+#define OPTION_MD_BASE  290
 
 #ifdef DEBUG
 #undef NDEBUG
@@ -376,6 +376,8 @@ COMMON int need_pass_2;
 /* TRUE if we should do no relaxing, and
    leave lots of padding.  */
 COMMON int linkrelax;
+
+COMMON int do_not_pad_sections_to_alignment;
 
 /* TRUE if we should produce a listing.  */
 extern int listing;

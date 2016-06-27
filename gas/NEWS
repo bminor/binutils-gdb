@@ -1,4 +1,7 @@
 -*- text -*-
+* Add --no-pad-sections to stop the assembler from padding the end of output
+  sections up to their alignment boundary.
+
 * Support for the ARMv8-M architecture has been added to the ARM port.  Support
   for the ARMv8-M Security and DSP Extensions has also been added to the ARM
   port.
