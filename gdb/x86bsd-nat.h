@@ -1,4 +1,4 @@
-/* Native-dependent code for AMD64 BSD's.
+/* Native-dependent code for x86 BSD's.
 
    Copyright (C) 2011-2016 Free Software Foundation, Inc.
 
@@ -17,22 +17,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef AMD64BSD_NAT_H
-#define AMD64BSD_NAT_H
+#ifndef X86BSD_NAT_H
+#define X86BSD_NAT_H
 
-/* Low level amd64 XSAVE info.  */
-extern size_t amd64bsd_xsave_len;
+/* Low level x86 XSAVE info.  */
+extern size_t x86bsd_xsave_len;
 
-/* Low level amd64 debug register functions.  */
+/* Create a prototype *BSD/x86 target.  The client can override it
+   with local methods.  */
 
-extern void amd64bsd_dr_set_control (unsigned long control);
+extern struct target_ops *x86bsd_target (void);
 
-extern void amd64bsd_dr_set_addr (int regnum, CORE_ADDR addr);
-
-extern CORE_ADDR amd64bsd_dr_get_addr (int regnum);
-
-extern unsigned long amd64bsd_dr_get_status (void);
-
-extern unsigned long amd64bsd_dr_get_control (void);
-
-#endif /* amd64bsd-nat.h */
+#endif /* x86bsd-nat.h */

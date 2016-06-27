@@ -1,3 +1,62 @@
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in [HFILES_NO_SRCDIR]: Replace 'amd64bsd-nat.h' with
+	'x86bsd-nat.h'.
+	* amd64bsd-nat.c: Include 'x86bsd-nat.h' instead of
+	'amd64bsd-nat.h'.
+	(amd64bsd_xsave_len): Rename and move to x86bsd-nat.c.
+	(amd64bsd_fetch_inferior_registers): Replace 'amd64bsd_xsave_len'
+	with 'x86bsd_xsave_len'.
+	(amd64bsd_store_inferior_registers): Likewise.
+	(amd64bsd_target): Inherit from x86bsd_target.
+	(amd64bsd_dr_get): Rename and move to x86bsd-nat.c.
+	(amd64bsd_dr_set): Likewise.
+	(amd64bsd_dr_set_control): Likewise.
+	(amd64bsd_dr_set_addr): Likewise.
+	(amd64bsd_dr_get_addr): Likewise.
+	(amd64bsd_dr_get_status): Likewise.
+	(amd64bsd_dr_get_control): Likewise.
+	* amd64fbsd-nat.c: Include 'x86bsd-nat.h' instead of
+	'amd64bsd-nat.h'.
+	(super_mourn_inferior): Move to x86bsd-nat.c.
+	(amd64fbsd_mourn_inferior): Rename and move to x86bsd-nat.c.
+	(amd64fbsd_read_description): Replace 'amd64bsd_xsave_len' with
+	'x86bsd_xsave_len'.
+	(_initialize_amd64fbsd_nat): Remove x86 watchpoint setup and
+	mourn_inferior' target op.
+	* config/i386/fbsd.mh (NATDEPFILES): Add x86bsd-nat.o.
+	* config/i386/fbsd64.mh: Likewise.
+	* config/i386/nbsd64.mh: Likewise.
+	* config/i386/nbsdelf.mh: Likewise.
+	* config/i386/obsd.mh: Likewise.
+	* config/i386/obsd64.mh: Likewise.
+	* i386bsd-nat.c: Include 'x86bsd-nat.h'.
+	(i386bsd_xsave_len): Rename and move to x86bsd-nat.c.
+	(i386bsd_fetch_inferior_registers): Replace 'i386bsd_xsave_len'
+	with 'x86bsd_xsave_len'.
+	(i386bsd_store_inferior_registers): Likewise.
+	(i386bsd_target): Inherit from x86bsd_target.
+	(i386bsd_dr_get): Rename and move to x86bsd-nat.c.
+	(i386bsd_dr_set): Likewise.
+	(i386bsd_dr_set_control): Likewise.
+	(i386bsd_dr_set_addr): Likewise.
+	(i386bsd_dr_get_addr): Likewise.
+	(i386bsd_dr_get_status): Likewise.
+	(i386bsd_dr_get_control): Likewise.
+	* i386bsd-nat.h (i386bsd_xsave_len): Remove.
+	(i386bsd_dr_set_control): Remove.
+	(i386bsd_dr_set_addr): Remove.
+	(i386bsd_dr_get_addr): Remove.
+	(i386bsd_dr_get_status): Remove.
+	(i386bsd_dr_get_control): Remove.
+	* i386fbsd-nat.c: Include 'x86bsd-nat.h'.
+	(i386fbsd_read_description): Replace 'i386bsd_xsave_len' with
+	'x86bsd_xsave_len'.
+	(_initialize_i386fbsd_nat): Remove x86 watchpoint setup and
+	mourn_inferior' target op.
+	* x86bsd-nat.c: New file.
+	* x86bsd-nat.h: New file.
+
 2016-07-01  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 
