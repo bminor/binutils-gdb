@@ -446,7 +446,7 @@ static const struct generic_val_print_decorations rust_decorations =
   " * I",
   "true",
   "false",
-  "void",
+  "()",
   "[",
   "]"
 };
@@ -729,13 +729,22 @@ rust_print_type (struct type *type, const char *varstring,
   if (show <= 0
       && TYPE_NAME (type) != NULL)
     {
-      fputs_filtered (TYPE_NAME (type), stream);
+      /* Rust calls the unit type "void" in its debuginfo,
+         but we don't want to print it as that.  */
+      if (TYPE_CODE (type) == TYPE_CODE_VOID)
+        fputs_filtered ("()", stream);
+      else
+        fputs_filtered (TYPE_NAME (type), stream);
       return;
     }
 
   type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
+    case TYPE_CODE_VOID:
+      fputs_filtered ("()", stream);
+      break;
+
     case TYPE_CODE_FUNC:
       /* Delegate varargs to the C printer.  */
       if (TYPE_VARARGS (type))
@@ -753,8 +762,13 @@ rust_print_type (struct type *type, const char *varstring,
 	  rust_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0,
 			   flags);
 	}
-      fputs_filtered (") -> ", stream);
-      rust_print_type (TYPE_TARGET_TYPE (type), "", stream, -1, 0, flags);
+      fputs_filtered (")", stream);
+      /* If it returns unit, we can omit the return type.  */
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+        {
+          fputs_filtered (" -> ", stream);
+          rust_print_type (TYPE_TARGET_TYPE (type), "", stream, -1, 0, flags);
+        }
       break;
 
     case TYPE_CODE_ARRAY:

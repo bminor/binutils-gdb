@@ -1,3 +1,9 @@
+2016-06-27  Manish Goregaokar  <manish@mozilla.com>
+
+	* rust-lang.c (rust_print_type): Print unit types as "()"
+	* rust-lang.c (rust_print_type): Omit return type for functions
+	returning unit
+
 2016-06-25  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* python/py-breakpoint.c (bppy_init): Clear bppy_pending_object

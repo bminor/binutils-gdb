@@ -48,6 +48,12 @@ fn diff2(x: i32, y: i32) -> i32 {
     x - y
 }
 
+// Empty function, should not have "void"
+// or "()" in its return type
+fn empty() {
+
+}
+
 pub struct Unit;
 
 // This triggers the non-zero optimization that yields a different
@@ -111,4 +117,5 @@ fn main () {
 
     println!("{}, {}", x.0, x.1);        // set breakpoint here
     println!("{}", diff2(92, 45));
+    empty();
 }

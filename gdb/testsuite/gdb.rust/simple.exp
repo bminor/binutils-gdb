@@ -149,6 +149,7 @@ gdb_test "print self::diff2(8, 9)" " = -1"
 gdb_test "print ::diff2(23, -23)" " = 46"
 
 gdb_test "ptype diff2" "fn \\(i32, i32\\) -> i32"
+gdb_test "ptype empty" "fn \\(\\)"
 
 gdb_test "print (diff2 as fn(i32, i32) -> i32)(19, -2)" " = 21"
 
