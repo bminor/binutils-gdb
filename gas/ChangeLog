@@ -1,3 +1,36 @@
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips16_reloc_p): Handle
+	BFD_RELOC_MIPS16_16_PCREL_S1.
+	(b_reloc_p): Likewise.
+	(limited_pcrel_reloc_p): Likewise.
+	(md_pcrel_from): Likewise.
+	(md_apply_fix): Likewise.
+	(tc_gen_reloc): Likewise.
+	(md_convert_frag): Likewise.
+	(mips_fix_adjustable): Update comment.
+	* testsuite/gas/mips/mips16-branch-reloc-2.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-reloc-3.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-addend-2.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-addend-3.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-absolute.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-reloc-2.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-reloc-3.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-addend-2.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-addend-3.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-absolute.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-addend-2.s: Add padding.
+	* testsuite/gas/mips/branch-weak.s: Adjust alignment, avoid
+	implicit instruction padding, avoid MIPS16 JR->JRC conversion.
+	* testsuite/gas/mips/branch-weak-6.d: New test.
+	* testsuite/gas/mips/branch-weak-7.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-06-27  Vineet Gupta  <vgupta@synopsys.com>
 
 	* config//tc-arc.c (tc_arc_frame_initial_instructions): Use

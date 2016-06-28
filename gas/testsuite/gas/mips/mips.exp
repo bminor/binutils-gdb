@@ -588,6 +588,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "branch-weak-3"
     run_dump_test "branch-weak-4"
     run_dump_test "branch-weak-5"
+    run_dump_test "branch-weak-6"
+    run_dump_test "branch-weak-7"
     run_dump_test "branch-local-1"
     if $has_newabi {
 	run_dump_test "branch-local-n32-1"

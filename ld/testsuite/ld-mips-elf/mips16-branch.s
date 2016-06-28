@@ -1,19 +1,15 @@
 	.text
-	.align	align, 0
-	.globl	foo
-	.ent	foo
-foo:
-	b	bar
-	.end	foo
-
-	.align	align, 0
 	.globl	bar
-	.weak	bar
+
+	.space	0x1000
+
 	.ent	bar
+	.set	mips16
 bar:
 	nop
-	jr	$ra
+	.set	nomips16
 	.end	bar
 
 # Force some (non-delay-slot) zero bytes, to make 'objdump' print ...
-	.align  align, 0
+	.align	4, 0
+	.space	16

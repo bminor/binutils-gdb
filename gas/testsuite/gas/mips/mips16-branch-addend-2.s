@@ -26,6 +26,8 @@ bar:
 	.set	nomips16
 	.end	bar
 
+	.space	0x1000
+
 # Force some (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.align	4, 0
 	.space	16

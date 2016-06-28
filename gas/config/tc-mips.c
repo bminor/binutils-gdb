@@ -4060,6 +4060,7 @@ mips16_reloc_p (bfd_reloc_code_real_type reloc)
     case BFD_RELOC_MIPS16_HI16_S:
     case BFD_RELOC_MIPS16_HI16:
     case BFD_RELOC_MIPS16_LO16:
+    case BFD_RELOC_MIPS16_16_PCREL_S1:
       return TRUE;
 
     default:
@@ -4114,6 +4115,7 @@ b_reloc_p (bfd_reloc_code_real_type reloc)
   return (reloc == BFD_RELOC_MIPS_26_PCREL_S2
 	  || reloc == BFD_RELOC_MIPS_21_PCREL_S2
 	  || reloc == BFD_RELOC_16_PCREL_S2
+	  || reloc == BFD_RELOC_MIPS16_16_PCREL_S1
 	  || reloc == BFD_RELOC_MICROMIPS_16_PCREL_S1
 	  || reloc == BFD_RELOC_MICROMIPS_10_PCREL_S1
 	  || reloc == BFD_RELOC_MICROMIPS_7_PCREL_S1);
@@ -4162,6 +4164,7 @@ limited_pcrel_reloc_p (bfd_reloc_code_real_type reloc)
   switch (reloc)
     {
     case BFD_RELOC_16_PCREL_S2:
+    case BFD_RELOC_MIPS16_16_PCREL_S1:
     case BFD_RELOC_MICROMIPS_7_PCREL_S1:
     case BFD_RELOC_MICROMIPS_10_PCREL_S1:
     case BFD_RELOC_MICROMIPS_16_PCREL_S1:
@@ -14628,6 +14631,7 @@ md_pcrel_from (fixS *fixP)
 
     case BFD_RELOC_MICROMIPS_16_PCREL_S1:
     case BFD_RELOC_MICROMIPS_JMP:
+    case BFD_RELOC_MIPS16_16_PCREL_S1:
     case BFD_RELOC_16_PCREL_S2:
     case BFD_RELOC_MIPS_21_PCREL_S2:
     case BFD_RELOC_MIPS_26_PCREL_S2:
@@ -14852,6 +14856,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     switch (fixP->fx_r_type)
       {
       case BFD_RELOC_16_PCREL_S2:
+      case BFD_RELOC_MIPS16_16_PCREL_S1:
       case BFD_RELOC_MICROMIPS_7_PCREL_S1:
       case BFD_RELOC_MICROMIPS_10_PCREL_S1:
       case BFD_RELOC_MICROMIPS_16_PCREL_S1:
@@ -15184,6 +15189,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       break;
 
+    case BFD_RELOC_MIPS16_16_PCREL_S1:
     case BFD_RELOC_MICROMIPS_7_PCREL_S1:
     case BFD_RELOC_MICROMIPS_10_PCREL_S1:
     case BFD_RELOC_MICROMIPS_16_PCREL_S1:
@@ -17216,11 +17222,11 @@ mips_fix_adjustable (fixS *fixp)
 
        5. We cannot reduce jump relocations (R_MIPS_26, R_MIPS16_26 or
 	  R_MICROMIPS_26_S1) or branch relocations (R_MIPS_PC26_S2,
-	  R_MIPS_PC21_S2, R_MIPS_PC16, R_MICROMIPS_PC16_S1,
-	  R_MICROMIPS_PC10_S1 or R_MICROMIPS_PC7_S1) against MIPS16 or
-	  microMIPS symbols because we need to keep the MIPS16 or
-	  microMIPS symbol for the purpose of mode mismatch detection
-	  and JAL to JALX instruction conversion in the linker.
+	  R_MIPS_PC21_S2, R_MIPS_PC16, R_MIPS16_PC16_S1,
+	  R_MICROMIPS_PC16_S1, R_MICROMIPS_PC10_S1 or R_MICROMIPS_PC7_S1)
+	  against MIPS16 or microMIPS symbols because we need to keep the
+	  MIPS16 or microMIPS symbol for the purpose of mode mismatch
+	  detection and JAL to JALX instruction conversion in the linker.
 
      For simplicity, we deal with (3)-(4) by not reducing _any_ relocation
      against a MIPS16 symbol.  We deal with (5) by additionally leaving
@@ -17263,6 +17269,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   if (fixp->fx_pcrel)
     {
       gas_assert (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
+		  || fixp->fx_r_type == BFD_RELOC_MIPS16_16_PCREL_S1
 		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_7_PCREL_S1
 		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_10_PCREL_S1
 		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_16_PCREL_S1
@@ -17870,8 +17877,41 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  || (operand->root.type == OP_PCREL
 	      ? asec != symsec
 	      : !bfd_is_abs_section (symsec)))
-	as_bad_where (fragp->fr_file, fragp->fr_line,
-		      _("unsupported relocation"));
+	{
+	  bfd_reloc_code_real_type reloc = BFD_RELOC_NONE;
+	  expressionS exp;
+	  fixS *fixp;
+
+	  switch (type)
+	    {
+	    case 'p':
+	    case 'q':
+	      reloc = BFD_RELOC_MIPS16_16_PCREL_S1;
+	      break;
+	    default:
+	      as_bad_where (fragp->fr_file, fragp->fr_line,
+			    _("unsupported relocation"));
+	      break;
+	    }
+	  if (reloc != BFD_RELOC_NONE)
+	    {
+	      gas_assert (ext);
+
+	      exp.X_op = O_symbol;
+	      exp.X_add_symbol = fragp->fr_symbol;
+	      exp.X_add_number = fragp->fr_offset;
+
+	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 2, &exp,
+				  TRUE, reloc);
+
+	      fixp->fx_file = fragp->fr_file;
+	      fixp->fx_line = fragp->fr_line;
+
+	      /* These relocations can have an addend that won't fit
+		 in 2 octets.  */
+	      fixp->fx_no_overflow = 1;
+	    }
+	}
       else
 	mips16_immed (fragp->fr_file, fragp->fr_line, type,
 		      BFD_RELOC_UNUSED, val, user_length, &insn);

@@ -1,3 +1,23 @@
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-mips.c (elf_mips16_howto_table_rel): Add
+	R_MIPS16_PC16_S1.
+	(mips16_reloc_map): Likewise.
+	* elf64-mips.c (mips16_elf64_howto_table_rel): Likewise.
+	(mips16_elf64_howto_table_rela): Likewise.
+	(mips16_reloc_map): Likewise.
+	* elfn32-mips.c (elf_mips16_howto_table_rel): Likewise.
+	(elf_mips16_howto_table_rela): Likewise.
+	(mips16_reloc_map): Likewise.
+	* elfxx-mips.c (mips16_branch_reloc_p): New function.
+	(mips16_reloc_p): Handle R_MIPS16_PC16_S1.
+	(b_reloc_p): Likewise.
+	(mips_elf_calculate_relocation): Likewise.
+	(_bfd_mips_elf_check_relocs): Likewise.
+	* reloc.c (BFD_RELOC_MIPS16_16_PCREL_S1): New relocation.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2016-06-27  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19264
