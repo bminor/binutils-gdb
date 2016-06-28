@@ -18266,6 +18266,24 @@ elf32_arm_copy_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
   return FALSE;
 }
 
+/* Make sure that mapping symbols in object files are not removed via the
+   "strip --strip-unneeded" tool.  These symbols are needed in order to
+   correctly generate interworking veneers, and for byte swapping code
+   regions.  Once an object file has been linked, it is safe to remove the
+   symbols as they will no longer be needed.  */
+
+static void
+elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
+{
+  if (((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
+      && sym->name != NULL
+      && sym->section != bfd_abs_section_ptr
+      && (strcmp (sym->name, "$a") == 0
+	  || strcmp (sym->name, "$t") == 0
+	  || strcmp (sym->name, "$d") == 0))
+    sym->flags |= BSF_KEEP;
+}
+
 #undef  elf_backend_copy_special_section_fields
 #define elf_backend_copy_special_section_fields elf32_arm_copy_special_section_fields
 
@@ -18324,6 +18342,7 @@ elf32_arm_copy_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
 #define elf_backend_begin_write_processing      elf32_arm_begin_write_processing
 #define elf_backend_add_symbol_hook		elf32_arm_add_symbol_hook
 #define elf_backend_count_additional_relocs	elf32_arm_count_additional_relocs
+#define elf_backend_symbol_processing		elf32_arm_backend_symbol_processing
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1
