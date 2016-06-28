@@ -1,3 +1,18 @@
+2016-06-28  Sriraman Tallam  <tmsriram@google.com>
+
+	* x86_64.cc (Lazy_view): New class.
+	(can_convert_mov_to_lea): Templatize function.  Make the function
+	check for appropriate relocation types and use the view parameter
+	to get section contents.
+	(can_convert_callq_to_direct): New function.
+	(Target_x86_64<size>::Scan::global): Refactor.
+	(Target_x86_64<size>::Relocate::relocate): Refactor. Change any indirect
+	call via GOT that can be converted.
+	* testsuite/Makefile.am (x86_64_indirect_call_to_direct.sh): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/x86_64_indirect_call_to_direct1.s: New file.
+	* testsuite/x86_64_indirect_jump_to_direct1.s: New file.
+
 2016-06-28  Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	* aarch64.cc (Target_aarch64::Scan::local): Move the call to got_section

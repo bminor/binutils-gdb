@@ -1096,6 +1096,25 @@ x86_64_mov_to_lea13.stdout: x86_64_mov_to_lea13
 x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
 	$(TEST_OBJDUMP) -dw $< > $@
 
+check_SCRIPTS += x86_64_indirect_call_to_direct.sh
+check_DATA += x86_64_indirect_call_to_direct1.stdout \
+	x86_64_indirect_jump_to_direct1.stdout
+MOSTLYCLEANFILES += x86_64_indirect_call_to_direct1 \
+	x86_64_indirect_jump_to_direct1
+
+x86_64_indirect_call_to_direct1.o: x86_64_indirect_call_to_direct1.s
+	$(TEST_AS) --64 -mrelax-relocations=yes -o $@ $<
+x86_64_indirect_call_to_direct1: x86_64_indirect_call_to_direct1.o gcctestdir/ld
+	gcctestdir/ld -o $@ $<
+x86_64_indirect_call_to_direct1.stdout: x86_64_indirect_call_to_direct1
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_indirect_jump_to_direct1.o: x86_64_indirect_jump_to_direct1.s
+	$(TEST_AS) --64 -mrelax-relocations=yes -o $@ $<
+x86_64_indirect_jump_to_direct1: x86_64_indirect_jump_to_direct1.o gcctestdir/ld
+	gcctestdir/ld -o $@ $<
+x86_64_indirect_jump_to_direct1.stdout: x86_64_indirect_jump_to_direct1
+	$(TEST_OBJDUMP) -dw $< > $@
+
 check_SCRIPTS += x86_64_overflow_pc32.sh
 check_DATA += x86_64_overflow_pc32.err
 MOSTLYCLEANFILES += x86_64_overflow_pc32.err
