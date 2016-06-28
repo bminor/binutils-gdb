@@ -2322,7 +2322,7 @@ aarch64_displaced_step_b (const int is_bl, const int32_t offset,
 {
   struct aarch64_displaced_step_data *dsd
     = (struct aarch64_displaced_step_data *) data;
-  int32_t new_offset = data->insn_addr - dsd->new_addr + offset;
+  int64_t new_offset = data->insn_addr - dsd->new_addr + offset;
 
   if (can_encode_int32 (new_offset, 28))
     {

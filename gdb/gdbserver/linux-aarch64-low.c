@@ -1575,7 +1575,7 @@ aarch64_ftrace_insn_reloc_b (const int is_bl, const int32_t offset,
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
-  int32_t new_offset
+  int64_t new_offset
     = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
 
   if (can_encode_int32 (new_offset, 28))
@@ -1590,7 +1590,7 @@ aarch64_ftrace_insn_reloc_b_cond (const unsigned cond, const int32_t offset,
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
-  int32_t new_offset
+  int64_t new_offset
     = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
 
   if (can_encode_int32 (new_offset, 21))
@@ -1627,7 +1627,7 @@ aarch64_ftrace_insn_reloc_cb (const int32_t offset, const int is_cbnz,
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
-  int32_t new_offset
+  int64_t new_offset
     = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
 
   if (can_encode_int32 (new_offset, 21))
@@ -1664,7 +1664,7 @@ aarch64_ftrace_insn_reloc_tb (const int32_t offset, int is_tbnz,
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
-  int32_t new_offset
+  int64_t new_offset
     = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
 
   if (can_encode_int32 (new_offset, 16))
@@ -1800,7 +1800,7 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
 {
   uint32_t buf[256];
   uint32_t *p = buf;
-  int32_t offset;
+  int64_t offset;
   int i;
   uint32_t insn;
   CORE_ADDR buildaddr = *jump_entry;
@@ -2137,7 +2137,7 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
     {
       sprintf (err,
 	       "E.Jump back from jump pad too far from tracepoint "
-	       "(offset 0x%" PRIx32 " cannot be encoded in 28 bits).",
+	       "(offset 0x%" PRIx64 " cannot be encoded in 28 bits).",
 	       offset);
       return 1;
     }
@@ -2151,7 +2151,7 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
     {
       sprintf (err,
 	       "E.Jump pad too far from tracepoint "
-	       "(offset 0x%" PRIx32 " cannot be encoded in 28 bits).",
+	       "(offset 0x%" PRIx64 " cannot be encoded in 28 bits).",
 	       offset);
       return 1;
     }

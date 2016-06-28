@@ -1,3 +1,8 @@
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_displaced_step_b): Use int64_t for
+	variable new_offset.
+
 2016-06-27  Manish Goregaokar  <manish@mozilla.com>
 
 	* rust-lang.c (rust_print_type, rust_decorations): Print unit
