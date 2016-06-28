@@ -1,3 +1,9 @@
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/catch-syscall.exp: Remove check on isnative and target
+	triplets.  Start gdb, execute catch syscall, and continue.  Check
+	gdb's output to determine catch syscall is supported.
+
 2016-06-27  Manish Goregaokar  <manish@mozilla.com>
 
 	* gdb.rust/simple.rs: Add test for returning unit in a function
