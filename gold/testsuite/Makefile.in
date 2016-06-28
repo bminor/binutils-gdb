@@ -340,9 +340,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4 script_test_5 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_6 script_test_7 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8 script_test_9 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list dynamic_list.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthin1.a libthin3.a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthinall.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_14 dynamic_list \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout libthin1.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthin3.a libthinall.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_2.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_4.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libthin2.a alt/libthin4.a
@@ -370,6 +370,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
 
+# Test for SORT_BY_INIT_PRIORITY.
+
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_36 = debug_msg.sh \
@@ -386,7 +388,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_6.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_7.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_9.sh dynamic_list.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_9.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_14.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.sh
 
 # Create the data files that debug_msg.sh analyzes.
 
@@ -432,6 +436,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_7.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_9.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_14.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
 @GCC_FALSE@script_test_1_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@script_test_1_DEPENDENCIES =
@@ -4605,6 +4610,8 @@ script_test_8.sh.log: script_test_8.sh
 	@p='script_test_8.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_9.sh.log: script_test_9.sh
 	@p='script_test_9.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_14.sh.log: script_test_14.sh
+	@p='script_test_14.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 dynamic_list.sh.log: dynamic_list.sh
 	@p='dynamic_list.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_1.sh.log: plugin_test_1.sh
@@ -6057,6 +6064,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12b.o: script_test_12b.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_14.o: script_test_14.s
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_14: $(srcdir)/script_test_14.t script_test_14.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -o $@ script_test_14.o -T $(srcdir)/script_test_14.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_14.stdout: script_test_14
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -s script_test_14 > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list $(srcdir)/dynamic_list.t \

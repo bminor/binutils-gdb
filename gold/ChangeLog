@@ -1,3 +1,20 @@
+2016-06-28  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	PR gold/18098
+	* script-c.h (Sort_wildcard): Add SORT_WILDCARD_BY_INIT_PRIORITY.
+	* script-sections.cc (Input_section_sorter::get_init_priority): New method.
+	(Input_section_sorter::operator()): Handle SORT_WILDCARD_BY_INIT_PRIORITY.
+	(Output_section_element_input::print): Likewise.
+	* script.cc (script_keyword_parsecodes): Add entry SORT_BY_INIT_PRIORITY.
+	* yyscript.y (SORT_BY_INIT_PRIORITY): New token.
+	(wildcard_section): Handle SORT_BY_INIT_PRIORITY.
+
+	* testsuite/Makefile.am (script_test_14): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/script_test_14.s: New test source file.
+	* testsuite/script_test_14.sh: New test script.
+	* testsuite/script_test_14.t: New test linker script.
+
 2016-06-28  James Clarke  <jrtc27@jrtc27.com>
 
 	* sparc.cc (Target_sparc::Scan::local): Don't convert R_SPARC_32

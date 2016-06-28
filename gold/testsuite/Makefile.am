@@ -1859,6 +1859,17 @@ script_test_12a.o: script_test_12a.c
 script_test_12b.o: script_test_12b.c
 	$(COMPILE) -O0 -c -o $@ $<
 
+# Test for SORT_BY_INIT_PRIORITY.
+check_SCRIPTS += script_test_14.sh
+check_DATA += script_test_14.stdout
+MOSTLYCLEANFILES += script_test_14
+script_test_14.o: script_test_14.s
+	$(TEST_AS) -o $@ $<
+script_test_14: $(srcdir)/script_test_14.t script_test_14.o gcctestdir/ld
+	gcctestdir/ld -o $@ script_test_14.o -T $(srcdir)/script_test_14.t
+script_test_14.stdout: script_test_14
+	$(TEST_OBJDUMP) -s script_test_14 > $@
+
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
 
