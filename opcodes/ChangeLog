@@ -1,3 +1,10 @@
+2016-06-28  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (operand_general_constraint_met_p): Check the
+	range of ldst_elemlist operands.
+	(print_register_list): Use PRIi64 to print the index.
+	(aarch64_print_operand): Likewise.
+
 2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* mcore-opc.h: Remove sentinal.

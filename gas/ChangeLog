@@ -1,3 +1,8 @@
+2016-06-28  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/gas/aarch64/diagnostic.s,
+	testsuite/gas/aarch64/diagnostic.l: Add tests for out-of-range indices.
+
 2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (mips16_reloc_p): Handle

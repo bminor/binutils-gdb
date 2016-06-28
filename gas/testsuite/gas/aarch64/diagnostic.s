@@ -209,3 +209,51 @@
 	ldst_single_wb_64 ldrsh
 
 	ldst_single_wb_64 ldrsw
+
+	dup	v0.2d, v1.2d[-1]
+	dup	v0.2d, v1.2d[0]
+	dup	v0.2d, v1.2d[1]
+	dup	v0.2d, v1.2d[2]
+	dup	v0.2d, v1.2d[64]
+
+	dup	v0.4s, v1.4s[-1]
+	dup	v0.4s, v1.4s[0]
+	dup	v0.4s, v1.4s[3]
+	dup	v0.4s, v1.4s[4]
+	dup	v0.4s, v1.4s[65]
+
+	dup	v0.8h, v1.8h[-1]
+	dup	v0.8h, v1.8h[0]
+	dup	v0.8h, v1.8h[7]
+	dup	v0.8h, v1.8h[8]
+	dup	v0.8h, v1.8h[66]
+
+	dup	v0.16b, v1.16b[-1]
+	dup	v0.16b, v1.16b[0]
+	dup	v0.16b, v1.16b[15]
+	dup	v0.16b, v1.16b[16]
+	dup	v0.16b, v1.16b[67]
+
+	ld2	{v0.d, v1.d}[-1], [x0]
+	ld2	{v0.d, v1.d}[0], [x0]
+	ld2	{v0.d, v1.d}[1], [x0]
+	ld2	{v0.d, v1.d}[2], [x0]
+	ld2	{v0.d, v1.d}[64], [x0]
+
+	ld2	{v0.s, v1.s}[-1], [x0]
+	ld2	{v0.s, v1.s}[0], [x0]
+	ld2	{v0.s, v1.s}[3], [x0]
+	ld2	{v0.s, v1.s}[4], [x0]
+	ld2	{v0.s, v1.s}[65], [x0]
+
+	ld2	{v0.h, v1.h}[-1], [x0]
+	ld2	{v0.h, v1.h}[0], [x0]
+	ld2	{v0.h, v1.h}[7], [x0]
+	ld2	{v0.h, v1.h}[8], [x0]
+	ld2	{v0.h, v1.h}[66], [x0]
+
+	ld2	{v0.b, v1.b}[-1], [x0]
+	ld2	{v0.b, v1.b}[0], [x0]
+	ld2	{v0.b, v1.b}[15], [x0]
+	ld2	{v0.b, v1.b}[16], [x0]
+	ld2	{v0.b, v1.b}[67], [x0]

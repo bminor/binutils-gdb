@@ -748,8 +748,8 @@ struct aarch64_opnd_info
 	} reg;
       struct
 	{
-	  unsigned regno : 5;
-	  unsigned index : 4;
+	  unsigned int regno;
+	  int64_t index;
 	} reglane;
       /* e.g. LVn.  */
       struct
@@ -759,7 +759,7 @@ struct aarch64_opnd_info
 	  /* 1 if it is a list of reg element.  */
 	  unsigned has_index : 1;
 	  /* Lane index; valid only when has_index is 1.  */
-	  unsigned index : 4;
+	  int64_t index;
 	} reglist;
       /* e.g. immediate or pc relative address offset.  */
       struct
