@@ -1,3 +1,8 @@
+2016-06-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20302
+	* testsuite/ld-scripts/pr20302.d: Exclude *-*-*aout.
+
 2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips16-branch-2.d: New test.
