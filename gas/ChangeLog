@@ -1,3 +1,7 @@
+2016-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* write.c: Remove "libbfd.h" inclusion.
+
 2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/elf/elf.exp: Use `supports_gnu_unique' with the
