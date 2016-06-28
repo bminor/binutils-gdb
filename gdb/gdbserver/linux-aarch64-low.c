@@ -570,6 +570,24 @@ aarch64_get_thread_area (int lwpid, CORE_ADDR *addrp)
   return 0;
 }
 
+/* Implementation of linux_target_ops method "get_syscall_trapinfo".  */
+
+static void
+aarch64_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
+{
+  int use_64bit = register_size (regcache->tdesc, 0) == 8;
+
+  if (use_64bit)
+    {
+      long l_sysno;
+
+      collect_register_by_name (regcache, "x8", &l_sysno);
+      *sysno = (int) l_sysno;
+    }
+  else
+    collect_register_by_name (regcache, "r7", sysno);
+}
+
 /* List of condition codes that we need.  */
 
 enum aarch64_condition_codes
@@ -2984,6 +3002,7 @@ struct linux_target_ops the_low_target =
   aarch64_supports_range_stepping,
   aarch64_breakpoint_kind_from_current_state,
   aarch64_supports_hardware_single_step,
+  aarch64_get_syscall_trapinfo,
 };
 
 void
