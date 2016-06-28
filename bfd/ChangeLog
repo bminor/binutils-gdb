@@ -1,5 +1,12 @@
 2016-06-28  Alan Modra  <amodra@gmail.com>
 
+	Apply from master
+	2016-05-19  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc64_elf_branch_reloc): Check for NULL owner
+	before dereferencing.
+
+2016-06-28  Alan Modra  <amodra@gmail.com>
+
 	PR ld/19264
 	* elf64-ppc.c (STUB_SHRINK_ITER): Define.
 	(ppc64_elf_size_stubs): Exit stub sizing loop past STUB_SHRINK_ITER
