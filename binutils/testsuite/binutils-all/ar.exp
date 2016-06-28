@@ -26,8 +26,8 @@ if ![is_remote host] {
     }
 }
 
-if {[istarget "alpha-*-*"]} then {
-  return
+if { [istarget "alpha-*-*"] && ![is_elf_format] } then {
+    return
 }
 
 # send_user "Version [binutil_version $AR]"
