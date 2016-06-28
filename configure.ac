@@ -1298,8 +1298,11 @@ case "${target}" in
   tic6x-*-*)
     noconfigdirs="$noconfigdirs sim"
     ;;
-  tilepro*-*-* | tilegx*-*-*)
+  tilegx*-*-*)
     noconfigdirs="$noconfigdirs sim"
+    ;;
+  tilepro*-*-*)
+    noconfigdirs="$noconfigdirs gdb sim"
     ;;
   v810-*-*)
     noconfigdirs="$noconfigdirs bfd binutils gas gdb ld opcodes target-libgloss"
