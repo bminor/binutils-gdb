@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "gdbthread.h"
 
 /* We include <signal.h> to make sure `struct fxsave64' is defined on
    NetBSD, since NetBSD's <machine/reg.h> needs it.  */
@@ -71,6 +72,7 @@ x86bsd_dr_get (ptid_t ptid, int regnum)
 static void
 x86bsd_dr_set (int regnum, unsigned long value)
 {
+  struct thread_info *thread;
   struct dbreg dbregs;
 
   if (ptrace (PT_GETDBREGS, get_ptrace_pid (inferior_ptid),
@@ -84,9 +86,13 @@ x86bsd_dr_set (int regnum, unsigned long value)
 
   DBREG_DRX ((&dbregs), regnum) = value;
 
-  if (ptrace (PT_SETDBREGS, get_ptrace_pid (inferior_ptid),
-              (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
-    perror_with_name (_("Couldn't write debug registers"));
+  ALL_NON_EXITED_THREADS (thread)
+    if (thread->inf == current_inferior ())
+      {
+	if (ptrace (PT_SETDBREGS, get_ptrace_pid (thread->ptid),
+		    (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
+	  perror_with_name (_("Couldn't write debug registers"));
+      }
 }
 
 static void

@@ -1,5 +1,11 @@
 2016-07-01  John Baldwin  <jhb@FreeBSD.org>
 
+	* x86bsd-nat.c: Include 'gdbthread.h'.
+	(x86bsd_dr_set): Set debug registers on all threads belonging to
+	the current inferior.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
 	* Makefile.in [HFILES_NO_SRCDIR]: Replace 'amd64bsd-nat.h' with
 	'x86bsd-nat.h'.
 	* amd64bsd-nat.c: Include 'x86bsd-nat.h' instead of
