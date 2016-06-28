@@ -5269,7 +5269,7 @@ bfin_adjust_dynamic_symbol (struct bfd_link_info *info,
 #else
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
-      (*_bfd_error_handler) (_("the bfin target does not currently support the generation of copy relocations"),
+      (*_bfd_error_handler) (_("the bfin target does not currently support the generation of copy relocations"));
       return FALSE;
     }
 #endif
