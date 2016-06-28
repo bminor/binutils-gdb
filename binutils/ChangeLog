@@ -1,3 +1,9 @@
+2016-06-28  Alan Modra  <amodra@gmail.com>
+
+	PR 20304
+	* objdump.c (objdump_print_symname): Don't attempt to retrieve
+	version info from synthetic symbols.
+
 2016-06-13  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (copy_main): Init newsym->othersym.
