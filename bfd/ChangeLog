@@ -1,3 +1,9 @@
+2016-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20306
+	* elflink.c (elf_link_check_versioned_symbol): Return false
+	for unreferenced undefined symbol.
+
 2016-06-28  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-bfin.c (bfin_adjust_dynamic_symbol): Fail if a COPY reloc

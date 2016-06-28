@@ -146,3 +146,18 @@ if { [is_remote host] || [which $CC] != 0 } {
     ld_compile "$CC $CFLAGS $cflags -O0" $srcdir/$subdir/pr19161-2.c tmpdir/pr19161-2.o
     run_dump_test "pr19161"
 }
+
+if { [is_elf_format] && [check_shared_lib_support] \
+     && ([is_remote host] || [which $CC] != 0) } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build libpr20306.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    {pr20306.c} \
+	    {} \
+	    "libpr20306.so" \
+	] \
+    ]
+    run_dump_test "pr20306"
+}

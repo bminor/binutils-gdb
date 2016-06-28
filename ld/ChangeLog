@@ -1,3 +1,9 @@
+2016-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-gc/gc.exp: Run pr20306 test.
+	* ld-gc/pr20306.c: New file.
+	* ld-gc/pr20306.d: Likewise.
+
 2016-06-28  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-elf/comm-data.exp: Expect comm-data2 test to fail
