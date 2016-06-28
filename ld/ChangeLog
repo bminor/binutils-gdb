@@ -1,3 +1,10 @@
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/attr-gnu-4-10.d: Match any UNIX OS/ABI.
+	* testsuite/ld-mips-elf/attr-gnu-4-50.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-60.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-70.d: Likewise.
+
 2016-06-28  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20302
