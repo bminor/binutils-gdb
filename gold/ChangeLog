@@ -1,5 +1,10 @@
 2016-06-29  Alan Modra  <amodra@gmail.com>
 
+	* script_test_12.t: Delete .plt, specify 64k page size.
+	* script_test_12i.t: Likewise.
+
+2016-06-29  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/plugin_layout_with_alignment.c: Explicitly align all
 	variables.
 
