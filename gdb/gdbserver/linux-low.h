@@ -241,11 +241,9 @@ struct linux_target_ops
   /* See target.h.  */
   int (*supports_hardware_single_step) (void);
 
-  /* Fill *SYSNO with the syscall nr trapped.  Fill *SYSRET with the
-     return code.  Only to be called when inferior is stopped
-     due to SYSCALL_SIGTRAP.  */
-  void (*get_syscall_trapinfo) (struct regcache *regcache,
-				int *sysno, int *sysret);
+  /* Fill *SYSNO with the syscall nr trapped.  Only to be called when
+     inferior is stopped due to SYSCALL_SIGTRAP.  */
+  void (*get_syscall_trapinfo) (struct regcache *regcache, int *sysno);
 
   /* See target.h.  */
   int (*get_ipa_tdesc_idx) (void);
