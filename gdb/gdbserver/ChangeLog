@@ -1,5 +1,10 @@
 2016-06-28  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-arm-low.c (arm_get_syscall_trapinfo): New function.
+	(the_low_target): Install arm_get_syscall_trapinfo.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_get_syscall_trapinfo): New
 	function.
 	(the_low_target): Install aarch64_get_syscall_trapinfo.
