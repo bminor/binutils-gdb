@@ -1,3 +1,8 @@
+2016-06-28  James Clarke  <jrtc27@jrtc27.com>
+
+	* testsuite/ld-elf/symbolic-func.r: Allow non-zero offsets from
+	.text.
+
 2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/attr-gnu-4-10.d: Match any UNIX OS/ABI.

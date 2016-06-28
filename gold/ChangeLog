@@ -1,3 +1,9 @@
+2016-06-28  James Clarke  <jrtc27@jrtc27.com>
+
+	* sparc.cc (Target_sparc::Scan::local): Don't convert R_SPARC_32
+	to R_SPARC_RELATIVE if class is ELFCLASS64.
+	(Target_sparc::Scan::global): Likewise.
+
 2016-06-23  Cary Coutant  <ccoutant@gmail.com>
 	    Igor Kudrin  <ikudrin@accesssoftek.com>
 
