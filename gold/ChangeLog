@@ -1,5 +1,10 @@
 2016-06-28  Igor Kudrin  <ikudrin@accesssoftek.com>
 
+	* aarch64.cc (Target_aarch64::Scan::local): Move the call to got_section
+	from the top level to the places of its use.
+
+2016-06-28  Igor Kudrin  <ikudrin@accesssoftek.com>
+
 	PR gold/18098
 	* script-c.h (Sort_wildcard): Add SORT_WILDCARD_BY_INIT_PRIORITY.
 	* script-sections.cc (Input_section_sorter::get_init_priority): New method.
