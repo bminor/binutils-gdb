@@ -1,3 +1,8 @@
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/ar.exp: Use `supports_gnu_unique' with
+	the `unique_symbol' test.
+
 2016-06-28  Alan Modra  <amodra@gmail.com>
 
 	PR 20304

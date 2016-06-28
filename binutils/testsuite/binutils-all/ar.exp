@@ -619,8 +619,6 @@ delete_an_element
 move_an_element
 empty_archive
 
-if { [is_elf_format]
-     && ![istarget "*-*-hpux*"]
-     && ![istarget "msp*-*-*"] } {
+if { [is_elf_format] && [supports_gnu_unique] } {
     unique_symbol
 }
