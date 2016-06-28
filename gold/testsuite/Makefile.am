@@ -3502,6 +3502,21 @@ MOSTLYCLEANFILES += arm_farcall_thumb_arm arm_farcall_thumb_arm_5t
 
 endif DEFAULT_TARGET_ARM
 
+if DEFAULT_TARGET_AARCH64
+
+check_SCRIPTS += aarch64_reloc_none.sh
+check_DATA += aarch64_reloc_none.stdout
+aarch64_reloc_none.o: aarch64_reloc_none.s
+	$(TEST_AS) -o $@ $<
+aarch64_reloc_none: aarch64_reloc_none.o ../ld-new
+	../ld-new -o $@ aarch64_reloc_none.o --gc-sections
+aarch64_reloc_none.stdout: aarch64_reloc_none
+	$(TEST_NM) $< > $@
+
+MOSTLYCLEANFILES += aarch64_reloc_none
+
+endif DEFAULT_TARGET_AARCH64
+
 if DEFAULT_TARGET_S390
 
 check_SCRIPTS += split_s390.sh

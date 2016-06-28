@@ -1,3 +1,13 @@
+2016-06-28  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* aarch64-reloc.def (NONE): New relocation.
+	* aarch64.cc (Target_aarch64::Scan::local): Handle R_AARCH64_NONE.
+	(Target_aarch64::Scan::global): Likewise.
+	* testsuite/Makefile.am (aarch64_reloc_none): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/aarch64_reloc_none.s: New test source file.
+	* testsuite/aarch64_reloc_none.sh: New test script.
+
 2016-06-28  Sriraman Tallam  <tmsriram@google.com>
 
 	* x86_64.cc (Lazy_view): New class.

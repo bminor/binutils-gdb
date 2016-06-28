@@ -5967,6 +5967,9 @@ Target_aarch64<size, big_endian>::Scan::local(
 
   switch (r_type)
     {
+    case elfcpp::R_AARCH64_NONE:
+      break;
+
     case elfcpp::R_AARCH64_ABS32:
     case elfcpp::R_AARCH64_ABS16:
       if (parameters->options().output_is_position_independent())
@@ -6226,6 +6229,9 @@ Target_aarch64<size, big_endian>::Scan::global(
 
   switch (r_type)
     {
+    case elfcpp::R_AARCH64_NONE:
+      break;
+
     case elfcpp::R_AARCH64_ABS16:
     case elfcpp::R_AARCH64_ABS32:
     case elfcpp::R_AARCH64_ABS64:

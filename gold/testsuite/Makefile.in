@@ -892,8 +892,11 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_6m \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t
-@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_89 = split_s390.sh
-@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_90 = split_s390_z1.stdout split_s390_z2.stdout split_s390_z3.stdout \
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_89 = aarch64_reloc_none.sh
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_90 = aarch64_reloc_none.stdout
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_91 = aarch64_reloc_none
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_92 = split_s390.sh
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_93 = split_s390_z1.stdout split_s390_z2.stdout split_s390_z3.stdout \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_z4.stdout split_s390_n1.stdout split_s390_n2.stdout \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_a1.stdout split_s390_a2.stdout split_s390_z1_ns.stdout \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_z2_ns.stdout split_s390_z3_ns.stdout split_s390_z4_ns.stdout \
@@ -905,7 +908,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z4_ns.stdout split_s390x_n1_ns.stdout \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_n2_ns.stdout split_s390x_r.stdout
 
-@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_91 = split_s390_z1 split_s390_z2 split_s390_z3 \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_94 = split_s390_z1 split_s390_z2 split_s390_z3 \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_z4 split_s390_n1 split_s390_n2 split_s390_a1 \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_a2 split_s390_z1_ns split_s390_z2_ns split_s390_z3_ns \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_z4_ns split_s390_n1_ns split_s390_n2_ns split_s390_r \
@@ -914,10 +917,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z1_ns split_s390x_z2_ns split_s390x_z3_ns \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z4_ns split_s390x_n1_ns split_s390x_n2_ns split_s390x_r
 
-@DEFAULT_TARGET_X86_64_TRUE@am__append_92 = *.dwo *.dwp
-@DEFAULT_TARGET_X86_64_TRUE@am__append_93 = dwp_test_1.sh \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_95 = *.dwo *.dwp
+@DEFAULT_TARGET_X86_64_TRUE@am__append_96 = dwp_test_1.sh \
 @DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.sh
-@DEFAULT_TARGET_X86_64_TRUE@am__append_94 = dwp_test_1.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_97 = dwp_test_1.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.stdout
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
@@ -2626,7 +2629,7 @@ MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_4) \
 	$(am__append_68) $(am__append_71) $(am__append_73) \
 	$(am__append_76) $(am__append_79) $(am__append_82) \
 	$(am__append_85) $(am__append_88) $(am__append_91) \
-	$(am__append_92)
+	$(am__append_94) $(am__append_95)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
@@ -2636,13 +2639,15 @@ check_SCRIPTS = $(am__append_2) $(am__append_21) $(am__append_27) \
 	$(am__append_43) $(am__append_47) $(am__append_50) \
 	$(am__append_66) $(am__append_69) $(am__append_74) \
 	$(am__append_77) $(am__append_80) $(am__append_83) \
-	$(am__append_86) $(am__append_89) $(am__append_93)
+	$(am__append_86) $(am__append_89) $(am__append_92) \
+	$(am__append_96)
 check_DATA = $(am__append_3) $(am__append_22) $(am__append_28) \
 	$(am__append_31) $(am__append_37) $(am__append_40) \
 	$(am__append_44) $(am__append_48) $(am__append_51) \
 	$(am__append_67) $(am__append_70) $(am__append_75) \
 	$(am__append_78) $(am__append_81) $(am__append_84) \
-	$(am__append_87) $(am__append_90) $(am__append_94)
+	$(am__append_87) $(am__append_90) $(am__append_93) \
+	$(am__append_97)
 BUILT_SOURCES = $(am__append_34)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -4711,6 +4716,8 @@ arm_farcall_thumb_thumb.sh.log: arm_farcall_thumb_thumb.sh
 	@p='arm_farcall_thumb_thumb.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_farcall_thumb_arm.sh.log: arm_farcall_thumb_arm.sh
 	@p='arm_farcall_thumb_arm.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+aarch64_reloc_none.sh.log: aarch64_reloc_none.sh
+	@p='aarch64_reloc_none.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 split_s390.sh.log: split_s390.sh
 	@p='split_s390.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 dwp_test_1.sh.log: dwp_test_1.sh
@@ -7100,6 +7107,12 @@ uninstall-am:
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_farcall_thumb_arm_5t.o: arm_farcall_thumb_arm.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -march=armv5t -o $@ $<
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@aarch64_reloc_none.o: aarch64_reloc_none.s
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@aarch64_reloc_none: aarch64_reloc_none.o ../ld-new
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ aarch64_reloc_none.o --gc-sections
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@aarch64_reloc_none.stdout: aarch64_reloc_none
+@DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_NM) $< > $@
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_z1.o: split_s390_1_z1.s
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_z2.o: split_s390_1_z2.s
