@@ -1,5 +1,8 @@
 2016-06-28  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-bfin.c (bfin_adjust_dynamic_symbol): Fail if a COPY reloc
+	is needed.
+
 	* elf32-arm.c (elf32_arm_backend_symbol_processing): New
 	function.  Marks mapping symbols in object files as precious, so
 	that strip will not remove them.

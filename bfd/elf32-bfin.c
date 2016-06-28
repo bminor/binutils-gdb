@@ -5252,7 +5252,8 @@ bfin_adjust_dynamic_symbol (struct bfd_link_info *info,
   s = bfd_get_linker_section (dynobj, ".dynbss");
   BFD_ASSERT (s != NULL);
 
-  /* We must generate a R_68K_COPY reloc to tell the dynamic linker to
+#if 0 /* Bfin does not currently have a COPY reloc.  */
+  /* We must generate a R_BFIN_COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rela.bss section we are going to use.  */
@@ -5265,7 +5266,13 @@ bfin_adjust_dynamic_symbol (struct bfd_link_info *info,
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
     }
-
+#else
+  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
+    {
+      (*_bfd_error_handler) (_("the bfin target does not currently support the generation of copy relocations"),
+      return FALSE;
+    }
+#endif
   /* We need to figure out the alignment required for this symbol.  I
      have no idea how ELF linkers handle this.  */
   power_of_two = bfd_log2 (h->size);

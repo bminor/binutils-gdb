@@ -70,6 +70,10 @@ if { ![istarget hppa64*-hpux*] } {
 	run_ld_link_tests {
 	    {"Build shared library for pr14170"
 		"-shared" "" "" "pr14170b.s" {} "pr14170.so" }
+	}
+	# bfin does not currently support copy relocs.
+	setup_xfail "bfin-*-*"
+	run_ld_link_tests {
 	    {"PR ld/14170"
 		"tmpdir/pr14170a.o tmpdir/pr14170.so" "" "" "pr14170c.s"
 		{ } "pr14170" }
@@ -103,6 +107,10 @@ if { [check_shared_lib_support] } then {
 	{"Build pr17068b.a"
 	    "" "" ""
 	    {pr17068b.s pr17068e.s} {} "pr17068b.a"}
+    }
+    # bfin does not currently support copy relocs.
+    setup_xfail "bfin-*-*"
+    run_ld_link_tests {
 	{"pr17068 link --as-needed lib in group"
 	    "--as-needed" "--start-group tmpdir/pr17068a.a tmpdir/pr17068.so tmpdir/pr17068b.a --end-group" ""
 	    {start.s pr17068.s} {} "pr17068"}
@@ -111,6 +119,8 @@ if { [check_shared_lib_support] } then {
     setup_xfail "tic6x-*-*"
     # Fails on MIPS because ABI trickery means that a NULL reloc is also emitted.
     setup_xfail "mips*-*-*"
+    # Fails on bfin because relocations are not created.
+    setup_xfail "bfin-*-*"
     run_ld_link_tests {
 	{"-Bsymbolic-functions"
 	    "-shared -Bsymbolic-functions" "" ""

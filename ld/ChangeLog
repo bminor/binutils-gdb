@@ -1,3 +1,30 @@
+2016-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/comm-data.exp: Expect comm-data2 test to fail
+	for bfin.
+	* testsuite/ld-elf/elf.exp: Expect pr14170 and symbolic function
+	tests to fail for bfin.
+	* testsuite/ld-elf/endsym.d: Expect to fail with cr16, crx, dlx,
+	nds32 and visium.
+	* testsuite/ld-elf/var1.d: Expect to fail with d30v, dlx, ft32 and
+	microblaze.
+	* testsuite/ld-pe/pe.exp: Expect foreign symbol test to fail for
+	mcore-pe.
+
+2016-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/merge.d: Add m68hc11 to list of targets that
+	expect to fail this test.
+	* testsuite/ld-scripts/overlay-size.d: Skip the entire test for
+	RX.
+	* testsuite/ld-scripts/rgn-at10.d: No longer expect this test to
+	fail for the RX.
+	* testsuite/ld-scripts/rgn-at11.d: Likewise.
+	* testsuite/ld-scripts/rgn-at2.d: Likewise.
+	* testsuite/ld-scripts/rgn-at6.d: Likewise.
+	* testsuite/ld-scripts/rgn-at7.d: Likewise.
+	* testsuite/ld-scripts/rgn-at8.d: Likewise.
+
 2016-06-28  James Clarke  <jrtc27@jrtc27.com>
 
 	* testsuite/ld-elf/symbolic-func.r: Allow non-zero offsets from
