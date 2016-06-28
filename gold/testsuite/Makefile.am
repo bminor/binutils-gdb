@@ -848,6 +848,7 @@ copy_test_2_pic.o: copy_test_2.cc
 copy_test_2.so: gcctestdir/ld copy_test_2_pic.o
 	$(CXXLINK) -Bgcctestdir/ -shared copy_test_2_pic.o
 
+if !DEFAULT_TARGET_POWERPC
 check_SCRIPTS += copy_test_protected.sh
 check_DATA += copy_test_protected.err
 MOSTLYCLEANFILES += copy_test_protected.err
@@ -859,6 +860,7 @@ copy_test_protected.err: copy_test_protected.o copy_test_2.so gcctestdir/ld
 	  rm -f $@; \
 	  exit 1; \
 	fi
+endif
 
 if TLS
 
