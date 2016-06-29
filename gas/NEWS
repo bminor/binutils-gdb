@@ -1,4 +1,6 @@
 -*- text -*-
+* Default to --enable-compressed-debug-sections=gas for Linux/x86 targets.
+
 * Add --no-pad-sections to stop the assembler from padding the end of output
   sections up to their alignment boundary.
 

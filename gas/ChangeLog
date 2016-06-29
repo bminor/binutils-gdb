@@ -1,3 +1,10 @@
+2016-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention --enable-compressed-debug-sections=gas is the
+	default for Linux/x86 targets.
+	* configure.tgt (ac_default_compressed_debug_sections): Default
+	to yes for Linux/x86 targets.
+
 2016-06-29  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* write.c: Remove "libbfd.h" inclusion.

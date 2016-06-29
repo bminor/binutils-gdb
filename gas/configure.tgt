@@ -502,3 +502,12 @@ if test $bfd_gas != yes; then
   echo This target is no longer supported in gas
   exit 1
 fi
+
+case ${cpu_type}-${fmt}-${os} in
+i386-elf-linux*)
+  # Default to compress DWARF debug sections for Linux/x86.
+  if test ${ac_default_compressed_debug_sections} = unset; then
+    ac_default_compressed_debug_sections=yes
+  fi
+  ;;
+esac
