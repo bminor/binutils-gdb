@@ -121,7 +121,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
   if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
 	       strlen (RUST_ENUM_PREFIX)) == 0)
     {
-      char *tail, *token, *name, *saveptr;
+      char *tail, *token, *name, *saveptr = NULL;
       unsigned long fieldno;
       struct type *member_type;
       LONGEST value;

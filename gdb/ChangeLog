@@ -1,6 +1,11 @@
 2016-06-29  Manish Goregaokar  <manish@mozilla.com>
 
 gdb/ChangeLog:
+	* rust-lang.c (rust_get_disr_info): Initialize saveptr to NULL.
+
+2016-06-29  Manish Goregaokar  <manish@mozilla.com>
+
+gdb/ChangeLog:
 	* rust-lang.c (rust_get_disr_info): Use strtok_r instead of strsep.
 
 2016-06-28  Yao Qi  <yao.qi@linaro.org>
