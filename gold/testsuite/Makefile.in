@@ -6962,7 +6962,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.o: memory_test.s
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -o $@ -c $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -Wl,-z,max-page-size=0x1000 -Wl,-z,common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.stdout: memory_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lWS  $< > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test_inc_1.t: $(srcdir)/memory_test_inc_1.t.src
@@ -6972,7 +6972,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test_inc_3.t: $(srcdir)/memory_test_inc_3.t.src
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	cp $< $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test_2: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -Wl,-z,max-page-size=0x1000 -Wl,-z,common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test.o: gdb_index_test.cc
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -gno-pubnames -c -o $@ $<
 @GCC_TRUE@@HAVE_PUBNAMES_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_1: gdb_index_test.o gcctestdir/ld
