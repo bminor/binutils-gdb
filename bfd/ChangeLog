@@ -1,3 +1,12 @@
+2016-06-29  Tristan Gingold  <gingold@adacore.com>
+
+	* version.m4: Bump version to 2.26.1
+	* configure: Regenerate.
+
+2016-06-29  Tristan Gingold  <gingold@adacore.com>
+
+	* development.sh: Set development to false.
+
 2016-06-28  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
