@@ -1,3 +1,7 @@
+2016-07-30  Tristan Gingold  <gingold@adacore.com>
+
+	* doc/binutils.texi (objdump): Fix mis-placement.
+
 2016-06-28  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/binutils-all/ar.exp: Relax previous restriction on
