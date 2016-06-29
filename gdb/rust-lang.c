@@ -121,7 +121,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
   if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
 	       strlen (RUST_ENUM_PREFIX)) == 0)
     {
-      char *name, *tail, *token;
+      char *tail, *token, *name, *saveptr;
       unsigned long fieldno;
       struct type *member_type;
       LONGEST value;
@@ -145,7 +145,9 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
          traversed in order to find the field (which may be several fields deep)
          and the variantname is the name of the variant of the case when the
          field is zero.  */
-      while ((token = strsep (&tail, "$")) != NULL)
+      for (token = strtok_r (tail, "$", &saveptr);
+           token != NULL;
+           token = strtok_r (NULL, "$", &saveptr))
         {
 	  if (sscanf (token, "%lu", &fieldno) != 1)
 	    {
@@ -161,7 +163,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
           member_type = TYPE_FIELD_TYPE (member_type, fieldno);
         }
 
-      if (token >= name + strlen (TYPE_FIELD_NAME (type, 0)))
+      if (token == NULL)
 	error (_("Invalid form for %s"), RUST_ENUM_PREFIX);
       value = unpack_long (member_type, valaddr + embedded_offset);
 

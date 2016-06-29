@@ -1,3 +1,8 @@
+2016-06-29  Manish Goregaokar  <manish@mozilla.com>
+
+gdb/ChangeLog:
+	* rust-lang.c (rust_get_disr_info): Use strtok_r instead of strsep.
+
 2016-06-28  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_displaced_step_b): Use int64_t for
