@@ -28,7 +28,15 @@ int pipe_syscall = SYS_pipe;
 int pipe2_syscall = SYS_pipe2;
 #endif
 int write_syscall = SYS_write;
+#if defined(__arm__)
+/* Although 123456789 is an illegal syscall umber on arm linux, kernel
+   sends SIGILL rather than returns -ENOSYS.  However, arm linux kernel
+   returns -ENOSYS if syscall number is within 0xf0001..0xf07ff, so we
+   can use 0xf07ff for unknown_syscall in test.  */
+int unknown_syscall = 0x0f07ff;
+#else
 int unknown_syscall = 123456789;
+#endif
 int exit_group_syscall = SYS_exit_group;
 
 /* Set by the test when it wants execve.  */

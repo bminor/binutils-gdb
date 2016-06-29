@@ -1,3 +1,8 @@
+2016-06-29  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/catch-syscall.c [__arm__]: Set unknown_syscall to
+	0x0f07ff.
+
 2016-06-28  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/catch-syscall.exp: Remove check on isnative and target
