@@ -1,3 +1,16 @@
+2016-06-29  Nick Clifton  <nickc@redhat.com>
+
+	* elfnn-aarch64.c (is_aarch64_mapping_symbol): New function.
+	Returns TRUE for AArch64 mapping symbols.
+	(elfNN_aarch64_backend_symbol_processing): New function.  Marks
+	mapping symbols as precious in object files so that they will not
+	be stripped.
+	(elf_backend_symbol_processing): Define.
+
+	* elf32-arm.c (is_arm_mapping_symbol): New function.  Returns TRUE
+	for ARM mapping symbols.
+	(elf32_arm_backend_symbol_processing): Make use of the new function.
+
 2016-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20306

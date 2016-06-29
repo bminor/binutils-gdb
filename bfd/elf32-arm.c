@@ -18266,6 +18266,28 @@ elf32_arm_copy_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
   return FALSE;
 }
 
+/* Returns TRUE if NAME is an ARM mapping symbol.
+   Traditionally the symbols $a, $d and $t have been used.
+   The ARM ELF standard also defines $x (for A64 code).  It also allows a
+   period initiated suffix to be added to the symbol: "$[adtx]\.[:sym_char]+".
+   Other tools might also produce $b (Thumb BL), $f, $p, $m and $v, but we do
+   not support them here.  $t.x indicates the start of ThumbEE instructions.  */
+
+static bfd_boolean
+is_arm_mapping_symbol (const char * name)
+{
+  return name != NULL /* Paranoia.  */
+    && name[0] == '$' /* Note: if objcopy --prefix-symbols has been used then
+			 the mapping symbols could have acquired a prefix.
+			 We do not support this here, since such symbols no
+			 longer conform to the ARM ELF ABI.  */
+    && (name[1] == 'a' || name[1] == 'd' || name[1] == 't' || name[1] == 'x')
+    && (name[2] == 0 || name[2] == '.');
+  /* FIXME: Strictly speaking the symbol is only a valid mapping symbol if
+     any characters that follow the period are legal characters for the body
+     of a symbol's name.  For now we just assume that this is the case.  */
+}
+
 /* Make sure that mapping symbols in object files are not removed via the
    "strip --strip-unneeded" tool.  These symbols are needed in order to
    correctly generate interworking veneers, and for byte swapping code
@@ -18276,11 +18298,8 @@ static void
 elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 {
   if (((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
-      && sym->name != NULL
       && sym->section != bfd_abs_section_ptr
-      && (strcmp (sym->name, "$a") == 0
-	  || strcmp (sym->name, "$t") == 0
-	  || strcmp (sym->name, "$d") == 0))
+      && is_arm_mapping_symbol (sym->name))
     sym->flags |= BSF_KEEP;
 }
 

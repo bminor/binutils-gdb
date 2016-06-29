@@ -9212,6 +9212,40 @@ elfNN_aarch64_plt_sym_val (bfd_vma i, const asection *plt,
   return plt->vma + PLT_ENTRY_SIZE + i * PLT_SMALL_ENTRY_SIZE;
 }
 
+/* Returns TRUE if NAME is an AArch64 mapping symbol.
+   The ARM ELF standard defines $x (for A64 code) and $d (for data).
+   It also allows a period initiated suffix to be added to the symbol, ie:
+   "$[adtx]\.[:sym_char]+".  */
+
+static bfd_boolean
+is_aarch64_mapping_symbol (const char * name)
+{
+  return name != NULL /* Paranoia.  */
+    && name[0] == '$' /* Note: if objcopy --prefix-symbols has been used then
+			 the mapping symbols could have acquired a prefix.
+			 We do not support this here, since such symbols no
+			 longer conform to the ARM ELF ABI.  */
+    && (name[1] == 'd' || name[1] == 'x')
+    && (name[2] == 0 || name[2] == '.');
+  /* FIXME: Strictly speaking the symbol is only a valid mapping symbol if
+     any characters that follow the period are legal characters for the body
+     of a symbol's name.  For now we just assume that this is the case.  */
+}
+
+/* Make sure that mapping symbols in object files are not removed via the
+   "strip --strip-unneeded" tool.  These symbols might needed in order to
+   correctly generate linked files.  Once an object file has been linked,
+   it should be safe to remove them.  */
+
+static void
+elfNN_aarch64_backend_symbol_processing (bfd *abfd, asymbol *sym)
+{
+  if (((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
+      && sym->section != bfd_abs_section_ptr
+      && is_aarch64_mapping_symbol (sym->name))
+    sym->flags |= BSF_KEEP;
+}
+
 
 /* We use this so we can override certain functions
    (though currently we don't).  */
@@ -9350,6 +9384,9 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define elf_backend_write_section		\
   elfNN_aarch64_write_section
+
+#define elf_backend_symbol_processing		\
+  elfNN_aarch64_backend_symbol_processing
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1
