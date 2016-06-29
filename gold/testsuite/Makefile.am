@@ -1147,6 +1147,59 @@ x32_overflow_pc32.err: x32_overflow_pc32.o gcctestdir/ld
 
 endif DEFAULT_TARGET_X86_64
 
+if DEFAULT_TARGET_X86_64_OR_X32
+
+check_PROGRAMS += pr20216a_test
+pr20216a_test_SOURCES = pr20216_main.c pr20216_def.c
+pr20216a_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o gcctestdir/ld gcctestdir/as
+pr20216a_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216a_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20216a_test_LDADD = pr20216_gd.o pr20216_ld.o
+
+check_PROGRAMS += pr20216b_test
+pr20216b_test_SOURCES = pr20216_main.c pr20216_def.c
+pr20216b_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o gcctestdir/ld gcctestdir/as
+pr20216b_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216b_test_LDFLAGS = -pie -Bgcctestdir/ -Wl,-R,.
+pr20216b_test_LDADD = pr20216_gd.o pr20216_ld.o
+
+check_PROGRAMS += pr20216c_test
+pr20216c_test_SOURCES = pr20216_main.c pr20216_def.c
+pr20216c_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o gcctestdir/ld gcctestdir/as
+pr20216c_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216c_test_LDFLAGS = -static -Bgcctestdir/ -Wl,-R,.
+pr20216c_test_LDADD = pr20216_gd.o pr20216_ld.o
+
+check_PROGRAMS += pr20216d_test
+pr20216d_test_SOURCES = pr20216_main.c pr20216_def.c
+pr20216d_test_DEPENDENCIES = pr20216a.so gcctestdir/ld gcctestdir/as
+pr20216d_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216d_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20216d_test_LDADD = pr20216a.so
+
+check_PROGRAMS += pr20216e_test
+pr20216e_test_SOURCES = pr20216_main.c
+pr20216e_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o pr20216b.so gcctestdir/ld gcctestdir/as
+pr20216e_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216e_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20216e_test_LDADD = pr20216_gd.o pr20216_ld.o pr20216b.so
+
+MOSTLYCLEANFILES += pr20216a.so pr20216b.so
+
+pr20216a.so: pr20216_gd.o pr20216_ld.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared pr20216_gd.o pr20216_ld.o
+
+pr20216b.so: pr20216_def.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared pr20216_def.o
+
+pr20216_gd.o: pr20216_gd.S
+	$(COMPILE) -c -o $@ $<
+
+pr20216_ld.o: pr20216_ld.S
+	$(COMPILE) -c -o $@ $<
+
+endif DEFAULT_TARGET_X86_64_OR_X32
+
 if DEFAULT_TARGET_I386
 
 check_SCRIPTS += i386_mov_to_lea.sh

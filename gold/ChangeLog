@@ -1,3 +1,53 @@
+2016-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/20216
+	* configure.ac (DEFAULT_TARGET_X86_64_OR_X32): New
+	AM_CONDITIONAL.
+	* configure: Regenerated.
+	* x86_64.cc (Target_x86_64<size>::Relocate::relocate): Allow
+	R_X86_64_GOTPCRELX relocation against __tls_get_addr.
+	(Target_x86_64<size>::Relocate::tls_gd_to_ie): Support indirect
+	call to __tls_get_addr.
+	(Target_x86_64<size>::Relocate::tls_gd_to_le): Likewise.
+	(Target_x86_64<size>::Relocate::tls_ld_to_le): Likewise.
+	* testsuite/Makefile.am (check_PROGRAMS): Add pr20216a_test,
+	pr20216b_test, pr20216c_test, pr20216d_test, pr20216e_test.
+	(pr20216a_test_SOURCES): New.
+	(pr20216a_test_DEPENDENCIES): Likewise.
+	(pr20216a_test_CFLAGS): Likewise.
+	(pr20216a_test_LDFLAGS): Likewise.
+	(pr20216a_test_LDADD): Likewise.
+	(pr20216b_test_SOURCES): Likewise.
+	(pr20216b_test_DEPENDENCIES): Likewise.
+	(pr20216b_test_CFLAGS): Likewise.
+	(pr20216b_test_LDFLAGS): Likewise.
+	(pr20216b_test_LDADD): Likewise.
+	(pr20216c_test_SOURCES): Likewise.
+	(pr20216c_test_DEPENDENCIES): Likewise.
+	(pr20216c_test_CFLAGS): Likewise.
+	(pr20216c_test_LDFLAGS): Likewise.
+	(pr20216c_test_LDADD): Likewise.
+	(pr20216d_test_SOURCES): Likewise.
+	(pr20216d_test_DEPENDENCIES): Likewise.
+	(pr20216d_test_CFLAGS): Likewise.
+	(pr20216d_test_LDFLAGS): Likewise.
+	(pr20216d_test_LDADD): Likewise.
+	(pr20216e_test_SOURCES): Likewise.
+	(pr20216e_test_DEPENDENCIES): Likewise.
+	(pr20216e_test_CFLAGS): Likewise.
+	(pr20216e_test_LDFLAGS): Likewise.
+	(pr20216e_test_LDADD): Likewise.
+	(pr20216a.so): Likewise.
+	(pr20216b.so): Likewise.
+	(pr20216_gd.o): Likewise.
+	(pr20216_ld.o): Likewise.
+	(MOSTLYCLEANFILES): Add pr20216a.so pr20216b.so.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/pr20216_def.c: New file.
+	* testsuite/pr20216_gd.S: Likewise.
+	* testsuite/pr20216_ld.S: Likewise.
+	* testsuite/pr20216_main.c: Likewise.
+
 2016-06-29  Alan Modra  <amodra@gmail.com>
 
 	* script_test_12.t: Delete .plt, specify 64k page size.
