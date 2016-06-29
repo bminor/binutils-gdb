@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-15
+  GCC_CP_FE_VERSION_0 = 0xffffffff-16
 };
 
 /* Qualifiers.  */
@@ -134,13 +134,15 @@ enum gcc_cp_symbol_kind
 
   GCC_CP_SYMBOL_LABEL,
 
-  /* A class (forward declared in new_decl, or introduced in
-     start_new_class_type), or, in a template parameter list scope, a
-     declaration of a template class, closing the parameter list.  */
+  /* A class, forward declared in new_decl (to be later defined in
+     start_class_definition), or, in a template parameter list scope,
+     a declaration of a template class, closing the parameter
+     list.  */
 
   GCC_CP_SYMBOL_CLASS,
 
-  /* A union being introduced with start_new_union_type.  */
+  /* A union, forward declared in new_decl (to be later defined in
+     start_class_definition).  */
 
   GCC_CP_SYMBOL_UNION,
 
@@ -396,6 +398,13 @@ typedef gcc_address gcc_cp_symbol_address_function (void *datum,
 						    struct gcc_cp_context *ctxt,
 						    const char *identifier);
 
+/* The type of the function called by GCC to ask GDB to enter or leave
+   the user expression scope.  */
+
+typedef void gcc_cp_enter_leave_user_expr_scope_function (void *datum,
+							  struct gcc_cp_context
+							  *context);
+
 /* The vtable used by the C front end.  */
 
 struct gcc_cp_fe_vtable
@@ -428,6 +437,8 @@ struct gcc_cp_fe_vtable
   void (*set_callbacks) (struct gcc_cp_context *self,
 			 gcc_cp_oracle_function *binding_oracle,
 			 gcc_cp_symbol_address_function *address_oracle,
+			 gcc_cp_enter_leave_user_expr_scope_function *enter_scope,
+			 gcc_cp_enter_leave_user_expr_scope_function *leave_scope,
 			 void *datum);
 
 #define GCC_METHOD0(R, N) \

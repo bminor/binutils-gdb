@@ -390,7 +390,7 @@ cplus_compute_program (struct compile_instance *inst,
       || inst->scope == COMPILE_I_PRINT_VALUE_SCOPE)
     {
       ui_file_put (var_stream, ui_file_write_for_put, buf);
-      fputs_unfiltered ("#pragma GCC user_expression\n", buf);
+      fputs_unfiltered ("#pragma GCC push_user_expression\n", buf);
     }
 
   write_macro_definitions (expr_block, expr_pc, buf);
@@ -431,8 +431,26 @@ cplus_compute_program (struct compile_instance *inst,
   if (inst->scope != COMPILE_I_RAW_SCOPE)
     fputs_unfiltered ("}\n", buf);
 
+  if (inst->scope == COMPILE_I_SIMPLE_SCOPE
+      || inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+      || inst->scope == COMPILE_I_PRINT_VALUE_SCOPE)
+    fputs_unfiltered ("#pragma GCC pop_user_expression\n", buf);
+
   add_code_footer (inst->scope, buf);
   code = ui_file_xstrdup (buf, NULL);
   do_cleanups (cleanup);
   return code;
+}
+
+void
+gcc_cplus_enter_scope (void *datum, struct gcc_cp_context *gcc_context)
+{
+  /* FIXME: enter the scope in which the user expression is supposed
+     to be parsed.  -lxo  */
+}
+
+void
+gcc_cplus_leave_scope (void *datum, struct gcc_cp_context *gcc_context)
+{
+  /* FIXME: leave the scopes entered by gcc_cplus_enter_scope.  -lxo  */
 }

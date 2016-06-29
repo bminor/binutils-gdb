@@ -34,19 +34,141 @@
 GCC_METHOD1 (int /* bool */, push_namespace,
 	     const char *)	      /* Argument NAME.  */
 
-/* Push FUNCTION_DECL as the current context.  */
+/* Push TYPE as the current binding level, making its members visible
+   for name lookup.  The current scope before the call must be the
+   scope in which the class was declared.  This should be used if the
+   definition of a class is already finished, but one wishes to define
+   a nested class, or to enter the scope of one of its member
+   functions.  */
+
+GCC_METHOD1 (int /* bool */, push_class,
+	     gcc_type)		/* Argument TYPE.  */
+
+/* Push FUNCTION_DECL as the current (empty) binding level (see
+   reactivate_decl).  The current enclosing scope before the call must
+   be the scope in which the function was declared.  */
 
 GCC_METHOD1 (int /* bool */, push_function,
 	     gcc_decl)	     /* Argument FUNCTION_DECL.  */
 
-/* Pop the namespace last entered with push_namespace, or function
-   last entered with push_function, restoring the binding level in
-   effect before the matching push_* call.  */
+/* Make DECL visible (again?) within SCOPE.  When SCOPE is NULL, it
+   means the current scope; if it is not NULL, it must name a function
+   that is currently active, even if not at the top of the binding
+   chain.
+
+   This function can be used to make e.g. a global function or
+   variable visible in a namespace or local scope (overriding another
+   enclosing definition of the same name), but its most common
+   expected use of this primitive, that gives it its name, is to make
+   declarations visible again after reentering a function scope,
+   because when a function is entered with push_function, that does
+   NOT make any of the declarations nested in it visible for name
+   lookup.
+
+   There is a reason/excuse for that: unlike namespaces and classes,
+   G++ doesn't ever have to reenter function scopes, so its name
+   resolution infrastructure is not prepared to do that.  But wait,
+   there is also a good use for this apparent limitation: a function
+   may contain multiple scopes (blocks), and the name may be bound to
+   different symbols in each of these scopes.  With this interface, as
+   we reenter a function scope, we may choose which symbols to make
+   visible for the code snippet, or, if there could be template
+   functions in local scopes, for unresolved names in nested template
+   class default arguments, or in nested template function signatures.
+
+   As for making a local declaration visible for the code snippet,
+   there are two possibilities: a) introduce it upfront, while
+   entering the scope for the user expression (see the enter_scope
+   callback, called by g++ when encountering the push_user_expression
+   pragma), which might save some scope switching and reactivate_decl
+   (though this can't be helped if some declarations have to be
+   introduced and discarded, because of multiple definitions of the
+   same name in different scopes within a function: they have to be
+   defined in discriminator order); or b) introduce it when its name
+   is looked up, entering the scope, introducing the declaration,
+   leaving the scope, and then reactivating the declaration in its
+   local scope.
+
+   Here's some more detail on how reactivate_decl works.  Say there's
+   a function foo whose body looks like this:
+
+   {
+     {
+// point 1
+       class c {} o __attribute__ ((__used__)); // c  , o
+     }
+     struct c {
+       void f() {
+// point 2
+       }
+     } o __attribute__ ((__used__));            // c_0, o_0
+     {
+       class c {} p __attribute__ ((__used__)); // c_1, p
+// point 3
+       o.f();
+     }
+   }
+
+   When we are about to define class c at point 1, we enter the
+   function foo scope, and since no symbols are visible at point 1, we
+   proceed to declare class c.  We may then define the class right
+   away, or, if we leave the function scope, and we later wish to
+   define it, or to define object o, we can reenter the scope and just
+   use the previously-obtained gcc_decl to define the class, without
+   having to reactivate the declaration.
+
+   Now, if we are to set up the binding context for point 2, we have
+   to define c_0::f, and in order to do so, we have to declare and
+   define c_0.  Before we can declare c_0, we MUST at least declare c.
+
+     As a general rule, before we can declare or define any local name
+     with a discriminator, we have to at least declare any other
+     occurrences of the same name in the same enclosing entity with
+     lower or absent discriminator.
+
+   So, we declare c, then we leave the function scope and reenter it
+   so as to declare c_0 (also with name "c", which is why we have to
+   leave and reenter the function scope, otherwise we would get an
+   error because of the duplicate definition; g++ will assign a
+   discriminator because it still remembers there was an earlier
+   declaration of c_0 within the function, it's just no longer in
+   scope), then we can define c_0, including its member function f.
+
+   Likewise, if we wish to define o_0, we have to define o first.  If
+   we wish to declare (and maybe then define) c_1, we have to at least
+   declare (c and then) c_0 first.
+
+   Then, as we set up the binding context to compile a code snippet at
+   point 3, we may choose to activate c_1, o_0 and p upfront,
+   declaring and discarding c, c_0 and o, and then reentering the
+   funciton scope to declare c_1, o_0 and p; or we can wait for oracle
+   lookups of c, o or p.  If c is looked up, and the debugger resolves
+   c in the scope to c_1, it is expected to enter the function scope
+   from the top level, declare c, leave it, reenter it, declare c_0,
+   leave it, reenter it, declare c_1, leave it, and then reactivate
+   c_1 in the function scope.  If c_1 is needed as a complete type,
+   the definition may be given right after the declaration, or the
+   scope will have to be reentered in order to define the class.
+
+.  If the code snippet is at point 2, we don't need to (re)activate
+   anything declaration: nothing from any local scope is visible.
+   Just entering the scope of the class containing member function f
+   reactivates the names of its members, including the class name
+   itself.  */
+
+GCC_METHOD2 (int /* bool */, reactivate_decl,
+	     gcc_decl,		/* Argument DECL.  */
+	     gcc_decl)		/* Argument SCOPE.  */
+
+/* Pop the namespace last entered with push_namespace, or class last
+   entered with push_class, or function last entered with
+   push_function, restoring the binding level in effect before the
+   matching push_* call.  */
 
 GCC_METHOD0 (int /* bool */, pop_namespace)
 
 /* Return the NAMESPACE_DECL, TYPE_DECL or FUNCTION_DECL of the
-   current binding level.  */
+   binding level that would be popped by pop_namespace.  */
 
 GCC_METHOD0 (gcc_decl, get_current_binding_level)
 
@@ -270,10 +392,7 @@ GCC_METHOD3 (gcc_decl, define_cdtor_clone,
 GCC_METHOD1 (gcc_type, decl_type,
 	     gcc_decl)            /* Argument DECL.  */
 
-/* Return the declaration for a type.  This is most useful to be able
-   to pass a class to new_friend, since it expects a gcc_decl, but
-   start_new_class_type and start_specialize_class_template return a
-   gcc_type.  */
+/* Return the declaration for a type.  */
 
 GCC_METHOD1 (gcc_decl, type_decl,
 	     gcc_type)            /* Argument TYPE.  */
@@ -610,52 +729,41 @@ GCC_METHOD5 (gcc_decl, specialize_function_template,
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
-/* Start defining a specialization of a template class, and enter its
-   own binding level.  Initially it has no fields.
+/* Specialize a template class as an incomplete type.  A definition
+   can be supplied later, with start_class_definition.
 
    TEMPLATE_DECL is the template class, and TARGS are the arguments
-   for the specialization.  BASE_CLASSES indicate the base classes of
-   class NAME.  FILENAME and LINE_NUMBER specify the source location
-   associated with the template class specialization.  */
+   for the specialization.  FILENAME and LINE_NUMBER specify the
+   source location associated with the template class
+   specialization.  */
 
-GCC_METHOD5 (gcc_type, start_specialize_class_template,
+GCC_METHOD4 (gcc_decl, specialize_class_template,
 	     gcc_decl,			   /* Argument TEMPLATE_DECL.  */
 	     const struct gcc_cp_template_args *,  /* Argument TARGS.  */
-	     const struct gcc_vbase_array *,/* Argument BASE_CLASSES.  */
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
-/* Create a new 'class' (or 'struct') type, record it in the current
-   binding level, and enter its own binding level.  Initially it has
-   no fields.
+/* Start defining a 'class', 'struct' or 'union' type, entering its
+   own binding level.  Initially it has no fields.
 
-   NAME is the class name.  BASE_CLASSES indicate the base classes of
-   class NAME.  FILENAME and LINE_NUMBER specify the source location
-   associated with the class.  */
+   TYPEDECL is the forward-declaration of the type, returned by
+   new_decl.  BASE_CLASSES indicate the base classes of class NAME.
+   FILENAME and LINE_NUMBER specify the source location associated
+   with the class definition, should they be different from those of
+   the forward declaration.  */
 
-GCC_METHOD5 (gcc_type, start_new_class_type,
-	     const char *,	      /* Argument NAME.  */
-	     enum gcc_cp_symbol_kind, /* Argument FLAGS.  */
+GCC_METHOD4 (gcc_type, start_class_definition,
+	     gcc_decl,		      /* Argument TYPEDECL.  */
 	     const struct gcc_vbase_array *,/* Argument BASE_CLASSES.  */
-	     const char *,	      /* Argument FILENAME.  */
-	     unsigned int)	      /* Argument LINE_NUMBER.  */
-
-/* Create a new 'union' type, record it in the current binding level,
-   and enter its own binding level.  Initially it has no fields.
-
-   NAME is the union name.  FILENAME and LINE_NUMBER specify its
-   source location.  */
-
-GCC_METHOD4 (gcc_type, start_new_union_type,
-	     const char *,	      /* Argument NAME.  */
-	     enum gcc_cp_symbol_kind, /* Argument FLAGS.  */
 	     const char *,	      /* Argument FILENAME.  */
 	     unsigned int)	      /* Argument LINE_NUMBER.  */
 
 /* Create a new closure class type, record it as the
    DISCRIMINATOR-numbered closure type in the current scope (or
    associated with EXTRA_SCOPE, if non-NULL), and enter the closure
-   type's own binding level.  Initially it has no fields.
+   type's own binding level.  This primitive would sort of combine
+   new_decl and start_class_definition, if they could be used to
+   introduce a closure type.  Initially it has no fields.
 
    NAME is the class name.  FILENAME and LINE_NUMBER specify the
    source location associated with the class.  EXTRA_SCOPE, if

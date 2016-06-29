@@ -171,6 +171,11 @@ extern gcc_cp_oracle_function gcc_cplus_convert_symbol;
 
 extern gcc_cp_symbol_address_function gcc_cplus_symbol_address;
 
+/* Callbacks suitable for use as the GCC C++ enter/leave scope requests.  */
+
+extern gcc_cp_enter_leave_user_expr_scope_function gcc_cplus_enter_scope;
+extern gcc_cp_enter_leave_user_expr_scope_function gcc_cplus_leave_scope;
+
 /* Instantiate a GDB object holding state for the GCC context FE.  The
    new object is returned.  */
 

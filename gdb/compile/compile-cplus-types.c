@@ -1624,6 +1624,9 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *instance,
 {
   int i, need_new_context;
   gcc_type result;
+  gcc_decl resuld; /* FIXME: yeah, it's a terrible pun.  Please make
+		      it go once we separate declaration from
+		      definition (see below).  -lxo */
   struct compile_cplus_context *pctx;
   char *name = NULL;
   const char *filename = NULL;
@@ -1679,6 +1682,37 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *instance,
      table.  This lets recursive types work.  */
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
+      if (debug_compile_cplus_types)
+	printf_unfiltered  ("new_decl for class %s\n", name);
+      resuld = CPCALL (new_decl, instance, name,
+		       GCC_CP_SYMBOL_CLASS | nested_access
+		       | (TYPE_DECLARED_CLASS (type)
+			  ? GCC_CP_FLAG_CLASS_NOFLAG
+			  : GCC_CP_FLAG_CLASS_IS_STRUCT),
+		       0, NULL, 0, filename, line);
+      if (debug_compile_cplus_types)
+	printf_unfiltered ("\tgcc_decl = %lld\n", resuld);
+    }
+  else
+    {
+      gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+      if (debug_compile_cplus_types)
+	printf_unfiltered ("new_decl for union type %s\n", name);
+      resuld = CPCALL (new_decl, instance, name,
+		       GCC_CP_SYMBOL_UNION | nested_access,
+		       0, NULL, 0, filename, line);
+      if (debug_compile_cplus_types)
+	printf_unfiltered ("\tgcc_decl = %lld\n", resuld);
+    }
+
+  /* FIXME: we should be able to pop the context at this point, rather
+     than at the end, and we ought to delay the rest of this function
+     to the point in which we need the class or union to be a complete
+     type, otherwise some well-formed C++ types cannot be represented.
+     -lxo */
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+    {
       struct gcc_vbase_array bases;
       int num_baseclasses = TYPE_N_BASECLASSES (type);
 
@@ -1704,29 +1738,27 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *instance,
 	}
 
       if (debug_compile_cplus_types)
-	printf_unfiltered  ("start_new_class_type %s\n", name);
-      result = CPCALL (start_new_class_type, instance, name,
-		       GCC_CP_SYMBOL_CLASS | nested_access
-		       | (TYPE_DECLARED_CLASS (type)
-			  ? GCC_CP_FLAG_CLASS_NOFLAG
-			  : GCC_CP_FLAG_CLASS_IS_STRUCT),
+	printf_unfiltered  ("start_class_definition for class %s\n", name);
+      result = CPCALL (start_class_definition, instance, resuld,
 		       &bases, filename, line);
       if (debug_compile_cplus_types)
 	printf_unfiltered ("\tgcc_type = %lld\n", result);
+
       xfree (bases.flags);
       xfree (bases.elements);
     }
   else
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+
       if (debug_compile_cplus_types)
-	printf_unfiltered ("start_new_union_type %s\n", name);
-      result = CPCALL (start_new_union_type, instance, name,
-		       GCC_CP_SYMBOL_UNION | nested_access,
-		       filename, line);
+	printf_unfiltered ("start_class_definition %s\n", name);
+      result = CPCALL (start_class_definition, instance, resuld,
+		       NULL, filename, line);
       if (debug_compile_cplus_types)
 	printf_unfiltered ("\tgcc_type = %lld\n", result);
     }
+
   insert_type (instance, type, result);
 
   /* Add definitions.  */
@@ -1757,7 +1789,6 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *instance,
       if (debug_compile_cplus_contexts)
 	printf_unfiltered ("identical contexts -- not leaving context\n");
     }
-
   delete_processing_context (pctx);
 
   do_cleanups (cleanups);
@@ -2268,7 +2299,10 @@ new_cplus_compile_instance (struct gcc_cp_context *fe)
 					xfree, xcalloc, xfree);
 
   fe->cp_ops->set_callbacks (fe, gcc_cplus_convert_symbol,
-			     gcc_cplus_symbol_address, result);
+			     gcc_cplus_symbol_address,
+			     gcc_cplus_enter_scope,
+			     gcc_cplus_leave_scope,
+			     result);
 
   return &result->base;
 }

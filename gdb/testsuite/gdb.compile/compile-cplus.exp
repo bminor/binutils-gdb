@@ -299,9 +299,12 @@ gdb_test "print staticshadow" " = 202"
 # As it references global variable we need the #pragma.
 # For #pragma we need multiline input.
 gdb_test_multiple "compile code -r" "compile code -r multiline 1" { -re "\r\n>$" {} }
-gdb_test_multiple "#pragma GCC user_expression" "compile code -r multiline 2" { -re "\r\n>$" {} }
-gdb_test_multiple "void _gdb_expr(void) { globalshadow = 77000; }" "compile code -r multiline 3" { -re "\r\n>$" {} }
-gdb_test_no_output "end" "compile code -r multiline 4"
+gdb_test_multiple "void _gdb_expr(void) {" "compile code -r multiline 2" { -re "\r\n>$" {} }
+gdb_test_multiple "#pragma GCC push_user_expression" "compile code -r multiline 3" { -re "\r\n>$" {} }
+gdb_test_multiple "  globalshadow = 77000;" "compile code -r multiline 4" { -re "\r\n>$" {} }
+gdb_test_multiple "#pragma GCC pop_user_expression" "compile code -r multiline 5" { -re "\r\n>$" {} }
+gdb_test_multiple "}" "compile code -r multiline 6" { -re "\r\n>$" {} }
+gdb_test_no_output "end" "compile code -r multiline 7"
 gdb_test "print 'compile-cplus.c'::globalshadow" " = 77000" \
     "check globalshadow with -r"
 
