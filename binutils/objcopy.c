@@ -507,6 +507,7 @@ static int compare_section_lma (const void *, const void *);
 static void mark_symbols_used_in_relocations (bfd *, asection *, void *);
 static bfd_boolean write_debugging_info (bfd *, void *, long *, asymbol ***);
 static const char *lookup_sym_redefinition (const char *);
+static const char *find_section_rename (const char *, flagword *);
 
 static void
 copy_usage (FILE *stream, int exit_status)
@@ -1390,12 +1391,14 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	    to[dst_count++] = create_new_symbol (ptr, obfd);
 	}
 
-      if (redefine_sym_list)
+      if (redefine_sym_list || section_rename_list)
 	{
-	  char *old_name, *new_name;
+	  char *new_name;
 
-	  old_name = (char *) bfd_asymbol_name (sym);
-	  new_name = (char *) lookup_sym_redefinition (old_name);
+	  new_name = (char *) lookup_sym_redefinition (name);
+	  if (new_name == name
+	      && (flags & BSF_SECTION_SYM) != 0)
+	    new_name = (char *) find_section_rename (name, NULL);
 	  bfd_asymbol_name (sym) = new_name;
 	  name = new_name;
 	}
@@ -2357,6 +2360,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       || change_leading_char
       || remove_leading_char
       || redefine_sym_list
+      || section_rename_list
       || weaken
       || add_symbols)
     {
@@ -2937,24 +2941,19 @@ add_section_rename (const char * old_name, const char * new_name,
 }
 
 /* Check the section rename list for a new name of the input section
-   ISECTION.  Return the new name if one is found.
-   Also set RETURNED_FLAGS to the flags to be used for this section.  */
+   called OLD_NAME.  Returns the new name if one is found and sets
+   RETURNED_FLAGS if non-NULL to the flags to be used for this section.  */
 
 static const char *
-find_section_rename (bfd * ibfd ATTRIBUTE_UNUSED, sec_ptr isection,
-		     flagword * returned_flags)
+find_section_rename (const char *old_name, flagword *returned_flags)
 {
-  const char * old_name = bfd_section_name (ibfd, isection);
-  section_rename * srename;
-
-  /* Default to using the flags of the input section.  */
-  * returned_flags = bfd_get_section_flags (ibfd, isection);
+  const section_rename *srename;
 
   for (srename = section_rename_list; srename != NULL; srename = srename->next)
     if (strcmp (srename->old_name, old_name) == 0)
       {
-	if (srename->flags != (flagword) -1)
-	  * returned_flags = srename->flags;
+	if (returned_flags != NULL && srename->flags != (flagword) -1)
+	  *returned_flags = srename->flags;
 
 	return srename->new_name;
       }
@@ -3004,7 +3003,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     return;
 
   /* Get the, possibly new, name of the output section.  */
-  name = find_section_rename (ibfd, isection, & flags);
+  name = bfd_section_name (ibfd, isection);
+  flags = bfd_get_section_flags (ibfd, isection);
+  name = find_section_rename (name, &flags);
 
   /* Prefix sections.  */
   if ((prefix_alloc_sections_string)

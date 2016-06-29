@@ -1,3 +1,238 @@
+2016-06-29  Tom Tromey  <tom@tromey.com>
+
+	PR python/20129:
+	* python/lib/gdb/command/frame_filters.py (_do_enable_frame_filter)
+	(SetFrameFilterPriority._set_filter_priority): Use "frame_filter",
+	not "name".
+
+2016-06-29  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/17210:
+	* target.c (free_memory_read_result_vector): Take a pointer to the
+	VEC as an argument.
+	(read_memory_robust): Install a cleanup for "result".
+	* mi/mi-main.c (mi_cmd_data_read_memory_bytes): Update.
+
+2016-06-29  Manish Goregaokar  <manish@mozilla.com>
+
+gdb/ChangeLog:
+	* rust-lang.c (rust_get_disr_info): Initialize saveptr to NULL.
+
+2016-06-29  Manish Goregaokar  <manish@mozilla.com>
+
+gdb/ChangeLog:
+	* rust-lang.c (rust_get_disr_info): Use strtok_r instead of strsep.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_displaced_step_b): Use int64_t for
+	variable new_offset.
+
+2016-06-27  Manish Goregaokar  <manish@mozilla.com>
+
+	* rust-lang.c (rust_print_type, rust_decorations): Print unit
+	types as "()", (rust_print_type): Omit return type for functions
+	returning unit
+
+2016-06-25  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* python/py-breakpoint.c (bppy_init): Clear bppy_pending_object
+	when there is an error during the breakpoint creation.
+
+2016-06-25  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_get_disr_info, rust_print_type): Fix
+	formatting.
+
+2016-06-25  Manish Goregaokar  <manish@mozilla.com>
+
+	PR gdb/20239
+	* rust-lang.c (rust_get_disr_info): Correctly interpret
+	NonZero-optimized enums of arbitrary depth.
+	(rust_print_type): Correctly print NonZero-optimized
+	enums.
+
+2016-06-24  David Taylor  <dtaylor@emc.com>
+
+	PR gdb/17520 Structure offset wrong when 1/4 GB or greater.
+	* c-lang.h: Change all parameters, variables, and struct or union
+	members used as struct or union fie3ld offsets from int to
+	LONGEST.
+	* c-valprint.c: Likewise.
+	* cp-abi.c: Likewise.
+	* cp-abi.h: Likewise.
+	* cp-valprint.c: Likewise.
+	* d-valprint.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* eval.c: Likewise.
+	* extension-priv.h: Likewise.
+	* extension.c: Likewise.
+	* extension.h: Likewise.
+	* findvar.c: Likewise.
+	* gdbtypes.h: Likewise.
+	* gnu-v2-abi.c: Likewise.
+	* gnu-v3-abi.c: Likewise.
+	* go-valprint.c: Likewise.
+	* guile/guile-internal.h: Likewise.
+	* guile/scm-pretty-print.c: Likewise.
+	* jv-valprint.c Likewise.
+	* opencl-lang.c: Likewise.
+	* p-lang.h: Likewise.
+	* python/py-prettyprint.c: Likewise.
+	* python/python-internal.h: Likewise.
+	* spu-tdep.c: Likewise.
+	* typeprint.c: Likewise.
+	* valarith.c: Likewise.
+	* valops.c: Likewise.
+	* valprint.c: Likewise.
+	* valprint.h: Likewise.
+	* value.c: Likewise.
+	* value.h: Likewise.
+	* p-valprint.c: Likewise.
+	* c-typeprint.c (c_type_print_base): When printing offset, use
+	plongest, not %d.
+	* gdbtypes.c (recursive_dump_type): Ditto.
+
+2016-06-24  David Taylor  <david.taylor@emc.com>
+
+	* MAINTAINERS (Write After Approval): Add David Taylor.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure.ac: Check for support for system call LWP fields on
+	FreeBSD.
+	* config.in, configure: Rebuild.
+	* data-directory/Makefile.in (SYSCALLS_FILES): Add freebsd.xml.
+	* fbsd-nat.c (fbsd_wait) [HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE]:
+	Report system call events.
+	[HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE]
+	(fbsd_set_syscall_catchpoint): New function.
+	(fbsd_nat_add_target) [HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE]:
+	Set "to_set_syscall_catchpoint" to "fbsd_set_syscall_catchpoint".
+	* fbsd-tdep.c: Include xml-syscall.h
+	(fbsd_get_syscall_number): New function.
+	(fbsd_init_abi): Set XML system call file name.
+	Add "get_syscall_number" gdbarch method.
+	* syscalls/freebsd.xml: New file.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c: Include "auxv.h".
+	(fbsd_print_auxv_entry): New function.
+	(fbsd_init_abi): Install gdbarch "print_auxv_entry" method.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* auxv.c (fprint_auxv_entry): New function.
+	(default_print_auxv_entry): New function.
+	(fprint_target_auxv): Use gdbarch_print_auxv_entry.
+	* auxv.h (enum auxv_format): New enum.
+	(fprint_auxv_entry): Declare.
+	(default_print_auxv_entry): Declare.
+	* gdbarch.sh (print_auxv_entry): New.
+	* gdbarch.c, gdbarch.h: Re-generated.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c [KERN_PROC_AUXV] New variable super_xfer_partial.
+	(fbsd_xfer_partial): New function.
+	(fbsd_nat_add_target) [KERN_PROC_AUXV] Set "to_xfer_partial" to
+	"fbsd_xfer_partial".
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (symbol_find_demangled_name): Loop over languages and
+	use language_sniff_from_mangled_name.
+	* rust-lang.c (rust_sniff_from_mangled_name): New function.
+	(rust_language_defn): Update.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_sniff_from_mangled_name): New function.
+	(objc_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn) <la_sniff_from_mangled_name>: New
+	field.
+	(language_sniff_from_mangled_name): Declare.
+	* language.c (language_sniff_from_mangled_name): New function.
+	(unknown_language_defn, auto_language_defn, local_language_defn):
+	Update.
+	* jv-lang.c (java_sniff_from_mangled_name): New function.
+	(java_language_defn): Use it.
+	* go-lang.c (go_sniff_from_mangled_name): New function.
+	(go_language_defn): Use it.
+	* f-lang.c (f_language_defn): Update.
+	* defs.h (enum language): Reorder.
+	* d-lang.c (d_sniff_from_mangled_name): New function.
+	(d_language_defn): Use it.
+	* cp-support.h (gdb_sniff_from_mangled_name): Declare.
+	* cp-support.c (gdb_sniff_from_mangled_name): New function.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* ada-lang.c (ada_sniff_from_mangled_name): New function.
+	(ada_language_defn): Use it.
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
+	* ada-lang.c (ada_extensions): New array.
+	(ada_language_defn): Use it.
+	* c-lang.c (c_extensions): New array.
+	(c_language_defn): Use it.
+	(cplus_extensions): New array.
+	(cplus_language_defn): Use it.
+	(asm_extensions): New array.
+	(asm_language_defn): Use it.
+	(minimal_language_defn): Update.
+	* d-lang.c (d_extensions): New array.
+	(d_language_defn): Use it.
+	* f-lang.c (f_extensions): New array.
+	(f_language_defn): Use it.
+	* go-lang.c (go_language_defn): Update.
+	* jv-lang.c (java_extensions): New array.
+	(java_language_defn): Use it.
+	* language.c (add_language): Call add_filename_language.
+	(unknown_language_defn, auto_language_defn, local_language_defn):
+	Update.
+	* language.h (struct language_defn) <la_filename_extensions>: New
+	field.
+	* m2-lang.c (m2_language_defn): Update.
+	* objc-lang.c (objc_extensions): New array.
+	(objc_language_defn): Use it.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* p-lang.c (p_extensions): New array.
+	(pascal_language_defn): Use it.
+	* rust-lang.c (rust_extensions): New array.
+	(rust_language_defn): Use it.
+	* symfile.c (add_filename_language): No longer static.  Make "ext"
+	const.
+	(init_filename_language_table): Remove.
+	(_initialize_symfile): Update.
+	* symfile.h (add_filename_language): Declare.
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (filename_language_table): Now a VEC.
+	(fl_table_size, fl_table_next): Remove.
+	(add_filename_language): Use VEC_safe_push.
+	(set_ext_lang_command, info_ext_lang_command)
+	(deduce_language_from_filename): Use VEC_iterate.
+	(init_filename_language_table): Use VEC_empty.
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (gdbpy_parameter): Now static.
+	* python/python-internal.h (gdbpy_parameter): Don't declare.
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/16483:
+	* python/lib/gdb/command/frame_filters.py
+	(InfoFrameFilter.list_frame_filters): Rename to print_list.  Print
+	nothing if no filters found.  Return value indicating whether
+	filters were printed.
+	(InfoFrameFilter.print_list): Remove.
+	(InfoFrameFilter.invoke): Print message if no frame filters
+	found.
+
 2016-06-21  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* f-valprint.c (f_val_print): Add field names for printing

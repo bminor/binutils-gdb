@@ -1,3 +1,99 @@
+2016-06-29  Nick Clifton  <nickc@redhat.com>
+
+	* elfnn-aarch64.c (is_aarch64_mapping_symbol): New function.
+	Returns TRUE for AArch64 mapping symbols.
+	(elfNN_aarch64_backend_symbol_processing): New function.  Marks
+	mapping symbols as precious in object files so that they will not
+	be stripped.
+	(elf_backend_symbol_processing): Define.
+
+	* elf32-arm.c (is_arm_mapping_symbol): New function.  Returns TRUE
+	for ARM mapping symbols.
+	(elf32_arm_backend_symbol_processing): Make use of the new function.
+
+2016-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20306
+	* elflink.c (elf_link_check_versioned_symbol): Return false
+	for unreferenced undefined symbol.
+
+2016-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-bfin.c (bfin_adjust_dynamic_symbol): Fail if a COPY reloc
+	is needed.
+
+	* elf32-arm.c (elf32_arm_backend_symbol_processing): New
+	function.  Marks mapping symbols in object files as precious, so
+	that strip will not remove them.
+	(elf_backend_symbol_processing): Define.
+
+2016-06-28  James Clarke  <jrtc27@jrtc27.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Don't convert
+	R_SPARC_32 to R_SPARC_RELATIVE if class is ELFCLASS64.
+
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-mips.c (elf_mips16_howto_table_rel): Add
+	R_MIPS16_PC16_S1.
+	(mips16_reloc_map): Likewise.
+	* elf64-mips.c (mips16_elf64_howto_table_rel): Likewise.
+	(mips16_elf64_howto_table_rela): Likewise.
+	(mips16_reloc_map): Likewise.
+	* elfn32-mips.c (elf_mips16_howto_table_rel): Likewise.
+	(elf_mips16_howto_table_rela): Likewise.
+	(mips16_reloc_map): Likewise.
+	* elfxx-mips.c (mips16_branch_reloc_p): New function.
+	(mips16_reloc_p): Handle R_MIPS16_PC16_S1.
+	(b_reloc_p): Likewise.
+	(mips_elf_calculate_relocation): Likewise.
+	(_bfd_mips_elf_check_relocs): Likewise.
+	* reloc.c (BFD_RELOC_MIPS16_16_PCREL_S1): New relocation.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2016-06-27  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19264
+	* elf64-ppc.c (STUB_SHRINK_ITER): Define.
+	(ppc64_elf_size_stubs): Exit stub sizing loop past STUB_SHRINK_ITER
+	if shrinking stubs.
+	(ppc64_elf_size_stubs): Adjust to suit.
+
+2016-06-27  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf32-dlx.h: New file.
+	* elf32-dlx.c: Adjust.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf32-xtensa.c (xtensa_make_property_section): Remove prototype.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_note): Handle NT_FREEBSD_PROCSTAT_AUXV
+	notes.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_note): Remove handling of NT_X86_XSTATE for
+	FreeBSD.  Remove case for NT_FREEBSD_THRMISC.
+	(elfcore_grok_freebsd_psinfo): New function.
+	(elfcore_grok_freebsd_prstatus): New function.
+	(elfcore_grok_freebsd_note): New function.
+	(elf_parse_notes): Use "elfcore_grok_freebsd_note" for "FreeBSD"
+	notes.
+
+2016-06-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* elflink.c: Check the value of BFD_SUPPORTS_PLUGINS rather
+	than its existance.
+
+2016-06-24  Alan Modra  <amodra@gmail.com>
+
+	* config.bfd: Delete mips vxworks patterns matched earlier.
+	Combine mips*-*-none with mips*-*-elf*.
+
 2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_perform_relocation): Call

@@ -58,11 +58,10 @@ enum sparc_opcode_arch_val
   SPARC_OPCODE_ARCH_V9V, /* V9 with OSA2011 and T4 additions, integer
                             multiply and Fujitsu fp multiply-add.  */
   SPARC_OPCODE_ARCH_V9M, /* V9 with OSA2015 and M7 additions.  */
+  SPARC_OPCODE_ARCH_MAX = SPARC_OPCODE_ARCH_V9M,
   SPARC_OPCODE_ARCH_BAD  /* Error return from sparc_opcode_lookup_arch.  */
 };
 
-/* The highest architecture in the table.  */
-#define SPARC_OPCODE_ARCH_MAX (SPARC_OPCODE_ARCH_BAD - 1)
 
 /* Given an enum sparc_opcode_arch_val, return the bitmask to use in
    insn encoding/decoding.  */

@@ -247,15 +247,6 @@ struct reloc_entry
   bfd_reloc_code_real_type reloc;
 };
 
-/* Structure for a hash table entry for a register.  */
-typedef struct
-{
-  const char *name;
-  unsigned char number;
-  unsigned char type;
-  unsigned char builtin;
-} reg_entry;
-
 /* Macros to define the register types and masks for the purpose
    of parsing.  */
 
@@ -301,7 +292,7 @@ typedef struct
 #define MULTI_REG_TYPE(T,V)	BASIC_REG_TYPE(T)
 
 /* Register type enumerators.  */
-typedef enum
+typedef enum aarch64_reg_type_
 {
   /* A list of REG_TYPE_*.  */
   AARCH64_REG_TYPES
@@ -313,6 +304,15 @@ typedef enum
 #define REG_TYPE(T)		(1 << REG_TYPE_##T)
 #undef MULTI_REG_TYPE
 #define MULTI_REG_TYPE(T,V)	V,
+
+/* Structure for a hash table entry for a register.  */
+typedef struct
+{
+  const char *name;
+  unsigned char number;
+  ENUM_BITFIELD (aarch64_reg_type_) type : 8;
+  unsigned char builtin;
+} reg_entry;
 
 /* Values indexed by aarch64_reg_type to assist the type checking.  */
 static const unsigned reg_type_masks[] =
@@ -7989,25 +7989,23 @@ struct aarch64_option_abi_value_table
 static const struct aarch64_option_abi_value_table aarch64_abis[] = {
   {"ilp32",		AARCH64_ABI_ILP32},
   {"lp64",		AARCH64_ABI_LP64},
-  {NULL,		0}
 };
 
 static int
 aarch64_parse_abi (const char *str)
 {
-  const struct aarch64_option_abi_value_table *opt;
-  size_t optlen = strlen (str);
+  unsigned int i;
 
-  if (optlen == 0)
+  if (str[0] == '\0')
     {
       as_bad (_("missing abi name `%s'"), str);
       return 0;
     }
 
-  for (opt = aarch64_abis; opt->name != NULL; opt++)
-    if (strlen (opt->name) == optlen && strncmp (str, opt->name, optlen) == 0)
+  for (i = 0; i < ARRAY_SIZE (aarch64_abis); i++)
+    if (strcmp (str, aarch64_abis[i].name) == 0)
       {
-	aarch64_abi = opt->value;
+	aarch64_abi = aarch64_abis[i].value;
 	return 1;
       }
 

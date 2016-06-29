@@ -194,26 +194,36 @@ extern void quit_serial_event_clear (void);
 /* * Languages represented in the symbol table and elsewhere.
    This should probably be in language.h, but since enum's can't
    be forward declared to satisfy opaque references before their
-   actual definition, needs to be here.  */
+   actual definition, needs to be here.
+
+   The constants here are in priority order.  In particular,
+   demangling is attempted according to this order.
+
+   Note that there's ambiguity between the mangling schemes of some of
+   these languages, so some symbols could be successfully demangled by
+   several languages.  For that reason, the constants here are sorted
+   in the order we'll attempt demangling them.  For example: Java and
+   Rust use C++ mangling, so must come after C++; Ada must come last
+   (see ada_sniff_from_mangled_name).  */
 
 enum language
   {
     language_unknown,		/* Language not known */
     language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
+    language_objc,		/* Objective-C */
     language_cplus,		/* C++ */
+    language_java,		/* Java */
     language_d,			/* D */
     language_go,		/* Go */
-    language_objc,		/* Objective-C */
-    language_java,		/* Java */
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
     language_pascal,		/* Pascal */
-    language_ada,		/* Ada */
     language_opencl,		/* OpenCL */
     language_rust,		/* Rust */
     language_minimal,		/* All other languages, minimal support only */
+    language_ada,		/* Ada */
     nr_languages
   };
 

@@ -1464,6 +1464,13 @@ typedef int (gdbarch_auxv_parse_ftype) (struct gdbarch *gdbarch, gdb_byte **read
 extern int gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 extern void set_gdbarch_auxv_parse (struct gdbarch *gdbarch, gdbarch_auxv_parse_ftype *auxv_parse);
 
+/* Print the description of a single auxv entry described by TYPE and VAL
+   to FILE. */
+
+typedef void (gdbarch_print_auxv_entry_ftype) (struct gdbarch *gdbarch, struct ui_file *file, CORE_ADDR type, CORE_ADDR val);
+extern void gdbarch_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file, CORE_ADDR type, CORE_ADDR val);
+extern void set_gdbarch_print_auxv_entry (struct gdbarch *gdbarch, gdbarch_print_auxv_entry_ftype *print_auxv_entry);
+
 /* Find the address range of the current inferior's vsyscall/vDSO, and
    write it to *RANGE.  If the vsyscall's length can't be determined, a
    range with zero length is returned.  Returns true if the vsyscall is

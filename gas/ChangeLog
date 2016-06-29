@@ -1,6 +1,265 @@
+2016-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention --enable-compressed-debug-sections=gas is the
+	default for Linux/x86 targets.
+	* configure.tgt (ac_default_compressed_debug_sections): Default
+	to yes for Linux/x86 targets.
+
+2016-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* write.c: Remove "libbfd.h" inclusion.
+
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/elf/elf.exp: Use `supports_gnu_unique' with the
+	`type' test.
+
+2016-06-28  Alan Modra  <amodra@gmail.com>
+
+	PR gas/20247
+	* testsuite/gas/elf/section11.s: Don't start directives in first column.
+
+2016-06-28  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/gas/aarch64/diagnostic.s,
+	testsuite/gas/aarch64/diagnostic.l: Add tests for out-of-range indices.
+
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips16_reloc_p): Handle
+	BFD_RELOC_MIPS16_16_PCREL_S1.
+	(b_reloc_p): Likewise.
+	(limited_pcrel_reloc_p): Likewise.
+	(md_pcrel_from): Likewise.
+	(md_apply_fix): Likewise.
+	(tc_gen_reloc): Likewise.
+	(md_convert_frag): Likewise.
+	(mips_fix_adjustable): Update comment.
+	* testsuite/gas/mips/mips16-branch-reloc-2.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-reloc-3.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-addend-2.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-addend-3.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-absolute.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-branch-reloc-2.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-reloc-3.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-addend-2.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-addend-3.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-absolute.l: Remove file.
+	* testsuite/gas/mips/mips16-branch-addend-2.s: Add padding.
+	* testsuite/gas/mips/branch-weak.s: Adjust alignment, avoid
+	implicit instruction padding, avoid MIPS16 JR->JRC conversion.
+	* testsuite/gas/mips/branch-weak-6.d: New test.
+	* testsuite/gas/mips/branch-weak-7.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-06-27  Vineet Gupta  <vgupta@synopsys.com>
+
+	* config//tc-arc.c (tc_arc_frame_initial_instructions): Use
+	cfi_add_CFA_def_cfa to generate default CFA with offset
+	* testsuite/gas/cfi/cfi-arc-1.d: Update expected output.
+
+2016-06-27  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20247
+	* as.h (do_not_pad_sections_to_alignment): New global variable.
+	* as.c (show_usage): Add --no-pad-sections.
+	(parse_args): Likewise.
+	* write.c (size_seg): Skip padding the end of the section if
+	requested from the command line.
+	(SUB_SEGMENT_ALIGN): Likewise.
+	* doc/as.texinfo: Document the new option.
+	* NEWS: Mention the new feature.
+	* testsuite/gas/elf/section11.s: New test.
+	* testsuite/gas/elf/section11.d: New test driver.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+
+2016-06-27  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-dlx.c: Include bfd/elf32-dlx.h.
+	* config/tc-dlx.h: Remove prototype of dlx_set_skip_hi16.
+
+2016-06-27  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-xtensa.c (xtensa_elf_suffix): Use ARRAY_SIZE instead of a
+	sentinal element.
+	(map_suffix_reloc_to_operator): Likewise.
+	(map_operator_to_reloc): Likewise.
+
+2016-06-27  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-nds32.c (md_begin): Use ARRAY_SIZE instead of a sentinal
+	element in relax_table.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-aarch64.c: Make the type of reg_entry::type
+	aarch_reg_type.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-bfin.c (bfin_cpus): Remove sentinal.
+	(md_parse_option): Adjust.
+	* config/tc-aarch64.c (aarch64_parse_abi): Replace use of a sentinal
+	with iteration from 0 to ARRAY_SIZE.
+	* config/tc-mcore.c (md_begin): Likewise.
+	* config/tc-visium.c (visium_parse_arch): Likewise.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-tic54x.c (tic54x_set_default_include): remove argument
+							   and simplify accordingly.
+	(tic54x_include): Adjust.
+	(tic54x_mlib): Likewise.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-xtensa.c (xtensa_make_property_section): Remove prototype.
+
+2016-06-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (append_insn): Use any `O_symbol' expression
+	unchanged with relaxed MIPS16 instructions.
+	(mips16_extended_frag): Adjust accordingly.  Return 1 right
+	away if a relocation will be required for the symbol requested.
+	Remove dead first relaxation pass code.
+	(mips_relax_frag): Pass `sec' down to `mips16_extended_frag'.
+	(md_convert_frag): Adjust symbol value calculation.  Raise an
+	error if a relocation is required for the symbol requested.
+	* testsuite/gas/mips/mips16@relax-swap3.d: Remove dump patterns,
+	add error output.
+	* testsuite/gas/mips/mips16@relax-swap3.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-relax-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-relax-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-relax-2.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-relax-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-2.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-4.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-5.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-2.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-0.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-3.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-0.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-3.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute.d: New test.
+	* testsuite/gas/mips/mips16-absolute-reloc-0.d: New test.
+	* testsuite/gas/mips/mips16-absolute-reloc-1.d: New test.
+	* testsuite/gas/mips/mips16-absolute-reloc-2.d: New test.
+	* testsuite/gas/mips/mips16-absolute-reloc-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-reloc-2.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-reloc-3.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-addend-2.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-addend-3.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-absolute.l: New error output.
+	* testsuite/gas/mips/mips16-branch-reloc-2.l: New error output.
+	* testsuite/gas/mips/mips16-branch-reloc-3.l: New error output.
+	* testsuite/gas/mips/mips16-branch-addend-2.l: New error output.
+	* testsuite/gas/mips/mips16-branch-addend-3.l: New error output.
+	* testsuite/gas/mips/mips16-branch-absolute.l: New error output.
+	* testsuite/gas/mips/mips16-absolute-reloc-2.l: New error output.
+	* testsuite/gas/mips/mips16-absolute-reloc-3.l: New error output.
+	* testsuite/gas/mips/mips16-pcrel-relax-0.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-relax-2.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-0.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-1.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-2.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-3.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-4.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-5.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-0.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-1.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-2.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-3.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-absolute.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-0.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-1.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-2.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-3.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-0.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-1.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-2.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-3.s: New test source.
+	* testsuite/gas/mips/mips16-branch-absolute.s: New test source.
+	* testsuite/gas/mips/mips16-absolute-reloc-0.s: New test source.
+	* testsuite/gas/mips/mips16-absolute-reloc-1.s: New test source.
+	* testsuite/gas/mips/mips16-absolute-reloc-2.s: New test source.
+	* testsuite/gas/mips/mips16-absolute-reloc-3.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-06-24  Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt (alpha-*-openbsd*): Use em=nbsd.
+
+2016-06-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (b_reloc_p): New function.
+	(mips_fix_adjustable): Also keep the original microMIPS symbol
+	referred from branch relocations.
+	* testsuite/gas/mips/branch-local-1.d: New test.
+	* testsuite/gas/mips/branch-local-n32-1.d: New test.
+	* testsuite/gas/mips/branch-local-n64-1.d: New test.
+	* testsuite/gas/mips/micromips@branch-misc-4-64.d: Update
+	relocations.
+	* testsuite/gas/mips/branch-local-1.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new cases.
+
+2016-06-23  Graham Markall  <graham.markall@embecosm.com>
+
+	* config/tc-arc.c (options, md_longopts, md_parse_option): Move
+	-mspfp, -mdpfp and -mfpuda out of the sections for dummy
+	options. Correct erroneous enabling of SPFP instructions when
+	using -mnps400.
+
+2016-06-22  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <brd, brh, brw, mffs, mffs., mffsce,
+	mffscdrn, mffscdrni, mffscrn, mffscrni, mffsl, nandxor, rldixor,
+	setbool, xor3>: New tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
 2016-06-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-xtensa.c: Include elf/xtensa.h.
+
+2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (calculate_reloc) <BFD_RELOC_HI16_S_PCREL>
+	<BFD_RELOC_LO16_PCREL>: New switch cases.
+	(md_apply_fix) <BFD_RELOC_HI16_S_PCREL, BFD_RELOC_LO16_PCREL>:
+	Move switch cases along `BFD_RELOC_MIPS_JMP'.
+	<BFD_RELOC_MIPS_21_PCREL_S2, BFD_RELOC_MIPS_26_PCREL_S2>
+	<BFD_RELOC_MIPS_18_PCREL_S3, BFD_RELOC_MIPS_19_PCREL_S2>: Handle
+	the resolved case.
+	* testsuite/gas/mips/pcrel-reloc-4.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-4-r6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-5.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-5-r6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-6.d: New test.
+	* testsuite/gas/mips/pcrel-reloc-6.l: New list test.
+	* testsuite/gas/mips/pcrel-reloc-4.s: New test source.
+	* testsuite/gas/mips/pcrel-reloc-6.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
 
 2016-06-21  Maciej W. Rozycki  <macro@imgtec.com>
 

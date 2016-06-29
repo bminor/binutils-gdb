@@ -567,7 +567,8 @@ c_value_print (struct value *val, struct ui_file *stream,
 	       const struct value_print_options *options)
 {
   struct type *type, *real_type, *val_type;
-  int full, top, using_enc;
+  int full, using_enc;
+  LONGEST top;
   struct value_print_options opts = *options;
 
   opts.deref_ref = 1;

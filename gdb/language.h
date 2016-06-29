@@ -164,6 +164,13 @@ struct language_defn
     /* Style of macro expansion, if any, supported by this language.  */
     enum macro_expansion la_macro_expansion;
 
+    /* A NULL-terminated array of file extensions for this language.
+       The extension must include the ".", like ".c".  If this
+       language doesn't need to provide any filename extensions, this
+       may be NULL.  */
+
+    const char *const *la_filename_extensions;
+
     /* Definitions related to expression printing, prefixifying, and
        dumping.  */
 
@@ -284,6 +291,22 @@ struct language_defn
 
     /* Return demangled language symbol, or NULL.  */
     char *(*la_demangle) (const char *mangled, int options);
+
+    /* Demangle a symbol according to this language's rules.  Unlike
+       la_demangle, this does not take any options.
+
+       *DEMANGLED will be set by this function.
+       
+       If this function returns 0, then *DEMANGLED must always be set
+       to NULL.
+
+       If this function returns 1, the implementation may set this to
+       a xmalloc'd string holding the demangled form.  However, it is
+       not required to.  The string, if any, is owned by the caller.
+
+       The resulting string should be of the form that will be
+       installed into a symbol.  */
+    int (*la_sniff_from_mangled_name) (const char *mangled, char **demangled);
 
     /* Return class name of a mangled method name or NULL.  */
     char *(*la_class_name_from_physname) (const char *physname);
@@ -557,6 +580,13 @@ extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
 /* Return demangled language symbol, or NULL.  */
 extern char *language_demangle (const struct language_defn *current_language, 
 				const char *mangled, int options);
+
+/* A wrapper for la_sniff_from_mangled_name.  The arguments and result
+   are as for the method.  */
+
+extern int language_sniff_from_mangled_name (const struct language_defn *lang,
+					     const char *mangled,
+					     char **demangled);
 
 /* Return class name from physname, or NULL.  */
 extern char *language_class_name_from_physname (const struct language_defn *,

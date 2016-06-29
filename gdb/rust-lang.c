@@ -25,6 +25,7 @@
 #include "c-lang.h"
 #include "charset.h"
 #include "cp-support.h"
+#include "demangle.h"
 #include "gdbarch.h"
 #include "infcall.h"
 #include "objfiles.h"
@@ -120,7 +121,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
   if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
 	       strlen (RUST_ENUM_PREFIX)) == 0)
     {
-      char *tail;
+      char *tail, *token, *name, *saveptr = NULL;
       unsigned long fieldno;
       struct type *member_type;
       LONGEST value;
@@ -130,32 +131,56 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
       if (TYPE_NFIELDS (type) != 1)
 	error (_("Only expected one field in %s type"), RUST_ENUM_PREFIX);
 
-      fieldno = strtoul (TYPE_FIELD_NAME (type, 0) + strlen (RUST_ENUM_PREFIX),
-			 &tail, 10);
-      if (*tail != '$')
-	error (_("Invalid form for %s"), RUST_ENUM_PREFIX);
-
+      /* Optimized enums have only one field.  */
       member_type = TYPE_FIELD_TYPE (type, 0);
-      if (fieldno >= TYPE_NFIELDS (member_type))
-	error (_("%s refers to field after end of member type"),
-	       RUST_ENUM_PREFIX);
 
-      embedded_offset += TYPE_FIELD_BITPOS (member_type, fieldno) / 8;
-      value = unpack_long (TYPE_FIELD_TYPE (member_type, fieldno),
-			   valaddr + embedded_offset);
+      name = xstrdup (TYPE_FIELD_NAME (type, 0));
+      cleanup = make_cleanup (xfree, name);
+      tail = name + strlen (RUST_ENUM_PREFIX);
+
+      /* The location of the value that doubles as a discriminant is
+         stored in the name of the field, as
+         RUST$ENCODED$ENUM$<fieldno>$<fieldno>$...$<variantname>
+         where the fieldnos are the indices of the fields that should be
+         traversed in order to find the field (which may be several fields deep)
+         and the variantname is the name of the variant of the case when the
+         field is zero.  */
+      for (token = strtok_r (tail, "$", &saveptr);
+           token != NULL;
+           token = strtok_r (NULL, "$", &saveptr))
+        {
+	  if (sscanf (token, "%lu", &fieldno) != 1)
+	    {
+	      /* We have reached the enum name, which cannot start
+		 with a digit.  */
+	      break;
+	    }
+          if (fieldno >= TYPE_NFIELDS (member_type))
+	    error (_("%s refers to field after end of member type"),
+		   RUST_ENUM_PREFIX);
+
+          embedded_offset += TYPE_FIELD_BITPOS (member_type, fieldno) / 8;
+          member_type = TYPE_FIELD_TYPE (member_type, fieldno);
+        }
+
+      if (token == NULL)
+	error (_("Invalid form for %s"), RUST_ENUM_PREFIX);
+      value = unpack_long (member_type, valaddr + embedded_offset);
+
       if (value == 0)
 	{
 	  ret.field_no = RUST_ENCODED_ENUM_HIDDEN;
-	  ret.name = concat (TYPE_NAME (type), "::", tail + 1, (char *) NULL);
+	  ret.name = concat (TYPE_NAME (type), "::", token, (char *) NULL);
 	}
       else
 	{
 	  ret.field_no = RUST_ENCODED_ENUM_REAL;
 	  ret.name = concat (TYPE_NAME (type), "::",
-			     rust_last_path_segment (TYPE_NAME (member_type)),
+			     rust_last_path_segment (TYPE_NAME (TYPE_FIELD_TYPE (type, 0))),
 			     (char *) NULL);
 	}
 
+      do_cleanups (cleanup);
       return ret;
     }
 
@@ -423,7 +448,7 @@ static const struct generic_val_print_decorations rust_decorations =
   " * I",
   "true",
   "false",
-  "void",
+  "()",
   "[",
   "]"
 };
@@ -706,13 +731,22 @@ rust_print_type (struct type *type, const char *varstring,
   if (show <= 0
       && TYPE_NAME (type) != NULL)
     {
-      fputs_filtered (TYPE_NAME (type), stream);
+      /* Rust calls the unit type "void" in its debuginfo,
+         but we don't want to print it as that.  */
+      if (TYPE_CODE (type) == TYPE_CODE_VOID)
+        fputs_filtered ("()", stream);
+      else
+        fputs_filtered (TYPE_NAME (type), stream);
       return;
     }
 
   type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
+    case TYPE_CODE_VOID:
+      fputs_filtered ("()", stream);
+      break;
+
     case TYPE_CODE_FUNC:
       /* Delegate varargs to the C printer.  */
       if (TYPE_VARARGS (type))
@@ -730,8 +764,13 @@ rust_print_type (struct type *type, const char *varstring,
 	  rust_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0,
 			   flags);
 	}
-      fputs_filtered (") -> ", stream);
-      rust_print_type (TYPE_TARGET_TYPE (type), "", stream, -1, 0, flags);
+      fputs_filtered (")", stream);
+      /* If it returns unit, we can omit the return type.  */
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+        {
+          fputs_filtered (" -> ", stream);
+          rust_print_type (TYPE_TARGET_TYPE (type), "", stream, -1, 0, flags);
+        }
       break;
 
     case TYPE_CODE_ARRAY:
@@ -839,8 +878,10 @@ rust_print_type (struct type *type, const char *varstring,
 
     case TYPE_CODE_UNION:
       {
-	/* ADT enums */
+	/* ADT enums.  */
 	int i, len = 0;
+	/* Skip the discriminant field.  */
+	int skip_to = 1;
 
 	fputs_filtered ("enum ", stream);
 	if (TYPE_TAG_NAME (type) != NULL)
@@ -849,7 +890,19 @@ rust_print_type (struct type *type, const char *varstring,
 	    fputs_filtered (" ", stream);
 	    len = strlen (TYPE_TAG_NAME (type));
 	  }
-	fputs_filtered ("{\n", stream);      
+	fputs_filtered ("{\n", stream);
+
+	if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
+		     strlen (RUST_ENUM_PREFIX)) == 0)
+	  {
+	    const char *zero_field = strrchr (TYPE_FIELD_NAME (type, 0), '$');
+	    if (zero_field != NULL && strlen (zero_field) > 1)
+	      {
+		fprintfi_filtered (level + 2, stream, "%s,\n", zero_field + 1);
+		/* There is no explicit discriminant field, skip nothing.  */
+		skip_to = 0;
+	      }
+	  }
 
 	for (i = 0; i < TYPE_NFIELDS (type); ++i)
 	  {
@@ -859,14 +912,14 @@ rust_print_type (struct type *type, const char *varstring,
 
 	    fprintfi_filtered (level + 2, stream, "%s", name);
 
-	    if (TYPE_NFIELDS (variant_type) > 1)
+	    if (TYPE_NFIELDS (variant_type) > skip_to)
 	      {
 		int first = 1;
 		int is_tuple = rust_tuple_variant_type_p (variant_type);
 		int j;
 
 		fputs_filtered (is_tuple ? "(" : "{", stream);
-		for (j = 1; j < TYPE_NFIELDS (variant_type); j++)
+		for (j = skip_to; j < TYPE_NFIELDS (variant_type); j++)
 		  {
 		    if (first)
 		      first = 0;
@@ -1988,6 +2041,17 @@ rust_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
 
 
+/* la_sniff_from_mangled_name for Rust.  */
+
+static int
+rust_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+  return *demangled != NULL;
+}
+
+
+
 static const struct exp_descriptor exp_descriptor_rust = 
 {
   rust_print_subexp,
@@ -1996,6 +2060,11 @@ static const struct exp_descriptor exp_descriptor_rust =
   rust_op_name,
   rust_dump_subexp_body,
   rust_evaluate_subexp
+};
+
+static const char *rust_extensions[] =
+{
+  ".rs", NULL
 };
 
 static const struct language_defn rust_language_defn =
@@ -2007,6 +2076,7 @@ static const struct language_defn rust_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  rust_extensions,
   &exp_descriptor_rust,
   rust_parse,
   rustyyerror,
@@ -2024,6 +2094,7 @@ static const struct language_defn rust_language_defn =
   rust_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   gdb_demangle,			/* Language specific symbol demangler */
+  rust_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */

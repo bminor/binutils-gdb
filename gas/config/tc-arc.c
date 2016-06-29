@@ -182,6 +182,10 @@ enum options
   OPTION_RELAX,
   OPTION_NPS400,
 
+  OPTION_SPFP,
+  OPTION_DPFP,
+  OPTION_FPUDA,
+
   /* The following options are deprecated and provided here only for
      compatibility reasons.  */
   OPTION_USER_MODE,
@@ -194,8 +198,6 @@ enum options
   OPTION_EA,
   OPTION_MUL64,
   OPTION_SIMD,
-  OPTION_SPFP,
-  OPTION_DPFP,
   OPTION_XMAC_D16,
   OPTION_XMAC_24,
   OPTION_DSP_PACKA,
@@ -205,8 +207,7 @@ enum options
   OPTION_XYMEMORY,
   OPTION_LOCK,
   OPTION_SWAPE,
-  OPTION_RTSC,
-  OPTION_FPUDA
+  OPTION_RTSC
 };
 
 struct option md_longopts[] =
@@ -225,6 +226,19 @@ struct option md_longopts[] =
   { "mrelax",           no_argument,       NULL, OPTION_RELAX },
   { "mnps400",          no_argument,       NULL, OPTION_NPS400 },
 
+  /* Floating point options */
+  { "mspfp", no_argument, NULL, OPTION_SPFP},
+  { "mspfp-compact", no_argument, NULL, OPTION_SPFP},
+  { "mspfp_compact", no_argument, NULL, OPTION_SPFP},
+  { "mspfp-fast", no_argument, NULL, OPTION_SPFP},
+  { "mspfp_fast", no_argument, NULL, OPTION_SPFP},
+  { "mdpfp", no_argument, NULL, OPTION_DPFP},
+  { "mdpfp-compact", no_argument, NULL, OPTION_DPFP},
+  { "mdpfp_compact", no_argument, NULL, OPTION_DPFP},
+  { "mdpfp-fast", no_argument, NULL, OPTION_DPFP},
+  { "mdpfp_fast", no_argument, NULL, OPTION_DPFP},
+  { "mfpuda", no_argument, NULL, OPTION_FPUDA},
+
   /* The following options are deprecated and provided here only for
      compatibility reasons.  */
   { "mav2em", no_argument, NULL, OPTION_ARCEM },
@@ -242,16 +256,6 @@ struct option md_longopts[] =
   { "mEA", no_argument, NULL, OPTION_EA },
   { "mmul64", no_argument, NULL, OPTION_MUL64 },
   { "msimd", no_argument, NULL, OPTION_SIMD},
-  { "mspfp", no_argument, NULL, OPTION_SPFP},
-  { "mspfp-compact", no_argument, NULL, OPTION_SPFP},
-  { "mspfp_compact", no_argument, NULL, OPTION_SPFP},
-  { "mspfp-fast", no_argument, NULL, OPTION_SPFP},
-  { "mspfp_fast", no_argument, NULL, OPTION_SPFP},
-  { "mdpfp", no_argument, NULL, OPTION_DPFP},
-  { "mdpfp-compact", no_argument, NULL, OPTION_DPFP},
-  { "mdpfp_compact", no_argument, NULL, OPTION_DPFP},
-  { "mdpfp-fast", no_argument, NULL, OPTION_DPFP},
-  { "mdpfp_fast", no_argument, NULL, OPTION_DPFP},
   { "mmac-d16", no_argument, NULL, OPTION_XMAC_D16},
   { "mmac_d16", no_argument, NULL, OPTION_XMAC_D16},
   { "mmac-24", no_argument, NULL, OPTION_XMAC_24},
@@ -265,7 +269,6 @@ struct option md_longopts[] =
   { "mlock", no_argument, NULL, OPTION_LOCK},
   { "mswape", no_argument, NULL, OPTION_SWAPE},
   { "mrtsc", no_argument, NULL, OPTION_RTSC},
-  { "mfpuda", no_argument, NULL, OPTION_FPUDA},
 
   { NULL,		no_argument, NULL, 0 }
 };
@@ -3294,7 +3297,7 @@ arc_parse_name (const char *name,
    -mrelax                       Enable relaxation
 
    The following CPU names are recognized:
-   arc700, av2em, av2hs.  */
+   arc600, arc700, arcem, archs, nps400.  */
 
 int
 md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
@@ -3345,18 +3348,6 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_NPS400:
       arc_features |= ARC_NPS400;
-
-    case OPTION_USER_MODE:
-    case OPTION_LD_EXT_MASK:
-    case OPTION_SWAP:
-    case OPTION_NORM:
-    case OPTION_BARREL_SHIFT:
-    case OPTION_MIN_MAX:
-    case OPTION_NO_MPY:
-    case OPTION_EA:
-    case OPTION_MUL64:
-    case OPTION_SIMD:
-      /* Dummy options are accepted but have no effect.  */
       break;
 
     case OPTION_SPFP:
@@ -3367,6 +3358,25 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
       arc_features |= ARC_DPFP;
       break;
 
+    case OPTION_FPUDA:
+      /* This option has an effect only on ARC EM.  */
+      if (arc_target & ARC_OPCODE_ARCv2EM)
+	arc_features |= ARC_FPUDA;
+      else
+	as_warn (_("FPUDA invalid for selected CPU"));
+      break;
+
+    /* Dummy options are accepted but have no effect.  */
+    case OPTION_USER_MODE:
+    case OPTION_LD_EXT_MASK:
+    case OPTION_SWAP:
+    case OPTION_NORM:
+    case OPTION_BARREL_SHIFT:
+    case OPTION_MIN_MAX:
+    case OPTION_NO_MPY:
+    case OPTION_EA:
+    case OPTION_MUL64:
+    case OPTION_SIMD:
     case OPTION_XMAC_D16:
     case OPTION_XMAC_24:
     case OPTION_DSP_PACKA:
@@ -3377,15 +3387,6 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
     case OPTION_LOCK:
     case OPTION_SWAPE:
     case OPTION_RTSC:
-      /* Dummy options are accepted but have no effect.  */
-      break;
-
-    case OPTION_FPUDA:
-      /* This option has an effect only on ARC EM.  */
-      if (arc_target & ARC_OPCODE_ARCv2EM)
-	arc_features |= ARC_FPUDA;
-      else
-	as_warn (_("FPUDA invalid for selected CPU"));
       break;
 
     default:
@@ -4159,7 +4160,7 @@ void
 tc_arc_frame_initial_instructions (void)
 {
   /* Stack pointer is register 28.  */
-  cfi_add_CFA_def_cfa_register (28);
+  cfi_add_CFA_def_cfa (28, 0);
 }
 
 int

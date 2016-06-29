@@ -68,6 +68,9 @@ if [istarget "*-*-hpux*"] {
     append AFLAGS " --defsym HPUX=1"
 }
 
+# bfin does not currently support copy relocs.
+setup_xfail "bfin-*-*"
+
 setup_xfail "arm*-*-*" "ld/13802"
 
 # List targets here that keep copy relocs rather than eliminating

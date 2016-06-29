@@ -8,7 +8,7 @@ ELF Header:
   Class:                             ELF32
   Data:                              2's complement,.*
   Version:                           1 \(current\)
-  OS/ABI:                            UNIX - System V
+  OS/ABI:                            UNIX - .*
   ABI Version:                       0
   Type:                              REL \(Relocatable file\)
   Machine:                           MIPS R3000

@@ -24,6 +24,10 @@
 #ifndef OPCODE_ARC_H
 #define OPCODE_ARC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef MAX_INSN_ARGS
 #define MAX_INSN_ARGS	     16
 #endif
@@ -35,10 +39,13 @@
 /* Instruction Class.  */
 typedef enum
   {
+    ACL,
     ARITH,
     AUXREG,
+    BITOP,
     BRANCH,
     CONTROL,
+    DPI,
     DSP,
     FLOAT,
     INVALID,
@@ -46,10 +53,7 @@ typedef enum
     KERNEL,
     LOGICAL,
     MEMORY,
-    BITOP,
     NET,
-    ACL,
-    DPI,
   } insn_class_t;
 
 /* Instruction Subclass.  */
@@ -603,5 +607,9 @@ extern const unsigned char arg_32bit_limmlimm[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_rc[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_u6[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_limm[MAX_INSN_ARGS + 1];
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OPCODE_ARC_H */

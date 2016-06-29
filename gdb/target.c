@@ -1825,15 +1825,15 @@ read_whatever_is_readable (struct target_ops *ops,
 void
 free_memory_read_result_vector (void *x)
 {
-  VEC(memory_read_result_s) *v = (VEC(memory_read_result_s) *) x;
+  VEC(memory_read_result_s) **v = (VEC(memory_read_result_s) **) x;
   memory_read_result_s *current;
   int ix;
 
-  for (ix = 0; VEC_iterate (memory_read_result_s, v, ix, current); ++ix)
+  for (ix = 0; VEC_iterate (memory_read_result_s, *v, ix, current); ++ix)
     {
       xfree (current->data);
     }
-  VEC_free (memory_read_result_s, v);
+  VEC_free (memory_read_result_s, *v);
 }
 
 VEC(memory_read_result_s) *
@@ -1842,6 +1842,8 @@ read_memory_robust (struct target_ops *ops,
 {
   VEC(memory_read_result_s) *result = 0;
   int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+  struct cleanup *cleanup = make_cleanup (free_memory_read_result_vector,
+					  &result);
 
   LONGEST xfered_total = 0;
   while (xfered_total < len)
@@ -1868,6 +1870,7 @@ read_memory_robust (struct target_ops *ops,
 	{
 	  LONGEST to_read = min (len - xfered_total, region_len);
 	  gdb_byte *buffer = (gdb_byte *) xmalloc (to_read * unit_size);
+	  struct cleanup *inner_cleanup = make_cleanup (xfree, buffer);
 
 	  LONGEST xfered_partial =
 	      target_read (ops, TARGET_OBJECT_MEMORY, NULL,
@@ -1878,7 +1881,7 @@ read_memory_robust (struct target_ops *ops,
 	    {
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
-	      xfree (buffer);
+	      do_cleanups (inner_cleanup);
 	      read_whatever_is_readable (ops, offset + xfered_total,
 					 offset + xfered_total + to_read,
 					 unit_size, &result);
@@ -1887,6 +1890,8 @@ read_memory_robust (struct target_ops *ops,
 	  else
 	    {
 	      struct memory_read_result r;
+
+	      discard_cleanups (inner_cleanup);
 	      r.data = buffer;
 	      r.begin = offset + xfered_total;
 	      r.end = r.begin + xfered_partial;
@@ -1896,6 +1901,8 @@ read_memory_robust (struct target_ops *ops,
 	  QUIT;
 	}
     }
+
+  discard_cleanups (cleanup);
   return result;
 }
 

@@ -3481,7 +3481,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 		}
 	      else
 		{
-		  if (r_type == R_SPARC_32 || r_type == R_SPARC_64)
+		  if (  (!ABI_64_P (output_bfd) && r_type == R_SPARC_32)
+		      || (ABI_64_P (output_bfd) && r_type == R_SPARC_64))
 		    {
 		      outrel.r_info = SPARC_ELF_R_INFO (htab, NULL,
 							0, R_SPARC_RELATIVE);

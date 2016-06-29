@@ -33,14 +33,13 @@ SECTIONS
   .rel.plt : { *(.rel.plt) }
   .rela.plt : { *(.rela.plt) }
   .init : { *(.init) }
-  .plt : { *(.plt) }
   .text : { *(.text) }
   .fini : { *(.fini) }
   .rodata : { *(.rodata .rodata.*) }
   .eh_frame_hdr : { *(.eh_frame_hdr) }
   .eh_frame : { *(.eh_frame) }
 
-  . = DATA_SEGMENT_ALIGN(0x1000, 0x1000);
+  . = DATA_SEGMENT_ALIGN(0x10000, 0x10000);
 
   .init_array : {
     __init_array_start = .;
@@ -57,6 +56,7 @@ SECTIONS
     test_array_start = .;
     *(.x1 .x2 .x3);
     test_array_end = .;
+    *(.x4);
     }
   .bss : { *(.bss) }
 

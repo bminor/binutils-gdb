@@ -275,7 +275,6 @@ static struct visium_arch_option_table visium_archs[] =
   {"mcm",   VISIUM_ARCH_MCM},
   {"gr5",   VISIUM_ARCH_MCM},
   {"gr6",   VISIUM_ARCH_GR6},
-  {NULL, 0}
 };
 
 struct visium_long_option_table
@@ -289,7 +288,7 @@ struct visium_long_option_table
 static int
 visium_parse_arch (const char *str)
 {
-  struct visium_arch_option_table *opt;
+  unsigned int i;
 
   if (strlen (str) == 0)
     {
@@ -297,11 +296,10 @@ visium_parse_arch (const char *str)
       return 0;
     }
 
-
-  for (opt = visium_archs; opt->name != NULL; opt++)
-    if (strcmp (opt->name, str) == 0)
+  for (i = 0; i < ARRAY_SIZE (visium_archs); i++)
+    if (strcmp (visium_archs[i].name, str) == 0)
       {
-	visium_arch = opt->value;
+	visium_arch = visium_archs[i].value;
 	return 1;
       }
 

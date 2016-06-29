@@ -41,6 +41,10 @@
 
 #include "opcode/arc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define IGNORE_FIRST_OPD 1
 
 /* Define this if we do not want to encode instructions based on the
@@ -130,5 +134,9 @@ extern struct arc_opcode *arcExtMap_genOpcode (const extInstruction_t *,
 
 /* Dump function (for debugging).  */
 extern void dump_ARC_extmap (void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ARC_EXTENSIONS_H */

@@ -758,11 +758,10 @@ get_pc (struct lwp_info *lwp)
 }
 
 /* This function should only be called if LWP got a SYSCALL_SIGTRAP.
-   Fill *SYSNO with the syscall nr trapped.  Fill *SYSRET with the
-   return code.  */
+   Fill *SYSNO with the syscall nr trapped.  */
 
 static void
-get_syscall_trapinfo (struct lwp_info *lwp, int *sysno, int *sysret)
+get_syscall_trapinfo (struct lwp_info *lwp, int *sysno)
 {
   struct thread_info *saved_thread;
   struct regcache *regcache;
@@ -770,9 +769,8 @@ get_syscall_trapinfo (struct lwp_info *lwp, int *sysno, int *sysret)
   if (the_low_target.get_syscall_trapinfo == NULL)
     {
       /* If we cannot get the syscall trapinfo, report an unknown
-	 system call number and -ENOSYS return value.  */
+	 system call number.  */
       *sysno = UNKNOWN_SYSCALL;
-      *sysret = -ENOSYS;
       return;
     }
 
@@ -780,13 +778,10 @@ get_syscall_trapinfo (struct lwp_info *lwp, int *sysno, int *sysret)
   current_thread = get_lwp_thread (lwp);
 
   regcache = get_thread_regcache (current_thread, 1);
-  (*the_low_target.get_syscall_trapinfo) (regcache, sysno, sysret);
+  (*the_low_target.get_syscall_trapinfo) (regcache, sysno);
 
   if (debug_threads)
-    {
-      debug_printf ("get_syscall_trapinfo sysno %d sysret %d\n",
-		    *sysno, *sysret);
-    }
+    debug_printf ("get_syscall_trapinfo sysno %d\n", *sysno);
 
   current_thread = saved_thread;
 }
@@ -3116,7 +3111,7 @@ static int
 gdb_catch_this_syscall_p (struct lwp_info *event_child)
 {
   int i, iter;
-  int sysno, sysret;
+  int sysno;
   struct thread_info *thread = get_lwp_thread (event_child);
   struct process_info *proc = get_thread_process (thread);
 
@@ -3126,7 +3121,7 @@ gdb_catch_this_syscall_p (struct lwp_info *event_child)
   if (VEC_index (int, proc->syscalls_to_catch, 0) == ANY_SYSCALL)
     return 1;
 
-  get_syscall_trapinfo (event_child, &sysno, &sysret);
+  get_syscall_trapinfo (event_child, &sysno);
   for (i = 0;
        VEC_iterate (int, proc->syscalls_to_catch, i, iter);
        i++)
@@ -3734,10 +3729,8 @@ linux_wait_1 (ptid_t ptid,
 
   if (WSTOPSIG (w) == SYSCALL_SIGTRAP)
     {
-      int sysret;
-
       get_syscall_trapinfo (event_child,
-			    &ourstatus->value.syscall_number, &sysret);
+			    &ourstatus->value.syscall_number);
       ourstatus->kind = event_child->syscall_state;
     }
   else if (current_thread->last_resume_kind == resume_stop

@@ -342,6 +342,8 @@ Options:\n\
   fprintf (stream, _("\
   -nocpp                  ignored\n"));
   fprintf (stream, _("\
+  -no-pad-sections        do not pad the end of sections to alignment boundaries\n"));
+  fprintf (stream, _("\
   -o OBJFILE              name the object-file output OBJFILE (default a.out)\n"));
   fprintf (stream, _("\
   -R                      fold data section into text section\n"));
@@ -479,7 +481,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_REDUCE_MEMORY_OVERHEADS,
       OPTION_WARN_FATAL,
       OPTION_COMPRESS_DEBUG,
-      OPTION_NOCOMPRESS_DEBUG
+      OPTION_NOCOMPRESS_DEBUG,
+      OPTION_NO_PAD_SECTIONS /* = STD_BASE + 40 */
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -542,6 +545,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"MD", required_argument, NULL, OPTION_DEPFILE}
     ,{"mri", no_argument, NULL, 'M'}
     ,{"nocpp", no_argument, NULL, OPTION_NOCPP}
+    ,{"no-pad-sections", no_argument, NULL, OPTION_NO_PAD_SECTIONS}
     ,{"no-warn", no_argument, NULL, 'W'}
     ,{"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS}
     ,{"statistics", no_argument, NULL, OPTION_STATISTICS}
@@ -635,6 +639,10 @@ parse_args (int * pargc, char *** pargv)
 	  exit (EXIT_SUCCESS);
 
 	case OPTION_NOCPP:
+	  break;
+
+	case OPTION_NO_PAD_SECTIONS:
+	  do_not_pad_sections_to_alignment = 1;
 	  break;
 
 	case OPTION_STATISTICS:

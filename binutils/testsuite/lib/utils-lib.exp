@@ -66,6 +66,15 @@ proc default_binutils_run { prog progargs } {
 	}
     }
 
+    # For objdump, automatically translate standard section
+    # names to the targets one, if they are different.
+    set sect_names [get_standard_section_names]
+    if { $sect_names != "" && [string match "*objdump" $prog] } {
+        regsub -- "-j \\.text" $progargs "-j [lindex $sect_names 0]" progargs
+        regsub -- "-j \\.data" $progargs "-j [lindex $sect_names 1]" progargs
+        regsub -- "-j \\.bss"  $progargs "-j [lindex $sect_names 2]" progargs
+    }
+
     send_log "$prog $progargs\n"
     verbose "$prog $progargs"
 
@@ -487,6 +496,15 @@ proc run_dump_test { name {extra_options {}} } {
 	return
     }
 
+    # For objdump, automatically translate standard section names to the targets one,
+    # if they are different.
+    set sect_names [get_standard_section_names]
+    if { $sect_names != "" && $dumpprogram == "objdump"} {
+        regsub -- "-j \\.text" $progopts1 "-j [lindex $sect_names 0]" progopts1
+        regsub -- "-j \\.data" $progopts1 "-j [lindex $sect_names 1]" progopts1
+        regsub -- "-j \\.bss"  $progopts1 "-j [lindex $sect_names 2]" progopts1
+    }
+
     verbose "running $binary $progopts $progopts1" 3
 
     set cmd "$binary $progopts $progopts1 ${copyfile}.o"
@@ -562,4 +580,17 @@ proc file_contents { filename } {
 proc verbose_eval { expr { level 1 } } {
     global verbose
     if $verbose>$level then { eval verbose "$expr" $level }
+}
+
+# Internal procedure: return the names of the standard sections
+#
+proc get_standard_section_names {} {
+    if [istarget "rx-*-*"] {
+        return { "P" "D_1" "B_1" }
+    }
+    if [istarget "alpha*-*-*vms*"] {
+        # Double quote: for TCL and for sh.
+        return { "\\\$CODE\\\$" "\\\$DATA\\\$" "\\\$BSS\\\$" }
+    }
+    return
 }

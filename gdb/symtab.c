@@ -747,110 +747,31 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 			    const char *mangled)
 {
   char *demangled = NULL;
+  int i;
+  int recognized;
 
   if (gsymbol->language == language_unknown)
     gsymbol->language = language_auto;
 
-  if (gsymbol->language == language_objc
-      || gsymbol->language == language_auto)
+  if (gsymbol->language != language_auto)
     {
-      demangled =
-	objc_demangle (mangled, 0);
-      if (demangled != NULL)
+      const struct language_defn *lang = language_def (gsymbol->language);
+
+      language_sniff_from_mangled_name (lang, mangled, &demangled);
+      return demangled;
+    }
+
+  for (i = language_unknown; i < nr_languages; ++i)
+    {
+      enum language l = (enum language) i;
+      const struct language_defn *lang = language_def (l);
+
+      if (language_sniff_from_mangled_name (lang, mangled, &demangled))
 	{
-	  gsymbol->language = language_objc;
+	  gsymbol->language = l;
 	  return demangled;
 	}
     }
-  if (gsymbol->language == language_cplus
-      || gsymbol->language == language_rust
-      || gsymbol->language == language_auto)
-    {
-      demangled =
-        gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
-      if (demangled != NULL)
-	{
-	  gsymbol->language = language_cplus;
-	  return demangled;
-	}
-    }
-  if (gsymbol->language == language_java)
-    {
-      demangled =
-        gdb_demangle (mangled,
-		      DMGL_PARAMS | DMGL_ANSI | DMGL_JAVA);
-      if (demangled != NULL)
-	{
-	  gsymbol->language = language_java;
-	  return demangled;
-	}
-    }
-  if (gsymbol->language == language_d
-      || gsymbol->language == language_auto)
-    {
-      demangled = d_demangle(mangled, 0);
-      if (demangled != NULL)
-	{
-	  gsymbol->language = language_d;
-	  return demangled;
-	}
-    }
-  /* FIXME(dje): Continually adding languages here is clumsy.
-     Better to just call la_demangle if !auto, and if auto then call
-     a utility routine that tries successive languages in turn and reports
-     which one it finds.  I realize the la_demangle options may be different
-     for different languages but there's already a FIXME for that.  */
-  if (gsymbol->language == language_go
-      || gsymbol->language == language_auto)
-    {
-      demangled = go_demangle (mangled, 0);
-      if (demangled != NULL)
-	{
-	  gsymbol->language = language_go;
-	  return demangled;
-	}
-    }
-
-  /* We could support `gsymbol->language == language_fortran' here to provide
-     module namespaces also for inferiors with only minimal symbol table (ELF
-     symbols).  Just the mangling standard is not standardized across compilers
-     and there is no DW_AT_producer available for inferiors with only the ELF
-     symbols to check the mangling kind.  */
-
-  /* Check for Ada symbols last.  See comment below explaining why.  */
-
-  if (gsymbol->language == language_auto)
-   {
-     const char *demangled = ada_decode (mangled);
-
-     if (demangled != mangled && demangled != NULL && demangled[0] != '<')
-       {
-	 /* Set the gsymbol language to Ada, but still return NULL.
-	    Two reasons for that:
-
-	      1. For Ada, we prefer computing the symbol's decoded name
-		 on the fly rather than pre-compute it, in order to save
-		 memory (Ada projects are typically very large).
-
-	      2. There are some areas in the definition of the GNAT
-		 encoding where, with a bit of bad luck, we might be able
-		 to decode a non-Ada symbol, generating an incorrect
-		 demangled name (Eg: names ending with "TB" for instance
-		 are identified as task bodies and so stripped from
-		 the decoded name returned).
-
-		 Returning NULL, here, helps us get a little bit of
-		 the best of both worlds.  Because we're last, we should
-		 not affect any of the other languages that were able to
-		 demangle the symbol before us; we get to correctly tag
-		 Ada symbols as such; and even if we incorrectly tagged
-		 a non-Ada symbol, which should be rare, any routing
-		 through the Ada language should be transparent (Ada
-		 tries to behave much like C/C++ with non-Ada symbols).  */
-	 gsymbol->language = language_ada;
-	 return NULL;
-       }
-   }
 
   return NULL;
 }

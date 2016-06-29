@@ -1,3 +1,37 @@
+2016-06-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* opcode/sparc.h (enum sparc_opcode_arch_val): Move
+	SPARC_OPCODE_ARCH_MAX into the enum.
+
+2016-06-28  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (aarch64_opnd_info): Change index fields to int64_t.
+
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf/mips.h (R_MIPS16_PC16_S1): New relocation.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf/xtensa.h (xtensa_make_property_section): New prototype.
+
+2016-06-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_EXECPATH, AT_FREEBSD_CANARY)
+	(AT_FREEBSD_CANARYLEN, AT_FREEBSD_OSRELDATE, AT_FREEBSD_NCPUS)
+	(AT_FREEBSD_PAGESIZES, AT_FREEBSD_PAGESIZESLEN)
+	(AT_FREEBSD_TIMEKEEP, AT_FREEBSD_STACKPROT): Define.
+
+2016-06-23  Graham Markall  <graham.markall@embecosm.com>
+
+	* opcode/arc.h: Make insn_class_t alphabetical again.
+
+2016-06-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* elf/dlx.h: Wrap in extern C.
+	* elf/xtensa.h: Likewise.
+	* opcode/arc.h: Likewise.
+
 2016-06-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* opcode/tilegx.h: Move TILEGX_NUM_PIPELINE_ENCODINGS into

@@ -26,6 +26,10 @@ if ![is_remote host] {
     }
 }
 
+if { [istarget "alpha-*-*"] && ![is_elf_format] } then {
+    return
+}
+
 # send_user "Version [binutil_version $AR]"
 
 # Test long file name support
@@ -600,7 +604,7 @@ proc empty_archive { } {
 # programs are built but not installed, running the testsuite on an
 # installed toolchain will produce ERRORs about missing bfdtest1 and
 # bfdtest2 executables.
-if { [file exists $base_dir/bfdtest1] && [file exists $base_dir/bfdtest2] } {
+if { ![istarget "tic30-*-*"] && [file exists $base_dir/bfdtest1] && [file exists $base_dir/bfdtest2] } {
     set bfdtests [list bfdtest1 bfdtest2]
 
     long_filenames $bfdtests
@@ -615,8 +619,6 @@ delete_an_element
 move_an_element
 empty_archive
 
-if { [is_elf_format]
-     && ![istarget "*-*-hpux*"]
-     && ![istarget "msp*-*-*"] } {
+if { [is_elf_format] && [supports_gnu_unique] } {
     unique_symbol
 }

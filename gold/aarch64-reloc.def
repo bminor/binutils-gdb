@@ -32,6 +32,9 @@
 // Type----------------------------+         |              |    |      |                       |     |                                              |
 // Name                            |         |              |    |      |                       |     |                                              |
 //  |                              |         |              |    |      |                       |     |                                              |
+ARD(NONE                         , STATIC  , NONE       ,   Y,  -1,    0,0                ,    0,0  , 0                    ,                         DATA  )
+// Above is from Table 4-5, Null relocation codes
+
 ARD(ABS64                        , STATIC ,  DATA       ,   Y,  -1,    0,0                ,    0,0  , Symbol::ABSOLUTE_REF ,                         DATA  )
 ARD(ABS32                        , STATIC ,  DATA       ,   Y,  -1,   31,32               ,    0,0  , Symbol::ABSOLUTE_REF ,                         DATA  )
 ARD(ABS16                        , STATIC ,  DATA       ,   Y,  -1,   15,16               ,    0,0  , Symbol::ABSOLUTE_REF ,                         DATA  )

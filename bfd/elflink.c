@@ -28,7 +28,7 @@
 #include "safe-ctype.h"
 #include "libiberty.h"
 #include "objalloc.h"
-#ifdef BFD_SUPPORTS_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
 #endif
 
@@ -3134,7 +3134,7 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
      object file is an IR object, give linker LTO plugin a chance to
      get the correct symbol table.  */
   if (abfd->plugin_format == bfd_plugin_yes
-#ifdef BFD_SUPPORTS_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
       || (abfd->plugin_format == bfd_plugin_unknown
 	  && bfd_link_plugin_object_p (abfd))
 #endif
@@ -9053,7 +9053,8 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
     case bfd_link_hash_undefined:
     case bfd_link_hash_undefweak:
       abfd = h->root.u.undef.abfd;
-      if ((abfd->flags & DYNAMIC) == 0
+      if (abfd == NULL
+	  || (abfd->flags & DYNAMIC) == 0
 	  || (elf_dyn_lib_class (abfd) & DYN_DT_NEEDED) == 0)
 	return FALSE;
       break;

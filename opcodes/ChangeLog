@@ -1,3 +1,34 @@
+2016-06-28  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (operand_general_constraint_met_p): Check the
+	range of ldst_elemlist operands.
+	(print_register_list): Use PRIi64 to print the index.
+	(aarch64_print_operand): Likewise.
+
+2016-06-25  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* mcore-opc.h: Remove sentinal.
+	* mcore-dis.c (print_insn_mcore): Adjust.
+
+2016-06-23  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-opc.c: Correct description of availability of NPS400
+	features.
+
+2016-06-22  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (RM, DRM, VXASH, VXASH_MASK, XMMF, XMMF_MASK): New defines.
+	(powerpc_opcodes) <brd, brh, brw, mffsce, mffscdrn, mffscdrni,
+	mffscrn, mffscrni, mffsl, nandxor, rldixor, setbool,
+	xor3>: New mnemonics.
+	<setb>: Change to a VX form instruction.
+	(insert_sh6): Add support for rldixor.
+	(extract_sh6): Likewise.
+
+2016-06-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* arc-ext.h: Wrap in extern C.
+
 2016-06-21  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-dis.c (arc_insn_length): Add comment on instruction length.

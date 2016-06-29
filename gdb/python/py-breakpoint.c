@@ -705,6 +705,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
     }
   CATCH (except, RETURN_MASK_ALL)
     {
+      bppy_pending_object = NULL;
       PyErr_Format (except.reason == RETURN_QUIT
 		    ? PyExc_KeyboardInterrupt : PyExc_RuntimeError,
 		    "%s", except.message);

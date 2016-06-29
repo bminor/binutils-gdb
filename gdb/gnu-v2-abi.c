@@ -183,7 +183,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
 
 static struct type *
-gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
+gnuv2_value_rtti_type (struct value *v, int *full, LONGEST *top, int *using_enc)
 {
   struct type *known_type;
   struct type *rtti_type;
@@ -340,7 +340,7 @@ vb_match (struct type *type, int index, struct type *basetype)
 
 static int
 gnuv2_baseclass_offset (struct type *type, int index,
-			const bfd_byte *valaddr, int embedded_offset,
+			const bfd_byte *valaddr, LONGEST embedded_offset,
 			CORE_ADDR address, const struct value *val)
 {
   struct type *basetype = TYPE_BASECLASS (type, index);
@@ -358,7 +358,7 @@ gnuv2_baseclass_offset (struct type *type, int index,
 	  if (vb_match (type, i, basetype))
 	    {
 	      struct type *field_type;
-	      int field_offset;
+	      LONGEST field_offset;
 	      int field_length;
 	      CORE_ADDR addr;
 

@@ -1,7 +1,6 @@
 #source: rgn-at11.s
 #ld: -T rgn-at11.t
 #objdump: -h --wide
-#xfail: rx-*-*
 # Test that lma is not adjusted in case the section start vma is aligned and
 # lma_region != region if not requested by script.
 # Fails for RX because it ignores the LMA (for compatibility with Renesas tools)

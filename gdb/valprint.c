@@ -303,7 +303,7 @@ val_print_scalar_type_p (struct type *type)
 int
 valprint_check_validity (struct ui_file *stream,
 			 struct type *type,
-			 int embedded_offset,
+			 LONGEST embedded_offset,
 			 const struct value *val)
 {
   type = check_typedef (type);
@@ -1042,7 +1042,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
    RECURSE.  */
 
 void
-val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
+val_print (struct type *type, const gdb_byte *valaddr, LONGEST embedded_offset,
 	   CORE_ADDR address, struct ui_file *stream, int recurse,
 	   const struct value *val,
 	   const struct value_print_options *options,
@@ -1303,7 +1303,7 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 
 void
 val_print_scalar_formatted (struct type *type,
-			    const gdb_byte *valaddr, int embedded_offset,
+			    const gdb_byte *valaddr, LONGEST embedded_offset,
 			    const struct value *val,
 			    const struct value_print_options *options,
 			    int size,
@@ -1965,7 +1965,7 @@ maybe_print_array_index (struct type *index_type, LONGEST index,
 
 void
 val_print_array_elements (struct type *type,
-			  const gdb_byte *valaddr, int embedded_offset,
+			  const gdb_byte *valaddr, LONGEST embedded_offset,
 			  CORE_ADDR address, struct ui_file *stream,
 			  int recurse,
 			  const struct value *val,

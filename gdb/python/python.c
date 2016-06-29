@@ -554,7 +554,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
 /* A Python function which returns a gdb parameter's value as a Python
    value.  */
 
-PyObject *
+static PyObject *
 gdbpy_parameter (PyObject *self, PyObject *args)
 {
   struct gdb_exception except = exception_none;

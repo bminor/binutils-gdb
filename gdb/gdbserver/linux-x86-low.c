@@ -991,25 +991,19 @@ x86_arch_setup (void)
    code.  This should only be called if LWP got a SYSCALL_SIGTRAP.  */
 
 static void
-x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno, int *sysret)
+x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
   if (use_64bit)
     {
       long l_sysno;
-      long l_sysret;
 
       collect_register_by_name (regcache, "orig_rax", &l_sysno);
-      collect_register_by_name (regcache, "rax", &l_sysret);
       *sysno = (int) l_sysno;
-      *sysret = (int) l_sysret;
     }
   else
-    {
-      collect_register_by_name (regcache, "orig_eax", sysno);
-      collect_register_by_name (regcache, "eax", sysret);
-    }
+    collect_register_by_name (regcache, "orig_eax", sysno);
 }
 
 static int

@@ -149,6 +149,7 @@ gdb_test "print self::diff2(8, 9)" " = -1"
 gdb_test "print ::diff2(23, -23)" " = 46"
 
 gdb_test "ptype diff2" "fn \\(i32, i32\\) -> i32"
+gdb_test "ptype empty" "fn \\(\\)"
 
 gdb_test "print (diff2 as fn(i32, i32) -> i32)(19, -2)" " = 21"
 
@@ -168,6 +169,17 @@ gdb_test "print 0..5" " = .*::ops::Range.* \\{start: 0, end: 5\\}"
 gdb_test "print ..5" " = .*::ops::RangeTo.* \\{end: 5\\}"
 gdb_test "print 5.." " = .*::ops::RangeFrom.* \\{start: 5\\}"
 gdb_test "print .." " = .*::ops::RangeFull"
+
+gdb_test "print str_some" \
+    " = core::option::Option<collections::string::String>::Some\\(collections::string::String .*"
+gdb_test "print str_none" " = core::option::Option<collections::string::String>::None"
+gdb_test "print int_some" " = core::option::Option::Some\\(1\\)"
+gdb_test "print int_none" " = core::option::Option::None"
+gdb_test "print box_some" " = core::option::Option<Box<u8>>::Some\\(.*\\)"
+gdb_test "print box_none" " = core::option::Option<Box<u8>>::None"
+gdb_test "print custom_some" \
+    " = simple::NonZeroOptimized::Value\\(collections::string::String .*"
+gdb_test "print custom_none" " = simple::NonZeroOptimized::Empty"
 
 proc test_one_slice {svar length base range} {
     global hex

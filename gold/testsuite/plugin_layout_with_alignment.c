@@ -26,44 +26,44 @@
 
 // --- Initialized .rodata items
 
-__attribute__ ((section(".rodata.v1_a2")))
+__attribute__ ((section(".rodata.v1_a2"), aligned(2)))
 const short rodata_item1 = 101;
 
-__attribute__ ((section(".rodata.v2_a1")))
+__attribute__ ((section(".rodata.v2_a1"), aligned(1)))
 const char rodata_item2 = 'a';
 
-__attribute__ ((section(".rodata.v3_a8")))
+__attribute__ ((section(".rodata.v3_a8"), aligned(8)))
 const double rodata_item3 = 777.777;
 
-__attribute__ ((section(".rodata.v4_a1")))
+__attribute__ ((section(".rodata.v4_a1"), aligned(1)))
 const char rodata_item4[7] = {'1', '2', '3', '4', '5', '6', '7'};
 
 // --- Initialized .data items
 
-__attribute__ ((section(".data.v1_a2")))
+__attribute__ ((section(".data.v1_a2"), aligned(2)))
 short rwdata_item1 = 101;
 
-__attribute__ ((section(".data.v2_a1")))
+__attribute__ ((section(".data.v2_a1"), aligned(1)))
 char rwdata_item2 = 'a';
 
-__attribute__ ((section(".data.v3_a8")))
+__attribute__ ((section(".data.v3_a8"), aligned(8)))
 double rwdata_item3 = 'b';
 
-__attribute__ ((section(".data.v4_a1")))
+__attribute__ ((section(".data.v4_a1"), aligned(1)))
 char rwdata_item4[3] = {'a', 'b', 'c'};
 
 // --- Uninitialized .data items
 
-__attribute__ ((section(".bss.v1_a2")))
+__attribute__ ((section(".bss.v1_a2"), aligned(2)))
 short bss_item1;
 
-__attribute__ ((section(".bss.v2_a1")))
+__attribute__ ((section(".bss.v2_a1"), aligned(1)))
 char bss_item2;
 
-__attribute__ ((section(".bss.v3_a8")))
+__attribute__ ((section(".bss.v3_a8"), aligned(8)))
 struct blah { union { double d; char c; } u; } bss_item3;
 
-__attribute__ ((section(".bss.v4_a1")))
+__attribute__ ((section(".bss.v4_a1"), aligned(1)))
 char bss_item4[3];
 
 int main (void)

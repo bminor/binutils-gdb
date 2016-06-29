@@ -1,3 +1,184 @@
+2016-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/20308
+	* i386.cc (Target_i386::Relocate::relocate): Allow
+	R_386_GOT32X relocation against ___tls_get_addr.
+	(Target_i386::Relocate::tls_gd_to_ie): Support indirect
+	call to __tls_get_addr.
+	(Target_i386::Relocate::tls_gd_to_le): Likewise.
+	(Target_i386::Relocate::tls_ld_to_le): Likewise.
+	* testsuite/Makefile.am (check_PROGRAMS): Add pr20308a_test,
+	pr20308b_test, pr20308c_test, pr20308d_test, pr20308e_test.
+	(pr20308a_test_SOURCES): New.
+	(pr20308a_test_DEPENDENCIES): Likewise.
+	(pr20308a_test_CFLAGS): Likewise.
+	(pr20308a_test_LDFLAGS): Likewise.
+	(pr20308a_test_LDADD): Likewise.
+	(pr20308b_test_SOURCES): Likewise.
+	(pr20308b_test_DEPENDENCIES): Likewise.
+	(pr20308b_test_CFLAGS): Likewise.
+	(pr20308b_test_LDFLAGS): Likewise.
+	(pr20308b_test_LDADD): Likewise.
+	(pr20308c_test_SOURCES): Likewise.
+	(pr20308c_test_DEPENDENCIES): Likewise.
+	(pr20308c_test_CFLAGS): Likewise.
+	(pr20308c_test_LDFLAGS): Likewise.
+	(pr20308c_test_LDADD): Likewise.
+	(pr20308d_test_SOURCES): Likewise.
+	(pr20308d_test_DEPENDENCIES): Likewise.
+	(pr20308d_test_CFLAGS): Likewise.
+	(pr20308d_test_LDFLAGS): Likewise.
+	(pr20308d_test_LDADD): Likewise.
+	(pr20308e_test_SOURCES): Likewise.
+	(pr20308e_test_DEPENDENCIES): Likewise.
+	(pr20308e_test_CFLAGS): Likewise.
+	(pr20308e_test_LDFLAGS): Likewise.
+	(pr20308e_test_LDADD): Likewise.
+	(pr20308a.so): Likewise.
+	(pr20308b.so): Likewise.
+	(pr20308_gd.o): Likewise.
+	(pr20308_ld.o): Likewise.
+	(MOSTLYCLEANFILES): Add pr20308a.so pr20308b.so.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/pr20308_def.c: New file.
+	* testsuite/pr20308_gd.S: Likewise.
+	* testsuite/pr20308_ld.S: Likewise.
+	* testsuite/pr20308_main.c: Likewise.
+
+2016-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/20216
+	* configure.ac (DEFAULT_TARGET_X86_64_OR_X32): New
+	AM_CONDITIONAL.
+	* configure: Regenerated.
+	* x86_64.cc (Target_x86_64<size>::Relocate::relocate): Allow
+	R_X86_64_GOTPCRELX relocation against __tls_get_addr.
+	(Target_x86_64<size>::Relocate::tls_gd_to_ie): Support indirect
+	call to __tls_get_addr.
+	(Target_x86_64<size>::Relocate::tls_gd_to_le): Likewise.
+	(Target_x86_64<size>::Relocate::tls_ld_to_le): Likewise.
+	* testsuite/Makefile.am (check_PROGRAMS): Add pr20216a_test,
+	pr20216b_test, pr20216c_test, pr20216d_test, pr20216e_test.
+	(pr20216a_test_SOURCES): New.
+	(pr20216a_test_DEPENDENCIES): Likewise.
+	(pr20216a_test_CFLAGS): Likewise.
+	(pr20216a_test_LDFLAGS): Likewise.
+	(pr20216a_test_LDADD): Likewise.
+	(pr20216b_test_SOURCES): Likewise.
+	(pr20216b_test_DEPENDENCIES): Likewise.
+	(pr20216b_test_CFLAGS): Likewise.
+	(pr20216b_test_LDFLAGS): Likewise.
+	(pr20216b_test_LDADD): Likewise.
+	(pr20216c_test_SOURCES): Likewise.
+	(pr20216c_test_DEPENDENCIES): Likewise.
+	(pr20216c_test_CFLAGS): Likewise.
+	(pr20216c_test_LDFLAGS): Likewise.
+	(pr20216c_test_LDADD): Likewise.
+	(pr20216d_test_SOURCES): Likewise.
+	(pr20216d_test_DEPENDENCIES): Likewise.
+	(pr20216d_test_CFLAGS): Likewise.
+	(pr20216d_test_LDFLAGS): Likewise.
+	(pr20216d_test_LDADD): Likewise.
+	(pr20216e_test_SOURCES): Likewise.
+	(pr20216e_test_DEPENDENCIES): Likewise.
+	(pr20216e_test_CFLAGS): Likewise.
+	(pr20216e_test_LDFLAGS): Likewise.
+	(pr20216e_test_LDADD): Likewise.
+	(pr20216a.so): Likewise.
+	(pr20216b.so): Likewise.
+	(pr20216_gd.o): Likewise.
+	(pr20216_ld.o): Likewise.
+	(MOSTLYCLEANFILES): Add pr20216a.so pr20216b.so.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/pr20216_def.c: New file.
+	* testsuite/pr20216_gd.S: Likewise.
+	* testsuite/pr20216_ld.S: Likewise.
+	* testsuite/pr20216_main.c: Likewise.
+
+2016-06-29  Alan Modra  <amodra@gmail.com>
+
+	* script_test_12.t: Delete .plt, specify 64k page size.
+	* script_test_12i.t: Likewise.
+
+2016-06-29  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/plugin_layout_with_alignment.c: Explicitly align all
+	variables.
+
+2016-06-29  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/Makefile.am (copy_test_protected): Disable for powerpc.
+	* testsuite/Makefile.in: Regenerate.
+
+2016-06-28  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* aarch64-reloc.def (NONE): New relocation.
+	* aarch64.cc (Target_aarch64::Scan::local): Handle R_AARCH64_NONE.
+	(Target_aarch64::Scan::global): Likewise.
+	* testsuite/Makefile.am (aarch64_reloc_none): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/aarch64_reloc_none.s: New test source file.
+	* testsuite/aarch64_reloc_none.sh: New test script.
+
+2016-06-28  Sriraman Tallam  <tmsriram@google.com>
+
+	* x86_64.cc (Lazy_view): New class.
+	(can_convert_mov_to_lea): Templatize function.  Make the function
+	check for appropriate relocation types and use the view parameter
+	to get section contents.
+	(can_convert_callq_to_direct): New function.
+	(Target_x86_64<size>::Scan::global): Refactor.
+	(Target_x86_64<size>::Relocate::relocate): Refactor. Change any indirect
+	call via GOT that can be converted.
+	* testsuite/Makefile.am (x86_64_indirect_call_to_direct.sh): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/x86_64_indirect_call_to_direct1.s: New file.
+	* testsuite/x86_64_indirect_jump_to_direct1.s: New file.
+
+2016-06-28  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* aarch64.cc (Target_aarch64::Scan::local): Move the call to got_section
+	from the top level to the places of its use.
+
+2016-06-28  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	PR gold/18098
+	* script-c.h (Sort_wildcard): Add SORT_WILDCARD_BY_INIT_PRIORITY.
+	* script-sections.cc (Input_section_sorter::get_init_priority): New method.
+	(Input_section_sorter::operator()): Handle SORT_WILDCARD_BY_INIT_PRIORITY.
+	(Output_section_element_input::print): Likewise.
+	* script.cc (script_keyword_parsecodes): Add entry SORT_BY_INIT_PRIORITY.
+	* yyscript.y (SORT_BY_INIT_PRIORITY): New token.
+	(wildcard_section): Handle SORT_BY_INIT_PRIORITY.
+
+	* testsuite/Makefile.am (script_test_14): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/script_test_14.s: New test source file.
+	* testsuite/script_test_14.sh: New test script.
+	* testsuite/script_test_14.t: New test linker script.
+
+2016-06-28  James Clarke  <jrtc27@jrtc27.com>
+
+	* sparc.cc (Target_sparc::Scan::local): Don't convert R_SPARC_32
+	to R_SPARC_RELATIVE if class is ELFCLASS64.
+	(Target_sparc::Scan::global): Likewise.
+
+2016-06-23  Cary Coutant  <ccoutant@gmail.com>
+	    Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	PR gold/15370
+	* script-sections.cc
+	(Output_section_element_input::set_section_addresses): Keep bin_count
+	separate from input_pattern_count.
+	* testsuite/script_test_12.t: Add another section .x4.
+	* testsuite/script_test_12i.t: Likewise.
+	* testsuite/script_test_12a.c: Likewise.
+	* testsuite/script_test_12b.c: Likewise.
+
+2016-06-23  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* gold-threads.cc (impl_threads::Lock_impl_threads): Fix typos.
+
 2016-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20283

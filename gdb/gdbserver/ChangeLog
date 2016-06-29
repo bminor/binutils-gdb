@@ -1,3 +1,33 @@
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_ftrace_insn_reloc_b): Use int64_t
+	for variable new_offset.
+	(aarch64_ftrace_insn_reloc_b_cond): Likewise.
+	(aarch64_ftrace_insn_reloc_cb): Likewise.
+	(aarch64_ftrace_insn_reloc_tb): Likewise.
+	(aarch64_install_fast_tracepoint_jump_pad): Likewise.  Use
+	PRIx64 instead of PRIx32.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (arm_get_syscall_trapinfo): New function.
+	(the_low_target): Install arm_get_syscall_trapinfo.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_get_syscall_trapinfo): New
+	function.
+	(the_low_target): Install aarch64_get_syscall_trapinfo.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (get_syscall_trapinfo): Remove parameter sysret.
+	Callers updated.
+	* linux-low.h (struct linux_target_ops) <get_syscall_trapinfo>:
+	Remove parameter sysno.
+	* linux-x86-low.c (x86_get_syscall_trapinfo): Remove parameter
+	sysret.
+
 2016-06-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* linux-s390-low.c (s390_emit_eq_goto): Mark function static.

@@ -5958,8 +5958,6 @@ Target_aarch64<size, big_endian>::Scan::local(
 
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>
       Reloc_section;
-  Output_data_got_aarch64<size, big_endian>* got =
-      target->got_section(symtab, layout);
   unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 
   // A local STT_GNU_IFUNC symbol may require a PLT entry.
@@ -5969,6 +5967,9 @@ Target_aarch64<size, big_endian>::Scan::local(
 
   switch (r_type)
     {
+    case elfcpp::R_AARCH64_NONE:
+      break;
+
     case elfcpp::R_AARCH64_ABS32:
     case elfcpp::R_AARCH64_ABS16:
       if (parameters->options().output_is_position_independent())
@@ -6004,6 +6005,8 @@ Target_aarch64<size, big_endian>::Scan::local(
     case elfcpp::R_AARCH64_LD64_GOTPAGE_LO15:
       // The above relocations are used to access GOT entries.
       {
+	Output_data_got_aarch64<size, big_endian>* got =
+	    target->got_section(symtab, layout);
 	bool is_new = false;
 	// This symbol requires a GOT entry.
 	if (is_ifunc)
@@ -6056,6 +6059,8 @@ Target_aarch64<size, big_endian>::Scan::local(
 	// Create a GOT entry for the tp-relative offset.
 	if (!parameters->doing_static_link())
 	  {
+	    Output_data_got_aarch64<size, big_endian>* got =
+		target->got_section(symtab, layout);
 	    got->add_local_with_rel(object, r_sym, GOT_TYPE_TLS_OFFSET,
 				    target->rela_dyn_section(layout),
 				    elfcpp::R_AARCH64_TLS_TPREL64);
@@ -6063,6 +6068,8 @@ Target_aarch64<size, big_endian>::Scan::local(
 	else if (!object->local_has_got_offset(r_sym,
 					       GOT_TYPE_TLS_OFFSET))
 	  {
+	    Output_data_got_aarch64<size, big_endian>* got =
+		target->got_section(symtab, layout);
 	    got->add_local(object, r_sym, GOT_TYPE_TLS_OFFSET);
 	    unsigned int got_offset =
 		object->local_got_offset(r_sym, GOT_TYPE_TLS_OFFSET);
@@ -6086,6 +6093,8 @@ Target_aarch64<size, big_endian>::Scan::local(
 	  }
 	gold_assert(tlsopt == tls::TLSOPT_NONE);
 
+	Output_data_got_aarch64<size, big_endian>* got =
+	    target->got_section(symtab, layout);
 	got->add_local_pair_with_rel(object,r_sym, data_shndx,
 				     GOT_TYPE_TLS_PAIR,
 				     target->rela_dyn_section(layout),
@@ -6220,6 +6229,9 @@ Target_aarch64<size, big_endian>::Scan::global(
 
   switch (r_type)
     {
+    case elfcpp::R_AARCH64_NONE:
+      break;
+
     case elfcpp::R_AARCH64_ABS16:
     case elfcpp::R_AARCH64_ABS32:
     case elfcpp::R_AARCH64_ABS64:

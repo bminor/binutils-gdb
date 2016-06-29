@@ -511,7 +511,7 @@ union field_location
      gdbarch_bits_big_endian=0 targets, it is the bit offset to
      the LSB.  */
 
-  int bitpos;
+  LONGEST bitpos;
 
   /* * Enum value.  */
   LONGEST enumval;

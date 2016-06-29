@@ -2090,7 +2090,11 @@ mips_elf_check_symbols (struct mips_elf_link_hash_entry *h, void *data)
 
    All we need to do here is shuffle the bits appropriately.
    As above, the two 16-bit halves must be swapped on a
-   little-endian system.  */
+   little-endian system.
+
+   Finally R_MIPS16_PC16_S1 corresponds to R_MIPS_PC16, however the
+   relocatable field is shifted by 1 rather than 2 and the same bit
+   shuffling is done as with the relocations above.  */
 
 static inline bfd_boolean
 mips16_reloc_p (int r_type)
@@ -2110,6 +2114,7 @@ mips16_reloc_p (int r_type)
     case R_MIPS16_TLS_GOTTPREL:
     case R_MIPS16_TLS_TPREL_HI16:
     case R_MIPS16_TLS_TPREL_LO16:
+    case R_MIPS16_PC16_S1:
       return TRUE;
 
     default:
@@ -2221,7 +2226,8 @@ b_reloc_p (int r_type)
   return (r_type == R_MIPS_PC26_S2
 	  || r_type == R_MIPS_PC21_S2
 	  || r_type == R_MIPS_PC16
-	  || r_type == R_MIPS_GNU_REL16_S2);
+	  || r_type == R_MIPS_GNU_REL16_S2
+	  || r_type == R_MIPS16_PC16_S1);
 }
 
 static inline bfd_boolean
@@ -2229,6 +2235,13 @@ aligned_pcrel_reloc_p (int r_type)
 {
   return (r_type == R_MIPS_PC18_S3
 	  || r_type == R_MIPS_PC19_S2);
+}
+
+static inline bfd_boolean
+mips16_branch_reloc_p (int r_type)
+{
+  return (r_type == R_MIPS16_26
+	  || r_type == R_MIPS16_PC16_S1);
 }
 
 static inline bfd_boolean
@@ -5562,7 +5575,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     }
 
   /* Make sure MIPS16 and microMIPS are not used together.  */
-  if ((r_type == R_MIPS16_26 && target_is_micromips_code_p)
+  if ((mips16_branch_reloc_p (r_type) && target_is_micromips_code_p)
       || (micromips_branch_reloc_p (r_type) && target_is_16_bit_code_p))
    {
       (*_bfd_error_handler)
@@ -5990,6 +6003,21 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       value = symbol + addend - p;
       if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
 	overflowed_p = mips_elf_overflow_p (value, 18);
+      value >>= howto->rightshift;
+      value &= howto->dst_mask;
+      break;
+
+    case R_MIPS16_PC16_S1:
+      if (howto->partial_inplace)
+	addend = _bfd_mips_elf_sign_extend (addend, 17);
+
+      if ((was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	  && ((symbol + addend) & 1) == 0)
+	return bfd_reloc_outofrange;
+
+      value = symbol + addend - p;
+      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	overflowed_p = mips_elf_overflow_p (value, 17);
       value >>= howto->rightshift;
       value &= howto->dst_mask;
       break;
@@ -8346,6 +8374,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_PC21_S2:
 	case R_MIPS_PC26_S2:
 	case R_MIPS16_26:
+	case R_MIPS16_PC16_S1:
 	case R_MICROMIPS_26_S1:
 	case R_MICROMIPS_PC7_S1:
 	case R_MICROMIPS_PC10_S1:

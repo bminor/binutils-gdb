@@ -1521,6 +1521,16 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       break;
 
     case AARCH64_OPND_CLASS_SIMD_REGLIST:
+      if (type == AARCH64_OPND_LEt)
+	{
+	  /* Get the upper bound for the element index.  */
+	  num = 16 / aarch64_get_qualifier_esize (qualifier) - 1;
+	  if (!value_in_range_p (opnd->reglist.index, 0, num))
+	    {
+	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, num);
+	      return 0;
+	    }
+	}
       /* The opcode dependent area stores the number of elements in
 	 each structure to be loaded/stored.  */
       num = get_opcode_dependent_value (opcode);
@@ -2256,7 +2266,7 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd)
 
   /* Prepare the index if any.  */
   if (opnd->reglist.has_index)
-    snprintf (tb, 8, "[%d]", opnd->reglist.index);
+    snprintf (tb, 8, "[%" PRIi64 "]", opnd->reglist.index);
   else
     tb[0] = '\0';
 
@@ -2479,7 +2489,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Ed:
     case AARCH64_OPND_En:
     case AARCH64_OPND_Em:
-      snprintf (buf, size, "v%d.%s[%d]", opnd->reglane.regno,
+      snprintf (buf, size, "v%d.%s[%" PRIi64 "]", opnd->reglane.regno,
 		aarch64_get_qualifier_name (opnd->qualifier),
 		opnd->reglane.index);
       break;

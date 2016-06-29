@@ -1,3 +1,91 @@
+2016-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-gc/gc.exp: Run pr20306 test.
+	* ld-gc/pr20306.c: New file.
+	* ld-gc/pr20306.d: Likewise.
+
+2016-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/comm-data.exp: Expect comm-data2 test to fail
+	for bfin.
+	* testsuite/ld-elf/elf.exp: Expect pr14170 and symbolic function
+	tests to fail for bfin.
+	* testsuite/ld-elf/endsym.d: Expect to fail with cr16, crx, dlx,
+	nds32 and visium.
+	* testsuite/ld-elf/var1.d: Expect to fail with d30v, dlx, ft32 and
+	microblaze.
+	* testsuite/ld-pe/pe.exp: Expect foreign symbol test to fail for
+	mcore-pe.
+
+2016-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/merge.d: Add m68hc11 to list of targets that
+	expect to fail this test.
+	* testsuite/ld-scripts/overlay-size.d: Skip the entire test for
+	RX.
+	* testsuite/ld-scripts/rgn-at10.d: No longer expect this test to
+	fail for the RX.
+	* testsuite/ld-scripts/rgn-at11.d: Likewise.
+	* testsuite/ld-scripts/rgn-at2.d: Likewise.
+	* testsuite/ld-scripts/rgn-at6.d: Likewise.
+	* testsuite/ld-scripts/rgn-at7.d: Likewise.
+	* testsuite/ld-scripts/rgn-at8.d: Likewise.
+
+2016-06-28  James Clarke  <jrtc27@jrtc27.com>
+
+	* testsuite/ld-elf/symbolic-func.r: Allow non-zero offsets from
+	.text.
+
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/attr-gnu-4-10.d: Match any UNIX OS/ABI.
+	* testsuite/ld-mips-elf/attr-gnu-4-50.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-60.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-70.d: Likewise.
+
+2016-06-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20302
+	* testsuite/ld-scripts/pr20302.d: Exclude *-*-*aout.
+
+2016-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16-branch-2.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-3.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-addend-2.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-addend-3.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-06-27  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20302
+	* lexsup.c (set_segment_start): If resetting the start address of
+	a section, remember to generate a new script element as well.
+	* testsuite/ld-scripts/pr20302.d: New test.
+	* testsuite/ld-scripts/scripts.exp: Run the new test.
+
+2016-06-24  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp (aarch64_choose_ilp32_emul):
+	Don't error out, always return an emulation.
+
+2016-06-24  Dilyan Palauzov <dilyan.palauzov@aegee.org>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lexsup.c (elf_shlib_list_options): Check DEFAULT_LD_Z_RELRO
+	for -z relro help message.
+
+2016-06-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/undefweak-overflow.d: Use wildcard
+	address matching.
+
+2016-06-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips-elf.exp: Uniquely identify
+	`undefweak-overflow' tests.
+
 2016-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20283

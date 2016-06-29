@@ -12927,6 +12927,20 @@ _ACEOF
 fi
 
 
+# See if <sys/ptrace.h> supports syscall fields on FreeBSD.  The
+# pl_syscall_code member of `struct ptrace_lwpinfo' was added in
+# FreeBSD 10.3.
+ac_fn_c_check_member "$LINENO" "struct ptrace_lwpinfo" "pl_syscall_code" "ac_cv_member_struct_ptrace_lwpinfo_pl_syscall_code" "#include <sys/ptrace.h>
+"
+if test "x$ac_cv_member_struct_ptrace_lwpinfo_pl_syscall_code" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE 1
+_ACEOF
+
+
+fi
+
 
 # Detect which type of /proc is in use, such as for Solaris.
 

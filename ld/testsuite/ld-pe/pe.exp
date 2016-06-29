@@ -101,4 +101,6 @@ set foreign_sym_test {
    {{nm -C non-c-lang-syms.d}} "non-c-lang-syms.x"}
 }
 
+# MCore rearranges symbol order.
+setup_xfail mcore-*-pe
 run_ld_link_tests $foreign_sym_test

@@ -1,3 +1,48 @@
+2016-06-29  Tom Tromey  <tom@tromey.com>
+
+	PR python/20129:
+	* gdb.python/py-framefilter.exp: Add tests for setting priority
+	and disabling of non-existent frame filter.
+
+2016-06-29  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/catch-syscall.c [__arm__]: Set unknown_syscall to
+	0x0f07ff.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/catch-syscall.exp: Remove check on isnative and target
+	triplets.  Start gdb, execute catch syscall, and continue.  Check
+	gdb's output to determine catch syscall is supported.
+
+2016-06-27  Manish Goregaokar  <manish@mozilla.com>
+
+	* gdb.rust/simple.rs: Add test for returning unit in a function
+	* gdb.rust/simple.exp: Add expectation for functions returning unit
+
+2016-06-27  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.python/py-breakpoint-create-fail.c,
+	gdb.python/py-breakpoint-create-fail.exp,
+	gdb.python/py-breakpoint-create-fail.py: New testcase.
+
+2016-06-25  Manish Goregaokar  <manish@mozilla.com>
+
+	PR gdb/20239
+	* gdb.rust/simple.rs: Add more tests for printing NonZero enums.
+	* gdb.rust/simple.exp: Add test expectations for new NonZero tests.
+
+2016-06-24  David Taylor  <dtaylor@emc.com>
+
+	* gdb.base/offsets.exp: New file.
+	* gdb.base/offsets.c: New file.
+
+2016-06-23  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/16483:
+	* gdb.python/py-framefilter.exp: Add "info frame-filter" test
+	before any filters are loaded.
+
 2016-06-21  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.fortran/derived-type.exp (print q): Add fields to the output.

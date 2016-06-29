@@ -1765,7 +1765,7 @@ read_pieced_value (struct value *v)
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
 	    int optim, unavail;
-	    int reg_offset = source_offset;
+	    LONGEST reg_offset = source_offset;
 
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
 		&& this_size < register_size (arch, gdb_regnum))
@@ -2016,7 +2016,7 @@ write_pieced_value (struct value *to, struct value *from)
    a synthetic pointer.  */
 
 static int
-check_pieced_synthetic_pointer (const struct value *value, int bit_offset,
+check_pieced_synthetic_pointer (const struct value *value, LONGEST bit_offset,
 				int bit_length)
 {
   struct piece_closure *c
@@ -2132,7 +2132,8 @@ indirect_pieced_value (struct value *value)
   struct type *type;
   struct frame_info *frame;
   struct dwarf2_locexpr_baton baton;
-  int i, bit_offset, bit_length;
+  int i, bit_length;
+  LONGEST bit_offset;
   struct dwarf_expr_piece *piece = NULL;
   LONGEST byte_offset;
   enum bfd_endian byte_order;

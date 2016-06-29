@@ -206,6 +206,78 @@ fbsd_find_memory_regions (struct target_ops *self,
 }
 #endif
 
+#ifdef KERN_PROC_AUXV
+static enum target_xfer_status (*super_xfer_partial) (struct target_ops *ops,
+						      enum target_object object,
+						      const char *annex,
+						      gdb_byte *readbuf,
+						      const gdb_byte *writebuf,
+						      ULONGEST offset,
+						      ULONGEST len,
+						      ULONGEST *xfered_len);
+
+/* Implement the "to_xfer_partial target_ops" method.  */
+
+static enum target_xfer_status
+fbsd_xfer_partial (struct target_ops *ops, enum target_object object,
+		   const char *annex, gdb_byte *readbuf,
+		   const gdb_byte *writebuf,
+		   ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+{
+  pid_t pid = ptid_get_pid (inferior_ptid);
+
+  switch (object)
+    {
+    case TARGET_OBJECT_AUXV:
+      {
+	struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+	unsigned char *buf;
+	size_t buflen;
+	int mib[4];
+
+	if (writebuf != NULL)
+	  return TARGET_XFER_E_IO;
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_AUXV;
+	mib[3] = pid;
+	if (offset == 0)
+	  {
+	    buf = readbuf;
+	    buflen = len;
+	  }
+	else
+	  {
+	    buflen = offset + len;
+	    buf = XCNEWVEC (unsigned char, buflen);
+	    cleanup = make_cleanup (xfree, buf);
+	  }
+	if (sysctl (mib, 4, buf, &buflen, NULL, 0) == 0)
+	  {
+	    if (offset != 0)
+	      {
+		if (buflen > offset)
+		  {
+		    buflen -= offset;
+		    memcpy (readbuf, buf + offset, buflen);
+		  }
+		else
+		  buflen = 0;
+	      }
+	    do_cleanups (cleanup);
+	    *xfered_len = buflen;
+	    return (buflen == 0) ? TARGET_XFER_EOF : TARGET_XFER_OK;
+	  }
+	do_cleanups (cleanup);
+	return TARGET_XFER_E_IO;
+      }
+    default:
+      return super_xfer_partial (ops, object, annex, readbuf, writebuf, offset,
+				 len, xfered_len);
+    }
+}
+#endif
+
 #ifdef PT_LWPINFO
 static int debug_fbsd_lwp;
 
@@ -707,6 +779,40 @@ fbsd_wait (struct target_ops *ops,
 	      return wptid;
 	    }
 #endif
+
+	  /* Note that PL_FLAG_SCE is set for any event reported while
+	     a thread is executing a system call in the kernel.  In
+	     particular, signals that interrupt a sleep in a system
+	     call will report this flag as part of their event.  Stops
+	     explicitly for system call entry and exit always use
+	     SIGTRAP, so only treat SIGTRAP events as system call
+	     entry/exit events.  */
+	  if (pl.pl_flags & (PL_FLAG_SCE | PL_FLAG_SCX)
+	      && ourstatus->value.sig == SIGTRAP)
+	    {
+#ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
+	      if (catch_syscall_enabled ())
+		{
+		  if (catching_syscall_number (pl.pl_syscall_code))
+		    {
+		      if (pl.pl_flags & PL_FLAG_SCE)
+			ourstatus->kind = TARGET_WAITKIND_SYSCALL_ENTRY;
+		      else
+			ourstatus->kind = TARGET_WAITKIND_SYSCALL_RETURN;
+		      ourstatus->value.syscall_number = pl.pl_syscall_code;
+		      return wptid;
+		    }
+		}
+#endif
+	      /* If the core isn't interested in this event, just
+		 continue the process explicitly and wait for another
+		 event.  Note that PT_SYSCALL is "sticky" on FreeBSD
+		 and once system call stops are enabled on a process
+		 it stops for all system call entries and exits.  */
+	      if (ptrace (PT_CONTINUE, pid, (caddr_t) 1, 0) == -1)
+		perror_with_name (("ptrace"));
+	      continue;
+	    }
 	}
       return wptid;
     }
@@ -817,6 +923,19 @@ fbsd_remove_exec_catchpoint (struct target_ops *self, int pid)
   return 0;
 }
 #endif
+
+#ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
+static int
+fbsd_set_syscall_catchpoint (struct target_ops *self, int pid, int needed,
+			     int any_count, int table_size, int *table)
+{
+
+  /* Ignore the arguments.  inf-ptrace.c will use PT_SYSCALL which
+     will catch all system call entries and exits.  The system calls
+     are filtered by GDB rather than the kernel.  */
+  return 0;
+}
+#endif
 #endif
 
 void
@@ -824,6 +943,10 @@ fbsd_nat_add_target (struct target_ops *t)
 {
   t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
   t->to_find_memory_regions = fbsd_find_memory_regions;
+#ifdef KERN_PROC_AUXV
+  super_xfer_partial = t->to_xfer_partial;
+  t->to_xfer_partial = fbsd_xfer_partial;
+#endif
 #ifdef PT_LWPINFO
   t->to_thread_alive = fbsd_thread_alive;
   t->to_pid_to_str = fbsd_pid_to_str;
@@ -848,6 +971,9 @@ fbsd_nat_add_target (struct target_ops *t)
 #ifdef PL_FLAG_EXEC
   t->to_insert_exec_catchpoint = fbsd_insert_exec_catchpoint;
   t->to_remove_exec_catchpoint = fbsd_remove_exec_catchpoint;
+#endif
+#ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
+  t->to_set_syscall_catchpoint = fbsd_set_syscall_catchpoint;
 #endif
 #endif
   add_target (t);
