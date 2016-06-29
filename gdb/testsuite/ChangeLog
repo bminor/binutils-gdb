@@ -1,3 +1,7 @@
+2016-06-29  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/return.c: Add copyright header.
+
 2016-06-29  Tom Tromey  <tom@tromey.com>
 
 	PR python/20129:
