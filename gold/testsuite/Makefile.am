@@ -1254,6 +1254,55 @@ i386_mov_to_lea7.stdout: i386_mov_to_lea7
 i386_mov_to_lea8.stdout: i386_mov_to_lea8
 	$(TEST_OBJDUMP) -dw $< > $@
 
+check_PROGRAMS += pr20308a_test
+pr20308a_test_SOURCES = pr20308_main.c pr20308_def.c
+pr20308a_test_DEPENDENCIES = pr20308_gd.o pr20308_ld.o gcctestdir/ld gcctestdir/as
+pr20308a_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308a_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20308a_test_LDADD = pr20308_gd.o pr20308_ld.o
+
+check_PROGRAMS += pr20308b_test
+pr20308b_test_SOURCES = pr20308_main.c pr20308_def.c
+pr20308b_test_DEPENDENCIES = pr20308_gd.o pr20308_ld.o gcctestdir/ld gcctestdir/as
+pr20308b_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308b_test_LDFLAGS = -pie -Bgcctestdir/ -Wl,-R,.
+pr20308b_test_LDADD = pr20308_gd.o pr20308_ld.o
+
+check_PROGRAMS += pr20308c_test
+pr20308c_test_SOURCES = pr20308_main.c pr20308_def.c
+pr20308c_test_DEPENDENCIES = pr20308_gd.o pr20308_ld.o gcctestdir/ld gcctestdir/as
+pr20308c_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308c_test_LDFLAGS = -static -Bgcctestdir/ -Wl,-R,.
+pr20308c_test_LDADD = pr20308_gd.o pr20308_ld.o
+
+check_PROGRAMS += pr20308d_test
+pr20308d_test_SOURCES = pr20308_main.c pr20308_def.c
+pr20308d_test_DEPENDENCIES = pr20308a.so gcctestdir/ld gcctestdir/as
+pr20308d_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308d_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20308d_test_LDADD = pr20308a.so
+
+check_PROGRAMS += pr20308e_test
+pr20308e_test_SOURCES = pr20308_main.c
+pr20308e_test_DEPENDENCIES = pr20308_gd.o pr20308_ld.o pr20308b.so gcctestdir/ld gcctestdir/as
+pr20308e_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308e_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20308e_test_LDADD = pr20308_gd.o pr20308_ld.o pr20308b.so
+
+MOSTLYCLEANFILES += pr20308a.so pr20308b.so
+
+pr20308a.so: pr20308_gd.o pr20308_ld.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared pr20308_gd.o pr20308_ld.o
+
+pr20308b.so: pr20308_def.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared pr20308_def.o
+
+pr20308_gd.o: pr20308_gd.S
+	$(COMPILE) -c -o $@ $<
+
+pr20308_ld.o: pr20308_ld.S
+	$(COMPILE) -c -o $@ $<
+
 endif DEFAULT_TARGET_I386
 
 check_PROGRAMS += many_sections_test
