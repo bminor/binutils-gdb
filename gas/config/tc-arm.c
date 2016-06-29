@@ -21549,7 +21549,7 @@ md_section_align (segT	 segment ATTRIBUTE_UNUSED,
     }
 #endif
 
-  return (size + 3) & ~ 3;
+  return size;
 }
 
 /* This is called from HANDLE_ALIGN in write.c.	 Fill in the contents
