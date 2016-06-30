@@ -318,6 +318,9 @@
 /* Target vendor. */
 #undef TARGET_VENDOR
 
+/* Target specific CPU. */
+#undef TARGET_WITH_CPU
+
 /* Use b modifier when opening binary files? */
 #undef USE_BINARY_FOPEN
 

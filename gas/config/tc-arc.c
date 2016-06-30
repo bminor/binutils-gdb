@@ -51,6 +51,10 @@
 /* Equal to MAX_PRECISION in atof-ieee.c.  */
 #define MAX_LITTLENUMS 6
 
+#ifndef TARGET_WITH_CPU
+#define TARGET_WITH_CPU "arc700"
+#endif /* TARGET_WITH_CPU */
+
 /* Enum used to enumerate the relaxable ins operands.  */
 enum rlx_operand_type
 {
@@ -2466,7 +2470,7 @@ md_begin (void)
   const struct arc_opcode *opcode = arc_opcodes;
 
   if (!mach_type_specified_p)
-    arc_select_cpu ("arc700");
+    arc_select_cpu (TARGET_WITH_CPU);
 
   /* The endianness can be chosen "at the factory".  */
   target_big_endian = byte_order == BIG_ENDIAN;
@@ -3401,7 +3405,8 @@ md_show_usage (FILE *stream)
 {
   fprintf (stream, _("ARC-specific assembler options:\n"));
 
-  fprintf (stream, "  -mcpu=<cpu name>\t  assemble for CPU <cpu name>\n");
+  fprintf (stream, "  -mcpu=<cpu name>\t  assemble for CPU <cpu name> "
+           "(default: %s)\n", TARGET_WITH_CPU);
   fprintf (stream, "  -mcpu=nps400\t\t  same as -mcpu=arc700 -mnps400\n");
   fprintf (stream, "  -mA6/-mARC600/-mARC601  same as -mcpu=arc600\n");
   fprintf (stream, "  -mA7/-mARC700\t\t  same as -mcpu=arc700\n");

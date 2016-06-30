@@ -34,6 +34,9 @@
 
 * Add assembly-time relaxation option for ARC cpus.
 
+* Add --with-cpu=TYPE configure option for ARC gas.  This allows the default
+  cpu type to be adjusted at configure time.
+
 Changes in 2.26:
 
 * Add a configure option --enable-compressed-debug-sections={all,gas} to
