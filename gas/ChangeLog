@@ -27,6 +27,14 @@
 	* testsuite/gas/all/pr20312.s: New test source.
 	* testsuite/gas/all/gas.exp: Run the new test
 
+2016-06-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config.in (TARGET_WITH_CPU): Undefine.
+	* configure.ac: Add --with-cpu support, and define in config.h.
+	* configure: Regenerate.
+	* config/tc-arc.c: Use TARGET_WITH_CPU to select default CPU.
+	* NEWS: Mention new configure option.
+
 2016-06-30  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* testsuite/gas/arm/armv8_2+rdma.d: New.
