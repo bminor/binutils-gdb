@@ -6495,7 +6495,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	 we finished last time.  */
       /* PR 14006.  When the address is 0 we are either at the start of the
 	 very first function, or else the first function in a new, unlinked
-	 executable section (eg because uf -ffunction-sections).  Either way
+	 executable section (eg because of -ffunction-sections).  Either way
 	 start scanning from the beginning of the symbol table, not where we
 	 left off last time.  */
       if (pc == 0)

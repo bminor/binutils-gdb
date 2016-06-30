@@ -1,3 +1,7 @@
+2016-06-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-dis.c (print_insn): Fix typo in comment.
+
 2016-06-28  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-opc.c (operand_general_constraint_met_p): Check the
