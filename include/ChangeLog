@@ -1,3 +1,8 @@
+2016-06-30  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* opcode/arm.h (ARM_ARCH_V8_2a): Add FPU_NEON_EXT_RDMA to the set
+	of enabled FPU features.
+
 2016-06-29  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* opcode/sparc.h (enum sparc_opcode_arch_val): Move
