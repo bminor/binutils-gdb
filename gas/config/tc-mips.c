@@ -7537,9 +7537,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  }
 	else
 	  {
-	    move_insn (&delay, ip->frag,
-		       ip->where - branch_disp + insn_length (ip));
-	    move_insn (ip, history[0].frag, history[0].where);
+	    /* If this is not a relaxed branch and we are in the
+	       same frag, then just swap the instructions.  */
+	    move_insn (ip, delay.frag, delay.where);
+	    move_insn (&delay, ip->frag, ip->where + insn_length (ip));
 	  }
 	history[0] = *ip;
 	delay.fixed_p = 1;

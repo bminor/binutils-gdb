@@ -1,5 +1,10 @@
 2016-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (append_insn): Simplify non-MIPS16 branch
+	swapping sequence.
+
+2016-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
 	PR gas/20312
 	* write.c (subsegs_finish_section): Force no section padding to
 	alignment on failed assembly, always set last frag's alignment
