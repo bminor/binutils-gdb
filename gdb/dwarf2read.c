@@ -6936,7 +6936,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       break;
     case DW_TAG_subprogram:
       addr = gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr);
-      if (pdi->is_external || cu->language == language_ada)
+      if (pdi->is_external
+	  || cu->language == language_ada
+	  || cu->language == language_fortran)
 	{
           /* brobecker/2007-12-26: Normally, only "external" DIEs are part
              of the global scope.  But in Ada, we want to be able to access
@@ -7219,6 +7221,8 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	{
 	  if (pdi->tag == DW_TAG_entry_point)
 	    add_partial_entry_point (pdi, lowpc, highpc, set_addrmap, cu);
+	  else if (pdi->tag == DW_TAG_subprogram)
+	    add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
 	  pdi = pdi->die_sibling;
 	}
     }
@@ -18530,7 +18534,8 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
 	  attr2 = dwarf2_attr (die, DW_AT_external, cu);
 	  if ((attr2 && (DW_UNSND (attr2) != 0))
-              || cu->language == language_ada)
+              || cu->language == language_ada
+	      || cu->language == language_fortran)
 	    {
               /* Subprograms marked external are stored as a global symbol.
                  Ada subprograms, whether marked external or not, are always
