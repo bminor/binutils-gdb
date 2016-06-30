@@ -38,7 +38,6 @@ check()
 }
 
 check dynamic_list.stdout "main"            # comes via --dynamic-list
-check dynamic_list.stdout "_ZdlPv"          # "operator delete(void*)"
 check dynamic_list.stdout "_Z4t1_6v"        # t1_6()
 check dynamic_list.stdout "_ZN4t16aD1Ev"    # t16a:~t16a()
 check dynamic_list.stdout "_ZN4t16a1tEv"    # t16a:t()

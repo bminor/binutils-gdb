@@ -1,5 +1,11 @@
 2016-06-29  Cary Coutant  <ccoutant@gmail.com>
 
+gold/
+	PR gold/20310
+	* testsuite/dynamic_list.sh: Remove check for _ZdlPv.
+
+2016-06-29  Cary Coutant  <ccoutant@gmail.com>
+
 	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add eh_test_2.
 	* testsuite/Makefile.in: Regenerate.
 
