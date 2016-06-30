@@ -1,5 +1,10 @@
 2016-06-30  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdbserver-support.exp (close_gdbserver, gdb_exit): Don't
+	unset inferior_spawn_id.
+
+2016-06-30  Pedro Alves  <palves@redhat.com>
+
 	* lib/mi-support.exp (default_mi_gdb_start): Declare global
 	FORCE_SEPARATE_MI_TTY, not SEPARATE_MI_TTY.
 
