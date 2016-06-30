@@ -1,3 +1,8 @@
+2016-06-30  Pedro Alves  <palves@redhat.com>
+
+	* lib/mi-support.exp (default_mi_gdb_start): Declare global
+	FORCE_SEPARATE_MI_TTY, not SEPARATE_MI_TTY.
+
 2016-06-29  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/return.c: Add copyright header.
