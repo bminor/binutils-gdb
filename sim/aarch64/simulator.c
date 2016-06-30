@@ -14083,7 +14083,11 @@ aarch64_step (sim_cpu *cpu)
     return FALSE;
 
   aarch64_set_next_PC (cpu, pc + 4);
-  aarch64_get_instr (cpu) = aarch64_get_mem_u32 (cpu, pc);
+
+  /* Code is always little-endian.  */
+  sim_core_read_buffer (CPU_STATE (cpu), cpu, read_map,
+			& aarch64_get_instr (cpu), pc, 4);
+  aarch64_get_instr (cpu) = endian_le2h_4 (aarch64_get_instr (cpu));
 
   TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %08x", pc,
 	      aarch64_get_instr (cpu));
