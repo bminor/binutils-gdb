@@ -1,3 +1,17 @@
+2016-06-30  Matthew Fortune <Matthew.Fortune@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (append_insn) <APPEND_SWAP>: Do not special
+	case MIPS16 handling.
+	* testsuite/gas/mips/branch-swap-3.d: New test.
+	* testsuite/gas/mips/branch-swap-4.d: New test.
+	* testsuite/gas/mips/mips16@branch-swap-3.d: New test.
+	* testsuite/gas/mips/mips16@branch-swap-4.d: New test.
+	* testsuite/gas/mips/micromips@branch-swap-3.d: New test.
+	* testsuite/gas/mips/micromips@branch-swap-4.d: New test.
+	* testsuite/gas/mips/branch-swap-3.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (append_insn): Simplify non-MIPS16 branch

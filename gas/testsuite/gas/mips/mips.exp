@@ -575,6 +575,9 @@ if { [istarget mips*-*-vxworks*] } {
 	    "MIPS branch swapping ($count)"
     }
 
+    run_dump_test_arches "branch-swap-3" [mips_arch_list_all]
+    run_dump_test_arches "branch-swap-4" [mips_arch_list_all]
+
     run_dump_test "branch-section-1"
     run_dump_test "branch-section-2"
     run_dump_test "branch-section-3"
