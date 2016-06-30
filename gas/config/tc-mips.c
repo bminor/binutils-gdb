@@ -6810,7 +6810,7 @@ get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
   if (mips_relax.sequence == 2)
     return APPEND_ADD;
 
-  /* We must not dabble with instructions in a ".set norerorder" block.  */
+  /* We must not dabble with instructions in a ".set noreorder" block.  */
   if (mips_opts.noreorder)
     return APPEND_ADD;
 

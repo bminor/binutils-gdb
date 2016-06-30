@@ -1,3 +1,7 @@
+2016-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (get_append_method): Fix a comment typo.
+
 2016-06-30  Matthew Fortune <Matthew.Fortune@imgtec.com>
 	    Maciej W. Rozycki  <macro@imgtec.com>
 
