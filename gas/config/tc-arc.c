@@ -502,7 +502,7 @@ static const struct arc_reloc_op_tag
   DEF (tpoff9,  BFD_RELOC_ARC_TLS_LE_S9,	0),
   DEF (tpoff,   BFD_RELOC_ARC_TLS_LE_32,	1),
   DEF (dtpoff9, BFD_RELOC_ARC_TLS_DTPOFF_S9,	0),
-  DEF (dtpoff,  BFD_RELOC_ARC_TLS_DTPOFF,	0),
+  DEF (dtpoff,  BFD_RELOC_ARC_TLS_DTPOFF,	1),
 };
 
 static const int arc_num_reloc_op
@@ -3130,28 +3130,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
 
   gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-  if (code == BFD_RELOC_ARC_TLS_DTPOFF
-      || code ==  BFD_RELOC_ARC_TLS_DTPOFF_S9)
-    {
-      asymbol *sym
-	= fixP->fx_subsy ? symbol_get_bfdsym (fixP->fx_subsy) : NULL;
-      /* We just want to store a 24 bit index, but we have to wait
-	 till after write_contents has been called via
-	 bfd_map_over_sections before we can get the index from
-	 _bfd_elf_symbol_from_bfd_symbol.  Thus, the write_relocs
-	 function is elf32-arc.c has to pick up the slack.
-	 Unfortunately, this leads to problems with hosts that have
-	 pointers wider than long (bfd_vma).  There would be various
-	 ways to handle this, all error-prone :-(  */
-      reloc->addend = (bfd_vma) sym;
-      if ((asymbol *) reloc->addend != sym)
-	{
-	  as_bad ("Can't store pointer\n");
-	  return NULL;
-	}
-    }
-  else
-    reloc->addend = fixP->fx_offset;
+  reloc->addend = fixP->fx_offset;
 
   return reloc;
 }

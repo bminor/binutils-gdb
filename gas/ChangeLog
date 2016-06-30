@@ -1,3 +1,9 @@
+2016-07-11  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (arc_reloc_op_tag): Allow complex ops for dtpoff.
+	(tc_gen_reloc): Remove passing DTPOFF base info into reloc addendum
+	as it is no longer needed.
+
 2016-07-04  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_qword_reg): Correct register kind
