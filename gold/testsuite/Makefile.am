@@ -390,7 +390,7 @@ eh_test: eh_test_a.o eh_test_b.o  gcctestdir/ld
 
 check_SCRIPTS += eh_test_2.sh
 check_DATA += eh_test_2.sects
-MOSTLYCLEANFILES += eh_test_2.sects
+MOSTLYCLEANFILES += eh_test_2 eh_test_2.sects
 eh_test_r.o: eh_test_a.o eh_test_b.o gcctestdir/ld
 	gcctestdir/ld -r -o $@ eh_test_a.o eh_test_b.o
 eh_test_2: eh_test_r.o gcctestdir/ld

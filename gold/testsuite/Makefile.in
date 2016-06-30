@@ -137,7 +137,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals eh_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test_2.sects \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so \

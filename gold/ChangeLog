@@ -1,3 +1,8 @@
+2016-06-29  Cary Coutant  <ccoutant@gmail.com>
+
+	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add eh_test_2.
+	* testsuite/Makefile.in: Regenerate.
+
 2016-06-30  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/Makefile.am (memory_test, memory_test_2): Pass
