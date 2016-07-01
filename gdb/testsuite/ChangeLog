@@ -31,8 +31,9 @@
 
 2016-06-27  Manish Goregaokar  <manish@mozilla.com>
 
-	* gdb.rust/simple.rs: Add test for returning unit in a function
-	* gdb.rust/simple.exp: Add expectation for functions returning unit
+	* gdb.rust/simple.rs: Add test for returning unit in a function.
+	* gdb.rust/simple.exp: Add expectation for functions returning
+	unit.
 
 2016-06-27  Pierre-Marie de Rodat  <derodat@adacore.com>
 
@@ -44,7 +45,8 @@
 
 	PR gdb/20239
 	* gdb.rust/simple.rs: Add more tests for printing NonZero enums.
-	* gdb.rust/simple.exp: Add test expectations for new NonZero tests.
+	* gdb.rust/simple.exp: Add test expectations for new NonZero
+	tests.
 
 2016-06-24  David Taylor  <dtaylor@emc.com>
 
@@ -589,7 +591,7 @@
 
 	* lib/compiler.c: Add Intel specific preprocessor macros.
 	* lib/compiler.cc: Likewise.
-	
+
 2016-04-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.server/connect-with-no-symbol-file.c: New file.
@@ -946,11 +948,13 @@
 
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
-	* gdb.fortran/vla-history.exp: Lookup array elements and printing exceeds timeout.
+	* gdb.fortran/vla-history.exp: Lookup array elements and printing
+	exceeds timeout.
 
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
-	* gdb.cp/vla-cxx.cc: Insert dummy assignment as anchor for an breakpoint.
+	* gdb.cp/vla-cxx.cc: Insert dummy assignment as anchor for an
+	breakpoint.
 
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
@@ -1906,9 +1910,9 @@
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
 	PR 17539
-        * gdb.base/display.exp: Expect displays to be sorted in ascending
-        order.  Use multi_line.
-        * gdb.base/solib-display.exp: Likewise.
+	* gdb.base/display.exp: Expect displays to be sorted in ascending
+	order.  Use multi_line.
+	* gdb.base/solib-display.exp: Likewise.
 
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
@@ -3636,7 +3640,8 @@
 
 2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
 
-	* lib/gdb.exp (supports_process_record): Return true for aarch64*-linux*.
+	* lib/gdb.exp (supports_process_record): Return true for
+	aarch64*-linux*.
 	(supports_reverse): Likewise.
 
 2015-05-22  Patrick Palka  <patrick@parcs.ath.cx>
