@@ -6821,6 +6821,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
       return NULL;
     }
 
+  /* Internal (nested) subroutines in Fortran get a prefix.  */
   if (pdi->tag == DW_TAG_enumerator)
     /* Enumerators should not get the name of the enumeration as a prefix.  */
     parent->scope = grandparent_scope;
@@ -6830,7 +6831,10 @@ partial_die_parent_scope (struct partial_die_info *pdi,
       || parent->tag == DW_TAG_class_type
       || parent->tag == DW_TAG_interface_type
       || parent->tag == DW_TAG_union_type
-      || parent->tag == DW_TAG_enumeration_type)
+      || parent->tag == DW_TAG_enumeration_type
+      || (cu->language == language_fortran
+	  && parent->tag == DW_TAG_subprogram
+	  && pdi->tag == DW_TAG_subprogram))
     {
       if (grandparent_scope == NULL)
 	parent->scope = parent->name;
@@ -8330,8 +8334,13 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_type_unit:
       read_type_unit_scope (die, cu);
       break;
-    case DW_TAG_entry_point:
     case DW_TAG_subprogram:
+      /* Internal subprograms in Fortran get a prefix.  */
+      if (cu->language == language_fortran
+	  && die->parent != NULL
+	  && die->parent->tag == DW_TAG_subprogram)
+      cu->processing_has_namespace_info = 1;
+    case DW_TAG_entry_point:
     case DW_TAG_inlined_subroutine:
       read_func_scope (die, cu);
       break;
@@ -19540,6 +19549,19 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	      return TYPE_TAG_NAME (parent_type);
 	    return "";
 	  }
+      case DW_TAG_subprogram:
+	/* Only internal subroutines in Fortran get a prefix with the name
+	   of the parent's subroutine.  */
+	if (cu->language == language_fortran)
+	  {
+	    if ((die->tag ==  DW_TAG_subprogram)
+		&& (dwarf2_name (parent, cu) != NULL))
+	      return dwarf2_name (parent, cu);
+	    else
+	      return "";
+	  }
+	else
+	  return determine_prefix (parent, cu);
 	/* Fall through.  */
       default:
 	return determine_prefix (parent, cu);
