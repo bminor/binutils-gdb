@@ -1,5 +1,13 @@
 2016-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* tc-i386.c (i386_index_check): Add special checks for bndmk,
+	bndldx, and bndstx.
+	* testsuite/gas/i386/mpx-inval-2.s: Add %rip and %eip relative
+	as well as scaling by other than 1 tests.
+	* testsuite/gas/i386/mpx-inval-2.l: Adjust accordingly.
+
+2016-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* tc-i386.c (md_assemble): Alter address size checking for MPX
 	instructions.
 	* testsuite/gas/i386/mpx-inval-2.s: New.

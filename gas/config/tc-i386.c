@@ -8612,6 +8612,23 @@ bad_address:
 			   || i.index_reg->reg_num == RegEiz))
 		      || !i.index_reg->reg_type.bitfield.baseindex)))
 	    goto bad_address;
+
+	  /* bndmk, bndldx, and bndstx have special restrictions. */
+	  if (current_templates->start->base_opcode == 0xf30f1b
+	      || (current_templates->start->base_opcode & ~1) == 0x0f1a)
+	    {
+	      /* They cannot use RIP-relative addressing. */
+	      if (i.base_reg && i.base_reg->reg_num == RegRip)
+		{
+		  as_bad (_("`%s' cannot be used here"), operand_string);
+		  return 0;
+		}
+
+	      /* bndldx and bndstx ignore their scale factor. */
+	      if (current_templates->start->base_opcode != 0xf30f1b
+		  && i.log2_scale_factor)
+		as_warn (_("register scaling is being ignored here"));
+	    }
 	}
       else
 	{
