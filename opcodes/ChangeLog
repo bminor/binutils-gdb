@@ -1,5 +1,12 @@
 2016-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (movzbl, movzbw, movzbq, movzwl, movzwq): Remove.
+	(movzb): Adjust to cover all permitted suffixes.
+	(movzw): New.
+	* i386-tbl.h: Re-generate.
+
+2016-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (jmp): Remove Disp32S from non-64-bit variant.
 	(lgdt): Remove Tbyte from non-64-bit variant.
 	(fxsave64, fxrstor64, xsave64, xrstor64, xsaveopt64, xrstors64,
