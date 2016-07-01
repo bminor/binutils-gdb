@@ -1,3 +1,10 @@
+2016-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/objcopy.exp
+	(objcopy_test_without_global_symbol): Expect this test to fail on
+	the AArch64 and ARM targets, since they preserve their mapping
+	symbols.
+
 2016-07-01  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.27.
