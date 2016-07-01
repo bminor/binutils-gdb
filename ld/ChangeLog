@@ -1,3 +1,10 @@
+2016-07-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (Thumb-2 BL): Assemble for ARMv7.
+	(Thumb-2 BL on ARMv6-M): New testcase.
+	* testsuite/ld-arm/thumb2-bl.d: Do not try to match testcase filename.
+	* testsuite/ld-arm/thumb2-bl.s: Do not select architecture.
+
 2016-07-01  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.27.

@@ -3569,6 +3569,24 @@ using_thumb2 (struct elf32_arm_link_hash_table *globals)
 	  || arch == TAG_CPU_ARCH_V8M_MAIN);
 }
 
+/* Determine whether Thumb-2 BL instruction is available.  */
+
+static bfd_boolean
+using_thumb2_bl (struct elf32_arm_link_hash_table *globals)
+{
+  int arch =
+    bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  /* Force return logic to be reviewed for each new architecture.  */
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
+	      || arch == TAG_CPU_ARCH_V8M_BASE
+	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+
+  /* Architecture was introduced after ARMv6T2 (eg. ARMv6-M).  */
+  return (arch == TAG_CPU_ARCH_V6T2
+	  || arch >= TAG_CPU_ARCH_V7);
+}
+
 /* Create .plt, .rel(a).plt, .got, .got.plt, .rel(a).got, .dynbss, and
    .rel(a).bss sections in DYNOBJ, and set up shortcuts to them in our
    hash table.  */
@@ -3823,8 +3841,7 @@ arm_type_of_stub (struct bfd_link_info *info,
   bfd_signed_vma branch_offset;
   unsigned int r_type;
   struct elf32_arm_link_hash_table * globals;
-  int thumb2;
-  int thumb_only;
+  bfd_boolean thumb2, thumb2_bl, thumb_only;
   enum elf32_arm_stub_type stub_type = arm_stub_none;
   int use_plt = 0;
   enum arm_st_branch_type branch_type = *actual_branch_type;
@@ -3839,8 +3856,8 @@ arm_type_of_stub (struct bfd_link_info *info,
     return stub_type;
 
   thumb_only = using_thumb_only (globals);
-
   thumb2 = using_thumb2 (globals);
+  thumb2_bl = using_thumb2_bl (globals);
 
   /* Determine where the call point is.  */
   location = (input_sec->output_offset
@@ -3906,10 +3923,10 @@ arm_type_of_stub (struct bfd_link_info *info,
 	   but only if this call is not through a PLT entry. Indeed,
 	   PLT stubs handle mode switching already.
       */
-      if ((!thumb2
+      if ((!thumb2_bl
 	    && (branch_offset > THM_MAX_FWD_BRANCH_OFFSET
 		|| (branch_offset < THM_MAX_BWD_BRANCH_OFFSET)))
-	  || (thumb2
+	  || (thumb2_bl
 	      && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
 		  || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
 	  || (thumb2
@@ -9838,6 +9855,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma signed_check;
 	int bitsize;
 	const int thumb2 = using_thumb2 (globals);
+	const int thumb2_bl = using_thumb2_bl (globals);
 
 	/* A branch to an undefined weak symbol is turned into a jump to
 	   the next instruction unless a PLT entry will be created.
@@ -10014,7 +10032,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	   this relocation according to whether we're relocating for
 	   Thumb-2 or not.  */
 	bitsize = howto->bitsize;
-	if (!thumb2)
+	if (!thumb2_bl)
 	  bitsize -= 2;
 	reloc_signed_max = (1 << (bitsize - 1)) - 1;
 	reloc_signed_min = ~reloc_signed_max;

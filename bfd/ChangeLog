@@ -1,3 +1,13 @@
+2016-07-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (using_thumb2_bl): New function.
+	(arm_type_of_stub): Declare thumb2 variable together and change type
+	to bfd_boolean.  Use using_thumb2_bl () to determine whether
+	THM_MAX_FWD_BRANCH_OFFSET or THM2_MAX_FWD_BRANCH_OFFSET should be
+	checked for BL range.
+	(elf32_arm_final_link_relocate): Use using_thumb2_bl () to determine
+	the bit size of BL offset.
+
 2016-06-29  Nick Clifton  <nickc@redhat.com>
 
 	* elfnn-aarch64.c (is_aarch64_mapping_symbol): New function.
