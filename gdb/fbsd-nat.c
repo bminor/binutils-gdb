@@ -609,7 +609,7 @@ fbsd_is_vfork_done_pending (pid_t pid)
 /* Check for a pending vfork done event.  If one is found, remove it
    from the list and return the PTID.  */
 
-static ptid
+static ptid_t
 fbsd_next_vfork_done (void)
 {
   struct fbsd_fork_info *info;

@@ -1,3 +1,7 @@
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_is_vfork_done_pending): Fix return type.
+
 2016-07-06  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_vfp_cprc_sub_candidate): Don't call
