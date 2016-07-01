@@ -173,7 +173,7 @@ static void swap_operands (void);
 static void swap_2_operands (int, int);
 static void optimize_imm (void);
 static void optimize_disp (void);
-static const insn_template *match_template (void);
+static const insn_template *match_template (char);
 static int check_string (void);
 static int process_suffix (void);
 static int check_byte_reg (void);
@@ -3537,7 +3537,7 @@ void
 md_assemble (char *line)
 {
   unsigned int j;
-  char mnemonic[MAX_MNEM_SIZE];
+  char mnemonic[MAX_MNEM_SIZE], mnem_suffix;
   const insn_template *t;
 
   /* Initialize globals.  */
@@ -3555,6 +3555,7 @@ md_assemble (char *line)
   line = parse_insn (line, mnemonic);
   if (line == NULL)
     return;
+  mnem_suffix = i.suffix;
 
   line = parse_operands (line, mnemonic);
   this_operand = -1;
@@ -3600,7 +3601,7 @@ md_assemble (char *line)
      making sure the overlap of the given operands types is consistent
      with the template operand types.  */
 
-  if (!(t = match_template ()))
+  if (!(t = match_template (mnem_suffix)))
     return;
 
   if (sse_check != check_none
@@ -4724,14 +4725,14 @@ VEX_check_operands (const insn_template *t)
 }
 
 static const insn_template *
-match_template (void)
+match_template (char mnem_suffix)
 {
   /* Points to template once we've found it.  */
   const insn_template *t;
   i386_operand_type overlap0, overlap1, overlap2, overlap3;
   i386_operand_type overlap4;
   unsigned int found_reverse_match;
-  i386_opcode_modifier suffix_check;
+  i386_opcode_modifier suffix_check, mnemsuf_check;
   i386_operand_type operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
   unsigned int j;
@@ -4759,6 +4760,19 @@ match_template (void)
     suffix_check.no_qsuf = 1;
   else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
     suffix_check.no_ldsuf = 1;
+
+  memset (&mnemsuf_check, 0, sizeof (mnemsuf_check));
+  if (intel_syntax)
+    {
+      switch (mnem_suffix)
+	{
+	case BYTE_MNEM_SUFFIX:  mnemsuf_check.no_bsuf = 1; break;
+	case WORD_MNEM_SUFFIX:  mnemsuf_check.no_wsuf = 1; break;
+	case SHORT_MNEM_SUFFIX: mnemsuf_check.no_ssuf = 1; break;
+	case LONG_MNEM_SUFFIX:  mnemsuf_check.no_lsuf = 1; break;
+	case QWORD_MNEM_SUFFIX: mnemsuf_check.no_qsuf = 1; break;
+	}
+    }
 
   /* Must have right number of operands.  */
   i.error = number_of_operands_mismatch;
@@ -4804,6 +4818,14 @@ match_template (void)
 	      || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
 	      || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf)
 	      || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf)))
+	continue;
+      /* In Intel mode all mnemonic suffixes must be explicitly allowed.  */
+      if ((t->opcode_modifier.no_bsuf && mnemsuf_check.no_bsuf)
+	  || (t->opcode_modifier.no_wsuf && mnemsuf_check.no_wsuf)
+	  || (t->opcode_modifier.no_lsuf && mnemsuf_check.no_lsuf)
+	  || (t->opcode_modifier.no_ssuf && mnemsuf_check.no_ssuf)
+	  || (t->opcode_modifier.no_qsuf && mnemsuf_check.no_qsuf)
+	  || (t->opcode_modifier.no_ldsuf && mnemsuf_check.no_ldsuf))
 	continue;
 
       if (!operand_size_match (t))

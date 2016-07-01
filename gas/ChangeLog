@@ -1,5 +1,15 @@
 2016-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	PR gas/20318
+	* config/tc-i386.c (match_template): Add char parameter,
+	consumed in Intel mode for an extra suffix check.
+	(md_assemble): New local variable mnem_suffix.
+	* testsuite/gas/i386/suffix-bad.s: New.
+	* testsuite/gas/i386/suffix-bad.l: New.
+	* testsuite/gas/i386/i386.exp: Run new test (twice).
+
+2016-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/movz.s: New.
 	* testsuite/gas/i386/movz32.d: New.
 	* testsuite/gas/i386/movz64.d: New.
