@@ -2,6 +2,10 @@
 
 	* configure: Regenerate.
 
+2016-07-01  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2016-07-01  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (movzbl, movzbw, movzbq, movzwl, movzwq): Remove.

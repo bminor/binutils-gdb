@@ -4,6 +4,10 @@
 
 2016-07-01  Tristan Gingold  <gingold@adacore.com>
 
+	* configure: Regenerate.
+
+2016-07-01  Tristan Gingold  <gingold@adacore.com>
+
 	* NEWS: Add marker for 2.27.
 
 2016-07-01  Jan Beulich  <jbeulich@suse.com>
