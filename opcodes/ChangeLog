@@ -1,3 +1,8 @@
+2016-07-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (xlat): Remove RepPrefixOk.
+	* i386-tbl.h: Re-generate.
+
 2016-06-30  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-dis.c (print_insn): Fix typo in comment.

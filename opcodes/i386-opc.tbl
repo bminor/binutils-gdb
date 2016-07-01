@@ -474,8 +474,8 @@ stos, 2, 0xaa, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk,
 ssto, 0, 0xaa, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
 ssto, 1, 0xaa, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
 ssto, 2, 0xaa, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
-xlat, 0, 0xd7, None, 1, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-xlat, 1, 0xd7, None, 1, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xlat, 0, 0xd7, None, 1, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString, { 0 }
+xlat, 1, 0xd7, None, 1, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 // Bit manipulation.
 bsf, 2, 0xfbc, None, 2, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }

@@ -326,6 +326,9 @@ struct _i386_insn
        explicit segment overrides are given.  */
     const seg_entry *seg[2];
 
+    /* Copied first memory operand string, for re-checking.  */
+    char *memop1_string;
+
     /* PREFIX holds all the given prefix opcodes (usually null).
        PREFIXES is the number of prefix opcodes.  */
     unsigned int prefixes;
@@ -3555,6 +3558,8 @@ md_assemble (char *line)
 
   line = parse_operands (line, mnemonic);
   this_operand = -1;
+  xfree (i.memop1_string);
+  i.memop1_string = NULL;
   if (line == NULL)
     return;
 
@@ -8510,7 +8515,7 @@ i386_index_check (const char *operand_string)
 
       kind = "string address";
 
-      if (current_templates->start->opcode_modifier.w)
+      if (current_templates->start->opcode_modifier.repprefixok)
 	{
 	  i386_operand_type type = current_templates->end[-1].operand_types[0];
 
@@ -8661,6 +8666,49 @@ RC_SAE_immediate (const char *imm_start)
   return 1;
 }
 
+/* Only string instructions can have a second memory operand, so
+   reduce current_templates to just those if it contains any.  */
+static int
+maybe_adjust_templates (void)
+{
+  const insn_template *t;
+
+  gas_assert (i.mem_operands == 1);
+
+  for (t = current_templates->start; t < current_templates->end; ++t)
+    if (t->opcode_modifier.isstring)
+      break;
+
+  if (t < current_templates->end)
+    {
+      static templates aux_templates;
+      bfd_boolean recheck;
+
+      aux_templates.start = t;
+      for (; t < current_templates->end; ++t)
+	if (!t->opcode_modifier.isstring)
+	  break;
+      aux_templates.end = t;
+
+      /* Determine whether to re-check the first memory operand.  */
+      recheck = (aux_templates.start != current_templates->start
+		 || t != current_templates->end);
+
+      current_templates = &aux_templates;
+
+      if (recheck)
+	{
+	  i.mem_operands = 0;
+	  if (i.memop1_string != NULL
+	      && i386_index_check (i.memop1_string) == 0)
+	    return 0;
+	  i.mem_operands = 1;
+	}
+    }
+
+  return 1;
+}
+
 /* Parse OPERAND_STRING into the i386_insn structure I.  Returns zero
    on error.  */
 
@@ -8800,6 +8848,8 @@ i386_att_operand (char *operand_string)
       char *vop_start;
 
     do_memory_reference:
+      if (i.mem_operands == 1 && !maybe_adjust_templates ())
+	return 0;
       if ((i.mem_operands == 1
 	   && !current_templates->start->opcode_modifier.isstring)
 	  || i.mem_operands == 2)
@@ -8977,6 +9027,8 @@ i386_att_operand (char *operand_string)
       if (i386_index_check (operand_string) == 0)
 	return 0;
       i.types[this_operand].bitfield.mem = 1;
+      if (i.mem_operands == 0)
+	i.memop1_string = xstrdup (operand_string);
       i.mem_operands++;
     }
   else
