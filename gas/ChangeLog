@@ -1,3 +1,7 @@
+2016-07-01  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/mpx-inval-2.l: Relax for COFF targets.
+
 2016-07-01  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.27.

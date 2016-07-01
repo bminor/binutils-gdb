@@ -122,7 +122,7 @@ GAS LISTING .*
 [ 	]*34[ 	]+bndstx %bnd3, base\(%rip\)
 [ 	]*35[ 	]+\?\?\?\? 670F1B0D 		bndstx %bnd1, base\(%eip\)
 .*  Error: 32-bit address isn't allowed in 64-bit MPX instructions\.
-[ 	]*35[ 	]+00000000 
+[ 	]*35[ 	]+[0-9a-f][0-9a-f][0-9a-f]00000 
 [ 	]*36[ 	]+
 [ 	]*37[ 	]+\#\#\# bndldx
 [ 	]*38[ 	]+\?\?\?\? 670F1A44 		bndldx 0x3\(%eax,%ebx,1\), %bnd0
@@ -137,7 +137,7 @@ GAS LISTING .*
 [ 	]*41[ 	]*bndldx base\(%rip\), %bnd1
 [ 	]*42[ 	]*\?\?\?\? 670F1A1D 		bndldx base\(%eip\), %bnd3
 .*  Error: 32-bit address isn't allowed in 64-bit MPX instructions\.
-[ 	]*42[ 	]*00000000 
+[ 	]*42[ 	]*[0-9a-f][0-9a-f][0-9a-f]00000 
 [ 	]*43[ 	]+
 [ 	]*44[ 	]+\.intel_syntax noprefix
 [ 	]*45[ 	]+\?\?\?\? 67F30F1B 		bndmk bnd1, \[eax\]
@@ -208,7 +208,7 @@ GAS LISTING .*
 [ 	]*73[ 	]+bndstx \[rip\+base\], bnd1
 [ 	]*74[ 	]+\?\?\?\? 670F1B1D 		bndstx \[eip\+base\], bnd3
 .*  Error: 32-bit address isn't allowed in 64-bit MPX instructions\.
-[ 	]*74[ 	]+00000000 
+[ 	]*74[ 	]+[0-9a-f][0-9a-f][0-9a-f]00000 
 [ 	]*75[ 	]+
 [ 	]*76[ 	]+\#\#\# bndldx
 [ 	]*77[ 	]+\?\?\?\? 670F1A44 		bndldx bnd0, \[eax\+ebx\*1\+0x3\]
@@ -224,5 +224,5 @@ GAS LISTING .*
 [ 	]*80[ 	]+bndldx bnd1, \[rip\+base\]
 [ 	]*81[ 	]+\?\?\?\? 670F1A1D 		bndldx bnd3, \[eip\+base\]
 .*  Error: 32-bit address isn't allowed in 64-bit MPX instructions\.
-[ 	]*81      00000000 
+[ 	]*81      [0-9a-f][0-9a-f][0-9a-f]00000 
 #pass
