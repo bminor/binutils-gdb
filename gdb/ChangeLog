@@ -15,12 +15,10 @@
 
 2016-06-29  Manish Goregaokar  <manish@mozilla.com>
 
-gdb/ChangeLog:
 	* rust-lang.c (rust_get_disr_info): Initialize saveptr to NULL.
 
 2016-06-29  Manish Goregaokar  <manish@mozilla.com>
 
-gdb/ChangeLog:
 	* rust-lang.c (rust_get_disr_info): Use strtok_r instead of strsep.
 
 2016-06-28  Yao Qi  <yao.qi@linaro.org>
@@ -31,8 +29,8 @@ gdb/ChangeLog:
 2016-06-27  Manish Goregaokar  <manish@mozilla.com>
 
 	* rust-lang.c (rust_print_type, rust_decorations): Print unit
-	types as "()", (rust_print_type): Omit return type for functions
-	returning unit
+	types as "()".
+	(rust_print_type): Omit return type for functions returning unit.
 
 2016-06-25  Pierre-Marie de Rodat  <derodat@adacore.com>
 
