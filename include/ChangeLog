@@ -1,3 +1,10 @@
+2016-07-01  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* opcode/aarch64.h (AARCH64_CPU_HAS_ALL_FEATURES): New.
+	(AARCH64_CPU_HAS_ANY_FEATURES): New.
+	(AARCH64_CPU_HAS_FEATURE): Define as AARCH64_CPU_HAS_ALL_FEATURES.
+	(AARCH64_OPCODE_HAS_FEATURE): Remove.
+
 2016-06-30  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* opcode/arm.h (ARM_ARCH_V8_2a): Add FPU_NEON_EXT_RDMA to the set

@@ -1,3 +1,15 @@
+2016-07-01  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (struct aarch64_option_cpu_value_table): Add
+	require field.
+	(aarch64_features): Initialize require fields.
+	(aarch64_parse_features): Handle dependencies.
+	(aarch64_feature_enable_set, aarch64_feature_disable_set): New.
+	(md_assemble): Use AARCH64_CPU_HAS_ALL_FEATURES.
+	* testsuite/gas/aarch64/illegal-nofp16.s: New.
+	* testsuite/gas/aarch64/illegal-nofp16.l: New.
+	* testsuite/gas/aarch64/illegal-nofp16.d: New.
+
 2016-07-01  Nick Clifton  <nickc@redhat.com>
 
 	* macro.c (macro_expand_body): Use a buffer big enough to hold an
