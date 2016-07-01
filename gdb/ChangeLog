@@ -1,4 +1,22 @@
 2016-07-01  Pedro Alves  <palves@redhat.com>
+	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* inf-ptrace.c (inf_ptrace_detach_success): New function, factored
+	out from ...
+	(inf_ptrace_detach): ... here.
+	* inf-ptrace.h (inf_ptrace_detach_success): New declaration.
+	* linux-nat.c (get_pending_status): Rename to ...
+	(get_detach_signal): ... this, and return a host signal instead of
+	filling in a wait status.
+	(detach_one_lwp): New function, factored out from detach_callback
+	and adjusted to handle detaching from a zombie thread.
+	(detach_callback): Skip the leader thread.
+	(linux_nat_detach): No longer defer to inf_ptrace_detach to detach
+	the leader thread, nor build a signal string to pass down.
+	Instead, use target_announce_detach, detach_one_lwp and
+	inf_ptrace_detach_success.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (breakpoint_init_inferior): Discard watchpoint
 	locations.

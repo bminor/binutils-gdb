@@ -267,6 +267,7 @@ static int kill_lwp (unsigned long lwpid, int signo);
 static void enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info);
 static void complete_ongoing_step_over (void);
 static int linux_low_ptrace_options (int attached);
+static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 
 /* When the event-loop is doing a step-over, this points at the thread
    being stepped.  */
@@ -1492,16 +1493,14 @@ get_detach_signal (struct thread_info *thread)
     }
 }
 
-static int
-linux_detach_one_lwp (struct inferior_list_entry *entry, void *args)
-{
-  struct thread_info *thread = (struct thread_info *) entry;
-  struct lwp_info *lwp = get_thread_lwp (thread);
-  int pid = * (int *) args;
-  int sig;
+/* Detach from LWP.  */
 
-  if (ptid_get_pid (entry->id) != pid)
-    return 0;
+static void
+linux_detach_one_lwp (struct lwp_info *lwp)
+{
+  struct thread_info *thread = get_lwp_thread (lwp);
+  int sig;
+  int lwpid;
 
   /* If there is a pending SIGSTOP, get rid of it.  */
   if (lwp->stop_expected)
@@ -1514,22 +1513,94 @@ linux_detach_one_lwp (struct inferior_list_entry *entry, void *args)
       lwp->stop_expected = 0;
     }
 
-  /* Flush any pending changes to the process's registers.  */
-  regcache_invalidate_thread (thread);
-
   /* Pass on any pending signal for this thread.  */
   sig = get_detach_signal (thread);
 
-  /* Finally, let it resume.  */
-  if (the_low_target.prepare_to_resume != NULL)
-    the_low_target.prepare_to_resume (lwp);
-  if (ptrace (PTRACE_DETACH, lwpid_of (thread), (PTRACE_TYPE_ARG3) 0,
+  /* Preparing to resume may try to write registers, and fail if the
+     lwp is zombie.  If that happens, ignore the error.  We'll handle
+     it below, when detach fails with ESRCH.  */
+  TRY
+    {
+      /* Flush any pending changes to the process's registers.  */
+      regcache_invalidate_thread (thread);
+
+      /* Finally, let it resume.  */
+      if (the_low_target.prepare_to_resume != NULL)
+	the_low_target.prepare_to_resume (lwp);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (!check_ptrace_stopped_lwp_gone (lwp))
+	throw_exception (ex);
+    }
+  END_CATCH
+
+  lwpid = lwpid_of (thread);
+  if (ptrace (PTRACE_DETACH, lwpid, (PTRACE_TYPE_ARG3) 0,
 	      (PTRACE_TYPE_ARG4) (long) sig) < 0)
-    error (_("Can't detach %s: %s"),
-	   target_pid_to_str (ptid_of (thread)),
-	   strerror (errno));
+    {
+      int save_errno = errno;
+
+      /* We know the thread exists, so ESRCH must mean the lwp is
+	 zombie.  This can happen if one of the already-detached
+	 threads exits the whole thread group.  In that case we're
+	 still attached, and must reap the lwp.  */
+      if (save_errno == ESRCH)
+	{
+	  int ret, status;
+
+	  ret = my_waitpid (lwpid, &status, __WALL);
+	  if (ret == -1)
+	    {
+	      warning (_("Couldn't reap LWP %d while detaching: %s"),
+		       lwpid, strerror (errno));
+	    }
+	  else if (!WIFEXITED (status) && !WIFSIGNALED (status))
+	    {
+	      warning (_("Reaping LWP %d while detaching "
+			 "returned unexpected status 0x%x"),
+		       lwpid, status);
+	    }
+	}
+      else
+	{
+	  error (_("Can't detach %s: %s"),
+		 target_pid_to_str (ptid_of (thread)),
+		 strerror (save_errno));
+	}
+    }
+  else if (debug_threads)
+    {
+      debug_printf ("PTRACE_DETACH (%s, %s, 0) (OK)\n",
+		    target_pid_to_str (ptid_of (thread)),
+		    strsignal (sig));
+    }
 
   delete_lwp (lwp);
+}
+
+/* Callback for find_inferior.  Detaches from non-leader threads of a
+   given process.  */
+
+static int
+linux_detach_lwp_callback (struct inferior_list_entry *entry, void *args)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct lwp_info *lwp = get_thread_lwp (thread);
+  int pid = *(int *) args;
+  int lwpid = lwpid_of (thread);
+
+  /* Skip other processes.  */
+  if (ptid_get_pid (entry->id) != pid)
+    return 0;
+
+  /* We don't actually detach from the thread group leader just yet.
+     If the thread group exits, we must reap the zombie clone lwps
+     before we're able to reap the leader.  */
+  if (ptid_get_pid (entry->id) == lwpid)
+    return 0;
+
+  linux_detach_one_lwp (lwp);
   return 0;
 }
 
@@ -1537,6 +1608,7 @@ static int
 linux_detach (int pid)
 {
   struct process_info *process;
+  struct lwp_info *main_lwp;
 
   process = find_process_pid (pid);
   if (process == NULL)
@@ -1560,7 +1632,13 @@ linux_detach (int pid)
   /* Stabilize threads (move out of jump pads).  */
   stabilize_threads ();
 
-  find_inferior (&all_threads, linux_detach_one_lwp, &pid);
+  /* Detach from the clone lwps first.  If the thread group exits just
+     while we're detaching, we must reap the clone lwps before we're
+     able to reap the leader.  */
+  find_inferior (&all_threads, linux_detach_lwp_callback, &pid);
+
+  main_lwp = find_lwp_pid (pid_to_ptid (pid));
+  linux_detach_one_lwp (main_lwp);
 
   the_target->mourn (process);
 

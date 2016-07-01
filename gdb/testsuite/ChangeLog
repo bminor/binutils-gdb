@@ -1,4 +1,10 @@
 2016-07-01  Pedro Alves  <palves@redhat.com>
+	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.threads/process-dies-while-detaching.c: New file.
+	* gdb.threads/process-dies-while-detaching.exp: New file.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
 
 	* gdb.multi/watchpoint-multi-exit.c: New file.
 	* gdb.multi/watchpoint-multi-exit.exp: New file.

@@ -1,3 +1,13 @@
+2016-07-01  Pedro Alves  <palves@redhat.com>
+	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-low.c: Change interface to take the target lwp_info
+	pointer directly and return void.  Handle detaching from a zombie
+	thread.
+	(linux_detach_lwp_callback): New function.
+	(linux_detach): Detach from the leader thread after detaching from
+	the clone threads.
+
 2016-06-28  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_ftrace_insn_reloc_b): Use int64_t
