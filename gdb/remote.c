@@ -10152,6 +10152,14 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   return TARGET_XFER_OK;
 }
 
+/* Implementation of to_get_memory_xfer_limit.  */
+
+static ULONGEST
+remote_get_memory_xfer_limit (struct target_ops *ops)
+{
+  return get_memory_write_packet_size ();
+}
+
 static int
 remote_search_memory (struct target_ops* ops,
 		      CORE_ADDR start_addr, ULONGEST search_space_len,
@@ -13065,6 +13073,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_interrupt = remote_interrupt;
   remote_ops.to_pass_ctrlc = remote_pass_ctrlc;
   remote_ops.to_xfer_partial = remote_xfer_partial;
+  remote_ops.to_get_memory_xfer_limit = remote_get_memory_xfer_limit;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;
   remote_ops.to_log_command = serial_log_command;

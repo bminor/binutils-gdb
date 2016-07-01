@@ -745,6 +745,12 @@ struct target_ops
 						ULONGEST *xfered_len)
       TARGET_DEFAULT_RETURN (TARGET_XFER_E_IO);
 
+    /* Return the limit on the size of any single memory transfer
+       for the target.  */
+
+    ULONGEST (*to_get_memory_xfer_limit) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (ULONGEST_MAX);
+
     /* Returns the memory map for the target.  A return value of NULL
        means that no memory map is available.  If a memory address
        does not fall within any returned regions, it's assumed to be

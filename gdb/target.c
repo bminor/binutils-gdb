@@ -1301,8 +1301,9 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 	 by memory_xfer_partial_1.  We will continually malloc
 	 and free a copy of the entire write request for breakpoint
 	 shadow handling even though we only end up writing a small
-	 subset of it.  Cap writes to 4KB to mitigate this.  */
-      len = min (4096, len);
+	 subset of it.  Cap writes to a limit specified by the target
+	 to mitigate this.  */
+      len = min (ops->to_get_memory_xfer_limit (ops), len);
 
       buf = (gdb_byte *) xmalloc (len);
       old_chain = make_cleanup (xfree, buf);

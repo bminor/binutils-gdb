@@ -1,3 +1,12 @@
+2016-07-01  Don Breazeal  <donb@codesourcery.com>
+
+	* remote.c (remote_get_memory_xfer_limit): New function.
+	* target-delegates.c: Regenerate.
+	* target.c (memory_xfer_partial): Call
+	target_ops.to_get_memory_xfer_limit.
+	* target.h (struct target_ops) <to_get_memory_xfer_limit>: New
+	member.
+
 2016-07-01  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (struct fbsd_fork_child_info): Rename to ...
