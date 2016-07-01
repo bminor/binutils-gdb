@@ -1,5 +1,9 @@
 2016-07-01  Tristan Gingold  <gingold@adacore.com>
 
+	* configure: Regenerate.
+
+2016-07-01  Tristan Gingold  <gingold@adacore.com>
+
 	* NEWS: Add marker for 2.27.
 
 2016-06-28  H.J. Lu  <hongjiu.lu@intel.com>
