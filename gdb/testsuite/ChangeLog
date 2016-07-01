@@ -1,3 +1,8 @@
+2016-07-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/watchpoint-multi-exit.c: New file.
+	* gdb.multi/watchpoint-multi-exit.exp: New file.
+
 2016-06-30  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdbserver-support.exp (close_gdbserver, gdb_exit): Don't

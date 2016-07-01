@@ -1,5 +1,11 @@
 2016-07-01  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (breakpoint_init_inferior): Discard watchpoint
+	locations.
+	* infcmd.c (detach_command): Call breakpoint_init_inferior.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
+
 	* darwin-nat.c (darwin_detach): Use target_announce_detach.
 	* inf-ptrace.c (inf_ptrace_detach): Likewise.
 	* nto-procfs.c (procfs_detach): Likewise.

@@ -2998,6 +2998,13 @@ detach_command (char *args, int from_tty)
 
   target_detach (args, from_tty);
 
+  /* The current inferior process was just detached successfully.  Get
+     rid of breakpoints that no longer make sense.  Note we don't do
+     this within target_detach because that is also used when
+     following child forks, and in that case we will want to transfer
+     breakpoints to the child, not delete them.  */
+  breakpoint_init_inferior (inf_exited);
+
   /* If the solist is global across inferiors, don't clear it when we
      detach from a single inferior.  */
   if (!gdbarch_has_global_solist (target_gdbarch ()))

@@ -4204,15 +4204,25 @@ breakpoint_init_inferior (enum inf_context context)
 	  /* Likewise for watchpoints on local expressions.  */
 	  if (w->exp_valid_block != NULL)
 	    delete_breakpoint (b);
-	  else if (context == inf_starting)
+	  else
 	    {
-	      /* Reset val field to force reread of starting value in
-		 insert_breakpoints.  */
-	      if (w->val)
-		value_free (w->val);
-	      w->val = NULL;
-	      w->val_valid = 0;
-	  }
+	      /* Get rid of existing locations, which are no longer
+		 valid.  New ones will be created in
+		 update_watchpoint, when the inferior is restarted.
+		 The next update_global_location_list call will
+		 garbage collect them.  */
+	      b->loc = NULL;
+
+	      if (context == inf_starting)
+		{
+		  /* Reset val field to force reread of starting value in
+		     insert_breakpoints.  */
+		  if (w->val)
+		    value_free (w->val);
+		  w->val = NULL;
+		  w->val_valid = 0;
+		}
+	    }
 	}
 	break;
       default:
