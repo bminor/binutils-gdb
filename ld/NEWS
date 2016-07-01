@@ -1,7 +1,5 @@
 -*- text -*-
 
-Changes in 2.27:
-
 Changes in 2.26:
 
 * Add --fix-stm32l4xx-629360 to the ARM linker to enable a link-time
