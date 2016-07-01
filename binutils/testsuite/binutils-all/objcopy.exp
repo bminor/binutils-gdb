@@ -1159,4 +1159,8 @@ proc objcopy_test_without_global_symbol { } {
     pass $test
 }
 
+# The AArch64 and ARM targets preserve mapping symbols
+# in object files, so they will fail this test.
+setup_xfail aarch64*-*-* arm*-*-*
+
 objcopy_test_without_global_symbol
