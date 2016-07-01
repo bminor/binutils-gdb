@@ -1,4 +1,27 @@
 2016-07-01  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* jit.c (jit_reader_load_command): Call reinit_frame_cache and
+	jit_inferior_created_hook.
+	(jit_reader_unload_command): Call reinit_frame_cache and
+	jit_inferior_exit_hook.
+	* jit.c (struct jit_unwind_private) <registers>: Delete field.
+	<regcache>: New field.
+	(jit_unwind_reg_set_impl): Set the register's value in the
+	regcache.  Free the passed-in gdb_reg_value.
+	(jit_dealloc_cache): Adjust to free the regcache.
+	(jit_frame_sniffer): Allocate a regcache instead of an array of
+	gdb_reg_value pointers.
+	(jit_frame_this_id): Adjust.
+	(jit_frame_prev_register): Read raw registers off of the regcache
+	instead of from the gdb_reg_value pointer array.  Use
+	gdbarch_pseudo_register_read_value to read pseudo registers.
+	* regcache.c (regcache_raw_set_cached_value): New function,
+	factored out from ...
+	(regcache_raw_write): ... here.
+	* regcache.h (regcache_raw_set_cached_value): Declare.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
 	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* inf-ptrace.c (inf_ptrace_detach_success): New function, factored

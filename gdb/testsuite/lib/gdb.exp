@@ -5435,18 +5435,23 @@ proc get_integer_valueof { exp default } {
     return ${val}
 }
 
-proc get_hexadecimal_valueof { exp default } {
+# Retrieve the value of EXP in the inferior, as an hexadecimal value
+# (using "print /x").  DEFAULT is used as fallback if print fails.
+# TEST is the test message to use.  If can be ommitted, in which case
+# a test message is built from EXP.
+
+proc get_hexadecimal_valueof { exp default {test ""} } {
     global gdb_prompt
-    send_gdb "print /x ${exp}\n"
-    set test "get hexadecimal valueof \"${exp}\""
-    gdb_expect {
+
+    if {$test == ""} {
+	set test "get hexadecimal valueof \"${exp}\""
+    }
+
+    set val ${default}
+    gdb_test_multiple "print /x ${exp}" $test {
 	-re "\\$\[0-9\]* = (0x\[0-9a-zA-Z\]+).*$gdb_prompt $" {
 	    set val $expect_out(1,string)
 	    pass "$test"
-	}
-	timeout {
-	    set val ${default}
-	    fail "$test (timeout)"
 	}
     }
     return ${val}

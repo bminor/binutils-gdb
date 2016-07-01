@@ -1,4 +1,22 @@
 2016-07-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/jit-reader.exp (info_registers_current_frame): New
+	procedure.
+	(jit_reader_test): Test the jit reader's unwinder.
+	* gdb.base/jithost.c (jit_function_00_code): New global.
+	(main): Use memcpy to fill in the mmapped code, instead of poking
+	bytes manually here.
+	* gdb.base/jitreader.c (enum register_mapping) <AMD64_RBP>: New
+	value.
+	(read_debug_info): Save the function's range.
+	(read_sp): New function.
+	(unwind_frame): Use it.  Also unwind RBP.
+	(get_frame_id): Use read_sp.
+	(gdb_init_reader): Use calloc instead of malloc.
+	* lib/gdb.exp (get_hexadecimal_valueof): Add optional 'test'
+	parameter.  Use gdb_test_multiple.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
 	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* gdb.threads/process-dies-while-detaching.c: New file.
