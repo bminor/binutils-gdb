@@ -3666,10 +3666,15 @@ md_assemble (char *line)
   if (i.bnd_prefix && !i.tm.opcode_modifier.bndprefixok)
     as_bad (_("expecting valid branch instruction after `bnd'"));
 
-  if (i.tm.cpu_flags.bitfield.cpumpx
-      && flag_code == CODE_64BIT
-      && i.prefix[ADDR_PREFIX])
-    as_bad (_("32-bit address isn't allowed in 64-bit MPX instructions."));
+  if (i.tm.cpu_flags.bitfield.cpumpx)
+    {
+      if (flag_code == CODE_64BIT && i.prefix[ADDR_PREFIX])
+	as_bad (_("32-bit address isn't allowed in 64-bit MPX instructions."));
+      else if (flag_code != CODE_16BIT
+	       ? i.prefix[ADDR_PREFIX]
+	       : i.mem_operands && !i.prefix[ADDR_PREFIX])
+	as_bad (_("16-bit address isn't allowed in MPX instructions"));
+    }
 
   /* Insert BND prefix.  */
   if (add_bnd_prefix
