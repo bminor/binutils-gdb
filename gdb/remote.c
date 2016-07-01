@@ -5134,15 +5134,7 @@ remote_detach_1 (const char *args, int from_tty)
   if (!target_has_execution)
     error (_("No process to detach from."));
 
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == NULL)
-	exec_file = "";
-      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-			 target_pid_to_str (pid_to_ptid (pid)));
-      gdb_flush (gdb_stdout);
-    }
+  target_announce_detach (from_tty);
 
   /* Tell the remote target to detach.  */
   remote_detach_pid (pid);

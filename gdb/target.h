@@ -1302,6 +1302,11 @@ extern struct target_ops *find_run_target (void);
 #define target_post_attach(pid) \
      (*current_target.to_post_attach) (&current_target, pid)
 
+/* Display a message indicating we're about to detach from the current
+   inferior process.  */
+
+extern void target_announce_detach (int from_tty);
+
 /* Takes a program previously attached to and detaches it.
    The program may resume execution (some targets do, some don't) and will
    no longer stop on signals, etc.  We better not have left any breakpoints

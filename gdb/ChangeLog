@@ -1,3 +1,12 @@
+2016-07-01  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_detach): Use target_announce_detach.
+	* inf-ptrace.c (inf_ptrace_detach): Likewise.
+	* nto-procfs.c (procfs_detach): Likewise.
+	* remote.c (remote_detach_1): Likewise.
+	* target.c (target_announce_detach): New function.
+	* target.h (target_announce_detach): New declaration.
+
 2016-06-29  Tom Tromey  <tom@tromey.com>
 
 	PR python/20129:

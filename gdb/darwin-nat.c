@@ -1739,15 +1739,7 @@ darwin_detach (struct target_ops *ops, const char *args, int from_tty)
   int res;
 
   /* Display message.  */
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-			 target_pid_to_str (pid_to_ptid (pid)));
-      gdb_flush (gdb_stdout);
-    }
+  target_announce_detach (from_tty);
 
   /* If ptrace() is in use, stop the process.  */
   if (!inf->priv->no_ptrace)

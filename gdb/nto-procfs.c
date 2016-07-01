@@ -962,15 +962,8 @@ procfs_detach (struct target_ops *ops, const char *args, int from_tty)
   int siggnal = 0;
   int pid;
 
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf_unfiltered ("Detaching from program: %s %s\n",
-			 exec_file, target_pid_to_str (inferior_ptid));
-      gdb_flush (gdb_stdout);
-    }
+  target_announce_detach ();
+
   if (args)
     siggnal = atoi (args);
 
