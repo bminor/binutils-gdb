@@ -842,7 +842,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	    {
 	      /* Sub in the macro invocation number.  */
 
-	      char buffer[10];
+	      char buffer[12];
 	      src++;
 	      sprintf (buffer, "%d", macro_number);
 	      sb_add_string (out, buffer);
