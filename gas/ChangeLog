@@ -1,5 +1,10 @@
 2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips.exp: Restrict 64-bit `branch-mips'
+	tests to NewABI targets.
+
+2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips.exp: Group `branch-misc' tests
 	together.
 
