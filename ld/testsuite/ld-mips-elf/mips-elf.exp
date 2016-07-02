@@ -142,6 +142,7 @@ run_dump_test "mips16-1"
 
 # MIPS branch offset final link checking.
 run_dump_test "branch-misc-1"
+run_dump_test "branch-misc-2"
 
 run_dump_test "mips16-branch-2" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-3" [list [list ld $abi_ldflags(o32)]]

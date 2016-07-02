@@ -1,3 +1,8 @@
+2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/branch-misc-2.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run it.
+
 2016-07-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/ld-arm/arm-elf.exp (Thumb-2 BL): Assemble for ARMv7.
