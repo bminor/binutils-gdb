@@ -561,12 +561,18 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "branch-misc-2pic" [mips_arch_list_matching mips1]
     run_dump_test "branch-misc-3"
     run_dump_test_arches "branch-misc-4" [mips_arch_list_matching mips1]
+    run_dump_test_arches "branch-misc-5" [mips_arch_list_matching mips1]
+    run_dump_test_arches "branch-misc-5pic" [mips_arch_list_matching mips1]
     if $has_newabi {
 	run_dump_test_arches "branch-misc-2-64" \
 					[mips_arch_list_matching mips3]
 	run_dump_test_arches "branch-misc-2pic-64" \
 					[mips_arch_list_matching mips3]
 	run_dump_test_arches "branch-misc-4-64" \
+					[mips_arch_list_matching mips3]
+	run_dump_test_arches "branch-misc-5-64" \
+					[mips_arch_list_matching mips3]
+	run_dump_test_arches "branch-misc-5pic-64" \
 					[mips_arch_list_matching mips3]
     }
     run_dump_test "branch-swap"

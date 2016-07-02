@@ -1,5 +1,32 @@
 2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/branch-misc-2.s: Move non
+	locally-defined-global symbol tests...
+	* testsuite/gas/mips/branch-misc-5.s: ... to this new test.
+	* testsuite/gas/mips/branch-misc-2.d: Update accordingly.
+	* testsuite/gas/mips/branch-misc-2-64.d: Likewise.
+	* testsuite/gas/mips/branch-misc-2pic.d: Likewise.
+	* testsuite/gas/mips/branch-misc-2pic-64.d: Likewise.
+	* testsuite/gas/mips/mipsr6@branch-misc-2-64.d: Likewise.
+	* testsuite/gas/mips/mipsr6@branch-misc-2pic-64.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-2.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-2-64.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-2pic.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-2pic-64.d: Likewise.
+	* testsuite/gas/mips/branch-misc-5.d: New test.
+	* testsuite/gas/mips/branch-misc-5pic.d: New test.
+	* testsuite/gas/mips/branch-misc-5-64.d: New test.
+	* testsuite/gas/mips/branch-misc-5pic-64.d: New test.
+	* testsuite/gas/mips/mipsr6@branch-misc-5-64.d: New test.
+	* testsuite/gas/mips/mipsr6@branch-misc-5pic-64.d: New test.
+	* testsuite/gas/mips/micromips@branch-misc-5.d: New test.
+	* testsuite/gas/mips/micromips@branch-misc-5pic.d: New test.
+	* testsuite/gas/mips/micromips@branch-misc-5-64.d: New test.
+	* testsuite/gas/mips/micromips@branch-misc-5pic-64.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/beq.s: Uncomment branches to undefined
 	symbols.
 	* testsuite/gas/mips/beq.d: Update accordingly.
