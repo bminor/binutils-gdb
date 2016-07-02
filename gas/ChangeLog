@@ -1,3 +1,8 @@
+2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips.exp: Group `branch-misc' tests
+	together.
+
 2016-07-01  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* config/tc-aarch64.c (struct aarch64_option_cpu_value_table): Add
