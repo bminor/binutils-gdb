@@ -38,4 +38,10 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> bnez	a0,0+0050 <.*>
 [	]*50: .*R_MIPS_PC16	text_label
 [0-9a-f]+ <[^>]*> nop
+[0-9a-f]+ <[^>]*> b	0+0058 <.*>
+[ 	]*58: .*R_MIPS_PC16	external_label
+[0-9a-f]+ <[^>]*> nop
+[0-9a-f]+ <[^>]*> bal	0+0060 <.*>
+[ 	]*60: .*R_MIPS_PC16	external_label
+[0-9a-f]+ <[^>]*> nop
 	\.\.\.

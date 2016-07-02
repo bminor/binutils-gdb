@@ -1,5 +1,13 @@
 2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/beq.s: Uncomment branches to undefined
+	symbols.
+	* testsuite/gas/mips/beq.d: Update accordingly.
+	* testsuite/gas/mips/mipsr6@beq.d: Likewise.
+	* testsuite/gas/mips/micromips@beq.d: Likewise.
+
+2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips.exp: Restrict 64-bit `branch-mips'
 	tests to NewABI targets.
 
