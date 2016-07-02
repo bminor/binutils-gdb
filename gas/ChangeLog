@@ -1,5 +1,35 @@
 2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/ecoff@ld-zero-3.d: Remove test.
+	* testsuite/gas/mips/ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/beq.d: Remove a.out and ECOFF support from
+	reloc patterns.
+	* testsuite/gas/mips/mipsr6@beq.d: Likewise.
+	* testsuite/gas/mips/bge.d: Likewise.
+	* testsuite/gas/mips/mipsr6@bge.d: Likewise.
+	* testsuite/gas/mips/bgeu.d: Likewise.
+	* testsuite/gas/mips/mipsr6@bgeu.d: Likewise.
+	* testsuite/gas/mips/blt.d: Likewise.
+	* testsuite/gas/mips/mipsr6@blt.d: Likewise.
+	* testsuite/gas/mips/bltu.d: Likewise.
+	* testsuite/gas/mips/mipsr6@bltu.d: Likewise.
+	* testsuite/gas/mips/branch-likely.d: Likewise.
+	* testsuite/gas/mips/la.d: Likewise.
+	* testsuite/gas/mips/lb.d: Likewise.
+	* testsuite/gas/mips/lifloat.d: Likewise.
+	* testsuite/gas/mips/sb.d: Likewise.
+	* testsuite/gas/mips/uld.d: Likewise.
+	* testsuite/gas/mips/ulh.d: Likewise.
+	* testsuite/gas/mips/ulw.d: Likewise.
+	* testsuite/gas/mips/usd.d: Likewise.
+	* testsuite/gas/mips/ush.d: Likewise.
+	* testsuite/gas/mips/usw.d: Likewise.
+
+2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/branch-misc-2.s: Move non
 	locally-defined-global symbol tests...
 	* testsuite/gas/mips/branch-misc-5.s: ... to this new test.
