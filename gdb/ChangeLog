@@ -1,3 +1,11 @@
+2016-07-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* common/signals.c (gdb_signal_from_host): Handle SIGLIBRT.
+	(do_gdb_signal_to_host): Likewise.
+	* infrun.c (_initialize_infrun): Pass GDB_SIGNAL_LIBRT through to
+	programs.
+	* proc-events.c (signal_table): Add entry for SIGLIBRT.
+
 2016-07-14  Tom Tromey  <tom@tromey.com>
 
 	* python/py-breakpoint.c (gdbpy_breakpoint_deleted): Add missing
