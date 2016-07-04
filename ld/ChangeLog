@@ -1,3 +1,10 @@
+2016-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/ft32.sc (__PMSIZE_): If not defined, set to 256K.
+	(__RAMSIZE): If not defined, set to 64K.
+	(MEMORY): Set the flash region size to __PMSIZE and the ram region
+	size to __RAMSIZE.
+
 2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/branch-misc-2.d: New test.
