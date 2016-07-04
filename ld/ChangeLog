@@ -1,3 +1,11 @@
+2016-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20321
+	* plugin.c (plugin_opt_plugin): Warn and return if plugin has
+	been loaded already.
+	* testsuite/ld-plugin/lto.exp: Run PR ld/20321 test.
+	* testsuite/ld-plugin/pr20321.c: New file.
+
 2016-07-04  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/ft32.sc (__PMSIZE_): If not defined, set to 256K.
