@@ -1,3 +1,7 @@
+2016-07-05  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.mi/mi-reverse.exp: Match =record-started output.
+
 2016-07-01  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/jit-reader.exp (info_registers_current_frame): New
