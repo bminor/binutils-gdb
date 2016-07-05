@@ -1,3 +1,8 @@
+2016-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure: Regenerate.
+	* configure.ac (HAVE_LIBBABELTRACE): Fix pos variable dereference.
+
 2016-07-01  Don Breazeal  <donb@codesourcery.com>
 
 	* remote.c (remote_get_memory_xfer_limit): New function.
