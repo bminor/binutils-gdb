@@ -5399,7 +5399,7 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* 20 */ { STRING_COMMA_LEN ("COMPRESSED") },
       /* ARM specific.  */
       /* 21 */ { STRING_COMMA_LEN ("ENTRYSECT") },
-      /* 22 */ { STRING_COMMA_LEN ("ARM_NOREAD") },
+      /* 22 */ { STRING_COMMA_LEN ("ARM_PURECODE") },
       /* 23 */ { STRING_COMMA_LEN ("COMDEF") }
     };
 
@@ -5475,7 +5475,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 		  switch (flag)
 		    {
 		    case SHF_ENTRYSECT: sindex = 21; break;
-		    case SHF_ARM_NOREAD: sindex = 22; break;
+		    case SHF_ARM_PURECODE: sindex = 22; break;
 		    case SHF_COMDEF: sindex = 23; break;
 		    default: break;
 		    }
@@ -5534,7 +5534,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 		  && flag == SHF_X86_64_LARGE)
 		*p = 'l';
 	      else if (elf_header.e_machine == EM_ARM
-		       && flag == SHF_ARM_NOREAD)
+		       && flag == SHF_ARM_PURECODE)
 		  *p = 'y';
 	      else if (flag & SHF_MASKOS)
 		{
@@ -6118,7 +6118,7 @@ process_section_headers (FILE * file)
 	  || elf_header.e_machine == EM_K1OM)
 	printf (_("l (large), "));
       else if (elf_header.e_machine == EM_ARM)
-	printf (_("y (noread), "));
+	printf (_("y (purecode), "));
       printf ("p (processor specific)\n");
     }
 

@@ -1,3 +1,15 @@
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* bfd-in2.h (SEC_ELF_NOREAD): Rename to ...
+	(SEC_ELF_PURECODE): ... this.
+	* elf32-arm.c (elf32_arm_post_process_headers): Rename SEC_ELF_NOREAD
+	to SEC_ELF_NOREAD.
+	(elf32_arm_fake_sections): Likewise.
+	(elf_32_arm_section_flags): Likewise.
+	(elf_32_arm_lookup_section_flags): Likewise.
+	* section.c (SEC_ELF_NOREAD): Rename to ...
+	(SEC_ELF_PURECODE): ... this.
+
 2016-07-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (using_thumb2_bl): New function.

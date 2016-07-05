@@ -493,12 +493,7 @@ dump_section_header (bfd *abfd, asection *section,
       PF (SEC_COFF_NOREAD, "NOREAD");
     }
   else if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    {
-      /* Note - sections can have both the READONLY and NOREAD attributes
-	 set.  In this case the NOREAD takes precedence, but we report both
-	 since the user may need to know that both bits are set.  */
-      PF (SEC_ELF_NOREAD, "NOREAD");
-    }
+    PF (SEC_ELF_PURECODE, "PURECODE");
   PF (SEC_THREAD_LOCAL, "THREAD_LOCAL");
   PF (SEC_GROUP, "GROUP");
   if (bfd_get_arch (abfd) == bfd_arch_mep)

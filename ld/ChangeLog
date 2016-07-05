@@ -1,3 +1,9 @@
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* testsuite/ld-arm/arm_noread.ld: Renamed to ...
+	testsuite/ld-arm/arm_purecode.ld: ... this, and replaced
+	all noread's by purecode.
+
 2016-07-05  Jan Beulich  <jbeulich@suse.com>
 
 	* ldexp.c (exp_fold_tree_1): Set linker_def field based on

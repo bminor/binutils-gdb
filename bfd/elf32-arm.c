@@ -15812,7 +15812,7 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
     }
 
   /* Scan segment to set p_flags attribute if it contains only sections with
-     SHF_ARM_NOREAD flag.  */
+     SHF_ARM_PURECODE flag.  */
   for (m = elf_seg_map (abfd); m != NULL; m = m->next)
     {
       unsigned int j;
@@ -15821,7 +15821,7 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
 	continue;
       for (j = 0; j < m->count; j++)
 	{
-	  if (!(elf_section_flags (m->sections[j]) & SHF_ARM_NOREAD))
+	  if (!(elf_section_flags (m->sections[j]) & SHF_ARM_PURECODE))
 	    break;
 	}
       if (j == m->count)
@@ -15884,8 +15884,8 @@ elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
       hdr->sh_flags |= SHF_LINK_ORDER;
     }
 
-  if (sec->flags & SEC_ELF_NOREAD)
-    hdr->sh_flags |= SHF_ARM_NOREAD;
+  if (sec->flags & SEC_ELF_PURECODE)
+    hdr->sh_flags |= SHF_ARM_PURECODE;
 
   return TRUE;
 }
@@ -18171,16 +18171,16 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 static bfd_boolean
 elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr * hdr)
 {
-  if (hdr->sh_flags & SHF_ARM_NOREAD)
-    *flags |= SEC_ELF_NOREAD;
+  if (hdr->sh_flags & SHF_ARM_PURECODE)
+    *flags |= SEC_ELF_PURECODE;
   return TRUE;
 }
 
 static flagword
 elf32_arm_lookup_section_flags (char *flag_name)
 {
-  if (!strcmp (flag_name, "SHF_ARM_NOREAD"))
-    return SHF_ARM_NOREAD;
+  if (!strcmp (flag_name, "SHF_ARM_PURECODE"))
+    return SHF_ARM_PURECODE;
 
   return SEC_NO_FLAGS;
 }
