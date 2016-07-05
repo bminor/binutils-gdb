@@ -2360,6 +2360,8 @@ enum stub_insn_type
    is inserted in arm_build_one_stub().  */
 #define THUMB16_BCOND_INSN(X)	{(X), THUMB16_TYPE, R_ARM_NONE, 1}
 #define THUMB32_INSN(X)		{(X), THUMB32_TYPE, R_ARM_NONE, 0}
+#define THUMB32_MOVT(X)		{(X), THUMB32_TYPE, R_ARM_THM_MOVT_ABS, 0}
+#define THUMB32_MOVW(X)		{(X), THUMB32_TYPE, R_ARM_THM_MOVW_ABS_NC, 0}
 #define THUMB32_B_INSN(X, Z)	{(X), THUMB32_TYPE, R_ARM_THM_JUMP24, (Z)}
 #define ARM_INSN(X)		{(X), ARM_TYPE, R_ARM_NONE, 0}
 #define ARM_REL_INSN(X, Z)	{(X), ARM_TYPE, R_ARM_JUMP24, (Z)}
@@ -2407,6 +2409,15 @@ static const insn_sequence elf32_arm_stub_long_branch_thumb2_only[] =
 {
   THUMB32_INSN (0xf85ff000),         /* ldr.w  pc, [pc, #-0] */
   DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(x) */
+};
+
+/* Thumb -> Thumb long branch stub. Used for PureCode sections on Thumb2
+   M-profile architectures.  */
+static const insn_sequence elf32_arm_stub_long_branch_thumb2_only_pure[] =
+{
+  THUMB32_MOVW (0xf2400c00),	     /* mov.w ip, R_ARM_MOVW_ABS_NC */
+  THUMB32_MOVT (0xf2c00c00),	     /* movt  ip, R_ARM_MOVT_ABS << 16 */
+  THUMB16_INSN (0x4760),             /* bx   ip */
 };
 
 /* V4T Thumb -> Thumb long branch stub. Using the stack is not
@@ -2634,6 +2645,7 @@ static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
   DEF_STUB(a8_veneer_bl) \
   DEF_STUB(a8_veneer_blx) \
   DEF_STUB(long_branch_thumb2_only) \
+  DEF_STUB(long_branch_thumb2_only_pure)
 
 #define DEF_STUB(x) arm_stub_##x,
 enum elf32_arm_stub_type
@@ -3808,6 +3820,7 @@ arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
     {
     case arm_stub_long_branch_thumb_only:
     case arm_stub_long_branch_thumb2_only:
+    case arm_stub_long_branch_thumb2_only_pure:
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:
     case arm_stub_long_branch_v4t_thumb_arm_pic:
@@ -3847,6 +3860,8 @@ arm_type_of_stub (struct bfd_link_info *info,
   enum arm_st_branch_type branch_type = *actual_branch_type;
   union gotplt_union *root_plt;
   struct arm_plt_info *arm_plt;
+  int arch;
+  int thumb2_movw;
 
   if (branch_type == ST_BRANCH_LONG)
     return stub_type;
@@ -3858,6 +3873,11 @@ arm_type_of_stub (struct bfd_link_info *info,
   thumb_only = using_thumb_only (globals);
   thumb2 = using_thumb2 (globals);
   thumb2_bl = using_thumb2_bl (globals);
+
+  arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  /* True for architectures that implement the thumb2 movw instruction.  */
+  thumb2_movw = thumb2 || (arch  == TAG_CPU_ARCH_V8M_BASE);
 
   /* Determine where the call point is.  */
   location = (input_sec->output_offset
@@ -3945,6 +3965,15 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      /* Thumb to thumb.  */
 	      if (!thumb_only)
 		{
+		  if (input_sec->flags & SEC_ELF_PURECODE)
+		    (*_bfd_error_handler) (_("%B(%s): warning: long branch "
+					     " veneers used in section with "
+					     "SHF_ARM_PURECODE section "
+					     "attribute is only supported"
+					     " for M-profile targets that "
+					     "implement the movw "
+					     "instruction."));
+
 		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 		    /* PIC stubs.  */
 		    ? ((globals->use_blx
@@ -3967,16 +3996,39 @@ arm_type_of_stub (struct bfd_link_info *info,
 		}
 	      else
 		{
-		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
-		    /* PIC stub.  */
-		    ? arm_stub_long_branch_thumb_only_pic
-		    /* non-PIC stub.  */
-		    : (thumb2 ? arm_stub_long_branch_thumb2_only
-			      : arm_stub_long_branch_thumb_only);
+		  if (thumb2_movw && (input_sec->flags & SEC_ELF_PURECODE))
+		      stub_type = arm_stub_long_branch_thumb2_only_pure;
+		  else
+		    {
+		      if (input_sec->flags & SEC_ELF_PURECODE)
+			(*_bfd_error_handler) (_("%B(%s): warning: long branch "
+						 " veneers used in section with "
+						 "SHF_ARM_PURECODE section "
+						 "attribute is only supported"
+						 " for M-profile targets that "
+						 "implement the movw "
+						 "instruction."));
+
+		      stub_type = (bfd_link_pic (info) | globals->pic_veneer)
+			/* PIC stub.  */
+			? arm_stub_long_branch_thumb_only_pic
+			/* non-PIC stub.  */
+			: (thumb2 ? arm_stub_long_branch_thumb2_only
+				  : arm_stub_long_branch_thumb_only);
+		    }
 		}
 	    }
 	  else
 	    {
+	      if (input_sec->flags & SEC_ELF_PURECODE)
+		(*_bfd_error_handler) (_("%B(%s): warning: long branch "
+					 " veneers used in section with "
+					 "SHF_ARM_PURECODE section "
+					 "attribute is only supported"
+					 " for M-profile targets that "
+					 "implement the movw "
+					 "instruction."));
+
 	      /* Thumb to arm.  */
 	      if (sym_sec != NULL
 		  && sym_sec->owner != NULL
@@ -4021,6 +4073,14 @@ arm_type_of_stub (struct bfd_link_info *info,
 	   || r_type == R_ARM_PLT32
 	   || r_type == R_ARM_TLS_CALL)
     {
+      if (input_sec->flags & SEC_ELF_PURECODE)
+	(*_bfd_error_handler) (_("%B(%s): warning: long branch "
+				 " veneers used in section with "
+				 "SHF_ARM_PURECODE section "
+				 "attribute is only supported"
+				 " for M-profile targets that "
+				 "implement the movw "
+				 "instruction."));
       if (branch_type == ST_BRANCH_TO_THUMB)
 	{
 	  /* Arm to thumb.  */
@@ -4446,6 +4506,7 @@ arm_stub_required_alignment (enum elf32_arm_stub_type stub_type)
     case arm_stub_long_branch_v4t_arm_thumb:
     case arm_stub_long_branch_thumb_only:
     case arm_stub_long_branch_thumb2_only:
+    case arm_stub_long_branch_thumb2_only_pure:
     case arm_stub_long_branch_v4t_thumb_thumb:
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:

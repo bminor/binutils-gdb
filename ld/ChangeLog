@@ -1,5 +1,11 @@
 2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
 
+	* testsuite/ld-arm/farcall-thumb2-purecode.d: New test result.
+	* testsuite/ld-arm/farcall-thumb2-purecode.s: New test.
+	* testsuite/ld-arm/arm-elf.exp: Run it.
+
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
 	* testsuite/ld-arm/arm_noread.ld: Renamed to ...
 	testsuite/ld-arm/arm_purecode.ld: ... this, and replaced
 	all noread's by purecode.

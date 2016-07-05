@@ -1,5 +1,15 @@
 2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
 
+	* elf32-arm.c (THUMB32_MOVT): New veneer macro.
+	(THUMB32_MOVW): Likewise.
+	(elf32_arm_stub_long_branch_thumb2_only_pure): New.
+	(DEF_STUBS): Define long_branch_thumb2_only_pure.
+	(arm_stub_is_thumb): Add new veneer stub.
+	(arm_type_of_stub): Use new veneer.
+	(arm_stub_required_alignment): Add new veneer.
+
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
 	* bfd-in2.h (SEC_ELF_NOREAD): Rename to ...
 	(SEC_ELF_PURECODE): ... this.
 	* elf32-arm.c (elf32_arm_post_process_headers): Rename SEC_ELF_NOREAD
