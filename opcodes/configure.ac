@@ -185,7 +185,7 @@ changequote([,])dnl
           SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.sl ${SHARED_LIBADD}"
 	  ;;
 	*)
-          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so ${SHARED_LIBADD}"
+          SHARED_LIBADD="../bfd/libbfd.la ${SHARED_LIBADD}"
 	  ;;
       esac
       SHARED_DEPENDENCIES="../bfd/libbfd.la"
