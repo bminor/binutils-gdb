@@ -1,3 +1,12 @@
+2016-07-04  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (check_qword_reg): Correct register kind
+	checked.
+	* testsuite/gas/i386/x86-64-suffix-bad.s: Add q-suffix with
+	16-bit register cases.
+	* testsuite/gas/i386/x86-64-suffix-bad.l: Adjust expectations.
+
+
 2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/ecoff@ld.d: Remove test.
