@@ -1,3 +1,8 @@
+2016-07-06  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_vfp_cprc_sub_candidate): Don't call
+	arm_vfp_cprc_sub_candidate for static field.
+
 2016-07-06  Manish Goregaokar  <manish@mozilla.com>
 
 	* rust-lang.c (rust_subscript): Allow subscripting pointers

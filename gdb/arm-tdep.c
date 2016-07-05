@@ -3554,8 +3554,11 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	int i;
 	for (i = 0; i < TYPE_NFIELDS (t); i++)
 	  {
-	    int sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
-							base_type);
+	    int sub_count = 0;
+
+	    if (!field_is_static (&TYPE_FIELD (t, i)))
+	      sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
+						      base_type);
 	    if (sub_count == -1)
 	      return -1;
 	    count += sub_count;
