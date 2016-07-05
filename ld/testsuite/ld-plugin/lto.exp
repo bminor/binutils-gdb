@@ -199,7 +199,7 @@ set lto_link_tests [list \
    "$plug_opt" "-flto $lto_no_fat" \
    {pr20267b.c} {} "libpr20267b.a"] \
   [list "Build pr20321" \
-   "-Wl,-plugin,$plug_so" "-flto" \
+   "-flto -Wl,-plugin,$plug_so" "-flto" \
    {pr20321.c} {} "pr20321" "c" ".*: duplicated plugin"] \
 ]
 

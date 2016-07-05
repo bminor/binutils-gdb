@@ -1,3 +1,7 @@
+2016-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-plugin/lto.exp: Add -flto to PR ld/20321 test.
+
 2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
 
 	* testsuite/ld-arm/farcall-thumb2-purecode.d: New test result.
