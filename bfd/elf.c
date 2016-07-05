@@ -9590,25 +9590,34 @@ elfcore_grok_freebsd_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   size_t offset;
 
-  /* Check for version 1 in pr_version. */
+  switch (abfd->arch_info->bits_per_word)
+    {
+    case 32:
+      if (note->descsz < 108)
+	return FALSE;
+      break;
+
+    case 64:
+      if (note->descsz < 120)
+	return FALSE;
+      break;
+
+    default:
+      return FALSE;
+    }
+
+  /* Check for version 1 in pr_version.  */
   if (bfd_h_get_32 (abfd, (bfd_byte *) note->descdata) != 1)
     return FALSE;
   offset = 4;
 
   /* Skip over pr_psinfosz. */
-  switch (abfd->arch_info->bits_per_word)
+  if (abfd->arch_info->bits_per_word == 32)
+    offset += 4;
+  else
     {
-    case 32:
-      offset += 4;
-      break;
-
-    case 64:
       offset += 4;	/* Padding before pr_psinfosz. */
       offset += 8;
-      break;
-
-    default:
-      return FALSE;
     }
 
   /* pr_fname is PRFNAMESZ (16) + 1 bytes in size.  */
@@ -9619,6 +9628,17 @@ elfcore_grok_freebsd_psinfo (bfd *abfd, Elf_Internal_Note *note)
   /* pr_psargs is PRARGSZ (80) + 1 bytes in size.  */
   elf_tdata (abfd)->core->command
     = _bfd_elfcore_strndup (abfd, note->descdata + offset, 81);
+  offset += 81;
+
+  /* Padding before pr_pid.  */
+  offset += 2;
+
+  /* The pr_pid field was added in version "1a".  */
+  if (note->descsz < offset + 4)
+    return TRUE;
+
+  elf_tdata (abfd)->core->pid
+    = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
 
   return TRUE;
 }
