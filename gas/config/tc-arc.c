@@ -308,8 +308,7 @@ struct arc_insn
   int nfixups;
   struct arc_fixup fixups[MAX_INSN_FIXUPS];
   long limm;
-  bfd_boolean short_insn; /* Boolean value: TRUE if current insn is
-			     short.  */
+  unsigned int len;       /* Length of instruction in bytes.  */
   bfd_boolean has_limm;   /* Boolean value: TRUE if limm field is
 			     valid.  */
   bfd_boolean relax;	  /* Boolean value: TRUE if needs
@@ -1343,10 +1342,10 @@ apply_fixups (struct arc_insn *insn, fragS *fragP, int fix)
 
       /* FIXME! the reloc size is wrong in the BFD file.
 	 When it is fixed please delete me.  */
-      size = (insn->short_insn && !fixup->islong) ? 2 : 4;
+      size = ((insn->len == 2) && !fixup->islong) ? 2 : 4;
 
       if (fixup->islong)
-	offset = (insn->short_insn) ? 2 : 4;
+	offset = insn->len;
 
       /* Some fixups are only used internally, thus no howto.  */
       if ((int) fixup->reloc == 0)
@@ -1356,7 +1355,7 @@ apply_fixups (struct arc_insn *insn, fragS *fragP, int fix)
 	{
 	  /* FIXME! the reloc size is wrong in the BFD file.
 	     When it is fixed please enable me.
-	     size = (insn->short_insn && !fixup->islong) ? 2 : 4; */
+	     size = ((insn->len == 2 && !fixup->islong) ? 2 : 4; */
 	  pcrel = fixup->pcrel;
 	}
       else
@@ -1397,48 +1396,22 @@ static void
 emit_insn0 (struct arc_insn *insn, char *where, bfd_boolean relax)
 {
   char *f = where;
+  size_t total_len;
 
   pr_debug ("Emit insn : 0x%x\n", insn->insn);
-  pr_debug ("\tShort   : 0x%d\n", insn->short_insn);
+  pr_debug ("\tShort   : 0x%d\n", (insn->len == 2));
   pr_debug ("\tLong imm: 0x%lx\n", insn->limm);
 
   /* Write out the instruction.  */
-  if (insn->short_insn)
-    {
-      if (insn->has_limm)
-	{
-	  if (!relax)
-	    f = frag_more (6);
-	  md_number_to_chars (f, insn->insn, 2);
-	  md_number_to_chars_midend (f + 2, insn->limm, 4);
-	  dwarf2_emit_insn (6);
-	}
-      else
-	{
-	  if (!relax)
-	    f = frag_more (2);
-	  md_number_to_chars (f, insn->insn, 2);
-	  dwarf2_emit_insn (2);
-	}
-    }
-  else
-    {
-      if (insn->has_limm)
-	{
-	  if (!relax)
-	    f = frag_more (8);
-	  md_number_to_chars_midend (f, insn->insn, 4);
-	  md_number_to_chars_midend (f + 4, insn->limm, 4);
-	  dwarf2_emit_insn (8);
-	}
-      else
-	{
-	  if (!relax)
-	    f = frag_more (4);
-	  md_number_to_chars_midend (f, insn->insn, 4);
-	  dwarf2_emit_insn (4);
-	}
-    }
+  total_len = insn->len + (insn->has_limm ? 4 : 0);
+  if (!relax)
+    f = frag_more (total_len);
+
+  md_number_to_chars_midend(f, insn->insn, insn->len);
+
+  if (insn->has_limm)
+    md_number_to_chars_midend (f + insn->len, insn->limm, 4);
+  dwarf2_emit_insn (total_len);
 
   if (!relax)
     apply_fixups (insn, frag_now, (f - frag_now->fr_literal));
@@ -3262,7 +3235,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 
   apply_fixups (&insn, fragP, fix);
 
-  size = insn.short_insn ? (insn.has_limm ? 6 : 2) : (insn.has_limm ? 8 : 4);
+  size = insn.len + (insn.has_limm ? 4 : 0);
   gas_assert (table_entry->rlx_length == size);
   emit_insn0 (&insn, dest, TRUE);
 
@@ -4037,8 +4010,8 @@ assemble_insn (const struct arc_opcode *opcode,
 
   insn->relax = relax_insn_p (opcode, tok, ntok, pflags, nflg);
 
-  /* Short instruction?  */
-  insn->short_insn = ARC_SHORT (opcode->mask) ? TRUE : FALSE;
+  /* Instruction length.  */
+  insn->len = ARC_SHORT (opcode->mask) ? 2 : 4;
 
   insn->insn = image;
 
