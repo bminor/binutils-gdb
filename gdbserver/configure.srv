@@ -67,6 +67,17 @@ case "${gdbserver_host}" in
 			srv_tgtobj="${srv_tgtobj} nat/netbsd-nat.o"
 			srv_tgtobj="${srv_tgtobj} arch/aarch64-insn.o arch/aarch64.o"
 			;;
+  arc*-*-linux*)
+			srv_regobj=""
+			srv_tgtobj="linux-arc-low.o arch/arc.o $srv_linux_obj"
+			srv_xmlfiles="arc/v1-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} arc/v1-aux.xml"
+			srv_xmlfiles="${srv_xmlfiles} arc/v2-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} arc/v2-aux.xml"
+			srv_linux_regsets=yes
+			srv_linux_usrregs=yes
+			srv_linux_thread_db=yes
+			;;
   arm*-*-linux*)	srv_tgtobj="$srv_linux_obj linux-arm-low.o"
 			srv_tgtobj="$srv_tgtobj linux-arm-tdesc.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"

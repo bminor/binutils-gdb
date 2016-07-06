@@ -1,3 +1,9 @@
+2020-10-06  Shahab Vahedi  <shahab@synopsys.com>
+
+	* configure.srv: Support ARC architecture.
+	* Makefile.in: Add linux-arc-low.cc and arch/arc.o.
+	* linux-arc-low.cc: New file.
+
 2020-10-07  Kamil Rytarowski  <n54@gmx.com>
 
 	* netbsd-low.cc (get_dynamic, get_r_debug, read_one_ptr)
