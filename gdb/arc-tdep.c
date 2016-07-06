@@ -612,8 +612,7 @@ arc_write_pc (struct regcache *regcache, CORE_ADDR new_pc)
   regcache_cooked_read_unsigned (regcache, gdbarch_ps_regnum (gdbarch),
 				 &status32);
 
-  /* Mask for DE bit is 0x40.  */
-  if (status32 & 0x40)
+  if ((status32 & ARC_STATUS32_DE_MASK) != 0)
     {
       if (arc_debug)
 	{

@@ -100,6 +100,11 @@ enum arc_regnum
    Longer registers are represented as pairs of 32-bit registers.  */
 #define ARC_REGISTER_SIZE  4
 
+/* STATUS32 register: hardware loops disabled bit.  */
+#define ARC_STATUS32_L_MASK (1 << 12)
+/* STATUS32 register: current instruction is a delay slot.  */
+#define ARC_STATUS32_DE_MASK (1 << 6)
+
 #define arc_print(fmt, args...) fprintf_unfiltered (gdb_stdlog, fmt, ##args)
 
 extern int arc_debug;

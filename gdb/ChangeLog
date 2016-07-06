@@ -1,3 +1,11 @@
+2020-08-25  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* configure.tgt: ARC support for GNU/Linux.
+	* Makefile.in (ALL_TARGET_OBJS): Likewise.
+	* arc-linux-tdep.c: New file.
+	* arc-tdep.h (ARC_STATUS32_L_MASK, ARC_STATUS32_DE_MASK): Declare.
+	* arc-tdep.c (arc_write_pc): Use it.
+
 2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
 
 	* arc-tdep.c (arc_check_for_hardware_loop): New.
