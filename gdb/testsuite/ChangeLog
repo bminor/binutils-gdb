@@ -1,5 +1,10 @@
 2016-07-06  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.ada/arraydim.exp: Remove extra directory level in build
+	directory.
+
+2016-07-06  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* lib/ada.exp: Remove extra directory level in build directory.
 	* gdb.ada/cond_lang.exp: Likewise.
 	* gdb.ada/exec_changed.exp: Likewise.
