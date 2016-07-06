@@ -1,3 +1,7 @@
+2016-07-06  Manish Goregaokar  <manish@mozilla.com>
+
+	* rust-lang.c (rust_subscript): Allow subscripting pointers
+
 2016-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure: Regenerate.
