@@ -1,5 +1,13 @@
 2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* opcode/arc.h (struct arc_opcode): Change type of opcode and mask
+	fields.
+	(struct arc_long_opcode): Delete.
+	(struct arc_operand): Change types for insert and extract
+	handlers.
+
+2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* opcode/arc.h: Make macros 64-bit safe.
 
 2016-11-03  Graham Markall  <graham.markall@embecosm.com>

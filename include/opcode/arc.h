@@ -116,13 +116,13 @@ struct arc_opcode
 
   /* The opcode itself.  Those bits which will be filled in with
      operands are zeroes.  */
-  unsigned opcode;
+  unsigned long long opcode;
 
   /* The opcode mask.  This is used by the disassembler.  This is a
      mask containing ones indicating those bits which must match the
      opcode field, and zeroes indicating those bits which need not
      match (and are presumably filled in by operands).  */
-  unsigned mask;
+  unsigned long long mask;
 
   /* One bit flags for the opcode.  These are primarily used to
      indicate specific processors and environments support the
@@ -145,30 +145,6 @@ struct arc_opcode
      assembly code, and are terminated by a zero.  */
   unsigned char flags[MAX_INSN_FLGS + 1];
 };
-
-/* Structure used to describe 48 and 64 bit instructions.  */
-struct arc_long_opcode
-{
-  /* The base instruction is either 16 or 32 bits, and is described like a
-     normal instruction.  */
-  struct arc_opcode base_opcode;
-
-  /* The template value for the 32-bit LIMM extension.  Used by the
-     assembler and disassembler in the same way as the 'opcode' field of
-     'struct arc_opcode'.  */
-  unsigned limm_template;
-
-  /* The mask value for the 32-bit LIMM extension.  Used by the
-     disassembler just like the 'mask' field in 'struct arc_opcode'.  */
-  unsigned limm_mask;
-
-  /* Array of operand codes similar to the 'operands' array in 'struct
-     arc_opcode'.  These operands are used to fill in the LIMM value.  */
-  unsigned char operands[MAX_INSN_ARGS + 1];
-};
-
-extern const struct arc_long_opcode arc_long_opcodes[];
-extern const unsigned arc_num_long_opcodes;
 
 /* The table itself is sorted by major opcode number, and is otherwise
    in the order in which the disassembler should consider
@@ -262,7 +238,9 @@ struct arc_operand
      string (the operand will be inserted in any case).	 If the
      operand value is legal, *ERRMSG will be unchanged (most operands
      can accept any value).  */
-  unsigned (*insert) (unsigned instruction, int op, const char **errmsg);
+  unsigned long long (*insert) (unsigned long long instruction,
+                                long long int op,
+                                const char **errmsg);
 
   /* Extraction function.  This is used by the disassembler.  To
      extract this operand type from an instruction, check this field.
@@ -281,7 +259,8 @@ struct arc_operand
      TRUE if this operand type can not actually be extracted from
      this operand (i.e., the instruction does not match).  If the
      operand is valid, *INVALID will not be changed.  */
-  int (*extract) (unsigned instruction, bfd_boolean *invalid);
+  long long int (*extract) (unsigned long long instruction,
+                            bfd_boolean *invalid);
 };
 
 /* Elements in the table are retrieved by indexing with values from

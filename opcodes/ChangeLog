@@ -1,3 +1,33 @@
+2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-dis.c (struct arc_operand_iterator): Remove all fields
+	relating to long instruction processing, add new limm field.
+	(OPCODE): Rename to...
+	(OPCODE_32BIT_INSN): ...this.
+	(OPCODE_AC): Delete.
+	(skip_this_opcode): Handle different instruction lengths, update
+	macro name.
+	(special_flag_p): Update parameter type.
+	(find_format_from_table): Update for more instruction lengths.
+	(find_format_long_instructions): Delete.
+	(find_format): Update for more instruction lengths.
+	(arc_insn_length): Likewise.
+	(extract_operand_value): Update for more instruction lengths.
+	(operand_iterator_next): Remove code relating to long
+	instructions.
+	(arc_opcode_to_insn_type): New function.
+	(print_insn_arc):Update for more instructions lengths.
+	* arc-ext.c (extInstruction_t): Change argument type.
+	* arc-ext.h (extInstruction_t): Change argument type.
+	* arc-fxi.h: Change type unsigned to unsigned long long
+	extensively throughout.
+	* arc-nps400-tbl.h: Add long instructions taken from
+	arc_long_opcodes table in arc-opc.c.
+	* arc-opc.c: Update parameter types on insert/extract handlers.
+	(arc_long_opcodes): Delete.
+	(arc_num_long_opcodes): Delete.
+	(arc_opcode_len): Update for more instruction lengths.
+
 2016-11-03  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-dis.c (print_insn_arc): Swap highbyte and lowbyte.

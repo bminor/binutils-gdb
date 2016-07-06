@@ -304,7 +304,7 @@ struct arc_fixup
 
 struct arc_insn
 {
-  unsigned int insn;
+  unsigned long long int insn;
   int nfixups;
   struct arc_fixup fixups[MAX_INSN_FIXUPS];
   long limm;
@@ -746,21 +746,32 @@ arc_insert_opcode (const struct arc_opcode *opcode)
 }
 
 
-/* Like md_number_to_chars but used for limms.  The 4-byte limm value,
-   is encoded as 'middle-endian' for a little-endian target.  FIXME!
-   this function is used for regular 4 byte instructions as well.  */
+/* Like md_number_to_chars but for middle-endian values.  The 4-byte limm
+   value, is encoded as 'middle-endian' for a little-endian target.  This
+   function is used for regular 4, 6, and 8 byte instructions as well.  */
 
 static void
-md_number_to_chars_midend (char *buf, valueT val, int n)
+md_number_to_chars_midend (char *buf, unsigned long long val, int n)
 {
-  if (n == 4)
+  switch (n)
     {
+    case 2:
+      md_number_to_chars (buf, val, n);
+      break;
+    case 6:
+      md_number_to_chars (buf, (val & 0xffff00000000) >> 32, 2);
+      md_number_to_chars_midend (buf + 2, (val & 0xffffffff), 4);
+      break;
+    case 4:
       md_number_to_chars (buf,     (val & 0xffff0000) >> 16, 2);
       md_number_to_chars (buf + 2, (val & 0xffff), 2);
-    }
-  else
-    {
-      md_number_to_chars (buf, val, n);
+      break;
+    case 8:
+      md_number_to_chars_midend (buf, (val & 0xffffffff00000000) >> 32, 4);
+      md_number_to_chars_midend (buf + 4, (val & 0xffffffff), 4);
+      break;
+    default:
+      abort ();
     }
 }
 
@@ -1398,8 +1409,8 @@ emit_insn0 (struct arc_insn *insn, char *where, bfd_boolean relax)
   char *f = where;
   size_t total_len;
 
-  pr_debug ("Emit insn : 0x%x\n", insn->insn);
-  pr_debug ("\tShort   : 0x%d\n", (insn->len == 2));
+  pr_debug ("Emit insn : 0x%llx\n", insn->insn);
+  pr_debug ("\tLength  : 0x%d\n", insn->len);
   pr_debug ("\tLong imm: 0x%lx\n", insn->limm);
 
   /* Write out the instruction.  */
@@ -1678,7 +1689,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
       int tokidx = 0;
       const expressionS *t = &emptyE;
 
-      pr_debug ("%s:%d: find_opcode_match: trying opcode 0x%08X ",
+      pr_debug ("%s:%d: find_opcode_match: trying opcode 0x%08llX ",
 		frag_now->fr_file, frag_now->fr_line, opcode->opcode);
 
       /* Don't match opcodes that don't exist on this
@@ -2226,108 +2237,6 @@ find_special_case_flag (const char *opname,
   return NULL;
 }
 
-/* The long instructions are not stored in a hash (there's not many of
-   them) and so there's no arc_opcode_hash_entry structure to return.  This
-   helper function for find_special_case_long_opcode takes an arc_opcode
-   result and places it into a fake arc_opcode_hash_entry that points to
-   the single arc_opcode OPCODE, which is then returned.  */
-
-static const struct arc_opcode_hash_entry *
-build_fake_opcode_hash_entry (const struct arc_opcode *opcode)
-{
-  static struct arc_opcode_hash_entry entry;
-  static struct arc_opcode tmp[2];
-  static const struct arc_opcode *ptr[2];
-
-  memcpy (&tmp[0], opcode, sizeof (struct arc_opcode));
-  memset (&tmp[1], 0, sizeof (struct arc_opcode));
-  entry.count = 1;
-  entry.opcode = ptr;
-  ptr[0] = tmp;
-  ptr[1] = NULL;
-  return &entry;
-}
-
-
-/* Used by the assembler to match the list of tokens against a long (48 or
-   64 bits) instruction.  If a matching long instruction is found, then
-   some of the tokens are consumed in this function and converted into a
-   single LIMM value, which is then added to the end of the token list,
-   where it will be consumed by a LIMM operand that exists in the base
-   opcode of the long instruction.  */
-
-static const struct arc_opcode_hash_entry *
-find_special_case_long_opcode (const char *opname,
-                               int *ntok ATTRIBUTE_UNUSED,
-                               expressionS *tok ATTRIBUTE_UNUSED,
-                               int *nflgs,
-                               struct arc_flags *pflags)
-{
-  unsigned i;
-
-  if (*ntok == MAX_INSN_ARGS)
-    return NULL;
-
-  for (i = 0; i < arc_num_long_opcodes; ++i)
-    {
-      struct arc_opcode fake_opcode;
-      const struct arc_opcode *opcode;
-      struct arc_insn insn;
-      expressionS *limm_token;
-
-      opcode = &arc_long_opcodes[i].base_opcode;
-
-      if (!(opcode->cpu & selected_cpu.flags))
-        continue;
-
-      if (!check_cpu_feature (opcode->subclass))
-        continue;
-
-      if (strcmp (opname, opcode->name) != 0)
-        continue;
-
-      /* Check that the flags are a match.  */
-      if (!parse_opcode_flags (opcode, *nflgs, pflags))
-        continue;
-
-      /* Parse the LIMM operands into the LIMM template.  */
-      memset (&fake_opcode, 0, sizeof (fake_opcode));
-      fake_opcode.name = "fake limm";
-      fake_opcode.opcode = arc_long_opcodes[i].limm_template;
-      fake_opcode.mask = arc_long_opcodes[i].limm_mask;
-      fake_opcode.cpu = opcode->cpu;
-      fake_opcode.insn_class = opcode->insn_class;
-      fake_opcode.subclass = opcode->subclass;
-      memcpy (&fake_opcode.operands[0],
-              &arc_long_opcodes[i].operands,
-              MAX_INSN_ARGS);
-      /* Leave fake_opcode.flags as zero.  */
-
-      pr_debug ("Calling assemble_insn to build fake limm value\n");
-      assemble_insn (&fake_opcode, tok, *ntok,
-                     NULL, 0, &insn);
-      pr_debug ("   got limm value: 0x%x\n", insn.insn);
-
-      /* Now create a new token at the end of the token array (We know this
-         is safe as the token array is always created with enough space for
-         MAX_INSN_ARGS, and we check at the start at the start of this
-         function that we're not there yet).  This new token will
-         correspond to a LIMM operand that will be contained in the
-         base_opcode of the arc_long_opcode.  */
-      limm_token = &tok[(*ntok)];
-      (*ntok)++;
-
-      /* Modify the LIMM token to hold the constant.  */
-      limm_token->X_op = O_constant;
-      limm_token->X_add_number = insn.insn;
-
-      /* Return the base opcode.  */
-      return build_fake_opcode_hash_entry (opcode);
-    }
-
-    return NULL;
-}
-
 /* Used to find special case opcode.  */
 
 static const struct arc_opcode_hash_entry *
@@ -2343,9 +2252,6 @@ find_special_case (const char *opname,
 
   if (entry == NULL)
     entry = find_special_case_flag (opname, nflgs, pflags);
-
-  if (entry == NULL)
-    entry = find_special_case_long_opcode (opname, ntok, tok, nflgs, pflags);
 
   return entry;
 }
@@ -2745,10 +2651,10 @@ find_operand_for_reloc (extended_bfd_reloc_code_real_type reloc)
 
 /* Insert an operand value into an instruction.  */
 
-static unsigned
-insert_operand (unsigned insn,
+static unsigned long long
+insert_operand (unsigned long long insn,
 		const struct arc_operand *operand,
-		offsetT val,
+		long long val,
 		const char *file,
 		unsigned line)
 {
@@ -2774,7 +2680,7 @@ insert_operand (unsigned insn,
 				   val, min, max, file, line);
     }
 
-  pr_debug ("insert field: %ld <= %ld <= %ld in 0x%08x\n",
+  pr_debug ("insert field: %ld <= %ld <= %ld in 0x%08llx\n",
 	    min, val, max, insn);
 
   if ((operand->flags & ARC_OPERAND_ALIGNED32)
@@ -3771,7 +3677,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	       struct arc_insn *insn)
 {
   const expressionS *reloc_exp = NULL;
-  unsigned image;
+  unsigned long long image;
   const unsigned char *argidx;
   int i;
   int tokidx = 0;
@@ -3783,7 +3689,7 @@ assemble_insn (const struct arc_opcode *opcode,
   memset (insn, 0, sizeof (*insn));
   image = opcode->opcode;
 
-  pr_debug ("%s:%d: assemble_insn: %s using opcode %x\n",
+  pr_debug ("%s:%d: assemble_insn: %s using opcode %llx\n",
 	    frag_now->fr_file, frag_now->fr_line, opcode->name,
 	    opcode->opcode);
 
@@ -4013,7 +3919,6 @@ assemble_insn (const struct arc_opcode *opcode,
 
   /* Instruction length.  */
   insn->len = arc_opcode_len (opcode);
-  gas_assert (insn->len == 2 || insn->len == 4);
 
   insn->insn = image;
 

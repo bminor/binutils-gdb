@@ -37,37 +37,18 @@
 
 struct arc_operand_iterator
 {
-  enum
-    {
-      OPERAND_ITERATOR_STANDARD,
-      OPERAND_ITERATOR_LONG
-    } mode;
+  /* The complete instruction value to extract operands from.  */
+  unsigned long long insn;
 
-  /* The array of 32-bit values that make up this instruction.  All
-     required values have been pre-loaded into this array during the
-     find_format call.  */
-  unsigned *insn;
+  /* The LIMM if this is being tracked separately.  This field is only
+     valid if we find the LIMM operand in the operand list.  */
+  unsigned limm;
 
-  union
-  {
-    struct
-    {
-      /* The opcode this iterator is operating on.  */
-      const struct arc_opcode *opcode;
+  /* The opcode this iterator is operating on.  */
+  const struct arc_opcode *opcode;
 
-      /* The index into the opcodes operand index list.  */
-      const unsigned char *opidx;
-    } standard;
-
-    struct
-    {
-      /* The long instruction opcode this iterator is operating on.  */
-      const struct arc_long_opcode *long_opcode;
-
-      /* Two indexes into the opcodes operand index lists.  */
-      const unsigned char *opidx_base, *opidx_limm;
-    } long_insn;
-  } state;
+  /* The index into the opcodes operand index list.  */
+  const unsigned char *opidx;
 };
 
 /* Globals variables.  */
@@ -123,9 +104,7 @@ static linkclass decodelist = NULL;
 
 #define BITS(word,s,e)  (((word) << (sizeof (word) * 8 - 1 - e)) >>	\
 			 (s + (sizeof (word) * 8 - 1 - e)))
-#define OPCODE(word)	(BITS ((word), 27, 31))
-
-#define OPCODE_AC(word)   (BITS ((word), 11, 15))
+#define OPCODE_32BIT_INSN(word)	(BITS ((word), 27, 31))
 
 /* Functions implementation.  */
 
@@ -169,7 +148,8 @@ skip_this_opcode (const struct arc_opcode *  opcode,
   bfd_boolean addme = TRUE;
 
   /* Check opcode for major 0x06, return if it is not in.  */
-  if (OPCODE (opcode->opcode) != 0x06)
+  if (arc_opcode_len (opcode) == 4
+      && OPCODE_32BIT_INSN (opcode->opcode) != 0x06)
     return FALSE;
 
   while (t != NULL
@@ -255,7 +235,7 @@ special_flag_p (const char *opname,
 static const struct arc_opcode *
 find_format_from_table (struct disassemble_info *info,
 			const struct arc_opcode *arc_table,
-                        unsigned *insn,
+                        unsigned long long insn,
 			unsigned int insn_len,
                         unsigned isa_mask,
 			bfd_boolean *has_limm,
@@ -272,23 +252,13 @@ find_format_from_table (struct disassemble_info *info,
 
       opcode = &arc_table[i++];
 
-      if ((arc_opcode_len (opcode) == 2) && (insn_len == 2))
-	{
-	  if (OPCODE_AC (opcode->opcode) != OPCODE_AC (insn[0]))
-	    continue;
-	}
-      else if ((arc_opcode_len (opcode) == 4) && (insn_len == 4))
-	{
-	  if (OPCODE (opcode->opcode) != OPCODE (insn[0]))
-	    continue;
-	}
-      else
-	continue;
-
-      if ((insn[0] ^ opcode->opcode) & opcode->mask)
-	continue;
-
       if (!(opcode->cpu & isa_mask))
+	continue;
+
+      if (arc_opcode_len (opcode) != (int) insn_len)
+	continue;
+
+      if ((insn & opcode->mask) != opcode->opcode)
 	continue;
 
       *has_limm = FALSE;
@@ -303,9 +273,9 @@ find_format_from_table (struct disassemble_info *info,
 	    continue;
 
 	  if (operand->extract)
-	    value = (*operand->extract) (insn[0], &invalid);
+	    value = (*operand->extract) (insn, &invalid);
 	  else
-	    value = (insn[0] >> operand->shift) & ((1 << operand->bits) - 1);
+	    value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
 
 	  /* Check for LIMM indicator.  If it is there, then make sure
 	     we pick the right format.  */
@@ -338,7 +308,7 @@ find_format_from_table (struct disassemble_info *info,
 	  /* Check first the extensions.  */
 	  if (cl_flags->flag_class & F_CLASS_EXTEND)
 	    {
-	      value = (insn[0] & 0x1F);
+	      value = (insn & 0x1F);
 	      if (arcExtMap_condCodeName (value))
 		continue;
 	    }
@@ -348,7 +318,7 @@ find_format_from_table (struct disassemble_info *info,
 	      const struct arc_flag_operand *flg_operand =
 		&arc_flag_operands[*flgopridx];
 
-	      value = (insn[0] >> flg_operand->shift)
+	      value = (insn >> flg_operand->shift)
 		& ((1 << flg_operand->bits) - 1);
 	      if (value == flg_operand->code)
 		foundA = 1;
@@ -379,97 +349,33 @@ find_format_from_table (struct disassemble_info *info,
   return NULL;
 }
 
-/* Find long instructions matching values in INSN array.  */
-
-static const struct arc_long_opcode *
-find_format_long_instructions (unsigned *insn,
-                               unsigned int *insn_len,
-                               unsigned isa_mask,
-                               bfd_vma memaddr,
-                               struct disassemble_info *info)
-{
-  unsigned int i;
-  unsigned limm = 0;
-  bfd_boolean limm_loaded = FALSE;
-
-  for (i = 0; i < arc_num_long_opcodes; ++i)
-    {
-      bfd_byte buffer[4];
-      int status;
-      const struct arc_opcode *opcode;
-
-      opcode = &arc_long_opcodes[i].base_opcode;
-
-      if ((arc_opcode_len (opcode) == 2) && (*insn_len == 2))
-        {
-          if (OPCODE_AC (opcode->opcode) != OPCODE_AC (insn[0]))
-            continue;
-        }
-      else if ((arc_opcode_len (opcode) == 4) && (*insn_len == 4))
-        {
-          if (OPCODE (opcode->opcode) != OPCODE (insn[0]))
-            continue;
-        }
-      else
-        continue;
-
-      if ((insn[0] ^ opcode->opcode) & opcode->mask)
-        continue;
-
-      if (!(opcode->cpu & isa_mask))
-        continue;
-
-      if (!limm_loaded)
-        {
-          status = (*info->read_memory_func) (memaddr + *insn_len, buffer,
-                                              4, info);
-          if (status != 0)
-            return NULL;
-
-          limm = ARRANGE_ENDIAN (info, buffer);
-          limm_loaded = TRUE;
-        }
-
-      /* Check the second word using the mask and template.  */
-      if ((limm & arc_long_opcodes[i].limm_mask)
-          != arc_long_opcodes[i].limm_template)
-        continue;
-
-      (*insn_len) += 4;
-      insn[1] = limm;
-      return &arc_long_opcodes[i];
-    }
-
-  return NULL;
-}
-
 /* Find opcode for INSN, trying various different sources.  The instruction
    length in INSN_LEN will be updated if the instruction requires a LIMM
-   extension, and the additional values loaded into the INSN array (which
-   must be big enough).
+   extension.
 
    A pointer to the opcode is placed into OPCODE_RESULT, and ITER is
-   initialised, ready to iterate over the operands of the found opcode.
+   initialised, ready to iterate over the operands of the found opcode.  If
+   the found opcode requires a LIMM then the LIMM value will be loaded into a
+   field of ITER.
 
    This function returns TRUE in almost all cases, FALSE is reserved to
-   indicate an error (failing to find an opcode is not an error) a
-   returned result of FALSE would indicate that the disassembler can't
-   continue.
+   indicate an error (failing to find an opcode is not an error) a returned
+   result of FALSE would indicate that the disassembler can't continue.
 
-   If no matching opcode is found then the returned result will be TRUE,
-   the value placed into OPCODE_RESULT will be NULL, ITER will be
-   undefined, and INSN_LEN will be unchanged.
+   If no matching opcode is found then the returned result will be TRUE, the
+   value placed into OPCODE_RESULT will be NULL, ITER will be undefined, and
+   INSN_LEN will be unchanged.
 
-   If a matching opcode is found, then the returned result will be TRUE,
-   the opcode pointer is placed into OPCODE_RESULT, INSN_LEN will be
-   increased by 4 if the instruction requires a LIMM, and the LIMM value
-   will have been loaded into the INSN[1].  Finally, ITER will have been
-   initialised so that calls to OPERAND_ITERATOR_NEXT will iterate over
-   the opcode's operands.  */
+   If a matching opcode is found, then the returned result will be TRUE, the
+   opcode pointer is placed into OPCODE_RESULT, INSN_LEN will be increased by
+   4 if the instruction requires a LIMM, and the LIMM value will have been
+   loaded into a field of ITER.  Finally, ITER will have been initialised so
+   that calls to OPERAND_ITERATOR_NEXT will iterate over the opcode's
+   operands.  */
 
 static bfd_boolean
 find_format (bfd_vma                       memaddr,
-	     unsigned *                    insn,
+	     unsigned long long            insn,
 	     unsigned int *                insn_len,
              unsigned                      isa_mask,
 	     struct disassemble_info *     info,
@@ -479,24 +385,28 @@ find_format (bfd_vma                       memaddr,
   const struct arc_opcode *opcode = NULL;
   bfd_boolean needs_limm;
   const extInstruction_t *einsn, *i;
+  unsigned limm = 0;
 
   /* First, try the extension instructions.  */
-  einsn = arcExtMap_insn (OPCODE (insn[0]), insn[0]);
-  for (i = einsn; (i != NULL) && (opcode == NULL); i = i->next)
+  if (*insn_len == 4)
     {
-      const char *errmsg = NULL;
-
-      opcode = arcExtMap_genOpcode (i, isa_mask, &errmsg);
-      if (opcode == NULL)
+      einsn = arcExtMap_insn (OPCODE_32BIT_INSN (insn), insn);
+      for (i = einsn; (i != NULL) && (opcode == NULL); i = i->next)
 	{
-	  (*info->fprintf_func) (info->stream, "\
-An error occured while generating the extension instruction operations");
-	  *opcode_result = NULL;
-	  return FALSE;
-	}
+	  const char *errmsg = NULL;
 
-      opcode = find_format_from_table (info, opcode, insn, *insn_len,
-				       isa_mask, &needs_limm, FALSE);
+	  opcode = arcExtMap_genOpcode (i, isa_mask, &errmsg);
+	  if (opcode == NULL)
+	    {
+	      (*info->fprintf_func) (info->stream, "\
+An error occured while generating the extension instruction operations");
+	      *opcode_result = NULL;
+	      return FALSE;
+	    }
+
+	  opcode = find_format_from_table (info, opcode, insn, *insn_len,
+					   isa_mask, &needs_limm, FALSE);
+	}
     }
 
   /* Then, try finding the first match in the opcode table.  */
@@ -517,38 +427,17 @@ An error occured while generating the extension instruction operations");
         }
       else
         {
-          insn[1] = ARRANGE_ENDIAN (info, buffer);
+          limm = ARRANGE_ENDIAN (info, buffer);
           *insn_len += 4;
         }
     }
 
-  if (opcode == NULL)
+  if (opcode != NULL)
     {
-      const struct arc_long_opcode *long_opcode;
-
-      /* No instruction found yet, try the long instructions.  */
-      long_opcode =
-        find_format_long_instructions (insn, insn_len, isa_mask,
-                                       memaddr, info);
-
-      if (long_opcode != NULL)
-        {
-          iter->mode = OPERAND_ITERATOR_LONG;
-          iter->insn = insn;
-          iter->state.long_insn.long_opcode = long_opcode;
-          iter->state.long_insn.opidx_base =
-            long_opcode->base_opcode.operands;
-          iter->state.long_insn.opidx_limm =
-            long_opcode->operands;
-          opcode = &long_opcode->base_opcode;
-        }
-    }
-  else
-    {
-      iter->mode = OPERAND_ITERATOR_STANDARD;
       iter->insn = insn;
-      iter->state.standard.opcode = opcode;
-      iter->state.standard.opidx = opcode->operands;
+      iter->limm = limm;
+      iter->opcode = opcode;
+      iter->opidx = opcode->operands;
     }
 
   *opcode_result = opcode;
@@ -557,7 +446,7 @@ An error occured while generating the extension instruction operations");
 
 static void
 print_flags (const struct arc_opcode *opcode,
-	     unsigned *insn,
+	     unsigned long long *insn,
 	     struct disassemble_info *info)
 {
   const unsigned char *flgidx;
@@ -701,8 +590,10 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
         {
           bfd_byte minor_opcode = lsb & 0x1f;
 
-          if (minor_opcode < 4)
-            return 2;
+	  if (minor_opcode < 4)
+	    return 6;
+	  else if (minor_opcode == 0x10 || minor_opcode == 0x11)
+	    return 8;
         }
       /* Fall through.  */
     case bfd_mach_arc_arc600:
@@ -722,7 +613,9 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
    is held in the array INSN.  */
 
 static int
-extract_operand_value (const struct arc_operand *operand, unsigned *insn)
+extract_operand_value (const struct arc_operand *operand,
+		       unsigned long long insn,
+		       unsigned limm)
 {
   int value;
 
@@ -730,22 +623,22 @@ extract_operand_value (const struct arc_operand *operand, unsigned *insn)
   if (operand->flags & ARC_OPERAND_LIMM)
     /* The second part of the instruction value will have been loaded as
        part of the find_format call made earlier.  */
-    value = insn[1];
+    value = limm;
   else
     {
       if (operand->extract)
-        value = (*operand->extract) (insn[0], (int *) NULL);
+        value = (*operand->extract) (insn, (int *) NULL);
       else
         {
           if (operand->flags & ARC_OPERAND_ALIGNED32)
             {
-              value = (insn[0] >> operand->shift)
+              value = (insn >> operand->shift)
                 & ((1 << (operand->bits - 2)) - 1);
               value = value << 2;
             }
           else
             {
-              value = (insn[0] >> operand->shift) & ((1 << operand->bits) - 1);
+              value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
             }
           if (operand->flags & ARC_OPERAND_SIGNED)
             {
@@ -769,66 +662,16 @@ operand_iterator_next (struct arc_operand_iterator *iter,
                        const struct arc_operand **operand,
                        int *value)
 {
-  if (iter->mode == OPERAND_ITERATOR_STANDARD)
+  if (*iter->opidx == 0)
     {
-      if (*iter->state.standard.opidx == 0)
-        {
-          *operand = NULL;
-          return FALSE;
-        }
-
-      *operand = &arc_operands[*iter->state.standard.opidx];
-      *value = extract_operand_value (*operand, iter->insn);
-      iter->state.standard.opidx++;
+      *operand = NULL;
+      return FALSE;
     }
-  else
-    {
-      const struct arc_operand *operand_base, *operand_limm;
-      int value_base, value_limm;
 
-      if (*iter->state.long_insn.opidx_limm == 0)
-        {
-          *operand = NULL;
-          return FALSE;
-        }
+  *operand = &arc_operands[*iter->opidx];
+  *value = extract_operand_value (*operand, iter->insn, iter->limm);
+  iter->opidx++;
 
-      operand_base = &arc_operands[*iter->state.long_insn.opidx_base];
-      operand_limm = &arc_operands[*iter->state.long_insn.opidx_limm];
-
-      if (operand_base->flags & ARC_OPERAND_LIMM)
-        {
-          /* We've reached the end of the operand list.  */
-          *operand = NULL;
-          return FALSE;
-        }
-
-      value_base = value_limm = 0;
-      if (!(operand_limm->flags & ARC_OPERAND_IGNORE))
-        {
-          /* This should never happen.  If it does then the use of
-             extract_operand_value below will access memory beyond
-             the insn array.  */
-          assert ((operand_limm->flags & ARC_OPERAND_LIMM) == 0);
-
-          *operand = operand_limm;
-          value_limm = extract_operand_value (*operand, &iter->insn[1]);
-        }
-
-      if (!(operand_base->flags & ARC_OPERAND_IGNORE))
-        {
-          *operand = operand_base;
-          value_base = extract_operand_value (*operand, iter->insn);
-        }
-
-      /* This is a bit of a fudge.  There's no reason why simply ORing
-         together the two values is the right thing to do, however, for all
-         the cases we currently have, it is the right thing, so, for now,
-         I've put off solving the more complex problem.  */
-      *value = value_base | value_limm;
-
-      iter->state.long_insn.opidx_base++;
-      iter->state.long_insn.opidx_limm++;
-    }
   return TRUE;
 }
 
@@ -891,17 +734,55 @@ parse_disassembler_options (char *options)
     }
 }
 
+/* Return the instruction type for an instruction described by OPCODE.  */
+
+static enum dis_insn_type
+arc_opcode_to_insn_type (const struct arc_opcode *opcode)
+{
+  enum dis_insn_type insn_type;
+
+  switch (opcode->insn_class)
+    {
+    case BRANCH:
+    case JUMP:
+      if (!strncmp (opcode->name, "bl", 2)
+	  || !strncmp (opcode->name, "jl", 2))
+	{
+	  if (opcode->subclass == COND)
+	    insn_type = dis_condjsr;
+	  else
+	    insn_type = dis_jsr;
+	}
+      else
+	{
+	  if (opcode->subclass == COND)
+	    insn_type = dis_condbranch;
+	  else
+	    insn_type = dis_branch;
+	}
+      break;
+    case MEMORY:
+      insn_type = dis_dref; /* FIXME! DB indicates mov as memory! */
+      break;
+    default:
+      insn_type = dis_nonbranch;
+      break;
+    }
+
+  return insn_type;
+}
+
 /* Disassemble ARC instructions.  */
 
 static int
 print_insn_arc (bfd_vma memaddr,
 		struct disassemble_info *info)
 {
-  bfd_byte buffer[4];
-  unsigned int lowbyte, highbyte;
+  bfd_byte buffer[8];
+  unsigned int highbyte, lowbyte;
   int status;
   unsigned int insn_len;
-  unsigned insn[2] = { 0, 0 };
+  unsigned long long insn = 0;
   unsigned isa_mask;
   const struct arc_opcode *opcode;
   bfd_boolean need_comma;
@@ -1031,25 +912,56 @@ print_insn_arc (bfd_vma memaddr,
   switch (insn_len)
     {
     case 2:
-      insn[0] = (buffer[highbyte] << 8) | buffer[lowbyte];
+      insn = (buffer[highbyte] << 8) | buffer[lowbyte];
+      break;
+
+    case 4:
+      {
+	/* This is a long instruction: Read the remaning 2 bytes.  */
+	status = (*info->read_memory_func) (memaddr + 2, &buffer[2], 2, info);
+	if (status != 0)
+	  {
+	    (*info->memory_error_func) (status, memaddr + 2, info);
+	    return -1;
+	  }
+	insn = (unsigned long long) ARRANGE_ENDIAN (info, buffer);
+      }
+      break;
+
+    case 6:
+      {
+	status = (*info->read_memory_func) (memaddr + 2, &buffer[2], 4, info);
+	if (status != 0)
+	  {
+	    (*info->memory_error_func) (status, memaddr + 2, info);
+	    return -1;
+	  }
+	insn = (unsigned long long) ARRANGE_ENDIAN (info, &buffer[2]);
+	insn |= ((unsigned long long) buffer[highbyte] << 40)
+	  | ((unsigned long long) buffer[lowbyte] << 32);
+      }
+      break;
+
+    case 8:
+      {
+	status = (*info->read_memory_func) (memaddr + 2, &buffer[2], 6, info);
+	if (status != 0)
+	  {
+	    (*info->memory_error_func) (status, memaddr + 2, info);
+	    return -1;
+	  }
+	insn =
+	  ((((unsigned long long) ARRANGE_ENDIAN (info, buffer)) << 32)
+	   | ((unsigned long long) ARRANGE_ENDIAN (info, &buffer[4])));
+      }
       break;
 
     default:
-      /* An unknown instruction is treated as being length 4.  This is
-         possibly not the best solution, but matches the behaviour that was
-         in place before the table based instruction length look-up was
-         introduced.  */
-    case 4:
-      /* This is a long instruction: Read the remaning 2 bytes.  */
-      status = (*info->read_memory_func) (memaddr + 2, &buffer[2], 2, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr + 2, info);
-	  return -1;
-	}
-      insn[0] = ARRANGE_ENDIAN (info, buffer);
-      break;
+      /* There is no instruction whose length is not 2, 4, 6, or 8.  */
+      abort ();
     }
+
+  pr_debug ("instruction value = %llx\n", insn);
 
   /* Set some defaults for the insn info.  */
   info->insn_info_valid    = 1;
@@ -1068,10 +980,31 @@ print_insn_arc (bfd_vma memaddr,
 
   if (!opcode)
     {
-      if (insn_len == 2)
-        (*info->fprintf_func) (info->stream, ".long %#04x", insn[0]);
-      else
-        (*info->fprintf_func) (info->stream, ".long %#08x", insn[0]);
+      switch (insn_len)
+	{
+	case 2:
+	  (*info->fprintf_func) (info->stream, ".long %#04llx",
+				 insn & 0xffff);
+	  break;
+	case 4:
+	  (*info->fprintf_func) (info->stream, ".long %#08llx",
+				 insn & 0xffffffff);
+	  break;
+	case 6:
+	  (*info->fprintf_func) (info->stream, ".long %#08llx",
+				 insn & 0xffffffff);
+	  (*info->fprintf_func) (info->stream, ".long %#04llx",
+				 (insn >> 32) & 0xffff);
+	  break;
+	case 8:
+	  (*info->fprintf_func) (info->stream, ".long %#08llx",
+				 insn & 0xffffffff);
+	  (*info->fprintf_func) (info->stream, ".long %#08llx",
+				 insn >> 32);
+	  break;
+	default:
+	  abort ();
+	}
 
       info->insn_type = dis_noninsn;
       return insn_len;
@@ -1081,37 +1014,11 @@ print_insn_arc (bfd_vma memaddr,
   (*info->fprintf_func) (info->stream, "%s", opcode->name);
 
   /* Preselect the insn class.  */
-  switch (opcode->insn_class)
-    {
-    case BRANCH:
-    case JUMP:
-      if (!strncmp (opcode->name, "bl", 2)
-	  || !strncmp (opcode->name, "jl", 2))
-	{
-	  if (opcode->subclass == COND)
-	    info->insn_type = dis_condjsr;
-	  else
-	    info->insn_type = dis_jsr;
-	}
-      else
-	{
-	  if (opcode->subclass == COND)
-	    info->insn_type = dis_condbranch;
-	  else
-	    info->insn_type = dis_branch;
-	}
-      break;
-    case MEMORY:
-      info->insn_type = dis_dref; /* FIXME! DB indicates mov as memory! */
-      break;
-    default:
-      info->insn_type = dis_nonbranch;
-      break;
-    }
+  info->insn_type = arc_opcode_to_insn_type (opcode);
 
-  pr_debug ("%s: 0x%08x\n", opcode->name, opcode->opcode);
+  pr_debug ("%s: 0x%08llx\n", opcode->name, opcode->opcode);
 
-  print_flags (opcode, insn, info);
+  print_flags (opcode, &insn, info);
 
   if (opcode->operands[0] != 0)
     (*info->fprintf_func) (info->stream, "\t");

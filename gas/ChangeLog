@@ -1,3 +1,17 @@
+2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (struct arc_insn): Change type of insn field.
+	(md_number_to_chars_midend): Support 6- and 8-byte values.
+	(emit_insn0): Update debug output.
+	(find_opcode_match): Likewise.
+	(build_fake_opcode_hash_entry): Delete.
+	(find_special_case_long_opcode): Delete.
+	(find_special_case): Remove long format special case handling.
+	(insert_operand): Change instruction type and update debug print
+	format.
+	(assemble_insn): Change instruction type, update debug print
+	formats, and remove unneeded assert.
+
 2016-11-03  Graham Markall  <graham.markall@embecosm.com>
 
 	* config/tc-arc.c (assemble_insn): Replace use of ARC_SHORT with
