@@ -1,3 +1,10 @@
+2016-07-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/ada.exp: Remove extra directory level in build directory.
+	* gdb.ada/cond_lang.exp: Likewise.
+	* gdb.ada/exec_changed.exp: Likewise.
+	* gdb.ada/lang_switch.exp: Likewise.
+
 2016-07-06  Manish Goregaokar  <manish@mozilla.com>
 
 	* simple.rs: Add test for raw pointer subscripting
