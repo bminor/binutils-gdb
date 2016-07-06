@@ -1,3 +1,7 @@
+2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h: Make macros 64-bit safe.
+
 2016-11-03  Graham Markall  <graham.markall@embecosm.com>
 
 	* opcode/arc.h (arc_opcode_len): Declare.
