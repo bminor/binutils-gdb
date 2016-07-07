@@ -1,5 +1,10 @@
 2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* cp-namespace.c (cp_lookup_bare_symbol): Initialize 
+	lang_this.symbol.
+
+2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* cp-namespace.c (cp_lookup_bare_symbol): Use language passed as
 	parameter to look for the symbol "this".
 
