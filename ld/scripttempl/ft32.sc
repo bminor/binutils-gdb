@@ -15,7 +15,7 @@ OUTPUT_ARCH(${ARCH})
 ${LIB_SEARCH_DIRS}
 
 /* Allow the command line to override the memory region sizes.  */
-__PMSIZE_ = DEFINED(__PMSIZE)  ? __PMSIZE : 256K;
+__PMSIZE = DEFINED(__PMSIZE)  ? __PMSIZE : 256K;
 __RAMSIZE = DEFINED(__RAMSIZE) ? __RAMSIZE : 64K;
 
 MEMORY
@@ -43,6 +43,7 @@ SECTIONS
     *(.rodata)
     *(.rodata*)
     ${RELOCATING+ _edata = . ; }
+    . = ALIGN(4);
   } ${RELOCATING+ > ram}
   .bss  ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
@@ -50,6 +51,7 @@ SECTIONS
     *(.bss)
     *(COMMON)
     ${RELOCATING+ _end = . ;  }
+    . = ALIGN(4);
   } ${RELOCATING+ > ram}
 
   ${RELOCATING+ __data_load_start = LOADADDR(.data); }
