@@ -1,3 +1,7 @@
+2016-07-08  James Bowman  <james.bowman@ftdichip.com>
+
+	* elf32-ft32.c (ft32_reloc_map): Use R_FT32_32 for BFD_RELOC_32.
+
 2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
 
 	* elf32-arm.c (THUMB32_MOVT): New veneer macro.
