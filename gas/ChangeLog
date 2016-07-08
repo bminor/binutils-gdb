@@ -1,3 +1,33 @@
+2016-10-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (arc_target): Delete.
+	(arc_target_name): Delete.
+	(arc_features): Delete.
+	(arc_mach_type): Delete.
+	(mach_type_specified_p): Delete.
+	(enum mach_selection_type): New enum.
+	(mach_selection_mode): New static global.
+	(selected_cpu): New static global.
+	(arc_eflag): Rename to ...
+	(arc_initial_eflag): ...this, and make const.
+	(arc_select_cpu): Update comment, new parameter, check how
+	previous machine type selection was made, and record this
+	selection.  Use selected_cpu instead of old globals.
+	(arc_option): Remove use of arc_get_mach, instead use
+	arc_select_cpu to validate machine type selection.  Use
+	selected_cpu over old globals.
+	(allocate_tok): Use selected_cpu over old globals.
+	(find_opcode_match): Likewise.
+	(assemble_tokens): Likewise.
+	(arc_cons_fix_new): Likewise.
+	(arc_extinsn): Likewise.
+	(arc_extcorereg): Likewise.
+	(md_begin): Update default machine type selection, use
+	selected_cpu over old globals.
+	(md_parse_option): Update machine type selection option handling,
+	use selected_cpu over old globals.
+	* testsuite/gas/arc/nps400-0.s: Add .cpu directive.
+
 2016-10-26  Alan Modra  <amodra@gmail.com>
 
 	Revert 2016-10-06  Alan Modra  <amodra@gmail.com>

@@ -1,3 +1,7 @@
+2016-10-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cpu-arc.c (arc_get_mach): Delete.
+
 2016-10-25  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (STUB_JALR): Correct description.
