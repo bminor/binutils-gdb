@@ -1,3 +1,8 @@
+2016-07-07  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-opc.c (ft32_opc_info): Correct mask for "callc"
+	and "jmpc".
+
 2016-07-01  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (movzbl, movzbw, movzbq, movzwl, movzwq): Remove.
