@@ -7481,7 +7481,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    ip->fixp[i]->fx_tcbit = 1;
 	  }
     }
-  install_insn (ip);
 
   /* Update the register mask information.  */
   mips_gprmask |= gpr_read_mask (ip) | gpr_write_mask (ip);
