@@ -1,3 +1,8 @@
+2016-07-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove the INSN2_ALIAS
+	annotation from the "nal" entry and reorder it beyond "bltzal".
+
 2016-07-12  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (ldtxa): New macro.

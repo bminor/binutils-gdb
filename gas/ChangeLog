@@ -1,3 +1,12 @@
+2016-07-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/nal-1.d: New test.
+	* testsuite/gas/mips/mipsr6@nal-1.d: New test.
+	* testsuite/gas/mips/nal-2.d: New test.
+	* testsuite/gas/mips/mipsr6@nal-2.d: New test.
+	* testsuite/gas/mips/nal.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-07-12  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/sparc/ldtxa.s: New file.
