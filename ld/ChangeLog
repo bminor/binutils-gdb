@@ -1,3 +1,12 @@
+2016-07-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* emulparams/arcelf.sh (SDATA_START_SYMBOLS): Add offset.
+	* testsuite/ld-arc/sda-relocs.dd: New file.
+	* testsuite/ld-arc/sda-relocs.ld: Likewise.
+	* testsuite/ld-arc/sda-relocs.rd: Likewise.
+	* testsuite/ld-arc/sda-relocs.s: Likewise.
+	* testsuite/ld-arc/arc.exp: Add SDA tests.
+
 2016-07-11  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/ld-arc/nps-1b.err: Update test to handle more
