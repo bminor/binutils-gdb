@@ -168,7 +168,6 @@ struct varobj_iter *
 py_varobj_get_iterator (struct varobj *var, PyObject *printer)
 {
   PyObject *children;
-  int i;
   PyObject *iter;
   struct py_varobj_iter *py_iter;
   struct cleanup *back_to = varobj_ensure_python_env (var);

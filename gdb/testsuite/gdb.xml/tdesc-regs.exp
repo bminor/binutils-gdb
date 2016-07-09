@@ -39,6 +39,9 @@ switch -glob -- [istarget] {
     "mips*-*-*" {
 	set core-regs {mips-cpu.xml mips-cp0.xml mips-fpu.xml mips-dsp.xml}
     }
+    "nds32*-*-*" {
+	set core-regs {nds32-core.xml}
+    }
     "nios2-*-*" {
 	set core-regs {nios2-cpu.xml}
     }

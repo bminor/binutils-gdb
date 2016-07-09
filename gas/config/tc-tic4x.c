@@ -124,7 +124,8 @@ typedef struct tic4x_insn
     unsigned int nchars;	/* This is always 4 for the C30.  */
     unsigned long opcode;	/* Opcode number.  */
     expressionS exp;		/* Expression required for relocation.  */
-    int reloc;			/* Relocation type required.  */
+    /* Relocation type required.  */
+    bfd_reloc_code_real_type reloc;
     int pcrel;			/* True if relocation PC relative.  */
     char *pname;		/* Name of instruction in parallel.  */
     unsigned int num_operands;	/* Number of operands in total.  */

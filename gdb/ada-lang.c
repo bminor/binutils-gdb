@@ -1452,6 +1452,45 @@ ada_la_decode (const char *encoded, int options)
   return xstrdup (ada_decode (encoded));
 }
 
+/* Implement la_sniff_from_mangled_name for Ada.  */
+
+static int
+ada_sniff_from_mangled_name (const char *mangled, char **out)
+{
+  const char *demangled = ada_decode (mangled);
+
+  *out = NULL;
+
+  if (demangled != mangled && demangled != NULL && demangled[0] != '<')
+    {
+      /* Set the gsymbol language to Ada, but still return 0.
+	 Two reasons for that:
+
+	 1. For Ada, we prefer computing the symbol's decoded name
+	 on the fly rather than pre-compute it, in order to save
+	 memory (Ada projects are typically very large).
+
+	 2. There are some areas in the definition of the GNAT
+	 encoding where, with a bit of bad luck, we might be able
+	 to decode a non-Ada symbol, generating an incorrect
+	 demangled name (Eg: names ending with "TB" for instance
+	 are identified as task bodies and so stripped from
+	 the decoded name returned).
+
+	 Returning 1, here, but not setting *DEMANGLED, helps us get a
+	 little bit of the best of both worlds.  Because we're last,
+	 we should not affect any of the other languages that were
+	 able to demangle the symbol before us; we get to correctly
+	 tag Ada symbols as such; and even if we incorrectly tagged a
+	 non-Ada symbol, which should be rare, any routing through the
+	 Ada language should be transparent (Ada tries to behave much
+	 like C/C++ with non-Ada symbols).  */
+      return 1;
+    }
+
+  return 0;
+}
+
 /* Returns non-zero iff SYM_NAME matches NAME, ignoring any trailing
    suffixes that encode debugging information or leading _ada_ on
    SYM_NAME (see is_name_suffix commentary for the debugging
@@ -2486,7 +2525,7 @@ ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
       accumSize += HOST_CHAR_BIT - unusedLS;
       if (accumSize >= HOST_CHAR_BIT)
         {
-          unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+          unpacked[unpacked_idx] = accum & ~(~0UL << HOST_CHAR_BIT);
           accumSize -= HOST_CHAR_BIT;
           accum >>= HOST_CHAR_BIT;
           unpacked_bytes_left -= 1;
@@ -2500,7 +2539,7 @@ ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
   while (unpacked_bytes_left > 0)
     {
       accum |= sign << accumSize;
-      unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+      unpacked[unpacked_idx] = accum & ~(~0UL << HOST_CHAR_BIT);
       accumSize -= HOST_CHAR_BIT;
       if (accumSize < 0)
 	accumSize = 0;
@@ -12183,6 +12222,8 @@ ada_unhandled_exception_name_addr_from_raise (void)
    (of any type), return the address in inferior memory where the name
    of the exception is stored, if applicable.
 
+   Assumes the selected frame is the current frame.
+
    Return zero if the address could not be computed, or if not relevant.  */
 
 static CORE_ADDR
@@ -12483,6 +12524,13 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	                                  : "\nCatchpoint ");
   ui_out_field_int (uiout, "bkptno", b->number);
   ui_out_text (uiout, ", ");
+
+  /* ada_exception_name_addr relies on the selected frame being the
+     current frame.  Need to do this here because this function may be
+     called more than once when printing a stop, and below, we'll
+     select the first frame past the Ada run-time (see
+     ada_find_printable_frame).  */
+  select_frame (get_current_frame ());
 
   switch (ex)
     {
@@ -14045,6 +14093,11 @@ ada_read_var_value (struct symbol *var, const struct block *var_block,
   return default_read_var_value (var, var_block, frame);
 }
 
+static const char *ada_extensions[] =
+{
+  ".adb", ".ads", ".a", ".ada", ".dg", NULL
+};
+
 const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   "Ada",
@@ -14054,6 +14107,7 @@ const struct language_defn ada_language_defn = {
                                    that's not quite what this means.  */
   array_row_major,
   macro_expansion_no,
+  ada_extensions,
   &ada_exp_descriptor,
   parse,
   ada_yyerror,
@@ -14071,6 +14125,7 @@ const struct language_defn ada_language_defn = {
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
   basic_lookup_transparent_type,        /* lookup_transparent_type */
   ada_la_decode,                /* Language specific symbol demangler */
+  ada_sniff_from_mangled_name,
   NULL,                         /* Language specific
 				   class_name_from_physname */
   ada_op_print_tab,             /* expression operators for printing */

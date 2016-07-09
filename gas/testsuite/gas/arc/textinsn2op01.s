@@ -1,5 +1,5 @@
 # Insn 2op .extInstruction test
-	.extInstruction myinsn, 0x07, 0x2d, SUFFIX_FLAG|SUFFIX_COND, SYNTAX_2OP|OP1_IMM_IMPLIED
+	.extInstruction myinsn, 0x07, 0x30, SUFFIX_FLAG|SUFFIX_COND, SYNTAX_2OP|OP1_IMM_IMPLIED
 
         myinsn r0,r1
         myinsn fp,sp

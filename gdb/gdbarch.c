@@ -47,6 +47,7 @@
 #include "observer.h"
 #include "regcache.h"
 #include "objfiles.h"
+#include "auxv.h"
 
 /* Static function declarations */
 
@@ -205,6 +206,7 @@ struct gdbarch
   gdbarch_push_dummy_call_ftype *push_dummy_call;
   int call_dummy_location;
   gdbarch_push_dummy_code_ftype *push_dummy_code;
+  gdbarch_code_of_frame_writable_ftype *code_of_frame_writable;
   gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
   gdbarch_print_vector_info_ftype *print_vector_info;
@@ -327,6 +329,7 @@ struct gdbarch
   gdbarch_insn_is_ret_ftype *insn_is_ret;
   gdbarch_insn_is_jump_ftype *insn_is_jump;
   gdbarch_auxv_parse_ftype *auxv_parse;
+  gdbarch_print_auxv_entry_ftype *print_auxv_entry;
   gdbarch_vsyscall_range_ftype *vsyscall_range;
   gdbarch_infcall_mmap_ftype *infcall_mmap;
   gdbarch_infcall_munmap_ftype *infcall_munmap;
@@ -387,6 +390,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->deprecated_fp_regnum = -1;
   gdbarch->call_dummy_location = AT_ENTRY_POINT;
+  gdbarch->code_of_frame_writable = default_code_of_frame_writable;
   gdbarch->print_registers_info = default_print_registers_info;
   gdbarch->print_float_info = default_print_float_info;
   gdbarch->register_sim_regno = legacy_register_sim_regno;
@@ -430,6 +434,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->insn_is_call = default_insn_is_call;
   gdbarch->insn_is_ret = default_insn_is_ret;
   gdbarch->insn_is_jump = default_insn_is_jump;
+  gdbarch->print_auxv_entry = default_print_auxv_entry;
   gdbarch->vsyscall_range = default_vsyscall_range;
   gdbarch->infcall_mmap = default_infcall_mmap;
   gdbarch->infcall_munmap = default_infcall_munmap;
@@ -552,6 +557,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of push_dummy_call, has predicate.  */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
   /* Skip verify of push_dummy_code, has predicate.  */
+  /* Skip verify of code_of_frame_writable, invalid_p == 0 */
   /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, invalid_p == 0 */
   /* Skip verify of print_vector_info, has predicate.  */
@@ -675,6 +681,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of insn_is_ret, invalid_p == 0 */
   /* Skip verify of insn_is_jump, invalid_p == 0 */
   /* Skip verify of auxv_parse, has predicate.  */
+  /* Skip verify of print_auxv_entry, invalid_p == 0 */
   /* Skip verify of vsyscall_range, invalid_p == 0 */
   /* Skip verify of infcall_mmap, invalid_p == 0 */
   /* Skip verify of infcall_munmap, invalid_p == 0 */
@@ -803,6 +810,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: char_signed = %s\n",
                       plongest (gdbarch->char_signed));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: code_of_frame_writable = <%s>\n",
+                      host_address_to_string (gdbarch->code_of_frame_writable));
   fprintf_unfiltered (file,
                       "gdbarch_dump: coff_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->coff_make_msymbol_special));
@@ -1160,6 +1170,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: pointer_to_address = <%s>\n",
                       host_address_to_string (gdbarch->pointer_to_address));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: print_auxv_entry = <%s>\n",
+                      host_address_to_string (gdbarch->print_auxv_entry));
   fprintf_unfiltered (file,
                       "gdbarch_dump: print_float_info = <%s>\n",
                       host_address_to_string (gdbarch->print_float_info));
@@ -2312,6 +2325,23 @@ set_gdbarch_push_dummy_code (struct gdbarch *gdbarch,
                              gdbarch_push_dummy_code_ftype push_dummy_code)
 {
   gdbarch->push_dummy_code = push_dummy_code;
+}
+
+int
+gdbarch_code_of_frame_writable (struct gdbarch *gdbarch, struct frame_info *frame)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->code_of_frame_writable != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_code_of_frame_writable called\n");
+  return gdbarch->code_of_frame_writable (gdbarch, frame);
+}
+
+void
+set_gdbarch_code_of_frame_writable (struct gdbarch *gdbarch,
+                                    gdbarch_code_of_frame_writable_ftype code_of_frame_writable)
+{
+  gdbarch->code_of_frame_writable = code_of_frame_writable;
 }
 
 void
@@ -4744,6 +4774,23 @@ set_gdbarch_auxv_parse (struct gdbarch *gdbarch,
                         gdbarch_auxv_parse_ftype auxv_parse)
 {
   gdbarch->auxv_parse = auxv_parse;
+}
+
+void
+gdbarch_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file, CORE_ADDR type, CORE_ADDR val)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->print_auxv_entry != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_print_auxv_entry called\n");
+  gdbarch->print_auxv_entry (gdbarch, file, type, val);
+}
+
+void
+set_gdbarch_print_auxv_entry (struct gdbarch *gdbarch,
+                              gdbarch_print_auxv_entry_ftype print_auxv_entry)
+{
+  gdbarch->print_auxv_entry = print_auxv_entry;
 }
 
 int

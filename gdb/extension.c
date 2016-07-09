@@ -497,7 +497,7 @@ free_ext_lang_type_printers (struct ext_lang_type_printers *printers)
 
 int
 apply_ext_lang_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
-				   int embedded_offset, CORE_ADDR address,
+				   LONGEST embedded_offset, CORE_ADDR address,
 				   struct ui_file *stream, int recurse,
 				   const struct value *val,
 				   const struct value_print_options *options,
@@ -774,8 +774,6 @@ set_active_ext_lang (const struct extension_language_defn *now_active)
 void
 restore_active_ext_lang (struct active_ext_lang_state *previous)
 {
-  const struct extension_language_defn *current = active_ext_lang;
-
   active_ext_lang = previous->ext_lang;
 
   if (target_terminal_is_ours ())

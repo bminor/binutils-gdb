@@ -39,7 +39,7 @@ if  { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable [list debug f90 
 
 clean_restart $testfile
 
-gdb_load_shlibs $libfile
+gdb_load_shlib $libfile
 
 if ![runto MAIN__] then {
     perror "couldn't run to breakpoint MAIN__"

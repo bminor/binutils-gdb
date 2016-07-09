@@ -135,6 +135,15 @@ libldtestplug3_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(libldtestplug3_la_CFLAGS) $(CFLAGS) \
 	$(libldtestplug3_la_LDFLAGS) $(LDFLAGS) -o $@
 @ENABLE_PLUGINS_TRUE@am_libldtestplug3_la_rpath =
+libldtestplug4_la_LIBADD =
+@ENABLE_PLUGINS_TRUE@am_libldtestplug4_la_OBJECTS =  \
+@ENABLE_PLUGINS_TRUE@	libldtestplug4_la-testplug4.lo
+libldtestplug4_la_OBJECTS = $(am_libldtestplug4_la_OBJECTS)
+libldtestplug4_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libldtestplug4_la_CFLAGS) $(CFLAGS) \
+	$(libldtestplug4_la_LDFLAGS) $(LDFLAGS) -o $@
+@ENABLE_PLUGINS_TRUE@am_libldtestplug4_la_rpath =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" \
 	"$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
@@ -170,8 +179,8 @@ YACCCOMPILE = $(YACC) $(AM_YFLAGS) $(YFLAGS)
 LTYACCCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=compile $(YACC) $(AM_YFLAGS) $(YFLAGS)
 SOURCES = $(libldtestplug_la_SOURCES) $(libldtestplug2_la_SOURCES) \
-	$(libldtestplug3_la_SOURCES) $(ld_new_SOURCES) \
-	$(EXTRA_ld_new_SOURCES)
+	$(libldtestplug3_la_SOURCES) $(libldtestplug4_la_SOURCES) \
+	$(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 INFO_DEPS = ld.info
 am__TEXINFO_TEX_DIR = $(srcdir)/../texinfo
 DVIS = ld.dvi
@@ -538,6 +547,7 @@ ALL_EMULATION_SOURCES = \
 	earmelf_linux_eabi.c \
 	earmelf_nacl.c \
 	earmelf_nbsd.c \
+	earmelf_phoenix.c \
 	earmelf_vxworks.c \
 	earmelfb.c \
 	earmelfb_fbsd.c \
@@ -970,7 +980,9 @@ ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $
 #
 # Build a dummy plugin using libtool.
 #
-@ENABLE_PLUGINS_TRUE@noinst_LTLIBRARIES = libldtestplug.la libldtestplug2.la libldtestplug3.la
+@ENABLE_PLUGINS_TRUE@noinst_LTLIBRARIES = libldtestplug.la libldtestplug2.la \
+@ENABLE_PLUGINS_TRUE@		     libldtestplug3.la libldtestplug4.la
+
 @ENABLE_PLUGINS_TRUE@libldtestplug_la_SOURCES = testplug.c
 @ENABLE_PLUGINS_TRUE@libldtestplug_la_CFLAGS = -g -O2
 @ENABLE_PLUGINS_TRUE@libldtestplug_la_LDFLAGS = -no-undefined -rpath /nowhere
@@ -980,6 +992,9 @@ ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $
 @ENABLE_PLUGINS_TRUE@libldtestplug3_la_SOURCES = testplug3.c
 @ENABLE_PLUGINS_TRUE@libldtestplug3_la_CFLAGS = -g -O2
 @ENABLE_PLUGINS_TRUE@libldtestplug3_la_LDFLAGS = -no-undefined -rpath /nowhere
+@ENABLE_PLUGINS_TRUE@libldtestplug4_la_SOURCES = testplug4.c
+@ENABLE_PLUGINS_TRUE@libldtestplug4_la_CFLAGS = -g -O2
+@ENABLE_PLUGINS_TRUE@libldtestplug4_la_LDFLAGS = -no-undefined -rpath /nowhere
 MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.
@@ -1069,6 +1084,8 @@ libldtestplug2.la: $(libldtestplug2_la_OBJECTS) $(libldtestplug2_la_DEPENDENCIES
 	$(libldtestplug2_la_LINK) $(am_libldtestplug2_la_rpath) $(libldtestplug2_la_OBJECTS) $(libldtestplug2_la_LIBADD) $(LIBS)
 libldtestplug3.la: $(libldtestplug3_la_OBJECTS) $(libldtestplug3_la_DEPENDENCIES) $(EXTRA_libldtestplug3_la_DEPENDENCIES) 
 	$(libldtestplug3_la_LINK) $(am_libldtestplug3_la_rpath) $(libldtestplug3_la_OBJECTS) $(libldtestplug3_la_LIBADD) $(LIBS)
+libldtestplug4.la: $(libldtestplug4_la_OBJECTS) $(libldtestplug4_la_DEPENDENCIES) $(EXTRA_libldtestplug4_la_DEPENDENCIES) 
+	$(libldtestplug4_la_LINK) $(am_libldtestplug4_la_rpath) $(libldtestplug4_la_OBJECTS) $(libldtestplug4_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -1167,6 +1184,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_linux_eabi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_nacl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_nbsd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_phoenix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_vxworks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelfb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelfb_fbsd.Po@am__quote@
@@ -1502,6 +1520,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lexsup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug2_la-testplug2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug3_la-testplug3.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug4_la-testplug4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug_la-testplug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mri.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-dll.Po@am__quote@
@@ -1549,6 +1568,13 @@ libldtestplug3_la-testplug3.lo: testplug3.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='testplug3.c' object='libldtestplug3_la-testplug3.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug3_la_CFLAGS) $(CFLAGS) -c -o libldtestplug3_la-testplug3.lo `test -f 'testplug3.c' || echo '$(srcdir)/'`testplug3.c
+
+libldtestplug4_la-testplug4.lo: testplug4.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug4_la_CFLAGS) $(CFLAGS) -MT libldtestplug4_la-testplug4.lo -MD -MP -MF $(DEPDIR)/libldtestplug4_la-testplug4.Tpo -c -o libldtestplug4_la-testplug4.lo `test -f 'testplug4.c' || echo '$(srcdir)/'`testplug4.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libldtestplug4_la-testplug4.Tpo $(DEPDIR)/libldtestplug4_la-testplug4.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='testplug4.c' object='libldtestplug4_la-testplug4.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug4_la_CFLAGS) $(CFLAGS) -c -o libldtestplug4_la-testplug4.lo `test -f 'testplug4.c' || echo '$(srcdir)/'`testplug4.c
 
 .l.c:
 	$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
@@ -2270,8 +2296,9 @@ ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 
 ealphavms.c: $(srcdir)/emulparams/alphavms.sh \
-  $(srcdir)/emultempl/vms.em $(srcdir)/scripttempl/alphavms.sc \
-  ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/vms.em \
+  $(srcdir)/emultempl/needrelax.em \
+  $(srcdir)/scripttempl/alphavms.sc ${GEN_DEPENDS}
 
 earcv2elf.c: $(srcdir)/emulparams/arcv2elf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elfarcv2.sc ${GEN_DEPENDS}
@@ -2336,6 +2363,10 @@ earmelf_nacl.c: $(srcdir)/emulparams/armelf_nacl.sh \
 
 earmelf_nbsd.c: $(srcdir)/emulparams/armelf_nbsd.sh \
   $(srcdir)/emulparams/armelf.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+earmelf_phoenix.c: $(srcdir)/emulparams/armelf_phoenix.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -3454,7 +3485,8 @@ eelf64_ia64_fbsd.c: $(srcdir)/emulparams/elf64_ia64_fbsd.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf64_ia64_vms.c: $(srcdir)/emulparams/elf64_ia64_vms.sh \
-  $(srcdir)/emultempl/vms.em $(srcdir)/emultempl/elf-generic.em \
+  $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/vms.em \
+  $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/ia64vms.sc ${GEN_DEPENDS}
 
 eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \

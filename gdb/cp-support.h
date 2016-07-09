@@ -181,4 +181,8 @@ extern void cp_decode_template_type_indices
      (const char *linkage_name, long *return_index,
       unsigned num_args, long *arg_indices);
 
+/* Like gdb_demangle, but suitable for use as la_sniff_from_mangled_name.  */
+
+int gdb_sniff_from_mangled_name (const char *mangled, char **demangled);
+
 #endif /* CP_SUPPORT_H */

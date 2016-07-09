@@ -136,6 +136,11 @@ elf32_sparc_final_write_processing (bfd *abfd,
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1;
       break;
     case bfd_mach_sparc_v8plusb :
+    case bfd_mach_sparc_v8plusc :
+    case bfd_mach_sparc_v8plusd :
+    case bfd_mach_sparc_v8pluse :
+    case bfd_mach_sparc_v8plusv :
+    case bfd_mach_sparc_v8plusm :
       elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
       elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1
@@ -180,11 +185,10 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 			     asection ** secp ATTRIBUTE_UNUSED,
 			     bfd_vma * valp ATTRIBUTE_UNUSED)
 {
-  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-       || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE)
+  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
       && (abfd->flags & DYNAMIC) == 0
       && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols = elf_gnu_symbol_any;
+    elf_tdata (info->output_bfd)->has_gnu_symbols |= elf_gnu_symbol_ifunc;
   return TRUE;
 }
 
@@ -265,18 +269,18 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 #define elf_backend_strtab_flags	SHF_STRINGS
 
 static bfd_boolean
-elf32_sparc_set_special_info_link (const bfd *ibfd ATTRIBUTE_UNUSED,
-				   bfd *obfd ATTRIBUTE_UNUSED,
-				   const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
-				   Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+elf32_sparc_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
+						 bfd *obfd ATTRIBUTE_UNUSED,
+						 const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+						 Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
 {
   /* PR 19938: FIXME: Need to add code for setting the sh_info
      and sh_link fields of Solaris specific section types.  */
   return FALSE;
 }
 
-#undef  elf_backend_set_special_section_info_and_link
-#define elf_backend_set_special_section_info_and_link elf32_sparc_set_special_info_link
+#undef  elf_backend_copy_special_section_fields
+#define elf_backend_copy_special_section_fields elf32_sparc_copy_solaris_special_section_fields
 
 #include "elf32-target.h"
 
@@ -341,7 +345,7 @@ elf32_sparc_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
   elf32_sparc_vxworks_final_write_processing
 #undef  elf_backend_static_tls_alignment
 #undef  elf_backend_strtab_flags
-#undef  elf_backend_set_special_section_info_and_link
+#undef  elf_backend_copy_special_section_fields
 
 #undef  elf32_bed
 #define elf32_bed				sparc_elf_vxworks_bed

@@ -20,6 +20,10 @@
 #ifndef _ELF_SH_H
 #define _ELF_SH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Processor specific flags for the ELF header e_flags field.  */
 
 #define EF_SH_MACH_MASK	0x1f
@@ -245,5 +249,9 @@ START_RELOC_NUMBERS (elf_sh_reloc_type)
   RELOC_NUMBER (R_SH_64, 254)
   RELOC_NUMBER (R_SH_64_PCREL, 255)
 END_RELOC_NUMBERS (R_SH_max)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

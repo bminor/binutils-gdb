@@ -162,7 +162,6 @@ macho_symtab_read (struct objfile *objfile,
 		   VEC (oso_el) **oso_vector_ptr)
 {
   long i;
-  const asymbol *dir_so = NULL;
   const asymbol *file_so = NULL;
   asymbol **oso_file = NULL;
   unsigned int nbr_syms = 0;
@@ -208,7 +207,6 @@ macho_symtab_read (struct objfile *objfile,
               else
                 {
                   file_so = sym;
-                  dir_so = NULL;
                   state = S_FIRST_SO;
                 }
             }
@@ -245,7 +243,6 @@ macho_symtab_read (struct objfile *objfile,
               else if (state == S_FIRST_SO)
                 {
                   /* Second SO stab for the file name.  */
-                  dir_so = file_so;
                   file_so = sym;
                   state = S_SECOND_SO;
                 }
@@ -292,7 +289,6 @@ macho_symtab_read (struct objfile *objfile,
                 {
                   complaint (&symfile_complaints, _("Missing nul SO"));
                   file_so = sym;
-                  dir_so = NULL;
                   state = S_FIRST_SO;
                 }
             }
@@ -838,7 +834,6 @@ static void
 macho_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   bfd *abfd = objfile->obfd;
-  CORE_ADDR offset;
   long storage_needed;
   bfd *dsym_bfd;
   VEC (oso_el) *oso_vector = NULL;
@@ -891,8 +886,6 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
       dsym_bfd = macho_check_dsym (objfile, &dsym_filename);
       if (dsym_bfd != NULL)
 	{
-	  int ix;
-	  oso_el *oso;
           struct bfd_section *asect, *dsect;
 
 	  make_cleanup (xfree, dsym_filename);
@@ -963,7 +956,6 @@ macho_symfile_offsets (struct objfile *objfile,
                        const struct section_addr_info *addrs)
 {
   unsigned int i;
-  unsigned int num_sections;
   struct obj_section *osect;
 
   /* Allocate section_offsets.  */

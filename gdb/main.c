@@ -68,10 +68,6 @@ static int gdb_datadir_provided = 0;
    the possibly relocated path to python's lib directory.  */
 char *python_libdir = 0;
 
-struct ui_file *gdb_stdout;
-struct ui_file *gdb_stderr;
-struct ui_file *gdb_stdlog;
-struct ui_file *gdb_stdin;
 /* Target IO streams.  */
 struct ui_file *gdb_stdtargin;
 struct ui_file *gdb_stdtarg;
@@ -313,11 +309,19 @@ setup_alternate_signal_stack (void)
 static int
 captured_command_loop (void *data)
 {
+  struct ui *ui = current_ui;
+
   /* Top-level execution commands can be run in the background from
      here on.  */
-  interpreter_async = 1;
+  current_ui->async = 1;
 
-  current_interp_command_loop ();
+  /* Give the interpreter a chance to print a prompt, if necessary  */
+  if (ui->prompt_state != PROMPT_BLOCKED)
+    interp_pre_command_loop (top_level_interpreter ());
+
+  /* Now it's time to start the event loop.  */
+  start_event_loop ();
+
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
      would clean things up (restoring the cleanup chain) to the state
      they were just prior to the call.  Technically, this means that
@@ -330,7 +334,7 @@ captured_command_loop (void *data)
      error) we try to quit.  If the quit is aborted, catch_errors()
      which called this catch the signal and restart the command
      loop.  */
-  quit_command (NULL, instream == stdin);
+  quit_command (NULL, ui->instream == ui->stdin_stream);
   return 1;
 }
 
@@ -365,7 +369,7 @@ catch_command_errors (catch_command_errors_ftype *command,
 {
   TRY
     {
-      int was_sync = sync_execution;
+      int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
 
       command (arg, from_tty);
 
@@ -392,7 +396,7 @@ catch_command_errors_const (catch_command_errors_const_ftype *command,
 {
   TRY
     {
-      int was_sync = sync_execution;
+      int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
 
       command (arg, from_tty);
 
@@ -508,7 +512,6 @@ captured_main (void *data)
   ndir = 0;
 
   saved_command_line = (char *) xstrdup ("");
-  instream = stdin;
 
 #ifdef __MINGW32__
   /* Ensure stderr is unbuffered.  A Cygwin pty or pipe is implemented
@@ -516,12 +519,9 @@ captured_main (void *data)
   setvbuf (stderr, NULL, _IONBF, BUFSIZ);
 #endif
 
-  gdb_stdout = stdio_fileopen (stdout);
-  gdb_stderr = stderr_fileopen ();
+  main_ui = new_ui (stdin, stdout, stderr);
+  current_ui = main_ui;
 
-  gdb_stdlog = gdb_stderr;	/* for moment */
-  gdb_stdtarg = gdb_stderr;	/* for moment */
-  gdb_stdin = stdio_fileopen (stdin);
   gdb_stdtargerr = gdb_stderr;	/* for moment */
   gdb_stdtargin = gdb_stdin;	/* for moment */
 
@@ -963,17 +963,7 @@ captured_main (void *data)
 
   /* Install the default UI.  All the interpreters should have had a
      look at things by now.  Initialize the default interpreter.  */
-
-  {
-    /* Find it.  */
-    struct interp *interp = interp_lookup (interpreter_p);
-
-    if (interp == NULL)
-      error (_("Interpreter `%s' unrecognized"), interpreter_p);
-    /* Install it.  */
-    if (!interp_set (interp, 1))
-      error (_("Interpreter `%s' failed to initialize."), interpreter_p);
-  }
+  set_top_level_interpreter (interpreter_p);
 
   /* FIXME: cagney/2003-02-03: The big hack (part 2 of 2) that lets
      GDB retain the old MI1 interpreter startup behavior.  Output the
@@ -1162,7 +1152,16 @@ captured_main (void *data)
 int
 gdb_main (struct captured_main_args *args)
 {
-  catch_errors (captured_main, args, "", RETURN_MASK_ALL);
+  TRY
+    {
+      captured_main (args);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_print (gdb_stderr, ex);
+    }
+  END_CATCH
+
   /* The only way to end up here is by an error (normal exit is
      handled by quit_force()), hence always return an error status.  */
   return 1;

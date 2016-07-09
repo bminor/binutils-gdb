@@ -20,11 +20,14 @@
 
 if { [istarget alpha*-*-*] } then {
 
-    set elf [expr [istarget *-*-elf*] \
+    set elf [expr    [istarget *-*-elf*] \
 		  || [istarget *-*-linux*] \
 		  || [istarget *-*-freebsd*] \
 		  || [istarget *-*-kfreebsd*-gnu] \
 		  || [istarget *-*-netbsd*] ]
+    if { [istarget *-*-linux*ecoff] } then {
+	set elf 0
+    }
 
     if $elf {
 	run_dump_test "elf-reloc-1"

@@ -1438,13 +1438,14 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 			      TYPE_FIELD_NAME (type, i),
 			      stream, show, level + 4,
 			      &local_flags);
-		fprintf_filtered (stream, " @%d",
-				  TYPE_FIELD_BITPOS (type, i));
+		fprintf_filtered (stream, " @%s",
+				  plongest (TYPE_FIELD_BITPOS (type, i)));
 		if (TYPE_FIELD_BITSIZE (type, i) > 1)
 		  {
-		    fprintf_filtered (stream, "-%d",
-				      TYPE_FIELD_BITPOS (type, i)
-				      + TYPE_FIELD_BITSIZE (type, i) - 1);
+		    fprintf_filtered (stream, "-%s",
+				      plongest (TYPE_FIELD_BITPOS (type, i)
+						+ TYPE_FIELD_BITSIZE (type, i)
+						- 1));
 		  }
 		fprintf_filtered (stream, ";\n");
 	      }

@@ -133,9 +133,17 @@ typedef struct
   enum processor_type type;	/* arch type */
   i386_cpu_flags flags;		/* cpu feature flags */
   unsigned int skip;		/* show_arch should skip this. */
-  unsigned int negated;		/* turn off indicated flags.  */
 }
 arch_entry;
+
+/* Used to turn off indicated flags.  */
+typedef struct
+{
+  const char *name;		/* arch name */
+  unsigned int len;		/* arch string length */
+  i386_cpu_flags flags;		/* cpu feature flags */
+}
+noarch_entry;
 
 static void update_code_flag (int, int);
 static void set_code_flag (int);
@@ -165,7 +173,7 @@ static void swap_operands (void);
 static void swap_2_operands (int, int);
 static void optimize_imm (void);
 static void optimize_disp (void);
-static const insn_template *match_template (void);
+static const insn_template *match_template (char);
 static int check_string (void);
 static int process_suffix (void);
 static int check_byte_reg (void);
@@ -317,6 +325,9 @@ struct _i386_insn
     /* SEG gives the seg_entries of this insn.  They are zero unless
        explicit segment overrides are given.  */
     const seg_entry *seg[2];
+
+    /* Copied first memory operand string, for re-checking.  */
+    char *memop1_string;
 
     /* PREFIX holds all the given prefix opcodes (usually null).
        PREFIXES is the number of prefix opcodes.  */
@@ -527,6 +538,10 @@ static int shared = 0;
    0 if att syntax.  */
 static int intel_syntax = 0;
 
+/* 1 for Intel64 ISA,
+   0 if AMD64 ISA.  */
+static int intel64;
+
 /* 1 for intel mnemonic,
    0 if att mnemonic.  */
 static int intel_mnemonic = !SYSV386_COMPAT;
@@ -730,237 +745,260 @@ static const arch_entry cpu_arch[] =
   /* Do not replace the first two entries - i386_target_format()
      relies on them being there in this order.  */
   { STRING_COMMA_LEN ("generic32"), PROCESSOR_GENERIC32,
-    CPU_GENERIC32_FLAGS, 0, 0 },
+    CPU_GENERIC32_FLAGS, 0 },
   { STRING_COMMA_LEN ("generic64"), PROCESSOR_GENERIC64,
-    CPU_GENERIC64_FLAGS, 0, 0 },
+    CPU_GENERIC64_FLAGS, 0 },
   { STRING_COMMA_LEN ("i8086"), PROCESSOR_UNKNOWN,
-    CPU_NONE_FLAGS, 0, 0 },
+    CPU_NONE_FLAGS, 0 },
   { STRING_COMMA_LEN ("i186"), PROCESSOR_UNKNOWN,
-    CPU_I186_FLAGS, 0, 0 },
+    CPU_I186_FLAGS, 0 },
   { STRING_COMMA_LEN ("i286"), PROCESSOR_UNKNOWN,
-    CPU_I286_FLAGS, 0, 0 },
+    CPU_I286_FLAGS, 0 },
   { STRING_COMMA_LEN ("i386"), PROCESSOR_I386,
-    CPU_I386_FLAGS, 0, 0 },
+    CPU_I386_FLAGS, 0 },
   { STRING_COMMA_LEN ("i486"), PROCESSOR_I486,
-    CPU_I486_FLAGS, 0, 0 },
+    CPU_I486_FLAGS, 0 },
   { STRING_COMMA_LEN ("i586"), PROCESSOR_PENTIUM,
-    CPU_I586_FLAGS, 0, 0 },
+    CPU_I586_FLAGS, 0 },
   { STRING_COMMA_LEN ("i686"), PROCESSOR_PENTIUMPRO,
-    CPU_I686_FLAGS, 0, 0 },
+    CPU_I686_FLAGS, 0 },
   { STRING_COMMA_LEN ("pentium"), PROCESSOR_PENTIUM,
-    CPU_I586_FLAGS, 0, 0 },
+    CPU_I586_FLAGS, 0 },
   { STRING_COMMA_LEN ("pentiumpro"), PROCESSOR_PENTIUMPRO,
-    CPU_PENTIUMPRO_FLAGS, 0, 0 },
+    CPU_PENTIUMPRO_FLAGS, 0 },
   { STRING_COMMA_LEN ("pentiumii"), PROCESSOR_PENTIUMPRO,
-    CPU_P2_FLAGS, 0, 0 },
+    CPU_P2_FLAGS, 0 },
   { STRING_COMMA_LEN ("pentiumiii"),PROCESSOR_PENTIUMPRO,
-    CPU_P3_FLAGS, 0, 0 },
+    CPU_P3_FLAGS, 0 },
   { STRING_COMMA_LEN ("pentium4"), PROCESSOR_PENTIUM4,
-    CPU_P4_FLAGS, 0, 0 },
+    CPU_P4_FLAGS, 0 },
   { STRING_COMMA_LEN ("prescott"), PROCESSOR_NOCONA,
-    CPU_CORE_FLAGS, 0, 0 },
+    CPU_CORE_FLAGS, 0 },
   { STRING_COMMA_LEN ("nocona"), PROCESSOR_NOCONA,
-    CPU_NOCONA_FLAGS, 0, 0 },
+    CPU_NOCONA_FLAGS, 0 },
   { STRING_COMMA_LEN ("yonah"), PROCESSOR_CORE,
-    CPU_CORE_FLAGS, 1, 0 },
+    CPU_CORE_FLAGS, 1 },
   { STRING_COMMA_LEN ("core"), PROCESSOR_CORE,
-    CPU_CORE_FLAGS, 0, 0 },
+    CPU_CORE_FLAGS, 0 },
   { STRING_COMMA_LEN ("merom"), PROCESSOR_CORE2,
-    CPU_CORE2_FLAGS, 1, 0 },
+    CPU_CORE2_FLAGS, 1 },
   { STRING_COMMA_LEN ("core2"), PROCESSOR_CORE2,
-    CPU_CORE2_FLAGS, 0, 0 },
+    CPU_CORE2_FLAGS, 0 },
   { STRING_COMMA_LEN ("corei7"), PROCESSOR_COREI7,
-    CPU_COREI7_FLAGS, 0, 0 },
+    CPU_COREI7_FLAGS, 0 },
   { STRING_COMMA_LEN ("l1om"), PROCESSOR_L1OM,
-    CPU_L1OM_FLAGS, 0, 0 },
+    CPU_L1OM_FLAGS, 0 },
   { STRING_COMMA_LEN ("k1om"), PROCESSOR_K1OM,
-    CPU_K1OM_FLAGS, 0, 0 },
+    CPU_K1OM_FLAGS, 0 },
   { STRING_COMMA_LEN ("iamcu"), PROCESSOR_IAMCU,
-    CPU_IAMCU_FLAGS, 0, 0 },
+    CPU_IAMCU_FLAGS, 0 },
   { STRING_COMMA_LEN ("k6"), PROCESSOR_K6,
-    CPU_K6_FLAGS, 0, 0 },
+    CPU_K6_FLAGS, 0 },
   { STRING_COMMA_LEN ("k6_2"), PROCESSOR_K6,
-    CPU_K6_2_FLAGS, 0, 0 },
+    CPU_K6_2_FLAGS, 0 },
   { STRING_COMMA_LEN ("athlon"), PROCESSOR_ATHLON,
-    CPU_ATHLON_FLAGS, 0, 0 },
+    CPU_ATHLON_FLAGS, 0 },
   { STRING_COMMA_LEN ("sledgehammer"), PROCESSOR_K8,
-    CPU_K8_FLAGS, 1, 0 },
+    CPU_K8_FLAGS, 1 },
   { STRING_COMMA_LEN ("opteron"), PROCESSOR_K8,
-    CPU_K8_FLAGS, 0, 0 },
+    CPU_K8_FLAGS, 0 },
   { STRING_COMMA_LEN ("k8"), PROCESSOR_K8,
-    CPU_K8_FLAGS, 0, 0 },
+    CPU_K8_FLAGS, 0 },
   { STRING_COMMA_LEN ("amdfam10"), PROCESSOR_AMDFAM10,
-    CPU_AMDFAM10_FLAGS, 0, 0 },
+    CPU_AMDFAM10_FLAGS, 0 },
   { STRING_COMMA_LEN ("bdver1"), PROCESSOR_BD,
-    CPU_BDVER1_FLAGS, 0, 0 },
+    CPU_BDVER1_FLAGS, 0 },
   { STRING_COMMA_LEN ("bdver2"), PROCESSOR_BD,
-    CPU_BDVER2_FLAGS, 0, 0 },
+    CPU_BDVER2_FLAGS, 0 },
   { STRING_COMMA_LEN ("bdver3"), PROCESSOR_BD,
-    CPU_BDVER3_FLAGS, 0, 0 },
+    CPU_BDVER3_FLAGS, 0 },
   { STRING_COMMA_LEN ("bdver4"), PROCESSOR_BD,
-    CPU_BDVER4_FLAGS, 0, 0 },
+    CPU_BDVER4_FLAGS, 0 },
   { STRING_COMMA_LEN ("znver1"), PROCESSOR_ZNVER,
-    CPU_ZNVER1_FLAGS, 0, 0 },
+    CPU_ZNVER1_FLAGS, 0 },
   { STRING_COMMA_LEN ("btver1"), PROCESSOR_BT,
-    CPU_BTVER1_FLAGS, 0, 0 },
+    CPU_BTVER1_FLAGS, 0 },
   { STRING_COMMA_LEN ("btver2"), PROCESSOR_BT,
-    CPU_BTVER2_FLAGS, 0, 0 },
+    CPU_BTVER2_FLAGS, 0 },
   { STRING_COMMA_LEN (".8087"), PROCESSOR_UNKNOWN,
-    CPU_8087_FLAGS, 0, 0 },
+    CPU_8087_FLAGS, 0 },
   { STRING_COMMA_LEN (".287"), PROCESSOR_UNKNOWN,
-    CPU_287_FLAGS, 0, 0 },
+    CPU_287_FLAGS, 0 },
   { STRING_COMMA_LEN (".387"), PROCESSOR_UNKNOWN,
-    CPU_387_FLAGS, 0, 0 },
-  { STRING_COMMA_LEN (".no87"), PROCESSOR_UNKNOWN,
-    CPU_ANY87_FLAGS, 0, 1 },
+    CPU_387_FLAGS, 0 },
+  { STRING_COMMA_LEN (".687"), PROCESSOR_UNKNOWN,
+    CPU_687_FLAGS, 0 },
   { STRING_COMMA_LEN (".mmx"), PROCESSOR_UNKNOWN,
-    CPU_MMX_FLAGS, 0, 0 },
-  { STRING_COMMA_LEN (".nommx"), PROCESSOR_UNKNOWN,
-    CPU_3DNOWA_FLAGS, 0, 1 },
+    CPU_MMX_FLAGS, 0 },
   { STRING_COMMA_LEN (".sse"), PROCESSOR_UNKNOWN,
-    CPU_SSE_FLAGS, 0, 0 },
+    CPU_SSE_FLAGS, 0 },
   { STRING_COMMA_LEN (".sse2"), PROCESSOR_UNKNOWN,
-    CPU_SSE2_FLAGS, 0, 0 },
+    CPU_SSE2_FLAGS, 0 },
   { STRING_COMMA_LEN (".sse3"), PROCESSOR_UNKNOWN,
-    CPU_SSE3_FLAGS, 0, 0 },
+    CPU_SSE3_FLAGS, 0 },
   { STRING_COMMA_LEN (".ssse3"), PROCESSOR_UNKNOWN,
-    CPU_SSSE3_FLAGS, 0, 0 },
+    CPU_SSSE3_FLAGS, 0 },
   { STRING_COMMA_LEN (".sse4.1"), PROCESSOR_UNKNOWN,
-    CPU_SSE4_1_FLAGS, 0, 0 },
+    CPU_SSE4_1_FLAGS, 0 },
   { STRING_COMMA_LEN (".sse4.2"), PROCESSOR_UNKNOWN,
-    CPU_SSE4_2_FLAGS, 0, 0 },
+    CPU_SSE4_2_FLAGS, 0 },
   { STRING_COMMA_LEN (".sse4"), PROCESSOR_UNKNOWN,
-    CPU_SSE4_2_FLAGS, 0, 0 },
-  { STRING_COMMA_LEN (".nosse"), PROCESSOR_UNKNOWN,
-    CPU_ANY_SSE_FLAGS, 0, 1 },
+    CPU_SSE4_2_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx"), PROCESSOR_UNKNOWN,
-    CPU_AVX_FLAGS, 0, 0 },
+    CPU_AVX_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx2"), PROCESSOR_UNKNOWN,
-    CPU_AVX2_FLAGS, 0, 0 },
+    CPU_AVX2_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512f"), PROCESSOR_UNKNOWN,
-    CPU_AVX512F_FLAGS, 0, 0 },
+    CPU_AVX512F_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512cd"), PROCESSOR_UNKNOWN,
-    CPU_AVX512CD_FLAGS, 0, 0 },
+    CPU_AVX512CD_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512er"), PROCESSOR_UNKNOWN,
-    CPU_AVX512ER_FLAGS, 0, 0 },
+    CPU_AVX512ER_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512pf"), PROCESSOR_UNKNOWN,
-    CPU_AVX512PF_FLAGS, 0, 0 },
+    CPU_AVX512PF_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512dq"), PROCESSOR_UNKNOWN,
-    CPU_AVX512DQ_FLAGS, 0, 0 },
+    CPU_AVX512DQ_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512bw"), PROCESSOR_UNKNOWN,
-    CPU_AVX512BW_FLAGS, 0, 0 },
+    CPU_AVX512BW_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512vl"), PROCESSOR_UNKNOWN,
-    CPU_AVX512VL_FLAGS, 0, 0 },
-  { STRING_COMMA_LEN (".noavx"), PROCESSOR_UNKNOWN,
-    CPU_ANY_AVX_FLAGS, 0, 1 },
+    CPU_AVX512VL_FLAGS, 0 },
   { STRING_COMMA_LEN (".vmx"), PROCESSOR_UNKNOWN,
-    CPU_VMX_FLAGS, 0, 0 },
+    CPU_VMX_FLAGS, 0 },
   { STRING_COMMA_LEN (".vmfunc"), PROCESSOR_UNKNOWN,
-    CPU_VMFUNC_FLAGS, 0, 0 },
+    CPU_VMFUNC_FLAGS, 0 },
   { STRING_COMMA_LEN (".smx"), PROCESSOR_UNKNOWN,
-    CPU_SMX_FLAGS, 0, 0 },
+    CPU_SMX_FLAGS, 0 },
   { STRING_COMMA_LEN (".xsave"), PROCESSOR_UNKNOWN,
-    CPU_XSAVE_FLAGS, 0, 0 },
+    CPU_XSAVE_FLAGS, 0 },
   { STRING_COMMA_LEN (".xsaveopt"), PROCESSOR_UNKNOWN,
-    CPU_XSAVEOPT_FLAGS, 0, 0 },
+    CPU_XSAVEOPT_FLAGS, 0 },
   { STRING_COMMA_LEN (".xsavec"), PROCESSOR_UNKNOWN,
-    CPU_XSAVEC_FLAGS, 0, 0 },
+    CPU_XSAVEC_FLAGS, 0 },
   { STRING_COMMA_LEN (".xsaves"), PROCESSOR_UNKNOWN,
-    CPU_XSAVES_FLAGS, 0, 0 },
+    CPU_XSAVES_FLAGS, 0 },
   { STRING_COMMA_LEN (".aes"), PROCESSOR_UNKNOWN,
-    CPU_AES_FLAGS, 0, 0 },
+    CPU_AES_FLAGS, 0 },
   { STRING_COMMA_LEN (".pclmul"), PROCESSOR_UNKNOWN,
-    CPU_PCLMUL_FLAGS, 0, 0 },
+    CPU_PCLMUL_FLAGS, 0 },
   { STRING_COMMA_LEN (".clmul"), PROCESSOR_UNKNOWN,
-    CPU_PCLMUL_FLAGS, 1, 0 },
+    CPU_PCLMUL_FLAGS, 1 },
   { STRING_COMMA_LEN (".fsgsbase"), PROCESSOR_UNKNOWN,
-    CPU_FSGSBASE_FLAGS, 0, 0 },
+    CPU_FSGSBASE_FLAGS, 0 },
   { STRING_COMMA_LEN (".rdrnd"), PROCESSOR_UNKNOWN,
-    CPU_RDRND_FLAGS, 0, 0 },
+    CPU_RDRND_FLAGS, 0 },
   { STRING_COMMA_LEN (".f16c"), PROCESSOR_UNKNOWN,
-    CPU_F16C_FLAGS, 0, 0 },
+    CPU_F16C_FLAGS, 0 },
   { STRING_COMMA_LEN (".bmi2"), PROCESSOR_UNKNOWN,
-    CPU_BMI2_FLAGS, 0, 0 },
+    CPU_BMI2_FLAGS, 0 },
   { STRING_COMMA_LEN (".fma"), PROCESSOR_UNKNOWN,
-    CPU_FMA_FLAGS, 0, 0 },
+    CPU_FMA_FLAGS, 0 },
   { STRING_COMMA_LEN (".fma4"), PROCESSOR_UNKNOWN,
-    CPU_FMA4_FLAGS, 0, 0 },
+    CPU_FMA4_FLAGS, 0 },
   { STRING_COMMA_LEN (".xop"), PROCESSOR_UNKNOWN,
-    CPU_XOP_FLAGS, 0, 0 },
+    CPU_XOP_FLAGS, 0 },
   { STRING_COMMA_LEN (".lwp"), PROCESSOR_UNKNOWN,
-    CPU_LWP_FLAGS, 0, 0 },
+    CPU_LWP_FLAGS, 0 },
   { STRING_COMMA_LEN (".movbe"), PROCESSOR_UNKNOWN,
-    CPU_MOVBE_FLAGS, 0, 0 },
+    CPU_MOVBE_FLAGS, 0 },
   { STRING_COMMA_LEN (".cx16"), PROCESSOR_UNKNOWN,
-    CPU_CX16_FLAGS, 0, 0 },
+    CPU_CX16_FLAGS, 0 },
   { STRING_COMMA_LEN (".ept"), PROCESSOR_UNKNOWN,
-    CPU_EPT_FLAGS, 0, 0 },
+    CPU_EPT_FLAGS, 0 },
   { STRING_COMMA_LEN (".lzcnt"), PROCESSOR_UNKNOWN,
-    CPU_LZCNT_FLAGS, 0, 0 },
+    CPU_LZCNT_FLAGS, 0 },
   { STRING_COMMA_LEN (".hle"), PROCESSOR_UNKNOWN,
-    CPU_HLE_FLAGS, 0, 0 },
+    CPU_HLE_FLAGS, 0 },
   { STRING_COMMA_LEN (".rtm"), PROCESSOR_UNKNOWN,
-    CPU_RTM_FLAGS, 0, 0 },
+    CPU_RTM_FLAGS, 0 },
   { STRING_COMMA_LEN (".invpcid"), PROCESSOR_UNKNOWN,
-    CPU_INVPCID_FLAGS, 0, 0 },
+    CPU_INVPCID_FLAGS, 0 },
   { STRING_COMMA_LEN (".clflush"), PROCESSOR_UNKNOWN,
-    CPU_CLFLUSH_FLAGS, 0, 0 },
+    CPU_CLFLUSH_FLAGS, 0 },
   { STRING_COMMA_LEN (".nop"), PROCESSOR_UNKNOWN,
-    CPU_NOP_FLAGS, 0, 0 },
+    CPU_NOP_FLAGS, 0 },
   { STRING_COMMA_LEN (".syscall"), PROCESSOR_UNKNOWN,
-    CPU_SYSCALL_FLAGS, 0, 0 },
+    CPU_SYSCALL_FLAGS, 0 },
   { STRING_COMMA_LEN (".rdtscp"), PROCESSOR_UNKNOWN,
-    CPU_RDTSCP_FLAGS, 0, 0 },
+    CPU_RDTSCP_FLAGS, 0 },
   { STRING_COMMA_LEN (".3dnow"), PROCESSOR_UNKNOWN,
-    CPU_3DNOW_FLAGS, 0, 0 },
+    CPU_3DNOW_FLAGS, 0 },
   { STRING_COMMA_LEN (".3dnowa"), PROCESSOR_UNKNOWN,
-    CPU_3DNOWA_FLAGS, 0, 0 },
+    CPU_3DNOWA_FLAGS, 0 },
   { STRING_COMMA_LEN (".padlock"), PROCESSOR_UNKNOWN,
-    CPU_PADLOCK_FLAGS, 0, 0 },
+    CPU_PADLOCK_FLAGS, 0 },
   { STRING_COMMA_LEN (".pacifica"), PROCESSOR_UNKNOWN,
-    CPU_SVME_FLAGS, 1, 0 },
+    CPU_SVME_FLAGS, 1 },
   { STRING_COMMA_LEN (".svme"), PROCESSOR_UNKNOWN,
-    CPU_SVME_FLAGS, 0, 0 },
+    CPU_SVME_FLAGS, 0 },
   { STRING_COMMA_LEN (".sse4a"), PROCESSOR_UNKNOWN,
-    CPU_SSE4A_FLAGS, 0, 0 },
+    CPU_SSE4A_FLAGS, 0 },
   { STRING_COMMA_LEN (".abm"), PROCESSOR_UNKNOWN,
-    CPU_ABM_FLAGS, 0, 0 },
+    CPU_ABM_FLAGS, 0 },
   { STRING_COMMA_LEN (".bmi"), PROCESSOR_UNKNOWN,
-    CPU_BMI_FLAGS, 0, 0 },
+    CPU_BMI_FLAGS, 0 },
   { STRING_COMMA_LEN (".tbm"), PROCESSOR_UNKNOWN,
-    CPU_TBM_FLAGS, 0, 0 },
+    CPU_TBM_FLAGS, 0 },
   { STRING_COMMA_LEN (".adx"), PROCESSOR_UNKNOWN,
-    CPU_ADX_FLAGS, 0, 0 },
+    CPU_ADX_FLAGS, 0 },
   { STRING_COMMA_LEN (".rdseed"), PROCESSOR_UNKNOWN,
-    CPU_RDSEED_FLAGS, 0, 0 },
+    CPU_RDSEED_FLAGS, 0 },
   { STRING_COMMA_LEN (".prfchw"), PROCESSOR_UNKNOWN,
-    CPU_PRFCHW_FLAGS, 0, 0 },
+    CPU_PRFCHW_FLAGS, 0 },
   { STRING_COMMA_LEN (".smap"), PROCESSOR_UNKNOWN,
-    CPU_SMAP_FLAGS, 0, 0 },
+    CPU_SMAP_FLAGS, 0 },
   { STRING_COMMA_LEN (".mpx"), PROCESSOR_UNKNOWN,
-    CPU_MPX_FLAGS, 0, 0 },
+    CPU_MPX_FLAGS, 0 },
   { STRING_COMMA_LEN (".sha"), PROCESSOR_UNKNOWN,
-    CPU_SHA_FLAGS, 0, 0 },
+    CPU_SHA_FLAGS, 0 },
   { STRING_COMMA_LEN (".clflushopt"), PROCESSOR_UNKNOWN,
-    CPU_CLFLUSHOPT_FLAGS, 0, 0 },
+    CPU_CLFLUSHOPT_FLAGS, 0 },
   { STRING_COMMA_LEN (".prefetchwt1"), PROCESSOR_UNKNOWN,
-    CPU_PREFETCHWT1_FLAGS, 0, 0 },
+    CPU_PREFETCHWT1_FLAGS, 0 },
   { STRING_COMMA_LEN (".se1"), PROCESSOR_UNKNOWN,
-    CPU_SE1_FLAGS, 0, 0 },
+    CPU_SE1_FLAGS, 0 },
   { STRING_COMMA_LEN (".clwb"), PROCESSOR_UNKNOWN,
-    CPU_CLWB_FLAGS, 0, 0 },
+    CPU_CLWB_FLAGS, 0 },
   { STRING_COMMA_LEN (".pcommit"), PROCESSOR_UNKNOWN,
-    CPU_PCOMMIT_FLAGS, 0, 0 },
+    CPU_PCOMMIT_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512ifma"), PROCESSOR_UNKNOWN,
-    CPU_AVX512IFMA_FLAGS, 0, 0 },
+    CPU_AVX512IFMA_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512vbmi"), PROCESSOR_UNKNOWN,
-    CPU_AVX512VBMI_FLAGS, 0, 0 },
+    CPU_AVX512VBMI_FLAGS, 0 },
   { STRING_COMMA_LEN (".clzero"), PROCESSOR_UNKNOWN,
-    CPU_CLZERO_FLAGS, 0, 0 },
+    CPU_CLZERO_FLAGS, 0 },
   { STRING_COMMA_LEN (".mwaitx"), PROCESSOR_UNKNOWN,
-    CPU_MWAITX_FLAGS, 0, 0 },
+    CPU_MWAITX_FLAGS, 0 },
   { STRING_COMMA_LEN (".ospke"), PROCESSOR_UNKNOWN,
-    CPU_OSPKE_FLAGS, 0, 0 },
+    CPU_OSPKE_FLAGS, 0 },
+  { STRING_COMMA_LEN (".rdpid"), PROCESSOR_UNKNOWN,
+    CPU_RDPID_FLAGS, 0 },
+};
+
+static const noarch_entry cpu_noarch[] =
+{
+  { STRING_COMMA_LEN ("no87"),  CPU_ANY_X87_FLAGS },
+  { STRING_COMMA_LEN ("no287"),  CPU_ANY_287_FLAGS },
+  { STRING_COMMA_LEN ("no387"),  CPU_ANY_387_FLAGS },
+  { STRING_COMMA_LEN ("no687"),  CPU_ANY_687_FLAGS },
+  { STRING_COMMA_LEN ("nommx"),  CPU_ANY_MMX_FLAGS },
+  { STRING_COMMA_LEN ("nosse"),  CPU_ANY_SSE_FLAGS },
+  { STRING_COMMA_LEN ("nosse2"),  CPU_ANY_SSE2_FLAGS },
+  { STRING_COMMA_LEN ("nosse3"),  CPU_ANY_SSE3_FLAGS },
+  { STRING_COMMA_LEN ("nossse3"),  CPU_ANY_SSSE3_FLAGS },
+  { STRING_COMMA_LEN ("nosse4.1"),  CPU_ANY_SSE4_1_FLAGS },
+  { STRING_COMMA_LEN ("nosse4.2"),  CPU_ANY_SSE4_2_FLAGS },
+  { STRING_COMMA_LEN ("nosse4"),  CPU_ANY_SSE4_1_FLAGS },
+  { STRING_COMMA_LEN ("noavx"),  CPU_ANY_AVX_FLAGS },
+  { STRING_COMMA_LEN ("noavx2"),  CPU_ANY_AVX2_FLAGS },
+  { STRING_COMMA_LEN ("noavx512f"), CPU_ANY_AVX512F_FLAGS },
+  { STRING_COMMA_LEN ("noavx512cd"), CPU_ANY_AVX512CD_FLAGS },
+  { STRING_COMMA_LEN ("noavx512er"), CPU_ANY_AVX512ER_FLAGS },
+  { STRING_COMMA_LEN ("noavx512pf"), CPU_ANY_AVX512PF_FLAGS },
+  { STRING_COMMA_LEN ("noavx512dq"), CPU_ANY_AVX512DQ_FLAGS },
+  { STRING_COMMA_LEN ("noavx512bw"), CPU_ANY_AVX512BW_FLAGS },
+  { STRING_COMMA_LEN ("noavx512vl"), CPU_ANY_AVX512VL_FLAGS },
+  { STRING_COMMA_LEN ("noavx512ifma"), CPU_ANY_AVX512IFMA_FLAGS },
+  { STRING_COMMA_LEN ("noavx512vbmi"), CPU_ANY_AVX512VBMI_FLAGS },
 };
 
 #ifdef I386COFF
@@ -1527,8 +1565,6 @@ cpu_flags_match (const insn_template *t)
       /* This instruction is available only on some archs.  */
       i386_cpu_flags cpu = cpu_arch_flags;
 
-      cpu.bitfield.cpu64 = 0;
-      cpu.bitfield.cpuno64 = 0;
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
 	{
@@ -1550,6 +1586,21 @@ cpu_flags_match (const insn_template *t)
 			  || cpu.bitfield.cpupclmul)
 			match |= CPU_FLAGS_PCLMUL_MATCH;
 		    }
+		}
+	      else
+		match |= CPU_FLAGS_ARCH_MATCH;
+	    }
+	  else if (x.bitfield.cpuavx512vl)
+	    {
+	      /* Match AVX512VL.  */
+	      if (cpu.bitfield.cpuavx512vl)
+		{
+		  /* Need another match.  */
+		  cpu.bitfield.cpuavx512vl = 0;
+		  if (!cpu_flags_all_zero (&cpu))
+		    match |= CPU_FLAGS_32BIT_MATCH;
+		  else
+		    match |= CPU_FLAGS_ARCH_MATCH;
 		}
 	      else
 		match |= CPU_FLAGS_ARCH_MATCH;
@@ -2368,12 +2419,8 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  break;
 		}
 
-	      if (!cpu_arch[j].negated)
-		flags = cpu_flags_or (cpu_arch_flags,
-				      cpu_arch[j].flags);
-	      else
-		flags = cpu_flags_and_not (cpu_arch_flags,
-					   cpu_arch[j].flags);
+	      flags = cpu_flags_or (cpu_arch_flags,
+				    cpu_arch[j].flags);
 
 	      if (!valid_iamcu_cpu_flags (&flags))
 		as_fatal (_("`%s' isn't valid for Intel MCU"),
@@ -2398,6 +2445,37 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	      return;
 	    }
 	}
+
+      if (*string == '.' && j >= ARRAY_SIZE (cpu_arch))
+	{
+	  /* Disable an ISA entension.  */
+	  for (j = 0; j < ARRAY_SIZE (cpu_noarch); j++)
+	    if (strcmp (string + 1, cpu_noarch [j].name) == 0)
+	      {
+		flags = cpu_flags_and_not (cpu_arch_flags,
+					   cpu_noarch[j].flags);
+		if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+		  {
+		    if (cpu_sub_arch_name)
+		      {
+			char *name = cpu_sub_arch_name;
+			cpu_sub_arch_name = concat (name, string,
+						    (const char *) NULL);
+			free (name);
+		      }
+		    else
+		      cpu_sub_arch_name = xstrdup (string);
+		    cpu_arch_flags = flags;
+		    cpu_arch_isa_flags = flags;
+		  }
+		(void) restore_line_pointer (e);
+		demand_empty_rest_of_line ();
+		return;
+	      }
+
+	  j = ARRAY_SIZE (cpu_arch);
+	}
+
       if (j >= ARRAY_SIZE (cpu_arch))
 	as_bad (_("no such architecture: `%s'"), string);
 
@@ -2511,7 +2589,7 @@ md_begin (void)
 
     /* Setup for loop.  */
     optab = i386_optab;
-    core_optab = (templates *) xmalloc (sizeof (templates));
+    core_optab = XNEW (templates);
     core_optab->start = optab;
 
     while (1)
@@ -2534,7 +2612,7 @@ md_begin (void)
 	      }
 	    if (optab->name == NULL)
 	      break;
-	    core_optab = (templates *) xmalloc (sizeof (templates));
+	    core_optab = XNEW (templates);
 	    core_optab->start = optab;
 	  }
       }
@@ -3459,7 +3537,7 @@ void
 md_assemble (char *line)
 {
   unsigned int j;
-  char mnemonic[MAX_MNEM_SIZE];
+  char mnemonic[MAX_MNEM_SIZE], mnem_suffix;
   const insn_template *t;
 
   /* Initialize globals.  */
@@ -3477,9 +3555,12 @@ md_assemble (char *line)
   line = parse_insn (line, mnemonic);
   if (line == NULL)
     return;
+  mnem_suffix = i.suffix;
 
   line = parse_operands (line, mnemonic);
   this_operand = -1;
+  xfree (i.memop1_string);
+  i.memop1_string = NULL;
   if (line == NULL)
     return;
 
@@ -3520,7 +3601,7 @@ md_assemble (char *line)
      making sure the overlap of the given operands types is consistent
      with the template operand types.  */
 
-  if (!(t = match_template ()))
+  if (!(t = match_template (mnem_suffix)))
     return;
 
   if (sse_check != check_none
@@ -3585,10 +3666,15 @@ md_assemble (char *line)
   if (i.bnd_prefix && !i.tm.opcode_modifier.bndprefixok)
     as_bad (_("expecting valid branch instruction after `bnd'"));
 
-  if (i.tm.cpu_flags.bitfield.cpumpx
-      && flag_code == CODE_64BIT
-      && i.prefix[ADDR_PREFIX])
-    as_bad (_("32-bit address isn't allowed in 64-bit MPX instructions."));
+  if (i.tm.cpu_flags.bitfield.cpumpx)
+    {
+      if (flag_code == CODE_64BIT && i.prefix[ADDR_PREFIX])
+	as_bad (_("32-bit address isn't allowed in 64-bit MPX instructions."));
+      else if (flag_code != CODE_16BIT
+	       ? i.prefix[ADDR_PREFIX]
+	       : i.mem_operands && !i.prefix[ADDR_PREFIX])
+	as_bad (_("16-bit address isn't allowed in MPX instructions"));
+    }
 
   /* Insert BND prefix.  */
   if (add_bnd_prefix
@@ -4644,14 +4730,14 @@ VEX_check_operands (const insn_template *t)
 }
 
 static const insn_template *
-match_template (void)
+match_template (char mnem_suffix)
 {
   /* Points to template once we've found it.  */
   const insn_template *t;
   i386_operand_type overlap0, overlap1, overlap2, overlap3;
   i386_operand_type overlap4;
   unsigned int found_reverse_match;
-  i386_opcode_modifier suffix_check;
+  i386_opcode_modifier suffix_check, mnemsuf_check;
   i386_operand_type operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
   unsigned int j;
@@ -4680,6 +4766,19 @@ match_template (void)
   else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
     suffix_check.no_ldsuf = 1;
 
+  memset (&mnemsuf_check, 0, sizeof (mnemsuf_check));
+  if (intel_syntax)
+    {
+      switch (mnem_suffix)
+	{
+	case BYTE_MNEM_SUFFIX:  mnemsuf_check.no_bsuf = 1; break;
+	case WORD_MNEM_SUFFIX:  mnemsuf_check.no_wsuf = 1; break;
+	case SHORT_MNEM_SUFFIX: mnemsuf_check.no_ssuf = 1; break;
+	case LONG_MNEM_SUFFIX:  mnemsuf_check.no_lsuf = 1; break;
+	case QWORD_MNEM_SUFFIX: mnemsuf_check.no_qsuf = 1; break;
+	}
+    }
+
   /* Must have right number of operands.  */
   i.error = number_of_operands_mismatch;
 
@@ -4707,10 +4806,12 @@ match_template (void)
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)
 	continue;
 
-      /* Check AT&T/Intel syntax.   */
+      /* Check AT&T/Intel syntax and Intel64/AMD64 ISA.   */
       i.error = unsupported_syntax;
       if ((intel_syntax && t->opcode_modifier.attsyntax)
-	  || (!intel_syntax && t->opcode_modifier.intelsyntax))
+	  || (!intel_syntax && t->opcode_modifier.intelsyntax)
+	  || (intel64 && t->opcode_modifier.amd64)
+	  || (!intel64 && t->opcode_modifier.intel64))
 	continue;
 
       /* Check the suffix, except for some instructions in intel mode.  */
@@ -4722,6 +4823,14 @@ match_template (void)
 	      || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
 	      || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf)
 	      || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf)))
+	continue;
+      /* In Intel mode all mnemonic suffixes must be explicitly allowed.  */
+      if ((t->opcode_modifier.no_bsuf && mnemsuf_check.no_bsuf)
+	  || (t->opcode_modifier.no_wsuf && mnemsuf_check.no_wsuf)
+	  || (t->opcode_modifier.no_lsuf && mnemsuf_check.no_lsuf)
+	  || (t->opcode_modifier.no_ssuf && mnemsuf_check.no_ssuf)
+	  || (t->opcode_modifier.no_qsuf && mnemsuf_check.no_qsuf)
+	  || (t->opcode_modifier.no_ldsuf && mnemsuf_check.no_ldsuf))
 	continue;
 
       if (!operand_size_match (t))
@@ -5561,7 +5670,7 @@ check_qword_reg (void)
     /* Warn if the r prefix on a general reg is missing.  */
     else if ((i.types[op].bitfield.reg16
 	      || i.types[op].bitfield.reg32)
-	     && (i.tm.operand_types[op].bitfield.reg32
+	     && (i.tm.operand_types[op].bitfield.reg64
 		 || i.tm.operand_types[op].bitfield.acc))
       {
 	/* Prohibit these changes in the 64bit mode, since the
@@ -7605,7 +7714,7 @@ lex_got (enum bfd_reloc_code_real *rel,
 
 	      /* Allocate and copy string.  The trailing NUL shouldn't
 		 be necessary, but be safe.  */
-	      tmpbuf = (char *) xmalloc (first + second + 2);
+	      tmpbuf = XNEWVEC (char, first + second + 2);
 	      memcpy (tmpbuf, input_line_pointer, first);
 	      if (second != 0 && *past_reloc != ' ')
 		/* Replace the relocation token with ' ', so that
@@ -7713,7 +7822,7 @@ lex_got (enum bfd_reloc_code_real *rel ATTRIBUTE_UNUSED,
 
 	      /* Allocate and copy string.  The trailing NUL shouldn't
 		 be necessary, but be safe.  */
-	      tmpbuf = (char *) xmalloc (first + second + 2);
+	      tmpbuf = XNEWVEC (char, first + second + 2);
 	      memcpy (tmpbuf, input_line_pointer, first);
 	      if (second != 0 && *past_reloc != ' ')
 		/* Replace the relocation token with ' ', so that
@@ -8433,7 +8542,7 @@ i386_index_check (const char *operand_string)
 
       kind = "string address";
 
-      if (current_templates->start->opcode_modifier.w)
+      if (current_templates->start->opcode_modifier.repprefixok)
 	{
 	  i386_operand_type type = current_templates->end[-1].operand_types[0];
 
@@ -8503,6 +8612,23 @@ bad_address:
 			   || i.index_reg->reg_num == RegEiz))
 		      || !i.index_reg->reg_type.bitfield.baseindex)))
 	    goto bad_address;
+
+	  /* bndmk, bndldx, and bndstx have special restrictions. */
+	  if (current_templates->start->base_opcode == 0xf30f1b
+	      || (current_templates->start->base_opcode & ~1) == 0x0f1a)
+	    {
+	      /* They cannot use RIP-relative addressing. */
+	      if (i.base_reg && i.base_reg->reg_num == RegRip)
+		{
+		  as_bad (_("`%s' cannot be used here"), operand_string);
+		  return 0;
+		}
+
+	      /* bndldx and bndstx ignore their scale factor. */
+	      if (current_templates->start->base_opcode != 0xf30f1b
+		  && i.log2_scale_factor)
+		as_warn (_("register scaling is being ignored here"));
+	    }
 	}
       else
 	{
@@ -8581,6 +8707,49 @@ RC_SAE_immediate (const char *imm_start)
   exp->X_op_symbol = (symbolS *) 0;
 
   i.types[this_operand].bitfield.imm8 = 1;
+  return 1;
+}
+
+/* Only string instructions can have a second memory operand, so
+   reduce current_templates to just those if it contains any.  */
+static int
+maybe_adjust_templates (void)
+{
+  const insn_template *t;
+
+  gas_assert (i.mem_operands == 1);
+
+  for (t = current_templates->start; t < current_templates->end; ++t)
+    if (t->opcode_modifier.isstring)
+      break;
+
+  if (t < current_templates->end)
+    {
+      static templates aux_templates;
+      bfd_boolean recheck;
+
+      aux_templates.start = t;
+      for (; t < current_templates->end; ++t)
+	if (!t->opcode_modifier.isstring)
+	  break;
+      aux_templates.end = t;
+
+      /* Determine whether to re-check the first memory operand.  */
+      recheck = (aux_templates.start != current_templates->start
+		 || t != current_templates->end);
+
+      current_templates = &aux_templates;
+
+      if (recheck)
+	{
+	  i.mem_operands = 0;
+	  if (i.memop1_string != NULL
+	      && i386_index_check (i.memop1_string) == 0)
+	    return 0;
+	  i.mem_operands = 1;
+	}
+    }
+
   return 1;
 }
 
@@ -8723,6 +8892,8 @@ i386_att_operand (char *operand_string)
       char *vop_start;
 
     do_memory_reference:
+      if (i.mem_operands == 1 && !maybe_adjust_templates ())
+	return 0;
       if ((i.mem_operands == 1
 	   && !current_templates->start->opcode_modifier.isstring)
 	  || i.mem_operands == 2)
@@ -8900,6 +9071,8 @@ i386_att_operand (char *operand_string)
       if (i386_index_check (operand_string) == 0)
 	return 0;
       i.types[this_operand].bitfield.mem = 1;
+      if (i.mem_operands == 0)
+	i.memop1_string = xstrdup (operand_string);
       i.mem_operands++;
     }
   else
@@ -9339,11 +9512,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	fixP->fx_done = 0;
 	return;
 
-      case BFD_RELOC_386_GOT32:
-      case BFD_RELOC_X86_64_GOT32:
-	value = 0; /* Fully resolved at runtime.  No addend.  */
-	break;
-
       case BFD_RELOC_VTABLE_INHERIT:
       case BFD_RELOC_VTABLE_ENTRY:
 	fixP->fx_done = 0;
@@ -9486,17 +9654,20 @@ parse_real_register (char *reg_string, char **end_op)
       && !cpu_arch_flags.bitfield.cpu387)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpummx)
+  if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpuregmmx)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.regxmm && !cpu_arch_flags.bitfield.cpusse)
+  if (r->reg_type.bitfield.regxmm && !cpu_arch_flags.bitfield.cpuregxmm)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.regymm && !cpu_arch_flags.bitfield.cpuavx)
+  if (r->reg_type.bitfield.regymm && !cpu_arch_flags.bitfield.cpuregymm)
     return (const reg_entry *) NULL;
 
-  if ((r->reg_type.bitfield.regzmm || r->reg_type.bitfield.regmask)
-       && !cpu_arch_flags.bitfield.cpuavx512f)
+  if (r->reg_type.bitfield.regzmm && !cpu_arch_flags.bitfield.cpuregzmm)
+    return (const reg_entry *) NULL;
+
+  if (r->reg_type.bitfield.regmask
+      && !cpu_arch_flags.bitfield.cpuregmask)
     return (const reg_entry *) NULL;
 
   /* Don't allow fake index register unless allow_index_reg isn't 0. */
@@ -9703,7 +9874,7 @@ int
 md_parse_option (int c, const char *arg)
 {
   unsigned int j;
-  char *arch, *next;
+  char *arch, *next, *saved;
 
   switch (c)
     {
@@ -9795,7 +9966,7 @@ md_parse_option (int c, const char *arg)
 	char *n, *t;
 	const char *s;
 
-	n = (char *) xmalloc (strlen (i386_comment_chars) + 1);
+	n = XNEWVEC (char, strlen (i386_comment_chars) + 1);
 	t = n;
 	for (s = i386_comment_chars; *s != '\0'; s++)
 	  if (*s != '/')
@@ -9807,7 +9978,11 @@ md_parse_option (int c, const char *arg)
       break;
 
     case OPTION_MARCH:
-      arch = xstrdup (arg);
+      saved = xstrdup (arg);
+      arch = saved;
+      /* Allow -march=+nosse.  */
+      if (*arch == '+')
+	arch++;
       do
 	{
 	  if (*arch == '.')
@@ -9841,12 +10016,8 @@ md_parse_option (int c, const char *arg)
 		  /* ISA entension.  */
 		  i386_cpu_flags flags;
 
-		  if (!cpu_arch[j].negated)
-		    flags = cpu_flags_or (cpu_arch_flags,
-					  cpu_arch[j].flags);
-		  else
-		    flags = cpu_flags_and_not (cpu_arch_flags,
-					       cpu_arch[j].flags);
+		  flags = cpu_flags_or (cpu_arch_flags,
+					cpu_arch[j].flags);
 
 		  if (!valid_iamcu_cpu_flags (&flags))
 		    as_fatal (_("`%s' isn't valid for Intel MCU"), arch);
@@ -9870,11 +10041,43 @@ md_parse_option (int c, const char *arg)
 	    }
 
 	  if (j >= ARRAY_SIZE (cpu_arch))
+	    {
+	      /* Disable an ISA entension.  */
+	      for (j = 0; j < ARRAY_SIZE (cpu_noarch); j++)
+		if (strcmp (arch, cpu_noarch [j].name) == 0)
+		  {
+		    i386_cpu_flags flags;
+
+		    flags = cpu_flags_and_not (cpu_arch_flags,
+					       cpu_noarch[j].flags);
+		    if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+		      {
+			if (cpu_sub_arch_name)
+			  {
+			    char *name = cpu_sub_arch_name;
+			    cpu_sub_arch_name = concat (arch,
+							(const char *) NULL);
+			    free (name);
+			  }
+			else
+			  cpu_sub_arch_name = xstrdup (arch);
+			cpu_arch_flags = flags;
+			cpu_arch_isa_flags = flags;
+		      }
+		    break;
+		  }
+
+	      if (j >= ARRAY_SIZE (cpu_noarch))
+		j = ARRAY_SIZE (cpu_arch);
+	    }
+
+	  if (j >= ARRAY_SIZE (cpu_arch))
 	    as_fatal (_("invalid -march= option: `%s'"), arg);
 
 	  arch = next;
 	}
-      while (next != NULL );
+      while (next != NULL);
+      free (saved);
       break;
 
     case OPTION_MTUNE:
@@ -10030,17 +10233,11 @@ md_parse_option (int c, const char *arg)
       break;
 
     case OPTION_MAMD64:
-      cpu_arch_flags.bitfield.cpuamd64 = 1;
-      cpu_arch_flags.bitfield.cpuintel64 = 0;
-      cpu_arch_isa_flags.bitfield.cpuamd64 = 1;
-      cpu_arch_isa_flags.bitfield.cpuintel64 = 0;
+      intel64 = 0;
       break;
 
     case OPTION_MINTEL64:
-      cpu_arch_flags.bitfield.cpuamd64 = 0;
-      cpu_arch_flags.bitfield.cpuintel64 = 1;
-      cpu_arch_isa_flags.bitfield.cpuamd64 = 0;
-      cpu_arch_isa_flags.bitfield.cpuintel64 = 1;
+      intel64 = 1;
       break;
 
     default:
@@ -10051,6 +10248,44 @@ md_parse_option (int c, const char *arg)
 
 #define MESSAGE_TEMPLATE \
 "                                                                                "
+
+static char *
+output_message (FILE *stream, char *p, char *message, char *start,
+		int *left_p, const char *name, int len)
+{
+  int size = sizeof (MESSAGE_TEMPLATE);
+  int left = *left_p;
+
+  /* Reserve 2 spaces for ", " or ",\0" */
+  left -= len + 2;
+
+  /* Check if there is any room.  */
+  if (left >= 0)
+    {
+      if (p != start)
+	{
+	  *p++ = ',';
+	  *p++ = ' ';
+	}
+      p = mempcpy (p, name, len);
+    }
+  else
+    {
+      /* Output the current message now and start a new one.  */
+      *p++ = ',';
+      *p = '\0';
+      fprintf (stream, "%s\n", message);
+      p = start;
+      left = size - (start - message) - len - 2;
+
+      gas_assert (left >= 0);
+
+      p = mempcpy (p, name, len);
+    }
+
+  *left_p = left;
+  return p;
+}
 
 static void
 show_arch (FILE *stream, int ext, int check)
@@ -10096,33 +10331,18 @@ show_arch (FILE *stream, int ext, int check)
 	  continue;
 	}
 
-      /* Reserve 2 spaces for ", " or ",\0" */
-      left -= len + 2;
-
-      /* Check if there is any room.  */
-      if (left >= 0)
-	{
-	  if (p != start)
-	    {
-	      *p++ = ',';
-	      *p++ = ' ';
-	    }
-	  p = mempcpy (p, name, len);
-	}
-      else
-	{
-	  /* Output the current message now and start a new one.  */
-	  *p++ = ',';
-	  *p = '\0';
-	  fprintf (stream, "%s\n", message);
-	  p = start;
-	  left = size - (start - message) - len - 2;
-
-	  gas_assert (left >= 0);
-
-	  p = mempcpy (p, name, len);
-	}
+      p = output_message (stream, p, message, start, &left, name, len);
     }
+
+  /* Display disabled extensions.  */
+  if (ext)
+    for (j = 0; j < ARRAY_SIZE (cpu_noarch); j++)
+      {
+	name = cpu_noarch [j].name;
+	len = cpu_noarch [j].len;
+	p = output_message (stream, p, message, start, &left, name,
+			    len);
+      }
 
   *p = '\0';
   fprintf (stream, "%s\n", message);
@@ -10601,8 +10821,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       code = BFD_RELOC_X86_64_GOTPC64;
     }
 
-  rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;

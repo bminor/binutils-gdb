@@ -198,7 +198,7 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
 
 /* Helper for link_callbacks callbacks vector.  */
 
-static bfd_boolean
+static void
 link_callbacks_multiple_definition (struct bfd_link_info *link_info,
 				    struct bfd_link_hash_entry *h, bfd *nbfd,
 				    asection *nsec, bfd_vma nval)
@@ -206,15 +206,14 @@ link_callbacks_multiple_definition (struct bfd_link_info *link_info,
   bfd *abfd = link_info->input_bfds;
 
   if (link_info->allow_multiple_definition)
-    return TRUE;
+    return;
   warning (_("Compiled module \"%s\": multiple symbol definitions: %s"),
 	   bfd_get_filename (abfd), h->root.string);
-  return FALSE;
 }
 
 /* Helper for link_callbacks callbacks vector.  */
 
-static bfd_boolean
+static void
 link_callbacks_warning (struct bfd_link_info *link_info, const char *xwarning,
                         const char *symbol, bfd *abfd, asection *section,
 			bfd_vma address)
@@ -222,13 +221,11 @@ link_callbacks_warning (struct bfd_link_info *link_info, const char *xwarning,
   warning (_("Compiled module \"%s\" section \"%s\": warning: %s"),
 	   bfd_get_filename (abfd), bfd_get_section_name (abfd, section),
 	   xwarning);
-  /* Maybe permit running as a module?  */
-  return FALSE;
 }
 
 /* Helper for link_callbacks callbacks vector.  */
 
-static bfd_boolean
+static void
 link_callbacks_undefined_symbol (struct bfd_link_info *link_info,
 				 const char *name, bfd *abfd, asection *section,
 				 bfd_vma address, bfd_boolean is_fatal)
@@ -236,25 +233,22 @@ link_callbacks_undefined_symbol (struct bfd_link_info *link_info,
   warning (_("Cannot resolve relocation to \"%s\" "
 	     "from compiled module \"%s\" section \"%s\"."),
 	   name, bfd_get_filename (abfd), bfd_get_section_name (abfd, section));
-  return FALSE;
 }
 
 /* Helper for link_callbacks callbacks vector.  */
 
-static bfd_boolean
+static void
 link_callbacks_reloc_overflow (struct bfd_link_info *link_info,
 			       struct bfd_link_hash_entry *entry,
 			       const char *name, const char *reloc_name,
 			       bfd_vma addend, bfd *abfd, asection *section,
 			       bfd_vma address)
 {
-  /* TRUE is required for intra-module relocations.  */
-  return TRUE;
 }
 
 /* Helper for link_callbacks callbacks vector.  */
 
-static bfd_boolean
+static void
 link_callbacks_reloc_dangerous (struct bfd_link_info *link_info,
 				const char *message, bfd *abfd,
 				asection *section, bfd_vma address)
@@ -263,12 +257,11 @@ link_callbacks_reloc_dangerous (struct bfd_link_info *link_info,
 	     "relocation: %s\n"),
 	   bfd_get_filename (abfd), bfd_get_section_name (abfd, section),
 	   message);
-  return FALSE;
 }
 
 /* Helper for link_callbacks callbacks vector.  */
 
-static bfd_boolean
+static void
 link_callbacks_unattached_reloc (struct bfd_link_info *link_info,
 				 const char *name, bfd *abfd, asection *section,
 				 bfd_vma address)
@@ -277,7 +270,6 @@ link_callbacks_unattached_reloc (struct bfd_link_info *link_info,
 	     "relocation: %s\n"),
 	   bfd_get_filename (abfd), bfd_get_section_name (abfd, section),
 	   name);
-  return FALSE;
 }
 
 /* Helper for link_callbacks callbacks vector.  */

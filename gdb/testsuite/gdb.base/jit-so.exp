@@ -68,7 +68,7 @@ proc one_jit_test {count match_str} {
 	global verbose testfile srcfile2 binfile2 binfile2_dlopen solib_binfile_target solib_binfile_test_msg
 
 	clean_restart $testfile
-	gdb_load_shlibs $binfile2
+	gdb_load_shlib $binfile2
 
 	# This is just to help debugging when things fail
 	if {$verbose > 0} {

@@ -1359,7 +1359,7 @@ proc default_gdb_exit {} {
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global verbose
-    global gdb_spawn_id
+    global gdb_spawn_id inferior_spawn_id
     global inotify_log_file
 
     gdb_stop_suppressing_tests
@@ -1400,6 +1400,7 @@ proc default_gdb_exit {} {
 	remote_close host
     }
     unset gdb_spawn_id
+    unset inferior_spawn_id
 }
 
 # Load a file into the debugger.
@@ -1733,6 +1734,11 @@ proc skip_d_tests {} {
     return 0
 }
 
+# Return 1 to skip Rust tests, 0 to try them.
+proc skip_rust_tests {} {
+    return [expr {![isnative]}]
+}
+
 # Return a 1 for configurations that do not support Python scripting.
 # PROMPT_REGEXP is the expected prompt.
 
@@ -2060,6 +2066,38 @@ proc with_target_charset { target_charset body } {
     set code [catch {uplevel 1 $body} result]
 
     gdb_test_no_output "set target-charset $saved" ""
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
+# Switch the default spawn id to SPAWN_ID, so that gdb_test,
+# mi_gdb_test etc. default to using it.
+
+proc switch_gdb_spawn_id {spawn_id} {
+    global gdb_spawn_id
+    global board board_info
+
+    set gdb_spawn_id $spawn_id
+    set board [host_info name]
+    set board_info($board,fileid) $spawn_id
+}
+
+# Run BODY with SPAWN_ID as current spawn id.
+
+proc with_spawn_id { spawn_id body } {
+    global gdb_spawn_id
+
+    set saved_spawn_id $gdb_spawn_id
+    switch_gdb_spawn_id $spawn_id
+
+    set code [catch {uplevel 1 $body} result]
+
+    switch_gdb_spawn_id $saved_spawn_id
 
     if {$code == 1} {
 	global errorInfo errorCode
@@ -3051,6 +3089,26 @@ proc gdb_is_target_remote {} {
     global gdb_prompt
 
     return [gdb_is_target_remote_prompt "$gdb_prompt $"]
+}
+
+# Return the effective value of use_gdb_stub.
+#
+# If the use_gdb_stub global has been set (it is set when the gdb process is
+# spawned), return that.  Otherwise, return the value of the use_gdb_stub
+# property from the board file.
+#
+# This is the preferred way of checking use_gdb_stub, since it allows to check
+# the value before the gdb has been spawned and it will return the correct value
+# even when it was overriden by the test.
+
+proc use_gdb_stub {} {
+  global use_gdb_stub
+
+  if [info exists use_gdb_stub] {
+     return $use_gdb_stub
+  }
+
+  return [target_info exists use_gdb_stub]
 }
 
 # Return 1 if the current remote target is an instance of our GDBserver, 0
@@ -4229,14 +4287,12 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
     }
 }
 
-# gdb_load_shlibs LIB...
+# gdb_load_shlib LIB...
 #
-# Copy the listed libraries to the target.
+# Copy the listed library to the target.
 
-proc gdb_load_shlibs { args } {
-    foreach file $args {
-	gdb_remote_download target [shlib_target_file $file]
-    }
+proc gdb_load_shlib { file } {
+    set dest [gdb_remote_download target [shlib_target_file $file]]
 
     if {[is_remote target]} {
 	# If the target is remote, we need to tell gdb where to find the
@@ -4245,8 +4301,10 @@ proc gdb_load_shlibs { args } {
 	# We could set this even when not testing remotely, but a user
 	# generally won't set it unless necessary.  In order to make the tests
 	# more like the real-life scenarios, we don't set it for local testing.
-	gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "" ""
+	gdb_test "set solib-search-path [file dirname $file]" "" ""
     }
+
+    return $dest
 }
 
 #
@@ -5238,6 +5296,16 @@ proc build_executable_from_specs {testname executable options args} {
 	    }
 	}
 	set ret [$func $sources_path "${binfile}" $options]
+    } elseif {[lsearch -exact $options rust] != -1} {
+	set sources_path {}
+	foreach {s local_options} $args {
+	    if { [regexp "^/" "$s"] } then {
+		lappend sources_path "$s"
+	    } else {
+		lappend sources_path "$srcdir/$subdir/$s"
+	    }
+	}
+	set ret [gdb_compile_rust $sources_path "${binfile}" $options]
     } else {
 	set objects {}
 	set i 0
@@ -5367,18 +5435,23 @@ proc get_integer_valueof { exp default } {
     return ${val}
 }
 
-proc get_hexadecimal_valueof { exp default } {
+# Retrieve the value of EXP in the inferior, as an hexadecimal value
+# (using "print /x").  DEFAULT is used as fallback if print fails.
+# TEST is the test message to use.  If can be ommitted, in which case
+# a test message is built from EXP.
+
+proc get_hexadecimal_valueof { exp default {test ""} } {
     global gdb_prompt
-    send_gdb "print /x ${exp}\n"
-    set test "get hexadecimal valueof \"${exp}\""
-    gdb_expect {
+
+    if {$test == ""} {
+	set test "get hexadecimal valueof \"${exp}\""
+    }
+
+    set val ${default}
+    gdb_test_multiple "print /x ${exp}" $test {
 	-re "\\$\[0-9\]* = (0x\[0-9a-zA-Z\]+).*$gdb_prompt $" {
 	    set val $expect_out(1,string)
 	    pass "$test"
-	}
-	timeout {
-	    set val ${default}
-	    fail "$test (timeout)"
 	}
     }
     return ${val}

@@ -1859,17 +1859,7 @@ static relax_info_t relax_table[] =
         {0, 0, 0, 0}
       } /* BR_RANGE_U4G */
     }						/* relax_fixup */
-  },
-  {
-    NULL, 					/* opcode */
-    0,						/* br_range */
-    {{0, 0, 0, FALSE}}, 			/* cond_field */
-    {{0}},					/* relax_code_seq */
-    {{{0, 0, 0, FALSE}}},			/* relax_code_condition */
-    {0}, 					/* relax_code_size */
-    {0}, 					/* relax_branch_isize */
-    {{{0, 0, 0, 0}}},				/* relax_fixup */
-  },
+  }
 };
 
 /* GAS definitions for command-line options.  */
@@ -3193,7 +3183,7 @@ nds32_parse_option (int c, const char *arg)
 {
   struct nds32_parse_option_table *coarse_tune;
   struct nds32_set_option_table *fine_tune;
-  char *ptr_arg = NULL;
+  const char *ptr_arg = NULL;
 
   switch (c)
     {
@@ -3709,14 +3699,14 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
   relocs = hash_find (nds32_hint_hash, name);
   if (relocs == NULL)
     {
-      relocs = malloc (sizeof (struct nds32_relocs_pattern));
+      relocs = XNEW (struct nds32_relocs_pattern);
       hash_insert (nds32_hint_hash, name, relocs);
     }
   else
     {
       while (relocs->next)
 	relocs=relocs->next;
-      relocs->next = malloc (sizeof (struct nds32_relocs_pattern));
+      relocs->next = XNEW (struct nds32_relocs_pattern);
       relocs = relocs->next;
     }
 
@@ -3729,7 +3719,7 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
   /* It has to build this list because there are maybe more than one
      instructions relative to the same instruction.  It to connect to
      next instruction after md_assemble.  */
-  new = malloc (sizeof (struct nds32_relocs_group));
+  new = XNEW (struct nds32_relocs_group);
   new->pattern = relocs;
   new->next = NULL;
   group = nds32_relax_hint_current;
@@ -3983,7 +3973,7 @@ void
 md_begin (void)
 {
   struct nds32_keyword *k;
-  relax_info_t *relax_info;
+  unsigned int i;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, nds32_baseline);
 
@@ -3998,8 +3988,9 @@ md_begin (void)
 
   /* Initial branch hash table.  */
   nds32_relax_info_hash = hash_new ();
-  for (relax_info = relax_table; relax_info->opcode; relax_info++)
-    hash_insert (nds32_relax_info_hash, relax_info->opcode, relax_info);
+  for (i = 0; i < ARRAY_SIZE (relax_table); i++)
+    hash_insert (nds32_relax_info_hash, relax_table[i].opcode,
+		 &relax_table[i]);
 
   /* Initial relax hint hash table.  */
   nds32_hint_hash = hash_new ();
@@ -5610,7 +5601,7 @@ nds32_get_align (addressT address, int align)
 {
   addressT mask, new_address;
 
-  mask = ~((~0) << align);
+  mask = ~((~0U) << align);
   new_address = (address + mask) & (~mask);
   return (new_address - address);
 }
@@ -6602,9 +6593,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
 

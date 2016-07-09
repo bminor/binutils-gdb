@@ -59,7 +59,7 @@ if { [gdb_compile_shlib ${srcdir}/${subdir}/$libsrc $lib_so $lib_opts] != ""
 # Start with a fresh gdb.
 
 clean_restart $executable
-gdb_load_shlibs ${lib_so}
+gdb_load_shlib ${lib_so}
 
 if ![runto_main] then {
     fail "Can't run to main"

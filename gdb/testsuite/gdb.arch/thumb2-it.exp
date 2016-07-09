@@ -20,9 +20,7 @@ if {![istarget arm*-*eabi*]} then {
     return
 }
 
-set testfile "thumb2-it"
-set srcfile ${testfile}.S
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .S
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug] != "" } {
     untested thumb2-it.exp

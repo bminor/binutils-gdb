@@ -974,7 +974,6 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
 				 int section,
 				 struct objfile *objfile)
 {
-  struct obj_section *obj_section;
   struct msym_bunch *newobj;
   struct minimal_symbol *msymbol;
 

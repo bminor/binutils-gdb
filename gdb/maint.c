@@ -41,6 +41,7 @@
 #include "top.h"
 #include "timeval-utils.h"
 #include "maint.h"
+#include "selftest.h"
 
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
@@ -958,7 +959,6 @@ static void
 set_per_command_cmd (char *args, int from_tty)
 {
   struct cmd_list_element *list;
-  size_t length;
   int val;
 
   val = parse_cli_boolean_value (args);
@@ -981,6 +981,16 @@ show_per_command_cmd (char *args, int from_tty)
 {
   cmd_show_list (per_command_showlist, from_tty, "");
 }
+
+
+/* The "maintenance selftest" command.  */
+
+static void
+maintenance_selftest (char *args, int from_tty)
+{
+  run_self_tests ();
+}
+
 
 void
 _initialize_maint_cmds (void)
@@ -1152,6 +1162,13 @@ replacement is optional."), &maintenancelist);
 Undeprecate a command.  Note that this is just in here so the \n\
 testsuite can check the command deprecator. You probably shouldn't use this,\n\
 If you decide you want to use it: maintenance undeprecate 'commandname'"),
+	   &maintenancelist);
+
+  add_cmd ("selftest", class_maintenance, maintenance_selftest, _("\
+Run gdb's unit tests.\n\
+Usage: maintenance selftest\n\
+This will run any unit tests that were built in to gdb.\n\
+gdb will abort if any test fails."),
 	   &maintenancelist);
 
   add_setshow_zinteger_cmd ("watchdog", class_maintenance, &watchdog, _("\

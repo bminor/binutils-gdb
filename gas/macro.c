@@ -404,7 +404,7 @@ get_any_string (size_t idx, sb *in, sb *out)
 	}
       else
 	{
-	  char *br_buf = (char *) xmalloc (1);
+	  char *br_buf = XNEWVEC (char, 1);
 	  char *in_br = br_buf;
 
 	  *in_br = '\0';
@@ -438,7 +438,7 @@ get_any_string (size_t idx, sb *in, sb *out)
 		    --in_br;
 		  else
 		    {
-		      br_buf = (char *) xmalloc (strlen (in_br) + 2);
+		      br_buf = XNEWVEC (char, strlen (in_br) + 2);
 		      strcpy (br_buf + 1, in_br);
 		      free (in_br);
 		      in_br = br_buf;
@@ -842,7 +842,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	    {
 	      /* Sub in the macro invocation number.  */
 
-	      char buffer[10];
+	      char buffer[12];
 	      src++;
 	      sprintf (buffer, "%d", macro_number);
 	      sb_add_string (out, buffer);
@@ -1250,9 +1250,7 @@ check_macro (const char *line, sb *expand,
   if (is_name_ender (*s))
     ++s;
 
-  copy = (char *) xmalloc (s - line + 1);
-  memcpy (copy, line, s - line);
-  copy[s - line] = '\0';
+  copy = xmemdup0 (line, s - line);
   for (cls = copy; *cls != '\0'; cls ++)
     *cls = TOLOWER (*cls);
 
@@ -1289,7 +1287,7 @@ delete_macro (const char *name)
   macro_entry *macro;
 
   len = strlen (name);
-  copy = (char *) xmalloc (len + 1);
+  copy = XNEWVEC (char, len + 1);
   for (i = 0; i < len; ++i)
     copy[i] = TOLOWER (name[i]);
   copy[i] = '\0';

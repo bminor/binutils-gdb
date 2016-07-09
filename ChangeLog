@@ -1,3 +1,27 @@
+2016-06-28  Walter Lee  <walt@tilera.com>
+
+	* configure.ac (tilepro-*-*): Add gdb to noconfigdirs.
+	* configure: Regenerate.
+
+2016-05-28  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.tpl (configure): Depend on m4 files included.
+	* Makefile.in: Regenerate.
+
+2016-05-27  Nick Clifton  <nickc@redhat.com>
+
+	* config.guess (Alpha OSF1): Fix typo introduced during the most
+	recent synchronization update.
+
+2016-05-23  Nick Clifton  <nickc@redhat.com>
+
+	* Import these patches from the gcc mainline:
+
+	2016-05-16  Jakub Sejdak  <jakub.sejdak@phoesys.com>
+
+	* config.guess: Import version 2016-04-02 (newest).
+	* config.sub: Import version 2016-05-10 (newest).
+
 2016-04-19  Nick Clifton  <nickc@redhat.com>
 
 	* Import this patch from the GCC mainline:

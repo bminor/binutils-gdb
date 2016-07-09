@@ -1154,7 +1154,7 @@ keep_going:
     abort ();
 
   /* Write out the instruction.  */
-  dwarf2_emit_insn (0);
+  dwarf2_emit_insn (size);
   if (relaxable && fc > 0)
     {
       /* On a 64-bit host the size of an 'int' is not the same

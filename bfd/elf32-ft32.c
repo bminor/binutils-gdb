@@ -160,7 +160,7 @@ struct ft32_reloc_map
 static const struct ft32_reloc_map ft32_reloc_map [] =
 {
   { BFD_RELOC_NONE,            R_FT32_NONE },
-  { BFD_RELOC_32,              R_FT32_20 },
+  { BFD_RELOC_32,              R_FT32_32 },
   { BFD_RELOC_16,              R_FT32_16 },
   { BFD_RELOC_8,               R_FT32_8 },
   { BFD_RELOC_FT32_10,           R_FT32_10 },
@@ -320,15 +320,14 @@ ft32_elf_relocate_section (bfd *output_bfd,
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      r = info->callbacks->reloc_overflow
+	      (*info->callbacks->reloc_overflow)
 		(info, (h ? &h->root : NULL), name, howto->name,
 		 (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
 	      break;
 
 	    case bfd_reloc_undefined:
-	      r = info->callbacks->undefined_symbol
-		(info, name, input_bfd, input_section, rel->r_offset,
-		 TRUE);
+	      (*info->callbacks->undefined_symbol)
+		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -349,11 +348,8 @@ ft32_elf_relocate_section (bfd *output_bfd,
 	    }
 
 	  if (msg)
-	    r = info->callbacks->warning
-	      (info, msg, name, input_bfd, input_section, rel->r_offset);
-
-	  if (! r)
-	    return FALSE;
+	    (*info->callbacks->warning) (info, msg, name, input_bfd,
+					 input_section, rel->r_offset);
 	}
     }
 

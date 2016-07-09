@@ -158,7 +158,6 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   static char *keywords[] = { "frame", "internal", NULL };
   struct finish_breakpoint_object *self_bpfinish =
       (struct finish_breakpoint_object *) self;
-  int type = bp_breakpoint;
   PyObject *frame_obj = NULL;
   int thread;
   struct frame_info *frame = NULL; /* init for gcc -Wall */
@@ -357,7 +356,6 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b, void *args)
 {
   struct breakpoint *bp_stopped = (struct breakpoint *) args;
   PyObject *py_bp = (PyObject *) b->py_bp_object;
-  struct gdbarch *garch = b->gdbarch ? b->gdbarch : get_current_arch ();
 
   /* Trigger out_of_scope if this is a FinishBreakpoint and its frame is
      not anymore in the current callstack.  */

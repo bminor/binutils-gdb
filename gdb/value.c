@@ -65,10 +65,10 @@ struct internal_function
 struct range
 {
   /* Lowest offset in the range.  */
-  int offset;
+  LONGEST offset;
 
   /* Length of the range.  */
-  int length;
+  LONGEST length;
 };
 
 typedef struct range range_s;
@@ -79,8 +79,8 @@ DEF_VEC_O(range_s);
    [offset2, offset2+len2) overlap.  */
 
 static int
-ranges_overlap (int offset1, int len1,
-		int offset2, int len2)
+ranges_overlap (LONGEST offset1, LONGEST len1,
+		LONGEST offset2, LONGEST len2)
 {
   ULONGEST h, l;
 
@@ -104,10 +104,10 @@ range_lessthan (const range_s *r1, const range_s *r2)
    OFFSET+LENGTH).  */
 
 static int
-ranges_contain (VEC(range_s) *ranges, int offset, int length)
+ranges_contain (VEC(range_s) *ranges, LONGEST offset, LONGEST length)
 {
   range_s what;
-  int i;
+  LONGEST i;
 
   what.offset = offset;
   what.length = length;
@@ -239,15 +239,15 @@ struct value
      the address.  If lval == lval_register, this is a further offset from
      location.address within the registers structure.  Note also the member
      embedded_offset below.  */
-  int offset;
+  LONGEST offset;
 
   /* Only used for bitfields; number of bits contained in them.  */
-  int bitsize;
+  LONGEST bitsize;
 
   /* Only used for bitfields; position of start of field.  For
      gdbarch_bits_big_endian=0 targets, it is the position of the LSB.  For
      gdbarch_bits_big_endian=1 targets, it is the position of the MSB.  */
-  int bitpos;
+  LONGEST bitpos;
 
   /* The number of references to this value.  When a value is created,
      the value chain holds a reference, so REFERENCE_COUNT is 1.  If
@@ -309,8 +309,8 @@ struct value
      `type', and `embedded_offset' is zero, so everything works
      normally.  */
   struct type *enclosing_type;
-  int embedded_offset;
-  int pointed_to_offset;
+  LONGEST embedded_offset;
+  LONGEST pointed_to_offset;
 
   /* Values are stored in a chain, so that they can be deleted easily
      over calls to the inferior.  Values assigned to internal
@@ -349,7 +349,7 @@ get_value_arch (const struct value *value)
 }
 
 int
-value_bits_available (const struct value *value, int offset, int length)
+value_bits_available (const struct value *value, LONGEST offset, LONGEST length)
 {
   gdb_assert (!value->lazy);
 
@@ -357,7 +357,8 @@ value_bits_available (const struct value *value, int offset, int length)
 }
 
 int
-value_bytes_available (const struct value *value, int offset, int length)
+value_bytes_available (const struct value *value,
+		       LONGEST offset, LONGEST length)
 {
   return value_bits_available (value,
 			       offset * TARGET_CHAR_BIT,
@@ -427,7 +428,8 @@ value_entirely_optimized_out (struct value *value)
    OFFSET bits, and extending for the next LENGTH bits.  */
 
 static void
-insert_into_bit_range_vector (VEC(range_s) **vectorp, int offset, int length)
+insert_into_bit_range_vector (VEC(range_s) **vectorp,
+			      LONGEST offset, LONGEST length)
 {
   range_s newr;
   int i;
@@ -592,13 +594,15 @@ insert_into_bit_range_vector (VEC(range_s) **vectorp, int offset, int length)
 }
 
 void
-mark_value_bits_unavailable (struct value *value, int offset, int length)
+mark_value_bits_unavailable (struct value *value,
+			     LONGEST offset, LONGEST length)
 {
   insert_into_bit_range_vector (&value->unavailable, offset, length);
 }
 
 void
-mark_value_bytes_unavailable (struct value *value, int offset, int length)
+mark_value_bytes_unavailable (struct value *value,
+			      LONGEST offset, LONGEST length)
 {
   mark_value_bits_unavailable (value,
 			       offset * TARGET_CHAR_BIT,
@@ -612,7 +616,7 @@ mark_value_bytes_unavailable (struct value *value, int offset, int length)
 
 static int
 find_first_range_overlap (VEC(range_s) *ranges, int pos,
-			  int offset, int length)
+			  LONGEST offset, LONGEST length)
 {
   range_s *r;
   int i;
@@ -748,8 +752,8 @@ struct ranges_and_idx
 static int
 find_first_range_overlap_and_match (struct ranges_and_idx *rp1,
 				    struct ranges_and_idx *rp2,
-				    int offset1, int offset2,
-				    int length, ULONGEST *l, ULONGEST *h)
+				    LONGEST offset1, LONGEST offset2,
+				    LONGEST length, ULONGEST *l, ULONGEST *h)
 {
   rp1->idx = find_first_range_overlap (rp1->ranges, rp1->idx,
 				       offset1, length);
@@ -870,9 +874,9 @@ value_contents_bits_eq (const struct value *val1, int offset1,
 }
 
 int
-value_contents_eq (const struct value *val1, int offset1,
-		   const struct value *val2, int offset2,
-		   int length)
+value_contents_eq (const struct value *val1, LONGEST offset1,
+		   const struct value *val2, LONGEST offset2,
+		   LONGEST length)
 {
   return value_contents_bits_eq (val1, offset1 * TARGET_CHAR_BIT,
 				 val2, offset2 * TARGET_CHAR_BIT,
@@ -1109,35 +1113,35 @@ deprecated_set_value_type (struct value *value, struct type *type)
   value->type = type;
 }
 
-int
+LONGEST
 value_offset (const struct value *value)
 {
   return value->offset;
 }
 void
-set_value_offset (struct value *value, int offset)
+set_value_offset (struct value *value, LONGEST offset)
 {
   value->offset = offset;
 }
 
-int
+LONGEST
 value_bitpos (const struct value *value)
 {
   return value->bitpos;
 }
 void
-set_value_bitpos (struct value *value, int bit)
+set_value_bitpos (struct value *value, LONGEST bit)
 {
   value->bitpos = bit;
 }
 
-int
+LONGEST
 value_bitsize (const struct value *value)
 {
   return value->bitsize;
 }
 void
-set_value_bitsize (struct value *value, int bit)
+set_value_bitsize (struct value *value, LONGEST bit)
 {
   value->bitsize = bit;
 }
@@ -1330,11 +1334,10 @@ value_ranges_copy_adjusted (struct value *dst, int dst_bit_offset,
    DST_OFFSET+LENGTH) range are wholly available.  */
 
 void
-value_contents_copy_raw (struct value *dst, int dst_offset,
-			 struct value *src, int src_offset, int length)
+value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
+			 struct value *src, LONGEST src_offset, LONGEST length)
 {
-  range_s *r;
-  int src_bit_offset, dst_bit_offset, bit_length;
+  LONGEST src_bit_offset, dst_bit_offset, bit_length;
   struct gdbarch *arch = get_value_arch (src);
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
@@ -1378,8 +1381,8 @@ value_contents_copy_raw (struct value *dst, int dst_offset,
    DST_OFFSET+LENGTH) range are wholly available.  */
 
 void
-value_contents_copy (struct value *dst, int dst_offset,
-		     struct value *src, int src_offset, int length)
+value_contents_copy (struct value *dst, LONGEST dst_offset,
+		     struct value *src, LONGEST src_offset, LONGEST length)
 {
   if (src->lazy)
     value_fetch_lazy (src);
@@ -1463,14 +1466,15 @@ mark_value_bytes_optimized_out (struct value *value, int offset, int length)
 /* See value.h.  */
 
 void
-mark_value_bits_optimized_out (struct value *value, int offset, int length)
+mark_value_bits_optimized_out (struct value *value,
+			       LONGEST offset, LONGEST length)
 {
   insert_into_bit_range_vector (&value->optimized_out, offset, length);
 }
 
 int
 value_bits_synthetic_pointer (const struct value *value,
-			      int offset, int length)
+			      LONGEST offset, LONGEST length)
 {
   if (value->lval != lval_computed
       || !value->location.computed.funcs->check_synthetic_pointer)
@@ -1480,26 +1484,26 @@ value_bits_synthetic_pointer (const struct value *value,
 								  length);
 }
 
-int
+LONGEST
 value_embedded_offset (const struct value *value)
 {
   return value->embedded_offset;
 }
 
 void
-set_value_embedded_offset (struct value *value, int val)
+set_value_embedded_offset (struct value *value, LONGEST val)
 {
   value->embedded_offset = val;
 }
 
-int
+LONGEST
 value_pointed_to_offset (const struct value *value)
 {
   return value->pointed_to_offset;
 }
 
 void
-set_value_pointed_to_offset (struct value *value, int val)
+set_value_pointed_to_offset (struct value *value, LONGEST val)
 {
   value->pointed_to_offset = val;
 }
@@ -1541,8 +1545,13 @@ value_address (const struct value *value)
     return 0;
   if (value->parent != NULL)
     return value_address (value->parent) + value->offset;
-  else
-    return value->location.address + value->offset;
+  if (NULL != TYPE_DATA_LOCATION (value_type (value)))
+    {
+      gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (value_type (value)));
+      return TYPE_DATA_LOCATION_ADDR (value_type (value));
+    }
+
+  return value->location.address + value->offset;
 }
 
 CORE_ADDR
@@ -1857,6 +1866,8 @@ void
 set_value_component_location (struct value *component,
 			      const struct value *whole)
 {
+  struct type *type;
+
   gdb_assert (whole->lval != lval_xcallable);
 
   if (whole->lval == lval_internalvar)
@@ -1872,9 +1883,15 @@ set_value_component_location (struct value *component,
       if (funcs->copy_closure)
         component->location.computed.closure = funcs->copy_closure (whole);
     }
+
+  /* If type has a dynamic resolved location property
+     update it's value address.  */
+  type = value_type (whole);
+  if (NULL != TYPE_DATA_LOCATION (type)
+      && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
+    set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
 }
 
-
 /* Access to the value history.  */
 
 /* Record a new value in the value history.
@@ -2359,8 +2376,9 @@ get_internalvar_function (struct internalvar *var,
 }
 
 void
-set_internalvar_component (struct internalvar *var, int offset, int bitpos,
-			   int bitsize, struct value *newval)
+set_internalvar_component (struct internalvar *var,
+			   LONGEST offset, LONGEST bitpos,
+			   LONGEST bitsize, struct value *newval)
 {
   gdb_byte *addr;
   struct gdbarch *arch;
@@ -2427,6 +2445,15 @@ set_internalvar (struct internalvar *var, struct value *val)
 	 call error () until new_data is installed into the var->u to avoid
 	 leaking memory.  */
       release_value (new_data.value);
+
+      /* Internal variables which are created from values with a dynamic
+         location don't need the location property of the origin anymore.
+         The resolved dynamic location is used prior then any other address
+         when accessing the value.
+         If we keep it, we would still refer to the origin value.
+         Remove the location property in case it exist.  */
+      remove_dyn_prop (DYN_PROP_DATA_LOCATION, value_type (new_data.value));
+
       break;
     }
 
@@ -3086,7 +3113,7 @@ set_value_enclosing_type (struct value *val, struct type *new_encl_type)
    FIELDNO says which field.  */
 
 struct value *
-value_primitive_field (struct value *arg1, int offset,
+value_primitive_field (struct value *arg1, LONGEST offset,
 		       int fieldno, struct type *arg_type)
 {
   struct value *v;
@@ -3116,8 +3143,8 @@ value_primitive_field (struct value *arg1, int offset,
 	 bit.  Assume that the address, offset, and embedded offset
 	 are sufficiently aligned.  */
 
-      int bitpos = TYPE_FIELD_BITPOS (arg_type, fieldno);
-      int container_bitsize = TYPE_LENGTH (type) * 8;
+      LONGEST bitpos = TYPE_FIELD_BITPOS (arg_type, fieldno);
+      LONGEST container_bitsize = TYPE_LENGTH (type) * 8;
 
       v = allocate_value_lazy (type);
       v->bitsize = TYPE_FIELD_BITSIZE (arg_type, fieldno);
@@ -3138,7 +3165,7 @@ value_primitive_field (struct value *arg1, int offset,
       /* This field is actually a base subobject, so preserve the
 	 entire object's contents for later references to virtual
 	 bases, etc.  */
-      int boffset;
+      LONGEST boffset;
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
@@ -3167,6 +3194,17 @@ value_primitive_field (struct value *arg1, int offset,
       v->type = type;
       v->offset = value_offset (arg1);
       v->embedded_offset = offset + value_embedded_offset (arg1) + boffset;
+    }
+  else if (NULL != TYPE_DATA_LOCATION (type))
+    {
+      /* Field is a dynamic data member.  */
+
+      gdb_assert (0 == offset);
+      /* We expect an already resolved data location.  */
+      gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (type));
+      /* For dynamic data types defer memory allocation
+         until we actual access the value.  */
+      v = allocate_value_lazy (type);
     }
   else
     {
@@ -3216,7 +3254,7 @@ value_field (struct value *arg1, int fieldno)
 struct value *
 value_fn_field (struct value **arg1p, struct fn_field *f,
 		int j, struct type *type,
-		int offset)
+		LONGEST offset)
 {
   struct value *v;
   struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
@@ -3286,14 +3324,14 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
 static LONGEST
 unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
-		     int bitpos, int bitsize)
+		     LONGEST bitpos, LONGEST bitsize)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (field_type));
   ULONGEST val;
   ULONGEST valmask;
   int lsbcount;
-  int bytes_read;
-  int read_offset;
+  LONGEST bytes_read;
+  LONGEST read_offset;
 
   /* Read the minimum number of bytes required; there may not be
      enough bytes to read an entire ULONGEST.  */
@@ -3342,7 +3380,7 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
 
 int
 unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
-			    int embedded_offset, int fieldno,
+			    LONGEST embedded_offset, int fieldno,
 			    const struct value *val, LONGEST *result)
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
@@ -3385,8 +3423,8 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 
 void
 unpack_value_bitfield (struct value *dest_val,
-		       int bitpos, int bitsize,
-		       const gdb_byte *valaddr, int embedded_offset,
+		       LONGEST bitpos, LONGEST bitsize,
+		       const gdb_byte *valaddr, LONGEST embedded_offset,
 		       const struct value *val)
 {
   enum bfd_endian byte_order;
@@ -3424,7 +3462,7 @@ unpack_value_bitfield (struct value *dest_val,
 struct value *
 value_field_bitfield (struct type *type, int fieldno,
 		      const gdb_byte *valaddr,
-		      int embedded_offset, const struct value *val)
+		      LONGEST embedded_offset, const struct value *val)
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
@@ -3445,12 +3483,12 @@ value_field_bitfield (struct type *type, int fieldno,
 
 void
 modify_field (struct type *type, gdb_byte *addr,
-	      LONGEST fieldval, int bitpos, int bitsize)
+	      LONGEST fieldval, LONGEST bitpos, LONGEST bitsize)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   ULONGEST oword;
   ULONGEST mask = (ULONGEST) -1 >> (8 * sizeof (ULONGEST) - bitsize);
-  int bytesize;
+  LONGEST bytesize;
 
   /* Normalize BITPOS.  */
   addr += bitpos / 8;
@@ -3466,7 +3504,7 @@ modify_field (struct type *type, gdb_byte *addr,
     {
       /* FIXME: would like to include fieldval in the message, but
          we don't have a sprintf_longest.  */
-      warning (_("Value does not fit in %d bits."), bitsize);
+      warning (_("Value does not fit in %s bits."), plongest (bitsize));
 
       /* Truncate it, otherwise adjoining fields may be corrupted.  */
       fieldval &= mask;
@@ -3494,7 +3532,7 @@ void
 pack_long (gdb_byte *buf, struct type *type, LONGEST num)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-  int len;
+  LONGEST len;
 
   type = check_typedef (type);
   len = TYPE_LENGTH (type);
@@ -3528,7 +3566,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
 static void
 pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
 {
-  int len;
+  LONGEST len;
   enum bfd_endian byte_order;
 
   type = check_typedef (type);

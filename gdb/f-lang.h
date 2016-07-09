@@ -37,19 +37,6 @@ extern void f_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 
 /* Language-specific data structures */
 
-/* In F90 subrange expression, either bound could be empty, indicating that
-   its value is by default that of the corresponding bound of the array or
-   string.  So we have four sorts of subrange in F90.  This enumeration type
-   is to identify this.  */
-   
-enum f90_range_type
-  {
-    BOTH_BOUND_DEFAULT,		/* "(:)"  */
-    LOW_BOUND_DEFAULT,		/* "(:high)"  */
-    HIGH_BOUND_DEFAULT,		/* "(low:)"  */
-    NONE_BOUND_DEFAULT		/* "(low:high)"  */
-  };
-
 /* A common block.  */
 
 struct common_block

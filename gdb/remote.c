@@ -4031,6 +4031,25 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   if (packet_support (PACKET_QAllow) != PACKET_DISABLE)
     remote_set_permissions (target);
 
+  /* gdbserver < 7.7 (before its fix from 2013-12-11) did reply to any
+     unknown 'v' packet with string "OK".  "OK" gets interpreted by GDB
+     as a reply to known packet.  For packet "vFile:setfs:" it is an
+     invalid reply and GDB would return error in
+     remote_hostio_set_filesystem, making remote files access impossible.
+     Disable "vFile:setfs:" in such case.  Do not disable other 'v' packets as
+     other "vFile" packets get correctly detected even on gdbserver < 7.7.  */
+  {
+    const char v_mustreplyempty[] = "vMustReplyEmpty";
+
+    putpkt (v_mustreplyempty);
+    getpkt (&rs->buf, &rs->buf_size, 0);
+    if (strcmp (rs->buf, "OK") == 0)
+      remote_protocol_packets[PACKET_vFile_setfs].support = PACKET_DISABLE;
+    else if (strcmp (rs->buf, "") != 0)
+      error (_("Remote replied unexpectedly to '%s': %s"), v_mustreplyempty,
+	     rs->buf);
+  }
+
   /* Next, we possibly activate noack mode.
 
      If the QStartNoAckMode packet configuration is set to AUTO,
@@ -5115,15 +5134,7 @@ remote_detach_1 (const char *args, int from_tty)
   if (!target_has_execution)
     error (_("No process to detach from."));
 
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == NULL)
-	exec_file = "";
-      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-			 target_pid_to_str (pid_to_ptid (pid)));
-      gdb_flush (gdb_stdout);
-    }
+  target_announce_detach (from_tty);
 
   /* Tell the remote target to detach.  */
   remote_detach_pid (pid);
@@ -5905,7 +5916,6 @@ remote_terminal_inferior (struct target_ops *self)
      can go away.  */
   if (!remote_async_terminal_ours_p)
     return;
-  delete_file_handler (input_fd);
   remote_async_terminal_ours_p = 0;
   /* NOTE: At this point we could also register our selves as the
      recipient of all input.  Any characters typed could then be
@@ -5918,7 +5928,6 @@ remote_terminal_ours (struct target_ops *self)
   /* See FIXME in remote_terminal_inferior.  */
   if (remote_async_terminal_ours_p)
     return;
-  add_file_handler (input_fd, stdin_event_handler, 0);
   remote_async_terminal_ours_p = 1;
 }
 
@@ -10143,6 +10152,14 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   return TARGET_XFER_OK;
 }
 
+/* Implementation of to_get_memory_xfer_limit.  */
+
+static ULONGEST
+remote_get_memory_xfer_limit (struct target_ops *ops)
+{
+  return get_memory_write_packet_size ();
+}
+
 static int
 remote_search_memory (struct target_ops* ops,
 		      CORE_ADDR start_addr, ULONGEST search_space_len,
@@ -13056,6 +13073,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_interrupt = remote_interrupt;
   remote_ops.to_pass_ctrlc = remote_pass_ctrlc;
   remote_ops.to_xfer_partial = remote_xfer_partial;
+  remote_ops.to_get_memory_xfer_limit = remote_get_memory_xfer_limit;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;
   remote_ops.to_log_command = serial_log_command;

@@ -35,6 +35,14 @@ struct thread_fsm
 
   /* Whether the FSM is done successfully.  */
   int finished;
+
+  /* The interpreter that issued the execution command that caused
+     this thread to resume.  If the top level interpreter is MI/async,
+     and the execution command was a CLI command (next/step/etc.),
+     we'll want to print stop event output to the MI console channel
+     (the stepped-to line, etc.), as if the user entered the execution
+     command on a real GDB console.  */
+  struct interp *command_interp;
 };
 
 /* The virtual table of a thread_fsm.  */
@@ -49,7 +57,7 @@ struct thread_fsm_ops
   /* Called to clean up target resources after the FSM.  E.g., if the
      FSM created internal breakpoints, this is where they should be
      deleted.  */
-  void (*clean_up) (struct thread_fsm *self);
+  void (*clean_up) (struct thread_fsm *self, struct thread_info *thread);
 
   /* Called after handle_inferior_event decides the target is done
      (that is, after stop_waiting).  The FSM is given a chance to
@@ -58,7 +66,7 @@ struct thread_fsm_ops
      should be re-resumed.  This is a good place to cache target data
      too.  For example, the "finish" command saves the just-finished
      function's return value here.  */
-  int (*should_stop) (struct thread_fsm *self);
+  int (*should_stop) (struct thread_fsm *self, struct thread_info *thread);
 
   /* If this FSM saved a function's return value, you can use this
      method to retrieve it.  Otherwise, this returns NULL.  */
@@ -72,17 +80,20 @@ struct thread_fsm_ops
   int (*should_notify_stop) (struct thread_fsm *self);
 };
 /* Initialize FSM.  */
-extern void thread_fsm_ctor (struct thread_fsm *fsm,
-			     struct thread_fsm_ops *ops);
+extern void thread_fsm_ctor (struct thread_fsm *self,
+			     struct thread_fsm_ops *ops,
+			     struct interp *cmd_interp);
 
 /* Calls the FSM's dtor method, and then frees FSM.  */
 extern void thread_fsm_delete (struct thread_fsm *fsm);
 
 /* Calls the FSM's clean_up method.  */
-extern void thread_fsm_clean_up (struct thread_fsm *fsm);
+extern void thread_fsm_clean_up (struct thread_fsm *fsm,
+				 struct thread_info *thread);
 
 /* Calls the FSM's should_stop method.  */
-extern int thread_fsm_should_stop (struct thread_fsm *fsm);
+extern int thread_fsm_should_stop (struct thread_fsm *fsm,
+				   struct thread_info *thread);
 
 /* Calls the FSM's return_value method.  */
 extern struct return_value_info *

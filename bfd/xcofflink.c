@@ -997,7 +997,7 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
   n->next = NULL;
 
-  if (abfd->my_archive == NULL)
+  if (abfd->my_archive == NULL || bfd_is_thin_archive (abfd->my_archive))
     {
       if (!bfd_xcoff_split_import_path (abfd, abfd->filename,
 					&n->path, &n->file))
@@ -1992,9 +1992,10 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		     sure the XCOFF linker is wholly prepared to
 		     handle them, and that would only be a warning,
 		     not an error.  */
-		  if (! ((*info->callbacks->multiple_definition)
-			 (info, &(*sym_hash)->root, NULL, NULL, (bfd_vma) 0)))
-		    goto error_return;
+		  (*info->callbacks->multiple_definition) (info,
+							   &(*sym_hash)->root,
+							   NULL, NULL,
+							   (bfd_vma) 0);
 		  /* Try not to give this error too many times.  */
 		  (*sym_hash)->flags &= ~XCOFF_MULTIPLY_DEFINED;
 		}
@@ -2291,7 +2292,7 @@ xcoff_link_check_dynamic_ar_symbols (bfd *abfd,
 	{
 	  if (!(*info->callbacks
 		->add_archive_element) (info, abfd, name, subsbfd))
-	    return FALSE;
+	    continue;
 	  *pneeded = TRUE;
 	  return TRUE;
 	}
@@ -2363,7 +2364,7 @@ xcoff_link_check_ar_symbols (bfd *abfd,
 	    {
 	      if (!(*info->callbacks
 		    ->add_archive_element) (info, abfd, name, subsbfd))
-		return FALSE;
+		continue;
 	      *pneeded = TRUE;
 	      return TRUE;
 	    }
@@ -3117,11 +3118,8 @@ bfd_xcoff_import_symbol (bfd *output_bfd,
       if (h->root.type == bfd_link_hash_defined
 	  && (! bfd_is_abs_section (h->root.u.def.section)
 	      || h->root.u.def.value != val))
-	{
-	  if (! ((*info->callbacks->multiple_definition)
-		 (info, &h->root, output_bfd, bfd_abs_section_ptr, val)))
-	    return FALSE;
-	}
+	(*info->callbacks->multiple_definition) (info, &h->root, output_bfd,
+						 bfd_abs_section_ptr, val);
 
       h->root.type = bfd_link_hash_defined;
       h->root.u.def.section = bfd_abs_section_ptr;
@@ -4942,10 +4940,9 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
                               if (name == NULL)
                                 return FALSE;
 
-                              if (!(*flinfo->info->callbacks->unattached_reloc)
-                                  (flinfo->info, name, input_bfd, o,
-                                   irel->r_vaddr))
-                                return FALSE;
+			      (*flinfo->info->callbacks->unattached_reloc)
+				(flinfo->info, name,
+				 input_bfd, o, irel->r_vaddr);
                             }
 			}
 		    }
@@ -5712,9 +5709,8 @@ xcoff_reloc_link_order (bfd *output_bfd,
 				     FALSE, FALSE, TRUE));
   if (h == NULL)
     {
-      if (! ((*flinfo->info->callbacks->unattached_reloc)
-	     (flinfo->info, link_order->u.reloc.p->u.name, NULL, NULL, (bfd_vma) 0)))
-	return FALSE;
+      (*flinfo->info->callbacks->unattached_reloc)
+	(flinfo->info, link_order->u.reloc.p->u.name, NULL, NULL, (bfd_vma) 0);
       return TRUE;
     }
 
@@ -5752,13 +5748,9 @@ xcoff_reloc_link_order (bfd *output_bfd,
 	case bfd_reloc_outofrange:
 	  abort ();
 	case bfd_reloc_overflow:
-	  if (! ((*flinfo->info->callbacks->reloc_overflow)
-		 (flinfo->info, NULL, link_order->u.reloc.p->u.name,
-		  howto->name, addend, NULL, NULL, (bfd_vma) 0)))
-	    {
-	      free (buf);
-	      return FALSE;
-	    }
+	  (*flinfo->info->callbacks->reloc_overflow)
+	    (flinfo->info, NULL, link_order->u.reloc.p->u.name,
+	     howto->name, addend, NULL, NULL, (bfd_vma) 0);
 	  break;
 	}
       ok = bfd_set_section_contents (output_bfd, output_section, (void *) buf,
@@ -6282,10 +6274,9 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      if ((*rel_hash)->indx < 0)
 		{
-		  if (! ((*info->callbacks->unattached_reloc)
-			 (info, (*rel_hash)->root.root.string,
-			  NULL, o, irel->r_vaddr)))
-		    goto error_return;
+		  (*info->callbacks->unattached_reloc)
+		    (info, (*rel_hash)->root.root.string,
+		     NULL, o, irel->r_vaddr);
 		  (*rel_hash)->indx = 0;
 		}
 	      irel->r_symndx = (*rel_hash)->indx;
@@ -6298,10 +6289,9 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	{
 	  if (toc_rel_hash->h->u.toc_indx < 0)
 	    {
-	      if (! ((*info->callbacks->unattached_reloc)
-		     (info, toc_rel_hash->h->root.root.string,
-		      NULL, o, toc_rel_hash->rel->r_vaddr)))
-		goto error_return;
+	      (*info->callbacks->unattached_reloc)
+		(info, toc_rel_hash->h->root.root.string,
+		 NULL, o, toc_rel_hash->rel->r_vaddr);
 	      toc_rel_hash->h->u.toc_indx = 0;
 	    }
 	  toc_rel_hash->rel->r_symndx = toc_rel_hash->h->u.toc_indx;

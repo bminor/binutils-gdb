@@ -101,7 +101,9 @@ struct lwp_info
   /* Arch-specific additions.  */
   struct arch_lwp_info *arch_private;
 
-  /* Next LWP in list.  */
+  /* Previous and next pointers in doubly-linked list of known LWPs,
+     sorted by reverse creation order.  */
+  struct lwp_info *prev;
   struct lwp_info *next;
 };
 

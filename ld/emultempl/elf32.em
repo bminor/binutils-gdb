@@ -105,6 +105,7 @@ gld${EMULATION_NAME}_before_parse (void)
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
   `if test -n "$CALL_NOP_BYTE" ; then echo link_info.call_nop_byte = $CALL_NOP_BYTE; fi`;
   link_info.check_relocs_after_open_input = `if test "x${CHECK_RELOCS_AFTER_OPEN_INPUT}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
+  link_info.relro = DEFAULT_LD_Z_RELRO;
 }
 
 EOF
@@ -1582,7 +1583,6 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	asection *s;
 	bfd_size_type sz;
 	char *msg;
-	bfd_boolean ret;
 
 	if (is->flags.just_syms)
 	  continue;
@@ -1598,11 +1598,9 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	  einfo ("%F%B: Can't read contents of section .gnu.warning: %E\n",
 		 is->the_bfd);
 	msg[sz] = '\0';
-	ret = link_info.callbacks->warning (&link_info, msg,
-					    (const char *) NULL,
-					    is->the_bfd, (asection *) NULL,
-					    (bfd_vma) 0);
-	ASSERT (ret);
+	(*link_info.callbacks->warning) (&link_info, msg,
+					 (const char *) NULL, is->the_bfd,
+					 (asection *) NULL, (bfd_vma) 0);
 	free (msg);
 
 	/* Clobber the section size, so that we don't waste space

@@ -469,7 +469,6 @@ solib_aix_get_section_offsets (struct objfile *objfile,
 {
   struct section_offsets *offsets;
   bfd *abfd = objfile->obfd;
-  int i;
 
   offsets = XCNEWVEC (struct section_offsets, objfile->num_sections);
 

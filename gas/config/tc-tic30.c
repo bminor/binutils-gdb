@@ -380,11 +380,10 @@ tic30_find_parallel_insn (char *current_line, char *next_line)
 	}
       }
   }
-  parallel_insn = malloc (strlen (first_opcode) + strlen (first_operands)
-			  + strlen (second_opcode) + strlen (second_operands) + 8);
-  sprintf (parallel_insn, "q_%s_%s %s | %s",
-	   first_opcode, second_opcode,
-	   first_operands, second_operands);
+
+  parallel_insn = concat ("q_", first_opcode, "_", second_opcode, " ",
+			  first_operands, " | ", second_operands,
+			  (char *) NULL);
   debug ("parallel insn = %s\n", parallel_insn);
   return parallel_insn;
 }

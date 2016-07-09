@@ -250,6 +250,10 @@
 #ifndef bfd_elfNN_bfd_link_hash_table_create
 #define bfd_elfNN_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
 #endif
+#ifndef bfd_elfNN_bfd_copy_link_hash_symbol_type
+#define bfd_elfNN_bfd_copy_link_hash_symbol_type \
+  _bfd_elf_copy_link_hash_symbol_type
+#endif
 #ifndef bfd_elfNN_bfd_link_add_symbols
 #define bfd_elfNN_bfd_link_add_symbols	bfd_elf_link_add_symbols
 #endif
@@ -266,6 +270,10 @@
 #define bfd_elfNN_bfd_link_hash_table_create \
   _bfd_generic_link_hash_table_create
 #endif
+#ifndef bfd_elfNN_bfd_copy_link_hash_symbol_type
+#define bfd_elfNN_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
+#endif
 #ifndef bfd_elfNN_bfd_link_add_symbols
 #define bfd_elfNN_bfd_link_add_symbols	_bfd_generic_link_add_symbols
 #endif
@@ -276,11 +284,6 @@
 
 #ifndef bfd_elfNN_bfd_link_just_syms
 #define bfd_elfNN_bfd_link_just_syms	_bfd_elf_link_just_syms
-#endif
-
-#ifndef bfd_elfNN_bfd_copy_link_hash_symbol_type
-#define bfd_elfNN_bfd_copy_link_hash_symbol_type \
-  _bfd_elf_copy_link_hash_symbol_type
 #endif
 
 #ifndef bfd_elfNN_bfd_link_split_section
@@ -686,8 +689,8 @@
 #define elf_backend_get_reloc_section _bfd_elf_get_reloc_section
 #endif
 
-#ifndef elf_backend_set_special_section_info_and_link
-#define elf_backend_set_special_section_info_and_link NULL
+#ifndef elf_backend_copy_special_section_fields
+#define elf_backend_copy_special_section_fields NULL
 #endif
 
 #ifndef elf_backend_compact_eh_encoding
@@ -797,7 +800,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_is_function_type,
   elf_backend_maybe_function_sym,
   elf_backend_get_reloc_section,
-  elf_backend_set_special_section_info_and_link,
+  elf_backend_copy_special_section_fields,
   elf_backend_link_order_error_handler,
   elf_backend_relplt_name,
   ELF_MACHINE_ALT1,
@@ -923,6 +926,8 @@ const bfd_target TARGET_BIG_SYM =
   BFD_JUMP_TABLE_CORE (bfd_elfNN),
 #ifdef bfd_elfNN_archive_functions
   BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+#elif defined USE_64_BIT_ARCHIVE
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
 #else
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif
@@ -1022,6 +1027,8 @@ const bfd_target TARGET_LITTLE_SYM =
   BFD_JUMP_TABLE_CORE (bfd_elfNN),
 #ifdef bfd_elfNN_archive_functions
   BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+#elif defined USE_64_BIT_ARCHIVE
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
 #else
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif

@@ -1150,11 +1150,9 @@ static struct value *
 mn10300_frame_prev_register (struct frame_info *this_frame,
 		             void **this_prologue_cache, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
   struct mn10300_prologue *p
     = mn10300_analyze_frame_prologue (this_frame, this_prologue_cache);
   CORE_ADDR frame_base = mn10300_frame_base (this_frame, this_prologue_cache);
-  int reg_size = register_size (get_frame_arch (this_frame), regnum);
 
   if (regnum == E_SP_REGNUM)
     return frame_unwind_got_constant (this_frame, regnum, frame_base);

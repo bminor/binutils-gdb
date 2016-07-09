@@ -1,5 +1,5 @@
 #source: nps-1.s
-#as: -mcpu=nps400
+#as: -mcpu=arc700 -mnps400
 #ld: -defsym=foo=0x57f03000
 #objdump: -d
 

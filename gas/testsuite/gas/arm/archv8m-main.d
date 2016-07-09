@@ -1,8 +1,7 @@
 #name: ARM V8-M mainline instructions
 #source: archv8m.s
 #as: -march=armv8-m.main
-#objdump: -dr --prefix-addresses --show-raw-insn
-#skip: *-*-pe *-wince-* *-*-coff
+#objdump: -dr --prefix-addresses --show-raw-insn -M force-thumb
 
 .*: +file format .*arm.*
 
@@ -46,3 +45,4 @@ Disassembly of section .text:
 0+.* <[^>]*> e8c2 1fe0 	stlex	r0, r1, \[r2\]
 0+.* <[^>]*> e8c2 1fc0 	stlexb	r0, r1, \[r2\]
 0+.* <[^>]*> e8c2 1fd0 	stlexh	r0, r1, \[r2\]
+#...

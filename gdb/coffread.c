@@ -563,7 +563,6 @@ static void
 coff_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   struct coff_symfile_info *info;
-  struct dbx_symfile_info *dbxinfo;
   bfd *abfd = objfile->obfd;
   coff_data_type *cdata = coff_data (abfd);
   char *name = bfd_get_filename (abfd);
@@ -576,7 +575,6 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   
   info = (struct coff_symfile_info *) objfile_data (objfile,
 						    coff_objfile_data_key);
-  dbxinfo = DBX_SYMFILE_INFO (objfile);
   symfile_bfd = abfd;		/* Kludge for swap routines.  */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */

@@ -2292,7 +2292,9 @@ Target_sparc<size, big_endian>::Scan::local(
       // apply the link-time value, so we flag the location with
       // an R_SPARC_RELATIVE relocation so the dynamic loader can
       // relocate it easily.
-      if (parameters->options().output_is_position_independent())
+      if (parameters->options().output_is_position_independent()
+	  && ((size == 64 && r_type == elfcpp::R_SPARC_64)
+	      || (size == 32 && r_type == elfcpp::R_SPARC_32)))
 	{
 	  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
@@ -2300,8 +2302,9 @@ Target_sparc<size, big_endian>::Scan::local(
 				       output_section, data_shndx,
 				       reloc.get_r_offset(),
 				       reloc.get_r_addend(), is_ifunc);
+	  break;
 	}
-      break;
+      /* Fall through.  */
 
     case elfcpp::R_SPARC_HIX22:
     case elfcpp::R_SPARC_LOX10:
@@ -2766,8 +2769,8 @@ Target_sparc<size, big_endian>::Scan::global(
 						       reloc.get_r_offset(),
 						       reloc.get_r_addend());
 	      }
-	    else if ((r_type == elfcpp::R_SPARC_32
-		      || r_type == elfcpp::R_SPARC_64)
+	    else if (((size == 64 && r_type == elfcpp::R_SPARC_64)
+		      || (size == 32 && r_type == elfcpp::R_SPARC_32))
 		     && gsym->can_use_relative_reloc(false))
 	      {
 		Reloc_section* rela_dyn = target->rela_dyn_section(layout);

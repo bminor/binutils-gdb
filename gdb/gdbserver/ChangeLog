@@ -1,3 +1,142 @@
+2016-07-01  Pedro Alves  <palves@redhat.com>
+	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-low.c: Change interface to take the target lwp_info
+	pointer directly and return void.  Handle detaching from a zombie
+	thread.
+	(linux_detach_lwp_callback): New function.
+	(linux_detach): Detach from the leader thread after detaching from
+	the clone threads.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_ftrace_insn_reloc_b): Use int64_t
+	for variable new_offset.
+	(aarch64_ftrace_insn_reloc_b_cond): Likewise.
+	(aarch64_ftrace_insn_reloc_cb): Likewise.
+	(aarch64_ftrace_insn_reloc_tb): Likewise.
+	(aarch64_install_fast_tracepoint_jump_pad): Likewise.  Use
+	PRIx64 instead of PRIx32.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (arm_get_syscall_trapinfo): New function.
+	(the_low_target): Install arm_get_syscall_trapinfo.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_get_syscall_trapinfo): New
+	function.
+	(the_low_target): Install aarch64_get_syscall_trapinfo.
+
+2016-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (get_syscall_trapinfo): Remove parameter sysret.
+	Callers updated.
+	* linux-low.h (struct linux_target_ops) <get_syscall_trapinfo>:
+	Remove parameter sysno.
+	* linux-x86-low.c (x86_get_syscall_trapinfo): Remove parameter
+	sysret.
+
+2016-06-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-s390-low.c (s390_emit_eq_goto): Mark function static.
+	(s390_emit_ne_goto): Likewise.
+	(s390_emit_lt_goto): Likewise.
+	(s390_emit_le_goto): Likewise.
+	(s390_emit_gt_goto): Likewise.
+	(s390_emit_ge_goto): Likewise.
+	(s390x_emit_eq_goto): Likewise.
+	(s390x_emit_ne_goto): Likewise.
+	(s390x_emit_lt_goto): Likewise.
+	(s390x_emit_le_goto): Likewise.
+	(s390x_emit_gt_goto): Likewise.
+	(s390x_emit_ge_goto): Likewise.
+	(s390_emit_ops_impl): Mark variable static.
+	(s390x_emit_ops): Likewise.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (handle_extended_wait): Call
+	uninsert_reinsert_breakpoints for the parent process.  Remove
+	reinsert breakpoints from the child process.  Reinsert them to
+	the parent process when vfork is done.
+	* mem-break.c (uninsert_reinsert_breakpoints): New function.
+	(reinsert_reinsert_breakpoints): New function.
+	* mem-break.h (uninsert_reinsert_breakpoints): Declare
+	(reinsert_reinsert_breakpoints): Declare.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (handle_extended_wait): If the parent is doing
+	step-over, remove the reinsert breakpoints from the forked child.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (unsuspend_all_lwps): Declare.
+	(linux_low_filter_event): If thread exited, call finish_step_over.
+	If step-over is finished, unsuspend other threads.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_resume_one_lwp_throw): Assert
+	has_reinsert_breakpoints returns false.
+	* mem-break.c (delete_disabled_breakpoints): Assert
+	bp type isn't reinsert_breakpoint.
+
+2016-06-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (maybe_hw_step): New function.
+	(linux_resume_one_lwp_throw): Call maybe_hw_step.
+	(finish_step_over): Switch current_thread to lwp temporarily,
+	and assert has_reinsert_breakpoints returns true.
+	(proceed_one_lwp): Call maybe_hw_step.
+	* mem-break.c (has_reinsert_breakpoints): New function.
+	* mem-break.h (has_reinsert_breakpoints): Declare.
+
+2016-06-02  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* win32-low.c (win32_create_inferior): Add pointer casts for C++.
+
+2016-05-17  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_stabilize_threads): Call unsuspend_all_lwps
+	instead of find_inferior.
+
+2016-05-05  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (get_next_pcs_read_memory_unsigned_integer):
+	Initialize res to zero.
+
+2016-05-05  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (arm_sigreturn_next_pc): Change type of cpsr
+	to uint32_t.
+
+2016-05-04  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	* spu-low.c (fetch_ppc_register): Cast PowerPC-Linux-specific value
+	used as first ptrace argument to PTRACE_TYPE_ARG1 for C++.
+	(fetch_ppc_memory_1, store_ppc_memory_1): Likewise.
+
+2016-04-28  Par Olsson  <par.olsson@windriver.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tracepoint.c (write_inferior_int8): New function.
+	(cmd_qtenable_disable): Write enable flag using
+	write_inferior_int8.
+
+2016-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (lwp_signal_can_be_delivered): Adjust.
+	(need_step_over_p): Return zero if the LWP has pending signals
+	can be delivered on software single step target.
+
+2016-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (reinsert_raw_breakpoint): If bp->inserted is true
+	return instead of error.
+
 2016-04-22  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch32-low.c (arm_store_gregset): Clear CPSR bits 20

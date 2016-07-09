@@ -524,7 +524,7 @@ frv_insert_vliw_insn (bfd_boolean count)
 
   if (current_vliw_chain == NULL)
     {
-      vliw_chain_entry = (struct vliw_chain *) xmalloc (sizeof (struct vliw_chain));
+      vliw_chain_entry = XNEW (struct vliw_chain);
       vliw_chain_entry->insn_count = 0;
       vliw_chain_entry->insn_list  = NULL;
       vliw_chain_entry->next       = NULL;
@@ -537,7 +537,7 @@ frv_insert_vliw_insn (bfd_boolean count)
 	previous_vliw_chain->next = vliw_chain_entry;
     }
 
-  vliw_insn_list_entry = (struct vliw_insn_list *) xmalloc (sizeof (struct vliw_insn_list));
+  vliw_insn_list_entry = XNEW (struct vliw_insn_list);
   vliw_insn_list_entry->type      = VLIW_GENERIC_TYPE;
   vliw_insn_list_entry->insn      = NULL;
   vliw_insn_list_entry->sym       = NULL;
@@ -678,9 +678,9 @@ frv_tomcat_shuffle (enum vliw_nop_type this_nop_type,
   struct vliw_insn_list *prev_insn = NULL;
   struct vliw_insn_list *curr_insn = vliw_to_split->insn_list;
 
-  struct vliw_chain *double_nop = (struct vliw_chain *) xmalloc (sizeof (struct vliw_chain));
-  struct vliw_chain *single_nop = (struct vliw_chain *) xmalloc (sizeof (struct vliw_chain));
-  struct vliw_chain *second_part = (struct vliw_chain *) xmalloc (sizeof (struct vliw_chain));
+  struct vliw_chain *double_nop = XNEW (struct vliw_chain);
+  struct vliw_chain *single_nop = XNEW (struct vliw_chain);
+  struct vliw_chain *second_part = XNEW (struct vliw_chain);
   struct vliw_chain *curr_vliw = vliw_chain_top;
   struct vliw_chain *prev_vliw = NULL;
 

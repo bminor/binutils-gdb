@@ -236,7 +236,10 @@ and height, and its pagination will be disabled; @pxref{Screen Size}.
 @findex gdb.breakpoints
 @defun gdb.breakpoints ()
 Return a sequence holding all of @value{GDBN}'s breakpoints.
-@xref{Breakpoints In Python}, for more information.
+@xref{Breakpoints In Python}, for more information.  In @value{GDBN}
+version 7.11 and earlier, this function returned @code{None} if there
+were no breakpoints.  This peculiarity was subsequently fixed, and now
+@code{gdb.breakpoints} returns an empty sequence in this case.
 @end defun
 
 @findex gdb.parameter

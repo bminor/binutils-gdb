@@ -39,9 +39,8 @@
    yylex and yyparse (indirectly) both check this.  */
 input_type parser_input;
 
-/* Line number in the current input file.
-   (FIXME Actually, it doesn't appear to get reset for each file?)  */
-unsigned int lineno = 1;
+/* Line number in the current input file.  */
+unsigned int lineno;
 
 /* The string we are currently lexing, or NULL if we are reading a
    file.  */
@@ -460,7 +459,10 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <<EOF>> {
   include_stack_ptr--;
   if (include_stack_ptr == 0)
-    yyterminate ();
+    {
+      lineno = 0;
+      yyterminate ();
+    }
   else
     yy_switch_to_buffer (include_stack[include_stack_ptr]);
 

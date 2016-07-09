@@ -463,8 +463,6 @@ static void
 dtrace_process_dof (asection *sect, struct objfile *objfile,
 		    VEC (probe_p) **probesp, struct dtrace_dof_hdr *dof)
 {
-  bfd *abfd = objfile->obfd;
-  int size = bfd_get_arch_size (abfd) / 8;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct dtrace_dof_sect *section;
   int i;

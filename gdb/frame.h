@@ -826,4 +826,9 @@ extern enum language get_frame_language (struct frame_info *frame);
 
 extern struct frame_info *skip_tailcall_frames (struct frame_info *frame);
 
+/* Return the first frame above FRAME or FRAME of which the code is
+   writable.  */
+
+extern struct frame_info *skip_unwritable_frames (struct frame_info *frame);
+
 #endif /* !defined (FRAME_H)  */

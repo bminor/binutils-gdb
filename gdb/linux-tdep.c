@@ -1757,7 +1757,6 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   int n_fields = 0;
   /* Cleanups.  */
   struct cleanup *c;
-  int i;
 
   gdb_assert (p != NULL);
 
@@ -2278,39 +2277,70 @@ linux_gdb_signal_to_target (struct gdbarch *gdbarch,
   return -1;
 }
 
-/* Rummage through mappings to find a mapping's size.  */
-
-static int
-find_mapping_size (CORE_ADDR vaddr, unsigned long size,
-		   int read, int write, int exec, int modified,
-		   void *data)
-{
-  struct mem_range *range = (struct mem_range *) data;
-
-  if (vaddr == range->start)
-    {
-      range->length = size;
-      return 1;
-    }
-  return 0;
-}
-
 /* Helper for linux_vsyscall_range that does the real work of finding
    the vsyscall's address range.  */
 
 static int
 linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
 {
+  char filename[100];
+  long pid;
+  char *data;
+
+  /* Can't access /proc if debugging a core file.  */
+  if (!target_has_execution)
+    return 0;
+
+  /* We need to know the real target PID to access /proc.  */
+  if (current_inferior ()->fake_pid_p)
+    return 0;
+
   if (target_auxv_search (&current_target, AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
 
-  /* This is installed by linux_init_abi below, so should always be
-     available.  */
-  gdb_assert (gdbarch_find_memory_regions_p (target_gdbarch ()));
+  pid = current_inferior ()->pid;
 
-  range->length = 0;
-  gdbarch_find_memory_regions (gdbarch, find_mapping_size, range);
-  return 1;
+  /* Note that reading /proc/PID/task/PID/maps (1) is much faster than
+     reading /proc/PID/maps (2).  The later identifies thread stacks
+     in the output, which requires scanning every thread in the thread
+     group to check whether a VMA is actually a thread's stack.  With
+     Linux 4.4 on an Intel i7-4810MQ @ 2.80GHz, with an inferior with
+     a few thousand threads, (1) takes a few miliseconds, while (2)
+     takes several seconds.  Also note that "smaps", what we read for
+     determining core dump mappings, is even slower than "maps".  */
+  xsnprintf (filename, sizeof filename, "/proc/%ld/task/%ld/maps", pid, pid);
+  data = target_fileio_read_stralloc (NULL, filename);
+  if (data != NULL)
+    {
+      struct cleanup *cleanup = make_cleanup (xfree, data);
+      char *line;
+      char *saveptr = NULL;
+
+      for (line = strtok_r (data, "\n", &saveptr);
+	   line != NULL;
+	   line = strtok_r (NULL, "\n", &saveptr))
+	{
+	  ULONGEST addr, endaddr;
+	  const char *p = line;
+
+	  addr = strtoulst (p, &p, 16);
+	  if (addr == range->start)
+	    {
+	      if (*p == '-')
+		p++;
+	      endaddr = strtoulst (p, &p, 16);
+	      range->length = endaddr - addr;
+	      do_cleanups (cleanup);
+	      return 1;
+	    }
+	}
+
+      do_cleanups (cleanup);
+    }
+  else
+    warning (_("unable to open /proc file '%s'"), filename);
+
+  return 0;
 }
 
 /* Implementation of the "vsyscall_range" gdbarch hook.  Handles

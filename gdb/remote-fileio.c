@@ -298,64 +298,25 @@ remote_fileio_to_fio_timeval (struct timeval *tv, struct fio_timeval *ftv)
   remote_fileio_to_fio_long (tv->tv_usec, ftv->ftv_usec);
 }
 
-static int remote_fio_ctrl_c_flag = 0;
+/* The quit handler originally installed.  */
+static quit_handler_ftype *remote_fileio_o_quit_handler;
 
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-static struct sigaction remote_fio_sa;
-static struct sigaction remote_fio_osa;
-#else
-static void (*remote_fio_ofunc)(int);
-#endif
+/* What to do on a QUIT call while handling a file I/O request.  We
+   throw a quit exception, which is caught by remote_fileio_request
+   and translated to an EINTR reply back to the target.  */
 
 static void
-remote_fileio_sig_init (void)
+remote_fileio_quit_handler (void)
 {
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-  remote_fio_sa.sa_handler = SIG_IGN;
-  sigemptyset (&remote_fio_sa.sa_mask);
-  remote_fio_sa.sa_flags = 0;
-  sigaction (SIGINT, &remote_fio_sa, &remote_fio_osa);
-#else
-  remote_fio_ofunc = signal (SIGINT, SIG_IGN);
-#endif
-}
-
-static void
-remote_fileio_sig_set (void (*sigint_func)(int))
-{
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-  remote_fio_sa.sa_handler = sigint_func;
-  sigemptyset (&remote_fio_sa.sa_mask);
-  remote_fio_sa.sa_flags = 0;
-  sigaction (SIGINT, &remote_fio_sa, NULL);
-#else
-  signal (SIGINT, sigint_func);
-#endif
-}
-
-static void
-remote_fileio_sig_exit (void)
-{
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-  sigaction (SIGINT, &remote_fio_osa, NULL);
-#else
-  signal (SIGINT, remote_fio_ofunc);
-#endif
-}
-
-static void
-remote_fileio_ctrl_c_signal_handler (int signo)
-{
-  remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
-  remote_fio_ctrl_c_flag = 1;
+  quit ();
 }
 
 static void
 remote_fileio_reply (int retcode, int error)
 {
   char buf[32];
+  int ctrl_c = check_quit_flag ();
 
-  remote_fileio_sig_set (SIG_IGN);
   strcpy (buf, "F");
   if (retcode < 0)
     {
@@ -363,9 +324,9 @@ remote_fileio_reply (int retcode, int error)
       retcode = -retcode;
     }
   sprintf (buf + strlen (buf), "%x", retcode);
-  if (error || remote_fio_ctrl_c_flag)
+  if (error || ctrl_c)
     {
-      if (error && remote_fio_ctrl_c_flag)
+      if (error && ctrl_c)
         error = FILEIO_EINTR;
       if (error < 0)
         {
@@ -373,11 +334,10 @@ remote_fileio_reply (int retcode, int error)
 	  error = -error;
 	}
       sprintf (buf + strlen (buf), ",%x", error);
-      if (remote_fio_ctrl_c_flag)
+      if (ctrl_c)
         strcat (buf, ",C");
     }
-  remote_fio_ctrl_c_flag = 0;
-  remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
+  quit_handler = remote_fileio_o_quit_handler;
   putpkt (buf);
 }
 
@@ -1164,7 +1124,7 @@ do_remote_fileio_request (struct ui_out *uiout, void *buf_arg)
   char *c;
   int idx;
 
-  remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
+  quit_handler = remote_fileio_quit_handler;
 
   c = strchr (++buf, ',');
   if (c)
@@ -1211,20 +1171,22 @@ remote_fileio_request (char *buf, int ctrlc_pending_p)
 {
   int ex;
 
-  remote_fileio_sig_init ();
+  /* Save the previous quit handler, so we can restore it.  No need
+     for a cleanup since we catch all exceptions below.  Note that the
+     quit handler is also restored by remote_fileio_reply just before
+     pushing a packet.  */
+  remote_fileio_o_quit_handler = quit_handler;
 
   if (ctrlc_pending_p)
     {
       /* If the target hasn't responded to the Ctrl-C sent
 	 asynchronously earlier, take this opportunity to send the
 	 Ctrl-C synchronously.  */
-      remote_fio_ctrl_c_flag = 1;
+      set_quit_flag ();
       remote_fileio_reply (-1, FILEIO_EINTR);
     }
   else
     {
-      remote_fio_ctrl_c_flag = 0;
-
       ex = catch_exceptions (current_uiout,
 			     do_remote_fileio_request, (void *)buf,
 			     RETURN_MASK_ALL);
@@ -1241,7 +1203,7 @@ remote_fileio_request (char *buf, int ctrlc_pending_p)
 	}
     }
 
-  remote_fileio_sig_exit ();
+  quit_handler = remote_fileio_o_quit_handler;
 }
 
 

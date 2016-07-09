@@ -73,9 +73,8 @@ proc standard_ada_testfile {base_file {dir ""}} {
     } else {
 	set testdir $dir
     }
-    set testfile $testdir/$base_file
-    set srcfile $srcdir/$subdir/$testfile.adb
-    set binfile [standard_output_file $testfile]
 
-    file mkdir [standard_output_file $testdir]
+    set testfile $base_file
+    set srcfile $srcdir/$subdir/$testdir/$testfile.adb
+    set binfile [standard_output_file $testfile]
 }

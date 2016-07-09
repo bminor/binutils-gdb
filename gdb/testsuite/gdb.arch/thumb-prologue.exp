@@ -20,9 +20,7 @@ if {![is_aarch32_target]} then {
     return
 }
 
-set testfile "thumb-prologue"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # Don't use "debug", so that we don't have line information for the assembly
 # fragments.

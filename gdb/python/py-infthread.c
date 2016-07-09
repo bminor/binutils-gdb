@@ -145,8 +145,6 @@ thpy_get_global_num (PyObject *self, void *closure)
 static PyObject *
 thpy_get_ptid (PyObject *self, void *closure)
 {
-  int pid;
-  long tid, lwp;
   thread_object *thread_obj = (thread_object *) self;
 
   THPY_REQUIRE_VALID (thread_obj);

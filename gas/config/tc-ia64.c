@@ -1741,7 +1741,7 @@ static unw_rec_list *
 alloc_record (unw_record_type t)
 {
   unw_rec_list *ptr;
-  ptr = xmalloc (sizeof (*ptr));
+  ptr = XNEW (unw_rec_list);
   memset (ptr, 0, sizeof (*ptr));
   ptr->slot_number = SLOT_NUM_NOT_SET;
   ptr->r.type = t;
@@ -2650,8 +2650,7 @@ set_imask (unw_rec_list *region,
   if (!imask)
     {
       imask_size = (region->r.record.r.rlen * 2 + 7) / 8 + 1;
-      imask = xmalloc (imask_size);
-      memset (imask, 0, imask_size);
+      imask = XCNEWVEC (unsigned char, imask_size);
 
       region->r.record.r.imask_size = imask_size;
       region->r.record.r.mask.i = imask;
@@ -4110,7 +4109,7 @@ save_prologue_count (unsigned long lbl, unsigned int count)
     lpc->prologue_count = count;
   else
     {
-      label_prologue_count *new_lpc = xmalloc (sizeof (* new_lpc));
+      label_prologue_count *new_lpc = XNEW (label_prologue_count);
 
       new_lpc->next = unwind.saved_prologue_counts;
       new_lpc->label_number = lbl;
@@ -4262,7 +4261,7 @@ dot_proc (int dummy ATTRIBUTE_UNUSED)
 	    }
 	  else
 	    {
-	      pending = xmalloc (sizeof (*pending));
+	      pending = XNEW (proc_pending);
 	      pending->sym = sym;
 	      last_pending = last_pending->next = pending;
 	    }
@@ -4484,8 +4483,7 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
 		    S_SET_SIZE (sym, frag_now_fix () - S_GET_VALUE (sym));
 		  else
 		    {
-		      symbol_get_obj (sym)->size =
-			(expressionS *) xmalloc (sizeof (expressionS));
+		      symbol_get_obj (sym)->size = XNEW (expressionS);
 		      symbol_get_obj (sym)->size->X_op = O_subtract;
 		      symbol_get_obj (sym)->size->X_add_symbol
 			= symbol_new (FAKE_LABEL_NAME, now_seg,
@@ -4670,11 +4668,11 @@ dot_rot (int type)
 
       if (!*drpp)
 	{
-	  *drpp = obstack_alloc (&notes, sizeof (*dr));
+	  *drpp = XOBNEW (&notes, struct dynreg);
 	  memset (*drpp, 0, sizeof (*dr));
 	}
 
-      name = obstack_alloc (&notes, len + 1);
+      name = XOBNEWVEC (&notes, char, len + 1);
       memcpy (name, start, len);
       name[len] = '\0';
 
@@ -7767,7 +7765,7 @@ ia64_frob_label (struct symbol *sym)
      labels.  */
   if (defining_tag)
     {
-      fix = obstack_alloc (&notes, sizeof (*fix));
+      fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.tag_fixups;
       fix->dw2_mark_labels = FALSE;
@@ -7779,7 +7777,7 @@ ia64_frob_label (struct symbol *sym)
   if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
     {
       md.last_text_seg = now_seg;
-      fix = obstack_alloc (&notes, sizeof (*fix));
+      fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.label_fixups;
       fix->dw2_mark_labels = dwarf2_loc_mark_labels;
@@ -7789,9 +7787,8 @@ ia64_frob_label (struct symbol *sym)
       if (md.path == md.maxpaths)
 	{
 	  md.maxpaths += 20;
-	  md.entry_labels = (const char **)
-	    xrealloc ((void *) md.entry_labels,
-		      md.maxpaths * sizeof (char *));
+	  md.entry_labels = XRESIZEVEC (const char *, md.entry_labels,
+					md.maxpaths);
 	}
       md.entry_labels[md.path++] = S_GET_NAME (sym);
     }
@@ -9732,9 +9729,7 @@ add_qp_imply (int p1, int p2)
   if (qp_implieslen == qp_impliestotlen)
     {
       qp_impliestotlen += 20;
-      qp_implies = (struct qp_imply *)
-	xrealloc ((void *) qp_implies,
-		  qp_impliestotlen * sizeof (struct qp_imply));
+      qp_implies = XRESIZEVEC (struct qp_imply, qp_implies, qp_impliestotlen);
     }
   if (md.debug_dv)
     fprintf (stderr, "  Registering PR%d implies PR%d\n", p1, p2);
@@ -9777,9 +9772,7 @@ add_qp_mutex (valueT mask)
   if (qp_mutexeslen == qp_mutexestotlen)
     {
       qp_mutexestotlen += 20;
-      qp_mutexes = (struct qpmutex *)
-	xrealloc ((void *) qp_mutexes,
-		  qp_mutexestotlen * sizeof (struct qpmutex));
+      qp_mutexes = XRESIZEVEC (struct qpmutex, qp_mutexes, qp_mutexestotlen);
     }
   if (md.debug_dv)
     {
@@ -10193,9 +10186,7 @@ mark_resource (struct ia64_opcode *idesc ATTRIBUTE_UNUSED,
   if (regdepslen == regdepstotlen)
     {
       regdepstotlen += 20;
-      regdeps = (struct rsrc *)
-	xrealloc ((void *) regdeps,
-		  regdepstotlen * sizeof (struct rsrc));
+      regdeps = XRESIZEVEC (struct rsrc, regdeps, regdepstotlen);
     }
 
   regdeps[regdepslen] = *spec;
@@ -11837,7 +11828,7 @@ dot_alias (int section)
       goto out;
     }
 
-  h = (struct alias *) xmalloc (sizeof (struct alias));
+  h = XNEW (struct alias);
   h->file = as_where (&h->line);
   h->name = name;
 

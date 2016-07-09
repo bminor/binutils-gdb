@@ -811,7 +811,7 @@ make_right_shifted_expr (expressionS * exp,
     stmp->bsym->flags |= BSF_RELC;
 
   /* Then wrap that in a "symbol expr" for good measure.  */
-  new_exp = xmalloc (sizeof (expressionS));
+  new_exp = XNEW (expressionS);
   memset (new_exp, 0, sizeof (expressionS));
   new_exp->X_op = O_symbol;
   new_exp->X_op_symbol = 0;
@@ -1012,7 +1012,7 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
   bfd_reloc_code_real_type r_type = fixP->fx_r_type;
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
 #ifdef GAS_CGEN_PCREL_R_TYPE
   if (fixP->fx_pcrel)
@@ -1029,7 +1029,7 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 
   gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
 
   /* Use fx_offset for these cases.  */

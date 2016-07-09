@@ -429,9 +429,7 @@ s_xstab (int what)
      the stab section name.  */
   if (saved_secname == 0 || strcmp (saved_secname, stab_secname))
     {
-      stabstr_secname = (char *) xmalloc (strlen (stab_secname) + 4);
-      strcpy (stabstr_secname, stab_secname);
-      strcat (stabstr_secname, "str");
+      stabstr_secname = concat (stab_secname, "str", (char *) NULL);
       if (saved_secname)
 	{
 	  free (saved_secname);
@@ -535,7 +533,7 @@ generate_asm_file (int type, const char *file)
   /* Allocate enough space for the file name (possibly extended with
      doubled up backslashes), the symbol name, and the other characters
      that make up a stabs file directive.  */
-  bufp = buf = (char *) xmalloc (2 * strlen (file) + strlen (sym) + 12);
+  bufp = buf = XNEWVEC (char, 2 * strlen (file) + strlen (sym) + 12);
 
   *bufp++ = '"';
 
@@ -631,13 +629,13 @@ stabs_generate_asm_lineno (void)
 
   if (in_dot_func_p)
     {
-      buf = (char *) xmalloc (100 + strlen (current_function_label));
+      buf = XNEWVEC (char, 100 + strlen (current_function_label));
       sprintf (buf, "%d,0,%d,%s-%s\n", N_SLINE, lineno,
 	       sym, current_function_label);
     }
   else
     {
-      buf = (char *) xmalloc (100);
+      buf = XNEWVEC (char, 100);
       sprintf (buf, "%d,0,%d,%s\n", N_SLINE, lineno, sym);
     }
   input_line_pointer = buf;

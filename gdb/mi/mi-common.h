@@ -57,6 +57,13 @@ struct mi_interp
   struct ui_file *targ;
   struct ui_file *event_channel;
 
+  /* Raw console output.  */
+  struct ui_file *raw_stdout;
+
+  /* Save the original value of raw_stdout here when logging, so we
+     can restore correctly when done.  */
+  struct ui_file *saved_raw_stdout;
+
   /* MI's builder.  */
   struct ui_out *mi_uiout;
 

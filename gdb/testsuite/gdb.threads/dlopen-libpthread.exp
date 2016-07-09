@@ -34,7 +34,7 @@ if {$relink_args == "" || ![prelink_no $relink_args]
     || [prepare_for_testing ${testfile}.exp ${executable} ${srcmainfile} {debug shlib_load}] } {
     return -1
 }
-gdb_load_shlibs $binfile_lib
+gdb_load_shlib $binfile_lib
 
 if { ![runto_main] } {
     return -1

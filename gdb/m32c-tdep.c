@@ -1949,7 +1949,6 @@ m32c_prev_register (struct frame_info *this_frame,
   struct m32c_prologue *p
     = m32c_analyze_frame_prologue (this_frame, this_prologue_cache);
   CORE_ADDR frame_base = m32c_frame_base (this_frame, this_prologue_cache);
-  int reg_size = register_size (get_frame_arch (this_frame), regnum);
 
   if (regnum == tdep->sp->num)
     return frame_unwind_got_constant (this_frame, regnum, frame_base);

@@ -3019,7 +3019,7 @@ i386_bnd_type (struct gdbarch *gdbarch)
 
   if (!tdep->i386_bnd_type)
     {
-      struct type *t, *bound_t;
+      struct type *t;
       const struct builtin_type *bt = builtin_type (gdbarch);
 
       /* The type we're building is described bellow:  */
@@ -8313,8 +8313,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int ymm0_regnum;
   int bnd0_regnum;
   int num_bnd_cooked;
-  int k0_regnum;
-  int zmm0_regnum;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -8694,7 +8692,6 @@ i386_mpx_bd_base (void)
   struct gdbarch_tdep *tdep;
   ULONGEST ret;
   enum register_status regstatus;
-  struct gdb_exception except;
 
   rcache = get_current_regcache ();
   tdep = gdbarch_tdep (get_regcache_arch (rcache));

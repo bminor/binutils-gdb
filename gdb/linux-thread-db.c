@@ -158,7 +158,6 @@ struct thread_db_info
   td_ta_new_ftype *td_ta_new_p;
   td_ta_map_lwp2thr_ftype *td_ta_map_lwp2thr_p;
   td_ta_thr_iter_ftype *td_ta_thr_iter_p;
-  td_thr_validate_ftype *td_thr_validate_p;
   td_thr_get_info_ftype *td_thr_get_info_p;
   td_thr_tls_get_addr_ftype *td_thr_tls_get_addr_p;
   td_thr_tlsbase_ftype *td_thr_tlsbase_p;
@@ -373,9 +372,6 @@ thread_from_lwp (ptid_t ptid)
 int
 thread_db_notice_clone (ptid_t parent, ptid_t child)
 {
-  td_thrhandle_t th;
-  td_thrinfo_t ti;
-  td_err_e err;
   struct thread_db_info *info;
 
   info = get_thread_db_info (ptid_get_pid (child));
@@ -564,7 +560,6 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   /* These are essential.  */
   CHK (TDB_VERBOSE_DLSYM (info, td_ta_map_lwp2thr));
-  CHK (TDB_VERBOSE_DLSYM (info, td_thr_validate));
   CHK (TDB_VERBOSE_DLSYM (info, td_thr_get_info));
 
   /* These are not essential.  */
@@ -1061,9 +1056,7 @@ record_thread (struct thread_db_info *info,
 	       ptid_t ptid, const td_thrhandle_t *th_p,
 	       const td_thrinfo_t *ti_p)
 {
-  td_err_e err;
   struct private_thread_info *priv;
-  int new_thread = (tp == NULL);
 
   /* A thread ID of zero may mean the thread library has not
      initialized yet.  Leave private == NULL until the thread library
@@ -1123,12 +1116,14 @@ thread_db_wait (struct target_ops *ops,
 
   ptid = beneath->to_wait (beneath, ptid, ourstatus, options);
 
-  if (ourstatus->kind == TARGET_WAITKIND_IGNORE)
-    return ptid;
-
-  if (ourstatus->kind == TARGET_WAITKIND_EXITED
-      || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
-    return ptid;
+  switch (ourstatus->kind)
+    {
+    case TARGET_WAITKIND_IGNORE:
+    case TARGET_WAITKIND_EXITED:
+    case TARGET_WAITKIND_THREAD_EXITED:
+    case TARGET_WAITKIND_SIGNALLED:
+      return ptid;
+    }
 
   info = get_thread_db_info (ptid_get_pid (ptid));
 

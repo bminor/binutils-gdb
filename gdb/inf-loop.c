@@ -61,7 +61,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 
       /* When running a command list (from a user command, say), these
 	 are only run when the command list is all done.  */
-      if (interpreter_async)
+      if (current_ui->async)
 	{
 	  check_frame_language_change ();
 

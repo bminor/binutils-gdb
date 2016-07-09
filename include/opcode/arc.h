@@ -24,8 +24,12 @@
 #ifndef OPCODE_ARC_H
 #define OPCODE_ARC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef MAX_INSN_ARGS
-#define MAX_INSN_ARGS	     8
+#define MAX_INSN_ARGS	     16
 #endif
 
 #ifndef MAX_INSN_FLGS
@@ -35,10 +39,13 @@
 /* Instruction Class.  */
 typedef enum
   {
+    ACL,
     ARITH,
     AUXREG,
+    BITOP,
     BRANCH,
     CONTROL,
+    DPI,
     DSP,
     FLOAT,
     INVALID,
@@ -46,9 +53,7 @@ typedef enum
     KERNEL,
     LOGICAL,
     MEMORY,
-    BITOP,
     NET,
-    ACL,
   } insn_class_t;
 
 /* Instruction Subclass.  */
@@ -59,6 +64,7 @@ typedef enum
     BTSCN,
     CD1,
     CD2,
+    COND,
     DIV,
     DP,
     DPA,
@@ -68,6 +74,7 @@ typedef enum
     MPY7E,
     MPY8E,
     MPY9E,
+    NPS400,
     QUARKSE,
     SHFT1,
     SHFT2,
@@ -91,7 +98,10 @@ typedef enum
 
     /* The conditional code can be extended over the standard variants
        via .extCondCode pseudo-op.  */
-    F_CLASS_EXTEND = (1 << 2)
+    F_CLASS_EXTEND = (1 << 2),
+
+    /* Condition code flag.  */
+    F_CLASS_COND = (1 << 3)
   } flag_class_t;
 
 /* The opcode table is an array of struct arc_opcode.  */
@@ -116,7 +126,7 @@ struct arc_opcode
   unsigned cpu;
 
   /* The instruction class.  This is used by gdb.  */
-  insn_class_t class;
+  insn_class_t insn_class;
 
   /* The instruction subclass.  */
   insn_subclass_t subclass;
@@ -132,6 +142,30 @@ struct arc_opcode
   unsigned char flags[MAX_INSN_FLGS + 1];
 };
 
+/* Structure used to describe 48 and 64 bit instructions.  */
+struct arc_long_opcode
+{
+  /* The base instruction is either 16 or 32 bits, and is described like a
+     normal instruction.  */
+  struct arc_opcode base_opcode;
+
+  /* The template value for the 32-bit LIMM extension.  Used by the
+     assembler and disassembler in the same way as the 'opcode' field of
+     'struct arc_opcode'.  */
+  unsigned limm_template;
+
+  /* The mask value for the 32-bit LIMM extension.  Used by the
+     disassembler just like the 'mask' field in 'struct arc_opcode'.  */
+  unsigned limm_mask;
+
+  /* Array of operand codes similar to the 'operands' array in 'struct
+     arc_opcode'.  These operands are used to fill in the LIMM value.  */
+  unsigned char operands[MAX_INSN_ARGS + 1];
+};
+
+extern const struct arc_long_opcode arc_long_opcodes[];
+extern const unsigned arc_num_long_opcodes;
+
 /* The table itself is sorted by major opcode number, and is otherwise
    in the order in which the disassembler should consider
    instructions.  */
@@ -143,7 +177,6 @@ extern const struct arc_opcode arc_opcodes[];
 #define ARC_OPCODE_ARC700   0x0002  /* ARC 700 specific insns.  */
 #define ARC_OPCODE_ARCv2EM  0x0004  /* ARCv2 EM specific insns.  */
 #define ARC_OPCODE_ARCv2HS  0x0008  /* ARCv2 HS specific insns.  */
-#define ARC_OPCODE_NPS400   0x0010  /* NPS400 specific insns.  */
 
 /* CPU combi.  */
 #define ARC_OPCODE_ARCALL  (ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700	\
@@ -157,6 +190,7 @@ extern const struct arc_opcode arc_opcodes[];
 #define ARC_ATOMIC   0x0002    /* Mutual exclusive with LLOCK.  */
 #define ARC_MPY      0x0004
 #define ARC_MULT     0x0004
+#define ARC_NPS400   0x0008
 
 /* Floating point support.  */
 #define ARC_DPFP     0x0010
@@ -335,7 +369,7 @@ extern const unsigned arc_num_flag_operands;
 struct arc_flag_class
 {
   /* Flag class.  */
-  flag_class_t class;
+  flag_class_t flag_class;
 
   /* List of valid flags (codes).  */
   unsigned flags[256];
@@ -516,8 +550,12 @@ extern const unsigned arc_num_relax_opcodes;
 /* Various constants used when defining an extension instruction.  */
 #define ARC_SYNTAX_3OP		(1 << 0)
 #define ARC_SYNTAX_2OP		(1 << 1)
-#define ARC_OP1_MUST_BE_IMM	(1 << 2)
-#define ARC_OP1_IMM_IMPLIED	(1 << 3)
+#define ARC_SYNTAX_1OP		(1 << 2)
+#define ARC_SYNTAX_NOP		(1 << 3)
+#define ARC_SYNTAX_MASK		(0x0F)
+
+#define ARC_OP1_MUST_BE_IMM	(1 << 0)
+#define ARC_OP1_IMM_IMPLIED	(1 << 1)
 
 #define ARC_SUFFIX_NONE		(1 << 0)
 #define ARC_SUFFIX_COND		(1 << 1)
@@ -565,5 +603,13 @@ extern const unsigned char arg_32bit_limmrc[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_limmu6[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_limms12[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_limmlimm[MAX_INSN_ARGS + 1];
+
+extern const unsigned char arg_32bit_rc[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_u6[MAX_INSN_ARGS + 1];
+extern const unsigned char arg_32bit_limm[MAX_INSN_ARGS + 1];
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OPCODE_ARC_H */

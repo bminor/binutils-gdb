@@ -82,7 +82,7 @@
 
 /* ARM-specific values for sh_flags.  */
 #define SHF_ENTRYSECT      0x10000000   /* Section contains an entry point.  */
-#define SHF_ARM_NOREAD     0x20000000   /* Section contains code that can be place on no read memory area.  */
+#define SHF_ARM_PURECODE   0x20000000   /* Section contains only code and no data.  */
 #define SHF_COMDEF         0x80000000   /* Section may be multiply defined in the input to a link step.  */
 
 /* ARM-specific program header flags.  */
@@ -311,6 +311,7 @@ enum
   Tag_MPextension_use,
   Tag_undefined_43,
   Tag_DIV_use,
+  Tag_DSP_extension = 46,
   Tag_nodefaults = 64,
   Tag_also_compatible_with,
   Tag_T2EE_use,
@@ -358,10 +359,29 @@ enum arm_st_branch_type {
   ST_BRANCH_TO_ARM,
   ST_BRANCH_TO_THUMB,
   ST_BRANCH_LONG,
-  ST_BRANCH_UNKNOWN
+  ST_BRANCH_UNKNOWN,
+  ST_BRANCH_ENUM_SIZE
 };
 
-#define ARM_SYM_BRANCH_TYPE(SYM) \
-  ((enum arm_st_branch_type) (SYM)->st_target_internal)
+#define NUM_ENUM_ARM_ST_BRANCH_TYPE_BITS 2
+#define ENUM_ARM_ST_BRANCH_TYPE_BITMASK	\
+  ((1 << NUM_ENUM_ARM_ST_BRANCH_TYPE_BITS) - 1)
+
+#define ARM_GET_SYM_BRANCH_TYPE(STI) \
+  ((enum arm_st_branch_type) ((STI) & ENUM_ARM_ST_BRANCH_TYPE_BITMASK))
+#ifdef BFD_ASSERT
+#define ARM_SET_SYM_BRANCH_TYPE(STI, TYPE)			\
+  do {								\
+    BFD_ASSERT (TYPE <= ST_BRANCH_ENUM_SIZE);			\
+    BFD_ASSERT ((1 << NUM_ENUM_ARM_ST_BRANCH_TYPE_BITS)		\
+		>= ST_BRANCH_ENUM_SIZE);			\
+    (STI) = (((STI) & ~ENUM_ARM_ST_BRANCH_TYPE_BITMASK)		\
+	     | ((TYPE) & ENUM_ARM_ST_BRANCH_TYPE_BITMASK));	\
+  } while (0)
+#else
+#define ARM_SET_SYM_BRANCH_TYPE(STI, TYPE)			\
+  (STI) = (((STI) & ~ENUM_ARM_ST_BRANCH_TYPE_BITMASK)		\
+	   | ((TYPE) & ENUM_ARM_ST_BRANCH_TYPE_BITMASK))
+#endif
 
 #endif /* _ELF_ARM_H */

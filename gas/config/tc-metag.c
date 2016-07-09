@@ -6331,7 +6331,7 @@ create_mnemonic_htab (void)
       insn_templates **slot = NULL;
       insn_templates *new_entry;
 
-      new_entry = xmalloc (sizeof (insn_templates));
+      new_entry = XNEW (insn_templates);
 
       new_entry->template = template;
       new_entry->next = NULL;
@@ -6847,7 +6847,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 void
 metag_handle_align (fragS * fragP)
 {
-  static char const noop[4] = { 0xfe, 0xff, 0xff, 0xa0 };
+  static unsigned char const noop[4] = { 0xfe, 0xff, 0xff, 0xa0 };
   int bytes, fix;
   char *p;
 
@@ -7006,8 +7006,8 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc		      = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr  = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc		      = XNEW (arelent);
+  reloc->sym_ptr_ptr  = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address      = fixp->fx_frag->fr_address + fixp->fx_where;
 

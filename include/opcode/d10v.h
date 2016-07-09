@@ -22,6 +22,10 @@
 #ifndef D10V_H
 #define D10V_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Format Specifier */
 #define FM00	0
 #define FM01	0x40000000
@@ -204,5 +208,9 @@ int d10v_reg_name_cnt (void);
 /* an expressionS only has one register type, so we fake it */
 /* by setting high bits to indicate type */
 #define REGISTER_MASK	0xFF
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* D10V_H */

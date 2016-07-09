@@ -167,7 +167,7 @@ try_claim (bfd *abfd)
 
   file.name = abfd->filename;
 
-  if (abfd->my_archive)
+  if (abfd->my_archive && !bfd_is_thin_archive (abfd->my_archive))
     {
       iobfd = abfd->my_archive;
       file.offset = abfd->origin;
@@ -185,7 +185,7 @@ try_claim (bfd *abfd)
 
   file.fd = fileno ((FILE *) iobfd->iostream);
 
-  if (!abfd->my_archive)
+  if (!abfd->my_archive || bfd_is_thin_archive (abfd->my_archive))
     {
       struct stat stat_buf;
       if (fstat (file.fd, &stat_buf))
@@ -287,6 +287,16 @@ bfd_plugin_specified_p (void)
   return has_plugin > 0;
 }
 
+/* Return TRUE if ABFD can be claimed by linker LTO plugin.  */
+
+bfd_boolean
+bfd_link_plugin_object_p (bfd *abfd)
+{
+  if (ld_plugin_object_p)
+    return ld_plugin_object_p (abfd) != NULL;
+  return FALSE;
+}
+
 extern const bfd_target plugin_vec;
 
 /* Return TRUE if TARGET is a pointer to plugin_vec.  */
@@ -365,7 +375,7 @@ bfd_plugin_object_p (bfd *abfd)
   if (ld_plugin_object_p)
     return ld_plugin_object_p (abfd);
 
-  if (abfd->plugin_format == bfd_plugin_uknown && !load_plugin (abfd))
+  if (abfd->plugin_format == bfd_plugin_unknown && !load_plugin (abfd))
     return NULL;
 
   return abfd->plugin_format == bfd_plugin_yes ? abfd->xvec : NULL;
@@ -597,7 +607,11 @@ const bfd_target plugin_vec =
   BFD_JUMP_TABLE_GENERIC (bfd_plugin),
   BFD_JUMP_TABLE_COPY (bfd_plugin),
   BFD_JUMP_TABLE_CORE (bfd_plugin),
+#ifdef USE_64_BIT_ARCHIVE
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_64_bit),
+#else
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+#endif
   BFD_JUMP_TABLE_SYMBOLS (bfd_plugin),
   BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (bfd_plugin),

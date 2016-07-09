@@ -29,6 +29,7 @@
 #include "xtensa-istack.h"
 #include "struc-symbol.h"
 #include "xtensa-config.h"
+#include "elf/xtensa.h"
 
 /* Provide default values for new configuration settings.  */
 #ifndef XSHAL_ABI
@@ -213,8 +214,6 @@ int generating_literals = 0;
 /* Required branch target alignment.  */
 #define XTENSA_PROP_BT_ALIGN_REQUIRE    0x3
 
-#define GET_XTENSA_PROP_BT_ALIGN(flag) \
-  (((unsigned) ((flag) & (XTENSA_PROP_BT_ALIGN_MASK))) >> 9)
 #define SET_XTENSA_PROP_BT_ALIGN(flag, align) \
   (((flag) & (~XTENSA_PROP_BT_ALIGN_MASK)) | \
     (((align) << 9) & XTENSA_PROP_BT_ALIGN_MASK))
@@ -235,8 +234,6 @@ int generating_literals = 0;
 
 #define XTENSA_PROP_ALIGNMENT_MASK      0x0001f000
 
-#define GET_XTENSA_PROP_ALIGNMENT(flag) \
-  (((unsigned) ((flag) & (XTENSA_PROP_ALIGNMENT_MASK))) >> 12)
 #define SET_XTENSA_PROP_ALIGNMENT(flag, align) \
   (((flag) & (~XTENSA_PROP_ALIGNMENT_MASK)) | \
     (((align) << 12) & XTENSA_PROP_ALIGNMENT_MASK))
@@ -364,7 +361,7 @@ struct suffix_reloc_map
   const char *suffix;
   int length;
   bfd_reloc_code_real_type reloc;
-  unsigned char operator;
+  operatorT operator;
 };
 
 #define SUFFIX_MAP(str, reloc, op) { str, sizeof (str) - 1, reloc, op }
@@ -380,7 +377,6 @@ static struct suffix_reloc_map suffix_relocs[] =
   SUFFIX_MAP ("tlscall", BFD_RELOC_XTENSA_TLS_CALL,	O_tlscall),
   SUFFIX_MAP ("tpoff",	BFD_RELOC_XTENSA_TLS_TPOFF,	O_tpoff),
   SUFFIX_MAP ("dtpoff",	BFD_RELOC_XTENSA_TLS_DTPOFF,	O_dtpoff),
-  { (char *) 0, 0,	BFD_RELOC_UNUSED,		0 }
 };
 
 
@@ -528,10 +524,6 @@ static void xtensa_switch_to_non_abs_literal_fragment (emit_state *);
 static void xtensa_switch_section_emit_state (emit_state *, segT, subsegT);
 static void xtensa_restore_emit_state (emit_state *);
 static segT cache_literal_section (bfd_boolean);
-
-/* Import from elf32-xtensa.c in BFD library.  */
-
-extern asection *xtensa_make_property_section (asection *, const char *);
 
 /* op_placement_info functions.  */
 
@@ -1594,10 +1586,7 @@ xtensa_literal_prefix (void)
 		"abcdefghijklmnopqrstuvwxyz_/0123456789.$");
 
   /* Get a null-terminated copy of the name.  */
-  name = xmalloc (len + 1);
-  gas_assert (name);
-  strncpy (name, input_line_pointer, len);
-  name[len] = 0;
+  name = xmemdup0 (input_line_pointer, len);
 
   /* Skip the name in the input line.  */
   input_line_pointer += len;
@@ -1727,7 +1716,7 @@ xtensa_elf_suffix (char **str_p, expressionS *exp_p)
   char *str2;
   int ch;
   int len;
-  struct suffix_reloc_map *ptr;
+  unsigned int i;
 
   if (*str++ != '@')
     return BFD_RELOC_NONE;
@@ -1744,10 +1733,10 @@ xtensa_elf_suffix (char **str_p, expressionS *exp_p)
   len = str2 - ident;
 
   ch = ident[0];
-  for (ptr = &suffix_relocs[0]; ptr->length > 0; ptr++)
-    if (ch == ptr->suffix[0]
-	&& len == ptr->length
-	&& memcmp (ident, ptr->suffix, ptr->length) == 0)
+  for (i = 0; i < ARRAY_SIZE (suffix_relocs); i++)
+    if (ch == suffix_relocs[i].suffix[0]
+	&& len == suffix_relocs[i].length
+	&& memcmp (ident, suffix_relocs[i].suffix, suffix_relocs[i].length) == 0)
       {
 	/* Now check for "identifier@suffix+constant".  */
 	if (*str == '-' || *str == '+')
@@ -1768,7 +1757,7 @@ xtensa_elf_suffix (char **str_p, expressionS *exp_p)
 	  }
 
 	*str_p = str;
-	return ptr->reloc;
+	return suffix_relocs[i].reloc;
       }
 
   return BFD_RELOC_UNUSED;
@@ -1776,21 +1765,21 @@ xtensa_elf_suffix (char **str_p, expressionS *exp_p)
 
 
 /* Find the matching operator type.  */
-static unsigned char
+static operatorT
 map_suffix_reloc_to_operator (bfd_reloc_code_real_type reloc)
 {
-  struct suffix_reloc_map *sfx;
-  unsigned char operator = (unsigned char) -1;
+  operatorT operator = O_illegal;
+  unsigned int i;
 
-  for (sfx = &suffix_relocs[0]; sfx->suffix; sfx++)
+  for (i = 0; i < ARRAY_SIZE (suffix_relocs); i++)
     {
-      if (sfx->reloc == reloc)
+      if (suffix_relocs[i].reloc == reloc)
 	{
-	  operator = sfx->operator;
+	  operator = suffix_relocs[i].operator;
 	  break;
 	}
     }
-  gas_assert (operator != (unsigned char) -1);
+  gas_assert (operator != O_illegal);
   return operator;
 }
 
@@ -1799,14 +1788,14 @@ map_suffix_reloc_to_operator (bfd_reloc_code_real_type reloc)
 static bfd_reloc_code_real_type
 map_operator_to_reloc (unsigned char operator, bfd_boolean is_literal)
 {
-  struct suffix_reloc_map *sfx;
+  unsigned int i;
   bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
 
-  for (sfx = &suffix_relocs[0]; sfx->suffix; sfx++)
+  for (i = 0; i < ARRAY_SIZE (suffix_relocs); i++)
     {
-      if (sfx->operator == operator)
+      if (suffix_relocs[i].operator == operator)
 	{
-	  reloc = sfx->reloc;
+	  reloc = suffix_relocs[i].reloc;
 	  break;
 	}
     }
@@ -2239,8 +2228,7 @@ xg_reverse_shift_count (char **cnt_argp)
   cnt_arg = *cnt_argp;
 
   /* replace the argument with "31-(argument)" */
-  new_arg = (char *) xmalloc (strlen (cnt_arg) + 6);
-  sprintf (new_arg, "31-(%s)", cnt_arg);
+  new_arg = concat ("31-(", cnt_argp, ")", (char *) NULL);
 
   free (cnt_arg);
   *cnt_argp = new_arg;
@@ -2428,7 +2416,7 @@ xtensa_translate_old_userreg_ops (char **popname)
 
   /* Translate the opcode.  */
   sr_name = xtensa_sysreg_name (isa, sr);
-  new_opname = (char *) xmalloc (strlen (sr_name) + 6);
+  new_opname = XNEWVEC (char, strlen (sr_name) + 6);
   sprintf (new_opname, "%s%cur.%s", (has_underbar ? "_" : ""),
 	   opname[0], sr_name);
   free (*popname);
@@ -6151,9 +6139,9 @@ new_resource_table (void *data,
   rt->opcode_unit_use = ouuf;
   rt->opcode_unit_stage = ousf;
 
-  rt->units = (unsigned char **) xcalloc (cycles, sizeof (unsigned char *));
+  rt->units = XCNEWVEC (unsigned char *, cycles);
   for (i = 0; i < cycles; i++)
-    rt->units[i] = (unsigned char *) xcalloc (nu, sizeof (unsigned char));
+    rt->units[i] = XCNEWVEC (unsigned char, nu);
 
   return rt;
 }
@@ -6187,7 +6175,7 @@ resize_resource_table (resource_table *rt, int cycles)
   for (i = 0; i < old_cycles; i++)
     rt->units[i] = XRESIZEVEC (unsigned char, rt->units[i], rt->num_units);
   for (i = old_cycles; i < cycles; i++)
-    rt->units[i] = xcalloc (rt->num_units, sizeof (unsigned char));
+    rt->units[i] = XCNEWVEC (unsigned char, rt->num_units);
 }
 
 
@@ -7438,7 +7426,7 @@ xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
 
   if (ts == NULL)
     {
-      ts = (struct trampoline_seg *)xcalloc(sizeof (struct trampoline_seg), 1);
+      ts = XCNEW(struct trampoline_seg);
       ts->next = trampoline_seg_list.next;
       trampoline_seg_list.next = ts;
       ts->seg = now_seg;
@@ -7553,7 +7541,7 @@ xtensa_maybe_create_literal_pool_frag (bfd_boolean create,
 
   if (lps == NULL)
     {
-      lps = (struct litpool_seg *)xcalloc (sizeof (struct litpool_seg), 1);
+      lps = XCNEW (struct litpool_seg);
       lps->next = litpool_seg_list.next;
       litpool_seg_list.next = lps;
       lps->seg = now_seg;
@@ -11568,7 +11556,7 @@ cache_literal_section (bfd_boolean use_abs_literals)
 	      || strncmp (text_name, ".text", 5) == 0))
 	len -= 5;
 
-      name = xmalloc (len + strlen (base_name) + 1);
+      name = XNEWVEC (char, len + strlen (base_name) + 1);
       if (strncmp (text_name, ".text", 5) == 0)
 	{
 	  strcpy (name, base_name);

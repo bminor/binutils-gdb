@@ -2796,7 +2796,6 @@ execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)
   int ilen, islots, is;
   xtensa_opcode opc;
   int insn_num = 0;
-  int fail = 0;
   void (*func) (struct gdbarch *, int, int, int, CORE_ADDR);
 
   uint32_t at, as, offset;
@@ -3192,7 +3191,6 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  struct xtensa_abi_handler *abi_handler;
 
   DEBUGTRACE ("gdbarch_init()\n");
 
@@ -3291,8 +3289,6 @@ extern initialize_file_ftype _initialize_xtensa_tdep;
 void
 _initialize_xtensa_tdep (void)
 {
-  struct cmd_list_element *c;
-
   gdbarch_register (bfd_arch_xtensa, xtensa_gdbarch_init, xtensa_dump_tdep);
   xtensa_init_reggroups ();
 

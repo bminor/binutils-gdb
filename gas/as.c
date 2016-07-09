@@ -342,6 +342,8 @@ Options:\n\
   fprintf (stream, _("\
   -nocpp                  ignored\n"));
   fprintf (stream, _("\
+  -no-pad-sections        do not pad the end of sections to alignment boundaries\n"));
+  fprintf (stream, _("\
   -o OBJFILE              name the object-file output OBJFILE (default a.out)\n"));
   fprintf (stream, _("\
   -R                      fold data section into text section\n"));
@@ -479,7 +481,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_REDUCE_MEMORY_OVERHEADS,
       OPTION_WARN_FATAL,
       OPTION_COMPRESS_DEBUG,
-      OPTION_NOCOMPRESS_DEBUG
+      OPTION_NOCOMPRESS_DEBUG,
+      OPTION_NO_PAD_SECTIONS /* = STD_BASE + 40 */
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -542,6 +545,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"MD", required_argument, NULL, OPTION_DEPFILE}
     ,{"mri", no_argument, NULL, 'M'}
     ,{"nocpp", no_argument, NULL, OPTION_NOCPP}
+    ,{"no-pad-sections", no_argument, NULL, OPTION_NO_PAD_SECTIONS}
     ,{"no-warn", no_argument, NULL, 'W'}
     ,{"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS}
     ,{"statistics", no_argument, NULL, OPTION_STATISTICS}
@@ -569,7 +573,7 @@ parse_args (int * pargc, char *** pargv)
   old_argv = *pargv;
 
   /* Initialize a new argv that contains no options.  */
-  new_argv = (char **) xmalloc (sizeof (char *) * (old_argc + 1));
+  new_argv = XNEWVEC (char *, old_argc + 1);
   new_argv[0] = old_argv[0];
   new_argc = 1;
   new_argv[new_argc] = NULL;
@@ -637,6 +641,10 @@ parse_args (int * pargc, char *** pargv)
 	case OPTION_NOCPP:
 	  break;
 
+	case OPTION_NO_PAD_SECTIONS:
+	  do_not_pad_sections_to_alignment = 1;
+	  break;
+
 	case OPTION_STATISTICS:
 	  flag_print_statistics = 1;
 	  break;
@@ -657,8 +665,14 @@ parse_args (int * pargc, char *** pargv)
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or later.\n\
 This program has absolutely no warranty.\n"));
+#ifdef TARGET_WITH_CPU
+	  printf (_("This assembler was configured for a target of `%s' "
+		    "and default,\ncpu type `%s'.\n"),
+		  TARGET_ALIAS, TARGET_WITH_CPU);
+#else
 	  printf (_("This assembler was configured for a target of `%s'.\n"),
 		  TARGET_ALIAS);
+#endif
 	  exit (EXIT_SUCCESS);
 
 	case OPTION_EMULATION:
@@ -726,7 +740,7 @@ This program has absolutely no warranty.\n"));
 	      as_fatal (_("bad defsym; format is --defsym name=value"));
 	    *s++ = '\0';
 	    i = bfd_scan_vma (s, (const char **) NULL, 0);
-	    n = (struct defsym_list *) xmalloc (sizeof *n);
+	    n = XNEW (struct defsym_list);
 	    n->next = defsyms;
 	    n->name = optarg;
 	    n->value = i;

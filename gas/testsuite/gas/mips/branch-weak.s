@@ -1,5 +1,5 @@
 	.text
-	.align	4, 0
+	.align	align, 0
 	.globl	foo
 	.ent	foo
 foo:
@@ -11,9 +11,9 @@ foo:
 	.weak	bar
 	.ent	bar
 bar:
+	nop
 	jr	$ra
 	.end	bar
 
 # Force some (non-delay-slot) zero bytes, to make 'objdump' print ...
-	.align  4, 0
-	.space  16
+	.align  align, 0

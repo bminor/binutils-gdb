@@ -991,7 +991,6 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
       for (i = 0; i < linetable->nitems; ++i)
 	{
 	  struct linetable_entry *item;
-	  struct cleanup *row_cleanup;
 
 	  item = &linetable->item [i];
 	  printf_filtered (_("%-6d %6d %s\n"), i, item->line,

@@ -19,19 +19,23 @@
 
 import gdb
 
+stop_handler_str = ""
+cont_handler_str = ""
 
 def signal_stop_handler (event):
     """Stop event handler"""
     assert (isinstance (event, gdb.StopEvent))
-    print ("stop_handler")
-    print (gdb.execute("info break", False, True))
+    global stop_handler_str
+    stop_handler_str = "stop_handler\n"
+    stop_handler_str += gdb.execute("info break", False, True)
 
 
 def continue_handler (event):
     """Continue event handler"""
     assert (isinstance (event, gdb.ContinueEvent))
-    print ("continue_handler")
-    print (gdb.execute("info break", False, True))
+    global cont_handler_str
+    cont_handler_str = "continue_handler\n"
+    cont_handler_str += gdb.execute("info break", False, True)
 
 
 class test_events (gdb.Command):

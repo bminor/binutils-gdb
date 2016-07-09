@@ -4480,16 +4480,16 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      r = info->callbacks->reloc_overflow (info, NULL, name,
-						   howto->name, (bfd_vma) 0,
-						   input_bfd, input_section,
-						   rel->r_offset);
+	      (*info->callbacks->reloc_overflow) (info, NULL, name,
+						  howto->name, (bfd_vma) 0,
+						  input_bfd, input_section,
+						  rel->r_offset);
 	      break;
 
 	    case bfd_reloc_undefined:
-	      r = info->callbacks->undefined_symbol (info, name, input_bfd,
-						     input_section,
-						     rel->r_offset, TRUE);
+	      (*info->callbacks->undefined_symbol) (info, name, input_bfd,
+						    input_section,
+						    rel->r_offset, TRUE);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -4515,8 +4515,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
 	  if (msg)
 	    {
-	      r = info->callbacks->warning
-		(info, msg, name, input_bfd, input_section, rel->r_offset);
+	      (*info->callbacks->warning) (info, msg, name, input_bfd,
+					   input_section, rel->r_offset);
 	      return FALSE;
 	    }
 	}
@@ -5344,22 +5344,19 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTGOT:
-	      s = htab->root.sgot;
-	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->output_section->vma;
+	      s = htab->root.sgotplt;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_JMPREL:
 	      s = htab->root.srelplt;
-	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->output_section->vma;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_PLTRELSZ:
 	      s = htab->root.srelplt;
-	      BFD_ASSERT (s != NULL);
 	      dyn.d_un.d_val = s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -5379,9 +5376,9 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_NIOS2_GP:
-	      s = htab->root.sgot;
-	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->output_section->vma + 0x7ff0;
+	      s = htab->root.sgotplt;
+	      dyn.d_un.d_ptr
+		= s->output_section->vma + s->output_offset + 0x7ff0;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 	    }

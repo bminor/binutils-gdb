@@ -688,6 +688,7 @@ AR
 am__fastdepCC_FALSE
 am__fastdepCC_TRUE
 CCDEPMODE
+am__nodep
 AMDEPBACKSLASH
 AMDEP_FALSE
 AMDEP_TRUE
@@ -788,6 +789,7 @@ enable_plugins
 enable_largefile
 enable_64_bit_bfd
 enable_targets
+enable_64_bit_archive
 with_mmap
 enable_secureplt
 enable_leading_mingw64_underscores
@@ -1441,6 +1443,7 @@ Optional Features:
   --disable-largefile     omit support for large files
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
   --enable-targets        alternative target configurations
+  --enable-64-bit-archive force 64-bit archives
   --enable-secureplt      Default to creating read-only plt entries
   --enable-leading-mingw64-underscores
                           Enable leading underscores on 64 bit mingw targets
@@ -3960,6 +3963,7 @@ fi
 if test "x$enable_dependency_tracking" != xno; then
   am_depcomp="$ac_aux_dir/depcomp"
   AMDEPBACKSLASH='\'
+  am__nodep='_no'
 fi
  if test "x$enable_dependency_tracking" != xno; then
   AMDEP_TRUE=
@@ -4022,11 +4026,11 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 
 # We need awk for the "check" target.  The system "awk" is bad on
 # some platforms.
-# Always define AMTAR for backward compatibility.
+# Always define AMTAR for backward compatibility.  Yes, it's still used
+# in the wild :-(  We should find a proper way to deprecate it ...
+AMTAR='$${TAR-tar}'
 
-AMTAR=${AMTAR-"${am_missing_run}tar"}
-
-am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
+am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
 
 
 
@@ -4044,6 +4048,7 @@ else
   # instance it was reported that on HP-UX the gcc test will end up
   # making a dummy file named `D' -- because `-MD' means `put the output
   # in D'.
+  rm -rf conftest.dir
   mkdir conftest.dir
   # Copy depcomp to subdir because otherwise we won't find it if we're
   # using a relative directory.
@@ -4103,7 +4108,7 @@ else
 	break
       fi
       ;;
-    msvisualcpp | msvcmsys)
+    msvc7 | msvc7msys | msvisualcpp | msvcmsys)
       # This compiler won't grok `-c -o', but also, the minuso test has
       # not run yet.  These depmodes are late enough in the game, and
       # so weak that their functioning should not be impacted.
@@ -11422,7 +11427,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11425 "configure"
+#line 11430 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11528,7 +11533,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11531 "configure"
+#line 11536 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12126,6 +12131,17 @@ if test "${enable_targets+set}" = set; then :
 esac
 fi
 
+# Check whether --enable-64_bit_archive was given.
+if test "${enable_64_bit_archive+set}" = set; then :
+  enableval=$enable_64_bit_archive; case "${enableval}" in
+  yes)  want_64_bit_archive=true  ;;
+  no)   want_64_bit_archive=false ;;
+  *)    as_fn_error "bad value ${enableval} for 64-bit-archive option" "$LINENO" 5 ;;
+esac
+else
+  want_64_bit_archive=unset
+fi
+
 
 # Check whether --with-mmap was given.
 if test "${with_mmap+set}" = set; then :
@@ -12435,7 +12451,7 @@ bfd_default_target_size=32
 
 # host stuff:
 
-ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi id ru uk"
+ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi id ru uk sr"
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
 USE_NLS=no
@@ -14592,6 +14608,23 @@ else	# all_targets is true
   test -n "$selarchs" &&
     selarchs=`echo $selarchs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
 fi	# all_targets is true
+
+if test "x$want_64_bit_archive" = xunset; then
+  # 64-bit MIPS and s390 ELF targets use 64-bit archives.
+  case "${bfd_backends}" in
+    *elf64-mips* | *elf64-s390*)
+      want_64_bit_archive=true
+      ;;
+  esac
+fi
+
+# 64-bit archives need a 64-bit bfd_vma.
+if test "x$want_64_bit_archive" = xtrue; then
+  want64=true
+
+$as_echo "#define USE_64_BIT_ARCHIVE 1" >>confdefs.h
+
+fi
 
 case ${host64}-${target64}-${want64} in
   *true*)

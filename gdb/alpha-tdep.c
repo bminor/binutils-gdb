@@ -1857,7 +1857,6 @@ extern initialize_file_ftype _initialize_alpha_tdep; /* -Wmissing-prototypes */
 void
 _initialize_alpha_tdep (void)
 {
-  struct cmd_list_element *c;
 
   gdbarch_register (bfd_arch_alpha, alpha_gdbarch_init, NULL);
 

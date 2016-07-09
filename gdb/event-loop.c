@@ -35,6 +35,7 @@
 #include "gdb_sys_time.h"
 #include "gdb_select.h"
 #include "observer.h"
+#include "top.h"
 
 /* Tell create_file_handler what events we are interested in.
    This is used by the select version of the event loop.  */
@@ -380,6 +381,7 @@ start_event_loop (void)
 	  /* If we long-jumped out of do_one_event, we probably didn't
 	     get around to resetting the prompt, which leaves readline
 	     in a messed-up state.  Reset it here.  */
+	  current_ui->prompt_state = PROMPT_NEEDED;
 	  observer_notify_command_error ();
 	  /* This call looks bizarre, but it is required.  If the user
 	     entered a command that caused an error,
@@ -967,6 +969,9 @@ invoke_async_signal_handlers (void)
 	break;
       any_ready = 1;
       async_handler_ptr->ready = 0;
+      /* Async signal handlers have no connection to whichever was the
+	 current UI, and thus always run on the main one.  */
+      current_ui = main_ui;
       (*async_handler_ptr->proc) (async_handler_ptr->client_data);
     }
 

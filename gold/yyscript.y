@@ -175,6 +175,7 @@
 %token SIZEOF
 %token SIZEOF_HEADERS	/* SIZEOF_HEADERS, sizeof_headers */
 %token SORT_BY_ALIGNMENT
+%token SORT_BY_INIT_PRIORITY
 %token SORT_BY_NAME
 %token SPECIAL
 %token SQUAD
@@ -676,6 +677,11 @@ wildcard_section:
 		default:
 		  abort();
 		}
+	    }
+	| SORT_BY_INIT_PRIORITY '(' wildcard_name ')'
+	    {
+	      $$.name = $3;
+	      $$.sort = SORT_WILDCARD_BY_INIT_PRIORITY;
 	    }
 	;
 

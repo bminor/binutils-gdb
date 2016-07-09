@@ -530,11 +530,9 @@ shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
 		     && ((*relocation + rel->r_addend) & 1) == 0)
 	      msg = _("PTA mismatch: a SHcompact address (bit 0 == 0)");
 
-	    if (msg != NULL
-		&& ! ((*info->callbacks->reloc_dangerous)
-		      (info, msg, abfd, input_section,
-		       rel->r_offset)))
-	      return FALSE;
+	    if (msg != NULL)
+	      (*info->callbacks->reloc_dangerous)
+		(info, msg, abfd, input_section, rel->r_offset);
 	  }
 	else
 	  {

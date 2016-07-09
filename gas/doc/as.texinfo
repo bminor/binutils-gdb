@@ -235,6 +235,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
  [@b{--listing-lhs-width2}=@var{NUM}] [@b{--listing-rhs-width}=@var{NUM}]
  [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}]
+ [@b{--no-pad-sections}]
  [@b{-o} @var{objfile}] [@b{-R}]
  [@b{--hash-size}=@var{NUM}] [@b{--reduce-memory-overheads}]
  [@b{--statistics}]
@@ -424,6 +425,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mdmx}] [@b{-no-mdmx}]
    [@b{-mdsp}] [@b{-mno-dsp}]
    [@b{-mdspr2}] [@b{-mno-dspr2}]
+   [@b{-mdspr3}] [@b{-mno-dspr3}]
    [@b{-mmsa}] [@b{-mno-msa}]
    [@b{-mxpa}] [@b{-mno-xpa}]
    [@b{-mmt}] [@b{-mno-mt}]
@@ -771,6 +773,11 @@ Set the maximum width of an input source line, as displayed in a listing, to
 @item --listing-cont-lines=@var{number}
 Set the maximum number of lines printed in a listing for a single line of input
 to @var{number} + 1.
+
+@item --no-pad-sections
+Stop the assembler for padding the ends of output sections to the alignment
+of that section.  The default is to pad the sections, but this can waste space
+which might be needed on targets which have tight memory constraints.
 
 @item -o @var{objfile}
 Name the object-file output from @command{@value{AS}} @var{objfile}.
@@ -1438,9 +1445,16 @@ This tells the assembler to accept DSP Release 1 instructions.
 @item -mdspr2
 @itemx -mno-dspr2
 Generate code for the DSP Release 2 Application Specific Extension.
-This option implies -mdsp.
+This option implies @samp{-mdsp}.
 This tells the assembler to accept DSP Release 2 instructions.
 @samp{-mno-dspr2} turns off this option.
+
+@item -mdspr3
+@itemx -mno-dspr3
+Generate code for the DSP Release 3 Application Specific Extension.
+This option implies @samp{-mdsp} and @samp{-mdspr2}.
+This tells the assembler to accept DSP Release 3 instructions.
+@samp{-mno-dspr3} turns off this option.
 
 @item -mmsa
 @itemx -mno-msa
@@ -2150,6 +2164,7 @@ assembler.)
 * listing::       --listing-XXX to configure listing output
 * M::		  -M or --mri to assemble in MRI compatibility mode
 * MD::            --MD for dependency tracking
+* no-pad-sections:: --no-pad-sections to stop section padding
 * o::             -o to name the object file
 * R::             -R to join data and text sections
 * statistics::    --statistics to see statistics about assembly
@@ -2486,6 +2501,15 @@ The rule is written to the file named in its argument.
 
 This feature is used in the automatic updating of makefiles.
 
+@node no-pad-sections
+@section Output Section Padding
+@kindex --no-pad-sections
+@cindex output section padding
+Normally the assembler will pad the end of each output section up to its
+alignment boundary.  But this can waste space, which can be significant on
+memory constrained targets.  So the @option{--no-pad-sections} option will
+disable this behaviour.
+
 @node o
 @section Name the Object File: @option{-o}
 
@@ -2672,7 +2696,7 @@ do include file processing with the @code{.include} directive
 (@pxref{Include,,@code{.include}}).  You can use the @sc{gnu} C compiler driver
 to get other ``CPP'' style preprocessing by giving the input file a
 @samp{.S} suffix.  @xref{Overall Options, ,Options Controlling the Kind of
-Output, gcc.info, Using GNU CC}.
+Output, gcc info, Using GNU CC}.
 
 Excess whitespace, comments, and character constants
 cannot be used in the portions of the input text that are not

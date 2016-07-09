@@ -640,7 +640,7 @@ string_to_event_location_basic (char **stringp,
 				const struct language_defn *language)
 {
   struct event_location *location;
-  const char *arg, *orig, *cs;
+  const char *cs;
 
   /* Try the input as a probe spec.  */
   cs = *stringp;

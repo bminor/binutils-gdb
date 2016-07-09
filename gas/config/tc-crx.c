@@ -1325,7 +1325,7 @@ static op_err
 check_range (long *num, int bits, int unsigned flags, int update)
 {
   uint32_t max;
-  int retval = OP_LEGAL;
+  op_err retval = OP_LEGAL;
   int bin;
   uint32_t upper_64kb = 0xffff0000;
   uint32_t value = *num;
@@ -1765,7 +1765,7 @@ preprocess_reglist (char *param, int *allocated)
 
   while (*paramP++ != '{');
 
-  new_param = (char *)xcalloc (MAX_INST_LEN, sizeof (char));
+  new_param = XCNEWVEC (char, MAX_INST_LEN);
   *allocated = 1;
   strncpy (new_param, param, paramP - param - 1);
 

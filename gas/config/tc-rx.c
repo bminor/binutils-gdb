@@ -109,7 +109,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 struct cpu_type
 {
   const char *cpu_name;
-  int type;
+  enum rx_cpu_types type;
 };
 
 struct cpu_type  cpu_type_list[] =
@@ -301,7 +301,7 @@ rx_include (int ignore)
     }
 
    current_filename = as_where (NULL);
-  f = (char *) xmalloc (strlen (current_filename) + strlen (filename) + 1);
+  f = XNEWVEC (char, strlen (current_filename) + strlen (filename) + 1);
 
   /* Check the filename.  If [@]..FILE[@] is found then replace
      this with the current assembler source filename, stripped
@@ -359,7 +359,7 @@ rx_include (int ignore)
       if (env && strlen (env) > len)
 	len = strlen (env);
 
-      path = (char *) xmalloc (strlen (f) + len + 5);
+      path = XNEWVEC (char, strlen (f) + len + 5);
 
       if (current_filename != NULL)
 	{
@@ -531,10 +531,7 @@ rx_section (int ignore)
 
       if (*p != '"' && *p != '#')
 	{
-	  char * name = (char *) xmalloc (len + 1);
-
-	  strncpy (name, input_line_pointer, len);
-	  name[len] = 0;
+	  char *name = xmemdup0 (input_line_pointer, len);
 
 	  input_line_pointer = p;
 	  parse_rx_section (name);
@@ -1765,7 +1762,8 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
   rx_bytesT * rxb = fragP->tc_frag_data;
   addressT addr0, mypc;
   int disp;
-  int reloc_type, reloc_adjust;
+  int reloc_adjust;
+  bfd_reloc_code_real_type reloc_type;
   char * op = fragP->fr_opcode;
   int keep_reloc = 0;
   int ri;
@@ -2140,6 +2138,8 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 	  break;
 	case BFD_RELOC_RX_32_OP:
 	  fix->fx_size = 4;
+	  break;
+	default:
 	  break;
 	}
     }

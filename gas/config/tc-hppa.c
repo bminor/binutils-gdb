@@ -5974,11 +5974,8 @@ pa_build_unwind_subspace (struct call_info *call_info)
   /* Replace the start symbol with a local symbol that will be reduced
      to a section offset.  This avoids problems with weak functions with
      multiple definitions, etc.  */
-  name = xmalloc (strlen ("L$\001start_")
-		  + strlen (S_GET_NAME (call_info->start_symbol))
-		  + 1);
-  strcpy (name, "L$\001start_");
-  strcat (name, S_GET_NAME (call_info->start_symbol));
+  name = concat ("L$\001start_", S_GET_NAME (call_info->start_symbol),
+		 (char *) NULL);
 
   /* If we have a .procend preceded by a .exit, then the symbol will have
      already been defined.  In that case, we don't want another unwind
@@ -6414,6 +6411,7 @@ hppa_elf_mark_end_of_function (void)
   /* ELF does not have EXIT relocations.  All we do is create a
      temporary symbol marking the end of the function.  */
   char *name;
+  symbolS *symbolP;
 
   if (last_call_info == NULL || last_call_info->start_symbol == NULL)
     {
@@ -6422,48 +6420,37 @@ hppa_elf_mark_end_of_function (void)
       return;
     }
 
-  name = xmalloc (strlen ("L$\001end_")
-		  + strlen (S_GET_NAME (last_call_info->start_symbol))
-		  + 1);
-  if (name)
+  name = concat ("L$\001end_", S_GET_NAME (last_call_info->start_symbol),
+		 (char *) NULL);
+
+  /* If we have a .exit followed by a .procend, then the
+     symbol will have already been defined.  */
+  symbolP = symbol_find (name);
+  if (symbolP)
     {
-      symbolS *symbolP;
+      /* The symbol has already been defined!  This can
+	 happen if we have a .exit followed by a .procend.
 
-      strcpy (name, "L$\001end_");
-      strcat (name, S_GET_NAME (last_call_info->start_symbol));
-
-      /* If we have a .exit followed by a .procend, then the
-	 symbol will have already been defined.  */
-      symbolP = symbol_find (name);
-      if (symbolP)
-	{
-	  /* The symbol has already been defined!  This can
-	     happen if we have a .exit followed by a .procend.
-
-	     This is *not* an error.  All we want to do is free
-	     the memory we just allocated for the name and continue.  */
-	  xfree (name);
-	}
-      else
-	{
-	  /* symbol value should be the offset of the
-	     last instruction of the function */
-	  symbolP = symbol_new (name, now_seg, (valueT) (frag_now_fix () - 4),
-				frag_now);
-
-	  gas_assert (symbolP);
-	  S_CLEAR_EXTERNAL (symbolP);
-	  symbol_table_insert (symbolP);
-	}
-
-      if (symbolP)
-	last_call_info->end_symbol = symbolP;
-      else
-	as_bad (_("Symbol '%s' could not be created."), name);
-
+	 This is *not* an error.  All we want to do is free
+	 the memory we just allocated for the name and continue.  */
+      xfree (name);
     }
   else
-    as_bad (_("No memory for symbol name."));
+    {
+      /* symbol value should be the offset of the
+	 last instruction of the function */
+      symbolP = symbol_new (name, now_seg, (valueT) (frag_now_fix () - 4),
+			    frag_now);
+
+      gas_assert (symbolP);
+      S_CLEAR_EXTERNAL (symbolP);
+      symbol_table_insert (symbolP);
+    }
+
+  if (symbolP)
+    last_call_info->end_symbol = symbolP;
+  else
+    as_bad (_("Symbol '%s' could not be created."), name);
 }
 #endif
 

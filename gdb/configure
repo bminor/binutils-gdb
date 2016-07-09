@@ -7050,6 +7050,7 @@ fi
 
 
 # On FreeBSD we may need libutil for kinfo_getvmmap (used by fbsd-nat.c).
+# On GNU/kFreeBSD systems, FreeBSD libutil is renamed to libutil-freebsd.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kinfo_getvmmap" >&5
 $as_echo_n "checking for library containing kinfo_getvmmap... " >&6; }
 if test "${ac_cv_search_kinfo_getvmmap+set}" = set; then :
@@ -7074,7 +7075,7 @@ return kinfo_getvmmap ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' util; do
+for ac_lib in '' util util-freebsd; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
@@ -9412,6 +9413,14 @@ else
   CONFIG_OBS="$CONFIG_OBS python.o"
   CONFIG_SRCS="$CONFIG_SRCS python/python.c"
 fi
+
+# Work around Python http://bugs.python.org/issue10112.  See also
+# http://bugs.python.org/issue11410, otherwise -Wl,--dynamic-list has
+# no effect.  Note that the only test after this that uses Python is
+# the -rdynamic/-Wl,--dynamic-list test, and we do want that one to be
+# run without -export-dynamic too.
+PYTHON_LIBS=`echo $PYTHON_LIBS | sed -e 's/-Xlinker -export-dynamic//'`
+
 
 
 
@@ -12918,6 +12927,20 @@ _ACEOF
 fi
 
 
+# See if <sys/ptrace.h> supports syscall fields on FreeBSD.  The
+# pl_syscall_code member of `struct ptrace_lwpinfo' was added in
+# FreeBSD 10.3.
+ac_fn_c_check_member "$LINENO" "struct ptrace_lwpinfo" "pl_syscall_code" "ac_cv_member_struct_ptrace_lwpinfo_pl_syscall_code" "#include <sys/ptrace.h>
+"
+if test "x$ac_cv_member_struct_ptrace_lwpinfo_pl_syscall_code" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE 1
+_ACEOF
+
+
+fi
+
 
 # Detect which type of /proc is in use, such as for Solaris.
 
@@ -13705,16 +13728,24 @@ rm -f core conftest.err conftest.$ac_objext \
      # libpythonX.Y.a would get its symbols required for
      # pythonX.Y/lib-dynload/*.so modules hidden by -Wl,--dynamic-list.
      # Problem does not happen for the recommended libpythonX.Y.so linkage.
+
+     # Note the workaround for Python
+     # http://bugs.python.org/issue10112 earlier has removed
+     # -export-dynamic from PYTHON_LIBS.  That's exactly what we want
+     # here too, as otherwise it'd make this -Wl,--dynamic-list test
+     # always pass.
      old_CFLAGS="$CFLAGS"
      CFLAGS="$CFLAGS $PYTHON_CFLAGS"
      old_LIBS="$LIBS"
      LIBS="$LIBS $PYTHON_LIBS"
+     old_CPPFLAGS="$CPPFLAGS"
+     CPPFLAGS="$CPPFLAGS $PYTHON_CPPFLAGS"
      if test "$cross_compiling" = yes; then :
   true
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include "${have_libpython}/Python.h"
+#include "Python.h"
 int
 main ()
 {
@@ -13736,6 +13767,7 @@ fi
 
      LIBS="$old_LIBS"
      CFLAGS="$old_CFLAGS"
+     CPPFLAGS="$old_CPPFLAGS"
    fi
    LDFLAGS="$old_LDFLAGS"
 fi
@@ -16390,6 +16422,7 @@ struct bt_iter_pos *pos = bt_iter_get_pos (bt_ctf_get_iter (NULL));
 			struct bt_ctf_event *event = NULL;
 			const struct bt_definition *scope;
 
+			pos->type = BT_SEEK_BEGIN;
 			bt_iter_set_pos (bt_ctf_get_iter (NULL), pos);
 			scope = bt_ctf_get_top_level_scope (event,
 			      				   BT_STREAM_EVENT_HEADER);
@@ -16481,6 +16514,12 @@ ac_config_links="$ac_config_links $ac_config_links_1"
 
 $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 
+
+if $development; then
+
+$as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
+
+fi
 
 
   gdb_ac_transform=`echo "$program_transform_name" | sed -e 's/\\$\\$/\\$/g'`

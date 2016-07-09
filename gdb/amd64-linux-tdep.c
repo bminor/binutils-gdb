@@ -1733,8 +1733,6 @@ amd64_dtrace_parse_probe_argument (struct gdbarch *gdbarch,
 				   struct parser_state *pstate,
 				   int narg)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct frame_info *this_frame = get_selected_frame (NULL);
   struct stoken str;
 
   /* DTrace probe arguments can be found on the ABI-defined places for
@@ -1764,7 +1762,6 @@ amd64_dtrace_parse_probe_argument (struct gdbarch *gdbarch,
   else
     {
       /* Additional arguments are passed on the stack.  */
-      CORE_ADDR sp;
       const char *regname = user_reg_map_regnum_to_name (gdbarch, AMD64_RSP_REGNUM);
 
       /* Displacement.  */

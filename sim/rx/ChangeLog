@@ -1,3 +1,9 @@
+2016-04-27  Nick Clifton  <nickc@redhat.com>
+
+	PR target/20000
+	* fpu.c (check_exceptions): Fix typo checking for signalling
+	NANs.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

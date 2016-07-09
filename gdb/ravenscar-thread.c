@@ -338,7 +338,6 @@ ravenscar_mourn_inferior (struct target_ops *ops)
 static void
 ravenscar_inferior_created (struct target_ops *target, int from_tty)
 {
-  struct ravenscar_arch_ops *ops;
 
   if (!ravenscar_task_support
       || gdbarch_ravenscar_ops (target_gdbarch ()) == NULL

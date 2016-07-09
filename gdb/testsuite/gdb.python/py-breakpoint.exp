@@ -34,12 +34,15 @@ proc test_bkpt_basic { } {
 	# Start with a fresh gdb.
 	clean_restart ${testfile}
 
+	# We should start with no breakpoints.
+	gdb_test "python print (gdb.breakpoints())" "\\(\\)"
+
 	if ![runto_main] then {
 	    fail "Cannot run to main."
 	    return 0
 	}
 
-	# Initially there should be one breakpoint: main.
+	# Now there should be one breakpoint: main.
 	gdb_py_test_silent_cmd "python blist = gdb.breakpoints()" \
 	    "Get Breakpoint List" 0
 	gdb_test "python print (blist\[0\])" \

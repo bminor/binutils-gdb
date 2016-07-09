@@ -1684,6 +1684,15 @@ gdb_demangle (const char *name, int options)
   return result;
 }
 
+/* See cp-support.h.  */
+
+int
+gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+  return *demangled != NULL;
+}
+
 /* Don't allow just "maintenance cplus".  */
 
 static  void

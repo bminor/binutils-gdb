@@ -1271,8 +1271,8 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       fixp->fx_subsy = NULL;
     }
 
-  reloc[0]		  = (arelent *) xmalloc (sizeof (arelent));
-  reloc[0]->sym_ptr_ptr   = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc[0]		  = XNEW (arelent);
+  reloc[0]->sym_ptr_ptr   = XNEW (asymbol *);
   * reloc[0]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc[0]->address       = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc[0]->addend        = fixp->fx_offset;
@@ -1284,8 +1284,8 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
     }
 
 #define OPX(REL,SYM,ADD)							\
-  reloc[rp]		   = (arelent *) xmalloc (sizeof (arelent));		\
-  reloc[rp]->sym_ptr_ptr   = (asymbol **) xmalloc (sizeof (asymbol *));		\
+  reloc[rp]		   = XNEW (arelent);		\
+  reloc[rp]->sym_ptr_ptr   = XNEW (asymbol *);		\
   reloc[rp]->howto         = bfd_reloc_type_lookup (stdoutput, REL);		\
   reloc[rp]->addend        = ADD;						\
   * reloc[rp]->sym_ptr_ptr = SYM;						\

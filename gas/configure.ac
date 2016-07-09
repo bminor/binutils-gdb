@@ -106,6 +106,17 @@ AM_BINUTILS_WARNINGS
 # Generate a header file
 AC_CONFIG_HEADERS(config.h:config.in)
 
+dnl Option --with-cpu=TYPE allows configure type control of the default
+dnl cpu type within the assembler.  Currently only the ARC target
+dnl supports this feature, but others may be added in the future.
+AC_ARG_WITH(cpu,
+            AS_HELP_STRING([--with-cpu=CPU],
+            [default cpu variant is CPU (currently only supported on ARC)]),
+            [AC_DEFINE_UNQUOTED(TARGET_WITH_CPU,
+                                "${with_cpu}",
+                                [Target specific CPU.])],
+            [])
+
 # PR 14072
 AH_VERBATIM([00_CONFIG_H_CHECK],
 [/* Check that config.h is #included before system headers

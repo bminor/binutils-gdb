@@ -2381,9 +2381,6 @@ decode_ARC_machine_flags (unsigned e_flags, unsigned e_machine, char buf[])
     case E_ARC_MACH_ARC700:
       strcat (buf, ", ARC700");
       break;
-    case E_ARC_MACH_NPS400:
-      strcat (buf, ", NPS400");
-      break;
 
       /* The only times we should end up here are (a) A corrupt ELF, (b) A
          new ELF with new architecture being read by an old version of
@@ -3689,6 +3686,23 @@ get_tic6x_segment_type (unsigned long type)
 }
 
 static const char *
+get_solaris_segment_type (unsigned long type)
+{
+  switch (type)
+    {
+    case 0x6464e550: return "PT_SUNW_UNWIND";
+    case 0x6474e550: return "PT_SUNW_EH_FRAME";
+    case 0x6ffffff7: return "PT_LOSUNW";
+    case 0x6ffffffa: return "PT_SUNWBSS";
+    case 0x6ffffffb: return "PT_SUNWSTACK";
+    case 0x6ffffffc: return "PT_SUNWDTRACE";
+    case 0x6ffffffd: return "PT_SUNWCAP";
+    case 0x6fffffff: return "PT_HISUNW";
+    default: return NULL;
+    }
+}
+
+static const char *
 get_segment_type (unsigned long p_type)
 {
   static char buff[32];
@@ -3758,7 +3772,10 @@ get_segment_type (unsigned long p_type)
 	      result = get_ia64_segment_type (p_type);
 	      break;
 	    default:
-	      result = NULL;
+	      if (elf_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
+		result = get_solaris_segment_type (p_type);
+	      else
+		result = NULL;
 	      break;
 	    }
 
@@ -5039,6 +5056,10 @@ get_32bit_section_headers (FILE * file, bfd_boolean probe)
       internal->sh_info      = BYTE_GET (shdrs[i].sh_info);
       internal->sh_addralign = BYTE_GET (shdrs[i].sh_addralign);
       internal->sh_entsize   = BYTE_GET (shdrs[i].sh_entsize);
+      if (!probe && internal->sh_link > num)
+	warn (_("Section %u has an out of range sh_link value of %u\n"), i, internal->sh_link);
+      if (!probe && internal->sh_flags & SHF_INFO_LINK && internal->sh_info > num)
+	warn (_("Section %u has an out of range sh_info value of %u\n"), i, internal->sh_info);
     }
 
   free (shdrs);
@@ -5097,6 +5118,10 @@ get_64bit_section_headers (FILE * file, bfd_boolean probe)
       internal->sh_info      = BYTE_GET (shdrs[i].sh_info);
       internal->sh_offset    = BYTE_GET (shdrs[i].sh_offset);
       internal->sh_addralign = BYTE_GET (shdrs[i].sh_addralign);
+      if (!probe && internal->sh_link > num)
+	warn (_("Section %u has an out of range sh_link value of %u\n"), i, internal->sh_link);
+      if (!probe && internal->sh_flags & SHF_INFO_LINK && internal->sh_info > num)
+	warn (_("Section %u has an out of range sh_info value of %u\n"), i, internal->sh_info);
     }
 
   free (shdrs);
@@ -5374,7 +5399,7 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* 20 */ { STRING_COMMA_LEN ("COMPRESSED") },
       /* ARM specific.  */
       /* 21 */ { STRING_COMMA_LEN ("ENTRYSECT") },
-      /* 22 */ { STRING_COMMA_LEN ("ARM_NOREAD") },
+      /* 22 */ { STRING_COMMA_LEN ("ARM_PURECODE") },
       /* 23 */ { STRING_COMMA_LEN ("COMDEF") }
     };
 
@@ -5450,7 +5475,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 		  switch (flag)
 		    {
 		    case SHF_ENTRYSECT: sindex = 21; break;
-		    case SHF_ARM_NOREAD: sindex = 22; break;
+		    case SHF_ARM_PURECODE: sindex = 22; break;
 		    case SHF_COMDEF: sindex = 23; break;
 		    default: break;
 		    }
@@ -5509,7 +5534,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 		  && flag == SHF_X86_64_LARGE)
 		*p = 'l';
 	      else if (elf_header.e_machine == EM_ARM
-		       && flag == SHF_ARM_NOREAD)
+		       && flag == SHF_ARM_PURECODE)
 		  *p = 'y';
 	      else if (flag & SHF_MASKOS)
 		{
@@ -6093,7 +6118,7 @@ process_section_headers (FILE * file)
 	  || elf_header.e_machine == EM_K1OM)
 	printf (_("l (large), "));
       else if (elf_header.e_machine == EM_ARM)
-	printf (_("y (noread), "));
+	printf (_("y (purecode), "));
       printf ("p (processor specific)\n");
     }
 
@@ -8686,7 +8711,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 
     case DT_MIPS_TIME_STAMP:
       {
-	char timebuf[20];
+	char timebuf[128];
 	struct tm * tmp;
 	time_t atime = entry->d_un.d_val;
 
@@ -8715,7 +8740,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
     case DT_MIPS_DELTA_SYM_NO:
     case DT_MIPS_DELTA_CLASSSYM_NO:
     case DT_MIPS_COMPACT_SIZE:
-      print_vma (entry->d_un.d_ptr, DEC);
+      print_vma (entry->d_un.d_val, DEC);
       break;
 
     default:
@@ -11469,6 +11494,7 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 static bfd_boolean
 is_32bit_abs_reloc (unsigned int reloc_type)
 {
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
   switch (elf_header.e_machine)
     {
     case EM_386:
@@ -11482,6 +11508,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 2; /* R_960_32.  */
     case EM_AARCH64:
       return reloc_type == 258; /* R_AARCH64_ABS32 */
+    case EM_ADAPTEVA_EPIPHANY:
+      return reloc_type == 3;
     case EM_ALPHA:
       return reloc_type == 1; /* R_ALPHA_REFLONG.  */
     case EM_ARC:
@@ -11494,8 +11522,6 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_AVR_OLD:
     case EM_AVR:
       return reloc_type == 1;
-    case EM_ADAPTEVA_EPIPHANY:
-      return reloc_type == 3;
     case EM_BLACKFIN:
       return reloc_type == 0x12; /* R_byte4_data.  */
     case EM_CRIS:
@@ -11654,6 +11680,7 @@ static bfd_boolean
 is_32bit_pcrel_reloc (unsigned int reloc_type)
 {
   switch (elf_header.e_machine)
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
     {
     case EM_386:
     case EM_IAMCU:
@@ -11671,6 +11698,9 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 49; /* R_ARC_32_PCREL.  */
     case EM_ARM:
       return reloc_type == 3;  /* R_ARM_REL32 */
+    case EM_AVR_OLD:
+    case EM_AVR:
+      return reloc_type == 36; /* R_AVR_32_PCREL.  */
     case EM_MICROBLAZE:
       return reloc_type == 2;  /* R_MICROBLAZE_32_PCREL.  */
     case EM_OR1K:
@@ -11800,6 +11830,8 @@ is_24bit_abs_reloc (unsigned int reloc_type)
     case EM_CYGNUS_MN10200:
     case EM_MN10200:
       return reloc_type == 4; /* R_MN10200_24.  */
+    case EM_FT32:
+      return reloc_type == 5; /* R_FT32_20.  */
     default:
       return FALSE;
     }
@@ -11811,17 +11843,18 @@ is_24bit_abs_reloc (unsigned int reloc_type)
 static bfd_boolean
 is_16bit_abs_reloc (unsigned int reloc_type)
 {
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
   switch (elf_header.e_machine)
     {
     case EM_ARC:
     case EM_ARC_COMPACT:
     case EM_ARC_COMPACT2:
       return reloc_type == 2; /* R_ARC_16.  */
+    case EM_ADAPTEVA_EPIPHANY:
+      return reloc_type == 5;
     case EM_AVR_OLD:
     case EM_AVR:
       return reloc_type == 4; /* R_AVR_16.  */
-    case EM_ADAPTEVA_EPIPHANY:
-      return reloc_type == 5;
     case EM_CYGNUS_D10V:
     case EM_D10V:
       return reloc_type == 3; /* R_D10V_16.  */
@@ -11835,6 +11868,12 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_M32C_OLD:
     case EM_M32C:
       return reloc_type == 1; /* R_M32C_16 */
+    case EM_CYGNUS_MN10200:
+    case EM_MN10200:
+      return reloc_type == 2; /* R_MN10200_16.  */
+    case EM_CYGNUS_MN10300:
+    case EM_MN10300:
+      return reloc_type == 2; /* R_MN10300_16.  */
     case EM_MSP430:
       if (uses_msp430x_relocs ())
 	return reloc_type == 2; /* R_MSP430_ABS16.  */
@@ -11850,17 +11889,11 @@ is_16bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 2; /* R_OR1K_16.  */
     case EM_TI_C6000:
       return reloc_type == 2; /* R_C6000_ABS16.  */
+    case EM_VISIUM:
+      return reloc_type == 2; /* R_VISIUM_16. */
     case EM_XC16X:
     case EM_C166:
       return reloc_type == 2; /* R_XC16C_ABS_16.  */
-    case EM_CYGNUS_MN10200:
-    case EM_MN10200:
-      return reloc_type == 2; /* R_MN10200_16.  */
-    case EM_CYGNUS_MN10300:
-    case EM_MN10300:
-      return reloc_type == 2; /* R_MN10300_16.  */
-    case EM_VISIUM:
-      return reloc_type == 2; /* R_VISIUM_16. */
     case EM_XGATE:
       return reloc_type == 3; /* R_XGATE_16.  */
     default:
@@ -11876,44 +11909,53 @@ is_none_reloc (unsigned int reloc_type)
 {
   switch (elf_header.e_machine)
     {
-    case EM_68K:     /* R_68K_NONE.  */
     case EM_386:     /* R_386_NONE.  */
-    case EM_SPARC32PLUS:
-    case EM_SPARCV9:
-    case EM_SPARC:   /* R_SPARC_NONE.  */
-    case EM_MIPS:    /* R_MIPS_NONE.  */
-    case EM_PARISC:  /* R_PARISC_NONE.  */
-    case EM_ALPHA:   /* R_ALPHA_NONE.  */
+    case EM_68K:     /* R_68K_NONE.  */
     case EM_ADAPTEVA_EPIPHANY:
-    case EM_PPC:     /* R_PPC_NONE.  */
-    case EM_PPC64:   /* R_PPC64_NONE.  */
-    case EM_ARC:     /* R_ARC_NONE.  */
-    case EM_ARC_COMPACT: /* R_ARC_NONE.  */
-    case EM_ARC_COMPACT2: /* R_ARC_NONE.  */
-    case EM_ARM:     /* R_ARM_NONE.  */
-    case EM_IA_64:   /* R_IA64_NONE.  */
-    case EM_SH:      /* R_SH_NONE.  */
-    case EM_S390_OLD:
-    case EM_S390:    /* R_390_NONE.  */
-    case EM_CRIS:    /* R_CRIS_NONE.  */
-    case EM_X86_64:  /* R_X86_64_NONE.  */
-    case EM_L1OM:    /* R_X86_64_NONE.  */
-    case EM_K1OM:    /* R_X86_64_NONE.  */
-    case EM_MN10300: /* R_MN10300_NONE.  */
-    case EM_FT32:    /* R_FT32_NONE.  */
-    case EM_MOXIE:   /* R_MOXIE_NONE.  */
-    case EM_M32R:    /* R_M32R_NONE.  */
-    case EM_TI_C6000:/* R_C6000_NONE.  */
-    case EM_TILEGX:  /* R_TILEGX_NONE.  */
-    case EM_TILEPRO: /* R_TILEPRO_NONE.  */
-    case EM_XC16X:
-    case EM_C166:    /* R_XC16X_NONE.  */
+    case EM_ALPHA:   /* R_ALPHA_NONE.  */
     case EM_ALTERA_NIOS2: /* R_NIOS2_NONE.  */
+    case EM_ARC:     /* R_ARC_NONE.  */
+    case EM_ARC_COMPACT2: /* R_ARC_NONE.  */
+    case EM_ARC_COMPACT: /* R_ARC_NONE.  */
+    case EM_ARM:     /* R_ARM_NONE.  */
+    case EM_C166:    /* R_XC16X_NONE.  */
+    case EM_CRIS:    /* R_CRIS_NONE.  */
+    case EM_FT32:    /* R_FT32_NONE.  */
+    case EM_IA_64:   /* R_IA64_NONE.  */
+    case EM_K1OM:    /* R_X86_64_NONE.  */
+    case EM_L1OM:    /* R_X86_64_NONE.  */
+    case EM_M32R:    /* R_M32R_NONE.  */
+    case EM_MIPS:    /* R_MIPS_NONE.  */
+    case EM_MN10300: /* R_MN10300_NONE.  */
+    case EM_MOXIE:   /* R_MOXIE_NONE.  */
     case EM_NIOS32:  /* R_NIOS_NONE.  */
     case EM_OR1K:    /* R_OR1K_NONE. */
+    case EM_PARISC:  /* R_PARISC_NONE.  */
+    case EM_PPC64:   /* R_PPC64_NONE.  */
+    case EM_PPC:     /* R_PPC_NONE.  */
+    case EM_S390:    /* R_390_NONE.  */
+    case EM_S390_OLD:
+    case EM_SH:      /* R_SH_NONE.  */
+    case EM_SPARC32PLUS:
+    case EM_SPARC:   /* R_SPARC_NONE.  */
+    case EM_SPARCV9:
+    case EM_TILEGX:  /* R_TILEGX_NONE.  */
+    case EM_TILEPRO: /* R_TILEPRO_NONE.  */
+    case EM_TI_C6000:/* R_C6000_NONE.  */
+    case EM_X86_64:  /* R_X86_64_NONE.  */
+    case EM_XC16X:
       return reloc_type == 0;
+
     case EM_AARCH64:
       return reloc_type == 0 || reloc_type == 256;
+    case EM_AVR_OLD:
+    case EM_AVR:
+      return (reloc_type == 0 /* R_AVR_NONE.  */
+	      || reloc_type == 30 /* R_AVR_DIFF8.  */
+	      || reloc_type == 31 /* R_AVR_DIFF16.  */
+	      || reloc_type == 32 /* R_AVR_DIFF32.  */);
+    case EM_METAG:
+      return reloc_type == 3; /* R_METAG_NONE.  */
     case EM_NDS32:
       return (reloc_type == 0       /* R_XTENSA_NONE.  */
 	      || reloc_type == 204  /* R_NDS32_DIFF8.  */
@@ -11926,8 +11968,6 @@ is_none_reloc (unsigned int reloc_type)
 	      || reloc_type == 17  /* R_XTENSA_DIFF8.  */
 	      || reloc_type == 18  /* R_XTENSA_DIFF16.  */
 	      || reloc_type == 19  /* R_XTENSA_DIFF32.  */);
-    case EM_METAG:
-      return reloc_type == 3; /* R_METAG_NONE.  */
     }
   return FALSE;
 }
@@ -12923,6 +12963,8 @@ static const char * arm_attr_tag_FP_HP_extension[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_ABI_FP_16bit_format[] =
   {"None", "IEEE 754", "Alternative Format"};
+static const char * arm_attr_tag_DSP_extension[] =
+  {"Follow architecture", "Allowed"};
 static const char * arm_attr_tag_MPextension_use[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_DIV_use[] =
@@ -12973,6 +13015,7 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(38, ABI_FP_16bit_format),
   LOOKUP(42, MPextension_use),
   LOOKUP(44, DIV_use),
+  LOOKUP(46, DSP_extension),
   {64, "nodefaults", 0, NULL},
   {65, "also_compatible_with", 0, NULL},
   LOOKUP(66, T2EE_use),
@@ -14185,6 +14228,8 @@ print_mips_ases (unsigned int mask)
     fputs ("\n\tDSP ASE", stdout);
   if (mask & AFL_ASE_DSPR2)
     fputs ("\n\tDSP R2 ASE", stdout);
+  if (mask & AFL_ASE_DSPR3)
+    fputs ("\n\tDSP R3 ASE", stdout);
   if (mask & AFL_ASE_EVA)
     fputs ("\n\tEnhanced VA Scheme", stdout);
   if (mask & AFL_ASE_MCU)
@@ -14444,7 +14489,7 @@ process_mips_specific (FILE * file)
 	    {
 	      Elf32_Lib liblist;
 	      time_t atime;
-	      char timebuf[20];
+	      char timebuf[128];
 	      struct tm * tmp;
 
 	      liblist.l_name = BYTE_GET (elib[cnt].l_name);
@@ -15098,7 +15143,7 @@ process_gnu_liblist (FILE * file)
 	    {
 	      Elf32_Lib liblist;
 	      time_t atime;
-	      char timebuf[20];
+	      char timebuf[128];
 	      struct tm * tmp;
 
 	      liblist.l_name = BYTE_GET (elib[cnt].l_name);

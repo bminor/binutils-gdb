@@ -24,6 +24,10 @@
 
 #include "bfd_stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint64_t ppc_cpu_t;
 
 /* The opcode table is an array of struct powerpc_opcode.  */
@@ -436,5 +440,9 @@ ppc_optional_operand_value (const struct powerpc_operand *operand)
     return (operand+1)->shift;
   return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PPC_H */

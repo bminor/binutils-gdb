@@ -5,18 +5,20 @@
 
 .*: +file format .*
 
-#...
-0+4000e0 <__start>:
-[ 	]*[a-f0-9]+:	ff 15 42 00 20 00    	callq  \*0x200042\(%rip\)        # 600128 <_GLOBAL_OFFSET_TABLE_\+0x18>
-[ 	]*[a-f0-9]+:	ff 25 3c 00 20 00    	jmpq   \*0x20003c\(%rip\)        # 600128 <_GLOBAL_OFFSET_TABLE_\+0x18>
-[ 	]*[a-f0-9]+:	48 03 05 35 00 20 00 	add    0x200035\(%rip\),%rax        # 600128 <_GLOBAL_OFFSET_TABLE_\+0x18>
-[ 	]*[a-f0-9]+:	48 8b 05 2e 00 20 00 	mov    0x20002e\(%rip\),%rax        # 600128 <_GLOBAL_OFFSET_TABLE_\+0x18>
-[ 	]*[a-f0-9]+:	48 85 05 27 00 20 00 	test   %rax,0x200027\(%rip\)        # 600128 <_GLOBAL_OFFSET_TABLE_\+0x18>
-[ 	]*[a-f0-9]+:	48 c7 c0 09 01 40 00 	mov    \$0x400109,%rax
 
-0+400108 <foo>:
-[ 	]*[a-f0-9]+:	c3                   	retq   
+Disassembly of section .text:
 
-0+400109 <bar>:
-[ 	]*[a-f0-9]+:	c3                   	retq   
+0+4000c8 <__start>:
+ +[a-f0-9]+:	ff 15 2a 00 20 00    	callq  \*0x20002a\(%rip\)        # 6000f8 <bar\+0x200007>
+ +[a-f0-9]+:	ff 25 24 00 20 00    	jmpq   \*0x200024\(%rip\)        # 6000f8 <bar\+0x200007>
+ +[a-f0-9]+:	48 03 05 1d 00 20 00 	add    0x20001d\(%rip\),%rax        # 6000f8 <bar\+0x200007>
+ +[a-f0-9]+:	48 8b 05 16 00 20 00 	mov    0x200016\(%rip\),%rax        # 6000f8 <bar\+0x200007>
+ +[a-f0-9]+:	48 85 05 0f 00 20 00 	test   %rax,0x20000f\(%rip\)        # 6000f8 <bar\+0x200007>
+ +[a-f0-9]+:	48 c7 c0 f1 00 40 00 	mov    \$0x4000f1,%rax
+
+0+4000f0 <foo>:
+ +[a-f0-9]+:	c3                   	retq   
+
+0+4000f1 <bar>:
+ +[a-f0-9]+:	c3                   	retq   
 #pass

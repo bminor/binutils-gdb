@@ -24,6 +24,8 @@
 #include "safe-ctype.h"
 #include "tc-dlx.h"
 #include "opcode/dlx.h"
+#include "elf/dlx.h"
+#include "bfd/elf32-dlx.h"
 
 /* Make it easier to clone this machine desc into another one.  */
 #define	machine_opcode      dlx_opcode
@@ -52,7 +54,7 @@ struct machine_it
   int pcrel;
   int size;
   int reloc_offset;		/* Offset of reloc within insn.  */
-  int reloc;
+  bfd_reloc_code_real_type reloc;
   int HI;
   int LO;
 }

@@ -1,4 +1,16 @@
 -*- text -*-
+
+Changes in 2.27:
+
+* Default to --enable-compressed-debug-sections=gas for Linux/x86 targets.
+
+* Add --no-pad-sections to stop the assembler from padding the end of output
+  sections up to their alignment boundary.
+
+* Support for the ARMv8-M architecture has been added to the ARM port.  Support
+  for the ARMv8-M Security and DSP Extensions has also been added to the ARM
+  port.
+
 * ARC backend accepts .extInstruction, .extCondCode, .extAuxRegister, and
   .extCoreRegister pseudo-ops that allow an user to define custom
   instructions, conditional codes, auxiliary and core registers.
@@ -24,6 +36,9 @@
   lfence, mfence and sfence as "lock addl $0x0, (%[re]sp)".
 
 * Add assembly-time relaxation option for ARC cpus.
+
+* Add --with-cpu=TYPE configure option for ARC gas.  This allows the default
+  cpu type to be adjusted at configure time.
 
 Changes in 2.26:
 

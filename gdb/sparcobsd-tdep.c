@@ -234,8 +234,6 @@ sparc32obsd_collect_uthread(const struct regcache *regcache,
 static void
 sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   /* OpenBSD/sparc is very similar to NetBSD/sparc ELF.  */
   sparc32nbsd_elf_init_abi (info, gdbarch);
 

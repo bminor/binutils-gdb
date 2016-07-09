@@ -310,8 +310,6 @@ void
 read_frame_local (struct symbol *sym, struct frame_info *frame,
 		  struct frame_arg *argp)
 {
-  struct value *val = NULL;
-
   argp->sym = sym;
   argp->val = NULL;
   argp->error = NULL;

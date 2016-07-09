@@ -296,7 +296,7 @@ spu_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
 {
   ULONGEST addr = *(ULONGEST *)stream;
 
-  if (fetch_ppc_memory (addr + offset, buf, nbytes) != 0)
+  if (fetch_ppc_memory (addr + offset, (gdb_byte *)buf, nbytes) != 0)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return -1;
@@ -347,7 +347,7 @@ spu_bfd_open (ULONGEST addr)
       int sect_size = bfd_section_size (nbfd, spu_name);
       if (sect_size > 20)
 	{
-	  char *buf = alloca (sect_size - 20 + 1);
+	  char *buf = (char *)alloca (sect_size - 20 + 1);
 	  bfd_get_section_contents (nbfd, spu_name, buf, 20, sect_size - 20);
 	  buf[sect_size - 20] = '\0';
 

@@ -22,6 +22,7 @@
 #ifndef _CPU_STATE_H
 #define _CPU_STATE_H
 
+#include "config.h"
 #include <sys/types.h>
 #include <stdint.h>
 #include <inttypes.h>
@@ -123,16 +124,14 @@ typedef enum VReg
 } VReg;
 
 /* All the different integer bit patterns for the components of a
-   general register are overlaid here using a union so as to allow all
-   reading and writing of the desired bits.
+   general register are overlaid here using a union so as to allow
+   all reading and writing of the desired bits.  Note that we have
+   to take care when emulating a big-endian AArch64 as we are
+   running on a little endian host.  */
 
-   N.B. the ARM spec says that when you write a 32 bit register you
-   are supposed to write the low 32 bits and zero the high 32
-   bits. But we don't actually have to care about this because Java
-   will only ever consume the 32 bits value as a 64 bit quantity after
-   an explicit extend.  */
 typedef union GRegisterValue
 {
+#if !WORDS_BIGENDIAN
   int8_t   s8;
   int16_t  s16;
   int32_t  s32;
@@ -141,6 +140,16 @@ typedef union GRegisterValue
   uint16_t u16;
   uint32_t u32;
   uint64_t u64;
+#else
+  struct { int64_t :56; int8_t s8; };
+  struct { int64_t :48; int16_t s16; };
+  struct { int64_t :32; int32_t s32; };
+  int64_t s64;
+  struct { uint64_t :56; uint8_t u8; };
+  struct { uint64_t :48; uint16_t u16; };
+  struct { uint64_t :32; uint32_t u32; };
+  uint64_t u64;
+#endif
 } GRegister;
 
 /* Float registers provide for storage of a single, double or quad

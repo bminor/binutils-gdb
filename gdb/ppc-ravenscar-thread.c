@@ -148,7 +148,6 @@ ppc_ravenscar_generic_fetch_registers
    struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  const int sp_regnum = gdbarch_sp_regnum (gdbarch);
   const int num_regs = gdbarch_num_regs (gdbarch);
   int current_regnum;
   CORE_ADDR current_address;

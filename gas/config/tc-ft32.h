@@ -24,9 +24,7 @@
 #define WORKING_DOT_WORD
 
 /* This macro is the BFD architecture to pass to `bfd_set_arch_mach'.  */
-const char *ft32_target_format;
-#define DEFAULT_TARGET_FORMAT  "elf32-ft32"
-#define TARGET_FORMAT          ft32_target_format
+#define TARGET_FORMAT  "elf32-ft32"
 
 #define TARGET_ARCH bfd_arch_ft32
 

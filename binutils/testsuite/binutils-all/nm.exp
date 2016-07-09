@@ -163,6 +163,7 @@ if [regexp $want $got] then {
 # all the ELF variants, but adding the patterns here to that proc then
 # introduces a whole slew of new regressions in the GAS and LD testsuites.
 if {   [is_elf_format]
+    || [istarget *-*-beos]
     || [istarget *-*-dragonfly*]
     || [istarget *-*-*elf]
     || [istarget *-*-freebsd*]

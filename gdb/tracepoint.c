@@ -1651,9 +1651,7 @@ encode_actions_and_make_cleanup (struct bp_location *tloc,
 				 struct collection_list *tracepoint_list,
 				 struct collection_list *stepping_list)
 {
-  char *default_collect_line = NULL;
   struct command_line *actions;
-  struct command_line *default_collect_action = NULL;
   int frame_reg;
   LONGEST frame_offset;
   struct cleanup *back_to, *return_chain;
@@ -1790,9 +1788,6 @@ start_tracing (char *notes)
 
   for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
     {
-      struct tracepoint *t = (struct tracepoint *) b;
-      struct bp_location *loc;
-
       if (b->enable_state == bp_enabled)
 	any_enabled = 1;
 
@@ -3963,7 +3958,6 @@ static void
 print_one_static_tracepoint_marker (int count,
 				    struct static_tracepoint_marker *marker)
 {
-  struct command_line *l;
   struct symbol *sym;
 
   char wrap_indent[80];

@@ -1158,7 +1158,7 @@ find_format (struct d30v_opcode *opcode,
 	    {
 	      int flags = d30v_operand_table[fm->operands[j]].flags;
 	      int bits = d30v_operand_table[fm->operands[j]].bits;
-	      int X_op = myops[j].X_op;
+	      operatorT X_op = myops[j].X_op;
 	      int num = myops[j].X_add_number;
 
 	      if (flags & OPERAND_SPECIAL)

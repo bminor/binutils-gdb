@@ -745,6 +745,12 @@ struct target_ops
 						ULONGEST *xfered_len)
       TARGET_DEFAULT_RETURN (TARGET_XFER_E_IO);
 
+    /* Return the limit on the size of any single memory transfer
+       for the target.  */
+
+    ULONGEST (*to_get_memory_xfer_limit) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (ULONGEST_MAX);
+
     /* Returns the memory map for the target.  A return value of NULL
        means that no memory map is available.  If a memory address
        does not fall within any returned regions, it's assumed to be
@@ -1301,6 +1307,11 @@ extern struct target_ops *find_run_target (void);
    necessary bookkeeping to be performed after an attach completes.  */
 #define target_post_attach(pid) \
      (*current_target.to_post_attach) (&current_target, pid)
+
+/* Display a message indicating we're about to detach from the current
+   inferior process.  */
+
+extern void target_announce_detach (int from_tty);
 
 /* Takes a program previously attached to and detaches it.
    The program may resume execution (some targets do, some don't) and will

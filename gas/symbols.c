@@ -1639,7 +1639,7 @@ define_dollar_label (long label)
     {
       dollar_labels = XNEWVEC (long, DOLLAR_LABEL_BUMP_BY);
       dollar_label_instances = XNEWVEC (long, DOLLAR_LABEL_BUMP_BY);
-      dollar_label_defines = (char *) xmalloc (DOLLAR_LABEL_BUMP_BY);
+      dollar_label_defines = XNEWVEC (char, DOLLAR_LABEL_BUMP_BY);
       dollar_label_max = DOLLAR_LABEL_BUMP_BY;
       dollar_label_count = 0;
     }
@@ -1649,7 +1649,8 @@ define_dollar_label (long label)
       dollar_labels = XRESIZEVEC (long, dollar_labels, dollar_label_max);
       dollar_label_instances = XRESIZEVEC (long, dollar_label_instances,
 					  dollar_label_max);
-      dollar_label_defines = (char *) xrealloc (dollar_label_defines, dollar_label_max);
+      dollar_label_defines = XRESIZEVEC (char, dollar_label_defines,
+					 dollar_label_max);
     }				/* if we needed to grow  */
 
   dollar_labels[dollar_label_count] = label;
@@ -3075,11 +3076,11 @@ symbol_relc_make_sym (symbolS * sym)
   sname_len = strlen (sname);
   typetag = symbol_section_p (sym) ? 'S' : 's';
 
-  terminal = xmalloc (1 /* S or s */
-		      + 8 /* sname_len in decimal */
-		      + 1 /* _ spacer */
-		      + sname_len /* name itself */
-		      + 1 /* \0 */ );
+  terminal = XNEWVEC (char, (1 /* S or s */
+			     + 8 /* sname_len in decimal */
+			     + 1 /* _ spacer */
+			     + sname_len /* name itself */
+			     + 1 /* \0 */ ));
 
   sprintf (terminal, "%c%d:%s", typetag, sname_len, sname);
   return terminal;
@@ -3220,25 +3221,16 @@ symbol_relc_make_expr (expressionS * exp)
 
   if (opstr == NULL)
     concat_string = NULL;
+  else if (arity == 0)
+    concat_string = xstrdup (opstr);
+  else if (arity == 1)
+    concat_string = concat (opstr, ":", operands[0], (char *) NULL);
+  else if (arity == 2)
+    concat_string = concat (opstr, ":", operands[0], ":", operands[1],
+			    (char *) NULL);
   else
-    {
-      /* Allocate new string; include inter-operand padding gaps etc.  */
-      concat_string = xmalloc (strlen (opstr)
-			       + 1
-			       + (arity >= 1 ? (strlen (operands[0]) + 1 ) : 0)
-			       + (arity >= 2 ? (strlen (operands[1]) + 1 ) : 0)
-			       + (arity >= 3 ? (strlen (operands[2]) + 0 ) : 0)
-			       + 1);
-      gas_assert (concat_string != NULL);
-
-      /* Format the thing.  */
-      sprintf (concat_string,
-	       (arity == 0 ? "%s" :
-		arity == 1 ? "%s:%s" :
-		arity == 2 ? "%s:%s:%s" :
-		/* arity == 3 */ "%s:%s:%s:%s"),
-	       opstr, operands[0], operands[1], operands[2]);
-    }
+    concat_string = concat (opstr, ":", operands[0], ":", operands[1], ":",
+			    operands[2], (char *) NULL);
 
   /* Free operand strings (not opstr).  */
   if (arity >= 1) xfree (operands[0]);

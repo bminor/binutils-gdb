@@ -97,7 +97,10 @@ static int
 pspy_initialize (pspace_object *self)
 {
   self->pspace = NULL;
-  self->dict = NULL;
+
+  self->dict = PyDict_New ();
+  if (self->dict == NULL)
+    return 0;
 
   self->printers = PyList_New (0);
   if (self->printers == NULL)

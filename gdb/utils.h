@@ -159,18 +159,27 @@ extern void reinitialize_more_filter (void);
 
 extern int pagination_enabled;
 
-/* Global ui_file streams.  These are all defined in main.c.  */
+extern struct ui_file **current_ui_gdb_stdout_ptr (void);
+extern struct ui_file **current_ui_gdb_stdin_ptr (void);
+extern struct ui_file **current_ui_gdb_stderr_ptr (void);
+extern struct ui_file **current_ui_gdb_stdlog_ptr (void);
+
+/* The current top level's ui_file streams.  */
+
 /* Normal results */
-extern struct ui_file *gdb_stdout;
+#define gdb_stdout (*current_ui_gdb_stdout_ptr ())
 /* Input stream */
-extern struct ui_file *gdb_stdin;
+#define gdb_stdin (*current_ui_gdb_stdin_ptr ())
 /* Serious error notifications */
-extern struct ui_file *gdb_stderr;
+#define gdb_stderr (*current_ui_gdb_stderr_ptr ())
 /* Log/debug/trace messages that should bypass normal stdout/stderr
    filtering.  For moment, always call this stream using
    *_unfiltered.  In the very near future that restriction shall be
    removed - either call shall be unfiltered.  (cagney 1999-06-13).  */
-extern struct ui_file *gdb_stdlog;
+#define gdb_stdlog (*current_ui_gdb_stdlog_ptr ())
+
+/* Truly global ui_file streams.  These are all defined in main.c.  */
+
 /* Target output that should bypass normal stdout/stderr filtering.
    For moment, always call this stream using *_unfiltered.  In the
    very near future that restriction shall be removed - either call

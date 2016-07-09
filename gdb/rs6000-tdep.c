@@ -1165,7 +1165,6 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
   int index;
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
-  int opcode; /* Branch instruction's OPcode.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
 
   /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
@@ -4632,6 +4631,7 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
 	  || at_dcsz == 0)
 	at_dcsz = 128; /* Assume 128-byte cache line size (POWER8)  */
 
+      ra = 0;
       if (PPC_RA (insn) != 0)
 	regcache_raw_read_unsigned (regcache,
 				    tdep->ppc_gp0_regnum + PPC_RA (insn), &ra);

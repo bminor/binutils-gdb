@@ -576,6 +576,16 @@ add_language (const struct language_defn *lang)
     language_names[i] = languages[i]->la_name;
   language_names[i] = NULL;
 
+  /* Add the filename extensions.  */
+  if (lang->la_filename_extensions != NULL)
+    {
+      int i;
+
+      for (i = 0; lang->la_filename_extensions[i] != NULL; ++i)
+	add_filename_language (lang->la_filename_extensions[i],
+			       lang->la_language);
+    }
+
   /* Build the "help set language" docs.  */
   tmp_stream = mem_fileopen ();
 
@@ -652,6 +662,23 @@ language_demangle (const struct language_defn *current_language,
   if (current_language != NULL && current_language->la_demangle)
     return current_language->la_demangle (mangled, options);
   return NULL;
+}
+
+/* See langauge.h.  */
+
+int
+language_sniff_from_mangled_name (const struct language_defn *lang,
+				  const char *mangled, char **demangled)
+{
+  gdb_assert (lang != NULL);
+
+  if (lang->la_sniff_from_mangled_name == NULL)
+    {
+      *demangled = NULL;
+      return 0;
+    }
+
+  return lang->la_sniff_from_mangled_name (mangled, demangled);
 }
 
 /* Return class name from physname or NULL.  */
@@ -824,6 +851,7 @@ const struct language_defn unknown_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
@@ -841,6 +869,7 @@ const struct language_defn unknown_language_defn =
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
+  NULL,
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
@@ -872,6 +901,7 @@ const struct language_defn auto_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
@@ -889,6 +919,7 @@ const struct language_defn auto_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
+  NULL,
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
@@ -918,6 +949,7 @@ const struct language_defn local_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
@@ -935,6 +967,7 @@ const struct language_defn local_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
+  NULL,
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
@@ -1086,9 +1119,6 @@ language_init_primitive_type_symbols (struct language_arch_info *lai,
 				      struct gdbarch *gdbarch)
 {
   int n;
-  struct compunit_symtab *cust;
-  struct symtab *symtab;
-  struct block *static_block, *global_block;
 
   gdb_assert (lai->primitive_type_vector != NULL);
 

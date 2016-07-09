@@ -46,7 +46,7 @@ CODE_FRAGMENT
 .
 .enum bfd_plugin_format
 .  {
-.    bfd_plugin_uknown = 0,
+.    bfd_plugin_unknown = 0,
 .    bfd_plugin_yes = 1,
 .    bfd_plugin_no = 2
 .  };
@@ -703,7 +703,8 @@ _bfd_default_error_handler (const char *fmt, ...)
 		  if (abfd == NULL)
 		    /* Invoking %B with a null bfd pointer is an internal error.  */
 		    abort ();
-		  else if (abfd->my_archive)
+		  else if (abfd->my_archive
+			   && !bfd_is_thin_archive (abfd->my_archive))
 		    snprintf (bufp, avail, "%s(%s)",
 			      abfd->my_archive->filename, abfd->filename);
 		  else

@@ -208,6 +208,12 @@ FORCE_PARALLEL
 Setting FORCE_PARALLEL to any non-empty value forces parallel testing
 mode even if RUNTESTFLAGS is not empty.
 
+FORCE_SEPARATE_MI_TTY
+
+Setting FORCE_MI_SEPARATE_UI to 1 forces all MI testing to start GDB
+in console mode, with MI running on a separate TTY, on a secondary UI
+started with "new-ui".
+
 GDB_INOTIFY
 
 For debugging parallel mode, it is handy to be able to see when a test

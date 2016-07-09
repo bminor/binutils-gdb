@@ -80,7 +80,7 @@ static void cp_print_static_field (struct type *, struct value *,
 				   const struct value_print_options *);
 
 static void cp_print_value (struct type *, struct type *,
-			    const gdb_byte *, int,
+			    const gdb_byte *, LONGEST,
 			    CORE_ADDR, struct ui_file *,
 			    int, const struct value *,
 			    const struct value_print_options *,
@@ -154,7 +154,7 @@ cp_is_vtbl_member (struct type *type)
 
 void
 cp_print_value_fields (struct type *type, struct type *real_type,
-		       const gdb_byte *valaddr, int offset,
+		       const gdb_byte *valaddr, LONGEST offset,
 		       CORE_ADDR address, struct ui_file *stream,
 		       int recurse, const struct value *val,
 		       const struct value_print_options *options,
@@ -417,7 +417,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
 void
 cp_print_value_fields_rtti (struct type *type,
-			    const gdb_byte *valaddr, int offset,
+			    const gdb_byte *valaddr, LONGEST offset,
 			    CORE_ADDR address,
 			    struct ui_file *stream, int recurse,
 			    const struct value *val,
@@ -434,7 +434,8 @@ cp_print_value_fields_rtti (struct type *type,
 				     TARGET_CHAR_BIT * TYPE_LENGTH (type)))
     {
       struct value *value;
-      int full, top, using_enc;
+      int full, using_enc;
+      LONGEST top;
 
       /* Ugh, we have to convert back to a value here.  */
       value = value_from_contents_and_address (type, valaddr + offset,
@@ -459,7 +460,7 @@ cp_print_value_fields_rtti (struct type *type,
 
 static void
 cp_print_value (struct type *type, struct type *real_type,
-		const gdb_byte *valaddr, int offset,
+		const gdb_byte *valaddr, LONGEST offset,
 		CORE_ADDR address, struct ui_file *stream,
 		int recurse, const struct value *val,
 		const struct value_print_options *options,
@@ -469,7 +470,7 @@ cp_print_value (struct type *type, struct type *real_type,
     = (struct type **) obstack_next_free (&dont_print_vb_obstack);
   struct obstack tmp_obstack = dont_print_vb_obstack;
   int i, n_baseclasses = TYPE_N_BASECLASSES (type);
-  int thisoffset;
+  LONGEST thisoffset;
   struct type *thistype;
 
   if (dont_print_vb == 0)
@@ -483,7 +484,7 @@ cp_print_value (struct type *type, struct type *real_type,
 
   for (i = 0; i < n_baseclasses; i++)
     {
-      int boffset = 0;
+      LONGEST boffset = 0;
       int skip = 0;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       const char *basename = TYPE_NAME (baseclass);

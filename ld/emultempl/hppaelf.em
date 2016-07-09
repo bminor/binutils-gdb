@@ -88,6 +88,7 @@ hppaelf_create_output_section_statements (void)
 
   stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
   ldlang_add_file (stub_file);
+  elf32_hppa_init_stub_bfd (stub_file->the_bfd, &link_info);
 }
 
 

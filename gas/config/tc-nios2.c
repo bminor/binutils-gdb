@@ -1128,7 +1128,7 @@ nios2_check_overflow (valueT fixup, reloc_howto_type *howto)
       if ((fixup & 0x80000000) > 0)
 	{
 	  /* Check for negative overflow.  */
-	  if ((signed) fixup < ((signed) ~0 << (howto->bitsize-1)))
+	  if ((signed) fixup < (signed) (~0U << (howto->bitsize - 1)))
 	    return TRUE;
 	}
       else
@@ -1482,7 +1482,7 @@ static nios2_insn_relocS *
 nios2_insn_reloc_new (bfd_reloc_code_real_type reloc_type, unsigned int pcrel)
 {
   nios2_insn_relocS *retval;
-  retval = (nios2_insn_relocS *) malloc (sizeof (nios2_insn_relocS));
+  retval = XNEW (nios2_insn_relocS);
   if (retval == NULL)
     {
       as_bad (_("can't create relocation"));
@@ -3159,10 +3159,7 @@ nios2_modify_arg (char **parsed_args, const char *modifier,
 {
   char *tmp = parsed_args[ndx];
 
-  parsed_args[ndx]
-    = (char *) malloc (strlen (parsed_args[ndx]) + strlen (modifier) + 1);
-  strcpy (parsed_args[ndx], tmp);
-  strcat (parsed_args[ndx], modifier);
+  parsed_args[ndx] = concat (tmp, modifier, (char *) NULL);
 }
 
 /* Modify parsed_args[ndx] by negating that argument.  */
@@ -3172,13 +3169,7 @@ nios2_negate_arg (char **parsed_args, const char *modifier ATTRIBUTE_UNUSED,
 {
   char *tmp = parsed_args[ndx];
 
-  parsed_args[ndx]
-    = (char *) malloc (strlen ("~(") + strlen (parsed_args[ndx]) +
-		       strlen (")+1") + 1);
-
-  strcpy (parsed_args[ndx], "~(");
-  strcat (parsed_args[ndx], tmp);
-  strcat (parsed_args[ndx], ")+1");
+  parsed_args[ndx] = concat ("~(", tmp, ")+1", (char *) NULL);
 }
 
 /* The function nios2_swap_args swaps the pointers at indices index_1 and
@@ -3863,8 +3854,8 @@ nios2_frob_symbol (symbolS *symp)
 arelent *
 tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
-  arelent *reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  arelent *reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;

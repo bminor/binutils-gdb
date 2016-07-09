@@ -33,7 +33,7 @@ if { [gdb_compile_shlib $srcdir/$subdir/$srcfile2 $sofile {debug c++}] != ""
 }
 
 clean_restart $testfile
-gdb_load_shlibs ${sofile}
+gdb_load_shlib ${sofile}
 
 gdb_test_no_output "set breakpoint pending yes"
 gdb_test "break C::C" {Breakpoint [0-9]+ \(C::C\) pending\.} "break C::C"

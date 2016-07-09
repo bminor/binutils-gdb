@@ -26,6 +26,10 @@
 
 #include "elf/reloc-macros.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Relocations.  */
 START_RELOC_NUMBERS (elf_xtensa_reloc_type)
      RELOC_NUMBER (R_XTENSA_NONE, 0)
@@ -204,5 +208,11 @@ typedef struct property_table_entry_t
     (((align) << 12) & XTENSA_PROP_ALIGNMENT_MASK))
 
 #define XTENSA_PROP_INSN_ABSLIT        0x00020000
+
+extern asection *xtensa_make_property_section (asection *, const char *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _ELF_XTENSA_H */
