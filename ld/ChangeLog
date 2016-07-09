@@ -1,3 +1,7 @@
+2016-07-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/elfv2exe.d: Update.
+
 2016-07-06  James Bowman  <james.bowman@ftdichip.com>
 
 	* scripttempl/ft32.sc (__PMSIZE): Correct __PMSIZE_.

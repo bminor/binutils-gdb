@@ -1,3 +1,9 @@
+2016-07-09  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/20337
+	* objdump.c (compare_symbols): For ELF, sort same value/type
+	symbols according to size.
+
 2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
 
 	* objdump.c (dump_section_header): Rename SEC_ELF_NOREAD
