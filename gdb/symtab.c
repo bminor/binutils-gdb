@@ -6282,6 +6282,7 @@ allocate_template_symbol (struct objfile *objfile)
 
   result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct template_symbol);
   initialize_objfile_symbol_1 (&result->base);
+  result->template_return_index = -1;
 
   return result;
 }

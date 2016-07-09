@@ -24,6 +24,7 @@
 #include "gdb_vecs.h"
 #include "gdbtypes.h"
 #include "common/enum-flags.h"
+#include "cp-abi.h"  /* !!keiths; YUCK!  Need enum template_argument_kinds!  */
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -909,6 +910,25 @@ struct template_symbol
   /* The template arguments.  This is an array with
      N_TEMPLATE_ARGUMENTS elements.  */
   struct symbol **template_arguments;
+
+  /* Default argument values or NULL if none is known or defined.
+     Also an array with N_TEMPLATE_ARGUMENTS elements.
+     TEMPLATE_ARGUMENT_KINDS tells us which.  */
+  struct symbol **default_arguments;
+
+  /* The kind of arguments;  also an array with
+     N_TEMPLATE_ARGUMENTS elements.  */
+  enum template_argument_kinds *template_argument_kinds;
+
+  /* For template functions (!!keiths: class?), if the return type
+     was specified as a template parameter, this will hold the index
+     of the template parameter used.  -1 otherwise.  */
+  long template_return_index;
+
+  /* Index into template_arguments describing the function's arguments
+     or -1 if the argument is not a template parameter.  There are
+     TYPE_NFIELDS entries.  */
+  long *template_argument_indices;
 };
 
 

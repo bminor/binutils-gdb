@@ -170,4 +170,15 @@ char *gdb_demangle (const char *name, int options);
 extern struct fn_field *cp_find_method_field (struct symbol *method_symbol,
 					      int xtor_only);
 
+/* If LINKAGE_NAME represents a function template, determine whether its
+   return type and arguments were declared using a template parameter.
+   Set RETURN_INDEX to the parameter index of the function's return type
+   or -1 if the type is not parameterized.  Do likewise for the function's
+   NUM_ARGS arguments, storing the results in ARG_INDICES, which should be
+   allocated by the caller.  */
+
+extern void cp_decode_template_type_indices
+     (const char *linkage_name, long *return_index,
+      unsigned num_args, long *arg_indices);
+
 #endif /* CP_SUPPORT_H */

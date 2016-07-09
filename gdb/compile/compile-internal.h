@@ -41,6 +41,7 @@ extern int debug_compile_cplus_types;
 extern int debug_compile_oracle;
 
 struct block;
+struct template_defn;
 
 /* An object of this type holds state associated with a given
    compilation job.  */
@@ -103,6 +104,9 @@ struct compile_cplus_instance
   /* Map from gdb symbols to gcc error messages to emit.  */
 
   htab_t symbol_err_map;
+
+  /* A cache of template definitions.  */
+  htab_t template_defns;
 };
 
 /* A helper macro that takes a compile_c_instance and returns its
@@ -265,4 +269,31 @@ extern const char *
 				       const struct type *method_type,
 				       char **outname,
 				       int *ignore);
+
+/* Loop over SYMBOLS, defining any generic template definitions for
+   any template symbols in the list.  */
+
+extern void
+  compile_cplus_define_templates (struct compile_cplus_instance *instance,
+				  VEC (block_symbol_d) *symbols);
+
+/* Find the generic template definition for TSYM or NULL if none was
+   found.  */
+
+extern struct template_defn *
+  find_template_defn (struct compile_cplus_instance *instance,
+		      const struct template_symbol *tsym);
+
+/* Enumerate the template arguments of template DEFN into DEST.  */
+
+extern void
+  enumerate_template_arguments (struct compile_cplus_instance *instance,
+				struct gcc_cp_template_args *dest,
+				const struct template_defn *templ_defn,
+				const struct template_symbol *tsymbol);
+
+/* Return the gcc_decl of the given generic template definition.  */
+
+extern gcc_decl get_template_decl (const struct template_defn *templ_defn);
+
 #endif /* GDB_COMPILE_INTERNAL_H */

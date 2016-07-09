@@ -1732,6 +1732,99 @@ info_vtbl_command (char *arg, int from_tty)
   cplus_print_vtable (value);
 }
 
+/* See description in cp-support.h.  */
+
+void
+cp_decode_template_type_indices (const char *linkage_name,
+				 long *return_index, unsigned num_args,
+				 long *arg_indices)
+{
+  struct demangle_parse_info *info;
+  char *demangled = NULL;
+  void *storage = NULL;
+  int idx;
+  struct demangle_component *ret_comp;
+
+  /* Initialize values to be returned to caller.  */
+  *return_index = -1;
+  for (idx = 0; idx < num_args; ++idx)
+    arg_indices[idx] = -1;
+
+  if (linkage_name == NULL)
+    {
+      /* !!keiths: I can't even issue a good error message!  */
+      warning (_("Template symbol has no linkage name."));
+      return;
+    }
+
+  info = mangled_name_to_comp (linkage_name, DMGL_ANSI | DMGL_PARAMS,
+			       &storage, &demangled);
+  if (info == NULL)
+    return;
+
+  /* !!keiths will certainly require extensive testing/revision.  */
+
+  /* Determine the return type index.  */
+  ret_comp = info->tree;
+  if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
+    {
+      if (d_left (info->tree)->type == DEMANGLE_COMPONENT_TEMPLATE
+	  && d_right (info->tree)->type == DEMANGLE_COMPONENT_FUNCTION_TYPE)
+	{
+	  ret_comp = d_right (info->tree);
+
+	  if (d_left (ret_comp) != NULL
+	      && d_left (ret_comp)->type == DEMANGLE_COMPONENT_TEMPLATE_PARAM)
+	    {
+	      /* The return type was based on a template parameter.
+		 Return the index of that parameter.  */
+	      *return_index = d_left (ret_comp)->u.s_number.number;
+	    }
+
+	  /* Determine the same information for the function arguments.  */
+	  ret_comp = d_right (ret_comp);
+	  idx = 0;
+	  while (ret_comp != NULL
+		 && ret_comp->type == DEMANGLE_COMPONENT_ARGLIST)
+	    {
+	      int done = 0;
+	      struct demangle_component *comp;
+
+	      comp = d_left (ret_comp);
+	      if (comp == NULL)
+		break;
+	      while (!done)
+		{
+		  switch (comp->type)
+		    {
+		    case DEMANGLE_COMPONENT_CONST:
+		    case DEMANGLE_COMPONENT_RESTRICT:
+		    case DEMANGLE_COMPONENT_VOLATILE:
+		    case DEMANGLE_COMPONENT_POINTER:
+		    case DEMANGLE_COMPONENT_REFERENCE:
+		    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
+		    case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
+		      comp = d_left (comp);
+		      break;
+		    default:
+		      done = 1;
+		      break;
+		    }
+		}
+
+	      if (comp->type == DEMANGLE_COMPONENT_TEMPLATE_PARAM)
+		arg_indices[idx] = comp->u.s_number.number;
+	      ++idx;
+
+	      ret_comp = d_right (ret_comp);
+	    }
+	}
+    }
+
+  xfree (storage);
+  xfree (demangled);
+}
+
 void
 _initialize_cp_support (void)
 {

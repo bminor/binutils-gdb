@@ -90,6 +90,22 @@ enum dtor_kinds {
   /* Unknown destructor, e.g., no linkage name.  */
   unknown_dtor
 };
+
+/* Kinds of template arguments.  */
+enum template_argument_kinds
+{
+  /* A type argument, e.g., "<typename T>".  */
+  type_parameter,
+
+  /* A value argument, e.g., "<int V>".  */
+  value_parameter,
+
+  /* A template argument, e.g., "<template <...> class T = X>".  */
+  template_parameter,
+
+  /* A variadic template pack, e.g., "<class ... Types>".  */
+  variadic_parameter
+};
   
 /* Return non-zero iff NAME is the mangled name of a destructor.
    Actually, return an `enum dtor_kind' value describing what *kind*

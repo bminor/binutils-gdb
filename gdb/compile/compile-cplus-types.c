@@ -30,6 +30,8 @@
 #include "objfiles.h"
 #include "block.h"
 #include "gdbcmd.h"
+#include "typeprint.h"
+#include "c-lang.h"
 
 /* Define to enable debugging for ctor/dtor definitions during
    type conversion.  */
@@ -39,21 +41,6 @@
    cache its resultant type.  This is used, for example, when defining
    namespaces for the oracle.  */
 #define DONT_CACHE_TYPE ((gcc_type) 0)
-
-/* keiths: Stolen from parser-defs.h.  Seems silly to include all of
-   parser-defs.h just for this.  [There is also a name conflict with
-   insert_type.]  */
-
-/* A string type.  */
-struct stoken
-{
-  /* Pointer to the beginning of the (not necessarily terminated)
-     string.  */
-  const char *ptr;
-
-  /* Length of the string.  */
-  int length;
-};
 
 /* A scope of a type.  Type names are broken into "scopes" or
    "components," a series of unqualified names comprising the
@@ -92,6 +79,41 @@ struct type_map_instance
   gcc_type gcc_type_handle;
 };
 
+/* A hashtable instance for tracking template definitions.  */
+struct template_defn
+{
+  /* The string name of the template, excluding any parameters.
+     NOTE: This is a convenience copy of tsymbol->search_name.
+     Remove eventually.
+
+     Allocated.  */
+  char *name;
+
+  /* !!keiths: Yuck. The string used for hashing this defn.
+
+     Allocated.  */
+  char *hash_string;
+
+  /* The template parameters needed by the compiler plug-in.
+     Note that the implementation currently only uses n_elements
+     and kind[].
+
+     Allocated.  */
+  struct gcc_cp_template_args *params;
+
+  /* The decl associated with this template definition.  */
+  gcc_decl decl;
+
+  /* The template symbol used to create this template definition.
+     NOTE: Any given template_defn could be associated with any number
+     of template instances in the program.  */
+  const struct template_symbol *tsymbol;
+
+  /* A list of default values for the parameters of this template.
+     Allocated.  */
+  struct symbol **default_arguments;
+};
+
 /* Flag to enable internal debugging.  */
 
 int debug_compile_cplus_types = 0;
@@ -120,6 +142,19 @@ copy_stoken (const struct stoken *token)
   return string;
 }
 
+/* Returns non-zero if the given TYPE represents a varargs function,
+   zero otherwise.  */
+
+static int
+ccp_is_varargs_p (const struct type *type)
+{
+  /* !!keiths: This doesn't always work, unfortunately.  When we have a
+     pure virtual method, TYPE_PROTOTYPED == 0.
+     But this *may* be needed for several gdb.compile tests.  Or at least
+     indicate other unresolved bugs in this file or elsewhere in gdb.  */
+  return TYPE_VARARGS (type) /*|| !TYPE_PROTOTYPED (type)*/;
+}
+
 /* Hash a type_map_instance.  */
 
 static hashval_t
@@ -139,6 +174,199 @@ eq_type_map_instance (const void *a, const void *b)
   const struct type_map_instance *instb = (struct type_map_instance *) b;
 
   return insta->type == instb->type;
+}
+
+/* Print out the function arguments for the function template TSYM
+   to STREAM.  This function does not actually print out the real
+   arguments like c_type_print_args.  If the function argument was
+   derived from a template parameter, it will print the template parameter
+   instead of the actual concrete type.  */
+
+static void
+ccp_print_args (struct ui_file *stream, const struct template_symbol *tsym)
+{
+  int i, artificials;
+  struct type *ttype = SYMBOL_TYPE (&tsym->base);
+
+  /* Loop through the function arguments of TSYM, outputting either a
+     template parameter or concrete type.  */
+  /* !!keiths: I think I probably need to normalize the parameter names.  */
+
+  fputc_unfiltered ('(', stream);
+  for (i = 0, artificials = 0; i < TYPE_NFIELDS (ttype); ++i)
+    {
+      int tidx;
+
+      if (TYPE_FIELD_ARTIFICIAL (ttype, i))
+	{
+	  ++artificials;
+	  continue;
+	}
+
+      if ((i - artificials) > 0)
+	fputs_unfiltered (", ", stream);
+
+      tidx = tsym->template_argument_indices[i];
+      if (tidx == -1)
+	{
+	  c_print_type (TYPE_FIELD_TYPE (ttype, i), "", stream, -1, 0,
+			&type_print_raw_options);
+	}
+      else
+	{
+	  struct symbol *arg_sym = tsym->template_arguments[tidx];
+
+	  /* we want to output T or V or ... For now, I won't normalize
+	     the names, using the source name instead.  Call me lazy.  */
+	  switch (tsym->template_argument_kinds[tidx])
+	    {
+	    case type_parameter:
+	      fprintf_unfiltered (stream, "typename %s",
+				  SYMBOL_NATURAL_NAME (arg_sym));
+	      break;
+	    case value_parameter:
+	      c_print_type (SYMBOL_TYPE (arg_sym), "", stream, -1, 0,
+			    &type_print_raw_options);
+	      fprintf_unfiltered (stream, " %s",
+				  SYMBOL_NATURAL_NAME (arg_sym));
+	      break;
+	    case template_parameter:
+	      break;
+	    case variadic_parameter:
+	      break;
+	    default:
+	      gdb_assert_not_reached ("unexpected template parameter kind");
+	    }
+	}
+    }
+  fputc_unfiltered (')', stream);
+}
+
+/* !!keiths: Currently, this only works for function templates.
+   [Not even tried class template yet.]  */
+
+/* Compute the hash string used by the given template definition.  */
+
+static void
+ccp_compute_template_defn_hash_string (struct template_defn *defn)
+{
+  int i;
+  long length;
+  char *hash_string;
+  static ui_file *hash_buf = NULL;
+
+  if (hash_buf == NULL)
+    hash_buf = mem_fileopen ();
+  else
+    ui_file_rewind (hash_buf);
+
+  /* return type
+     (stripped) name
+     <
+     parameter_list
+     >
+     (
+     arglist
+     )
+  */
+  gdb_assert (defn->tsymbol != NULL);
+  gdb_assert (defn->hash_string == NULL);
+
+  if (defn->tsymbol->template_return_index == -1)
+    {
+      struct type *return_type;
+
+      /* The return type was specified as a concrete type, not a template
+	 parameter.  */
+      return_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (&defn->tsymbol->base));
+      c_print_type (return_type, "", hash_buf, -1, 0,
+		    &type_print_raw_options);
+    }
+  else
+    {
+      long idx = defn->tsymbol->template_return_index;
+      struct symbol *sym = defn->tsymbol->template_arguments[idx];
+
+      /* The return type is a template parameter.  Print the name of the
+	 parameter instead of the actual instanced type.  */
+      fputs_unfiltered (SYMBOL_NATURAL_NAME (sym), hash_buf);
+    }
+
+  fprintf_unfiltered (hash_buf, " %s<", defn->name);
+
+  /* Loop through all template parameters.  */
+  for (i = 0; i < defn->tsymbol->n_template_arguments; ++i)
+    {
+      struct symbol *sym = defn->tsymbol->template_arguments[i];
+
+      if (i != 0)
+	fputs_unfiltered (", ", hash_buf);
+
+      /* !!keiths: Do we need more specifics than this?  */
+      fputs_unfiltered (SYMBOL_NATURAL_NAME (sym), hash_buf);
+    }
+
+  /* If last char is '>', output extra space!  */
+  fputs_unfiltered ("> ", hash_buf);
+
+  /* Print function arguments.  */
+  ccp_print_args (hash_buf, defn->tsymbol);
+
+  /* Done.  Return the string hash.  */
+  defn->hash_string = ui_file_xstrdup (hash_buf, &length);
+#if 0
+  printf ("hash string for %s is %s\n", defn->name, defn->hash_string);
+#endif
+}
+
+/* Hashing function for struct template_defn.  */
+
+static hashval_t
+hash_template_defn (const void *p)
+{
+  const struct template_defn *defn = (const struct template_defn *) p;
+
+  /* The definition's hash string should have already been computed.  */
+  gdb_assert (defn->hash_string != NULL);
+  return htab_hash_string (defn->hash_string);
+}
+
+/* Check two template definitions for equality.
+
+   Returns 1 if the two are equal.  */
+
+/* !!keiths: I don't think this is going to be sufficient
+   when we have templates of the same name in different
+   CUs.  I wonder if we should check the symtab & lineno of the
+   symbols in the two template_defn's.  */
+
+static int
+eq_template_defn (const void *a, const void *b)
+{
+  const struct template_defn *d1 = (struct template_defn *) a;
+  const struct template_defn *d2 = (struct template_defn *) b;
+
+  return streq (d1->hash_string, d2->hash_string);
+}
+
+/* Free a struct template_defn.  */
+
+static void
+delete_template_defn (void *e)
+{
+  int i;
+  struct template_defn *defn = (struct template_defn *) e;
+
+  xfree (defn->name);
+  xfree (defn->hash_string);
+  if (defn->params != NULL)
+    {
+      xfree (defn->params->kinds);
+      xfree (defn->params->elements);
+      xfree (defn->params);
+    }
+  xfree (defn->default_arguments);
+  xfree (defn);
 }
 
 
@@ -173,6 +401,509 @@ insert_type (struct compile_cplus_instance *instance, struct type *type,
       *add = inst;
       *slot = add;
     }
+}
+
+static struct gcc_cp_template_args *
+new_gcc_cp_template_args (int num)
+{
+  struct gcc_cp_template_args *args;
+
+  args = XCNEW (struct gcc_cp_template_args);
+  args->n_elements = num;
+  args->kinds = XNEWVEC (char, num);
+  memset (args->kinds, -1, sizeof (char) * num);
+  args->elements = XCNEWVEC (gcc_cp_template_arg, num);
+
+  return args;
+}
+
+/* Loop through the template arguments of TSYMBOL, filling in the `kinds'
+   member of DEST.  */
+
+static void
+enumerate_template_parameter_kinds (struct compile_cplus_instance *instance,
+				    struct gcc_cp_template_args *dest,
+				    const struct template_symbol *tsymbol)
+{
+  int i;
+
+  for (i = 0; i < tsymbol->n_template_arguments; ++i)
+    {
+      switch (tsymbol->template_argument_kinds[i])
+	{
+	case type_parameter:
+	  dest->kinds[i] = GCC_CP_TPARG_CLASS;
+	  break;
+	case value_parameter:
+	  dest->kinds[i] = GCC_CP_TPARG_VALUE;
+	  break;
+	case template_parameter:
+	  dest->kinds[i] = GCC_CP_TPARG_TEMPL;
+	  break;
+	case variadic_parameter:
+	  dest->kinds[i] = GCC_CP_TPARG_PACK;
+	  break;
+	default:
+	  gdb_assert_not_reached ("unexpected template parameter kind");
+	}
+    }
+}
+
+/* Helper function to define and return the `value' of TYPE of the template
+   parameter ARG in compile INSTANCE.  */
+
+static gcc_expr
+get_template_argument_value (struct compile_cplus_instance *instance,
+			     gcc_type type, struct symbol *arg)
+{
+  gcc_expr value = 0;
+
+  switch (SYMBOL_CLASS (arg))
+    {
+      /* !!keiths: More (incomplete) fun.  */
+    case LOC_CONST:
+      if (debug_compile_cplus_types)
+	{
+	  printf_unfiltered ("literal_expr %lld %ld\n",
+			     type, SYMBOL_VALUE (arg));
+	}
+	value = CPCALL (literal_expr, instance, type, SYMBOL_VALUE (arg));
+      break;
+
+    case LOC_COMPUTED:
+      {
+	struct value *val;
+	struct frame_info *frame = NULL;
+
+	/* !!keiths: I don't think this can happen, but I've been
+	   wrong before.  */
+	if (symbol_read_needs_frame (arg))
+	  {
+	    frame = get_selected_frame (NULL);
+	    gdb_assert (frame != NULL);
+	  }
+	val = read_var_value (arg, instance->base.block, frame);
+
+	/* !!keiths: This is a hack, but I don't want to write
+	   yet another linkage name translation function.  At least
+	   not just yet.  */
+	value = CPCALL (literal_expr, instance, type, value_address (val));
+      }
+      break;
+
+    default:
+      gdb_assert_not_reached
+	("unhandled template value argument symbol class");
+    }
+
+  return value;
+}
+
+/* Enumerate the template arguments of template TSYM into DEST.  */
+
+static void
+ccp_enumerate_template_arguments (struct compile_cplus_instance *instance,
+				  struct gcc_cp_template_args *dest,
+				  const struct template_defn *defn,
+				  const struct template_symbol *tsym)
+{
+  int i;
+
+  for (i = 0; i < tsym->n_template_arguments; ++i)
+    {
+      struct symbol *arg = tsym->template_arguments[i];
+
+      switch (tsym->template_argument_kinds[i])
+	{
+	case type_parameter:
+	  {
+	    gcc_type type = convert_cplus_type (instance, SYMBOL_TYPE (arg),
+						GCC_CP_ACCESS_NONE);
+
+	    dest->elements[i].type = type;
+	  }
+	  break;
+
+	case value_parameter:
+	  {
+	    gcc_type type = defn->params->elements[i].type;
+
+	    dest->elements[i].value
+	      = get_template_argument_value (instance, type, arg);
+	  }
+	  break;
+
+	case template_parameter:
+	  break;
+
+	case variadic_parameter:
+	  break;
+
+	default:
+	  gdb_assert_not_reached ("unexpected template parameter kind");
+	}
+    }
+}
+
+/* Enumerate the template parameters of the generic form of the template
+   definition DEFN into DEST.  */
+
+static void
+ccp_define_template_parameters_generic
+(struct compile_cplus_instance *instance, struct gcc_cp_template_args *dest,
+ const struct template_defn *defn, const struct template_symbol *tsym)
+{
+  int i;
+  const char *filename = symbol_symtab (&tsym->base)->filename;
+  unsigned int line = SYMBOL_LINE (&tsym->base);
+
+  for (i = 0; i < tsym->n_template_arguments; ++i)
+    {
+      const char *id = SYMBOL_NATURAL_NAME (tsym->template_arguments[i]);
+
+      switch (tsym->template_argument_kinds[i])
+	{
+	case type_parameter:
+	  {
+	    /* GDB doesn't support variadic templates yet.  */
+	    int is_pack = 0;
+	    gcc_type default_type = 0;
+
+	    if (defn->default_arguments[i] != NULL)
+	      {
+		struct type *type
+		  = SYMBOL_TYPE (defn->default_arguments[i]);
+
+		default_type = convert_cplus_type (instance, type,
+						   GCC_CP_ACCESS_NONE);
+	      }
+
+	    if (debug_compile_cplus_types)
+	      {
+		printf_unfiltered
+		  ("new_template_typename_parm %s %d %lld %s %d\n",
+		   id, is_pack, default_type, filename, line);
+	      }
+
+	    dest->elements[i].type
+	      = CPCALL (new_template_typename_parm, instance, id, is_pack,
+			default_type, filename, line);
+	  }
+	  break;
+
+	case value_parameter:
+	  {
+	    gcc_expr default_value = 0;
+	    gcc_type gcctype;
+	    struct type *ptype = SYMBOL_TYPE (tsym->template_arguments[i]);
+
+	    /* Get the argument's type.  */
+	    gcctype
+	      = convert_cplus_type (instance, ptype, GCC_CP_ACCESS_NONE);
+	    dest->elements[i].type = gcctype;
+
+	    if (defn->default_arguments[i] != NULL)
+	      {
+		default_value
+		  = get_template_argument_value (instance, gcctype,
+						 defn->default_arguments[i]);
+	      }
+
+	    if (debug_compile_cplus_types)
+	      {
+		printf_unfiltered
+		  ("new_template_value_parm %lld %s %lld %s %d\n",
+		   gcctype, id, default_value, filename, line);
+	      }
+
+	    CPCALL (new_template_value_parm, instance, gcctype, id,
+			default_value, filename, line);
+	  }
+	  break;
+
+	case template_parameter:
+	  dest->elements[i].templ = 0;
+	  break;
+
+	case variadic_parameter:
+	  /* GDB doesn't support variadic templates.  */
+	  dest->elements[i].pack = 0;
+	  break;
+
+	default:
+	  gdb_assert_not_reached ("unexpected template parameter kind");
+	}
+    }
+}
+
+/* See definition in compile-internal.h.  */
+
+void
+enumerate_template_arguments (struct compile_cplus_instance *instance,
+			      struct gcc_cp_template_args *dest,
+			      const struct template_defn *defn,
+			      const struct template_symbol *tsymbol)
+{
+  enumerate_template_parameter_kinds (instance, dest, tsymbol);
+  ccp_enumerate_template_arguments (instance, dest, defn, tsymbol);
+}
+
+/* See definition in compile-internal.h.  */
+
+gcc_decl
+get_template_decl (const struct template_defn *templ_defn)
+{
+  return templ_defn->decl;
+}
+
+/* Allocate a generic template definition.  */
+
+static struct template_defn *
+new_template_defn (const struct template_defn *base)
+{
+  struct template_defn *defn;
+  struct cleanup *back_to;
+
+  defn = XCNEW (struct template_defn);
+  defn->name = xstrdup (base->name);
+  defn->tsymbol = base->tsymbol;
+  defn->hash_string = base->hash_string;
+  defn->params
+    = new_gcc_cp_template_args (base->tsymbol->n_template_arguments);
+  defn->default_arguments = XCNEWVEC (struct symbol *,
+				      defn->tsymbol->n_template_arguments);
+  return defn;
+}
+
+/* A hashtable callback to define (to the plug-in) and fill-in the
+   function template definition based on the template instance in SLOT.
+   CALL_DATA should be the compiler instance to use.  */
+
+static int
+define_function_template (void **slot, void *call_data)
+{
+  int i, need_new_context;
+  struct template_defn *defn;
+  gcc_type return_type, func_type, result;
+  struct gcc_type_array array;
+  int artificials, is_varargs;
+  struct type *templ_type;
+  struct compile_cplus_context *pctx;
+  struct cleanup *back_to;
+  struct compile_cplus_instance *instance;
+  const struct template_symbol *tsym;
+  char *id;
+
+  defn = (struct template_defn *) *slot;
+  instance = (struct compile_cplus_instance *) call_data;
+  tsym = defn->tsymbol;
+
+  /* The defn->name may be a qualified name, containing, e.g., namespaces.
+     We don't want those for the decl.  */
+  id = cp_func_name (defn->name);
+  back_to = make_cleanup (xfree, id);
+
+  /* First assess the processing context.  */
+  pctx = new_processing_context (instance, SYMBOL_NATURAL_NAME (&tsym->base),
+				 SYMBOL_TYPE (&tsym->base), &result);
+  if (result != GCC_TYPE_NONE)
+    {
+      gdb_assert (pctx == NULL);
+      do_cleanups (back_to);
+      /* new_processing_context returned the type of the actual template
+	 instance from which we're constructing the template definition.
+	 It is already defined.  */
+      return 1;
+    }
+
+  /* If we need a new context, push it.  */
+  need_new_context = ccp_need_new_context (pctx);
+  if (need_new_context)
+    ccp_push_processing_context (instance, pctx);
+
+  if (debug_compile_cplus_types)
+    {
+      printf_unfiltered ("start_new_template_decl for generic %s\n",
+			 defn->hash_string);
+    }
+  CPCALL (start_new_template_decl, instance);
+
+  /* Get the parameters' generic kinds and types.  */
+  enumerate_template_parameter_kinds (instance, defn->params, tsym);
+  ccp_define_template_parameters_generic (instance, defn->params,
+					  defn, tsym);
+
+  /* The return type is either a concrete type (TYPE_TARGET_TYPE)
+     or a template parameter.  */
+  if (tsym->template_return_index != -1)
+    return_type = defn->params->elements[tsym->template_return_index].type;
+  else
+    {
+      return_type
+	= convert_cplus_type (instance,
+			      TYPE_TARGET_TYPE (SYMBOL_TYPE (&tsym->base)),
+			      GCC_CP_ACCESS_NONE);
+    }
+
+  /* Get the parameters' definitions, and put them into ARRAY.  */
+  templ_type = SYMBOL_TYPE (&tsym->base);
+  is_varargs = ccp_is_varargs_p (templ_type);
+  array.n_elements = TYPE_NFIELDS (templ_type);
+  array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (templ_type));
+  make_cleanup (xfree, array.elements);
+  artificials = 0;
+  for (i = 0; i < TYPE_NFIELDS (templ_type); ++i)
+    {
+      if (TYPE_FIELD_ARTIFICIAL (templ_type, i))
+	{
+	  --array.n_elements;
+	  ++artificials;
+	}
+      else
+	{
+	  int tidx = tsym->template_argument_indices[i];
+
+	  if (tidx == -1)
+	    {
+	      /* The parameter's type is a concrete type.  */
+	      array.elements[i - artificials]
+		= convert_cplus_type (instance,
+				      TYPE_FIELD_TYPE (templ_type, i),
+				      GCC_CP_ACCESS_NONE);
+	    }
+	  else
+	    {
+	      /* The parameter's type is a template parameter.  */
+	      array.elements[i - artificials]
+		= defn->params->elements[tidx].type;
+	    }
+	}
+    }
+
+  if (debug_compile_cplus_types)
+    {
+      printf_unfiltered ("build_function_type for %s %lld %d\n",
+			 SYMBOL_LINKAGE_NAME (&tsym->base), return_type,
+			 is_varargs);
+    }
+  func_type = CPCALL (build_function_type, instance, return_type, &array,
+		      is_varargs);
+
+  /* Finally, define the new generic template declaration.  */
+  if (debug_compile_cplus_types)
+    printf_unfiltered ("new_decl template defn %s\n", id);
+  defn->decl = CPCALL (new_decl, instance,
+		       id,
+		       GCC_CP_SYMBOL_FUNCTION /*| nested_access?*/,
+		       func_type,
+		       0,
+		       0,
+		       symbol_symtab (&(tsym->base))->filename,
+		       SYMBOL_LINE (&(tsym->base)));
+
+  /* Pop the processing context, if we pushed one, and then delete it.  */
+  if (need_new_context)
+    ccp_pop_processing_context (instance, pctx);
+  delete_processing_context (pctx);
+
+  do_cleanups (back_to);
+
+  /* Do all templates in the table.  */
+  return 1;
+}
+
+/* See compile-internal.h.  */
+
+void
+compile_cplus_define_templates (struct compile_cplus_instance *instance,
+				VEC (block_symbol_d) *symbols)
+{
+  int i;
+  struct block_symbol *elt;
+
+  /* We need to do this in two passes.  On the first pass, we collect
+     the list of "unique" template definitions we need (using the template
+     hashing function) and we collect the list of default values for the
+     template (which can only be done after we have a list of all templates).
+     On the second pass, we iterate over the list of templates we need to
+     define, enumerating those definitions (with default values) to the
+     compiler plug-in.  */
+
+  for (i = 0; VEC_iterate (block_symbol_d, symbols, i, elt); ++i)
+    {
+      if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (elt->symbol))
+	{
+	  int j;
+	  void **slot;
+	  struct template_defn defn, *p;
+	  struct cleanup *back_to;
+	  struct template_symbol *tsym
+	    = (struct template_symbol *) elt->symbol;
+
+	  /* To do lookups, we need only NAME, TSYMBOL, HASH.  */
+	  memset (&defn, 0, sizeof (struct template_defn));
+	  defn.name = tsym->search_name;
+	  defn.tsymbol = tsym;
+	  ccp_compute_template_defn_hash_string (&defn);
+	  slot = htab_find_slot (instance->template_defns, &defn, INSERT);
+	  if (*slot == NULL)
+	    {
+	      p = new_template_defn (&defn);
+	      *slot = p;
+	    }
+	  else
+	    {
+	      xfree (defn.hash_string);
+	      p = (struct template_defn *) *slot;
+	    }
+
+	  /* Loop over the template arguments, noting any default values.  */
+	  for (j = 0; j < tsym->n_template_arguments; ++j)
+	    {
+	      if (p->default_arguments[j] == NULL
+		  && tsym->default_arguments[j] != NULL)
+		p->default_arguments[j] = tsym->default_arguments[j];
+	    }
+	}
+    }
+
+  /* Now iterate through template list and create any template definitions
+     we encountered.  */
+  htab_traverse (instance->template_defns,
+		 define_function_template, instance);
+}
+
+/* See definition in compile-internal.h.  */
+
+struct template_defn *
+find_template_defn (struct compile_cplus_instance *instance,
+		    const struct template_symbol *tsym)
+{
+  void **slot;
+  struct template_defn defn, *p;
+
+  /* Some times, the template has no search name defined, i.e., no linkage
+     name from the compiler.  There's not much we can do in this case.  */
+  if (tsym->search_name == NULL)
+    return NULL;
+
+  /* To do lookups, all we need is the template's name and symbol
+     (and compute its hash string).   */
+  memset (&defn, 0, sizeof (struct template_defn));
+  defn.name = tsym->search_name;
+  defn.tsymbol = tsym;
+  ccp_compute_template_defn_hash_string (&defn);
+  slot = htab_find_slot (instance->template_defns, &defn, NO_INSERT);
+  xfree (defn.hash_string);
+  if (slot != NULL && *slot != NULL)
+    {
+      /* A template generic for this was already defined.  */
+      p = (struct template_defn *) *slot;
+      return p;
+    }
+
+  /* No generic for this template was found.  */
+  return NULL;
 }
 
 /* A useful debugging function to output the processing context PCTX
@@ -994,9 +1725,17 @@ ccp_convert_struct_or_union_members (struct compile_cplus_instance *instance,
 		struct block_symbol sym
 		  = lookup_symbol (physname, get_current_search_block (),
 				   VAR_DOMAIN, NULL);
-		const char *filename = symbol_symtab (sym.symbol)->filename;
-		unsigned int line = SYMBOL_LINE (sym.symbol);
+		const char *filename;
+		unsigned int line;
 
+		if (sym.symbol == NULL)
+		  {
+		    /* We didn't actually find the symbol.  There's little
+		       we can do but ignore this member.  */
+		    continue;
+		  }
+		filename = symbol_symtab (sym.symbol)->filename;
+		line = SYMBOL_LINE (sym.symbol);
 		physaddr = SYMBOL_VALUE_ADDRESS (sym.symbol);
 		if (debug_compile_cplus_types)
 		  {
@@ -1923,7 +2662,8 @@ ccp_convert_enum (struct compile_cplus_instance *instance, struct type *type,
   return result;
 }
 
-/* Convert a function type to its gcc representation.  */
+/* Convert a function type to its gcc representation.  This function does
+   not deal with function templates.  */
 
 static gcc_type
 ccp_convert_func (struct compile_cplus_instance *instance, struct type *type,
@@ -1932,11 +2672,7 @@ ccp_convert_func (struct compile_cplus_instance *instance, struct type *type,
   int i, artificials;
   gcc_type result, return_type;
   struct gcc_type_array array;
-  /* !!keiths: This doesn't always work, unfortunately.  When we have a
-     pure virtual method, TYPE_PROTOTYPED == 0.
-     But this *may* be needed for several gdb.compile tests.  Or at least
-     indicate other unresolved bugs in this file or elsewhere in gdb.  */
-  int is_varargs = TYPE_VARARGS (type) /*|| !TYPE_PROTOTYPED (type)*/;
+  int is_varargs = ccp_is_varargs_p (type);
 
   /* This approach means we can't make self-referential function
      types.  Those are impossible in C, though.  */
@@ -1967,7 +2703,10 @@ ccp_convert_func (struct compile_cplus_instance *instance, struct type *type,
   /* We omit setting the argument types to `void' to be a little flexible
      with some minsyms like printf (compile-cplus.exp has examples).  */
   if (debug_compile_cplus_types)
-    printf_unfiltered ("build_function_type %s\n", TYPE_SAFE_NAME (type));
+    {
+      printf_unfiltered ("build_function_type %lld %d\n",
+			 return_type, is_varargs);
+    }
   result = CPCALL (build_function_type, instance,
 		   return_type, &array, is_varargs);
   xfree (array.elements);
@@ -2116,7 +2855,7 @@ ccp_convert_namespace (struct compile_cplus_instance *instance,
       make_cleanup (xfree, name);
     }
   else
-    name = NULL;
+    name = "";
 
   need_new_context = ccp_need_new_context (pctx);
   if (need_new_context)
@@ -2259,6 +2998,7 @@ delete_instance (struct compile_instance *c)
   htab_delete (instance->type_map);
   if (instance->symbol_err_map != NULL)
     htab_delete (instance->symbol_err_map);
+  htab_delete (instance->template_defns);
   xfree (instance);
 }
 
@@ -2297,6 +3037,10 @@ new_cplus_compile_instance (struct gcc_cp_context *fe)
   result->type_map = htab_create_alloc (10, hash_type_map_instance,
 					eq_type_map_instance,
 					xfree, xcalloc, xfree);
+  result->template_defns = htab_create_alloc (10, hash_template_defn,
+					      eq_template_defn,
+					      delete_template_defn,
+					      xcalloc, xfree);
 
   fe->cp_ops->set_callbacks (fe, gcc_cplus_convert_symbol,
 			     gcc_cplus_symbol_address,

@@ -159,7 +159,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 
   if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
     sym_type = 0;
-  else
+  else if (!SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym.symbol))
     sym_type = convert_cplus_type (instance, SYMBOL_TYPE (sym.symbol),
 				   GCC_CP_ACCESS_NONE);
 
@@ -170,10 +170,17 @@ convert_one_symbol (struct compile_cplus_instance *instance,
   else
     {
       gcc_decl decl;
+      struct template_defn *template_decl;
       /* Squash compiler warning.  */
       gcc_cp_symbol_kind_flags kind = GCC_CP_FLAG_BASE;
       CORE_ADDR addr = 0;
       char *symbol_name = NULL, *name = NULL;
+      struct gcc_cp_template_args targs;
+      struct cleanup *back_to;
+
+      /* Arrange to free `name' and 'symbol_name'.  */
+      back_to = make_cleanup (free_current_contents, &name);
+      make_cleanup (free_current_contents, &symbol_name);
 
       switch (SYMBOL_CLASS (sym.symbol))
 	{
@@ -181,7 +188,10 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	  if (TYPE_CODE (SYMBOL_TYPE (sym.symbol)) == TYPE_CODE_TYPEDEF)
 	    kind = GCC_CP_SYMBOL_TYPEDEF;
 	  else  if (TYPE_CODE (SYMBOL_TYPE (sym.symbol)) == TYPE_CODE_NAMESPACE)
-	    return;
+	    {
+	      do_cleanups (back_to);
+	      return;
+	    }
 	  break;
 
 	case LOC_LABEL:
@@ -221,6 +231,31 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 		/* !!keiths: I don't think we can get here, can we?  */
 		gdb_assert_not_reached ("told to ignore method!");
 	      }
+
+	    if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym.symbol))
+	      {
+		int i;
+		struct template_symbol *tsym
+		  = (struct template_symbol *) sym.symbol;
+
+		/* Find the template definition, defining the template,
+		   if needed.  */
+		template_decl = find_template_defn (instance, tsym);
+		if (template_decl != NULL)
+		  {
+		    /* Construct the template specialization.  This will
+		       be used later.  */
+		    targs.n_elements = tsym->n_template_arguments;
+		    targs.kinds = XNEWVEC (char ,targs.n_elements);
+		    make_cleanup (xfree, targs.kinds);
+		    targs.elements = XNEWVEC (gcc_cp_template_arg,
+					      targs.n_elements);
+		    make_cleanup (xfree, targs.elements);
+
+		    enumerate_template_arguments (instance, &targs,
+						  template_decl, tsym);
+		  }
+	      }
 	  }
 	  break;
 
@@ -228,6 +263,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	  if (TYPE_CODE (SYMBOL_TYPE (sym.symbol)) == TYPE_CODE_ENUM)
 	    {
 	      /* Already handled by convert_enum.  */
+	      do_cleanups (back_to);
 	      return;
 	    }
 	  if (debug_compile_cplus_types)
@@ -239,6 +275,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 		  sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
 		  SYMBOL_VALUE (sym.symbol),
 		  filename, line);
+	  do_cleanups (back_to);
 	  return;
 
 	case LOC_CONST_BYTES:
@@ -345,6 +382,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 		  xfree (symbol_name);
 		  xfree (name);
 		  delete_processing_context (pctx);
+		  do_cleanups (back_to);
 		  return;
 		}
 
@@ -361,14 +399,31 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	    }
 
 	  /* Define the decl.  */
-	  if (debug_compile_cplus_types)
+	  if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym.symbol))
 	    {
-	      printf_unfiltered ("new_decl %s %d %s\n", name, (int) kind,
-				 symbol_name);
+	      if (debug_compile_cplus_types)
+		{
+		  printf_unfiltered ("specialize_function_template %s\n",
+				     SYMBOL_NATURAL_NAME (sym.symbol));
+		}
+	      decl = CPCALL (specialize_function_template, instance,
+			     get_template_decl (template_decl),
+			     &targs,
+			     addr,
+			     filename,
+			     line);
 	    }
-	  decl = CPCALL (new_decl, instance,
-			 name, kind, sym_type, symbol_name, addr,
-			 filename, line);
+	  else
+	    {
+	      if (debug_compile_cplus_types)
+		{
+		  printf_unfiltered ("new_decl %s %d %s\n", name, (int) kind,
+				     symbol_name);
+		}
+	      decl = CPCALL (new_decl, instance,
+			     name, kind, sym_type, symbol_name, addr,
+			     filename, line);
+	    }
 
 	  /* Pop any processing context.  */
 	  if (need_new_context)
@@ -377,8 +432,8 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	  delete_processing_context (pctx);
 	}
 
-      xfree (symbol_name);
-      xfree (name);
+      /* Free any allocated memory.  */
+      do_cleanups (back_to);
     }
 }
 
@@ -532,9 +587,14 @@ regexp_search_symbols (struct compile_cplus_instance *instance,
       search_domain = TYPES_DOMAIN;
       break;
     case VAR_DOMAIN:
-      /* !!keiths: Don't run this for VAR_DOMAIN symbols?  */
+      /* !!keiths: We really don't want to search functions.  The search
+	 will return all kinds of stuff that we don't really want, such as
+	 every operator+ defined in every class.  */
       return 0;
-      search_domain = VARIABLES_DOMAIN;
+      /* !!keiths; fscked up.  We need to search through functions
+	 when GCC_CP_ORACLE_SYMBOL (= VAR_DOMAIN).  */
+      /* !!keiths; I hope we don't have to search even more domains!  */
+      search_domain = FUNCTIONS_DOMAIN;
       break;
     default:
       /* This will cause search_symbols to assert.  */
@@ -545,7 +605,7 @@ regexp_search_symbols (struct compile_cplus_instance *instance,
   symbols = NULL;
   cleanup = make_cleanup_free_search_symbols (&symbols);
 
-  regexp = xstrprintf ("\\(\\(.*::\\)\\|^\\)%s$", name);
+  regexp = xstrprintf ("\\(\\(::\\)\\|^\\)%s\\($\\|<\\)", name);
   make_cleanup (xfree, regexp);
   search_symbols (regexp, search_domain, 0, NULL, &symbols);
 
@@ -581,6 +641,7 @@ gcc_cplus_convert_symbol (void *datum,
   int found = 0;
   struct search_multiple_result search_result;
   struct cleanup *cleanups;
+  /* !!keiths create htab for template definitions */
 
   switch (request)
     {
@@ -636,6 +697,10 @@ gcc_cplus_convert_symbol (void *datum,
 	    {
 	      struct block_symbol *elt;
 
+	      /* Define any template generics from the found symbols.  */
+	      compile_cplus_define_templates (instance, search_result.symbols);
+
+	      /* Convert each found symbol.  */
 	      for (ix = 0;
 		   VEC_iterate (block_symbol_d, search_result.symbols, ix, elt);
 		   ++ix)
