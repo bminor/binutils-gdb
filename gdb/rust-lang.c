@@ -1415,6 +1415,12 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
 	  low_bound = 0;
 	  high_bound = value_as_long (len);
 	}
+      else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+	{
+	  base = lhs;
+	  low_bound = 0;
+	  high_bound = LONGEST_MAX;
+	}
       else
 	error (_("Cannot subscript non-array type"));
 

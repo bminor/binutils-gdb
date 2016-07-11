@@ -5134,15 +5134,7 @@ remote_detach_1 (const char *args, int from_tty)
   if (!target_has_execution)
     error (_("No process to detach from."));
 
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == NULL)
-	exec_file = "";
-      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-			 target_pid_to_str (pid_to_ptid (pid)));
-      gdb_flush (gdb_stdout);
-    }
+  target_announce_detach (from_tty);
 
   /* Tell the remote target to detach.  */
   remote_detach_pid (pid);
@@ -10160,6 +10152,14 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   return TARGET_XFER_OK;
 }
 
+/* Implementation of to_get_memory_xfer_limit.  */
+
+static ULONGEST
+remote_get_memory_xfer_limit (struct target_ops *ops)
+{
+  return get_memory_write_packet_size ();
+}
+
 static int
 remote_search_memory (struct target_ops* ops,
 		      CORE_ADDR start_addr, ULONGEST search_space_len,
@@ -13073,6 +13073,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_interrupt = remote_interrupt;
   remote_ops.to_pass_ctrlc = remote_pass_ctrlc;
   remote_ops.to_xfer_partial = remote_xfer_partial;
+  remote_ops.to_get_memory_xfer_limit = remote_get_memory_xfer_limit;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;
   remote_ops.to_log_command = serial_log_command;

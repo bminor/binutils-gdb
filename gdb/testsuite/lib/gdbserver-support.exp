@@ -324,7 +324,7 @@ proc gdbserver_spawn { child_args } {
 # Close the GDBserver connection.
 
 proc close_gdbserver {} {
-    global server_spawn_id inferior_spawn_id
+    global server_spawn_id
 
     # We can't just call close, because if gdbserver is local then that means
     # that it will get a SIGHUP.  Doing it this way could also allow us to
@@ -340,7 +340,6 @@ proc close_gdbserver {} {
     catch "close -i $server_spawn_id"
     catch "wait -i $server_spawn_id"
     unset server_spawn_id
-    unset inferior_spawn_id
 }
 
 # Hook into GDB exit, and close GDBserver.
@@ -349,7 +348,7 @@ if { [info procs gdbserver_gdb_exit] == "" } {
     rename gdb_exit gdbserver_orig_gdb_exit
 }
 proc gdb_exit {} {
-    global gdb_spawn_id server_spawn_id inferior_spawn_id
+    global gdb_spawn_id server_spawn_id
     global gdb_prompt
     global gdbserver_reconnect_p
 
@@ -376,7 +375,6 @@ proc gdb_exit {} {
 		-i "$server_spawn_id" eof {
 		    wait -i $expect_out(spawn_id)
 		    unset server_spawn_id
-		    unset inferior_spawn_id
 		}
 	    }
 	}

@@ -193,7 +193,7 @@ proc default_mi_gdb_start { args } {
     global timeout
     global gdb_spawn_id gdb_main_spawn_id inferior_spawn_id mi_spawn_id
     global MIFLAGS
-    global SEPARATE_MI_TTY
+    global FORCE_SEPARATE_MI_TTY
 
     if {[info exists FORCE_SEPARATE_MI_TTY]} {
 	set separate_mi_pty $FORCE_SEPARATE_MI_TTY

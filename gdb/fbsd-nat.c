@@ -281,6 +281,10 @@ fbsd_xfer_partial (struct target_ops *ops, enum target_object object,
 #ifdef PT_LWPINFO
 static int debug_fbsd_lwp;
 
+static void (*super_resume) (struct target_ops *,
+			     ptid_t,
+			     int,
+			     enum gdb_signal);
 static ptid_t (*super_wait) (struct target_ops *,
 			     ptid_t,
 			     struct target_waitstatus *,
@@ -492,10 +496,136 @@ fbsd_update_thread_list (struct target_ops *ops)
 #endif
 }
 
-static void (*super_resume) (struct target_ops *,
-			     ptid_t,
-			     int,
-			     enum gdb_signal);
+#ifdef TDP_RFPPWAIT
+/*
+  To catch fork events, PT_FOLLOW_FORK is set on every traced process
+  to enable stops on returns from fork or vfork.  Note that both the
+  parent and child will always stop, even if system call stops are not
+  enabled.
+
+  After a fork, both the child and parent process will stop and report
+  an event.  However, there is no guarantee of order.  If the parent
+  reports its stop first, then fbsd_wait explicitly waits for the new
+  child before returning.  If the child reports its stop first, then
+  the event is saved on a list and ignored until the parent's stop is
+  reported.  fbsd_wait could have been changed to fetch the parent PID
+  of the new child and used that to wait for the parent explicitly.
+  However, if two threads in the parent fork at the same time, then
+  the wait on the parent might return the "wrong" fork event.
+
+  The initial version of PT_FOLLOW_FORK did not set PL_FLAG_CHILD for
+  the new child process.  This flag could be inferred by treating any
+  events for an unknown pid as a new child.
+
+  In addition, the initial version of PT_FOLLOW_FORK did not report a
+  stop event for the parent process of a vfork until after the child
+  process executed a new program or exited.  The kernel was changed to
+  defer the wait for exit or exec of the child until after posting the
+  stop event shortly after the change to introduce PL_FLAG_CHILD.
+  This could be worked around by reporting a vfork event when the
+  child event posted and ignoring the subsequent event from the
+  parent.
+
+  This implementation requires both of these fixes for simplicity's
+  sake.  FreeBSD versions newer than 9.1 contain both fixes.
+*/
+
+struct fbsd_fork_info
+{
+  struct fbsd_fork_info *next;
+  ptid_t ptid;
+};
+
+static struct fbsd_fork_info *fbsd_pending_children;
+
+/* Record a new child process event that is reported before the
+   corresponding fork event in the parent.  */
+
+static void
+fbsd_remember_child (ptid_t pid)
+{
+  struct fbsd_fork_info *info = XCNEW (struct fbsd_fork_info);
+
+  info->ptid = pid;
+  info->next = fbsd_pending_children;
+  fbsd_pending_children = info;
+}
+
+/* Check for a previously-recorded new child process event for PID.
+   If one is found, remove it from the list and return the PTID.  */
+
+static ptid_t
+fbsd_is_child_pending (pid_t pid)
+{
+  struct fbsd_fork_info *info, *prev;
+  ptid_t ptid;
+
+  prev = NULL;
+  for (info = fbsd_pending_children; info; prev = info, info = info->next)
+    {
+      if (ptid_get_pid (info->ptid) == pid)
+	{
+	  if (prev == NULL)
+	    fbsd_pending_children = info->next;
+	  else
+	    prev->next = info->next;
+	  ptid = info->ptid;
+	  xfree (info);
+	  return ptid;
+	}
+    }
+  return null_ptid;
+}
+
+static struct fbsd_fork_info *fbsd_pending_vfork_done;
+
+/* Record a pending vfork done event.  */
+
+static void
+fbsd_add_vfork_done (ptid_t pid)
+{
+  struct fbsd_fork_info *info = XCNEW (struct fbsd_fork_info);
+
+  info->ptid = pid;
+  info->next = fbsd_pending_vfork_done;
+  fbsd_pending_vfork_done = info;
+}
+
+/* Check for a pending vfork done event for a specific PID.  */
+
+static int
+fbsd_is_vfork_done_pending (pid_t pid)
+{
+  struct fbsd_fork_info *info;
+
+  for (info = fbsd_pending_vfork_done; info != NULL; info = info->next)
+    {
+      if (ptid_get_pid (info->ptid) == pid)
+	return 1;
+    }
+  return 0;
+}
+
+/* Check for a pending vfork done event.  If one is found, remove it
+   from the list and return the PTID.  */
+
+static ptid_t
+fbsd_next_vfork_done (void)
+{
+  struct fbsd_fork_info *info;
+  ptid_t ptid;
+
+  if (fbsd_pending_vfork_done != NULL)
+    {
+      info = fbsd_pending_vfork_done;
+      fbsd_pending_vfork_done = info->next;
+      ptid = info->ptid;
+      xfree (info);
+      return ptid;
+    }
+  return null_ptid;
+}
+#endif
 
 static int
 resume_one_thread_cb (struct thread_info *tp, void *data)
@@ -535,6 +665,17 @@ static void
 fbsd_resume (struct target_ops *ops,
 	     ptid_t ptid, int step, enum gdb_signal signo)
 {
+#ifdef TDP_RFPPWAIT
+  pid_t pid;
+
+  /* Don't PT_CONTINUE a process which has a pending vfork done event.  */
+  if (ptid_equal (minus_one_ptid, ptid))
+    pid = ptid_get_pid (inferior_ptid);
+  else
+    pid = ptid_get_pid (ptid);
+  if (fbsd_is_vfork_done_pending (pid))
+    return;
+#endif
 
   if (debug_fbsd_lwp)
     fprintf_unfiltered (gdb_stdlog,
@@ -556,88 +697,6 @@ fbsd_resume (struct target_ops *ops,
   super_resume (ops, ptid, step, signo);
 }
 
-#ifdef TDP_RFPPWAIT
-/*
-  To catch fork events, PT_FOLLOW_FORK is set on every traced process
-  to enable stops on returns from fork or vfork.  Note that both the
-  parent and child will always stop, even if system call stops are not
-  enabled.
-
-  After a fork, both the child and parent process will stop and report
-  an event.  However, there is no guarantee of order.  If the parent
-  reports its stop first, then fbsd_wait explicitly waits for the new
-  child before returning.  If the child reports its stop first, then
-  the event is saved on a list and ignored until the parent's stop is
-  reported.  fbsd_wait could have been changed to fetch the parent PID
-  of the new child and used that to wait for the parent explicitly.
-  However, if two threads in the parent fork at the same time, then
-  the wait on the parent might return the "wrong" fork event.
-
-  The initial version of PT_FOLLOW_FORK did not set PL_FLAG_CHILD for
-  the new child process.  This flag could be inferred by treating any
-  events for an unknown pid as a new child.
-
-  In addition, the initial version of PT_FOLLOW_FORK did not report a
-  stop event for the parent process of a vfork until after the child
-  process executed a new program or exited.  The kernel was changed to
-  defer the wait for exit or exec of the child until after posting the
-  stop event shortly after the change to introduce PL_FLAG_CHILD.
-  This could be worked around by reporting a vfork event when the
-  child event posted and ignoring the subsequent event from the
-  parent.
-
-  This implementation requires both of these fixes for simplicity's
-  sake.  FreeBSD versions newer than 9.1 contain both fixes.
-*/
-
-struct fbsd_fork_child_info
-{
-  struct fbsd_fork_child_info *next;
-  ptid_t child;			/* Pid of new child.  */
-};
-
-static struct fbsd_fork_child_info *fbsd_pending_children;
-
-/* Record a new child process event that is reported before the
-   corresponding fork event in the parent.  */
-
-static void
-fbsd_remember_child (ptid_t pid)
-{
-  struct fbsd_fork_child_info *info = XCNEW (struct fbsd_fork_child_info);
-
-  info->child = pid;
-  info->next = fbsd_pending_children;
-  fbsd_pending_children = info;
-}
-
-/* Check for a previously-recorded new child process event for PID.
-   If one is found, remove it from the list and return the PTID.  */
-
-static ptid_t
-fbsd_is_child_pending (pid_t pid)
-{
-  struct fbsd_fork_child_info *info, *prev;
-  ptid_t ptid;
-
-  prev = NULL;
-  for (info = fbsd_pending_children; info; prev = info, info = info->next)
-    {
-      if (ptid_get_pid (info->child) == pid)
-	{
-	  if (prev == NULL)
-	    fbsd_pending_children = info->next;
-	  else
-	    prev->next = info->next;
-	  ptid = info->child;
-	  xfree (info);
-	  return ptid;
-	}
-    }
-  return null_ptid;
-}
-#endif
-
 /* Wait for the child specified by PTID to do something.  Return the
    process ID of the child, or MINUS_ONE_PTID in case of error; store
    the status in *OURSTATUS.  */
@@ -651,6 +710,12 @@ fbsd_wait (struct target_ops *ops,
 
   while (1)
     {
+      wptid = fbsd_next_vfork_done ();
+      if (!ptid_equal (wptid, null_ptid))
+	{
+	  ourstatus->kind = TARGET_WAITKIND_VFORK_DONE;
+	  return wptid;
+	}
       wptid = super_wait (ops, ptid, ourstatus, target_options);
       if (ourstatus->kind == TARGET_WAITKIND_STOPPED)
 	{
@@ -826,9 +891,10 @@ static int
 fbsd_follow_fork (struct target_ops *ops, int follow_child,
 			int detach_fork)
 {
-  if (!follow_child)
+  if (!follow_child && detach_fork)
     {
       struct thread_info *tp = inferior_thread ();
+      int has_vforked = tp->pending_follow.kind == TARGET_WAITKIND_VFORKED;
       pid_t child_pid = ptid_get_pid (tp->pending_follow.value.related_pid);
 
       /* Breakpoints have already been detached from the child by
@@ -836,6 +902,33 @@ fbsd_follow_fork (struct target_ops *ops, int follow_child,
 
       if (ptrace (PT_DETACH, child_pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
 	perror_with_name (("ptrace"));
+
+      if (has_vforked)
+	{
+	  /* We can't insert breakpoints until the child process has
+	     finished with the shared memory region.  The parent
+	     process doesn't wait for the child process to exit or
+	     exec until after it has been resumed from the ptrace stop
+	     to report the fork.  Once it has been resumed it doesn't
+	     stop again before returning to userland, so there is no
+	     reliable way to wait on the parent.
+
+	     We can't stay attached to the child to wait for an exec
+	     or exit because it may invoke ptrace(PT_TRACE_ME)
+	     (e.g. if the parent process is a debugger forking a new
+	     child process).
+
+	     In the end, the best we can do is to make sure it runs
+	     for a little while.  Hopefully it will be out of range of
+	     any breakpoints we reinsert.  Usually this is only the
+	     single-step breakpoint at vfork's return point.  */
+
+	  usleep (10000);
+
+	  /* Schedule a fake VFORK_DONE event to report on the next
+	     wait.  */
+	  fbsd_add_vfork_done (inferior_ptid);
+	}
     }
 
   return 0;

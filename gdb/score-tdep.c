@@ -813,13 +813,7 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
   int ret;
   gdb_byte *memblock = NULL;
 
-  if (size < 0)
-    {
-      error (_("Error: malloc size < 0 in file:%s, line:%d!"),
-             __FILE__, __LINE__);
-      return NULL;
-    }
-  else if (size == 0)
+  if (size == 0)
     return NULL;
 
   memblock = (gdb_byte *) xmalloc (size);

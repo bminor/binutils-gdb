@@ -82,7 +82,7 @@
 
 /* ARM-specific values for sh_flags.  */
 #define SHF_ENTRYSECT      0x10000000   /* Section contains an entry point.  */
-#define SHF_ARM_NOREAD     0x20000000   /* Section contains code that can be place on no read memory area.  */
+#define SHF_ARM_PURECODE   0x20000000   /* Section contains only code and no data.  */
 #define SHF_COMDEF         0x80000000   /* Section may be multiply defined in the input to a link step.  */
 
 /* ARM-specific program header flags.  */

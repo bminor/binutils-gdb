@@ -820,6 +820,7 @@ linux_nat_pass_signals (struct target_ops *self,
 static int stop_wait_callback (struct lwp_info *lp, void *data);
 static char *linux_child_pid_to_exec_file (struct target_ops *self, int pid);
 static int resume_stopped_resumed_lwps (struct lwp_info *lp, void *data);
+static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 
 
 
@@ -1295,9 +1296,13 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
     target_async (1);
 }
 
-/* Get pending status of LP.  */
+/* Get pending signal of THREAD as a host signal number, for detaching
+   purposes.  This is the signal the thread last stopped for, which we
+   need to deliver to the thread when detaching, otherwise, it'd be
+   suppressed/lost.  */
+
 static int
-get_pending_status (struct lwp_info *lp, int *status)
+get_detach_signal (struct lwp_info *lp)
 {
   enum gdb_signal signo = GDB_SIGNAL_0;
 
@@ -1350,8 +1355,6 @@ get_pending_status (struct lwp_info *lp, int *status)
 	}
     }
 
-  *status = 0;
-
   if (signo == GDB_SIGNAL_0)
     {
       if (debug_linux_nat)
@@ -1370,21 +1373,28 @@ get_pending_status (struct lwp_info *lp, int *status)
     }
   else
     {
-      *status = W_STOPCODE (gdb_signal_to_host (signo));
-
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "GPT: lwp %s has pending signal %s\n",
 			    target_pid_to_str (lp->ptid),
 			    gdb_signal_to_string (signo));
+
+      return gdb_signal_to_host (signo);
     }
 
   return 0;
 }
 
-static int
-detach_callback (struct lwp_info *lp, void *data)
+/* Detach from LP.  If SIGNO_P is non-NULL, then it points to the
+   signal number that should be passed to the LWP when detaching.
+   Otherwise pass any pending signal the LWP may have, if any.  */
+
+static void
+detach_one_lwp (struct lwp_info *lp, int *signo_p)
 {
+  int lwpid = ptid_get_lwp (lp->ptid);
+  int signo;
+
   gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
 
   if (debug_linux_nat && lp->status)
@@ -1400,36 +1410,83 @@ detach_callback (struct lwp_info *lp, void *data)
 			    "DC: Sending SIGCONT to %s\n",
 			    target_pid_to_str (lp->ptid));
 
-      kill_lwp (ptid_get_lwp (lp->ptid), SIGCONT);
+      kill_lwp (lwpid, SIGCONT);
       lp->signalled = 0;
     }
 
-  /* We don't actually detach from the LWP that has an id equal to the
-     overall process id just yet.  */
-  if (ptid_get_lwp (lp->ptid) != ptid_get_pid (lp->ptid))
+  if (signo_p == NULL)
     {
-      int status = 0;
-
       /* Pass on any pending signal for this LWP.  */
-      get_pending_status (lp, &status);
+      signo = get_detach_signal (lp);
+    }
+  else
+    signo = *signo_p;
 
+  /* Preparing to resume may try to write registers, and fail if the
+     lwp is zombie.  If that happens, ignore the error.  We'll handle
+     it below, when detach fails with ESRCH.  */
+  TRY
+    {
       if (linux_nat_prepare_to_resume != NULL)
 	linux_nat_prepare_to_resume (lp);
-      errno = 0;
-      if (ptrace (PTRACE_DETACH, ptid_get_lwp (lp->ptid), 0,
-		  WSTOPSIG (status)) < 0)
-	error (_("Can't detach %s: %s"), target_pid_to_str (lp->ptid),
-	       safe_strerror (errno));
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (!check_ptrace_stopped_lwp_gone (lp))
+	throw_exception (ex);
+    }
+  END_CATCH
 
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog,
-			    "PTRACE_DETACH (%s, %s, 0) (OK)\n",
-			    target_pid_to_str (lp->ptid),
-			    strsignal (WSTOPSIG (status)));
+  if (ptrace (PTRACE_DETACH, lwpid, 0, signo) < 0)
+    {
+      int save_errno = errno;
 
-      delete_lwp (lp->ptid);
+      /* We know the thread exists, so ESRCH must mean the lwp is
+	 zombie.  This can happen if one of the already-detached
+	 threads exits the whole thread group.  In that case we're
+	 still attached, and must reap the lwp.  */
+      if (save_errno == ESRCH)
+	{
+	  int ret, status;
+
+	  ret = my_waitpid (lwpid, &status, __WALL);
+	  if (ret == -1)
+	    {
+	      warning (_("Couldn't reap LWP %d while detaching: %s"),
+		       lwpid, strerror (errno));
+	    }
+	  else if (!WIFEXITED (status) && !WIFSIGNALED (status))
+	    {
+	      warning (_("Reaping LWP %d while detaching "
+			 "returned unexpected status 0x%x"),
+		       lwpid, status);
+	    }
+	}
+      else
+	{
+	  error (_("Can't detach %s: %s"), target_pid_to_str (lp->ptid),
+		 safe_strerror (save_errno));
+	}
+    }
+  else if (debug_linux_nat)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "PTRACE_DETACH (%s, %s, 0) (OK)\n",
+			  target_pid_to_str (lp->ptid),
+			  strsignal (signo));
     }
 
+  delete_lwp (lp->ptid);
+}
+
+static int
+detach_callback (struct lwp_info *lp, void *data)
+{
+  /* We don't actually detach from the thread group leader just yet.
+     If the thread group exits, we must reap the zombie clone lwps
+     before we're able to reap the leader.  */
+  if (ptid_get_lwp (lp->ptid) != ptid_get_pid (lp->ptid))
+    detach_one_lwp (lp, NULL);
   return 0;
 }
 
@@ -1437,7 +1494,6 @@ static void
 linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   int pid;
-  int status;
   struct lwp_info *main_lwp;
 
   pid = ptid_get_pid (inferior_ptid);
@@ -1459,29 +1515,6 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 
   main_lwp = find_lwp_pid (pid_to_ptid (pid));
 
-  /* Pass on any pending signal for the last LWP.  */
-  if ((args == NULL || *args == '\0')
-      && get_pending_status (main_lwp, &status) != -1
-      && WIFSTOPPED (status))
-    {
-      char *tem;
-
-      /* Put the signal number in ARGS so that inf_ptrace_detach will
-	 pass it along with PTRACE_DETACH.  */
-      tem = (char *) alloca (8);
-      xsnprintf (tem, 8, "%d", (int) WSTOPSIG (status));
-      args = tem;
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog,
-			    "LND: Sending signal %s to %s\n",
-			    args,
-			    target_pid_to_str (main_lwp->ptid));
-    }
-
-  if (linux_nat_prepare_to_resume != NULL)
-    linux_nat_prepare_to_resume (main_lwp);
-  delete_lwp (main_lwp->ptid);
-
   if (forks_exist_p ())
     {
       /* Multi-fork case.  The current inferior_ptid is being detached
@@ -1491,7 +1524,24 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
       linux_fork_detach (args, from_tty);
     }
   else
-    linux_ops->to_detach (ops, args, from_tty);
+    {
+      int signo;
+
+      target_announce_detach (from_tty);
+
+      /* Pass on any pending signal for the last LWP, unless the user
+	 requested detaching with a different signal (most likely 0,
+	 meaning, discard the signal).  */
+      if (args != NULL)
+	signo = atoi (args);
+      else
+	signo = get_detach_signal (main_lwp);
+
+      detach_one_lwp (main_lwp, &signo);
+
+      inf_ptrace_detach_success (ops);
+    }
+  delete_lwp (main_lwp->ptid);
 }
 
 /* Resume execution of the inferior process.  If STEP is nonzero,

@@ -198,6 +198,9 @@ set lto_link_tests [list \
   [list "Build libpr20267b.a" \
    "$plug_opt" "-flto $lto_no_fat" \
    {pr20267b.c} {} "libpr20267b.a"] \
+  [list "Build pr20321" \
+   "-flto -Wl,-plugin,$plug_so" "-flto" \
+   {pr20321.c} {} "pr20321" "c" ".*: duplicated plugin"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {

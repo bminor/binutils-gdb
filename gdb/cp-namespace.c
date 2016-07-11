@@ -206,9 +206,14 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
       struct block_symbol lang_this;
       struct type *type;
 
-      lang_this = lookup_language_this (language_def (language_cplus), block);
+      lang_this.symbol = NULL;
+
+      if (langdef != NULL)
+	lang_this = lookup_language_this (langdef, block);
+
       if (lang_this.symbol == NULL)
 	return null_block_symbol;
+
 
       type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
       /* If TYPE_NAME is NULL, abandon trying to find this symbol.

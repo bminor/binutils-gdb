@@ -84,8 +84,14 @@ typedef uint32_t aarch64_insn;
 /* CPU-specific features.  */
 typedef unsigned long aarch64_feature_set;
 
-#define AARCH64_CPU_HAS_FEATURE(CPU,FEAT)	\
+#define AARCH64_CPU_HAS_ALL_FEATURES(CPU,FEAT)	\
+  ((~(CPU) & (FEAT)) == 0)
+
+#define AARCH64_CPU_HAS_ANY_FEATURES(CPU,FEAT)	\
   (((CPU) & (FEAT)) != 0)
+
+#define AARCH64_CPU_HAS_FEATURE(CPU,FEAT)	\
+  AARCH64_CPU_HAS_ALL_FEATURES (CPU,FEAT)
 
 #define AARCH64_MERGE_FEATURE_SETS(TARG,F1,F2)	\
   do						\
@@ -102,9 +108,6 @@ typedef unsigned long aarch64_feature_set;
   while (0)
 
 #define AARCH64_FEATURE(core,coproc) ((core) | (coproc))
-
-#define AARCH64_OPCODE_HAS_FEATURE(OPC,FEAT)	\
-  (((OPC) & (FEAT)) != 0)
 
 enum aarch64_operand_class
 {

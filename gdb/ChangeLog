@@ -1,3 +1,211 @@
+2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* cp-namespace.c (cp_lookup_bare_symbol): Initialize 
+	lang_this.symbol.
+
+2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* cp-namespace.c (cp_lookup_bare_symbol): Use language passed as
+	parameter to look for the symbol "this".
+
+
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* h8300-tdep.c (h8300_print_register): Remove extraneous parentheses.
+
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* ada-lang.c (ada_unpack_from_contents): Use unsigned constants with
+	left shifts.
+
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* sh64-tdep.c (sh64_analyze_prologue): Set "uses_fp" when setting
+	the MEDIA_FP_REGNUM register.
+
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* score-tdep.c (score7_malloc_and_get_memblock): Remove check for
+	negative size.
+
+2016-07-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_is_vfork_done_pending): Fix return type.
+
+2016-07-06  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_vfp_cprc_sub_candidate): Don't call
+	arm_vfp_cprc_sub_candidate for static field.
+
+2016-07-06  Manish Goregaokar  <manish@mozilla.com>
+
+	* rust-lang.c (rust_subscript): Allow subscripting pointers
+
+2016-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure: Regenerate.
+	* configure.ac (HAVE_LIBBABELTRACE): Fix pos variable dereference.
+
+2016-07-01  Don Breazeal  <donb@codesourcery.com>
+
+	* remote.c (remote_get_memory_xfer_limit): New function.
+	* target-delegates.c: Regenerate.
+	* target.c (memory_xfer_partial): Call
+	target_ops.to_get_memory_xfer_limit.
+	* target.h (struct target_ops) <to_get_memory_xfer_limit>: New
+	member.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (struct fbsd_fork_child_info): Rename to ...
+	(struct fbsd_fork_info): ... this.
+	(struct fbsd_fork_info) <child>: Rename to ...
+	(struct fbsd_fork_info) <ptid>: ... this.
+	(fbsd_pending_children): Update type.
+	(fbsd_remember_child): Update type and field name.
+	(fbsd_is_child_pending): Likewise.
+	(fbsd_pending_vfork_done): New variable.
+	(fbsd_is_vfork_done_pending): New function.
+	(fbsd_next_vfork_done): New function.
+	(fbsd_resume): Don't resume processes with a pending vfork done
+	event.
+	(fbsd_wait): Report pending vfork done events.
+	(fbsd_follow_fork): Delay and record a pending vfork done event
+	for a vfork parent when detaching the child.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (super_resume): Move earlier next to "super_wait".
+	(resume_one_thread_cb): Move below fork following helper code.
+	(resume_all_threads_cb): Likewise.
+	(fbsd_resume): Likewise.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_follow_fork): Only detach child if
+	"detach_fork" is true.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* x86bsd-nat.c: Include 'gdbthread.h'.
+	(x86bsd_dr_set): Set debug registers on all threads belonging to
+	the current inferior.
+
+2016-07-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in [HFILES_NO_SRCDIR]: Replace 'amd64bsd-nat.h' with
+	'x86bsd-nat.h'.
+	* amd64bsd-nat.c: Include 'x86bsd-nat.h' instead of
+	'amd64bsd-nat.h'.
+	(amd64bsd_xsave_len): Rename and move to x86bsd-nat.c.
+	(amd64bsd_fetch_inferior_registers): Replace 'amd64bsd_xsave_len'
+	with 'x86bsd_xsave_len'.
+	(amd64bsd_store_inferior_registers): Likewise.
+	(amd64bsd_target): Inherit from x86bsd_target.
+	(amd64bsd_dr_get): Rename and move to x86bsd-nat.c.
+	(amd64bsd_dr_set): Likewise.
+	(amd64bsd_dr_set_control): Likewise.
+	(amd64bsd_dr_set_addr): Likewise.
+	(amd64bsd_dr_get_addr): Likewise.
+	(amd64bsd_dr_get_status): Likewise.
+	(amd64bsd_dr_get_control): Likewise.
+	* amd64fbsd-nat.c: Include 'x86bsd-nat.h' instead of
+	'amd64bsd-nat.h'.
+	(super_mourn_inferior): Move to x86bsd-nat.c.
+	(amd64fbsd_mourn_inferior): Rename and move to x86bsd-nat.c.
+	(amd64fbsd_read_description): Replace 'amd64bsd_xsave_len' with
+	'x86bsd_xsave_len'.
+	(_initialize_amd64fbsd_nat): Remove x86 watchpoint setup and
+	mourn_inferior' target op.
+	* config/i386/fbsd.mh (NATDEPFILES): Add x86bsd-nat.o.
+	* config/i386/fbsd64.mh: Likewise.
+	* config/i386/nbsd64.mh: Likewise.
+	* config/i386/nbsdelf.mh: Likewise.
+	* config/i386/obsd.mh: Likewise.
+	* config/i386/obsd64.mh: Likewise.
+	* i386bsd-nat.c: Include 'x86bsd-nat.h'.
+	(i386bsd_xsave_len): Rename and move to x86bsd-nat.c.
+	(i386bsd_fetch_inferior_registers): Replace 'i386bsd_xsave_len'
+	with 'x86bsd_xsave_len'.
+	(i386bsd_store_inferior_registers): Likewise.
+	(i386bsd_target): Inherit from x86bsd_target.
+	(i386bsd_dr_get): Rename and move to x86bsd-nat.c.
+	(i386bsd_dr_set): Likewise.
+	(i386bsd_dr_set_control): Likewise.
+	(i386bsd_dr_set_addr): Likewise.
+	(i386bsd_dr_get_addr): Likewise.
+	(i386bsd_dr_get_status): Likewise.
+	(i386bsd_dr_get_control): Likewise.
+	* i386bsd-nat.h (i386bsd_xsave_len): Remove.
+	(i386bsd_dr_set_control): Remove.
+	(i386bsd_dr_set_addr): Remove.
+	(i386bsd_dr_get_addr): Remove.
+	(i386bsd_dr_get_status): Remove.
+	(i386bsd_dr_get_control): Remove.
+	* i386fbsd-nat.c: Include 'x86bsd-nat.h'.
+	(i386fbsd_read_description): Replace 'i386bsd_xsave_len' with
+	'x86bsd_xsave_len'.
+	(_initialize_i386fbsd_nat): Remove x86 watchpoint setup and
+	mourn_inferior' target op.
+	* x86bsd-nat.c: New file.
+	* x86bsd-nat.h: New file.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* jit.c (jit_reader_load_command): Call reinit_frame_cache and
+	jit_inferior_created_hook.
+	(jit_reader_unload_command): Call reinit_frame_cache and
+	jit_inferior_exit_hook.
+	* jit.c (struct jit_unwind_private) <registers>: Delete field.
+	<regcache>: New field.
+	(jit_unwind_reg_set_impl): Set the register's value in the
+	regcache.  Free the passed-in gdb_reg_value.
+	(jit_dealloc_cache): Adjust to free the regcache.
+	(jit_frame_sniffer): Allocate a regcache instead of an array of
+	gdb_reg_value pointers.
+	(jit_frame_this_id): Adjust.
+	(jit_frame_prev_register): Read raw registers off of the regcache
+	instead of from the gdb_reg_value pointer array.  Use
+	gdbarch_pseudo_register_read_value to read pseudo registers.
+	* regcache.c (regcache_raw_set_cached_value): New function,
+	factored out from ...
+	(regcache_raw_write): ... here.
+	* regcache.h (regcache_raw_set_cached_value): Declare.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
+	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* inf-ptrace.c (inf_ptrace_detach_success): New function, factored
+	out from ...
+	(inf_ptrace_detach): ... here.
+	* inf-ptrace.h (inf_ptrace_detach_success): New declaration.
+	* linux-nat.c (get_pending_status): Rename to ...
+	(get_detach_signal): ... this, and return a host signal instead of
+	filling in a wait status.
+	(detach_one_lwp): New function, factored out from detach_callback
+	and adjusted to handle detaching from a zombie thread.
+	(detach_callback): Skip the leader thread.
+	(linux_nat_detach): No longer defer to inf_ptrace_detach to detach
+	the leader thread, nor build a signal string to pass down.
+	Instead, use target_announce_detach, detach_one_lwp and
+	inf_ptrace_detach_success.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (breakpoint_init_inferior): Discard watchpoint
+	locations.
+	* infcmd.c (detach_command): Call breakpoint_init_inferior.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_detach): Use target_announce_detach.
+	* inf-ptrace.c (inf_ptrace_detach): Likewise.
+	* nto-procfs.c (procfs_detach): Likewise.
+	* remote.c (remote_detach_1): Likewise.
+	* target.c (target_announce_detach): New function.
+	* target.h (target_announce_detach): New declaration.
+
 2016-06-29  Tom Tromey  <tom@tromey.com>
 
 	PR python/20129:
@@ -15,12 +223,10 @@
 
 2016-06-29  Manish Goregaokar  <manish@mozilla.com>
 
-gdb/ChangeLog:
 	* rust-lang.c (rust_get_disr_info): Initialize saveptr to NULL.
 
 2016-06-29  Manish Goregaokar  <manish@mozilla.com>
 
-gdb/ChangeLog:
 	* rust-lang.c (rust_get_disr_info): Use strtok_r instead of strsep.
 
 2016-06-28  Yao Qi  <yao.qi@linaro.org>
@@ -31,8 +237,8 @@ gdb/ChangeLog:
 2016-06-27  Manish Goregaokar  <manish@mozilla.com>
 
 	* rust-lang.c (rust_print_type, rust_decorations): Print unit
-	types as "()", (rust_print_type): Omit return type for functions
-	returning unit
+	types as "()".
+	(rust_print_type): Omit return type for functions returning unit.
 
 2016-06-25  Pierre-Marie de Rodat  <derodat@adacore.com>
 

@@ -1,3 +1,57 @@
+2016-07-11  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c: made PR_DEBUG always defined.
+
+2016-07-11  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-got.h: Moved got related structures from elf32-arc.c to
+	this file. More precisely, tls_type_e, tls_got_entries, got_entry.
+	* (arc_get_local_got_ents, got_entry_for_type, new_got_entry_to_list,
+	tls_type_for_reloc, symbol_has_entry_of_type,
+	get_got_entry_list_for_symbol, arc_got_entry_type_for_reloc,
+	ADD_SYMBOL_REF_SEC_AND_RELOC, rc_fill_got_info_for_reloc,
+	relocate_fix_got_relocs_for_got_info,
+	create_got_dynrelocs_for_single_entry,
+	create_got_dynrelocs_for_got_info): Added to file.
+	* elf32-arc.c: Removed GOT & TLS related structs and functions to
+	arc-got.h.
+
+2016-07-08  James Bowman  <james.bowman@ftdichip.com>
+
+	* elf32-ft32.c (ft32_reloc_map): Use R_FT32_32 for BFD_RELOC_32.
+
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* elf32-arm.c (THUMB32_MOVT): New veneer macro.
+	(THUMB32_MOVW): Likewise.
+	(elf32_arm_stub_long_branch_thumb2_only_pure): New.
+	(DEF_STUBS): Define long_branch_thumb2_only_pure.
+	(arm_stub_is_thumb): Add new veneer stub.
+	(arm_type_of_stub): Use new veneer.
+	(arm_stub_required_alignment): Add new veneer.
+
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* bfd-in2.h (SEC_ELF_NOREAD): Rename to ...
+	(SEC_ELF_PURECODE): ... this.
+	* elf32-arm.c (elf32_arm_post_process_headers): Rename SEC_ELF_NOREAD
+	to SEC_ELF_NOREAD.
+	(elf32_arm_fake_sections): Likewise.
+	(elf_32_arm_section_flags): Likewise.
+	(elf_32_arm_lookup_section_flags): Likewise.
+	* section.c (SEC_ELF_NOREAD): Rename to ...
+	(SEC_ELF_PURECODE): ... this.
+
+2016-07-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (using_thumb2_bl): New function.
+	(arm_type_of_stub): Declare thumb2 variable together and change type
+	to bfd_boolean.  Use using_thumb2_bl () to determine whether
+	THM_MAX_FWD_BRANCH_OFFSET or THM2_MAX_FWD_BRANCH_OFFSET should be
+	checked for BL range.
+	(elf32_arm_final_link_relocate): Use using_thumb2_bl () to determine
+	the bit size of BL offset.
+
 2016-06-29  Nick Clifton  <nickc@redhat.com>
 
 	* elfnn-aarch64.c (is_aarch64_mapping_symbol): New function.

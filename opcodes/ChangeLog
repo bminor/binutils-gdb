@@ -1,3 +1,39 @@
+2016-07-07  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-opc.c (ft32_opc_info): Correct mask for "callc"
+	and "jmpc".
+
+2016-07-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (movzbl, movzbw, movzbq, movzwl, movzwq): Remove.
+	(movzb): Adjust to cover all permitted suffixes.
+	(movzw): New.
+	* i386-tbl.h: Re-generate.
+
+2016-07-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (jmp): Remove Disp32S from non-64-bit variant.
+	(lgdt): Remove Tbyte from non-64-bit variant.
+	(fxsave64, fxrstor64, xsave64, xrstor64, xsaveopt64, xrstors64,
+	xsaves64, xsavec64): Remove Disp16.
+	(cvtsi2ss, cvtsi2sd, invept, invvpid, invpcid, vcvtsi2sd):
+	Remove Disp32S from non-64-bit variants. Remove Disp16 from
+	64-bit variants.
+	(vcvtsi2ss, vcvtsd2si, vcvtsd2usi, vcvtsi2sd, vcvtusi2sd,
+	vcvtusi2ss, vcvtss2si, vcvtss2usi, vcvttsd2si, vcvttsd2usi,
+	vcvttss2si, vcvttss2usi, vmovd, vmovq): Remove Disp16 from
+	64-bit variants.
+	* i386-tbl.h: Re-generate.
+
+2016-07-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (xlat): Remove RepPrefixOk.
+	* i386-tbl.h: Re-generate.
+
+2016-06-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-dis.c (print_insn): Fix typo in comment.
+
 2016-06-28  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-opc.c (operand_general_constraint_met_p): Check the

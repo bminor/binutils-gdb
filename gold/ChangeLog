@@ -1,3 +1,20 @@
+2016-06-29  Cary Coutant  <ccoutant@gmail.com>
+
+gold/
+	PR gold/20310
+	* testsuite/dynamic_list.sh: Remove check for _ZdlPv.
+
+2016-06-29  Cary Coutant  <ccoutant@gmail.com>
+
+	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add eh_test_2.
+	* testsuite/Makefile.in: Regenerate.
+
+2016-06-30  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/Makefile.am (memory_test, memory_test_2): Pass
+	-Wl,-z to gcc, not plain -z.
+	* testsuite/Makefile.in: Regenerate.
+
 2016-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/20308

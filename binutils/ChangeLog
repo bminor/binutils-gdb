@@ -1,3 +1,57 @@
+2016-07-09  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/20337
+	* objdump.c (compare_symbols): For ELF, sort same value/type
+	symbols according to size.
+
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* objdump.c (dump_section_header): Rename SEC_ELF_NOREAD
+	to SEC_ELF_NOREAD.
+	* readelf.c (get_elf_section_flags): Rename ARM_NOREAD to
+	ARM_PURECODE and SHF_ARM_NOREAD to SHF_ARM_PURECODE.
+	(process_section_headers): Rename noread to purecode.
+
+	* section.c (SEC_ELF_NOREAD): Rename to ...
+	(SEC_ELF_PURECODE): ... this.
+
+2016-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* prdbg.c (pr_enum_type): Use a buffer big enough to hold an
+	extremely large decimal value.
+	(pr_range_type): Likewise.
+	(pr_array_type): Likewise.
+	(pr_struct_field): Likewise.
+	(pr_class_baseclass): Likewise.
+	(pr_class_method_variant): Likewise.
+	(pr_tag_type): Likewise.
+	(pr_int_constant): Likewise.
+	(pr_typed_constant): Likewise.
+	(pr_variable): Likewise.
+	(pr_function_parameter): Likewise.
+	(pr_start_block): Likewise.
+	(pr_lineno): Likewise.
+	(pr_end_block): Likewise.
+	(tg_enum_type): Likewise.
+	(tg_int_constant): Likewise.
+	(tg_typed_constant): Likewise.
+	(tg_start_block): Likewise.
+
+2016-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/objcopy.exp
+	(objcopy_test_without_global_symbol): Expect this test to fail on
+	the AArch64 and ARM targets, since they preserve their mapping
+	symbols.
+
+2016-07-01  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.27.
+
+2016-07-30  Tristan Gingold  <gingold@adacore.com>
+
+	* doc/binutils.texi (objdump): Fix mis-placement.
+
 2016-06-28  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/binutils-all/ar.exp: Relax previous restriction on

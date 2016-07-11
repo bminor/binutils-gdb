@@ -665,8 +665,14 @@ parse_args (int * pargc, char *** pargv)
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or later.\n\
 This program has absolutely no warranty.\n"));
+#ifdef TARGET_WITH_CPU
+	  printf (_("This assembler was configured for a target of `%s' "
+		    "and default,\ncpu type `%s'.\n"),
+		  TARGET_ALIAS, TARGET_WITH_CPU);
+#else
 	  printf (_("This assembler was configured for a target of `%s'.\n"),
 		  TARGET_ALIAS);
+#endif
 	  exit (EXIT_SUCCESS);
 
 	case OPTION_EMULATION:

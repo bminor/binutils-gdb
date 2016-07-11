@@ -2360,6 +2360,8 @@ enum stub_insn_type
    is inserted in arm_build_one_stub().  */
 #define THUMB16_BCOND_INSN(X)	{(X), THUMB16_TYPE, R_ARM_NONE, 1}
 #define THUMB32_INSN(X)		{(X), THUMB32_TYPE, R_ARM_NONE, 0}
+#define THUMB32_MOVT(X)		{(X), THUMB32_TYPE, R_ARM_THM_MOVT_ABS, 0}
+#define THUMB32_MOVW(X)		{(X), THUMB32_TYPE, R_ARM_THM_MOVW_ABS_NC, 0}
 #define THUMB32_B_INSN(X, Z)	{(X), THUMB32_TYPE, R_ARM_THM_JUMP24, (Z)}
 #define ARM_INSN(X)		{(X), ARM_TYPE, R_ARM_NONE, 0}
 #define ARM_REL_INSN(X, Z)	{(X), ARM_TYPE, R_ARM_JUMP24, (Z)}
@@ -2407,6 +2409,15 @@ static const insn_sequence elf32_arm_stub_long_branch_thumb2_only[] =
 {
   THUMB32_INSN (0xf85ff000),         /* ldr.w  pc, [pc, #-0] */
   DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(x) */
+};
+
+/* Thumb -> Thumb long branch stub. Used for PureCode sections on Thumb2
+   M-profile architectures.  */
+static const insn_sequence elf32_arm_stub_long_branch_thumb2_only_pure[] =
+{
+  THUMB32_MOVW (0xf2400c00),	     /* mov.w ip, R_ARM_MOVW_ABS_NC */
+  THUMB32_MOVT (0xf2c00c00),	     /* movt  ip, R_ARM_MOVT_ABS << 16 */
+  THUMB16_INSN (0x4760),             /* bx   ip */
 };
 
 /* V4T Thumb -> Thumb long branch stub. Using the stack is not
@@ -2634,6 +2645,7 @@ static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
   DEF_STUB(a8_veneer_bl) \
   DEF_STUB(a8_veneer_blx) \
   DEF_STUB(long_branch_thumb2_only) \
+  DEF_STUB(long_branch_thumb2_only_pure)
 
 #define DEF_STUB(x) arm_stub_##x,
 enum elf32_arm_stub_type
@@ -3569,6 +3581,24 @@ using_thumb2 (struct elf32_arm_link_hash_table *globals)
 	  || arch == TAG_CPU_ARCH_V8M_MAIN);
 }
 
+/* Determine whether Thumb-2 BL instruction is available.  */
+
+static bfd_boolean
+using_thumb2_bl (struct elf32_arm_link_hash_table *globals)
+{
+  int arch =
+    bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  /* Force return logic to be reviewed for each new architecture.  */
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
+	      || arch == TAG_CPU_ARCH_V8M_BASE
+	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+
+  /* Architecture was introduced after ARMv6T2 (eg. ARMv6-M).  */
+  return (arch == TAG_CPU_ARCH_V6T2
+	  || arch >= TAG_CPU_ARCH_V7);
+}
+
 /* Create .plt, .rel(a).plt, .got, .got.plt, .rel(a).got, .dynbss, and
    .rel(a).bss sections in DYNOBJ, and set up shortcuts to them in our
    hash table.  */
@@ -3790,6 +3820,7 @@ arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
     {
     case arm_stub_long_branch_thumb_only:
     case arm_stub_long_branch_thumb2_only:
+    case arm_stub_long_branch_thumb2_only_pure:
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:
     case arm_stub_long_branch_v4t_thumb_arm_pic:
@@ -3823,13 +3854,14 @@ arm_type_of_stub (struct bfd_link_info *info,
   bfd_signed_vma branch_offset;
   unsigned int r_type;
   struct elf32_arm_link_hash_table * globals;
-  int thumb2;
-  int thumb_only;
+  bfd_boolean thumb2, thumb2_bl, thumb_only;
   enum elf32_arm_stub_type stub_type = arm_stub_none;
   int use_plt = 0;
   enum arm_st_branch_type branch_type = *actual_branch_type;
   union gotplt_union *root_plt;
   struct arm_plt_info *arm_plt;
+  int arch;
+  int thumb2_movw;
 
   if (branch_type == ST_BRANCH_LONG)
     return stub_type;
@@ -3839,8 +3871,13 @@ arm_type_of_stub (struct bfd_link_info *info,
     return stub_type;
 
   thumb_only = using_thumb_only (globals);
-
   thumb2 = using_thumb2 (globals);
+  thumb2_bl = using_thumb2_bl (globals);
+
+  arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  /* True for architectures that implement the thumb2 movw instruction.  */
+  thumb2_movw = thumb2 || (arch  == TAG_CPU_ARCH_V8M_BASE);
 
   /* Determine where the call point is.  */
   location = (input_sec->output_offset
@@ -3906,10 +3943,10 @@ arm_type_of_stub (struct bfd_link_info *info,
 	   but only if this call is not through a PLT entry. Indeed,
 	   PLT stubs handle mode switching already.
       */
-      if ((!thumb2
+      if ((!thumb2_bl
 	    && (branch_offset > THM_MAX_FWD_BRANCH_OFFSET
 		|| (branch_offset < THM_MAX_BWD_BRANCH_OFFSET)))
-	  || (thumb2
+	  || (thumb2_bl
 	      && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
 		  || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
 	  || (thumb2
@@ -3928,6 +3965,15 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      /* Thumb to thumb.  */
 	      if (!thumb_only)
 		{
+		  if (input_sec->flags & SEC_ELF_PURECODE)
+		    (*_bfd_error_handler) (_("%B(%s): warning: long branch "
+					     " veneers used in section with "
+					     "SHF_ARM_PURECODE section "
+					     "attribute is only supported"
+					     " for M-profile targets that "
+					     "implement the movw "
+					     "instruction."));
+
 		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 		    /* PIC stubs.  */
 		    ? ((globals->use_blx
@@ -3950,16 +3996,39 @@ arm_type_of_stub (struct bfd_link_info *info,
 		}
 	      else
 		{
-		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
-		    /* PIC stub.  */
-		    ? arm_stub_long_branch_thumb_only_pic
-		    /* non-PIC stub.  */
-		    : (thumb2 ? arm_stub_long_branch_thumb2_only
-			      : arm_stub_long_branch_thumb_only);
+		  if (thumb2_movw && (input_sec->flags & SEC_ELF_PURECODE))
+		      stub_type = arm_stub_long_branch_thumb2_only_pure;
+		  else
+		    {
+		      if (input_sec->flags & SEC_ELF_PURECODE)
+			(*_bfd_error_handler) (_("%B(%s): warning: long branch "
+						 " veneers used in section with "
+						 "SHF_ARM_PURECODE section "
+						 "attribute is only supported"
+						 " for M-profile targets that "
+						 "implement the movw "
+						 "instruction."));
+
+		      stub_type = (bfd_link_pic (info) | globals->pic_veneer)
+			/* PIC stub.  */
+			? arm_stub_long_branch_thumb_only_pic
+			/* non-PIC stub.  */
+			: (thumb2 ? arm_stub_long_branch_thumb2_only
+				  : arm_stub_long_branch_thumb_only);
+		    }
 		}
 	    }
 	  else
 	    {
+	      if (input_sec->flags & SEC_ELF_PURECODE)
+		(*_bfd_error_handler) (_("%B(%s): warning: long branch "
+					 " veneers used in section with "
+					 "SHF_ARM_PURECODE section "
+					 "attribute is only supported"
+					 " for M-profile targets that "
+					 "implement the movw "
+					 "instruction."));
+
 	      /* Thumb to arm.  */
 	      if (sym_sec != NULL
 		  && sym_sec->owner != NULL
@@ -4004,6 +4073,14 @@ arm_type_of_stub (struct bfd_link_info *info,
 	   || r_type == R_ARM_PLT32
 	   || r_type == R_ARM_TLS_CALL)
     {
+      if (input_sec->flags & SEC_ELF_PURECODE)
+	(*_bfd_error_handler) (_("%B(%s): warning: long branch "
+				 " veneers used in section with "
+				 "SHF_ARM_PURECODE section "
+				 "attribute is only supported"
+				 " for M-profile targets that "
+				 "implement the movw "
+				 "instruction."));
       if (branch_type == ST_BRANCH_TO_THUMB)
 	{
 	  /* Arm to thumb.  */
@@ -4429,6 +4506,7 @@ arm_stub_required_alignment (enum elf32_arm_stub_type stub_type)
     case arm_stub_long_branch_v4t_arm_thumb:
     case arm_stub_long_branch_thumb_only:
     case arm_stub_long_branch_thumb2_only:
+    case arm_stub_long_branch_thumb2_only_pure:
     case arm_stub_long_branch_v4t_thumb_thumb:
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:
@@ -9838,6 +9916,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma signed_check;
 	int bitsize;
 	const int thumb2 = using_thumb2 (globals);
+	const int thumb2_bl = using_thumb2_bl (globals);
 
 	/* A branch to an undefined weak symbol is turned into a jump to
 	   the next instruction unless a PLT entry will be created.
@@ -10014,7 +10093,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	   this relocation according to whether we're relocating for
 	   Thumb-2 or not.  */
 	bitsize = howto->bitsize;
-	if (!thumb2)
+	if (!thumb2_bl)
 	  bitsize -= 2;
 	reloc_signed_max = (1 << (bitsize - 1)) - 1;
 	reloc_signed_min = ~reloc_signed_max;
@@ -15794,7 +15873,7 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
     }
 
   /* Scan segment to set p_flags attribute if it contains only sections with
-     SHF_ARM_NOREAD flag.  */
+     SHF_ARM_PURECODE flag.  */
   for (m = elf_seg_map (abfd); m != NULL; m = m->next)
     {
       unsigned int j;
@@ -15803,7 +15882,7 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
 	continue;
       for (j = 0; j < m->count; j++)
 	{
-	  if (!(elf_section_flags (m->sections[j]) & SHF_ARM_NOREAD))
+	  if (!(elf_section_flags (m->sections[j]) & SHF_ARM_PURECODE))
 	    break;
 	}
       if (j == m->count)
@@ -15866,8 +15945,8 @@ elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
       hdr->sh_flags |= SHF_LINK_ORDER;
     }
 
-  if (sec->flags & SEC_ELF_NOREAD)
-    hdr->sh_flags |= SHF_ARM_NOREAD;
+  if (sec->flags & SEC_ELF_PURECODE)
+    hdr->sh_flags |= SHF_ARM_PURECODE;
 
   return TRUE;
 }
@@ -18153,16 +18232,16 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 static bfd_boolean
 elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr * hdr)
 {
-  if (hdr->sh_flags & SHF_ARM_NOREAD)
-    *flags |= SEC_ELF_NOREAD;
+  if (hdr->sh_flags & SHF_ARM_PURECODE)
+    *flags |= SEC_ELF_PURECODE;
   return TRUE;
 }
 
 static flagword
 elf32_arm_lookup_section_flags (char *flag_name)
 {
-  if (!strcmp (flag_name, "SHF_ARM_NOREAD"))
-    return SHF_ARM_NOREAD;
+  if (!strcmp (flag_name, "SHF_ARM_PURECODE"))
+    return SHF_ARM_PURECODE;
 
   return SEC_NO_FLAGS;
 }

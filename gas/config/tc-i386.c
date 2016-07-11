@@ -173,7 +173,7 @@ static void swap_operands (void);
 static void swap_2_operands (int, int);
 static void optimize_imm (void);
 static void optimize_disp (void);
-static const insn_template *match_template (void);
+static const insn_template *match_template (char);
 static int check_string (void);
 static int process_suffix (void);
 static int check_byte_reg (void);
@@ -325,6 +325,9 @@ struct _i386_insn
     /* SEG gives the seg_entries of this insn.  They are zero unless
        explicit segment overrides are given.  */
     const seg_entry *seg[2];
+
+    /* Copied first memory operand string, for re-checking.  */
+    char *memop1_string;
 
     /* PREFIX holds all the given prefix opcodes (usually null).
        PREFIXES is the number of prefix opcodes.  */
@@ -3534,7 +3537,7 @@ void
 md_assemble (char *line)
 {
   unsigned int j;
-  char mnemonic[MAX_MNEM_SIZE];
+  char mnemonic[MAX_MNEM_SIZE], mnem_suffix;
   const insn_template *t;
 
   /* Initialize globals.  */
@@ -3552,9 +3555,12 @@ md_assemble (char *line)
   line = parse_insn (line, mnemonic);
   if (line == NULL)
     return;
+  mnem_suffix = i.suffix;
 
   line = parse_operands (line, mnemonic);
   this_operand = -1;
+  xfree (i.memop1_string);
+  i.memop1_string = NULL;
   if (line == NULL)
     return;
 
@@ -3595,7 +3601,7 @@ md_assemble (char *line)
      making sure the overlap of the given operands types is consistent
      with the template operand types.  */
 
-  if (!(t = match_template ()))
+  if (!(t = match_template (mnem_suffix)))
     return;
 
   if (sse_check != check_none
@@ -3660,10 +3666,15 @@ md_assemble (char *line)
   if (i.bnd_prefix && !i.tm.opcode_modifier.bndprefixok)
     as_bad (_("expecting valid branch instruction after `bnd'"));
 
-  if (i.tm.cpu_flags.bitfield.cpumpx
-      && flag_code == CODE_64BIT
-      && i.prefix[ADDR_PREFIX])
-    as_bad (_("32-bit address isn't allowed in 64-bit MPX instructions."));
+  if (i.tm.cpu_flags.bitfield.cpumpx)
+    {
+      if (flag_code == CODE_64BIT && i.prefix[ADDR_PREFIX])
+	as_bad (_("32-bit address isn't allowed in 64-bit MPX instructions."));
+      else if (flag_code != CODE_16BIT
+	       ? i.prefix[ADDR_PREFIX]
+	       : i.mem_operands && !i.prefix[ADDR_PREFIX])
+	as_bad (_("16-bit address isn't allowed in MPX instructions"));
+    }
 
   /* Insert BND prefix.  */
   if (add_bnd_prefix
@@ -4719,14 +4730,14 @@ VEX_check_operands (const insn_template *t)
 }
 
 static const insn_template *
-match_template (void)
+match_template (char mnem_suffix)
 {
   /* Points to template once we've found it.  */
   const insn_template *t;
   i386_operand_type overlap0, overlap1, overlap2, overlap3;
   i386_operand_type overlap4;
   unsigned int found_reverse_match;
-  i386_opcode_modifier suffix_check;
+  i386_opcode_modifier suffix_check, mnemsuf_check;
   i386_operand_type operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
   unsigned int j;
@@ -4754,6 +4765,19 @@ match_template (void)
     suffix_check.no_qsuf = 1;
   else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
     suffix_check.no_ldsuf = 1;
+
+  memset (&mnemsuf_check, 0, sizeof (mnemsuf_check));
+  if (intel_syntax)
+    {
+      switch (mnem_suffix)
+	{
+	case BYTE_MNEM_SUFFIX:  mnemsuf_check.no_bsuf = 1; break;
+	case WORD_MNEM_SUFFIX:  mnemsuf_check.no_wsuf = 1; break;
+	case SHORT_MNEM_SUFFIX: mnemsuf_check.no_ssuf = 1; break;
+	case LONG_MNEM_SUFFIX:  mnemsuf_check.no_lsuf = 1; break;
+	case QWORD_MNEM_SUFFIX: mnemsuf_check.no_qsuf = 1; break;
+	}
+    }
 
   /* Must have right number of operands.  */
   i.error = number_of_operands_mismatch;
@@ -4799,6 +4823,14 @@ match_template (void)
 	      || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
 	      || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf)
 	      || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf)))
+	continue;
+      /* In Intel mode all mnemonic suffixes must be explicitly allowed.  */
+      if ((t->opcode_modifier.no_bsuf && mnemsuf_check.no_bsuf)
+	  || (t->opcode_modifier.no_wsuf && mnemsuf_check.no_wsuf)
+	  || (t->opcode_modifier.no_lsuf && mnemsuf_check.no_lsuf)
+	  || (t->opcode_modifier.no_ssuf && mnemsuf_check.no_ssuf)
+	  || (t->opcode_modifier.no_qsuf && mnemsuf_check.no_qsuf)
+	  || (t->opcode_modifier.no_ldsuf && mnemsuf_check.no_ldsuf))
 	continue;
 
       if (!operand_size_match (t))
@@ -5638,7 +5670,7 @@ check_qword_reg (void)
     /* Warn if the r prefix on a general reg is missing.  */
     else if ((i.types[op].bitfield.reg16
 	      || i.types[op].bitfield.reg32)
-	     && (i.tm.operand_types[op].bitfield.reg32
+	     && (i.tm.operand_types[op].bitfield.reg64
 		 || i.tm.operand_types[op].bitfield.acc))
       {
 	/* Prohibit these changes in the 64bit mode, since the
@@ -8510,7 +8542,7 @@ i386_index_check (const char *operand_string)
 
       kind = "string address";
 
-      if (current_templates->start->opcode_modifier.w)
+      if (current_templates->start->opcode_modifier.repprefixok)
 	{
 	  i386_operand_type type = current_templates->end[-1].operand_types[0];
 
@@ -8580,6 +8612,23 @@ bad_address:
 			   || i.index_reg->reg_num == RegEiz))
 		      || !i.index_reg->reg_type.bitfield.baseindex)))
 	    goto bad_address;
+
+	  /* bndmk, bndldx, and bndstx have special restrictions. */
+	  if (current_templates->start->base_opcode == 0xf30f1b
+	      || (current_templates->start->base_opcode & ~1) == 0x0f1a)
+	    {
+	      /* They cannot use RIP-relative addressing. */
+	      if (i.base_reg && i.base_reg->reg_num == RegRip)
+		{
+		  as_bad (_("`%s' cannot be used here"), operand_string);
+		  return 0;
+		}
+
+	      /* bndldx and bndstx ignore their scale factor. */
+	      if (current_templates->start->base_opcode != 0xf30f1b
+		  && i.log2_scale_factor)
+		as_warn (_("register scaling is being ignored here"));
+	    }
 	}
       else
 	{
@@ -8658,6 +8707,49 @@ RC_SAE_immediate (const char *imm_start)
   exp->X_op_symbol = (symbolS *) 0;
 
   i.types[this_operand].bitfield.imm8 = 1;
+  return 1;
+}
+
+/* Only string instructions can have a second memory operand, so
+   reduce current_templates to just those if it contains any.  */
+static int
+maybe_adjust_templates (void)
+{
+  const insn_template *t;
+
+  gas_assert (i.mem_operands == 1);
+
+  for (t = current_templates->start; t < current_templates->end; ++t)
+    if (t->opcode_modifier.isstring)
+      break;
+
+  if (t < current_templates->end)
+    {
+      static templates aux_templates;
+      bfd_boolean recheck;
+
+      aux_templates.start = t;
+      for (; t < current_templates->end; ++t)
+	if (!t->opcode_modifier.isstring)
+	  break;
+      aux_templates.end = t;
+
+      /* Determine whether to re-check the first memory operand.  */
+      recheck = (aux_templates.start != current_templates->start
+		 || t != current_templates->end);
+
+      current_templates = &aux_templates;
+
+      if (recheck)
+	{
+	  i.mem_operands = 0;
+	  if (i.memop1_string != NULL
+	      && i386_index_check (i.memop1_string) == 0)
+	    return 0;
+	  i.mem_operands = 1;
+	}
+    }
+
   return 1;
 }
 
@@ -8800,6 +8892,8 @@ i386_att_operand (char *operand_string)
       char *vop_start;
 
     do_memory_reference:
+      if (i.mem_operands == 1 && !maybe_adjust_templates ())
+	return 0;
       if ((i.mem_operands == 1
 	   && !current_templates->start->opcode_modifier.isstring)
 	  || i.mem_operands == 2)
@@ -8977,6 +9071,8 @@ i386_att_operand (char *operand_string)
       if (i386_index_check (operand_string) == 0)
 	return 0;
       i.types[this_operand].bitfield.mem = 1;
+      if (i.mem_operands == 0)
+	i.memop1_string = xstrdup (operand_string);
       i.mem_operands++;
     }
   else

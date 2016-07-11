@@ -1051,7 +1051,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 	fprintf_filtered (file, "u> ");
       if ((C | Z) == 1)
 	fprintf_filtered (file, "u<= ");
-      if ((C == 0))
+      if (C == 0)
 	fprintf_filtered (file, "u>= ");
       if (C == 1)
 	fprintf_filtered (file, "u< ");

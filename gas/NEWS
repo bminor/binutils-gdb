@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.27:
+
 * Default to --enable-compressed-debug-sections=gas for Linux/x86 targets.
 
 * Add --no-pad-sections to stop the assembler from padding the end of output
@@ -33,6 +36,9 @@
   lfence, mfence and sfence as "lock addl $0x0, (%[re]sp)".
 
 * Add assembly-time relaxation option for ARC cpus.
+
+* Add --with-cpu=TYPE configure option for ARC gas.  This allows the default
+  cpu type to be adjusted at configure time.
 
 Changes in 2.26:
 

@@ -1,3 +1,72 @@
+2016-07-11  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/nps-1b.err: Update test to handle more
+	verbosity.
+
+2016-07-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/elfv2exe.d: Update.
+
+2016-07-06  James Bowman  <james.bowman@ftdichip.com>
+
+	* scripttempl/ft32.sc (__PMSIZE): Correct __PMSIZE_.
+	(DATA): add ALIGN.
+        (BSS): add ALIGN
+
+2016-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-plugin/lto.exp: Add -flto to PR ld/20321 test.
+
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* testsuite/ld-arm/farcall-thumb2-purecode.d: New test result.
+	* testsuite/ld-arm/farcall-thumb2-purecode.s: New test.
+	* testsuite/ld-arm/arm-elf.exp: Run it.
+
+2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* testsuite/ld-arm/arm_noread.ld: Renamed to ...
+	testsuite/ld-arm/arm_purecode.ld: ... this, and replaced
+	all noread's by purecode.
+
+2016-07-05  Jan Beulich  <jbeulich@suse.com>
+
+	* ldexp.c (exp_fold_tree_1): Set linker_def field based on
+	assignment line number.
+	* ldlex.l (lineno): Drop initializer.
+	(<<EOF>>): Set lineno to zero after reaching top of stack.
+
+2016-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20321
+	* plugin.c (plugin_opt_plugin): Warn and return if plugin has
+	been loaded already.
+	* testsuite/ld-plugin/lto.exp: Run PR ld/20321 test.
+	* testsuite/ld-plugin/pr20321.c: New file.
+
+2016-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/ft32.sc (__PMSIZE_): If not defined, set to 256K.
+	(__RAMSIZE): If not defined, set to 64K.
+	(MEMORY): Set the flash region size to __PMSIZE and the ram region
+	size to __RAMSIZE.
+
+2016-07-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/branch-misc-2.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run it.
+
+2016-07-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (Thumb-2 BL): Assemble for ARMv7.
+	(Thumb-2 BL on ARMv6-M): New testcase.
+	* testsuite/ld-arm/thumb2-bl.d: Do not try to match testcase filename.
+	* testsuite/ld-arm/thumb2-bl.s: Do not select architecture.
+
+2016-07-01  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.27.
+
 2016-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-gc/gc.exp: Run pr20306 test.

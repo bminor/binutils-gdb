@@ -1,3 +1,75 @@
+2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.fortran/derived-types.exp (result_line, result_line_2):
+	New variables.
+	(print this%a, print this%b, print this): New tests.
+	* gdb.fortran/derived-types.f90 (this): New object and
+	initialization.
+
+2016-07-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.ada/arraydim.exp: Remove extra directory level in build
+	directory.
+
+2016-07-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/ada.exp: Remove extra directory level in build directory.
+	* gdb.ada/cond_lang.exp: Likewise.
+	* gdb.ada/exec_changed.exp: Likewise.
+	* gdb.ada/lang_switch.exp: Likewise.
+
+2016-07-06  Manish Goregaokar  <manish@mozilla.com>
+
+	* simple.rs: Add test for raw pointer subscripting
+	* simple.exp: Add test expectations
+
+2016-07-05  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.mi/mi-reverse.exp: Match =record-started output.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/jit-reader.exp (info_registers_current_frame): New
+	procedure.
+	(jit_reader_test): Test the jit reader's unwinder.
+	* gdb.base/jithost.c (jit_function_00_code): New global.
+	(main): Use memcpy to fill in the mmapped code, instead of poking
+	bytes manually here.
+	* gdb.base/jitreader.c (enum register_mapping) <AMD64_RBP>: New
+	value.
+	(read_debug_info): Save the function's range.
+	(read_sp): New function.
+	(unwind_frame): Use it.  Also unwind RBP.
+	(get_frame_id): Use read_sp.
+	(gdb_init_reader): Use calloc instead of malloc.
+	* lib/gdb.exp (get_hexadecimal_valueof): Add optional 'test'
+	parameter.  Use gdb_test_multiple.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
+	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.threads/process-dies-while-detaching.c: New file.
+	* gdb.threads/process-dies-while-detaching.exp: New file.
+
+2016-07-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/watchpoint-multi-exit.c: New file.
+	* gdb.multi/watchpoint-multi-exit.exp: New file.
+
+2016-06-30  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdbserver-support.exp (close_gdbserver, gdb_exit): Don't
+	unset inferior_spawn_id.
+
+2016-06-30  Pedro Alves  <palves@redhat.com>
+
+	* lib/mi-support.exp (default_mi_gdb_start): Declare global
+	FORCE_SEPARATE_MI_TTY, not SEPARATE_MI_TTY.
+
+2016-06-29  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/return.c: Add copyright header.
+
 2016-06-29  Tom Tromey  <tom@tromey.com>
 
 	PR python/20129:
@@ -17,8 +89,9 @@
 
 2016-06-27  Manish Goregaokar  <manish@mozilla.com>
 
-	* gdb.rust/simple.rs: Add test for returning unit in a function
-	* gdb.rust/simple.exp: Add expectation for functions returning unit
+	* gdb.rust/simple.rs: Add test for returning unit in a function.
+	* gdb.rust/simple.exp: Add expectation for functions returning
+	unit.
 
 2016-06-27  Pierre-Marie de Rodat  <derodat@adacore.com>
 
@@ -30,7 +103,8 @@
 
 	PR gdb/20239
 	* gdb.rust/simple.rs: Add more tests for printing NonZero enums.
-	* gdb.rust/simple.exp: Add test expectations for new NonZero tests.
+	* gdb.rust/simple.exp: Add test expectations for new NonZero
+	tests.
 
 2016-06-24  David Taylor  <dtaylor@emc.com>
 
@@ -575,7 +649,7 @@
 
 	* lib/compiler.c: Add Intel specific preprocessor macros.
 	* lib/compiler.cc: Likewise.
-	
+
 2016-04-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.server/connect-with-no-symbol-file.c: New file.
@@ -932,11 +1006,13 @@
 
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
-	* gdb.fortran/vla-history.exp: Lookup array elements and printing exceeds timeout.
+	* gdb.fortran/vla-history.exp: Lookup array elements and printing
+	exceeds timeout.
 
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
-	* gdb.cp/vla-cxx.cc: Insert dummy assignment as anchor for an breakpoint.
+	* gdb.cp/vla-cxx.cc: Insert dummy assignment as anchor for an
+	breakpoint.
 
 2016-03-02  Bernhard Heckel  <bernhard.heckel@intel.com>
 
@@ -1892,9 +1968,9 @@
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
 	PR 17539
-        * gdb.base/display.exp: Expect displays to be sorted in ascending
-        order.  Use multi_line.
-        * gdb.base/solib-display.exp: Likewise.
+	* gdb.base/display.exp: Expect displays to be sorted in ascending
+	order.  Use multi_line.
+	* gdb.base/solib-display.exp: Likewise.
 
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
@@ -3622,7 +3698,8 @@
 
 2015-05-26  Omair Javaid  <omair.javaid@linaro.org>
 
-	* lib/gdb.exp (supports_process_record): Return true for aarch64*-linux*.
+	* lib/gdb.exp (supports_process_record): Return true for
+	aarch64*-linux*.
 	(supports_reverse): Likewise.
 
 2015-05-22  Patrick Palka  <patrick@parcs.ath.cx>

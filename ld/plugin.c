@@ -237,6 +237,7 @@ void
 plugin_opt_plugin (const char *plugin)
 {
   plugin_t *newplug;
+  plugin_t *curplug = plugins_list;
 
   newplug = xmalloc (sizeof *newplug);
   memset (newplug, 0, sizeof *newplug);
@@ -244,6 +245,18 @@ plugin_opt_plugin (const char *plugin)
   newplug->dlhandle = dlopen (plugin, RTLD_NOW);
   if (!newplug->dlhandle)
     einfo (_("%P%F: %s: error loading plugin: %s\n"), plugin, dlerror ());
+
+  /* Check if plugin has been loaded already.  */
+  while (curplug)
+    {
+      if (newplug->dlhandle == curplug->dlhandle)
+	{
+	  einfo (_("%P: %s: duplicated plugin\n"), plugin);
+	  free (newplug);
+	  return;
+	}
+      curplug = curplug->next;
+    }
 
   /* Chain on end, so when we run list it is in command-line order.  */
   *plugins_tail_chain_ptr = newplug;

@@ -33,18 +33,32 @@ struct jit_code_entry only_entry;
 
 typedef void (jit_function_t) ();
 
-int main (int argc, char **argv)
+/* The code of the jit_function_00 function that is copied into an
+   mmapped buffer in the inferior at run time.
+
+   The second instruction mangles the stack pointer, meaning that when
+   stopped at the third instruction, GDB needs assistance from the JIT
+   unwinder in order to be able to unwind successfully.  */
+const unsigned char jit_function_00_code[] = {
+  0xcc,				/* int3 */
+  0x48, 0x83, 0xf4, 0xff,	/* xor $0xffffffffffffffff, %rsp */
+  0x48, 0x83, 0xf4, 0xff,	/* xor $0xffffffffffffffff, %rsp */
+  0xc3				/* ret */
+};
+
+int
+main (int argc, char **argv)
 {
+  struct jithost_abi *symfile;
   char *code = mmap (NULL, getpagesize (), PROT_WRITE | PROT_EXEC,
 		     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   jit_function_t *function = (jit_function_t *) code;
 
-  code[0] = 0xcc; /* SIGTRAP  */
-  code[1] = 0xc3; /* RET  */
+  memcpy (code, jit_function_00_code, sizeof (jit_function_00_code));
 
-  struct jithost_abi *symfile = malloc (sizeof (struct jithost_abi));
+  symfile = malloc (sizeof (struct jithost_abi));
   symfile->begin = code;
-  symfile->end = code + 2;
+  symfile->end = code + sizeof (jit_function_00_code);
 
   only_entry.symfile_addr = symfile;
   only_entry.symfile_size = sizeof (struct jithost_abi);

@@ -6080,7 +6080,7 @@ md_assemble (char *str)
 	{
 	  /* Check that this instruction is supported for this CPU.  */
 	  if (!opcode->avariant
-	      || !AARCH64_CPU_HAS_FEATURE (cpu_variant, *opcode->avariant))
+	      || !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant, *opcode->avariant))
 	    {
 	      as_bad (_("selected processor does not support `%s'"), str);
 	      return;
@@ -7801,23 +7801,33 @@ struct aarch64_option_cpu_value_table
 {
   const char *name;
   const aarch64_feature_set value;
+  const aarch64_feature_set require; /* Feature dependencies.  */
 };
 
 static const struct aarch64_option_cpu_value_table aarch64_features[] = {
-  {"crc",		AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0)},
-  {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0)},
-  {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
-  {"lse",		AARCH64_FEATURE (AARCH64_FEATURE_LSE, 0)},
-  {"simd",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
-  {"pan",		AARCH64_FEATURE (AARCH64_FEATURE_PAN, 0)},
-  {"lor",		AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0)},
-  {"ras",		AARCH64_FEATURE (AARCH64_FEATURE_RAS, 0)},
-  {"rdma",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD
-					 | AARCH64_FEATURE_RDMA, 0)},
-  {"fp16",		AARCH64_FEATURE (AARCH64_FEATURE_F16
-					 | AARCH64_FEATURE_FP, 0)},
-  {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0)},
-  {NULL,		AARCH64_ARCH_NONE}
+  {"crc",		AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0),
+			AARCH64_ARCH_NONE},
+  {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0),
+			AARCH64_ARCH_NONE},
+  {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0),
+			AARCH64_ARCH_NONE},
+  {"lse",		AARCH64_FEATURE (AARCH64_FEATURE_LSE, 0),
+			AARCH64_ARCH_NONE},
+  {"simd",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0),
+			AARCH64_ARCH_NONE},
+  {"pan",		AARCH64_FEATURE (AARCH64_FEATURE_PAN, 0),
+			AARCH64_ARCH_NONE},
+  {"lor",		AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0),
+			AARCH64_ARCH_NONE},
+  {"ras",		AARCH64_FEATURE (AARCH64_FEATURE_RAS, 0),
+			AARCH64_ARCH_NONE},
+  {"rdma",		AARCH64_FEATURE (AARCH64_FEATURE_RDMA, 0),
+			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
+  {"fp16",		AARCH64_FEATURE (AARCH64_FEATURE_F16, 0),
+			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
+  {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0),
+			AARCH64_ARCH_NONE},
+  {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 
 struct aarch64_long_option_table
@@ -7827,6 +7837,38 @@ struct aarch64_long_option_table
   int (*func) (const char *subopt);	/* Function to decode sub-option.  */
   char *deprecated;		/* If non-null, print this message.  */
 };
+
+/* Transitive closure of features depending on set.  */
+static aarch64_feature_set
+aarch64_feature_disable_set (aarch64_feature_set set)
+{
+  const struct aarch64_option_cpu_value_table *opt;
+  aarch64_feature_set prev = 0;
+
+  while (prev != set) {
+    prev = set;
+    for (opt = aarch64_features; opt->name != NULL; opt++)
+      if (AARCH64_CPU_HAS_ANY_FEATURES (opt->require, set))
+        AARCH64_MERGE_FEATURE_SETS (set, set, opt->value);
+  }
+  return set;
+}
+
+/* Transitive closure of dependencies of set.  */
+static aarch64_feature_set
+aarch64_feature_enable_set (aarch64_feature_set set)
+{
+  const struct aarch64_option_cpu_value_table *opt;
+  aarch64_feature_set prev = 0;
+
+  while (prev != set) {
+    prev = set;
+    for (opt = aarch64_features; opt->name != NULL; opt++)
+      if (AARCH64_CPU_HAS_FEATURE (set, opt->value))
+        AARCH64_MERGE_FEATURE_SETS (set, set, opt->require);
+  }
+  return set;
+}
 
 static int
 aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
@@ -7895,11 +7937,19 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
       for (opt = aarch64_features; opt->name != NULL; opt++)
 	if (strncmp (opt->name, str, optlen) == 0)
 	  {
+	    aarch64_feature_set set;
+
 	    /* Add or remove the extension.  */
 	    if (adding_value)
-	      AARCH64_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->value);
+	      {
+		set = aarch64_feature_enable_set (opt->value);
+		AARCH64_MERGE_FEATURE_SETS (*ext_set, *ext_set, set);
+	      }
 	    else
-	      AARCH64_CLEAR_FEATURE (*ext_set, *ext_set, opt->value);
+	      {
+		set = aarch64_feature_disable_set (opt->value);
+		AARCH64_CLEAR_FEATURE (*ext_set, *ext_set, set);
+	      }
 	    break;
 	  }
 

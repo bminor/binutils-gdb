@@ -6810,7 +6810,7 @@ get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
   if (mips_relax.sequence == 2)
     return APPEND_ADD;
 
-  /* We must not dabble with instructions in a ".set norerorder" block.  */
+  /* We must not dabble with instructions in a ".set noreorder" block.  */
   if (mips_opts.noreorder)
     return APPEND_ADD;
 
@@ -7481,7 +7481,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    ip->fixp[i]->fx_tcbit = 1;
 	  }
     }
-  install_insn (ip);
 
   /* Update the register mask information.  */
   mips_gprmask |= gpr_read_mask (ip) | gpr_write_mask (ip);
@@ -7518,13 +7517,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     case APPEND_SWAP:
       {
 	struct mips_cl_insn delay = history[0];
-	if (mips_opts.mips16)
-	  {
-	    know (delay.frag == ip->frag);
-	    move_insn (ip, delay.frag, delay.where);
-	    move_insn (&delay, ip->frag, ip->where + insn_length (ip));
-	  }
-	else if (relaxed_branch || delay.frag != ip->frag)
+
+	if (relaxed_branch || delay.frag != ip->frag)
 	  {
 	    /* Add the delay slot instruction to the end of the
 	       current frag and shrink the fixed part of the
@@ -7537,9 +7531,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  }
 	else
 	  {
-	    move_insn (&delay, ip->frag,
-		       ip->where - branch_disp + insn_length (ip));
-	    move_insn (ip, history[0].frag, history[0].where);
+	    /* If this is not a relaxed branch and we are in the
+	       same frag, then just swap the instructions.  */
+	    move_insn (ip, delay.frag, delay.where);
+	    move_insn (&delay, ip->frag, ip->where + insn_length (ip));
 	  }
 	history[0] = *ip;
 	delay.fixed_p = 1;

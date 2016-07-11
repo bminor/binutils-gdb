@@ -901,8 +901,11 @@ sh64_analyze_prologue (struct gdbarch *gdbarch,
 	    }
 
 	  else if (IS_MOV_R14 (insn))
-	    cache->saved_regs[MEDIA_FP_REGNUM] =
-	      cache->sp_offset - ((((insn & 0xf) ^ 0x8) - 0x8) << 2);
+	    {
+	      cache->saved_regs[MEDIA_FP_REGNUM] =
+		cache->sp_offset - ((((insn & 0xf) ^ 0x8) - 0x8) << 2);
+	      cache->uses_fp = 1;
+	    }
 
 	  else if (IS_MOV_R0 (insn))
 	    {
@@ -931,6 +934,7 @@ sh64_analyze_prologue (struct gdbarch *gdbarch,
 	      /* Store R14 at r0_val-4 from SP.  Decrement r0 by 4.  */
 	      cache->saved_regs[MEDIA_FP_REGNUM] = cache->sp_offset
 	      					   - (r0_val - 4);
+	      cache->uses_fp = 1;
 	      r0_val -= 4;
 	    }
 
@@ -957,22 +961,25 @@ sh64_analyze_prologue (struct gdbarch *gdbarch,
 						 9) << 2);
 
 	  else if (IS_STQ_R14_R15 (insn))
-	    cache->saved_regs[MEDIA_FP_REGNUM]
-	      = cache->sp_offset - (sign_extend ((insn & 0xffc00) >> 10,
-						 9) << 3);
+	    {
+	      cache->saved_regs[MEDIA_FP_REGNUM]
+		= cache->sp_offset - (sign_extend ((insn & 0xffc00) >> 10,
+						   9) << 3);
+	      cache->uses_fp = 1;
+	    }
 
 	  else if (IS_STL_R14_R15 (insn))
-	    cache->saved_regs[MEDIA_FP_REGNUM]
-	      = cache->sp_offset - (sign_extend ((insn & 0xffc00) >> 10,
-						 9) << 2);
+	    {
+	      cache->saved_regs[MEDIA_FP_REGNUM]
+		= cache->sp_offset - (sign_extend ((insn & 0xffc00) >> 10,
+						   9) << 2);
+	      cache->uses_fp = 1;
+	    }
 
 	  else if (IS_MOV_SP_FP_MEDIA (insn))
 	    break;
 	}
     }
-
-  if (cache->saved_regs[MEDIA_FP_REGNUM] >= 0)
-    cache->uses_fp = 1;
 }
 
 static CORE_ADDR

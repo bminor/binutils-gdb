@@ -493,12 +493,7 @@ dump_section_header (bfd *abfd, asection *section,
       PF (SEC_COFF_NOREAD, "NOREAD");
     }
   else if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    {
-      /* Note - sections can have both the READONLY and NOREAD attributes
-	 set.  In this case the NOREAD takes precedence, but we report both
-	 since the user may need to know that both bits are set.  */
-      PF (SEC_ELF_NOREAD, "NOREAD");
-    }
+    PF (SEC_ELF_PURECODE, "PURECODE");
   PF (SEC_THREAD_LOCAL, "THREAD_LOCAL");
   PF (SEC_GROUP, "GROUP");
   if (bfd_get_arch (abfd) == bfd_arch_mep)
@@ -741,6 +736,21 @@ compare_symbols (const void *ap, const void *bp)
 	return -1;
       else
 	return 1;
+    }
+
+  if (bfd_get_flavour (bfd_asymbol_bfd (a)) == bfd_target_elf_flavour
+      && bfd_get_flavour (bfd_asymbol_bfd (b)) == bfd_target_elf_flavour)
+    {
+      bfd_vma asz, bsz;
+
+      asz = 0;
+      if ((a->flags & BSF_SYNTHETIC) == 0)
+	asz = ((elf_symbol_type *) a)->internal_elf_sym.st_size;
+      bsz = 0;
+      if ((b->flags & BSF_SYNTHETIC) == 0)
+	bsz = ((elf_symbol_type *) b)->internal_elf_sym.st_size;
+      if (asz != bsz)
+	return asz > bsz ? -1 : 1;
     }
 
   /* Symbols that start with '.' might be section names, so sort them

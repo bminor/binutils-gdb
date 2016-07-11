@@ -4,16 +4,16 @@ ENTRY(_start)
 MEMORY
 {
  read_memory   (rx)   : ORIGIN = 0x00008000, LENGTH = 4M
- noread_memory (!rx)  : ORIGIN = 0x00800000, LENGTH = 4M
+ purecode_memory (!rx)  : ORIGIN = 0x00800000, LENGTH = 4M
 }
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
   PROVIDE (__executable_start = 0x8000); . = 0x8000;
-  .text.noread      :
+  .text.purecode      :
     {
-        INPUT_SECTION_FLAGS (SHF_ARM_NOREAD) *(.text*)
-    } > noread_memory
+        INPUT_SECTION_FLAGS (SHF_ARM_PURECODE) *(.text*)
+    } > purecode_memory
   .text           :
   {
     *(.before)

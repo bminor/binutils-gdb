@@ -28,6 +28,7 @@ GDB_DECLARE_GPL_COMPATIBLE_READER;
 enum register_mapping
 {
   AMD64_RA = 16,
+  AMD64_RBP = 6,
   AMD64_RSP = 7,
 };
 
@@ -47,6 +48,11 @@ read_debug_info (struct gdb_reader_funcs *self,
   struct gdb_symtab *symtab = cbs->symtab_open (cbs, object, "");
   GDB_CORE_ADDR begin = (GDB_CORE_ADDR) symfile->begin;
   GDB_CORE_ADDR end = (GDB_CORE_ADDR) symfile->end;
+  struct reader_state *state = (struct reader_state *) self->priv_data;
+
+  /* Record the function's range, for the unwinder.  */
+  state->code_begin = begin;
+  state->code_end = end;
 
   cbs->block_open (cbs, symtab, NULL, begin, end, "jit_function_00");
 
@@ -91,11 +97,36 @@ read_register (struct gdb_unwind_callbacks *callbacks, int dw_reg,
   return 1;
 }
 
+/* Read the stack pointer into *VALUE.  IP is the address the inferior
+   is currently stopped at.  Takes care of demangling the stack
+   pointer if necessary.  */
+
+static int
+read_sp (struct gdb_reader_funcs *self, struct gdb_unwind_callbacks *cbs,
+	 uintptr_t ip, uintptr_t *value)
+{
+  struct reader_state *state = (struct reader_state *) self->priv_data;
+  uintptr_t sp;
+
+  if (!read_register (cbs, AMD64_RSP, &sp))
+    return GDB_FAIL;
+
+  /* If stopped at the instruction after the "xor $-1, %rsp", demangle
+     the stack pointer back.  */
+  if (ip == state->code_begin + 5)
+    sp ^= (uintptr_t) -1;
+
+  *value = sp;
+  return GDB_SUCCESS;
+}
+
 static enum gdb_status
 unwind_frame (struct gdb_reader_funcs *self, struct gdb_unwind_callbacks *cbs)
 {
   const int word_size = sizeof (uintptr_t);
-  uintptr_t this_sp, this_ip, prev_ip, prev_sp;
+  uintptr_t prev_sp, this_sp;
+  uintptr_t prev_ip, this_ip;
+  uintptr_t prev_bp, this_bp;
   struct reader_state *state = (struct reader_state *) self->priv_data;
 
   if (!read_register (cbs, AMD64_RA, &this_ip))
@@ -104,15 +135,25 @@ unwind_frame (struct gdb_reader_funcs *self, struct gdb_unwind_callbacks *cbs)
   if (this_ip >= state->code_end || this_ip < state->code_begin)
     return GDB_FAIL;
 
-  if (!read_register (cbs, AMD64_RSP, &this_sp))
+  /* Unwind RBP in order to make the unwinder that tries to unwind
+     from the just-unwound frame happy.  */
+  if (!read_register (cbs, AMD64_RBP, &this_bp))
+    return GDB_FAIL;
+  /* RBP is unmodified.  */
+  prev_bp = this_bp;
+
+  /* Fetch the demangled stack pointer.  */
+  if (!read_sp (self, cbs, this_ip, &this_sp))
     return GDB_FAIL;
 
+  /* The return address is saved on the stack.  */
   if (cbs->target_read (this_sp, &prev_ip, word_size) == GDB_FAIL)
     return GDB_FAIL;
-
   prev_sp = this_sp + word_size;
+
   write_register (cbs, AMD64_RA, prev_ip);
   write_register (cbs, AMD64_RSP, prev_sp);
+  write_register (cbs, AMD64_RBP, prev_bp);
   return GDB_SUCCESS;
 }
 
@@ -121,9 +162,11 @@ get_frame_id (struct gdb_reader_funcs *self, struct gdb_unwind_callbacks *cbs)
 {
   struct reader_state *state = (struct reader_state *) self->priv_data;
   struct gdb_frame_id frame_id;
-
+  uintptr_t ip;
   uintptr_t sp;
-  read_register (cbs, AMD64_RSP, &sp);
+
+  read_register (cbs, AMD64_RA, &ip);
+  read_sp (self, cbs, ip, &sp);
 
   frame_id.code_address = (GDB_CORE_ADDR) state->code_begin;
   frame_id.stack_address = (GDB_CORE_ADDR) sp;
@@ -141,7 +184,7 @@ destroy_reader (struct gdb_reader_funcs *self)
 struct gdb_reader_funcs *
 gdb_init_reader (void)
 {
-  struct reader_state *state = malloc (sizeof (struct reader_state));
+  struct reader_state *state = calloc (1, sizeof (struct reader_state));
   struct gdb_reader_funcs *reader_funcs =
     malloc (sizeof (struct gdb_reader_funcs));
 
