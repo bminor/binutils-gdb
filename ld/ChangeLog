@@ -1,3 +1,8 @@
+2016-07-11  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/nps-1b.err: Update test to handle more
+	verbosity.
+
 2016-07-09  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/elfv2exe.d: Update.
