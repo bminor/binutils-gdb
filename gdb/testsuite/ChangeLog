@@ -1,3 +1,8 @@
+2016-07-21  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.rs (main): Use empty struct expression.
+	* gdb.rust/simple.exp: Add tests for empty struct expression.
+
 2016-07-21  Yao Qi  <yao.qi@linaro.org>
 
 	* lib/gdbserver-support.exp (skip_gdbserver_tests): Return 1

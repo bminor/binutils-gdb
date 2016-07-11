@@ -428,10 +428,14 @@ struct_expr_tail:
 		}
 ;
 
-/* S{} is documented as valid but seems to be an unstable feature, so
-   it is left out here.  */
 struct_expr_list:
-	struct_expr_tail
+	/* %empty */
+		{
+		  VEC (set_field) **result
+		    = OBSTACK_ZALLOC (&work_obstack, VEC (set_field) *);
+		  $$ = result;
+		}
+|	struct_expr_tail
 		{
 		  VEC (set_field) **result
 		    = OBSTACK_ZALLOC (&work_obstack, VEC (set_field) *);

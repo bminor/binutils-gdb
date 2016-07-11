@@ -1,5 +1,11 @@
 2016-07-21  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_tuple_struct_type_p): Return false for empty
+	structs.
+	* rust-exp.y (struct_expr_list): Allow empty elements.
+
+2016-07-21  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* warning.m4 (AM_GDB_WARNINGS) <build_warnings>: Add
 	-Wunused-but-set-parameter, -Wunused-but-set-variable.

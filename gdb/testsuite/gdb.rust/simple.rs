@@ -81,6 +81,7 @@ fn main () {
     let i = ["whatever"; 8];
 
     let j = Unit;
+    let j2 = Unit{};
 
     let k = SpaceSaver::Nothing;
     let l = SpaceSaver::Thebox(9, Box::new(1729));
