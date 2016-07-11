@@ -47,8 +47,8 @@ CompileExpression::add_imp "mytemplate<int, 1> ()" -1
 CompileExpression::add_imp "mytemplate<int, 1> (1)" 2
 CompileExpression::add_imp "mytemplate<0> ()" 0
 CompileExpression::add_imp "mytemplate ()" 100
-CompileExpression::add_imp "defaultvals ()" 10
-#CompileExpression::add_imp "defaultvals<A> ()" 20
+CompileExpression::add_imp "defaultvals ()" 20
+CompileExpression::add_imp "defaultvals<int> ()" 10
 CompileExpression::add_imp "deduct (1234)" 1234
 
 CompileExpression::run_tests "code"

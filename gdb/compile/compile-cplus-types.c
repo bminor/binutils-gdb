@@ -574,6 +574,9 @@ ccp_define_template_parameters_generic
 		struct type *type
 		  = SYMBOL_TYPE (defn->default_arguments[i]);
 
+		/* This type must previously have been converted,
+		   or GCC will error with "definition of TYPE inside
+		   template parameter list."  */
 		default_type = convert_cplus_type (instance, type,
 						   GCC_CP_ACCESS_NONE);
 	      }
@@ -597,7 +600,8 @@ ccp_define_template_parameters_generic
 	    gcc_type gcctype;
 	    struct type *ptype = SYMBOL_TYPE (tsym->template_arguments[i]);
 
-	    /* Get the argument's type.  */
+	    /* Get the argument's type.  This type must also have been
+	     previously defined (or declared) to prevent errors.  */
 	    gcctype
 	      = convert_cplus_type (instance, ptype, GCC_CP_ACCESS_NONE);
 	    dest->elements[i].type = gcctype;
@@ -812,6 +816,29 @@ define_function_template (void **slot, void *call_data)
   return 1;
 }
 
+/* Define (!!keiths: or declare?) the type for the IDX'th default argument
+   of the template TSYM.  */
+
+static void
+define_template_parameter_type (struct compile_cplus_instance *instance,
+				const struct template_symbol *tsym, int idx)
+{
+  switch (tsym->template_argument_kinds[idx])
+    {
+    case type_parameter:
+    case value_parameter:
+      convert_cplus_type (instance,
+			  SYMBOL_TYPE (tsym->default_arguments[idx]),
+			  GCC_CP_ACCESS_NONE);
+      break;
+
+    case template_parameter:
+    case variadic_parameter:
+    default:
+      gdb_assert (_("unexpected template parameter kind"));
+    }
+}
+
 /* See compile-internal.h.  */
 
 void
@@ -857,16 +884,23 @@ compile_cplus_define_templates (struct compile_cplus_instance *instance,
 	      p = (struct template_defn *) *slot;
 	    }
 
-	  /* Loop over the template arguments, noting any default values.  */
+	  /* Loop over the template arguments, noting any default values
+	     and defining any types.  */
 	  for (j = 0; j < tsym->n_template_arguments; ++j)
 	    {
 	      if (p->default_arguments[j] == NULL
 		  && tsym->default_arguments[j] != NULL)
-		p->default_arguments[j] = tsym->default_arguments[j];
+		{
+		  p->default_arguments[j] = tsym->default_arguments[j];
+		  define_template_parameter_type (instance, tsym, j);
+		}
 	    }
 	}
     }
 
+  /* !!keiths: From here on out, we MUST have all types declared or defined,
+     otherwise GCC will give us "definition of TYPE in template parameter
+     list."  */
   /* Now iterate through template list and create any template definitions
      we encountered.  */
   htab_traverse (instance->template_defns,

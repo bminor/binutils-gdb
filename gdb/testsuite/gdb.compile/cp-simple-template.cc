@@ -37,6 +37,8 @@ int mytemplate (void)
 struct A
 {
   A (int val) : value (val) { }
+  operator int () const { return value; }
+
   template <typename T>
   T tempmethod (void)
   {
@@ -52,16 +54,25 @@ T deduct (T a)
   return a;
 }
 
-static int operator+ (int a, A b) { return a + b.value; }
-
 extern char const g_str[] = "hello";
 
+#if 0
+/* This chaining of defaults has no good representation in the debug info.
+   For each instance where T2 defaulted to T1, we will have as many
+   default values in the debug info for T2, one for each such instance.  */
 template <typename T1 = int, typename T2 = T1, typename T3 = T2,
 	  int V1 = 10, int V2 = 20, const char* V3 = g_str>
 T1 defaultvals (void)
 {
   return static_cast<T1> (V1);
 }
+#else
+template <typename T = A, int V = 10, const char* S = g_str>
+T defaultvals (void)
+{
+  return static_cast<T> (V);
+}
+#endif
 
 int
 main (void)
@@ -75,9 +86,7 @@ main (void)
     + mytemplate ()
     + a.tempmethod<int> ()
     + defaultvals ()
-    /* + defaultvals<A> ()
-       This causes "error: definition of 'struct A' inside template
-       parameter list".  Disabling for now.  */
+    + defaultvals<int> ()
     + deduct (0); // break here
 }
 
