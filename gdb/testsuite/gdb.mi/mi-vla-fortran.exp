@@ -18,6 +18,7 @@
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
+load_lib "fortran.exp"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -31,6 +32,9 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
      untested mi-vla-fortran.exp
      return -1
 }
+
+# Depending on the compiler being used, the type names can be printed differently.
+set real [fortran_real4]
 
 mi_delete_breakpoints
 mi_gdb_reinitialize_dir $srcdir/$subdir
@@ -58,7 +62,7 @@ mi_gdb_test "503-var-evaluate-expression vla1_not_allocated" \
   "503\\^done,value=\"\\\[0\\\]\"" \
   "eval variable vla1_not_allocated"
 mi_list_array_varobj_children_with_index "vla1_not_allocated" "0" "1" \
-    "real\\\(kind=4\\\)" "get children of vla1_not_allocated"
+    "$real" "get children of vla1_not_allocated"
 
 
 
@@ -71,10 +75,10 @@ mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
 mi_gdb_test "510-data-evaluate-expression vla1" \
   "510\\^done,value=\"\\(.*\\)\"" "evaluate allocated vla"
 
-mi_create_varobj_checked vla1_allocated vla1 "real\\\(kind=4\\\) \\\(5\\\)" \
+mi_create_varobj_checked vla1_allocated vla1 "$real \\\(5\\\)" \
   "create local variable vla1_allocated"
 mi_gdb_test "511-var-info-type vla1_allocated" \
-  "511\\^done,type=\"real\\\(kind=4\\\) \\\(5\\\)\"" \
+  "511\\^done,type=\"$real \\\(5\\\)\"" \
   "info type variable vla1_allocated"
 mi_gdb_test "512-var-show-format vla1_allocated" \
   "512\\^done,format=\"natural\"" \
@@ -83,7 +87,7 @@ mi_gdb_test "513-var-evaluate-expression vla1_allocated" \
   "513\\^done,value=\"\\\[5\\\]\"" \
   "eval variable vla1_allocated"
 mi_list_array_varobj_children_with_index "vla1_allocated" "5" "1" \
-    "real\\\(kind=4\\\)" "get children of vla1_allocated"
+    "$real" "get children of vla1_allocated"
 
 
 set bp_lineno [gdb_get_line_number "vla1-filled"]
@@ -148,7 +152,7 @@ gdb_expect {
 	    "583\\^done,value=\"\\\[0\\\]\"" \
 	    "eval variable pvla2_not_associated"
 	mi_list_array_varobj_children_with_index "pvla2_not_associated" "0" "1" \
-	    "real\\\(kind=4\\\)" "get children of pvla2_not_associated"
+	    "$real" "get children of pvla2_not_associated"
     }
     -re "580\\^error,msg=\"value contents too large \\(\[0-9\]+ bytes\\).*${mi_gdb_prompt}$" {
 	# Undefined behaviour in gfortran.
@@ -173,9 +177,9 @@ mi_gdb_test "590-data-evaluate-expression pvla2" \
   "evaluate associated vla"
 
 mi_create_varobj_checked pvla2_associated pvla2 \
-  "real\\\(kind=4\\\) \\\(5,2\\\)" "create local variable pvla2_associated"
+  "$real \\\(5,2\\\)" "create local variable pvla2_associated"
 mi_gdb_test "591-var-info-type pvla2_associated" \
-  "591\\^done,type=\"real\\\(kind=4\\\) \\\(5,2\\\)\"" \
+  "591\\^done,type=\"$real \\\(5,2\\\)\"" \
   "info type variable pvla2_associated"
 mi_gdb_test "592-var-show-format pvla2_associated" \
   "592\\^done,format=\"natural\"" \
