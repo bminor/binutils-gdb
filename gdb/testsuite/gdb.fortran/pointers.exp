@@ -57,6 +57,24 @@ gdb_test_multiple "print intap" $test {
 gdb_test "print realp" "= \\(PTR TO -> \\( $real \\)\\) 0x0" "print realp, not associated"
 gdb_test "print *realp" "Cannot access memory at address 0x0" "print *realp, not associated"
 gdb_test "print \$my_var = intp" "= \\(PTR TO -> \\( $int \\)\\) 0x0"
+set test "print cyclicp1, not associated"
+gdb_test_multiple "print cyclicp1" $test {
+  -re "= \\( i = -?\\d+, p = 0x0 \\)\r\n$gdb_prompt $" {
+    pass $test
+  }
+  -re "= \\( i = -?\\d+, p = <not associated> \\)\r\n$gdb_prompt $" {
+    pass $test
+  }
+}
+set test "print cyclicp1%p, not associated"
+gdb_test_multiple "print cyclicp1%p" $test {
+  -re "= \\(PTR TO -> \\( Type typewithpointer \\)\\) 0x0\r\n$gdb_prompt $" {
+    pass $test
+  }
+  -re "= \\(PTR TO -> \\( Type typewithpointer \\)\\) <not associated>\r\n$gdb_prompt $" {
+    pass $test
+  }
+}
 
 
 gdb_breakpoint [gdb_get_line_number "Before value assignment"]
@@ -118,6 +136,8 @@ gdb_test_multiple "print *(arrayOfPtr(3)%p)" $test_name {
     pass $test_name
   }
 }
+gdb_test "print cyclicp1" "= \\( i = 1, p = $hex\( <.*>\)? \\)"
+gdb_test "print cyclicp1%p" "= \\(PTR TO -> \\( Type typewithpointer \\)\\) $hex\( <.*>\)?"
 gdb_test "print *((integer*) &inta + 2)" "= 3" "print temporary pointer, array"
 gdb_test "print *((integer*) &intvla + 3)" "= 4" "print temporary pointer, allocated vla"
 gdb_test "print \$pc" "= \\(PTR TO -> \\( void \\(\\)\\(\\)\\)\\) $hex <pointers\\+\\d+>" "Print program counter"

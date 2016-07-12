@@ -20,6 +20,11 @@ program pointers
     integer, allocatable :: ivla2 (:, :)
   end type two
 
+  type :: typeWithPointer
+    integer i
+    type(typeWithPointer), pointer:: p
+  end type typeWithPointer
+
   type :: twoPtr
     type (two), pointer :: p
   end type twoPtr
@@ -34,6 +39,7 @@ program pointers
   real, target    :: realv
   type(two), target  :: twov
   type(twoPtr) :: arrayOfPtr (3)
+  type(typeWithPointer), target:: cyclicp1,cyclicp2
 
   logical, pointer :: logp
   complex, pointer :: comp
@@ -57,6 +63,8 @@ program pointers
   nullify (arrayOfPtr(1)%p)
   nullify (arrayOfPtr(2)%p)
   nullify (arrayOfPtr(3)%p)
+  nullify (cyclicp1%p)
+  nullify (cyclicp2%p)
 
   logp => logv    ! Before pointer assignment
   comp => comv
@@ -68,6 +76,10 @@ program pointers
   realp => realv
   twop => twov
   arrayOfPtr(2)%p => twov
+  cyclicp1%i = 1
+  cyclicp1%p => cyclicp2
+  cyclicp2%i = 2
+  cyclicp2%p => cyclicp1
 
   logv = associated(logp)     ! Before value assignment
   comv = cmplx(1,2)
