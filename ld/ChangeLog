@@ -1,3 +1,8 @@
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-arc/tls_ie-01.s: Added to verify associated fix.
+	* testsuite/ld-arc/tls_ie-01.d: Likewise
+
 2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* emultempl/armelf.em (in_implib_filename): Declare and initialize new

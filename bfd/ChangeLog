@@ -1,5 +1,11 @@
 2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* arc-got.h (relocate_fix_got_relocs_for_got_info): Fixed addresses in
+	debug comments. Fixed address in .got related to TLS_IE_GOT dynamic
+	relocation.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* reloc.c: Fixed type in ARC_SECTOFF relocations. Added ARC_SDA_12
 	relocation.
 	* bfd-in2.h: Regenerated from the previous changes.
