@@ -1,3 +1,9 @@
+2016-07-12  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* linux-nios2-low.c (nios2_fill_gregset): Add type cast
+	to buf parameter.
+	(nios2_store_gregset): Likewise.
+
 2016-07-01  Pedro Alves  <palves@redhat.com>
 	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
