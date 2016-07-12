@@ -23,6 +23,10 @@ if ![runto_main] {
     return -1
 }
 
+gdb_breakpoint [gdb_get_line_number "Before pointer assignment"]
+gdb_continue_to_breakpoint "Before pointer assignment"
+gdb_test "ptype ptr" "int \\(\\*\\)\\\[variable length\\\]" "ptype ptr, Before pointer assignment"
+
 gdb_breakpoint [gdb_get_line_number "vlas_filled"]
 gdb_continue_to_breakpoint "vlas_filled"
 
@@ -33,3 +37,4 @@ gdb_test "print vlaref" " = \\(int \\(&\\)\\\[3\\\]\\) @$hex: \\{5, 7, 9\\}"
 # bug being tested, it's better not to depend on the exact spelling.
 gdb_test "print vlaref2" " = \\(.*\\) @$hex: \\{5, 7, 9\\}"
 gdb_test "print c" " = \\{e = \\{c = @$hex\\}\\}"
+gdb_test "ptype ptr" "int \\(\\*\\)\\\[3\\\]"

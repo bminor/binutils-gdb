@@ -15,6 +15,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+extern "C" {
+#include <stddef.h>
+}
+
 struct container;
 
 struct element
@@ -40,11 +44,16 @@ int main(int argc, char **argv)
   typedef typeof (vla) &vlareftypedef;
   vlareftypedef vlaref2 (vla);
   container c;
+  typeof (vla) *ptr = NULL;
+
+  // Before pointer assignment
+  ptr = &vla;
 
   for (int i = 0; i < z; ++i)
     vla[i] = 5 + 2 * i;
 
   // vlas_filled
   vla[0] = 2 * vla[0];
+
   return vla[2];
 }

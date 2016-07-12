@@ -485,6 +485,25 @@ whatis_exp (char *exp, int show)
       printf_filtered (" */\n");    
     }
 
+  /* Resolve any dynamic target type, as we might print
+     additional information about the target.
+     For example, in Fortran and C we are printing the dimension of the
+     dynamic array the pointer is pointing to.  */
+  if (TYPE_CODE (type) == TYPE_CODE_PTR
+      && is_dynamic_type (type) == 1)
+    {
+      CORE_ADDR addr;
+      if (NULL != TYPE_DATA_LOCATION (TYPE_TARGET_TYPE(type)))
+	addr = value_address (val);
+      else
+	addr = value_as_address (val);
+
+      if (addr != 0
+	  && type_not_associated (type) == 0)
+	TYPE_TARGET_TYPE (type) = resolve_dynamic_type (TYPE_TARGET_TYPE (type),
+							NULL, addr);
+    }
+
   LA_PRINT_TYPE (type, "", gdb_stdout, show, 0, &flags);
   printf_filtered ("\n");
 
