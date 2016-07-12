@@ -15188,15 +15188,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MICROMIPS_7_PCREL_S1:
     case BFD_RELOC_MICROMIPS_10_PCREL_S1:
     case BFD_RELOC_MICROMIPS_16_PCREL_S1:
-      /* We adjust the offset back to even.  */
-      if ((*valP & 0x1) != 0)
-	--(*valP);
-
-      if (! fixP->fx_done)
-	break;
-
-      /* Should never visit here, because we keep the relocation.  */
-      abort ();
+      gas_assert (!fixP->fx_done);
       break;
 
     case BFD_RELOC_VTABLE_INHERIT:

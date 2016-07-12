@@ -1,5 +1,22 @@
 2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (md_apply_fix) <BFD_RELOC_MIPS16_16_PCREL_S1>
+	<BFD_RELOC_MICROMIPS_7_PCREL_S1, BFD_RELOC_MICROMIPS_10_PCREL_S1>
+	<BFD_RELOC_MICROMIPS_16_PCREL_S1>: Keep the ISA bit in the
+	addend calculated.
+	* testsuite/gas/mips/mips16-branch-absolute.s: Set the ISA bit
+	in `bar', export `foo'.
+	* testsuite/gas/mips/mips16-branch-absolute.d: Adjust
+	accordingly.
+	* testsuite/gas/mips/mips16-branch-absolute-n32.d: Likewise.
+	* testsuite/gas/mips/mips16-branch-absolute-n64.d: Likewise.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-n32.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-n64.d:
+	Likewise.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16-branch-absolute.d: Update patterns.
 	* testsuite/gas/mips/branch-absolute.d: New test.
 	* testsuite/gas/mips/branch-absolute-n32.d: New test.

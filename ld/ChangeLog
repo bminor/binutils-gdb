@@ -1,5 +1,20 @@
 2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/ld-mips-elf/mips16-branch-absolute.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests, except
+	from `mips16-branch-absolute' and
+	`mips16-branch-absolute-addend', referred indirectly only.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/ld-mips-elf/branch-absolute.d: New test.
 	* testsuite/ld-mips-elf/branch-absolute-n32.d: New test.
 	* testsuite/ld-mips-elf/branch-absolute-n64.d: New test.
