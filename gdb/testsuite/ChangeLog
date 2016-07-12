@@ -1,3 +1,8 @@
+2016-07-12  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/selftest-support.exp (selftest_setup): Match the output
+	when captured_main is inlined.
+
 2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.fortran/derived-types.exp (result_line, result_line_2):
