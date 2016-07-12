@@ -14814,6 +14814,22 @@ mips_force_relocation (fixS *fixp)
   return 0;
 }
 
+/* Implement TC_FORCE_RELOCATION_ABS.  */
+
+bfd_boolean
+mips_force_relocation_abs (fixS *fixp)
+{
+  if (generic_force_reloc (fixp))
+    return TRUE;
+
+  /* These relocations do not have enough bits in the in-place addend
+     to hold an arbitrary absolute section's offset.  */
+  if (HAVE_IN_PLACE_ADDENDS && limited_pcrel_reloc_p (fixp->fx_r_type))
+    return TRUE;
+
+  return FALSE;
+}
+
 /* Read the instruction associated with RELOC from BUF.  */
 
 static unsigned int

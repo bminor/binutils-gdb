@@ -144,6 +144,7 @@ run_dump_test "mips16-1"
 run_dump_test "branch-misc-1"
 run_dump_test "branch-misc-2"
 run_dump_test "branch-absolute" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "branch-absolute-addend" [list [list ld $abi_ldflags(o32)]]
 if $has_newabi {
     run_dump_test "branch-absolute-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "branch-absolute-addend-n32" \
@@ -157,6 +158,9 @@ run_dump_test "mips16-branch-2" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-3" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-addend-2" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-addend-3" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16-branch-absolute" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16-branch-absolute-addend" \
+					[list [list ld $abi_ldflags(o32)]]
 if $has_newabi {
     run_dump_test "mips16-branch-absolute-n32" \
 					[list [list ld $abi_ldflags(n32)]]
@@ -169,6 +173,8 @@ if $has_newabi {
 }
 
 run_dump_test "micromips-branch-absolute" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "micromips-branch-absolute-addend" \
+					[list [list ld $abi_ldflags(o32)]]
 if $has_newabi {
     run_dump_test "micromips-branch-absolute-n32" \
 					[list [list ld $abi_ldflags(n32)]]

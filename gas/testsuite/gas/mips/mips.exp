@@ -612,6 +612,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "branch-local-n64-1"
     }
     run_dump_test "branch-absolute"
+    run_dump_test "branch-absolute-addend"
     if $has_newabi {
 	run_dump_test "branch-absolute-n32"
 	run_dump_test "branch-absolute-addend-n32"
@@ -1281,6 +1282,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "micromips-warn-branch-delay"
     run_dump_test "micromips-warn-branch-delay-1"
     run_dump_test "micromips-branch-absolute"
+    run_dump_test "micromips-branch-absolute-addend"
     if $has_newabi {
 	run_dump_test "micromips-branch-absolute-n32"
 	run_dump_test "micromips-branch-absolute-addend-n32"
@@ -1393,6 +1395,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips16-branch-addend-2"
     run_dump_test "mips16-branch-addend-3"
     run_dump_test "mips16-branch-absolute"
+    run_dump_test "mips16-branch-absolute-addend"
     if $has_newabi {
 	run_dump_test "mips16-branch-absolute-n32"
 	run_dump_test "mips16-branch-absolute-addend-n32"

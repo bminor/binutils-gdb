@@ -1,5 +1,24 @@
 2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.h (TC_FORCE_RELOCATION_ABS): New macro.
+	(mips_force_relocation_abs): New prototype.
+	* config/tc-mips.c (mips_force_relocation_abs): New function.
+	* testsuite/gas/mips/branch-absolute.d: Adjust dump patterns.
+	* testsuite/gas/mips/mips16-branch-absolute.d: Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-n32.d: Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-n64.d: Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-addend-n32.d:
+	Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-addend-n64.d:
+	Likewise.
+	* testsuite/gas/mips/branch-absolute-addend.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-addend.d: New test.
+	* testsuite/gas/mips/micromips-branch-absolute-addend.d: New
+	test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (md_apply_fix) <BFD_RELOC_MIPS16_16_PCREL_S1>
 	<BFD_RELOC_MICROMIPS_7_PCREL_S1, BFD_RELOC_MICROMIPS_10_PCREL_S1>
 	<BFD_RELOC_MICROMIPS_16_PCREL_S1>: Keep the ISA bit in the

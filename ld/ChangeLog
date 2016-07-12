@@ -1,5 +1,12 @@
 2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/ld-mips-elf/mips-elf.exp: Run
+	`branch-absolute-addend', `mips16-branch-absolute',
+	`mips16-branch-absolute-addend' and
+	`micromips-branch-absolute-addend'.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/ld-mips-elf/mips16-branch-absolute.d: New test.
 	* testsuite/ld-mips-elf/mips16-branch-absolute-n32.d: New test.
 	* testsuite/ld-mips-elf/mips16-branch-absolute-n64.d: New test.
