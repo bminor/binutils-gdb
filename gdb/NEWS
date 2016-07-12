@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.11
 
+* Fortran: Support pointers to dynamic types.
+
 * GDB now supports a negative repeat count in the 'x' command to examine
   memory backward from the given address.  For example:
 

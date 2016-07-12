@@ -645,6 +645,28 @@ c_value_print (struct value *val, struct ui_file *stream,
       else
 	{
 	  /* normal case */
+	  if (TYPE_CODE (type) == TYPE_CODE_PTR
+	      && 1 == is_dynamic_type (type))
+	    {
+	      CORE_ADDR addr;
+	      if (NULL != TYPE_DATA_LOCATION (TYPE_TARGET_TYPE (type)))
+		addr = value_address (val);
+	      else
+		addr = value_as_address (val);
+
+	      /* We resolve the target-type only when the
+	         pointer is associated.  */
+	      if ((addr != 0)
+		  && (0 == type_not_associated (type)))
+		  TYPE_TARGET_TYPE (type) =
+		      resolve_dynamic_type (TYPE_TARGET_TYPE (type),
+					    NULL, addr);
+	    }
+	  else
+	    {
+	      /* Do nothing. References are already resolved from the beginning,
+	         only pointers are resolved when we actual need the target.  */
+	    }
 	  fprintf_filtered (stream, "(");
 	  type_print (value_type (val), "", stream, -1);
 	  fprintf_filtered (stream, ") ");

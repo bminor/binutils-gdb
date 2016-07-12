@@ -20,14 +20,20 @@ program pointers
     integer, allocatable :: ivla2 (:, :)
   end type two
 
+  type :: twoPtr
+    type (two), pointer :: p
+  end type twoPtr
+
   logical, target :: logv
   complex, target :: comv
   character, target :: charv
   character (len=3), target :: chara
   integer, target :: intv
   integer, target, dimension (10,2) :: inta
+  integer, target, allocatable, dimension (:) :: intvla
   real, target    :: realv
   type(two), target  :: twov
+  type(twoPtr) :: arrayOfPtr (3)
 
   logical, pointer :: logp
   complex, pointer :: comp
@@ -35,6 +41,7 @@ program pointers
   character (len=3), pointer:: charap
   integer, pointer :: intp
   integer, pointer, dimension (:,:) :: intap
+  integer, pointer, dimension (:) :: intvlap
   real, pointer :: realp
   type(two), pointer :: twop
 
@@ -44,8 +51,12 @@ program pointers
   nullify (charap)
   nullify (intp)
   nullify (intap)
+  nullify (intvlap)
   nullify (realp)
   nullify (twop)
+  nullify (arrayOfPtr(1)%p)
+  nullify (arrayOfPtr(2)%p)
+  nullify (arrayOfPtr(3)%p)
 
   logp => logv    ! Before pointer assignment
   comp => comv
@@ -53,8 +64,10 @@ program pointers
   charap => chara
   intp => intv
   intap => inta
+  intvlap => intvla
   realp => realv
   twop => twov
+  arrayOfPtr(2)%p => twov
 
   logv = associated(logp)     ! Before value assignment
   comv = cmplx(1,2)
@@ -63,6 +76,10 @@ program pointers
   intv = 10
   inta(:,:) = 1
   inta(3,1) = 3
+  allocate (intvla(10))
+  intvla(:) = 2
+  intvla(4) = 4
+  intvlap => intvla
   realv = 3.14
 
   allocate (twov%ivla1(3))

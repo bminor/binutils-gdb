@@ -1562,6 +1562,19 @@ value_ind (struct value *arg1)
   if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
     {
       struct type *enc_type;
+      CORE_ADDR addr;
+
+      if (type_not_associated (base_type))
+        error (_("Attempt to take contents of a not associated pointer."));
+
+      if (NULL != TYPE_DATA_LOCATION (TYPE_TARGET_TYPE (base_type)))
+	addr = value_address (arg1);
+      else
+	addr = value_as_address (arg1);
+
+      if (addr != 0)
+	TYPE_TARGET_TYPE (base_type) =
+	    resolve_dynamic_type (TYPE_TARGET_TYPE (base_type), NULL, addr);
 
       /* We may be pointing to something embedded in a larger object.
          Get the real type of the enclosing object.  */
@@ -1577,8 +1590,7 @@ value_ind (struct value *arg1)
       else
 	/* Retrieve the enclosing object pointed to.  */
 	arg2 = value_at_lazy (enc_type, 
-			      (value_as_address (arg1)
-			       - value_pointed_to_offset (arg1)));
+			      (addr - value_pointed_to_offset (arg1)));
 
       enc_type = value_type (arg2);
       return readjust_indirect_value_type (arg2, enc_type, base_type, arg1);

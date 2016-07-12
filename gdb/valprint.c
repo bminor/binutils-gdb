@@ -1141,12 +1141,6 @@ value_check_printable (struct value *val, struct ui_file *stream,
       return 0;
     }
 
-  if (type_not_associated (value_type (val)))
-    {
-      val_print_not_associated (stream);
-      return 0;
-    }
-
   if (type_not_allocated (value_type (val)))
     {
       val_print_not_allocated (stream);
