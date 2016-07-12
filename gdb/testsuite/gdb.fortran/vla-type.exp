@@ -132,7 +132,10 @@ gdb_test "ptype fivearr(2)%tone" \
                      "End Type one" ]
 
 # Check allocation status of dynamic array and it's dynamic members
-gdb_test "ptype fivedynarr" "type = <not allocated>"
+gdb_test "ptype fivedynarr" \
+         [multi_line "type = Type five" \
+                     "    Type one :: tone" \
+                     "End Type five \\(:\\)" ]
 gdb_test "next" ""
 gdb_test "ptype fivedynarr(2)" \
          [multi_line "type = Type five" \
@@ -141,7 +144,7 @@ gdb_test "ptype fivedynarr(2)" \
          "ptype fivedynarr(2), tone is not allocated"
 gdb_test "ptype fivedynarr(2)%tone" \
          [multi_line "type = Type one" \
-                     "    $int :: ivla\\(<not allocated>\\)" \
+                     "    $int :: ivla\\(:,:,:\\)" \
                      "End Type one" ] \
          "ptype fivedynarr(2)%tone, not allocated"
 

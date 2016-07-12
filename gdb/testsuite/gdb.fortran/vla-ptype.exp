@@ -32,9 +32,9 @@ set real [fortran_real4]
 # Check the ptype of various VLA states and pointer to VLA's.
 gdb_breakpoint [gdb_get_line_number "vla1-init"]
 gdb_continue_to_breakpoint "vla1-init"
-gdb_test "ptype vla1" "type = <not allocated>" "ptype vla1 not initialized"
-gdb_test "ptype vla2" "type = <not allocated>" "ptype vla2 not initialized"
-gdb_test "ptype pvla" "type = <not associated>" "ptype pvla not initialized"
+gdb_test "ptype vla1" "type = $real \\(:,:,:\\)" "ptype vla1 not initialized"
+gdb_test "ptype vla2" "type = $real \\(:,:,:\\)" "ptype vla2 not initialized"
+gdb_test "ptype pvla" "type = $real \\(:,:,:\\)" "ptype pvla not initialized"
 gdb_test "ptype vla1(3, 6, 9)" "no such vector element \\\(vector not allocated\\\)" \
   "ptype vla1(3, 6, 9) not initialized"
 gdb_test "ptype vla2(5, 45, 20)" \
@@ -81,20 +81,20 @@ gdb_test "ptype vla2(5, 45, 20)" "type = $real" \
 
 gdb_breakpoint [gdb_get_line_number "pvla-deassociated"]
 gdb_continue_to_breakpoint "pvla-deassociated"
-gdb_test "ptype pvla" "type = <not associated>" "ptype pvla deassociated"
+gdb_test "ptype pvla" "type = $real \\(:,:,:\\)" "ptype pvla deassociated"
 gdb_test "ptype pvla(5, 45, 20)" \
   "no such vector element \\\(vector not associated\\\)" \
   "ptype pvla(5, 45, 20) not associated"
 
 gdb_breakpoint [gdb_get_line_number "vla1-deallocated"]
 gdb_continue_to_breakpoint "vla1-deallocated"
-gdb_test "ptype vla1" "type = <not allocated>" "ptype vla1 not allocated"
+gdb_test "ptype vla1" "type = $real \\(:,:,:\\)" "ptype vla1 not allocated"
 gdb_test "ptype vla1(3, 6, 9)" "no such vector element \\\(vector not allocated\\\)" \
   "ptype vla1(3, 6, 9) not allocated"
 
 gdb_breakpoint [gdb_get_line_number "vla2-deallocated"]
 gdb_continue_to_breakpoint "vla2-deallocated"
-gdb_test "ptype vla2" "type = <not allocated>" "ptype vla2 not allocated"
+gdb_test "ptype vla2" "type = $real \\(:,:,:\\)" "ptype vla2 not allocated"
 gdb_test "ptype vla2(5, 45, 20)" \
   "no such vector element \\\(vector not allocated\\\)" \
   "ptype vla2(5, 45, 20) not allocated"
