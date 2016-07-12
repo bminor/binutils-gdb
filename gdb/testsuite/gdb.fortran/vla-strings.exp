@@ -1,0 +1,103 @@
+# Copyright 2016 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+standard_testfile ".f90"
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
+    {debug f90 quiet}] } {
+    return -1
+}
+
+# check that all fortran standard datatypes will be
+# handled correctly when using as VLA's
+
+if ![runto_main] {
+    untested "could not run to main"
+    return -1
+}
+
+gdb_breakpoint [gdb_get_line_number "var_char-allocated-1"]
+gdb_continue_to_breakpoint "var_char-allocated-1"
+set test "whatis var_char first time"
+gdb_test_multiple "whatis var_char" $test {
+    -re "type = PTR TO -> \\( character\\*10 \\)\r\n$gdb_prompt $" {
+	    pass $test
+    }
+    -re "type = character\\*10\r\n$gdb_prompt $" {
+	    pass $test
+    }
+}
+set test "ptype var_char first time"
+gdb_test_multiple "ptype var_char" $test {
+    -re "type = PTR TO -> \\( character\\*10 \\)\r\n$gdb_prompt $" {
+	    pass $test
+    }
+    -re "type = character\\*10\r\n$gdb_prompt $" {
+	    pass $test
+    }
+}
+
+
+gdb_test "next" "\\d+.*var_char = 'foo'.*" \
+  "next to allocation status of var_char"
+gdb_test "print l" " = \\.TRUE\\." "print allocation status first time"
+
+
+gdb_breakpoint [gdb_get_line_number "var_char-filled-1"]
+gdb_continue_to_breakpoint "var_char-filled-1"
+set test "print var_char, var_char-filled-1"
+gdb_test_multiple "print var_char" $test {
+    -re "= \\(PTR TO -> \\( character\\*3 \\)\\) $hex\r\n$gdb_prompt $" {
+        gdb_test "print *var_char" "= 'foo'" "print *var_char, var_char-filled-1"
+	    pass $test
+    }
+    -re "= 'foo'\r\n$gdb_prompt $" {
+	    pass $test
+    }
+}
+set test "ptype var_char, var_char-filled-1"
+gdb_test_multiple "ptype var_char" $test {
+    -re "type = PTR TO -> \\( character\\*3 \\)\r\n$gdb_prompt $" {
+	    pass $test
+    }
+    -re "type = character\\*3\r\n$gdb_prompt $" {
+	    pass $test
+    }
+}
+gdb_test "print var_char(1)" " = 102 'f'" "print var_char(1)"
+gdb_test "print var_char(3)" " = 111 'o'" "print var_char(3)"
+
+
+gdb_breakpoint [gdb_get_line_number "var_char-filled-2"]
+gdb_continue_to_breakpoint "var_char-filled-2"
+set test "print var_char, var_char-filled-2"
+gdb_test_multiple "print var_char" $test {
+    -re "= \\(PTR TO -> \\( character\\*6 \\)\\) $hex\r\n$gdb_prompt $" {
+        gdb_test "print *var_char" "= 'foobar'" "print *var_char, var_char-filled-2"
+	    pass $test
+    }
+    -re "= 'foobar'\r\n$gdb_prompt $" {
+	    pass $test
+    }
+}
+set test "ptype var_char, var_char-filled-2"
+gdb_test_multiple "ptype var_char" $test {
+    -re "type = PTR TO -> \\( character\\*6 \\)\r\n$gdb_prompt $" {
+	    pass $test
+    }
+    -re "type = character\\*6\r\n$gdb_prompt $" {
+	    pass $test
+    }
+}
