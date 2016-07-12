@@ -1,3 +1,26 @@
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/branch-absolute.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-n32.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-n64.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-addend.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-addend-n32.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-addend-n64.d: New test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute.d: New test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend.d: New
+	test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend-n32.d:
+	New test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend-n64.d:
+	New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests, except
+	from `branch-absolute-addend' and
+	`micromips-branch-absolute-addend', referred indirectly only.
+
 2016-07-14  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* emulparams/arcelf.sh (SDATA_START_SYMBOLS): Add offset.

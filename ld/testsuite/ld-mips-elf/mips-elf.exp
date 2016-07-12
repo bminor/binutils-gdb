@@ -143,11 +143,32 @@ run_dump_test "mips16-1"
 # MIPS branch offset final link checking.
 run_dump_test "branch-misc-1"
 run_dump_test "branch-misc-2"
+run_dump_test "branch-absolute" [list [list ld $abi_ldflags(o32)]]
+if $has_newabi {
+    run_dump_test "branch-absolute-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "branch-absolute-addend-n32" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "branch-absolute-n64" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "branch-absolute-addend-n64" \
+					[list [list ld $abi_ldflags(n64)]]
+}
 
 run_dump_test "mips16-branch-2" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-3" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-addend-2" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-addend-3" [list [list ld $abi_ldflags(o32)]]
+
+run_dump_test "micromips-branch-absolute" [list [list ld $abi_ldflags(o32)]]
+if $has_newabi {
+    run_dump_test "micromips-branch-absolute-n32" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "micromips-branch-absolute-addend-n32" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "micromips-branch-absolute-n64" \
+					[list [list ld $abi_ldflags(n64)]]
+    run_dump_test "micromips-branch-absolute-addend-n64" \
+					[list [list ld $abi_ldflags(n64)]]
+}
 
 # Jalx test
 run_dump_test "jalx-1"

@@ -586,16 +586,6 @@ bfd_perform_relocation (bfd *abfd,
   asymbol *symbol;
 
   symbol = *(reloc_entry->sym_ptr_ptr);
-  if (bfd_is_abs_section (symbol->section)
-      && output_bfd != NULL)
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
-
-  /* PR 17512: file: 0f67f69d.  */
-  if (howto == NULL)
-    return bfd_reloc_undefined;
 
   /* If we are not producing relocatable output, return an error if
      the symbol is not defined.  An undefined weak symbol is
@@ -608,7 +598,7 @@ bfd_perform_relocation (bfd *abfd,
   /* If there is a function supplied to handle this relocation type,
      call it.  It'll return `bfd_reloc_continue' if further processing
      can be done.  */
-  if (howto->special_function)
+  if (howto && howto->special_function)
     {
       bfd_reloc_status_type cont;
       cont = howto->special_function (abfd, reloc_entry, symbol, data,
@@ -617,6 +607,17 @@ bfd_perform_relocation (bfd *abfd,
       if (cont != bfd_reloc_continue)
 	return cont;
     }
+
+  if (bfd_is_abs_section (symbol->section)
+      && output_bfd != NULL)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* PR 17512: file: 0f67f69d.  */
+  if (howto == NULL)
+    return bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?
      Include the size of the reloc in the test for out of range addresses.
@@ -981,16 +982,11 @@ bfd_install_relocation (bfd *abfd,
   bfd_byte *data;
 
   symbol = *(reloc_entry->sym_ptr_ptr);
-  if (bfd_is_abs_section (symbol->section))
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
 
   /* If there is a function supplied to handle this relocation type,
      call it.  It'll return `bfd_reloc_continue' if further processing
      can be done.  */
-  if (howto->special_function)
+  if (howto && howto->special_function)
     {
       bfd_reloc_status_type cont;
 
@@ -1004,6 +1000,15 @@ bfd_install_relocation (bfd *abfd,
       if (cont != bfd_reloc_continue)
 	return cont;
     }
+
+  if (bfd_is_abs_section (symbol->section))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* No need to check for howto != NULL if !bfd_is_abs_section as
+     it will have been checked in `bfd_perform_relocation already'.  */
 
   /* Is the address of the relocation really within the section?  */
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
