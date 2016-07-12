@@ -1,3 +1,7 @@
+2016-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* binary.c (binary_set_section_contents): Second grammar fix.
+
 2016-07-12  Douglas B Rupp  <rupp@adacore.com>
 
 	* binary.c (binary_set_section_contents): Fix grammar in warning
