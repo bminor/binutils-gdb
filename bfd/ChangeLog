@@ -1,5 +1,19 @@
 2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* elf-bfd.h: Added ARC_ELF_DATA to enum elf_target_id.
+	* elf32-arc.c (struct elf_arc_link_hash_entry): Added.
+	(struct elf_arc_link_hash_table): Likewise.
+	(elf_arc_link_hash_newfunc): Likewise.
+	(elf_arc_link_hash_table_free): Likewise.
+	(arc_elf_link_hash_table_create): Likewise.
+	(elf_arc_relocate_section): Fixed conditions related to dynamic
+	(elf_arc_check_relocs): Likewise.
+	(arc_elf_create_dynamic_sections): Added
+	(elf_arc_adjust_dynamic_symbol): Changed access to .rela.bss to be done
+	through the hash table.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* arc-got.h (relocate_fix_got_relocs_for_got_info): Fixed addresses in
 	debug comments. Fixed address in .got related to TLS_IE_GOT dynamic
 	relocation.
