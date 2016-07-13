@@ -86,7 +86,7 @@ main (void)
     + mytemplate ()
     + a.tempmethod<int> ()
     + defaultvals ()
-    + defaultvals<int> ()
+    + defaultvals<int, 20> ()
     + deduct (0); // break here
 }
 
