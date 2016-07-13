@@ -1,3 +1,11 @@
+2016-07-12  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-opc.c (ldtxa): New macro.
+	(sparc_opcodes): Use the macro defined above to add entries for
+	the LDTXA instructions.
+	(asi_table): Add the ASI_TWINX_* asis used in the LDTXA
+	instruction.
+
 2016-07-07  James Bowman  <james.bowman@ftdichip.com>
 
 	* ft32-opc.c (ft32_opc_info): Correct mask for "callc"

@@ -370,6 +370,28 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "lda",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1)|RS1_G0,	"[i]o,g", 0, 0, 0, v9 },
 { "lda",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1)|SIMM13(~0),	"[1]o,g", 0, 0, 0, v9 }, /* ld [rs1+0],d */
 
+/* Note that the LDTXA instructions share an opcode with the
+   (deprecated) LDTWA instructions below.  They are differenciated by
+   the combination of the `i' instruction field and the ASI used in
+   the instruction.  */
+
+#define ldtxa(asi) \
+{ "ldtxa",	F3(3, 0x13, 0)|ASI((asi)), F3(~3, ~0x13, ~0)|ASI(~(asi)), "[1+2]A,d", 0, HWCAP_ASI_BLK_INIT, 0, v9c }, \
+{ "ldtxa",	F3(3, 0x13, 0)|ASI((asi)), F3(~3, ~0x13, ~0)|ASI(~(asi))|RS2_G0, "[1]A,d", 0, HWCAP_ASI_BLK_INIT, 0, v9c }
+
+ldtxa (0x22), /* #ASI_TWINX_AIUP  */
+ldtxa (0x23), /* #ASI_TWINX_AIUS  */
+ldtxa (0x26), /* #ASI_TWINX_REAL  */
+ldtxa (0x27), /* #ASI_TWINX_N  */
+ldtxa (0x2A), /* #ASI_TWINX_AIUP_L  */
+ldtxa (0x2B), /* #ASI_TWINX_AIUS_L  */
+ldtxa (0x2E), /* #ASI_TWINX_REAL_L  */
+ldtxa (0x2F), /* #ASI_TWINX_NL  */
+ldtxa (0xE2), /* #ASI_TWINX_P  */
+ldtxa (0xE3), /* #ASI_TWINX_S  */
+ldtxa (0xEA), /* #ASI_TWINX_PL  */
+ldtxa (0xEB), /* #ASI_TWINX_SL  */
+
 { "ldtwa",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0),		"[1+2]A,d", 0, 0, 0, v9 },
 { "ldtwa",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0)|RS2_G0,	"[1]A,d", 0, 0, 0, v9 }, /* ldda [rs1+%g0],d */
 { "ldtwa",	F3(3, 0x13, 1), F3(~3, ~0x13, ~1),		"[1+i]o,d", 0, 0, 0, v9 },
@@ -2421,6 +2443,18 @@ static arg asi_table[] =
   { 0xf1, "#ASI_BLK_S", },
   { 0xf8, "#ASI_BLK_PL", },
   { 0xf9, "#ASI_BLK_SL", },
+  { 0x22, "#ASI_TWINX_AIUP", },
+  { 0x23, "#ASI_TWINX_AIUS", },
+  { 0x26, "#ASI_TWINX_REAL", },
+  { 0x27, "#ASI_TWINX_N", },
+  { 0x2A, "#ASI_TWINX_AIUP_L", },
+  { 0x2B, "#ASI_TWINX_AIUS_L", },
+  { 0x2E, "#ASI_TWINX_REAL_L", },
+  { 0x2F, "#ASI_TWINX_NL", },
+  { 0xE2, "#ASI_TWINX_P", },
+  { 0xE3, "#ASI_TWINX_S", },
+  { 0xEA, "#ASI_TWINX_PL", },
+  { 0xEB, "#ASI_TWINX_SL", },
   { 0, 0 }
 };
 

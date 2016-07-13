@@ -1,3 +1,9 @@
+2016-07-12  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/ldtxa.s: New file.
+	* testsuite/gas/sparc/ldtxa.d: Likewise.
+	* testsuite/gas/sparc/sparc.exp: Execute the ldtxa test.
+
 2016-07-11  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* config/tc-arc.c (arc_reloc_op_tag): Allow complex ops for dtpoff.
