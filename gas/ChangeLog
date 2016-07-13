@@ -10,6 +10,11 @@
 	(tc_gen_reloc): Remove passing DTPOFF base info into reloc addendum
 	as it is no longer needed.
 
+2016-07-08  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (append_insn): Remove extraneous
+	`install_insn' call.
+
 2016-07-04  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_qword_reg): Correct register kind
