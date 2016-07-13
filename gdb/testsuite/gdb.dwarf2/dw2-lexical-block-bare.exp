@@ -24,10 +24,16 @@ standard_testfile .S main.c
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile]
 Dwarf::assemble $asm_file {
+    global srcdir subdir srcfile2
+
+    set main_result [function_range main ${srcdir}/${subdir}/${srcfile2}]
+    set main_start [lindex $main_result 0]
+    set main_length [lindex $main_result 1]
+
     cu {} {
 	compile_unit {
-	    {low_pc [gdb_target_symbol main] DW_FORM_addr}
-	    {high_pc [gdb_target_symbol main]+0x10000 DW_FORM_addr}
+	    {low_pc $main_start addr}
+	    {high_pc "$main_start + $main_length" addr}
 	} {
 	    declare_labels integer_label
 
@@ -40,8 +46,8 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_subprogram {
 		{name main}
 		{DW_AT_external 1 flag}
-		{low_pc [gdb_target_symbol main] DW_FORM_addr}
-		{high_pc [gdb_target_symbol main]+0x10000 DW_FORM_addr}
+		{low_pc $main_start addr}
+		{high_pc "$main_start + $main_length" addr}
 	    } {
 		DW_TAG_lexical_block {
 		} {

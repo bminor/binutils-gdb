@@ -26,6 +26,16 @@ standard_testfile dw2-bad-mips-linkage-name.c dw2-bad-mips-linkage-name.S
 
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
+    global srcdir subdir srcfile
+
+    set f_result [function_range f ${srcdir}/${subdir}/${srcfile}]
+    set f_start [lindex $f_result 0]
+    set f_length [lindex $f_result 1]
+
+    set g_result [function_range g ${srcdir}/${subdir}/${srcfile}]
+    set g_start [lindex $g_result 0]
+    set g_length [lindex $g_result 1]
+
     cu {} {
 	DW_TAG_compile_unit {
                 {DW_AT_language @DW_LANG_C}
@@ -42,15 +52,15 @@ Dwarf::assemble $asm_file {
 	    }
             DW_TAG_subprogram {
                 {name f}
-                {low_pc [gdb_target_symbol f] addr}
-                {high_pc f_end_lbl addr}
+                {low_pc $f_start addr}
+                {high_pc "$f_start + $f_length" addr}
                 {type :$b_l}
 		{DW_AT_MIPS_linkage_name _Z1fv}
 	    }
             DW_TAG_subprogram {
                 {name g}
-                {low_pc [gdb_target_symbol g] addr}
-                {high_pc g_end_lbl addr}
+                {low_pc $g_start addr}
+                {high_pc "$g_start + $g_length" addr}
                 {type :$b_l}
 		{DW_AT_MIPS_linkage_name 42 DW_FORM_data1}
 	    }

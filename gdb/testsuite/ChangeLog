@@ -1,3 +1,14 @@
+2016-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/atomic-type.exp: Use function_range for low_pc and high_pc.
+	* gdb.dwarf2/atomic.c (f): Rename f_end_lbl to f_label.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.c (f): Rename f_end_lbl to
+	f_label.
+	(g): Rename g_end_lbl to g_label.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: Use function_range for
+	low_pc and high_pc.
+	* gdb.dwarf2/dw2-lexical-block-bare.exp: Likewise.
+
 2016-07-12  Tom Tromey  <tom@tromey.com>
 
 	PR python/19293:
