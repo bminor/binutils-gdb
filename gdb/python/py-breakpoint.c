@@ -948,6 +948,7 @@ gdbpy_breakpoint_deleted (struct breakpoint *b)
 	  if (!evregpy_no_listeners_p (gdb_py_events.breakpoint_deleted))
 	    {
 	      PyObject *bp_obj_alias = (PyObject *) bp_obj;
+
 	      Py_INCREF (bp_obj_alias);
 	      if (evpy_emit_event (bp_obj_alias,
 				   gdb_py_events.breakpoint_deleted) < 0)
