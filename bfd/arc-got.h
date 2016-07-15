@@ -77,6 +77,7 @@ got_entry_for_type (struct got_entry **list,
 		    enum tls_type_e type)
 {
   struct got_entry **p = list;
+
   while (*p != NULL)
     {
       if ((*p)->type == type)
@@ -95,6 +96,8 @@ new_got_entry_to_list (struct got_entry **list,
   /* Find list end.  Avoid having multiple entries of the same
      type.  */
   struct got_entry **p = list;
+  struct got_entry *entry;
+
   while (*p != NULL)
     {
       if ((*p)->type == type)
@@ -102,8 +105,7 @@ new_got_entry_to_list (struct got_entry **list,
       p = &((*p)->next);
     }
 
-  struct got_entry *entry
-    = (struct got_entry *) malloc (sizeof (struct got_entry));
+  entry = (struct got_entry *) xmalloc (sizeof (struct got_entry));
 
   entry->type = type;
   entry->offset = offset;
@@ -113,8 +115,8 @@ new_got_entry_to_list (struct got_entry **list,
   entry->existing_entries = existing_entries;
 
   ARC_DEBUG ("New GOT got entry added to list: "
-	     "type: %d, offset: %d, existing_entries:%d\n",
-	     type, offset, existing_entries);
+	     "type: %d, offset: %ld, existing_entries: %d\n",
+	     type, (long) offset, existing_entries);
 
   /* Add the entry to the end of the list.  */
   *p = entry;
@@ -124,26 +126,26 @@ static enum tls_type_e
 tls_type_for_reloc (reloc_howto_type *howto)
 {
   enum tls_type_e ret = GOT_UNKNOWN;
+
   if (is_reloc_for_GOT (howto))
-    ret = GOT_NORMAL;
-  else
+    return GOT_NORMAL;
+
+  switch (howto->type)
     {
-      switch (howto->type)
-	{
-	  case R_ARC_TLS_GD_GOT:
-	    ret = GOT_TLS_GD;
-	    break;
-	  case R_ARC_TLS_IE_GOT:
-	    ret = GOT_TLS_IE;
-	    break;
-	  case R_ARC_TLS_LE_32:
-	    ret = GOT_TLS_LE;
-	    break;
-	  default:
-	    ret = GOT_UNKNOWN;
-	    break;
-	}
+    case R_ARC_TLS_GD_GOT:
+      ret = GOT_TLS_GD;
+      break;
+    case R_ARC_TLS_IE_GOT:
+      ret = GOT_TLS_IE;
+      break;
+    case R_ARC_TLS_LE_32:
+      ret = GOT_TLS_LE;
+      break;
+    default:
+      ret = GOT_UNKNOWN;
+      break;
     }
+
   return ret;
 };
 
@@ -171,8 +173,9 @@ arc_got_entry_type_for_reloc (reloc_howto_type *howto)
   enum tls_type_e type = GOT_UNKNOWN;
 
   if (is_reloc_for_GOT (howto))
-    type = GOT_NORMAL;
-  else if (is_reloc_for_TLS (howto))
+    return  GOT_NORMAL;
+
+  if (is_reloc_for_TLS (howto))
     {
       switch (howto->type)
 	{
@@ -257,22 +260,21 @@ arc_fill_got_info_for_reloc (enum tls_type_e type,
 
 
 static bfd_vma
-relocate_fix_got_relocs_for_got_info (struct got_entry **list_p,
-				      enum tls_type_e type,
-				      struct bfd_link_info *  info,
-				      bfd *output_bfd,
-				      unsigned long r_symndx,
-				      Elf_Internal_Sym *local_syms,
-			  	      asection **local_sections,
-			     	      struct elf_link_hash_entry *h,
-				      struct arc_relocation_data *reloc_data)
+relocate_fix_got_relocs_for_got_info (struct got_entry **          list_p,
+				      enum tls_type_e              type,
+				      struct bfd_link_info *       info,
+				      bfd *                        output_bfd,
+				      unsigned long                r_symndx,
+				      Elf_Internal_Sym *           local_syms,
+			  	      asection **                  local_sections,
+			     	      struct elf_link_hash_entry * h,
+				      struct arc_relocation_data * reloc_data)
 {
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+  struct got_entry *entry = NULL;
 
   if (list_p == NULL || type == GOT_UNKNOWN || type == GOT_TLS_LE)
     return 0;
-
-  struct elf_link_hash_table *htab = elf_hash_table (info);
-  struct got_entry *entry = NULL;
 
   entry = got_entry_for_type (list_p, type);
   BFD_ASSERT (entry);
@@ -280,7 +282,7 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **list_p,
   if (h == NULL
       || (! elf_hash_table (info)->dynamic_sections_created
 	  || (bfd_link_pic (info)
-	  && SYMBOL_REFERENCES_LOCAL (info, h))))
+	      && SYMBOL_REFERENCES_LOCAL (info, h))))
     {
       const char ATTRIBUTE_UNUSED *symbol_name;
       static const char local_name[] = "(local)";
@@ -294,8 +296,8 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **list_p,
 	  reloc_data->sym_section = h->root.u.def.section;
 
 	  sym_value = h->root.u.def.value
-		      + h->root.u.def.section->output_section->vma
-		      + h->root.u.def.section->output_offset;
+	    + h->root.u.def.section->output_section->vma
+	    + h->root.u.def.section->output_offset;
 
 	  tls_sec = elf_hash_table (info)->tls_sec;
 
@@ -307,8 +309,8 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **list_p,
 	  asection *sec = local_sections[r_symndx];
 
 	  sym_value = sym->st_value
-			    + sec->output_section->vma
-			    + sec->output_offset;
+	    + sec->output_section->vma
+	    + sec->output_offset;
 
 	  tls_sec = elf_hash_table (info)->tls_sec;
 
@@ -320,82 +322,83 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **list_p,
 	{
 	  switch (entry->type)
 	    {
-	      case GOT_TLS_GD:
-		{
-		  BFD_ASSERT (tls_sec && tls_sec->output_section);
-		  bfd_vma sec_vma = tls_sec->output_section->vma;
+	    case GOT_TLS_GD:
+	      {
+		BFD_ASSERT (tls_sec && tls_sec->output_section);
+		bfd_vma sec_vma = tls_sec->output_section->vma;
 
-		  bfd_put_32 (output_bfd,
-			      sym_value - sec_vma,
-			      htab->sgot->contents + entry->offset
-			      + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
-				 ? 4 : 0));
+		bfd_put_32 (output_bfd,
+			    sym_value - sec_vma,
+			    htab->sgot->contents + entry->offset
+			    + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
+			       ? 4 : 0));
 
-		  ARC_DEBUG ("arc_info: FIXED -> %s value = 0x%x "
-			     "@ 0x%x, for symbol %s\n",
-			     (entry->type == GOT_TLS_GD ? "GOT_TLS_GD" :
-			      "GOT_TLS_IE"),
-			     sym_value - sec_vma,
-			     htab->sgot->contents + entry->offset
-			     + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
-				? 4 : 0),
-			     symbol_name);
-		}
-		break;
+		ARC_DEBUG ("arc_info: FIXED -> %s value = %#lx "
+			   "@ %p, for symbol %s\n",
+			   (entry->type == GOT_TLS_GD ? "GOT_TLS_GD" :
+			    "GOT_TLS_IE"),
+			   (long) (sym_value - sec_vma),
+			   htab->sgot->contents + entry->offset
+			   + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
+			      ? 4 : 0),
+			   symbol_name);
+	      }
+	      break;
 
-	      case GOT_TLS_IE:
-		{
-		  BFD_ASSERT (tls_sec && tls_sec->output_section);
-		  bfd_vma ATTRIBUTE_UNUSED sec_vma
-		    = tls_sec->output_section->vma;
+	    case GOT_TLS_IE:
+	      {
+		BFD_ASSERT (tls_sec && tls_sec->output_section);
+		bfd_vma ATTRIBUTE_UNUSED sec_vma
+		  = tls_sec->output_section->vma;
 
-		  ARC_DEBUG ("arc_info: FIXED -> %s value = 0x%x "
-			     "@ 0x%x, for symbol %s\n",
-			     (entry->type == GOT_TLS_GD ? "GOT_TLS_GD" :
-			      "GOT_TLS_IE"),
-			     sym_value - sec_vma,
-			     htab->sgot->contents + entry->offset
-			     + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
-				? 4 : 0),
-			     symbol_name);
-		}
-		break;
+		ARC_DEBUG ("arc_info: FIXED -> %s value = %#lx "
+			   "@ %p, for symbol %s\n",
+			   (entry->type == GOT_TLS_GD ? "GOT_TLS_GD" :
+			    "GOT_TLS_IE"),
+			   (long) (sym_value - sec_vma),
+			   htab->sgot->contents + entry->offset
+			   + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
+			      ? 4 : 0),
+			   symbol_name);
+	      }
+	      break;
 
-	      case GOT_NORMAL:
-		{
-		  bfd_vma sec_vma
-		    = reloc_data->sym_section->output_section->vma
-		      + reloc_data->sym_section->output_offset;
+	    case GOT_NORMAL:
+	      {
+		bfd_vma sec_vma
+		  = reloc_data->sym_section->output_section->vma
+		  + reloc_data->sym_section->output_offset;
 
-		  if (h->root.type != bfd_link_hash_undefweak)
-		    {
-		      bfd_put_32 (output_bfd,
-				  reloc_data->sym_value + sec_vma,
-				  htab->sgot->contents + entry->offset);
+		if (h->root.type != bfd_link_hash_undefweak)
+		  {
+		    bfd_put_32 (output_bfd,
+				reloc_data->sym_value + sec_vma,
+				htab->sgot->contents + entry->offset);
 
-		      ARC_DEBUG ("arc_info: PATCHED: 0x%08x "
-				 "@ 0x%08x for sym %s in got offset 0x%x\n",
-				 reloc_data->sym_value + sec_vma,
-				 htab->sgot->output_section->vma
-				 + htab->sgot->output_offset + entry->offset,
-				 symbol_name,
-				 entry->offset);
-		    }
-		  else
-		    {
-		      ARC_DEBUG ("arc_info: PATCHED: NOT_PATCHED "
-				 "@ 0x%08x for sym %s in got offset 0x%x "
-				 "(is undefweak)\n",
-				 htab->sgot->output_section->vma
-				 + htab->sgot->output_offset + entry->offset,
-				 symbol_name,
-				 entry->offset);
+		    ARC_DEBUG ("arc_info: PATCHED: %#08lx "
+			       "@ %#08lx for sym %s in got offset %#lx\n",
+			       (long) (reloc_data->sym_value + sec_vma),
+			       (long) (htab->sgot->output_section->vma
+				       + htab->sgot->output_offset + entry->offset),
+			       symbol_name,
+			       (long) entry->offset);
 		  }
-		}
-		break;
-	      default:
-		BFD_ASSERT (0);
-		break;
+		else
+		  {
+		    ARC_DEBUG ("arc_info: PATCHED: NOT_PATCHED "
+			       "@ %#08lx for sym %s in got offset %#lx "
+			       "(is undefweak)\n",
+			       (long) (htab->sgot->output_section->vma
+				       + htab->sgot->output_offset
+				       + entry->offset),
+			       symbol_name,
+			       (long) entry->offset);
+		  }
+	      }
+	      break;
+	    default:
+	      BFD_ASSERT (0);
+	      break;
 	    }
 	  entry->processed = TRUE;
 	}
@@ -455,13 +458,14 @@ create_got_dynrelocs_for_single_entry (struct got_entry *list,
 	      ADD_RELA (output_bfd, got, got_offset, dynindx,
 	    	    R_ARC_TLS_DTPMOD, 0);
 	      ARC_DEBUG ("arc_info: TLS_DYNRELOC: type = %d, \
-GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
+GOT_OFFSET = %#lx, GOT_VMA = %#lx, INDEX = %ld, ADDEND = 0x0\n",
 			 list->type,
-			 got_offset,
-			 htab->sgot->output_section->vma
-			 + htab->sgot->output_offset + got_offset,
-			 dynindx, 0);
+			 (long) got_offset,
+			 (long) (htab->sgot->output_section->vma
+				 + htab->sgot->output_offset + got_offset),
+			 (long) dynindx);
 	}
+
       if (e == TLS_GOT_MOD_AND_OFF || e == TLS_GOT_OFF)
 	{
 	  bfd_vma addend = 0;
@@ -477,12 +481,12 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
 		    addend);
 
 	  ARC_DEBUG ("arc_info: TLS_DYNRELOC: type = %d, \
-GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
+GOT_OFFSET = %#lx, GOT_VMA = %#lx, INDEX = %ld, ADDEND = %#lx\n",
 		     list->type,
-		     got_offset,
-		     htab->sgot->output_section->vma
-		     + htab->sgot->output_offset + got_offset,
-		     dynindx, addend);
+		     (long) got_offset,
+		     (long) (htab->sgot->output_section->vma
+			     + htab->sgot->output_offset + got_offset),
+		     (long) dynindx, (long) addend);
 	}
       list->created_dyn_relocation = TRUE;
     }

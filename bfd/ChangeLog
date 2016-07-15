@@ -1,3 +1,17 @@
+2016-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arc.c (PR_DEBUG): Delete.
+	Fix printing of debug information.  Fix formatting of debug
+	statements.
+	(debug_arc_reloc): Handle symbols that are not from an input file.
+	(arc_do_relocation): Remove excessive exclamation points.
+
+	* arc-got.h: Fix formatting.  Fix printing of debug information.
+	(new_got_entry_to_list): Use xmalloc.
+	* config.bfd: use the big-endian arc vector as the default vector
+	for big-endian arc targets.
+
 2016-07-15  Alan Modra  <amodra@gmail.com>
 
 	* cofflink.c (mark_relocs): Exclude relocs with -1 r_symndx

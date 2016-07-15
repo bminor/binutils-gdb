@@ -29,22 +29,19 @@
 #include "opcode/arc.h"
 #include "arc-plt.h"
 
-#define PR_DEBUG(fmt, args...) fprintf (stderr, fmt, ##args)
-
 /* #define ARC_ENABLE_DEBUG 1  */
-#ifndef ARC_ENABLE_DEBUG
-#define ARC_DEBUG(...)
-#else
-static char *
+#ifdef ARC_ENABLE_DEBUG
+static const char *
 name_for_global_symbol (struct elf_link_hash_entry *h)
 {
   static char *local_str = "(local)";
   if (h == NULL)
     return local_str;
-  else
-    return h->root.root.string;
+  return h->root.root.string;
 }
-#define ARC_DEBUG(args...) fprintf (stderr, ##args)
+#define ARC_DEBUG(fmt, args...) fprintf (stderr, fmt, ##args)
+#else
+#define ARC_DEBUG(...)
 #endif
 
 
@@ -236,7 +233,9 @@ enum howto_list
 #undef ARC_RELOC_HOWTO
 
 #define ARC_RELOC_HOWTO(TYPE, VALUE, RSIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
-  [TYPE] = HOWTO (R_##TYPE, 0, RSIZE, BITSIZE, FALSE, 0, complain_overflow_##OVERFLOW, arc_elf_reloc, "R_" #TYPE, FALSE, 0, 0, FALSE),
+  [TYPE] = HOWTO (R_##TYPE, 0, RSIZE, BITSIZE, FALSE, 0,		\
+		  complain_overflow_##OVERFLOW, arc_elf_reloc,		\
+		  "R_" #TYPE, FALSE, 0, 0, FALSE),
 
 static struct reloc_howto_struct elf_arc_howto_table[] =
 {
@@ -640,61 +639,60 @@ DO_NOTHING:
   return;
 }
 
-#define BFD_DEBUG_PIC(...)
-
+#ifdef ARC_ENABLE_DEBUG
+#define DEBUG_ARC_RELOC(A) debug_arc_reloc (A)
 
 static void
 debug_arc_reloc (struct arc_relocation_data reloc_data)
 {
-  PR_DEBUG ("Reloc type=%s, should_relocate = %s\n",
-	   reloc_data.howto->name,
-	   reloc_data.should_relocate ? "true" : "false");
-  PR_DEBUG ("  offset = 0x%x, addend = 0x%x\n",
-	   (unsigned int) reloc_data.reloc_offset,
-	   (unsigned int) reloc_data.reloc_addend);
-  PR_DEBUG (" Symbol:\n");
-  PR_DEBUG ("  value = 0x%08x\n",
-	   (unsigned int) reloc_data.sym_value);
+  ARC_DEBUG ("Reloc type=%s, should_relocate = %s\n",
+	     reloc_data.howto->name,
+	     reloc_data.should_relocate ? "true" : "false");
+  ARC_DEBUG ("  offset = 0x%x, addend = 0x%x\n",
+	     (unsigned int) reloc_data.reloc_offset,
+	     (unsigned int) reloc_data.reloc_addend);
+  ARC_DEBUG (" Symbol:\n");
+  ARC_DEBUG ("  value = 0x%08x\n",
+	     (unsigned int) reloc_data.sym_value);
   if (reloc_data.sym_section != NULL)
     {
-      PR_DEBUG (" Symbol Section:\n");
-      PR_DEBUG (
-	       "  section name = %s, output_offset 0x%08x",
-	       reloc_data.sym_section->name,
-	       (unsigned int) reloc_data.sym_section->output_offset);
+      ARC_DEBUG (" Symbol Section:\n");
+      ARC_DEBUG ("  section name = %s, output_offset 0x%08x",
+		 reloc_data.sym_section->name,
+		 (unsigned int) reloc_data.sym_section->output_offset);
       if (reloc_data.sym_section->output_section != NULL)
-	{
-	  PR_DEBUG (
-		   ", output_section->vma = 0x%08x",
+	ARC_DEBUG (", output_section->vma = 0x%08x",
 		   ((unsigned int) reloc_data.sym_section->output_section->vma));
-	}
-      PR_DEBUG ( "\n");
-      PR_DEBUG ("  file: %s\n", reloc_data.sym_section->owner->filename);
+      ARC_DEBUG ("\n");
+      if (reloc_data.sym_section->owner && reloc_data.sym_section->owner->filename)
+	ARC_DEBUG ("  file: %s\n", reloc_data.sym_section->owner->filename);
     }
   else
     {
-      PR_DEBUG ( "  symbol section is NULL\n");
+      ARC_DEBUG ("  symbol section is NULL\n");
     }
 
-  PR_DEBUG ( " Input_section:\n");
+  ARC_DEBUG (" Input_section:\n");
   if (reloc_data.input_section != NULL)
     {
-      PR_DEBUG (
-	       "  section name = %s, output_offset 0x%08x, output_section->vma = 0x%08x\n",
-	       reloc_data.input_section->name,
-	       (unsigned int) reloc_data.input_section->output_offset,
-	       (unsigned int) reloc_data.input_section->output_section->vma);
-      PR_DEBUG ( "  changed_address = 0x%08x\n",
-	       (unsigned int) (reloc_data.input_section->output_section->vma
-	       + reloc_data.input_section->output_offset
-	       + reloc_data.reloc_offset));
-      PR_DEBUG ("  file: %s\n", reloc_data.input_section->owner->filename);
+      ARC_DEBUG ("  section name = %s, output_offset 0x%08x, output_section->vma = 0x%08x\n",
+		 reloc_data.input_section->name,
+		 (unsigned int) reloc_data.input_section->output_offset,
+		 (unsigned int) reloc_data.input_section->output_section->vma);
+      ARC_DEBUG ("  changed_address = 0x%08x\n",
+		 (unsigned int) (reloc_data.input_section->output_section->vma
+				 + reloc_data.input_section->output_offset
+				 + reloc_data.reloc_offset));
+      ARC_DEBUG ("  file: %s\n", reloc_data.input_section->owner->filename);
     }
   else
     {
-      PR_DEBUG ( "	input section is NULL\n");
+      ARC_DEBUG ("	input section is NULL\n");
     }
 }
+#else
+#define DEBUG_ARC_RELOC(A)
+#endif /* ARC_ENABLE_DEBUG */
 
 static bfd_vma
 middle_endian_convert (bfd_vma insn, bfd_boolean do_it)
@@ -798,60 +796,67 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 
 #define none (0)
 
-#define PRINT_DEBUG_RELOC_INFO_BEFORE(FORMULA, TYPE) \
-    {\
-      asection *sym_section = reloc_data.sym_section; \
-      asection *input_section = reloc_data.input_section; \
-      ARC_DEBUG ("RELOC_TYPE = " TYPE "\n"); \
-      ARC_DEBUG ("FORMULA = " FORMULA "\n"); \
-      ARC_DEBUG ("S = 0x%x\n", S); \
-      ARC_DEBUG ("A = 0x%x\n", A); \
-      ARC_DEBUG ("L = 0x%x\n", L); \
-      if (sym_section->output_section != NULL) \
-	{ \
-	  ARC_DEBUG ("symbol_section->vma = 0x%x\n", \
-	     sym_section->output_section->vma + sym_section->output_offset); \
-	} \
-      else \
-	{ \
-	  ARC_DEBUG ("symbol_section->vma = NULL\n"); \
-	} \
-      if (input_section->output_section != NULL) \
-	{ \
-	  ARC_DEBUG ("symbol_section->vma = 0x%x\n", \
-	     input_section->output_section->vma + input_section->output_offset); \
-	} \
-      else \
-	{ \
-	  ARC_DEBUG ("symbol_section->vma = NULL\n"); \
-	} \
-      ARC_DEBUG ("PCL = 0x%x\n", P); \
-      ARC_DEBUG ("P = 0x%x\n", P); \
-      ARC_DEBUG ("G = 0x%x\n", G); \
-      ARC_DEBUG ("SDA_OFFSET = 0x%x\n", _SDA_BASE_); \
+#ifdef ARC_ENABLE_DEBUG
+#define PRINT_DEBUG_RELOC_INFO_BEFORE(FORMULA, TYPE)			\
+  do									\
+    {									\
+      asection *sym_section = reloc_data.sym_section;			\
+      asection *input_section = reloc_data.input_section;		\
+      ARC_DEBUG ("RELOC_TYPE = " TYPE "\n");				\
+      ARC_DEBUG ("FORMULA = " FORMULA "\n");				\
+      ARC_DEBUG ("S = %#lx\n", S);					\
+      ARC_DEBUG ("A = %#lx\n", A);					\
+      ARC_DEBUG ("L = %lx\n", L);					\
+      if (sym_section->output_section != NULL)				\
+	ARC_DEBUG ("symbol_section->vma = %#lx\n",			\
+		   sym_section->output_section->vma			\
+		   + sym_section->output_offset);			\
+      else								\
+	ARC_DEBUG ("symbol_section->vma = NULL\n");			\
+      if (input_section->output_section != NULL)			\
+	ARC_DEBUG ("symbol_section->vma = %#lx\n",			\
+		   input_section->output_section->vma			\
+		   + input_section->output_offset);			\
+      else								\
+	ARC_DEBUG ("symbol_section->vma = NULL\n");			\
+      ARC_DEBUG ("PCL = %#lx\n", P);					\
+      ARC_DEBUG ("P = %#lx\n", P);					\
+      ARC_DEBUG ("G = %#lx\n", G);					\
+      ARC_DEBUG ("SDA_OFFSET = %#lx\n", _SDA_BASE_);			\
       ARC_DEBUG ("SDA_SET = %d\n", reloc_data.sdata_begin_symbol_vma_set); \
-      ARC_DEBUG ("GOT_OFFSET = 0x%x\n", GOT); \
-      ARC_DEBUG ("relocation = 0x%08x\n", relocation); \
-      ARC_DEBUG ("before = 0x%08x\n", (unsigned int) insn); \
-      ARC_DEBUG ("data   = 0x%08x (%u) (%d)\n", (unsigned int) relocation, (unsigned int) relocation, (int) relocation); \
-    }
+      ARC_DEBUG ("GOT_OFFSET = %#lx\n", GOT);				\
+      ARC_DEBUG ("relocation = %#08lx\n", relocation);			\
+      ARC_DEBUG ("before = %#08x\n", (unsigned) insn);			\
+      ARC_DEBUG ("data   = %08x (%u) (%d)\n", (unsigned) relocation,	\
+		 (unsigned) relocation, (int) relocation);		\
+    }									\
+  while (0)
 
-#define PRINT_DEBUG_RELOC_INFO_AFTER \
-    { \
-      ARC_DEBUG ("after  = 0x%08x\n", (unsigned int) insn); \
-    }
+#define PRINT_DEBUG_RELOC_INFO_AFTER				\
+  do								\
+    {								\
+      ARC_DEBUG ("after  = 0x%08x\n", (unsigned int) insn);	\
+    }								\
+  while (0)
+
+#else
+
+#define PRINT_DEBUG_RELOC_INFO_BEFORE(...)
+#define PRINT_DEBUG_RELOC_INFO_AFTER 
+
+#endif /* ARC_ENABLE_DEBUG */
 
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
-  case R_##TYPE: \
-    { \
-      bfd_signed_vma bitsize ATTRIBUTE_UNUSED = BITSIZE; \
-      relocation = FORMULA  ; \
-      PRINT_DEBUG_RELOC_INFO_BEFORE (#FORMULA, #TYPE); \
-      insn = middle_endian_convert (insn, IS_ME (#FORMULA, abfd)); \
-      insn = (* get_replace_function (abfd, TYPE)) (insn, relocation); \
-      insn = middle_endian_convert (insn, IS_ME (#FORMULA, abfd)); \
-      PRINT_DEBUG_RELOC_INFO_AFTER \
-    } \
+  case R_##TYPE:							\
+    {									\
+      bfd_signed_vma bitsize ATTRIBUTE_UNUSED = BITSIZE;		\
+      relocation = FORMULA  ;						\
+      PRINT_DEBUG_RELOC_INFO_BEFORE (#FORMULA, #TYPE);			\
+      insn = middle_endian_convert (insn, IS_ME (#FORMULA, abfd));	\
+      insn = (* get_replace_function (abfd, TYPE)) (insn, relocation);	\
+      insn = middle_endian_convert (insn, IS_ME (#FORMULA, abfd));	\
+      PRINT_DEBUG_RELOC_INFO_AFTER;					\
+    }									\
     break;
 
 static bfd_reloc_status_type
@@ -913,24 +918,16 @@ arc_do_relocation (bfd_byte * contents,
   else
     flag = arc_special_overflow_checks (reloc_data, relocation, info);
 
-#undef  DEBUG_ARC_RELOC
-#define DEBUG_ARC_RELOC(A) debug_arc_reloc (A)
   if (flag != bfd_reloc_ok)
     {
-      PR_DEBUG ( "Relocation overflows !!!!\n");
-
+      ARC_DEBUG ("Relocation overflows !\n");
       DEBUG_ARC_RELOC (reloc_data);
+      ARC_DEBUG ("Relocation value = signed -> %d, unsigned -> %u"
+		 ", hex -> (0x%08x)\n",
+		(int) relocation, (unsigned) relocation, (int) relocation);
 
-      PR_DEBUG (
-		"Relocation value = signed -> %d, unsigned -> %u"
-		", hex -> (0x%08x)\n",
-		(int) relocation,
-		(unsigned int) relocation,
-		(unsigned int) relocation);
       return flag;
     }
-#undef  DEBUG_ARC_RELOC
-#define DEBUG_ARC_RELOC(A)
 
   /* Write updated instruction back to memory.  */
   switch (reloc_data.howto->size)
@@ -989,21 +986,21 @@ arc_do_relocation (bfd_byte * contents,
 			      corresponding to the st_shndx field of each
 			      local symbol.  */
 static bfd_boolean
-elf_arc_relocate_section (bfd *		   output_bfd,
+elf_arc_relocate_section (bfd *		          output_bfd,
 			  struct bfd_link_info *  info,
-			  bfd *		   input_bfd,
-			  asection *	      input_section,
-			  bfd_byte *	      contents,
+			  bfd *		          input_bfd,
+			  asection *	          input_section,
+			  bfd_byte *	          contents,
 			  Elf_Internal_Rela *     relocs,
 			  Elf_Internal_Sym *      local_syms,
-			  asection **	     local_sections)
+			  asection **	          local_sections)
 {
-  Elf_Internal_Shdr *	   symtab_hdr;
-  struct elf_link_hash_entry ** sym_hashes;
-  Elf_Internal_Rela *	   rel;
-  Elf_Internal_Rela *	   wrel;
-  Elf_Internal_Rela *	   relend;
-  struct elf_link_hash_table *htab = elf_hash_table (info);
+  Elf_Internal_Shdr *	         symtab_hdr;
+  struct elf_link_hash_entry **  sym_hashes;
+  Elf_Internal_Rela *	         rel;
+  Elf_Internal_Rela *	         wrel;
+  Elf_Internal_Rela *	         relend;
+  struct elf_link_hash_table *   htab = elf_hash_table (info);
 
   symtab_hdr = &((elf_tdata (input_bfd))->symtab_hdr);
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1014,11 +1011,12 @@ elf_arc_relocate_section (bfd *		   output_bfd,
     {
       enum elf_arc_reloc_type       r_type;
       reloc_howto_type *	    howto;
-      unsigned long		 r_symndx;
+      unsigned long		    r_symndx;
       struct elf_link_hash_entry *  h;
       Elf_Internal_Sym *	    sym;
       asection *		    sec;
-      struct elf_link_hash_entry *h2;
+      struct elf_link_hash_entry *  h2;
+      const char *                  msg;
 
       struct arc_relocation_data reloc_data =
       {
@@ -1064,17 +1062,13 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		{
 		  sec = local_sections[r_symndx];
 
-		  /* for RELA relocs.Just adjust the addend
+		  /* For RELA relocs.  Just adjust the addend
 		     value in the relocation entry.  */
 		  rel->r_addend += sec->output_offset + sym->st_value;
 
-		  BFD_DEBUG_PIC (
-		    PR_DEBUG ("local symbols reloc "
-			      "(section=%d %s) seen in %s\n",
-			      r_symndx,
-			      local_sections[r_symndx]->name,
-			      __PRETTY_FUNCTION__)
-		  );
+		  ARC_DEBUG ("local symbols reloc (section=%d %s) seen in %s\n",
+			     (int) r_symndx, local_sections[r_symndx]->name,
+			     __PRETTY_FUNCTION__);
 		}
 	    }
 	}
@@ -1191,6 +1185,9 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	}
       else /* Global symbol.  */
 	{
+	  /* FIXME: We should use the RELOC_FOR_GLOBAL_SYMBOL macro
+	     (defined in elf-bfd.h) here.  */
+
 	  /* Get the symbol's entry in the symtab.  */
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
@@ -1313,6 +1310,7 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 		  output_bfd, info, NULL);
 	    }
 	}
+
       switch (r_type)
 	{
 	  case R_ARC_32:
@@ -1347,8 +1345,9 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 				    + input_section->output_offset);
 
 #define IS_ARC_PCREL_TYPE(TYPE) \
-  (   (TYPE == R_ARC_PC32) \
+  (   (TYPE == R_ARC_PC32)      \
    || (TYPE == R_ARC_32_PCREL))
+
 		if (skip)
 		  {
 		    memset (&outrel, 0, sizeof outrel);
@@ -1425,8 +1424,47 @@ elf_arc_relocate_section (bfd *		   output_bfd,
 	  return FALSE;
 	}
 
-      if (arc_do_relocation (contents, reloc_data, info) != bfd_reloc_ok)
-	return FALSE;
+      msg = NULL;
+      switch (arc_do_relocation (contents, reloc_data, info))
+	{
+	case bfd_reloc_ok:
+	  continue; /* The reloc processing loop.  */
+
+	case bfd_reloc_overflow:
+	  (*info->callbacks->reloc_overflow)
+	    (info, (h ? &h->root : NULL), reloc_data.symbol_name, howto->name, (bfd_vma) 0,
+	     input_bfd, input_section, rel->r_offset);
+	  break;
+
+	case bfd_reloc_undefined:
+	  (*info->callbacks->undefined_symbol)
+	    (info, reloc_data.symbol_name, input_bfd, input_section, rel->r_offset, TRUE);
+	  break;
+
+	case bfd_reloc_other:
+	  msg = _("%B(%A): warning: unaligned access to symbol '%s' in the small data area");
+	  break;
+
+	case bfd_reloc_outofrange:
+	  msg = _("%B(%A): internal error: out of range error");
+	  break;
+
+	case bfd_reloc_notsupported:
+	  msg = _("%B(%A): internal error: unsupported relocation error");
+	  break;
+
+	case bfd_reloc_dangerous:
+	  msg = _("%B(%A): internal error: dangerous relocation");
+	  break;
+
+	default:
+	  msg = _("%B(%A): internal error: unknown error");
+	  break;
+	}
+
+      if (msg)
+	_bfd_error_handler (msg, input_bfd, input_section, reloc_data.symbol_name);
+      return FALSE;
     }
 
   return TRUE;
@@ -1633,8 +1671,8 @@ arc_get_plt_version (struct bfd_link_info *info)
   for (i = 0; i < 1; i++)
     {
       ARC_DEBUG ("%d: size1 = %d, size2 = %d\n", i,
-		 plt_versions[i].entry_size,
-		 plt_versions[i].elem_size);
+		 (int) plt_versions[i].entry_size,
+		 (int) plt_versions[i].elem_size);
     }
 
   if (bfd_get_mach (info->output_bfd) == bfd_mach_arc_arcv2)
@@ -1669,7 +1707,7 @@ add_symbol_to_plt (struct bfd_link_info *info)
   ret = htab->splt->size;
 
   htab->splt->size += plt_data->elem_size;
-  ARC_DEBUG ("PLT_SIZE = %d\n", htab->splt->size);
+  ARC_DEBUG ("PLT_SIZE = %d\n", (int) htab->splt->size);
 
   htab->sgotplt->size += 4;
   htab->srelplt->size += sizeof (Elf32_External_Rela);
@@ -1746,22 +1784,22 @@ relocate_plt_for_symbol (bfd *output_bfd,
 		      / plt_data->elem_size;
   bfd_vma got_offset = (plt_index + 3) * 4;
 
-  ARC_DEBUG ("arc_info: PLT_OFFSET = 0x%x, PLT_ENTRY_VMA = 0x%x, \
-GOT_ENTRY_OFFSET = 0x%x, GOT_ENTRY_VMA = 0x%x, for symbol %s\n",
-	     h->plt.offset,
-	     htab->splt->output_section->vma
-	     + htab->splt->output_offset
-	     + h->plt.offset,
-	     got_offset,
-	     htab->sgotplt->output_section->vma
-	     + htab->sgotplt->output_offset
-	     + got_offset,
+  ARC_DEBUG ("arc_info: PLT_OFFSET = %#lx, PLT_ENTRY_VMA = %#lx, \
+GOT_ENTRY_OFFSET = %#lx, GOT_ENTRY_VMA = %#lx, for symbol %s\n",
+	     (long) h->plt.offset,
+	     (long) (htab->splt->output_section->vma
+		     + htab->splt->output_offset
+		     + h->plt.offset),
+	     (long) got_offset,
+	     (long) (htab->sgotplt->output_section->vma
+		     + htab->sgotplt->output_offset
+		     + got_offset),
 	     h->root.root.string);
-
 
   {
     bfd_vma i = 0;
     uint16_t *ptr = (uint16_t *) plt_data->elem;
+
     for (i = 0; i < plt_data->elem_size/2; i++)
       {
 	uint16_t data = ptr[i];

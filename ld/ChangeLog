@@ -1,3 +1,8 @@
+2016-07-15  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-arc/arc.exp: Always run the sda-relocs test in
+	little endian mode.
+
 2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips-elf.exp: Run
