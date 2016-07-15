@@ -1,3 +1,9 @@
+2016-07-15  Zachary Welch  <zwelch@codesourcery.com>
+	    Don Breazeal <donb@codesourcery.com>
+
+	* gdb.base/maint.exp: Escape paths used in regular expressions.
+	* gdb.stabs/weird.exp: Likewise.
+
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
 	PR python/15620, PR python/18620:
