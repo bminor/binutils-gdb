@@ -1,3 +1,11 @@
+2016-07-20  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_enable_lwp_events): Remove function.
+	(fbsd_enable_proc_events): New function.
+	(fbsd_enable_follow_fork): Remove function.
+	(fbsd_post_startup_inferior): Use "fbsd_enable_proc_events".
+	(fbsd_post_attach): Likewise.
+
 2016-07-15  John Baldwin  <jhb@FreeBSD.org>
 
 	* common/signals.c (gdb_signal_from_host): Handle SIGLIBRT.
