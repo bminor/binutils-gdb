@@ -1721,6 +1721,16 @@ command @code{OUTPUT_FORMAT} can also specify the output format, but
 this option overrides it.  @xref{BFD}.
 @end ifclear
 
+@kindex --out-implib
+@item --out-implib @var{file}
+Create an import library in @var{file} corresponding to the executable
+the linker is generating (eg. a DLL or ELF program).  This import
+library (which should be called @code{*.dll.a} or @code{*.a} for DLLs)
+may be used to link clients against the generated executable; this
+behaviour makes it possible to skip a separate import library creation
+step (eg. @code{dlltool} for DLLs).  This option is only available for
+the i386 PE and ELF targetted ports of the linker.
+
 @kindex -pie
 @kindex --pic-executable
 @item -pie
@@ -2580,16 +2590,6 @@ automatically or implicitly exported symbols.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @cindex DLLs, creating
-@kindex --out-implib
-@item --out-implib @var{file}
-The linker will create the file @var{file} which will contain an
-import lib corresponding to the DLL the linker is generating. This
-import lib (which should be called @code{*.dll.a} or @code{*.a}
-may be used to link clients against the generated DLL; this behaviour
-makes it possible to skip a separate @code{dlltool} import library
-creation step.
-[This option is specific to the i386 PE targeted port of the linker]
-
 @kindex --enable-auto-image-base
 @item --enable-auto-image-base
 @itemx --enable-auto-image-base=@var{value}

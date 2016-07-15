@@ -1,5 +1,12 @@
 -*- text -*-
 
+Changes in 2.28:
+
+* Extended the --out-implib=<file> option, previously restricted to x86 PE
+  targets, to any ELF based target.  This allows the generation of an import
+  library for an ELF executable, which can then be used by another application
+  to link against the executable.
+
 Changes in 2.27:
 
 * Add a configure option --enable-relro to decide whether -z relro should

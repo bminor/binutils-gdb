@@ -1,3 +1,17 @@
+2016-07-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf-bfd.h (elf_backend_filter_implib_symbols): Declare backend hook.
+	(_bfd_elf_filter_global_symbols): Declare.
+	* elf.c (_bfd_elf_filter_global_symbols): New function.
+	* elflink.c (elf_filter_global_symbols): Likewise.
+	(elf_output_implib): Likewise.
+	(bfd_elf_final_link): Call above function, failing if it does.
+	* elfxx-target.h (elf_backend_filter_implib_symbols): Define macro and
+	default it to NULL.
+	(elf_backend_copy_indirect_symbol): Fix spacing.
+	(elf_backend_hide_symbol): Likewise.
+	(elfNN_bed): Initialize elf_backend_filter_implib_symbols backend hook.
+
 2016-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Nick Clifton  <nickc@redhat.com>
 

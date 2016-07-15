@@ -163,6 +163,9 @@ typedef struct
      input files.  */
   bfd_boolean accept_unknown_input_arch;
 
+  /* Name of the import library to generate.  */
+  char *out_implib_filename;
+
   /* If TRUE we'll just print the default output on stdout.  */
   bfd_boolean print_output_format;
 

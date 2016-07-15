@@ -524,11 +524,14 @@
 #ifndef elf_backend_output_arch_syms
 #define elf_backend_output_arch_syms		NULL
 #endif
+#ifndef elf_backend_filter_implib_symbols
+#define elf_backend_filter_implib_symbols	NULL
+#endif
 #ifndef elf_backend_copy_indirect_symbol
-#define elf_backend_copy_indirect_symbol  _bfd_elf_link_hash_copy_indirect
+#define elf_backend_copy_indirect_symbol	_bfd_elf_link_hash_copy_indirect
 #endif
 #ifndef elf_backend_hide_symbol
-#define elf_backend_hide_symbol		_bfd_elf_link_hash_hide_symbol
+#define elf_backend_hide_symbol			_bfd_elf_link_hash_hide_symbol
 #endif
 #ifndef elf_backend_fixup_symbol
 #define elf_backend_fixup_symbol		NULL
@@ -764,6 +767,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_print_symbol_all,
   elf_backend_output_arch_local_syms,
   elf_backend_output_arch_syms,
+  elf_backend_filter_implib_symbols,
   elf_backend_copy_indirect_symbol,
   elf_backend_hide_symbol,
   elf_backend_fixup_symbol,

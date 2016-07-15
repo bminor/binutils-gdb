@@ -1126,6 +1126,11 @@ struct elf_backend_data
      bfd_boolean (*) (void *, const char *, Elf_Internal_Sym *, asection *,
 		      struct elf_link_hash_entry *));
 
+  /* Filter what symbols of the output file to include in the import
+     library if one is created.  */
+  unsigned int (*elf_backend_filter_implib_symbols)
+    (bfd *, struct bfd_link_info *, asymbol **, long);
+
   /* Copy any information related to dynamic linking from a pre-existing
      symbol to a newly created symbol.  Also called to copy flags and
      other back-end info to a weakdef, in which case the symbol is not
@@ -1951,6 +1956,8 @@ extern bfd_boolean _bfd_elf_section_already_linked
   (bfd *, asection *, struct bfd_link_info *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
+extern unsigned int _bfd_elf_filter_global_symbols
+  (bfd *, struct bfd_link_info *, asymbol **, long);
 extern asection *_bfd_elf_check_kept_section
   (asection *, struct bfd_link_info *);
 #define _bfd_elf_link_just_syms _bfd_generic_link_just_syms
