@@ -1,5 +1,17 @@
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
+	* elfcomm.h (HOST_WIDEST_INT): Move to..
+	* sysdep.h: ..here.
+	* od-macho.c: Don't include libbfd.h.  Do include dwarf.h
+	(dump_dyld_info_rebase): Use read_leb128 rather than
+	read_unsigned_leb128.
+	(dump_dyld_info_bind, dump_dyld_info_export_1): Likewise.
+	(dump_segment_split_info): Likewise.
+	(dump_dyld_info): Rename vars to avoid shadowing dwarf.h enums.
+	(dump_load_command): Likewise.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
 	* ar.c: Don't include libbfd.h.
 	* objcopy.c: Likewise.
 	* bucomm.c (bfd_get_archive_filename): Use xmalloc rather than
