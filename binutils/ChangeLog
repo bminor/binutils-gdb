@@ -1,5 +1,17 @@
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
+	* bucomm.c: Don't include libbfd.h.
+	(endian_string, display_target_list): Delete forward declaration.
+	(display_info_table, display_target_tables): Likewise.
+	(LONGEST_ARCH): Delete.
+	(struct display_target): New.
+	(do_display_target): New function.
+	(display_target_list, display_info): Rewrite functions.
+	(display_info_table): Delete.
+	(do_info_size, do_info_header, do_info_row): New functions.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
 	* elfcomm.h (HOST_WIDEST_INT): Move to..
 	* sysdep.h: ..here.
 	* od-macho.c: Don't include libbfd.h.  Do include dwarf.h
