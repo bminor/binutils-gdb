@@ -29,7 +29,6 @@
 #include "progress.h"
 #include "getopt.h"
 #include "aout/ar.h"
-#include "libbfd.h"
 #include "bucomm.h"
 #include "arsup.h"
 #include "filenames.h"

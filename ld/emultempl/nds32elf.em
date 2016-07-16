@@ -22,7 +22,6 @@
 
 fragment <<EOF
 
-#include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/nds32.h"
 #include "bfd_stdint.h"

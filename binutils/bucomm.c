@@ -616,14 +616,7 @@ bfd_get_archive_filename (const bfd *abfd)
       if (curr)
 	free (buf);
       curr = needed + (needed >> 1);
-      buf = (char *) bfd_malloc (curr);
-      /* If we can't malloc, fail safe by returning just the file name.
-	 This function is only used when building error messages.  */
-      if (!buf)
-	{
-	  curr = 0;
-	  return bfd_get_filename (abfd);
-	}
+      buf = (char *) xmalloc (curr);
     }
   sprintf (buf, "%s(%s)", bfd_get_filename (abfd->my_archive),
 	   bfd_get_filename (abfd));

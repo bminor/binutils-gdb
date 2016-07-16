@@ -1,3 +1,13 @@
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* libbfd-in.h (BFD_ALIGN): Move to..
+	* bfd-in.h: ..here.
+	* elf32-ppc.h (struct ppc_elf_params): Add pagesize.
+	* elf32-ppc.c (default_params): Adjust init.
+	(ppc_elf_link_params): Set pagesize_p2.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2016-07-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf-bfd.h (elf_backend_filter_implib_symbols): Declare backend hook.

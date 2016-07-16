@@ -3365,7 +3365,8 @@ static struct bfd_link_hash_table *
 ppc_elf_link_hash_table_create (bfd *abfd)
 {
   struct ppc_elf_link_hash_table *ret;
-  static struct ppc_elf_params default_params = { PLT_OLD, 0, 1, 0, 0, 12, 0 };
+  static struct ppc_elf_params default_params
+    = { PLT_OLD, 0, 1, 0, 0, 12, 0, 0 };
 
   ret = bfd_zmalloc (sizeof (struct ppc_elf_link_hash_table));
   if (ret == NULL)
@@ -3411,6 +3412,7 @@ ppc_elf_link_params (struct bfd_link_info *info, struct ppc_elf_params *params)
 
   if (htab)
     htab->params = params;
+  params->pagesize_p2 = bfd_log2 (params->pagesize);
 }
 
 /* Create .got and the related sections.  */

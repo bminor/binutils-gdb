@@ -1,3 +1,20 @@
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c: Don't include libbfd.h.
+	* emultempl/nds32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	(pagesize): Delete.
+	(params): Update init.
+	(ppc_after_open_output): Use params.pagesize.  Don't call bfd_log2.
+	(PARSE_AND_LIST_ARGS_CASES): Use params.pagesize.
+	* emultempl/sh64elf.em: Don't include libbfd.h.
+	(after_allocation): Use ASSERT, not BFD_ASSERT.
+	* emultempl/xtensaelf.em: Don't include libbfd.h.
+	(replace_insn_sec_with_prop_sec): Use xmalloc, not bfd_malloc.
+	* Makefile.am: Update dependencies.
+	* Makefile.in: Regenerate.
+
 2016-07-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 	    Nick Clifton  <nickc@redhat.com>
 

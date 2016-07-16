@@ -39,7 +39,6 @@
 #include "fnmatch.h"
 #include "demangle.h"
 #include "hashtab.h"
-#include "libbfd.h"
 #include "elf-bfd.h"
 #ifdef ENABLE_PLUGINS
 #include "plugin.h"
