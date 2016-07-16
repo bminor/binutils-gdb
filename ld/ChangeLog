@@ -1,5 +1,10 @@
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (open_output): Replace bfd_search_for_target with
+	bfd_iterate_over_targets.  Localize vars.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.c: Don't include libbfd.h.
 	* emultempl/nds32elf.em: Likewise.
 	* emultempl/ppc64elf.em: Likewise.

@@ -1,5 +1,11 @@
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
+	* targets.c (bfd_seach_for_target): Rename to..
+	(bfd_iterate_over_targets): ..this.  Rewrite doc.
+	* bfd-in2.h: Regenerate.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
 	* archures.c (bfd_default_set_arch_mach): Make available in bfd.h.
 	* libbfd.h: Regenerate.
 	* bfd-in2.h: Regenerate.
