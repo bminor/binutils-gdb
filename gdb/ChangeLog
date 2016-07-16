@@ -1,5 +1,23 @@
 2016-07-20  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (fbsd_enable_proc_events): Enable "PTRACE_VFORK"
+	events.
+	(fbsd_pending_vfork_done): Only define if "PTRACE_VFORK" is not
+	defined.
+	(fbsd_add_vfork_done): Likewise.
+	(fbsd_is_vfork_done_pending): Likewise.
+	(fbsd_next_vfork_done): Likewise.
+	(fbsd_resume): Only ignore pending vfork done events if
+	"PTRACE_VFORK" is not defined.
+	(fbsd_wait): Only look for pending vfork done events if
+	"PTRACE_VFORK" is not defined.
+	[PTRACE_VFORK]: Handle "PL_FLAG_VFORKED" and "PL_FLAG_VFORK_DONE"
+	events.
+	(fbsd_follow_fork): Only fake a vfork done event if "PTRACE_VFORK"
+	is not defined.
+
+2016-07-20  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c (fbsd_wait): Use "fbsd_enable_proc_events" on
 	new child processes.
 

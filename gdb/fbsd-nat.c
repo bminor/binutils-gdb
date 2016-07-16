@@ -435,6 +435,9 @@ fbsd_enable_proc_events (pid_t pid)
 	      sizeof (events)) == -1)
     perror_with_name (("ptrace"));
   events |= PTRACE_FORK | PTRACE_LWP;
+#ifdef PTRACE_VFORK
+  events |= PTRACE_VFORK;
+#endif
   if (ptrace (PT_SET_EVENT_MASK, pid, (PTRACE_TYPE_ARG3)&events,
 	      sizeof (events)) == -1)
     perror_with_name (("ptrace"));
@@ -598,6 +601,7 @@ fbsd_is_child_pending (pid_t pid)
   return null_ptid;
 }
 
+#ifndef PTRACE_VFORK
 static struct fbsd_fork_info *fbsd_pending_vfork_done;
 
 /* Record a pending vfork done event.  */
@@ -647,6 +651,7 @@ fbsd_next_vfork_done (void)
   return null_ptid;
 }
 #endif
+#endif
 
 static int
 resume_one_thread_cb (struct thread_info *tp, void *data)
@@ -686,7 +691,7 @@ static void
 fbsd_resume (struct target_ops *ops,
 	     ptid_t ptid, int step, enum gdb_signal signo)
 {
-#ifdef TDP_RFPPWAIT
+#if defined(TDP_RFPPWAIT) && !defined(PTRACE_VFORK)
   pid_t pid;
 
   /* Don't PT_CONTINUE a process which has a pending vfork done event.  */
@@ -731,12 +736,14 @@ fbsd_wait (struct target_ops *ops,
 
   while (1)
     {
+#ifndef PTRACE_VFORK
       wptid = fbsd_next_vfork_done ();
       if (!ptid_equal (wptid, null_ptid))
 	{
 	  ourstatus->kind = TARGET_WAITKIND_VFORK_DONE;
 	  return wptid;
 	}
+#endif
       wptid = super_wait (ops, ptid, ourstatus, target_options);
       if (ourstatus->kind == TARGET_WAITKIND_STOPPED)
 	{
@@ -812,12 +819,18 @@ fbsd_wait (struct target_ops *ops,
 #ifdef TDP_RFPPWAIT
 	  if (pl.pl_flags & PL_FLAG_FORKED)
 	    {
+#ifndef PTRACE_VFORK
 	      struct kinfo_proc kp;
+#endif
 	      ptid_t child_ptid;
 	      pid_t child;
 
 	      child = pl.pl_child_pid;
 	      ourstatus->kind = TARGET_WAITKIND_FORKED;
+#ifdef PTRACE_VFORK
+	      if (pl.pl_flags & PL_FLAG_VFORKED)
+		ourstatus->kind = TARGET_WAITKIND_VFORKED;
+#endif
 
 	      /* Make sure the other end of the fork is stopped too.  */
 	      child_ptid = fbsd_is_child_pending (child);
@@ -839,11 +852,13 @@ fbsd_wait (struct target_ops *ops,
 	      /* Enable additional events on the child process.  */
 	      fbsd_enable_proc_events (ptid_get_pid (child_ptid));
 
+#ifndef PTRACE_VFORK
 	      /* For vfork, the child process will have the P_PPWAIT
 		 flag set.  */
 	      fbsd_fetch_kinfo_proc (child, &kp);
 	      if (kp.ki_flag & P_PPWAIT)
 		ourstatus->kind = TARGET_WAITKIND_VFORKED;
+#endif
 	      ourstatus->value.related_pid = child_ptid;
 
 	      return wptid;
@@ -857,6 +872,14 @@ fbsd_wait (struct target_ops *ops,
 	      fbsd_remember_child (wptid);
 	      continue;
 	    }
+
+#ifdef PTRACE_VFORK
+	  if (pl.pl_flags & PL_FLAG_VFORK_DONE)
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_VFORK_DONE;
+	      return wptid;
+	    }
+#endif
 #endif
 
 #ifdef PL_FLAG_EXEC
@@ -918,7 +941,6 @@ fbsd_follow_fork (struct target_ops *ops, int follow_child,
   if (!follow_child && detach_fork)
     {
       struct thread_info *tp = inferior_thread ();
-      int has_vforked = tp->pending_follow.kind == TARGET_WAITKIND_VFORKED;
       pid_t child_pid = ptid_get_pid (tp->pending_follow.value.related_pid);
 
       /* Breakpoints have already been detached from the child by
@@ -927,7 +949,8 @@ fbsd_follow_fork (struct target_ops *ops, int follow_child,
       if (ptrace (PT_DETACH, child_pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
 	perror_with_name (("ptrace"));
 
-      if (has_vforked)
+#ifndef PTRACE_VFORK
+      if (tp->pending_follow.kind == TARGET_WAITKIND_VFORKED)
 	{
 	  /* We can't insert breakpoints until the child process has
 	     finished with the shared memory region.  The parent
@@ -953,6 +976,7 @@ fbsd_follow_fork (struct target_ops *ops, int follow_child,
 	     wait.  */
 	  fbsd_add_vfork_done (inferior_ptid);
 	}
+#endif
     }
 
   return 0;
