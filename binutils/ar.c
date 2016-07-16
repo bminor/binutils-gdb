@@ -33,6 +33,7 @@
 #include "arsup.h"
 #include "filenames.h"
 #include "binemul.h"
+#include "plugin-api.h"
 #include "plugin.h"
 
 #ifdef __GO32___
