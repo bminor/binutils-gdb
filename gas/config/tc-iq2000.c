@@ -27,7 +27,6 @@
 #include "cgen.h"
 #include "elf/common.h"
 #include "elf/iq2000.h"
-#include "libbfd.h"
 #include "sb.h"
 #include "macro.h"
 

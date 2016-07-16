@@ -2387,6 +2387,9 @@ const bfd_arch_info_type *bfd_arch_get_compatible
 
 void bfd_set_arch_info (bfd *abfd, const bfd_arch_info_type *arg);
 
+bfd_boolean bfd_default_set_arch_mach
+   (bfd *abfd, enum bfd_architecture arch, unsigned long mach);
+
 enum bfd_architecture bfd_get_arch (bfd *abfd);
 
 unsigned long bfd_get_mach (bfd *abfd);

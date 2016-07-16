@@ -27,7 +27,6 @@
 #include "cgen.h"
 #include "elf/common.h"
 #include "elf/mt.h"
-#include "libbfd.h"
 
 /* Structure to hold all of the different components
    describing an individual instruction.  */

@@ -28,7 +28,6 @@
 #include "elf/common.h"
 #include "elf/epiphany.h"
 #include "dwarf2dbg.h"
-#include "libbfd.h"
 
 /* Structure to hold all of the different components describing
    an individual instruction.  */

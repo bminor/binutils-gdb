@@ -1,5 +1,16 @@
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-epiphany.c: Don't include libbfd.h.
+	* config/tc-frv.c: Likewise.
+	* config/tc-ip2k.c: Likewise.
+	* config/tc-iq2000.c: Likewise.
+	* config/tc-m32c.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-mt.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
 	* config/bfin-parse.y: Don't include libbfd.h.
 	* config/tc-bfin.c: Likewise.
 	* config/tc-rl78.c: Likewise.
