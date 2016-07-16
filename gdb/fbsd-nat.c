@@ -836,6 +836,9 @@ fbsd_wait (struct target_ops *ops,
 		  child_ptid = ptid_build (child, pl.pl_lwpid, 0);
 		}
 
+	      /* Enable additional events on the child process.  */
+	      fbsd_enable_proc_events (ptid_get_pid (child_ptid));
+
 	      /* For vfork, the child process will have the P_PPWAIT
 		 flag set.  */
 	      fbsd_fetch_kinfo_proc (child, &kp);
