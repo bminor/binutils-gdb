@@ -1,3 +1,9 @@
+2016-07-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-z8k.c (newfix): Make type of type argument
+	bfd_reloc_code_real_type.
+	(apply_fix): Likewise.
+
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-epiphany.c: Don't include libbfd.h.
