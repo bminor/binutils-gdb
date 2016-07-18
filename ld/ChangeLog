@@ -1,3 +1,15 @@
+2016-07-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* plugin.c (plugin_call_claim_file): Restore the file offset after
+	an unsuccessful attempt to claim a file.
+	* testplug.c (bytes_to_read_before_claim): New global.
+	(record_read_length): New function, sets new global
+	bytes_to_read_before_claim.
+	(parse_option): Handle 'read:<NUMBER>' option.
+	(onclaim_file): Read file content before checking for claim.
+	* testsuite/ld-plugin/plugin-30.d: New file.
+	* testsuite/ld-plugin/plugin.exp: Add new test.
+
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
 	* plugin.c: Don't include libbfd.h.  Include plugin-api.h

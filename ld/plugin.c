@@ -1049,9 +1049,14 @@ plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed)
     {
       if (curplug->claim_file_handler)
 	{
+	  off_t cur_offset;
 	  enum ld_plugin_status rv;
+
 	  called_plugin = curplug;
+	  cur_offset = lseek (file->fd, 0, SEEK_CUR);
 	  rv = (*curplug->claim_file_handler) (file, claimed);
+	  if (!*claimed)
+	    lseek (file->fd, cur_offset, SEEK_SET);
 	  called_plugin = NULL;
 	  if (rv != LDPS_OK)
 	    set_plugin_error (curplug->name);
