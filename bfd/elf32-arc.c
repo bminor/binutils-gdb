@@ -2227,8 +2227,8 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 
 	  switch (internal_dyn.d_tag)
 	    {
-	      GET_SYMBOL_OR_SECTION (DT_INIT, "_init", NULL)
-	      GET_SYMBOL_OR_SECTION (DT_FINI, "_fini", NULL)
+	      GET_SYMBOL_OR_SECTION (DT_INIT, info->init_function, NULL)
+	      GET_SYMBOL_OR_SECTION (DT_FINI, info->fini_function, NULL)
 	      GET_SYMBOL_OR_SECTION (DT_PLTGOT, NULL, ".plt")
 	      GET_SYMBOL_OR_SECTION (DT_JMPREL, NULL, ".rela.plt")
 	      GET_SYMBOL_OR_SECTION (DT_PLTRELSZ, NULL, ".rela.plt")
@@ -2376,8 +2376,8 @@ elf_arc_size_dynamic_sections (bfd * output_bfd,
 	 section.  Checking if the .init section is present.  We also
 	 create DT_INIT and DT_FINI entries if the init_str has been
 	 changed by the user.  */
-      ADD_DYNAMIC_SYMBOL ("init", DT_INIT);
-      ADD_DYNAMIC_SYMBOL ("fini", DT_FINI);
+      ADD_DYNAMIC_SYMBOL (info->init_function, DT_INIT);
+      ADD_DYNAMIC_SYMBOL (info->fini_function, DT_FINI);
     }
   else
     {

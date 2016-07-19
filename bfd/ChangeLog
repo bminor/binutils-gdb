@@ -1,3 +1,7 @@
+2016-08-26  Cupertino Miranda  <cmiranda@synospsys.com>
+
+	* elf32-arc.c (elf_arc_finish_dynamic_sections): Changed.
+
 2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* elf-bfd.h: Added ARC_ELF_DATA to enum elf_target_id.
