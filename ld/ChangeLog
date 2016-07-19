@@ -1,3 +1,8 @@
+2016-07-19  Roland McGrath  <roland@hack.frob.com>
+
+	* emulparams/aarch64elf.sh (GENERATE_PIE_SCRIPT): Set to yes.
+	* emulparams/aarch64elf32.sh: Likewise.
+
 2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/unaligned-branch-2.d: Update error
@@ -1051,7 +1056,7 @@
 	* testsuite/ld-plugin/pr20103c.c: Likewise.
 
 2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
-    
+
 	* testsuite/ld-mips-elf/jalx-local.d: New test.
 	* testsuite/ld-mips-elf/jalx-local-n32.d: New test.
 	* testsuite/ld-mips-elf/jalx-local-n64.d: New test.
