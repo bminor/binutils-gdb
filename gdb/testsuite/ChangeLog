@@ -1,3 +1,9 @@
+2016-07-19  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.gdb/selftest.exp: Remove checks on is_remote and isnative.
+	(test_with_self): Remove some code.  Remove argument executable.
+	(top-level): Use do_self_tests.
+
 2016-07-15  Zachary Welch  <zwelch@codesourcery.com>
 	    Don Breazeal <donb@codesourcery.com>
 
