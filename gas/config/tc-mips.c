@@ -14803,7 +14803,7 @@ mips_force_relocation (fixS *fixp)
   /* We want to keep R_MIPS_PC26_S2, R_MIPS_PC21_S2, BFD_RELOC_16_PCREL_S2
      BFD_RELOC_MIPS_21_PCREL_S2 and BFD_RELOC_MIPS_26_PCREL_S2 relocations
      against MIPS16 and microMIPS symbols so that we do cross-mode branch
-     diagnostics.  */
+     diagnostics and BAL to JALX conversion by the linker.  */
   if ((fixp->fx_r_type == R_MIPS_PC26_S2
        || fixp->fx_r_type == R_MIPS_PC21_S2
        || fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
@@ -14950,7 +14950,12 @@ fix_bad_misaligned_jump_p (fixS *fixP, int shift)
 
 /* Return TRUE if the instruction pointed to by FIXP is an invalid branch
    to a symbol whose annotation indicates another ISA mode.  For absolute
-   symbols check the ISA bit instead.  */
+   symbols check the ISA bit instead.
+
+   We accept BFD_RELOC_16_PCREL_S2 relocations against MIPS16 and microMIPS
+   symbols or BFD_RELOC_MICROMIPS_16_PCREL_S1 relocations against regular
+   MIPS symbols and associated with BAL instructions as these instructions
+   may be be converted to JALX by the linker.  */
 
 static bfd_boolean
 fix_bad_cross_mode_branch_p (fixS *fixP)
@@ -14976,6 +14981,11 @@ fix_bad_cross_mode_branch_p (fixS *fixP)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_16_PCREL_S2:
+      return ((absolute_p ? val & 1 : ELF_ST_IS_COMPRESSED (other))
+	      && opcode != 0x0411);
+    case BFD_RELOC_MICROMIPS_16_PCREL_S1:
+      return ((absolute_p ? !(val & 1) : !ELF_ST_IS_MICROMIPS (other))
+	      && opcode != 0x4060);
     case BFD_RELOC_MIPS_21_PCREL_S2:
     case BFD_RELOC_MIPS_26_PCREL_S2:
       return absolute_p ? val & 1 : ELF_ST_IS_COMPRESSED (other);
@@ -14983,7 +14993,6 @@ fix_bad_cross_mode_branch_p (fixS *fixP)
       return absolute_p ? !(val & 1) : !ELF_ST_IS_MIPS16 (other);
     case BFD_RELOC_MICROMIPS_7_PCREL_S1:
     case BFD_RELOC_MICROMIPS_10_PCREL_S1:
-    case BFD_RELOC_MICROMIPS_16_PCREL_S1:
       return absolute_p ? !(val & 1) : !ELF_ST_IS_MICROMIPS (other);
     default:
       abort ();
@@ -17463,7 +17472,8 @@ mips_fix_adjustable (fixS *fixp)
 	  R_MICROMIPS_PC16_S1, R_MICROMIPS_PC10_S1 or R_MICROMIPS_PC7_S1)
 	  against MIPS16 or microMIPS symbols because we need to keep the
 	  MIPS16 or microMIPS symbol for the purpose of mode mismatch
-	  detection and JAL to JALX instruction conversion in the linker.
+	  detection and JAL or BAL to JALX instruction conversion in the
+	  linker.
 
      For simplicity, we deal with (3)-(4) by not reducing _any_ relocation
      against a MIPS16 symbol.  We deal with (5) by additionally leaving

@@ -611,17 +611,25 @@ if { [istarget mips*-*-vxworks*] } {
 				"MIPS branch local symbol relocation 2"
     run_list_test "branch-local-3" "-32" \
 				"MIPS branch local symbol relocation 3"
+    run_dump_test "branch-local-4"
     if $has_newabi {
 	run_dump_test "branch-local-n32-1"
 	run_list_test "branch-local-n32-2" "-n32 -march=from-abi" \
 				"MIPS branch local symbol relocation 2 (n32)"
 	run_list_test "branch-local-n32-3" "-n32 -march=from-abi" \
 				"MIPS branch local symbol relocation 3 (n32)"
+	run_dump_test "branch-local-n32-4"
 	run_dump_test "branch-local-n64-1"
 	run_list_test "branch-local-n64-2" "-64 -march=from-abi" \
 				"MIPS branch local symbol relocation 2 (n64)"
 	run_list_test "branch-local-n64-3" "-64 -march=from-abi" \
 				"MIPS branch local symbol relocation 3 (n64)"
+	run_dump_test "branch-local-n64-4"
+    }
+    run_dump_test "branch-addend"
+    if $has_newabi {
+	run_dump_test "branch-addend-n32"
+	run_dump_test "branch-addend-n64"
     }
     run_dump_test "branch-absolute"
     run_dump_test "branch-absolute-addend"

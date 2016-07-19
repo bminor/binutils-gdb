@@ -1,13 +1,6 @@
 .*: Assembler messages:
-.*:10: Error: branch to a symbol in another ISA mode
-.*:12: Error: branch to a symbol in another ISA mode
-.*:14: Error: branch to a symbol in another ISA mode
-.*:16: Error: branch to a symbol in another ISA mode
-.*:18: Error: branch to a symbol in another ISA mode
-.*:20: Error: branch to a symbol in another ISA mode
-.*:22: Error: branch to a symbol in another ISA mode
-.*:24: Error: branch to a symbol in another ISA mode
-.*:26: Error: branch to a symbol in another ISA mode
+.*:20: Error: branch to misaligned address \(0x11e5\)
+.*:24: Error: branch to misaligned address \(0x11e7\)
 .*:34: Error: branch to misaligned address \(0x11f5\)
 .*:38: Error: branch to misaligned address \(0x11f7\)
 .*:42: Error: branch to a symbol in another ISA mode

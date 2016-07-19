@@ -17,24 +17,21 @@
 .*:51: Error: branch to misaligned address \(0x11a7\)
 .*:53: Error: branch to misaligned address \(0x11a7\)
 .*:55: Error: branch to misaligned address \(0x11a7\)
-.*:63: Error: branch to a symbol in another ISA mode
 .*:65: Error: branch to a symbol in another ISA mode
 .*:67: Error: branch to a symbol in another ISA mode
-.*:69: Error: branch to a symbol in another ISA mode
+.*:69: Error: branch to misaligned address \(0x11b2\)
 .*:71: Error: branch to a symbol in another ISA mode
 .*:73: Error: branch to a symbol in another ISA mode
-.*:75: Error: branch to a symbol in another ISA mode
 .*:77: Error: branch to a symbol in another ISA mode
 .*:79: Error: branch to a symbol in another ISA mode
-.*:81: Error: branch to a symbol in another ISA mode
+.*:81: Error: branch to misaligned address \(0x11b5\)
 .*:83: Error: branch to a symbol in another ISA mode
 .*:85: Error: branch to a symbol in another ISA mode
-.*:87: Error: branch to a symbol in another ISA mode
+.*:87: Error: branch to misaligned address \(0x11b6\)
 .*:89: Error: branch to a symbol in another ISA mode
 .*:91: Error: branch to a symbol in another ISA mode
-.*:93: Error: branch to a symbol in another ISA mode
+.*:93: Error: branch to misaligned address \(0x11b7\)
 .*:95: Error: branch to a symbol in another ISA mode
 .*:97: Error: branch to a symbol in another ISA mode
-.*:99: Error: branch to a symbol in another ISA mode
 .*:101: Error: branch to a symbol in another ISA mode
 .*:103: Error: branch to a symbol in another ISA mode

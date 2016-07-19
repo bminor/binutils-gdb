@@ -1,5 +1,12 @@
 2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_perform_relocation): Convert cross-mode
+	BAL to JALX.
+	(_bfd_mips_elf_relocate_section) <bfd_reloc_outofrange>: Add a
+	corresponding error message.
+
+2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (b_reloc_p): Add R_MICROMIPS_PC16_S1,
 	R_MICROMIPS_PC10_S1 and R_MICROMIPS_PC7_S1.
 	(branch_reloc_p): New function.

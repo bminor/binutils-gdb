@@ -6339,7 +6339,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
   /* Set the field.  */
   x |= (value & howto->dst_mask);
 
-  /* Detect incorrect JALX usage.  If required, turn JAL into JALX.  */
+  /* Detect incorrect JALX usage.  If required, turn JAL or BAL into JALX.  */
   if (!cross_mode_jump_p && jal_reloc_p (r_type))
     {
       bfd_vma opcode = x >> 26;
@@ -6393,10 +6393,50 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
     }
   else if (cross_mode_jump_p && b_reloc_p (r_type))
     {
-      info->callbacks->einfo
-	(_("%X%H: Unsupported branch between ISA modes\n"),
-	 input_bfd, input_section, relocation->r_offset);
-      return TRUE;
+      bfd_boolean ok = FALSE;
+      bfd_vma opcode = x >> 16;
+      bfd_vma jalx_opcode = 0;
+      bfd_vma addr;
+      bfd_vma dest;
+
+      if (r_type == R_MICROMIPS_PC16_S1)
+	{
+	  ok = opcode == 0x4060;
+	  jalx_opcode = 0x3c;
+	  value <<= 1;
+	}
+      else if (r_type == R_MIPS_PC16 || r_type == R_MIPS_GNU_REL16_S2)
+	{
+	  ok = opcode == 0x411;
+	  jalx_opcode = 0x1d;
+	  value <<= 2;
+	}
+
+      if (bfd_link_pic (info) || !ok)
+	{
+	  info->callbacks->einfo
+	    (_("%X%H: Unsupported branch between ISA modes\n"),
+	     input_bfd, input_section, relocation->r_offset);
+	  return TRUE;
+	}
+
+      addr = (input_section->output_section->vma
+	      + input_section->output_offset
+	      + relocation->r_offset
+	      + 4);
+      dest = addr + (((value & 0x3ffff) ^ 0x20000) - 0x20000);
+
+      if ((addr >> 28) << 28 != (dest >> 28) << 28)
+	{
+	  info->callbacks->einfo
+	    (_("%X%H: Cannot convert branch between ISA modes "
+	       "to JALX: relocation out of range\n"),
+	     input_bfd, input_section, relocation->r_offset);
+	  return TRUE;
+	}
+
+      /* Make this the JALX opcode.  */
+      x = ((dest >> 2) & 0x3ffffff) | jalx_opcode << 26;
     }
 
   /* Try converting JAL to BAL and J(AL)R to B(AL), if the target is in
@@ -10390,7 +10430,10 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      ? _("Jump to a non-word-aligned address")
 		      : _("Jump to a non-instruction-aligned address")));
 	  else if (b_reloc_p (howto->type))
-	    msg = _("Branch to a non-instruction-aligned address");
+	    msg = (cross_mode_jump_p
+		   ? _("Cannot convert a branch to JALX "
+		       "for a non-word-aligned address")
+		   : _("Branch to a non-instruction-aligned address"));
 	  else if (aligned_pcrel_reloc_p (howto->type))
 	    msg = _("PC-relative load from unaligned address");
 	  if (msg)
