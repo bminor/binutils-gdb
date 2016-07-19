@@ -911,8 +911,7 @@ step_once (SIM_CPU *cpu)
 
       case OP_break:
 	/* Stop on this address.  */
-	sim_engine_halt (CPU_STATE (cpu), cpu, NULL, cpu->pc, sim_stopped, SIM_SIGTRAP);
-	cpu->pc = ipc;
+	sim_engine_halt (CPU_STATE (cpu), cpu, NULL, ipc, sim_stopped, SIM_SIGTRAP);
 	break;
 
       case OP_bld:
