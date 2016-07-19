@@ -244,6 +244,25 @@ if $has_newabi {
 
 run_dump_test "unaligned-branch" [list [list ld $abi_ldflags(o32)]]
 
+if $has_newabi {
+    run_dump_test "unaligned-branch-2" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-r6-1" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-r6-2" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-mips16" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-micromips" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jump" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jump-mips16" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jump-micromips" \
+					[list [list ld $abi_ldflags(n32)]]
+}
+
 run_dump_test "unaligned-lwpc-0" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-lwpc-1" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-ldpc-0" [list [list ld $abi_ldflags(o32)]]

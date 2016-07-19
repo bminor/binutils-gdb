@@ -20,7 +20,7 @@ Disassembly of section \.text:
 			6: R_MIPS_NONE	\*ABS\*\-0x4
 [0-9a-f]+ <[^>]*> 0c00      	nop
 [0-9a-f]+ <[^>]*> 9400 0000 	b	0+0010 <g6\+0x10>
-			c: R_MICROMIPS_PC16_S1	\.data\-0x4
+			c: R_MICROMIPS_PC16_S1	\.Ldata\-0x4
 			c: R_MIPS_NONE	\*ABS\*\-0x4
 			c: R_MIPS_NONE	\*ABS\*\-0x4
 [0-9a-f]+ <[^>]*> 0c00      	nop

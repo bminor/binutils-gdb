@@ -1,3 +1,110 @@
+2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_force_relocation): Also retain branch
+	relocations against MIPS16 and microMIPS symbols.
+	(fix_bad_cross_mode_jump_p): New function.
+	(fix_bad_same_mode_jalx_p): Likewise.
+	(fix_bad_misaligned_jump_p): Likewise.
+	(fix_bad_cross_mode_branch_p): Likewise.
+	(fix_bad_misaligned_branch_p): Likewise.
+	(fix_validate_branch): Likewise.
+	(md_apply_fix) <BFD_RELOC_MIPS_JMP, BFD_RELOC_MIPS16_JMP>
+	<BFD_RELOC_MICROMIPS_JMP>: Separate from BFD_RELOC_MIPS_SHIFT5,
+	etc.  Verify the ISA mode and alignment of the jump target.
+	<BFD_RELOC_MIPS_21_PCREL_S2>: Replace the inline alignment check
+	with a call to `fix_validate_branch'.
+	<BFD_RELOC_MIPS_26_PCREL_S2>: Likewise.
+	<BFD_RELOC_16_PCREL_S2>: Likewise.
+	<BFD_RELOC_MICROMIPS_7_PCREL_S1, BFD_RELOC_MICROMIPS_10_PCREL_S1>
+	<BFD_RELOC_MICROMIPS_16_PCREL_S1>: Retain the original addend.
+	Verify the ISA mode and alignment of the branch target.
+	(md_convert_frag): Verify the ISA mode and alignment of resolved
+	MIPS16 branch targets.
+	* testsuite/gas/mips/branch-misc-1.s: Annotate non-instruction
+	branch targets with `.insn'.
+	* testsuite/gas/mips/branch-misc-5.s: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-5-64.d: Update
+	accordingly.
+	* testsuite/gas/mips/micromips@branch-misc-5pic-64.d: Likewise.
+	* testsuite/gas/mips/micromips-branch-relax.s: Annotate
+	non-instruction branch target with `.insn'.
+	* testsuite/gas/mips/micromips.s: Replace microMIPS JALX targets
+	with external symbols.
+	* testsuite/gas/mips/micromips-insn32.d: Update accordingly.
+	* testsuite/gas/mips/micromips-noinsn32.d: Likewise.
+	* testsuite/gas/mips/micromips-trap.d: Likewise.
+	* testsuite/gas/mips/micromips.d: Likewise.
+	* testsuite/gas/mips/mips16.s: Annotate non-instruction branch
+	targets with `.insn'.
+	* testsuite/gas/mips/mips16.d: Update accordingly.
+	* testsuite/gas/mips/mips16-64.d: Likewise.
+	* testsuite/gas/mips/mips16-dwarf2.s: Annotate non-instruction
+	branch target with `.insn'.
+	* testsuite/gas/mips/relax-swap3.s: Likewise.
+	* testsuite/gas/mips/branch-local-2.l: New list test.
+	* testsuite/gas/mips/branch-local-3.l: New list test.
+	* testsuite/gas/mips/branch-local-n32-2.l: New list test.
+	* testsuite/gas/mips/branch-local-n32-3.l: New list test.
+	* testsuite/gas/mips/branch-local-n64-2.l: New list test.
+	* testsuite/gas/mips/branch-local-n64-3.l: New list test.
+	* testsuite/gas/mips/unaligned-jump-1.l: New list test.
+	* testsuite/gas/mips/unaligned-jump-2.l: New list test.
+	* testsuite/gas/mips/unaligned-jump-3.d: New test.
+	* testsuite/gas/mips/unaligned-jump-mips16-1.l: New list test.
+	* testsuite/gas/mips/unaligned-jump-mips16-2.l: New list test.
+	* testsuite/gas/mips/unaligned-jump-mips16-3.d: New test.
+	* testsuite/gas/mips/unaligned-jump-micromips-1.l: New list
+	test.
+	* testsuite/gas/mips/unaligned-jump-micromips-2.l: New list
+	test.
+	* testsuite/gas/mips/unaligned-jump-micromips-3.d: New test.
+	* testsuite/gas/mips/unaligned-branch-1.l: New list test.
+	* testsuite/gas/mips/unaligned-branch-2.l: New list test.
+	* testsuite/gas/mips/unaligned-branch-3.d: New test.
+	* testsuite/gas/mips/unaligned-branch-r6-1.l: New list test.
+	* testsuite/gas/mips/unaligned-branch-r6-2.l: New list test.
+	* testsuite/gas/mips/unaligned-branch-r6-3.l: New list test.
+	* testsuite/gas/mips/unaligned-branch-r6-4.l: New list test.
+	* testsuite/gas/mips/unaligned-branch-r6-5.d: New test.
+	* testsuite/gas/mips/unaligned-branch-r6-6.d: New test.
+	* testsuite/gas/mips/unaligned-branch-mips16-1.l: New list test.
+	* testsuite/gas/mips/unaligned-branch-mips16-2.l: New list test.
+	* testsuite/gas/mips/unaligned-branch-mips16-3.d: New test.
+	* testsuite/gas/mips/unaligned-branch-micromips-1.l: New list
+	test.
+	* testsuite/gas/mips/unaligned-branch-micromips-2.l: New list
+	test.
+	* testsuite/gas/mips/unaligned-branch-micromips-3.d: New test.
+	* testsuite/gas/mips/branch-local-2.s: New test source.
+	* testsuite/gas/mips/branch-local-3.s: New test source.
+	* testsuite/gas/mips/branch-local-n32-2.s: New test source.
+	* testsuite/gas/mips/branch-local-n32-3.s: New test source.
+	* testsuite/gas/mips/branch-local-n64-2.s: New test source.
+	* testsuite/gas/mips/branch-local-n64-3.s: New test source.
+	* testsuite/gas/mips/unaligned-jump-1.s: New test source.
+	* testsuite/gas/mips/unaligned-jump-2.s: New test source.
+	* testsuite/gas/mips/unaligned-jump-mips16-1.s: New test source.
+	* testsuite/gas/mips/unaligned-jump-mips16-2.s: New test source.
+	* testsuite/gas/mips/unaligned-jump-micromips-1.s: New test
+	source.
+	* testsuite/gas/mips/unaligned-jump-micromips-2.s: New test
+	source.
+	* testsuite/gas/mips/unaligned-branch-1.s: New test source.
+	* testsuite/gas/mips/unaligned-branch-2.s: New test source.
+	* testsuite/gas/mips/unaligned-branch-r6-1.s: New test source.
+	* testsuite/gas/mips/unaligned-branch-r6-2.s: New test source.
+	* testsuite/gas/mips/unaligned-branch-r6-3.s: New test source.
+	* testsuite/gas/mips/unaligned-branch-r6-4.s: New test source.
+	* testsuite/gas/mips/unaligned-branch-mips16-1.s: New test
+	source.
+	* testsuite/gas/mips/unaligned-branch-mips16-2.s: New test
+	source.
+	* testsuite/gas/mips/unaligned-branch-micromips-1.s: New test
+	source.
+	* testsuite/gas/mips/unaligned-branch-micromips-2.s: New test
+	source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-07-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* config/tc-nds32.c (struct nds32_pseudo_opcode): Make pseudo_val

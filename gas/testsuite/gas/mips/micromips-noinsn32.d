@@ -1181,7 +1181,7 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	f000 0000 	jalx	[0-9a-f]+ <test>
-[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test2
+[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test4
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	41a2 0000 	lui	v0,0x0
 [ 	]*[0-9a-f]+: R_MICROMIPS_HI16	test
@@ -7595,7 +7595,7 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	f000 0000 	jalx	[0-9a-f]+ <test>
-[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
+[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot_ext
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03e2 0f3c 	jalr	v0
 [ 0-9a-f]+:	0000 0000 	nop

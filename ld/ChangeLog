@@ -1,3 +1,28 @@
+2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-jalx-1.d: Update error message
+	expected.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-mips16-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-micromips-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-1.d: Likewise.
+	* testsuite/ld-mips-elf/undefweak-overflow.s: Add jumps,
+	microMIPS BAL and MIPS16 instructions.
+	* testsuite/ld-mips-elf/undefweak-overflow.d: Update
+	accordingly.
+	* testsuite/ld-mips-elf/unaligned-branch-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-1.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-mips16.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-micromips.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jump-mips16.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jump-micromips.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jump.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2016-07-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* plugin.c (plugin_call_claim_file): Restore the file offset after

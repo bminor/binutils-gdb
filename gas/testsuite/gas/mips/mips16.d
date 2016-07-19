@@ -42,7 +42,7 @@ Disassembly of section .text:
   64:	f7bf fc40 	ld	v0,0 <data1>
   68:	f6a0 fc54 	ld	v0,71c <data2>
   6c:	f001 fc40 	ld	v0,868 <bar>
-  70:	f0c1 fc40 	ld	v0,930 <quux>
+  70:	f0c1 fc40 	ld	v0,930 <iuux>
   74:	f840      	ld	v0,0\(sp\)
   76:	f000 f841 	ld	v0,1\(sp\)
   7a:	f000 f842 	ld	v0,2\(sp\)
@@ -127,7 +127,7 @@ Disassembly of section .text:
  194:	f67f b20c 	lw	v0,0 <data1>
  198:	f580 b204 	lw	v0,71c <data2>
  19c:	f6c0 b20c 	lw	v0,868 <bar>
- 1a0:	f780 b210 	lw	v0,930 <quux>
+ 1a0:	f780 b210 	lw	v0,930 <iuux>
  1a4:	9200      	lw	v0,0\(sp\)
  1a6:	f000 9201 	lw	v0,1\(sp\)
  1aa:	f000 9202 	lw	v0,2\(sp\)
@@ -500,7 +500,7 @@ Disassembly of section .text:
  698:	f17f fe48 	dla	v0,0 <data1>
  69c:	f080 fe40 	dla	v0,71c <data2>
  6a0:	f1c0 fe48 	dla	v0,868 <bar>
- 6a4:	f280 fe4c 	dla	v0,930 <quux>
+ 6a4:	f280 fe4c 	dla	v0,930 <iuux>
  6a8:	fb00      	daddiu	sp,0
  6aa:	f000 fb01 	daddiu	sp,1
  6ae:	f7ff fb1f 	daddiu	sp,-1
@@ -529,7 +529,7 @@ Disassembly of section .text:
  6ee:	f11f 0a14 	la	v0,0 <data1>
  6f2:	0a0b      	la	v0,71c <data2>
  6f4:	0a5d      	la	v0,868 <bar>
- 6f6:	0a8f      	la	v0,930 <quux>
+ 6f6:	0a8f      	la	v0,930 <iuux>
  6f8:	6300      	addiu	sp,0
  6fa:	f000 6301 	addiu	sp,1
  6fe:	f7ff 631f 	addiu	sp,-1
@@ -644,23 +644,23 @@ Disassembly of section .text:
  80a:	f3ff 221b 	beqz	v0,4 <insns1>
  80e:	2288      	beqz	v0,720 <insns2>
  810:	222b      	beqz	v0,868 <bar>
- 812:	f080 220d 	beqz	v0,930 <quux>
+ 812:	f080 220d 	beqz	v0,930 <iuux>
  816:	f3ff 2a15 	bnez	v0,4 <insns1>
  81a:	2a82      	bnez	v0,720 <insns2>
  81c:	2a25      	bnez	v0,868 <bar>
- 81e:	f080 2a07 	bnez	v0,930 <quux>
+ 81e:	f080 2a07 	bnez	v0,930 <iuux>
  822:	f3ff 600f 	bteqz	4 <insns1>
  826:	f77f 601b 	bteqz	720 <insns2>
  82a:	601e      	bteqz	868 <bar>
- 82c:	f080 6000 	bteqz	930 <quux>
+ 82c:	f080 6000 	bteqz	930 <iuux>
  830:	f3ff 6108 	btnez	4 <insns1>
  834:	f77f 6114 	btnez	720 <insns2>
  838:	6117      	btnez	868 <bar>
- 83a:	617a      	btnez	930 <quux>
+ 83a:	617a      	btnez	930 <iuux>
  83c:	f3ff 1002 	b	4 <insns1>
  840:	176f      	b	720 <insns2>
  842:	1012      	b	868 <bar>
- 844:	1075      	b	930 <quux>
+ 844:	1075      	b	930 <iuux>
  846:	e805      	break	0
  848:	e825      	break	1
  84a:	efe5      	break	63

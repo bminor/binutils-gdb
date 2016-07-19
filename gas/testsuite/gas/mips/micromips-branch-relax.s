@@ -157,6 +157,7 @@ test:
 
 	.skip	511 << 1
 test2:
+	.insn
 
 	.skip	(32767 - 511) << 1
 test3:

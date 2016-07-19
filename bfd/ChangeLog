@@ -1,3 +1,25 @@
+2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (b_reloc_p): Add R_MICROMIPS_PC16_S1,
+	R_MICROMIPS_PC10_S1 and R_MICROMIPS_PC7_S1.
+	(branch_reloc_p): New function.
+	(mips_elf_calculate_relocation): Handle ISA mode determination
+	for relocations against section symbols, against absolute
+	symbols and absolute relocations.  Also set `*cross_mode_jump_p'
+	for branches.
+	<R_MIPS16_26, R_MIPS_26, R_MICROMIPS_26_S1>: Suppress alignment
+	checks for weak undefined symbols.  Also check target alignment
+	within the same ISA mode.
+	<R_MIPS_PC16, R_MIPS_GNU_REL16_S2>: Handle cross-mode branches
+	in the alignment check.
+	<R_MICROMIPS_PC7_S1>: Add an alignment check.
+	<R_MICROMIPS_PC10_S1>: Likewise.
+	<R_MICROMIPS_PC16_S1>: Likewise.
+	(mips_elf_perform_relocation): Report a failure for unsupported
+	same-mode JALX instructions and cross-mode branches.
+	(_bfd_mips_elf_relocate_section) <bfd_reloc_outofrange>: Add
+	error messages for jumps to misaligned addresses.
+
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c: Include plugin-api.h.
