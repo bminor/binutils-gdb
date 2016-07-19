@@ -1,3 +1,13 @@
+2016-07-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.opt/inline-break.exp: Remove optimize=-O2.
+	* gdb.opt/inline-bt.exp: Likewise.
+	* gdb.opt/inline-cmds.exp: Remove optimize=-O2 and add
+	additional_flags=-Winline.
+	* gdb.opt/inline-locals.exp: Likewise.
+	* gdb.opt/inline-markers.c (ATTR): Define.
+	(inlined_fn): Use it.
+
 2016-07-19  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.gdb/selftest.exp: Remove checks on is_remote and isnative.
