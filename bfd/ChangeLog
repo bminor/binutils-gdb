@@ -1,3 +1,9 @@
+2016-07-20  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_howto_raw <R_PPC64_PLTREL32>): Put
+	ppc64_elf_unhandled_reloc for special_function.
+	* elf32-ppc.c (ppc_elf_howto_raw): Similarly for lots of relocs.
+
 2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_perform_relocation): Convert cross-mode
