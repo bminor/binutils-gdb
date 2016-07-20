@@ -1,3 +1,8 @@
+2016-07-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_force_relocation): Remove
+	R_MIPS_PC26_S2 and R_MIPS_PC21_S2.
+
 2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (mips_force_relocation, mips_fix_adjustable):

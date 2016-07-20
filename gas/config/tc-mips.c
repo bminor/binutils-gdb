@@ -14800,13 +14800,11 @@ mips_force_relocation (fixS *fixp)
       || fixp->fx_r_type == BFD_RELOC_MICROMIPS_16_PCREL_S1)
     return 1;
 
-  /* We want to keep R_MIPS_PC26_S2, R_MIPS_PC21_S2, BFD_RELOC_16_PCREL_S2
-     BFD_RELOC_MIPS_21_PCREL_S2 and BFD_RELOC_MIPS_26_PCREL_S2 relocations
-     against MIPS16 and microMIPS symbols so that we do cross-mode branch
-     diagnostics and BAL to JALX conversion by the linker.  */
-  if ((fixp->fx_r_type == R_MIPS_PC26_S2
-       || fixp->fx_r_type == R_MIPS_PC21_S2
-       || fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
+  /* We want to keep BFD_RELOC_16_PCREL_S2 BFD_RELOC_MIPS_21_PCREL_S2
+     and BFD_RELOC_MIPS_26_PCREL_S2 relocations against MIPS16 and
+     microMIPS symbols so that we can do cross-mode branch diagnostics
+     and BAL to JALX conversion by the linker.  */
+  if ((fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
        || fixp->fx_r_type == BFD_RELOC_MIPS_21_PCREL_S2
        || fixp->fx_r_type == BFD_RELOC_MIPS_26_PCREL_S2)
       && fixp->fx_addsy
