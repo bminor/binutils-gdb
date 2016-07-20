@@ -5271,7 +5271,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  p->p_memsz = bed->s->sizeof_ehdr;
 	  if (m->count > 0)
 	    {
-	      if (p->p_vaddr < (bfd_vma) off)
+	      if (p->p_vaddr < (bfd_vma) off
+		  || (!m->p_paddr_valid
+		      && p->p_paddr < (bfd_vma) off))
 		{
 		  (*_bfd_error_handler)
 		    (_("%B: Not enough room for program headers, try linking with -N"),
