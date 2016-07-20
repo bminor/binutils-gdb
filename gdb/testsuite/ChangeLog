@@ -1,5 +1,10 @@
 2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Add "next over TRY" and
+	"step into captured_main (args)".
+
+2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.btrace/tailcall-only.exp: Use is_lp64_target check.
 
 2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
