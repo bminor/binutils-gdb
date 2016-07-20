@@ -1255,80 +1255,55 @@ exp_fold_tree_no_dot (etree_type *tree)
 etree_type *
 exp_binop (int code, etree_type *lhs, etree_type *rhs)
 {
-  etree_type value, *new_e;
+  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->binary));
 
-  value.type.node_code = code;
-  value.type.filename = lhs->type.filename;
-  value.type.lineno = lhs->type.lineno;
-  value.binary.lhs = lhs;
-  value.binary.rhs = rhs;
-  value.type.node_class = etree_binary;
-  exp_fold_tree_no_dot (&value);
-  if (expld.result.valid_p)
-    return exp_intop (expld.result.value);
-
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->binary));
-  memcpy (new_e, &value, sizeof (new_e->binary));
+  new_e->type.node_code = code;
+  new_e->type.filename = lhs->type.filename;
+  new_e->type.lineno = lhs->type.lineno;
+  new_e->binary.lhs = lhs;
+  new_e->binary.rhs = rhs;
+  new_e->type.node_class = etree_binary;
   return new_e;
 }
 
 etree_type *
 exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
 {
-  etree_type value, *new_e;
+  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->trinary));
 
-  value.type.node_code = code;
-  value.type.filename = cond->type.filename;
-  value.type.lineno = cond->type.lineno;
-  value.trinary.lhs = lhs;
-  value.trinary.cond = cond;
-  value.trinary.rhs = rhs;
-  value.type.node_class = etree_trinary;
-  exp_fold_tree_no_dot (&value);
-  if (expld.result.valid_p)
-    return exp_intop (expld.result.value);
-
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->trinary));
-  memcpy (new_e, &value, sizeof (new_e->trinary));
+  new_e->type.node_code = code;
+  new_e->type.filename = cond->type.filename;
+  new_e->type.lineno = cond->type.lineno;
+  new_e->trinary.lhs = lhs;
+  new_e->trinary.cond = cond;
+  new_e->trinary.rhs = rhs;
+  new_e->type.node_class = etree_trinary;
   return new_e;
 }
 
 etree_type *
 exp_unop (int code, etree_type *child)
 {
-  etree_type value, *new_e;
+  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->unary));
 
-  value.unary.type.node_code = code;
-  value.unary.type.filename = child->type.filename;
-  value.unary.type.lineno = child->type.lineno;
-  value.unary.child = child;
-  value.unary.type.node_class = etree_unary;
-  exp_fold_tree_no_dot (&value);
-  if (expld.result.valid_p)
-    return exp_intop (expld.result.value);
-
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->unary));
-  memcpy (new_e, &value, sizeof (new_e->unary));
+  new_e->unary.type.node_code = code;
+  new_e->unary.type.filename = child->type.filename;
+  new_e->unary.type.lineno = child->type.lineno;
+  new_e->unary.child = child;
+  new_e->unary.type.node_class = etree_unary;
   return new_e;
 }
 
 etree_type *
 exp_nameop (int code, const char *name)
 {
-  etree_type value, *new_e;
+  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->name));
 
-  value.name.type.node_code = code;
-  value.name.type.filename = ldlex_filename ();
-  value.name.type.lineno = lineno;
-  value.name.name = name;
-  value.name.type.node_class = etree_name;
-
-  exp_fold_tree_no_dot (&value);
-  if (expld.result.valid_p)
-    return exp_intop (expld.result.value);
-
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->name));
-  memcpy (new_e, &value, sizeof (new_e->name));
+  new_e->name.type.node_code = code;
+  new_e->name.type.filename = ldlex_filename ();
+  new_e->name.type.lineno = lineno;
+  new_e->name.name = name;
+  new_e->name.type.node_class = etree_name;
   return new_e;
 
 }

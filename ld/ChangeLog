@@ -1,3 +1,9 @@
+2016-07-20  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_unop, exp_binop, exp_trinop, exp_nameop): Don't
+	fold expression.
+	* testsuite/ld-elf/maxpage3b.d: Expect correct maxpagesize.
+
 2016-07-19  Roland McGrath  <roland@hack.frob.com>
 
 	* emulparams/aarch64elf.sh (GENERATE_PIE_SCRIPT): Set to yes.
