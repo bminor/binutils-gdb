@@ -1,5 +1,4 @@
 .ifndef NO_GLOBAL
-	.bss
 	.comm	exported1,1
 
 	.data
@@ -10,7 +9,7 @@ exported2:
 	.byte	21
 .endif
 
-	.bss
+	.section ".bss", "aw", %nobits
 not_exported1:
 	.space	1
 	.size	not_exported1, 1

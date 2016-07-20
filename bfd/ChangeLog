@@ -1,3 +1,13 @@
+2016-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_filter_global_symbols): Skip local symbols.
+	(swap_out_syms): Return an error when not finding ELF output
+	section rather than asserting.
+
+2016-07-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elflink.c (elf_output_implib): Call bfd_set_error on no symbols.
+
 2016-07-20  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf.c (elfcore_grok_freebsd_psinfo): Check for minimum note size

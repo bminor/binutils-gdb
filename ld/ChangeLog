@@ -1,3 +1,14 @@
+2016-07-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (run_ld_link_tests): Add optional
+	parameter to pass list of xfails.
+	* testsuite/ld-elf/elf.exp: Add xfails for implib tests.  Tidy
+	implib test formatting.  Don't set .data start address.
+	* testsuite/ld-elf/implib.s: Remove first .bss directive and
+	replace second one with equivalent .section directive.
+	* testsuite/ld-elf/empty-implib.out: Add expected final error.
+	* testsuite/ld-elf/implib.rd: Update.
+
 2016-07-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20376

@@ -1159,7 +1159,9 @@ proc ar_simple_create { ar aropts target objects } {
 #     in all other cases, any output from the linker during linking is
 #     treated as a sign of an error and FAILs the test.
 #
-proc run_ld_link_tests { ldtests } {
+# args is an optional list of target triplets to be xfailed.
+#
+proc run_ld_link_tests { ldtests args } {
     global ld
     global as
     global nm
@@ -1186,6 +1188,10 @@ proc run_ld_link_tests { ldtests } {
 
 	if ![runtest_file_p $runtests $testname] then {
 	    continue
+	}
+
+	foreach target $args {
+	    setup_xfail $target
 	}
 
 	set ld_options [lindex $testitem 1]

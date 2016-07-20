@@ -3893,9 +3893,10 @@ _bfd_elf_filter_global_symbols (bfd *abfd, struct bfd_link_info *info,
 	continue;
 
       h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, FALSE);
+      if (h == NULL)
+	continue;
       if (h->type != bfd_link_hash_defined && h->type != bfd_link_hash_defweak)
 	continue;
-
       if (h->linker_def || h->ldscript_def)
 	continue;
 
@@ -7643,7 +7644,9 @@ error_return:
 		     section of a symbol to be a section that is
 		     actually in the output file.  */
 		  sec2 = bfd_get_section_by_name (abfd, sec->name);
-		  if (sec2 == NULL)
+		  if (sec2 != NULL)
+		    shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
+		  if (shndx == SHN_BAD)
 		    {
 		      _bfd_error_handler (_("\
 Unable to find equivalent output section for symbol '%s' from section '%s'"),
@@ -7652,9 +7655,6 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 		      bfd_set_error (bfd_error_invalid_operation);
 		      goto error_return;
 		    }
-
-		  shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
-		  BFD_ASSERT (shndx != SHN_BAD);
 		}
 	    }
 

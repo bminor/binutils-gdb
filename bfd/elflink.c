@@ -11091,6 +11091,7 @@ elf_output_implib (bfd *abfd, struct bfd_link_info *info)
     symcount = _bfd_elf_filter_global_symbols (abfd, info, sympp, symcount);
   if (symcount == 0)
     {
+      bfd_set_error (bfd_error_no_symbols);
       (*_bfd_error_handler) (_("%B: no symbol found for import library"),
 			     implib_bfd);
       goto free_sym_buf;
