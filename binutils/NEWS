@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The ARC port of objdump now accepts a -M option to specify the extra
+  instruction class(es) that should be disassembled.
+
 * The --remove-section option for objcopy and strip now accepts section
   patterns starting with an exclamation point to indicate a non-matching
   section.  A non-matching section is removed from the set of sections

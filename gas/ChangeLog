@@ -1,3 +1,14 @@
+2016-07-20  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/dsp.d: New file.
+	* testsuite/gas/arc/dsp.s: Likewise.
+	* testsuite/gas/arc/fpu.d: Likewise.
+	* testsuite/gas/arc/fpu.s: Likewise.
+	* testsuite/gas/arc/ext2op.d: Add specific disassembler option.
+	* testsuite/gas/arc/ext3op.d: Likewise.
+	* testsuite/gas/arc/tdpfp.d: Likewise.
+	* testsuite/gas/arc/tfpuda.d: Likewise.
+
 2016-07-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (mips_force_relocation): Remove

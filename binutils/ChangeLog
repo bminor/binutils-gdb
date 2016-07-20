@@ -1,3 +1,10 @@
+2016-07-20  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* doc/binutils.texi (objdump): Add ARC disassembler options.
+	* testsuite/binutils-all/arc/dsp.s: New file.
+	* testsuite/binutils-all/arc/objdump.exp: Likewise.
+	* NEWS: Mention the new feature.
+
 2016-07-20  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (objcopy): Note that the localize symbol

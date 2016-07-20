@@ -2240,6 +2240,27 @@ some targets.  If it is necessary to specify more than one
 disassembler option then multiple @option{-M} options can be used or
 can be placed together into a comma separated list.
 
+For the ARC architecture the option can be used to specify the extra
+instruction classes that should be disassembled.  A comma separated
+list of one or more of the following values should be used:
+
+@table @code
+@item dsp
+Recognize DSP instructions.
+@item spfp
+Recognize FPX SP instructions.
+@item dpfp
+Recognize FPX DP instructions.
+@item quarkse_em
+Recognize FPU QuarkSE-EM instructions.
+@item fpuda
+Recognize double assist FPU instructions.
+@item fpus
+Recognize single precision FPU instructions.
+@item fpud
+Recognize double precision FPU instructions.
+@end table
+
 If the target is an ARM architecture then this switch can be used to
 select which register name set is used during disassembler.  Specifying
 @option{-M reg-names-std} (the default) will select the register names as
@@ -2366,6 +2387,15 @@ disassemble VAX binary files that don't contain symbol tables (like
 ROM dumps).  In these cases, the function entry mask would otherwise
 be decoded as VAX instructions, which would probably lead the rest
 of the function being wrongly disassembled.
+
+For ARC, @option{dsp} controls the printing of DSP instructions,
+@option{spfp} selects the printing of FPX single precision FP
+instructions, @option{dpfp} selects the printing of FPX double
+precision FP instructions, @option{quarkse_em} selects the printing of
+special QuarkSE-EM instructions, @option{fpuda} selects the printing
+of double precision assist instructions, @option{fpus} selects the
+printing of FPU single precision FP instructions, while @option{fpud}
+selects the printing of FPU souble precision FP instructions.
 
 @item -p
 @itemx --private-headers
