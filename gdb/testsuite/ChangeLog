@@ -1,5 +1,9 @@
 2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.btrace/tailcall-only.exp: Use is_lp64_target check.
+
+2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.python/py-unwind.exp: Test also ![is_lp64_target].
 
 2016-07-19  Pedro Alves  <palves@redhat.com>
