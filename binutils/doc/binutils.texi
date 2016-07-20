@@ -1321,8 +1321,9 @@ such as @option{-L}.
 
 @item -L @var{symbolname}
 @itemx --localize-symbol=@var{symbolname}
-Make symbol @var{symbolname} local to the file, so that it is not
-visible externally.  This option may be given more than once.
+Convert a global or weak symbol called @var{symbolname} into a local
+symbol, so that it is not visible externally.  This option may be
+given more than once.  Note - unique symbols are not converted.
 
 @item -W @var{symbolname}
 @itemx --weaken-symbol=@var{symbolname}

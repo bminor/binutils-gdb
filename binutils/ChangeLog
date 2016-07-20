@@ -1,3 +1,8 @@
+2016-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi (objcopy): Note that the localize symbol
+	options do not affect unique symbols.
+
 2016-07-16  Alan Modra  <amodra@gmail.com>
 
 	* ar.c: Include plugin-api.h.
