@@ -1,3 +1,93 @@
+2016-07-21  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.rs (main): Use empty struct expression.
+	* gdb.rust/simple.exp: Add tests for empty struct expression.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp (skip_gdbserver_tests): Return 1
+	if gdb_skip_xml_test is true on some targets.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.server/solib-list.exp: Unset last_loaded_file.
+
+2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Add "next over TRY" and
+	"step into captured_main (args)".
+
+2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.btrace/tailcall-only.exp: Use is_lp64_target check.
+
+2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-unwind.exp: Test also ![is_lp64_target].
+
+2016-07-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.opt/inline-break.exp: Remove optimize=-O2.
+	* gdb.opt/inline-bt.exp: Likewise.
+	* gdb.opt/inline-cmds.exp: Remove optimize=-O2 and add
+	additional_flags=-Winline.
+	* gdb.opt/inline-locals.exp: Likewise.
+	* gdb.opt/inline-markers.c (ATTR): Define.
+	(inlined_fn): Use it.
+
+2016-07-19  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.gdb/selftest.exp: Remove checks on is_remote and isnative.
+	(test_with_self): Remove some code.  Remove argument executable.
+	(top-level): Use do_self_tests.
+
+2016-07-15  Zachary Welch  <zwelch@codesourcery.com>
+	    Don Breazeal <donb@codesourcery.com>
+
+	* gdb.base/maint.exp: Escape paths used in regular expressions.
+	* gdb.stabs/weird.exp: Likewise.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR python/15620, PR python/18620:
+	* gdb.python/py-breakpoint.exp (connect_event, check_last_event)
+	(test_bkpt_events): New procs.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR python/17698:
+	* gdb.python/py-breakpoint.exp (test_bkpt_basic): Add "pending"
+	test.
+	(test_watchpoints): Likewise.
+	(test_bkpt_pending): New proc.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR cli/18053:
+	* gdb.base/jit-so.exp (one_jit_test): Add jit-reader-load
+	completion test.
+
+2016-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/atomic-type.exp: Use function_range for low_pc and high_pc.
+	* gdb.dwarf2/atomic.c (f): Rename f_end_lbl to f_label.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.c (f): Rename f_end_lbl to
+	f_label.
+	(g): Rename g_end_lbl to g_label.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: Use function_range for
+	low_pc and high_pc.
+	* gdb.dwarf2/dw2-lexical-block-bare.exp: Likewise.
+
+2016-07-12  Tom Tromey  <tom@tromey.com>
+
+	PR python/19293:
+	* gdb.python/py-unwind-maint.exp: Update tests.
+
+2016-07-12  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/selftest-support.exp (selftest_setup): Match the output
+	when captured_main is inlined.
+
 2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.fortran/derived-types.exp (result_line, result_line_2):

@@ -92,3 +92,4 @@ def register_unwinder(locus, unwinder, replace=False):
                                    unwinder.name)
         i += 1
     locus.frame_unwinders.insert(0, unwinder)
+    gdb.invalidate_cached_frames()

@@ -21,9 +21,8 @@
 #ifndef _PLUGIN_H_
 #define _PLUGIN_H_
 
-#include "bfd.h"
-
 void bfd_plugin_set_program_name (const char *);
+int bfd_plugin_open_input (bfd *, struct ld_plugin_input_file *);
 void bfd_plugin_set_plugin (const char *);
 bfd_boolean bfd_plugin_target_p (const bfd_target *);
 bfd_boolean bfd_plugin_specified_p (void);

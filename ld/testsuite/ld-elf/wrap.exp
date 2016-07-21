@@ -54,4 +54,4 @@ set run_tests {
 }
 
 run_cc_link_tests $build_tests
-run_ld_link_exec_tests [] $run_tests
+run_ld_link_exec_tests $run_tests

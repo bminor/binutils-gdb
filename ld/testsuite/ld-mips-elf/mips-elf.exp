@@ -143,11 +143,48 @@ run_dump_test "mips16-1"
 # MIPS branch offset final link checking.
 run_dump_test "branch-misc-1"
 run_dump_test "branch-misc-2"
+run_dump_test "branch-absolute" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "branch-absolute-addend" [list [list ld $abi_ldflags(o32)]]
+if $has_newabi {
+    run_dump_test "branch-absolute-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "branch-absolute-addend-n32" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "branch-absolute-n64" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "branch-absolute-addend-n64" \
+					[list [list ld $abi_ldflags(n64)]]
+}
 
 run_dump_test "mips16-branch-2" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-3" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-addend-2" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-branch-addend-3" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16-branch-absolute" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16-branch-absolute-addend" \
+					[list [list ld $abi_ldflags(o32)]]
+if $has_newabi {
+    run_dump_test "mips16-branch-absolute-n32" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "mips16-branch-absolute-addend-n32" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "mips16-branch-absolute-n64" \
+					[list [list ld $abi_ldflags(n64)]]
+    run_dump_test "mips16-branch-absolute-addend-n64" \
+					[list [list ld $abi_ldflags(n64)]]
+}
+
+run_dump_test "micromips-branch-absolute" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "micromips-branch-absolute-addend" \
+					[list [list ld $abi_ldflags(o32)]]
+if $has_newabi {
+    run_dump_test "micromips-branch-absolute-n32" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "micromips-branch-absolute-addend-n32" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "micromips-branch-absolute-n64" \
+					[list [list ld $abi_ldflags(n64)]]
+    run_dump_test "micromips-branch-absolute-addend-n64" \
+					[list [list ld $abi_ldflags(n64)]]
+}
 
 # Jalx test
 run_dump_test "jalx-1"
@@ -176,15 +213,26 @@ if { $linux_gnu } {
 
 run_dump_test "jalx-addend" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "jalx-local" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "bal-jalx-addend" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "bal-jalx-local" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "bal-jalx-pic" [list [list ld $abi_ldflags(o32)]]
 if $has_newabi {
     run_dump_test "jalx-addend-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "jalx-local-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "bal-jalx-addend-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "bal-jalx-local-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "bal-jalx-pic-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "jalx-addend-n64" [list [list ld $abi_ldflags(n64)]]
     run_dump_test "jalx-local-n64" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "bal-jalx-addend-n64" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "bal-jalx-local-n64" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "bal-jalx-pic-n64" [list [list ld $abi_ldflags(n64)]]
 }
 
 run_dump_test "unaligned-jalx-0" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-jalx-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-3" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-jalx-mips16-0" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-jalx-mips16-1" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-jalx-micromips-0" [list [list ld $abi_ldflags(o32)]]
@@ -194,6 +242,10 @@ if $has_newabi {
     run_dump_test "unaligned-jalx-addend-0" \
 					[list [list ld $abi_ldflags(n32)]]
     run_dump_test "unaligned-jalx-addend-1" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jalx-addend-2" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jalx-addend-3" \
 					[list [list ld $abi_ldflags(n32)]]
     run_dump_test "unaligned-jalx-addend-mips16-0" \
 					[list [list ld $abi_ldflags(n32)]]
@@ -206,6 +258,25 @@ if $has_newabi {
 }
 
 run_dump_test "unaligned-branch" [list [list ld $abi_ldflags(o32)]]
+
+if $has_newabi {
+    run_dump_test "unaligned-branch-2" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-r6-1" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-r6-2" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-mips16" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-micromips" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jump" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jump-mips16" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jump-micromips" \
+					[list [list ld $abi_ldflags(n32)]]
+}
 
 run_dump_test "unaligned-lwpc-0" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "unaligned-lwpc-1" [list [list ld $abi_ldflags(o32)]]

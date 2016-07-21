@@ -755,7 +755,7 @@ test3:
 	jal	test2
 
 	jalx	test
-	jalx	test2
+	jalx	test4
 
 	la	$2, test
 	lca	$2, test
@@ -5563,7 +5563,7 @@ test_delay_slot:
 	bgezall	$3, test_delay_slot
 	bltzall	$3, test_delay_slot
 	jal	test_delay_slot
-	jalx	test_delay_slot
+	jalx	test_delay_slot_ext
 	.ifndef	insn32
 	jalr16	$2
 	.endif

@@ -25,7 +25,6 @@
 #include "elf/nios2.h"
 #include "tc-nios2.h"
 #include "bfd.h"
-#include "libbfd.h"
 #include "dwarf2dbg.h"
 #include "subsegs.h"
 #include "safe-ctype.h"

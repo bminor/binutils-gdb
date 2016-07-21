@@ -437,7 +437,6 @@ microblaze_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct microblaze_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  CORE_ADDR func;
   int rn;
 
   if (*this_cache)
@@ -451,7 +450,8 @@ microblaze_frame_cache (struct frame_info *next_frame, void **this_cache)
   for (rn = 0; rn < gdbarch_num_regs (gdbarch); rn++)
     cache->register_offsets[rn] = -1;
 
-  func = get_frame_func (next_frame);
+  /* Call for side effects.  */
+  get_frame_func (next_frame);
 
   cache->pc = get_frame_address_in_block (next_frame);
 

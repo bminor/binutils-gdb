@@ -55,7 +55,10 @@ gdb_test "print *(&c as *mut i32)" " = 0"
 
 gdb_test "print j" " = simple::Unit"
 gdb_test "ptype j" " = struct simple::Unit"
+gdb_test "print j2" " = simple::Unit"
+gdb_test "ptype j2" " = struct simple::Unit"
 gdb_test "print simple::Unit" " = simple::Unit"
+gdb_test "print simple::Unit{}" " = simple::Unit"
 
 gdb_test "print g" " = \\(u8 \\(\\*\\)\\\[6\\\]\\) $hex b\"hi bob\""
 gdb_test "ptype g" " = u8 \\(\\*\\)\\\[6\\\]"

@@ -1075,6 +1075,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--interleave-width=}@var{width}]
         [@option{-j} @var{sectionpattern}|@option{--only-section=}@var{sectionpattern}]
         [@option{-R} @var{sectionpattern}|@option{--remove-section=}@var{sectionpattern}]
+        [@option{--remove-relocations=}@var{sectionpattern}]
         [@option{-p}|@option{--preserve-dates}]
         [@option{-D}|@option{--enable-deterministic-archives}]
         [@option{-U}|@option{--disable-deterministic-archives}]
@@ -1221,6 +1222,18 @@ This option may be given more than once.  Note that using this option
 inappropriately may make the output file unusable.  Wildcard
 characters are accepted in @var{sectionpattern}.
 
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not be copied, even if earlier
+use of @option{--only-section} on the same command line would
+otherwise copy it.  For example:
+
+@smallexample
+  --only-section=.text.* --only-section=!.text.foo
+@end smallexample
+
+will copy all sectinos maching '.text.*' but not the section
+'.text.foo'.
+
 @item -R @var{sectionpattern}
 @itemx --remove-section=@var{sectionpattern}
 Remove any section matching @var{sectionpattern} from the output file.
@@ -1229,6 +1242,46 @@ inappropriately may make the output file unusable.  Wildcard
 characters are accepted in @var{sectionpattern}.  Using both the
 @option{-j} and @option{-R} options together results in undefined
 behaviour.
+
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not be removed even if an
+earlier use of @option{--remove-section} on the same command line
+would otherwise remove it.  For example:
+
+@smallexample
+  --remove-section=.text.* --remove-section=!.text.foo
+@end smallexample
+
+will remove all sections matching the pattern '.text.*', but will not
+remove the section '.text.foo'.
+
+@item --remove-relocations=@var{sectionpattern}
+Remove relocations from the output file for any section matching
+@var{sectionpattern}.  This option may be given more than once.  Note
+that using this option inappropriately may make the output file
+unusable.  Wildcard characters are accepted in @var{sectionpattern}.
+For example:
+
+@smallexample
+  --remove-relocations=.text.*
+@end smallexample
+
+will remove the relocations for all sections matching the patter
+'.text.*'.
+
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not have their relocation
+removed even if an earlier use of @option{--remove-relocations} on the
+same command line would otherwise cause the relocations to be removed.
+For example:
+
+@smallexample
+  --remove-relocations=.text.* --remove-relocations=!.text.foo
+@end smallexample
+
+will remove all relocations for sections matching the pattern
+'.text.*', but will not remove relocations for the section
+'.text.foo'.
 
 @item -S
 @itemx --strip-all
@@ -1268,8 +1321,9 @@ such as @option{-L}.
 
 @item -L @var{symbolname}
 @itemx --localize-symbol=@var{symbolname}
-Make symbol @var{symbolname} local to the file, so that it is not
-visible externally.  This option may be given more than once.
+Convert a global or weak symbol called @var{symbolname} into a local
+symbol, so that it is not visible externally.  This option may be
+given more than once.  Note - unique symbols are not converted.
 
 @item -W @var{symbolname}
 @itemx --weaken-symbol=@var{symbolname}
@@ -2186,6 +2240,15 @@ some targets.  If it is necessary to specify more than one
 disassembler option then multiple @option{-M} options can be used or
 can be placed together into a comma separated list.
 
+For ARC, @option{dsp} controls the printing of DSP instructions,
+@option{spfp} selects the printing of FPX single precision FP
+instructions, @option{dpfp} selects the printing of FPX double
+precision FP instructions, @option{quarkse_em} selects the printing of
+special QuarkSE-EM instructions, @option{fpuda} selects the printing
+of double precision assist instructions, @option{fpus} selects the
+printing of FPU single precision FP instructions, while @option{fpud}
+selects the printing of FPU souble precision FP instructions.
+
 If the target is an ARM architecture then this switch can be used to
 select which register name set is used during disassembler.  Specifying
 @option{-M reg-names-std} (the default) will select the register names as
@@ -2964,6 +3027,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-w}|@option{--wildcard}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
+      [@option{--remove-relocations=}@var{sectionpattern}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
       [@option{-D}|@option{--enable-deterministic-archives}]
       [@option{-U}|@option{--disable-deterministic-archives}]
@@ -3020,6 +3084,46 @@ option may be given more than once.  Note that using this option
 inappropriately may make the output file unusable.  The wildcard
 character @samp{*} may be given at the end of @var{sectionname}.  If
 so, then any section starting with @var{sectionname} will be removed.
+
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not be removed even if an
+earlier use of @option{--remove-section} on the same command line
+would otherwise remove it.  For example:
+
+@smallexample
+  --remove-section=.text.* --remove-section=!.text.foo
+@end smallexample
+
+will remove all sections matching the pattern '.text.*', but will not
+remove the section '.text.foo'.
+
+@item --remove-relocations=@var{sectionpattern}
+Remove relocations from the output file for any section matching
+@var{sectionpattern}.  This option may be given more than once.  Note
+that using this option inappropriately may make the output file
+unusable.  Wildcard characters are accepted in @var{sectionpattern}.
+For example:
+
+@smallexample
+  --remove-relocations=.text.*
+@end smallexample
+
+will remove the relocations for all sections matching the patter
+'.text.*'.
+
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not have their relocation
+removed even if an earlier use of @option{--remove-relocations} on the
+same command line would otherwise cause the relocations to be removed.
+For example:
+
+@smallexample
+  --remove-relocations=.text.* --remove-relocations=!.text.foo
+@end smallexample
+
+will remove all relocations for sections matching the pattern
+'.text.*', but will not remove relocations for the section
+'.text.foo'.
 
 @item -s
 @itemx --strip-all

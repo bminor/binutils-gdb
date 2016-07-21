@@ -908,7 +908,6 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
   struct dwarf2_fde *fde;
   CORE_ADDR text_offset;
   struct dwarf2_frame_state fs;
-  int addr_size;
 
   memset (&fs, 0, sizeof (struct dwarf2_frame_state));
 
@@ -923,7 +922,6 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
   fs.data_align = fde->cie->data_alignment_factor;
   fs.code_align = fde->cie->code_alignment_factor;
   fs.retaddr_column = fde->cie->return_address_register;
-  addr_size = fde->cie->addr_size;
 
   /* Check for "quirks" - known bugs in producers.  */
   dwarf2_frame_find_quirks (&fs, fde);

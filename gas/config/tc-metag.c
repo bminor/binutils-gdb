@@ -24,7 +24,6 @@
 #include "symcat.h"
 #include "safe-ctype.h"
 #include "hashtab.h"
-#include "libbfd.h"
 
 #include <stdio.h>
 
@@ -6416,7 +6415,7 @@ create_dspreg_htabs (void)
 
       /* Make sure there are no hash table collisions, which would
 	 require chaining entries.  */
-      BFD_ASSERT (*slot == NULL);
+      gas_assert (*slot == NULL);
       *slot = reg;
     }
 
@@ -6439,7 +6438,7 @@ create_dspreg_htabs (void)
 
 	  /* Make sure there are no hash table collisions, which would
 	     require chaining entries.  */
-	  BFD_ASSERT (*slot == NULL);
+	  gas_assert (*slot == NULL);
 	  *slot = reg;
 	}
     }
@@ -6486,7 +6485,7 @@ create_scond_htab (void)
 							scond, INSERT);
       /* Make sure there are no hash table collisions, which would
 	 require chaining entries.  */
-      BFD_ASSERT (*slot == NULL);
+      gas_assert (*slot == NULL);
       *slot = scond;
     }
 }

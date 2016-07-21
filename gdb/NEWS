@@ -80,6 +80,11 @@ new-ui INTERP TTY
   Start a new user interface instance running INTERP as interpreter,
   using the TTY file for input/output.
 
+* Python Scripting
+
+  ** gdb.Breakpoint objects have a new attribute "pending", which
+     indicates whether the breakpoint is pending.
+
 * Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
   was added in GDBserver, including JIT compiling fast tracepoint's
   conditional expression bytecode into native code.

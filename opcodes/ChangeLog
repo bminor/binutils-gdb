@@ -1,3 +1,35 @@
+2016-07-20  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (skipclass): New structure.
+	(decodelist): New variable.
+	(is_compatible_p): New function.
+	(new_element): Likewise.
+	(skip_class_p): Likewise.
+	(find_format_from_table): Use skip_class_p function.
+	(find_format): Decode first the extension instructions.
+	(print_insn_arc): Select either ARCEM or ARCHS based on elf
+	e_flags.
+	(parse_option): New function.
+	(parse_disassembler_options): Likewise.
+	(print_arc_disassembler_options): Likewise.
+	(print_insn_arc): Use parse_disassembler_options function.  Proper
+	select ARCv2 cpu variant.
+	* disassemble.c (disassembler_usage): Add ARC disassembler
+	options.
+
+2016-07-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove the INSN2_ALIAS
+	annotation from the "nal" entry and reorder it beyond "bltzal".
+
+2016-07-12  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-opc.c (ldtxa): New macro.
+	(sparc_opcodes): Use the macro defined above to add entries for
+	the LDTXA instructions.
+	(asi_table): Add the ASI_TWINX_* asis used in the LDTXA
+	instruction.
+
 2016-07-07  James Bowman  <james.bowman@ftdichip.com>
 
 	* ft32-opc.c (ft32_opc_info): Correct mask for "callc"

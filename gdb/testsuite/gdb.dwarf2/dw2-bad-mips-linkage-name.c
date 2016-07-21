@@ -28,7 +28,7 @@ main (void)
 int
 f (char *x)
 {
-  asm (".global f_end_lbl\nf_end_lbl:");
+  asm ("f_label: .globl f_label");
   return 0;
 }
 
@@ -36,6 +36,6 @@ f (char *x)
 int
 g (char *x)
 {
-  asm (".global g_end_lbl\ng_end_lbl:");
+  asm ("g_label: .globl g_label");
   return 0;
 }

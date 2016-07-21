@@ -270,7 +270,7 @@ binary_set_section_contents (bfd *abfd,
 
 	  if (s->filepos < 0)
 	    (*_bfd_error_handler)
-	      (_("Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."),
+	      (_("Warning: Writing section `%s' at huge (ie negative) file offset 0x%lx."),
 	       bfd_get_section_name (abfd, s),
 	       (unsigned long) s->filepos);
 	}

@@ -470,7 +470,7 @@ void (*pre_init_ui_hook) (void);
 static void
 do_chdir_cleanup (void *old_dir)
 {
-  chdir (old_dir);
+  chdir ((const char *) old_dir);
   xfree (old_dir);
 }
 #endif

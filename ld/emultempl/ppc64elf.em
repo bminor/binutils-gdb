@@ -25,7 +25,6 @@
 fragment <<EOF
 
 #include "ldctor.h"
-#include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf64-ppc.h"
 #include "ldlex.h"

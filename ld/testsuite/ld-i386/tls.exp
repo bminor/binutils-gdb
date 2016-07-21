@@ -67,7 +67,7 @@ run_cc_link_tests [list \
     ] \
 ]
 
-run_ld_link_exec_tests [] [list \
+run_ld_link_exec_tests [list \
     [list \
 	"TLS GD/LD -> LE transition without PLT (dynamic)" \
 	"tmpdir/tls-def1.o tmpdir/tls-main1.o tmpdir/tls-gd1.o \

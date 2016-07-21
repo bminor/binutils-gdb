@@ -28,7 +28,6 @@
 #include "cgen.h"
 #include "elf/common.h"
 #include "elf/mep.h"
-#include "libbfd.h"
 #include "xregex.h"
 
 /* Structure to hold all of the different components describing

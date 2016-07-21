@@ -1,3 +1,136 @@
+2016-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_filter_global_symbols): Skip local symbols.
+	(swap_out_syms): Return an error when not finding ELF output
+	section rather than asserting.
+
+2016-07-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elflink.c (elf_output_implib): Call bfd_set_error on no symbols.
+
+2016-07-20  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_psinfo): Check for minimum note size
+	and handle pr_pid if present.
+
+2016-07-20  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_howto_raw <R_PPC64_PLTREL32>): Put
+	ppc64_elf_unhandled_reloc for special_function.
+	* elf32-ppc.c (ppc_elf_howto_raw): Similarly for lots of relocs.
+
+2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_perform_relocation): Convert cross-mode
+	BAL to JALX.
+	(_bfd_mips_elf_relocate_section) <bfd_reloc_outofrange>: Add a
+	corresponding error message.
+
+2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (b_reloc_p): Add R_MICROMIPS_PC16_S1,
+	R_MICROMIPS_PC10_S1 and R_MICROMIPS_PC7_S1.
+	(branch_reloc_p): New function.
+	(mips_elf_calculate_relocation): Handle ISA mode determination
+	for relocations against section symbols, against absolute
+	symbols and absolute relocations.  Also set `*cross_mode_jump_p'
+	for branches.
+	<R_MIPS16_26, R_MIPS_26, R_MICROMIPS_26_S1>: Suppress alignment
+	checks for weak undefined symbols.  Also check target alignment
+	within the same ISA mode.
+	<R_MIPS_PC16, R_MIPS_GNU_REL16_S2>: Handle cross-mode branches
+	in the alignment check.
+	<R_MICROMIPS_PC7_S1>: Add an alignment check.
+	<R_MICROMIPS_PC10_S1>: Likewise.
+	<R_MICROMIPS_PC16_S1>: Likewise.
+	(mips_elf_perform_relocation): Report a failure for unsupported
+	same-mode JALX instructions and cross-mode branches.
+	(_bfd_mips_elf_relocate_section) <bfd_reloc_outofrange>: Add
+	error messages for jumps to misaligned addresses.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c: Include plugin-api.h.
+	* plugin.c (bfd_plugin_open_input): New function, extracted from..
+	(try_claim): ..here.
+	* plugin.h: Don't include bfd.h.
+	(bfd_plugin_open_input): Declare.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* targets.c (bfd_seach_for_target): Rename to..
+	(bfd_iterate_over_targets): ..this.  Rewrite doc.
+	* bfd-in2.h: Regenerate.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* archures.c (bfd_default_set_arch_mach): Make available in bfd.h.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* libbfd-in.h (BFD_ALIGN): Move to..
+	* bfd-in.h: ..here.
+	* elf32-ppc.h (struct ppc_elf_params): Add pagesize.
+	* elf32-ppc.c (default_params): Adjust init.
+	(ppc_elf_link_params): Set pagesize_p2.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2016-07-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf-bfd.h (elf_backend_filter_implib_symbols): Declare backend hook.
+	(_bfd_elf_filter_global_symbols): Declare.
+	* elf.c (_bfd_elf_filter_global_symbols): New function.
+	* elflink.c (elf_filter_global_symbols): Likewise.
+	(elf_output_implib): Likewise.
+	(bfd_elf_final_link): Call above function, failing if it does.
+	* elfxx-target.h (elf_backend_filter_implib_symbols): Define macro and
+	default it to NULL.
+	(elf_backend_copy_indirect_symbol): Fix spacing.
+	(elf_backend_hide_symbol): Likewise.
+	(elfNN_bed): Initialize elf_backend_filter_implib_symbols backend hook.
+
+2016-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arc.c (PR_DEBUG): Delete.
+	Fix printing of debug information.  Fix formatting of debug
+	statements.
+	(debug_arc_reloc): Handle symbols that are not from an input file.
+	(arc_do_relocation): Remove excessive exclamation points.
+
+	* arc-got.h: Fix formatting.  Fix printing of debug information.
+	(new_got_entry_to_list): Use xmalloc.
+	* config.bfd: use the big-endian arc vector as the default vector
+	for big-endian arc targets.
+
+2016-07-15  Alan Modra  <amodra@gmail.com>
+
+	* cofflink.c (mark_relocs): Exclude relocs with -1 r_symndx
+	from marking sym_indices.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* reloc.c (bfd_perform_relocation): Try the `howto' handler
+	first with relocations against absolute symbols.
+	(bfd_install_relocation): Likewise.
+
+2016-07-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Align
+	.got/.got.plt sections to 8 bytes.
+
+2016-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* binary.c (binary_set_section_contents): Second grammar fix.
+
+2016-07-12  Douglas B Rupp  <rupp@adacore.com>
+
+	* binary.c (binary_set_section_contents): Fix grammar in warning
+	message.
+
 2016-07-11  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* elf32-arc.c: made PR_DEBUG always defined.

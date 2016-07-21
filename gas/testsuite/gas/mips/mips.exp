@@ -607,10 +607,41 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "branch-weak-6"
     run_dump_test "branch-weak-7"
     run_dump_test "branch-local-1"
+    run_list_test "branch-local-2" "-32" \
+				"MIPS branch local symbol relocation 2"
+    run_list_test "branch-local-3" "-32" \
+				"MIPS branch local symbol relocation 3"
+    run_dump_test "branch-local-4"
     if $has_newabi {
 	run_dump_test "branch-local-n32-1"
+	run_list_test "branch-local-n32-2" "-n32 -march=from-abi" \
+				"MIPS branch local symbol relocation 2 (n32)"
+	run_list_test "branch-local-n32-3" "-n32 -march=from-abi" \
+				"MIPS branch local symbol relocation 3 (n32)"
+	run_dump_test "branch-local-n32-4"
 	run_dump_test "branch-local-n64-1"
+	run_list_test "branch-local-n64-2" "-64 -march=from-abi" \
+				"MIPS branch local symbol relocation 2 (n64)"
+	run_list_test "branch-local-n64-3" "-64 -march=from-abi" \
+				"MIPS branch local symbol relocation 3 (n64)"
+	run_dump_test "branch-local-n64-4"
     }
+    run_dump_test "branch-addend"
+    if $has_newabi {
+	run_dump_test "branch-addend-n32"
+	run_dump_test "branch-addend-n64"
+    }
+    run_dump_test "branch-absolute"
+    run_dump_test "branch-absolute-addend"
+    if $has_newabi {
+	run_dump_test "branch-absolute-n32"
+	run_dump_test "branch-absolute-addend-n32"
+	run_dump_test "branch-absolute-n64"
+	run_dump_test "branch-absolute-addend-n64"
+    }
+
+    run_dump_test_arches "nal-1" [mips_arch_list_matching mips1 !micromips]
+    run_dump_test_arches "nal-2" [mips_arch_list_matching mips1 !micromips]
 
     run_dump_test "compact-eh-eb-1"
     run_dump_test "compact-eh-eb-2"
@@ -836,6 +867,62 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "jalx-addend-n64"
 	run_dump_test "jalx-local-n64"
     }
+
+    run_list_test "unaligned-jump-1" "-32" \
+				"MIPS jump to unaligned symbol 1"
+    run_list_test "unaligned-jump-2" "-32" \
+				"MIPS jump to unaligned symbol 2"
+    if $has_newabi {
+	run_dump_test "unaligned-jump-3"
+    }
+    run_list_test "unaligned-jump-mips16-1" "-32" \
+				"MIPS16 jump to unaligned symbol 1"
+    run_list_test "unaligned-jump-mips16-2" "-32" \
+				"MIPS16 jump to unaligned symbol 2"
+    if $has_newabi {
+	run_dump_test "unaligned-jump-mips16-3"
+    }
+    run_list_test "unaligned-jump-micromips-1" "-32" \
+				"microMIPS jump to unaligned symbol 1"
+    run_list_test "unaligned-jump-micromips-2" "-32" \
+				"microMIPS jump to unaligned symbol 2"
+    if $has_newabi {
+	run_dump_test "unaligned-jump-micromips-3"
+    }
+    run_list_test "unaligned-branch-1" "-32" \
+				"MIPS branch to unaligned symbol 1"
+    run_list_test "unaligned-branch-2" "-32" \
+				"MIPS branch to unaligned symbol 2"
+    if $has_newabi {
+	run_dump_test "unaligned-branch-3"
+    }
+    run_list_test "unaligned-branch-r6-1" "-32" \
+				"MIPSr6 branch to unaligned symbol 1"
+    run_list_test "unaligned-branch-r6-2" "-32 -mips64r6" \
+				"MIPSr6 branch to unaligned symbol 2"
+    run_list_test "unaligned-branch-r6-3" "-32" \
+				"MIPSr6 branch to unaligned symbol 3"
+    run_list_test "unaligned-branch-r6-4" "-32 -mips64r6" \
+				"MIPSr6 branch to unaligned symbol 4"
+    if $has_newabi {
+	run_dump_test "unaligned-branch-r6-5"
+	run_dump_test "unaligned-branch-r6-6"
+    }
+    run_list_test "unaligned-branch-mips16-1" "-32" \
+				"MIPS16 branch to unaligned symbol 1"
+    run_list_test "unaligned-branch-mips16-2" "-32" \
+				"MIPS16 branch to unaligned symbol 2"
+    if $has_newabi {
+	run_dump_test "unaligned-branch-mips16-3"
+    }
+    run_list_test "unaligned-branch-micromips-1" "-32" \
+				"microMIPS branch to unaligned symbol 1"
+    run_list_test "unaligned-branch-micromips-2" "-32" \
+				"microMIPS branch to unaligned symbol 2"
+    if $has_newabi {
+	run_dump_test "unaligned-branch-micromips-3"
+    }
+
     # Check MIPS16 HI16/LO16 relocations
     run_dump_test "mips16-hilo"
     if $has_newabi {
@@ -1270,6 +1357,14 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "micromips-branch-delay"
     run_dump_test "micromips-warn-branch-delay"
     run_dump_test "micromips-warn-branch-delay-1"
+    run_dump_test "micromips-branch-absolute"
+    run_dump_test "micromips-branch-absolute-addend"
+    if $has_newabi {
+	run_dump_test "micromips-branch-absolute-n32"
+	run_dump_test "micromips-branch-absolute-addend-n32"
+	run_dump_test "micromips-branch-absolute-n64"
+	run_dump_test "micromips-branch-absolute-addend-n64"
+    }
     run_dump_test "micromips-b16"
     run_list_test "micromips-ill"
 
@@ -1376,6 +1471,13 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips16-branch-addend-2"
     run_dump_test "mips16-branch-addend-3"
     run_dump_test "mips16-branch-absolute"
+    run_dump_test "mips16-branch-absolute-addend"
+    if $has_newabi {
+	run_dump_test "mips16-branch-absolute-n32"
+	run_dump_test "mips16-branch-absolute-addend-n32"
+	run_dump_test "mips16-branch-absolute-n64"
+	run_dump_test "mips16-branch-absolute-addend-n64"
+    }
     run_dump_test "mips16-absolute-reloc-0"
     run_dump_test "mips16-absolute-reloc-1"
     run_dump_test "mips16-absolute-reloc-2"

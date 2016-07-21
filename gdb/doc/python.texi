@@ -2965,6 +2965,21 @@ A gdb.Frame object representing the frame in which the register was modified.
 Denotes which register was modified.
 @end defvar
 
+@item events.breakpoint_created
+This is emitted when a new breakpoint has been created.  The argument
+that is passed is the new @code{gdb.Breakpoint} object.
+
+@item events.breakpoint_modified
+This is emitted when a breakpoint has been modified in some way.  The
+argument that is passed is the new @code{gdb.Breakpoint} object.
+
+@item events.breakpoint_deleted
+This is emitted when a breakpoint has been deleted.  The argument that
+is passed is the @code{gdb.Breakpoint} object.  When this event is
+emitted, the @code{gdb.Breakpoint} object will already be in its
+invalid state; that is, the @code{is_valid} method will return
+@code{False}.
+
 @end table
 
 @node Threads In Python
@@ -3838,6 +3853,15 @@ frames, as expressed by the given @var{reason} code (an integer, see the
 @code{unwind_stop_reason} method further down in this section).
 @end defun
 
+@findex gdb.invalidate_cached_frames
+@defun gdb.invalidate_cached_frames
+@value{GDBN} internally keeps a cache of the frames that have been
+unwound.  This function invalidates this cache.
+
+This function should not generally be called by ordinary Python code.
+It is documented for the sake of completeness.
+@end defun
+
 A @code{gdb.Frame} object has the following methods:
 
 @defun Frame.is_valid ()
@@ -4570,6 +4594,48 @@ the class of watchpoint to create, if @var{type} is
 is assumed to be a @code{gdb.WP_WRITE} class.
 @end defun
 
+The available types are represented by constants defined in the @code{gdb}
+module:
+
+@vtable @code
+@vindex BP_BREAKPOINT
+@item gdb.BP_BREAKPOINT
+Normal code breakpoint.
+
+@vindex BP_WATCHPOINT
+@item gdb.BP_WATCHPOINT
+Watchpoint breakpoint.
+
+@vindex BP_HARDWARE_WATCHPOINT
+@item gdb.BP_HARDWARE_WATCHPOINT
+Hardware assisted watchpoint.
+
+@vindex BP_READ_WATCHPOINT
+@item gdb.BP_READ_WATCHPOINT
+Hardware assisted read watchpoint.
+
+@vindex BP_ACCESS_WATCHPOINT
+@item gdb.BP_ACCESS_WATCHPOINT
+Hardware assisted access watchpoint.
+@end vtable
+
+The available watchpoint types represented by constants are defined in the
+@code{gdb} module:
+
+@vtable @code
+@vindex WP_READ
+@item gdb.WP_READ
+Read only watchpoint.
+
+@vindex WP_WRITE
+@item gdb.WP_WRITE
+Write only watchpoint.
+
+@vindex WP_ACCESS
+@item gdb.WP_ACCESS
+Read/Write watchpoint.
+@end vtable
+
 @defun Breakpoint.stop (self)
 The @code{gdb.Breakpoint} class can be sub-classed and, in
 particular, you may choose to implement the @code{stop} method.
@@ -4604,23 +4670,6 @@ class MyBreakpoint (gdb.Breakpoint):
 @end smallexample
 @end defun
 
-The available watchpoint types represented by constants are defined in the
-@code{gdb} module:
-
-@vtable @code
-@vindex WP_READ
-@item gdb.WP_READ
-Read only watchpoint.
-
-@vindex WP_WRITE
-@item gdb.WP_WRITE
-Write only watchpoint.
-
-@vindex WP_ACCESS
-@item gdb.WP_ACCESS
-Read/Write watchpoint.
-@end vtable
-
 @defun Breakpoint.is_valid ()
 Return @code{True} if this @code{Breakpoint} object is valid,
 @code{False} otherwise.  A @code{Breakpoint} object can become invalid
@@ -4649,6 +4698,12 @@ This attribute is @code{True} if the breakpoint is silent, and
 Note that a breakpoint can also be silent if it has commands and the
 first command is @code{silent}.  This is not reported by the
 @code{silent} attribute.
+@end defvar
+
+@defvar Breakpoint.pending
+This attribute is @code{True} if the breakpoint is pending, and
+@code{False} otherwise.  @xref{Set Breaks}.  This attribute is
+read-only.
 @end defvar
 
 @anchor{python_breakpoint_thread}
@@ -4696,31 +4751,6 @@ function, will result in an error after the breakpoint has been hit
 (as it has been automatically deleted).  This attribute is not
 writable.
 @end defvar
-
-The available types are represented by constants defined in the @code{gdb}
-module:
-
-@vtable @code
-@vindex BP_BREAKPOINT
-@item gdb.BP_BREAKPOINT
-Normal code breakpoint.
-
-@vindex BP_WATCHPOINT
-@item gdb.BP_WATCHPOINT
-Watchpoint breakpoint.
-
-@vindex BP_HARDWARE_WATCHPOINT
-@item gdb.BP_HARDWARE_WATCHPOINT
-Hardware assisted watchpoint.
-
-@vindex BP_READ_WATCHPOINT
-@item gdb.BP_READ_WATCHPOINT
-Hardware assisted read watchpoint.
-
-@vindex BP_ACCESS_WATCHPOINT
-@item gdb.BP_ACCESS_WATCHPOINT
-Hardware assisted access watchpoint.
-@end vtable
 
 @defvar Breakpoint.hit_count
 This attribute holds the hit count for the breakpoint, an integer.

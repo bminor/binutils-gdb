@@ -294,7 +294,10 @@ rust_underscore_fields (struct type *type, int offset)
 int
 rust_tuple_struct_type_p (struct type *type)
 {
-  return rust_underscore_fields (type, 0);
+  /* This is just an approximation until DWARF can represent Rust more
+     precisely.  We exclude zero-length structs because they may not
+     be tuple structs, and there's no way to tell.  */
+  return TYPE_NFIELDS (type) > 0 && rust_underscore_fields (type, 0);
 }
 
 /* Return true if a variant TYPE is a tuple variant, false otherwise.  */
@@ -888,7 +891,6 @@ rust_print_type (struct type *type, const char *varstring,
 	  {
 	    fputs_filtered (TYPE_TAG_NAME (type), stream);
 	    fputs_filtered (" ", stream);
-	    len = strlen (TYPE_TAG_NAME (type));
 	  }
 	fputs_filtered ("{\n", stream);
 

@@ -1118,6 +1118,17 @@ if [is_elf_format] {
 
     run_dump_test "exclude-1a"
     run_dump_test "exclude-1b"
+
+    run_dump_test "only-section-01"
+    run_dump_test "remove-section-01"
+
+    # Test the remove relocation functionality
+    set test_list [lsort [glob -nocomplain $srcdir/$subdir/remove-relocs-*.d]]
+    foreach t $test_list {
+        # We need to strip the ".d", but can leave the dirname.
+        verbose [file rootname $t]
+        run_dump_test [file rootname $t]
+    }
 }
 run_dump_test "localize-hidden-2"
 

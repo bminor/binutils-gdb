@@ -141,6 +141,20 @@ proc skip_gdbserver_tests { } {
     return 1
   }
 
+    # If GDB is lack of XML support, and targets, like arm, have
+    # multiple target descriptions, GDB doesn't know which target
+    # description GDBserver uses, and may fail to parse 'g' packet
+    # after connection.
+    if { [gdb_skip_xml_test]
+	 && ([istarget "arm*-*-linux*"]
+	     || [istarget "mips*-*-linux*"]
+	     || [istarget "powerpc*-*-linux*"]
+	     || [istarget "s390*-*-linux*"]
+	     || [istarget "x86_64-*-linux*"]
+	     || [istarget "i\[34567\]86-*-linux*"]) } {
+	return 1
+    }
+
   return 0
 }
 

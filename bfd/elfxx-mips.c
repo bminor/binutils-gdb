@@ -2227,7 +2227,10 @@ b_reloc_p (int r_type)
 	  || r_type == R_MIPS_PC21_S2
 	  || r_type == R_MIPS_PC16
 	  || r_type == R_MIPS_GNU_REL16_S2
-	  || r_type == R_MIPS16_PC16_S1);
+	  || r_type == R_MIPS16_PC16_S1
+	  || r_type == R_MICROMIPS_PC16_S1
+	  || r_type == R_MICROMIPS_PC10_S1
+	  || r_type == R_MICROMIPS_PC7_S1);
 }
 
 static inline bfd_boolean
@@ -2235,6 +2238,16 @@ aligned_pcrel_reloc_p (int r_type)
 {
   return (r_type == R_MIPS_PC18_S3
 	  || r_type == R_MIPS_PC19_S2);
+}
+
+static inline bfd_boolean
+branch_reloc_p (int r_type)
+{
+  return (r_type == R_MIPS_26
+	  || r_type == R_MIPS_PC26_S2
+	  || r_type == R_MIPS_PC21_S2
+	  || r_type == R_MIPS_PC16
+	  || r_type == R_MIPS_GNU_REL16_S2);
 }
 
 static inline bfd_boolean
@@ -5322,6 +5335,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   /* Figure out the value of the symbol.  */
   if (local_p)
     {
+      bfd_boolean micromips_p = MICROMIPS_P (abfd);
       Elf_Internal_Sym *sym;
 
       sym = local_syms + r_symndx;
@@ -5350,8 +5364,26 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (*namep == NULL || **namep == '\0')
 	*namep = bfd_section_name (input_bfd, sec);
 
-      target_is_16_bit_code_p = ELF_ST_IS_MIPS16 (sym->st_other);
-      target_is_micromips_code_p = ELF_ST_IS_MICROMIPS (sym->st_other);
+      /* For relocations against a section symbol and ones against no
+         symbol (absolute relocations) infer the ISA mode from the addend.  */
+      if (section_p || r_symndx == STN_UNDEF)
+	{
+	  target_is_16_bit_code_p = (addend & 1) && !micromips_p;
+	  target_is_micromips_code_p = (addend & 1) && micromips_p;
+	}
+      /* For relocations against an absolute symbol infer the ISA mode
+         from the value of the symbol plus addend.  */
+      else if (bfd_is_abs_section (sec))
+	{
+	  target_is_16_bit_code_p = ((symbol + addend) & 1) && !micromips_p;
+	  target_is_micromips_code_p = ((symbol + addend) & 1) && micromips_p;
+	}
+      /* Otherwise just use the regular symbol annotation available.  */
+      else
+	{
+	  target_is_16_bit_code_p = ELF_ST_IS_MIPS16 (sym->st_other);
+	  target_is_micromips_code_p = ELF_ST_IS_MICROMIPS (sym->st_other);
+	}
     }
   else
     {
@@ -5591,10 +5623,12 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
      acceptable.  */
   *cross_mode_jump_p = (!bfd_link_relocatable (info)
 			&& !(h && h->root.root.type == bfd_link_hash_undefweak)
-			&& ((r_type == R_MIPS16_26 && !target_is_16_bit_code_p)
-			    || (r_type == R_MICROMIPS_26_S1
+			&& ((mips16_branch_reloc_p (r_type)
+			     && !target_is_16_bit_code_p)
+			    || (micromips_branch_reloc_p (r_type)
 				&& !target_is_micromips_code_p)
-			    || ((r_type == R_MIPS_26 || r_type == R_MIPS_JALR)
+			    || ((branch_reloc_p (r_type)
+				 || r_type == R_MIPS_JALR)
 				&& (target_is_16_bit_code_p
 				    || target_is_micromips_code_p))));
 
@@ -5804,9 +5838,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  value = addend;
 	value += symbol;
 
-	/* Make sure the target of JALX is word-aligned.  Bit 0 must be
-	   the correct ISA mode selector and bit 1 must be 0.  */
-	if (*cross_mode_jump_p && (value & 3) != (r_type == R_MIPS_26))
+	/* Make sure the target of a jump is suitably aligned.  Bit 0 must
+	   be the correct ISA mode selector except for weak undefined
+	   symbols.  */
+	if ((was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	    && (*cross_mode_jump_p
+		? (value & 3) != (r_type == R_MIPS_26)
+	        : (value & ((1 << shift) - 1)) != (r_type != R_MIPS_26)))
 	  return bfd_reloc_outofrange;
 
 	value >>= shift;
@@ -5997,7 +6035,12 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 18);
 
-      if ((symbol + addend) & 3)
+      /* No need to exclude weak undefined symbols here as they resolve
+         to 0 and never set `*cross_mode_jump_p', so this alignment check
+         will never trigger for them.  */
+      if (*cross_mode_jump_p
+	  ? ((symbol + addend) & 3) != 1
+	  : ((symbol + addend) & 3) != 0)
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
@@ -6012,7 +6055,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	addend = _bfd_mips_elf_sign_extend (addend, 17);
 
       if ((was_local_p || h->root.root.type != bfd_link_hash_undefweak)
-	  && ((symbol + addend) & 1) == 0)
+	  && (*cross_mode_jump_p
+	      ? ((symbol + addend) & 3) != 0
+	      : ((symbol + addend) & 1) == 0))
 	return bfd_reloc_outofrange;
 
       value = symbol + addend - p;
@@ -6095,6 +6140,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MICROMIPS_PC7_S1:
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 8);
+
+      if ((was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	  && (*cross_mode_jump_p
+	      ? ((symbol + addend + 2) & 3) != 0
+	      : ((symbol + addend + 2) & 1) == 0))
+	return bfd_reloc_outofrange;
+
       value = symbol + addend - p;
       if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
 	overflowed_p = mips_elf_overflow_p (value, 8);
@@ -6105,6 +6157,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MICROMIPS_PC10_S1:
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 11);
+
+      if ((was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	  && (*cross_mode_jump_p
+	      ? ((symbol + addend + 2) & 3) != 0
+	      : ((symbol + addend + 2) & 1) == 0))
+	return bfd_reloc_outofrange;
+
       value = symbol + addend - p;
       if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
 	overflowed_p = mips_elf_overflow_p (value, 11);
@@ -6115,6 +6174,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MICROMIPS_PC16_S1:
       if (howto->partial_inplace)
 	addend = _bfd_mips_elf_sign_extend (addend, 17);
+
+      if ((was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	  && (*cross_mode_jump_p
+	      ? ((symbol + addend) & 3) != 0
+	      : ((symbol + addend) & 1) == 0))
+	return bfd_reloc_outofrange;
+
       value = symbol + addend - p;
       if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
 	overflowed_p = mips_elf_overflow_p (value, 17);
@@ -6273,7 +6339,21 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
   /* Set the field.  */
   x |= (value & howto->dst_mask);
 
-  /* If required, turn JAL into JALX.  */
+  /* Detect incorrect JALX usage.  If required, turn JAL or BAL into JALX.  */
+  if (!cross_mode_jump_p && jal_reloc_p (r_type))
+    {
+      bfd_vma opcode = x >> 26;
+
+      if (r_type == R_MIPS16_26 ? opcode == 0x7
+	  : r_type == R_MICROMIPS_26_S1 ? opcode == 0x3c
+	  : opcode == 0x1d)
+	{
+	  info->callbacks->einfo
+	    (_("%X%H: Unsupported JALX to the same ISA mode\n"),
+	     input_bfd, input_section, relocation->r_offset);
+	  return TRUE;
+	}
+    }
   if (cross_mode_jump_p && jal_reloc_p (r_type))
     {
       bfd_boolean ok;
@@ -6310,6 +6390,53 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 
       /* Make this the JALX opcode.  */
       x = (x & ~(0x3f << 26)) | (jalx_opcode << 26);
+    }
+  else if (cross_mode_jump_p && b_reloc_p (r_type))
+    {
+      bfd_boolean ok = FALSE;
+      bfd_vma opcode = x >> 16;
+      bfd_vma jalx_opcode = 0;
+      bfd_vma addr;
+      bfd_vma dest;
+
+      if (r_type == R_MICROMIPS_PC16_S1)
+	{
+	  ok = opcode == 0x4060;
+	  jalx_opcode = 0x3c;
+	  value <<= 1;
+	}
+      else if (r_type == R_MIPS_PC16 || r_type == R_MIPS_GNU_REL16_S2)
+	{
+	  ok = opcode == 0x411;
+	  jalx_opcode = 0x1d;
+	  value <<= 2;
+	}
+
+      if (bfd_link_pic (info) || !ok)
+	{
+	  info->callbacks->einfo
+	    (_("%X%H: Unsupported branch between ISA modes\n"),
+	     input_bfd, input_section, relocation->r_offset);
+	  return TRUE;
+	}
+
+      addr = (input_section->output_section->vma
+	      + input_section->output_offset
+	      + relocation->r_offset
+	      + 4);
+      dest = addr + (((value & 0x3ffff) ^ 0x20000) - 0x20000);
+
+      if ((addr >> 28) << 28 != (dest >> 28) << 28)
+	{
+	  info->callbacks->einfo
+	    (_("%X%H: Cannot convert branch between ISA modes "
+	       "to JALX: relocation out of range\n"),
+	     input_bfd, input_section, relocation->r_offset);
+	  return TRUE;
+	}
+
+      /* Make this the JALX opcode.  */
+      x = ((dest >> 2) & 0x3ffffff) | jalx_opcode << 26;
     }
 
   /* Try converting JAL to BAL and J(AL)R to B(AL), if the target is in
@@ -10296,9 +10423,17 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case bfd_reloc_outofrange:
 	  msg = NULL;
 	  if (jal_reloc_p (howto->type))
-	    msg = _("JALX to a non-word-aligned address");
+	    msg = (cross_mode_jump_p
+		   ? _("Cannot convert a jump to JALX "
+		       "for a non-word-aligned address")
+		   : (howto->type == R_MIPS16_26
+		      ? _("Jump to a non-word-aligned address")
+		      : _("Jump to a non-instruction-aligned address")));
 	  else if (b_reloc_p (howto->type))
-	    msg = _("Branch to a non-instruction-aligned address");
+	    msg = (cross_mode_jump_p
+		   ? _("Cannot convert a branch to JALX "
+		       "for a non-word-aligned address")
+		   : _("Branch to a non-instruction-aligned address"));
 	  else if (aligned_pcrel_reloc_p (howto->type))
 	    msg = _("PC-relative load from unaligned address");
 	  if (msg)

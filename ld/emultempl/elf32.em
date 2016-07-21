@@ -1027,6 +1027,20 @@ gld${EMULATION_NAME}_after_open (void)
   if (!is_elf_hash_table (htab))
     return;
 
+  if (command_line.out_implib_filename)
+    {
+      unlink_if_ordinary (command_line.out_implib_filename);
+      link_info.out_implib_bfd
+	= bfd_openw (command_line.out_implib_filename,
+		     bfd_get_target (link_info.output_bfd));
+
+      if (link_info.out_implib_bfd == NULL)
+	{
+	  einfo ("%F%s: Can't open for writing: %E\n",
+		 command_line.out_implib_filename);
+	}
+    }
+
   if (emit_note_gnu_build_id != NULL)
     {
       bfd *abfd;

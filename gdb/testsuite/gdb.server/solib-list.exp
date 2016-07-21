@@ -71,6 +71,11 @@ foreach nonstop { 0 1 } { with_test_prefix "non-stop $nonstop" {
     # displaced-stepping buffer at unmapped that time address _start.
     gdb_test "set displaced-stepping off"
 
+    # Unset last_loaded_file because we want GDBserver spawn
+    # ${interp_system} not ${last_loaded_file}.
+    global last_loaded_file
+    unset -nocomplain last_loaded_file
+
     # Note we pass ${interp_system}, the program gdbserver spawns, as
     # argument here, instead of using gdb_load, because we don't want
     # to download the interpreter to the target (it's already there)

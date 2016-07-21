@@ -57,7 +57,6 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 	    int target_does_save)
 {
   struct trace_status *ts = current_trace_status ();
-  int status;
   struct uploaded_tp *uploaded_tps = NULL, *utp;
   struct uploaded_tsv *uploaded_tsvs = NULL, *utsv;
 
@@ -77,8 +76,10 @@ trace_save (const char *filename, struct trace_file_writer *writer,
     }
 
   /* Get the trace status first before opening the file, so if the
-     target is losing, we can get out without touching files.  */
-  status = target_get_trace_status (ts);
+     target is losing, we can get out without touching files.  Since
+     we're just calling this for side effects, we ignore the
+     result.  */
+  target_get_trace_status (ts);
 
   writer->ops->start (writer, filename);
 

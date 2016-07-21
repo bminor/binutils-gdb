@@ -1,3 +1,242 @@
+2016-07-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Replace
+	"targets_to_xfail" parameter with "args".
+	* testsuite/ld-elf/compress.exp: Remove empty list of xfails on
+	all calls to run_ld_link_exec_tests.
+	* testsuite/ld-elf/dwarf.exp: Likewise.
+	* testsuite/ld-elf/indirect.exp: Likewise.
+	* testsuite/ld-elf/wrap.exp: Likewise.
+	* testsuite/ld-i386/i386.exp: Likewise.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
+	* testsuite/ld-i386/tls.exp: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-pie/pie.exp: Likewise.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/ld-size/size.exp: Likewise.
+	* testsuite/ld-x86-64/mpx.exp: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Likewise.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-elf/elf.exp: Likewise.  Reorder args when providing
+	xfails and simplify lists.
+	* testsuite/ld-elf/shared.exp: Likewise.
+
+2016-07-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (run_ld_link_tests): Add optional
+	parameter to pass list of xfails.
+	* testsuite/ld-elf/elf.exp: Add xfails for implib tests.  Tidy
+	implib test formatting.  Don't set .data start address.
+	* testsuite/ld-elf/implib.s: Remove first .bss directive and
+	replace second one with equivalent .section directive.
+	* testsuite/ld-elf/empty-implib.out: Add expected final error.
+	* testsuite/ld-elf/implib.rd: Update.
+
+2016-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20376
+	* elf.c (assign_file_positions_for_load_sections): Also check
+	p_paddr for program header space.
+
+2016-07-20  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_unop, exp_binop, exp_trinop, exp_nameop): Don't
+	fold expression.
+	* testsuite/ld-elf/maxpage3b.d: Expect correct maxpagesize.
+
+2016-07-19  Roland McGrath  <roland@hack.frob.com>
+
+	* emulparams/aarch64elf.sh (GENERATE_PIE_SCRIPT): Set to yes.
+	* emulparams/aarch64elf32.sh: Likewise.
+
+2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-branch-2.d: Update error
+	messages expected.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-mips16.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-addend.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-local.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-addend-n32.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-local-n32.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-n32.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-addend-n64.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-local-n64.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-n64.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-3.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-3.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jalx-2.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-jalx-3.s: New test source.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-2.s: New test
+	source.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-3.s: New test
+	source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/unaligned-jalx-1.d: Update error message
+	expected.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-mips16-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-micromips-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-mips16-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-micromips-1.d: Likewise.
+	* testsuite/ld-mips-elf/undefweak-overflow.s: Add jumps,
+	microMIPS BAL and MIPS16 instructions.
+	* testsuite/ld-mips-elf/undefweak-overflow.d: Update
+	accordingly.
+	* testsuite/ld-mips-elf/unaligned-branch-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-1.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-mips16.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-micromips.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jump-mips16.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jump-micromips.d: New test.
+	* testsuite/ld-mips-elf/unaligned-jump.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-07-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* plugin.c (plugin_call_claim_file): Restore the file offset after
+	an unsuccessful attempt to claim a file.
+	* testplug.c (bytes_to_read_before_claim): New global.
+	(record_read_length): New function, sets new global
+	bytes_to_read_before_claim.
+	(parse_option): Handle 'read:<NUMBER>' option.
+	(onclaim_file): Read file content before checking for claim.
+	* testsuite/ld-plugin/plugin-30.d: New file.
+	* testsuite/ld-plugin/plugin.exp: Add new test.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c: Don't include libbfd.h.  Include plugin-api.h
+	before bfd/plugin.h.
+	(plugin_object_p): Use bfd_plugin_open_input.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (open_output): Replace bfd_search_for_target with
+	bfd_iterate_over_targets.  Localize vars.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c: Don't include libbfd.h.
+	* emultempl/nds32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	(pagesize): Delete.
+	(params): Update init.
+	(ppc_after_open_output): Use params.pagesize.  Don't call bfd_log2.
+	(PARSE_AND_LIST_ARGS_CASES): Use params.pagesize.
+	* emultempl/sh64elf.em: Don't include libbfd.h.
+	(after_allocation): Use ASSERT, not BFD_ASSERT.
+	* emultempl/xtensaelf.em: Don't include libbfd.h.
+	(replace_insn_sec_with_prop_sec): Use xmalloc, not bfd_malloc.
+	* Makefile.am: Update dependencies.
+	* Makefile.in: Regenerate.
+
+2016-07-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Open import
+	library file for writing and initialize implib_bfd field of link_info
+	structure.
+	* emultempl/pe.em (pe_implib_filename): Remove variable declaration.
+	(OPTION_IMPLIB_FILENAME): Remove macro definition.
+	(gld${EMULATION_NAME}_add_options): Remove --out-implib option.
+	(gld_${EMULATION_NAME}_list_options): Likewise.
+	(gld${EMULATION_NAME}_handle_option): Likewise.
+	(gld_${EMULATION_NAME}_finish): Use command_line.out_implib_filename
+	instead of pe_implib_filename.
+	* emultempl/pep.em (pep_implib_filename): Remove variable declaration.
+	(OPTION_IMPLIB_FILENAME): Remove enumerator.
+	(gld${EMULATION_NAME}_add_options): Remove --out-implib option.
+	(gld_${EMULATION_NAME}_list_options): Likewise.
+	(gld${EMULATION_NAME}_handle_option): Likewise.
+	(gld_${EMULATION_NAME}_finish): Use command_line.out_implib_filename
+	instead of pep_implib_filename.
+	* ld.h (args_type): Declare new out_implib_filename field.
+	* ld.texinfo (--out-implib): Move documentation to arch-independent
+	part and rephrase to apply to ELF targets.
+	* ldexp.c (exp_fold_tree_1): Set ldscript_def field to 1 for symbols
+	defined in linker scripts.
+	* ldlex.h (enum option_values): Declare new OPTION_OUT_IMPLIB
+	enumerator.
+	* lexsup.c (ld_options): Add entry for new --out-implib switch.
+	(parse_args): Handle OPTION_OUT_IMPLIB case.
+	* testsuite/ld-elf/elf.exp (Generate empty import library): New test.
+	(Generate import library): Likewise.
+	* testsuite/ld-elf/implib.s: Likewise.
+	* testsuite/ld-elf/implib.rd: New file.
+	* testsuite/ld-elf/empty-implib.out: Likewise
+
+2016-07-15  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-arc/arc.exp: Always run the sda-relocs test in
+	little endian mode.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips-elf.exp: Run
+	`branch-absolute-addend', `mips16-branch-absolute',
+	`mips16-branch-absolute-addend' and
+	`micromips-branch-absolute-addend'.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16-branch-absolute.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests, except
+	from `mips16-branch-absolute' and
+	`mips16-branch-absolute-addend', referred indirectly only.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/branch-absolute.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-n32.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-n64.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-addend.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-addend-n32.d: New test.
+	* testsuite/ld-mips-elf/branch-absolute-addend-n64.d: New test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute.d: New test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend.d: New
+	test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend-n32.d:
+	New test.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend-n64.d:
+	New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests, except
+	from `branch-absolute-addend' and
+	`micromips-branch-absolute-addend', referred indirectly only.
+
+2016-07-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* emulparams/arcelf.sh (SDATA_START_SYMBOLS): Add offset.
+	* testsuite/ld-arc/sda-relocs.dd: New file.
+	* testsuite/ld-arc/sda-relocs.ld: Likewise.
+	* testsuite/ld-arc/sda-relocs.rd: Likewise.
+	* testsuite/ld-arc/sda-relocs.s: Likewise.
+	* testsuite/ld-arc/arc.exp: Add SDA tests.
+
 2016-07-11  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/ld-arc/nps-1b.err: Update test to handle more
@@ -864,7 +1103,7 @@
 	* testsuite/ld-plugin/pr20103c.c: Likewise.
 
 2016-05-24  Maciej W. Rozycki  <macro@imgtec.com>
-    
+
 	* testsuite/ld-mips-elf/jalx-local.d: New test.
 	* testsuite/ld-mips-elf/jalx-local-n32.d: New test.
 	* testsuite/ld-mips-elf/jalx-local-n64.d: New test.

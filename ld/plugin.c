@@ -21,7 +21,6 @@
 #include "sysdep.h"
 #include "libiberty.h"
 #include "bfd.h"
-#include "libbfd.h"
 #include "bfdlink.h"
 #include "bfdver.h"
 #include "ld.h"
@@ -30,9 +29,9 @@
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "plugin-api.h"
 #include "../bfd/plugin.h"
 #include "plugin.h"
-#include "plugin-api.h"
 #include "elf-bfd.h"
 #if HAVE_MMAP
 # include <sys/mman.h>
@@ -1050,9 +1049,14 @@ plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed)
     {
       if (curplug->claim_file_handler)
 	{
+	  off_t cur_offset;
 	  enum ld_plugin_status rv;
+
 	  called_plugin = curplug;
+	  cur_offset = lseek (file->fd, 0, SEEK_CUR);
 	  rv = (*curplug->claim_file_handler) (file, claimed);
+	  if (!*claimed)
+	    lseek (file->fd, cur_offset, SEEK_SET);
 	  called_plugin = NULL;
 	  if (rv != LDPS_OK)
 	    set_plugin_error (curplug->name);
@@ -1083,12 +1087,8 @@ plugin_object_p (bfd *ibfd)
 {
   int claimed;
   plugin_input_file_t *input;
-  off_t offset, filesize;
   struct ld_plugin_input_file file;
   bfd *abfd;
-  bfd_boolean inarchive;
-  const char *name;
-  int fd;
 
   /* Don't try the dummy object file.  */
   if ((ibfd->flags & BFD_PLUGIN) != 0)
@@ -1102,14 +1102,6 @@ plugin_object_p (bfd *ibfd)
 	return NULL;
     }
 
-  inarchive = (ibfd->my_archive != NULL
-	       && !bfd_is_thin_archive (ibfd->my_archive));
-  name = inarchive ? ibfd->my_archive->filename : ibfd->filename;
-  fd = open (name, O_RDONLY | O_BINARY);
-
-  if (fd < 0)
-    return NULL;
-
   /* We create a dummy BFD, initially empty, to house whatever symbols
      the plugin may want to add.  */
   abfd = plugin_get_ir_dummy_bfd (ibfd->filename, ibfd);
@@ -1119,39 +1111,31 @@ plugin_object_p (bfd *ibfd)
     einfo (_("%P%F: plugin failed to allocate memory for input: %s\n"),
 	   bfd_get_error ());
 
-  if (inarchive)
-    {
-      /* Offset and filesize must refer to the individual archive
-	 member, not the whole file, and must exclude the header.
-	 Fortunately for us, that is how the data is stored in the
-	 origin field of the bfd and in the arelt_data.  */
-      offset = ibfd->origin;
-      filesize = arelt_size (ibfd);
-    }
-  else
-    {
-      offset = 0;
-      filesize = lseek (fd, 0, SEEK_END);
+  if (!bfd_plugin_open_input (ibfd, &file))
+    return NULL;
 
+  if (file.name == ibfd->filename)
+    {
       /* We must copy filename attached to ibfd if it is not an archive
 	 member since it may be freed by bfd_close below.  */
-      name = plugin_strdup (abfd, name);
+      file.name = plugin_strdup (abfd, file.name);
     }
 
-  file.name = name;
-  file.offset = offset;
-  file.filesize = filesize;
-  file.fd = fd;
   file.handle = input;
+  /* The plugin API expects that the file descriptor won't be closed
+     and reused as done by the bfd file cache.  So dup one.  */
+  file.fd = dup (file.fd);
+  if (file.fd < 0)
+    return NULL;
 
   input->abfd = abfd;
   input->view_buffer.addr = NULL;
   input->view_buffer.filesize = 0;
   input->view_buffer.offset = 0;
-  input->fd = fd;
+  input->fd = file.fd;
   input->use_mmap = FALSE;
-  input->offset = offset;
-  input->filesize = filesize;
+  input->offset = file.offset;
+  input->filesize = file.filesize;
   input->name = plugin_strdup (abfd, ibfd->filename);
 
   claimed = 0;
@@ -1160,7 +1144,7 @@ plugin_object_p (bfd *ibfd)
     einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
 
-  if (input->fd != -1 && ! bfd_plugin_target_p (ibfd->xvec))
+  if (input->fd != -1 && !bfd_plugin_target_p (ibfd->xvec))
     {
       /* FIXME: fd belongs to us, not the plugin.  GCC plugin, which
 	 doesn't need fd after plugin_call_claim_file, doesn't use
@@ -1170,7 +1154,7 @@ plugin_object_p (bfd *ibfd)
 	 release_input_file after it is done, uses BFD plugin target
 	 vector.  This scheme doesn't work when a plugin needs fd and
 	 doesn't use BFD plugin target vector neither.  */
-      close (fd);
+      close (input->fd);
       input->fd = -1;
     }
 

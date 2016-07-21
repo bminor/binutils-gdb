@@ -2453,7 +2453,6 @@ varobj_value_get_print_value (struct value *value,
   struct type *type = NULL;
   long len = 0;
   char *encoding = NULL;
-  struct gdbarch *gdbarch = NULL;
   /* Initialize it just to avoid a GCC false warning.  */
   CORE_ADDR str_addr = 0;
   int string_print = 0;
@@ -2464,7 +2463,6 @@ varobj_value_get_print_value (struct value *value,
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  gdbarch = get_type_arch (value_type (value));
 #if HAVE_PYTHON
   if (gdb_python_initialized)
     {
@@ -2518,6 +2516,7 @@ varobj_value_get_print_value (struct value *value,
 
 		      if (s)
 			{
+			  struct gdbarch *gdbarch;
 			  char *hint;
 
 			  hint = gdbpy_get_display_hint (value_formatter);
@@ -2530,6 +2529,7 @@ varobj_value_get_print_value (struct value *value,
 
 			  len = strlen (s);
 			  thevalue = (char *) xmemdup (s, len + 1, len + 1);
+			  gdbarch = get_type_arch (value_type (value));
 			  type = builtin_type (gdbarch)->builtin_char;
 			  xfree (s);
 

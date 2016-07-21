@@ -1,3 +1,95 @@
+2016-07-20  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* doc/binutils.texi (objdump): Add ARC disassembler options.
+	* testsuite/binutils-all/arc/dsp.s: New file.
+	* testsuite/binutils-all/arc/objdump.exp: Likewise.
+	* NEWS: Mention the new feature.
+
+2016-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi (objcopy): Note that the localize symbol
+	options do not affect unique symbols.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* ar.c: Include plugin-api.h.
+	* nm.c: Likewise.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* bucomm.c: Don't include libbfd.h.
+	(endian_string, display_target_list): Delete forward declaration.
+	(display_info_table, display_target_tables): Likewise.
+	(LONGEST_ARCH): Delete.
+	(struct display_target): New.
+	(do_display_target): New function.
+	(display_target_list, display_info): Rewrite functions.
+	(display_info_table): Delete.
+	(do_info_size, do_info_header, do_info_row): New functions.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.h (HOST_WIDEST_INT): Move to..
+	* sysdep.h: ..here.
+	* od-macho.c: Don't include libbfd.h.  Do include dwarf.h
+	(dump_dyld_info_rebase): Use read_leb128 rather than
+	read_unsigned_leb128.
+	(dump_dyld_info_bind, dump_dyld_info_export_1): Likewise.
+	(dump_segment_split_info): Likewise.
+	(dump_dyld_info): Rename vars to avoid shadowing dwarf.h enums.
+	(dump_load_command): Likewise.
+
+2016-07-16  Alan Modra  <amodra@gmail.com>
+
+	* ar.c: Don't include libbfd.h.
+	* objcopy.c: Likewise.
+	* bucomm.c (bfd_get_archive_filename): Use xmalloc rather than
+	bfd_malloc.
+
+2016-07-15  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/remove-relocs-01.s: Use .dc.a, not .word.
+
+2016-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/binutils.texi (objcopy): Document 'remove-relocations'.
+	(strip): Likewise.
+	* objcopy.c (SECTION_CONTEXT_REMOVE_RELOCS): Define.
+	(enum command_line_switch): Add 'OPTION_REMOVE_RELOCS'.
+	(struct option strip_options): Add 'remove-relocations'.
+	(struct option copy_options): Likewise.
+	(copy_usage): Likewise.
+	(strip_usage): Likewise.
+	(handle_remove_relocations_option): New function.
+	(discard_relocations): New function.
+	(handle_remove_section_option): New function.
+	(copy_relocations_in_section): Use discard_relocations.
+	(strip_main): Use handle_remove_section_option for
+	'remove-section', and handle 'remove-relocations' option.
+	(copy_main): Likewise.
+	* testsuite/binutils-all/objcopy.exp: Run new tests.
+	* testsuite/binutils-all/remove-relocs-01.d: New file.
+	* testsuite/binutils-all/remove-relocs-01.s: New file.
+	* testsuite/binutils-all/remove-relocs-02.d: New file.
+	* testsuite/binutils-all/remove-relocs-03.d: New file.
+	* testsuite/binutils-all/remove-relocs-04.d: New file.
+	* testsuite/binutils-all/remove-relocs-05.d: New file.
+	* testsuite/binutils-all/remove-relocs-06.d: New file.
+	* NEWS: Mention new option.
+
+2016-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (find_section_list): Handle section patterns starting
+	with '!' being a non-matching pattern.
+	* doc/binutils.texi (objcopy): Give example of using '!' with
+	--remove-section and --only-section.
+	(strip): Give example of using '!' with --remove-section.
+	* testsuite/binutils-all/data-sections.s: New file.
+	* testsuite/binutils-all/only-section-01.d: New file.
+	* testsuite/binutils-all/remove-section-01.d: New file.
+	* testsuite/binutils-all/objcopy.exp: Run new tests.
+	* NEWS: Mention new feature.
+
 2016-07-09  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/20337

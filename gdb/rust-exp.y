@@ -428,10 +428,14 @@ struct_expr_tail:
 		}
 ;
 
-/* S{} is documented as valid but seems to be an unstable feature, so
-   it is left out here.  */
 struct_expr_list:
-	struct_expr_tail
+	/* %empty */
+		{
+		  VEC (set_field) **result
+		    = OBSTACK_ZALLOC (&work_obstack, VEC (set_field) *);
+		  $$ = result;
+		}
+|	struct_expr_tail
 		{
 		  VEC (set_field) **result
 		    = OBSTACK_ZALLOC (&work_obstack, VEC (set_field) *);
@@ -968,17 +972,15 @@ super_name (const struct rust_op *ident, unsigned int n_supers)
       int i;
       int len;
       VEC (int) *offsets = NULL;
-      unsigned int current_len, previous_len;
+      unsigned int current_len;
       struct cleanup *cleanup;
 
       cleanup = make_cleanup (VEC_cleanup (int), &offsets);
       current_len = cp_find_first_component (scope);
-      previous_len = 0;
       while (scope[current_len] != '\0')
 	{
 	  VEC_safe_push (int, offsets, current_len);
 	  gdb_assert (scope[current_len] == ':');
-	  previous_len = current_len;
 	  /* The "::".  */
 	  current_len += 2;
 	  current_len += cp_find_first_component (scope

@@ -1,3 +1,119 @@
+2016-07-21  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (find_gdb_breakpoint): Cast bp to
+	'struct gdb_breakpoint *' rather than 'gdb_breakpoint *'.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* server.c (handle_v_requests): Support s and S actions
+	if target_supports_software_single_step return true.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (resume_stopped_resumed_lwps): If resume request
+	is resume_step, call maybe_hw_step.
+	(linux_wait_1): Stop all threads, remove reinsert breakpoints,
+	and unstop them.
+	(linux_resume_one_lwp_throw): Don't assert the thread has reinsert
+	breakpoints or not.
+	(proceed_one_lwp): If resume request is resume_step, install
+	reinsert breakpoints and call maybe_hw_step.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (proceed_one_lwp): Declare.
+	(linux_resume_one_thread): Remove local variable 'step'.
+	Lift code enqueue signal.  Call proceed_one_lwp instead of
+	linux_resume_one_lwp.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_resume_one_thread): Call
+	enqueue_pending_signal.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* gdbthread.h (make_cleanup_restore_current_thread): Declare.
+	* inferiors.c (do_restore_current_thread_cleanup): New function.
+	(make_cleanup_restore_current_thread): Likewise.
+	* linux-low.c (install_software_single_step_breakpoints): Call
+	make_cleanup_restore_current_thread.  Switch current_thread to
+	thread.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (struct reinsert_breakpoint) <ptid>: New field.
+	(set_reinsert_breakpoint): New parameter ptid.  Callers updated.
+	(clone_one_breakpoint): Likewise.
+	(delete_reinsert_breakpoints): Change parameter to thread.
+	Callers updated.
+	(has_reinsert_breakpoints): Likewise.
+	(uninsert_reinsert_breakpoints): Likewise.
+	(reinsert_reinsert_breakpoints): Likewise.
+	* mem-break.h (set_reinsert_breakpoint): Update declaration.
+	(delete_reinsert_breakpoints): Likewise.
+	(reinsert_reinsert_breakpoints): Likewise.
+	(uninsert_reinsert_breakpoints): Likewise.
+	(has_reinsert_breakpoints): Likewise.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* inferiors.c (get_thread_process): Make parameter const.
+	* inferiors.h (get_thread_process): Update declaration.
+	* mem-break.c (clone_all_breakpoints): Remove all parameters.
+	Add new parameters child_thread and parent_thread.  Callers
+	updated.
+	* mem-break.h (clone_all_breakpoints): Update declaration.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (struct breakpoint) <cond_list>: Remove.
+	<command_list, handler>: Remove.
+	(struct gdb_breakpoint): New.
+	(struct other_breakpoint): New.
+	(struct reinsert_breakpoint): New.
+	(is_gdb_breakpoint): New function.
+	(any_persistent_commands): Update command_list if
+	is_gdb_breakpoint returns true.
+	(set_breakpoint): Create breakpoints according to their types.
+	(find_gdb_breakpoint): Return 'struct gdb_breakpoint *'.
+	(set_gdb_breakpoint_1): Likewise.
+	(set_gdb_breakpoint): Likewise.
+	(clear_breakpoint_conditions): Change parameter type to
+	'struct gdb_breakpoint *'.
+	(clear_breakpoint_commands): Likewise.
+	(clear_breakpoint_conditions_and_commands): Likewise.
+	(add_condition_to_breakpoint): Likewise.
+	(add_breakpoint_condition): Likewise.
+	(add_commands_to_breakpoint): Likewise.
+	(check_breakpoints): Check other_breakpoint.
+	(clone_one_breakpoint): Clone breakpopint according to its type.
+	* mem-break.h (struct gdb_breakpoint): Declare.
+	(set_gdb_breakpoint): Update declaration.
+	(clear_breakpoint_conditions_and_commands): Likewise.
+	(add_breakpoint_condition): Likewise.
+	(add_breakpoint_commands): Likewise.
+	* server.c (process_point_options): Change parameter type to
+	'struct gdb_breakpoint *'.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (set_breakpoint_at): Rename it to ...
+	(set_breakpoint_type_at): ... it.
+	(set_breakpoint_at): Call set_breakpoint_type_at.
+	(set_reinsert_breakpoint): Call set_breakpoint_type_at.
+	* mem-break.h (set_breakpoint_at): Update comments.
+
+2016-07-12  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* linux-nios2-low.c (nios2_fill_gregset): Add type cast
+	to buf parameter.
+	(nios2_store_gregset): Likewise.
+
 2016-07-01  Pedro Alves  <palves@redhat.com>
 	    Antoine Tremblay  <antoine.tremblay@ericsson.com>
 

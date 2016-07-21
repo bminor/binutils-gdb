@@ -136,6 +136,41 @@ foreach t $test_list {
     run_dump_test [file rootname $t]
 }
 
+# Targets using the generic linker backend don't support generating
+# an import library.
+set xfail_implib ""
+if { [istarget "d30v-*-*"]
+     || [istarget "dlx-*-*"]
+     || [istarget "fr30-*-*"]
+     || ([istarget "frv-*-*"] && ![istarget "frv-*-linux*"])
+     || [istarget "ft32-*-*"]
+     || [istarget "i860-*-*"]
+     || [istarget "i960-*-*"]
+     || [istarget "iq2000-*-*"]
+     || [istarget "mn10200-*-*"]
+     || [istarget "moxie-*-*"]
+     || [istarget "msp430-*-*"]
+     || [istarget "mt-*-*"]
+     || [istarget "pj*-*-*"] } {
+    set xfail_implib "*-*-*"
+}
+
+# Check that the --out-implib option work correctly.
+run_ld_link_tests {
+    {"Generate empty import library"
+	"--out-implib=tmpdir/implib.lib" ""
+	"--defsym NO_GLOBAL=1"
+	{implib.s}
+	{{ld empty-implib.out}}
+	"implib"}
+    {"Generate import library"
+	"--out-implib=tmpdir/implib.lib" ""
+	""
+	{implib.s}
+	{{readelf {-s tmpdir/implib.lib} implib.rd}}
+	"implib"}
+} $xfail_implib
+
 if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
@@ -205,22 +240,22 @@ set array_tests_static {
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
-set xfails [list "*-*-netbsdelf*"]
-run_ld_link_exec_tests $xfails $array_tests
+set xfails "*-*-netbsdelf*"
+run_ld_link_exec_tests $array_tests $xfails
 
 if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
-    run_ld_link_exec_tests $xfails $array_tests_pie
+    run_ld_link_exec_tests $array_tests_pie $xfails
 }
 
+# <http://www.gnu.org/software/hurd/open_issues/binutils.html#static>
 # Be cautious to not XFAIL for *-*-linux-gnu*, *-*-kfreebsd-gnu*, etc.
 switch -regexp $target_triplet {
     ^\[^-\]*-\[^-\]*-gnu.*$ {
-	# <http://www.gnu.org/software/hurd/open_issues/binutils.html#static>
-	lappend xfails "*-*-*"
+	set xfails "*-*-*"
     }
 }
-run_ld_link_exec_tests $xfails $array_tests_static
+run_ld_link_exec_tests $array_tests_static $xfails
 
 catch "exec rm -f tmpdir/preinit tmpdir/init tmpdir/fini tmpdir/init-mixed" status

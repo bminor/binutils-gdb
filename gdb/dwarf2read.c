@@ -4497,12 +4497,12 @@ read_abbrev_offset (struct dwarf2_section_info *section,
 {
   bfd *abfd = get_section_bfd_owner (section);
   const gdb_byte *info_ptr;
-  unsigned int length, initial_length_size, offset_size;
+  unsigned int initial_length_size, offset_size;
   sect_offset abbrev_offset;
 
   dwarf2_read_section (dwarf2_per_objfile->objfile, section);
   info_ptr = section->buffer + offset.sect_off;
-  length = read_initial_length (abfd, info_ptr, &initial_length_size);
+  read_initial_length (abfd, info_ptr, &initial_length_size);
   offset_size = initial_length_size == 4 ? 4 : 8;
   info_ptr += initial_length_size + 2 /*version*/;
   abbrev_offset.sect_off = read_offset_1 (abfd, info_ptr, offset_size);
@@ -21578,9 +21578,10 @@ dwarf_decode_macro_bytes (bfd *abfd,
 	  if (!section_is_gnu)
 	    {
 	      unsigned int bytes_read;
-	      int constant;
 
-	      constant = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	      /* This reads the constant, but since we don't recognize
+		 any vendor extensions, we ignore it.  */
+	      read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
 	      mac_ptr += bytes_read;
 	      read_direct_string (abfd, mac_ptr, &bytes_read);
 	      mac_ptr += bytes_read;

@@ -25,6 +25,7 @@
 
 /* Breakpoints are opaque.  */
 struct breakpoint;
+struct gdb_breakpoint;
 struct fast_tracepoint_jump;
 struct raw_breakpoint;
 struct process_info;
@@ -70,8 +71,8 @@ enum target_hw_bp_type raw_bkpt_type_to_target_hw_bp_type
    failure returns NULL and sets *ERR to either -1 for error, or 1 if
    Z_TYPE breakpoints are not supported on this target.  */
 
-struct breakpoint *set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind,
-				       int *err);
+struct gdb_breakpoint *set_gdb_breakpoint (char z_type, CORE_ADDR addr,
+					   int kind, int *err);
 
 /* Delete a GDB breakpoint of type Z_TYPE and kind KIND previously
    inserted at ADDR with set_gdb_breakpoint_at.  Returns 0 on success,
@@ -107,20 +108,20 @@ int reinsert_breakpoint_inserted_here (CORE_ADDR addr);
 /* Clear all breakpoint conditions and commands associated with a
    breakpoint.  */
 
-void clear_breakpoint_conditions_and_commands (struct breakpoint *bp);
+void clear_breakpoint_conditions_and_commands (struct gdb_breakpoint *bp);
 
 /* Set target-side condition CONDITION to the breakpoint at ADDR.
    Returns false on failure.  On success, advances CONDITION pointer
    past the condition and returns true.  */
 
-int add_breakpoint_condition (struct breakpoint *bp, char **condition);
+int add_breakpoint_condition (struct gdb_breakpoint *bp, char **condition);
 
 /* Set target-side commands COMMANDS to the breakpoint at ADDR.
    Returns false on failure.  On success, advances COMMANDS past the
    commands and returns true.  If PERSIST, the commands should run
    even while GDB is disconnected.  */
 
-int add_breakpoint_commands (struct breakpoint *bp, char **commands,
+int add_breakpoint_commands (struct gdb_breakpoint *bp, char **commands,
 			     int persist);
 
 int any_persistent_commands (void);
@@ -141,7 +142,8 @@ int gdb_breakpoint_here (CORE_ADDR where);
 
 /* Create a new breakpoint at WHERE, and call HANDLER when
    it is hit.  HANDLER should return 1 if the breakpoint
-   should be deleted, 0 otherwise.  */
+   should be deleted, 0 otherwise.  The type of the created
+   breakpoint is other_breakpoint.  */
 
 struct breakpoint *set_breakpoint_at (CORE_ADDR where,
 				      int (*handler) (CORE_ADDR));
@@ -150,31 +152,32 @@ struct breakpoint *set_breakpoint_at (CORE_ADDR where,
 
 int delete_breakpoint (struct breakpoint *bkpt);
 
-/* Set a reinsert breakpoint at STOP_AT.  */
+/* Set a reinsert breakpoint at STOP_AT for thread represented by
+   PTID.  */
 
-void set_reinsert_breakpoint (CORE_ADDR stop_at);
+void set_reinsert_breakpoint (CORE_ADDR stop_at, ptid_t ptid);
 
-/* Delete all reinsert breakpoints.  */
+/* Delete all reinsert breakpoints of THREAD.  */
 
-void delete_reinsert_breakpoints (void);
+void delete_reinsert_breakpoints (struct thread_info *thread);
 
-/* Reinsert all reinsert breakpoints of the current process.  */
+/* Reinsert all reinsert breakpoints of THREAD.  */
 
-void reinsert_reinsert_breakpoints (void);
+void reinsert_reinsert_breakpoints (struct thread_info *thread);
 
-/* Uninsert all reinsert breakpoints of the current process.  This
-   still leaves the reinsert breakpoints in the table.  */
+/* Uninsert all reinsert breakpoints of THREAD.  This still leaves
+   the reinsert breakpoints in the table.  */
 
-void uninsert_reinsert_breakpoints (void);
+void uninsert_reinsert_breakpoints (struct thread_info *thread);
 
 /* Reinsert breakpoints at WHERE (and change their status to
    inserted).  */
 
 void reinsert_breakpoints_at (CORE_ADDR where);
 
-/* Process PROC has reinsert breakpoints or not.  */
+/* The THREAD has reinsert breakpoints or not.  */
 
-int has_reinsert_breakpoints (struct process_info *proc);
+int has_reinsert_breakpoints (struct thread_info *thread);
 
 /* Uninsert breakpoints at WHERE (and change their status to
    uninserted).  This still leaves the breakpoints in the table.  */
@@ -265,10 +268,10 @@ int insert_memory_breakpoint (struct raw_breakpoint *bp);
 
 int remove_memory_breakpoint (struct raw_breakpoint *bp);
 
-/* Create a new breakpoint list NEW_BKPT_LIST that is a copy of SRC.  */
+/* Create a new breakpoint list in CHILD_THREAD's process that is a
+   copy of breakpoint list in PARENT_THREAD's process.  */
 
-void clone_all_breakpoints (struct breakpoint **new_bkpt_list,
-			    struct raw_breakpoint **new_raw_bkpt_list,
-			    const struct breakpoint *src);
+void clone_all_breakpoints (struct thread_info *child_thread,
+			    const struct thread_info *parent_thread);
 
 #endif /* MEM_BREAK_H */

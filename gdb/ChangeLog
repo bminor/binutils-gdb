@@ -1,3 +1,178 @@
+2016-07-21  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_tuple_struct_type_p): Return false for empty
+	structs.
+	* rust-exp.y (struct_expr_list): Allow empty elements.
+
+2016-07-21  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* warning.m4 (AM_GDB_WARNINGS) <build_warnings>: Add
+	-Wunused-but-set-parameter, -Wunused-but-set-variable.
+
+2016-07-21  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c (go32_create_inferior): Add cast.
+	* ser-go32.c (dos_noop): Delete.
+	(dos_flush_output, dos_setparity, dos_drain_output): New
+	functions.
+	(dos_write): Add cast.
+	(dos_ops): Use dos_flush_output, dos_setparity and
+	dos_drain_output.
+	* top.c (do_chdir_cleanup): Add cast.
+
+2016-07-21  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (handle_exception): Remove "th".
+
+2016-07-21  Pedro Alves  <palves@redhat.com>
+
+	* varobj.c (varobj_value_get_print_value): Move "gdbarch" to block
+	scope that uses it.
+
+2016-07-20  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_enable_proc_events): Enable "PTRACE_VFORK"
+	events.
+	(fbsd_pending_vfork_done): Only define if "PTRACE_VFORK" is not
+	defined.
+	(fbsd_add_vfork_done): Likewise.
+	(fbsd_is_vfork_done_pending): Likewise.
+	(fbsd_next_vfork_done): Likewise.
+	(fbsd_resume): Only ignore pending vfork done events if
+	"PTRACE_VFORK" is not defined.
+	(fbsd_wait): Only look for pending vfork done events if
+	"PTRACE_VFORK" is not defined.
+	[PTRACE_VFORK]: Handle "PL_FLAG_VFORKED" and "PL_FLAG_VFORK_DONE"
+	events.
+	(fbsd_follow_fork): Only fake a vfork done event if "PTRACE_VFORK"
+	is not defined.
+
+2016-07-20  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_wait): Use "fbsd_enable_proc_events" on
+	new child processes.
+
+2016-07-20  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_enable_lwp_events): Remove function.
+	(fbsd_enable_proc_events): New function.
+	(fbsd_enable_follow_fork): Remove function.
+	(fbsd_post_startup_inferior): Use "fbsd_enable_proc_events".
+	(fbsd_post_attach): Likewise.
+
+2016-07-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* common/signals.c (gdb_signal_from_host): Handle SIGLIBRT.
+	(do_gdb_signal_to_host): Likewise.
+	* infrun.c (_initialize_infrun): Pass GDB_SIGNAL_LIBRT through to
+	programs.
+	* proc-events.c (signal_table): Add entry for SIGLIBRT.
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
+	* python/py-breakpoint.c (gdbpy_breakpoint_deleted): Add missing
+	newline.
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
+	* mips-tdep.c (micromips_scan_prologue): Remove "frame_addr".
+	(mips_o32_push_dummy_call): Remove "stack_used_p".
+	* aarch64-tdep.c (aarch64_record_data_proc_imm): Remove
+	"insn_bit28".
+	* rust-lang.c (rust_print_type): Remove "len".
+	* rust-exp.y (super_name): Remove "current_len".
+	* python/py-framefilter.c (py_print_type): Remove "type".
+	* mdebugread.c (parse_partial_symbols): Remove
+	"past_first_source_file".
+	<N_SO>: Remove "valu", "first_so_symnum", "prev_textlow_not_set".
+	* m2-valprint.c (m2_print_unbounded_array): Remove
+	"content_type".
+	(m2_val_print): Remove "i".
+	* linespec.c (unexpected_linespec_error): Remove "cleanup".
+	* f-valprint.c (f_val_print): Remove "i".
+	* elfread.c (elf_symtab_read): Remove "offset".
+	* dwarf2-frame.c (dwarf2_fetch_cfa_info): Remove "addr_size".
+	* jit.c (jit_dealloc_cache): Remove "i" and "frame_arch".
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
+	* arch-utils.c (default_skip_permanent_breakpoint): Remove
+	"bp_insn".
+	* disasm.c (do_assembly_only): Remove "num_displayed".
+	* dwarf2read.c (read_abbrev_offset): Remove "length".
+	(dwarf_decode_macro_bytes) <DW_MACINFO_vendor_ext>: Remove
+	"constant".
+	* m32c-tdep.c (make_regs): Remove "r2hl", "r3hl", and "intbhl".
+	* microblaze-tdep.c (microblaze_frame_cache): Remove "func".
+	* tracefile.c (trace_save): Remove "status".
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (simple_overlay_update_1): Remove initialization
+	of "size", and commented-out code.
+	(simple_overlay_update): Likewise.
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.c (tui_show_source_line): Use getcurx.
+	* tui/tui-io.c (tui_puts): Use getcurx.
+	(tui_redisplay_readline): Likewise.
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
+	* inflow.c (child_terminal_ours_1): Use ATTRIBUTE_UNUSED.
+
+2016-07-14  Tom Tromey  <tom@tromey.com>
+
+	* corefile.c (reopen_exec_file): Only examine st.st_mtime if stat
+	succeeded.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR python/15620, PR python/18620:
+	* python/py-evts.c (gdbpy_initialize_py_events): Call
+	add_new_registry for new events.
+	* python/py-events.h (events_object) <breakpoint_created,
+	breakpoint_deleted, breakpoint_modified>: New fields.
+	* python/py-breakpoint.c (gdbpy_breakpoint_created): Emit the
+	breakpoint changed event.
+	(gdbpy_breakpoint_deleted): Emit the breakpoint deleted event.
+	(gdbpy_breakpoint_modified): New function.
+	(gdbpy_initialize_breakpoints): Attach to the breakpoint modified
+	observer.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR python/17698:
+	* NEWS: Update.
+	* python/py-breakpoint.c (bppy_get_pending): New function.
+	(breakpoint_object_getset): Add entry for "pending".
+	* breakpoint.h (pending_breakpoint_p): Declare.
+	* breakpoint.c (pending_breakpoint_p): New function.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	* python/py-breakpoint.c (bppy_get_visibility)
+	(gdbpy_breakpoint_created): Use user_breakpoint_p.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR cli/18053:
+	* jit.c (jit_reader_load_command): Use tilde_expand.
+	(_initialize_jit): Fix help for jit-reader-unload.  Set completer
+	for new commands.
+
+2016-07-12  Tom Tromey  <tom@tromey.com>
+
+	PR python/19293:
+	* python/lib/gdb/command/unwinders.py (do_enable_unwinder): Call
+	gdb.invalidate_cached_frames.
+	* python/lib/gdb/unwinder.py (register_unwinder): Call
+	gdb.invalidate_cached_frames.
+	* python/python.c (gdbpy_invalidate_cached_frames): New function.
+	(python_GdbMethods): Add entry for invalidate_cached_frames.
+
 2016-07-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* cp-namespace.c (cp_lookup_bare_symbol): Initialize 

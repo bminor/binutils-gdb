@@ -1,3 +1,16 @@
+2016-07-20  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* dis-asm.h: Declare print_arc_disassembler_options.
+
+2016-07-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* bfdlink.h (struct bfd_link_info): Declare new ldscript_def and
+	out_implib_bfd fields.
+
+2016-07-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* elf/arc-reloc.def (ARC_SDA32): Don't use ME transformation.
+
 2016-07-05  Andre Vieria  <andre.simoesdiasvieira@arm.com>
 
 	* include/elf/arm.h (SHF_ARM_NOREAD): Rename to ...
