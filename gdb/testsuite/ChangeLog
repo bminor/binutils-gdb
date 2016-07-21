@@ -1,5 +1,10 @@
 2016-07-21  Yao Qi  <yao.qi@linaro.org>
 
+	* lib/gdbserver-support.exp (skip_gdbserver_tests): Return 1
+	if gdb_skip_xml_test is true on some targets.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.server/solib-list.exp: Unset last_loaded_file.
 
 2016-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
