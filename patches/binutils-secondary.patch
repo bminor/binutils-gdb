@@ -1,4 +1,4 @@
-From d4780cd0196d80d0304424ec3d5eaf2e5f446af0 Mon Sep 17 00:00:00 2001
+From 053173102097ed091e4ca575c106ac8c67d188db Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 4 Nov 2013 09:35:07 -0800
 Subject: [PATCH] Add STB_SECONDARY support
@@ -293,7 +293,7 @@ ld/testsuite/
  create mode 100644 ld/testsuite/ld-elf/secondary8b.rd
 
 diff --git a/bfd/archive.c b/bfd/archive.c
-index 68c18bf..fd21ea2 100644
+index 53e295e..c5372ed 100644
 --- a/bfd/archive.c
 +++ b/bfd/archive.c
 @@ -2380,6 +2380,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
@@ -401,10 +401,10 @@ index 79a14f3..40e6839 100644
  	      sym->symbol.flags |= BSF_GNU_UNIQUE;
  	      break;
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index c401bfe..7b152c9 100644
+index 991efac..871cd7b 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
-@@ -927,7 +927,8 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
+@@ -940,7 +940,8 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
     overriding a new definition.  We set TYPE_CHANGE_OK if it is OK for
     the type to change.  We set SIZE_CHANGE_OK if it is OK for the size
     to change.  By OK to change, we mean that we shouldn't warn if the
@@ -414,7 +414,7 @@ index c401bfe..7b152c9 100644
  
  static bfd_boolean
  _bfd_elf_merge_symbol (bfd *abfd,
-@@ -937,6 +938,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
+@@ -950,6 +951,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
  		       asection **psec,
  		       bfd_vma *pvalue,
  		       struct elf_link_hash_entry **sym_hash,
@@ -422,7 +422,7 @@ index c401bfe..7b152c9 100644
  		       bfd **poldbfd,
  		       bfd_boolean *pold_weak,
  		       unsigned int *pold_alignment,
-@@ -953,7 +955,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
+@@ -966,7 +968,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
    int bind;
    bfd *oldbfd;
    bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
@@ -431,7 +431,7 @@ index c401bfe..7b152c9 100644
    const struct elf_backend_data *bed;
    char *new_version;
  
-@@ -1074,9 +1076,17 @@ _bfd_elf_merge_symbol (bfd *abfd,
+@@ -1087,9 +1089,17 @@ _bfd_elf_merge_symbol (bfd *abfd,
    if (poldbfd && *poldbfd == NULL)
      *poldbfd = oldbfd;
  
@@ -451,7 +451,7 @@ index c401bfe..7b152c9 100644
  	     || h->root.type == bfd_link_hash_undefweak);
    if (pold_weak)
      *pold_weak = oldweak;
-@@ -1107,7 +1117,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
+@@ -1120,7 +1130,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
      {
        if (bfd_is_und_section (sec))
  	{
@@ -460,7 +460,7 @@ index c401bfe..7b152c9 100644
  	    {
  	      h->ref_dynamic_nonweak = 1;
  	      hi->ref_dynamic_nonweak = 1;
-@@ -1358,7 +1368,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
+@@ -1371,7 +1381,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
  
    if (newdef && !newdyn && olddyn)
      newweak = FALSE;
@@ -469,12 +469,12 @@ index c401bfe..7b152c9 100644
      oldweak = FALSE;
  
    /* Allow changes between different types of function symbol.  */
-@@ -1473,10 +1483,14 @@ _bfd_elf_merge_symbol (bfd *abfd,
-      represent variables; this can cause confusion in principle, but
+@@ -1487,10 +1497,14 @@ _bfd_elf_merge_symbol (bfd *abfd,
       any such confusion would seem to indicate an erroneous program or
       shared library.  We also permit a common symbol in a regular
--     object to override a weak symbol in a shared object.  */
-+     object to override a weak symbol in a shared object.
+      object to override a weak symbol in a shared object.  A common
+-     symbol in executable also overrides a symbol in a shared object.  */
++     symbol in executable also overrides a symbol in a shared object.
 +
 +     We let a definition in a dynamic object override the old secondary
 +     symbol.  */
@@ -484,8 +484,8 @@ index c401bfe..7b152c9 100644
 +      && !oldsecondary
        && (olddef
  	  || (h->root.type == bfd_link_hash_common
- 	      && (newweak || newfunc))))
-@@ -1515,8 +1529,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
+ 	      && (newweak
+@@ -1531,8 +1545,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
        *size_change_ok = TRUE;
      }
  
@@ -497,7 +497,7 @@ index c401bfe..7b152c9 100644
      {
        /* Don't skip new non-IR weak syms.  */
        if (!(oldbfd != NULL
-@@ -1547,18 +1562,20 @@ _bfd_elf_merge_symbol (bfd *abfd,
+@@ -1563,18 +1578,20 @@ _bfd_elf_merge_symbol (bfd *abfd,
       always take precedence over symbols from dynamic objects, even if
       they are defined after the dynamic object in the link.
  
@@ -522,7 +522,7 @@ index c401bfe..7b152c9 100644
      {
        /* Change the hash table entry to undefined, and let
  	 _bfd_generic_link_add_one_symbol do the right thing with the
-@@ -1661,8 +1678,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
+@@ -1677,8 +1694,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
  
  /* This function is called to create an indirect symbol from the
     default for the symbol with the default version if needed. The
@@ -533,7 +533,7 @@ index c401bfe..7b152c9 100644
  
  static bfd_boolean
  _bfd_elf_add_default_symbol (bfd *abfd,
-@@ -1672,6 +1689,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
+@@ -1688,6 +1705,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
  			     Elf_Internal_Sym *sym,
  			     asection *sec,
  			     bfd_vma value,
@@ -541,7 +541,7 @@ index c401bfe..7b152c9 100644
  			     bfd **poldbfd,
  			     bfd_boolean *dynsym)
  {
-@@ -1724,6 +1742,11 @@ _bfd_elf_add_default_symbol (bfd *abfd,
+@@ -1740,6 +1758,11 @@ _bfd_elf_add_default_symbol (bfd *abfd,
  	return TRUE;
      }
  
@@ -553,7 +553,7 @@ index c401bfe..7b152c9 100644
    bed = get_elf_backend_data (abfd);
    collect = bed->collect;
    dynamic = (abfd->flags & DYNAMIC) != 0;
-@@ -1744,8 +1767,9 @@ _bfd_elf_add_default_symbol (bfd *abfd,
+@@ -1760,8 +1783,9 @@ _bfd_elf_add_default_symbol (bfd *abfd,
    matched = TRUE;
    tmp_sec = sec;
    if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
@@ -565,7 +565,7 @@ index c401bfe..7b152c9 100644
      return FALSE;
  
    if (skip)
-@@ -1864,8 +1888,9 @@ nondefault:
+@@ -1880,8 +1904,9 @@ nondefault:
    size_change_ok = FALSE;
    tmp_sec = sec;
    if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
@@ -577,7 +577,7 @@ index c401bfe..7b152c9 100644
      return FALSE;
  
    if (skip)
-@@ -3011,31 +3036,41 @@ _bfd_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
+@@ -3027,31 +3052,41 @@ _bfd_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
    return tls;
  }
  
@@ -632,7 +632,7 @@ index c401bfe..7b152c9 100644
  
    /* If the symbol is in a target specific section then we
       must rely upon the backend to tell us what it is.  */
-@@ -3054,9 +3089,12 @@ is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
+@@ -3070,9 +3105,12 @@ is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
  
  /* Search the symbol table of the archive element of the archive ABFD
     whose archive map contains a mention of SYMDEF, and determine if
@@ -647,7 +647,7 @@ index c401bfe..7b152c9 100644
  {
    Elf_Internal_Shdr * hdr;
    bfd_size_type symcount;
-@@ -3121,7 +3159,8 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
+@@ -3137,7 +3175,8 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
  
        if (strcmp (name, symdef->name) == 0)
  	{
@@ -657,7 +657,7 @@ index c401bfe..7b152c9 100644
  	  break;
  	}
      }
-@@ -3973,6 +4012,7 @@ error_free_dyn:
+@@ -3989,6 +4028,7 @@ error_free_dyn:
        unsigned int old_alignment;
        bfd *old_bfd;
        bfd_boolean matched;
@@ -665,7 +665,7 @@ index c401bfe..7b152c9 100644
  
        override = FALSE;
  
-@@ -4000,6 +4040,10 @@ error_free_dyn:
+@@ -4016,6 +4056,10 @@ error_free_dyn:
  	  flags = BSF_WEAK;
  	  break;
  
@@ -676,7 +676,7 @@ index c401bfe..7b152c9 100644
  	case STB_GNU_UNIQUE:
  	  flags = BSF_GNU_UNIQUE;
  	  break;
-@@ -4235,7 +4279,7 @@ error_free_dyn:
+@@ -4251,7 +4295,7 @@ error_free_dyn:
  			      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
  
  	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
@@ -685,7 +685,7 @@ index c401bfe..7b152c9 100644
  				      &old_alignment, &skip, &override,
  				      &type_change_ok, &size_change_ok,
  				      &matched))
-@@ -4258,7 +4302,12 @@ error_free_dyn:
+@@ -4274,7 +4318,12 @@ error_free_dyn:
  	      && vernum > 1
  	      && definition)
  	    h->verinfo.verdef = &elf_tdata (abfd)->verdef[vernum - 1];
@@ -698,7 +698,7 @@ index c401bfe..7b152c9 100644
  
        if (! (_bfd_generic_link_add_one_symbol
  	     (info, abfd, name, flags, sec, value, NULL, FALSE, bed->collect,
-@@ -4338,10 +4387,14 @@ error_free_dyn:
+@@ -4354,10 +4403,14 @@ error_free_dyn:
  	      if (! definition)
  		{
  		  h->ref_regular = 1;
@@ -715,7 +715,7 @@ index c401bfe..7b152c9 100644
  		{
  		  h->def_regular = 1;
  		  if (h->def_dynamic)
-@@ -4370,6 +4423,13 @@ error_free_dyn:
+@@ -4386,6 +4439,13 @@ error_free_dyn:
  		{
  		  h->def_dynamic = 1;
  		  hi->def_dynamic = 1;
@@ -729,7 +729,7 @@ index c401bfe..7b152c9 100644
  		}
  
  	      /* If the indirect symbol has been forced local, don't
-@@ -4388,7 +4448,8 @@ error_free_dyn:
+@@ -4404,7 +4464,8 @@ error_free_dyn:
  	  if (definition
  	      || (!override && h->root.type == bfd_link_hash_common))
  	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
@@ -739,7 +739,7 @@ index c401bfe..7b152c9 100644
  	      goto error_free_vers;
  
  	  /* Check the alignment when a common symbol is involved. This
-@@ -5182,16 +5243,27 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
+@@ -5198,16 +5259,27 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
  		 map alone.  Instead we must read in the element's symbol
  		 table and check that to see what kind of symbol definition
  		 this is.  */
@@ -769,7 +769,7 @@ index c401bfe..7b152c9 100644
  
  	  /* We need to include this archive member.  */
  	  element = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
-@@ -9322,7 +9394,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9339,7 +9411,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, type);
    else if (h->root.type == bfd_link_hash_undefweak
  	   || h->root.type == bfd_link_hash_defweak)
@@ -792,7 +792,7 @@ index c401bfe..7b152c9 100644
    else
      sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
    sym.st_target_internal = h->target_internal;
-@@ -9360,7 +9446,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9377,7 +9463,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
    if (sym.st_shndx == SHN_UNDEF
        && h->ref_regular
        && (ELF_ST_BIND (sym.st_info) == STB_GLOBAL
@@ -802,7 +802,7 @@ index c401bfe..7b152c9 100644
      {
        int bindtype;
        type = ELF_ST_TYPE (sym.st_info);
-@@ -9386,10 +9473,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9403,10 +9490,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      sym.st_size = 0;
  
    /* If a non-weak symbol with non-default visibility is not defined
@@ -961,7 +961,7 @@ index 5ca4d34..d151f99 100644
  		|| bfd_is_und_section (sym->section)
  		|| bfd_is_com_section (sym->section));
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index a40453d..78f2825 100644
+index 7deac04..08a79c2 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
 @@ -10117,6 +10117,7 @@ get_symbol_binding (unsigned int binding)
@@ -1262,7 +1262,7 @@ index 0000000..37bd0ce
 +	.comm foobar,30
 +	.secondary foobar
 diff --git a/gas/testsuite/gas/elf/elf.exp b/gas/testsuite/gas/elf/elf.exp
-index 489a546..f34fb06 100644
+index fb5619d..da95cd1 100644
 --- a/gas/testsuite/gas/elf/elf.exp
 +++ b/gas/testsuite/gas/elf/elf.exp
 @@ -222,8 +222,13 @@ if { [is_elf_format] } then {
@@ -1390,7 +1390,7 @@ index d0a1afd..bd7df2c 100644
 -	
 \ No newline at end of file
 diff --git a/include/bfdlink.h b/include/bfdlink.h
-index 0ac2097..2280a3c 100644
+index eeea6ef..bdbda79 100644
 --- a/include/bfdlink.h
 +++ b/include/bfdlink.h
 @@ -108,6 +108,9 @@ struct bfd_link_hash_entry
@@ -1426,10 +1426,10 @@ index 087d876..b82f399 100644
  #define STB_GNU_UNIQUE	10		/* Symbol is unique in namespace */
  #define STB_HIOS	12		/* OS-specific semantics */
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index f3ec875..3ca8dcc 100644
+index 3e9f684..e09ae0d 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
-@@ -2431,6 +2431,8 @@ fragment <<EOF
+@@ -2438,6 +2438,8 @@ fragment <<EOF
  	link_info.error_textrel = FALSE;
        else if (strcmp (optarg, "textoff") == 0)
  	link_info.error_textrel = FALSE;
@@ -1439,7 +1439,7 @@ index f3ec875..3ca8dcc 100644
  fi
  
 diff --git a/ld/ld.texinfo b/ld/ld.texinfo
-index 26a27de..8ba3387 100644
+index b2b99ab..b2a45d6 100644
 --- a/ld/ld.texinfo
 +++ b/ld/ld.texinfo
 @@ -1185,6 +1185,10 @@ Marks the object may contain $ORIGIN.
@@ -1454,7 +1454,7 @@ index 26a27de..8ba3387 100644
  Set the emulation maximum page size to @var{value}.
  
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 7425da0..1922e0b 100644
+index 21133ab..8fcb5de 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
 @@ -270,6 +270,7 @@ main (int argc, char **argv)

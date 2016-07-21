@@ -54,8 +54,6 @@ extern const pseudo_typeS md_pseudo_table[];
 extern const char cris_comment_chars[];
 extern const char line_comment_chars[];
 extern const char line_separator_chars[];
-extern const char EXP_CHARS[];
-extern const char FLT_CHARS[];
 
 /* This should be optional, since it is ignored as an escape (assumed to
    be itself) if it is not recognized.  */

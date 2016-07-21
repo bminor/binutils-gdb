@@ -27,7 +27,8 @@ enum x86_linux_tdesc {
   X86_TDESC_SSE = 1,
   X86_TDESC_AVX = 2,
   X86_TDESC_MPX = 3,
-  X86_TDESC_AVX512 = 4,
+  X86_TDESC_AVX_MPX = 4,
+  X86_TDESC_AVX512 = 5,
 };
 
 #ifdef __x86_64__
@@ -44,6 +45,10 @@ extern const struct target_desc *tdesc_amd64_avx_linux;
 /* Defined in auto-generated file amd64-avx512-linux.c.  */
 void init_registers_amd64_avx512_linux (void);
 extern const struct target_desc *tdesc_amd64_avx512_linux;
+
+/* Defined in auto-generated file amd64-avx-mpx-linux.c.  */
+void init_registers_amd64_avx_mpx_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_mpx_linux;
 
 /* Defined in auto-generated file amd64-mpx-linux.c.  */
 void init_registers_amd64_mpx_linux (void);
@@ -78,6 +83,10 @@ extern const struct target_desc *tdesc_i386_mmx_linux;
 /* Defined in auto-generated file i386-avx-linux.c.  */
 void init_registers_i386_avx_linux (void);
 extern const struct target_desc *tdesc_i386_avx_linux;
+
+/* Defined in auto-generated file i386-avx-mpx-linux.c.  */
+void init_registers_i386_avx_mpx_linux (void);
+extern const struct target_desc *tdesc_i386_avx_mpx_linux;
 
 /* Defined in auto-generated file i386-avx512-linux.c.  */
 void init_registers_i386_avx512_linux (void);

@@ -36,7 +36,7 @@ esac
 # map target info into gdb names.
 
 case "${targ}" in
-aarch64*-*-elf)
+aarch64*-*-elf | aarch64*-*-rtems*)
 	# Target: AArch64 embedded system
 	gdb_target_obs="aarch64-tdep.o aarch64-newlib-tdep.o aarch64-insn.o"
 	;;
@@ -285,7 +285,7 @@ m32c-*-*)
 
 m32r*-*-linux*)
 	# Target: Renesas M32R running GNU/Linux
-	gdb_target_obs="m32r-tdep.o m32r-linux-tdep.o remote-m32r-sdi.o \
+	gdb_target_obs="m32r-tdep.o m32r-linux-tdep.o \
 			glibc-tdep.o solib-svr4.o symfile-mem.o \
 			linux-tdep.o"
 	gdb_sim=../sim/m32r/libsim.a
@@ -293,7 +293,7 @@ m32r*-*-linux*)
 	;;
 m32r*-*-*)
 	# Target: Renesas m32r processor
-	gdb_target_obs="m32r-tdep.o remote-m32r-sdi.o"
+	gdb_target_obs="m32r-tdep.o"
 	gdb_sim=../sim/m32r/libsim.a
 	;;
 
@@ -364,12 +364,12 @@ mips64*-*-openbsd*)
 	;;
 mips*-sde*-elf*)
 	# Target: MIPS SDE
-	gdb_target_obs="mips-tdep.o mips-sde-tdep.o remote-mips.o"
+	gdb_target_obs="mips-tdep.o mips-sde-tdep.o"
 	gdb_sim=../sim/mips/libsim.a
 	;;
 mips*-*-elf)
 	# Target: MIPS ELF
-	gdb_target_obs="mips-tdep.o remote-mips.o"
+	gdb_target_obs="mips-tdep.o"
 	gdb_sim=../sim/mips/libsim.a
 	;;
 mips*-*-*)
@@ -392,6 +392,11 @@ msp430*-*-elf)
 mt-*-*)
 	# Target: Morpho Technologies ms1 processor
 	gdb_target_obs="mt-tdep.o"
+	;;
+
+nds32*-*-elf)
+	# Target: AndesTech NDS32 core
+	gdb_target_obs="nds32-tdep.o"
 	;;
 
 nios2*-*-linux*)
@@ -650,6 +655,9 @@ x86_64-*-dicos*)
 	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o \
 			dicos-tdep.o i386-dicos-tdep.o amd64-dicos-tdep.o"
 	;;
+x86_64-*-elf* | x86_64-*-rtems*)
+	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o i386bsd-tdep.o"
+	 ;;
 x86_64-*-linux*)
 	# Target: GNU/Linux x86-64
 	gdb_target_obs="amd64-tdep.o amd64-linux-tdep.o i386-tdep.o \

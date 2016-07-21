@@ -36,6 +36,13 @@
 #include "libhppa.h"
 #include "elf/hppa.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void elf32_hppa_init_stub_bfd
+  (bfd *, struct bfd_link_info *);
+
 int elf32_hppa_setup_section_lists
   (bfd *, struct bfd_link_info *);
 
@@ -73,5 +80,9 @@ extern elf_hppa_reloc_type ** _bfd_elf32_hppa_gen_reloc_type
 #define R_HPPA_PCREL_CALL		R_PARISC_PCREL21L
 #define R_HPPA_ABS_CALL			R_PARISC_DIR17F
 #define R_HPPA_COMPLEX			R_PARISC_UNIMPLEMENTED
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _ELF32_HPPA_H */

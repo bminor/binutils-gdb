@@ -46,12 +46,12 @@ clean_restart ${binfile}
 gdb_test_no_output "set height 0"
 
 #
-# break at main
+# break in main
 #
 
 set main_line [gdb_get_line_number "break main"]
 
-gdb_test "break main" \
+gdb_test "break ${srcfile}:${main_line}" \
     "Breakpoint.*at.* file .*$srcfile, line $main_line\\." \
     "breakpoint main"
 
@@ -293,16 +293,17 @@ gdb_test_multiple "delete 3" "delete bp 3" {
 }
 
 #
-# break at main, after value is initialized. This is in preparation
+# break in main, after value is initialized. This is in preparation
 # to test the annotate output for the display command.
 #
-gdb_test_multiple "break main" "break at main" {
+set test "break in main"
+gdb_test_multiple "break ${srcfile}:${main_line}" $test {
     -re "post-prompt.*Breakpoint 4 at $hex: file ${escapedsrcfile}, line $main_line.*\032\032breakpoints-invalid.*$gdb_prompt$" {
-	pass "break at main"
+	pass $test
     }
     -re "post-prompt.*Breakpoint 4 at $hex: file .*${srcfile}, line $main_line.*\032\032breakpoints-invalid.*$gdb_prompt$" {
 	setup_xfail "*-*-*" 1270
-	fail "break at main"
+	fail $test
     }
 }
 

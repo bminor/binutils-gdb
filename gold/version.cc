@@ -36,7 +36,7 @@ namespace gold
 // version number from configure.ac.  But it's easier to just change
 // this file for now.
 
-static const char* version_string = "1.11";
+static const char* version_string = "1.12";
 
 // Report version information.
 

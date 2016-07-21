@@ -125,10 +125,12 @@ recognized:
 @code{cortex-a53},
 @code{cortex-a57},
 @code{cortex-a72},
+@code{cortex-a73},
 @code{cortex-r4},
 @code{cortex-r4f},
 @code{cortex-r5},
 @code{cortex-r7},
+@code{cortex-r8},
 @code{cortex-m7},
 @code{cortex-m4},
 @code{cortex-m3},
@@ -184,6 +186,8 @@ architectures),
 @code{virt} (Virtualization Extensions for v7-A architecture, implies
 @code{idiv}),
 @code{pan} (Priviliged Access Never Extensions for v8-A architecture),
+@code{ras} (Reliability, Availability and Serviceability extensions
+for v8-A architecture),
 @code{rdma} (ARMv8.1 Advanced SIMD extensions for v8-A architecture, implies
 @code{simd})
 and

@@ -9295,7 +9295,8 @@ Several commands set convenient defaults for @var{addr}.
 @table @r
 @item @var{n}, the repeat count
 The repeat count is a decimal integer; the default is 1.  It specifies
-how much memory (counting by units @var{u}) to display.
+how much memory (counting by units @var{u}) to display.  If a negative
+number is specified, memory is examined backward from @var{addr}.
 @c This really is **decimal**; unaffected by 'set radix' as of GDB
 @c 4.1.2.
 
@@ -9350,6 +9351,10 @@ starting at address @code{0x54320}.  @samp{x/4xw $sp} prints the four
 words (@samp{w}) of memory above the stack pointer (here, @samp{$sp};
 @pxref{Registers, ,Registers}) in hexadecimal (@samp{x}).
 
+You can also specify a negative repeat count to examine memory backward
+from the given address.  For example, @samp{x/-3uh 0x54320} prints three
+halfwords (@code{h}) at @code{0x54314}, @code{0x54328}, and @code{0x5431c}.
+
 Since the letters indicating unit sizes are all distinct from the
 letters specifying output formats, you do not have to remember whether
 unit size or format comes first; either order works.  The output
@@ -9365,6 +9370,13 @@ slot instructions, if any, beyond the count specified, which immediately
 follow the last instruction that is within the count.  The command
 @code{disassemble} gives an alternative way of inspecting machine
 instructions; see @ref{Machine Code,,Source and Machine Code}.
+
+If a negative repeat count is specified for the formats @samp{s} or @samp{i},
+the command displays null-terminated strings or instructions before the given
+address as many as the absolute value of the given number.  For the @samp{i}
+format, we use line number information in the debug info to accurately locate
+instruction boundaries while disassembling backward.  If line info is not
+available, the command stops examining memory with an error message.
 
 All the defaults for the arguments to @code{x} are designed to make it
 easy to continue scanning memory with minimal specifications each time
@@ -10759,6 +10771,19 @@ This function differs from @code{$_caller_matches} in that this function
 checks all stack frames from the immediate caller to the frame specified
 by @var{number_of_frames}, whereas @code{$_caller_matches} only checks the
 frame specified by @var{number_of_frames}.
+
+@item $_as_string(@var{value})
+@findex $_as_string@r{, convenience function}
+Return the string representation of @var{value}.
+
+This function is useful to obtain the textual label (enumerator) of an
+enumeration value.  For example, assuming the variable @var{node} is of
+an enumerated type:
+
+@smallexample
+(gdb) printf "Visiting node of type %s\n", $_as_string(node)
+Visiting node of type NODE_INTEGER
+@end smallexample
 
 @end table
 
@@ -12865,6 +12890,13 @@ Collect all local variables.
 Collect the return address.  This is helpful if you want to see more
 of a backtrace.
 
+@emph{Note:} The return address location can not always be reliably
+determined up front, and the wrong address / registers may end up
+collected instead.  On some architectures the reliability is higher
+for tracepoints at function entry, while on others it's the opposite.
+When this happens, backtracing will stop because the return address is
+found unavailable (unless another collect rule happened to match it).
+
 @item $_probe_argc
 Collects the number of arguments from the static probe at which the
 tracepoint is located.
@@ -13365,7 +13397,8 @@ Stop debugging trace snapshots, resume @emph{live} debugging.
 Same as @samp{tfind none}.
 
 @item tfind
-No argument means find the next trace snapshot.
+No argument means find the next trace snapshot or find the first
+one if no trace snapshot is selected.
 
 @item tfind -
 Find the previous trace snapshot before the current one.  This permits
@@ -14378,7 +14411,7 @@ being set automatically by @value{GDBN}.
 @section Supported Languages
 
 @value{GDBN} supports C, C@t{++}, D, Go, Objective-C, Fortran, Java,
-OpenCL C, Pascal, assembly, Modula-2, and Ada.
+OpenCL C, Pascal, Rust, assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -14402,6 +14435,7 @@ language reference or tutorial.
 * OpenCL C::                    OpenCL C
 * Fortran::                     Fortran
 * Pascal::                      Pascal
+* Rust::                        Rust
 * Modula-2::                    Modula-2
 * Ada::                         Ada
 @end menu
@@ -15206,6 +15240,99 @@ syntax.
 The Pascal-specific command @code{set print pascal_static-members}
 controls whether static members of Pascal objects are displayed.
 @xref{Print Settings, pascal_static-members}.
+
+@node Rust
+@subsection Rust
+
+@value{GDBN} supports the @url{https://www.rust-lang.org/, Rust
+Programming Language}.  Type- and value-printing, and expression
+parsing, are reasonably complete.  However, there are a few
+peculiarities and holes to be aware of.
+
+@itemize @bullet
+@item
+Linespecs (@pxref{Specify Location}) are never relative to the current
+crate.  Instead, they act as if there were a global namespace of
+crates, somewhat similar to the way @code{extern crate} behaves.
+
+That is, if @value{GDBN} is stopped at a breakpoint in a function in
+crate @samp{A}, module @samp{B}, then @code{break B::f} will attempt
+to set a breakpoint in a function named @samp{f} in a crate named
+@samp{B}.
+
+As a consequence of this approach, linespecs also cannot refer to
+items using @samp{self::} or @samp{super::}.
+
+@item
+Because @value{GDBN} implements Rust name-lookup semantics in
+expressions, it will sometimes prepend the current crate to a name.
+For example, if @value{GDBN} is stopped at a breakpoint in the crate
+@samp{K}, then @code{print ::x::y} will try to find the symbol
+@samp{K::x::y}.
+
+However, since it is useful to be able to refer to other crates when
+debugging, @value{GDBN} provides the @code{extern} extension to
+circumvent this.  To use the extension, just put @code{extern} before
+a path expression to refer to the otherwise unavailable ``global''
+scope.
+
+In the above example, if you wanted to refer to the symbol @samp{y} in
+the crate @samp{x}, you would use @code{print extern x::y}.
+
+@item
+The Rust expression evaluator does not support ``statement-like''
+expressions such as @code{if} or @code{match}, or lambda expressions.
+
+@item
+Tuple expressions are not implemented.
+
+@item
+The Rust expression evaluator does not currently implement the
+@code{Drop} trait.  Objects that may be created by the evaluator will
+never be destroyed.
+
+@item
+@value{GDBN} does not implement type inference for generics.  In order
+to call generic functions or otherwise refer to generic items, you
+will have to specify the type parameters manually.
+
+@item
+@value{GDBN} currently uses the C@t{++} demangler for Rust.  In most
+cases this does not cause any problems.  However, in an expression
+context, completing a generic function name will give syntactically
+invalid results.  This happens because Rust requires the @samp{::}
+operator between the function name and its generic arguments.  For
+example, @value{GDBN} might provide a completion like
+@code{crate::f<u32>}, where the parser would require
+@code{crate::f::<u32>}.
+
+@item
+As of this writing, the Rust compiler (version 1.8) has a few holes in
+the debugging information it generates.  These holes prevent certain
+features from being implemented by @value{GDBN}:
+@itemize @bullet
+
+@item
+Method calls cannot be made via traits.
+
+@item
+Trait objects cannot be created or inspected.
+
+@item
+Operator overloading is not implemented.
+
+@item
+When debugging in a monomorphized function, you cannot use the generic
+type names.
+
+@item
+The type @code{Self} is not available.
+
+@item
+@code{use} statements are not available, so some names may not be
+available in the crate.
+@end itemize
+@end itemize
 
 @node Modula-2
 @subsection Modula-2
@@ -17161,6 +17288,15 @@ line 1574.
 @}
 (@value{GDBP})
 @end smallexample
+
+@kindex maint info line-table
+@cindex listing @value{GDBN}'s internal line tables
+@cindex line tables, listing @value{GDBN}'s internal
+@item maint info line-table @r{[} @var{regexp} @r{]}
+
+List the @code{struct linetable} from all @code{struct symtab}
+instances whose name matches @var{regexp}.  If @var{regexp} is not
+given, list the @code{struct linetable} from all @code{struct symtab}.
 
 @kindex maint set symbol-cache-size
 @cindex symbol cache size
@@ -21823,7 +21959,6 @@ acceptable commands.
 
 @menu
 * ARM::                         ARM
-* M32R/SDI::                    Renesas M32R/SDI
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
@@ -21930,43 +22065,6 @@ The default value is @code{all}.
 @end table
 @end table
 
-@node M32R/SDI
-@subsection Renesas M32R/SDI
-
-The following commands are available for M32R/SDI:
-
-@table @code
-@item sdireset
-@kindex sdireset
-@cindex reset SDI connection, M32R
-This command resets the SDI connection.
-
-@item sdistatus
-@kindex sdistatus
-This command shows the SDI connection status.
-
-@item debug_chaos
-@kindex debug_chaos
-@cindex M32R/Chaos debugging
-Instructs the remote that M32R/Chaos debugging is to be used.
-
-@item use_debug_dma
-@kindex use_debug_dma
-Instructs the remote to use the DEBUG_DMA method of accessing memory.
-
-@item use_mon_code
-@kindex use_mon_code
-Instructs the remote to use the MON_CODE method of accessing memory.
-
-@item use_ib_break
-@kindex use_ib_break
-Instructs the remote to set breakpoints by IB break.
-
-@item use_dbt_break
-@kindex use_dbt_break
-Instructs the remote to set breakpoints by DBT.
-@end table
-
 @node M68K
 @subsection M68k
 
@@ -22013,59 +22111,8 @@ Show MicroBlaze-specific debugging level.
 @node MIPS Embedded
 @subsection @acronym{MIPS} Embedded
 
-@cindex @acronym{MIPS} boards
-@value{GDBN} can use the @acronym{MIPS} remote debugging protocol to talk to a
-@acronym{MIPS} board attached to a serial line.  This is available when
-you configure @value{GDBN} with @samp{--target=mips-elf}.
-
-@need 1000
-Use these @value{GDBN} commands to specify the connection to your target board:
-
-@table @code
-@item target mips @var{port}
-@kindex target mips @var{port}
-To run a program on the board, start up @code{@value{GDBP}} with the
-name of your program as the argument.  To connect to the board, use the
-command @samp{target mips @var{port}}, where @var{port} is the name of
-the serial port connected to the board.  If the program has not already
-been downloaded to the board, you may use the @code{load} command to
-download it.  You can then use all the usual @value{GDBN} commands.
-
-For example, this sequence connects to the target board through a serial
-port, and loads and runs a program called @var{prog} through the
-debugger:
-
-@smallexample
-host$ @value{GDBP} @var{prog}
-@value{GDBN} is free software and @dots{}
-(@value{GDBP}) target mips /dev/ttyb
-(@value{GDBP}) load @var{prog}
-(@value{GDBP}) run
-@end smallexample
-
-@item target mips @var{hostname}:@var{portnumber}
-On some @value{GDBN} host configurations, you can specify a TCP
-connection (for instance, to a serial line managed by a terminal
-concentrator) instead of a serial port, using the syntax
-@samp{@var{hostname}:@var{portnumber}}.
-
-@item target pmon @var{port}
-@kindex target pmon @var{port}
-PMON ROM monitor.
-
-@item target ddb @var{port}
-@kindex target ddb @var{port}
-NEC's DDB variant of PMON for Vr4300.
-
-@item target lsi @var{port}
-@kindex target lsi @var{port}
-LSI variant of PMON.
-
-@end table
-
-
 @noindent
-@value{GDBN} also supports these special commands for @acronym{MIPS} targets:
+@value{GDBN} supports these special commands for @acronym{MIPS} targets:
 
 @table @code
 @item set mipsfpu double
@@ -22095,78 +22142,6 @@ and @samp{set mipsfpu off} will select no floating point.
 
 As usual, you can inquire about the @code{mipsfpu} variable with
 @samp{show mipsfpu}.
-
-@item set timeout @var{seconds}
-@itemx set retransmit-timeout @var{seconds}
-@itemx show timeout
-@itemx show retransmit-timeout
-@cindex @code{timeout}, @acronym{MIPS} protocol
-@cindex @code{retransmit-timeout}, @acronym{MIPS} protocol
-@kindex set timeout
-@kindex show timeout
-@kindex set retransmit-timeout
-@kindex show retransmit-timeout
-You can control the timeout used while waiting for a packet, in the @acronym{MIPS}
-remote protocol, with the @code{set timeout @var{seconds}} command.  The
-default is 5 seconds.  Similarly, you can control the timeout used while
-waiting for an acknowledgment of a packet with the @code{set
-retransmit-timeout @var{seconds}} command.  The default is 3 seconds.
-You can inspect both values with @code{show timeout} and @code{show
-retransmit-timeout}.  (These commands are @emph{only} available when
-@value{GDBN} is configured for @samp{--target=mips-elf}.)
-
-The timeout set by @code{set timeout} does not apply when @value{GDBN}
-is waiting for your program to stop.  In that case, @value{GDBN} waits
-forever because it has no way of knowing how long the program is going
-to run before stopping.
-
-@item set syn-garbage-limit @var{num}
-@kindex set syn-garbage-limit@r{, @acronym{MIPS} remote}
-@cindex synchronize with remote @acronym{MIPS} target
-Limit the maximum number of characters @value{GDBN} should ignore when
-it tries to synchronize with the remote target.  The default is 10
-characters.  Setting the limit to -1 means there's no limit.
-
-@item show syn-garbage-limit
-@kindex show syn-garbage-limit@r{, @acronym{MIPS} remote}
-Show the current limit on the number of characters to ignore when
-trying to synchronize with the remote system.
-
-@item set monitor-prompt @var{prompt}
-@kindex set monitor-prompt@r{, @acronym{MIPS} remote}
-@cindex remote monitor prompt
-Tell @value{GDBN} to expect the specified @var{prompt} string from the
-remote monitor.  The default depends on the target:
-@table @asis
-@item pmon target
-@samp{PMON}
-@item ddb target
-@samp{NEC010}
-@item lsi target
-@samp{PMON>}
-@end table
-
-@item show monitor-prompt
-@kindex show monitor-prompt@r{, @acronym{MIPS} remote}
-Show the current strings @value{GDBN} expects as the prompt from the
-remote monitor.
-
-@item set monitor-warnings
-@kindex set monitor-warnings@r{, @acronym{MIPS} remote}
-Enable or disable monitor warnings about hardware breakpoints.  This
-has effect only for the @code{lsi} target.  When on, @value{GDBN} will
-display warning messages whose codes are returned by the @code{lsi}
-PMON monitor for breakpoint commands.
-
-@item show monitor-warnings
-@kindex show monitor-warnings@r{, @acronym{MIPS} remote}
-Show the current setting of printing monitor warnings.
-
-@item pmon @var{command}
-@kindex pmon@r{, @acronym{MIPS} remote}
-@cindex send PMON command
-This command allows sending an arbitrary @var{command} string to the
-monitor.  The monitor must be in debug mode for this to work.
 @end table
 
 @node PowerPC Embedded
@@ -24936,18 +24911,11 @@ The @sc{gdb/mi} interface included in @value{GDBN} 5.1, 5.2, and 5.3.
 @end table
 
 @cindex invoke another interpreter
-The interpreter being used by @value{GDBN} may not be dynamically
-switched at runtime.  Although possible, this could lead to a very
-precarious situation.  Consider an IDE using @sc{gdb/mi}.  If a user
-enters the command "interpreter-set console" in a console view,
-@value{GDBN} would switch to using the console interpreter, rendering
-the IDE inoperable!
 
 @kindex interpreter-exec
-Although you may only choose a single interpreter at startup, you may execute
-commands in any interpreter from the current interpreter using the appropriate
-command.  If you are running the console interpreter, simply use the
-@code{interpreter-exec} command:
+You may execute commands in any interpreter from the current
+interpreter using the appropriate command.  If you are running the
+console interpreter, simply use the @code{interpreter-exec} command:
 
 @smallexample
 interpreter-exec mi "-data-list-register-names"
@@ -24955,6 +24923,49 @@ interpreter-exec mi "-data-list-register-names"
 
 @sc{gdb/mi} has a similar command, although it is only available in versions of
 @value{GDBN} which support @sc{gdb/mi} version 2 (or greater).
+
+Note that @code{interpreter-exec} only changes the interpreter for the
+duration of the specified command.  It does not change the interpreter
+permanently.
+
+@cindex start a new independent interpreter
+
+Although you may only choose a single interpreter at startup, it is
+possible to run an independent interpreter on a specified input/output
+device (usually a tty).
+
+For example, consider a debugger GUI or IDE that wants to provide a
+@value{GDBN} console view.  It may do so by embedding a terminal
+emulator widget in its GUI, starting @value{GDBN} in the traditional
+command-line mode with stdin/stdout/stderr redirected to that
+terminal, and then creating an MI interpreter running on a specified
+input/output device.  The console interpreter created by @value{GDBN}
+at startup handles commands the user types in the terminal widget,
+while the GUI controls and synchronizes state with @value{GDBN} using
+the separate MI interpreter.
+
+To start a new secondary @dfn{user interface} running MI, use the
+@code{new-ui} command:
+
+@kindex new-ui
+@cindex new user interface
+@smallexample
+new-ui @var{interpreter} @var{tty}
+@end smallexample
+
+The @var{interpreter} parameter specifies the interpreter to run.
+This accepts the same values as the @code{interpreter-exec} command.
+For example, @samp{console}, @samp{mi}, @samp{mi2}, etc.  The
+@var{tty} parameter specifies the name of the bidirectional file the
+interpreter uses for input/output, usually the name of a
+pseudoterminal slave on Unix systems.  For example:
+
+@smallexample
+(@value{GDBP}) new-ui mi /dev/pts/9
+@end smallexample
+
+@noindent
+runs an MI interpreter on @file{/dev/pts/9}.
 
 @node TUI
 @chapter @value{GDBN} Text User Interface
@@ -26460,11 +26471,16 @@ breakpoint commands; @xref{GDB/MI Breakpoint Commands}.  The
 Note that if a breakpoint is emitted in the result record of a
 command, then it will not also be emitted in an async record.
 
-@item =record-started,thread-group="@var{id}"
+@item =record-started,thread-group="@var{id}",method="@var{method}"[,format="@var{format}"]
 @itemx =record-stopped,thread-group="@var{id}"
 Execution log recording was either started or stopped on an
 inferior.  The @var{id} is the @value{GDBN} identifier of the thread
 group corresponding to the affected inferior.
+
+The @var{method} field indicates the method used to record execution.  If the
+method in use supports multiple recording formats, @var{format} will be present
+and contain the currently used format.  @xref{Process Record and Replay}
+for existing method and format values.
 
 @item =cmd-param-changed,param=@var{param},value=@var{value}
 Reports that a parameter of the command @code{set @var{param}} is
@@ -34582,6 +34598,11 @@ that symbol is described.  The type chain produced by this command is
 a recursive definition of the data type as stored in @value{GDBN}'s
 data structures, including its flags and contained types.
 
+@kindex maint selftest
+@cindex self tests
+Run any self tests that were compiled in to @value{GDBN}.  This will
+print a message showing how many tests were run, and how many failed.
+
 @kindex maint set dwarf always-disassemble
 @kindex maint show dwarf always-disassemble
 @item maint set dwarf always-disassemble
@@ -37283,9 +37304,40 @@ starting at @var{offset} bytes into the data.  The content and
 encoding of @var{annex} is specific to @var{object}; it can supply
 additional details about what data to access.
 
-Here are the specific requests of this form defined so far.  All
+Reply:
+@table @samp
+@item m @var{data}
+Data @var{data} (@pxref{Binary Data}) has been read from the
+target.  There may be more data at a higher address (although
+it is permitted to return @samp{m} even for the last valid
+block of data, as long as at least one byte of data was read).
+It is possible for @var{data} to have fewer bytes than the @var{length} in the
+request.
+
+@item l @var{data}
+Data @var{data} (@pxref{Binary Data}) has been read from the target.
+There is no more data to be read.  It is possible for @var{data} to
+have fewer bytes than the @var{length} in the request.
+
+@item l
+The @var{offset} in the request is at the end of the data.
+There is no more data to be read.
+
+@item E00
+The request was malformed, or @var{annex} was invalid.
+
+@item E @var{nn}
+The offset was invalid, or there was an error encountered reading the data.
+The @var{nn} part is a hex-encoded @code{errno} value.
+
+@item @w{}
+An empty reply indicates the @var{object} string was not recognized by
+the stub, or that the object does not support reading.
+@end table
+
+Here are the specific requests of this form defined so far.  All the
 @samp{qXfer:@var{object}:read:@dots{}} requests use the same reply
-formats, listed below.
+formats, listed above.
 
 @table @samp
 @item qXfer:auxv:read::@var{offset},@var{length}
@@ -37490,37 +37542,6 @@ Access the target's @dfn{operating system information}.
 
 @end table
 
-Reply:
-@table @samp
-@item m @var{data}
-Data @var{data} (@pxref{Binary Data}) has been read from the
-target.  There may be more data at a higher address (although
-it is permitted to return @samp{m} even for the last valid
-block of data, as long as at least one byte of data was read).
-It is possible for @var{data} to have fewer bytes than the @var{length} in the
-request.
-
-@item l @var{data}
-Data @var{data} (@pxref{Binary Data}) has been read from the target.
-There is no more data to be read.  It is possible for @var{data} to
-have fewer bytes than the @var{length} in the request.
-
-@item l
-The @var{offset} in the request is at the end of the data.
-There is no more data to be read.
-
-@item E00
-The request was malformed, or @var{annex} was invalid.
-
-@item E @var{nn}
-The offset was invalid, or there was an error encountered reading the data.
-The @var{nn} part is a hex-encoded @code{errno} value.
-
-@item @w{}
-An empty reply indicates the @var{object} string was not recognized by
-the stub, or that the object does not support reading.
-@end table
-
 @item qXfer:@var{object}:write:@var{annex}:@var{offset}:@var{data}@dots{}
 @cindex write data into object, remote request
 @anchor{qXfer write}
@@ -37531,9 +37552,27 @@ written is given by @var{data}@dots{}.  The content and encoding of @var{annex}
 is specific to @var{object}; it can supply additional details about what data
 to access.
 
-Here are the specific requests of this form defined so far.  All
+Reply:
+@table @samp
+@item @var{nn}
+@var{nn} (hex encoded) is the number of bytes written.
+This may be fewer bytes than supplied in the request.
+
+@item E00
+The request was malformed, or @var{annex} was invalid.
+
+@item E @var{nn}
+The offset was invalid, or there was an error encountered writing the data.
+The @var{nn} part is a hex-encoded @code{errno} value.
+
+@item @w{}
+An empty reply indicates the @var{object} string was not
+recognized by the stub, or that the object does not support writing.
+@end table
+
+Here are the specific requests of this form defined so far.  All the
 @samp{qXfer:@var{object}:write:@dots{}} requests use the same reply
-formats, listed below.
+formats, listed above.
 
 @table @samp
 @item qXfer:siginfo:write::@var{offset}:@var{data}@dots{}
@@ -37556,24 +37595,6 @@ in that context to be accessed.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
-@end table
-
-Reply:
-@table @samp
-@item @var{nn}
-@var{nn} (hex encoded) is the number of bytes written.
-This may be fewer bytes than supplied in the request.
-
-@item E00
-The request was malformed, or @var{annex} was invalid.
-
-@item E @var{nn}
-The offset was invalid, or there was an error encountered writing the data.
-The @var{nn} part is a hex-encoded @code{errno} value.
-
-@item @w{}
-An empty reply indicates the @var{object} string was not
-recognized by the stub, or that the object does not support writing.
 @end table
 
 @item qXfer:@var{object}:@var{operation}:@dots{}
@@ -40330,6 +40351,7 @@ target descriptions.  @xref{Expat}.
 * Target Description Format::       The contents of a target description.
 * Predefined Target Types::         Standard types available for target
                                     descriptions.
+* Enum Target Types::               How to define enum target types.
 * Standard Target Features::        Features @value{GDBN} knows about.
 @end menu
 
@@ -40530,7 +40552,8 @@ Any register's value is a collection of bits which @value{GDBN} must
 interpret.  The default interpretation is a two's complement integer,
 but other types can be requested by name in the register description.
 Some predefined types are provided by @value{GDBN} (@pxref{Predefined
-Target Types}), and the description can define additional composite types.
+Target Types}), and the description can define additional composite
+and enum types.
 
 Each type element must have an @samp{id} attribute, which gives
 a unique (within the containing @samp{<feature>}) name to the type.
@@ -40560,24 +40583,15 @@ each of which has a @var{name} and a @var{type}:
 @end smallexample
 
 @cindex <struct>
+@cindex <flags>
 If a register's value is composed from several separate values, define
-it with a structure type.  There are two forms of the @samp{<struct>}
-element; a @samp{<struct>} element must either contain only bitfields
-or contain no bitfields.  If the structure contains only bitfields,
-its total size in bytes must be specified, each bitfield must have an
-explicit start and end, and bitfields are automatically assigned an
-integer type.  The field's @var{start} should be less than or
-equal to its @var{end}, and zero represents the least significant bit.
+it with either a structure type or a flags type.
+A flags type may only contain bitfields.
+A structure type may either contain only bitfields or contain no bitfields.
+If the value contains only bitfields, its total size in bytes must be
+specified.
 
-@smallexample
-<struct id="@var{id}" size="@var{size}">
-  <field name="@var{name}" start="@var{start}" end="@var{end}"/>
-  @dots{}
-</struct>
-@end smallexample
-
-If the structure contains no bitfields, then each field has an
-explicit type, and no implicit padding is added.
+Non-bitfield values have a @var{name} and @var{type}.
 
 @smallexample
 <struct id="@var{id}">
@@ -40586,19 +40600,66 @@ explicit type, and no implicit padding is added.
 </struct>
 @end smallexample
 
-@cindex <flags>
-If a register's value is a series of single-bit flags, define it with
-a flags type.  The @samp{<flags>} element has an explicit @var{size}
-and contains one or more @samp{<field>} elements.  Each field has a
-@var{name}, a @var{start}, and an @var{end}.  Only single-bit flags
-are supported.
+Both @var{name} and @var{type} values are required.
+No implicit padding is added.
+
+Bitfield values have a @var{name}, @var{start}, @var{end} and @var{type}.
+
+@smallexample
+<struct id="@var{id}" size="@var{size}">
+  <field name="@var{name}" start="@var{start}" end="@var{end}" type="@var{type}"/>
+  @dots{}
+</struct>
+@end smallexample
 
 @smallexample
 <flags id="@var{id}" size="@var{size}">
-  <field name="@var{name}" start="@var{start}" end="@var{end}"/>
+  <field name="@var{name}" start="@var{start}" end="@var{end}" type="@var{type}"/>
   @dots{}
 </flags>
 @end smallexample
+
+The @var{name} value is required.
+Bitfield values may be named with the empty string, @samp{""},
+in which case the field is ``filler'' and its value is not printed.
+Not all bits need to be specified, so ``filler'' fields are optional.
+
+The @var{start} value is required, and @var{end} and @var{type}
+are optional.
+The field's @var{start} must be less than or equal to its @var{end},
+and zero represents the least significant bit.
+The default value of @var{end} is @var{start}, a single bit field.
+
+The default value of @var{type} depends on whether the
+@var{end} was specified.  If @var{end} is specified then the default
+value of @var{type} is an unsigned integer.  If @var{end} is unspecified
+then the default value of @var{type} is @code{bool}.
+
+Which to choose?  Structures or flags?
+
+Registers defined with @samp{flags} have these advantages over
+defining them with @samp{struct}:
+
+@itemize @bullet
+@item
+Arithmetic may be performed on them as if they were integers.
+@item
+They are printed in a more readable fashion.
+@end itemize
+
+Registers defined with @samp{struct} have one advantage over
+defining them with @samp{flags}:
+
+@itemize @bullet
+@item
+One can fetch individual fields like in @samp{C}.
+
+@smallexample
+(gdb) print $my_struct_reg.field3
+$1 = 42
+@end smallexample
+
+@end itemize
 
 @subsection Registers
 @cindex <reg>
@@ -40668,6 +40729,9 @@ types.  The currently supported types are:
 
 @table @code
 
+@item bool
+Boolean type, occupying a single bit.
+
 @item int8
 @itemx int16
 @itemx int32
@@ -40710,6 +40774,44 @@ The 10-byte extended precision format used by x87 registers.
 
 @end table
 
+@node Enum Target Types
+@section Enum Target Types
+@cindex target descriptions, enum types
+
+Enum target types are useful in @samp{struct} and @samp{flags}
+register descriptions.  @xref{Target Description Format}.
+
+Enum types have a name, size and a list of name/value pairs.
+
+@smallexample
+<enum id="@var{id}" size="@var{size}">
+  <evalue name="@var{name}" value="@var{value}"/>
+  @dots{}
+</enum>
+@end smallexample
+
+Enums must be defined before they are used.
+
+@smallexample
+<enum id="levels_type" size="4">
+  <evalue name="low" value="0"/>
+  <evalue name="high" value="1"/>
+</enum>
+<flags id="flags_type" size="4">
+  <field name="X" start="0"/>
+  <field name="LEVEL" start="1" end="1" type="levels_type"/>
+</flags>
+<reg name="flags" bitsize="32" type="flags_type"/>
+@end smallexample
+
+Given that description, a value of 3 for the @samp{flags} register
+would be printed as:
+
+@smallexample
+(gdb) info register flags
+flags 0x3 [ X LEVEL=high ]
+@end smallexample
+
 @node Standard Target Features
 @section Standard Target Features
 @cindex target descriptions, standard features
@@ -40751,6 +40853,7 @@ registers using the capitalization used in the description.
 * MicroBlaze Features::
 * MIPS Features::
 * M68K Features::
+* NDS32 Features::
 * Nios II Features::
 * PowerPC Features::
 * S/390 and System z Features::
@@ -40958,6 +41061,28 @@ This feature is optional.  If present, it should contain registers
 @samp{fp0} through @samp{fp7}, @samp{fpcontrol}, @samp{fpstatus} and
 @samp{fpiaddr}.
 @end table
+
+@node NDS32 Features
+@subsection NDS32 Features
+@cindex target descriptions, NDS32 features
+
+The @samp{org.gnu.gdb.nds32.core} feature is required for NDS32
+targets.  It should contain at least registers @samp{r0} through
+@samp{r10}, @samp{r15}, @samp{fp}, @samp{gp}, @samp{lp}, @samp{sp},
+and @samp{pc}.
+
+The @samp{org.gnu.gdb.nds32.fpu} feature is optional.  If present,
+it should contain 64-bit double-precision floating-point registers
+@samp{fd0} through @emph{fdN}, which should be @samp{fd3}, @samp{fd7},
+@samp{fd15}, or @samp{fd31} based on the FPU configuration implemented.
+
+@emph{Note:} The first sixteen 64-bit double-precision floating-point
+registers are overlapped with the thirty-two 32-bit single-precision
+floating-point registers.  The 32-bit single-precision registers, if
+not being listed explicitly, will be synthesized from halves of the
+overlapping 64-bit double-precision registers.  Listing 32-bit
+single-precision registers explicitly is deprecated, and the
+support to it could be totally removed some day.
 
 @node Nios II Features
 @subsection Nios II Features
@@ -41513,7 +41638,7 @@ Here are some of the most frequently needed @value{GDBN} commands:
 
 @c pod2man highlights the right hand side of the @item lines.
 @table @env
-@item break [@var{file}:]@var{functiop}
+@item break [@var{file}:]@var{function}
 Set a breakpoint at @var{function} (in @var{file}).
 
 @item run [@var{arglist}]

@@ -12,6 +12,5 @@
   <architecture>i386</architecture>
   <xi:include href="32bit-core.xml"/>
   <xi:include href="32bit-sse.xml"/>
-  <xi:include href="32bit-avx.xml"/>
   <xi:include href="32bit-mpx.xml"/>
 </target>

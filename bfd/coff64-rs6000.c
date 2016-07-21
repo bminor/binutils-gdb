@@ -1250,15 +1250,11 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 	    {
 	      if (info->unresolved_syms_in_objects != RM_IGNORE
 		  && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
-		{
-		  if (! ((*info->callbacks->undefined_symbol)
-			 (info, h->root.root.string,
-			  input_bfd, input_section,
-			  rel->r_vaddr - input_section->vma,
-			  (info->unresolved_syms_in_objects
-			   == RM_GENERATE_ERROR))))
-		    return FALSE;
-		}
+		(*info->callbacks->undefined_symbol)
+		  (info, h->root.root.string, input_bfd, input_section,
+		   rel->r_vaddr - input_section->vma,
+		   info->unresolved_syms_in_objects == RM_GENERATE_ERROR);
+
 	      if (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)
 		{
@@ -1337,11 +1333,10 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 	    }
 	  sprintf (reloc_type_name, "0x%02x", rel->r_type);
 
-	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, (h ? &h->root : NULL), name, reloc_type_name,
-		  (bfd_vma) 0, input_bfd, input_section,
-		  rel->r_vaddr - input_section->vma)))
-	    return FALSE;
+	  (*info->callbacks->reloc_overflow)
+	    (info, (h ? &h->root : NULL), name, reloc_type_name,
+	     (bfd_vma) 0, input_bfd, input_section,
+	     rel->r_vaddr - input_section->vma);
 	}
 
       /* Add RELOCATION to the right bits of VALUE_TO_RELOCATE.  */
@@ -2741,6 +2736,7 @@ const bfd_target rs6000_xcoff64_vec =
     _bfd_generic_copy_link_hash_symbol_type,
     _bfd_xcoff_bfd_final_link,
     _bfd_generic_link_split_section,
+    _bfd_generic_link_check_relocs,
     bfd_generic_gc_sections,
     bfd_generic_lookup_section_flags,
     bfd_generic_merge_sections,
@@ -2999,6 +2995,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     _bfd_generic_copy_link_hash_symbol_type,
     _bfd_xcoff_bfd_final_link,
     _bfd_generic_link_split_section,
+    _bfd_generic_link_check_relocs,
     bfd_generic_gc_sections,
     bfd_generic_lookup_section_flags,
     bfd_generic_merge_sections,

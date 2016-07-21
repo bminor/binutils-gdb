@@ -955,10 +955,7 @@ gdb_os_poll_quit (host_callback *p)
     deprecated_ui_loop_hook (0);
 
   if (check_quit_flag ())	/* gdb's idea of quit */
-    {
-      clear_quit_flag ();	/* we've stolen it */
-      return 1;
-    }
+    return 1;
   return 0;
 }
 

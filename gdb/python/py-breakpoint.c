@@ -392,7 +392,7 @@ bppy_get_location (PyObject *self, void *closure)
   str = event_location_to_string (obj->bp->location);
   if (! str)
     str = "";
-  return PyString_Decode (str, strlen (str), host_charset (), NULL);
+  return host_string_to_python_string (str);
 }
 
 /* Python function to get the breakpoint expression.  */
@@ -414,7 +414,7 @@ bppy_get_expression (PyObject *self, void *closure)
   if (! str)
     str = "";
 
-  return PyString_Decode (str, strlen (str), host_charset (), NULL);
+  return host_string_to_python_string (str);
 }
 
 /* Python function to get the condition expression of a breakpoint.  */
@@ -430,7 +430,7 @@ bppy_get_condition (PyObject *self, void *closure)
   if (! str)
     Py_RETURN_NONE;
 
-  return PyString_Decode (str, strlen (str), host_charset (), NULL);
+  return host_string_to_python_string (str);
 }
 
 /* Returns 0 on success.  Returns -1 on error, with a python exception set.
@@ -515,7 +515,7 @@ bppy_get_commands (PyObject *self, void *closure)
   ui_out_redirect (current_uiout, NULL);
   cmdstr = ui_file_xstrdup (string_file, &length);
   make_cleanup (xfree, cmdstr);
-  result = PyString_Decode (cmdstr, strlen (cmdstr), host_charset (), NULL);
+  result = host_string_to_python_string (cmdstr);
   do_cleanups (chain);
   return result;
 }
@@ -705,6 +705,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
     }
   CATCH (except, RETURN_MASK_ALL)
     {
+      bppy_pending_object = NULL;
       PyErr_Format (except.reason == RETURN_QUIT
 		    ? PyExc_KeyboardInterrupt : PyExc_RuntimeError,
 		    "%s", except.message);
@@ -746,13 +747,13 @@ gdbpy_breakpoints (PyObject *self, PyObject *args)
   PyObject *list, *tuple;
 
   if (bppy_live == 0)
-    Py_RETURN_NONE;
+    return PyTuple_New (0);
 
   list = PyList_New (0);
   if (!list)
     return NULL;
 
-  /* If iteratre_over_breakpoints returns non NULL it signals an error
+  /* If iterate_over_breakpoints returns non NULL it signals an error
      condition.  In that case abandon building the list and return
      NULL.  */
   if (iterate_over_breakpoints (build_bp_list, list) != NULL)

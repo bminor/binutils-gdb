@@ -100,14 +100,10 @@ proc readelf_test { options binary_file regexp_file xfails } {
 
     set target_machine ""
     if [istarget "mips*-*-*"] then {
-	if { [istarget "mips*-*-*linux*"]
-	     || [istarget "mips*-sde-elf*"]
-	     || [istarget "mips*-mti-elf*"]
-	     || [istarget "mips*-img-elf*"]
-	     || [istarget "mips*-*freebsd*"] } then {
-	    set target_machine tmips
-	} else {
+	if [is_bad_symtab] then {
 	    set target_machine mips
+	} else {
+	    set target_machine tmips
 	}
     }
 
@@ -269,7 +265,12 @@ proc readelf_dump_test {} {
     set tempfile [remote_download host tmpdir/dumptest.o]
 
     # Run "readelf -p.data" on it.
-    set got [remote_exec host "$READELF $READELFFLAGS -p.data $tempfile" "" "/dev/null" "readelf.out"]
+    set sect_names [get_standard_section_names]
+    if { $sect_names != "" } {
+	set got [remote_exec host "$READELF $READELFFLAGS -p[lindex $sect_names 1] $tempfile" "" "/dev/null" "readelf.out"]
+    } else {
+	set got [remote_exec host "$READELF $READELFFLAGS -p.data $tempfile" "" "/dev/null" "readelf.out"]
+    }
     set got [lindex $got 1]
 
     # Upload the results.
@@ -334,6 +335,7 @@ readelf_find_size $tempfile
 # Run the tests.
 readelf_test -h $tempfile readelf.h  {}
 readelf_test -S $tempfile readelf.s  {}
+setup_xfail "mips-*-*irix*"
 readelf_test -s $tempfile readelf.ss {}
 readelf_test -r $tempfile readelf.r  {}
 

@@ -44,6 +44,7 @@
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
 #include "features/i386/amd64-mpx.c"
+#include "features/i386/amd64-avx-mpx.c"
 #include "features/i386/amd64-avx512.c"
 
 #include "features/i386/x32.c"
@@ -1301,12 +1302,10 @@ static void
 fixup_riprel (struct gdbarch *gdbarch, struct displaced_step_closure *dsc,
 	      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const struct amd64_insn *insn_details = &dsc->insn_details;
   int modrm_offset = insn_details->modrm_offset;
   gdb_byte *insn = insn_details->raw_insn + modrm_offset;
   CORE_ADDR rip_base;
-  int32_t disp;
   int insn_length;
   int arch_tmp_regno, tmp_regno;
   ULONGEST orig_value;
@@ -1315,7 +1314,6 @@ fixup_riprel (struct gdbarch *gdbarch, struct displaced_step_closure *dsc,
   ++insn;
 
   /* Compute the rip-relative address.	*/
-  disp = extract_signed_integer (insn, sizeof (int32_t), byte_order);
   insn_length = gdb_buffered_insn_length (gdbarch, dsc->insn_buf,
 					  dsc->max_len, from);
   rip_base = from + insn_length;
@@ -3163,6 +3161,8 @@ amd64_target_description (uint64_t xcr0)
       return tdesc_amd64_avx512;
     case X86_XSTATE_MPX_MASK:
       return tdesc_amd64_mpx;
+    case X86_XSTATE_AVX_MPX_MASK:
+      return tdesc_amd64_avx_mpx;
     case X86_XSTATE_AVX_MASK:
       return tdesc_amd64_avx;
     default:
@@ -3179,6 +3179,7 @@ _initialize_amd64_tdep (void)
   initialize_tdesc_amd64 ();
   initialize_tdesc_amd64_avx ();
   initialize_tdesc_amd64_mpx ();
+  initialize_tdesc_amd64_avx_mpx ();
   initialize_tdesc_amd64_avx512 ();
 
   initialize_tdesc_x32 ();

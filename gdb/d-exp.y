@@ -55,65 +55,10 @@
 #define parse_type(ps) builtin_type (parse_gdbarch (ps))
 #define parse_d_type(ps) builtin_d_type (parse_gdbarch (ps))
 
-/* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
-   as well as gratuitiously global symbol names, so we can have multiple
-   yacc generated parsers in gdb.  Note that these are only the variables
-   produced by yacc.  If other parser generators (bison, byacc, etc) produce
-   additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list.  */
-
-#define	yymaxdepth d_maxdepth
-#define	yyparse	d_parse_internal
-#define	yylex	d_lex
-#define	yyerror	d_error
-#define	yylval	d_lval
-#define	yychar	d_char
-#define	yydebug	d_debug
-#define	yypact	d_pact
-#define	yyr1	d_r1
-#define	yyr2	d_r2
-#define	yydef	d_def
-#define	yychk	d_chk
-#define	yypgo	d_pgo
-#define	yyact	d_act
-#define	yyexca	d_exca
-#define	yyerrflag d_errflag
-#define	yynerrs	d_nerrs
-#define	yyps	d_ps
-#define	yypv	d_pv
-#define	yys	d_s
-#define	yy_yys	d_yys
-#define	yystate	d_state
-#define	yytmp	d_tmp
-#define	yyv	d_v
-#define	yy_yyv	d_yyv
-#define	yyval	d_val
-#define	yylloc	d_lloc
-#define	yyreds	d_reds	/* With YYDEBUG defined */
-#define	yytoks	d_toks	/* With YYDEBUG defined */
-#define	yyname	d_name	/* With YYDEBUG defined */
-#define	yyrule	d_rule	/* With YYDEBUG defined */
-#define	yylhs	d_yylhs
-#define	yylen	d_yylen
-#define	yydefre	d_yydefred
-#define	yydgoto	d_yydgoto
-#define	yysindex d_yysindex
-#define	yyrindex d_yyrindex
-#define	yygindex d_yygindex
-#define	yytable	d_yytable
-#define	yycheck	d_yycheck
-#define	yyss	d_yyss
-#define	yysslim	d_yysslim
-#define	yyssp	d_yyssp
-#define	yystacksize d_yystacksize
-#define	yyvs	d_yyvs
-#define	yyvsp	d_yyvsp
-
-#ifndef YYDEBUG
-#define YYDEBUG 1	/* Default to yydebug support */
-#endif
-
-#define YYFPRINTF parser_fprintf
+/* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
+   etc).  */
+#define GDB_YY_REMAP_PREFIX d_
+#include "yy-remap.h"
 
 /* The state of the parser, used internally when we are parsing the
    expression.  */
@@ -739,7 +684,6 @@ parse_number (struct parser_state *ps, const char *p,
 
   if (parsed_float)
     {
-      const struct builtin_d_type *builtin_d_types;
       const char *suffix;
       int suffix_len;
       char *s, *sp;

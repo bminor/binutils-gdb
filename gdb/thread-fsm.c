@@ -22,8 +22,10 @@
 /* See thread-fsm.h.  */
 
 void
-thread_fsm_ctor (struct thread_fsm *self, struct thread_fsm_ops *ops)
+thread_fsm_ctor (struct thread_fsm *self, struct thread_fsm_ops *ops,
+		 struct interp *cmd_interp)
 {
+  self->command_interp = cmd_interp;
   self->finished = 0;
   self->ops = ops;
 }
@@ -44,18 +46,18 @@ thread_fsm_delete (struct thread_fsm *self)
 /* See thread-fsm.h.  */
 
 void
-thread_fsm_clean_up (struct thread_fsm *self)
+thread_fsm_clean_up (struct thread_fsm *self, struct thread_info *thread)
 {
   if (self->ops->clean_up != NULL)
-    self->ops->clean_up (self);
+    self->ops->clean_up (self, thread);
 }
 
 /* See thread-fsm.h.  */
 
 int
-thread_fsm_should_stop (struct thread_fsm *self)
+thread_fsm_should_stop (struct thread_fsm *self, struct thread_info *thread)
 {
-  return self->ops->should_stop (self);
+  return self->ops->should_stop (self, thread);
 }
 
 /* See thread-fsm.h.  */

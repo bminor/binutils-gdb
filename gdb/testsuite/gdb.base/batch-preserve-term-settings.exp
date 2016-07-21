@@ -28,8 +28,7 @@ if [is_remote host] {
 }
 
 # The shell's prompt.
-set shell_prompt "$ "
-set shell_prompt_re [string_to_regexp $shell_prompt]
+set shell_prompt_re "\[$#\] "
 
 # Spawn shell.  Returns true on success, false otherwise.
 

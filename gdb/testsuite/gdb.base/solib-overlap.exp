@@ -99,7 +99,8 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
 
     clean_restart ${binfile_base}
     # This testcase currently does not support remote targets.
-    # gdb_load_shlibs ${binfile_lib1} ${binfile_lib2}
+    # gdb_load_shlib ${binfile_lib1}
+    # gdb_load_shlib ${binfile_lib2}
 
     # Here we should get:
     # warning: .dynamic section for ".../solib-overlap-lib1.so" is not at the expected address (wrong library or version mismatch?)

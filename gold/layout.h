@@ -902,6 +902,10 @@ class Layout
 			  const Output_data_reloc_generic* dyn_rel,
 			  bool add_debug, bool dynrel_includes_plt);
 
+  // Add a target-specific dynamic tag with constant value.
+  void
+  add_target_specific_dynamic_tag(elfcpp::DT tag, unsigned int val);
+
   // Compute and write out the build ID if needed.
   void
   write_build_id(Output_file*, unsigned char*, size_t) const;

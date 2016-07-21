@@ -579,8 +579,7 @@ static const CGEN_OPINST *or1k_cgen_opinst_table[MAX_INSNS] = {
 /* Function to call before using the operand instance table.  */
 
 void
-or1k_cgen_init_opinst_table (cd)
-     CGEN_CPU_DESC cd;
+or1k_cgen_init_opinst_table (CGEN_CPU_DESC cd)
 {
   int i;
   const CGEN_OPINST **oi = & or1k_cgen_opinst_table[0];

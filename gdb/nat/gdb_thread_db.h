@@ -57,7 +57,6 @@ typedef td_err_e (td_ta_clear_event_ftype) (const td_thragent_t *ta,
 typedef td_err_e (td_ta_event_getmsg_ftype) (const td_thragent_t *ta,
 					     td_event_msg_t *msg);
 
-typedef td_err_e (td_thr_validate_ftype) (const td_thrhandle_t *th);
 typedef td_err_e (td_thr_get_info_ftype) (const td_thrhandle_t *th,
 					  td_thrinfo_t *infop);
 typedef td_err_e (td_thr_event_enable_ftype) (const td_thrhandle_t *th,

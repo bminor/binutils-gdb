@@ -28,7 +28,24 @@
 # (and thus aren't affected by shared library unloading) are not
 # disabled prematurely.
 
-if { [skip_shlib_tests] || [is_remote target] } {
+if { [skip_shlib_tests] } {
+    return 0
+}
+
+# This test is currently not supported for stub targets, because it uses the
+# start command (through gdb_start_cmd).  In theory, it could be changed to
+# use something else (kill + gdb_run_cmd with a manual breakpoint at main).
+# However, when we try that with the native-gdbserver board, we see that the
+# test fails and gdb outputs this upon connection:
+#
+#   warning: Unable to display "a_global": No symbol "a_global" in current context.
+#   warning: Unable to display "b_global": No symbol "b_global" in current context.
+#   warning: Unable to display "c_global": No symbol "c_global" in current context.
+#
+# This is because the initial stop is done before the shared libraries are
+# loaded.
+
+if { [use_gdb_stub] } {
     return 0
 }
 

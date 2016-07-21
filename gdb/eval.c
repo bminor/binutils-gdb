@@ -406,8 +406,8 @@ value_f90_subarray (struct value *array,
   int pc = (*pos) + 1;
   LONGEST low_bound, high_bound;
   struct type *range = check_typedef (TYPE_INDEX_TYPE (value_type (array)));
-  enum f90_range_type range_type
-    = (enum f90_range_type) longest_to_int (exp->elts[pc].longconst);
+  enum range_type range_type
+    = (enum range_type) longest_to_int (exp->elts[pc].longconst);
  
   *pos += 3;
 
@@ -1810,13 +1810,13 @@ evaluate_subexp_standard (struct type *expect_type,
       switch (code)
 	{
 	case TYPE_CODE_ARRAY:
-	  if (exp->elts[*pos].opcode == OP_F90_RANGE)
+	  if (exp->elts[*pos].opcode == OP_RANGE)
 	    return value_f90_subarray (arg1, exp, pos, noside);
 	  else
 	    goto multi_f77_subscript;
 
 	case TYPE_CODE_STRING:
-	  if (exp->elts[*pos].opcode == OP_F90_RANGE)
+	  if (exp->elts[*pos].opcode == OP_RANGE)
 	    return value_f90_subarray (arg1, exp, pos, noside);
 	  else
 	    {
@@ -1900,7 +1900,8 @@ evaluate_subexp_standard (struct type *expect_type,
       {
         struct type *type = value_type (arg1);
         struct type *real_type;
-        int full, top, using_enc;
+        int full, using_enc;
+        LONGEST top;
 	struct value_print_options opts;
 
 	get_user_print_options (&opts);
@@ -1917,7 +1918,7 @@ evaluate_subexp_standard (struct type *expect_type,
       arg3 = value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
 			       NULL, "structure pointer");
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	arg3 = value_zero (value_type (arg3), not_lval);
+	arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));
       return arg3;
 
     case STRUCTOP_MEMBER:
@@ -2427,7 +2428,8 @@ evaluate_subexp_standard (struct type *expect_type,
       if (noside == EVAL_SKIP)
 	goto nosideret;
       type = check_typedef (value_type (arg2));
-      if (TYPE_CODE (type) != TYPE_CODE_INT)
+      if (TYPE_CODE (type) != TYPE_CODE_INT
+          && TYPE_CODE (type) != TYPE_CODE_ENUM)
 	error (_("Non-integral right operand for \"@\" operator."));
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{

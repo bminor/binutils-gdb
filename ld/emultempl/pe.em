@@ -563,7 +563,6 @@ set_entry_point (void)
     }
   else
     {
-
       for (i = 0; v[i].entry; i++)
         if (v[i].value == pe_subsystem)
           break;
@@ -1060,10 +1059,38 @@ pe_undef_cdecl_match (struct bfd_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+/* Change UNDEF to a defined symbol, taking data from SYM.  */
+
+static void
+change_undef (struct bfd_link_hash_entry * undef,
+	      struct bfd_link_hash_entry * sym)
+{
+  static bfd_boolean  gave_warning_message = FALSE;
+
+  undef->type = bfd_link_hash_defined;
+  undef->u.def.value = sym->u.def.value;
+  undef->u.def.section = sym->u.def.section;
+
+  if (pe_enable_stdcall_fixup == -1)
+    {
+      einfo (_("Warning: resolving %s by linking to %s\n"),
+	     undef->root.string, sym->root.string);
+
+      if (! gave_warning_message)
+	{
+	  einfo (_("Use --enable-stdcall-fixup to disable these warnings\n"));
+	  einfo (_("Use --disable-stdcall-fixup to disable these fixups\n"));
+	  gave_warning_message = TRUE;
+	}
+    }
+
+  /* PR 19803: Make sure that the linked symbol is not garbage collected.  */
+  lang_add_gc_name (sym->root.string);
+}
+
 static void
 pe_fixup_stdcalls (void)
 {
-  static int gave_warning_message = 0;
   struct bfd_link_hash_entry *undef, *sym;
 
   if (pe_dll_extra_pe_debug)
@@ -1072,69 +1099,39 @@ pe_fixup_stdcalls (void)
   for (undef = link_info.hash->undefs; undef; undef=undef->u.undef.next)
     if (undef->type == bfd_link_hash_undefined)
       {
-	char* at = strchr (undef->root.string, '@');
-	int lead_at = (*undef->root.string == '@');
+	const char * name = undef->root.string;
+	char * at;
+	int lead_at = (*name == '@');
+
 	if (lead_at)
-	  at = strchr (undef->root.string + 1, '@');
+	  at = strchr (name + 1, '@');
+	else
+	  at = strchr (name, '@');
 
 	if (at || lead_at)
 	  {
 	    /* The symbol is a stdcall symbol, so let's look for a
 	       cdecl symbol with the same name and resolve to that.  */
-	    char *cname = xstrdup (undef->root.string);
+	    char *cname = xstrdup (name);
 
 	    if (lead_at)
 	      *cname = '_';
-	    at = strchr (cname, '@');
-	    if (at)
-	      *at = 0;
-	    sym = bfd_link_hash_lookup (link_info.hash, cname, 0, 0, 1);
+	    if (at)	      
+	      * strchr (cname, '@') = 0;
+	    sym = bfd_link_hash_lookup (link_info.hash, cname, FALSE, FALSE, TRUE);
 
 	    if (sym && sym->type == bfd_link_hash_defined)
-	      {
-		undef->type = bfd_link_hash_defined;
-		undef->u.def.value = sym->u.def.value;
-		undef->u.def.section = sym->u.def.section;
-
-		if (pe_enable_stdcall_fixup == -1)
-		  {
-		    einfo (_("Warning: resolving %s by linking to %s\n"),
-			   undef->root.string, cname);
-		    if (! gave_warning_message)
-		      {
-			gave_warning_message = 1;
-			einfo (_("Use --enable-stdcall-fixup to disable these warnings\n"));
-			einfo (_("Use --disable-stdcall-fixup to disable these fixups\n"));
-		      }
-		  }
-	      }
+	      change_undef (undef, sym);
 	  }
 	else
 	  {
 	    /* The symbol is a cdecl symbol, so we look for stdcall
 	       symbols - which means scanning the whole symbol table.  */
-	    pe_undef_found_sym = 0;
+	    pe_undef_found_sym = NULL;
 	    bfd_link_hash_traverse (link_info.hash, pe_undef_cdecl_match,
-				    (char *) undef->root.string);
-	    sym = pe_undef_found_sym;
-	    if (sym)
-	      {
-		undef->type = bfd_link_hash_defined;
-		undef->u.def.value = sym->u.def.value;
-		undef->u.def.section = sym->u.def.section;
-
-		if (pe_enable_stdcall_fixup == -1)
-		  {
-		    einfo (_("Warning: resolving %s by linking to %s\n"),
-			   undef->root.string, sym->root.string);
-		    if (! gave_warning_message)
-		      {
-			gave_warning_message = 1;
-			einfo (_("Use --enable-stdcall-fixup to disable these warnings\n"));
-			einfo (_("Use --disable-stdcall-fixup to disable these fixups\n"));
-		      }
-		  }
-	      }
+				    (char *) name);
+	    if (pe_undef_found_sym)
+	      change_undef (undef, pe_undef_found_sym);
 	  }
       }
 }
@@ -2225,21 +2222,27 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 	  orphan_init_done = 1;
 	}
 
+      flags = s->flags;
+      if (!bfd_link_relocatable (&link_info))
+	{
+	  nexts = s;
+	  while ((nexts = bfd_get_next_section_by_name (nexts->owner,
+							nexts)))
+	    if (nexts->output_section == NULL
+		&& (nexts->flags & SEC_EXCLUDE) == 0
+		&& ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
+		&& (nexts->owner->flags & DYNAMIC) == 0
+		&& nexts->owner->usrdata != NULL
+		&& !(((lang_input_statement_type *) nexts->owner->usrdata)
+		     ->flags.just_syms))
+	      flags = (((flags ^ SEC_READONLY)
+			| (nexts->flags ^ SEC_READONLY))
+		       ^ SEC_READONLY);
+	}
+
       /* Try to put the new output section in a reasonable place based
 	 on the section name and section flags.  */
 
-      flags = s->flags;
-      nexts = s;
-      while ((nexts = bfd_get_next_section_by_name (nexts->owner, nexts)))
-	if (nexts->output_section == NULL
-	    && (nexts->flags & SEC_EXCLUDE) == 0
-	    && ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
-	    && (nexts->owner->flags & DYNAMIC) == 0
-	    && nexts->owner->usrdata != NULL
-	    && !(((lang_input_statement_type *) nexts->owner->usrdata)
-		 ->flags.just_syms))
-	  flags = (((flags ^ SEC_READONLY) | (nexts->flags ^ SEC_READONLY))
-		   ^ SEC_READONLY);
       place = NULL;
       if ((flags & SEC_ALLOC) == 0)
 	;

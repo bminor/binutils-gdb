@@ -76,6 +76,9 @@ extern int safe_read_memory_integer (CORE_ADDR memaddr, int len,
 extern ULONGEST read_memory_unsigned_integer (CORE_ADDR memaddr,
 					      int len,
 					      enum bfd_endian byte_order);
+extern int safe_read_memory_unsigned_integer (CORE_ADDR memaddr, int len,
+					      enum bfd_endian byte_order,
+					      ULONGEST *return_value);
 
 /* Read an integer from debugged code memory, given address,
    number of bytes, and byte order for code.  */

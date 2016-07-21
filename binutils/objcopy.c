@@ -221,7 +221,7 @@ static enum
 } do_debug_sections = nothing;
 
 /* Whether to generate ELF common symbols with the STT_COMMON type.  */
-static enum bfd_link_discard do_elf_stt_common = unchanged;
+static enum bfd_link_elf_stt_common do_elf_stt_common = unchanged;
 
 /* Whether to change the leading character in symbol names.  */
 static bfd_boolean change_leading_char = FALSE;
@@ -507,6 +507,7 @@ static int compare_section_lma (const void *, const void *);
 static void mark_symbols_used_in_relocations (bfd *, asection *, void *);
 static bfd_boolean write_debugging_info (bfd *, void *, long *, asymbol ***);
 static const char *lookup_sym_redefinition (const char *);
+static const char *find_section_rename (const char *, flagword *);
 
 static void
 copy_usage (FILE *stream, int exit_status)
@@ -715,8 +716,8 @@ parse_flags (const char *s)
 	}
 
       if (0) ;
-#define PARSE_FLAG(fname,fval) \
-  else if (strncasecmp (fname, s, len) == 0) ret |= fval
+#define PARSE_FLAG(fname,fval)					\
+      else if (strncasecmp (fname, s, len) == 0) ret |= fval
       PARSE_FLAG ("alloc", SEC_ALLOC);
       PARSE_FLAG ("load", SEC_LOAD);
       PARSE_FLAG ("noload", SEC_NEVER_LOAD);
@@ -757,7 +758,7 @@ parse_symflags (const char *s, char **other)
 {
   flagword ret;
   const char *snext;
-  int len;
+  size_t len;
 
   ret = BSF_NO_FLAGS;
 
@@ -765,21 +766,23 @@ parse_symflags (const char *s, char **other)
     {
       snext = strchr (s, ',');
       if (snext == NULL)
-	  len = strlen (s);
+	len = strlen (s);
       else
 	{
 	  len = snext - s;
 	  ++snext;
 	}
 
-#define PARSE_FLAG(fname,fval)							  \
-      else if (len == (int) sizeof fname - 1 && strncasecmp (fname, s, len) == 0) \
+#define PARSE_FLAG(fname, fval)						\
+      else if (len == sizeof fname - 1					\
+	       && strncasecmp (fname, s, len) == 0)			\
 	ret |= fval
 
-#define PARSE_OTHER(fname,fval)								   \
-      else if (len >= (int) sizeof fname && strncasecmp (fname, s, sizeof fname - 1) == 0) \
+#define PARSE_OTHER(fname, fval)					\
+      else if (len >= sizeof fname					\
+	       && strncasecmp (fname, s, sizeof fname - 1) == 0)	\
 	fval = xstrndup (s + sizeof fname - 1, len - sizeof fname + 1)
-      
+
       if (0) ;
       PARSE_FLAG ("local", BSF_LOCAL);
       PARSE_FLAG ("global", BSF_GLOBAL);
@@ -809,9 +812,9 @@ parse_symflags (const char *s, char **other)
 	  copy[len] = '\0';
 	  non_fatal (_("unrecognized symbol flag `%s'"), copy);
 	  fatal (_("supported flags: %s"),
-		  "local, global, export, debug, function, weak, section, "
-		  "constructor, warning, indirect, file, object, synthetic, "
-		  "indirect-function, unique-object, before=<othersym>");
+		 "local, global, export, debug, function, weak, section, "
+		 "constructor, warning, indirect, file, object, synthetic, "
+		 "indirect-function, unique-object, before=<othersym>");
 	}
 
       s = snext;
@@ -1136,12 +1139,12 @@ is_update_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       struct section_add *pupdate;
 
       for (pupdate = update_sections;
-           pupdate != NULL;
-           pupdate = pupdate->next)
+	   pupdate != NULL;
+	   pupdate = pupdate->next)
 	{
-          if (strcmp (sec->name, pupdate->name) == 0)
-            return TRUE;
-        }
+	  if (strcmp (sec->name, pupdate->name) == 0)
+	    return TRUE;
+	}
     }
 
   return FALSE;
@@ -1166,8 +1169,8 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	fatal (_("error: section %s matches both remove and copy options"),
 	       bfd_get_section_name (abfd, sec));
       if (p && is_update_section (abfd, sec))
-        fatal (_("error: section %s matches both update and remove options"),
-               bfd_get_section_name (abfd, sec));
+	fatal (_("error: section %s matches both update and remove options"),
+	       bfd_get_section_name (abfd, sec));
 
       if (p != NULL)
 	return TRUE;
@@ -1309,9 +1312,9 @@ need_sym_before (struct addsym_node **node, const char *sym)
 static asymbol *
 create_new_symbol (struct addsym_node *ptr, bfd *obfd)
 {
-  asymbol *sym = bfd_make_empty_symbol(obfd);
+  asymbol *sym = bfd_make_empty_symbol (obfd);
 
-  bfd_asymbol_name(sym) = ptr->symdef;
+  bfd_asymbol_name (sym) = ptr->symdef;
   sym->value = ptr->symval;
   sym->flags = ptr->flags;
   if (ptr->section)
@@ -1321,8 +1324,8 @@ create_new_symbol (struct addsym_node *ptr, bfd *obfd)
 	fatal (_("Section %s not found"), ptr->section);
       sym->section = sec;
     }
-  else 
-      sym->section = bfd_abs_section_ptr;
+  else
+    sym->section = bfd_abs_section_ptr;
   return sym;
 }
 
@@ -1359,12 +1362,14 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	    to[dst_count++] = create_new_symbol (ptr, obfd);
 	}
 
-      if (redefine_sym_list)
+      if (redefine_sym_list || section_rename_list)
 	{
-	  char *old_name, *new_name;
+	  char *new_name;
 
-	  old_name = (char *) bfd_asymbol_name (sym);
-	  new_name = (char *) lookup_sym_redefinition (old_name);
+	  new_name = (char *) lookup_sym_redefinition (name);
+	  if (new_name == name
+	      && (flags & BSF_SECTION_SYM) != 0)
+	    new_name = (char *) find_section_rename (name, NULL);
 	  bfd_asymbol_name (sym) = new_name;
 	  name = new_name;
 	}
@@ -1387,12 +1392,12 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
       /* Short circuit for change_leading_char if we can do it in-place.  */
       if (rem_leading_char && add_leading_char && !prefix_symbols_string)
-        {
+	{
 	  name[0] = bfd_get_symbol_leading_char (obfd);
 	  bfd_asymbol_name (sym) = name;
 	  rem_leading_char = FALSE;
 	  add_leading_char = FALSE;
-        }
+	}
 
       /* Remove leading char.  */
       if (rem_leading_char)
@@ -1400,23 +1405,23 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
       /* Add new leading char and/or prefix.  */
       if (add_leading_char || prefix_symbols_string)
-        {
-          char *n, *ptr;
+	{
+	  char *n, *ptr;
 
-          ptr = n = (char *) xmalloc (1 + strlen (prefix_symbols_string)
-                                      + strlen (name) + 1);
-          if (add_leading_char)
+	  ptr = n = (char *) xmalloc (1 + strlen (prefix_symbols_string)
+				      + strlen (name) + 1);
+	  if (add_leading_char)
 	    *ptr++ = bfd_get_symbol_leading_char (obfd);
 
-          if (prefix_symbols_string)
-            {
-              strcpy (ptr, prefix_symbols_string);
-              ptr += strlen (prefix_symbols_string);
-           }
+	  if (prefix_symbols_string)
+	    {
+	      strcpy (ptr, prefix_symbols_string);
+	      ptr += strlen (prefix_symbols_string);
+	    }
 
-          strcpy (ptr, name);
-          bfd_asymbol_name (sym) = n;
-          name = n;
+	  strcpy (ptr, name);
+	  bfd_asymbol_name (sym) = n;
+	  name = n;
 	}
 
       if (strip_symbols == STRIP_ALL)
@@ -1660,7 +1665,7 @@ add_redefine_syms_file (const char *filename)
       if ((c == '\r' && (c = getc (file)) == '\n')
 	  || c == '\n' || c == EOF)
 	{
- end_of_line:
+	end_of_line:
 	  /* Append the redefinition to the list.  */
 	  if (buf[0] != '\0')
 	    redefine_list_append (filename, &buf[0], &buf[outsym_off]);
@@ -1675,7 +1680,7 @@ add_redefine_syms_file (const char *filename)
 	}
       else
 	fatal (_("%s:%d: garbage found at end of line"), filename, lineno);
- comment:
+    comment:
       if (len != 0 && (outsym_off == 0 || outsym_off == len))
 	fatal (_("%s:%d: missing new symbol name"), filename, lineno);
       buf[len++] = '\0';
@@ -2011,15 +2016,15 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  if (bfd_get_section_by_name (obfd, padd->name))
 	    {
 	      bfd_nonfatal_message (NULL, obfd, NULL,
-				 _("can't add section '%s'"), padd->name);
+				    _("can't add section '%s'"), padd->name);
 	      return FALSE;
 	    }
 	  else
 	    {
 	      /* We use LINKER_CREATED here so that the backend hooks
-	         will create any special section type information,
-	         instead of presuming we know what we're doing merely
-	         because we set the flags.  */
+		 will create any special section type information,
+		 instead of presuming we know what we're doing merely
+		 because we set the flags.  */
 	      padd->section = bfd_make_section_with_flags
 		(obfd, padd->name, flags | SEC_LINKER_CREATED);
 	      if (padd->section == NULL)
@@ -2326,6 +2331,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       || change_leading_char
       || remove_leading_char
       || redefine_sym_list
+      || section_rename_list
       || weaken
       || add_symbols)
     {
@@ -2382,14 +2388,14 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       struct section_add *pupdate;
 
       for (pupdate = update_sections;
-           pupdate != NULL;
-           pupdate = pupdate->next)
+	   pupdate != NULL;
+	   pupdate = pupdate->next)
 	{
 	  asection *osec;
 
 	  osec = pupdate->section->output_section;
 	  if (! bfd_set_section_contents (obfd, osec, pupdate->contents,
-	                                  0, pupdate->size))
+					  0, pupdate->size))
 	    {
 	      bfd_nonfatal_message (NULL, obfd, osec, NULL);
 	      return FALSE;
@@ -2511,7 +2517,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   /* Make a temp directory to hold the contents.  */
   dir = make_tempdir (bfd_get_filename (obfd));
   if (dir == NULL)
-      fatal (_("cannot create tempdir for archive copying (error: %s)"),
+    fatal (_("cannot create tempdir for archive copying (error: %s)"),
 	   strerror (errno));
 
   if (strip_symbols == STRIP_ALL)
@@ -2778,7 +2784,7 @@ copy_file (const char *input_filename, const char *output_filename,
       bfd *obfd;
 
       /* bfd_get_target does not return the correct value until
-         bfd_check_format succeeds.  */
+	 bfd_check_format succeeds.  */
       if (output_target == NULL)
 	{
 	  output_target = bfd_get_target (ibfd);
@@ -2805,7 +2811,7 @@ copy_file (const char *input_filename, const char *output_filename,
     do_copy:
 
       /* bfd_get_target does not return the correct value until
-         bfd_check_format succeeds.  */
+	 bfd_check_format succeeds.  */
       if (output_target == NULL)
 	output_target = bfd_get_target (ibfd);
 
@@ -2906,24 +2912,19 @@ add_section_rename (const char * old_name, const char * new_name,
 }
 
 /* Check the section rename list for a new name of the input section
-   ISECTION.  Return the new name if one is found.
-   Also set RETURNED_FLAGS to the flags to be used for this section.  */
+   called OLD_NAME.  Returns the new name if one is found and sets
+   RETURNED_FLAGS if non-NULL to the flags to be used for this section.  */
 
 static const char *
-find_section_rename (bfd * ibfd ATTRIBUTE_UNUSED, sec_ptr isection,
-		     flagword * returned_flags)
+find_section_rename (const char *old_name, flagword *returned_flags)
 {
-  const char * old_name = bfd_section_name (ibfd, isection);
-  section_rename * srename;
-
-  /* Default to using the flags of the input section.  */
-  * returned_flags = bfd_get_section_flags (ibfd, isection);
+  const section_rename *srename;
 
   for (srename = section_rename_list; srename != NULL; srename = srename->next)
     if (strcmp (srename->old_name, old_name) == 0)
       {
-	if (srename->flags != (flagword) -1)
-	  * returned_flags = srename->flags;
+	if (returned_flags != NULL && srename->flags != (flagword) -1)
+	  *returned_flags = srename->flags;
 
 	return srename->new_name;
       }
@@ -2973,7 +2974,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     return;
 
   /* Get the, possibly new, name of the output section.  */
-  name = find_section_rename (ibfd, isection, & flags);
+  name = bfd_section_name (ibfd, isection);
+  flags = bfd_get_section_flags (ibfd, isection);
+  name = find_section_rename (name, &flags);
 
   /* Prefix sections.  */
   if ((prefix_alloc_sections_string)
@@ -3000,7 +3003,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
   else if (strip_symbols == STRIP_NONDEBUG
 	   && (flags & (SEC_ALLOC | SEC_GROUP)) != 0
-           && !is_nondebug_keep_contents_section (ibfd, isection))
+	   && !is_nondebug_keep_contents_section (ibfd, isection))
     {
       flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP);
       if (obfd->xvec->flavour == bfd_target_elf_flavour)
@@ -3117,7 +3120,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   /* All went well.  */
   return;
 
-loser:
+ loser:
   status = 1;
   bfd_nonfatal_message (NULL, obfd, osection, err);
 }
@@ -3226,7 +3229,9 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  for (i = 0; i < relcount; i++)
 	    {
 	      /* PR 17512: file: 9e907e0c.  */
-	      if (relpp[i]->sym_ptr_ptr)
+	      if (relpp[i]->sym_ptr_ptr
+		  /* PR 20096 */
+		  && * relpp[i]->sym_ptr_ptr)
 		if (is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
 					 keep_specific_htab))
 		  temp_relpp [temp_relcount++] = relpp [i];
@@ -3499,9 +3504,9 @@ write_debugging_info (bfd *obfd, void *dhandle,
 	}
 
       /* We can get away with setting the section contents now because
-         the next thing the caller is going to do is copy over the
-         real sections.  We may someday have to split the contents
-         setting out of this function.  */
+	 the next thing the caller is going to do is copy over the
+	 real sections.  We may someday have to split the contents
+	 setting out of this function.  */
       if (! bfd_set_section_contents (obfd, stabsec, syms, 0, symsize)
 	  || ! bfd_set_section_contents (obfd, stabstrsec, strings, 0,
 					 stringsize))
@@ -3516,7 +3521,7 @@ write_debugging_info (bfd *obfd, void *dhandle,
 
   bfd_nonfatal_message (NULL, obfd, NULL,
 			_("don't know how to write debugging information for %s"),
-	     bfd_get_target (obfd));
+			bfd_get_target (obfd));
   return FALSE;
 }
 
@@ -3824,8 +3829,8 @@ convert_efi_target (char *efi)
 
 static struct section_add *
 init_section_add (const char *arg,
-                  struct section_add *next,
-                  const char *option)
+		  struct section_add *next,
+		  const char *option)
 {
   struct section_add *pa;
   const char *s;
@@ -3862,7 +3867,7 @@ section_add_load_file (struct section_add *pa)
   f = fopen (pa->filename, FOPEN_RB);
   if (f == NULL)
     fatal (_("cannot open: %s: %s"),
-           pa->filename, strerror (errno));
+	   pa->filename, strerror (errno));
 
   off = 0;
   alloc = 4096;
@@ -3872,14 +3877,14 @@ section_add_load_file (struct section_add *pa)
       off_t got;
 
       if (off == alloc)
-        {
-          alloc <<= 1;
-          pa->contents = (bfd_byte *) xrealloc (pa->contents, alloc);
-        }
+	{
+	  alloc <<= 1;
+	  pa->contents = (bfd_byte *) xrealloc (pa->contents, alloc);
+	}
 
       got = fread (pa->contents + off, 1, alloc - off, f);
       if (ferror (f))
-        fatal (_("%s: fread failed"), pa->filename);
+	fatal (_("%s: fread failed"), pa->filename);
 
       off += got;
     }
@@ -4060,20 +4065,20 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_ADD_SECTION:
-          add_sections = init_section_add (optarg, add_sections,
-                                           "--add-section");
-          section_add_load_file (add_sections);
+	  add_sections = init_section_add (optarg, add_sections,
+					   "--add-section");
+	  section_add_load_file (add_sections);
 	  break;
 
 	case OPTION_UPDATE_SECTION:
 	  update_sections = init_section_add (optarg, update_sections,
-                                              "--update-section");
+					      "--update-section");
 	  section_add_load_file (update_sections);
 	  break;
 
 	case OPTION_DUMP_SECTION:
-          dump_sections = init_section_add (optarg, dump_sections,
-                                            "--dump-section");
+	  dump_sections = init_section_add (optarg, dump_sections,
+					    "--dump-section");
 	  break;
 
 	case OPTION_ADD_SYMBOL:
@@ -4101,6 +4106,7 @@ copy_main (int argc, char *argv[])
 	      }
 
 	    t = strchr (t + 1, ',');
+	    newsym->othersym = NULL;
 	    if (t)
 	      newsym->flags = parse_symflags (t+1, &newsym->othersym);
 	    else
@@ -4496,39 +4502,39 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_REVERSE_BYTES:
-          {
-            int prev = reverse_bytes;
+	  {
+	    int prev = reverse_bytes;
 
-            reverse_bytes = atoi (optarg);
-            if ((reverse_bytes <= 0) || ((reverse_bytes % 2) != 0))
-              fatal (_("number of bytes to reverse must be positive and even"));
+	    reverse_bytes = atoi (optarg);
+	    if ((reverse_bytes <= 0) || ((reverse_bytes % 2) != 0))
+	      fatal (_("number of bytes to reverse must be positive and even"));
 
-            if (prev && prev != reverse_bytes)
-              non_fatal (_("Warning: ignoring previous --reverse-bytes value of %d"),
-                         prev);
-            break;
-          }
+	    if (prev && prev != reverse_bytes)
+	      non_fatal (_("Warning: ignoring previous --reverse-bytes value of %d"),
+			 prev);
+	    break;
+	  }
 
 	case OPTION_FILE_ALIGNMENT:
 	  pe_file_alignment = parse_vma (optarg, "--file-alignment");
 	  break;
 
 	case OPTION_HEAP:
-	    {
-	      char *end;
-	      pe_heap_reserve = strtoul (optarg, &end, 0);
-	      if (end == optarg
-		  || (*end != '.' && *end != '\0'))
-		non_fatal (_("%s: invalid reserve value for --heap"),
-			   optarg);
-	      else if (*end != '\0')
-		{
-		  pe_heap_commit = strtoul (end + 1, &end, 0);
-		  if (*end != '\0')
-		    non_fatal (_("%s: invalid commit value for --heap"),
-			       optarg);
-		}
-	    }
+	  {
+	    char *end;
+	    pe_heap_reserve = strtoul (optarg, &end, 0);
+	    if (end == optarg
+		|| (*end != '.' && *end != '\0'))
+	      non_fatal (_("%s: invalid reserve value for --heap"),
+			 optarg);
+	    else if (*end != '\0')
+	      {
+		pe_heap_commit = strtoul (end + 1, &end, 0);
+		if (*end != '\0')
+		  non_fatal (_("%s: invalid commit value for --heap"),
+			     optarg);
+	      }
+	  }
 	  break;
 
 	case OPTION_IMAGE_BASE:
@@ -4545,21 +4551,21 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_STACK:
-	    {
-	      char *end;
-	      pe_stack_reserve = strtoul (optarg, &end, 0);
-	      if (end == optarg
-		  || (*end != '.' && *end != '\0'))
-		non_fatal (_("%s: invalid reserve value for --stack"),
-			   optarg);
-	      else if (*end != '\0')
-		{
-		  pe_stack_commit = strtoul (end + 1, &end, 0);
-		  if (*end != '\0')
-		    non_fatal (_("%s: invalid commit value for --stack"),
-			       optarg);
-		}
-	    }
+	  {
+	    char *end;
+	    pe_stack_reserve = strtoul (optarg, &end, 0);
+	    if (end == optarg
+		|| (*end != '.' && *end != '\0'))
+	      non_fatal (_("%s: invalid reserve value for --stack"),
+			 optarg);
+	    else if (*end != '\0')
+	      {
+		pe_stack_commit = strtoul (end + 1, &end, 0);
+		if (*end != '\0')
+		  non_fatal (_("%s: invalid commit value for --stack"),
+			     optarg);
+	      }
+	  }
 	  break;
 
 	case 0:

@@ -123,8 +123,7 @@ if [runto inner] then {
     # This test is not as obscure as it might look.  `p getenv ("TERM")'
     # is a real-world example, at least on many systems.
     if [target_info exists gdb,cannot_call_functions] {
-	setup_xfail "*-*-*" 2416
-	fail "p/c array_index(\"abcdef\",2)"
+	unsupported "p/c array_index(\"abcdef\",2)"
     } else {
 	# We need to up this because this can be really slow on some boards.
 	# (malloc() is called as part of the test).

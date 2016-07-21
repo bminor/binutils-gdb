@@ -559,7 +559,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
 	  if (TYPE_CODE (fld_type) == TYPE_CODE_ARRAY)
 	    {
 	      tgt_type = TYPE_TARGET_TYPE (fld_type);
-	      if (TYPE_LENGTH (fld_type) >= 0 && TYPE_LENGTH (tgt_type) >= 0
+	      if (TYPE_LENGTH (tgt_type) > 0
 		  && TYPE_LENGTH (fld_type) / TYPE_LENGTH (tgt_type) > 2)
 		return 1;
 	    }

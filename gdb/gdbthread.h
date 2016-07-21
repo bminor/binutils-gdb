@@ -136,11 +136,6 @@ struct thread_control_state
      at.  */
   bpstat stop_bpstat;
 
-  /* The interpreter that issued the execution command.  NULL if the
-     thread was resumed as a result of a command applied to some other
-     thread (e.g., "next" with scheduler-locking off).  */
-  struct interp *command_interp;
-
   /* Whether the command that started the thread was a stepping
      command.  This is used to decide whether "set scheduler-locking
      step" behaves like "on" or "off".  */

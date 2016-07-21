@@ -1175,7 +1175,7 @@ print_help_for_command (struct cmd_list_element *c, const char *prefix,
  * all sublists of LIST.
  * PREFIX is the prefix to print before each command name.
  * STREAM is the stream upon which the output should be written.
- * CLASS should be:
+ * THECLASS should be:
  *      A non-negative class number to list only commands in that
  * class.
  *      ALL_COMMANDS to list all commands in list.
@@ -1192,15 +1192,18 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
   struct cmd_list_element *c;
 
   for (c = list; c; c = c->next)
-    {      
+    {
       if (c->abbrev_flag == 0
+	  && !c->cmd_deprecated
 	  && (theclass == all_commands
 	      || (theclass == all_classes && c->func == NULL)
 	      || (theclass == c->theclass && c->func != NULL)))
 	{
 	  print_help_for_command (c, prefix, recurse, stream);
 	}
-      else if (c->abbrev_flag == 0 && recurse
+      else if (c->abbrev_flag == 0
+	       && recurse
+	       && !c->cmd_deprecated
 	       && theclass == class_user && c->prefixlist != NULL)
 	/* User-defined commands may be subcommands.  */
 	help_cmd_list (*c->prefixlist, theclass, c->prefixname,

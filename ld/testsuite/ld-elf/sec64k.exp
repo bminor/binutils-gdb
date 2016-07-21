@@ -29,7 +29,7 @@ if ![is_elf_format] {
 
 # Targets using the generic linker backend don't sort section symbols
 # before local symbols, so don't bother testing them.
-if { [istarget "arc-*-*"]
+if { [istarget "arc*-*-*"]
      || [istarget "d30v-*-*"]
      || [istarget "dlx-*-*"]
      || [istarget "i960-*-*"]
@@ -40,8 +40,10 @@ if { [istarget "arc-*-*"]
     return
 }
 
-# m68hc11, m68hc12 and xgate run out of address space.
-if { [istarget "m68hc1*-*"] || [istarget "xgate-*"] } {
+# ft32, m68hc11, m68hc12 and xgate run out of address space.
+if {   [istarget "ft32-*-*"]
+    || [istarget "m68hc1*-*"]
+    || [istarget "xgate-*"] } {
     return
 }
 
@@ -166,17 +168,15 @@ if [catch { set ofd [open "tmpdir/$test2.d" w] } x] {
     return
 }
 
-# too big for d10v and msp
+# too big for avr, d10v and msp
 # lack of fancy orphan section handling causes overlap on fr30 and iq2000
 if { ![istarget "d10v-*-*"]
+     && ![istarget "avr-*-*"]
      && ![istarget "msp*-*-*"]
      && ![istarget "fr30-*-*"] 
      && ![istarget "iq2000-*-*"] } {
     foreach sfile $sfiles { puts $ofd "#source: $sfile" }
-    if { [istarget "avr-*-*"] } then {
-	puts $ofd "#as: -mmcu=avr6"
-	puts $ofd "#ld: -mavr6"
-    } elseif { [istarget spu*-*-*] } {
+    if { [istarget spu*-*-*] } {
 	puts $ofd "#ld: --local-store 0:0"
     } else {
 	puts $ofd "#ld:"

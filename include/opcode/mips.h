@@ -25,6 +25,10 @@
 
 #include "bfd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* These are bit masks and shift counts to use to access the various
    fields of an instruction.  To retrieve the X field of an
    instruction, use the expression
@@ -1256,6 +1260,7 @@ static const unsigned int mips_isa_table[] = {
 #define ASE_MSA64		0x00001000
 /* eXtended Physical Address (XPA) Extension.  */
 #define ASE_XPA			0x00002000
+#define ASE_DSPR3		0x00004000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 
@@ -2282,5 +2287,9 @@ extern const int bfd_micromips_num_opcodes;
 /* A NOP insn impemented as "or at,at,zero".
    Used to implement -mfix-loongson2f.  */
 #define LOONGSON2F_NOP_INSN	0x00200825
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _MIPS_H_ */

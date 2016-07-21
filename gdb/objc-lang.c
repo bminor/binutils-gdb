@@ -281,6 +281,15 @@ objc_demangle (const char *mangled, int options)
     return NULL;	/* Not an objc mangled name.  */
 }
 
+/* la_sniff_from_mangled_name for ObjC.  */
+
+static int
+objc_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = objc_demangle (mangled, 0);
+  return *demangled != NULL;
+}
+
 /* Determine if we are currently in the Objective-C dispatch function.
    If so, get the address of the method function that the dispatcher
    would call and use that as the function to step into instead.  Also
@@ -350,6 +359,11 @@ static const struct op_print objc_op_print_tab[] =
     {NULL, OP_NULL, PREC_NULL, 0}
 };
 
+static const char *objc_extensions[] =
+{
+  ".m", NULL
+};
+
 const struct language_defn objc_language_defn = {
   "objective-c",		/* Language name */
   "Objective-C",
@@ -358,9 +372,10 @@ const struct language_defn objc_language_defn = {
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  objc_extensions,
   &exp_descriptor_standard,
   c_parse,
-  c_error,
+  c_yyerror,
   null_post_parser,
   c_printchar,		       /* Print a character constant */
   c_printstr,		       /* Function to print string constant */
@@ -375,6 +390,7 @@ const struct language_defn objc_language_defn = {
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   objc_demangle,		/* Language specific symbol demangler */
+  objc_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname */
   objc_op_print_tab,		/* Expression operators for printing */

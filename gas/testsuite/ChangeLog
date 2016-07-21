@@ -1,5 +1,0 @@
-2016-02-16  Claudiu Zissulescu  <claziss@synopsys.com>
-
-	* gas/cfi/cfi-arc-1.d: New file.
-	* gas/cfi/cfi-arc-1.s: Likewise.
-	* gas/cfi/cfi.exp: Allow running tests for arc.

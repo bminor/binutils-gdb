@@ -133,7 +133,7 @@ SECTIONS
   {
     ${R_RDATA}
     ${RELOCATING+__rt_psrelocs_start = .;}
-    *(.rdata_runtime_pseudo_reloc)
+    KEEP(*(.rdata_runtime_pseudo_reloc))
     ${RELOCATING+__rt_psrelocs_end = .;}
   }
   ${RELOCATING+__rt_psrelocs_size = __rt_psrelocs_end - __rt_psrelocs_start;}

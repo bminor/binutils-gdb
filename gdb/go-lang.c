@@ -385,6 +385,15 @@ go_demangle (const char *mangled_name, int options)
   return result;
 }
 
+/* la_sniff_from_mangled_name for Go.  */
+
+static int
+go_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = go_demangle (mangled, 0);
+  return *demangled != NULL;
+}
+
 /* Given a Go symbol, return its package or NULL if unknown.
    Space for the result is malloc'd, caller must free.  */
 
@@ -565,9 +574,10 @@ static const struct language_defn go_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_c,
   go_parse,
-  go_error,
+  go_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant.  */
   c_printstr,			/* Function to print string constant.  */
@@ -583,6 +593,7 @@ static const struct language_defn go_language_defn =
   basic_lookup_symbol_nonlocal, 
   basic_lookup_transparent_type,
   go_demangle,			/* Language specific symbol demangler.  */
+  go_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname.  */
   go_op_print_tab,		/* Expression operators for printing.  */

@@ -363,7 +363,7 @@ static void
 print_fixed_point_type (struct type *type, struct ui_file *stream)
 {
   DOUBLEST delta = ada_delta (type);
-  DOUBLEST small = ada_fixed_to_float (type, 1.0);
+  DOUBLEST small = ada_fixed_to_float (type, 1);
 
   if (delta < 0.0)
     fprintf_filtered (stream, "delta ??");

@@ -105,6 +105,22 @@ proc gdb_find_go_linker {} {
     return [find_go]
 }
 
+proc gdb_find_rustc {} {
+    global tool_root_dir
+    if {![is_remote host]} {
+	set rustc [lookfor_file $tool_root_dir rustc]
+	if {$rustc == ""} {
+	    set rustc rustc
+	}
+    } else {
+	set rustc ""
+    }
+    if {$rustc != ""} {
+	append rustc " --color never"
+    }
+    return $rustc
+}
+
 proc gdb_find_ldd {} {
     global LDD_FOR_TARGET
     if [info exists LDD_FOR_TARGET] {
@@ -262,6 +278,18 @@ proc gdb_default_target_compile {source destfile type options} {
 	    }
 	}
 
+	if { $i == "rust" } {
+	    set compiler_type "rust"
+	    if {[board_info $dest exists rustflags]} {
+		append add_flags " [target_info rustflags]"
+	    }
+	    if {[board_info $dest exists rustflags]} {
+		set compiler [target_info rustflags]
+	    } else {
+		set compiler [find_rustc]
+	    }
+	}
+
 	if {[regexp "^dest=" $i]} {
 	    regsub "^dest=" $i "" tmp
 	    if {[board_info $tmp exists name]} {
@@ -324,6 +352,7 @@ proc gdb_default_target_compile {source destfile type options} {
     global GNATMAKE_FOR_TARGET
     global GO_FOR_TARGET
     global GO_LD_FOR_TARGET
+    global RUSTC_FOR_TARGET
 
     if {[info exists GNATMAKE_FOR_TARGET]} {
 	if { $compiler_type == "ada" } {
@@ -370,6 +399,12 @@ proc gdb_default_target_compile {source destfile type options} {
 	}
     }
 
+    if {[info exists RUSTC_FOR_TARGET]} {
+	if {$compiler_type == "rust"} {
+	    set compiler $RUSTC_FOR_TARGET
+	}
+    }
+
     if { $type == "executable" && $linker != "" } {
 	set compiler $linker
     }
@@ -388,7 +423,11 @@ proc gdb_default_target_compile {source destfile type options} {
     }
 
     if {$type == "object"} {
-	append add_flags " -c"
+	if {$compiler_type == "rust"} {
+	    append add_flags "--emit obj"
+	} else {
+	    append add_flags " -c"
+	}
     }
 
     if { $type == "preprocess" } {
@@ -602,6 +641,11 @@ if {[info procs find_go_linker] == ""} {
 
 if {[info procs find_gdc] == ""} {
     rename gdb_find_gdc find_gdc
+    set use_gdb_compile 1
+}
+
+if {[info procs find_rustc] == ""} {
+    rename gdb_find_rustc find_rustc
     set use_gdb_compile 1
 }
 

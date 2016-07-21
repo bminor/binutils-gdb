@@ -43,6 +43,8 @@
 #include "agent.h"
 #include "auxv.h"
 #include "target-debug.h"
+#include "top.h"
+#include "event-top.h"
 
 static void target_info (char *, int);
 
@@ -477,11 +479,24 @@ target_terminal_is_ours (void)
 void
 target_terminal_inferior (void)
 {
+  struct ui *ui = current_ui;
+
   /* A background resume (``run&'') should leave GDB in control of the
-     terminal.  Use target_can_async_p, not target_is_async_p, since at
-     this point the target is not async yet.  However, if sync_execution
-     is not set, we know it will become async prior to resume.  */
-  if (target_can_async_p () && !sync_execution)
+     terminal.  */
+  if (ui->prompt_state != PROMPT_BLOCKED)
+    return;
+
+  /* Always delete the current UI's input file handler, regardless of
+     terminal_state, because terminal_state is only valid for the main
+     UI.  */
+  delete_file_handler (ui->input_fd);
+
+  /* Since we always run the inferior in the main console (unless "set
+     inferior-tty" is in effect), when some UI other than the main one
+     calls target_terminal_inferior/target_terminal_inferior, then we
+     only register/unregister the UI's input from the event loop, but
+     leave the main UI's terminal settings as is.  */
+  if (ui != main_ui)
     return;
 
   if (terminal_state == terminal_is_inferior)
@@ -491,6 +506,11 @@ target_terminal_inferior (void)
      inferior's terminal modes.  */
   (*current_target.to_terminal_inferior) (&current_target);
   terminal_state = terminal_is_inferior;
+
+  /* If the user hit C-c before, pretend that it was hit right
+     here.  */
+  if (check_quit_flag ())
+    target_pass_ctrlc ();
 }
 
 /* See target.h.  */
@@ -498,6 +518,17 @@ target_terminal_inferior (void)
 void
 target_terminal_ours (void)
 {
+  struct ui *ui = current_ui;
+
+  /* Always add the current UI's input file handler, regardless of
+     terminal_state, because terminal_state is only valid for the main
+     UI.  */
+  add_file_handler (ui->input_fd, stdin_event_handler, ui);
+
+  /* See target_terminal_inferior.  */
+  if (ui != main_ui)
+    return;
+
   if (terminal_state == terminal_is_ours)
     return;
 
@@ -510,6 +541,12 @@ target_terminal_ours (void)
 void
 target_terminal_ours_for_output (void)
 {
+  struct ui *ui = current_ui;
+
+  /* See target_terminal_inferior.  */
+  if (ui != main_ui)
+    return;
+
   if (terminal_state != terminal_is_inferior)
     return;
   (*current_target.to_terminal_ours_for_output) (&current_target);
@@ -1264,8 +1301,9 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 	 by memory_xfer_partial_1.  We will continually malloc
 	 and free a copy of the entire write request for breakpoint
 	 shadow handling even though we only end up writing a small
-	 subset of it.  Cap writes to 4KB to mitigate this.  */
-      len = min (4096, len);
+	 subset of it.  Cap writes to a limit specified by the target
+	 to mitigate this.  */
+      len = min (ops->to_get_memory_xfer_limit (ops), len);
 
       buf = (gdb_byte *) xmalloc (len);
       old_chain = make_cleanup (xfree, buf);
@@ -1530,8 +1568,6 @@ target_memory_map (void)
   VEC(mem_region_s) *result;
   struct mem_region *last_one, *this_one;
   int ix;
-  struct target_ops *t;
-
   result = current_target.to_memory_map (&current_target);
   if (result == NULL)
     return NULL;
@@ -1790,15 +1826,15 @@ read_whatever_is_readable (struct target_ops *ops,
 void
 free_memory_read_result_vector (void *x)
 {
-  VEC(memory_read_result_s) *v = (VEC(memory_read_result_s) *) x;
+  VEC(memory_read_result_s) **v = (VEC(memory_read_result_s) **) x;
   memory_read_result_s *current;
   int ix;
 
-  for (ix = 0; VEC_iterate (memory_read_result_s, v, ix, current); ++ix)
+  for (ix = 0; VEC_iterate (memory_read_result_s, *v, ix, current); ++ix)
     {
       xfree (current->data);
     }
-  VEC_free (memory_read_result_s, v);
+  VEC_free (memory_read_result_s, *v);
 }
 
 VEC(memory_read_result_s) *
@@ -1807,6 +1843,8 @@ read_memory_robust (struct target_ops *ops,
 {
   VEC(memory_read_result_s) *result = 0;
   int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+  struct cleanup *cleanup = make_cleanup (free_memory_read_result_vector,
+					  &result);
 
   LONGEST xfered_total = 0;
   while (xfered_total < len)
@@ -1833,6 +1871,7 @@ read_memory_robust (struct target_ops *ops,
 	{
 	  LONGEST to_read = min (len - xfered_total, region_len);
 	  gdb_byte *buffer = (gdb_byte *) xmalloc (to_read * unit_size);
+	  struct cleanup *inner_cleanup = make_cleanup (xfree, buffer);
 
 	  LONGEST xfered_partial =
 	      target_read (ops, TARGET_OBJECT_MEMORY, NULL,
@@ -1843,7 +1882,7 @@ read_memory_robust (struct target_ops *ops,
 	    {
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
-	      xfree (buffer);
+	      do_cleanups (inner_cleanup);
 	      read_whatever_is_readable (ops, offset + xfered_total,
 					 offset + xfered_total + to_read,
 					 unit_size, &result);
@@ -1852,6 +1891,8 @@ read_memory_robust (struct target_ops *ops,
 	  else
 	    {
 	      struct memory_read_result r;
+
+	      discard_cleanups (inner_cleanup);
 	      r.data = buffer;
 	      r.begin = offset + xfered_total;
 	      r.end = r.begin + xfered_partial;
@@ -1861,6 +1902,8 @@ read_memory_robust (struct target_ops *ops,
 	  QUIT;
 	}
     }
+
+  discard_cleanups (cleanup);
   return result;
 }
 
@@ -2225,8 +2268,6 @@ target_preopen (int from_tty)
 void
 target_detach (const char *args, int from_tty)
 {
-  struct target_ops* t;
-  
   if (gdbarch_has_global_breakpoints (target_gdbarch ()))
     /* Don't remove global breakpoints here.  They're removed on
        disconnection from the target.  */
@@ -2284,8 +2325,6 @@ target_thread_name (struct thread_info *info)
 void
 target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
-  struct target_ops *t;
-
   target_dcache_invalidate ();
 
   current_target.to_resume (&current_target, ptid, step, signal);
@@ -2788,7 +2827,7 @@ static int lowest_closed_fd;
 static int
 acquire_fileio_fd (struct target_ops *t, int fd)
 {
-  fileio_fh_t *fh, buf;
+  fileio_fh_t *fh;
 
   gdb_assert (!is_closed_fileio_fh (fd));
 
@@ -3213,6 +3252,28 @@ find_target_at (enum strata stratum)
 }
 
 
+
+/* See target.h  */
+
+void
+target_announce_detach (int from_tty)
+{
+  pid_t pid;
+  char *exec_file;
+
+  if (!from_tty)
+    return;
+
+  exec_file = get_exec_file (0);
+  if (exec_file == NULL)
+    exec_file = "";
+
+  pid = ptid_get_pid (inferior_ptid);
+  printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
+		     target_pid_to_str (pid_to_ptid (pid)));
+  gdb_flush (gdb_stdout);
+}
+
 /* The inferior process has died.  Long live the inferior!  */
 
 void
@@ -3360,9 +3421,17 @@ target_interrupt (ptid_t ptid)
 /* See target.h.  */
 
 void
-target_check_pending_interrupt (void)
+target_pass_ctrlc (void)
 {
-  (*current_target.to_check_pending_interrupt) (&current_target);
+  (*current_target.to_pass_ctrlc) (&current_target);
+}
+
+/* See target.h.  */
+
+void
+default_target_pass_ctrlc (struct target_ops *ops)
+{
+  target_interrupt (inferior_ptid);
 }
 
 /* See target/target.h.  */
@@ -3486,8 +3555,6 @@ target_fetch_registers (struct regcache *regcache, int regno)
 void
 target_store_registers (struct regcache *regcache, int regno)
 {
-  struct target_ops *t;
-
   if (!may_write_registers)
     error (_("Writing to registers is not allowed (regno %d)"), regno);
 

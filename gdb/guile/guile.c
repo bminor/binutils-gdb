@@ -27,7 +27,7 @@
 #include "cli/cli-utils.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "interps.h"
+#include "top.h"
 #include "extension-priv.h"
 #include "utils.h"
 #include "version.h"
@@ -155,7 +155,6 @@ const struct extension_language_ops guile_extension_ops =
   gdbscm_breakpoint_cond_says_stop,
 
   NULL, /* gdbscm_check_quit_flag, */
-  NULL, /* gdbscm_clear_quit_flag, */
   NULL, /* gdbscm_set_quit_flag, */
 };
 
@@ -166,8 +165,8 @@ guile_repl_command (char *arg, int from_tty)
 {
   struct cleanup *cleanup;
 
-  cleanup = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  cleanup = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   arg = skip_spaces (arg);
 
@@ -199,8 +198,8 @@ guile_command (char *arg, int from_tty)
 {
   struct cleanup *cleanup;
 
-  cleanup = make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  cleanup = make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   arg = skip_spaces (arg);
 
@@ -329,8 +328,8 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
     {
       struct cleanup *inner_cleanups;
 
-      inner_cleanups = make_cleanup_restore_integer (&interpreter_async);
-      interpreter_async = 0;
+      inner_cleanups = make_cleanup_restore_integer (&current_ui->async);
+      current_ui->async = 0;
 
       prevent_dont_repeat ();
       if (to_string)
@@ -629,9 +628,9 @@ initialize_scheme_side (void)
   char *boot_scm_path;
   char *msg;
 
-  guile_datadir = concat (gdb_datadir, SLASH_STRING, "guile", NULL);
+  guile_datadir = concat (gdb_datadir, SLASH_STRING, "guile", (char *) NULL);
   boot_scm_path = concat (guile_datadir, SLASH_STRING, "gdb",
-			  SLASH_STRING, boot_scm_filename, NULL);
+			  SLASH_STRING, boot_scm_filename, (char *) NULL);
 
   scm_c_catch (SCM_BOOL_T, boot_guile_support, boot_scm_path,
 	       handle_boot_error, boot_scm_path, NULL, NULL);

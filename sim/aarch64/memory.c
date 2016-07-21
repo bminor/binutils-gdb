@@ -42,33 +42,41 @@ mem_error (sim_cpu *cpu, const char *message, uint64_t addr)
   TRACE_MEMORY (cpu, "ERROR: %s: %" PRIx64, message, addr);
 }
 
-#define FETCH_FUNC(RETURN_TYPE, ACCESS_TYPE, NAME, N)			\
+/* FIXME: AArch64 requires aligned memory access if SCTRLR_ELx.A is set,
+   but we are not implementing that here.  */
+#define FETCH_FUNC64(RETURN_TYPE, ACCESS_TYPE, NAME, N)			\
   RETURN_TYPE								\
   aarch64_get_mem_##NAME (sim_cpu *cpu, uint64_t address)		\
   {									\
-    return (RETURN_TYPE) sim_core_read_##N (cpu, 0, read_map, address); \
+    RETURN_TYPE val = (RETURN_TYPE) (ACCESS_TYPE)			\
+      sim_core_read_unaligned_##N (cpu, 0, read_map, address);		\
+    TRACE_MEMORY (cpu, "read of %" PRIx64 " (%d bytes) from %" PRIx64,	\
+		  val, N, address);					\
+									\
+    return val;								\
   }
 
-/* A variant of the FETCH_FUNC macro that uses unaligned reads.
-   The AArch64 only requires 4-byte alignment for 8-byte quantities
-   but the sim common core does not support this.  */
-#define FETCH_FUNC_U(RETURN_TYPE, ACCESS_TYPE, NAME)			\
+FETCH_FUNC64 (uint64_t, uint64_t, u64, 8)
+FETCH_FUNC64 (int64_t,   int64_t, s64, 8)
+
+#define FETCH_FUNC32(RETURN_TYPE, ACCESS_TYPE, NAME, N)			\
   RETURN_TYPE								\
   aarch64_get_mem_##NAME (sim_cpu *cpu, uint64_t address)		\
   {									\
-    return (RETURN_TYPE) sim_core_read_unaligned_8 (cpu, 0, read_map, address); \
+    RETURN_TYPE val = (RETURN_TYPE) (ACCESS_TYPE)			\
+      sim_core_read_unaligned_##N (cpu, 0, read_map, address);		\
+    TRACE_MEMORY (cpu, "read of %8x (%d bytes) from %" PRIx64,		\
+		  val, N, address);					\
+									\
+    return val;								\
   }
 
-FETCH_FUNC_U (uint64_t, uint64_t, u64)
-FETCH_FUNC_U (int64_t,   int64_t, s64)
-FETCH_FUNC (uint32_t,   uint32_t, u32, 4)
-FETCH_FUNC (int32_t,     int32_t, s32, 4)
-FETCH_FUNC (uint32_t,   uint16_t, u16, 2)
-FETCH_FUNC (int32_t,     int16_t, s16, 2)
-FETCH_FUNC (uint32_t,    uint8_t, u8, 1)
-FETCH_FUNC (int32_t,      int8_t, s8, 1)
-FETCH_FUNC (float,         float, float, 4)
-FETCH_FUNC_U (double,     double, double)
+FETCH_FUNC32 (uint32_t, uint32_t, u32, 4)
+FETCH_FUNC32 (int32_t,   int32_t, s32, 4)
+FETCH_FUNC32 (uint32_t, uint16_t, u16, 2)
+FETCH_FUNC32 (int32_t,   int16_t, s16, 2)
+FETCH_FUNC32 (uint32_t,  uint8_t, u8, 1)
+FETCH_FUNC32 (int32_t,    int8_t, s8, 1)
 
 void
 aarch64_get_mem_long_double (sim_cpu *cpu, uint64_t address, FRegister *a)
@@ -77,6 +85,8 @@ aarch64_get_mem_long_double (sim_cpu *cpu, uint64_t address, FRegister *a)
   a->v[1] = sim_core_read_unaligned_8 (cpu, 0, read_map, address + 8);
 }
 
+/* FIXME: Aarch64 requires aligned memory access if SCTRLR_ELx.A is set,
+   but we are not implementing that here.  */
 #define STORE_FUNC(TYPE, NAME, N)					\
   void									\
   aarch64_set_mem_##NAME (sim_cpu *cpu, uint64_t address, TYPE value)	\
@@ -88,30 +98,14 @@ aarch64_get_mem_long_double (sim_cpu *cpu, uint64_t address, FRegister *a)
     sim_core_write_unaligned_##N (cpu, 0, write_map, address, value);	\
   }
 
-/* A variant of the STORE_FUNC macro that uses unaligned writes.
-   The AArch64 only requires 4-byte alignment for 8-byte quantities
-   but the sim common core does not support this.  */
-#define STORE_FUNC_U(TYPE, NAME)					\
-  void									\
-  aarch64_set_mem_##NAME (sim_cpu *cpu, uint64_t address, TYPE value)	\
-  {									\
-    TRACE_MEMORY (cpu,							\
-		  "write of %" PRIx64 " (8 bytes) to %" PRIx64,		\
-		  (uint64_t) value, address);				\
-									\
-    sim_core_write_unaligned_8 (cpu, 0, write_map, address, value);	\
-  }
-
-STORE_FUNC_U (uint64_t, u64)
-STORE_FUNC_U (int64_t,  s64)
-STORE_FUNC (uint32_t,   u32, 4)
-STORE_FUNC (int32_t,    s32, 4)
-STORE_FUNC (uint16_t,   u16, 2)
-STORE_FUNC (int16_t,    s16, 2)
-STORE_FUNC (uint8_t,    u8, 1)
-STORE_FUNC (int8_t,     s8, 1)
-STORE_FUNC (float,      float, 4)
-STORE_FUNC_U (double,   double)
+STORE_FUNC (uint64_t, u64, 8)
+STORE_FUNC (int64_t,  s64, 8)
+STORE_FUNC (uint32_t, u32, 4)
+STORE_FUNC (int32_t,  s32, 4)
+STORE_FUNC (uint16_t, u16, 2)
+STORE_FUNC (int16_t,  s16, 2)
+STORE_FUNC (uint8_t,  u8, 1)
+STORE_FUNC (int8_t,   s8, 1)
 
 void
 aarch64_set_mem_long_double (sim_cpu *cpu, uint64_t address, FRegister a)

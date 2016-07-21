@@ -143,7 +143,6 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
   CORE_ADDR sigcontext_addr =
     sp
@@ -673,17 +672,14 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (fremovexattr);
       SYSCALL_MAP (getcwd);
       SYSCALL_MAP (lookup_dcookie);
-      UNSUPPORTED_SYSCALL_MAP (eventfd2);
-
-    case aarch64_sys_epoll_create1:
-      return gdb_sys_epoll_create;
-
+      SYSCALL_MAP (eventfd2);
+      SYSCALL_MAP (epoll_create1);
       SYSCALL_MAP (epoll_ctl);
       SYSCALL_MAP (epoll_pwait);
       SYSCALL_MAP (dup);
-      UNSUPPORTED_SYSCALL_MAP (dup3);
+      SYSCALL_MAP (dup3);
       SYSCALL_MAP (fcntl);
-      UNSUPPORTED_SYSCALL_MAP (inotify_init1);
+      SYSCALL_MAP (inotify_init1);
       SYSCALL_MAP (inotify_add_watch);
       SYSCALL_MAP (inotify_rm_watch);
       SYSCALL_MAP (ioctl);
@@ -703,7 +699,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (statfs);
       SYSCALL_MAP (truncate);
       SYSCALL_MAP (ftruncate);
-      UNSUPPORTED_SYSCALL_MAP (fallocate);
+      SYSCALL_MAP (fallocate);
       SYSCALL_MAP (faccessat);
       SYSCALL_MAP (fchdir);
       SYSCALL_MAP (chroot);
@@ -714,7 +710,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (openat);
       SYSCALL_MAP (close);
       SYSCALL_MAP (vhangup);
-      UNSUPPORTED_SYSCALL_MAP (pipe2);
+      SYSCALL_MAP (pipe2);
       SYSCALL_MAP (quotactl);
       SYSCALL_MAP (getdents64);
       SYSCALL_MAP (lseek);

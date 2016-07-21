@@ -613,7 +613,7 @@ proc gdb_collect_globals_test_1 { } {
 
 	# whole object available
 	gdb_test "print derived_whole" \
-	    " = \\(Derived\\) {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex <vtable for Derived.*>, z = 4}"
+	    " = \\(Derived\\) {<Middle> = {<Base> = {x = 2}, _vptr.Middle = ${hex}( <\[^>]*>)?, y = 3}, _vptr.Derived = $hex <vtable for Derived.*>, z = 4}"
     }
 
     gdb_test_no_output "set print object off"
@@ -631,7 +631,7 @@ proc gdb_collect_globals_test_1 { } {
 
 	# whole object available
 	gdb_test "print derived_whole" \
-	    " = {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex <vtable for Derived.*>, z = 4}"
+	    " = {<Middle> = {<Base> = {x = 2}, _vptr.Middle = ${hex}( <\[^>]*>)?, y = 3}, _vptr.Derived = $hex <vtable for Derived.*>, z = 4}"
     }
 
     # An instance of a virtual class where we collected everything but

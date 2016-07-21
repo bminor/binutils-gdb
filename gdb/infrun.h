@@ -35,11 +35,6 @@ extern int debug_displaced;
    of shared library events by the dynamic linker.  */
 extern int stop_on_solib_events;
 
-/* Are we simulating synchronous execution? This is used in async gdb
-   to implement the 'run', 'continue' etc commands, which will not
-   redisplay the prompt until the execution is actually over.  */
-extern int sync_execution;
-
 /* True if execution commands resume all threads of all processes by
    default; otherwise, resume only threads of the current inferior
    process.  */
@@ -132,6 +127,10 @@ extern void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
    ADDRESS in ASPACE.  */
 extern int stepping_past_instruction_at (struct address_space *aspace,
 					 CORE_ADDR address);
+
+/* Returns true if thread whose thread number is THREAD is stepping
+   over a breakpoint.  */
+extern int thread_is_stepping_over_breakpoint (int thread);
 
 /* Returns true if we're trying to step past an instruction that
    triggers a non-steppable watchpoint.  */
@@ -233,5 +232,15 @@ extern struct thread_info *step_over_queue_head;
 /* Remove breakpoints if possible (usually that means, if everything
    is stopped).  On failure, print a message.  */
 extern void maybe_remove_breakpoints (void);
+
+/* If a UI was in sync execution mode, and now isn't, restore its
+   prompt (a synchronous execution command has finished, and we're
+   ready for input).  */
+extern void all_uis_check_sync_execution_done (void);
+
+/* If a UI was in sync execution mode, and hasn't displayed the prompt
+   yet, re-disable its prompt (a synchronous execution command was
+   started or re-started).  */
+extern void all_uis_on_sync_execution_starting (void);
 
 #endif /* INFRUN_H */

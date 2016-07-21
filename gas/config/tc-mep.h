@@ -106,7 +106,7 @@ extern int mep_unrecognized_line (int);
 extern void mep_cleanup (void);
 
 #define md_elf_section_letter		mep_elf_section_letter
-extern bfd_vma mep_elf_section_letter (int, char **);
+extern bfd_vma mep_elf_section_letter (int, const char **);
 #define md_elf_section_flags		mep_elf_section_flags
 extern flagword mep_elf_section_flags  (flagword, bfd_vma, int);
 

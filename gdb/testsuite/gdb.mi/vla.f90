@@ -18,6 +18,7 @@ program vla
   real, target, allocatable :: vla2(:, :)
   real, pointer :: pvla2 (:, :)
   logical :: l
+  nullify (pvla2)
 
   allocate (vla1 (5))         ! vla1-not-allocated
   l = allocated(vla1)         ! vla1-allocated

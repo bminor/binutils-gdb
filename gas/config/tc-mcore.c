@@ -454,18 +454,18 @@ const pseudo_typeS md_pseudo_table[] =
 void
 md_begin (void)
 {
-  const mcore_opcode_info * opcode;
   const char * prev_name = "";
+  unsigned int i;
 
   opcode_hash_control = hash_new ();
 
   /* Insert unique names into hash table.  */
-  for (opcode = mcore_table; opcode->name; opcode ++)
+  for (i = 0; i < ARRAY_SIZE (mcore_table); i++)
     {
-      if (! streq (prev_name, opcode->name))
+      if (! streq (prev_name, mcore_table[i].name))
 	{
-	  prev_name = opcode->name;
-	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+	  prev_name = mcore_table[i].name;
+	  hash_insert (opcode_hash_control, mcore_table[i].name, (char *) &mcore_table[i]);
 	}
     }
 }
@@ -1598,6 +1598,9 @@ md_assemble (char * str)
   output[0] = INST_BYTE0 (inst);
   output[1] = INST_BYTE1 (inst);
 
+#ifdef OBJ_ELF
+  dwarf2_emit_insn (2);
+#endif
   check_literals (opcode->transfer, isize);
 }
 
@@ -1616,7 +1619,7 @@ md_mcore_end (void)
 
 /* Various routines to kill one day.  */
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
@@ -1650,7 +1653,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char * arg)
+md_parse_option (int c, const char * arg)
 {
   switch (c)
     {
@@ -2183,8 +2186,8 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
       break;
   }
 
-  rel = xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  rel = XNEW (arelent);
+  rel->sym_ptr_ptr = XNEW (asymbol *);
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   /* Always pass the addend along!  */

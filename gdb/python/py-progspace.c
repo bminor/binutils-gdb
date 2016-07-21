@@ -71,9 +71,7 @@ pspy_get_filename (PyObject *self, void *closure)
       struct objfile *objfile = obj->pspace->symfile_object_file;
 
       if (objfile)
-	return PyString_Decode (objfile_name (objfile),
-				strlen (objfile_name (objfile)),
-				host_charset (), NULL);
+	return host_string_to_python_string (objfile_name (objfile));
     }
   Py_RETURN_NONE;
 }
@@ -99,7 +97,10 @@ static int
 pspy_initialize (pspace_object *self)
 {
   self->pspace = NULL;
-  self->dict = NULL;
+
+  self->dict = PyDict_New ();
+  if (self->dict == NULL)
+    return 0;
 
   self->printers = PyList_New (0);
   if (self->printers == NULL)

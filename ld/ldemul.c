@@ -328,7 +328,7 @@ ldemul_list_emulation_options (FILE *f)
 	}
     }
 
-  if (! options_found)
+  if (!options_found)
     fprintf (f, _("  no emulation specific options.\n"));
 }
 

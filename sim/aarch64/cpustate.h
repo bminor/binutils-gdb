@@ -22,6 +22,7 @@
 #ifndef _CPU_STATE_H
 #define _CPU_STATE_H
 
+#include "config.h"
 #include <sys/types.h>
 #include <stdint.h>
 #include <inttypes.h>
@@ -123,16 +124,14 @@ typedef enum VReg
 } VReg;
 
 /* All the different integer bit patterns for the components of a
-   general register are overlaid here using a union so as to allow all
-   reading and writing of the desired bits.
+   general register are overlaid here using a union so as to allow
+   all reading and writing of the desired bits.  Note that we have
+   to take care when emulating a big-endian AArch64 as we are
+   running on a little endian host.  */
 
-   N.B. the ARM spec says that when you write a 32 bit register you
-   are supposed to write the low 32 bits and zero the high 32
-   bits. But we don't actually have to care about this because Java
-   will only ever consume the 32 bits value as a 64 bit quantity after
-   an explicit extend.  */
 typedef union GRegisterValue
 {
+#if !WORDS_BIGENDIAN
   int8_t   s8;
   int16_t  s16;
   int32_t  s32;
@@ -141,6 +140,16 @@ typedef union GRegisterValue
   uint16_t u16;
   uint32_t u32;
   uint64_t u64;
+#else
+  struct { int64_t :56; int8_t s8; };
+  struct { int64_t :48; int16_t s16; };
+  struct { int64_t :32; int32_t s32; };
+  int64_t s64;
+  struct { uint64_t :56; uint8_t u8; };
+  struct { uint64_t :48; uint16_t u16; };
+  struct { uint64_t :32; uint32_t u32; };
+  uint64_t u64;
+#endif
 } GRegister;
 
 /* Float registers provide for storage of a single, double or quad
@@ -168,10 +177,10 @@ typedef union FRegisterValue
   float        s;
   double       d;
 
-  uint64_t    v[2];
-  uint32_t    w[4];
-  uint16_t    h[8];
-  uint8_t     b[16];
+  uint64_t     v[2];
+  uint32_t     w[4];
+  uint16_t     h[8];
+  uint8_t      b[16];
 
   int64_t      V[2];
   int32_t      W[4];
@@ -194,10 +203,10 @@ typedef union FRegisterValue
 
 typedef enum FlagIdx
 {
-  V_IDX,
-  C_IDX,
-  Z_IDX,
-  N_IDX
+  V_IDX = 0,
+  C_IDX = 1,
+  Z_IDX = 2,
+  N_IDX = 3
 } FlagIdx;
 
 typedef enum FlagMask
@@ -216,7 +225,7 @@ typedef uint32_t FlagsRegister;
 
    This register includes IDC, IXC, UFC, OFC, DZC, IOC and QC bits,
    and the floating point N, Z, C, V bits but the latter are unused in
-   aarch64 mode. the sim ignores QC for now.
+   aarch64 mode.  The sim ignores QC for now.
 
    Bit positions are as per the ARMv7 FPSCR register
 
@@ -269,12 +278,17 @@ extern uint32_t    aarch64_get_reg_u8  (sim_cpu *, GReg, int);
 extern int32_t     aarch64_get_reg_s8  (sim_cpu *, GReg, int);
 
 extern void        aarch64_set_reg_u64 (sim_cpu *, GReg, int, uint64_t);
+extern void        aarch64_set_reg_u32 (sim_cpu *, GReg, int, uint32_t);
 extern void        aarch64_set_reg_s64 (sim_cpu *, GReg, int, int64_t);
+extern void        aarch64_set_reg_s32 (sim_cpu *, GReg, int, int32_t);
 
 /* FP Register access functions.  */
+extern float       aarch64_get_FP_half   (sim_cpu *, VReg);
 extern float       aarch64_get_FP_float  (sim_cpu *, VReg);
 extern double      aarch64_get_FP_double (sim_cpu *, VReg);
 extern void        aarch64_get_FP_long_double (sim_cpu *, VReg, FRegister *);
+
+extern void        aarch64_set_FP_half   (sim_cpu *, VReg, float);
 extern void        aarch64_set_FP_float  (sim_cpu *, VReg, float);
 extern void        aarch64_set_FP_double (sim_cpu *, VReg, double);
 extern void        aarch64_set_FP_long_double (sim_cpu *, VReg, FRegister);
@@ -329,5 +343,10 @@ extern float       aarch64_get_vec_float  (sim_cpu *, VReg, unsigned);
 extern double      aarch64_get_vec_double (sim_cpu *, VReg, unsigned);
 extern void        aarch64_set_vec_float  (sim_cpu *, VReg, unsigned, float);
 extern void        aarch64_set_vec_double (sim_cpu *, VReg, unsigned, double);
+
+/* System register accessors.  */
+extern uint64_t	   aarch64_get_thread_id (sim_cpu *);
+extern uint32_t	   aarch64_get_FPCR (sim_cpu *);
+extern void	   aarch64_set_FPCR (sim_cpu *, uint32_t);
 
 #endif /* _CPU_STATE_H  */

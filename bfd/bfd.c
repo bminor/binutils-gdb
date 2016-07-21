@@ -46,7 +46,7 @@ CODE_FRAGMENT
 .
 .enum bfd_plugin_format
 .  {
-.    bfd_plugin_uknown = 0,
+.    bfd_plugin_unknown = 0,
 .    bfd_plugin_yes = 1,
 .    bfd_plugin_no = 2
 .  };
@@ -717,7 +717,8 @@ _bfd_default_error_handler (const char *fmt, ...)
 		  if (abfd == NULL)
 		    /* Invoking %B with a null bfd pointer is an internal error.  */
 		    abort ();
-		  else if (abfd->my_archive)
+		  else if (abfd->my_archive
+			   && !bfd_is_thin_archive (abfd->my_archive))
 		    snprintf (bufp, avail, "%s(%s)",
 			      abfd->my_archive->filename, abfd->filename);
 		  else
@@ -2309,6 +2310,11 @@ bfd_group_signature (asection *group, asymbol **isympp)
   bfd *abfd = group->owner;
   Elf_Internal_Shdr *ghdr;
 
+  /* PR 20089: An earlier error may have prevented us from loading the
+     symbol table.  */
+  if (isympp == NULL)
+    return NULL;
+
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     return NULL;
 
@@ -2319,6 +2325,7 @@ bfd_group_signature (asection *group, asymbol **isympp)
       Elf_Internal_Shdr *symhdr = elf_elfsections (abfd) [ghdr->sh_link];
 
       if (symhdr->sh_type == SHT_SYMTAB
+	  && ghdr->sh_info > 0
 	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
 	return isympp[ghdr->sh_info - 1];
     }

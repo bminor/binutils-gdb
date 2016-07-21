@@ -288,7 +288,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   CORE_ADDR stack_dest = sp;
   int argreg = TILEGX_R0_REGNUM;
   int i, j;
-  int typelen, slacklen, alignlen;
+  int typelen, slacklen;
   static const gdb_byte four_zero_words[16] = { 0 };
 
   /* If struct_return is 1, then the struct return address will
@@ -375,9 +375,6 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
   CORE_ADDR prolog_end = end_addr;
-  ULONGEST inst, inst2;
-  LONGEST offset;
-  int regnum;
   gdb_byte instbuf[32 * TILEGX_BUNDLE_SIZE_IN_BYTES];
   CORE_ADDR instbuf_start;
   unsigned int instbuf_size;
@@ -780,7 +777,6 @@ tilegx_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
-      ULONGEST inst, inst2;
       CORE_ADDR addr = func_end - TILEGX_BUNDLE_SIZE_IN_BYTES;
 
       /* FIXME: Find the actual epilogue.  */
@@ -866,7 +862,6 @@ tilegx_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct tilegx_frame_cache *cache;
   CORE_ADDR current_pc;
-  int i;
 
   if (*this_cache)
     return (struct tilegx_frame_cache *) *this_cache;

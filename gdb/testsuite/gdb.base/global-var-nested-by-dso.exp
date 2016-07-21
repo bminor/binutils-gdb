@@ -45,7 +45,8 @@ if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable \
 }
 
 clean_restart $binfile
-gdb_load_shlibs $binfile_lib1 $binfile_lib2
+gdb_load_shlib $binfile_lib1
+gdb_load_shlib $binfile_lib2
 
 if { ![runto_main] } {
   return -1

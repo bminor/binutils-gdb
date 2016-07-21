@@ -354,7 +354,6 @@ resolving more generic problems.
 The host maintainer ensures that gdb can be built as a cross debugger on
 their platform.
 
-AIX			Joel Brobecker		brobecker@adacore.com
 Darwin			Tristan Gingold		gingold@adacore.com
 djgpp native		Eli Zaretskii		eliz@gnu.org
 GNU Hurd		Alfred M. Szmidt	ams@gnu.org
@@ -548,6 +547,7 @@ Matthew Gretton-Dann				matthew.gretton-dann@arm.com
 Maxim Grigoriev					maxim2405@gmail.com
 Jerome Guitton					guitton@act-europe.fr
 Ben Harris					bjh21@netbsd.org
+Bernhard Heckel					bernhard.heckel@intel.com
 Richard Henderson				rth@redhat.com
 Aldy Hernandez					aldyh@redhat.com
 Paul Hilfinger					hilfinger@gnat.com
@@ -569,6 +569,7 @@ Jeff Johnston					jjohnstn@redhat.com
 Geoff Keating					geoffk@redhat.com
 Mark Kettenis					kettenis@gnu.org
 Marc Khouzam					marc.khouzam@ericsson.com
+Toshihito Kikuchi					k.toshihito@yahoo.de
 Jim Kingdon					kingdon@panix.com
 Paul Koning					paul_koning@dell.com
 Marcin Kościelnicki				koriakin@0x04.net
@@ -580,6 +581,7 @@ Jeff Law					law@redhat.com
 Justin Lebar					justin.lebar@gmail.com
 David Lecomber					david@streamline-computing.com
 Don Lee						don.lee@sunplusct.com
+Yan-Ting Lin					currygt52@gmail.com
 Robert Lipe					rjl@sco.com
 Lei Liu						lei.liu2@windriver.com
 Sandra Loosemore				sandra@codesourcery.com
@@ -663,6 +665,7 @@ Jackie Smith Cashion				jsmith@redhat.com
 Petr Sorfa					petrs@caldera.com
 Andrew Stubbs					ams@codesourcery.com
 Emi Suzuki					emi-suzuki@tjsys.co.jp
+David Taylor					david.taylor@emc.com
 Ian Lance Taylor				ian@airs.com
 Walfred Tedeschi				walfred.tedeschi@intel.com
 Gary Thomas					gthomas@redhat.com

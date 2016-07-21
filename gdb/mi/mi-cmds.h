@@ -157,9 +157,6 @@ extern struct mi_cmd *mi_lookup (const char *command);
 /* Debug flag */
 extern int mi_debug_p;
 
-/* Raw console output - FIXME: should this be a parameter? */
-extern struct ui_file *raw_stdout;
-
 extern void mi_execute_command (const char *cmd, int from_tty);
 
 #endif

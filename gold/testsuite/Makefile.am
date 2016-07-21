@@ -388,6 +388,16 @@ eh_test_b.o: eh_test_b.cc
 eh_test: eh_test_a.o eh_test_b.o  gcctestdir/ld
 	$(CXXLINK_S) -Bgcctestdir/ eh_test_a.o eh_test_b.o
 
+check_SCRIPTS += eh_test_2.sh
+check_DATA += eh_test_2.sects
+MOSTLYCLEANFILES += eh_test_2 eh_test_2.sects
+eh_test_r.o: eh_test_a.o eh_test_b.o gcctestdir/ld
+	gcctestdir/ld -r -o $@ eh_test_a.o eh_test_b.o
+eh_test_2: eh_test_r.o gcctestdir/ld
+	$(CXXLINK_S) -Bgcctestdir/ -Wl,--eh-frame-hdr eh_test_r.o
+eh_test_2.sects: eh_test_2
+	$(TEST_READELF) -SW $< >$@ 2>/dev/null
+
 if HAVE_STATIC
 check_PROGRAMS += basic_static_test
 basic_static_test: basic_test.o gcctestdir/ld
@@ -838,6 +848,20 @@ copy_test_2_pic.o: copy_test_2.cc
 copy_test_2.so: gcctestdir/ld copy_test_2_pic.o
 	$(CXXLINK) -Bgcctestdir/ -shared copy_test_2_pic.o
 
+if !DEFAULT_TARGET_POWERPC
+check_SCRIPTS += copy_test_protected.sh
+check_DATA += copy_test_protected.err
+MOSTLYCLEANFILES += copy_test_protected.err
+copy_test_protected.err: copy_test_protected.o copy_test_2.so gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -o copy_test_protected copy_test_protected.o copy_test_2.so -Wl,-R,. "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o copy_test_protected copy_test_protected.o copy_test_2.so -Wl,-R,. 2>$@; \
+	then \
+	  echo 1>&2 "Link of copy_test_protected should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+endif
+
 if TLS
 
 check_PROGRAMS += tls_test
@@ -1074,6 +1098,25 @@ x86_64_mov_to_lea13.stdout: x86_64_mov_to_lea13
 x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
 	$(TEST_OBJDUMP) -dw $< > $@
 
+check_SCRIPTS += x86_64_indirect_call_to_direct.sh
+check_DATA += x86_64_indirect_call_to_direct1.stdout \
+	x86_64_indirect_jump_to_direct1.stdout
+MOSTLYCLEANFILES += x86_64_indirect_call_to_direct1 \
+	x86_64_indirect_jump_to_direct1
+
+x86_64_indirect_call_to_direct1.o: x86_64_indirect_call_to_direct1.s
+	$(TEST_AS) --64 -mrelax-relocations=yes -o $@ $<
+x86_64_indirect_call_to_direct1: x86_64_indirect_call_to_direct1.o gcctestdir/ld
+	gcctestdir/ld -o $@ $<
+x86_64_indirect_call_to_direct1.stdout: x86_64_indirect_call_to_direct1
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_indirect_jump_to_direct1.o: x86_64_indirect_jump_to_direct1.s
+	$(TEST_AS) --64 -mrelax-relocations=yes -o $@ $<
+x86_64_indirect_jump_to_direct1: x86_64_indirect_jump_to_direct1.o gcctestdir/ld
+	gcctestdir/ld -o $@ $<
+x86_64_indirect_jump_to_direct1.stdout: x86_64_indirect_jump_to_direct1
+	$(TEST_OBJDUMP) -dw $< > $@
+
 check_SCRIPTS += x86_64_overflow_pc32.sh
 check_DATA += x86_64_overflow_pc32.err
 MOSTLYCLEANFILES += x86_64_overflow_pc32.err
@@ -1103,6 +1146,59 @@ x32_overflow_pc32.err: x32_overflow_pc32.o gcctestdir/ld
 	fi
 
 endif DEFAULT_TARGET_X86_64
+
+if DEFAULT_TARGET_X86_64_OR_X32
+
+check_PROGRAMS += pr20216a_test
+pr20216a_test_SOURCES = pr20216_main.c pr20216_def.c
+pr20216a_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o gcctestdir/ld gcctestdir/as
+pr20216a_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216a_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20216a_test_LDADD = pr20216_gd.o pr20216_ld.o
+
+check_PROGRAMS += pr20216b_test
+pr20216b_test_SOURCES = pr20216_main.c pr20216_def.c
+pr20216b_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o gcctestdir/ld gcctestdir/as
+pr20216b_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216b_test_LDFLAGS = -pie -Bgcctestdir/ -Wl,-R,.
+pr20216b_test_LDADD = pr20216_gd.o pr20216_ld.o
+
+check_PROGRAMS += pr20216c_test
+pr20216c_test_SOURCES = pr20216_main.c pr20216_def.c
+pr20216c_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o gcctestdir/ld gcctestdir/as
+pr20216c_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216c_test_LDFLAGS = -static -Bgcctestdir/ -Wl,-R,.
+pr20216c_test_LDADD = pr20216_gd.o pr20216_ld.o
+
+check_PROGRAMS += pr20216d_test
+pr20216d_test_SOURCES = pr20216_main.c pr20216_def.c
+pr20216d_test_DEPENDENCIES = pr20216a.so gcctestdir/ld gcctestdir/as
+pr20216d_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216d_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20216d_test_LDADD = pr20216a.so
+
+check_PROGRAMS += pr20216e_test
+pr20216e_test_SOURCES = pr20216_main.c
+pr20216e_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o pr20216b.so gcctestdir/ld gcctestdir/as
+pr20216e_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20216e_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20216e_test_LDADD = pr20216_gd.o pr20216_ld.o pr20216b.so
+
+MOSTLYCLEANFILES += pr20216a.so pr20216b.so
+
+pr20216a.so: pr20216_gd.o pr20216_ld.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared pr20216_gd.o pr20216_ld.o
+
+pr20216b.so: pr20216_def.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared pr20216_def.o
+
+pr20216_gd.o: pr20216_gd.S
+	$(COMPILE) -c -o $@ $<
+
+pr20216_ld.o: pr20216_ld.S
+	$(COMPILE) -c -o $@ $<
+
+endif DEFAULT_TARGET_X86_64_OR_X32
 
 if DEFAULT_TARGET_I386
 
@@ -1157,6 +1253,55 @@ i386_mov_to_lea7.stdout: i386_mov_to_lea7
 	$(TEST_OBJDUMP) -dw $< > $@
 i386_mov_to_lea8.stdout: i386_mov_to_lea8
 	$(TEST_OBJDUMP) -dw $< > $@
+
+check_PROGRAMS += pr20308a_test
+pr20308a_test_SOURCES = pr20308_main.c pr20308_def.c
+pr20308a_test_DEPENDENCIES = pr20308_gd.o pr20308_ld.o gcctestdir/ld gcctestdir/as
+pr20308a_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308a_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20308a_test_LDADD = pr20308_gd.o pr20308_ld.o
+
+check_PROGRAMS += pr20308b_test
+pr20308b_test_SOURCES = pr20308_main.c pr20308_def.c
+pr20308b_test_DEPENDENCIES = pr20308_gd.o pr20308_ld.o gcctestdir/ld gcctestdir/as
+pr20308b_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308b_test_LDFLAGS = -pie -Bgcctestdir/ -Wl,-R,.
+pr20308b_test_LDADD = pr20308_gd.o pr20308_ld.o
+
+check_PROGRAMS += pr20308c_test
+pr20308c_test_SOURCES = pr20308_main.c pr20308_def.c
+pr20308c_test_DEPENDENCIES = pr20308_gd.o pr20308_ld.o gcctestdir/ld gcctestdir/as
+pr20308c_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308c_test_LDFLAGS = -static -Bgcctestdir/ -Wl,-R,.
+pr20308c_test_LDADD = pr20308_gd.o pr20308_ld.o
+
+check_PROGRAMS += pr20308d_test
+pr20308d_test_SOURCES = pr20308_main.c pr20308_def.c
+pr20308d_test_DEPENDENCIES = pr20308a.so gcctestdir/ld gcctestdir/as
+pr20308d_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308d_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20308d_test_LDADD = pr20308a.so
+
+check_PROGRAMS += pr20308e_test
+pr20308e_test_SOURCES = pr20308_main.c
+pr20308e_test_DEPENDENCIES = pr20308_gd.o pr20308_ld.o pr20308b.so gcctestdir/ld gcctestdir/as
+pr20308e_test_CFLAGS = -Bgcctestdir/ -fPIE
+pr20308e_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+pr20308e_test_LDADD = pr20308_gd.o pr20308_ld.o pr20308b.so
+
+MOSTLYCLEANFILES += pr20308a.so pr20308b.so
+
+pr20308a.so: pr20308_gd.o pr20308_ld.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared pr20308_gd.o pr20308_ld.o
+
+pr20308b.so: pr20308_def.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared pr20308_def.o
+
+pr20308_gd.o: pr20308_gd.S
+	$(COMPILE) -c -o $@ $<
+
+pr20308_ld.o: pr20308_ld.S
+	$(COMPILE) -c -o $@ $<
 
 endif DEFAULT_TARGET_I386
 
@@ -1368,6 +1513,8 @@ check_PROGRAMS += flagstest_compress_debug_sections
 check_DATA += flagstest_compress_debug_sections.stdout \
 	      flagstest_compress_debug_sections.cmp \
 	      flagstest_compress_debug_sections.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections.check \
+		    flagstest_compress_debug_sections.cmp
 flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
@@ -1402,6 +1549,8 @@ check_PROGRAMS += flagstest_compress_debug_sections_gnu
 check_DATA += flagstest_compress_debug_sections_gnu.stdout \
 	      flagstest_compress_debug_sections_gnu.cmp \
 	      flagstest_compress_debug_sections_gnu.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections_gnu.check \
+		    flagstest_compress_debug_sections_gnu.cmp
 flagstest_compress_debug_sections_gnu: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gnu
 	test -s $@
@@ -1427,6 +1576,8 @@ check_PROGRAMS += flagstest_compress_debug_sections_gabi
 check_DATA += flagstest_compress_debug_sections_gabi.stdout \
 	      flagstest_compress_debug_sections_gabi.cmp \
 	      flagstest_compress_debug_sections_gabi.check
+MOSTLYCLEANFILES += flagstest_compress_debug_sections_gabi.cmp \
+		    flagstest_compress_debug_sections_gabi.check
 flagstest_compress_debug_sections_gabi: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib-gabi
 	test -s $@
@@ -1831,6 +1982,17 @@ script_test_12a.o: script_test_12a.c
 script_test_12b.o: script_test_12b.c
 	$(COMPILE) -O0 -c -o $@ $<
 
+# Test for SORT_BY_INIT_PRIORITY.
+check_SCRIPTS += script_test_14.sh
+check_DATA += script_test_14.stdout
+MOSTLYCLEANFILES += script_test_14
+script_test_14.o: script_test_14.s
+	$(TEST_AS) -o $@ $<
+script_test_14: $(srcdir)/script_test_14.t script_test_14.o gcctestdir/ld
+	gcctestdir/ld -o $@ script_test_14.o -T $(srcdir)/script_test_14.t
+script_test_14.stdout: script_test_14
+	$(TEST_OBJDUMP) -s script_test_14 > $@
+
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
 
@@ -1999,6 +2161,25 @@ MOSTLYCLEANFILES += two_file_test_1c.o
 two_file_test_1c.o: two_file_test_1.o
 	cp two_file_test_1.o $@
 
+# As above, but check COMDAT case, where a non-IR file contains a duplicate
+# of a COMDAT group in an IR file.
+check_DATA += plugin_test_9b.err
+MOSTLYCLEANFILES += plugin_test_9b.err
+plugin_test_9b.err: plugin_test_9b_ir.o.syms plugin_test_9b_ir.o plugin_test_9b_elf.o gcctestdir/ld plugin_test.so
+	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9b -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_ZN1A5printEv" plugin_test_9b_ir.o plugin_test_9b_elf.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9b -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_ZN1A5printEv" plugin_test_9b_ir.o plugin_test_9b_elf.o 2>$@; then \
+	  echo 1>&2 "Link of plugin_test_9b should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+# Make a .syms file that claims to define a method in class A in a COMDAT group.
+# The real plugin_test_9b_ir.o will be compiled without the -D, and will not
+# define any methods in class A.
+plugin_test_9b_ir.o.syms: plugin_test_9b_ir_witha.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_test_9b_ir_witha.o: plugin_test_9b_ir.cc
+	$(CXXCOMPILE) -c -DUSE_CLASS_A -o $@ $<
+
 check_PROGRAMS += plugin_test_10
 check_SCRIPTS += plugin_test_10.sh
 check_DATA += plugin_test_10.sections
@@ -2020,6 +2201,22 @@ plugin_test_11.err: plugin_test_11
 plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 	rm -f $@
 	$(TEST_AR) crT $@ $^
+
+
+check_PROGRAMS += plugin_test_start_lib
+check_SCRIPTS += plugin_test_start_lib.sh
+check_DATA += plugin_test_start_lib.err
+MOSTLYCLEANFILES += plugin_test_start_lib.err
+plugin_test_start_lib: unused.o plugin_start_lib_test.o plugin_start_lib_test_2.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_start_lib_test.o \
+		-Wl,--start-lib plugin_start_lib_test_2.syms -Wl,--end-lib 2>plugin_test_start_lib.err
+plugin_test_start_lib.err: plugin_test_start_lib
+	@touch plugin_test_start_lib.err
+
+
+plugin_start_lib_test_2.syms: plugin_start_lib_test_2.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+
 
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
@@ -2084,6 +2281,21 @@ plugin_section_order.so: plugin_section_order.o
 	$(LINK) -Bgcctestdir/ -shared plugin_section_order.o
 plugin_section_order.o: plugin_section_order.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
+
+check_SCRIPTS += plugin_layout_with_alignment.sh
+check_DATA += plugin_layout_with_alignment.stdout
+MOSTLYCLEANFILES += plugin_layout_with_alignment
+plugin_layout_with_alignment.o: plugin_layout_with_alignment.c
+	$(COMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
+plugin_layout_with_alignment: plugin_layout_with_alignment.o plugin_section_alignment.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_section_alignment.so" plugin_layout_with_alignment.o
+plugin_layout_with_alignment.stdout: plugin_layout_with_alignment
+	$(TEST_NM) -n --synthetic plugin_layout_with_alignment > plugin_layout_with_alignment.stdout
+
+plugin_section_alignment.so: plugin_section_alignment.o
+	$(CXXLINK) -Bgcctestdir/ -shared plugin_section_alignment.o
+plugin_section_alignment.o: plugin_section_alignment.cc
+	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
 
 endif PLUGINS
 
@@ -2177,7 +2389,6 @@ MOSTLYCLEANFILES += retain_symbols_file_test retain_symbols_file_test.in \
 retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
 	echo 'main' > retain_symbols_file_test.in
 	echo 't1' >> retain_symbols_file_test.in
-	echo '_ZN4t16bC1Ev' >> retain_symbols_file_test.in
 	echo '_ZNK4t20a3getEv' >> retain_symbols_file_test.in
 	echo '_Z3t18v' >> retain_symbols_file_test.in
 	echo '__tcf_0' >> retain_symbols_file_test.in
@@ -2519,14 +2730,14 @@ MOSTLYCLEANFILES += memory_test.stdout memory_test memory_test.o
 memory_test.o: memory_test.s
 	$(COMPILE) -o $@ -c $<
 memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
-	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
+	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -Wl,-z,max-page-size=0x1000 -Wl,-z,common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
 memory_test.stdout: memory_test
 	$(TEST_READELF) -lWS  $< > $@
 
 # Test INCLUDE directives in linker scripts.
 # The binary isn't runnable, so we just check that we can build it without errors.
 check_DATA += memory_test_2
-MOSTLYCLEANFILES += memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
+MOSTLYCLEANFILES += memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t memory_test_2
 memory_test_inc_1.t: $(srcdir)/memory_test_inc_1.t.src
 	cp $< $@
 memory_test_inc_2.t: $(srcdir)/memory_test_inc_2.t.src
@@ -2534,7 +2745,7 @@ memory_test_inc_2.t: $(srcdir)/memory_test_inc_2.t.src
 memory_test_inc_3.t: $(srcdir)/memory_test_inc_3.t.src
 	cp $< $@
 memory_test_2: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t memory_test_inc_1.t memory_test_inc_2.t memory_test_inc_3.t
-	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
+	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -Wl,-z,max-page-size=0x1000 -Wl,-z,common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
 
 if HAVE_PUBNAMES
 
@@ -2552,7 +2763,7 @@ gdb_index_test_1.stdout: gdb_index_test_1
 # Test that --gdb-index functions correctly with compressed debug sections.
 check_SCRIPTS += gdb_index_test_2.sh
 check_DATA += gdb_index_test_2.stdout
-MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2
+MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2 gdb_index_test_2_gabi
 gdb_index_test_cdebug.o: gdb_index_test.cc
 	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections -c -o $@ $<
 gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
@@ -3394,6 +3605,21 @@ arm_farcall_thumb_arm_5t.o: arm_farcall_thumb_arm.s
 MOSTLYCLEANFILES += arm_farcall_thumb_arm arm_farcall_thumb_arm_5t
 
 endif DEFAULT_TARGET_ARM
+
+if DEFAULT_TARGET_AARCH64
+
+check_SCRIPTS += aarch64_reloc_none.sh
+check_DATA += aarch64_reloc_none.stdout
+aarch64_reloc_none.o: aarch64_reloc_none.s
+	$(TEST_AS) -o $@ $<
+aarch64_reloc_none: aarch64_reloc_none.o ../ld-new
+	../ld-new -o $@ aarch64_reloc_none.o --gc-sections
+aarch64_reloc_none.stdout: aarch64_reloc_none
+	$(TEST_NM) $< > $@
+
+MOSTLYCLEANFILES += aarch64_reloc_none
+
+endif DEFAULT_TARGET_AARCH64
 
 if DEFAULT_TARGET_S390
 

@@ -22,12 +22,6 @@ AC_DEFUN([GDB_AC_PTRACE],
 
 AC_CHECK_HEADERS([sys/ptrace.h ptrace.h])
 
-# Needs to be tested in C++ mode, to detect whether we need to cast
-# the first argument to enum __ptrace_request.
-if test "$enable_build_with_cxx" = "yes"; then
-    AC_LANG_PUSH([C++])
-fi
-
 gdb_ptrace_headers='
 #include <sys/types.h>
 #if HAVE_SYS_PTRACE_H
@@ -96,9 +90,5 @@ AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG4, $[4],
 if test -n "$[5]"; then
   AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG5, $[5],
     [Define to the type of arg 5 for ptrace.])
-fi
-
-if test "$enable_build_with_cxx" = "yes"; then
-    AC_LANG_POP([C++])
 fi
 ])

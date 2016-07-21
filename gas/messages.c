@@ -228,7 +228,7 @@ as_bad_internal (const char *file, unsigned int line, char *buffer)
 }
 
 /* Send to stderr a string as a warning, and locate warning in input
-   file(s).  Please us when there is no recovery, but we want to
+   file(s).  Please use when there is no recovery, but we want to
    continue processing but not produce an object file.
    Please explain in string (which may have '\n's) what recovery was
    done.  */
@@ -342,13 +342,13 @@ sprint_value (char *buf, valueT val)
 #define HEX_MIN_THRESHOLD	-(HEX_MAX_THRESHOLD)
 
 static void
-as_internal_value_out_of_range (const char *  prefix,
-				offsetT       val,
-				offsetT       min,
-				offsetT       max,
-				const char *        file,
-				unsigned      line,
-				int           bad)
+as_internal_value_out_of_range (const char *prefix,
+				offsetT val,
+				offsetT min,
+				offsetT max,
+				const char *file,
+				unsigned line,
+				int bad)
 {
   const char * err;
 
@@ -414,22 +414,22 @@ as_internal_value_out_of_range (const char *  prefix,
 }
 
 void
-as_warn_value_out_of_range (char *   prefix,
-			   offsetT  value,
-			   offsetT  min,
-			   offsetT  max,
-			   const char *   file,
+as_warn_value_out_of_range (const char *prefix,
+			   offsetT value,
+			   offsetT min,
+			   offsetT max,
+			   const char *file,
 			   unsigned line)
 {
   as_internal_value_out_of_range (prefix, value, min, max, file, line, 0);
 }
 
 void
-as_bad_value_out_of_range (char *   prefix,
-			   offsetT  value,
-			   offsetT  min,
-			   offsetT  max,
-			   const char *   file,
+as_bad_value_out_of_range (const char *prefix,
+			   offsetT value,
+			   offsetT min,
+			   offsetT max,
+			   const char *file,
 			   unsigned line)
 {
   as_internal_value_out_of_range (prefix, value, min, max, file, line, 1);

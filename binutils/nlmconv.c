@@ -2082,7 +2082,7 @@ link_inputs (struct string_list *inputs, char *ld, char * mfile)
   for (q = inputs; q != NULL; q = q->next)
     ++c;
 
-  argv = (char **) alloca ((c + 7) * sizeof (char *));
+  argv = (char **) xmalloc ((c + 7) * sizeof (char *));
 
 #ifndef __MSDOS__
   if (ld == NULL)
@@ -2140,6 +2140,8 @@ link_inputs (struct string_list *inputs, char *ld, char * mfile)
 
   pid = pexecute (ld, argv, program_name, (char *) NULL, &errfmt, &errarg,
 		  PEXECUTE_SEARCH | PEXECUTE_ONE);
+  free (argv);
+
   if (pid == -1)
     {
       fprintf (stderr, _("%s: execution of %s failed: "), program_name, ld);

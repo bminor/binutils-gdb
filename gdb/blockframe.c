@@ -197,7 +197,6 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
   struct bound_minimal_symbol msymbol;
   struct compunit_symtab *compunit_symtab = NULL;
   struct objfile *objfile;
-  int i;
   CORE_ADDR mapped_pc;
 
   /* To ensure that the symbol returned belongs to the correct setion

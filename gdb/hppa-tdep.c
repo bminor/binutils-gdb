@@ -730,10 +730,6 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Stack base address at which the first parameter is stored.  */
   CORE_ADDR param_end = 0;
 
-  /* The inner most end of the stack after all the parameters have
-     been pushed.  */
-  CORE_ADDR new_sp = 0;
-
   /* Two passes.  First pass computes the location of everything,
      second pass writes the bytes out.  */
   int write_pass;
@@ -2288,7 +2284,6 @@ hppa_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
   struct hppa_frame_cache *info;
-  CORE_ADDR pc = get_frame_pc (this_frame);
   struct unwind_table_entry *u;
 
   info = hppa_frame_cache (this_frame, this_cache);
@@ -3224,8 +3219,6 @@ extern initialize_file_ftype _initialize_hppa_tdep;
 void
 _initialize_hppa_tdep (void)
 {
-  struct cmd_list_element *c;
-
   gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
 
   hppa_objfile_priv_data = register_objfile_data ();

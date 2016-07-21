@@ -142,6 +142,12 @@ run_dump_test "mips16-1"
 
 # MIPS branch offset final link checking.
 run_dump_test "branch-misc-1"
+run_dump_test "branch-misc-2"
+
+run_dump_test "mips16-branch-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16-branch-3" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16-branch-addend-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16-branch-addend-3" [list [list ld $abi_ldflags(o32)]]
 
 # Jalx test
 run_dump_test "jalx-1"
@@ -167,6 +173,44 @@ if { $linux_gnu } {
 	      { { objdump -d jalx-2.dd } } \
 	      "jalx-2"]]
 }
+
+run_dump_test "jalx-addend" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "jalx-local" [list [list ld $abi_ldflags(o32)]]
+if $has_newabi {
+    run_dump_test "jalx-addend-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "jalx-local-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "jalx-addend-n64" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "jalx-local-n64" [list [list ld $abi_ldflags(n64)]]
+}
+
+run_dump_test "unaligned-jalx-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-mips16-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-mips16-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-micromips-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-micromips-1" [list [list ld $abi_ldflags(o32)]]
+
+if $has_newabi {
+    run_dump_test "unaligned-jalx-addend-0" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jalx-addend-1" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jalx-addend-mips16-0" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jalx-addend-mips16-1" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jalx-addend-micromips-0" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-jalx-addend-micromips-1" \
+					[list [list ld $abi_ldflags(n32)]]
+}
+
+run_dump_test "unaligned-branch" [list [list ld $abi_ldflags(o32)]]
+
+run_dump_test "unaligned-lwpc-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-lwpc-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-ldpc-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-ldpc-1" [list [list ld $abi_ldflags(o32)]]
 
 # Test multi-got link.  We only do this on GNU/Linux because it requires
 # the "traditional" emulations.
@@ -419,6 +463,8 @@ if { $has_newabi } {
 	    "reloc-6b"]]
 }
 
+run_dump_test "reloc-local-overflow" [list [list ld $abi_ldflags(o32)]]
+
 if {$has_newabi && $linux_gnu} {
     run_dump_test "eh-frame1-n32"
     run_dump_test "eh-frame1-n64"
@@ -455,13 +501,21 @@ if {$linux_gnu} {
 
 run_dump_test "jaloverflow"
 run_dump_test "jaloverflow-2"
+
+run_dump_test "jal-global-overflow-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "jal-global-overflow-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "jal-local-overflow-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "jal-local-overflow-1" [list [list ld $abi_ldflags(o32)]]
+
 run_dump_test "undefweak-overflow" [list [list as $abi_asflags(o32)] \
 					 [list ld $abi_ldflags(o32)]]
 
 if {$has_newabi} {
-    run_dump_test "undefweak-overflow" [list [list as $abi_asflags(n32)] \
+    run_dump_test "undefweak-overflow" [list [list name (n32)] \
+					     [list as $abi_asflags(n32)] \
 					     [list ld $abi_ldflags(n32)]]
-    run_dump_test "undefweak-overflow" [list [list as $abi_asflags(n64)] \
+    run_dump_test "undefweak-overflow" [list [list name (n64)] \
+					     [list as $abi_asflags(n64)] \
 					     [list ld $abi_ldflags(n64)]]
 }
 
@@ -897,5 +951,33 @@ if { $linux_gnu } {
 	    n32 -1 0 mips16
 	run_mips_plt_test "n32 PLTs for mixed MIPS and microMIPS" \
 	    n32 -1 1 umips
+    }
+}
+
+# PR ld/19908 export class tests.
+if { $linux_gnu } {
+    run_ld_link_tests [list \
+	[list "Shared library for MIPS export class symbol reference tests" \
+	      "$abi_ldflags(o32) -shared" "" \
+	      "$abi_asflags(o32)" \
+	      { export-class-ref-f2.s } \
+	      { { readelf --dyn-syms export-class-ref-lib.sd } } \
+	      "export-class-ref-lib.so"]]
+    foreach { class flag } { internal 1 hidden 2 protected 3 } {
+	run_ld_link_tests [list \
+	    [list "MIPS $class symbol reference test 1" \
+		  "$abi_ldflags(o32) -e f0" "tmpdir/export-class-ref-lib.so" \
+		  "$abi_asflags(o32) --defsym defv=$flag" \
+		  { export-class-ref-f0.s export-class-ref-f1.s } \
+		  [list [list readelf --dyn-syms export-$class-ref.sd] \
+			[list readelf --dyn-syms export-local-ref.sd]] \
+		  "export-$class-ref"] \
+	    [list "MIPS $class symbol reference test 2" \
+		  "$abi_ldflags(o32) -e f0" "tmpdir/export-class-ref-lib.so" \
+		  "$abi_asflags(o32) --defsym defv=$flag --defsym refv=$flag" \
+		  { export-class-ref-f0.s export-class-ref-f1.s } \
+		  [list [list readelf --dyn-syms export-$class-ref.sd] \
+			[list readelf --dyn-syms export-local-ref.sd]] \
+		  "export-$class-ref"]]
     }
 }

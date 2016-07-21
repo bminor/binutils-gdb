@@ -362,13 +362,17 @@ if {[skip_shlib_tests]} {
 }
 
 set libbin [standard_output_file ${testfile}-shlib.so]
+set binfile [standard_output_file ${testfile}-shlib]
+
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile2} $libbin {debug}] != ""
-     || [build_executable $testfile ${testfile}-shlib $srcfile \
-	     [list debug ldflags=$libbin]] == -1 } {
+     || [gdb_compile ${srcdir}/${subdir}/${srcfile} $binfile executable \
+	     [list debug shlib=$libbin]] == -1 } {
     return -1
 }
 
-clean_restart ${testfile}-shlib
+clean_restart $binfile
+gdb_load_shlib $libbin
+
 if ![runto_main] {
     return -1
 }

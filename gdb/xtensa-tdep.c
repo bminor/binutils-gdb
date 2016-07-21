@@ -1285,7 +1285,7 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   if (windowed)
     {
-      char op1;
+      LONGEST op1;
 
       /* Get WINDOWBASE, WINDOWSTART, and PS registers.  */
       wb = get_frame_register_unsigned (this_frame, 
@@ -1293,8 +1293,8 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
       ws = get_frame_register_unsigned (this_frame,
 					gdbarch_tdep (gdbarch)->ws_regnum);
 
-      op1 = read_memory_integer (pc, 1, byte_order);
-      if (XTENSA_IS_ENTRY (gdbarch, op1))
+      if (safe_read_memory_integer (pc, 1, byte_order, &op1)
+	  && XTENSA_IS_ENTRY (gdbarch, op1))
 	{
 	  int callinc = CALLINC (ps);
 	  ra = get_frame_register_unsigned
@@ -2796,7 +2796,6 @@ execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)
   int ilen, islots, is;
   xtensa_opcode opc;
   int insn_num = 0;
-  int fail = 0;
   void (*func) (struct gdbarch *, int, int, int, CORE_ADDR);
 
   uint32_t at, as, offset;
@@ -3192,7 +3191,6 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  struct xtensa_abi_handler *abi_handler;
 
   DEBUGTRACE ("gdbarch_init()\n");
 
@@ -3291,8 +3289,6 @@ extern initialize_file_ftype _initialize_xtensa_tdep;
 void
 _initialize_xtensa_tdep (void)
 {
-  struct cmd_list_element *c;
-
   gdbarch_register (bfd_arch_xtensa, xtensa_gdbarch_init, xtensa_dump_tdep);
   xtensa_init_reggroups ();
 

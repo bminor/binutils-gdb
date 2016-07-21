@@ -34,7 +34,7 @@
 #include "cp-abi.h"
 #include "namespace.h"
 #include <signal.h>
-
+#include "gdb_setjmp.h"
 #include "safe-ctype.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
@@ -1037,8 +1037,13 @@ cp_find_first_component_aux (const char *name, int permissive)
 	      return strlen (name);
 	    }
 	case '\0':
-	case ':':
 	  return index;
+	case ':':
+	  /* ':' marks a component iff the next character is also a ':'.
+	     Otherwise it is probably malformed input.  */
+	  if (name[index + 1] == ':')
+	    return index;
+	  break;
 	case 'o':
 	  /* Operator names can screw up the recursion.  */
 	  if (operator_possible
@@ -1596,7 +1601,9 @@ gdb_demangle (const char *name, int options)
 				    "demangler-warning", short_msg);
 	      make_cleanup (xfree, long_msg);
 
-	      target_terminal_ours ();
+	      make_cleanup_restore_target_terminal ();
+	      target_terminal_ours_for_output ();
+
 	      begin_line ();
 	      if (core_dump_allowed)
 		fprintf_unfiltered (gdb_stderr,
@@ -1618,6 +1625,15 @@ gdb_demangle (const char *name, int options)
 #endif
 
   return result;
+}
+
+/* See cp-support.h.  */
+
+int
+gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+  return *demangled != NULL;
 }
 
 /* Don't allow just "maintenance cplus".  */

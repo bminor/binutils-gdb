@@ -151,7 +151,6 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 			struct tic6x_unwind_cache *cache,
 			struct frame_info *this_frame)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned long inst;
   unsigned int src_reg, base_reg, dst_reg;
   int i;
@@ -175,8 +174,6 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
      2nd one is optional.  */
   while (pc < current_pc)
     {
-      int offset = 0;
-
       unsigned long inst = tic6x_fetch_instruction (gdbarch, pc);
 
       if ((inst & 0x1ffc) == 0x1dc0 || (inst & 0x1ffc) == 0x1bc0

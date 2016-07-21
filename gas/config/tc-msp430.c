@@ -69,9 +69,6 @@
 int msp430_enable_relax;
 int msp430_enable_polys;
 
-/*  Set linkrelax here to avoid fixups in most sections.  */
-int linkrelax = 1;
-
 /* GCC uses the some condition codes which we'll
    implement as new polymorph instructions.
 
@@ -684,7 +681,7 @@ enum
 {
   OPTION_SILICON_ERRATA = OPTION_MD_BASE,
   OPTION_SILICON_ERRATA_WARN,
-} option_numbers;
+};
 
 static unsigned int silicon_errata_fix = 0;
 static unsigned int silicon_errata_warn = 0;
@@ -698,7 +695,7 @@ static unsigned int silicon_errata_warn = 0;
 static void
 msp430_set_arch (int option)
 {
-  char *str = (char *) alloca (32);	/* 32 for good measure.  */
+  char str[32];	/* 32 for good measure.  */
 
   input_line_pointer = extract_word (input_line_pointer, str, 32);
 
@@ -1329,7 +1326,7 @@ msp430_mcu_data [] =
 };  
 
 int
-md_parse_option (int c, char * arg)
+md_parse_option (int c, const char * arg)
 {
   switch (c)
     {
@@ -1497,7 +1494,7 @@ static void
 msp430_section (int arg)
 {
   char * saved_ilp = input_line_pointer;
-  char * name = obj_elf_section_name ();
+  const char * name = obj_elf_section_name ();
 
   msp430_make_init_symbols (name);
 
@@ -1630,7 +1627,7 @@ extract_cmd (char * from, char * to, int limit)
   return from;
 }
 
-char *
+const char *
 md_atof (int type, char * litP, int * sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, FALSE);
@@ -1647,6 +1644,9 @@ md_begin (void)
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH,
 		     target_is_430x () ? bfd_mach_msp430x : bfd_mach_msp11);
+
+  /*  Set linkrelax here to avoid fixups in most sections.  */
+  linkrelax = 1;
 }
 
 /* Returns the register number equivalent to the string T.
@@ -2156,7 +2156,7 @@ msp430_dstoperand (struct msp430_operand_s * op,
 
   if (op->am == 2)
     {
-      char *__tl = "0";
+      char *__tl = (char *) "0";
 
       op->mode = OP_EXP;
       op->am = 1;
@@ -2471,6 +2471,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
   bfd_boolean addr_op;
   const char * error_message;
   static signed int repeat_count = 0;
+  static bfd_boolean prev_insn_is_nop = FALSE;
   bfd_boolean fix_emitted;
 
   /* Opcode is the one from opcodes table
@@ -2542,7 +2543,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
      support it for compatibility purposes.  */
   if (addr_op && opcode->fmt >= 0)
     {
-      char * old_name = opcode->name;
+      const char * old_name = opcode->name;
       char real_name[32];
 
       sprintf (real_name, "%sa", old_name);
@@ -2670,7 +2671,24 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       switch (opcode->insn_opnumb)
 	{
 	case 0:
-	  if (is_opcode ("eint") || is_opcode ("dint"))
+	  if (is_opcode ("eint"))
+	    {
+	      if (! prev_insn_is_nop)
+		{
+		  if (gen_interrupt_nops)
+		    {
+		      frag = frag_more (2);
+		      bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
+		      dwarf2_emit_insn (2);
+
+		      if (warn_interrupt_nops)
+			as_warn (_("inserting a NOP before EINT"));
+		    }
+		  else if (warn_interrupt_nops)
+		    as_warn (_("a NOP might be needed before the EINT"));
+		}
+	    }
+	  else if (is_opcode ("dint"))
 	    check_for_nop |= NOP_CHECK_INTERRUPT;
 
 	  /* Set/clear bits instructions.  */
@@ -3857,6 +3875,11 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       as_bad (_("Illegal instruction or not implemented opcode."));
     }
 
+  if (is_opcode ("nop"))
+    prev_insn_is_nop = TRUE;
+  else
+    prev_insn_is_nop = FALSE;
+	    
   input_line_pointer = line;
   return 0;
 }
@@ -4164,7 +4187,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
   static arelent * relocs[MAX_RELOC_EXPANSION + 1];
   arelent *reloc;
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 
@@ -4215,7 +4238,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	  && ! S_IS_GAS_LOCAL (fixp->fx_addsy)
 	  && ! S_IS_GAS_LOCAL (fixp->fx_subsy))
 	{
-	  arelent * reloc2 = xmalloc (sizeof * reloc);
+	  arelent * reloc2 = XNEW (arelent);
 
 	  relocs[0] = reloc2;
 	  relocs[1] = reloc;
@@ -4229,7 +4252,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	    reloc2->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	  else
 	    {
-	      reloc2->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	      reloc2->sym_ptr_ptr = XNEW (asymbol *);
 	      *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 	    }
 
@@ -4241,7 +4264,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	    }
 	  else
 	    {
-	      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	      reloc->sym_ptr_ptr = XNEW (asymbol *);
 	      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	    }
 
@@ -4298,7 +4321,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	  return & no_relocs;
 	}
 #endif
-      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      reloc->sym_ptr_ptr = XNEW (asymbol *);
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->addend = fixp->fx_offset;
 

@@ -691,6 +691,7 @@ ALL_TARGET_OBS = \
 	moxie-tdep.o \
 	msp430-tdep.o \
 	mt-tdep.o \
+	nds32-tdep.o \
 	nios2-tdep.o nios2-linux-tdep.o \
 	nto-tdep.o \
 	ppc-linux-tdep.o ppcfbsd-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o  \
@@ -716,7 +717,6 @@ ALL_TARGET_OBS = \
 	sol2-tdep.o \
 	solib-frv.o solib-svr4.o \
 	solib-darwin.o solib-dsbt.o \
-	remote-m32r-sdi.o remote-mips.o \
 	xcoffread.o \
 	symfile-mem.o \
 	windows-tdep.o \
@@ -870,8 +870,9 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	proc-service.list progspace.c \
 	prologue-value.c psymtab.c \
 	regcache.c reggroups.c remote.c remote-fileio.c remote-notif.c reverse.c \
-	sentinel-frame.c \
-	serial.c ser-base.c ser-unix.c skip.c \
+	rust-exp.y rust-lang.c \
+	selftest.c sentinel-frame.c \
+	serial.c ser-base.c ser-unix.c ser-event.c skip.c \
 	solib.c solib-target.c source.c \
 	stabsread.c stack.c probe.c stap-probe.c std-regs.c \
 	symfile.c symfile-debug.c symfile-mem.c symmisc.c symtab.c \
@@ -911,7 +912,7 @@ common/gdb_signals.h nat/gdb_thread_db.h common/gdb_vecs.h \
 common/x86-xstate.h nat/linux-ptrace.h nat/mips-linux-watch.h \
 proc-utils.h aarch64-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
 ppcnbsd-tdep.h cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
-exec.h m32r-tdep.h osabi.h gdbcore.h amd64bsd-nat.h \
+exec.h m32r-tdep.h osabi.h gdbcore.h x86bsd-nat.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
 ia64-tdep.h ada-lang.h varobj.h varobj-iter.h frv-tdep.h \
 nto-tdep.h serial.h \
@@ -967,7 +968,7 @@ amd64-darwin-tdep.h charset-list.h \
 config/djgpp/langinfo.h config/djgpp/nl_types.h darwin-nat.h \
 dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
 i386-darwin-tdep.h x86-nat.h linux-record.h moxie-tdep.h nios2-tdep.h \
-ft32-tdep.h \
+ft32-tdep.h nds32-tdep.h \
 osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
 record-full.h solib-aix.h \
@@ -988,7 +989,7 @@ common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
 common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h nat/amd64-linux-siginfo.h\
 nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h arch/aarch64-insn.h \
-tid-parse.h
+tid-parse.h ser-event.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1061,12 +1062,12 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	go-lang.o go-valprint.o go-typeprint.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o jv-varobj.o \
 	m2-lang.o opencl-lang.o p-lang.o p-typeprint.o p-valprint.o \
-	sentinel-frame.o \
+	selftest.o sentinel-frame.o \
 	complaints.o typeprint.o \
 	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \
 	ada-valprint.o c-valprint.o cp-valprint.o d-valprint.o f-valprint.o \
 	m2-valprint.o \
-	serial.o mdebugread.o top.o utils.o \
+	ser-event.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	user-regs.o \
 	frame.o frame-unwind.o doublest.o \
@@ -1075,6 +1076,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	gnu-v2-abi.o gnu-v3-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o d-namespace.o \
 	reggroups.o \
+	rust-lang.o \
 	trad-frame.o \
 	tramp-frame.o \
 	solib.o solib-target.o \
@@ -1107,12 +1109,12 @@ YYFILES = c-exp.c \
 	ada-lex.c \
 	ada-exp.c \
 	jv-exp.c \
-	d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c
+	d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
 YYOBJ = c-exp.o \
 	cp-name-parser.o \
 	ada-exp.o \
 	jv-exp.o \
-	d-exp.o f-exp.o go-exp.o m2-exp.o p-exp.o
+	d-exp.o f-exp.o go-exp.o m2-exp.o p-exp.o rust-exp.o
 
 # Things which need to be built when making a distribution.
 
@@ -1361,6 +1363,7 @@ init.c: $(INIT_FILES)
 	    -e '/version.[co]$$/d' \
 	    -e '/^[a-z0-9A-Z_]*_[SU].[co]$$/d' \
 	    -e '/[a-z0-9A-Z_]*-exp.tab.[co]$$/d' \
+	    -e 's/-exp\.o$$/-exp.y/' \
 	    -e 's/\.[co]$$/.c/' \
 	    -e 's,signals\.c,common/signals\.c,' \
 	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
@@ -1483,7 +1486,7 @@ local-maintainer-clean:
 		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
 		jv-exp.tab \
-		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c
+		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)
 	rm -f nm.h config.status
@@ -1724,6 +1727,7 @@ ALLDEPFILES = \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	mips64obsd-nat.c mips64obsd-tdep.c \
 	msp430-tdep.c \
+	nds32-tdep.c \
 	nios2-tdep.c nios2-linux-tdep.c \
 	nbsd-nat.c nbsd-tdep.c obsd-nat.c obsd-tdep.c \
 	posix-hdep.c common/posix-strerror.c \
@@ -1733,7 +1737,6 @@ ALLDEPFILES = \
 	ppcobsd-nat.c ppcobsd-tdep.c \
 	procfs.c \
 	ravenscar-thread.c \
-	remote-m32r-sdi.c remote-mips.c \
 	remote-sim.c \
 	dcache.c \
 	rl78-tdep.c \

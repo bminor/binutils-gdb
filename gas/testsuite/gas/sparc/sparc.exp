@@ -56,8 +56,10 @@ if [istarget sparc*-*-*] {
 	run_dump_test "prefetch"
 	run_dump_test "set64"
 	run_dump_test "synth64"
+        run_dump_test "rdasr"
 	run_dump_test "rdpr"
 	run_dump_test "rdhpr"
+        run_dump_test "wrasr"
 	run_dump_test "wrpr"
 	run_dump_test "wrhpr"
 	run_dump_test "window"
@@ -97,6 +99,9 @@ if [istarget sparc*-*-*] {
     run_dump_test "natural-32"
 
     run_list_test "pr4587" ""
+
+    run_dump_test "pr19910-1"
+    run_list_test "pr19910-2"
 }
 
 if [istarget sparc-*-vxworks*] {

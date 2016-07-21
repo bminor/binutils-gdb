@@ -1018,6 +1018,15 @@ static char *java_demangle (const char *mangled, int options)
   return gdb_demangle (mangled, options | DMGL_JAVA);
 }
 
+/* la_sniff_from_mangled_name for Java.  */
+
+static int
+java_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = java_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+  return *demangled != NULL;
+}
+
 /* Find the member function name of the demangled name NAME.  NAME
    must be a method name including arguments, in order to correctly
    locate the last component.
@@ -1162,6 +1171,11 @@ const struct exp_descriptor exp_descriptor_java =
   evaluate_subexp_java
 };
 
+static const char *java_extensions[] =
+{
+  ".java", ".class", NULL
+};
+
 const struct language_defn java_language_defn =
 {
   "java",			/* Language name */
@@ -1171,9 +1185,10 @@ const struct language_defn java_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  java_extensions,
   &exp_descriptor_java,
   java_parse,
-  java_error,
+  java_yyerror,
   null_post_parser,
   java_printchar,		/* Print a character constant */
   java_printstr,		/* Function to print string constant */
@@ -1188,6 +1203,7 @@ const struct language_defn java_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   java_demangle,		/* Language specific symbol demangler */
+  java_sniff_from_mangled_name,
   java_class_name_from_physname,/* Language specific class name */
   java_op_print_tab,		/* expression operators for printing */
   0,				/* not c-style arrays */

@@ -63,7 +63,7 @@ with_test_prefix "without symbols" {
 	"single pending dprintf info"
 
     gdb_load ${binfile}
-    gdb_load_shlibs $lib_sl
+    gdb_load_shlib $lib_sl
 
     gdb_run_cmd
 
@@ -71,7 +71,7 @@ with_test_prefix "without symbols" {
 }
 
 clean_restart ${binfile}
-gdb_load_shlibs $lib_sl
+gdb_load_shlib $lib_sl
 
 #
 # Test setting, querying, and modifying pending breakpoints

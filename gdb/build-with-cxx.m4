@@ -29,7 +29,7 @@ AC_DEFUN([GDB_AC_BUILD_WITH_CXX],
       *)
 	  AC_MSG_ERROR([bad value $enableval for --enable-build-with-cxx]) ;;
     esac],
-    [enable_build_with_cxx=no])
+    [enable_build_with_cxx=yes])
 
   if test "$enable_build_with_cxx" = "yes"; then
     COMPILER='$(CXX)'

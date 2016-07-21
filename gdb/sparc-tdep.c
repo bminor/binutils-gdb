@@ -684,7 +684,6 @@ sparc_skip_stack_check (const CORE_ADDR start_pc)
 {
   CORE_ADDR pc = start_pc;
   unsigned long insn;
-  int offset_stack_checking_sequence = 0;
   int probing_loop = 0;
 
   /* With GCC, all stack checking sequences begin with the same two
@@ -1605,7 +1604,7 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
   return 0;
 }
 
-int
+static int
 sparc_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *arch = get_frame_arch (frame);

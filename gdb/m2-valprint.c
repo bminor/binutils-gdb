@@ -301,7 +301,9 @@ static const struct generic_val_print_decorations m2_decorations =
   " * I",
   "TRUE",
   "FALSE",
-  "void"
+  "void",
+  "{",
+  "}"
 };
 
 /* See val_print for a description of the various parameters of this

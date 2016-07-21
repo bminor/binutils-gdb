@@ -23,7 +23,7 @@
 
 #include "defs.h"
 #include "gdb_select.h"
-#include "interps.h"
+#include "top.h"
 #include "target.h"
 #include "guile-internal.h"
 
@@ -201,7 +201,9 @@ ioscm_input_waiting (SCM port)
     FD_ZERO (&input_fds);
     FD_SET (fdes, &input_fds);
 
-    num_found = gdb_select (num_fds, &input_fds, NULL, NULL, &timeout);
+    num_found = interruptible_select (num_fds,
+				      &input_fds, NULL, NULL,
+				      &timeout);
     if (num_found < 0)
       {
 	/* Guile doesn't export SIGINT hooks like Python does.
@@ -515,8 +517,8 @@ ioscm_with_output_to_port_worker (SCM port, SCM thunk, enum oport oport,
 
   cleanups = set_batch_flag_and_make_cleanup_restore_page_info ();
 
-  make_cleanup_restore_integer (&interpreter_async);
-  interpreter_async = 0;
+  make_cleanup_restore_integer (&current_ui->async);
+  current_ui->async = 0;
 
   port_file = ioscm_file_port_new (port);
 

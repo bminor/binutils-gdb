@@ -132,6 +132,10 @@ void supply_static_tracepoint_registers (struct regcache *regcache,
 					 CORE_ADDR pc);
 void set_trampoline_buffer_space (CORE_ADDR begin, CORE_ADDR end,
 				  char *errmsg);
+void *alloc_jump_pad_buffer (size_t size);
+#ifndef HAVE_GETAUXVAL
+unsigned long getauxval (unsigned long type);
+#endif
 #else
 void stop_tracing (void);
 
@@ -163,8 +167,7 @@ int agent_mem_read_string (struct eval_agent_expr_context *ctx,
 
 /* The prototype the get_raw_reg function in the IPA.  Each arch's
    bytecode compiler emits calls to this function.  */
-IP_AGENT_EXPORT_FUNC ULONGEST gdb_agent_get_raw_reg
-  (const unsigned char *raw_regs, int regnum);
+ULONGEST get_raw_reg (const unsigned char *raw_regs, int regnum);
 
 /* Returns the address of the get_raw_reg function in the IPA.  */
 CORE_ADDR get_raw_reg_func_addr (void);

@@ -349,7 +349,7 @@ break_trace_same_addr_6 "trace" "enable" "trace" "disable"
 break_trace_same_addr_6 "trace" "disable" "trace" "enable"
 
 set libipa [get_in_proc_agent]
-gdb_load_shlibs $libipa
+set remote_libipa [gdb_load_shlib $libipa]
 
 # Can't use prepare_for_testing, because that splits compiling into
 # building objects and then linking, and we'd fail with "linker input
@@ -368,7 +368,7 @@ if ![runto_main] {
 }
 
 gdb_reinitialize_dir $srcdir/$subdir
-if { [gdb_test "info sharedlibrary" ".*${libipa}.*" "IPA loaded"] != 0 } {
+if { [gdb_test "info sharedlibrary" ".*${remote_libipa}.*" "IPA loaded"] != 0 } {
     untested "Could not find IPA lib loaded"
 } else {
     foreach break_always_inserted { "on" "off" } {

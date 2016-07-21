@@ -824,6 +824,11 @@ const struct exp_descriptor exp_descriptor_c =
   evaluate_subexp_c
 };
 
+static const char *c_extensions[] =
+{
+  ".c", NULL
+};
+
 const struct language_defn c_language_defn =
 {
   "c",				/* Language name */
@@ -833,9 +838,10 @@ const struct language_defn c_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  c_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_error,
+  c_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -850,6 +856,7 @@ const struct language_defn c_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -951,6 +958,11 @@ cplus_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_bool;
 }
 
+static const char *cplus_extensions[] =
+{
+  ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++", NULL
+};
+
 const struct language_defn cplus_language_defn =
 {
   "c++",			/* Language name */
@@ -960,9 +972,10 @@ const struct language_defn cplus_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  cplus_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_error,
+  c_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -977,6 +990,7 @@ const struct language_defn cplus_language_defn =
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   cp_lookup_transparent_type,   /* lookup_transparent_type */
   gdb_demangle,			/* Language specific symbol demangler */
+  gdb_sniff_from_mangled_name,
   cp_class_name_from_physname,  /* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -996,6 +1010,11 @@ const struct language_defn cplus_language_defn =
   LANG_MAGIC
 };
 
+static const char *asm_extensions[] =
+{
+  ".s", ".sx", ".S", NULL
+};
+
 const struct language_defn asm_language_defn =
 {
   "asm",			/* Language name */
@@ -1005,9 +1024,10 @@ const struct language_defn asm_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  asm_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_error,
+  c_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -1022,6 +1042,7 @@ const struct language_defn asm_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -1055,9 +1076,10 @@ const struct language_defn minimal_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  NULL,
   &exp_descriptor_c,
   c_parse,
-  c_error,
+  c_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -1072,6 +1094,7 @@ const struct language_defn minimal_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */

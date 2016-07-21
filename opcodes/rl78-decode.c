@@ -5337,13 +5337,13 @@ rl78_decode_opcode (unsigned long pc AU,
     case 0xeb:
     case 0xfb:
         {
-          /** 11ra 1011			movw	%0, %e!1			*/
+          /** 11ra 1011			movw	%0, %es!1			*/
 #line 886 "rl78-decode.opc"
           int ra AU = (op[0] >> 4) & 0x03;
           if (trace)
             {
               printf ("\033[33m%s\033[0m  %02x\n",
-                     "/** 11ra 1011			movw	%0, %e!1			*/",
+                     "/** 11ra 1011			movw	%0, %es!1			*/",
                      op[0]);
               printf ("  ra = 0x%x\n", ra);
             }

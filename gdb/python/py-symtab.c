@@ -108,8 +108,7 @@ stpy_get_filename (PyObject *self, void *closure)
   STPY_REQUIRE_VALID (self, symtab);
   filename = symtab_to_filename_for_display (symtab);
 
-  str_obj = PyString_Decode (filename, strlen (filename),
-			     host_charset (), NULL);
+  str_obj = host_string_to_python_string (filename);
   return str_obj;
 }
 
@@ -140,8 +139,7 @@ stpy_get_producer (PyObject *self, void *closure)
     {
       const char *producer = COMPUNIT_PRODUCER (cust);
 
-      return PyString_Decode (producer, strlen (producer),
-			      host_charset (), NULL);
+      return host_string_to_python_string (producer);
     }
 
   Py_RETURN_NONE;
@@ -157,7 +155,7 @@ stpy_fullname (PyObject *self, PyObject *args)
 
   fullname = symtab_to_fullname (symtab);
 
-  return PyString_Decode (fullname, strlen (fullname), host_charset (), NULL);
+  return host_string_to_python_string (fullname);
 }
 
 /* Implementation of gdb.Symtab.is_valid (self) -> Boolean.
@@ -439,7 +437,6 @@ PyObject *
 symtab_and_line_to_sal_object (struct symtab_and_line sal)
 {
   sal_object *sal_obj;
-  int success = 0;
 
   sal_obj = PyObject_New (sal_object, &sal_object_type);
   if (sal_obj)

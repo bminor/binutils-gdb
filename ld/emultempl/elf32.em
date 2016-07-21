@@ -105,6 +105,8 @@ gld${EMULATION_NAME}_before_parse (void)
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
   `if test -n "$CALL_NOP_BYTE" ; then echo link_info.call_nop_byte = $CALL_NOP_BYTE; fi`;
+  link_info.check_relocs_after_open_input = `if test "x${CHECK_RELOCS_AFTER_OPEN_INPUT}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
+  link_info.relro = DEFAULT_LD_Z_RELRO;
   link_info.sharable_sections = `if test "$SHARABLE_SECTIONS" = "yes" ; then echo TRUE ; else echo FALSE ; fi`;
 }
 
@@ -1583,7 +1585,6 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	asection *s;
 	bfd_size_type sz;
 	char *msg;
-	bfd_boolean ret;
 
 	if (is->flags.just_syms)
 	  continue;
@@ -1599,11 +1600,9 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	  einfo ("%F%B: Can't read contents of section .gnu.warning: %E\n",
 		 is->the_bfd);
 	msg[sz] = '\0';
-	ret = link_info.callbacks->warning (&link_info, msg,
-					    (const char *) NULL,
-					    is->the_bfd, (asection *) NULL,
-					    (bfd_vma) 0);
-	ASSERT (ret);
+	(*link_info.callbacks->warning) (&link_info, msg,
+					 (const char *) NULL, is->the_bfd,
+					 (asection *) NULL, (bfd_vma) 0);
 	free (msg);
 
 	/* Clobber the section size, so that we don't waste space
@@ -1963,25 +1962,32 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       return os;
     }
 
+  flags = s->flags;
+  if (!bfd_link_relocatable (&link_info))
+    {
+      nexts = s;
+      while ((nexts = bfd_get_next_section_by_name (nexts->owner, nexts))
+	     != NULL)
+	if (nexts->output_section == NULL
+	    && (nexts->flags & SEC_EXCLUDE) == 0
+	    && ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
+	    && (nexts->owner->flags & DYNAMIC) == 0
+	    && nexts->owner->usrdata != NULL
+	    && !(((lang_input_statement_type *) nexts->owner->usrdata)
+		 ->flags.just_syms)
+	    && _bfd_elf_match_sections_by_type (nexts->owner, nexts,
+						s->owner, s))
+	  flags = (((flags ^ SEC_READONLY)
+		    | (nexts->flags ^ SEC_READONLY))
+		   ^ SEC_READONLY);
+    }
+
   /* Decide which segment the section should go in based on the
      section name and section flags.  We put loadable .note sections
      right after the .interp section, so that the PT_NOTE segment is
      stored right after the program headers where the OS can read it
      in the first page.  */
 
-  flags = s->flags;
-  nexts = s;
-  while ((nexts = bfd_get_next_section_by_name (nexts->owner, nexts)) != NULL)
-    if (nexts->output_section == NULL
-	&& (nexts->flags & SEC_EXCLUDE) == 0
-	&& ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
-	&& (nexts->owner->flags & DYNAMIC) == 0
-	&& nexts->owner->usrdata != NULL
-	&& !(((lang_input_statement_type *) nexts->owner->usrdata)
-	     ->flags.just_syms)
-	&& _bfd_elf_match_sections_by_type (nexts->owner, nexts, s->owner, s))
-      flags = (((flags ^ SEC_READONLY) | (nexts->flags ^ SEC_READONLY))
-	       ^ SEC_READONLY);
   place = NULL;
   if ((flags & (SEC_ALLOC | SEC_DEBUGGING)) == 0)
     place = &hold[orphan_nonalloc];

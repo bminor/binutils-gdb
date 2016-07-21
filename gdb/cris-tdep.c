@@ -811,15 +811,8 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      int struct_return, CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int stack_offset;
   int argreg;
   int argnum;
-
-  /* The function's arguments and memory allocated by gdb for the arguments to
-     point at reside in separate areas on the stack.
-     Both frame pointers grow toward higher addresses.  */
-  CORE_ADDR fp_arg;
-  CORE_ADDR fp_mem;
 
   struct stack_item *si = NULL;
 
@@ -837,7 +830,6 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Now load as many as possible of the first arguments into registers,
      and push the rest onto the stack.  */
   argreg = ARG1_REGNUM;
-  stack_offset = 0;
 
   for (argnum = 0; argnum < nargs; argnum++)
     {
@@ -1040,9 +1032,6 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
   /* Next instruction, lookahead.  */
   unsigned short insn_next; 
   int regno;
-
-  /* Is there a push fp?  */
-  int have_fp; 
 
   /* Number of byte on stack used for local variables and movem.  */
   int val; 
@@ -1472,7 +1461,6 @@ cris_spec_reg_applicable (struct gdbarch *gdbarch,
 static int
 cris_register_size (struct gdbarch *gdbarch, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
   int spec_regno;
   
@@ -3894,8 +3882,6 @@ extern initialize_file_ftype _initialize_cris_tdep; /* -Wmissing-prototypes */
 void
 _initialize_cris_tdep (void)
 {
-  struct cmd_list_element *c;
-
   gdbarch_register (bfd_arch_cris, cris_gdbarch_init, cris_dump_tdep);
   
   /* CRIS-specific user-commands.  */
@@ -4048,10 +4034,10 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case BFD_ENDIAN_BIG:
-      internal_error (__FILE__, __LINE__,
-		      _("cris_gdbarch_init: big endian byte order in info"));
-      break;
-    
+      /* Cris is always little endian, but the user could have forced
+	 big endian with "set endian".  */
+      return 0;
+
     default:
       internal_error (__FILE__, __LINE__,
 		      _("cris_gdbarch_init: unknown byte order in info"));
@@ -4083,9 +4069,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case 8:
     case 9:
       /* Old versions; not supported.  */
-      internal_error (__FILE__, __LINE__, 
-		      _("cris_gdbarch_init: unsupported CRIS version"));
-      break;
+      return 0;
 
     case 10:
     case 11: 
@@ -4125,8 +4109,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, 
-		      _("cris_gdbarch_init: unknown CRIS version"));
+      /* Unknown version.  */
+      return 0;
     }
 
   /* Dummy frame functions (shared between CRISv10 and CRISv32 since they

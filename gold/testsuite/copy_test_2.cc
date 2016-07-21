@@ -21,3 +21,5 @@
 // MA 02110-1301, USA.
 
 long long l = 2;
+
+int ip __attribute__((visibility("protected"))) = 3;

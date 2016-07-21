@@ -62,9 +62,13 @@ class Target_sparc : public Sized_target<size, big_endian>
       copy_relocs_(elfcpp::R_SPARC_COPY),
       got_mod_index_offset_(-1U), tls_get_addr_sym_(NULL),
       elf_machine_(sparc_info.machine_code), elf_flags_(0),
-      elf_flags_set_(false)
+      elf_flags_set_(false), register_syms_()
   {
   }
+
+  // Make a new symbol table entry.
+  Sized_symbol<size>*
+  make_symbol(const char*, elfcpp::STT, Object*, unsigned int, uint64_t);
 
   // Process the relocations to determine unreferenced sections for
   // garbage collection.
@@ -164,13 +168,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   // Return whether SYM is defined by the ABI.
   bool
   do_is_defined_by_abi(const Symbol* sym) const
-  {
-    // XXX Really need to support this better...
-    if (sym->type() == elfcpp::STT_SPARC_REGISTER)
-      return 1;
-
-    return strcmp(sym->name(), "___tls_get_addr") == 0;
-  }
+  { return strcmp(sym->name(), "___tls_get_addr") == 0; }
 
   // Return the PLT address to use for a global symbol.
   uint64_t
@@ -441,6 +439,16 @@ class Target_sparc : public Sized_target<size, big_endian>
     GOT_TYPE_TLS_PAIR = 2,      // GOT entry for TLS module/offset pair
   };
 
+  struct Register_symbol
+  {
+    Register_symbol()
+      : name(NULL), shndx(0), obj(NULL)
+    { }
+    const char* name;
+    unsigned int shndx;
+    Object* obj;
+  };
+
   // The GOT section.
   Output_data_got<size, big_endian>* got_;
   // The PLT section.
@@ -461,6 +469,8 @@ class Target_sparc : public Sized_target<size, big_endian>
   elfcpp::Elf_Word elf_flags_;
   // Whether elf_flags_ has been set for the first time yet
   bool elf_flags_set_;
+  // STT_SPARC_REGISTER symbols (%g2, %g3, %g6, %g7).
+  Register_symbol register_syms_[4];
 };
 
 template<>
@@ -497,7 +507,7 @@ Target::Target_info Target_sparc<64, true>::sparc_info =
   64,			// size
   true,			// is_big_endian
   elfcpp::EM_SPARCV9,	// machine_code
-  false,		// has_make_symbol
+  true,			// has_make_symbol
   false,		// has_resolve
   false,		// has_code_fill
   true,			// is_default_stack_executable
@@ -2282,7 +2292,9 @@ Target_sparc<size, big_endian>::Scan::local(
       // apply the link-time value, so we flag the location with
       // an R_SPARC_RELATIVE relocation so the dynamic loader can
       // relocate it easily.
-      if (parameters->options().output_is_position_independent())
+      if (parameters->options().output_is_position_independent()
+	  && ((size == 64 && r_type == elfcpp::R_SPARC_64)
+	      || (size == 32 && r_type == elfcpp::R_SPARC_32)))
 	{
 	  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
@@ -2290,8 +2302,9 @@ Target_sparc<size, big_endian>::Scan::local(
 				       output_section, data_shndx,
 				       reloc.get_r_offset(),
 				       reloc.get_r_addend(), is_ifunc);
+	  break;
 	}
-      break;
+      /* Fall through.  */
 
     case elfcpp::R_SPARC_HIX22:
     case elfcpp::R_SPARC_LOX10:
@@ -2756,8 +2769,8 @@ Target_sparc<size, big_endian>::Scan::global(
 						       reloc.get_r_offset(),
 						       reloc.get_r_addend());
 	      }
-	    else if ((r_type == elfcpp::R_SPARC_32
-		      || r_type == elfcpp::R_SPARC_64)
+	    else if (((size == 64 && r_type == elfcpp::R_SPARC_64)
+		      || (size == 32 && r_type == elfcpp::R_SPARC_32))
 		     && gsym->can_use_relative_reloc(false))
 	      {
 		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
@@ -3023,6 +3036,68 @@ Target_sparc<size, big_endian>::Scan::global(
     }
 }
 
+// Make a new symbol table entry.
+// STT_SPARC_REGISTER symbols require special handling,
+// so we intercept these symbols and keep track of them separately.
+// We will resolve register symbols here and output them at symbol
+// finalization time.
+
+template<int size, bool big_endian>
+Sized_symbol<size>*
+Target_sparc<size, big_endian>::make_symbol(const char* name,
+					    elfcpp::STT type,
+					    Object* object,
+					    unsigned int shndx,
+					    uint64_t value)
+{
+  // REGISTER symbols are used only on SPARC-64.
+  if (size == 64 && type == elfcpp::STT_SPARC_REGISTER)
+    {
+      // Ignore REGISTER symbols in dynamic objects.
+      if (object->is_dynamic())
+	return NULL;
+      // Only registers 2, 3, 6, and 7 can be declared global.
+      int reg = value;
+      switch (reg)
+	{
+	case 2: case 3:
+	  reg -= 2;
+	  break;
+	case 6: case 7:
+	  reg -= 4;
+	  break;
+	default:
+	  gold_error(_("%s: only registers %%g[2367] can be declared "
+		       "using STT_REGISTER"),
+		     object->name().c_str());
+	  return NULL;
+	}
+      Register_symbol& rsym = this->register_syms_[reg];
+      if (rsym.name == NULL)
+	{
+	  rsym.name = name;
+	  rsym.shndx = shndx;
+	  rsym.obj = object;
+	}
+      else
+	{
+	  if (strcmp(rsym.name, name) != 0)
+	    {
+	      gold_error(_("%s: register %%g%d declared as '%s'; "
+			   "previously declared as '%s' in %s"),
+			 object->name().c_str(),
+			 static_cast<int>(value),
+			 *name ? name : "#scratch",
+			 *rsym.name ? rsym.name : "#scratch",
+			 rsym.obj->name().c_str());
+	      return NULL;
+	    }
+	}
+      return NULL;
+    }
+  return new Sized_symbol<size>();
+}
+
 // Process relocations for gc.
 
 template<int size, bool big_endian>
@@ -3164,6 +3239,27 @@ Target_sparc<size, big_endian>::do_finalize_sections(
 
       symtab->define_symbols(layout, 2, syms,
 			     layout->script_options()->saw_sections_clause());
+    }
+
+  for (int reg = 0; reg < 4; ++reg)
+    {
+      Register_symbol& rsym = this->register_syms_[reg];
+      if (rsym.name != NULL)
+	{
+	  int value = reg < 3 ? reg + 2 : reg + 4;
+	  Sized_symbol<size>* sym = new Sized_symbol<size>();
+	  if (rsym.shndx == elfcpp::SHN_UNDEF)
+	    sym->init_undefined(rsym.name, NULL, value,
+				elfcpp::STT_SPARC_REGISTER, elfcpp::STB_GLOBAL,
+				elfcpp::STV_DEFAULT, 0);
+	  else
+	    sym->init_constant(rsym.name, NULL, value, 0,
+			       elfcpp::STT_SPARC_REGISTER, elfcpp::STB_GLOBAL,
+			       elfcpp::STV_DEFAULT, 0, false);
+	  symtab->add_target_global_symbol(sym);
+	  layout->add_target_specific_dynamic_tag(elfcpp::DT_SPARC_REGISTER,
+						  value);
+	}
     }
 }
 

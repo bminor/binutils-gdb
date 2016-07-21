@@ -111,6 +111,7 @@ enum
 
   AVR_ARG1_REGNUM = 24,         /* Single byte argument */
   AVR_ARGN_REGNUM = 25,         /* Multi byte argments */
+  AVR_LAST_ARG_REGNUM = 8,      /* Last argument register */
 
   AVR_RET1_REGNUM = 24,         /* Single byte return value */
   AVR_RETN_REGNUM = 25,         /* Multi byte return value */
@@ -1106,8 +1107,6 @@ static struct value *
 avr_frame_prev_register (struct frame_info *this_frame,
 			 void **this_prologue_cache, int regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct avr_unwind_cache *info
     = avr_frame_unwind_cache (this_frame, this_prologue_cache);
 
@@ -1269,7 +1268,6 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                      int nargs, struct value **args, CORE_ADDR sp,
                      int struct_return, CORE_ADDR struct_addr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
   gdb_byte buf[3];
   int call_length = gdbarch_tdep (gdbarch)->call_length;
@@ -1298,23 +1296,24 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       const bfd_byte *contents = value_contents (arg);
       int len = TYPE_LENGTH (type);
 
-      /* Calculate the potential last register needed.  */
-      last_regnum = regnum - (len + (len & 1));
+      /* Calculate the potential last register needed.
+         E.g. For length 2, registers regnum and regnum-1 (say 25 and 24)
+         shall be used. So, last needed register will be regnum-1(24).  */
+      last_regnum = regnum - (len + (len & 1)) + 1;
 
       /* If there are registers available, use them.  Once we start putting
          stuff on the stack, all subsequent args go on stack.  */
-      if ((si == NULL) && (last_regnum >= 8))
+      if ((si == NULL) && (last_regnum >= AVR_LAST_ARG_REGNUM))
         {
-          ULONGEST val;
-
           /* Skip a register for odd length args.  */
           if (len & 1)
             regnum--;
 
-          val = extract_unsigned_integer (contents, len, byte_order);
+          /* Write MSB of argument into register and subsequent bytes in
+             decreasing register numbers.  */
           for (j = 0; j < len; j++)
             regcache_cooked_write_unsigned
-              (regcache, regnum--, val >> (8 * (len - j - 1)));
+              (regcache, regnum--, contents[len - j - 1]);
         }
       /* No registers available, push the args onto the stack.  */
       else

@@ -170,7 +170,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
      ':' may be in the args of a template spec.  This isn't intended to be
      a complete test, just cheap and documentary.  */
   if (strchr (name, '<') == NULL && strchr (name, '(') == NULL)
-    gdb_assert (strchr (name, ':') == NULL);
+    gdb_assert (strstr (name, "::") == NULL);
 
   sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym.symbol != NULL)
@@ -206,9 +206,14 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
       struct block_symbol lang_this;
       struct type *type;
 
-      lang_this = lookup_language_this (language_def (language_cplus), block);
+      lang_this.symbol = NULL;
+
+      if (langdef != NULL)
+	lang_this = lookup_language_this (langdef, block);
+
       if (lang_this.symbol == NULL)
 	return null_block_symbol;
+
 
       type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
       /* If TYPE_NAME is NULL, abandon trying to find this symbol.
@@ -246,10 +251,9 @@ cp_search_static_and_baseclasses (const char *name,
   struct block_symbol klass_sym;
   struct type *klass_type;
 
-  /* The test here uses <= instead of < because Fortran also uses this,
-     and the module.exp testcase will pass "modmany::" for NAME here.  */
-  gdb_assert (prefix_len + 2 <= strlen (name));
-  gdb_assert (name[prefix_len + 1] == ':');
+  /* Check for malformed input.  */
+  if (prefix_len + 2 > strlen (name) || name[prefix_len + 1] != ':')
+    return null_block_symbol;
 
   /* Find the name of the class and the name of the method, variable, etc.  */
 

@@ -1481,6 +1481,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case bfd_mach_frv:
     case bfd_mach_frvsimple:
+    case bfd_mach_fr300:
     case bfd_mach_fr500:
     case bfd_mach_frvtomcat:
     case bfd_mach_fr550:
@@ -1562,6 +1563,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case bfd_mach_frv:
     case bfd_mach_frvsimple:
+    case bfd_mach_fr300:
     case bfd_mach_fr500:
     case bfd_mach_frvtomcat:
       /* fr500-style hardware debugging support.  */

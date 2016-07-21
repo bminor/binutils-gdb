@@ -364,7 +364,7 @@ run (const char *what, char *args)
     if (*s == ' ')
       i++;
   i++;
-  argv = alloca (sizeof (char *) * (i + 3));
+  argv = xmalloc (sizeof (char *) * (i + 3));
   i = 0;
   argv[i++] = what;
   s = args;
@@ -392,6 +392,7 @@ run (const char *what, char *args)
 
   pid = pexecute (argv[0], (char * const *) argv, prog_name, temp_base,
 		  &errmsg_fmt, &errmsg_arg, PEXECUTE_ONE | PEXECUTE_SEARCH);
+  free (argv);
 
   if (pid == -1)
     {

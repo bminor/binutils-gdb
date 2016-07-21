@@ -45,5 +45,10 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 4060 fffe 	bal	0002004e <text_label\+0x2004e>
 			2004e: R_MICROMIPS_PC16_S1	text_label
 [0-9a-f]+ <[^>]*> 0000 0000 	nop
+[0-9a-f]+ <[^>]*> 9400 fffe 	b	00020056 <text_label\+0x20056>
+			20056: R_MICROMIPS_PC16_S1	external_label
 [0-9a-f]+ <[^>]*> 0c00      	nop
+[0-9a-f]+ <[^>]*> 4060 fffe 	bal	0002005c <text_label\+0x2005c>
+			2005c: R_MICROMIPS_PC16_S1	external_label
+[0-9a-f]+ <[^>]*> 0000 0000 	nop
 	\.\.\.

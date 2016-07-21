@@ -1,3 +1,14 @@
+2016-04-10  Oleg Endo  <olegendo@gcc.gnu.org>
+
+	* interp.c (dmul): Split into dmul_s and dmul_u.  Use explicit integer
+	width types and simplify implementation.
+	* gencode.c (dmuls.l, dmulu.l): Use new functions dmul_s and dmul_u.
+
+2016-04-09  Oleg Endo  <olegendo@gcc.gnu.org>
+
+	* interp.c (sim_memory_size): Default init to 30.
+	(parse_and_set_memory_size): Adjust upper bound to 31.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

@@ -84,8 +84,14 @@ typedef uint32_t aarch64_insn;
 /* CPU-specific features.  */
 typedef unsigned long aarch64_feature_set;
 
-#define AARCH64_CPU_HAS_FEATURE(CPU,FEAT)	\
+#define AARCH64_CPU_HAS_ALL_FEATURES(CPU,FEAT)	\
+  ((~(CPU) & (FEAT)) == 0)
+
+#define AARCH64_CPU_HAS_ANY_FEATURES(CPU,FEAT)	\
   (((CPU) & (FEAT)) != 0)
+
+#define AARCH64_CPU_HAS_FEATURE(CPU,FEAT)	\
+  AARCH64_CPU_HAS_ALL_FEATURES (CPU,FEAT)
 
 #define AARCH64_MERGE_FEATURE_SETS(TARG,F1,F2)	\
   do						\
@@ -102,9 +108,6 @@ typedef unsigned long aarch64_feature_set;
   while (0)
 
 #define AARCH64_FEATURE(core,coproc) ((core) | (coproc))
-
-#define AARCH64_OPCODE_HAS_FEATURE(OPC,FEAT)	\
-  (((OPC) & (FEAT)) != 0)
 
 enum aarch64_operand_class
 {
@@ -535,6 +538,9 @@ struct aarch64_opcode
 
   /* Flags providing information about this instruction */
   uint32_t flags;
+
+  /* If non-NULL, a function to verify that a given instruction is valid.  */
+  bfd_boolean (* verifier) (const struct aarch64_opcode *, const aarch64_insn);
 };
 
 typedef struct aarch64_opcode aarch64_opcode;
@@ -745,8 +751,8 @@ struct aarch64_opnd_info
 	} reg;
       struct
 	{
-	  unsigned regno : 5;
-	  unsigned index : 4;
+	  unsigned int regno;
+	  int64_t index;
 	} reglane;
       /* e.g. LVn.  */
       struct
@@ -756,7 +762,7 @@ struct aarch64_opnd_info
 	  /* 1 if it is a list of reg element.  */
 	  unsigned has_index : 1;
 	  /* Lane index; valid only when has_index is 1.  */
-	  unsigned index : 4;
+	  int64_t index;
 	} reglist;
       /* e.g. immediate or pc relative address offset.  */
       struct

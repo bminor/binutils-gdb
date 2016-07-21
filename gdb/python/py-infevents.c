@@ -36,8 +36,6 @@ static PyObject *
 create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
 				   CORE_ADDR addr)
 {
-  int pid;
-  long tid, lwp;
   PyObject *event;
   PyObject *ptid_obj = NULL;
   PyObject *addr_obj = NULL;

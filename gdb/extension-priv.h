@@ -181,7 +181,7 @@ struct extension_language_ops
   enum ext_lang_rc (*apply_val_pretty_printer)
     (const struct extension_language_defn *,
      struct type *type, const gdb_byte *valaddr,
-     int embedded_offset, CORE_ADDR address,
+     LONGEST embedded_offset, CORE_ADDR address,
      struct ui_file *stream, int recurse,
      const struct value *val, const struct value_print_options *options,
      const struct language_defn *language);
@@ -232,7 +232,7 @@ struct extension_language_ops
   enum ext_lang_bp_stop (*breakpoint_cond_says_stop)
     (const struct extension_language_defn *, struct breakpoint *);
 
-  /* The next three are used to connect GDB's SIGINT handling with the
+  /* The next two are used to connect GDB's SIGINT handling with the
      extension language's.
 
      Terminology: If an extension language can use GDB's SIGINT handling then
@@ -241,9 +241,6 @@ struct extension_language_ops
 
      These need not be implemented, but if one of them is implemented
      then they all must be.  */
-
-  /* Clear the SIGINT indicator.  */
-  void (*clear_quit_flag) (const struct extension_language_defn *);
 
   /* Set the SIGINT indicator.
      This is called by GDB's SIGINT handler and must be async-safe.  */

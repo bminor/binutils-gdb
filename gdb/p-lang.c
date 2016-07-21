@@ -412,6 +412,11 @@ pascal_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_bool;
 }
 
+static const char *p_extensions[] =
+{
+  ".pas", ".p", ".pp", NULL
+};
+
 const struct language_defn pascal_language_defn =
 {
   "pascal",			/* Language name */
@@ -421,9 +426,10 @@ const struct language_defn pascal_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  p_extensions,
   &exp_descriptor_standard,
   pascal_parse,
-  pascal_error,
+  pascal_yyerror,
   null_post_parser,
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
@@ -438,6 +444,7 @@ const struct language_defn pascal_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific class_name_from_physname */
   pascal_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */

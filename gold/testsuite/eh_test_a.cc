@@ -1,4 +1,9 @@
+template<typename C>
 void
-bar()
+bar(C*)
 {
 }
+
+template
+void
+bar<int>(int*);

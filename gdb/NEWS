@@ -3,6 +3,30 @@
 
 *** Changes since GDB 7.11
 
+* GDB now supports a negative repeat count in the 'x' command to examine
+  memory backward from the given address.  For example:
+
+    (gdb) bt
+    #0  Func1 (n=42, p=0x40061c "hogehoge") at main.cpp:4
+    #1  0x400580 in main (argc=1, argv=0x7fffffffe5c8) at main.cpp:8
+    (gdb) x/-5i 0x0000000000400580
+       0x40056a <main(int, char**)+8>:      mov    %edi,-0x4(%rbp)
+       0x40056d <main(int, char**)+11>:     mov    %rsi,-0x10(%rbp)
+       0x400571 <main(int, char**)+15>:     mov    $0x40061c,%esi
+       0x400576 <main(int, char**)+20>:     mov    $0x2a,%edi
+       0x40057b <main(int, char**)+25>:
+        callq  0x400536 <Func1(int, char const*)>
+
+* Fortran: Support structures with fields of dynamic types and 
+  arrays of dynamic types.
+
+* GDB now supports multibit bitfields and enums in target register
+  descriptions.
+
+* New Python-based convenience function $_as_string(val), which returns
+  the textual representation of a value.  This function is especially
+  useful to obtain the text label of an enum value.
+
 * Intel MPX bound violation handling.
 
    Segmentation faults caused by a Intel MPX boundary violation
@@ -17,6 +41,25 @@
    Bounds: [lower = 0x7fffffffc390, upper = 0x7fffffffc3a3]
    0x0000000000400d7c in upper () at i386-mpx-sigsegv.c:68
 
+* Rust language support.
+  GDB now supports debugging programs written in the Rust programming
+  language.  See https://www.rust-lang.org/ for more information about
+  Rust.
+
+* Support for running interpreters on specified input/output devices
+
+  GDB now supports a new mechanism that allows frontends to provide
+  fully featured GDB console views, as a better alternative to
+  building such views on top of the "-interpreter-exec console"
+  command.  See the new "new-ui" command below.  With that command,
+  frontends can now start GDB in the traditional command-line mode
+  running in an embedded terminal emulator widget, and create a
+  separate MI interpreter running on a specified i/o device.  In this
+  way, GDB handles line editing, history, tab completion, etc. in the
+  console all by itself, and the GUI uses the separate MI interpreter
+  for its own control and synchronization, invisible to the command
+  line.
+
 * New commands
 
 skip -file file
@@ -26,6 +69,44 @@ skip -rfunction regular-expression
   A generalized form of the skip command, with new support for
   glob-style file names and regular expressions for function names.
   Additionally, a file spec and a function spec may now be combined.
+
+maint info line-table REGEXP
+  Display the contents of GDB's internal line table data struture.
+
+maint selftest
+  Run any GDB unit tests that were compiled in.
+
+new-ui INTERP TTY
+  Start a new user interface instance running INTERP as interpreter,
+  using the TTY file for input/output.
+
+* Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
+  was added in GDBserver, including JIT compiling fast tracepoint's
+  conditional expression bytecode into native code.
+
+* Support for various remote target protocols and ROM monitors has
+  been removed:
+
+  target m32rsdi	Remote M32R debugging over SDI
+  target mips		MIPS remote debugging protocol
+  target pmon		PMON ROM monitor
+  target ddb		NEC's DDB variant of PMON for Vr4300
+  target rockhopper	NEC RockHopper variant of PMON
+  target lsi		LSI variant of PMO
+
+* Support for tracepoints and fast tracepoints on powerpc-linux,
+  powerpc64-linux, and powerpc64le-linux was added in GDBserver,
+  including JIT compiling fast tracepoint's conditional expression
+  bytecode into native code.
+
+* MI async record =record-started now includes the method and format used for
+  recording.  For example:
+
+    =record-started,thread-group="i1",method="btrace",format="bts"
+
+* New targets
+
+Andes NDS32			nds32*-*-elf
 
 *** Changes in GDB 7.11
 
@@ -206,25 +287,19 @@ QThreadEvents
   stop for that same thread.
 
 N stop reply
-
   Indicates that there are no resumed threads left in the target (all
   threads are stopped).  The remote stub reports support for this stop
   reply to GDB's qSupported query.
 
-QCatchSyscalls:1 [;SYSNO]...
-QCatchSyscalls:0
-  Enable ("QCatchSyscalls:1") or disable ("QCatchSyscalls:0")
-  catching syscalls from the inferior process.
+QCatchSyscalls
+  Enables/disables catching syscalls from the inferior process.
+  The remote stub reports support for this packet to GDB's qSupported query.
 
 syscall_entry stop reason
   Indicates that a syscall was just called.
 
 syscall_return stop reason
   Indicates that a syscall just returned.
-
-QCatchSyscalls:1 in qSupported
-  The qSupported packet may now include QCatchSyscalls:1 in the reply
-  to indicate support for catching syscalls.
 
 * Extended-remote exec events
 

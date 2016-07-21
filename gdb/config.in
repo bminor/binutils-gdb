@@ -65,6 +65,9 @@
 /* Define to the default OS ABI for this configuration. */
 #undef GDB_OSABI_DEFAULT
 
+/* Define if self-testing features should be enabled */
+#undef GDB_SELF_TEST
+
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
@@ -452,6 +455,9 @@
 
 /* Define to 1 if `struct ptrace_lwpinfo' is a member of `pl_tdname'. */
 #undef HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME
+
+/* Define to 1 if `struct ptrace_lwpinfo' is a member of `pl_syscall_code'. */
+#undef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
 
 /* Define to 1 if your system has struct reg in <machine/reg.h>. */
 #undef HAVE_STRUCT_REG

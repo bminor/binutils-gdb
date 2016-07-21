@@ -43,8 +43,8 @@ if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""
 
 clean_restart $executable
 
-gdb_load_shlibs $lib_sl1
-gdb_load_shlibs $lib_sl2
+gdb_load_shlib $lib_sl1
+gdb_load_shlib $lib_sl2
 
 if ![runto_main] {
     fail "Can't run to main to check for trace support"
@@ -307,7 +307,8 @@ proc pending_tracepoint_installed_during_trace { trace_type } \
 \[0-9\]+\[\t \]+\(fast |\)tracepoint\[ \]+keep y.*pendfunc2.*" \
 	"tracepoint is resolved"
 
-    gdb_test "tfind start" "#0  $hex in pendfunc2 .*" "tfind test frame 0"
+    # powerpc64 shows "in .pendfunc2" here.
+    gdb_test "tfind start" "#0  $hex in .?pendfunc2 .*" "tfind test frame 0"
     gdb_test "tfind" "Target failed to find requested trace frame..*" "tfind test frame"
 }}
 
@@ -502,7 +503,7 @@ pending_tracepoint_installed_during_trace "trace"
 
 # Re-compile test case with IPA.
 set libipa [get_in_proc_agent]
-gdb_load_shlibs $libipa
+gdb_load_shlib $libipa
 
 lappend exec_opts "shlib=$libipa"
 

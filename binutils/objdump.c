@@ -493,12 +493,7 @@ dump_section_header (bfd *abfd, asection *section,
       PF (SEC_COFF_NOREAD, "NOREAD");
     }
   else if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    {
-      /* Note - sections can have both the READONLY and NOREAD attributes
-	 set.  In this case the NOREAD takes precedence, but we report both
-	 since the user may need to know that both bits are set.  */
-      PF (SEC_ELF_NOREAD, "NOREAD");
-    }
+    PF (SEC_ELF_PURECODE, "PURECODE");
   PF (SEC_THREAD_LOCAL, "THREAD_LOCAL");
   PF (SEC_GROUP, "GROUP");
   if (bfd_get_arch (abfd) == bfd_arch_mep)
@@ -743,6 +738,21 @@ compare_symbols (const void *ap, const void *bp)
 	return 1;
     }
 
+  if (bfd_get_flavour (bfd_asymbol_bfd (a)) == bfd_target_elf_flavour
+      && bfd_get_flavour (bfd_asymbol_bfd (b)) == bfd_target_elf_flavour)
+    {
+      bfd_vma asz, bsz;
+
+      asz = 0;
+      if ((a->flags & BSF_SYNTHETIC) == 0)
+	asz = ((elf_symbol_type *) a)->internal_elf_sym.st_size;
+      bsz = 0;
+      if ((b->flags & BSF_SYNTHETIC) == 0)
+	bsz = ((elf_symbol_type *) b)->internal_elf_sym.st_size;
+      if (asz != bsz)
+	return asz > bsz ? -1 : 1;
+    }
+
   /* Symbols that start with '.' might be section names, so sort them
      after symbols that don't start with '.'.  */
   if (an[0] == '.' && bn[0] != '.')
@@ -823,7 +833,8 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
 	name = alloc;
     }
 
-  version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
+  if ((sym->flags & BSF_SYNTHETIC) == 0)
+    version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
 
   if (bfd_is_und_section (bfd_get_section (sym)))
     hidden = TRUE;
@@ -1135,6 +1146,7 @@ struct print_file_list
   const char **linemap;
   unsigned maxline;
   unsigned last_line;
+  unsigned max_printed;
   int first;
 };
 
@@ -1260,6 +1272,7 @@ try_print_file_open (const char *origname, const char *modname)
 
   p->linemap = index_file (p->map, p->mapsize, &p->maxline);
   p->last_line = 0;
+  p->max_printed = 0;
   p->filename = origname;
   p->modname = modname;
   p->next = print_files;
@@ -1348,6 +1361,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
   unsigned int linenumber;
   unsigned int discriminator;
   bfd_boolean reloc;
+  char *path = NULL;
 
   if (! with_line_numbers && ! with_source_code)
     return;
@@ -1368,20 +1382,21 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
     {
       char *path_up;
       const char *fname = filename;
-      char *path = (char *) alloca (prefix_length + PATH_MAX + 1);
+
+      path = xmalloc (prefix_length + PATH_MAX + 1);
 
       if (prefix_length)
 	memcpy (path, prefix, prefix_length);
       path_up = path + prefix_length;
 
       /* Build relocated filename, stripping off leading directories
-	 from the initial filename if requested. */
+	 from the initial filename if requested.  */
       if (prefix_strip > 0)
 	{
 	  int level = 0;
 	  const char *s;
 
-	  /* Skip selected directory levels. */
+	  /* Skip selected directory levels.  */
 	  for (s = fname + 1; *s != '\0' && level < prefix_strip; s++)
 	    if (IS_DIR_SEPARATOR(*s))
 	      {
@@ -1390,7 +1405,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	      }
 	}
 
-      /* Update complete filename. */
+      /* Update complete filename.  */
       strncpy (path_up, fname, PATH_MAX);
       path_up[PATH_MAX] = '\0';
 
@@ -1445,10 +1460,17 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	      l = linenumber - SHOW_PRECEDING_CONTEXT_LINES;
 	      if (l >= linenumber)
 		l = 1;
-	      if (p->last_line >= l && p->last_line <= linenumber)
-		l = p->last_line + 1;
+	      if (p->max_printed >= l)
+		{
+		  if (p->max_printed < linenumber)
+		    l = p->max_printed + 1;
+		  else
+		    l = linenumber;
+		}
 	    }
 	  dump_lines (p, l, linenumber);
+	  if (p->max_printed < linenumber)
+	    p->max_printed = linenumber;
 	  p->last_line = linenumber;
 	  p->first = 0;
 	}
@@ -1469,6 +1491,9 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 
   if (discriminator != prev_discriminator)
     prev_discriminator = discriminator;
+
+  if (path)
+    free (path);
 }
 
 /* Pseudo FILE object for strings.  */
@@ -2520,6 +2545,10 @@ dump_dwarf (bfd *abfd)
 
     case bfd_arch_aarch64:
       init_dwarf_regnames_aarch64();
+      break;
+
+    case bfd_arch_s390:
+      init_dwarf_regnames_s390 ();
       break;
 
     default:

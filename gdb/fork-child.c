@@ -31,6 +31,7 @@
 #include "gdbcmd.h"
 #include "solib.h"
 #include "filestuff.h"
+#include "top.h"
 
 #include <signal.h>
 
@@ -141,6 +142,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   struct inferior *inf;
   int i;
   int save_errno;
+  struct ui *save_ui;
 
   /* If no exec file handed to us, get it from the exec-file command
      -- with a good, common error message if none is specified.  */
@@ -275,6 +277,9 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
      restore it.  */
   save_our_env = environ;
 
+  /* Likewise the current UI.  */
+  save_ui = current_ui;
+
   /* Tell the terminal handling subsystem what tty we plan to run on;
      it will just record the information for later.  */
   new_tty_prefork (inferior_io_terminal);
@@ -282,8 +287,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   /* It is generally good practice to flush any possible pending stdio
      output prior to doing a fork, to avoid the possibility of both
      the parent and child flushing the same data after the fork.  */
-  gdb_flush (gdb_stdout);
-  gdb_flush (gdb_stderr);
+  gdb_flush (main_ui->m_gdb_stdout);
+  gdb_flush (main_ui->m_gdb_stderr);
 
   /* If there's any initialization of the target layers that must
      happen to prepare to handle the child we're about fork, do it
@@ -312,6 +317,16 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   if (pid == 0)
     {
+      /* Switch to the main UI, so that gdb_std{in/out/err} in the
+	 child are mapped to std{in/out/err}.  This makes it possible
+	 to use fprintf_unfiltered/warning/error/etc. in the child
+	 from here on.  */
+      current_ui = main_ui;
+
+      /* Close all file descriptors except those that gdb inherited
+	 (usually 0/1/2), so they don't leak to the inferior.  Note
+	 that this closes the file descriptors of all secondary
+	 UIs.  */
       close_most_fds ();
 
       if (debug_fork)
@@ -377,6 +392,9 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   /* Restore our environment in case a vforked child clob'd it.  */
   environ = save_our_env;
+
+  /* Likewise the current UI.  */
+  current_ui = save_ui;
 
   if (!have_inferiors ())
     init_thread_list ();

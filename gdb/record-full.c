@@ -535,26 +535,18 @@ record_full_arch_list_add_end (void)
 }
 
 static void
-record_full_check_insn_num (int set_terminal)
+record_full_check_insn_num (void)
 {
   if (record_full_insn_num == record_full_insn_max_num)
     {
       /* Ask user what to do.  */
       if (record_full_stop_at_limit)
 	{
-	  int q;
-
-	  if (set_terminal)
-	    target_terminal_ours ();
-	  q = yquery (_("Do you want to auto delete previous execution "
+	  if (!yquery (_("Do you want to auto delete previous execution "
 			"log entries when record/replay buffer becomes "
-			"full (record full stop-at-limit)?"));
-	  if (set_terminal)
-	    target_terminal_inferior ();
-	  if (q)
-	    record_full_stop_at_limit = 0;
-	  else
+			"full (record full stop-at-limit)?")))
 	    error (_("Process record: stopped by user."));
+	  record_full_stop_at_limit = 0;
 	}
     }
 }
@@ -583,7 +575,7 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
   record_full_arch_list_tail = NULL;
 
   /* Check record_full_insn_num.  */
-  record_full_check_insn_num (1);
+  record_full_check_insn_num ();
 
   /* If gdb sends a signal value to target_resume,
      save it in the 'end' field of the previous instruction.
@@ -877,7 +869,7 @@ record_full_open (const char *name, int from_tty)
 
   record_full_init_record_breakpoints ();
 
-  observer_notify_record_changed (current_inferior (),  1);
+  observer_notify_record_changed (current_inferior (),  1, "full", NULL);
 }
 
 /* "to_close" target method.  Close the process record target.  */
@@ -1420,7 +1412,7 @@ static void
 record_full_registers_change (struct regcache *regcache, int regnum)
 {
   /* Check record_full_insn_num.  */
-  record_full_check_insn_num (0);
+  record_full_check_insn_num ();
 
   record_full_arch_list_head = NULL;
   record_full_arch_list_tail = NULL;
@@ -1546,7 +1538,7 @@ record_full_xfer_partial (struct target_ops *ops, enum target_object object,
 	}
 
       /* Check record_full_insn_num */
-      record_full_check_insn_num (0);
+      record_full_check_insn_num ();
 
       /* Record registers change to list as an instruction.  */
       record_full_arch_list_head = NULL;
@@ -1650,6 +1642,7 @@ record_full_insert_breakpoint (struct target_ops *ops,
 {
   struct record_full_breakpoint *bp;
   int in_target_beneath = 0;
+  int ix;
 
   if (!RECORD_FULL_IS_REPLAY)
     {
@@ -1669,6 +1662,32 @@ record_full_insert_breakpoint (struct target_ops *ops,
 	return ret;
 
       in_target_beneath = 1;
+    }
+  else
+    {
+      CORE_ADDR addr = bp_tgt->reqstd_address;
+      int bplen;
+
+      gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
+
+      bp_tgt->placed_address = addr;
+      bp_tgt->placed_size = bplen;
+    }
+
+  /* Use the existing entries if found in order to avoid duplication
+     in record_full_breakpoints.  */
+
+  for (ix = 0;
+       VEC_iterate (record_full_breakpoint_p,
+		    record_full_breakpoints, ix, bp);
+       ++ix)
+    {
+      if (bp->addr == bp_tgt->placed_address
+	  && bp->address_space == bp_tgt->placed_address_space)
+	{
+	  gdb_assert (bp->in_target_beneath == in_target_beneath);
+	  return 0;
+	}
     }
 
   bp = XNEW (struct record_full_breakpoint);

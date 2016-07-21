@@ -18,6 +18,10 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int elf32_tic6x_merge_arch_attributes (int, int);
 
 /* This function is provided for use from the assembler.  */
@@ -32,3 +36,7 @@ struct elf32_tic6x_params
 
 extern void elf32_tic6x_setup (struct bfd_link_info *,
 			       struct elf32_tic6x_params *);
+
+#ifdef __cplusplus
+}
+#endif

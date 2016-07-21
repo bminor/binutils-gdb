@@ -517,11 +517,9 @@ get_value (arelent *reloc,
 	value = h->u.c.size;
       else
 	{
-	  if (! ((*link_info->callbacks->undefined_symbol)
-		 (link_info, bfd_asymbol_name (symbol),
-		  input_section->owner, input_section, reloc->address,
-		  TRUE)))
-	    abort ();
+	  (*link_info->callbacks->undefined_symbol)
+	    (link_info, bfd_asymbol_name (symbol),
+	     input_section->owner, input_section, reloc->address, TRUE);
 	  value = 0;
 	}
     }
@@ -1393,6 +1391,7 @@ b_out_bfd_get_relocated_section_contents (bfd *output_bfd,
 #define b_out_section_already_linked           _bfd_generic_section_already_linked
 #define b_out_bfd_define_common_symbol         bfd_generic_define_common_symbol
 #define aout_32_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
+#define b_out_bfd_link_check_relocs            _bfd_generic_link_check_relocs
 
 extern const bfd_target bout_le_vec;
 

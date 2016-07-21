@@ -48,8 +48,6 @@ static struct {
 
 static int remote_fio_system_call_allowed = 0;
 
-static struct async_signal_handler *sigint_fileio_token;
-
 static int
 remote_fileio_init_fd_map (void)
 {
@@ -300,74 +298,25 @@ remote_fileio_to_fio_timeval (struct timeval *tv, struct fio_timeval *ftv)
   remote_fileio_to_fio_long (tv->tv_usec, ftv->ftv_usec);
 }
 
-static int remote_fio_ctrl_c_flag = 0;
-static int remote_fio_no_longjmp = 0;
+/* The quit handler originally installed.  */
+static quit_handler_ftype *remote_fileio_o_quit_handler;
 
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-static struct sigaction remote_fio_sa;
-static struct sigaction remote_fio_osa;
-#else
-static void (*remote_fio_ofunc)(int);
-#endif
+/* What to do on a QUIT call while handling a file I/O request.  We
+   throw a quit exception, which is caught by remote_fileio_request
+   and translated to an EINTR reply back to the target.  */
 
 static void
-remote_fileio_sig_init (void)
-{
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-  remote_fio_sa.sa_handler = SIG_IGN;
-  sigemptyset (&remote_fio_sa.sa_mask);
-  remote_fio_sa.sa_flags = 0;
-  sigaction (SIGINT, &remote_fio_sa, &remote_fio_osa);
-#else
-  remote_fio_ofunc = signal (SIGINT, SIG_IGN);
-#endif
-}
-
-static void
-remote_fileio_sig_set (void (*sigint_func)(int))
-{
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-  remote_fio_sa.sa_handler = sigint_func;
-  sigemptyset (&remote_fio_sa.sa_mask);
-  remote_fio_sa.sa_flags = 0;
-  sigaction (SIGINT, &remote_fio_sa, NULL);
-#else
-  signal (SIGINT, sigint_func);
-#endif
-}
-
-static void
-remote_fileio_sig_exit (void)
-{
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-  sigaction (SIGINT, &remote_fio_osa, NULL);
-#else
-  signal (SIGINT, remote_fio_ofunc);
-#endif
-}
-
-static void
-async_remote_fileio_interrupt (gdb_client_data arg)
+remote_fileio_quit_handler (void)
 {
   quit ();
-}
-
-static void
-remote_fileio_ctrl_c_signal_handler (int signo)
-{
-  remote_fileio_sig_set (SIG_IGN);
-  remote_fio_ctrl_c_flag = 1;
-  if (!remote_fio_no_longjmp)
-    gdb_call_async_signal_handler (sigint_fileio_token, 1);
-  remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
 }
 
 static void
 remote_fileio_reply (int retcode, int error)
 {
   char buf[32];
+  int ctrl_c = check_quit_flag ();
 
-  remote_fileio_sig_set (SIG_IGN);
   strcpy (buf, "F");
   if (retcode < 0)
     {
@@ -375,9 +324,9 @@ remote_fileio_reply (int retcode, int error)
       retcode = -retcode;
     }
   sprintf (buf + strlen (buf), "%x", retcode);
-  if (error || remote_fio_ctrl_c_flag)
+  if (error || ctrl_c)
     {
-      if (error && remote_fio_ctrl_c_flag)
+      if (error && ctrl_c)
         error = FILEIO_EINTR;
       if (error < 0)
         {
@@ -385,10 +334,10 @@ remote_fileio_reply (int retcode, int error)
 	  error = -error;
 	}
       sprintf (buf + strlen (buf), ",%x", error);
-      if (remote_fio_ctrl_c_flag)
+      if (ctrl_c)
         strcat (buf, ",C");
     }
-  remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
+  quit_handler = remote_fileio_o_quit_handler;
   putpkt (buf);
 }
 
@@ -475,7 +424,6 @@ remote_fileio_func_open (char *buf)
 	}
     }
 
-  remote_fio_no_longjmp = 1;
   fd = gdb_open_cloexec (pathname, flags, mode);
   if (fd < 0)
     {
@@ -506,7 +454,6 @@ remote_fileio_func_close (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   if (fd != FIO_FD_CONSOLE_IN && fd != FIO_FD_CONSOLE_OUT && close (fd))
     remote_fileio_return_errno (-1);
   remote_fileio_close_target_fd ((int) num);
@@ -564,7 +511,6 @@ remote_fileio_func_read (char *buf)
 	  buffer = (gdb_byte *) xmalloc (16384);
 	  if (remaining_buf)
 	    {
-	      remote_fio_no_longjmp = 1;
 	      if (remaining_length > length)
 		{
 		  memcpy (buffer, remaining_buf, length);
@@ -595,7 +541,6 @@ remote_fileio_func_read (char *buf)
 		 safe margin, in case the limit depends on system
 		 resources or version.  */
 	      ret = ui_file_read (gdb_stdtargin, (char *) buffer, 16383);
-	      remote_fio_no_longjmp = 1;
 	      if (ret > 0 && (size_t)ret > length)
 		{
 		  remaining_buf = (char *) xmalloc (ret - length);
@@ -614,7 +559,6 @@ remote_fileio_func_read (char *buf)
 	   Therefore a complete solution must check how many bytes have been
 	   read on EINTR to return a more reliable value to the target */
 	old_offset = lseek (fd, 0, SEEK_CUR);
-	remote_fio_no_longjmp = 1;
 	ret = read (fd, buffer, length);
 	if (ret < 0 && errno == EINTR)
 	  {
@@ -687,7 +631,6 @@ remote_fileio_func_write (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   switch (fd)
     {
       case FIO_FD_CONSOLE_IN:
@@ -761,7 +704,6 @@ remote_fileio_func_lseek (char *buf)
       return;
     }
   
-  remote_fio_no_longjmp = 1;
   ret = lseek (fd, offset, flag);
 
   if (ret == (off_t) -1)
@@ -819,7 +761,6 @@ remote_fileio_func_rename (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = rename (oldpath, newpath);
 
   if (ret == -1)
@@ -895,7 +836,6 @@ remote_fileio_func_unlink (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = unlink (pathname);
 
   if (ret == -1)
@@ -937,7 +877,6 @@ remote_fileio_func_stat (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = stat (pathname, &st);
 
   if (ret == -1)
@@ -997,7 +936,6 @@ remote_fileio_func_fstat (char *buf)
     }
   ptrval = (CORE_ADDR) lnum;
 
-  remote_fio_no_longjmp = 1;
   if (fd == FIO_FD_CONSOLE_IN || fd == FIO_FD_CONSOLE_OUT)
     {
       host_to_fileio_uint (1, fst.fst_dev);
@@ -1073,7 +1011,6 @@ remote_fileio_func_gettimeofday (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = gettimeofday (&tv, NULL);
 
   if (ret == -1)
@@ -1108,7 +1045,6 @@ remote_fileio_func_isatty (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  remote_fio_no_longjmp = 1;
   fd = remote_fileio_map_fd ((int) target_fd);
   remote_fileio_return_success (fd == FIO_FD_CONSOLE_IN ||
   				fd == FIO_FD_CONSOLE_OUT ? 1 : 0);
@@ -1152,7 +1088,6 @@ remote_fileio_func_system (char *buf)
       return;
     }
 
-  remote_fio_no_longjmp = 1;
   ret = system (cmdline);
 
   if (!length)
@@ -1189,7 +1124,7 @@ do_remote_fileio_request (struct ui_out *uiout, void *buf_arg)
   char *c;
   int idx;
 
-  remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
+  quit_handler = remote_fileio_quit_handler;
 
   c = strchr (++buf, ',');
   if (c)
@@ -1236,22 +1171,22 @@ remote_fileio_request (char *buf, int ctrlc_pending_p)
 {
   int ex;
 
-  remote_fileio_sig_init ();
+  /* Save the previous quit handler, so we can restore it.  No need
+     for a cleanup since we catch all exceptions below.  Note that the
+     quit handler is also restored by remote_fileio_reply just before
+     pushing a packet.  */
+  remote_fileio_o_quit_handler = quit_handler;
 
   if (ctrlc_pending_p)
     {
       /* If the target hasn't responded to the Ctrl-C sent
 	 asynchronously earlier, take this opportunity to send the
 	 Ctrl-C synchronously.  */
-      remote_fio_ctrl_c_flag = 1;
-      remote_fio_no_longjmp = 0;
+      set_quit_flag ();
       remote_fileio_reply (-1, FILEIO_EINTR);
     }
   else
     {
-      remote_fio_ctrl_c_flag = 0;
-      remote_fio_no_longjmp = 0;
-
       ex = catch_exceptions (current_uiout,
 			     do_remote_fileio_request, (void *)buf,
 			     RETURN_MASK_ALL);
@@ -1268,7 +1203,7 @@ remote_fileio_request (char *buf, int ctrlc_pending_p)
 	}
     }
 
-  remote_fileio_sig_exit ();
+  quit_handler = remote_fileio_o_quit_handler;
 }
 
 
@@ -1366,9 +1301,6 @@ void
 initialize_remote_fileio (struct cmd_list_element *remote_set_cmdlist,
 			  struct cmd_list_element *remote_show_cmdlist)
 {
-  sigint_fileio_token =
-    create_async_signal_handler (async_remote_fileio_interrupt, NULL);
-
   add_cmd ("system-call-allowed", no_class,
 	   set_system_call_allowed,
 	   _("Set if the host system(3) call is allowed for the target."),

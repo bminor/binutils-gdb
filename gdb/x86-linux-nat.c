@@ -215,6 +215,11 @@ x86_linux_read_description (struct target_ops *ops)
 	    return tdesc_x32_avx_linux; /* No MPX on x32 using AVX.  */
 	  else
 	    return tdesc_amd64_mpx_linux;
+	case X86_XSTATE_AVX_MPX_MASK:
+	  if (is_x32)
+	    return tdesc_x32_avx_linux; /* No MPX on x32 using AVX.  */
+	  else
+	    return tdesc_amd64_avx_mpx_linux;
 	case X86_XSTATE_AVX_MASK:
 	  if (is_x32)
 	    return tdesc_x32_avx_linux;
@@ -237,6 +242,8 @@ x86_linux_read_description (struct target_ops *ops)
 	  return tdesc_i386_avx512_linux;
 	case X86_XSTATE_MPX_MASK:
 	  return tdesc_i386_mpx_linux;
+	case X86_XSTATE_AVX_MPX_MASK:
+	  return tdesc_i386_avx_mpx_linux;
 	case X86_XSTATE_AVX_MASK:
 	  return tdesc_i386_avx_linux;
 	default:
@@ -255,7 +262,6 @@ x86_linux_enable_btrace (struct target_ops *self, ptid_t ptid,
 			 const struct btrace_config *conf)
 {
   struct btrace_target_info *tinfo;
-  struct gdbarch *gdbarch;
 
   errno = 0;
   tinfo = linux_enable_btrace (ptid, conf);

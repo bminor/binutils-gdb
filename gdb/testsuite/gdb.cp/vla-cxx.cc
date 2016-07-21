@@ -45,5 +45,6 @@ int main(int argc, char **argv)
     vla[i] = 5 + 2 * i;
 
   // vlas_filled
+  vla[0] = 2 * vla[0];
   return vla[2];
 }

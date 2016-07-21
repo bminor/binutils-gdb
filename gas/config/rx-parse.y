@@ -1494,9 +1494,14 @@ rx_intop (expressionS exp, int nbits, int opbits)
   long v;
   long mask, msb;
 
-  if (exp.X_op == O_big && nbits == 32)
-      return 1;
-  if (exp.X_op != O_constant)
+  if (exp.X_op == O_big)
+    {
+      if (nbits == 32)
+	return 1;
+      if (exp.X_add_number == -1)
+	return 0;
+    }
+  else if (exp.X_op != O_constant)
     return 0;
   v = exp.X_add_number;
 

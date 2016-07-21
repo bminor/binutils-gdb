@@ -38,7 +38,7 @@ if { [gdb_compile ${objfile} ${binfile} executable $opts] != "" } {
 }
 
 clean_restart ${binfile}
-gdb_load_shlibs ${binfile_lib}
+gdb_load_shlib ${binfile_lib}
 
 if ![runto lib] {
     return -1

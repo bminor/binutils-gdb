@@ -349,7 +349,7 @@ static int mips_32bitmode = 0;
 
 /* Likewise 64-bit registers.  */
 #define ABI_NEEDS_64BIT_REGS(ABI)	\
-  ((ABI) == N32_ABI 			\
+  ((ABI) == N32_ABI			\
    || (ABI) == N64_ABI			\
    || (ABI) == O64_ABI)
 
@@ -1017,7 +1017,7 @@ static int mips_relax_branch;
 
 /* Branch without likely bit.  If label is out of range, we turn:
 
- 	beq reg1, reg2, label
+	beq reg1, reg2, label
 	delay slot
 
    into
@@ -1410,6 +1410,8 @@ enum options
     OPTION_NO_SMARTMIPS,
     OPTION_DSPR2,
     OPTION_NO_DSPR2,
+    OPTION_DSPR3,
+    OPTION_NO_DSPR3,
     OPTION_EVA,
     OPTION_NO_EVA,
     OPTION_XPA,
@@ -1522,6 +1524,8 @@ struct option md_longopts[] =
   {"mno-smartmips", no_argument, NULL, OPTION_NO_SMARTMIPS},
   {"mdspr2", no_argument, NULL, OPTION_DSPR2},
   {"mno-dspr2", no_argument, NULL, OPTION_NO_DSPR2},
+  {"mdspr3", no_argument, NULL, OPTION_DSPR3},
+  {"mno-dspr3", no_argument, NULL, OPTION_NO_DSPR3},
   {"meva", no_argument, NULL, OPTION_EVA},
   {"mno-eva", no_argument, NULL, OPTION_NO_EVA},
   {"mmicromips", no_argument, NULL, OPTION_MICROMIPS},
@@ -1663,6 +1667,11 @@ static const struct mips_ase mips_ases[] = {
     2, 2, 2, 2,
     -1 },
 
+  { "dspr3", ASE_DSP | ASE_DSPR2 | ASE_DSPR3, 0,
+    OPTION_DSPR3, OPTION_NO_DSPR3,
+    6, 6, -1, -1,
+    -1 },
+
   { "eva", ASE_EVA, 0,
     OPTION_EVA, OPTION_NO_EVA,
      2,  2,  2,  2,
@@ -1716,7 +1725,7 @@ static const struct mips_ase mips_ases[] = {
 
 /* Groups of ASE_* flags that represent different revisions of an ASE.  */
 static const unsigned int mips_ase_groups[] = {
-  ASE_DSP | ASE_DSPR2
+  ASE_DSP | ASE_DSPR2 | ASE_DSPR3
 };
 
 /* Pseudo-op table.
@@ -2420,9 +2429,8 @@ set_insn_error_ss (int argnum, const char *msg, const char *s1, const char *s2)
 static void
 report_insn_error (const char *str)
 {
-  const char *msg;
+  const char *msg = concat (insn_error.msg, " `%s'", NULL);
 
-  msg = ACONCAT ((insn_error.msg, " `%s'", NULL));
   switch (insn_error.format)
     {
     case ERR_FMT_PLAIN:
@@ -2437,6 +2445,8 @@ report_insn_error (const char *str)
       as_bad (msg, insn_error.u.ss[0], insn_error.u.ss[1], str);
       break;
     }
+
+  free ((char *) msg);
 }
 
 /* Initialize vr4120_conflicts.  There is a bit of duplication here:
@@ -3041,7 +3051,8 @@ mips_parse_base_start (char *s)
 static char *
 mips_parse_argument_token (char *s, char float_format)
 {
-  char *end, *save_in, *err;
+  char *end, *save_in;
+  const char *err;
   unsigned int regno1, regno2, channels;
   struct mips_operand_token token;
 
@@ -3599,21 +3610,20 @@ md_begin (void)
 
   for (i = 0; i < 32; i++)
     {
-      char regname[7];
+      char regname[6];
 
       /* R5900 VU0 floating-point register.  */
-      regname[sizeof (rename) - 1] = 0;
-      snprintf (regname, sizeof (regname) - 1, "$vf%d", i);
+      sprintf (regname, "$vf%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
 				       RTYPE_VF | i, &zero_address_frag));
 
       /* R5900 VU0 integer register.  */
-      snprintf (regname, sizeof (regname) - 1, "$vi%d", i);
+      sprintf (regname, "$vi%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
 				       RTYPE_VI | i, &zero_address_frag));
 
       /* MSA register.  */
-      snprintf (regname, sizeof (regname) - 1, "$w%d", i);
+      sprintf (regname, "$w%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
 				       RTYPE_MSA | i, &zero_address_frag));
     }
@@ -3848,7 +3858,7 @@ mips_check_options (struct mips_set_options *opts, bfd_boolean abi_checks)
       if (abi_checks
 	  && ABI_NEEDS_64BIT_REGS (mips_abi))
 	as_warn (_("`fp=32' used with a 64-bit ABI"));
-      if (ISA_IS_R6 (mips_opts.isa) && opts->single_float == 0)
+      if (ISA_IS_R6 (opts->isa) && opts->single_float == 0)
 	as_bad (_("`fp=32' used with a MIPS R6 cpu"));
       break;
     default:
@@ -3860,13 +3870,13 @@ mips_check_options (struct mips_set_options *opts, bfd_boolean abi_checks)
     as_bad (_("`nooddspreg` cannot be used with a 64-bit ABI"));
 
   if (opts->micromips == 1 && opts->mips16 == 1)
-    as_bad (_("`mips16' cannot be used with `micromips'"));
-  else if (ISA_IS_R6 (mips_opts.isa)
+    as_bad (_("`%s' cannot be used with `%s'"), "mips16", "micromips");
+  else if (ISA_IS_R6 (opts->isa)
 	   && (opts->micromips == 1
 	       || opts->mips16 == 1))
-    as_fatal (_("`%s' can not be used with `%s'"),
+    as_fatal (_("`%s' cannot be used with `%s'"),
 	      opts->micromips ? "micromips" : "mips16",
-	      mips_cpu_info_from_isa (mips_opts.isa)->name);
+	      mips_cpu_info_from_isa (opts->isa)->name);
 
   if (ISA_IS_R6 (opts->isa) && mips_relax_branch)
     as_fatal (_("branch relaxation is not supported in `%s'"),
@@ -4050,6 +4060,7 @@ mips16_reloc_p (bfd_reloc_code_real_type reloc)
     case BFD_RELOC_MIPS16_HI16_S:
     case BFD_RELOC_MIPS16_HI16:
     case BFD_RELOC_MIPS16_LO16:
+    case BFD_RELOC_MIPS16_16_PCREL_S1:
       return TRUE;
 
     default:
@@ -4099,6 +4110,18 @@ jmp_reloc_p (bfd_reloc_code_real_type reloc)
 }
 
 static inline bfd_boolean
+b_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  return (reloc == BFD_RELOC_MIPS_26_PCREL_S2
+	  || reloc == BFD_RELOC_MIPS_21_PCREL_S2
+	  || reloc == BFD_RELOC_16_PCREL_S2
+	  || reloc == BFD_RELOC_MIPS16_16_PCREL_S1
+	  || reloc == BFD_RELOC_MICROMIPS_16_PCREL_S1
+	  || reloc == BFD_RELOC_MICROMIPS_10_PCREL_S1
+	  || reloc == BFD_RELOC_MICROMIPS_7_PCREL_S1);
+}
+
+static inline bfd_boolean
 got16_reloc_p (bfd_reloc_code_real_type reloc)
 {
   return (reloc == BFD_RELOC_MIPS_GOT16 || reloc == BFD_RELOC_MIPS16_GOT16
@@ -4141,6 +4164,7 @@ limited_pcrel_reloc_p (bfd_reloc_code_real_type reloc)
   switch (reloc)
     {
     case BFD_RELOC_16_PCREL_S2:
+    case BFD_RELOC_MIPS16_16_PCREL_S1:
     case BFD_RELOC_MICROMIPS_7_PCREL_S1:
     case BFD_RELOC_MICROMIPS_10_PCREL_S1:
     case BFD_RELOC_MICROMIPS_16_PCREL_S1:
@@ -6263,8 +6287,8 @@ nops_for_vr4130 (int ignore, const struct mips_cl_insn *hist,
   return 0;
 }
 
-#define BASE_REG_EQ(INSN1, INSN2) 	\
-  ((((INSN1) >> OP_SH_RS) & OP_MASK_RS) \
+#define BASE_REG_EQ(INSN1, INSN2)	\
+  ((((INSN1) >> OP_SH_RS) & OP_MASK_RS)	\
       == (((INSN2) >> OP_SH_RS) & OP_MASK_RS))
 
 /* Return the minimum alignment for this store instruction.  */
@@ -6731,11 +6755,11 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
       /* Parameter must be 16 bit. */
       && (*reloc_type == BFD_RELOC_16_PCREL_S2)
       /* Branch to same segment. */
-      && (S_GET_SEGMENT(address_expr->X_add_symbol) == now_seg)
+      && (S_GET_SEGMENT (address_expr->X_add_symbol) == now_seg)
       /* Branch to same code fragment. */
-      && (symbol_get_frag(address_expr->X_add_symbol) == frag_now)
+      && (symbol_get_frag (address_expr->X_add_symbol) == frag_now)
       /* Can only calculate branch offset if value is known. */
-      && symbol_constant_p(address_expr->X_add_symbol)
+      && symbol_constant_p (address_expr->X_add_symbol)
       /* Check if branch is really conditional. */
       && !((ip->insn_opcode & 0xffff0000) == 0x10000000   /* beq $0,$0 */
 	|| (ip->insn_opcode & 0xffff0000) == 0x04010000   /* bgez $0 */
@@ -6744,7 +6768,7 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
       int distance;
       /* Check if loop is shorter than 6 instructions including
          branch and delay slot.  */
-      distance = frag_now_fix() - S_GET_VALUE(address_expr->X_add_symbol);
+      distance = frag_now_fix () - S_GET_VALUE (address_expr->X_add_symbol);
       if (distance <= 20)
         {
           int i;
@@ -6756,7 +6780,7 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
           for (i = 0; i < (distance / 4); i++)
             {
               if ((history[i].cleared_p)
-                  || delayed_branch_p(&history[i]))
+                  || delayed_branch_p (&history[i]))
                 {
                   rv = TRUE;
                   break;
@@ -6786,7 +6810,7 @@ get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
   if (mips_relax.sequence == 2)
     return APPEND_ADD;
 
-  /* We must not dabble with instructions in a ".set norerorder" block.  */
+  /* We must not dabble with instructions in a ".set noreorder" block.  */
   if (mips_opts.noreorder)
     return APPEND_ADD;
 
@@ -6962,6 +6986,7 @@ calculate_reloc (bfd_reloc_code_real_type reloc, offsetT operand,
       return TRUE;
 
     case BFD_RELOC_HI16_S:
+    case BFD_RELOC_HI16_S_PCREL:
     case BFD_RELOC_MICROMIPS_HI16_S:
     case BFD_RELOC_MIPS16_HI16_S:
       *result = ((operand + 0x8000) >> 16) & 0xffff;
@@ -6974,6 +6999,7 @@ calculate_reloc (bfd_reloc_code_real_type reloc, offsetT operand,
       return TRUE;
 
     case BFD_RELOC_LO16:
+    case BFD_RELOC_LO16_PCREL:
     case BFD_RELOC_MICROMIPS_LO16:
     case BFD_RELOC_MIPS16_LO16:
       *result = operand & 0xffff;
@@ -7034,7 +7060,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  {
 	    int shift;
 
-	    shift = mips_opts.micromips ? 1 : 2;
+	    /* Shift is 2, unusually, for microMIPS JALX.  */
+	    shift = (mips_opts.micromips
+		     && strcmp (ip->insn_mo->name, "jalx") != 0) ? 1 : 2;
 	    if ((address_expr->X_add_number & ((1 << shift) - 1)) != 0)
 	      as_bad (_("jump to misaligned address (0x%lx)"),
 		      (unsigned long) address_expr->X_add_number);
@@ -7282,15 +7310,31 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
   else if (mips_opts.mips16 && *reloc_type > BFD_RELOC_UNUSED)
     {
+      symbolS *symbol;
+      offsetT offset;
+
       /* We need to set up a variant frag.  */
       gas_assert (address_expr != NULL);
+      /* Pass any `O_symbol' expression unchanged as an `expr_section'
+         symbol created by `make_expr_symbol' may not get a necessary
+         external relocation produced.  */
+      if (address_expr->X_op == O_symbol)
+	{
+	  symbol = address_expr->X_add_symbol;
+	  offset = address_expr->X_add_number;
+	}
+      else
+	{
+	  symbol = make_expr_symbol (address_expr);
+	  offset = 0;
+	}
       add_relaxed_insn (ip, 4, 0,
 			RELAX_MIPS16_ENCODE
 			(*reloc_type - BFD_RELOC_UNUSED,
 			 forced_insn_length == 2, forced_insn_length == 4,
 			 delayed_branch_p (&history[0]),
 			 history[0].mips16_absolute_jump_p),
-			make_expr_symbol (address_expr), 0);
+			symbol, offset);
     }
   else if (mips_opts.mips16 && insn_length (ip) == 2)
     {
@@ -7412,8 +7456,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  if (hi_fixup == 0
 	      || !fixup_has_matching_lo_p (hi_fixup->fixp))
 	    {
-	      hi_fixup = ((struct mips_hi_fixup *)
-			  xmalloc (sizeof (struct mips_hi_fixup)));
+	      hi_fixup = XNEW (struct mips_hi_fixup);
 	      hi_fixup->next = mips_hi_fixup_list;
 	      mips_hi_fixup_list = hi_fixup;
 	    }
@@ -7438,7 +7481,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    ip->fixp[i]->fx_tcbit = 1;
 	  }
     }
-  install_insn (ip);
 
   /* Update the register mask information.  */
   mips_gprmask |= gpr_read_mask (ip) | gpr_write_mask (ip);
@@ -7475,13 +7517,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     case APPEND_SWAP:
       {
 	struct mips_cl_insn delay = history[0];
-	if (mips_opts.mips16)
-	  {
-	    know (delay.frag == ip->frag);
-	    move_insn (ip, delay.frag, delay.where);
-	    move_insn (&delay, ip->frag, ip->where + insn_length (ip));
-	  }
-	else if (relaxed_branch || delay.frag != ip->frag)
+
+	if (relaxed_branch || delay.frag != ip->frag)
 	  {
 	    /* Add the delay slot instruction to the end of the
 	       current frag and shrink the fixed part of the
@@ -7494,9 +7531,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  }
 	else
 	  {
-	    move_insn (&delay, ip->frag,
-		       ip->where - branch_disp + insn_length (ip));
-	    move_insn (ip, history[0].frag, history[0].where);
+	    /* If this is not a relaxed branch and we are in the
+	       same frag, then just swap the instructions.  */
+	    move_insn (ip, delay.frag, delay.where);
+	    move_insn (&delay, ip->frag, ip->where + insn_length (ip));
 	  }
 	history[0] = *ip;
 	delay.fixed_p = 1;
@@ -11035,7 +11073,7 @@ macro (struct mips_cl_insn *ip, char *str)
 		  if (mips_opts.noreorder)
 		    macro_build (NULL, "nop", "");
 		  expr1.X_add_number = mips_cprestore_offset;
-  		  macro_build_ldst_constoffset (&expr1, ADDRESS_LOAD_INSN,
+		  macro_build_ldst_constoffset (&expr1, ADDRESS_LOAD_INSN,
 						mips_gp_register,
 						mips_frame_reg,
 						HAVE_64BIT_ADDRESSES);
@@ -11179,7 +11217,7 @@ macro (struct mips_cl_insn *ip, char *str)
 		  if (mips_opts.noreorder)
 		    macro_build (NULL, "nop", "");
 		  expr1.X_add_number = mips_cprestore_offset;
-  		  macro_build_ldst_constoffset (&expr1, ADDRESS_LOAD_INSN,
+		  macro_build_ldst_constoffset (&expr1, ADDRESS_LOAD_INSN,
 						mips_gp_register,
 						mips_frame_reg,
 						HAVE_64BIT_ADDRESSES);
@@ -12136,8 +12174,8 @@ macro (struct mips_cl_insn *ip, char *str)
 		  && offset_expr.X_add_number == 0);
       s = segment_name (S_GET_SEGMENT (offset_expr.X_add_symbol));
       if (strcmp (s, ".lit8") == 0)
- 	{
- 	  op[2] = mips_gp_register;
+	{
+	  op[2] = mips_gp_register;
 	  offset_reloc[0] = BFD_RELOC_MIPS_LITERAL;
 	  offset_reloc[1] = BFD_RELOC_UNUSED;
 	  offset_reloc[2] = BFD_RELOC_UNUSED;
@@ -12159,7 +12197,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	  offset_reloc[0] = BFD_RELOC_LO16;
 	  offset_reloc[1] = BFD_RELOC_UNUSED;
 	  offset_reloc[2] = BFD_RELOC_UNUSED;
- 	}
+	}
       align = 8;
       /* Fall through */
 
@@ -13530,14 +13568,12 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
   struct mips_opcode *insn;
 
   /* Make a copy of the instruction so that we can fiddle with it.  */
-  name = alloca (length + 1);
-  memcpy (name, start, length);
-  name[length] = '\0';
+  name = xstrndup (start, length);
 
   /* Look up the instruction as-is.  */
   insn = (struct mips_opcode *) hash_find (hash, name);
   if (insn)
-    return insn;
+    goto end;
 
   dot = strchr (name, '.');
   if (dot && dot[1])
@@ -13552,7 +13588,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
 	  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0)
 	    {
 	      *opcode_extra |= mask << mips_vu0_channel_mask.lsb;
-	      return insn;
+	      goto end;
 	    }
 	}
     }
@@ -13577,12 +13613,15 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
 	  if (insn)
 	    {
 	      forced_insn_length = suffix;
-	      return insn;
+	      goto end;
 	    }
 	}
     }
 
-  return NULL;
+  insn = NULL;
+ end:
+  free (name);
+  return insn;
 }
 
 /* Assemble an instruction into its binary format.  If the instruction
@@ -13994,7 +14033,7 @@ my_getExpression (expressionS *ep, char *str)
   input_line_pointer = save_in;
 }
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
@@ -14042,7 +14081,7 @@ mips_set_option_string (const char **string_ptr, const char *new_value)
 }
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   unsigned int i;
 
@@ -14587,12 +14626,18 @@ md_pcrel_from (fixS *fixP)
 
     case BFD_RELOC_MICROMIPS_16_PCREL_S1:
     case BFD_RELOC_MICROMIPS_JMP:
+    case BFD_RELOC_MIPS16_16_PCREL_S1:
     case BFD_RELOC_16_PCREL_S2:
     case BFD_RELOC_MIPS_21_PCREL_S2:
     case BFD_RELOC_MIPS_26_PCREL_S2:
     case BFD_RELOC_MIPS_JMP:
       /* Return the address of the delay slot.  */
       return addr + 4;
+
+    case BFD_RELOC_MIPS_18_PCREL_S3:
+      /* Return the aligned address of the doubleword containing
+         the instruction.  */
+      return addr & ~7;
 
     default:
       return addr;
@@ -14756,7 +14801,7 @@ mips_force_relocation (fixS *fixp)
     return 1;
 
   /* We want all PC-relative relocations to be kept for R6 relaxation.  */
-  if (ISA_IS_R6 (mips_opts.isa)
+  if (ISA_IS_R6 (file_mips_opts.isa)
       && (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_21_PCREL_S2
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_26_PCREL_S2
@@ -14806,6 +14851,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     switch (fixP->fx_r_type)
       {
       case BFD_RELOC_16_PCREL_S2:
+      case BFD_RELOC_MIPS16_16_PCREL_S1:
       case BFD_RELOC_MICROMIPS_7_PCREL_S1:
       case BFD_RELOC_MICROMIPS_10_PCREL_S1:
       case BFD_RELOC_MICROMIPS_16_PCREL_S1:
@@ -14892,14 +14938,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS16_TLS_GOTTPREL:
     case BFD_RELOC_MIPS16_TLS_TPREL_HI16:
     case BFD_RELOC_MIPS16_TLS_TPREL_LO16:
-      if (!fixP->fx_addsy)
-	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("TLS relocation against a constant"));
-	  break;
-	}
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      /* fall through */
+      if (fixP->fx_addsy)
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("TLS relocation against a constant"));
+      break;
 
     case BFD_RELOC_MIPS_JMP:
     case BFD_RELOC_MIPS_SHIFT5:
@@ -14929,6 +14973,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS_GOT_LO16:
     case BFD_RELOC_MIPS_CALL_HI16:
     case BFD_RELOC_MIPS_CALL_LO16:
+    case BFD_RELOC_HI16_S_PCREL:
+    case BFD_RELOC_LO16_PCREL:
     case BFD_RELOC_MIPS16_GPREL:
     case BFD_RELOC_MIPS16_GOT16:
     case BFD_RELOC_MIPS16_CALL16:
@@ -15010,16 +15056,43 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     case BFD_RELOC_MIPS_21_PCREL_S2:
+      if ((*valP & 0x3) != 0)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch to misaligned address (%lx)"), (long) *valP);
+      if (!fixP->fx_done)
+	break;
+
+      if (*valP + 0x400000 <= 0x7fffff)
+	{
+	  insn = read_insn (buf);
+	  insn |= (*valP >> 2) & 0x1fffff;
+	  write_insn (buf, insn);
+	}
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
+      break;
+
     case BFD_RELOC_MIPS_26_PCREL_S2:
       if ((*valP & 0x3) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("branch to misaligned address (%lx)"), (long) *valP);
+      if (!fixP->fx_done)
+	break;
 
-      gas_assert (!fixP->fx_done);
+      if (*valP + 0x8000000 <= 0xfffffff)
+	{
+	  insn = read_insn (buf);
+	  insn |= (*valP >> 2) & 0x3ffffff;
+	  write_insn (buf, insn);
+	}
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
       break;
 
     case BFD_RELOC_MIPS_18_PCREL_S3:
-      if ((S_GET_VALUE (fixP->fx_addsy) & 0x7) != 0)
+      if (fixP->fx_addsy && (S_GET_VALUE (fixP->fx_addsy) & 0x7) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("PC-relative access using misaligned symbol (%lx)"),
 		      (long) S_GET_VALUE (fixP->fx_addsy));
@@ -15027,22 +15100,37 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("PC-relative access using misaligned offset (%lx)"),
 		      (long) fixP->fx_offset);
+      if (!fixP->fx_done)
+	break;
 
-      gas_assert (!fixP->fx_done);
+      if (*valP + 0x100000 <= 0x1fffff)
+	{
+	  insn = read_insn (buf);
+	  insn |= (*valP >> 3) & 0x3ffff;
+	  write_insn (buf, insn);
+	}
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("PC-relative access out of range"));
       break;
 
     case BFD_RELOC_MIPS_19_PCREL_S2:
       if ((*valP & 0x3) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("PC-relative access to misaligned address (%lx)"),
-		      (long) (S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset));
+		      (long) *valP);
+      if (!fixP->fx_done)
+	break;
 
-      gas_assert (!fixP->fx_done);
-      break;
-
-    case BFD_RELOC_HI16_S_PCREL:
-    case BFD_RELOC_LO16_PCREL:
-      gas_assert (!fixP->fx_done);
+      if (*valP + 0x100000 <= 0x1fffff)
+	{
+	  insn = read_insn (buf);
+	  insn |= (*valP >> 2) & 0x7ffff;
+	  write_insn (buf, insn);
+	}
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("PC-relative access out of range"));
       break;
 
     case BFD_RELOC_16_PCREL_S2:
@@ -15096,6 +15184,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       break;
 
+    case BFD_RELOC_MIPS16_16_PCREL_S1:
     case BFD_RELOC_MICROMIPS_7_PCREL_S1:
     case BFD_RELOC_MICROMIPS_10_PCREL_S1:
     case BFD_RELOC_MICROMIPS_16_PCREL_S1:
@@ -15470,20 +15559,22 @@ s_option (int x ATTRIBUTE_UNUSED)
     {
       /* FIXME: What does this mean?  */
     }
-  else if (strncmp (opt, "pic", 3) == 0)
+  else if (strncmp (opt, "pic", 3) == 0 && ISDIGIT (opt[3]) && opt[4] == '\0')
     {
       int i;
 
       i = atoi (opt + 3);
-      if (i == 0)
+      if (i != 0 && i != 2)
+	as_bad (_(".option pic%d not supported"), i);
+      else if (mips_pic == VXWORKS_PIC)
+	as_bad (_(".option pic%d not supported in VxWorks PIC mode"), i);
+      else if (i == 0)
 	mips_pic = NO_PIC;
       else if (i == 2)
 	{
 	  mips_pic = SVR4_PIC;
 	  mips_abicalls = TRUE;
 	}
-      else
-	as_bad (_(".option pic%d not supported"), i);
 
       if (mips_pic == SVR4_PIC)
 	{
@@ -15510,10 +15601,29 @@ struct mips_option_stack
 
 static struct mips_option_stack *mips_opts_stack;
 
-static bfd_boolean
+/* Return status for .set/.module option handling.  */
+
+enum code_option_type
+{
+  /* Unrecognized option.  */
+  OPTION_TYPE_BAD = -1,
+
+  /* Ordinary option.  */
+  OPTION_TYPE_NORMAL,
+
+  /* ISA changing option.  */
+  OPTION_TYPE_ISA
+};
+
+/* Handle common .set/.module options.  Return status indicating option
+   type.  */
+
+static enum code_option_type
 parse_code_option (char * name)
 {
+  bfd_boolean isa_set = FALSE;
   const struct mips_ase *ase;
+
   if (strncmp (name, "at=", 3) == 0)
     {
       char *s = name + 3;
@@ -15586,6 +15696,7 @@ parse_code_option (char * name)
 	    {
 	      mips_opts.arch = p->cpu;
 	      mips_opts.isa = p->isa;
+	      isa_set = TRUE;
 	    }
 	}
       else if (strncmp (name, "mips", 4) == 0)
@@ -15599,6 +15710,7 @@ parse_code_option (char * name)
 	    {
 	      mips_opts.arch = p->cpu;
 	      mips_opts.isa = p->isa;
+	      isa_set = TRUE;
 	    }
 	}
       else
@@ -15617,8 +15729,9 @@ parse_code_option (char * name)
   else if (strcmp (name, "nosym32") == 0)
     mips_opts.sym32 = FALSE;
   else
-    return FALSE;
-  return TRUE;
+    return OPTION_TYPE_BAD;
+
+  return isa_set ? OPTION_TYPE_ISA : OPTION_TYPE_NORMAL;
 }
 
 /* Handle the .set pseudo-op.  */
@@ -15626,8 +15739,8 @@ parse_code_option (char * name)
 static void
 s_mipsset (int x ATTRIBUTE_UNUSED)
 {
+  enum code_option_type type = OPTION_TYPE_NORMAL;
   char *name = input_line_pointer, ch;
-  int prev_isa = mips_opts.isa;
 
   file_mips_check_options ();
 
@@ -15678,7 +15791,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     {
       struct mips_option_stack *s;
 
-      s = (struct mips_option_stack *) xmalloc (sizeof *s);
+      s = XNEW (struct mips_option_stack);
       s->next = mips_opts_stack;
       s->options = mips_opts;
       mips_opts_stack = s;
@@ -15704,12 +15817,16 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	  free (s);
 	}
     }
-  else if (!parse_code_option (name))
-    as_warn (_("tried to set unrecognized symbol: %s\n"), name);
+  else
+    {
+      type = parse_code_option (name);
+      if (type == OPTION_TYPE_BAD)
+	as_warn (_("tried to set unrecognized symbol: %s\n"), name);
+    }
 
   /* The use of .set [arch|cpu]= historically 'fixes' the width of gp and fp
      registers based on what is supported by the arch/cpu.  */
-  if (mips_opts.isa != prev_isa)
+  if (type == OPTION_TYPE_ISA)
     {
       switch (mips_opts.isa)
 	{
@@ -15776,7 +15893,7 @@ s_module (int ignore ATTRIBUTE_UNUSED)
 
   if (!file_mips_opts_checked)
     {
-      if (!parse_code_option (name))
+      if (parse_code_option (name) == OPTION_TYPE_BAD)
 	as_bad (_(".module used with unrecognized symbol: %s\n"), name);
 
       /* Update module level settings from mips_opts.  */
@@ -16411,7 +16528,7 @@ s_nan (int ignore ATTRIBUTE_UNUSED)
    directive, such as in:
 
    foo:
-   	.stabs ...
+	.stabs ...
 	.set mips16
 
    so the current mode wins.  */
@@ -16631,12 +16748,17 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
   if (RELAX_MIPS16_USER_EXT (fragp->fr_subtype))
     return 1;
 
+  symsec = S_GET_SEGMENT (fragp->fr_symbol);
   type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
   operand = mips16_immed_operand (type, FALSE);
+  if (S_FORCE_RELOC (fragp->fr_symbol, TRUE)
+      || (operand->root.type == OP_PCREL
+	  ? sec != symsec
+	  : !bfd_is_abs_section (symsec)))
+    return 1;
 
   sym_frag = symbol_get_frag (fragp->fr_symbol);
-  val = S_GET_VALUE (fragp->fr_symbol);
-  symsec = S_GET_SEGMENT (fragp->fr_symbol);
+  val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;
 
   if (operand->root.type == OP_PCREL)
     {
@@ -16644,47 +16766,16 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
       addressT addr;
       offsetT maxtiny;
 
-      /* We won't have the section when we are called from
-         mips_relax_frag.  However, we will always have been called
-         from md_estimate_size_before_relax first.  If this is a
-         branch to a different section, we mark it as such.  If SEC is
-         NULL, and the frag is not marked, then it must be a branch to
-         the same section.  */
+      if (RELAX_MIPS16_LONG_BRANCH (fragp->fr_subtype))
+	return 1;
+
       pcrel_op = (const struct mips_pcrel_operand *) operand;
-      if (sec == NULL)
-	{
-	  if (RELAX_MIPS16_LONG_BRANCH (fragp->fr_subtype))
-	    return 1;
-	}
-      else
-	{
-	  /* Must have been called from md_estimate_size_before_relax.  */
-	  if (symsec != sec)
-	    {
-	      fragp->fr_subtype =
-		RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
 
-	      /* FIXME: We should support this, and let the linker
-                 catch branches and loads that are out of range.  */
-	      as_bad_where (fragp->fr_file, fragp->fr_line,
-			    _("unsupported PC relative reference to different section"));
-
-	      return 1;
-	    }
-	  if (fragp != sym_frag && sym_frag->fr_address == 0)
-	    /* Assume non-extended on the first relaxation pass.
-	       The address we have calculated will be bogus if this is
-	       a forward branch to another frag, as the forward frag
-	       will have fr_address == 0.  */
-	    return 0;
-	}
-
-      /* In this case, we know for sure that the symbol fragment is in
-	 the same section.  If the relax_marker of the symbol fragment
-	 differs from the relax_marker of this fragment, we have not
-	 yet adjusted the symbol fragment fr_address.  We want to add
-	 in STRETCH in order to get a better estimate of the address.
-	 This particularly matters because of the shift bits.  */
+      /* If the relax_marker of the symbol fragment differs from the
+	 relax_marker of this fragment, we have not yet adjusted the
+	 symbol fragment fr_address.  We want to add in STRETCH in
+	 order to get a better estimate of the address.  This
+	 particularly matters because of the shift bits.  */
       if (stretch != 0
 	  && sym_frag->relax_marker != fragp->relax_marker)
 	{
@@ -16744,9 +16835,8 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
       /* If any of the shifted bits are set, we must use an extended
          opcode.  If the address depends on the size of this
          instruction, this can lead to a loop, so we arrange to always
-         use an extended opcode.  We only check this when we are in
-         the main relaxation loop, when SEC is NULL.  */
-      if ((val & ((1 << operand->shift) - 1)) != 0 && sec == NULL)
+         use an extended opcode.  */
+      if ((val & ((1 << operand->shift) - 1)) != 0)
 	{
 	  fragp->fr_subtype =
 	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
@@ -16767,16 +16857,13 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 	 extended with the next value above maxtiny.  */
       maxtiny = mips_int_operand_max (operand);
       if (val == maxtiny + (1 << operand->shift)
-	  && ! RELAX_MIPS16_EXTENDED (fragp->fr_subtype)
-	  && sec == NULL)
+	  && ! RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
 	{
 	  fragp->fr_subtype =
 	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
 	  return 1;
 	}
     }
-  else if (symsec != absolute_section && sec != NULL)
-    as_bad_where (fragp->fr_file, fragp->fr_line, _("unsupported relocation"));
 
   return !mips16_immed_in_range_p (operand, BFD_RELOC_UNUSED, val);
 }
@@ -16794,6 +16881,7 @@ relaxed_branch_length (fragS *fragp, asection *sec, int update)
 
   if (fragp
       && S_IS_DEFINED (fragp->fr_symbol)
+      && !S_IS_WEAK (fragp->fr_symbol)
       && sec == S_GET_SEGMENT (fragp->fr_symbol))
     {
       addressT addr;
@@ -16807,12 +16895,9 @@ relaxed_branch_length (fragS *fragp, asection *sec, int update)
 
       toofar = val < - (0x8000 << 2) || val >= (0x8000 << 2);
     }
-  else if (fragp)
-    /* If the symbol is not defined or it's in a different segment,
-       assume the user knows what's going on and emit a short
-       branch.  */
-    toofar = FALSE;
   else
+    /* If the symbol is not defined or it's in a different segment,
+       we emit the long sequence.  */
     toofar = TRUE;
 
   if (fragp && update && toofar != RELAX_BRANCH_TOOFAR (fragp->fr_subtype))
@@ -16860,6 +16945,7 @@ relaxed_micromips_32bit_branch_length (fragS *fragp, asection *sec, int update)
 
   if (fragp
       && S_IS_DEFINED (fragp->fr_symbol)
+      && !S_IS_WEAK (fragp->fr_symbol)
       && sec == S_GET_SEGMENT (fragp->fr_symbol))
     {
       addressT addr;
@@ -16877,12 +16963,9 @@ relaxed_micromips_32bit_branch_length (fragS *fragp, asection *sec, int update)
 
       toofar = val < - (0x8000 << 1) || val >= (0x8000 << 1);
     }
-  else if (fragp)
-    /* If the symbol is not defined or it's in a different segment,
-       assume the user knows what's going on and emit a short
-       branch.  */
-    toofar = FALSE;
   else
+    /* If the symbol is not defined or it's in a different segment,
+       we emit the long sequence.  */
     toofar = TRUE;
 
   if (fragp && update
@@ -16954,6 +17037,7 @@ relaxed_micromips_16bit_branch_length (fragS *fragp, asection *sec, int update)
 
   if (fragp
       && S_IS_DEFINED (fragp->fr_symbol)
+      && !S_IS_WEAK (fragp->fr_symbol)
       && sec == S_GET_SEGMENT (fragp->fr_symbol))
     {
       addressT addr;
@@ -17091,16 +17175,18 @@ mips_fix_adjustable (fixS *fixp)
       && (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE) != 0)
     return 0;
 
-  /* There is no place to store an in-place offset for JALR relocations.
-     Likewise an in-range offset of limited PC-relative relocations may
+  /* There is no place to store an in-place offset for JALR relocations.  */
+  if (jalr_reloc_p (fixp->fx_r_type) && HAVE_IN_PLACE_ADDENDS)
+    return 0;
+
+  /* Likewise an in-range offset of limited PC-relative relocations may
      overflow the in-place relocatable field if recalculated against the
      start address of the symbol's containing section.
 
      Also, PC relative relocations for MIPS R6 need to be symbol rather than
      section relative to allow linker relaxations to be performed later on.  */
-  if ((HAVE_IN_PLACE_ADDENDS || ISA_IS_R6 (mips_opts.isa))
-      && (limited_pcrel_reloc_p (fixp->fx_r_type)
-	  || jalr_reloc_p (fixp->fx_r_type)))
+  if (limited_pcrel_reloc_p (fixp->fx_r_type)
+      && (HAVE_IN_PLACE_ADDENDS || ISA_IS_R6 (file_mips_opts.isa)))
     return 0;
 
   /* R_MIPS16_26 relocations against non-MIPS16 functions might resolve
@@ -17130,13 +17216,16 @@ mips_fix_adjustable (fixS *fixp)
      There is a further restriction:
 
        5. We cannot reduce jump relocations (R_MIPS_26, R_MIPS16_26 or
-	  R_MICROMIPS_26_S1) against MIPS16 or microMIPS symbols on
-	  targets with in-place addends; the relocation field cannot
-	  encode the low bit.
+	  R_MICROMIPS_26_S1) or branch relocations (R_MIPS_PC26_S2,
+	  R_MIPS_PC21_S2, R_MIPS_PC16, R_MIPS16_PC16_S1,
+	  R_MICROMIPS_PC16_S1, R_MICROMIPS_PC10_S1 or R_MICROMIPS_PC7_S1)
+	  against MIPS16 or microMIPS symbols because we need to keep the
+	  MIPS16 or microMIPS symbol for the purpose of mode mismatch
+	  detection and JAL to JALX instruction conversion in the linker.
 
      For simplicity, we deal with (3)-(4) by not reducing _any_ relocation
-     against a MIPS16 symbol.  We deal with (5) by by not reducing any
-     such relocations on REL targets.
+     against a MIPS16 symbol.  We deal with (5) by additionally leaving
+     alone any jump and branch relocations against a microMIPS symbol.
 
      We deal with (1)-(2) by saying that, if there's a R_MIPS16_26
      relocation against some symbol R, no relocation against R may be
@@ -17147,10 +17236,10 @@ mips_fix_adjustable (fixS *fixp)
      that we have for MIPS16 symbols.  */
   if (fixp->fx_subsy == NULL
       && (ELF_ST_IS_MIPS16 (S_GET_OTHER (fixp->fx_addsy))
-	  || *symbol_get_tc (fixp->fx_addsy)
-	  || (HAVE_IN_PLACE_ADDENDS
-	      && ELF_ST_IS_MICROMIPS (S_GET_OTHER (fixp->fx_addsy))
-	      && jmp_reloc_p (fixp->fx_r_type))))
+	  || (ELF_ST_IS_MICROMIPS (S_GET_OTHER (fixp->fx_addsy))
+	      && (jmp_reloc_p (fixp->fx_r_type)
+		  || b_reloc_p (fixp->fx_r_type)))
+	  || *symbol_get_tc (fixp->fx_addsy)))
     return 0;
 
   return 1;
@@ -17167,14 +17256,15 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   bfd_reloc_code_real_type code;
 
   memset (retval, 0, sizeof(retval));
-  reloc = retval[0] = (arelent *) xcalloc (1, sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = retval[0] = XCNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   if (fixp->fx_pcrel)
     {
       gas_assert (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
+		  || fixp->fx_r_type == BFD_RELOC_MIPS16_16_PCREL_S1
 		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_7_PCREL_S1
 		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_10_PCREL_S1
 		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_16_PCREL_S1
@@ -17188,7 +17278,24 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
       /* At this point, fx_addnumber is "symbol offset - pcrel address".
 	 Relocations want only the symbol offset.  */
-      reloc->addend = fixp->fx_addnumber + reloc->address;
+      switch (fixp->fx_r_type)
+	{
+	case BFD_RELOC_MIPS_18_PCREL_S3:
+	  reloc->addend = fixp->fx_addnumber + (reloc->address & ~7);
+	  break;
+	default:
+	  reloc->addend = fixp->fx_addnumber + reloc->address;
+	  break;
+	}
+    }
+  else if (HAVE_IN_PLACE_ADDENDS
+	   && fixp->fx_r_type == BFD_RELOC_MICROMIPS_JMP
+	   && (read_compressed_insn (fixp->fx_frag->fr_literal
+				     + fixp->fx_where, 4) >> 26) == 0x3c)
+    {
+      /* Shift is 2, unusually, for microMIPS JALX.  Adjust the in-place
+         addend accordingly.  */
+      reloc->addend = fixp->fx_addnumber >> 1;
     }
   else
     reloc->addend = fixp->fx_addnumber;
@@ -17248,7 +17355,7 @@ mips_relax_frag (asection *sec, fragS *fragp, long stretch)
   if (! RELAX_MIPS16_P (fragp->fr_subtype))
     return 0;
 
-  if (mips16_extended_frag (fragp, NULL, stretch))
+  if (mips16_extended_frag (fragp, sec, stretch))
     {
       if (RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
 	return 0;
@@ -17701,12 +17808,13 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       unsigned int user_length, length;
       unsigned long insn;
       bfd_boolean ext;
+      segT symsec;
 
       type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
       operand = mips16_immed_operand (type, FALSE);
 
       ext = RELAX_MIPS16_EXTENDED (fragp->fr_subtype);
-      val = resolve_symbol_value (fragp->fr_symbol);
+      val = resolve_symbol_value (fragp->fr_symbol) + fragp->fr_offset;
       if (operand->root.type == OP_PCREL)
 	{
 	  const struct mips_pcrel_operand *pcrel_op;
@@ -17759,8 +17867,49 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       else
 	user_length = 0;
 
-      mips16_immed (fragp->fr_file, fragp->fr_line, type,
-		    BFD_RELOC_UNUSED, val, user_length, &insn);
+      symsec = S_GET_SEGMENT (fragp->fr_symbol);
+      if (S_FORCE_RELOC (fragp->fr_symbol, TRUE)
+	  || (operand->root.type == OP_PCREL
+	      ? asec != symsec
+	      : !bfd_is_abs_section (symsec)))
+	{
+	  bfd_reloc_code_real_type reloc = BFD_RELOC_NONE;
+	  expressionS exp;
+	  fixS *fixp;
+
+	  switch (type)
+	    {
+	    case 'p':
+	    case 'q':
+	      reloc = BFD_RELOC_MIPS16_16_PCREL_S1;
+	      break;
+	    default:
+	      as_bad_where (fragp->fr_file, fragp->fr_line,
+			    _("unsupported relocation"));
+	      break;
+	    }
+	  if (reloc != BFD_RELOC_NONE)
+	    {
+	      gas_assert (ext);
+
+	      exp.X_op = O_symbol;
+	      exp.X_add_symbol = fragp->fr_symbol;
+	      exp.X_add_number = fragp->fr_offset;
+
+	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 2, &exp,
+				  TRUE, reloc);
+
+	      fixp->fx_file = fragp->fr_file;
+	      fixp->fx_line = fragp->fr_line;
+
+	      /* These relocations can have an addend that won't fit
+		 in 2 octets.  */
+	      fixp->fx_no_overflow = 1;
+	    }
+	}
+      else
+	mips16_immed (fragp->fr_file, fragp->fr_line, type,
+		      BFD_RELOC_UNUSED, val, user_length, &insn);
 
       length = (ext ? 4 : 2);
       gas_assert (mips16_opcode_length (insn) == length);
@@ -17885,7 +18034,7 @@ mips_record_label (symbolS *sym)
   struct insn_label_list *l;
 
   if (free_insn_labels == NULL)
-    l = (struct insn_label_list *) xmalloc (sizeof *l);
+    l = XNEW (struct insn_label_list);
   else
     {
       l = free_insn_labels;
@@ -17928,6 +18077,8 @@ mips_convert_ase_flags (int ase)
     ext_ases |= AFL_ASE_DSP;
   if (ase & ASE_DSPR2)
     ext_ases |= AFL_ASE_DSPR2;
+  if (ase & ASE_DSPR3)
+    ext_ases |= AFL_ASE_DSPR3;
   if (ase & ASE_EVA)
     ext_ases |= AFL_ASE_EVA;
   if (ase & ASE_MCU)
@@ -18366,7 +18517,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
   if (p && cur_proc_ptr)
     {
       OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (p);
-      expressionS *exp = xmalloc (sizeof (expressionS));
+      expressionS *exp = XNEW (expressionS);
 
       obj->size = exp;
       exp->X_op = O_subtract;
@@ -18677,7 +18828,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "m5100",          0, ASE_MCU,		ISA_MIPS32R5, CPU_MIPS32R5 },
   { "m5101",          0, ASE_MCU,		ISA_MIPS32R5, CPU_MIPS32R5 },
   /* P5600 with EVA and Virtualization ASEs, other ASEs are optional.  */
-  { "p5600",          0, ASE_VIRT | ASE_EVA | ASE_XPA, 	ISA_MIPS32R5, CPU_MIPS32R5 },
+  { "p5600",          0, ASE_VIRT | ASE_EVA | ASE_XPA,	ISA_MIPS32R5, CPU_MIPS32R5 },
 
   /* MIPS 64 */
   { "5kc",            0, 0,			ISA_MIPS64,   CPU_MIPS64 },
@@ -18708,8 +18859,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
      MIPS64R2 rather than MIPS64.  */
   { "xlp",	      0, 0,			ISA_MIPS64R2, CPU_XLR },
 
-  /* i6400.  */
+  /* MIPS 64 Release 6 */
   { "i6400",	      0, ASE_MSA,		ISA_MIPS64R6, CPU_MIPS64R6},
+  { "p6600",	      0, ASE_VIRT | ASE_MSA,	ISA_MIPS64R6, CPU_MIPS64R6},
 
   /* End marker */
   { NULL, 0, 0, 0, 0 }
@@ -18936,6 +19088,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mdspr2			generate DSP R2 instructions\n\
 -mno-dspr2		do not generate DSP R2 instructions\n"));
+  fprintf (stream, _("\
+-mdspr3			generate DSP R3 instructions\n\
+-mno-dspr3		do not generate DSP R3 instructions\n"));
   fprintf (stream, _("\
 -mmt			generate MT instructions\n\
 -mno-mt			do not generate MT instructions\n"));

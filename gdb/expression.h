@@ -152,4 +152,17 @@ extern void dump_raw_expression (struct expression *,
 				 struct ui_file *, char *);
 extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
+/* In an OP_RANGE expression, either bound could be empty, indicating
+   that its value is by default that of the corresponding bound of the
+   array or string.  So we have four sorts of subrange.  This
+   enumeration type is to identify this.  */
+   
+enum range_type
+  {
+    BOTH_BOUND_DEFAULT,		/* "(:)"  */
+    LOW_BOUND_DEFAULT,		/* "(:high)"  */
+    HIGH_BOUND_DEFAULT,		/* "(low:)"  */
+    NONE_BOUND_DEFAULT		/* "(low:high)"  */
+  };
+
 #endif /* !defined (EXPRESSION_H) */

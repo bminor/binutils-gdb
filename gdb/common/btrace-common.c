@@ -43,6 +43,26 @@ btrace_format_string (enum btrace_format format)
 
 /* See btrace-common.h.  */
 
+const char *
+btrace_format_short_string (enum btrace_format format)
+{
+  switch (format)
+    {
+    case BTRACE_FORMAT_NONE:
+      return "unknown";
+
+    case BTRACE_FORMAT_BTS:
+      return "bts";
+
+    case BTRACE_FORMAT_PT:
+      return "pt";
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
+}
+
+/* See btrace-common.h.  */
+
 void
 btrace_data_init (struct btrace_data *data)
 {

@@ -1565,6 +1565,8 @@ Target_i386::plt_entry_count() const
 unsigned int
 Target_i386::first_plt_entry_offset() const
 {
+  if (this->plt_ == NULL)
+    return 0;
   return this->plt_->first_plt_entry_offset();
 }
 
@@ -1573,6 +1575,8 @@ Target_i386::first_plt_entry_offset() const
 unsigned int
 Target_i386::plt_entry_size() const
 {
+  if (this->plt_ == NULL)
+    return 0;
   return this->plt_->get_plt_entry_size();
 }
 
@@ -2394,6 +2398,23 @@ Target_i386::Scan::global(Symbol_table* symtab,
       break;
 
     case elfcpp::R_386_GOTOFF:
+      // A GOT-relative reference must resolve locally.
+      if (!gsym->is_defined())
+        gold_error(_("%s: relocation R_386_GOTOFF against undefined symbol %s"
+		     " cannot be used when making a shared object"),
+		   object->name().c_str(), gsym->name());
+      else if (gsym->is_from_dynobj())
+        gold_error(_("%s: relocation R_386_GOTOFF against external symbol %s"
+		     " cannot be used when making a shared object"),
+		   object->name().c_str(), gsym->name());
+      else if (gsym->is_preemptible())
+        gold_error(_("%s: relocation R_386_GOTOFF against preemptible symbol %s"
+		     " cannot be used when making a shared object"),
+		   object->name().c_str(), gsym->name());
+      // We need a GOT section.
+      target->got_section(symtab, layout);
+      break;
+
     case elfcpp::R_386_GOTPC:
       // We need a GOT section.
       target->got_section(symtab, layout);
@@ -2769,6 +2790,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
   if (this->skip_call_tls_get_addr_)
     {
       if ((r_type != elfcpp::R_386_PLT32
+	   && r_type != elfcpp::R_386_GOT32X
 	   && r_type != elfcpp::R_386_PC32)
 	  || gsym == NULL
 	  || strcmp(gsym->name(), "___tls_get_addr") != 0)
@@ -3297,9 +3319,11 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
 				    unsigned char* view,
 				    section_size_type view_size)
 {
-  // leal foo(,%reg,1),%eax; call ___tls_get_addr
+  // leal foo(,%ebx,1),%eax; call ___tls_get_addr@PLT
   //  ==> movl %gs:0,%eax; subl $foo@tpoff,%eax
-  // leal foo(%reg),%eax; call ___tls_get_addr
+  // leal foo(%ebx),%eax; call ___tls_get_addr@PLT
+  //  ==> movl %gs:0,%eax; subl $foo@tpoff,%eax
+  // leal foo(%reg),%eax; call *___tls_get_addr@GOT(%reg)
   //  ==> movl %gs:0,%eax; subl $foo@tpoff,%eax
 
   tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
@@ -3307,10 +3331,12 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
 
   unsigned char op1 = view[-1];
   unsigned char op2 = view[-2];
+  unsigned char op3 = view[4];
 
   tls::check_tls(relinfo, relnum, rel.get_r_offset(),
 		 op2 == 0x8d || op2 == 0x04);
-  tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[4] == 0xe8);
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+		 op3 == 0xe8 || op3 == 0xff);
 
   int roff = 5;
 
@@ -3324,12 +3350,18 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
     }
   else
     {
+      unsigned char reg = op1 & 7;
       tls::check_tls(relinfo, relnum, rel.get_r_offset(),
-		     (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
-      if (rel.get_r_offset() + 9 < view_size
-	  && view[9] == 0x90)
+		     ((op1 & 0xf8) == 0x80
+		      && reg != 4
+		      && reg != 0
+		      && (op3 == 0xe8 || (view[5] & 0x7) == reg)));
+      if (op3 == 0xff
+	  || (rel.get_r_offset() + 9 < view_size
+	      && view[9] == 0x90))
 	{
-	  // There is a trailing nop.  Use the size byte subl.
+	  // There is an indirect call or a trailing nop.  Use the size
+	  // byte subl.
 	  memcpy(view - 2, "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
 	  roff = 6;
 	}
@@ -3360,20 +3392,24 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 				    unsigned char* view,
 				    section_size_type view_size)
 {
-  // leal foo(,%ebx,1),%eax; call ___tls_get_addr
+  // leal foo(,%ebx,1),%eax; call ___tls_get_addr@PLT
   //  ==> movl %gs:0,%eax; addl foo@gotntpoff(%ebx),%eax
-  // leal foo(%ebx),%eax; call ___tls_get_addr; nop
+  // leal foo(%ebx),%eax; call ___tls_get_addr@PLT; nop
   //  ==> movl %gs:0,%eax; addl foo@gotntpoff(%ebx),%eax
+  // leal foo(%reg),%eax; call *___tls_get_addr@GOT(%reg)
+  //  ==> movl %gs:0,%eax; addl foo@gotntpoff(%reg),%eax
 
   tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
   tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 9);
 
   unsigned char op1 = view[-1];
   unsigned char op2 = view[-2];
+  unsigned char op3 = view[4];
 
   tls::check_tls(relinfo, relnum, rel.get_r_offset(),
 		 op2 == 0x8d || op2 == 0x04);
-  tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[4] == 0xe8);
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+		 op3 == 0xe8 || op3 == 0xff);
 
   int roff;
 
@@ -3387,10 +3423,14 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
     }
   else
     {
+      unsigned char reg = op1 & 7;
       tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 10);
       tls::check_tls(relinfo, relnum, rel.get_r_offset(),
-		     (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
-      tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[9] == 0x90);
+		     ((op1 & 0xf8) == 0x80
+		      && reg != 4
+		      && reg != 0
+		      && ((op3 == 0xe8 && view[9] == 0x90)
+			   || (view[5] & 0x7) == reg)));
       roff = 6;
     }
 
@@ -3491,19 +3531,36 @@ Target_i386::Relocate::tls_ld_to_le(const Relocate_info<32, false>* relinfo,
 				    unsigned char* view,
 				    section_size_type view_size)
 {
-  // leal foo(%reg), %eax; call ___tls_get_addr
+  // leal foo(%ebx), %eax; call ___tls_get_addr@PLT
   // ==> movl %gs:0,%eax; nop; leal 0(%esi,1),%esi
+  // leal foo(%reg), %eax; call call *___tls_get_addr@GOT(%reg)
+  // ==> movl %gs:0,%eax; leal (%esi),%esi
 
   tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
-  tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 9);
+
+  unsigned char op1 = view[-1];
+  unsigned char op2 = view[-2];
+  unsigned char op3 = view[4];
+
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+		 op3 == 0xe8 || op3 == 0xff);
+  tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size,
+		   op3 == 0xe8 ? 9 : 10);
 
   // FIXME: Does this test really always pass?
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(), op2 == 0x8d);
+
+  unsigned char reg = op1 & 7;
   tls::check_tls(relinfo, relnum, rel.get_r_offset(),
-		 view[-2] == 0x8d && view[-1] == 0x83);
+		 ((op1 & 0xf8) == 0x80
+		  && reg != 4
+		  && reg != 0
+		  && (op3 == 0xe8 || (view[5] & 0x7) == reg)));
 
-  tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[4] == 0xe8);
-
-  memcpy(view - 2, "\x65\xa1\0\0\0\0\x90\x8d\x74\x26\0", 11);
+  if (op3 == 0xe8)
+    memcpy(view - 2, "\x65\xa1\0\0\0\0\x90\x8d\x74\x26\0", 11);
+  else
+    memcpy(view - 2, "\x65\xa1\0\0\0\0\x8d\xb6\0\0\0\0", 12);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
   // We can skip it.

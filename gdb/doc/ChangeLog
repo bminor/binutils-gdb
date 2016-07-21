@@ -1,3 +1,92 @@
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Interpreters): Update intepreter-exec section,
+	document new-ui and explain use case.
+
+2016-06-17  Yan-Ting Lin  <currygt52@gmail.com>
+
+	* gdb.texinfo (Standard Target Features): Document NDS32 features.
+	(NDS32 Features): New Section.
+
+2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
+
+	* gdb.texinfo (Examining Memory): Document negative repeat
+	count in the 'x' command.
+
+2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document method and
+	format fields in =record-started.
+	* observer.texi (record_changed): Add method and format
+	parameters.
+
+2016-05-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (General Query Packets): Move the description of the
+	response before the long list of the specific 'read' and 'write'
+	requests.
+
+2016-05-23  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Basic Python): Document gdb.breakpoints return.
+
+2016-05-24  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/19194:
+	* gdb.texinfo (gdb man): Fix typo.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Supported Languages): Mention Rust.  Update menu.
+	(Rust): New node.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint selftest".
+
+2016-04-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (tfind): Complete doc about tfind without
+	argument.
+
+2016-04-13  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* agentexpr.texi (byte): Fix zero_ext description.
+
+2016-03-31  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (M32R/SDI): Delete node.
+	(MIPS Embedded): Remove references to the MIPS remote debugging
+	protocol, PMON and variants, and the associated commands.
+
+2016-03-15  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Target Descriptions): New menu item "Enum Target Types".
+	(Target Description Format): Mention enum types.  Update docs on
+	flags types.
+	(Predefined Target Types): Add "bool".
+	(Enum Target Types): New node.
+
+2016-03-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Tracepoint Actions): Fix typo.
+
+2016-03-15  Pedro Alves  <palves@redhat.com>
+	    Andreas Arnez  <arnez@linux.vnet.ibm.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.texinfo (Tracepoint Actions): Document possible
+	unreliability of '$_ret'.
+
+2016-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Document new 'maint info line-table'
+	command.
+
+2016-03-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.texinfo (Convenience Functions): Document $_as_string.
+
 2016-02-23  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Skipping Over Functions and Files): Document new

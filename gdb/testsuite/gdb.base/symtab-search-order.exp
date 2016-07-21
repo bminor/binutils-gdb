@@ -40,7 +40,7 @@ if { [gdb_compile_shlib $lib1src $lib1 $lib_opts] != ""
 # Start with a fresh gdb.
 
 clean_restart $binfile
-gdb_load_shlibs $lib1
+gdb_load_shlib $lib1
 
 if ![runto_main] {
     fail "Can't run to main"

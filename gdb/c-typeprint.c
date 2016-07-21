@@ -371,6 +371,7 @@ c_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
     case TYPE_CODE_ENUM:
+    case TYPE_CODE_FLAGS:
     case TYPE_CODE_INT:
     case TYPE_CODE_FLT:
     case TYPE_CODE_VOID:
@@ -748,6 +749,7 @@ c_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
+    case TYPE_CODE_FLAGS:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_INT:
     case TYPE_CODE_FLT:
@@ -1400,6 +1402,55 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 	    }
 	  fprintf_filtered (stream, "}");
 	}
+      break;
+
+    case TYPE_CODE_FLAGS:
+      {
+	struct type_print_options local_flags = *flags;
+
+	local_flags.local_typedefs = NULL;
+
+	c_type_print_modifier (type, stream, 0, 1);
+	fprintf_filtered (stream, "flag ");
+	print_name_maybe_canonical (TYPE_NAME (type), flags, stream);
+	if (show > 0)
+	  {
+	    fputs_filtered (" ", stream);
+	    fprintf_filtered (stream, "{\n");
+	    if (TYPE_NFIELDS (type) == 0)
+	      {
+		if (TYPE_STUB (type))
+		  fprintfi_filtered (level + 4, stream,
+				     _("<incomplete type>\n"));
+		else
+		  fprintfi_filtered (level + 4, stream,
+				     _("<no data fields>\n"));
+	      }
+	    len = TYPE_NFIELDS (type);
+	    for (i = 0; i < len; i++)
+	      {
+		QUIT;
+		print_spaces_filtered (level + 4, stream);
+		/* We pass "show" here and not "show - 1" to get enum types
+		   printed.  There's no other way to see them.  */
+		c_print_type (TYPE_FIELD_TYPE (type, i),
+			      TYPE_FIELD_NAME (type, i),
+			      stream, show, level + 4,
+			      &local_flags);
+		fprintf_filtered (stream, " @%s",
+				  plongest (TYPE_FIELD_BITPOS (type, i)));
+		if (TYPE_FIELD_BITSIZE (type, i) > 1)
+		  {
+		    fprintf_filtered (stream, "-%s",
+				      plongest (TYPE_FIELD_BITPOS (type, i)
+						+ TYPE_FIELD_BITSIZE (type, i)
+						- 1));
+		  }
+		fprintf_filtered (stream, ";\n");
+	      }
+	    fprintfi_filtered (level, stream, "}");
+	  }
+      }
       break;
 
     case TYPE_CODE_VOID:

@@ -73,7 +73,7 @@ if {[prepare_for_testing $testfile  $binfile "$srcfile $srcfile2" $exec_opts]} {
     return
 }
 
-gdb_load_shlibs ${lib_so}
+gdb_load_shlib ${lib_so}
 
 if ![runto_main] then {
     fail "Can't run to main"

@@ -45,7 +45,7 @@ struct msp430_operand_s
 
 struct  msp430_opcode_s
 {
-  char *name;
+  const char *name;
   int fmt;
   int insn_opnumb;
   int bin_opcode;

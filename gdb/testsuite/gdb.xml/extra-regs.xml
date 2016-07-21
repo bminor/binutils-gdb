@@ -23,6 +23,30 @@
       <field name="Y" start="2" end="2"/>
     </flags>
 
+    <enum id="Z_values" size="4">
+      <evalue name="yes" value="1"/>
+      <evalue name="no" value="0"/>
+      <evalue name="maybe" value="2"/>
+      <evalue name="so" value="3"/>
+    </enum>
+
+    <flags id="mixed_flags" size="4">
+      <!-- Elided end and type. -->
+      <field name="A" start="0"/>
+      <!-- Elided end, unsigned int. -->
+      <field name="B" start="1" type="uint32"/>
+      <!-- Elided end, bool. -->
+      <field name="C" start="2" type="bool"/>
+      <!-- Elided type, single bitfield. -->
+      <field name="D" start="3" end="3"/>
+      <!-- Anonymous field. -->
+      <field name="" start="4" end="5"/>
+      <!-- Multi-bit bitfield, elided type. -->
+      <field name="E" start="6" end="7"/>
+      <!-- Enum bitfield. -->
+      <field name="Z" start="8" end="9" type="Z_values"/>
+    </flags>
+
     <reg name="extrareg" bitsize="32"/>
     <reg name="uintreg" bitsize="32" type="uint32"/>
     <reg name="vecreg" bitsize="32" type="v4int8"/>
@@ -30,5 +54,6 @@
     <reg name="structreg" bitsize="64" type="struct1"/>
     <reg name="bitfields" bitsize="64" type="struct2"/>
     <reg name="flags" bitsize="32" type="flags"/>
+    <reg name="mixed_flags" bitsize="32" type="mixed_flags"/>
   </feature>
 </target>

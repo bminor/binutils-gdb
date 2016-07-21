@@ -31,13 +31,10 @@ static const char enabled_field_name[] = "enabled";
 static const char match_method_name[] = "match";
 static const char get_arg_types_method_name[] = "get_arg_types";
 static const char get_result_type_method_name[] = "get_result_type";
-static const char invoke_method_name[] = "invoke";
 static const char matchers_attr_str[] = "xmethods";
 
 static PyObject *py_match_method_name = NULL;
 static PyObject *py_get_arg_types_method_name = NULL;
-static PyObject *py_get_result_type_method_name = NULL;
-static PyObject *py_invoke_method_name = NULL;
 
 struct gdbpy_worker_data
 {
@@ -735,18 +732,9 @@ gdbpy_initialize_xmethods (void)
   if (py_match_method_name == NULL)
     return -1;
 
-  py_invoke_method_name = PyString_FromString (invoke_method_name);
-  if (py_invoke_method_name == NULL)
-    return -1;
-
   py_get_arg_types_method_name
     = PyString_FromString (get_arg_types_method_name);
   if (py_get_arg_types_method_name == NULL)
-    return -1;
-
-  py_get_result_type_method_name
-    = PyString_FromString (get_result_type_method_name);
-  if (py_get_result_type_method_name == NULL)
     return -1;
 
   return 1;

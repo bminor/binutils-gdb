@@ -14,14 +14,16 @@ OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 ${LIB_SEARCH_DIRS}
 
-PROVIDE( __PMSIZE = 256K );
-PROVIDE( __RAMSIZE = 64K );
+/* Allow the command line to override the memory region sizes.  */
+__PMSIZE = DEFINED(__PMSIZE)  ? __PMSIZE : 256K;
+__RAMSIZE = DEFINED(__RAMSIZE) ? __RAMSIZE : 64K;
 
 MEMORY
 {
-  flash     (rx)   : ORIGIN = 0, LENGTH = __PMSIZE
+  flash     (rx)   : ORIGIN = 0,        LENGTH = __PMSIZE
   ram       (rw!x) : ORIGIN = 0x800000, LENGTH = __RAMSIZE
 }
+
 SECTIONS
 {
   .text :
@@ -35,19 +37,21 @@ SECTIONS
     . = ALIGN(4);
   } ${RELOCATING+ > flash}
   ${CONSTRUCTING+${TORS}}
-  .data	  : AT (ADDR (.text) + SIZEOF (.text))
+  .data	: ${RELOCATING+ AT (ADDR (.text) + SIZEOF (.text))}
   {
     *(.data)
     *(.rodata)
     *(.rodata*)
     ${RELOCATING+ _edata = . ; }
+    . = ALIGN(4);
   } ${RELOCATING+ > ram}
-  .bss  SIZEOF(.data) + ADDR(.data) :
+  .bss  ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
     ${RELOCATING+ _bss_start = . ; }
     *(.bss)
     *(COMMON)
     ${RELOCATING+ _end = . ;  }
+    . = ALIGN(4);
   } ${RELOCATING+ > ram}
 
   ${RELOCATING+ __data_load_start = LOADADDR(.data); }
@@ -61,5 +65,10 @@ SECTIONS
   {
     *(.stabstr)
   }
+EOF
+
+. $srcdir/scripttempl/DWARF.sc
+
+cat <<EOF
 }
 EOF

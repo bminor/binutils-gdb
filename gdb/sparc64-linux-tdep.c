@@ -241,7 +241,6 @@ static int
 sparc64_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   CORE_ADDR jb_addr;
   gdb_byte buf[8];
 

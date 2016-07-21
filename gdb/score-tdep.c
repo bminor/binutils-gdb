@@ -549,12 +549,9 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       enum type_code typecode = TYPE_CODE (arg_type);
       const gdb_byte *val = value_contents (arg);
       int downward_offset = 0;
-      int odd_sized_struct_p;
       int arg_last_part_p = 0;
 
       arglen = TYPE_LENGTH (arg_type);
-      odd_sized_struct_p = (arglen > SCORE_REGSIZE
-                            && arglen % SCORE_REGSIZE != 0);
 
       /* If a arg should be aligned to 8 bytes (long long or double),
          the value should be put to even register numbers.  */
@@ -816,13 +813,7 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
   int ret;
   gdb_byte *memblock = NULL;
 
-  if (size < 0)
-    {
-      error (_("Error: malloc size < 0 in file:%s, line:%d!"),
-             __FILE__, __LINE__);
-      return NULL;
-    }
-  else if (size == 0)
+  if (size == 0)
     return NULL;
 
   memblock = (gdb_byte *) xmalloc (size);
@@ -1088,12 +1079,10 @@ score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   int fp_offset_p = 0;
   int inst_len = 0;
 
-  CORE_ADDR prev_pc = -1;
-
   sp = get_frame_register_unsigned (this_frame, SCORE_SP_REGNUM);
   fp = get_frame_register_unsigned (this_frame, SCORE_FP_REGNUM);
 
-  for (; cur_pc < pc; prev_pc = cur_pc, cur_pc += inst_len)
+  for (; cur_pc < pc; cur_pc += inst_len)
     {
       inst_t *inst = NULL;
 
@@ -1181,7 +1170,6 @@ score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
               /* addi! r2, offset */
               if (pc - cur_pc >= 2)
                 {
-		  unsigned int save_v = inst->v;
 		  inst_t *inst2;
 		  
 		  cur_pc += inst->len;
@@ -1267,7 +1255,6 @@ score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
               /* addi r2, offset */
               if (pc - cur_pc >= 2)
                 {
-		  unsigned int save_v = inst->v;
 		  inst_t *inst2;
 		  
 		  cur_pc += inst->len;

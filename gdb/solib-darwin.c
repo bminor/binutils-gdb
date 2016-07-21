@@ -363,7 +363,6 @@ static CORE_ADDR
 darwin_read_exec_load_addr_from_dyld (struct darwin_info *info)
 {
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int ptr_len = TYPE_LENGTH (ptr_type);
   unsigned int image_info_size = ptr_len * 3;
   int i;
@@ -524,7 +523,6 @@ darwin_solib_read_all_image_info_addr (struct darwin_info *info)
 {
   gdb_byte buf[8];
   LONGEST len;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
   /* Sanity check.  */

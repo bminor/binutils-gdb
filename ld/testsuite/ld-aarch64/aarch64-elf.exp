@@ -46,18 +46,16 @@ set aarch64elftests {
 }
 
 proc aarch64_choose_ilp32_emul {} {
-    if [istarget aarch64-*-linux*] then {
-        return "aarch64linux32"
-    } elseif [istarget aarch64-*-elf] {
-        return "aarch64elf32"
-    } elseif [istarget aarch64_be-*-linux*] {
-        return "aarch64linux32b"
-    } elseif [istarget aarch64_be-*-elf] {
-        return "aarch64elf32b"
-    } else {
-      perror "Unknown target triple."
-      exit 1
+    if [istarget *linux*] then {
+	if [istarget aarch64_be-*] {
+	    return "aarch64linux32b"
+	}
+	return "aarch64linux32"
     }
+    if [istarget aarch64_be-*] {
+        return "aarch64elf32b"
+    }
+    return "aarch64elf32"
 }
 
 run_ld_link_tests $aarch64elftests
@@ -96,8 +94,11 @@ run_dump_test "emit-relocs-269"
 run_dump_test "emit-relocs-269-bad"
 run_dump_test "emit-relocs-270"
 run_dump_test "emit-relocs-270-bad"
+run_dump_test "emit-relocs-270-overflow"
 run_dump_test "emit-relocs-271"
+run_dump_test "emit-relocs-271-overflow"
 run_dump_test "emit-relocs-272"
+run_dump_test "emit-relocs-272-overflow"
 run_dump_test "emit-relocs-273"
 run_dump_test "emit-relocs-274"
 run_dump_test "emit-relocs-275"
@@ -226,6 +227,7 @@ run_dump_test "gc-tls-relocs"
 run_dump_test "gc-plt-relocs"
 run_dump_test "gc-relocs-257-dyn"
 run_dump_test "gc-relocs-257"
+run_dump_test "implicit_got_section_1"
 run_dump_test "pr17415"
 run_dump_test "tprel_g2_overflow"
 run_dump_test "tprel_add_lo12_overflow"
@@ -280,6 +282,10 @@ run_dump_test "relocs-1027-symbolic-func"
 run_dump_test "dt_textrel"
 
 run_dump_test "plt_mapping_symbol"
+
+run_dump_test "rela-abs-relative"
+run_dump_test "rela-abs-relative-be"
+run_dump_test "rela-abs-relative-opt"
 
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}

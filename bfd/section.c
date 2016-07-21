@@ -361,8 +361,8 @@ CODE_FRAGMENT
 .     when memory read flag isn't set. *}
 .#define SEC_COFF_NOREAD 0x40000000
 .
-.  {* Indicate that section has the no read flag set.  *}
-.#define SEC_ELF_NOREAD 0x80000000
+.  {* Indicate that section has the purecode flag set.  *}
+.#define SEC_ELF_PURECODE 0x80000000
 .
 .  {*  End of section flags.  *}
 .
@@ -430,7 +430,7 @@ CODE_FRAGMENT
 .      information.  *}
 .  bfd_vma lma;
 .
-.  {* The size of the section in octets, as it will be output.
+.  {* The size of the section in *octets*, as it will be output.
 .     Contains a value even if the section has no contents (e.g., the
 .     size of <<.bss>>).  *}
 .  bfd_size_type size;

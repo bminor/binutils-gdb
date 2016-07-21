@@ -1,5 +1,10 @@
 -*- text -*-
 
+Changes in 2.27:
+
+* Add a configure option, --enable-64-bit-archive, to force use of a
+  64-bit format when creating an archive symbol index.
+
 * Add --elf-stt-common= option to objcopy for ELF targets to control
   whether to convert common symbols to the STT_COMMON type.
 

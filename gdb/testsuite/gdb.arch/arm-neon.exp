@@ -21,7 +21,7 @@ if {![istarget "aarch64*-*-*"] && ![istarget "arm*-*-*"]} {
 }
 
 standard_testfile
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
+if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug quiet}] } {
     unsupported "ARM NEON is not supported"
     return -1
 }

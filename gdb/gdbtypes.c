@@ -756,7 +756,7 @@ replace_type (struct type *ntype, struct type *type)
      the assignment of one type's main type structure to the other
      will produce a type with references to objects (names; field
      lists; etc.) allocated on an objfile other than its own.  */
-  gdb_assert (TYPE_OBJFILE (ntype) == TYPE_OBJFILE (ntype));
+  gdb_assert (TYPE_OBJFILE (ntype) == TYPE_OBJFILE (type));
 
   *TYPE_MAIN_TYPE (ntype) = *TYPE_MAIN_TYPE (type);
 
@@ -1421,7 +1421,6 @@ lookup_typename (const struct language_defn *language,
 		 const struct block *block, int noerr)
 {
   struct symbol *sym;
-  struct type *type;
 
   sym = lookup_symbol_in_language (name, block, VAR_DOMAIN,
 				   language->la_language, NULL).symbol;
@@ -1889,7 +1888,6 @@ resolve_dynamic_range (struct type *dyn_range_type,
   CORE_ADDR value;
   struct type *static_range_type, *static_target_type;
   const struct dynamic_prop *prop;
-  const struct dwarf2_locexpr_baton *baton;
   struct dynamic_prop low_bound, high_bound;
 
   gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
@@ -2064,7 +2062,9 @@ resolve_dynamic_struct (struct type *type,
 
       pinfo.type = check_typedef (TYPE_FIELD_TYPE (type, i));
       pinfo.valaddr = addr_stack->valaddr;
-      pinfo.addr = addr_stack->addr;
+      pinfo.addr
+	= (addr_stack->addr
+	   + (TYPE_FIELD_BITPOS (resolved_type, i) / TARGET_CHAR_BIT));
       pinfo.next = addr_stack;
 
       TYPE_FIELD_TYPE (resolved_type, i)
@@ -2090,8 +2090,13 @@ resolve_dynamic_struct (struct type *type,
 	resolved_type_bit_length = new_bit_length;
     }
 
-  TYPE_LENGTH (resolved_type)
-    = (resolved_type_bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
+  /* The length of a type won't change for fortran, but it does for C and Ada.
+     For fortran the size of dynamic fields might change over time but not the
+     type length of the structure.  If we adapt it, we run into problems
+     when calculating the element offset for arrays of structs.  */
+  if (current_language->la_language != language_fortran)
+    TYPE_LENGTH (resolved_type)
+      = (resolved_type_bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
 
   /* The Ada language uses this field as a cache for static fixed types: reset
      it as RESOLVED_TYPE must have its own static fixed type.  */
@@ -2224,6 +2229,37 @@ add_dyn_prop (enum dynamic_prop_node_kind prop_kind, struct dynamic_prop prop,
   TYPE_DYN_PROP_LIST (type) = temp;
 }
 
+/* Remove dynamic property from TYPE in case it exists.  */
+
+void
+remove_dyn_prop (enum dynamic_prop_node_kind prop_kind,
+                 struct type *type)
+{
+  struct dynamic_prop_list *prev_node, *curr_node;
+
+  curr_node = TYPE_DYN_PROP_LIST (type);
+  prev_node = NULL;
+
+  while (NULL != curr_node)
+    {
+      if (curr_node->prop_kind == prop_kind)
+	{
+	  /* Update the linked list but don't free anything.
+	     The property was allocated on objstack and it is not known
+	     if we are on top of it.  Nevertheless, everything is released
+	     when the complete objstack is freed.  */
+	  if (NULL == prev_node)
+	    TYPE_DYN_PROP_LIST (type) = curr_node->next;
+	  else
+	    prev_node->next = curr_node->next;
+
+	  return;
+	}
+
+      prev_node = curr_node;
+      curr_node = curr_node->next;
+    }
+}
 
 /* Find the real type of TYPE.  This function returns the real type,
    after removing all layers of typedefs, and completing opaque or stub
@@ -2393,7 +2429,6 @@ check_typedef (struct type *type)
 
   if (TYPE_TARGET_STUB (type))
     {
-      struct type *range_type;
       struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
       if (TYPE_STUB (target_type) || TYPE_TARGET_STUB (target_type))
@@ -4262,8 +4297,8 @@ recursive_dump_type (struct type *type, int spaces)
 			  idx, plongest (TYPE_FIELD_ENUMVAL (type, idx)));
       else
 	printfi_filtered (spaces + 2,
-			  "[%d] bitpos %d bitsize %d type ",
-			  idx, TYPE_FIELD_BITPOS (type, idx),
+			  "[%d] bitpos %s bitsize %d type ",
+			  idx, plongest (TYPE_FIELD_BITPOS (type, idx)),
 			  TYPE_FIELD_BITSIZE (type, idx));
       gdb_print_host_address (TYPE_FIELD_TYPE (type, idx), gdb_stdout);
       printf_filtered (" name '%s' (",
@@ -4594,7 +4629,7 @@ copy_type (const struct type *type)
 
 struct type *
 arch_type (struct gdbarch *gdbarch,
-	   enum type_code code, int length, char *name)
+	   enum type_code code, int length, const char *name)
 {
   struct type *type;
 
@@ -4614,7 +4649,7 @@ arch_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_integer_type (struct gdbarch *gdbarch,
-		   int bit, int unsigned_p, char *name)
+		   int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
@@ -4633,7 +4668,7 @@ arch_integer_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_character_type (struct gdbarch *gdbarch,
-		     int bit, int unsigned_p, char *name)
+		     int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
@@ -4650,7 +4685,7 @@ arch_character_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_boolean_type (struct gdbarch *gdbarch,
-		   int bit, int unsigned_p, char *name)
+		   int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
@@ -4668,7 +4703,8 @@ arch_boolean_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_float_type (struct gdbarch *gdbarch,
-		 int bit, char *name, const struct floatformat **floatformats)
+		 int bit, const char *name,
+		 const struct floatformat **floatformats)
 {
   struct type *t;
 
@@ -4682,6 +4718,15 @@ arch_float_type (struct gdbarch *gdbarch,
 
   t = arch_type (gdbarch, TYPE_CODE_FLT, bit / TARGET_CHAR_BIT, name);
   TYPE_FLOATFORMAT (t) = floatformats;
+
+  if (floatformats != NULL)
+    {
+      size_t len = TYPE_LENGTH (t);
+
+      gdb_assert (len >= floatformat_totalsize_bytes (floatformats[0]));
+      gdb_assert (len >= floatformat_totalsize_bytes (floatformats[1]));
+    }
+
   return t;
 }
 
@@ -4690,7 +4735,7 @@ arch_float_type (struct gdbarch *gdbarch,
 
 struct type *
 arch_complex_type (struct gdbarch *gdbarch,
-		   char *name, struct type *target_type)
+		   const char *name, struct type *target_type)
 {
   struct type *t;
 
@@ -4704,47 +4749,65 @@ arch_complex_type (struct gdbarch *gdbarch,
    NAME is the type name.  LENGTH is the size of the flag word in bytes.  */
 
 struct type *
-arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
+arch_flags_type (struct gdbarch *gdbarch, const char *name, int length)
 {
-  int nfields = length * TARGET_CHAR_BIT;
+  int max_nfields = length * TARGET_CHAR_BIT;
   struct type *type;
 
   type = arch_type (gdbarch, TYPE_CODE_FLAGS, length, name);
   TYPE_UNSIGNED (type) = 1;
-  TYPE_NFIELDS (type) = nfields;
+  TYPE_NFIELDS (type) = 0;
+  /* Pre-allocate enough space assuming every field is one bit.  */
   TYPE_FIELDS (type)
-    = (struct field *) TYPE_ZALLOC (type, nfields * sizeof (struct field));
+    = (struct field *) TYPE_ZALLOC (type, max_nfields * sizeof (struct field));
 
   return type;
 }
 
 /* Add field to TYPE_CODE_FLAGS type TYPE to indicate the bit at
+   position BITPOS is called NAME.  Pass NAME as "" for fields that
+   should not be printed.  */
+
+void
+append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
+			 struct type *field_type, const char *name)
+{
+  int type_bitsize = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+  int field_nr = TYPE_NFIELDS (type);
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLAGS);
+  gdb_assert (TYPE_NFIELDS (type) + 1 <= type_bitsize);
+  gdb_assert (start_bitpos >= 0 && start_bitpos < type_bitsize);
+  gdb_assert (nr_bits >= 1 && nr_bits <= type_bitsize);
+  gdb_assert (name != NULL);
+
+  TYPE_FIELD_NAME (type, field_nr) = xstrdup (name);
+  TYPE_FIELD_TYPE (type, field_nr) = field_type;
+  SET_FIELD_BITPOS (TYPE_FIELD (type, field_nr), start_bitpos);
+  TYPE_FIELD_BITSIZE (type, field_nr) = nr_bits;
+  ++TYPE_NFIELDS (type);
+}
+
+/* Special version of append_flags_type_field to add a flag field.
+   Add field to TYPE_CODE_FLAGS type TYPE to indicate the bit at
    position BITPOS is called NAME.  */
 
 void
-append_flags_type_flag (struct type *type, int bitpos, char *name)
+append_flags_type_flag (struct type *type, int bitpos, const char *name)
 {
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLAGS);
-  gdb_assert (bitpos < TYPE_NFIELDS (type));
-  gdb_assert (bitpos >= 0);
+  struct gdbarch *gdbarch = get_type_arch (type);
 
-  if (name)
-    {
-      TYPE_FIELD_NAME (type, bitpos) = xstrdup (name);
-      SET_FIELD_BITPOS (TYPE_FIELD (type, bitpos), bitpos);
-    }
-  else
-    {
-      /* Don't show this field to the user.  */
-      SET_FIELD_BITPOS (TYPE_FIELD (type, bitpos), -1);
-    }
+  append_flags_type_field (type, bitpos, 1,
+			   builtin_type (gdbarch)->builtin_bool,
+			   name);
 }
 
 /* Allocate a TYPE_CODE_STRUCT or TYPE_CODE_UNION type structure (as
    specified by CODE) associated with GDBARCH.  NAME is the type name.  */
 
 struct type *
-arch_composite_type (struct gdbarch *gdbarch, char *name, enum type_code code)
+arch_composite_type (struct gdbarch *gdbarch, const char *name,
+		     enum type_code code)
 {
   struct type *t;
 
@@ -4760,7 +4823,7 @@ arch_composite_type (struct gdbarch *gdbarch, char *name, enum type_code code)
    the caller should do so.  Return the new field.  */
 
 struct field *
-append_composite_type_field_raw (struct type *t, char *name,
+append_composite_type_field_raw (struct type *t, const char *name,
 				 struct type *field)
 {
   struct field *f;
@@ -4779,7 +4842,7 @@ append_composite_type_field_raw (struct type *t, char *name,
    ALIGNMENT (if non-zero) specifies the minimum field alignment.  */
 
 void
-append_composite_type_field_aligned (struct type *t, char *name,
+append_composite_type_field_aligned (struct type *t, const char *name,
 				     struct type *field, int alignment)
 {
   struct field *f = append_composite_type_field_raw (t, name, field);
@@ -4819,7 +4882,7 @@ append_composite_type_field_aligned (struct type *t, char *name,
 /* Add new field with name NAME and type FIELD to composite type T.  */
 
 void
-append_composite_type_field (struct type *t, char *name,
+append_composite_type_field (struct type *t, const char *name,
 			     struct type *field)
 {
   append_composite_type_field_aligned (t, name, field, 0);

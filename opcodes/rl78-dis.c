@@ -229,7 +229,8 @@ print_insn_rl78_common (bfd_vma addr, disassemble_info * dis, RL78_Dis_Isa isa)
 	    if (do_bang)
 	      {
 		/* If we are going to display SP by name, we must omit the bang.  */
-		if ((oper->type == RL78_Operand_Indirect || RL78_Operand_BitIndirect)
+		if ((oper->type == RL78_Operand_Indirect
+		     || oper->type == RL78_Operand_BitIndirect)
 		    && oper->reg == RL78_Reg_None
 		    && do_sfr
 		    && ((oper->addend == 0xffff8 && opcode.size == RL78_Word)

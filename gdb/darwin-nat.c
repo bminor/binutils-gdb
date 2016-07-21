@@ -728,7 +728,7 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
 	{
 	  /* Either deliver a new signal or cancel the signal received.  */
 	  res = PTRACE (PT_THUPDATE, inf->pid,
-			(caddr_t)thread->gdb_port, nsignal);
+			(caddr_t) (uintptr_t) thread->gdb_port, nsignal);
 	  if (res < 0)
 	    inferior_debug (1, _("ptrace THUP: res=%d\n"), res);
 	}
@@ -1013,7 +1013,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	      else
 		{
 		  status->kind = TARGET_WAITKIND_SIGNALLED;
-		  status->value.sig = WTERMSIG (wstatus);
+		  status->value.sig = gdb_signal_from_host (WTERMSIG (wstatus));
 		}
 
 	      inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
@@ -1739,15 +1739,7 @@ darwin_detach (struct target_ops *ops, const char *args, int from_tty)
   int res;
 
   /* Display message.  */
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-			 target_pid_to_str (pid_to_ptid (pid)));
-      gdb_flush (gdb_stdout);
-    }
+  target_announce_detach (from_tty);
 
   /* If ptrace() is in use, stop the process.  */
   if (!inf->priv->no_ptrace)

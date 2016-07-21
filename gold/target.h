@@ -834,7 +834,7 @@ class Sized_target : public Target
   // symbol table.  This will only be called if has_make_symbol()
   // returns true.
   virtual Sized_symbol<size>*
-  make_symbol() const
+  make_symbol(const char*, elfcpp::STT, Object*, unsigned int, uint64_t)
   { gold_unreachable(); }
 
   // Resolve a symbol for the target.  This should be overridden by a

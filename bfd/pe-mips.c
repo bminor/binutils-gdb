@@ -702,12 +702,9 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
 	      }
 
 	  else if (! bfd_link_relocatable (info))
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma, TRUE)))
-		return FALSE;
-	    }
+	    (*info->callbacks->undefined_symbol)
+	      (info, h->root.root.string, input_bfd, input_section,
+	       rel->r_vaddr - input_section->vma, TRUE);
 	}
 
       src = rel->r_vaddr + input_section->output_section->vma

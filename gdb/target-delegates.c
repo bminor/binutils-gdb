@@ -1608,23 +1608,18 @@ debug_interrupt (struct target_ops *self, ptid_t arg1)
 }
 
 static void
-delegate_check_pending_interrupt (struct target_ops *self)
+delegate_pass_ctrlc (struct target_ops *self)
 {
   self = self->beneath;
-  self->to_check_pending_interrupt (self);
+  self->to_pass_ctrlc (self);
 }
 
 static void
-tdefault_check_pending_interrupt (struct target_ops *self)
+debug_pass_ctrlc (struct target_ops *self)
 {
-}
-
-static void
-debug_check_pending_interrupt (struct target_ops *self)
-{
-  fprintf_unfiltered (gdb_stdlog, "-> %s->to_check_pending_interrupt (...)\n", debug_target.to_shortname);
-  debug_target.to_check_pending_interrupt (&debug_target);
-  fprintf_unfiltered (gdb_stdlog, "<- %s->to_check_pending_interrupt (", debug_target.to_shortname);
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_pass_ctrlc (...)\n", debug_target.to_shortname);
+  debug_target.to_pass_ctrlc (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_pass_ctrlc (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
@@ -2065,6 +2060,33 @@ debug_xfer_partial (struct target_ops *self, enum target_object arg1, const char
   target_debug_print_ULONGEST_p (arg7);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_enum_target_xfer_status (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static ULONGEST
+delegate_get_memory_xfer_limit (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_get_memory_xfer_limit (self);
+}
+
+static ULONGEST
+tdefault_get_memory_xfer_limit (struct target_ops *self)
+{
+  return ULONGEST_MAX;
+}
+
+static ULONGEST
+debug_get_memory_xfer_limit (struct target_ops *self)
+{
+  ULONGEST result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_get_memory_xfer_limit (...)\n", debug_target.to_shortname);
+  result = debug_target.to_get_memory_xfer_limit (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_get_memory_xfer_limit (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_ULONGEST (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }
@@ -4194,8 +4216,8 @@ install_delegators (struct target_ops *ops)
     ops->to_stop = delegate_stop;
   if (ops->to_interrupt == NULL)
     ops->to_interrupt = delegate_interrupt;
-  if (ops->to_check_pending_interrupt == NULL)
-    ops->to_check_pending_interrupt = delegate_check_pending_interrupt;
+  if (ops->to_pass_ctrlc == NULL)
+    ops->to_pass_ctrlc = delegate_pass_ctrlc;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_pid_to_exec_file == NULL)
@@ -4228,6 +4250,8 @@ install_delegators (struct target_ops *ops)
     ops->to_get_thread_local_address = delegate_get_thread_local_address;
   if (ops->to_xfer_partial == NULL)
     ops->to_xfer_partial = delegate_xfer_partial;
+  if (ops->to_get_memory_xfer_limit == NULL)
+    ops->to_get_memory_xfer_limit = delegate_get_memory_xfer_limit;
   if (ops->to_memory_map == NULL)
     ops->to_memory_map = delegate_memory_map;
   if (ops->to_flash_erase == NULL)
@@ -4442,7 +4466,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_thread_name = tdefault_thread_name;
   ops->to_stop = tdefault_stop;
   ops->to_interrupt = tdefault_interrupt;
-  ops->to_check_pending_interrupt = tdefault_check_pending_interrupt;
+  ops->to_pass_ctrlc = default_target_pass_ctrlc;
   ops->to_rcmd = default_rcmd;
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
   ops->to_log_command = tdefault_log_command;
@@ -4459,6 +4483,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_goto_bookmark = tdefault_goto_bookmark;
   ops->to_get_thread_local_address = tdefault_get_thread_local_address;
   ops->to_xfer_partial = tdefault_xfer_partial;
+  ops->to_get_memory_xfer_limit = tdefault_get_memory_xfer_limit;
   ops->to_memory_map = tdefault_memory_map;
   ops->to_flash_erase = tdefault_flash_erase;
   ops->to_flash_done = tdefault_flash_done;
@@ -4598,7 +4623,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_thread_name = debug_thread_name;
   ops->to_stop = debug_stop;
   ops->to_interrupt = debug_interrupt;
-  ops->to_check_pending_interrupt = debug_check_pending_interrupt;
+  ops->to_pass_ctrlc = debug_pass_ctrlc;
   ops->to_rcmd = debug_rcmd;
   ops->to_pid_to_exec_file = debug_pid_to_exec_file;
   ops->to_log_command = debug_log_command;
@@ -4615,6 +4640,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_goto_bookmark = debug_goto_bookmark;
   ops->to_get_thread_local_address = debug_get_thread_local_address;
   ops->to_xfer_partial = debug_xfer_partial;
+  ops->to_get_memory_xfer_limit = debug_get_memory_xfer_limit;
   ops->to_memory_map = debug_memory_map;
   ops->to_flash_erase = debug_flash_erase;
   ops->to_flash_done = debug_flash_done;

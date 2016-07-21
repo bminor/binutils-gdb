@@ -154,10 +154,12 @@ SECTIONS
   {
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__bss_start = .) ; }
+    ${RELOCATING+ PROVIDE (__bssstart = .); }
     *(.bss)
     *(COMMON)
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
   } ${RELOCATING+ > data}
+  ${RELOCATING+ PROVIDE (__bsssize = SIZEOF(.bss)); }
 
   .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
   {
@@ -183,7 +185,7 @@ SECTIONS
     ${RELOCATING+ _vectors_end = . ; }
   } ${RELOCATING+ > vectors}
 
-  .MP430.attributes 0 :
+  .MSP430.attributes 0 :
   {
     KEEP (*(.MSP430.attributes))
     KEEP (*(.gnu.attributes))

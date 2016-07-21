@@ -395,6 +395,12 @@ typedef CORE_ADDR (gdbarch_push_dummy_code_ftype) (struct gdbarch *gdbarch, CORE
 extern CORE_ADDR gdbarch_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr, struct regcache *regcache);
 extern void set_gdbarch_push_dummy_code (struct gdbarch *gdbarch, gdbarch_push_dummy_code_ftype *push_dummy_code);
 
+/* Return true if the code of FRAME is writable. */
+
+typedef int (gdbarch_code_of_frame_writable_ftype) (struct gdbarch *gdbarch, struct frame_info *frame);
+extern int gdbarch_code_of_frame_writable (struct gdbarch *gdbarch, struct frame_info *frame);
+extern void set_gdbarch_code_of_frame_writable (struct gdbarch *gdbarch, gdbarch_code_of_frame_writable_ftype *code_of_frame_writable);
+
 typedef void (gdbarch_print_registers_info_ftype) (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, int regnum, int all);
 extern void gdbarch_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, int regnum, int all);
 extern void set_gdbarch_print_registers_info (struct gdbarch *gdbarch, gdbarch_print_registers_info_ftype *print_registers_info);
@@ -646,15 +652,16 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
    indicates if the target needs software single step.  An ISA method to
    implement it.
   
-   FIXME/cagney/2001-01-18: This should be replaced with something that inserts
-   breakpoints using the breakpoint system instead of blatting memory directly
-   (as with rs6000).
-  
    FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
    target can single step.  If not, then implement single step using breakpoints.
   
    A return value of 1 means that the software_single_step breakpoints
-   were inserted; 0 means they were not. */
+   were inserted; 0 means they were not.  Multiple breakpoints may be
+   inserted for some instructions such as conditional branch.  However,
+   each implementation must always evaluate the condition and only put
+   the breakpoint at the branch destination if the condition is true, so
+   that we ensure forward progress when stepping past a conditional
+   branch to self. */
 
 extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
 
@@ -1456,6 +1463,13 @@ extern int gdbarch_auxv_parse_p (struct gdbarch *gdbarch);
 typedef int (gdbarch_auxv_parse_ftype) (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 extern int gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 extern void set_gdbarch_auxv_parse (struct gdbarch *gdbarch, gdbarch_auxv_parse_ftype *auxv_parse);
+
+/* Print the description of a single auxv entry described by TYPE and VAL
+   to FILE. */
+
+typedef void (gdbarch_print_auxv_entry_ftype) (struct gdbarch *gdbarch, struct ui_file *file, CORE_ADDR type, CORE_ADDR val);
+extern void gdbarch_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file, CORE_ADDR type, CORE_ADDR val);
+extern void set_gdbarch_print_auxv_entry (struct gdbarch *gdbarch, gdbarch_print_auxv_entry_ftype *print_auxv_entry);
 
 /* Find the address range of the current inferior's vsyscall/vDSO, and
    write it to *RANGE.  If the vsyscall's length can't be determined, a

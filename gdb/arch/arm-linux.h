@@ -20,6 +20,9 @@
 #ifndef ARM_LINUX_H
 #define ARM_LINUX_H
 
+/* The index to access CSPR in user_regs defined in GLIBC.  */
+#define ARM_CPSR_GREGNUM 16
+
 /* There are a couple of different possible stack layouts that
    we need to support.
 

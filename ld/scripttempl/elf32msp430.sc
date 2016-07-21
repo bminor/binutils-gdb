@@ -210,7 +210,6 @@ SECTIONS
     KEEP (*(.fini_array))
     KEEP (*(SORT(.fini_array.*)))
     PROVIDE (__fini_array_end = .);
-    LONG(0); /* Sentinel.  */
 
     /* gcc uses crtbegin.o to find the start of the constructors, so
        we make sure it is first.  Because this is a wildcard, it
@@ -275,7 +274,8 @@ SECTIONS
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
     ${RELOCATING+. = ALIGN(2);}
-    ${RELOCATING+ PROVIDE (__bss_start = .) ; }
+    ${RELOCATING+ PROVIDE (__bss_start = .); }
+    ${RELOCATING+ PROVIDE (__bssstart = .); }
     *(.lower.bss.* .lower.bss)
     ${RELOCATING+. = ALIGN(2);}
     *(.bss)
@@ -283,6 +283,7 @@ SECTIONS
     *(COMMON)
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
   } ${RELOCATING+ > data}
+  ${RELOCATING+ PROVIDE (__bsssize = SIZEOF(.bss)); }
 
   .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
   {
@@ -314,10 +315,10 @@ SECTIONS
   .comment 0 : { *(.comment) }
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
-  .MP430.attributes 0 :
+  .MSP430.attributes 0 :
   {
     KEEP (*(.MSP430.attributes))
     KEEP (*(.gnu.attributes))

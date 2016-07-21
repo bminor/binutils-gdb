@@ -76,8 +76,8 @@
    150 isn't special; it's just an arbitrary non-ASCII char value.  */
 #define OPTION_STD_BASE 150
 /* The first getopt value for machine-dependent long options.
-   190 gives the standard options room to grow.  */
-#define OPTION_MD_BASE 190
+   290 gives the standard options room to grow.  */
+#define OPTION_MD_BASE  290
 
 #ifdef DEBUG
 #undef NDEBUG
@@ -97,13 +97,6 @@
 
 /* Define the standard progress macros.  */
 #include "progress.h"
-
-/* This doesn't get taken care of anywhere.  */
-#ifndef __MWERKS__  /* Metrowerks C chokes on the "defined (inline)"  */
-#if !defined (__GNUC__) && !defined (inline)
-#define inline
-#endif
-#endif /* !__MWERKS__ */
 
 /* Other stuff from config.h.  */
 #ifdef NEED_DECLARATION_ENVIRON
@@ -142,14 +135,6 @@ extern int vsnprintf(char *, size_t, const char *, va_list);
 /* Hack to make "gcc -Wall" not complain about obstack macros.  */
 #if !defined (memcpy) && !defined (bcopy)
 #define bcopy(src,dest,size)	memcpy (dest, src, size)
-#endif
-
-/* Make Saber happier on obstack.h.  */
-#ifdef SABER
-#undef  __PTR_TO_INT
-#define __PTR_TO_INT(P) ((int) (P))
-#undef  __INT_TO_PTR
-#define __INT_TO_PTR(P) ((char *) (P))
 #endif
 
 #ifndef __LINE__
@@ -392,6 +377,8 @@ COMMON int need_pass_2;
    leave lots of padding.  */
 COMMON int linkrelax;
 
+COMMON int do_not_pad_sections_to_alignment;
+
 /* TRUE if we should produce a listing.  */
 extern int listing;
 
@@ -477,15 +464,15 @@ void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
 void   sprint_value (char *, addressT);
 int    had_errors (void);
 int    had_warnings (void);
-void   as_warn_value_out_of_range (char *, offsetT, offsetT, offsetT,
+void   as_warn_value_out_of_range (const char *, offsetT, offsetT, offsetT,
 				   const char *, unsigned);
-void   as_bad_value_out_of_range (char *, offsetT, offsetT, offsetT,
+void   as_bad_value_out_of_range (const char *, offsetT, offsetT, offsetT,
 				  const char *, unsigned);
 void   print_version_id (void);
 char * app_push (void);
 char * atof_ieee (char *, int, LITTLENUM_TYPE *);
-char * ieee_md_atof (int, char *, int *, bfd_boolean);
-char * vax_md_atof (int, char *, int *);
+const char * ieee_md_atof (int, char *, int *, bfd_boolean);
+const char * vax_md_atof (int, char *, int *);
 char * input_scrub_include_file (const char *, char *);
 void   input_scrub_insert_line (const char *);
 void   input_scrub_insert_file (char *);
@@ -521,6 +508,14 @@ segT   subseg_get (const char *, int);
 
 const char *remap_debug_filename (const char *);
 void add_debug_prefix_map (const char *);
+
+static inline char *
+xmemdup0 (const char *in, size_t len)
+{
+  char *out = (char *) xmalloc (len + 1);
+  out[len] = 0;
+  return (char *) memcpy (out, in, len);
+}
 
 struct expressionS;
 struct fix;
@@ -585,12 +580,7 @@ COMMON const char *        found_comment_file;
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 /* If .size directive failure should be error or warning.  */
-COMMON enum
-  {
-    size_check_error = 0,
-    size_check_warning
-  }
-flag_size_check;
+COMMON int flag_allow_nonconst_size;
 
 /* If we should generate ELF common symbols with the STT_COMMON type.  */
 extern int flag_use_elf_stt_common;

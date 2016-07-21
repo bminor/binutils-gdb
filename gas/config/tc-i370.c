@@ -358,7 +358,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
@@ -1867,7 +1867,7 @@ i370_macro (char *str, const struct i370_macro *macro)
     }
 
   /* Put the string together.  */
-  complete = s = alloca (len + 1);
+  complete = s = XNEWVEC (char, len + 1);
   format = macro->format;
   while (*format != '\0')
     {
@@ -1885,6 +1885,7 @@ i370_macro (char *str, const struct i370_macro *macro)
 
   /* Assemble the constructed instruction.  */
   md_assemble (complete);
+  free (complete);
 }
 
 /* This routine is called for each instruction to be assembled.  */
@@ -2351,7 +2352,7 @@ i370_tc (int ignore ATTRIBUTE_UNUSED)
     }
 }
 
-char *
+const char *
 md_atof (int type, char *litp, int *sizep)
 {
   /* 360/370/390 have two float formats: an old, funky 360 single-precision
@@ -2602,9 +2603,9 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);

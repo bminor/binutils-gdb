@@ -139,7 +139,7 @@ input_scrub_push (char *saved_position)
 {
   struct input_save *saved;
 
-  saved = (struct input_save *) xmalloc (sizeof *saved);
+  saved = XNEW (struct input_save);
 
   saved->saved_position = saved_position;
   saved->buffer_start = buffer_start;
@@ -163,8 +163,8 @@ input_scrub_push (char *saved_position)
   buffer_length = input_file_buffer_size ();
   sb_index = -1;
 
-  buffer_start = (char *) xmalloc ((BEFORE_SIZE + buffer_length
-                                    + buffer_length + AFTER_SIZE + 1));
+  buffer_start = XNEWVEC (char, (BEFORE_SIZE + buffer_length
+				 + buffer_length + AFTER_SIZE + 1));
   memcpy (buffer_start, BEFORE_STRING, (int) BEFORE_SIZE);
 
   return saved;
@@ -208,8 +208,8 @@ input_scrub_begin (void)
 
   buffer_length = input_file_buffer_size ();
 
-  buffer_start = (char *) xmalloc ((BEFORE_SIZE + buffer_length
-                                    + buffer_length + AFTER_SIZE + 1));
+  buffer_start = XNEWVEC (char, (BEFORE_SIZE + buffer_length
+				 + buffer_length + AFTER_SIZE + 1));
   memcpy (buffer_start, BEFORE_STRING, (int) BEFORE_SIZE);
 
   /* Line number things.  */
@@ -389,10 +389,10 @@ input_scrub_next_buffer (char **bufp)
 
       partial_size = limit - (buffer_start + BEFORE_SIZE);
       buffer_length += input_file_buffer_size ();
-      buffer_start = (char *) xrealloc (buffer_start,
-					(BEFORE_SIZE
-					 + 2 * buffer_length
-					 + AFTER_SIZE + 1));
+      buffer_start = XRESIZEVEC (char, buffer_start,
+				 (BEFORE_SIZE
+				  + 2 * buffer_length
+				  + AFTER_SIZE + 1));
     }
 
   /* Tell the listing we've finished the file.  */

@@ -135,8 +135,8 @@ extern struct ui_file *mem_fileopen (void);
 /* Open/create a STDIO based UI_FILE using the already open FILE.  */
 extern struct ui_file *stdio_fileopen (FILE *file);
 
-/* Create a ui_file from stderr.  */
-extern struct ui_file *stderr_fileopen (void);
+/* Likewise, for stderr-like streams.  */
+extern struct ui_file *stderr_fileopen (FILE *file);
 
 
 /* Open NAME returning an STDIO based UI_FILE.  */

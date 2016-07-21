@@ -567,14 +567,14 @@ stdio_file_read (struct ui_file *file, char *buf, long length_buf)
     internal_error (__FILE__, __LINE__,
 		    _("stdio_file_read: bad magic number"));
 
-  /* For the benefit of Windows, call gdb_select before reading from
-     the file.  Wait until at least one byte of data is available.
-     Control-C can interrupt gdb_select, but not read.  */
+  /* Wait until at least one byte of data is available, or we get
+     interrupted with Control-C.  */
   {
     fd_set readfds;
+
     FD_ZERO (&readfds);
     FD_SET (stdio->fd, &readfds);
-    if (gdb_select (stdio->fd + 1, &readfds, NULL, NULL, NULL) == -1)
+    if (interruptible_select (stdio->fd + 1, &readfds, NULL, NULL, NULL) == -1)
       return -1;
   }
 
@@ -681,9 +681,9 @@ stderr_file_fputs (const char *linebuffer, struct ui_file *file)
 #endif
 
 struct ui_file *
-stderr_fileopen (void)
+stderr_fileopen (FILE *stream)
 {
-  struct ui_file *ui_file = stdio_fileopen (stderr);
+  struct ui_file *ui_file = stdio_fileopen (stream);
 
 #ifdef __MINGW32__
   /* There is no real line-buffering on Windows, see

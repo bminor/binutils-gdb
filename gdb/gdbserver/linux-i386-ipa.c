@@ -95,8 +95,8 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
     }
 }
 
-IP_AGENT_EXPORT_FUNC ULONGEST
-gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
+ULONGEST
+get_raw_reg (const unsigned char *raw_regs, int regnum)
 {
   /* This should maybe be allowed to return an error code, or perhaps
      better, have the emit_reg detect this, and emit a constant zero,
@@ -260,6 +260,8 @@ get_ipa_tdesc (int idx)
       return tdesc_i386_avx_linux;
     case X86_TDESC_MPX:
       return tdesc_i386_mpx_linux;
+    case X86_TDESC_AVX_MPX:
+      return tdesc_i386_avx_mpx_linux;
     case X86_TDESC_AVX512:
       return tdesc_i386_avx512_linux;
     default:
@@ -267,6 +269,21 @@ get_ipa_tdesc (int idx)
 		      "unknown ipa tdesc index: %d", idx);
       return tdesc_i386_linux;
     }
+}
+
+/* Allocate buffer for the jump pads.  On i386, we can reach an arbitrary
+   address with a jump instruction, so just allocate normally.  */
+
+void *
+alloc_jump_pad_buffer (size_t size)
+{
+  void *res = mmap (NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+		    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+  if (res == MAP_FAILED)
+    return NULL;
+
+  return res;
 }
 
 void

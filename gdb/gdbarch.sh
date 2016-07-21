@@ -485,6 +485,9 @@ M:CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, C
 v:int:call_dummy_location::::AT_ENTRY_POINT::0
 M:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr, struct regcache *regcache:sp, funaddr, args, nargs, value_type, real_pc, bp_addr, regcache
 
+# Return true if the code of FRAME is writable.
+m:int:code_of_frame_writable:struct frame_info *frame:frame::default_code_of_frame_writable::0
+
 m:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all::default_print_registers_info::0
 m:void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args::default_print_float_info::0
 M:void:print_vector_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
@@ -605,15 +608,16 @@ m:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # indicates if the target needs software single step.  An ISA method to
 # implement it.
 #
-# FIXME/cagney/2001-01-18: This should be replaced with something that inserts
-# breakpoints using the breakpoint system instead of blatting memory directly
-# (as with rs6000).
-#
 # FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
 # target can single step.  If not, then implement single step using breakpoints.
 #
 # A return value of 1 means that the software_single_step breakpoints
-# were inserted; 0 means they were not.
+# were inserted; 0 means they were not.  Multiple breakpoints may be
+# inserted for some instructions such as conditional branch.  However,
+# each implementation must always evaluate the condition and only put
+# the breakpoint at the branch destination if the condition is true, so
+# that we ensure forward progress when stepping past a conditional
+# branch to self.
 F:int:software_single_step:struct frame_info *frame:frame
 
 # Return non-zero if the processor is executing a delay slot and a
@@ -1105,6 +1109,10 @@ m:int:insn_is_jump:CORE_ADDR addr:addr::default_insn_is_jump::0
 # Return -1 if there is insufficient buffer for a whole entry.
 # Return 1 if an entry was read into *TYPEP and *VALP.
 M:int:auxv_parse:gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp:readptr, endptr, typep, valp
+
+# Print the description of a single auxv entry described by TYPE and VAL
+# to FILE.
+m:void:print_auxv_entry:struct ui_file *file, CORE_ADDR type, CORE_ADDR val:file, type, val::default_print_auxv_entry::0
 
 # Find the address range of the current inferior's vsyscall/vDSO, and
 # write it to *RANGE.  If the vsyscall's length can't be determined, a
@@ -1612,6 +1620,7 @@ cat <<EOF
 #include "observer.h"
 #include "regcache.h"
 #include "objfiles.h"
+#include "auxv.h"
 
 /* Static function declarations */
 

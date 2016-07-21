@@ -192,8 +192,8 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
 {
   struct type *array_type = check_typedef (value_type (array));
   struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
-  unsigned int elt_size = type_length_units (elt_type);
-  unsigned int elt_offs = elt_size * longest_to_int (index - lowerbound);
+  ULONGEST elt_size = type_length_units (elt_type);
+  ULONGEST elt_offs = elt_size * (index - lowerbound);
   struct value *v;
 
   if (index < lowerbound || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
@@ -205,6 +205,14 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
         error (_("no such vector element (vector not allocated)"));
       else
         error (_("no such vector element"));
+    }
+
+  if (is_dynamic_type (elt_type))
+    {
+      CORE_ADDR address;
+
+      address = value_address (array) + elt_offs;
+      elt_type = resolve_dynamic_type (elt_type, NULL, address);
     }
 
   if (VALUE_LVAL (array) == lval_memory && value_lazy (array))

@@ -33,7 +33,7 @@ mcore_opclass;
 
 typedef struct inst
 {
-  char *         name;
+  const char *   name;
   mcore_opclass  opclass;
   unsigned char  transfer;
   unsigned short inst;
@@ -206,6 +206,5 @@ const mcore_opcode_info mcore_table[] =
   { "rori",	RSI,	0,	0x3800 },
   { "rotri",	RSI,    0,	0x3800 },
   { "nop",	O0,     0,	0x1200 },  /* mov r0, r0 */
-  { 0,		0,	0,      0 }
 };
 #endif

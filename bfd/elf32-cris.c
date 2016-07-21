@@ -1973,7 +1973,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      r = info->callbacks->reloc_overflow
+	      (*info->callbacks->reloc_overflow)
 		(info, (h ? &h->root : NULL), symname, howto->name,
 		 (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
 	      if (additional_relocation_error_msg_count > 0)
@@ -2010,9 +2010,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      break;
 
 	    case bfd_reloc_undefined:
-	      r = info->callbacks->undefined_symbol
-		(info, symname, input_bfd, input_section, rel->r_offset,
-		 TRUE);
+	      (*info->callbacks->undefined_symbol)
+		(info, symname, input_bfd, input_section, rel->r_offset, TRUE);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -2033,11 +2032,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    }
 
 	  if (msg)
-	    r = info->callbacks->warning
-	      (info, msg, symname, input_bfd, input_section, rel->r_offset);
-
-	  if (! r)
-	    return FALSE;
+	    (*info->callbacks->warning) (info, msg, symname, input_bfd,
+					 input_section, rel->r_offset);
 	}
     }
 
@@ -2336,22 +2332,21 @@ elf_cris_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTGOT:
-	      s = bfd_get_section_by_name (output_bfd, ".got");
-	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->vma;
+	      dyn.d_un.d_ptr = sgot->output_section->vma + sgot->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_JMPREL:
 	      /* Yes, we *can* have a .plt and no .plt.rela, for instance
 		 if all symbols are found in the .got (not .got.plt).  */
-	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
-	      dyn.d_un.d_ptr = s != NULL ? s->vma : 0;
+	      s = bfd_get_linker_section (dynobj, ".rela.plt");
+	      dyn.d_un.d_ptr = s != NULL ? (s->output_section->vma
+					    + s->output_offset) : 0;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
+	      s = bfd_get_linker_section (dynobj, ".rela.plt");
 	      if (s == NULL)
 		dyn.d_un.d_val = 0;
 	      else
@@ -2367,7 +2362,7 @@ elf_cris_finish_dynamic_sections (bfd *output_bfd,
 		 linker script arranges for .rela.plt to follow all
 		 other relocation sections, we don't have to worry
 		 about changing the DT_RELA entry.  */
-	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
+	      s = bfd_get_linker_section (dynobj, ".rela.plt");
 	      if (s != NULL)
 		dyn.d_un.d_val -= s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);

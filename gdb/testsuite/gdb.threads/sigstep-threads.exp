@@ -45,7 +45,7 @@ for {set i 0} {$i < 100} {incr i} {
     # Presume this step failed - as in the case of a timeout.
     set failed 1
     gdb_test_multiple "step" $test {
-	-re "\r\nProgram received signal SIGUSR1, User defined signal 1.\r\n" {
+	-re " received signal SIGUSR1, User defined signal 1.\r\n" {
 	    exp_continue -continue_timer
 	}
 	-re "step-(\[012\]).*\r\n$gdb_prompt $" {

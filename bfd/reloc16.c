@@ -80,11 +80,9 @@ bfd_coff_reloc16_get_value (arelent *reloc,
 	value = 0;
       else
 	{
-	  if (!((*link_info->callbacks->undefined_symbol)
-		(link_info, bfd_asymbol_name (symbol),
-		 input_section->owner, input_section, reloc->address,
-		 TRUE)))
-	    abort ();
+	  (*link_info->callbacks->undefined_symbol)
+	    (link_info, bfd_asymbol_name (symbol),
+	     input_section->owner, input_section, reloc->address, TRUE);
 	  value = 0;
 	}
     }

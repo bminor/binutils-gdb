@@ -406,6 +406,8 @@ enum SHT
   SHT_MIPS_REGINFO = 0x70000006,
   // Section contains miscellaneous options.
   SHT_MIPS_OPTIONS = 0x7000000d,
+  // ABI related flags section.
+  SHT_MIPS_ABIFLAGS = 0x7000002a,
 
   // AARCH64-specific section type.
   SHT_AARCH64_ATTRIBUTES = 0x70000003,
@@ -866,6 +868,8 @@ enum DT
   DT_MIPS_PLTGOT = 0x70000032,
   // Points to the base of a writable PLT.
   DT_MIPS_RWPLT = 0x70000034,
+  // Relative offset of run time loader map, used for debugging.
+  DT_MIPS_RLD_MAP_REL = 0x70000035,
 
   DT_AUXILIARY = 0x7ffffffd,
   DT_USED = 0x7ffffffe,

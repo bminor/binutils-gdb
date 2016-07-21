@@ -466,12 +466,28 @@ if { ![check_ifunc_attribute_available] } {
 
 run_cc_link_tests [list \
     [list \
+	"Build pr18808a.o" \
+	"" \
+	"" \
+	{ pr18808a.c } \
+	"" \
+	"" \
+    ] \
+    [list \
 	"Build libpr18808.so" \
 	"-shared" \
 	"-fPIC -O2 -g" \
 	{ pr18808b.c } \
 	{} \
 	"libpr18808.so" \
+    ] \
+    [list \
+	"Build pr18841a.o" \
+	"" \
+	"" \
+	{ pr18841a.c } \
+	"" \
+	"" \
     ] \
     [list \
 	"Build libpr18841b.so" \
@@ -489,31 +505,71 @@ run_cc_link_tests [list \
 	{} \
 	"libpr18841c.so" \
     ] \
+    [list \
+	"Build libpr19784a.so" \
+	"-shared -Wl,-Bsymbolic-functions" \
+	"-fPIC -O2 -g" \
+	{ pr19784b.c pr19784c.c } \
+	{} \
+	"libpr19784a.so" \
+    ] \
+    [list \
+	"Build libpr19784b.so" \
+	"-shared -Wl,-Bsymbolic-functions" \
+	"-fPIC -O2 -g" \
+	{ pr19784c.c pr19784b.c } \
+	{} \
+	"libpr19784b.so" \
+    ] \
+    [list \
+	"Build pr19784a.o" \
+	"" \
+	"" \
+	{ pr19784a.c } \
+	"" \
+	"" \
+    ] \
 ]
 
 run_ld_link_exec_tests [] [list \
     [list \
 	"Run pr18808" \
-	"tmpdir/libpr18808.so" \
+	"tmpdir/pr18808a.o tmpdir/libpr18808.so" \
 	"" \
-	{ pr18808a.c } \
+	{ dummy.c } \
 	"pr18808" \
 	"pr18808.out" \
     ] \
     [list \
 	"Run pr18841 with libpr18841b.so" \
-	"tmpdir/libpr18841b.so" \
+	"tmpdir/pr18841a.o tmpdir/libpr18841b.so" \
 	"" \
-	{ pr18841a.c } \
+	{ dummy.c } \
 	"pr18841b" \
 	"pr18841.out" \
     ] \
     [list \
 	"Run pr18841 with libpr18841c.so" \
-	"tmpdir/libpr18841c.so" \
+	"--as-needed tmpdir/pr18841a.o tmpdir/libpr18841c.so" \
 	"" \
-	{ pr18841a.c } \
+	{ dummy.c } \
 	"pr18841c" \
 	"pr18841.out" \
+    ] \
+    [list \
+	"Run pr19784a" \
+	"tmpdir/pr19784a.o tmpdir/libpr19784a.so" \
+	"" \
+	{ dummy.c } \
+	"pr19784a" \
+	"pass.out" \
+    ] \
+    [list \
+	"Run pr19784b" \
+	"--as-needed tmpdir/pr19784a.o tmpdir/libpr19784b.so" \
+	"" \
+	{ dummy.c } \
+	"pr19784b" \
+	"pass.out" \
     ] \
 ]

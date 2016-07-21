@@ -26,14 +26,19 @@ if  {[gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile}1.o \
     return -1
 }
 
-# Start GDB and load object file, compute the offset of the
+if  {[gdb_compile [list ${binfile}1.o] \
+	  "${binfile}1" executable {}] != ""} {
+    return -1
+}
+
+# Start GDB and load executable file, compute the offset of the
 # instruction in bar returned from foo.  It is needed in the Dwarf
 # Assembler.
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}1.o
+gdb_load ${binfile}1
 
 set returned_from_foo ""
 
@@ -183,7 +188,7 @@ gdb_test_no_output "set print entry-values both"
 gdb_test_sequence "bt" "bt (1)" {
     "\[\r\n\]#0 .* foo \\(i=[-]?[0-9]+, i@entry=2, j=[-]?[0-9]+, j@entry=3\\)"
     "\[\r\n\]#1 .* bar \\(i=<optimized out>, i@entry=<optimized out>\\)"
-    "\[\r\n\]#2 .* main \\(\\)"
+    "\[\r\n\]#2 .* \.?main \\(\\)"
 }
 
 # Update global variables 'global1' and 'global2' and test that the
@@ -195,7 +200,7 @@ gdb_test_no_output "set var global2=11"
 gdb_test_sequence "bt" "bt (2)" {
     "\[\r\n\]#0 .* foo \\(i=[-]?[0-9]+, i@entry=10, j=[-]?[0-9]+, j@entry=11\\)"
     "\[\r\n\]#1 .* bar \\(i=<optimized out>, i@entry=<optimized out>\\)"
-    "\[\r\n\]#2 .* main \\(\\)"
+    "\[\r\n\]#2 .* \.?main \\(\\)"
 }
 
 # Restart GDB and trace.

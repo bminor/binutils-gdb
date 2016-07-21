@@ -240,15 +240,7 @@ inf_ptrace_detach (struct target_ops *ops, const char *args, int from_tty)
   pid_t pid = ptid_get_pid (inferior_ptid);
   int sig = 0;
 
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-			 target_pid_to_str (pid_to_ptid (pid)));
-      gdb_flush (gdb_stdout);
-    }
+  target_announce_detach (from_tty);
   if (args)
     sig = atoi (args);
 
@@ -264,6 +256,16 @@ inf_ptrace_detach (struct target_ops *ops, const char *args, int from_tty)
 #else
   error (_("This system does not support detaching from a process"));
 #endif
+
+  inf_ptrace_detach_success (ops);
+}
+
+/* See inf-ptrace.h.  */
+
+void
+inf_ptrace_detach_success (struct target_ops *ops)
+{
+  pid_t pid = ptid_get_pid (inferior_ptid);
 
   inferior_ptid = null_ptid;
   detach_inferior (pid);

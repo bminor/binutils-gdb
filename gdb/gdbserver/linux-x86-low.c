@@ -789,6 +789,9 @@ x86_linux_read_description (void)
 		case X86_XSTATE_AVX512_MASK:
 		  return tdesc_amd64_avx512_linux;
 
+		case X86_XSTATE_AVX_MPX_MASK:
+		  return tdesc_amd64_avx_mpx_linux;
+
 		case X86_XSTATE_MPX_MASK:
 		  return tdesc_amd64_mpx_linux;
 
@@ -835,6 +838,9 @@ x86_linux_read_description (void)
 
 	    case (X86_XSTATE_MPX_MASK):
 	      return tdesc_i386_mpx_linux;
+
+	    case (X86_XSTATE_AVX_MPX_MASK):
+	      return tdesc_i386_avx_mpx_linux;
 
 	    case (X86_XSTATE_AVX_MASK):
 	      return tdesc_i386_avx_linux;
@@ -985,25 +991,19 @@ x86_arch_setup (void)
    code.  This should only be called if LWP got a SYSCALL_SIGTRAP.  */
 
 static void
-x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno, int *sysret)
+x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
   if (use_64bit)
     {
       long l_sysno;
-      long l_sysret;
 
       collect_register_by_name (regcache, "orig_rax", &l_sysno);
-      collect_register_by_name (regcache, "rax", &l_sysret);
       *sysno = (int) l_sysno;
-      *sysret = (int) l_sysret;
     }
   else
-    {
-      collect_register_by_name (regcache, "orig_eax", sysno);
-      collect_register_by_name (regcache, "eax", sysret);
-    }
+    collect_register_by_name (regcache, "orig_eax", sysno);
 }
 
 static int
@@ -2855,6 +2855,8 @@ x86_get_ipa_tdesc_idx (void)
     return X86_TDESC_AVX;
   if (tdesc == tdesc_amd64_mpx_linux)
     return X86_TDESC_MPX;
+  if (tdesc == tdesc_amd64_avx_mpx_linux)
+    return X86_TDESC_AVX_MPX;
   if (tdesc == tdesc_amd64_avx512_linux || tdesc == tdesc_x32_avx512_linux)
     return X86_TDESC_AVX512;
 #endif
@@ -2867,6 +2869,8 @@ x86_get_ipa_tdesc_idx (void)
     return X86_TDESC_AVX;
   if (tdesc == tdesc_i386_mpx_linux)
     return X86_TDESC_MPX;
+  if (tdesc == tdesc_i386_avx_mpx_linux)
+    return X86_TDESC_AVX_MPX;
   if (tdesc == tdesc_i386_avx512_linux)
     return X86_TDESC_AVX512;
 
@@ -2928,6 +2932,7 @@ initialize_low_arch (void)
   init_registers_amd64_avx_linux ();
   init_registers_amd64_avx512_linux ();
   init_registers_amd64_mpx_linux ();
+  init_registers_amd64_avx_mpx_linux ();
 
   init_registers_x32_linux ();
   init_registers_x32_avx_linux ();
@@ -2942,6 +2947,7 @@ initialize_low_arch (void)
   init_registers_i386_avx_linux ();
   init_registers_i386_avx512_linux ();
   init_registers_i386_mpx_linux ();
+  init_registers_i386_avx_mpx_linux ();
 
   tdesc_i386_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_i386_linux_no_xml, tdesc_i386_linux);

@@ -162,7 +162,7 @@ gdb_test "b [gdb_get_line_number "before exit"]" \
 
 send_gdb "continue\n"
 gdb_expect {
-    -re ".*Program received signal SIGSEGV.*a_thread_local = 0;.*$gdb_prompt $" {
+    -re ".* received signal SIGSEGV.*a_thread_local = 0;.*$gdb_prompt $" {
         # This is the first symptom if the gcc and binutils versions
         # in use support TLS, but the system glibc does not.
         unsupported "continue to first thread: system does not support TLS"

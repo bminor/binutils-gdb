@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+#include <sys/mman.h>
 #include "tracepoint.h"
 #include "linux-x86-tdesc.h"
 
@@ -69,8 +70,8 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
 		     ((char *) buf) + x86_64_ft_collect_regmap[i]);
 }
 
-IP_AGENT_EXPORT_FUNC ULONGEST
-gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
+ULONGEST
+get_raw_reg (const unsigned char *raw_regs, int regnum)
 {
   if (regnum >= X86_64_NUM_FT_COLLECT_GREGS)
     return 0;
@@ -181,6 +182,8 @@ get_ipa_tdesc (int idx)
       return tdesc_amd64_avx_linux;
     case X86_TDESC_MPX:
       return tdesc_amd64_mpx_linux;
+    case X86_TDESC_AVX_MPX:
+      return tdesc_amd64_avx_mpx_linux;
     case X86_TDESC_AVX512:
       return tdesc_amd64_avx512_linux;
     default:
@@ -190,11 +193,29 @@ get_ipa_tdesc (int idx)
     }
 }
 
+/* Allocate buffer for the jump pads.  Since we're using 32-bit jumps
+   to reach them, and the executable is at low addresses, MAP_32BIT
+   works just fine.  Shared libraries, being allocated at the top,
+   are unfortunately out of luck.  */
+
+void *
+alloc_jump_pad_buffer (size_t size)
+{
+  void *res = mmap (NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+		    MAP_PRIVATE | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+
+  if (res == MAP_FAILED)
+    return NULL;
+
+  return res;
+}
+
 void
 initialize_low_tracepoint (void)
 {
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();
+  init_registers_amd64_avx_mpx_linux ();
   init_registers_amd64_mpx_linux ();
   init_registers_amd64_avx512_linux ();
 }

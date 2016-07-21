@@ -1375,7 +1375,8 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
     }
 
   return _bfd_relocate_contents (howto, input_bfd, relocation,
-				 contents + address);
+				 contents
+				 + address * bfd_octets_per_byte (input_bfd));
 }
 
 /* Relocate a given location using a given value and howto.  */
@@ -2302,6 +2303,11 @@ ENUMX
   BFD_RELOC_MICROMIPS_16_PCREL_S1
 ENUMDOC
   microMIPS PC-relative relocations.
+
+ENUM
+  BFD_RELOC_MIPS16_16_PCREL_S1
+ENUMDOC
+  MIPS16 PC-relative relocation.
 
 ENUM
   BFD_RELOC_MIPS_21_PCREL_S2
@@ -3667,6 +3673,8 @@ ENUMX
   BFD_RELOC_ARC_S25W_PCREL_PLT
 ENUMX
   BFD_RELOC_ARC_S21H_PCREL_PLT
+ENUMX
+  BFD_RELOC_ARC_NPS_CMEM16
 ENUMDOC
   ARC relocs.
 
@@ -6773,6 +6781,10 @@ ENUMDOC
   important as several tables in the AArch64 bfd backend are indexed
   by these enumerators; make sure they are all synced.
 ENUM
+  BFD_RELOC_AARCH64_NULL
+ENUMDOC
+  Deprecated AArch64 null relocation code.
+ENUM
   BFD_RELOC_AARCH64_NONE
 ENUMDOC
   AArch64 null relocation code.
@@ -7994,26 +8006,22 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	      switch (r)
 		{
 		case bfd_reloc_undefined:
-		  if (!((*link_info->callbacks->undefined_symbol)
-			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address,
-			 TRUE)))
-		    goto error_return;
+		  (*link_info->callbacks->undefined_symbol)
+		    (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+		     input_bfd, input_section, (*parent)->address, TRUE);
 		  break;
 		case bfd_reloc_dangerous:
 		  BFD_ASSERT (error_message != NULL);
-		  if (!((*link_info->callbacks->reloc_dangerous)
-			(link_info, error_message, input_bfd, input_section,
-			 (*parent)->address)))
-		    goto error_return;
+		  (*link_info->callbacks->reloc_dangerous)
+		    (link_info, error_message,
+		     input_bfd, input_section, (*parent)->address);
 		  break;
 		case bfd_reloc_overflow:
-		  if (!((*link_info->callbacks->reloc_overflow)
-			(link_info, NULL,
-			 bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 (*parent)->howto->name, (*parent)->addend,
-			 input_bfd, input_section, (*parent)->address)))
-		    goto error_return;
+		  (*link_info->callbacks->reloc_overflow)
+		    (link_info, NULL,
+		     bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+		     (*parent)->howto->name, (*parent)->addend,
+		     input_bfd, input_section, (*parent)->address);
 		  break;
 		case bfd_reloc_outofrange:
 		  /* PR ld/13730:

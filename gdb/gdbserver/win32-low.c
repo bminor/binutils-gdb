@@ -642,8 +642,8 @@ win32_create_inferior (char *program, char **program_args)
   if (path_ptr)
     {
       int size = cygwin_conv_path_list (CCP_POSIX_TO_WIN_A, path_ptr, NULL, 0);
-      orig_path = alloca (strlen (path_ptr) + 1);
-      new_path = alloca (size);
+      orig_path = (char *) alloca (strlen (path_ptr) + 1);
+      new_path = (char *) alloca (size);
       strcpy (orig_path, path_ptr);
       cygwin_conv_path_list (CCP_POSIX_TO_WIN_A, path_ptr, new_path, size);
       setenv ("PATH", new_path, 1);

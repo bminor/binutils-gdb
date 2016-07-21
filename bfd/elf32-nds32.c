@@ -2300,7 +2300,7 @@ nds32_insertion_sort (void *base, size_t nmemb, size_t size,
 {
   char *ptr = (char *) base;
   int i, j;
-  char *tmp = alloca (size);
+  char *tmp = xmalloc (size);
 
   /* If i is less than j, i is inserted before j.
 
@@ -2324,6 +2324,7 @@ nds32_insertion_sort (void *base, size_t nmemb, size_t size,
       memmove (ptr + (j + 1) * size, ptr + j * size, (i - j) * size);
       memcpy (ptr + j * size, tmp, size);
     }
+  free (tmp);
 }
 
 /* Sort relocation by r_offset.
@@ -5423,16 +5424,14 @@ check_reloc:
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      if (!((*info->callbacks->reloc_overflow)
-		    (info, (h ? &h->root : NULL), name, howto->name,
-		     (bfd_vma) 0, input_bfd, input_section, offset)))
-		return FALSE;
+	      (*info->callbacks->reloc_overflow)
+		(info, (h ? &h->root : NULL), name, howto->name,
+		 (bfd_vma) 0, input_bfd, input_section, offset);
 	      break;
 
 	    case bfd_reloc_undefined:
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, name, input_bfd, input_section, offset, TRUE)))
-		return FALSE;
+	      (*info->callbacks->undefined_symbol)
+		(info, name, input_bfd, input_section, offset, TRUE);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -5451,10 +5450,9 @@ check_reloc:
 	      errmsg = _("internal error: unknown error");
 	      /* Fall through.  */
 
-common_error:
-	      if (!((*info->callbacks->warning)
-		    (info, errmsg, name, input_bfd, input_section, offset)))
-		return FALSE;
+	    common_error:
+	      (*info->callbacks->warning) (info, errmsg, name, input_bfd,
+					   input_section, offset);
 	      break;
 	    }
 	}
@@ -5709,20 +5707,17 @@ nds32_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	      break;
 
 	    case DT_PLTGOT:
-	      /* name = ".got"; */
-	      s = htab->sgot->output_section;
+	      s = htab->sgotplt;
 	      goto get_vma;
 	    case DT_JMPREL:
-	      s = htab->srelplt->output_section;
+	      s = htab->srelplt;
 	    get_vma:
-	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->vma;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = htab->srelplt->output_section;
-	      BFD_ASSERT (s != NULL);
+	      s = htab->srelplt;
 	      dyn.d_un.d_val = s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -5739,7 +5734,7 @@ nds32_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 		 about changing the DT_RELA entry.  */
 	      if (htab->srelplt != NULL)
 		{
-		  s = htab->srelplt->output_section;
+		  s = htab->srelplt;
 		  dyn.d_un.d_val -= s->size;
 		}
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
@@ -13061,25 +13056,22 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
 	      switch (r)
 		{
 		case bfd_reloc_undefined:
-		  if (!((*link_info->callbacks->undefined_symbol)
-			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address, TRUE)))
-		    goto error_return;
+		  (*link_info->callbacks->undefined_symbol)
+		    (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+		     input_bfd, input_section, (*parent)->address, TRUE);
 		  break;
 		case bfd_reloc_dangerous:
 		  BFD_ASSERT (error_message != NULL);
-		  if (!((*link_info->callbacks->reloc_dangerous)
-			(link_info, error_message, input_bfd, input_section,
-			 (*parent)->address)))
-		    goto error_return;
+		  (*link_info->callbacks->reloc_dangerous)
+		    (link_info, error_message,
+		     input_bfd, input_section, (*parent)->address);
 		  break;
 		case bfd_reloc_overflow:
-		  if (!((*link_info->callbacks->reloc_overflow)
-			(link_info, NULL,
-			 bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 (*parent)->howto->name, (*parent)->addend,
-			 input_bfd, input_section, (*parent)->address)))
-		    goto error_return;
+		  (*link_info->callbacks->reloc_overflow)
+		    (link_info, NULL,
+		     bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+		     (*parent)->howto->name, (*parent)->addend,
+		     input_bfd, input_section, (*parent)->address);
 		  break;
 		case bfd_reloc_outofrange:
 		  /* PR ld/13730:

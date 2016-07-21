@@ -1,6 +1,7 @@
 .thumb
 .syntax unified
 
+T:
 blx r4
 blx r9
 bx  r4

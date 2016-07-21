@@ -31,7 +31,7 @@ if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile2} ${libfile} {debug c++}] 
     return -1
 }
 
-gdb_load_shlibs $libfile
+gdb_load_shlib $libfile
 
 if { ![runto_main] } {
     return -1

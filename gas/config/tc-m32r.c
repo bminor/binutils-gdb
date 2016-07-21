@@ -164,7 +164,7 @@ struct m32r_hi_fixup
 
 static struct m32r_hi_fixup *m32r_hi_fixup_list;
 
-struct
+static const struct
 {
   enum bfd_architecture bfd_mach;
   int mach_flags;
@@ -266,7 +266,7 @@ parallel (void)
 }
 
 int
-md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
@@ -585,7 +585,7 @@ debug_sym (int ignore ATTRIBUTE_UNUSED)
 
   else
     {
-      lnk = (sym_linkS *) xmalloc (sizeof (sym_linkS));
+      lnk = XNEW (sym_linkS);
       lnk->symbol = symbolP;
       lnk->next = debug_sym_link;
       debug_sym_link = lnk;
@@ -613,7 +613,7 @@ expand_debug_syms (sym_linkS *syms, int align)
     {
       symbolS *symbolP = syms->symbol;
       next_syms = syms->next;
-      input_line_pointer = ".\n";
+      input_line_pointer = (char *) ".\n";
       pseudo_set (symbolP);
       free ((char *) syms);
     }
@@ -1898,7 +1898,7 @@ m32r_record_hi16 (int reloc_type,
   gas_assert (reloc_type == BFD_RELOC_M32R_HI16_SLO
 	  || reloc_type == BFD_RELOC_M32R_HI16_ULO);
 
-  hi_fixup = xmalloc (sizeof (* hi_fixup));
+  hi_fixup = XNEW (struct m32r_hi_fixup);
   hi_fixup->fixp = fixP;
   hi_fixup->seg  = now_seg;
   hi_fixup->next = m32r_hi_fixup_list;
@@ -2106,7 +2106,7 @@ md_number_to_chars (char *buf, valueT val, int n)
 /* Equal to MAX_PRECISION in atof-ieee.c.  */
 #define MAX_LITTLENUMS 6
 
-char *
+const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
@@ -2195,9 +2195,9 @@ tc_gen_reloc (asection * section, fixS * fixP)
   arelent * reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = xmalloc (sizeof (* reloc));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
 

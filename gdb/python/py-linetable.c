@@ -169,7 +169,6 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
   struct symtab *symtab;
   gdb_py_longest py_line;
   struct linetable_entry *best_entry = NULL;
-  linetable_entry_object *result;
   VEC (CORE_ADDR) *pcs = NULL;
   PyObject *tuple;
 
@@ -239,7 +238,6 @@ ltpy_get_all_source_lines (PyObject *self, PyObject *args)
   Py_ssize_t index;
   PyObject *source_list, *source_dict, *line;
   struct linetable_entry *item;
-  Py_ssize_t list_size;
 
   LTPY_REQUIRE_VALID (self, symtab);
 
@@ -295,7 +293,6 @@ static PyObject *
 ltpy_is_valid (PyObject *self, PyObject *args)
 {
   struct symtab *symtab = NULL;
-  linetable_object *obj = (linetable_object *) self;
 
   symtab = symtab_object_to_symtab (get_symtab (self));
 
@@ -427,7 +424,6 @@ ltpy_iternext (PyObject *self)
 {
   ltpy_iterator_object *iter_obj = (ltpy_iterator_object *) self;
   struct symtab *symtab;
-  int index;
   PyObject *obj;
   struct linetable_entry *item;
 

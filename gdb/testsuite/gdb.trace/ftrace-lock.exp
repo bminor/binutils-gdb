@@ -48,7 +48,7 @@ if ![gdb_target_supports_trace] {
 
 # Compile the test case with the in-process agent library.
 set libipa [get_in_proc_agent]
-gdb_load_shlibs $libipa
+set remote_libipa [gdb_load_shlib $libipa]
 
 lappend options shlib=$libipa
 
@@ -64,7 +64,7 @@ if ![runto_main] {
     return -1
 }
 
-if { [gdb_test "info sharedlibrary" ".*${libipa}.*" "IPA loaded"] != 0 } {
+if { [gdb_test "info sharedlibrary" ".*${remote_libipa}.*" "IPA loaded"] != 0 } {
     untested "Could not find IPA lib loaded"
     return 1
 }

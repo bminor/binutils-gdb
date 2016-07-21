@@ -78,9 +78,7 @@ objfpy_get_filename (PyObject *self, void *closure)
   objfile_object *obj = (objfile_object *) self;
 
   if (obj->objfile)
-    return PyString_Decode (objfile_name (obj->objfile),
-			    strlen (objfile_name (obj->objfile)),
-			    host_charset (), NULL);
+    return host_string_to_python_string (objfile_name (obj->objfile));
   Py_RETURN_NONE;
 }
 
@@ -96,8 +94,7 @@ objfpy_get_username (PyObject *self, void *closure)
     {
       const char *username = obj->objfile->original_name;
 
-      return PyString_Decode (username, strlen (username),
-			      host_charset (), NULL);
+      return host_string_to_python_string (username);
     }
 
   Py_RETURN_NONE;
@@ -152,8 +149,7 @@ objfpy_get_build_id (PyObject *self, void *closure)
       char *hex_form = make_hex_string (build_id->data, build_id->size);
       PyObject *result;
 
-      result = PyString_Decode (hex_form, strlen (hex_form),
-				host_charset (), NULL);
+      result = host_string_to_python_string (hex_form);
       xfree (hex_form);
       return result;
     }
@@ -200,7 +196,10 @@ static int
 objfpy_initialize (objfile_object *self)
 {
   self->objfile = NULL;
-  self->dict = NULL;
+
+  self->dict = PyDict_New ();
+  if (self->dict == NULL)
+    return 0;
 
   self->printers = PyList_New (0);
   if (self->printers == NULL)

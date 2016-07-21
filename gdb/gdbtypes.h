@@ -511,7 +511,7 @@ union field_location
      gdbarch_bits_big_endian=0 targets, it is the bit offset to
      the LSB.  */
 
-  int bitpos;
+  LONGEST bitpos;
 
   /* * Enum value.  */
   LONGEST enumval;
@@ -1676,13 +1676,17 @@ extern struct type *init_type (enum type_code, int, int, const char *,
 			       struct objfile *);
 
 /* Helper functions to construct architecture-owned types.  */
-extern struct type *arch_type (struct gdbarch *, enum type_code, int, char *);
-extern struct type *arch_integer_type (struct gdbarch *, int, int, char *);
-extern struct type *arch_character_type (struct gdbarch *, int, int, char *);
-extern struct type *arch_boolean_type (struct gdbarch *, int, int, char *);
-extern struct type *arch_float_type (struct gdbarch *, int, char *,
+extern struct type *arch_type (struct gdbarch *, enum type_code, int,
+			       const char *);
+extern struct type *arch_integer_type (struct gdbarch *, int, int,
+				       const char *);
+extern struct type *arch_character_type (struct gdbarch *, int, int,
+					 const char *);
+extern struct type *arch_boolean_type (struct gdbarch *, int, int,
+				       const char *);
+extern struct type *arch_float_type (struct gdbarch *, int, const char *,
 				     const struct floatformat **);
-extern struct type *arch_complex_type (struct gdbarch *, char *,
+extern struct type *arch_complex_type (struct gdbarch *, const char *,
 				       struct type *);
 
 /* Helper functions to construct a struct or record type.  An
@@ -1692,22 +1696,26 @@ extern struct type *arch_complex_type (struct gdbarch *, char *,
    field packed against the previous.  */
 
 extern struct type *arch_composite_type (struct gdbarch *gdbarch,
-					 char *name, enum type_code code);
-extern void append_composite_type_field (struct type *t, char *name,
+					 const char *name, enum type_code code);
+extern void append_composite_type_field (struct type *t, const char *name,
 					 struct type *field);
 extern void append_composite_type_field_aligned (struct type *t,
-						 char *name,
+						 const char *name,
 						 struct type *field,
 						 int alignment);
-struct field *append_composite_type_field_raw (struct type *t, char *name,
+struct field *append_composite_type_field_raw (struct type *t, const char *name,
 					       struct type *field);
 
 /* Helper functions to construct a bit flags type.  An initially empty
    type is created using arch_flag_type().  Flags are then added using
-   append_flag_type_flag().  */
+   append_flag_type_field() and append_flag_type_flag().  */
 extern struct type *arch_flags_type (struct gdbarch *gdbarch,
-				     char *name, int length);
-extern void append_flags_type_flag (struct type *type, int bitpos, char *name);
+				     const char *name, int length);
+extern void append_flags_type_field (struct type *type,
+				     int start_bitpos, int nr_bits,
+				     struct type *field_type, const char *name);
+extern void append_flags_type_flag (struct type *type, int bitpos,
+				    const char *name);
 
 extern void make_vector_type (struct type *array_type);
 extern struct type *init_vector_type (struct type *elt_type, int n);
@@ -1822,6 +1830,9 @@ extern struct dynamic_prop *get_dyn_prop
 extern void add_dyn_prop
   (enum dynamic_prop_node_kind kind, struct dynamic_prop prop,
    struct type *type, struct objfile *objfile);
+
+extern void remove_dyn_prop (enum dynamic_prop_node_kind prop_kind,
+                             struct type *type);
 
 extern struct type *check_typedef (struct type *);
 

@@ -259,6 +259,9 @@
   <syscall name="statfs64" number="265"/>
   <syscall name="fstatfs64" number="266"/>
   <syscall name="remap_file_pages" number="267"/>
+  <syscall name="mbind" number="268"/>
+  <syscall name="get_mempolicy" number="269"/>
+  <syscall name="set_mempolicy" number="270"/>
   <syscall name="mq_open" number="271"/>
   <syscall name="mq_unlink" number="272"/>
   <syscall name="mq_timedsend" number="273"/>
@@ -275,6 +278,7 @@
   <syscall name="inotify_init" number="284"/>
   <syscall name="inotify_add_watch" number="285"/>
   <syscall name="inotify_rm_watch" number="286"/>
+  <syscall name="migrate_pages" number="287"/>
   <syscall name="openat" number="288"/>
   <syscall name="mkdirat" number="289"/>
   <syscall name="mknodat" number="290"/>
@@ -297,6 +301,7 @@
   <syscall name="sync_file_range" number="307"/>
   <syscall name="tee" number="308"/>
   <syscall name="vmsplice" number="309"/>
+  <syscall name="move_pages" number="310"/>
   <syscall name="getcpu" number="311"/>
   <syscall name="epoll_pwait" number="312"/>
   <syscall name="utimes" number="313"/>
@@ -339,4 +344,24 @@
   <syscall name="s390_pci_mmio_write" number="352"/>
   <syscall name="s390_pci_mmio_read" number="353"/>
   <syscall name="execveat" number="354"/>
+  <syscall name="userfaultfd" number="355"/>
+  <syscall name="membarrier" number="356"/>
+  <syscall name="recvmmsg" number="357"/>
+  <syscall name="sendmmsg" number="358"/>
+  <syscall name="socket" number="359"/>
+  <syscall name="socketpair" number="360"/>
+  <syscall name="bind" number="361"/>
+  <syscall name="connect" number="362"/>
+  <syscall name="listen" number="363"/>
+  <syscall name="accept4" number="364"/>
+  <syscall name="getsockopt" number="365"/>
+  <syscall name="setsockopt" number="366"/>
+  <syscall name="getsockname" number="367"/>
+  <syscall name="getpeername" number="368"/>
+  <syscall name="sendto" number="369"/>
+  <syscall name="sendmsg" number="370"/>
+  <syscall name="recvfrom" number="371"/>
+  <syscall name="recvmsg" number="372"/>
+  <syscall name="shutdown" number="373"/>
+  <syscall name="mlock2" number="374"/>
 </syscalls_info>

@@ -166,7 +166,7 @@ thread_cancel_execution_command (struct thread_info *thr)
 {
   if (thr->thread_fsm != NULL)
     {
-      thread_fsm_clean_up (thr->thread_fsm);
+      thread_fsm_clean_up (thr->thread_fsm, thr);
       thread_fsm_delete (thr->thread_fsm);
       thr->thread_fsm = NULL;
     }
@@ -1201,7 +1201,6 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
   ptid_t current_ptid;
   struct cleanup *old_chain;
   const char *extra_info, *name, *target_id;
-  int current_thread = -1;
   struct inferior *inf;
   int default_inf_num = current_inferior ()->num;
 
@@ -1260,9 +1259,6 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
     {
       struct cleanup *chain2;
       int core;
-
-      if (ptid_equal (tp->ptid, current_ptid))
-	current_thread = tp->global_num;
 
       if (!should_print_thread (requested_threads, default_inf_num,
 				global_ids, pid, tp))

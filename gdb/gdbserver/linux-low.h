@@ -241,11 +241,9 @@ struct linux_target_ops
   /* See target.h.  */
   int (*supports_hardware_single_step) (void);
 
-  /* Fill *SYSNO with the syscall nr trapped.  Fill *SYSRET with the
-     return code.  Only to be called when inferior is stopped
-     due to SYSCALL_SIGTRAP.  */
-  void (*get_syscall_trapinfo) (struct regcache *regcache,
-				int *sysno, int *sysret);
+  /* Fill *SYSNO with the syscall nr trapped.  Only to be called when
+     inferior is stopped due to SYSCALL_SIGTRAP.  */
+  void (*get_syscall_trapinfo) (struct regcache *regcache, int *sysno);
 
   /* See target.h.  */
   int (*get_ipa_tdesc_idx) (void);
@@ -364,10 +362,6 @@ struct lwp_info
   /* When collecting_fast_tracepoint is first found to be 1, we insert
      a exit-jump-pad-quickly breakpoint.  This is it.  */
   struct breakpoint *exit_jump_pad_bkpt;
-
-  /* True if the LWP was seen stop at an internal breakpoint and needs
-     stepping over later when it is resumed.  */
-  int need_step_over;
 
 #ifdef USE_THREAD_DB
   int thread_known;

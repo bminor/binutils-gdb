@@ -249,7 +249,7 @@ app_push (void)
 {
   struct app_save *saved;
 
-  saved = (struct app_save *) xmalloc (sizeof (*saved));
+  saved = XNEW (struct app_save);
   saved->state = state;
   saved->old_state = old_state;
   saved->out_string = out_string;
@@ -259,7 +259,7 @@ app_push (void)
     saved->saved_input = NULL;
   else
     {
-      saved->saved_input = (char *) xmalloc (saved_input_len);
+      saved->saved_input = XNEWVEC (char, saved_input_len);
       memcpy (saved->saved_input, saved_input, saved_input_len);
       saved->saved_input_len = saved_input_len;
     }

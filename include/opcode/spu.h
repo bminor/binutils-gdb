@@ -83,7 +83,7 @@ struct spu_opcode
 {
    spu_iformat insn_type;
    unsigned int opcode;
-   char *mnemonic;
+   const char *mnemonic;
    int arg[5];
 };
 

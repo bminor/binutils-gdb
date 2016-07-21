@@ -25,19 +25,4 @@
 
 extern struct target_ops *i386bsd_target (void);
 
-/* Low level i386 XSAVE info.  */
-extern size_t i386bsd_xsave_len;
-
-/* low level i386 debug register functions used in i386fbsd-nat.c.  */
-
-extern void i386bsd_dr_set_control (unsigned long control);
-
-extern void i386bsd_dr_set_addr (int regnum, CORE_ADDR addr);
-
-extern CORE_ADDR i386bsd_dr_get_addr (int regnum);
-
-extern unsigned long i386bsd_dr_get_status (void);
-
-extern unsigned long i386bsd_dr_get_control (void);
-
 #endif /* i386bsd-nat.h */

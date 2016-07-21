@@ -246,6 +246,14 @@ if { [dump_common1 $test1c2] } {
 #
 # The following tests are for when we are generating STT_COMMON symbols only.
 #
+# Handling of -z common and -z nocommon flags is enabled only if
+# $GENERATE_SHLIB_SCRIPT is turned on in emulparams i.e. shared
+# libraries are supported.
+
+if ![check_shared_lib_support]  {
+    return
+}
+
 stt_common_test "-static -e 0" "static link of common symbols"
 stt_common_test "-shared"      "shared link of common symbols"
 stt_common_test "-pie"         "position independent link of common symbols"

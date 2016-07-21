@@ -20,13 +20,15 @@
 #ifndef MI_MAIN_H
 #define MI_MAIN_H
 
+struct ui_file;
+
 extern void mi_load_progress (const char *section_name,
 			      unsigned long sent_so_far,
 			      unsigned long total_section,
 			      unsigned long total_sent,
 			      unsigned long grand_total);
 
-extern void mi_print_timing_maybe (void);
+extern void mi_print_timing_maybe (struct ui_file *file);
 
 /* Whether MI is in async mode.  */
 

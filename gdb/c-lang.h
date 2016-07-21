@@ -63,7 +63,7 @@ DEF_ENUM_FLAGS_TYPE (enum c_string_type_values, c_string_type);
 
 extern int c_parse (struct parser_state *);
 
-extern void c_error (char *);
+extern void c_yyerror (char *);
 
 extern int c_parse_escape (const char **, struct obstack *);
 
@@ -123,14 +123,14 @@ extern void cp_print_class_member (const gdb_byte *, struct type *,
 				   struct ui_file *, char *);
 
 extern void cp_print_value_fields (struct type *, struct type *,
-				   const gdb_byte *, int, CORE_ADDR,
+				   const gdb_byte *, LONGEST, CORE_ADDR,
 				   struct ui_file *, int,
 				   const struct value *,
 				   const struct value_print_options *,
 				   struct type **, int);
 
 extern void cp_print_value_fields_rtti (struct type *,
-					const gdb_byte *, int, CORE_ADDR,
+					const gdb_byte *, LONGEST, CORE_ADDR,
 					struct ui_file *, int,
 					const struct value *,
 					const struct value_print_options *,

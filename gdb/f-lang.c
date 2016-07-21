@@ -235,6 +235,13 @@ f_make_symbol_completion_list (const char *text, const char *word,
   return default_make_symbol_completion_list_break_on (text, word, ":", code);
 }
 
+static const char *f_extensions[] =
+{
+  ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
+  ".f90", ".F90", ".f95", ".F95", ".f03", ".F03", ".f08", ".F08",
+  NULL
+};
+
 const struct language_defn f_language_defn =
 {
   "fortran",
@@ -244,9 +251,10 @@ const struct language_defn f_language_defn =
   case_sensitive_off,
   array_column_major,
   macro_expansion_no,
+  f_extensions,
   &exp_descriptor_standard,
   f_parse,			/* parser */
-  f_error,			/* parser error function */
+  f_yyerror,			/* parser error function */
   null_post_parser,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
@@ -260,7 +268,14 @@ const struct language_defn f_language_defn =
   NULL,                    	/* name_of_this */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
+
+  /* We could support demangling here to provide module namespaces
+     also for inferiors with only minimal symbol table (ELF symbols).
+     Just the mangling standard is not standardized across compilers
+     and there is no DW_AT_producer available for inferiors with only
+     the ELF symbols to check the mangling kind.  */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   f_op_print_tab,		/* expression operators for printing */

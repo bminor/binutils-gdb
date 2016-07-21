@@ -23,8 +23,7 @@
 # test.
 
 if [target_info exists gdb,cannot_call_functions] {
-    setup_xfail "*-*-*"
-    fail "This target can not call functions"
+    unsupported "This target can not call functions"
     continue
 }
 

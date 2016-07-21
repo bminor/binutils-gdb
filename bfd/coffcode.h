@@ -4076,6 +4076,8 @@ coff_write_object_contents (bfd * abfd)
     internal_f.f_flags |= F_DYNLOAD;
 #endif
 
+  memset (&internal_a, 0, sizeof internal_a);
+
   /* Set up architecture-dependent stuff.  */
   {
     unsigned int magic = 0;
@@ -5477,6 +5479,8 @@ dummy_reloc16_extra_cases (bfd *abfd ATTRIBUTE_UNUSED,
 #define coff_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type
 #define coff_bfd_link_split_section  _bfd_generic_link_split_section
+
+#define coff_bfd_link_check_relocs   _bfd_generic_link_check_relocs
 
 #ifndef coff_start_final_link
 #define coff_start_final_link NULL
