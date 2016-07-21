@@ -996,7 +996,7 @@ find_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind)
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     if (bp->type == type && bp->raw->pc == addr
 	&& (kind == -1 || bp->raw->kind == kind))
-      return (gdb_breakpoint *) bp;
+      return (struct gdb_breakpoint *) bp;
 
   return NULL;
 }
