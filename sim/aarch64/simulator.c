@@ -7754,7 +7754,7 @@ fsqrts (sim_cpu *cpu)
   unsigned sd = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  aarch64_set_FP_float (cpu, sd, sqrt (aarch64_get_FP_float (cpu, sn)));
+  aarch64_set_FP_float (cpu, sd, sqrtf (aarch64_get_FP_float (cpu, sn)));
 }
 
 /* Double square root.  */
