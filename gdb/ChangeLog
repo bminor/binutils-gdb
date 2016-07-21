@@ -1,5 +1,16 @@
 2016-07-21  Pedro Alves  <palves@redhat.com>
 
+	* go32-nat.c (go32_create_inferior): Add cast.
+	* ser-go32.c (dos_noop): Delete.
+	(dos_flush_output, dos_setparity, dos_drain_output): New
+	functions.
+	(dos_write): Add cast.
+	(dos_ops): Use dos_flush_output, dos_setparity and
+	dos_drain_output.
+	* top.c (do_chdir_cleanup): Add cast.
+
+2016-07-21  Pedro Alves  <palves@redhat.com>
+
 	* windows-nat.c (handle_exception): Remove "th".
 
 2016-07-21  Pedro Alves  <palves@redhat.com>
