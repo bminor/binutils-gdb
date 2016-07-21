@@ -1,5 +1,9 @@
 2016-07-21  Pedro Alves  <palves@redhat.com>
 
+	* windows-nat.c (handle_exception): Remove "th".
+
+2016-07-21  Pedro Alves  <palves@redhat.com>
+
 	* varobj.c (varobj_value_get_print_value): Move "gdbarch" to block
 	scope that uses it.
 

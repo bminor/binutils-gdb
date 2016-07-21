@@ -1014,13 +1014,12 @@ display_selectors (char * args, int from_tty)
 static int
 handle_exception (struct target_waitstatus *ourstatus)
 {
-  windows_thread_info *th;
   DWORD code = current_event.u.Exception.ExceptionRecord.ExceptionCode;
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
   /* Record the context of the current thread.  */
-  th = thread_rec (current_event.dwThreadId, -1);
+  thread_rec (current_event.dwThreadId, -1);
 
   switch (code)
     {
