@@ -2641,7 +2641,10 @@ resume_stopped_resumed_lwps (struct inferior_list_entry *entry)
       && !lp->status_pending_p
       && thread->last_status.kind == TARGET_WAITKIND_IGNORE)
     {
-      int step = thread->last_resume_kind == resume_step;
+      int step = 0;
+
+      if (thread->last_resume_kind == resume_step)
+	step = maybe_hw_step (thread);
 
       if (debug_threads)
 	debug_printf ("RSRL: resuming stopped-resumed LWP %s at %s: step=%d\n",
@@ -3700,6 +3703,66 @@ linux_wait_1 (ptid_t ptid,
 
   /* Alright, we're going to report a stop.  */
 
+  /* Remove reinsert breakpoints.  */
+  if (can_software_single_step ())
+    {
+      /* Remove reinsert breakpoints or not.  It it is true, stop all
+	 lwps, so that other threads won't hit the breakpoint in the
+	 staled memory.  */
+      int remove_reinsert_breakpoints_p = 0;
+
+      if (non_stop)
+	{
+	  remove_reinsert_breakpoints_p
+	    = has_reinsert_breakpoints (current_thread);
+	}
+      else
+	{
+	  /* In all-stop, a stop reply cancels all previous resume
+	     requests.  Delete all reinsert breakpoints.  */
+	  struct inferior_list_entry *inf, *tmp;
+
+	  ALL_INFERIORS (&all_threads, inf, tmp)
+	    {
+	      struct thread_info *thread = (struct thread_info *) inf;
+
+	      if (has_reinsert_breakpoints (thread))
+		{
+		  remove_reinsert_breakpoints_p = 1;
+		  break;
+		}
+	    }
+	}
+
+      if (remove_reinsert_breakpoints_p)
+	{
+	  /* If we remove reinsert breakpoints from memory, stop all lwps,
+	     so that other threads won't hit the breakpoint in the staled
+	     memory.  */
+	  stop_all_lwps (0, event_child);
+
+	  if (non_stop)
+	    {
+	      gdb_assert (has_reinsert_breakpoints (current_thread));
+	      delete_reinsert_breakpoints (current_thread);
+	    }
+	  else
+	    {
+	      struct inferior_list_entry *inf, *tmp;
+
+	      ALL_INFERIORS (&all_threads, inf, tmp)
+		{
+		  struct thread_info *thread = (struct thread_info *) inf;
+
+		  if (has_reinsert_breakpoints (thread))
+		    delete_reinsert_breakpoints (thread);
+		}
+	    }
+
+	  unstop_all_lwps (0, event_child);
+	}
+    }
+
   if (!stabilizing_threads)
     {
       /* In all-stop, stop all threads.  */
@@ -4352,12 +4415,6 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	}
 
       step = maybe_hw_step (thread);
-    }
-  else
-    {
-      /* If the thread isn't doing step-over, there shouldn't be any
-	 reinsert breakpoints.  */
-      gdb_assert (!has_reinsert_breakpoints (thread));
     }
 
   if (fast_tp_collecting == 1)
@@ -5166,7 +5223,14 @@ proceed_one_lwp (struct inferior_list_entry *entry, void *except)
       if (debug_threads)
 	debug_printf ("   stepping LWP %ld, client wants it stepping\n",
 		      lwpid_of (thread));
-      step = 1;
+
+      /* If resume_step is requested by GDB, install reinsert
+	 breakpoints when the thread is about to be actually resumed if
+	 the reinsert breakpoints weren't removed.  */
+      if (can_software_single_step () && !has_reinsert_breakpoints (thread))
+	install_software_single_step_breakpoints (lwp);
+
+      step = maybe_hw_step (thread);
     }
   else if (lwp->bp_reinsert != 0)
     {

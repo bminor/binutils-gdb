@@ -1,5 +1,16 @@
 2016-07-21  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (resume_stopped_resumed_lwps): If resume request
+	is resume_step, call maybe_hw_step.
+	(linux_wait_1): Stop all threads, remove reinsert breakpoints,
+	and unstop them.
+	(linux_resume_one_lwp_throw): Don't assert the thread has reinsert
+	breakpoints or not.
+	(proceed_one_lwp): If resume request is resume_step, install
+	reinsert breakpoints and call maybe_hw_step.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (proceed_one_lwp): Declare.
 	(linux_resume_one_thread): Remove local variable 'step'.
 	Lift code enqueue signal.  Call proceed_one_lwp instead of
