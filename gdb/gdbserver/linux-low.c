@@ -268,6 +268,7 @@ static void enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t 
 static void complete_ongoing_step_over (void);
 static int linux_low_ptrace_options (int attached);
 static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
+static int proceed_one_lwp (struct inferior_list_entry *entry, void *except);
 
 /* When the event-loop is doing a step-over, this points at the thread
    being stepped.  */
@@ -4912,7 +4913,6 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
 {
   struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
-  int step;
   int leave_all_stopped = * (int *) arg;
   int leave_pending;
 
@@ -4979,36 +4979,35 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
 		   || lwp->status_pending_p
 		   || leave_all_stopped);
 
+  /* If we have a new signal, enqueue the signal.  */
+  if (lwp->resume->sig != 0)
+    {
+      siginfo_t info, *info_p;
+
+      /* If this is the same signal we were previously stopped by,
+	 make sure to queue its siginfo.  */
+      if (WIFSTOPPED (lwp->last_status)
+	  && WSTOPSIG (lwp->last_status) == lwp->resume->sig
+	  && ptrace (PTRACE_GETSIGINFO, lwpid_of (thread),
+		     (PTRACE_TYPE_ARG3) 0, &info) == 0)
+	info_p = &info;
+      else
+	info_p = NULL;
+
+      enqueue_pending_signal (lwp, lwp->resume->sig, info_p);
+    }
+
   if (!leave_pending)
     {
       if (debug_threads)
 	debug_printf ("resuming LWP %ld\n", lwpid_of (thread));
 
-      step = (lwp->resume->kind == resume_step);
-      linux_resume_one_lwp (lwp, step, lwp->resume->sig, NULL);
+      proceed_one_lwp (entry, NULL);
     }
   else
     {
       if (debug_threads)
 	debug_printf ("leaving LWP %ld stopped\n", lwpid_of (thread));
-
-      /* If we have a new signal, enqueue the signal.  */
-      if (lwp->resume->sig != 0)
-	{
-	  siginfo_t info, *info_p;
-
-	  /* If this is the same signal we were previously stopped by,
-	     make sure to queue its siginfo.  */
-	  if (WIFSTOPPED (lwp->last_status)
-	      && WSTOPSIG (lwp->last_status) == lwp->resume->sig
-	      && ptrace (PTRACE_GETSIGINFO, lwpid_of (thread),
-			 (PTRACE_TYPE_ARG3) 0, &info) == 0)
-	    info_p = &info;
-	  else
-	    info_p = NULL;
-
-	  enqueue_pending_signal (lwp, lwp->resume->sig, info_p);
-	}
     }
 
   thread->last_status.kind = TARGET_WAITKIND_IGNORE;
