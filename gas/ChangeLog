@@ -1,3 +1,7 @@
+2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2016-07-20  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/dsp.d: New file.

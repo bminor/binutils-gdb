@@ -1,3 +1,8 @@
+2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.m4 (BFD_VERSION): Set to 2.27.51.
+	* configure: Regenerated.
+
 2016-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (_bfd_elf_filter_global_symbols): Skip local symbols.
