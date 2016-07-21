@@ -33,12 +33,6 @@
 	* testsuite/ld-elf/empty-implib.out: Add expected final error.
 	* testsuite/ld-elf/implib.rd: Update.
 
-2016-07-20  H.J. Lu  <hongjiu.lu@intel.com>
-
-	PR ld/20376
-	* elf.c (assign_file_positions_for_load_sections): Also check
-	p_paddr for program header space.
-
 2016-07-20  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (exp_unop, exp_binop, exp_trinop, exp_nameop): Don't

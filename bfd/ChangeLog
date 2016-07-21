@@ -13,6 +13,12 @@
 	* elf.c (elfcore_grok_freebsd_psinfo): Check for minimum note size
 	and handle pr_pid if present.
 
+2016-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20376
+	* elf.c (assign_file_positions_for_load_sections): Also check
+	p_paddr for program header space.
+
 2016-07-20  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_howto_raw <R_PPC64_PLTREL32>): Put
