@@ -141,7 +141,8 @@ int gdb_breakpoint_here (CORE_ADDR where);
 
 /* Create a new breakpoint at WHERE, and call HANDLER when
    it is hit.  HANDLER should return 1 if the breakpoint
-   should be deleted, 0 otherwise.  */
+   should be deleted, 0 otherwise.  The type of the created
+   breakpoint is other_breakpoint.  */
 
 struct breakpoint *set_breakpoint_at (CORE_ADDR where,
 				      int (*handler) (CORE_ADDR));

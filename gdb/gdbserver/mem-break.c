@@ -785,18 +785,27 @@ set_breakpoint (enum bkpt_type type, enum raw_bkpt_type raw_type,
   return bp;
 }
 
-/* See mem-break.h  */
+/* Set breakpoint of TYPE on address WHERE with handler HANDLER.  */
 
-struct breakpoint *
-set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
+static struct breakpoint *
+set_breakpoint_type_at (enum bkpt_type type, CORE_ADDR where,
+			int (*handler) (CORE_ADDR))
 {
   int err_ignored;
   CORE_ADDR placed_address = where;
   int breakpoint_kind = target_breakpoint_kind_from_pc (&placed_address);
 
-  return set_breakpoint (other_breakpoint, raw_bkpt_type_sw,
+  return set_breakpoint (type, raw_bkpt_type_sw,
 			 placed_address, breakpoint_kind, handler,
 			 &err_ignored);
+}
+
+/* See mem-break.h  */
+
+struct breakpoint *
+set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
+{
+  return set_breakpoint_type_at (other_breakpoint, where, handler);
 }
 
 
@@ -1411,8 +1420,7 @@ set_reinsert_breakpoint (CORE_ADDR stop_at)
 {
   struct breakpoint *bp;
 
-  bp = set_breakpoint_at (stop_at, NULL);
-  bp->type = reinsert_breakpoint;
+  bp = set_breakpoint_type_at (reinsert_breakpoint, stop_at, NULL);
 }
 
 void

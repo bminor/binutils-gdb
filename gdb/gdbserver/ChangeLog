@@ -1,3 +1,11 @@
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (set_breakpoint_at): Rename it to ...
+	(set_breakpoint_type_at): ... it.
+	(set_breakpoint_at): Call set_breakpoint_type_at.
+	(set_reinsert_breakpoint): Call set_breakpoint_type_at.
+	* mem-break.h (set_breakpoint_at): Update comments.
+
 2016-07-12  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* linux-nios2-low.c (nios2_fill_gregset): Add type cast
