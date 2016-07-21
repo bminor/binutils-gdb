@@ -211,6 +211,9 @@ struct other_breakpoint
 struct reinsert_breakpoint
 {
   struct breakpoint base;
+
+  /* Thread the reinsert breakpoint belongs to.  */
+  ptid_t ptid;
 };
 
 /* Return the breakpoint size from its kind.  */
@@ -1476,17 +1479,21 @@ gdb_breakpoint_here (CORE_ADDR where)
 }
 
 void
-set_reinsert_breakpoint (CORE_ADDR stop_at)
+set_reinsert_breakpoint (CORE_ADDR stop_at, ptid_t ptid)
 {
-  struct breakpoint *bp;
+  struct reinsert_breakpoint *bp;
 
-  bp = set_breakpoint_type_at (reinsert_breakpoint, stop_at, NULL);
+  gdb_assert (ptid_get_pid (current_ptid) == ptid_get_pid (ptid));
+
+  bp = (struct reinsert_breakpoint *) set_breakpoint_type_at (reinsert_breakpoint,
+							      stop_at, NULL);
+  bp->ptid = ptid;
 }
 
 void
-delete_reinsert_breakpoints (void)
+delete_reinsert_breakpoints (struct thread_info *thread)
 {
-  struct process_info *proc = current_process ();
+  struct process_info *proc = get_thread_process (thread);
   struct breakpoint *bp, **bp_link;
 
   bp = proc->breakpoints;
@@ -1494,11 +1501,17 @@ delete_reinsert_breakpoints (void)
 
   while (bp)
     {
-      if (bp->type == reinsert_breakpoint)
+      if (bp->type == reinsert_breakpoint
+	  && ptid_equal (((struct reinsert_breakpoint *) bp)->ptid,
+			 ptid_of (thread)))
 	{
+	  struct thread_info *saved_thread = current_thread;
+
+	  current_thread = thread;
 	  *bp_link = bp->next;
 	  release_breakpoint (proc, bp);
 	  bp = *bp_link;
+	  current_thread = saved_thread;
 	}
       else
 	{
@@ -1578,21 +1591,29 @@ uninsert_all_breakpoints (void)
 }
 
 void
-uninsert_reinsert_breakpoints (void)
+uninsert_reinsert_breakpoints (struct thread_info *thread)
 {
-  struct process_info *proc = current_process ();
+  struct process_info *proc = get_thread_process (thread);
   struct breakpoint *bp;
 
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     {
-    if (bp->type == reinsert_breakpoint)
+    if (bp->type == reinsert_breakpoint
+	&& ptid_equal (((struct reinsert_breakpoint *) bp)->ptid,
+		       ptid_of (thread)))
       {
 	gdb_assert (bp->raw->inserted > 0);
 
 	/* Only uninsert the raw breakpoint if it only belongs to a
 	   reinsert breakpoint.  */
 	if (bp->raw->refcount == 1)
-	  uninsert_raw_breakpoint (bp->raw);
+	  {
+	    struct thread_info *saved_thread = current_thread;
+
+	    current_thread = thread;
+	    uninsert_raw_breakpoint (bp->raw);
+	    current_thread = saved_thread;
+	  }
       }
     }
 }
@@ -1642,8 +1663,9 @@ reinsert_breakpoints_at (CORE_ADDR pc)
 }
 
 int
-has_reinsert_breakpoints (struct process_info *proc)
+has_reinsert_breakpoints (struct thread_info *thread)
 {
+  struct process_info *proc = get_thread_process (thread);
   struct breakpoint *bp, **bp_link;
 
   bp = proc->breakpoints;
@@ -1651,7 +1673,9 @@ has_reinsert_breakpoints (struct process_info *proc)
 
   while (bp)
     {
-      if (bp->type == reinsert_breakpoint)
+      if (bp->type == reinsert_breakpoint
+	  && ptid_equal (((struct reinsert_breakpoint *) bp)->ptid,
+			 ptid_of (thread)))
 	return 1;
       else
 	{
@@ -1677,19 +1701,27 @@ reinsert_all_breakpoints (void)
 }
 
 void
-reinsert_reinsert_breakpoints (void)
+reinsert_reinsert_breakpoints (struct thread_info *thread)
 {
-  struct process_info *proc = current_process ();
+  struct process_info *proc = get_thread_process (thread);
   struct breakpoint *bp;
 
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     {
-      if (bp->type == reinsert_breakpoint)
+      if (bp->type == reinsert_breakpoint
+	  && ptid_equal (((struct reinsert_breakpoint *) bp)->ptid,
+			 ptid_of (thread)))
 	{
 	  gdb_assert (bp->raw->inserted > 0);
 
 	  if (bp->raw->refcount == 1)
-	    reinsert_raw_breakpoint (bp->raw);
+	    {
+	      struct thread_info *saved_thread = current_thread;
+
+	      current_thread = thread;
+	      reinsert_raw_breakpoint (bp->raw);
+	      current_thread = saved_thread;
+	    }
 	}
     }
 }
@@ -2113,7 +2145,7 @@ clone_agent_expr (const struct agent_expr *src_ax)
 /* Deep-copy the contents of one breakpoint to another.  */
 
 static struct breakpoint *
-clone_one_breakpoint (const struct breakpoint *src)
+clone_one_breakpoint (const struct breakpoint *src, ptid_t ptid)
 {
   struct breakpoint *dest;
   struct raw_breakpoint *dest_raw;
@@ -2174,6 +2206,9 @@ clone_one_breakpoint (const struct breakpoint *src)
 	= XCNEW (struct reinsert_breakpoint);
 
       dest = (struct breakpoint *) reinsert_dest;
+      /* Since reinsert breakpoint is thread specific, don't copy
+	 thread id from SRC, use ID instead.  */
+      reinsert_dest->ptid = ptid;
     }
   else
     gdb_assert_not_reached ("unhandled breakpoint type");
@@ -2201,7 +2236,7 @@ clone_all_breakpoints (struct thread_info *child_thread,
 
   for (bp = parent_proc->breakpoints; bp != NULL; bp = bp->next)
     {
-      new_bkpt = clone_one_breakpoint (bp);
+      new_bkpt = clone_one_breakpoint (bp, ptid_of (child_thread));
       APPEND_TO_LIST (new_list, new_bkpt, bkpt_tail);
       APPEND_TO_LIST (new_raw_list, new_bkpt->raw, raw_bkpt_tail);
     }

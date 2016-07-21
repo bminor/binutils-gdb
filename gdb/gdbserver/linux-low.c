@@ -549,15 +549,11 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	      && can_software_single_step ()
 	      && event == PTRACE_EVENT_VFORK)
 	    {
-	      struct thread_info *saved_thread = current_thread;
-
-	      current_thread = event_thr;
 	      /* If we leave reinsert breakpoints there, child will
 		 hit it, so uninsert reinsert breakpoints from parent
 		 (and child).  Once vfork child is done, reinsert
 		 them back to parent.  */
-	      uninsert_reinsert_breakpoints ();
-	      current_thread = saved_thread;
+	      uninsert_reinsert_breakpoints (event_thr);
 	    }
 
 	  clone_all_breakpoints (child_thr, event_thr);
@@ -592,17 +588,13 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  if (event_lwp->bp_reinsert != 0
 	      && can_software_single_step ())
 	    {
-	      struct thread_info *saved_thread = current_thread;
-
 	      /* The child process is forked and stopped, so it is safe
 		 to access its memory without stopping all other threads
 		 from other processes.  */
-	      current_thread = child_thr;
-	      delete_reinsert_breakpoints ();
-	      current_thread = saved_thread;
+	      delete_reinsert_breakpoints (child_thr);
 
-	      gdb_assert (has_reinsert_breakpoints (parent_proc));
-	      gdb_assert (!has_reinsert_breakpoints (child_proc));
+	      gdb_assert (has_reinsert_breakpoints (event_thr));
+	      gdb_assert (!has_reinsert_breakpoints (child_thr));
 	    }
 
 	  /* Report the event.  */
@@ -656,14 +648,9 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 
       if (event_lwp->bp_reinsert != 0 && can_software_single_step ())
 	{
-	  struct thread_info *saved_thread = current_thread;
-	  struct process_info *proc = get_thread_process (event_thr);
+	  reinsert_reinsert_breakpoints (event_thr);
 
-	  current_thread = event_thr;
-	  reinsert_reinsert_breakpoints ();
-	  current_thread = saved_thread;
-
-	  gdb_assert (has_reinsert_breakpoints (proc));
+	  gdb_assert (has_reinsert_breakpoints (event_thr));
 	}
 
       /* Report the event.  */
@@ -2632,11 +2619,9 @@ maybe_hw_step (struct thread_info *thread)
     return 1;
   else
     {
-      struct process_info *proc = get_thread_process (thread);
-
       /* GDBserver must insert reinsert breakpoint for software
 	 single step.  */
-      gdb_assert (has_reinsert_breakpoints (proc));
+      gdb_assert (has_reinsert_breakpoints (thread));
       return 0;
     }
 }
@@ -4224,7 +4209,7 @@ install_software_single_step_breakpoints (struct lwp_info *lwp)
   next_pcs = (*the_low_target.get_next_pcs) (regcache);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); ++i)
-    set_reinsert_breakpoint (pc);
+    set_reinsert_breakpoint (pc, current_ptid);
 
   do_cleanups (old_chain);
 }
@@ -4367,7 +4352,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
     {
       /* If the thread isn't doing step-over, there shouldn't be any
 	 reinsert breakpoints.  */
-      gdb_assert (!has_reinsert_breakpoints (proc));
+      gdb_assert (!has_reinsert_breakpoints (thread));
     }
 
   if (fast_tp_collecting == 1)
@@ -4860,8 +4845,8 @@ finish_step_over (struct lwp_info *lwp)
 	 threads but LWP stopped while doing that.  */
       if (!can_hardware_single_step ())
 	{
-	  gdb_assert (has_reinsert_breakpoints (current_process ()));
-	  delete_reinsert_breakpoints ();
+	  gdb_assert (has_reinsert_breakpoints (current_thread));
+	  delete_reinsert_breakpoints (current_thread);
 	}
 
       step_over_bkpt = null_ptid;
