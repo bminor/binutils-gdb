@@ -1,3 +1,8 @@
+2016-07-21  Pedro Alves  <palves@redhat.com>
+
+	* varobj.c (varobj_value_get_print_value): Move "gdbarch" to block
+	scope that uses it.
+
 2016-07-20  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_enable_proc_events): Enable "PTRACE_VFORK"
