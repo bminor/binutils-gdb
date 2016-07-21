@@ -1,5 +1,36 @@
 2016-07-21  Yao Qi  <yao.qi@linaro.org>
 
+	* mem-break.c (struct breakpoint) <cond_list>: Remove.
+	<command_list, handler>: Remove.
+	(struct gdb_breakpoint): New.
+	(struct other_breakpoint): New.
+	(struct reinsert_breakpoint): New.
+	(is_gdb_breakpoint): New function.
+	(any_persistent_commands): Update command_list if
+	is_gdb_breakpoint returns true.
+	(set_breakpoint): Create breakpoints according to their types.
+	(find_gdb_breakpoint): Return 'struct gdb_breakpoint *'.
+	(set_gdb_breakpoint_1): Likewise.
+	(set_gdb_breakpoint): Likewise.
+	(clear_breakpoint_conditions): Change parameter type to
+	'struct gdb_breakpoint *'.
+	(clear_breakpoint_commands): Likewise.
+	(clear_breakpoint_conditions_and_commands): Likewise.
+	(add_condition_to_breakpoint): Likewise.
+	(add_breakpoint_condition): Likewise.
+	(add_commands_to_breakpoint): Likewise.
+	(check_breakpoints): Check other_breakpoint.
+	(clone_one_breakpoint): Clone breakpopint according to its type.
+	* mem-break.h (struct gdb_breakpoint): Declare.
+	(set_gdb_breakpoint): Update declaration.
+	(clear_breakpoint_conditions_and_commands): Likewise.
+	(add_breakpoint_condition): Likewise.
+	(add_breakpoint_commands): Likewise.
+	* server.c (process_point_options): Change parameter type to
+	'struct gdb_breakpoint *'.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
 	* mem-break.c (set_breakpoint_at): Rename it to ...
 	(set_breakpoint_type_at): ... it.
 	(set_breakpoint_at): Call set_breakpoint_type_at.

@@ -25,6 +25,7 @@
 
 /* Breakpoints are opaque.  */
 struct breakpoint;
+struct gdb_breakpoint;
 struct fast_tracepoint_jump;
 struct raw_breakpoint;
 struct process_info;
@@ -70,8 +71,8 @@ enum target_hw_bp_type raw_bkpt_type_to_target_hw_bp_type
    failure returns NULL and sets *ERR to either -1 for error, or 1 if
    Z_TYPE breakpoints are not supported on this target.  */
 
-struct breakpoint *set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind,
-				       int *err);
+struct gdb_breakpoint *set_gdb_breakpoint (char z_type, CORE_ADDR addr,
+					   int kind, int *err);
 
 /* Delete a GDB breakpoint of type Z_TYPE and kind KIND previously
    inserted at ADDR with set_gdb_breakpoint_at.  Returns 0 on success,
@@ -107,20 +108,20 @@ int reinsert_breakpoint_inserted_here (CORE_ADDR addr);
 /* Clear all breakpoint conditions and commands associated with a
    breakpoint.  */
 
-void clear_breakpoint_conditions_and_commands (struct breakpoint *bp);
+void clear_breakpoint_conditions_and_commands (struct gdb_breakpoint *bp);
 
 /* Set target-side condition CONDITION to the breakpoint at ADDR.
    Returns false on failure.  On success, advances CONDITION pointer
    past the condition and returns true.  */
 
-int add_breakpoint_condition (struct breakpoint *bp, char **condition);
+int add_breakpoint_condition (struct gdb_breakpoint *bp, char **condition);
 
 /* Set target-side commands COMMANDS to the breakpoint at ADDR.
    Returns false on failure.  On success, advances COMMANDS past the
    commands and returns true.  If PERSIST, the commands should run
    even while GDB is disconnected.  */
 
-int add_breakpoint_commands (struct breakpoint *bp, char **commands,
+int add_breakpoint_commands (struct gdb_breakpoint *bp, char **commands,
 			     int persist);
 
 int any_persistent_commands (void);
