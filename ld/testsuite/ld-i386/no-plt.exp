@@ -163,7 +163,7 @@ run_cc_link_tests [list \
     ] \
 ]
 
-run_ld_link_exec_tests [] [list \
+run_ld_link_exec_tests [list \
     [list \
 	"No PLT (dynamic 1a)" \
 	"tmpdir/no-plt-check1a.o tmpdir/no-plt-main1.o \
@@ -288,7 +288,7 @@ if { [check_ifunc_available] } {
 	] \
     ]
 
-    run_ld_link_exec_tests [] [list \
+    run_ld_link_exec_tests [list \
 	[list \
 	    "Run pr20244-3a" \
 	    "tmpdir/pr20244-3a.o tmpdir/pr20244-3b.o \

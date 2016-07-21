@@ -240,22 +240,22 @@ set array_tests_static {
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
-set xfails [list "*-*-netbsdelf*"]
-run_ld_link_exec_tests $xfails $array_tests
+set xfails "*-*-netbsdelf*"
+run_ld_link_exec_tests $array_tests $xfails
 
 if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
-    run_ld_link_exec_tests $xfails $array_tests_pie
+    run_ld_link_exec_tests $array_tests_pie $xfails
 }
 
+# <http://www.gnu.org/software/hurd/open_issues/binutils.html#static>
 # Be cautious to not XFAIL for *-*-linux-gnu*, *-*-kfreebsd-gnu*, etc.
 switch -regexp $target_triplet {
     ^\[^-\]*-\[^-\]*-gnu.*$ {
-	# <http://www.gnu.org/software/hurd/open_issues/binutils.html#static>
-	lappend xfails "*-*-*"
+	set xfails "*-*-*"
     }
 }
-run_ld_link_exec_tests $xfails $array_tests_static
+run_ld_link_exec_tests $array_tests_static $xfails
 
 catch "exec rm -f tmpdir/preinit tmpdir/init tmpdir/fini tmpdir/init-mixed" status

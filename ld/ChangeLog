@@ -1,5 +1,29 @@
 2016-07-21  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Replace
+	"targets_to_xfail" parameter with "args".
+	* testsuite/ld-elf/compress.exp: Remove empty list of xfails on
+	all calls to run_ld_link_exec_tests.
+	* testsuite/ld-elf/dwarf.exp: Likewise.
+	* testsuite/ld-elf/indirect.exp: Likewise.
+	* testsuite/ld-elf/wrap.exp: Likewise.
+	* testsuite/ld-i386/i386.exp: Likewise.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
+	* testsuite/ld-i386/tls.exp: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-pie/pie.exp: Likewise.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/ld-size/size.exp: Likewise.
+	* testsuite/ld-x86-64/mpx.exp: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Likewise.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-elf/elf.exp: Likewise.  Reorder args when providing
+	xfails and simplify lists.
+	* testsuite/ld-elf/shared.exp: Likewise.
+
+2016-07-21  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/ld-lib.exp (run_ld_link_tests): Add optional
 	parameter to pass list of xfails.
 	* testsuite/ld-elf/elf.exp: Add xfails for implib tests.  Tidy

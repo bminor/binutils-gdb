@@ -435,7 +435,7 @@ set run_tests {
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
-run_ld_link_exec_tests [list "*-*-netbsdelf*"] $run_tests
+run_ld_link_exec_tests $run_tests "*-*-netbsdelf*"
 
 # Check --no-add-needed and --no-copy-dt-needed-entries
 set testname "--no-add-needed"
@@ -510,7 +510,7 @@ set run_cxx_tests {
 }
 
 run_cc_link_tests $build_cxx_tests
-run_ld_link_exec_tests [] $run_cxx_tests
+run_ld_link_exec_tests $run_cxx_tests
 
 if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
@@ -540,7 +540,7 @@ if { [istarget *-*-linux*]
 	    "libpr19579.so" \
 	] \
     ]
-    run_ld_link_exec_tests [] [list \
+    run_ld_link_exec_tests [list \
 	[list \
 	    "Run pr2404 with PIE" \
 	    "-pie tmpdir/pr2404b.o tmpdir/libpr2404a.so" \
@@ -638,7 +638,7 @@ proc mix_pic_and_non_pic {xfails cflags ldflags exe} {
     send_log "cp tmpdir/libpr19719b.so tmpdir/libpr19719.so\n"
     exec cp tmpdir/libpr19719b.so tmpdir/libpr19719.so
 
-    run_ld_link_exec_tests [] [list \
+    run_ld_link_exec_tests [list \
 	[list \
 	    "Run $exe fun defined" \
 	    "$ldflags tmpdir/libpr19719b.o tmpdir/libpr19719.so -rpath tmpdir" \

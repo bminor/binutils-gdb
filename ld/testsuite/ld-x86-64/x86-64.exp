@@ -559,7 +559,7 @@ proc undefined_weak {cflags ldflags} {
 
     exec cp tmpdir/libpr19704a.so tmpdir/libpr19704.so
 
-    run_ld_link_exec_tests [] [list \
+    run_ld_link_exec_tests [list \
 	[list \
 	    "Run pr19704" \
 	    "$ldflags tmpdir/libpr19704.so -R tmpdir" \
@@ -824,7 +824,7 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
     ]
 
-    run_ld_link_exec_tests [] [list \
+    run_ld_link_exec_tests [list \
 	[list \
 	    "Run plt-main" \
 	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
@@ -918,7 +918,7 @@ if { [isnative] && [which $CC] != 0 } {
 	    ] \
 	]
 
-	run_ld_link_exec_tests [] [list \
+	run_ld_link_exec_tests [list \
 	    [list \
 		"Run plt-main with -z bndplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
