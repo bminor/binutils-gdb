@@ -1,5 +1,14 @@
 2016-07-21  Yao Qi  <yao.qi@linaro.org>
 
+	* inferiors.c (get_thread_process): Make parameter const.
+	* inferiors.h (get_thread_process): Update declaration.
+	* mem-break.c (clone_all_breakpoints): Remove all parameters.
+	Add new parameters child_thread and parent_thread.  Callers
+	updated.
+	* mem-break.h (clone_all_breakpoints): Update declaration.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
 	* mem-break.c (struct breakpoint) <cond_list>: Remove.
 	<command_list, handler>: Remove.
 	(struct gdb_breakpoint): New.

@@ -399,7 +399,7 @@ have_attached_inferiors_p (void)
 }
 
 struct process_info *
-get_thread_process (struct thread_info *thread)
+get_thread_process (const struct thread_info *thread)
 {
   int pid = ptid_get_pid (thread->entry.id);
   return find_process_pid (pid);

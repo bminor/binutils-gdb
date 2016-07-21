@@ -2184,21 +2184,22 @@ clone_one_breakpoint (const struct breakpoint *src)
   return dest;
 }
 
-/* Create a new breakpoint list NEW_LIST that is a copy of the
-   list starting at SRC_LIST.  Create the corresponding new
-   raw_breakpoint list NEW_RAW_LIST as well.  */
+/* See mem-break.h.  */
 
 void
-clone_all_breakpoints (struct breakpoint **new_list,
-		       struct raw_breakpoint **new_raw_list,
-		       const struct breakpoint *src_list)
+clone_all_breakpoints (struct thread_info *child_thread,
+		       const struct thread_info *parent_thread)
 {
   const struct breakpoint *bp;
   struct breakpoint *new_bkpt;
   struct breakpoint *bkpt_tail = NULL;
   struct raw_breakpoint *raw_bkpt_tail = NULL;
+  struct process_info *child_proc = get_thread_process (child_thread);
+  struct process_info *parent_proc = get_thread_process (parent_thread);
+  struct breakpoint **new_list = &child_proc->breakpoints;
+  struct raw_breakpoint **new_raw_list = &child_proc->raw_breakpoints;
 
-  for (bp = src_list; bp != NULL; bp = bp->next)
+  for (bp = parent_proc->breakpoints; bp != NULL; bp = bp->next)
     {
       new_bkpt = clone_one_breakpoint (bp);
       APPEND_TO_LIST (new_list, new_bkpt, bkpt_tail);

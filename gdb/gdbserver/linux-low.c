@@ -560,9 +560,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	      current_thread = saved_thread;
 	    }
 
-	  clone_all_breakpoints (&child_proc->breakpoints,
-				 &child_proc->raw_breakpoints,
-				 parent_proc->breakpoints);
+	  clone_all_breakpoints (child_thr, event_thr);
 
 	  tdesc = XNEW (struct target_desc);
 	  copy_target_description (tdesc, parent_proc->tdesc);

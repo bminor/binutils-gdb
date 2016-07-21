@@ -267,10 +267,10 @@ int insert_memory_breakpoint (struct raw_breakpoint *bp);
 
 int remove_memory_breakpoint (struct raw_breakpoint *bp);
 
-/* Create a new breakpoint list NEW_BKPT_LIST that is a copy of SRC.  */
+/* Create a new breakpoint list in CHILD_THREAD's process that is a
+   copy of breakpoint list in PARENT_THREAD's process.  */
 
-void clone_all_breakpoints (struct breakpoint **new_bkpt_list,
-			    struct raw_breakpoint **new_raw_bkpt_list,
-			    const struct breakpoint *src);
+void clone_all_breakpoints (struct thread_info *child_thread,
+			    const struct thread_info *parent_thread);
 
 #endif /* MEM_BREAK_H */
