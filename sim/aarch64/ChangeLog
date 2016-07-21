@@ -1,6 +1,6 @@
 2016-07-21  Nick Clifton  <nickc@redhat.com>
 
-	* simulator.c (fsqrts): Use fsqrt rather than sqrt.
+	* simulator.c (fsqrts): Use sqrtf rather than sqrt.
 
 2016-06-30  Jim Wilson  <jim.wilson@linaro.org>
 
