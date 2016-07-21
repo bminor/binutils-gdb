@@ -4995,21 +4995,19 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
       /* If we have a new signal, enqueue the signal.  */
       if (lwp->resume->sig != 0)
 	{
-	  struct pending_signals *p_sig = XCNEW (struct pending_signals);
-
-	  p_sig->prev = lwp->pending_signals;
-	  p_sig->signal = lwp->resume->sig;
+	  siginfo_t info, *info_p;
 
 	  /* If this is the same signal we were previously stopped by,
-	     make sure to queue its siginfo.  We can ignore the return
-	     value of ptrace; if it fails, we'll skip
-	     PTRACE_SETSIGINFO.  */
+	     make sure to queue its siginfo.  */
 	  if (WIFSTOPPED (lwp->last_status)
-	      && WSTOPSIG (lwp->last_status) == lwp->resume->sig)
-	    ptrace (PTRACE_GETSIGINFO, lwpid_of (thread), (PTRACE_TYPE_ARG3) 0,
-		    &p_sig->info);
+	      && WSTOPSIG (lwp->last_status) == lwp->resume->sig
+	      && ptrace (PTRACE_GETSIGINFO, lwpid_of (thread),
+			 (PTRACE_TYPE_ARG3) 0, &info) == 0)
+	    info_p = &info;
+	  else
+	    info_p = NULL;
 
-	  lwp->pending_signals = p_sig;
+	  enqueue_pending_signal (lwp, lwp->resume->sig, info_p);
 	}
     }
 

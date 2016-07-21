@@ -1,5 +1,10 @@
 2016-07-21  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (linux_resume_one_thread): Call
+	enqueue_pending_signal.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
 	* gdbthread.h (make_cleanup_restore_current_thread): Declare.
 	* inferiors.c (do_restore_current_thread_cleanup): New function.
 	(make_cleanup_restore_current_thread): Likewise.
