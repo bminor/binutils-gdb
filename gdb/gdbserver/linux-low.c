@@ -4202,10 +4202,14 @@ install_software_single_step_breakpoints (struct lwp_info *lwp)
 {
   int i;
   CORE_ADDR pc;
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
+  struct thread_info *thread = get_lwp_thread (lwp);
+  struct regcache *regcache = get_thread_regcache (thread, 1);
   VEC (CORE_ADDR) *next_pcs = NULL;
-  struct cleanup *old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+  struct cleanup *old_chain = make_cleanup_restore_current_thread ();
 
+  make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+
+  current_thread = thread;
   next_pcs = (*the_low_target.get_next_pcs) (regcache);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); ++i)
