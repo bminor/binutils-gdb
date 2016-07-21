@@ -1,5 +1,10 @@
 2016-07-21  Yao Qi  <yao.qi@linaro.org>
 
+	* server.c (handle_v_requests): Support s and S actions
+	if target_supports_software_single_step return true.
+
+2016-07-21  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (resume_stopped_resumed_lwps): If resume request
 	is resume_step, call maybe_hw_step.
 	(linux_wait_1): Stop all threads, remove reinsert breakpoints,

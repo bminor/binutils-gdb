@@ -2958,12 +2958,15 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 	{
 	  strcpy (own_buf, "vCont;c;C;t");
 
-	  if (target_supports_hardware_single_step () || !vCont_supported)
+	  if (target_supports_hardware_single_step ()
+	      || target_supports_software_single_step ()
+	      || !vCont_supported)
 	    {
-	      /* If target supports hardware single step, add actions s
-		 and S to the list of supported actions.  On the other
-		 hand, if GDB doesn't request the supported vCont actions
-		 in qSupported packet, add s and S to the list too.  */
+	      /* If target supports single step either by hardware or by
+		 software, add actions s and S to the list of supported
+		 actions.  On the other hand, if GDB doesn't request the
+		 supported vCont actions in qSupported packet, add s and
+		 S to the list too.  */
 	      own_buf = own_buf + strlen (own_buf);
 	      strcpy (own_buf, ";s;S");
 	    }
