@@ -1,5 +1,10 @@
 2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* ld/testsuite/ld-arc/tls_gd-01.s: Added a testcase for this patch.
+	* ld/testsuite/ld-arc/tls_gd-01.d: Likewise.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* testsuite/ld-arc/tls_ie-01.s: Added to verify associated fix.
 	* testsuite/ld-arc/tls_ie-01.d: Likewise
 

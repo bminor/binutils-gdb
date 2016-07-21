@@ -1,3 +1,8 @@
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_relocate_section): Changed. Set should_relocate
+	to TRUE for GOT and TLS relocs.
+
 2016-08-26  Cupertino Miranda  <cmiranda@synospsys.com>
 
 	* elf32-arc.c (elf_arc_finish_dynamic_sections): Changed.

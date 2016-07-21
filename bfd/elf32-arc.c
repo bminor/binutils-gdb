@@ -1374,6 +1374,8 @@ elf_arc_relocate_section (bfd *		          output_bfd,
       if ((is_reloc_for_GOT (howto)
 	   || is_reloc_for_TLS (howto)))
 	{
+	  reloc_data.should_relocate = TRUE;
+
 	  struct got_entry **list
 	    = get_got_entry_list_for_symbol (output_bfd, r_symndx, h);
 
