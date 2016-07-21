@@ -1,3 +1,8 @@
+2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.m4 (BFD_VERSION): Set to 2.27.51.
+	* configure: Regenerated.
+
 2016-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (_bfd_elf_filter_global_symbols): Skip local symbols.
@@ -12,6 +17,12 @@
 
 	* elf.c (elfcore_grok_freebsd_psinfo): Check for minimum note size
 	and handle pr_pid if present.
+
+2016-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20376
+	* elf.c (assign_file_positions_for_load_sections): Also check
+	p_paddr for program header space.
 
 2016-07-20  Alan Modra  <amodra@gmail.com>
 
