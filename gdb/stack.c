@@ -1531,7 +1531,7 @@ frame_info (char *addr_exp, int from_tty)
   printf_filtered ("saved %s = ", pc_regname);
 
   if (!frame_id_p (frame_unwind_caller_id (fi)))
-    val_print_unavailable (gdb_stdout);
+    val_print_not_saved (gdb_stdout);
   else
     {
       TRY
