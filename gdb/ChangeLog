@@ -1,3 +1,8 @@
+2016-10-06  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* stack.c (frame_info): Call val_print_not_saved instead of
+	val_print_unavailable if frame_id check fails.
+
 2016-10-06  Pedro Alves  <palves@redhat.com>
 
 	* jit.c (free_objfile_data): Delete the JIT breakpoint and clear
