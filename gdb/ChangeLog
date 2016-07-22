@@ -1,3 +1,8 @@
+2016-07-22  Yao Qi  <yao.qi@linaro.org>
+
+	* ctf.c (ctf_traceframe_info): Call bt_ctf_get_uint64 rather than
+	bt_ctf_get_int64.
+
 2016-07-21  Tom Tromey  <tom@tromey.com>
 
 	* rust-lang.c (rust_tuple_struct_type_p): Return false for empty

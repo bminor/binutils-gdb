@@ -1692,7 +1692,7 @@ ctf_traceframe_info (struct target_ops *self)
 	  const struct bt_definition *def;
 
 	  def = bt_ctf_get_field (event, scope, "num");
-	  vnum = (int) bt_ctf_get_int64 (def);
+	  vnum = (int) bt_ctf_get_uint64 (def);
 	  VEC_safe_push (int, info->tvars, vnum);
 	}
       else
