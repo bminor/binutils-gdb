@@ -146,6 +146,27 @@ copy_stoken (const struct stoken *token)
   return string;
 }
 
+/* !!keiths: Paranoia?  Sadly, we have this information already, but it is
+   currently tossed when convert_cplus_type is called from
+   convert_one_symbol.  */
+
+static const struct block *
+get_current_search_block (void)
+{
+  const struct block *block;
+  enum language save_language;
+
+  /* get_selected_block can change the current language when there
+     is no selected frame yet.  */
+  /* !!keiths this is probably a bit (over-)defensive, since we can't
+     actually compile anything without running the inferior.  */
+  save_language = current_language->la_language;
+  block = get_selected_block (0);
+  set_language (save_language);
+
+  return block;
+}
+
 /* Return the declaration name of the natural name NATURAL.
    This returns a name with no function arguments or template parameters.
    The result must be freed by the caller.  */
@@ -161,12 +182,23 @@ ccp_decl_name (const char *natural)
 
       /* !!keiths: FIXME: Write a new parser func to do this.  */
       name = cp_func_name (natural);
-      stripped = cp_strip_template_parameters (name);
-      if (stripped != NULL)
-       {
-         xfree (name);
-         name = stripped;
-       }
+      if (name == NULL)
+	{
+	  stripped = cp_strip_template_parameters (natural);
+	  if (stripped != NULL)
+	    return stripped;
+
+	  name = xstrdup (natural);
+	}
+      else
+	{
+	  stripped = cp_strip_template_parameters (name);
+	  if (stripped != NULL)
+	    {
+	      xfree (name);
+	      return stripped;
+	    }
+	}
     }
 
   return name;
@@ -276,7 +308,7 @@ ccp_print_args (struct ui_file *stream, const struct template_symbol *tsym)
       if ((i - artificials) > 0)
 	fputs_unfiltered (", ", stream);
 
-      tidx = tsym->template_argument_indices[i];
+      tidx = tsym->template_argument_indices[i - artificials];
       if (tidx == -1)
 	{
 	  c_print_type (TYPE_FIELD_TYPE (ttype, i), "", stream, -1, 0,
@@ -284,29 +316,9 @@ ccp_print_args (struct ui_file *stream, const struct template_symbol *tsym)
 	}
       else
 	{
-	  struct symbol *arg_sym = tsym->template_arguments[tidx];
+	  struct symbol *sym = tsym->template_arguments[i - artificials];
 
-	  /* we want to output T or V or ... For now, I won't normalize
-	     the names, using the source name instead.  Call me lazy.  */
-	  switch (tsym->template_argument_kinds[tidx])
-	    {
-	    case type_parameter:
-	      fprintf_unfiltered (stream, "typename %s",
-				  SYMBOL_NATURAL_NAME (arg_sym));
-	      break;
-	    case value_parameter:
-	      c_print_type (SYMBOL_TYPE (arg_sym), "", stream, -1, 0,
-			    &type_print_raw_options);
-	      fprintf_unfiltered (stream, " %s",
-				  SYMBOL_NATURAL_NAME (arg_sym));
-	      break;
-	    case template_parameter:
-	      break;
-	    case variadic_parameter:
-	      break;
-	    default:
-	      gdb_assert_not_reached ("unexpected template parameter kind");
-	    }
+	  fputs_unfiltered (SYMBOL_NATURAL_NAME (sym), stream);
 	}
     }
   fputc_unfiltered (')', stream);
@@ -373,7 +385,28 @@ ccp_compute_template_defn_hash_string (struct template_defn *defn)
 	fputs_unfiltered (", ", hash_buf);
 
       /* !!keiths: Do we need more specifics than this?  */
-      fputs_unfiltered (SYMBOL_NATURAL_NAME (sym), hash_buf);
+
+      /* we want to output T or V or ... For now, I won't normalize
+	 the names, using the source name instead.  Call me lazy.  */
+      switch (defn->tsymbol->template_argument_kinds[i])
+	{
+	case type_parameter:
+	  fprintf_unfiltered (hash_buf, "typename %s",
+			      SYMBOL_NATURAL_NAME (sym));
+	  break;
+	case value_parameter:
+	  c_print_type (SYMBOL_TYPE (sym), "", hash_buf, -1, 0,
+			&type_print_raw_options);
+	  fprintf_unfiltered (hash_buf, " %s",
+			      SYMBOL_NATURAL_NAME (sym));
+	  break;
+	case template_parameter:
+	  break;
+	case variadic_parameter:
+	  break;
+	default:
+	  gdb_assert_not_reached ("unexpected template parameter kind");
+	}
     }
 
   /* If last char is '>', output extra space!  */
@@ -730,6 +763,37 @@ get_template_decl (const struct template_defn *templ_defn)
   return templ_defn->decl;
 }
 
+/* Define the type for all default template parameters for the template
+   given by DEFN.  */
+
+static void
+define_default_template_parameter_types
+(struct compile_cplus_instance *instance, struct template_defn *defn)
+{
+  int i;
+
+  for (i = 0; i < defn->tsymbol->n_template_arguments; ++i)
+    {
+      if (defn->default_arguments[i] != NULL)
+	{
+	  switch (defn->tsymbol->template_argument_kinds[i])
+	    {
+	    case type_parameter:
+	    case value_parameter:
+	      convert_cplus_type (instance,
+				  SYMBOL_TYPE (defn->default_arguments[i]),
+				  GCC_CP_ACCESS_NONE);
+	      break;
+
+	    case template_parameter:
+	    case variadic_parameter:
+	    default:
+	      gdb_assert (_("unexpected template parameter kind"));
+	    }
+	}
+    }
+}
+
 /* Allocate a generic template definition.  */
 
 static struct template_defn *
@@ -754,7 +818,7 @@ new_template_defn (const struct template_defn *base)
    CALL_DATA should be the compiler instance to use.  */
 
 static int
-define_function_template (void **slot, void *call_data)
+define_template (void **slot, void *call_data)
 {
   int i, need_new_context;
   struct template_defn *defn;
@@ -767,6 +831,7 @@ define_function_template (void **slot, void *call_data)
   struct compile_cplus_instance *instance;
   const struct template_symbol *tsym;
   char *id;
+  gcc_cp_symbol_kind_flags addl_flags = (gcc_cp_symbol_kind_flags) 0;
 
   defn = (struct template_defn *) *slot;
   if (defn->defined)
@@ -776,15 +841,20 @@ define_function_template (void **slot, void *call_data)
       return 1;
     }
 
+  defn->defined = 1;
   instance = (struct compile_cplus_instance *) call_data;
   tsym = defn->tsymbol;
 
   /* The defn->name may be a qualified name, containing, e.g., namespaces.
      We don't want those for the decl.  */
+  // !!keiths: maybe_canonicalize_special_function
   id = cp_func_name (defn->name);
   back_to = make_cleanup (xfree, id);
 
-  /* First assess the processing context.  */
+  /* Define any default value types.  */
+  define_default_template_parameter_types (instance, defn);
+
+  /* Assess the processing context.  */
   pctx = new_processing_context (instance, SYMBOL_NATURAL_NAME (&tsym->base),
 				 SYMBOL_TYPE (&tsym->base), &result);
   if (result != GCC_TYPE_NONE)
@@ -863,9 +933,8 @@ define_function_template (void **slot, void *call_data)
 
   if (debug_compile_cplus_types)
     {
-      printf_unfiltered ("build_function_type for %s %lld %d\n",
-			 SYMBOL_LINKAGE_NAME (&tsym->base), return_type,
-			 is_varargs);
+      printf_unfiltered ("build_function_type for template %s %lld %d\n",
+			 defn->hash_string, return_type, is_varargs);
     }
   func_type = CPCALL (build_function_type, instance, return_type, &array,
 		      is_varargs);
@@ -887,34 +956,10 @@ define_function_template (void **slot, void *call_data)
     ccp_pop_processing_context (instance, pctx);
   delete_processing_context (pctx);
 
-  defn->defined = 1;
   do_cleanups (back_to);
 
   /* Do all templates in the table.  */
   return 1;
-}
-
-/* Define (!!keiths: or declare?) the type for the IDX'th default argument
-   of the template TSYM.  */
-
-static void
-define_template_parameter_type (struct compile_cplus_instance *instance,
-				const struct template_symbol *tsym, int idx)
-{
-  switch (tsym->template_argument_kinds[idx])
-    {
-    case type_parameter:
-    case value_parameter:
-      convert_cplus_type (instance,
-			  SYMBOL_TYPE (tsym->default_arguments[idx]),
-			  GCC_CP_ACCESS_NONE);
-      break;
-
-    case template_parameter:
-    case variadic_parameter:
-    default:
-      gdb_assert (_("unexpected template parameter kind"));
-    }
 }
 
 /* If SYM is a template symbol whose generic we have not yet declared,
@@ -925,7 +970,7 @@ static void
 ccp_maybe_define_new_template (struct compile_cplus_instance *instance,
 			       const struct symbol *sym)
 {
-  if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym))
+  if (sym != NULL && SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym))
     {
       int j;
       void **slot;
@@ -958,7 +1003,11 @@ ccp_maybe_define_new_template (struct compile_cplus_instance *instance,
 	      && tsym->default_arguments[j] != NULL)
 	    {
 	      p->default_arguments[j] = tsym->default_arguments[j];
-	      define_template_parameter_type (instance, tsym, j);
+
+	      /* We don't want to define them here because it could start
+		 emitting template definitions before we're even done
+		 collecting the default values.  [Easy to demonstrate if the
+		 default value is a class.]  */
 	    }
 	}
     }
@@ -971,7 +1020,7 @@ static void
 ccp_emit_template_decls (struct compile_cplus_instance *instance)
 {
   htab_traverse (instance->template_defns,
-                define_function_template, instance);
+		 define_template, instance);
 }
 
 /* See compile-internal.h.  */
@@ -1094,27 +1143,6 @@ static struct compile_cplus_scope *
 get_processing_context_scope (struct compile_cplus_context *pctx)
 {
   return VEC_last (compile_cplus_scope_def, CONTEXT_SCOPES (pctx));
-}
-
-/* !!keiths: Paranoia?  Sadly, we have this information already, but it is
-   currently tossed when convert_cplus_type is called from
-   convert_one_symbol.  */
-
-static const struct block *
-get_current_search_block (void)
-{
-  const struct block *block;
-  enum language save_language;
-
-  /* get_selected_block can change the current language when there
-     is no selected frame yet.  */
-  /* !!keiths this is probably a bit (over-)defensive, since we can't
-     actually compile anything without running the inferior.  */
-  save_language = current_language->la_language;
-  block = get_selected_block (0);
-  set_language (save_language);
-
-  return block;
 }
 
 /* Convert TYPENAME into a vector of namespace and top-most/super
@@ -2252,11 +2280,13 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *instance,
 {
   int i;
 
+  /* Now define the actual methods/template specializations.  */
   for (i = 0; i < TYPE_NFN_FIELDS (type); ++i)
     {
       int j;
       struct fn_field *methods = TYPE_FN_FIELDLIST1 (type, i);
-      const char *overloaded_name = TYPE_FN_FIELDLIST_NAME (type, i);
+      const char *overloaded_name
+	= ccp_decl_name (TYPE_FN_FIELDLIST_NAME (type, i));
 
       /* Loop through the fieldlist, adding decls to the compiler's
 	 representation of the class.  */
@@ -2335,9 +2365,6 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *instance,
 		{
 		  /* !!keiths: This is beyond hacky, and is really only a
 		     lame workaround for detecting pure virtual methods.  */
-		  method_type
-		    = ccp_convert_method (instance, type,
-					  TYPE_FN_FIELD_TYPE (methods, j));
 		  if (debug_compile_cplus_types)
 		    {
 		      printf_unfiltered ("new_decl pure virtual method %s\n",
@@ -2375,15 +2402,15 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *instance,
 
 	  filename = symbol_symtab (sym.symbol)->filename;
 	  line = SYMBOL_LINE (sym.symbol);
+	  /* !!keiths: Is this sufficient?  */
+	  address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
 
-	  /* All class methods have TYPE_CODE_METHOD, including static
-	     methods.  For the plug-in, though, these use different calls.  */
 	  if (TYPE_FN_FIELD_STATIC_P (methods, j))
 	    {
-	      kind = " static";
-	      method_type
-		= ccp_convert_func (instance,
-				    TYPE_FN_FIELD_TYPE (methods, j), 0);
+	      kind = "static";
+	      method_type = ccp_convert_func (instance,
+					      TYPE_FN_FIELD_TYPE (methods, j),
+					      1);
 	    }
 	  else
 	    {
@@ -2391,13 +2418,10 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *instance,
 	      method_type
 		= ccp_convert_method (instance, type,
 				      TYPE_FN_FIELD_TYPE (methods, j));
-
-	      if (TYPE_FN_FIELD_VIRTUAL_P (methods, j))
-		sym_kind |= GCC_CP_FLAG_VIRTUAL_FUNCTION;
 	    }
 
-	  /* !!keiths: Is this sufficient?  */
-	  address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
+	  if (TYPE_FN_FIELD_VIRTUAL_P (methods, j))
+	    sym_kind |= GCC_CP_FLAG_VIRTUAL_FUNCTION;
 
 	  /* FIXME: for cdtors, we must call new_decl with a zero
 	     address, if we haven't created the base declaration
