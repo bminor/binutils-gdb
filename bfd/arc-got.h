@@ -369,28 +369,26 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **          list_p,
 		  = reloc_data->sym_section->output_section->vma
 		  + reloc_data->sym_section->output_offset;
 
-		if (h->root.type != bfd_link_hash_undefweak)
+		if (h != NULL
+		    && h->root.type == bfd_link_hash_undefweak)
+		  ARC_DEBUG ("arc_info: PATCHED: NOT_PATCHED "
+			     "@ %#08lx for sym %s in got offset %#lx "
+			     "(is undefweak)\n",
+			     (long) (htab->sgot->output_section->vma
+				     + htab->sgot->output_offset
+				     + entry->offset),
+			     symbol_name,
+			     (long) entry->offset);
+		else
 		  {
 		    bfd_put_32 (output_bfd,
 				reloc_data->sym_value + sec_vma,
 				htab->sgot->contents + entry->offset);
-
 		    ARC_DEBUG ("arc_info: PATCHED: %#08lx "
 			       "@ %#08lx for sym %s in got offset %#lx\n",
 			       (long) (reloc_data->sym_value + sec_vma),
 			       (long) (htab->sgot->output_section->vma
 				       + htab->sgot->output_offset + entry->offset),
-			       symbol_name,
-			       (long) entry->offset);
-		  }
-		else
-		  {
-		    ARC_DEBUG ("arc_info: PATCHED: NOT_PATCHED "
-			       "@ %#08lx for sym %s in got offset %#lx "
-			       "(is undefweak)\n",
-			       (long) (htab->sgot->output_section->vma
-				       + htab->sgot->output_offset
-				       + entry->offset),
 			       symbol_name,
 			       (long) entry->offset);
 		  }

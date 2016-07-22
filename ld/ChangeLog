@@ -1,3 +1,8 @@
+2016-07-22  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-arc/got-01.d: New file.
+	* testsuite/ld-arc/got-01.s: New file.
+
 2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

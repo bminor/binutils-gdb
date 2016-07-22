@@ -1,3 +1,9 @@
+2016-07-22  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-got.h (relocate_fix_got_relocs_for_got_info): Handle the
+	case where there's no elf_link_hash_entry while processing
+	GOT_NORMAL got entries.
+
 2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.m4 (BFD_VERSION): Set to 2.27.51.
