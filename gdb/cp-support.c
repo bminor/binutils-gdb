@@ -887,7 +887,11 @@ cp_strip_template_parameters (const char *linkage_name)
 			       &storage, &demangled_name);
 
   if (info == NULL)
-    return NULL;
+    {
+      info = cp_demangled_name_to_comp (linkage_name, NULL);
+      if (info == NULL)
+	return NULL;
+    }
 
   ret_comp = info->tree;
   ret = NULL;

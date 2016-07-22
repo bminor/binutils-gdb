@@ -112,6 +112,10 @@ struct template_defn
   /* A list of default values for the parameters of this template.
      Allocated.  */
   struct symbol **default_arguments;
+
+  /* Has this template already been defined?  This is a necessary evil
+     since we have to traverse over all hash table entries.  */
+  int defined;
 };
 
 /* Flag to enable internal debugging.  */
@@ -142,6 +146,32 @@ copy_stoken (const struct stoken *token)
   return string;
 }
 
+/* Return the declaration name of the natural name NATURAL.
+   This returns a name with no function arguments or template parameters.
+   The result must be freed by the caller.  */
+
+static char *
+ccp_decl_name (const char *natural)
+{
+  char *name = NULL;
+
+  if (natural != NULL)
+    {
+      char *stripped;
+
+      /* !!keiths: FIXME: Write a new parser func to do this.  */
+      name = cp_func_name (natural);
+      stripped = cp_strip_template_parameters (name);
+      if (stripped != NULL)
+       {
+         xfree (name);
+         name = stripped;
+       }
+    }
+
+  return name;
+}
+
 /* Returns non-zero if the given TYPE represents a varargs function,
    zero otherwise.  */
 
@@ -153,6 +183,46 @@ ccp_is_varargs_p (const struct type *type)
      But this *may* be needed for several gdb.compile tests.  Or at least
      indicate other unresolved bugs in this file or elsewhere in gdb.  */
   return TYPE_VARARGS (type) /*|| !TYPE_PROTOTYPED (type)*/;
+}
+
+/* Get the access flag for the NUM'th field of TYPE.  */
+
+static enum gcc_cp_symbol_kind
+get_field_access_flag (const struct type *type, int num)
+{
+  if (TYPE_FIELD_PROTECTED (type, num))
+    return GCC_CP_ACCESS_PROTECTED;
+  else if (TYPE_FIELD_PRIVATE (type, num))
+    return GCC_CP_ACCESS_PRIVATE;
+
+  /* GDB assumes everything else is public.  */
+  return GCC_CP_ACCESS_PUBLIC;
+}
+
+/* Get the access flag for the NUM'th method of TYPE's FNI'th
+   fieldlist.  */
+
+static enum gcc_cp_symbol_kind
+get_method_access_flag (const struct type *type, int fni, int num)
+{
+  const struct fn_field *methods;
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
+
+  /* If this type was not declared a class, everything is public.  */
+  if (!TYPE_DECLARED_CLASS (type))
+    return GCC_CP_ACCESS_PUBLIC;
+
+  /* Otherwise, read accessibility from the fn_field.  */
+  methods = TYPE_FN_FIELDLIST1 (type, fni);
+  if (TYPE_FN_FIELD_PUBLIC (methods, num))
+    return GCC_CP_ACCESS_PUBLIC;
+  else if (TYPE_FN_FIELD_PROTECTED (methods, num))
+    return GCC_CP_ACCESS_PROTECTED;
+  else if (TYPE_FN_FIELD_PRIVATE (methods, num))
+    return GCC_CP_ACCESS_PRIVATE;
+
+  gdb_assert_not_reached ("unhandled method access specifier");
 }
 
 /* Hash a type_map_instance.  */
@@ -699,6 +769,13 @@ define_function_template (void **slot, void *call_data)
   char *id;
 
   defn = (struct template_defn *) *slot;
+  if (defn->defined)
+    {
+      /* This template has already been defined.  Keep looking for more
+	 undefined templates.  */
+      return 1;
+    }
+
   instance = (struct compile_cplus_instance *) call_data;
   tsym = defn->tsymbol;
 
@@ -765,7 +842,7 @@ define_function_template (void **slot, void *call_data)
 	}
       else
 	{
-	  int tidx = tsym->template_argument_indices[i];
+	  int tidx = tsym->template_argument_indices[i - artificials];
 
 	  if (tidx == -1)
 	    {
@@ -810,6 +887,7 @@ define_function_template (void **slot, void *call_data)
     ccp_pop_processing_context (instance, pctx);
   delete_processing_context (pctx);
 
+  defn->defined = 1;
   do_cleanups (back_to);
 
   /* Do all templates in the table.  */
@@ -839,6 +917,63 @@ define_template_parameter_type (struct compile_cplus_instance *instance,
     }
 }
 
+/* If SYM is a template symbol whose generic we have not yet declared,
+   add it to INSTANCE's list of template definitions and scan for default
+   values.  */
+
+static void
+ccp_maybe_define_new_template (struct compile_cplus_instance *instance,
+			       const struct symbol *sym)
+{
+  if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym))
+    {
+      int j;
+      void **slot;
+      struct template_defn defn, *p;
+      struct cleanup *back_to;
+      struct template_symbol *tsym = (struct template_symbol *) sym;
+
+      /* To do lookups, we need only NAME, TSYM, HASH.  */
+      memset (&defn, 0, sizeof (struct template_defn));
+      defn.name = tsym->search_name;
+      defn.tsymbol = tsym;
+      ccp_compute_template_defn_hash_string (&defn);
+      slot = htab_find_slot (instance->template_defns, &defn, INSERT);
+      if (*slot == NULL)
+	{
+	  p = new_template_defn (&defn);
+	  *slot = p;
+	}
+      else
+	{
+	  xfree (defn.hash_string);
+	  p = (struct template_defn *) *slot;
+	}
+
+      /* Loop over the template arguments, noting any default values
+	 and defining any types.  */
+      for (j = 0; j < tsym->n_template_arguments; ++j)
+	{
+	  if (p->default_arguments[j] == NULL
+	      && tsym->default_arguments[j] != NULL)
+	    {
+	      p->default_arguments[j] = tsym->default_arguments[j];
+	      define_template_parameter_type (instance, tsym, j);
+	    }
+	}
+    }
+}
+
+/* A helper function to emit declarations for any new templates
+   in INSTANCE.  */
+
+static void
+ccp_emit_template_decls (struct compile_cplus_instance *instance)
+{
+  htab_traverse (instance->template_defns,
+                define_function_template, instance);
+}
+
 /* See compile-internal.h.  */
 
 void
@@ -857,54 +992,13 @@ compile_cplus_define_templates (struct compile_cplus_instance *instance,
      compiler plug-in.  */
 
   for (i = 0; VEC_iterate (block_symbol_d, symbols, i, elt); ++i)
-    {
-      if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (elt->symbol))
-	{
-	  int j;
-	  void **slot;
-	  struct template_defn defn, *p;
-	  struct cleanup *back_to;
-	  struct template_symbol *tsym
-	    = (struct template_symbol *) elt->symbol;
-
-	  /* To do lookups, we need only NAME, TSYMBOL, HASH.  */
-	  memset (&defn, 0, sizeof (struct template_defn));
-	  defn.name = tsym->search_name;
-	  defn.tsymbol = tsym;
-	  ccp_compute_template_defn_hash_string (&defn);
-	  slot = htab_find_slot (instance->template_defns, &defn, INSERT);
-	  if (*slot == NULL)
-	    {
-	      p = new_template_defn (&defn);
-	      *slot = p;
-	    }
-	  else
-	    {
-	      xfree (defn.hash_string);
-	      p = (struct template_defn *) *slot;
-	    }
-
-	  /* Loop over the template arguments, noting any default values
-	     and defining any types.  */
-	  for (j = 0; j < tsym->n_template_arguments; ++j)
-	    {
-	      if (p->default_arguments[j] == NULL
-		  && tsym->default_arguments[j] != NULL)
-		{
-		  p->default_arguments[j] = tsym->default_arguments[j];
-		  define_template_parameter_type (instance, tsym, j);
-		}
-	    }
-	}
-    }
+    ccp_maybe_define_new_template (instance, elt->symbol);
 
   /* !!keiths: From here on out, we MUST have all types declared or defined,
      otherwise GCC will give us "definition of TYPE in template parameter
      list."  */
-  /* Now iterate through template list and create any template definitions
-     we encountered.  */
-  htab_traverse (instance->template_defns,
-		 define_function_template, instance);
+  /* Create any new template definitions we encountered.  */
+  ccp_emit_template_decls (instance);
 }
 
 /* See definition in compile-internal.h.  */
@@ -1551,46 +1645,6 @@ ccp_convert_array (struct compile_cplus_instance *instance, struct type *type)
 	printf_unfiltered ("build_array_type\n");
       return CPCALL (build_array_type, instance, element_type, count);
     }
-}
-
-/* Get the access flag for the NUM'th field of TYPE.  */
-
-static enum gcc_cp_symbol_kind
-get_field_access_flag (const struct type *type, int num)
-{
-  if (TYPE_FIELD_PROTECTED (type, num))
-    return GCC_CP_ACCESS_PROTECTED;
-  else if (TYPE_FIELD_PRIVATE (type, num))
-    return GCC_CP_ACCESS_PRIVATE;
-
-  /* GDB assumes everything else is public.  */
-  return GCC_CP_ACCESS_PUBLIC;
-}
-
-/* Get the access flag for the NUM'th method of TYPE's FNI'th
-   fieldlist.  */
-
-static enum gcc_cp_symbol_kind
-get_method_access_flag (const struct type *type, int fni, int num)
-{
-  const struct fn_field *methods;
-
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
-
-  /* If this type was not declared a class, everything is public.  */
-  if (!TYPE_DECLARED_CLASS (type))
-    return GCC_CP_ACCESS_PUBLIC;
-
-  /* Otherwise, read accessibility from the fn_field.  */
-  methods = TYPE_FN_FIELDLIST1 (type, fni);
-  if (TYPE_FN_FIELD_PUBLIC (methods, num))
-    return GCC_CP_ACCESS_PUBLIC;
-  else if (TYPE_FN_FIELD_PROTECTED (methods, num))
-    return GCC_CP_ACCESS_PROTECTED;
-  else if (TYPE_FN_FIELD_PRIVATE (methods, num))
-    return GCC_CP_ACCESS_PRIVATE;
-
-  gdb_assert_not_reached ("unhandled method access specifier");
 }
 
 /* Convert a typedef of TYPE.  If not GCC_CP_ACCESS_NONE, NESTED_ACCESS
@@ -2422,7 +2476,7 @@ ccp_convert_struct_or_union (struct compile_cplus_instance *instance,
 
   if (TYPE_NAME (type) != NULL)
     {
-      name = cp_func_name (TYPE_NAME (type));
+      name = ccp_decl_name (TYPE_NAME (type));
       make_cleanup (xfree, name);
     }
   else
