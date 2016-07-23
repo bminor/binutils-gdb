@@ -85,6 +85,13 @@ new-ui INTERP TTY
   ** gdb.Breakpoint objects have a new attribute "pending", which
      indicates whether the breakpoint is pending.
 
+signal-event EVENTID
+  Signal ("set") the given MS-Windows event object.  This is used in
+  conjunction with the Windows JIT debugging (AeDebug) support, where
+  the OS suspends a crashing process until a debugger can attach to
+  it.  Resuming the crashing process, in order to debug it, is done by
+  signalling an event.
+
 * Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
   was added in GDBserver, including JIT compiling fast tracepoint's
   conditional expression bytecode into native code.

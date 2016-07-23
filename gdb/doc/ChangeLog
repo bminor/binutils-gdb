@@ -1,3 +1,8 @@
+2016-06-30  Руслан Ижбулатов  <lrn1986@gmail.com>
+
+	* gdb.texinfo (Cygwin Native): Document the new 'signal-event'
+	command.
+
 2016-07-13  Tom Tromey  <tom@tromey.com>
 
 	PR python/15620, PR python/18620:
@@ -11724,4 +11729,5 @@ mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never
+coding: utf-8
 End:

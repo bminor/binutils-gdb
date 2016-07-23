@@ -56,6 +56,7 @@
 #include "solist.h"
 #include "solib.h"
 #include "xml-support.h"
+#include "inttypes.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -823,6 +824,25 @@ windows_clear_solib (void)
 {
   solib_start.next = NULL;
   solib_end = &solib_start;
+}
+
+static void
+signal_event_command (char *args, int from_tty)
+{
+  uintptr_t event_id = 0;
+  char *endargs = NULL;
+
+  if (args == NULL)
+    error (_("signal-event requires an argument (integer event id)"));
+
+  event_id = strtoumax (args, &endargs, 10);
+
+  if ((errno == ERANGE) || (event_id == 0) || (event_id > UINTPTR_MAX) ||
+      ((HANDLE) event_id == INVALID_HANDLE_VALUE))
+    error (_("Failed to convert `%s' to event id"), args);
+
+  SetEvent ((HANDLE) event_id);
+  CloseHandle ((HANDLE) event_id);
 }
 
 /* Handle DEBUG_STRING output from child process.
@@ -2549,6 +2569,13 @@ _initialize_windows_nat (void)
 #ifdef __CYGWIN__
   cygwin_internal (CW_SET_DOS_FILE_WARNING, 0);
 #endif
+
+  add_com ("signal-event", class_run, signal_event_command, _("\
+Signal a crashed process with event ID, to allow its debugging.\n\
+This command is needed in support of setting up GDB as JIT debugger on \
+MS-Windows.  The command should be invoked from the GDB command line using \
+the '-ex' command-line option.  The ID of the event that blocks the \
+crashed process will be supplied by the Windows JIT debugging mechanism."));
 
 #ifdef __CYGWIN__
   add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\

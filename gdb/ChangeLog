@@ -1,3 +1,10 @@
+2016-06-30  Руслан Ижбулатов  <lrn1986@gmail.com>
+
+	PR gdb/14529
+	* windows-nat.c (signal_event_command): New command 'signal-event'
+	for W32 JIT debug support.
+	* NEWS: Add an entry about the new 'signal-event' command.
+
 2016-07-22  Tom Tromey  <tom@tromey.com>
 
 	PR rust/20162:

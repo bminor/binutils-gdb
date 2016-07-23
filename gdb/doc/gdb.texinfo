@@ -21520,6 +21520,35 @@ This command displays thread specific information stored in the
 Thread Information Block (readable on the X86 CPU family using @code{$fs}
 selector for 32-bit programs and @code{$gs} for 64-bit programs).
 
+@kindex signal-event
+@item signal-event @var{id}
+This command signals an event with user-provided @var{id}.  Used to resume
+crashing process when attached to it using MS-Windows JIT debugging (AeDebug).
+
+To use it, create or edit the following keys in
+@code{HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug} and/or
+@code{HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug}
+(for x86_64 versions):
+
+@itemize @minus
+@item
+@code{Debugger} (REG_SZ) --- a command to launch the debugger.
+Suggested command is: @code{@var{fully-qualified-path-to-gdb.exe} -ex
+"attach %ld" -ex "signal-event %ld" -ex "continue"}.
+
+The first @code{%ld} will be replaced by the process ID of the
+crashing process, the second @code{%ld} will be replaced by the ID of
+the event that blocks the crashing process, waiting for @value{GDBN}
+to attach.
+
+@item
+@code{Auto} (REG_SZ) --- either @code{1} or @code{0}.  @code{1} will
+make the system run debugger specified by the Debugger key
+automatically, @code{0} will cause a dialog box with ``OK'' and
+``Cancel'' buttons to appear, which allows the user to either
+terminate the crashing process (OK) or debug it (Cancel).
+@end itemize
+
 @kindex set cygwin-exceptions
 @cindex debugging the Cygwin DLL
 @cindex Cygwin DLL, debugging
