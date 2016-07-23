@@ -1,3 +1,12 @@
+2016-07-23  Andrew Pinski  <apinski@cavium.com>
+
+	* nat/aarch64-linux-hw-point.c
+	(aarch64_linux_get_debug_reg_capacity): Handle
+	ARMv8.1 and ARMv8.2 debug versions.
+	* nat/aarch64-linux-hw-point.h
+	(AARCH64_DEBUG_ARCH_V8_1): New define.
+	(AARCH64_DEBUG_ARCH_V8_2): New define.
+
 2016-06-30  Руслан Ижбулатов  <lrn1986@gmail.com>
 
 	PR gdb/14529
