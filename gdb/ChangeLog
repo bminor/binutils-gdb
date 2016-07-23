@@ -1,3 +1,67 @@
+2016-07-23  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* xml-syscall.c (get_syscalls_by_group): New.
+	(get_syscall_group_names): New.
+	(struct syscall_group_desc): New structure to store group data.
+	(struct syscalls_info): Include field to store the group list.
+	(sysinfo_free_syscall_group_desc): New.
+	(free_syscalls_info): Free group list.
+	(syscall_group_create_syscall_group_desc): New.
+	(syscall_group_add_syscall): New.
+	(syscall_create_syscall_desc): Add syscall to its groups.
+	(syscall_start_syscall): Load group attribute.
+	(syscall_group_get_group_by_name): New.
+	(xml_list_syscalls_by_group): New.
+	(xml_list_of_groups): New.
+	* xml-syscall.h (get_syscalls_by_group): Export function
+	to retrieve a list of syscalls filtered by the group name.
+	(get_syscall_group_names): Export function to retrieve the list
+	of syscall groups.
+	* break-catch-syscall.c (catch_syscall_split_args): Verify if
+	argument is a syscall group and expand it to a list of syscalls
+	when creating catchpoints.
+	(catch_syscall_completer): Add word completion for system call
+	groups.
+	* configure.ac: Include dependency for xsltproc when building
+	in maintainer-mode.
+	* break-catch-syscall.c (_initialize_breakpoint): Update catch
+	syscall command documentation.
+	* NEWS: Include section about catching groups of syscalls.
+	* configure: Regenerate.
+	* data-directory/Makefile.in: Generate syscall xml when building
+	in maintainer mode.
+	* syscalls/gdb-syscalls.dtd: Include group attribute to the
+	syscall element.
+	* syscalls/apply-defaults.xsl: New.
+	* syscalls/linux-defaults.xml.in: New.
+	* syscalls/aarch64-linux.xml: Rename to aarch64-linux.xml.in.
+	* syscalls/amd64-linux.xml: Rename to amd64-linux.xml.in.
+	* syscalls/arm-linux.xml: Rename to arm-linux.xml.in.
+	* syscalls/bfin-linux.xml: Rename to bfin-linux.xml.in.
+	* syscalls/i386-linux.xml: Rename to i386-linux.xml.in.
+	* syscalls/mips-n32-linux.xml: Rename to mips-n32-linux.xml.in.
+	* syscalls/mips-n64-linux.xml: Rename to mips-n64-linux.xml.in.
+	* syscalls/mips-o32-linux.xml: Rename to mips-o32-linux.xml.in.
+	* syscalls/ppc-linux.xml: Rename to ppc-linux.xml.in.
+	* syscalls/ppc64-linux.xml: Rename to ppc64-linux.xml.in.
+	* syscalls/s390-linux.xml: Rename to s390-linux.xml.in.
+	* syscalls/s390x-linux.xml: Rename to s390x-linux.xml.in.
+	* syscalls/sparc-linux.xml: Rename to sparc-linux.xml.in.
+	* syscalls/sparc64-linux.xml: Rename to sparc64-linux.xml.in.
+	* syscalls/aarch64-linux.xml: Regenerate.
+	* syscalls/amd64-linux.xml: Regenerate.
+	* syscalls/arm-linux.xml: Regenerate.
+	* syscalls/i386-linux.xml: Regenerate.
+	* syscalls/mips-n32-linux.xml: Regenerate.
+	* syscalls/mips-n64-linux.xml: Regenerate.
+	* syscalls/mips-o32-linux.xml: Regenerate.
+	* syscalls/ppc-linux.xml: Regenerate.
+	* syscalls/ppc64-linux.xml: Regenerate.
+	* syscalls/s390-linux.xml: Regenerate.
+	* syscalls/s390x-linux.xml: Regenerate.
+	* syscalls/sparc-linux.xml: Regenerate.
+	* syscalls/sparc64-linux.xml: Regenerate.
+
 2016-07-23  Andrew Pinski  <apinski@cavium.com>
 
 	* nat/aarch64-linux-hw-point.c

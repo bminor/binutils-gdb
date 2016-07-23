@@ -385,6 +385,42 @@ proc test_catch_syscall_fail_nodatadir {} {
     }
 }
 
+proc test_catch_syscall_group {} {
+    global decimal
+
+    set sysnum "\\\[${decimal}\\\]"
+
+    gdb_test "catch syscall g:process" \
+	"Catchpoint $decimal \\(syscalls (\'(clone|fork|execve|exit)\' $sysnum)+.*" \
+	"set catchpoint on a group of syscalls"
+
+    gdb_test "catch syscall group:process read" \
+	"Catchpoint $decimal \\(syscalls (\'(clone|fork|execve|exit)\' $sysnum)+.*read.*\\)" \
+	"set catchpoints on a group of syscalls and on a single syscall"
+
+    gdb_test "catch syscall group:" \
+	"Unknown syscall group ''\." \
+	"set catchpoints on an invalid group"
+
+    gdb_test "catch syscall g:junk" \
+	"Unknown syscall group 'junk'\." \
+	"set catchpoints on an unknown group."
+
+    gdb_test "complete catch syscall g:proc" \
+	"catch syscall g:process" \
+	"complete catch syscall group with 'g:' prefix"
+
+    gdb_test "complete catch syscall group:proc" \
+	"catch syscall group:process" \
+	"complete catch syscall group with 'group:' prefix"
+
+    gdb_test_sequence "complete catch syscall g" \
+	"complete catch syscall group suggests 'group:' prefix" {
+	    "group:descriptor" "group:file" "group:ipc" "group:memory"
+	    "group:network" "group:process" "group:signal"
+	}
+}
+
 proc do_syscall_tests {} {
     # NOTE: We don't have to point gdb at the correct data-directory.
     # For the build tree that is handled by INTERNAL_GDBFLAGS.
@@ -435,6 +471,9 @@ proc do_syscall_tests {} {
     # Testing if the 'catch syscall' command works when switching to
     # different architectures on-the-fly (PR gdb/10737).
     if [runto_main] then { test_catch_syscall_multi_arch }
+
+    # Testing the 'catch' syscall command for a group of syscalls.
+    if [runto_main] then { test_catch_syscall_group }
 }
 
 proc test_catch_syscall_without_args_noxml {} {

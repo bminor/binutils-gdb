@@ -4375,7 +4375,7 @@ A failed Ada assertion.
 A call to @code{exec}.
 
 @item syscall
-@itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @dots{} 
+@itemx syscall @r{[}@var{name} @r{|} @var{number} @r{|} @r{group:}@var{groupname} @r{|} @r{g:}@var{groupname}@r{]} @dots{}
 @kindex catch syscall
 @cindex break on a system call.
 A call to or return from a system call, a.k.a.@: @dfn{syscall}.  A
@@ -4409,6 +4409,15 @@ into the corresponding numeric code, but using the number directly
 may be useful if @value{GDBN}'s database does not have the complete
 list of syscalls on your system (e.g., because @value{GDBN} lags
 behind the OS upgrades).
+
+You may specify a group of related syscalls to be caught at once using
+the @code{group:} syntax (@code{g:} is a shorter equivalent).  For
+instance, on some platforms @value{GDBN} allows you to catch all
+network related syscalls, by passing the argument @code{group:network}
+to @code{catch syscall}.  Note that not all syscall groups are
+available in every system.  You can use the command completion
+facilities (@pxref{Completion,, command completion}) to list the
+syscall groups available on your environment.
 
 The example below illustrates how this command works if you don't provide
 arguments to it:
@@ -4464,6 +4473,23 @@ Continuing.
 
 Program exited normally.
 (@value{GDBP})
+@end smallexample
+
+Here is an example of catching a syscall group:
+
+@smallexample
+(@value{GDBP}) catch syscall group:process
+Catchpoint 1 (syscalls 'exit' [1] 'fork' [2] 'waitpid' [7]
+'execve' [11] 'wait4' [114] 'clone' [120] 'vfork' [190]
+'exit_group' [252] 'waitid' [284] 'unshare' [310])
+(@value{GDBP}) r
+Starting program: /tmp/catch-syscall
+
+Catchpoint 1 (call to syscall fork), 0x00007ffff7df4e27 in open64 ()
+   from /lib64/ld-linux-x86-64.so.2
+
+(@value{GDBP}) c
+Continuing.
 @end smallexample
 
 However, there can be situations when there is no corresponding name

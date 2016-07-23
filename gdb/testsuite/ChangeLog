@@ -1,3 +1,9 @@
+2016-07-23  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* gdb.base/catch-syscall.exp (do_syscall_tests): Add call
+	to test_catch_syscall_group.
+	(test_catch_syscall_group): New.
+
 2016-07-21  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/simple.rs (main): Use empty struct expression.

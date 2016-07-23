@@ -60,6 +60,11 @@
   for its own control and synchronization, invisible to the command
   line.
 
+* The "catch syscall" command catches groups of related syscalls.
+
+  The "catch syscall" command now supports catching a group of related
+  syscalls using the 'group:' or 'g:' prefix.
+
 * New commands
 
 skip -file file
