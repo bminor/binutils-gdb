@@ -1,3 +1,8 @@
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (is_generic_elf): New, extracted from..
+	* testsuite/ld-elf/elf.exp: ..here.
+
 2016-10-06  Ludovic Courtès  <ludo@gnu.org>
 
 	* emulparams/elf32bmipn32-defs.sh: Shift quote of
