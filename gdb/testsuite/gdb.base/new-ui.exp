@@ -143,4 +143,31 @@ proc do_test {} {
     }
 }
 
-do_test
+# Test missing / invalid arguments.
+
+proc do_test_invalid_args {} {
+    global testfile
+
+    clean_restart $testfile
+
+    spawn -pty
+    set extra_tty_name $spawn_out(slave,name)
+
+    # Test bad terminal path.
+    gdb_test "new-ui console /non/existent/path" \
+	     "opening terminal failed: No such file or directory\." \
+	     "new-ui with bad terminal path"
+
+    # Test bad interpreter name.
+    gdb_test "new-ui bloop $extra_tty_name" \
+	     "Interpreter `bloop' unrecognized" \
+	     "new-ui with bad interpreter name"
+
+    # Test that we can continue working normally.
+    if ![runto_main] {
+	fail "could not run to main"
+    }
+}
+
+with_test_prefix "do_test" do_test
+with_test_prefix "do_test_invalid_args" do_test_invalid_args

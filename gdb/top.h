@@ -185,6 +185,9 @@ extern void switch_thru_all_uis_next (struct switch_thru_all_uis *state);
 extern struct ui *new_ui (FILE *instream, FILE *outstream, FILE *errstream);
 extern void delete_ui (struct ui *todel);
 
+/* Cleanup that deletes a UI.  */
+extern struct cleanup *make_delete_ui_cleanup (struct ui *ui);
+
 /* Cleanup that restores the current UI.  */
 extern void restore_ui_cleanup (void *data);
 

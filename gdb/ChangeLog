@@ -1,3 +1,11 @@
+2016-07-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* top.h (make_delete_ui_cleanup): New declaration.
+	* top.c (delete_ui_cleanup): New function.
+	(make_delete_ui_cleanup): New function.
+	(new_ui_command): Create restore_ui cleanup earlier, create a
+	delete_ui cleanup and discard it on success.
+
 2016-07-25  Pedro Alves  <palves@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

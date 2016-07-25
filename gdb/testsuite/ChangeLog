@@ -1,3 +1,8 @@
+2016-07-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/new-ui.exp (do_test_invalid_args): New
+	procedure.
+
 2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* gdb.btrace/reconnect.c: New file.

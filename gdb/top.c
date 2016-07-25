@@ -324,6 +324,24 @@ delete_ui (struct ui *todel)
   free_ui (ui);
 }
 
+/* Cleanup that deletes a UI.  */
+
+static void
+delete_ui_cleanup (void *void_ui)
+{
+  struct ui *ui = (struct ui *) void_ui;
+
+  delete_ui (ui);
+}
+
+/* See top.h.  */
+
+struct cleanup *
+make_delete_ui_cleanup (struct ui *ui)
+{
+  return make_cleanup (delete_ui_cleanup, ui);
+}
+
 /* Open file named NAME for read/write, making sure not to make it the
    controlling terminal.  */
 
@@ -353,13 +371,13 @@ new_ui_command (char *args, int from_tty)
   char **argv;
   const char *interpreter_name;
   const char *tty_name;
-  struct cleanup *back_to;
-  struct cleanup *streams_chain;
+  struct cleanup *success_chain;
+  struct cleanup *failure_chain;
 
   dont_repeat ();
 
   argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  success_chain = make_cleanup_freeargv (argv);
   argc = countargv (argv);
 
   if (argc < 2)
@@ -368,7 +386,9 @@ new_ui_command (char *args, int from_tty)
   interpreter_name = argv[0];
   tty_name = argv[1];
 
-  streams_chain = make_cleanup (null_cleanup, NULL);
+  make_cleanup (restore_ui_cleanup, current_ui);
+
+  failure_chain = make_cleanup (null_cleanup, NULL);
 
   /* Open specified terminal, once for each of
      stdin/stdout/stderr.  */
@@ -379,20 +399,20 @@ new_ui_command (char *args, int from_tty)
     }
 
   ui = new_ui (stream[0], stream[1], stream[2]);
-
-  discard_cleanups (streams_chain);
+  make_cleanup (delete_ui_cleanup, ui);
 
   ui->async = 1;
 
-  make_cleanup (restore_ui_cleanup, current_ui);
   current_ui = ui;
 
   set_top_level_interpreter (interpreter_name);
 
   interp_pre_command_loop (top_level_interpreter ());
 
-  /* This restores the previous UI.  */
-  do_cleanups (back_to);
+  discard_cleanups (failure_chain);
+
+  /* This restores the previous UI and frees argv.  */
+  do_cleanups (success_chain);
 
   printf_unfiltered ("New UI allocated\n");
 }
