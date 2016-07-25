@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.26.51.0.1 for Linux, which is
-based on binutils 2015 1114 master branch on sourceware.org plus
+This is the beta release of binutils 2.26.51.0.2 for Linux, which is
+based on binutils 2016 0711 master branch on sourceware.org plus
 various changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -143,12 +143,91 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.26.51.0.1 to
+Please report any bugs related to binutils 2.26.51.0.2 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.26.51.0.1:
+
+1. Update from binutils 2016 0711.
+2. Add support for Intel RDPID instructions.
+3. Add --enable-relro and make it the default for Linux targets.
+PR 20283.
+4. Make --enable-compressed-debug-sections=gas the default for
+Linux/x86 targets.
+5. Add --no-pad-sections option to gas.
+6. Add -z noreloc-overflow option to x86-64 ld.  PR 19807.
+7. Speedup orphan placement for relocatable link.  PR 19739.
+8. Fix .weakref directive with defined symbol.  PR 19498.
+9. Fix assembler fegmentation fault on bad input.  PR 19896.
+10. Set sh_entsize on .init_array, .fini_array and .preinit_array
+sections.  PR 20118.
+11. Treat common symbol in executable as definition.  PR 19579.
+12. Allow zero length archive elements.  PR 19775.
+13. Fix an --as-needed ld regression.  PR 19886.
+14. Don't create dynamic sections for relocatable output.  PR 19789.
+15. Always count the NULL entry in dynamic symbol table.
+16. Handle symbols defined/referenced only within IR.  PR 20070.
+17. Enable 64-bit archives in ar and ranlib.  PR 14625.
+18. Improve symbol choice with objdump.  PR 20337.
+19. Don't retrieve version info from synthetic symbols.  PR 20304.
+20. Update objcopy to check corrupt binary.  PRs 20089/20096.
+21. Check corrupt binary with invalid sh_link field.  PR 20063.
+22. Strip global symbol defined in discarded section.  PR 17550.
+23. Fix a linker crash with -shared --gc-sections -u.  PR 20306.
+24. Properly handle dynamic reloc against normal symbol.  PR 19939.
+25. Update ld to warn for duplicated plugin.  PR 20321.
+26. Updated ld to use the IR symbol table for the IR input object. PRs
+18250/20267.
+27. Update ld to properly handle common symbol with LTO.  PR 20276.
+28. Handle thin archives with LTO.  PR 20241.
+29. Don't claim new IR symbols after all IR symbols have been claimed.
+PR 20103.
+30. Handle indirect branches for AMD64 and Intel64 in x86-64 assembler
+and disassembler.  PR binutis/18386.
+31. Don't use vec_disp8 encoding with the .d32 suffix.  PR 19909.
+32. Improve x86-64 disassembler.  PRs 19983/19984.
+33. Improve ".arch .noXXX" directives in x86 assembler.  PR 20145.
+34. Require another match for AVX512VL in x86 assembler.  PR 20140.
+35. Enable VREX for AVX512 directives in x86 assembler.  PR 20141.
+36. Preserve addend for R_386_GOT32 and R_X86_64_GOT32 in x86 assembler.
+PR 19600.
+37. Update ld to remove PLT entry for IFUNC function via GOT.  PR 20253.
+38. Don't check undefined symbols for relocations against x86 IFUNC
+symbols.
+39. Update x86 ld to skip relocations in non-loaded, non-alloced sections.
+40. Update i386 ld to handle "op $imm, bar@GOT".  PR 20244.
+41. Update x86 ld to support dynamic TLS models with indirect call.
+42. Properly override IFUNC symbols in executales.  PRs 16467/20159.
+43. Don't convert R_386_GOT32 relocation.  PR 20117.
+44. Don't convert GOTPCREL relocation against large section.  PR 20093.
+45. Updated x86-64 ld to Skip debug sections when estimating distances.
+PR 20006.
+46. Check run-time R_X86_64_32 relocation overflow.  PR 19969.
+47. Update x86 ld to check ELF relocs after opening all input files.
+48. Updated x86 ld to bind defined symbol locally in PIE. PR 19827.
+49. Updated x86 ld to handle local IFUNC symbols in shared object.  PR
+19784.
+50. Improve gold support.
+51. Improve COFF support.
+52. Improve freebsd support.
+53. Improve Solaris support.
+54. Add dlx support.
+55. Improve arc support.
+56. Improve arm support.
+57. Improve avr support.
+58. Improve bfin upport.
+59. Improve ft32 support.
+60. Improve hppa support.
+61. Improve msp430 support.
+62. Improve mips support.
+63. Improve ppc support.
+64. Improve s390 support.
+65. Improve sparc support.
+66. Improve z8k support.
 
 Changes from binutils 2.25.51.0.4:
 
@@ -1241,7 +1320,7 @@ already been defined.  PR 12001.
 16. Improve ppc support.
 17. Improve tic6x support.
 
-It is available as users/hjl/linux/release/2.26.51.0.1 tag at
+It is available as users/hjl/linux/release/2.26.51.0.2 tag at
 
 https://sourceware.org/git/?p=binutils-gdb.git;a=summary
 
@@ -1250,4 +1329,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-02/29/2016
+07/25/2016
