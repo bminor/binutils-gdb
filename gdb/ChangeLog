@@ -1,5 +1,9 @@
 2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* MAINTAINERS (Write After Approval): Add Tim Wiederhake
+
+2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* NEWS: Resume btrace on reconnect.
 	* record-btrace.c: Added record-btrace.h include.
 	(record_btrace_open): Split into this and ...
