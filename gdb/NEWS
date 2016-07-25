@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.11
 
+* GDBserver now supports recording btrace without maintaining an active
+  GDB connection.
+
 * GDB now supports a negative repeat count in the 'x' command to examine
   memory backward from the given address.  For example:
 

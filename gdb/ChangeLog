@@ -1,3 +1,16 @@
+2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* NEWS: Resume btrace on reconnect.
+	* record-btrace.c: Added record-btrace.h include.
+	(record_btrace_open): Split into this and ...
+	(record_btrace_push_target): ... this.
+	(record_btrace_disconnect): New function.
+	(init_record_btrace_ops): Use record_btrace_disconnect.
+	* record-btrace.h: New file.
+	* remote.c: Added record-btrace.h include.
+	(remote_start_remote): Check recording status.
+	(remote_btrace_maybe_reopen): New function.
+
 2016-07-23  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	* xml-syscall.c (get_syscalls_by_group): New.

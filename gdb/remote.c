@@ -70,6 +70,7 @@
 #include "ax-gdb.h"
 #include "agent.h"
 #include "btrace.h"
+#include "record-btrace.h"
 
 /* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
@@ -230,6 +231,8 @@ static int remote_supports_cond_breakpoints (struct target_ops *self);
 static int remote_can_run_breakpoint_commands (struct target_ops *self);
 
 static void remote_btrace_reset (void);
+
+static void remote_btrace_maybe_reopen (void);
 
 static int stop_reply_queue_length (void);
 
@@ -4297,6 +4300,10 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
       merge_uploaded_tracepoints (&uploaded_tps);
     }
+
+  /* Possibly the target has been engaged in a btrace record started
+     previously; find out where things are at.  */
+  remote_btrace_maybe_reopen ();
 
   /* The thread and inferior lists are now synchronized with the
      target, our symbols have been relocated, and we're merged the
@@ -12772,6 +12779,60 @@ btrace_read_config (struct btrace_config *conf)
       parse_xml_btrace_conf (conf, xml);
       do_cleanups (cleanup);
     }
+}
+
+/* Maybe reopen target btrace.  */
+
+static void
+remote_btrace_maybe_reopen (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  struct cleanup *cleanup;
+  struct thread_info *tp;
+  int btrace_target_pushed = 0;
+  int warned = 0;
+
+  cleanup = make_cleanup_restore_current_thread ();
+  ALL_NON_EXITED_THREADS (tp)
+    {
+      set_general_thread (tp->ptid);
+
+      memset (&rs->btrace_config, 0x00, sizeof (struct btrace_config));
+      btrace_read_config (&rs->btrace_config);
+
+      if (rs->btrace_config.format == BTRACE_FORMAT_NONE)
+	continue;
+
+#if !defined (HAVE_LIBIPT)
+      if (rs->btrace_config.format == BTRACE_FORMAT_PT)
+	{
+	  if (!warned)
+	    {
+	      warned = 1;
+	      warning (_("GDB does not support Intel Processor Trace. "
+			 "\"record\" will not work in this session."));
+	    }
+
+	  continue;
+	}
+#endif /* !defined (HAVE_LIBIPT) */
+
+      /* Push target, once, but before anything else happens.  This way our
+	 changes to the threads will be cleaned up by unpushing the target
+	 in case btrace_read_config () throws.  */
+      if (!btrace_target_pushed)
+	{
+	  btrace_target_pushed = 1;
+	  record_btrace_push_target ();
+	  printf_filtered (_("Target is recording using %s.\n"),
+			   btrace_format_string (rs->btrace_config.format));
+	}
+
+      tp->btrace.target = XCNEW (struct btrace_target_info);
+      tp->btrace.target->ptid = tp->ptid;
+      tp->btrace.target->conf = rs->btrace_config;
+    }
+  do_cleanups (cleanup);
 }
 
 /* Enable branch tracing.  */

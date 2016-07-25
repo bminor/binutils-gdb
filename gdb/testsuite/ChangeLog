@@ -1,3 +1,8 @@
+2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* gdb.btrace/reconnect.c: New file.
+	* gdb.btrace/reconnect.exp: New file.
+
 2016-07-23  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	* gdb.base/catch-syscall.exp (do_syscall_tests): Add call

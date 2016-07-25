@@ -6657,7 +6657,9 @@ Hardware-supported instruction recording.  This method does not record
 data.  Further, the data is collected in a ring buffer so old data will
 be overwritten when the buffer is full.  It allows limited reverse
 execution.  Variables and registers are not available during reverse
-execution.
+execution.  In remote debugging, recording continues on disconnect.
+Recorded data can be inspected after reconnecting.  The recording may
+be stopped using @code{record stop}.
 
 The recording format can be specified as parameter.  Without a parameter
 the command chooses the recording format.  The following recording

@@ -1,3 +1,7 @@
+2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* gdb.texinfo: Resume btrace on reconnect.
+
 2016-07-23  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	* gdb.texinfo (Set Catchpoints): Add 'group' argument to catch
