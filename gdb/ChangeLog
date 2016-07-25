@@ -1,3 +1,18 @@
+2016-07-25  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-procfs.c (enum proc_state): New enum.
+	(parse_proc_status_state): New function.
+	(linux_proc_pid_get_state): Replace output string buffer parameter
+	with an output proc_state parameter.  Use parse_proc_status_state.
+	(linux_proc_pid_is_gone): Adjust to use proc_state values.
+	(linux_proc_pid_has_state): Change type of 'state' parameter; now
+	an enum proc_state.  Adjust to linux_proc_pid_get_state interface
+	change.
+	(linux_proc_pid_is_stopped)
+	(linux_proc_pid_is_trace_stopped_nowarn)
+	(linux_proc_pid_is_zombie_maybe_warn): Adjust to
+	linux_proc_pid_get_state interface change.
+
 2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* MAINTAINERS (Write After Approval): Add Tim Wiederhake
