@@ -1,3 +1,9 @@
+2016-07-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/sec64k.exp: Run test for arc, msp430, or1k
+	and m32r.  Correct comment.  Relax ld -r match to account for
+	msp increased number of default sections.
+
 2016-07-22  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* testsuite/ld-arc/got-01.d: New file.
