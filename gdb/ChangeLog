@@ -1,4 +1,10 @@
 2016-07-25  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* nat/linux-procfs.c (parse_proc_status_state): Handle lowercase
+	't'.
+
+2016-07-25  Pedro Alves  <palves@redhat.com>
 
 	* nat/linux-procfs.c (enum proc_state): New enum.
 	(parse_proc_status_state): New function.

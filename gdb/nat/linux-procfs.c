@@ -102,7 +102,10 @@ parse_proc_status_state (const char *state)
 
   switch (state[0])
     {
+    case 't':
+      return PROC_STATE_TRACING_STOP;
     case 'T':
+      /* Before Linux 2.6.33, tracing stop used uppercase T.  */
       if (strcmp (state, "T (tracing stop)") == 0)
 	return PROC_STATE_TRACING_STOP;
       else
