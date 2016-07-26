@@ -1,3 +1,10 @@
+2016-07-27  Alan Modra  <amodra@gmail.com>
+
+	* amd64-darwin-tdep.c: Don't include libbfd.h.
+	* i386-darwin-tdep.c: Likewise.
+	* rs6000-nat.c: Likewise.
+	* rs6000-tdep.c: Likewise.
+
 2016-07-26  Tom Tromey  <tom@tromey.com>
 
 	* symtab.c (register_symbol_computed_impl): Update.

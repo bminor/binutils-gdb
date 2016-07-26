@@ -1,3 +1,7 @@
+2016-07-27  Alan Modra  <amodra@gmail.com>
+
+	* memory.c: Don't include libbfd.h.
+
 2016-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* simulator.c (fsqrts): Use sqrtf rather than sqrt.

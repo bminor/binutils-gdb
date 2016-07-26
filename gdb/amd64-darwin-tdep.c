@@ -26,7 +26,6 @@
 #include "floatformat.h"
 #include "symtab.h"
 #include "regcache.h"
-#include "libbfd.h"
 #include "objfiles.h"
 
 #include "i387-tdep.h"

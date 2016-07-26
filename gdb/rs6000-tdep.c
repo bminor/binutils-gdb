@@ -43,7 +43,6 @@
 #include "record-full.h"
 #include "auxv.h"
 
-#include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
 #include "libcoff.h"		/* for xcoff_data */
 #include "coff/xcoff.h"
