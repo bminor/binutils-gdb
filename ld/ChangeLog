@@ -1,3 +1,10 @@
+2016-07-26  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* ldbuildid.c: Changes for MinGW32:
+	Include windows.h and rpcdce.h.
+	(validate_build_id_style): Allow "uuid" style.
+	(generate_build_id): Fill in id_bits using UuidCreate().
+
 2016-07-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/sec64k.exp: Run test for arc, msp430, or1k
