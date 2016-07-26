@@ -427,13 +427,15 @@ x86_get_pc (struct regcache *regcache)
 
   if (use_64bit)
     {
-      unsigned long pc;
+      uint64_t pc;
+
       collect_register_by_name (regcache, "rip", &pc);
       return (CORE_ADDR) pc;
     }
   else
     {
-      unsigned int pc;
+      uint32_t pc;
+
       collect_register_by_name (regcache, "eip", &pc);
       return (CORE_ADDR) pc;
     }
@@ -446,12 +448,14 @@ x86_set_pc (struct regcache *regcache, CORE_ADDR pc)
 
   if (use_64bit)
     {
-      unsigned long newpc = pc;
+      uint64_t newpc = pc;
+
       supply_register_by_name (regcache, "rip", &newpc);
     }
   else
     {
-      unsigned int newpc = pc;
+      uint32_t newpc = pc;
+
       supply_register_by_name (regcache, "eip", &newpc);
     }
 }

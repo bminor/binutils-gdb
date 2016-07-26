@@ -1,5 +1,12 @@
 2016-07-26  Pedro Alves  <palves@redhat.com>
 
+	PR server/20414
+	* linux-x86-low.c (x86_get_pc, x86_set_pc): Use uint64_t instead
+	of unsigned long for 64-bit registers and use uint32_t instead of
+	unsigned int for 32-bit registers.
+
+2016-07-26  Pedro Alves  <palves@redhat.com>
+
 	* linux-x86-low.c (x86_siginfo_fixup): Rename 'native' parameter
 	to 'ptrace'.
 
