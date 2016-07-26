@@ -1,5 +1,11 @@
 2016-07-26  Pedro Alves  <palves@redhat.com>
 
+	* nat/linux-ptrace.c: Include "gregset.h".
+	(linux_ptrace_test_ret_to_nx): Use PTRACE_GETREGS instead of
+	PTRACE_PEEKUSER.
+
+2016-07-26  Pedro Alves  <palves@redhat.com>
+
 	* amd64-linux-nat.c (amd64_linux_siginfo_fixup): Rename 'native'
 	parameter to 'ptrace'.
 	* nat/amd64-linux-siginfo.c (GDB_SI_SIZE): New define.
