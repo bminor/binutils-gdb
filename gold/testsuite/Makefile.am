@@ -3619,6 +3619,19 @@ aarch64_reloc_none.stdout: aarch64_reloc_none
 
 MOSTLYCLEANFILES += aarch64_reloc_none
 
+check_SCRIPTS += aarch64_relocs.sh
+check_DATA += aarch64_relocs.stdout
+aarch64_globals.o: aarch64_globals.s
+	$(TEST_AS) -o $@ $<
+aarch64_relocs.o: aarch64_relocs.s
+	$(TEST_AS) -o $@ $<
+aarch64_relocs: aarch64_relocs.o aarch64_globals.o ../ld-new
+	../ld-new -o $@ aarch64_relocs.o aarch64_globals.o -e0 --emit-relocs
+aarch64_relocs.stdout: aarch64_relocs
+	$(TEST_OBJDUMP) -dr $< > $@
+
+MOSTLYCLEANFILES += aarch64_relocs
+
 endif DEFAULT_TARGET_AARCH64
 
 if DEFAULT_TARGET_S390
