@@ -974,13 +974,13 @@ proc run_mips_plt_test { name abi filter micromips suffix {extra {}} } {
     set ld_flags "$abi_ldflags($abi) -T compressed-plt-1.ld"
     set dynobj "tmpdir/compressed-plt-1-${abi}-dyn.so"
     set files [list]
-    if { $filter & 3 } {
+    if { $filter & 7 } {
 	lappend files compressed-plt-1a.s
     }
-    if { $filter & 12 } {
+    if { $filter & 56 } {
 	lappend files compressed-plt-1b.s
     }
-    if { $filter & 16 } {
+    if { $filter & 64 } {
 	lappend files compressed-plt-1c.s
     }
     eval [list lappend files] $extra
@@ -1000,28 +1000,35 @@ proc run_mips_plt_test { name abi filter micromips suffix {extra {}} } {
 
 if { $linux_gnu } {
     build_mips_plt_lib o32
-    run_mips_plt_test "o32 PLTs for standard encoding" o32 28 0 se
-    run_mips_plt_test "o32 PLTs for MIPS16 encoding" o32 19 0 mips16-only
-    run_mips_plt_test "o32 PLTs for microMIPS encoding" o32 19 1 umips-only
+    run_mips_plt_test "o32 PLTs for standard encoding" o32 104 0 se
+    run_mips_plt_test "o32 PLTs for standard branches" o32 16 0 branch
+    run_mips_plt_test "o32 PLTs for MIPS16 encoding" o32 69 0 mips16-only
+    run_mips_plt_test "o32 PLTs for MIPS16 branches" o32 2 0 mips16-bronly
+    run_mips_plt_test "o32 PLTs for microMIPS encoding" o32 69 1 umips-only
+    run_mips_plt_test "o32 PLTs for microMIPS branches" o32 2 1 umips-bronly
     run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16" \
-	o32 -1 0 mips16
+	o32 109 0 mips16
+    run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16 branches" \
+	o32 18 0 mips16-branch
     run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16 with %got" \
-	o32 -1 0 mips16-got compressed-plt-1d.s
+	o32 109 0 mips16-got compressed-plt-1d.s
     run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16 with .word" \
-	o32 -1 0 mips16-word compressed-plt-1e.s
+	o32 109 0 mips16-word compressed-plt-1e.s
     run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS" \
-	o32 -1 1 umips
+	o32 109 1 umips
+    run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS branches" \
+	o32 18 1 umips-branch
     run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS with %got" \
-	o32 -1 1 umips-got compressed-plt-1d.s
+	o32 109 1 umips-got compressed-plt-1d.s
     run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS with .word" \
-	o32 -1 1 umips-word compressed-plt-1e.s
+	o32 109 1 umips-word compressed-plt-1e.s
 
     if $has_newabi {
 	build_mips_plt_lib n32
 	run_mips_plt_test "n32 PLTs for mixed MIPS and MIPS16" \
-	    n32 -1 0 mips16
+	    n32 109 0 mips16
 	run_mips_plt_test "n32 PLTs for mixed MIPS and microMIPS" \
-	    n32 -1 1 umips
+	    n32 109 1 umips
     }
 }
 

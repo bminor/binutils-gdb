@@ -5585,7 +5585,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
      case the symbol will have been set by mips_elf_set_plt_sym_value
      to point to the standard PLT entry, so redirect to the compressed
      one.  */
-  else if ((r_type == R_MIPS16_26 || r_type == R_MICROMIPS_26_S1)
+  else if ((mips16_branch_reloc_p (r_type)
+	    || micromips_branch_reloc_p (r_type))
 	   && !bfd_link_relocatable (info)
 	   && h != NULL
 	   && h->use_plt_entry
@@ -8795,7 +8796,9 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
          a PLT entry is not created because the symbol is satisfied
          locally.  */
       if (h != NULL
-	  && jal_reloc_p (r_type)
+	  && (branch_reloc_p (r_type)
+	      || mips16_branch_reloc_p (r_type)
+	      || micromips_branch_reloc_p (r_type))
 	  && !SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  if (h->plt.plist == NULL)
@@ -8803,7 +8806,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (h->plt.plist == NULL)
 	    return FALSE;
 
-	  if (r_type == R_MIPS_26)
+	  if (branch_reloc_p (r_type))
 	    h->plt.plist->need_mips = TRUE;
 	  else
 	    h->plt.plist->need_comp = TRUE;

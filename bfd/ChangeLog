@@ -1,3 +1,9 @@
+2016-07-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Handle branches
+	in PLT compression selection.
+	(_bfd_mips_elf_check_relocs): Likewise.
+
 2016-07-22  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* arc-got.h (relocate_fix_got_relocs_for_got_info): Handle the
