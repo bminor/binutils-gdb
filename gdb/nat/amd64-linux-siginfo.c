@@ -21,23 +21,29 @@
 #include "common-defs.h"
 #include "amd64-linux-siginfo.h"
 
-/* The nat_* types below define the most complete kernel siginfo type
-   known for the architecture, independent of the system/libc headers.  */
+#define GDB_SI_SIZE 128
+
+/* The types below define the most complete kernel siginfo types known
+   for the architecture, independent of the system/libc headers.  They
+   are named from a 64-bit kernel's perspective:
+
+   | layout | type                 |
+   |--------+----------------------|
+   | 64-bit | nat_siginfo_t        |
+   | 32-bit | compat_siginfo_t     |
+   | x32    | compat_x32_siginfo_t |
+*/
+
+#ifndef __ILP32__
 
 typedef int nat_int_t;
-typedef void* nat_uptr_t;
+typedef unsigned long nat_uptr_t;
 
 typedef int nat_time_t;
 typedef int nat_timer_t;
 
-/* For native 64-bit, clock_t in _sigchld is 64bit aligned at 4 bytes.  */
-typedef long __attribute__ ((__aligned__ (4))) nat_clock_t;
-
-struct nat_timeval
-{
-  nat_time_t tv_sec;
-  int tv_usec;
-};
+/* For native 64-bit, clock_t in _sigchld is 64-bit.  */
+typedef long nat_clock_t;
 
 typedef union nat_sigval
 {
@@ -106,11 +112,9 @@ typedef struct nat_siginfo
       int _fd;
     } _sigpoll;
   } _sifields;
-} nat_siginfo_t __attribute__ ((__aligned__ (8)));
+} nat_siginfo_t;
 
-/*  Sanity check for the siginfo structure size.  */
-
-gdb_static_assert (sizeof (nat_siginfo_t) == sizeof (siginfo_t));
+#endif /* __ILP32__ */
 
 /* These types below (compat_*) define a siginfo type that is layout
    compatible with the siginfo type exported by the 32-bit userspace
@@ -286,62 +290,71 @@ typedef struct compat_x32_siginfo
 #define si_overrun si_timer2
 #endif
 
+/* The type of the siginfo object the kernel returns in
+   PTRACE_GETSIGINFO.  If gdb is built as a x32 program, we get a x32
+   siginfo.  */
+#ifdef __ILP32__
+typedef compat_x32_siginfo_t ptrace_siginfo_t;
+#else
+typedef nat_siginfo_t ptrace_siginfo_t;
+#endif
+
 /*  Convert the system provided siginfo into compatible siginfo.  */
 
 static void
-compat_siginfo_from_siginfo (compat_siginfo_t *to, siginfo_t *from)
+compat_siginfo_from_siginfo (compat_siginfo_t *to, const siginfo_t *from)
 {
-  nat_siginfo_t from_nat;
+  ptrace_siginfo_t from_ptrace;
 
-  memcpy (&from_nat, from, sizeof (from_nat));
+  memcpy (&from_ptrace, from, sizeof (from_ptrace));
   memset (to, 0, sizeof (*to));
 
-  to->si_signo = from_nat.si_signo;
-  to->si_errno = from_nat.si_errno;
-  to->si_code = from_nat.si_code;
+  to->si_signo = from_ptrace.si_signo;
+  to->si_errno = from_ptrace.si_errno;
+  to->si_code = from_ptrace.si_code;
 
   if (to->si_code == SI_TIMER)
     {
-      to->cpt_si_timerid = from_nat.cpt_si_timerid;
-      to->cpt_si_overrun = from_nat.cpt_si_overrun;
-      to->cpt_si_ptr = (intptr_t) from_nat.cpt_si_ptr;
+      to->cpt_si_timerid = from_ptrace.cpt_si_timerid;
+      to->cpt_si_overrun = from_ptrace.cpt_si_overrun;
+      to->cpt_si_ptr = from_ptrace.cpt_si_ptr;
     }
   else if (to->si_code == SI_USER)
     {
-      to->cpt_si_pid = from_nat.cpt_si_pid;
-      to->cpt_si_uid = from_nat.cpt_si_uid;
+      to->cpt_si_pid = from_ptrace.cpt_si_pid;
+      to->cpt_si_uid = from_ptrace.cpt_si_uid;
     }
   else if (to->si_code < 0)
     {
-      to->cpt_si_pid = from_nat.cpt_si_pid;
-      to->cpt_si_uid = from_nat.cpt_si_uid;
-      to->cpt_si_ptr = (intptr_t) from_nat.cpt_si_ptr;
+      to->cpt_si_pid = from_ptrace.cpt_si_pid;
+      to->cpt_si_uid = from_ptrace.cpt_si_uid;
+      to->cpt_si_ptr = from_ptrace.cpt_si_ptr;
     }
   else
     {
       switch (to->si_signo)
 	{
 	case SIGCHLD:
-	  to->cpt_si_pid = from_nat.cpt_si_pid;
-	  to->cpt_si_uid = from_nat.cpt_si_uid;
-	  to->cpt_si_status = from_nat.cpt_si_status;
-	  to->cpt_si_utime = from_nat.cpt_si_utime;
-	  to->cpt_si_stime = from_nat.cpt_si_stime;
+	  to->cpt_si_pid = from_ptrace.cpt_si_pid;
+	  to->cpt_si_uid = from_ptrace.cpt_si_uid;
+	  to->cpt_si_status = from_ptrace.cpt_si_status;
+	  to->cpt_si_utime = from_ptrace.cpt_si_utime;
+	  to->cpt_si_stime = from_ptrace.cpt_si_stime;
 	  break;
 	case SIGILL:
 	case SIGFPE:
 	case SIGSEGV:
 	case SIGBUS:
-	  to->cpt_si_addr = (intptr_t) from_nat.cpt_si_addr;
+	  to->cpt_si_addr = from_ptrace.cpt_si_addr;
 	  break;
 	case SIGPOLL:
-	  to->cpt_si_band = from_nat.cpt_si_band;
-	  to->cpt_si_fd = from_nat.cpt_si_fd;
+	  to->cpt_si_band = from_ptrace.cpt_si_band;
+	  to->cpt_si_fd = from_ptrace.cpt_si_fd;
 	  break;
 	default:
-	  to->cpt_si_pid = from_nat.cpt_si_pid;
-	  to->cpt_si_uid = from_nat.cpt_si_uid;
-	  to->cpt_si_ptr = (intptr_t) from_nat.cpt_si_ptr;
+	  to->cpt_si_pid = from_ptrace.cpt_si_pid;
+	  to->cpt_si_uid = from_ptrace.cpt_si_uid;
+	  to->cpt_si_ptr = from_ptrace.cpt_si_ptr;
 	  break;
 	}
     }
@@ -350,124 +363,124 @@ compat_siginfo_from_siginfo (compat_siginfo_t *to, siginfo_t *from)
 /* Convert the compatible siginfo into system siginfo.  */
 
 static void
-siginfo_from_compat_siginfo (siginfo_t *to, compat_siginfo_t *from)
+siginfo_from_compat_siginfo (siginfo_t *to, const compat_siginfo_t *from)
 {
-  nat_siginfo_t to_nat;
+  ptrace_siginfo_t to_ptrace;
 
-  memset (&to_nat, 0, sizeof (to_nat));
+  memset (&to_ptrace, 0, sizeof (to_ptrace));
 
-  to_nat.si_signo = from->si_signo;
-  to_nat.si_errno = from->si_errno;
-  to_nat.si_code = from->si_code;
+  to_ptrace.si_signo = from->si_signo;
+  to_ptrace.si_errno = from->si_errno;
+  to_ptrace.si_code = from->si_code;
 
-  if (to_nat.si_code == SI_TIMER)
+  if (to_ptrace.si_code == SI_TIMER)
     {
-      to_nat.cpt_si_timerid = from->cpt_si_timerid;
-      to_nat.cpt_si_overrun = from->cpt_si_overrun;
-      to_nat.cpt_si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
+      to_ptrace.cpt_si_timerid = from->cpt_si_timerid;
+      to_ptrace.cpt_si_overrun = from->cpt_si_overrun;
+      to_ptrace.cpt_si_ptr = from->cpt_si_ptr;
     }
-  else if (to_nat.si_code == SI_USER)
+  else if (to_ptrace.si_code == SI_USER)
     {
-      to_nat.cpt_si_pid = from->cpt_si_pid;
-      to_nat.cpt_si_uid = from->cpt_si_uid;
+      to_ptrace.cpt_si_pid = from->cpt_si_pid;
+      to_ptrace.cpt_si_uid = from->cpt_si_uid;
     }
-  if (to_nat.si_code < 0)
+  if (to_ptrace.si_code < 0)
     {
-      to_nat.cpt_si_pid = from->cpt_si_pid;
-      to_nat.cpt_si_uid = from->cpt_si_uid;
-      to_nat.cpt_si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
+      to_ptrace.cpt_si_pid = from->cpt_si_pid;
+      to_ptrace.cpt_si_uid = from->cpt_si_uid;
+      to_ptrace.cpt_si_ptr = from->cpt_si_ptr;
     }
   else
     {
-      switch (to_nat.si_signo)
+      switch (to_ptrace.si_signo)
 	{
 	case SIGCHLD:
-	  to_nat.cpt_si_pid = from->cpt_si_pid;
-	  to_nat.cpt_si_uid = from->cpt_si_uid;
-	  to_nat.cpt_si_status = from->cpt_si_status;
-	  to_nat.cpt_si_utime = from->cpt_si_utime;
-	  to_nat.cpt_si_stime = from->cpt_si_stime;
+	  to_ptrace.cpt_si_pid = from->cpt_si_pid;
+	  to_ptrace.cpt_si_uid = from->cpt_si_uid;
+	  to_ptrace.cpt_si_status = from->cpt_si_status;
+	  to_ptrace.cpt_si_utime = from->cpt_si_utime;
+	  to_ptrace.cpt_si_stime = from->cpt_si_stime;
 	  break;
 	case SIGILL:
 	case SIGFPE:
 	case SIGSEGV:
 	case SIGBUS:
-	  to_nat.cpt_si_addr = (void *) (intptr_t) from->cpt_si_addr;
-	  to_nat.cpt_si_addr_lsb = (short) from->cpt_si_addr_lsb;
+	  to_ptrace.cpt_si_addr = from->cpt_si_addr;
+	  to_ptrace.cpt_si_addr_lsb = from->cpt_si_addr_lsb;
 	  break;
 	case SIGPOLL:
-	  to_nat.cpt_si_band = from->cpt_si_band;
-	  to_nat.cpt_si_fd = from->cpt_si_fd;
+	  to_ptrace.cpt_si_band = from->cpt_si_band;
+	  to_ptrace.cpt_si_fd = from->cpt_si_fd;
 	  break;
 	default:
-	  to_nat.cpt_si_pid = from->cpt_si_pid;
-	  to_nat.cpt_si_uid = from->cpt_si_uid;
-	  to_nat.cpt_si_ptr = (void* ) (intptr_t) from->cpt_si_ptr;
+	  to_ptrace.cpt_si_pid = from->cpt_si_pid;
+	  to_ptrace.cpt_si_uid = from->cpt_si_uid;
+	  to_ptrace.cpt_si_ptr = from->cpt_si_ptr;
 	  break;
 	}
     }
-  memcpy (to, &to_nat, sizeof (to_nat));
+  memcpy (to, &to_ptrace, sizeof (to_ptrace));
 }
 
 /*  Convert the system provided siginfo into compatible x32 siginfo.  */
 
 static void
 compat_x32_siginfo_from_siginfo (compat_x32_siginfo_t *to,
-				 siginfo_t *from)
+				 const siginfo_t *from)
 {
-  nat_siginfo_t from_nat;
+  ptrace_siginfo_t from_ptrace;
 
-  memcpy (&from_nat, from, sizeof (from_nat));
+  memcpy (&from_ptrace, from, sizeof (from_ptrace));
   memset (to, 0, sizeof (*to));
 
-  to->si_signo = from_nat.si_signo;
-  to->si_errno = from_nat.si_errno;
-  to->si_code = from_nat.si_code;
+  to->si_signo = from_ptrace.si_signo;
+  to->si_errno = from_ptrace.si_errno;
+  to->si_code = from_ptrace.si_code;
 
   if (to->si_code == SI_TIMER)
     {
-      to->cpt_si_timerid = from_nat.cpt_si_timerid;
-      to->cpt_si_overrun = from_nat.cpt_si_overrun;
-      to->cpt_si_ptr = (intptr_t) from_nat.cpt_si_ptr;
+      to->cpt_si_timerid = from_ptrace.cpt_si_timerid;
+      to->cpt_si_overrun = from_ptrace.cpt_si_overrun;
+      to->cpt_si_ptr = from_ptrace.cpt_si_ptr;
     }
   else if (to->si_code == SI_USER)
     {
-      to->cpt_si_pid = from_nat.cpt_si_pid;
-      to->cpt_si_uid = from_nat.cpt_si_uid;
+      to->cpt_si_pid = from_ptrace.cpt_si_pid;
+      to->cpt_si_uid = from_ptrace.cpt_si_uid;
     }
   else if (to->si_code < 0)
     {
-      to->cpt_si_pid = from_nat.cpt_si_pid;
-      to->cpt_si_uid = from_nat.cpt_si_uid;
-      to->cpt_si_ptr = (intptr_t) from_nat.cpt_si_ptr;
+      to->cpt_si_pid = from_ptrace.cpt_si_pid;
+      to->cpt_si_uid = from_ptrace.cpt_si_uid;
+      to->cpt_si_ptr = from_ptrace.cpt_si_ptr;
     }
   else
     {
       switch (to->si_signo)
 	{
 	case SIGCHLD:
-	  to->cpt_si_pid = from_nat.cpt_si_pid;
-	  to->cpt_si_uid = from_nat.cpt_si_uid;
-	  to->cpt_si_status = from_nat.cpt_si_status;
-	  memcpy (&to->cpt_si_utime, &from_nat.cpt_si_utime,
+	  to->cpt_si_pid = from_ptrace.cpt_si_pid;
+	  to->cpt_si_uid = from_ptrace.cpt_si_uid;
+	  to->cpt_si_status = from_ptrace.cpt_si_status;
+	  memcpy (&to->cpt_si_utime, &from_ptrace.cpt_si_utime,
 		  sizeof (to->cpt_si_utime));
-	  memcpy (&to->cpt_si_stime, &from_nat.cpt_si_stime,
+	  memcpy (&to->cpt_si_stime, &from_ptrace.cpt_si_stime,
 		  sizeof (to->cpt_si_stime));
 	  break;
 	case SIGILL:
 	case SIGFPE:
 	case SIGSEGV:
 	case SIGBUS:
-	  to->cpt_si_addr = (intptr_t) from_nat.cpt_si_addr;
+	  to->cpt_si_addr = from_ptrace.cpt_si_addr;
 	  break;
 	case SIGPOLL:
-	  to->cpt_si_band = from_nat.cpt_si_band;
-	  to->cpt_si_fd = from_nat.cpt_si_fd;
+	  to->cpt_si_band = from_ptrace.cpt_si_band;
+	  to->cpt_si_fd = from_ptrace.cpt_si_fd;
 	  break;
 	default:
-	  to->cpt_si_pid = from_nat.cpt_si_pid;
-	  to->cpt_si_uid = from_nat.cpt_si_uid;
-	  to->cpt_si_ptr = (intptr_t) from_nat.cpt_si_ptr;
+	  to->cpt_si_pid = from_ptrace.cpt_si_pid;
+	  to->cpt_si_uid = from_ptrace.cpt_si_uid;
+	  to->cpt_si_ptr = from_ptrace.cpt_si_ptr;
 	  break;
 	}
     }
@@ -479,98 +492,105 @@ compat_x32_siginfo_from_siginfo (compat_x32_siginfo_t *to,
 /* Convert the compatible x32 siginfo into system siginfo.  */
 static void
 siginfo_from_compat_x32_siginfo (siginfo_t *to,
-				 compat_x32_siginfo_t *from)
+				 const compat_x32_siginfo_t *from)
 {
-  nat_siginfo_t to_nat;
+  ptrace_siginfo_t to_ptrace;
 
-  memset (&to_nat, 0, sizeof (to_nat));
-  to_nat.si_signo = from->si_signo;
-  to_nat.si_errno = from->si_errno;
-  to_nat.si_code = from->si_code;
+  memset (&to_ptrace, 0, sizeof (to_ptrace));
+  to_ptrace.si_signo = from->si_signo;
+  to_ptrace.si_errno = from->si_errno;
+  to_ptrace.si_code = from->si_code;
 
-  if (to_nat.si_code == SI_TIMER)
+  if (to_ptrace.si_code == SI_TIMER)
     {
-      to_nat.cpt_si_timerid = from->cpt_si_timerid;
-      to_nat.cpt_si_overrun = from->cpt_si_overrun;
-      to_nat.cpt_si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
+      to_ptrace.cpt_si_timerid = from->cpt_si_timerid;
+      to_ptrace.cpt_si_overrun = from->cpt_si_overrun;
+      to_ptrace.cpt_si_ptr = from->cpt_si_ptr;
     }
-  else if (to_nat.si_code == SI_USER)
+  else if (to_ptrace.si_code == SI_USER)
     {
-      to_nat.cpt_si_pid = from->cpt_si_pid;
-      to_nat.cpt_si_uid = from->cpt_si_uid;
+      to_ptrace.cpt_si_pid = from->cpt_si_pid;
+      to_ptrace.cpt_si_uid = from->cpt_si_uid;
     }
-  if (to_nat.si_code < 0)
+  if (to_ptrace.si_code < 0)
     {
-      to_nat.cpt_si_pid = from->cpt_si_pid;
-      to_nat.cpt_si_uid = from->cpt_si_uid;
-      to_nat.cpt_si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
+      to_ptrace.cpt_si_pid = from->cpt_si_pid;
+      to_ptrace.cpt_si_uid = from->cpt_si_uid;
+      to_ptrace.cpt_si_ptr = from->cpt_si_ptr;
     }
   else
     {
-      switch (to_nat.si_signo)
+      switch (to_ptrace.si_signo)
 	{
 	case SIGCHLD:
-	  to_nat.cpt_si_pid = from->cpt_si_pid;
-	  to_nat.cpt_si_uid = from->cpt_si_uid;
-	  to_nat.cpt_si_status = from->cpt_si_status;
-	  memcpy (&to_nat.cpt_si_utime, &from->cpt_si_utime,
-		  sizeof (to_nat.cpt_si_utime));
-	  memcpy (&to_nat.cpt_si_stime, &from->cpt_si_stime,
-		  sizeof (to_nat.cpt_si_stime));
+	  to_ptrace.cpt_si_pid = from->cpt_si_pid;
+	  to_ptrace.cpt_si_uid = from->cpt_si_uid;
+	  to_ptrace.cpt_si_status = from->cpt_si_status;
+	  memcpy (&to_ptrace.cpt_si_utime, &from->cpt_si_utime,
+		  sizeof (to_ptrace.cpt_si_utime));
+	  memcpy (&to_ptrace.cpt_si_stime, &from->cpt_si_stime,
+		  sizeof (to_ptrace.cpt_si_stime));
 	  break;
 	case SIGILL:
 	case SIGFPE:
 	case SIGSEGV:
 	case SIGBUS:
-	  to_nat.cpt_si_addr = (void *) (intptr_t) from->cpt_si_addr;
+	  to_ptrace.cpt_si_addr = from->cpt_si_addr;
 	  break;
 	case SIGPOLL:
-	  to_nat.cpt_si_band = from->cpt_si_band;
-	  to_nat.cpt_si_fd = from->cpt_si_fd;
+	  to_ptrace.cpt_si_band = from->cpt_si_band;
+	  to_ptrace.cpt_si_fd = from->cpt_si_fd;
 	  break;
 	default:
-	  to_nat.cpt_si_pid = from->cpt_si_pid;
-	  to_nat.cpt_si_uid = from->cpt_si_uid;
-	  to_nat.cpt_si_ptr = (void* ) (intptr_t) from->cpt_si_ptr;
+	  to_ptrace.cpt_si_pid = from->cpt_si_pid;
+	  to_ptrace.cpt_si_uid = from->cpt_si_uid;
+	  to_ptrace.cpt_si_ptr = from->cpt_si_ptr;
 	  break;
 	}
     }
-  memcpy (to, &to_nat, sizeof (to_nat));
+  memcpy (to, &to_ptrace, sizeof (to_ptrace));
 }
 
-/* Convert a native/host siginfo object, into/from the siginfo in the
+/* Convert a ptrace siginfo object, into/from the siginfo in the
    layout of the inferiors' architecture.  Returns true if any
    conversion was done; false otherwise.  If DIRECTION is 1, then copy
-   from INF to NATIVE.  If DIRECTION is 0, then copy from NATIVE to INF.  */
+   from INF to PTRACE.  If DIRECTION is 0, then copy from NATIVE to
+   INF.  */
 
 int
-amd64_linux_siginfo_fixup_common (siginfo_t *native, gdb_byte *inf,
+amd64_linux_siginfo_fixup_common (siginfo_t *ptrace, gdb_byte *inf,
 				  int direction,
 				  enum amd64_siginfo_fixup_mode mode)
 {
   if (mode == FIXUP_32)
     {
-      gdb_assert (sizeof (siginfo_t) == sizeof (compat_siginfo_t));
-
       if (direction == 0)
-	compat_siginfo_from_siginfo ((struct compat_siginfo *) inf, native);
+	compat_siginfo_from_siginfo ((struct compat_siginfo *) inf, ptrace);
       else
-	siginfo_from_compat_siginfo (native, (struct compat_siginfo *) inf);
+	siginfo_from_compat_siginfo (ptrace, (struct compat_siginfo *) inf);
 
       return 1;
     }
   else if (mode == FIXUP_X32)
     {
-      gdb_assert (sizeof (siginfo_t) == sizeof (compat_x32_siginfo_t));
-
       if (direction == 0)
 	compat_x32_siginfo_from_siginfo ((struct compat_x32_siginfo *) inf,
-					 native);
+					 ptrace);
       else
-	siginfo_from_compat_x32_siginfo (native,
+	siginfo_from_compat_x32_siginfo (ptrace,
 					 (struct compat_x32_siginfo *) inf);
 
       return 1;
     }
   return 0;
 }
+
+/* Sanity check for the siginfo structure sizes.  */
+
+gdb_static_assert (sizeof (siginfo_t) == GDB_SI_SIZE);
+#ifndef __ILP32__
+gdb_static_assert (sizeof (nat_siginfo_t) == GDB_SI_SIZE);
+#endif
+gdb_static_assert (sizeof (compat_x32_siginfo_t) == GDB_SI_SIZE);
+gdb_static_assert (sizeof (compat_siginfo_t) == GDB_SI_SIZE);
+gdb_static_assert (sizeof (ptrace_siginfo_t) == GDB_SI_SIZE);

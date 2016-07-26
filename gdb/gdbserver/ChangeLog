@@ -1,3 +1,8 @@
+2016-07-26  Pedro Alves  <palves@redhat.com>
+
+	* linux-x86-low.c (x86_siginfo_fixup): Rename 'native' parameter
+	to 'ptrace'.
+
 2016-07-21  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.
