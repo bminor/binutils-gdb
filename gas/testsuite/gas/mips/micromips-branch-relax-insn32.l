@@ -1,10 +1,7 @@
 .*: Assembler messages:
-.*:71: Warning: no .cprestore pseudo-op used in PIC code
-.*:69: Warning: relaxed out-of-range branch into a jump
 .*:73: Warning: relaxed out-of-range branch into a jump
 .*:75: Warning: relaxed out-of-range branch into a jump
 .*:77: Warning: relaxed out-of-range branch into a jump
-.*:80: Warning: relaxed out-of-range branch into a jump
 .*:83: Warning: relaxed out-of-range branch into a jump
 .*:85: Warning: relaxed out-of-range branch into a jump
 .*:87: Warning: relaxed out-of-range branch into a jump
@@ -15,8 +12,6 @@
 .*:97: Warning: relaxed out-of-range branch into a jump
 .*:99: Warning: relaxed out-of-range branch into a jump
 .*:101: Warning: relaxed out-of-range branch into a jump
-.*:104: Warning: relaxed out-of-range branch into a jump
-.*:106: Warning: relaxed out-of-range branch into a jump
 .*:109: Warning: relaxed out-of-range branch into a jump
 .*:111: Warning: relaxed out-of-range branch into a jump
 .*:113: Warning: relaxed out-of-range branch into a jump

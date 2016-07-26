@@ -1,3 +1,32 @@
+2016-07-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (RELAX_MICROMIPS_ENCODE): Add `insn32' flag.
+	(RELAX_MICROMIPS_INSN32): New macro.
+	(RELAX_MICROMIPS_UNCOND, RELAX_MICROMIPS_COMPACT)
+	(RELAX_MICROMIPS_LINK, RELAX_MICROMIPS_RELAX32)
+	(RELAX_MICROMIPS_TOOFAR16, RELAX_MICROMIPS_MARK_TOOFAR16)
+	(RELAX_MICROMIPS_CLEAR_TOOFAR16, RELAX_MICROMIPS_TOOFAR32)
+	(RELAX_MICROMIPS_MARK_TOOFAR32, RELAX_MICROMIPS_CLEAR_TOOFAR32):
+	Shift bits.
+	(append_insn): Record `mips_opts.insn32' with relaxed microMIPS
+	branches.
+	(relaxed_micromips_32bit_branch_length): Handle the `insn32'
+	mode.
+	(md_convert_frag): Likewise.
+	* testsuite/gas/mips/micromips-branch-relax.s: Add `insn32'
+	conditionals.
+	* testsuite/gas/mips/micromips-branch-relax.l: Update line
+	numbers accordingly.
+	* testsuite/gas/mips/micromips-branch-relax-pic.l: Likewise.
+	* testsuite/gas/mips/micromips-branch-relax-insn32.d: New test.
+	* testsuite/gas/mips/micromips-branch-relax-insn32-pic.d: New
+	test.
+	* testsuite/gas/mips/micromips-branch-relax-insn32.l: New
+	stderr output.
+	* testsuite/gas/mips/micromips-branch-relax-insn32-pic.l: New
+	stderr output.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
