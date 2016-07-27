@@ -1,3 +1,73 @@
+2016-07-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (RELAX_MICROMIPS_ENCODE): Add `nods' flag.
+	(RELAX_MICROMIPS_RELAX32, RELAX_MICROMIPS_TOOFAR16)
+	(RELAX_MICROMIPS_MARK_TOOFAR16, RELAX_MICROMIPS_CLEAR_TOOFAR16)
+	(RELAX_MICROMIPS_TOOFAR32, RELAX_MICROMIPS_MARK_TOOFAR32)
+	(RELAX_MICROMIPS_CLEAR_TOOFAR32): Shift bits.
+	(get_append_method): Also return APPEND_ADD_COMPACT for
+	microMIPS instructions.
+	(find_altered_mips16_opcode): Exclude macros from matching.
+	Factor code out...
+	(find_altered_opcode): ... to this new function.
+	(find_altered_micromips_opcode): New function.
+	(frag_branch_delay_slot_size): Likewise.
+	(append_insn): Handle microMIPS branch/jump compaction.
+	(macro_start): Likewise.
+	(relaxed_micromips_32bit_branch_length): Likewise.
+	(md_convert_frag): Likewise.
+	* testsuite/gas/mips/micromips.s: Add conditional explicit NOPs
+	for delay slot filling.
+	* testsuite/gas/mips/micromips-b16.s: Add explicit NOPs for
+	delay slot filling.
+	* testsuite/gas/mips/micromips-size-1.s: Likewise.
+	* testsuite/gas/mips/micromips.l: Adjust line numbers.
+	* testsuite/gas/mips/micromips-warn.l: Likewise.
+	* testsuite/gas/mips/micromips-size-1.l: Likewise.
+	* testsuite/gas/mips/micromips.d: Adjust padding.
+	* testsuite/gas/mips/micromips-trap.d: Likewise.
+	* testsuite/gas/mips/micromips-insn32.d: Likewise.
+	* testsuite/gas/mips/micromips-noinsn32.d: Likewise.
+	* testsuite/gas/mips/micromips@beq.d: Update patterns for
+	branch/jump compaction.
+	* testsuite/gas/mips/micromips@bge.d: Likewise.
+	* testsuite/gas/mips/micromips@bgeu.d: Likewise.
+	* testsuite/gas/mips/micromips@blt.d: Likewise.
+	* testsuite/gas/mips/micromips@bltu.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-4.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-4-64.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-5.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-5pic.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-5-64.d: Likewise.
+	* testsuite/gas/mips/micromips@branch-misc-5pic-64.d: Likewise.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local.d: Likewise.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local-n32.d:
+	Likewise.
+	* testsuite/gas/mips/micromips@jal-svr4pic-local-n64.d:
+	Likewise.
+	* testsuite/gas/mips/micromips@loc-swap.d: Likewise.
+	* testsuite/gas/mips/micromips@loc-swap-dis.d: Likewise.
+	* testsuite/gas/mips/micromips@relax.d: Likewise.
+	* testsuite/gas/mips/micromips@relax-at.d: Likewise.
+	* testsuite/gas/mips/micromips@relax-swap3.d: Likewise.
+	* testsuite/gas/mips/branch-extern-2.d: Likewise.
+	* testsuite/gas/mips/branch-extern-4.d: Likewise.
+	* testsuite/gas/mips/branch-section-2.d: Likewise.
+	* testsuite/gas/mips/branch-section-4.d: Likewise.
+	* testsuite/gas/mips/branch-weak-2.d: Likewise.
+	* testsuite/gas/mips/branch-weak-5.d: Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute.d: Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-n32.d: Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-n64.d: Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-addend.d:
+	Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-addend-n32.d:
+	Likewise.
+	* testsuite/gas/mips/micromips-branch-absolute-addend-n64.d:
+	Likewise.
+	* testsuite/gas/mips/micromips-compact.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
 2016-07-27  Graham Markall  <graham.markall@embecosm.com>
 
         * config/tc-arc.c: Add new global arc_addrtype_hash.

@@ -1,3 +1,9 @@
+2016-07-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* micromips-opc.c (micromips_opcodes): Reorder "bc" next to "b",
+	"beqzc" next to "beq", "bnezc" next to "bne" and "jrc" next to
+	"j".
+
 2016-07-27  Graham Markall  <graham.markall@embecosm.com>
 
         * arc-nps400-tbl.h: Change block comments to GNU format.

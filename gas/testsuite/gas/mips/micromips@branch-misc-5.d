@@ -9,14 +9,10 @@
 .*: +file format .*mips.*
 
 Disassembly of section \.text:
-[0-9a-f]+ <[^>]*> 9400 fffe 	b	0+0000 <g6>
+[0-9a-f]+ <[^>]*> 40e0 fffe 	bc	0+0000 <g6>
 			0: R_MICROMIPS_PC16_S1	x1
-[0-9a-f]+ <[^>]*> 0c00      	nop
-[0-9a-f]+ <[^>]*> 9400 fffe 	b	0+0006 <g6\+0x6>
-			6: R_MICROMIPS_PC16_S1	x2
-[0-9a-f]+ <[^>]*> 0c00      	nop
-[0-9a-f]+ <[^>]*> 9400 fffe 	b	0+000c <g6\+0xc>
-			c: R_MICROMIPS_PC16_S1	\.Ldata
-[0-9a-f]+ <[^>]*> 0c00      	nop
-[0-9a-f]+ <[^>]*> 0c00      	nop
+[0-9a-f]+ <[^>]*> 40e0 fffe 	bc	0+0004 <g6\+0x4>
+			4: R_MICROMIPS_PC16_S1	x2
+[0-9a-f]+ <[^>]*> 40e0 fffe 	bc	0+0008 <g6\+0x8>
+			8: R_MICROMIPS_PC16_S1	\.Ldata
 	\.\.\.

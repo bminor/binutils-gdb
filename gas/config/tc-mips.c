@@ -1153,13 +1153,14 @@ static int mips_relax_branch;
    code found in the opcode file for this relocation, the register
    selected as the assembler temporary, whether in the 32-bit
    instruction mode, whether the branch is unconditional, whether it is
-   compact, whether it stores the link address implicitly in $ra,
-   whether relaxation of out-of-range 32-bit branches to a sequence of
+   compact, whether there is no delay-slot instruction available to fill
+   in, whether it stores the link address implicitly in $ra, whether
+   relaxation of out-of-range 32-bit branches to a sequence of
    instructions is enabled, and whether the displacement of a branch is
    too large to fit as an immediate argument of a 16-bit and a 32-bit
    branch, respectively.  */
 #define RELAX_MICROMIPS_ENCODE(type, at, insn32,		\
-			       uncond, compact, link,		\
+			       uncond, compact, link, nods,	\
 			       relax32, toofar16, toofar32)	\
   (0x40000000							\
    | ((type) & 0xff)						\
@@ -1168,9 +1169,10 @@ static int mips_relax_branch;
    | ((uncond) ? 0x4000 : 0)					\
    | ((compact) ? 0x8000 : 0)					\
    | ((link) ? 0x10000 : 0)					\
-   | ((relax32) ? 0x20000 : 0)					\
-   | ((toofar16) ? 0x40000 : 0)					\
-   | ((toofar32) ? 0x80000 : 0))
+   | ((nods) ? 0x20000 : 0)					\
+   | ((relax32) ? 0x40000 : 0)					\
+   | ((toofar16) ? 0x80000 : 0)					\
+   | ((toofar32) ? 0x100000 : 0))
 #define RELAX_MICROMIPS_P(i) (((i) & 0xc0000000) == 0x40000000)
 #define RELAX_MICROMIPS_TYPE(i) ((i) & 0xff)
 #define RELAX_MICROMIPS_AT(i) (((i) >> 8) & 0x1f)
@@ -1178,14 +1180,15 @@ static int mips_relax_branch;
 #define RELAX_MICROMIPS_UNCOND(i) (((i) & 0x4000) != 0)
 #define RELAX_MICROMIPS_COMPACT(i) (((i) & 0x8000) != 0)
 #define RELAX_MICROMIPS_LINK(i) (((i) & 0x10000) != 0)
-#define RELAX_MICROMIPS_RELAX32(i) (((i) & 0x20000) != 0)
+#define RELAX_MICROMIPS_NODS(i) (((i) & 0x20000) != 0)
+#define RELAX_MICROMIPS_RELAX32(i) (((i) & 0x40000) != 0)
 
-#define RELAX_MICROMIPS_TOOFAR16(i) (((i) & 0x40000) != 0)
-#define RELAX_MICROMIPS_MARK_TOOFAR16(i) ((i) | 0x40000)
-#define RELAX_MICROMIPS_CLEAR_TOOFAR16(i) ((i) & ~0x40000)
-#define RELAX_MICROMIPS_TOOFAR32(i) (((i) & 0x80000) != 0)
-#define RELAX_MICROMIPS_MARK_TOOFAR32(i) ((i) | 0x80000)
-#define RELAX_MICROMIPS_CLEAR_TOOFAR32(i) ((i) & ~0x80000)
+#define RELAX_MICROMIPS_TOOFAR16(i) (((i) & 0x80000) != 0)
+#define RELAX_MICROMIPS_MARK_TOOFAR16(i) ((i) | 0x80000)
+#define RELAX_MICROMIPS_CLEAR_TOOFAR16(i) ((i) & ~0x80000)
+#define RELAX_MICROMIPS_TOOFAR32(i) (((i) & 0x100000) != 0)
+#define RELAX_MICROMIPS_MARK_TOOFAR32(i) ((i) | 0x100000)
+#define RELAX_MICROMIPS_CLEAR_TOOFAR32(i) ((i) & ~0x100000)
 
 /* Sign-extend 16-bit value X.  */
 #define SEXT_16BIT(X) ((((X) + 0x8000) & 0xffff) - 0x8000)
@@ -6830,10 +6833,38 @@ get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
 	  && gpr_read_mask (ip) != 0)
 	return APPEND_ADD_COMPACT;
 
+      if (mips_opts.micromips
+	  && ((ip->insn_opcode & 0xffe0) == 0x4580
+	      || (!forced_insn_length
+		  && ((ip->insn_opcode & 0xfc00) == 0xcc00
+		      || (ip->insn_opcode & 0xdc00) == 0x8c00))
+	      || (ip->insn_opcode & 0xdfe00000) == 0x94000000
+	      || (ip->insn_opcode & 0xdc1f0000) == 0x94000000))
+	return APPEND_ADD_COMPACT;
+
       return APPEND_ADD_WITH_NOP;
     }
 
   return APPEND_ADD;
+}
+
+/* IP is an instruction whose opcode we have just changed, END points
+   to the end of the opcode table processed.  Point IP->insn_mo to the
+   new opcode's definition.  */
+
+static void
+find_altered_opcode (struct mips_cl_insn *ip, const struct mips_opcode *end)
+{
+  const struct mips_opcode *mo;
+
+  for (mo = ip->insn_mo; mo < end; mo++)
+    if (mo->pinfo != INSN_MACRO
+	&& (ip->insn_opcode & mo->mask) == mo->match)
+      {
+	ip->insn_mo = mo;
+	return;
+      }
+  abort ();
 }
 
 /* IP is a MIPS16 instruction whose opcode we have just changed.
@@ -6842,16 +6873,16 @@ get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
 static void
 find_altered_mips16_opcode (struct mips_cl_insn *ip)
 {
-  const struct mips_opcode *mo, *end;
+  find_altered_opcode (ip, &mips16_opcodes[bfd_mips16_num_opcodes]);
+}
 
-  end = &mips16_opcodes[bfd_mips16_num_opcodes];
-  for (mo = ip->insn_mo; mo < end; mo++)
-    if ((ip->insn_opcode & mo->mask) == mo->match)
-      {
-	ip->insn_mo = mo;
-	return;
-      }
-  abort ();
+/* IP is a microMIPS instruction whose opcode we have just changed.
+   Point IP->insn_mo to the new opcode's definition.  */
+
+static void
+find_altered_micromips_opcode (struct mips_cl_insn *ip)
+{
+  find_altered_opcode (ip, &micromips_opcodes[bfd_micromips_num_opcodes]);
 }
 
 /* For microMIPS macros, we need to generate a local number label
@@ -7042,8 +7073,14 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   prev_pinfo2 = history[0].insn_mo->pinfo2;
   pinfo = ip->insn_mo->pinfo;
 
+  /* Don't raise alarm about `nods' frags as they'll fill in the right
+     kind of nop in relaxation if required.  */
   if (mips_opts.micromips
       && !expansionp
+      && !(history[0].frag
+	   && history[0].frag->fr_type == rs_machine_dependent
+	   && RELAX_MICROMIPS_P (history[0].frag->fr_subtype)
+	   && RELAX_MICROMIPS_NODS (history[0].frag->fr_subtype))
       && (((prev_pinfo2 & INSN2_BRANCH_DELAY_16BIT) != 0
 	   && micromips_insn_length (ip->insn_mo) != 2)
 	  || ((prev_pinfo2 & INSN2_BRANCH_DELAY_32BIT) != 0
@@ -7293,21 +7330,26 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      16-bit/32-bit instructions.  */
 	   && !forced_insn_length)
     {
-      bfd_boolean relax16 = *reloc_type > BFD_RELOC_UNUSED;
+      bfd_boolean relax16 = (method != APPEND_ADD_COMPACT
+			     && *reloc_type > BFD_RELOC_UNUSED);
       int type = relax16 ? *reloc_type - BFD_RELOC_UNUSED : 0;
       int uncond = uncond_branch_p (ip) ? -1 : 0;
-      int compact = compact_branch_p (ip);
+      int compact = compact_branch_p (ip) || method == APPEND_ADD_COMPACT;
+      int nods = method == APPEND_ADD_WITH_NOP;
       int al = pinfo & INSN_WRITE_GPR_31;
-      int length32;
+      int length32 = nods ? 8 : 4;
 
       gas_assert (address_expr != NULL);
       gas_assert (!mips_relax.sequence);
 
       relaxed_branch = TRUE;
-      length32 = relaxed_micromips_32bit_branch_length (NULL, NULL, uncond);
-      add_relaxed_insn (ip, relax32 ? length32 : 4, relax16 ? 2 : 4,
+      if (nods)
+	method = APPEND_ADD;
+      if (relax32)
+	length32 = relaxed_micromips_32bit_branch_length (NULL, NULL, uncond);
+      add_relaxed_insn (ip, length32, relax16 ? 2 : 4,
 			RELAX_MICROMIPS_ENCODE (type, AT, mips_opts.insn32,
-						uncond, compact, al,
+						uncond, compact, al, nods,
 						relax32, 0, 0),
 			address_expr->X_add_symbol,
 			address_expr->X_add_number);
@@ -7512,9 +7554,50 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
     case APPEND_ADD_COMPACT:
       /* Convert MIPS16 jr/jalr into a "compact" jump.  */
-      gas_assert (mips_opts.mips16);
-      ip->insn_opcode |= 0x0080;
-      find_altered_mips16_opcode (ip);
+      if (mips_opts.mips16)
+	{
+	  ip->insn_opcode |= 0x0080;
+	  find_altered_mips16_opcode (ip);
+	}
+      /* Convert microMIPS instructions.  */
+      else if (mips_opts.micromips)
+	{
+	  /* jr16->jrc */
+	  if ((ip->insn_opcode & 0xffe0) == 0x4580)
+	    ip->insn_opcode |= 0x0020;
+	  /* b16->bc */
+	  else if ((ip->insn_opcode & 0xfc00) == 0xcc00)
+	    ip->insn_opcode = 0x40e00000;
+	  /* beqz16->beqzc, bnez16->bnezc */
+	  else if ((ip->insn_opcode & 0xdc00) == 0x8c00)
+	    {
+	      unsigned long regno;
+
+	      regno = ip->insn_opcode >> MICROMIPSOP_SH_MD;
+	      regno &= MICROMIPSOP_MASK_MD;
+	      regno = micromips_to_32_reg_d_map[regno];
+	      ip->insn_opcode = (((ip->insn_opcode << 9) & 0x00400000)
+				 | (regno << MICROMIPSOP_SH_RS)
+				 | 0x40a00000) ^ 0x00400000;
+	    }
+	  /* beqz->beqzc, bnez->bnezc */
+	  else if ((ip->insn_opcode & 0xdfe00000) == 0x94000000)
+	    ip->insn_opcode = ((ip->insn_opcode & 0x001f0000)
+			       | ((ip->insn_opcode >> 7) & 0x00400000)
+			       | 0x40a00000) ^ 0x00400000;
+	  /* beq $0->beqzc, bne $0->bnezc */
+	  else if ((ip->insn_opcode & 0xdc1f0000) == 0x94000000)
+	    ip->insn_opcode = (((ip->insn_opcode >>
+				 (MICROMIPSOP_SH_RT - MICROMIPSOP_SH_RS))
+				& (MICROMIPSOP_MASK_RS << MICROMIPSOP_SH_RS))
+			       | ((ip->insn_opcode >> 7) & 0x00400000)
+			       | 0x40a00000) ^ 0x00400000;
+	  else
+	    abort ();
+	  find_altered_micromips_opcode (ip);
+	}
+      else
+	abort ();
       install_insn (ip);
       insert_into_history (0, 1, ip);
       break;
@@ -8274,19 +8357,25 @@ macro_start (void)
   memset (&mips_macro_warning.insns, 0, sizeof (mips_macro_warning.insns));
   mips_macro_warning.delay_slot_p = (mips_opts.noreorder
 				     && delayed_branch_p (&history[0]));
-  switch (history[0].insn_mo->pinfo2
-	  & (INSN2_BRANCH_DELAY_32BIT | INSN2_BRANCH_DELAY_16BIT))
-    {
-    case INSN2_BRANCH_DELAY_32BIT:
-      mips_macro_warning.delay_slot_length = 4;
-      break;
-    case INSN2_BRANCH_DELAY_16BIT:
-      mips_macro_warning.delay_slot_length = 2;
-      break;
-    default:
-      mips_macro_warning.delay_slot_length = 0;
-      break;
-    }
+  if (history[0].frag
+      && history[0].frag->fr_type == rs_machine_dependent
+      && RELAX_MICROMIPS_P (history[0].frag->fr_subtype)
+      && RELAX_MICROMIPS_NODS (history[0].frag->fr_subtype))
+    mips_macro_warning.delay_slot_length = 0;
+  else
+    switch (history[0].insn_mo->pinfo2
+	    & (INSN2_BRANCH_DELAY_32BIT | INSN2_BRANCH_DELAY_16BIT))
+      {
+      case INSN2_BRANCH_DELAY_32BIT:
+	mips_macro_warning.delay_slot_length = 4;
+	break;
+      case INSN2_BRANCH_DELAY_16BIT:
+	mips_macro_warning.delay_slot_length = 2;
+	break;
+      default:
+	mips_macro_warning.delay_slot_length = 0;
+	break;
+      }
   mips_macro_warning.first_frag = NULL;
 }
 
@@ -17185,6 +17274,21 @@ relaxed_branch_length (fragS *fragp, asection *sec, int update)
   return length;
 }
 
+/* Get a FRAG's branch instruction delay slot size, either from the
+   short-delay-slot bit of a branch-and-link instruction if AL is TRUE,
+   or SHORT_INSN_SIZE otherwise.  */
+
+static int
+frag_branch_delay_slot_size (fragS *fragp, bfd_boolean al, int short_insn_size)
+{
+  char *buf = fragp->fr_literal + fragp->fr_fix;
+
+  if (al)
+    return (read_compressed_insn (buf, 4) & 0x02000000) ? 2 : 4;
+  else
+    return short_insn_size;
+}
+
 /* Compute the length of a branch sequence, and adjust the
    RELAX_MICROMIPS_TOOFAR32 bit accordingly.  If FRAGP is NULL, the
    worst-case length is computed, with UPDATE being used to indicate
@@ -17194,8 +17298,20 @@ relaxed_branch_length (fragS *fragp, asection *sec, int update)
 static int
 relaxed_micromips_32bit_branch_length (fragS *fragp, asection *sec, int update)
 {
+  bfd_boolean insn32 = TRUE;
+  bfd_boolean nods = TRUE;
+  bfd_boolean al = TRUE;
+  int short_insn_size;
   bfd_boolean toofar;
   int length;
+
+  if (fragp)
+    {
+      insn32 = RELAX_MICROMIPS_INSN32 (fragp->fr_subtype);
+      nods = RELAX_MICROMIPS_NODS (fragp->fr_subtype);
+      al = RELAX_MICROMIPS_LINK (fragp->fr_subtype);
+    }
+  short_insn_size = insn32 ? 4 : 2;
 
   if (fragp
       && S_IS_DEFINED (fragp->fr_symbol)
@@ -17233,19 +17349,15 @@ relaxed_micromips_32bit_branch_length (fragS *fragp, asection *sec, int update)
     {
       bfd_boolean compact_known = fragp != NULL;
       bfd_boolean compact = FALSE;
-      bfd_boolean insn32 = TRUE;
       bfd_boolean uncond;
-      int short_insn_size;
 
       if (fragp)
 	{
 	  compact = RELAX_MICROMIPS_COMPACT (fragp->fr_subtype);
 	  uncond = RELAX_MICROMIPS_UNCOND (fragp->fr_subtype);
-	  insn32 = RELAX_MICROMIPS_INSN32 (fragp->fr_subtype);
 	}
       else
 	uncond = update < 0;
-      short_insn_size = insn32 ? 4 : 2;
 
       /* If label is out of range, we turn branch <br>:
 
@@ -17275,6 +17387,13 @@ relaxed_micromips_32bit_branch_length (fragS *fragp, asection *sec, int update)
       if (mips_pic != NO_PIC)
 	length += 4 + short_insn_size;
 
+      /* Add an extra nop if the jump has no compact form and we need
+         to fill the delay slot.  */
+      if ((mips_pic == NO_PIC || al) && nods)
+	length += (fragp
+		   ? frag_branch_delay_slot_size (fragp, al, short_insn_size)
+		   : short_insn_size);
+
       /* If branch <br> is conditional, we prepend negated branch <brneg>:
 
 			<brneg>	0f			# 4 bytes
@@ -17282,6 +17401,12 @@ relaxed_micromips_32bit_branch_length (fragS *fragp, asection *sec, int update)
        */
       if (!uncond)
 	length += (compact_known && compact) ? 4 : 4 + short_insn_size;
+    }
+  else if (nods)
+    {
+      /* Add an extra nop to fill the delay slot.  */
+      gas_assert (fragp);
+      length += frag_branch_delay_slot_size (fragp, al, short_insn_size);
     }
 
   return length;
@@ -17847,6 +17972,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       char *buf = fragp->fr_literal + fragp->fr_fix;
       bfd_boolean compact = RELAX_MICROMIPS_COMPACT (fragp->fr_subtype);
       bfd_boolean insn32 = RELAX_MICROMIPS_INSN32 (fragp->fr_subtype);
+      bfd_boolean nods = RELAX_MICROMIPS_NODS (fragp->fr_subtype);
       bfd_boolean al = RELAX_MICROMIPS_LINK (fragp->fr_subtype);
       int type = RELAX_MICROMIPS_TYPE (fragp->fr_subtype);
       bfd_boolean short_ds;
@@ -17898,7 +18024,22 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  fixp->fx_line = fragp->fr_line;
 
 	  if (type == 0)
-	    return;
+	    {
+	      insn = read_compressed_insn (buf, 4);
+	      buf += 4;
+
+	      if (nods)
+		{
+		  /* Check the short-delay-slot bit.  */
+		  if (!al || (insn & 0x02000000) != 0)
+		    buf = write_compressed_insn (buf, 0x0c00, 2);
+		  else
+		    buf = write_compressed_insn (buf, 0x00000000, 4);
+		}
+
+	      gas_assert (buf == fragp->fr_literal + fragp->fr_fix);
+	      return;
+	    }
 	}
 
       /* Relax 16-bit branches to 32-bit branches.  */
@@ -17925,6 +18066,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      || !RELAX_MICROMIPS_TOOFAR32 (fragp->fr_subtype))
 	    {
 	      buf = write_compressed_insn (buf, insn, 4);
+	      if (nods)
+		buf = write_compressed_insn (buf, 0x0c00, 2);
 	      gas_assert (buf == fragp->fr_literal + fragp->fr_fix);
 	      return;
 	    }
@@ -17937,7 +18080,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 		     _("relaxed out-of-range branch into a jump"));
 
       /* Set the short-delay-slot bit.  */
-      short_ds = al && (insn & 0x02000000) != 0;
+      short_ds = !al || (insn & 0x02000000) != 0;
 
       if (!RELAX_MICROMIPS_UNCOND (fragp->fr_subtype))
 	{
@@ -18007,7 +18150,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
       if (mips_pic == NO_PIC)
 	{
-	  unsigned long jal = short_ds ? 0x74000000 : 0xf4000000; /* jal/s  */
+	  unsigned long jal = (short_ds || nods
+			       ? 0x74000000 : 0xf4000000);	/* jal/s  */
 
 	  /* j/jal/jals <sym>  R_MICROMIPS_26_S1  */
 	  insn = al ? jal : 0xd4000000;
@@ -18019,7 +18163,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
 	  buf = write_compressed_insn (buf, insn, 4);
 
-	  if (compact)
+	  if (compact || nods)
 	    {
 	      /* nop  */
 	      if (insn32)
@@ -18068,7 +18212,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
 	      buf = write_compressed_insn (buf, insn, 4);
 
-	      if (compact)
+	      if (compact || nods)
 		/* nop  */
 		buf = write_compressed_insn (buf, 0x00000000, 4);
 	    }
@@ -18076,12 +18220,20 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	    {
 	      /* jr/jrc/jalr/jalrs $at  */
 	      unsigned long jalr = short_ds ? 0x45e0 : 0x45c0;	/* jalr/s  */
-	      unsigned long jr = compact ? 0x45a0 : 0x4580;	/* jr/c  */
+	      unsigned long jr = compact || nods ? 0x45a0 : 0x4580; /* jr/c  */
 
 	      insn = al ? jalr : jr;
 	      insn |= at << MICROMIPSOP_SH_MJ;
 
 	      buf = write_compressed_insn (buf, insn, 2);
+	      if (al && nods)
+		{
+		  /* nop  */
+		  if (short_ds)
+		    buf = write_compressed_insn (buf, 0x0c00, 2);
+		  else
+		    buf = write_compressed_insn (buf, 0x00000000, 4);
+		}
 	    }
 	}
 

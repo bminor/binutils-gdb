@@ -27,6 +27,5 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 459f      	jr	ra
 [0-9a-f]+ <[^>]*> 4c11      	addiu	sp,sp,32
 [0-9a-f]+ <[^>]*> 0000 0000 	nop
-[0-9a-f]+ <[^>]*> 459f      	jr	ra
-[0-9a-f]+ <[^>]*> 0c00      	nop
+[0-9a-f]+ <[^>]*> 45bf      	jrc	ra
 	\.\.\.

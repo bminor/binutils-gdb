@@ -1,3 +1,10 @@
+2016-07-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/micromips-branch-absolute.d: Update
+	patterns for branch compaction.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend.d:
+	Likewise.
+
 2016-07-27  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-gc/personality.d: Use "target cfi" to restrict the

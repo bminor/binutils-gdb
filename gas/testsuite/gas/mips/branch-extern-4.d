@@ -11,6 +11,5 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: R_MICROMIPS_GOT16	bar
 [0-9a-f]+ <[^>]*> 3021 0000 	addiu	at,at,0
 [ 	]*[0-9a-f]+: R_MICROMIPS_LO16	bar
-[0-9a-f]+ <[^>]*> 4581      	jr	at
-[0-9a-f]+ <[^>]*> 0c00      	nop
+[0-9a-f]+ <[^>]*> 45a1      	jrc	at
 	\.\.\.
