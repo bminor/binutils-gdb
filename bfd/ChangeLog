@@ -1,3 +1,13 @@
+2016-07-27  Nick Clifton  <nickc@redhat.com>
+
+	* Import this patch from the mainline:
+	2016-07-27  Ozkan Sezer  <sezeroz@gmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20401
+	* coffgen.c (fini_reloc_cookie_rels): Check for the extistence
+	of the coff_section_data before using it.
+
 2016-07-01  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.26.90
