@@ -1,3 +1,21 @@
+2016-07-27  Graham Markall  <graham.markall@embecosm.com>
+
+        * config/tc-arc.c: Add new global arc_addrtype_hash.
+        Define O_colon and O_addrtype.
+        (debug_exp): Add O_colon and O_addrtype.
+        (tokenize_arguments): Handle colon and address type
+        tokens.
+        (declare_addrtype): New function.
+        (md_begin): Initialise arc_addrtype_hash.
+        (arc_parse_name): Add lookup of address types.
+	(assemble_insn): Handle colons and address types by
+        ignoring them.
+        * testsuite/gas/arc/nps400-8.s: New file.
+        * testsuite/gas/arc/nps400-8.d: New file.
+        * testsuite/gas/arc/nps400-8.s: Add PMU instruction tests.
+        * testsuite/gas/arc/nps400-8.d: Add expected PMU
+        instruction output.
+
 2016-07-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (RELAX_MICROMIPS_ENCODE): Add `insn32' flag.

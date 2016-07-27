@@ -1,3 +1,22 @@
+2016-07-27  Graham Markall  <graham.markall@embecosm.com>
+
+        * arc-nps400-tbl.h: Change block comments to GNU format.
+        * arc-dis.c: Add new globals addrtypenames,
+        addrtypenames_max, and addtypeunknown.
+        (get_addrtype): New function.
+        (print_insn_arc): Print colons and address types when
+        required.
+        * arc-opc.c: Add MAKE_INSERT_NPS_ADDRTYPE macro and use to
+        define insert and extract functions for all address types.
+        (arc_operands): Add operands for colon and all address
+        types.
+        * arc-nps-400-tbl.h: Add NPS-400 BMU instructions to opcode table.
+        * arc-opc.c: Add NPS_BD_TYPE and NPS_BMU_NUM operands,
+        insert_nps_bd_num_buff and extract_nps_bd_num_buff functions.
+        * arc-nps-400-tbl.h: Add NPS-400 PMU instructions to opcode table.
+        * arc-opc.c: Add NPS_PMU_NXT_DST and NPS_PMU_NUM_JOB operands,
+        insert_nps_pmu_num_job and extract_nps_pmu_num_job functions.
+
 2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

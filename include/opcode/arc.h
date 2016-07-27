@@ -38,71 +38,73 @@ extern "C" {
 
 /* Instruction Class.  */
 typedef enum
-  {
-    ACL,
-    ARITH,
-    AUXREG,
-    BITOP,
-    BRANCH,
-    CONTROL,
-    DPI,
-    DSP,
-    FLOAT,
-    INVALID,
-    JUMP,
-    KERNEL,
-    LOGICAL,
-    MEMORY,
-    NET,
-  } insn_class_t;
+{
+  ACL,
+  ARITH,
+  AUXREG,
+  BITOP,
+  BMU,
+  BRANCH,
+  CONTROL,
+  DPI,
+  DSP,
+  FLOAT,
+  INVALID,
+  JUMP,
+  KERNEL,
+  LOGICAL,
+  MEMORY,
+  NET,
+  PMU
+} insn_class_t;
 
 /* Instruction Subclass.  */
 typedef enum
-  {
-    NONE,
-    CVT,
-    BTSCN,
-    CD1,
-    CD2,
-    COND,
-    DIV,
-    DP,
-    DPA,
-    DPX,
-    MPY1E,
-    MPY6E,
-    MPY7E,
-    MPY8E,
-    MPY9E,
-    NPS400,
-    QUARKSE,
-    SHFT1,
-    SHFT2,
-    SWAP,
-    SP,
-    SPX
-  } insn_subclass_t;
+{
+  NONE,
+  CVT,
+  BTSCN,
+  CD1,
+  CD2,
+  COND,
+  DIV,
+  DP,
+  DPA,
+  DPX,
+  MPY1E,
+  MPY6E,
+  MPY7E,
+  MPY8E,
+  MPY9E,
+  NPS400,
+  QUARKSE,
+  SHFT1,
+  SHFT2,
+  SWAP,
+  SP,
+  SPX
+} insn_subclass_t;
 
 /* Flags class.  */
 typedef enum
-  {
-    F_CLASS_NONE = 0,
+{
+  F_CLASS_NONE = 0,
 
-    /* At most one flag from the set of flags can appear in the
-       instruction.  */
-    F_CLASS_OPTIONAL = (1 << 0),
+  /* At most one flag from the set of flags can appear in the
+     instruction.  */
+  F_CLASS_OPTIONAL = (1 << 0),
 
-    /* Exactly one from from the set of flags must appear in the
-       instruction.  */
-    F_CLASS_REQUIRED = (1 << 1),
+  /* Exactly one from from the set of flags must appear in the
+     instruction.  */
+  F_CLASS_REQUIRED = (1 << 1),
 
-    /* The conditional code can be extended over the standard variants
-       via .extCondCode pseudo-op.  */
-    F_CLASS_EXTEND = (1 << 2),
+  /* The conditional code can be extended over the standard variants
+     via .extCondCode pseudo-op.  */
+  F_CLASS_EXTEND = (1 << 2),
 
-    /* Condition code flag.  */
-    F_CLASS_COND = (1 << 3)
-  } flag_class_t;
+  /* Condition code flag.  */
+  F_CLASS_COND = (1 << 3)
+} flag_class_t;
 
 /* The opcode table is an array of struct arc_opcode.  */
 struct arc_opcode
@@ -336,11 +338,24 @@ extern const unsigned arc_NToperand;
 /* Mark the braket possition.  */
 #define ARC_OPERAND_BRAKET      0x1000
 
+/* Address type operand for NPS400.  */
+#define ARC_OPERAND_ADDRTYPE    0x2000
+
+/* Mark the colon position.  */
+#define ARC_OPERAND_COLON       0x4000
+
 /* Mask for selecting the type for typecheck purposes.  */
-#define ARC_OPERAND_TYPECHECK_MASK		\
-  (ARC_OPERAND_IR |				\
-   ARC_OPERAND_LIMM | ARC_OPERAND_SIGNED | 	\
-   ARC_OPERAND_UNSIGNED | ARC_OPERAND_BRAKET)
+#define ARC_OPERAND_TYPECHECK_MASK		 \
+  (ARC_OPERAND_IR				 \
+   | ARC_OPERAND_LIMM     | ARC_OPERAND_SIGNED	 \
+   | ARC_OPERAND_UNSIGNED | ARC_OPERAND_BRAKET   \
+   | ARC_OPERAND_ADDRTYPE | ARC_OPERAND_COLON)
+
+/* Macro to determine if an operand is a fake operand.  */
+#define ARC_OPERAND_IS_FAKE(op)                     \
+  ((operand->flags & ARC_OPERAND_FAKE)              \
+   && !((operand->flags & ARC_OPERAND_BRAKET)	    \
+	|| (operand->flags & ARC_OPERAND_COLON)))
 
 /* The flags structure.  */
 struct arc_flag_operand
@@ -607,6 +622,67 @@ extern const unsigned char arg_32bit_limmlimm[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_rc[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_u6[MAX_INSN_ARGS + 1];
 extern const unsigned char arg_32bit_limm[MAX_INSN_ARGS + 1];
+
+/* Address types used in the NPS-400. See page 367 of the NPS-400 CTOP
+   Instruction Set Reference Manual v2.4 for a description of address types.  */
+
+typedef enum
+{
+  /* Addresses in memory.  */
+
+  /* Buffer descriptor.  */
+  ARC_NPS400_ADDRTYPE_BD,
+
+  /* Job identifier.  */
+  ARC_NPS400_ADDRTYPE_JID,
+
+  /* Linked Buffer Descriptor.  */
+  ARC_NPS400_ADDRTYPE_LBD,
+
+  /* Multicast Buffer Descriptor.  */
+  ARC_NPS400_ADDRTYPE_MBD,
+
+  /* Summarized Address.  */
+  ARC_NPS400_ADDRTYPE_SD,
+
+  /* SMEM Security Context Local Memory.  */
+  ARC_NPS400_ADDRTYPE_SM,
+
+  /* Extended Address.  */
+  ARC_NPS400_ADDRTYPE_XA,
+
+  /* Extended Summarized Address.  */
+  ARC_NPS400_ADDRTYPE_XD,
+
+  /* CMEM offset addresses.  */
+
+  /* On-demand Counter Descriptor.  */
+  ARC_NPS400_ADDRTYPE_CD,
+
+  /* CMEM Buffer Descriptor.  */
+  ARC_NPS400_ADDRTYPE_CBD,
+
+  /* CMEM Job Identifier.  */
+  ARC_NPS400_ADDRTYPE_CJID,
+
+  /* CMEM Linked Buffer Descriptor.  */
+  ARC_NPS400_ADDRTYPE_CLBD,
+
+  /* CMEM Offset.  */
+  ARC_NPS400_ADDRTYPE_CM,
+
+  /* CMEM Summarized Address.  */
+  ARC_NPS400_ADDRTYPE_CSD,
+
+  /* CMEM Extended Address.  */
+  ARC_NPS400_ADDRTYPE_CXA,
+
+  /* CMEM Extended Summarized Address.  */
+  ARC_NPS400_ADDRTYPE_CXD
+
+} arc_nps_address_type;
+
+#define ARC_NUM_ADDRTYPES 16
 
 #ifdef __cplusplus
 }
