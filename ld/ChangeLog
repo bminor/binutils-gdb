@@ -1,3 +1,8 @@
+2016-07-27  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-gc/personality.d: Use "target cfi" to restrict the
+	test to targets which support cfi.
+
 2016-07-27  Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	* ldbuildid.c (generate_build_id): Warning fix.
