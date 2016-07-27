@@ -152,7 +152,8 @@ generate_build_id (bfd *abfd,
 	  return FALSE;
 	}
       FreeLibrary (rpc_library);
-      memcpy (id_bits, &uuid, size < sizeof (UUID) ? size : sizeof (UUID));
+      memcpy (id_bits, &uuid,
+	      (size_t) size < sizeof (UUID) ? (size_t) size : sizeof (UUID));
 #endif /* __MINGW32__ */
     }
   else if (strneq (style, "0x", 2))

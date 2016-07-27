@@ -1,3 +1,7 @@
+2016-07-27  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* ldbuildid.c (generate_build_id): Warning fix.
+
 2016-07-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/compressed-plt-1.s: Add branch support.
