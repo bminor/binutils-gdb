@@ -1,3 +1,16 @@
+2016-07-27  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/sparc.exp: Use is_elf_format to discriminate
+	ELF targets.
+	Run natural, natural-32, pr4587, ticc-imm-reg, v8-movwr-imm,
+	pause, save-args, cbcond, cfr, crypto edge, flush, hpcvis3, ima,
+	ld_st_fsr, ldtw_sttw, ldd_std, ldx_stx, ldx_efsr, mwait, mcdper,
+	sparc5vis4, xcrypto, v9branch1 and imm-plus-rreg only in ELF
+	targets.
+	(sparc_elf_setup): Delete.
+	* testsuite/gas/sparc/save-args.d: Fix a copy-paste typo in the
+	test's #name entry.
+
 2016-07-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (RELAX_MICROMIPS_ENCODE): Add `nods' flag.
