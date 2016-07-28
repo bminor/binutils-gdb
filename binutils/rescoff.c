@@ -249,7 +249,7 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       for (j = 0; j < length; j++)
 	{
 	  /* PR 17512: file: 05dc4a16.  */
-	  if (length < 0 || ers >= (bfd_byte *) ere || ers + j * 2 + 4 >= (bfd_byte *) ere)
+	  if (length < 0 || ers >= flaginfo->data_end || ers + j * 2 + 4 >= flaginfo->data_end)
 	    overrun (flaginfo, _("resource name"));
 	  re->id.u.n.name[j] = windres_get_16 (wrbfd, ers + j * 2 + 2, 2);
 	}

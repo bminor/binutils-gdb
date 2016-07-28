@@ -1,3 +1,11 @@
+2016-07-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* rescoff.c (read_coff_res_dir): Fix detection of buffer overrun.
+	* resbin.c (bin_to_res_version): Allow for the padded length of a
+	version block to be longer than the recorded length.  Skip padding
+	bytes.
+
 2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
