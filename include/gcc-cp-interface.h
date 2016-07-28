@@ -410,7 +410,7 @@ typedef void gcc_cp_enter_leave_user_expr_scope_function (void *datum,
 struct gcc_cp_fe_vtable
 {
   /* The version of the C interface.  The value is one of the
-     gcc_c_api_version constants.  */
+     gcc_cp_api_version constants.  */
 
   unsigned int cp_version;
 

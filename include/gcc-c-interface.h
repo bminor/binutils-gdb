@@ -41,7 +41,11 @@ struct gcc_c_context;
 
 enum gcc_c_api_version
 {
-  GCC_C_FE_VERSION_0 = 2
+  GCC_C_FE_VERSION_0 = 0,
+
+  /* Added char_type.  Added new version of int_type and float_type,
+     deprecated int_type_v0 and float_type_v0.  */
+  GCC_C_FE_VERSION_1 = 1
 };
 
 /* Qualifiers.  */
