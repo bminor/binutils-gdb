@@ -490,7 +490,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   int ok;
   FILE *src;
   struct gdbarch *gdbarch = get_current_arch ();
-  char *triplet_rx;
+  char *triplet_rx = NULL;
   char *error_message;
 
   if (!target_has_execution)

@@ -170,7 +170,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
   else
     {
       gcc_decl decl;
-      struct template_defn *template_decl;
+      struct template_defn *template_decl = NULL;
       /* Squash compiler warning.  */
       gcc_cp_symbol_kind_flags kind = GCC_CP_FLAG_BASE;
       CORE_ADDR addr = 0;

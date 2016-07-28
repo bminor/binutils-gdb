@@ -595,7 +595,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (*const swap_sym_in) (bfd *, void *, SYMR *) = debug_swap->swap_sym_in;
   char *name;
-  struct symbol *s;
+  struct symbol *s = NULL;
   struct block *b;
   struct mdebug_pending *pend;
   struct type *t;
