@@ -1,3 +1,7 @@
+2016-07-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* signals.def: Add GDB_SIGNAL_LIBRT.
+
 2016-01-06  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.h (sim_open): Mark argv const.

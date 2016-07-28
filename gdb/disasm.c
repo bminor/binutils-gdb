@@ -737,13 +737,11 @@ do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  CORE_ADDR low, CORE_ADDR high,
 		  int how_many, int flags, struct ui_file *stb)
 {
-  int num_displayed = 0;
   struct cleanup *ui_out_chain;
 
   ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
 
-  num_displayed = dump_insns (gdbarch, uiout, di, low, high, how_many,
-                              flags, stb, NULL);
+  dump_insns (gdbarch, uiout, di, low, high, how_many, flags, stb, NULL);
 
   do_cleanups (ui_out_chain);
 }

@@ -139,7 +139,7 @@ ARC_RELOC_HOWTO(ARC_SDA32, 18, \
                 32, \
                 replace_word32, \
                 signed, \
-                ( ME ( ( ( S + A ) - _SDA_BASE_ ) ) ))
+                ( ( ( S + A ) - _SDA_BASE_ ) ))
 
 ARC_RELOC_HOWTO(ARC_SDA_LDST, 19, \
                 2, \
@@ -454,7 +454,7 @@ ARC_RELOC_HOWTO(ARC_TLS_DTPOFF, 67, \
                 32, \
                 replace_word32, \
                 dont, \
-                ( ME ( ( S - TLS_REL ) ) ))
+                ( ME ( S - SECTSTART ) + A ))
 
 ARC_RELOC_HOWTO(ARC_TLS_DTPOFF_S9, 73, \
                 2, \

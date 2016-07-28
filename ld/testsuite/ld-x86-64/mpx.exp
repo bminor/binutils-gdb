@@ -120,7 +120,7 @@ run_ld_link_tests {
      {mpx4a.s} {{objdump -dw mpx4.dd}} "mpx4"}
 }
 
-run_ld_link_exec_tests [] $run_tests
+run_ld_link_exec_tests $run_tests
 
 run_dump_test "bnd-branch-1"
 run_dump_test "bnd-ifunc-1"

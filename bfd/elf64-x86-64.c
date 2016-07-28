@@ -1162,6 +1162,17 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
 	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 3))
 	return FALSE;
     }
+
+  /* Align .got section to its entry size.  */
+  if (htab->elf.sgot != NULL
+      && !bfd_set_section_alignment (dynobj, htab->elf.sgot, 3))
+    return FALSE;
+
+  /* Align .got.plt section to its entry size.  */
+  if (htab->elf.sgotplt != NULL
+      && !bfd_set_section_alignment (dynobj, htab->elf.sgotplt, 3))
+    return FALSE;
+
   return TRUE;
 }
 

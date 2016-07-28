@@ -284,6 +284,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 set binfile [gdb_remote_download host ${binfile} \
 		 [standard_output_file object.o]]
+set binfile_re [string_to_regexp $binfile]
 send_gdb "file $binfile\n"
 # If $binfile is very long, a \r (but not a \n) will echo in the
 # middle of the echo of the command.  So to match the echo, we
@@ -300,7 +301,7 @@ gdb_expect 60 {
 	send_gdb "y\n"
 	exp_continue
     }
-    -re "^Reading symbols from .*$binfile\\.\\.\\.done\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)\r\n$gdb_prompt $" {
+    -re "^Reading symbols from .*$binfile_re\\.\\.\\.done\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)\r\n$gdb_prompt $" {
 	pass "weirdx.o read without error"
     }
     -re ".*$gdb_prompt $" {

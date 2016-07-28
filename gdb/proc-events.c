@@ -1536,6 +1536,9 @@ static struct trans signal_table[] =
 #ifdef SIGAIO
   { SIGAIO, "SIGAIO", "Asynchronous I/O signal" },
 #endif
+#ifdef SIGLIBRT
+  { SIGLIBRT, "SIGLIBRT", "Used by librt" },
+#endif
 
   /* FIXME: add real-time signals.  */
 };

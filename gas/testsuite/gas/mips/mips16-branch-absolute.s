@@ -2,6 +2,7 @@
 
 	.space	0x1000
 
+	.globl	foo
 	.ent	foo
 	.set	mips16
 foo:
@@ -18,4 +19,4 @@ foo:
 	.align	4, 0
 	.space	16
 
-	.set	bar, 0x1234
+	.set	bar, 0x1235

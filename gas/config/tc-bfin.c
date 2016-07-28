@@ -26,7 +26,6 @@
 #ifdef OBJ_ELF
 #include "dwarf2dbg.h"
 #endif
-#include "libbfd.h"
 #include "elf/common.h"
 #include "elf/bfin.h"
 

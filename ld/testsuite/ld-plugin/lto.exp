@@ -481,10 +481,10 @@ if ![isnative] {
     return
 }
 
-run_ld_link_exec_tests [] $lto_run_tests
+run_ld_link_exec_tests $lto_run_tests
 
 if { [is_elf_format] } {
-    run_ld_link_exec_tests [] $lto_run_elf_tests
+    run_ld_link_exec_tests $lto_run_elf_tests
 }
 
 proc pr20103 {cflags libs} {

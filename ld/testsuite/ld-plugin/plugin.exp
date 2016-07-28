@@ -236,6 +236,10 @@ set plugin_lib_tests [list \
 			-plugin-opt sym:${_}text::0:0:0 \
 			-plugin-opt add:tmpdir/text.o \
     $testsrcfiles_notext -Ltmpdir -ltext $libs" "" "" "" {{ld plugin-19.d}} "main.x" ] \
+    [list "plugin with empty archive" \
+	               "-plugin $plugin_path $regclm \
+			-plugin-opt read:8 \
+    $testobjfiles tmpdir/libempty.a $libs" "" "" "" {{ld plugin-30.d}} "main.x" ] \
 ]
 
 set plugin_extra_elf_tests [list \
@@ -289,7 +293,8 @@ if { [is_elf_format] \
     run_ld_link_tests $plugin_extra_elf_tests
 }
 
-if ![ar_simple_create $ar "" "tmpdir/libtext.a" "tmpdir/text.o"] {
+if {![ar_simple_create $ar "" "tmpdir/libtext.a" "tmpdir/text.o"] || \
+    ![ar_simple_create $ar "" "tmpdir/libempty.a" ""]} {
     foreach testitem $plugin_lib_tests {
 	unresolved [lindex $testitem 0]
     }

@@ -16,7 +16,7 @@
 standard_testfile .c inline-markers.c
 
 if {[prepare_for_testing $testfile.exp $testfile \
-	 [list $srcfile $srcfile2] {debug optimize=-O2}]} {
+	 [list $srcfile $srcfile2] {debug additional_flags=-Winline}]} {
     return -1
 }
 

@@ -7,6 +7,9 @@ set|show compile-gcc
 
 *** Changes since GDB 7.11
 
+* GDBserver now supports recording btrace without maintaining an active
+  GDB connection.
+
 * GDB now supports a negative repeat count in the 'x' command to examine
   memory backward from the given address.  For example:
 
@@ -64,6 +67,11 @@ set|show compile-gcc
   for its own control and synchronization, invisible to the command
   line.
 
+* The "catch syscall" command catches groups of related syscalls.
+
+  The "catch syscall" command now supports catching a group of related
+  syscalls using the 'group:' or 'g:' prefix.
+
 * New commands
 
 skip -file file
@@ -83,6 +91,18 @@ maint selftest
 new-ui INTERP TTY
   Start a new user interface instance running INTERP as interpreter,
   using the TTY file for input/output.
+
+* Python Scripting
+
+  ** gdb.Breakpoint objects have a new attribute "pending", which
+     indicates whether the breakpoint is pending.
+
+signal-event EVENTID
+  Signal ("set") the given MS-Windows event object.  This is used in
+  conjunction with the Windows JIT debugging (AeDebug) support, where
+  the OS suspends a crashing process until a debugger can attach to
+  it.  Resuming the crashing process, in order to debug it, is done by
+  signalling an event.
 
 * Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
   was added in GDBserver, including JIT compiling fast tracepoint's

@@ -179,4 +179,4 @@ set run_tests {
      {pr19553a.c} "pr19553d" "pr19553d.out"}
 }
 
-run_ld_link_exec_tests [] $run_tests
+run_ld_link_exec_tests $run_tests

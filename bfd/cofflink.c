@@ -1398,7 +1398,8 @@ mark_relocs (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	 in the relocation table.  This will then be picked up in the
 	 skip/don't-skip pass.  */
       for (; irel < irelend; irel++)
-	flaginfo->sym_indices[ irel->r_symndx ] = -1;
+	if ((unsigned long) irel->r_symndx < obj_raw_syment_count (input_bfd))
+	  flaginfo->sym_indices[irel->r_symndx] = -1;
     }
 }
 

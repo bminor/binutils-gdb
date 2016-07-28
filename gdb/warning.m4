@@ -39,7 +39,7 @@ fi
 build_warnings="-Wall -Wpointer-arith \
 -Wno-unused -Wunused-value -Wunused-function \
 -Wno-switch -Wno-char-subscripts \
--Wempty-body"
+-Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable"
 
 # Now add in C and C++ specific options, depending on mode.
 if test "$enable_build_with_cxx" = "yes"; then

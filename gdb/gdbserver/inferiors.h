@@ -88,7 +88,7 @@ struct process_info
    no current thread selected.  */
 
 struct process_info *current_process (void);
-struct process_info *get_thread_process (struct thread_info *);
+struct process_info *get_thread_process (const struct thread_info *);
 
 extern struct inferior_list all_processes;
 

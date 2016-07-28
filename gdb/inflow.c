@@ -398,7 +398,7 @@ child_terminal_ours_1 (int output_only)
          pgrp.  */
       sighandler_t osigttou = NULL;
 #endif
-      int result;
+      int result ATTRIBUTE_UNUSED;
 
 #ifdef SIGTTOU
       if (job_control)

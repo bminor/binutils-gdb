@@ -28,7 +28,6 @@
 #include "filenames.h"
 #include "fnmatch.h"
 #include "elf-bfd.h"
-#include "libbfd.h"
 #include "coff/internal.h"
 #include "libcoff.h"
 
@@ -139,6 +138,7 @@ struct section_list
 #define SECTION_CONTEXT_SET_LMA   (1 << 4) /* Set the sections' LMA address.  */
 #define SECTION_CONTEXT_ALTER_LMA (1 << 5) /* Increment or decrement the section's LMA address.  */
 #define SECTION_CONTEXT_SET_FLAGS (1 << 6) /* Set the section's flags.  */
+#define SECTION_CONTEXT_REMOVE_RELOCS (1 << 7) /* Remove relocations for this section.  */
 
   bfd_vma		vma_val;   /* Amount to change by or set to.  */
   bfd_vma		lma_val;   /* Amount to change by or set to.  */
@@ -326,6 +326,7 @@ enum command_line_switch
   OPTION_REDEFINE_SYM,
   OPTION_REDEFINE_SYMS,
   OPTION_REMOVE_LEADING_CHAR,
+  OPTION_REMOVE_RELOCS,
   OPTION_RENAME_SECTION,
   OPTION_REVERSE_BYTES,
   OPTION_SECTION_ALIGNMENT,
@@ -367,6 +368,7 @@ static struct option strip_options[] =
   {"output-target", required_argument, 0, 'O'},
   {"preserve-dates", no_argument, 0, 'p'},
   {"remove-section", required_argument, 0, 'R'},
+  {"remove-relocations", required_argument, 0, OPTION_REMOVE_RELOCS},
   {"strip-all", no_argument, 0, 's'},
   {"strip-debug", no_argument, 0, 'S'},
   {"strip-dwo", no_argument, 0, OPTION_STRIP_DWO},
@@ -451,6 +453,7 @@ static struct option copy_options[] =
   {"redefine-syms", required_argument, 0, OPTION_REDEFINE_SYMS},
   {"remove-leading-char", no_argument, 0, OPTION_REMOVE_LEADING_CHAR},
   {"remove-section", required_argument, 0, 'R'},
+  {"remove-relocations", required_argument, 0, OPTION_REMOVE_RELOCS},
   {"rename-section", required_argument, 0, OPTION_RENAME_SECTION},
   {"reverse-bytes", required_argument, 0, OPTION_REVERSE_BYTES},
   {"section-alignment", required_argument, 0, OPTION_SECTION_ALIGNMENT},
@@ -538,6 +541,7 @@ copy_usage (FILE *stream, int exit_status)
   -j --only-section <name>         Only copy section <name> into the output\n\
      --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to <file>\n\
   -R --remove-section <name>       Remove section <name> from the output\n\
+     --remove-relocations <name>   Remove relocations from section <name>\n\
   -S --strip-all                   Remove all symbol and relocation information\n\
   -g --strip-debug                 Remove all debugging symbols & sections\n\
      --strip-dwo                   Remove all DWO sections\n\
@@ -668,6 +672,7 @@ strip_usage (FILE *stream, int exit_status)
                                    Disable -D behavior (default)\n"));
   fprintf (stream, _("\
   -R --remove-section=<name>       Also remove section <name> from the output\n\
+     --remove-relocations <name>   Remove relocations from section <name>\n\
   -s --strip-all                   Remove all symbol and relocation information\n\
   -g -S -d --strip-debug           Remove all debugging symbols & sections\n\
      --strip-dwo                   Remove all DWO sections\n\
@@ -854,7 +859,7 @@ parse_symflags (const char *s, char **other)
 static struct section_list *
 find_section_list (const char *name, bfd_boolean add, unsigned int context)
 {
-  struct section_list *p;
+  struct section_list *p, *match = NULL;
 
   /* assert ((context & ((1 << 7) - 1)) != 0); */
 
@@ -890,19 +895,36 @@ find_section_list (const char *name, bfd_boolean add, unsigned int context)
 	}
       /* If we are not adding a new name/pattern then
 	 only check for a match if the context applies.  */
-      else if ((p->context & context)
-	       /* We could check for the presence of wildchar characters
-		  first and choose between calling strcmp and fnmatch,
-		  but is that really worth it ?  */
-	       && fnmatch (p->pattern, name, 0) == 0)
-	{
-	  p->used = TRUE;
-	  return p;
-	}
+      else if (p->context & context)
+        {
+          /* We could check for the presence of wildchar characters
+             first and choose between calling strcmp and fnmatch,
+             but is that really worth it ?  */
+          if (p->pattern [0] == '!')
+            {
+              if (fnmatch (p->pattern + 1, name, 0) == 0)
+                {
+                  p->used = TRUE;
+                  return NULL;
+                }
+            }
+          else
+            {
+              if (fnmatch (p->pattern, name, 0) == 0)
+                {
+                  if (match == NULL)
+                    match = p;
+                }
+            }
+        }
     }
 
   if (! add)
-    return NULL;
+    {
+      if (match != NULL)
+        match->used = TRUE;
+      return match;
+    }
 
   p = (struct section_list *) xmalloc (sizeof (struct section_list));
   p->pattern = name;
@@ -3190,6 +3212,46 @@ skip_section (bfd *ibfd, sec_ptr isection)
   return FALSE;
 }
 
+/* Add section SECTION_PATTERN to the list of sections that will have their
+   relocations removed.  */
+
+static void
+handle_remove_relocations_option (const char *section_pattern)
+{
+  find_section_list (section_pattern, TRUE, SECTION_CONTEXT_REMOVE_RELOCS);
+}
+
+/* Return TRUE if ISECTION from IBFD should have its relocations removed,
+   otherwise return FALSE.  If the user has requested that relocations be
+   removed from a section that does not have relocations then this
+   function will still return TRUE.  */
+
+static bfd_boolean
+discard_relocations (bfd *ibfd ATTRIBUTE_UNUSED, asection *isection)
+{
+  return (find_section_list (bfd_section_name (ibfd, isection), FALSE,
+			     SECTION_CONTEXT_REMOVE_RELOCS) != NULL);
+}
+
+/* Wrapper for dealing with --remove-section (-R) command line arguments.
+   A special case is detected here, if the user asks to remove a relocation
+   section (one starting with ".rela." or ".rel.") then this removal must
+   be done using a different technique.  */
+
+static void
+handle_remove_section_option (const char *section_pattern)
+{
+  if (strncmp (section_pattern, ".rela.", 6) == 0)
+    handle_remove_relocations_option (section_pattern + 5);
+  else if (strncmp (section_pattern, ".rel.", 5) == 0)
+    handle_remove_relocations_option (section_pattern + 4);
+  else
+    {
+      find_section_list (section_pattern, TRUE, SECTION_CONTEXT_REMOVE);
+      sections_removed = TRUE;
+    }
+}
+
 /* Copy relocations in input section ISECTION of IBFD to an output
    section with the same name in OBFDARG.  If stripping then don't
    copy any relocation info.  */
@@ -3209,7 +3271,9 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   osection = isection->output_section;
 
   /* Core files and DWO files do not need to be relocated.  */
-  if (bfd_get_format (obfd) == bfd_core || strip_symbols == STRIP_NONDWO)
+  if (bfd_get_format (obfd) == bfd_core
+      || strip_symbols == STRIP_NONDWO
+      || discard_relocations (ibfd, isection))
     relsize = 0;
   else
     {
@@ -3589,8 +3653,10 @@ strip_main (int argc, char *argv[])
 	  input_target = output_target = optarg;
 	  break;
 	case 'R':
-	  find_section_list (optarg, TRUE, SECTION_CONTEXT_REMOVE);
-	  sections_removed = TRUE;
+	  handle_remove_section_option (optarg);
+	  break;
+	case OPTION_REMOVE_RELOCS:
+	  handle_remove_relocations_option (optarg);
 	  break;
 	case 's':
 	  strip_symbols = STRIP_ALL;
@@ -3992,8 +4058,11 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case 'R':
-	  find_section_list (optarg, TRUE, SECTION_CONTEXT_REMOVE);
-	  sections_removed = TRUE;
+	  handle_remove_section_option (optarg);
+	  break;
+
+        case OPTION_REMOVE_RELOCS:
+	  handle_remove_relocations_option (optarg);
 	  break;
 
 	case 'S':

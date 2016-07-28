@@ -29,6 +29,7 @@
 #include "libiberty.h"
 #include "objalloc.h"
 #if BFD_SUPPORTS_PLUGINS
+#include "plugin-api.h"
 #include "plugin.h"
 #endif
 
@@ -11028,6 +11029,108 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   return TRUE;
 }
 
+/* Generate an import library in INFO->implib_bfd from symbols in ABFD.
+   Returns TRUE upon success, FALSE otherwise.  */
+
+static bfd_boolean
+elf_output_implib (bfd *abfd, struct bfd_link_info *info)
+{
+  bfd_boolean ret = FALSE;
+  bfd *implib_bfd;
+  const struct elf_backend_data *bed;
+  flagword flags;
+  enum bfd_architecture arch;
+  unsigned int mach;
+  asymbol **sympp = NULL;
+  long symsize;
+  long symcount;
+  long src_count;
+  elf_symbol_type *osymbuf;
+
+  implib_bfd = info->out_implib_bfd;
+  bed = get_elf_backend_data (abfd);
+
+  if (!bfd_set_format (implib_bfd, bfd_object))
+    return FALSE;
+
+  flags = bfd_get_file_flags (abfd);
+  flags &= ~HAS_RELOC;
+  if (!bfd_set_start_address (implib_bfd, 0)
+      || !bfd_set_file_flags (implib_bfd, flags))
+    return FALSE;
+
+  /* Copy architecture of output file to import library file.  */
+  arch = bfd_get_arch (abfd);
+  mach = bfd_get_mach (abfd);
+  if (!bfd_set_arch_mach (implib_bfd, arch, mach)
+      && (abfd->target_defaulted
+	  || bfd_get_arch (abfd) != bfd_get_arch (implib_bfd)))
+    return FALSE;
+
+  /* Get symbol table size.  */
+  symsize = bfd_get_symtab_upper_bound (abfd);
+  if (symsize < 0)
+    return FALSE;
+
+  /* Read in the symbol table.  */
+  sympp = (asymbol **) xmalloc (symsize);
+  symcount = bfd_canonicalize_symtab (abfd, sympp);
+  if (symcount < 0)
+    goto free_sym_buf;
+
+  /* Allow the BFD backend to copy any private header data it
+     understands from the output BFD to the import library BFD.  */
+  if (! bfd_copy_private_header_data (abfd, implib_bfd))
+    goto free_sym_buf;
+
+  /* Filter symbols to appear in the import library.  */
+  if (bed->elf_backend_filter_implib_symbols)
+    symcount = bed->elf_backend_filter_implib_symbols (abfd, info, sympp,
+						       symcount);
+  else
+    symcount = _bfd_elf_filter_global_symbols (abfd, info, sympp, symcount);
+  if (symcount == 0)
+    {
+      bfd_set_error (bfd_error_no_symbols);
+      (*_bfd_error_handler) (_("%B: no symbol found for import library"),
+			     implib_bfd);
+      goto free_sym_buf;
+    }
+
+
+  /* Make symbols absolute.  */
+  osymbuf = (elf_symbol_type *) bfd_alloc2 (implib_bfd, symcount,
+					    sizeof (*osymbuf));
+  for (src_count = 0; src_count < symcount; src_count++)
+    {
+      memcpy (&osymbuf[src_count], (elf_symbol_type *) sympp[src_count],
+	      sizeof (*osymbuf));
+      osymbuf[src_count].symbol.section = bfd_abs_section_ptr;
+      osymbuf[src_count].internal_elf_sym.st_shndx = SHN_ABS;
+      osymbuf[src_count].symbol.value += sympp[src_count]->section->vma;
+      osymbuf[src_count].internal_elf_sym.st_value =
+	osymbuf[src_count].symbol.value;
+      sympp[src_count] = &osymbuf[src_count].symbol;
+    }
+
+  bfd_set_symtab (implib_bfd, sympp, symcount);
+
+  /* Allow the BFD backend to copy any private data it understands
+     from the output BFD to the import library BFD.  This is done last
+     to permit the routine to look at the filtered symbol table.  */
+  if (! bfd_copy_private_bfd_data (abfd, implib_bfd))
+    goto free_sym_buf;
+
+  if (!bfd_close (implib_bfd))
+    goto free_sym_buf;
+
+  ret = TRUE;
+
+free_sym_buf:
+  free (sympp);
+  return ret;
+}
+
 static void
 elf_final_link_free (bfd *obfd, struct elf_final_link_info *flinfo)
 {
@@ -11828,6 +11931,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       if (bfd_seek (abfd, symstrtab_hdr->sh_offset, SEEK_SET) != 0
 	  || ! _bfd_elf_strtab_emit (abfd, flinfo.symstrtab))
 	return FALSE;
+    }
+
+  if (info->out_implib_bfd && !elf_output_implib (abfd, info))
+    {
+      (*_bfd_error_handler) (_("%B: failed to generate import library"),
+			     info->out_implib_bfd);
+      return FALSE;
     }
 
   /* Adjust the relocs to have the correct symbol indices.  */

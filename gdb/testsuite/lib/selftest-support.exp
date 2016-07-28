@@ -94,6 +94,11 @@ proc selftest_setup { executable function } {
         -re "Starting program.*Breakpoint \[0-9\]+,.*$function .data.*$gdb_prompt $" {
             xfail "$description (line numbers scrambled?)"
         }
+	-re "Starting program.*Breakpoint \[0-9\]+,.* at .*main.c:.*$function.*$gdb_prompt $" {
+	    # $function may be inlined, so the program stops at the line
+	    # calling $function.
+	    pass "$description"
+	}
         -re "vfork: No more processes.*$gdb_prompt $" {
             fail "$description (out of virtual memory)"
             set timeout $oldtimeout

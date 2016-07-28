@@ -25,8 +25,12 @@
 #include <assert.h>
 #include "dis-asm.h"
 #include "opcode/arc.h"
+#include "elf/arc.h"
 #include "arc-dis.h"
 #include "arc-ext.h"
+#include "elf-bfd.h"
+#include "libiberty.h"
+#include "opintl.h"
 
 /* Structure used to iterate over, and extract the values for, operands of
    an opcode.  */
@@ -81,6 +85,30 @@ static const char * const regnames[64] =
   "r56", "r57", "ACCL", "ACCH", "lp_count", "rezerved", "LIMM", "pcl"
 };
 
+static const char * const addrtypenames[ARC_NUM_ADDRTYPES] =
+{
+  "bd", "jid", "lbd", "mbd", "sd", "sm", "xa", "xd",
+  "cd", "cbd", "cjid", "clbd", "cm", "csd", "cxa", "cxd"
+};
+
+static int addrtypenames_max = ARC_NUM_ADDRTYPES - 1;
+
+static const char * const addrtypeunknown = "unknown";
+
+/* This structure keeps track which instruction class(es)
+   should be ignored durring disassembling.  */
+
+typedef struct skipclass
+{
+  insn_class_t     insn_class;
+  insn_subclass_t  subclass;
+  struct skipclass *nxt;
+} skipclass_t, *linkclass;
+
+/* Intial classes of instructions to be consider first when
+   disassembling.  */
+static linkclass decodelist = NULL;
+
 /* Macros section.  */
 
 #ifdef DEBUG
@@ -101,6 +129,88 @@ static const char * const regnames[64] =
 
 /* Functions implementation.  */
 
+/* Return TRUE when two classes are not opcode conflicting.  */
+
+static bfd_boolean
+is_compatible_p (insn_class_t     classA,
+		 insn_subclass_t  sclassA,
+		 insn_class_t     classB,
+		 insn_subclass_t  sclassB)
+{
+  if (classA == DSP && sclassB == DPX)
+    return FALSE;
+  if (sclassA == DPX && classB == DSP)
+    return FALSE;
+  return TRUE;
+}
+
+/* Add a new element to the decode list.  */
+
+static void
+add_to_decodelist (insn_class_t     insn_class,
+		   insn_subclass_t  subclass)
+{
+  linkclass t = (linkclass) xmalloc (sizeof (skipclass_t));
+
+  t->insn_class = insn_class;
+  t->subclass = subclass;
+  t->nxt = decodelist;
+  decodelist = t;
+}
+
+/* Return TRUE if we need to skip the opcode from being
+   disassembled.  */
+
+static bfd_boolean
+skip_this_opcode (const struct arc_opcode *  opcode,
+		  struct disassemble_info *  info)
+{
+  linkclass t = decodelist;
+  bfd_boolean addme = TRUE;
+
+  /* Check opcode for major 0x06, return if it is not in.  */
+  if (OPCODE (opcode->opcode) != 0x06)
+    return FALSE;
+
+  while (t != NULL
+	 && is_compatible_p (t->insn_class, t->subclass,
+			     opcode->insn_class, opcode->subclass))
+    {
+      if ((t->insn_class == opcode->insn_class)
+	  && (t->subclass == opcode->subclass))
+	addme = FALSE;
+      t = t->nxt;
+    }
+
+  /* If we found an incompatibility then we must skip.  */
+  if (t != NULL)
+    return TRUE;
+
+  /* Even if we do not precisely know the if the right mnemonics
+     is correctly displayed, keep the disassmbled code class
+     consistent.  */
+  if (addme)
+    {
+      switch (opcode->insn_class)
+	{
+	case DSP:
+	case FLOAT:
+	  /* Add to the conflict list only the classes which
+	     counts.  */
+	  add_to_decodelist (opcode->insn_class, opcode->subclass);
+	  /* Warn if we have to decode an opcode and no preferred
+	     classes have been chosen.  */
+	  info->fprintf_func (info->stream, _("\n\
+Warning: disassembly may be wrong due to guessed opcode class choice.\n\
+ Use -M<class[,class]> to select the correct opcode class(es).\n\t\t\t\t"));
+	  break;
+	default:
+	  break;
+	}
+    }
+  return FALSE;
+}
+
 static bfd_vma
 bfd_getm32 (unsigned int data)
 {
@@ -111,7 +221,7 @@ bfd_getm32 (unsigned int data)
   return value;
 }
 
-static int
+static bfd_boolean
 special_flag_p (const char *opname,
 		const char *flgname)
 {
@@ -133,124 +243,137 @@ special_flag_p (const char *opname,
 	    break; /* End of the array.  */
 
 	  if (strcmp (flgname, arc_flag_operands[flgidx].name) == 0)
-	    return 1;
+	    return TRUE;
 	}
     }
-  return 0;
+  return FALSE;
 }
 
 /* Find opcode from ARC_TABLE given the instruction described by INSN and
    INSNLEN.  The ISA_MASK restricts the possible matches in ARC_TABLE.  */
 
 static const struct arc_opcode *
-find_format_from_table (const struct arc_opcode *arc_table,
-                        unsigned *insn, unsigned int insn_len,
-                        unsigned isa_mask, bfd_boolean *has_limm)
+find_format_from_table (struct disassemble_info *info,
+			const struct arc_opcode *arc_table,
+                        unsigned *insn,
+			unsigned int insn_len,
+                        unsigned isa_mask,
+			bfd_boolean *has_limm,
+			bfd_boolean overlaps)
 {
   unsigned int i = 0;
   const struct arc_opcode *opcode = NULL;
   const unsigned char *opidx;
   const unsigned char *flgidx;
 
-  do {
-    bfd_boolean invalid = FALSE;
+  do
+    {
+      bfd_boolean invalid = FALSE;
 
-    opcode = &arc_table[i++];
+      opcode = &arc_table[i++];
 
-    if (ARC_SHORT (opcode->mask) && (insn_len == 2))
-      {
-	if (OPCODE_AC (opcode->opcode) != OPCODE_AC (insn[0]))
-	  continue;
-      }
-    else if (!ARC_SHORT (opcode->mask) && (insn_len == 4))
-      {
-	if (OPCODE (opcode->opcode) != OPCODE (insn[0]))
-	  continue;
-      }
-    else
-      continue;
+      if (ARC_SHORT (opcode->mask) && (insn_len == 2))
+	{
+	  if (OPCODE_AC (opcode->opcode) != OPCODE_AC (insn[0]))
+	    continue;
+	}
+      else if (!ARC_SHORT (opcode->mask) && (insn_len == 4))
+	{
+	  if (OPCODE (opcode->opcode) != OPCODE (insn[0]))
+	    continue;
+	}
+      else
+	continue;
 
-    if ((insn[0] ^ opcode->opcode) & opcode->mask)
-      continue;
+      if ((insn[0] ^ opcode->opcode) & opcode->mask)
+	continue;
 
-    if (!(opcode->cpu & isa_mask))
-      continue;
+      if (!(opcode->cpu & isa_mask))
+	continue;
 
-    *has_limm = FALSE;
+      *has_limm = FALSE;
 
-    /* Possible candidate, check the operands.  */
-    for (opidx = opcode->operands; *opidx; opidx++)
-      {
-	int value;
-	const struct arc_operand *operand = &arc_operands[*opidx];
+      /* Possible candidate, check the operands.  */
+      for (opidx = opcode->operands; *opidx; opidx++)
+	{
+	  int value;
+	  const struct arc_operand *operand = &arc_operands[*opidx];
 
-	if (operand->flags & ARC_OPERAND_FAKE)
-	  continue;
+	  if (operand->flags & ARC_OPERAND_FAKE)
+	    continue;
 
-	if (operand->extract)
-	  value = (*operand->extract) (insn[0], &invalid);
-	else
-	  value = (insn[0] >> operand->shift) & ((1 << operand->bits) - 1);
+	  if (operand->extract)
+	    value = (*operand->extract) (insn[0], &invalid);
+	  else
+	    value = (insn[0] >> operand->shift) & ((1 << operand->bits) - 1);
 
-	/* Check for LIMM indicator.  If it is there, then make sure
-	   we pick the right format.  */
-	if (operand->flags & ARC_OPERAND_IR
-	    && !(operand->flags & ARC_OPERAND_LIMM))
-	  {
-	    if ((value == 0x3E && insn_len == 4)
-		|| (value == 0x1E && insn_len == 2))
-	      {
-		invalid = TRUE;
-		break;
-	      }
-	  }
+	  /* Check for LIMM indicator.  If it is there, then make sure
+	     we pick the right format.  */
+	  if (operand->flags & ARC_OPERAND_IR
+	      && !(operand->flags & ARC_OPERAND_LIMM))
+	    {
+	      if ((value == 0x3E && insn_len == 4)
+		  || (value == 0x1E && insn_len == 2))
+		{
+		  invalid = TRUE;
+		  break;
+		}
+	    }
 
-        if (operand->flags & ARC_OPERAND_LIMM
-            && !(operand->flags & ARC_OPERAND_DUPLICATE))
-          *has_limm = TRUE;
-      }
+	  if (operand->flags & ARC_OPERAND_LIMM
+	      && !(operand->flags & ARC_OPERAND_DUPLICATE))
+	    *has_limm = TRUE;
+	}
 
-    /* Check the flags.  */
-    for (flgidx = opcode->flags; *flgidx; flgidx++)
-      {
-	/* Get a valid flag class.  */
-	const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
-	const unsigned *flgopridx;
-	int foundA = 0, foundB = 0;
-	unsigned int value;
+      /* Check the flags.  */
+      for (flgidx = opcode->flags; *flgidx; flgidx++)
+	{
+	  /* Get a valid flag class.  */
+	  const struct arc_flag_class *cl_flags = &arc_flag_classes[*flgidx];
+	  const unsigned *flgopridx;
+	  int foundA = 0, foundB = 0;
+	  unsigned int value;
 
-	/* Check first the extensions.  */
-	if (cl_flags->flag_class & F_CLASS_EXTEND)
-	  {
-	    value = (insn[0] & 0x1F);
-	    if (arcExtMap_condCodeName (value))
-	      continue;
-	  }
-	for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
-	  {
-	    const struct arc_flag_operand *flg_operand =
-	      &arc_flag_operands[*flgopridx];
+	  /* Check first the extensions.  */
+	  if (cl_flags->flag_class & F_CLASS_EXTEND)
+	    {
+	      value = (insn[0] & 0x1F);
+	      if (arcExtMap_condCodeName (value))
+		continue;
+	    }
 
-	    value = (insn[0] >> flg_operand->shift)
-	      & ((1 << flg_operand->bits) - 1);
-	    if (value == flg_operand->code)
-	      foundA = 1;
-	    if (value)
-	      foundB = 1;
-	  }
-	if (!foundA && foundB)
-	  {
-	    invalid = TRUE;
-	    break;
-	  }
-      }
+	  for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
+	    {
+	      const struct arc_flag_operand *flg_operand =
+		&arc_flag_operands[*flgopridx];
 
-    if (invalid)
-      continue;
+	      value = (insn[0] >> flg_operand->shift)
+		& ((1 << flg_operand->bits) - 1);
+	      if (value == flg_operand->code)
+		foundA = 1;
+	      if (value)
+		foundB = 1;
+	    }
 
-    /* The instruction is valid.  */
-    return opcode;
-  } while (opcode->mask);
+	  if (!foundA && foundB)
+	    {
+	      invalid = TRUE;
+	      break;
+	    }
+	}
+
+      if (invalid)
+	continue;
+
+      if (insn_len == 4
+	  && overlaps
+	  && skip_this_opcode (opcode, info))
+	continue;
+
+      /* The instruction is valid.  */
+      return opcode;
+    }
+  while (opcode->mask);
 
   return NULL;
 }
@@ -344,43 +467,41 @@ find_format_long_instructions (unsigned *insn,
    the opcode's operands.  */
 
 static bfd_boolean
-find_format (bfd_vma memaddr, unsigned *insn, unsigned int *insn_len,
-             unsigned isa_mask, struct disassemble_info *info,
-             const struct arc_opcode **opcode_result,
-             struct arc_operand_iterator *iter)
+find_format (bfd_vma                       memaddr,
+	     unsigned *                    insn,
+	     unsigned int *                insn_len,
+             unsigned                      isa_mask,
+	     struct disassemble_info *     info,
+             const struct arc_opcode **    opcode_result,
+             struct arc_operand_iterator * iter)
 {
-  const struct arc_opcode *opcode;
+  const struct arc_opcode *opcode = NULL;
   bfd_boolean needs_limm;
+  const extInstruction_t *einsn;
 
-  /* Find the first match in the opcode table.  */
-  opcode = find_format_from_table (arc_opcodes, insn, *insn_len,
-                                   isa_mask, &needs_limm);
-
-  if (opcode == NULL)
+  /* First, try the extension instructions.  */
+  einsn = arcExtMap_insn (OPCODE (insn[0]), insn[0]);
+  if (einsn != NULL)
     {
-      const extInstruction_t *einsn;
+      const char *errmsg = NULL;
 
-      /* No instruction found.  Try the extensions.  */
-      einsn = arcExtMap_insn (OPCODE (insn[0]), insn[0]);
-      if (einsn != NULL)
+      opcode = arcExtMap_genOpcode (einsn, isa_mask, &errmsg);
+      if (opcode == NULL)
 	{
-	  const char *errmsg = NULL;
-	  opcode = arcExtMap_genOpcode (einsn, isa_mask, &errmsg);
-	  if (opcode == NULL)
-	    {
-	      (*info->fprintf_func) (info->stream,
-				     "An error occured while "
-				     "generating the extension instruction "
-				     "operations");
-              *opcode_result = NULL;
-	      return FALSE;
-	    }
-
-	  opcode = find_format_from_table (opcode, insn, *insn_len,
-                                           isa_mask, &needs_limm);
-	  assert (opcode != NULL);
+	  (*info->fprintf_func) (info->stream, "\
+An error occured while generating the extension instruction operations");
+	  *opcode_result = NULL;
+	  return FALSE;
 	}
+
+      opcode = find_format_from_table (info, opcode, insn, *insn_len,
+				       isa_mask, &needs_limm, FALSE);
     }
+
+  /* Then, try finding the first match in the opcode table.  */
+  if (opcode == NULL)
+    opcode = find_format_from_table (info, arc_opcodes, insn, *insn_len,
+				     isa_mask, &needs_limm, TRUE);
 
   if (needs_limm && opcode != NULL)
     {
@@ -542,6 +663,18 @@ get_auxreg (const struct arc_opcode *opcode,
   return NULL;
 }
 
+/* Convert a value representing an address type to a string used to refer to
+   the address type in assembly code.  */
+
+static const char *
+get_addrtype (int value)
+{
+  if (value < 0 || value > addrtypenames_max)
+    return addrtypeunknown;
+
+  return addrtypenames[value];
+}
+
 /* Calculate the instruction length for an instruction starting with MSB
    and LSB, the most and least significant byte.  The ISA_MASK is used to
    filter the instructions considered to only those that are part of the
@@ -697,6 +830,65 @@ operand_iterator_next (struct arc_operand_iterator *iter,
   return TRUE;
 }
 
+/* Helper for parsing the options.  */
+
+static void
+parse_option (char *option)
+{
+  if (CONST_STRNEQ (option, "dsp"))
+    add_to_decodelist (DSP, NONE);
+
+  else if (CONST_STRNEQ (option, "spfp"))
+    add_to_decodelist (FLOAT, SPX);
+
+  else if (CONST_STRNEQ (option, "dpfp"))
+    add_to_decodelist (FLOAT, DPX);
+
+  else if (CONST_STRNEQ (option, "quarkse_em"))
+    add_to_decodelist (FLOAT, QUARKSE);
+
+  else if (CONST_STRNEQ (option, "fpuda"))
+    add_to_decodelist (FLOAT, DPA);
+
+  else if (CONST_STRNEQ (option, "fpud"))
+    {
+      add_to_decodelist (FLOAT, SP);
+      add_to_decodelist (FLOAT, CVT);
+    }
+
+  else if (CONST_STRNEQ (option, "fpus"))
+    {
+      add_to_decodelist (FLOAT, DP);
+      add_to_decodelist (FLOAT, CVT);
+    }
+  else
+    fprintf (stderr, _("Unrecognised disassembler option: %s\n"), option);
+}
+
+/* Go over the options list and parse it.  */
+
+static void
+parse_disassembler_options (char *options)
+{
+  if (options == NULL)
+    return;
+
+  while (*options)
+    {
+      /* Skip empty options.  */
+      if (*options == ',')
+	{
+	  ++ options;
+	  continue;
+	}
+
+      parse_option (options);
+
+      while (*options != ',' && *options != '\0')
+	++ options;
+    }
+}
+
 /* Disassemble ARC instructions.  */
 
 static int
@@ -716,10 +908,22 @@ print_insn_arc (bfd_vma memaddr,
   const struct arc_operand *operand;
   int value;
   struct arc_operand_iterator iter;
+  Elf_Internal_Ehdr *header = NULL;
+
+  if (info->disassembler_options)
+    {
+      parse_disassembler_options (info->disassembler_options);
+
+      /* Avoid repeated parsing of the options.  */
+      info->disassembler_options = NULL;
+    }
 
   memset (&iter, 0, sizeof (iter));
   lowbyte  = ((info->endian == BFD_ENDIAN_LITTLE) ? 1 : 0);
   highbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 0 : 1);
+
+  if (info->section && info->section->owner)
+    header = elf_elfheader (info->section->owner);
 
   switch (info->mach)
     {
@@ -733,7 +937,15 @@ print_insn_arc (bfd_vma memaddr,
 
     case bfd_mach_arc_arcv2:
     default:
-      isa_mask = ARC_OPCODE_ARCv2HS | ARC_OPCODE_ARCv2EM;
+      isa_mask = ARC_OPCODE_ARCv2EM;
+      if ((header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
+	{
+	  isa_mask = ARC_OPCODE_ARCv2HS;
+	  /* FPU instructions are not extensions for HS.  */
+	  add_to_decodelist (FLOAT, SP);
+	  add_to_decodelist (FLOAT, DP);
+	  add_to_decodelist (FLOAT, CVT);
+	}
       break;
     }
 
@@ -810,6 +1022,7 @@ print_insn_arc (bfd_vma memaddr,
 
   insn_len = arc_insn_length (buffer[lowbyte], buffer[highbyte], info);
   pr_debug ("instruction length = %d bytes\n", insn_len);
+
   switch (insn_len)
     {
     case 2:
@@ -913,14 +1126,19 @@ print_insn_arc (bfd_vma memaddr,
 	}
 
       /* Only take input from real operands.  */
-      if ((operand->flags & ARC_OPERAND_FAKE)
-	  && !(operand->flags & ARC_OPERAND_BRAKET))
+      if (ARC_OPERAND_IS_FAKE (operand))
 	continue;
 
       if ((operand->flags & ARC_OPERAND_IGNORE)
 	  && (operand->flags & ARC_OPERAND_IR)
           && value == -1)
 	continue;
+
+      if (operand->flags & ARC_OPERAND_COLON)
+        {
+          (*info->fprintf_func) (info->stream, ":");
+          continue;
+        }
 
       if (need_comma)
 	(*info->fprintf_func) (info->stream, ",");
@@ -932,6 +1150,8 @@ print_insn_arc (bfd_vma memaddr,
 	  need_comma = FALSE;
 	  continue;
 	}
+
+      need_comma = TRUE;
 
       /* Print the operand as directed by the flags.  */
       if (operand->flags & ARC_OPERAND_IR)
@@ -954,6 +1174,7 @@ print_insn_arc (bfd_vma memaddr,
       else if (operand->flags & ARC_OPERAND_LIMM)
 	{
 	  const char *rname = get_auxreg (opcode, value, isa_mask);
+
 	  if (rname && open_braket)
 	    (*info->fprintf_func) (info->stream, "%s", rname);
 	  else
@@ -981,6 +1202,13 @@ print_insn_arc (bfd_vma memaddr,
 	  else
 	    (*info->fprintf_func) (info->stream, "%d", value);
 	}
+      else if (operand->flags & ARC_OPERAND_ADDRTYPE)
+        {
+          const char *addrtype = get_addrtype (value);
+          (*info->fprintf_func) (info->stream, "%s", addrtype);
+          /* A colon follow an address type.  */
+          need_comma = FALSE;
+        }
       else
 	{
 	  if (operand->flags & ARC_OPERAND_TRUNCATE
@@ -998,8 +1226,6 @@ print_insn_arc (bfd_vma memaddr,
 		(*info->fprintf_func) (info->stream, "%#x", value);
 	    }
 	}
-
-      need_comma = TRUE;
     }
 
   return insn_len;
@@ -1041,6 +1267,30 @@ arcAnalyzeInstr (bfd_vma memaddr,
 
   return ret;
 }
+
+void
+print_arc_disassembler_options (FILE *stream)
+{
+  fprintf (stream, _("\n\
+The following ARC specific disassembler options are supported for use \n\
+with -M switch (multiple options should be separated by commas):\n"));
+
+  fprintf (stream, _("\
+  dsp             Recognize DSP instructions.\n"));
+  fprintf (stream, _("\
+  spfp            Recognize FPX SP instructions.\n"));
+  fprintf (stream, _("\
+  dpfp            Recognize FPX DP instructions.\n"));
+  fprintf (stream, _("\
+  quarkse_em      Recognize FPU QuarkSE-EM instructions.\n"));
+  fprintf (stream, _("\
+  fpuda           Recognize double assist FPU instructions.\n"));
+  fprintf (stream, _("\
+  fpus            Recognize single precision FPU instructions.\n"));
+  fprintf (stream, _("\
+  fpud            Recognize double precision FPU instructions.\n"));
+}
+
 
 /* Local variables:
    eval: (c-set-style "gnu")

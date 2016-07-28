@@ -6026,6 +6026,23 @@ Target_aarch64<size, big_endian>::Scan::local(
       }
       break;
 
+    case elfcpp::R_AARCH64_MOVW_UABS_G0:        // 263
+    case elfcpp::R_AARCH64_MOVW_UABS_G0_NC:     // 264
+    case elfcpp::R_AARCH64_MOVW_UABS_G1:        // 265
+    case elfcpp::R_AARCH64_MOVW_UABS_G1_NC:     // 266
+    case elfcpp::R_AARCH64_MOVW_UABS_G2:        // 267
+    case elfcpp::R_AARCH64_MOVW_UABS_G2_NC:     // 268
+    case elfcpp::R_AARCH64_MOVW_UABS_G3:        // 269
+    case elfcpp::R_AARCH64_MOVW_SABS_G0:        // 270
+    case elfcpp::R_AARCH64_MOVW_SABS_G1:        // 271
+    case elfcpp::R_AARCH64_MOVW_SABS_G2:        // 272
+      if (parameters->options().output_is_position_independent())
+	{
+	  gold_error(_("%s: unsupported reloc %u in pos independent link."),
+		     object->name().c_str(), r_type);
+	}
+      break;
+
     case elfcpp::R_AARCH64_LD_PREL_LO19:        // 273
     case elfcpp::R_AARCH64_ADR_PREL_LO21:       // 274
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:    // 275
@@ -6308,6 +6325,23 @@ Target_aarch64<size, big_endian>::Scan::global(
       if (gsym->needs_plt_entry())
 	{
 	  target->make_plt_entry(symtab, layout, gsym);
+	}
+      break;
+
+    case elfcpp::R_AARCH64_MOVW_UABS_G0:        // 263
+    case elfcpp::R_AARCH64_MOVW_UABS_G0_NC:     // 264
+    case elfcpp::R_AARCH64_MOVW_UABS_G1:        // 265
+    case elfcpp::R_AARCH64_MOVW_UABS_G1_NC:     // 266
+    case elfcpp::R_AARCH64_MOVW_UABS_G2:        // 267
+    case elfcpp::R_AARCH64_MOVW_UABS_G2_NC:     // 268
+    case elfcpp::R_AARCH64_MOVW_UABS_G3:        // 269
+    case elfcpp::R_AARCH64_MOVW_SABS_G0:        // 270
+    case elfcpp::R_AARCH64_MOVW_SABS_G1:        // 271
+    case elfcpp::R_AARCH64_MOVW_SABS_G2:        // 272
+      if (parameters->options().output_is_position_independent())
+	{
+	  gold_error(_("%s: unsupported reloc %u in pos independent link."),
+		     object->name().c_str(), r_type);
 	}
       break;
 
@@ -6991,6 +7025,23 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_PREL16:
       reloc_status = Reloc::template pcrela_ua<16>(
 	view, object, psymval, addend, address, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_MOVW_UABS_G0:
+    case elfcpp::R_AARCH64_MOVW_UABS_G0_NC:
+    case elfcpp::R_AARCH64_MOVW_UABS_G1:
+    case elfcpp::R_AARCH64_MOVW_UABS_G1_NC:
+    case elfcpp::R_AARCH64_MOVW_UABS_G2:
+    case elfcpp::R_AARCH64_MOVW_UABS_G2_NC:
+    case elfcpp::R_AARCH64_MOVW_UABS_G3:
+      reloc_status = Reloc::template rela_general<32>(
+	view, object, psymval, addend, reloc_property);
+      break;
+    case elfcpp::R_AARCH64_MOVW_SABS_G0:
+    case elfcpp::R_AARCH64_MOVW_SABS_G1:
+    case elfcpp::R_AARCH64_MOVW_SABS_G2:
+      reloc_status = Reloc::movnz(view, psymval->value(object, addend),
+				  reloc_property);
       break;
 
     case elfcpp::R_AARCH64_LD_PREL_LO19:

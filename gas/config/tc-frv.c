@@ -24,7 +24,6 @@
 #include "opcodes/frv-desc.h"
 #include "opcodes/frv-opc.h"
 #include "cgen.h"
-#include "libbfd.h"
 #include "elf/common.h"
 #include "elf/frv.h"
 #include "dwarf2dbg.h"

@@ -956,9 +956,8 @@ get_specific (opcode_entry_type *opcode, op_type *operands)
 static char buffer[20];
 
 static void
-newfix (int ptr, int type, int size, expressionS *operand)
+newfix (int ptr, bfd_reloc_code_real_type type, int size, expressionS *operand)
 {
-  int is_pcrel = 0;
   fixS *fixP;
 
   /* Size is in nibbles.  */
@@ -966,12 +965,17 @@ newfix (int ptr, int type, int size, expressionS *operand)
       || operand->X_op_symbol
       || operand->X_add_number)
     {
+      int is_pcrel;
       switch(type)
         {
         case BFD_RELOC_8_PCREL:
         case BFD_RELOC_Z8K_CALLR:
         case BFD_RELOC_Z8K_DISP7:
           is_pcrel = 1;
+	  break;
+	default:
+	  is_pcrel = 0;
+	  break;
         }
       fixP = fix_new_exp (frag_now, ptr, size / 2,
                           operand, is_pcrel, type);
@@ -981,7 +985,8 @@ newfix (int ptr, int type, int size, expressionS *operand)
 }
 
 static char *
-apply_fix (char *ptr, int type, expressionS *operand, int size)
+apply_fix (char *ptr, bfd_reloc_code_real_type type, expressionS *operand,
+	   int size)
 {
   long n = operand->X_add_number;
 

@@ -1,3 +1,8 @@
+2016-07-27  Alan Modra  <amodra@gmail.com>
+
+	* load.c: Don't include libbfd.h.
+	(rx_load): Don't use private iovec seek or read.
+
 2016-04-27  Nick Clifton  <nickc@redhat.com>
 
 	PR target/20000

@@ -50,6 +50,9 @@ typedef struct
   eventregistry_object *inferior_call;
   eventregistry_object *memory_changed;
   eventregistry_object *register_changed;
+  eventregistry_object *breakpoint_created;
+  eventregistry_object *breakpoint_deleted;
+  eventregistry_object *breakpoint_modified;
 
   PyObject *module;
 

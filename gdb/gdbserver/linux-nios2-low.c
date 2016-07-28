@@ -183,7 +183,7 @@ nios2_supply_register (struct regcache *regcache, int regno,
 static void
 nios2_fill_gregset (struct regcache *regcache, void *buf)
 {
-  union nios2_register *regset = buf;
+  union nios2_register *regset = (union nios2_register *) buf;
   int i;
 
   for (i = 1; i < nios2_num_regs; i++)
@@ -193,7 +193,7 @@ nios2_fill_gregset (struct regcache *regcache, void *buf)
 static void
 nios2_store_gregset (struct regcache *regcache, const void *buf)
 {
-  const union nios2_register *regset = buf;
+  const union nios2_register *regset = (union nios2_register *) buf;
   int i;
 
   for (i = 0; i < nios2_num_regs; i++)

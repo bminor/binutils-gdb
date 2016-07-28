@@ -26,7 +26,6 @@ fragment <<EOF
 
 #include <xtensa-config.h>
 #include "../bfd/elf-bfd.h"
-#include "../bfd/libbfd.h"
 #include "elf/xtensa.h"
 #include "bfd.h"
 
@@ -116,12 +115,7 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
 
   if (insn_sec->size != 0)
     {
-      insn_contents = (bfd_byte *) bfd_malloc (insn_sec->size);
-      if (insn_contents == NULL)
-	{
-	  *error_message = _("out of memory");
-	  goto cleanup;
-	}
+      insn_contents = (bfd_byte *) xmalloc (insn_sec->size);
       if (! bfd_get_section_contents (abfd, insn_sec, insn_contents,
 				      (file_ptr) 0, insn_sec->size))
 	{

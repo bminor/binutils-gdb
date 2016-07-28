@@ -1,3 +1,9 @@
+2016-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (Multiply64): Only issue error messages about invalid
+	arguments if debugging is enabled.
+	* armos.c (ARMul_OSHandleSWI): Ignore invalid flags.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

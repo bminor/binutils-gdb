@@ -45,8 +45,8 @@
 
 #define MAJOR_OPCODE(x)  (((x) & 0xF8000000) >> 27)
 #define SUB_OPCODE(x)	 (((x) & 0x003F0000) >> 16)
-#define LP_INSN(x)	 ((MAJOR_OPCODE (x) == 0x4) && \
-			  (SUB_OPCODE (x) == 0x28))
+#define LP_INSN(x)	 ((MAJOR_OPCODE (x) == 0x4) \
+			  && (SUB_OPCODE (x) == 0x28))
 
 /* Equal to MAX_PRECISION in atof-ieee.c.  */
 #define MAX_LITTLENUMS 6
@@ -102,7 +102,8 @@ enum arc_rlx_types
 #define is_spfp_p(op)           (((sc) == SPX))
 #define is_dpfp_p(op)           (((sc) == DPX))
 #define is_fpuda_p(op)          (((sc) == DPA))
-#define is_br_jmp_insn_p(op)    (((op)->insn_class == BRANCH || (op)->insn_class == JUMP))
+#define is_br_jmp_insn_p(op)    (((op)->insn_class == BRANCH \
+				  || (op)->insn_class == JUMP))
 #define is_kernel_insn_p(op)    (((op)->insn_class == KERNEL))
 #define is_nps400_p(op)         (((sc) == NPS400))
 
@@ -420,6 +421,9 @@ static struct hash_control *arc_reg_hash;
 /* The hash table of aux register symbols.  */
 static struct hash_control *arc_aux_hash;
 
+/* The hash table of address types.  */
+static struct hash_control *arc_addrtype_hash;
+
 /* A table of CPU names and opcode sets.  */
 static const struct cpu_type
 {
@@ -460,6 +464,12 @@ static const struct cpu_type
 
 /* Used to define a bracket as operand in tokens.  */
 #define O_bracket O_md32
+
+/* Used to define a colon as an operand in tokens.  */
+#define O_colon O_md31
+
+/* Used to define address types in nps400.  */
+#define O_addrtype O_md30
 
 /* Dummy relocation, to be sorted out.  */
 #define DUMMY_RELOC_ARC_ENTRY     (BFD_RELOC_UNUSED + 1)
@@ -502,7 +512,7 @@ static const struct arc_reloc_op_tag
   DEF (tpoff9,  BFD_RELOC_ARC_TLS_LE_S9,	0),
   DEF (tpoff,   BFD_RELOC_ARC_TLS_LE_32,	1),
   DEF (dtpoff9, BFD_RELOC_ARC_TLS_DTPOFF_S9,	0),
-  DEF (dtpoff,  BFD_RELOC_ARC_TLS_DTPOFF,	0),
+  DEF (dtpoff,  BFD_RELOC_ARC_TLS_DTPOFF,	1),
 };
 
 static const int arc_num_reloc_op
@@ -553,56 +563,56 @@ const relax_typeS md_relax_table[] =
 
   /* BL_S s13 ->
      BL s25.  */
-  RELAX_TABLE_ENTRY(13, 1, 2, ARC_RLX_BL),
-  RELAX_TABLE_ENTRY(25, 1, 4, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (13, 1, 2, ARC_RLX_BL),
+  RELAX_TABLE_ENTRY (25, 1, 4, ARC_RLX_NONE),
 
   /* B_S s10 ->
      B s25.  */
-  RELAX_TABLE_ENTRY(10, 1, 2, ARC_RLX_B),
-  RELAX_TABLE_ENTRY(25, 1, 4, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (10, 1, 2, ARC_RLX_B),
+  RELAX_TABLE_ENTRY (25, 1, 4, ARC_RLX_NONE),
 
   /* ADD_S c,b, u3 ->
      ADD<.f> a,b,u6 ->
      ADD<.f> a,b,limm.  */
-  RELAX_TABLE_ENTRY(3, 0, 2, ARC_RLX_ADD_U6),
-  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_ADD_LIMM),
-  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (3, 0, 2, ARC_RLX_ADD_U6),
+  RELAX_TABLE_ENTRY (6, 0, 4, ARC_RLX_ADD_LIMM),
+  RELAX_TABLE_ENTRY_MAX (0, 8, ARC_RLX_NONE),
 
   /* LD_S a, [b, u7] ->
      LD<zz><.x><.aa><.di> a, [b, s9] ->
      LD<zz><.x><.aa><.di> a, [b, limm] */
-  RELAX_TABLE_ENTRY(7, 0, 2, ARC_RLX_LD_S9),
-  RELAX_TABLE_ENTRY(9, 1, 4, ARC_RLX_LD_LIMM),
-  RELAX_TABLE_ENTRY_MAX(1, 8, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (7, 0, 2, ARC_RLX_LD_S9),
+  RELAX_TABLE_ENTRY (9, 1, 4, ARC_RLX_LD_LIMM),
+  RELAX_TABLE_ENTRY_MAX (1, 8, ARC_RLX_NONE),
 
   /* MOV_S b, u8 ->
      MOV<.f> b, s12 ->
      MOV<.f> b, limm.  */
-  RELAX_TABLE_ENTRY(8, 0, 2, ARC_RLX_MOV_S12),
-  RELAX_TABLE_ENTRY(8, 0, 4, ARC_RLX_MOV_LIMM),
-  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (8, 0, 2, ARC_RLX_MOV_S12),
+  RELAX_TABLE_ENTRY (8, 0, 4, ARC_RLX_MOV_LIMM),
+  RELAX_TABLE_ENTRY_MAX (0, 8, ARC_RLX_NONE),
 
   /* SUB_S c, b, u3 ->
      SUB<.f> a, b, u6 ->
      SUB<.f> a, b, limm.  */
-  RELAX_TABLE_ENTRY(3, 0, 2, ARC_RLX_SUB_U6),
-  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_SUB_LIMM),
-  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (3, 0, 2, ARC_RLX_SUB_U6),
+  RELAX_TABLE_ENTRY (6, 0, 4, ARC_RLX_SUB_LIMM),
+  RELAX_TABLE_ENTRY_MAX (0, 8, ARC_RLX_NONE),
 
   /* MPY<.f> a, b, u6 ->
      MPY<.f> a, b, limm.  */
-  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_MPY_LIMM),
-  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (6, 0, 4, ARC_RLX_MPY_LIMM),
+  RELAX_TABLE_ENTRY_MAX (0, 8, ARC_RLX_NONE),
 
   /* MOV<.f><.cc> b, u6 ->
      MOV<.f><.cc> b, limm.  */
-  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_MOV_RLIMM),
-  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (6, 0, 4, ARC_RLX_MOV_RLIMM),
+  RELAX_TABLE_ENTRY_MAX (0, 8, ARC_RLX_NONE),
 
   /* ADD<.f><.cc> b, b, u6 ->
      ADD<.f><.cc> b, b, limm.  */
-  RELAX_TABLE_ENTRY(6, 0, 4, ARC_RLX_ADD_RRLIMM),
-  RELAX_TABLE_ENTRY_MAX(0, 8, ARC_RLX_NONE),
+  RELAX_TABLE_ENTRY (6, 0, 4, ARC_RLX_ADD_RRLIMM),
+  RELAX_TABLE_ENTRY_MAX (0, 8, ARC_RLX_NONE),
 };
 
 /* Order of this table's entries matters!  */
@@ -979,6 +989,8 @@ debug_exp (expressionS *t)
     case O_logical_or:		name = "O_logical_or";		break;
     case O_index:		name = "O_index";		break;
     case O_bracket:		name = "O_bracket";		break;
+    case O_colon:		name = "O_colon";               break;
+    case O_addrtype:		name = "O_addrtype";            break;
     }
 
   switch (t->X_md)
@@ -1066,6 +1078,16 @@ tokenize_arguments (char *str,
 	  ++tok;
 	  ++num_args;
 	  break;
+
+        case ':':
+          input_line_pointer++;
+          if (!saw_arg || num_args == ntok)
+            goto err;
+          tok->X_op = O_colon;
+          saw_arg = FALSE;
+          ++tok;
+          ++num_args;
+          break;
 
 	case '@':
 	  /* We have labels, function names and relocations, all
@@ -1693,8 +1715,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	  const struct arc_operand *operand = &arc_operands[*opidx];
 
 	  /* Only take input from real operands.  */
-	  if ((operand->flags & ARC_OPERAND_FAKE)
-	      && !(operand->flags & ARC_OPERAND_BRAKET))
+	  if (ARC_OPERAND_IS_FAKE (operand))
 	    continue;
 
 	  /* When we expect input, make sure we have it.  */
@@ -1704,6 +1725,12 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	  /* Match operand type with expression type.  */
 	  switch (operand->flags & ARC_OPERAND_TYPECHECK_MASK)
 	    {
+            case ARC_OPERAND_ADDRTYPE:
+              /* Check to be an address type.  */
+              if (tok[tokidx].X_op != O_addrtype)
+                goto match_failed;
+              break;
+
 	    case ARC_OPERAND_IR:
 	      /* Check to be a register.  */
 	      if ((tok[tokidx].X_op != O_register
@@ -1754,6 +1781,12 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	      if (tok[tokidx].X_op != O_bracket)
 		goto match_failed;
 	      break;
+
+            case ARC_OPERAND_COLON:
+              /* Check if colon is also in opcode table as operand.  */
+              if (tok[tokidx].X_op != O_colon)
+                goto match_failed;
+              break;
 
 	    case ARC_OPERAND_LIMM:
 	    case ARC_OPERAND_SIGNED:
@@ -2010,8 +2043,9 @@ pseudo_operand_match (const expressionS *tok,
 
     case O_symbol:
       /* Handle all symbols as long immediates or signed 9.  */
-      if (operand_real->flags & ARC_OPERAND_LIMM ||
-	  ((operand_real->flags & ARC_OPERAND_SIGNED) && operand_real->bits == 9))
+      if (operand_real->flags & ARC_OPERAND_LIMM
+	  || ((operand_real->flags & ARC_OPERAND_SIGNED)
+	      && operand_real->bits == 9))
 	ret = TRUE;
       break;
 
@@ -2094,8 +2128,8 @@ find_special_case_pseudo (const char *opname,
       operand_pseudo = &pseudo_insn->operand[i];
       operand_real = &arc_operands[operand_pseudo->operand_idx];
 
-      if (operand_real->flags & ARC_OPERAND_BRAKET &&
-	  !operand_pseudo->needs_insert)
+      if (operand_real->flags & ARC_OPERAND_BRAKET
+	  && !operand_pseudo->needs_insert)
 	continue;
 
       /* Has to be inserted (i.e. this token does not exist yet).  */
@@ -2461,6 +2495,22 @@ declare_register_set (void)
     }
 }
 
+/* Construct a symbol for an address type.  */
+
+static void
+declare_addrtype (const char *name, int number)
+{
+  const char *err;
+  symbolS *addrtypeS = symbol_create (name, undefined_section,
+                                      number, &zero_address_frag);
+
+  err = hash_insert (arc_addrtype_hash, S_GET_NAME (addrtypeS),
+                     (void *) addrtypeS);
+  if (err)
+    as_fatal (_("Inserting \"%s\" into address type table failed: %s"),
+              name, err);
+}
+
 /* Port-specific assembler initialization.  This function is called
    once, at assembler startup time.  */
 
@@ -2575,6 +2625,28 @@ md_begin (void)
 	as_fatal (_("internal error: can't hash aux register '%s': %s"),
 		  auxr->name, retval);
     }
+
+  /* Address type declaration.  */
+  arc_addrtype_hash = hash_new ();
+  if (arc_addrtype_hash == NULL)
+    as_fatal (_("Virtual memory exhausted"));
+
+  declare_addrtype ("bd", ARC_NPS400_ADDRTYPE_BD);
+  declare_addrtype ("jid", ARC_NPS400_ADDRTYPE_JID);
+  declare_addrtype ("lbd", ARC_NPS400_ADDRTYPE_LBD);
+  declare_addrtype ("mbd", ARC_NPS400_ADDRTYPE_MBD);
+  declare_addrtype ("sd", ARC_NPS400_ADDRTYPE_SD);
+  declare_addrtype ("sm", ARC_NPS400_ADDRTYPE_SM);
+  declare_addrtype ("xa", ARC_NPS400_ADDRTYPE_XA);
+  declare_addrtype ("xd", ARC_NPS400_ADDRTYPE_XD);
+  declare_addrtype ("cd", ARC_NPS400_ADDRTYPE_CD);
+  declare_addrtype ("cbd", ARC_NPS400_ADDRTYPE_CBD);
+  declare_addrtype ("cjid", ARC_NPS400_ADDRTYPE_CJID);
+  declare_addrtype ("clbd", ARC_NPS400_ADDRTYPE_CLBD);
+  declare_addrtype ("cm", ARC_NPS400_ADDRTYPE_CM);
+  declare_addrtype ("csd", ARC_NPS400_ADDRTYPE_CSD);
+  declare_addrtype ("cxa", ARC_NPS400_ADDRTYPE_CXA);
+  declare_addrtype ("cxd", ARC_NPS400_ADDRTYPE_CXD);
 }
 
 /* Write a value out to the object file, using the appropriate
@@ -3130,28 +3202,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
 
   gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-  if (code == BFD_RELOC_ARC_TLS_DTPOFF
-      || code ==  BFD_RELOC_ARC_TLS_DTPOFF_S9)
-    {
-      asymbol *sym
-	= fixP->fx_subsy ? symbol_get_bfdsym (fixP->fx_subsy) : NULL;
-      /* We just want to store a 24 bit index, but we have to wait
-	 till after write_contents has been called via
-	 bfd_map_over_sections before we can get the index from
-	 _bfd_elf_symbol_from_bfd_symbol.  Thus, the write_relocs
-	 function is elf32-arc.c has to pick up the slack.
-	 Unfortunately, this leads to problems with hosts that have
-	 pointers wider than long (bfd_vma).  There would be various
-	 ways to handle this, all error-prone :-(  */
-      reloc->addend = (bfd_vma) sym;
-      if ((asymbol *) reloc->addend != sym)
-	{
-	  as_bad ("Can't store pointer\n");
-	  return NULL;
-	}
-    }
-  else
-    reloc->addend = fixP->fx_offset;
+  reloc->addend = fixP->fx_offset;
 
   return reloc;
 }
@@ -3275,7 +3326,7 @@ arc_parse_name (const char *name,
   if (!assembling_insn)
     return FALSE;
 
-  /* Handle only registers.  */
+  /* Handle only registers and address types.  */
   if (e->X_op != O_absent)
     return FALSE;
 
@@ -3286,6 +3337,15 @@ arc_parse_name (const char *name,
       e->X_add_number = S_GET_VALUE (sym);
       return TRUE;
     }
+
+  sym = hash_find (arc_addrtype_hash, name);
+  if (sym)
+    {
+      e->X_op = O_addrtype;
+      e->X_add_number = S_GET_VALUE (sym);
+      return TRUE;
+    }
+
   return FALSE;
 }
 
@@ -3747,8 +3807,7 @@ assemble_insn (const struct arc_opcode *opcode,
       const struct arc_operand *operand = &arc_operands[*argidx];
       const expressionS *t = (const expressionS *) 0;
 
-      if ((operand->flags & ARC_OPERAND_FAKE)
-	  && !(operand->flags & ARC_OPERAND_BRAKET))
+      if (ARC_OPERAND_IS_FAKE (operand))
 	continue;
 
       if (operand->flags & ARC_OPERAND_DUPLICATE)
@@ -3785,7 +3844,9 @@ assemble_insn (const struct arc_opcode *opcode,
 	  break;
 
 	case O_bracket:
-	  /* Ignore brackets.  */
+        case O_colon:
+        case O_addrtype:
+	  /* Ignore brackets, colons, and address types.  */
 	  break;
 
 	case O_absent:

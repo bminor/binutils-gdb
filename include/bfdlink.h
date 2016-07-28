@@ -108,6 +108,9 @@ struct bfd_link_hash_entry
      in a linker script.  */
   unsigned int linker_def : 1;
 
+  /* Symbol defined in a linker script.  */
+  unsigned int ldscript_def : 1;
+
   /* A union of information depending upon the type.  */
   union
     {
@@ -531,6 +534,9 @@ struct bfd_link_info
 
   /* The output BFD.  */
   bfd *output_bfd;
+
+  /* The import library generated.  */
+  bfd *out_implib_bfd;
 
   /* The list of input BFD's involved in the link.  These are chained
      together via the link.next field.  */

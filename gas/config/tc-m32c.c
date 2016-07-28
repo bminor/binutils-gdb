@@ -27,7 +27,6 @@
 #include "cgen.h"
 #include "elf/common.h"
 #include "elf/m32c.h"
-#include "libbfd.h"
 #include "safe-ctype.h"
 
 /* Structure to hold all of the different components

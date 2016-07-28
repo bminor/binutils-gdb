@@ -2368,7 +2368,6 @@ parse_partial_symbols (struct objfile *objfile)
   SYMR sh;
   struct partial_symtab *pst;
   int textlow_not_set = 1;
-  int past_first_source_file = 0;
 
   /* List of current psymtab's include files.  */
   const char **psymtab_include_list;
@@ -2957,16 +2956,8 @@ parse_partial_symbols (struct objfile *objfile)
 
 		  case N_SO:
 		    {
-		      CORE_ADDR valu;
 		      static int prev_so_symnum = -10;
-		      static int first_so_symnum;
 		      const char *p;
-		      int prev_textlow_not_set;
-
-		      valu = sh.value + ANOFFSET (objfile->section_offsets,
-						  SECT_OFF_TEXT (objfile));
-
-		      prev_textlow_not_set = textlow_not_set;
 
 		      /* A zero value is probably an indication for the
 			 SunPRO 3.0 compiler.  dbx_end_psymtab explicitly tests
@@ -2974,19 +2965,12 @@ parse_partial_symbols (struct objfile *objfile)
 
 		      if (sh.value == 0
 			  && gdbarch_sofun_address_maybe_missing (gdbarch))
-			{
-			  textlow_not_set = 1;
-			  valu = 0;
-			}
+			textlow_not_set = 1;
 		      else
 			textlow_not_set = 0;
 
-		      past_first_source_file = 1;
-
 		      if (prev_so_symnum != symnum - 1)
 			{		/* Here if prev stab wasn't N_SO.  */
-			  first_so_symnum = symnum;
-
 			  if (pst)
 			    {
 			      pst = (struct partial_symtab *) 0;

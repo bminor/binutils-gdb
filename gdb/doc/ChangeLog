@@ -1,3 +1,39 @@
+2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* gdb.texinfo: Resume btrace on reconnect.
+
+2016-07-23  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* gdb.texinfo (Set Catchpoints): Add 'group' argument to catch
+	syscall.
+
+2016-06-30  Руслан Ижбулатов  <lrn1986@gmail.com>
+
+	* gdb.texinfo (Cygwin Native): Document the new 'signal-event'
+	command.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR python/15620, PR python/18620:
+	* python.texi (Events In Python): Document new breakpoint events.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR python/17698:
+	* python.texi (Breakpoints In Python): Document
+	Breakpoint.pending.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Breakpoints In Python): Move table of types and
+	table of watchpoint types earlier in node.
+
+2016-07-12  Tom Tromey  <tom@tromey.com>
+
+	PR python/19293:
+	* python.texi (Frames In Python): Document
+	gdb.invalidate_cached_frames.
+
 2016-06-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Interpreters): Update intepreter-exec section,
@@ -11702,4 +11738,5 @@ mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never
+coding: utf-8
 End:

@@ -89,6 +89,17 @@ gdbpy_initialize_py_events (void)
   if (add_new_registry (&gdb_py_events.clear_objfiles, "clear_objfiles") < 0)
     return -1;
 
+  if (add_new_registry (&gdb_py_events.breakpoint_created,
+			"breakpoint_created") < 0)
+    return -1;
+
+  if (add_new_registry (&gdb_py_events.breakpoint_deleted,
+			"breakpoint_deleted") < 0)
+    return -1;
+  if (add_new_registry (&gdb_py_events.breakpoint_modified,
+			"breakpoint_modified") < 0)
+    return -1;
+
   if (gdb_pymodule_addobject (gdb_module,
 			      "events",
 			      (PyObject *) gdb_py_events.module) < 0)

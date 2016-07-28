@@ -233,7 +233,6 @@ elf_symtab_read (struct objfile *objfile, int type,
   asymbol *sym;
   long i;
   CORE_ADDR symaddr;
-  CORE_ADDR offset;
   enum minimal_symbol_type ms_type;
   /* Name of the last file symbol.  This is either a constant string or is
      saved on the objfile's filename cache.  */
@@ -263,8 +262,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 	  continue;
 	}
 
-      offset = ANOFFSET (objfile->section_offsets,
-			 gdb_bfd_section_index (objfile->obfd, sym->section));
       if (type == ST_DYNAMIC
 	  && sym->section == bfd_und_section_ptr
 	  && (sym->flags & BSF_FUNCTION))

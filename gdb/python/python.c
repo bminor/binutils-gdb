@@ -885,6 +885,15 @@ gdbpy_find_pc_line (PyObject *self, PyObject *args)
   return result;
 }
 
+/* Implementation of gdb.invalidate_cached_frames.  */
+
+static PyObject *
+gdbpy_invalidate_cached_frames (PyObject *self, PyObject *args)
+{
+  reinit_frame_cache ();
+  Py_RETURN_NONE;
+}
+
 /* Read a file as Python code.
    This is the extension_language_script_ops.script_sourcer "method".
    FILE is the file to load.  FILENAME is name of the file FILE.
@@ -2071,6 +2080,12 @@ Return the selected inferior object." },
   { "inferiors", gdbpy_inferiors, METH_NOARGS,
     "inferiors () -> (gdb.Inferior, ...).\n\
 Return a tuple containing all inferiors." },
+
+  { "invalidate_cached_frames", gdbpy_invalidate_cached_frames, METH_NOARGS,
+    "invalidate_cached_frames () -> None.\n\
+Invalidate any cached frame objects in gdb.\n\
+Intended for internal use only." },
+
   {NULL, NULL, 0, NULL}
 };
 

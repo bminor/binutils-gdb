@@ -1,4 +1,4 @@
-/****                  Bit Manipulation Instructions                  ****/
+/* Bit Manipulation Instructions.  */
 
 /* movl<.cl> */
 { "movh", 0x48080000, 0xf81f0000, ARC_OPCODE_ARC700, BITOP, NPS400, { NPS_R_DST, NPS_R_SRC1, NPS_UIMM16 }, { 0 }},
@@ -148,7 +148,7 @@
 /* crc32<.r> 0,limm,u6		00111 110 01 110100 R 111 uuuuuu 111110 */
 { "crc32", 0x3e74703e, 0xffff703f, ARC_OPCODE_ARC700, BITOP, NPS400, { ZA, LIMM, UIMM6_20 }, { C_NPS_R }},
 
-/****                 Arithmetic & Logic Instructions                 ****/
+/* Arithmetic & Logic Instructions.  */
 
 #define ADDB_LIKE(NAME,SUBOP2)                                          \
   { NAME, (0x48000000 | SUBOP2), 0xf80f001f, ARC_OPCODE_ARC700, ARITH, NPS400, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_SRC1_POS, NPS_SRC2_POS, NPS_ADDB_SIZE }, { C_NPS_F, C_NPS_SX }},
@@ -367,7 +367,7 @@ ADDL_LIKE ("xorl", 0xE, NPS_UIMM16)
 /* hofs a,b,min_hofs,psbc */
 { "hofs", 0x38760000, 0xf8ff0000, ARC_OPCODE_ARC700, ARITH, NPS400, { RA, RB, NPS_MIN_HOFS, NPS_PSBC }, { C_F }},
 
-/****                  Protocol Decoder Instructions                  ****/
+/* Protocol Decoder Instructions.  */
 
 /* dctcp b,c  00111bbb001011110bbbcccccc000000 */
 { "dctcp", 0x382f0000, 0xf8ff803f, ARC_OPCODE_ARC700, NET, NPS400, { RB, RC }, { 0 }},
@@ -381,12 +381,12 @@ ADDL_LIKE ("xorl", 0xE, NPS_UIMM16)
 /* dcet a,b,c  00111bbb001000000bbbccccccaaaaaa */
 { "dcet", 0x38200000, 0xf8ff8000, ARC_OPCODE_ARC700, NET, NPS400, { RA, RB, RC }, { 0 }},
 
-/****                        ACL Instructions                         ****/
+/* ACL Instructions.  */
 
 /* dcacl<.f> a,b,c  00111bbb001001010bbbccccccaaaaaa */
 { "dcacl", 0x38250000, 0xf8ff0000, ARC_OPCODE_ARC700, ACL, NPS400, { RA, RB, RC }, { C_F }},
 
-/****                        DPI Instructions                         ****/
+/* DPI Instructions.  */
 
 /* hash dst,src1,src2,width,perm,nonlinear,basemat */
 { "hash", 0x58180000, 0xf81f0000, ARC_OPCODE_ARC700, DPI, NPS400, { NPS_DPI_DST, NPS_DPI_SRC1_3B, NPS_R_SRC2_3B, NPS_HASH_WIDTH, NPS_HASH_PERM, NPS_HASH_NONLINEAR, NPS_HASH_BASEMAT }, { 0 }},
@@ -524,7 +524,7 @@ HASH_P(3, 0xC)
 /* ldbit<.x2|.x4>.di<.cl> a,[limm,c]  001001100011011X1111CCCCCCAAAAAA */
 { "ldbit", 0x2636f000, 0xff3ef000, ARC_OPCODE_ARC700, DPI, NPS400, { RA, BRAKET, LIMM, RC, BRAKETdup }, { C_NPS_LDBIT_X_2, C_NPS_LDBIT_DI, C_NPS_LDBIT_CL2 }},
 
-/****                  Pipeline Control Instructions                  ****/
+/* Pipeline Control Instructions.  */
 
 /* schd<.rw|.rd> */
 { "schd", 0x3e6f7004, 0xffffff7f, ARC_OPCODE_ARC700, CONTROL, NPS400, { 0 }, { C_NPS_SCHD_RW }},
@@ -541,7 +541,7 @@ HASH_P(3, 0xC)
 /* hwscd.restore 0,C */
 { "hwschd", 0x3e6f7003, 0xfffff03f, ARC_OPCODE_ARC700, CONTROL, NPS400, { ZA, RC }, { C_NPS_HWS_RESTORE }},
 
-/****      Load / Store From (0x57f00000 + Offset) Instructions       ****/
+/* Load / Store From (0x57f00000 + Offset) Instructions.  */
 
 #define XLDST_LIKE(NAME,SUBOP2)                                          \
   { NAME, (0x58000000 | (SUBOP2 << 16)), 0xf81f0000, ARC_OPCODE_ARC700, MEMORY, NPS400, { NPS_R_DST, BRAKET, NPS_XLDST_UIMM16, BRAKETdup }, { 0 }},
@@ -552,3 +552,99 @@ XLDST_LIKE("xld", 0xa)
 XLDST_LIKE("xstb", 0xc)
 XLDST_LIKE("xstw", 0xd)
 XLDST_LIKE("xst", 0xe)
+
+/* BMU Instructions.  */
+
+/* sbdalc dst, src1, type */
+{ "sbdalc", 0x38500040, 0xf8ff09c0, ARC_OPCODE_ARC700, BMU, NPS400, { RA, RB, NPS_BD_TYPE }, { 0 }},
+
+/* bdalc dst, [cm:src1], src1, src2 */
+{ "bdalc", 0x38100000, 0xf8ff0000, ARC_OPCODE_ARC700, BMU, NPS400, { RA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup,  RC }, { 0 }},
+
+/* bdalc dst, [cm:src1], src1, type, num_buff */
+{ "bdalc", 0x38500800, 0xf8ff0800, ARC_OPCODE_ARC700, BMU, NPS400, { RA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, NPS_BD_TYPE, NPS_BMU_NUM }, { 0 }},
+
+/* sbdfre 0, src1, src2 */
+{ "sbdfre", 0x3817003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, RC }, { 0 }},
+
+/* bdfre 0, [cm:src1], src1, src2 */
+{ "bdfre", 0x3811003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, RC }, { 0 }},
+
+/* bdfre 0, [cm:src1], src1, type, num_buff */
+{ "bdfre", 0x3851083e, 0xf8ff083f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, NPS_BD_TYPE, NPS_BMU_NUM }, { 0 }},
+
+/* bdfre 0, [cm:src1], src1, num_buff */
+{ "bdfre", 0x3851003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, NPS_BMU_NUM }, { 0 }},
+
+/* bdbgt 0, src1, src2 */
+{ "bdbgt", 0x3818003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, RC }, { 0 }},
+
+/* sidxalc dst, src1 */
+{ "sidxalc", 0x385c0040, 0xf8ff0040, ARC_OPCODE_ARC700, BMU, NPS400, { RA, RB }, { 0 }},
+
+/* idxalc dst, [cm:src1], src1, src2 */
+{ "idxalc", 0x381c0000, 0xf8ff0000, ARC_OPCODE_ARC700, BMU, NPS400, { RA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, RC }, { 0 }},
+
+/* idxalc dst, [cm:src1], src1, num_idx */
+{ "idxalc", 0x385c0800, 0xf8ff0800, ARC_OPCODE_ARC700, BMU, NPS400, { RA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, NPS_BMU_NUM }, { 0 }},
+
+/* sidxfre 0, src1, src2 */
+{ "sidxfre", 0x381d003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, RC }, { 0 }},
+
+/* idxfre 0, [cm:src1], src1, src2 */
+{ "idxfre", 0x381e003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, RC }, { 0 }},
+
+/* idxfre 0, [cm:src1], src1, num_buff */
+{ "idxfre", 0x385e003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, NPS_BMU_NUM }, { 0 }},
+
+/* idxbgt 0, src1, src2 */
+{ "idxbgt", 0x3819003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, RC }, { 0 }},
+
+/* efabgt 0, limm, src2 */
+{ "efabgt", 0x3e0d703e, 0xfffff03f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, LIMM, RC }, { 0 }},
+
+/* efabgt 0, src1, limm */
+{ "efabgt", 0x380d0fbe, 0xf8ff80ff, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, LIMM }, { 0 }},
+
+/* efabgt 0, src1, src2 */
+{ "efabgt", 0x380d003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, RC }, { 0 }},
+
+/* efabgt dst, limm, src2 */
+{ "efabgt", 0x3e0d7000, 0xfffff000, ARC_OPCODE_ARC700, BMU, NPS400, { RA, LIMM, RC }, { 0 }},
+
+/* efabgt dst, src1, limm */
+{ "efabgt", 0x380d0f80, 0xf8ff0fc0, ARC_OPCODE_ARC700, BMU, NPS400, { RA, RB, LIMM }, { 0 }},
+
+/* efabgt dst, src1, src2 */
+{ "efabgt", 0x380d0000, 0xf8ff8000, ARC_OPCODE_ARC700, BMU, NPS400, { RA, RB, RC }, { 0 }},
+
+/* PMU Instructions. */
+
+/* jobget<.cl> 0, [cjid:src1] */
+{ "jobget", 0x3e2f7020, 0xfffff03f, ARC_OPCODE_ARC700, PMU, NPS400, { ZA, BRAKET, NPS_CJID, COLON, RC, BRAKET }, { 0 }},
+
+{ "jobget", 0x3e2f7021, 0xfffff03f, ARC_OPCODE_ARC700, PMU, NPS400, { ZA, BRAKET, NPS_CJID, COLON, RC, BRAKET }, { C_NPS_CL }},
+
+/* jobdn 0, [cjid:src1], src1, src2 */
+{ "jobdn", 0x3812003e, 0xf8ff803f, ARC_OPCODE_ARC700, PMU, NPS400, { ZA, BRAKET, NPS_CJID, COLON, RB, BRAKETdup, RBdup, RC }, { 0 }},
+
+/* jobdn 0, [cjid:src1], src1, nxt_dst */
+{ "jobdn", 0x3852003e, 0xf8ff803f, ARC_OPCODE_ARC700, PMU, NPS400, { ZA, BRAKET, NPS_CJID, COLON, RB, BRAKETdup, RBdup, NPS_PMU_NXT_DST }, { 0 }},
+
+/* sjobalc dst, src1 */
+{ "sjobalc", 0x385f0040, 0xf8ff8fc0, ARC_OPCODE_ARC700, PMU, NPS400, { RA, RB }, { 0 }},
+
+/* jobalc dst, [cm:src1], src1, num_job */
+{ "jobalc", 0x385f0800, 0xf8ff8800, ARC_OPCODE_ARC700, PMU, NPS400, { RA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, NPS_PMU_NUM_JOB }, { 0 }},
+
+/* jobalc dst, [cm:src1], src1, src2 */
+{ "jobalc", 0x381f0000, 0xf8ff8000, ARC_OPCODE_ARC700, PMU, NPS400, { RA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RBdup, RC }, { 0 }},
+
+/* jobbgt dst, src1, src2 */
+{ "jobbgt", 0x381a0000, 0xf8ff0000, ARC_OPCODE_ARC700, PMU, NPS400, { RA, RB, RC }, { 0 }},
+
+/* cnljob 0 */
+{ "cnljob", 0x3e6f70ff, 0xffffffff, ARC_OPCODE_ARC700, PMU, NPS400, { ZA }, { 0 }},
+
+/* qseq dst, [src1] */
+{ "qseq", 0x386f0028, 0xf8ff803f, ARC_OPCODE_ARC700, PMU, NPS400, { RB, BRAKET, RC, BRAKETdup }, { 0 }},

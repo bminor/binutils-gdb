@@ -22,7 +22,6 @@
 #include "as.h"
 
 #include "bfin-aux.h"  /* Opcode generating auxiliaries.  */
-#include "libbfd.h"
 #include "elf/common.h"
 #include "elf/bfin.h"
 

@@ -35,13 +35,15 @@ if [info exists COMPILE] {
     # make check RUNTESTFLAGS="gdb.btrace/tailcall-only.exp COMPILE=1"
     standard_testfile tailcall-only.c
     lappend opts debug optimize=-O2
-} elseif {[istarget "x86_64-*-*"]} {
-	standard_testfile x86_64-tailcall-only.S
-} elseif {[istarget "i?86-*-*"]} {
-	standard_testfile i686-tailcall-only.S
+} elseif {[istarget "i?86-*-*"] || [istarget "x86_64-*-*"]} {
+	if {[is_amd64_regs_target]} {
+		standard_testfile x86_64-tailcall-only.S
+	} else {
+		standard_testfile i686-tailcall-only.S
+	}
 } else {
     verbose "Skipping ${testfile}."
-    return
+    return -1
 }
 
 if [prepare_for_testing tailcall-only.exp $testfile $srcfile $opts] {

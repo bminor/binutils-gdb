@@ -386,7 +386,7 @@ run_cc_link_tests [list \
     ] \
 ]
 
-run_ld_link_exec_tests [] [list \
+run_ld_link_exec_tests [list \
     [list \
 	"Common symbol override ifunc test 1a" \
 	"-static" \
@@ -430,7 +430,7 @@ run_cc_link_tests [list \
     ] \
 ]
 
-run_ld_link_exec_tests [] [list \
+run_ld_link_exec_tests [list \
     [list \
 	"Run pr16467" \
 	"tmpdir/pr16467c.o tmpdir/libpr16467b.so tmpdir/libpr16467a.so" \
@@ -531,7 +531,7 @@ run_cc_link_tests [list \
     ] \
 ]
 
-run_ld_link_exec_tests [] [list \
+run_ld_link_exec_tests [list \
     [list \
 	"Run pr18808" \
 	"tmpdir/pr18808a.o tmpdir/libpr18808.so" \

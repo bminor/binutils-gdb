@@ -1815,29 +1815,28 @@ bfd_target_list (void)
 
 /*
 FUNCTION
-	bfd_seach_for_target
+	bfd_iterate_over_targets
 
 SYNOPSIS
-	const bfd_target *bfd_search_for_target
-	  (int (*search_func) (const bfd_target *, void *),
-	   void *);
+	const bfd_target *bfd_iterate_over_targets
+	  (int (*func) (const bfd_target *, void *),
+	   void *data);
 
 DESCRIPTION
-	Return a pointer to the first transfer vector in the list of
-	transfer vectors maintained by BFD that produces a non-zero
-	result when passed to the function @var{search_func}.  The
-	parameter @var{data} is passed, unexamined, to the search
-	function.
+	Call @var{func} for each target in the list of BFD target
+	vectors, passing @var{data} to @var{func}.  Stop iterating if
+	@var{func} returns a non-zero result, and return that target
+	vector.  Return NULL if @var{func} always returns zero.
 */
 
 const bfd_target *
-bfd_search_for_target (int (*search_func) (const bfd_target *, void *),
-		       void *data)
+bfd_iterate_over_targets (int (*func) (const bfd_target *, void *),
+			  void *data)
 {
-  const bfd_target * const *target;
+  const bfd_target *const *target;
 
-  for (target = bfd_target_vector; *target != NULL; target ++)
-    if (search_func (*target, data))
+  for (target = bfd_target_vector; *target != NULL; ++target)
+    if (func (*target, data))
       return *target;
 
   return NULL;

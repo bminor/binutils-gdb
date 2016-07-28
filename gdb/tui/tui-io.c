@@ -172,9 +172,9 @@ tui_puts (const char *string)
 	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
 	  if (c == '\t')
 	    {
-	      int line, col;
+	      int col;
 
-	      getyx (w, line, col);
+	      col = getcurx (w);
 	      do
 		{
 		  waddch (w, ' ');
@@ -198,7 +198,7 @@ tui_redisplay_readline (void)
 {
   int prev_col;
   int height;
-  int col, line;
+  int col;
   int c_pos;
   int c_line;
   int in;
@@ -230,7 +230,7 @@ tui_redisplay_readline (void)
   for (in = 0; prompt && prompt[in]; in++)
     {
       waddch (w, prompt[in]);
-      getyx (w, line, col);
+      col = getcurx (w);
       if (col <= prev_col)
         height++;
       prev_col = col;
@@ -256,7 +256,7 @@ tui_redisplay_readline (void)
       else if (c == '\t')
 	{
 	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
-	  getyx (w, line, col);
+	  col = getcurx (w);
 	  do
 	    {
 	      waddch (w, ' ');
@@ -269,7 +269,7 @@ tui_redisplay_readline (void)
 	}
       if (c == '\n')
 	TUI_CMD_WIN->detail.command_info.start_line = getcury (w);
-      getyx (w, line, col);
+      col = getcurx (w);
       if (col < prev_col)
         height++;
       prev_col = col;

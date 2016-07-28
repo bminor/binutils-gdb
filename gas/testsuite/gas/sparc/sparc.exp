@@ -86,6 +86,7 @@ if [istarget sparc*-*-*] {
     run_dump_test "pause"
     run_dump_test "cfr"
     run_dump_test "ldtw_sttw"
+    run_dump_test "ldtxa"
     run_dump_test "ldd_std"
     run_dump_test "ldx_stx"
     run_dump_test "ldx_efsr"

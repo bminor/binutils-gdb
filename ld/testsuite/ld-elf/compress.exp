@@ -112,7 +112,7 @@ set run_tests {
 }
 
 run_cc_link_tests $build_tests
-run_ld_link_exec_tests [] $run_tests
+run_ld_link_exec_tests $run_tests
 
 set test_name "Link with zlib-gabi compressed debug input"
 send_log "cmp tmpdir/libfoo.so tmpdir/libfoozlib.so\n"

@@ -36,6 +36,7 @@
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "bucomm.h"
+#include "plugin-api.h"
 #include "plugin.h"
 
 /* When sorting by size, we use this structure to hold the size and a

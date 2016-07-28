@@ -158,49 +158,50 @@ bfd_plugin_set_program_name (const char *program_name)
   plugin_program_name = program_name;
 }
 
+int
+bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
+{
+  bfd *iobfd;
+
+  iobfd = ibfd;
+  if (ibfd->my_archive && !bfd_is_thin_archive (ibfd->my_archive))
+    iobfd = ibfd->my_archive;
+  file->name = iobfd->filename;
+
+  if (!iobfd->iostream && !bfd_open_file (iobfd))
+    return 0;
+
+  file->fd = fileno ((FILE *) iobfd->iostream);
+
+  if (iobfd == ibfd)
+    {
+      struct stat stat_buf;
+      if (fstat (file->fd, &stat_buf))
+        return 0;
+      file->offset = 0;
+      file->filesize = stat_buf.st_size;
+    }
+  else
+    {
+      file->offset = ibfd->origin;
+      file->filesize = arelt_size (ibfd);
+    }
+  return 1;
+}
+
 static int
 try_claim (bfd *abfd)
 {
   int claimed = 0;
   struct ld_plugin_input_file file;
-  bfd *iobfd;
 
-  file.name = abfd->filename;
-
-  if (abfd->my_archive && !bfd_is_thin_archive (abfd->my_archive))
-    {
-      iobfd = abfd->my_archive;
-      file.offset = abfd->origin;
-      file.filesize = arelt_size (abfd);
-    }
-  else
-    {
-      iobfd = abfd;
-      file.offset = 0;
-      file.filesize = 0;
-    }
-
-  if (!iobfd->iostream && !bfd_open_file (iobfd))
+  if (!bfd_plugin_open_input (abfd, &file))
     return 0;
-
-  file.fd = fileno ((FILE *) iobfd->iostream);
-
-  if (!abfd->my_archive || bfd_is_thin_archive (abfd->my_archive))
-    {
-      struct stat stat_buf;
-      if (fstat (file.fd, &stat_buf))
-        return 0;
-      file.filesize = stat_buf.st_size;
-    }
-
   file.handle = abfd;
-  off_t cur_offset = lseek(file.fd, 0, SEEK_CUR);
+  off_t cur_offset = lseek (file.fd, 0, SEEK_CUR);
   claim_file (&file, &claimed);
-  lseek(file.fd, cur_offset, SEEK_SET);
-  if (!claimed)
-    return 0;
-
-  return 1;
+  lseek (file.fd, cur_offset, SEEK_SET);
+  return claimed;
 }
 
 static int

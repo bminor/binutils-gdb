@@ -26,7 +26,6 @@
 #include <string.h>
 
 #include "bfd.h"
-#include "libbfd.h"
 #include "libiberty.h"
 #include "elf/internal.h"
 #include "elf/common.h"
