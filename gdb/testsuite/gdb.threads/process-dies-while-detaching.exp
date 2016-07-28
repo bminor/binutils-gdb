@@ -318,7 +318,7 @@ proc do_test {multi_process cmd} {
 }
 
 foreach multi_process {0 1} {
-    set mode [expr {$multi_process ? "single-process" : "multi-process"}]
+    set mode [expr {$multi_process ? "multi-process" : "single-process"}]
     foreach cmd {"detach" "continue"} {
 	with_test_prefix "$mode: $cmd" {
 	    do_test $multi_process $cmd

@@ -1,5 +1,11 @@
 2016-08-01  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.threads/process-dies-while-detaching.exp (do_test): Set
+	variable mode to "multi-process" if $multi_process is 1, otherwise
+	set it to "single-process".
+
+2016-08-01  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.cp/anon-struct.exp: Check is_aarch32_target.
 	* gdb.cp/cpexprs.exp: Likewise.
 	* gdb.cp/m-static.exp: Likewise.
