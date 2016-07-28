@@ -18082,13 +18082,15 @@ will print to the console.
 
 @subsection Compiler search for the @code{compile} command
 
-@value{GDBN} needs to find @value{NGCC} for the inferior being debugged which
-may not be obvious for remote targets of different architecture than where
-@value{GDBN} is running.  Environment variable @code{PATH} (@code{PATH} from
-shell that executed @value{GDBN}, not the one set by @value{GDBN}
-command @code{set environment}).  @xref{Environment}.  @code{PATH} on
+@value{GDBN} needs to find @value{NGCC} for the inferior being debugged
+which may not be obvious for remote targets of different architecture
+than where @value{GDBN} is running.  Environment variable @code{PATH} on
 @value{GDBN} host is searched for @value{NGCC} binary matching the
-target architecture and operating system.
+target architecture and operating system.  This search can be overriden
+by @code{set compile-gcc} @value{GDBN} command below.  @code{PATH} is
+taken from shell that executed @value{GDBN}, it is not the value set by
+@value{GDBN} command @code{set environment}).  @xref{Environment}.
+
 
 Specifically @code{PATH} is searched for binaries matching regular expression
 @code{@var{arch}(-[^-]*)?-@var{os}-gcc} according to the inferior target being
@@ -18097,6 +18099,28 @@ example both @code{i386} and @code{x86_64} targets look for pattern
 @code{(x86_64|i.86)} and both @code{s390} and @code{s390x} targets look
 for pattern @code{s390x?}.  @var{os} is currently supported only for
 pattern @code{linux(-gnu)?}.
+
+On Posix hosts the compiler driver @value{GDBN} needs to find also
+shared library @file{libcc1.so} from the compiler.  It is searched in
+default shared library search path (overridable with usual environment
+variable @code{LD_LIBRARY_PATH}), unrelated to @code{PATH} or @code{set
+compile-gcc} settings.  Contrary to it @file{libcc1plugin.so} is found
+according to the installation of the found compiler --- as possibly
+specified by the @code{set compile-gcc} command.
+
+@table @code
+@item set compile-gcc
+@cindex compile command driver filename override
+Set compilation command used for compiling and injecting code with the
+@code{compile} commands.  If this option is not set (it is set to
+an empty string), the search described above will occur --- that is the
+default.
+
+@item show compile-gcc
+Displays the current compile command @value{NGCC} driver filename.
+If set, it is the main command @command{gcc}, found usually for example
+under name @file{x86_64-linux-gnu-gcc}.
+@end table
 
 @node GDB Files
 @chapter @value{GDBN} Files

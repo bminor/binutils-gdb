@@ -345,6 +345,19 @@ append_args (int *argcp, char ***argvp, int argc, char **argv)
   (*argvp)[(*argcp)] = NULL;
 }
 
+/* String for 'set compile-gcc' and 'show compile-gcc'.  */
+static char *compile_gcc;
+
+/* Implement 'show compile-gcc'.  */
+
+static void
+show_compile_gcc (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Compile command GCC driver filename is \"%s\".\n"),
+		    value);
+}
+
 /* Return DW_AT_producer parsed for get_selected_frame () (if any).
    Return NULL otherwise.
 
@@ -477,8 +490,6 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   int ok;
   FILE *src;
   struct gdbarch *gdbarch = get_current_arch ();
-  const char *os_rx;
-  const char *arch_rx;
   char *triplet_rx;
   char *error_message;
 
@@ -531,22 +542,39 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   if (compile_debug)
     fprintf_unfiltered (gdb_stdlog, "debug output:\n\n%s", code);
 
-  os_rx = osabi_triplet_regexp (gdbarch_osabi (gdbarch));
-  arch_rx = gdbarch_gnu_triplet_regexp (gdbarch);
+  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
+    compiler->fe->ops->set_verbose (compiler->fe, compile_debug);
 
-  /* Allow triplets with or without vendor set.  */
-  triplet_rx = concat (arch_rx, "(-[^-]*)?-", os_rx, (char *) NULL);
-  make_cleanup (xfree, triplet_rx);
+  if (compile_gcc[0] != 0)
+    {
+      if (compiler->fe->ops->version < GCC_FE_VERSION_1)
+	error (_("Command 'set compile-gcc' requires GCC version 6 or higher "
+		 "(libcc1 interface version 1 or higher)"));
+
+      compiler->fe->ops->set_driver_filename (compiler->fe, compile_gcc);
+    }
+  else
+    {
+      const char *os_rx = osabi_triplet_regexp (gdbarch_osabi (gdbarch));
+      const char *arch_rx = gdbarch_gnu_triplet_regexp (gdbarch);
+
+      /* Allow triplets with or without vendor set.  */
+      triplet_rx = concat (arch_rx, "(-[^-]*)?-", os_rx, (char *) NULL);
+      make_cleanup (xfree, triplet_rx);
+
+      if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
+	compiler->fe->ops->set_triplet_regexp (compiler->fe, triplet_rx);
+    }
 
   /* Set compiler command-line arguments.  */
   get_args (compiler, gdbarch, &argc, &argv);
   make_cleanup_freeargv (argv);
 
   if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
-    compiler->fe->ops->set_verbose (compiler->fe, compile_debug);
-
-  error_message = compiler->fe->ops->set_arguments (compiler->fe, triplet_rx,
-						    argc, argv);
+    error_message = compiler->fe->ops->set_arguments (compiler->fe, argc, argv);
+  else
+    error_message = compiler->fe->ops->set_arguments_v0 (compiler->fe, triplet_rx,
+							 argc, argv);
   if (error_message != NULL)
     {
       make_cleanup (xfree, error_message);
@@ -767,4 +795,17 @@ String quoting is parsed like in shell, for example:\n\
 			 " -fno-stack-protector"
   );
   set_compile_args (compile_args, 0, NULL);
+
+  add_setshow_optional_filename_cmd ("compile-gcc", class_support,
+				     &compile_gcc,
+				     _("Set compile command "
+				       "GCC driver filename"),
+				     _("Show compile command "
+				       "GCC driver filename"),
+				     _("\
+It should be absolute filename of the gcc executable.\n\
+If empty the default target triplet will be searched in $PATH."),
+				     NULL, show_compile_gcc, &setlist,
+				     &showlist);
+  compile_gcc = xstrdup ("");
 }

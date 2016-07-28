@@ -1,3 +1,7 @@
+set|show compile-gcc
+  Set and show compilation command used for compiling and injecting code
+  with the 'compile' commands.
+
 		What has changed in GDB?
 	     (Organized release by release)
 
