@@ -831,7 +831,6 @@ define_template (void **slot, void *call_data)
   struct compile_cplus_instance *instance;
   const struct template_symbol *tsym;
   char *id;
-  gcc_cp_symbol_kind_flags addl_flags = (gcc_cp_symbol_kind_flags) 0;
 
   defn = (struct template_defn *) *slot;
   if (defn->defined)

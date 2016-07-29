@@ -169,7 +169,6 @@ convert_one_symbol (struct compile_cplus_instance *instance,
     }
   else
     {
-      gcc_decl decl;
       struct template_defn *template_decl = NULL;
       /* Squash compiler warning.  */
       gcc_cp_symbol_kind_flags kind = GCC_CP_FLAG_BASE;
@@ -204,7 +203,6 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	    int ignore;
 	    char *special_name;
 	    const char *func_name;
-	    struct fn_field *field;
 
 	    kind = GCC_CP_SYMBOL_FUNCTION;
 	    addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
@@ -212,7 +210,6 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 
 	    special_name = NULL;
-	    field = cp_find_method_field (sym.symbol, 1);
 	    func_name = maybe_canonicalize_special_function
 	      (SYMBOL_LINKAGE_NAME (sym.symbol), NULL,
 	       SYMBOL_TYPE (sym.symbol), &special_name, &ignore);
@@ -406,12 +403,12 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 		  printf_unfiltered ("specialize_function_template %s\n",
 				     SYMBOL_NATURAL_NAME (sym.symbol));
 		}
-	      decl = CPCALL (specialize_function_template, instance,
-			     get_template_decl (template_decl),
-			     &targs,
-			     addr,
-			     filename,
-			     line);
+	      CPCALL (specialize_function_template, instance,
+		      get_template_decl (template_decl),
+		      &targs,
+		      addr,
+		      filename,
+		      line);
 	    }
 	  else
 	    {
@@ -420,9 +417,9 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 		  printf_unfiltered ("new_decl %s %d %s\n", name, (int) kind,
 				     symbol_name);
 		}
-	      decl = CPCALL (new_decl, instance,
-			     name, kind, sym_type, symbol_name, addr,
-			     filename, line);
+	      CPCALL (new_decl, instance,
+		      name, kind, sym_type, symbol_name, addr,
+		      filename, line);
 	    }
 
 	  /* Pop any processing context.  */
@@ -501,7 +498,6 @@ convert_symbol_bmsym (struct compile_cplus_instance *instance,
   struct type *type;
   gcc_cp_symbol_kind_flags kind;
   gcc_type sym_type;
-  gcc_decl decl;
   CORE_ADDR addr;
 
   addr = MSYMBOL_VALUE_ADDRESS (objfile, msym);
@@ -560,9 +556,9 @@ convert_symbol_bmsym (struct compile_cplus_instance *instance,
       printf_unfiltered ("new_decl minsym %s %d\n",
 			 MSYMBOL_NATURAL_NAME (msym), (int) kind);
     }
-  decl = CPCALL (new_decl, instance,
-		 MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
-		 NULL, addr, NULL, 0);
+  CPCALL (new_decl, instance,
+	  MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
+	  NULL, addr, NULL, 0);
   if (debug_compile_cplus_types)
     printf_unfiltered ("pop_namespace \"\"\n");
   CPCALL (pop_namespace, instance);
