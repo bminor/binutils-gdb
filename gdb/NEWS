@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.11
+*** Changes in GDB 7.12
 
 * GDBserver now supports recording btrace without maintaining an active
   GDB connection.
