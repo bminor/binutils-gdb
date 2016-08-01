@@ -1,3 +1,8 @@
+2016-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.12 branch created (41bfcd638a4e0e48b96ce4de2845372dea481322):
+	* version.in: Bump version to 7.12.50.DATE-git.
+
 2016-07-27  Alan Modra  <amodra@gmail.com>
 
 	* amd64-darwin-tdep.c: Don't include libbfd.h.
