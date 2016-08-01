@@ -1,5 +1,9 @@
 2016-08-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 7.11.90.
+
+2016-08-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Rename "since GDB 7.11" section into "in GDB 7.12" section.
 
 2016-08-01  Joel Brobecker  <brobecker@adacore.com>
