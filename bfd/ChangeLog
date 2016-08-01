@@ -1,3 +1,10 @@
+2016-08-01  Andrew Jenner  <andrew@codesourcery.com>
+	Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* elf32-ppc.c (is_branch_reloc): Recognise VLE branch relocations.
+	(ppc_elf_howto_raw): Fix dst_mask of R_PPC_VLE_REL15.
+	(ppc_elf_vle_split16): Clear field before inserting.
+
 2016-08-01  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

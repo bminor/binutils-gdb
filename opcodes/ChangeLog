@@ -1,3 +1,13 @@
+2016-07-25  Andrew Jenner  <andrew@codesourcery.com>
+	Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	opcodes/
+	* ppc-opc.c (vle_opcodes): Alias 'e_cmpwi' to 'e_cmpi' and
+	'e_cmplwi' to 'e_cmpli' instead.
+	(OPVUPRT, OPVUPRT_MASK): Define.
+	(powerpc_opcodes): Add E200Z4 insns.
+	(vle_opcodes): Add context save/restore insns.
+
 2016-07-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* micromips-opc.c (micromips_opcodes): Reorder "bc" next to "b",

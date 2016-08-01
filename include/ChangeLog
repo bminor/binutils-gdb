@@ -1,3 +1,7 @@
+2016-08-01  Andrew Jenner  <andrew@codesourcery.com>
+
+	* opcode/ppc.h (PPC_OPCODE_E200Z4): New define.
+
 2016-07-27  Graham Markall  <graham.markall@embecosm.com>
 
         * opcode/arc.h: Add ARC_OPERAND_ADDRTYPE,
