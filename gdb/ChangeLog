@@ -1,5 +1,9 @@
 2016-08-01  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.11.90 released.
+
+2016-08-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Set GDB version number to 7.11.90.
 
 2016-08-01  Joel Brobecker  <brobecker@adacore.com>
