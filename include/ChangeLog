@@ -2,6 +2,10 @@
 
 	* opcode/ppc.h (PPC_OPCODE_E200Z4): New define.
 
+2016-07-29  Aldy Hernandez  <aldyh@redhat.com>
+
+	* libiberty.h (MAX_ALLOCA_SIZE): New macro.
+
 2016-07-27  Graham Markall  <graham.markall@embecosm.com>
 
         * opcode/arc.h: Add ARC_OPERAND_ADDRTYPE,
