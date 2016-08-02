@@ -2160,7 +2160,7 @@ maybe_canonicalize_special_function (const char *field_name,
       *outname = (char *) xmalloc (len);
       strcpy (*outname, "li");
       strncat (*outname, field_name, end - field_name);
-      (*outname)[len] = '\0';
+      (*outname)[len-1] = '\0';
       return "li";
     }
 
