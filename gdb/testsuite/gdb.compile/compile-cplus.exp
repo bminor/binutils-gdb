@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Free Software Foundation, Inc.
+# Copyright 2014-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,20 +47,6 @@ clean_restart ${testfile}
 #
 gdb_test_no_output "set language c++" \
     "Set language to C++"
-#
-# Test command without an running inferior.
-#
-gdb_test "compile code int i=2;" \
-    "The program must be running for the compile command to work.*" \
-    "Test compile code command without running inferior"
-
-gdb_test "compile int i=2;" \
-    "The program must be running for the compile command to work.*" \
-    "Test compile command without running inferior"
-
-gdb_test "compile file -r ${srcdir}/${subdir}/${testfile}-mod.c" \
-    "The program must be running for the compile command to work.*" \
-    "Test compile file command without running inferior"
 
 if ![runto_main] {
     return -1
@@ -75,27 +61,6 @@ if {[skip_compile_feature_tests]} {
 # Test delimiter for code, and arguments.
 #
 
-gdb_test_no_output "compile -- f = 10" \
-    "Test abbreviations and code delimiter"
-
-gdb_test "compile f = 10;" ".*= 10;: No such file.*" \
-    "Test abbreviations and code collision"
-
-gdb_test_no_output "compile -r -- void _gdb_expr(){int i = 5;}" \
-    "Test delimiter with -r"
-
-gdb_test_no_output "compile -raw -- void _gdb_expr(){int i = 5;}" \
-    "Test delimiter with -raw"
-
-gdb_test "compile -- -r  void _gdb_expr(){int i = 5;}" \
-    ".* error: 'r' was not declared in this scope.*" \
-    "Test delimiter with -r after it"
-
-gdb_test "p globalvar" " = 10" "expect 10"
-
-gdb_test_no_output "compile code globalvar = 11" \
-    "set variable without trailing semicolon"
-gdb_test "p globalvar" " = 11" "check variable without trailing semicolon"
 
 gdb_test_no_output "compile code globalvar = SOME_MACRO;" \
     "set variable from macro"
@@ -110,12 +75,6 @@ gdb_test "p globalvar" " = 42" "expect 42"
 
 gdb_test_no_output "compile code globalvar *= 2;" "modify variable"
 gdb_test "p globalvar" " = 84" "expect 84"
-
-gdb_test_multiple "compile code" "compile code multiline 1" { -re "\r\n>$" {} }
-gdb_test_multiple "globalvar = 10;" "compile code multiline 2" { -re "\r\n>$" {} }
-gdb_test_multiple "globalvar *= 2;" "compile code multiline 3" { -re "\r\n>$" {} }
-gdb_test_no_output "end" "compile code multiline 4"
-gdb_test "p globalvar" " = 20" "expect 20"
 
 gdb_test_no_output "compile file -r ${srcdir}/${subdir}/${testfile}-mod.c" \
     "use external source file"
