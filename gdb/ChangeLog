@@ -1,3 +1,7 @@
+2016-08-03  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Mention new Python breakpoint events.
+
 2016-08-02  Tom Tromey  <tom@tromey.com>
 
 	* MAINTAINERS (Core): Add self as Rust maintainer.
