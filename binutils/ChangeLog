@@ -1,3 +1,9 @@
+2016-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* resbin.c (bin_to_res_version): Cast variables to correct type
+	for printing in error message.
+
 2016-07-28  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

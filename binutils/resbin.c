@@ -964,7 +964,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
   /* PR 17512: The verlen field does not include padding length.  */
   if (verlen > length)
     fatal (_("version length %lu greater than resource length %lu"),
-	   verlen, length);
+	   (unsigned long) verlen, (unsigned long) length);
 
   if (type != 0)
     fatal (_("unexpected version type %d"), (int) type);
