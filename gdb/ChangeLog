@@ -1,3 +1,7 @@
+2016-08-02  Tom Tromey  <tom@tromey.com>
+
+	* MAINTAINERS (Core): Add self as Rust maintainer.
+
 2016-08-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.
