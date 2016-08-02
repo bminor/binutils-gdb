@@ -1,3 +1,8 @@
+2016-08-02  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20428
+	* elf64-ppc.c (ppc_get_stub_entry): Don't segfault on NULL group.
+
 2016-06-29  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.26.2

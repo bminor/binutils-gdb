@@ -4504,6 +4504,8 @@ ppc_get_stub_entry (const asection *input_section,
      more than one stub used to reach say, printf, and we need to
      distinguish between them.  */
   group = htab->sec_info[input_section->id].u.group;
+  if (group == NULL)
+    return NULL;
 
   if (h != NULL && h->u.stub_cache != NULL
       && h->u.stub_cache->h == h
