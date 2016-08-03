@@ -1,3 +1,7 @@
+2016-08-03  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2016-07-19  Roland McGrath  <roland@hack.frob.com>
 
 	* emulparams/aarch64elf.sh (GENERATE_PIE_SCRIPT): Set to yes.
