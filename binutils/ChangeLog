@@ -2,6 +2,10 @@
 
 	* configure: Regenerate.
 
+2016-08-03  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2016-07-01  Nick Clifton  <nickc@redhat.com>
 
 	* Import this patch from the mainline:
