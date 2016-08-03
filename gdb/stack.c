@@ -1101,7 +1101,8 @@ find_frame_funname (struct frame_info *frame, char **funname,
 	}
       else
 	{
-	  *funname = xstrdup (SYMBOL_PRINT_NAME (func));
+	  const char *print_name = SYMBOL_PRINT_NAME (func);
+
 	  *funlang = SYMBOL_LANGUAGE (func);
 	  if (funcp)
 	    *funcp = func;
@@ -1112,14 +1113,17 @@ find_frame_funname (struct frame_info *frame, char **funname,
 		 stored in the symbol table, but we stored a version
 		 with DMGL_PARAMS turned on, and here we don't want to
 		 display parameters.  So remove the parameters.  */
-	      char *func_only = cp_remove_params (*funname);
+	      char *func_only = cp_remove_params (print_name);
 
 	      if (func_only)
-		{
-		  xfree (*funname);
-		  *funname = func_only;
-		}
+		*funname = func_only;
 	    }
+
+	  /* If we didn't hit the C++ case above, set *funname here.
+	     This approach is taken to avoid having to install a
+	     cleanup in case cp_remove_params can throw.  */
+	  if (*funname == NULL)
+	    *funname = xstrdup (print_name);
 	}
     }
   else
