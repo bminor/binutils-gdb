@@ -1,5 +1,10 @@
 2016-08-03  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (find_frame_funname): Avoid any possible leak in case
+	cp_remove_params can throw.
+
+2016-08-03  Tom Tromey  <tom@tromey.com>
+
 	* NEWS: Mention new Python breakpoint events.
 
 2016-08-02  Tom Tromey  <tom@tromey.com>
