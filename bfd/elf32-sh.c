@@ -5682,6 +5682,7 @@ sh_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
+#if 0
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
@@ -5895,6 +5896,7 @@ sh_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 
   return TRUE;
 }
+#endif
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
@@ -7455,7 +7457,7 @@ sh_elf_encode_eh_address (bfd *abfd,
 					sh_elf_merge_private_data
 
 #define elf_backend_gc_mark_hook	sh_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook	sh_elf_gc_sweep_hook
+//#define elf_backend_gc_sweep_hook	sh_elf_gc_sweep_hook
 #define elf_backend_check_relocs	sh_elf_check_relocs
 #define elf_backend_copy_indirect_symbol \
 					sh_elf_copy_indirect_symbol

@@ -1,3 +1,21 @@
+2016-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/17739
+	* emulparams/shelf.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): Define with
+	valye 'yes'.
+	* emulparams/shelf32.sh: Likewise.
+	* emulparams/shelf32.sh: Likewise.
+	* emulparams/shelf_nto.sh: Likewise.
+	* emulparams/shelf_nto.sh: Likewise.
+	* emulparams/shelf_vxworks.sh: Likewise.
+	* emulparams/shelf_vxworks.sh: Likewise.
+	* emulparams/shlelf32_linux.sh: Likewise.
+	* emulparams/shlelf32_linux.sh: Likewise.
+	* emulparams/shlelf_linux.sh: Likewise.
+	* emulparams/shlelf_linux.sh: Likewise.
+	* emulparams/shlelf_nto.sh: Likewise.
+	* emulparams/shlelf_nto.sh: Likewise.
+
 2016-08-03  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

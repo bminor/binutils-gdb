@@ -1,3 +1,9 @@
+2016-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/17739
+	* elf32-sh.c (sh_elf_gc_sweep_hook): Delete.
+	(elf_backend_sweep_hook): Delete.
+
 2016-08-03  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.27.0
