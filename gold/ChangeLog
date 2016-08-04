@@ -1,3 +1,37 @@
+2018-02-05  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	* gold/aarch64.c (AArch64_insn_utilities::aarch64_movn_decode_imm):
+	New function.
+	(AArch64_insn_utilities::aarch64_movk_decode_imm): Likewise.
+	(AArch64_insn_utilities::clz_hwi): Likewise.
+	(AArch64_insn_utilities::aarch64_bitmask_imm): Likewise.
+	(Target_aarch64::do_calls_non_split): Likewise.
+	* gold/testsuite/Makefile.am [DEFAULT_TARGET_AARCH64] (check_SCRIPTS):
+	add split_aarch64.sh.
+	[DEFAULT_TARGET_AARCH64] (check_DATA): Add split_aarch64_{1,2,3,4,r)
+	tests.
+	[DEFAULT_TARGET_AARCH64] (SPLIT_DEFSYMS): New rule.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_1.o): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_2.o): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_3.o): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_4.o): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_r.o): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_n.o): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_1): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_2): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_2.stdout): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_3.stdout): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_4): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_4.stdout): Likewise.
+	[DEFAULT_TARGET_AARCH64] (split_aarch64_r.stdout): Likewise.
+	[DEFAULT_TARGET_AARCH64] (MOSTLYCLEANFILES): Likewise.
+	* gold/testsuite/split_aarch64.sh: New file.
+	* gold/testsuite/split_aarch64_1.s: Likewise.
+	* gold/testsuite/split_aarch64_2.s: Likewise.
+	* gold/testsuite/split_aarch64_3.s: Likewise.
+	* gold/testsuite/split_aarch64_4.s: Likewise.
+	* gold/testsuite/split_aarch64_n.s: Likewise.
+
 2018-02-07  Alan Modra  <amodra@gmail.com>
 
 	Revert 2018-01-17  Alan Modra  <amodra@gmail.com>

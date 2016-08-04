@@ -3875,16 +3875,45 @@ endif DEFAULT_TARGET_ARM
 
 if DEFAULT_TARGET_AARCH64
 
-check_SCRIPTS += aarch64_reloc_none.sh
-check_DATA += aarch64_reloc_none.stdout
+check_SCRIPTS += aarch64_reloc_none.sh split_aarch64.sh
+check_DATA += aarch64_reloc_none.stdout split_aarch64_1.stdout \
+	split_aarch64_2.stdout split_aarch64_3.stdout split_aarch64_4.stdout \
+	split_aarch64_r.stdout
 aarch64_reloc_none.o: aarch64_reloc_none.s
 	$(TEST_AS) -o $@ $<
 aarch64_reloc_none: aarch64_reloc_none.o ../ld-new
 	../ld-new -o $@ aarch64_reloc_none.o --gc-sections
 aarch64_reloc_none.stdout: aarch64_reloc_none
 	$(TEST_NM) $< > $@
-
-MOSTLYCLEANFILES += aarch64_reloc_none
+SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+split_aarch64_1.o: split_aarch64_1.s
+	$(TEST_AS) -o $@ $<
+split_aarch64_2.o: split_aarch64_2.s
+	$(TEST_AS) -o $@ $<
+split_aarch64_3.o: split_aarch64_3.s
+	$(TEST_AS) -o $@ $<
+split_aarch64_4.o: split_aarch64_4.s
+	$(TEST_AS) -o $@ $<
+split_aarch64_n.o: split_aarch64_n.s
+	$(TEST_AS) -o $@ $<
+split_aarch64_1: split_aarch64_1.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_aarch64_1.o
+split_aarch64_1.stdout: split_aarch64_1
+	$(TEST_OBJDUMP) -d $< > $@
+split_aarch64_2: split_aarch64_2.o split_aarch64_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_aarch64_2.o split_aarch64_n.o
+split_aarch64_2.stdout: split_aarch64_2
+	$(TEST_OBJDUMP) -d $< > $@
+split_aarch64_3.stdout: split_aarch64_3.o split_aarch64_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o split_aarch64_3 split_aarch64_3.o split_aarch64_n.o > $@ 2>&1 || exit 0
+split_aarch64_4: split_aarch64_4.o split_aarch64_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_aarch64_4.o split_aarch64_n.o
+split_aarch64_4.stdout: split_aarch64_4
+	$(TEST_OBJDUMP) -d $< > $@
+split_aarch64_r.stdout: split_aarch64_1.o split_aarch64_n.o ../ld-new
+	../ld-new -r split_aarch64_1.o split_aarch64_n.o -o split_aarch64_r > $@ 2>&1 || exit 0
+#MOSTLYCLEANFILES += aarch64_reloc_none split_aarch64_1 split_aarch64_2 \
+	split_aarch64_3 split_aarch64_r
 
 check_SCRIPTS += aarch64_relocs.sh
 check_DATA += aarch64_relocs.stdout

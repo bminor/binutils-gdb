@@ -69,7 +69,7 @@ class AArch64_relocate_functions;
 
 // Utility class dealing with insns. This is ported from macros in
 // bfd/elfnn-aarch64.cc, but wrapped inside a class as static members. This
-// class is used in erratum sequence scanning.
+// class is used in erratum sequence scanning and split-stack calls.
 
 template<bool big_endian>
 class AArch64_insn_utilities
@@ -165,6 +165,98 @@ public:
     // Sign extend to 64-bit by repeating msbt 31 (64-33) times and merge it
     // with value.
     return ((((uint64_t)(1) << 32) - msbt) << 33) | value;
+  }
+
+  // Retrieve encoded movn 64-bit signed imm value (64-bit variant only).
+  static int64_t
+  aarch64_movn_decode_imm(const Insntype movn)
+  {
+    int64_t imm = (movn & 0x1fffe0) >> 5;
+    int hw = ((movn & 0x600000) >> 21) << 4;
+    return imm << hw;
+  }
+
+  // Retrieve encoded movk 64-bit signed imm value updating and existent value
+  // (64-bit variant only).
+  static int64_t
+  aarch64_movk_decode_imm(const Insntype movk, int64_t value)
+  {
+    int64_t imm = (movk & 0x1FFFE0) >> 5;
+    int hw = ((movk & 0x600000) >> 21) << 4;
+    int64_t ret = imm << hw;
+    int64_t mask = 0xffff << hw;
+    return value ^ ((value ^ ret) & mask);
+  }
+
+  // Return true if val is an immediate that can be loaded into a
+  // register by a MOVZ instruction.
+  static bool
+  aarch64_movw_imm (int64_t val)
+  {
+    return ((val & 0xffffl) == val)
+            || ((val & (0xffffl << 16)) == val)
+            || ((val & (0xffffl << 32)) == val)
+            || ((val & (0xffffl << 48)) == val);
+  }
+
+  // For convenience, define 0 -> word_size.
+  static inline int
+  clz_hwi (uint64_t x)
+  {
+    if (x == 0)
+      return 64;
+    return __builtin_clzl (x);
+  }
+
+  // Return true if val is a valid bitmask immediate.
+  static bool
+  aarch64_bitmask_imm (int64_t val_in)
+  {
+    static const uint64_t bitmask_imm_mul[] =
+      {
+	0x0000000100000001ull,
+	0x0001000100010001ull,
+	0x0101010101010101ull,
+	0x1111111111111111ull,
+	0x5555555555555555ull,
+      };
+    uint64_t val, tmp, mask, first_one, next_one;
+    int bits;
+
+    // Check for a single sequence of one bits and return quickly if so.
+    // The special cases of all ones and all zeroes returns false.
+    val = (uint64_t) val_in;
+    tmp = val + (val & -val);
+
+    if (tmp == (tmp & -tmp))
+      return (val + 1) > 1;
+
+    // Invert if the immediate doesn't start with a zero bit - this means we
+    // only need to search for sequences of one bits.
+    if (val & 1)
+      val = ~val;
+
+    // Find the first set bit and set tmp to val with the first sequence of
+    // one bits removed.  Return success if there is a single sequence of
+    // ones.
+    first_one = val & -val;
+    tmp = val & (val + first_one);
+
+    if (tmp == 0)
+      return true;
+
+    // Find the next set bit and compute the difference in bit position.
+    next_one = tmp & -tmp;
+    bits = clz_hwi (first_one) - clz_hwi (next_one);
+    mask = val ^ tmp;
+
+    // Check the bit position difference is a power of 2, and that the first
+    // sequence of one bits fits within 'bits' bits.
+    if ((mask >> bits) != 0 || bits != (bits & -bits))
+      return false;
+
+    // Check the sequence of one bits is repeated 64/bits times.
+    return val == mask * bitmask_imm_mul[__builtin_clz (bits) - 26];
   }
 
   static bool
@@ -3053,6 +3145,14 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   bool
   do_can_check_for_function_pointers() const
   { return true; }
+
+  // Adjust -fsplit-stack code which calls non-split-stack code.
+  void
+  do_calls_non_split(Relobj* object, unsigned int shndx,
+		     section_offset_type fnoffset, section_size_type fnsize,
+		     const unsigned char* prelocs, size_t reloc_count,
+		     unsigned char* view, section_size_type view_size,
+		     std::string* from, std::string* to) const;
 
   // Return the number of entries in the PLT.
   unsigned int
@@ -6842,6 +6942,116 @@ Target_aarch64<size, big_endian>::gc_process_relocs(
     needs_special_offset_handling,
     local_symbol_count,
     plocal_symbols);
+}
+
+// FNOFFSET in section SHNDX in OBJECT is the start of a function
+// compiled with -fsplit-stack.  The function calls non-split-stack
+// code.  Change the function to ensure it has enough stack space to
+// call some random function.
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::do_calls_non_split(
+    Relobj* object,
+    unsigned int shndx,
+    section_offset_type fnoffset,
+    section_size_type fnsize,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    unsigned char* view,
+    section_size_type view_size,
+    std::string* from,
+    std::string* to) const
+{
+  // 32-bit not supported.
+  if (size == 32)
+    {
+      // warn
+      Target::do_calls_non_split(object, shndx, fnoffset, fnsize,
+				 prelocs, reloc_count, view, view_size,
+				 from, to);
+      return;
+    }
+
+  // The function starts with:
+  // mrs    x9, tpidr_el0
+  // mov    x10, <required stack allocation>
+  // movk   x10, #0x0, lsl #16
+  // sub    x10, sp, x10
+  // mov    x11, sp          # if function has stacked arguments
+  // mov    x12, x30
+  // ldur   x9, [x9, #-8]
+  // cmp    x9, x10
+
+  unsigned char *entry = view + fnoffset;
+  unsigned char *pinsn = entry;
+  bool ok = false;
+
+  const uint32_t mov_mask = 0xff80001f; // ignore 'hw' bits.
+  const uint32_t mrs_x9_tp = 0xd53bd049;
+  const uint32_t movz_x10_imm = 0xd280000a;
+  const uint32_t movk_x10_imm = 0xf280000a;
+  const uint32_t cmp_x10_mask = 0xeb00015f;
+  const size_t max_insn = 8;
+
+  uint32_t insn = elfcpp::Swap<32, big_endian>::readval(entry);
+  if (insn == mrs_x9_tp)
+    {
+      unsigned char *pmov = 0, *pmovk = 0;
+      int64_t allocate = 0;
+      /* Add an upper limit to handle ill formated headers.  */
+      for (size_t i = 0; i < max_insn; i++)
+	{
+	  pinsn += 4;
+	  insn = elfcpp::Swap<32, big_endian>::readval(pinsn);
+	  if ((insn & mov_mask) == movz_x10_imm)
+	    {
+	      pmov = pinsn;
+	      allocate = Insn_utilities::aarch64_movn_decode_imm(insn);
+	    }
+	  else if ((insn & mov_mask) == movk_x10_imm)
+	    {
+	      pmovk = pinsn;
+	      allocate = Insn_utilities::aarch64_movk_decode_imm(insn, allocate);
+	    }
+	  else if ((insn & cmp_x10_mask) == cmp_x10_mask)
+	    break;
+	}
+
+      if (pmov != 0 && pmovk != 0)
+	{
+	  int extra = parameters->options().split_stack_adjust_size();
+	  allocate += extra;
+	  if (allocate >= ((int64_t)1 << 32) || extra < 0)
+	    {
+	      object->error(_("split-stack stack size overflow at "
+			      "section %u offset %0zx"),
+			    shndx, static_cast<size_t>(fnoffset));
+	      return;
+	    }
+
+	  insn = movz_x10_imm | ((allocate & 0xffff) << 5);
+	  elfcpp::Swap<32, big_endian>::writeval(pmov, insn);
+	  insn = movk_x10_imm | (((allocate >> 16) & 0xffff) << 5);
+	  insn |= 0x200000; // Set 'hw' bits to 01 to shift imm 16 bits.
+	  elfcpp::Swap<32, big_endian>::writeval(pmovk, insn);
+	  ok = true;
+        }
+    }
+
+  if (!ok)
+    {
+      if (!object->has_no_split_stack())
+	object->error(_("failed to match split-stack sequence at "
+			"section %u offset %0zx"),
+		      shndx, static_cast<size_t>(fnoffset));
+    }
+
+  // We have to change the function so that it calls
+  // __morestack_non_split instead of __morestack.  The former will
+  // allocate additional stack space.
+  *from = "__morestack";
+  *to = "__morestack_non_split";
 }
 
 // Scan relocations for a section.
