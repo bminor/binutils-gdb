@@ -1,5 +1,23 @@
 2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* emultempl/armelf.em (cmse_implib): Declare and define this new
+	static variable.
+	(arm_elf_create_output_section_statements): Add new cmse_implib
+	parameter.
+	(OPTION_CMSE_IMPLIB): Define macro.
+	(PARSE_AND_LIST_LONGOPTS): Add entry for new --cmse-implib switch.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_CMSE_IMPLIB case.
+	* ld.texinfo (--cmse-implib): Document new option.
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway import library generation): New test.
+	(Secure gateway import library generation: errors): Likewise.
+	* testsuite/ld-arm/cmse-implib.s: New file.
+	* testsuite/ld-arm/cmse-implib-errors.out: Likewise.
+	* testsuite/ld-arm/cmse-implib.rd: Likewise.
+
+2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* ld.texinfo (Placement of SG veneers): New concept entry.
 	* testsuite/ld-arm/arm-elf.exp
 	(Secure gateway veneers: no .gnu.sgstubs section): New test.
