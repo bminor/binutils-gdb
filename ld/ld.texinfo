@@ -6853,6 +6853,12 @@ entries which only support 512Mb of code.
 The @samp{--no-apply-dynamic-relocs} option makes AArch64 linker do not apply
 link-time values for dynamic relocations.
 
+@cindex Placement of SG veneers
+All SG veneers are placed in the special output section @code{.gnu.sgstubs}.
+Its start address must be set, either with the command line option
+@samp{--section-start} or in a linker script, to indicate where to place these
+veneers in memory.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

@@ -1,3 +1,18 @@
+2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld.texinfo (Placement of SG veneers): New concept entry.
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway veneers: no .gnu.sgstubs section): New test.
+	(Secure gateway veneers: wrong entry functions): Likewise.
+	(Secure gateway veneers (ARMv8-M Baseline)): Likewise.
+	(Secure gateway veneers (ARMv8-M Mainline)): Likewise.
+	* testsuite/ld-arm/cmse-veneers.s: New file.
+	* testsuite/ld-arm/cmse-veneers.d: Likewise.
+	* testsuite/ld-arm/cmse-veneers.rd: Likewise.
+	* testsuite/ld-arm/cmse-veneers.sd: Likewise.
+	* testsuite/ld-arm/cmse-veneers-no-gnu_sgstubs.out: Likewise.
+	* testsuite/ld-arm/cmse-veneers-wrong-entryfct.out: Likewise.
+
 2016-08-02  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/17739
