@@ -1,3 +1,10 @@
+2016-08-04  Stefan Trleman  <stefan.teleman@oracle.com>
+
+	PR gas/20427
+	* config/tc-sparc.c (cons_fix_new_sparc): Prevent the generation
+	of 64-bit relocation types when assembling for a 32-bit Solaris
+	target.
+
 2016-07-27  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/sparc/sparc.exp: Use is_elf_format to discriminate

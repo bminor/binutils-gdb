@@ -4890,6 +4890,15 @@ cons_fix_new_sparc (fragS *frag,
       && now_seg->flags & SEC_ALLOC)
     r = BFD_RELOC_SPARC_REV32;
 
+#ifdef TE_SOLARIS
+  /* The Solaris linker does not allow R_SPARC_UA64
+     relocations for 32-bit executables.  */
+  if (!target_little_endian_data
+      && sparc_arch_size != 64
+      && r == BFD_RELOC_64)
+    r = BFD_RELOC_32;
+#endif
+
   if (sparc_cons_special_reloc)
     {
       if (*sparc_cons_special_reloc == 'd')
@@ -4920,7 +4929,14 @@ cons_fix_new_sparc (fragS *frag,
 	{
 	case 2: r = BFD_RELOC_SPARC_UA16; break;
 	case 4: r = BFD_RELOC_SPARC_UA32; break;
+#ifdef TE_SOLARIS
+        /* The Solaris linker does not allow R_SPARC_UA64
+	   relocations for 32-bit executables.  */
+        case 8: r = sparc_arch_size == 64 ?
+                    BFD_RELOC_SPARC_UA64 : BFD_RELOC_SPARC_UA32; break;
+#else
 	case 8: r = BFD_RELOC_SPARC_UA64; break;
+#endif
 	default: abort ();
 	}
    }
