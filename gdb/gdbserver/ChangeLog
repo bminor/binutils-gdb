@@ -1,3 +1,8 @@
+2016-08-04  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (regsets_fetch_inferior_registers): Check
+	errno is ESRCH or not.
+
 2016-08-02  Yao Qi  <yao.qi@linaro.org>
 
 	* thread-db.c (struct thread_db) <td_ta_event_getmsg_p>: Remove.

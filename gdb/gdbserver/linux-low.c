@@ -5405,6 +5405,12 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 		 not "active".  This can happen in normal operation,
 		 so suppress the warning in this case.  */
 	    }
+	  else if (errno == ESRCH)
+	    {
+	      /* At this point, ESRCH should mean the process is
+		 already gone, in which case we simply ignore attempts
+		 to read its registers.  */
+	    }
 	  else
 	    {
 	      char s[256];
