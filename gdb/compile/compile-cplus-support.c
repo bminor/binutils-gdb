@@ -180,7 +180,7 @@ add_code_header (enum compile_i_scope_types type, struct ui_file *buf)
   switch (type)
     {
     case COMPILE_I_SIMPLE_SCOPE:
-      fputs_unfiltered ("extern \"C\" void "
+      fputs_unfiltered ("void "
 			GCC_FE_WRAPPER_FUNCTION
 			" (struct "
 			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG

@@ -34,7 +34,7 @@ set srcfilesoptions [list ${srcfile} ${options}]
 if { $srcfile3 != "" } {
     lappend srcfilesoptions $srcfile3 ${options}
 }
-lappend srcfilesoptions $srcfile4 "nodebug"
+lappend srcfilesoptions $srcfile4 "nodebug c++"
 if { [eval build_executable_from_specs ${testfile}.exp $testfile {$options} ${srcfilesoptions}] } {
     return -1
 }
@@ -122,7 +122,7 @@ gdb_test_multiple $test $test {
     }
 }
 
-gdb_test "info sym $infcall_pc" "\r\n_gdb_expr .*" "info sym found"
+gdb_test "info sym $infcall_pc" "\r\n_gdb_expr.*" "info sym found"
 gdb_test "return" "\r\n#0  main .*" "return" \
 	 "Make _gdb_expr\\(__gdb_regs\\*\\) return now\\? \\(y or n\\) " "y"
 gdb_test "info sym $infcall_pc" "\r\nNo symbol matches .*" "info sym not found"
