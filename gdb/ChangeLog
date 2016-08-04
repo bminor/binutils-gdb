@@ -1,3 +1,11 @@
+2016-08-04  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (tdesc_arm_with_vfpv3): Remove the
+	declaration.
+	(aarch64_linux_read_description): Remove code on getting
+	auxv and select target description on it.  Select target
+	description by the result of NT_ARM_VFP ptrace request.
+
 2016-08-03  Tom Tromey  <tom@tromey.com>
 
 	PR python/18565:
