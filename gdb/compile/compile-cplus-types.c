@@ -2369,6 +2369,11 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *instance,
 		      printf_unfiltered ("new_decl pure virtual method %s\n",
 					 name);
 		    }
+		  kind = "";
+		  method_type
+		    = ccp_convert_method (instance, type,
+					  TYPE_FN_FIELD_TYPE (methods, j));
+
 		  CPCALL (new_decl, instance,
 			  name,
 			  (sym_kind
