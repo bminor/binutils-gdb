@@ -2,6 +2,16 @@
 
 	Backport from master.
 
+	2016-08-05  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20364
+	* config/tc-aarch64.c (s_ltorg): Change the mapping state after
+	aligning the frag.
+	(aarch64_init): Treat rs_align frags in code sections as
+	containing code, not data.
+	* testsuite/gas/aarch64/pr20364.s: New test.
+	* testsuite/gas/aarch64/pr20364.d: New test driver.
+
 	2015-03-13  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.h (SUB_SEGMENT_ALIGN): Define to be zero.
