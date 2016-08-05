@@ -1581,6 +1581,13 @@
 
 	* scripttempl/avrtiny.sc (.text): Do not set LMA to zero.
 
+2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/lib/ld-lib.exp (check_lto_available): Return 1 on
+	Linux with GCC 4.9 or newer.
+	(check_lto_fat_available): Likewise.
+	(check_lto_shared_available): Likewise.
+
 2016-04-21  Nick Clifton  <nickc@redhat.com>
 
 	* ldlang.c (lang_check_relocs): Use bfd_link_check_relocs in
