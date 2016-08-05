@@ -22,7 +22,7 @@ dnl allowing a user to build with a C++ compiler.
 AC_DEFUN([GDB_AC_BUILD_WITH_CXX],
 [
   AC_ARG_ENABLE(build-with-cxx,
-  AS_HELP_STRING([--enable-build-with-cxx], [build with C++ compiler instead of C compiler]),
+  AS_HELP_STRING([--disable-build-with-cxx], [build with C compiler instead of C++ compiler]),
     [case $enableval in
       yes | no)
 	  ;;
