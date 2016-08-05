@@ -1,5 +1,14 @@
 2016-08-05  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/20429
+	* config/tc-arm.c (do_vfp_nsyn_push): Check that no more than 16
+	registers are pushed.
+	(do_vfp_nsyn_pop): Check that no more than 16 registers are
+	popped.
+	* testsuite/gas/arm/pr20429.s: New test.
+	* testsuite/gas/arm/pr20429.d: New test driver.
+	* testsuite/gas/arm/pr20429.1: Expected error output.
+
 	PR gas/20364
 	* config/tc-aarch64.c (s_ltorg): Change the mapping state after
 	aligning the frag.

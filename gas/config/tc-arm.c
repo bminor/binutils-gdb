@@ -14390,6 +14390,11 @@ static void
 do_vfp_nsyn_push (void)
 {
   nsyn_insert_sp ();
+
+  constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
+	      _("register list must contain at least 1 and at most 16 "
+		"registers"));
+
   if (inst.operands[1].issingle)
     do_vfp_nsyn_opcode ("fstmdbs");
   else
@@ -14400,6 +14405,11 @@ static void
 do_vfp_nsyn_pop (void)
 {
   nsyn_insert_sp ();
+
+  constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
+	      _("register list must contain at least 1 and at most 16 "
+		"registers"));
+
   if (inst.operands[1].issingle)
     do_vfp_nsyn_opcode ("fldmias");
   else
