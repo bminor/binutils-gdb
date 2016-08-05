@@ -5,6 +5,13 @@
 
 *** Changes in GDB 7.12
 
+* GDB and GDBserver now build with a C++ compiler by default.
+
+  The --enable-build-with-cxx configure option is now enabled by
+  default.  One must now explicitly configure with
+  --disable-build-with-cxx in order to build with a C compiler.  This
+  option will be removed in a future release.
+
 * GDBserver now supports recording btrace without maintaining an active
   GDB connection.
 

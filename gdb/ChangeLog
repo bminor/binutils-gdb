@@ -1,5 +1,10 @@
 2016-08-05  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention that GDB and GDBserver build with a C++ compiler
+	by default.
+
+2016-08-05  Pedro Alves  <palves@redhat.com>
+
 	* build-with-cxx.m4: Change help string to be in terms of
 	--disable-build-with-cxx.
 	* configure: Regenerate.
