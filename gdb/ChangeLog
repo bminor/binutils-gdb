@@ -1,3 +1,7 @@
+2016-08-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* event-top.h (cli_command_loop): Remove.
+
 2016-08-05  Pedro Alves  <palves@redhat.com>
 
 	PR remote/20398
