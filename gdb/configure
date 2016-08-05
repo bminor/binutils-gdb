@@ -1503,7 +1503,8 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --enable-plugins        Enable support for plugins
   --disable-largefile     omit support for large files
-  --enable-build-with-cxx build with C++ compiler instead of C compiler
+  --disable-build-with-cxx
+                          build with C compiler instead of C++ compiler
   --enable-targets=TARGETS
                           alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)

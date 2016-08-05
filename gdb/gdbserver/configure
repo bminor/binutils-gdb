@@ -1339,7 +1339,8 @@ Optional Features:
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
   --disable-largefile     omit support for large files
-  --enable-build-with-cxx build with C++ compiler instead of C compiler
+  --disable-build-with-cxx
+                          build with C compiler instead of C++ compiler
   --enable-libmcheck      Try linking with -lmcheck if available
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
