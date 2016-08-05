@@ -1736,12 +1736,12 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
       if (pool == NULL || pool->symbol == NULL || pool->next_free_entry == 0)
 	continue;
 
-      mapping_state (MAP_DATA);
-
       /* Align pool as you have word accesses.
          Only make a frag if we have to.  */
       if (!need_pass_2)
 	frag_align (align, 0, 0);
+
+      mapping_state (MAP_DATA);
 
       record_alignment (now_seg, align);
 
@@ -6373,10 +6373,14 @@ aarch64_init_frag (fragS * fragP, int max_chars)
 
   switch (fragP->fr_type)
     {
-    case rs_align:
     case rs_align_test:
     case rs_fill:
       mapping_state_2 (MAP_DATA, max_chars);
+      break;
+    case rs_align:
+      /* PR 20364: We can get alignment frags in code sections,
+	 so do not just assume that we should use the MAP_DATA state.  */
+      mapping_state_2 (subseg_text_p (now_seg) ? MAP_INSN : MAP_DATA, max_chars);
       break;
     case rs_align_code:
       mapping_state_2 (MAP_INSN, max_chars);
