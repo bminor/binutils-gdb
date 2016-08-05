@@ -1,5 +1,11 @@
 2016-08-05  Pedro Alves  <palves@redhat.com>
 
+	PR remote/20398
+	* remote-fileio.c (remote_fileio_quit_handler): Check the quit
+	flag before calling quit.
+
+2016-08-05  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention that GDB and GDBserver build with a C++ compiler
 	by default.
 
