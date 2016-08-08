@@ -23,16 +23,12 @@
 
 #include "sim-basics.h"
 #include "sim-signal.h"
-
-/* TODO: Delete this.  Need to convert bu32/etc... to common sim types
-         and unwind the bfin-sim.h/machs.h include below first though.  */
-typedef struct _sim_cpu SIM_CPU;
+#include "arch.h"
+#include "sim-base.h"
 
 #include "bfin-sim.h"
 
 #include "machs.h"
-
-#include "sim-base.h"
 
 struct _sim_cpu {
   /* ... simulator specific members ... */
