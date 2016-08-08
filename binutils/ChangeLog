@@ -1,3 +1,9 @@
+2016-08-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20439
+	* dwarf.c (display_debug_lines_decoded): Check directory and file
+	indicies before using them to access directory and file tables.
+
 2016-08-02  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
