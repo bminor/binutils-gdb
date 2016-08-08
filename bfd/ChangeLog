@@ -1,3 +1,16 @@
+2016-08-08  Nick Clifton  <nickc@redhat.com>
+
+	* doc/chew.c (delete_string): Only free the string buffer if it is
+	there.  Mark the buffer as NULL after freeing.
+	(drop): Free the dropped string.
+	(free_words): New function: Frees the memory allocated to the
+	dictionary.
+	(add_instrinsic): Duplicate the name string, so that it can be
+	freed later on.
+	(compile): Free unused words.
+	(main): Free the dictionary and top level string buffers at the
+	end.
+
 2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add one parameter.
