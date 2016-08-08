@@ -1,5 +1,14 @@
 2016-08-08  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/20440
+	* dwarf.c (display_debug_lines_decoded): Add checks for running
+	off the end of the section when populating the directory table and
+	file table.
+	(frame_display_row): Set max_regs equal to ncols.
+	(load_specific_debug_section): If the section is compressed, but
+	it is not big enough to hold a compression header then warn and
+	return 0.
+
 	PR binutils/20439
 	* dwarf.c (display_debug_lines_decoded): Check directory and file
 	indicies before using them to access directory and file tables.

@@ -5622,6 +5622,7 @@ get_compression_header (Elf_Internal_Chdr *chdr, unsigned char *buf)
   if (is_32bit_elf)
     {
       Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) buf;
+
       chdr->ch_type = BYTE_GET (echdr->ch_type);
       chdr->ch_size = BYTE_GET (echdr->ch_size);
       chdr->ch_addralign = BYTE_GET (echdr->ch_addralign);
@@ -5630,6 +5631,7 @@ get_compression_header (Elf_Internal_Chdr *chdr, unsigned char *buf)
   else
     {
       Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) buf;
+
       chdr->ch_type = BYTE_GET (echdr->ch_type);
       chdr->ch_size = BYTE_GET (echdr->ch_size);
       chdr->ch_addralign = BYTE_GET (echdr->ch_addralign);
@@ -6086,12 +6088,15 @@ process_section_headers (FILE * file)
 	      /* Minimum section size is 12 bytes for 32-bit compression
 		 header + 12 bytes for compressed data header.  */
 	      unsigned char buf[24];
+
 	      assert (sizeof (buf) >= sizeof (Elf64_External_Chdr));
 	      if (get_data (&buf, (FILE *) file, section->sh_offset, 1,
 			    sizeof (buf), _("compression header")))
 		{
 		  Elf_Internal_Chdr chdr;
-		  get_compression_header (&chdr, buf);
+
+		  (void) get_compression_header (&chdr, buf);
+
 		  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
 		    printf ("       ZLIB, ");
 		  else
@@ -12573,8 +12578,17 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
       if ((sec->sh_flags & SHF_COMPRESSED) != 0)
 	{
 	  Elf_Internal_Chdr chdr;
-	  unsigned int compression_header_size
-	    = get_compression_header (&chdr, start);
+	  unsigned int compression_header_size;
+
+	  if (size < sizeof chdr)
+	    {
+	      warn (_("compressed section %s is too small to contain a compression header"),
+		    section->name);
+	      return 0;
+	    }
+
+	  compression_header_size = get_compression_header (&chdr, start);
+
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),

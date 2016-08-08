@@ -3252,14 +3252,30 @@ display_debug_lines_decoded (struct dwarf_section *section,
 
 	  /* Traverse the Directory table just to count entries.  */
 	  data = standard_opcodes + linfo.li_opcode_base - 1;
+	  /* PR 20440 */
+	  if (data >= end)
+	    {
+	      warn (_("opcode base of %d extends beyond end of section\n"),
+		    linfo.li_opcode_base);
+	      return 0;
+	    }
+
 	  if (*data != 0)
 	    {
 	      unsigned char *ptr_directory_table = data;
 
-	      while (*data != 0)
+	      while (data < end && *data != 0)
 		{
 		  data += strnlen ((char *) data, end - data) + 1;
 		  n_directories++;
+		}
+
+	      /* PR 20440 */
+	      if (data >= end)
+		{
+		  warn (_("directory table ends unexpectedly\n"));
+		  n_directories = 0;
+		  break;
 		}
 
 	      /* Go through the directory table again to save the directories.  */
@@ -3279,11 +3295,11 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	  data++;
 
 	  /* Traverse the File Name table just to count the entries.  */
-	  if (*data != 0)
+	  if (data < end && *data != 0)
 	    {
 	      unsigned char *ptr_file_name_table = data;
 
-	      while (*data != 0)
+	      while (data < end && *data != 0)
 		{
 		  unsigned int bytes_read;
 
@@ -3298,6 +3314,13 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		  data += bytes_read;
 
 		  n_files++;
+		}
+
+	      if (data >= end)
+		{
+		  warn (_("file table ends unexpectedly\n"));
+		  n_files = 0;
+		  break;
 		}
 
 	      /* Go through the file table again to save the strings.  */
@@ -5582,7 +5605,7 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
   unsigned int r;
   char tmp[100];
 
-  if (*max_regs < fc->ncols)
+  if (*max_regs != fc->ncols)
     *max_regs = fc->ncols;
 
   if (*need_col_headers)
