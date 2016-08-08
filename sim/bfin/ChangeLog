@@ -1,3 +1,12 @@
+2016-08-13  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/20438
+	* machs.h (MODEL_TYPE, MACH_ATTR, BFIN_INSN_*): Move ...
+	* arch.h: ... to this new header file.
+	* sim-main.h (SIM_CPU): Delete.
+	Include arch.h before sim-base.h, and move sim-base.h before
+	bfin-sim.h.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
