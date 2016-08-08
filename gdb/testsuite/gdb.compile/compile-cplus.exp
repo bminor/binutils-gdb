@@ -163,7 +163,7 @@ CompileExpression::add_exp "class Baz: public Foo {public: int z = 12;}; Baz baz
 ## Multiple inheritance
 CompileExpression::add_exp "class MI: public Base, public Base2 {int pure_virt () {return 42;}}; MI MIVar; var = MIVar.pure_virt();" 42
 CompileExpression::add_exp "class MI: public Base, public Base2 {int pure_virt () {return Base::return_value() + 42;}}; MI MIVar; var =  MIVar.pure_virt();" 43
-CompileExpression::add_exp "class Base3 {public: int z = 99;}; class MI:public Base, public Base3 {int pure_virt () {return Base3::z + 42;}}; MI MIVar; var = MIVar.pure_virt();" 141
+CompileExpression::add_exp "class Base3 {public: int z = 99;}; class MI: public Base, public Base3 {int pure_virt () {return Base3::z + 42;}}; MI MIVar; var = MIVar.pure_virt();" 141
 CompileExpression::run_tests "code"
 
 gdb_test "p localvar" " = 50" "expect localvar 50"

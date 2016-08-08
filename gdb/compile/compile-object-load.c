@@ -744,7 +744,12 @@ compile_object_load (const char *object_file, const char *source_file,
       switch (bmsym.minsym == NULL
 	      ? mst_unknown : MSYMBOL_TYPE (bmsym.minsym))
 	{
+	  /* Phil: FIXME: Not clear if there is anything else to be
+	     done here for data and bss symbols than insert the
+	     relocated address into the value field.  */
 	case mst_text:
+	case mst_bss:
+	case mst_data:
 	  sym->value = BMSYMBOL_VALUE_ADDRESS (bmsym);
 	  if (compile_debug)
 	    fprintf_unfiltered (gdb_stdlog,
