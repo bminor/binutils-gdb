@@ -1,3 +1,10 @@
+2016-08-08  Pedro Alves  <palves@redhat.com>
+
+	* features/i386/amd64-avx-mpx-linux.c: Regenerate.
+	* features/i386/amd64-avx-mpx.c: Regenerate.
+	* features/i386/i386-avx-mpx-linux.c: Regenerate.
+	* features/i386/i386-avx-mpx.c: Regenerate.
+
 2016-08-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* event-top.h (cli_command_loop): Remove.
