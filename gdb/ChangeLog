@@ -1,3 +1,8 @@
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	* value.c (unpack_value_bitfield): Skip unpacking if the parent
+	has no contents buffer to begin with.
+
 2016-08-08  Pedro Alves  <palves@redhat.com>
 
 	* features/i386/amd64-avx-mpx-linux.c: Regenerate.

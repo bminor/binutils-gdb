@@ -3430,17 +3430,24 @@ unpack_value_bitfield (struct value *dest_val,
   enum bfd_endian byte_order;
   int src_bit_offset;
   int dst_bit_offset;
-  LONGEST num;
   struct type *field_type = value_type (dest_val);
 
-  /* First, unpack and sign extend the bitfield as if it was wholly
-     available.  Invalid/unavailable bits are read as zero, but that's
-     OK, as they'll end up marked below.  */
   byte_order = gdbarch_byte_order (get_type_arch (field_type));
-  num = unpack_bits_as_long (field_type, valaddr + embedded_offset,
-			     bitpos, bitsize);
-  store_signed_integer (value_contents_raw (dest_val),
-			TYPE_LENGTH (field_type), byte_order, num);
+
+  /* First, unpack and sign extend the bitfield as if it was wholly
+     valid.  Optimized out/unavailable bits are read as zero, but
+     that's OK, as they'll end up marked below.  If the VAL is
+     wholly-invalid we may have skipped allocating its contents,
+     though.  See allocate_optimized_out_value.  */
+  if (valaddr != NULL)
+    {
+      LONGEST num;
+
+      num = unpack_bits_as_long (field_type, valaddr + embedded_offset,
+				 bitpos, bitsize);
+      store_signed_integer (value_contents_raw (dest_val),
+			    TYPE_LENGTH (field_type), byte_order, num);
+    }
 
   /* Now copy the optimized out / unavailability ranges to the right
      bits.  */
