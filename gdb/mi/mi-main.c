@@ -2139,6 +2139,13 @@ mi_execute_command (const char *cmd, int from_tty)
 	}
       CATCH (result, RETURN_MASK_ALL)
 	{
+	  /* Like in start_event_loop, enable input and force display
+	     of the prompt.  Otherwise, any command that calls
+	     async_disable_stdin, and then throws, will leave input
+	     disabled.  */
+	  async_enable_stdin ();
+	  current_ui->prompt_state = PROMPT_NEEDED;
+
 	  /* The command execution failed and error() was called
 	     somewhere.  */
 	  mi_print_exception (command->token, result);

@@ -1,5 +1,10 @@
 2016-08-09  Pedro Alves  <palves@redhat.com>
 
+	PR mi/20431
+	* gdb.mi/mi-cmd-error.exp: New file.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/18653
 	* gdb.base/signals-state-child.c: New file.
 	* gdb.base/signals-state-child.exp: New file.
