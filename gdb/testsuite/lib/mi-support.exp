@@ -1272,7 +1272,7 @@ proc mi_expect_interrupt { test } {
     if {$async} {
 	set prompt_re ""
     } else {
-	set prompt_re "$mi_gdb_prompt$"
+	set prompt_re "$mi_gdb_prompt"
     }
 
     set r_nonstop "reason=\"signal-received\",signal-name=\"0\",signal-meaning=\"Signal 0\""
@@ -1287,7 +1287,7 @@ proc mi_expect_interrupt { test } {
 	    pass "$test"
 	    return 0
 	}
-	-re ".*\r\n$mi_gdb_prompt$" {
+	-re ".*\r\n$mi_gdb_prompt" {
 	    verbose -log "got $expect_out(buffer)"
 	    fail "$test (unknown output after running)"
 	    return -1
