@@ -200,6 +200,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
       tdesc.o print-utils.o rsp-low.o errors.o common-debug.o cleanups.o \
       common-exceptions.o symbol.o btrace-common.o fileio.o common-regcache.o \
+      signals-state-save-restore.o \
       $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
@@ -713,6 +714,9 @@ fileio.o: ../common/fileio.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 common-regcache.o: ../common/common-regcache.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+signals-state-save-restore.o: ../common/signals-state-save-restore.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
