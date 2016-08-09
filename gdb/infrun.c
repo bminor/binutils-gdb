@@ -3848,6 +3848,7 @@ check_curr_ui_sync_execution_done (void)
     {
       target_terminal_ours ();
       observer_notify_sync_execution_done ();
+      ui_register_input_event_handler (ui);
     }
 }
 

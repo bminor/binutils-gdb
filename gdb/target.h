@@ -1523,21 +1523,23 @@ extern int target_terminal_is_ours (void);
 
 extern void target_terminal_init (void);
 
-/* Put the inferior's terminal settings into effect.
-   This is preparation for starting or resuming the inferior.  */
+/* Put the inferior's terminal settings into effect.  This is
+   preparation for starting or resuming the inferior.  This is a no-op
+   unless called with the main UI as current UI.  */
 
 extern void target_terminal_inferior (void);
 
 /* Put some of our terminal settings into effect, enough to get proper
    results from our output, but do not change into or out of RAW mode
    so that no input is discarded.  This is a no-op if terminal_ours
-   was most recently called.  */
+   was most recently called.  This is a no-op unless called with the main
+   UI as current UI.  */
 
 extern void target_terminal_ours_for_output (void);
 
-/* Put our terminal settings into effect.
-   First record the inferior's terminal settings
-   so they can be restored properly later.  */
+/* Put our terminal settings into effect.  First record the inferior's
+   terminal settings so they can be restored properly later.  This is
+   a no-op unless called with the main UI as current UI.  */
 
 extern void target_terminal_ours (void);
 

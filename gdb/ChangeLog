@@ -1,5 +1,28 @@
 2016-08-09  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/20418
+	* event-top.c (ui_register_input_event_handler)
+	(ui_unregister_input_event_handler): New functions.
+	(async_enable_stdin): Register input in the event loop.
+	(async_disable_stdin): Unregister input from the event loop.
+	(gdb_setup_readline): Register input in the event loop.
+	* infrun.c (check_curr_ui_sync_execution_done): Register input in
+	the event loop.
+	* target.c (target_terminal_inferior): Don't unregister input from
+	the event loop.
+	(target_terminal_ours): Don't register input in the event loop.
+	* target.h (target_terminal_inferior)
+	(target_terminal_ours_for_output, target_terminal_ours): Update
+	comments.
+	* top.h (ui_register_input_event_handler)
+	(ui_unregister_input_event_handler): New declarations.
+	* utils.c (ui_unregister_input_event_handler_cleanup)
+	(prepare_to_handle_input): New functions.
+	(defaulted_query, prompt_for_continue): Use
+	prepare_to_handle_input.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
 	PR mi/20431
 	* mi/mi-main.c (mi_execute_command): Enable input and set prompt
 	state to PROMPT_NEEDED.

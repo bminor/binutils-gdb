@@ -1,4 +1,11 @@
 2016-08-09  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20418
+	* gdb.mi/new-ui-mi-sync.c, gdb.mi/new-ui-mi-sync.exp: New files.
+	* lib/mi-support.exp (mi_expect_interrupt): Remove anchors.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
 
 	PR mi/20431
 	* gdb.mi/mi-cmd-error.exp: New file.
