@@ -1,3 +1,8 @@
+2016-08-09  Jiaming Wei  <jmwei@hxgpt.com>
+
+	* elf64-alpha.c (elf64_alpha_copy_indirect_symbol): Fix thinko
+	adjusting the use_count of merged .got entries.
+
 2016-08-08  Nick Clifton  <nickc@redhat.com>
 
 	* doc/chew.c (delete_string): Only free the string buffer if it is
