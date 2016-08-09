@@ -1,3 +1,7 @@
+2016-08-09  Roland McGrath  <roland@hack.frob.com>
+
+	* emulparams/armelf.sh (GENERATE_PIE_SCRIPT): Set to yes.
+
 2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* emultempl/armelf.em (cmse_implib): Declare and define this new
