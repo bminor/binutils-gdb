@@ -1,3 +1,13 @@
+2016-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20436
+	* testsuite/lib/ld-lib.exp (check_gcc_plugin_enabled): New
+	proc.
+	(check_lto_available): Return 0 if check_gcc_plugin_enabled
+	returns 0.
+	(check_lto_fat_available): Likewise.
+	(check_lto_shared_available): Likewise.
+
 2016-08-09  Roland McGrath  <roland@hack.frob.com>
 
 	* emulparams/armelf.sh (GENERATE_PIE_SCRIPT): Set to yes.

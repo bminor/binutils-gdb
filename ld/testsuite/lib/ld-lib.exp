@@ -1808,13 +1808,35 @@ proc check_sysroot_available { } {
     return $ld_sysroot_available_saved
 }
 
+# Returns 1 if plugin is enabled in gcc.  Returns 0 otherwise.
+proc check_gcc_plugin_enabled { } {
+    global CC
+
+    if {![info exists CC]} {
+	set CC [find_gcc]
+    }
+    if { $CC == "" } {
+      return 0
+    }
+    set state [remote_exec host $CC -v]
+    for { set i 0 } { $i < [llength $state] } { incr i } {
+	set v [lindex $state $i]
+	if { [ string match "*--disable-plugin*" $v ] } {
+	    verbose "plugin is disabled by $v"
+	    return 0;
+	}
+    }
+
+    return 1;
+}
+
 # Returns true if the target compiler supports LTO
 proc check_lto_available { } {
     global lto_available_saved
     global CC
 
     if {![info exists lto_available_saved]} {
-        if { [which $CC] == 0 } {
+        if { ![check_gcc_plugin_enabled] } {
 	    set lto_available_saved 0
 	    return 0
 	}
@@ -1857,7 +1879,7 @@ proc check_lto_fat_available { } {
     global CC
 
     if {![info exists lto_fat_available_saved]} {
-        if { [which $CC] == 0 } {
+        if { ![check_gcc_plugin_enabled] } {
 	    set lto_fat_available_saved 0
 	    return 0
 	}
@@ -1900,7 +1922,7 @@ proc check_lto_shared_available { } {
     global CC
 
     if {![info exists lto_shared_available_saved]} {
-        if { [which $CC] == 0 } {
+        if { ![check_gcc_plugin_enabled] } {
 	    set lto_shared_available_saved 0
 	    return 0
 	}
