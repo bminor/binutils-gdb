@@ -22,7 +22,7 @@
 #include "notif.h"
 #include "tdesc.h"
 #include "rsp-low.h"
-
+#include "signals-state-save-restore.h"
 #include <ctype.h>
 #include <unistd.h>
 #if HAVE_SIGNAL_H
@@ -3610,6 +3610,8 @@ captured_main (int argc, char *argv[])
   /* Remember stdio descriptors.  LISTEN_DESC must not be listed, it will be
      opened by remote_prepare.  */
   notice_open_fds ();
+
+  save_original_signals_state ();
 
   /* We need to know whether the remote connection is stdio before
      starting the inferior.  Inferiors created in this scenario have

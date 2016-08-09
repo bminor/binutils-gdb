@@ -22,7 +22,7 @@
 #include "agent.h"
 #include "tdesc.h"
 #include "rsp-low.h"
-
+#include "signals-state-save-restore.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
 #include "gdb_wait.h"
@@ -974,6 +974,8 @@ linux_create_inferior (char *program, char **allargs)
 	      /* Errors ignored.  */;
 	    }
 	}
+
+      restore_original_signals_state ();
 
       execv (program, allargs);
       if (errno == ENOENT)
