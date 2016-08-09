@@ -1,3 +1,7 @@
+2016-08-09  Roland McGrath  <roland@hack.frob.com>
+
+	* emulparams/armelf.sh (GENERATE_PIE_SCRIPT): Set to yes.
+
 2016-08-02  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/17739
