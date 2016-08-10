@@ -201,7 +201,7 @@ typedef enum
   }
 insertion_state_t;
 
-static int remove_breakpoint (struct bp_location *, insertion_state_t);
+static int remove_breakpoint (struct bp_location *);
 static int remove_breakpoint_1 (struct bp_location *, insertion_state_t);
 
 static enum print_stop_action print_bp_stop_message (bpstat bs);
@@ -3189,7 +3189,7 @@ insert_breakpoint_locations (void)
 	{
 	  for (loc = bpt->loc; loc; loc = loc->next)
 	    if (loc->inserted)
-	      remove_breakpoint (loc, mark_uninserted);
+	      remove_breakpoint (loc);
 
 	  hw_breakpoint_error = 1;
 	  fprintf_unfiltered (tmp_error_stream,
@@ -3229,7 +3229,7 @@ remove_breakpoints (void)
   ALL_BP_LOCATIONS (bl, blp_tmp)
   {
     if (bl->inserted && !is_tracepoint (bl->owner))
-      val |= remove_breakpoint (bl, mark_uninserted);
+      val |= remove_breakpoint (bl);
   }
   return val;
 }
@@ -3274,7 +3274,7 @@ remove_breakpoints_pid (int pid)
 
     if (bl->inserted && !bl->target_info.persist)
       {
-	val = remove_breakpoint (bl, mark_uninserted);
+	val = remove_breakpoint (bl);
 	if (val != 0)
 	  return val;
       }
@@ -4088,7 +4088,7 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
 }
 
 static int
-remove_breakpoint (struct bp_location *bl, insertion_state_t is)
+remove_breakpoint (struct bp_location *bl)
 {
   int ret;
   struct cleanup *old_chain;
@@ -4104,7 +4104,7 @@ remove_breakpoint (struct bp_location *bl, insertion_state_t is)
 
   switch_to_program_space_and_thread (bl->pspace);
 
-  ret = remove_breakpoint_1 (bl, is);
+  ret = remove_breakpoint_1 (bl, mark_uninserted);
 
   do_cleanups (old_chain);
   return ret;
@@ -12609,7 +12609,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
 	  if (!keep_in_target)
 	    {
-	      if (remove_breakpoint (old_loc, mark_uninserted))
+	      if (remove_breakpoint (old_loc))
 		{
 		  /* This is just about all we can do.  We could keep
 		     this location on the global list, and try to

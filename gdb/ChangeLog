@@ -1,3 +1,12 @@
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
+	* breakpoint.c (remove_breakpoint): Remove 'is' parameter and
+	always pass mark_uninserted to remove_breakpoint_1.
+	(insert_breakpoint_locations, remove_breakpoints)
+	(remove_breakpoints_pid, update_global_location_list): Update
+	callers.
+
 2016-08-10  Руслан Ижбулатов  <lrn1986@gmail.com>
 	    Pedro Alves  <palves@redhat.com>
 
