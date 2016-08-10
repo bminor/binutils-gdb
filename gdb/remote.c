@@ -9335,7 +9335,8 @@ Target doesn't support breakpoints that have target side commands."));
 static int
 remote_remove_breakpoint (struct target_ops *ops,
 			  struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
+			  struct bp_target_info *bp_tgt,
+			  enum remove_bp_reason reason)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   struct remote_state *rs = get_remote_state ();
@@ -9364,7 +9365,7 @@ remote_remove_breakpoint (struct target_ops *ops,
       return (rs->buf[0] == 'E');
     }
 
-  return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
+  return memory_remove_breakpoint (ops, gdbarch, bp_tgt, reason);
 }
 
 static enum Z_packet_type

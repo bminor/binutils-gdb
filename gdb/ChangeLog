@@ -1,6 +1,41 @@
 2016-08-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19187
+	* break-catch-sig.c (signal_catchpoint_remove_location): Adjust
+	interface.
+	* break-catch-syscall.c (remove_catch_syscall):
+	* breakpoint.c (enum remove_bp_reason): Moved to breakpoint.h.
+	(remove_breakpoint_1): Pass 'reason' down.
+	(remove_catch_fork, remove_catch_vfork, remove_catch_solib)
+	(remove_catch_exec, remove_watchpoint, remove_masked_watchpoint)
+	(base_breakpoint_remove_location, bkpt_remove_location)
+	(bkpt_probe_remove_location, bkpt_probe_remove_location): Adjust
+	interface.
+	* breakpoint.h (enum remove_bp_reason): Moved here from
+	breakpoint.c.
+	(struct breakpoint_ops) <remove_location>: Add 'reason' parameter.
+	* corelow.c (core_remove_breakpoint): New function.
+	(init_core_ops): Install it as to_remove_breakpoint method.
+	* exec.c (exec_remove_breakpoint): New function.
+	(init_exec_ops): Install it as to_remove_breakpoint method.
+	* mem-break.c (memory_remove_breakpoint): Adjust interface.
+	* record-btrace.c (record_btrace_remove_breakpoint): Adjust
+	interface.
+	* record-full.c (record_full_remove_breakpoint)
+	(record_full_core_remove_breakpoint): Adjust interface.
+	* remote.c (remote_remove_breakpoint): Adjust interface.
+	* target-debug.h (target_debug_print_enum_remove_bp_reason): New
+	macro.
+	* target-delegates.c: Regenerate.
+	* target.c (target_remove_breakpoint): Add 'reason' parameter.
+	* target.h (struct target_ops) <to_remove_breakpoint>: Add
+	'reason' parameter.
+	(target_remove_breakpoint, memory_remove_breakpoint): Add 'reason'
+	parameter.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
 	* breakpoint.c (insertion_state_t): Delete.
 	(enum remove_bp_reason): New.
 	(detach_breakpoints, remove_breakpoint_1, remove_breakpoint):
