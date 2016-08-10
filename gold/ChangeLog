@@ -1,3 +1,13 @@
+2016-08-10  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20216
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Add check for
+	R_X86_64_GOTPCREL. Reset skip_call_tls_get_addr_ after printing
+	error message.
+	* testsuite/Makefile.am (pr20216_gd.o): Add -Bgcctestdir/.
+	(pr20216_ld.o): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
 2016-08-10  James Clarke  <jrtc27@jrtc27.com>
 
 	PR gold/20443
