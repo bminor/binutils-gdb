@@ -1075,6 +1075,16 @@ ignore (struct target_ops *ops, struct gdbarch *gdbarch,
   return 0;
 }
 
+/* Implement the to_remove_breakpoint method.  */
+
+static int
+exec_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
+			struct bp_target_info *bp_tgt,
+			enum remove_bp_reason reason)
+{
+  return 0;
+}
+
 static int
 exec_has_memory (struct target_ops *ops)
 {
@@ -1106,7 +1116,7 @@ Specify the filename of the executable file.";
   exec_ops.to_get_section_table = exec_get_section_table;
   exec_ops.to_files_info = exec_files_info;
   exec_ops.to_insert_breakpoint = ignore;
-  exec_ops.to_remove_breakpoint = ignore;
+  exec_ops.to_remove_breakpoint = exec_remove_breakpoint;
   exec_ops.to_stratum = file_stratum;
   exec_ops.to_has_memory = exec_has_memory;
   exec_ops.to_make_corefile_notes = exec_make_note_section;

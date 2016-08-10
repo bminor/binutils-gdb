@@ -2113,7 +2113,8 @@ target_insert_breakpoint (struct gdbarch *gdbarch,
 
 int
 target_remove_breakpoint (struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
+			  struct bp_target_info *bp_tgt,
+			  enum remove_bp_reason reason)
 {
   /* This is kind of a weird case to handle, but the permission might
      have been changed after breakpoints were inserted - in which case
@@ -2126,7 +2127,7 @@ target_remove_breakpoint (struct gdbarch *gdbarch,
     }
 
   return current_target.to_remove_breakpoint (&current_target,
-					      gdbarch, bp_tgt);
+					      gdbarch, bp_tgt, reason);
 }
 
 static void

@@ -158,7 +158,7 @@ insert_catch_syscall (struct bp_location *bl)
    catchpoints.  */
 
 static int
-remove_catch_syscall (struct bp_location *bl)
+remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
 {
   struct syscall_catchpoint *c = (struct syscall_catchpoint *) bl->owner;
   struct inferior *inf = current_inferior ();
