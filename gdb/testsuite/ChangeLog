@@ -1,3 +1,9 @@
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
+	* gdb.reverse/waitpid-reverse.exp: Add comment and remove
+	setup_kfails.
+
 2016-08-09  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 
