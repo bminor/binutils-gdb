@@ -1,6 +1,13 @@
 2016-08-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19187
+	* record-full.c (record_full_remove_breakpoint): Don't remove the
+	breakpoint from the record_full_breakpoints VEC if we're detaching
+	the breakpoint from a fork child.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
 	* break-catch-sig.c (signal_catchpoint_remove_location): Adjust
 	interface.
 	* break-catch-syscall.c (remove_catch_syscall):

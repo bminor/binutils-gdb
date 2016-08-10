@@ -1731,8 +1731,11 @@ record_full_remove_breakpoint (struct target_ops *ops,
 		return ret;
 	    }
 
-	  VEC_unordered_remove (record_full_breakpoint_p,
-				record_full_breakpoints, ix);
+	  if (reason == REMOVE_BREAKPOINT)
+	    {
+	      VEC_unordered_remove (record_full_breakpoint_p,
+				    record_full_breakpoints, ix);
+	    }
 	  return 0;
 	}
     }
