@@ -3505,6 +3505,7 @@ Target_x86_64<size>::Relocate::relocate(
   if (this->skip_call_tls_get_addr_)
     {
       if ((r_type != elfcpp::R_X86_64_PLT32
+	   && r_type != elfcpp::R_X86_64_GOTPCREL
 	   && r_type != elfcpp::R_X86_64_GOTPCRELX
 	   && r_type != elfcpp::R_X86_64_PLT32_BND
 	   && r_type != elfcpp::R_X86_64_PC32_BND
@@ -3514,6 +3515,7 @@ Target_x86_64<size>::Relocate::relocate(
 	{
 	  gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 				 _("missing expected TLS relocation"));
+	  this->skip_call_tls_get_addr_ = false;
 	}
       else
 	{

@@ -1193,10 +1193,10 @@ pr20216b.so: pr20216_def.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared pr20216_def.o
 
 pr20216_gd.o: pr20216_gd.S
-	$(COMPILE) -c -o $@ $<
+	$(COMPILE) -Bgcctestdir/ -c -o $@ $<
 
 pr20216_ld.o: pr20216_ld.S
-	$(COMPILE) -c -o $@ $<
+	$(COMPILE) -Bgcctestdir/ -c -o $@ $<
 
 endif DEFAULT_TARGET_X86_64_OR_X32
 
