@@ -2150,6 +2150,7 @@ Target_sparc<size, big_endian>::Scan::check_non_pic(Relobj* object, unsigned int
 	case elfcpp::R_SPARC_RELATIVE:
 	case elfcpp::R_SPARC_IRELATIVE:
 	case elfcpp::R_SPARC_COPY:
+	case elfcpp::R_SPARC_32:
 	case elfcpp::R_SPARC_64:
 	case elfcpp::R_SPARC_GLOB_DAT:
 	case elfcpp::R_SPARC_JMP_SLOT:
