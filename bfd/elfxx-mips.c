@@ -1964,6 +1964,8 @@ mips_elf_add_la25_stub (struct bfd_link_info *info,
   /* Prefer to use LUI/ADDIU stubs if the function is at the beginning
      of the section and if we would need no more than 2 nops.  */
   value = mips_elf_get_la25_target (stub, &s);
+  if (ELF_ST_IS_MICROMIPS (stub->h->root.other))
+    value &= ~1;
   use_trampoline_p = (value != 0 || s->alignment_power > 4);
 
   h->la25_stub = stub;

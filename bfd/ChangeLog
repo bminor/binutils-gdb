@@ -1,5 +1,11 @@
 2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_add_la25_stub): Clear the ISA bit of
+	the stub address retrieved if associated with a microMIPS
+	function.
+
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (mips_elf_create_stub_symbol): For a microMIPS
 	stub also add STO_MICROMIPS annotation.
 
