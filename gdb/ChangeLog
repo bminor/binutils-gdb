@@ -1,5 +1,14 @@
 2016-08-10  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/19187
+	* breakpoint.c (remove_breakpoint): Remove 'is' parameter and
+	always pass mark_uninserted to remove_breakpoint_1.
+	(insert_breakpoint_locations, remove_breakpoints)
+	(remove_breakpoints_pid, update_global_location_list): Update
+	callers.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
 	* common/signals-state-save-restore.c
 	(save_original_signals_state, restore_original_signals_state):
 	Wrap perror_with_name arguments with '()'.
