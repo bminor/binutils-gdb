@@ -1,3 +1,8 @@
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Set the ISA bit
+	in microMIPS LA25 stub references.
+
 2016-08-09  Jiaming Wei  <jmwei@hxgpt.com>
 
 	* elf64-alpha.c (elf64_alpha_copy_indirect_symbol): Fix thinko

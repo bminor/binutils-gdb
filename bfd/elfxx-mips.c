@@ -5577,9 +5577,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   else if (h != NULL && h->la25_stub
 	   && mips_elf_relocation_needs_la25_stub (input_bfd, r_type,
 						   target_is_16_bit_code_p))
-    symbol = (h->la25_stub->stub_section->output_section->vma
-	      + h->la25_stub->stub_section->output_offset
-	      + h->la25_stub->offset);
+    {
+	symbol = (h->la25_stub->stub_section->output_section->vma
+		  + h->la25_stub->stub_section->output_offset
+		  + h->la25_stub->offset);
+	if (ELF_ST_IS_MICROMIPS (h->root.other))
+	  symbol |= 1;
+    }
   /* For direct MIPS16 and microMIPS calls make sure the compressed PLT
      entry is used if a standard PLT entry has also been made.  In this
      case the symbol will have been set by mips_elf_set_plt_sym_value
