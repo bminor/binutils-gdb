@@ -1,5 +1,14 @@
 2016-08-10  James Clarke  <jrtc27@jrtc27.com>
 
+	PR gold/20443
+	* symtab.cc (Symbol_table::add_from_relobj): Handle NULL symbols,
+	which will be present for STT_SPARC_REGISTER.
+	(Symbol_table::add_from_pluginobj): Likewise.
+	(Symbol_table::add_from_dynobj): Likewise.
+	(Symbol_table::add_from_incrobj): Removed dead code.
+
+2016-08-10  James Clarke  <jrtc27@jrtc27.com>
+
 	PR gold/20442
 	* sparc.cc (Target_sparc::Relocate::relocate): R_SPARC_GOTDATA_OP_LOX10
 	should fall back on R_SPARC_GOT10, not R_SPARC_GOT13.
