@@ -1,6 +1,11 @@
+2016-08-10  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/20441
+	* sparc.cc (Target_sparc::Scan::check_non_pic): Allow R_SPARC_32 on
+	sparc64.
+
 2016-06-29  Cary Coutant  <ccoutant@gmail.com>
 
-gold/
 	PR gold/20310
 	* testsuite/dynamic_list.sh: Remove check for _ZdlPv.
 
