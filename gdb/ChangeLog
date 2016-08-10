@@ -1,3 +1,15 @@
+2016-08-10  Руслан Ижбулатов  <lrn1986@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (MS_VC_EXCEPTION): New define.
+	(handle_exception_result): New enum.
+	(windows_delete_thread): Free the thread's name.
+	(handle_exception): Handle MS_VC_EXCEPTION.
+	(get_windows_debug_event): Handle HANDLE_EXCEPTION_IGNORED.
+	(windows_thread_name): New function.
+	(windows_target): Install it as to_thread_name method.
+	* NEWS: Mention the thread naming support on MS-Windows.
+
 2016-08-10  Pedro Alves  <palves@redhat.com>
 
 	* common/signals-state-save-restore.c

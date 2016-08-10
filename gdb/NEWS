@@ -3,6 +3,12 @@
 
 *** Changes since GDB 7.12
 
+* Support for thread names on MS-Windows.
+
+  GDB now catches and handles the special exception that programs
+  running on MS-Windows use to assign names to threads in the
+  debugger.
+
 *** Changes in GDB 7.12
 
 * GDB and GDBserver now build with a C++ compiler by default.
