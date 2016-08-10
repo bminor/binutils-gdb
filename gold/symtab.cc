@@ -1325,6 +1325,9 @@ Symbol_table::add_from_relobj(
       res = this->add_from_object(relobj, name, name_key, ver, ver_key,
 				  is_default_version, *psym, st_shndx,
 				  is_ordinary, orig_st_shndx);
+
+      if (res == NULL)
+	continue;
       
       if (is_forced_local)
 	this->force_local(res);
@@ -1405,6 +1408,9 @@ Symbol_table::add_from_pluginobj(
   res = this->add_from_object(obj, name, name_key, ver, ver_key,
 		              is_default_version, *sym, st_shndx,
 			      is_ordinary, st_shndx);
+
+  if (res == NULL)
+    return NULL;
 
   if (is_forced_local)
     this->force_local(res);
@@ -1602,6 +1608,9 @@ Symbol_table::add_from_dynobj(
 	    }
 	}
 
+      if (res == NULL)
+	continue;
+
       // Note that it is possible that RES was overridden by an
       // earlier object, in which case it can't be aliased here.
       if (st_shndx != elfcpp::SHN_UNDEF
@@ -1640,7 +1649,6 @@ Symbol_table::add_from_incrobj(
 
   Stringpool::Key ver_key = 0;
   bool is_default_version = false;
-  bool is_forced_local = false;
 
   Stringpool::Key name_key;
   name = this->namepool_.add(name, true, &name_key);
@@ -1649,9 +1657,6 @@ Symbol_table::add_from_incrobj(
   res = this->add_from_object(obj, name, name_key, ver, ver_key,
 		              is_default_version, *sym, st_shndx,
 			      is_ordinary, st_shndx);
-
-  if (is_forced_local)
-    this->force_local(res);
 
   return res;
 }
