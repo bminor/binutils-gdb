@@ -1578,12 +1578,13 @@ mips_elf_create_stub_symbol (struct bfd_link_info *info,
 			     const char *prefix, asection *s, bfd_vma value,
 			     bfd_vma size)
 {
+  bfd_boolean micromips_p = ELF_ST_IS_MICROMIPS (h->root.other);
   struct bfd_link_hash_entry *bh;
   struct elf_link_hash_entry *elfh;
   char *name;
   bfd_boolean res;
 
-  if (ELF_ST_IS_MICROMIPS (h->root.other))
+  if (micromips_p)
     value |= 1;
 
   /* Create a new symbol.  */
@@ -1601,6 +1602,8 @@ mips_elf_create_stub_symbol (struct bfd_link_info *info,
   elfh->type = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
   elfh->size = size;
   elfh->forced_local = 1;
+  if (micromips_p)
+    elfh->other = ELF_ST_SET_MICROMIPS (elfh->other);
   return TRUE;
 }
 

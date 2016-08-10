@@ -1,5 +1,10 @@
 2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_create_stub_symbol): For a microMIPS
+	stub also add STO_MICROMIPS annotation.
+
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (mips_elf_calculate_relocation): Set the ISA bit
 	in microMIPS LA25 stub references.
 
