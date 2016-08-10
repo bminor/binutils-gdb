@@ -43,7 +43,7 @@ save_original_signals_state (void)
 
   res = sigprocmask (0,  NULL, &original_signal_mask);
   if (res == -1)
-    perror_with_name ("sigprocmask");
+    perror_with_name (("sigprocmask"));
 
   for (i = 1; i < NSIG; i++)
     {
@@ -56,7 +56,7 @@ save_original_signals_state (void)
 	  continue;
 	}
       else if (res == -1)
-	perror_with_name ("sigaction");
+	perror_with_name (("sigaction"));
 
       /* If we find a custom signal handler already installed, then
 	 this function was called too late.  */
@@ -84,11 +84,11 @@ restore_original_signals_state (void)
 	  continue;
 	}
       else if (res == -1)
-	perror_with_name ("sigaction");
+	perror_with_name (("sigaction"));
     }
 
   res = sigprocmask (SIG_SETMASK,  &original_signal_mask, NULL);
   if (res == -1)
-    perror_with_name ("sigprocmask");
+    perror_with_name (("sigprocmask"));
 #endif
 }
