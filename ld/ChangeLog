@@ -1,5 +1,11 @@
 2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
 
+	PR ld/15428
+	* testsuite/ld-mips-elf/mips-elf.exp: Un-KFAIL `__ehdr_start'
+	test 2.
+
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/ld-mips-elf/pic-and-nonpic-1-micromips-rel.dd: New
 	test.
 	* testsuite/ld-mips-elf/pic-and-nonpic-1-micromips-rel.nd: New
