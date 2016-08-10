@@ -1,6 +1,14 @@
 2016-08-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19187
+	* breakpoint.c (insertion_state_t): Delete.
+	(enum remove_bp_reason): New.
+	(detach_breakpoints, remove_breakpoint_1, remove_breakpoint):
+	Adjust to use enum remove_bp_reason instead of insertion_state_t.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
 	* breakpoint.c (remove_breakpoint): Remove 'is' parameter and
 	always pass mark_uninserted to remove_breakpoint_1.
 	(insert_breakpoint_locations, remove_breakpoints)
