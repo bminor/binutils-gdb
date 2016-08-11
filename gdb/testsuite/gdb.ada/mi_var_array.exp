@@ -48,5 +48,5 @@ mi_gdb_test "-var-create vta * vta" \
     "Create bt varobj"
 
 mi_gdb_test "-var-list-children vta" \
-    "\\^done,numchild=\"2\",children=\\\[child={name=\"vta.n\",exp=\"n\",numchild=\"0\",type=\"bar\\.int\"},child={name=\"vta.f\",exp=\"f\",numchild=\"0\",type=\"array \\(1 .. n\\) of character\"}\\\],.*" \
+    "\\^done,numchild=\"2\",children=\\\[child={name=\"vta.n\",exp=\"n\",numchild=\"0\",type=\"bar\\.int\",thread-id=\"1\"},child={name=\"vta.f\",exp=\"f\",numchild=\"0\",type=\"array \\(1 .. n\\) of character\",thread-id=\"1\"}\\\],.*" \
     "list vta's children"

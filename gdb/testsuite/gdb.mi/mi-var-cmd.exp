@@ -381,7 +381,7 @@ mi_gdb_test "-var-update *" \
 	"assign same value to func (update)"
 
 mi_gdb_test "-var-create array_ptr * array_ptr" \
-	"\\^done,name=\"array_ptr\",numchild=\"1\",value=\"$hex <array>\",type=\"int \\*\",has_more=\"0\"" \
+	"\\^done,name=\"array_ptr\",numchild=\"1\",value=\"$hex <array>\",type=\"int \\*\",thread-id=\"1\",has_more=\"0\"" \
 	"create global variable array_ptr"
 
 mi_gdb_test "-var-assign array_ptr array2" \
@@ -608,7 +608,7 @@ mi_check_varobj_value F 7 "check F inside callee"
 # A varobj we fail to read during -var-update should be considered
 # out of scope.
 mi_gdb_test "-var-create null_ptr * **0" \
-    {\^done,name="null_ptr",numchild="0",value=".*",type="int",has_more="0"} \
+    {\^done,name="null_ptr",numchild="0",value=".*",type="int",thread-id="1"has_more="0"} \
     "create null_ptr"
 
 # Allow this to succeed, if address zero is readable, although it

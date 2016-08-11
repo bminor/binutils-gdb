@@ -49,6 +49,6 @@ mi_gdb_test "-gdb-set print object on" ".*"
 # We use a explicit cast to (void *) as that is the
 # type that caused the bug this testcase is testing for.
 mi_gdb_test "-var-create sp1 * ((void*)\$sp)" \
-	    "\\^done,name=\"sp1\",numchild=\"0\",value=\"$hex\",type=\"void \\*\",has_more=\"0\"" \
+	    "\\^done,name=\"sp1\",numchild=\"0\",value=\"$hex\",type=\"void \\*\",thread-id=\"1\",has_more=\"0\"" \
 	    "-var-create sp1 * \$sp"
 gdb_exit

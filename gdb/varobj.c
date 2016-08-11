@@ -323,6 +323,7 @@ varobj_create (char *objname,
 	}
 
       p = expression;
+      //      innermost_block = block_global_block (block);
       innermost_block = NULL;
       /* Wrap the call to parse expression, so we can 
          return a sensible error.  */
@@ -2103,6 +2104,8 @@ new_root_variable (void)
   var->root->floating = 0;
   var->root->rootvar = NULL;
   var->root->is_valid = 1;
+  var->root->thread_id = 0;
+  var->root->next = NULL;
 
   return var;
 }

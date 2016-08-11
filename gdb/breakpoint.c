@@ -1867,7 +1867,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
   frame_saved = 0;
 
   /* Determine if the watchpoint is within scope.  */
-  if (b->exp_valid_block == NULL)
+  if (!frame_id_p (b->watchpoint_frame))
     within_current_scope = 1;
   else
     {
@@ -4196,7 +4196,7 @@ breakpoint_init_inferior (enum inf_context context)
 	  struct watchpoint *w = (struct watchpoint *) b;
 
 	  /* Likewise for watchpoints on local expressions.  */
-	  if (w->exp_valid_block != NULL)
+	  if (frame_id_p (w->watchpoint_frame))
 	    delete_breakpoint (b);
 	  else
 	    {
@@ -5145,7 +5145,7 @@ watchpoint_check (void *p)
   if (!watchpoint_in_thread_scope (b))
     return WP_IGNORE;
 
-  if (b->exp_valid_block == NULL)
+  if (!frame_id_p (b->watchpoint_frame))
     within_current_scope = 1;
   else
     {
@@ -5170,7 +5170,7 @@ watchpoint_check (void *p)
 
       /* If we've gotten confused in the unwinder, we might have
 	 returned a frame that can't describe this variable.  */
-      if (within_current_scope)
+      if (within_current_scope && b->exp_valid_block != NULL)
 	{
 	  struct symbol *function;
 
@@ -10529,13 +10529,16 @@ break_range_command (char *arg, int from_tty)
   update_global_location_list (UGLL_MAY_INSERT);
 }
 
+typedef int (for_each_exp_symbol_callback) (const struct expression *exp, int i, void *data);
+
 /*  Return non-zero if EXP is verified as constant.  Returned zero
     means EXP is variable.  Also the constant detection may fail for
     some constant expressions and in such case still falsely return
     zero.  */
 
 static int
-watchpoint_exp_is_const (const struct expression *exp)
+for_each_expression_symbol (const struct expression *exp,
+			    for_each_exp_symbol_callback *cb, void *cb_data)
 {
   int i = exp->nelts;
 
@@ -10613,34 +10616,86 @@ watchpoint_exp_is_const (const struct expression *exp)
 	  break;
 
 	case OP_VAR_VALUE:
-	  /* Check whether the associated symbol is a constant.
-
-	     We use SYMBOL_CLASS rather than TYPE_CONST because it's
-	     possible that a buggy compiler could mark a variable as
-	     constant even when it is not, and TYPE_CONST would return
-	     true in this case, while SYMBOL_CLASS wouldn't.
-
-	     We also have to check for function symbols because they
-	     are always constant.  */
-	  {
-	    struct symbol *s = exp->elts[i + 2].symbol;
-
-	    if (SYMBOL_CLASS (s) != LOC_BLOCK
-		&& SYMBOL_CLASS (s) != LOC_CONST
-		&& SYMBOL_CLASS (s) != LOC_CONST_BYTES)
-	      return 0;
-	    break;
-	  }
+	  if (cb (exp, i, cb_data))
+	    return 1;
+	  break;
 
 	/* The default action is to return 0 because we are using
 	   the optimistic approach here: If we don't know something,
 	   then it is not a constant.  */
 	default:
-	  return 0;
+	  return 1;
 	}
     }
 
-  return 1;
+  return 0;
+}
+
+static int
+exp_element_symbol_is_const (const struct expression *exp, int i,
+			     void *cb_data)
+{
+  if (exp->elts[i].opcode == OP_VAR_VALUE)
+    {
+      /* Check whether the associated symbol is a constant.
+
+	 We use SYMBOL_CLASS rather than TYPE_CONST because it's
+	 possible that a buggy compiler could mark a variable as
+	 constant even when it is not, and TYPE_CONST would return
+	 true in this case, while SYMBOL_CLASS wouldn't.
+
+	 We also have to check for function symbols because they
+	 are always constant.  */
+      struct symbol *s = exp->elts[i + 2].symbol;
+
+      if (SYMBOL_CLASS (s) != LOC_BLOCK
+	  && SYMBOL_CLASS (s) != LOC_CONST
+	  && SYMBOL_CLASS (s) != LOC_CONST_BYTES)
+	{
+	  /* Stop looking.  */
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
+static int
+watchpoint_exp_is_const (struct expression *exp)
+{
+  if (!for_each_expression_symbol (exp, exp_element_symbol_is_const, NULL))
+    return 1;
+  return 0;
+}
+
+
+static int
+exp_element_symbol_needs_frame (const struct expression *exp, int i,
+				void *cb_data)
+{
+  switch (exp->elts[i].opcode)
+    {
+    case OP_VAR_VALUE:
+      {
+	struct symbol *s = exp->elts[i + 2].symbol;
+
+	if (symbol_read_needs_frame (s))
+	  return 1;
+	break;
+      }
+    case OP_REGISTER:
+      return 1;
+    }
+
+  return 0;
+ }
+
+static int
+expression_needs_frame (const struct expression *exp)
+{
+  if (for_each_expression_symbol (exp, exp_element_symbol_needs_frame, NULL))
+    return 1;
+  return 0;
 }
 
 /* Implement the "dtor" breakpoint_ops method for watchpoints.  */
@@ -11331,13 +11386,16 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   if (*tok)
     error (_("Junk at end of command."));
 
-  frame = block_innermost_frame (exp_valid_block);
+  if (exp_valid_block == NULL && expression_needs_frame (exp))
+    frame = get_selected_frame (NULL);
+  else
+    frame = block_innermost_frame (exp_valid_block);
 
   /* If the expression is "local", then set up a "watchpoint scope"
      breakpoint at the point where we've left the scope of the watchpoint
      expression.  Create the scope breakpoint before the watchpoint, so
      that we will encounter it first in bpstat_stop_status.  */
-  if (exp_valid_block && frame)
+  if (frame != NULL)
     {
       if (frame_id_p (frame_unwind_caller_id (frame)))
 	{
