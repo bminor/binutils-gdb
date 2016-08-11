@@ -264,7 +264,8 @@ linespec_location_completer (struct cmd_list_element *ignore,
       char *s;
 
       file_to_match = (char *) xmalloc (colon - text + 1);
-      strncpy (file_to_match, text, colon - text + 1);
+      strncpy (file_to_match, text, colon - text);
+      file_to_match[colon - text] = '\0';
       /* Remove trailing colons and quotes from the file name.  */
       for (s = file_to_match + (colon - text);
 	   s > file_to_match;
