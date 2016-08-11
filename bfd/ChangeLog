@@ -1,3 +1,9 @@
+2016-08-11  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Don't exit with
+	non_got_ref true in any case where we could have generated dynbss
+	copies but decide not to do so.
+
 2016-08-02  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/17739
