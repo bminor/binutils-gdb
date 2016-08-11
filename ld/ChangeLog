@@ -1,3 +1,10 @@
+2016-08-11  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20436
+	* testsuite/lib/ld-lib.exp (at_least_gcc_version): Don't ignore
+	remote_exec status.
+	(check_gcc_plugin_enabled): Likewise.  Revert previous patch.
+
 2016-08-11  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20436

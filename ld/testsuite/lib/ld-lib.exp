@@ -35,9 +35,12 @@ proc at_least_gcc_version { major minor } {
 	set CC [find_gcc]
     }
     if { $CC == "" } {
-      return 0
+	return 0
     }
     set state [remote_exec host $CC --version]
+    if { [lindex $state 0] != 0 } {
+	return 0;
+    }
     set tmp "[lindex $state 1]\n"
     # Look for (eg) 4.6.1 in the version output.
     set ver_re "\[^\\.0-9\]+(\[1-9\]\[0-9\]*)\\.(\[0-9\]+)(?:\\.\[0-9\]+)?"
@@ -1816,13 +1819,13 @@ proc check_gcc_plugin_enabled { } {
 	set CC [find_gcc]
     }
     if { $CC == ""} {
-      return 0
-    }
-    if { ![is_remote host] && [which $CC] == 0 } then {
-      return 0
+	return 0
     }
     set state [remote_exec host $CC -v]
-    for { set i 0 } { $i < [llength $state] } { incr i } {
+    if { [lindex $state 0] != 0 } {
+	return 0;
+    }
+    for { set i 1 } { $i < [llength $state] } { incr i } {
 	set v [lindex $state $i]
 	if { [ string match "*--disable-plugin*" $v ] } {
 	    verbose "plugin is disabled by $v"
