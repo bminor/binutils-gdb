@@ -1,3 +1,9 @@
+2016-08-11  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20413
+	* nat/linux-ptrace.c: Include <sys/procfs.h> instead of
+	"gregset.h".
+
 2016-08-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19187
