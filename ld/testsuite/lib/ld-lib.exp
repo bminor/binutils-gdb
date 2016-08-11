@@ -1815,7 +1815,10 @@ proc check_gcc_plugin_enabled { } {
     if {![info exists CC]} {
 	set CC [find_gcc]
     }
-    if { $CC == "" } {
+    if { $CC == ""} {
+      return 0
+    }
+    if { ![is_remote host] && [which $CC] == 0 } then {
       return 0
     }
     set state [remote_exec host $CC -v]

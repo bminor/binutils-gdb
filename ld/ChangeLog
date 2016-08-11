@@ -1,3 +1,10 @@
+2016-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20436
+	* testsuite/lib/ld-lib.exp (check_gcc_plugin_enabled): When not
+	testing remotely, check to see if target compiler is installed
+	before trying to run it.
+
 2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/15428
