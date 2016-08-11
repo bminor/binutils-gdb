@@ -3375,6 +3375,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	{
 	  status = 1;
 	  bfd_nonfatal_message (NULL, ibfd, isection, NULL);
+	  free (memhunk);
 	  return;
 	}
 
@@ -3428,6 +3429,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	{
 	  status = 1;
 	  bfd_nonfatal_message (NULL, obfd, osection, NULL);
+	  free (memhunk);
 	  return;
 	}
       free (memhunk);
@@ -3449,6 +3451,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	{
 	  status = 1;
 	  bfd_nonfatal_message (NULL, obfd, osection, NULL);
+	  free (memhunk);
 	  return;
 	}
       free (memhunk);
