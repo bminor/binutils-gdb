@@ -2240,7 +2240,7 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p)
 	}
     }
 
-  if (aarch64_imm_float_p (fpword) || (fpword & 0x7fffffff) == 0)
+  if (aarch64_imm_float_p (fpword) || fpword == 0)
     {
       *immed = fpword;
       *ccp = str;

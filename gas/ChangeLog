@@ -1,3 +1,9 @@
+2016-08-11  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_aarch64_imm_float): Reject -0.0.
+	* testsuite/gas/aarch64/illegal.s, testsuite/gas/aarch64/illegal.l:
+	Add tests for -0.0.  Add an end-of-file comment.
+
 2016-08-05  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/20429
