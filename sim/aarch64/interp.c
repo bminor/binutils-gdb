@@ -135,7 +135,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 		     char * const *argv, char * const *env)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0);
-  long storage;
+  long storage = 0;
   bfd_vma addr = 0;
 
   if (abfd != NULL)
@@ -154,7 +154,8 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       STATE_PROG_ARGV (sd) = dupargv (argv);
     }
 
-  storage = bfd_get_symtab_upper_bound (abfd);
+  if (abfd != NULL)
+    storage = bfd_get_symtab_upper_bound (abfd);
   if (storage > 0)
     {
       symtab = (asymbol **) xmalloc (storage);
@@ -163,7 +164,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       qsort (symtab, symcount, sizeof (asymbol *), compare_symbols);
     }
 
-  aarch64_init (cpu, bfd_get_start_address (abfd));
+  aarch64_init (cpu, addr);
 
   return SIM_RC_OK;
 }
@@ -332,7 +333,6 @@ sim_open (SIM_OPEN_KIND                  kind,
 	  struct bfd *                   abfd,
 	  char * const *                 argv)
 {
-  int i;
   sim_cpu *cpu;
   SIM_DESC sd = sim_state_alloc (kind, callback);
 

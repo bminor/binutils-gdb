@@ -64,10 +64,8 @@
 		  " exe addr %" PRIx64,					\
 		  __LINE__, aarch64_get_PC (cpu));			\
       if (! TRACE_ANY_P (cpu))						\
-	{								\
-	  sim_io_eprintf (CPU_STATE (cpu), "SIM Error: Unimplemented instruction: "); \
-	  trace_disasm (CPU_STATE (cpu), cpu, aarch64_get_PC (cpu));	\
-	}								\
+        sim_io_eprintf (CPU_STATE (cpu), "SIM Error: Unimplemented instruction: %#08x\n", \
+                        aarch64_get_instr (cpu));			\
       sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu),\
 		       sim_stopped, SIM_SIGABRT);			\
     }									\
@@ -14074,7 +14072,7 @@ aarch64_decode_and_execute (sim_cpu *cpu, uint64_t pc)
     }
 }
 
-static bfd_boolean
+bfd_boolean
 aarch64_step (sim_cpu *cpu)
 {
   uint64_t pc = aarch64_get_PC (cpu);

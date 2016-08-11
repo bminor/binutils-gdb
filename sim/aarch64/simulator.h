@@ -47,6 +47,10 @@ extern void         aarch64_init (sim_cpu *, uint64_t);
 
 extern void         aarch64_run (SIM_DESC);
 
+/* Call this to execute one instruction at the current PC.  */
+
+extern bfd_boolean  aarch64_step (sim_cpu *);
+
 extern const char * aarch64_get_func (uint64_t);
 extern uint64_t     aarch64_get_sym_value (const char *);
 extern void         aarch64_init_LIT_table (void);
