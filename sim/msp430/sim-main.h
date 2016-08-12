@@ -21,19 +21,13 @@
 #ifndef _MSP430_MAIN_SIM_H_
 #define _MSP430_MAIN_SIM_H_
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 #include "msp430-sim.h"
 #include "sim-base.h"
 
-struct _sim_cpu
-{
-  /* Simulator specific members.  */
-  struct msp430_cpu_state state;
-  sim_cpu_base base;
-};
-
-#define MSP430_CPU(sd)       (STATE_CPU ((sd), 0))
-#define MSP430_CPU_STATE(sd) (MSP430_CPU ((sd)->state))
+#define MSP430_SIM_CPU(cpu) ((struct msp430_cpu_state *) CPU_ARCH_DATA (cpu))
 
 #include "sim-config.h"
 #include "sim-types.h"

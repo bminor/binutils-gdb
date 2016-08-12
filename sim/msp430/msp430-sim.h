@@ -44,6 +44,6 @@ struct msp430_cpu_state
   uint64_t     hw32mult_result;
 };
 
-#define HWMULT(SD, FIELD) MSP430_CPU (SD)->state.FIELD
+#define HWMULT(sd, field) MSP430_SIM_CPU (STATE_CPU (sd, 0))->field
 
 #endif
