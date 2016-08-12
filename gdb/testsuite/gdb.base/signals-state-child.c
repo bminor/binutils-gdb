@@ -74,7 +74,7 @@ main (int argc, char **argv)
 	{
 	  int m;
 
-	  fprintf (out, "sigaction={sa_handler=", i);
+	  fprintf (out, "sigaction={sa_handler=");
 
 	  if (oldact.sa_handler == SIG_DFL)
 	    fprintf (out, "SIG_DFL");

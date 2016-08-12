@@ -1,3 +1,8 @@
+2016-08-12  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/signals-state-child.c (main): Remove "i" from fprintf's
+	argument list.
+
 2016-08-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19187
