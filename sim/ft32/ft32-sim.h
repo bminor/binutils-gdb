@@ -40,4 +40,6 @@ struct ft32_cpu_state {
   int exception;
 };
 
+#define FT32_SIM_CPU(cpu) ((struct ft32_cpu_state *) CPU_ARCH_DATA (cpu))
+
 #endif  /* _FT32_SIM_H_ */
