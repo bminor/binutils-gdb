@@ -31,12 +31,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* ??? wip.  better solution must wait.  */
 
 SIM_RC
-sim_cpu_alloc_all (SIM_DESC sd, int ncpus)
+sim_cpu_alloc_all_extra (SIM_DESC sd, int ncpus, size_t extra_bytes)
 {
   int c;
 
   for (c = 0; c < ncpus; ++c)
-    STATE_CPU (sd, c) = sim_cpu_alloc (sd);
+    STATE_CPU (sd, c) = sim_cpu_alloc_extra (sd, extra_bytes);
   return SIM_RC_OK;
 }
 
@@ -44,15 +44,24 @@ sim_cpu_alloc_all (SIM_DESC sd, int ncpus)
    EXTRA_BYTES is additional space to allocate for the sim_cpu struct.  */
 
 sim_cpu *
-sim_cpu_alloc (SIM_DESC sd)
+sim_cpu_alloc_extra (SIM_DESC sd, size_t extra_bytes)
 {
-  int extra_bytes = 0;
+  sim_cpu *cpu;
 
-#ifdef CGEN_ARCH
+#ifndef CGEN_ARCH
+# define cgen_cpu_max_extra_bytes(sd) 0
+#endif
+#ifdef SIM_HAVE_COMMON_SIM_CPU
+  cpu = zalloc (sizeof (*cpu));
+
   extra_bytes += cgen_cpu_max_extra_bytes (sd);
+  if (extra_bytes)
+    CPU_ARCH_DATA (cpu) = zalloc (extra_bytes);
+#else
+  cpu = zalloc (sizeof (*cpu) + cgen_cpu_max_extra_bytes (sd));
 #endif
 
-  return zalloc (sizeof (sim_cpu) + extra_bytes);
+  return cpu;
 }
 
 /* Free all resources held by all cpus.  */
@@ -72,6 +81,10 @@ sim_cpu_free_all (SIM_DESC sd)
 void
 sim_cpu_free (sim_cpu *cpu)
 {
+#ifdef SIM_HAVE_COMMON_SIM_CPU
+  free (CPU_ARCH_DATA (cpu));
+#endif
+
   free (cpu);
 }
 

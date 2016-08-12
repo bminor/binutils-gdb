@@ -122,10 +122,24 @@ typedef struct {
 
 } sim_cpu_base;
 
+#ifdef SIM_HAVE_COMMON_SIM_CPU
+struct _sim_cpu {
+  /* All the common state.  */
+  sim_cpu_base base;
+
+  /* Pointer for sim target to store arbitrary cpu data.  Normally the
+     target should define a struct and use it here.  */
+  void *arch_data;
+#define CPU_ARCH_DATA(cpu) ((cpu)->arch_data)
+};
+#endif
+
 /* Create all cpus.  */
-extern SIM_RC sim_cpu_alloc_all (SIM_DESC, int);
+extern SIM_RC sim_cpu_alloc_all_extra (SIM_DESC, int, size_t);
+#define sim_cpu_alloc_all(state, ncpus) sim_cpu_alloc_all_extra (state, ncpus, 0)
 /* Create a cpu.  */
-extern sim_cpu *sim_cpu_alloc (SIM_DESC);
+extern sim_cpu *sim_cpu_alloc_extra (SIM_DESC, size_t);
+#define sim_cpu_alloc(sd) sim_cpu_alloc_extra (sd, 0)
 /* Release resources held by all cpus.  */
 extern void sim_cpu_free_all (SIM_DESC);
 /* Release resources held by a cpu.  */

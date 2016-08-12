@@ -19,6 +19,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 #include "sim-base.h"
 #include "bfd.h"
@@ -27,10 +29,5 @@
 #include "armdefs.h"
 
 extern struct ARMul_State *state;
-
-struct _sim_cpu {
-
-  sim_cpu_base base;
-};
 
 #endif
