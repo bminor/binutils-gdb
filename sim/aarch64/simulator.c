@@ -14072,7 +14072,7 @@ aarch64_decode_and_execute (sim_cpu *cpu, uint64_t pc)
     }
 }
 
-bfd_boolean
+static bfd_boolean
 aarch64_step (sim_cpu *cpu)
 {
   uint64_t pc = aarch64_get_PC (cpu);
@@ -14102,10 +14102,15 @@ aarch64_run (SIM_DESC sd)
   sim_cpu *cpu = STATE_CPU (sd, 0);
 
   while (aarch64_step (cpu))
-    aarch64_update_PC (cpu);
+    {
+      aarch64_update_PC (cpu);
 
-  sim_engine_halt (sd, NULL, NULL, aarch64_get_PC (cpu),
-		   sim_exited, aarch64_get_reg_s32 (cpu, R0, SP_OK));
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
+    }
+
+  sim_engine_halt (sd, cpu, NULL, aarch64_get_PC (cpu),
+		   sim_exited, aarch64_get_reg_s32 (cpu, R0, NO_SP));
 }
 
 void

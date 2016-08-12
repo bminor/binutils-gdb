@@ -1,3 +1,11 @@
+2016-08-12  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (aarch64_step): Revert pervious delta.
+	(aarch64_run): Call sim_events_tick after each
+	instruction is simulated, and if necessary call
+	sim_events_process.
+	* simulator.h: Revert previous delta.
+
 2016-08-11  Nick Clifton  <nickc@redhat.com>
 
 	* interp.c (sim_create_inferior): Allow for being called with a
@@ -5,6 +13,8 @@
 	with that start address.
 	* simulator.c (HALT_NYI): Just print out the numeric value of the
 	instruction when not tracing.
+	(aarch64_step): Change from static to global.
+	* simulator.h: Add a prototype for aarch64_step().
 
 2016-07-27  Alan Modra  <amodra@gmail.com>
 
