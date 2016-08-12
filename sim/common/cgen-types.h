@@ -56,7 +56,7 @@ typedef enum mode_type {
 #define MAX_TARGET_MODES ((int) MODE_TARGET_MAX)
 #define MAX_MODES ((int) MODE_MAX)
 
-extern const char *mode_names[];
+extern const char * const mode_names[];
 #define MODE_NAME(m) (mode_names[m])
 
 typedef void VOID;

@@ -1,5 +1,10 @@
 2016-08-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-types.h (mode_names): Mark const.
+	* cgen-utils.c (mode_names): Likewise.
+
+2016-08-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-defs.h (struct cgen_state): Delete argv and envp.
 	(STATE_ARGV, STATE_ENVP): Delete.
 
