@@ -22,6 +22,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #define SIM_ENGINE_HALT_HOOK(SD,LAST_CPU,CIA) /* disable this hook */
 
 #include "sim-basics.h"
@@ -52,17 +54,6 @@ mn10300_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), 
 
 #define IMEM8_IMMED(EA, N) \
 (sim_core_read_aligned_1(STATE_CPU(sd, 0), EA, exec_map, (EA) + (N)))
-
-
-/* FIXME: For moment, save/restore PC value found in struct State.
-   Struct State will one day go away, being placed in the sim_cpu
-   state. */
-
-struct _sim_cpu {
-  sim_event *pending_nmi;
-  sim_cia cia;
-  sim_cpu_base base;
-};
 
 /* For compatibility, until all functions converted to passing
    SIM_DESC as an argument */
