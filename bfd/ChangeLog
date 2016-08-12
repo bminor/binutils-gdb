@@ -1,3 +1,9 @@
+2016-08-12  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_link_hash_table): Add local_dynsymcount.
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Set local_dynsymcount.
+	(bfd_elf_final_link): Set .dynsym sh_info from local_dynsymcount.
+
 2016-08-11  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Don't exit with

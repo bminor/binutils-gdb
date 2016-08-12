@@ -904,6 +904,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
       for (p = elf_hash_table (info)->dynlocal; p ; p = p->next)
 	p->dynindx = ++dynsymcount;
     }
+  elf_hash_table (info)->local_dynsymcount = dynsymcount;
 
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_link_renumber_hash_table_dynsyms,
@@ -11781,7 +11782,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       Elf_Internal_Sym sym;
       bfd_byte *dynsym = elf_hash_table (info)->dynsym->contents;
-      long last_local = 0;
+
+      o = elf_hash_table (info)->dynsym->output_section;
+      elf_section_data (o)->this_hdr.sh_info
+	= elf_hash_table (info)->local_dynsymcount + 1;
 
       /* Write out the section symbols for the output sections.  */
       if (bfd_link_pic (info)
@@ -11811,8 +11815,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		return FALSE;
 	      sym.st_value = s->vma;
 	      dest = dynsym + dynindx * bed->s->sizeof_sym;
-	      if (last_local < dynindx)
-		last_local = dynindx;
 	      bed->s->swap_symbol_out (abfd, &sym, dest, 0);
 	    }
 	}
@@ -11845,16 +11847,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 				  + e->isym.st_value);
 		}
 
-	      if (last_local < e->dynindx)
-		last_local = e->dynindx;
-
 	      dest = dynsym + e->dynindx * bed->s->sizeof_sym;
 	      bed->s->swap_symbol_out (abfd, &sym, dest, 0);
 	    }
 	}
-
-      elf_section_data (elf_hash_table (info)->dynsym->output_section)->this_hdr.sh_info =
-	last_local + 1;
     }
 
   /* We get the global symbols from the hash table.  */

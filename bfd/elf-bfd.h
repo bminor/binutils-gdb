@@ -524,6 +524,7 @@ struct elf_link_hash_table
   /* The number of symbols found in the link which is intended for the
      mandatory DT_SYMTAB tag (.dynsym section) in .dynamic section.  */
   bfd_size_type dynsymcount;
+  bfd_size_type local_dynsymcount;
 
   /* The string table of dynamic symbols, which becomes the .dynstr
      section.  */

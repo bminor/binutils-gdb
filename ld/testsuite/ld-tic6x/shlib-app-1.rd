@@ -4,7 +4,7 @@ Section Headers:
   \[Nr\] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
   \[ 0\]                   NULL            00000000 000000 000000 00      0   0  0
   \[ 1\] \.hash             HASH            00008000 001000 000044 04   A  2   0  4
-  \[ 2\] \.dynsym           DYNSYM          00008044 001044 0000c0 10   A  3   6  4
+  \[ 2\] \.dynsym           DYNSYM          00008044 001044 0000c0 10   A  3   7  4
   \[ 3\] \.dynstr           STRTAB          00008104 001104 000035 00   A  0   0  1
   \[ 4\] \.rela\.got         RELA            0000813c 00113c 000018 0c  AI  2  11  4
   \[ 5\] \.rela\.neardata    RELA            00008154 001154 000018 0c  AI  2  12  4

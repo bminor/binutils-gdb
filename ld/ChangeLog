@@ -1,5 +1,21 @@
 2016-08-12  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-tic6x/shlib-1.rd: Correct expected .dynsym sh_info.
+	* testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1rb.rd: Likewise.
+
+2016-08-12  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-undefined/weak-fundef.s: New.
 	* testsuite/ld-undefined/weak-undef.t: Don't specify filename.
 	* testsuite/ld-undefined/weak-undef.exp: Run new tests.  Rearrange
