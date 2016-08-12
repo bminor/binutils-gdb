@@ -1,3 +1,10 @@
+2016-08-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-undefined/weak-fundef.s: New.
+	* testsuite/ld-undefined/weak-undef.t: Don't specify filename.
+	* testsuite/ld-undefined/weak-undef.exp: Run new tests.  Rearrange
+	much of old code.  Use is_elf_format to select targets.
+
 2016-08-11  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20436
