@@ -23,17 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "bfd.h"
 
 /* Allocate space for all cpus in the simulator.
-   Space for the cpu must currently exist prior to parsing ARGV.
-   EXTRA_BYTES is additional space to allocate for the sim_cpu struct.  */
+   Space for the cpu must currently exist prior to parsing ARGV.  */
 /* ??? wip.  better solution must wait.  */
 
 SIM_RC
-sim_cpu_alloc_all (SIM_DESC sd, int ncpus, int extra_bytes)
+sim_cpu_alloc_all (SIM_DESC sd, int ncpus)
 {
   int c;
 
   for (c = 0; c < ncpus; ++c)
-    STATE_CPU (sd, c) = sim_cpu_alloc (sd, extra_bytes);
+    STATE_CPU (sd, c) = sim_cpu_alloc (sd);
   return SIM_RC_OK;
 }
 
@@ -41,8 +40,14 @@ sim_cpu_alloc_all (SIM_DESC sd, int ncpus, int extra_bytes)
    EXTRA_BYTES is additional space to allocate for the sim_cpu struct.  */
 
 sim_cpu *
-sim_cpu_alloc (SIM_DESC sd, int extra_bytes)
+sim_cpu_alloc (SIM_DESC sd)
 {
+  int extra_bytes = 0;
+
+#ifdef CGEN_ARCH
+  extra_bytes += cgen_cpu_max_extra_bytes ();
+#endif
+
   return zalloc (sizeof (sim_cpu) + extra_bytes);
 }
 

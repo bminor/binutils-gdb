@@ -110,7 +110,7 @@ sim_open (SIM_OPEN_KIND kind,
 
   /* Initialise the simulator.  */
 
-  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       sim_state_free (sd);
       return 0;

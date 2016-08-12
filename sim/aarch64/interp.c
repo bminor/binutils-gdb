@@ -329,7 +329,7 @@ sim_open (SIM_OPEN_KIND                  kind,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* Perform the initialization steps one by one.  */
-  if (sim_cpu_alloc_all (sd, 1, 0) != SIM_RC_OK
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK
       || sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK
       || sim_parse_args (sd, argv) != SIM_RC_OK
       || sim_analyze_program (sd,

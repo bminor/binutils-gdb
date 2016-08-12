@@ -123,9 +123,9 @@ typedef struct {
 } sim_cpu_base;
 
 /* Create all cpus.  */
-extern SIM_RC sim_cpu_alloc_all (SIM_DESC, int, int);
+extern SIM_RC sim_cpu_alloc_all (SIM_DESC, int);
 /* Create a cpu.  */
-extern sim_cpu *sim_cpu_alloc (SIM_DESC, int);
+extern sim_cpu *sim_cpu_alloc (SIM_DESC);
 /* Release resources held by all cpus.  */
 extern void sim_cpu_free_all (SIM_DESC);
 /* Release resources held by a cpu.  */

@@ -1,3 +1,7 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
 2021-04-08  Tom Tromey  <tom@tromey.com>
 
 	* sim-if.c (sim_open, sim_create_inferior): Use new-style

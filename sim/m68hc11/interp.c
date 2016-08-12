@@ -404,7 +404,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

@@ -1,3 +1,12 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-cpu.c (sim_cpu_alloc_all): Delete 3rd arg.  Delete 2nd arg to
+	sim_cpu_alloc.
+	(sim_cpu_alloc): Move extra_bytes to local var.  Add result of
+	cgen_cpu_max_extra_bytes.
+	* sim-cpu.h (sim_cpu_alloc_all): Delete 3rd arg.
+	(sim_cpu_alloc): Delete 2nd arg.
+
 2021-04-08  Tom Tromey  <tom@tromey.com>
 
 	* cgen-utils.c (RORQI, ROLQI, RORHI, ROLHI, RORSI, ROLSI): Use

@@ -659,7 +659,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   bfd_byte sp_init[4] = {0, 0, 0, 0};
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, cgen_cpu_max_extra_bytes ()) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
