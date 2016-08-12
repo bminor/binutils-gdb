@@ -1,5 +1,11 @@
 2016-08-12  Roland McGrath  <roland@hack.frob.com>
 
+	PR gold/20462
+	* script-sections.cc (Script_sections::release_segments):
+	Reset this->segments_created_.
+
+2016-08-12  Roland McGrath  <roland@hack.frob.com>
+
 	* yyscript.y (HIDDEN): New %token.
 	(assignment): Handle HIDDEN(string = expr) syntax.
 	* script.cc (script_keyword_parsecodes): Add HIDDEN.
