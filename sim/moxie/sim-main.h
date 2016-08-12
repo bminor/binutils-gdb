@@ -20,23 +20,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 #include "sim-base.h"
 #include "bfd.h"
 
 #define PCIDX 17
 
-struct _sim_cpu {
-
-  /* The following are internal simulator state variables: */
-
-/* To keep this default simulator simple, and fast, we use a direct
-   vector of registers. The internal simulator engine then uses
-   manifests to access the correct slot. */
-
+struct moxie_sim_cpu {
+  /* To keep this default simulator simple, and fast, we use a direct
+     vector of registers. The internal simulator engine then uses
+     manifests to access the correct slot. */
   unsigned_word registers[19];
-
-  sim_cpu_base base;
 };
+
+#define MOXIE_SIM_CPU(cpu) ((struct moxie_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 #endif

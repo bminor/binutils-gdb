@@ -127,7 +127,7 @@ struct moxie_regset
 #define CC_GTU 1<<3
 #define CC_LTU 1<<4
 
-/* TODO: This should be moved to sim-main.h:_sim_cpu.  */
+/* TODO: This should be moved to sim-main.h:moxie_sim_cpu.  */
 union
 {
   struct moxie_regset asregs;
@@ -1173,13 +1173,13 @@ moxie_reg_fetch (SIM_CPU *scpu, int rn, void *memory, int length)
 static sim_cia
 moxie_pc_get (sim_cpu *cpu)
 {
-  return cpu->registers[PCIDX];
+  return MOXIE_SIM_CPU (cpu)->registers[PCIDX];
 }
 
 static void
 moxie_pc_set (sim_cpu *cpu, sim_cia pc)
 {
-  cpu->registers[PCIDX] = pc;
+  MOXIE_SIM_CPU (cpu)->registers[PCIDX] = pc;
 }
 
 static void
@@ -1203,7 +1203,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   current_target_byte_order = BFD_ENDIAN_BIG;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct moxie_sim_cpu))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
