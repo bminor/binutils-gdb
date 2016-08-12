@@ -1,3 +1,9 @@
+2016-08-12  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_symbol_table): Generate a warning if a local
+	symbol is found at and offste greater than or equal to the sh_info
+	field of it's section header.
+
 2016-08-08  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20440

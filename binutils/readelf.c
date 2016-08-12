@@ -11114,6 +11114,11 @@ process_symbol_table (FILE * file)
 		}
 
 	      putchar ('\n');
+
+	      if (ELF_ST_BIND (psym->st_info) == STB_LOCAL
+		  && si >= section->sh_info)
+		warn (_("local symbol %u found at index >= %s's sh_info value of %u\n"),
+		      si, printable_section_name (section), section->sh_info);
 	    }
 
 	  free (symtab);
