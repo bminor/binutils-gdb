@@ -21,19 +21,12 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 #include "sim-base.h"
 #include "bfd.h"
 
 #include "ft32-sim.h"
-
-struct _sim_cpu {
-
-  /* The following are internal simulator state variables: */
-
-  struct ft32_cpu_state state;
-
-  sim_cpu_base base;
-};
 
 #endif
