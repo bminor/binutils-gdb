@@ -1,3 +1,7 @@
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.xml/tdesc-regs.exp: set core-regs for arc*-*-elf32.
+
 2016-09-21  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/20604:

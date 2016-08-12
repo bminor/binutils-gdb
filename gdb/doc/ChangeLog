@@ -1,3 +1,10 @@
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.texinfo (Embedded Processors): Document ARC.
+	(Synopsys ARC): New section.
+	(Standard Target Features): Document ARC features.
+	(ARC Features): New section.
+
 2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* .gitignore: New file.

@@ -30,6 +30,10 @@ switch -glob -- [istarget] {
     "aarch64*-*-*" {
 	set core-regs {aarch64-core.xml}
     }
+    "arc*-*-*" {
+	set architecture "arc:ARCv2"
+	set core-regs {arc-v2.xml}
+    }
     "arm*-*-*" {
         set core-regs {arm-core.xml}
     }

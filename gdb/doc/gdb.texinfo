@@ -22017,6 +22017,7 @@ acceptable commands.
 
 
 @menu
+* ARC::                         Synopsys ARC
 * ARM::                         ARM
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
@@ -22026,6 +22027,30 @@ acceptable commands.
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
 @end menu
+
+@node ARC
+@subsection Synopsys ARC
+@cindex Synopsys ARC
+@cindex ARC specific commands
+@cindex ARC600
+@cindex ARC700
+@cindex ARC EM
+@cindex ARC HS
+
+@value{GDBN} provides the following ARC-specific commands:
+
+@table @code
+@item set debug arc
+@kindex set debug arc
+Control the level of ARC specific debug messages.  Use 0 for no messages (the
+default) and 1 for debug messages.  At present higher values offer no further
+messages.
+
+@item show debug arc
+@kindex show debug arc
+Show the level of ARC specific debugging in operation.
+
+@end table
 
 @node ARM
 @subsection ARM
@@ -40907,6 +40932,7 @@ registers using the capitalization used in the description.
 
 @menu
 * AArch64 Features::
+* ARC Features::
 * ARM Features::
 * i386 Features::
 * MicroBlaze Features::
@@ -40931,6 +40957,45 @@ targets.  It should contain registers @samp{x0} through @samp{x30},
 The @samp{org.gnu.gdb.aarch64.fpu} feature is optional.  If present,
 it should contain registers @samp{v0} through @samp{v31}, @samp{fpsr},
 and @samp{fpcr}.
+
+@node ARC Features
+@subsection ARC Features
+@cindex target descriptions, ARC Features
+
+ARC processors are highly configurable, so even core registers and their number
+are not completely predetermined.  In addition flags and PC registers which are
+important to @value{GDBN} are not ``core'' registers in ARC.  It is required
+that one of the core registers features is present.
+@samp{org.gnu.gdb.arc.aux-minimal} feature is mandatory.
+
+The @samp{org.gnu.gdb.arc.core.v2} feature is required for ARC EM and ARC HS
+targets with a normal register file.  It should contain registers @samp{r0}
+through @samp{r25}, @samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}, @samp{blink},
+@samp{lp_count} and @samp{pcl}.  This feature may contain register @samp{ilink}
+and any of extension core registers @samp{r32} through @samp{r59/acch}.
+@samp{ilink} and extension core registers are not available to read/write, when
+debugging GNU/Linux applications, thus @samp{ilink} is made optional.
+
+The @samp{org.gnu.gdb.arc.core-reduced.v2} feature is required for ARC EM and
+ARC HS targets with a reduced register file.  It should contain registers
+@samp{r0} through @samp{r3}, @samp{r10} through @samp{r15}, @samp{gp},
+@samp{fp}, @samp{sp}, @samp{r30}, @samp{blink}, @samp{lp_count} and @samp{pcl}.
+This feature may contain register @samp{ilink} and any of extension core
+registers @samp{r32} through @samp{r59/acch}.
+
+The @samp{org.gnu.gdb.arc.core.arcompact} feature is required for ARCompact
+targets with a normal register file.  It should contain registers @samp{r0}
+through @samp{r25}, @samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}, @samp{blink},
+@samp{lp_count} and @samp{pcl}.  This feature may contain registers
+@samp{ilink1}, @samp{ilink2} and any of extension core registers @samp{r32}
+through @samp{r59/acch}.  @samp{ilink1} and @samp{ilink2} and extension core
+registers are not available when debugging GNU/Linux applications.  The only
+difference with @samp{org.gnu.gdb.arc.core.v2} feature is in the names of
+@samp{ilink1} and @samp{ilink2} registers and that @samp{r30} is mandatory in
+ARC v2, but @samp{ilink2} is optional on ARCompact.
+
+The @samp{org.gnu.gdb.arc.aux-minimal} feature is required for all ARC
+targets.  It should contain registers @samp{pc} and @samp{status32}.
 
 @node ARM Features
 @subsection ARM Features

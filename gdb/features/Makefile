@@ -148,6 +148,8 @@ OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 # to make on the command line.
 XMLTOC = \
 	aarch64.xml \
+	arc-v2.xml \
+	arc-arcompact.xml \
 	arm-with-iwmmxt.xml \
 	arm-with-m-fpa-layout.xml \
 	arm-with-m-vfp-d16.xml \

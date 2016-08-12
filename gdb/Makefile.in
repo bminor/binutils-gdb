@@ -652,6 +652,7 @@ ALL_64_TARGET_OBS = \
 
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
+	arc-tdep.o \
 	armbsd-tdep.o arm.o arm-linux.o arm-linux-tdep.o \
 	arm-get-next-pcs.o arm-symbian-tdep.o \
 	armnbsd-tdep.o armobsd-tdep.o \
@@ -906,7 +907,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 HFILES_NO_SRCDIR = \
 common/gdb_signals.h nat/gdb_thread_db.h common/gdb_vecs.h \
 common/x86-xstate.h nat/linux-ptrace.h nat/mips-linux-watch.h \
-proc-utils.h aarch64-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
+proc-utils.h aarch64-tdep.h arc-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
 ppcnbsd-tdep.h cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h x86bsd-nat.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
@@ -1664,6 +1665,7 @@ ALLDEPFILES = \
 	alpha-tdep.c alpha-mdebug-tdep.c \
 	alpha-linux-tdep.c \
 	alphabsd-tdep.c alphafbsd-tdep.c alphanbsd-tdep.c alphaobsd-tdep.c \
+	arc-tdep.c \
 	amd64-nat.c amd64-tdep.c \
 	amd64bsd-nat.c amd64fbsd-nat.c amd64fbsd-tdep.c \
 	amd64nbsd-nat.c amd64nbsd-tdep.c \

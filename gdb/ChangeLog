@@ -1,3 +1,18 @@
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add arc-tdep.o.
+	(HFILES_NO_SRCDIR): Add arc-tdep.h.
+	(ALLDEPFILES): Add arc-tdep.c.
+	* NEWS: Mention new ARC port.
+	* configure.tgt: Add ARC.
+	* arc-tdep.c: New file.
+	* arc-tdep.h: New file.
+	* features/Makefile (XMLTOC): Add arc-v2.xml and arc-arcompact.xml.
+	* features/arc-v2.xml: New file.
+	* features/arc-v2.c: New file (generated).
+	* features/arc-arcompact.xml: New file.
+	* features/arc-arcompact.c: New file (generated).
+
 2016-09-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* rs6000-tdep.c (ppc_process_record_op63): Fix return of instruction
