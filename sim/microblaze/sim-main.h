@@ -18,6 +18,8 @@
 #ifndef MICROBLAZE_SIM_MAIN
 #define MICROBLAZE_SIM_MAIN
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "microblaze.h"
 #include "sim-basics.h"
 #include "sim-base.h"
@@ -43,9 +45,6 @@
   signed_2	imm_high;
 };
 
-struct _sim_cpu {
-  struct microblaze_regset microblaze_cpu;
-  sim_cpu_base base;
-};
+#define MICROBLAZE_SIM_CPU(cpu) ((struct microblaze_regset *) CPU_ARCH_DATA (cpu))
 
 #endif /* MICROBLAZE_SIM_MAIN */

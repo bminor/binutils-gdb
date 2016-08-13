@@ -24,7 +24,7 @@
 #define GET_RA	((inst & RA_MASK) >> RA_LOW)
 #define GET_RB	((inst & RB_MASK) >> RB_LOW)
 
-#define CPU     cpu->microblaze_cpu
+#define CPU     (*MICROBLAZE_SIM_CPU (cpu))
 
 #define RD      CPU.regs[rd]
 #define RA      CPU.regs[ra]
