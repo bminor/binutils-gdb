@@ -302,7 +302,7 @@ extern void        aarch64_save_LR (sim_cpu *);
 
 /* Instruction accessor - implemented as a
    macro as we do not need to annotate it.  */
-#define aarch64_get_instr(cpu)  ((cpu)->instr)
+#define aarch64_get_instr(cpu)  (AARCH64_SIM_CPU (cpu)->instr)
 
 /* Flag register accessors.  */
 extern uint32_t    aarch64_get_CPSR       (sim_cpu *);
