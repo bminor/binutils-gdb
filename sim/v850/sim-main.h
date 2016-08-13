@@ -1,6 +1,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 /* The v850 has 32bit words, numbered 31 (MSB) to 0 (LSB) */
 
 #define WITH_TARGET_WORD_MSB 31
@@ -32,15 +34,13 @@ typedef struct _v850_regs {
   reg64_t vregs[32];		/* vector registers.  */
 } v850_regs;
 
-struct _sim_cpu
-{
-  /* ... simulator specific members ... */
+struct v850_sim_cpu {
   v850_regs reg;
   reg_t psw_mask;               /* only allow non-reserved bits to be set */
   sim_event *pending_nmi;
-  /* ... base type ... */
-  sim_cpu_base base;
 };
+
+#define V850_SIM_CPU(cpu) ((struct v850_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 /* For compatibility, until all functions converted to passing
    SIM_DESC as an argument */
@@ -90,15 +90,15 @@ nia = PC
 
 
 /* new */
-#define GR  ((CPU)->reg.regs)
-#define SR  ((CPU)->reg.sregs)
-#define VR  ((CPU)->reg.vregs)
-#define MPU0_SR  ((STATE_CPU (sd, 0))->reg.mpu0_sregs)
-#define MPU1_SR  ((STATE_CPU (sd, 0))->reg.mpu1_sregs)
-#define FPU_SR   ((STATE_CPU (sd, 0))->reg.fpu_sregs)
+#define GR  (V850_SIM_CPU (CPU)->reg.regs)
+#define SR  (V850_SIM_CPU (CPU)->reg.sregs)
+#define VR  (V850_SIM_CPU (CPU)->reg.vregs)
+#define MPU0_SR  (V850_SIM_CPU (STATE_CPU (sd, 0))->reg.mpu0_sregs)
+#define MPU1_SR  (V850_SIM_CPU (STATE_CPU (sd, 0))->reg.mpu1_sregs)
+#define FPU_SR   (V850_SIM_CPU (STATE_CPU (sd, 0))->reg.fpu_sregs)
 
 /* old */
-#define State    (STATE_CPU (simulator, 0)->reg)
+#define State    (V850_SIM_CPU (STATE_CPU (simulator, 0))->reg)
 #define PC	(State.pc)
 #define SP_REGNO        3
 #define SP      (State.regs[SP_REGNO])
