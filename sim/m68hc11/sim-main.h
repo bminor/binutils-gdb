@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef _SIM_MAIN_H
 #define _SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 #include "sim-base.h"
 
@@ -31,8 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "opcode/m68hc11.h"
 #include "sim-signal.h"
 #include "sim-types.h"
-
-struct _sim_cpu;
 
 #include "interrupts.h"
 #include <setjmp.h>
@@ -133,11 +133,9 @@ enum M6811_Special
 #define M6812_MAX_PORTS (0x3ff+1)
 #define MAX_PORTS       (M6812_MAX_PORTS)
 
-struct _sim_cpu;
+typedef void (* cpu_interp) (sim_cpu *);
 
-typedef void (* cpu_interp) (struct _sim_cpu*);
-
-struct _sim_cpu {
+struct m68hc11_sim_cpu {
   /* CPU registers.  */
   struct m6811_regs     cpu_regs;
 
@@ -203,42 +201,40 @@ struct _sim_cpu {
   
 
   struct hw            *hw_cpu;
-
-  /* ... base type ... */
-  sim_cpu_base base;
 };
+#define M68HC11_SIM_CPU(cpu) ((struct m68hc11_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 /* Returns the cpu absolute cycle time (A virtual counter incremented
    at each 68HC11 E clock).  */
-#define cpu_current_cycle(cpu)    ((cpu)->cpu_absolute_cycle)
-#define cpu_add_cycles(cpu, T)    ((cpu)->cpu_current_cycle += (int64_t) (T))
-#define cpu_is_running(cpu)       ((cpu)->cpu_running)
+#define cpu_current_cycle(cpu)    (M68HC11_SIM_CPU (cpu)->cpu_absolute_cycle)
+#define cpu_add_cycles(cpu, T)    (M68HC11_SIM_CPU (cpu)->cpu_current_cycle += (int64_t) (T))
+#define cpu_is_running(cpu)       (M68HC11_SIM_CPU (cpu)->cpu_running)
 
 /* Get the IO/RAM base addresses depending on the M6811_INIT register.  */
 #define cpu_get_io_base(cpu) \
-  (((uint16_t)(((cpu)->ios[M6811_INIT]) & 0x0F)) << 12)
+  (((uint16_t)((M68HC11_SIM_CPU (cpu)->ios[M6811_INIT]) & 0x0F)) << 12)
 #define cpu_get_reg_base(cpu) \
-  (((uint16_t)(((cpu)->ios[M6811_INIT]) & 0xF0)) << 8)
+  (((uint16_t)((M68HC11_SIM_CPU (cpu)->ios[M6811_INIT]) & 0xF0)) << 8)
 
 /* Returns the different CPU registers.  */
-#define cpu_get_ccr(cpu)          ((cpu)->cpu_regs.ccr)
-#define cpu_get_pc(cpu)           ((cpu)->cpu_regs.pc)
-#define cpu_get_d(cpu)            ((cpu)->cpu_regs.d)
-#define cpu_get_x(cpu)            ((cpu)->cpu_regs.ix)
-#define cpu_get_y(cpu)            ((cpu)->cpu_regs.iy)
-#define cpu_get_sp(cpu)           ((cpu)->cpu_regs.sp)
-#define cpu_get_a(cpu)            (((cpu)->cpu_regs.d >> 8) & 0x0FF)
-#define cpu_get_b(cpu)            ((cpu)->cpu_regs.d & 0x0FF)
-#define cpu_get_page(cpu)         ((cpu)->cpu_regs.page)
+#define cpu_get_ccr(cpu)          (M68HC11_SIM_CPU (cpu)->cpu_regs.ccr)
+#define cpu_get_pc(cpu)           (M68HC11_SIM_CPU (cpu)->cpu_regs.pc)
+#define cpu_get_d(cpu)            (M68HC11_SIM_CPU (cpu)->cpu_regs.d)
+#define cpu_get_x(cpu)            (M68HC11_SIM_CPU (cpu)->cpu_regs.ix)
+#define cpu_get_y(cpu)            (M68HC11_SIM_CPU (cpu)->cpu_regs.iy)
+#define cpu_get_sp(cpu)           (M68HC11_SIM_CPU (cpu)->cpu_regs.sp)
+#define cpu_get_a(cpu)            ((M68HC11_SIM_CPU (cpu)->cpu_regs.d >> 8) & 0x0FF)
+#define cpu_get_b(cpu)            (M68HC11_SIM_CPU (cpu)->cpu_regs.d & 0x0FF)
+#define cpu_get_page(cpu)         (M68HC11_SIM_CPU (cpu)->cpu_regs.page)
 
 /* 68HC12 specific and Motorola internal registers.  */
 #define cpu_get_tmp3(cpu)         (0)
 #define cpu_get_tmp2(cpu)         (0)
 
-#define cpu_set_d(cpu, val)       ((cpu)->cpu_regs.d = (val))
-#define cpu_set_x(cpu, val)       ((cpu)->cpu_regs.ix = (val))
-#define cpu_set_y(cpu, val)       ((cpu)->cpu_regs.iy = (val))
-#define cpu_set_page(cpu, val)    ((cpu)->cpu_regs.page = (val))
+#define cpu_set_d(cpu, val)       (M68HC11_SIM_CPU (cpu)->cpu_regs.d = (val))
+#define cpu_set_x(cpu, val)       (M68HC11_SIM_CPU (cpu)->cpu_regs.ix = (val))
+#define cpu_set_y(cpu, val)       (M68HC11_SIM_CPU (cpu)->cpu_regs.iy = (val))
+#define cpu_set_page(cpu, val)    (M68HC11_SIM_CPU (cpu)->cpu_regs.page = (val))
 
 /* 68HC12 specific and Motorola internal registers.  */
 #define cpu_set_tmp3(cpu, val)    (0)
@@ -246,17 +242,17 @@ struct _sim_cpu {
 
 #if 0
 /* This is a function in m68hc11_sim.c to keep track of the frame.  */
-#define cpu_set_sp(cpu, val)      ((cpu)->cpu_regs.sp = (val))
+#define cpu_set_sp(cpu, val)      (M68HC11_SIM_CPU (cpu)->cpu_regs.sp = (val))
 #endif
 
-#define cpu_set_pc(cpu, val)      ((cpu)->cpu_regs.pc = (val))
+#define cpu_set_pc(cpu, val)      (M68HC11_SIM_CPU (cpu)->cpu_regs.pc = (val))
 
 #define cpu_set_a(cpu, val)  \
   cpu_set_d(cpu, ((val) << 8) | cpu_get_b (cpu))
 #define cpu_set_b(cpu, val)  \
   cpu_set_d(cpu, ((cpu_get_a (cpu)) << 8) | ((val) & 0x0FF))
 
-#define cpu_set_ccr(cpu, val)     ((cpu)->cpu_regs.ccr = (val))
+#define cpu_set_ccr(cpu, val)     (M68HC11_SIM_CPU (cpu)->cpu_regs.ccr = (val))
 #define cpu_get_ccr_H(cpu)        ((cpu_get_ccr (cpu) & M6811_H_BIT) ? 1 : 0)
 #define cpu_get_ccr_X(cpu)        ((cpu_get_ccr (cpu) & M6811_X_BIT) ? 1 : 0)
 #define cpu_get_ccr_S(cpu)        ((cpu_get_ccr (cpu) & M6811_S_BIT) ? 1 : 0)
@@ -286,10 +282,12 @@ extern void cpu_memory_exception (sim_cpu *cpu,
 STATIC_INLINE UNUSED address_word
 phys_to_virt (sim_cpu *cpu, address_word addr)
 {
-  if (addr >= cpu->bank_start && addr < cpu->bank_end)
-    return ((address_word) (addr - cpu->bank_start)
-            + (((address_word) cpu->cpu_regs.page) << cpu->bank_shift)
-            + cpu->bank_virtual);
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+
+  if (addr >= m68hc11_cpu->bank_start && addr < m68hc11_cpu->bank_end)
+    return ((address_word) (addr - m68hc11_cpu->bank_start)
+            + (((address_word) m68hc11_cpu->cpu_regs.page) << m68hc11_cpu->bank_shift)
+            + m68hc11_cpu->bank_virtual);
   else
     return (address_word) (addr);
 }
@@ -411,40 +409,44 @@ cpu_ccr_update_sub16 (sim_cpu *cpu, uint16_t r, uint16_t a, uint16_t b)
 STATIC_INLINE UNUSED void
 cpu_m68hc11_push_uint8 (sim_cpu *cpu, uint8_t val)
 {
-  uint16_t addr = cpu->cpu_regs.sp;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.sp;
 
   memory_write8 (cpu, addr, val);
-  cpu->cpu_regs.sp = addr - 1;
+  m68hc11_cpu->cpu_regs.sp = addr - 1;
 }
 
 STATIC_INLINE UNUSED void
 cpu_m68hc11_push_uint16 (sim_cpu *cpu, uint16_t val)
 {
-  uint16_t addr = cpu->cpu_regs.sp - 1;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.sp - 1;
 
   memory_write16 (cpu, addr, val);
-  cpu->cpu_regs.sp = addr - 1;
+  m68hc11_cpu->cpu_regs.sp = addr - 1;
 }
 
 STATIC_INLINE UNUSED uint8_t
 cpu_m68hc11_pop_uint8 (sim_cpu *cpu)
 {
-  uint16_t addr = cpu->cpu_regs.sp;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.sp;
   uint8_t val;
   
   val = memory_read8 (cpu, addr + 1);
-  cpu->cpu_regs.sp = addr + 1;
+  m68hc11_cpu->cpu_regs.sp = addr + 1;
   return val;
 }
 
 STATIC_INLINE UNUSED uint16_t
 cpu_m68hc11_pop_uint16 (sim_cpu *cpu)
 {
-  uint16_t addr = cpu->cpu_regs.sp;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.sp;
   uint16_t val;
   
   val = memory_read16 (cpu, addr + 1);
-  cpu->cpu_regs.sp = addr + 2;
+  m68hc11_cpu->cpu_regs.sp = addr + 2;
   return val;
 }
 
@@ -452,42 +454,46 @@ cpu_m68hc11_pop_uint16 (sim_cpu *cpu)
 STATIC_INLINE UNUSED void
 cpu_m68hc12_push_uint8 (sim_cpu *cpu, uint8_t val)
 {
-  uint16_t addr = cpu->cpu_regs.sp;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.sp;
 
   addr --;
   memory_write8 (cpu, addr, val);
-  cpu->cpu_regs.sp = addr;
+  m68hc11_cpu->cpu_regs.sp = addr;
 }
 
 STATIC_INLINE UNUSED void
 cpu_m68hc12_push_uint16 (sim_cpu *cpu, uint16_t val)
 {
-  uint16_t addr = cpu->cpu_regs.sp;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.sp;
 
   addr -= 2;
   memory_write16 (cpu, addr, val);
-  cpu->cpu_regs.sp = addr;
+  m68hc11_cpu->cpu_regs.sp = addr;
 }
 
 STATIC_INLINE UNUSED uint8_t
 cpu_m68hc12_pop_uint8 (sim_cpu *cpu)
 {
-  uint16_t addr = cpu->cpu_regs.sp;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.sp;
   uint8_t val;
   
   val = memory_read8 (cpu, addr);
-  cpu->cpu_regs.sp = addr + 1;
+  m68hc11_cpu->cpu_regs.sp = addr + 1;
   return val;
 }
 
 STATIC_INLINE UNUSED uint16_t
 cpu_m68hc12_pop_uint16 (sim_cpu *cpu)
 {
-  uint16_t addr = cpu->cpu_regs.sp;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.sp;
   uint16_t val;
   
   val = memory_read16 (cpu, addr);
-  cpu->cpu_regs.sp = addr + 2;
+  m68hc11_cpu->cpu_regs.sp = addr + 2;
   return val;
 }
 
@@ -495,22 +501,24 @@ cpu_m68hc12_pop_uint16 (sim_cpu *cpu)
 STATIC_INLINE UNUSED uint8_t
 cpu_fetch8 (sim_cpu *cpu)
 {
-  uint16_t addr = cpu->cpu_regs.pc;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.pc;
   uint8_t val;
   
   val = memory_read8 (cpu, addr);
-  cpu->cpu_regs.pc = addr + 1;
+  m68hc11_cpu->cpu_regs.pc = addr + 1;
   return val;
 }
 
 STATIC_INLINE UNUSED uint16_t
 cpu_fetch16 (sim_cpu *cpu)
 {
-  uint16_t addr = cpu->cpu_regs.pc;
+  struct m68hc11_sim_cpu *m68hc11_cpu = M68HC11_SIM_CPU (cpu);
+  uint16_t addr = m68hc11_cpu->cpu_regs.pc;
   uint16_t val;
   
   val = memory_read16 (cpu, addr);
-  cpu->cpu_regs.pc = addr + 2;
+  m68hc11_cpu->cpu_regs.pc = addr + 2;
   return val;
 }
 
