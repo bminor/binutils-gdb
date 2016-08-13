@@ -98,8 +98,8 @@ mcore_store_unsigned_integer (unsigned char *addr, int len, unsigned long val)
 
 static int memcycles = 1;
 
-#define gr	cpu->active_gregs
-#define cr	cpu->regs.cregs
+#define gr	MCORE_SIM_CPU (cpu)->active_gregs
+#define cr	MCORE_SIM_CPU (cpu)->regs.cregs
 #define sr	cr[0]
 #define vbr	cr[1]
 #define esr	cr[2]
@@ -125,10 +125,12 @@ static int memcycles = 1;
 #define SR_AF()		((sr >> 1) & 1)
 static void set_active_regs (SIM_CPU *cpu)
 {
+  struct mcore_sim_cpu *mcore_cpu = MCORE_SIM_CPU (cpu);
+
   if (SR_AF())
-    cpu->active_gregs = cpu->regs.alt_gregs;
+    mcore_cpu->active_gregs = mcore_cpu->regs.alt_gregs;
   else
-    cpu->active_gregs = cpu->regs.gregs;
+    mcore_cpu->active_gregs = mcore_cpu->regs.gregs;
 }
 
 #define	TRAPCODE	1	/* r1 holds which function we want */
@@ -144,13 +146,15 @@ static void set_active_regs (SIM_CPU *cpu)
 static void
 set_initial_gprs (SIM_CPU *cpu)
 {
+  struct mcore_sim_cpu *mcore_cpu = MCORE_SIM_CPU (cpu);
+
   /* Set up machine just out of reset.  */
   CPU_PC_SET (cpu, 0);
   sr = 0;
 
   /* Clean out the GPRs and alternate GPRs.  */
-  memset (&cpu->regs.gregs, 0, sizeof(cpu->regs.gregs));
-  memset (&cpu->regs.alt_gregs, 0, sizeof(cpu->regs.alt_gregs));
+  memset (&mcore_cpu->regs.gregs, 0, sizeof(mcore_cpu->regs.gregs));
+  memset (&mcore_cpu->regs.alt_gregs, 0, sizeof(mcore_cpu->regs.alt_gregs));
 
   /* Make our register set point to the right place.  */
   set_active_regs (cpu);
@@ -203,10 +207,12 @@ process_stub (SIM_DESC sd, SIM_CPU *cpu, int what)
 static void
 util (SIM_DESC sd, SIM_CPU *cpu, unsigned what)
 {
+  struct mcore_sim_cpu *mcore_cpu = MCORE_SIM_CPU (cpu);
+
   switch (what)
     {
     case 0:	/* exit */
-      sim_engine_halt (sd, cpu, NULL, cpu->regs.pc, sim_exited, gr[PARM1]);
+      sim_engine_halt (sd, cpu, NULL, mcore_cpu->regs.pc, sim_exited, gr[PARM1]);
       break;
 
     case 1:	/* printf */
@@ -220,7 +226,7 @@ util (SIM_DESC sd, SIM_CPU *cpu, unsigned what)
       break;
 
     case 3:	/* utime */
-      gr[RET1] = cpu->insts;
+      gr[RET1] = mcore_cpu->insts;
       break;
 
     case 0xFF:
@@ -287,6 +293,7 @@ static int tracing = 0;
 static void
 step_once (SIM_DESC sd, SIM_CPU *cpu)
 {
+  struct mcore_sim_cpu *mcore_cpu = MCORE_SIM_CPU (cpu);
   int needfetch;
   word ibuf;
   word pc;
@@ -349,7 +356,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 
       if ((WLincyc == 1) && (pc == WLendpc))
 	{
-	  cycs = (cpu->cycles + (insts + bonus_cycles +
+	  cycs = (mcore_cpu->cycles + (insts + bonus_cycles +
 				       (memops * memcycles)) - WLbcyc);
 
 	  if (WLcnts[WLW] == 1)
@@ -384,7 +391,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 		  if (pc == WL[w])
 		    {
 		      WLcnts[w]++;
-		      WLbcyc = cpu->cycles + insts
+		      WLbcyc = mcore_cpu->cycles + insts
 			+ bonus_cycles + (memops * memcycles);
 		      WLendpc = gr[15];
 		      WLincyc = 1;
@@ -1215,10 +1222,10 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 
   /* Hide away the things we've cached while executing.  */
   CPU_PC_SET (cpu, pc);
-  cpu->insts += insts;		/* instructions done ... */
-  cpu->cycles += insts;		/* and each takes a cycle */
-  cpu->cycles += bonus_cycles;	/* and extra cycles for branches */
-  cpu->cycles += memops * memcycles;	/* and memop cycle delays */
+  mcore_cpu->insts += insts;		/* instructions done ... */
+  mcore_cpu->cycles += insts;		/* and each takes a cycle */
+  mcore_cpu->cycles += bonus_cycles;	/* and extra cycles for branches */
+  mcore_cpu->cycles += memops * memcycles;	/* and memop cycle delays */
 }
 
 void
@@ -1244,6 +1251,8 @@ sim_engine_run (SIM_DESC sd,
 static int
 mcore_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
+  struct mcore_sim_cpu *mcore_cpu = MCORE_SIM_CPU (cpu);
+
   if (rn < NUM_MCORE_REGS && rn >= 0)
     {
       if (length == 4)
@@ -1252,7 +1261,7 @@ mcore_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 
 	  /* misalignment safe */
 	  ival = mcore_extract_unsigned_integer (memory, 4);
-	  cpu->asints[rn] = ival;
+	  mcore_cpu->asints[rn] = ival;
 	}
 
       return 4;
@@ -1264,11 +1273,13 @@ mcore_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 static int
 mcore_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
+  struct mcore_sim_cpu *mcore_cpu = MCORE_SIM_CPU (cpu);
+
   if (rn < NUM_MCORE_REGS && rn >= 0)
     {
       if (length == 4)
 	{
-	  long ival = cpu->asints[rn];
+	  long ival = mcore_cpu->asints[rn];
 
 	  /* misalignment-safe */
 	  mcore_store_unsigned_integer (memory, 4, ival);
@@ -1284,18 +1295,19 @@ void
 sim_info (SIM_DESC sd, int verbose)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
+  struct mcore_sim_cpu *mcore_cpu = MCORE_SIM_CPU (cpu);
 #ifdef WATCHFUNCTIONS
   int w, wcyc;
 #endif
-  double virttime = cpu->cycles / 36.0e6;
+  double virttime = mcore_cpu->cycles / 36.0e6;
   host_callback *callback = STATE_CALLBACK (sd);
 
   callback->printf_filtered (callback, "\n\n# instructions executed  %10d\n",
-			     cpu->insts);
+			     mcore_cpu->insts);
   callback->printf_filtered (callback, "# cycles                 %10d\n",
-			     cpu->cycles);
+			     mcore_cpu->cycles);
   callback->printf_filtered (callback, "# pipeline stalls        %10d\n",
-			     cpu->stalls);
+			     mcore_cpu->stalls);
   callback->printf_filtered (callback, "# virtual time taken     %10.4f\n",
 			     virttime);
 
@@ -1326,13 +1338,13 @@ sim_info (SIM_DESC sd, int verbose)
 static sim_cia
 mcore_pc_get (sim_cpu *cpu)
 {
-  return cpu->regs.pc;
+  return MCORE_SIM_CPU (cpu)->regs.pc;
 }
 
 static void
 mcore_pc_set (sim_cpu *cpu, sim_cia pc)
 {
-  cpu->regs.pc = pc;
+  MCORE_SIM_CPU (cpu)->regs.pc = pc;
 }
 
 static void
@@ -1356,7 +1368,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   cb->syscall_map = cb_mcore_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct mcore_sim_cpu))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
