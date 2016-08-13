@@ -370,7 +370,7 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 "ctret"
 {
   nia  = (CTPC & ~1);
-  PSW = (CTPSW & (CPU)->psw_mask);
+  PSW = (CTPSW & V850_SIM_CPU (CPU)->psw_mask);
   TRACE_BRANCH1 (PSW);
 }
 
@@ -954,7 +954,7 @@ regID,111111,RRRRR + selID,00000100000:IX:::ldsr
   /* FIXME: For now we ignore the selID.  */
   if (idecode_issue == idecode_v850e3v5_issue && selID != 0)
     {
-      (CPU)->reg.selID_sregs[selID][regID] = sreg;
+      V850_SIM_CPU (CPU)->reg.selID_sregs[selID][regID] = sreg;
     }
   else if ((   idecode_issue == idecode_v850e2_issue
             || idecode_issue == idecode_v850e3v5_issue
