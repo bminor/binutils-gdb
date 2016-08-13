@@ -382,13 +382,13 @@ sim_info (SIM_DESC sd, int verbose)
 static sim_cia
 microblaze_pc_get (sim_cpu *cpu)
 {
-  return cpu->microblaze_cpu.spregs[0];
+  return MICROBLAZE_SIM_CPU (cpu)->spregs[0];
 }
 
 static void
 microblaze_pc_set (sim_cpu *cpu, sim_cia pc)
 {
-  cpu->microblaze_cpu.spregs[0] = pc;
+  MICROBLAZE_SIM_CPU (cpu)->spregs[0] = pc;
 }
 
 static void
@@ -409,7 +409,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct microblaze_regset))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
