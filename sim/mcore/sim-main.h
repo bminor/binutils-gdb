@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 
 typedef long int           word;
@@ -48,8 +50,7 @@ struct mcore_regset
 #define LAST_VALID_CREG	32		/* only 0..12 implemented */
 #define NUM_MCORE_REGS	(16 + 16 + LAST_VALID_CREG + 1)
 
-struct _sim_cpu {
-
+struct mcore_sim_cpu {
   union
   {
     struct mcore_regset regs;
@@ -64,9 +65,9 @@ struct _sim_cpu {
   int stalls;
   int cycles;
   int insts;
-
-  sim_cpu_base base;
 };
+
+#define MCORE_SIM_CPU(cpu) ((struct mcore_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 #endif
 
