@@ -33,7 +33,7 @@ static int bench_mode = -1;
 static struct timeval bench_start;
 static struct timeval bench_stop;
 
-void
+static void
 emul_bench (struct _sim_cpu* cpu)
 {
   int op;
@@ -90,7 +90,7 @@ emul_bench (struct _sim_cpu* cpu)
 }
 #endif
 
-void
+static void
 emul_write(struct _sim_cpu* state)
 {
   int addr = cpu_get_x (state) & 0x0FFFF;
@@ -115,7 +115,7 @@ emul_write(struct _sim_cpu* state)
    But doing an exit () on a real target is really a non-sense.
    exit () is important for the validation of GCC.  The exit status
    is passed in 'D' register.  */
-void
+static void
 emul_exit (sim_cpu *cpu)
 {
   sim_engine_halt (CPU_STATE (cpu), cpu,

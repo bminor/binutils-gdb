@@ -1,3 +1,20 @@
+2016-08-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-m68hc11eepr.c (attach_m68hc11eepr_regs): Drop cast with
+	return value of hw_malloc.
+	* dv-m68hc11sio.c (m68hc11sio_rx_poll): Mark static.
+	(m68hc11sio_tx_poll): Likewise.
+	* dv-m68hc11spi.c (m68hc11spi_clock): Likewise.
+	* dv-m68hc11tim.c (m68hc11tim_timer_event): Likewise.
+	* dv-nvram.c (attach_nvram_regs): Drop cast with
+	return value of hw_malloc.
+	* emulos.c (emul_bench): Mark static.
+	(emul_write): Likewise.
+	(emul_exit): Likewise.
+	* gencode.c: Include stdio.h.
+	(gen_function_entry): Unify two print lines.
+	(cmp_opcode): Mark args const.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

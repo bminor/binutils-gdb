@@ -186,7 +186,7 @@ attach_nvram_regs (struct hw *me, struct nvram *controller)
 
     case NVRAM_SAVE_MODIFIED:
     case NVRAM_SAVE_ALL:
-      controller->data = (char*) hw_malloc (me, attach_size);
+      controller->data = hw_malloc (me, attach_size);
       if (controller->data == 0)
         hw_abort (me, "Not enough memory, try to use the mode 'map'");
 

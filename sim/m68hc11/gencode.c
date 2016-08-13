@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
@@ -1987,8 +1988,7 @@ void
 gen_function_entry (FILE *fp, const char *name, int locals)
 {
   /* Generate interpretor entry point.	*/
-  print (fp, 0, "%s (proc)\n", name);
-  print (fp, indent_level, "struct _sim_cpu* proc;");
+  print (fp, 0, "%s (sim_cpu *proc)\n", name);
   print (fp, indent_level, "{\n");
 
   /* Interpretor local variables.  */
@@ -2007,7 +2007,7 @@ gen_function_close (FILE *fp)
 }
 
 int
-cmp_opcode (void* e1, void* e2)
+cmp_opcode (const void *e1, const void *e2)
 {
   struct m6811_opcode_def* op1 = (struct m6811_opcode_def*) e1;
   struct m6811_opcode_def* op2 = (struct m6811_opcode_def*) e2;

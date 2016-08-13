@@ -234,7 +234,7 @@ set_bit_port (struct hw *me, sim_cpu *cpu, int port, int mask, int value)
 #define SPI_START_BIT  1
 #define SPI_MIDDLE_BIT 2
 
-void
+static void
 m68hc11spi_clock (struct hw *me, void *data)
 {
   SIM_DESC sd;

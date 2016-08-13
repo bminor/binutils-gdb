@@ -236,7 +236,7 @@ enum event_type
   COMPARE_EVENT
 };
 
-void
+static void
 m68hc11tim_timer_event (struct hw *me, void *data)
 {
   SIM_DESC sd;
