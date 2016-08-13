@@ -4921,7 +4921,7 @@
   do_xori (SD_, RS, RT, IMMEDIATE);
 }
 
-
+
 //
 // MIPS Architecture:
 //
@@ -5730,7 +5730,7 @@
   PENDING_FILL (RT, v);
   TRACE_ALU_RESULT (v);
 }
-  
+
 010001,00000,5.RT,5.FS,00000000000:COP1:32,f::MFC1b
 "mfc1 r<RT>, f<FS>"
 *mipsIV:
@@ -5742,7 +5742,7 @@
 *vr4100:
 *vr5000:
 *r3900:
-{ 
+{
   do_mfc1b (SD_, RT, FS);
 }
 
@@ -5851,14 +5851,14 @@
 *mipsI:
 *mipsII:
 *mipsIII:
-{ 
+{
   check_fpu (SD_);
   if (SizeFGR () == 64)
     PENDING_FILL ((FS + FGR_BASE), (SET64HI (0xDEADC0DE) | VL4_8 (GPR[RT])));
   else
     PENDING_FILL ((FS + FGR_BASE), VL4_8 (GPR[RT]));
   TRACE_FP_RESULT (GPR[RT]);
-} 
+}
 
 010001,00100,5.RT,5.FS,00000000000:COP1:32,f::MTC1b
 "mtc1 r<RT>, f<FS>"
@@ -6229,7 +6229,7 @@
   do_trunc_fmt (SD_, fmt_word, FMT, FD, FS);
 }
 
-
+
 //
 // MIPS Architecture:
 //

@@ -190,7 +190,7 @@
 	  if (sat == 1)
 	    {
 	      if (setcond == 2)
-		h0 = 0x7fff; 
+		h0 = 0x7fff;
 	      else if (setcond == 1)
 		h0 = 0x8000;
 	    }
@@ -239,11 +239,11 @@
 	}
     }
   if (setcond == 2)
-    result = 0x7fffffff; 
+    result = 0x7fffffff;
   else if (setcond == 1)
     result = 0x80000000;
   else
-    result = v1 << shift; 
+    result = v1 << shift;
   GPR[rd] = EXTEND32 (result);
 }
 
@@ -1833,7 +1833,7 @@
 	result = 0x7fffffff;
       else if (setcond == 2)
 	result = 0x80000000;
-      else 
+      else
 	{
 	  if (shift != 0)
 	    result = ((result >> (shift - 1)) + 1) >> 1;

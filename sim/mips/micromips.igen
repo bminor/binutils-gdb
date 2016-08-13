@@ -85,7 +85,7 @@
 *micromips32:
 *micromips64:
 {
-  switch(reg)
+  switch (reg)
     {
     case 0: return 0;
     case 1: return 17;
@@ -1311,7 +1311,7 @@
 {
   if (lwmregs & 0x10)
     {
-      switch(lwmregs & 0xf)
+      switch (lwmregs & 0xf)
         {
         case 0:
           return "ra";
@@ -1339,7 +1339,7 @@
     }
   else
     {
-      switch(lwmregs & 0xf)
+      switch (lwmregs & 0xf)
         {
         case 1:
           return "s0";

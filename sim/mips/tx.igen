@@ -16,7 +16,7 @@
   LO = EXTEND32 (prod);
   HI = EXTEND32 (VH4_8 (prod));
   TRACE_ALU_RESULT2 (HI, LO);
-  if(RD != 0 )
+  if (RD != 0)
     GPR[RD] = LO;
 }
 
@@ -34,7 +34,7 @@
   LO = EXTEND32 (prod);
   HI = EXTEND32 (VH4_8 (prod));
   TRACE_ALU_RESULT2 (HI, LO);
-  if(RD != 0)
+  if (RD != 0)
     GPR[RD] = LO;
 }
 

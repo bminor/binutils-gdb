@@ -40,16 +40,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    The 24-bit accumulators are signed and are represented as 32-bit
    signed values, which are reduced to 24-bit signed values prior to
    Round and Clamp operations.
-  
+
    A 16-bit packed halfword element (QH) is always signed.
    The 48-bit accumulators are signed and are represented as 64-bit
    signed values, which are reduced to 48-bit signed values prior to
    Round and Clamp operations.
-  
+
    The code below assumes a 2's-complement representation of signed
    quantities.  Care is required to clear extended sign bits when
    repacking fields.
-  
+
    The code (and the code for arithmetic shifts in mips.igen) also makes
    the (not guaranteed portable) assumption that right shifts of signed
    quantities in C do sign extension.  */
@@ -374,7 +374,7 @@ mdmx_cpr_op(sim_cpu *cpu,
 	    int op,
 	    unsigned64 op1,
 	    int vt,
-	    MX_fmtsel fmtsel) 
+	    MX_fmtsel fmtsel)
 {
   unsigned64 op2;
   unsigned64 result = 0;
@@ -849,7 +849,7 @@ mdmx_acc_op(sim_cpu *cpu,
 	    int op,
 	    unsigned64 op1,
 	    int vt,
-	    MX_fmtsel fmtsel) 
+	    MX_fmtsel fmtsel)
 {
   unsigned64 op2;
 
@@ -897,7 +897,7 @@ unsigned64
 mdmx_rac_op(sim_cpu *cpu,
 	    address_word cia,
 	    int op,
-	    int fmt) 
+	    int fmt)
 {
   unsigned64    result;
   unsigned int  shift;
@@ -935,7 +935,7 @@ mdmx_wacl(sim_cpu *cpu,
 	  address_word cia,
 	  int fmt,
 	  unsigned64 vs,
-	  unsigned64 vt) 
+	  unsigned64 vt)
 {
   int           i;
 
@@ -1330,7 +1330,7 @@ mdmx_round_op(sim_cpu *cpu,
 	      address_word cia,
 	      int rm,
 	      int vt,
-	      MX_fmtsel fmtsel) 
+	      MX_fmtsel fmtsel)
 {
   unsigned64 op2;
   unsigned64 result = 0;

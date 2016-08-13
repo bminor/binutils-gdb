@@ -151,7 +151,7 @@
   signed64 prod;
   unsigned32 result;
   w1 = (signed32) v1;
-  w2 = (signed32 )v2;
+  w2 = (signed32) v2;
   if (w1 == (signed32) 0x80000000 && w2 == (signed32) 0x80000000)
     {
       DSPCR |= DSPCR_OUFLAG5;

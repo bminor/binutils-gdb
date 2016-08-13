@@ -238,7 +238,7 @@ enum float_operation
   };
 
 
-/* The internal representation of an MDMX accumulator. 
+/* The internal representation of an MDMX accumulator.
    Note that 24 and 48 bit accumulator elements are represented in
    32 or 64 bits.  Since the accumulators are 2's complement with
    overflow suppressed, high-order bits can be ignored in most contexts.  */
@@ -246,13 +246,13 @@ enum float_operation
 typedef signed32 signed24;
 typedef signed64 signed48;
 
-typedef union { 
+typedef union {
   signed24  ob[8];
-  signed48  qh[4]; 
+  signed48  qh[4];
 } MDMX_accumulator;
 
 
-/* Conventional system arguments.  */ 
+/* Conventional system arguments.  */
 #define SIM_STATE  sim_cpu *cpu, address_word cia
 #define SIM_ARGS   CPU, cia
 
@@ -446,7 +446,7 @@ struct _sim_cpu {
   pending_write_queue pending;
 
   /* The MDMX accumulator (used only for MDMX ASE).  */
-  MDMX_accumulator acc; 
+  MDMX_accumulator acc;
 #define ACC             ((CPU)->acc)
 
   /* LLBIT = Load-Linked bit. A bit of "virtual" state used by atomic
@@ -632,7 +632,7 @@ enum ExceptionCause {
 
 /* The following break instructions are reserved for use by the
    simulator.  The first is used to halt the simulation.  The second
-   is used by gdb for break-points.  NOTE: Care must be taken, since 
+   is used by gdb for break-points.  NOTE: Care must be taken, since
    this value may be used in later revisions of the MIPS ISA. */
 #define HALT_INSTRUCTION_MASK   (0x03FFFFC0)
 
@@ -697,7 +697,7 @@ void decode_coproc (SIM_DESC sd, sim_cpu *cpu, address_word cia,
 		 (rt), (rd), (sel))
 
 int sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
-  
+
 
 /* FPR access.  */
 unsigned64 value_fpr (SIM_STATE, int fpr, FP_formats);

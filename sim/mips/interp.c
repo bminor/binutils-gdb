@@ -69,7 +69,7 @@ char* pr_uword64 (uword64 addr);
 #define RSVD_INSTRUCTION_MASK      (0xFC00003F)
 
 #define RSVD_INSTRUCTION_ARG_SHIFT 6
-#define RSVD_INSTRUCTION_ARG_MASK  0xFFFFF  
+#define RSVD_INSTRUCTION_ARG_MASK  0xFFFFF
 
 
 /* Bits in the Debug register */
@@ -122,13 +122,13 @@ static void ColdReset (SIM_DESC sd);
 #define K1SIZE  (0x20000000)
 
 /* Simple run-time monitor support.
-   
+
    We emulate the monitor by placing magic reserved instructions at
    the monitor's entry points; when we hit these instructions, instead
    of raising an exception (as we would normally), we look at the
    instruction and perform the appropriate monitory operation.
-   
-   `*_monitor_base' are the physical addresses at which the corresponding 
+
+   `*_monitor_base' are the physical addresses at which the corresponding
         monitor vectors are located.  `0' means none.  By default,
         install all three.
     The RSVD_INSTRUCTION... macros specify the magic instructions we
@@ -245,7 +245,7 @@ Re-compile simulator with \"-DWITH_TRACE_ANY_P\" to enable this option.\n");
       display_mem_info = 1;
       break;
     }
-  
+
   return SIM_RC_OK;
 }
 
@@ -288,7 +288,7 @@ static const OPTION mips_options[] =
     '\0', NULL, "List configured memory regions", mips_option_handler },
   { { "memory-info", no_argument, NULL, OPTION_INFO_MEMORY },
     '\0', NULL, NULL, mips_option_handler },
-  
+
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
 
@@ -364,7 +364,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   CPU_MAX_INSNS (cpu) = nr_itable_entries;
 
   STATE = 0;
-  
+
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
   sim_add_option_table (sd, NULL, mips_options);
@@ -430,7 +430,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	      /* Delete old region. */
 	      sim_do_commandf (sd, "memory delete %d:0x%" PRIxTW "@%d",
 			       match->space, match->addr, match->level);
-	    }	      
+	    }
 	  else if (mem_size == 0)
 	    mem_size = MEM_SIZE;
 	  /* Limit to KSEG1 size (512MB) */
@@ -455,13 +455,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 
       /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
       sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
-		       0x9FC00000, 
+		       0x9FC00000,
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xBFC00000);
 
       /* SRAM: 0x8000_0000 - 0x803F_FFFF and 0xA000_0000 - 0xA03F_FFFF */
       sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
-		       0x80000000, 
+		       0x80000000,
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xA0000000);
 
@@ -470,8 +470,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	{
 	  unsigned size = 4 * 1024 * 1024;  /* 4 MB */
 	  sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
-			   0x88000000 + (i * size), 
-			   size, 
+			   0x88000000 + (i * size),
+			   size,
 			   0xA8000000 + (i * size));
 	}
     }
@@ -501,13 +501,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 
       /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
       sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
-		       0x9FC00000, 
+		       0x9FC00000,
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xBFC00000);
 
       /* SRAM: 0x8000_0000 - 0x803F_FFFF and 0xA000_0000 - 0xA03F_FFFF */
       sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
-		       0x80000000, 
+		       0x80000000,
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xA0000000);
 
@@ -516,8 +516,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	{
 	  unsigned size = 4 * 1024 * 1024;  /* 4 MB */
 	  sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
-			   0x88000000 + (i * size), 
-			   size, 
+			   0x88000000 + (i * size),
+			   size,
 			   0xA8000000 + (i * size));
 	}
 
@@ -566,7 +566,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       sim_hw_parse (sd, "/tx3904sio@0xfffff400 > int sio1 /tx3904irc");
 
       /* add PAL timer & I/O module */
-      if(! strcmp(board, BOARD_JMR3904_PAL))
+      if (!strcmp(board, BOARD_JMR3904_PAL))
 	{
 	 /* the device */
 	 sim_hw_parse (sd, "/pal@0xffff0000");
@@ -578,7 +578,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	 sim_hw_parse (sd, "/pal@0x31000000 > int int0 /tx3904irc");
 	}
 
-      if(! strcmp(board, BOARD_JMR3904_DEBUG))
+      if (!strcmp(board, BOARD_JMR3904_DEBUG))
 	{
 	  /* -- DEBUG: glue interrupt generators --- */
 	  sim_hw_parse (sd, "/glue@0xffff0000/reg 0xffff0000 0x50");
@@ -688,9 +688,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
     open_trace(sd);
 
   /*
-  sim_io_eprintf (sd, "idt@%x pmon@%x lsipmon@%x\n", 
+  sim_io_eprintf (sd, "idt@%x pmon@%x lsipmon@%x\n",
 		  idt_monitor_base,
-		  pmon_monitor_base, 
+		  pmon_monitor_base,
 		  lsipmon_monitor_base);
   */
 
@@ -783,8 +783,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   /* Write an abort sequence into the TRAP (common) exception vector
      addresses.  This is to catch code executing a TRAP (et.al.)
      instruction without installing a trap handler. */
-  if ((idt_monitor_base != 0) || 
-      (pmon_monitor_base != 0) || 
+  if ((idt_monitor_base != 0) ||
+      (pmon_monitor_base != 0) ||
       (lsipmon_monitor_base != 0))
     {
       unsigned32 halt[2] = { 0x2404002f /* addiu r4, r0, 47 */,
@@ -868,7 +868,7 @@ mips_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 	{
 	  if (length == 8)
 	    {
-	      cpu->fgr[rn - FGR_BASE] = 
+	      cpu->fgr[rn - FGR_BASE] =
 		(unsigned32) T2H_8 (*(unsigned64*)memory);
 	      return 8;
 	    }
@@ -1096,7 +1096,7 @@ sim_firmware_command (SIM_DESC sd, char *arg)
 	p ++; /* skip over @ */
 
 	address = strtoul (p, &q, 0);
-	if (*q != '\0') 
+	if (*q != '\0')
 	  {
 	    sim_io_printf (sd, "Invalid address given to the"
 			   "`sim firmware NAME@ADDRESS' command: %s\n",
@@ -1152,7 +1152,7 @@ Recognized firmware names are: `idt', `pmon', `lsipmon', and `none'.\n",
 		     arg);
       return SIM_RC_FAIL;
     }
-  
+
   return SIM_RC_OK;
 }
 
@@ -1340,7 +1340,7 @@ sim_monitor (SIM_DESC sd,
 	sim_memopt *entry, *match = NULL;
 
 	/* Search for memory region mapped to KSEG0 or KSEG1. */
-	for (entry = STATE_MEMOPT (sd); 
+	for (entry = STATE_MEMOPT (sd);
 	     entry != NULL;
 	     entry = entry->next)
 	  {
@@ -1350,7 +1350,7 @@ sim_monitor (SIM_DESC sd,
 	    else
 	      {
 		sim_memopt *alias;
-		for (alias = entry->alias; 
+		for (alias = entry->alias;
 		     alias != NULL;
 		     alias = alias->next)
 		  if ((alias->addr == K0BASE || alias->addr == K1BASE)
@@ -1374,7 +1374,7 @@ sim_monitor (SIM_DESC sd,
 	/* sim_io_eprintf (sd, "sim: get_mem_info() deprecated\n"); */
 	break;
       }
-    
+
     case 158: /* PMON printf */
       /* in:  A0 = pointer to format string */
       /*      A1 = optional argument 1 */
@@ -1666,11 +1666,11 @@ mips16_entry (SIM_DESC sd,
 	      FPR_STATE[0] = fmt_uninterpreted;
 	      FPR_STATE[1] = fmt_uninterpreted;
 	    }
-	}	  
+	}
 
       PC = RA;
     }
-  
+
 }
 
 /*-- trace support ----------------------------------------------------------*/
@@ -1723,7 +1723,7 @@ dotrace (SIM_DESC sd,
 {
   if (STATE & simTRACE) {
     va_list ap;
-    fprintf(tracefh,"%d %s ; width %d ; ", 
+    fprintf(tracefh,"%d %s ; width %d ; ",
 		type,
 		pr_addr(address),
 		width);
@@ -1764,19 +1764,19 @@ ColdReset (SIM_DESC sd)
       /* RESET: Fixed PC address: */
       PC = (unsigned_word) UNSIGNED64 (0xFFFFFFFFBFC00000);
       /* The reset vector address is in the unmapped, uncached memory space. */
-      
+
       SR &= ~(status_SR | status_TS | status_RP);
       SR |= (status_ERL | status_BEV);
-      
+
       /* Cheat and allow access to the complete register set immediately */
       if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT
 	  && WITH_TARGET_WORD_BITSIZE == 64)
 	SR |= status_FR; /* 64bit registers */
-      
+
       /* Ensure that any instructions with pending register updates are
 	 cleared: */
       PENDING_INVALIDATE();
-      
+
       /* Initialise the FPU registers to the unknown state */
       if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
 	{
@@ -1784,7 +1784,7 @@ ColdReset (SIM_DESC sd)
 	  for (rn = 0; (rn < 32); rn++)
 	    FPR_STATE[rn] = fmt_uninterpreted;
 	}
-      
+
       /* Initialise the Config0 register. */
       C0_CONFIG = 0x80000000 		/* Config1 present */
 	| 2;				/* KSEG0 uncached */
@@ -1838,7 +1838,7 @@ signal_exception (SIM_DESC sd,
           if (INDELAYSLOT())
             {
               CANCELDELAYSLOT();
-              
+
               Debug |= Debug_DBD;  /* signaled from within in delay slot */
               DEPC = cia - 4;      /* reference the branch instruction */
             }
@@ -1847,7 +1847,7 @@ signal_exception (SIM_DESC sd,
               Debug &= ~Debug_DBD; /* not signaled from within a delay slot */
               DEPC = cia;
             }
-        
+
           Debug |= Debug_DM;            /* in debugging mode */
           Debug |= Debug_DBp;           /* raising a DBp exception */
           PC = 0xBFC00200;
@@ -1991,7 +1991,7 @@ signal_exception (SIM_DESC sd,
        case FPE:
 	 sim_engine_halt (SD, CPU, NULL, PC,
 			  sim_stopped, SIM_SIGFPE);
-	 
+
        case BreakPoint:
 	 sim_engine_halt (SD, CPU, NULL, PC, sim_stopped, SIM_SIGTRAP);
 	 break;
@@ -2040,7 +2040,7 @@ signal_exception (SIM_DESC sd,
    that are UNPREDICTABLE. ..."  (MIPS64 Architecture for Programmers
    Volume II, The MIPS64 Instruction Set.  MIPS Document MD00087 revision
    0.95, page 2.)
-  
+
    For UNPREDICTABLE behaviour, we print a message, if possible print
    the offending instructions mips.igen instruction name (provided by
    the caller), and stop the simulator.
@@ -2106,7 +2106,7 @@ cop_ld (SIM_DESC sd,
 {
 
 #ifdef DEBUG
-  printf("DBG: COP_LD: coproc_num = %d, coproc_reg = %d, value = 0x%s : PC = 0x%s\n", coproc_num, coproc_reg, pr_uword64(memword), pr_addr(cia) );
+  printf("DBG: COP_LD: coproc_num = %d, coproc_reg = %d, value = 0x%s : PC = 0x%s\n", coproc_num, coproc_reg, pr_uword64(memword), pr_addr(cia));
 #endif
 
   switch (coproc_num) {
@@ -2314,7 +2314,7 @@ decode_coproc (SIM_DESC sd,
 		/* 29 = TagHi              R4000   VR4100  VR4300 */
 		/* 30 = ErrorEPC           R4000   VR4100  VR4300 */
 		if (STATE_VERBOSE_P(SD))
-		  sim_io_eprintf (SD, 
+		  sim_io_eprintf (SD,
 				  "Warning: PC 0x%lx:interp.c decode_coproc DEADC0DE\n",
 				  (unsigned long)cia);
 		GPR[rt] = 0xDEADC0DE; /* CPR[0,rd] */
@@ -2343,10 +2343,10 @@ decode_coproc (SIM_DESC sd,
 		cfg = C0_CONFIG;
 		break;
 	      case 1:
-		/* MIPS32 r/o Config1: 
+		/* MIPS32 r/o Config1:
 		   Config2 present */
 		cfg = 0x80000000;
-		/* MIPS16 implemented. 
+		/* MIPS16 implemented.
 		   XXX How to check configuration? */
 		cfg |= 0x0000004;
 		if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
@@ -2354,12 +2354,12 @@ decode_coproc (SIM_DESC sd,
 		  cfg |= 0x00000021;
 		break;
 	      case 2:
-		/* MIPS32 r/o Config2: 
+		/* MIPS32 r/o Config2:
 		   Config3 present. */
 		cfg = 0x80000000;
 		break;
 	      case 3:
-		/* MIPS32 r/o Config3: 
+		/* MIPS32 r/o Config3:
 		   SmartMIPS implemented. */
 		cfg = 0x00000002;
 		break;
@@ -2408,26 +2408,26 @@ decode_coproc (SIM_DESC sd,
            read/modify/write sequence fails. */
       }
     break;
-    
+
     case 2: /* co-processor 2 */
       {
 	int handle = 0;
 
 
-	if(! handle)
+	if (!handle)
 	  {
 	    sim_io_eprintf(sd, "COP2 instruction 0x%08X at PC = 0x%s : No handler present\n",
 			   instruction,pr_addr(cia));
 	  }
       }
     break;
-    
+
     case 1: /* should not occur (FPU co-processor) */
     case 3: /* should not occur (FPU co-processor) */
       SignalException(ReservedInstruction,instruction);
       break;
     }
-  
+
   return;
 }
 
@@ -2445,14 +2445,14 @@ get_cell (void)
   static int cell=0;
   if (++cell>=NUMCELLS) cell=0;
   return buf[cell];
-}     
+}
 
 /* Print routines to handle variable size regs, etc */
 
 /* Eliminate warning from compiler on 32-bit systems */
-static int thirty_two = 32;	
+static int thirty_two = 32;
 
-char* 
+char*
 pr_addr (SIM_ADDR addr)
 {
   char *paddr_str=get_cell();
@@ -2474,7 +2474,7 @@ pr_addr (SIM_ADDR addr)
   return paddr_str;
 }
 
-char* 
+char*
 pr_uword64 (uword64 addr)
 {
   char *paddr_str=get_cell();
@@ -2501,7 +2501,7 @@ mips_core_signal (SIM_DESC sd,
     {
     case sim_core_unmapped_signal:
       sim_io_eprintf (sd, "mips-core: %d byte %s to unmapped address 0x%lx at 0x%lx\n",
-                      nr_bytes, copy, 
+                      nr_bytes, copy,
 		      (unsigned long) addr, (unsigned long) ip);
       COP0_BADVADDR = addr;
       SignalExceptionDataReference();
@@ -2509,10 +2509,10 @@ mips_core_signal (SIM_DESC sd,
 
     case sim_core_unaligned_signal:
       sim_io_eprintf (sd, "mips-core: %d byte %s to unaligned address 0x%lx at 0x%lx\n",
-                      nr_bytes, copy, 
+                      nr_bytes, copy,
 		      (unsigned long) addr, (unsigned long) ip);
       COP0_BADVADDR = addr;
-      if(transfer == read_transfer) 
+      if (transfer == read_transfer)
 	SignalExceptionAddressLoad();
       else
 	SignalExceptionAddressStore();
@@ -2530,8 +2530,8 @@ mips_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word cia)
 {
   ASSERT(cpu != NULL);
 
-  if(cpu->exc_suspended > 0)
-    sim_io_eprintf(sd, "Warning, nested exception triggered (%d)\n", cpu->exc_suspended); 
+  if (cpu->exc_suspended > 0)
+    sim_io_eprintf(sd, "Warning, nested exception triggered (%d)\n", cpu->exc_suspended);
 
   PC = cia;
   memcpy(cpu->exc_trigger_registers, cpu->registers, sizeof(cpu->exc_trigger_registers));
@@ -2543,9 +2543,9 @@ mips_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception)
 {
   ASSERT(cpu != NULL);
 
-  if(cpu->exc_suspended > 0)
-    sim_io_eprintf(sd, "Warning, nested exception signal (%d then %d)\n", 
-		   cpu->exc_suspended, exception); 
+  if (cpu->exc_suspended > 0)
+    sim_io_eprintf(sd, "Warning, nested exception signal (%d then %d)\n",
+		   cpu->exc_suspended, exception);
 
   memcpy(cpu->exc_suspend_registers, cpu->registers, sizeof(cpu->exc_suspend_registers));
   memcpy(cpu->registers, cpu->exc_trigger_registers, sizeof(cpu->registers));
@@ -2557,26 +2557,26 @@ mips_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception)
 {
   ASSERT(cpu != NULL);
 
-  if(exception == 0 && cpu->exc_suspended > 0)
+  if (exception == 0 && cpu->exc_suspended > 0)
     {
       /* warn not for breakpoints */
-      if(cpu->exc_suspended != sim_signal_to_host(sd, SIM_SIGTRAP))
+      if (cpu->exc_suspended != sim_signal_to_host(sd, SIM_SIGTRAP))
 	sim_io_eprintf(sd, "Warning, resuming but ignoring pending exception signal (%d)\n",
-		       cpu->exc_suspended); 
+		       cpu->exc_suspended);
     }
-  else if(exception != 0 && cpu->exc_suspended > 0)
+  else if (exception != 0 && cpu->exc_suspended > 0)
     {
-      if(exception != cpu->exc_suspended) 
+      if (exception != cpu->exc_suspended)
 	sim_io_eprintf(sd, "Warning, resuming with mismatched exception signal (%d vs %d)\n",
-		       cpu->exc_suspended, exception); 
-      
-      memcpy(cpu->registers, cpu->exc_suspend_registers, sizeof(cpu->registers)); 
+		       cpu->exc_suspended, exception);
+
+      memcpy(cpu->registers, cpu->exc_suspend_registers, sizeof(cpu->registers));
     }
-  else if(exception != 0 && cpu->exc_suspended == 0)
+  else if (exception != 0 && cpu->exc_suspended == 0)
     {
-      sim_io_eprintf(sd, "Warning, ignoring spontanous exception signal (%d)\n", exception); 
+      sim_io_eprintf(sd, "Warning, ignoring spontanous exception signal (%d)\n", exception);
     }
-  cpu->exc_suspended = 0; 
+  cpu->exc_suspended = 0;
 }
 
 

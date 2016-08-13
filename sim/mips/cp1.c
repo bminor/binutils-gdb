@@ -127,7 +127,7 @@ value_fpr (sim_cpu *cpu,
     }
 
   /* For values not yet accessed, set to the desired format.  */
-  if (fmt < fmt_uninterpreted) 
+  if (fmt < fmt_uninterpreted)
     {
       if (FPR_STATE[fpr] == fmt_uninterpreted)
 	{
@@ -1119,7 +1119,7 @@ fp_binary_r(sim_cpu *cpu,
 	    address_word cia,
 	    int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
 	    unsigned64 op1,
-	    unsigned64 op2) 
+	    unsigned64 op2)
 {
   sim_fpu wop1;
   sim_fpu wop2;
