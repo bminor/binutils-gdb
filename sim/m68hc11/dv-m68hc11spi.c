@@ -156,7 +156,7 @@ m68hc11spi_port_event (struct hw *me,
 {
   SIM_DESC sd;
   struct m68hc11spi *controller;
-  sim_cpu* cpu;
+  sim_cpu *cpu;
   unsigned8 val;
   
   controller = hw_data (me);

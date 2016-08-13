@@ -521,7 +521,7 @@ m68hc11tim_print_timer (struct hw *me, const char *name,
   else
     {
       signed64 t;
-      sim_cpu* cpu;
+      sim_cpu *cpu;
 
       cpu = STATE_CPU (sd, 0);
 

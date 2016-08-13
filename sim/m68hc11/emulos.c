@@ -34,7 +34,7 @@ static struct timeval bench_start;
 static struct timeval bench_stop;
 
 static void
-emul_bench (struct _sim_cpu* cpu)
+emul_bench (sim_cpu *cpu)
 {
   int op;
 
@@ -91,18 +91,18 @@ emul_bench (struct _sim_cpu* cpu)
 #endif
 
 static void
-emul_write(struct _sim_cpu* state)
+emul_write (sim_cpu *cpu)
 {
-  int addr = cpu_get_x (state) & 0x0FFFF;
-  int size = cpu_get_d (state) & 0x0FFFF;
+  int addr = cpu_get_x (cpu) & 0x0FFFF;
+  int size = cpu_get_d (cpu) & 0x0FFFF;
 
   if (addr + size > 0x0FFFF) {
     size = 0x0FFFF - addr;
   }
-  state->cpu_running = 0;
+  cpu->cpu_running = 0;
   while (size)
     {
-      uint8 val = memory_read8 (state, addr);
+      uint8 val = memory_read8 (cpu, addr);
         
       write(0, &val, 1);
       addr ++;
@@ -124,9 +124,9 @@ emul_exit (sim_cpu *cpu)
 }
 
 void
-emul_os (int code, sim_cpu *proc)
+emul_os (int code, sim_cpu *cpu)
 {
-  proc->cpu_current_cycle = 8;
+  cpu->cpu_current_cycle = 8;
   switch (code)
     {
     case 0x0:
@@ -134,7 +134,7 @@ emul_os (int code, sim_cpu *proc)
 
       /* 0xCD 0x01 */
     case 0x01:
-      emul_write (proc);
+      emul_write (cpu);
       break;
 
       /* 0xCD 0x02 */
@@ -143,13 +143,13 @@ emul_os (int code, sim_cpu *proc)
 
       /* 0xCD 0x03 */
     case 0x03:
-      emul_exit (proc);
+      emul_exit (cpu);
       break;
 
       /* 0xCD 0x04 */
     case 0x04:
 #ifndef WIN32
-      emul_bench (proc);
+      emul_bench (cpu);
 #endif
       break;
         
