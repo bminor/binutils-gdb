@@ -22,6 +22,8 @@
 #ifndef _SIM_MAIN_H
 #define _SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 #include "sim-types.h"
 #include "sim-base.h"
@@ -30,7 +32,7 @@
 #include "cpustate.h"
 
 /* A per-core state structure.  */
-struct _sim_cpu
+struct aarch64_sim_cpu
 {
   GRegister    gr[33];	/* Extra register at index 32 is used to hold zero value.  */
   FRegister    fr[32];
@@ -44,9 +46,9 @@ struct _sim_cpu
   uint32_t     instr;
 
   uint64_t     tpidr;  /* Thread pointer id.  */
-
-  sim_cpu_base base;
 };
+
+#define AARCH64_SIM_CPU(cpu) ((struct aarch64_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 typedef enum
 {

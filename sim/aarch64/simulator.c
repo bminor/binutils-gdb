@@ -5394,6 +5394,7 @@ do_vec_ADDP (sim_cpu *cpu)
      instr[9,5]   = Vn
      instr[4,0]   = V dest.  */
 
+  struct aarch64_sim_cpu *aarch64_cpu = AARCH64_SIM_CPU (cpu);
   FRegister copy_vn;
   FRegister copy_vm;
   unsigned full = INSTR (30, 30);
@@ -5408,8 +5409,8 @@ do_vec_ADDP (sim_cpu *cpu)
   NYI_assert (15, 10, 0x2F);
 
   /* Make copies of the source registers in case vd == vn/vm.  */
-  copy_vn = cpu->fr[vn];
-  copy_vm = cpu->fr[vm];
+  copy_vn = aarch64_cpu->fr[vn];
+  copy_vm = aarch64_cpu->fr[vm];
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (size)
