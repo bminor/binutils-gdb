@@ -21,6 +21,8 @@
 
 #include <sys/types.h>
 
+#include "gregset.h"
+
 #ifdef HAVE_PROC_SERVICE_H
 
 /* glibc's proc_service.h doesn't wrap itself with extern "C".  Need
@@ -59,8 +61,6 @@ EXTERN_C_POP
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>
 #endif
-
-#include "gregset.h"
 
 EXTERN_C_PUSH
 
