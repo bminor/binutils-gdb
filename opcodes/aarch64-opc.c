@@ -334,18 +334,18 @@ aarch64_get_operand_desc (enum aarch64_opnd type)
 /* Table of all conditional affixes.  */
 const aarch64_cond aarch64_conds[16] =
 {
-  {{"eq"}, 0x0},
-  {{"ne"}, 0x1},
-  {{"cs", "hs"}, 0x2},
-  {{"cc", "lo", "ul"}, 0x3},
-  {{"mi"}, 0x4},
-  {{"pl"}, 0x5},
+  {{"eq", "none"}, 0x0},
+  {{"ne", "any"}, 0x1},
+  {{"cs", "hs", "nlast"}, 0x2},
+  {{"cc", "lo", "ul", "last"}, 0x3},
+  {{"mi", "first"}, 0x4},
+  {{"pl", "nfrst"}, 0x5},
   {{"vs"}, 0x6},
   {{"vc"}, 0x7},
-  {{"hi"}, 0x8},
-  {{"ls"}, 0x9},
-  {{"ge"}, 0xa},
-  {{"lt"}, 0xb},
+  {{"hi", "pmore"}, 0x8},
+  {{"ls", "plast"}, 0x9},
+  {{"ge", "tcont"}, 0xa},
+  {{"lt", "tstop"}, 0xb},
   {{"gt"}, 0xc},
   {{"le"}, 0xd},
   {{"al"}, 0xe},
@@ -2940,7 +2940,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		       const aarch64_opnd_info *opnds, int idx, int *pcrel_p,
 		       bfd_vma *address)
 {
-  int i;
+  unsigned int i, num_conds;
   const char *name = NULL;
   const aarch64_opnd_info *opnd = opnds + idx;
   enum aarch64_modifier_kind kind;
@@ -3306,6 +3306,17 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_COND:
     case AARCH64_OPND_COND1:
       snprintf (buf, size, "%s", opnd->cond->names[0]);
+      num_conds = ARRAY_SIZE (opnd->cond->names);
+      for (i = 1; i < num_conds && opnd->cond->names[i]; ++i)
+	{
+	  size_t len = strlen (buf);
+	  if (i == 1)
+	    snprintf (buf + len, size - len, "  // %s = %s",
+		      opnd->cond->names[0], opnd->cond->names[i]);
+	  else
+	    snprintf (buf + len, size - len, ", %s",
+		      opnd->cond->names[i]);
+	}
       break;
 
     case AARCH64_OPND_ADDR_ADRP:

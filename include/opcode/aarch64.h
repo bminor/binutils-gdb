@@ -859,7 +859,7 @@ typedef struct
 {
   /* A list of names with the first one as the disassembly preference;
      terminated by NULL if fewer than 3.  */
-  const char *names[3];
+  const char *names[4];
   aarch64_insn value;
 } aarch64_cond;
 

@@ -109,8 +109,8 @@ Disassembly of section \.text:
   fc:	37400522 	tbnz	w2, #8, 1a0 <lab>
  100:	b7780002 	tbnz	x2, #47, 0 <xlab>
 			100: R_AARCH64_TSTBR14	xlab
- 104:	540004e0 	b\.eq	1a0 <lab>
- 108:	54000000 	b\.eq	0 <xlab>
+ 104:	540004e0 	b\.eq	1a0 <lab>  // b\.none
+ 108:	54000000 	b\.eq	0 <xlab>  // b\.none
 			108: R_AARCH64_CONDBR19	xlab
  10c:	b40004a0 	cbz	x0, 1a0 <lab>
  110:	b500001e 	cbnz	x30, 0 <xlab>
