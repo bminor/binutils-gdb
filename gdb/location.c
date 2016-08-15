@@ -498,9 +498,8 @@ explicit_location_lex_one (const char **inp,
 	{
 	  /* Special case: C++ operator,.  */
 	  if (language->la_language == language_cplus
-	      && strncmp (*inp, "operator", 8)
-	      && (*inp)[9] == ',')
-	    (*inp) += 9;
+	      && strncmp (*inp, "operator", 8) == 0)
+	    (*inp) += 8;
 	  ++(*inp);
 	}
     }

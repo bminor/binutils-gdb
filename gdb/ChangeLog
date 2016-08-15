@@ -1,3 +1,9 @@
+2016-08-15  Yao Qi  <yao.qi@linaro.org>
+
+	* location.c (explicit_location_lex_one): Compare the return
+	value of strncmp with zero.  Don't check (*inp)[9].  Increment
+	*inp by 8.
+
 2016-08-11  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/20413
