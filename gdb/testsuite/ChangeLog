@@ -1,3 +1,9 @@
+2016-08-15  Doug Evans  <dje@google.com>
+
+	* gdb.xml/extra-regs.xml: Update, end field now required, default type
+	for single bitfields is bool.
+	* gdb.xml/tdesc-regs.exp: Ditto.
+
 2016-08-12  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/signals-state-child.c (main): Remove "i" from fprintf's

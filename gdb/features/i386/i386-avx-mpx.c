@@ -163,7 +163,7 @@ initialize_tdesc_i386_avx_mpx (void)
   tdesc_add_bitfield (type, "base", 12, 31);
   tdesc_add_bitfield (type, "reserved", 2, 11);
   tdesc_add_bitfield (type, "preserved", 1, 1);
-  tdesc_add_bitfield (type, "enabled", 0, 1);
+  tdesc_add_bitfield (type, "enabled", 0, 0);
 
   type = tdesc_create_union (feature, "cfgu");
   field_type = tdesc_named_type (feature, "data_ptr");
