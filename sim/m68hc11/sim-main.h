@@ -287,15 +287,12 @@ struct _sim_cpu {
 #define cpu_set_ccr_Z(cpu, val)   cpu_set_ccr_flag (cpu, M6811_Z_BIT, val)
 #define cpu_set_ccr_I(cpu, val)   cpu_set_ccr_flag (cpu, M6811_I_BIT, val)
 
-#undef inline
-#define inline static __inline__
-
 extern void cpu_memory_exception (sim_cpu *cpu,
                                   SIM_SIGNAL excep,
                                   uint16 addr,
                                   const char *message);
 
-inline address_word
+STATIC_INLINE address_word
 phys_to_virt (sim_cpu *cpu, address_word addr)
 {
   if (addr >= cpu->bank_start && addr < cpu->bank_end)
@@ -306,7 +303,7 @@ phys_to_virt (sim_cpu *cpu, address_word addr)
     return (address_word) (addr);
 }
 
-inline uint8
+STATIC_INLINE uint8
 memory_read8 (sim_cpu *cpu, uint16 addr)
 {
   uint8 val;
@@ -319,7 +316,7 @@ memory_read8 (sim_cpu *cpu, uint16 addr)
   return val;
 }
 
-inline void
+STATIC_INLINE void
 memory_write8 (sim_cpu *cpu, uint16 addr, uint8 val)
 {
   if (sim_core_write_buffer (CPU_STATE (cpu), cpu, 0, &val, addr, 1) != 1)
@@ -329,7 +326,7 @@ memory_write8 (sim_cpu *cpu, uint16 addr, uint8 val)
     }
 }
 
-inline uint16
+STATIC_INLINE uint16
 memory_read16 (sim_cpu *cpu, uint16 addr)
 {
   uint8 b[2];
@@ -342,7 +339,7 @@ memory_read16 (sim_cpu *cpu, uint16 addr)
   return (((uint16) (b[0])) << 8) | ((uint16) b[1]);
 }
 
-inline void
+STATIC_INLINE void
 memory_write16 (sim_cpu *cpu, uint16 addr, uint16 val)
 {
   uint8 b[2];
@@ -358,7 +355,7 @@ memory_write16 (sim_cpu *cpu, uint16 addr, uint16 val)
 extern void
 cpu_ccr_update_tst8 (sim_cpu *cpu, uint8 val);
 
-     inline void
+STATIC_INLINE void
 cpu_ccr_update_tst16 (sim_cpu *cpu, uint16 val)
 {
   cpu_set_ccr_V (cpu, 0);
@@ -366,7 +363,7 @@ cpu_ccr_update_tst16 (sim_cpu *cpu, uint16 val)
   cpu_set_ccr_Z (cpu, val == 0 ? 1 : 0);
 }
 
-     inline void
+STATIC_INLINE void
 cpu_ccr_update_shift8 (sim_cpu *cpu, uint8 val)
 {
   cpu_set_ccr_N (cpu, val & 0x80 ? 1 : 0);
@@ -374,7 +371,7 @@ cpu_ccr_update_shift8 (sim_cpu *cpu, uint8 val)
   cpu_set_ccr_V (cpu, cpu_get_ccr_N (cpu) ^ cpu_get_ccr_C (cpu));
 }
 
-     inline void
+STATIC_INLINE void
 cpu_ccr_update_shift16 (sim_cpu *cpu, uint16 val)
 {
   cpu_set_ccr_N (cpu, val & 0x8000 ? 1 : 0);
@@ -382,7 +379,7 @@ cpu_ccr_update_shift16 (sim_cpu *cpu, uint16 val)
   cpu_set_ccr_V (cpu, cpu_get_ccr_N (cpu) ^ cpu_get_ccr_C (cpu));
 }
 
-inline void
+STATIC_INLINE void
 cpu_ccr_update_add8 (sim_cpu *cpu, uint8 r, uint8 a, uint8 b)
 {
   cpu_set_ccr_C (cpu, ((a & b) | (b & ~r) | (a & ~r)) & 0x80 ? 1 : 0);
@@ -392,7 +389,7 @@ cpu_ccr_update_add8 (sim_cpu *cpu, uint8 r, uint8 a, uint8 b)
 }
 
 
-inline void
+STATIC_INLINE void
 cpu_ccr_update_sub8 (sim_cpu *cpu, uint8 r, uint8 a, uint8 b)
 {
   cpu_set_ccr_C (cpu, ((~a & b) | (b & r) | (~a & r)) & 0x80 ? 1 : 0);
@@ -401,7 +398,7 @@ cpu_ccr_update_sub8 (sim_cpu *cpu, uint8 r, uint8 a, uint8 b)
   cpu_set_ccr_N (cpu, r & 0x80 ? 1 : 0);
 }
 
-inline void
+STATIC_INLINE void
 cpu_ccr_update_add16 (sim_cpu *cpu, uint16 r, uint16 a, uint16 b)
 {
   cpu_set_ccr_C (cpu, ((a & b) | (b & ~r) | (a & ~r)) & 0x8000 ? 1 : 0);
@@ -410,7 +407,7 @@ cpu_ccr_update_add16 (sim_cpu *cpu, uint16 r, uint16 a, uint16 b)
   cpu_set_ccr_N (cpu, r & 0x8000 ? 1 : 0);
 }
 
-inline void
+STATIC_INLINE void
 cpu_ccr_update_sub16 (sim_cpu *cpu, uint16 r, uint16 a, uint16 b)
 {
   cpu_set_ccr_C (cpu, ((~a & b) | (b & r) | (~a & r)) & 0x8000 ? 1 : 0);
@@ -420,7 +417,7 @@ cpu_ccr_update_sub16 (sim_cpu *cpu, uint16 r, uint16 a, uint16 b)
 }
 
 /* Push and pop instructions for 68HC11 (next-available stack mode).  */
-inline void
+STATIC_INLINE void
 cpu_m68hc11_push_uint8 (sim_cpu *cpu, uint8 val)
 {
   uint16 addr = cpu->cpu_regs.sp;
@@ -429,7 +426,7 @@ cpu_m68hc11_push_uint8 (sim_cpu *cpu, uint8 val)
   cpu->cpu_regs.sp = addr - 1;
 }
 
-inline void
+STATIC_INLINE void
 cpu_m68hc11_push_uint16 (sim_cpu *cpu, uint16 val)
 {
   uint16 addr = cpu->cpu_regs.sp - 1;
@@ -438,7 +435,7 @@ cpu_m68hc11_push_uint16 (sim_cpu *cpu, uint16 val)
   cpu->cpu_regs.sp = addr - 1;
 }
 
-inline uint8
+STATIC_INLINE uint8
 cpu_m68hc11_pop_uint8 (sim_cpu *cpu)
 {
   uint16 addr = cpu->cpu_regs.sp;
@@ -449,7 +446,7 @@ cpu_m68hc11_pop_uint8 (sim_cpu *cpu)
   return val;
 }
 
-inline uint16
+STATIC_INLINE uint16
 cpu_m68hc11_pop_uint16 (sim_cpu *cpu)
 {
   uint16 addr = cpu->cpu_regs.sp;
@@ -461,7 +458,7 @@ cpu_m68hc11_pop_uint16 (sim_cpu *cpu)
 }
 
 /* Push and pop instructions for 68HC12 (last-used stack mode).  */
-inline void
+STATIC_INLINE void
 cpu_m68hc12_push_uint8 (sim_cpu *cpu, uint8 val)
 {
   uint16 addr = cpu->cpu_regs.sp;
@@ -471,7 +468,7 @@ cpu_m68hc12_push_uint8 (sim_cpu *cpu, uint8 val)
   cpu->cpu_regs.sp = addr;
 }
 
-inline void
+STATIC_INLINE void
 cpu_m68hc12_push_uint16 (sim_cpu *cpu, uint16 val)
 {
   uint16 addr = cpu->cpu_regs.sp;
@@ -481,7 +478,7 @@ cpu_m68hc12_push_uint16 (sim_cpu *cpu, uint16 val)
   cpu->cpu_regs.sp = addr;
 }
 
-inline uint8
+STATIC_INLINE uint8
 cpu_m68hc12_pop_uint8 (sim_cpu *cpu)
 {
   uint16 addr = cpu->cpu_regs.sp;
@@ -492,7 +489,7 @@ cpu_m68hc12_pop_uint8 (sim_cpu *cpu)
   return val;
 }
 
-inline uint16
+STATIC_INLINE uint16
 cpu_m68hc12_pop_uint16 (sim_cpu *cpu)
 {
   uint16 addr = cpu->cpu_regs.sp;
@@ -504,7 +501,7 @@ cpu_m68hc12_pop_uint16 (sim_cpu *cpu)
 }
 
 /* Fetch a 8/16 bit value and update the PC.  */
-inline uint8
+STATIC_INLINE uint8
 cpu_fetch8 (sim_cpu *cpu)
 {
   uint16 addr = cpu->cpu_regs.pc;
@@ -515,7 +512,7 @@ cpu_fetch8 (sim_cpu *cpu)
   return val;
 }
 
-inline uint16
+STATIC_INLINE uint16
 cpu_fetch16 (sim_cpu *cpu)
 {
   uint16 addr = cpu->cpu_regs.pc;

@@ -1,3 +1,15 @@
+2016-08-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (inline): Delete define.
+	(phys_to_virt): Change inline to STATIC_INLINE.
+	(memory_read8, memory_write8, memory_read16, memory_write16,
+	cpu_ccr_update_tst16, cpu_ccr_update_shift8, cpu_ccr_update_shift16,
+	cpu_ccr_update_add8, cpu_ccr_update_sub8, cpu_ccr_update_add16,
+	cpu_ccr_update_sub16, cpu_m68hc11_push_uint8, cpu_m68hc11_push_uint16,
+	cpu_m68hc11_pop_uint8, cpu_m68hc11_pop_uint16, cpu_m68hc12_push_uint8,
+	cpu_m68hc12_push_uint16, cpu_m68hc12_pop_uint8,
+	cpu_m68hc12_pop_uint16, cpu_fetch8, cpu_fetch16): Likewise.
+
 2016-08-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_get_bank_parameters): Delete abfd arg.
