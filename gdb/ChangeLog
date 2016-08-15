@@ -1,3 +1,9 @@
+2016-08-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	PR gdb/20457
+	* gdb_proc_service.h: Add an include of gregset.h
+        [!HAVE_PROC_SERVICE_H]: Remove the include of gregset.h.
+
 2016-08-15  Yao Qi  <yao.qi@linaro.org>
 
 	* location.c (explicit_location_lex_one): Compare the return
