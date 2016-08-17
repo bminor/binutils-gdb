@@ -1,3 +1,8 @@
+2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.multi/remove-inferiors.exp: New file.
+	* gdb.multi/remove-inferiors.c: New file.
+
 2016-08-12  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/signals-state-child.c (main): Remove "i" from fprintf's
