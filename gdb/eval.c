@@ -477,7 +477,7 @@ value_f90_subarray (struct value *array, struct expression *exp,
 	  range = &index->U.range;
 
 	  *pos += 3;
-	  range->f90_range_type = (enum range_type) longest_to_int (exp->elts[pc].longconst);
+	  range->f90_range_type = (enum range_type) exp->elts[pc].longconst;
 
 	  /* If a lower bound was provided by the user, the bit has been
 	     set and we can assign the value from the elt stack.  Same for
@@ -499,6 +499,10 @@ value_f90_subarray (struct value *array, struct expression *exp,
 	  /* Assign the default stride value '1'.  */
 	  else
 	    range->stride = 1;
+
+	  /* Check the provided stride value is illegal, aka '0'.  */
+	  if (range->stride == 0)
+	    error (_("Stride must not be 0"));
 	}
       /* User input is an index.  E.g.: "p arry(5)".  */
       else
@@ -515,10 +519,8 @@ value_f90_subarray (struct value *array, struct expression *exp,
 
     }
 
-  /* Traverse the array from right to left and evaluate each corresponding
-     user input.  VALUE_SUBSCRIPT is called for every index, until a range
-     expression is evaluated.  After a range expression has been evaluated,
-     every subsequent expression is also treated as a range.  */
+  /* Traverse the array from right to left and set the high and low bounds
+     for later use.  */
   for (i = nargs - 1; i >= 0; i--)
     {
       struct subscript_store *index = &subscript_array[i];
@@ -551,6 +553,48 @@ value_f90_subarray (struct value *array, struct expression *exp,
 		|| range->high > TYPE_HIGH_BOUND (index_type))
 	      error (_("provided bound(s) outside array bound(s)"));
 
+	    /* For a negative stride the lower boundary must be larger than the
+	       upper boundary.
+	       For a positive stride the lower boundary must be smaller than the
+	       upper boundary.  */
+	    if ((range->stride < 0 && range->low < range->high)
+		|| (range->stride > 0 && range->low > range->high))
+	      error (_("Wrong value provided for stride and boundaries"));
+
+	  }
+	  break;
+
+	case SUBSCRIPT_INDEX:
+	  break;
+
+	}
+
+       array_type = TYPE_TARGET_TYPE (array_type);
+    }
+
+  /* Reset ARRAY_TYPE before slicing.*/
+  array_type = check_typedef (value_type (new_array));
+
+  /* Traverse the array from right to left and evaluate each corresponding
+     user input.  VALUE_SUBSCRIPT is called for every index, until a range
+     expression is evaluated.  After a range expression has been evaluated,
+     every subsequent expression is also treated as a range.  */
+  for (i = nargs - 1; i >= 0; i--)
+    {
+      struct subscript_store *index = &subscript_array[i];
+      struct type *index_type = TYPE_INDEX_TYPE (array_type);
+
+      switch (index->kind)
+	{
+	case SUBSCRIPT_RANGE:
+	  {
+
+	    /* When we hit the first range specified by the user, we must
+	       treat any subsequent user entry as a range.  We simply
+	       increment DIM_COUNT which tells us how many times we are
+	       calling VALUE_SLICE_1.  */
+	    subscript_range *range = &index->U.range;
+
 	    /* DIM_COUNT counts every user argument that is treated as a range.
 	       This is necessary for expressions like 'print array(7, 8:9).
 	       Here the first argument is a literal, but must be treated as a
@@ -558,10 +602,9 @@ value_f90_subarray (struct value *array, struct expression *exp,
 	    dim_count++;
 
 	    new_array
-	      = value_slice_1 (new_array,
-			       longest_to_int (range->low),
-			       longest_to_int (range->high - range->low + 1),
-			       dim_count);
+	      = value_slice_1 (new_array, range->low,
+			       range->high - range->low + 1,
+			       range->stride, dim_count);
 	  }
 	  break;
 
@@ -580,21 +623,32 @@ value_f90_subarray (struct value *array, struct expression *exp,
 								  (new_array)));
 	    else
 	      {
-		/* Check for valid index input.  */
-		if (index->U.number < TYPE_LOW_BOUND (index_type)
-		    || index->U.number > TYPE_HIGH_BOUND (index_type))
-		  error (_("error no such vector element"));
-
 		dim_count++;
+
+		/* We might end up here, because we have to treat the provided
+		   index like a range. But now VALUE_SUBSCRIPTED_RVALUE
+		   cannot do the range checks for us. So we have to make sure
+		   ourselves that the user provided index is inside the
+		   array bounds.  Throw an error if not.  */
+		if (index->U.number < TYPE_LOW_BOUND (index_type)
+		    && index->U.number > TYPE_HIGH_BOUND (index_type))
+		  error (_("provided bound(s) outside array bound(s)"));
+
+		if (index->U.number > TYPE_LOW_BOUND (index_type)
+		    && index->U.number > TYPE_HIGH_BOUND (index_type))
+		  error (_("provided bound(s) outside array bound(s)"));
+
 		new_array = value_slice_1 (new_array,
-					   longest_to_int (index->U.number),
-					   1, /* length is '1' element  */
+					   index->U.number,
+					   1, /* COUNT is '1' element  */
+					   1, /* STRIDE set to '1'  */
 					   dim_count);
 	      }
 
 	  }
 	  break;
 	}
+      array_type = TYPE_TARGET_TYPE (array_type);
     }
 
   /* With DIM_COUNT > 1 we currently have a one dimensional array, but expect
@@ -620,7 +674,9 @@ value_f90_subarray (struct value *array, struct expression *exp,
 	 the output array.  So we traverse the SUBSCRIPT_ARRAY again, looking
 	 for a range entry.  When we find one, we use the range info to create
 	 an additional range_type to set the correct bounds and dimensions for
-	 the output array.  */
+	 the output array.  In addition, we may have a stride value that is not
+	 '1', forcing us to adjust the number of elements in a range, according
+	 to the stride value.  */
       for (i = 0; i < nargs; i++)
 	{
 	  struct subscript_store *index = &subscript_array[i];
@@ -629,12 +685,20 @@ value_f90_subarray (struct value *array, struct expression *exp,
 	    {
 	      struct type *range_type, *interim_array_type;
 
+	      int new_length;
+
+	      /* The length of a sub-dimension with all elements between the
+		 bounds plus the start element itself.  It may be modified by
+		 a user provided stride value.  */
+	      new_length = index->U.range.high - index->U.range.low;
+
+	      new_length /= index->U.range.stride;
+
 	      range_type
 		= create_static_range_type (NULL,
 					    elt_type,
-					    1,
-					    index->U.range.high
-					      - index->U.range.low + 1);
+					    index->U.range.low,
+					    index->U.range.low + new_length);
 
 	      interim_array_type = create_array_type (NULL,
 						      elt_type,
