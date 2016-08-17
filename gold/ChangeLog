@@ -1,3 +1,11 @@
+2016-08-17  Cary Coutant  <ccoutant@gmail.com>
+
+	* i386.cc (Target_i386): Reset skip_call_tls_get_addr_ after printing
+	error message.
+	* testsuite/Makefile.am (pr20216a): Add missing dependencies.
+	(pr20308a): Add -Bgcctestdir/ to compile rules.
+	* testsuite/Makefile.in: Regenerate.
+
 2016-08-12  Roland McGrath  <roland@hack.frob.com>
 
 	PR gold/20462
