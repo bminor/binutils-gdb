@@ -40,7 +40,7 @@ proc test_remove_inferiors { } {
 
     # Test that it is not possible to remove the current inferior.
     gdb_test "remove-inferiors 2" \
-	     "warning: Can not remove current symbol inferior 2." \
+	     "warning: Can not remove current inferior 2." \
 	     "can't remove current inferior"
 
     # Test that it is possible to remove a non-active non-current inferior.

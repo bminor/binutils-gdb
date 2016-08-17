@@ -1,5 +1,9 @@
 2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* inferior.c (remove_inferior_command): Fix error message.
+
+2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* inferior.c (exit_inferior_1): Remove comment.
 
 2016-08-15  Matthew Wahab  <matthew.wahab@arm.com>

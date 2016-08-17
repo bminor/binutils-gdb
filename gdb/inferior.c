@@ -803,7 +803,7 @@ remove_inferior_command (char *args, int from_tty)
 
       if (inf == current_inferior ())
 	{
-	  warning (_("Can not remove current symbol inferior %d."), num);
+	  warning (_("Can not remove current inferior %d."), num);
 	  continue;
 	}
     

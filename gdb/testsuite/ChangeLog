@@ -1,5 +1,10 @@
 2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.multi/remove-inferiors.exp (test_remove_inferiors): Fix
+	expected error message.
+
+2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.multi/remove-inferiors.exp: New file.
 	* gdb.multi/remove-inferiors.c: New file.
 
