@@ -5,6 +5,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #define DEBUG
 
 /* These define the size of main memory for the simulator.
@@ -114,7 +116,7 @@ typedef struct
 #endif
 } decoded_inst;
 
-struct _sim_cpu {
+struct h8300_sim_cpu {
   unsigned int regs[20];	/* 8 GR's plus ZERO, SBR, and VBR.  */
   unsigned int pc;
 
@@ -128,9 +130,8 @@ struct _sim_cpu {
 
   unsigned char *memory;
   int mask;
-  
-  sim_cpu_base base;
 };
+#define H8300_SIM_CPU(sd) ((struct h8300_sim_cpu *) CPU_ARCH_DATA (sd))
 
 struct h8300_sim_state {
   unsigned long memory_size;
@@ -142,8 +143,8 @@ struct h8300_sim_state {
 
 /* The current state of the processor; registers, memory, etc.  */
 
-#define cpu_set_pc(CPU, VAL)	(((CPU)->pc)  = (VAL))
-#define cpu_get_pc(CPU)		(((CPU)->pc))
+#define cpu_set_pc(cpu, val)	(H8300_SIM_CPU (cpu)->pc = (val))
+#define cpu_get_pc(cpu)		(H8300_SIM_CPU (cpu)->pc)
 
 /* Magic numbers used to distinguish an exit from a breakpoint.  */
 #define LIBC_EXIT_MAGIC1 0xdead	
