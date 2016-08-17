@@ -57,13 +57,13 @@ static int memory_size;
 static unsigned int
 h8_get_reg (sim_cpu *cpu, int regnum)
 {
-  return cpu->regs[regnum];
+  return H8300_SIM_CPU (cpu)->regs[regnum];
 }
 
 static void
 h8_set_reg (sim_cpu *cpu, int regnum, int val)
 {
-  cpu->regs[regnum] = val;
+  H8300_SIM_CPU (cpu)->regs[regnum] = val;
 }
 
 #define h8_get_ccr(cpu)		h8_get_reg (cpu, CCR_REGNUM)
@@ -88,25 +88,25 @@ h8_set_reg (sim_cpu *cpu, int regnum, int val)
 static int
 h8_get_mask (sim_cpu *cpu)
 {
-  return cpu->mask;
+  return H8300_SIM_CPU (cpu)->mask;
 }
 
 static void
 h8_set_mask (sim_cpu *cpu, int val)
 {
-  cpu->mask = val;
+  H8300_SIM_CPU (cpu)->mask = val;
 }
 #if 0
 static int
 h8_get_exception (sim_cpu *cpu)
 {
-  return cpu->exception;
+  return H8300_SIM_CPU (cpu)->exception;
 }
 
 static void
 h8_set_exception (sim_cpu *cpu, int val)
 {
-  cpu->exception = val;
+  H8300_SIM_CPU (cpu)->exception = val;
 }
 
 static enum h8300_sim_state
@@ -125,7 +125,7 @@ h8_set_state (SIM_DESC sd, enum h8300_sim_state val)
 static unsigned int *
 h8_get_reg_buf (sim_cpu *cpu)
 {
-  return &cpu->regs[0];
+  return &H8300_SIM_CPU (cpu)->regs[0];
 }
 
 #ifdef ADEBUG
@@ -145,77 +145,77 @@ h8_increment_stats (SIM_DESC sd, int idx)
 static unsigned char *
 h8_get_memory_buf (sim_cpu *cpu)
 {
-  return cpu->memory;
+  return H8300_SIM_CPU (cpu)->memory;
 }
 
 static void
 h8_set_memory_buf (sim_cpu *cpu, unsigned char *ptr)
 {
-  cpu->memory = ptr;
+  H8300_SIM_CPU (cpu)->memory = ptr;
 }
 
 static unsigned char
 h8_get_memory (sim_cpu *cpu, int idx)
 {
   ASSERT (idx < memory_size);
-  return cpu->memory[idx];
+  return H8300_SIM_CPU (cpu)->memory[idx];
 }
 
 static void
 h8_set_memory (sim_cpu *cpu, int idx, unsigned int val)
 {
   ASSERT (idx < memory_size);
-  cpu->memory[idx] = (unsigned char) val;
+  H8300_SIM_CPU (cpu)->memory[idx] = (unsigned char) val;
 }
 
 static unsigned int
 h8_get_delayed_branch (sim_cpu *cpu)
 {
-  return cpu->delayed_branch;
+  return H8300_SIM_CPU (cpu)->delayed_branch;
 }
 
 static void
 h8_set_delayed_branch (sim_cpu *cpu, unsigned int dest)
 {
-  cpu->delayed_branch = dest;
+  H8300_SIM_CPU (cpu)->delayed_branch = dest;
 }
 
 static char **
 h8_get_command_line (sim_cpu *cpu)
 {
-  return cpu->command_line;
+  return H8300_SIM_CPU (cpu)->command_line;
 }
 
 static void
 h8_set_command_line (sim_cpu *cpu, char ** val)
 {
-  cpu->command_line = val;
+  H8300_SIM_CPU (cpu)->command_line = val;
 }
 
 static char *
 h8_get_cmdline_arg (sim_cpu *cpu, int index)
 {
-  return cpu->command_line[index];
+  return H8300_SIM_CPU (cpu)->command_line[index];
 }
 
 static void
 h8_set_cmdline_arg (sim_cpu *cpu, int index, char * val)
 {
-  cpu->command_line[index] = val;
+  H8300_SIM_CPU (cpu)->command_line[index] = val;
 }
 
 /* MAC Saturation Mode */
 static int
 h8_get_macS (sim_cpu *cpu)
 {
-  return cpu->macS;
+  return H8300_SIM_CPU (cpu)->macS;
 }
 
 #if 0
 static void
 h8_set_macS (sim_cpu *cpu, int val)
 {
-  cpu->macS = (val != 0);
+  H8300_SIM_CPU (cpu)->macS = (val != 0);
 }
 #endif
 
@@ -223,39 +223,39 @@ h8_set_macS (sim_cpu *cpu, int val)
 static int
 h8_get_macZ (sim_cpu *cpu)
 {
-  return cpu->macZ;
+  return H8300_SIM_CPU (cpu)->macZ;
 }
 
 static void
 h8_set_macZ (sim_cpu *cpu, int val)
 {
-  cpu->macZ = (val != 0);
+  H8300_SIM_CPU (cpu)->macZ = (val != 0);
 }
 
 /* MAC Negative Flag */
 static int
 h8_get_macN (sim_cpu *cpu)
 {
-  return cpu->macN;
+  return H8300_SIM_CPU (cpu)->macN;
 }
 
 static void
 h8_set_macN (sim_cpu *cpu, int val)
 {
-  cpu->macN = (val != 0);
+  H8300_SIM_CPU (cpu)->macN = (val != 0);
 }
 
 /* MAC Overflow Flag */
 static int
 h8_get_macV (sim_cpu *cpu)
 {
-  return cpu->macV;
+  return H8300_SIM_CPU (cpu)->macV;
 }
 
 static void
 h8_set_macV (sim_cpu *cpu, int val)
 {
-  cpu->macV = (val != 0);
+  H8300_SIM_CPU (cpu)->macV = (val != 0);
 }
 
 /* End CPU data object.  */
@@ -1593,7 +1593,7 @@ init_pointers (SIM_DESC sd)
 
       h8_set_mask (cpu, memory_size - 1);
 
-      memset (h8_get_reg_buf (cpu), 0, sizeof (cpu->regs));
+      memset (h8_get_reg_buf (cpu), 0, sizeof (H8300_SIM_CPU (cpu)->regs));
 
       for (i = 0; i < 8; i++)
 	{
@@ -4592,13 +4592,13 @@ static const OPTION h8300_options[] =
 static sim_cia
 h8300_pc_get (sim_cpu *cpu)
 {
-  return cpu->pc;
+  return H8300_SIM_CPU (cpu)->pc;
 }
 
 static void
 h8300_pc_set (sim_cpu *cpu, sim_cia pc)
 {
-  cpu->pc = pc;
+  H8300_SIM_CPU (cpu)->pc = pc;
 }
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
@@ -4629,7 +4629,8 @@ sim_open (SIM_OPEN_KIND kind,
   current_target_byte_order = BFD_ENDIAN_BIG;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct h8300_sim_cpu))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
