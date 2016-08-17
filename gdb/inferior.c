@@ -249,8 +249,6 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
 
   iterate_over_threads (delete_thread_of_inferior, &arg);
 
-  /* Notify the observers before removing the inferior from the list,
-     so that the observers have a chance to look it up.  */
   observer_notify_inferior_exit (inf);
 
   inf->pid = 0;
