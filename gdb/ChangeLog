@@ -1,3 +1,7 @@
+2016-08-18  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (ppc_process_record_op31): Handle HTM instructions.
+
 2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* inferior.c (remove_inferior_command): Fix error message.
