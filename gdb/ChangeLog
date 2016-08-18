@@ -1,3 +1,7 @@
+2016-08-18  Carl Love  <cel@us.ibm.com>
+
+	* MAINTANERS Write After Approval): Add "Carl Love".
+
 2016-08-18  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* rs6000-tdep.c (ppc_process_record_op31): Handle HTM instructions.

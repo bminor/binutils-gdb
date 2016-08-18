@@ -1,3 +1,9 @@
+2016-08-18  Carl Love  <cel@us.ibm.com>
+
+	* gdb.arch/powerpc-power.s: Add new Power9 instruction tests
+	and sync up the test with tests in gas/testsuite/gas/ppc.
+	* gdb.arch/powerpc-power.exp: Likewise.
+
 2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.multi/remove-inferiors.exp (test_remove_inferiors): Fix
