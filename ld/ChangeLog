@@ -1,3 +1,8 @@
+2016-08-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-undefined/weak-undef.exp: Use unsupported not
+	unresolved.
+
 2016-08-12  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-tic6x/shlib-1.rd: Correct expected .dynsym sh_info.

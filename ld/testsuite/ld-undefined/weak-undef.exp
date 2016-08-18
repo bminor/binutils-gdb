@@ -67,7 +67,7 @@ switch -glob $target_triplet {
 }
 
 if { $asflags == "" || ![is_elf_format] || ![check_shared_lib_support]} then {
-    unresolved $testname
+    unsupported $testname
 } elseif {![ld_assemble $as "$asflags $srcdir/$subdir/weak-fundef.s" \
 		tmpdir/weak-fundef.o]} then {
     fail $testname
