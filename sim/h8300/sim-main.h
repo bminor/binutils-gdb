@@ -126,7 +126,6 @@ struct _sim_cpu {
   char **command_line;		/* Pointer to command line arguments.  */
 
   unsigned char *memory;
-  unsigned char *eightbit;
   int mask;
   
   sim_cpu_base base;

@@ -38,6 +38,8 @@
 
 int debug;
 
+static int memory_size;
+
 #define X(op, size)  (op * 4 + size)
 
 #define SP (h8300hmode && !h8300_normal_mode ? SL : SW)
@@ -251,37 +253,15 @@ h8_set_memory_buf (SIM_DESC sd, unsigned char *ptr)
 static unsigned char
 h8_get_memory (SIM_DESC sd, int idx)
 {
+  ASSERT (idx < memory_size);
   return (STATE_CPU (sd, 0)) -> memory[idx];
 }
 
 static void
 h8_set_memory (SIM_DESC sd, int idx, unsigned int val)
 {
+  ASSERT (idx < memory_size);
   (STATE_CPU (sd, 0)) -> memory[idx] = (unsigned char) val;
-}
-
-static unsigned char *
-h8_get_eightbit_buf (SIM_DESC sd)
-{
-  return (STATE_CPU (sd, 0)) -> eightbit;
-}
-
-static void
-h8_set_eightbit_buf (SIM_DESC sd, unsigned char *ptr)
-{
-  (STATE_CPU (sd, 0)) -> eightbit = ptr;
-}
-
-static unsigned char
-h8_get_eightbit (SIM_DESC sd, int idx)
-{
-  return (STATE_CPU (sd, 0)) -> eightbit[idx];
-}
-
-static void
-h8_set_eightbit (SIM_DESC sd, int idx, unsigned int val)
-{
-  (STATE_CPU (sd, 0)) -> eightbit[idx] = (unsigned char) val;
 }
 
 static unsigned int
@@ -423,8 +403,6 @@ int h8300hmode  = 0;
 int h8300smode  = 0;
 int h8300_normal_mode  = 0;
 int h8300sxmode = 0;
-
-static int memory_size;
 
 static int
 get_now (void)
@@ -1151,41 +1129,31 @@ static unsigned short *wreg[16];
   ((X) < memory_size \
    ? ((h8_get_memory (sd, (X)+0) << 24) | (h8_get_memory (sd, (X)+1) << 16)  \
     | (h8_get_memory (sd, (X)+2) <<  8) | (h8_get_memory (sd, (X)+3) <<  0)) \
-   : ((h8_get_eightbit (sd, ((X)+0) & 0xff) << 24) \
-    | (h8_get_eightbit (sd, ((X)+1) & 0xff) << 16) \
-    | (h8_get_eightbit (sd, ((X)+2) & 0xff) <<  8) \
-    | (h8_get_eightbit (sd, ((X)+3) & 0xff) <<  0)))
+   : 0)
 
 #define GET_MEMORY_W(X) \
   ((X) < memory_size \
-   ? ((h8_get_memory   (sd, (X)+0) << 8) \
-    | (h8_get_memory   (sd, (X)+1) << 0)) \
-   : ((h8_get_eightbit (sd, ((X)+0) & 0xff) << 8) \
-    | (h8_get_eightbit (sd, ((X)+1) & 0xff) << 0)))
-
+   ? ((h8_get_memory (sd, (X)+0) << 8) | (h8_get_memory (sd, (X)+1) << 0)) \
+   : 0)
 
 #define GET_MEMORY_B(X) \
-  ((X) < memory_size ? (h8_get_memory   (sd, (X))) \
-                     : (h8_get_eightbit (sd, (X) & 0xff)))
+  ((X) < memory_size ? h8_get_memory (sd, (X)) : 0)
 
 #define SET_MEMORY_L(X, Y)  \
 {  register unsigned char *_p; register int __y = (Y); \
-   _p = ((X) < memory_size ? h8_get_memory_buf   (sd) +  (X) : \
-                             h8_get_eightbit_buf (sd) + ((X) & 0xff)); \
+   _p = ((X) < memory_size ? h8_get_memory_buf (sd) + (X) : 0); \
    _p[0] = __y >> 24; _p[1] = __y >> 16; \
    _p[2] = __y >>  8; _p[3] = __y >>  0; \
 }
 
 #define SET_MEMORY_W(X, Y) \
 {  register unsigned char *_p; register int __y = (Y); \
-   _p = ((X) < memory_size ? h8_get_memory_buf   (sd) +  (X) : \
-                             h8_get_eightbit_buf (sd) + ((X) & 0xff)); \
+   _p = ((X) < memory_size ? h8_get_memory_buf (sd) + (X) : 0); \
    _p[0] = __y >> 8; _p[1] = __y; \
 }
 
 #define SET_MEMORY_B(X, Y) \
-  ((X) < memory_size ? (h8_set_memory   (sd, (X), (Y))) \
-                     : (h8_set_eightbit (sd, (X) & 0xff, (Y))))
+  ((X) < memory_size ? h8_set_memory (sd, (X), (Y)) : 0)
 
 /* Simulate a memory fetch.
    Return 0 for success, -1 for failure.
@@ -1661,13 +1629,10 @@ init_pointers (SIM_DESC sd)
 
       if (h8_get_memory_buf (sd))
 	free (h8_get_memory_buf (sd));
-      if (h8_get_eightbit_buf (sd))
-	free (h8_get_eightbit_buf (sd));
 
       h8_set_memory_buf (sd, (unsigned char *) 
 			 calloc (sizeof (char), memory_size));
       sd->memory_size = memory_size;
-      h8_set_eightbit_buf (sd, (unsigned char *) calloc (sizeof (char), 256));
 
       h8_set_mask (sd, memory_size - 1);
 
@@ -2164,25 +2129,12 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 				    ? h8_get_reg (sd, R4_REGNUM) & 0xffff
 				    : h8_get_reg (sd, R4_REGNUM) & 0xff);
 
-	      _src = (h8_get_reg (sd, R5_REGNUM) < memory_size
-		      ? h8_get_memory_buf   (sd) + h8_get_reg (sd, R5_REGNUM)
-		      : h8_get_eightbit_buf (sd) + 
-		       (h8_get_reg (sd, R5_REGNUM) & 0xff));
+	      _src = h8_get_memory_buf (sd) + h8_get_reg (sd, R5_REGNUM);
 	      if ((_src + count) >= (h8_get_memory_buf (sd) + memory_size))
-		{
-		  if ((_src + count) >= (h8_get_eightbit_buf (sd) + 0x100))
-		    goto illegal;
-		}
-	      _dst = (h8_get_reg (sd, R6_REGNUM) < memory_size
-		      ? h8_get_memory_buf   (sd) + h8_get_reg (sd, R6_REGNUM)
-		      : h8_get_eightbit_buf (sd) + 
-		       (h8_get_reg (sd, R6_REGNUM) & 0xff));
-
+		goto illegal;
+	      _dst = h8_get_memory_buf (sd) + h8_get_reg (sd, R6_REGNUM);
 	      if ((_dst + count) >= (h8_get_memory_buf (sd) + memory_size))
-		{
-		  if ((_dst + count) >= (h8_get_eightbit_buf (sd) + 0x100))
-		    goto illegal;
-		}
+		goto illegal;
 	      memcpy (_dst, _src, count);
 
 	      h8_set_reg (sd, R5_REGNUM, h8_get_reg (sd, R5_REGNUM) + count);
@@ -4444,11 +4396,9 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 	  h8_set_memory    (sd, addr + i, buffer[i]);
 	}
       else
-	{
-	  h8_set_eightbit (sd, (addr + i) & 0xff, buffer[i]);
-	}
+	break;
     }
-  return size;
+  return i;
 }
 
 int
@@ -4457,10 +4407,10 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
   init_pointers (sd);
   if (addr < 0)
     return 0;
-  if (addr < memory_size)
+  if (addr + size < memory_size)
     memcpy (buffer, h8_get_memory_buf (sd) + addr, size);
   else
-    memcpy (buffer, h8_get_eightbit_buf (sd) + (addr & 0xff), size);
+    return 0;
   return size;
 }
 
@@ -4835,13 +4785,10 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 
   if (h8_get_memory_buf (sd))
     free (h8_get_memory_buf (sd));
-  if (h8_get_eightbit_buf (sd))
-    free (h8_get_eightbit_buf (sd));
 
   h8_set_memory_buf (sd, (unsigned char *) 
 		     calloc (sizeof (char), memory_size));
   sd->memory_size = memory_size;
-  h8_set_eightbit_buf (sd, (unsigned char *) calloc (sizeof (char), 256));
 
   /* `msize' must be a power of two.  */
   if ((memory_size & (memory_size - 1)) != 0)
