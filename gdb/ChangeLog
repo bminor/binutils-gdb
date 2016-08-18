@@ -1,5 +1,10 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* configure: Rebuild.
+	* warning.m4 (AM_GDB_WARNINGS): Add -Wimplicit-fallthrough.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* linux-record.c (record_linux_system_call) <case
 	RECORD_SYS_RECVFROM>: Add "break".
 

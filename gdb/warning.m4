@@ -43,7 +43,8 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized \
 -Wno-mismatched-tags \
 -Wno-error=deprecated-register \
--Wsuggest-override"
+-Wsuggest-override \
+-Wimplicit-fallthrough"
 
 case "${host}" in
   *-*-mingw32*)
