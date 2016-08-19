@@ -23,9 +23,9 @@ Section Headers:
  +\[[ 0-9]+\] .xtensa.info +NOTE +0+ .*
  +\[[ 0-9]+\] .xt.lit +PROGBITS +0+ .*
  +\[[ 0-9]+\] .xt.prop +PROGBITS +0+ .*
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 Key to Flags:
 #...
 

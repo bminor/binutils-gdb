@@ -5922,6 +5922,122 @@ process_section_headers (FILE * file)
        i < elf_header.e_shnum;
        i++, section++)
     {
+      /* Run some sanity checks on the section header.  */
+
+      /* Check the sh_link field.  */
+      switch (section->sh_type)
+	{
+	case SHT_SYMTAB_SHNDX:
+	case SHT_GROUP:
+	case SHT_HASH:
+	case SHT_GNU_HASH:
+	case SHT_GNU_versym:
+	case SHT_REL:
+	case SHT_RELA:
+	  if (section->sh_link < 1
+	      || section->sh_link > elf_header.e_shnum
+	      || (section_headers[section->sh_link].sh_type != SHT_SYMTAB
+		  && section_headers[section->sh_link].sh_type != SHT_DYNSYM))
+	    warn (_("[%2u]: Link field (%u) should index a symtab section.\n"),
+		  i, section->sh_link);
+	  break;
+
+	case SHT_DYNAMIC:
+	case SHT_SYMTAB:
+	case SHT_DYNSYM:
+	case SHT_GNU_verneed:
+	case SHT_GNU_verdef:
+	case SHT_GNU_LIBLIST:
+	  if (section->sh_link < 1
+	      || section->sh_link > elf_header.e_shnum
+	      || section_headers[section->sh_link].sh_type != SHT_STRTAB)
+	    warn (_("[%2u]: Link field (%u) should index a string section.\n"),
+		  i, section->sh_link);
+	  break;
+
+	case SHT_INIT_ARRAY:
+	case SHT_FINI_ARRAY:
+	case SHT_PREINIT_ARRAY:
+	  if (section->sh_type < SHT_LOOS && section->sh_link != 0)
+	    warn (_("[%2u]: Unexpected value (%u) in link field.\n"),
+		  i, section->sh_link);
+	  break;
+
+	default:
+	  /* FIXME: Add support for target specific section types.  */
+#if 0 	  /* Currently we do not check other section types as there are too
+	     many special cases.  Stab sections for example have a type
+	     of SHT_PROGBITS but an sh_link field that links to the .stabstr
+	     section.  */
+	  if (section->sh_type < SHT_LOOS && section->sh_link != 0)
+	    warn (_("[%2u]: Unexpected value (%u) in link field.\n"),
+		  i, section->sh_link);
+#endif
+	  break;
+	}
+
+      /* Check the sh_info field.  */
+      switch (section->sh_type)
+	{
+	case SHT_REL:
+	case SHT_RELA:
+	  if (section->sh_info < 1
+	      || section->sh_info > elf_header.e_shnum
+	      || (section_headers[section->sh_info].sh_type != SHT_PROGBITS
+		  && section_headers[section->sh_info].sh_type != SHT_NOBITS
+		  && section_headers[section->sh_info].sh_type != SHT_NOTE
+		  && section_headers[section->sh_info].sh_type != SHT_INIT_ARRAY
+		  /* FIXME: Are other section types valid ?  */
+		  && section_headers[section->sh_info].sh_type < SHT_LOOS))
+	    {
+	      if (section->sh_info == 0
+		  && (streq (SECTION_NAME (section), ".rel.dyn")
+		      || streq (SECTION_NAME (section), ".rela.dyn")))
+		/* The .rel.dyn and .rela.dyn sections have an sh_info field
+		   of zero.  No idea why.  I would have expected the index
+		   of the .plt section.  */
+		   ;
+	      else
+		warn (_("[%2u]: Info field (%u) should index a relocatable section.\n"),
+		      i, section->sh_info);
+	    }
+	  break;
+
+	case SHT_DYNAMIC:
+	case SHT_HASH:
+	case SHT_SYMTAB_SHNDX:
+	case SHT_INIT_ARRAY:
+	case SHT_FINI_ARRAY:
+	case SHT_PREINIT_ARRAY:
+	  if (section->sh_info != 0)
+	    warn (_("[%2u]: Unexpected value (%u) in info field.\n"),
+		  i, section->sh_info);
+	  break;
+
+	case SHT_GROUP:
+	case SHT_SYMTAB:
+	case SHT_DYNSYM:
+	  /* A symbol index - we assume that it is valid.  */
+	  break;
+
+	default:
+	  /* FIXME: Add support for target specific section types.  */
+	  if (section->sh_type == SHT_NOBITS)
+	    /* NOBITS section headers with non-zero sh_info fields can be
+	       created when a binary is stripped of everything but its debug
+	       information.  The stripped sections have their headers preserved but their types set to SHT_NOBITS.  so do not check this type of section.  */
+	    ;
+	  else if (section->sh_flags & SHF_INFO_LINK)
+	    {
+	      if (section->sh_info < 1 || section->sh_info > elf_header.e_shnum)
+		warn (_("[%2u]: Expected link to another section in info field"), i);
+	    }
+	  else if (section->sh_type < SHT_LOOS && section->sh_info != 0)
+	    warn (_("[%2u]: Unexpected value (%u) in info field.\n"),
+		  i, section->sh_info);
+	  break;
+	}
+
       printf ("  [%2u] ", i);
       if (do_section_details)
 	printf ("%s\n      ", printable_section_name (section));
@@ -11116,7 +11232,12 @@ process_symbol_table (FILE * file)
 	      putchar ('\n');
 
 	      if (ELF_ST_BIND (psym->st_info) == STB_LOCAL
-		  && si >= section->sh_info)
+		  && si >= section->sh_info
+		  /* Irix 5 and 6 MIPS binaries are known to ignore this requirement.  */
+		  && elf_header.e_machine != EM_MIPS
+		  /* Solaris binaries have been found to violate this requirement as
+		     well.  Not sure if this is a bug or an ABI requirement.  */
+		  && elf_header.e_ident[EI_OSABI] != ELFOSABI_SOLARIS)
 		warn (_("local symbol %u found at index >= %s's sh_info value of %u\n"),
 		      si, printable_section_name (section), section->sh_info);
 	    }

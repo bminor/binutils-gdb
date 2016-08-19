@@ -1,3 +1,9 @@
+2016-08-19  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/readelf.s: Adjust expected ordering of
+	sections.
+	* testsuite/binutils-all/readelf.s-64: Likewise.
+
 2016-08-12  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (process_symbol_table): Generate a warning if a local

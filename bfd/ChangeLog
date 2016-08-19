@@ -1,3 +1,8 @@
+2016-08-19  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (assign_section_numbers): Assign number for the .shstrtab
+	section after the symbol table and string table sections.
+
 2016-08-19  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_entry): Add weakref.

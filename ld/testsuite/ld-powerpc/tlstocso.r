@@ -21,9 +21,9 @@ Section Headers:
  +\[[ 0-9]+\] \.opd .*
  +\[[ 0-9]+\] \.got .*
  +\[[ 0-9]+\] \.plt .*
- +\[[ 0-9]+\] \.shstrtab .*
  +\[[ 0-9]+\] \.symtab .*
  +\[[ 0-9]+\] \.strtab .*
+ +\[[ 0-9]+\] \.shstrtab .*
 #...
 
 Elf file type is DYN \(Shared object file\)

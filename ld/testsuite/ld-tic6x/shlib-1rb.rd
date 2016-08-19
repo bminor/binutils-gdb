@@ -16,9 +16,9 @@ Section Headers:
   \[11\] \.neardata         PROGBITS        10000128 002128 000008 00  WA  0   0  4
   \[12\] \.bss              NOBITS          10000130 002130 000004 00  WA  0   0  4
   \[13\] \.c6xabi\.attributes C6000_ATTRIBUTES 00000000 002130 000019 00      0   0  1
-  \[14\] \.shstrtab         STRTAB          00000000 [0-9a-f]+ 00007b 00      0   0  1
-  \[15\] \.symtab           SYMTAB          00000000 [0-9a-f]+ [0-9a-f]+ 10     16  [0-9]+  4
-  \[16\] \.strtab           STRTAB          00000000 [0-9a-f]+ [0-9a-f]+ 00      0   0  1
+  \[14\] \.symtab           SYMTAB          00000000 [0-9a-f]+ [0-9a-f]+ 10     15  [0-9]+  4
+  \[15\] \.strtab           STRTAB          00000000 [0-9a-f]+ [0-9a-f]+ 00      0   0  1
+  \[16\] \.shstrtab         STRTAB          00000000 [0-9a-f]+ 00007b 00      0   0  1
 Key to Flags:
 #...
 

@@ -11,8 +11,8 @@ Section Headers:
   \[ 2\] .data             PROGBITS        00000000 000034 000000 00  WA  0   0  1
   \[ 3\] .bss              NOBITS          00000000 000034 000000 00  WA  0   0  1
   \[ 4\] .eh_frame         X86_64_UNWIND   00000000 000034 000008 00   A  0   0  1
-  \[ 5\] .shstrtab         STRTAB          00000000 [0-9a-f]+ 000036 00   .  0   0  1
-  \[ 6\] .symtab           SYMTAB          00000000 [0-9a-f]+ 000050 10      7   5  4
-  \[ 7\] .strtab           STRTAB          00000000 [0-9a-f]+ 000001 00   .  0   0  1
+  \[ 5\] .symtab           SYMTAB          00000000 [0-9a-f]+ 000050 10      6   5  4
+  \[ 6\] .strtab           STRTAB          00000000 [0-9a-f]+ 000001 00   .  0   0  1
+  \[ 7\] .shstrtab         STRTAB          00000000 [0-9a-f]+ 000036 00   .  0   0  1
 Key to Flags:
 #pass
