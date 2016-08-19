@@ -50,6 +50,7 @@ gld${EMULATION_NAME}_before_parse (void)
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   input_flags.dynamic = TRUE;
   config.has_shared = TRUE;
+  link_info.relro = DEFAULT_LD_Z_RELRO;
 }
 
 /* Try to open a dynamic archive.  This is where we know that Linux

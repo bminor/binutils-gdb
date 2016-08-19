@@ -1,5 +1,11 @@
 2016-08-19  Nick Clifton  <nickc@redhat.com>
 
+	* emultempl/aarch64elf.em (before_parse): Initialise the relro
+	field in the link_info structure.
+	* emultempl/armelf.em (before_parse): Likewise.
+	* emultempl/linux.em (before_parse): Likewise.
+	* emultempl/scoreelf.em (before_parse): Likewise.
+
 	* testsuite/ld-alpha/tlsbin.rd: Adjust expected ordering of sections.
 	* testsuite/ld-alpha/tlsbinr.rd: Likewise.
 	* testsuite/ld-alpha/tlspic.rd: Likewise.
