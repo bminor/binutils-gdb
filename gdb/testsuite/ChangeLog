@@ -1,3 +1,8 @@
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/mi-trace-frame-collected.exp
+	(test_trace_frame_collected): On x32, expect two registers.
+
 2016-08-18  Carl Love  <cel@us.ibm.com>
 
 	* gdb.arch/powerpc-power.s: Add new Power9 instruction tests
