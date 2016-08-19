@@ -3950,6 +3950,9 @@ struct ppc_link_hash_entry
   /* Track dynamic relocs copied for this symbol.  */
   struct elf_dyn_relocs *dyn_relocs;
 
+  /* Chain of aliases referring to a weakdef.  */
+  struct ppc_link_hash_entry *weakref;
+
   /* Link between function code and descriptor symbols.  */
   struct ppc_link_hash_entry *oh;
 
@@ -4738,6 +4741,45 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir->elf.needs_plt |= eind->elf.needs_plt;
   edir->elf.pointer_equality_needed |= eind->elf.pointer_equality_needed;
 
+  /* If we were called to copy over info for a weak sym, don't copy
+     dyn_relocs, plt/got info, or dynindx.  We used to copy dyn_relocs
+     in order to simplify readonly_dynrelocs and save a field in the
+     symbol hash entry, but that means dyn_relocs can't be used in any
+     tests about a specific symbol, or affect other symbol flags which
+     are then tested.
+     Chain weakdefs so we can get from the weakdef back to an alias.
+     The list is circular so that we don't need to use u.weakdef as
+     well as this list to look at all aliases.  */
+  if (eind->elf.root.type != bfd_link_hash_indirect)
+    {
+      struct ppc_link_hash_entry *cur, *add, *next;
+
+      add = eind;
+      do
+	{
+	  cur = edir->weakref;
+	  if (cur != NULL)
+	    {
+	      do
+		{
+		  /* We can be called twice for the same symbols.
+		     Don't make multiple loops.  */
+		  if (cur == add)
+		    return;
+		  cur = cur->weakref;
+		} while (cur != edir);
+	    }
+	  next = add->weakref;
+	  if (cur != add)
+	    {
+	      add->weakref = edir->weakref != NULL ? edir->weakref : edir;
+	      edir->weakref = add;
+	    }
+	  add = next;
+	} while (add != NULL && add != eind);
+      return;
+    }
+
   /* Copy over any dynamic relocs we may have on the indirect sym.  */
   if (eind->dyn_relocs != NULL)
     {
@@ -4769,16 +4811,6 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
       edir->dyn_relocs = eind->dyn_relocs;
       eind->dyn_relocs = NULL;
     }
-
-  /* If we were called to copy over info for a weak sym, that's all.
-     You might think dyn_relocs need not be copied over;  After all,
-     both syms will be dynamic or both non-dynamic so we're just
-     moving reloc accounting around.  However, ELIMINATE_COPY_RELOCS
-     code in ppc64_elf_adjust_dynamic_symbol needs to check for
-     dyn_relocs in read-only sections, and it does so on what is the
-     DIR sym here.  */
-  if (eind->elf.root.type != bfd_link_hash_indirect)
-    return;
 
   /* Copy over got entries that we may have already seen to the
      symbol which just became indirect.  */
@@ -7122,6 +7154,24 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
   return FALSE;
 }
 
+/* Return true if we have dynamic relocs against H or any of its weak
+   aliases, that apply to read-only sections.  */
+
+static bfd_boolean
+alias_readonly_dynrelocs (struct elf_link_hash_entry *h)
+{
+  struct ppc_link_hash_entry *eh;
+
+  eh = (struct ppc_link_hash_entry *) h;
+  do
+    {
+      if (readonly_dynrelocs (&eh->elf))
+	return TRUE;
+      eh = eh->weakref;
+    } while (eh != NULL && &eh->elf != h);
+
+  return FALSE;
+}
 
 /* Return true if a global entry stub will be created for H.  Valid
    for ELFv2 before plt entries have been allocated.  */
@@ -7192,7 +7242,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     few more instructions, and pointer_equality_needed causes
 	     extra work in ld.so when resolving these symbols.  */
 	  if (global_entry_stub (h)
-	      && !readonly_dynrelocs (h))
+	      && !alias_readonly_dynrelocs (h))
 	    {
 	      h->pointer_equality_needed = 0;
 	      /* After adjust_dynamic_symbol, non_got_ref set in
@@ -7242,7 +7292,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
       /* If we didn't find any dynamic relocs in read-only sections, then
 	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-      || (ELIMINATE_COPY_RELOCS && !readonly_dynrelocs (h))
+      || (ELIMINATE_COPY_RELOCS && !alias_readonly_dynrelocs (h))
 
       /* Protected variables do not work with .dynbss.  The copy in
 	 .dynbss won't be used by the shared library with the protected
@@ -14695,25 +14745,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if (NO_OPD_RELOCS && is_opd)
 	    break;
 
-	  if (bfd_link_pic (info)
-	      ? ((h == NULL
-		  || ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
-		  || h->elf.root.type != bfd_link_hash_undefweak)
-		 && (must_be_dyn_reloc (info, r_type)
-		     || !SYMBOL_CALLS_LOCAL (info, &h->elf)))
-	      : (h == NULL
-		 ? ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-		 : (h->elf.type == STT_GNU_IFUNC
-		    ? (abiversion (output_bfd) >= 2
-		       ? !(h->elf.pointer_equality_needed
-			   && !h->elf.def_regular
-			   && h->elf.root.type == bfd_link_hash_defined
-			   && h->elf.root.u.def.section == htab->glink)
-		       : !h->elf.needs_copy)
-		    : (ELIMINATE_COPY_RELOCS
-		       && !(h->elf.non_got_ref
-			    || h->elf.def_regular
-			    || h->elf.dynindx == -1)))))
+	  if (h != NULL
+	      ? h->dyn_relocs != NULL
+	      : (bfd_link_pic (info)
+		 ? must_be_dyn_reloc (info, r_type)
+		 : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC))
 	    {
 	      bfd_boolean skip, relocate;
 	      asection *sreloc;

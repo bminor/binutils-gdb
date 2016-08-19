@@ -1,5 +1,15 @@
 2016-08-19  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add weakref.
+	(ppc64_elf_copy_indirect_symbol): Set weakref.  Don't merge
+	dyn_relocs for weakdefs.
+	(alias_readonly_dynrelocs): New function.
+	(ppc64_elf_adjust_dynamic_symbol): Use alias_readonly_dynrelocs.
+	(ppc64_elf_relocate_section): Simplify condition under which
+	dyn_relocs are emitted.
+
+2016-08-19  Alan Modra  <amodra@gmail.com>
+
 	PR 20472
 	* elf64-ppc.c (ppc64_elf_before_check_relocs): Tweak abiversion test.
 	(readonly_dynrelocs): Comment fix.
