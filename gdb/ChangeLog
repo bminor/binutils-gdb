@@ -1,3 +1,8 @@
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	* amd64-tdep.c (amd64_relocate_instruction) <callq>: Handle return
+	addresses over 0x7fffffff.
+
 2016-08-18  Carl Love  <cel@us.ibm.com>
 
 	* MAINTANERS Write After Approval): Add "Carl Love".

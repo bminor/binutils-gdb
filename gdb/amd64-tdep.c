@@ -1764,15 +1764,47 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
      the user program would return to.  */
   if (insn[0] == 0xe8)
     {
-      gdb_byte push_buf[16];
-      unsigned int ret_addr;
+      gdb_byte push_buf[32];
+      CORE_ADDR ret_addr;
+      int i = 0;
 
       /* Where "ret" in the original code will return to.  */
       ret_addr = oldloc + insn_length;
-      push_buf[0] = 0x68; /* pushq $...  */
-      store_unsigned_integer (&push_buf[1], 4, byte_order, ret_addr);
+
+      /* If pushing an address higher than or equal to 0x80000000,
+	 avoid 'pushq', as that sign extends its 32-bit operand, which
+	 would be incorrect.  */
+      if (ret_addr <= 0x7fffffff)
+	{
+	  push_buf[0] = 0x68; /* pushq $...  */
+	  store_unsigned_integer (&push_buf[1], 4, byte_order, ret_addr);
+	  i = 5;
+	}
+      else
+	{
+	  push_buf[i++] = 0x48; /* sub    $0x8,%rsp */
+	  push_buf[i++] = 0x83;
+	  push_buf[i++] = 0xec;
+	  push_buf[i++] = 0x08;
+
+	  push_buf[i++] = 0xc7; /* movl    $imm,(%rsp) */
+	  push_buf[i++] = 0x04;
+	  push_buf[i++] = 0x24;
+	  store_unsigned_integer (&push_buf[i], 4, byte_order,
+				  ret_addr & 0xffffffff);
+	  i += 4;
+
+	  push_buf[i++] = 0xc7; /* movl    $imm,4(%rsp) */
+	  push_buf[i++] = 0x44;
+	  push_buf[i++] = 0x24;
+	  push_buf[i++] = 0x04;
+	  store_unsigned_integer (&push_buf[i], 4, byte_order,
+				  ret_addr >> 32);
+	  i += 4;
+	}
+      gdb_assert (i <= sizeof (push_buf));
       /* Push the push.  */
-      append_insns (to, 5, push_buf);
+      append_insns (to, i, push_buf);
 
       /* Convert the relative call to a relative jump.  */
       insn[0] = 0xe9;
