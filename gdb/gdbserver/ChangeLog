@@ -1,3 +1,17 @@
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20415
+	* Makefile.in (x32-linux-ipa.o, x32-avx-linux-ipa.o)
+	(x32-avx512-linux-ipa.o): New rules.
+	* configure.ac (x86_64-*-linux*): New x32 check.
+	* configure.srv (ipa_x32_linux_regobj): New.
+	(x86_64-*-linux*): Use $ipa_x32_linux_regobj if building for x32.
+	* linux-amd64-ipa.c (get_ipa_tdesc) [__ILP32__]: Return x32
+	descriptions.
+	(initialize_low_tracepoint) [__ILP32__]: Initialize x32
+	descriptions.
+	* configure: Regenerate.
+
 2016-08-09  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/18653

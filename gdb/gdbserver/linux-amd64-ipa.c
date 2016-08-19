@@ -174,6 +174,19 @@ supply_static_tracepoint_registers (struct regcache *regcache,
 const struct target_desc *
 get_ipa_tdesc (int idx)
 {
+#if defined __ILP32__
+  switch (idx)
+    {
+    case X86_TDESC_SSE:
+      return tdesc_x32_linux;
+    case X86_TDESC_AVX:
+      return tdesc_x32_avx_linux;
+    case X86_TDESC_AVX512:
+      return tdesc_x32_avx512_linux;
+    default:
+      break;
+    }
+#else
   switch (idx)
     {
     case X86_TDESC_SSE:
@@ -186,11 +199,11 @@ get_ipa_tdesc (int idx)
       return tdesc_amd64_avx_mpx_linux;
     case X86_TDESC_AVX512:
       return tdesc_amd64_avx512_linux;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      "unknown ipa tdesc index: %d", idx);
-      return tdesc_amd64_linux;
     }
+#endif
+
+  internal_error (__FILE__, __LINE__,
+		  "unknown ipa tdesc index: %d", idx);
 }
 
 /* Allocate buffer for the jump pads.  Since we're using 32-bit jumps
@@ -213,9 +226,15 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
+#if defined __ILP32__
+  init_registers_x32_linux ();
+  init_registers_x32_avx_linux ();
+  init_registers_x32_avx512_linux ();
+#else
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();
   init_registers_amd64_avx_mpx_linux ();
   init_registers_amd64_mpx_linux ();
   init_registers_amd64_avx512_linux ();
+#endif
 }
