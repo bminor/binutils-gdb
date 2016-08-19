@@ -8691,6 +8691,14 @@ do_co_reg2c (void)
       constraint (Rn == REG_PC, BAD_PC);
     }
 
+  /* Only check the MRRC{2} variants.  */
+  if ((inst.instruction & 0x0FF00000) == 0x0C500000)
+    {
+       /* If Rd == Rn, error that the operation is
+	  unpredictable (example MRRC p3,#1,r1,r1,c4).  */
+       constraint (Rd == Rn, BAD_OVERLAP);
+    }
+
   inst.instruction |= inst.operands[0].reg << 8;
   inst.instruction |= inst.operands[1].imm << 4;
   inst.instruction |= Rd << 12;

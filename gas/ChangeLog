@@ -1,3 +1,10 @@
+2016-08-19  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-arm.c (do_co_reg2c): Added constraint.
+	* testsuite/gas/arm/dest-unpredictable.s: New.
+	* testsuite/gas/arm/dest-unpredictable.l: New.
+	* testsuite/gas/arm/dest-unpredictable.d: New.
+
 2016-08-19  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/i386/ilp32/x86-64-unwind.d: Adjust expected
