@@ -1,3 +1,21 @@
+2016-08-19  Alan Modra  <amodra@gmail.com>
+
+	PR 20472
+	* elf64-ppc.c (ppc64_elf_before_check_relocs): Tweak abiversion test.
+	(readonly_dynrelocs): Comment fix.
+	(global_entry_stub): New function.
+	(ppc64_elf_adjust_dynamic_symbol): Tweak abiversion test.  Match
+	ELFv2 code deciding on dynamic relocs vs. global entry stubs to
+	that in size_global_entry_stubs, handling ifunc too.  Delete dead
+	weak sym code.
+	(allocate_dynrelocs): Ensure dyn_relocs field is cleared when no
+	dyn_relocs are needed.  Correct handling of ifunc dyn_relocs.
+	Tidy ELIMINATE_COPY_RELOCS code, only setting dynindx for
+	undefweak syms.  Expand and correct comments.
+	(size_global_entry_stubs): Ensure symbol is defined.
+	(ppc64_elf_relocate_section): Match condition under which
+	dyn_relocs are emitted to that in allocate_dynrelocs.
+
 2016-08-12  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_link_hash_table): Add local_dynsymcount.
