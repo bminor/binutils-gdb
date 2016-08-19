@@ -25,9 +25,7 @@ if ![istarget "powerpc64*-*"] then {
     return
 }
 
-set testfile "powerpc-d128-regs"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {quiet debug}] != "" } {
      untested powerpc-d128-regs.exp
