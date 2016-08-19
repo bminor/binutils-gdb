@@ -1092,10 +1092,10 @@ amd64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   buf[i++] = 0x41; buf[i++] = 0x51; /* push %r9 */
   buf[i++] = 0x41; buf[i++] = 0x50; /* push %r8 */
   buf[i++] = 0x9c; /* pushfq */
-  buf[i++] = 0x48; /* movl <addr>,%rdi */
+  buf[i++] = 0x48; /* movabs <addr>,%rdi */
   buf[i++] = 0xbf;
-  *((unsigned long *)(buf + i)) = (unsigned long) tpaddr;
-  i += sizeof (unsigned long);
+  memcpy (buf + i, &tpaddr, 8);
+  i += 8;
   buf[i++] = 0x57; /* push %rdi */
   append_insns (&buildaddr, i, buf);
 
