@@ -1,5 +1,10 @@
 2016-08-19  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_analyze_prologue): Handle register
+	based STP instruction.
+
+2016-08-19  Yao Qi  <yao.qi@linaro.org>
+
 	* completer.c (linespec_location_completer): Make file_to_match
 	null-terminated.
 
