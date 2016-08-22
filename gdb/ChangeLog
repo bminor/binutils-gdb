@@ -1,3 +1,16 @@
+2016-09-02  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/11616:
+	* dwarf2read.c (decode_locdesc): Handle DW_OP_form_tls_address.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Handle
+	DW_OP_form_tls_address.
+	(locexpr_describe_location_piece): Likewise.
+	* dwarf2expr.h (struct dwarf_expr_context_funcs): Update comment.
+	* dwarf2expr.c (execute_stack_op): Handle DW_OP_form_tls_address.
+	(ctx_no_get_tls_address): Mention DW_OP_form_tls_address.
+	* compile/compile-loc2c.c (struct insn_info): Update comment.
+	(compute_stack_depth_worker): Handle DW_OP_form_tls_address.
+
 2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* target.c (target_wait): Mention that the function's prototype
