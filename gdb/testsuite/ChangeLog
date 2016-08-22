@@ -1,3 +1,9 @@
+2016-08-24  Kevin Buettner  <kevinb@redhat.com>
+
+    	* gdb.python/py-recurse-unwind.c: New file.
+    	* gdb.python/py-recurse-unwind.py: New file.
+    	* gdb.python/py-recurse-unwind.exp: New file.
+
 2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/set-inferior-tty.exp: New file.
