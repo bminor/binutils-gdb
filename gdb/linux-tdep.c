@@ -2287,15 +2287,40 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
   long pid;
   char *data;
 
-  /* Can't access /proc if debugging a core file.  */
-  if (!target_has_execution)
+  if (target_auxv_search (&current_target, AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
+
+  /* It doesn't make sense to access the host's /proc when debugging a
+     core file.  Instead, look for the PT_LOAD segment that matches
+     the vDSO.  */
+  if (!target_has_execution)
+    {
+      Elf_Internal_Phdr *phdrs;
+      long phdrs_size;
+      int num_phdrs, i;
+
+      phdrs_size = bfd_get_elf_phdr_upper_bound (core_bfd);
+      if (phdrs_size == -1)
+	return 0;
+
+      phdrs = (Elf_Internal_Phdr *) alloca (phdrs_size);
+      num_phdrs = bfd_get_elf_phdrs (core_bfd, phdrs);
+      if (num_phdrs == -1)
+	return 0;
+
+      for (i = 0; i < num_phdrs; i++)
+	if (phdrs[i].p_type == PT_LOAD
+	    && phdrs[i].p_vaddr == range->start)
+	  {
+	    range->length = phdrs[i].p_memsz;
+	    return 1;
+	  }
+
+      return 0;
+    }
 
   /* We need to know the real target PID to access /proc.  */
   if (current_inferior ()->fake_pid_p)
-    return 0;
-
-  if (target_auxv_search (&current_target, AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
 
   pid = current_inferior ()->pid;

@@ -1,3 +1,10 @@
+2016-08-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20505
+	* gdb.base/vdso-warning.exp: Test core dumps too.  Use
+	with_test_prefix.  Factor out bits to ...
+	(test_no_vdso): ... this new procedure.
+
 2016-08-19  Carl Love  <cel@us.ibm.com>
 
 	* gdb.arch/altivec-regs.exp: Use standard_testfile instead of
