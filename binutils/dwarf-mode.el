@@ -1,6 +1,6 @@
 ;;; dwarf-mode.el --- Browser for DWARF information.
 
-;; Version: 1.2
+;; Version: 1.3
 
 ;; Copyright (C) 2012-2016 Free Software Foundation, Inc.
 
@@ -162,6 +162,7 @@ This is the main interface to `dwarf-mode'."
 	 (buffer (generate-new-buffer (concat "*DWARF for " base-name "*"))))
     (pop-to-buffer buffer)
     (dwarf-mode)
+    (setq default-directory (file-name-directory file))
     (set (make-local-variable 'dwarf-file) file)
     (dwarf-do-refresh)))
 
