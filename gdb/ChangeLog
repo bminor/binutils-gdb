@@ -1,3 +1,14 @@
+2020-12-22  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (arc_make_sigtramp_frame_cache): New function.
+	(arc_sigtramp_frame_this_id): Likewise.
+	(arc_sigtramp_frame_prev_register): Likewise.
+	(arc_sigtramp_frame_sniffer): Likewise.
+	(arc_siftramp_frame_unwind): New global variable.
+	(arc_gdbarch_init): Use sigtramp capabilities.
+	(arc_dump_tdep): Print sigtramp fields.
+	* arc-tdep.h (gdbarch_tdep): Add sigtramp fields.
+
 2020-12-21  Tom Tromey  <tom@tromey.com>
 
 	* expression.h (enum noside): Move earlier.

@@ -124,6 +124,19 @@ struct gdbarch_tdep
 
   /* Whether target has hardware (aka zero-delay) loops.  */
   bool has_hw_loops;
+
+  /* Detect sigtramp.  */
+  bool (*is_sigtramp) (struct frame_info *);
+
+  /* Get address of sigcontext for sigtramp.  */
+  CORE_ADDR (*sigcontext_addr) (struct frame_info *);
+
+  /* Offset of registers in `struct sigcontext'.  */
+  const int *sc_reg_offset;
+
+  /* Number of registers in sc_reg_offsets.  Most likely a ARC_LAST_REGNUM,
+     but in theory it could be less, so it is kept separate.  */
+  int sc_num_regs;
 };
 
 /* Utility functions used by other ARC-specific modules.  */
