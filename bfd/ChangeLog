@@ -1,3 +1,8 @@
+2016-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* doc/chew.c (main): Free the string buffer used to files as they
+	are parsed.
+
 2016-08-22  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Move error for @local ifunc..

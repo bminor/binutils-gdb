@@ -1602,6 +1602,7 @@ main (ac, av)
 	      read_in (&b, f);
 	      compile (b.ptr);
 	      perform ();
+	      delete_string (&b);
 	    }
 	  else if (av[i][1] == 'i')
 	    {
