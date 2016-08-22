@@ -1,3 +1,11 @@
+2016-08-22  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Move error for @local ifunc..
+	(ppc_elf_relocate_section): ..to here.  Comment.  Error on
+	detecting -mbss-plt -fPIC local ifuncs too.
+	(ppc_elf_size_dynamic_sections): Comment on unnecessary glink
+	branch table entries.
+
 2016-08-19  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (assign_section_numbers): Assign number for the .shstrtab
