@@ -1,3 +1,9 @@
+2016-08-22  Nick Clifton  <nickc@redhat.com>
+
+	PR gprof/20499
+	* corefile.c (core_create_syms_from): Avoid walking off the end of
+	the symbol table.
+
 2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

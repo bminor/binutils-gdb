@@ -553,6 +553,13 @@ core_create_syms_from (const char * sym_table_file)
         if (type != 't' && type != 'T')
           continue;
 
+      /* PR 20499 */
+      if ((symtab.limit - symtab.base) >= symtab.len)
+	{
+	  fprintf (stderr, _("%s: too many symbols in file '%s'\n"), whoami, sym_table_file);
+	  done (1);
+	}
+
       sym_init (symtab.limit);
 
       sscanf (address, "%" BFD_VMA_FMT "x", &(symtab.limit->addr) );
