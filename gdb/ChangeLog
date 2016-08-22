@@ -1,3 +1,11 @@
+2016-08-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20505
+	* linux-tdep.c (linux_vsyscall_range_raw): For core inferiors,
+	find the vDSO's start address with AT_SYSINFO_EHDR too, and
+	determine the vDSO's size by finding the PT_LOAD segment that
+	matches AT_SYSINFO_EHDR.
+
 2016-08-19  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_analyze_prologue): Handle register

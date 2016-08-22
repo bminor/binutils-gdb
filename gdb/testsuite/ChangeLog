@@ -1,3 +1,10 @@
+2016-08-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20505
+	* gdb.base/vdso-warning.exp: Test core dumps too.  Use
+	with_test_prefix.  Factor out bits to ...
+	(test_no_vdso): ... this new procedure.
+
 2016-08-15  Doug Evans  <dje@google.com>
 
 	* gdb.xml/extra-regs.xml: Update, end field now required, default type
