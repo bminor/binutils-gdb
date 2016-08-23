@@ -1842,6 +1842,8 @@ amd64_emit_call (CORE_ADDR fn)
   else
     {
       int offset32 = offset64; /* we know we can't overflow here.  */
+
+      buf[i++] = 0xe8; /* call <reladdr> */
       memcpy (buf + i, &offset32, 4);
       i += 4;
     }

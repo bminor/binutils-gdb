@@ -1,5 +1,9 @@
 2016-08-23  Pedro Alves  <palves@redhat.com>
 
+	* linux-x86-low.c (amd64_emit_call): Emit missing call opcode.
+
+2016-08-23  Pedro Alves  <palves@redhat.com>
+
 	* linux-x86-low.c (amd64_install_fast_tracepoint_jump_pad): Fix
 	comment.  Use memcpy instead of casting through unsigned long.
 
