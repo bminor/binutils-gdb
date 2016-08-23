@@ -18688,7 +18688,7 @@ elf32_arm_count_additional_relocs (asection *sec)
 {
   struct _arm_elf_section_data *arm_data;
   arm_data = get_arm_elf_section_data (sec);
-  return arm_data->additional_reloc_count;
+  return arm_data == NULL ? 0 : arm_data->additional_reloc_count;
 }
 
 /* Called to set the sh_flags, sh_link and sh_info fields of OSECTION which

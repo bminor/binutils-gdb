@@ -1,3 +1,8 @@
+2016-08-23  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (elf32_arm_count_additional_relocs): Return zero if
+	there is no arm data associated with the section.
+
 2016-08-23  Alan Modra  <amodra@gmail.com>
 
 	PR 20475
