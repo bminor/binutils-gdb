@@ -648,6 +648,15 @@ rsp-low-ipa.o: ../common/rsp-low.c
 errors-ipa.o: ../common/errors.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
+x32-linux-ipa.o: x32-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+x32-avx-linux-ipa.o: x32-avx-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+x32-avx512-linux-ipa.o: x32-avx512-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
 
 ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<

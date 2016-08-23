@@ -6796,6 +6796,37 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_i386_is_x86_64" >&5
 $as_echo "$gdb_cv_i386_is_x86_64" >&6; }
     ;;
+
+  x86_64-*-linux*)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if building for x32" >&5
+$as_echo_n "checking if building for x32... " >&6; }
+if test "${gdb_cv_x86_is_x32+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  save_CPPFLAGS="$CPPFLAGS"
+		    CPPFLAGS="$CPPFLAGS $CFLAGS"
+		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#if __x86_64__ && __ILP32__
+got it
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "got it" >/dev/null 2>&1; then :
+  gdb_cv_x86_is_x32=yes
+else
+  gdb_cv_x86_is_x32=no
+fi
+rm -f conftest*
+
+		    CPPFLAGS="$save_CPPFLAGS"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_x86_is_x32" >&5
+$as_echo "$gdb_cv_x86_is_x32" >&6; }
+    ;;
+
   m68k-*-*)
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking if building for Coldfire" >&5
 $as_echo_n "checking if building for Coldfire... " >&6; }
