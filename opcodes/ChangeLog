@@ -1,3 +1,8 @@
+2016-08-23  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (CORE_INSN, __FP_INSN, SIMD_INSN): Add OP parameter.
+	(aarch64_opcode_table): Update uses accordingly.
+
 2016-07-25  Andrew Jenner  <andrew@codesourcery.com>
 	Kwok Cheung Yeung  <kcy@codesourcery.com>
 
