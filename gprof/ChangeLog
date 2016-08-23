@@ -1,3 +1,16 @@
+2016-08-23  Nick Clifton  <nickc@redhat.com>
+
+	PR gprof/20499
+	* corefile.c (BUFSIZE): Define.
+	(STR_BUFSIZE): Define.
+	(read_function_mappings): Use BUFSIZE and STR)BUFSIZE.
+	(num_of_syms_in): Move buf, address and name arrays out of
+	function and declare as static BUFSIZE arrays.
+	Use STR_BUFSIZE when scanning for name and address.
+	(core_create_syms_from): Revert previous delta.  Instead
+	short circuit the parsing of a symbol if all three fields
+	could not be found.
+
 2016-08-22  Nick Clifton  <nickc@redhat.com>
 
 	PR gprof/20499
