@@ -1,3 +1,9 @@
+2016-08-23  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20494
+	* gdb.base/new-ui-echo.c: New file.
+	* gdb.base/new-ui-echo.exp: New file.
+
 2016-08-23  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/signals-state-child.exp: Set variables gdb_txt and
