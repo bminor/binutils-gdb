@@ -1,5 +1,10 @@
 2016-08-23  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (V8_2_INSN): New macro.
+	(aarch64_opcode_table): Use it.
+
+2016-08-23  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (aarch64_opcode_table): Make more use of
 	CORE_INSN, __FP_INSN and SIMD_INSN.
 

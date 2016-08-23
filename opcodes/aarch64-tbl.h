@@ -1412,6 +1412,8 @@ static const aarch64_feature_set aarch64_feature_stat_profile =
   { NAME, OPCODE, MASK, CLASS, 0, FP_F16, OPS, QUALS, FLAGS, NULL }
 #define SF16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS)		\
   { NAME, OPCODE, MASK, CLASS, 0, SIMD_F16, OPS, QUALS, FLAGS, NULL }
+#define V8_2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, OP, ARMV8_2, OPS, QUALS, FLAGS, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -2062,7 +2064,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("asr", 0x13000000, 0x7f800000, bitfield, OP_ASR_IMM, OP3 (Rd, Rn, IMM), QL_SHIFT, F_ALIAS | F_P2 | F_CONV),
   CORE_INSN ("bfm", 0x33000000, 0x7f800000, bitfield, 0, OP4 (Rd, Rn, IMMR, IMMS), QL_BF, F_HAS_ALIAS | F_SF | F_N),
   CORE_INSN ("bfi", 0x33000000, 0x7f800000, bitfield, OP_BFI, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV),
-  {"bfc", 0x330003e0, 0x7f8003e0, bitfield, OP_BFC, ARMV8_2, OP3 (Rd, IMM, WIDTH), QL_BF1, F_ALIAS | F_P2 | F_CONV, NULL},
+  V8_2_INSN ("bfc", 0x330003e0, 0x7f8003e0, bitfield, OP_BFC, OP3 (Rd, IMM, WIDTH), QL_BF1, F_ALIAS | F_P2 | F_CONV),
   CORE_INSN ("bfxil", 0x33000000, 0x7f800000, bitfield, OP_BFXIL, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV),
   CORE_INSN ("ubfm", 0x53000000, 0x7f800000, bitfield, 0, OP4 (Rd, Rn, IMMR, IMMS), QL_BF, F_HAS_ALIAS | F_SF | F_N),
   CORE_INSN ("ubfiz", 0x53000000, 0x7f800000, bitfield, OP_UBFIZ, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV),
@@ -2123,7 +2125,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("rev16", 0x5ac00400, 0x7ffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAME, F_SF),
   CORE_INSN ("rev",   0x5ac00800, 0xfffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAMEW, 0),
   CORE_INSN ("rev",   0xdac00c00, 0xfffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAMEX, F_SF | F_HAS_ALIAS | F_P1),
-  {"rev64", 0xdac00c00, 0xfffffc00, dp_1src, 0, ARMV8_2, OP2 (Rd, Rn), QL_I2SAMEX, F_SF | F_ALIAS, NULL},
+  V8_2_INSN ("rev64", 0xdac00c00, 0xfffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAMEX, F_SF | F_ALIAS),
   CORE_INSN ("clz",   0x5ac01000, 0x7ffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAME, F_SF),
   CORE_INSN ("cls",   0x5ac01400, 0x7ffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAME, F_SF),
   CORE_INSN ("rev32", 0xdac00800, 0xfffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAMEX, 0),
