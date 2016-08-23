@@ -1,3 +1,7 @@
+2016-08-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* stack.c (parse_frame_specification): Fix typo in comment.
+
 2016-08-23  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/20494

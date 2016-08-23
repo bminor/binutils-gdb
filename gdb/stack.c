@@ -1277,8 +1277,8 @@ print_frame (struct frame_info *frame, int print_level,
 
 /* Read a frame specification in whatever the appropriate format is from
    FRAME_EXP.  Call error() if the specification is in any way invalid (so
-   this function never returns NULL).  When SEPECTED_P is non-NULL set its
-   target to indicate that the default selected frame was used.  */
+   this function never returns NULL).  When SELECTED_FRAME_P is non-NULL
+   set its target to indicate that the default selected frame was used.  */
 
 static struct frame_info *
 parse_frame_specification (const char *frame_exp, int *selected_frame_p)
