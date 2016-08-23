@@ -1,3 +1,10 @@
+2016-08-23  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/signals-state-child.exp: Set variables gdb_txt and
+	standalone_txt.  Delete gdb_txt and standalone_txt on host
+	and target.  Spawn the binary on target.  Copy files from
+	target to host.
+
 2016-08-22  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/20505

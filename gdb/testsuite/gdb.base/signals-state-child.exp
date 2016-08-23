@@ -29,10 +29,20 @@
 
 standard_testfile
 
-set gdb_txt [standard_output_file gdb.txt]
-set standalone_txt [standard_output_file standalone.txt]
-remote_exec host "rm -f $gdb_txt"
-remote_exec host "rm -f $standalone_txt"
+if {![is_remote host] && ![is_remote target]} {
+    set gdb_txt [standard_output_file gdb.txt]
+    set standalone_txt [standard_output_file standalone.txt]
+    set purely_local 1
+} else {
+    set gdb_txt gdb.txt
+    set standalone_txt standalone.txt
+    set purely_local 0
+}
+
+remote_file host delete $gdb_txt
+remote_file host delete $standalone_txt
+remote_file target delete $gdb_txt
+remote_file target delete $standalone_txt
 
 set options [list debug "additional_flags=-DOUTPUT_TXT=\"$gdb_txt\""]
 if {[build_executable $testfile.exp $testfile $srcfile $options]} {
@@ -55,14 +65,14 @@ if {[build_executable $testfile.exp $testfile-standalone $srcfile $options]} {
 # local_exec uses -ignore SIGHUP, while remote_spawn does not, if we
 # used remote_exec, the test program would start with SIGHUP ignored
 # when run standalone, but not when run through gdb.
-set res [remote_spawn host "$binfile-standalone"]
+set res [remote_spawn target "$binfile-standalone"]
 if { $res < 0 || $res == "" } {
     untested "spawning $binfile-standalone failed"
     return 1
 } else {
     pass "collect standalone signals state"
 }
-remote_close host
+remote_close target
 
 # Now run the program through gdb, and dump its initial signal actions
 # and mask in "gdb.txt".
@@ -75,6 +85,12 @@ if { ! [ runto_main ] } then {
 }
 
 gdb_continue_to_end "collect signals state under gdb"
+
+if {!$purely_local} {
+    # Copy file from target to host through build.
+    remote_download host [remote_upload target gdb.txt] gdb.txt
+    remote_download host [remote_upload target standalone.txt] standalone.txt
+}
 
 # Diff the .txt files.  They should be identical.
 gdb_test "shell diff -s $standalone_txt $gdb_txt" \
