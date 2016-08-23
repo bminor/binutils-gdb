@@ -998,7 +998,10 @@ or1k_elf_relocate_section (bfd *output_bfd,
         case R_OR1K_GOTOFF_HI16:
           /* Relocation is offset from GOT.  */
           BFD_ASSERT (sgot != NULL);
-          relocation -= sgot->output_section->vma;
+	  relocation
+	    -= (htab->root.hgot->root.u.def.value
+		+ htab->root.hgot->root.u.def.section->output_offset
+		+ htab->root.hgot->root.u.def.section->output_section->vma);
           break;
 
         case R_OR1K_INSN_REL_26:

@@ -1,3 +1,9 @@
+2016-08-23  Alan Modra  <amodra@gmail.com>
+
+	PR 20475
+	* elf32-or1k.c (or1k_elf_relocate_section): Offset from
+	_GLOBAL_OFFSET_TABLE_, not start of .got section.
+
 2016-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* doc/chew.c (main): Free the string buffer used to files as they
