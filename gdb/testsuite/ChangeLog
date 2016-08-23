@@ -1,5 +1,12 @@
 2016-08-23  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.server/connect-stopped-target.exp (do_test): Pass "" to
+	gdbserver_spawn.
+	* gdb.server/connect-without-multi-process.exp (do_test):
+	Likewise.
+
+2016-08-23  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/signals-state-child.exp: Set variables gdb_txt and
 	standalone_txt.  Delete gdb_txt and standalone_txt on host
 	and target.  Spawn the binary on target.  Copy files from
