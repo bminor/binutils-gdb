@@ -1,3 +1,13 @@
+2016-08-23  Roland McGrath  <roland@hack.frob.com>
+
+	* options.h (General_options): Grok -z stack-size.
+	* output.h (Output_segment::set_size): New method.
+	* layout.cc (Layout::create_executable_stack_info): Renamed to ...
+	(Layout::create_stack_segment): ... this.  Always create the
+	segment if -z stack-size was used.
+	(Layout::set_segment_offsets): Don't call ->set_offset on the
+	PT_GNU_STACK segment.
+
 2016-08-17  Cary Coutant  <ccoutant@gmail.com>
 
 	* i386.cc (Target_i386): Reset skip_call_tls_get_addr_ after printing

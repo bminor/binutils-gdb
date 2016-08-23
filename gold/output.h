@@ -2499,7 +2499,7 @@ class Output_data_got : public Output_data_got_base
   // entry.
   bool
   add_local(Relobj* object, unsigned int sym_index, unsigned int got_type,
-            uint64_t addend);
+	    uint64_t addend);
 
   // Like add_local, but use the PLT offset of the local symbol if it
   // has one.
@@ -2643,7 +2643,7 @@ class Output_data_got : public Output_data_got_base
 
     // Create a local symbol entry plus addend.
     Got_entry(Relobj* object, unsigned int local_sym_index,
-        bool use_plt_or_tls_offset, uint64_t addend)
+	bool use_plt_or_tls_offset, uint64_t addend)
       : local_sym_index_(local_sym_index),
 	use_plt_or_tls_offset_(use_plt_or_tls_offset), addend_(addend)
     {
@@ -4794,6 +4794,13 @@ class Output_segment
   {
     if (align > this->min_p_align_)
       this->min_p_align_ = align;
+  }
+
+  // Set the memory size of this segment.
+  void
+  set_size(uint64_t size)
+  {
+    this->memsz_ = size;
   }
 
   // Set the offset of this segment based on the section.  This should

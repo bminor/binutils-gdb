@@ -647,7 +647,7 @@ class General_options
   DEFINE_bool(apply_dynamic_relocs, options::TWO_DASHES, '\0', true,
 	      N_("Apply link-time values for dynamic relocations (default)"),
 	      N_("(aarch64 only) Do not apply link-time values "
-	         "for dynamic relocations"));
+		 "for dynamic relocations"));
 
   DEFINE_bool(as_needed, options::TWO_DASHES, '\0', false,
 	      N_("Only set DT_NEEDED for shared libraries if used"),
@@ -1293,7 +1293,7 @@ class General_options
 	      N_("Mark output as requiring executable stack"), NULL);
   DEFINE_bool(global, options::DASH_Z, '\0', false,
 	      N_("Make symbols in DSO available for subsequently loaded "
-	         "objects"), NULL);
+		 "objects"), NULL);
   DEFINE_bool(initfirst, options::DASH_Z, '\0', false,
 	      N_("Mark DSO to be initialized first at runtime"),
 	      NULL);
@@ -1339,6 +1339,8 @@ class General_options
   DEFINE_bool(relro, options::DASH_Z, '\0', DEFAULT_LD_Z_RELRO,
 	      N_("Where possible mark variables read-only after relocation"),
 	      N_("Don't mark variables read-only after relocation"));
+  DEFINE_uint64(stack_size, options::DASH_Z, '\0', 0,
+		N_("Set PT_GNU_STACK segment p_memsz to SIZE"), N_("SIZE"));
   DEFINE_bool(text, options::DASH_Z, '\0', false,
 	      N_("Do not permit relocations in read-only segments"),
 	      N_("Permit relocations in read-only segments (default)"));
