@@ -1,3 +1,8 @@
+2016-08-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (run_cc_link_tests): Don't fail tests
+	twice.
+
 2016-08-19  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/aarch64elf.em (before_parse): Initialise the relro

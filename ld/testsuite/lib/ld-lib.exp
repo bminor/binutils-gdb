@@ -1588,7 +1588,6 @@ proc run_cc_link_tests { ldtests } {
 	    # compile only
 	} elseif { [regexp ".*\\.a$" $binfile] } {
 	    if { ![ar_simple_create $ar $ldflags $binfile "$objfiles"] } {
-		fail $testname
 		set failed 1
 	    }
 	} else {
@@ -1604,10 +1603,6 @@ proc run_cc_link_tests { ldtests } {
 		} else {
 		    set failed 1
 		}
-	    }
-
-	    if { $failed == 1 } {
-		fail $testname
 	    }
 	}
 
@@ -1669,13 +1664,12 @@ proc run_cc_link_tests { ldtests } {
 	    }
 	}
 
-	if { $failed != 0 } {
+	if { $failed } {
 	    fail $testname
-	} elseif { $is_unresolved == 0 } {
-	    pass $testname
-	} else {
+	} elseif { $is_unresolved } {
 	    unresolved $testname
-	    continue
+	} else {
+	    pass $testname
 	}
     }
 }
