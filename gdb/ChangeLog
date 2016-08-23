@@ -1,3 +1,19 @@
+2016-08-23  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20494
+	* inflow.c (our_terminal_info, initial_gdb_ttystate): Update
+	comments.
+	(enum gdb_has_a_terminal_flag_enum, gdb_has_a_terminal_flag):
+	Delete.
+	(set_initial_gdb_ttystate): Record our_terminal_info here too,
+	instead of ...
+	(gdb_has_a_terminal): ... here.  Reimplement in terms of
+	initial_gdb_ttystate.  Make static.
+	* terminal.h (gdb_has_a_terminal): Delete declaration.
+	(set_initial_gdb_ttystate): Add comment.
+	* top.c (show_interactive_mode): Use input_interactive_p instead
+	of gdb_has_a_terminal.
+
 2016-08-22  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/20505
