@@ -1,5 +1,10 @@
 2016-08-23  Pedro Alves  <palves@redhat.com>
 
+	* gdb.trace/mi-trace-frame-collected.exp
+	(test_trace_frame_collected): On x32, expect two registers.
+
+2016-08-23  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/20494
 	* gdb.base/new-ui-echo.c: New file.
 	* gdb.base/new-ui-echo.exp: New file.
