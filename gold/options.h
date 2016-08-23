@@ -674,6 +674,9 @@ class General_options
   DEFINE_bool_alias(dn, Bdynamic, options::ONE_DASH, '\0',
 		    N_("alias for -Bstatic"), NULL, true);
 
+  DEFINE_bool(be8,options::TWO_DASHES, '\0', false,
+	      N_("Output BE8 format image"), NULL);
+
   DEFINE_bool(Bgroup, options::ONE_DASH, '\0', false,
 	      N_("Use group name lookup rules for shared library"), NULL);
 
