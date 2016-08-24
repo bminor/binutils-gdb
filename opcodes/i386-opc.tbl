@@ -5958,3 +5958,9 @@ rdpid, 1, 0xf30fc7, 0x7, 2, CpuRDPID|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|N
 rdpid, 1, 0xf30fc7, 0x7, 2, CpuRDPID|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64 }
 
 // RDPID instructions end.
+
+// PTWRITE instructions.
+
+ptwrite, 1, 0xf30fae, 0x4, 2, CpuPTWRITE, Modrm|CheckRegSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+
+// PTWRITE instructions end.

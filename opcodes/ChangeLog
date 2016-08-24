@@ -1,3 +1,19 @@
+2016-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PREFIX_MOD_0_0FAE_REG_4): New.
+	(PREFIX_MOD_3_0FAE_REG_4): Likewise.
+	(prefix_table): Add PREFIX_MOD_0_0FAE_REG_4 and
+	PREFIX_MOD_3_0FAE_REG_4.
+	(mod_table): Use PREFIX_MOD_0_0FAE_REG_4 and
+	PREFIX_MOD_3_0FAE_REG_4.
+	* i386-gen.c (cpu_flag_init): Add CPU_PTWRITE_FLAGS.
+	(cpu_flags): Add CpuPTWRITE.
+	* i386-opc.h (CpuPTWRITE): New.
+	(i386_cpu_flags): Add cpuptwrite.
+	* i386-opc.tbl: Add ptwrite instruction.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2016-08-24  Anton Kolesov  <Anton.Kolesov@synopsys.com>
 
 	* arc-dis.h: Wrap around in extern "C".
