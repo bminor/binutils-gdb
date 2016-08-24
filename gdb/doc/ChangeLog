@@ -1,3 +1,8 @@
+2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Input/Output): Mention possibility to unset
+	inferior-tty.
+
 2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* gdb.texinfo: Resume btrace on reconnect.

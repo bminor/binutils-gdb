@@ -1,3 +1,10 @@
+2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* infcmd.c (set_inferior_io_terminal): Set inferior terminal to
+	NULL if terminal_name is an empty string.
+	(_initialize_infcmd): Make the argument of "set inferior-tty"
+	optional, mention it in the help doc.
+
 2016-08-24  Carl Love  <cel@us.ibm.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Remove call
