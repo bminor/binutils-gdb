@@ -5957,7 +5957,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_pc_regnum (gdbarch, PPC_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, PPC_R0_REGNUM + 1);
-  set_gdbarch_deprecated_fp_regnum (gdbarch, PPC_R0_REGNUM + 1);
   set_gdbarch_fp0_regnum (gdbarch, tdep->ppc_fp0_regnum);
   set_gdbarch_register_sim_regno (gdbarch, rs6000_register_sim_regno);
 
