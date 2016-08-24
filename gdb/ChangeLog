@@ -1,3 +1,10 @@
+2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* infcmd.c (set_inferior_io_terminal): Set inferior terminal to
+	NULL if terminal_name is an empty string.
+	(_initialize_infcmd): Make the argument of "set inferior-tty"
+	optional, mention it in the help doc.
+
 2016-08-23  Pedro Alves  <palves@redhat.com>
 
 	* amd64-tdep.c (amd64_relocate_instruction) <callq>: Handle return

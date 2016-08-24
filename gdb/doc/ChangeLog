@@ -1,3 +1,8 @@
+2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Input/Output): Mention possibility to unset
+	inferior-tty.
+
 2016-08-15  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Target Description Format): Update docs on "end"

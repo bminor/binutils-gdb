@@ -1,3 +1,8 @@
+2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/set-inferior-tty.exp: New file.
+	* gdb.base/set-inferior-tty.c: New file.
+
 2016-08-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb.trace/mi-trace-frame-collected.exp
