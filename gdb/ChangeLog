@@ -1,3 +1,17 @@
+2016-08-25  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	* aarch64-linux-nat.c (ps_get_thread_area): Remove const from
+	struct ps_prochandle.
+	* amd64-linux-nat.c (ps_get_thread_area): Likewise.
+	* arm-linux-nat.c (ps_get_thread_area): Likewise.
+	* gdb_proc_service.h (ps_get_thread_area): Likewise.
+	* i386-linux-nat.c (ps_get_thread_area): Likewise.
+	* m68klinux-nat.c (ps_get_thread_area): Likewise.
+	* mips-linux-nat.c (ps_get_thread_area): Likewise.
+	* nat/aarch64-linux.c (aarch64_ps_get_thread_area): Likewise.
+	* nat/aarch64-linux.h (aarch64_ps_get_thread_area): Likewise.
+	* xtensa-linux-nat.c (ps_get_thread_area): Likewise.
+
 2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* infcmd.c (set_inferior_io_terminal): Set inferior terminal to
