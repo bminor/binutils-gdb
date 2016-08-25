@@ -1,3 +1,12 @@
+2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* server.c (start_inferior): New variable 'ptid'.  Replace calls
+	to the_target->resume by target_continue{,_no_signal}, depending
+	on the case.
+	* target.c (target_stop_and_wait): Call target_continue_no_signal
+	instead of the_target->resume.
+	(target_continue): New function.
+
 2016-08-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-low.c (linux_wait_1): Move event switch after unsuspend_lwps.

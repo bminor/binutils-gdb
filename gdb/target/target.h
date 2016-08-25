@@ -64,10 +64,14 @@ extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 
 extern void target_stop_and_wait (ptid_t ptid);
 
-/* Restart a target previously stopped by target_stop_and_wait.
-   No signal is delivered to the target.  This function must be
-   provided by the client.  */
+/* Restart a target previously stopped.  No signal is delivered to the
+   target.  This function must be provided by the client.  */
 
 extern void target_continue_no_signal (ptid_t ptid);
+
+/* Restart a target previously stopped.  SIGNAL is delivered to the
+   target.  This function must be provided by the client.  */
+
+extern void target_continue (ptid_t ptid, enum gdb_signal signal);
 
 #endif /* TARGET_COMMON_H */

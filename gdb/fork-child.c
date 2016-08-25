@@ -514,7 +514,7 @@ startup_inferior (int ntraps)
       if (resume_signal != GDB_SIGNAL_TRAP)
 	{
 	  /* Let shell child handle its own signals in its own way.  */
-	  target_resume (resume_ptid, 0, resume_signal);
+	  target_continue (resume_ptid, resume_signal);
 	}
       else
 	{
@@ -540,7 +540,7 @@ startup_inferior (int ntraps)
 	    break;
 
 	  /* Just make it go on.  */
-	  target_resume (resume_ptid, 0, GDB_SIGNAL_0);
+	  target_continue_no_signal (resume_ptid);
 	}
     }
 

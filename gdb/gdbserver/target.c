@@ -248,12 +248,8 @@ target_stop_and_wait (ptid_t ptid)
 {
   struct target_waitstatus status;
   int was_non_stop = non_stop;
-  struct thread_resume resume_info;
 
-  resume_info.thread = ptid;
-  resume_info.kind = resume_stop;
-  resume_info.sig = GDB_SIGNAL_0;
-  (*the_target->resume) (&resume_info, 1);
+  target_continue_no_signal (ptid);
 
   non_stop = 1;
   mywait (ptid, &status, 0, 0);
@@ -270,6 +266,19 @@ target_continue_no_signal (ptid_t ptid)
   resume_info.thread = ptid;
   resume_info.kind = resume_continue;
   resume_info.sig = GDB_SIGNAL_0;
+  (*the_target->resume) (&resume_info, 1);
+}
+
+/* See target/target.h.  */
+
+void
+target_continue (ptid_t ptid, enum gdb_signal signal)
+{
+  struct thread_resume resume_info;
+
+  resume_info.thread = ptid;
+  resume_info.kind = resume_continue;
+  resume_info.sig = gdb_signal_to_host (signal);
   (*the_target->resume) (&resume_info, 1);
 }
 

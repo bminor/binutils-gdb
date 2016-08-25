@@ -3716,7 +3716,7 @@ wait_again:
 		    else
 		      {
 			/* How to keep going without returning to wfi: */
-			target_resume (ptid, 0, GDB_SIGNAL_0);
+			target_continue_no_signal (ptid);
 			goto wait_again;
 		      }
 		  }
@@ -3742,7 +3742,7 @@ wait_again:
 		    /* This is an internal event and should be transparent
 		       to wfi, so resume the execution and wait again.	See
 		       comment in procfs_init_inferior() for more details.  */
-		    target_resume (ptid, 0, GDB_SIGNAL_0);
+		    target_continue_no_signal (ptid);
 		    goto wait_again;
 		  }
 #endif

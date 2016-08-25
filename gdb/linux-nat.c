@@ -4289,7 +4289,7 @@ cleanup_target_stop (void *arg)
   gdb_assert (arg != NULL);
 
   /* Unpause all */
-  target_resume (*ptid, 0, GDB_SIGNAL_0);
+  target_continue_no_signal (*ptid);
 }
 
 static VEC(static_tracepoint_marker_p) *

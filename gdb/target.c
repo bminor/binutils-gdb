@@ -3449,6 +3449,14 @@ target_continue_no_signal (ptid_t ptid)
   target_resume (ptid, 0, GDB_SIGNAL_0);
 }
 
+/* See target/target.h.  */
+
+void
+target_continue (ptid_t ptid, enum gdb_signal signal)
+{
+  target_resume (ptid, 0, signal);
+}
+
 /* Concatenate ELEM to LIST, a comma separate list, and return the
    result.  The LIST incoming argument is released.  */
 
