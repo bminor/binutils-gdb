@@ -1,3 +1,10 @@
+2016-08-25  Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt (powerpc*-*-linux* et al): Rewrite, adding LE
+	support for BE.  First output all target endian configury
+	values, then opposite endian.  Handle more tooldirs.  Fix
+	bogus matches with strings in MANUF-OS part of target triple.
+
 2016-08-23  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp (run_cc_link_tests): Don't fail tests
