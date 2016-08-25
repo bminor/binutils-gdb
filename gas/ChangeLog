@@ -1,3 +1,13 @@
+2016-08-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (v7m_psrs): Remove msp_s, MSP_S, psp_s and PSP_S
+	special registers.
+	* testsuite/gas/arm/archv8m-cmse-msr.s: Remove test for above special
+	registers.
+	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Likewise.
+	* testsuite/gas/arm/archv8m-cmse-msr-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-4.d: Likewise.
+
 2016-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .ptwrite.
