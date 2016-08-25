@@ -65,6 +65,37 @@ proc skip_compile_feature_tests {} {
 #    gdb_test "p var" "= 3"
 #    gdb_test_no_output "compoile code a = function (3); var = a;"
 #    gdb_test "p var" "= 21"
+#
+# Additional option flags that may be passed to add_mp or add_exp:
+# Pass -value, -compile, and/or -print to indicate that the value,
+# compile, or print steps will optionally fail. Specify -xfail or
+# -kfail to indicate how each particular step will fail.  These may be
+# followed by any accepted DejaGNU parameters such as architecture and
+# bug#.
+#
+# -compile and -value are used when "code" tests are run, the former
+# specifying that the "compile code" command (to GDB) will fail or pass
+# in the prescribed manner.  -value indicates that the "print $VARIABLE"
+# command (to GDB) will fail in the prescribed manner.
+#
+# -print is used to specify that an expression will fail in the presribed
+# manner when "print" tests are run.
+#
+# Pass "-name NAME" to set an optional test name.  If not specified,
+# the harness will use test names such as "compile code EXPR" and
+# "result of compile code EXPR".
+#
+# These options must be passed LAST to the add_imp/add_exp.
+#
+# Examples:
+#
+# Both "code" and "print" tests are expected to xfail:
+# CompileExpression add_imp "foo" 3 -compile {xfail *-*-*} -print {xfail *-*-*}
+#
+# The "print $VARIABLE" portion of the "code" test is expected to kfail
+# (the actual "compile code" GDB command will succeed), but the "print"
+# test should pass:
+# CompileExpression add_imp "foo" 3 -value {kfail *-*-* gdb/1234}
 
 namespace eval ::CompileExpression {
 
@@ -73,7 +104,7 @@ namespace eval ::CompileExpression {
     variable varName_ {}
 
     # A list containing all the expressions to test.
-    # The format is EXPR RESULT IS_EXPLICIT TEST_NAME
+    # The format is EXPR RESULT IS_EXPLICIT TEST_NAME OPT_FAIL_LIST
     variable expr_list_ {}
 
     # Start a new expression list.  VARNAME is the name of the variable
@@ -98,10 +129,12 @@ namespace eval ::CompileExpression {
     # Unlike explicit expressions, implicit expressions may be tested
     # with both "compile print" and "compile code".
 
-    proc add_imp {exp result {tst ""}} {
+    proc add_imp {exp result {tst ""} args} {
 	variable expr_list_
 
-	lappend expr_list_ [list $exp $result 0 $tst]
+	parse_args {{compile {"" ""}} {value {"" ""}} {print {"" ""}} {name ""}}
+	lappend expr_list_ [list $exp $result 0 $name \
+				[list $compile $value $print]]
     }
 
     # Add an "explicit" expression to the list of tests to run.
@@ -116,10 +149,12 @@ namespace eval ::CompileExpression {
     # with "compile print."  If run_tests is called with "print", any
     # explicit expressions in the expression list will be ignored.
 
-    proc add_exp {exp result {tst ""}} {
+    proc add_exp {exp result args} {
 	variable expr_list_
 
-	lappend expr_list_ [list $exp $result 1 $tst]
+	parse_args {{compile {"" ""}} {value {"" ""}} {print {"" ""}} {name ""}}
+	lappend expr_list_ [list $exp $result 1 $name \
+				[list $compile $value $print]]
     }
 
     # Run compile tests for CMD ("print" or "code").
@@ -135,9 +170,14 @@ namespace eval ::CompileExpression {
 
 	foreach exp_test $expr_list_ {
 	    set exp [lindex $exp_test 0]
-	    set result [lindex $exp_test 1]
+	    set result [string_to_regexp [lindex $exp_test 1]]
 	    set is_explicit [lindex $exp_test 2]
 	    set tst [lindex $exp_test 3]
+	    set fail_list [lindex $exp_test 4]
+
+	    # Get expected result of test.  Will be "" if test is
+	    # expected to PASS.
+	    lassign $fail_list fail_compile fail_value fail_print
 
 	    # Set a test name if one hasn't been provided.
 	    if {$tst == ""} {
@@ -146,6 +186,7 @@ namespace eval ::CompileExpression {
 
 	    if {[string match $cmd "print"]} {
 		if {!$is_expilcit} {
+		    eval setup_failures_ $fail_print
 		    gdb_test "compile print $exp" $result $tst
 		}
 	    } else {
@@ -154,8 +195,32 @@ namespace eval ::CompileExpression {
 		} else {
 		    set command "compile code $varName_ = $exp"
 		}
+		eval setup_failures_ $fail_compile
 		gdb_test_no_output $command $tst
+		eval setup_failures_ $fail_value
 		gdb_test "p $varName_" "= $result" "result of $tst"
+	    }
+	}
+    }
+
+    # A convenience proc used to set up xfail and kfail tests.
+    # HOW is either xfail or kfail (case is ignored).  ARGS is any
+    # optional architecture, bug number, or other string to pass to
+    # respective DejaGNU setup_$how routines.
+
+    proc setup_failures_ {how args} {
+	switch -nocase $how {
+	    xfail {
+		eval setup_xfail $args
+	    }
+
+	    kfail {
+		eval setup_kfail $args
+	    }
+
+	    default {
+		# Do nothing.  Either the test is expected to PASS
+		# or we have an unhandled failure mode.
 	    }
 	}
     }
