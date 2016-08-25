@@ -421,7 +421,7 @@ aarch64_stopped_by_watchpoint (void)
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
   return aarch64_ps_get_thread_area (ph, lwpid, idx, base,

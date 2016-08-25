@@ -245,7 +245,7 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
    a request for a thread's local storage address.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
   if (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 32)
