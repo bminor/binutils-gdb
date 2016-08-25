@@ -282,7 +282,7 @@ extern void
 
 extern struct template_defn *
   find_template_defn (struct compile_cplus_instance *instance,
-		      const struct template_symbol *tsym);
+		      struct template_symbol *tsym);
 
 /* Enumerate the template arguments of template DEFN into DEST.  */
 

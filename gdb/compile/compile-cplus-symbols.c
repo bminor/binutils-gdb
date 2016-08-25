@@ -210,6 +210,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 
 	    special_name = NULL;
+	    //cp_find_method_field (sym.symbol, 1);
 	    func_name = maybe_canonicalize_special_function
 	      (SYMBOL_LINKAGE_NAME (sym.symbol), NULL,
 	       SYMBOL_TYPE (sym.symbol), &special_name, &ignore);

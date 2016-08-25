@@ -143,6 +143,21 @@ struct type *cp_find_type_baseclass_by_name (struct type *parent_type,
 extern struct demangle_parse_info *cp_demangled_name_to_comp
      (const char *demangled_name, const char **errmsg);
 
+/* Convert a mangled name to a demangle_component tree.  *MEMORY is
+   set to the block of used memory that should be freed when finished
+   with the tree.  DEMANGLED_P is set to the char * that should be
+   freed when finished with the tree, or NULL if none was needed.
+   OPTIONS will be passed to the demangler.  */
+
+struct demangle_parse_info *
+cp_mangled_name_to_comp (const char *mangled_name, int options,
+			 void **memory, char **demangled_p);
+
+/* Convenience macros to move through the demangle tree.  */
+
+#define d_left(dc) (dc)->u.s_binary.left
+#define d_right(dc) (dc)->u.s_binary.right
+
 extern char *cp_comp_to_string (struct demangle_component *result,
 				int estimated_len);
 
@@ -170,16 +185,15 @@ char *gdb_demangle (const char *name, int options);
 extern struct fn_field *cp_find_method_field (struct symbol *method_symbol,
 					      int xtor_only);
 
-/* If LINKAGE_NAME represents a function template, determine whether its
-   return type and arguments were declared using a template parameter.
-   Set RETURN_INDEX to the parameter index of the function's return type
-   or -1 if the type is not parameterized.  Do likewise for the function's
-   NUM_ARGS arguments, storing the results in ARG_INDICES, which should be
-   allocated by the caller.  */
+/* Decode template information for TSYMBOL.  This function determines whether
+   the template's return and argument types are concrete types or template
+   parameters.  The symbol's obstack is used to allocate any needed memory.
+   If OPT_INFO is non-NULL, use the given demangle tree to do this.  Otherwise,
+   this function will demangle the template's linkage name.  */
 
-extern void cp_decode_template_type_indices
-     (const char *linkage_name, long *return_index,
-      unsigned num_args, long *arg_indices);
+extern void
+  cp_decode_template_type_indices (struct template_symbol *tsymbol,
+				   const struct demangle_parse_info *opt_info);
 
 /* Like gdb_demangle, but suitable for use as la_sniff_from_mangled_name.  */
 

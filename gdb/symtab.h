@@ -924,15 +924,25 @@ struct template_symbol
      N_TEMPLATE_ARGUMENTS elements.  */
   enum template_argument_kinds *template_argument_kinds;
 
-  /* For template functions (!!keiths: class?), if the return type
-     was specified as a template parameter, this will hold the index
-     of the template parameter used.  -1 otherwise.  */
+  /* The template's linkage name.  */
+  const char *linkage_name;
+
+  /* The template argument substitutions below are populated lazily to speed
+     up initial symbol reading.  This is done by parsing the symbol's
+     linkage name.  */
+
+  /* If the return type was specified as a template parameter, this will
+     hold the index of the template parameter used;  -1 otherwise.  */
   long template_return_index;
 
   /* Index into template_arguments describing the function's arguments
      or -1 if the argument is not a template parameter.  There are
      TYPE_NFIELDS entries.  */
   long *template_argument_indices;
+
+  /* If this symbol is a conversion operator, this records which template
+     parameter is used for the conversion; -1 otherwise.  */
+  long conversion_operator_index;
 };
 
 

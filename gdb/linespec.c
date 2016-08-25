@@ -1168,6 +1168,37 @@ find_toplevel_char (const char *s, char c)
   return 0;
 }
 
+/* See description in linespec.h.  */
+
+const char *
+find_toplevel_char_r (const char *s, size_t len, char c)
+{
+  int quoted = 0;
+  int depth = 0;
+  const char *scan;
+
+  for (scan = s + len; scan >= s; --scan)
+    {
+      if (quoted)
+	{
+	  if (*scan == quoted)
+	    quoted = 0;
+	}
+      else if (*scan == ')' || *scan == '>')
+	++depth;
+      else if ((*scan == '(' || *scan == '<') && depth > 0)
+	--depth;
+
+      if (*scan == c && !quoted && depth == 0)
+	return scan;
+      else if ((*scan == '"' || *scan == '\'')
+	       && scan > s && *(scan - 1) != '\\')
+	quoted = *scan;
+    }
+
+  return NULL;
+}
+
 /* See linespec.h.  */
 
 const char *

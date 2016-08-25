@@ -182,6 +182,11 @@ extern int is_ada_operator (const char *string);
 
 extern const char *find_toplevel_char (const char *s, char c);
 
+/* Like find_toplevel_char but searches S backwards, starting LEN characters
+   into S.  */
+
+extern const char *find_toplevel_char_r (const char *s, size_t len, char c);
+
 /* The string equivalent of find_toplevel_char.  Returns a pointer
    to the location of NEEDLE in HAYSTACK, ignoring any occurrences
    inside "()" and "<>".  Returns NULL if NEEDLE was not found.  */

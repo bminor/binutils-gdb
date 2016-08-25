@@ -39,14 +39,33 @@ struct A
   A (int val) : value (val) { }
   operator int () const { return value; }
 
-  template <typename T>
+  template <typename T = A>
   T tempmethod (void)
   {
-    return static_cast<T> (0);
+    return value;
+  }
+
+  template <typename T = A, int V = -1>
+  static T stempmethod (void)
+  {
+    return V;
+  }
+
+  template <typename T = A, int V = -2>
+  static T stempmethod (T arg)
+  {
+    return arg + V;
   }
 
   int value;
 };
+
+template<>
+int
+A::tempmethod (void)
+{
+  return -value;
+}
 
 template <typename T>
 T deduct (T a)
@@ -55,6 +74,15 @@ T deduct (T a)
 }
 
 extern char const g_str[] = "hello";
+
+template <typename T>
+int mod_test (T a) { return 1; }
+
+template <typename T>
+int mod_test (T* const a) { return 2; }
+
+template <typename T>
+int mod_test (T const* const a) { return 3; }
 
 #if 0
 /* This chaining of defaults has no good representation in the debug info.
@@ -74,17 +102,54 @@ T defaultvals (void)
 }
 #endif
 
+// A handful of operator templates
+struct O
+{
+  O (int v) : v_ (v) { }
+
+  template <typename T>
+  operator T (void) { return -v_; }
+
+  template <typename T>
+  O operator+ (T val)
+  {
+    return v_ + val;
+  }
+
+  int v_;
+};
+
+template <typename T>
+const T** ret_test (void) { return 0; }
+
+template <typename T>
+T const* const* ret2_test (void) { return 0; }
+
 int
 main (void)
 {
   A a (20);
+  O o (30);
   int var = 0xdeadbeef;
+  int i = 1;
+  const int j = 1;
+  int* pi = &i;
+  int const* const cpci = &j;
+  int *const cpi = &i;
+
+  int o_val = o + 30;
+  int mod_value = mod_test (i) + mod_test (cpci) + mod_test (cpi);
+  const char** cp = ret_test<char> ();
+  char const* const* ccp = ret2_test<char> ();
 
   return mytemplate<int, 1> (0)
     + mytemplate<int, 1> ()
     + mytemplate<0> ()
     + mytemplate ()
+    + a.tempmethod ()
     + a.tempmethod<int> ()
+    + A::stempmethod ()
+    + A::stempmethod (0)
     + defaultvals ()
     + defaultvals<int, 20> ()
     + deduct (0); // break here

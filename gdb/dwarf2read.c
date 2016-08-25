@@ -11769,15 +11769,11 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       /* Determine whether the template's return and argument types were
 	 specified using template parameters.  */
       linkage_name = dw2_linkage_name (die, cu);
-      templ_func->template_argument_indices
-	= XOBNEWVEC (&objfile->objfile_obstack, long, TYPE_NFIELDS (type));
+      templ_func->linkage_name = linkage_name;
       if (linkage_name != NULL)
 	{
 	  char *str;
 
-	  cp_decode_template_type_indices
-	    (linkage_name, &(templ_func->template_return_index),
-	     TYPE_NFIELDS (type), templ_func->template_argument_indices);
 	  str = cp_strip_template_parameters (linkage_name);
 	  if (str != NULL)
 	    {

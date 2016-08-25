@@ -408,6 +408,9 @@ function
 		|	colon_ext_only function_arglist start_opt
 			{ $$ = fill_comp (DEMANGLE_COMPONENT_TYPED_NAME, $1, $2.comp);
 			  if ($3) $$ = fill_comp (DEMANGLE_COMPONENT_LOCAL_NAME, $$, $3); }
+		|	colon_ext_only start_opt
+		        { $$ = $1;
+			  if ($2) $$ = fill_comp (DEMANGLE_COMPONENT_LOCAL_NAME, $$, $2); }
 
 		|	conversion_op_name start_opt
 			{ $$ = $1.comp;

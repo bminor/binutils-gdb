@@ -36,9 +36,7 @@
 #include <signal.h>
 #include "gdb_setjmp.h"
 #include "safe-ctype.h"
-
-#define d_left(dc) (dc)->u.s_binary.left
-#define d_right(dc) (dc)->u.s_binary.right
+#include "linespec.h"		/* for find_toplevel_char_r  */
 
 /* Functions related to demangled name parsing.  */
 
@@ -618,15 +616,11 @@ cp_canonicalize_string (const char *string)
   return ret;
 }
 
-/* Convert a mangled name to a demangle_component tree.  *MEMORY is
-   set to the block of used memory that should be freed when finished
-   with the tree.  DEMANGLED_P is set to the char * that should be
-   freed when finished with the tree, or NULL if none was needed.
-   OPTIONS will be passed to the demangler.  */
+/* See description in cp-support.h.  */
 
-static struct demangle_parse_info *
-mangled_name_to_comp (const char *mangled_name, int options,
-		      void **memory, char **demangled_p)
+struct demangle_parse_info *
+cp_mangled_name_to_comp (const char *mangled_name, int options,
+			 void **memory, char **demangled_p)
 {
   char *demangled_name;
   struct demangle_parse_info *info;
@@ -679,8 +673,8 @@ cp_class_name_from_physname (const char *physname)
   struct demangle_parse_info *info;
   int done;
 
-  info = mangled_name_to_comp (physname, DMGL_ANSI,
-			       &storage, &demangled_name);
+  info = cp_mangled_name_to_comp (physname, DMGL_ANSI,
+				  &storage, &demangled_name);
   if (info == NULL)
     return NULL;
 
@@ -801,6 +795,7 @@ unqualified_name_from_comp (struct demangle_component *comp)
       case DEMANGLE_COMPONENT_DTOR:
       case DEMANGLE_COMPONENT_OPERATOR:
       case DEMANGLE_COMPONENT_EXTENDED_OPERATOR:
+      case DEMANGLE_COMPONENT_CONVERSION:
 	done = 1;
 	break;
       default:
@@ -827,8 +822,8 @@ method_name_from_physname (const char *physname)
   struct demangle_component *ret_comp;
   struct demangle_parse_info *info;
 
-  info = mangled_name_to_comp (physname, DMGL_ANSI,
-			       &storage, &demangled_name);
+  info = cp_mangled_name_to_comp (physname, DMGL_ANSI,
+				  &storage, &demangled_name);
   if (info == NULL)
     return NULL;
 
@@ -876,21 +871,49 @@ cp_func_name (const char *full_name)
 /* See description in cp-support.h.  */
 
 char *
-cp_strip_template_parameters (const char *linkage_name)
+cp_strip_template_parameters (const char *linkage_or_phys_name)
 {
+  /* !!keiths: This is by far the best way to do this, but there is
+     one really big problem... The code below resets the the top-level
+     node to below the (first) DEMANGLE_COMPONENT_TEMPLATE node in the tree.
+
+     Normally that works, however, there is a special case (of course!)
+     where this fails: conversion operators.  Those *require* the template
+     parameter to deduce the name of the operator.  As a result, the code
+     below will not work on conversion operators at all (and maybe others,
+     I haven't checked).  */
+#if 0
   struct demangle_component *ret_comp;
   struct demangle_parse_info *info;
   void *storage = NULL;
-  char *ret, *demangled_name = NULL;
+  char *ret, *str = NULL, *demangled_name = NULL;
 
-  info = mangled_name_to_comp (linkage_name, DMGL_ANSI | DMGL_PARAMS,
-			       &storage, &demangled_name);
+  info = cp_mangled_name_to_comp (linkage_or_phys_name, DMGL_ANSI,
+				  &storage, &demangled_name);
 
   if (info == NULL)
     {
-      info = cp_demangled_name_to_comp (linkage_name, NULL);
+      info = cp_demangled_name_to_comp (linkage_or_phys_name, NULL);
       if (info == NULL)
-	return NULL;
+	{
+	  char *p;
+
+	  /* Special case: cp_demangled_name_to_comp doesn't like
+	     template specializations, templatename<>.  Adjust for that
+	     here until libiberty is fixed.  */
+	  str = xstrdup (linkage_or_phys_name);
+	  p = strstr (str, "<>");
+	  if (p == NULL)
+	    return NULL;
+
+	  *p = '\0';
+	  info = cp_demangled_name_to_comp (str, NULL);
+	  if (info == NULL)
+	    {
+	      xfree (str);
+	      return NULL;
+	    }
+	}
     }
 
   ret_comp = info->tree;
@@ -919,6 +942,16 @@ cp_strip_template_parameters (const char *linkage_name)
 	      break;
 	    case DEMANGLE_COMPONENT_TEMPLATE:
 	      ret_comp = d_left (ret_comp);
+	      if (ret_comp->type == DEMANGLE_COMPONENT_QUAL_NAME
+		  && d_right (ret_comp)->type == DEMANGLE_COMPONENT_CONVERSION)
+		{
+		  /* Remove the template parameter, replacing this
+		     node with a NAME node.  */
+		  /* !!keiths: Can't be done without modifications to
+		     libiberty *or* reimplementing the entire libiberty
+		     printer (d_print_comp_inner).  */
+		  /* !!keiths: Is there any other option???  */
+		}
 	      /* fall through */
 	    default:
 	      done = 1;
@@ -931,7 +964,46 @@ cp_strip_template_parameters (const char *linkage_name)
   cp_demangled_name_parse_free (info);
   xfree (storage);
   xfree (demangled_name);
+  xfree (str);
   return ret;
+#else
+  char *demangled_name = NULL;
+  char *stripped = NULL;
+  const char *name;
+
+  demangled_name = gdb_demangle (linkage_or_phys_name, DMGL_ANSI);
+  if (demangled_name != NULL)
+    name = demangled_name;
+  else
+    name = linkage_or_phys_name;
+
+  /* Only attempt to strip this if it looks like a template.  */
+  if (strchr (name, '<') != NULL
+      && strchr (name, '>') != NULL)
+    {
+      const char *p;
+      size_t len = strlen (name) - 1;
+
+      /* This is evil, but since we cannot use demangler trees, we have
+	 no choice but to do textual searches.  It is simply easiest to
+	 do this backwards.  */
+
+      /* Since we are searching backwards, we need only find the opening
+	 '<' from the end of the string (at the "top level").  */
+      p = find_toplevel_char_r (name, len, '<');
+      if (p != NULL)
+	{
+	  /* Remove any trailing whitespace.  */
+	  while (p > name && (ISSPACE (*(p - 1))))
+	    --p;
+	  stripped = savestring (name, p - name);
+	}
+    }
+
+  xfree (demangled_name);
+  //printf ("stripped = \"%s\"\n", stripped);
+  return stripped;
+#endif
 }
 
 /* DEMANGLED_NAME is the name of a function, including parameters and
@@ -1748,32 +1820,59 @@ info_vtbl_command (char *arg, int from_tty)
 /* See description in cp-support.h.  */
 
 void
-cp_decode_template_type_indices (const char *linkage_name,
-				 long *return_index, unsigned num_args,
-				 long *arg_indices)
+cp_decode_template_type_indices (struct template_symbol *tsymbol,
+				 const struct demangle_parse_info *opt_info)
 {
-  struct demangle_parse_info *info;
+  struct demangle_parse_info *allocd_info;
+  const struct demangle_parse_info *info;
   char *demangled = NULL;
   void *storage = NULL;
   int idx;
   struct demangle_component *ret_comp;
+  struct objfile *objfile;
+  struct cleanup *back_to;
 
-  /* Initialize values to be returned to caller.  */
-  *return_index = -1;
-  for (idx = 0; idx < num_args; ++idx)
-    arg_indices[idx] = -1;
+  /* Only do this once.  */
+  if (tsymbol->template_argument_indices != NULL)
+    return;
 
-  if (linkage_name == NULL)
+  if (tsymbol->linkage_name == NULL)
     {
       /* !!keiths: I can't even issue a good error message!  */
       warning (_("Template symbol has no linkage name."));
       return;
     }
 
-  info = mangled_name_to_comp (linkage_name, DMGL_ANSI | DMGL_PARAMS,
-			       &storage, &demangled);
-  if (info == NULL)
-    return;
+  /* Initialize values to be returned to caller.  */
+  gdb_assert (SYMBOL_OBJFILE_OWNED (&tsymbol->base));
+  objfile = symbol_objfile (&tsymbol->base);
+  tsymbol->template_return_index = -1;
+  tsymbol->template_argument_indices
+    = XOBNEWVEC (&objfile->objfile_obstack, long,
+		 TYPE_NFIELDS (SYMBOL_TYPE (&tsymbol->base)));
+
+  for (idx = 0; idx < TYPE_NFIELDS (SYMBOL_TYPE (&tsymbol->base)); ++idx)
+    tsymbol->template_argument_indices[idx] = -1;
+
+  back_to = make_cleanup (null_cleanup, NULL);
+  if (opt_info != NULL)
+    info = opt_info;
+  else
+    {
+      allocd_info = cp_mangled_name_to_comp (tsymbol->linkage_name,
+					     DMGL_ANSI | DMGL_PARAMS,
+					     &storage, &demangled);
+      info = allocd_info;
+      if (info == NULL)
+	{
+	  do_cleanups (back_to);
+	  return;
+	}
+
+      make_cleanup_cp_demangled_name_parse_free (allocd_info);
+      make_cleanup (xfree, storage);
+      make_cleanup (xfree, demangled);
+    }
 
   /* !!keiths will certainly require extensive testing/revision.  */
 
@@ -1781,31 +1880,96 @@ cp_decode_template_type_indices (const char *linkage_name,
   ret_comp = info->tree;
   if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
     {
-      if (d_left (info->tree)->type == DEMANGLE_COMPONENT_TEMPLATE
-	  && d_right (info->tree)->type == DEMANGLE_COMPONENT_FUNCTION_TYPE)
+      if (d_left (ret_comp)->type == DEMANGLE_COMPONENT_TEMPLATE
+	  && d_right (ret_comp)->type == DEMANGLE_COMPONENT_FUNCTION_TYPE)
 	{
-	  ret_comp = d_right (info->tree);
+	  int done = 0;
+	  struct demangle_component *func_comp = d_right (ret_comp);
 
-	  if (d_left (ret_comp) != NULL
-	      && d_left (ret_comp)->type == DEMANGLE_COMPONENT_TEMPLATE_PARAM)
+	  /* Move to looking at the return type node.  */
+	  ret_comp = d_left (func_comp);
+	  if (ret_comp != NULL)
 	    {
-	      /* The return type was based on a template parameter.
-		 Return the index of that parameter.  */
-	      *return_index = d_left (ret_comp)->u.s_number.number;
+	      while (!done)
+		{
+		  switch (ret_comp->type)
+		    {
+		    case DEMANGLE_COMPONENT_CONST:
+		    case DEMANGLE_COMPONENT_RESTRICT:
+		    case DEMANGLE_COMPONENT_VOLATILE:
+		    case DEMANGLE_COMPONENT_POINTER:
+		    case DEMANGLE_COMPONENT_REFERENCE:
+		    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
+		      ret_comp = d_left (ret_comp);
+		      break;
+
+		      /*TYPED_NAME et al? */
+
+		    case DEMANGLE_COMPONENT_TEMPLATE_PARAM:
+		      /* The return type was based on a template parameter.
+			 Return the index of that parameter.  */
+		      tsymbol->template_return_index
+			= ret_comp->u.s_number.number;
+		      done = 1;
+		      break;
+
+		    default:
+		      done = 1;
+		      break;
+		    }
+		}
+	    }
+	  else
+	    {
+	      /* The function had no marked return type.  Check if it is
+		 a conversion operator and record the template parameter
+		 index for that.  */
+
+	      ret_comp = d_left (info->tree);
+	      while (!done)
+		{
+		  switch (ret_comp->type)
+		    {
+		    case DEMANGLE_COMPONENT_TEMPLATE:
+		    case DEMANGLE_COMPONENT_CONVERSION:
+		    case DEMANGLE_COMPONENT_CONST:
+		    case DEMANGLE_COMPONENT_RESTRICT:
+		    case DEMANGLE_COMPONENT_VOLATILE:
+		    case DEMANGLE_COMPONENT_POINTER:
+		    case DEMANGLE_COMPONENT_REFERENCE:
+		    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
+		      ret_comp = d_left (ret_comp);
+		      break;
+
+		    case DEMANGLE_COMPONENT_QUAL_NAME:
+		      ret_comp = d_right (ret_comp);
+		      break;
+
+		    case DEMANGLE_COMPONENT_TEMPLATE_PARAM:
+		      tsymbol->conversion_operator_index
+			= ret_comp->u.s_number.number;
+		      done = 1;
+		      break;
+
+		    default:
+		      done = 1;
+		      break;
+		    }
+		}
 	    }
 
 	  /* Determine the same information for the function arguments.  */
-	  ret_comp = d_right (ret_comp);
+	  ret_comp = d_right (func_comp);
 	  idx = 0;
 	  while (ret_comp != NULL
 		 && ret_comp->type == DEMANGLE_COMPONENT_ARGLIST)
 	    {
-	      int done = 0;
 	      struct demangle_component *comp;
 
 	      comp = d_left (ret_comp);
 	      if (comp == NULL)
 		break;
+	      done = 0;
 	      while (!done)
 		{
 		  switch (comp->type)
@@ -1816,7 +1980,6 @@ cp_decode_template_type_indices (const char *linkage_name,
 		    case DEMANGLE_COMPONENT_POINTER:
 		    case DEMANGLE_COMPONENT_REFERENCE:
 		    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
-		    case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
 		      comp = d_left (comp);
 		      break;
 		    default:
@@ -1826,7 +1989,8 @@ cp_decode_template_type_indices (const char *linkage_name,
 		}
 
 	      if (comp->type == DEMANGLE_COMPONENT_TEMPLATE_PARAM)
-		arg_indices[idx] = comp->u.s_number.number;
+		tsymbol->template_argument_indices[idx]
+		  = comp->u.s_number.number;
 	      ++idx;
 
 	      ret_comp = d_right (ret_comp);
@@ -1834,8 +1998,7 @@ cp_decode_template_type_indices (const char *linkage_name,
 	}
     }
 
-  xfree (storage);
-  xfree (demangled);
+  do_cleanups (back_to);
 }
 
 void
