@@ -1,3 +1,9 @@
+2016-08-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* xtensa-tdep.h (XTENSA_GDBARCH_TDEP_INSTANTIATE): Replace
+	designated initializer list by plain initializer list, for C++
+	compliance.
+
 2016-08-25  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
 
 	* aarch64-linux-nat.c (ps_get_thread_area): Remove const from
