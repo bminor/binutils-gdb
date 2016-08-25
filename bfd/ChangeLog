@@ -1,5 +1,20 @@
 2016-08-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* elf32-s390.c (stdarg.h): New include.
+	(elf_s390_grok_psinfo): New function.
+	(elf_s390_write_core_note): New function.
+	(elf_backend_grok_psinfo): Declare backend hook.
+	(elf_backend_write_core_note): Likewise.
+	* elf64-s390.c (stdarg.h): New include.
+	(elf_s390_grok_prstatus): New function.
+	(elf_s390_grok_psinfo): New function.
+	(elf_s390_write_core_note): New function.
+	(elf_backend_grok_prstatus): Declare backend hook.
+	(elf_backend_grok_psinfo): Likewise.
+	(elf_backend_write_core_note): Likewise.
+
+2016-08-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* elf32-s390.c (allocate_dynrelocs): Fix indentation.
 	(elf_s390_finish_ifunc_symbol): Likewise.
 	(elf_s390_finish_dynamic_symbol): Likewise.
