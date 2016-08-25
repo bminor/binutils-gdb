@@ -1,3 +1,13 @@
+2016-08-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf32-s390.c (allocate_dynrelocs): Fix indentation.
+	(elf_s390_finish_ifunc_symbol): Likewise.
+	(elf_s390_finish_dynamic_symbol): Likewise.
+	(elf_s390_finish_dynamic_sections): Likewise.
+	(elf_s390_grok_prstatus): Likewise.
+	* elf64-s390.c (elf_s390_hash_table): Fix indentation.
+	(elf_s390_finish_dynamic_symbol): Likewise.
+
 2016-08-24  Anton Kolesov  <Anton.Kolesov@synopsys.com>
 
 	* elf32-arc.c (elf32_arc_grok_prstatus): New function.

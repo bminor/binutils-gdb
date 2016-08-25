@@ -1917,7 +1917,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	h->got.offset = (bfd_vma) -1;
     }
   else if (h->got.refcount > 0)
-   {
+    {
       asection *s;
       bfd_boolean dyn;
       int tls_type = elf_s390_hash_entry(h)->tls_type;
@@ -3497,8 +3497,8 @@ elf_s390_finish_ifunc_symbol (bfd *output_bfd,
   /* S390 uses halfwords for relative branch calc!  */
   relative_offset = - (plt->output_offset +
 		       (PLT_ENTRY_SIZE * iplt_index) + 18) / 2;
-/* If offset is > 32768, branch to a previous branch
-   390 can only handle +-64 K jumps.  */
+  /* If offset is > 32768, branch to a previous branch
+     390 can only handle +-64 K jumps.  */
   if ( -32768 > (int) relative_offset )
     relative_offset
       = -(unsigned) (((65536 / PLT_ENTRY_SIZE - 1) * PLT_ENTRY_SIZE) / 2);
@@ -3810,7 +3810,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 	    }
 	}
       else if (bfd_link_pic (info)
-	  && SYMBOL_REFERENCES_LOCAL (info, h))
+	       && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  /* If this is a static link, or it is a -Bsymbolic link and
 	     the symbol is defined locally or was forced to be local
@@ -3982,7 +3982,7 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 			  htab->elf.sgotplt->output_section->vma
 			  + htab->elf.sgotplt->output_offset,
 			  htab->elf.splt->contents + 24);
-	   }
+	    }
 	  elf_section_data (htab->elf.splt->output_section)
 	    ->this_hdr.sh_entsize = 4;
 	}
@@ -4048,20 +4048,20 @@ elf_s390_grok_prstatus (bfd * abfd, Elf_Internal_Note * note)
 
   switch (note->descsz)
     {
-      default:
-	return FALSE;
+    default:
+      return FALSE;
 
-      case 224:		/* S/390 Linux.  */
-	/* pr_cursig */
-	elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
+    case 224:			/* S/390 Linux.  */
+      /* pr_cursig */
+      elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
 
-	/* pr_pid */
-	elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 24);
+      /* pr_pid */
+      elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 24);
 
-	/* pr_reg */
-	offset = 72;
-	size = 144;
-	break;
+      /* pr_reg */
+      offset = 72;
+      size = 144;
+      break;
     }
 
   /* Make a ".reg/999" section.  */
