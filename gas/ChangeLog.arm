@@ -1,3 +1,20 @@
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Backport from mainline
+	2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (v7m_psrs): Add MSPLIM, PSPLIM, MSPLIM_NS,
+	PSPLIM_NS, PRIMASK_NS, BASEPRI_NS, FAULTMASK_NS, CONTROL_NS, SP_NS and
+	their lowecase counterpart special registers.  Write register
+	identifier in hex.
+	* testsuite/gas/arm/archv8m-cmse-msr.s: Reorganize tests per
+	operation, special register and then case.  Use different register for
+	each operation.  Add tests for new special registers.
+	* testsuite/gas/arm/archv8m-cmse-msr-base.d: Adapt expected result
+	accordingly.
+	* testsuite/gas/arm/archv8m-cmse-msr-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-4.d: Likewise.
+
 2016-08-25  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	Backport from mainline

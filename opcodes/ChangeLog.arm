@@ -1,3 +1,12 @@
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Backport from mainline
+	2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (psr_name): Use hex as case labels.  Add detection for
+	MSPLIM, PSPLIM, MSPLIM_NS, PSPLIM_NS, PRIMASK_NS, BASEPRI_NS,
+	FAULTMASK_NS, CONTROL_NS and SP_NS special registers.
+
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (get_sym_code_type): Use ARM_GET_SYM_BRANCH_TYPE to get
