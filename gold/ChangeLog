@@ -1,3 +1,14 @@
+2016-08-26  Han Shen  <shenhan@google.com>
+
+	PR gold/20529 - relaxing loop never ends.
+
+	* powerpc.cc (Stub_table::min_size_threshold_): New member to
+	limit size.
+	(Stub_table::set_min_size_threshold): New member function.
+	(Stub_table::set_address_and_size): Add code to only allow size
+	increase.
+	(Target_powerpc::do_relax): Add code to record last size.
+
 2016-08-23  Roland McGrath  <roland@hack.frob.com>
 
 	* options.h (General_options): Grok -z stack-size.
