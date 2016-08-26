@@ -1,5 +1,10 @@
 2016-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 20513
+	* ldlang.c (section_already_linked): Deal with SHF_EXCLUDE sections.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/vle-multiseg-1.d: Adjust to suit segment change.
 	* testsuite/ld-powerpc/vle-multiseg-2.d: Likewise.
 	* testsuite/ld-powerpc/vle-multiseg-3.d: Likewise.
