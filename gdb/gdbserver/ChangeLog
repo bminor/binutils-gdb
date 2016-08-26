@@ -1,3 +1,22 @@
+2016-08-31  Andrew Pinski  <apinski@cavium.com>
+
+	* Makefile.in (clean): Remove aarch64_ilp32.c also.
+	(aarch64_ilp32-ipa.o): New target.
+	(aarch64_ilp32.c): New target.
+	* configure.srv (aarch64*-*-linux*): Add ilp32 files
+	to srv_regobj, srv_xmlfiles and ipa_obj.
+	* linux-aarch64-ipa.c (init_registers_aarch64_ilp32):
+	Declare.
+	(tdesc_aarch64_ilp32): Likewise.
+	(get_ipa_tdesc): Return tdesc_aarch64_ilp32 for ILP32.
+	(initialize_low_tracepoint): Call init_registers_aarch64_ilp32
+	for ILP32.
+	* linux-aarch64-low.c (init_registers_aarch64_ilp32): Declare.
+	(tdesc_aarch64_ilp32): Likewise.
+	(aarch64_linux_read_description): Return tdesc_aarch64_ilp32
+	for ILP32 executables.
+	(initialize_low_arch): Call init_registers_aarch64_ilp32.
+
 2016-08-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-low.c (linux_wait_1): Move event switch after unsuspend_lwps.

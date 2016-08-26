@@ -352,6 +352,7 @@ clean:
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f $(IPA_LIB)
 	rm -f aarch64.c
+	rm -f aarch64_ilp32.c
 	rm -f reg-arm.c reg-bfin.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-sh.c reg-sparc.c reg-spu.c amd64.c i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c amd64-linux.c reg-xtensa.c
@@ -538,6 +539,9 @@ linux-aarch64-ipa.o: linux-aarch64-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 aarch64-ipa.o: aarch64.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+aarch64_ilp32-ipa.o: aarch64_ilp32.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 linux-s390-ipa.o: linux-s390-ipa.c
@@ -800,6 +804,8 @@ aarch64-insn.o: ../arch/aarch64-insn.c
 
 aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64.dat aarch64.c
+aarch64_ilp32.c : $(srcdir)/../regformats/aarch64_ilp32.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64_ilp32.dat aarch64_ilp32.c
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
 arm-with-iwmmxt.c : $(srcdir)/../regformats/arm-with-iwmmxt.dat $(regdat_sh)

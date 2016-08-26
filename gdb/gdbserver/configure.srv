@@ -50,7 +50,7 @@ srv_linux_obj="linux-low.o linux-osdata.o linux-procfs.o linux-ptrace.o linux-wa
 
 case "${target}" in
   aarch64*-*-linux*)
-			srv_regobj="aarch64.o"
+			srv_regobj="aarch64.o aarch64_ilp32.o"
 			srv_regobj="${srv_regobj} arm-with-neon.o"
 			srv_tgtobj="linux-aarch64-low.o aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
@@ -58,14 +58,15 @@ case "${target}" in
 			srv_tgtobj="$srv_tgtobj aarch64-linux.o"
 			srv_tgtobj="$srv_tgtobj aarch64-insn.o"
 			srv_tgtobj="${srv_tgtobj} $srv_linux_obj"
-			srv_xmlfiles="aarch64.xml"
+			srv_xmlfiles="aarch64.xml aarch64_ilp32.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} aarch64_ilp32-core.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-fpu.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-core.xml arm-vfpv3.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-with-neon.xml"
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
-			ipa_obj="linux-aarch64-ipa.o aarch64-ipa.o"
+			ipa_obj="linux-aarch64-ipa.o aarch64-ipa.o aarch64_ilp32-ipa.o"
 			;;
   arm*-*-linux*)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
 			srv_regobj="${srv_regobj} arm-with-vfpv2.o"

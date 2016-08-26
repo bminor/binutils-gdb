@@ -29,6 +29,9 @@
 /* Defined in auto-generated file aarch64.c.  */
 void init_registers_aarch64 (void);
 extern const struct target_desc *tdesc_aarch64;
+/* Defined in auto-geenrated file aarch64_ilp32.c.  */
+void init_registers_aarch64_ilp32 (void);
+extern const struct target_desc *tdesc_aarch64_ilp32;
 
 /* Each register saved by the jump pad is in a 16 byte cell.  */
 #define FT_CR_SIZE 16
@@ -155,6 +158,9 @@ get_raw_reg (const unsigned char *raw_regs, int regnum)
 const struct target_desc *
 get_ipa_tdesc (int idx)
 {
+  if (sizeof (void*) == 4)
+    return tdesc_aarch64_ilp32;
+
   return tdesc_aarch64;
 }
 
@@ -207,5 +213,8 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
-  init_registers_aarch64 ();
+  if (sizeof(void*) == 4)
+    init_registers_aarch64_ilp32 ();
+  else
+    init_registers_aarch64 ();
 }

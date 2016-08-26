@@ -1,5 +1,19 @@
 2015-08-31  Andrew Pinski  <apinski@cavium.com>
 
+	* aarch64-tdep.c: Include "features/aarch64_ilp32.c".
+	(aarch64_gdbarch_init): Handle ilp32 correctly.
+	(_initialize_aarch64_tdep): Call initialize_tdesc_aarch64_ilp32
+	too.
+	* features/Makefile (WHICH): Add aarch64_ilp32.
+	(aarch64_ilp32-expedite): Set.
+	(XMLTOC): Add aarch64_ilp32.xml.
+	(features/aarch64_ilp32-core.xml): New file.
+	(features/aarch64_ilp32.xml): New file.
+	(features/aarch64_ilp32.c): Generate.
+	(regformats/aarch64_ilp32.dat): Generate.
+
+2015-08-31  Andrew Pinski  <apinski@cavium.com>
+
 	* aarch64-tdep.h (gdbarch_tdep): Add ilp32 field.
 	* aarch64-tdep.c (aarch64_gdbarch_init): Setup ILP32 support.
 	Make sure the gdbarches have compatible ilp32 flags.

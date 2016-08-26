@@ -43,7 +43,7 @@
 #
 #   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
 
-WHICH = aarch64 \
+WHICH = aarch64 aarch64_ilp32 \
 	arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
 	i386/i386 i386/i386-linux \
 	i386/i386-mmx i386/i386-mmx-linux \
@@ -77,6 +77,7 @@ WHICH = aarch64 \
 
 # Record which registers should be sent to GDB by default after stop.
 aarch64-expedite = x29,sp,pc
+aarch64_ilp32-expedite = x29,sp,pc
 arm-expedite = r11,sp,pc
 i386/i386-expedite = ebp,esp,eip
 i386/i386-linux-expedite = ebp,esp,eip
@@ -148,6 +149,7 @@ OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 # to make on the command line.
 XMLTOC = \
 	aarch64.xml \
+	aarch64_ilp32.xml \
 	arm-with-iwmmxt.xml \
 	arm-with-m-fpa-layout.xml \
 	arm-with-m-vfp-d16.xml \

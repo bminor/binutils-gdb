@@ -42,6 +42,8 @@
 /* Defined in auto-generated files.  */
 void init_registers_aarch64 (void);
 extern const struct target_desc *tdesc_aarch64;
+void init_registers_aarch64_ilp32 (void);
+extern const struct target_desc *tdesc_aarch64_ilp32;
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
@@ -484,8 +486,13 @@ aarch64_linux_read_description (void)
 
   is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
-  if (is_elf64)
+  if (sizeof (void *) == 4 && is_elf64)
+    error (_("Can't debug 64-bit process with 32-bit GDBserver"));
+
+  if (machine == EM_AARCH64 && is_elf64)
     return tdesc_aarch64;
+  else if (machine == EM_AARCH64 && !is_elf64)
+    return tdesc_aarch64_ilp32;
   else
     return tdesc_arm_with_neon;
 }
@@ -3009,6 +3016,7 @@ void
 initialize_low_arch (void)
 {
   init_registers_aarch64 ();
+  init_registers_aarch64_ilp32 ();
 
   initialize_low_arch_aarch32 ();
 

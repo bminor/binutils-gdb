@@ -56,6 +56,7 @@
 #include "record-full.h"
 
 #include "features/aarch64.c"
+#include "features/aarch64_ilp32.c"
 
 #include "arch/aarch64-insn.h"
 
@@ -2655,11 +2656,14 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Ensure we always have a target descriptor.  */
   if (!tdesc_has_registers (tdesc))
-    tdesc = tdesc_aarch64;
+    tdesc = ilp32 ? tdesc_aarch64_ilp32 : tdesc_aarch64;
 
   gdb_assert (tdesc);
 
-  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.core");
+  if (ilp32)
+    feature = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64_ilp32.core");
+  else
+    feature = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.core");
 
   if (feature == NULL)
     return NULL;
@@ -2845,6 +2849,7 @@ _initialize_aarch64_tdep (void)
 		    aarch64_dump_tdep);
 
   initialize_tdesc_aarch64 ();
+  initialize_tdesc_aarch64_ilp32 ();
 
   /* Debug this file's internals.  */
   add_setshow_boolean_cmd ("aarch64", class_maintenance, &aarch64_debug, _("\
