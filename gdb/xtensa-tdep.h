@@ -224,55 +224,55 @@ struct gdbarch_tdep
 
 /* Macro to instantiate a gdbarch_tdep structure.  */
 
-#define XTENSA_GDBARCH_TDEP_INSTANTIATE(rmap,spillsz)		\
-	{							\
-	  .target_flags = 0,					\
-	  .spill_location = -1,					\
-	  .spill_size = (spillsz),				\
-	  .unused = 0,						\
-	  .call_abi = (XSHAL_ABI == XTHAL_ABI_CALL0		\
-		       ? CallAbiCall0Only			\
-		       : CallAbiDefault),			\
-	  .debug_interrupt_level = XCHAL_DEBUGLEVEL,		\
-	  .icache_line_bytes = XCHAL_ICACHE_LINESIZE,		\
-	  .dcache_line_bytes = XCHAL_DCACHE_LINESIZE,		\
-	  .dcache_writeback = XCHAL_DCACHE_IS_WRITEBACK,	\
-	  .isa_use_windowed_registers = (XSHAL_ABI != XTHAL_ABI_CALL0),	\
-	  .isa_use_density_instructions = XCHAL_HAVE_DENSITY,	\
-	  .isa_use_exceptions = XCHAL_HAVE_EXCEPTIONS,		\
-	  .isa_use_ext_l32r = XSHAL_USE_ABSOLUTE_LITERALS,	\
-	  .isa_max_insn_size = XCHAL_MAX_INSTRUCTION_SIZE,	\
-	  .debug_num_ibreaks = XCHAL_NUM_IBREAK,		\
-	  .debug_num_dbreaks = XCHAL_NUM_DBREAK,		\
-	  .regmap = rmap,			\
-	  .num_regs = 0,			\
-	  .num_nopriv_regs = 0,			\
-	  .num_pseudo_regs = 0,			\
-	  .num_aregs = XCHAL_NUM_AREGS,		\
-	  .num_contexts = XCHAL_NUM_CONTEXTS,	\
-	  .ar_base = -1,			\
-	  .a0_base = -1,			\
-	  .wb_regnum = -1,			\
-	  .ws_regnum = -1,			\
-	  .pc_regnum = -1,			\
-	  .ps_regnum = -1,			\
-	  .lbeg_regnum = -1,			\
-	  .lend_regnum = -1,			\
-	  .lcount_regnum = -1,			\
-	  .sar_regnum = -1,			\
-	  .litbase_regnum = -1,			\
-	  .interrupt_regnum = -1,		\
-	  .interrupt2_regnum = -1,		\
-	  .cpenable_regnum = -1,		\
-	  .debugcause_regnum = -1,		\
-	  .exccause_regnum = -1,		\
-	  .excvaddr_regnum = -1,		\
-	  .max_register_raw_size = 0,		\
-	  .max_register_virtual_size = 0,	\
-	  .fp_layout = 0,			\
-	  .fp_layout_bytes = 0,			\
-	  .gregmap = 0,				\
-	}
+#define XTENSA_GDBARCH_TDEP_INSTANTIATE(rmap,spillsz)			\
+  {									\
+    0,				/* target_flags */			\
+    -1,				/* spill_location */			\
+    (spillsz),			/* spill_size */			\
+    0,				/* unused */				\
+    (XSHAL_ABI == XTHAL_ABI_CALL0					\
+     ? CallAbiCall0Only							\
+     : CallAbiDefault),		/* call_abi */				\
+    XCHAL_DEBUGLEVEL,		/* debug_interrupt_level */		\
+    XCHAL_ICACHE_LINESIZE,	/* icache_line_bytes */			\
+    XCHAL_DCACHE_LINESIZE,	/* dcache_line_bytes */			\
+    XCHAL_DCACHE_IS_WRITEBACK,  /* dcache_writeback */			\
+    (XSHAL_ABI != XTHAL_ABI_CALL0),   /* isa_use_windowed_registers */	\
+    XCHAL_HAVE_DENSITY,		 /* isa_use_density_instructions */	\
+    XCHAL_HAVE_EXCEPTIONS,	 /* isa_use_exceptions */		\
+    XSHAL_USE_ABSOLUTE_LITERALS, /* isa_use_ext_l32r */			\
+    XCHAL_MAX_INSTRUCTION_SIZE,  /* isa_max_insn_size */		\
+    XCHAL_NUM_IBREAK,		 /* debug_num_ibreaks */		\
+    XCHAL_NUM_DBREAK,		 /* debug_num_dbreaks */		\
+    rmap,			 /* regmap */				\
+    0,				 /* num_regs */				\
+    0,				 /* num_nopriv_regs */			\
+    0,				 /* num_pseudo_regs */			\
+    XCHAL_NUM_AREGS,		 /* num_aregs */			\
+    XCHAL_NUM_CONTEXTS,		 /* num_contexts */			\
+    -1,				 /* ar_base */				\
+    -1,				 /* a0_base */				\
+    -1,				 /* wb_regnum */			\
+    -1,				 /* ws_regnum */			\
+    -1,				 /* pc_regnum */			\
+    -1,				 /* ps_regnum */			\
+    -1,				 /* lbeg_regnum */			\
+    -1,				 /* lend_regnum */			\
+    -1,				 /* lcount_regnum */			\
+    -1,				 /* sar_regnum */			\
+    -1,				 /* litbase_regnum */			\
+    -1,				 /* interrupt_regnum */			\
+    -1,				 /* interrupt2_regnum */		\
+    -1,				 /* cpenable_regnum */			\
+    -1,				 /* debugcause_regnum */		\
+    -1,				 /* exccause_regnum */			\
+    -1,				 /* excvaddr_regnum */			\
+    0,				 /* max_register_raw_size */		\
+    0,				 /* max_register_virtual_size */	\
+    0,				 /* fp_layout */			\
+    0,				 /* fp_layout_bytes */			\
+    0,				 /* gregmap */				\
+  }
 #define XTENSA_CONFIG_INSTANTIATE(rmap,spill_size)	\
 	struct gdbarch_tdep xtensa_tdep = \
 	  XTENSA_GDBARCH_TDEP_INSTANTIATE(rmap,spill_size);
