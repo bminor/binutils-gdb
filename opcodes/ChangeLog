@@ -1,3 +1,9 @@
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (psr_name): Use hex as case labels.  Add detection for
+	MSPLIM, PSPLIM, MSPLIM_NS, PSPLIM_NS, PRIMASK_NS, BASEPRI_NS,
+	FAULTMASK_NS, CONTROL_NS and SP_NS special registers.
+
 2016-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (PREFIX_MOD_0_0FAE_REG_4): New.
