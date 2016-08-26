@@ -7173,6 +7173,19 @@ alias_readonly_dynrelocs (struct elf_link_hash_entry *h)
   return FALSE;
 }
 
+/* Return whether EH has pc-relative dynamic relocs.  */
+
+static bfd_boolean
+pc_dynrelocs (struct ppc_link_hash_entry *eh)
+{
+  struct elf_dyn_relocs *p;
+
+  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+    if (p->pc_count != 0)
+      return TRUE;
+  return FALSE;
+}
+
 /* Return true if a global entry stub will be created for H.  Valid
    for ELFv2 before plt entries have been allocated.  */
 
@@ -14745,10 +14758,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if (NO_OPD_RELOCS && is_opd)
 	    break;
 
-	  if (h != NULL
-	      ? h->dyn_relocs != NULL
-	      : (bfd_link_pic (info)
-		 ? must_be_dyn_reloc (info, r_type)
+	  if (bfd_link_pic (info)
+	      ? ((h != NULL && pc_dynrelocs (h))
+		 || must_be_dyn_reloc (info, r_type))
+	      : (h != NULL
+		 ? h->dyn_relocs != NULL
 		 : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC))
 	    {
 	      bfd_boolean skip, relocate;
