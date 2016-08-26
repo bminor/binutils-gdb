@@ -938,7 +938,10 @@ print_insn_arc (bfd_vma memaddr,
     case bfd_mach_arc_arcv2:
     default:
       isa_mask = ARC_OPCODE_ARCv2EM;
-      if ((header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
+      /* TODO: Perhaps remove defitinion of header since it is only used at
+         this location.  */
+      if (header != NULL
+	  && (header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
 	{
 	  isa_mask = ARC_OPCODE_ARCv2HS;
 	  /* FPU instructions are not extensions for HS.  */

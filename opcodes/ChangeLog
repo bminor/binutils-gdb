@@ -1,3 +1,7 @@
+2016-08-30  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* opcodes/arc-dis.c (print_insn_arc): Changed.
+
 2016-08-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix typo in opcode, camellia_fi ->
