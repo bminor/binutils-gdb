@@ -1,3 +1,9 @@
+2016-08-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/crypto.d: Rename invalid opcode camellia_fi
+	to camellia_fl.
+	* testsuite/gas/sparc/crypto.s: Likewise.
+
 2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (v7m_psrs): Add MSPLIM, PSPLIM, MSPLIM_NS,

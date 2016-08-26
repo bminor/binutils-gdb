@@ -1,3 +1,8 @@
+2016-08-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-opc.c (sparc_opcodes): Fix typo in opcode, camellia_fi ->
+	camellia_fl.
+
 2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (psr_name): Use hex as case labels.  Add detection for
