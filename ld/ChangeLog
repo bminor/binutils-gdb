@@ -1,3 +1,20 @@
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* emultempl/armelf.em (params): New static variable.
+	(thumb_entry_symbol, byteswap_code, target1_is_rel, target2_type,
+	fix_v4bx, use_blx, vfp11_denorm_fix, stm32l4xx_fix, fix_cortex_a8,
+	no_enum_size_warning, no_wchar_size_warning, pic_veneer,
+	merge_exidx_entries, fix_arm1176, cmse_implib): move as part of the
+	above new structure.
+	(arm_elf_before_allocation): Access static variable from the params
+	structure.
+	(gld${EMULATION_NAME}_finish): Likewise.
+	(arm_elf_create_output_section_statements): Likewise and pass the
+	address of that structure to bfd_elf32_arm_set_target_relocs instead
+	of the static variables.
+	(PARSE_AND_LIST_ARGS_CASES): Access static variable from the params
+	structure.
+
 2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* ld/testsuite/ld-arc/tls_gd-01.s: Added a testcase for this patch.

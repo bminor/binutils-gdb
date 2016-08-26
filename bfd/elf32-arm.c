@@ -8674,18 +8674,9 @@ error_return:
 /* Set target relocation values needed during linking.  */
 
 void
-bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
+bfd_elf32_arm_set_target_params (struct bfd *output_bfd,
 				 struct bfd_link_info *link_info,
-				 int target1_is_rel,
-				 char * target2_type,
-				 int fix_v4bx,
-				 int use_blx,
-				 bfd_arm_vfp11_fix vfp11_fix,
-				 bfd_arm_stm32l4xx_fix stm32l4xx_fix,
-				 int no_enum_warn, int no_wchar_warn,
-				 int pic_veneer, int fix_cortex_a8,
-				 int fix_arm1176, int cmse_implib,
-				 bfd *in_implib_bfd)
+				 struct elf32_arm_params *params)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -8693,31 +8684,33 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
   if (globals == NULL)
     return;
 
-  globals->target1_is_rel = target1_is_rel;
-  if (strcmp (target2_type, "rel") == 0)
+  globals->target1_is_rel = params->target1_is_rel;
+  if (strcmp (params->target2_type, "rel") == 0)
     globals->target2_reloc = R_ARM_REL32;
-  else if (strcmp (target2_type, "abs") == 0)
+  else if (strcmp (params->target2_type, "abs") == 0)
     globals->target2_reloc = R_ARM_ABS32;
-  else if (strcmp (target2_type, "got-rel") == 0)
+  else if (strcmp (params->target2_type, "got-rel") == 0)
     globals->target2_reloc = R_ARM_GOT_PREL;
   else
     {
       _bfd_error_handler (_("Invalid TARGET2 relocation type '%s'."),
-			  target2_type);
+			  params->target2_type);
     }
-  globals->fix_v4bx = fix_v4bx;
-  globals->use_blx |= use_blx;
-  globals->vfp11_fix = vfp11_fix;
-  globals->stm32l4xx_fix = stm32l4xx_fix;
-  globals->pic_veneer = pic_veneer;
-  globals->fix_cortex_a8 = fix_cortex_a8;
-  globals->fix_arm1176 = fix_arm1176;
-  globals->cmse_implib = cmse_implib;
-  globals->in_implib_bfd = in_implib_bfd;
+  globals->fix_v4bx = params->fix_v4bx;
+  globals->use_blx |= params->use_blx;
+  globals->vfp11_fix = params->vfp11_denorm_fix;
+  globals->stm32l4xx_fix = params->stm32l4xx_fix;
+  globals->pic_veneer = params->pic_veneer;
+  globals->fix_cortex_a8 = params->fix_cortex_a8;
+  globals->fix_arm1176 = params->fix_arm1176;
+  globals->cmse_implib = params->cmse_implib;
+  globals->in_implib_bfd = params->in_implib_bfd;
 
   BFD_ASSERT (is_arm_elf (output_bfd));
-  elf_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
-  elf_arm_tdata (output_bfd)->no_wchar_size_warning = no_wchar_warn;
+  elf_arm_tdata (output_bfd)->no_enum_size_warning
+    = params->no_enum_size_warning;
+  elf_arm_tdata (output_bfd)->no_wchar_size_warning
+    = params->no_wchar_size_warning;
 }
 
 /* Replace the target offset of a Thumb bl or b.w instruction.  */

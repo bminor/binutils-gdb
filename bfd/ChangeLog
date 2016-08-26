@@ -1,5 +1,16 @@
 2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* bfd-in.h (struct elf32_arm_params): Define.
+	(bfd_elf32_arm_set_target_relocs): Rename into ...
+	(bfd_elf32_arm_set_target_params): This.  Use a struct
+	elf32_arm_params to pass all parameters but the bfd and bfd_link_info.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (bfd_elf32_arm_set_target_relocs): Rename into ...
+	(bfd_elf32_arm_set_target_params): This.  Pass all values via a struct
+	elf32_arm_params rather than as individual parameters.
+
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* elf32-arm.c (elf32_arm_get_stub_entry): Assert that we don't access
 	passed the end of htab->stub_group array.
 	(elf32_arm_create_or_find_stub_sec): Likewise.
