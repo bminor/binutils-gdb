@@ -1,3 +1,43 @@
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* emultempl/armelf.em (in_implib_filename): Declare and initialize new
+	variable.
+	(arm_elf_create_output_section_statements): Open import input library
+	file for writing and pass resulting in_implib_bfd to
+	bfd_elf32_arm_set_target_relocs.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_IN_IMPLIB option.
+	(PARSE_AND_LIST_LONGOPTS): Define --in-implib option.
+	(PARSE_AND_LIST_OPTIONS): Add help message for --in-implib option.
+	(PARSE_AND_LIST_ARGS_CASES): Handle new OPTION_IN_IMPLIB case.
+	* ld.texinfo (--cmse-implib): Update to mention --in-implib.
+	(--in-implib): Document new option.
+	* NEWS: Likewise.
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway import library generation): add --defsym VER=1 to gas
+	CLI.
+	(Secure gateway import library generation: errors): Likewise.
+	(Input secure gateway import library): New test.
+	(Input secure gateway import library: no output import library):
+	Likewise.
+	(Input secure gateway import library: not an SG input import library):
+	Likewise.
+	(Input secure gateway import library: earlier stub section base):
+	Likewise.
+	(Input secure gateway import library: later stub section base):
+	Likewise.
+	(Input secure gateway import library: veneer comeback): Likewise.
+	(Input secure gateway import library: entry function change):
+	Likewise.
+	* testsuite/ld-arm/cmse-implib.s: Add input import library testing.
+	* testsuite/ld-arm/cmse-implib.rd: Update accordingly.
+	* testsuite/ld-arm/cmse-new-implib.out: New file.
+	* testsuite/ld-arm/cmse-new-implib.rd: Likewise.
+	* testsuite/ld-arm/cmse-new-implib-no-output.out: Likewise.
+	* testsuite/ld-arm/cmse-new-implib-not-sg-in-implib.out: Likewise.
+	* testsuite/ld-arm/cmse-new-earlier-later-implib.out: Likewise.
+	* testsuite/ld-arm/cmse-new-comeback-implib.rd: Likewise.
+	* testsuite/ld-arm/cmse-new-wrong-implib.out: Likewise.
+
 2016-08-25  Alan Modra  <amodra@gmail.com>
 
 	* configure.tgt (powerpc*-*-linux* et al): Rewrite, adding LE
