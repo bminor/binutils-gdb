@@ -834,6 +834,14 @@ _bfd_elf_setup_sections (bfd *abfd)
 	      elf_linked_to_section (s) = linksec;
 	    }
 	}
+      else if (this_hdr->sh_type == SHT_GROUP
+	       && elf_next_in_group (s) == NULL)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: SHT_GROUP section [index %d] has no SHF_GROUP sections"),
+	     abfd, elf_section_data (s)->this_idx);
+	  result = FALSE;
+	}
     }
 
   /* Process section groups.  */
@@ -3403,12 +3411,19 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
       /* The ELF backend linker sets sh_info to -2 when the group
 	 signature symbol is global, and thus the index can't be
 	 set until all local symbols are output.  */
-      asection *igroup = elf_sec_group (elf_next_in_group (sec));
-      struct bfd_elf_section_data *sec_data = elf_section_data (igroup);
-      unsigned long symndx = sec_data->this_hdr.sh_info;
-      unsigned long extsymoff = 0;
+      asection *igroup;
+      struct bfd_elf_section_data *sec_data;
+      unsigned long symndx;
+      unsigned long extsymoff;
       struct elf_link_hash_entry *h;
 
+      /* The point of this little dance to the first SHF_GROUP section
+	 then back to the SHT_GROUP section is that this gets us to
+	 the SHT_GROUP in the input object.  */
+      igroup = elf_sec_group (elf_next_in_group (sec));
+      sec_data = elf_section_data (igroup);
+      symndx = sec_data->this_hdr.sh_info;
+      extsymoff = 0;
       if (!elf_bad_symtab (igroup->owner))
 	{
 	  Elf_Internal_Shdr *symtab_hdr;

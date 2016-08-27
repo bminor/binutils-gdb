@@ -1,5 +1,12 @@
 2016-08-27  Alan Modra  <amodra@gmail.com>
 
+	PR 20520
+	* elf.c (_bfd_elf_setup_sections): Check that SHT_GROUP sections
+	have corresponding SHF_GROUP sections.
+	(bfd_elf_set_group_contents): Comment.
+
+2016-08-27  Alan Modra  <amodra@gmail.com>
+
 	PR 20519
 	* elf64-ppc.c (pc_dynrelocs): New function.
 	(ppc64_elf_relocate_section): Use it and must_be_dyn_reloc to
