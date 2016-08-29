@@ -822,28 +822,6 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{objdump {-dw} pr19319.dd}} \
 	    "pr19319" \
 	] \
-	[list \
-	    "Build libpr19784a.so" \
-	    "-shared -Wl,-Bsymbolic-functions" \
-	    "-fPIC -O2 -g" \
-	    { pr19784b.c pr19784c.c } \
-	    {} \
-	    "libpr19784a.so" \
-	] \
-	[list \
-	    "Build libpr19784b.so" \
-	    "-shared -Wl,-Bsymbolic-functions" \
-	    "-fPIC -O2 -g" \
-	    { pr19784c.c pr19784b.c } \
-	    {} \
-	    "libpr19784b.so" \
-	] \
-	[list \
-	   "Build pr19784a.o" \
-	   "" \
-	   "" \
-	   { pr19784a.c } \
-	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -914,23 +892,54 @@ if { [isnative] && [which $CC] != 0 } {
 	    "gotpcrel1" \
 	    "gotpcrel1.out" \
 	] \
-	[list \
-	    "Run pr19784a" \
-	    "tmpdir/pr19784a.o tmpdir/libpr19784a.so" \
-	    "" \
-	    { dummy.s } \
-	    "pr19784a" \
-	    "pass.out" \
-	] \
-	[list \
-	    "Run pr19784b" \
-	    "--as-needed tmpdir/pr19784a.o tmpdir/libpr19784b.so" \
-	    "" \
-	    { dummy.s } \
-	    "pr19784b" \
-	    "pass.out" \
-	] \
     ]
+
+    # Run-time tests which require working ifunc attribute support.
+    if { [check_ifunc_attribute_available] } {
+	run_cc_link_tests [list \
+	    [list \
+		"Build libpr19784a.so" \
+		"-shared -Wl,-Bsymbolic-functions" \
+		"-fPIC -O2 -g" \
+		{ pr19784b.c pr19784c.c } \
+		{} \
+		"libpr19784a.so" \
+	    ] \
+	    [list \
+		"Build libpr19784b.so" \
+		"-shared -Wl,-Bsymbolic-functions" \
+		"-fPIC -O2 -g" \
+		{ pr19784c.c pr19784b.c } \
+		{} \
+		"libpr19784b.so" \
+	    ] \
+	    [list \
+		"Build pr19784a.o" \
+		"" \
+		"" \
+		{ pr19784a.c } \
+	    ] \
+	]
+
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Run pr19784a" \
+		"tmpdir/pr19784a.o tmpdir/libpr19784a.so" \
+		"" \
+		{ dummy.s } \
+		"pr19784a" \
+		"pass.out" \
+	    ] \
+	    [list \
+		"Run pr19784b" \
+		"--as-needed tmpdir/pr19784a.o tmpdir/libpr19784b.so" \
+		"" \
+		{ dummy.s } \
+		"pr19784b" \
+		"pass.out" \
+	    ] \
+	]
+    }
 
     if { [istarget "x86_64-*-linux*"] \
 	 && ![istarget "x86_64-*-linux*-gnux32"]} {

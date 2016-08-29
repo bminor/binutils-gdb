@@ -1,5 +1,10 @@
 2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/19784 tests only
+	if ifunc attribute works.
+
+2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/14961
 	PR ld/20515
 	* testsuite/ld-i386/i386.exp: Run pr20515.
