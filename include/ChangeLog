@@ -1,3 +1,22 @@
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+	* elf/arc-reloc.def: Fixed relocation formula for N*, SDA, SDA_12,
+	SDA_16_LD*, S13_PCREL, N32_ME, SECTOFF_* relocations.
+	* opcode/arc-func.h (replace_disp12s): Added. Used for SDA_12
+	relocation.
+
+2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (ARM_GET_SYM_CMSE_SPCL): Define macro.
+	(ARM_SET_SYM_CMSE_SPCL): Likewise.
+
+2016-08-01  Andrew Jenner  <andrew@codesourcery.com>
+
+	* opcode/ppc.h (PPC_OPCODE_E200Z4): New define.
+
+2016-07-29  Aldy Hernandez  <aldyh@redhat.com>
+
+	* libiberty.h (MAX_ALLOCA_SIZE): New macro.
+
 2016-07-27  Graham Markall  <graham.markall@embecosm.com>
 
         * opcode/arc.h: Add ARC_OPERAND_ADDRTYPE,

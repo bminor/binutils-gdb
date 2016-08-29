@@ -2982,7 +2982,13 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	      Stub_table<size, big_endian>* stub_table
 		= static_cast<Stub_table<size, big_endian>*>(
 		    i->relaxed_input_section());
-	      off += stub_table->set_address_and_size(os, off);
+	      Address stub_table_size = stub_table->set_address_and_size(os, off);
+	      off += stub_table_size;
+	      // After a few iterations, set current stub table size
+	      // as min size threshold, so later stub tables can only
+	      // grow in size.
+	      if (pass >= 4)
+		stub_table->set_min_size_threshold(stub_table_size);
 	    }
 	  else
 	    off += i->data_size();
@@ -3634,8 +3640,8 @@ class Stub_table : public Output_relaxed_input_section
       targ_(targ), plt_call_stubs_(), long_branch_stubs_(),
       orig_data_size_(owner->current_data_size()),
       plt_size_(0), last_plt_size_(0),
-      branch_size_(0), last_branch_size_(0), eh_frame_added_(false),
-      need_save_res_(false)
+      branch_size_(0), last_branch_size_(0), min_size_threshold_(0),
+      eh_frame_added_(false), need_save_res_(false)
   {
     this->set_output_section(output_section);
 
@@ -3726,6 +3732,11 @@ class Stub_table : public Output_relaxed_input_section
       off = align_address(off, this->stub_align());
     // Include original section size and alignment padding in size
     my_size += off - start_off;
+    // Ensure new size is always larger than min size
+    // threshold. Alignment requirement is included in "my_size", so
+    // increase "my_size" does not invalidate alignment.
+    if (my_size < this->min_size_threshold_)
+      my_size = this->min_size_threshold_;
     this->reset_address_and_file_offset();
     this->set_current_data_size(my_size);
     this->set_address_and_file_offset(os->address() + start_off,
@@ -3750,6 +3761,9 @@ class Stub_table : public Output_relaxed_input_section
   section_size_type
   plt_size() const
   { return this->plt_size_; }
+
+  void set_min_size_threshold(Address min_size)
+  { this->min_size_threshold_ = min_size; }
 
   bool
   size_update()
@@ -4015,6 +4029,13 @@ class Stub_table : public Output_relaxed_input_section
   section_size_type orig_data_size_;
   // size of stubs
   section_size_type plt_size_, last_plt_size_, branch_size_, last_branch_size_;
+  // Some rare cases cause (PR/20529) fluctuation in stub table
+  // size, which leads to an endless relax loop. This is to be fixed
+  // by, after the first few iterations, allowing only increase of
+  // stub table size. This variable sets the minimal possible size of
+  // a stub table, it is zero for the first few iterations, then
+  // increases monotonically.
+  Address min_size_threshold_;
   // Whether .eh_frame info has been created for this stub section.
   bool eh_frame_added_;
   // Set if this stub group needs a copy of out-of-line register

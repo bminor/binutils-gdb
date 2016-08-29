@@ -597,40 +597,75 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
   | powerpc*-*-linux* | powerpc*-*-netbsd* | powerpc*-*-openbsd* \
   | powerpc*-*-solaris* | powerpc*-*-kaos* | powerpc*-*-vxworks*)
 			case "${targ}" in
-			*64*)	targ_emul=elf64ppc
-				targ_extra_emuls="elf32ppc elf32ppclinux elf32ppcsim"
-				targ_extra_libpath="elf32ppc elf32ppclinux"
-				td=tdir_elf32ppc
-				case "${targ}" in
-				powerpc*le-*) td=tdir_elf32lppc;;
-				esac
-				eval ${td}=`echo "${targ_alias}" | sed -e 's/64//'`
-				eval ${td}linux=\$${td}
-				eval ${td}sim=\$${td}
-				;;
-			*linux*) targ_emul=elf32ppclinux
-				targ_extra_emuls="elf32ppc elf32ppcsim"
-				targ_extra_libpath=elf32ppc
-				targ64_extra_emuls=elf64ppc
-				targ64_extra_libpath=elf64ppc
-				;;
-			*)	targ_emul=elf32ppc
-				targ_extra_emuls="elf32ppclinux elf32ppcsim"
-				targ_extra_libpath=elf32ppclinux
-				targ64_extra_emuls=elf64ppc
-				targ64_extra_libpath=elf64ppc
-				;;
+			powerpc64*)
+			    targ_emul=elf64ppc
+			    targ_extra_emuls="elf32ppc elf32ppclinux elf32ppcsim"
+			    targ_extra_libpath="elf32ppc elf32ppclinux" ;;
+			*linux*)
+			    targ_emul=elf32ppclinux
+			    targ_extra_emuls="elf32ppc elf32ppcsim"
+			    targ_extra_libpath=elf32ppc
+			    targ64_extra_emuls=elf64ppc
+			    targ64_extra_libpath=elf64ppc ;;
+			*)
+			    targ_emul=elf32ppc
+			    targ_extra_emuls="elf32ppclinux elf32ppcsim"
+			    targ_extra_libpath=elf32ppclinux
+			    targ64_extra_emuls=elf64ppc
+			    targ64_extra_libpath=elf64ppc ;;
 			esac
+			td=tdir_elf32ppc
+			td64=tdir_elf64ppc
+			s=s/ppc/lppc/g
 			case "${targ}" in
-			powerpc*le-*)
-				# PR 19985: Include big endian emulations.
-				for z in targ_extra_emuls targ_extra_libpath targ64_extra_emuls targ64_extra_libpath
-				do
-				  eval ${z}=\"\$${z} `eval echo \\$${z} | sed -e 's/ppc/lppc/g'`\"
-				done
-				targ_extra_emuls="$targ_extra_emuls $targ_emul"
-			        eval targ_emul=\"`eval echo \\$targ_emul | sed -e 's/ppc/lppc/g'`\"
-			esac ;;
+			powerpcle-* | powerpc64le-*)
+			    for z in td td64 targ_emul targ_extra_emuls \
+					 targ_extra_libpath targ64_extra_emuls \
+					 targ64_extra_libpath
+			    do
+				eval ${z}=\"\`echo \$${z} \| sed -e $s\`\"
+			    done
+			    s=s/lppc/ppc/g ;;
+			esac
+			# Why oh why did we set tooldir based on target_alias
+			# rather than on target?
+			eval tdir_${targ_emul}="${targ_alias}"
+			cpu=`echo "${targ_alias}" | sed -e 's/-.*//'`
+			rest=`echo "${targ_alias}" | sed -e 's/^[^-]*//'`
+			le=le
+			case "${cpu}" in
+			*little) le=little
+			esac
+			ta32=`echo "${cpu}" | sed -e s/64//`"${rest}"
+			ta64=`echo "${cpu}" | sed -e 's/64//;s/$/64/;s/'${le}'64$/64'${le}'/;s/be64$/64be/'`"${rest}"
+			eval test -n \"\$${td}\" || eval ${td}="${ta32}"
+			eval test -n \"\$${td}linux\" || eval ${td}linux="${ta32}"
+			eval test -n \"\$${td}sim\" || eval ${td}sim="${ta32}"
+			eval test -n \"\$${td64}\" || eval ${td64}="${ta64}"
+			# Now provide the other endian
+			for z in targ_extra_emuls targ_extra_libpath
+			do
+			    eval ${z}=\"\$${z} \`echo ${targ_emul} \$${z} \| sed -e $s\`\"
+			done
+			for z in targ64_extra_emuls targ64_extra_libpath
+			do
+			    eval ${z}=\"\$${z} \`echo \$${z} \| sed -e $s\`\"
+			done
+			td=`echo "${td}" | sed -e $s`
+			td64=`echo "${td64}" | sed -e $s`
+			case "${targ}" in
+			powerpcle-* | powerpc64le-*)
+			    cpu=`echo "${cpu}" | sed -e s/${le}\$//` ;;
+			*)
+			    cpu=`echo "${cpu}" | sed -e s/be\$//`${le} ;;
+			esac
+			ta32=`echo "${cpu}" | sed -e s/64//`"${rest}"
+			ta64=`echo "${cpu}" | sed -e 's/64//;s/$/64/;s/'${le}'64$/64'${le}/`"${rest}"
+			eval test -n \"\$${td}\" || eval ${td}="${ta32}"
+			eval test -n \"\$${td}linux\" || eval ${td}linux="${ta32}"
+			eval test -n \"\$${td}sim\" || eval ${td}sim="${ta32}"
+			eval test -n \"\$${td64}\" || eval ${td64}="${ta64}"
+			;;
 powerpc-*-nto*)         targ_emul=elf32ppcnto ;;
 powerpcle-*-nto*)       targ_emul=elf32lppcnto ;;
 powerpc-*-rtems*)	targ_emul=elf32ppc ;;

@@ -1719,7 +1719,7 @@ show_interactive_mode (struct ui_file *file, int from_tty,
   if (interactive_mode == AUTO_BOOLEAN_AUTO)
     fprintf_filtered (file, "Debugger's interactive mode "
 		            "is %s (currently %s).\n",
-                      value, gdb_has_a_terminal () ? "on" : "off");
+                      value, input_interactive_p (current_ui) ? "on" : "off");
   else
     fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
 }

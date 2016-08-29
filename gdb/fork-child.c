@@ -32,7 +32,7 @@
 #include "solib.h"
 #include "filestuff.h"
 #include "top.h"
-
+#include "signals-state-save-restore.h"
 #include <signal.h>
 
 /* This just gets used as a default if we can't find SHELL.  */
@@ -365,6 +365,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
         undebuggable.  Indeed, you probably got an error message
         saying "not parent".  Sorry; you'll have to use print
         statements!  */
+
+      restore_original_signals_state ();
 
       /* There is no execlpe call, so we have to set the environment
          for our child in the global variable.  If we've vforked, this

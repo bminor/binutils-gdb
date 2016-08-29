@@ -1,6 +1,86 @@
+2016-08-26  Han Shen  <shenhan@google.com>
+
+	PR gold/20529 - relaxing loop never ends.
+
+	* powerpc.cc (Stub_table::min_size_threshold_): New member to
+	limit size.
+	(Stub_table::set_min_size_threshold): New member function.
+	(Stub_table::set_address_and_size): Add code to only allow size
+	increase.
+	(Target_powerpc::do_relax): Add code to record last size.
+
+2016-08-23  Roland McGrath  <roland@hack.frob.com>
+
+	* options.h (General_options): Grok -z stack-size.
+	* output.h (Output_segment::set_size): New method.
+	* layout.cc (Layout::create_executable_stack_info): Renamed to ...
+	(Layout::create_stack_segment): ... this.  Always create the
+	segment if -z stack-size was used.
+	(Layout::set_segment_offsets): Don't call ->set_offset on the
+	PT_GNU_STACK segment.
+
+2016-08-15  Bharathi Seshadri  <bseshadr@cisco.com>
+
+	* options.h (General_options): Add --be8 option.
+	* arm.cc (Arm_relobj::do_relocate_sections): Add code to swap for be8.
+	(Output_data_plt_arm_standard::do_fill_first_plt_entry): Likewise.
+	(Output_data_plt_arm_short::do_fill_plt_entry): Likewise.
+	(Output_data_plt_arm_long::do_fill_plt_entry): Likewise.
+	(Target_arm::do_adjust_elf_header): Do EF_ARM_BE8 adjustment.
+
+2016-08-17  Cary Coutant  <ccoutant@gmail.com>
+
+	* i386.cc (Target_i386): Reset skip_call_tls_get_addr_ after printing
+	error message.
+	* testsuite/Makefile.am (pr20216a): Add missing dependencies.
+	(pr20308a): Add -Bgcctestdir/ to compile rules.
+	* testsuite/Makefile.in: Regenerate.
+
+2016-08-12  Roland McGrath  <roland@hack.frob.com>
+
+	PR gold/20462
+	* script-sections.cc (Script_sections::release_segments):
+	Reset this->segments_created_.
+
+2016-08-12  Roland McGrath  <roland@hack.frob.com>
+
+	* yyscript.y (HIDDEN): New %token.
+	(assignment): Handle HIDDEN(string = expr) syntax.
+	* script.cc (script_keyword_parsecodes): Add HIDDEN.
+
+2016-08-10  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20216
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Add check for
+	R_X86_64_GOTPCREL. Reset skip_call_tls_get_addr_ after printing
+	error message.
+	* testsuite/Makefile.am (pr20216_gd.o): Add -Bgcctestdir/.
+	(pr20216_ld.o): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
+2016-08-10  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/20443
+	* symtab.cc (Symbol_table::add_from_relobj): Handle NULL symbols,
+	which will be present for STT_SPARC_REGISTER.
+	(Symbol_table::add_from_pluginobj): Likewise.
+	(Symbol_table::add_from_dynobj): Likewise.
+	(Symbol_table::add_from_incrobj): Removed dead code.
+
+2016-08-10  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/20442
+	* sparc.cc (Target_sparc::Relocate::relocate): R_SPARC_GOTDATA_OP_LOX10
+	should fall back on R_SPARC_GOT10, not R_SPARC_GOT13.
+
+2016-08-10  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/20441
+	* sparc.cc (Target_sparc::Scan::check_non_pic): Allow R_SPARC_32 on
+	sparc64.
+
 2016-06-29  Cary Coutant  <ccoutant@gmail.com>
 
-gold/
 	PR gold/20310
 	* testsuite/dynamic_list.sh: Remove check for _ZdlPv.
 

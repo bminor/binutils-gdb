@@ -186,7 +186,7 @@ is_64bit_tdesc (void)
 /* Called by libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
 #ifdef __x86_64__
@@ -1092,10 +1092,10 @@ amd64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   buf[i++] = 0x41; buf[i++] = 0x51; /* push %r9 */
   buf[i++] = 0x41; buf[i++] = 0x50; /* push %r8 */
   buf[i++] = 0x9c; /* pushfq */
-  buf[i++] = 0x48; /* movl <addr>,%rdi */
+  buf[i++] = 0x48; /* movabs <addr>,%rdi */
   buf[i++] = 0xbf;
-  *((unsigned long *)(buf + i)) = (unsigned long) tpaddr;
-  i += sizeof (unsigned long);
+  memcpy (buf + i, &tpaddr, 8);
+  i += 8;
   buf[i++] = 0x57; /* push %rdi */
   append_insns (&buildaddr, i, buf);
 
@@ -1842,6 +1842,8 @@ amd64_emit_call (CORE_ADDR fn)
   else
     {
       int offset32 = offset64; /* we know we can't overflow here.  */
+
+      buf[i++] = 0xe8; /* call <reladdr> */
       memcpy (buf + i, &offset32, 4);
       i += 4;
     }

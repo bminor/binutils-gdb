@@ -2499,9 +2499,11 @@ display the name of the terminal that will be used for future runs of your
 program.
 
 @table @code
-@item set inferior-tty /dev/ttyb
+@item set inferior-tty [ @var{tty} ]
 @kindex set inferior-tty
-Set the tty for the program being debugged to /dev/ttyb.
+Set the tty for the program being debugged to @var{tty}.  Omitting @var{tty}
+restores the default behavior, which is to use the same terminal as
+@value{GDBN}.
 
 @item show inferior-tty
 @kindex show inferior-tty

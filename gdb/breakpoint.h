@@ -39,6 +39,18 @@ struct linespec_result;
 struct linespec_sals;
 struct event_location;
 
+/* Why are we removing the breakpoint from the target?  */
+
+enum remove_bp_reason
+{
+  /* A regular remove.  Remove the breakpoint and forget everything
+     about it.  */
+  REMOVE_BREAKPOINT,
+
+  /* Detach the breakpoints from a fork child.  */
+  DETACH_BREAKPOINT,
+};
+
 /* This is the maximum number of bytes a breakpoint instruction can
    take.  Feel free to increase it.  It's just used in a few places to
    size arrays that should be independent of the target
@@ -519,7 +531,7 @@ struct breakpoint_ops
      with the "insert" method above.  Return 0 for success, 1 if the
      breakpoint, watchpoint or catchpoint type is not supported,
      -1 for failure.  */
-  int (*remove_location) (struct bp_location *);
+  int (*remove_location) (struct bp_location *, enum remove_bp_reason reason);
 
   /* Return true if it the target has stopped due to hitting
      breakpoint location BL.  This function does not check if we

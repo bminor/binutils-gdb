@@ -3252,14 +3252,30 @@ display_debug_lines_decoded (struct dwarf_section *section,
 
 	  /* Traverse the Directory table just to count entries.  */
 	  data = standard_opcodes + linfo.li_opcode_base - 1;
+	  /* PR 20440 */
+	  if (data >= end)
+	    {
+	      warn (_("opcode base of %d extends beyond end of section\n"),
+		    linfo.li_opcode_base);
+	      return 0;
+	    }
+
 	  if (*data != 0)
 	    {
 	      unsigned char *ptr_directory_table = data;
 
-	      while (*data != 0)
+	      while (data < end && *data != 0)
 		{
 		  data += strnlen ((char *) data, end - data) + 1;
 		  n_directories++;
+		}
+
+	      /* PR 20440 */
+	      if (data >= end)
+		{
+		  warn (_("directory table ends unexpectedly\n"));
+		  n_directories = 0;
+		  break;
 		}
 
 	      /* Go through the directory table again to save the directories.  */
@@ -3279,11 +3295,11 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	  data++;
 
 	  /* Traverse the File Name table just to count the entries.  */
-	  if (*data != 0)
+	  if (data < end && *data != 0)
 	    {
 	      unsigned char *ptr_file_name_table = data;
 
-	      while (*data != 0)
+	      while (data < end && *data != 0)
 		{
 		  unsigned int bytes_read;
 
@@ -3298,6 +3314,13 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		  data += bytes_read;
 
 		  n_files++;
+		}
+
+	      if (data >= end)
+		{
+		  warn (_("file table ends unexpectedly\n"));
+		  n_files = 0;
+		  break;
 		}
 
 	      /* Go through the file table again to save the strings.  */
@@ -3334,7 +3357,20 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	      else
 		{
 		  unsigned int ix = file_table[0].directory_index;
-		  const char *directory = ix ? (char *)directory_table[ix - 1] : ".";
+		  const char *directory;
+
+		  if (ix == 0)
+		    directory = ".";
+		  /* PR 20439 */
+		  else if (n_directories == 0)
+		    directory = _("<unknown>");
+		  else if (ix > n_directories)
+		    {
+		      warn (_("directory index %u > number of directories %u\n"), ix, n_directories);
+		      directory = _("<corrupt>");
+		    }
+		  else
+		    directory = (char *) directory_table[ix - 1];
 
 		  if (do_wide || strlen (directory) < 76)
 		    printf (_("CU: %s/%s:\n"), directory, file_table[0].name);
@@ -3492,20 +3528,35 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		   data += bytes_read;
 		   state_machine_regs.file = adv;
 
-		   if (file_table == NULL)
-		     printf (_("\n [Use file table entry %d]\n"), state_machine_regs.file - 1);
-		   else if (file_table[state_machine_regs.file - 1].directory_index == 0)
-		     /* If directory index is 0, that means current directory.  */
-		     printf ("\n./%s:[++]\n",
-			     file_table[state_machine_regs.file - 1].name);
-		   else if (directory_table == NULL)
-		     printf (_("\n [Use directory table entry %d]\n"),
-			     file_table[state_machine_regs.file - 1].directory_index - 1);
-		   else
-		     /* The directory index starts counting at 1.  */
-		     printf ("\n%s/%s:\n",
-			     directory_table[file_table[state_machine_regs.file - 1].directory_index - 1],
-			     file_table[state_machine_regs.file - 1].name);
+		   {
+		     unsigned file = state_machine_regs.file - 1;
+		     unsigned dir;
+
+		     if (file_table == NULL || n_files == 0)
+		       printf (_("\n [Use file table entry %d]\n"), file);
+		     /* PR 20439 */
+		     else if (file >= n_files)
+		       {
+			 warn (_("file index %u > number of files %u\n"), file + 1, n_files);
+			 printf (_("\n <over large file table index %u>"), file);
+		       }
+		     else if ((dir = file_table[file].directory_index) == 0)
+		       /* If directory index is 0, that means current directory.  */
+		       printf ("\n./%s:[++]\n", file_table[file].name);
+		     else if (directory_table == NULL || n_directories == 0)
+		       printf (_("\n [Use file %s in directory table entry %d]\n"),
+			       file_table[file].name, dir);
+		     /* PR 20439 */
+		     else if (dir > n_directories)
+		       {
+			 warn (_("directory index %u > number of directories %u\n"), dir, n_directories);
+			 printf (_("\n <over large directory table entry %u>\n"), dir);
+		       }
+		     else
+		       printf ("\n%s/%s:\n",
+			       /* The directory index starts counting at 1.  */
+			       directory_table[dir - 1], file_table[file].name);
+		   }
 		   break;
 
 		 case DW_LNS_set_column:
@@ -3587,9 +3638,19 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	      size_t fileNameLength;
 
 	      if (file_table)
-		fileName = (char *) file_table[state_machine_regs.file - 1].name;
+		{
+		  unsigned indx = state_machine_regs.file - 1;
+		  /* PR 20439  */
+		  if (indx >= n_files)
+		    {
+		      warn (_("corrupt file index %u encountered\n"), indx);
+		      fileName = _("<corrupt>");
+		    }
+		  else
+		    fileName = (char *) file_table[indx].name;
+		}
 	      else
-		fileName = "<unknown>";
+		fileName = _("<unknown>");
 
 	      fileNameLength = strlen (fileName);
 
@@ -5544,7 +5605,7 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
   unsigned int r;
   char tmp[100];
 
-  if (*max_regs < fc->ncols)
+  if (*max_regs != fc->ncols)
     *max_regs = fc->ncols;
 
   if (*need_col_headers)

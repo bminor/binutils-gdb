@@ -6853,6 +6853,31 @@ entries which only support 512Mb of code.
 The @samp{--no-apply-dynamic-relocs} option makes AArch64 linker do not apply
 link-time values for dynamic relocations.
 
+@cindex Placement of SG veneers
+All SG veneers are placed in the special output section @code{.gnu.sgstubs}.
+Its start address must be set, either with the command line option
+@samp{--section-start} or in a linker script, to indicate where to place these
+veneers in memory.
+
+@kindex --cmse-implib
+@cindex Secure gateway import library
+The @samp{--cmse-implib} option requests that the import libraries
+specified by the @samp{--out-implib} and @samp{--in-implib} options are
+secure gateway import libraries, suitable for linking a non-secure
+executable against secure code as per ARMv8-M Security Extensions.
+
+@kindex --in-implib=@var{file}
+@cindex Input import library
+The @samp{--in-implib=file} specifies an input import library whose symbols
+must keep the same address in the executable being produced.  A warning is
+given if no @samp{--out-implib} is given but new symbols have been introduced
+in the executable that should be listed in its import library.  Otherwise, if
+@samp{--out-implib} is specified, the symbols are added to the output import
+library.  A warning is also given if some symbols present in the input import
+library have disappeared from the executable.  This option is only effective
+for Secure Gateway import libraries, ie. when @samp{--cmse-implib} is
+specified.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

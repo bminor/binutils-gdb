@@ -308,7 +308,8 @@ static quit_handler_ftype *remote_fileio_o_quit_handler;
 static void
 remote_fileio_quit_handler (void)
 {
-  quit ();
+  if (check_quit_flag ())
+    quit ();
 }
 
 static void

@@ -64,10 +64,8 @@
 		  " exe addr %" PRIx64,					\
 		  __LINE__, aarch64_get_PC (cpu));			\
       if (! TRACE_ANY_P (cpu))						\
-	{								\
-	  sim_io_eprintf (CPU_STATE (cpu), "SIM Error: Unimplemented instruction: "); \
-	  trace_disasm (CPU_STATE (cpu), cpu, aarch64_get_PC (cpu));	\
-	}								\
+        sim_io_eprintf (CPU_STATE (cpu), "SIM Error: Unimplemented instruction: %#08x\n", \
+                        aarch64_get_instr (cpu));			\
       sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu),\
 		       sim_stopped, SIM_SIGABRT);			\
     }									\
@@ -13165,7 +13163,8 @@ bl (sim_cpu *cpu, int32_t offset)
 		    " %*scall %" PRIx64 " [%s]"
 		    " [args: %" PRIx64 " %" PRIx64 " %" PRIx64 "]",
 		    stack_depth, " ", aarch64_get_next_PC (cpu),
-		    aarch64_get_func (aarch64_get_next_PC (cpu)),
+		    aarch64_get_func (CPU_STATE (cpu),
+				      aarch64_get_next_PC (cpu)),
 		    aarch64_get_reg_u64 (cpu, 0, NO_SP),
 		    aarch64_get_reg_u64 (cpu, 1, NO_SP),
 		    aarch64_get_reg_u64 (cpu, 2, NO_SP)
@@ -13204,7 +13203,8 @@ blr (sim_cpu *cpu)
 		    " %*scall %" PRIx64 " [%s]"
 		    " [args: %" PRIx64 " %" PRIx64 " %" PRIx64 "]",
 		    stack_depth, " ", aarch64_get_next_PC (cpu),
-		    aarch64_get_func (aarch64_get_next_PC (cpu)),
+		    aarch64_get_func (CPU_STATE (cpu),
+				      aarch64_get_next_PC (cpu)),
 		    aarch64_get_reg_u64 (cpu, 0, NO_SP),
 		    aarch64_get_reg_u64 (cpu, 1, NO_SP),
 		    aarch64_get_reg_u64 (cpu, 2, NO_SP)
@@ -14104,10 +14104,15 @@ aarch64_run (SIM_DESC sd)
   sim_cpu *cpu = STATE_CPU (sd, 0);
 
   while (aarch64_step (cpu))
-    aarch64_update_PC (cpu);
+    {
+      aarch64_update_PC (cpu);
 
-  sim_engine_halt (sd, NULL, NULL, aarch64_get_PC (cpu),
-		   sim_exited, aarch64_get_reg_s32 (cpu, R0, SP_OK));
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
+    }
+
+  sim_engine_halt (sd, cpu, NULL, aarch64_get_PC (cpu),
+		   sim_exited, aarch64_get_reg_s32 (cpu, R0, NO_SP));
 }
 
 void

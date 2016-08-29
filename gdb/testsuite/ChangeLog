@@ -1,3 +1,128 @@
+2016-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/default.exp (tty): Remove.
+
+2016-08-24  Kevin Buettner  <kevinb@redhat.com>
+
+    	* gdb.python/py-recurse-unwind.c: New file.
+    	* gdb.python/py-recurse-unwind.py: New file.
+    	* gdb.python/py-recurse-unwind.exp: New file.
+
+2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/set-inferior-tty.exp: New file.
+	* gdb.base/set-inferior-tty.c: New file.
+
+2016-08-23  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20494
+	* gdb.base/new-ui-echo.c: New file.
+	* gdb.base/new-ui-echo.exp: New file.
+
+2016-08-23  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.server/connect-stopped-target.exp (do_test): Pass "" to
+	gdbserver_spawn.
+	* gdb.server/connect-without-multi-process.exp (do_test):
+	Likewise.
+
+2016-08-23  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/signals-state-child.exp: Set variables gdb_txt and
+	standalone_txt.  Delete gdb_txt and standalone_txt on host
+	and target.  Spawn the binary on target.  Copy files from
+	target to host.
+
+2016-08-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20505
+	* gdb.base/vdso-warning.exp: Test core dumps too.  Use
+	with_test_prefix.  Factor out bits to ...
+	(test_no_vdso): ... this new procedure.
+
+2016-08-19  Carl Love  <cel@us.ibm.com>
+
+	* gdb.arch/altivec-regs.exp: Use standard_testfile instead of
+	maintaining separate logic for constructing the output path.
+	* gdb.arch/powerpc-d128-regs.exp: Likewise.
+	* gdb.arch/ppc-dfp.exp: Likewise.
+	* gdb.arch/ppc-fp.exp: Likewise.
+	* gdb.arch/vsx-regs.exp: Likewise.
+	* gdb.arch/altivec-abi.exp: Likewise, plus added local variable
+	binprefix for generating the additional binary files.
+
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/mi-trace-frame-collected.exp
+	(test_trace_frame_collected): On x32, expect two registers.
+
+2016-08-18  Carl Love  <cel@us.ibm.com>
+
+	* gdb.arch/powerpc-power.s: Add new Power9 instruction tests
+	and sync up the test with tests in gas/testsuite/gas/ppc.
+	* gdb.arch/powerpc-power.exp: Likewise.
+
+2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.multi/remove-inferiors.exp (test_remove_inferiors): Fix
+	expected error message.
+
+2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.multi/remove-inferiors.exp: New file.
+	* gdb.multi/remove-inferiors.c: New file.
+
+2016-08-12  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/signals-state-child.c (main): Remove "i" from fprintf's
+	argument list.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
+	* gdb.reverse/waitpid-reverse.exp: Add comment and remove
+	setup_kfails.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20418
+	* gdb.mi/new-ui-mi-sync.c, gdb.mi/new-ui-mi-sync.exp: New files.
+	* lib/mi-support.exp (mi_expect_interrupt): Remove anchors.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	PR mi/20431
+	* gdb.mi/mi-cmd-error.exp: New file.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18653
+	* gdb.base/signals-state-child.c: New file.
+	* gdb.base/signals-state-child.exp: New file.
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Add new pattern.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/bitfield-parent-optimized-out.exp: New file.
+
+2016-08-03  Tom Tromey  <tom@tromey.com>
+
+	PR python/18565:
+	* gdb.python/py-frame-inline.exp: Add Frame.function test.
+
+2016-08-01  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/process-dies-while-detaching.exp (do_test): Set
+	variable mode to "multi-process" if $multi_process is 1, otherwise
+	set it to "single-process".
+
+2016-08-01  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.cp/anon-struct.exp: Check is_aarch32_target.
+	* gdb.cp/cpexprs.exp: Likewise.
+	* gdb.cp/m-static.exp: Likewise.
+
 2016-07-26  Tom Tromey  <tom@tromey.com>
 
 	PR python/20190:

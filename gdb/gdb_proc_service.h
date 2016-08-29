@@ -21,6 +21,8 @@
 
 #include <sys/types.h>
 
+#include "gregset.h"
+
 #ifdef HAVE_PROC_SERVICE_H
 
 /* glibc's proc_service.h doesn't wrap itself with extern "C".  Need
@@ -59,8 +61,6 @@ EXTERN_C_POP
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>
 #endif
-
-#include "gregset.h"
 
 EXTERN_C_PUSH
 
@@ -124,7 +124,7 @@ extern pid_t ps_getpid (struct ps_prochandle *);
 /* Fetch the special per-thread address associated with the given LWP.
    This call is only used on a few platforms (most use a normal register).
    The meaning of the `int' parameter is machine-dependent.  */
-extern ps_err_e ps_get_thread_area (const struct ps_prochandle *,
+extern ps_err_e ps_get_thread_area (struct ps_prochandle *,
 				    lwpid_t, int, psaddr_t *);
 
 

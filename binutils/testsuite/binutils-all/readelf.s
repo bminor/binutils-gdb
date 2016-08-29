@@ -14,8 +14,8 @@ Section Headers:
 # MIPS targets put .reginfo, .mdebug, .MIPS.abiflags and .gnu.attributes here.
 # v850 targets put .call_table_data and .call_table_text here.
 #...
- +\[ .\] .shstrtab +STRTAB +00000000 0+.* 0+.* 00 .* +0 +0 +.
  +\[..\] .symtab +SYMTAB +00000000 0+.* 0+.* 10 +.. +.+ +4
  +\[..\] .strtab +STRTAB +00000000 0+.* 0+.* 00 .* +0 +0 +1
+ +\[..\] .shstrtab +STRTAB +00000000 0+.* 0+.* 00 .* +0 +0 +.
 Key to Flags:
 #...

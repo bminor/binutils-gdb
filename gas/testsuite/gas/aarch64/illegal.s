@@ -567,3 +567,21 @@ one_label:
 	mrs	x7, S1_1_C16_C6_6
 	mrs	x8, S2_2_C15_C16_7
 	mrs	x9, S3_3_C14_C15_8
+
+	fmov	s0, #-0.0
+	fmov	s0, #0x40000000 // OK
+	fmov	s0, #0x80000000
+	fmov	s0, #0xc0000000 // OK
+	fmov	d0, #-0.0
+	fmov	d0, #0x4000000000000000 // OK
+	fmov	d0, #0x8000000000000000
+	fmov	d0, #0xc000000000000000 // OK
+
+	fcmgt	v0.4s, v0.4s, #0.0 // OK
+	fcmgt	v0.4s, v0.4s, #0 // OK
+	fcmgt	v0.4s, v0.4s, #-0.0
+	fcmgt	v0.2d, v0.2d, #0.0 // OK
+	fcmgt	v0.2d, v0.2d, #0 // OK
+	fcmgt	v0.2d, v0.2d, #-0.0
+
+	// End (for errors during literal pool generation)

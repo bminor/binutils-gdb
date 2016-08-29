@@ -1004,7 +1004,8 @@ procfs_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 
 static int
 procfs_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
+			  struct bp_target_info *bp_tgt,
+			  enum remove_bp_reason reason)
 {
   return procfs_breakpoint (bp_tgt->placed_address, _DEBUG_BREAK_EXEC, -1);
 }

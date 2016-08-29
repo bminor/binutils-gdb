@@ -123,11 +123,11 @@ static const OPTION interrupt_options[] =
 
 /* Initialize the interrupts module.  */
 void
-interrupts_initialize (SIM_DESC sd, struct _sim_cpu *proc)
+interrupts_initialize (SIM_DESC sd, sim_cpu *cpu)
 {
-  struct interrupts *interrupts = &proc->cpu_interrupts;
+  struct interrupts *interrupts = &cpu->cpu_interrupts;
   
-  interrupts->cpu          = proc;
+  interrupts->cpu          = cpu;
 
   sim_add_option_table (sd, 0, interrupt_options);
 }

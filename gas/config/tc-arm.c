@@ -8691,6 +8691,14 @@ do_co_reg2c (void)
       constraint (Rn == REG_PC, BAD_PC);
     }
 
+  /* Only check the MRRC{2} variants.  */
+  if ((inst.instruction & 0x0FF00000) == 0x0C500000)
+    {
+       /* If Rd == Rn, error that the operation is
+	  unpredictable (example MRRC p3,#1,r1,r1,c4).  */
+       constraint (Rd == Rn, BAD_OVERLAP);
+    }
+
   inst.instruction |= inst.operands[0].reg << 8;
   inst.instruction |= inst.operands[1].imm << 4;
   inst.instruction |= Rd << 12;
@@ -14390,6 +14398,11 @@ static void
 do_vfp_nsyn_push (void)
 {
   nsyn_insert_sp ();
+
+  constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
+	      _("register list must contain at least 1 and at most 16 "
+		"registers"));
+
   if (inst.operands[1].issingle)
     do_vfp_nsyn_opcode ("fstmdbs");
   else
@@ -14400,6 +14413,11 @@ static void
 do_vfp_nsyn_pop (void)
 {
   nsyn_insert_sp ();
+
+  constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
+	      _("register list must contain at least 1 and at most 16 "
+		"registers"));
+
   if (inst.operands[1].issingle)
     do_vfp_nsyn_opcode ("fldmias");
   else
@@ -18780,24 +18798,33 @@ static const struct asm_psr psrs[] =
 /* Table of V7M psr names.  */
 static const struct asm_psr v7m_psrs[] =
 {
-  {"apsr",	  0 }, {"APSR",		0 },
-  {"iapsr",	  1 }, {"IAPSR",	1 },
-  {"eapsr",	  2 }, {"EAPSR",	2 },
-  {"psr",	  3 }, {"PSR",		3 },
-  {"xpsr",	  3 }, {"XPSR",		3 }, {"xPSR",	  3 },
-  {"ipsr",	  5 }, {"IPSR",		5 },
-  {"epsr",	  6 }, {"EPSR",		6 },
-  {"iepsr",	  7 }, {"IEPSR",	7 },
-  {"msp",	  8 }, {"MSP",		8 }, {"msp_s",     8 }, {"MSP_S",     8 },
-  {"psp",	  9 }, {"PSP",		9 }, {"psp_s",     9 }, {"PSP_S",     9 },
-  {"primask",	  16}, {"PRIMASK",	16},
-  {"basepri",	  17}, {"BASEPRI",	17},
-  {"basepri_max", 18}, {"BASEPRI_MAX",	18},
-  {"basepri_max", 18}, {"BASEPRI_MASK",	18}, /* Typo, preserved for backwards compatibility.  */
-  {"faultmask",	  19}, {"FAULTMASK",	19},
-  {"control",	  20}, {"CONTROL",	20},
-  {"msp_ns",	0x88}, {"MSP_NS",     0x88},
-  {"psp_ns",	0x89}, {"PSP_NS",     0x89}
+  {"apsr",	   0x0 }, {"APSR",	   0x0 },
+  {"iapsr",	   0x1 }, {"IAPSR",	   0x1 },
+  {"eapsr",	   0x2 }, {"EAPSR",	   0x2 },
+  {"psr",	   0x3 }, {"PSR",	   0x3 },
+  {"xpsr",	   0x3 }, {"XPSR",	   0x3 }, {"xPSR",	  3 },
+  {"ipsr",	   0x5 }, {"IPSR",	   0x5 },
+  {"epsr",	   0x6 }, {"EPSR",	   0x6 },
+  {"iepsr",	   0x7 }, {"IEPSR",	   0x7 },
+  {"msp",	   0x8 }, {"MSP",	   0x8 },
+  {"psp",	   0x9 }, {"PSP",	   0x9 },
+  {"msplim",	   0xa }, {"MSPLIM",	   0xa },
+  {"psplim",	   0xb }, {"PSPLIM",	   0xb },
+  {"primask",	   0x10}, {"PRIMASK",	   0x10},
+  {"basepri",	   0x11}, {"BASEPRI",	   0x11},
+  {"basepri_max",  0x12}, {"BASEPRI_MAX",  0x12},
+  {"basepri_max",  0x12}, {"BASEPRI_MASK", 0x12}, /* Typo, preserved for backwards compatibility.  */
+  {"faultmask",	   0x13}, {"FAULTMASK",	   0x13},
+  {"control",	   0x14}, {"CONTROL",	   0x14},
+  {"msp_ns",	   0x88}, {"MSP_NS",	   0x88},
+  {"psp_ns",	   0x89}, {"PSP_NS",	   0x89},
+  {"msplim_ns",	   0x8a}, {"MSPLIM_NS",	   0x8a},
+  {"psplim_ns",	   0x8b}, {"PSPLIM_NS",	   0x8b},
+  {"primask_ns",   0x90}, {"PRIMASK_NS",   0x90},
+  {"basepri_ns",   0x91}, {"BASEPRI_NS",   0x91},
+  {"faultmask_ns", 0x93}, {"FAULTMASK_NS", 0x93},
+  {"control_ns",   0x94}, {"CONTROL_NS",   0x94},
+  {"sp_ns",	   0x98}, {"SP_NS",	   0x98 }
 };
 
 /* Table of all shift-in-operand names.	 */

@@ -1,3 +1,76 @@
+2016-08-25  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	PR server/20491
+	* gdb_proc_service.h (ps_get_thread_area): Remove const from struct
+	ps_prochandle.
+	* linux-aarch64-low.c (ps_get_thread_area): Likewise.
+	* linux-arm-low.c (ps_get_thread_area): Likewise.
+	* linux-crisv32-low.c (ps_get_thread_area): Likewise.
+	* linux-m68k-low.c (ps_get_thread_area): Likewise.
+	* linux-mips-low.c (ps_get_thread_area): Likewise.
+	* linux-nios2-low.c (ps_get_thread_area): Likewise.
+	* linux-tic6x-low.c (ps_get_thread_area): Likewise.
+	* linux-x86-low.c (ps_get_thread_area): Likewise.
+	* linux-xtensa-low.c (ps_get_thread_area): Likewise.
+
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-x86-low.c (amd64_emit_call): Emit missing call opcode.
+
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-x86-low.c (amd64_install_fast_tracepoint_jump_pad): Fix
+	comment.  Use memcpy instead of casting through unsigned long.
+
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-amd64-ipa.c (alloc_jump_pad_buffer) [__ILP32__]: Try
+	allocating around 0x80000000.
+
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20415
+	* Makefile.in (x32-linux-ipa.o, x32-avx-linux-ipa.o)
+	(x32-avx512-linux-ipa.o): New rules.
+	* configure.ac (x86_64-*-linux*): New x32 check.
+	* configure.srv (ipa_x32_linux_regobj): New.
+	(x86_64-*-linux*): Use $ipa_x32_linux_regobj if building for x32.
+	* linux-amd64-ipa.c (get_ipa_tdesc) [__ILP32__]: Return x32
+	descriptions.
+	(initialize_low_tracepoint) [__ILP32__]: Initialize x32
+	descriptions.
+	* configure: Regenerate.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18653
+	* Makefile.in (OBS): Add signals-state-save-restore.o.
+	(signals-state-save-restore.o): New rule.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* linux-low.c: Include "signals-state-save-restore.h".
+	(linux_create_inferior): Call
+	restore_original_signals_state.
+	* server.c: Include "dispositions-save-restore.h".
+	(captured_main): Call save_original_signals_state.
+
+2016-08-05  Pedro Alves  <palves@redhat.com>
+
+	* configure: Regenerate.
+
+2016-08-04  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (regsets_fetch_inferior_registers): Check
+	errno is ESRCH or not.
+
+2016-08-02  Yao Qi  <yao.qi@linaro.org>
+
+	* thread-db.c (struct thread_db) <td_ta_event_getmsg_p>: Remove.
+	<td_ta_set_event_p, td_ta_event_addr_p>: Remove.
+	(thread_db_load_search): Update.
+	(try_thread_db_load_1): Don't look for td_ta_event_addr,
+	td_ta_set_event and td_ta_event_getmsg.
+
 2016-07-26  Pedro Alves  <palves@redhat.com>
 
 	PR server/20414

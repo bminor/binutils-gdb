@@ -240,7 +240,7 @@ m68hc11sio_port_event (struct hw *me,
 }
 
 
-void
+static void
 m68hc11sio_rx_poll (struct hw *me, void *data)
 {
   SIM_DESC sd;
@@ -313,7 +313,7 @@ m68hc11sio_rx_poll (struct hw *me, void *data)
 }
 
 
-void
+static void
 m68hc11sio_tx_poll (struct hw *me, void *data)
 {
   SIM_DESC sd;

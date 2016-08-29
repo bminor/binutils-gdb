@@ -357,6 +357,8 @@ if { $linux_gnu } {
     #
     # The third test checks that we do the same when linking the
     # result of the first link (with no other source files).
+    #
+    # We then repeat the same three tests for microMIPS stubs.
     run_ld_link_tests {
 	{"PIC and non-PIC test 1 (relocatable)" "-r -melf32btsmip" ""
 	 "-32 -EB -mips2" {pic-and-nonpic-1a.s pic-and-nonpic-1b.s}
@@ -375,6 +377,42 @@ if { $linux_gnu } {
 	 {{objdump -dr pic-and-nonpic-1.dd}
 	  {readelf --symbols pic-and-nonpic-1.nd}}
 	 "pic-and-nonpic-1-static2.o"}
+	{"PIC and non-PIC test 1, microMIPS (relocatable)"
+	 "-r -melf32btsmip" ""
+	 "-32 -EB -mips2"
+	 {pic-and-nonpic-1a-micromips.s pic-and-nonpic-1b-micromips.s}
+	 {{objdump -dr pic-and-nonpic-1-micromips-rel.dd}
+	  {readelf --symbols pic-and-nonpic-1-micromips-rel.nd}}
+	 "pic-and-nonpic-1-micromips-rel.o"}
+	{"PIC and non-PIC test 1, microMIPS (static 1)"
+	 "-melf32btsmip -Tpic-and-nonpic-1.ld" ""
+	 "-32 -EB -mips2"
+	 {pic-and-nonpic-1a-micromips.s pic-and-nonpic-1b-micromips.s}
+	 {{objdump -dr pic-and-nonpic-1-micromips.dd}
+	  {readelf --symbols pic-and-nonpic-1-micromips.nd}}
+	 "pic-and-nonpic-1-micromips-static1.o"}
+    }
+    # The final executable produced with the following test is supposed
+    # to be the same as one produced with the preceding test, however
+    # as noted in PR ld/20453 it is not.  Consequently output from
+    # `objdump -dr' is not the same either.  Expect:
+    #
+    #	regexp_diff match failure
+    #	regexp "^   4103c:	f001 0415 	jalx	41054 <f3>$"
+    #	line   "   4103c:	f001 0400 	jalx	41000 <.pic.f3>"
+    #
+    # from the test below due to this problem.
+    setup_kfail "mips*-*-*" "ld/20453"
+    # The final check below should be folded into the `run_ld_link_tests'
+    # call above once `setup_kfail' has been removed.
+    run_ld_link_tests {
+	{"PIC and non-PIC test 1, microMIPS (static 2)"
+	 "-melf32btsmip -Tpic-and-nonpic-1.ld \
+	  tmpdir/pic-and-nonpic-1-micromips-rel.o" ""
+	 "" {}
+	 {{objdump -dr pic-and-nonpic-1-micromips.dd}
+	  {readelf --symbols pic-and-nonpic-1-micromips.nd}}
+	 "pic-and-nonpic-1-micromips-static2.o"}
     }
     run_dump_test "pic-and-nonpic-2"
     run_ld_link_tests {
@@ -923,9 +961,6 @@ foreach { abi } $abis {
             [list ehdr_start-${suff}.s] \
             [list "readelf -s ehdr_start-1.nd"] \
             "ehdr_start-1-${abi}"]]
-    if [regexp "(?:n32|n64)" "$abi"] {
-	setup_kfail "mips*-*-*" "ld/15428"
-    }
     run_ld_link_tests [list \
         [list \
             "MIPS magic __ehdr_start symbol test 2 ($abi)" \

@@ -903,6 +903,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
 	common/errors.c common/common-debug.c common/common-exceptions.c \
 	common/btrace-common.c common/fileio.c common/common-regcache.c \
+	common/signals-state-save-restore.c \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -995,7 +996,8 @@ common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
 common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h nat/amd64-linux-siginfo.h\
 nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h arch/aarch64-insn.h \
-tid-parse.h ser-event.h
+tid-parse.h ser-event.h \
+common/signals-state-save-restore.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1055,6 +1057,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	build-id.o buildsym.o \
 	findcmd.o \
 	std-regs.o \
+	signals-state-save-restore.o \
 	signals.o \
 	exec.o reverse.o \
 	bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
@@ -2302,6 +2305,10 @@ fileio.o: ${srcdir}/common/fileio.c
 
 common-regcache.o: ${srcdir}/common/common-regcache.c
 	$(COMPILE) $(srcdir)/common/common-regcache.c
+	$(POSTCOMPILE)
+
+signals-state-save-restore.o: $(srcdir)/common/signals-state-save-restore.c
+	$(COMPILE) $(srcdir)/common/signals-state-save-restore.c
 	$(POSTCOMPILE)
 
 #

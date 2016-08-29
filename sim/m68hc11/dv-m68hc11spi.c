@@ -156,7 +156,7 @@ m68hc11spi_port_event (struct hw *me,
 {
   SIM_DESC sd;
   struct m68hc11spi *controller;
-  sim_cpu* cpu;
+  sim_cpu *cpu;
   unsigned8 val;
   
   controller = hw_data (me);
@@ -234,7 +234,7 @@ set_bit_port (struct hw *me, sim_cpu *cpu, int port, int mask, int value)
 #define SPI_START_BIT  1
 #define SPI_MIDDLE_BIT 2
 
-void
+static void
 m68hc11spi_clock (struct hw *me, void *data)
 {
   SIM_DESC sd;

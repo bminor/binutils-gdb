@@ -486,15 +486,9 @@ target_terminal_inferior (void)
   if (ui->prompt_state != PROMPT_BLOCKED)
     return;
 
-  /* Always delete the current UI's input file handler, regardless of
-     terminal_state, because terminal_state is only valid for the main
-     UI.  */
-  delete_file_handler (ui->input_fd);
-
   /* Since we always run the inferior in the main console (unless "set
      inferior-tty" is in effect), when some UI other than the main one
      calls target_terminal_inferior/target_terminal_inferior, then we
-     only register/unregister the UI's input from the event loop, but
      leave the main UI's terminal settings as is.  */
   if (ui != main_ui)
     return;
@@ -519,11 +513,6 @@ void
 target_terminal_ours (void)
 {
   struct ui *ui = current_ui;
-
-  /* Always add the current UI's input file handler, regardless of
-     terminal_state, because terminal_state is only valid for the main
-     UI.  */
-  add_file_handler (ui->input_fd, stdin_event_handler, ui);
 
   /* See target_terminal_inferior.  */
   if (ui != main_ui)
@@ -2124,7 +2113,8 @@ target_insert_breakpoint (struct gdbarch *gdbarch,
 
 int
 target_remove_breakpoint (struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
+			  struct bp_target_info *bp_tgt,
+			  enum remove_bp_reason reason)
 {
   /* This is kind of a weird case to handle, but the permission might
      have been changed after breakpoints were inserted - in which case
@@ -2137,7 +2127,7 @@ target_remove_breakpoint (struct gdbarch *gdbarch,
     }
 
   return current_target.to_remove_breakpoint (&current_target,
-					      gdbarch, bp_tgt);
+					      gdbarch, bp_tgt, reason);
 }
 
 static void

@@ -907,9 +907,27 @@ extern bfd_boolean bfd_elf32_arm_allocate_interworking_sections
 extern bfd_boolean bfd_elf32_arm_process_before_allocation
   (bfd *, struct bfd_link_info *);
 
-void bfd_elf32_arm_set_target_relocs
-  (bfd *, struct bfd_link_info *, int, char *, int, int, bfd_arm_vfp11_fix,
-   bfd_arm_stm32l4xx_fix, int, int, int, int, int);
+struct elf32_arm_params {
+  char *thumb_entry_symbol;
+  int byteswap_code;
+  int target1_is_rel;
+  char * target2_type;
+  int fix_v4bx;
+  int use_blx;
+  bfd_arm_vfp11_fix vfp11_denorm_fix;
+  bfd_arm_stm32l4xx_fix stm32l4xx_fix;
+  int no_enum_size_warning;
+  int no_wchar_size_warning;
+  int pic_veneer;
+  int fix_cortex_a8;
+  int fix_arm1176;
+  int merge_exidx_entries;
+  int cmse_implib;
+  bfd *in_implib_bfd;
+};
+
+void bfd_elf32_arm_set_target_params
+  (bfd *, struct bfd_link_info *, struct elf32_arm_params *);
 
 extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
   (bfd *, struct bfd_link_info *);
@@ -3713,13 +3731,14 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_AC_SECTOFF_U8,
   BFD_RELOC_AC_SECTOFF_U8_1,
   BFD_RELOC_AC_SECTOFF_U8_2,
-  BFD_RELOC_AC_SECTFOFF_S9,
-  BFD_RELOC_AC_SECTFOFF_S9_1,
-  BFD_RELOC_AC_SECTFOFF_S9_2,
+  BFD_RELOC_AC_SECTOFF_S9,
+  BFD_RELOC_AC_SECTOFF_S9_1,
+  BFD_RELOC_AC_SECTOFF_S9_2,
   BFD_RELOC_ARC_SECTOFF_ME_1,
   BFD_RELOC_ARC_SECTOFF_ME_2,
   BFD_RELOC_ARC_SECTOFF_1,
   BFD_RELOC_ARC_SECTOFF_2,
+  BFD_RELOC_ARC_SDA_12,
   BFD_RELOC_ARC_SDA16_ST2,
   BFD_RELOC_ARC_32_PCREL,
   BFD_RELOC_ARC_PC32,

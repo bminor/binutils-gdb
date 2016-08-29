@@ -1,3 +1,344 @@
+2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/19784 tests only
+	if ifunc attribute works.
+
+2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14961
+	PR ld/20515
+	* testsuite/ld-i386/i386.exp: Run pr20515.
+	* testsuite/ld-i386/pr20515.d: New file.
+	* testsuite/ld-i386/pr20515.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-14a.s: Use R_386_PLT32 to call IFUNC
+	function.
+	* testsuite/ld-ifunc/ifunc-14c.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-i386.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-local-i386.s: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Move PR ld/19784 tests to ...
+	* testsuite/ld-x86-64/x86-64.exp: Here.
+	* testsuite/ld-ifunc/pr19784a.c: Moved to ...
+	* testsuite/ld-x86-64/pr19784a.c: Here.
+	* testsuite/ld-ifunc/pr19784b.c: Moved to ...
+	* testsuite/ld-x86-64/pr19784b.c: Here.
+	* testsuite/ld-ifunc/pr19784c.c: Moved to ...
+	* testsuite/ld-x86-64/pr19784c.c: Here.
+
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* emultempl/armelf.em (params): New static variable.
+	(thumb_entry_symbol, byteswap_code, target1_is_rel, target2_type,
+	fix_v4bx, use_blx, vfp11_denorm_fix, stm32l4xx_fix, fix_cortex_a8,
+	no_enum_size_warning, no_wchar_size_warning, pic_veneer,
+	merge_exidx_entries, fix_arm1176, cmse_implib): move as part of the
+	above new structure.
+	(arm_elf_before_allocation): Access static variable from the params
+	structure.
+	(gld${EMULATION_NAME}_finish): Likewise.
+	(arm_elf_create_output_section_statements): Likewise and pass the
+	address of that structure to bfd_elf32_arm_set_target_relocs instead
+	of the static variables.
+	(PARSE_AND_LIST_ARGS_CASES): Access static variable from the params
+	structure.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* ld/testsuite/ld-arc/tls_gd-01.s: Added a testcase for this patch.
+	* ld/testsuite/ld-arc/tls_gd-01.d: Likewise.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-arc/tls_ie-01.s: Added to verify associated fix.
+	* testsuite/ld-arc/tls_ie-01.d: Likewise
+
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* emultempl/armelf.em (in_implib_filename): Declare and initialize new
+	variable.
+	(arm_elf_create_output_section_statements): Open import input library
+	file for writing and pass resulting in_implib_bfd to
+	bfd_elf32_arm_set_target_relocs.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_IN_IMPLIB option.
+	(PARSE_AND_LIST_LONGOPTS): Define --in-implib option.
+	(PARSE_AND_LIST_OPTIONS): Add help message for --in-implib option.
+	(PARSE_AND_LIST_ARGS_CASES): Handle new OPTION_IN_IMPLIB case.
+	* ld.texinfo (--cmse-implib): Update to mention --in-implib.
+	(--in-implib): Document new option.
+	* NEWS: Likewise.
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway import library generation): add --defsym VER=1 to gas
+	CLI.
+	(Secure gateway import library generation: errors): Likewise.
+	(Input secure gateway import library): New test.
+	(Input secure gateway import library: no output import library):
+	Likewise.
+	(Input secure gateway import library: not an SG input import library):
+	Likewise.
+	(Input secure gateway import library: earlier stub section base):
+	Likewise.
+	(Input secure gateway import library: later stub section base):
+	Likewise.
+	(Input secure gateway import library: veneer comeback): Likewise.
+	(Input secure gateway import library: entry function change):
+	Likewise.
+	* testsuite/ld-arm/cmse-implib.s: Add input import library testing.
+	* testsuite/ld-arm/cmse-implib.rd: Update accordingly.
+	* testsuite/ld-arm/cmse-new-implib.out: New file.
+	* testsuite/ld-arm/cmse-new-implib.rd: Likewise.
+	* testsuite/ld-arm/cmse-new-implib-no-output.out: Likewise.
+	* testsuite/ld-arm/cmse-new-implib-not-sg-in-implib.out: Likewise.
+	* testsuite/ld-arm/cmse-new-earlier-later-implib.out: Likewise.
+	* testsuite/ld-arm/cmse-new-comeback-implib.rd: Likewise.
+	* testsuite/ld-arm/cmse-new-wrong-implib.out: Likewise.
+
+2016-08-25  Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt (powerpc*-*-linux* et al): Rewrite, adding LE
+	support for BE.  First output all target endian configury
+	values, then opposite endian.  Handle more tooldirs.  Fix
+	bogus matches with strings in MANUF-OS part of target triple.
+
+2016-08-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (run_cc_link_tests): Don't fail tests
+	twice.
+
+2016-08-19  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/aarch64elf.em (before_parse): Initialise the relro
+	field in the link_info structure.
+	* emultempl/armelf.em (before_parse): Likewise.
+	* emultempl/linux.em (before_parse): Likewise.
+	* emultempl/scoreelf.em (before_parse): Likewise.
+
+	* testsuite/ld-alpha/tlsbin.rd: Adjust expected ordering of sections.
+	* testsuite/ld-alpha/tlsbinr.rd: Likewise.
+	* testsuite/ld-alpha/tlspic.rd: Likewise.
+	* testsuite/ld-cris/libdso-2.d: Likewise.
+	* testsuite/ld-i386/nogot1.d: Likewise.
+	* testsuite/ld-i386/pr12718.d: Likewise.
+	* testsuite/ld-i386/pr12921.d: Likewise.
+	* testsuite/ld-i386/tlsbin-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlsbin.rd: Likewise.
+	* testsuite/ld-i386/tlsbin2-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlsbin2.rd: Likewise.
+	* testsuite/ld-i386/tlsbindesc-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlsbindesc.rd: Likewise.
+	* testsuite/ld-i386/tlsdesc-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlsdesc.rd: Likewise.
+	* testsuite/ld-i386/tlsgdesc-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlsgdesc.rd: Likewise.
+	* testsuite/ld-i386/tlsnopic-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlsnopic.rd: Likewise.
+	* testsuite/ld-i386/tlspic-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlspic.rd: Likewise.
+	* testsuite/ld-i386/tlspic2-nacl.rd: Likewise.
+	* testsuite/ld-i386/tlspic2.rd: Likewise.
+	* testsuite/ld-ia64/tlsbin.rd: Likewise.
+	* testsuite/ld-ia64/tlspic.rd: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-10.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-50.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-60.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-70.d: Likewise.
+	* testsuite/ld-mmix/bspec1.d: Likewise.
+	* testsuite/ld-mmix/bspec2.d: Likewise.
+	* testsuite/ld-mmix/local1.d: Likewise.
+	* testsuite/ld-mmix/local3.d: Likewise.
+	* testsuite/ld-mmix/local5.d: Likewise.
+	* testsuite/ld-mmix/local7.d: Likewise.
+	* testsuite/ld-mmix/undef-3.d: Likewise.
+	* testsuite/ld-powerpc/tlsexe.r: Likewise.
+	* testsuite/ld-powerpc/tlsexe32.r: Likewise.
+	* testsuite/ld-powerpc/tlsexetoc.r: Likewise.
+	* testsuite/ld-powerpc/tlsso.r: Likewise.
+	* testsuite/ld-powerpc/tlsso32.r: Likewise.
+	* testsuite/ld-powerpc/tlstocso.r: Likewise.
+	* testsuite/ld-s390/tlsbin.rd: Likewise.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+	* testsuite/ld-s390/tlspic.rd: Likewise.
+	* testsuite/ld-s390/tlspic_64.rd: Likewise.
+	* testsuite/ld-sh/sh64/crange1.rd: Likewise.
+	* testsuite/ld-sh/sh64/crange2.rd: Likewise.
+	* testsuite/ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* testsuite/ld-sh/sh64/crange3-media.rd: Likewise.
+	* testsuite/ld-sh/sh64/crange3.rd: Likewise.
+	* testsuite/ld-sh/sh64/crangerel1.rd: Likewise.
+	* testsuite/ld-sh/sh64/crangerel2.rd: Likewise.
+	* testsuite/ld-sh/tlsbin-2.d: Likewise.
+	* testsuite/ld-sh/tlspic-2.d: Likewise.
+	* testsuite/ld-sparc/gotop32.rd: Likewise.
+	* testsuite/ld-sparc/gotop64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunnopic32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunnopic64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunpic32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunpic64.rd: Likewise.
+	* testsuite/ld-tic6x/common.d: Likewise.
+	* testsuite/ld-tic6x/shlib-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1rb.rd: Likewise.
+	* testsuite/ld-x86-64/ilp32-4-nacl.d: Likewise.
+	* testsuite/ld-x86-64/ilp32-4.d: Likewise.
+	* testsuite/ld-x86-64/nogot1.d: Likewise.
+	* testsuite/ld-x86-64/pr12718.d: Likewise.
+	* testsuite/ld-x86-64/pr12921.d: Likewise.
+	* testsuite/ld-x86-64/split-by-file-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/split-by-file.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbindesc-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbindesc.rd: Likewise.
+	* testsuite/ld-x86-64/tlsdesc-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsdesc.rd: Likewise.
+	* testsuite/ld-x86-64/tlsgdesc-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsgdesc.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic2-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.rd: Likewise.
+	* testsuite/ld-xtensa/tlsbin.rd: Likewise.
+	* testsuite/ld-xtensa/tlspic.rd: Likewise.
+
+2016-08-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-undefined/weak-undef.exp: Use unsupported not
+	unresolved.
+
+2016-08-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-tic6x/shlib-1.rd: Correct expected .dynsym sh_info.
+	* testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1rb.rd: Likewise.
+
+2016-08-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-undefined/weak-fundef.s: New.
+	* testsuite/ld-undefined/weak-undef.t: Don't specify filename.
+	* testsuite/ld-undefined/weak-undef.exp: Run new tests.  Rearrange
+	much of old code.  Use is_elf_format to select targets.
+
+2016-08-11  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20436
+	* testsuite/lib/ld-lib.exp (at_least_gcc_version): Don't ignore
+	remote_exec status.
+	(check_gcc_plugin_enabled): Likewise.  Revert previous patch.
+
+2016-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20436
+	* testsuite/lib/ld-lib.exp (check_gcc_plugin_enabled): When not
+	testing remotely, check to see if target compiler is installed
+	before trying to run it.
+
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/15428
+	* testsuite/ld-mips-elf/mips-elf.exp: Un-KFAIL `__ehdr_start'
+	test 2.
+
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/pic-and-nonpic-1-micromips-rel.dd: New
+	test.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1-micromips-rel.nd: New
+	test.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1-micromips.dd: New test.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1-micromips.nd: New test.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1a-micromips.s: New test
+	source.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1b-micromips.s: New test
+	source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2016-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20436
+	* testsuite/lib/ld-lib.exp (check_gcc_plugin_enabled): New
+	proc.
+	(check_lto_available): Return 0 if check_gcc_plugin_enabled
+	returns 0.
+	(check_lto_fat_available): Likewise.
+	(check_lto_shared_available): Likewise.
+
+2016-08-09  Roland McGrath  <roland@hack.frob.com>
+
+	* emulparams/armelf.sh (GENERATE_PIE_SCRIPT): Set to yes.
+
+2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* emultempl/armelf.em (cmse_implib): Declare and define this new
+	static variable.
+	(arm_elf_create_output_section_statements): Add new cmse_implib
+	parameter.
+	(OPTION_CMSE_IMPLIB): Define macro.
+	(PARSE_AND_LIST_LONGOPTS): Add entry for new --cmse-implib switch.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_CMSE_IMPLIB case.
+	* ld.texinfo (--cmse-implib): Document new option.
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway import library generation): New test.
+	(Secure gateway import library generation: errors): Likewise.
+	* testsuite/ld-arm/cmse-implib.s: New file.
+	* testsuite/ld-arm/cmse-implib-errors.out: Likewise.
+	* testsuite/ld-arm/cmse-implib.rd: Likewise.
+
+2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld.texinfo (Placement of SG veneers): New concept entry.
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway veneers: no .gnu.sgstubs section): New test.
+	(Secure gateway veneers: wrong entry functions): Likewise.
+	(Secure gateway veneers (ARMv8-M Baseline)): Likewise.
+	(Secure gateway veneers (ARMv8-M Mainline)): Likewise.
+	* testsuite/ld-arm/cmse-veneers.s: New file.
+	* testsuite/ld-arm/cmse-veneers.d: Likewise.
+	* testsuite/ld-arm/cmse-veneers.rd: Likewise.
+	* testsuite/ld-arm/cmse-veneers.sd: Likewise.
+	* testsuite/ld-arm/cmse-veneers-no-gnu_sgstubs.out: Likewise.
+	* testsuite/ld-arm/cmse-veneers-wrong-entryfct.out: Likewise.
+
+2016-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/17739
+	* emulparams/shelf.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): Define with
+	valye 'yes'.
+	* emulparams/shelf32.sh: Likewise.
+	* emulparams/shelf32.sh: Likewise.
+	* emulparams/shelf_nto.sh: Likewise.
+	* emulparams/shelf_nto.sh: Likewise.
+	* emulparams/shelf_vxworks.sh: Likewise.
+	* emulparams/shelf_vxworks.sh: Likewise.
+	* emulparams/shlelf32_linux.sh: Likewise.
+	* emulparams/shlelf32_linux.sh: Likewise.
+	* emulparams/shlelf_linux.sh: Likewise.
+	* emulparams/shlelf_linux.sh: Likewise.
+	* emulparams/shlelf_nto.sh: Likewise.
+	* emulparams/shlelf_nto.sh: Likewise.
+
 2016-07-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/micromips-branch-absolute.d: Update
@@ -1529,6 +1870,13 @@
 2016-04-25  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* scripttempl/avrtiny.sc (.text): Do not set LMA to zero.
+
+2016-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/lib/ld-lib.exp (check_lto_available): Return 1 on
+	Linux with GCC 4.9 or newer.
+	(check_lto_fat_available): Likewise.
+	(check_lto_shared_available): Likewise.
 
 2016-04-21  Nick Clifton  <nickc@redhat.com>
 

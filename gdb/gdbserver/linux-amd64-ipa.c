@@ -174,6 +174,19 @@ supply_static_tracepoint_registers (struct regcache *regcache,
 const struct target_desc *
 get_ipa_tdesc (int idx)
 {
+#if defined __ILP32__
+  switch (idx)
+    {
+    case X86_TDESC_SSE:
+      return tdesc_x32_linux;
+    case X86_TDESC_AVX:
+      return tdesc_x32_avx_linux;
+    case X86_TDESC_AVX512:
+      return tdesc_x32_avx512_linux;
+    default:
+      break;
+    }
+#else
   switch (idx)
     {
     case X86_TDESC_SSE:
@@ -186,21 +199,64 @@ get_ipa_tdesc (int idx)
       return tdesc_amd64_avx_mpx_linux;
     case X86_TDESC_AVX512:
       return tdesc_amd64_avx512_linux;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      "unknown ipa tdesc index: %d", idx);
-      return tdesc_amd64_linux;
     }
+#endif
+
+  internal_error (__FILE__, __LINE__,
+		  "unknown ipa tdesc index: %d", idx);
 }
 
-/* Allocate buffer for the jump pads.  Since we're using 32-bit jumps
-   to reach them, and the executable is at low addresses, MAP_32BIT
-   works just fine.  Shared libraries, being allocated at the top,
-   are unfortunately out of luck.  */
+/* Allocate buffer for the jump pads.  The branch instruction has a
+   reach of +/- 31-bit, and the executable is loaded at low addresses.
+
+   64-bit: Use MAP_32BIT to allocate in the first 2GB.  Shared
+   libraries, being allocated at the top, are unfortunately out of
+   luck.
+
+   x32: Since MAP_32BIT is 64-bit only, do the placement manually.
+   Try allocating at '0x80000000 - SIZE' initially, decreasing until
+   we hit a free area.  This ensures the executable is fully covered,
+   and is as close as possible to the shared libraries, which are
+   usually mapped at the top of the first 4GB of the address space.
+*/
 
 void *
 alloc_jump_pad_buffer (size_t size)
 {
+#if __ILP32__
+  uintptr_t addr;
+  int pagesize;
+
+  pagesize = sysconf (_SC_PAGE_SIZE);
+  if (pagesize == -1)
+    perror_with_name ("sysconf");
+
+  addr = 0x80000000 - size;
+
+  /* size should already be page-aligned, but this can't hurt.  */
+  addr &= ~(pagesize - 1);
+
+  /* Search for a free area.  If we hit 0, we're out of luck.  */
+  for (; addr; addr -= pagesize)
+    {
+      void *res;
+
+      /* No MAP_FIXED - we don't want to zap someone's mapping.  */
+      res = mmap ((void *) addr, size,
+		  PROT_READ | PROT_WRITE | PROT_EXEC,
+		  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+      /* If we got what we wanted, return.  */
+      if ((uintptr_t) res == addr)
+	return res;
+
+      /* If we got a mapping, but at a wrong address, undo it.  */
+      if (res != MAP_FAILED)
+	munmap (res, size);
+    }
+
+  return NULL;
+#else
   void *res = mmap (NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
 		    MAP_PRIVATE | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
 
@@ -208,14 +264,21 @@ alloc_jump_pad_buffer (size_t size)
     return NULL;
 
   return res;
+#endif
 }
 
 void
 initialize_low_tracepoint (void)
 {
+#if defined __ILP32__
+  init_registers_x32_linux ();
+  init_registers_x32_avx_linux ();
+  init_registers_x32_avx512_linux ();
+#else
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();
   init_registers_amd64_avx_mpx_linux ();
   init_registers_amd64_mpx_linux ();
   init_registers_amd64_avx512_linux ();
+#endif
 }

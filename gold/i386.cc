@@ -2794,8 +2794,11 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 	   && r_type != elfcpp::R_386_PC32)
 	  || gsym == NULL
 	  || strcmp(gsym->name(), "___tls_get_addr") != 0)
-	gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
-			       _("missing expected TLS relocation"));
+	{
+	  gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+				 _("missing expected TLS relocation"));
+	  this->skip_call_tls_get_addr_ = false;
+	}
       else
 	{
 	  this->skip_call_tls_get_addr_ = false;

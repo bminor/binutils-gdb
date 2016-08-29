@@ -4,7 +4,7 @@ Section Headers:
   \[Nr\] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
   \[ 0\]                   NULL            00000000 000000 000000 00      0   0  0
   \[ 1\] \.hash             HASH            00008000 001000 000048 04   A  2   0  4
-  \[ 2\] \.dynsym           DYNSYM          00008048 001048 0000d0 10   A  3   6  4
+  \[ 2\] \.dynsym           DYNSYM          00008048 001048 0000d0 10   A  3   7  4
   \[ 3\] \.dynstr           STRTAB          00008118 001118 000025 00   A  0   0  1
   \[ 4\] \.rela\.text        RELA            00008140 001140 00000c 0c  AI  2  10  4
   \[ 5\] \.rela\.got         RELA            0000814c 00114c 000024 0c  AI  2  11  4
@@ -17,9 +17,9 @@ Section Headers:
   \[12\] \.neardata         PROGBITS        10000128 002128 000008 00  WA  0   0  4
   \[13\] \.bss              NOBITS          10000130 002130 000004 00  WA  0   0  4
   \[14\] \.c6xabi\.attributes C6000_ATTRIBUTES 00000000 002130 000019 00      0   0  1
-  \[15\] \.shstrtab         STRTAB          00000000 [0-9a-f]+ 000080 00      0   0  1
-  \[16\] \.symtab           SYMTAB          00000000 [0-9a-f]+ [0-9a-f]+ 10     17  [0-9]+  4
-  \[17\] \.strtab           STRTAB          00000000 [0-9a-f]+ [0-9a-f]+ 00      0   0  1
+  \[15\] \.symtab           SYMTAB          00000000 [0-9a-f]+ [0-9a-f]+ 10     16  [0-9]+  4
+  \[16\] \.strtab           STRTAB          00000000 [0-9a-f]+ [0-9a-f]+ 00      0   0  1
+  \[17\] \.shstrtab         STRTAB          00000000 [0-9a-f]+ 000080 00      0   0  1
 Key to Flags:
 #...
 

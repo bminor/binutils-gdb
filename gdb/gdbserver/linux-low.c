@@ -22,7 +22,7 @@
 #include "agent.h"
 #include "tdesc.h"
 #include "rsp-low.h"
-
+#include "signals-state-save-restore.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
 #include "gdb_wait.h"
@@ -974,6 +974,8 @@ linux_create_inferior (char *program, char **allargs)
 	      /* Errors ignored.  */;
 	    }
 	}
+
+      restore_original_signals_state ();
 
       execv (program, allargs);
       if (errno == ENOENT)
@@ -5404,6 +5406,12 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 	      /* ENODATA may be returned if the regset is currently
 		 not "active".  This can happen in normal operation,
 		 so suppress the warning in this case.  */
+	    }
+	  else if (errno == ESRCH)
+	    {
+	      /* At this point, ESRCH should mean the process is
+		 already gone, in which case we simply ignore attempts
+		 to read its registers.  */
 	    }
 	  else
 	    {

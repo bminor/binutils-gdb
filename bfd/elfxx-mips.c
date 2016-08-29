@@ -1578,12 +1578,13 @@ mips_elf_create_stub_symbol (struct bfd_link_info *info,
 			     const char *prefix, asection *s, bfd_vma value,
 			     bfd_vma size)
 {
+  bfd_boolean micromips_p = ELF_ST_IS_MICROMIPS (h->root.other);
   struct bfd_link_hash_entry *bh;
   struct elf_link_hash_entry *elfh;
   char *name;
   bfd_boolean res;
 
-  if (ELF_ST_IS_MICROMIPS (h->root.other))
+  if (micromips_p)
     value |= 1;
 
   /* Create a new symbol.  */
@@ -1601,6 +1602,8 @@ mips_elf_create_stub_symbol (struct bfd_link_info *info,
   elfh->type = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
   elfh->size = size;
   elfh->forced_local = 1;
+  if (micromips_p)
+    elfh->other = ELF_ST_SET_MICROMIPS (elfh->other);
   return TRUE;
 }
 
@@ -1961,6 +1964,8 @@ mips_elf_add_la25_stub (struct bfd_link_info *info,
   /* Prefer to use LUI/ADDIU stubs if the function is at the beginning
      of the section and if we would need no more than 2 nops.  */
   value = mips_elf_get_la25_target (stub, &s);
+  if (ELF_ST_IS_MICROMIPS (stub->h->root.other))
+    value &= ~1;
   use_trampoline_p = (value != 0 || s->alignment_power > 4);
 
   h->la25_stub = stub;
@@ -5577,9 +5582,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   else if (h != NULL && h->la25_stub
 	   && mips_elf_relocation_needs_la25_stub (input_bfd, r_type,
 						   target_is_16_bit_code_p))
-    symbol = (h->la25_stub->stub_section->output_section->vma
-	      + h->la25_stub->stub_section->output_offset
-	      + h->la25_stub->offset);
+    {
+	symbol = (h->la25_stub->stub_section->output_section->vma
+		  + h->la25_stub->stub_section->output_offset
+		  + h->la25_stub->offset);
+	if (ELF_ST_IS_MICROMIPS (h->root.other))
+	  symbol |= 1;
+    }
   /* For direct MIPS16 and microMIPS calls make sure the compressed PLT
      entry is used if a standard PLT entry has also been made.  In this
      case the symbol will have been set by mips_elf_set_plt_sym_value

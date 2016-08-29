@@ -6639,6 +6639,80 @@ Arm_relobj<big_endian>::do_relocate_sections(
 	      section_address,
 	      section_size);
 	}
+	// BE8 swapping
+	if (parameters->options().be8())
+	  {
+	    section_size_type  span_start, span_end;
+	    elfcpp::Shdr<32, big_endian>
+	      shdr(pshdrs + i * elfcpp::Elf_sizes<32>::shdr_size);
+	    Mapping_symbol_position section_start(i, 0);
+	    typename Mapping_symbols_info::const_iterator p =
+	      this->mapping_symbols_info_.lower_bound(section_start);
+	    unsigned char* view = (*pviews)[i].view;
+	    Arm_address view_address = (*pviews)[i].address;
+	    section_size_type view_size = (*pviews)[i].view_size;
+	    while (p != this->mapping_symbols_info_.end()
+		   && p->first.first == i)
+	      {
+		typename Mapping_symbols_info::const_iterator next =
+		  this->mapping_symbols_info_.upper_bound(p->first);
+
+		// Only swap arm or thumb code.
+		if ((p->second == 'a') || (p->second == 't'))
+		  {
+		    Output_section* os = this->output_section(i);
+		    gold_assert(os != NULL);
+		    Arm_address section_address =
+		      this->simple_input_section_output_address(i, os);
+		    span_start = convert_to_section_size_type(p->first.second);
+		    if (next != this->mapping_symbols_info_.end()
+		        && next->first.first == i)
+		      span_end =
+			convert_to_section_size_type(next->first.second);
+		    else
+		      span_end =
+			convert_to_section_size_type(shdr.get_sh_size());
+		    unsigned char* section_view =
+		      view + (section_address - view_address);
+		    uint64_t section_size = this->section_size(i);
+
+		    gold_assert(section_address >= view_address
+				&& ((section_address + section_size)
+				    <= (view_address + view_size)));
+
+		    // Set Output view for swapping
+		    unsigned char *oview = section_view + span_start;
+		    unsigned int index = 0;
+		    if (p->second == 'a')
+		      {
+			while (index + 3 < (span_end - span_start))
+			  {
+			    typedef typename elfcpp::Swap<32, big_endian>
+						     ::Valtype Valtype;
+			    Valtype* wv =
+			      reinterpret_cast<Valtype*>(oview+index);
+			    uint32_t val = elfcpp::Swap<32, false>::readval(wv);
+			    elfcpp::Swap<32, true>::writeval(wv, val);
+			    index += 4;
+			  }
+		      }
+		    else if (p->second == 't')
+		      {
+		        while (index + 1 < (span_end - span_start))
+			  {
+			    typedef typename elfcpp::Swap<16, big_endian>
+						     ::Valtype Valtype;
+			    Valtype* wv =
+			      reinterpret_cast<Valtype*>(oview+index);
+			    uint16_t val = elfcpp::Swap<16, false>::readval(wv);
+			    elfcpp::Swap<16, true>::writeval(wv, val);
+			    index += 2;
+			   }
+		      }
+	          }
+	        p = next;
+	      }
+	  }
     }
 }
 
@@ -7785,7 +7859,18 @@ Output_data_plt_arm_standard<big_endian>::do_fill_first_plt_entry(
   const size_t num_first_plt_words = (sizeof(first_plt_entry)
 				      / sizeof(first_plt_entry[0]));
   for (size_t i = 0; i < num_first_plt_words - 1; i++)
-    elfcpp::Swap<32, big_endian>::writeval(pov + i * 4, first_plt_entry[i]);
+    {
+      if (parameters->options().be8())
+	{
+	  elfcpp::Swap<32, false>::writeval(pov + i * 4,
+					    first_plt_entry[i]);
+	}
+      else
+	{
+	  elfcpp::Swap<32, big_endian>::writeval(pov + i * 4,
+						 first_plt_entry[i]);
+	}
+    }
   // Last word in first PLT entry is &GOT[0] - .
   elfcpp::Swap<32, big_endian>::writeval(pov + 16,
 					 got_address - (plt_address + 16));
@@ -7846,11 +7931,21 @@ Output_data_plt_arm_short<big_endian>::do_fill_plt_entry(
     gold_error(_("PLT offset too large, try linking with --long-plt"));
 
   uint32_t plt_insn0 = plt_entry[0] | ((offset >> 20) & 0xff);
-  elfcpp::Swap<32, big_endian>::writeval(pov, plt_insn0);
   uint32_t plt_insn1 = plt_entry[1] | ((offset >> 12) & 0xff);
-  elfcpp::Swap<32, big_endian>::writeval(pov + 4, plt_insn1);
   uint32_t plt_insn2 = plt_entry[2] | (offset & 0xfff);
-  elfcpp::Swap<32, big_endian>::writeval(pov + 8, plt_insn2);
+
+  if (parameters->options().be8())
+    {
+      elfcpp::Swap<32, false>::writeval(pov, plt_insn0);
+      elfcpp::Swap<32, false>::writeval(pov + 4, plt_insn1);
+      elfcpp::Swap<32, false>::writeval(pov + 8, plt_insn2);
+    }
+  else
+    {
+      elfcpp::Swap<32, big_endian>::writeval(pov, plt_insn0);
+      elfcpp::Swap<32, big_endian>::writeval(pov + 4, plt_insn1);
+      elfcpp::Swap<32, big_endian>::writeval(pov + 8, plt_insn2);
+    }
 }
 
 // This class generates long (16-byte) entries, for arbitrary displacements.
@@ -7906,13 +8001,24 @@ Output_data_plt_arm_long<big_endian>::do_fill_plt_entry(
 		    - (plt_address + plt_offset + 8));
 
   uint32_t plt_insn0 = plt_entry[0] | (offset >> 28);
-  elfcpp::Swap<32, big_endian>::writeval(pov, plt_insn0);
   uint32_t plt_insn1 = plt_entry[1] | ((offset >> 20) & 0xff);
-  elfcpp::Swap<32, big_endian>::writeval(pov + 4, plt_insn1);
   uint32_t plt_insn2 = plt_entry[2] | ((offset >> 12) & 0xff);
-  elfcpp::Swap<32, big_endian>::writeval(pov + 8, plt_insn2);
   uint32_t plt_insn3 = plt_entry[3] | (offset & 0xfff);
-  elfcpp::Swap<32, big_endian>::writeval(pov + 12, plt_insn3);
+
+  if (parameters->options().be8())
+    {
+      elfcpp::Swap<32, false>::writeval(pov, plt_insn0);
+      elfcpp::Swap<32, false>::writeval(pov + 4, plt_insn1);
+      elfcpp::Swap<32, false>::writeval(pov + 8, plt_insn2);
+      elfcpp::Swap<32, false>::writeval(pov + 12, plt_insn3);
+    }
+  else
+    {
+      elfcpp::Swap<32, big_endian>::writeval(pov, plt_insn0);
+      elfcpp::Swap<32, big_endian>::writeval(pov + 4, plt_insn1);
+      elfcpp::Swap<32, big_endian>::writeval(pov + 8, plt_insn2);
+      elfcpp::Swap<32, big_endian>::writeval(pov + 12, plt_insn3);
+    }
 }
 
 // Write out the PLT.  This uses the hand-coded instructions above,
@@ -10683,7 +10789,14 @@ Target_arm<big_endian>::do_adjust_elf_header(
     e_ident[elfcpp::EI_OSABI] = 0;
   e_ident[elfcpp::EI_ABIVERSION] = 0;
 
-  // FIXME: Do EF_ARM_BE8 adjustment.
+  // Do EF_ARM_BE8 adjustment.
+  if (parameters->options().be8() && !big_endian)
+    gold_error("BE8 images only valid in big-endian mode.");
+  if (parameters->options().be8())
+    {
+      flags |= elfcpp::EF_ARM_BE8;
+      this->set_processor_specific_flags(flags);
+    }
 
   // If we're working in EABI_VER5, set the hard/soft float ABI flags
   // as appropriate.

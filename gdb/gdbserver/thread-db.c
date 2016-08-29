@@ -56,9 +56,6 @@ struct thread_db
 
   /* Addresses of libthread_db functions.  */
   td_ta_new_ftype *td_ta_new_p;
-  td_ta_event_getmsg_ftype * td_ta_event_getmsg_p;
-  td_ta_set_event_ftype *td_ta_set_event_p;
-  td_ta_event_addr_ftype *td_ta_event_addr_p;
   td_ta_map_lwp2thr_ftype *td_ta_map_lwp2thr_p;
   td_thr_get_info_ftype *td_thr_get_info_p;
   td_ta_thr_iter_ftype *td_ta_thr_iter_p;
@@ -475,9 +472,6 @@ thread_db_load_search (void)
   tdb->td_symbol_list_p = &td_symbol_list;
 
   /* These are not essential.  */
-  tdb->td_ta_event_addr_p = &td_ta_event_addr;
-  tdb->td_ta_set_event_p = &td_ta_set_event;
-  tdb->td_ta_event_getmsg_p = &td_ta_event_getmsg;
   tdb->td_thr_tls_get_addr_p = &td_thr_tls_get_addr;
   tdb->td_thr_tlsbase_p = &td_thr_tlsbase;
 
@@ -542,9 +536,6 @@ try_thread_db_load_1 (void *handle)
   CHK (1, TDB_DLSYM (tdb, td_symbol_list));
 
   /* These are not essential.  */
-  CHK (0, TDB_DLSYM (tdb, td_ta_event_addr));
-  CHK (0, TDB_DLSYM (tdb, td_ta_set_event));
-  CHK (0, TDB_DLSYM (tdb, td_ta_event_getmsg));
   CHK (0, TDB_DLSYM (tdb, td_thr_tls_get_addr));
   CHK (0, TDB_DLSYM (tdb, td_thr_tlsbase));
 

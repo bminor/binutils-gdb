@@ -322,10 +322,11 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 			 is64 ? 8 : 4, regs[rt]);
 	}
       else if ((inst.opcode->iclass == ldstpair_off
-		|| inst.opcode->iclass == ldstpair_indexed)
-	       && inst.operands[2].addr.preind
+		|| (inst.opcode->iclass == ldstpair_indexed
+		    && inst.operands[2].addr.preind))
 	       && strcmp ("stp", inst.opcode->name) == 0)
 	{
+	  /* STP with addressing mode Pre-indexed and Base register.  */
 	  unsigned rt1 = inst.operands[0].reg.regno;
 	  unsigned rt2 = inst.operands[1].reg.regno;
 	  unsigned rn = inst.operands[2].addr.base_regno;

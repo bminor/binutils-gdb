@@ -202,6 +202,8 @@ enum
   CpuOSPKE,
   /* RDPID instruction required */
   CpuRDPID,
+  /* PTWRITE instruction required */
+  CpuPTWRITE,
   /* MMX register support required */
   CpuRegMMX,
   /* XMM register support required */
@@ -320,6 +322,7 @@ typedef union i386_cpu_flags
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
       unsigned int cpurdpid:1;
+      unsigned int cpuptwrite:1;
       unsigned int cpuregmmx:1;
       unsigned int cpuregxmm:1;
       unsigned int cpuregymm:1;

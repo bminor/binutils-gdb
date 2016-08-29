@@ -1755,6 +1755,7 @@ script_keyword_parsecodes[] =
   { "FLOAT", FLOAT },
   { "FORCE_COMMON_ALLOCATION", FORCE_COMMON_ALLOCATION },
   { "GROUP", GROUP },
+  { "HIDDEN", HIDDEN },
   { "HLL", HLL },
   { "INCLUDE", INCLUDE },
   { "INFO", INFO },
@@ -2696,7 +2697,7 @@ script_add_library(void* closurev, const char* name, size_t length)
 
   if (name_string[0] != 'l')
     gold_error(_("library name must be prefixed with -l"));
-    
+
   Input_file_argument file(name_string.c_str() + 1,
 			   Input_file_argument::INPUT_FILE_TYPE_LIBRARY,
 			   "", false,

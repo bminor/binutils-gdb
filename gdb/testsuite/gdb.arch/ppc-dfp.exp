@@ -21,9 +21,7 @@ if ![istarget "powerpc*"] then {
     return
 }
 
-set testfile "ppc-dfp"
-set binfile ${objdir}/${subdir}/${testfile}
-set srcfile ${testfile}.c
+standard_testfile
 
 if [get_compiler_info] {
     warning "get_compiler failed"
