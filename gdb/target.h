@@ -1341,17 +1341,7 @@ extern void target_disconnect (const char *, int);
 
 extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
 
-/* Wait for process pid to do something.  PTID = -1 to wait for any
-   pid to do something.  Return pid of child, or -1 in case of error;
-   store status through argument pointer STATUS.  Note that it is
-   _NOT_ OK to throw_exception() out of target_wait() without popping
-   the debugging target from the stack; GDB isn't prepared to get back
-   to the prompt with a debugging target but without the frame cache,
-   stop_pc, etc., set up.  OPTIONS is a bitwise OR of TARGET_W*
-   options.  */
-
-extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status,
-			   int options);
+/* For target_read_memory see target/target.h.  */
 
 /* The default target_ops::to_wait implementation.  */
 

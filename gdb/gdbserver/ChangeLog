@@ -1,5 +1,11 @@
 2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* target.c (mywait): Call target_wait instead of
+	the_target->wait.
+	(target_wait): New function.
+
+2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* server.c (start_inferior): New variable 'ptid'.  Replace calls
 	to the_target->resume by target_continue{,_no_signal}, depending
 	on the case.

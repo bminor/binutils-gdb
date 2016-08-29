@@ -2283,6 +2283,8 @@ target_disconnect (const char *args, int from_tty)
   current_target.to_disconnect (&current_target, args, from_tty);
 }
 
+/* See target/target.h.  */
+
 ptid_t
 target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 {

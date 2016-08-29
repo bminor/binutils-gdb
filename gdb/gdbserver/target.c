@@ -211,7 +211,7 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
   if (connected_wait)
     server_waiting = 1;
 
-  ret = (*the_target->wait) (ptid, ourstatus, options);
+  ret = target_wait (ptid, ourstatus, options);
 
   /* We don't expose _LOADED events to gdbserver core.  See the
      `dlls_changed' global.  */
@@ -254,6 +254,14 @@ target_stop_and_wait (ptid_t ptid)
   non_stop = 1;
   mywait (ptid, &status, 0, 0);
   non_stop = was_non_stop;
+}
+
+/* See target/target.h.  */
+
+ptid_t
+target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
+{
+  return (*the_target->wait) (ptid, status, options);
 }
 
 /* See target/target.h.  */

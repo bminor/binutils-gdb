@@ -1,5 +1,12 @@
 2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* target.c (target_wait): Mention that the function's prototype
+	can be found at target/target.h.
+	* target.h (target_wait): Move prototype from here...
+	* target/target.h (target_wait): ... to here.
+
+2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* fork-child.c (startup_inferior): Replace calls to target_resume
 	by target_continue{,_no_signal}, depending on the case.
 	* linux-nat.c (cleanup_target_stop): Call
