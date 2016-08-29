@@ -12706,7 +12706,9 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	  Elf_Internal_Chdr chdr;
 	  unsigned int compression_header_size;
 
-	  if (size < sizeof chdr)
+	  if (size < (is_32bit_elf
+		      ? sizeof (Elf32_External_Chdr)
+		      : sizeof (Elf64_External_Chdr)))
 	    {
 	      warn (_("compressed section %s is too small to contain a compression header"),
 		    section->name);

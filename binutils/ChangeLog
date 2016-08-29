@@ -1,3 +1,8 @@
+2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (load_specific_debug_section): Check the external
+	compression header size.
+
 2016-08-19  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/binutils-all/readelf.s: Adjust expected ordering of
@@ -17,9 +22,9 @@
 	off the end of the section when populating the directory table and
 	file table.
 	(frame_display_row): Set max_regs equal to ncols.
-	(load_specific_debug_section): If the section is compressed, but
-	it is not big enough to hold a compression header then warn and
-	return 0.
+	* readelf.c (load_specific_debug_section): If the section is
+	compressed, but it is not big enough to hold a compression
+	header then warn and return 0.
 
 	PR binutils/20439
 	* dwarf.c (display_debug_lines_decoded): Check directory and file
