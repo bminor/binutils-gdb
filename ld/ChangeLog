@@ -1,3 +1,24 @@
+2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14961
+	PR ld/20515
+	* testsuite/ld-i386/i386.exp: Run pr20515.
+	* testsuite/ld-i386/pr20515.d: New file.
+	* testsuite/ld-i386/pr20515.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-14a.s: Use R_386_PLT32 to call IFUNC
+	function.
+	* testsuite/ld-ifunc/ifunc-14c.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-i386.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-local-i386.s: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Move PR ld/19784 tests to ...
+	* testsuite/ld-x86-64/x86-64.exp: Here.
+	* testsuite/ld-ifunc/pr19784a.c: Moved to ...
+	* testsuite/ld-x86-64/pr19784a.c: Here.
+	* testsuite/ld-ifunc/pr19784b.c: Moved to ...
+	* testsuite/ld-x86-64/pr19784b.c: Here.
+	* testsuite/ld-ifunc/pr19784c.c: Moved to ...
+	* testsuite/ld-x86-64/pr19784c.c: Here.
+
 2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* emultempl/armelf.em (params): New static variable.

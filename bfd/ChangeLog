@@ -1,3 +1,11 @@
+2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14961
+	PR ld/20515
+	* elf32-i386.c (elf_i386_check_relocs): Issue an error when
+	R_386_PC32 relocation is used to call IFUNC function in PIC
+	object.
+
 2016-08-27  Alan Modra  <amodra@gmail.com>
 
 	PR 20520

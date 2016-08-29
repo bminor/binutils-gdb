@@ -2178,6 +2178,20 @@ do_relocation:
 		     a function defined in a shared library.  */
 		  if ((sec->flags & SEC_CODE) == 0)
 		    h->pointer_equality_needed = 1;
+		  else if (h->type == STT_GNU_IFUNC
+			   && bfd_link_pic (info))
+		    {
+		    if (isym == NULL)
+		      name = h->root.root.string;
+		    else
+		      name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
+					       NULL);
+		    (*_bfd_error_handler)
+		      (_("%B: unsupported non-PIC call to IFUNC `%s'"),
+		       abfd, name);
+		      bfd_set_error (bfd_error_bad_value);
+		      goto error_return;
+		    }
 		}
 	      else
 		{
