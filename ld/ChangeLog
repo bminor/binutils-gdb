@@ -1,3 +1,8 @@
+2016-08-30  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-arc/tls_gs-01.d: Set to XFAIL on arc*-*-elf*.
+	* testsuite/ld-arc/tls_ie-01.d: Likewise.
+
 2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/19784 tests only
