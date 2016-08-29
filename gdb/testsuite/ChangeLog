@@ -1,3 +1,7 @@
+2016-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/default.exp (tty): Remove.
+
 2016-08-24  Kevin Buettner  <kevinb@redhat.com>
 
     	* gdb.python/py-recurse-unwind.c: New file.
