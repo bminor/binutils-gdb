@@ -186,7 +186,7 @@ is_64bit_tdesc (void)
 /* Called by libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
 #ifdef __x86_64__
@@ -427,13 +427,15 @@ x86_get_pc (struct regcache *regcache)
 
   if (use_64bit)
     {
-      unsigned long pc;
+      uint64_t pc;
+
       collect_register_by_name (regcache, "rip", &pc);
       return (CORE_ADDR) pc;
     }
   else
     {
-      unsigned int pc;
+      uint32_t pc;
+
       collect_register_by_name (regcache, "eip", &pc);
       return (CORE_ADDR) pc;
     }
@@ -446,12 +448,14 @@ x86_set_pc (struct regcache *regcache, CORE_ADDR pc)
 
   if (use_64bit)
     {
-      unsigned long newpc = pc;
+      uint64_t newpc = pc;
+
       supply_register_by_name (regcache, "rip", &newpc);
     }
   else
     {
-      unsigned int newpc = pc;
+      uint32_t newpc = pc;
+
       supply_register_by_name (regcache, "eip", &newpc);
     }
 }
@@ -624,14 +628,14 @@ x86_debug_reg_state (pid_t pid)
    as debugging it with a 32-bit GDBSERVER, we do the 32-bit <-> 64-bit
    conversion in-place ourselves.  */
 
-/* Convert a native/host siginfo object, into/from the siginfo in the
+/* Convert a ptrace/host siginfo object, into/from the siginfo in the
    layout of the inferiors' architecture.  Returns true if any
    conversion was done; false otherwise.  If DIRECTION is 1, then copy
-   from INF to NATIVE.  If DIRECTION is 0, copy from NATIVE to
+   from INF to PTRACE.  If DIRECTION is 0, copy from PTRACE to
    INF.  */
 
 static int
-x86_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+x86_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 {
 #ifdef __x86_64__
   unsigned int machine;
@@ -640,11 +644,11 @@ x86_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
 
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
-      return amd64_linux_siginfo_fixup_common (native, inf, direction,
+      return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					       FIXUP_32);
   /* No fixup for native x32 GDB.  */
   else if (!is_elf64 && sizeof (void *) == 8)
-    return amd64_linux_siginfo_fixup_common (native, inf, direction,
+    return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					     FIXUP_X32);
 #endif
 
@@ -1088,10 +1092,10 @@ amd64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   buf[i++] = 0x41; buf[i++] = 0x51; /* push %r9 */
   buf[i++] = 0x41; buf[i++] = 0x50; /* push %r8 */
   buf[i++] = 0x9c; /* pushfq */
-  buf[i++] = 0x48; /* movl <addr>,%rdi */
+  buf[i++] = 0x48; /* movabs <addr>,%rdi */
   buf[i++] = 0xbf;
-  *((unsigned long *)(buf + i)) = (unsigned long) tpaddr;
-  i += sizeof (unsigned long);
+  memcpy (buf + i, &tpaddr, 8);
+  i += 8;
   buf[i++] = 0x57; /* push %rdi */
   append_insns (&buildaddr, i, buf);
 
@@ -1838,6 +1842,8 @@ amd64_emit_call (CORE_ADDR fn)
   else
     {
       int offset32 = offset64; /* we know we can't overflow here.  */
+
+      buf[i++] = 0xe8; /* call <reladdr> */
       memcpy (buf + i, &offset32, 4);
       i += 4;
     }

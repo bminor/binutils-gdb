@@ -85,6 +85,16 @@ static const char * const regnames[64] =
   "r56", "r57", "ACCL", "ACCH", "lp_count", "rezerved", "LIMM", "pcl"
 };
 
+static const char * const addrtypenames[ARC_NUM_ADDRTYPES] =
+{
+  "bd", "jid", "lbd", "mbd", "sd", "sm", "xa", "xd",
+  "cd", "cbd", "cjid", "clbd", "cm", "csd", "cxa", "cxd"
+};
+
+static int addrtypenames_max = ARC_NUM_ADDRTYPES - 1;
+
+static const char * const addrtypeunknown = "unknown";
+
 /* This structure keeps track which instruction class(es)
    should be ignored durring disassembling.  */
 
@@ -175,7 +185,7 @@ skip_this_opcode (const struct arc_opcode *  opcode,
   /* If we found an incompatibility then we must skip.  */
   if (t != NULL)
     return TRUE;
-  
+
   /* Even if we do not precisely know the if the right mnemonics
      is correctly displayed, keep the disassmbled code class
      consistent.  */
@@ -653,6 +663,18 @@ get_auxreg (const struct arc_opcode *opcode,
   return NULL;
 }
 
+/* Convert a value representing an address type to a string used to refer to
+   the address type in assembly code.  */
+
+static const char *
+get_addrtype (int value)
+{
+  if (value < 0 || value > addrtypenames_max)
+    return addrtypeunknown;
+
+  return addrtypenames[value];
+}
+
 /* Calculate the instruction length for an instruction starting with MSB
    and LSB, the most and least significant byte.  The ISA_MASK is used to
    filter the instructions considered to only those that are part of the
@@ -1104,14 +1126,19 @@ print_insn_arc (bfd_vma memaddr,
 	}
 
       /* Only take input from real operands.  */
-      if ((operand->flags & ARC_OPERAND_FAKE)
-	  && !(operand->flags & ARC_OPERAND_BRAKET))
+      if (ARC_OPERAND_IS_FAKE (operand))
 	continue;
 
       if ((operand->flags & ARC_OPERAND_IGNORE)
 	  && (operand->flags & ARC_OPERAND_IR)
           && value == -1)
 	continue;
+
+      if (operand->flags & ARC_OPERAND_COLON)
+        {
+          (*info->fprintf_func) (info->stream, ":");
+          continue;
+        }
 
       if (need_comma)
 	(*info->fprintf_func) (info->stream, ",");
@@ -1123,6 +1150,8 @@ print_insn_arc (bfd_vma memaddr,
 	  need_comma = FALSE;
 	  continue;
 	}
+
+      need_comma = TRUE;
 
       /* Print the operand as directed by the flags.  */
       if (operand->flags & ARC_OPERAND_IR)
@@ -1145,6 +1174,7 @@ print_insn_arc (bfd_vma memaddr,
       else if (operand->flags & ARC_OPERAND_LIMM)
 	{
 	  const char *rname = get_auxreg (opcode, value, isa_mask);
+
 	  if (rname && open_braket)
 	    (*info->fprintf_func) (info->stream, "%s", rname);
 	  else
@@ -1172,6 +1202,13 @@ print_insn_arc (bfd_vma memaddr,
 	  else
 	    (*info->fprintf_func) (info->stream, "%d", value);
 	}
+      else if (operand->flags & ARC_OPERAND_ADDRTYPE)
+        {
+          const char *addrtype = get_addrtype (value);
+          (*info->fprintf_func) (info->stream, "%s", addrtype);
+          /* A colon follow an address type.  */
+          need_comma = FALSE;
+        }
       else
 	{
 	  if (operand->flags & ARC_OPERAND_TRUNCATE
@@ -1189,8 +1226,6 @@ print_insn_arc (bfd_vma memaddr,
 		(*info->fprintf_func) (info->stream, "%#x", value);
 	    }
 	}
-
-      need_comma = TRUE;
     }
 
   return insn_len;

@@ -56,6 +56,7 @@
 #include "solist.h"
 #include "solib.h"
 #include "xml-support.h"
+#include "inttypes.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -172,6 +173,19 @@ static int debug_registers_used;
 
 static int windows_initialization_done;
 #define DR6_CLEAR_VALUE 0xffff0ff0
+
+/* The exception thrown by a program to tell the debugger the name of
+   a thread.  The exception record contains an ID of a thread and a
+   name to give it.  This exception has no documented name, but MSDN
+   dubs it "MS_VC_EXCEPTION" in one code example.  */
+#define MS_VC_EXCEPTION 0x406d1388
+
+typedef enum
+{
+  HANDLE_EXCEPTION_UNHANDLED = 0,
+  HANDLE_EXCEPTION_HANDLED,
+  HANDLE_EXCEPTION_IGNORED
+} handle_exception_result;
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file.  */
@@ -440,6 +454,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code)
     {
       windows_thread_info *here = th->next;
       th->next = here->next;
+      xfree (here->name);
       xfree (here);
     }
 }
@@ -825,6 +840,25 @@ windows_clear_solib (void)
   solib_end = &solib_start;
 }
 
+static void
+signal_event_command (char *args, int from_tty)
+{
+  uintptr_t event_id = 0;
+  char *endargs = NULL;
+
+  if (args == NULL)
+    error (_("signal-event requires an argument (integer event id)"));
+
+  event_id = strtoumax (args, &endargs, 10);
+
+  if ((errno == ERANGE) || (event_id == 0) || (event_id > UINTPTR_MAX) ||
+      ((HANDLE) event_id == INVALID_HANDLE_VALUE))
+    error (_("Failed to convert `%s' to event id"), args);
+
+  SetEvent ((HANDLE) event_id);
+  CloseHandle ((HANDLE) event_id);
+}
+
 /* Handle DEBUG_STRING output from child process.
    Cygwin prepends its messages with a "cygwin:".  Interpret this as
    a Cygwin signal.  Otherwise just print the string as a warning.  */
@@ -1011,10 +1045,12 @@ display_selectors (char * args, int from_tty)
     host_address_to_string (\
       current_event.u.Exception.ExceptionRecord.ExceptionAddress))
 
-static int
+static handle_exception_result
 handle_exception (struct target_waitstatus *ourstatus)
 {
-  DWORD code = current_event.u.Exception.ExceptionRecord.ExceptionCode;
+  EXCEPTION_RECORD *rec = &current_event.u.Exception.ExceptionRecord;
+  DWORD code = rec->ExceptionCode;
+  handle_exception_result result = HANDLE_EXCEPTION_HANDLED;
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
@@ -1037,14 +1073,13 @@ handle_exception (struct target_waitstatus *ourstatus)
 	   cygwin-specific-signal.  So, ignore SEGVs if they show up
 	   within the text segment of the DLL itself.  */
 	const char *fn;
-	CORE_ADDR addr = (CORE_ADDR) (uintptr_t)
-	  current_event.u.Exception.ExceptionRecord.ExceptionAddress;
+	CORE_ADDR addr = (CORE_ADDR) (uintptr_t) rec->ExceptionAddress;
 
 	if ((!cygwin_exceptions && (addr >= cygwin_load_start
 				    && addr < cygwin_load_end))
 	    || (find_pc_partial_function (addr, &fn, NULL, NULL)
 		&& startswith (fn, "KERNEL32!IsBad")))
-	  return 0;
+	  return HANDLE_EXCEPTION_UNHANDLED;
       }
 #endif
       break;
@@ -1120,10 +1155,48 @@ handle_exception (struct target_waitstatus *ourstatus)
       DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_NONCONTINUABLE_EXCEPTION");
       ourstatus->value.sig = GDB_SIGNAL_ILL;
       break;
+    case MS_VC_EXCEPTION:
+      if (rec->NumberParameters >= 3
+	  && (rec->ExceptionInformation[0] & 0xffffffff) == 0x1000)
+	{
+	  DWORD named_thread_id;
+	  windows_thread_info *named_thread;
+	  CORE_ADDR thread_name_target;
+
+	  DEBUG_EXCEPTION_SIMPLE ("MS_VC_EXCEPTION");
+
+	  thread_name_target = rec->ExceptionInformation[1];
+	  named_thread_id = (DWORD) (0xffffffff & rec->ExceptionInformation[2]);
+
+	  if (named_thread_id == (DWORD) -1)
+	    named_thread_id = current_event.dwThreadId;
+
+	  named_thread = thread_rec (named_thread_id, 0);
+	  if (named_thread != NULL)
+	    {
+	      int thread_name_len;
+	      char *thread_name;
+
+	      thread_name_len = target_read_string (thread_name_target,
+						    &thread_name, 1025, NULL);
+	      if (thread_name_len > 0)
+		{
+		  thread_name[thread_name_len - 1] = '\0';
+		  xfree (named_thread->name);
+		  named_thread->name = thread_name;
+		}
+	      else
+		xfree (thread_name);
+	    }
+	  ourstatus->value.sig = GDB_SIGNAL_TRAP;
+	  result = HANDLE_EXCEPTION_IGNORED;
+	  break;
+	}
+	/* treat improperly formed exception as unknown, fallthrough */
     default:
       /* Treat unhandled first chance exceptions specially.  */
       if (current_event.u.Exception.dwFirstChance)
-	return 0;
+	return HANDLE_EXCEPTION_UNHANDLED;
       printf_unfiltered ("gdb: unknown target exception 0x%08x at %s\n",
 	(unsigned) current_event.u.Exception.ExceptionRecord.ExceptionCode,
 	host_address_to_string (
@@ -1133,7 +1206,7 @@ handle_exception (struct target_waitstatus *ourstatus)
     }
   exception_count++;
   last_sig = ourstatus->value.sig;
-  return 1;
+  return result;
 }
 
 /* Resume thread specified by ID, or all artificially suspended
@@ -1490,10 +1563,19 @@ get_windows_debug_event (struct target_ops *ops,
 		     "EXCEPTION_DEBUG_EVENT"));
       if (saw_create != 1)
 	break;
-      if (handle_exception (ourstatus))
-	thread_id = current_event.dwThreadId;
-      else
-	continue_status = DBG_EXCEPTION_NOT_HANDLED;
+      switch (handle_exception (ourstatus))
+	{
+	case HANDLE_EXCEPTION_UNHANDLED:
+	default:
+	  continue_status = DBG_EXCEPTION_NOT_HANDLED;
+	  break;
+	case HANDLE_EXCEPTION_HANDLED:
+	  thread_id = current_event.dwThreadId;
+	  break;
+	case HANDLE_EXCEPTION_IGNORED:
+	  continue_status = DBG_CONTINUE;
+	  break;
+	}
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* Message from the kernel.  */
@@ -2494,6 +2576,14 @@ windows_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
   return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
 }
 
+/* Implementation of the to_thread_name method.  */
+
+static const char *
+windows_thread_name (struct target_ops *self, struct thread_info *thr)
+{
+  return thread_rec (ptid_get_tid (thr->ptid), 0)->name;
+}
+
 static struct target_ops *
 windows_target (void)
 {
@@ -2518,6 +2608,7 @@ windows_target (void)
   t->to_pid_to_exec_file = windows_pid_to_exec_file;
   t->to_get_ada_task_ptid = windows_get_ada_task_ptid;
   t->to_get_tib_address = windows_get_tib_address;
+  t->to_thread_name = windows_thread_name;
 
   return t;
 }
@@ -2549,6 +2640,13 @@ _initialize_windows_nat (void)
 #ifdef __CYGWIN__
   cygwin_internal (CW_SET_DOS_FILE_WARNING, 0);
 #endif
+
+  add_com ("signal-event", class_run, signal_event_command, _("\
+Signal a crashed process with event ID, to allow its debugging.\n\
+This command is needed in support of setting up GDB as JIT debugger on \
+MS-Windows.  The command should be invoked from the GDB command line using \
+the '-ex' command-line option.  The ID of the event that blocks the \
+crashed process will be supplied by the Windows JIT debugging mechanism."));
 
 #ifdef __CYGWIN__
   add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\

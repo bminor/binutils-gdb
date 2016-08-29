@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "record.h"
+#include "record-btrace.h"
 #include "gdbthread.h"
 #include "target.h"
 #include "gdbcmd.h"
@@ -199,6 +200,26 @@ record_btrace_handle_async_inferior_event (gdb_client_data data)
   inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
+/* See record-btrace.h.  */
+
+void
+record_btrace_push_target (void)
+{
+  const char *format;
+
+  record_btrace_auto_enable ();
+
+  push_target (&record_btrace_ops);
+
+  record_btrace_async_inferior_event_handler
+    = create_async_event_handler (record_btrace_handle_async_inferior_event,
+				  NULL);
+  record_btrace_generating_corefile = 0;
+
+  format = btrace_format_short_string (record_btrace_conf.format);
+  observer_notify_record_changed (current_inferior (), 1, "btrace", format);
+}
+
 /* The to_open method of target record-btrace.  */
 
 static void
@@ -206,7 +227,6 @@ record_btrace_open (const char *args, int from_tty)
 {
   struct cleanup *disable_chain;
   struct thread_info *tp;
-  const char *format;
 
   DEBUG ("open");
 
@@ -226,17 +246,7 @@ record_btrace_open (const char *args, int from_tty)
 	make_cleanup (record_btrace_disable_callback, tp);
       }
 
-  record_btrace_auto_enable ();
-
-  push_target (&record_btrace_ops);
-
-  record_btrace_async_inferior_event_handler
-    = create_async_event_handler (record_btrace_handle_async_inferior_event,
-				  NULL);
-  record_btrace_generating_corefile = 0;
-
-  format = btrace_format_short_string (record_btrace_conf.format);
-  observer_notify_record_changed (current_inferior (), 1, "btrace", format);
+  record_btrace_push_target ();
 
   discard_cleanups (disable_chain);
 }
@@ -255,6 +265,21 @@ record_btrace_stop_recording (struct target_ops *self)
   ALL_NON_EXITED_THREADS (tp)
     if (tp->btrace.target != NULL)
       btrace_disable (tp);
+}
+
+/* The to_disconnect method of target record-btrace.  */
+
+static void
+record_btrace_disconnect (struct target_ops *self, const char *args,
+			  int from_tty)
+{
+  struct target_ops *beneath = self->beneath;
+
+  /* Do not stop recording, just clean up GDB side.  */
+  unpush_target (self);
+
+  /* Forward disconnect.  */
+  beneath->to_disconnect (beneath, args, from_tty);
 }
 
 /* The to_close method of target record-btrace.  */
@@ -1408,7 +1433,8 @@ record_btrace_insert_breakpoint (struct target_ops *ops,
 static int
 record_btrace_remove_breakpoint (struct target_ops *ops,
 				 struct gdbarch *gdbarch,
-				 struct bp_target_info *bp_tgt)
+				 struct bp_target_info *bp_tgt,
+				 enum remove_bp_reason reason)
 {
   const char *old;
   int ret;
@@ -1421,7 +1447,8 @@ record_btrace_remove_breakpoint (struct target_ops *ops,
   ret = 0;
   TRY
     {
-      ret = ops->beneath->to_remove_breakpoint (ops->beneath, gdbarch, bp_tgt);
+      ret = ops->beneath->to_remove_breakpoint (ops->beneath, gdbarch, bp_tgt,
+						reason);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -2824,7 +2851,7 @@ init_record_btrace_ops (void)
   ops->to_close = record_btrace_close;
   ops->to_async = record_btrace_async;
   ops->to_detach = record_detach;
-  ops->to_disconnect = record_disconnect;
+  ops->to_disconnect = record_btrace_disconnect;
   ops->to_mourn_inferior = record_mourn_inferior;
   ops->to_kill = record_kill;
   ops->to_stop_recording = record_btrace_stop_recording;

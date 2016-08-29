@@ -25,6 +25,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/s390.h"
+#include <stdarg.h>
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
@@ -664,9 +665,9 @@ struct elf_s390_link_hash_table
 
 /* Get the s390 ELF linker hash table from a link_info structure.  */
 
-#define elf_s390_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == S390_ELF_DATA ? ((struct elf_s390_link_hash_table *) ((p)->hash)) : NULL)
+#define elf_s390_hash_table(p)						\
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash))	\
+   == S390_ELF_DATA ? ((struct elf_s390_link_hash_table *) ((p)->hash)) : NULL)
 
 #define ELF64 1
 #include "elf-s390-common.c"
@@ -3603,7 +3604,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 	    }
 	}
       else if (bfd_link_pic (info)
-	  && SYMBOL_REFERENCES_LOCAL (info, h))
+	       && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  /* If this is a static link, or it is a -Bsymbolic link and
 	     the symbol is defined locally or was forced to be local
@@ -3622,7 +3623,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
       else
 	{
 	  BFD_ASSERT((h->got.offset & 1) == 0);
-do_glob_dat:
+	do_glob_dat:
 	  bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgot->contents + h->got.offset);
 	  rela.r_info = ELF64_R_INFO (h->dynindx, R_390_GLOB_DAT);
 	  rela.r_addend = 0;
@@ -3843,7 +3844,120 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 
   return TRUE;
 }
+
+/* Support for core dump NOTE sections.  */
 
+static bfd_boolean
+elf_s390_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  int offset;
+  size_t size;
+
+  switch (note->descsz)
+    {
+    default:
+      return FALSE;
+
+    case 336:			/* sizeof(struct elf_prstatus) on s390x */
+      /* pr_cursig */
+      elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
+
+      /* pr_pid */
+      elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 32);
+
+      /* pr_reg */
+      offset = 112;
+      size = 216;
+      break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  size, note->descpos + offset);
+}
+
+static bfd_boolean
+elf_s390_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+{
+  switch (note->descsz)
+    {
+    default:
+      return FALSE;
+
+    case 136:			/* sizeof(struct elf_prpsinfo) on s390x */
+      elf_tdata (abfd)->core->pid
+	= bfd_get_32 (abfd, note->descdata + 24);
+      elf_tdata (abfd)->core->program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
+      elf_tdata (abfd)->core->command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
+    }
+
+  /* Note that for some reason, a spurious space is tacked
+     onto the end of the args in some (at least one anyway)
+     implementations, so strip it off if it exists.  */
+
+  {
+    char *command = elf_tdata (abfd)->core->command;
+    int n = strlen (command);
+
+    if (0 < n && command[n - 1] == ' ')
+      command[n - 1] = '\0';
+  }
+
+  return TRUE;
+}
+
+static char *
+elf_s390_write_core_note (bfd *abfd, char *buf, int *bufsiz,
+			  int note_type, ...)
+{
+  va_list ap;
+
+  switch (note_type)
+    {
+    default:
+      return NULL;
+
+    case NT_PRPSINFO:
+      {
+	char data[136] = { 0 };
+	const char *fname, *psargs;
+
+	va_start (ap, note_type);
+	fname = va_arg (ap, const char *);
+	psargs = va_arg (ap, const char *);
+	va_end (ap);
+
+	strncpy (data + 40, fname, 16);
+	strncpy (data + 56, psargs, 80);
+	return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type,
+				   &data, sizeof (data));
+      }
+
+    case NT_PRSTATUS:
+      {
+	char data[336] = { 0 };
+	long pid;
+	int cursig;
+	const void *gregs;
+
+	va_start (ap, note_type);
+	pid = va_arg (ap, long);
+	cursig = va_arg (ap, int);
+	gregs = va_arg (ap, const void *);
+	va_end (ap);
+
+	bfd_put_16 (abfd, cursig, data + 12);
+	bfd_put_32 (abfd, pid, data + 32);
+	memcpy (data + 112, gregs, 216);
+	return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type,
+				   &data, sizeof (data));
+      }
+    }
+  /* NOTREACHED */
+}
+
 /* Return address for Ith PLT stub in section PLT, for relocation REL
    or (bfd_vma) -1 if it should not be included.  */
 
@@ -3942,6 +4056,9 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_relocate_section	      elf_s390_relocate_section
 #define elf_backend_size_dynamic_sections     elf_s390_size_dynamic_sections
 #define elf_backend_init_index_section	      _bfd_elf_init_1_index_section
+#define elf_backend_grok_prstatus	      elf_s390_grok_prstatus
+#define elf_backend_grok_psinfo		      elf_s390_grok_psinfo
+#define elf_backend_write_core_note	      elf_s390_write_core_note
 #define elf_backend_plt_sym_val		      elf_s390_plt_sym_val
 #define elf_backend_add_symbol_hook           elf_s390_add_symbol_hook
 #define elf_backend_sort_relocs_p             elf_s390_elf_sort_relocs_p

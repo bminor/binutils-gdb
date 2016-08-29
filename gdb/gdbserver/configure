@@ -1339,7 +1339,8 @@ Optional Features:
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
   --disable-largefile     omit support for large files
-  --enable-build-with-cxx build with C++ compiler instead of C compiler
+  --disable-build-with-cxx
+                          build with C compiler instead of C++ compiler
   --enable-libmcheck      Try linking with -lmcheck if available
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
@@ -5912,7 +5913,7 @@ fi
 done
 
 
-  for ac_func in fdwalk getrlimit pipe pipe2 socketpair
+  for ac_func in fdwalk getrlimit pipe pipe2 socketpair sigaction
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -6795,6 +6796,37 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_i386_is_x86_64" >&5
 $as_echo "$gdb_cv_i386_is_x86_64" >&6; }
     ;;
+
+  x86_64-*-linux*)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if building for x32" >&5
+$as_echo_n "checking if building for x32... " >&6; }
+if test "${gdb_cv_x86_is_x32+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  save_CPPFLAGS="$CPPFLAGS"
+		    CPPFLAGS="$CPPFLAGS $CFLAGS"
+		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#if __x86_64__ && __ILP32__
+got it
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "got it" >/dev/null 2>&1; then :
+  gdb_cv_x86_is_x32=yes
+else
+  gdb_cv_x86_is_x32=no
+fi
+rm -f conftest*
+
+		    CPPFLAGS="$save_CPPFLAGS"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_x86_is_x32" >&5
+$as_echo "$gdb_cv_x86_is_x32" >&6; }
+    ;;
+
   m68k-*-*)
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking if building for Coldfire" >&5
 $as_echo_n "checking if building for Coldfire... " >&6; }

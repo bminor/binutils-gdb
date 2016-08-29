@@ -185,8 +185,17 @@ extern void switch_thru_all_uis_next (struct switch_thru_all_uis *state);
 extern struct ui *new_ui (FILE *instream, FILE *outstream, FILE *errstream);
 extern void delete_ui (struct ui *todel);
 
+/* Cleanup that deletes a UI.  */
+extern struct cleanup *make_delete_ui_cleanup (struct ui *ui);
+
 /* Cleanup that restores the current UI.  */
 extern void restore_ui_cleanup (void *data);
+
+/* Register the UI's input file descriptor in the event loop.  */
+extern void ui_register_input_event_handler (struct ui *ui);
+
+/* Unregister the UI's input file descriptor from the event loop.  */
+extern void ui_unregister_input_event_handler (struct ui *ui);
 
 /* From top.c.  */
 extern char *saved_command_line;

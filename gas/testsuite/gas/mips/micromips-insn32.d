@@ -683,6 +683,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	9411 fffe 	beqz	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
 [ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	b402 fffe 	bnez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
 [ 0-9a-f]+:	0000 0000 	nop
@@ -5068,6 +5069,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	03ff 937c 	wait	0x3ff
 [ 0-9a-f]+:	03ff 8b7c 	syscall	0x3ff
 [ 0-9a-f]+:	03ff fffa 	cop2	0x7fffff
+[ 0-9a-f]+:	0000 0000 	nop
 
 [0-9a-f]+ <fp_test>:
 [ 0-9a-f]+:	5400 01a0 	prefx	0x0,zero\(zero\)

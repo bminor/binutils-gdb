@@ -24,9 +24,7 @@ if {![istarget "powerpc*"] || [skip_vsx_tests]} then {
     return
 }
 
-set testfile "vsx-regs"
-set binfile ${objdir}/${subdir}/${testfile}
-set srcfile ${testfile}.c
+standard_testfile
 
 set compile_flags {debug nowarnings quiet}
 if [get_compiler_info] {

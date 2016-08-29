@@ -1,3 +1,44 @@
+2016-08-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include bfd.h.
+	(symcount, symtab, aarch64_get_sym_value): Delete.
+	(remove_useless_symbols): Change count type to long.
+	(aarch64_get_func): Add SIM_DESC to arg list.  Add symcount
+	and symtab local variables.
+	(sim_create_inferior): Delete storage.  Replace symbol code
+	with a call to trace_load_symbols.
+	* memory.c: Delete bfd.h, elf/internal.h, and elf/common.h
+	includes.
+	(aarch64_get_heap_start): Change aarch64_get_sym_value to
+	trace_sym_value.
+	* memory.h: Delete bfd.h include.
+	(mem_add_blk): Delete unused prototype.
+	* simulator.c (bl, blr): Pass SIM_DESC to aarch64_get_func.
+	* simulator.c (aarch64_get_func): Add SIM_DESC to arg list.
+	(aarch64_get_sym_value): Delete.
+
+2016-08-12  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (aarch64_step): Revert pervious delta.
+	(aarch64_run): Call sim_events_tick after each
+	instruction is simulated, and if necessary call
+	sim_events_process.
+	* simulator.h: Revert previous delta.
+
+2016-08-11  Nick Clifton  <nickc@redhat.com>
+
+	* interp.c (sim_create_inferior): Allow for being called with a
+	NULL abfd parameter.  If a bfd is provided, initialise the sim
+	with that start address.
+	* simulator.c (HALT_NYI): Just print out the numeric value of the
+	instruction when not tracing.
+	(aarch64_step): Change from static to global.
+	* simulator.h: Add a prototype for aarch64_step().
+
+2016-07-27  Alan Modra  <amodra@gmail.com>
+
+	* memory.c: Don't include libbfd.h.
+
 2016-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* simulator.c (fsqrts): Use sqrtf rather than sqrt.

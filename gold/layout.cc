@@ -2135,7 +2135,7 @@ void
 Layout::create_notes()
 {
   this->create_gold_note();
-  this->create_executable_stack_info();
+  this->create_stack_segment();
   this->create_build_id();
 }
 
@@ -2785,7 +2785,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       if (load_seg != NULL)
 	ehdr_start->set_output_segment(load_seg, Symbol::SEGMENT_START);
       else
-        ehdr_start->set_undefined();
+	ehdr_start->set_undefined();
     }
 
   // Set the file offsets of all the non-data sections we've seen so
@@ -2985,25 +2985,29 @@ Layout::create_gold_note()
 // executable.  Otherwise, if at least one input file a
 // .note.GNU-stack section, and some input file has no .note.GNU-stack
 // section, we use the target default for whether the stack should be
-// executable.  Otherwise, we don't generate a stack note.  When
-// generating a object file, we create a .note.GNU-stack section with
-// the appropriate marking.  When generating an executable or shared
-// library, we create a PT_GNU_STACK segment.
+// executable.  If -z stack-size was used to set a p_memsz value for
+// PT_GNU_STACK, we generate the segment regardless.  Otherwise, we
+// don't generate a stack note.  When generating a object file, we
+// create a .note.GNU-stack section with the appropriate marking.
+// When generating an executable or shared library, we create a
+// PT_GNU_STACK segment.
 
 void
-Layout::create_executable_stack_info()
+Layout::create_stack_segment()
 {
   bool is_stack_executable;
   if (parameters->options().is_execstack_set())
     {
       is_stack_executable = parameters->options().is_stack_executable();
       if (!is_stack_executable
-          && this->input_requires_executable_stack_
-          && parameters->options().warn_execstack())
+	  && this->input_requires_executable_stack_
+	  && parameters->options().warn_execstack())
 	gold_warning(_("one or more inputs require executable stack, "
-	               "but -z noexecstack was given"));
+		       "but -z noexecstack was given"));
     }
-  else if (!this->input_with_gnu_stack_note_)
+  else if (!this->input_with_gnu_stack_note_
+	   && (!parameters->options().user_set_stack_size()
+	       || parameters->options().relocatable()))
     return;
   else
     {
@@ -3032,7 +3036,12 @@ Layout::create_executable_stack_info()
       int flags = elfcpp::PF_R | elfcpp::PF_W;
       if (is_stack_executable)
 	flags |= elfcpp::PF_X;
-      this->make_output_segment(elfcpp::PT_GNU_STACK, flags);
+      Output_segment* seg =
+	this->make_output_segment(elfcpp::PT_GNU_STACK, flags);
+      seg->set_size(parameters->options().stack_size());
+      // BFD lets targets override this default alignment, but the only
+      // targets that do so are ones that Gold does not support so far.
+      seg->set_minimum_p_align(16);
     }
 }
 
@@ -3718,7 +3727,9 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
        p != this->segment_list_.end();
        ++p)
     {
-      if ((*p)->type() != elfcpp::PT_LOAD)
+      // PT_GNU_STACK was set up correctly when it was created.
+      if ((*p)->type() != elfcpp::PT_LOAD
+	  && (*p)->type() != elfcpp::PT_GNU_STACK)
 	(*p)->set_offset((*p)->type() == elfcpp::PT_GNU_RELRO
 			 ? increase_relro
 			 : 0);

@@ -1,3 +1,504 @@
+2016-08-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* xtensa-tdep.h (XTENSA_GDBARCH_TDEP_INSTANTIATE): Replace
+	designated initializer list by plain initializer list, for C++
+	compliance.
+
+2016-08-25  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	* aarch64-linux-nat.c (ps_get_thread_area): Remove const from
+	struct ps_prochandle.
+	* amd64-linux-nat.c (ps_get_thread_area): Likewise.
+	* arm-linux-nat.c (ps_get_thread_area): Likewise.
+	* gdb_proc_service.h (ps_get_thread_area): Likewise.
+	* i386-linux-nat.c (ps_get_thread_area): Likewise.
+	* m68klinux-nat.c (ps_get_thread_area): Likewise.
+	* mips-linux-nat.c (ps_get_thread_area): Likewise.
+	* nat/aarch64-linux.c (aarch64_ps_get_thread_area): Likewise.
+	* nat/aarch64-linux.h (aarch64_ps_get_thread_area): Likewise.
+	* xtensa-linux-nat.c (ps_get_thread_area): Likewise.
+
+2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* infcmd.c (set_inferior_io_terminal): Set inferior terminal to
+	NULL if terminal_name is an empty string.
+	(_initialize_infcmd): Make the argument of "set inferior-tty"
+	optional, mention it in the help doc.
+
+2016-08-24  Carl Love  <cel@us.ibm.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Remove call
+	set_gdbarch_deprecated_fp_regnum() architecture
+	initialization function.
+
+2016-08-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* stack.c (parse_frame_specification): Fix typo in comment.
+
+2016-08-23  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20494
+	* inflow.c (our_terminal_info, initial_gdb_ttystate): Update
+	comments.
+	(enum gdb_has_a_terminal_flag_enum, gdb_has_a_terminal_flag):
+	Delete.
+	(set_initial_gdb_ttystate): Record our_terminal_info here too,
+	instead of ...
+	(gdb_has_a_terminal): ... here.  Reimplement in terms of
+	initial_gdb_ttystate.  Make static.
+	* terminal.h (gdb_has_a_terminal): Delete declaration.
+	(set_initial_gdb_ttystate): Add comment.
+	* top.c (show_interactive_mode): Use input_interactive_p instead
+	of gdb_has_a_terminal.
+
+2016-08-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20505
+	* linux-tdep.c (linux_vsyscall_range_raw): For core inferiors,
+	find the vDSO's start address with AT_SYSINFO_EHDR too, and
+	determine the vDSO's size by finding the PT_LOAD segment that
+	matches AT_SYSINFO_EHDR.
+
+2016-08-19  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_analyze_prologue): Handle register
+	based STP instruction.
+
+2016-08-19  Yao Qi  <yao.qi@linaro.org>
+
+	* completer.c (linespec_location_completer): Make file_to_match
+	null-terminated.
+
+2016-08-19  Pedro Alves  <palves@redhat.com>
+
+	* amd64-tdep.c (amd64_relocate_instruction) <callq>: Handle return
+	addresses over 0x7fffffff.
+
+2016-08-18  Carl Love  <cel@us.ibm.com>
+
+	* MAINTANERS Write After Approval): Add "Carl Love".
+
+2016-08-18  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (ppc_process_record_op31): Handle HTM instructions.
+
+2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferior.c (remove_inferior_command): Fix error message.
+
+2016-08-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferior.c (exit_inferior_1): Remove comment.
+
+2016-08-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	PR gdb/20457
+	* gdb_proc_service.h: Add an include of gregset.h
+        [!HAVE_PROC_SERVICE_H]: Remove the include of gregset.h.
+
+2016-08-15  Yao Qi  <yao.qi@linaro.org>
+
+	* location.c (explicit_location_lex_one): Compare the return
+	value of strncmp with zero.  Don't check (*inp)[9].  Increment
+	*inp by 8.
+
+2016-08-11  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20413
+	* nat/linux-ptrace.c: Include <sys/procfs.h> instead of
+	"gregset.h".
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
+	* record-full.c (record_full_remove_breakpoint): Don't remove the
+	breakpoint from the record_full_breakpoints VEC if we're detaching
+	the breakpoint from a fork child.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
+	* break-catch-sig.c (signal_catchpoint_remove_location): Adjust
+	interface.
+	* break-catch-syscall.c (remove_catch_syscall):
+	* breakpoint.c (enum remove_bp_reason): Moved to breakpoint.h.
+	(remove_breakpoint_1): Pass 'reason' down.
+	(remove_catch_fork, remove_catch_vfork, remove_catch_solib)
+	(remove_catch_exec, remove_watchpoint, remove_masked_watchpoint)
+	(base_breakpoint_remove_location, bkpt_remove_location)
+	(bkpt_probe_remove_location, bkpt_probe_remove_location): Adjust
+	interface.
+	* breakpoint.h (enum remove_bp_reason): Moved here from
+	breakpoint.c.
+	(struct breakpoint_ops) <remove_location>: Add 'reason' parameter.
+	* corelow.c (core_remove_breakpoint): New function.
+	(init_core_ops): Install it as to_remove_breakpoint method.
+	* exec.c (exec_remove_breakpoint): New function.
+	(init_exec_ops): Install it as to_remove_breakpoint method.
+	* mem-break.c (memory_remove_breakpoint): Adjust interface.
+	* record-btrace.c (record_btrace_remove_breakpoint): Adjust
+	interface.
+	* record-full.c (record_full_remove_breakpoint)
+	(record_full_core_remove_breakpoint): Adjust interface.
+	* remote.c (remote_remove_breakpoint): Adjust interface.
+	* target-debug.h (target_debug_print_enum_remove_bp_reason): New
+	macro.
+	* target-delegates.c: Regenerate.
+	* target.c (target_remove_breakpoint): Add 'reason' parameter.
+	* target.h (struct target_ops) <to_remove_breakpoint>: Add
+	'reason' parameter.
+	(target_remove_breakpoint, memory_remove_breakpoint): Add 'reason'
+	parameter.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
+	* breakpoint.c (insertion_state_t): Delete.
+	(enum remove_bp_reason): New.
+	(detach_breakpoints, remove_breakpoint_1, remove_breakpoint):
+	Adjust to use enum remove_bp_reason instead of insertion_state_t.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19187
+	* breakpoint.c (remove_breakpoint): Remove 'is' parameter and
+	always pass mark_uninserted to remove_breakpoint_1.
+	(insert_breakpoint_locations, remove_breakpoints)
+	(remove_breakpoints_pid, update_global_location_list): Update
+	callers.
+
+2016-08-10  Руслан Ижбулатов  <lrn1986@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (MS_VC_EXCEPTION): New define.
+	(handle_exception_result): New enum.
+	(windows_delete_thread): Free the thread's name.
+	(handle_exception): Handle MS_VC_EXCEPTION.
+	(get_windows_debug_event): Handle HANDLE_EXCEPTION_IGNORED.
+	(windows_thread_name): New function.
+	(windows_target): Install it as to_thread_name method.
+	* NEWS: Mention the thread naming support on MS-Windows.
+
+2016-08-10  Pedro Alves  <palves@redhat.com>
+
+	* common/signals-state-save-restore.c
+	(save_original_signals_state, restore_original_signals_state):
+	Wrap perror_with_name arguments with '()'.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20418
+	* event-top.c (ui_register_input_event_handler)
+	(ui_unregister_input_event_handler): New functions.
+	(async_enable_stdin): Register input in the event loop.
+	(async_disable_stdin): Unregister input from the event loop.
+	(gdb_setup_readline): Register input in the event loop.
+	* infrun.c (check_curr_ui_sync_execution_done): Register input in
+	the event loop.
+	* target.c (target_terminal_inferior): Don't unregister input from
+	the event loop.
+	(target_terminal_ours): Don't register input in the event loop.
+	* target.h (target_terminal_inferior)
+	(target_terminal_ours_for_output, target_terminal_ours): Update
+	comments.
+	* top.h (ui_register_input_event_handler)
+	(ui_unregister_input_event_handler): New declarations.
+	* utils.c (ui_unregister_input_event_handler_cleanup)
+	(prepare_to_handle_input): New functions.
+	(defaulted_query, prompt_for_continue): Use
+	prepare_to_handle_input.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	PR mi/20431
+	* mi/mi-main.c (mi_execute_command): Enable input and set prompt
+	state to PROMPT_NEEDED.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18653
+	* Makefile.in (SFILES): Add
+	common/signals-state-save-restore.c.
+	(HFILES_NO_SRCDIR): Add common/signals-state-save-restore.h.
+	(COMMON_OBS): Add signals-state-save-restore.o.
+	(signals-state-save-restore.o): New rule.
+	* configure: Regenerate.
+	* fork-child.c: Include "signals-state-save-restore.h".
+	(fork_inferior): Call restore_original_signals_state.
+	* main.c: Include "signals-state-save-restore.h".
+	(captured_main): Call save_original_signals_state.
+	* common/common.m4: Add sigaction to AC_CHECK_FUNCS checks.
+	* common/signals-state-save-restore.c: New file.
+	* common/signals-state-save-restore.h: New file.
+
+2016-08-09  Pedro Alves  <palves@redhat.com>
+
+	* value.c (unpack_value_bitfield): Skip unpacking if the parent
+	has no contents buffer to begin with.
+
+2016-08-08  Pedro Alves  <palves@redhat.com>
+
+	* features/i386/amd64-avx-mpx-linux.c: Regenerate.
+	* features/i386/amd64-avx-mpx.c: Regenerate.
+	* features/i386/i386-avx-mpx-linux.c: Regenerate.
+	* features/i386/i386-avx-mpx.c: Regenerate.
+
+2016-08-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* event-top.h (cli_command_loop): Remove.
+
+2016-08-05  Pedro Alves  <palves@redhat.com>
+
+	PR remote/20398
+	* remote-fileio.c (remote_fileio_quit_handler): Check the quit
+	flag before calling quit.
+
+2016-08-05  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that GDB and GDBserver build with a C++ compiler
+	by default.
+
+2016-08-05  Pedro Alves  <palves@redhat.com>
+
+	* build-with-cxx.m4: Change help string to be in terms of
+	--disable-build-with-cxx.
+	* configure: Regenerate.
+
+2016-08-04  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (tdesc_arm_with_vfpv3): Remove the
+	declaration.
+	(aarch64_linux_read_description): Remove code on getting
+	auxv and select target description on it.  Select target
+	description by the result of NT_ARM_VFP ptrace request.
+
+2016-08-03  Tom Tromey  <tom@tromey.com>
+
+	PR python/18565:
+	* python/py-frame.c (frapy_function): Use find_frame_funname.
+
+2016-08-03  Tom Tromey  <tom@tromey.com>
+
+	* stack.c (find_frame_funname): Avoid any possible leak in case
+	cp_remove_params can throw.
+
+2016-08-03  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Mention new Python breakpoint events.
+
+2016-08-02  Tom Tromey  <tom@tromey.com>
+
+	* MAINTAINERS (Core): Add self as Rust maintainer.
+
+2016-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
+2016-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.12 branch created (41bfcd638a4e0e48b96ce4de2845372dea481322):
+	* version.in: Bump version to 7.12.50.DATE-git.
+
+2016-07-27  Alan Modra  <amodra@gmail.com>
+
+	* amd64-darwin-tdep.c: Don't include libbfd.h.
+	* i386-darwin-tdep.c: Likewise.
+	* rs6000-nat.c: Likewise.
+	* rs6000-tdep.c: Likewise.
+
+2016-07-26  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (register_symbol_computed_impl): Update.
+	PR python/20190:
+	* value.h (symbol_read_needs): Declare.
+	(symbol_read_needs_frame): Add comment.
+	* symtab.h (struct symbol_computed_ops) <read_variable>: Update
+	comment.
+	<get_symbol_read_needs>: Rename.  Change return type.
+	* findvar.c (symbol_read_needs): New function.
+	(symbol_read_needs_frame): Rewrite.
+	(default_read_var_value): Use symbol_read_needs.
+	* dwarf2loc.c (struct symbol_needs_baton): Rename.
+	<needs>: Renamed from needs_frame.  Changed type.
+	(needs_frame_read_addr_from_reg, symbol_needs_get_reg_value)
+	(symbol_needs_read_mem, symbol_needs_frame_base)
+	(symbol_needs_frame_cfa, symbol_needs_tls_address)
+	(symbol_needs_dwarf_call): Rename.
+	(needs_dwarf_reg_entry_value): Update.
+	(symbol_needs_ctx_funcs, dwarf2_loc_desc_get_symbol_read_needs):
+	Rename and update.
+	(locexpr_get_symbol_read_needs, loclist_symbol_needs): Likewise.
+	(dwarf2_locexpr_funcs, dwarf2_loclist_funcs): Update.
+	* defs.h (enum symbol_needs_kind): New.
+
+2016-07-26  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-ptrace.c: Include "gregset.h".
+	(linux_ptrace_test_ret_to_nx): Use PTRACE_GETREGS instead of
+	PTRACE_PEEKUSER.
+
+2016-07-26  Pedro Alves  <palves@redhat.com>
+
+	* amd64-linux-nat.c (amd64_linux_siginfo_fixup): Rename 'native'
+	parameter to 'ptrace'.
+	* nat/amd64-linux-siginfo.c (GDB_SI_SIZE): New define.
+	(nat_uptr_t): New an unsigned long.
+	(nat_clock_t): Remove attribute __aligned__.
+	(struct nat_timeval): Delete.
+	(nat_siginfo_t): Remove attribute __aligned__.
+	(ptrace_siginfo_t): Define.
+	(compat_siginfo_from_siginfo, siginfo_from_compat_siginfo)
+	(compat_x32_siginfo_from_siginfo)
+	(siginfo_from_compat_x32_siginfo): Make 'from' parameter const.
+	Convert through a ptrace_siginfo_t instead of a nat_siginfo_t.
+	Remove casts.
+	(amd64_linux_siginfo_fixup_common): Rename 'native' parameter to
+	'ptrace'.  Remove static assertions.
+	(top level): New static assertions.
+
+2016-07-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* top.h (make_delete_ui_cleanup): New declaration.
+	* top.c (delete_ui_cleanup): New function.
+	(make_delete_ui_cleanup): New function.
+	(new_ui_command): Create restore_ui cleanup earlier, create a
+	delete_ui cleanup and discard it on success.
+
+2016-07-25  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* nat/linux-procfs.c (parse_proc_status_state): Handle lowercase
+	't'.
+
+2016-07-25  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-procfs.c (enum proc_state): New enum.
+	(parse_proc_status_state): New function.
+	(linux_proc_pid_get_state): Replace output string buffer parameter
+	with an output proc_state parameter.  Use parse_proc_status_state.
+	(linux_proc_pid_is_gone): Adjust to use proc_state values.
+	(linux_proc_pid_has_state): Change type of 'state' parameter; now
+	an enum proc_state.  Adjust to linux_proc_pid_get_state interface
+	change.
+	(linux_proc_pid_is_stopped)
+	(linux_proc_pid_is_trace_stopped_nowarn)
+	(linux_proc_pid_is_zombie_maybe_warn): Adjust to
+	linux_proc_pid_get_state interface change.
+
+2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* MAINTAINERS (Write After Approval): Add Tim Wiederhake
+
+2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* NEWS: Resume btrace on reconnect.
+	* record-btrace.c: Added record-btrace.h include.
+	(record_btrace_open): Split into this and ...
+	(record_btrace_push_target): ... this.
+	(record_btrace_disconnect): New function.
+	(init_record_btrace_ops): Use record_btrace_disconnect.
+	* record-btrace.h: New file.
+	* remote.c: Added record-btrace.h include.
+	(remote_start_remote): Check recording status.
+	(remote_btrace_maybe_reopen): New function.
+
+2016-07-23  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* xml-syscall.c (get_syscalls_by_group): New.
+	(get_syscall_group_names): New.
+	(struct syscall_group_desc): New structure to store group data.
+	(struct syscalls_info): Include field to store the group list.
+	(sysinfo_free_syscall_group_desc): New.
+	(free_syscalls_info): Free group list.
+	(syscall_group_create_syscall_group_desc): New.
+	(syscall_group_add_syscall): New.
+	(syscall_create_syscall_desc): Add syscall to its groups.
+	(syscall_start_syscall): Load group attribute.
+	(syscall_group_get_group_by_name): New.
+	(xml_list_syscalls_by_group): New.
+	(xml_list_of_groups): New.
+	* xml-syscall.h (get_syscalls_by_group): Export function
+	to retrieve a list of syscalls filtered by the group name.
+	(get_syscall_group_names): Export function to retrieve the list
+	of syscall groups.
+	* break-catch-syscall.c (catch_syscall_split_args): Verify if
+	argument is a syscall group and expand it to a list of syscalls
+	when creating catchpoints.
+	(catch_syscall_completer): Add word completion for system call
+	groups.
+	* configure.ac: Include dependency for xsltproc when building
+	in maintainer-mode.
+	* break-catch-syscall.c (_initialize_breakpoint): Update catch
+	syscall command documentation.
+	* NEWS: Include section about catching groups of syscalls.
+	* configure: Regenerate.
+	* data-directory/Makefile.in: Generate syscall xml when building
+	in maintainer mode.
+	* syscalls/gdb-syscalls.dtd: Include group attribute to the
+	syscall element.
+	* syscalls/apply-defaults.xsl: New.
+	* syscalls/linux-defaults.xml.in: New.
+	* syscalls/aarch64-linux.xml: Rename to aarch64-linux.xml.in.
+	* syscalls/amd64-linux.xml: Rename to amd64-linux.xml.in.
+	* syscalls/arm-linux.xml: Rename to arm-linux.xml.in.
+	* syscalls/bfin-linux.xml: Rename to bfin-linux.xml.in.
+	* syscalls/i386-linux.xml: Rename to i386-linux.xml.in.
+	* syscalls/mips-n32-linux.xml: Rename to mips-n32-linux.xml.in.
+	* syscalls/mips-n64-linux.xml: Rename to mips-n64-linux.xml.in.
+	* syscalls/mips-o32-linux.xml: Rename to mips-o32-linux.xml.in.
+	* syscalls/ppc-linux.xml: Rename to ppc-linux.xml.in.
+	* syscalls/ppc64-linux.xml: Rename to ppc64-linux.xml.in.
+	* syscalls/s390-linux.xml: Rename to s390-linux.xml.in.
+	* syscalls/s390x-linux.xml: Rename to s390x-linux.xml.in.
+	* syscalls/sparc-linux.xml: Rename to sparc-linux.xml.in.
+	* syscalls/sparc64-linux.xml: Rename to sparc64-linux.xml.in.
+	* syscalls/aarch64-linux.xml: Regenerate.
+	* syscalls/amd64-linux.xml: Regenerate.
+	* syscalls/arm-linux.xml: Regenerate.
+	* syscalls/i386-linux.xml: Regenerate.
+	* syscalls/mips-n32-linux.xml: Regenerate.
+	* syscalls/mips-n64-linux.xml: Regenerate.
+	* syscalls/mips-o32-linux.xml: Regenerate.
+	* syscalls/ppc-linux.xml: Regenerate.
+	* syscalls/ppc64-linux.xml: Regenerate.
+	* syscalls/s390-linux.xml: Regenerate.
+	* syscalls/s390x-linux.xml: Regenerate.
+	* syscalls/sparc-linux.xml: Regenerate.
+	* syscalls/sparc64-linux.xml: Regenerate.
+
+2016-07-23  Andrew Pinski  <apinski@cavium.com>
+
+	* nat/aarch64-linux-hw-point.c
+	(aarch64_linux_get_debug_reg_capacity): Handle
+	ARMv8.1 and ARMv8.2 debug versions.
+	* nat/aarch64-linux-hw-point.h
+	(AARCH64_DEBUG_ARCH_V8_1): New define.
+	(AARCH64_DEBUG_ARCH_V8_2): New define.
+
+2016-06-30  Руслан Ижбулатов  <lrn1986@gmail.com>
+
+	PR gdb/14529
+	* windows-nat.c (signal_event_command): New command 'signal-event'
+	for W32 JIT debug support.
+	* NEWS: Add an entry about the new 'signal-event' command.
+
+2016-07-22  Tom Tromey  <tom@tromey.com>
+
+	PR rust/20162:
+	* dwarf2read.c (scan_partial_symbols) <DW_TAG_structure_type>:
+	Call scan_partial_symbols for children when reading a Rust CU.
+	(dwarf2_physname): Ignore invalid DW_AT_linkage_name generated by
+	rustc.
+	(process_structure_scope) <DW_TAG_subprogram>: Call
+	read_func_scope for Rust.
+
+2016-07-22  Yao Qi  <yao.qi@linaro.org>
+
+	* ctf.c (ctf_traceframe_info): Call bt_ctf_get_uint64 rather than
+	bt_ctf_get_int64.
+
 2016-07-21  Tom Tromey  <tom@tromey.com>
 
 	* rust-lang.c (rust_tuple_struct_type_p): Return false for empty

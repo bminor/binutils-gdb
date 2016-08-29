@@ -550,6 +550,22 @@ stdin_event_handler (int error, gdb_client_data client_data)
     }
 }
 
+/* See top.h.  */
+
+void
+ui_register_input_event_handler (struct ui *ui)
+{
+  add_file_handler (ui->input_fd, stdin_event_handler, ui);
+}
+
+/* See top.h.  */
+
+void
+ui_unregister_input_event_handler (struct ui *ui)
+{
+  delete_file_handler (ui->input_fd);
+}
+
 /* Re-enable stdin after the end of an execution command in
    synchronous mode, or after an error from the target, and we aborted
    the exec operation.  */
@@ -562,6 +578,7 @@ async_enable_stdin (void)
   if (ui->prompt_state == PROMPT_BLOCKED)
     {
       target_terminal_ours ();
+      ui_register_input_event_handler (ui);
       ui->prompt_state = PROMPT_NEEDED;
     }
 }
@@ -575,6 +592,7 @@ async_disable_stdin (void)
   struct ui *ui = current_ui;
 
   ui->prompt_state = PROMPT_BLOCKED;
+  delete_file_handler (ui->input_fd);
 }
 
 
@@ -1284,7 +1302,7 @@ gdb_setup_readline (int editing)
      Another source is going to be the target program (inferior), but
      that must be registered only when it actually exists (I.e. after
      we say 'run' or after we connect to a remote target.  */
-  add_file_handler (ui->input_fd, stdin_event_handler, ui);
+  ui_register_input_event_handler (ui);
 }
 
 /* Disable command input through the standard CLI channels.  Used in

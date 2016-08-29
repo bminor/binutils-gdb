@@ -457,7 +457,7 @@ aarch64_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
    storage (or its descriptor).  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
   int is_64bit_p
@@ -481,7 +481,6 @@ aarch64_linux_child_post_startup_inferior (struct target_ops *self,
   super_post_startup_inferior (self, ptid);
 }
 
-extern struct target_desc *tdesc_arm_with_vfpv3;
 extern struct target_desc *tdesc_arm_with_neon;
 
 /* Implement the "to_read_description" target_ops method.  */
@@ -489,47 +488,20 @@ extern struct target_desc *tdesc_arm_with_neon;
 static const struct target_desc *
 aarch64_linux_read_description (struct target_ops *ops)
 {
-  CORE_ADDR at_phent;
+  int ret, tid;
+  gdb_byte regbuf[VFP_REGS_SIZE];
+  struct iovec iovec;
 
-  if (target_auxv_search (ops, AT_PHENT, &at_phent) == 1)
-    {
-      if (at_phent == sizeof (Elf64_External_Phdr))
-	return tdesc_aarch64;
-      else
-	{
-	  CORE_ADDR arm_hwcap = 0;
+  tid = ptid_get_lwp (inferior_ptid);
 
-	  if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)
-	    return ops->beneath->to_read_description (ops->beneath);
+  iovec.iov_base = regbuf;
+  iovec.iov_len = VFP_REGS_SIZE;
 
-#ifndef COMPAT_HWCAP_VFP
-#define COMPAT_HWCAP_VFP        (1 << 6)
-#endif
-#ifndef COMPAT_HWCAP_NEON
-#define COMPAT_HWCAP_NEON       (1 << 12)
-#endif
-#ifndef COMPAT_HWCAP_VFPv3
-#define COMPAT_HWCAP_VFPv3      (1 << 13)
-#endif
-
-	  if (arm_hwcap & COMPAT_HWCAP_VFP)
-	    {
-	      char *buf;
-	      const struct target_desc *result = NULL;
-
-	      if (arm_hwcap & COMPAT_HWCAP_NEON)
-		result = tdesc_arm_with_neon;
-	      else if (arm_hwcap & COMPAT_HWCAP_VFPv3)
-		result = tdesc_arm_with_vfpv3;
-
-	      return result;
-	    }
-
-	  return NULL;
-	}
-    }
-
-  return tdesc_aarch64;
+  ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
+  if (ret == 0)
+    return tdesc_arm_with_neon;
+  else
+    return tdesc_aarch64;
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the

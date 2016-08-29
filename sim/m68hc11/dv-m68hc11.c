@@ -496,7 +496,7 @@ m68hc11cpu_port_event (struct hw *me,
 {
   struct m68hc11cpu *controller = hw_data (me);
   SIM_DESC sd;
-  sim_cpu* cpu;
+  sim_cpu *cpu;
   
   sd  = hw_system (me);
   cpu = STATE_CPU (sd, 0);

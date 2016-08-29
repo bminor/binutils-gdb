@@ -1345,6 +1345,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "micromips"
     run_dump_test "micromips-trap"
+    run_dump_test "micromips-compact"
     run_dump_test "micromips-insn32"
     run_dump_test "micromips-noinsn32"
     run_list_test "micromips" "-mips32r2 -32 -mfp64 -minsn32" \
@@ -1354,6 +1355,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "micromips-size-1"
     run_dump_test "micromips-branch-relax"
     run_dump_test "micromips-branch-relax-pic"
+    run_dump_test "micromips-branch-relax-insn32"
+    run_dump_test "micromips-branch-relax-insn32-pic"
     run_dump_test "micromips-branch-delay"
     run_dump_test "micromips-warn-branch-delay"
     run_dump_test "micromips-warn-branch-delay-1"

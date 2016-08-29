@@ -2218,7 +2218,7 @@ elf64_alpha_copy_indirect_symbol (struct bfd_link_info *info,
 		&& gi->reloc_type == gs->reloc_type
 		&& gi->addend == gs->addend)
 	      {
-		gi->use_count += gs->use_count;
+		gs->use_count += gi->use_count;
 	        goto got_found;
 	      }
 	  gi->next = hs->got_entries;

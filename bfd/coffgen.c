@@ -2691,7 +2691,13 @@ static void
 fini_reloc_cookie_rels (struct coff_reloc_cookie *cookie,
 			asection *sec)
 {
-  if (cookie->rels && coff_section_data (NULL, sec)->relocs != cookie->rels)
+  if (cookie->rels
+      /* PR 20401.  The relocs may not have been cached, so check first.
+	 If the relocs were loaded by init_reloc_cookie_rels() then this
+	 will be the case.  FIXME: Would performance be improved if the
+	 relocs *were* cached ?  */
+      && coff_section_data (NULL, sec)
+      && coff_section_data (NULL, sec)->relocs != cookie->rels)
     free (cookie->rels);
 }
 

@@ -22,6 +22,10 @@
 #ifndef ARCDIS_H
 #define ARCDIS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum ARC_Debugger_OperandType
 {
     ARC_UNDEFINED,
@@ -102,4 +106,9 @@ struct arcDisState
 
 struct arcDisState
 arcAnalyzeInstr (bfd_vma memaddr, struct disassemble_info *);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

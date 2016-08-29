@@ -629,7 +629,8 @@ struct symbol_computed_ops
      frame FRAME.  If the variable has been optimized out, return
      zero.
 
-     Iff `read_needs_frame (SYMBOL)' is zero, then FRAME may be zero.  */
+     Iff `read_needs_frame (SYMBOL)' is not SYMBOL_NEEDS_FRAME, then
+     FRAME may be zero.  */
 
   struct value *(*read_variable) (struct symbol * symbol,
 				  struct frame_info * frame);
@@ -640,8 +641,11 @@ struct symbol_computed_ops
   struct value *(*read_variable_at_entry) (struct symbol *symbol,
 					   struct frame_info *frame);
 
-  /* Return non-zero if we need a frame to find the value of the SYMBOL.  */
-  int (*read_needs_frame) (struct symbol * symbol);
+  /* Find the "symbol_needs_kind" value for the given symbol.  This
+     value determines whether reading the symbol needs memory (e.g., a
+     global variable), just registers (a thread-local), or a frame (a
+     local variable).  */
+  enum symbol_needs_kind (*get_symbol_read_needs) (struct symbol * symbol);
 
   /* Write to STREAM a natural-language description of the location of
      SYMBOL, in the context of ADDR.  */

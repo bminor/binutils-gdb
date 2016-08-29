@@ -357,6 +357,8 @@ if { $linux_gnu } {
     #
     # The third test checks that we do the same when linking the
     # result of the first link (with no other source files).
+    #
+    # We then repeat the same three tests for microMIPS stubs.
     run_ld_link_tests {
 	{"PIC and non-PIC test 1 (relocatable)" "-r -melf32btsmip" ""
 	 "-32 -EB -mips2" {pic-and-nonpic-1a.s pic-and-nonpic-1b.s}
@@ -375,6 +377,42 @@ if { $linux_gnu } {
 	 {{objdump -dr pic-and-nonpic-1.dd}
 	  {readelf --symbols pic-and-nonpic-1.nd}}
 	 "pic-and-nonpic-1-static2.o"}
+	{"PIC and non-PIC test 1, microMIPS (relocatable)"
+	 "-r -melf32btsmip" ""
+	 "-32 -EB -mips2"
+	 {pic-and-nonpic-1a-micromips.s pic-and-nonpic-1b-micromips.s}
+	 {{objdump -dr pic-and-nonpic-1-micromips-rel.dd}
+	  {readelf --symbols pic-and-nonpic-1-micromips-rel.nd}}
+	 "pic-and-nonpic-1-micromips-rel.o"}
+	{"PIC and non-PIC test 1, microMIPS (static 1)"
+	 "-melf32btsmip -Tpic-and-nonpic-1.ld" ""
+	 "-32 -EB -mips2"
+	 {pic-and-nonpic-1a-micromips.s pic-and-nonpic-1b-micromips.s}
+	 {{objdump -dr pic-and-nonpic-1-micromips.dd}
+	  {readelf --symbols pic-and-nonpic-1-micromips.nd}}
+	 "pic-and-nonpic-1-micromips-static1.o"}
+    }
+    # The final executable produced with the following test is supposed
+    # to be the same as one produced with the preceding test, however
+    # as noted in PR ld/20453 it is not.  Consequently output from
+    # `objdump -dr' is not the same either.  Expect:
+    #
+    #	regexp_diff match failure
+    #	regexp "^   4103c:	f001 0415 	jalx	41054 <f3>$"
+    #	line   "   4103c:	f001 0400 	jalx	41000 <.pic.f3>"
+    #
+    # from the test below due to this problem.
+    setup_kfail "mips*-*-*" "ld/20453"
+    # The final check below should be folded into the `run_ld_link_tests'
+    # call above once `setup_kfail' has been removed.
+    run_ld_link_tests {
+	{"PIC and non-PIC test 1, microMIPS (static 2)"
+	 "-melf32btsmip -Tpic-and-nonpic-1.ld \
+	  tmpdir/pic-and-nonpic-1-micromips-rel.o" ""
+	 "" {}
+	 {{objdump -dr pic-and-nonpic-1-micromips.dd}
+	  {readelf --symbols pic-and-nonpic-1-micromips.nd}}
+	 "pic-and-nonpic-1-micromips-static2.o"}
     }
     run_dump_test "pic-and-nonpic-2"
     run_ld_link_tests {
@@ -923,9 +961,6 @@ foreach { abi } $abis {
             [list ehdr_start-${suff}.s] \
             [list "readelf -s ehdr_start-1.nd"] \
             "ehdr_start-1-${abi}"]]
-    if [regexp "(?:n32|n64)" "$abi"] {
-	setup_kfail "mips*-*-*" "ld/15428"
-    }
     run_ld_link_tests [list \
         [list \
             "MIPS magic __ehdr_start symbol test 2 ($abi)" \
@@ -974,13 +1009,13 @@ proc run_mips_plt_test { name abi filter micromips suffix {extra {}} } {
     set ld_flags "$abi_ldflags($abi) -T compressed-plt-1.ld"
     set dynobj "tmpdir/compressed-plt-1-${abi}-dyn.so"
     set files [list]
-    if { $filter & 3 } {
+    if { $filter & 7 } {
 	lappend files compressed-plt-1a.s
     }
-    if { $filter & 12 } {
+    if { $filter & 56 } {
 	lappend files compressed-plt-1b.s
     }
-    if { $filter & 16 } {
+    if { $filter & 64 } {
 	lappend files compressed-plt-1c.s
     }
     eval [list lappend files] $extra
@@ -1000,28 +1035,35 @@ proc run_mips_plt_test { name abi filter micromips suffix {extra {}} } {
 
 if { $linux_gnu } {
     build_mips_plt_lib o32
-    run_mips_plt_test "o32 PLTs for standard encoding" o32 28 0 se
-    run_mips_plt_test "o32 PLTs for MIPS16 encoding" o32 19 0 mips16-only
-    run_mips_plt_test "o32 PLTs for microMIPS encoding" o32 19 1 umips-only
+    run_mips_plt_test "o32 PLTs for standard encoding" o32 104 0 se
+    run_mips_plt_test "o32 PLTs for standard branches" o32 16 0 branch
+    run_mips_plt_test "o32 PLTs for MIPS16 encoding" o32 69 0 mips16-only
+    run_mips_plt_test "o32 PLTs for MIPS16 branches" o32 2 0 mips16-bronly
+    run_mips_plt_test "o32 PLTs for microMIPS encoding" o32 69 1 umips-only
+    run_mips_plt_test "o32 PLTs for microMIPS branches" o32 2 1 umips-bronly
     run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16" \
-	o32 -1 0 mips16
+	o32 109 0 mips16
+    run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16 branches" \
+	o32 18 0 mips16-branch
     run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16 with %got" \
-	o32 -1 0 mips16-got compressed-plt-1d.s
+	o32 109 0 mips16-got compressed-plt-1d.s
     run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16 with .word" \
-	o32 -1 0 mips16-word compressed-plt-1e.s
+	o32 109 0 mips16-word compressed-plt-1e.s
     run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS" \
-	o32 -1 1 umips
+	o32 109 1 umips
+    run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS branches" \
+	o32 18 1 umips-branch
     run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS with %got" \
-	o32 -1 1 umips-got compressed-plt-1d.s
+	o32 109 1 umips-got compressed-plt-1d.s
     run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS with .word" \
-	o32 -1 1 umips-word compressed-plt-1e.s
+	o32 109 1 umips-word compressed-plt-1e.s
 
     if $has_newabi {
 	build_mips_plt_lib n32
 	run_mips_plt_test "n32 PLTs for mixed MIPS and MIPS16" \
-	    n32 -1 0 mips16
+	    n32 109 0 mips16
 	run_mips_plt_test "n32 PLTs for mixed MIPS and microMIPS" \
-	    n32 -1 1 umips
+	    n32 109 1 umips
     }
 }
 

@@ -25,11 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "bfd.h"
-#include "libbfd.h"
 #include "libiberty.h"
-#include "elf/internal.h"
-#include "elf/common.h"
 
 #include "memory.h"
 #include "simulator.h"
@@ -164,10 +160,10 @@ aarch64_get_mem_ptr (sim_cpu *cpu, uint64_t address)
 uint64_t
 aarch64_get_heap_start (sim_cpu *cpu)
 {
-  uint64_t heap = aarch64_get_sym_value ("end");
+  uint64_t heap = trace_sym_value (CPU_STATE (cpu), "end");
 
   if (heap == 0)
-    heap = aarch64_get_sym_value ("_end");
+    heap = trace_sym_value (CPU_STATE (cpu), "_end");
   if (heap == 0)
     {
       heap = STACK_TOP - 0x100000;

@@ -44,6 +44,7 @@
 #include <signal.h>
 #include "event-top.h"
 #include "infrun.h"
+#include "signals-state-save-restore.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -505,6 +506,7 @@ captured_main (void *data)
 
   bfd_init ();
   notice_open_fds ();
+  save_original_signals_state ();
 
   make_cleanup (VEC_cleanup (cmdarg_s), &cmdarg_vec);
   dirsize = 1;

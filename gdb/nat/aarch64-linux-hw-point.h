@@ -68,6 +68,8 @@
 
 /* Macro for the expected version of the ARMv8-A debug architecture.  */
 #define AARCH64_DEBUG_ARCH_V8 0x6
+#define AARCH64_DEBUG_ARCH_V8_1 0x7
+#define AARCH64_DEBUG_ARCH_V8_2 0x8
 
 /* ptrace expects control registers to be formatted as follows:
 

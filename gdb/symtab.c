@@ -6092,7 +6092,7 @@ register_symbol_computed_impl (enum address_class aclass,
   gdb_assert (ops != NULL);
   gdb_assert (ops->tracepoint_var_ref != NULL);
   gdb_assert (ops->describe_location != NULL);
-  gdb_assert (ops->read_needs_frame != NULL);
+  gdb_assert (ops->get_symbol_read_needs != NULL);
   gdb_assert (ops->read_variable != NULL);
 
   return result;

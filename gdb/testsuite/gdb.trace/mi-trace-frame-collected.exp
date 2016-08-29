@@ -95,15 +95,25 @@ proc test_trace_frame_collected { data_source } {
 
 	# Test MI command '-trace-frame-collected' dumps only
 	# collected registers.
+
+	# While the tracepoint has no explicit action that causes
+	# collection of registers other than the PC, some
+	# architectures manage to collect or guess more than that.
 	if { [istarget "s390*-*-*"] } {
-	    # Only PC is collected, but on s390 PC is a pseudo-register -
-	    # collecting it also collects the underlying PSWA register.
+	    # On s390 PC is a pseudo-register - collecting it also
+	    # collects the underlying PSWA register.
 	    if { "$data_source" != "tfile" } {
 		set reg_pattern "$reg_pattern,$reg_pattern"
 	    } else {
 		# For tfile, PSWM and CC are also guessed.
 		set reg_pattern "$reg_pattern,$reg_pattern,$reg_pattern,$reg_pattern"
 	    }
+	} elseif {[is_amd64_regs_target] && [is_ilp32_target]} {
+	    # x32.  While on the 64-bit ABI gdb only exposes 64-bit
+	    # $pc/$rip, on x32, GDB exposes 32-bit $eip as well, as a
+	    # pseudo-register.  Thus, collecting $pc/$rip
+	    # automatically always collects $eip as well.
+	    set reg_pattern "$reg_pattern,$reg_pattern"
 	}
 
 	mi_gdb_test "-trace-frame-collected" \

@@ -22,6 +22,7 @@ PYTHON_SRCDIR = $(srcdir)/../python/lib
 GUILE_SRCDIR = $(srcdir)/../guile/lib
 SYSTEM_GDBINIT_SRCDIR = $(srcdir)/../system-gdbinit
 VPATH = $(srcdir):$(SYSCALLS_SRCDIR):$(PYTHON_SRCDIR):$(GUILE_SRCDIR):$(SYSTEM_GDBINIT_SRCDIR)
+XSLTPROC = @XSLTPROC@
 
 top_srcdir = @top_srcdir@
 top_builddir = @top_builddir@
@@ -44,15 +45,14 @@ GDB_DATADIR = @GDB_DATADIR@
 
 SYSCALLS_DIR = syscalls
 SYSCALLS_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(SYSCALLS_DIR)
-SYSCALLS_FILES = \
-	gdb-syscalls.dtd \
-	arm-linux.xml aarch64-linux.xml \
+GEN_SYSCALLS_FILES = arm-linux.xml aarch64-linux.xml \
 	ppc-linux.xml ppc64-linux.xml \
 	i386-linux.xml amd64-linux.xml \
 	sparc-linux.xml sparc64-linux.xml \
 	mips-o32-linux.xml mips-n32-linux.xml mips-n64-linux.xml \
-	s390-linux.xml s390x-linux.xml \
-	freebsd.xml
+	s390-linux.xml s390x-linux.xml
+
+SYSCALLS_FILES = gdb-syscalls.dtd freebsd.xml $(GEN_SYSCALLS_FILES)
 
 PYTHON_DIR = python
 PYTHON_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(PYTHON_DIR)
@@ -162,6 +162,21 @@ FLAGS_TO_PASS = \
 
 .PHONY: all
 all: stamp-syscalls stamp-python stamp-guile stamp-system-gdbinit
+
+%.xml: @MAINTAINER_MODE_TRUE@ %.xml.in apply-defaults.xsl linux-defaults.xml.in
+	$(XSLTPROC) -o $(SYSCALLS_SRCDIR)/$@ $(SYSCALLS_SRCDIR)/apply-defaults.xsl\
+		$(SYSCALLS_SRCDIR)/$@.in
+
+.PHONY: syscall-xml
+syscall-xml: $(GEN_SYSCALLS_FILES)
+
+.PHONY: clean-syscall-xml
+# Only clean files generated XML files.
+clean-syscall-xml:
+	files='$(GEN_SYSCALLS_FILES)' ; \
+	for file in $$files; do \
+		rm -f "$(SYSCALLS_SRCDIR)/$$file"; \
+	done
 
 # For portability's sake, we need to handle systems that don't have
 # symbolic links.

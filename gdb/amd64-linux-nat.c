@@ -245,7 +245,7 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
    a request for a thread's local storage address.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
   if (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 32)
@@ -321,25 +321,25 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-/* Convert a native/host siginfo object, into/from the siginfo in the
+/* Convert a ptrace/host siginfo object, into/from the siginfo in the
    layout of the inferiors' architecture.  Returns true if any
    conversion was done; false otherwise.  If DIRECTION is 1, then copy
-   from INF to NATIVE.  If DIRECTION is 0, copy from NATIVE to
+   from INF to PTRACE.  If DIRECTION is 0, copy from PTRACE to
    INF.  */
 
 static int
-amd64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+amd64_linux_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 {
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
 
   /* Is the inferior 32-bit?  If so, then do fixup the siginfo
      object.  */
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
-      return amd64_linux_siginfo_fixup_common (native, inf, direction,
+      return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					       FIXUP_32);
   /* No fixup for native x32 GDB.  */
   else if (gdbarch_addr_bit (gdbarch) == 32 && sizeof (void *) == 8)
-      return amd64_linux_siginfo_fixup_common (native, inf, direction,
+      return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					       FIXUP_X32);
   else
     return 0;

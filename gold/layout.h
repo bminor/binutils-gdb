@@ -1037,9 +1037,9 @@ class Layout
   void
   create_gold_note();
 
-  // Record whether the stack must be executable.
+  // Record whether the stack must be executable, and a user-supplied size.
   void
-  create_executable_stack_info();
+  create_stack_segment();
 
   // Create a build ID note if needed.
   void

@@ -22,9 +22,9 @@ Section Headers:
  +\[[ 0-9]+\] .tbss +NOBITS .* 0+40 00 WAT +0 +0 +1
  +\[[ 0-9]+\] .dynamic +DYNAMIC .*
  +\[[ 0-9]+\] .got +PROGBITS .*
- +\[[ 0-9]+\] .shstrtab .*
  +\[[ 0-9]+\] .symtab .*
  +\[[ 0-9]+\] .strtab .*
+ +\[[ 0-9]+\] .shstrtab .*
 Key to Flags:
 #...
 

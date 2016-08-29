@@ -1192,11 +1192,11 @@ pr20216a.so: pr20216_gd.o pr20216_ld.o gcctestdir/ld
 pr20216b.so: pr20216_def.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared pr20216_def.o
 
-pr20216_gd.o: pr20216_gd.S
-	$(COMPILE) -c -o $@ $<
+pr20216_gd.o: pr20216_gd.S gcctestdir/as
+	$(COMPILE) -Bgcctestdir/ -c -o $@ $<
 
-pr20216_ld.o: pr20216_ld.S
-	$(COMPILE) -c -o $@ $<
+pr20216_ld.o: pr20216_ld.S gcctestdir/as
+	$(COMPILE) -Bgcctestdir/ -c -o $@ $<
 
 endif DEFAULT_TARGET_X86_64_OR_X32
 
@@ -1297,11 +1297,11 @@ pr20308a.so: pr20308_gd.o pr20308_ld.o gcctestdir/ld
 pr20308b.so: pr20308_def.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared pr20308_def.o
 
-pr20308_gd.o: pr20308_gd.S
-	$(COMPILE) -c -o $@ $<
+pr20308_gd.o: pr20308_gd.S gcctestdir/as
+	$(COMPILE) -Bgcctestdir/ -c -o $@ $<
 
-pr20308_ld.o: pr20308_ld.S
-	$(COMPILE) -c -o $@ $<
+pr20308_ld.o: pr20308_ld.S gcctestdir/as
+	$(COMPILE) -Bgcctestdir/ -c -o $@ $<
 
 endif DEFAULT_TARGET_I386
 
@@ -3618,6 +3618,19 @@ aarch64_reloc_none.stdout: aarch64_reloc_none
 	$(TEST_NM) $< > $@
 
 MOSTLYCLEANFILES += aarch64_reloc_none
+
+check_SCRIPTS += aarch64_relocs.sh
+check_DATA += aarch64_relocs.stdout
+aarch64_globals.o: aarch64_globals.s
+	$(TEST_AS) -o $@ $<
+aarch64_relocs.o: aarch64_relocs.s
+	$(TEST_AS) -o $@ $<
+aarch64_relocs: aarch64_relocs.o aarch64_globals.o ../ld-new
+	../ld-new -o $@ aarch64_relocs.o aarch64_globals.o -e0 --emit-relocs
+aarch64_relocs.stdout: aarch64_relocs
+	$(TEST_OBJDUMP) -dr $< > $@
+
+MOSTLYCLEANFILES += aarch64_relocs
 
 endif DEFAULT_TARGET_AARCH64
 

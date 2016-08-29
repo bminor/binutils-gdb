@@ -920,6 +920,16 @@ ignore (struct target_ops *ops, struct gdbarch *gdbarch,
   return 0;
 }
 
+/* Implement the to_remove_breakpoint method.  */
+
+static int
+core_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
+			struct bp_target_info *bp_tgt,
+			enum remove_bp_reason reason)
+{
+  return 0;
+}
+
 
 /* Okay, let's be honest: threads gleaned from a core file aren't
    exactly lively, are they?  On the other hand, if we don't claim
@@ -1043,7 +1053,7 @@ init_core_ops (void)
   core_ops.to_xfer_partial = core_xfer_partial;
   core_ops.to_files_info = core_files_info;
   core_ops.to_insert_breakpoint = ignore;
-  core_ops.to_remove_breakpoint = ignore;
+  core_ops.to_remove_breakpoint = core_remove_breakpoint;
   core_ops.to_thread_alive = core_thread_alive;
   core_ops.to_read_description = core_read_description;
   core_ops.to_pid_to_str = core_pid_to_str;

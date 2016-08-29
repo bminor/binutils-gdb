@@ -72,6 +72,4 @@ extern void gdb_rl_callback_handler_install (const char *prompt);
    currently installed.  */
 extern void gdb_rl_callback_handler_reinstall (void);
 
-extern void cli_command_loop (void *);
-
 #endif

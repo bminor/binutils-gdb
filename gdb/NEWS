@@ -1,7 +1,25 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.11
+*** Changes since GDB 7.12
+
+* Support for thread names on MS-Windows.
+
+  GDB now catches and handles the special exception that programs
+  running on MS-Windows use to assign names to threads in the
+  debugger.
+
+*** Changes in GDB 7.12
+
+* GDB and GDBserver now build with a C++ compiler by default.
+
+  The --enable-build-with-cxx configure option is now enabled by
+  default.  One must now explicitly configure with
+  --disable-build-with-cxx in order to build with a C compiler.  This
+  option will be removed in a future release.
+
+* GDBserver now supports recording btrace without maintaining an active
+  GDB connection.
 
 * GDB now supports a negative repeat count in the 'x' command to examine
   memory backward from the given address.  For example:
@@ -60,6 +78,11 @@
   for its own control and synchronization, invisible to the command
   line.
 
+* The "catch syscall" command catches groups of related syscalls.
+
+  The "catch syscall" command now supports catching a group of related
+  syscalls using the 'group:' or 'g:' prefix.
+
 * New commands
 
 skip -file file
@@ -84,6 +107,16 @@ new-ui INTERP TTY
 
   ** gdb.Breakpoint objects have a new attribute "pending", which
      indicates whether the breakpoint is pending.
+  ** Three new breakpoint-related events have been added:
+     gdb.breakpoint_created, gdb.breakpoint_modified, and
+     gdb.breakpoint_deleted.
+
+signal-event EVENTID
+  Signal ("set") the given MS-Windows event object.  This is used in
+  conjunction with the Windows JIT debugging (AeDebug) support, where
+  the OS suspends a crashing process until a debugger can attach to
+  it.  Resuming the crashing process, in order to debug it, is done by
+  signalling an event.
 
 * Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
   was added in GDBserver, including JIT compiling fast tracepoint's

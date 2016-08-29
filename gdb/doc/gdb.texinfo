@@ -2499,9 +2499,11 @@ display the name of the terminal that will be used for future runs of your
 program.
 
 @table @code
-@item set inferior-tty /dev/ttyb
+@item set inferior-tty [ @var{tty} ]
 @kindex set inferior-tty
-Set the tty for the program being debugged to /dev/ttyb.
+Set the tty for the program being debugged to @var{tty}.  Omitting @var{tty}
+restores the default behavior, which is to use the same terminal as
+@value{GDBN}.
 
 @item show inferior-tty
 @kindex show inferior-tty
@@ -4375,7 +4377,7 @@ A failed Ada assertion.
 A call to @code{exec}.
 
 @item syscall
-@itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @dots{} 
+@itemx syscall @r{[}@var{name} @r{|} @var{number} @r{|} @r{group:}@var{groupname} @r{|} @r{g:}@var{groupname}@r{]} @dots{}
 @kindex catch syscall
 @cindex break on a system call.
 A call to or return from a system call, a.k.a.@: @dfn{syscall}.  A
@@ -4409,6 +4411,15 @@ into the corresponding numeric code, but using the number directly
 may be useful if @value{GDBN}'s database does not have the complete
 list of syscalls on your system (e.g., because @value{GDBN} lags
 behind the OS upgrades).
+
+You may specify a group of related syscalls to be caught at once using
+the @code{group:} syntax (@code{g:} is a shorter equivalent).  For
+instance, on some platforms @value{GDBN} allows you to catch all
+network related syscalls, by passing the argument @code{group:network}
+to @code{catch syscall}.  Note that not all syscall groups are
+available in every system.  You can use the command completion
+facilities (@pxref{Completion,, command completion}) to list the
+syscall groups available on your environment.
 
 The example below illustrates how this command works if you don't provide
 arguments to it:
@@ -4464,6 +4475,23 @@ Continuing.
 
 Program exited normally.
 (@value{GDBP})
+@end smallexample
+
+Here is an example of catching a syscall group:
+
+@smallexample
+(@value{GDBP}) catch syscall group:process
+Catchpoint 1 (syscalls 'exit' [1] 'fork' [2] 'waitpid' [7]
+'execve' [11] 'wait4' [114] 'clone' [120] 'vfork' [190]
+'exit_group' [252] 'waitid' [284] 'unshare' [310])
+(@value{GDBP}) r
+Starting program: /tmp/catch-syscall
+
+Catchpoint 1 (call to syscall fork), 0x00007ffff7df4e27 in open64 ()
+   from /lib64/ld-linux-x86-64.so.2
+
+(@value{GDBP}) c
+Continuing.
 @end smallexample
 
 However, there can be situations when there is no corresponding name
@@ -6631,7 +6659,9 @@ Hardware-supported instruction recording.  This method does not record
 data.  Further, the data is collected in a ring buffer so old data will
 be overwritten when the buffer is full.  It allows limited reverse
 execution.  Variables and registers are not available during reverse
-execution.
+execution.  In remote debugging, recording continues on disconnect.
+Recorded data can be inspected after reconnecting.  The recording may
+be stopped using @code{record stop}.
 
 The recording format can be specified as parameter.  Without a parameter
 the command chooses the recording format.  The following recording
@@ -21519,6 +21549,35 @@ about the six segment registers.
 This command displays thread specific information stored in the
 Thread Information Block (readable on the X86 CPU family using @code{$fs}
 selector for 32-bit programs and @code{$gs} for 64-bit programs).
+
+@kindex signal-event
+@item signal-event @var{id}
+This command signals an event with user-provided @var{id}.  Used to resume
+crashing process when attached to it using MS-Windows JIT debugging (AeDebug).
+
+To use it, create or edit the following keys in
+@code{HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug} and/or
+@code{HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug}
+(for x86_64 versions):
+
+@itemize @minus
+@item
+@code{Debugger} (REG_SZ) --- a command to launch the debugger.
+Suggested command is: @code{@var{fully-qualified-path-to-gdb.exe} -ex
+"attach %ld" -ex "signal-event %ld" -ex "continue"}.
+
+The first @code{%ld} will be replaced by the process ID of the
+crashing process, the second @code{%ld} will be replaced by the ID of
+the event that blocks the crashing process, waiting for @value{GDBN}
+to attach.
+
+@item
+@code{Auto} (REG_SZ) --- either @code{1} or @code{0}.  @code{1} will
+make the system run debugger specified by the Debugger key
+automatically, @code{0} will cause a dialog box with ``OK'' and
+``Cancel'' buttons to appear, which allows the user to either
+terminate the crashing process (OK) or debug it (Cancel).
+@end itemize
 
 @kindex set cygwin-exceptions
 @cindex debugging the Cygwin DLL

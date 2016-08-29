@@ -2150,6 +2150,7 @@ Target_sparc<size, big_endian>::Scan::check_non_pic(Relobj* object, unsigned int
 	case elfcpp::R_SPARC_RELATIVE:
 	case elfcpp::R_SPARC_IRELATIVE:
 	case elfcpp::R_SPARC_COPY:
+	case elfcpp::R_SPARC_32:
 	case elfcpp::R_SPARC_64:
 	case elfcpp::R_SPARC_GLOB_DAT:
 	case elfcpp::R_SPARC_JMP_SLOT:
@@ -3468,6 +3469,13 @@ Target_sparc<size, big_endian>::Relocate::relocate(
       Reloc::lo10(view, object, psymval, addend);
       break;
 
+    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
+      if (gdop_valid)
+	{
+	  Reloc::gdop_lox10(view, got_offset);
+	  break;
+	}
+      /* Fall through.  */
     case elfcpp::R_SPARC_GOT10:
       Reloc::lo10(view, got_offset, addend);
       break;
@@ -3486,13 +3494,6 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	}
       break;
 
-    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
-      if (gdop_valid)
-	{
-	  Reloc::gdop_lox10(view, got_offset);
-	  break;
-	}
-      /* Fall through.  */
     case elfcpp::R_SPARC_GOT13:
       Reloc::rela32_13(view, got_offset, addend);
       break;

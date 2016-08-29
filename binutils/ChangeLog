@@ -1,3 +1,44 @@
+2016-08-19  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/readelf.s: Adjust expected ordering of
+	sections.
+	* testsuite/binutils-all/readelf.s-64: Likewise.
+
+2016-08-12  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_symbol_table): Generate a warning if a local
+	symbol is found at and offste greater than or equal to the sh_info
+	field of it's section header.
+
+2016-08-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20440
+	* dwarf.c (display_debug_lines_decoded): Add checks for running
+	off the end of the section when populating the directory table and
+	file table.
+	(frame_display_row): Set max_regs equal to ncols.
+	(load_specific_debug_section): If the section is compressed, but
+	it is not big enough to hold a compression header then warn and
+	return 0.
+
+	PR binutils/20439
+	* dwarf.c (display_debug_lines_decoded): Check directory and file
+	indicies before using them to access directory and file tables.
+
+2016-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* resbin.c (bin_to_res_version): Cast variables to correct type
+	for printing in error message.
+
+2016-07-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* rescoff.c (read_coff_res_dir): Fix detection of buffer overrun.
+	* resbin.c (bin_to_res_version): Allow for the padded length of a
+	version block to be longer than the recorded length.  Skip padding
+	bytes.
+
 2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

@@ -262,24 +262,26 @@ debug_insert_breakpoint (struct target_ops *self, struct gdbarch *arg1, struct b
 }
 
 static int
-delegate_remove_breakpoint (struct target_ops *self, struct gdbarch *arg1, struct bp_target_info *arg2)
+delegate_remove_breakpoint (struct target_ops *self, struct gdbarch *arg1, struct bp_target_info *arg2, enum remove_bp_reason arg3)
 {
   self = self->beneath;
-  return self->to_remove_breakpoint (self, arg1, arg2);
+  return self->to_remove_breakpoint (self, arg1, arg2, arg3);
 }
 
 static int
-debug_remove_breakpoint (struct target_ops *self, struct gdbarch *arg1, struct bp_target_info *arg2)
+debug_remove_breakpoint (struct target_ops *self, struct gdbarch *arg1, struct bp_target_info *arg2, enum remove_bp_reason arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_remove_breakpoint (...)\n", debug_target.to_shortname);
-  result = debug_target.to_remove_breakpoint (&debug_target, arg1, arg2);
+  result = debug_target.to_remove_breakpoint (&debug_target, arg1, arg2, arg3);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_remove_breakpoint (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_gdbarch_p (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_bp_target_info_p (arg2);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_enum_remove_bp_reason (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);

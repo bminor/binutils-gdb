@@ -18,6 +18,8 @@
 #
 # This test tests waitpid syscall for reverse execution.
 #
+# Also serves as regression test for gdb/19187 (recording across a
+# fork).
 
 if ![supports_reverse] {
     return
@@ -40,14 +42,12 @@ gdb_test "break marker2" \
     "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
     "set breakpoint at marker2"
 
-setup_kfail "gdb/19187" *-*-*
 gdb_continue_to_breakpoint "marker2" ".*$srcfile:.*"
 
 gdb_test "break marker1" \
     "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
     "set breakpoint at marker1"
 
-setup_kfail "gdb/19187" *-*-*
 gdb_test "reverse-continue" ".*$srcfile:$decimal.*" "reverse to marker1"
 
 # If the variable was recorded properly on syscall, the old contents (-1)

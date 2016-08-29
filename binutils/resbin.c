@@ -961,9 +961,10 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
   get_version_header (wrbfd, data, length, "VS_VERSION_INFO",
 		      (unichar **) NULL, &verlen, &vallen, &type, &off);
 
-  if ((unsigned int) verlen != length)
-    fatal (_("version length %d does not match resource length %lu"),
-	   (int) verlen, (unsigned long) length);
+  /* PR 17512: The verlen field does not include padding length.  */
+  if (verlen > length)
+    fatal (_("version length %lu greater than resource length %lu"),
+	   (unsigned long) verlen, (unsigned long) length);
 
   if (type != 0)
     fatal (_("unexpected version type %d"), (int) type);
@@ -1164,8 +1165,15 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	      vallen -= 4;
 	    }
 	}
+      else if (ch == 0)
+	{
+	  if (length == 8)
+	    /* Padding - skip.  */
+	    break;
+	  fatal (_("nul bytes found in version string"));
+	}
       else
-	fatal (_("unexpected version string"));
+	fatal (_("unexpected version string character: %x"), ch);
 
       vi->next = NULL;
       *pp = vi;

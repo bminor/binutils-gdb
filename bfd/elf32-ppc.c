@@ -1425,7 +1425,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 "R_PPC_VLE_REL15",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xfe,			/* dst_mask */
+	 0xfffe,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   /* A relative 24 bit branch.  */
@@ -3948,7 +3948,8 @@ is_branch_reloc (enum elf_ppc_reloc_type r_type)
 	  || r_type == R_PPC_ADDR24
 	  || r_type == R_PPC_ADDR14
 	  || r_type == R_PPC_ADDR14_BRTAKEN
-	  || r_type == R_PPC_ADDR14_BRNTAKEN);
+	  || r_type == R_PPC_ADDR14_BRNTAKEN
+	  || r_type == R_PPC_VLE_REL24);
 }
 
 static void
@@ -4389,15 +4390,6 @@ ppc_elf_check_relocs (bfd *abfd,
 	    }
 	  if (h != NULL && h->type == STT_GNU_IFUNC)
 	    {
-	      if (bfd_link_pic (info))
-		{
-		  info->callbacks->einfo
-		    (_("%P: %H: @local call to ifunc %s\n"),
-		     abfd, sec, rel->r_offset,
-		     h->root.root.string);
-		  bfd_set_error (bfd_error_bad_value);
-		  return FALSE;
-		}
 	      h->needs_plt = 1;
 	      if (!update_plt_info (abfd, &h->plt.plist, NULL, 0))
 		return FALSE;
@@ -4899,6 +4891,7 @@ ppc_elf_vle_split16 (bfd *output_bfd, bfd_byte *loc,
   insn = bfd_get_32 (output_bfd, loc);
   top5 = value & 0xf800;
   top5 = top5 << (split16_format == split16a_type ? 9 : 5);
+  insn &= (split16_format == split16a_type ? ~0x1f007ff : ~0x1f07ff);
   insn |= top5;
   insn |= value & 0x7ff;
   bfd_put_32 (output_bfd, insn, loc);
@@ -6502,7 +6495,9 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
       && htab->elf.dynamic_sections_created)
     {
       htab->glink_pltresolve = htab->glink->size;
-      /* Space for the branch table.  */
+      /* Space for the branch table.  ??? We don't need entries for
+	 non-dynamic symbols in this table.  This case can arise with
+	 static ifuncs or forced local ifuncs.  */
       htab->glink->size += htab->glink->size / (GLINK_ENTRY_SIZE / 4) - 4;
       /* Pad out to align the start of PLTresolve.  */
       htab->glink->size += -htab->glink->size & (htab->params->ppc476_workaround
@@ -8306,6 +8301,26 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    }
 	  if (ent != NULL)
 	    {
+	      if (bfd_link_pic (info)
+		  && ent->sec != got2
+		  && htab->plt_type != PLT_NEW
+		  && (!htab->elf.dynamic_sections_created
+		      || h == NULL
+		      || h->dynindx == -1))
+		{
+		  /* Uh oh, we are going to create a pic glink stub
+		     for an ifunc (here for h == NULL and later in
+		     finish_dynamic_symbol for h != NULL), and
+		     apparently are using code compiled with
+		     -mbss-plt.  The difficulty is that -mbss-plt code
+		     gives no indication via a magic PLTREL24 addend
+		     whether r30 is equal to _GLOBAL_OFFSET_TABLE_ or
+		     is pointing into a .got2 section (and how far
+		     into .got2).  */
+		    info->callbacks->einfo
+		      (_("%X%P: %H: unsupported bss-plt -fPIC ifunc %s\n"),
+		       input_bfd, input_section, rel->r_offset, sym_name);
+		}
 	      if (h == NULL && (ent->plt.offset & 1) == 0)
 		{
 		  Elf_Internal_Rela rela;
@@ -8653,6 +8668,20 @@ ppc_elf_relocate_section (bfd *output_bfd,
 						    rel->r_offset,
 						    TRUE);
 	      goto copy_reloc;
+	    }
+	  if (h != NULL && h->type == STT_GNU_IFUNC && bfd_link_pic (info))
+	    {
+	      /* @local on an ifunc does not really make sense since
+		 the ifunc resolver can take you anywhere.  More
+		 seriously, calls to ifuncs must go through a plt call
+		 stub, and for pic the plt call stubs uses r30 to
+		 access the PLT.  The problem is that a call that is
+		 local won't have the +32k reloc addend trick marking
+		 -fPIC code, so the linker won't know whether r30 is
+		 _GLOBAL_OFFSET_TABLE_ or pointing into a .got2 section.  */
+	      info->callbacks->einfo (_("%X%P: %H: @local call to ifunc %s\n"),
+				      input_bfd, input_section, rel->r_offset,
+				      h->root.root.string);
 	    }
 	  break;
 

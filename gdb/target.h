@@ -478,7 +478,8 @@ struct target_ops
 				 struct bp_target_info *)
       TARGET_DEFAULT_FUNC (memory_insert_breakpoint);
     int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
-				 struct bp_target_info *)
+				 struct bp_target_info *,
+				 enum remove_bp_reason)
       TARGET_DEFAULT_FUNC (memory_remove_breakpoint);
 
     /* Returns true if the target stopped because it executed a
@@ -1507,7 +1508,8 @@ extern int target_insert_breakpoint (struct gdbarch *gdbarch,
    machine.  Result is 0 for success, non-zero for error.  */
 
 extern int target_remove_breakpoint (struct gdbarch *gdbarch,
-				     struct bp_target_info *bp_tgt);
+				     struct bp_target_info *bp_tgt,
+				     enum remove_bp_reason reason);
 
 /* Returns true if the terminal settings of the inferior are in
    effect.  */
@@ -1523,21 +1525,23 @@ extern int target_terminal_is_ours (void);
 
 extern void target_terminal_init (void);
 
-/* Put the inferior's terminal settings into effect.
-   This is preparation for starting or resuming the inferior.  */
+/* Put the inferior's terminal settings into effect.  This is
+   preparation for starting or resuming the inferior.  This is a no-op
+   unless called with the main UI as current UI.  */
 
 extern void target_terminal_inferior (void);
 
 /* Put some of our terminal settings into effect, enough to get proper
    results from our output, but do not change into or out of RAW mode
    so that no input is discarded.  This is a no-op if terminal_ours
-   was most recently called.  */
+   was most recently called.  This is a no-op unless called with the main
+   UI as current UI.  */
 
 extern void target_terminal_ours_for_output (void);
 
-/* Put our terminal settings into effect.
-   First record the inferior's terminal settings
-   so they can be restored properly later.  */
+/* Put our terminal settings into effect.  First record the inferior's
+   terminal settings so they can be restored properly later.  This is
+   a no-op unless called with the main UI as current UI.  */
 
 extern void target_terminal_ours (void);
 
@@ -2371,7 +2375,8 @@ extern struct target_section_table *target_get_section_table
 /* From mem-break.c */
 
 extern int memory_remove_breakpoint (struct target_ops *, struct gdbarch *,
-				     struct bp_target_info *);
+				     struct bp_target_info *,
+				     enum remove_bp_reason);
 
 extern int memory_insert_breakpoint (struct target_ops *, struct gdbarch *,
 				     struct bp_target_info *);

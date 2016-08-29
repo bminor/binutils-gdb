@@ -43,7 +43,6 @@
 #include "record-full.h"
 #include "auxv.h"
 
-#include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
 #include "libcoff.h"		/* for xcoff_data */
 #include "coff/xcoff.h"
@@ -4614,17 +4613,17 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
 
     case 654:		/* Transaction Begin */
     case 686:		/* Transaction End */
-    case 718:		/* Transaction Check */
     case 750:		/* Transaction Suspend or Resume */
     case 782:		/* Transaction Abort Word Conditional */
     case 814:		/* Transaction Abort Doubleword Conditional */
     case 846:		/* Transaction Abort Word Conditional Immediate */
     case 878:		/* Transaction Abort Doubleword Conditional Immediate */
     case 910:		/* Transaction Abort */
-      fprintf_unfiltered (gdb_stdlog, "Cannot record Transaction instructions. "
-			  "%08x at %s, 31-%d.\n",
-			  insn, paddress (gdbarch, addr), ext);
-      return -1;
+      record_full_arch_list_add_reg (regcache, tdep->ppc_ps_regnum);
+      /* FALL-THROUGH */
+    case 718:		/* Transaction Check */
+      record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum);
+      return 0;
 
     case 1014:		/* Data Cache Block set to Zero */
       if (target_auxv_search (&current_target, AT_DCACHEBSIZE, &at_dcsz) <= 0
@@ -5958,7 +5957,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_pc_regnum (gdbarch, PPC_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, PPC_R0_REGNUM + 1);
-  set_gdbarch_deprecated_fp_regnum (gdbarch, PPC_R0_REGNUM + 1);
   set_gdbarch_fp0_regnum (gdbarch, tdep->ppc_fp0_regnum);
   set_gdbarch_register_sim_regno (gdbarch, rs6000_register_sim_regno);
 

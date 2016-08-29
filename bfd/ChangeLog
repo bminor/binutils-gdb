@@ -1,3 +1,332 @@
+2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14961
+	PR ld/20515
+	* elf32-i386.c (elf_i386_check_relocs): Issue an error when
+	R_386_PC32 relocation is used to call IFUNC function in PIC
+	object.
+
+2016-08-27  Alan Modra  <amodra@gmail.com>
+
+	PR 20520
+	* elf.c (_bfd_elf_setup_sections): Check that SHT_GROUP sections
+	have corresponding SHF_GROUP sections.
+	(bfd_elf_set_group_contents): Comment.
+
+2016-08-27  Alan Modra  <amodra@gmail.com>
+
+	PR 20519
+	* elf64-ppc.c (pc_dynrelocs): New function.
+	(ppc64_elf_relocate_section): Use it and must_be_dyn_reloc to
+	handle pic dynamic relocs.
+
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* bfd-in.h (struct elf32_arm_params): Define.
+	(bfd_elf32_arm_set_target_relocs): Rename into ...
+	(bfd_elf32_arm_set_target_params): This.  Use a struct
+	elf32_arm_params to pass all parameters but the bfd and bfd_link_info.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (bfd_elf32_arm_set_target_relocs): Rename into ...
+	(bfd_elf32_arm_set_target_params): This.  Pass all values via a struct
+	elf32_arm_params rather than as individual parameters.
+
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_get_stub_entry): Assert that we don't access
+	passed the end of htab->stub_group array.
+	(elf32_arm_create_or_find_stub_sec): Likewise.
+	(elf32_arm_create_stub): Likewise.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_relocate_section): Changed. Set should_relocate
+	to TRUE for GOT and TLS relocs.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synospsys.com>
+
+	* elf32-arc.c (elf_arc_finish_dynamic_sections): Changed.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf-bfd.h: Added ARC_ELF_DATA to enum elf_target_id.
+	* elf32-arc.c (struct elf_arc_link_hash_entry): Added.
+	(struct elf_arc_link_hash_table): Likewise.
+	(elf_arc_link_hash_newfunc): Likewise.
+	(elf_arc_link_hash_table_free): Likewise.
+	(arc_elf_link_hash_table_create): Likewise.
+	(elf_arc_relocate_section): Fixed conditions related to dynamic
+	(elf_arc_check_relocs): Likewise.
+	(arc_elf_create_dynamic_sections): Added
+	(elf_arc_adjust_dynamic_symbol): Changed access to .rela.bss to be done
+	through the hash table.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-got.h (relocate_fix_got_relocs_for_got_info): Fixed addresses in
+	debug comments. Fixed address in .got related to TLS_IE_GOT dynamic
+	relocation.
+
+2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* reloc.c: Fixed type in ARC_SECTOFF relocations. Added ARC_SDA_12
+	relocation.
+	* bfd-in2.h: Regenerated from the previous changes.
+	* libbfd.h: Regenerated from the previous changes.
+
+2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add a new parameter for
+	the input import library bfd.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (struct elf32_arm_link_hash_table): New in_implib_bfd
+	and new_cmse_stub_offset fields.
+	(stub_hash_newfunc): Initialize stub_offset and stub_template_size to
+	-1.
+	(elf32_arm_add_stub): Likewise for stub_offset.
+	(arm_new_stubs_start_offset_ptr): New function.
+	(arm_build_one_stub): Only allocate a stub_offset if it is -1.  Allow
+	empty SG veneers to have zero relocations.
+	(arm_size_one_stub): Only initialize stub size and template
+	information for non empty veneers.  Do not update veneer section size
+	if veneer already has an offset.
+	(elf32_arm_create_stub): Return the stub entry pointer or NULL instead
+	of a boolean indicating success or failure.
+	(cmse_scan): Change stub_changed parameter into an integer pointer
+	parameter cmse_stub_created to count the number of stub created and
+	adapt to change of return value in elf32_arm_create_stub.
+	(cmse_entry_fct_p): New function.
+	(arm_list_new_cmse_stub): Likewise.
+	(set_cmse_veneer_addr_from_implib): Likewise.
+	(elf32_arm_size_stubs): Define cmse_stub_created, pass its address to
+	cmse_scan instead of that of cmse_stub_changed to compute the number
+	of stub created and use it to initialize stub_changed.  Call
+	set_cmse_veneer_addr_from_implib after all cmse_scan.  Adapt to change
+	of return value in elf32_arm_create_stub.  Use
+	arm_stub_section_start_offset () if not NULL to initialize size of
+	secure gateway veneers section.  Initialize stub_offset of Cortex-A8
+	erratum fix to -1.  Use ret to hold return value.
+	(elf32_arm_build_stubs): Use arm_stub_section_start_offset () if not
+	NULL to initialize size of secure gateway veneers section.  Adapt
+	comment to stress the importance of zeroing veneer section content.
+	(bfd_elf32_arm_set_target_relocs): Add new in_implib_bfd parameter to
+	initialize eponymous field in struct elf32_arm_link_hash_table.
+
+2016-08-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf32-s390.c (stdarg.h): New include.
+	(elf_s390_grok_psinfo): New function.
+	(elf_s390_write_core_note): New function.
+	(elf_backend_grok_psinfo): Declare backend hook.
+	(elf_backend_write_core_note): Likewise.
+	* elf64-s390.c (stdarg.h): New include.
+	(elf_s390_grok_prstatus): New function.
+	(elf_s390_grok_psinfo): New function.
+	(elf_s390_write_core_note): New function.
+	(elf_backend_grok_prstatus): Declare backend hook.
+	(elf_backend_grok_psinfo): Likewise.
+	(elf_backend_write_core_note): Likewise.
+
+2016-08-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf32-s390.c (allocate_dynrelocs): Fix indentation.
+	(elf_s390_finish_ifunc_symbol): Likewise.
+	(elf_s390_finish_dynamic_symbol): Likewise.
+	(elf_s390_finish_dynamic_sections): Likewise.
+	(elf_s390_grok_prstatus): Likewise.
+	* elf64-s390.c (elf_s390_hash_table): Fix indentation.
+	(elf_s390_finish_dynamic_symbol): Likewise.
+
+2016-08-24  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* elf32-arc.c (elf32_arc_grok_prstatus): New function.
+
+2016-08-23  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (elf32_arm_count_additional_relocs): Return zero if
+	there is no arm data associated with the section.
+
+2016-08-23  Alan Modra  <amodra@gmail.com>
+
+	PR 20475
+	* elf32-or1k.c (or1k_elf_relocate_section): Offset from
+	_GLOBAL_OFFSET_TABLE_, not start of .got section.
+
+2016-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* doc/chew.c (main): Free the string buffer used to files as they
+	are parsed.
+
+2016-08-22  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Move error for @local ifunc..
+	(ppc_elf_relocate_section): ..to here.  Comment.  Error on
+	detecting -mbss-plt -fPIC local ifuncs too.
+	(ppc_elf_size_dynamic_sections): Comment on unnecessary glink
+	branch table entries.
+
+2016-08-19  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (assign_section_numbers): Assign number for the .shstrtab
+	section after the symbol table and string table sections.
+
+2016-08-19  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add weakref.
+	(ppc64_elf_copy_indirect_symbol): Set weakref.  Don't merge
+	dyn_relocs for weakdefs.
+	(alias_readonly_dynrelocs): New function.
+	(ppc64_elf_adjust_dynamic_symbol): Use alias_readonly_dynrelocs.
+	(ppc64_elf_relocate_section): Simplify condition under which
+	dyn_relocs are emitted.
+
+2016-08-19  Alan Modra  <amodra@gmail.com>
+
+	PR 20472
+	* elf64-ppc.c (ppc64_elf_before_check_relocs): Tweak abiversion test.
+	(readonly_dynrelocs): Comment fix.
+	(global_entry_stub): New function.
+	(ppc64_elf_adjust_dynamic_symbol): Tweak abiversion test.  Match
+	ELFv2 code deciding on dynamic relocs vs. global entry stubs to
+	that in size_global_entry_stubs, handling ifunc too.  Delete dead
+	weak sym code.
+	(allocate_dynrelocs): Ensure dyn_relocs field is cleared when no
+	dyn_relocs are needed.  Correct handling of ifunc dyn_relocs.
+	Tidy ELIMINATE_COPY_RELOCS code, only setting dynindx for
+	undefweak syms.  Expand and correct comments.
+	(size_global_entry_stubs): Ensure symbol is defined.
+	(ppc64_elf_relocate_section): Match condition under which
+	dyn_relocs are emitted to that in allocate_dynrelocs.
+
+2016-08-12  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_link_hash_table): Add local_dynsymcount.
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Set local_dynsymcount.
+	(bfd_elf_final_link): Set .dynsym sh_info from local_dynsymcount.
+
+2016-08-11  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Don't exit with
+	non_got_ref true in any case where we could have generated dynbss
+	copies but decide not to do so.
+
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_add_la25_stub): Clear the ISA bit of
+	the stub address retrieved if associated with a microMIPS
+	function.
+
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_create_stub_symbol): For a microMIPS
+	stub also add STO_MICROMIPS annotation.
+
+2016-08-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Set the ISA bit
+	in microMIPS LA25 stub references.
+
+2016-08-09  Jiaming Wei  <jmwei@hxgpt.com>
+
+	* elf64-alpha.c (elf64_alpha_copy_indirect_symbol): Fix thinko
+	adjusting the use_count of merged .got entries.
+
+2016-08-08  Nick Clifton  <nickc@redhat.com>
+
+	* doc/chew.c (delete_string): Only free the string buffer if it is
+	there.  Mark the buffer as NULL after freeing.
+	(drop): Free the dropped string.
+	(free_words): New function: Frees the memory allocated to the
+	dictionary.
+	(add_instrinsic): Duplicate the name string, so that it can be
+	freed later on.
+	(compile): Free unused words.
+	(main): Free the dictionary and top level string buffers at the
+	end.
+
+2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add one parameter.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (struct elf32_arm_link_hash_table): Declare new
+	cmse_implib field.
+	(bfd_elf32_arm_set_target_relocs): Add new parameter to initialize
+	cmse_implib field in struct elf32_arm_link_hash_table.
+	(elf32_arm_filter_cmse_symbols): New function.
+	(elf32_arm_filter_implib_symbols): Likewise.
+	(elf_backend_filter_implib_symbols): Define to
+	elf32_arm_filter_implib_symbols.
+
+2016-08-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (CMSE_PREFIX): Define macro.
+	(elf32_arm_stub_cmse_branch_thumb_only): Define stub sequence.
+	(cmse_branch_thumb_only): Declare stub.
+	(struct elf32_arm_link_hash_table): Define cmse_stub_sec field.
+	(elf32_arm_get_plt_info): Add globals parameter.  Use it to return
+	FALSE if there is no PLT.
+	(arm_type_of_stub): Adapt to new elf32_arm_get_plt_info signature.
+	(elf32_arm_final_link_relocate): Likewise.
+	(elf32_arm_gc_sweep_hook): Likewise.
+	(elf32_arm_gc_mark_extra_sections): Mark sections holding ARMv8-M
+	secure entry functions.
+	(arm_stub_is_thumb): Add case for arm_stub_cmse_branch_thumb_only.
+	(arm_dedicated_stub_output_section_required): Change to a switch case
+	and add a case for arm_stub_cmse_branch_thumb_only.
+	(arm_dedicated_stub_output_section_required_alignment): Likewise.
+	(arm_stub_dedicated_output_section_name): Likewise.
+	(arm_stub_dedicated_input_section_ptr): Likewise and remove
+	ATTRIBUTE_UNUSED for htab parameter.
+	(arm_stub_required_alignment): Likewise.
+	(arm_stub_sym_claimed): Likewise.
+	(arm_dedicated_stub_section_padding): Likewise.
+	(cmse_scan): New function.
+	(elf32_arm_size_stubs): Call cmse_scan for ARM M profile targets.
+	Set stub_changed to TRUE if such veneers were created.
+	(elf32_arm_swap_symbol_in): Add detection code for CMSE special
+	symbols.
+
+2016-08-02  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20428
+	* elf64-ppc.c (ppc_get_stub_entry): Don't segfault on NULL group.
+
+2016-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/17739
+	* elf32-sh.c (sh_elf_gc_sweep_hook): Delete.
+	(elf_backend_sweep_hook): Delete.
+
+2016-08-01  Andrew Jenner  <andrew@codesourcery.com>
+	Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* elf32-ppc.c (is_branch_reloc): Recognise VLE branch relocations.
+	(ppc_elf_howto_raw): Fix dst_mask of R_PPC_VLE_REL15.
+	(ppc_elf_vle_split16): Clear field before inserting.
+
+2016-08-01  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2016-07-27  Ozkan Sezer  <sezeroz@gmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20401
+	* coffgen.c (fini_reloc_cookie_rels): Check for the extistence
+	of the coff_section_data before using it.
+
+2016-07-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Handle branches
+	in PLT compression selection.
+	(_bfd_mips_elf_check_relocs): Likewise.
+
+2016-07-22  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-got.h (relocate_fix_got_relocs_for_got_info): Handle the
+	case where there's no elf_link_hash_entry while processing
+	GOT_NORMAL got entries.
+
 2016-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.m4 (BFD_VERSION): Set to 2.27.51.
