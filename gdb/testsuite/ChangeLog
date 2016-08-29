@@ -1,3 +1,7 @@
+2016-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/default.exp (tty): Remove.
+
 2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/set-inferior-tty.exp: New file.

@@ -799,8 +799,6 @@ gdb_test "thread apply" "Please specify a thread ID list" "thread apply"
 gdb_test "thread find" "Command requires an argument." "thread find"
 #test thread name
 gdb_test "thread name" "No thread selected" "thread name"
-#test tty
-gdb_test "tty" "Argument required .filename to set it to\..*" "tty"
 #test until "u" abbreviation
 gdb_test "u" "The program is not being run." "until \"u\" abbreviation"
 #test until
