@@ -1725,7 +1725,7 @@ tp_array_compar (const void *ap_voidp, const void *bp_voidp)
 
   if (a->inf->num != b->inf->num)
     {
-      return ((a->inf->num > b->inf->num) - (a->inf->num < b->inf->num)
+      return (((a->inf->num > b->inf->num) - (a->inf->num < b->inf->num))
 	      * (tp_array_compar_ascending ? +1 : -1));
     }
 
