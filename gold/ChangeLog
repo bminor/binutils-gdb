@@ -1,3 +1,14 @@
+2016-08-30  Alan Modra  <amodra@gmail.com>
+
+	PR 20523
+	* powerpc.cc (class Stub_control): Add has14_.  Comment owner_.
+	(Stub_control::can_add_to_stub_group): Correct grouping of
+	sections containing 14-bit external branches.  When returning
+	false, set state_ to reflect the fact that we have one section
+	for the next group.  Rewrite most of function for clarity.
+	Add and expand comments.
+	(Target_powerpc::do_relax): Print stub group size retry in hex.
+
 2016-08-26  Han Shen  <shenhan@google.com>
 
 	PR gold/20529 - relaxing loop never ends.
