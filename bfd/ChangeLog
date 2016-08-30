@@ -1,5 +1,12 @@
 2016-08-31  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (group_sections): Delete stub14_group_size.  Instead,
+	track max group size with a new "group_size" var that is reduced
+	by a factor of 1024 from the 24-bit branch size whenever a 14-bit
+	branch is seen.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc_elf_section_processing): Delete.
 	(elf_backend_section_processing): Don't define.
 	(ppc_elf_modify_segment_map): Set p_flags and mark valid.  Don't
