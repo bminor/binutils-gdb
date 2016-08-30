@@ -490,11 +490,11 @@ static char name[BUFSIZE];
 
 /* Return number of symbols in a symbol-table file.  */
 
-static int
+static unsigned int
 num_of_syms_in (FILE * f)
 {
   char   type;
-  int num = 0;
+  unsigned int num = 0;
 
   while (!feof (f) && fgets (buf, BUFSIZE - 1, f))
     {
@@ -531,6 +531,13 @@ core_create_syms_from (const char * sym_table_file)
       fprintf (stderr, _("%s: file `%s' has no symbols\n"), whoami, sym_table_file);
       done (1);
     }
+  /* PR 20499 - prevent integer overflow computing argument to xmalloc.  */
+  else if ((symtab.len * (unsigned) sizeof (Sym)) < symtab.len)
+    {
+      fprintf (stderr, _("%s: file `%s' has too many symbols: %u\n"),
+	       whoami, sym_table_file, symtab.len);
+      done (1);
+    }
 
   symtab.base = (Sym *) xmalloc (symtab.len * sizeof (Sym));
 
@@ -564,6 +571,12 @@ core_create_syms_from (const char * sym_table_file)
       max_vma = MAX (symtab.limit->addr, max_vma);
 
       ++symtab.limit;
+      /* PR 20499 - it is theoretically possible that there are so many
+	 symbols in the file that the scan in num_of_syms_in() wrapped
+	 around.  So be paranoid here and exit the loop if we have
+	 reached the end of our allocated table.  */
+      if ((unsigned int)(symtab.limit - symtab.base) == symtab.len)
+	break;
     }
   fclose (f);
 
