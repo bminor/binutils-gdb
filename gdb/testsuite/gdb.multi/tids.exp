@@ -224,6 +224,12 @@ with_test_prefix "two inferiors" {
     thr_apply_info_thr "1.1-2 2.2-3" \
 	"1.1 1.2 2.2 2.3"
 
+    # All threads.
+    thread_apply "all" \
+	"2.3 2.2 2.1 1.3 1.2 1.1"
+    thread_apply "all -ascending" \
+	"1.1 1.2 1.3 2.1 2.2 2.3"
+
     # Now test using GDB convenience variables.
 
     gdb_test "p \$inf = 1" " = 1"

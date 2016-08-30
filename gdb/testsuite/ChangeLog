@@ -1,3 +1,7 @@
+2016-08-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.multi/tids.exp: Test "thread apply all".
+
 2016-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/default.exp (tty): Remove.

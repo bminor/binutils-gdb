@@ -1,3 +1,7 @@
+2016-08-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* thread.c (tp_array_compar): Insert missing parentheses.
+
 2016-08-26  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* xtensa-tdep.h (XTENSA_GDBARCH_TDEP_INSTANTIATE): Replace
