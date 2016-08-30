@@ -3678,7 +3678,7 @@ print_conversion_node (const struct demangle_component *comp,
    generic template parameters instead of any instanced type.
 
    For example, both "void foo<int> (int)" and "void foo<A> (A)" will
-   return "T foo<typename T>(A)".  */
+   return "T foo<typename T>(T)".  */
 
 static char *
 ccp_template_decl (struct template_symbol *tsymbol,
