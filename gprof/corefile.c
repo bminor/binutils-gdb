@@ -28,6 +28,7 @@
 #include "hist.h"
 #include "corefile.h"
 #include "safe-ctype.h"
+#include <limits.h>    /* For UINT_MAX.  */
 
 bfd *core_bfd;
 static int core_num_syms;
@@ -500,7 +501,11 @@ num_of_syms_in (FILE * f)
     {
       if (sscanf (buf, "%" STR_BUFSIZE "s %c %" STR_BUFSIZE "s", address, &type, name) == 3)
         if (type == 't' || type == 'T')
-          ++num;
+	  {
+	    /* PR 20499 - prevent integer overflow computing argument to xmalloc.  */	  
+	    if (++num >= UINT_MAX / sizeof (Sym))
+	      return -1U;
+	  }
     }
 
   return num;
@@ -531,11 +536,10 @@ core_create_syms_from (const char * sym_table_file)
       fprintf (stderr, _("%s: file `%s' has no symbols\n"), whoami, sym_table_file);
       done (1);
     }
-  /* PR 20499 - prevent integer overflow computing argument to xmalloc.  */
-  else if ((symtab.len * (unsigned) sizeof (Sym)) < symtab.len)
+  else if (symtab.len == -1U)
     {
-      fprintf (stderr, _("%s: file `%s' has too many symbols: %u\n"),
-	       whoami, sym_table_file, symtab.len);
+      fprintf (stderr, _("%s: file `%s' has too many symbols\n"),
+	       whoami, sym_table_file);
       done (1);
     }
 
@@ -571,12 +575,6 @@ core_create_syms_from (const char * sym_table_file)
       max_vma = MAX (symtab.limit->addr, max_vma);
 
       ++symtab.limit;
-      /* PR 20499 - it is theoretically possible that there are so many
-	 symbols in the file that the scan in num_of_syms_in() wrapped
-	 around.  So be paranoid here and exit the loop if we have
-	 reached the end of our allocated table.  */
-      if ((unsigned int)(symtab.limit - symtab.base) == symtab.len)
-	break;
     }
   fclose (f);
 

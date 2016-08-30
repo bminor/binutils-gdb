@@ -2,10 +2,9 @@
 
 	PR gprof/20499
 	* corefile.c (num_of_syms_in): Return an unsigned int.
-	(core_create_syms_from): Catch a possible integer overflow
-	computing the argument to xmalloc.  Also allow for the possibility
-	that an integer overflow in num_of_syms_in means that less space
-	has been allocated than expected.
+	Fail if the count exceeds the maximum possible allocatable size.
+	(core_create_syms_from): Exit early if num_of_syms_in returns a
+	failure code.
 
 2016-08-23  Nick Clifton  <nickc@redhat.com>
 
