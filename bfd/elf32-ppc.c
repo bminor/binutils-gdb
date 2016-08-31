@@ -2444,18 +2444,6 @@ ppc_elf_lookup_section_flags (char *flag_name)
   return 0;
 }
 
-/* Add the VLE flag if required.  */
-
-bfd_boolean
-ppc_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *shdr)
-{
-  if (bfd_get_mach (abfd) == bfd_mach_ppc_vle
-      && (shdr->sh_flags & SHF_EXECINSTR) != 0)
-    shdr->sh_flags |= SHF_PPC_VLE;
-
-  return TRUE;
-}
-
 /* Return address for Ith PLT stub in section PLT, for relocation REL
    or (bfd_vma) -1 if it should not be included.  */
 
@@ -2535,10 +2523,7 @@ bfd_boolean
 ppc_elf_modify_segment_map (bfd *abfd,
 			    struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  struct elf_segment_map *m, *n;
-  bfd_size_type amt;
-  unsigned int j, k;
-  bfd_boolean sect0_vle, sectj_vle;
+  struct elf_segment_map *m;
 
   /* At this point in the link, output sections have already been sorted by
      LMA and assigned to segments.  All that is left to do is to ensure
@@ -2548,25 +2533,59 @@ ppc_elf_modify_segment_map (bfd *abfd,
 
   for (m = elf_seg_map (abfd); m != NULL; m = m->next)
     {
-      if (m->count == 0)
+      struct elf_segment_map *n;
+      bfd_size_type amt;
+      unsigned int j, k;
+      unsigned int p_flags;
+
+      if (m->p_type != PT_LOAD || m->count == 0)
 	continue;
 
-      sect0_vle = (elf_section_flags (m->sections[0]) & SHF_PPC_VLE) != 0;
-      for (j = 1; j < m->count; ++j)
+      for (p_flags = PF_R, j = 0; j != m->count; ++j)
 	{
-	  sectj_vle = (elf_section_flags (m->sections[j]) & SHF_PPC_VLE) != 0;
+	  if ((m->sections[j]->flags & SEC_READONLY) == 0)
+	    p_flags |= PF_W;
+	  if ((m->sections[j]->flags & SEC_CODE) != 0)
+	    {
+	      p_flags |= PF_X;
+	      if ((elf_section_flags (m->sections[j]) & SHF_PPC_VLE) != 0)
+		p_flags |= PF_PPC_VLE;
+	      break;
+	    }
+	}
+      if (j != m->count)
+	while (++j != m->count)
+	  {
+	    unsigned int p_flags1 = PF_R;
 
-	  if (sectj_vle != sect0_vle)
-	    break;
-        }
-      if (j >= m->count)
+	    if ((m->sections[j]->flags & SEC_READONLY) == 0)
+	      p_flags1 |= PF_W;
+	    if ((m->sections[j]->flags & SEC_CODE) != 0)
+	      {
+		p_flags1 |= PF_X;
+		if ((elf_section_flags (m->sections[j]) & SHF_PPC_VLE) != 0)
+		  p_flags1 |= PF_PPC_VLE;
+		if (((p_flags1 ^ p_flags) & PF_PPC_VLE) != 0)
+		  break;
+	      }
+	    p_flags |= p_flags1;
+	  }
+      /* If we're splitting a segment which originally contained rw
+	 sections then those sections might now only be in one of the
+	 two parts.  So always set p_flags if splitting, even if we
+	 are being called for objcopy with p_flags_valid set.  */
+      if (j != m->count || !m->p_flags_valid)
+	{
+	  m->p_flags_valid = 1;
+	  m->p_flags = p_flags;
+	}
+      if (j == m->count)
 	continue;
 
-      /* sections 0..j-1 stay in this (current) segment,
+      /* Sections 0..j-1 stay in this (current) segment,
 	 the remainder are put in a new segment.
 	 The scan resumes with the new segment.  */
 
-      /* Fix the new segment.  */
       amt = sizeof (struct elf_segment_map);
       amt += (m->count - j - 1) * sizeof (asection *);
       n = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
@@ -2574,20 +2593,13 @@ ppc_elf_modify_segment_map (bfd *abfd,
         return FALSE;
 
       n->p_type = PT_LOAD;
-      n->p_flags = PF_X | PF_R;
-      if (sectj_vle)
-        n->p_flags |= PF_PPC_VLE;
       n->count = m->count - j;
       for (k = 0; k < n->count; ++k)
-        {
-          n->sections[k] = m->sections[j+k];
-          m->sections[j+k] = NULL;
-	}
+	n->sections[k] = m->sections[j + k];
+      m->count = j;
+      m->p_size_valid = 0;
       n->next = m->next;
       m->next = n;
-
-      /* Fix the current segment  */
-      m->count = j;
     }
 
   return TRUE;
@@ -10860,7 +10872,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_action_discarded		ppc_elf_action_discarded
 #define elf_backend_init_index_section		_bfd_elf_init_1_index_section
 #define elf_backend_lookup_section_flags_hook	ppc_elf_lookup_section_flags
-#define elf_backend_section_processing		ppc_elf_section_processing
 
 #include "elf32-target.h"
 

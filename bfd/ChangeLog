@@ -1,3 +1,11 @@
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_section_processing): Delete.
+	(elf_backend_section_processing): Don't define.
+	(ppc_elf_modify_segment_map): Set p_flags and mark valid.  Don't
+	split on non-exec sections differing in SHF_PPC_VLE.  When
+	splitting segments, mark size invalid.
+
 2016-08-30  Alan Modra  <amodra@gmail.com>
 
 	PR 20531
