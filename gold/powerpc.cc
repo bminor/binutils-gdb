@@ -2439,9 +2439,8 @@ class Stub_control
   // the stubbed branches.
   Stub_control(int32_t size, bool no_size_errors)
     : state_(NO_GROUP), stub_group_size_(abs(size)),
-      stub14_group_size_(abs(size) >> 10),
       stubs_always_before_branch_(size < 0),
-      suppress_size_errors_(no_size_errors), has14_(false),
+      suppress_size_errors_(no_size_errors), group_size_(0),
       group_end_addr_(0), owner_(NULL), output_section_(NULL)
   {
   }
@@ -2479,10 +2478,12 @@ class Stub_control
 
   State state_;
   uint32_t stub_group_size_;
-  uint32_t stub14_group_size_;
   bool stubs_always_before_branch_;
   bool suppress_size_errors_;
-  bool has14_;
+  // Current max size of group.  Starts at stub_group_size_ but is
+  // reduced to stub_group_size_/1024 on seeing a section with
+  // external conditional branches.
+  uint32_t group_size_;
   uint64_t group_end_addr_;
   // owner_ and output_section_ specify the section to which stubs are
   // attached.  The stubs are placed at the end of this section.
@@ -2513,9 +2514,9 @@ Stub_control::can_add_to_stub_group(Output_section* o,
       this_size = i->data_size();
     }
 
-  uint32_t group_size
-    = has14 ? this->stub14_group_size_ : this->stub_group_size_;
-  uint64_t end_addr = start_addr + this_size;
+  uint32_t group_size = this->stub_group_size_;
+  if (has14)
+    this->group_size_ = group_size = group_size >> 10;
 
   if (this_size > group_size && !this->suppress_size_errors_)
     gold_warning(_("%s:%s exceeds group size"),
@@ -2529,14 +2530,12 @@ Stub_control::can_add_to_stub_group(Output_section* o,
 	     (long long) this_size,
 	     (long long) this->group_end_addr_ - start_addr);
 
-  this->has14_ = this->has14_ || has14;
-  group_size = this->has14_ ? this->stub14_group_size_ : this->stub_group_size_;
-
+  uint64_t end_addr = start_addr + this_size;
   if (this->state_ == HAS_STUB_SECTION)
     {
       // Can we add this section, which is before the stubs, to the
       // group?
-      if (this->group_end_addr_ - start_addr <= group_size)
+      if (this->group_end_addr_ - start_addr <= this->group_size_)
 	return true;
     }
   else
@@ -2557,19 +2556,20 @@ Stub_control::can_add_to_stub_group(Output_section* o,
 
       if (this->state_ == FINDING_STUB_SECTION)
 	{
-	  if (this->group_end_addr_ - start_addr <= group_size)
+	  if (this->group_end_addr_ - start_addr <= this->group_size_)
 	    return true;
 	  // The group after the stubs has reached maximum size.
 	  // Now see about adding sections before the stubs to the
 	  // group.  If the current section has a 14-bit branch and
-	  // the group after the stubs exceeds stub14_group_size_
-	  // (because they didn't have 14-bit branches), don't add
-	  // sections before the stubs:  The size of stubs for such a
-	  // large group may exceed the reach of a 14-bit branch.
+	  // the group after the stubs exceeds group_size_ (because
+	  // they didn't have 14-bit branches), don't add sections
+	  // before the stubs:  The size of stubs for such a large
+	  // group may exceed the reach of a 14-bit branch.
 	  if (!this->stubs_always_before_branch_
-	      && this_size <= group_size
-	      && this->group_end_addr_ - end_addr <= group_size)
+	      && this_size <= this->group_size_
+	      && this->group_end_addr_ - end_addr <= this->group_size_)
 	    {
+	      gold_debug(DEBUG_TARGET, "adding before stubs");
 	      this->state_ = HAS_STUB_SECTION;
 	      this->group_end_addr_ = end_addr;
 	      return true;
@@ -2579,6 +2579,7 @@ Stub_control::can_add_to_stub_group(Output_section* o,
 	{
 	  // Only here on very first use of Stub_control
 	  this->state_ = FINDING_STUB_SECTION;
+	  this->group_size_ = group_size;
 	  this->group_end_addr_ = end_addr;
 	  return true;
 	}
@@ -2593,7 +2594,7 @@ Stub_control::can_add_to_stub_group(Output_section* o,
   // set later after we've retrieved those values for the current
   // group.
   this->state_ = FINDING_STUB_SECTION;
-  this->has14_ = has14;
+  this->group_size_ = group_size;
   this->group_end_addr_ = end_addr;
   return false;
 }

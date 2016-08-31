@@ -1,5 +1,12 @@
 2016-08-31  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (class Stub_control): Delete stub14_group_size_
+	and has14_.  Add group_size_.
+	(Stub_control::can_add_to_stub_group): Adjust to suit.  Print
+	debug info when switching to adding sections before stubs.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
 	* debug.h (DEBUG_TARGET): New.
 	(DEBUG_ALL): Add DEBUG_TARGET.
 	(gold_debug): Delete FORMAT param.
