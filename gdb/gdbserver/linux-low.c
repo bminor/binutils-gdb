@@ -3771,24 +3771,6 @@ linux_wait_1 (ptid_t ptid,
       if (!non_stop)
 	stop_all_lwps (0, NULL);
 
-      /* If we're not waiting for a specific LWP, choose an event LWP
-	 from among those that have had events.  Giving equal priority
-	 to all LWPs that have had events helps prevent
-	 starvation.  */
-      if (ptid_equal (ptid, minus_one_ptid))
-	{
-	  event_child->status_pending_p = 1;
-	  event_child->status_pending = w;
-
-	  select_event_lwp (&event_child);
-
-	  /* current_thread and event_child must stay in sync.  */
-	  current_thread = get_lwp_thread (event_child);
-
-	  event_child->status_pending_p = 0;
-	  w = event_child->status_pending;
-	}
-
       if (step_over_finished)
 	{
 	  if (!non_stop)
@@ -3812,6 +3794,25 @@ linux_wait_1 (ptid_t ptid,
 	      unstop_all_lwps (1, event_child);
 	    }
 	}
+
+      /* If we're not waiting for a specific LWP, choose an event LWP
+	 from among those that have had events.  Giving equal priority
+	 to all LWPs that have had events helps prevent
+	 starvation.  */
+      if (ptid_equal (ptid, minus_one_ptid))
+	{
+	  event_child->status_pending_p = 1;
+	  event_child->status_pending = w;
+
+	  select_event_lwp (&event_child);
+
+	  /* current_thread and event_child must stay in sync.  */
+	  current_thread = get_lwp_thread (event_child);
+
+	  event_child->status_pending_p = 0;
+	  w = event_child->status_pending;
+	}
+
 
       /* Stabilize threads (move out of jump pads).  */
       if (!non_stop)
