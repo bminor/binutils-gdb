@@ -1,3 +1,10 @@
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* debug.h (DEBUG_TARGET): New.
+	(DEBUG_ALL): Add DEBUG_TARGET.
+	(gold_debug): Delete FORMAT param.
+	* powerpc.cc (Stub_control::can_add_to_stub_group): Print debug ourput.
+
 2016-08-30  Alan Modra  <amodra@gmail.com>
 
 	PR 20523

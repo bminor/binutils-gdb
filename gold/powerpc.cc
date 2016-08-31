@@ -2522,6 +2522,13 @@ Stub_control::can_add_to_stub_group(Output_section* o,
 		 i->relobj()->name().c_str(),
 		 i->relobj()->section_name(i->shndx()).c_str());
 
+  gold_debug(DEBUG_TARGET, "maybe add%s %s:%s size=%#llx total=%#llx",
+	     has14 ? " 14bit" : "",
+	     i->relobj()->name().c_str(),
+	     i->relobj()->section_name(i->shndx()).c_str(),
+	     (long long) this_size,
+	     (long long) this->group_end_addr_ - start_addr);
+
   this->has14_ = this->has14_ || has14;
   group_size = this->has14_ ? this->stub14_group_size_ : this->stub_group_size_;
 
@@ -2578,6 +2585,8 @@ Stub_control::can_add_to_stub_group(Output_section* o,
       else
 	gold_unreachable();
     }
+
+  gold_debug(DEBUG_TARGET, "nope, didn't fit\n");
 
   // The section fails to fit in the current group.  Set up a few
   // things for the next group.  owner_ and output_section_ will be
