@@ -1,3 +1,11 @@
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/vle-multiseg-1.d: Adjust to suit segment change.
+	* testsuite/ld-powerpc/vle-multiseg-2.d: Likewise.
+	* testsuite/ld-powerpc/vle-multiseg-3.d: Likewise.
+	* testsuite/ld-powerpc/vle-multiseg-6.d: Likewise.
+	* testsuite/ld-powerpc/vle-reloc-2.d: Likewise.
+
 2016-08-30  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* testsuite/ld-arc/tls_gs-01.d: Set to XFAIL on arc*-*-elf*.
