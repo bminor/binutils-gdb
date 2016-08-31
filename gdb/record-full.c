@@ -1650,7 +1650,7 @@ record_full_insert_breakpoint (struct target_ops *ops,
 	 really need to install regular breakpoints in the inferior.
 	 However, we do have to insert software single-step
 	 breakpoints, in case the target can't hardware step.  To keep
-	 things single, we always insert.  */
+	 things simple, we always insert.  */
       struct cleanup *old_cleanups;
       int ret;
 
