@@ -3085,6 +3085,7 @@ get_opd_info (asection * sec)
 
 /* Parameters for the qsort hook.  */
 static bfd_boolean synthetic_relocatable;
+static asection *synthetic_opd;
 
 /* qsort comparison function for ppc64_elf_get_synthetic_symtab.  */
 
@@ -3101,12 +3102,15 @@ compare_symbols (const void *ap, const void *bp)
     return 1;
 
   /* then .opd symbols.  */
-  if (strcmp (a->section->name, ".opd") == 0
-      && strcmp (b->section->name, ".opd") != 0)
-    return -1;
-  if (strcmp (a->section->name, ".opd") != 0
-      && strcmp (b->section->name, ".opd") == 0)
-    return 1;
+  if (synthetic_opd != NULL)
+    {
+      if (strcmp (a->section->name, ".opd") == 0
+	  && strcmp (b->section->name, ".opd") != 0)
+	return -1;
+      if (strcmp (a->section->name, ".opd") != 0
+	  && strcmp (b->section->name, ".opd") == 0)
+	return 1;
+    }
 
   /* then other code symbols.  */
   if ((a->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
@@ -3265,6 +3269,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
     memcpy (syms, static_syms, (symcount + 1) * sizeof (*syms));
 
   synthetic_relocatable = relocatable;
+  synthetic_opd = opd;
   qsort (syms, symcount, sizeof (*syms), compare_symbols);
 
   if (!relocatable && symcount > 1)
@@ -3281,7 +3286,11 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
     }
 
   i = 0;
-  if (strcmp (syms[i]->section->name, ".opd") == 0)
+  /* Note that here and in compare_symbols we can't compare opd and
+     sym->section directly.  With separate debug info files, the
+     symbols will be extracted from the debug file while abfd passed
+     to this function is the real binary.  */
+  if (opd != NULL && strcmp (syms[i]->section->name, ".opd") == 0)
     ++i;
   codesecsym = i;
 
@@ -3297,9 +3306,10 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
       break;
   secsymend = i;
 
-  for (; i < symcount; ++i)
-    if (strcmp (syms[i]->section->name, ".opd") != 0)
-      break;
+  if (opd != NULL)
+    for (; i < symcount; ++i)
+      if (strcmp (syms[i]->section->name, ".opd") != 0)
+	break;
   opdsymend = i;
 
   for (; i < symcount; ++i)
