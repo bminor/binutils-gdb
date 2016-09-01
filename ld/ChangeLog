@@ -1,3 +1,15 @@
+2016-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20513
+	* testsuite/ld-elf/pr20513a.d: New file.
+	* testsuite/ld-elf/pr20513a.s: Likewise.
+	* testsuite/ld-elf/pr20513b.d: Likewise.
+	* testsuite/ld-elf/pr20513b.s: Likewise.
+	* testsuite/ld-elf/pr20513c.d: Likewise.
+	* testsuite/ld-elf/pr20513d.d: Likewise.
+	* testsuite/ld-elf/pr20513e.d: Likewise.
+	* testsuite/ld-elf/pr20513f.d: Likewise.
+
 2016-08-31  Alan Modra  <amodra@gmail.com>
 
 	PR 20513
