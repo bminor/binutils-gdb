@@ -1,3 +1,9 @@
+2016-09-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (cmse_entry_fct_p): Store instruction encoding in an
+	array of bytes and use bfd_get_16 to interpret its encoding according
+	to endianness of target.
+
 2016-09-01  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (synthetic_opd): New static var.

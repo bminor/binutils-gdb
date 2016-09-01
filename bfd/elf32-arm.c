@@ -5775,6 +5775,7 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
 static bfd_boolean
 cmse_entry_fct_p (struct elf32_arm_link_hash_entry *hash)
 {
+  bfd_byte contents[4];
   uint32_t first_insn;
   asection *section;
   file_ptr offset;
@@ -5791,11 +5792,13 @@ cmse_entry_fct_p (struct elf32_arm_link_hash_entry *hash)
   section = hash->root.root.u.def.section;
   abfd = section->owner;
   offset = hash->root.root.u.def.value - section->vma;
-  if (!bfd_get_section_contents (abfd, section, &first_insn, offset,
-				 sizeof (first_insn)))
+  if (!bfd_get_section_contents (abfd, section, contents, offset,
+				 sizeof (contents)))
     return FALSE;
 
-  /* Start by SG instruction.  */
+  first_insn = bfd_get_32 (abfd, contents);
+
+  /* Starts by SG instruction.  */
   return first_insn == 0xe97fe97f;
 }
 
