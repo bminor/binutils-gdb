@@ -1,3 +1,9 @@
+2016-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr20513c.d: Limit to *-*-linux* and *-*-gnu*
+	targets.
+	* testsuite/ld-elf/pr20513d.d: Likewise.
+
 2016-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20513
