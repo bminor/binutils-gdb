@@ -807,6 +807,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Check Thumb to Thumb farcall veneers
 
 # Check Thumb to ARM farcall veneers
+
+# Check handling of --target1-abs, --target1-rel and --target2 options
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_91 = arm_abs_global.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_in_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_out_of_range.sh \
@@ -820,7 +822,12 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_arm_arm.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_arm_thumb.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb.sh \
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm.sh
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target1_abs.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target1_rel.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target2_rel.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target2_abs.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target2_got_rel.sh
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_92 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range.stdout \
@@ -865,7 +872,12 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_7m.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_6m.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm.stdout \
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t.stdout
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target1_abs.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target1_rel.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target2_rel.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target2_abs.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_target2_got_rel.stdout
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_93 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range \
@@ -908,7 +920,12 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_7m \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_6m \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm \
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@ arm_target1_abs \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@ arm_target1_rel \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@ arm_target2_rel \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@ arm_target2_abs \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@ arm_target2_got_rel
 @DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_94 = aarch64_reloc_none.sh \
 @DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	aarch64_relocs.sh
 @DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_95 = aarch64_reloc_none.stdout \
@@ -5149,6 +5166,16 @@ arm_farcall_thumb_thumb.sh.log: arm_farcall_thumb_thumb.sh
 	@p='arm_farcall_thumb_thumb.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_farcall_thumb_arm.sh.log: arm_farcall_thumb_arm.sh
 	@p='arm_farcall_thumb_arm.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_target1_abs.sh.log: arm_target1_abs.sh
+	@p='arm_target1_abs.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_target1_rel.sh.log: arm_target1_rel.sh
+	@p='arm_target1_rel.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_target2_rel.sh.log: arm_target2_rel.sh
+	@p='arm_target2_rel.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_target2_abs.sh.log: arm_target2_abs.sh
+	@p='arm_target2_abs.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_target2_got_rel.sh.log: arm_target2_got_rel.sh
+	@p='arm_target2_got_rel.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 aarch64_reloc_none.sh.log: aarch64_reloc_none.sh
 	@p='aarch64_reloc_none.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 aarch64_relocs.sh.log: aarch64_relocs.sh
@@ -7586,6 +7613,42 @@ uninstall-am:
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_farcall_thumb_arm_5t.o: arm_farcall_thumb_arm.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -march=armv5t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target1_abs.stdout: arm_target1_abs
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -s $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target1_abs: arm_target1.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --target1-abs --section-start .text=0x8000 -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target1_rel.stdout: arm_target1_rel
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -s $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target1_rel: arm_target1.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --target1-rel --section-start .text=0x8000 -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target1.o: arm_target1.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target2_rel.stdout: arm_target2_rel
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -s $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target2_rel: arm_target2.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --target2=rel --section-start .text=0x8000 -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target2_abs.stdout: arm_target2_abs
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -s $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target2_abs: arm_target2.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --target2=abs --section-start .text=0x8000 -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target2_got_rel.stdout: arm_target2_got_rel
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -s $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target2_got_rel: arm_target2.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --target2=got-rel --section-start .text=0x8000 --section-start .got=0x9000 -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_target2.o: arm_target2.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 @DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@aarch64_reloc_none.o: aarch64_reloc_none.s
 @DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 @DEFAULT_TARGET_AARCH64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@aarch64_reloc_none: aarch64_reloc_none.o ../ld-new
