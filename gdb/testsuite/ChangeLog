@@ -1,5 +1,10 @@
 2016-09-02  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/return-nodebug.exp: Skip the test if	skip_float_test
+	is true and $type is "float" or "double".
+
+2016-09-02  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.arch/arm-neon.exp: Skip it if gdb_skip_float_test returns
 	true.
 	* gdb.base/call-ar-st.exp: Invoke gdb_skip_float_test.
