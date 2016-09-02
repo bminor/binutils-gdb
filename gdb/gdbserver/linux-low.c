@@ -550,11 +550,11 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	      && can_software_single_step ()
 	      && event == PTRACE_EVENT_VFORK)
 	    {
-	      /* If we leave reinsert breakpoints there, child will
-		 hit it, so uninsert reinsert breakpoints from parent
+	      /* If we leave single-step breakpoints there, child will
+		 hit it, so uninsert single-step breakpoints from parent
 		 (and child).  Once vfork child is done, reinsert
 		 them back to parent.  */
-	      uninsert_reinsert_breakpoints (event_thr);
+	      uninsert_single_step_breakpoints (event_thr);
 	    }
 
 	  clone_all_breakpoints (child_thr, event_thr);
@@ -581,8 +581,8 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  event_lwp->status_pending_p = 1;
 	  event_lwp->status_pending = wstat;
 
-	  /* If the parent thread is doing step-over with reinsert
-	     breakpoints, the list of reinsert breakpoints are cloned
+	  /* If the parent thread is doing step-over with single-step
+	     breakpoints, the list of single-step breakpoints are cloned
 	     from the parent's.  Remove them from the child process.
 	     In case of vfork, we'll reinsert them back once vforked
 	     child is done.  */
@@ -592,10 +592,10 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	      /* The child process is forked and stopped, so it is safe
 		 to access its memory without stopping all other threads
 		 from other processes.  */
-	      delete_reinsert_breakpoints (child_thr);
+	      delete_single_step_breakpoints (child_thr);
 
-	      gdb_assert (has_reinsert_breakpoints (event_thr));
-	      gdb_assert (!has_reinsert_breakpoints (child_thr));
+	      gdb_assert (has_single_step_breakpoints (event_thr));
+	      gdb_assert (!has_single_step_breakpoints (child_thr));
 	    }
 
 	  /* Report the event.  */
@@ -649,9 +649,9 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 
       if (event_lwp->bp_reinsert != 0 && can_software_single_step ())
 	{
-	  reinsert_reinsert_breakpoints (event_thr);
+	  reinsert_single_step_breakpoints (event_thr);
 
-	  gdb_assert (has_reinsert_breakpoints (event_thr));
+	  gdb_assert (has_single_step_breakpoints (event_thr));
 	}
 
       /* Report the event.  */
@@ -2622,9 +2622,9 @@ maybe_hw_step (struct thread_info *thread)
     return 1;
   else
     {
-      /* GDBserver must insert reinsert breakpoint for software
+      /* GDBserver must insert single-step breakpoint for software
 	 single step.  */
-      gdb_assert (has_reinsert_breakpoints (thread));
+      gdb_assert (has_single_step_breakpoints (thread));
       return 0;
     }
 }
@@ -3330,13 +3330,13 @@ linux_wait_1 (ptid_t ptid,
      the breakpoint address.
      So in the case of the hardware single step advance the PC manually
      past the breakpoint and in the case of software single step advance only
-     if it's not the reinsert_breakpoint we are hitting.
+     if it's not the single_step_breakpoint we are hitting.
      This avoids that a program would keep trapping a permanent breakpoint
      forever.  */
   if (!ptid_equal (step_over_bkpt, null_ptid)
       && event_child->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
       && (event_child->stepping
-	  || !reinsert_breakpoint_inserted_here (event_child->stop_pc)))
+	  || !single_step_breakpoint_inserted_here (event_child->stop_pc)))
     {
       int increment_pc = 0;
       int breakpoint_kind = 0;
@@ -3390,8 +3390,8 @@ linux_wait_1 (ptid_t ptid,
 
       /* We have a SIGTRAP, possibly a step-over dance has just
 	 finished.  If so, tweak the state machine accordingly,
-	 reinsert breakpoints and delete any reinsert (software
-	 single-step) breakpoints.  */
+	 reinsert breakpoints and delete any single-step
+	 breakpoints.  */
       step_over_finished = finish_step_over (event_child);
 
       /* Now invoke the callbacks of any internal breakpoints there.  */
@@ -3705,48 +3705,48 @@ linux_wait_1 (ptid_t ptid,
 
   /* Alright, we're going to report a stop.  */
 
-  /* Remove reinsert breakpoints.  */
+  /* Remove single-step breakpoints.  */
   if (can_software_single_step ())
     {
-      /* Remove reinsert breakpoints or not.  It it is true, stop all
+      /* Remove single-step breakpoints or not.  It it is true, stop all
 	 lwps, so that other threads won't hit the breakpoint in the
 	 staled memory.  */
-      int remove_reinsert_breakpoints_p = 0;
+      int remove_single_step_breakpoints_p = 0;
 
       if (non_stop)
 	{
-	  remove_reinsert_breakpoints_p
-	    = has_reinsert_breakpoints (current_thread);
+	  remove_single_step_breakpoints_p
+	    = has_single_step_breakpoints (current_thread);
 	}
       else
 	{
 	  /* In all-stop, a stop reply cancels all previous resume
-	     requests.  Delete all reinsert breakpoints.  */
+	     requests.  Delete all single-step breakpoints.  */
 	  struct inferior_list_entry *inf, *tmp;
 
 	  ALL_INFERIORS (&all_threads, inf, tmp)
 	    {
 	      struct thread_info *thread = (struct thread_info *) inf;
 
-	      if (has_reinsert_breakpoints (thread))
+	      if (has_single_step_breakpoints (thread))
 		{
-		  remove_reinsert_breakpoints_p = 1;
+		  remove_single_step_breakpoints_p = 1;
 		  break;
 		}
 	    }
 	}
 
-      if (remove_reinsert_breakpoints_p)
+      if (remove_single_step_breakpoints_p)
 	{
-	  /* If we remove reinsert breakpoints from memory, stop all lwps,
+	  /* If we remove single-step breakpoints from memory, stop all lwps,
 	     so that other threads won't hit the breakpoint in the staled
 	     memory.  */
 	  stop_all_lwps (0, event_child);
 
 	  if (non_stop)
 	    {
-	      gdb_assert (has_reinsert_breakpoints (current_thread));
-	      delete_reinsert_breakpoints (current_thread);
+	      gdb_assert (has_single_step_breakpoints (current_thread));
+	      delete_single_step_breakpoints (current_thread);
 	    }
 	  else
 	    {
@@ -3756,8 +3756,8 @@ linux_wait_1 (ptid_t ptid,
 		{
 		  struct thread_info *thread = (struct thread_info *) inf;
 
-		  if (has_reinsert_breakpoints (thread))
-		    delete_reinsert_breakpoints (thread);
+		  if (has_single_step_breakpoints (thread))
+		    delete_single_step_breakpoints (thread);
 		}
 	    }
 
@@ -4280,7 +4280,7 @@ install_software_single_step_breakpoints (struct lwp_info *lwp)
   next_pcs = (*the_low_target.get_next_pcs) (regcache);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); ++i)
-    set_reinsert_breakpoint (pc, current_ptid);
+    set_single_step_breakpoint (pc, current_ptid);
 
   do_cleanups (old_chain);
 }
@@ -4881,7 +4881,7 @@ start_step_over (struct lwp_info *lwp)
 }
 
 /* Finish a step-over.  Reinsert the breakpoint we had uninserted in
-   start_step_over, if still there, and delete any reinsert
+   start_step_over, if still there, and delete any single-step
    breakpoints we've set, on non hardware single-step targets.  */
 
 static int
@@ -4903,15 +4903,15 @@ finish_step_over (struct lwp_info *lwp)
 
       lwp->bp_reinsert = 0;
 
-      /* Delete any software-single-step reinsert breakpoints.  No
-	 longer needed.  We don't have to worry about other threads
-	 hitting this trap, and later not being able to explain it,
-	 because we were stepping over a breakpoint, and we hold all
-	 threads but LWP stopped while doing that.  */
+      /* Delete any single-step breakpoints.  No longer needed.  We
+	 don't have to worry about other threads hitting this trap,
+	 and later not being able to explain it, because we were
+	 stepping over a breakpoint, and we hold all threads but
+	 LWP stopped while doing that.  */
       if (!can_hardware_single_step ())
 	{
-	  gdb_assert (has_reinsert_breakpoints (current_thread));
-	  delete_reinsert_breakpoints (current_thread);
+	  gdb_assert (has_single_step_breakpoints (current_thread));
+	  delete_single_step_breakpoints (current_thread);
 	}
 
       step_over_bkpt = null_ptid;
@@ -5227,10 +5227,11 @@ proceed_one_lwp (struct inferior_list_entry *entry, void *except)
 	debug_printf ("   stepping LWP %ld, client wants it stepping\n",
 		      lwpid_of (thread));
 
-      /* If resume_step is requested by GDB, install reinsert
+      /* If resume_step is requested by GDB, install single-step
 	 breakpoints when the thread is about to be actually resumed if
-	 the reinsert breakpoints weren't removed.  */
-      if (can_software_single_step () && !has_reinsert_breakpoints (thread))
+	 the single-step breakpoints weren't removed.  */
+      if (can_software_single_step ()
+	  && !has_single_step_breakpoints (thread))
 	install_software_single_step_breakpoints (lwp);
 
       step = maybe_hw_step (thread);
