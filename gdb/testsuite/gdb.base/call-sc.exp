@@ -35,6 +35,7 @@ standard_testfile .c
 if [get_compiler_info] {
     return -1
 }
+set skip_float_test [gdb_skip_float_test]
 
 # Compile a variant of scalars.c using TYPE to specify the type of the
 # parameter and return-type.  Run the compiled program up to "main".
@@ -427,7 +428,7 @@ start_scalars_test tll
 test_scalar_calls
 test_scalar_returns
 
-if ![target_info exists gdb,skip_float_tests] {
+if {!$skip_float_test} {
     # Approx size: 4, 8, ...
     start_scalars_test tf
     test_scalar_calls
