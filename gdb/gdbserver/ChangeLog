@@ -1,3 +1,9 @@
+2016-09-02  Akash Trehan  <akash.trehan123@gmail.com>
+
+	PR gdb/19495
+	* remote-utils.c (relocate_instruction): Remove redundant strcpy()
+	call writing data to own_buf.
+
 2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* target.c (mywait): Call target_wait instead of

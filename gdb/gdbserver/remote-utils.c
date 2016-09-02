@@ -1579,7 +1579,6 @@ relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
   ULONGEST written = 0;
 
   /* Send the request.  */
-  strcpy (own_buf, "qRelocInsn:");
   sprintf (own_buf, "qRelocInsn:%s;%s", paddress (oldloc),
 	   paddress (*to));
   if (putpkt (own_buf) < 0)
