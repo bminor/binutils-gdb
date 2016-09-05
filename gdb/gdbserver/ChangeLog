@@ -1,3 +1,12 @@
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMPILER, COMPILER_CFLAGS): Remove.
+	(COMPILE.pre, CC_LD): Use CXX directly.
+	(INTERNAL_CFLAGS_BASE): Use CXXFLAGS directly.
+	* acinclude.m4: Don't include build-with-cxx.m4.
+	* configure.ac: Remove GDB_AC_BUILD_WITH_CXX call.
+	* configure: Regenerate.
+
 2016-09-02  Akash Trehan  <akash.trehan123@gmail.com>
 
 	PR gdb/19495

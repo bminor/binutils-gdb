@@ -49,11 +49,6 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 RANLIB = @RANLIB@
 
-# The name of the compiler to use.
-COMPILER = @COMPILER@
-# Set to CFLAGS or CXXFLAGS, depending on compiler/language.
-COMPILER_CFLAGS = @COMPILER_CFLAGS@
-
 CC = @CC@
 CXX = @CXX@
 AR = @AR@
@@ -66,7 +61,7 @@ depcomp = $(SHELL) $(srcdir)/../depcomp
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(COMPILER)
+COMPILE.pre = $(CXX)
 COMPILE.post = -c -o $@
 COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
@@ -84,8 +79,8 @@ VPATH = @srcdir@
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefinded refs.
-#CC_LD=gcc -static
-CC_LD=$(COMPILER)
+#CC_LD=g++ -static
+CC_LD=$(CXX)
 
 # Where is the "include" directory?  Traditionally ../include or ./include
 INCLUDE_DIR =  ${srcdir}/../../include
@@ -138,7 +133,7 @@ CXXFLAGS = @CXXFLAGS@
 CPPFLAGS = @CPPFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS_BASE =  ${COMPILER_CFLAGS} ${GLOBAL_CFLAGS} \
+INTERNAL_CFLAGS_BASE =  ${CXXFLAGS} ${GLOBAL_CFLAGS} \
 	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${CPPFLAGS}
 INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
 INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER

@@ -732,8 +732,6 @@ MAKE
 CCDEPMODE
 DEPDIR
 am__leading_dot
-COMPILER_CFLAGS
-COMPILER
 INSTALL_STRIP_PROGRAM
 STRIP
 install_sh
@@ -809,7 +807,6 @@ enable_option_checking
 enable_maintainer_mode
 enable_plugins
 enable_largefile
-enable_build_with_cxx
 with_separate_debug_dir
 with_gdb_datadir
 with_relocated_sources
@@ -1503,8 +1500,6 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --enable-plugins        Enable support for plugins
   --disable-largefile     omit support for large files
-  --disable-build-with-cxx
-                          build with C compiler instead of C++ compiler
   --enable-targets=TARGETS
                           alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
@@ -4954,32 +4949,6 @@ test "$program_suffix" != NONE &&
 # By default was `s,x,x', remove it if useless.
 ac_script='s/[\\$]/&&/g;s/;s,x,x,$//'
 program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
-
-
-# See if we are building with C++, and substitute COMPILER.
-
-  # Check whether --enable-build-with-cxx was given.
-if test "${enable_build_with_cxx+set}" = set; then :
-  enableval=$enable_build_with_cxx; case $enableval in
-      yes | no)
-	  ;;
-      *)
-	  as_fn_error "bad value $enableval for --enable-build-with-cxx" "$LINENO" 5 ;;
-    esac
-else
-  enable_build_with_cxx=yes
-fi
-
-
-  if test "$enable_build_with_cxx" = "yes"; then
-    COMPILER='$(CXX)'
-    COMPILER_CFLAGS='$(CXXFLAGS)'
-   else
-    COMPILER='$(CC)'
-    COMPILER_CFLAGS='$(CFLAGS)'
-  fi
-
-
 
 
 # Dependency checking.
@@ -14254,21 +14223,12 @@ if test "${ERROR_ON_WARNING}" = yes ; then
     WERROR_CFLAGS="-Werror"
 fi
 
-# These options work in either C or C++ modes.
+# The options we'll try to enable.
 build_warnings="-Wall -Wpointer-arith \
 -Wno-unused -Wunused-value -Wunused-function \
 -Wno-switch -Wno-char-subscripts \
--Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable"
-
-# Now add in C and C++ specific options, depending on mode.
-if test "$enable_build_with_cxx" = "yes"; then
-   build_warnings="$build_warnings -Wno-sign-compare -Wno-write-strings \
--Wno-narrowing"
-else
-   build_warnings="$build_warnings -Wpointer-sign -Wmissing-prototypes \
--Wdeclaration-after-statement -Wmissing-parameter-type \
--Wold-style-declaration -Wold-style-definition"
-fi
+-Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable \
+-Wno-sign-compare -Wno-write-strings -Wno-narrowing"
 
 # Enable -Wno-format by default when using gcc on mingw since many
 # GCC versions complain about %I64.
@@ -14310,14 +14270,12 @@ fi
 
 # The set of warnings supported by a C++ compiler is not the same as
 # of the C compiler.
-if test "$enable_build_with_cxx" = "yes"; then
-    ac_ext=cpp
+ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-fi
 
 WARN_CFLAGS=""
 if test "x${build_warnings}" != x -a "x$GCC" = xyes
@@ -14369,14 +14327,12 @@ fi
 
 
 
-if test "$enable_build_with_cxx" = "yes"; then
-   ac_ext=c
+ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-fi
 
 
 # In the Cygwin environment, we need some additional flags.

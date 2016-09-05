@@ -1,5 +1,17 @@
 2016-09-05  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention that a C++ compiler is now required.
+	* Makefile.in (COMPILER, COMPILER_CFLAGS): Remove.
+	(COMPILE.pre, CC_LD): Use CXX directly.
+	(INTERNAL_CFLAGS_BASE): Use CXXFLAGS directly.
+	* acinclude.m4: Don't include build-with-cxx.m4.
+	* build-with-cxx.m4: Delete file.
+	* configure.ac: Remove GDB_AC_BUILD_WITH_CXX call.
+	* warning.m4: Assume $enable_build_with_cxx is yes.
+	* configure: Regenerate.
+
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
 	PR backtrace/19927
 	* frame.c (get_frame_id): Compute the frame id if not computed
 	yet.
