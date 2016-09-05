@@ -511,7 +511,26 @@ get_frame_id (struct frame_info *fi)
   if (fi == NULL)
     return null_frame_id;
 
-  gdb_assert (fi->this_id.p);
+  if (!fi->this_id.p)
+    {
+      int stashed;
+
+      /* If we haven't computed the frame id yet, then it must be that
+	 this is the current frame.  Compute it now, and stash the
+	 result.  The IDs of other frames are computed as soon as
+	 they're created, in order to detect cycles.  See
+	 get_prev_frame_if_no_cycle.  */
+      gdb_assert (fi->level == 0);
+
+      /* Compute.  */
+      compute_frame_id (fi);
+
+      /* Since this is the first frame in the chain, this should
+	 always succeed.  */
+      stashed = frame_stash_add (fi);
+      gdb_assert (stashed);
+    }
+
   return fi->this_id.value;
 }
 
@@ -1487,23 +1506,7 @@ frame_obstack_zalloc (unsigned long size)
   return data;
 }
 
-/* Return the innermost (currently executing) stack frame.  This is
-   split into two functions.  The function unwind_to_current_frame()
-   is wrapped in catch exceptions so that, even when the unwind of the
-   sentinel frame fails, the function still returns a stack frame.  */
-
-static int
-unwind_to_current_frame (struct ui_out *ui_out, void *args)
-{
-  struct frame_info *frame = get_prev_frame ((struct frame_info *) args);
-
-  /* A sentinel frame can fail to unwind, e.g., because its PC value
-     lands in somewhere like start.  */
-  if (frame == NULL)
-    return 1;
-  current_frame = frame;
-  return 0;
-}
+static struct frame_info *get_prev_frame_always_1 (struct frame_info *this_frame);
 
 struct frame_info *
 get_current_frame (void)
@@ -1525,16 +1528,28 @@ get_current_frame (void)
 
   if (current_frame == NULL)
     {
+      int stashed;
       struct frame_info *sentinel_frame =
 	create_sentinel_frame (current_program_space, get_current_regcache ());
-      if (catch_exceptions (current_uiout, unwind_to_current_frame,
-			    sentinel_frame, RETURN_MASK_ERROR) != 0)
-	{
-	  /* Oops! Fake a current frame?  Is this useful?  It has a PC
-             of zero, for instance.  */
-	  current_frame = sentinel_frame;
-	}
+
+      /* Set the current frame before computing the frame id, to avoid
+	 recursion inside compute_frame_id, in case the frame's
+	 unwinder decides to do a symbol lookup (which depends on the
+	 selected frame's block).
+
+	 This call must always succeed.  In particular, nothing inside
+	 get_prev_frame_always_1 should try to unwind from the
+	 sentinel frame, because that could fail/throw, and we always
+	 want to leave with the current frame created and linked in --
+	 we should never end up with the sentinel frame as outermost
+	 frame.  */
+      current_frame = get_prev_frame_always_1 (sentinel_frame);
+      gdb_assert (current_frame != NULL);
+
+      /* No need to compute the frame id yet.  That'll be done lazily
+	 from inside get_frame_id instead.  */
     }
+
   return current_frame;
 }
 
@@ -1812,8 +1827,18 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
   struct cleanup *prev_frame_cleanup;
 
   prev_frame = get_prev_frame_raw (this_frame);
-  if (prev_frame == NULL)
-    return NULL;
+
+  /* Don't compute the frame id of the current frame yet.  Unwinding
+     the sentinel frame can fail (e.g., if the thread is gone and we
+     can't thus read its registers).  If we let the cycle detection
+     code below try to compute a frame ID, then an error thrown from
+     within the frame ID computation would result in the sentinel
+     frame as outermost frame, which is bogus.  Instead, we'll compute
+     the current frame's ID lazily in get_frame_id.  Note that there's
+     no point in doing cycle detection when there's only one frame, so
+     nothing is lost here.  */
+  if (prev_frame->level == 0)
+    return prev_frame;
 
   /* The cleanup will remove the previous frame that get_prev_frame_raw
      linked onto THIS_FRAME.  */

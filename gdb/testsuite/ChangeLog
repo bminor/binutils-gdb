@@ -1,3 +1,11 @@
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
+	PR backtrace/19927
+	* gdb.python/py-unwind-maint.exp: Adjust tests to not expect that
+	unwinders are immediately called as side effect of "source" or
+	"disable unwinder" commands.
+	* gdb.python/py-recurse-unwind.exp: Remove setup_kfail calls.
+
 2016-09-02  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/return-nodebug.exp: Skip the test if	skip_float_test

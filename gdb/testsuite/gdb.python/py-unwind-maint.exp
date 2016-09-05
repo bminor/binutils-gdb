@@ -34,10 +34,13 @@ if ![runto_main ] then {
     return -1
 }
 
-gdb_test_sequence "source ${pyfile}" "import python scripts" {
-    "Python script imported"
+gdb_test "source ${pyfile}" "Python script imported" \
+    "import python scripts"
+
+gdb_test_sequence "frame" "All unwinders enabled" {
     "py_unwind_maint_ps_unwinder called"
     "global_unwinder called"
+    "#0  main"
 }
 
 gdb_test_sequence "info unwinder" "Show all unwinders" {
@@ -56,7 +59,6 @@ gdb_test_sequence "continue" "Unwinders called" {
 
 gdb_test_sequence "disable unwinder global .*" "Unwinder disabled" {
     "1 unwinder disabled"
-    "py_unwind_maint_ps_unwinder called"
 }
 
 gdb_test_sequence "info unwinder" "Show with global unwinder disabled" {

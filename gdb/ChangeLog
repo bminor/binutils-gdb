@@ -1,3 +1,14 @@
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
+	PR backtrace/19927
+	* frame.c (get_frame_id): Compute the frame id if not computed
+	yet.
+	(unwind_to_current_frame): Delete.
+	(get_current_frame): Use get_prev_frame_always_1 to get the
+	current frame and assert that that always succeeds.
+	(get_prev_frame_if_no_cycle): Skip cycle detection if returning
+	the current frame.
+
 2016-09-02  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/11616:
