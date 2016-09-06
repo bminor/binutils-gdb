@@ -2681,6 +2681,30 @@ allocate_gnat_aux_type (struct type *type)
   *(TYPE_GNAT_SPECIFIC (type)) = gnat_aux_default;
 }
 
+/* Helper function to initialize a newly allocated type.  Set type code
+   to CODE and initialize the type-specific fields accordingly.  */
+
+static void
+set_type_code (struct type *type, enum type_code code)
+{
+  TYPE_CODE (type) = code;
+
+  switch (code)
+    {
+      case TYPE_CODE_STRUCT:
+      case TYPE_CODE_UNION:
+      case TYPE_CODE_NAMESPACE:
+        INIT_CPLUS_SPECIFIC (type);
+        break;
+      case TYPE_CODE_FLT:
+        TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FLOATFORMAT;
+        break;
+      case TYPE_CODE_FUNC:
+	INIT_FUNC_SPECIFIC (type);
+        break;
+    }
+}
+
 /* Helper function to initialize the standard scalar types.
 
    If NAME is non-NULL, then it is used to initialize the type name.
@@ -2694,7 +2718,7 @@ init_type (enum type_code code, int length, int flags,
   struct type *type;
 
   type = alloc_type (objfile);
-  TYPE_CODE (type) = code;
+  set_type_code (type, code);
   TYPE_LENGTH (type) = length;
 
   gdb_assert (!(flags & (TYPE_FLAG_MIN - 1)));
@@ -2730,20 +2754,6 @@ init_type (enum type_code code, int length, int flags,
   if (name && strcmp (name, "char") == 0)
     TYPE_NOSIGN (type) = 1;
 
-  switch (code)
-    {
-      case TYPE_CODE_STRUCT:
-      case TYPE_CODE_UNION:
-      case TYPE_CODE_NAMESPACE:
-        INIT_CPLUS_SPECIFIC (type);
-        break;
-      case TYPE_CODE_FLT:
-        TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FLOATFORMAT;
-        break;
-      case TYPE_CODE_FUNC:
-	INIT_FUNC_SPECIFIC (type);
-        break;
-    }
   return type;
 }
 
@@ -4634,7 +4644,7 @@ arch_type (struct gdbarch *gdbarch,
   struct type *type;
 
   type = alloc_type_arch (gdbarch);
-  TYPE_CODE (type) = code;
+  set_type_code (type, code);
   TYPE_LENGTH (type) = length;
 
   if (name)

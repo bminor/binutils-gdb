@@ -1,5 +1,10 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.c (set_type_code): New function.
+	(init_type, arch_type): Use it.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (ada_language_arch_info): Use gdbarch_long_double_bit
 	instead of gdbarch_double_bit for "long_long_float".
 
