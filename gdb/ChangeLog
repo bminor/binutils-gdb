@@ -1,5 +1,46 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (init_type): Remove FLAGS argument.  Move OBJFILE
+	argument to first position.
+	(init_integer_type): New prototype.
+	(init_character_type): Likewise.
+	(init_boolean_type): Likewise.
+	(init_float_type): Likewise.
+	(init_decfloat_type): Likewise.
+	(init_complex_type): Likewise.
+	(init_pointer_type): Likewise.
+	* gdbtypes.c (verify_floatflormat): New function.
+	(init_type): Remove FLAGS argument and processing.  Move OBJFILE
+	argument to first position.
+	(init_integer_type): New function.
+	(init_character_type): Likewise.
+	(init_boolean_type): Likewise.
+	(init_float_type): Likewise.
+	(init_decfloat_type): Likewise.
+	(init_complex_type): Likewise.
+	(init_pointer_type): Likewise.
+	(arch_float_type): Use verify_floatflormat.
+	(objfile_type): Use init_..._type helpers instead of calling
+	init_type directly.
+	* dwarf2read.c (fixup_go_packaging): Update to changed init_type
+	prototype.
+	(read_namespace_type): Likewise.
+	(read_module_type): Likewise.
+	(read_typedef): Likewise.
+	(read_unspecified_type): Likewise.
+	(build_error_marker_type): Likewise.
+	(read_base_type): Use init_..._type helpers.
+	* mdebugread.c (basic_type): Use init_..._type helpers.
+	(parse_type): Update to changed init_type prototype.
+	(cross_ref): Likewise.
+	* stabsread.c (rs6000_builtin_type): Use init_..._type helpers.
+	(read_sun_builtin_type): Likewise.
+	(read_sun_floating_type): Likewise.
+	(read_range_type): Likewise.  Also update to changed init_type
+	prototype.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (arch_decfloat_type): New prototype.
 	(arch_pointer_type): Likewise.
 	* gdbtypes.c (arch_decfloat_type): New function.

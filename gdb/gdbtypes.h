@@ -1672,8 +1672,21 @@ extern unsigned int type_length_units (struct type *type);
 
 /* * Helper function to construct objfile-owned types.  */
 
-extern struct type *init_type (enum type_code, int, int, const char *,
-			       struct objfile *);
+extern struct type *init_type (struct objfile *, enum type_code, int,
+			       const char *);
+extern struct type *init_integer_type (struct objfile *, int, int,
+				       const char *);
+extern struct type *init_character_type (struct objfile *, int, int,
+					 const char *);
+extern struct type *init_boolean_type (struct objfile *, int, int,
+				       const char *);
+extern struct type *init_float_type (struct objfile *, int, const char *,
+				     const struct floatformat **);
+extern struct type *init_decfloat_type (struct objfile *, int, const char *);
+extern struct type *init_complex_type (struct objfile *, const char *,
+				       struct type *);
+extern struct type *init_pointer_type (struct objfile *, int, const char *,
+				       struct type *);
 
 /* Helper functions to construct architecture-owned types.  */
 extern struct type *arch_type (struct gdbarch *, enum type_code, int,
