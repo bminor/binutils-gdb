@@ -1,3 +1,7 @@
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.cp/hang.exp: Remove reference to TYPE_FLAG_STUB in comment.
+
 2016-09-05  Pedro Alves  <palves@redhat.com>
 
 	PR backtrace/19927

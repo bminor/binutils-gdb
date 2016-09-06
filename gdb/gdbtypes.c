@@ -1119,7 +1119,7 @@ create_array_type_with_stride (struct type *result_type,
   if (bit_stride > 0)
     TYPE_FIELD_BITSIZE (result_type, 0) = bit_stride;
 
-  /* TYPE_FLAG_TARGET_STUB will take care of zero length arrays.  */
+  /* TYPE_TARGET_STUB will take care of zero length arrays.  */
   if (TYPE_LENGTH (result_type) == 0)
     TYPE_TARGET_STUB (result_type) = 1;
 
@@ -4325,77 +4325,77 @@ recursive_dump_type (struct type *type, int spaces)
 		    TYPE_INSTANCE_FLAGS (type));
   if (TYPE_CONST (type))
     {
-      puts_filtered (" TYPE_FLAG_CONST");
+      puts_filtered (" TYPE_CONST");
     }
   if (TYPE_VOLATILE (type))
     {
-      puts_filtered (" TYPE_FLAG_VOLATILE");
+      puts_filtered (" TYPE_VOLATILE");
     }
   if (TYPE_CODE_SPACE (type))
     {
-      puts_filtered (" TYPE_FLAG_CODE_SPACE");
+      puts_filtered (" TYPE_CODE_SPACE");
     }
   if (TYPE_DATA_SPACE (type))
     {
-      puts_filtered (" TYPE_FLAG_DATA_SPACE");
+      puts_filtered (" TYPE_DATA_SPACE");
     }
   if (TYPE_ADDRESS_CLASS_1 (type))
     {
-      puts_filtered (" TYPE_FLAG_ADDRESS_CLASS_1");
+      puts_filtered (" TYPE_ADDRESS_CLASS_1");
     }
   if (TYPE_ADDRESS_CLASS_2 (type))
     {
-      puts_filtered (" TYPE_FLAG_ADDRESS_CLASS_2");
+      puts_filtered (" TYPE_ADDRESS_CLASS_2");
     }
   if (TYPE_RESTRICT (type))
     {
-      puts_filtered (" TYPE_FLAG_RESTRICT");
+      puts_filtered (" TYPE_RESTRICT");
     }
   if (TYPE_ATOMIC (type))
     {
-      puts_filtered (" TYPE_FLAG_ATOMIC");
+      puts_filtered (" TYPE_ATOMIC");
     }
   puts_filtered ("\n");
 
   printfi_filtered (spaces, "flags");
   if (TYPE_UNSIGNED (type))
     {
-      puts_filtered (" TYPE_FLAG_UNSIGNED");
+      puts_filtered (" TYPE_UNSIGNED");
     }
   if (TYPE_NOSIGN (type))
     {
-      puts_filtered (" TYPE_FLAG_NOSIGN");
+      puts_filtered (" TYPE_NOSIGN");
     }
   if (TYPE_STUB (type))
     {
-      puts_filtered (" TYPE_FLAG_STUB");
+      puts_filtered (" TYPE_STUB");
     }
   if (TYPE_TARGET_STUB (type))
     {
-      puts_filtered (" TYPE_FLAG_TARGET_STUB");
+      puts_filtered (" TYPE_TARGET_STUB");
     }
   if (TYPE_STATIC (type))
     {
-      puts_filtered (" TYPE_FLAG_STATIC");
+      puts_filtered (" TYPE_STATIC");
     }
   if (TYPE_PROTOTYPED (type))
     {
-      puts_filtered (" TYPE_FLAG_PROTOTYPED");
+      puts_filtered (" TYPE_PROTOTYPED");
     }
   if (TYPE_INCOMPLETE (type))
     {
-      puts_filtered (" TYPE_FLAG_INCOMPLETE");
+      puts_filtered (" TYPE_INCOMPLETE");
     }
   if (TYPE_VARARGS (type))
     {
-      puts_filtered (" TYPE_FLAG_VARARGS");
+      puts_filtered (" TYPE_VARARGS");
     }
   /* This is used for things like AltiVec registers on ppc.  Gcc emits
      an attribute for the array type, which tells whether or not we
      have a vector, instead of a regular array.  */
   if (TYPE_VECTOR (type))
     {
-      puts_filtered (" TYPE_FLAG_VECTOR");
+      puts_filtered (" TYPE_VECTOR");
     }
   if (TYPE_FIXED_INSTANCE (type))
     {

@@ -1,5 +1,18 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (enum type_flag_value): Remove.
+	Remove references to TYPE_FLAG_... in comments throughout.
+	* gdbtypes.c (recursive_dump_type): Do not print TYPE_FLAG_... 
+	flags, print the corresponding TYPE_... access macro names.
+	Remove references to TYPE_FLAG_... in comments throughout.
+	* infcall.c: Remove references to TYPE_FLAG_... in comments.
+	* valprint.c: Likewise.
+	* gdb-gdb.py (class TypeFlag): No longer consider TYPE_FLAG_...
+	values, only TYPE_INSTANCE_FLAG_... values.
+	(class TypeFlagsPrinter): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (init_type): Remove FLAGS argument.  Move OBJFILE
 	argument to first position.
 	(init_integer_type): New prototype.

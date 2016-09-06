@@ -61,10 +61,9 @@
 
    Unfortunately, on certain older platforms, the debug info doesn't
    indicate reliably how each function was defined.  A function type's
-   TYPE_FLAG_PROTOTYPED flag may be clear, even if the function was
-   defined in prototype style.  When calling a function whose
-   TYPE_FLAG_PROTOTYPED flag is clear, GDB consults this flag to
-   decide what to do.
+   TYPE_PROTOTYPED flag may be clear, even if the function was defined
+   in prototype style.  When calling a function whose TYPE_PROTOTYPED
+   flag is clear, GDB consults this flag to decide what to do.
 
    For modern targets, it is proper to assume that, if the prototype
    flag is clear, that can be trusted: `float' arguments should be
