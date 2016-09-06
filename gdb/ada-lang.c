@@ -14012,7 +14012,7 @@ ada_language_arch_info (struct gdbarch *gdbarch,
     = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
 			 0, "long_long_integer");
   lai->primitive_type_vector [ada_primitive_type_long_double]
-    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+    = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
 		       "long_long_float", NULL);
   lai->primitive_type_vector [ada_primitive_type_natural]
     = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
