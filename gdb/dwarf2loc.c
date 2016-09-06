@@ -2601,11 +2601,14 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 /* See dwarf2loc.h.  */
 
 int
-dwarf2_evaluate_property (const struct dynamic_prop *prop,
+dwarf2_evaluate_property_signed (const struct dynamic_prop *prop,
 			  struct frame_info *frame,
 			  struct property_addr_info *addr_stack,
-			  CORE_ADDR *value)
+			  CORE_ADDR *value,
+			  int is_signed)
 {
+  int rc = 0;
+
   if (prop == NULL)
     return 0;
 
@@ -2629,7 +2632,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
 		*value = value_as_address (val);
 	      }
-	    return 1;
+	    rc = 1;
 	  }
       }
       break;
@@ -2651,7 +2654,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	    if (!value_optimized_out (val))
 	      {
 		*value = value_as_address (val);
-		return 1;
+		rc = 1;
 	      }
 	  }
       }
@@ -2659,8 +2662,8 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
     case PROP_CONST:
       *value = prop->data.const_val;
-      return 1;
-
+      rc = 1;
+      break;
     case PROP_ADDR_OFFSET:
       {
 	struct dwarf2_property_baton *baton
@@ -2681,11 +2684,38 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  val = value_at (baton->offset_info.type,
 			  pinfo->addr + baton->offset_info.offset);
 	*value = value_as_address (val);
-	return 1;
+	rc = 1;
       }
+      break;
     }
 
-  return 0;
+  if (rc == 1 && is_signed == 1)
+    {
+      /* If we have a valid return candidate and it's value is signed,
+         we have to sign-extend the value because CORE_ADDR on 64bit machine has
+         8 bytes but address size of an 32bit application is 4 bytes.  */
+      struct gdbarch * gdbarch = target_gdbarch ();
+      const int addr_bit = gdbarch_addr_bit (gdbarch);
+      const CORE_ADDR neg_mask = ((~0) <<  (addr_bit - 1));
+
+      /* Check if signed bit is set and sign-extend values.  */
+      if (*value & (neg_mask))
+	*value |= (neg_mask );
+    }
+  return rc;
+}
+
+int
+dwarf2_evaluate_property (const struct dynamic_prop *prop,
+			  struct frame_info *frame,
+			  struct property_addr_info *addr_stack,
+			  CORE_ADDR *value)
+{
+  return dwarf2_evaluate_property_signed (prop,
+				   frame,
+				   addr_stack,
+				   value,
+				   0);
 }
 
 /* See dwarf2loc.h.  */

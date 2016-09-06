@@ -138,6 +138,12 @@ int dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			      struct property_addr_info *addr_stack,
 			      CORE_ADDR *value);
 
+int dwarf2_evaluate_property_signed (const struct dynamic_prop *prop,
+			      struct frame_info *frame,
+			      struct property_addr_info *addr_stack,
+			      CORE_ADDR *value,
+			      int is_signed);
+
 /* A helper for the compiler interface that compiles a single dynamic
    property to C code.
 
