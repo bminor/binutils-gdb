@@ -1,3 +1,8 @@
+2016-09-06  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (request_dump_bynumber): Only call memcpy if
+	dump_sects is not NULL.
+
 2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (load_specific_debug_section): Check the external

@@ -4238,10 +4238,13 @@ request_dump_bynumber (unsigned int section, dump_type type)
 	error (_("Out of memory allocating dump request table.\n"));
       else
 	{
-	  /* Copy current flag settings.  */
-	  memcpy (new_dump_sects, dump_sects, num_dump_sects * sizeof (* dump_sects));
+	  if (dump_sects)
+	    {
+	      /* Copy current flag settings.  */
+	      memcpy (new_dump_sects, dump_sects, num_dump_sects * sizeof (* dump_sects));
 
-	  free (dump_sects);
+	      free (dump_sects);
+	    }
 
 	  dump_sects = new_dump_sects;
 	  num_dump_sects = section + 1;
