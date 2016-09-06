@@ -1441,12 +1441,12 @@ basic_type (int bt, struct objfile *objfile)
 
     case btFloat:
       tp = init_float_type (objfile, gdbarch_float_bit (gdbarch),
-			    "float", NULL);
+			    "float", gdbarch_float_format (gdbarch));
       break;
 
     case btDouble:
       tp = init_float_type (objfile, gdbarch_double_bit (gdbarch),
-			    "double", NULL);
+			    "double", gdbarch_double_format (gdbarch));
       break;
 
     case btComplex:

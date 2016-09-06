@@ -1,5 +1,20 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (ada_language_arch_info): Use gdbarch-provided
+	platform ABI floating-point formats for built-in types.
+	* d-lang.c (build_d_types): Likewise.
+	* f-lang.c (build_fortran_types): Likewise.
+	* m2-lang.c (build_m2_types): Likewise.
+	* mdebugread.c (basic_type): Likewise.
+
+	* go-lang.c (build_go_types): Use IEEE floating-point formats
+	for language built-in types as mandanted by the language.
+	* jv-lang.c (build_java_types): Likewise.
+	* rust-lang.c (rust_language_arch_info): Likewise.
+	* stabsread.c (rs6000_builtin_type): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.c (init_type): Remove "char" special case.
 	(arch_integer_type): Likewise.
 	(gdbtypes_post_init): Set TYPE_NOSIGN for "char" type.

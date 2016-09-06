@@ -2133,17 +2133,20 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       break;
     case 12:
       /* IEEE single precision (32 bit).  */
-      rettype = init_float_type (objfile, 32, "float", NULL);
+      rettype = init_float_type (objfile, 32, "float",
+				 floatformats_ieee_single);
       break;
     case 13:
       /* IEEE double precision (64 bit).  */
-      rettype = init_float_type (objfile, 64, "double", NULL);
+      rettype = init_float_type (objfile, 64, "double",
+				 floatformats_ieee_double);
       break;
     case 14:
       /* This is an IEEE double on the RS/6000, and different machines with
          different sizes for "long double" should use different negative
          type numbers.  See stabs.texinfo.  */
-      rettype = init_float_type (objfile, 64, "long double", NULL);
+      rettype = init_float_type (objfile, 64, "long double",
+				 floatformats_ieee_double);
       break;
     case 15:
       rettype = init_integer_type (objfile, 32, 0, "integer");
@@ -2152,10 +2155,12 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = init_boolean_type (objfile, 32, 1, "boolean");
       break;
     case 17:
-      rettype = init_float_type (objfile, 32, "short real", NULL);
+      rettype = init_float_type (objfile, 32, "short real",
+				 floatformats_ieee_single);
       break;
     case 18:
-      rettype = init_float_type (objfile, 64, "real", NULL);
+      rettype = init_float_type (objfile, 64, "real",
+				 floatformats_ieee_double);
       break;
     case 19:
       rettype = init_type (objfile, TYPE_CODE_ERROR, 0, "stringptr");

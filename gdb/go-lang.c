@@ -648,9 +648,9 @@ build_go_types (struct gdbarch *gdbarch)
   builtin_go_type->builtin_uint64
     = arch_integer_type (gdbarch, 64, 1, "uint64");
   builtin_go_type->builtin_float32
-    = arch_float_type (gdbarch, 32, "float32", NULL);
+    = arch_float_type (gdbarch, 32, "float32", floatformats_ieee_single);
   builtin_go_type->builtin_float64
-    = arch_float_type (gdbarch, 64, "float64", NULL);
+    = arch_float_type (gdbarch, 64, "float64", floatformats_ieee_double);
   builtin_go_type->builtin_complex64
     = arch_complex_type (gdbarch, "complex64",
 			 builtin_go_type->builtin_float32);

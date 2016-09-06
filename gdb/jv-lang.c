@@ -1241,9 +1241,9 @@ build_java_types (struct gdbarch *gdbarch)
   builtin_java_type->builtin_char
     = arch_character_type (gdbarch, 16, 1, "char");
   builtin_java_type->builtin_float
-    = arch_float_type (gdbarch, 32, "float", NULL);
+    = arch_float_type (gdbarch, 32, "float", floatformats_ieee_single);
   builtin_java_type->builtin_double
-    = arch_float_type (gdbarch, 64, "double", NULL);
+    = arch_float_type (gdbarch, 64, "double", floatformats_ieee_double);
   builtin_java_type->builtin_void
     = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
 

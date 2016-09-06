@@ -332,13 +332,13 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_real
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
-		       "real", NULL);
+		       "real", gdbarch_float_format (gdbarch));
   builtin_f_type->builtin_real_s8
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
-		       "real*8", NULL);
+		       "real*8", gdbarch_double_format (gdbarch));
   builtin_f_type->builtin_real_s16
     = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
-		       "real*16", NULL);
+		       "real*16", gdbarch_long_double_format (gdbarch));
 
   builtin_f_type->builtin_complex_s8
     = arch_complex_type (gdbarch, "complex*8",
