@@ -136,6 +136,10 @@ CXX_FOR_TARGET = ` \
     fi; \
   fi`
 
+# Strip out sanitization options as we want to test building binaries without any extra paraphernalia
+CFLAGS_FOR_TARGET = `echo $(CFLAGS) | sed -e 's/-fsanitize=address//g' -e 's/-fsanitize=undefined//g'`
+CXXFLAGS_FOR_TARGET = `echo $(CXXFLAGS) | sed -e 's/-fsanitize=address//g' -e 's/-fsanitize=undefined//g'`
+
 transform = s/^ld-new$$/$(installed_linker)/;@program_transform_name@
 bin_PROGRAMS = ld-new
 info_TEXINFOS = ld.texinfo
@@ -2075,8 +2079,8 @@ check-DEJAGNU: site.exp
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
-		CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS)" \
-		CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS)" \
+		CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS_FOR_TARGET)" \
+		CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
 		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" \
 		LIBIBERTY="$(LIBIBERTY) $(LIBINTL)" LIBS="$(LIBS)" \

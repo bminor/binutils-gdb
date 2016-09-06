@@ -1,3 +1,12 @@
+2016-09-06  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (CFLAGS_FOR_TARGET): Define as a copy of CFLAGS but
+	without any sanitization options.
+	(CXXFLAGS_FOR_TARGET): Define as a copy of CXXFLAGS but	without
+	any sanitization options.
+	(check-DEJAGNU): Pass CFLAGS_FOR_TARGET and CXXFLAGS_FOR_TARGET
+	as CFLAGS and CXXFLAGS respectively.
+
 2016-09-02  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/20545
