@@ -1893,7 +1893,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
   gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->low;
-  if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+  if (dwarf2_evaluate_property_signed (prop, NULL, addr_stack, &value, 1))
     {
       low_bound.kind = PROP_CONST;
       low_bound.data.const_val = value;
@@ -1905,7 +1905,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
     }
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->high;
-  if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+  if (dwarf2_evaluate_property_signed (prop, NULL, addr_stack, &value, 1))
     {
       high_bound.kind = PROP_CONST;
       high_bound.data.const_val = value;

@@ -44,3 +44,7 @@ gdb_test "print sizeof(pvla)" " = 0" "print sizeof non-associated pvla"
 gdb_breakpoint [gdb_get_line_number "pvla-associated"]
 gdb_continue_to_breakpoint "pvla-associated"
 gdb_test "print sizeof(pvla)" " = 4000" "print sizeof associated pvla"
+
+gdb_breakpoint [gdb_get_line_number "vla1-neg-bounds"]
+gdb_continue_to_breakpoint "vla1-neg-bounds"
+gdb_test "print sizeof(vla1)" " = 480" "print sizeof vla1 negative bounds"

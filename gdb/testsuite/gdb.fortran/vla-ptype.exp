@@ -98,3 +98,7 @@ gdb_test "ptype vla2" "type = <not allocated>" "ptype vla2 not allocated"
 gdb_test "ptype vla2(5, 45, 20)" \
   "no such vector element \\\(vector not allocated\\\)" \
   "ptype vla2(5, 45, 20) not allocated"
+
+gdb_breakpoint [gdb_get_line_number "vla1-neg-bounds"]
+gdb_continue_to_breakpoint "vla1-neg-bounds"
+gdb_test "ptype vla1" "type = $real \\(-2:1,-5:4,-3:-1\\)" "ptype vla1 negative bounds"

@@ -54,4 +54,14 @@ program vla
 
   allocate (vla3 (2,2))               ! vla2-deallocated
   vla3(:,:) = 13
+
+  allocate (vla1 (-2:1, -5:4, -3:-1))
+  l = allocated(vla1)
+
+  vla1(:, :, :) = 1
+  vla1(-2, -3, -1) = -231
+
+  deallocate (vla1)                   ! vla1-neg-bounds
+  l = allocated(vla1)
+
 end program vla
