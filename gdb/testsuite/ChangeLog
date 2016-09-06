@@ -1,3 +1,12 @@
+2016-09-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/new-ui-pending-input.c: New file.
+	* gdb.base/new-ui-pending-input.exp: New file.
+	* gdb.exp (clear_gdb_spawn_id): New procedure.
+	(with_spawn_id): Check whether gdb_spawn_id exists before
+	referencing it.  If gdb_spawn_id didn't exist on entry, clear it
+	on exit.
+
 2016-08-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.multi/tids.exp: Test "thread apply all".

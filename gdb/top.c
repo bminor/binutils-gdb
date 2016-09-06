@@ -561,9 +561,15 @@ check_frame_language_change (void)
 void
 wait_sync_command_done (void)
 {
+  /* Processing events may change the current UI.  */
+  struct cleanup *old_chain = make_cleanup_restore_current_ui ();
+  struct ui *ui = current_ui;
+
   while (gdb_do_one_event () >= 0)
-    if (current_ui->prompt_state != PROMPT_BLOCKED)
+    if (ui->prompt_state != PROMPT_BLOCKED)
       break;
+
+  do_cleanups (old_chain);
 }
 
 /* See top.h.  */
@@ -1029,6 +1035,9 @@ gdb_readline_wrapper (const char *prompt)
 
   ui->secondary_prompt_depth++;
   back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
+
+  /* Processing events may change the current UI.  */
+  make_cleanup_restore_current_ui ();
 
   if (cleanup->target_is_async_orig)
     target_async (0);

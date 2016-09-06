@@ -2087,17 +2087,35 @@ proc switch_gdb_spawn_id {spawn_id} {
     set board_info($board,fileid) $spawn_id
 }
 
+# Clear the default spawn id.
+
+proc clear_gdb_spawn_id {} {
+    global gdb_spawn_id
+    global board board_info
+
+    unset -nocomplain gdb_spawn_id
+    set board [host_info name]
+    unset -nocomplain board_info($board,fileid)
+}
+
 # Run BODY with SPAWN_ID as current spawn id.
 
 proc with_spawn_id { spawn_id body } {
     global gdb_spawn_id
 
-    set saved_spawn_id $gdb_spawn_id
+    if [info exists gdb_spawn_id] {
+	set saved_spawn_id $gdb_spawn_id
+    }
+
     switch_gdb_spawn_id $spawn_id
 
     set code [catch {uplevel 1 $body} result]
 
-    switch_gdb_spawn_id $saved_spawn_id
+    if [info exists saved_spawn_id] {
+	switch_gdb_spawn_id $saved_spawn_id
+    } else {
+	clear_gdb_spawn_id
+    }
 
     if {$code == 1} {
 	global errorInfo errorCode
