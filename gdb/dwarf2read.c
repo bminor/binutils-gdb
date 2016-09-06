@@ -14757,6 +14757,27 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   return this_type;
 }
 
+/* Allocate a floating-point type of size BITS and name NAME.  Pass NAME_HINT
+   (which may be different from NAME) to the architecture back-end to allow
+   it to guess the correct format if necessary.  */
+
+static struct type *
+dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
+			const char *name_hint)
+{
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  const struct floatformat **format;
+  struct type *type;
+
+  format = gdbarch_floatformat_for_type (gdbarch, name_hint, bits);
+  if (format)
+    type = init_float_type (objfile, bits, name, format);
+  else
+    type = init_type (objfile, TYPE_CODE_ERROR, bits / TARGET_CHAR_BIT, name);
+
+  return type;
+}
+
 /* Find a representation of a given base type and install
    it in the TYPE field of the die.  */
 
@@ -14797,14 +14818,14 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type = init_boolean_type (objfile, bits, 1, name);
 	break;
       case DW_ATE_complex_float:
-	type = init_float_type (objfile, bits / 2, NULL, NULL);
+	type = dwarf2_init_float_type (objfile, bits / 2, NULL, name);
 	type = init_complex_type (objfile, name, type);
 	break;
       case DW_ATE_decimal_float:
 	type = init_decfloat_type (objfile, bits, name);
 	break;
       case DW_ATE_float:
-	type = init_float_type (objfile, bits, name, NULL);
+	type = dwarf2_init_float_type (objfile, bits, name, name);
 	break;
       case DW_ATE_signed:
 	type = init_integer_type (objfile, bits, 0, name);

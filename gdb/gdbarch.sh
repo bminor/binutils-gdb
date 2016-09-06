@@ -383,6 +383,11 @@ v:const struct floatformat **:double_format:::::floatformats_ieee_double::pforma
 v:int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
 v:const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (gdbarch->long_double_format)
 
+# Returns the floating-point format to be used for values of length LENGTH.
+# NAME, if non-NULL, is the type name, which may be used to distinguish
+# different target formats of the same length.
+m:const struct floatformat **:floatformat_for_type:const char *name, int length:name, length:0:default_floatformat_for_type::0
+
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
 # target, you need only set gdbarch_ptr_bit and gdbarch_addr_bit

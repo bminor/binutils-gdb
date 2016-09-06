@@ -2712,21 +2712,16 @@ set_type_code (struct type *type, enum type_code code)
 static int
 verify_floatformat (int bit, const struct floatformat **floatformats)
 {
+  gdb_assert (floatformats != NULL);
+  gdb_assert (floatformats[0] != NULL && floatformats[1] != NULL);
+
   if (bit == -1)
-    {
-      gdb_assert (floatformats != NULL);
-      gdb_assert (floatformats[0] != NULL && floatformats[1] != NULL);
-      bit = floatformats[0]->totalsize;
-    }
+    bit = floatformats[0]->totalsize;
   gdb_assert (bit >= 0);
 
-  if (floatformats != NULL)
-    {
-      size_t len = bit / TARGET_CHAR_BIT;
-
-      gdb_assert (len >= floatformat_totalsize_bytes (floatformats[0]));
-      gdb_assert (len >= floatformat_totalsize_bytes (floatformats[1]));
-    }
+  size_t len = bit / TARGET_CHAR_BIT;
+  gdb_assert (len >= floatformat_totalsize_bytes (floatformats[0]));
+  gdb_assert (len >= floatformat_totalsize_bytes (floatformats[1]));
 
   return bit;
 }

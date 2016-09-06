@@ -353,6 +353,24 @@ dbx_alloc_type (int typenums[2], struct objfile *objfile)
   return (*type_addr);
 }
 
+/* Allocate a floating-point type of size BITS.  */
+
+static struct type *
+dbx_init_float_type (struct objfile *objfile, int bits)
+{
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  const struct floatformat **format;
+  struct type *type;
+
+  format = gdbarch_floatformat_for_type (gdbarch, NULL, bits);
+  if (format)
+    type = init_float_type (objfile, bits, NULL, format);
+  else
+    type = init_type (objfile, TYPE_CODE_ERROR, bits / TARGET_CHAR_BIT, NULL);
+
+  return type;
+}
+
 /* for all the stabs in a given stab vector, build appropriate types 
    and fix their symbols in given symbol vector.  */
 
@@ -3847,11 +3865,11 @@ read_sun_floating_type (char **pp, int typenums[2], struct objfile *objfile)
   if (details == NF_COMPLEX || details == NF_COMPLEX16
       || details == NF_COMPLEX32)
     {
-      rettype = init_float_type (objfile, nbits / 2, NULL, NULL);
+      rettype = dbx_init_float_type (objfile, nbits / 2);
       return init_complex_type (objfile, NULL, rettype);
     }
 
-  return init_float_type (objfile, nbits, NULL, NULL);
+  return dbx_init_float_type (objfile, nbits);
 }
 
 /* Read a number from the string pointed to by *PP.
@@ -4138,7 +4156,7 @@ read_range_type (char **pp, int typenums[2], int type_size,
   if (n3 == 0 && n2 > 0)
     {
       struct type *float_type
-	= init_float_type (objfile, n2 * TARGET_CHAR_BIT, NULL, NULL);
+	= dbx_init_float_type (objfile, n2 * TARGET_CHAR_BIT);
 
       if (self_subrange)
 	return init_complex_type (objfile, NULL, float_type);

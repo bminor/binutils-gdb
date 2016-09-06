@@ -1,5 +1,22 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (floatformat_for_type): New gdbarch callback.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.h (default_floatformat_for_type): New prototype.
+	* arch-utils.c (default_floatformat_for_type): New function.
+
+	* doublest.c (floatformat_from_length): Remove.
+	(floatformat_from_type): Assume TYPE_FLOATFORMAT is non-NULL.
+	* gdbtypes.c (verify_floatformat): Require non-NULL format.
+
+	* dwarf2read.c (dwarf2_init_float_type): New function.
+	(read_base_type): Use it.
+	* stabsread.c (dbx_init_float_type): New function.
+	(read_sun_floating_type): Use it.
+	(read_range_type): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (ada_language_arch_info): Use gdbarch-provided
 	platform ABI floating-point formats for built-in types.
 	* d-lang.c (build_d_types): Likewise.

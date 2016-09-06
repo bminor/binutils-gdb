@@ -770,52 +770,8 @@ floatformat_from_doublest (const struct floatformat *fmt,
 }
 
 
-/* Return a floating-point format for a floating-point variable of
-   length LEN.  If no suitable floating-point format is found, an
-   error is thrown.
-
-   We need this functionality since information about the
-   floating-point format of a type is not always available to GDB; the
-   debug information typically only tells us the size of a
-   floating-point type.
-
-   FIXME: kettenis/2001-10-28: In many places, particularly in
-   target-dependent code, the format of floating-point types is known,
-   but not passed on by GDB.  This should be fixed.  */
-
-static const struct floatformat *
-floatformat_from_length (struct gdbarch *gdbarch, int len)
-{
-  const struct floatformat *format;
-
-  if (len * TARGET_CHAR_BIT == gdbarch_half_bit (gdbarch))
-    format = gdbarch_half_format (gdbarch)
-	       [gdbarch_byte_order (gdbarch)];
-  else if (len * TARGET_CHAR_BIT == gdbarch_float_bit (gdbarch))
-    format = gdbarch_float_format (gdbarch)
-	       [gdbarch_byte_order (gdbarch)];
-  else if (len * TARGET_CHAR_BIT == gdbarch_double_bit (gdbarch))
-    format = gdbarch_double_format (gdbarch)
-	       [gdbarch_byte_order (gdbarch)];
-  else if (len * TARGET_CHAR_BIT == gdbarch_long_double_bit (gdbarch))
-    format = gdbarch_long_double_format (gdbarch)
-	       [gdbarch_byte_order (gdbarch)];
-  /* On i386 the 'long double' type takes 96 bits,
-     while the real number of used bits is only 80,
-     both in processor and in memory.
-     The code below accepts the real bit size.  */ 
-  else if ((gdbarch_long_double_format (gdbarch) != NULL)
-	   && (len * TARGET_CHAR_BIT
-               == gdbarch_long_double_format (gdbarch)[0]->totalsize))
-    format = gdbarch_long_double_format (gdbarch)
-	       [gdbarch_byte_order (gdbarch)];
-  else
-    format = NULL;
-  if (format == NULL)
-    error (_("Unrecognized %d-bit floating-point type."),
-	   len * TARGET_CHAR_BIT);
-  return format;
-}
+/* Return the floating-point format for a floating-point variable of
+   type TYPE.  */
 
 const struct floatformat *
 floatformat_from_type (const struct type *type)
@@ -824,11 +780,8 @@ floatformat_from_type (const struct type *type)
   const struct floatformat *fmt;
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
-  if (TYPE_FLOATFORMAT (type) != NULL)
-    fmt = TYPE_FLOATFORMAT (type)[gdbarch_byte_order (gdbarch)];
-  else
-    fmt = floatformat_from_length (gdbarch, TYPE_LENGTH (type));
-
+  gdb_assert (TYPE_FLOATFORMAT (type));
+  fmt = TYPE_FLOATFORMAT (type)[gdbarch_byte_order (gdbarch)];
   gdb_assert (TYPE_LENGTH (type) >= floatformat_totalsize_bytes (fmt));
   return fmt;
 }
