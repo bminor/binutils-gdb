@@ -447,12 +447,20 @@ struct ui *main_ui;
 struct ui *current_ui;
 struct ui *ui_list;
 
-/* See top.h.  */
+/* A cleanup handler that restores the current UI.  */
 
-void
+static void
 restore_ui_cleanup (void *data)
 {
   current_ui = (struct ui *) data;
+}
+
+/* See top.h.  */
+
+struct cleanup *
+make_cleanup_restore_current_ui (void)
+{
+  return make_cleanup (restore_ui_cleanup, current_ui);
 }
 
 /* See top.h.  */
@@ -461,7 +469,7 @@ void
 switch_thru_all_uis_init (struct switch_thru_all_uis *state)
 {
   state->iter = ui_list;
-  state->old_chain = make_cleanup (restore_ui_cleanup, current_ui);
+  state->old_chain = make_cleanup_restore_current_ui ();
 }
 
 /* See top.h.  */

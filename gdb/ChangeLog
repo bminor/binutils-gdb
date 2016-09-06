@@ -1,3 +1,14 @@
+2016-09-06  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (restore_ui_cleanup): Now static.
+	(make_cleanup_restore_current_ui): New function.
+	(switch_thru_all_uis_init): Use it.
+	* infcall.c (call_thread_fsm_should_stop): Use it.
+	* infrun.c (fetch_inferior_event): Use it.
+	* top.c (new_ui_command): Use it.
+	* top.h (restore_ui_cleanup): Delete declaration.
+	(make_cleanup_restore_current_ui): New declaration.
+
 2016-08-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* thread.c (tp_array_compar): Insert missing parentheses.

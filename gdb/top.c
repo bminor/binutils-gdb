@@ -386,7 +386,7 @@ new_ui_command (char *args, int from_tty)
   interpreter_name = argv[0];
   tty_name = argv[1];
 
-  make_cleanup (restore_ui_cleanup, current_ui);
+  make_cleanup_restore_current_ui ();
 
   failure_chain = make_cleanup (null_cleanup, NULL);
 
