@@ -610,9 +610,8 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      be defined.  */
   void_type = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
   func_void_type = make_function_type (void_type, NULL);
-  tdep->pc_type = arch_type (gdbarch, TYPE_CODE_PTR, 4, NULL);
-  TYPE_TARGET_TYPE (tdep->pc_type) = func_void_type;
-  TYPE_UNSIGNED (tdep->pc_type) = 1;
+  tdep->pc_type = arch_pointer_type (gdbarch, 4 * TARGET_CHAR_BIT, NULL,
+				     func_void_type);
   TYPE_INSTANCE_FLAGS (tdep->pc_type) |= TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
 
   set_gdbarch_read_pc (gdbarch, ft32_read_pc);

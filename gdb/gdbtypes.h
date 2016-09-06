@@ -1686,7 +1686,10 @@ extern struct type *arch_boolean_type (struct gdbarch *, int, int,
 				       const char *);
 extern struct type *arch_float_type (struct gdbarch *, int, const char *,
 				     const struct floatformat **);
+extern struct type *arch_decfloat_type (struct gdbarch *, int, const char *);
 extern struct type *arch_complex_type (struct gdbarch *, const char *,
+				       struct type *);
+extern struct type *arch_pointer_type (struct gdbarch *, int, const char *,
 				       struct type *);
 
 /* Helper functions to construct a struct or record type.  An

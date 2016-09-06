@@ -1,5 +1,17 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (arch_decfloat_type): New prototype.
+	(arch_pointer_type): Likewise.
+	* gdbtypes.c (arch_decfloat_type): New function.
+	(arch_pointer_type): Likewise.
+	(gdbtypes_post_init): Use arch_decfloat_type.
+	* avr-tdep.c (avr_gdbarch_init): Use arch_pointer_type.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* m32c-tdep.c (make_types): Likewise.
+	* rl78-tdep.c (rl78_gdbarch_init): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.c (set_type_code): New function.
 	(init_type, arch_type): Use it.
 
