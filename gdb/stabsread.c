@@ -2102,6 +2102,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       break;
     case 2:
       rettype = init_integer_type (objfile, 8, 0, "char");
+      TYPE_NOSIGN (rettype) = 1;
       break;
     case 3:
       rettype = init_integer_type (objfile, 16, 0, "short");

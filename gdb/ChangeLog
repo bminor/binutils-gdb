@@ -1,5 +1,14 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.c (init_type): Remove "char" special case.
+	(arch_integer_type): Likewise.
+	(gdbtypes_post_init): Set TYPE_NOSIGN for "char" type.
+	(objfile_type): Likewise.
+	* mdebugread.c (basic_type): Likewise.
+	* stabsread.c (rs6000_builtin_type): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (enum type_flag_value): Remove.
 	Remove references to TYPE_FLAG_... in comments throughout.
 	* gdbtypes.c (recursive_dump_type): Do not print TYPE_FLAG_... 

@@ -2748,11 +2748,6 @@ init_type (struct objfile *objfile, enum type_code code, int length,
   TYPE_LENGTH (type) = length;
   TYPE_NAME (type) = name;
 
-  /* C++ fancies.  */
-
-  if (name && strcmp (name, "char") == 0)
-    TYPE_NOSIGN (type) = 1;
-
   return type;
 }
 
@@ -4780,8 +4775,6 @@ arch_integer_type (struct gdbarch *gdbarch,
   t = arch_type (gdbarch, TYPE_CODE_INT, bit / TARGET_CHAR_BIT, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
-  if (name && strcmp (name, "char") == 0)
-    TYPE_NOSIGN (t) = 1;
 
   return t;
 }
@@ -5046,6 +5039,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_char
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
+  TYPE_NOSIGN (builtin_type->builtin_char) = 1;
   builtin_type->builtin_signed_char
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
 			 0, "signed char");
@@ -5193,6 +5187,7 @@ objfile_type (struct objfile *objfile)
   objfile_type->builtin_char
     = init_integer_type (objfile, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
+  TYPE_NOSIGN (objfile_type->builtin_char) = 1;
   objfile_type->builtin_signed_char
     = init_integer_type (objfile, TARGET_CHAR_BIT,
 			 0, "signed char");

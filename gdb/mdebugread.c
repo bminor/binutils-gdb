@@ -1408,6 +1408,7 @@ basic_type (int bt, struct objfile *objfile)
 
     case btChar:
       tp = init_integer_type (objfile, 8, 0, "char");
+      TYPE_NOSIGN (tp) = 1;
       break;
 
     case btUChar:
