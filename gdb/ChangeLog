@@ -1,5 +1,12 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i386-tdep.c (i386_floatformat_for_type): New function.
+	(i386_gdbarch_init): Install it.
+	* ppc-linux-tdep.c (ppc_floatformat_for_type): New function.
+	(ppc_linux_init_abi): Install it.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (floatformat_for_type): New gdbarch callback.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* arch-utils.h (default_floatformat_for_type): New prototype.

@@ -1,5 +1,12 @@
 2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.base/float128.c: New file.
+	* gdb.base/float128.exp: Likewise.
+	* gdb.base/floatn.c: Likewise.
+	* gdb.base/floatn.exp: Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.cp/hang.exp: Remove reference to TYPE_FLAG_STUB in comment.
 
 2016-09-05  Pedro Alves  <palves@redhat.com>
