@@ -1,3 +1,11 @@
+2016-09-02  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20545
+	* testsuite/ld-avr/avr-prop-7.d: New test.
+	* testsuite/ld-avr/avr-prop-7.s: New test.
+	* testsuite/ld-avr/avr-prop-8.d: New test.
+	* testsuite/ld-avr/avr-prop-8.s: New test.
+
 2016-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr20513c.d: Limit to *-*-linux* and *-*-gnu*
