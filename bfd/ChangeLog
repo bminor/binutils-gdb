@@ -1,3 +1,9 @@
+2016-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20550
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Resolve size
+	relocation with copy relocation when building executable.
+
 2016-09-02  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/20545

@@ -207,6 +207,12 @@ set x86_64tests {
      "--64" { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
     {"Build pr19969.so" "-melf_x86_64 -shared" ""
      "--64" { pr19969a.S } {} "pr19969.so"}
+    {"Build pr20550a.o" "" ""
+     "--64" { pr20550a.s }}
+    {"Build pr20550b.so" "-melf_x86_64 -shared" ""
+     "--64" { pr20550b.s } {} "pr20550b.so"}
+    {"Build pr20550" "-melf_x86_64 -pie tmpdir/pr20550a.o tmpdir/pr20550b.so" ""
+     "--64" { dummy.s } {} "pr20550"}
 }
 
 # So as to avoid rewriting every last test case here in a nacl variant,

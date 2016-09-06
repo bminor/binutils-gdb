@@ -1,3 +1,11 @@
+2016-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20550
+	* testsuite/ld-x86-64/pr20550a.s: New file.
+	* testsuite/ld-x86-64/pr20550b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp (x86_64tests): Add tests for
+	PR ld/20550.
+
 2016-09-06  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (CFLAGS_FOR_TARGET): Define as a copy of CFLAGS but
