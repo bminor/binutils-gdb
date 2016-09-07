@@ -1,3 +1,8 @@
+2016-09-07  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c ((arm_cpus): Use ARM_ARCH_V8A_CRC for all
+	ARMv8-A CPUs except xgene1.
+
 2016-08-31  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_assemble): Set sh_flags for VLE.  Test
