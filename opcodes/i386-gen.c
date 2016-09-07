@@ -223,8 +223,6 @@ static initializer cpu_flag_init[] =
     "unknown" },
   { "CPU_IAMCU_FLAGS",
     "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586" },
-  { "CPU_IAMCU_COMPAT_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuNo64|CpuNop" },
   { "CPU_ADX_FLAGS",
     "CpuADX" },
   { "CPU_RDSEED_FLAGS",

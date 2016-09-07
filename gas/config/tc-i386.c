@@ -1520,20 +1520,6 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
   return x;
 }
 
-static int
-valid_iamcu_cpu_flags (const i386_cpu_flags *flags)
-{
-  if (cpu_arch_isa == PROCESSOR_IAMCU)
-    {
-      static const i386_cpu_flags iamcu_flags = CPU_IAMCU_COMPAT_FLAGS;
-      i386_cpu_flags compat_flags;
-      compat_flags = cpu_flags_and_not (*flags, iamcu_flags);
-      return cpu_flags_all_zero (&compat_flags);
-    }
-  else
-    return 1;
-}
-
 #define CPU_FLAGS_ARCH_MATCH		0x1
 #define CPU_FLAGS_64BIT_MATCH		0x2
 #define CPU_FLAGS_AES_MATCH		0x4
@@ -2424,10 +2410,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	      flags = cpu_flags_or (cpu_arch_flags,
 				    cpu_arch[j].flags);
 
-	      if (!valid_iamcu_cpu_flags (&flags))
-		as_fatal (_("`%s' isn't valid for Intel MCU"),
-			  cpu_arch[j].name);
-	      else if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
 		  if (cpu_sub_arch_name)
 		    {
@@ -10021,9 +10004,7 @@ md_parse_option (int c, const char *arg)
 		  flags = cpu_flags_or (cpu_arch_flags,
 					cpu_arch[j].flags);
 
-		  if (!valid_iamcu_cpu_flags (&flags))
-		    as_fatal (_("`%s' isn't valid for Intel MCU"), arch);
-		  else if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
 		      if (cpu_sub_arch_name)
 			{
