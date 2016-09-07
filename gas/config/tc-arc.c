@@ -1157,7 +1157,7 @@ tokenize_arguments (char *str,
 	      restore_line_pointer (c);
 	      tmpE.X_add_number = 0;
 	    }
-	  else if ((*input_line_pointer != '+')
+	  if ((*input_line_pointer != '+')
 		   && (*input_line_pointer != '-'))
 	    {
 	      tmpE.X_add_number = 0;

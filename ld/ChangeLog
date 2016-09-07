@@ -1,3 +1,11 @@
+2016-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/tls-dtpoff.dd: New file.
+	* testsuite/ld-arc/tls-dtpoff.rd: Likewise.
+	* testsuite/ld-arc/tls-dtpoff.s: Likewise.
+	* testsuite/ld-arc/tls-relocs.ld: Likewise.
+	* testsuite/ld-arc/arc.exp: Add new tdpoff test.
+
 2016-09-14  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20537

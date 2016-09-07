@@ -1,3 +1,10 @@
+2016-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/tls-relocs2.d: New file.
+	* testsuite/gas/arc/tls-relocs2.s: Likewise.
+	* config/tc-arc.c (tokenize_arguments): Accept offsets when base
+	is used.
+
 2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* config/tc-s390.c (s390_parse_cpu): Support alternate arch
