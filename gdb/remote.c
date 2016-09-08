@@ -6029,7 +6029,7 @@ remote_notif_stop_ack (struct notif_client *self, char *buf,
   struct stop_reply *stop_reply = (struct stop_reply *) event;
 
   /* acknowledge */
-  putpkt ((char *) self->ack_command);
+  putpkt (self->ack_command);
 
   if (stop_reply->ws.kind == TARGET_WAITKIND_IGNORE)
       /* We got an unknown stop reply.  */
@@ -6979,8 +6979,8 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  rs->last_sent_signal = GDB_SIGNAL_0;
 	  target_terminal_inferior ();
 
-	  strcpy ((char *) buf, rs->last_sent_step ? "s" : "c");
-	  putpkt ((char *) buf);
+	  strcpy (buf, rs->last_sent_step ? "s" : "c");
+	  putpkt (buf);
 	  break;
 	}
       /* else fallthrough */
@@ -13395,7 +13395,7 @@ show_remote_cmd (char *args, int from_tty)
 	ui_out_field_string (uiout, "name", list->name);
 	ui_out_text (uiout, ":  ");
 	if (list->type == show_cmd)
-	  do_show_command ((char *) NULL, from_tty, list);
+	  do_show_command (NULL, from_tty, list);
 	else
 	  cmd_func (list, NULL, from_tty);
 	/* Close the tuple.  */

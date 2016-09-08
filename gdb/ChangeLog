@@ -1,3 +1,8 @@
+2016-09-08  Tom Tromey  <tom@tromey.com>
+
+	* remote.c (remote_notif_stop_ack, remote_wait_as)
+	(show_remote_cmd): Remove unneeded casts.
+
 2016-09-06  Pedro Alves  <palves@redhat.com>
 
 	* top.c (wait_sync_command_done): Don't assume current_ui doesn't
