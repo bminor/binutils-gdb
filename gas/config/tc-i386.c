@@ -10460,7 +10460,7 @@ i386_target_format (void)
 	      cpu_arch_tune_flags = cpu_arch_isa_flags;
 	    }
 	}
-      else
+      else if (cpu_arch_isa != PROCESSOR_IAMCU)
 	as_fatal (_("Intel MCU doesn't support `%s' architecture"),
 		  cpu_arch_name);
     }
