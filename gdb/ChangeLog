@@ -1,3 +1,8 @@
+2016-09-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elfread.c (auxv.h): New include.
+	(elf_gnu_ifunc_resolve_addr): Pass HWCAP to ifunc resolver.
+
 2016-09-08  Tom Tromey  <tom@tromey.com>
 
 	* remote.c (remote_notif_stop_ack, remote_wait_as)

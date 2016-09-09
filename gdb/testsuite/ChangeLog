@@ -1,3 +1,12 @@
+2016-09-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu-ifunc-lib.c (resolver_hwcap): New external
+	variable declaration.
+	(gnu_ifunc): Add parameter hwcap.  Store it in resolver_hwcap.
+	* gdb.base/gnu-ifunc.c (resolver_hwcap): New global variable.
+	* gdb.base/gnu-ifunc.exp: Add test to verify that the resolver
+	received HWCAP as its argument.
+
 2016-09-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/new-ui-pending-input.c: New file.
