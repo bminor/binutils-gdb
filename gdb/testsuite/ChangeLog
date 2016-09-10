@@ -1,3 +1,8 @@
+2016-09-10  Jon Beniston  <jon@beniston.com>
+
+	* lib/mi-support.exp (mi_gdb_target_load): Use target_sim_options
+	for sim target.
+
 2016-09-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/gnu-ifunc-lib.c (resolver_hwcap): New external
