@@ -1,3 +1,10 @@
+2016-09-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/stap-probe.c (m1): New variable 'dummy', necessary to
+	make m1's definition to be different from m2's.  Use 'dummy' as an
+	argument for probe 'two'.
+
 2016-09-10  Jon Beniston  <jon@beniston.com>
 
 	* lib/mi-support.exp (mi_gdb_target_load): Use target_sim_options
