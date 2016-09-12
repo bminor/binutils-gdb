@@ -1,3 +1,7 @@
+2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Support alternate arch strings.
+
 2016-09-12  Patrick Steuer  <steuer@linux.vnet.ibm.com>
 
 	* s390-opc.txt: Fix kmctr instruction type.

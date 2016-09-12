@@ -1,5 +1,12 @@
 2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
+	* config/tc-s390.c (s390_parse_cpu): Support alternate arch
+	strings.
+	* doc/as.texinfo: Document new arch strings.
+	* doc/c-s390.texi: Likewise.
+
+2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
 	* config/tc-s390.c: Set all facitily bits by default
 
 2016-09-12  Patrick Steuer  <steuer@linux.vnet.ibm.com>

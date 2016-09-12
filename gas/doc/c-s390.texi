@@ -14,9 +14,11 @@
 @cindex s390 support
 
 The s390 version of @code{@value{AS}} supports two architectures modes
-and seven chip levels. The architecture modes are the Enterprise System
+and ten chip levels. The architecture modes are the Enterprise System
 Architecture (ESA) and the newer z/Architecture mode. The chip levels
-are g5, g6, z900, z990, z9-109, z9-ec, z10, z196, zEC12, and z13.
+are g5 (or arch3), g6, z900 (or arch5), z990 (or arch6), z9-109, z9-ec
+(or arch7), z10 (or arch8), z196 (or arch9), zEC12 (or arch10), and
+z13 (or arch11).
 
 @menu
 * s390 Options::                Command-line Options.
@@ -58,19 +60,31 @@ message.
 @item -march=@var{CPU}
 This option specifies the target processor. The following processor names
 are recognized:
-@code{g5},
+@code{g5} (or @code{arch3}),
 @code{g6},
-@code{z900},
-@code{z990},
+@code{z900} (or @code{arch5}),
+@code{z990} (or @code{arch6}),
 @code{z9-109},
-@code{z9-ec},
-@code{z10},
-@code{z196},
-@code{zEC12}, and
-@code{z13}.
-Assembling an instruction that is not supported on the target processor
-results in an error message. Do not specify @code{g5} or @code{g6}
-with @samp{-mzarch}.
+@code{z9-ec} (or @code{arch7}),
+@code{z10} (or @code{arch8}),
+@code{z196} (or @code{arch9}),
+@code{zEC12} (or @code{arch10}) and
+@code{z13} (or @code{arch11}).
+
+Assembling an instruction that is not supported on the target
+processor results in an error message.
+
+The processor names starting with @code{arch} refer to the edition
+number in the Principle of Operations manual.  They can be used as
+alternate processor names and have been added for compatibility with
+the IBM XL compiler.
+
+@code{arch3}, @code{g5} and @code{g6} cannot be used with the
+@samp{-mzarch} option since the z/Architecture mode is not supported
+on these processor levels.
+
+There is no @code{arch4} option supported. @code{arch4} matches
+@code{-march=arch5 -mesa}.
 
 @cindex @samp{-mregnames} option, s390
 @item -mregnames
