@@ -41,8 +41,11 @@ static int s390_arch_size = 0;
    Since with S/390 a newer CPU always supports everything from its
    predecessors this will accept every valid asm input.  */
 static unsigned int current_cpu = S390_OPCODE_MAXCPU - 1;
+/* All facilities are enabled by default.  */
+static unsigned int current_flags = S390_INSTR_FLAG_FACILITY_MASK;
+/* The mode mask default is picked in init_default_arch depending on
+   the current cpu.  */
 static unsigned int current_mode_mask = 0;
-static unsigned int current_flags = 0;
 
 /* Set to TRUE if the highgprs flag in the ELF header needs to be set
    for the output file.  */
