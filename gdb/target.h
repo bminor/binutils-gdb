@@ -1660,9 +1660,7 @@ void target_follow_exec (struct inferior *inf, char *execd_pathname);
    be defined by those targets that require the debugger to perform
    cleanup or internal state changes in response to the process event.  */
 
-/* The inferior process has died.  Do what is right.  */
-
-void target_mourn_inferior (void);
+/* For target_mourn_inferior see target/target.h.  */
 
 /* Does target have enough data to do a run or attach command? */
 

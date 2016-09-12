@@ -267,6 +267,14 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 /* See target/target.h.  */
 
 void
+target_mourn_inferior (ptid_t ptid)
+{
+  (*the_target->mourn) (find_process_pid (ptid_get_pid (ptid)));
+}
+
+/* See target/target.h.  */
+
+void
 target_continue_no_signal (ptid_t ptid)
 {
   struct thread_resume resume_info;

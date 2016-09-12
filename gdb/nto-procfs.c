@@ -726,7 +726,7 @@ interrupt_query (void)
   if (query (_("Interrupted while waiting for the program.\n\
 Give up (and stop debugging it)? ")))
     {
-      target_mourn_inferior ();
+      target_mourn_inferior (inferior_ptid);
       quit ();
     }
 }
@@ -1300,7 +1300,7 @@ procfs_interrupt (struct target_ops *self, ptid_t ptid)
 static void
 procfs_kill_inferior (struct target_ops *ops)
 {
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 /* Fill buf with regset and return devctl cmd to do the setting.  Return

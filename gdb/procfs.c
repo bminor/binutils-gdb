@@ -4273,7 +4273,7 @@ procfs_kill_inferior (struct target_ops *ops)
 
       if (pi)
 	unconditionally_kill_inferior (pi);
-      target_mourn_inferior ();
+      target_mourn_inferior (inferior_ptid);
     }
 }
 

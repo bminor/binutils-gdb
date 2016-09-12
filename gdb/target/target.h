@@ -86,4 +86,8 @@ extern void target_continue (ptid_t ptid, enum gdb_signal signal);
 extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status,
 			   int options);
 
+/* The inferior process has died.  Do what is right.  */
+
+extern void target_mourn_inferior (ptid_t ptid);
+
 #endif /* TARGET_COMMON_H */

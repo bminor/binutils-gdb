@@ -1,3 +1,12 @@
+2016-09-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* server.c (start_inferior): Call target_mourn_inferior instead of
+	mourn_inferior; pass ptid_t argument to it.
+	(resume): Likewise.
+	(handle_target_event): Likewise.
+	* target.c (target_mourn_inferior): New function.
+	* target.h (mourn_inferior): Delete macro.
+
 2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* linux-low.c (lwp_is_stepping): New function.

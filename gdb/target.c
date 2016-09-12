@@ -2377,8 +2377,9 @@ default_mourn_inferior (struct target_ops *self)
 }
 
 void
-target_mourn_inferior (void)
+target_mourn_inferior (ptid_t ptid)
 {
+  gdb_assert (ptid_equal (ptid, inferior_ptid));
   current_target.to_mourn_inferior (&current_target);
 
   /* We no longer need to keep handles on any of the object files.

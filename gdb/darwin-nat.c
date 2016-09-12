@@ -1381,7 +1381,7 @@ darwin_kill_inferior (struct target_ops *ops)
     warning (_("Failed to kill inferior: kill (%d, 9) returned [%s]"),
 	     inf->pid, safe_strerror (errno));
 
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 static void

@@ -5159,7 +5159,7 @@ remote_detach_1 (const char *args, int from_tty)
   /* If doing detach-on-fork, we don't mourn, because that will delete
      breakpoints that should be available for the followed inferior.  */
   if (!is_fork_parent)
-    target_mourn_inferior ();
+    target_mourn_inferior (inferior_ptid);
   else
     {
       inferior_ptid = null_ptid;
@@ -8909,7 +8909,7 @@ remote_kill (struct target_ops *ops)
       res = remote_vkill (pid, rs);
       if (res == 0)
 	{
-	  target_mourn_inferior ();
+	  target_mourn_inferior (inferior_ptid);
 	  return;
 	}
     }
@@ -8926,7 +8926,7 @@ remote_kill (struct target_ops *ops)
 	 not in extended mode, mourning the inferior also unpushes
 	 remote_ops from the target stack, which closes the remote
 	 connection.  */
-      target_mourn_inferior ();
+      target_mourn_inferior (inferior_ptid);
 
       return;
     }

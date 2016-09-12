@@ -1,3 +1,30 @@
+2016-09-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* darwin-nat.c (darwin_kill_inferior): Adjusting call to
+	target_mourn_inferior to include ptid_t argument.
+	* fork-child.c (startup_inferior): Likewise.
+	* gnu-nat.c (gnu_kill_inferior): Likewise.
+	* inf-ptrace.c (inf_ptrace_kill): Likewise.
+	* infrun.c (handle_inferior_event_1): Likewise.
+	* linux-nat.c (linux_nat_attach): Likewise.
+	(linux_nat_kill): Likewise.
+	* nto-procfs.c (interrupt_query): Likewise.
+	(procfs_interrupt): Likewise.
+	(procfs_kill_inferior): Likewise.
+	* procfs.c (procfs_kill_inferior): Likewise.
+	* record.c (record_mourn_inferior): Likewise.
+	* remote-sim.c (gdbsim_kill): Likewise.
+	* remote.c (remote_detach_1): Likewise.
+	(remote_kill): Likewise.
+	* target.c (target_mourn_inferior): Change declaration to accept
+	new ptid_t argument; use gdb_assert on it.
+	* target.h (target_mourn_inferior): Move function prototype from
+	here...
+	* target/target.h (target_mourn_inferior): ... to here.  Adjust it
+	to accept new ptid_t argument.
+	* windows-nat.c (get_windows_debug_event): Adjusting call to
+	target_mourn_inferior to include ptid_t argument.
+
 2016-09-18  Pedro Alves  <palves@redhat.com>
 
 	* s390-linux-nat.c: Include <algorithm>.
