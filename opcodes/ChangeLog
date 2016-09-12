@@ -1,3 +1,7 @@
+2016-09-12  Patrick Steuer  <steuer@linux.vnet.ibm.com>
+
+	* s390-opc.txt: Fix kmctr instruction type.
+
 2016-09-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Remove CPU_IAMCU_COMPAT_FLAGS.

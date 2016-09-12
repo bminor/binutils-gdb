@@ -1,3 +1,7 @@
+2016-09-12  Patrick Steuer  <steuer@linux.vnet.ibm.com>
+
+	* testsuite/gas/s390/zarch-z196.d: Adjust testcase.
+
 2016-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_target_format): Allow PROCESSOR_IAMCU
