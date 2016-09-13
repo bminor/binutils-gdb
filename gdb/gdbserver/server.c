@@ -285,8 +285,7 @@ start_inferior (char **argv)
      (assuming success).  */
   last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
-  /* The last_status.kind was set by the call to ptrace(PTRACE_TRACEME, ...).
-     At this point, the target process, if it exits, is stopped.  Do not call
+  /* At this point, the target process, if it exits, is stopped.  Do not call
      the function target_post_create_inferior if the process has already
      exited, as the target implementation of the routine may rely on the
      process being live. */

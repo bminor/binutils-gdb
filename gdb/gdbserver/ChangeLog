@@ -1,5 +1,11 @@
 2016-09-06  Carl Love  <cel@us.ibm.com>
 
+	* server.c (start_inferior):  Fixed comment, requested comment change
+	didn't get updated correctly.  Removed reference to ptrace () call as
+	it is only true on Linux systems.
+
+2016-09-06  Carl Love  <cel@us.ibm.com>
+
 	* server.c (start_inferior):  Do not call
 	function target_post_create_inferior () if the
 	inferior process has already exited.
