@@ -1,3 +1,7 @@
+2016-09-14  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.c (arc_get_disassembler): Accept a null bfd gracefully.
+
 2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-mkopc.c (main): Support alternate arch strings.

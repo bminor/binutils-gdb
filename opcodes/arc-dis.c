@@ -1238,11 +1238,16 @@ print_insn_arc (bfd_vma memaddr,
 disassembler_ftype
 arc_get_disassembler (bfd *abfd)
 {
-  /* Read the extenssion insns and registers, if any.  */
-  build_ARC_extmap (abfd);
+  /* BFD my be absent, if opcodes is invoked from the debugger that
+     has connected to remote target and doesn't have an ELF file.  */
+  if (abfd != NULL)
+    {
+      /* Read the extension insns and registers, if any.  */
+      build_ARC_extmap (abfd);
 #ifdef DEBUG
-  dump_ARC_extmap ();
+      dump_ARC_extmap ();
 #endif
+    }
 
   return print_insn_arc;
 }
