@@ -2199,15 +2199,19 @@ fi
 
 fragment <<EOF
 
-#define OPTION_DISABLE_NEW_DTAGS	(400)
-#define OPTION_ENABLE_NEW_DTAGS		(OPTION_DISABLE_NEW_DTAGS + 1)
-#define OPTION_GROUP			(OPTION_ENABLE_NEW_DTAGS + 1)
-#define OPTION_EH_FRAME_HDR		(OPTION_GROUP + 1)
-#define OPTION_EXCLUDE_LIBS		(OPTION_EH_FRAME_HDR + 1)
-#define OPTION_HASH_STYLE		(OPTION_EXCLUDE_LIBS + 1)
-#define OPTION_BUILD_ID			(OPTION_HASH_STYLE + 1)
-#define OPTION_AUDIT			(OPTION_BUILD_ID + 1)
-#define OPTION_COMPRESS_DEBUG		(OPTION_AUDIT + 1)
+enum elf_options
+{
+  OPTION_DISABLE_NEW_DTAGS = 400,
+  OPTION_ENABLE_NEW_DTAGS,
+  OPTION_GROUP,
+  OPTION_EH_FRAME_HDR,
+  OPTION_NO_EH_FRAME_HDR,
+  OPTION_EXCLUDE_LIBS,
+  OPTION_HASH_STYLE,
+  OPTION_BUILD_ID,
+  OPTION_AUDIT,
+  OPTION_COMPRESS_DEBUG
+};
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -2243,6 +2247,7 @@ fragment <<EOF
     {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
     {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
     {"eh-frame-hdr", no_argument, NULL, OPTION_EH_FRAME_HDR},
+    {"no-eh-frame-hdr", no_argument, NULL, OPTION_NO_EH_FRAME_HDR},
     {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
     {"hash-style", required_argument, NULL, OPTION_HASH_STYLE},
 EOF
@@ -2320,6 +2325,10 @@ fragment <<EOF
 
     case OPTION_EH_FRAME_HDR:
       link_info.eh_frame_hdr_type = DWARF2_EH_HDR;
+      break;
+
+    case OPTION_NO_EH_FRAME_HDR:
+      link_info.eh_frame_hdr_type = 0;
       break;
 
     case OPTION_GROUP:

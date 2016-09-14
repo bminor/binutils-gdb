@@ -2270,9 +2270,12 @@ file as @code{__wrap_malloc}; if you do, the assembler may resolve the
 call before the linker has a chance to wrap it to @code{malloc}.
 
 @kindex --eh-frame-hdr
+@kindex --no-eh-frame-hdr
 @item --eh-frame-hdr
-Request creation of @code{.eh_frame_hdr} section and ELF
-@code{PT_GNU_EH_FRAME} segment header.
+@itemx --no-eh-frame-hdr
+Request (@option{--eh-frame-hdr}) or suppress
+(@option{--no-eh-frame-hdr}) the creation of @code{.eh_frame_hdr}
+section and ELF @code{PT_GNU_EH_FRAME} segment header.
 
 @kindex --ld-generated-unwind-info
 @item --no-ld-generated-unwind-info

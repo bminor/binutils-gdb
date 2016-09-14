@@ -1,3 +1,13 @@
+2016-09-14  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20537
+	* emultempl/elf32.em: More OPTION_xxx values into an enum.  Add
+	OPTION_NO_EH_FRAME_HDR.
+	(_add_options): Add support for --no-eh-frame-hdr.
+	* ld.texinfo: Document new option.
+	* lexsup.c (elf_shlib_list_options): List new option.
+	* NEWS: Mention the new option.
+
 2016-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20550

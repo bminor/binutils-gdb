@@ -1724,6 +1724,8 @@ elf_shlib_list_options (FILE *file)
   fprintf (file, _("\
   --eh-frame-hdr              Create .eh_frame_hdr section\n"));
   fprintf (file, _("\
+  --no-eh-frame-hdr           Do not create .eh_frame_hdr section\n"));
+  fprintf (file, _("\
   --exclude-libs=LIBS         Make all symbols in LIBS hidden\n"));
   fprintf (file, _("\
   --hash-style=STYLE          Set hash style to sysv, gnu or both\n"));
