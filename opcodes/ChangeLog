@@ -1,3 +1,17 @@
+2016-09-26  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-ext-tbl.h (EXTINSN2OPF): Define.
+	(EXTINSN2OP): Use EXTINSN2OPF.
+	(bspeekm, bspop, modapp): New extension instructions.
+	* arc-opc.c (F_DNZ_ND): Define.
+	(F_DNZ_D): Likewise.
+	(F_SIZEB1): Changed.
+	(C_DNZ_D): Define.
+	(C_HARD): Changed.
+	* arc-tbl.h (dbnz): New instruction.
+	(prealloc): Allow it for ARC EM.
+	(xbfu): Likewise.
+
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-opc.c (print_immediate_offset_address): Print spaces

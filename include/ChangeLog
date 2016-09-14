@@ -1,3 +1,7 @@
+2016-09-26  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (insn_class_t): Add two new classes.
+
 2016-09-26  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc.h (Tag_GNU_Power_ABI_FP): Comment on new values.
