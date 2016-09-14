@@ -1,3 +1,8 @@
+2016-09-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): Only mark section
+	not already marked.
+
 2016-09-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20605

@@ -53,6 +53,16 @@ __acle_se_\name:
 	@ Valid setup for entry function without SG veneer
 	entry glob_entry_fct, function, global, entry_fct=nop
 
+	@ Valid setup for entry function with absolute address
+	.align 2
+	.global	__acle_se_abs_entry_fct
+	.global	abs_entry_fct
+	.type	__acle_se_abs_entry_fct, %function
+	.type	abs_entry_fct, %function
+__acle_se_abs_entry_fct = 0x10000
+abs_entry_fct = 0x10004
+	.size	abs_entry_fct, 0
+	.size	__acle_se_abs_entry_fct, 0
 .else
 	@ Invalid setups for veneer generation (visibility)
 	entry loc_entry_veneer1, function, local

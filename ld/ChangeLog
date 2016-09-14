@@ -1,3 +1,9 @@
+2016-09-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/cmse-veneers.s: Add a test for ARMv8-M Security
+	Extensions entry functions in absolute section.
+	* testsuite/ld-arm/cmse-veneers.rd: Adapt expected output accordingly.
+
 2016-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/ld-arc/tls-dtpoff.dd: New file.

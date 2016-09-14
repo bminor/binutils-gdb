@@ -14906,7 +14906,8 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 		  if (ARM_GET_SYM_CMSE_SPCL (cmse_hash->root.target_internal))
 		    {
 		      cmse_sec = cmse_hash->root.root.u.def.section;
-		      if (!_bfd_elf_gc_mark (info, cmse_sec, gc_mark_hook))
+		      if (!cmse_sec->gc_mark &&
+			  !_bfd_elf_gc_mark (info, cmse_sec, gc_mark_hook))
 			return FALSE;
 		    }
 		}
