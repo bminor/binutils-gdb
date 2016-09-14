@@ -1625,7 +1625,7 @@ undo_terminal_modifications_before_exit (void)
 /* Quit without asking for confirmation.  */
 
 void
-quit_force (char *args, int from_tty)
+quit_force (int *exit_arg, int from_tty)
 {
   int exit_code = 0;
   struct qt_args qt;
@@ -1634,16 +1634,12 @@ quit_force (char *args, int from_tty)
 
   /* An optional expression may be used to cause gdb to terminate with the 
      value of that expression.  */
-  if (args)
-    {
-      struct value *val = parse_and_eval (args);
-
-      exit_code = (int) value_as_long (val);
-    }
+  if (exit_arg)
+    exit_code = *exit_arg;
   else if (return_child_result)
     exit_code = return_child_result_value;
 
-  qt.args = args;
+  qt.args = NULL;
   qt.from_tty = from_tty;
 
   /* We want to handle any quit errors and exit regardless.  */

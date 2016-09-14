@@ -344,12 +344,23 @@ show_configuration (char *args, int from_tty)
 void
 quit_command (char *args, int from_tty)
 {
+  int exit_code = 0;
+
+  /* An optional expression may be used to cause gdb to terminate with
+     the value of that expression.  */
+  if (args)
+    {
+      struct value *val = parse_and_eval (args);
+
+      exit_code = (int) value_as_long (val);
+    }
+
   if (!quit_confirm ())
     error (_("Not confirmed."));
 
   query_if_trace_running (from_tty);
 
-  quit_force (args, from_tty);
+  quit_force (args ? &exit_code : NULL, from_tty);
 }
 
 static void

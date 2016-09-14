@@ -1,3 +1,8 @@
+2016-09-21  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/20604:
+	* gdb.base/quit.exp: New file.
+
 2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* .gitignore: New file.

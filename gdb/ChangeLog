@@ -1,3 +1,11 @@
+2016-09-21  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/20604:
+	* top.h (quit_force): Update.
+	* top.c (quit_force): Changed type of first argument.  Don't
+	evaluate expression.  Pass NULL to kill_or_detach.
+	* cli/cli-cmds.c (quit_command): Evaluate "args".
+
 2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* .gitignore: Ignore more files.
