@@ -1,3 +1,9 @@
+2016-09-14  Bhushan Attarde  <bhushan.attarde@imgtec.com>
+
+	* format.c (struct bfd_preserve): New "build_id" field.
+	(bfd_preserve_save): Save "build_id".
+	(bfd_preserve_restore): Restore "build_id".
+
 2016-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20550
