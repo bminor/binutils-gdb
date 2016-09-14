@@ -1,3 +1,22 @@
+2016-09-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (md_assemble): Detect and warning on
+	unpredictable DCTI couples in certain arches.
+	(dcti_couples_detect): New global.
+	(md_longopts): Add command line option -dcti-couples-detect.
+	(md_show_usage): Document -dcti-couples-detect.
+	(md_parse_option): Handle OPTION_DCTI_COUPLES_DETECT.
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run
+	dcti-couples-v8, dcti-couples-v9 and dcti-couples-v9c tests.
+	* testsuite/gas/sparc/dcti-couples.s: New file.
+	* testsuite/gas/sparc/dcti-couples-v9c.d: Likewise.
+	* testsuite/gas/sparc/dcti-couples-v8.d: Likewise.
+	* testsuite/gas/sparc/dcti-couples-v9.d: Likewise.
+	* testsuite/gas/sparc/dcti-couples-v9c.l: Likewise.
+	* testsuite/gas/sparc/dcti-couples-v8.l: Likewise.
+	* doc/as.texinfo (Overview): Document --dcti-couples-detect.
+	* doc/c-sparc.texi (Sparc-Opts): Likewise.
+
 2016-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/tls-relocs2.d: New file.

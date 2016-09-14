@@ -530,10 +530,21 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 
 @emph{Target SPARC options:}
 @c The order here is important.  See c-sparc.texi.
-   [@b{-Av6}|@b{-Av7}|@b{-Av8}|@b{-Asparclet}|@b{-Asparclite}
-    @b{-Av8plus}|@b{-Av8plusa}|@b{-Av9}|@b{-Av9a}]
-   [@b{-xarch=v8plus}|@b{-xarch=v8plusa}] [@b{-bump}]
+   [@b{-Av6}|@b{-Av7}|@b{-Av8}|@b{-Aleon}|@b{-Asparclet}|@b{-Asparclite}
+    @b{-Av8plus}|@b{-Av8plusa}|@b{-Av8plusb}|@b{-Av8plusc}|@b{-Av8plusd}
+    @b{-Av8plusv}|@b{-Av8plusm}|@b{-Av9}|@b{-Av9a}|@b{-Av9b}|@b{-Av9c}
+    @b{-Av9d}|@b{-Av9e}|@b{-Av9v}|@b{-Av9m}|@b{-Asparc}|@b{-Asparcvis}
+    @b{-Asparcvis2}|@b{-Asparcfmaf}|@b{-Asparcima}|@b{-Asparcvis3}
+    @b{-Asparcvisr}|@b{-Asparc5}]
+   [@b{-xarch=v8plus}|@b{-xarch=v8plusa}]|@b{-xarch=v8plusb}|@b{-xarch=v8plusc}
+    @b{-xarch=v8plusd}|@b{-xarch=v8plusv}|@b{-xarch=v8plusm}|@b{-xarch=v9}
+    @b{-xarch=v9a}|@b{-xarch=v9b}|@b{-xarch=v9c}|@b{-xarch=v9d}|@b{-xarch=v9e}
+    @b{-xarch=v9v}|@b{-xarch=v9m}|@b{-xarch=sparc}|@b{-xarch=sparcvis}
+    @b{-xarch=sparcvis2}|@b{-xarch=sparcfmaf}|@b{-xarch=sparcima}
+    @b{-xarch=sparcvis3}|@b{-xarch=sparcvisr}|@b{-xarch=sparc5}
+    @b{-bump}]
    [@b{-32}|@b{-64}]
+   [@b{--enforce-aligned-data}][@b{--dcti-couples-detect}]
 @end ifset
 @ifset TIC54X
 
