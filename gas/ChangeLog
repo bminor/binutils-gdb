@@ -1,5 +1,10 @@
 2016-09-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* config/tc-sparc.c (sparc_ip): Print the instruction arguments
+	in "architecture mismatch" error messages.
+
+2016-09-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* config/tc-sparc.c (md_assemble): Detect and warning on
 	unpredictable DCTI couples in certain arches.
 	(dcti_couples_detect): New global.

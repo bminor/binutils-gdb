@@ -3224,7 +3224,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  ++arch;
 		}
 
-	      as_bad (_("Architecture mismatch on \"%s\"."), str);
+	      as_bad (_("Architecture mismatch on \"%s %s\"."), str, argsStart);
 	      as_tsktsk (_(" (Requires %s; requested architecture is %s.)"),
 			 required_archs,
 			 sparc_opcode_archs[max_architecture].name);
