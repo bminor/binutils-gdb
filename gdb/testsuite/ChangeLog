@@ -1,3 +1,7 @@
+2016-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/m-static.h (gnu_obj_4::somewhere): Use constexpr for C++11.
+
 2016-09-15  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gdb.arch/powerpc-power.s: Update Power9 instruction tests
