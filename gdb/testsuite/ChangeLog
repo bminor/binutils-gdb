@@ -1,3 +1,7 @@
+2016-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/future.exp: Set CCACHE_DISABLE, clear CCACHE_NODISABLE.
+
 2016-09-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
