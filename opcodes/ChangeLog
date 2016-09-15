@@ -1,3 +1,7 @@
+2016-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (find_format): Walk the linked list pointed by einsn.
+
 2016-09-14  Peter Bergner <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes) <slbiag>: New mnemonic.

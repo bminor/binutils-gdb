@@ -477,15 +477,15 @@ find_format (bfd_vma                       memaddr,
 {
   const struct arc_opcode *opcode = NULL;
   bfd_boolean needs_limm;
-  const extInstruction_t *einsn;
+  const extInstruction_t *einsn, *i;
 
   /* First, try the extension instructions.  */
   einsn = arcExtMap_insn (OPCODE (insn[0]), insn[0]);
-  if (einsn != NULL)
+  for (i = einsn; (i != NULL) && (opcode == NULL); i = i->next)
     {
       const char *errmsg = NULL;
 
-      opcode = arcExtMap_genOpcode (einsn, isa_mask, &errmsg);
+      opcode = arcExtMap_genOpcode (i, isa_mask, &errmsg);
       if (opcode == NULL)
 	{
 	  (*info->fprintf_func) (info->stream, "\
