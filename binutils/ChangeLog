@@ -1,3 +1,7 @@
+2016-09-14  Ed Maste  <emaste@freebsd.org>
+
+	* readelf.c (process_mips_specific): Fix typo in error message.
+
 2016-09-06  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (request_dump_bynumber): Only call memcpy if

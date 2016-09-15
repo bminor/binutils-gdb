@@ -14721,7 +14721,7 @@ process_mips_specific (FILE * file)
               cmalloc ((sect->sh_size / sizeof (eopt)), sizeof (* iopt));
 	  if (iopt == NULL)
 	    {
-	      error (_("Out of memory allocatinf space for MIPS options\n"));
+	      error (_("Out of memory allocating space for MIPS options\n"));
 	      return 0;
 	    }
 
