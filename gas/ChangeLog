@@ -1,3 +1,9 @@
+2016-09-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run
+	dcti-couples-v9 only in ELF targets to avoid spurious failures in
+	sparc-aout and sparc-coff targets.
+
 2016-09-14  Peter Bergner <bergner@vnet.ibm.com>
 
 	* testsuite/gas/ppc/power9.d <slbiag, cpabort> New tests.
