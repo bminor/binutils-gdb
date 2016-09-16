@@ -1,3 +1,8 @@
+2016-09-21  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c (aarch32_gp_regcache_collect): Keep
+	bits 20 to 23.
+
 2016-09-20  Tom Tromey  <tom@tromey.com>
 
 	* python/py-value.c (convert_value_from_python): Make PyInt_Check
