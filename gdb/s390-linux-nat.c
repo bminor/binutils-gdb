@@ -436,14 +436,15 @@ s390_linux_store_inferior_registers (struct target_ops *ops,
    The only thing we actually need is the total address space area
    spanned by the watchpoints.  */
 
-struct watch_area
+typedef struct watch_area
 {
-  struct watch_area *next;
   CORE_ADDR lo_addr;
   CORE_ADDR hi_addr;
-};
+} s390_watch_area;
 
-static struct watch_area *watch_base = NULL;
+DEF_VEC_O (s390_watch_area);
+
+VEC_s390_watch_area *watch_areas = NULL;
 
 static int
 s390_stopped_by_watchpoint (struct target_ops *ops)
@@ -453,7 +454,7 @@ s390_stopped_by_watchpoint (struct target_ops *ops)
   int result;
 
   /* Speed up common case.  */
-  if (!watch_base)
+  if (VEC_empty (s390_watch_area, watch_areas))
     return 0;
 
   parea.len = sizeof (per_lowcore);
@@ -487,7 +488,8 @@ s390_prepare_to_resume (struct lwp_info *lp)
   ptrace_area parea;
 
   CORE_ADDR watch_lo_addr = (CORE_ADDR)-1, watch_hi_addr = 0;
-  struct watch_area *area;
+  unsigned ix;
+  s390_watch_area *area;
   struct arch_lwp_info *lp_priv = lwp_arch_private_info (lp);
 
   if (lp_priv == NULL || !lp_priv->per_info_changed)
@@ -499,20 +501,22 @@ s390_prepare_to_resume (struct lwp_info *lp)
   if (tid == 0)
     tid = ptid_get_pid (ptid_of_lwp (lp));
 
-  for (area = watch_base; area; area = area->next)
-    {
-      watch_lo_addr = min (watch_lo_addr, area->lo_addr);
-      watch_hi_addr = max (watch_hi_addr, area->hi_addr);
-    }
-
   parea.len = sizeof (per_info);
   parea.process_addr = (addr_t) & per_info;
   parea.kernel_addr = offsetof (struct user_regs_struct, per_info);
   if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea, 0) < 0)
     perror_with_name (_("Couldn't retrieve watchpoint status"));
 
-  if (watch_base)
+  if (!VEC_empty (s390_watch_area, watch_areas))
     {
+      for (ix = 0;
+	   VEC_iterate (s390_watch_area, watch_areas, ix, area);
+	   ix++)
+	{
+	  watch_lo_addr = min (watch_lo_addr, area->lo_addr);
+	  watch_hi_addr = max (watch_hi_addr, area->hi_addr);
+	}
+
       per_info.control_regs.bits.em_storage_alteration = 1;
       per_info.control_regs.bits.storage_alt_space_ctl = 1;
     }
@@ -575,16 +579,11 @@ s390_insert_watchpoint (struct target_ops *self,
 			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
-  struct watch_area *area = XNEW (struct watch_area);
+  s390_watch_area area;
 
-  if (!area)
-    return -1;
-
-  area->lo_addr = addr;
-  area->hi_addr = addr + len - 1;
-
-  area->next = watch_base;
-  watch_base = area;
+  area.lo_addr = addr;
+  area.hi_addr = addr + len - 1;
+  VEC_safe_push (s390_watch_area, watch_areas, &area);
 
   return s390_refresh_per_info ();
 }
@@ -594,25 +593,23 @@ s390_remove_watchpoint (struct target_ops *self,
 			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
-  struct watch_area *area, **parea;
+  unsigned ix;
+  s390_watch_area *area;
 
-  for (parea = &watch_base; *parea; parea = &(*parea)->next)
-    if ((*parea)->lo_addr == addr
-	&& (*parea)->hi_addr == addr + len - 1)
-      break;
-
-  if (!*parea)
+  for (ix = 0;
+       VEC_iterate (s390_watch_area, watch_areas, ix, area);
+       ix++)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  "Attempt to remove nonexistent watchpoint.\n");
-      return -1;
+      if (area->lo_addr == addr && area->hi_addr == addr + len - 1)
+	{
+	  VEC_unordered_remove (s390_watch_area, watch_areas, ix);
+	  return s390_refresh_per_info ();
+	}
     }
 
-  area = *parea;
-  *parea = area->next;
-  xfree (area);
-
-  return s390_refresh_per_info ();
+  fprintf_unfiltered (gdb_stderr,
+		      "Attempt to remove nonexistent watchpoint.\n");
+  return -1;
 }
 
 static int

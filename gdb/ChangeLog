@@ -1,5 +1,16 @@
 2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-nat.c (s390_watch_area): New typedef.  Define a VEC.
+	(watch_base): Remove variable.
+	(watch_areas): New variable.
+	(s390_stopped_by_watchpoint): Transform operations on the
+	watch_base list to equivalent operations on the watch_areas VEC.
+	(s390_prepare_to_resume): Likewise.
+	(s390_insert_watchpoint): Likewise.
+	(s390_remove_watchpoint): Likewise.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-nat.c (s390_prepare_to_resume): Use advertised lwp
 	functions instead of accessing lwp_info structure members.
 	(s390_mark_per_info_changed): New function.
