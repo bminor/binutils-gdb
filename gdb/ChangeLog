@@ -1,5 +1,21 @@
 2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-nat.c (PER_BIT, PER_EVENT_BRANCH, PER_EVENT_IFETCH)
+	(PER_EVENT_STORE, PER_EVENT_NULLIFICATION)
+	(PER_CONTROL_BRANCH_ADDRESS, PER_CONTROL_SUSPENSION)
+	(PER_CONTROL_ALTERATION): New macros.
+	(struct s390_debug_reg_state) <break_areas>: New member.
+	(s390_forget_process): Free break_areas as well.
+	(s390_linux_new_fork): Copy break_areas as well.
+	(s390_prepare_to_resume): Install hardware breakpoints.
+	(s390_can_use_hw_breakpoint): Indicate support for hardware
+	breakpoints.
+	(s390_insert_hw_breakpoint, s390_remove_hw_breakpoint): New
+	linux_nat target methods.
+	(_initialize_s390_nat): Register them.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* nat/linux-nat.h (lwp_is_stepping): New declaration.
 	* linux-nat.c (lwp_is_stepping): New function.
 

@@ -2953,7 +2953,8 @@ proc skip_hw_breakpoint_tests {} {
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
 	 || [istarget "arm*-*-*"]
-	 || [istarget "aarch64*-*-*"]} {
+	 || [istarget "aarch64*-*-*"]
+	 || [istarget "s390*-*-*"] } {
 	return 0
     }
 

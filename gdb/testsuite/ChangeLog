@@ -1,3 +1,7 @@
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp: No longer skip hardware breakpoint tests on s390.
+
 2016-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/casts.cc (decltype): Move it ...

@@ -93,6 +93,18 @@ static const struct regset s390_64_gregset =
 #define S390_PSWA_OFFSET 8
 #endif
 
+/* PER-event mask bits and PER control bits (CR9).  */
+
+#define PER_BIT(n)			(1UL << (63 - (n)))
+#define PER_EVENT_BRANCH		PER_BIT (32)
+#define PER_EVENT_IFETCH		PER_BIT (33)
+#define PER_EVENT_STORE			PER_BIT (34)
+#define PER_EVENT_NULLIFICATION		PER_BIT (39)
+#define PER_CONTROL_BRANCH_ADDRESS	PER_BIT (40)
+#define PER_CONTROL_SUSPENSION		PER_BIT (41)
+#define PER_CONTROL_ALTERATION		PER_BIT (42)
+
+
 /* Fill GDB's register array with the general-purpose register values
    in *REGP.
 
@@ -450,6 +462,7 @@ DEF_VEC_O (s390_watch_area);
 struct s390_debug_reg_state
 {
   VEC_s390_watch_area *watch_areas;
+  VEC_s390_watch_area *break_areas;
 };
 
 /* Per-process data.  */
@@ -531,6 +544,7 @@ s390_forget_process (pid_t pid)
       if (proc->pid == pid)
 	{
 	  VEC_free (s390_watch_area, proc->state.watch_areas);
+	  VEC_free (s390_watch_area, proc->state.break_areas);
 	  *proc_link = proc->next;
 	  xfree (proc);
 	  return;
@@ -564,6 +578,8 @@ s390_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
 
   child_state->watch_areas = VEC_copy (s390_watch_area,
 				       parent_state->watch_areas);
+  child_state->break_areas = VEC_copy (s390_watch_area,
+				       parent_state->break_areas);
 }
 
 /* Dump PER state.  */
@@ -649,9 +665,19 @@ s390_prepare_to_resume (struct lwp_info *lp)
   s390_watch_area *area;
   struct arch_lwp_info *lp_priv = lwp_arch_private_info (lp);
   struct s390_debug_reg_state *state = s390_get_debug_reg_state (pid);
+  int step = lwp_is_stepping (lp);
 
-  if (lp_priv == NULL || !lp_priv->per_info_changed)
+  /* Nothing to do if there was never any PER info for this thread.  */
+  if (lp_priv == NULL)
     return;
+
+  /* If PER info has changed, update it.  When single-stepping, disable
+     hardware breakpoints (if any).  Otherwise we're done.  */
+  if (!lp_priv->per_info_changed)
+    {
+      if (!step || VEC_empty (s390_watch_area, state->break_areas))
+	return;
+    }
 
   lp_priv->per_info_changed = 0;
 
@@ -662,8 +688,11 @@ s390_prepare_to_resume (struct lwp_info *lp)
   parea.len = sizeof (per_info);
   parea.process_addr = (addr_t) & per_info;
   parea.kernel_addr = offsetof (struct user_regs_struct, per_info);
-  if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea, 0) < 0)
-    perror_with_name (_("Couldn't retrieve watchpoint status"));
+
+  /* Clear PER info, but adjust the single_step field (used by older
+     kernels only).  */
+  memset (&per_info, 0, sizeof (per_info));
+  per_info.single_step = (step != 0);
 
   if (!VEC_empty (s390_watch_area, state->watch_areas))
     {
@@ -675,13 +704,46 @@ s390_prepare_to_resume (struct lwp_info *lp)
 	  watch_hi_addr = max (watch_hi_addr, area->hi_addr);
 	}
 
-      per_info.control_regs.bits.em_storage_alteration = 1;
-      per_info.control_regs.bits.storage_alt_space_ctl = 1;
+      /* Enable storage-alteration events.  */
+      per_info.control_regs.words.cr[0] |= (PER_EVENT_STORE
+					    | PER_CONTROL_ALTERATION);
     }
-  else
+
+  if (!VEC_empty (s390_watch_area, state->break_areas))
     {
-      per_info.control_regs.bits.em_storage_alteration = 0;
-      per_info.control_regs.bits.storage_alt_space_ctl = 0;
+      /* Don't install hardware breakpoints while single-stepping, since
+	 our PER settings (e.g. the nullification bit) might then conflict
+	 with the kernel's.  But re-install them afterwards.  */
+      if (step)
+	lp_priv->per_info_changed = 1;
+      else
+	{
+	  for (ix = 0;
+	       VEC_iterate (s390_watch_area, state->break_areas, ix, area);
+	       ix++)
+	    {
+	      watch_lo_addr = min (watch_lo_addr, area->lo_addr);
+	      watch_hi_addr = max (watch_hi_addr, area->hi_addr);
+	    }
+
+	  /* If there's just one breakpoint, enable instruction-fetching
+	     nullification events for the breakpoint address (fast).
+	     Otherwise stop after any instruction within the PER area and
+	     after any branch into it (slow).  */
+	  if (watch_hi_addr == watch_lo_addr)
+	    per_info.control_regs.words.cr[0] |= (PER_EVENT_NULLIFICATION
+						  | PER_EVENT_IFETCH);
+	  else
+	    {
+	      /* The PER area must include the instruction before the
+		 first breakpoint address.  */
+	      watch_lo_addr = watch_lo_addr > 6 ? watch_lo_addr - 6 : 0;
+	      per_info.control_regs.words.cr[0]
+		|= (PER_EVENT_BRANCH
+		    | PER_EVENT_IFETCH
+		    | PER_CONTROL_BRANCH_ADDRESS);
+	    }
+	}
     }
   per_info.starting_addr = watch_lo_addr;
   per_info.ending_addr = watch_hi_addr;
@@ -777,11 +839,61 @@ s390_remove_watchpoint (struct target_ops *self,
   return -1;
 }
 
+/* Implement the "can_use_hw_breakpoint" target_ops method. */
+
 static int
 s390_can_use_hw_breakpoint (struct target_ops *self,
 			    enum bptype type, int cnt, int othertype)
 {
-  return type == bp_hardware_watchpoint;
+  if (type == bp_hardware_watchpoint || type == bp_hardware_breakpoint)
+    return 1;
+  return 0;
+}
+
+/* Implement the "insert_hw_breakpoint" target_ops method.  */
+
+static int
+s390_insert_hw_breakpoint (struct target_ops *self,
+			   struct gdbarch *gdbarch,
+			   struct bp_target_info *bp_tgt)
+{
+  s390_watch_area area;
+  struct s390_debug_reg_state *state;
+
+  area.lo_addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
+  area.hi_addr = area.lo_addr;
+  state = s390_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+  VEC_safe_push (s390_watch_area, state->break_areas, &area);
+
+  return s390_refresh_per_info ();
+}
+
+/* Implement the "remove_hw_breakpoint" target_ops method.  */
+
+static int
+s390_remove_hw_breakpoint (struct target_ops *self,
+			   struct gdbarch *gdbarch,
+			   struct bp_target_info *bp_tgt)
+{
+  unsigned ix;
+  struct watch_area *area;
+  struct s390_debug_reg_state *state;
+
+  state = s390_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+  for (ix = 0;
+       VEC_iterate (s390_watch_area, state->break_areas, ix, area);
+       ix++)
+    {
+      if (area->lo_addr == bp_tgt->placed_address)
+	{
+	  VEC_unordered_remove (s390_watch_area, state->break_areas, ix);
+	  return s390_refresh_per_info ();
+	}
+    }
+
+  fprintf_unfiltered (gdb_stderr,
+		      "Attempt to remove nonexistent breakpoint.\n");
+  return -1;
 }
 
 static int
@@ -904,6 +1016,8 @@ _initialize_s390_nat (void)
 
   /* Add our watchpoint methods.  */
   t->to_can_use_hw_breakpoint = s390_can_use_hw_breakpoint;
+  t->to_insert_hw_breakpoint = s390_insert_hw_breakpoint;
+  t->to_remove_hw_breakpoint = s390_remove_hw_breakpoint;
   t->to_region_ok_for_hw_watchpoint = s390_region_ok_for_hw_watchpoint;
   t->to_have_continuable_watchpoint = 1;
   t->to_stopped_by_watchpoint = s390_stopped_by_watchpoint;
