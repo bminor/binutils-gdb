@@ -1,3 +1,8 @@
+2016-09-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.c (arm_fill_gregset): Keep bits 20 to
+	23.
+
 2016-08-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-low.c (linux_wait_1): Move event switch after unsuspend_lwps.

@@ -1,3 +1,8 @@
+2016-09-21  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c (aarch32_gp_regcache_collect): Keep
+	bits 20 to 23.
+
 2016-09-20  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* rs6000-tdep.c (ppc_process_record_op31): Fix record of Store String
