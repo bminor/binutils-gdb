@@ -488,16 +488,16 @@ s390_prepare_to_resume (struct lwp_info *lp)
 
   CORE_ADDR watch_lo_addr = (CORE_ADDR)-1, watch_hi_addr = 0;
   struct watch_area *area;
+  struct arch_lwp_info *lp_priv = lwp_arch_private_info (lp);
 
-  if (lp->arch_private == NULL
-      || !lp->arch_private->per_info_changed)
+  if (lp_priv == NULL || !lp_priv->per_info_changed)
     return;
 
-  lp->arch_private->per_info_changed = 0;
+  lp_priv->per_info_changed = 0;
 
-  tid = ptid_get_lwp (lp->ptid);
+  tid = ptid_get_lwp (ptid_of_lwp (lp));
   if (tid == 0)
-    tid = ptid_get_pid (lp->ptid);
+    tid = ptid_get_pid (ptid_of_lwp (lp));
 
   for (area = watch_base; area; area = area->next)
     {
@@ -528,19 +528,15 @@ s390_prepare_to_resume (struct lwp_info *lp)
     perror_with_name (_("Couldn't modify watchpoint status"));
 }
 
-/* Make sure that LP is stopped and mark its PER info as changed, so
-   the next resume will update it.  */
+/* Mark the PER info as changed, so the next resume will update it.  */
 
 static void
-s390_refresh_per_info (struct lwp_info *lp)
+s390_mark_per_info_changed (struct lwp_info *lp)
 {
-  if (lp->arch_private == NULL)
-    lp->arch_private = XCNEW (struct arch_lwp_info);
+  if (lwp_arch_private_info (lp) == NULL)
+    lwp_set_arch_private_info (lp, XCNEW (struct arch_lwp_info));
 
-  lp->arch_private->per_info_changed = 1;
-
-  if (!lp->stopped)
-    linux_stop_lwp (lp);
+  lwp_arch_private_info (lp)->per_info_changed = 1;
 }
 
 /* When attaching to a new thread, mark its PER info as changed.  */
@@ -548,8 +544,30 @@ s390_refresh_per_info (struct lwp_info *lp)
 static void
 s390_new_thread (struct lwp_info *lp)
 {
-  lp->arch_private = XCNEW (struct arch_lwp_info);
-  lp->arch_private->per_info_changed = 1;
+  s390_mark_per_info_changed (lp);
+}
+
+/* Iterator callback for s390_refresh_per_info.  */
+
+static int
+s390_refresh_per_info_cb (struct lwp_info *lp, void *arg)
+{
+  s390_mark_per_info_changed (lp);
+
+  if (!lwp_is_stopped (lp))
+    linux_stop_lwp (lp);
+  return 0;
+}
+
+/* Make sure that threads are stopped and mark PER info as changed.  */
+
+static int
+s390_refresh_per_info (void)
+{
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
+
+  iterate_over_lwps (pid_ptid, s390_refresh_per_info_cb, NULL);
+  return 0;
 }
 
 static int
@@ -557,7 +575,6 @@ s390_insert_watchpoint (struct target_ops *self,
 			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
-  struct lwp_info *lp;
   struct watch_area *area = XNEW (struct watch_area);
 
   if (!area)
@@ -569,9 +586,7 @@ s390_insert_watchpoint (struct target_ops *self,
   area->next = watch_base;
   watch_base = area;
 
-  ALL_LWPS (lp)
-    s390_refresh_per_info (lp);
-  return 0;
+  return s390_refresh_per_info ();
 }
 
 static int
@@ -579,7 +594,6 @@ s390_remove_watchpoint (struct target_ops *self,
 			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
-  struct lwp_info *lp;
   struct watch_area *area, **parea;
 
   for (parea = &watch_base; *parea; parea = &(*parea)->next)
@@ -598,9 +612,7 @@ s390_remove_watchpoint (struct target_ops *self,
   *parea = area->next;
   xfree (area);
 
-  ALL_LWPS (lp)
-    s390_refresh_per_info (lp);
-  return 0;
+  return s390_refresh_per_info ();
 }
 
 static int

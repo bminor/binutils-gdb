@@ -1,3 +1,15 @@
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (s390_prepare_to_resume): Use advertised lwp
+	functions instead of accessing lwp_info structure members.
+	(s390_mark_per_info_changed): New function.
+	(s390_new_thread): Use it.
+	(s390_refresh_per_info_cb): New function.
+	(s390_refresh_per_info): Remove parameter.  Refresh all lwps of
+	the current process.
+	(s390_insert_watchpoint): Adjust call to s390_refresh_per_info.
+	(s390_remove_watchpoint): Likewise.
+
 2016-09-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* elfread.c (auxv.h): New include.
