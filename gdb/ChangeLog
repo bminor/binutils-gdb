@@ -1,3 +1,16 @@
+2016-10-03  Simon Marchi  <simark@simark.ca>
+
+	* infrun.c (restore_current_uiout_cleanup): Move to ui-out.c.
+	(print_stop_event): Use make_cleanup_restore_current_uiout.
+	* python/python.c (execute_gdb_command): Likewise.
+	* ui-out.c (restore_current_uiout_cleanup): Move from infrun.c.
+	(make_cleanup_restore_current_uiout): New function definition.
+	* ui-out.h (make_cleanup_restore_current_uiout): New function
+	declaration.
+	* utils.c (do_restore_ui_out): Remove.
+	(make_cleanup_restore_ui_out): Remove.
+	* utils.h (make_cleanup_restore_ui_out): Remove.
+
 2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
 

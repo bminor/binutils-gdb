@@ -8096,16 +8096,6 @@ print_stop_location (struct target_waitstatus *ws)
     print_stack_frame (get_selected_frame (NULL), 0, source_flag, 1);
 }
 
-/* Cleanup that restores a previous current uiout.  */
-
-static void
-restore_current_uiout_cleanup (void *arg)
-{
-  struct ui_out *saved_uiout = (struct ui_out *) arg;
-
-  current_uiout = saved_uiout;
-}
-
 /* See infrun.h.  */
 
 void
@@ -8118,7 +8108,7 @@ print_stop_event (struct ui_out *uiout)
 
   get_last_target_status (&last_ptid, &last);
 
-  old_chain = make_cleanup (restore_current_uiout_cleanup, current_uiout);
+  old_chain = make_cleanup_restore_current_uiout ();
   current_uiout = uiout;
 
   print_stop_location (&last);
