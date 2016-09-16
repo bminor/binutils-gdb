@@ -1,5 +1,10 @@
 2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* nat/linux-nat.h (lwp_is_stepping): New declaration.
+	* linux-nat.c (lwp_is_stepping): New function.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-nat.c (gdbcmd.h): New include.
 	(s390_show_debug_regs): New function.
 	(s390_stopped_by_watchpoint): Call it, if show_debug_regs is set.

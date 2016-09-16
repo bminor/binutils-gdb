@@ -176,6 +176,14 @@ lwp_stop_reason (struct lwp_info *lwp)
   return lwp->stop_reason;
 }
 
+/* See nat/linux-nat.h.  */
+
+int
+lwp_is_stepping (struct lwp_info *lwp)
+{
+  return lwp->stepping;
+}
+
 /* A list of all unknown processes which receive stop signals.  Some
    other process will presumably claim each of these as forked
    children momentarily.  */

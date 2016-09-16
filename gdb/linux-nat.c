@@ -355,6 +355,14 @@ lwp_stop_reason (struct lwp_info *lwp)
   return lwp->stop_reason;
 }
 
+/* See nat/linux-nat.h.  */
+
+int
+lwp_is_stepping (struct lwp_info *lwp)
+{
+  return lwp->step;
+}
+
 
 /* Trivial list manipulation functions to keep track of a list of
    new stopped processes.  */

@@ -1,3 +1,7 @@
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-low.c (lwp_is_stepping): New function.
+
 2016-09-06  Carl Love  <cel@us.ibm.com>
 
 	* server.c (start_inferior):  Fixed comment, requested comment change
