@@ -430,8 +430,8 @@ s390_linux_store_inferior_registers (struct target_ops *ops,
 
 /* Hardware-assisted watchpoint handling.  */
 
-/* We maintain a list of all currently active watchpoints in order
-   to properly handle watchpoint removal.
+/* For each process we maintain a list of all currently active
+   watchpoints, in order to properly handle watchpoint removal.
 
    The only thing we actually need is the total address space area
    spanned by the watchpoints.  */
@@ -444,17 +444,138 @@ typedef struct watch_area
 
 DEF_VEC_O (s390_watch_area);
 
-VEC_s390_watch_area *watch_areas = NULL;
+/* Hardware debug state.  */
+
+struct s390_debug_reg_state
+{
+  VEC_s390_watch_area *watch_areas;
+};
+
+/* Per-process data.  */
+
+struct s390_process_info
+{
+  struct s390_process_info *next;
+  pid_t pid;
+  struct s390_debug_reg_state state;
+};
+
+static struct s390_process_info *s390_process_list = NULL;
+
+/* Find process data for process PID.  */
+
+static struct s390_process_info *
+s390_find_process_pid (pid_t pid)
+{
+  struct s390_process_info *proc;
+
+  for (proc = s390_process_list; proc; proc = proc->next)
+    if (proc->pid == pid)
+      return proc;
+
+  return NULL;
+}
+
+/* Add process data for process PID.  Returns newly allocated info
+   object.  */
+
+static struct s390_process_info *
+s390_add_process (pid_t pid)
+{
+  struct s390_process_info *proc = XCNEW (struct s390_process_info);
+
+  proc->pid = pid;
+  proc->next = s390_process_list;
+  s390_process_list = proc;
+
+  return proc;
+}
+
+/* Get data specific info for process PID, creating it if necessary.
+   Never returns NULL.  */
+
+static struct s390_process_info *
+s390_process_info_get (pid_t pid)
+{
+  struct s390_process_info *proc;
+
+  proc = s390_find_process_pid (pid);
+  if (proc == NULL)
+    proc = s390_add_process (pid);
+
+  return proc;
+}
+
+/* Get hardware debug state for process PID.  */
+
+static struct s390_debug_reg_state *
+s390_get_debug_reg_state (pid_t pid)
+{
+  return &s390_process_info_get (pid)->state;
+}
+
+/* Called whenever GDB is no longer debugging process PID.  It deletes
+   data structures that keep track of hardware debug state.  */
+
+static void
+s390_forget_process (pid_t pid)
+{
+  struct s390_process_info *proc, **proc_link;
+
+  proc = s390_process_list;
+  proc_link = &s390_process_list;
+
+  while (proc != NULL)
+    {
+      if (proc->pid == pid)
+	{
+	  VEC_free (s390_watch_area, proc->state.watch_areas);
+	  *proc_link = proc->next;
+	  xfree (proc);
+	  return;
+	}
+
+      proc_link = &proc->next;
+      proc = *proc_link;
+    }
+}
+
+/* linux_nat_new_fork hook.   */
+
+static void
+s390_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+{
+  pid_t parent_pid;
+  struct s390_debug_reg_state *parent_state;
+  struct s390_debug_reg_state *child_state;
+
+  /* NULL means no watchpoint has ever been set in the parent.  In
+     that case, there's nothing to do.  */
+  if (lwp_arch_private_info (parent) == NULL)
+    return;
+
+  /* GDB core assumes the child inherits the watchpoints/hw breakpoints of
+     the parent.  So copy the debug state from parent to child.  */
+
+  parent_pid = ptid_get_pid (parent->ptid);
+  parent_state = s390_get_debug_reg_state (parent_pid);
+  child_state = s390_get_debug_reg_state (child_pid);
+
+  child_state->watch_areas = VEC_copy (s390_watch_area,
+				       parent_state->watch_areas);
+}
 
 static int
 s390_stopped_by_watchpoint (struct target_ops *ops)
 {
+  struct s390_debug_reg_state *state
+    = s390_get_debug_reg_state (ptid_get_pid (inferior_ptid));
   per_lowcore_bits per_lowcore;
   ptrace_area parea;
   int result;
 
   /* Speed up common case.  */
-  if (VEC_empty (s390_watch_area, watch_areas))
+  if (VEC_empty (s390_watch_area, state->watch_areas))
     return 0;
 
   parea.len = sizeof (per_lowcore);
@@ -483,6 +604,7 @@ static void
 s390_prepare_to_resume (struct lwp_info *lp)
 {
   int tid;
+  pid_t pid = ptid_get_pid (ptid_of_lwp (lp));
 
   per_struct per_info;
   ptrace_area parea;
@@ -491,6 +613,7 @@ s390_prepare_to_resume (struct lwp_info *lp)
   unsigned ix;
   s390_watch_area *area;
   struct arch_lwp_info *lp_priv = lwp_arch_private_info (lp);
+  struct s390_debug_reg_state *state = s390_get_debug_reg_state (pid);
 
   if (lp_priv == NULL || !lp_priv->per_info_changed)
     return;
@@ -499,7 +622,7 @@ s390_prepare_to_resume (struct lwp_info *lp)
 
   tid = ptid_get_lwp (ptid_of_lwp (lp));
   if (tid == 0)
-    tid = ptid_get_pid (ptid_of_lwp (lp));
+    tid = pid;
 
   parea.len = sizeof (per_info);
   parea.process_addr = (addr_t) & per_info;
@@ -507,10 +630,10 @@ s390_prepare_to_resume (struct lwp_info *lp)
   if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea, 0) < 0)
     perror_with_name (_("Couldn't retrieve watchpoint status"));
 
-  if (!VEC_empty (s390_watch_area, watch_areas))
+  if (!VEC_empty (s390_watch_area, state->watch_areas))
     {
       for (ix = 0;
-	   VEC_iterate (s390_watch_area, watch_areas, ix, area);
+	   VEC_iterate (s390_watch_area, state->watch_areas, ix, area);
 	   ix++)
 	{
 	  watch_lo_addr = min (watch_lo_addr, area->lo_addr);
@@ -580,10 +703,12 @@ s390_insert_watchpoint (struct target_ops *self,
 			struct expression *cond)
 {
   s390_watch_area area;
+  struct s390_debug_reg_state *state
+    = s390_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   area.lo_addr = addr;
   area.hi_addr = addr + len - 1;
-  VEC_safe_push (s390_watch_area, watch_areas, &area);
+  VEC_safe_push (s390_watch_area, state->watch_areas, &area);
 
   return s390_refresh_per_info ();
 }
@@ -595,14 +720,16 @@ s390_remove_watchpoint (struct target_ops *self,
 {
   unsigned ix;
   s390_watch_area *area;
+  struct s390_debug_reg_state *state
+    = s390_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   for (ix = 0;
-       VEC_iterate (s390_watch_area, watch_areas, ix, area);
+       VEC_iterate (s390_watch_area, state->watch_areas, ix, area);
        ix++)
     {
       if (area->lo_addr == addr && area->hi_addr == addr + len - 1)
 	{
-	  VEC_unordered_remove (s390_watch_area, watch_areas, ix);
+	  VEC_unordered_remove (s390_watch_area, state->watch_areas, ix);
 	  return s390_refresh_per_info ();
 	}
     }
@@ -753,4 +880,6 @@ _initialize_s390_nat (void)
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, s390_new_thread);
   linux_nat_set_prepare_to_resume (t, s390_prepare_to_resume);
+  linux_nat_set_forget_process (t, s390_forget_process);
+  linux_nat_set_new_fork (t, s390_linux_new_fork);
 }

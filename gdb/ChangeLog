@@ -1,5 +1,23 @@
 2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-nat.c (watch_areas): Remove variable.  Replace by a
+	member of...
+	(struct s390_debug_reg_state): ...this.  New struct.
+	(struct s390_process_info): New struct.
+	(s390_process_list): New variable.
+	(s390_find_process_pid, s390_add_process, s390_process_info_get)
+	(s390_get_debug_reg_state): New functions.
+	(s390_stopped_by_watchpoint): Now access the watch_areas VEC via
+	s390_get_debug_reg_state.
+	(s390_prepare_to_resume): Likewise.
+	(s390_insert_watchpoint): Likewise.
+	(s390_remove_watchpoint): Likewise.
+	(s390_forget_process, s390_linux_new_fork): New linux_nat target
+	methods.
+	(_initialize_s390_nat): Register them.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-nat.c (s390_watch_area): New typedef.  Define a VEC.
 	(watch_base): Remove variable.
 	(watch_areas): New variable.
