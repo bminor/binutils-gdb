@@ -41,6 +41,7 @@
 #include "solib-svr4.h"
 #include "tilegx-tdep.h"
 #include "opcode/tilegx.h"
+#include <algorithm>
 
 struct tilegx_frame_cache
 {
@@ -428,7 +429,8 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 	  if (instbuf_size > size_on_same_page)
 	    instbuf_size = size_on_same_page;
 
-	  instbuf_size = min (instbuf_size, (end_addr - next_addr));
+	  instbuf_size = std::min ((CORE_ADDR) instbuf_size,
+				   (end_addr - next_addr));
 	  instbuf_start = next_addr;
 
 	  status = safe_frame_unwind_memory (next_frame, instbuf_start,
@@ -752,14 +754,14 @@ tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
         = skip_prologue_using_sal (gdbarch, func_start);
 
       if (post_prologue_pc != 0)
-        return max (start_pc, post_prologue_pc);
+        return std::max (start_pc, post_prologue_pc);
     }
 
   /* Don't straddle a section boundary.  */
   s = find_pc_section (start_pc);
   end_pc = start_pc + 8 * TILEGX_BUNDLE_SIZE_IN_BYTES;
   if (s != NULL)
-    end_pc = min (end_pc, obj_section_endaddr (s));
+    end_pc = std::min (end_pc, obj_section_endaddr (s));
 
   /* Otherwise, try to skip prologue the hard way.  */
   return tilegx_analyze_prologue (gdbarch,

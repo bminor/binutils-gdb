@@ -44,6 +44,7 @@
 
 /* To get entry_point_address.  */
 #include "objfiles.h"
+#include <algorithm>
 
 /* Nios II specific header.  */
 #include "nios2-tdep.h"
@@ -1685,7 +1686,7 @@ nios2_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
         = skip_prologue_using_sal (gdbarch, func_addr);
 
       if (post_prologue_pc != 0)
-        return max (start_pc, post_prologue_pc);
+        return std::max (start_pc, post_prologue_pc);
     }
 
   /* Prologue analysis does the rest....  */

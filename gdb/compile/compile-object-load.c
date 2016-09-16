@@ -31,6 +31,7 @@
 #include "compile.h"
 #include "block.h"
 #include "arch-utils.h"
+#include <algorithm>
 
 /* Track inferior memory reserved by inferior mmap.  */
 
@@ -186,7 +187,7 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
     return;
 
   alignment = ((CORE_ADDR) 1) << bfd_get_section_alignment (abfd, sect);
-  data->last_max_alignment = max (data->last_max_alignment, alignment);
+  data->last_max_alignment = std::max (data->last_max_alignment, alignment);
 
   data->last_size = (data->last_size + alignment - 1) & -alignment;
 

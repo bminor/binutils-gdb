@@ -36,6 +36,7 @@
 #include "regcache.h"
 #include "dis-asm.h"
 #include "objfiles.h"
+#include <algorithm>
 
 /* AVR Background:
 
@@ -882,7 +883,7 @@ avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   post_prologue_pc = skip_prologue_using_sal (gdbarch, func_addr);
   if (post_prologue_pc != 0)
-    return max (pc, post_prologue_pc);
+    return std::max (pc, post_prologue_pc);
 
   {
     CORE_ADDR prologue_end = pc;

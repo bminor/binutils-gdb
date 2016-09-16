@@ -1,3 +1,68 @@
+2016-09-16  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (min, max): Delete.
+	* aarch64-tdep.c: Include <algorithm> and use std::min and
+	std::max throughout.
+	* aarch64-tdep.c: Likewise.
+	* alpha-tdep.c: Likewise.
+	* amd64-tdep.c: Likewise.
+	* amd64-windows-tdep.c: Likewise.
+	* arm-tdep.c: Likewise.
+	* avr-tdep.c: Likewise.
+	* breakpoint.c: Likewise.
+	* btrace.c: Likewise.
+	* ctf.c: Likewise.
+	* disasm.c: Likewise.
+	* doublest.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* dwarf2read.c: Likewise.
+	* environ.c: Likewise.
+	* exec.c: Likewise.
+	* f-exp.y: Likewise.
+	* findcmd.c: Likewise.
+	* ft32-tdep.c: Likewise.
+	* gcore.c: Likewise.
+	* hppa-tdep.c: Likewise.
+	* i386-darwin-tdep.c: Likewise.
+	* i386-tdep.c: Likewise.
+	* linux-thread-db.c: Likewise.
+	* lm32-tdep.c: Likewise.
+	* m32r-tdep.c: Likewise.
+	* m88k-tdep.c: Likewise.
+	* memrange.c: Likewise.
+	* minidebug.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* moxie-tdep.c: Likewise.
+	* nds32-tdep.c: Likewise.
+	* nios2-tdep.c: Likewise.
+	* nto-procfs.c: Likewise.
+	* parse.c: Likewise.
+	* ppc-sysv-tdep.c: Likewise.
+	* probe.c: Likewise.
+	* record-btrace.c: Likewise.
+	* remote.c: Likewise.
+	* rs6000-tdep.c: Likewise.
+	* rx-tdep.c: Likewise.
+	* s390-linux-nat.c: Likewise.
+	* s390-linux-tdep.c: Likewise.
+	* ser-tcp.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* sh64-tdep.c: Likewise.
+	* source.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* symfile.c: Likewise.
+	* target-memory.c: Likewise.
+	* target.c: Likewise.
+	* tic6x-tdep.c: Likewise.
+	* tilegx-tdep.c: Likewise.
+	* tracefile-tfile.c: Likewise.
+	* tracepoint.c: Likewise.
+	* valprint.c: Likewise.
+	* value.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+	* cli/cli-cmds.c: Likewise.
+	* compile/compile-object-load.c: Likewise.
+
 2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-nat.c (PER_BIT, PER_EVENT_BRANCH, PER_EVENT_IFETCH)

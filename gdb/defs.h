@@ -102,13 +102,6 @@ enum compile_i_scope_types
 
 #include "hashtab.h"
 
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
 /* * Enable dbx commands if set.  */
 extern int dbx_commands;
 

@@ -45,6 +45,7 @@
 #include "target-debug.h"
 #include "top.h"
 #include "event-top.h"
+#include <algorithm>
 
 static void target_info (char *, int);
 
@@ -1292,7 +1293,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 	 shadow handling even though we only end up writing a small
 	 subset of it.  Cap writes to a limit specified by the target
 	 to mitigate this.  */
-      len = min (ops->to_get_memory_xfer_limit (ops), len);
+      len = std::min (ops->to_get_memory_xfer_limit (ops), len);
 
       buf = (gdb_byte *) xmalloc (len);
       old_chain = make_cleanup (xfree, buf);
@@ -1858,7 +1859,7 @@ read_memory_robust (struct target_ops *ops,
 	}
       else
 	{
-	  LONGEST to_read = min (len - xfered_total, region_len);
+	  LONGEST to_read = std::min (len - xfered_total, region_len);
 	  gdb_byte *buffer = (gdb_byte *) xmalloc (to_read * unit_size);
 	  struct cleanup *inner_cleanup = make_cleanup (xfree, buffer);
 
@@ -2445,7 +2446,8 @@ simple_search_memory (struct target_ops *ops,
   while (search_space_len >= pattern_len)
     {
       gdb_byte *found_ptr;
-      unsigned nr_search_bytes = min (search_space_len, search_buf_size);
+      unsigned nr_search_bytes
+	= std::min (search_space_len, (ULONGEST) search_buf_size);
 
       found_ptr = (gdb_byte *) memmem (search_buf, nr_search_bytes,
 				       pattern, pattern_len);
@@ -2478,7 +2480,8 @@ simple_search_memory (struct target_ops *ops,
 	  gdb_assert (keep_len == pattern_len - 1);
 	  memcpy (search_buf, search_buf + chunk_size, keep_len);
 
-	  nr_to_read = min (search_space_len - keep_len, chunk_size);
+	  nr_to_read = std::min (search_space_len - keep_len,
+				 (ULONGEST) chunk_size);
 
 	  if (target_read (ops, TARGET_OBJECT_MEMORY, NULL,
 			   search_buf + keep_len, read_addr,
@@ -2850,7 +2853,7 @@ static void
 release_fileio_fd (int fd, fileio_fh_t *fh)
 {
   fh->fd = -1;
-  lowest_closed_fd = min (lowest_closed_fd, fd);
+  lowest_closed_fd = std::min (lowest_closed_fd, fd);
 }
 
 /* Return a pointer to the fileio_fhandle_t corresponding to FD.  */
@@ -3582,7 +3585,7 @@ simple_verify_memory (struct target_ops *ops,
       ULONGEST xfered_len;
       enum target_xfer_status status;
       gdb_byte buf[1024];
-      ULONGEST howmuch = min (sizeof (buf), size - total_xfered);
+      ULONGEST howmuch = std::min (sizeof (buf), size - total_xfered);
 
       status = target_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
 				    buf, NULL, lma + total_xfered, howmuch,

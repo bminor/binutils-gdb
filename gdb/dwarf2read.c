@@ -73,6 +73,7 @@
 
 #include <fcntl.h>
 #include <sys/types.h>
+#include <algorithm>
 
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
@@ -12156,8 +12157,8 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
 
   if (dwarf2_get_pc_bounds (die, &low, &high, cu, NULL) >= PC_BOUNDS_RANGES)
     {
-      *lowpc = min (*lowpc, low);
-      *highpc = max (*highpc, high);
+      *lowpc = std::min (*lowpc, low);
+      *highpc = std::max (*highpc, high);
     }
 
   /* If the language does not allow nested subprograms (either inside
@@ -12221,8 +12222,8 @@ get_scope_pc_bounds (struct die_info *die,
 
 	    if (current_low != ((CORE_ADDR) -1))
 	      {
-		best_low = min (best_low, current_low);
-		best_high = max (best_high, current_high);
+		best_low = std::min (best_low, current_low);
+		best_high = std::max (best_high, current_high);
 	      }
 	    break;
 	  default:

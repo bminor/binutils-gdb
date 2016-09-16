@@ -37,6 +37,7 @@
 
 #include <inttypes.h>
 #include <ctype.h>
+#include <algorithm>
 
 /* Command lists for btrace maintenance commands.  */
 static struct cmd_list_element *maint_btrace_cmdlist;
@@ -395,7 +396,7 @@ ftrace_new_return (struct btrace_function *prev,
 	     We start at the preceding function's level in case this has
 	     already been a return for which we have not seen the call.
 	     We start at level 0 otherwise, to handle tail calls correctly.  */
-	  bfun->level = min (0, prev->level) - 1;
+	  bfun->level = std::min (0, prev->level) - 1;
 
 	  /* Fix up the call stack for PREV.  */
 	  ftrace_fixup_caller (prev, bfun, BFUN_UP_LINKS_TO_RET);
@@ -645,7 +646,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  /* Maintain the function level offset.
 	     For all but the last block, we do it here.  */
 	  if (blk != 0)
-	    level = min (level, end->level);
+	    level = std::min (level, end->level);
 
 	  size = 0;
 	  TRY
@@ -691,7 +692,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	     and is not really part of the execution history, it shouldn't
 	     affect the level.  */
 	  if (blk == 0)
-	    level = min (level, end->level);
+	    level = std::min (level, end->level);
 	}
     }
 
@@ -801,7 +802,7 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 	    }
 
 	  /* Maintain the function level offset.  */
-	  *plevel = min (*plevel, end->level);
+	  *plevel = std::min (*plevel, end->level);
 
 	  btinsn.pc = (CORE_ADDR) insn.ip;
 	  btinsn.size = (gdb_byte) insn.size;
@@ -1827,7 +1828,7 @@ btrace_insn_next (struct btrace_insn_iterator *it, unsigned int stride)
       space = end - index;
 
       /* Advance the iterator as far as possible within this segment.  */
-      adv = min (space, stride);
+      adv = std::min (space, stride);
       stride -= adv;
       index += adv;
       steps += adv;
@@ -1906,7 +1907,7 @@ btrace_insn_prev (struct btrace_insn_iterator *it, unsigned int stride)
 	}
 
       /* Advance the iterator as far as possible within this segment.  */
-      adv = min (index, stride);
+      adv = std::min (index, stride);
 
       stride -= adv;
       index -= adv;

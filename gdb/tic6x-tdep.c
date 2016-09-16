@@ -48,6 +48,7 @@
 #include "tic6x-tdep.h"
 #include "language.h"
 #include "target-descriptions.h"
+#include <algorithm>
 
 #include "features/tic6x-c64xp.c"
 #include "features/tic6x-c64x.c"
@@ -308,7 +309,7 @@ tic6x_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-	return max (start_pc, post_prologue_pc);
+	return std::max (start_pc, post_prologue_pc);
     }
 
   /* Can't determine prologue from the symbol table, need to examine

@@ -41,6 +41,7 @@
 
 #include "ft32-tdep.h"
 #include "gdb/sim-ft32.h"
+#include <algorithm>
 
 #define RAM_BIAS  0x800000  /* Bias added to RAM addresses.  */
 
@@ -274,7 +275,7 @@ ft32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-	return max (pc, post_prologue_pc);
+	return std::max (pc, post_prologue_pc);
       else
 	{
 	  /* Can't determine prologue from the symbol table, need to examine

@@ -52,6 +52,7 @@
 #include "dwarf2.h"
 /* registers numbers shared with the simulator.  */
 #include "gdb/sim-sh.h"
+#include <algorithm>
 
 /* List of "set sh ..." and "show sh ..." commands.  */
 static struct cmd_list_element *setshcmdlist = NULL;
@@ -654,7 +655,7 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 	{
 	  pc += 2;
 	  /* Don't go any further than six more instructions.  */
-	  limit_pc = min (limit_pc, pc + (2 * 6));
+	  limit_pc = std::min (limit_pc, pc + (2 * 6));
 
 	  cache->uses_fp = 1;
 	  /* At this point, only allow argument register moves to other
@@ -728,7 +729,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       post_prologue_pc = skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-        return max (pc, post_prologue_pc);
+        return std::max (pc, post_prologue_pc);
     }
 
   /* Can't determine prologue from the symbol table, need to examine
@@ -745,7 +746,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Do not allow limit_pc to be past the function end, if we know
      where that end is...  */
   if (func_end_addr != 0)
-    limit_pc = min (limit_pc, func_end_addr);
+    limit_pc = std::min (limit_pc, func_end_addr);
 
   cache.sp_offset = -4;
   post_prologue_pc = sh_analyze_prologue (gdbarch, pc, limit_pc, &cache, 0);

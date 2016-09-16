@@ -30,6 +30,7 @@
 #include "symtab.h"
 #include "trad-frame.h"
 #include "value.h"
+#include <algorithm>
 
 #include "m88k-tdep.h"
 
@@ -558,7 +559,7 @@ m88k_analyze_prologue (struct gdbarch *gdbarch,
              prologue.  */
 	  if (cache->fp_offset != -1
 	      && cache->saved_regs[M88K_R1_REGNUM].addr != -1)
-	    return min (pc, end);
+	    return std::min (pc, end);
 	  break;
 
 	case M88K_PIA_NOTE_ST:
@@ -566,7 +567,7 @@ m88k_analyze_prologue (struct gdbarch *gdbarch,
 	  /* If no frame has been allocated, the stores aren't part of
              the prologue.  */
 	  if (cache->sp_offset == 0)
-	    return min (pc, end);
+	    return std::min (pc, end);
 
 	  /* Record location of saved registers.  */
 	  {
@@ -583,7 +584,7 @@ m88k_analyze_prologue (struct gdbarch *gdbarch,
 	  /* A second stack pointer adjustment isn't part of the
              prologue.  */
 	  if (cache->sp_offset != 0)
-	    return min (pc, end);
+	    return std::min (pc, end);
 
 	  /* Store stack pointer adjustment.  */
 	  cache->sp_offset = -SUBU_OFFSET (insn);
@@ -593,7 +594,7 @@ m88k_analyze_prologue (struct gdbarch *gdbarch,
 	  /* A second frame pointer assignment isn't part of the
              prologue.  */
 	  if (cache->fp_offset != -1)
-	    return min (pc, end);
+	    return std::min (pc, end);
 
 	  /* Record frame pointer assignment.  */
 	  cache->fp_offset = ADDU_OFFSET (insn);
@@ -604,12 +605,12 @@ m88k_analyze_prologue (struct gdbarch *gdbarch,
              the instruction in the delay slot might be.  Limit the
              prologue analysis to the delay slot and record the branch
              instruction as the end of the prologue.  */
-	  limit = min (limit, pc + 2 * M88K_INSN_SIZE);
+	  limit = std::min (limit, pc + 2 * M88K_INSN_SIZE);
 	  end = pc;
 	  break;
 
 	case M88K_PIA_NOTE_PROLOGUE_END:
-	  return min (pc, end);
+	  return std::min (pc, end);
 	}
 
       pc += M88K_INSN_SIZE;

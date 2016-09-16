@@ -38,6 +38,7 @@
 #include "dwarf2loc.h"
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
+#include <algorithm>
 
 extern int dwarf_always_disassemble;
 
@@ -862,7 +863,7 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
 
   /* Intersect callers.  */
 
-  callers = min (result->callers, length);
+  callers = std::min ((long) result->callers, length);
   for (idx = 0; idx < callers; idx++)
     if (result->call_site[idx] != VEC_index (call_sitep, chain, idx))
       {
@@ -872,7 +873,7 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
 
   /* Intersect callees.  */
 
-  callees = min (result->callees, length);
+  callees = std::min ((long) result->callees, length);
   for (idx = 0; idx < callees; idx++)
     if (result->call_site[result->length - 1 - idx]
 	!= VEC_index (call_sitep, chain, length - 1 - idx))

@@ -28,6 +28,7 @@
 #include "floatformat.h"
 #include "gdbtypes.h"
 #include <math.h>		/* ldexp */
+#include <algorithm>
 
 /* The odds that CHAR_BIT will be anything but 8 are low enough that I'm not
    going to bother with trying to muck around with whether it is defined in
@@ -255,7 +256,7 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
 
   while (mant_bits_left > 0)
     {
-      mant_bits = min (mant_bits_left, 32);
+      mant_bits = std::min (mant_bits_left, 32);
 
       mant = get_field (ufrom, order, fmt->totalsize, mant_off, mant_bits);
 
@@ -565,7 +566,7 @@ floatformat_classify (const struct floatformat *fmt,
   mant_zero = 1;
   while (mant_bits_left > 0)
     {
-      mant_bits = min (mant_bits_left, 32);
+      mant_bits = std::min (mant_bits_left, 32);
 
       mant = get_field (uval, order, fmt->totalsize, mant_off, mant_bits);
 
@@ -862,7 +863,8 @@ convert_typed_floating (const void *from, const struct type *from_type,
          comment in store_typed_floating for a discussion about
          zeroing out remaining bytes in the target buffer.  */
       memset (to, 0, TYPE_LENGTH (to_type));
-      memcpy (to, from, min (TYPE_LENGTH (from_type), TYPE_LENGTH (to_type)));
+      memcpy (to, from, std::min (TYPE_LENGTH (from_type),
+				  TYPE_LENGTH (to_type)));
     }
   else
     {

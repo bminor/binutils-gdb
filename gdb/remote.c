@@ -71,6 +71,7 @@
 #include "agent.h"
 #include "btrace.h"
 #include "record-btrace.h"
+#include <algorithm>
 
 /* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
@@ -3354,7 +3355,7 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
       getpkt (&rs->buf, &rs->buf_size, 0);
       if (rs->buf[0] != 0)
 	{
-	  n = min (strlen (rs->buf) / 2, sizeof (display_buf));
+	  n = std::min (strlen (rs->buf) / 2, sizeof (display_buf));
 	  result = hex2bin (rs->buf, (gdb_byte *) display_buf, n);
 	  display_buf [result] = '\0';
 	  return display_buf;
@@ -7466,7 +7467,7 @@ hexnumlen (ULONGEST num)
   for (i = 0; num != 0; i++)
     num >>= 4;
 
-  return max (i, 1);
+  return std::max (i, 1);
 }
 
 /* Set BUF to the minimum number of hex digits representing NUM.  */
@@ -7671,18 +7672,22 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   if (packet_format == 'X')
     {
       /* Best guess at number of bytes that will fit.  */
-      todo_units = min (len_units, payload_capacity_bytes / unit_size);
+      todo_units = std::min (len_units,
+			     (ULONGEST) payload_capacity_bytes / unit_size);
       if (use_length)
 	payload_capacity_bytes -= hexnumlen (todo_units);
-      todo_units = min (todo_units, payload_capacity_bytes / unit_size);
+      todo_units = std::min (todo_units, payload_capacity_bytes / unit_size);
     }
   else
     {
       /* Number of bytes that will fit.  */
-      todo_units = min (len_units, (payload_capacity_bytes / unit_size) / 2);
+      todo_units
+	= std::min (len_units,
+		    (ULONGEST) (payload_capacity_bytes / unit_size) / 2);
       if (use_length)
 	payload_capacity_bytes -= hexnumlen (todo_units);
-      todo_units = min (todo_units, (payload_capacity_bytes / unit_size) / 2);
+      todo_units = std::min (todo_units,
+			     (payload_capacity_bytes / unit_size) / 2);
     }
 
   if (todo_units <= 0)
@@ -7841,7 +7846,8 @@ remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len_units,
      get_memory_packet_size ensures this.  */
 
   /* Number of units that will fit.  */
-  todo_units = min (len_units, (buf_size_bytes / unit_size) / 2);
+  todo_units = std::min (len_units,
+			 (ULONGEST) (buf_size_bytes / unit_size) / 2);
 
   /* Construct "m"<memaddr>","<len>".  */
   memaddr = remote_address_masked (memaddr);
@@ -9901,7 +9907,7 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
      may not, since we don't know how much of it will need to be escaped;
      the target is free to respond with slightly less data.  We subtract
      five to account for the response type and the protocol frame.  */
-  n = min (get_remote_packet_size () - 5, len);
+  n = std::min (get_remote_packet_size () - 5, len);
   snprintf (rs->buf, get_remote_packet_size () - 4, "qXfer:%s:read:%s:%s,%s",
 	    object_name, annex ? annex : "",
 	    phex_nz (offset, sizeof offset),

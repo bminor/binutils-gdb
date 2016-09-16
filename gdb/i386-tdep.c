@@ -66,6 +66,7 @@
 #include "expression.h"
 #include "parser-defs.h"
 #include <ctype.h>
+#include <algorithm>
 
 /* Register names.  */
 
@@ -1365,7 +1366,7 @@ i386_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc > pc + offset_and)
     cache->saved_sp_reg = regnums[reg];
 
-  return min (pc + offset + 3, current_pc);
+  return std::min (pc + offset + 3, current_pc);
 }
 
 /* Maximum instruction length we need to handle.  */
@@ -1836,7 +1837,7 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
 	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
-        return max (start_pc, post_prologue_pc);
+        return std::max (start_pc, post_prologue_pc);
     }
  
   cache.locals = -1;

@@ -52,6 +52,7 @@
 #include "xtensa-isa.h"
 #include "xtensa-tdep.h"
 #include "xtensa-config.h"
+#include <algorithm>
 
 
 static unsigned int xtensa_debug_level = 0;
@@ -2417,10 +2418,10 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
   if (pc == 0)
     {
       find_pc_partial_function (start, 0, NULL, &end_pc);
-      body_pc = min (end_pc, body_pc);
+      body_pc = std::min (end_pc, body_pc);
     }
   else
-    body_pc = min (pc, body_pc);
+    body_pc = std::min (pc, body_pc);
 
   cache->call0 = 1;
   rtmp = (xtensa_c0reg_t*) alloca(nregs * sizeof(xtensa_c0reg_t));

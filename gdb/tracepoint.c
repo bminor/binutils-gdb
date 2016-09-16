@@ -56,6 +56,7 @@
 #include "rsp-low.h"
 #include "tracefile.h"
 #include "location.h"
+#include <algorithm>
 
 /* readline include files */
 #include "readline/readline.h"
@@ -4324,8 +4325,8 @@ traceframe_available_memory (VEC(mem_range_s) **result,
 
 	    nr = VEC_safe_push (mem_range_s, *result, NULL);
 
-	    nr->start = max (lo1, lo2);
-	    nr->length = min (hi1, hi2) - nr->start;
+	    nr->start = std::max (lo1, lo2);
+	    nr->length = std::min (hi1, hi2) - nr->start;
 	  }
 
       normalize_mem_ranges (*result);

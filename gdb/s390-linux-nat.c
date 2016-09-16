@@ -700,8 +700,8 @@ s390_prepare_to_resume (struct lwp_info *lp)
 	   VEC_iterate (s390_watch_area, state->watch_areas, ix, area);
 	   ix++)
 	{
-	  watch_lo_addr = min (watch_lo_addr, area->lo_addr);
-	  watch_hi_addr = max (watch_hi_addr, area->hi_addr);
+	  watch_lo_addr = std::min (watch_lo_addr, area->lo_addr);
+	  watch_hi_addr = std::max (watch_hi_addr, area->hi_addr);
 	}
 
       /* Enable storage-alteration events.  */
@@ -722,8 +722,8 @@ s390_prepare_to_resume (struct lwp_info *lp)
 	       VEC_iterate (s390_watch_area, state->break_areas, ix, area);
 	       ix++)
 	    {
-	      watch_lo_addr = min (watch_lo_addr, area->lo_addr);
-	      watch_hi_addr = max (watch_hi_addr, area->hi_addr);
+	      watch_lo_addr = std::min (watch_lo_addr, area->lo_addr);
+	      watch_hi_addr = std::max (watch_hi_addr, area->hi_addr);
 	    }
 
 	  /* If there's just one breakpoint, enable instruction-fetching
