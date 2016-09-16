@@ -1,3 +1,10 @@
+2016-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/casts.cc (decltype): Move it ...
+	(main): ... with its call to ...
+	* gdb.cp/casts03.cc: ... a new file.
+	* gdb.cp/casts.exp: Add new file casts03.cc, move decltype test to it.
+
 2016-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/m-static.h (gnu_obj_4::somewhere): Use constexpr for C++11.
