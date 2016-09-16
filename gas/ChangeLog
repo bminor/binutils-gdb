@@ -1,3 +1,14 @@
+2016-09-16  Peter Bergner <bergner@vnet.ibm.com>
+
+	Apply from master.
+	2016-09-14  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <slbiag, cpabort> New tests.
+	<addex., brd, brh, brw, lwzmx, nandxor, rldixor, setbool,
+	xor3, cp_abort, copy_first, paste, paste_last, sync>: Remove tests.
+	<copy, paste.>: Update tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
 2016-07-27  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/sparc/sparc.exp: Use is_elf_format to discriminate
