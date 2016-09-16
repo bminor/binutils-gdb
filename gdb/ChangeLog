@@ -1,5 +1,14 @@
 2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-nat.c (gdbcmd.h): New include.
+	(s390_show_debug_regs): New function.
+	(s390_stopped_by_watchpoint): Call it, if show_debug_regs is set.
+	(s390_prepare_to_resume): Likewise.
+	(_initialize_s390_nat): Register the command "maint set
+	show-debug-regs".
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-nat.c (watch_areas): Remove variable.  Replace by a
 	member of...
 	(struct s390_debug_reg_state): ...this.  New struct.

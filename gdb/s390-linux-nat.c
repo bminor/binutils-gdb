@@ -28,6 +28,7 @@
 #include "gregset.h"
 #include "regset.h"
 #include "nat/linux-ptrace.h"
+#include "gdbcmd.h"
 
 #include "s390-linux-tdep.h"
 #include "elf/common.h"
@@ -565,6 +566,37 @@ s390_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
 				       parent_state->watch_areas);
 }
 
+/* Dump PER state.  */
+
+static void
+s390_show_debug_regs (int tid, const char *where)
+{
+  per_struct per_info;
+  ptrace_area parea;
+
+  parea.len = sizeof (per_info);
+  parea.process_addr = (addr_t) &per_info;
+  parea.kernel_addr = offsetof (struct user_regs_struct, per_info);
+
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea, 0) < 0)
+    perror_with_name (_("Couldn't retrieve debug regs"));
+
+  debug_printf ("PER (debug) state for %d -- %s\n"
+		"  cr9-11: %lx %lx %lx\n"
+		"  start, end: %lx %lx\n"
+		"  code/ATMID: %x  address: %lx  PAID: %x\n",
+		tid,
+		where,
+		per_info.control_regs.words.cr[0],
+		per_info.control_regs.words.cr[1],
+		per_info.control_regs.words.cr[2],
+		per_info.starting_addr,
+		per_info.ending_addr,
+		per_info.lowcore.words.perc_atmid,
+		per_info.lowcore.words.address,
+		per_info.lowcore.words.access_id);
+}
+
 static int
 s390_stopped_by_watchpoint (struct target_ops *ops)
 {
@@ -573,6 +605,9 @@ s390_stopped_by_watchpoint (struct target_ops *ops)
   per_lowcore_bits per_lowcore;
   ptrace_area parea;
   int result;
+
+  if (show_debug_regs)
+    s390_show_debug_regs (s390_inferior_tid (), "stop");
 
   /* Speed up common case.  */
   if (VEC_empty (s390_watch_area, state->watch_areas))
@@ -653,6 +688,9 @@ s390_prepare_to_resume (struct lwp_info *lp)
 
   if (ptrace (PTRACE_POKEUSR_AREA, tid, &parea, 0) < 0)
     perror_with_name (_("Couldn't modify watchpoint status"));
+
+  if (show_debug_regs)
+    s390_show_debug_regs (tid, "resume");
 }
 
 /* Mark the PER info as changed, so the next resume will update it.  */
@@ -882,4 +920,17 @@ _initialize_s390_nat (void)
   linux_nat_set_prepare_to_resume (t, s390_prepare_to_resume);
   linux_nat_set_forget_process (t, s390_forget_process);
   linux_nat_set_new_fork (t, s390_linux_new_fork);
+
+  /* A maintenance command to enable showing the PER state.  */
+  add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
+			   &show_debug_regs, _("\
+Set whether to show the PER (debug) hardware state."), _("\
+Show whether to show the PER (debug) hardware state."), _("\
+Use \"on\" to enable, \"off\" to disable.\n\
+If enabled, the PER state is shown after it is changed by GDB,\n\
+and when the inferior triggers a breakpoint or watchpoint."),
+			   NULL,
+			   NULL,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 }
