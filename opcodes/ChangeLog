@@ -1,3 +1,22 @@
+2016-09-16  Peter Bergner <bergner@vnet.ibm.com>
+
+	Apply from master.
+	2016-09-14  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <slbiag>: New mnemonic.
+	<addex., brd, brh, brw, lwzmx, nandxor, rldixor, setbool,
+	xor3>: Delete mnemonics.
+	<cp_abort>: Rename mnemonic from ...
+	<cpabort>: ...to this.
+	<setb>: Change to a X form instruction.
+	<sync>: Change to 1 operand form.
+	<copy>: Delete mnemonic.
+	<copy_first>: Rename mnemonic from ...
+	<copy>: ...to this.
+	<paste, paste.>: Delete mnemonics.
+	<paste_last>: Rename mnemonic from ...
+	<paste.>: ...to this.
+
 2016-06-29  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
