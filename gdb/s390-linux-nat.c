@@ -39,6 +39,7 @@
 #include <sys/procfs.h>
 #include <sys/ucontext.h>
 #include <elf.h>
+#include <algorithm>
 
 /* Per-thread arch-specific data.  */
 

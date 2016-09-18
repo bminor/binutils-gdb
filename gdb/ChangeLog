@@ -1,5 +1,9 @@
 2016-09-18  Pedro Alves  <palves@redhat.com>
 
+	* s390-linux-nat.c: Include <algorithm>.
+
+2016-09-18  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (hardware_watchpoint_inserted_in_range): Explicitly
 	specify the std:min/std::max specialization.
 	* exec.c (section_table_read_available_memory): Likewise.
