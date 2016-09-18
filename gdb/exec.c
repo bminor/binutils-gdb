@@ -798,7 +798,7 @@ section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
 	  enum target_xfer_status status;
 
 	  /* Get the intersection window.  */
-	  end = std::min (offset + len, r->start + r->length);
+	  end = std::min<CORE_ADDR> (offset + len, r->start + r->length);
 
 	  gdb_assert (end - offset <= len);
 

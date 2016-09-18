@@ -3585,7 +3585,7 @@ simple_verify_memory (struct target_ops *ops,
       ULONGEST xfered_len;
       enum target_xfer_status status;
       gdb_byte buf[1024];
-      ULONGEST howmuch = std::min (sizeof (buf), size - total_xfered);
+      ULONGEST howmuch = std::min<ULONGEST> (sizeof (buf), size - total_xfered);
 
       status = target_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
 				    buf, NULL, lma + total_xfered, howmuch,
