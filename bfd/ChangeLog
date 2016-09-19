@@ -1,3 +1,9 @@
+2016-09-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Allow
+	negative offsets to _GLOBAL_OFFSET_TABLE_ if the .got section is
+	bigger than 0x1000 bytes.
+
 2016-09-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): Only mark section

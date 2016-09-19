@@ -2661,19 +2661,19 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
   /* Allocate .plt and .got entries, and space for local symbols.  */
   htab_traverse (htab->loc_hash_table, allocate_local_dynrelocs, info);
 
-  if (! ABI_64_P (output_bfd)
-      && !htab->is_vxworks
+  if (!htab->is_vxworks
       && elf_hash_table (info)->dynamic_sections_created)
     {
-      /* Make space for the trailing nop in .plt.  */
-      if (htab->elf.splt->size > 0)
-	htab->elf.splt->size += 1 * SPARC_INSN_BYTES;
+      if (! ABI_64_P (output_bfd))
+        {
+          /* Make space for the trailing nop in .plt.  */
+          if (htab->elf.splt->size > 0)
+            htab->elf.splt->size += 1 * SPARC_INSN_BYTES;
+        }
 
       /* If the .got section is more than 0x1000 bytes, we add
 	 0x1000 to the value of _GLOBAL_OFFSET_TABLE_, so that 13
-	 bit relocations have a greater chance of working.
-
-	 FIXME: Make this optimization work for 64-bit too.  */
+	 bit relocations have a greater chance of working.  */
       if (htab->elf.sgot->size >= 0x1000
 	  && elf_hash_table (info)->hgot->root.u.def.value == 0)
 	elf_hash_table (info)->hgot->root.u.def.value = 0x1000;
