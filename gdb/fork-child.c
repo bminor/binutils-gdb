@@ -482,7 +482,7 @@ startup_inferior (int ntraps)
 
 	  case TARGET_WAITKIND_SIGNALLED:
 	    target_terminal_ours ();
-	    target_mourn_inferior (resume_ptid);
+	    target_mourn_inferior (event_ptid);
 	    error (_("During startup program terminated with signal %s, %s."),
 		   gdb_signal_to_name (ws.value.sig),
 		   gdb_signal_to_string (ws.value.sig));
@@ -490,7 +490,7 @@ startup_inferior (int ntraps)
 
 	  case TARGET_WAITKIND_EXITED:
 	    target_terminal_ours ();
-	    target_mourn_inferior (resume_ptid);
+	    target_mourn_inferior (event_ptid);
 	    if (ws.value.integer)
 	      error (_("During startup program exited with code %d."),
 		     ws.value.integer);

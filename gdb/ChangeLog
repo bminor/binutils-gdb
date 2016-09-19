@@ -1,3 +1,9 @@
+2016-09-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* fork-inferior.c (startup_inferior): Pass 'event_ptid' instead of
+	'resume_ptid' to 'target_mourn_inferior'.  Fix regression
+	introduced by my last commit.
+
 2016-09-19  Pedro Alves  <palves@redhat.com>
 
 	* common/gdb_locale.h [!ENABLE_NLS] (gettext, dgettext, dcgettext,
