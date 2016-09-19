@@ -1,3 +1,10 @@
+2016-09-19  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_locale.h [!ENABLE_NLS] (gettext, dgettext, dcgettext,
+	textdomain, bindtextdomain): Delete macros.
+	* main.c (captured_main) [!ENABLE_NLS]: Skip bintextdomain and
+	textdomain calls.
+
 2016-09-19  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* darwin-nat.c (darwin_kill_inferior): Adjusting call to
