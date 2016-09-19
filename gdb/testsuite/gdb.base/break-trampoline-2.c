@@ -13,18 +13,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* Shared library entry points.  */
-extern int foo (void);
-extern int bar (void);
-
-/* Defined in break-trampoline-2.c.  */
-extern int call_static_bar (void);
+static int
+bar (void)
+{
+  return 1; /* in static */
+}
 
 int
-main (void)
+call_static_bar (void)
 {
-  foo ();
-  bar ();
-  call_static_bar ();
-  return 0;
+  return bar ();
 }

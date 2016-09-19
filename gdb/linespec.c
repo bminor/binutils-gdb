@@ -3671,10 +3671,26 @@ name_is_plt (const char *name)
   return 0;
 }
 
-/* A helper function to classify a minimal_symbol_type according to
-   priority.  */
+/* Classes of minimal symbols.  The order of the values matters:
+   Static symbols go first as we always add them.  Trampoline symbols
+   are ignored if we find extern symbols, so trampolines go last.  See
+   search_minsyms_for_name.  */
 
-static int
+enum msym_class
+{
+  /* Static symbols.  */
+  MSYM_CLASS_STATIC,
+
+  /* Extern symbols.  */
+  MSYM_CLASS_EXTERN,
+
+  /* Trampolines.  */
+  MSYM_CLASS_TRAMPOLINE,
+};
+
+/* A helper function to classify a minimal_symbol_type.  */
+
+static enum msym_class
 classify_mtype (enum minimal_symbol_type t)
 {
   switch (t)
@@ -3682,20 +3698,18 @@ classify_mtype (enum minimal_symbol_type t)
     case mst_file_text:
     case mst_file_data:
     case mst_file_bss:
-      /* Intermediate priority.  */
-      return 1;
-
-    case mst_solib_trampoline:
-      /* Lowest priority.  */
-      return 2;
+      return MSYM_CLASS_STATIC;
 
     default:
-      /* Highest priority.  */
-      return 0;
+      return MSYM_CLASS_EXTERN;
+
+    case mst_solib_trampoline:
+      return MSYM_CLASS_TRAMPOLINE;
     }
 }
 
-/* Callback for qsort that sorts symbols by priority.  */
+/* Callback for qsort that sorts minimal symbols by class.  See
+   search_minsyms_for_name.  */
 
 static int
 compare_msyms (const void *a, const void *b)
@@ -3705,7 +3719,7 @@ compare_msyms (const void *a, const void *b)
   enum minimal_symbol_type ta = MSYMBOL_TYPE (moa->minsym);
   enum minimal_symbol_type tb = MSYMBOL_TYPE (mob->minsym);
 
-  return classify_mtype (ta) - classify_mtype (tb);
+  return (int) classify_mtype (ta) - (int) classify_mtype (tb);
 }
 
 /* Callback for iterate_over_minimal_symbols that adds the symbol to
@@ -3827,26 +3841,28 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
 
     if (!VEC_empty (bound_minimal_symbol_d, local.msyms))
       {
-	int classification;
 	int ix;
 	bound_minimal_symbol_d *item;
+	int any_extern = 0;
 
 	qsort (VEC_address (bound_minimal_symbol_d, local.msyms),
 	       VEC_length (bound_minimal_symbol_d, local.msyms),
 	       sizeof (bound_minimal_symbol_d),
 	       compare_msyms);
 
-	/* Now the minsyms are in classification order.  So, we walk
-	   over them and process just the minsyms with the same
-	   classification as the very first minsym in the list.  */
-	item = VEC_index (bound_minimal_symbol_d, local.msyms, 0);
-	classification = classify_mtype (MSYMBOL_TYPE (item->minsym));
-
+	/* Now the minsyms are in classification order.  We walk over
+	   them and if we see an extern symbol, we ignore trampoline
+	   symbols.  Static symbols are always added which is why they
+	   are sorted first.  */
 	for (ix = 0;
 	     VEC_iterate (bound_minimal_symbol_d, local.msyms, ix, item);
 	     ++ix)
 	  {
-	    if (classify_mtype (MSYMBOL_TYPE (item->minsym)) != classification)
+	    enum msym_class cls = classify_mtype (MSYMBOL_TYPE (item->minsym));
+
+	    if (cls == MSYM_CLASS_EXTERN)
+	      any_extern = 1;
+	    else if (cls == MSYM_CLASS_TRAMPOLINE && any_extern)
 	      break;
 
 	    VEC_safe_push (bound_minimal_symbol_d,

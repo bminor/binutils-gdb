@@ -18,3 +18,9 @@ foo (void)
 {
   return 0; /* in dso */
 }
+
+int
+bar (void)
+{
+  return 0; /* in dso */
+}

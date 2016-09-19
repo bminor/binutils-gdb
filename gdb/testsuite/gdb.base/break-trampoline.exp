@@ -20,18 +20,26 @@
 #   library is loaded.  Instead the foo@plt location is replaced by
 #   the "foo" function in the shared library.
 #
+# - If there's both a static "foo" function in the program, and a
+#   "foo" extern function in a shared library, "break foo" before the
+#   shared library is loaded should set two locations: one in the
+#   static function, and another in foo@plt.  Once the shared library
+#   is loaded, we should replace the plt location with the real foo
+#   function location, and keep the "foo" static function location.
+
 if { [skip_shlib_tests] } {
     return 0
 }
 
-standard_testfile break-trampoline.c break-trampoline-solib.c
+standard_testfile break-trampoline.c break-trampoline-2.c break-trampoline-solib.c
 set exec_src ${srcdir}/${subdir}/${srcfile}
-set lib_src ${srcdir}/${subdir}/${srcfile2}
+set exec_src2 ${srcdir}/${subdir}/${srcfile2}
+set lib_src ${srcdir}/${subdir}/${srcfile3}
 
 # Test both C and C++.
 
 proc do_test {lang} {
-    global exec_src lib_src binfile gdb_prompt
+    global exec_src exec_src2 lib_src binfile gdb_prompt
     global hex decimal
 
     set lib [standard_output_file break-trampoline-solib-$lang.so]
@@ -45,7 +53,7 @@ proc do_test {lang} {
     }
 
     if { [gdb_compile_shlib ${lib_src} ${lib} $lib_opts] != ""
-	 || [gdb_compile ${exec_src} ${binfile} executable $exec_opts] != ""} {
+	 || [gdb_compile "${exec_src} ${exec_src2}" ${binfile} executable $exec_opts] != ""} {
 	untested "Could not compile $lib or $binfile."
 	return -1
     }
@@ -55,13 +63,19 @@ proc do_test {lang} {
 
     if {$lang == "c++"} {
 	set foo_plt "foo()@plt"
+	set bar_plt "bar()@plt"
 	set foo_sym "foo()"
+	set bar_sym "bar()"
     } else {
 	set foo_plt "foo@plt"
+	set bar_plt "bar@plt"
 	set foo_sym "foo"
+	set bar_sym "bar"
     }
     set foo_plt_re [string_to_regexp $foo_plt]
+    set bar_plt_re [string_to_regexp $bar_plt]
     set foo_sym_re [string_to_regexp $foo_sym]
+    set bar_sym_re [string_to_regexp $bar_sym]
 
     with_test_prefix "set break before run" {
 	clean_restart ${binfile}
@@ -91,6 +105,70 @@ proc do_test {lang} {
 	    }
 	    -re "breakpoint${ws}${any}y${any}in ${foo_sym_re} at ${any}${lib_src}:${decimal}\r\n.*hit 1 time.*$gdb_prompt $" {
 		pass $test
+	    }
+	}
+    }
+
+    # Similar, but run to bar instead of foo.  There's a "bar" static
+    # function in the program, which should also get a location.
+    with_test_prefix "set break before run, with static function" {
+	clean_restart ${binfile}
+	gdb_load_shlib ${lib}
+
+	gdb_test "break bar" "Breakpoint 1 .*2 locations.*"
+
+	set test "info breakpoints before run"
+	set plt_count 0
+	set static_count 0
+	gdb_test_multiple "info breakpoints" $test {
+	    -re "${ws}y${ws}${any}<${bar_plt_re}>\r\n" {
+		incr plt_count
+		exp_continue
+	    }
+	    -re "${ws}y${ws}${any} in ${bar_sym_re} at ${any}${exec_src2}:${decimal}\r\n" {
+		incr static_count
+		exp_continue
+	    }
+	    -re "$gdb_prompt $" {
+		gdb_assert \
+		    {$plt_count == 1 && $static_count == 1} \
+		    $test
+	    }
+	}
+
+	gdb_run_cmd
+	set test "run to bar"
+	gdb_test_multiple "" $test {
+	    -re "bar \\(\\) at ${any}${lib_src}:${decimal}\r\n.*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+
+	set test "info breakpoints, bar resolved"
+	set plt_count 0
+	set static_count 0
+	set extern_count 0
+	gdb_test_multiple "info breakpoints" $test {
+	    -re "${ws}y${ws}${any}<${bar_plt_re}>\r\n" {
+		incr plt_count
+		exp_continue
+	    }
+	    -re "${ws}y${ws}${any} in ${bar_sym_re} at ${any}${exec_src2}:${decimal}\r\n" {
+		incr static_count
+		exp_continue
+	    }
+	    -re "${ws}y${ws}${any} in ${bar_sym_re} at ${any}${lib_src}:${decimal}\r\n" {
+		incr extern_count
+		exp_continue
+	    }
+	    -re "$gdb_prompt $" {
+		if {$plt_count > 0} {
+		    fail "$test (PR 17201)"
+		} else {
+		    gdb_assert \
+			{$static_count == 1 && $extern_count == 1} \
+			$test
+		}
 	    }
 	}
     }
