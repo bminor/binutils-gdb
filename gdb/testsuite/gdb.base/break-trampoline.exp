@@ -1,0 +1,162 @@
+# Copyright 2016 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Exercise various corner cases around plt symbols:
+#
+# - Make sure that setting a breakpoint on "foo" in a shared library
+#   does not end up with a location set in foo@plt if the shared
+#   library is loaded.  Instead the foo@plt location is replaced by
+#   the "foo" function in the shared library.
+#
+if { [skip_shlib_tests] } {
+    return 0
+}
+
+standard_testfile break-trampoline.c break-trampoline-solib.c
+set exec_src ${srcdir}/${subdir}/${srcfile}
+set lib_src ${srcdir}/${subdir}/${srcfile2}
+
+# Test both C and C++.
+
+proc do_test {lang} {
+    global exec_src lib_src binfile gdb_prompt
+    global hex decimal
+
+    set lib [standard_output_file break-trampoline-solib-$lang.so]
+    set lib_opts [list debug $lang]
+
+    set binfile [standard_output_file break-trampoline-$lang]
+    set exec_opts [list debug $lang shlib=${lib}]
+
+    if [get_compiler_info] {
+	return -1
+    }
+
+    if { [gdb_compile_shlib ${lib_src} ${lib} $lib_opts] != ""
+	 || [gdb_compile ${exec_src} ${binfile} executable $exec_opts] != ""} {
+	untested "Could not compile $lib or $binfile."
+	return -1
+    }
+
+    set any "\[^\r\n\]*"
+    set ws "\[ \t\]*"
+
+    if {$lang == "c++"} {
+	set foo_plt "foo()@plt"
+	set foo_sym "foo()"
+    } else {
+	set foo_plt "foo@plt"
+	set foo_sym "foo"
+    }
+    set foo_plt_re [string_to_regexp $foo_plt]
+    set foo_sym_re [string_to_regexp $foo_sym]
+
+    with_test_prefix "set break before run" {
+	clean_restart ${binfile}
+	gdb_load_shlib ${lib}
+
+	gdb_test "break foo" "Breakpoint 1 at $hex"
+
+	set test "info breakpoints before run"
+	gdb_test_multiple "info breakpoints" $test {
+	    -re "breakpoint${any}<${foo_plt_re}>\r\n$gdb_prompt $" {
+		pass $test
+	    }
+	}
+
+	gdb_run_cmd
+	set test "run to foo"
+	gdb_test_multiple "" $test {
+	    -re "foo \\(\\) at ${any}${lib_src}:${decimal}\r\n.*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+
+	set test "info breakpoints, foo resolved"
+	gdb_test_multiple "info breakpoints" $test {
+	    -re "${foo_plt_re}.*$gdb_prompt $" {
+		fail "$test (PR 17201)"
+	    }
+	    -re "breakpoint${ws}${any}y${any}in ${foo_sym_re} at ${any}${lib_src}:${decimal}\r\n.*hit 1 time.*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+    }
+
+    # Test that setting a breakpoint on the plt symbol directly does
+    # not end up resolved to the text symbol in the dso.
+    with_test_prefix "set breat at plt before run" {
+	clean_restart ${binfile}
+	gdb_load_shlib ${lib}
+
+	gdb_test "break ${foo_plt}" "Breakpoint 1 at $hex"
+
+	set test "info breakpoints before run"
+	gdb_test_multiple "info breakpoints" $test {
+	    -re "breakpoint${any}<$foo_plt_re>\r\n$gdb_prompt $" {
+		pass $test
+	    }
+	}
+
+	set test "run to foo@plt"
+	gdb_run_cmd
+	gdb_test_multiple "" $test {
+	    -re "in ${foo_plt_re}.*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+
+	set test "info breakpoints after run"
+	gdb_test_multiple "info breakpoints" $test {
+	    -re "breakpoint${any}<${foo_plt_re}>\r\n.*hit 1 time.*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+    }
+
+    with_test_prefix "set break after run" {
+	clean_restart ${binfile}
+	gdb_load_shlib ${lib}
+
+	if ![runto_main] {
+	    return 0
+	}
+
+	# Set up breakpoints.
+	set test "break foo"
+	gdb_test_multiple "break foo" $test {
+	    -re "2 locations.*$gdb_prompt $" {
+		fail "$test (PR 17201)"
+	    }
+	    -re "Breakpoint 2 at $hex: file .*$lib_src, line.*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+
+	set test "info breakpoints"
+	gdb_test_multiple "info breakpoints" $test {
+	    -re "${foo_plt_re}.*$gdb_prompt $" {
+		fail "$test (PR 17201)"
+	    }
+	    -re "breakpoint${any} in ${foo_sym_re} at ${any}$lib_src:${any}\r\n$gdb_prompt $" {
+		pass $test
+	    }
+	}
+    }
+}
+
+foreach_with_prefix language {c c++} {
+    do_test $language
+}

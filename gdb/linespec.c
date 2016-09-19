@@ -3651,9 +3651,25 @@ struct collect_minsyms
   /* The list_mode setting from the initial call.  */
   int list_mode;
 
+  /* If WANT_TRAMPOLINE is set, ignore mst_text @plt symbols, thus
+     collecting only the corresponding mst_solib_trampoline
+     symbol.  */
+  int want_trampoline;
+
   /* The resulting symbols.  */
   VEC (bound_minimal_symbol_d) *msyms;
 };
+
+static int
+name_is_plt (const char *name)
+{
+  size_t len = strlen (name);
+
+  if (len > 4 && strcmp (name + len - 4, "@plt") == 0)
+    return 1;
+
+  return 0;
+}
 
 /* A helper function to classify a minimal_symbol_type according to
    priority.  */
@@ -3700,6 +3716,11 @@ add_minsym (struct minimal_symbol *minsym, void *d)
 {
   struct collect_minsyms *info = (struct collect_minsyms *) d;
   bound_minimal_symbol_d mo;
+
+  if (info->want_trampoline
+      && MSYMBOL_TYPE (minsym) == mst_text
+      && name_is_plt (MSYMBOL_LINKAGE_NAME (minsym)))
+    return;
 
   mo.minsym = minsym;
   mo.objfile = info->objfile;
@@ -3767,6 +3788,7 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
   local.funfirstline = info->state->funfirstline;
   local.list_mode = info->state->list_mode;
   local.symtab = symtab;
+  local.want_trampoline = !name_is_plt (name);
 
   cleanup = make_cleanup (VEC_cleanup (bound_minimal_symbol_d), &local.msyms);
 
