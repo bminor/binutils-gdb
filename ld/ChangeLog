@@ -1,6 +1,6 @@
 2016-09-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* ld/ld.texinfo (Input Section Basics): Expand the description of
+	* ld.texinfo (Input Section Basics): Expand the description of
 	EXCLUDE_FILE.
 
 2016-09-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
