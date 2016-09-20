@@ -1,3 +1,8 @@
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldgram.y: Rename file_NAME_list to section_NAME_list
+	throughout.
+
 2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
 	    Andrew Waterman <andrew@sifive.com>
 
