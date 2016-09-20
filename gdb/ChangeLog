@@ -1,3 +1,8 @@
+2016-09-20  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (ppc_process_record_op31): Fix record of Store String
+	Word instructions.
+
 2016-09-06  Pedro Alves  <palves@redhat.com>
 
 	* top.c (wait_sync_command_done): Don't assume current_ui doesn't
