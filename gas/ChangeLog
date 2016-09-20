@@ -1,7 +1,99 @@
-2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+2016-09-16  Peter Bergner <bergner@vnet.ibm.com>
+
+	Apply from master.
+	2016-09-14  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <slbiag, cpabort> New tests.
+	<addex., brd, brh, brw, lwzmx, nandxor, rldixor, setbool,
+	xor3, cp_abort, copy_first, paste, paste_last, sync>: Remove tests.
+	<copy, paste.>: Update tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
+2016-06-29  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2016-06-29  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2016-06-29  Maciej W. Rozycki  <macro@imgtec.com>
 
 	Backport from master
-	2016-06-03  Peter Bergner <bergner@vnet.ibm.com>
+	2016-04-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (code_option_type): New enum.
+	(parse_code_option): Return status indicating option type.
+	(s_mipsset): Update `parse_code_option' call site accordingly.
+	Always set register sizes from the ISA with ISA overrides.
+	(s_module): Update `parse_code_option' call site.
+	* testsuite/gas/mips/isa-override-1.d: New test.
+	* testsuite/gas/mips/micromips@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips1@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r3@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r5@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips32r6@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r2@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r3@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r5@isa-override-1.d: New test.
+	* testsuite/gas/mips/mips64r6@isa-override-1.d: New test.
+	* testsuite/gas/mips/r3000@isa-override-1.d: New test.
+	* testsuite/gas/mips/r3900@isa-override-1.d: New test.
+	* testsuite/gas/mips/r5900@isa-override-1.d: New test.
+	* testsuite/gas/mips/octeon@isa-override-1.d: New test.
+	* testsuite/gas/mips/octeon3@isa-override-1.d: New test.
+	* testsuite/gas/mips/isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips1@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips2@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r2@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r3@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r5@isa-override-2.l: New list test.
+	* testsuite/gas/mips/mips32r6@isa-override-2.l: New list test.
+	* testsuite/gas/mips/r3000@isa-override-2.l: New list test.
+	* testsuite/gas/mips/r3900@isa-override-2.l: New list test.
+	* testsuite/gas/mips/octeon3@isa-override-2.l: New list test.
+	* testsuite/gas/mips/octeon3@isa-override-1.l: New stderr
+	output.
+	* testsuite/gas/mips/isa-override-1.s: New test source.
+	* testsuite/gas/mips/r5900@isa-override-1.s: New test source.
+	* testsuite/gas/mips/isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips1@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips2@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r2@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r3@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r5@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips32r6@isa-override-2.s: New test source.
+	* testsuite/gas/mips/r3000@isa-override-2.s: New test source.
+	* testsuite/gas/mips/r3900@isa-override-2.s: New test source.
+	* testsuite/gas/mips/octeon3@isa-override-2.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	Backport from master
+	2016-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* write.c: Remove "libbfd.h" inclusion.
+
+2016-06-23  Peter Bergner  <bergner@vnet.ibm.com>
+
+	Apply from master.
+	2016-06-22  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <brd, brh, brw, mffs, mffs., mffsce,
+	mffscdrn, mffscdrni, mffscrn, mffscrni, mffsl, nandxor, rldixor,
+	setbool, xor3>: New tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
+2016-06-03  Peter Bergner  <bergner@vnet.ibm.com>
+
+	Backport from master
+	2016-06-03  Peter Bergner  <bergner@vnet.ibm.com>
 
 	PR binutils/20196
 	* gas/testsuite/gas/ppc/e6500.s <lbarx, lharx, lwarx, ldarx,
@@ -13,10 +105,10 @@
 	stdcx.>: Add tests.
 	* gas/testsuite/gas/ppc/power4.d: Likewise.
 
-2016-06-01  Peter Bergner <bergner@vnet.ibm.com>
+2016-06-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	Backport from master
-	2016-05-26  Peter Bergner <bergner@vnet.ibm.com>
+	2016-05-26  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* testsuite/gas/ppc/altivec3.d <vmsumudm>: Add test.
 	* testsuite/gas/ppc/altivec3.s: Likewise.

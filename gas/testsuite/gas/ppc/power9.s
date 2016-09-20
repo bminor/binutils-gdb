@@ -312,6 +312,7 @@ power9:
 	addpcis     7,-0x8000
 	subpcis     7,0x8000
 	slbsync
+	slbiag      10
 	slbieg      10,11
 	slbmfee     3,4
 	slbmfee     3,4,0
@@ -325,23 +326,16 @@ power9:
 	tlbiel      3
 	tlbiel      3,0,0,0,0
 	tlbiel      3,4,3,1,1
-	copy        12,13,0
-	copy_first  12,13
-	copy        12,13,1
-	paste       10,11,0
-	paste       10,11
-	paste.      10,11,1
-	paste_last  10,11
-	cp_abort
+	copy        12,13
+	paste.      10,11
+	cpabort
 	hwsync
 	sync
-	sync        0,0x0
+	sync        0
 	lwsync
-	sync        1,0x0
+	sync        1
 	ptesync
-	sync        2,0x0
-	sync	    0,0x7
-	sync	    1,0x8
+	sync        2
 	ldat        20,0,0x0
 	ldat        20,10,0x1c
 	lwat        21,0,0x0
@@ -354,8 +348,6 @@ power9:
 	rmieg       30
 	ldmx        10,0,15
 	ldmx        10,3,15
-	lwzmx       11,0,16
-	lwzmx       11,3,16
 	stop
 	wait
 	wait        0
@@ -378,6 +370,13 @@ power9:
 	addex       11,12,13,0
 	addex       11,12,13,1
 	addex       11,12,13,2
-	addex.      21,22,23,0
-	addex.      21,22,23,1
-	addex.      21,22,23,2
+	mffs        25
+	mffs.       25
+	mffsce      26
+	mffscdrn    27,20
+	mffscdrni   28,0
+	mffscdrni   28,7
+	mffscrn     29,21
+	mffscrni    30,0
+	mffscrni    30,3
+	mffsl       31
