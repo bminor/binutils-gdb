@@ -1,5 +1,34 @@
 2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ldlang.h (struct lang_wild_statement_struct): Add
+	exclude_name_list field.
+	* ldlang.c (walk_wild_file_in_exclude_list): New function.
+	(walk_wild_consider_section): Use new
+	walk_wild_file_in_exclude_list function.
+	(walk_wild_file): Add call to walk_wild_file_in_exclude_list.
+	(print_wild_statement): Print new exclude_name_list field.
+	(lang_add_wild): Initialise new exclude_name_list field.
+	* testsuite/ld-scripts/exclude-file-1.d: New file.
+	* testsuite/ld-scripts/exclude-file-1.map: New file.
+	* testsuite/ld-scripts/exclude-file-1.t: New file.
+	* testsuite/ld-scripts/exclude-file-2.d: New file.
+	* testsuite/ld-scripts/exclude-file-2.map: New file.
+	* testsuite/ld-scripts/exclude-file-2.t: New file.
+	* testsuite/ld-scripts/exclude-file-3.d: New file.
+	* testsuite/ld-scripts/exclude-file-3.map: New file.
+	* testsuite/ld-scripts/exclude-file-3.t: New file.
+	* testsuite/ld-scripts/exclude-file-4.d: New file.
+	* testsuite/ld-scripts/exclude-file-4.map: New file.
+	* testsuite/ld-scripts/exclude-file-4.t: New file.
+	* testsuite/ld-scripts/exclude-file-a.s: New file.
+	* testsuite/ld-scripts/exclude-file-b.s: New file.
+	* testsuite/ld-scripts/exclude-file.exp: New file.
+	* ld.texinfo (Input Section Basics): Update description of
+	EXCLUDE_FILE to cover the new features.
+	* NEWS: Mention new EXCLUDE_FILE usage.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/lib/ld-lib.exp (run_dump_test): Use object file names
 	based on the original source file name.
 	* testsuite/ld-discard/extern.d: Update object file names.

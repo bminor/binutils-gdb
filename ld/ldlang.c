@@ -223,6 +223,43 @@ unique_section_p (const asection *sec,
 
 /* Generic traversal routines for finding matching sections.  */
 
+/* Return true if FILE matches a pattern in EXCLUDE_LIST, otherwise return
+   false.  */
+
+static bfd_boolean
+walk_wild_file_in_exclude_list (struct name_list *exclude_list,
+                                lang_input_statement_type *file)
+{
+  struct name_list *list_tmp;
+
+  for (list_tmp = exclude_list;
+       list_tmp;
+       list_tmp = list_tmp->next)
+    {
+      char *p = archive_path (list_tmp->name);
+
+      if (p != NULL)
+	{
+	  if (input_statement_is_archive_path (list_tmp->name, p, file))
+	    return TRUE;
+	}
+
+      else if (name_match (list_tmp->name, file->filename) == 0)
+	return TRUE;
+
+      /* FIXME: Perhaps remove the following at some stage?  Matching
+	 unadorned archives like this was never documented and has
+	 been superceded by the archive:path syntax.  */
+      else if (file->the_bfd != NULL
+	       && file->the_bfd->my_archive != NULL
+	       && name_match (list_tmp->name,
+			      file->the_bfd->my_archive->filename) == 0)
+	return TRUE;
+    }
+
+  return FALSE;
+}
+
 /* Try processing a section against a wildcard.  This just calls
    the callback unless the filename exclusion list is present
    and excludes the file.  It's hardly ever present so this
@@ -236,33 +273,9 @@ walk_wild_consider_section (lang_wild_statement_type *ptr,
 			    callback_t callback,
 			    void *data)
 {
-  struct name_list *list_tmp;
-
   /* Don't process sections from files which were excluded.  */
-  for (list_tmp = sec->spec.exclude_name_list;
-       list_tmp;
-       list_tmp = list_tmp->next)
-    {
-      char *p = archive_path (list_tmp->name);
-
-      if (p != NULL)
-	{
-	  if (input_statement_is_archive_path (list_tmp->name, p, file))
-	    return;
-	}
-
-      else if (name_match (list_tmp->name, file->filename) == 0)
-	return;
-
-      /* FIXME: Perhaps remove the following at some stage?  Matching
-	 unadorned archives like this was never documented and has
-	 been superceded by the archive:path syntax.  */
-      else if (file->the_bfd != NULL
-	       && file->the_bfd->my_archive != NULL
-	       && name_match (list_tmp->name,
-			      file->the_bfd->my_archive->filename) == 0)
-	return;
-    }
+  if (walk_wild_file_in_exclude_list (sec->spec.exclude_name_list, file))
+    return;
 
   (*callback) (ptr, sec, s, ptr->section_flag_list, file, data);
 }
@@ -860,6 +873,9 @@ walk_wild_file (lang_wild_statement_type *s,
 		callback_t callback,
 		void *data)
 {
+  if (walk_wild_file_in_exclude_list (s->exclude_name_list, f))
+    return;
+
   if (f->the_bfd == NULL
       || !bfd_check_format (f->the_bfd, bfd_archive))
     walk_wild_section (s, f, callback, data);
@@ -4419,6 +4435,15 @@ print_wild_statement (lang_wild_statement_type *w,
 
   print_space ();
 
+  if (w->exclude_name_list)
+    {
+      name_list *tmp;
+      minfo ("EXCLUDE_FILE(%s", w->exclude_name_list->name);
+      for (tmp = w->exclude_name_list->next; tmp; tmp = tmp->next)
+        minfo (" %s", tmp->name);
+      minfo (") ");
+    }
+
   if (w->filenames_sorted)
     minfo ("SORT(");
   if (w->filename != NULL)
@@ -7073,11 +7098,13 @@ lang_add_wild (struct wildcard_spec *filespec,
   new_stmt->filename = NULL;
   new_stmt->filenames_sorted = FALSE;
   new_stmt->section_flag_list = NULL;
+  new_stmt->exclude_name_list = NULL;
   if (filespec != NULL)
     {
       new_stmt->filename = filespec->name;
       new_stmt->filenames_sorted = filespec->sorted == by_name;
       new_stmt->section_flag_list = filespec->section_flag_list;
+      new_stmt->exclude_name_list = filespec->exclude_name_list;
     }
   new_stmt->section_list = section_list;
   new_stmt->keep_sections = keep_sections;

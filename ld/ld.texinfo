@@ -4192,14 +4192,24 @@ include all input @samp{.text} sections, you would write:
 @end smallexample
 @noindent
 Here the @samp{*} is a wildcard which matches any file name.  To exclude a list
+@cindex EXCLUDE_FILE
 of files from matching the file name wildcard, EXCLUDE_FILE may be used to
 match all files except the ones specified in the EXCLUDE_FILE list.  For
 example:
 @smallexample
+EXCLUDE_FILE (*crtend.o *otherfile.o) *(.ctors)
+@end smallexample
+@noindent
+will cause all .ctors sections from all files except @file{crtend.o}
+and @file{otherfile.o} to be included.  The EXCLUDE_FILE can also be
+placed inside the section list, for example:
+@smallexample
 *(EXCLUDE_FILE (*crtend.o *otherfile.o) .ctors)
 @end smallexample
-will cause all .ctors sections from all files except @file{crtend.o} and
-@file{otherfile.o} to be included.
+@noindent
+The result of this is identically to the previous example.  Supporting
+two syntaxes for EXCLUDE_FILE is useful if the section list contains
+more than one section, as described below.
 
 There are two ways to include more than one section:
 @smallexample
@@ -4214,8 +4224,9 @@ they are found in the linker input.  In the second example, all
 @samp{.text} input sections will appear first, followed by all
 @samp{.rdata} input sections.
 
-When using EXCLUDE_FILE with more than one section, the exclusion only
-applies to the section immediately following, for example:
+When using EXCLUDE_FILE with more than one section, if the exclusion
+is within the section list then the exclusion only applies to the
+immediately following section, for example:
 @smallexample
 *(EXCLUDE_FILE (*somefile.o) .text .rdata)
 @end smallexample
@@ -4224,9 +4235,16 @@ will cause all @samp{.text} sections from all files except
 @file{somefile.o} to be included, while all @samp{.rdata} sections
 from all files, including @file{somefile.o}, will be included.  To
 exclude the @samp{.rdata} sections from @file{somefile.o} the example
-should be modified to:
+could be modified to:
 @smallexample
 *(EXCLUDE_FILE (*somefile.o) .text EXCLUDE_FILE (*somefile.o) .rdata)
+@end smallexample
+@noindent
+Alternatively, placing the EXCLUDE_FILE outside of the section list,
+before the input file selection, will cause the exclusion to apply for
+all sections.  Thus the previous example can be rewritten as:
+@smallexample
+EXCLUDE_FILE (*somefile.o) *(.text .rdata)
 @end smallexample
 
 You can specify a file name to include sections from a particular file.

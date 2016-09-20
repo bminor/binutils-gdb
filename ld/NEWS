@@ -1,5 +1,9 @@
 -*- text -*-
 
+* The EXCLUDE_FILE linker script construct can now be applied outside of the
+  section list in order for the exclusions to apply over all input sections in
+  the list.
+
 * Add support for the RISC-V architecture.
 
 * The command line option --no-eh-frame-hdr can now be used in ELF based
