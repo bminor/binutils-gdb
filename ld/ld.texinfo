@@ -4214,6 +4214,21 @@ they are found in the linker input.  In the second example, all
 @samp{.text} input sections will appear first, followed by all
 @samp{.rdata} input sections.
 
+When using EXCLUDE_FILE with more than one section, the exclusion only
+applies to the section immediately following, for example:
+@smallexample
+*(EXCLUDE_FILE (*somefile.o) .text .rdata)
+@end smallexample
+@noindent
+will cause all @samp{.text} sections from all files except
+@file{somefile.o} to be included, while all @samp{.rdata} sections
+from all files, including @file{somefile.o}, will be included.  To
+exclude the @samp{.rdata} sections from @file{somefile.o} the example
+should be modified to:
+@smallexample
+*(EXCLUDE_FILE (*somefile.o) .text EXCLUDE_FILE (*somefile.o) .rdata)
+@end smallexample
+
 You can specify a file name to include sections from a particular file.
 You would do this if one or more of your files contain special data that
 needs to be at a particular location in memory.  For example:
