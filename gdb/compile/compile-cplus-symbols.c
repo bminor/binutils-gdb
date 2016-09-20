@@ -169,7 +169,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
     }
   else
     {
-      struct template_defn *template_decl = NULL;
+      struct function_template_defn *template_decl = NULL;
       /* Squash compiler warning.  */
       gcc_cp_symbol_kind_flags kind = GCC_CP_FLAG_BASE;
       CORE_ADDR addr = 0;
@@ -238,20 +238,19 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 
 		/* Find the template definition, defining the template,
 		   if needed.  */
-		template_decl = find_template_defn (instance, tsym);
+		template_decl = find_function_template_defn (instance, tsym);
 		if (template_decl != NULL)
 		  {
 		    /* Construct the template specialization.  This will
 		       be used later.  */
-		    targs.n_elements = tsym->n_template_arguments;
+		    targs.n_elements = tsym->template_arguments->n_arguments;
 		    targs.kinds = XNEWVEC (char ,targs.n_elements);
 		    make_cleanup (xfree, targs.kinds);
-		    targs.elements = XNEWVEC (gcc_cp_template_arg,
-					      targs.n_elements);
+		    targs.elements = XNEWVEC (gcc_cp_template_arg, targs.n_elements);
 		    make_cleanup (xfree, targs.elements);
-
 		    enumerate_template_arguments (instance, &targs,
-						  template_decl, tsym);
+						  (struct template_defn *) template_decl,
+						  tsym->template_arguments);
 		  }
 	      }
 	  }

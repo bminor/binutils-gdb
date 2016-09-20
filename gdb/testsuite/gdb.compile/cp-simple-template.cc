@@ -125,6 +125,21 @@ const T** ret_test (void) { return 0; }
 template <typename T>
 T const* const* ret2_test (void) { return 0; }
 
+// Some simple class templates
+template <typename T1 = O, typename T2 = int, int V = 3>
+class classt
+{
+public:
+  classt (T1 v) : val1_ (v), val2_ (107) { }
+  T1 get1 (void) const { return val1_; }
+  T2 get2 (void) const { return val2_; }
+  int get3 (void) const { return V; }
+
+private:
+  T1 val1_;
+  T2 val2_;
+};
+
 int
 main (void)
 {
@@ -141,6 +156,15 @@ main (void)
   int mod_value = mod_test (i) + mod_test (cpci) + mod_test (cpi);
   const char** cp = ret_test<char> ();
   char const* const* ccp = ret2_test<char> ();
+
+  classt<> cddd (o);
+  classt<int> cdd (100);
+  classt<int, char> cd (101);
+  classt<int, char, 12> c (102);
+  int cvals = cddd.get1 () + cddd.get2 () + cddd.get3 ();
+  cvals += cdd.get1 () + cdd.get2 () + cdd.get3 ();
+  cvals += cd.get1 () + cd.get2 () + cd.get3 ();
+  cvals += c.get1 () + c.get2 () + c.get3 ();
 
   return mytemplate<int, 1> (0)
     + mytemplate<int, 1> ()

@@ -41,7 +41,7 @@ extern int debug_compile_cplus_types;
 extern int debug_compile_oracle;
 
 struct block;
-struct template_defn;
+struct function_template_defn;
 
 /* An object of this type holds state associated with a given
    compilation job.  */
@@ -105,8 +105,11 @@ struct compile_cplus_instance
 
   htab_t symbol_err_map;
 
-  /* A cache of template definitions.  */
-  htab_t template_defns;
+  /* A cache of function template definitions.  */
+  htab_t function_template_defns;
+
+  /* A cache of class template definitions.  */
+  htab_t class_template_defns;
 };
 
 /* A helper macro that takes a compile_c_instance and returns its
@@ -280,20 +283,21 @@ extern void
 /* Find the generic template definition for TSYM or NULL if none was
    found.  */
 
-extern struct template_defn *
-  find_template_defn (struct compile_cplus_instance *instance,
-		      struct template_symbol *tsym);
+extern struct function_template_defn *
+  find_function_template_defn (struct compile_cplus_instance *instance,
+			       struct template_symbol *tsym);
 
-/* Enumerate the template arguments of template DEFN into DEST.  */
+/* Enumerate the template arguments fo template DEFN into DEST.  */
 
 extern void
   enumerate_template_arguments (struct compile_cplus_instance *instance,
 				struct gcc_cp_template_args *dest,
-				const struct template_defn *templ_defn,
-				const struct template_symbol *tsymbol);
+				const struct template_defn *defn,
+				const struct template_argument_info *arg_info);
 
 /* Return the gcc_decl of the given generic template definition.  */
 
-extern gcc_decl get_template_decl (const struct template_defn *templ_defn);
+extern gcc_decl
+  get_template_decl (const struct function_template_defn *templ_defn);
 
 #endif /* GDB_COMPILE_INTERNAL_H */

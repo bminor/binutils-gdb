@@ -545,9 +545,9 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	{
 	  struct template_symbol *templ
 	    = (struct template_symbol *) function;
-	  struct symbol *sym = search_symbol_list (name,
-						   templ->n_template_arguments,
-						   templ->template_arguments);
+	  struct symbol *sym
+	    = search_symbol_list (name, templ->template_arguments->n_arguments,
+				  templ->template_arguments->arguments);
 
 	  if (sym != NULL)
 	    {

@@ -908,21 +908,8 @@ struct template_symbol
   /* Search name of the template (it's name sans parameters).  */
   char *search_name;
 
-  /* The number of template arguments.  */
-  int n_template_arguments;
-
-  /* The template arguments.  This is an array with
-     N_TEMPLATE_ARGUMENTS elements.  */
-  struct symbol **template_arguments;
-
-  /* Default argument values or NULL if none is known or defined.
-     Also an array with N_TEMPLATE_ARGUMENTS elements.
-     TEMPLATE_ARGUMENT_KINDS tells us which.  */
-  struct symbol **default_arguments;
-
-  /* The kind of arguments;  also an array with
-     N_TEMPLATE_ARGUMENTS elements.  */
-  enum template_argument_kinds *template_argument_kinds;
+  /* Information on template arguments.  */
+  struct template_argument_info *template_arguments;
 
   /* The template's linkage name.  */
   const char *linkage_name;
