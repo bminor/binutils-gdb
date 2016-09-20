@@ -620,6 +620,7 @@ proc run_dump_test { name {extra_options {}} } {
     set dumpfile tmpdir/dump.out
     set run_ld 0
     set run_objcopy 0
+    set objfile_names {}
     set opts(as) {}
     set opts(ld) {}
     set opts(ld_after_inputfiles) {}
@@ -666,6 +667,22 @@ proc run_dump_test { name {extra_options {}} } {
 		} else {
 		    lappend asflags {}
 		}
+
+                # Create the object file name based on nothing but the source
+                # file name.
+                set new_objfile \
+                    [concat tmpdir/[file rootname [file tail [lindex $opt_val 0]]].o]
+                # But, sometimes, we have the exact same source filename in
+                # different directories (foo/src.s bar/src.s) which would lead
+                # us to try and create two src.o files.  We detect this
+                # conflict here, and instead create src.o and src1.o.
+                set j 0
+                while { [lsearch $objfile_names $new_objfile] != -1 } {
+                    incr j
+                    set new_objfile \
+                        [concat tmpdir/[file rootname [file tail  [lindex $opt_val 0]]]${j}.o]
+                }
+		lappend objfile_names $new_objfile
 	    }
 	    default {
 		if [string length $opts($opt_name)] {
@@ -792,6 +809,7 @@ proc run_dump_test { name {extra_options {}} } {
     if { $opts(source) == "" } {
 	set sourcefiles [list ${file}.s]
 	set asflags [list ""]
+	set objfile_names [list tmpdir/[file tail ${file}].o]
     } else {
 	set sourcefiles {}
 	foreach sf $opts(source) {
@@ -826,7 +844,7 @@ proc run_dump_test { name {extra_options {}} } {
 	}
 	regsub "RUN_OBJCOPY" $sourceasflags "" sourceasflags
 
-	set objfile "tmpdir/dump$i.o"
+	set objfile [lindex $objfile_names $i]
 	catch "exec rm -f $objfile" exec_output
 	lappend objfiles $objfile
 	set cmd "$AS $ASFLAGS $opts(as) $sourceasflags -o $objfile $sourcefile"
@@ -1014,7 +1032,7 @@ proc run_dump_test { name {extra_options {}} } {
             }
         }
     } else {
-	set objfile "tmpdir/dump0.o"
+	set objfile [lindex $objfiles 0]
     }
 
     # We must not have expected failure if we get here.

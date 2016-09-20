@@ -1,5 +1,14 @@
 2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/lib/ld-lib.exp (run_dump_test): Use object file names
+	based on the original source file name.
+	* testsuite/ld-discard/extern.d: Update object file names.
+	* testsuite/ld-discard/start.d: Likewise.
+	* testsuite/ld-discard/static.d: Likewise.
+	* testsuite/ld-elf/orphan-8.map: Likewise.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Add
 	xc16x-*-elf to the list of targets that don't support -shared.
 
