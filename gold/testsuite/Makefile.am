@@ -3604,6 +3604,52 @@ arm_farcall_thumb_arm_5t.o: arm_farcall_thumb_arm.s
 
 MOSTLYCLEANFILES += arm_farcall_thumb_arm arm_farcall_thumb_arm_5t
 
+# Check handling of --target1-abs, --target1-rel and --target2 options
+
+check_SCRIPTS += arm_target1_abs.sh arm_target1_rel.sh \
+		 arm_target2_rel.sh arm_target2_abs.sh arm_target2_got_rel.sh
+check_DATA += arm_target1_abs.stdout arm_target1_rel.stdout \
+	      arm_target2_rel.stdout arm_target2_abs.stdout arm_target2_got_rel.stdout
+
+arm_target1_abs.stdout: arm_target1_abs
+	$(TEST_OBJDUMP) -s $< > $@
+
+arm_target1_abs: arm_target1.o ../ld-new
+	../ld-new --target1-abs --section-start .text=0x8000 -o $@ $<
+
+arm_target1_rel.stdout: arm_target1_rel
+	$(TEST_OBJDUMP) -s $< > $@
+
+arm_target1_rel: arm_target1.o ../ld-new
+	../ld-new --target1-rel --section-start .text=0x8000 -o $@ $<
+
+arm_target1.o: arm_target1.s
+	$(TEST_AS) -o $@ $<
+
+arm_target2_rel.stdout: arm_target2_rel
+	$(TEST_OBJDUMP) -s $< > $@
+
+arm_target2_rel: arm_target2.o ../ld-new
+	../ld-new --target2=rel --section-start .text=0x8000 -o $@ $<
+
+arm_target2_abs.stdout: arm_target2_abs
+	$(TEST_OBJDUMP) -s $< > $@
+
+arm_target2_abs: arm_target2.o ../ld-new
+	../ld-new --target2=abs --section-start .text=0x8000 -o $@ $<
+
+arm_target2_got_rel.stdout: arm_target2_got_rel
+	$(TEST_OBJDUMP) -s $< > $@
+
+arm_target2_got_rel: arm_target2.o ../ld-new
+	../ld-new --target2=got-rel --section-start .text=0x8000 --section-start .got=0x9000 -o $@ $<
+
+arm_target2.o: arm_target2.s
+	$(TEST_AS) -o $@ $<
+
+MOSTLYCLEANFILES += arm_target1_abs arm_target1_rel \
+		    arm_target2_rel arm_target2_abs arm_target2_got_rel
+
 endif DEFAULT_TARGET_ARM
 
 if DEFAULT_TARGET_AARCH64

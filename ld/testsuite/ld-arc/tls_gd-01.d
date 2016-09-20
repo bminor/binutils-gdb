@@ -2,6 +2,7 @@
 #as: -mcpu=arc700
 #ld: -shared
 #objdump: -d
+#xfail: arc*-*-elf*
 
 [^:]+:     file format elf32-littlearc
 

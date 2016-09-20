@@ -45,6 +45,7 @@
 #include "gdb/sim-sh.h"
 #include "language.h"
 #include "sh64-tdep.h"
+#include <algorithm>
 
 /* Information that is dependent on the processor variant.  */
 enum sh_abi
@@ -685,7 +686,7 @@ sh64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* If after_prologue returned a useful address, then use it.  Else
      fall back on the instruction skipping code.  */
   if (post_prologue_pc != 0)
-    return max (pc, post_prologue_pc);
+    return std::max (pc, post_prologue_pc);
   else
     return sh64_skip_prologue_hard_way (gdbarch, pc);
 }

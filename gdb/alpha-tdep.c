@@ -43,6 +43,7 @@
 #include "elf-bfd.h"
 
 #include "alpha-tdep.h"
+#include <algorithm>
 
 /* Instruction decoding.  The notations for registers, immediates and
    opcodes are the same as the one used in Compaq's Alpha architecture
@@ -721,7 +722,7 @@ alpha_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   post_prologue_pc = alpha_after_prologue (pc);
   if (post_prologue_pc != 0)
-    return max (pc, post_prologue_pc);
+    return std::max (pc, post_prologue_pc);
 
   /* Can't determine prologue from the symbol table, need to examine
      instructions.  */

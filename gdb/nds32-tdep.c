@@ -41,6 +41,8 @@
 #include "nds32-tdep.h"
 #include "elf/nds32.h"
 #include "opcode/nds32.h"
+#include <algorithm>
+
 #include "features/nds32.c"
 
 /* Simple macros for instruction analysis.  */
@@ -894,7 +896,7 @@ nds32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-	return max (pc, post_prologue_pc);
+	return std::max (pc, post_prologue_pc);
     }
 
   /* Can't determine prologue from the symbol table, need to examine

@@ -38,9 +38,6 @@ AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
-# See if we are building with C++, and substitute COMPILER.
-GDB_AC_BUILD_WITH_CXX
-
 # Dependency checking.
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])

@@ -1289,7 +1289,7 @@ pe_ILF_object_p (bfd * abfd)
 }
 
 static void
-pe_bfd_read_buildid(bfd *abfd)
+pe_bfd_read_buildid (bfd *abfd)
 {
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
@@ -1306,7 +1306,7 @@ pe_bfd_read_buildid(bfd *abfd)
 
   addr += extra->ImageBase;
 
-  /* Search for the section containing the DebugDirectory */
+  /* Search for the section containing the DebugDirectory.  */
   for (section = abfd->sections; section != NULL; section = section->next)
     {
       if ((addr >= section->vma) && (addr < (section->vma + section->size)))
@@ -1314,16 +1314,21 @@ pe_bfd_read_buildid(bfd *abfd)
     }
 
   if (section == NULL)
-    {
-      return;
-    }
-  else if (!(section->flags & SEC_HAS_CONTENTS))
-    {
-      return;
-    }
+    return;
+
+  if (!(section->flags & SEC_HAS_CONTENTS))
+    return;
 
   dataoff = addr - section->vma;
 
+  /* PR 20605: Make sure that the data is really there.  */
+  if (dataoff + size > section->size)
+    {
+      _bfd_error_handler (_("%B: Error: Debug Data ends beyond end of debug directory."),
+			  abfd);
+      return;
+    }
+  
   /* Read the whole section. */
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
@@ -1354,8 +1359,8 @@ pe_bfd_read_buildid(bfd *abfd)
                                               (file_ptr) idd.PointerToRawData,
                                               idd.SizeOfData, cvinfo))
             {
-              struct bfd_build_id* build_id = bfd_alloc(abfd,
-                         sizeof(struct bfd_build_id) + cvinfo->SignatureLength);
+              struct bfd_build_id* build_id = bfd_alloc (abfd,
+                         sizeof (struct bfd_build_id) + cvinfo->SignatureLength);
               if (build_id)
                 {
                   build_id->size = cvinfo->SignatureLength;

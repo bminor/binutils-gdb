@@ -2087,17 +2087,35 @@ proc switch_gdb_spawn_id {spawn_id} {
     set board_info($board,fileid) $spawn_id
 }
 
+# Clear the default spawn id.
+
+proc clear_gdb_spawn_id {} {
+    global gdb_spawn_id
+    global board board_info
+
+    unset -nocomplain gdb_spawn_id
+    set board [host_info name]
+    unset -nocomplain board_info($board,fileid)
+}
+
 # Run BODY with SPAWN_ID as current spawn id.
 
 proc with_spawn_id { spawn_id body } {
     global gdb_spawn_id
 
-    set saved_spawn_id $gdb_spawn_id
+    if [info exists gdb_spawn_id] {
+	set saved_spawn_id $gdb_spawn_id
+    }
+
     switch_gdb_spawn_id $spawn_id
 
     set code [catch {uplevel 1 $body} result]
 
-    switch_gdb_spawn_id $saved_spawn_id
+    if [info exists saved_spawn_id] {
+	switch_gdb_spawn_id $saved_spawn_id
+    } else {
+	clear_gdb_spawn_id
+    }
 
     if {$code == 1} {
 	global errorInfo errorCode
@@ -2935,7 +2953,8 @@ proc skip_hw_breakpoint_tests {} {
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
 	 || [istarget "arm*-*-*"]
-	 || [istarget "aarch64*-*-*"]} {
+	 || [istarget "aarch64*-*-*"]
+	 || [istarget "s390*-*-*"] } {
 	return 0
     }
 
@@ -4882,13 +4901,101 @@ proc rerun_to_main {} {
   }
 }
 
-# Print a message and return true if a test should be skipped
-# due to lack of floating point suport.
+# Return true if a test should be skipped due to lack of floating
+# point support or GDB can't fetch the contents from floating point
+# registers.
 
-proc gdb_skip_float_test { msg } {
+gdb_caching_proc gdb_skip_float_test {
     if [target_info exists gdb,skip_float_tests] {
-	verbose "Skipping test '$msg': no float tests."
 	return 1
+    }
+
+    # There is an ARM kernel ptrace bug that hardware VFP registers
+    # are not updated after GDB ptrace set VFP registers.  The bug
+    # was introduced by kernel commit 8130b9d7b9d858aa04ce67805e8951e3cb6e9b2f
+    # in 2012 and is fixed in e2dfb4b880146bfd4b6aa8e138c0205407cebbaf
+    # in May 2016.  In other words, kernels older than 4.6.3, 4.4.14,
+    # 4.1.27, 3.18.36, and 3.14.73 have this bug.
+    # This kernel bug is detected by check how does GDB change the
+    # program result by changing one VFP register.
+    if { [istarget "arm*-*-linux*"] } {
+
+	set compile_flags {debug nowarnings }
+
+	# Set up, compile, and execute a test program having VFP
+	# operations.
+	set src [standard_temp_file arm_vfp[pid].c]
+	set exe [standard_temp_file arm_vfp[pid].x]
+
+	gdb_produce_source $src {
+	    int main() {
+		double d = 4.0;
+		int ret;
+
+		asm ("vldr d0, [%0]" : : "r" (&d));
+		asm ("vldr d1, [%0]" : : "r" (&d));
+		asm (".global break_here\n"
+		     "break_here:");
+		asm ("vcmp.f64 d0, d1\n"
+		     "vmrs APSR_nzcv, fpscr\n"
+		     "bne L_value_different\n"
+		     "movs %0, #0\n"
+		     "b L_end\n"
+		     "L_value_different:\n"
+		     "movs %0, #1\n"
+		     "L_end:\n" : "=r" (ret) :);
+
+		/* Return $d0 != $d1.  */
+		return ret;
+	    }
+	}
+
+	verbose "compiling testfile $src" 2
+	set lines [gdb_compile $src $exe executable $compile_flags]
+	file delete $src
+
+	if ![string match "" $lines] then {
+	    verbose "testfile compilation failed, returning 1" 2
+	    return 0
+	}
+
+	# No error message, compilation succeeded so now run it via gdb.
+	# Run the test up to 5 times to detect whether ptrace can
+	# correctly update VFP registers or not.
+	set skip_vfp_test 0
+	for {set i 0} {$i < 5} {incr i} {
+	    global gdb_prompt srcdir subdir
+
+	    gdb_exit
+	    gdb_start
+	    gdb_reinitialize_dir $srcdir/$subdir
+	    gdb_load "$exe"
+
+	    runto_main
+	    gdb_test "break *break_here"
+	    gdb_continue_to_breakpoint "break_here"
+
+	    # Modify $d0 to a different value, so the exit code should
+	    # be 1.
+	    gdb_test "set \$d0 = 5.0"
+
+	    set test "continue to exit"
+	    gdb_test_multiple "continue" "$test" {
+		-re "exited with code 01.*$gdb_prompt $" {
+		}
+		-re "exited normally.*$gdb_prompt $" {
+		    # However, the exit code is 0.  That means something
+		    # wrong in setting VFP registers.
+		    set skip_vfp_test 1
+		    break
+		}
+	    }
+	}
+
+	gdb_exit
+	remote_file build delete $exe
+
+	return $skip_vfp_test
     }
     return 0
 }

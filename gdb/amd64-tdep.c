@@ -40,6 +40,7 @@
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
 #include "x86-xstate.h"
+#include <algorithm>
 
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
@@ -846,10 +847,10 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
       gdb_assert (regnum != -1);
 
       if (readbuf)
-	regcache_raw_read_part (regcache, regnum, offset, min (len, 8),
+	regcache_raw_read_part (regcache, regnum, offset, std::min (len, 8),
 				readbuf + i * 8);
       if (writebuf)
-	regcache_raw_write_part (regcache, regnum, offset, min (len, 8),
+	regcache_raw_write_part (regcache, regnum, offset, std::min (len, 8),
 				 writebuf + i * 8);
     }
 
@@ -957,7 +958,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
 
 	      gdb_assert (regnum != -1);
 	      memset (buf, 0, sizeof buf);
-	      memcpy (buf, valbuf + j * 8, min (len, 8));
+	      memcpy (buf, valbuf + j * 8, std::min (len, 8));
 	      regcache_raw_write_part (regcache, regnum, offset, 8, buf);
 	    }
 	}
@@ -2067,7 +2068,7 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc > pc + offset_and)
     cache->saved_sp_reg = amd64_arch_reg_to_regnum (reg);
 
-  return min (pc + offset + 2, current_pc);
+  return std::min (pc + offset + 2, current_pc);
 }
 
 /* Similar to amd64_analyze_stack_align for x32.  */
@@ -2249,7 +2250,7 @@ amd64_x32_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc > pc + offset_and)
     cache->saved_sp_reg = amd64_arch_reg_to_regnum (reg);
 
-  return min (pc + offset + 2, current_pc);
+  return std::min (pc + offset + 2, current_pc);
 }
 
 /* Do a limited analysis of the prologue at PC and update CACHE
@@ -2438,7 +2439,7 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
 	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
-        return max (start_pc, post_prologue_pc);
+        return std::max (start_pc, post_prologue_pc);
     }
 
   amd64_init_frame_cache (&cache);

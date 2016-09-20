@@ -477,15 +477,15 @@ find_format (bfd_vma                       memaddr,
 {
   const struct arc_opcode *opcode = NULL;
   bfd_boolean needs_limm;
-  const extInstruction_t *einsn;
+  const extInstruction_t *einsn, *i;
 
   /* First, try the extension instructions.  */
   einsn = arcExtMap_insn (OPCODE (insn[0]), insn[0]);
-  if (einsn != NULL)
+  for (i = einsn; (i != NULL) && (opcode == NULL); i = i->next)
     {
       const char *errmsg = NULL;
 
-      opcode = arcExtMap_genOpcode (einsn, isa_mask, &errmsg);
+      opcode = arcExtMap_genOpcode (i, isa_mask, &errmsg);
       if (opcode == NULL)
 	{
 	  (*info->fprintf_func) (info->stream, "\
@@ -938,7 +938,10 @@ print_insn_arc (bfd_vma memaddr,
     case bfd_mach_arc_arcv2:
     default:
       isa_mask = ARC_OPCODE_ARCv2EM;
-      if ((header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
+      /* TODO: Perhaps remove defitinion of header since it is only used at
+         this location.  */
+      if (header != NULL
+	  && (header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
 	{
 	  isa_mask = ARC_OPCODE_ARCv2HS;
 	  /* FPU instructions are not extensions for HS.  */
@@ -1235,11 +1238,16 @@ print_insn_arc (bfd_vma memaddr,
 disassembler_ftype
 arc_get_disassembler (bfd *abfd)
 {
-  /* Read the extenssion insns and registers, if any.  */
-  build_ARC_extmap (abfd);
+  /* BFD my be absent, if opcodes is invoked from the debugger that
+     has connected to remote target and doesn't have an ELF file.  */
+  if (abfd != NULL)
+    {
+      /* Read the extension insns and registers, if any.  */
+      build_ARC_extmap (abfd);
 #ifdef DEBUG
-  dump_ARC_extmap ();
+      dump_ARC_extmap ();
 #endif
+    }
 
   return print_insn_arc;
 }

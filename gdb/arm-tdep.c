@@ -58,6 +58,7 @@
 
 #include "record.h"
 #include "record-full.h"
+#include <algorithm>
 
 #include "features/arm-with-m.c"
 #include "features/arm-with-m-fpa-layout.c"
@@ -1393,7 +1394,7 @@ thumb_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR prev_pc,
        function is.  */
     return;
 
-  prologue_end = min (prologue_end, prev_pc);
+  prologue_end = std::min (prologue_end, prev_pc);
 
   thumb_analyze_prologue (gdbarch, prologue_start, prologue_end, cache);
 }
@@ -4287,7 +4288,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
      footwork to distinguish a real IT instruction from the second
      half of a 32-bit instruction, but there is no need for that if
      there's no candidate.  */
-  buf_len = min (bpaddr - boundary, MAX_IT_BLOCK_PREFIX);
+  buf_len = std::min (bpaddr - boundary, (CORE_ADDR) MAX_IT_BLOCK_PREFIX);
   if (buf_len == 0)
     /* No room for an IT instruction.  */
     return bpaddr;

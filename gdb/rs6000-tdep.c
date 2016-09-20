@@ -64,6 +64,7 @@
 
 #include "ax.h"
 #include "ax-gdb.h"
+#include <algorithm>
 
 #include "features/rs6000/powerpc-32.c"
 #include "features/rs6000/powerpc-altivec32.c"
@@ -2185,7 +2186,7 @@ rs6000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-	return max (pc, post_prologue_pc);
+	return std::max (pc, post_prologue_pc);
     }
 
   /* Can't determine prologue from the symbol table, need to examine
@@ -4539,7 +4540,8 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 725:		/* Store String Word Immediate */
       ra = 0;
       if (PPC_RA (insn) != 0)
-	regcache_raw_read_unsigned (regcache, tdep->ppc_xer_regnum, &ra);
+	regcache_raw_read_unsigned (regcache,
+				    tdep->ppc_gp0_regnum + PPC_RA (insn), &ra);
       ea += ra;
 
       nb = PPC_NB (insn);
@@ -4553,7 +4555,8 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 661:		/* Store String Word Indexed */
       ra = 0;
       if (PPC_RA (insn) != 0)
-	regcache_raw_read_unsigned (regcache, tdep->ppc_xer_regnum, &ra);
+	regcache_raw_read_unsigned (regcache,
+				    tdep->ppc_gp0_regnum + PPC_RA (insn), &ra);
       ea += ra;
 
       regcache_raw_read_unsigned (regcache, tdep->ppc_xer_regnum, &xer);
@@ -4561,7 +4564,9 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
 
       if (nb != 0)
 	{
-	  regcache_raw_read_unsigned (regcache, tdep->ppc_xer_regnum, &rb);
+	  regcache_raw_read_unsigned (regcache,
+				      tdep->ppc_gp0_regnum + PPC_RB (insn),
+				      &rb);
 	  ea += rb;
 	  record_full_arch_list_add_mem (ea, nb);
 	}

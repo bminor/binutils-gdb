@@ -66,6 +66,7 @@
 #include "expression.h"
 #include "parser-defs.h"
 #include <ctype.h>
+#include <algorithm>
 
 /* Register names.  */
 
@@ -1365,7 +1366,7 @@ i386_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc > pc + offset_and)
     cache->saved_sp_reg = regnums[reg];
 
-  return min (pc + offset + 3, current_pc);
+  return std::min (pc + offset + 3, current_pc);
 }
 
 /* Maximum instruction length we need to handle.  */
@@ -1836,7 +1837,7 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
 	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
-        return max (start_pc, post_prologue_pc);
+        return std::max (start_pc, post_prologue_pc);
     }
  
   cache.locals = -1;
@@ -8161,6 +8162,23 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
     }
 }
 
+/* Return a floating-point format for a floating-point variable of
+   length LEN in bits.  If non-NULL, NAME is the name of its type.
+   If no suitable type is found, return NULL.  */
+
+const struct floatformat **
+i386_floatformat_for_type (struct gdbarch *gdbarch,
+			   const char *name, int len)
+{
+  if (len == 128 && name)
+    if (strcmp (name, "__float128") == 0
+	|| strcmp (name, "_Float128") == 0
+	|| strcmp (name, "complex _Float128") == 0)
+      return floatformats_ia64_quad;
+
+  return default_floatformat_for_type (gdbarch, name, len);
+}
+
 static int
 i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 		       struct tdesc_arch_data *tdesc_data)
@@ -8369,6 +8387,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
+
+  /* Support for floating-point data type variants.  */
+  set_gdbarch_floatformat_for_type (gdbarch, i386_floatformat_for_type);
 
   /* Register numbers of various important registers.  */
   set_gdbarch_sp_regnum (gdbarch, I386_ESP_REGNUM); /* %esp */

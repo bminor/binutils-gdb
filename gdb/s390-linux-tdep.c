@@ -58,6 +58,7 @@
 #include "elf/common.h"
 #include "elf/s390.h"
 #include "elf-bfd.h"
+#include <algorithm>
 
 #include "features/s390-linux32.c"
 #include "features/s390-linux32v1.c"
@@ -1734,7 +1735,7 @@ s390_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-	return max (pc, post_prologue_pc);
+	return std::max (pc, post_prologue_pc);
     }
 
   skip_pc = s390_analyze_prologue (gdbarch, pc, (CORE_ADDR)-1, &data);

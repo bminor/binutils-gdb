@@ -25359,17 +25359,17 @@ static const struct arm_cpu_option_table arm_cpus[] =
 								  "Cortex-A15"),
   ARM_CPU_OPT ("cortex-a17",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A17"),
-  ARM_CPU_OPT ("cortex-a32",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a32",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A32"),
-  ARM_CPU_OPT ("cortex-a35",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a35",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A35"),
-  ARM_CPU_OPT ("cortex-a53",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a53",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A53"),
-  ARM_CPU_OPT ("cortex-a57",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a57",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A57"),
-  ARM_CPU_OPT ("cortex-a72",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a72",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A72"),
-  ARM_CPU_OPT ("cortex-a73",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a73",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A73"),
   ARM_CPU_OPT ("cortex-r4",	ARM_ARCH_V7R,	 FPU_NONE,	  "Cortex-R4"),
   ARM_CPU_OPT ("cortex-r4f",	ARM_ARCH_V7R,	 FPU_ARCH_VFP_V3D16,
@@ -25388,10 +25388,10 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-m1",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M1"),
   ARM_CPU_OPT ("cortex-m0",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M0"),
   ARM_CPU_OPT ("cortex-m0plus",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M0+"),
-  ARM_CPU_OPT ("exynos-m1",	ARM_ARCH_V8A,	 FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("exynos-m1",	ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Samsung " \
 								  "Exynos M1"),
-  ARM_CPU_OPT ("qdf24xx",	ARM_ARCH_V8A,	 FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("qdf24xx",	ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Qualcomm "
 								  "QDF24XX"),
 
@@ -25416,7 +25416,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
   /* APM X-Gene family.  */
   ARM_CPU_OPT ("xgene1",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 	                                                          "APM X-Gene 1"),
-  ARM_CPU_OPT ("xgene2",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("xgene2",        ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 	                                                          "APM X-Gene 2"),
 
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, NULL }

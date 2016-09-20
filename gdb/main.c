@@ -501,8 +501,10 @@ captured_main (void *data)
 #if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
 #endif
+#ifdef ENABLE_NLS
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
+#endif
 
   bfd_init ();
   notice_open_fds ();

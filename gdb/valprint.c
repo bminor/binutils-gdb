@@ -36,6 +36,7 @@
 #include "charset.h"
 #include "typeprint.h"
 #include <ctype.h>
+#include <algorithm>
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -999,10 +1000,9 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_UNDEF:
-      /* This happens (without TYPE_FLAG_STUB set) on systems which
-         don't use dbx xrefs (NO_DBX_XREFS in gcc) if a file has a
-         "struct foo *bar" and no complete type for struct foo in that
-         file.  */
+      /* This happens (without TYPE_STUB set) on systems which don't use
+         dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
+         and no complete type for struct foo in that file.  */
       fprintf_filtered (stream, _("<incomplete type>"));
       break;
 
@@ -2179,7 +2179,7 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
     {
       /* We want fetchlimit chars, so we might as well read them all in
 	 one operation.  */
-      unsigned int fetchlen = min (len, fetchlimit);
+      unsigned int fetchlen = std::min ((unsigned) len, fetchlimit);
 
       *buffer = (gdb_byte *) xmalloc (fetchlen * width);
       bufptr = *buffer;
@@ -2203,12 +2203,12 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 	 So we choose the minimum of 8 and fetchlimit.  We used to use 200
 	 instead of 8 but 200 is way too big for remote debugging over a
 	  serial line.  */
-      chunksize = min (8, fetchlimit);
+      chunksize = std::min (8u, fetchlimit);
 
       do
 	{
 	  QUIT;
-	  nfetch = min (chunksize, fetchlimit - bufsize);
+	  nfetch = std::min ((unsigned long) chunksize, fetchlimit - bufsize);
 
 	  if (*buffer == NULL)
 	    *buffer = (gdb_byte *) xmalloc (nfetch * width);
@@ -2865,8 +2865,8 @@ val_print_string (struct type *elttype, const char *encoding,
      because finding the null byte (or available memory) is what actually
      limits the fetch.  */
 
-  fetchlimit = (len == -1 ? options->print_max : min (len,
-						      options->print_max));
+  fetchlimit = (len == -1 ? options->print_max : std::min ((unsigned) len,
+							   options->print_max));
 
   err = read_string (addr, len, width, fetchlimit, byte_order,
 		     &buffer, &bytes_read);

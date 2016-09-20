@@ -1,3 +1,7 @@
+2016-09-07  Richard Earnshaw  <rearnsha@arm.com>
+
+	* opcode/arm.h (ARM_ARCH_V8A_CRC): New architecture.
+
 2016-08-26  Cupertino Miranda  <cmiranda@synopsys.com>
 	* elf/arc-reloc.def: Fixed relocation formula for N*, SDA, SDA_12,
 	SDA_16_LD*, S13_PCREL, N32_ME, SECTOFF_* relocations.

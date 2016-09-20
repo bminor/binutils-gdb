@@ -15,11 +15,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#define max(a, b) ((a) > (b) ? (a) : (b))
-
 #include "defs.h"
 #include "environ.h"
+#include <algorithm>
 
 
 /* Return a new environment object.  */
@@ -68,7 +66,7 @@ init_environ (struct gdb_environ *e)
 
   if (e->allocated < i)
     {
-      e->allocated = max (i, e->allocated + 10);
+      e->allocated = std::max (i, e->allocated + 10);
       e->vector = (char **) xrealloc ((char *) e->vector,
 				      (e->allocated + 1) * sizeof (char *));
     }

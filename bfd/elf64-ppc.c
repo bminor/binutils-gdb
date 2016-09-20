@@ -3085,6 +3085,7 @@ get_opd_info (asection * sec)
 
 /* Parameters for the qsort hook.  */
 static bfd_boolean synthetic_relocatable;
+static asection *synthetic_opd;
 
 /* qsort comparison function for ppc64_elf_get_synthetic_symtab.  */
 
@@ -3101,12 +3102,15 @@ compare_symbols (const void *ap, const void *bp)
     return 1;
 
   /* then .opd symbols.  */
-  if (strcmp (a->section->name, ".opd") == 0
-      && strcmp (b->section->name, ".opd") != 0)
-    return -1;
-  if (strcmp (a->section->name, ".opd") != 0
-      && strcmp (b->section->name, ".opd") == 0)
-    return 1;
+  if (synthetic_opd != NULL)
+    {
+      if (strcmp (a->section->name, ".opd") == 0
+	  && strcmp (b->section->name, ".opd") != 0)
+	return -1;
+      if (strcmp (a->section->name, ".opd") != 0
+	  && strcmp (b->section->name, ".opd") == 0)
+	return 1;
+    }
 
   /* then other code symbols.  */
   if ((a->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
@@ -3265,6 +3269,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
     memcpy (syms, static_syms, (symcount + 1) * sizeof (*syms));
 
   synthetic_relocatable = relocatable;
+  synthetic_opd = opd;
   qsort (syms, symcount, sizeof (*syms), compare_symbols);
 
   if (!relocatable && symcount > 1)
@@ -3281,7 +3286,11 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
     }
 
   i = 0;
-  if (strcmp (syms[i]->section->name, ".opd") == 0)
+  /* Note that here and in compare_symbols we can't compare opd and
+     sym->section directly.  With separate debug info files, the
+     symbols will be extracted from the debug file while abfd passed
+     to this function is the real binary.  */
+  if (opd != NULL && strcmp (syms[i]->section->name, ".opd") == 0)
     ++i;
   codesecsym = i;
 
@@ -3297,9 +3306,10 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
       break;
   secsymend = i;
 
-  for (; i < symcount; ++i)
-    if (strcmp (syms[i]->section->name, ".opd") != 0)
-      break;
+  if (opd != NULL)
+    for (; i < symcount; ++i)
+      if (strcmp (syms[i]->section->name, ".opd") != 0)
+	break;
   opdsymend = i;
 
   for (; i < symcount; ++i)
@@ -12049,7 +12059,6 @@ group_sections (struct bfd_link_info *info,
 {
   struct ppc_link_hash_table *htab;
   asection *osec;
-  bfd_size_type stub14_group_size;
   bfd_boolean suppress_size_errors;
 
   htab = ppc_hash_table (info);
@@ -12057,20 +12066,13 @@ group_sections (struct bfd_link_info *info,
     return FALSE;
 
   suppress_size_errors = FALSE;
-  stub14_group_size = stub_group_size >> 10;
   if (stub_group_size == 1)
     {
       /* Default values.  */
       if (stubs_always_before_branch)
-	{
-	  stub_group_size = 0x1e00000;
-	  stub14_group_size = 0x7800;
-	}
+	stub_group_size = 0x1e00000;
       else
-	{
-	  stub_group_size = 0x1c00000;
-	  stub14_group_size = 0x7000;
-	}
+	stub_group_size = 0x1c00000;
       suppress_size_errors = TRUE;
     }
 
@@ -12090,12 +12092,15 @@ group_sections (struct bfd_link_info *info,
 	  bfd_boolean big_sec;
 	  bfd_vma curr_toc;
 	  struct map_stub *group;
+	  bfd_size_type group_size;
 
 	  curr = tail;
 	  total = tail->size;
-	  big_sec = total > (ppc64_elf_section_data (tail) != NULL
-			     && ppc64_elf_section_data (tail)->has_14bit_branch
-			     ? stub14_group_size : stub_group_size);
+	  group_size = (ppc64_elf_section_data (tail) != NULL
+			&& ppc64_elf_section_data (tail)->has_14bit_branch
+			? stub_group_size >> 10 : stub_group_size);
+
+	  big_sec = total > group_size;
 	  if (big_sec && !suppress_size_errors)
 	    (*_bfd_error_handler) (_("%B section %A exceeds stub group size"),
 				     tail->owner, tail);
@@ -12105,20 +12110,20 @@ group_sections (struct bfd_link_info *info,
 		 && ((total += curr->output_offset - prev->output_offset)
 		     < (ppc64_elf_section_data (prev) != NULL
 			&& ppc64_elf_section_data (prev)->has_14bit_branch
-			? stub14_group_size : stub_group_size))
+			? (group_size = stub_group_size >> 10) : group_size))
 		 && htab->sec_info[prev->id].toc_off == curr_toc)
 	    curr = prev;
 
 	  /* OK, the size from the start of CURR to the end is less
-	     than stub_group_size and thus can be handled by one stub
+	     than group_size and thus can be handled by one stub
 	     section.  (or the tail section is itself larger than
-	     stub_group_size, in which case we may be toast.)  We
-	     should really be keeping track of the total size of stubs
-	     added here, as stubs contribute to the final output
-	     section size.  That's a little tricky, and this way will
-	     only break if stubs added make the total size more than
-	     2^25, ie. for the default stub_group_size, if stubs total
-	     more than 2097152 bytes, or nearly 75000 plt call stubs.  */
+	     group_size, in which case we may be toast.)  We should
+	     really be keeping track of the total size of stubs added
+	     here, as stubs contribute to the final output section
+	     size.  That's a little tricky, and this way will only
+	     break if stubs added make the total size more than 2^25,
+	     ie. for the default stub_group_size, if stubs total more
+	     than 2097152 bytes, or nearly 75000 plt call stubs.  */
 	  group = bfd_alloc (curr->owner, sizeof (*group));
 	  if (group == NULL)
 	    return FALSE;
@@ -12135,7 +12140,7 @@ group_sections (struct bfd_link_info *info,
 	    }
 	  while (tail != curr && (tail = prev) != NULL);
 
-	  /* But wait, there's more!  Input sections up to stub_group_size
+	  /* But wait, there's more!  Input sections up to group_size
 	     bytes before the stub section can be handled by it too.
 	     Don't do this if we have a really large section after the
 	     stubs, as adding more stubs increases the chance that
@@ -12147,7 +12152,7 @@ group_sections (struct bfd_link_info *info,
 		     && ((total += tail->output_offset - prev->output_offset)
 			 < (ppc64_elf_section_data (prev) != NULL
 			    && ppc64_elf_section_data (prev)->has_14bit_branch
-			    ? stub14_group_size : stub_group_size))
+			    ? (group_size = stub_group_size >> 10) : group_size))
 		     && htab->sec_info[prev->id].toc_off == curr_toc)
 		{
 		  tail = prev;

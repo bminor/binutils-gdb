@@ -441,9 +441,9 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	    run_dump_test "iamcu-1"
 	    run_dump_test "iamcu-2"
 	    run_dump_test "iamcu-3"
+	    run_dump_test "iamcu-4"
+	    run_dump_test "iamcu-5"
 	    run_list_test "iamcu-inval-1" "-march=iamcu -al"
-	    run_list_test "iamcu-inval-2" "-march=iamcu -al"
-	    run_list_test "iamcu-inval-3" "-march=iamcu+sse4 -al"
 	}
     }
 

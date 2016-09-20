@@ -7,6 +7,12 @@ set|show compile-gcc
 
 *** Changes since GDB 7.12
 
+* GDB and GDBserver now require building with a C++ compiler.
+
+  It is no longer possible to build GDB or GDBserver with a C
+  compiler.  The --disable-build-with-cxx configure option has been
+  removed.
+
 * Support for thread names on MS-Windows.
 
   GDB now catches and handles the special exception that programs

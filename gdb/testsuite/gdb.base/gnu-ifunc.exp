@@ -76,6 +76,21 @@ gdb_continue_to_breakpoint "break-at-call" ".*break-at-call.*"
 
 gdb_test "p gnu_ifunc (3)" " = 4"
 
+# Test that the resolver received its argument.
+
+set actual_hwcap "0x0"
+set test "info auxv"
+gdb_test_multiple $test $test {
+    -re "\r\n\\d+\\s+AT_HWCAP\[^\r\n\]+($hex)\r\n.*$gdb_prompt $" {
+	set actual_hwcap $expect_out(1,string)
+    }
+    -re ".*$gdb_prompt $" {
+	pass "$test (no HWCAP)"
+    }
+}
+
+gdb_test "p/x resolver_hwcap" "= $actual_hwcap" "resolver received HWCAP"
+
 # Test GDB will skip the gnu_ifunc resolver on first call.
 
 gdb_test "step" "\r\nfinal .*"

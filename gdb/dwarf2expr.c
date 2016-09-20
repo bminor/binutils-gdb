@@ -1257,6 +1257,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  break;
 
 	case DW_OP_GNU_push_tls_address:
+	case DW_OP_form_tls_address:
 	  /* Variable is at a constant offset in the thread-local
 	  storage block into the objfile for the current thread and
 	  the dynamic linker module containing this expression.  Here
@@ -1533,7 +1534,7 @@ ctx_no_get_frame_pc (void *baton)
 CORE_ADDR
 ctx_no_get_tls_address (void *baton, CORE_ADDR offset)
 {
-  error (_("%s is invalid in this context"), "DW_OP_GNU_push_tls_address");
+  error (_("%s is invalid in this context"), "DW_OP_form_tls_address");
 }
 
 /* Stub dwarf_expr_context_funcs.dwarf_call implementation.  */

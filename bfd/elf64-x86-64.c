@@ -4818,7 +4818,9 @@ direct:
 		    && (h->needs_copy
 			|| eh->needs_copy
 			|| h->root.type == bfd_link_hash_undefined)
-		    && IS_X86_64_PCREL_TYPE (r_type))
+		    && (IS_X86_64_PCREL_TYPE (r_type)
+			|| r_type == R_X86_64_SIZE32
+			|| r_type == R_X86_64_SIZE64))
 	       && (h == NULL
 		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			&& !resolved_to_zero)

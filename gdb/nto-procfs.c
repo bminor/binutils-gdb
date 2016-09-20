@@ -516,7 +516,7 @@ procfs_meminfo (char *args, int from_tty)
       return;
     }
 
-  num = min (num, num_mapinfos);
+  num = std::min (num, num_mapinfos);
 
   /* Run through the list of mapinfos, and store the data and text info
      so we can print it at the bottom of the loop.  */
@@ -726,7 +726,7 @@ interrupt_query (void)
   if (query (_("Interrupted while waiting for the program.\n\
 Give up (and stop debugging it)? ")))
     {
-      target_mourn_inferior ();
+      target_mourn_inferior (inferior_ptid);
       quit ();
     }
 }
@@ -939,7 +939,7 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
 	  tempread = nto_read_auxv_from_initial_stack (initial_stack, tempbuf,
 						       sizeof_tempbuf,
 						       sizeof (auxv_t));
-	  tempread = min (tempread, len) - offset;
+	  tempread = std::min (tempread, len) - offset;
 	  memcpy (readbuf, tempbuf + offset, tempread);
 	  *xfered_len = tempread;
 	  return tempread ? TARGET_XFER_OK : TARGET_XFER_EOF;
@@ -1300,7 +1300,7 @@ procfs_interrupt (struct target_ops *self, ptid_t ptid)
 static void
 procfs_kill_inferior (struct target_ops *ops)
 {
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 /* Fill buf with regset and return devctl cmd to do the setting.  Return

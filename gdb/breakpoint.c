@@ -80,6 +80,7 @@
 
 #include "mi/mi-common.h"
 #include "extension.h"
+#include <algorithm>
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind
@@ -4435,8 +4436,8 @@ hardware_watchpoint_inserted_in_range (struct address_space *aspace,
 	    CORE_ADDR l, h;
 
 	    /* Check for intersection.  */
-	    l = max (loc->address, addr);
-	    h = min (loc->address + loc->length, addr + len);
+	    l = std::max<CORE_ADDR> (loc->address, addr);
+	    h = std::min<CORE_ADDR> (loc->address + loc->length, addr + len);
 	    if (l < h)
 	      return 1;
 	  }
@@ -5996,7 +5997,7 @@ bpstat_what (bpstat bs_head)
 			  _("bpstat_what: unhandled bptype %d"), (int) bptype);
 	}
 
-      retval.main_action = max (retval.main_action, this_action);
+      retval.main_action = std::max (retval.main_action, this_action);
     }
 
   return retval;

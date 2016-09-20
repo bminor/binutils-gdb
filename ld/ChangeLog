@@ -1,3 +1,93 @@
+2016-09-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.texinfo (Input Section Basics): Expand the description of
+	EXCLUDE_FILE.
+
+2016-09-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/cmse-veneers.s: Add a test for ARMv8-M Security
+	Extensions entry functions in absolute section.
+	* testsuite/ld-arm/cmse-veneers.rd: Adapt expected output accordingly.
+
+2016-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/tls-dtpoff.dd: New file.
+	* testsuite/ld-arc/tls-dtpoff.rd: Likewise.
+	* testsuite/ld-arc/tls-dtpoff.s: Likewise.
+	* testsuite/ld-arc/tls-relocs.ld: Likewise.
+	* testsuite/ld-arc/arc.exp: Add new tdpoff test.
+
+2016-09-14  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20537
+	* emultempl/elf32.em: More OPTION_xxx values into an enum.  Add
+	OPTION_NO_EH_FRAME_HDR.
+	(_add_options): Add support for --no-eh-frame-hdr.
+	* ld.texinfo: Document new option.
+	* lexsup.c (elf_shlib_list_options): List new option.
+	* NEWS: Mention the new option.
+
+2016-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20550
+	* testsuite/ld-x86-64/pr20550a.s: New file.
+	* testsuite/ld-x86-64/pr20550b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp (x86_64tests): Add tests for
+	PR ld/20550.
+
+2016-09-06  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (CFLAGS_FOR_TARGET): Define as a copy of CFLAGS but
+	without any sanitization options.
+	(CXXFLAGS_FOR_TARGET): Define as a copy of CXXFLAGS but	without
+	any sanitization options.
+	(check-DEJAGNU): Pass CFLAGS_FOR_TARGET and CXXFLAGS_FOR_TARGET
+	as CFLAGS and CXXFLAGS respectively.
+
+2016-09-02  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20545
+	* testsuite/ld-avr/avr-prop-7.d: New test.
+	* testsuite/ld-avr/avr-prop-7.s: New test.
+	* testsuite/ld-avr/avr-prop-8.d: New test.
+	* testsuite/ld-avr/avr-prop-8.s: New test.
+
+2016-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr20513c.d: Limit to *-*-linux* and *-*-gnu*
+	targets.
+	* testsuite/ld-elf/pr20513d.d: Likewise.
+
+2016-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20513
+	* testsuite/ld-elf/pr20513a.d: New file.
+	* testsuite/ld-elf/pr20513a.s: Likewise.
+	* testsuite/ld-elf/pr20513b.d: Likewise.
+	* testsuite/ld-elf/pr20513b.s: Likewise.
+	* testsuite/ld-elf/pr20513c.d: Likewise.
+	* testsuite/ld-elf/pr20513d.d: Likewise.
+	* testsuite/ld-elf/pr20513e.d: Likewise.
+	* testsuite/ld-elf/pr20513f.d: Likewise.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	PR 20513
+	* ldlang.c (section_already_linked): Deal with SHF_EXCLUDE sections.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/vle-multiseg-1.d: Adjust to suit segment change.
+	* testsuite/ld-powerpc/vle-multiseg-2.d: Likewise.
+	* testsuite/ld-powerpc/vle-multiseg-3.d: Likewise.
+	* testsuite/ld-powerpc/vle-multiseg-6.d: Likewise.
+	* testsuite/ld-powerpc/vle-reloc-2.d: Likewise.
+
+2016-08-30  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-arc/tls_gs-01.d: Set to XFAIL on arc*-*-elf*.
+	* testsuite/ld-arc/tls_ie-01.d: Likewise.
+
 2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/19784 tests only

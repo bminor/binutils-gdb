@@ -170,7 +170,7 @@ record_mourn_inferior (struct target_ops *t)
      threads are discarded.  */
   record_unpush (t);
 
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 /* See record.h.  */

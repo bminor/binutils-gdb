@@ -61,10 +61,9 @@
 
    Unfortunately, on certain older platforms, the debug info doesn't
    indicate reliably how each function was defined.  A function type's
-   TYPE_FLAG_PROTOTYPED flag may be clear, even if the function was
-   defined in prototype style.  When calling a function whose
-   TYPE_FLAG_PROTOTYPED flag is clear, GDB consults this flag to
-   decide what to do.
+   TYPE_PROTOTYPED flag may be clear, even if the function was defined
+   in prototype style.  When calling a function whose TYPE_PROTOTYPED
+   flag is clear, GDB consults this flag to decide what to do.
 
    For modern targets, it is proper to assume that, if the prototype
    flag is clear, that can be trusted: `float' arguments should be
@@ -531,7 +530,7 @@ call_thread_fsm_should_stop (struct thread_fsm *self,
       f->return_value = get_call_return_value (&f->return_meta_info);
 
       /* Break out of wait_sync_command_done.  */
-      old_chain = make_cleanup (restore_ui_cleanup, current_ui);
+      old_chain = make_cleanup_restore_current_ui ();
       current_ui = f->waiting_ui;
       target_terminal_ours ();
       f->waiting_ui->prompt_state = PROMPT_NEEDED;

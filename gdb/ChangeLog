@@ -1,3 +1,428 @@
+2016-09-20  Tom Tromey  <tom@tromey.com>
+
+	* python/py-value.c (convert_value_from_python): Make PyInt_Check
+	conditional on Python 2.
+	* python/py-arch.c (archpy_disassemble): Make PyInt_Check
+	conditional on Python 2.
+
+2016-09-20  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (ppc_process_record_op31): Fix record of Store String
+	Word instructions.
+
+2016-09-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* fork-inferior.c (startup_inferior): Pass 'event_ptid' instead of
+	'resume_ptid' to 'target_mourn_inferior'.  Fix regression
+	introduced by my last commit.
+
+2016-09-19  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_locale.h [!ENABLE_NLS] (gettext, dgettext, dcgettext,
+	textdomain, bindtextdomain): Delete macros.
+	* main.c (captured_main) [!ENABLE_NLS]: Skip bintextdomain and
+	textdomain calls.
+
+2016-09-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* darwin-nat.c (darwin_kill_inferior): Adjusting call to
+	target_mourn_inferior to include ptid_t argument.
+	* fork-child.c (startup_inferior): Likewise.
+	* gnu-nat.c (gnu_kill_inferior): Likewise.
+	* inf-ptrace.c (inf_ptrace_kill): Likewise.
+	* infrun.c (handle_inferior_event_1): Likewise.
+	* linux-nat.c (linux_nat_attach): Likewise.
+	(linux_nat_kill): Likewise.
+	* nto-procfs.c (interrupt_query): Likewise.
+	(procfs_interrupt): Likewise.
+	(procfs_kill_inferior): Likewise.
+	* procfs.c (procfs_kill_inferior): Likewise.
+	* record.c (record_mourn_inferior): Likewise.
+	* remote-sim.c (gdbsim_kill): Likewise.
+	* remote.c (remote_detach_1): Likewise.
+	(remote_kill): Likewise.
+	* target.c (target_mourn_inferior): Change declaration to accept
+	new ptid_t argument; use gdb_assert on it.
+	* target.h (target_mourn_inferior): Move function prototype from
+	here...
+	* target/target.h (target_mourn_inferior): ... to here.  Adjust it
+	to accept new ptid_t argument.
+	* windows-nat.c (get_windows_debug_event): Adjusting call to
+	target_mourn_inferior to include ptid_t argument.
+
+2016-09-18  Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-nat.c: Include <algorithm>.
+
+2016-09-18  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (hardware_watchpoint_inserted_in_range): Explicitly
+	specify the std:min/std::max specialization.
+	* exec.c (section_table_read_available_memory): Likewise.
+	* remote.c (remote_read_qxfer): Likewise.
+	* target.c (simple_verify_memory): Likewise.
+
+2016-09-16  Simon Marchi  <simark@simark.ca>
+
+	* infrun.c (restore_current_uiout_cleanup): Move to ui-out.c.
+	(print_stop_event): Use make_cleanup_restore_current_uiout.
+	* python/python.c (execute_gdb_command): Likewise.
+	* ui-out.c (restore_current_uiout_cleanup): Move from infrun.c.
+	(make_cleanup_restore_current_uiout): New function definition.
+	* ui-out.h (make_cleanup_restore_current_uiout): New function
+	declaration.
+	* utils.c (do_restore_ui_out): Remove.
+	(make_cleanup_restore_ui_out): Remove.
+	* utils.h (make_cleanup_restore_ui_out): Remove.
+
+2016-09-16  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (min, max): Delete.
+	* aarch64-tdep.c: Include <algorithm> and use std::min and
+	std::max throughout.
+	* aarch64-tdep.c: Likewise.
+	* alpha-tdep.c: Likewise.
+	* amd64-tdep.c: Likewise.
+	* amd64-windows-tdep.c: Likewise.
+	* arm-tdep.c: Likewise.
+	* avr-tdep.c: Likewise.
+	* breakpoint.c: Likewise.
+	* btrace.c: Likewise.
+	* ctf.c: Likewise.
+	* disasm.c: Likewise.
+	* doublest.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* dwarf2read.c: Likewise.
+	* environ.c: Likewise.
+	* exec.c: Likewise.
+	* f-exp.y: Likewise.
+	* findcmd.c: Likewise.
+	* ft32-tdep.c: Likewise.
+	* gcore.c: Likewise.
+	* hppa-tdep.c: Likewise.
+	* i386-darwin-tdep.c: Likewise.
+	* i386-tdep.c: Likewise.
+	* linux-thread-db.c: Likewise.
+	* lm32-tdep.c: Likewise.
+	* m32r-tdep.c: Likewise.
+	* m88k-tdep.c: Likewise.
+	* memrange.c: Likewise.
+	* minidebug.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* moxie-tdep.c: Likewise.
+	* nds32-tdep.c: Likewise.
+	* nios2-tdep.c: Likewise.
+	* nto-procfs.c: Likewise.
+	* parse.c: Likewise.
+	* ppc-sysv-tdep.c: Likewise.
+	* probe.c: Likewise.
+	* record-btrace.c: Likewise.
+	* remote.c: Likewise.
+	* rs6000-tdep.c: Likewise.
+	* rx-tdep.c: Likewise.
+	* s390-linux-nat.c: Likewise.
+	* s390-linux-tdep.c: Likewise.
+	* ser-tcp.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* sh64-tdep.c: Likewise.
+	* source.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* symfile.c: Likewise.
+	* target-memory.c: Likewise.
+	* target.c: Likewise.
+	* tic6x-tdep.c: Likewise.
+	* tilegx-tdep.c: Likewise.
+	* tracefile-tfile.c: Likewise.
+	* tracepoint.c: Likewise.
+	* valprint.c: Likewise.
+	* value.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+	* cli/cli-cmds.c: Likewise.
+	* compile/compile-object-load.c: Likewise.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (PER_BIT, PER_EVENT_BRANCH, PER_EVENT_IFETCH)
+	(PER_EVENT_STORE, PER_EVENT_NULLIFICATION)
+	(PER_CONTROL_BRANCH_ADDRESS, PER_CONTROL_SUSPENSION)
+	(PER_CONTROL_ALTERATION): New macros.
+	(struct s390_debug_reg_state) <break_areas>: New member.
+	(s390_forget_process): Free break_areas as well.
+	(s390_linux_new_fork): Copy break_areas as well.
+	(s390_prepare_to_resume): Install hardware breakpoints.
+	(s390_can_use_hw_breakpoint): Indicate support for hardware
+	breakpoints.
+	(s390_insert_hw_breakpoint, s390_remove_hw_breakpoint): New
+	linux_nat target methods.
+	(_initialize_s390_nat): Register them.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* nat/linux-nat.h (lwp_is_stepping): New declaration.
+	* linux-nat.c (lwp_is_stepping): New function.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (gdbcmd.h): New include.
+	(s390_show_debug_regs): New function.
+	(s390_stopped_by_watchpoint): Call it, if show_debug_regs is set.
+	(s390_prepare_to_resume): Likewise.
+	(_initialize_s390_nat): Register the command "maint set
+	show-debug-regs".
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (watch_areas): Remove variable.  Replace by a
+	member of...
+	(struct s390_debug_reg_state): ...this.  New struct.
+	(struct s390_process_info): New struct.
+	(s390_process_list): New variable.
+	(s390_find_process_pid, s390_add_process, s390_process_info_get)
+	(s390_get_debug_reg_state): New functions.
+	(s390_stopped_by_watchpoint): Now access the watch_areas VEC via
+	s390_get_debug_reg_state.
+	(s390_prepare_to_resume): Likewise.
+	(s390_insert_watchpoint): Likewise.
+	(s390_remove_watchpoint): Likewise.
+	(s390_forget_process, s390_linux_new_fork): New linux_nat target
+	methods.
+	(_initialize_s390_nat): Register them.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (s390_watch_area): New typedef.  Define a VEC.
+	(watch_base): Remove variable.
+	(watch_areas): New variable.
+	(s390_stopped_by_watchpoint): Transform operations on the
+	watch_base list to equivalent operations on the watch_areas VEC.
+	(s390_prepare_to_resume): Likewise.
+	(s390_insert_watchpoint): Likewise.
+	(s390_remove_watchpoint): Likewise.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (s390_prepare_to_resume): Use advertised lwp
+	functions instead of accessing lwp_info structure members.
+	(s390_mark_per_info_changed): New function.
+	(s390_new_thread): Use it.
+	(s390_refresh_per_info_cb): New function.
+	(s390_refresh_per_info): Remove parameter.  Refresh all lwps of
+	the current process.
+	(s390_insert_watchpoint): Adjust call to s390_refresh_per_info.
+	(s390_remove_watchpoint): Likewise.
+
+2016-09-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elfread.c (auxv.h): New include.
+	(elf_gnu_ifunc_resolve_addr): Pass HWCAP to ifunc resolver.
+
+2016-09-08  Tom Tromey  <tom@tromey.com>
+
+	* remote.c (remote_notif_stop_ack, remote_wait_as)
+	(show_remote_cmd): Remove unneeded casts.
+
+2016-09-06  Pedro Alves  <palves@redhat.com>
+
+	* top.c (wait_sync_command_done): Don't assume current_ui doesn't
+	change across events.  Restore the current UI before returning.
+	(gdb_readline_wrapper): Restore the current UI before returning.
+
+2016-09-06  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (restore_ui_cleanup): Now static.
+	(make_cleanup_restore_current_ui): New function.
+	(switch_thru_all_uis_init): Use it.
+	* infcall.c (call_thread_fsm_should_stop): Use it.
+	* infrun.c (fetch_inferior_event): Use it.
+	* top.c (new_ui_command): Use it.
+	* top.h (restore_ui_cleanup): Delete declaration.
+	(make_cleanup_restore_current_ui): New declaration.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* i386-tdep.c (i386_floatformat_for_type): New function.
+	(i386_gdbarch_init): Install it.
+	* ppc-linux-tdep.c (ppc_floatformat_for_type): New function.
+	(ppc_linux_init_abi): Install it.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (floatformat_for_type): New gdbarch callback.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.h (default_floatformat_for_type): New prototype.
+	* arch-utils.c (default_floatformat_for_type): New function.
+
+	* doublest.c (floatformat_from_length): Remove.
+	(floatformat_from_type): Assume TYPE_FLOATFORMAT is non-NULL.
+	* gdbtypes.c (verify_floatformat): Require non-NULL format.
+
+	* dwarf2read.c (dwarf2_init_float_type): New function.
+	(read_base_type): Use it.
+	* stabsread.c (dbx_init_float_type): New function.
+	(read_sun_floating_type): Use it.
+	(read_range_type): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ada-lang.c (ada_language_arch_info): Use gdbarch-provided
+	platform ABI floating-point formats for built-in types.
+	* d-lang.c (build_d_types): Likewise.
+	* f-lang.c (build_fortran_types): Likewise.
+	* m2-lang.c (build_m2_types): Likewise.
+	* mdebugread.c (basic_type): Likewise.
+
+	* go-lang.c (build_go_types): Use IEEE floating-point formats
+	for language built-in types as mandanted by the language.
+	* jv-lang.c (build_java_types): Likewise.
+	* rust-lang.c (rust_language_arch_info): Likewise.
+	* stabsread.c (rs6000_builtin_type): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbtypes.c (init_type): Remove "char" special case.
+	(arch_integer_type): Likewise.
+	(gdbtypes_post_init): Set TYPE_NOSIGN for "char" type.
+	(objfile_type): Likewise.
+	* mdebugread.c (basic_type): Likewise.
+	* stabsread.c (rs6000_builtin_type): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbtypes.h (enum type_flag_value): Remove.
+	Remove references to TYPE_FLAG_... in comments throughout.
+	* gdbtypes.c (recursive_dump_type): Do not print TYPE_FLAG_... 
+	flags, print the corresponding TYPE_... access macro names.
+	Remove references to TYPE_FLAG_... in comments throughout.
+	* infcall.c: Remove references to TYPE_FLAG_... in comments.
+	* valprint.c: Likewise.
+	* gdb-gdb.py (class TypeFlag): No longer consider TYPE_FLAG_...
+	values, only TYPE_INSTANCE_FLAG_... values.
+	(class TypeFlagsPrinter): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbtypes.h (init_type): Remove FLAGS argument.  Move OBJFILE
+	argument to first position.
+	(init_integer_type): New prototype.
+	(init_character_type): Likewise.
+	(init_boolean_type): Likewise.
+	(init_float_type): Likewise.
+	(init_decfloat_type): Likewise.
+	(init_complex_type): Likewise.
+	(init_pointer_type): Likewise.
+	* gdbtypes.c (verify_floatflormat): New function.
+	(init_type): Remove FLAGS argument and processing.  Move OBJFILE
+	argument to first position.
+	(init_integer_type): New function.
+	(init_character_type): Likewise.
+	(init_boolean_type): Likewise.
+	(init_float_type): Likewise.
+	(init_decfloat_type): Likewise.
+	(init_complex_type): Likewise.
+	(init_pointer_type): Likewise.
+	(arch_float_type): Use verify_floatflormat.
+	(objfile_type): Use init_..._type helpers instead of calling
+	init_type directly.
+	* dwarf2read.c (fixup_go_packaging): Update to changed init_type
+	prototype.
+	(read_namespace_type): Likewise.
+	(read_module_type): Likewise.
+	(read_typedef): Likewise.
+	(read_unspecified_type): Likewise.
+	(build_error_marker_type): Likewise.
+	(read_base_type): Use init_..._type helpers.
+	* mdebugread.c (basic_type): Use init_..._type helpers.
+	(parse_type): Update to changed init_type prototype.
+	(cross_ref): Likewise.
+	* stabsread.c (rs6000_builtin_type): Use init_..._type helpers.
+	(read_sun_builtin_type): Likewise.
+	(read_sun_floating_type): Likewise.
+	(read_range_type): Likewise.  Also update to changed init_type
+	prototype.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbtypes.h (arch_decfloat_type): New prototype.
+	(arch_pointer_type): Likewise.
+	* gdbtypes.c (arch_decfloat_type): New function.
+	(arch_pointer_type): Likewise.
+	(gdbtypes_post_init): Use arch_decfloat_type.
+	* avr-tdep.c (avr_gdbarch_init): Use arch_pointer_type.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* m32c-tdep.c (make_types): Likewise.
+	* rl78-tdep.c (rl78_gdbarch_init): Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbtypes.c (set_type_code): New function.
+	(init_type, arch_type): Use it.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ada-lang.c (ada_language_arch_info): Use gdbarch_long_double_bit
+	instead of gdbarch_double_bit for "long_long_float".
+
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that a C++ compiler is now required.
+	* Makefile.in (COMPILER, COMPILER_CFLAGS): Remove.
+	(COMPILE.pre, CC_LD): Use CXX directly.
+	(INTERNAL_CFLAGS_BASE): Use CXXFLAGS directly.
+	* acinclude.m4: Don't include build-with-cxx.m4.
+	* build-with-cxx.m4: Delete file.
+	* configure.ac: Remove GDB_AC_BUILD_WITH_CXX call.
+	* warning.m4: Assume $enable_build_with_cxx is yes.
+	* configure: Regenerate.
+
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
+	PR backtrace/19927
+	* frame.c (get_frame_id): Compute the frame id if not computed
+	yet.
+	(unwind_to_current_frame): Delete.
+	(get_current_frame): Use get_prev_frame_always_1 to get the
+	current frame and assert that that always succeeds.
+	(get_prev_frame_if_no_cycle): Skip cycle detection if returning
+	the current frame.
+
+2016-09-02  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/11616:
+	* dwarf2read.c (decode_locdesc): Handle DW_OP_form_tls_address.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Handle
+	DW_OP_form_tls_address.
+	(locexpr_describe_location_piece): Likewise.
+	* dwarf2expr.h (struct dwarf_expr_context_funcs): Update comment.
+	* dwarf2expr.c (execute_stack_op): Handle DW_OP_form_tls_address.
+	(ctx_no_get_tls_address): Mention DW_OP_form_tls_address.
+	* compile/compile-loc2c.c (struct insn_info): Update comment.
+	(compute_stack_depth_worker): Handle DW_OP_form_tls_address.
+
+2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* target.c (target_wait): Mention that the function's prototype
+	can be found at target/target.h.
+	* target.h (target_wait): Move prototype from here...
+	* target/target.h (target_wait): ... to here.
+
+2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* fork-child.c (startup_inferior): Replace calls to target_resume
+	by target_continue{,_no_signal}, depending on the case.
+	* linux-nat.c (cleanup_target_stop): Call
+	target_continue_no_signal instead of target_resume.
+	* procfs.c (procfs_wait): Likewise.
+	* target.c (target_continue): New function.
+	* target/target.h (target_continue): New prototype.
+
+2016-08-31  Yao Qi  <yao.qi@linaro.org>
+
+	* record-full.c (record_full_insert_breakpoint): Fix typo.
+
+2016-08-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* thread.c (tp_array_compar): Insert missing parentheses.
+
 2016-08-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* xtensa-tdep.h (XTENSA_GDBARCH_TDEP_INSTANTIATE): Replace

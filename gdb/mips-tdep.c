@@ -55,6 +55,7 @@
 #include "user-regs.h"
 #include "valprint.h"
 #include "ax.h"
+#include <algorithm>
 
 static const struct objfile_data *mips_pdr_data;
 
@@ -3039,7 +3040,7 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 		       && ((reglist >= 1 && reglist <= 9)
 			   || (reglist >= 16 && reglist <= 25)))
 		{
-		  int sreglist = min(reglist & 0xf, 8);
+		  int sreglist = std::min(reglist & 0xf, 8);
 
 		  s = 4 << ((b12s4_op (insn) & 0x2) == 0x2);
 		  for (i = 0; i < sreglist; i++)
@@ -6645,7 +6646,7 @@ mips_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-	return max (pc, post_prologue_pc);
+	return std::max (pc, post_prologue_pc);
     }
 
   /* Can't determine prologue from the symbol table, need to examine

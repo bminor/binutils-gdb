@@ -1,3 +1,44 @@
+2016-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (find_format): Walk the linked list pointed by einsn.
+
+2016-09-14  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <slbiag>: New mnemonic.
+	<addex., brd, brh, brw, lwzmx, nandxor, rldixor, setbool,
+	xor3>: Delete mnemonics.
+	<cp_abort>: Rename mnemonic from ...
+	<cpabort>: ...to this.
+	<setb>: Change to a X form instruction.
+	<sync>: Change to 1 operand form.
+	<copy>: Delete mnemonic.
+	<copy_first>: Rename mnemonic from ...
+	<copy>: ...to this.
+	<paste, paste.>: Delete mnemonics.
+	<paste_last>: Rename mnemonic from ...
+	<paste.>: ...to this.
+
+2016-09-14  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.c (arc_get_disassembler): Accept a null bfd gracefully.
+
+2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Support alternate arch strings.
+
+2016-09-12  Patrick Steuer  <steuer@linux.vnet.ibm.com>
+
+	* s390-opc.txt: Fix kmctr instruction type.
+
+2016-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Remove CPU_IAMCU_COMPAT_FLAGS.
+	* i386-init.h: Regenerated.
+
+2016-08-30  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* opcodes/arc-dis.c (print_insn_arc): Changed.
+
 2016-08-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix typo in opcode, camellia_fi ->

@@ -34,6 +34,7 @@
 #include "regset.h"
 #include "gdb_bfd.h"
 #include "readline/tilde.h"
+#include <algorithm>
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
@@ -572,7 +573,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
   if (!startswith (bfd_section_name (obfd, osec), "load"))
     return;
 
-  size = min (total_size, MAX_COPY_BYTES);
+  size = std::min (total_size, (bfd_size_type) MAX_COPY_BYTES);
   memhunk = (gdb_byte *) xmalloc (size);
   old_chain = make_cleanup (xfree, memhunk);
 

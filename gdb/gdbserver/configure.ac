@@ -40,9 +40,6 @@ AC_ARG_PROGRAM
 
 AC_HEADER_STDC
 
-# See if we are building with C++, and substitute COMPILER.
-GDB_AC_BUILD_WITH_CXX
-
 # Set the 'development' global.
 . $srcdir/../../bfd/development.sh
 

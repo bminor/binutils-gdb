@@ -43,6 +43,7 @@
 #include "ui-out.h"
 #include "readline/readline.h"
 #include "common/enum-flags.h"
+#include <algorithm>
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -283,7 +284,7 @@ select_source_symtab (struct symtab *s)
       xfree (sals.sals);
       current_source_pspace = sal.pspace;
       current_source_symtab = sal.symtab;
-      current_source_line = max (sal.line - (lines_to_list - 1), 1);
+      current_source_line = std::max (sal.line - (lines_to_list - 1), 1);
       if (current_source_symtab)
 	return;
     }
@@ -1706,7 +1707,7 @@ forward_search_command (char *regex, int from_tty)
 	  do_cleanups (cleanups);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
-	  current_source_line = max (line - lines_to_list / 2, 1);
+	  current_source_line = std::max (line - lines_to_list / 2, 1);
 	  return;
 	}
       line++;
@@ -1784,7 +1785,7 @@ reverse_search_command (char *regex, int from_tty)
 	  do_cleanups (cleanups);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
-	  current_source_line = max (line - lines_to_list / 2, 1);
+	  current_source_line = std::max (line - lines_to_list / 2, 1);
 	  return;
 	}
       line--;

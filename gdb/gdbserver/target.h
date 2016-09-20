@@ -517,9 +517,6 @@ int kill_inferior (int);
 #define detach_inferior(pid) \
   (*the_target->detach) (pid)
 
-#define mourn_inferior(PROC) \
-  (*the_target->mourn) (PROC)
-
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)
 

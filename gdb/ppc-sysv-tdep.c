@@ -28,6 +28,7 @@
 #include "objfiles.h"
 #include "infcall.h"
 #include "dwarf2.h"
+#include <algorithm>
 
 
 /* Check whether FTPYE is a (pointer to) function type that should use
@@ -1189,7 +1190,7 @@ ppc64_aggregate_candidate (struct type *type,
 	      if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 		count += sub_count;
 	      else
-		count = max (count, sub_count);
+		count = std::max (count, sub_count);
 	    }
 
 	  /* There must be no padding.  */

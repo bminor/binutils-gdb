@@ -1,3 +1,105 @@
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp: No longer skip hardware breakpoint tests on s390.
+
+2016-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/casts.cc (decltype): Move it ...
+	(main): ... with its call to ...
+	* gdb.cp/casts03.cc: ... a new file.
+	* gdb.cp/casts.exp: Add new file casts03.cc, move decltype test to it.
+
+2016-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/m-static.h (gnu_obj_4::somewhere): Use constexpr for C++11.
+
+2016-09-15  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.s: Update Power9 instruction tests
+	and sync up the test with tests in gas/testsuite/gas/ppc.
+	* gdb.arch/powerpc-power.exp: Likewise.
+
+2016-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/future.exp: Set CCACHE_DISABLE, clear CCACHE_NODISABLE.
+
+2016-09-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/stap-probe.c (m1): New variable 'dummy', necessary to
+	make m1's definition to be different from m2's.  Use 'dummy' as an
+	argument for probe 'two'.
+
+2016-09-10  Jon Beniston  <jon@beniston.com>
+
+	* lib/mi-support.exp (mi_gdb_target_load): Use target_sim_options
+	for sim target.
+
+2016-09-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu-ifunc-lib.c (resolver_hwcap): New external
+	variable declaration.
+	(gnu_ifunc): Add parameter hwcap.  Store it in resolver_hwcap.
+	* gdb.base/gnu-ifunc.c (resolver_hwcap): New global variable.
+	* gdb.base/gnu-ifunc.exp: Add test to verify that the resolver
+	received HWCAP as its argument.
+
+2016-09-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/new-ui-pending-input.c: New file.
+	* gdb.base/new-ui-pending-input.exp: New file.
+	* gdb.exp (clear_gdb_spawn_id): New procedure.
+	(with_spawn_id): Check whether gdb_spawn_id exists before
+	referencing it.  If gdb_spawn_id didn't exist on entry, clear it
+	on exit.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/float128.c: New file.
+	* gdb.base/float128.exp: Likewise.
+	* gdb.base/floatn.c: Likewise.
+	* gdb.base/floatn.exp: Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.cp/hang.exp: Remove reference to TYPE_FLAG_STUB in comment.
+
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
+	PR backtrace/19927
+	* gdb.python/py-unwind-maint.exp: Adjust tests to not expect that
+	unwinders are immediately called as side effect of "source" or
+	"disable unwinder" commands.
+	* gdb.python/py-recurse-unwind.exp: Remove setup_kfail calls.
+
+2016-09-02  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/return-nodebug.exp: Skip the test if	skip_float_test
+	is true and $type is "float" or "double".
+
+2016-09-02  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/arm-neon.exp: Skip it if gdb_skip_float_test returns
+	true.
+	* gdb.base/call-ar-st.exp: Invoke gdb_skip_float_test.
+	* gdb.base/call-rt-st.exp: Likewise.
+	* gdb.base/call-sc.exp: Invoke gdb_skip_float_test and use its
+	return value instead of gdb,skip_float_test.
+	* gdb.base/callfuncs.exp: Invoke gdb_skip_float_test.
+	(do_function_calls): Use its return value instead of
+	gdb,skip_float_test.
+	* gdb.base/finish.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/return.exp: Likewise.
+	* gdb.base/return2.exp: Likewise.
+	* gdb.base/varargs.exp: Likewise.
+	* lib/gdb.exp (gdb_skip_float_test): Change it to
+	gdb_caching_proc.  Detect the broken ptrace on arm-linux.
+
+2016-08-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.multi/tids.exp: Test "thread apply all".
+
 2016-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/default.exp (tty): Remove.

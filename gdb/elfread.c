@@ -46,6 +46,7 @@
 #include "gdb_bfd.h"
 #include "build-id.h"
 #include "location.h"
+#include "auxv.h"
 
 extern void _initialize_elfread (void);
 
@@ -860,6 +861,8 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
   CORE_ADDR start_at_pc, address;
   struct type *func_func_type = builtin_type (gdbarch)->builtin_func_func;
   struct value *function, *address_val;
+  CORE_ADDR hwcap = 0;
+  struct value *hwcap_val;
 
   /* Try first any non-intrusive methods without an inferior call.  */
 
@@ -875,10 +878,14 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
   function = allocate_value (func_func_type);
   set_value_address (function, pc);
 
-  /* STT_GNU_IFUNC resolver functions have no parameters.  FUNCTION is the
-     function entry address.  ADDRESS may be a function descriptor.  */
+  /* STT_GNU_IFUNC resolver functions usually receive the HWCAP vector as
+     parameter.  FUNCTION is the function entry address.  ADDRESS may be a
+     function descriptor.  */
 
-  address_val = call_function_by_hand (function, 0, NULL);
+  target_auxv_search (&current_target, AT_HWCAP, &hwcap);
+  hwcap_val = value_from_longest (builtin_type (gdbarch)
+				  ->builtin_unsigned_long, hwcap);
+  address_val = call_function_by_hand (function, 1, &hwcap_val);
   address = value_as_address (address_val);
   address = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
 						&current_target);

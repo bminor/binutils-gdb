@@ -73,6 +73,7 @@
 
 #include <fcntl.h>
 #include <sys/types.h>
+#include <algorithm>
 
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
@@ -7884,8 +7885,8 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 	= (const char *) obstack_copy0 (&objfile->per_bfd->storage_obstack,
 					package_name,
 					strlen (package_name));
-      struct type *type = init_type (TYPE_CODE_MODULE, 0, 0,
-				     saved_package_name, objfile);
+      struct type *type = init_type (objfile, TYPE_CODE_MODULE, 0,
+				     saved_package_name);
       struct symbol *sym;
 
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
@@ -12412,8 +12413,8 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
 
   if (dwarf2_get_pc_bounds (die, &low, &high, cu, NULL) >= PC_BOUNDS_RANGES)
     {
-      *lowpc = min (*lowpc, low);
-      *highpc = max (*highpc, high);
+      *lowpc = std::min (*lowpc, low);
+      *highpc = std::max (*highpc, high);
     }
 
   /* If the language does not allow nested subprograms (either inside
@@ -12477,8 +12478,8 @@ get_scope_pc_bounds (struct die_info *die,
 
 	    if (current_low != ((CORE_ADDR) -1))
 	      {
-		best_low = min (best_low, current_low);
-		best_high = max (best_high, current_high);
+		best_low = std::min (best_low, current_low);
+		best_high = std::max (best_high, current_high);
 	      }
 	    break;
 	  default:
@@ -14598,9 +14599,7 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
 			    previous_prefix, name, 0, cu);
 
   /* Create the type.  */
-  type = init_type (TYPE_CODE_NAMESPACE, 0, 0, NULL,
-		    objfile);
-  TYPE_NAME (type) = name;
+  type = init_type (objfile, TYPE_CODE_NAMESPACE, 0, name);
   TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
   return set_die_type (die, type, cu);
@@ -14670,7 +14669,7 @@ read_module_type (struct die_info *die, struct dwarf2_cu *cu)
     complaint (&symfile_complaints,
 	       _("DW_TAG_module has no name, offset 0x%x"),
                die->offset.sect_off);
-  type = init_type (TYPE_CODE_MODULE, 0, 0, module_name, objfile);
+  type = init_type (objfile, TYPE_CODE_MODULE, 0, module_name);
 
   /* determine_prefix uses TYPE_TAG_NAME.  */
   TYPE_TAG_NAME (type) = TYPE_NAME (type);
@@ -15208,9 +15207,8 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   struct type *this_type, *target_type;
 
   name = dwarf2_full_name (NULL, die, cu);
-  this_type = init_type (TYPE_CODE_TYPEDEF, 0,
-			 TYPE_FLAG_TARGET_STUB, NULL, objfile);
-  TYPE_NAME (this_type) = name;
+  this_type = init_type (objfile, TYPE_CODE_TYPEDEF, 0, name);
+  TYPE_TARGET_STUB (this_type) = 1;
   set_die_type (die, this_type, cu);
   target_type = die_type (die, cu);
   if (target_type != this_type)
@@ -15228,6 +15226,27 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   return this_type;
 }
 
+/* Allocate a floating-point type of size BITS and name NAME.  Pass NAME_HINT
+   (which may be different from NAME) to the architecture back-end to allow
+   it to guess the correct format if necessary.  */
+
+static struct type *
+dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
+			const char *name_hint)
+{
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  const struct floatformat **format;
+  struct type *type;
+
+  format = gdbarch_floatformat_for_type (gdbarch, name_hint, bits);
+  if (format)
+    type = init_float_type (objfile, bits, name, format);
+  else
+    type = init_type (objfile, TYPE_CODE_ERROR, bits / TARGET_CHAR_BIT, name);
+
+  return type;
+}
+
 /* Find a representation of a given base type and install
    it in the TYPE field of the die.  */
 
@@ -15237,11 +15256,8 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   struct type *type;
   struct attribute *attr;
-  int encoding = 0, size = 0;
+  int encoding = 0, bits = 0;
   const char *name;
-  enum type_code code = TYPE_CODE_INT;
-  int type_flags = 0;
-  struct type *target_type = NULL;
 
   attr = dwarf2_attr (die, DW_AT_encoding, cu);
   if (attr)
@@ -15251,7 +15267,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     {
-      size = DW_UNSND (attr);
+      bits = DW_UNSND (attr) * TARGET_CHAR_BIT;
     }
   name = dwarf2_name (die, cu);
   if (!name)
@@ -15264,61 +15280,63 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       case DW_ATE_address:
 	/* Turn DW_ATE_address into a void * pointer.  */
-	code = TYPE_CODE_PTR;
-	type_flags |= TYPE_FLAG_UNSIGNED;
-	target_type = init_type (TYPE_CODE_VOID, 1, 0, NULL, objfile);
+	type = init_type (objfile, TYPE_CODE_VOID, 1, NULL);
+	type = init_pointer_type (objfile, bits, name, type);
 	break;
       case DW_ATE_boolean:
-	code = TYPE_CODE_BOOL;
-	type_flags |= TYPE_FLAG_UNSIGNED;
+	type = init_boolean_type (objfile, bits, 1, name);
 	break;
       case DW_ATE_complex_float:
-	code = TYPE_CODE_COMPLEX;
-	target_type = init_type (TYPE_CODE_FLT, size / 2, 0, NULL, objfile);
+	type = dwarf2_init_float_type (objfile, bits / 2, NULL, name);
+	type = init_complex_type (objfile, name, type);
 	break;
       case DW_ATE_decimal_float:
-	code = TYPE_CODE_DECFLOAT;
+	type = init_decfloat_type (objfile, bits, name);
 	break;
       case DW_ATE_float:
-	code = TYPE_CODE_FLT;
+	type = dwarf2_init_float_type (objfile, bits, name, name);
 	break;
       case DW_ATE_signed:
+	type = init_integer_type (objfile, bits, 0, name);
 	break;
       case DW_ATE_unsigned:
-	type_flags |= TYPE_FLAG_UNSIGNED;
 	if (cu->language == language_fortran
 	    && name
 	    && startswith (name, "character("))
-	  code = TYPE_CODE_CHAR;
+	  type = init_character_type (objfile, bits, 1, name);
+	else
+	  type = init_integer_type (objfile, bits, 1, name);
 	break;
       case DW_ATE_signed_char:
 	if (cu->language == language_ada || cu->language == language_m2
 	    || cu->language == language_pascal
 	    || cu->language == language_fortran)
-	  code = TYPE_CODE_CHAR;
+	  type = init_character_type (objfile, bits, 0, name);
+	else
+	  type = init_integer_type (objfile, bits, 0, name);
 	break;
       case DW_ATE_unsigned_char:
 	if (cu->language == language_ada || cu->language == language_m2
 	    || cu->language == language_pascal
 	    || cu->language == language_fortran
 	    || cu->language == language_rust)
-	  code = TYPE_CODE_CHAR;
-	type_flags |= TYPE_FLAG_UNSIGNED;
+	  type = init_character_type (objfile, bits, 1, name);
+	else
+	  type = init_integer_type (objfile, bits, 1, name);
 	break;
       case DW_ATE_UTF:
 	/* We just treat this as an integer and then recognize the
 	   type by name elsewhere.  */
+	type = init_integer_type (objfile, bits, 0, name);
 	break;
 
       default:
 	complaint (&symfile_complaints, _("unsupported DW_AT_encoding: '%s'"),
 		   dwarf_type_encoding_name (encoding));
+	type = init_type (objfile, TYPE_CODE_ERROR,
+			  bits / TARGET_CHAR_BIT, name);
 	break;
     }
-
-  type = init_type (code, size, type_flags, NULL, objfile);
-  TYPE_NAME (type) = name;
-  TYPE_TARGET_TYPE (type) = target_type;
 
   if (name && strcmp (name, "char") == 0)
     TYPE_NOSIGN (type) = 1;
@@ -15599,7 +15617,7 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 
   /* For now, we only support the C meaning of an unspecified type: void.  */
 
-  type = init_type (TYPE_CODE_VOID, 0, 0, NULL, cu->objfile);
+  type = init_type (cu->objfile, TYPE_CODE_VOID, 0, NULL);
   TYPE_NAME (type) = dwarf2_name (die, cu);
 
   return set_die_type (die, type, cu);
@@ -19495,7 +19513,7 @@ build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
 				  message, strlen (message));
   xfree (message);
 
-  return init_type (TYPE_CODE_ERROR, 0, 0, saved, objfile);
+  return init_type (objfile, TYPE_CODE_ERROR, 0, saved);
 }
 
 /* Look up the type of DIE in CU using its type attribute ATTR.
@@ -21285,6 +21303,7 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  break;
 
         case DW_OP_GNU_push_tls_address:
+	case DW_OP_form_tls_address:
 	  /* The top of the stack has the offset from the beginning
 	     of the thread control block at which the variable is located.  */
 	  /* Nothing should follow this operator, so the top of stack would

@@ -2294,6 +2294,12 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
       return;
     }
 
+  /* Deal with SHF_EXCLUDE ELF sections.  */
+  if (!bfd_link_relocatable (&link_info)
+      && (abfd->flags & BFD_PLUGIN) == 0
+      && (sec->flags & (SEC_GROUP | SEC_KEEP | SEC_EXCLUDE)) == SEC_EXCLUDE)
+    sec->output_section = bfd_abs_section_ptr;
+
   if (!(abfd->flags & DYNAMIC))
     bfd_section_already_linked (abfd, sec, &link_info);
 }

@@ -1128,8 +1128,10 @@ rust_language_arch_info (struct gdbarch *gdbarch,
   types[rust_primitive_isize] = arch_integer_type (gdbarch, length, 0, "isize");
   types[rust_primitive_usize] = arch_integer_type (gdbarch, length, 1, "usize");
 
-  types[rust_primitive_f32] = arch_float_type (gdbarch, 32, "f32", NULL);
-  types[rust_primitive_f64] = arch_float_type (gdbarch, 64, "f64", NULL);
+  types[rust_primitive_f32] = arch_float_type (gdbarch, 32, "f32",
+					       floatformats_ieee_single);
+  types[rust_primitive_f64] = arch_float_type (gdbarch, 64, "f64",
+					       floatformats_ieee_double);
 
   types[rust_primitive_unit] = arch_integer_type (gdbarch, 0, 1, "()");
 

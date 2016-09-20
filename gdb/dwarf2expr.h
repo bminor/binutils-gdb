@@ -56,7 +56,7 @@ struct dwarf_expr_context_funcs
   CORE_ADDR (*get_frame_pc) (void *baton);
 
   /* Return the thread-local storage address for
-     DW_OP_GNU_push_tls_address.  */
+     DW_OP_GNU_push_tls_address or DW_OP_form_tls_address.  */
   CORE_ADDR (*get_tls_address) (void *baton, CORE_ADDR offset);
 
   /* Execute DW_AT_location expression for the DWARF expression subroutine in

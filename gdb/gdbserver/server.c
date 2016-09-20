@@ -258,12 +258,7 @@ start_inferior (char **argv)
 
   if (wrapper_argv != NULL)
     {
-      struct thread_resume resume_info;
-
-      memset (&resume_info, 0, sizeof (resume_info));
-      resume_info.thread = pid_to_ptid (signal_pid);
-      resume_info.kind = resume_continue;
-      resume_info.sig = 0;
+      ptid_t ptid = pid_to_ptid (signal_pid);
 
       last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
@@ -271,7 +266,7 @@ start_inferior (char **argv)
 	{
 	  do
 	    {
-	      (*the_target->resume) (&resume_info, 1);
+	      target_continue_no_signal (ptid);
 
 	      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 	      if (last_status.kind != TARGET_WAITKIND_STOPPED)
@@ -290,16 +285,19 @@ start_inferior (char **argv)
      (assuming success).  */
   last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
-  target_post_create_inferior ();
-
+  /* At this point, the target process, if it exits, is stopped.  Do not call
+     the function target_post_create_inferior if the process has already
+     exited, as the target implementation of the routine may rely on the
+     process being live. */
   if (last_status.kind != TARGET_WAITKIND_EXITED
       && last_status.kind != TARGET_WAITKIND_SIGNALLED)
     {
+      target_post_create_inferior ();
       current_thread->last_resume_kind = resume_stop;
       current_thread->last_status = last_status;
     }
   else
-    mourn_inferior (find_process_pid (ptid_get_pid (last_ptid)));
+    target_mourn_inferior (last_ptid);
 
   return signal_pid;
 }
@@ -2781,7 +2779,7 @@ resume (struct thread_resume *actions, size_t num_actions)
 
       if (last_status.kind == TARGET_WAITKIND_EXITED
           || last_status.kind == TARGET_WAITKIND_SIGNALLED)
-        mourn_inferior (find_process_pid (ptid_get_pid (last_ptid)));
+        target_mourn_inferior (last_ptid);
     }
 }
 
@@ -3929,7 +3927,6 @@ process_serial_event (void)
 
       if ((tracing && disconnected_tracing) || any_persistent_commands ())
 	{
-	  struct thread_resume resume_info;
 	  struct process_info *process = find_process_pid (pid);
 
 	  if (process == NULL)
@@ -3965,10 +3962,7 @@ process_serial_event (void)
 	  process->gdb_detached = 1;
 
 	  /* Detaching implicitly resumes all threads.  */
-	  resume_info.thread = minus_one_ptid;
-	  resume_info.kind = resume_continue;
-	  resume_info.sig = 0;
-	  (*the_target->resume) (&resume_info, 1);
+	  target_continue_no_signal (minus_one_ptid);
 
 	  write_ok (own_buf);
 	  break; /* from switch/case */
@@ -4398,7 +4392,7 @@ handle_target_event (int err, gdb_client_data client_data)
 	  || last_status.kind == TARGET_WAITKIND_SIGNALLED)
 	{
 	  mark_breakpoints_out (process);
-	  mourn_inferior (process);
+	  target_mourn_inferior (last_ptid);
 	}
       else if (last_status.kind == TARGET_WAITKIND_THREAD_EXITED)
 	;
@@ -4428,7 +4422,7 @@ handle_target_event (int err, gdb_client_data client_data)
 	      /* A thread stopped with a signal, but gdb isn't
 		 connected to handle it.  Pass it down to the
 		 inferior, as if it wasn't being traced.  */
-	      struct thread_resume resume_info;
+	      enum gdb_signal signal;
 
 	      if (debug_threads)
 		debug_printf ("GDB not connected; forwarding event %d for"
@@ -4436,13 +4430,11 @@ handle_target_event (int err, gdb_client_data client_data)
 			      (int) last_status.kind,
 			      target_pid_to_str (last_ptid));
 
-	      resume_info.thread = last_ptid;
-	      resume_info.kind = resume_continue;
 	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
-		resume_info.sig = gdb_signal_to_host (last_status.value.sig);
+		signal = last_status.value.sig;
 	      else
-		resume_info.sig = 0;
-	      (*the_target->resume) (&resume_info, 1);
+		signal = GDB_SIGNAL_0;
+	      target_continue (last_ptid, signal);
 	    }
 	}
       else

@@ -1,3 +1,100 @@
+2016-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/textinsnxop.d: New file.
+	* testsuite/gas/arc/textinsnxop.s: Likewise.
+
+2016-09-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run
+	dcti-couples-v9 only in ELF targets to avoid spurious failures in
+	sparc-aout and sparc-coff targets.
+
+2016-09-14  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <slbiag, cpabort> New tests.
+	<addex., brd, brh, brw, lwzmx, nandxor, rldixor, setbool,
+	xor3, cp_abort, copy_first, paste, paste_last, sync>: Remove tests.
+	<copy, paste.>: Update tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
+2016-09-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Print the instruction arguments
+	in "architecture mismatch" error messages.
+
+2016-09-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (md_assemble): Detect and warning on
+	unpredictable DCTI couples in certain arches.
+	(dcti_couples_detect): New global.
+	(md_longopts): Add command line option -dcti-couples-detect.
+	(md_show_usage): Document -dcti-couples-detect.
+	(md_parse_option): Handle OPTION_DCTI_COUPLES_DETECT.
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run
+	dcti-couples-v8, dcti-couples-v9 and dcti-couples-v9c tests.
+	* testsuite/gas/sparc/dcti-couples.s: New file.
+	* testsuite/gas/sparc/dcti-couples-v9c.d: Likewise.
+	* testsuite/gas/sparc/dcti-couples-v8.d: Likewise.
+	* testsuite/gas/sparc/dcti-couples-v9.d: Likewise.
+	* testsuite/gas/sparc/dcti-couples-v9c.l: Likewise.
+	* testsuite/gas/sparc/dcti-couples-v8.l: Likewise.
+	* doc/as.texinfo (Overview): Document --dcti-couples-detect.
+	* doc/c-sparc.texi (Sparc-Opts): Likewise.
+
+2016-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/tls-relocs2.d: New file.
+	* testsuite/gas/arc/tls-relocs2.s: Likewise.
+	* config/tc-arc.c (tokenize_arguments): Accept offsets when base
+	is used.
+
+2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): Support alternate arch
+	strings.
+	* doc/as.texinfo: Document new arch strings.
+	* doc/c-s390.texi: Likewise.
+
+2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* config/tc-s390.c: Set all facitily bits by default
+
+2016-09-12  Patrick Steuer  <steuer@linux.vnet.ibm.com>
+
+	* testsuite/gas/s390/zarch-z196.d: Adjust testcase.
+
+2016-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_target_format): Allow PROCESSOR_IAMCU
+	for Intel MCU.
+
+2016-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (valid_iamcu_cpu_flags): Removed.
+	(set_cpu_arch): Updated.
+	(md_parse_option): Likewise.
+	* testsuite/gas/i386/i386.exp: Run iamcu-4 and iamcu-5.  Remove
+	iamcu-inval-2 and iamcu-inval-3.
+	* testsuite/gas/i386/iamcu-4.d: New file.
+	* testsuite/gas/i386/iamcu-4.s: Likewise.
+	* testsuite/gas/i386/iamcu-5.d: Likewise.
+	* testsuite/gas/i386/iamcu-5.s: Likewise.
+	* testsuite/gas/i386/iamcu-inval-2.l: Removed.
+	* testsuite/gas/i386/iamcu-inval-2.s: Likewise.
+	* testsuite/gas/i386/iamcu-inval-3.l: Likewise.
+	* testsuite/gas/i386/iamcu-inval-3.s: Likewise.
+
+2016-09-07  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c ((arm_cpus): Use ARM_ARCH_V8A_CRC for all
+	ARMv8-A CPUs except xgene1.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Set sh_flags for VLE.  Test
+	ppc_cpu rather than calling ppc_mach to determine VLE mode.
+	(ppc_frag_check, ppc_handle_align): Likewise use ppc_cpu.
+
 2016-08-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/sparc/crypto.d: Rename invalid opcode camellia_fi

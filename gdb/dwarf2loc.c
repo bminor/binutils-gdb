@@ -38,6 +38,7 @@
 #include "dwarf2loc.h"
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
+#include <algorithm>
 
 extern int dwarf_always_disassemble;
 
@@ -862,7 +863,7 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
 
   /* Intersect callers.  */
 
-  callers = min (result->callers, length);
+  callers = std::min ((long) result->callers, length);
   for (idx = 0; idx < callers; idx++)
     if (result->call_site[idx] != VEC_index (call_sitep, chain, idx))
       {
@@ -872,7 +873,7 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
 
   /* Intersect callees.  */
 
-  callees = min (result->callees, length);
+  callees = std::min ((long) result->callees, length);
   for (idx = 0; idx < callees; idx++)
     if (result->call_site[result->length - 1 - idx]
 	!= VEC_index (call_sitep, chain, length - 1 - idx))
@@ -3571,6 +3572,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  break;
 
 	case DW_OP_GNU_push_tls_address:
+	case DW_OP_form_tls_address:
 	  unimplemented (op);
 	  break;
 
@@ -3907,7 +3909,8 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	   && (data[0] == DW_OP_addr
 	       || (addr_size == 4 && data[0] == DW_OP_const4u)
 	       || (addr_size == 8 && data[0] == DW_OP_const8u))
-	   && data[1 + addr_size] == DW_OP_GNU_push_tls_address
+	   && (data[1 + addr_size] == DW_OP_GNU_push_tls_address
+	       || data[1 + addr_size] == DW_OP_form_tls_address)
 	   && piece_end_p (data + 2 + addr_size, end))
     {
       ULONGEST offset;
@@ -3930,7 +3933,8 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	   && data + 1 + (leb128_size = skip_leb128 (data + 1, end)) < end
 	   && data[0] == DW_OP_GNU_const_index
 	   && leb128_size > 0
-	   && data[1 + leb128_size] == DW_OP_GNU_push_tls_address
+	   && (data[1 + leb128_size] == DW_OP_GNU_push_tls_address
+	       || data[1 + leb128_size] == DW_OP_form_tls_address)
 	   && piece_end_p (data + 2 + leb128_size, end))
     {
       uint64_t offset;

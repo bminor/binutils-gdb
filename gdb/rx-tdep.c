@@ -36,6 +36,7 @@
 
 #include "elf/rx.h"
 #include "elf-bfd.h"
+#include <algorithm>
 
 /* Certain important register numbers.  */
 enum
@@ -897,7 +898,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      && arg_size <= 4 * (RX_R4_REGNUM - arg_reg + 1)
 		      && arg_size % 4 == 0)
 		    {
-		      int len = min (arg_size, 4);
+		      int len = std::min (arg_size, (ULONGEST) 4);
 
 		      if (write_pass)
 			regcache_cooked_write_unsigned (regcache, arg_reg,
@@ -960,7 +961,7 @@ rx_return_value (struct gdbarch *gdbarch,
 
       while (valtype_len > 0)
 	{
-	  int len = min (valtype_len, 4);
+	  int len = std::min (valtype_len, (ULONGEST) 4);
 
 	  regcache_cooked_read_unsigned (regcache, argreg, &u);
 	  store_unsigned_integer (readbuf + offset, len, byte_order, u);
@@ -978,7 +979,7 @@ rx_return_value (struct gdbarch *gdbarch,
 
       while (valtype_len > 0)
 	{
-	  int len = min (valtype_len, 4);
+	  int len = std::min (valtype_len, (ULONGEST) 4);
 
 	  u = extract_unsigned_integer (writebuf + offset, len, byte_order);
 	  regcache_cooked_write_unsigned (regcache, argreg, u);

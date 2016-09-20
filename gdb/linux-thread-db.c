@@ -45,6 +45,7 @@
 #include <signal.h>
 #include <ctype.h>
 #include "nat/linux-namespaces.h"
+#include <algorithm>
 
 /* GNU/Linux libthread_db support.
 
@@ -1599,13 +1600,13 @@ info_auto_load_libthread_db (char *args, int from_tty)
       if (i == 0 || strcmp (array[i - 1]->filename, array[i]->filename) != 0)
 	{
 	  unique_filenames++;
-	  max_filename_len = max (max_filename_len,
-				  strlen (array[i]->filename));
+	  max_filename_len = std::max (max_filename_len,
+				       strlen (array[i]->filename));
 
 	  if (i > 0)
 	    {
 	      pids_len -= strlen (", ");
-	      max_pids_len = max (max_pids_len, pids_len);
+	      max_pids_len = std::max (max_pids_len, pids_len);
 	    }
 	  pids_len = 0;
 	}
@@ -1614,7 +1615,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   if (i)
     {
       pids_len -= strlen (", ");
-      max_pids_len = max (max_pids_len, pids_len);
+      max_pids_len = std::max (max_pids_len, pids_len);
     }
 
   /* Table header shifted right by preceding "libthread-db:  " would not match

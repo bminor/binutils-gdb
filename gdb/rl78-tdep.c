@@ -1410,16 +1410,9 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->rl78_int32 = arch_integer_type (gdbarch, 32, 0, "int32_t");
 
   tdep->rl78_data_pointer
-    = arch_type (gdbarch, TYPE_CODE_PTR, 16 / TARGET_CHAR_BIT,
-                 xstrdup ("rl78_data_addr_t"));
-  TYPE_TARGET_TYPE (tdep->rl78_data_pointer) = tdep->rl78_void;
-  TYPE_UNSIGNED (tdep->rl78_data_pointer) = 1;
-
+    = arch_pointer_type (gdbarch, 16, "rl78_data_addr_t", tdep->rl78_void);
   tdep->rl78_code_pointer
-    = arch_type (gdbarch, TYPE_CODE_PTR, 32 / TARGET_CHAR_BIT,
-                 xstrdup ("rl78_code_addr_t"));
-  TYPE_TARGET_TYPE (tdep->rl78_code_pointer) = tdep->rl78_void;
-  TYPE_UNSIGNED (tdep->rl78_code_pointer) = 1;
+    = arch_pointer_type (gdbarch, 32, "rl78_code_addr_t", tdep->rl78_void);
 
   tdep->rl78_psw_type = arch_flags_type (gdbarch, "builtin_type_rl78_psw", 1);
   append_flags_type_flag (tdep->rl78_psw_type, 0, "CY");

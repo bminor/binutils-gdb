@@ -1,3 +1,62 @@
+2016-09-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* server.c (start_inferior): Call target_mourn_inferior instead of
+	mourn_inferior; pass ptid_t argument to it.
+	(resume): Likewise.
+	(handle_target_event): Likewise.
+	* target.c (target_mourn_inferior): New function.
+	* target.h (mourn_inferior): Delete macro.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-low.c (lwp_is_stepping): New function.
+
+2016-09-06  Carl Love  <cel@us.ibm.com>
+
+	* server.c (start_inferior):  Fixed comment, requested comment change
+	didn't get updated correctly.  Removed reference to ptrace () call as
+	it is only true on Linux systems.
+
+2016-09-06  Carl Love  <cel@us.ibm.com>
+
+	* server.c (start_inferior):  Do not call
+	function target_post_create_inferior () if the
+	inferior process has already exited.
+
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMPILER, COMPILER_CFLAGS): Remove.
+	(COMPILE.pre, CC_LD): Use CXX directly.
+	(INTERNAL_CFLAGS_BASE): Use CXXFLAGS directly.
+	* acinclude.m4: Don't include build-with-cxx.m4.
+	* configure.ac: Remove GDB_AC_BUILD_WITH_CXX call.
+	* configure: Regenerate.
+
+2016-09-02  Akash Trehan  <akash.trehan123@gmail.com>
+
+	PR gdb/19495
+	* remote-utils.c (relocate_instruction): Remove redundant strcpy()
+	call writing data to own_buf.
+
+2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* target.c (mywait): Call target_wait instead of
+	the_target->wait.
+	(target_wait): New function.
+
+2016-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* server.c (start_inferior): New variable 'ptid'.  Replace calls
+	to the_target->resume by target_continue{,_no_signal}, depending
+	on the case.
+	* target.c (target_stop_and_wait): Call target_continue_no_signal
+	instead of the_target->resume.
+	(target_continue): New function.
+
+2016-08-31  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-low.c (linux_wait_1): Move event switch after unsuspend_lwps.
+
 2016-08-25  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
 
 	PR server/20491

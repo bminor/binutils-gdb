@@ -1461,7 +1461,7 @@ find_separate_debug_file (const char *dir,
   struct cleanup *back_to;
   int ix;
 
-  /* Set I to max (strlen (canon_dir), strlen (dir)).  */
+  /* Set I to std::max (strlen (canon_dir), strlen (dir)).  */
   i = strlen (dir);
   if (canon_dir != NULL && strlen (canon_dir) > i)
     i = strlen (canon_dir);

@@ -39,6 +39,7 @@
 #include "event-loop.h"
 #include "inf-loop.h"
 #include "vec.h"
+#include <algorithm>
 
 /* The target_ops of record-btrace.  */
 static struct target_ops record_btrace_ops;
@@ -1003,8 +1004,8 @@ btrace_compute_src_line_range (const struct btrace_function *bfun,
       if (sal.symtab != symtab || sal.line == 0)
 	continue;
 
-      begin = min (begin, sal.line);
-      end = max (end, sal.line);
+      begin = std::min (begin, sal.line);
+      end = std::max (end, sal.line);
     }
 
  out:
@@ -1380,7 +1381,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 		     & SEC_READONLY) != 0)
 		  {
 		    /* Truncate the request to fit into this section.  */
-		    len = min (len, section->endaddr - offset);
+		    len = std::min (len, section->endaddr - offset);
 		    break;
 		  }
 	      }

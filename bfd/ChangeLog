@@ -1,3 +1,74 @@
+2016-09-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Allow
+	negative offsets to _GLOBAL_OFFSET_TABLE_ if the .got section is
+	bigger than 0x1000 bytes.
+
+2016-09-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): Only mark section
+	not already marked.
+
+2016-09-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20605
+	* peicode.h (pe_bfd_read_buildid): Check that the Data Directory
+	contains a valid size for the Debug directory.
+
+2016-09-14  Bhushan Attarde  <bhushan.attarde@imgtec.com>
+
+	* format.c (struct bfd_preserve): New "build_id" field.
+	(bfd_preserve_save): Save "build_id".
+	(bfd_preserve_restore): Restore "build_id".
+
+2016-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20550
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Resolve size
+	relocation with copy relocation when building executable.
+
+2016-09-02  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20545
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Add parameter
+	delete_shrinks_insn. Modify computation of shrinked_insn_address.
+	Compute shrink_boundary and adjust addend only if
+	addend_within_shrink_boundary.
+	(elf32_avr_relax_section): Modify calls to
+	elf32_avr_relax_delete_bytes to pass extra parameter.
+
+2016-09-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (cmse_entry_fct_p): Store instruction encoding in an
+	array of bytes and use bfd_get_16 to interpret its encoding according
+	to endianness of target.
+
+2016-09-01  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (synthetic_opd): New static var.
+	(compare_symbols): Don't treat symbols in .opd specially for ELFv2.
+	(ppc64_elf_get_synthetic_symtab): Likewise.  Comment.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (group_sections): Delete stub14_group_size.  Instead,
+	track max group size with a new "group_size" var that is reduced
+	by a factor of 1024 from the 24-bit branch size whenever a 14-bit
+	branch is seen.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_section_processing): Delete.
+	(elf_backend_section_processing): Don't define.
+	(ppc_elf_modify_segment_map): Set p_flags and mark valid.  Don't
+	split on non-exec sections differing in SHF_PPC_VLE.  When
+	splitting segments, mark size invalid.
+
+2016-08-30  Alan Modra  <amodra@gmail.com>
+
+	PR 20531
+	* elf32-ppc.c (_bfd_elf_ppc_set_arch): Add missing "break".
+
 2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14961

@@ -71,6 +71,7 @@
 #include "agent.h"
 #include "btrace.h"
 #include "record-btrace.h"
+#include <algorithm>
 
 /* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
@@ -3354,7 +3355,7 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
       getpkt (&rs->buf, &rs->buf_size, 0);
       if (rs->buf[0] != 0)
 	{
-	  n = min (strlen (rs->buf) / 2, sizeof (display_buf));
+	  n = std::min (strlen (rs->buf) / 2, sizeof (display_buf));
 	  result = hex2bin (rs->buf, (gdb_byte *) display_buf, n);
 	  display_buf [result] = '\0';
 	  return display_buf;
@@ -5158,7 +5159,7 @@ remote_detach_1 (const char *args, int from_tty)
   /* If doing detach-on-fork, we don't mourn, because that will delete
      breakpoints that should be available for the followed inferior.  */
   if (!is_fork_parent)
-    target_mourn_inferior ();
+    target_mourn_inferior (inferior_ptid);
   else
     {
       inferior_ptid = null_ptid;
@@ -6029,7 +6030,7 @@ remote_notif_stop_ack (struct notif_client *self, char *buf,
   struct stop_reply *stop_reply = (struct stop_reply *) event;
 
   /* acknowledge */
-  putpkt ((char *) self->ack_command);
+  putpkt (self->ack_command);
 
   if (stop_reply->ws.kind == TARGET_WAITKIND_IGNORE)
       /* We got an unknown stop reply.  */
@@ -6979,8 +6980,8 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  rs->last_sent_signal = GDB_SIGNAL_0;
 	  target_terminal_inferior ();
 
-	  strcpy ((char *) buf, rs->last_sent_step ? "s" : "c");
-	  putpkt ((char *) buf);
+	  strcpy (buf, rs->last_sent_step ? "s" : "c");
+	  putpkt (buf);
 	  break;
 	}
       /* else fallthrough */
@@ -7466,7 +7467,7 @@ hexnumlen (ULONGEST num)
   for (i = 0; num != 0; i++)
     num >>= 4;
 
-  return max (i, 1);
+  return std::max (i, 1);
 }
 
 /* Set BUF to the minimum number of hex digits representing NUM.  */
@@ -7671,18 +7672,22 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   if (packet_format == 'X')
     {
       /* Best guess at number of bytes that will fit.  */
-      todo_units = min (len_units, payload_capacity_bytes / unit_size);
+      todo_units = std::min (len_units,
+			     (ULONGEST) payload_capacity_bytes / unit_size);
       if (use_length)
 	payload_capacity_bytes -= hexnumlen (todo_units);
-      todo_units = min (todo_units, payload_capacity_bytes / unit_size);
+      todo_units = std::min (todo_units, payload_capacity_bytes / unit_size);
     }
   else
     {
       /* Number of bytes that will fit.  */
-      todo_units = min (len_units, (payload_capacity_bytes / unit_size) / 2);
+      todo_units
+	= std::min (len_units,
+		    (ULONGEST) (payload_capacity_bytes / unit_size) / 2);
       if (use_length)
 	payload_capacity_bytes -= hexnumlen (todo_units);
-      todo_units = min (todo_units, (payload_capacity_bytes / unit_size) / 2);
+      todo_units = std::min (todo_units,
+			     (payload_capacity_bytes / unit_size) / 2);
     }
 
   if (todo_units <= 0)
@@ -7841,7 +7846,8 @@ remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len_units,
      get_memory_packet_size ensures this.  */
 
   /* Number of units that will fit.  */
-  todo_units = min (len_units, (buf_size_bytes / unit_size) / 2);
+  todo_units = std::min (len_units,
+			 (ULONGEST) (buf_size_bytes / unit_size) / 2);
 
   /* Construct "m"<memaddr>","<len>".  */
   memaddr = remote_address_masked (memaddr);
@@ -8903,7 +8909,7 @@ remote_kill (struct target_ops *ops)
       res = remote_vkill (pid, rs);
       if (res == 0)
 	{
-	  target_mourn_inferior ();
+	  target_mourn_inferior (inferior_ptid);
 	  return;
 	}
     }
@@ -8920,7 +8926,7 @@ remote_kill (struct target_ops *ops)
 	 not in extended mode, mourning the inferior also unpushes
 	 remote_ops from the target stack, which closes the remote
 	 connection.  */
-      target_mourn_inferior ();
+      target_mourn_inferior (inferior_ptid);
 
       return;
     }
@@ -9901,7 +9907,7 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
      may not, since we don't know how much of it will need to be escaped;
      the target is free to respond with slightly less data.  We subtract
      five to account for the response type and the protocol frame.  */
-  n = min (get_remote_packet_size () - 5, len);
+  n = std::min<LONGEST> (get_remote_packet_size () - 5, len);
   snprintf (rs->buf, get_remote_packet_size () - 4, "qXfer:%s:read:%s:%s,%s",
 	    object_name, annex ? annex : "",
 	    phex_nz (offset, sizeof offset),
@@ -13395,7 +13401,7 @@ show_remote_cmd (char *args, int from_tty)
 	ui_out_field_string (uiout, "name", list->name);
 	ui_out_text (uiout, ":  ");
 	if (list->type == show_cmd)
-	  do_show_command ((char *) NULL, from_tty, list);
+	  do_show_command (NULL, from_tty, list);
 	else
 	  cmd_func (list, NULL, from_tty);
 	/* Close the tuple.  */

@@ -602,8 +602,9 @@ proc mi_gdb_target_load { } {
 	    }
 	}
     } elseif { [target_info protocol] == "sim" } {
+	set target_sim_options "[board_info target gdb,target_sim_options]"
 	# For the simulator, just connect to it directly.
-	send_gdb "47-target-select sim\n"
+	send_gdb "47-target-select sim $target_sim_options\n"
 	gdb_expect $loadtimeout {
 	    -re "47\\^connected.*$mi_gdb_prompt$" {
 	    }

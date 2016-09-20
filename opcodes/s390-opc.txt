@@ -1115,7 +1115,7 @@ b2b8 srnmb S_RD "set 3 bit bfp rounding mode" z196 zarch
 b92a kmf RRE_RR "cipher message with CFB" z196 zarch
 b92b kmo RRE_RR "cipher message with OFB" z196 zarch
 b92c pcc RRE_00 "perform cryptographic computation" z196 zarch
-b92d kmctr RRF_R0RR2 "cipher message with counter" z196 zarch
+b92d kmctr RRF_R0RR "cipher message with counter" z196 zarch
 
 # The new instructions of the IBM zEnterprise EC12
 b2ec etnd RRE_R0 "extract transaction nesting depth" zEC12 zarch htm

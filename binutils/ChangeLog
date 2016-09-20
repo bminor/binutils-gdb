@@ -1,3 +1,20 @@
+2016-09-19  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (print_symbol): Remove is_synthetic param.  Test sym->flags
+	instead.
+	(print_size_symbols, print_symbols): Adjust to suit, deleting
+	now unused synth_count param and fromsynth var.
+	(display_rel_file): Adjust, localizing synth_count.
+
+2016-09-14  Ed Maste  <emaste@freebsd.org>
+
+	* readelf.c (process_mips_specific): Fix typo in error message.
+
+2016-09-06  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (request_dump_bynumber): Only call memcpy if
+	dump_sects is not NULL.
+
 2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (load_specific_debug_section): Check the external

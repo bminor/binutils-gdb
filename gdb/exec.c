@@ -43,6 +43,7 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include "solist.h"
+#include <algorithm>
 
 void (*deprecated_file_changed_hook) (char *);
 
@@ -758,8 +759,8 @@ section_table_available_memory (VEC(mem_range_s) *memory,
 
 	  r = VEC_safe_push (mem_range_s, memory, NULL);
 
-	  r->start = max (lo1, lo2);
-	  r->length = min (hi1, hi2) - r->start;
+	  r->start = std::max (lo1, lo2);
+	  r->length = std::min (hi1, hi2) - r->start;
 	}
     }
 
@@ -797,7 +798,7 @@ section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
 	  enum target_xfer_status status;
 
 	  /* Get the intersection window.  */
-	  end = min (offset + len, r->start + r->length);
+	  end = std::min<CORE_ADDR> (offset + len, r->start + r->length);
 
 	  gdb_assert (end - offset <= len);
 
