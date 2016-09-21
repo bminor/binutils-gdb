@@ -1,3 +1,7 @@
+2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* .gitignore: New file.
+
 2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Input/Output): Mention possibility to unset

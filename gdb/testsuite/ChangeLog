@@ -1,3 +1,7 @@
+2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* .gitignore: New file.
+
 2016-09-21  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* gdb.arch/mips16-thunks.exp: Use `standard_output_file'
