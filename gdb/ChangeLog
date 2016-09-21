@@ -1,3 +1,15 @@
+2016-09-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (PPC_DQ): New macro.
+	(ppc_process_record_op4): Add Power ISA 3.0 instructions.
+	(ppc_process_record_op19): Likewise.
+	(ppc_process_record_op31): Likewise.
+	(ppc_process_record_op59): Likewise.
+	(ppc_process_record_op60): Likewise.
+	(ppc_process_record_op63): Likewise.
+	(ppc_process_record): Likewise.
+	(ppc_process_record_op61): New function.
+
 2016-09-21  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch32-linux-nat.c (aarch32_gp_regcache_collect): Keep
