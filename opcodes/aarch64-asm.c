@@ -1167,6 +1167,8 @@ aarch64_get_variant (struct aarch64_inst *inst)
 static void
 do_misc_encoding (aarch64_inst *inst)
 {
+  unsigned int value;
+
   switch (inst->opcode->op)
     {
     case OP_FCVT:
@@ -1180,6 +1182,47 @@ do_misc_encoding (aarch64_inst *inst)
       break;
     case OP_FCVTXN_S:
       encode_asisd_fcvtxn (inst);
+      break;
+    case OP_MOV_P_P:
+    case OP_MOVS_P_P:
+      /* Copy Pn to Pm and Pg.  */
+      value = extract_field (FLD_SVE_Pn, inst->value, 0);
+      insert_field (FLD_SVE_Pm, &inst->value, value, 0);
+      insert_field (FLD_SVE_Pg4_10, &inst->value, value, 0);
+      break;
+    case OP_MOV_Z_P_Z:
+      /* Copy Zd to Zm.  */
+      value = extract_field (FLD_SVE_Zd, inst->value, 0);
+      insert_field (FLD_SVE_Zm_16, &inst->value, value, 0);
+      break;
+    case OP_MOV_Z_V:
+      /* Fill in the zero immediate.  */
+      insert_field (FLD_SVE_tsz, &inst->value,
+		    1 << aarch64_get_variant (inst), 0);
+      break;
+    case OP_MOV_Z_Z:
+      /* Copy Zn to Zm.  */
+      value = extract_field (FLD_SVE_Zn, inst->value, 0);
+      insert_field (FLD_SVE_Zm_16, &inst->value, value, 0);
+      break;
+    case OP_MOV_Z_Zi:
+      break;
+    case OP_MOVM_P_P_P:
+      /* Copy Pd to Pm.  */
+      value = extract_field (FLD_SVE_Pd, inst->value, 0);
+      insert_field (FLD_SVE_Pm, &inst->value, value, 0);
+      break;
+    case OP_MOVZS_P_P_P:
+    case OP_MOVZ_P_P_P:
+      /* Copy Pn to Pm.  */
+      value = extract_field (FLD_SVE_Pn, inst->value, 0);
+      insert_field (FLD_SVE_Pm, &inst->value, value, 0);
+      break;
+    case OP_NOTS_P_P_P_Z:
+    case OP_NOT_P_P_P_Z:
+      /* Copy Pg to Pm.  */
+      value = extract_field (FLD_SVE_Pg4_10, inst->value, 0);
+      insert_field (FLD_SVE_Pm, &inst->value, value, 0);
       break;
     default: break;
     }

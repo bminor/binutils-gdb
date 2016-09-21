@@ -297,6 +297,14 @@ struct reloc_entry
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64) | REG_TYPE(VN)	\
 		 | REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
 		 | REG_TYPE(FP_S) | REG_TYPE(FP_D) | REG_TYPE(FP_Q))	\
+  /* Typecheck: as above, but also Zn and Pn.  This should only be	\
+     used for SVE instructions, since Zn and Pn are valid symbols	\
+     in other contexts.  */						\
+  MULTI_REG_TYPE(R_Z_BHSDQ_VZP, REG_TYPE(R_32) | REG_TYPE(R_64)		\
+		 | REG_TYPE(Z_32) | REG_TYPE(Z_64) | REG_TYPE(VN)	\
+		 | REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
+		 | REG_TYPE(FP_S) | REG_TYPE(FP_D) | REG_TYPE(FP_Q)	\
+		 | REG_TYPE(ZN) | REG_TYPE(PN))				\
   /* Any integer register; used for error messages only.  */		\
   MULTI_REG_TYPE(R_N, REG_TYPE(R_32) | REG_TYPE(R_64)			\
 		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
@@ -403,6 +411,7 @@ get_reg_expected_msg (aarch64_reg_type reg_type)
       msg = N_("C0 - C15 expected");
       break;
     case REG_TYPE_R_Z_BHSDQ_V:
+    case REG_TYPE_R_Z_BHSDQ_VZP:
       msg = N_("register expected");
       break;
     case REG_TYPE_BHSDQ:	/* any [BHSDQ]P FP  */
@@ -5246,7 +5255,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   clear_error ();
   skip_whitespace (str);
 
-  imm_reg_type = REG_TYPE_R_Z_BHSDQ_V;
+  if (AARCH64_CPU_HAS_FEATURE (AARCH64_FEATURE_SVE, *opcode->avariant))
+    imm_reg_type = REG_TYPE_R_Z_BHSDQ_VZP;
+  else
+    imm_reg_type = REG_TYPE_R_Z_BHSDQ_V;
 
   for (i = 0; operands[i] != AARCH64_OPND_NIL; i++)
     {
@@ -8385,6 +8397,9 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
   {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0),
 			AARCH64_ARCH_NONE},
+  {"sve",		AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0),
+			AARCH64_FEATURE (AARCH64_FEATURE_FP
+					 | AARCH64_FEATURE_SIMD, 0)},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 

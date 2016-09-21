@@ -1,5 +1,40 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (OP_SVE_B, OP_SVE_BB, OP_SVE_BBBU, OP_SVE_BMB)
+	(OP_SVE_BPB, OP_SVE_BUB, OP_SVE_BUBB, OP_SVE_BUU, OP_SVE_BZ)
+	(OP_SVE_BZB, OP_SVE_BZBB, OP_SVE_BZU, OP_SVE_DD, OP_SVE_DDD)
+	(OP_SVE_DMD, OP_SVE_DMH, OP_SVE_DMS, OP_SVE_DU, OP_SVE_DUD, OP_SVE_DUU)
+	(OP_SVE_DUV_BHS, OP_SVE_DUV_BHSD, OP_SVE_DZD, OP_SVE_DZU, OP_SVE_HB)
+	(OP_SVE_HMD, OP_SVE_HMS, OP_SVE_HU, OP_SVE_HUU, OP_SVE_HZU, OP_SVE_RR)
+	(OP_SVE_RURV_BHSD, OP_SVE_RUV_BHSD, OP_SVE_SMD, OP_SVE_SMH, OP_SVE_SMS)
+	(OP_SVE_SU, OP_SVE_SUS, OP_SVE_SUU, OP_SVE_SZS, OP_SVE_SZU, OP_SVE_UB)
+	(OP_SVE_UUD, OP_SVE_UUS, OP_SVE_VMR_BHSD, OP_SVE_VMU_SD)
+	(OP_SVE_VMVD_BHS, OP_SVE_VMVU_BHSD, OP_SVE_VMVU_SD, OP_SVE_VMVV_BHSD)
+	(OP_SVE_VMVV_SD, OP_SVE_VMV_BHSD, OP_SVE_VMV_HSD, OP_SVE_VMV_SD)
+	(OP_SVE_VM_SD, OP_SVE_VPU_BHSD, OP_SVE_VPV_BHSD, OP_SVE_VRR_BHSD)
+	(OP_SVE_VRU_BHSD, OP_SVE_VR_BHSD, OP_SVE_VUR_BHSD, OP_SVE_VUU_BHSD)
+	(OP_SVE_VUVV_BHSD, OP_SVE_VUVV_SD, OP_SVE_VUV_BHSD, OP_SVE_VUV_SD)
+	(OP_SVE_VU_BHSD, OP_SVE_VU_HSD, OP_SVE_VU_SD, OP_SVE_VVD_BHS)
+	(OP_SVE_VVU_BHSD, OP_SVE_VVVU_SD, OP_SVE_VVV_BHSD, OP_SVE_VVV_SD)
+	(OP_SVE_VV_BHSD, OP_SVE_VV_HSD_BHS, OP_SVE_VV_SD, OP_SVE_VWW_BHSD)
+	(OP_SVE_VXX_BHSD, OP_SVE_VZVD_BHS, OP_SVE_VZVU_BHSD, OP_SVE_VZVV_BHSD)
+	(OP_SVE_VZVV_SD, OP_SVE_VZV_SD, OP_SVE_V_SD, OP_SVE_WU, OP_SVE_WV_BHSD)
+	(OP_SVE_XU, OP_SVE_XUV_BHSD, OP_SVE_XVW_BHSD, OP_SVE_XV_BHSD)
+	(OP_SVE_XWU, OP_SVE_XXU): New macros.
+	(aarch64_feature_sve): New variable.
+	(SVE): New macro.
+	(_SVE_INSN): Likewise.
+	(aarch64_opcode_table): Add SVE instructions.
+	* aarch64-opc.h (extract_fields): Declare.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.c (do_misc_encoding): Handle the new SVE aarch64_ops.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.c (extract_fields): Make global.
+	(do_misc_decoding): Handle the new SVE aarch64_ops.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-opc.h (FLD_SVE_M_4, FLD_SVE_M_14, FLD_SVE_M_16)
 	(FLD_SVE_sz, FLD_SVE_tsz, FLD_SVE_tszl_8, FLD_SVE_tszl_19): New
 	aarch64_field_kinds.

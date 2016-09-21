@@ -1,5 +1,14 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* doc/c-aarch64.texi: Document the "sve" feature.
+	* config/tc-aarch64.c (REG_TYPE_R_Z_BHSDQ_VZP): New register type.
+	(get_reg_expected_msg): Handle it.
+	(parse_operands): When parsing operands of an SVE instruction,
+	disallow immediates that match REG_TYPE_R_Z_BHSDQ_VZP.
+	(aarch64_features): Add an entry for SVE.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Handle the new SVE core
 	and FP register operands.
 

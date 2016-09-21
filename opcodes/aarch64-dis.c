@@ -123,7 +123,7 @@ parse_aarch64_dis_options (const char *options)
    is encoded in H:L:M in some cases, the fields H:L:M should be passed in
    the order of H, L, M.  */
 
-static inline aarch64_insn
+aarch64_insn
 extract_fields (aarch64_insn code, aarch64_insn mask, ...)
 {
   uint32_t num;
@@ -1811,17 +1811,59 @@ decode_fcvt (aarch64_inst *inst)
 static int
 do_misc_decoding (aarch64_inst *inst)
 {
+  unsigned int value;
   switch (inst->opcode->op)
     {
     case OP_FCVT:
       return decode_fcvt (inst);
+
     case OP_FCVTN:
     case OP_FCVTN2:
     case OP_FCVTL:
     case OP_FCVTL2:
       return decode_asimd_fcvt (inst);
+
     case OP_FCVTXN_S:
       return decode_asisd_fcvtxn (inst);
+
+    case OP_MOV_P_P:
+    case OP_MOVS_P_P:
+      value = extract_field (FLD_SVE_Pn, inst->value, 0);
+      return (value == extract_field (FLD_SVE_Pm, inst->value, 0)
+	      && value == extract_field (FLD_SVE_Pg4_10, inst->value, 0));
+
+    case OP_MOV_Z_P_Z:
+      return (extract_field (FLD_SVE_Zd, inst->value, 0)
+	      == extract_field (FLD_SVE_Zm_16, inst->value, 0));
+
+    case OP_MOV_Z_V:
+      /* Index must be zero.  */
+      value = extract_fields (inst->value, 0, 2, FLD_SVE_tszh, FLD_imm5);
+      return value == 1 || value == 2 || value == 4 || value == 8;
+
+    case OP_MOV_Z_Z:
+      return (extract_field (FLD_SVE_Zn, inst->value, 0)
+	      == extract_field (FLD_SVE_Zm_16, inst->value, 0));
+
+    case OP_MOV_Z_Zi:
+      /* Index must be nonzero.  */
+      value = extract_fields (inst->value, 0, 2, FLD_SVE_tszh, FLD_imm5);
+      return value != 1 && value != 2 && value != 4 && value != 8;
+
+    case OP_MOVM_P_P_P:
+      return (extract_field (FLD_SVE_Pd, inst->value, 0)
+	      == extract_field (FLD_SVE_Pm, inst->value, 0));
+
+    case OP_MOVZS_P_P_P:
+    case OP_MOVZ_P_P_P:
+      return (extract_field (FLD_SVE_Pn, inst->value, 0)
+	      == extract_field (FLD_SVE_Pm, inst->value, 0));
+
+    case OP_NOTS_P_P_P_Z:
+    case OP_NOT_P_P_P_Z:
+      return (extract_field (FLD_SVE_Pm, inst->value, 0)
+	      == extract_field (FLD_SVE_Pg4_10, inst->value, 0));
+
     default:
       return 0;
     }
