@@ -1,5 +1,14 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (vector_el_type): Add NT_zero and NT_merge.
+	(parse_vector_type_for_operand): Assert that the skipped character
+	is a '.'.
+	(parse_predication_for_operand): New function.
+	(parse_typed_reg): Parse /z and /m suffixes for predicate registers.
+	(vectype_to_qualifier): Handle NT_zero and NT_merge.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (NTA_HASVARWIDTH): New macro.
 	(AARCH64_REG_TYPES): Add ZN and PN.
 	(get_reg_expected_msg): Handle them.

@@ -83,7 +83,9 @@ enum vector_el_type
   NT_h,
   NT_s,
   NT_d,
-  NT_q
+  NT_q,
+  NT_zero,
+  NT_merge
 };
 
 /* Bits for DEFINED field in vector_type_el.  */
@@ -750,6 +752,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
   enum vector_el_type type;
 
   /* skip '.' */
+  gas_assert (*ptr == '.');
   ptr++;
 
   if (reg_type == REG_TYPE_ZN || reg_type == REG_TYPE_PN || !ISDIGIT (*ptr))
@@ -816,6 +819,38 @@ elt_size:
   return TRUE;
 }
 
+/* *STR contains an SVE zero/merge predication suffix.  Parse it into
+   *PARSED_TYPE and point *STR at the end of the suffix.  */
+
+static bfd_boolean
+parse_predication_for_operand (struct vector_type_el *parsed_type, char **str)
+{
+  char *ptr = *str;
+
+  /* Skip '/'.  */
+  gas_assert (*ptr == '/');
+  ptr++;
+  switch (TOLOWER (*ptr))
+    {
+    case 'z':
+      parsed_type->type = NT_zero;
+      break;
+    case 'm':
+      parsed_type->type = NT_merge;
+      break;
+    default:
+      if (*ptr != '\0' && *ptr != ',')
+	first_error_fmt (_("unexpected character `%c' in predication type"),
+			 *ptr);
+      else
+	first_error (_("missing predication type"));
+      return FALSE;
+    }
+  parsed_type->width = 0;
+  *str = ptr + 1;
+  return TRUE;
+}
+
 /* Parse a register of the type TYPE.
 
    Return PARSE_FAIL if the string pointed by *CCP is not a valid register
@@ -860,10 +895,18 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
   type = reg->type;
 
   if ((type == REG_TYPE_VN || type == REG_TYPE_ZN || type == REG_TYPE_PN)
-      && *str == '.')
+      && (*str == '.' || (type == REG_TYPE_PN && *str == '/')))
     {
-      if (!parse_vector_type_for_operand (type, &parsetype, &str))
-	return PARSE_FAIL;
+      if (*str == '.')
+	{
+	  if (!parse_vector_type_for_operand (type, &parsetype, &str))
+	    return PARSE_FAIL;
+	}
+      else
+	{
+	  if (!parse_predication_for_operand (&parsetype, &str))
+	    return PARSE_FAIL;
+	}
 
       /* Register if of the form Vn.[bhsdq].  */
       is_typed_vecreg = TRUE;
@@ -4654,6 +4697,11 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
 
   if (!vectype->defined || vectype->type == NT_invtype)
     goto vectype_conversion_fail;
+
+  if (vectype->type == NT_zero)
+    return AARCH64_OPND_QLF_P_Z;
+  if (vectype->type == NT_merge)
+    return AARCH64_OPND_QLF_P_M;
 
   gas_assert (vectype->type >= NT_b && vectype->type <= NT_q);
 

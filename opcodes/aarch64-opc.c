@@ -603,6 +603,9 @@ struct operand_qualifier_data aarch64_opnd_qualifiers[] =
   {8, 2, 0x7, "2d", OQK_OPD_VARIANT},
   {16, 1, 0x8, "1q", OQK_OPD_VARIANT},
 
+  {0, 0, 0, "z", OQK_OPD_VARIANT},
+  {0, 0, 0, "m", OQK_OPD_VARIANT},
+
   /* Qualifiers constraining the value range.
      First 3 fields:
      Lower bound, higher bound, unused.  */
@@ -2623,6 +2626,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Pt:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
 	snprintf (buf, size, "p%d", opnd->reg.regno);
+      else if (opnd->qualifier == AARCH64_OPND_QLF_P_Z
+	       || opnd->qualifier == AARCH64_OPND_QLF_P_M)
+	snprintf (buf, size, "p%d/%s", opnd->reg.regno,
+		  aarch64_get_qualifier_name (opnd->qualifier));
       else
 	snprintf (buf, size, "p%d.%s", opnd->reg.regno,
 		  aarch64_get_qualifier_name (opnd->qualifier));

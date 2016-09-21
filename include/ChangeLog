@@ -1,5 +1,10 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* opcode/aarch64.h (AARCH64_OPND_QLF_P_Z): New aarch64_opnd_qualifier.
+	(AARCH64_OPND_QLF_P_M): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* opcode/aarch64.h (AARCH64_OPND_CLASS_SVE_REG): New
 	aarch64_operand_class.
 	(AARCH64_OPND_CLASS_PRED_REG): Likewise.

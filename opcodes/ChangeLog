@@ -1,5 +1,11 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-opc.c (aarch64_opnd_qualifiers): Add entries for
+	AARCH64_OPND_QLF_P_[ZM].
+	(aarch64_print_operand): Print /z and /m where appropriate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for new SVE operands.
 	* aarch64-opc.h (FLD_SVE_Pd, FLD_SVE_Pg3, FLD_SVE_Pg4_5)
 	(FLD_SVE_Pg4_10, FLD_SVE_Pg4_16, FLD_SVE_Pm, FLD_SVE_Pn, FLD_SVE_Pt)
