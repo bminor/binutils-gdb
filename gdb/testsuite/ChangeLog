@@ -1,5 +1,12 @@
 2016-09-22  Yao Qi  <yao.qi@linaro.org>
 
+	* boards/gdbserver-base.exp (gdb_server_prog): Set the absolute
+	path.
+	* boards/remote-gdbserver-on-localhost.exp: Use gdbserver-base.
+	Remove duplication.
+
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
 	* lib/gdbserver-support.exp: Check the existence of
 	gdbserver_orig_gdb_exit rather than gdbserver_gdb_exit.
 
