@@ -1,5 +1,12 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* opcode/aarch64.h (sve_cpy, sve_index, sve_limm, sve_misc)
+	(sve_movprfx, sve_pred_zm, sve_shift_pred, sve_shift_unpred)
+	(sve_size_bhs, sve_size_bhsd, sve_size_hsd, sve_size_sd): New
+	aarch64_insn_classes.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* opcode/aarch64.h (AARCH64_OPND_SVE_Rm): New aarch64_opnd.
 	(AARCH64_OPND_SVE_Rn_SP, AARCH64_OPND_SVE_VZn, AARCH64_OPND_SVE_Vd)
 	(AARCH64_OPND_SVE_Vm, AARCH64_OPND_SVE_Vn): Likewise.

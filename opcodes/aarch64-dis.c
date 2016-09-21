@@ -2444,6 +2444,105 @@ determine_disassembling_preference (struct aarch64_inst *inst)
     }
 }
 
+/* Some instructions (including all SVE ones) use the instruction class
+   to describe how a qualifiers_list index is represented in the instruction
+   encoding.  If INST is such an instruction, decode the appropriate fields
+   and fill in the operand qualifiers accordingly.  Return true if no
+   problems are found.  */
+
+static bfd_boolean
+aarch64_decode_variant_using_iclass (aarch64_inst *inst)
+{
+  int i, variant;
+
+  variant = 0;
+  switch (inst->opcode->iclass)
+    {
+    case sve_cpy:
+      variant = extract_fields (inst->value, 0, 2, FLD_size, FLD_SVE_M_14);
+      break;
+
+    case sve_index:
+      i = extract_field (FLD_SVE_tsz, inst->value, 0);
+      if (i == 0)
+	return FALSE;
+      while ((i & 1) == 0)
+	{
+	  i >>= 1;
+	  variant += 1;
+	}
+      break;
+
+    case sve_limm:
+      /* Pick the smallest applicable element size.  */
+      if ((inst->value & 0x20600) == 0x600)
+	variant = 0;
+      else if ((inst->value & 0x20400) == 0x400)
+	variant = 1;
+      else if ((inst->value & 0x20000) == 0)
+	variant = 2;
+      else
+	variant = 3;
+      break;
+
+    case sve_misc:
+      /* sve_misc instructions have only a single variant.  */
+      break;
+
+    case sve_movprfx:
+      variant = extract_fields (inst->value, 0, 2, FLD_size, FLD_SVE_M_16);
+      break;
+
+    case sve_pred_zm:
+      variant = extract_field (FLD_SVE_M_4, inst->value, 0);
+      break;
+
+    case sve_shift_pred:
+      i = extract_fields (inst->value, 0, 2, FLD_SVE_tszh, FLD_SVE_tszl_8);
+    sve_shift:
+      if (i == 0)
+	return FALSE;
+      while (i != 1)
+	{
+	  i >>= 1;
+	  variant += 1;
+	}
+      break;
+
+    case sve_shift_unpred:
+      i = extract_fields (inst->value, 0, 2, FLD_SVE_tszh, FLD_SVE_tszl_19);
+      goto sve_shift;
+
+    case sve_size_bhs:
+      variant = extract_field (FLD_size, inst->value, 0);
+      if (variant >= 3)
+	return FALSE;
+      break;
+
+    case sve_size_bhsd:
+      variant = extract_field (FLD_size, inst->value, 0);
+      break;
+
+    case sve_size_hsd:
+      i = extract_field (FLD_size, inst->value, 0);
+      if (i < 1)
+	return FALSE;
+      variant = i - 1;
+      break;
+
+    case sve_size_sd:
+      variant = extract_field (FLD_SVE_sz, inst->value, 0);
+      break;
+
+    default:
+      /* No mapping between instruction class and qualifiers.  */
+      return TRUE;
+    }
+
+  for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
+    inst->operands[i].qualifier = inst->opcode->qualifiers_list[variant][i];
+  return TRUE;
+}
 /* Decode the CODE according to OPCODE; fill INST.  Return 0 if the decoding
    fails, which meanes that CODE is not an instruction of OPCODE; otherwise
    return 1.
@@ -2488,6 +2587,14 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
   if (opcode_has_special_coder (opcode) && do_special_decoding (inst) == 0)
     {
       DEBUG_TRACE ("opcode flag-based decoder FAIL");
+      goto decode_fail;
+    }
+
+  /* Possibly use the instruction class to determine the correct
+     qualifier.  */
+  if (!aarch64_decode_variant_using_iclass (inst))
+    {
+      DEBUG_TRACE ("iclass-based decoder FAIL");
       goto decode_fail;
     }
 

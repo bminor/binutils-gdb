@@ -1,5 +1,17 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-opc.h (FLD_SVE_M_4, FLD_SVE_M_14, FLD_SVE_M_16)
+	(FLD_SVE_sz, FLD_SVE_tsz, FLD_SVE_tszl_8, FLD_SVE_tszl_19): New
+	aarch64_field_kinds.
+	* aarch64-opc.c (fields): Add corresponding entries.
+	* aarch64-asm.c (aarch64_get_variant): New function.
+	(aarch64_encode_variant_using_iclass): Likewise.
+	(aarch64_opcode_encode): Call it.
+	* aarch64-dis.c (aarch64_decode_variant_using_iclass): New function.
+	(aarch64_opcode_decode): Call it.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE core
 	and FP register operands.
 	* aarch64-opc.h (FLD_SVE_Rm, FLD_SVE_Rn, FLD_SVE_Vd, FLD_SVE_Vm)

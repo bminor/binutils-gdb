@@ -264,6 +264,9 @@ const aarch64_field fields[] =
     { 31,  1 },	/* b5: in the test bit and branch instructions.  */
     { 19,  5 },	/* b40: in the test bit and branch instructions.  */
     { 10,  6 },	/* scale: in the fixed-point scalar to fp converting inst.  */
+    {  4,  1 }, /* SVE_M_4: Merge/zero select, bit 4.  */
+    { 14,  1 }, /* SVE_M_14: Merge/zero select, bit 14.  */
+    { 16,  1 }, /* SVE_M_16: Merge/zero select, bit 16.  */
     { 17,  1 }, /* SVE_N: SVE equivalent of N.  */
     {  0,  4 }, /* SVE_Pd: p0-p15, bits [3,0].  */
     { 10,  3 }, /* SVE_Pg3: p0-p7, bits [12,10].  */
@@ -299,7 +302,11 @@ const aarch64_field fields[] =
     { 10,  2 }, /* SVE_msz: 2-bit shift amount for ADR.  */
     {  5,  5 }, /* SVE_pattern: vector pattern enumeration.  */
     {  0,  4 }, /* SVE_prfop: prefetch operation for SVE PRF[BHWD].  */
+    { 22,  1 }, /* SVE_sz: 1-bit element size select.  */
+    { 16,  4 }, /* SVE_tsz: triangular size select.  */
     { 22,  2 }, /* SVE_tszh: triangular size select high, bits [23,22].  */
+    {  8,  2 }, /* SVE_tszl_8: triangular size select low, bits [9,8].  */
+    { 19,  2 }, /* SVE_tszl_19: triangular size select low, bits [20,19].  */
     { 14,  1 }, /* SVE_xs_14: UXTW/SXTW select (bit 14).  */
     { 22,  1 }  /* SVE_xs_22: UXTW/SXTW select (bit 22).  */
 };
