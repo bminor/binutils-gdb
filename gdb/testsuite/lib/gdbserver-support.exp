@@ -358,7 +358,7 @@ proc close_gdbserver {} {
 
 # Hook into GDB exit, and close GDBserver.
 
-if { [info procs gdbserver_gdb_exit] == "" } {
+if { [info procs gdbserver_orig_gdb_exit] == "" } {
     rename gdb_exit gdbserver_orig_gdb_exit
 }
 proc gdb_exit {} {

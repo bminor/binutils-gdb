@@ -1,3 +1,8 @@
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp: Check the existence of
+	gdbserver_orig_gdb_exit rather than gdbserver_gdb_exit.
+
 2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* gdb.xml/tdesc-regs.exp: set core-regs for arc*-*-elf32.
