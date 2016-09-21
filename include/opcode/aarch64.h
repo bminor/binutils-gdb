@@ -120,6 +120,8 @@ enum aarch64_operand_class
   AARCH64_OPND_CLASS_SISD_REG,
   AARCH64_OPND_CLASS_SIMD_REGLIST,
   AARCH64_OPND_CLASS_CP_REG,
+  AARCH64_OPND_CLASS_SVE_REG,
+  AARCH64_OPND_CLASS_PRED_REG,
   AARCH64_OPND_CLASS_ADDRESS,
   AARCH64_OPND_CLASS_IMMEDIATE,
   AARCH64_OPND_CLASS_SYSTEM,
@@ -241,6 +243,25 @@ enum aarch64_opnd
   AARCH64_OPND_BARRIER_ISB,	/* Barrier operand for ISB.  */
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
+
+  AARCH64_OPND_SVE_Pd,		/* SVE p0-p15 in Pd.  */
+  AARCH64_OPND_SVE_Pg3,		/* SVE p0-p7 in Pg.  */
+  AARCH64_OPND_SVE_Pg4_5,	/* SVE p0-p15 in Pg, bits [8,5].  */
+  AARCH64_OPND_SVE_Pg4_10,	/* SVE p0-p15 in Pg, bits [13,10].  */
+  AARCH64_OPND_SVE_Pg4_16,	/* SVE p0-p15 in Pg, bits [19,16].  */
+  AARCH64_OPND_SVE_Pm,		/* SVE p0-p15 in Pm.  */
+  AARCH64_OPND_SVE_Pn,		/* SVE p0-p15 in Pn.  */
+  AARCH64_OPND_SVE_Pt,		/* SVE p0-p15 in Pt.  */
+  AARCH64_OPND_SVE_Za_5,	/* SVE vector register in Za, bits [9,5].  */
+  AARCH64_OPND_SVE_Za_16,	/* SVE vector register in Za, bits [20,16].  */
+  AARCH64_OPND_SVE_Zd,		/* SVE vector register in Zd.  */
+  AARCH64_OPND_SVE_Zm_5,	/* SVE vector register in Zm, bits [9,5].  */
+  AARCH64_OPND_SVE_Zm_16,	/* SVE vector register in Zm, bits [20,16].  */
+  AARCH64_OPND_SVE_Zn,		/* SVE vector register in Zn.  */
+  AARCH64_OPND_SVE_Zn_INDEX,	/* Indexed SVE vector register, for DUP.  */
+  AARCH64_OPND_SVE_ZnxN,	/* SVE vector register list in Zn.  */
+  AARCH64_OPND_SVE_Zt,		/* SVE vector register in Zt.  */
+  AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an

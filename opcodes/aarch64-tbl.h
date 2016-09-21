@@ -2819,4 +2819,40 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(SYSTEM, prfop, "PRFOP", 0, F(),					\
       "a prefetch operation specifier")					\
     Y (SYSTEM, hint, "BARRIER_PSB", 0, F (),				\
-      "the PSB option name CSYNC")
+      "the PSB option name CSYNC")					\
+    Y(PRED_REG, regno, "SVE_Pd", 0, F(FLD_SVE_Pd),			\
+      "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_Pg3", 0, F(FLD_SVE_Pg3),			\
+      "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_Pg4_5", 0, F(FLD_SVE_Pg4_5),		\
+      "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_Pg4_10", 0, F(FLD_SVE_Pg4_10),		\
+      "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_Pg4_16", 0, F(FLD_SVE_Pg4_16),		\
+      "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_Pm", 0, F(FLD_SVE_Pm),			\
+      "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_Pn", 0, F(FLD_SVE_Pn),			\
+      "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_Pt", 0, F(FLD_SVE_Pt),			\
+      "an SVE predicate register")					\
+    Y(SVE_REG, regno, "SVE_Za_5", 0, F(FLD_SVE_Za_5),			\
+      "an SVE vector register")						\
+    Y(SVE_REG, regno, "SVE_Za_16", 0, F(FLD_SVE_Za_16),			\
+      "an SVE vector register")						\
+    Y(SVE_REG, regno, "SVE_Zd", 0, F(FLD_SVE_Zd),			\
+      "an SVE vector register")						\
+    Y(SVE_REG, regno, "SVE_Zm_5", 0, F(FLD_SVE_Zm_5),			\
+      "an SVE vector register")						\
+    Y(SVE_REG, regno, "SVE_Zm_16", 0, F(FLD_SVE_Zm_16),			\
+      "an SVE vector register")						\
+    Y(SVE_REG, regno, "SVE_Zn", 0, F(FLD_SVE_Zn),			\
+      "an SVE vector register")						\
+    Y(SVE_REG, sve_index, "SVE_Zn_INDEX", 0, F(FLD_SVE_Zn),		\
+      "an indexed SVE vector register")					\
+    Y(SVE_REG, sve_reglist, "SVE_ZnxN", 0, F(FLD_SVE_Zn),		\
+      "a list of SVE vector registers")					\
+    Y(SVE_REG, regno, "SVE_Zt", 0, F(FLD_SVE_Zt),			\
+      "an SVE vector register")						\
+    Y(SVE_REG, sve_reglist, "SVE_ZtxN", 0, F(FLD_SVE_Zt),		\
+      "a list of SVE vector registers")

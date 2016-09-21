@@ -1185,6 +1185,40 @@ aarch64_ext_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
 
   return 1;
 }
+
+/* Decode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
+   array specifies which field to use for Zn.  MM is encoded in the
+   concatenation of imm5 and SVE_tszh, with imm5 being the less
+   significant part.  */
+int
+aarch64_ext_sve_index (const aarch64_operand *self,
+		       aarch64_opnd_info *info, aarch64_insn code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int val;
+
+  info->reglane.regno = extract_field (self->fields[0], code, 0);
+  val = extract_fields (code, 0, 2, FLD_SVE_tszh, FLD_imm5);
+  if ((val & 15) == 0)
+    return 0;
+  while ((val & 1) == 0)
+    val /= 2;
+  info->reglane.index = val / 2;
+  return 1;
+}
+
+/* Decode {Zn.<T> - Zm.<T>}.  The fields array specifies which field
+   to use for Zn.  The opcode-dependent value specifies the number
+   of registers in the list.  */
+int
+aarch64_ext_sve_reglist (const aarch64_operand *self,
+			 aarch64_opnd_info *info, aarch64_insn code,
+			 const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  info->reglist.first_regno = extract_field (self->fields[0], code, 0);
+  info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
+  return 1;
+}
 
 /* Bitfields that are commonly used to encode certain operands' information
    may be partially used as part of the base opcode in some instructions.

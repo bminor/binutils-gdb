@@ -1,5 +1,23 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (NTA_HASVARWIDTH): New macro.
+	(AARCH64_REG_TYPES): Add ZN and PN.
+	(get_reg_expected_msg): Handle them.
+	(parse_vector_type_for_operand): Add a reg_type parameter.
+	Skip the width for Zn and Pn registers.
+	(parse_typed_reg): Extend vector handling to Zn and Pn.  Update the
+	call to parse_vector_type_for_operand.  Set HASVARTYPE for Zn and Pn,
+	expecting the width to be 0.
+	(parse_vector_reg_list): Restrict error about [BHSD]nn operands to
+	REG_TYPE_VN.
+	(vectype_to_qualifier): Use S_[BHSD] qualifiers for NTA_HASVARWIDTH.
+	(parse_operands): Handle the new Zn and Pn operands.
+	(REGSET16): New macro, split out from...
+	(REGSET31): ...here.
+	(reg_names): Add Zn and Pn entries.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (output_operand_error_record): Handle
 	AARCH64_OPDE_UNTIED_OPERAND.
 

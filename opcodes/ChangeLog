@@ -1,5 +1,27 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for new SVE operands.
+	* aarch64-opc.h (FLD_SVE_Pd, FLD_SVE_Pg3, FLD_SVE_Pg4_5)
+	(FLD_SVE_Pg4_10, FLD_SVE_Pg4_16, FLD_SVE_Pm, FLD_SVE_Pn, FLD_SVE_Pt)
+	(FLD_SVE_Za_5, FLD_SVE_Za_16, FLD_SVE_Zd, FLD_SVE_Zm_5, FLD_SVE_Zm_16)
+	(FLD_SVE_Zn, FLD_SVE_Zt, FLD_SVE_tzsh): New aarch64_field_kinds.
+	* aarch64-opc.c (fields): Add corresponding entries here.
+	(operand_general_constraint_met_p): Check that SVE register lists
+	have the correct length.  Check the ranges of SVE index registers.
+	Check for cases where p8-p15 are used in 3-bit predicate fields.
+	(aarch64_print_operand): Handle the new SVE operands.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_index, ins_sve_reglist): New inserters.
+	* aarch64-asm.c (aarch64_ins_sve_index): New function.
+	(aarch64_ins_sve_reglist): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_index, ext_sve_reglist): New extractors.
+	* aarch64-dis.c (aarch64_ext_sve_index): New function.
+	(aarch64_ext_sve_reglist): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (CORE_INSN, __FP_INSN, SIMD_INSN, CRYP_INSN)
 	(_CRC_INSN, _LSE_INSN, _LOR_INSN, RDMA_INSN, FP16_INSN, SF16_INSN)
 	(V8_2_INSN, aarch64_opcode_table): Initialize tied_operand field.

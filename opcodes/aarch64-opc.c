@@ -199,6 +199,22 @@ const aarch64_field fields[] =
     { 31,  1 },	/* b5: in the test bit and branch instructions.  */
     { 19,  5 },	/* b40: in the test bit and branch instructions.  */
     { 10,  6 },	/* scale: in the fixed-point scalar to fp converting inst.  */
+    {  0,  4 }, /* SVE_Pd: p0-p15, bits [3,0].  */
+    { 10,  3 }, /* SVE_Pg3: p0-p7, bits [12,10].  */
+    {  5,  4 }, /* SVE_Pg4_5: p0-p15, bits [8,5].  */
+    { 10,  4 }, /* SVE_Pg4_10: p0-p15, bits [13,10].  */
+    { 16,  4 }, /* SVE_Pg4_16: p0-p15, bits [19,16].  */
+    { 16,  4 }, /* SVE_Pm: p0-p15, bits [19,16].  */
+    {  5,  4 }, /* SVE_Pn: p0-p15, bits [8,5].  */
+    {  0,  4 }, /* SVE_Pt: p0-p15, bits [3,0].  */
+    {  5,  5 }, /* SVE_Za_5: SVE vector register, bits [9,5].  */
+    { 16,  5 }, /* SVE_Za_16: SVE vector register, bits [20,16].  */
+    {  0,  5 }, /* SVE_Zd: SVE vector register. bits [4,0].  */
+    {  5,  5 }, /* SVE_Zm_5: SVE vector register, bits [9,5].  */
+    { 16,  5 }, /* SVE_Zm_16: SVE vector register, bits [20,16]. */
+    {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
+    {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
+    { 22,  2 }, /* SVE_tszh: triangular size select high, bits [23,22].  */
 };
 
 enum aarch64_operand_class
@@ -1329,6 +1345,43 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 	default:
 	  break;
+	}
+      break;
+
+    case AARCH64_OPND_CLASS_SVE_REG:
+      switch (type)
+	{
+	case AARCH64_OPND_SVE_Zn_INDEX:
+	  size = aarch64_get_qualifier_esize (opnd->qualifier);
+	  if (!value_in_range_p (opnd->reglane.index, 0, 64 / size - 1))
+	    {
+	      set_elem_idx_out_of_range_error (mismatch_detail, idx,
+					       0, 64 / size - 1);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_ZnxN:
+	case AARCH64_OPND_SVE_ZtxN:
+	  if (opnd->reglist.num_regs != get_opcode_dependent_value (opcode))
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("invalid register list"));
+	      return 0;
+	    }
+	  break;
+
+	default:
+	  break;
+	}
+      break;
+
+    case AARCH64_OPND_CLASS_PRED_REG:
+      if (opnd->reg.regno >= 8
+	  && get_operand_fields_width (get_operand_from_code (type)) == 3)
+	{
+	  set_other_error (mismatch_detail, idx, _("p0-p7 expected"));
+	  return 0;
 	}
       break;
 
@@ -2558,6 +2611,46 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_LVt_AL:
     case AARCH64_OPND_LEt:
       print_register_list (buf, size, opnd, "v");
+      break;
+
+    case AARCH64_OPND_SVE_Pd:
+    case AARCH64_OPND_SVE_Pg3:
+    case AARCH64_OPND_SVE_Pg4_5:
+    case AARCH64_OPND_SVE_Pg4_10:
+    case AARCH64_OPND_SVE_Pg4_16:
+    case AARCH64_OPND_SVE_Pm:
+    case AARCH64_OPND_SVE_Pn:
+    case AARCH64_OPND_SVE_Pt:
+      if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
+	snprintf (buf, size, "p%d", opnd->reg.regno);
+      else
+	snprintf (buf, size, "p%d.%s", opnd->reg.regno,
+		  aarch64_get_qualifier_name (opnd->qualifier));
+      break;
+
+    case AARCH64_OPND_SVE_Za_5:
+    case AARCH64_OPND_SVE_Za_16:
+    case AARCH64_OPND_SVE_Zd:
+    case AARCH64_OPND_SVE_Zm_5:
+    case AARCH64_OPND_SVE_Zm_16:
+    case AARCH64_OPND_SVE_Zn:
+    case AARCH64_OPND_SVE_Zt:
+      if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
+	snprintf (buf, size, "z%d", opnd->reg.regno);
+      else
+	snprintf (buf, size, "z%d.%s", opnd->reg.regno,
+		  aarch64_get_qualifier_name (opnd->qualifier));
+      break;
+
+    case AARCH64_OPND_SVE_ZnxN:
+    case AARCH64_OPND_SVE_ZtxN:
+      print_register_list (buf, size, opnd, "z");
+      break;
+
+    case AARCH64_OPND_SVE_Zn_INDEX:
+      snprintf (buf, size, "z%d.%s[%" PRIi64 "]", opnd->reglane.regno,
+		aarch64_get_qualifier_name (opnd->qualifier),
+		opnd->reglane.index);
       break;
 
     case AARCH64_OPND_Cn:

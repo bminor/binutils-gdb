@@ -1,5 +1,18 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* opcode/aarch64.h (AARCH64_OPND_CLASS_SVE_REG): New
+	aarch64_operand_class.
+	(AARCH64_OPND_CLASS_PRED_REG): Likewise.
+	(AARCH64_OPND_SVE_Pd, AARCH64_OPND_SVE_Pg3, AARCH64_OPND_SVE_Pg4_5)
+	(AARCH64_OPND_SVE_Pg4_10, AARCH64_OPND_SVE_Pg4_16)
+	(AARCH64_OPND_SVE_Pm, AARCH64_OPND_SVE_Pn, AARCH64_OPND_SVE_Pt)
+	(AARCH64_OPND_SVE_Za_5, AARCH64_OPND_SVE_Za_16, AARCH64_OPND_SVE_Zd)
+	(AARCH64_OPND_SVE_Zm_5, AARCH64_OPND_SVE_Zm_16, AARCH64_OPND_SVE_Zn)
+	(AARCH64_OPND_SVE_Zn_INDEX, AARCH64_OPND_SVE_ZnxN)
+	(AARCH64_OPND_SVE_Zt, AARCH64_OPND_SVE_ZtxN): New aarch64_opnds.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* opcode/aarch64.h (aarch64_opcode): Add a tied_operand field.
 	(AARCH64_OPDE_UNTIED_OPERAND): New aarch64_operand_error_kind.
 
