@@ -500,7 +500,6 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 34:
       return aarch64_ins_ldst_elemlist (self, info, code, inst);
     case 37:
-    case 46:
     case 47:
     case 48:
     case 49:
@@ -525,6 +524,8 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 41:
     case 42:
       return aarch64_ins_advsimd_imm_modified (self, info, code, inst);
+    case 46:
+      return aarch64_ins_fpimm (self, info, code, inst);
     case 59:
       return aarch64_ins_limm (self, info, code, inst);
     case 60:

@@ -417,6 +417,16 @@ aarch64_ins_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+/* Insert fields for an 8-bit floating-point immediate.  */
+const char *
+aarch64_ins_fpimm (const aarch64_operand *self, const aarch64_opnd_info *info,
+		   aarch64_insn *code,
+		   const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  insert_all_fields (self, code, info->imm.value);
+  return NULL;
+}
+
 /* Insert #<fbits> for the immediate operand in fp fix-point instructions,
    e.g.  SCVTF <Dd>, <Wn>, #<fbits>.  */
 const char *

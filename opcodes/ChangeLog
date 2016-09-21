@@ -1,5 +1,17 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERNADS): Use fpimm rather than imm
+	for FPIMM.
+	* aarch64-asm.h (ins_fpimm): New inserter.
+	* aarch64-asm.c (aarch64_ins_fpimm): New function.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_fpimm): New extractor.
+	* aarch64-dis.c (aarch64_ext_imm): Remove fpimm test.
+	(aarch64_ext_fpimm): New function.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-asm.c: Include libiberty.h.
 	(insert_fields): New function.
 	(aarch64_ins_imm): Use it.

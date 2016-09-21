@@ -10450,7 +10450,6 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 34:
       return aarch64_ext_ldst_elemlist (self, info, code, inst);
     case 37:
-    case 46:
     case 47:
     case 48:
     case 49:
@@ -10478,6 +10477,8 @@ aarch64_extract_operand (const aarch64_operand *self,
       return aarch64_ext_advsimd_imm_modified (self, info, code, inst);
     case 43:
       return aarch64_ext_shll_imm (self, info, code, inst);
+    case 46:
+      return aarch64_ext_fpimm (self, info, code, inst);
     case 59:
       return aarch64_ext_limm (self, info, code, inst);
     case 60:

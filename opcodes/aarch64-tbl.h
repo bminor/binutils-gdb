@@ -2738,7 +2738,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "an immediate shift amount of 8, 16 or 32")			\
     X(IMMEDIATE, 0, 0, "IMM0", 0, F(), "0")				\
     X(IMMEDIATE, 0, 0, "FPIMM0", 0, F(), "0.0")				\
-    Y(IMMEDIATE, imm, "FPIMM", 0, F(FLD_imm8),				\
+    Y(IMMEDIATE, fpimm, "FPIMM", 0, F(FLD_imm8),			\
       "an 8-bit floating-point constant")				\
     Y(IMMEDIATE, imm, "IMMR", 0, F(FLD_immr),				\
       "the right rotate amount")					\

@@ -598,9 +598,6 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 
   imm = extract_all_fields (self, code);
 
-  if (info->type == AARCH64_OPND_FPIMM)
-    info->imm.is_fp = 1;
-
   if (operand_need_sign_extension (self))
     imm = sign_extend (imm, get_operand_fields_width (self) - 1);
 
@@ -692,6 +689,17 @@ aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
       return 0;
     }
 
+  return 1;
+}
+
+/* Decode an 8-bit floating-point immediate.  */
+int
+aarch64_ext_fpimm (const aarch64_operand *self, aarch64_opnd_info *info,
+		   const aarch64_insn code,
+		   const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  info->imm.value = extract_all_fields (self, code);
+  info->imm.is_fp = 1;
   return 1;
 }
 
