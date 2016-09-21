@@ -1,5 +1,10 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-opc.c (print_register_list): Add a prefix parameter.
+	(aarch64_print_operand): Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERNADS): Use fpimm rather than imm
 	for FPIMM.
 	* aarch64-asm.h (ins_fpimm): New inserter.
