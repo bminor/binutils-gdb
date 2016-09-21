@@ -5399,6 +5399,7 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
 				     tdep->ppc_fp0_regnum + PPC_FRT (insn));
       if (PPC_RC (insn))
 	record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum);
+      return 0;
     }
 
   switch (ext & 0xff)
@@ -5462,7 +5463,7 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
       if (PPC_RC (insn))
 	record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum);
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      break;
+      return 0;
 
     case 354:		/* DFP Extract Biased Exponent Quad */
       record_full_arch_list_add_reg (regcache,
@@ -5541,7 +5542,7 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
       if (PPC_RC (insn))
 	record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum);
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      break;
+      return 0;
 
     case 0:		/* Floating Compare Unordered */
     case 32:		/* Floating Compare Ordered */
