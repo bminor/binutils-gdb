@@ -2822,6 +2822,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "the PSB option name CSYNC")					\
     Y(IMMEDIATE, imm, "SVE_PATTERN", 0, F(FLD_SVE_pattern),		\
       "an enumeration value such as POW2")				\
+    Y(IMMEDIATE, sve_scale, "SVE_PATTERN_SCALED", 0,			\
+      F(FLD_SVE_pattern), "an enumeration value such as POW2")		\
     Y(IMMEDIATE, imm, "SVE_PRFOP", 0, F(FLD_SVE_prfop),			\
       "an enumeration value such as PLDL1KEEP")				\
     Y(PRED_REG, regno, "SVE_Pd", 0, F(FLD_SVE_Pd),			\

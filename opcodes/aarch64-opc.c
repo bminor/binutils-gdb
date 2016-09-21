@@ -279,6 +279,7 @@ const aarch64_field fields[] =
     { 16,  5 }, /* SVE_Zm_16: SVE vector register, bits [20,16]. */
     {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
+    { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
     {  5,  5 }, /* SVE_pattern: vector pattern enumeration.  */
     {  0,  4 }, /* SVE_prfop: prefetch operation for SVE PRF[BHWD].  */
     { 22,  2 }, /* SVE_tszh: triangular size select high, bits [23,22].  */
@@ -359,6 +360,7 @@ const struct aarch64_name_value_pair aarch64_operand_modifiers [] =
     {"sxth", 0x5},
     {"sxtw", 0x6},
     {"sxtx", 0x7},
+    {"mul", 0x0},
     {NULL, 0},
 };
 
@@ -1303,6 +1305,18 @@ set_sft_amount_out_of_range_error (aarch64_operand_error *mismatch_detail,
 			  _("shift amount"));
 }
 
+/* Report that the MUL modifier in operand IDX should be in the range
+   [LOWER_BOUND, UPPER_BOUND].  */
+static inline void
+set_multiplier_out_of_range_error (aarch64_operand_error *mismatch_detail,
+				   int idx, int lower_bound, int upper_bound)
+{
+  if (mismatch_detail == NULL)
+    return;
+  set_out_of_range_error (mismatch_detail, idx, lower_bound, upper_bound,
+			  _("multiplier"));
+}
+
 static inline void
 set_unaligned_error (aarch64_operand_error *mismatch_detail, int idx,
 		     int alignment)
@@ -2001,6 +2015,15 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SVE_PATTERN_SCALED:
+	  assert (opnd->shifter.kind == AARCH64_MOD_MUL);
+	  if (!value_in_range_p (opnd->shifter.amount, 1, 16))
+	    {
+	      set_multiplier_out_of_range_error (mismatch_detail, idx, 1, 16);
+	      return 0;
+	    }
+	  break;
+
 	default:
 	  break;
 	}
@@ -2525,7 +2548,8 @@ print_register_offset_address (char *buf, size_t size,
   if (print_extend_p)
     {
       if (print_amount_p)
-	snprintf (tb, sizeof (tb), ",%s #%d", shift_name, opnd->shifter.amount);
+	snprintf (tb, sizeof (tb), ",%s #%" PRIi64, shift_name,
+		  opnd->shifter.amount);
       else
 	snprintf (tb, sizeof (tb), ",%s", shift_name);
     }
@@ -2620,7 +2644,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	    }
 	}
       if (opnd->shifter.amount)
-	snprintf (buf, size, "%s, %s #%d",
+	snprintf (buf, size, "%s, %s #%" PRIi64,
 		  get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0),
 		  aarch64_operand_modifiers[kind].name,
 		  opnd->shifter.amount);
@@ -2637,7 +2661,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	snprintf (buf, size, "%s",
 		  get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0));
       else
-	snprintf (buf, size, "%s, %s #%d",
+	snprintf (buf, size, "%s, %s #%" PRIi64,
 		  get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0),
 		  aarch64_operand_modifiers[opnd->shifter.kind].name,
 		  opnd->shifter.amount);
@@ -2760,6 +2784,26 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
       break;
 
+    case AARCH64_OPND_SVE_PATTERN_SCALED:
+      if (optional_operand_p (opcode, idx)
+	  && !opnd->shifter.operator_present
+	  && opnd->imm.value == get_optional_operand_default_value (opcode))
+	break;
+      enum_value = opnd->imm.value;
+      assert (enum_value < ARRAY_SIZE (aarch64_sve_pattern_array));
+      if (aarch64_sve_pattern_array[opnd->imm.value])
+	snprintf (buf, size, "%s", aarch64_sve_pattern_array[opnd->imm.value]);
+      else
+	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+      if (opnd->shifter.operator_present)
+	{
+	  size_t len = strlen (buf);
+	  snprintf (buf + len, size - len, ", %s #%" PRIi64,
+		    aarch64_operand_modifiers[opnd->shifter.kind].name,
+		    opnd->shifter.amount);
+	}
+      break;
+
     case AARCH64_OPND_SVE_PRFOP:
       enum_value = opnd->imm.value;
       assert (enum_value < ARRAY_SIZE (aarch64_sve_prfop_array));
@@ -2794,7 +2838,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_AIMM:
     case AARCH64_OPND_HALF:
       if (opnd->shifter.amount)
-	snprintf (buf, size, "#0x%" PRIx64 ", lsl #%d", opnd->imm.value,
+	snprintf (buf, size, "#0x%" PRIx64 ", lsl #%" PRIi64, opnd->imm.value,
 		  opnd->shifter.amount);
       else
 	snprintf (buf, size, "#0x%" PRIx64, opnd->imm.value);
@@ -2806,7 +2850,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	  || opnd->shifter.kind == AARCH64_MOD_NONE)
 	snprintf (buf, size, "#0x%" PRIx64, opnd->imm.value);
       else
-	snprintf (buf, size, "#0x%" PRIx64 ", %s #%d", opnd->imm.value,
+	snprintf (buf, size, "#0x%" PRIx64 ", %s #%" PRIi64, opnd->imm.value,
 		  aarch64_operand_modifiers[opnd->shifter.kind].name,
 		  opnd->shifter.amount);
       break;

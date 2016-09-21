@@ -1,5 +1,13 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (SHIFTED_MUL): New parse_shift_mode.
+	(parse_shift): Handle it.  Reject AARCH64_MOD_MUL for all other
+	shift modes.  Skip range tests for AARCH64_MOD_MUL.
+	(process_omitted_operand): Handle AARCH64_OPND_SVE_PATTERN_SCALED.
+	(parse_operands): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (parse_enum_string): New function.
 	(po_enum_or_fail): New macro.
 	(parse_operands): Handle AARCH64_OPND_SVE_PATTERN and

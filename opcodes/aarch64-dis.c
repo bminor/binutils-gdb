@@ -1219,6 +1219,26 @@ aarch64_ext_sve_reglist (const aarch64_operand *self,
   info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
   return 1;
 }
+
+/* Decode <pattern>{, MUL #<amount>}.  The fields array specifies which
+   fields to use for <pattern>.  <amount> - 1 is encoded in the SVE_imm4
+   field.  */
+int
+aarch64_ext_sve_scale (const aarch64_operand *self,
+		       aarch64_opnd_info *info, aarch64_insn code,
+		       const aarch64_inst *inst)
+{
+  int val;
+
+  if (!aarch64_ext_imm (self, info, code, inst))
+    return 0;
+  val = extract_field (FLD_SVE_imm4, code, 0);
+  info->shifter.kind = AARCH64_MOD_MUL;
+  info->shifter.amount = val + 1;
+  info->shifter.operator_present = (val != 0);
+  info->shifter.amount_present = (val != 0);
+  return 1;
+}
 
 /* Bitfields that are commonly used to encode certain operands' information
    may be partially used as part of the base opcode in some instructions.

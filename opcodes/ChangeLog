@@ -1,5 +1,27 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add an entry for
+	AARCH64_OPND_SVE_PATTERN_SCALED.
+	* aarch64-opc.h (FLD_SVE_imm4): New aarch64_field_kind.
+	* aarch64-opc.c (fields): Add a corresponding entry.
+	(set_multiplier_out_of_range_error): New function.
+	(aarch64_operand_modifiers): Add entry for AARCH64_MOD_MUL.
+	(operand_general_constraint_met_p): Handle
+	AARCH64_OPND_SVE_PATTERN_SCALED.
+	(print_register_offset_address): Use PRIi64 to print the
+	shift amount.
+	(aarch64_print_operand): Likewise.  Handle
+	AARCH64_OPND_SVE_PATTERN_SCALED.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_scale): New inserter.
+	* aarch64-asm.c (aarch64_ins_sve_scale): New function.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_scale): New inserter.
+	* aarch64-dis.c (aarch64_ext_sve_scale): New function.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for
 	AARCH64_OPND_SVE_PATTERN and AARCH64_OPND_SVE_PRFOP.
 	* aarch64-opc.h (FLD_SVE_pattern): New aarch64_field_kind.

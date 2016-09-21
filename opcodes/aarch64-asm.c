@@ -772,6 +772,19 @@ aarch64_ins_sve_reglist (const aarch64_operand *self,
   return NULL;
 }
 
+/* Encode <pattern>{, MUL #<amount>}.  The fields array specifies which
+   fields to use for <pattern>.  <amount> - 1 is encoded in the SVE_imm4
+   field.  */
+const char *
+aarch64_ins_sve_scale (const aarch64_operand *self,
+		       const aarch64_opnd_info *info, aarch64_insn *code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  insert_all_fields (self, code, info->imm.value);
+  insert_field (FLD_SVE_imm4, code, info->shifter.amount - 1, 0);
+  return NULL;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for

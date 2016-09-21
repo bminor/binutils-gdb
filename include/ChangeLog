@@ -1,5 +1,13 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* opcode/aarch64.h (AARCH64_OPND_SVE_PATTERN_SCALED): New
+	aarch64_opnd.
+	(AARCH64_MOD_MUL): New aarch64_modifier_kind.
+	(aarch64_opnd_info): Make shifter.amount an int64_t and
+	rearrange the fields.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* opcode/aarch64.h (AARCH64_OPND_SVE_PATTERN): New aarch64_opnd.
 	(AARCH64_OPND_SVE_PRFOP): Likewise.
 	(aarch64_sve_pattern_array): Declare.

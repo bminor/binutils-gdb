@@ -245,6 +245,7 @@ enum aarch64_opnd
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
 
   AARCH64_OPND_SVE_PATTERN,	/* SVE vector pattern enumeration.  */
+  AARCH64_OPND_SVE_PATTERN_SCALED, /* Likewise, with additional MUL factor.  */
   AARCH64_OPND_SVE_PRFOP,	/* SVE prefetch operation.  */
   AARCH64_OPND_SVE_Pd,		/* SVE p0-p15 in Pd.  */
   AARCH64_OPND_SVE_Pg3,		/* SVE p0-p7 in Pg.  */
@@ -745,6 +746,7 @@ enum aarch64_modifier_kind
   AARCH64_MOD_SXTH,
   AARCH64_MOD_SXTW,
   AARCH64_MOD_SXTX,
+  AARCH64_MOD_MUL,
 };
 
 bfd_boolean
@@ -836,10 +838,10 @@ struct aarch64_opnd_info
   struct
     {
       enum aarch64_modifier_kind kind;
-      int amount;
       unsigned operator_present: 1;	/* Only valid during encoding.  */
       /* Value of the 'S' field in ld/st reg offset; used only in decoding.  */
       unsigned amount_present: 1;
+      int64_t amount;
     } shifter;
 
   unsigned skip:1;	/* Operand is not completed if there is a fixup needed
