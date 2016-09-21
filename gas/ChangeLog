@@ -1,5 +1,11 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (double_precision_operand_p): New function.
+	(parse_operands): Use it to calculate the dp_p input to
+	parse_aarch64_imm_float.  Handle the new SVE FP immediate operands.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Handle the new SVE integer
 	immediate operands.
 

@@ -1,5 +1,11 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* opcode/aarch64.h (AARCH64_OPND_SVE_FPIMM8): New aarch64_opnd.
+	(AARCH64_OPND_SVE_I1_HALF_ONE, AARCH64_OPND_SVE_I1_HALF_TWO)
+	(AARCH64_OPND_SVE_I1_ZERO_ONE): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* opcode/aarch64.h (AARCH64_OPND_SIMM5): New aarch64_opnd.
 	(AARCH64_OPND_SVE_AIMM, AARCH64_OPND_SVE_ASIMM)
 	(AARCH64_OPND_SVE_INV_LIMM, AARCH64_OPND_SVE_LIMM)

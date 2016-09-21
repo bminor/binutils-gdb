@@ -107,6 +107,7 @@ enum aarch64_field_kind
   FLD_SVE_Zm_16,
   FLD_SVE_Zn,
   FLD_SVE_Zt,
+  FLD_SVE_i1,
   FLD_SVE_imm3,
   FLD_SVE_imm4,
   FLD_SVE_imm5,

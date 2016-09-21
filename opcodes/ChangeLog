@@ -1,5 +1,28 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE FP
+	immediate operands.
+	* aarch64-opc.h (FLD_SVE_i1): New aarch64_field_kind.
+	* aarch64-opc.c (fields): Add corresponding entry.
+	(operand_general_constraint_met_p): Handle the new SVE FP immediate
+	operands.
+	(aarch64_print_operand): Likewise.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_float_half_one, ins_sve_float_half_two)
+	(ins_sve_float_zero_one): New inserters.
+	* aarch64-asm.c (aarch64_ins_sve_float_half_one): New function.
+	(aarch64_ins_sve_float_half_two): Likewise.
+	(aarch64_ins_sve_float_zero_one): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_float_half_one, ext_sve_float_half_two)
+	(ext_sve_float_zero_one): New extractors.
+	* aarch64-dis.c (aarch64_ext_sve_float_half_one): New function.
+	(aarch64_ext_sve_float_half_two): Likewise.
+	(aarch64_ext_sve_float_zero_one): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE
 	integer immediate operands.
 	* aarch64-opc.h (FLD_SVE_immN, FLD_SVE_imm3, FLD_SVE_imm5)

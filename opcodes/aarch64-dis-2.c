@@ -10426,21 +10426,21 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 27:
     case 35:
     case 36:
-    case 135:
-    case 136:
-    case 137:
-    case 138:
     case 139:
     case 140:
     case 141:
     case 142:
-    case 155:
-    case 156:
-    case 157:
-    case 158:
+    case 143:
+    case 144:
+    case 145:
+    case 146:
     case 159:
     case 160:
+    case 161:
+    case 162:
     case 163:
+    case 164:
+    case 167:
       return aarch64_ext_regno (self, info, code, inst);
     case 8:
       return aarch64_ext_regrt_sysins (self, info, code, inst);
@@ -10483,16 +10483,16 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 69:
     case 70:
     case 71:
-    case 132:
-    case 134:
-    case 147:
-    case 148:
-    case 149:
-    case 150:
+    case 136:
+    case 138:
     case 151:
     case 152:
     case 153:
     case 154:
+    case 155:
+    case 156:
+    case 157:
+    case 158:
       return aarch64_ext_imm (self, info, code, inst);
     case 38:
     case 39:
@@ -10504,9 +10504,10 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 43:
       return aarch64_ext_shll_imm (self, info, code, inst);
     case 46:
+    case 129:
       return aarch64_ext_fpimm (self, info, code, inst);
     case 60:
-    case 130:
+    case 134:
       return aarch64_ext_limm (self, info, code, inst);
     case 61:
       return aarch64_ext_aimm (self, info, code, inst);
@@ -10597,22 +10598,28 @@ aarch64_extract_operand (const aarch64_operand *self,
       return aarch64_ext_sve_aimm (self, info, code, inst);
     case 128:
       return aarch64_ext_sve_asimm (self, info, code, inst);
-    case 129:
-      return aarch64_ext_inv_limm (self, info, code, inst);
+    case 130:
+      return aarch64_ext_sve_float_half_one (self, info, code, inst);
     case 131:
-      return aarch64_ext_sve_limm_mov (self, info, code, inst);
+      return aarch64_ext_sve_float_half_two (self, info, code, inst);
+    case 132:
+      return aarch64_ext_sve_float_zero_one (self, info, code, inst);
     case 133:
+      return aarch64_ext_inv_limm (self, info, code, inst);
+    case 135:
+      return aarch64_ext_sve_limm_mov (self, info, code, inst);
+    case 137:
       return aarch64_ext_sve_scale (self, info, code, inst);
-    case 143:
-    case 144:
+    case 147:
+    case 148:
       return aarch64_ext_sve_shlimm (self, info, code, inst);
-    case 145:
-    case 146:
+    case 149:
+    case 150:
       return aarch64_ext_sve_shrimm (self, info, code, inst);
-    case 161:
+    case 165:
       return aarch64_ext_sve_index (self, info, code, inst);
-    case 162:
-    case 164:
+    case 166:
+    case 168:
       return aarch64_ext_sve_reglist (self, info, code, inst);
     default: assert (0); abort ();
     }
