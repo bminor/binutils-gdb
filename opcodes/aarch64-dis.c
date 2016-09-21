@@ -2787,6 +2787,22 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
     }
 }
 
+/* Set NAME to a copy of INST's mnemonic with the "." suffix removed.  */
+
+static void
+remove_dot_suffix (char *name, const aarch64_inst *inst)
+{
+  char *ptr;
+  size_t len;
+
+  ptr = strchr (inst->opcode->name, '.');
+  assert (ptr && inst->cond);
+  len = ptr - inst->opcode->name;
+  assert (len < 8);
+  strncpy (name, inst->opcode->name, len);
+  name[len] = '\0';
+}
+
 /* Print the instruction mnemonic name.  */
 
 static void
@@ -2797,19 +2813,33 @@ print_mnemonic_name (const aarch64_inst *inst, struct disassemble_info *info)
       /* For instructions that are truly conditionally executed, e.g. b.cond,
 	 prepare the full mnemonic name with the corresponding condition
 	 suffix.  */
-      char name[8], *ptr;
-      size_t len;
+      char name[8];
 
-      ptr = strchr (inst->opcode->name, '.');
-      assert (ptr && inst->cond);
-      len = ptr - inst->opcode->name;
-      assert (len < 8);
-      strncpy (name, inst->opcode->name, len);
-      name [len] = '\0';
+      remove_dot_suffix (name, inst);
       (*info->fprintf_func) (info->stream, "%s.%s", name, inst->cond->names[0]);
     }
   else
     (*info->fprintf_func) (info->stream, "%s", inst->opcode->name);
+}
+
+/* Decide whether we need to print a comment after the operands of
+   instruction INST.  */
+
+static void
+print_comment (const aarch64_inst *inst, struct disassemble_info *info)
+{
+  if (inst->opcode->flags & F_COND)
+    {
+      char name[8];
+      unsigned int i, num_conds;
+
+      remove_dot_suffix (name, inst);
+      num_conds = ARRAY_SIZE (inst->cond->names);
+      for (i = 1; i < num_conds && inst->cond->names[i]; ++i)
+	(*info->fprintf_func) (info->stream, "%s %s.%s",
+			       i == 1 ? "  //" : ",",
+			       name, inst->cond->names[i]);
+    }
 }
 
 /* Print the instruction according to *INST.  */
@@ -2820,6 +2850,7 @@ print_aarch64_insn (bfd_vma pc, const aarch64_inst *inst,
 {
   print_mnemonic_name (inst, info);
   print_operands (pc, inst->opcode, inst->operands, info);
+  print_comment (inst, info);
 }
 
 /* Entry-point of the instruction disassembler and printer.  */

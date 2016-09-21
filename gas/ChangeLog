@@ -1,5 +1,22 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (opcode_lookup): Search for the end of
+	a condition name, rather than assuming that it will have exactly
+	2 characters.
+	(parse_operands): Likewise.
+	* testsuite/gas/aarch64/alias.d: Add new condition-code comments
+	to the expected output.
+	* testsuite/gas/aarch64/beq_1.d: Likewise.
+	* testsuite/gas/aarch64/float-fp16.d: Likewise.
+	* testsuite/gas/aarch64/int-insns.d: Likewise.
+	* testsuite/gas/aarch64/no-aliases.d: Likewise.
+	* testsuite/gas/aarch64/programmer-friendly.d: Likewise.
+	* testsuite/gas/aarch64/reloc-insn.d: Likewise.
+	* testsuite/gas/aarch64/b_c_1.d, testsuite/gas/aarch64/b_c_1.s:
+	New test.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* testsuite/gas/aarch64/diagnostic.s,
 	testsuite/gas/aarch64/diagnostic.l: Add tests for
 	invalid uses of MUL VL and MUL in base AArch64 instructions.

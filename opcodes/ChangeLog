@@ -1,5 +1,15 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-dis.c (remove_dot_suffix): New function, split out from...
+	(print_mnemonic_name): ...here.
+	(print_comment): New function.
+	(print_aarch64_insn): Call it.
+	* aarch64-opc.c (aarch64_conds): Add SVE names.
+	(aarch64_print_operand): Print alternative condition names in
+	a comment.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (OP_SVE_B, OP_SVE_BB, OP_SVE_BBBU, OP_SVE_BMB)
 	(OP_SVE_BPB, OP_SVE_BUB, OP_SVE_BUBB, OP_SVE_BUU, OP_SVE_BZ)
 	(OP_SVE_BZB, OP_SVE_BZBB, OP_SVE_BZU, OP_SVE_DD, OP_SVE_DDD)

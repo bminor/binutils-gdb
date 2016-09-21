@@ -4836,41 +4836,44 @@ lookup_mnemonic (const char *start, int len)
 static templates *
 opcode_lookup (char **str)
 {
-  char *end, *base;
+  char *end, *base, *dot;
   const aarch64_cond *cond;
   char condname[16];
   int len;
 
   /* Scan up to the end of the mnemonic, which must end in white space,
      '.', or end of string.  */
+  dot = 0;
   for (base = end = *str; is_part_of_name(*end); end++)
-    if (*end == '.')
-      break;
+    if (*end == '.' && !dot)
+      dot = end;
 
-  if (end == base)
+  if (end == base || dot == base)
     return 0;
 
   inst.cond = COND_ALWAYS;
 
   /* Handle a possible condition.  */
-  if (end[0] == '.')
+  if (dot)
     {
-      cond = hash_find_n (aarch64_cond_hsh, end + 1, 2);
+      cond = hash_find_n (aarch64_cond_hsh, dot + 1, end - dot - 1);
       if (cond)
 	{
 	  inst.cond = cond->value;
-	  *str = end + 3;
+	  *str = end;
 	}
       else
 	{
-	  *str = end;
+	  *str = dot;
 	  return 0;
 	}
+      len = dot - base;
     }
   else
-    *str = end;
-
-  len = end - base;
+    {
+      *str = end;
+      len = end - base;
+    }
 
   if (inst.cond == COND_ALWAYS)
     {
@@ -5826,20 +5829,25 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_COND:
 	case AARCH64_OPND_COND1:
-	  info->cond = hash_find_n (aarch64_cond_hsh, str, 2);
-	  str += 2;
-	  if (info->cond == NULL)
-	    {
-	      set_syntax_error (_("invalid condition"));
-	      goto failure;
-	    }
-	  else if (operands[i] == AARCH64_OPND_COND1
-		   && (info->cond->value & 0xe) == 0xe)
-	    {
-	      /* Not allow AL or NV.  */
-	      set_default_error ();
-	      goto failure;
-	    }
+	  {
+	    char *start = str;
+	    do
+	      str++;
+	    while (ISALPHA (*str));
+	    info->cond = hash_find_n (aarch64_cond_hsh, start, str - start);
+	    if (info->cond == NULL)
+	      {
+		set_syntax_error (_("invalid condition"));
+		goto failure;
+	      }
+	    else if (operands[i] == AARCH64_OPND_COND1
+		     && (info->cond->value & 0xe) == 0xe)
+	      {
+		/* Do not allow AL or NV.  */
+		set_default_error ();
+		goto failure;
+	      }
+	  }
 	  break;
 
 	case AARCH64_OPND_ADDR_ADRP:
