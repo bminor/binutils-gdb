@@ -1,5 +1,21 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (parse_address_main): Remove reloc and
+	accept_reg_post_index parameters.  Parse relocations and register
+	post indexes unconditionally.
+	(parse_address): Remove accept_reg_post_index parameter.
+	Update call to parse_address_main.
+	(parse_address_reloc): Delete.
+	(parse_operands): Call parse_address instead of parse_address_main.
+	Update existing callers of parse_address and make them check
+	inst.reloc.type where appropriate.
+	* testsuite/gas/aarch64/diagnostic.s: Add tests for relocations
+	in ADDR_SIMPLE, SIMD_ADDR_SIMPLE, ADDR_SIMM7 and ADDR_SIMM9 addresses.
+	Also test for invalid uses of post-index register addressing.
+	* testsuite/gas/aarch64/diagnostic.l: Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (REG_TYPE_R_Z, REG_TYPE_R_SP): New register
 	types.
 	(get_reg_expected_msg): Handle them and REG_TYPE_R64_SP.

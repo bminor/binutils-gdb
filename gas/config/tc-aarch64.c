@@ -3173,8 +3173,7 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
    supported by the instruction, and to set inst.reloc.type.  */
 
 static bfd_boolean
-parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
-		    int accept_reg_post_index)
+parse_address_main (char **str, aarch64_opnd_info *operand)
 {
   char *p = *str;
   const reg_entry *reg;
@@ -3190,7 +3189,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 
       /* #:<reloc_op>:<symbol>  */
       skip_past_char (&p, '#');
-      if (reloc && skip_past_char (&p, ':'))
+      if (skip_past_char (&p, ':'))
 	{
 	  bfd_reloc_code_real_type ty;
 	  struct reloc_table_entry *entry;
@@ -3315,7 +3314,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	{
 	  /* [Xn,#:<reloc_op>:<symbol>  */
 	  skip_past_char (&p, '#');
-	  if (reloc && skip_past_char (&p, ':'))
+	  if (skip_past_char (&p, ':'))
 	    {
 	      struct reloc_table_entry *entry;
 
@@ -3388,8 +3387,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	  return FALSE;
 	}
 
-      if (accept_reg_post_index
-	  && (reg = aarch64_reg_parse_32_64 (&p, &offset_qualifier)))
+      reg = aarch64_reg_parse_32_64 (&p, &offset_qualifier);
+      if (reg)
 	{
 	  /* [Xn],Xm */
 	  if (!aarch64_check_reg_type (reg, REG_TYPE_R_64))
@@ -3428,19 +3427,12 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
   return TRUE;
 }
 
-/* Return TRUE on success; otherwise return FALSE.  */
+/* Parse a base AArch64 address (as opposed to an SVE one).  Return TRUE
+   on success.  */
 static bfd_boolean
-parse_address (char **str, aarch64_opnd_info *operand,
-	       int accept_reg_post_index)
+parse_address (char **str, aarch64_opnd_info *operand)
 {
-  return parse_address_main (str, operand, 0, accept_reg_post_index);
-}
-
-/* Return TRUE on success; otherwise return FALSE.  */
-static bfd_boolean
-parse_address_reloc (char **str, aarch64_opnd_info *operand)
-{
-  return parse_address_main (str, operand, 1, 0);
+  return parse_address_main (str, operand);
 }
 
 /* Parse an operand for a MOVZ, MOVN or MOVK instruction.
@@ -5419,7 +5411,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_ADDR_PCREL19:
 	case AARCH64_OPND_ADDR_PCREL21:
 	case AARCH64_OPND_ADDR_PCREL26:
-	  po_misc_or_fail (parse_address_reloc (&str, info));
+	  po_misc_or_fail (parse_address (&str, info));
 	  if (!info->addr.pcrel)
 	    {
 	      set_syntax_error (_("invalid pc-relative address"));
@@ -5490,7 +5482,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    char *start = str;
 	    /* First use the normal address-parsing routines, to get
 	       the usual syntax errors.  */
-	    po_misc_or_fail (parse_address (&str, info, 0));
+	    po_misc_or_fail (parse_address (&str, info));
 	    if (info->addr.pcrel || info->addr.offset.is_reg
 		|| !info->addr.preind || info->addr.postind
 		|| info->addr.writeback)
@@ -5521,7 +5513,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_ADDR_REGOFF:
 	  /* [<Xn|SP>, <R><m>{, <extend> {<amount>}}]  */
-	  po_misc_or_fail (parse_address (&str, info, 0));
+	  po_misc_or_fail (parse_address (&str, info));
 	  if (info->addr.pcrel || !info->addr.offset.is_reg
 	      || !info->addr.preind || info->addr.postind
 	      || info->addr.writeback)
@@ -5540,11 +5532,16 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_ADDR_SIMM7:
-	  po_misc_or_fail (parse_address (&str, info, 0));
+	  po_misc_or_fail (parse_address (&str, info));
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || (!info->addr.preind && !info->addr.postind))
 	    {
 	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  if (inst.reloc.type != BFD_RELOC_UNUSED)
+	    {
+	      set_syntax_error (_("relocation not allowed"));
 	      goto failure;
 	    }
 	  assign_imm_if_const_or_fixup_later (&inst.reloc, info,
@@ -5555,7 +5552,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_ADDR_SIMM9:
 	case AARCH64_OPND_ADDR_SIMM9_2:
-	  po_misc_or_fail (parse_address_reloc (&str, info));
+	  po_misc_or_fail (parse_address (&str, info));
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || (!info->addr.preind && !info->addr.postind)
 	      || (operands[i] == AARCH64_OPND_ADDR_SIMM9_2
@@ -5576,7 +5573,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_ADDR_UIMM12:
-	  po_misc_or_fail (parse_address_reloc (&str, info));
+	  po_misc_or_fail (parse_address (&str, info));
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || !info->addr.preind || info->addr.writeback)
 	    {
@@ -5596,7 +5593,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SIMD_ADDR_POST:
 	  /* [<Xn|SP>], <Xm|#<amount>>  */
-	  po_misc_or_fail (parse_address (&str, info, 1));
+	  po_misc_or_fail (parse_address (&str, info));
 	  if (!info->addr.postind || !info->addr.writeback)
 	    {
 	      set_syntax_error (_("invalid addressing mode"));

@@ -265,3 +265,15 @@
 
 	st2	{v0.4s, v1.4s}, [sp], xzr
 	str	x1, [x2, sp]
+
+	ldr	x0, [x1, #:lo12:foo] // OK
+	ldnp	x1, x2, [x3, #:lo12:foo]
+	ld1	{v0.4s}, [x3, #:lo12:foo]
+	stuminl x0, [x3, #:lo12:foo]
+	prfum	pldl1keep, [x3, #:lo12:foo]
+
+	ldr	x0, [x3], x4
+	ldnp	x1, x2, [x3], x4
+	ld1	{v0.4s}, [x3], x4 // OK
+	stuminl x0, [x3], x4
+	prfum	pldl1keep, [x3], x4
