@@ -1,5 +1,30 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (REG_TYPE_R_Z, REG_TYPE_R_SP): New register
+	types.
+	(get_reg_expected_msg): Handle them and REG_TYPE_R64_SP.
+	(aarch64_check_reg_type): Simplify.
+	(aarch64_reg_parse_32_64): Return the reg_entry instead of the
+	register number.  Return the type as a qualifier rather than an
+	"isreg32" boolean.  Remove reject_sp, reject_rz and isregzero
+	parameters.
+	(parse_shifter_operand): Update call to aarch64_parse_32_64_reg.
+	Use get_reg_expected_msg.
+	(parse_address_main): Likewise.  Use aarch64_check_reg_type.
+	(po_int_reg_or_fail): Replace reject_sp and reject_rz parameters
+	with a reg_type parameter.  Update call to aarch64_parse_32_64_reg.
+	Use aarch64_check_reg_type to test the result.
+	(parse_operands): Update after the above changes.  Parse ADDR_SIMPLE
+	addresses normally before enforcing the syntax restrictions.
+	* testsuite/gas/aarch64/diagnostic.s: Add tests for a post-index
+	zero register and for a stack pointer index.
+	* testsuite/gas/aarch64/diagnostic.l: Update accordingly.
+	Also update existing diagnostic messages after the above changes.
+	* testsuite/gas/aarch64/illegal-lse.l: Update the error message
+	for 32-bit register bases.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (parse_aarch64_imm_float): Remove range check.
 	(parse_operands): Check the range of 8-bit FP immediates here instead.
 

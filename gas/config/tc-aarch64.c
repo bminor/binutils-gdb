@@ -265,16 +265,22 @@ struct reloc_entry
   BASIC_REG_TYPE(FP_Q)	/* q[0-31] */	\
   BASIC_REG_TYPE(CN)	/* c[0-7]  */	\
   BASIC_REG_TYPE(VN)	/* v[0-31] */	\
-  /* Typecheck: any 64-bit int reg         (inc SP exc XZR) */		\
+  /* Typecheck: any 64-bit int reg         (inc SP exc XZR).  */	\
   MULTI_REG_TYPE(R64_SP, REG_TYPE(R_64) | REG_TYPE(SP_64))		\
-  /* Typecheck: any int                    (inc {W}SP inc [WX]ZR) */	\
+  /* Typecheck: x[0-30], w[0-30] or [xw]zr.  */				\
+  MULTI_REG_TYPE(R_Z, REG_TYPE(R_32) | REG_TYPE(R_64)			\
+		 | REG_TYPE(Z_32) | REG_TYPE(Z_64))			\
+  /* Typecheck: x[0-30], w[0-30] or {w}sp.  */				\
+  MULTI_REG_TYPE(R_SP, REG_TYPE(R_32) | REG_TYPE(R_64)			\
+		 | REG_TYPE(SP_32) | REG_TYPE(SP_64))			\
+  /* Typecheck: any int                    (inc {W}SP inc [WX]ZR).  */	\
   MULTI_REG_TYPE(R_Z_SP, REG_TYPE(R_32) | REG_TYPE(R_64)		\
 		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64)) 			\
   /* Typecheck: any [BHSDQ]P FP.  */					\
   MULTI_REG_TYPE(BHSDQ, REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
 		 | REG_TYPE(FP_S) | REG_TYPE(FP_D) | REG_TYPE(FP_Q))	\
-  /* Typecheck: any int or [BHSDQ]P FP or V reg (exc SP inc [WX]ZR)  */	\
+  /* Typecheck: any int or [BHSDQ]P FP or V reg (exc SP inc [WX]ZR).  */ \
   MULTI_REG_TYPE(R_Z_BHSDQ_V, REG_TYPE(R_32) | REG_TYPE(R_64)		\
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64) | REG_TYPE(VN)	\
 		 | REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
@@ -344,6 +350,15 @@ get_reg_expected_msg (aarch64_reg_type reg_type)
     case REG_TYPE_R_N:
       msg = N_("integer register expected");
       break;
+    case REG_TYPE_R64_SP:
+      msg = N_("64-bit integer or SP register expected");
+      break;
+    case REG_TYPE_R_Z:
+      msg = N_("integer or zero register expected");
+      break;
+    case REG_TYPE_R_SP:
+      msg = N_("integer or SP register expected");
+      break;
     case REG_TYPE_R_Z_SP:
       msg = N_("integer, zero or SP register expected");
       break;
@@ -389,9 +404,6 @@ get_reg_expected_msg (aarch64_reg_type reg_type)
 
 /* Instructions take 4 bytes in the object file.  */
 #define INSN_SIZE	4
-
-/* Define some common error messages.  */
-#define BAD_SP          _("SP not allowed here")
 
 static struct hash_control *aarch64_ops_hsh;
 static struct hash_control *aarch64_cond_hsh;
@@ -671,72 +683,45 @@ parse_reg (char **ccp)
 static bfd_boolean
 aarch64_check_reg_type (const reg_entry *reg, aarch64_reg_type type)
 {
-  if (reg->type == type)
-    return TRUE;
-
-  switch (type)
-    {
-    case REG_TYPE_R64_SP:	/* 64-bit integer reg (inc SP exc XZR).  */
-    case REG_TYPE_R_Z_SP:	/* Integer reg (inc {X}SP inc [WX]ZR).  */
-    case REG_TYPE_R_Z_BHSDQ_V:	/* Any register apart from Cn.  */
-    case REG_TYPE_BHSDQ:	/* Any [BHSDQ]P FP or SIMD scalar register.  */
-    case REG_TYPE_VN:		/* Vector register.  */
-      gas_assert (reg->type < REG_TYPE_MAX && type < REG_TYPE_MAX);
-      return ((reg_type_masks[reg->type] & reg_type_masks[type])
-	      == reg_type_masks[reg->type]);
-    default:
-      as_fatal ("unhandled type %d", type);
-      abort ();
-    }
+  return (reg_type_masks[type] & (1 << reg->type)) != 0;
 }
 
-/* Parse a register and return PARSE_FAIL if the register is not of type R_Z_SP.
-   Return the register number otherwise.  *ISREG32 is set to one if the
-   register is 32-bit wide; *ISREGZERO is set to one if the register is
-   of type Z_32 or Z_64.
+/* Try to parse a base or offset register.  Return the register entry
+   on success, setting *QUALIFIER to the register qualifier.  Return null
+   otherwise.
+
    Note that this function does not issue any diagnostics.  */
 
-static int
-aarch64_reg_parse_32_64 (char **ccp, int reject_sp, int reject_rz,
-			 int *isreg32, int *isregzero)
+static const reg_entry *
+aarch64_reg_parse_32_64 (char **ccp, aarch64_opnd_qualifier_t *qualifier)
 {
   char *str = *ccp;
   const reg_entry *reg = parse_reg (&str);
 
   if (reg == NULL)
-    return PARSE_FAIL;
-
-  if (! aarch64_check_reg_type (reg, REG_TYPE_R_Z_SP))
-    return PARSE_FAIL;
+    return NULL;
 
   switch (reg->type)
     {
-    case REG_TYPE_SP_32:
-    case REG_TYPE_SP_64:
-      if (reject_sp)
-	return PARSE_FAIL;
-      *isreg32 = reg->type == REG_TYPE_SP_32;
-      *isregzero = 0;
-      break;
     case REG_TYPE_R_32:
-    case REG_TYPE_R_64:
-      *isreg32 = reg->type == REG_TYPE_R_32;
-      *isregzero = 0;
-      break;
+    case REG_TYPE_SP_32:
     case REG_TYPE_Z_32:
-    case REG_TYPE_Z_64:
-      if (reject_rz)
-	return PARSE_FAIL;
-      *isreg32 = reg->type == REG_TYPE_Z_32;
-      *isregzero = 1;
+      *qualifier = AARCH64_OPND_QLF_W;
       break;
+
+    case REG_TYPE_R_64:
+    case REG_TYPE_SP_64:
+    case REG_TYPE_Z_64:
+      *qualifier = AARCH64_OPND_QLF_X;
+      break;
+
     default:
-      return PARSE_FAIL;
+      return NULL;
     }
 
   *ccp = str;
 
-  return reg->number;
+  return reg;
 }
 
 /* Parse the qualifier of a SIMD vector register or a SIMD vector element.
@@ -3032,13 +3017,13 @@ static bfd_boolean
 parse_shifter_operand (char **str, aarch64_opnd_info *operand,
 		       enum parse_shift_mode mode)
 {
-  int reg;
-  int isreg32, isregzero;
+  const reg_entry *reg;
+  aarch64_opnd_qualifier_t qualifier;
   enum aarch64_operand_class opd_class
     = aarch64_get_operand_class (operand->type);
 
-  if ((reg =
-       aarch64_reg_parse_32_64 (str, 0, 0, &isreg32, &isregzero)) != PARSE_FAIL)
+  reg = aarch64_reg_parse_32_64 (str, &qualifier);
+  if (reg)
     {
       if (opd_class == AARCH64_OPND_CLASS_IMMEDIATE)
 	{
@@ -3046,14 +3031,14 @@ parse_shifter_operand (char **str, aarch64_opnd_info *operand,
 	  return FALSE;
 	}
 
-      if (!isregzero && reg == REG_SP)
+      if (!aarch64_check_reg_type (reg, REG_TYPE_R_Z))
 	{
-	  set_syntax_error (BAD_SP);
+	  set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_Z)));
 	  return FALSE;
 	}
 
-      operand->reg.regno = reg;
-      operand->qualifier = isreg32 ? AARCH64_OPND_QLF_W : AARCH64_OPND_QLF_X;
+      operand->reg.regno = reg->number;
+      operand->qualifier = qualifier;
 
       /* Accept optional shift operation on register.  */
       if (! skip_past_comma (str))
@@ -3192,8 +3177,9 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 		    int accept_reg_post_index)
 {
   char *p = *str;
-  int reg;
-  int isreg32, isregzero;
+  const reg_entry *reg;
+  aarch64_opnd_qualifier_t base_qualifier;
+  aarch64_opnd_qualifier_t offset_qualifier;
   expressionS *exp = &inst.reloc.exp;
 
   if (! skip_past_char (&p, '['))
@@ -3270,14 +3256,13 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 
   /* [ */
 
-  /* Accept SP and reject ZR */
-  reg = aarch64_reg_parse_32_64 (&p, 0, 1, &isreg32, &isregzero);
-  if (reg == PARSE_FAIL || isreg32)
+  reg = aarch64_reg_parse_32_64 (&p, &base_qualifier);
+  if (!reg || !aarch64_check_reg_type (reg, REG_TYPE_R64_SP))
     {
-      set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_64)));
+      set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R64_SP)));
       return FALSE;
     }
-  operand->addr.base_regno = reg;
+  operand->addr.base_regno = reg->number;
 
   /* [Xn */
   if (skip_past_comma (&p))
@@ -3285,12 +3270,17 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
       /* [Xn, */
       operand->addr.preind = 1;
 
-      /* Reject SP and accept ZR */
-      reg = aarch64_reg_parse_32_64 (&p, 1, 0, &isreg32, &isregzero);
-      if (reg != PARSE_FAIL)
+      reg = aarch64_reg_parse_32_64 (&p, &offset_qualifier);
+      if (reg)
 	{
+	  if (!aarch64_check_reg_type (reg, REG_TYPE_R_Z))
+	    {
+	      set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_Z)));
+	      return FALSE;
+	    }
+
 	  /* [Xn,Rm  */
-	  operand->addr.offset.regno = reg;
+	  operand->addr.offset.regno = reg->number;
 	  operand->addr.offset.is_reg = 1;
 	  /* Shifted index.  */
 	  if (skip_past_comma (&p))
@@ -3309,13 +3299,13 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	      || operand->shifter.kind == AARCH64_MOD_LSL
 	      || operand->shifter.kind == AARCH64_MOD_SXTX)
 	    {
-	      if (isreg32)
+	      if (offset_qualifier == AARCH64_OPND_QLF_W)
 		{
 		  set_syntax_error (_("invalid use of 32-bit register offset"));
 		  return FALSE;
 		}
 	    }
-	  else if (!isreg32)
+	  else if (offset_qualifier == AARCH64_OPND_QLF_X)
 	    {
 	      set_syntax_error (_("invalid use of 64-bit register offset"));
 	      return FALSE;
@@ -3399,16 +3389,16 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
 	}
 
       if (accept_reg_post_index
-	  && (reg = aarch64_reg_parse_32_64 (&p, 1, 1, &isreg32,
-					     &isregzero)) != PARSE_FAIL)
+	  && (reg = aarch64_reg_parse_32_64 (&p, &offset_qualifier)))
 	{
 	  /* [Xn],Xm */
-	  if (isreg32)
+	  if (!aarch64_check_reg_type (reg, REG_TYPE_R_64))
 	    {
-	      set_syntax_error (_("invalid 32-bit register offset"));
+	      set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_64)));
 	      return FALSE;
 	    }
-	  operand->addr.offset.regno = reg;
+
+	  operand->addr.offset.regno = reg->number;
 	  operand->addr.offset.is_reg = 1;
 	}
       else if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
@@ -3723,19 +3713,15 @@ parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
       }								\
   } while (0)
 
-#define po_int_reg_or_fail(reject_sp, reject_rz) do {		\
-    val = aarch64_reg_parse_32_64 (&str, reject_sp, reject_rz,	\
-                                   &isreg32, &isregzero);	\
-    if (val == PARSE_FAIL)					\
+#define po_int_reg_or_fail(reg_type) do {			\
+    reg = aarch64_reg_parse_32_64 (&str, &qualifier);		\
+    if (!reg || !aarch64_check_reg_type (reg, reg_type))	\
       {								\
 	set_default_error ();					\
 	goto failure;						\
       }								\
-    info->reg.regno = val;					\
-    if (isreg32)						\
-      info->qualifier = AARCH64_OPND_QLF_W;			\
-    else							\
-      info->qualifier = AARCH64_OPND_QLF_X;			\
+    info->reg.regno = reg->number;				\
+    info->qualifier = qualifier;				\
   } while (0)
 
 #define po_imm_nc_or_fail() do {				\
@@ -4993,10 +4979,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   for (i = 0; operands[i] != AARCH64_OPND_NIL; i++)
     {
       int64_t val;
-      int isreg32, isregzero;
+      const reg_entry *reg;
       int comma_skipped_p = 0;
       aarch64_reg_type rtype;
       struct vector_type_el vectype;
+      aarch64_opnd_qualifier_t qualifier;
       aarch64_opnd_info *info = &inst.base.operands[i];
 
       DEBUG_TRACE ("parse operand %d", i);
@@ -5032,12 +5019,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Ra:
 	case AARCH64_OPND_Rt_SYS:
 	case AARCH64_OPND_PAIRREG:
-	  po_int_reg_or_fail (1, 0);
+	  po_int_reg_or_fail (REG_TYPE_R_Z);
 	  break;
 
 	case AARCH64_OPND_Rd_SP:
 	case AARCH64_OPND_Rn_SP:
-	  po_int_reg_or_fail (0, 1);
+	  po_int_reg_or_fail (REG_TYPE_R_SP);
 	  break;
 
 	case AARCH64_OPND_Rm_EXT:
@@ -5498,24 +5485,39 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_ADDR_SIMPLE:
 	case AARCH64_OPND_SIMD_ADDR_SIMPLE:
-	  /* [<Xn|SP>{, #<simm>}]  */
-	  po_char_or_fail ('[');
-	  po_reg_or_fail (REG_TYPE_R64_SP);
-	  /* Accept optional ", #0".  */
-	  if (operands[i] == AARCH64_OPND_ADDR_SIMPLE
-	      && skip_past_char (&str, ','))
-	    {
-	      skip_past_char (&str, '#');
-	      if (! skip_past_char (&str, '0'))
-		{
-		  set_fatal_syntax_error
-		    (_("the optional immediate offset can only be 0"));
-		  goto failure;
-		}
-	    }
-	  po_char_or_fail (']');
-	  info->addr.base_regno = val;
-	  break;
+	  {
+	    /* [<Xn|SP>{, #<simm>}]  */
+	    char *start = str;
+	    /* First use the normal address-parsing routines, to get
+	       the usual syntax errors.  */
+	    po_misc_or_fail (parse_address (&str, info, 0));
+	    if (info->addr.pcrel || info->addr.offset.is_reg
+		|| !info->addr.preind || info->addr.postind
+		|| info->addr.writeback)
+	      {
+		set_syntax_error (_("invalid addressing mode"));
+		goto failure;
+	      }
+
+	    /* Then retry, matching the specific syntax of these addresses.  */
+	    str = start;
+	    po_char_or_fail ('[');
+	    po_reg_or_fail (REG_TYPE_R64_SP);
+	    /* Accept optional ", #0".  */
+	    if (operands[i] == AARCH64_OPND_ADDR_SIMPLE
+		&& skip_past_char (&str, ','))
+	      {
+		skip_past_char (&str, '#');
+		if (! skip_past_char (&str, '0'))
+		  {
+		    set_fatal_syntax_error
+		      (_("the optional immediate offset can only be 0"));
+		    goto failure;
+		  }
+	      }
+	    po_char_or_fail (']');
+	    break;
+	  }
 
 	case AARCH64_OPND_ADDR_REGOFF:
 	  /* [<Xn|SP>, <R><m>{, <extend> {<amount>}}]  */
