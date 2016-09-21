@@ -2004,14 +2004,14 @@ reg_name_p (char *str, aarch64_reg_type reg_type)
 
    To prevent the expression parser from pushing a register name
    into the symbol table as an undefined symbol, firstly a check is
-   done to find out whether STR is a valid register name followed
-   by a comma or the end of line.  Return FALSE if STR is such a
-   string.  */
+   done to find out whether STR is a register of type REG_TYPE followed
+   by a comma or the end of line.  Return FALSE if STR is such a string.  */
 
 static bfd_boolean
-parse_immediate_expression (char **str, expressionS *exp)
+parse_immediate_expression (char **str, expressionS *exp,
+			    aarch64_reg_type reg_type)
 {
-  if (reg_name_p (*str, REG_TYPE_R_Z_BHSDQ_V))
+  if (reg_name_p (*str, reg_type))
     {
       set_recoverable_error (_("immediate operand required"));
       return FALSE;
@@ -2030,16 +2030,17 @@ parse_immediate_expression (char **str, expressionS *exp)
 
 /* Constant immediate-value read function for use in insn parsing.
    STR points to the beginning of the immediate (with the optional
-   leading #); *VAL receives the value.
+   leading #); *VAL receives the value.  REG_TYPE says which register
+   names should be treated as registers rather than as symbolic immediates.
 
    Return TRUE on success; otherwise return FALSE.  */
 
 static bfd_boolean
-parse_constant_immediate (char **str, int64_t * val)
+parse_constant_immediate (char **str, int64_t *val, aarch64_reg_type reg_type)
 {
   expressionS exp;
 
-  if (! parse_immediate_expression (str, &exp))
+  if (! parse_immediate_expression (str, &exp, reg_type))
     return FALSE;
 
   if (exp.X_op != O_constant)
@@ -2148,12 +2149,14 @@ aarch64_double_precision_fmovable (uint64_t imm, uint32_t *fpword)
    value in *IMMED in the format of IEEE754 single-precision encoding.
    *CCP points to the start of the string; DP_P is TRUE when the immediate
    is expected to be in double-precision (N.B. this only matters when
-   hexadecimal representation is involved).
+   hexadecimal representation is involved).  REG_TYPE says which register
+   names should be treated as registers rather than as symbolic immediates.
 
    N.B. 0.0 is accepted by this function.  */
 
 static bfd_boolean
-parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p)
+parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
+			 aarch64_reg_type reg_type)
 {
   char *str = *ccp;
   char *fpnum;
@@ -2173,7 +2176,7 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p)
       /* Support the hexadecimal representation of the IEEE754 encoding.
 	 Double-precision is expected when DP_P is TRUE, otherwise the
 	 representation should be in single-precision.  */
-      if (! parse_constant_immediate (&str, &val))
+      if (! parse_constant_immediate (&str, &val, reg_type))
 	goto invalid_fp;
 
       if (dp_p)
@@ -2237,15 +2240,15 @@ invalid_fp:
 
    To prevent the expression parser from pushing a register name into the
    symbol table as an undefined symbol, a check is firstly done to find
-   out whether STR is a valid register name followed by a comma or the end
-   of line.  Return FALSE if STR is such a register.  */
+   out whether STR is a register of type REG_TYPE followed by a comma or
+   the end of line.  Return FALSE if STR is such a register.  */
 
 static bfd_boolean
-parse_big_immediate (char **str, int64_t *imm)
+parse_big_immediate (char **str, int64_t *imm, aarch64_reg_type reg_type)
 {
   char *ptr = *str;
 
-  if (reg_name_p (ptr, REG_TYPE_R_Z_BHSDQ_V))
+  if (reg_name_p (ptr, reg_type))
     {
       set_syntax_error (_("immediate operand required"));
       return FALSE;
@@ -3736,12 +3739,12 @@ parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
   } while (0)
 
 #define po_imm_nc_or_fail() do {				\
-    if (! parse_constant_immediate (&str, &val))		\
+    if (! parse_constant_immediate (&str, &val, imm_reg_type))	\
       goto failure;						\
   } while (0)
 
 #define po_imm_or_fail(min, max) do {				\
-    if (! parse_constant_immediate (&str, &val))		\
+    if (! parse_constant_immediate (&str, &val, imm_reg_type))	\
       goto failure;						\
     if (val < min || val > max)					\
       {								\
@@ -4980,9 +4983,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   int i;
   char *backtrack_pos = 0;
   const enum aarch64_opnd *operands = opcode->operands;
+  aarch64_reg_type imm_reg_type;
 
   clear_error ();
   skip_whitespace (str);
+
+  imm_reg_type = REG_TYPE_R_Z_BHSDQ_V;
 
   for (i = 0; operands[i] != AARCH64_OPND_NIL; i++)
     {
@@ -5219,8 +5225,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    bfd_boolean res1 = FALSE, res2 = FALSE;
 	    /* N.B. -0.0 will be rejected; although -0.0 shouldn't be rejected,
 	       it is probably not worth the effort to support it.  */
-	    if (!(res1 = parse_aarch64_imm_float (&str, &qfloat, FALSE))
-		&& !(res2 = parse_constant_immediate (&str, &val)))
+	    if (!(res1 = parse_aarch64_imm_float (&str, &qfloat, FALSE,
+						  imm_reg_type))
+		&& !(res2 = parse_constant_immediate (&str, &val,
+						      imm_reg_type)))
 	      goto failure;
 	    if ((res1 && qfloat == 0) || (res2 && val == 0))
 	      {
@@ -5253,7 +5261,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SIMD_IMM:
 	case AARCH64_OPND_SIMD_IMM_SFT:
-	  if (! parse_big_immediate (&str, &val))
+	  if (! parse_big_immediate (&str, &val, imm_reg_type))
 	    goto failure;
 	  assign_imm_if_const_or_fixup_later (&inst.reloc, info,
 					      /* addr_off_p */ 0,
@@ -5284,7 +5292,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    bfd_boolean dp_p
 	      = (aarch64_get_qualifier_esize (inst.base.operands[0].qualifier)
 		 == 8);
-	    if (! parse_aarch64_imm_float (&str, &qfloat, dp_p))
+	    if (! parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type))
 	      goto failure;
 	    if (qfloat == 0)
 	      {
@@ -5372,7 +5380,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_EXCEPTION:
-	  po_misc_or_fail (parse_immediate_expression (&str, &inst.reloc.exp));
+	  po_misc_or_fail (parse_immediate_expression (&str, &inst.reloc.exp,
+						       imm_reg_type));
 	  assign_imm_if_const_or_fixup_later (&inst.reloc, info,
 					      /* addr_off_p */ 0,
 					      /* need_libopcodes_p */ 0,

@@ -1,5 +1,17 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (parse_immediate_expression): Add a
+	reg_type parameter.
+	(parse_constant_immediate): Likewise, and update calls.
+	(parse_aarch64_imm_float): Likewise.
+	(parse_big_immediate): Likewise.
+	(po_imm_nc_or_fail): Update accordingly, passing down a new
+	imm_reg_type variable.
+	(po_imm_of_fail): Likewise.
+	(parse_operands): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (parse_neon_reg_list): Rename to...
 	(parse_vector_reg_list): ...this and take a register type
 	as input.
