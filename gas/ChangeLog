@@ -1,3 +1,8 @@
+2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/arc/dis-inv.s: Test to validate patch.
+	* testsuite/arc/dis-inv.d: Likewise.
+
 2016-10-14  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/shortlimm_a7.d: New file.
