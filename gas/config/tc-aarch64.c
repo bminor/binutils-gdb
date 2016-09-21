@@ -2148,7 +2148,8 @@ can_convert_double_to_float (uint64_t imm, uint32_t *fpword)
    hexadecimal representation is involved).  REG_TYPE says which register
    names should be treated as registers rather than as symbolic immediates.
 
-   N.B. 0.0 is accepted by this function.  */
+   This routine accepts any IEEE float; it is up to the callers to reject
+   invalid ones.  */
 
 static bfd_boolean
 parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
@@ -2224,12 +2225,9 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
 	}
     }
 
-  if (aarch64_imm_float_p (fpword) || fpword == 0)
-    {
-      *immed = fpword;
-      *ccp = str;
-      return TRUE;
-    }
+  *immed = fpword;
+  *ccp = str;
+  return TRUE;
 
 invalid_fp:
   set_fatal_syntax_error (_("invalid floating-point constant"));
@@ -5296,7 +5294,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      = (aarch64_get_qualifier_esize (inst.base.operands[0].qualifier)
 		 == 8);
 	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type)
-		|| qfloat == 0)
+		|| !aarch64_imm_float_p (qfloat))
 	      {
 		if (!error_p ())
 		  set_fatal_syntax_error (_("invalid floating-point"

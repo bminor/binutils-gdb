@@ -1,5 +1,10 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (parse_aarch64_imm_float): Remove range check.
+	(parse_operands): Check the range of 8-bit FP immediates here instead.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (parse_aarch64_imm_float): Report a specific
 	low-severity error for registers.
 	(parse_operands): Report an invalid floating point constant for
