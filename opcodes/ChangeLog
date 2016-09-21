@@ -1,5 +1,14 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-opc.c (get_offset_int_reg_name): New function.
+	(print_immediate_offset_address): Likewise.
+	(print_register_offset_address): Take the base and offset
+	registers as parameters.
+	(aarch64_print_operand): Update caller accordingly.  Use
+	print_immediate_offset_address.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-opc.c (BANK): New macro.
 	(R32, R64): Take a register number as argument
 	(int_reg): Use BANK.
