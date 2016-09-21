@@ -2761,6 +2761,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a 16-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "CCMP_IMM", 0, F(FLD_imm5),			\
       "a 5-bit unsigned immediate")					\
+    Y(IMMEDIATE, imm, "SIMM5", OPD_F_SEXT, F(FLD_imm5),			\
+      "a 5-bit signed immediate")					\
     Y(IMMEDIATE, imm, "NZCV", 0, F(FLD_nzcv),				\
       "a flag bit specifier giving an alternative value for each flag")	\
     Y(IMMEDIATE, limm, "LIMM", 0, F(FLD_N,FLD_immr,FLD_imms),		\
@@ -2925,6 +2927,19 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, sve_addr_zz_uxtw, "SVE_ADDR_ZZ_UXTW", 0,			\
       F(FLD_SVE_Zn,FLD_SVE_Zm_16),					\
       "an address with a vector register offset")			\
+    Y(IMMEDIATE, sve_aimm, "SVE_AIMM", 0, F(FLD_SVE_imm9),		\
+      "a 9-bit unsigned arithmetic operand")				\
+    Y(IMMEDIATE, sve_asimm, "SVE_ASIMM", 0, F(FLD_SVE_imm9),		\
+      "a 9-bit signed arithmetic operand")				\
+    Y(IMMEDIATE, inv_limm, "SVE_INV_LIMM", 0,				\
+      F(FLD_SVE_N,FLD_SVE_immr,FLD_SVE_imms),				\
+      "an inverted 13-bit logical immediate")				\
+    Y(IMMEDIATE, limm, "SVE_LIMM", 0,					\
+      F(FLD_SVE_N,FLD_SVE_immr,FLD_SVE_imms),				\
+      "a 13-bit logical immediate")					\
+    Y(IMMEDIATE, sve_limm_mov, "SVE_LIMM_MOV", 0,			\
+      F(FLD_SVE_N,FLD_SVE_immr,FLD_SVE_imms),				\
+      "a 13-bit logical move immediate")				\
     Y(IMMEDIATE, imm, "SVE_PATTERN", 0, F(FLD_SVE_pattern),		\
       "an enumeration value such as POW2")				\
     Y(IMMEDIATE, sve_scale, "SVE_PATTERN_SCALED", 0,			\
@@ -2947,6 +2962,30 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "an SVE predicate register")					\
     Y(PRED_REG, regno, "SVE_Pt", 0, F(FLD_SVE_Pt),			\
       "an SVE predicate register")					\
+    Y(IMMEDIATE, sve_shlimm, "SVE_SHLIMM_PRED", 0,			\
+      F(FLD_SVE_tszh,FLD_SVE_imm5), "a shift-left immediate operand")	\
+    Y(IMMEDIATE, sve_shlimm, "SVE_SHLIMM_UNPRED", 0,			\
+      F(FLD_SVE_tszh,FLD_imm5), "a shift-left immediate operand")	\
+    Y(IMMEDIATE, sve_shrimm, "SVE_SHRIMM_PRED", 0,			\
+      F(FLD_SVE_tszh,FLD_SVE_imm5), "a shift-right immediate operand")	\
+    Y(IMMEDIATE, sve_shrimm, "SVE_SHRIMM_UNPRED", 0,			\
+      F(FLD_SVE_tszh,FLD_imm5), "a shift-right immediate operand")	\
+    Y(IMMEDIATE, imm, "SVE_SIMM5", OPD_F_SEXT, F(FLD_SVE_imm5),		\
+      "a 5-bit signed immediate")					\
+    Y(IMMEDIATE, imm, "SVE_SIMM5B", OPD_F_SEXT, F(FLD_SVE_imm5b),	\
+      "a 5-bit signed immediate")					\
+    Y(IMMEDIATE, imm, "SVE_SIMM6", OPD_F_SEXT, F(FLD_SVE_imms),		\
+      "a 6-bit signed immediate")					\
+    Y(IMMEDIATE, imm, "SVE_SIMM8", OPD_F_SEXT, F(FLD_SVE_imm8),		\
+      "an 8-bit signed immediate")					\
+    Y(IMMEDIATE, imm, "SVE_UIMM3", 0, F(FLD_SVE_imm3),			\
+      "a 3-bit unsigned immediate")					\
+    Y(IMMEDIATE, imm, "SVE_UIMM7", 0, F(FLD_SVE_imm7),			\
+      "a 7-bit unsigned immediate")					\
+    Y(IMMEDIATE, imm, "SVE_UIMM8", 0, F(FLD_SVE_imm8),			\
+      "an 8-bit unsigned immediate")					\
+    Y(IMMEDIATE, imm, "SVE_UIMM8_53", 0, F(FLD_imm5,FLD_imm3),		\
+      "an 8-bit unsigned immediate")					\
     Y(SVE_REG, regno, "SVE_Za_5", 0, F(FLD_SVE_Za_5),			\
       "an SVE vector register")						\
     Y(SVE_REG, regno, "SVE_Za_16", 0, F(FLD_SVE_Za_16),			\

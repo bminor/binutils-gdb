@@ -1,5 +1,10 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (parse_operands): Handle the new SVE integer
+	immediate operands.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (SHIFTED_NONE, SHIFTED_MUL_VL): New
 	parse_shift_modes.
 	(parse_shift): Handle SHIFTED_MUL_VL.

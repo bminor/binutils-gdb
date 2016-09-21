@@ -1,5 +1,43 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE
+	integer immediate operands.
+	* aarch64-opc.h (FLD_SVE_immN, FLD_SVE_imm3, FLD_SVE_imm5)
+	(FLD_SVE_imm5b, FLD_SVE_imm7, FLD_SVE_imm8, FLD_SVE_imm9)
+	(FLD_SVE_immr, FLD_SVE_imms, FLD_SVE_tszh): New aarch64_field_kinds.
+	* aarch64-opc.c (fields): Add corresponding entries.
+	(operand_general_constraint_met_p): Handle the new SVE integer
+	immediate operands.
+	(aarch64_print_operand): Likewise.
+	(aarch64_sve_dupm_mov_immediate_p): New function.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_inv_limm, ins_sve_aimm, ins_sve_asimm)
+	(ins_sve_limm_mov, ins_sve_shlimm, ins_sve_shrimm): New inserters.
+	* aarch64-asm.c (aarch64_ins_limm_1): New function, split out from...
+	(aarch64_ins_limm): ...here.
+	(aarch64_ins_inv_limm): New function.
+	(aarch64_ins_sve_aimm): Likewise.
+	(aarch64_ins_sve_asimm): Likewise.
+	(aarch64_ins_sve_limm_mov): Likewise.
+	(aarch64_ins_sve_shlimm): Likewise.
+	(aarch64_ins_sve_shrimm): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_inv_limm, ext_sve_aimm, ext_sve_asimm)
+	(ext_sve_limm_mov, ext_sve_shlimm, ext_sve_shrimm): New extractors.
+	* aarch64-dis.c (decode_limm): New function, split out from...
+	(aarch64_ext_limm): ...here.
+	(aarch64_ext_inv_limm): New function.
+	(decode_sve_aimm): Likewise.
+	(aarch64_ext_sve_aimm): Likewise.
+	(aarch64_ext_sve_asimm): Likewise.
+	(aarch64_ext_sve_limm_mov): Likewise.
+	(aarch64_top_bit): Likewise.
+	(aarch64_ext_sve_shlimm): Likewise.
+	(aarch64_ext_sve_shrimm): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for new MUL VL
 	operands.
 	* aarch64-opc.c (aarch64_operand_modifiers): Initialize

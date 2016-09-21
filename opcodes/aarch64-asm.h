@@ -54,6 +54,7 @@ AARCH64_DECL_OPD_INSERTER (ins_fpimm);
 AARCH64_DECL_OPD_INSERTER (ins_fbits);
 AARCH64_DECL_OPD_INSERTER (ins_aimm);
 AARCH64_DECL_OPD_INSERTER (ins_limm);
+AARCH64_DECL_OPD_INSERTER (ins_inv_limm);
 AARCH64_DECL_OPD_INSERTER (ins_ft);
 AARCH64_DECL_OPD_INSERTER (ins_addr_simple);
 AARCH64_DECL_OPD_INSERTER (ins_addr_regoff);
@@ -79,9 +80,14 @@ AARCH64_DECL_OPD_INSERTER (ins_sve_addr_zi_u5);
 AARCH64_DECL_OPD_INSERTER (ins_sve_addr_zz_lsl);
 AARCH64_DECL_OPD_INSERTER (ins_sve_addr_zz_sxtw);
 AARCH64_DECL_OPD_INSERTER (ins_sve_addr_zz_uxtw);
+AARCH64_DECL_OPD_INSERTER (ins_sve_aimm);
+AARCH64_DECL_OPD_INSERTER (ins_sve_asimm);
 AARCH64_DECL_OPD_INSERTER (ins_sve_index);
+AARCH64_DECL_OPD_INSERTER (ins_sve_limm_mov);
 AARCH64_DECL_OPD_INSERTER (ins_sve_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_sve_scale);
+AARCH64_DECL_OPD_INSERTER (ins_sve_shlimm);
+AARCH64_DECL_OPD_INSERTER (ins_sve_shrimm);
 
 #undef AARCH64_DECL_OPD_INSERTER
 
