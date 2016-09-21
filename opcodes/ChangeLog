@@ -1,5 +1,18 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE core
+	and FP register operands.
+	* aarch64-opc.h (FLD_SVE_Rm, FLD_SVE_Rn, FLD_SVE_Vd, FLD_SVE_Vm)
+	(FLD_SVE_Vn): New aarch64_field_kinds.
+	* aarch64-opc.c (fields): Add corresponding entries.
+	(aarch64_print_operand): Handle the new SVE core and FP register
+	operands.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm-2.c: Likewise.
+	* aarch64-dis-2.c: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE FP
 	immediate operands.
 	* aarch64-opc.h (FLD_SVE_i1): New aarch64_field_kind.
