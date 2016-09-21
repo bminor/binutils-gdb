@@ -76,7 +76,7 @@ static enum aarch64_abi_type aarch64_abi = AARCH64_ABI_LP64;
 #define ilp32_p		(aarch64_abi == AARCH64_ABI_ILP32)
 #endif
 
-enum neon_el_type
+enum vector_el_type
 {
   NT_invtype = -1,
   NT_b,
@@ -92,7 +92,7 @@ enum neon_el_type
 
 struct neon_type_el
 {
-  enum neon_el_type type;
+  enum vector_el_type type;
   unsigned char defined;
   unsigned width;
   int64_t index;
@@ -752,7 +752,7 @@ parse_neon_type_for_operand (struct neon_type_el *parsed_type, char **str)
   char *ptr = *str;
   unsigned width;
   unsigned element_size;
-  enum neon_el_type type;
+  enum vector_el_type type;
 
   /* skip '.' */
   ptr++;
@@ -4637,7 +4637,7 @@ opcode_lookup (char **str)
 static inline aarch64_opnd_qualifier_t
 vectype_to_qualifier (const struct neon_type_el *vectype)
 {
-  /* Element size in bytes indexed by neon_el_type.  */
+  /* Element size in bytes indexed by vector_el_type.  */
   const unsigned char ele_size[5]
     = {1, 2, 4, 8, 16};
   const unsigned int ele_base [5] =
