@@ -1,5 +1,13 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* opcode/aarch64.h (AARCH64_OPND_SVE_ADDR_RI_S4xVL): New aarch64_opnd.
+	(AARCH64_OPND_SVE_ADDR_RI_S4x2xVL, AARCH64_OPND_SVE_ADDR_RI_S4x3xVL)
+	(AARCH64_OPND_SVE_ADDR_RI_S4x4xVL, AARCH64_OPND_SVE_ADDR_RI_S6xVL)
+	(AARCH64_OPND_SVE_ADDR_RI_S9xVL): Likewise.
+	(AARCH64_MOD_MUL_VL): New aarch64_modifier_kind.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* opcode/aarch64.h (AARCH64_OPND_SVE_ADDR_RI_U6): New aarch64_opnd.
 	(AARCH64_OPND_SVE_ADDR_RI_U6x2, AARCH64_OPND_SVE_ADDR_RI_U6x4)
 	(AARCH64_OPND_SVE_ADDR_RI_U6x8, AARCH64_OPND_SVE_ADDR_RR)

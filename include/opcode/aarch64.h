@@ -244,6 +244,12 @@ enum aarch64_opnd
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
 
+  AARCH64_OPND_SVE_ADDR_RI_S4xVL,   /* SVE [<Xn|SP>, #<simm4>, MUL VL].  */
+  AARCH64_OPND_SVE_ADDR_RI_S4x2xVL, /* SVE [<Xn|SP>, #<simm4>*2, MUL VL].  */
+  AARCH64_OPND_SVE_ADDR_RI_S4x3xVL, /* SVE [<Xn|SP>, #<simm4>*3, MUL VL].  */
+  AARCH64_OPND_SVE_ADDR_RI_S4x4xVL, /* SVE [<Xn|SP>, #<simm4>*4, MUL VL].  */
+  AARCH64_OPND_SVE_ADDR_RI_S6xVL,   /* SVE [<Xn|SP>, #<simm6>, MUL VL].  */
+  AARCH64_OPND_SVE_ADDR_RI_S9xVL,   /* SVE [<Xn|SP>, #<simm9>, MUL VL].  */
   AARCH64_OPND_SVE_ADDR_RI_U6,	    /* SVE [<Xn|SP>, #<uimm6>].  */
   AARCH64_OPND_SVE_ADDR_RI_U6x2,    /* SVE [<Xn|SP>, #<uimm6>*2].  */
   AARCH64_OPND_SVE_ADDR_RI_U6x4,    /* SVE [<Xn|SP>, #<uimm6>*4].  */
@@ -786,6 +792,7 @@ enum aarch64_modifier_kind
   AARCH64_MOD_SXTW,
   AARCH64_MOD_SXTX,
   AARCH64_MOD_MUL,
+  AARCH64_MOD_MUL_VL,
 };
 
 bfd_boolean

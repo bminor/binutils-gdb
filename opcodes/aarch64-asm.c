@@ -745,6 +745,56 @@ aarch64_ins_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+/* Encode an SVE address [<base>, #<simm4>*<factor>, MUL VL],
+   where <simm4> is a 4-bit signed value and where <factor> is 1 plus
+   SELF's operand-dependent value.  fields[0] specifies the field that
+   holds <base>.  <simm4> is encoded in the SVE_imm4 field.  */
+const char *
+aarch64_ins_sve_addr_ri_s4xvl (const aarch64_operand *self,
+			       const aarch64_opnd_info *info,
+			       aarch64_insn *code,
+			       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int factor = 1 + get_operand_specific_data (self);
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_field (FLD_SVE_imm4, code, info->addr.offset.imm / factor, 0);
+  return NULL;
+}
+
+/* Encode an SVE address [<base>, #<simm6>*<factor>, MUL VL],
+   where <simm6> is a 6-bit signed value and where <factor> is 1 plus
+   SELF's operand-dependent value.  fields[0] specifies the field that
+   holds <base>.  <simm6> is encoded in the SVE_imm6 field.  */
+const char *
+aarch64_ins_sve_addr_ri_s6xvl (const aarch64_operand *self,
+			       const aarch64_opnd_info *info,
+			       aarch64_insn *code,
+			       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int factor = 1 + get_operand_specific_data (self);
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_field (FLD_SVE_imm6, code, info->addr.offset.imm / factor, 0);
+  return NULL;
+}
+
+/* Encode an SVE address [<base>, #<simm9>*<factor>, MUL VL],
+   where <simm9> is a 9-bit signed value and where <factor> is 1 plus
+   SELF's operand-dependent value.  fields[0] specifies the field that
+   holds <base>.  <simm9> is encoded in the concatenation of the SVE_imm6
+   and imm3 fields, with imm3 being the less-significant part.  */
+const char *
+aarch64_ins_sve_addr_ri_s9xvl (const aarch64_operand *self,
+			       const aarch64_opnd_info *info,
+			       aarch64_insn *code,
+			       const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int factor = 1 + get_operand_specific_data (self);
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_fields (code, info->addr.offset.imm / factor, 0,
+		 2, FLD_imm3, FLD_SVE_imm6);
+  return NULL;
+}
+
 /* Encode an SVE address [X<n>, #<SVE_imm6> << <shift>], where <SVE_imm6>
    is a 6-bit unsigned number and where <shift> is SELF's operand-dependent
    value.  fields[0] specifies the base register field.  */

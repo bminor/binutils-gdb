@@ -1,5 +1,30 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for new MUL VL
+	operands.
+	* aarch64-opc.c (aarch64_operand_modifiers): Initialize
+	the AARCH64_MOD_MUL_VL entry.
+	(value_aligned_p): Cope with non-power-of-two alignments.
+	(operand_general_constraint_met_p): Handle the new MUL VL addresses.
+	(print_immediate_offset_address): Likewise.
+	(aarch64_print_operand): Likewise.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_addr_ri_s4xvl, ins_sve_addr_ri_s6xvl)
+	(ins_sve_addr_ri_s9xvl): New inserters.
+	* aarch64-asm.c (aarch64_ins_sve_addr_ri_s4xvl): New function.
+	(aarch64_ins_sve_addr_ri_s6xvl): Likewise.
+	(aarch64_ins_sve_addr_ri_s9xvl): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_addr_ri_s4xvl, ext_sve_addr_ri_s6xvl)
+	(ext_sve_addr_ri_s9xvl): New extractors.
+	* aarch64-dis.c (aarch64_ext_sve_addr_reg_mul_vl): New function.
+	(aarch64_ext_sve_addr_ri_s4xvl): Likewise.
+	(aarch64_ext_sve_addr_ri_s6xvl): Likewise.
+	(aarch64_ext_sve_addr_ri_s9xvl): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE
 	address operands.
 	* aarch64-opc.h (FLD_SVE_imm6, FLD_SVE_msz, FLD_SVE_xs_14)

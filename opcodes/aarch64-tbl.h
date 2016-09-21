@@ -2820,6 +2820,24 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a prefetch operation specifier")					\
     Y(SYSTEM, hint, "BARRIER_PSB", 0, F (),				\
       "the PSB option name CSYNC")					\
+    Y(ADDRESS, sve_addr_ri_s4xvl, "SVE_ADDR_RI_S4xVL",			\
+      0 << OPD_F_OD_LSB, F(FLD_Rn),					\
+      "an address with a 4-bit signed offset, multiplied by VL")	\
+    Y(ADDRESS, sve_addr_ri_s4xvl, "SVE_ADDR_RI_S4x2xVL",		\
+      1 << OPD_F_OD_LSB, F(FLD_Rn),					\
+      "an address with a 4-bit signed offset, multiplied by 2*VL")	\
+    Y(ADDRESS, sve_addr_ri_s4xvl, "SVE_ADDR_RI_S4x3xVL",		\
+      2 << OPD_F_OD_LSB, F(FLD_Rn),					\
+      "an address with a 4-bit signed offset, multiplied by 3*VL")	\
+    Y(ADDRESS, sve_addr_ri_s4xvl, "SVE_ADDR_RI_S4x4xVL",		\
+      3 << OPD_F_OD_LSB, F(FLD_Rn),					\
+      "an address with a 4-bit signed offset, multiplied by 4*VL")	\
+    Y(ADDRESS, sve_addr_ri_s6xvl, "SVE_ADDR_RI_S6xVL",			\
+      0 << OPD_F_OD_LSB, F(FLD_Rn),					\
+      "an address with a 6-bit signed offset, multiplied by VL")	\
+    Y(ADDRESS, sve_addr_ri_s9xvl, "SVE_ADDR_RI_S9xVL",			\
+      0 << OPD_F_OD_LSB, F(FLD_Rn),					\
+      "an address with a 9-bit signed offset, multiplied by VL")	\
     Y(ADDRESS, sve_addr_ri_u6, "SVE_ADDR_RI_U6", 0 << OPD_F_OD_LSB,	\
       F(FLD_Rn), "an address with a 6-bit unsigned offset")		\
     Y(ADDRESS, sve_addr_ri_u6, "SVE_ADDR_RI_U6x2", 1 << OPD_F_OD_LSB,	\

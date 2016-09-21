@@ -2922,6 +2922,7 @@ find_reloc_table_entry (char **str)
 /* Mode argument to parse_shift and parser_shifter_operand.  */
 enum parse_shift_mode
 {
+  SHIFTED_NONE,			/* no shifter allowed  */
   SHIFTED_ARITH_IMM,		/* "rn{,lsl|lsr|asl|asr|uxt|sxt #n}" or
 				   "#imm{,lsl #n}"  */
   SHIFTED_LOGIC_IMM,		/* "rn{,lsl|lsr|asl|asr|ror #n}" or
@@ -2929,6 +2930,7 @@ enum parse_shift_mode
   SHIFTED_LSL,			/* bare "lsl #n"  */
   SHIFTED_MUL,			/* bare "mul #n"  */
   SHIFTED_LSL_MSL,		/* "lsl|msl #n"  */
+  SHIFTED_MUL_VL,		/* "mul vl"  */
   SHIFTED_REG_OFFSET		/* [su]xtw|sxtx {#n} or lsl #n  */
 };
 
@@ -2970,7 +2972,8 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
     }
 
   if (kind == AARCH64_MOD_MUL
-      && mode != SHIFTED_MUL)
+      && mode != SHIFTED_MUL
+      && mode != SHIFTED_MUL_VL)
     {
       set_syntax_error (_("invalid use of 'MUL'"));
       return FALSE;
@@ -3010,6 +3013,22 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	}
       break;
 
+    case SHIFTED_MUL_VL:
+      /* "MUL VL" consists of two separate tokens.  Require the first
+	 token to be "MUL" and look for a following "VL".  */
+      if (kind == AARCH64_MOD_MUL)
+	{
+	  skip_whitespace (p);
+	  if (strncasecmp (p, "vl", 2) == 0 && !ISALPHA (p[2]))
+	    {
+	      p += 2;
+	      kind = AARCH64_MOD_MUL_VL;
+	      break;
+	    }
+	}
+      set_syntax_error (_("only 'MUL VL' is permitted"));
+      return FALSE;
+
     case SHIFTED_REG_OFFSET:
       if (kind != AARCH64_MOD_UXTW && kind != AARCH64_MOD_LSL
 	  && kind != AARCH64_MOD_SXTW && kind != AARCH64_MOD_SXTX)
@@ -3037,7 +3056,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 
   /* Parse shift amount.  */
   exp_has_prefix = 0;
-  if (mode == SHIFTED_REG_OFFSET && *p == ']')
+  if ((mode == SHIFTED_REG_OFFSET && *p == ']') || kind == AARCH64_MOD_MUL_VL)
     exp.X_op = O_absent;
   else
     {
@@ -3048,7 +3067,11 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	}
       my_get_expression (&exp, &p, GE_NO_PREFIX, 0);
     }
-  if (exp.X_op == O_absent)
+  if (kind == AARCH64_MOD_MUL_VL)
+    /* For consistency, give MUL VL the same shift amount as an implicit
+       MUL #1.  */
+    operand->shifter.amount = 1;
+  else if (exp.X_op == O_absent)
     {
       if (aarch64_extend_operator_p (kind) == FALSE || exp_has_prefix)
 	{
@@ -3268,6 +3291,7 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
    PC-relative (literal)
      label
    SVE:
+     [base,#imm,MUL VL]
      [base,Zm.D{,LSL #imm}]
      [base,Zm.S,(S|U)XTW {#imm}]
      [base,Zm.D,(S|U)XTW {#imm}] // ignores top 32 bits of Zm.D elements
@@ -3307,15 +3331,20 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
    corresponding register.
 
    BASE_TYPE says which types of base register should be accepted and
-   OFFSET_TYPE says the same for offset registers.  In all other respects,
-   it is the caller's responsibility to check for addressing modes not
-   supported by the instruction, and to set inst.reloc.type.  */
+   OFFSET_TYPE says the same for offset registers.  IMM_SHIFT_MODE
+   is the type of shifter that is allowed for immediate offsets,
+   or SHIFTED_NONE if none.
+
+   In all other respects, it is the caller's responsibility to check
+   for addressing modes not supported by the instruction, and to set
+   inst.reloc.type.  */
 
 static bfd_boolean
 parse_address_main (char **str, aarch64_opnd_info *operand,
 		    aarch64_opnd_qualifier_t *base_qualifier,
 		    aarch64_opnd_qualifier_t *offset_qualifier,
-		    aarch64_reg_type base_type, aarch64_reg_type offset_type)
+		    aarch64_reg_type base_type, aarch64_reg_type offset_type,
+		    enum parse_shift_mode imm_shift_mode)
 {
   char *p = *str;
   const reg_entry *reg;
@@ -3497,12 +3526,19 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	      inst.reloc.type = entry->ldst_type;
 	      inst.reloc.pc_rel = entry->pc_rel;
 	    }
-	  else if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
+	  else
 	    {
-	      set_syntax_error (_("invalid expression in the address"));
-	      return FALSE;
+	      if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
+		{
+		  set_syntax_error (_("invalid expression in the address"));
+		  return FALSE;
+		}
+	      /* [Xn,<expr>  */
+	      if (imm_shift_mode != SHIFTED_NONE && skip_past_comma (&p))
+		/* [Xn,<expr>,<shifter>  */
+		if (! parse_shift (&p, operand, imm_shift_mode))
+		  return FALSE;
 	    }
-	  /* [Xn,<expr>  */
 	}
     }
 
@@ -3582,10 +3618,10 @@ parse_address (char **str, aarch64_opnd_info *operand)
 {
   aarch64_opnd_qualifier_t base_qualifier, offset_qualifier;
   return parse_address_main (str, operand, &base_qualifier, &offset_qualifier,
-			     REG_TYPE_R64_SP, REG_TYPE_R_Z);
+			     REG_TYPE_R64_SP, REG_TYPE_R_Z, SHIFTED_NONE);
 }
 
-/* Parse an address in which SVE vector registers are allowed.
+/* Parse an address in which SVE vector registers and MUL VL are allowed.
    The arguments have the same meaning as for parse_address_main.
    Return TRUE on success.  */
 static bfd_boolean
@@ -3594,7 +3630,8 @@ parse_sve_address (char **str, aarch64_opnd_info *operand,
 		   aarch64_opnd_qualifier_t *offset_qualifier)
 {
   return parse_address_main (str, operand, base_qualifier, offset_qualifier,
-			     REG_TYPE_SVE_BASE, REG_TYPE_SVE_OFFSET);
+			     REG_TYPE_SVE_BASE, REG_TYPE_SVE_OFFSET,
+			     SHIFTED_MUL_VL);
 }
 
 /* Parse an operand for a MOVZ, MOVN or MOVK instruction.
@@ -5938,11 +5975,18 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  /* No qualifier.  */
 	  break;
 
+	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x4xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S6xVL:
+	case AARCH64_OPND_SVE_ADDR_RI_S9xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_U6:
 	case AARCH64_OPND_SVE_ADDR_RI_U6x2:
 	case AARCH64_OPND_SVE_ADDR_RI_U6x4:
 	case AARCH64_OPND_SVE_ADDR_RI_U6x8:
-	  /* [X<n>{, #imm}]
+	  /* [X<n>{, #imm, MUL VL}]
+	     [X<n>{, #imm}]
 	     but recognizing SVE registers.  */
 	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
 					      &offset_qualifier));

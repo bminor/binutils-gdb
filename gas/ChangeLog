@@ -1,5 +1,14 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (SHIFTED_NONE, SHIFTED_MUL_VL): New
+	parse_shift_modes.
+	(parse_shift): Handle SHIFTED_MUL_VL.
+	(parse_address_main): Add an imm_shift_mode parameter.
+	(parse_address, parse_sve_address): Update accordingly.
+	(parse_operands): Handle MUL VL addressing modes.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (REG_TYPE_SVE_BASE, REG_TYPE_SVE_OFFSET): New
 	register types.
 	(get_reg_expected_msg): Handle them.
