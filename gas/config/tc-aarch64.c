@@ -4134,7 +4134,7 @@ find_best_match (const aarch64_inst *instr,
     }
 
   max_num_matched = 0;
-  idx = -1;
+  idx = 0;
 
   /* For each pattern.  */
   for (i = 0; i < AARCH64_MAX_QLF_SEQ_NUM; ++i, ++qualifiers_list)
@@ -4146,9 +4146,6 @@ find_best_match (const aarch64_inst *instr,
       if (empty_qualifier_sequence_p (qualifiers) == TRUE)
 	{
 	  DEBUG_TRACE_IF (i == 0, "empty list of qualifier sequence");
-	  if (i != 0 && idx == -1)
-	    /* If nothing has been matched, return the 1st sequence.  */
-	    idx = 0;
 	  break;
 	}
 

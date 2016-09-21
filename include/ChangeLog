@@ -1,3 +1,7 @@
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (F_STRICT): New flag.
+
 2016-09-07  Richard Earnshaw  <rearnsha@arm.com>
 
 	* opcode/arm.h (ARM_ARCH_V8A_CRC): New architecture.

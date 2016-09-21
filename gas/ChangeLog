@@ -1,5 +1,10 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (find_best_match): Simplify, allowing an
+	instruction with all-NIL qualifiers to fail to match.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (parse_address_main): Remove reloc and
 	accept_reg_post_index parameters.  Parse relocations and register
 	post indexes unconditionally.

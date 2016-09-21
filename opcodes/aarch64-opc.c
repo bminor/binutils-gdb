@@ -854,7 +854,7 @@ aarch64_find_best_match (const aarch64_inst *inst,
 static int
 match_operands_qualifier (aarch64_inst *inst, bfd_boolean update_p)
 {
-  int i;
+  int i, nops;
   aarch64_opnd_qualifier_seq_t qualifiers;
 
   if (!aarch64_find_best_match (inst, inst->opcode->qualifiers_list, -1,
@@ -862,6 +862,15 @@ match_operands_qualifier (aarch64_inst *inst, bfd_boolean update_p)
     {
       DEBUG_TRACE ("matching FAIL");
       return 0;
+    }
+
+  if (inst->opcode->flags & F_STRICT)
+    {
+      /* Require an exact qualifier match, even for NIL qualifiers.  */
+      nops = aarch64_num_of_operands (inst->opcode);
+      for (i = 0; i < nops; ++i)
+	if (inst->operands[i].qualifier != qualifiers[i])
+	  return FALSE;
     }
 
   /* Update the qualifiers.  */
