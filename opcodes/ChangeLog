@@ -1,5 +1,14 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-opc.c (aarch64_logical_immediate_p): Replace is32
+	with an esize parameter.
+	(operand_general_constraint_met_p): Update accordingly.
+	Fix misindented code.
+	* aarch64-asm.c (aarch64_ins_limm): Update call to
+	aarch64_logical_immediate_p.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-opc.c (match_operands_qualifier): Handle F_STRICT.
 
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>

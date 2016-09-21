@@ -436,11 +436,11 @@ aarch64_ins_limm (const aarch64_operand *self, const aarch64_opnd_info *info,
 {
   aarch64_insn value;
   uint64_t imm = info->imm.value;
-  int is32 = aarch64_get_qualifier_esize (inst->operands[0].qualifier) == 4;
+  int esize = aarch64_get_qualifier_esize (inst->operands[0].qualifier);
 
   if (inst->opcode->op == OP_BIC)
     imm = ~imm;
-  if (aarch64_logical_immediate_p (imm, is32, &value) == FALSE)
+  if (aarch64_logical_immediate_p (imm, esize, &value) == FALSE)
     /* The constraint check should have guaranteed this wouldn't happen.  */
     assert (0);
 

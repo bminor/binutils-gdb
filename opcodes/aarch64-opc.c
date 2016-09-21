@@ -1062,16 +1062,18 @@ build_immediate_table (void)
    be accepted by logical (immediate) instructions
    e.g. ORR <Xd|SP>, <Xn>, #<imm>.
 
-   IS32 indicates whether or not VALUE is a 32-bit immediate.
+   ESIZE is the number of bytes in the decoded immediate value.
    If ENCODING is not NULL, on the return of TRUE, the standard encoding for
    VALUE will be returned in *ENCODING.  */
 
 bfd_boolean
-aarch64_logical_immediate_p (uint64_t value, int is32, aarch64_insn *encoding)
+aarch64_logical_immediate_p (uint64_t value, int esize, aarch64_insn *encoding)
 {
   simd_imm_encoding imm_enc;
   const simd_imm_encoding *imm_encoding;
   static bfd_boolean initialized = FALSE;
+  uint64_t upper;
+  int i;
 
   DEBUG_TRACE ("enter with 0x%" PRIx64 "(%" PRIi64 "), is32: %d", value,
 	       value, is32);
@@ -1082,17 +1084,16 @@ aarch64_logical_immediate_p (uint64_t value, int is32, aarch64_insn *encoding)
       initialized = TRUE;
     }
 
-  if (is32)
-    {
-      /* Allow all zeros or all ones in top 32-bits, so that
-	 constant expressions like ~1 are permitted.  */
-      if (value >> 32 != 0 && value >> 32 != 0xffffffff)
-	return FALSE;
+  /* Allow all zeros or all ones in top bits, so that
+     constant expressions like ~1 are permitted.  */
+  upper = (uint64_t) -1 << (esize * 4) << (esize * 4);
+  if ((value & ~upper) != value && (value | upper) != value)
+    return FALSE;
 
-      /* Replicate the 32 lower bits to the 32 upper bits.  */
-      value &= 0xffffffff;
-      value |= value << 32;
-    }
+  /* Replicate to a full 64-bit value.  */
+  value &= ~upper;
+  for (i = esize * 8; i < 64; i *= 2)
+    value |= (value << i);
 
   imm_enc.imm = value;
   imm_encoding = (const simd_imm_encoding *)
@@ -1645,7 +1646,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_IMM_MOV:
 	    {
-	      int is32 = aarch64_get_qualifier_esize (opnds[0].qualifier) == 4;
+	      int esize = aarch64_get_qualifier_esize (opnds[0].qualifier);
 	      imm = opnd->imm.value;
 	      assert (idx == 1);
 	      switch (opcode->op)
@@ -1654,7 +1655,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		  imm = ~imm;
 		  /* Fall through...  */
 		case OP_MOV_IMM_WIDE:
-		  if (!aarch64_wide_constant_p (imm, is32, NULL))
+		  if (!aarch64_wide_constant_p (imm, esize == 4, NULL))
 		    {
 		      set_other_error (mismatch_detail, idx,
 				       _("immediate out of range"));
@@ -1662,7 +1663,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		    }
 		  break;
 		case OP_MOV_IMM_LOG:
-		  if (!aarch64_logical_immediate_p (imm, is32, NULL))
+		  if (!aarch64_logical_immediate_p (imm, esize, NULL))
 		    {
 		      set_other_error (mismatch_detail, idx,
 				       _("immediate out of range"));
@@ -1707,18 +1708,18 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 
 	case AARCH64_OPND_LIMM:
-	    {
-	      int is32 = opnds[0].qualifier == AARCH64_OPND_QLF_W;
-	      uint64_t uimm = opnd->imm.value;
-	      if (opcode->op == OP_BIC)
-		uimm = ~uimm;
-	      if (aarch64_logical_immediate_p (uimm, is32, NULL) == FALSE)
-		{
-		  set_other_error (mismatch_detail, idx,
-				   _("immediate out of range"));
-		  return 0;
-		}
-	    }
+	  {
+	    int esize = aarch64_get_qualifier_esize (opnds[0].qualifier);
+	    uint64_t uimm = opnd->imm.value;
+	    if (opcode->op == OP_BIC)
+	      uimm = ~uimm;
+	    if (aarch64_logical_immediate_p (uimm, esize, NULL) == FALSE)
+	      {
+		set_other_error (mismatch_detail, idx,
+				 _("immediate out of range"));
+		return 0;
+	      }
+	  }
 	  break;
 
 	case AARCH64_OPND_IMM0:
