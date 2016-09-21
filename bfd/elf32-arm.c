@@ -2346,6 +2346,13 @@ static const insn_sequence elf32_arm_stub_long_branch_thumb_only[] =
   DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(X) */
 };
 
+/* Thumb -> Thumb long branch stub in thumb2 encoding.  Used on armv7.  */
+static const insn_sequence elf32_arm_stub_long_branch_thumb2_only[] =
+{
+  THUMB32_INSN (0xf85ff000),         /* ldr.w  pc, [pc, #-0] */
+  DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(x) */
+};
+
 /* V4T Thumb -> Thumb long branch stub. Using the stack is not
    allowed.  */
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb[] =
@@ -2577,7 +2584,8 @@ static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
   DEF_STUB(a8_veneer_b_cond) \
   DEF_STUB(a8_veneer_b) \
   DEF_STUB(a8_veneer_bl) \
-  DEF_STUB(a8_veneer_blx)
+  DEF_STUB(a8_veneer_blx) \
+  DEF_STUB(long_branch_thumb2_only) \
 
 #define DEF_STUB(x) arm_stub_##x,
 enum elf32_arm_stub_type
@@ -3730,6 +3738,7 @@ arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
   switch (stub_type)
     {
     case arm_stub_long_branch_thumb_only:
+    case arm_stub_long_branch_thumb2_only:
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:
     case arm_stub_long_branch_v4t_thumb_arm_pic:
@@ -3896,7 +3905,8 @@ arm_type_of_stub (struct bfd_link_info *info,
 		    /* PIC stub.  */
 		    ? arm_stub_long_branch_thumb_only_pic
 		    /* non-PIC stub.  */
-		    : arm_stub_long_branch_thumb_only;
+		    : (thumb2 ? arm_stub_long_branch_thumb2_only
+			      : arm_stub_long_branch_thumb_only);
 		}
 	    }
 	  else
@@ -4408,6 +4418,7 @@ arm_stub_required_alignment (enum elf32_arm_stub_type stub_type)
     case arm_stub_long_branch_any_any:
     case arm_stub_long_branch_v4t_arm_thumb:
     case arm_stub_long_branch_thumb_only:
+    case arm_stub_long_branch_thumb2_only:
     case arm_stub_long_branch_v4t_thumb_thumb:
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:
