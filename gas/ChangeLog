@@ -1,5 +1,10 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (output_operand_error_record): Handle
+	AARCH64_OPDE_UNTIED_OPERAND.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (find_best_match): Simplify, allowing an
 	instruction with all-NIL qualifiers to fail to match.
 

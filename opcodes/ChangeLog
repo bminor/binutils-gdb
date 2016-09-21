@@ -1,5 +1,13 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (CORE_INSN, __FP_INSN, SIMD_INSN, CRYP_INSN)
+	(_CRC_INSN, _LSE_INSN, _LOR_INSN, RDMA_INSN, FP16_INSN, SF16_INSN)
+	(V8_2_INSN, aarch64_opcode_table): Initialize tied_operand field.
+	* aarch64-opc.c (aarch64_match_operands_constraint): Check for
+	tied operands.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-opc.c (get_offset_int_reg_name): New function.
 	(print_immediate_offset_address): Likewise.
 	(print_register_offset_address): Take the base and offset
