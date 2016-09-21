@@ -2010,11 +2010,19 @@ search_struct_method (const char *name, struct value **arg1p,
 	}
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
-	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
+	  int j, k;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 
 	  name_matched = 1;
 	  check_stub_method_group (type, i);
+
+	  /* Count the number of non-aliased/duplicated methods.  */
+	  for (k = 0; k < TYPE_FN_FIELDLIST_LENGTH (type, i); ++k)
+	    {
+	      if (!TYPE_FN_FIELD_DUPLICATE (f, k))
+		++j;
+	    }
+	  --j;
 	  if (j > 0 && args == 0)
 	    error (_("cannot resolve overloaded method "
 		     "`%s': no arguments supplied"), name);
