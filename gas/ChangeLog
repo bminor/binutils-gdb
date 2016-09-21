@@ -1,5 +1,20 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* testsuite/gas/aarch64/diagnostic.s,
+	testsuite/gas/aarch64/diagnostic.l: Add tests for
+	invalid uses of MUL VL and MUL in base AArch64 instructions.
+	* testsuite/gas/aarch64/sve-add.s, testsuite/gas/aarch64/sve-add.d,
+	testsuite/gas/aarch64/sve-dup.s, testsuite/gas/aarch64/sve-dup.d,
+	testsuite/gas/aarch64/sve-invalid.s,
+	testsuite/gas/aarch64/sve-invalid.d,
+	testsuite/gas/aarch64/sve-invalid.l,
+	testsuite/gas/aarch64/sve-reg-diagnostic.s,
+	testsuite/gas/aarch64/sve-reg-diagnostic.d,
+	testsuite/gas/aarch64/sve-reg-diagnostic.l,
+	testsuite/gas/aarch64/sve.s, testsuite/gas/aarch64/sve.d: New tests.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* doc/c-aarch64.texi: Document the "sve" feature.
 	* config/tc-aarch64.c (REG_TYPE_R_Z_BHSDQ_VZP): New register type.
 	(get_reg_expected_msg): Handle it.
