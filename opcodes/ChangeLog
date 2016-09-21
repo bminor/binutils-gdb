@@ -1,5 +1,11 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-opc.c (BANK): New macro.
+	(R32, R64): Take a register number as argument
+	(int_reg): Use BANK.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-opc.c (print_register_list): Add a prefix parameter.
 	(aarch64_print_operand): Update accordingly.
 
