@@ -1,3 +1,7 @@
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-gen.c (indented_print): Avoid hard-coded indentation limit.
+
 2016-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* arc-dis.c (find_format): Walk the linked list pointed by einsn.
