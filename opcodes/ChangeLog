@@ -1,5 +1,47 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE
+	address operands.
+	* aarch64-opc.h (FLD_SVE_imm6, FLD_SVE_msz, FLD_SVE_xs_14)
+	(FLD_SVE_xs_22): New aarch64_field_kinds.
+	(OPD_F_OD_MASK, OPD_F_OD_LSB, OPD_F_NO_ZR): New flags.
+	(get_operand_specific_data): New function.
+	* aarch64-opc.c (fields): Add entries for FLD_SVE_imm6, FLD_SVE_msz,
+	FLD_SVE_xs_14 and FLD_SVE_xs_22.
+	(operand_general_constraint_met_p): Handle the new SVE address
+	operands.
+	(sve_reg): New array.
+	(get_addr_sve_reg_name): New function.
+	(aarch64_print_operand): Handle the new SVE address operands.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_addr_ri_u6, ins_sve_addr_rr_lsl)
+	(ins_sve_addr_rz_xtw, ins_sve_addr_zi_u5, ins_sve_addr_zz_lsl)
+	(ins_sve_addr_zz_sxtw, ins_sve_addr_zz_uxtw): New inserters.
+	* aarch64-asm.c (aarch64_ins_sve_addr_ri_u6): New function.
+	(aarch64_ins_sve_addr_rr_lsl): Likewise.
+	(aarch64_ins_sve_addr_rz_xtw): Likewise.
+	(aarch64_ins_sve_addr_zi_u5): Likewise.
+	(aarch64_ins_sve_addr_zz): Likewise.
+	(aarch64_ins_sve_addr_zz_lsl): Likewise.
+	(aarch64_ins_sve_addr_zz_sxtw): Likewise.
+	(aarch64_ins_sve_addr_zz_uxtw): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_addr_ri_u6, ext_sve_addr_rr_lsl)
+	(ext_sve_addr_rz_xtw, ext_sve_addr_zi_u5, ext_sve_addr_zz_lsl)
+	(ext_sve_addr_zz_sxtw, ext_sve_addr_zz_uxtw): New extractors.
+	* aarch64-dis.c (aarch64_ext_sve_add_reg_imm): New function.
+	(aarch64_ext_sve_addr_ri_u6): Likewise.
+	(aarch64_ext_sve_addr_rr_lsl): Likewise.
+	(aarch64_ext_sve_addr_rz_xtw): Likewise.
+	(aarch64_ext_sve_addr_zi_u5): Likewise.
+	(aarch64_ext_sve_addr_zz): Likewise.
+	(aarch64_ext_sve_addr_zz_lsl): Likewise.
+	(aarch64_ext_sve_addr_zz_sxtw): Likewise.
+	(aarch64_ext_sve_addr_zz_uxtw): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (AARCH64_OPERANDS): Add an entry for
 	AARCH64_OPND_SVE_PATTERN_SCALED.
 	* aarch64-opc.h (FLD_SVE_imm4): New aarch64_field_kind.

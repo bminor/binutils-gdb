@@ -107,9 +107,13 @@ enum aarch64_field_kind
   FLD_SVE_Zn,
   FLD_SVE_Zt,
   FLD_SVE_imm4,
+  FLD_SVE_imm6,
+  FLD_SVE_msz,
   FLD_SVE_pattern,
   FLD_SVE_prfop,
   FLD_SVE_tszh,
+  FLD_SVE_xs_14,
+  FLD_SVE_xs_22,
 };
 
 /* Field description.  */
@@ -156,6 +160,9 @@ extern const aarch64_operand aarch64_operands[];
 						   value by 2 to get the value
 						   of an immediate operand.  */
 #define OPD_F_MAYBE_SP		0x00000010	/* May potentially be SP.  */
+#define OPD_F_OD_MASK		0x00000060	/* Operand-dependent data.  */
+#define OPD_F_OD_LSB		5
+#define OPD_F_NO_ZR		0x00000080	/* ZR index not allowed.  */
 
 static inline bfd_boolean
 operand_has_inserter (const aarch64_operand *operand)
@@ -185,6 +192,13 @@ static inline bfd_boolean
 operand_maybe_stack_pointer (const aarch64_operand *operand)
 {
   return (operand->flags & OPD_F_MAYBE_SP) ? TRUE : FALSE;
+}
+
+/* Return the value of the operand-specific data field (OPD_F_OD_MASK).  */
+static inline unsigned int
+get_operand_specific_data (const aarch64_operand *operand)
+{
+  return (operand->flags & OPD_F_OD_MASK) >> OPD_F_OD_LSB;
 }
 
 /* Return the total width of the operand *OPERAND.  */

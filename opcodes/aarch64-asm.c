@@ -745,6 +745,114 @@ aarch64_ins_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+/* Encode an SVE address [X<n>, #<SVE_imm6> << <shift>], where <SVE_imm6>
+   is a 6-bit unsigned number and where <shift> is SELF's operand-dependent
+   value.  fields[0] specifies the base register field.  */
+const char *
+aarch64_ins_sve_addr_ri_u6 (const aarch64_operand *self,
+			    const aarch64_opnd_info *info, aarch64_insn *code,
+			    const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int factor = 1 << get_operand_specific_data (self);
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_field (FLD_SVE_imm6, code, info->addr.offset.imm / factor, 0);
+  return NULL;
+}
+
+/* Encode an SVE address [X<n>, X<m>{, LSL #<shift>}], where <shift>
+   is SELF's operand-dependent value.  fields[0] specifies the base
+   register field and fields[1] specifies the offset register field.  */
+const char *
+aarch64_ins_sve_addr_rr_lsl (const aarch64_operand *self,
+			     const aarch64_opnd_info *info, aarch64_insn *code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_field (self->fields[1], code, info->addr.offset.regno, 0);
+  return NULL;
+}
+
+/* Encode an SVE address [X<n>, Z<m>.<T>, (S|U)XTW {#<shift>}], where
+   <shift> is SELF's operand-dependent value.  fields[0] specifies the
+   base register field, fields[1] specifies the offset register field and
+   fields[2] is a single-bit field that selects SXTW over UXTW.  */
+const char *
+aarch64_ins_sve_addr_rz_xtw (const aarch64_operand *self,
+			     const aarch64_opnd_info *info, aarch64_insn *code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_field (self->fields[1], code, info->addr.offset.regno, 0);
+  if (info->shifter.kind == AARCH64_MOD_UXTW)
+    insert_field (self->fields[2], code, 0, 0);
+  else
+    insert_field (self->fields[2], code, 1, 0);
+  return NULL;
+}
+
+/* Encode an SVE address [Z<n>.<T>, #<imm5> << <shift>], where <imm5> is a
+   5-bit unsigned number and where <shift> is SELF's operand-dependent value.
+   fields[0] specifies the base register field.  */
+const char *
+aarch64_ins_sve_addr_zi_u5 (const aarch64_operand *self,
+			    const aarch64_opnd_info *info, aarch64_insn *code,
+			    const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int factor = 1 << get_operand_specific_data (self);
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_field (FLD_imm5, code, info->addr.offset.imm / factor, 0);
+  return NULL;
+}
+
+/* Encode an SVE address [Z<n>.<T>, Z<m>.<T>{, <modifier> {#<msz>}}],
+   where <modifier> is fixed by the instruction and where <msz> is a
+   2-bit unsigned number.  fields[0] specifies the base register field
+   and fields[1] specifies the offset register field.  */
+static const char *
+aarch64_ext_sve_addr_zz (const aarch64_operand *self,
+			 const aarch64_opnd_info *info, aarch64_insn *code)
+{
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_field (self->fields[1], code, info->addr.offset.regno, 0);
+  insert_field (FLD_SVE_msz, code, info->shifter.amount, 0);
+  return NULL;
+}
+
+/* Encode an SVE address [Z<n>.<T>, Z<m>.<T>{, LSL #<msz>}], where
+   <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
+   field and fields[1] specifies the offset register field.  */
+const char *
+aarch64_ins_sve_addr_zz_lsl (const aarch64_operand *self,
+			     const aarch64_opnd_info *info, aarch64_insn *code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  return aarch64_ext_sve_addr_zz (self, info, code);
+}
+
+/* Encode an SVE address [Z<n>.<T>, Z<m>.<T>, SXTW {#<msz>}], where
+   <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
+   field and fields[1] specifies the offset register field.  */
+const char *
+aarch64_ins_sve_addr_zz_sxtw (const aarch64_operand *self,
+			      const aarch64_opnd_info *info,
+			      aarch64_insn *code,
+			      const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  return aarch64_ext_sve_addr_zz (self, info, code);
+}
+
+/* Encode an SVE address [Z<n>.<T>, Z<m>.<T>, UXTW {#<msz>}], where
+   <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
+   field and fields[1] specifies the offset register field.  */
+const char *
+aarch64_ins_sve_addr_zz_uxtw (const aarch64_operand *self,
+			      const aarch64_opnd_info *info,
+			      aarch64_insn *code,
+			      const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  return aarch64_ext_sve_addr_zz (self, info, code);
+}
+
 /* Encode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less

@@ -10426,21 +10426,21 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 27:
     case 35:
     case 36:
-    case 92:
-    case 93:
-    case 94:
-    case 95:
-    case 96:
-    case 97:
-    case 98:
-    case 99:
-    case 100:
-    case 101:
-    case 102:
-    case 103:
-    case 104:
-    case 105:
-    case 108:
+    case 123:
+    case 124:
+    case 125:
+    case 126:
+    case 127:
+    case 128:
+    case 129:
+    case 130:
+    case 131:
+    case 132:
+    case 133:
+    case 134:
+    case 135:
+    case 136:
+    case 139:
       return aarch64_ext_regno (self, info, code, inst);
     case 8:
       return aarch64_ext_regrt_sysins (self, info, code, inst);
@@ -10482,8 +10482,8 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 68:
     case 69:
     case 70:
-    case 89:
-    case 91:
+    case 120:
+    case 122:
       return aarch64_ext_imm (self, info, code, inst);
     case 38:
     case 39:
@@ -10536,12 +10536,50 @@ aarch64_extract_operand (const aarch64_operand *self,
       return aarch64_ext_prfop (self, info, code, inst);
     case 88:
       return aarch64_ext_hint (self, info, code, inst);
+    case 89:
     case 90:
-      return aarch64_ext_sve_scale (self, info, code, inst);
+    case 91:
+    case 92:
+      return aarch64_ext_sve_addr_ri_u6 (self, info, code, inst);
+    case 93:
+    case 94:
+    case 95:
+    case 96:
+    case 97:
+    case 98:
+    case 99:
+    case 100:
+    case 101:
+    case 102:
+    case 103:
+    case 104:
+      return aarch64_ext_sve_addr_rr_lsl (self, info, code, inst);
+    case 105:
     case 106:
-      return aarch64_ext_sve_index (self, info, code, inst);
     case 107:
+    case 108:
     case 109:
+    case 110:
+    case 111:
+    case 112:
+      return aarch64_ext_sve_addr_rz_xtw (self, info, code, inst);
+    case 113:
+    case 114:
+    case 115:
+    case 116:
+      return aarch64_ext_sve_addr_zi_u5 (self, info, code, inst);
+    case 117:
+      return aarch64_ext_sve_addr_zz_lsl (self, info, code, inst);
+    case 118:
+      return aarch64_ext_sve_addr_zz_sxtw (self, info, code, inst);
+    case 119:
+      return aarch64_ext_sve_addr_zz_uxtw (self, info, code, inst);
+    case 121:
+      return aarch64_ext_sve_scale (self, info, code, inst);
+    case 137:
+      return aarch64_ext_sve_index (self, info, code, inst);
+    case 138:
+    case 140:
       return aarch64_ext_sve_reglist (self, info, code, inst);
     default: assert (0); abort ();
     }
