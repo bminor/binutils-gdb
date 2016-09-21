@@ -1,5 +1,11 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-opc.c (print_immediate_offset_address): Print spaces
+	after commas in addresses.
+	(aarch64_print_operand): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-opc.c (operand_general_constraint_met_p): Use "must be"
 	rather than "should be" or "expected to be" in error messages.
 

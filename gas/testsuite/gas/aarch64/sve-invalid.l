@@ -2,228 +2,228 @@
 .*: Error: operand 2 must be an SVE predicate register -- `fmov z1,z2'
 .*: Error: operand mismatch -- `fmov z1,#1\.0'
 .*: Info:    did you mean this\?
-.*: Info:    	fmov z1\.s,#1\.000000000000000000e\+00
+.*: Info:    	fmov z1\.s, #1\.000000000000000000e\+00
 .*: Info:    other valid variant\(s\):
-.*: Info:    	fmov z1\.d,#1\.000000000000000000e\+00
+.*: Info:    	fmov z1\.d, #1\.000000000000000000e\+00
 .*: Error: operand mismatch -- `fmov z1,#0\.0'
 .*: Info:    did you mean this\?
-.*: Info:    	fmov z1\.s,#0\.0
+.*: Info:    	fmov z1\.s, #0\.0
 .*: Info:    other valid variant\(s\):
-.*: Info:    	fmov z1\.d,#0\.0
+.*: Info:    	fmov z1\.d, #0\.0
 .*: Error: missing predication type at operand 2 -- `not z0\.s,p1/'
 .*: Error: missing predication type at operand 2 -- `not z0\.s,p1/,z2\.s'
 .*: Error: unexpected character `c' in predication type at operand 2 -- `not z0\.s,p1/c,z2\.s'
 .*: Error: operand mismatch -- `movprfx z0\.h,z1\.h'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0,z1
+.*: Info:    	movprfx z0, z1
 .*: Error: operand mismatch -- `movprfx z0,z1\.h'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0,z1
+.*: Info:    	movprfx z0, z1
 .*: Error: operand mismatch -- `movprfx z0\.h,z1'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0,z1
+.*: Info:    	movprfx z0, z1
 .*: Error: operand mismatch -- `movprfx z0\.h,z1\.s'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0,z1
+.*: Info:    	movprfx z0, z1
 .*: Error: operand mismatch -- `movprfx z0,p1/m,z1'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand mismatch -- `movprfx z0,p1/z,z1'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand mismatch -- `movprfx z0\.b,p1/m,z1'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand mismatch -- `movprfx z0\.b,p1/z,z1'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand mismatch -- `movprfx z0,p1/m,z1\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand mismatch -- `movprfx z0,p1/z,z1\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand mismatch -- `movprfx z0\.h,p1/m,z1\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand mismatch -- `movprfx z0\.h,p1/z,z1\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand mismatch -- `movprfx z0\.b,p1,z1\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	movprfx z0\.b,p1/z,z1\.b
+.*: Info:    	movprfx z0\.b, p1/z, z1\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	movprfx z0\.b,p1/m,z1\.b
-.*: Info:    	movprfx z0\.h,p1/z,z1\.h
-.*: Info:    	movprfx z0\.h,p1/m,z1\.h
-.*: Info:    	movprfx z0\.s,p1/z,z1\.s
-.*: Info:    	movprfx z0\.s,p1/m,z1\.s
-.*: Info:    	movprfx z0\.d,p1/z,z1\.d
-.*: Info:    	movprfx z0\.d,p1/m,z1\.d
+.*: Info:    	movprfx z0\.b, p1/m, z1\.b
+.*: Info:    	movprfx z0\.h, p1/z, z1\.h
+.*: Info:    	movprfx z0\.h, p1/m, z1\.h
+.*: Info:    	movprfx z0\.s, p1/z, z1\.s
+.*: Info:    	movprfx z0\.s, p1/m, z1\.s
+.*: Info:    	movprfx z0\.d, p1/z, z1\.d
+.*: Info:    	movprfx z0\.d, p1/m, z1\.d
 .*: Error: operand 1 must be an SVE vector register -- `movprfx p0,p1'
 .*: Error: operand mismatch -- `ldr p0\.b,\[x1\]'
 .*: Info:    did you mean this\?
-.*: Info:    	ldr p0,\[x1\]
+.*: Info:    	ldr p0, \[x1\]
 .*: Error: operand mismatch -- `ldr z0\.b,\[x1\]'
 .*: Info:    did you mean this\?
-.*: Info:    	ldr z0,\[x1\]
+.*: Info:    	ldr z0, \[x1\]
 .*: Error: operand mismatch -- `str p0\.b,\[x1\]'
 .*: Info:    did you mean this\?
-.*: Info:    	str p0,\[x1\]
+.*: Info:    	str p0, \[x1\]
 .*: Error: operand mismatch -- `str z0\.b,\[x1\]'
 .*: Info:    did you mean this\?
-.*: Info:    	str z0,\[x1\]
+.*: Info:    	str z0, \[x1\]
 .*: Error: operand mismatch -- `mov z0,b0'
 .*: Info:    did you mean this\?
-.*: Info:    	mov z0\.b,b0
+.*: Info:    	mov z0\.b, b0
 .*: Info:    other valid variant\(s\):
-.*: Info:    	mov z0\.h,h0
-.*: Info:    	mov z0\.s,s0
-.*: Info:    	mov z0\.d,d0
+.*: Info:    	mov z0\.h, h0
+.*: Info:    	mov z0\.s, s0
+.*: Info:    	mov z0\.d, d0
 .*: Error: operand mismatch -- `mov z0,z1'
 .*: Info:    did you mean this\?
-.*: Info:    	mov z0\.d,z1\.d
+.*: Info:    	mov z0\.d, z1\.d
 .*: Error: operand mismatch -- `mov p0,p1'
 .*: Info:    did you mean this\?
-.*: Info:    	mov p0\.b,p1\.b
+.*: Info:    	mov p0\.b, p1\.b
 .*: Error: operand mismatch -- `add z0,z0,z2'
 .*: Info:    did you mean this\?
-.*: Info:    	add z0\.b,z0\.b,z2\.b
+.*: Info:    	add z0\.b, z0\.b, z2\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	add z0\.h,z0\.h,z2\.h
-.*: Info:    	add z0\.s,z0\.s,z2\.s
-.*: Info:    	add z0\.d,z0\.d,z2\.d
+.*: Info:    	add z0\.h, z0\.h, z2\.h
+.*: Info:    	add z0\.s, z0\.s, z2\.s
+.*: Info:    	add z0\.d, z0\.d, z2\.d
 .*: Error: operand mismatch -- `add z0,z0,#2'
 .*: Info:    did you mean this\?
-.*: Info:    	add z0\.b,z0\.b,#2
+.*: Info:    	add z0\.b, z0\.b, #2
 .*: Info:    other valid variant\(s\):
-.*: Info:    	add z0\.h,z0\.h,#2
-.*: Info:    	add z0\.s,z0\.s,#2
-.*: Info:    	add z0\.d,z0\.d,#2
+.*: Info:    	add z0\.h, z0\.h, #2
+.*: Info:    	add z0\.s, z0\.s, #2
+.*: Info:    	add z0\.d, z0\.d, #2
 .*: Error: operand mismatch -- `add z0,z1,z2'
 .*: Info:    did you mean this\?
-.*: Info:    	add z0\.b,z1\.b,z2\.b
+.*: Info:    	add z0\.b, z1\.b, z2\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	add z0\.h,z1\.h,z2\.h
-.*: Info:    	add z0\.s,z1\.s,z2\.s
-.*: Info:    	add z0\.d,z1\.d,z2\.d
+.*: Info:    	add z0\.h, z1\.h, z2\.h
+.*: Info:    	add z0\.s, z1\.s, z2\.s
+.*: Info:    	add z0\.d, z1\.d, z2\.d
 .*: Error: operand 2 must be the same register as operand 1 -- `add z0,z1,#1'
 .*: Error: operand 2 must be the same register as operand 1 -- `add z0\.b,z1\.b,#1'
 .*: Error: operand mismatch -- `add z0\.b,z0\.h,#1'
 .*: Info:    did you mean this\?
-.*: Info:    	add z0\.b,z0\.b,#1
+.*: Info:    	add z0\.b, z0\.b, #1
 .*: Info:    other valid variant\(s\):
-.*: Info:    	add z0\.h,z0\.h,#1
-.*: Info:    	add z0\.s,z0\.s,#1
-.*: Info:    	add z0\.d,z0\.d,#1
+.*: Info:    	add z0\.h, z0\.h, #1
+.*: Info:    	add z0\.s, z0\.s, #1
+.*: Info:    	add z0\.d, z0\.d, #1
 .*: Error: constant expression required at operand 2 -- `mov z0\.b,z32\.b'
 .*: Error: operand 2 must be an SVE predicate register -- `mov p0\.b,p16\.b'
 .*: Error: p0-p7 expected at operand 2 -- `cmpeq p0\.b,p8/z,z1\.b,z2\.b'
 .*: Error: p0-p7 expected at operand 2 -- `cmpeq p0\.b,p15/z,z1\.b,z2\.b'
 .*: Error: operand mismatch -- `ld1w z0\.s,p0,\[x0\]'
 .*: Info:    did you mean this\?
-.*: Info:    	ld1w \{z0\.s\},p0/z,\[x0\]
+.*: Info:    	ld1w \{z0\.s\}, p0/z, \[x0\]
 .*: Error: operand mismatch -- `ld1w z0\.s,p0/m,\[x0\]'
 .*: Info:    did you mean this\?
-.*: Info:    	ld1w \{z0\.s\},p0/z,\[x0\]
+.*: Info:    	ld1w \{z0\.s\}, p0/z, \[x0\]
 .*: Error: operand mismatch -- `cmpeq p0\.b,p0,z1\.b,z2\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	cmpeq p0\.b,p0/z,z1\.b,z2\.b
+.*: Info:    	cmpeq p0\.b, p0/z, z1\.b, z2\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	cmpeq p0\.h,p0/z,z1\.h,z2\.h
-.*: Info:    	cmpeq p0\.s,p0/z,z1\.s,z2\.s
-.*: Info:    	cmpeq p0\.d,p0/z,z1\.d,z2\.d
+.*: Info:    	cmpeq p0\.h, p0/z, z1\.h, z2\.h
+.*: Info:    	cmpeq p0\.s, p0/z, z1\.s, z2\.s
+.*: Info:    	cmpeq p0\.d, p0/z, z1\.d, z2\.d
 .*: Error: operand mismatch -- `cmpeq p0\.b,p0/m,z1\.b,z2\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	cmpeq p0\.b,p0/z,z1\.b,z2\.b
+.*: Info:    	cmpeq p0\.b, p0/z, z1\.b, z2\.b
 .*: Info:    other valid variant\(s\):
-.*: Info:    	cmpeq p0\.h,p0/z,z1\.h,z2\.h
-.*: Info:    	cmpeq p0\.s,p0/z,z1\.s,z2\.s
-.*: Info:    	cmpeq p0\.d,p0/z,z1\.d,z2\.d
+.*: Info:    	cmpeq p0\.h, p0/z, z1\.h, z2\.h
+.*: Info:    	cmpeq p0\.s, p0/z, z1\.s, z2\.s
+.*: Info:    	cmpeq p0\.d, p0/z, z1\.d, z2\.d
 .*: Error: operand mismatch -- `add z0\.s,p0,z0\.s,z1\.s'
 .*: Info:    did you mean this\?
-.*: Info:    	add z0\.s,p0/m,z0\.s,z1\.s
+.*: Info:    	add z0\.s, p0/m, z0\.s, z1\.s
 .*: Info:    other valid variant\(s\):
-.*: Info:    	add z0\.b,p0/m,z0\.b,z1\.b
-.*: Info:    	add z0\.h,p0/m,z0\.h,z1\.h
-.*: Info:    	add z0\.d,p0/m,z0\.d,z1\.d
+.*: Info:    	add z0\.b, p0/m, z0\.b, z1\.b
+.*: Info:    	add z0\.h, p0/m, z0\.h, z1\.h
+.*: Info:    	add z0\.d, p0/m, z0\.d, z1\.d
 .*: Error: operand mismatch -- `add z0\.s,p0/z,z0\.s,z1\.s'
 .*: Info:    did you mean this\?
-.*: Info:    	add z0\.s,p0/m,z0\.s,z1\.s
+.*: Info:    	add z0\.s, p0/m, z0\.s, z1\.s
 .*: Info:    other valid variant\(s\):
-.*: Info:    	add z0\.b,p0/m,z0\.b,z1\.b
-.*: Info:    	add z0\.h,p0/m,z0\.h,z1\.h
-.*: Info:    	add z0\.d,p0/m,z0\.d,z1\.d
+.*: Info:    	add z0\.b, p0/m, z0\.b, z1\.b
+.*: Info:    	add z0\.h, p0/m, z0\.h, z1\.h
+.*: Info:    	add z0\.d, p0/m, z0\.d, z1\.d
 .*: Error: operand mismatch -- `st1w z0\.s,p0/z,\[x0\]'
 .*: Info:    did you mean this\?
-.*: Info:    	st1w \{z0\.s\},p0,\[x0\]
+.*: Info:    	st1w \{z0\.s\}, p0, \[x0\]
 .*: Error: operand mismatch -- `st1w z0\.s,p0/m,\[x0\]'
 .*: Info:    did you mean this\?
-.*: Info:    	st1w \{z0\.s\},p0,\[x0\]
+.*: Info:    	st1w \{z0\.s\}, p0, \[x0\]
 .*: Error: missing type suffix at operand 1 -- `ld1b z0,p1/z,\[x1\]'
 .*: Error: missing type suffix at operand 1 -- `ld1h z0,p1/z,\[x1\]'
 .*: Error: missing type suffix at operand 1 -- `ld1w z0,p1/z,\[x1\]'

@@ -4478,7 +4478,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 
       /* Delimiter.  */
       if (str[0] != '\0')
-	strcat (buf, i == 0 ? " " : ",");
+	strcat (buf, i == 0 ? " " : ", ");
 
       /* Append the operand string.  */
       strcat (buf, str);

@@ -1,5 +1,26 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (print_operands): Print spaces between
+	operands.
+	* testsuite/gas/aarch64/ilp32-basic.d: Expect spaces after ","
+	in addresses.
+	* testsuite/gas/aarch64/ldst-reg-imm-post-ind.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-imm-pre-ind.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-pair.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-reg-offset.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-uns-imm.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-unscaled-imm.d: Likewise.
+	* testsuite/gas/aarch64/reloc-insn.d: Likewise.
+	* testsuite/gas/aarch64/sve.d: Likewise.
+	* testsuite/gas/aarch64/symbol.d: Likewise.
+	* testsuite/gas/aarch64/system.d: Likewise.
+	* testsuite/gas/aarch64/tls-desc.d: Likewise.
+	* testsuite/gas/aarch64/sve-invalid.l: Expect spaces after ","
+	in suggested alternatives.
+	* testsuite/gas/aarch64/verbose-error.l: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (output_operand_error_record): Use "must be"
 	rather than "should be" or "expected to be" in error messages.
 	(parse_operands): Likewise.

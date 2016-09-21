@@ -13,8 +13,8 @@ Disassembly of section \.text:
 			4: R_AARCH64_P32_ADD_ABS_LO12_NC	ptrs
    8:	b9000080 	str	w0, \[x4\]
 			8: R_AARCH64_P32_LDST32_ABS_LO12_NC	ptrs
-   c:	b9000461 	str	w1, \[x3,#4\]
-  10:	b9000862 	str	w2, \[x3,#8\]
+   c:	b9000461 	str	w1, \[x3, #4\]
+  10:	b9000862 	str	w2, \[x3, #8\]
   14:	90000004 	adrp	x4, c <.*>
 			14: R_AARCH64_P32_ADR_GOT_PAGE	ptrs
   18:	f9400083 	ldr	x3, \[x4\]

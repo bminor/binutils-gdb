@@ -20,15 +20,15 @@ Disassembly of section .text:
 Disassembly of section .plt:
 
 0000000000010024 \<.plt\>:
-   10024:	a9bf7bf0 	stp	x16, x30, \[sp,#-16\]!
+   10024:	a9bf7bf0 	stp	x16, x30, \[sp, #-16\]!
    10028:	90000090 	adrp	x16, 20000 \<_GLOBAL_OFFSET_TABLE_\>
-   1002c:	f9401611 	ldr	x17, \[x16,#40\]
+   1002c:	f9401611 	ldr	x17, \[x16, #40\]
    10030:	9100a210 	add	x16, x16, #0x28
    10034:	d61f0220 	br	x17
    10038:	d503201f 	nop
    1003c:	d503201f 	nop
    10040:	d503201f 	nop
    10044:	90000090 	adrp	x16, 20000 \<_GLOBAL_OFFSET_TABLE_\>
-   10048:	f9401a11 	ldr	x17, \[x16,#48\]
+   10048:	f9401a11 	ldr	x17, \[x16, #48\]
    1004c:	9100c210 	add	x16, x16, #0x30
    10050:	d61f0220 	br	x17

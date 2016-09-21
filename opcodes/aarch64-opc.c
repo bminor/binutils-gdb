@@ -2864,20 +2864,20 @@ print_immediate_offset_address (char *buf, size_t size,
   if (opnd->addr.writeback)
     {
       if (opnd->addr.preind)
-	snprintf (buf, size, "[%s,#%d]!", base, opnd->addr.offset.imm);
+	snprintf (buf, size, "[%s, #%d]!", base, opnd->addr.offset.imm);
       else
-	snprintf (buf, size, "[%s],#%d", base, opnd->addr.offset.imm);
+	snprintf (buf, size, "[%s], #%d", base, opnd->addr.offset.imm);
     }
   else
     {
       if (opnd->shifter.operator_present)
 	{
 	  assert (opnd->shifter.kind == AARCH64_MOD_MUL_VL);
-	  snprintf (buf, size, "[%s,#%d,mul vl]",
+	  snprintf (buf, size, "[%s, #%d, mul vl]",
 		    base, opnd->addr.offset.imm);
 	}
       else if (opnd->addr.offset.imm)
-	snprintf (buf, size, "[%s,#%d]", base, opnd->addr.offset.imm);
+	snprintf (buf, size, "[%s, #%d]", base, opnd->addr.offset.imm);
       else
 	snprintf (buf, size, "[%s]", base);
     }
@@ -2912,15 +2912,15 @@ print_register_offset_address (char *buf, size_t size,
   if (print_extend_p)
     {
       if (print_amount_p)
-	snprintf (tb, sizeof (tb), ",%s #%" PRIi64, shift_name,
+	snprintf (tb, sizeof (tb), ", %s #%" PRIi64, shift_name,
 		  opnd->shifter.amount);
       else
-	snprintf (tb, sizeof (tb), ",%s", shift_name);
+	snprintf (tb, sizeof (tb), ", %s", shift_name);
     }
   else
     tb[0] = '\0';
 
-  snprintf (buf, size, "[%s,%s%s]", base, offset, tb);
+  snprintf (buf, size, "[%s, %s%s]", base, offset, tb);
 }
 
 /* Generate the string representation of the operand OPNDS[IDX] for OPCODE
@@ -3433,7 +3433,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_ADDR_UIMM12:
       name = get_64bit_int_reg_name (opnd->addr.base_regno, 1);
       if (opnd->addr.offset.imm)
-	snprintf (buf, size, "[%s,#%d]", name, opnd->addr.offset.imm);
+	snprintf (buf, size, "[%s, #%d]", name, opnd->addr.offset.imm);
       else
 	snprintf (buf, size, "[%s]", name);
       break;

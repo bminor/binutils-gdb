@@ -1,5 +1,49 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* testsuite/ld-aarch64/emit-relocs-28.d: Expect spaces after ","
+	in addresses.
+	* testsuite/ld-aarch64/emit-relocs-301-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-301.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-302-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-302.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-310-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-310.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-313.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-515-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-515.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-516-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-516.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-531.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-532.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-533.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-534.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-535.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-536.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-537.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-538.d: Likewise.
+	* testsuite/ld-aarch64/erratum835769.d: Likewise.
+	* testsuite/ld-aarch64/erratum843419.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-plt.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-plt.d: Likewise.
+	* testsuite/ld-aarch64/gc-plt-relocs.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-21.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-7c.d: Likewise.
+	* testsuite/ld-aarch64/tls-desc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-desc-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-desc.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-ie-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-all.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gd-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gdesc-ie-2.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gdesc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-large-desc-ie-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-large-desc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-tiny-desc.d: Likewise.
+	* testsuite/ld-aarch64/tls-tiny-gd.d: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* testsuite/ld-aarch64/emit-relocs-280.d: Match branch comments.
 	* testsuite/ld-aarch64/weak-undefined.d: Likewise.
 
