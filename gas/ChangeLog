@@ -1,5 +1,15 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (output_operand_error_record): Use "must be"
+	rather than "should be" or "expected to be" in error messages.
+	(parse_operands): Likewise.
+	* testsuite/gas/aarch64/diagnostic.l: Likewise.
+	* testsuite/gas/aarch64/legacy_reg_names.l: Likewise.
+	* testsuite/gas/aarch64/sve-invalid.l: Likewise.
+	* testsuite/gas/aarch64/sve-reg-diagnostic.l: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (opcode_lookup): Search for the end of
 	a condition name, rather than assuming that it will have exactly
 	2 characters.

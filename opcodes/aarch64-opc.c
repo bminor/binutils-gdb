@@ -1914,7 +1914,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (opnd->shifter.amount != 0 && opnd->shifter.amount != 12)
 	    {
 	      set_other_error (mismatch_detail, idx,
-			       _("shift amount expected to be 0 or 12"));
+			       _("shift amount must be 0 or 12"));
 	      return 0;
 	    }
 	  if (!value_fit_unsigned_field_p (opnd->imm.value, 12))
@@ -1937,7 +1937,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_aligned_p (opnd->shifter.amount, 16))
 	    {
 	      set_other_error (mismatch_detail, idx,
-			       _("shift amount should be a multiple of 16"));
+			       _("shift amount must be a multiple of 16"));
 	      return 0;
 	    }
 	  if (!value_in_range_p (opnd->shifter.amount, 0, size * 8 - 16))
@@ -2174,7 +2174,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      if (opnd->shifter.amount != 8 && opnd->shifter.amount != 16)
 		{
 		  set_other_error (mismatch_detail, idx,
-				   _("shift amount expected to be 0 or 16"));
+				   _("shift amount must be 0 or 16"));
 		  return 0;
 		}
 	      break;

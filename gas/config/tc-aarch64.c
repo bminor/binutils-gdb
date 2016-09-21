@@ -4543,7 +4543,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
       else
 	{
 	  gas_assert (idx >= 0);
-	  as_bad (_("operand %d should be %s -- `%s'"), idx + 1,
+	  as_bad (_("operand %d must be %s -- `%s'"), idx + 1,
 		aarch64_get_operand_desc (opd_code), str);
 	}
       break;
@@ -4656,7 +4656,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 		detail->error ? detail->error : _("immediate value"),
 		detail->data[0], detail->data[1], idx + 1, str);
       else
-	as_bad (_("%s expected to be %d at operand %d -- `%s'"),
+	as_bad (_("%s must be %d at operand %d -- `%s'"),
 		detail->error ? detail->error : _("immediate value"),
 		detail->data[0], idx + 1, str);
       break;
@@ -4673,7 +4673,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
       break;
 
     case AARCH64_OPDE_UNALIGNED:
-      as_bad (_("immediate value should be a multiple of "
+      as_bad (_("immediate value must be a multiple of "
 		"%d at operand %d -- `%s'"),
 	      detail->data[0], idx + 1, str);
       break;
@@ -6056,7 +6056,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      else
 		{
 		  set_fatal_syntax_error
-		    (_("writeback value should be an immediate constant"));
+		    (_("writeback value must be an immediate constant"));
 		  goto failure;
 		}
 	    }

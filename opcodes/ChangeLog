@@ -1,5 +1,10 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-opc.c (operand_general_constraint_met_p): Use "must be"
+	rather than "should be" or "expected to be" in error messages.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-dis.c (remove_dot_suffix): New function, split out from...
 	(print_mnemonic_name): ...here.
 	(print_comment): New function.
