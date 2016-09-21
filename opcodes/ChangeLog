@@ -1,5 +1,13 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-asm.c: Include libiberty.h.
+	(insert_fields): New function.
+	(aarch64_ins_imm): Use it.
+	* aarch64-dis.c (extract_fields): New function.
+	(aarch64_ext_imm): Use it.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-opc.c (aarch64_logical_immediate_p): Replace is32
 	with an esize parameter.
 	(operand_general_constraint_met_p): Update accordingly.
