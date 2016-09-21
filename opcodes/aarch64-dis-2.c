@@ -10426,8 +10426,6 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 27:
     case 35:
     case 36:
-    case 89:
-    case 90:
     case 91:
     case 92:
     case 93:
@@ -10440,7 +10438,9 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 100:
     case 101:
     case 102:
-    case 105:
+    case 103:
+    case 104:
+    case 107:
       return aarch64_ext_regno (self, info, code, inst);
     case 8:
       return aarch64_ext_regrt_sysins (self, info, code, inst);
@@ -10482,6 +10482,8 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 68:
     case 69:
     case 70:
+    case 89:
+    case 90:
       return aarch64_ext_imm (self, info, code, inst);
     case 38:
     case 39:
@@ -10534,10 +10536,10 @@ aarch64_extract_operand (const aarch64_operand *self,
       return aarch64_ext_prfop (self, info, code, inst);
     case 88:
       return aarch64_ext_hint (self, info, code, inst);
-    case 103:
+    case 105:
       return aarch64_ext_sve_index (self, info, code, inst);
-    case 104:
     case 106:
+    case 108:
       return aarch64_ext_sve_reglist (self, info, code, inst);
     default: assert (0); abort ();
     }

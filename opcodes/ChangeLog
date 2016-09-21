@@ -1,5 +1,21 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for
+	AARCH64_OPND_SVE_PATTERN and AARCH64_OPND_SVE_PRFOP.
+	* aarch64-opc.h (FLD_SVE_pattern): New aarch64_field_kind.
+	(FLD_SVE_prfop): Likewise.
+	* aarch64-opc.c: Include libiberty.h.
+	(aarch64_sve_pattern_array): New variable.
+	(aarch64_sve_prfop_array): Likewise.
+	(fields): Add entries for FLD_SVE_pattern and FLD_SVE_prfop.
+	(aarch64_print_operand): Handle AARCH64_OPND_SVE_PATTERN and
+	AARCH64_OPND_SVE_PRFOP.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-opc.c (aarch64_opnd_qualifiers): Add entries for
 	AARCH64_OPND_QLF_P_[ZM].
 	(aarch64_print_operand): Print /z and /m where appropriate.

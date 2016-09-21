@@ -2820,6 +2820,10 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a prefetch operation specifier")					\
     Y (SYSTEM, hint, "BARRIER_PSB", 0, F (),				\
       "the PSB option name CSYNC")					\
+    Y(IMMEDIATE, imm, "SVE_PATTERN", 0, F(FLD_SVE_pattern),		\
+      "an enumeration value such as POW2")				\
+    Y(IMMEDIATE, imm, "SVE_PRFOP", 0, F(FLD_SVE_prfop),			\
+      "an enumeration value such as PLDL1KEEP")				\
     Y(PRED_REG, regno, "SVE_Pd", 0, F(FLD_SVE_Pd),			\
       "an SVE predicate register")					\
     Y(PRED_REG, regno, "SVE_Pg3", 0, F(FLD_SVE_Pg3),			\

@@ -1,5 +1,12 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (parse_enum_string): New function.
+	(po_enum_or_fail): New macro.
+	(parse_operands): Handle AARCH64_OPND_SVE_PATTERN and
+	AARCH64_OPND_SVE_PRFOP.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (vector_el_type): Add NT_zero and NT_merge.
 	(parse_vector_type_for_operand): Assert that the skipped character
 	is a '.'.

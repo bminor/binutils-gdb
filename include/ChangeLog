@@ -1,5 +1,12 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* opcode/aarch64.h (AARCH64_OPND_SVE_PATTERN): New aarch64_opnd.
+	(AARCH64_OPND_SVE_PRFOP): Likewise.
+	(aarch64_sve_pattern_array): Declare.
+	(aarch64_sve_prfop_array): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* opcode/aarch64.h (AARCH64_OPND_QLF_P_Z): New aarch64_opnd_qualifier.
 	(AARCH64_OPND_QLF_P_M): Likewise.
 
