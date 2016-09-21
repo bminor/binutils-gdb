@@ -1,5 +1,18 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (neon_type_el): Rename to...
+	(vector_type_el): ...this.
+	(parse_neon_type_for_operand): Update accordingly.
+	(parse_typed_reg): Likewise.
+	(aarch64_reg_parse): Likewise.
+	(vectype_to_qualifier): Likewise.
+	(parse_operands): Likewise.
+	(eq_neon_type_el): Likewise.  Rename to...
+	(eq_vector_type_el): ...this.
+	(parse_neon_reg_list): Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (neon_el_type: Rename to...
 	(vector_el_type): ...this.
 	(neon_type_el): Update accordingly.

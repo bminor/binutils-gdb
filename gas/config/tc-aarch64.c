@@ -86,11 +86,11 @@ enum vector_el_type
   NT_q
 };
 
-/* Bits for DEFINED field in neon_type_el.  */
+/* Bits for DEFINED field in vector_type_el.  */
 #define NTA_HASTYPE  1
 #define NTA_HASINDEX 2
 
-struct neon_type_el
+struct vector_type_el
 {
   enum vector_el_type type;
   unsigned char defined;
@@ -747,7 +747,7 @@ aarch64_reg_parse_32_64 (char **ccp, int reject_sp, int reject_rz,
    8b 16b 2h 4h 8h 2s 4s 1d 2d
    b h s d q  */
 static bfd_boolean
-parse_neon_type_for_operand (struct neon_type_el *parsed_type, char **str)
+parse_neon_type_for_operand (struct vector_type_el *parsed_type, char **str)
 {
   char *ptr = *str;
   unsigned width;
@@ -835,12 +835,12 @@ elt_size:
 
 static int
 parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
-		 struct neon_type_el *typeinfo, bfd_boolean in_reg_list)
+		 struct vector_type_el *typeinfo, bfd_boolean in_reg_list)
 {
   char *str = *ccp;
   const reg_entry *reg = parse_reg (&str);
-  struct neon_type_el atype;
-  struct neon_type_el parsetype;
+  struct vector_type_el atype;
+  struct vector_type_el parsetype;
   bfd_boolean is_typed_vecreg = FALSE;
 
   atype.defined = 0;
@@ -955,9 +955,9 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
 
 static int
 aarch64_reg_parse (char **ccp, aarch64_reg_type type,
-		   aarch64_reg_type *rtype, struct neon_type_el *vectype)
+		   aarch64_reg_type *rtype, struct vector_type_el *vectype)
 {
-  struct neon_type_el atype;
+  struct vector_type_el atype;
   char *str = *ccp;
   int reg = parse_typed_reg (&str, type, rtype, &atype,
 			     /*in_reg_list= */ FALSE);
@@ -974,7 +974,7 @@ aarch64_reg_parse (char **ccp, aarch64_reg_type type,
 }
 
 static inline bfd_boolean
-eq_neon_type_el (struct neon_type_el e1, struct neon_type_el e2)
+eq_vector_type_el (struct vector_type_el e1, struct vector_type_el e2)
 {
   return
     e1.type == e2.type
@@ -1003,11 +1003,11 @@ eq_neon_type_el (struct neon_type_el e1, struct neon_type_el e2)
    (by reg_list_valid_p).  */
 
 static int
-parse_neon_reg_list (char **ccp, struct neon_type_el *vectype)
+parse_neon_reg_list (char **ccp, struct vector_type_el *vectype)
 {
   char *str = *ccp;
   int nb_regs;
-  struct neon_type_el typeinfo, typeinfo_first;
+  struct vector_type_el typeinfo, typeinfo_first;
   int val, val_range;
   int in_range;
   int ret_val;
@@ -1072,7 +1072,7 @@ parse_neon_reg_list (char **ccp, struct neon_type_el *vectype)
 	  val_range = val;
 	  if (nb_regs == 0)
 	    typeinfo_first = typeinfo;
-	  else if (! eq_neon_type_el (typeinfo_first, typeinfo))
+	  else if (! eq_vector_type_el (typeinfo_first, typeinfo))
 	    {
 	      set_first_syntax_error
 		(_("type mismatch in vector register list"));
@@ -4631,11 +4631,11 @@ opcode_lookup (char **str)
   return NULL;
 }
 
-/* Internal helper routine converting a vector neon_type_el structure
-   *VECTYPE to a corresponding operand qualifier.  */
+/* Internal helper routine converting a vector_type_el structure *VECTYPE
+   to a corresponding operand qualifier.  */
 
 static inline aarch64_opnd_qualifier_t
-vectype_to_qualifier (const struct neon_type_el *vectype)
+vectype_to_qualifier (const struct vector_type_el *vectype)
 {
   /* Element size in bytes indexed by vector_el_type.  */
   const unsigned char ele_size[5]
@@ -4988,7 +4988,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
       int isreg32, isregzero;
       int comma_skipped_p = 0;
       aarch64_reg_type rtype;
-      struct neon_type_el vectype;
+      struct vector_type_el vectype;
       aarch64_opnd_info *info = &inst.base.operands[i];
 
       DEBUG_TRACE ("parse operand %d", i);
