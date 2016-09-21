@@ -1,5 +1,16 @@
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* config/tc-aarch64.c (parse_aarch64_imm_float): Report a specific
+	low-severity error for registers.
+	(parse_operands): Report an invalid floating point constant for
+	if parsing an FPIMM8 fails, and if no better error has been
+	recorded.
+	* testsuite/gas/aarch64/diagnostic.s,
+	testsuite/gas/aarch64/diagnostic.l: Add tests for integer operands
+	to FMOV.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* config/tc-aarch64.c (aarch64_double_precision_fmovable): Rename
 	to...
 	(can_convert_double_to_float): ...this.  Accept any double-precision

@@ -2189,6 +2189,12 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
     }
   else
     {
+      if (reg_name_p (str, reg_type))
+	{
+	  set_recoverable_error (_("immediate operand required"));
+	  return FALSE;
+	}
+
       /* We must not accidentally parse an integer as a floating-point number.
 	 Make sure that the value we parse is not an integer by checking for
 	 special characters '.' or 'e'.  */
@@ -5223,8 +5229,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	       it is probably not worth the effort to support it.  */
 	    if (!(res1 = parse_aarch64_imm_float (&str, &qfloat, FALSE,
 						  imm_reg_type))
-		&& !(res2 = parse_constant_immediate (&str, &val,
-						      imm_reg_type)))
+		&& (error_p ()
+		    || !(res2 = parse_constant_immediate (&str, &val,
+							  imm_reg_type))))
 	      goto failure;
 	    if ((res1 && qfloat == 0) || (res2 && val == 0))
 	      {
@@ -5288,11 +5295,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    bfd_boolean dp_p
 	      = (aarch64_get_qualifier_esize (inst.base.operands[0].qualifier)
 		 == 8);
-	    if (! parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type))
-	      goto failure;
-	    if (qfloat == 0)
+	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type)
+		|| qfloat == 0)
 	      {
-		set_fatal_syntax_error (_("invalid floating-point constant"));
+		if (!error_p ())
+		  set_fatal_syntax_error (_("invalid floating-point"
+					    " constant"));
 		goto failure;
 	      }
 	    inst.base.operands[i].imm.value = encode_imm_float_bits (qfloat);

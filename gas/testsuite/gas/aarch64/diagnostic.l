@@ -144,3 +144,7 @@
 [^:]*:255: Error: register element index out of range 0 to 15 at operand 1 -- `ld2 {v0\.b,v1\.b}\[-1\],\[x0\]'
 [^:]*:258: Error: register element index out of range 0 to 15 at operand 1 -- `ld2 {v0\.b,v1\.b}\[16\],\[x0\]'
 [^:]*:259: Error: register element index out of range 0 to 15 at operand 1 -- `ld2 {v0\.b,v1\.b}\[67\],\[x0\]'
+[^:]*:261: Error: invalid floating-point constant at operand 2 -- `fmov d0,#2'
+[^:]*:262: Error: invalid floating-point constant at operand 2 -- `fmov d0,#-2'
+[^:]*:263: Error: invalid floating-point constant at operand 2 -- `fmov s0,2'
+[^:]*:264: Error: invalid floating-point constant at operand 2 -- `fmov s0,-2'
