@@ -4501,6 +4501,7 @@ arm_new_stubs_start_offset_ptr (struct elf32_arm_link_hash_table *htab,
     case arm_stub_long_branch_any_any:
     case arm_stub_long_branch_v4t_arm_thumb:
     case arm_stub_long_branch_thumb_only:
+    case arm_stub_long_branch_thumb2_only:
     case arm_stub_long_branch_v4t_thumb_thumb:
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:
