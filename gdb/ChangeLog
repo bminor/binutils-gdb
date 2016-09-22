@@ -1,5 +1,10 @@
 2016-09-23  Tom Tromey  <tom@tromey.com>
 
+	* break-catch-sig.c: Include <string>.
+	(signal_catchpoint_print_one): Use std::string.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
 	* utils.c (struct restore_ui_out_closure): Remove.
 	* objfiles.h (terminate_minimal_symbol_table): Don't declare.
 
