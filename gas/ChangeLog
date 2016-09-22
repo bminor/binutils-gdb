@@ -1,3 +1,8 @@
+2016-09-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (v7m_psrs): Remove BASEPRI_MASK MRS/MSR special
+	register and redundant basepri_max.
+
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* config/tc-aarch64.c (print_operands): Print spaces between
