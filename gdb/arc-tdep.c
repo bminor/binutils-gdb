@@ -574,8 +574,9 @@ arc_return_value (struct gdbarch *gdbarch, struct value *function,
 			  || TYPE_LENGTH (valtype) > 2 * ARC_REGISTER_SIZE);
 
   if (arc_debug)
-    debug_printf ("arc: return_value (readbuf = %p, writebuf = %p)\n",
-		  readbuf, writebuf);
+    debug_printf ("arc: return_value (readbuf = %s, writebuf = %s)\n",
+		  host_address_to_string (readbuf),
+		  host_address_to_string (writebuf));
 
   if (writebuf != NULL)
     {

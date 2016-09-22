@@ -1,3 +1,7 @@
+2016-09-22  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c: Fix ARI warning for printf(%p).
+
 2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* MAINTAINERS (Write After Approval): Add Anton Kolesov.
