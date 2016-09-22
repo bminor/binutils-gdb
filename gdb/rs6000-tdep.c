@@ -4700,9 +4700,11 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
 
     case 397:		/* Store VSX Vector with Length */
     case 429:		/* Store VSX Vector Left-justified with Length */
+      ra = 0;
       if (PPC_RA (insn) != 0)
 	regcache_raw_read_unsigned (regcache,
-				    tdep->ppc_gp0_regnum + PPC_RA (insn), &ea);
+				    tdep->ppc_gp0_regnum + PPC_RA (insn), &ra);
+      ea = ra;
       regcache_raw_read_unsigned (regcache,
 				  tdep->ppc_gp0_regnum + PPC_RB (insn), &rb);
       /* Store up to 16 bytes.  */
@@ -4713,9 +4715,11 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
 
     case 710:		/* Store Word Atomic */
     case 742:		/* Store Doubleword Atomic */
+      ra = 0;
       if (PPC_RA (insn) != 0)
 	regcache_raw_read_unsigned (regcache,
-				    tdep->ppc_gp0_regnum + PPC_RA (insn), &ea);
+				    tdep->ppc_gp0_regnum + PPC_RA (insn), &ra);
+      ea = ra;
       switch (ext)
 	{
 	case 710:	/* Store Word Atomic */
