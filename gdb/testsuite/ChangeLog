@@ -1,5 +1,13 @@
 2016-09-22  Yao Qi  <yao.qi@linaro.org>
 
+	* lib/gdbserver-support.exp: Rename mi_gdb_exit.
+	(gdb_exit): Rename it to ...
+	(gdbserver_gdb_exit): ...  Close GDBserver.
+	(gdb_exit): New proc, call gdbserver_gdb_exit.
+	(mi_gdb_exit): Likewise.
+
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
 	* boards/gdbserver-base.exp (gdb_server_prog): Set the absolute
 	path.
 	* boards/remote-gdbserver-on-localhost.exp: Use gdbserver-base.
