@@ -1,5 +1,10 @@
 2016-09-23  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.c: Include <vector>.
+	(objfile_relocate): Use std::vector.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c: Include <string> and <vector>.
 	(rust_evaluate_funcall): Use std::vector, std::string.
 	(rust_evaluate_subexp): Use std::string.
