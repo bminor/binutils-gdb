@@ -1,5 +1,32 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_initial_scan): Use
+	minimal_symbol_reader.
+	* mipsread.c (mipscoff_symfile_read): Use
+	minimal_symbol_reader.
+	* minsyms.h (minimal_symbol_reader): New class.
+	(init_minimal_symbol_collection)
+	(make_cleanup_discard_minimal_symbols, install_minimal_symbols):
+	Don't declare.
+	* minsyms.c (minimal_symbol_reader): Renamed from
+	init_minimal_symbol_collection, turned into constructor.
+	(~minimal_symbol_reader): Renamed from
+	do_discard_minimal_symbols_cleanup, turned into destructor.
+	(make_cleanup_discard_minimal_symbols): Remove.
+	(minimal_symbol_reader::install): Rename form
+	install_minimal_symbols.
+	* mdebugread.c (elfmdebug_build_psymtabs): Use
+	minimal_symbol_reader.
+	* machoread.c (macho_symfile_read): Use
+	minimal_symbol_reader.
+	* elfread.c (elf_read_minimal_symbols): Use
+	minimal_symbol_reader.
+	* dbxread.c (dbx_symfile_read): Use minimal_symbol_reader.
+	* coffread.c (coff_symfile_read): Use
+	minimal_symbol_reader.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* top.c (new_ui_command, wait_sync_command_done)
 	(gdb_readline_wrapper): Use scoped_restore.
 	* infrun.c (fetch_inferior_event): Use scoped_restore.

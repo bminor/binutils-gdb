@@ -921,8 +921,7 @@ get_symbol_leading_char (bfd *abfd)
 
 /* See minsyms.h.  */
 
-void
-init_minimal_symbol_collection (void)
+minimal_symbol_reader::minimal_symbol_reader ()
 {
   msym_count = 0;
   msym_bunch = NULL;
@@ -930,6 +929,26 @@ init_minimal_symbol_collection (void)
      first call to save a minimal symbol to allocate the memory for
      the first bunch.  */
   msym_bunch_index = BUNCH_SIZE;
+}
+
+/* Discard the currently collected minimal symbols, if any.  If we wish
+   to save them for later use, we must have already copied them somewhere
+   else before calling this function.
+
+   FIXME:  We could allocate the minimal symbol bunches on their own
+   obstack and then simply blow the obstack away when we are done with
+   it.  Is it worth the extra trouble though?  */
+
+minimal_symbol_reader::~minimal_symbol_reader ()
+{
+  struct msym_bunch *next;
+
+  while (msym_bunch != NULL)
+    {
+      next = msym_bunch->next;
+      xfree (msym_bunch);
+      msym_bunch = next;
+    }
 }
 
 /* See minsyms.h.  */
@@ -1087,37 +1106,6 @@ compare_minimal_symbols (const void *fn1p, const void *fn2p)
     }
 }
 
-/* Discard the currently collected minimal symbols, if any.  If we wish
-   to save them for later use, we must have already copied them somewhere
-   else before calling this function.
-
-   FIXME:  We could allocate the minimal symbol bunches on their own
-   obstack and then simply blow the obstack away when we are done with
-   it.  Is it worth the extra trouble though?  */
-
-static void
-do_discard_minimal_symbols_cleanup (void *arg)
-{
-  struct msym_bunch *next;
-
-  while (msym_bunch != NULL)
-    {
-      next = msym_bunch->next;
-      xfree (msym_bunch);
-      msym_bunch = next;
-    }
-}
-
-/* See minsyms.h.  */
-
-struct cleanup *
-make_cleanup_discard_minimal_symbols (void)
-{
-  return make_cleanup (do_discard_minimal_symbols_cleanup, 0);
-}
-
-
-
 /* Compact duplicate entries out of a minimal symbol table by walking
    through the table and compacting out entries with duplicate addresses
    and matching names.  Return the number of entries remaining.
@@ -1244,7 +1232,7 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
    attempts to demangle them if we later add more minimal symbols.  */
 
 void
-install_minimal_symbols (struct objfile *objfile)
+minimal_symbol_reader::install (struct objfile *objfile)
 {
   int bindex;
   int mcount;

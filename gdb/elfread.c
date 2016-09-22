@@ -1049,8 +1049,8 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
       return;
     }
 
-  init_minimal_symbol_collection ();
-  back_to = make_cleanup_discard_minimal_symbols ();
+  minimal_symbol_reader reader;
+  back_to = make_cleanup (null_cleanup, NULL);
 
   /* Allocate struct to keep track of the symfile.  */
   dbx = XCNEW (struct dbx_symfile_info);
@@ -1149,7 +1149,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
      responsibility to install them.  "mdebug" appears to be the only one
      which will do this.  */
 
-  install_minimal_symbols (objfile);
+  reader.install (objfile);
   do_cleanups (back_to);
 
   if (symtab_create_debug)

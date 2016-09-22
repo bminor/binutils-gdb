@@ -3006,8 +3006,7 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
   free_pending_blocks ();
   back_to = make_cleanup (really_free_pendings, 0);
 
-  init_minimal_symbol_collection ();
-  make_cleanup_discard_minimal_symbols ();
+  minimal_symbol_reader reader;
 
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
@@ -3017,7 +3016,7 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
 
-  install_minimal_symbols (objfile);
+  reader.install (objfile);
 
   /* DWARF2 sections.  */
 

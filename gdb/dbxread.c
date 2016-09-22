@@ -558,8 +558,7 @@ dbx_symfile_read (struct objfile *objfile, int symfile_flags)
   free_pending_blocks ();
   back_to = make_cleanup (really_free_pendings, 0);
 
-  init_minimal_symbol_collection ();
-  make_cleanup_discard_minimal_symbols ();
+  minimal_symbol_reader reader;
 
   /* Read stabs data from executable file and define symbols.  */
 
@@ -572,7 +571,7 @@ dbx_symfile_read (struct objfile *objfile, int symfile_flags)
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
 
-  install_minimal_symbols (objfile);
+  reader.install (objfile);
 
   do_cleanups (back_to);
 }

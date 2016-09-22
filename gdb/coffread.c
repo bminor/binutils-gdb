@@ -568,7 +568,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   unsigned int num_symbols;
   int symtab_offset;
   int stringtab_offset;
-  struct cleanup *back_to, *cleanup_minimal_symbols;
+  struct cleanup *back_to;
   int stabstrsize;
   
   info = (struct coff_symfile_info *) objfile_data (objfile,
@@ -645,8 +645,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   if (val < 0)
     error (_("\"%s\": can't get string table"), name);
 
-  init_minimal_symbol_collection ();
-  cleanup_minimal_symbols = make_cleanup_discard_minimal_symbols ();
+  minimal_symbol_reader reader;
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -656,7 +655,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   /* Install any minimal symbols that have been collected as the
      current minimal symbols for this objfile.  */
 
-  install_minimal_symbols (objfile);
+  reader.install (objfile);
 
   if (pe_file)
     {
@@ -698,9 +697,6 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 	    }
 	}
     }
-
-  /* Free the installed minimal symbol data.  */
-  do_cleanups (cleanup_minimal_symbols);
 
   bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
 

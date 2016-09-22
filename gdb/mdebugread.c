@@ -4870,14 +4870,12 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 {
   bfd *abfd = objfile->obfd;
   struct ecoff_debug_info *info;
-  struct cleanup *back_to;
 
   /* FIXME: It's not clear whether we should be getting minimal symbol
      information from .mdebug in an ELF file, or whether we will.
      Re-initialize the minimal symbol reader in case we do.  */
 
-  init_minimal_symbol_collection ();
-  back_to = make_cleanup_discard_minimal_symbols ();
+  minimal_symbol_reader reader;
 
   info = ((struct ecoff_debug_info *)
 	  obstack_alloc (&objfile->objfile_obstack,
@@ -4889,8 +4887,7 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 
   mdebug_build_psymtabs (objfile, swap, info);
 
-  install_minimal_symbols (objfile);
-  do_cleanups (back_to);
+  reader.install (objfile);
 }
 
 void

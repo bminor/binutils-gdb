@@ -53,21 +53,33 @@ struct bound_minimal_symbol
    as opaque and use functions provided by minsyms.c to inspect them.
 */
 
-/* Prepare to start collecting minimal symbols.  This should be called
-   by a symbol reader to initialize the minimal symbol module.
-   Currently, minimal symbol table creation is not reentrant; it
-   relies on global (static) variables in minsyms.c.  */
+/* An RAII-based object that is used to record minimal symbols while
+   they are being read.  */
+class minimal_symbol_reader
+{
+ public:
 
-void init_minimal_symbol_collection (void);
+  /* Prepare to start collecting minimal symbols.  This should be called
+     by a symbol reader to initialize the minimal symbol module.
+     Currently, minimal symbol table creation is not reentrant; it
+     relies on global (static) variables in minsyms.c.  */
 
-/* Return a cleanup which is used to clean up the global state left
-   over by minimal symbol creation.  After calling
-   init_minimal_symbol_collection, a symbol reader should call this
-   function.  Then, after all minimal symbols have been read,
-   regardless of whether they are installed or not, the cleanup
-   returned by this function should be run.  */
+  explicit minimal_symbol_reader ();
 
-struct cleanup *make_cleanup_discard_minimal_symbols (void);
+  ~minimal_symbol_reader ();
+
+  /* Install the minimal symbols that have been collected into the
+     given objfile.  */
+
+  void install (struct objfile *);
+
+ private:
+
+  /* No need for these.  They are intentionally not defined anywhere.  */
+  minimal_symbol_reader &operator=
+    (const minimal_symbol_reader &);
+  minimal_symbol_reader (const minimal_symbol_reader &);
+};
 
 /* Record a new minimal symbol.  This is the "full" entry point;
    simpler convenience entry points are also provided below.
@@ -121,13 +133,6 @@ struct minimal_symbol *prim_record_minimal_symbol_and_info
      enum minimal_symbol_type,
      int section,
      struct objfile *);
-
-/* Install the minimal symbols that have been collected into the given
-   objfile.  After this is called, the cleanup returned by
-   make_cleanup_discard_minimal_symbols should be run in order to
-   clean up global state.  */
-
-void install_minimal_symbols (struct objfile *);
 
 /* Create the terminating entry of OBJFILE's minimal symbol table.
    If OBJFILE->msymbols is zero, allocate a single entry from

@@ -855,8 +855,7 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 	  symbol_table = (asymbol **) xmalloc (storage_needed);
 	  make_cleanup (xfree, symbol_table);
 
-          init_minimal_symbol_collection ();
-          make_cleanup_discard_minimal_symbols ();
+          minimal_symbol_reader reader;
 
 	  symcount = bfd_canonicalize_symtab (objfile->obfd, symbol_table);
 
@@ -867,7 +866,7 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 
 	  macho_symtab_read (objfile, symcount, symbol_table, &oso_vector);
 
-          install_minimal_symbols (objfile);
+          reader.install (objfile);
 	}
 
       /* Try to read .eh_frame / .debug_frame.  */
