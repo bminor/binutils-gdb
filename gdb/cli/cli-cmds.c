@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include "dyn-string.h"
 #include "readline/readline.h"
 #include "readline/tilde.h"
 #include "completer.h"
@@ -57,6 +56,7 @@
 
 #include <fcntl.h>
 #include <algorithm>
+#include <string>
 
 /* Prototypes for local command functions */
 
@@ -1382,11 +1382,11 @@ apropos_command (char *searchstr, int from_tty)
    This does not take care of quoting elements in case they contain spaces
    on purpose.  */
 
-static dyn_string_t
-argv_to_dyn_string (char **argv, int n)
+static std::string
+argv_to_string (char **argv, int n)
 {
   int i;
-  dyn_string_t result = dyn_string_new (10);
+  std::string result;
 
   gdb_assert (argv != NULL);
   gdb_assert (n >= 0 && n <= countargv (argv));
@@ -1394,8 +1394,8 @@ argv_to_dyn_string (char **argv, int n)
   for (i = 0; i < n; ++i)
     {
       if (i > 0)
-	dyn_string_append_char (result, ' ');
-      dyn_string_append_cstr (result, argv[i]);
+	result += " ";
+      result += argv[i];
     }
 
   return result;
@@ -1437,9 +1437,9 @@ alias_command (char *args, int from_tty)
 {
   int i, alias_argc, command_argc;
   int abbrev_flag = 0;
-  char *args2, *equals, *alias, *command;
+  char *args2, *equals;
+  const char *alias, *command;
   char **alias_argv, **command_argv;
-  dyn_string_t alias_dyn_string, command_dyn_string;
   struct cleanup *cleanup;
 
   if (args == NULL || strchr (args, '=') == NULL)
@@ -1491,16 +1491,14 @@ alias_command (char *args, int from_tty)
   /* COMMAND must exist.
      Reconstruct the command to remove any extraneous spaces,
      for better error messages.  */
-  command_dyn_string = argv_to_dyn_string (command_argv, command_argc);
-  make_cleanup_dyn_string_delete (command_dyn_string);
-  command = dyn_string_buf (command_dyn_string);
+  std::string command_string (argv_to_string (command_argv, command_argc));
+  command = command_string.c_str ();
   if (! valid_command_p (command))
     error (_("Invalid command to alias to: %s"), command);
 
   /* ALIAS must not exist.  */
-  alias_dyn_string = argv_to_dyn_string (alias_argv, alias_argc);
-  make_cleanup_dyn_string_delete (alias_dyn_string);
-  alias = dyn_string_buf (alias_dyn_string);
+  std::string alias_string (argv_to_string (alias_argv, alias_argc));
+  alias = alias_string.c_str ();
   if (valid_command_p (alias))
     error (_("Alias already exists: %s"), alias);
 
@@ -1521,7 +1519,6 @@ alias_command (char *args, int from_tty)
     }
   else
     {
-      dyn_string_t alias_prefix_dyn_string, command_prefix_dyn_string;
       const char *alias_prefix, *command_prefix;
       struct cmd_list_element *c_alias, *c_command;
 
@@ -1530,14 +1527,12 @@ alias_command (char *args, int from_tty)
 
       /* Create copies of ALIAS and COMMAND without the last word,
 	 and use that to verify the leading elements match.  */
-      alias_prefix_dyn_string =
-	argv_to_dyn_string (alias_argv, alias_argc - 1);
-      make_cleanup_dyn_string_delete (alias_prefix_dyn_string);
-      command_prefix_dyn_string =
-	argv_to_dyn_string (alias_argv, command_argc - 1);
-      make_cleanup_dyn_string_delete (command_prefix_dyn_string);
-      alias_prefix = dyn_string_buf (alias_prefix_dyn_string);
-      command_prefix = dyn_string_buf (command_prefix_dyn_string);
+      std::string alias_prefix_string (argv_to_string (alias_argv,
+						       alias_argc - 1));
+      std::string command_prefix_string (argv_to_string (alias_argv,
+							 command_argc - 1));
+      alias_prefix = alias_prefix_string.c_str ();
+      command_prefix = command_prefix_string.c_str ();
 
       c_command = lookup_cmd_1 (& command_prefix, cmdlist, NULL, 1);
       /* We've already tried to look up COMMAND.  */

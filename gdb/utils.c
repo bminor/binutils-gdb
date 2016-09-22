@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dyn-string.h"
 #include <ctype.h>
 #include "gdb_wait.h"
 #include "event-top.h"
@@ -152,18 +151,6 @@ struct cleanup *
 make_cleanup_freeargv (char **arg)
 {
   return make_cleanup (do_freeargv, arg);
-}
-
-static void
-do_dyn_string_delete (void *arg)
-{
-  dyn_string_delete ((dyn_string_t) arg);
-}
-
-struct cleanup *
-make_cleanup_dyn_string_delete (dyn_string_t arg)
-{
-  return make_cleanup (do_dyn_string_delete, arg);
 }
 
 static void

@@ -1,5 +1,14 @@
 2016-09-23  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (make_cleanup_dyn_string_delete): Remove declaration.
+	* utils.c: Don't include dyn-string.h.
+	(do_dyn_string_delete, make_cleanup_dyn_string_delete): Remove.
+	* cli/cli-cmds.c: Include <string>.  Don't include dyn-string.h.
+	(argv_to_string): Rename.  Change return type to std::string.
+	(alias_command): Use std::string.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.c: Include <vector>.
 	(objfile_relocate): Use std::vector.
 
