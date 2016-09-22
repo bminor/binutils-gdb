@@ -337,7 +337,11 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
 
   abfd = bfd_openr (name, bfd_get_target (link_info.output_bfd));
   if (abfd == NULL)
-    return FALSE;
+    {
+      if (verbose)
+	info_msg (_("attempt to open %s failed\n"), name);
+      return FALSE;
+    }
 
   /* Linker needs to decompress sections.  */
   abfd->flags |= BFD_DECOMPRESS;
