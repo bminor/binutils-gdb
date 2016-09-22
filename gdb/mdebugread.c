@@ -4875,7 +4875,7 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
      information from .mdebug in an ELF file, or whether we will.
      Re-initialize the minimal symbol reader in case we do.  */
 
-  minimal_symbol_reader reader;
+  minimal_symbol_reader reader (objfile);
 
   info = ((struct ecoff_debug_info *)
 	  obstack_alloc (&objfile->objfile_obstack,
@@ -4887,7 +4887,7 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 
   mdebug_build_psymtabs (objfile, swap, info);
 
-  reader.install (objfile);
+  reader.install ();
 }
 
 void

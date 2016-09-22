@@ -70,7 +70,7 @@ mipscoff_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   bfd *abfd = objfile->obfd;
 
-  minimal_symbol_reader reader;
+  minimal_symbol_reader reader (objfile);
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -89,7 +89,7 @@ mipscoff_symfile_read (struct objfile *objfile, int symfile_flags)
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
 
-  reader.install (objfile);
+  reader.install ();
 }
 
 /* Perform any local cleanups required when we are done with a

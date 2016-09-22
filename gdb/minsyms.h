@@ -64,14 +64,14 @@ class minimal_symbol_reader
      Currently, minimal symbol table creation is not reentrant; it
      relies on global (static) variables in minsyms.c.  */
 
-  explicit minimal_symbol_reader ();
+  explicit minimal_symbol_reader (struct objfile *);
 
   ~minimal_symbol_reader ();
 
   /* Install the minimal symbols that have been collected into the
      given objfile.  */
 
-  void install (struct objfile *);
+  void install ();
 
  private:
 
@@ -79,6 +79,8 @@ class minimal_symbol_reader
   minimal_symbol_reader &operator=
     (const minimal_symbol_reader &);
   minimal_symbol_reader (const minimal_symbol_reader &);
+
+  struct objfile *m_objfile;
 };
 
 /* Record a new minimal symbol.  This is the "full" entry point;

@@ -921,7 +921,8 @@ get_symbol_leading_char (bfd *abfd)
 
 /* See minsyms.h.  */
 
-minimal_symbol_reader::minimal_symbol_reader ()
+minimal_symbol_reader::minimal_symbol_reader (struct objfile *obj)
+: m_objfile (obj)
 {
   msym_count = 0;
   msym_bunch = NULL;
@@ -1232,7 +1233,7 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
    attempts to demangle them if we later add more minimal symbols.  */
 
 void
-minimal_symbol_reader::install (struct objfile *objfile)
+minimal_symbol_reader::install ()
 {
   int bindex;
   int mcount;
@@ -1240,7 +1241,7 @@ minimal_symbol_reader::install (struct objfile *objfile)
   struct minimal_symbol *msymbols;
   int alloc_count;
 
-  if (objfile->per_bfd->minsyms_read)
+  if (m_objfile->per_bfd->minsyms_read)
     return;
 
   if (msym_count > 0)
@@ -1249,7 +1250,7 @@ minimal_symbol_reader::install (struct objfile *objfile)
 	{
 	  fprintf_unfiltered (gdb_stdlog,
 			      "Installing %d minimal symbols of objfile %s.\n",
-			      msym_count, objfile_name (objfile));
+			      msym_count, objfile_name (m_objfile));
 	}
 
       /* Allocate enough space in the obstack, into which we will gather the
@@ -1257,17 +1258,17 @@ minimal_symbol_reader::install (struct objfile *objfile)
          compact out the duplicate entries.  Once we have a final table,
          we will give back the excess space.  */
 
-      alloc_count = msym_count + objfile->per_bfd->minimal_symbol_count + 1;
-      obstack_blank (&objfile->per_bfd->storage_obstack,
+      alloc_count = msym_count + m_objfile->per_bfd->minimal_symbol_count + 1;
+      obstack_blank (&m_objfile->per_bfd->storage_obstack,
 		     alloc_count * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
-	obstack_base (&objfile->per_bfd->storage_obstack);
+	obstack_base (&m_objfile->per_bfd->storage_obstack);
 
       /* Copy in the existing minimal symbols, if there are any.  */
 
-      if (objfile->per_bfd->minimal_symbol_count)
-	memcpy ((char *) msymbols, (char *) objfile->per_bfd->msymbols,
-	    objfile->per_bfd->minimal_symbol_count * sizeof (struct minimal_symbol));
+      if (m_objfile->per_bfd->minimal_symbol_count)
+	memcpy ((char *) msymbols, (char *) m_objfile->per_bfd->msymbols,
+	    m_objfile->per_bfd->minimal_symbol_count * sizeof (struct minimal_symbol));
 
       /* Walk through the list of minimal symbol bunches, adding each symbol
          to the new contiguous array of symbols.  Note that we start with the
@@ -1275,7 +1276,7 @@ minimal_symbol_reader::install (struct objfile *objfile)
          msym_bunch_index for the first bunch we copy over), and thereafter
          each bunch is full.  */
 
-      mcount = objfile->per_bfd->minimal_symbol_count;
+      mcount = m_objfile->per_bfd->minimal_symbol_count;
 
       for (bunch = msym_bunch; bunch != NULL; bunch = bunch->next)
 	{
@@ -1292,12 +1293,12 @@ minimal_symbol_reader::install (struct objfile *objfile)
       /* Compact out any duplicates, and free up whatever space we are
          no longer using.  */
 
-      mcount = compact_minimal_symbols (msymbols, mcount, objfile);
+      mcount = compact_minimal_symbols (msymbols, mcount, m_objfile);
 
-      obstack_blank_fast (&objfile->per_bfd->storage_obstack,
+      obstack_blank_fast (&m_objfile->per_bfd->storage_obstack,
 	       (mcount + 1 - alloc_count) * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
-	obstack_finish (&objfile->per_bfd->storage_obstack);
+	obstack_finish (&m_objfile->per_bfd->storage_obstack);
 
       /* We also terminate the minimal symbol table with a "null symbol",
          which is *not* included in the size of the table.  This makes it
@@ -1313,14 +1314,14 @@ minimal_symbol_reader::install (struct objfile *objfile)
          The strings themselves are also located in the storage_obstack
          of this objfile.  */
 
-      objfile->per_bfd->minimal_symbol_count = mcount;
-      objfile->per_bfd->msymbols = msymbols;
+      m_objfile->per_bfd->minimal_symbol_count = mcount;
+      m_objfile->per_bfd->msymbols = msymbols;
 
       /* Now build the hash tables; we can't do this incrementally
          at an earlier point since we weren't finished with the obstack
 	 yet.  (And if the msymbol obstack gets moved, all the internal
 	 pointers to other msymbols need to be adjusted.)  */
-      build_minimal_symbol_hash_tables (objfile);
+      build_minimal_symbol_hash_tables (m_objfile);
     }
 }
 

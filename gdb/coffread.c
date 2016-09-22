@@ -645,7 +645,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   if (val < 0)
     error (_("\"%s\": can't get string table"), name);
 
-  minimal_symbol_reader reader;
+  minimal_symbol_reader reader (objfile);
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -655,7 +655,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   /* Install any minimal symbols that have been collected as the
      current minimal symbols for this objfile.  */
 
-  reader.install (objfile);
+  reader.install ();
 
   if (pe_file)
     {

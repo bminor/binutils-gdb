@@ -1,5 +1,21 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_initial_scan): Update.
+	* mipsread.c (mipscoff_symfile_read): Update.
+	* minsyms.c (minimal_symbol_reader): Add obj argument.
+	Initialize member.
+	(install): Remove objfile argument.  Update.
+	* mdebugread.c (elfmdebug_build_psymtabs): Update.
+	* machoread.c (macho_symfile_read): Update.
+	* elfread.c (elf_read_minimal_symbols): Update.
+	* dbxread.c (dbx_symfile_read): Update.
+	* coffread.c (coff_symfile_read): Update.
+	* minsyms.h (minimal_symbol_reader): Add m_objfile member.
+	(constructor): Add objfile argument.
+	(minimal_symbol_reader::install): Remove objfile argument.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_initial_scan): Use
 	minimal_symbol_reader.
 	* mipsread.c (mipscoff_symfile_read): Use
