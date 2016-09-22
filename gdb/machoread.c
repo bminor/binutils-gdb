@@ -97,7 +97,8 @@ macho_register_oso (VEC (oso_el) **oso_vector_ptr,
 /* Add symbol SYM to the minimal symbol table of OBJFILE.  */
 
 static void
-macho_symtab_add_minsym (struct objfile *objfile, const asymbol *sym)
+macho_symtab_add_minsym (minimal_symbol_reader &reader,
+			 struct objfile *objfile, const asymbol *sym)
 {
   if (sym->name == NULL || *sym->name == '\0')
     {
@@ -147,10 +148,9 @@ macho_symtab_add_minsym (struct objfile *objfile, const asymbol *sym)
       else
         return;	/* Skip this symbol.  */
 
-      prim_record_minimal_symbol_and_info
-        (sym->name, symaddr, ms_type,
-	 gdb_bfd_section_index (objfile->obfd, sym->section),
-	 objfile);
+      reader.record_with_info (sym->name, symaddr, ms_type,
+			       gdb_bfd_section_index (objfile->obfd,
+						      sym->section));
     }
 }
 
@@ -158,7 +158,8 @@ macho_symtab_add_minsym (struct objfile *objfile, const asymbol *sym)
    NUMBER_OF_SYMBOLS for OBJFILE.  Registers OSO filenames found.  */
 
 static void
-macho_symtab_read (struct objfile *objfile,
+macho_symtab_read (minimal_symbol_reader &reader,
+		   struct objfile *objfile,
 		   long number_of_symbols, asymbol **symbol_table,
 		   VEC (oso_el) **oso_vector_ptr)
 {
@@ -227,7 +228,7 @@ macho_symtab_read (struct objfile *objfile,
           else
             {
               /* Non-debugging symbols go to the minimal symbol table.  */
-              macho_symtab_add_minsym (objfile, sym);
+              macho_symtab_add_minsym (reader, objfile, sym);
             }
           break;
 
@@ -864,7 +865,8 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 		   bfd_get_filename (objfile->obfd),
 		   bfd_errmsg (bfd_get_error ()));
 
-	  macho_symtab_read (objfile, symcount, symbol_table, &oso_vector);
+	  macho_symtab_read (reader, objfile, symcount, symbol_table,
+			     &oso_vector);
 
           reader.install ();
 	}

@@ -262,9 +262,10 @@ static void dbx_read_symtab (struct partial_symtab *self,
 
 static void dbx_psymtab_to_symtab_1 (struct objfile *, struct partial_symtab *);
 
-static void read_dbx_dynamic_symtab (struct objfile *objfile);
+static void read_dbx_dynamic_symtab (minimal_symbol_reader &reader,
+				     struct objfile *objfile);
 
-static void read_dbx_symtab (struct objfile *);
+static void read_dbx_symtab (minimal_symbol_reader &, struct objfile *);
 
 static void free_bincl_list (struct objfile *);
 
@@ -286,7 +287,8 @@ static void dbx_symfile_read (struct objfile *, int);
 
 static void dbx_symfile_finish (struct objfile *);
 
-static void record_minimal_symbol (const char *, CORE_ADDR, int,
+static void record_minimal_symbol (minimal_symbol_reader &,
+				   const char *, CORE_ADDR, int,
 				   struct objfile *);
 
 static void add_new_header_file (char *, int);
@@ -429,7 +431,8 @@ explicit_lookup_type (int real_filenum, int index)
 #endif
 
 static void
-record_minimal_symbol (const char *name, CORE_ADDR address, int type,
+record_minimal_symbol (minimal_symbol_reader &reader,
+		       const char *name, CORE_ADDR address, int type,
 		       struct objfile *objfile)
 {
   enum minimal_symbol_type ms_type;
@@ -508,8 +511,7 @@ record_minimal_symbol (const char *name, CORE_ADDR address, int type,
       && address < lowest_text_address)
     lowest_text_address = address;
 
-  prim_record_minimal_symbol_and_info
-    (name, address, ms_type, section, objfile);
+  reader.record_with_info (name, address, ms_type, section);
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -562,11 +564,11 @@ dbx_symfile_read (struct objfile *objfile, int symfile_flags)
 
   /* Read stabs data from executable file and define symbols.  */
 
-  read_dbx_symtab (objfile);
+  read_dbx_symtab (reader, objfile);
 
   /* Add the dynamic symbols.  */
 
-  read_dbx_dynamic_symtab (objfile);
+  read_dbx_dynamic_symtab (reader, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
@@ -978,7 +980,8 @@ set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
    add them to the minimal symbol table.  */
 
 static void
-read_dbx_dynamic_symtab (struct objfile *objfile)
+read_dbx_dynamic_symtab (minimal_symbol_reader &reader,
+			 struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
@@ -1052,7 +1055,7 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
 	  if (sym->flags & BSF_GLOBAL)
 	    type |= N_EXT;
 
-	  record_minimal_symbol (bfd_asymbol_name (sym), sym_value,
+	  record_minimal_symbol (reader, bfd_asymbol_name (sym), sym_value,
 				 type, objfile);
 	}
     }
@@ -1105,8 +1108,7 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
 	}
 
       name = bfd_asymbol_name (*rel->sym_ptr_ptr);
-      prim_record_minimal_symbol (name, address, mst_solib_trampoline,
-				  objfile);
+      reader.record (name, address, mst_solib_trampoline);
     }
 
   do_cleanups (back_to);
@@ -1169,7 +1171,7 @@ function_outside_compilation_unit_complaint (const char *arg1)
    debugging information is available.  */
 
 static void
-read_dbx_symtab (struct objfile *objfile)
+read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch.  */
@@ -1325,7 +1327,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  record_it:
 	  namestring = set_namestring (objfile, &nlist);
 
-	  record_minimal_symbol (namestring, nlist.n_value,
+	  record_minimal_symbol (reader, namestring, nlist.n_value,
 				 nlist.n_type, objfile);	/* Always */
 	  continue;
 

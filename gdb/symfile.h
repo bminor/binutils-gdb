@@ -652,7 +652,8 @@ void dwarf2_free_objfile (struct objfile *);
 
 /* From mdebugread.c */
 
-extern void mdebug_build_psymtabs (struct objfile *,
+extern void mdebug_build_psymtabs (minimal_symbol_reader &,
+				   struct objfile *,
 				   const struct ecoff_debug_swap *,
 				   struct ecoff_debug_info *);
 

@@ -1,5 +1,45 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (record_minimal_symbol, scan_xcoff_symtab): Add
+	"reader" argument.  Update.
+	(xcoff_initial_scan): Update.
+	* symfile.h (mdebug_build_psymtabs): Add "reader" argument.
+	* mipsread.c (mipscoff_symfile_read): Update.
+	(read_alphacoff_dynamic_symtab): Add "reader" argument.  Update.
+	* minsyms.h (minimal_symbol_reader) <record, record_full>:
+	Declare.
+	<m_msym_bunch, m_msym_bunch_index, m_msym_count>: New members.
+	<record_with_info>: New function, renamed from
+	prim_record_minimal_symbol_and_info.
+	* minsyms.c (msym_bunch, msym_bunch_index, msym_count): Remove
+	globals.
+	(minimal_symbol_reader): Initialize new members.
+	(minimal_symbol_reader::record): Renamed from
+	prim_record_minimal_symbol.
+	(minimal_symbol_reader::record_full): Renamed from
+	prim_record_minimal_symbol_full.
+	(prim_record_minimal_symbol_and_info): Move to minsyms.h; rename.
+	* mdebugread.c (mdebug_build_psymtabs, parse_partial_symbols)
+	(record_minimal_symbol): Add "reader" argument.  Update.
+	(elfmdebug_build_psymtabs): Update.
+	* machoread.c (macho_symtab_add_minsym, macho_symtab_read): Add
+	"reader" argument.  Update.
+	(macho_symfile_read): Update.
+	* elfread.c (record_minimal_symbol, elf_symtab_read)
+	(elf_rel_plt_read): Add "reader" argument.  Update.
+	(elf_read_minimal_symbols): Update.
+	* dbxread.c (record_minimal_symbol, read_dbx_dynamic_symtab)
+	(read_dbx_symtab): Add "reader" argument.  Update.
+	(dbx_symfile_read): Update.
+	* coffread.c (record_minimal_symbol, coff_symtab_read): Add
+	"reader" argument.  Update.
+	(coff_symfile_read): Update.
+	* coff-pe-read.h (read_pe_exported_syms): Add "reader" argument.
+	* coff-pe-read.c (add_pe_exported_sym, add_pe_forwarded_sym)
+	(read_pe_exported_syms): Add "reader" argument.  Update.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_initial_scan): Update.
 	* mipsread.c (mipscoff_symfile_read): Update.
 	* minsyms.c (minimal_symbol_reader): Add obj argument.

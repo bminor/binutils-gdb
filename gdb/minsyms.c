@@ -64,19 +64,6 @@ struct msym_bunch
     struct minimal_symbol contents[BUNCH_SIZE];
   };
 
-/* Bunch currently being filled up.
-   The next field points to chain of filled bunches.  */
-
-static struct msym_bunch *msym_bunch;
-
-/* Number of slots filled in current bunch.  */
-
-static int msym_bunch_index;
-
-/* Total number of minimal symbols recorded so far for the objfile.  */
-
-static int msym_count;
-
 /* See minsyms.h.  */
 
 unsigned int
@@ -922,14 +909,14 @@ get_symbol_leading_char (bfd *abfd)
 /* See minsyms.h.  */
 
 minimal_symbol_reader::minimal_symbol_reader (struct objfile *obj)
-: m_objfile (obj)
-{
-  msym_count = 0;
-  msym_bunch = NULL;
-  /* Note that presetting msym_bunch_index to BUNCH_SIZE causes the
+: m_objfile (obj),
+  m_msym_bunch (NULL),
+  /* Note that presetting m_msym_bunch_index to BUNCH_SIZE causes the
      first call to save a minimal symbol to allocate the memory for
      the first bunch.  */
-  msym_bunch_index = BUNCH_SIZE;
+  m_msym_bunch_index (BUNCH_SIZE),
+  m_msym_count (0)
+{
 }
 
 /* Discard the currently collected minimal symbols, if any.  If we wish
@@ -944,20 +931,19 @@ minimal_symbol_reader::~minimal_symbol_reader ()
 {
   struct msym_bunch *next;
 
-  while (msym_bunch != NULL)
+  while (m_msym_bunch != NULL)
     {
-      next = msym_bunch->next;
-      xfree (msym_bunch);
-      msym_bunch = next;
+      next = m_msym_bunch->next;
+      xfree (m_msym_bunch);
+      m_msym_bunch = next;
     }
 }
 
 /* See minsyms.h.  */
 
 void
-prim_record_minimal_symbol (const char *name, CORE_ADDR address,
-			    enum minimal_symbol_type ms_type,
-			    struct objfile *objfile)
+minimal_symbol_reader::record (const char *name, CORE_ADDR address,
+				      enum minimal_symbol_type ms_type)
 {
   int section;
 
@@ -967,32 +953,31 @@ prim_record_minimal_symbol (const char *name, CORE_ADDR address,
     case mst_text_gnu_ifunc:
     case mst_file_text:
     case mst_solib_trampoline:
-      section = SECT_OFF_TEXT (objfile);
+      section = SECT_OFF_TEXT (m_objfile);
       break;
     case mst_data:
     case mst_file_data:
-      section = SECT_OFF_DATA (objfile);
+      section = SECT_OFF_DATA (m_objfile);
       break;
     case mst_bss:
     case mst_file_bss:
-      section = SECT_OFF_BSS (objfile);
+      section = SECT_OFF_BSS (m_objfile);
       break;
     default:
       section = -1;
     }
 
-  prim_record_minimal_symbol_and_info (name, address, ms_type,
-				       section, objfile);
+  record_with_info (name, address, ms_type, section);
 }
 
 /* See minsyms.h.  */
 
 struct minimal_symbol *
-prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
-				 CORE_ADDR address,
-				 enum minimal_symbol_type ms_type,
-				 int section,
-				 struct objfile *objfile)
+minimal_symbol_reader::record_full (const char *name, int name_len,
+					   int copy_name,
+					   CORE_ADDR address,
+					   enum minimal_symbol_type ms_type,
+					   int section)
 {
   struct msym_bunch *newobj;
   struct minimal_symbol *msymbol;
@@ -1009,7 +994,7 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
 
   /* It's safe to strip the leading char here once, since the name
      is also stored stripped in the minimal symbol table.  */
-  if (name[0] == get_symbol_leading_char (objfile->obfd))
+  if (name[0] == get_symbol_leading_char (m_objfile->obfd))
     {
       ++name;
       --name_len;
@@ -1018,17 +1003,17 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
   if (ms_type == mst_file_text && startswith (name, "__gnu_compiled"))
     return (NULL);
 
-  if (msym_bunch_index == BUNCH_SIZE)
+  if (m_msym_bunch_index == BUNCH_SIZE)
     {
       newobj = XCNEW (struct msym_bunch);
-      msym_bunch_index = 0;
-      newobj->next = msym_bunch;
-      msym_bunch = newobj;
+      m_msym_bunch_index = 0;
+      newobj->next = m_msym_bunch;
+      m_msym_bunch = newobj;
     }
-  msymbol = &msym_bunch->contents[msym_bunch_index];
+  msymbol = &m_msym_bunch->contents[m_msym_bunch_index];
   MSYMBOL_SET_LANGUAGE (msymbol, language_auto,
-			&objfile->per_bfd->storage_obstack);
-  MSYMBOL_SET_NAMES (msymbol, name, name_len, copy_name, objfile);
+			&m_objfile->per_bfd->storage_obstack);
+  MSYMBOL_SET_NAMES (msymbol, name, name_len, copy_name, m_objfile);
 
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
   MSYMBOL_SECTION (msymbol) = section;
@@ -1047,26 +1032,13 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
 
   /* If we already read minimal symbols for this objfile, then don't
      ever allocate a new one.  */
-  if (!objfile->per_bfd->minsyms_read)
+  if (!m_objfile->per_bfd->minsyms_read)
     {
-      msym_bunch_index++;
-      objfile->per_bfd->n_minsyms++;
+      m_msym_bunch_index++;
+      m_objfile->per_bfd->n_minsyms++;
     }
-  msym_count++;
+  m_msym_count++;
   return msymbol;
-}
-
-/* See minsyms.h.  */
-
-struct minimal_symbol *
-prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
-				     enum minimal_symbol_type ms_type,
-				     int section,
-				     struct objfile *objfile)
-{
-  return prim_record_minimal_symbol_full (name, strlen (name), 1,
-					  address, ms_type,
-					  section, objfile);
 }
 
 /* Compare two minimal symbols by address and return a signed result based
@@ -1244,13 +1216,13 @@ minimal_symbol_reader::install ()
   if (m_objfile->per_bfd->minsyms_read)
     return;
 
-  if (msym_count > 0)
+  if (m_msym_count > 0)
     {
       if (symtab_create_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog,
 			      "Installing %d minimal symbols of objfile %s.\n",
-			      msym_count, objfile_name (m_objfile));
+			      m_msym_count, objfile_name (m_objfile));
 	}
 
       /* Allocate enough space in the obstack, into which we will gather the
@@ -1258,7 +1230,7 @@ minimal_symbol_reader::install ()
          compact out the duplicate entries.  Once we have a final table,
          we will give back the excess space.  */
 
-      alloc_count = msym_count + m_objfile->per_bfd->minimal_symbol_count + 1;
+      alloc_count = m_msym_count + m_objfile->per_bfd->minimal_symbol_count + 1;
       obstack_blank (&m_objfile->per_bfd->storage_obstack,
 		     alloc_count * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
@@ -1278,11 +1250,11 @@ minimal_symbol_reader::install ()
 
       mcount = m_objfile->per_bfd->minimal_symbol_count;
 
-      for (bunch = msym_bunch; bunch != NULL; bunch = bunch->next)
+      for (bunch = m_msym_bunch; bunch != NULL; bunch = bunch->next)
 	{
-	  for (bindex = 0; bindex < msym_bunch_index; bindex++, mcount++)
+	  for (bindex = 0; bindex < m_msym_bunch_index; bindex++, mcount++)
 	    msymbols[mcount] = bunch->contents[bindex];
-	  msym_bunch_index = BUNCH_SIZE;
+	  m_msym_bunch_index = BUNCH_SIZE;
 	}
 
       /* Sort the minimal symbols by address.  */
