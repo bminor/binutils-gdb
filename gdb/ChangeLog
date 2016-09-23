@@ -1,5 +1,12 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* top.c (new_ui_command, wait_sync_command_done)
+	(gdb_readline_wrapper): Use scoped_restore.
+	* infrun.c (fetch_inferior_event): Use scoped_restore.
+	* infcall.c (call_thread_fsm_should_stop): Use scoped_restore.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* utils.c (make_cleanup_restore_ui_file, do_restore_ui_file)
 	(struct restore_ui_file_closure): Remove.
 	* utils.h (make_cleanup_restore_ui_file): Don't declare.

@@ -386,33 +386,35 @@ new_ui_command (char *args, int from_tty)
   interpreter_name = argv[0];
   tty_name = argv[1];
 
-  make_cleanup_restore_current_ui ();
+  {
+    scoped_restore save_ui = make_scoped_restore (&current_ui);
 
-  failure_chain = make_cleanup (null_cleanup, NULL);
+    failure_chain = make_cleanup (null_cleanup, NULL);
 
-  /* Open specified terminal, once for each of
-     stdin/stdout/stderr.  */
-  for (i = 0; i < 3; i++)
-    {
-      stream[i] = open_terminal_stream (tty_name);
-      make_cleanup_fclose (stream[i]);
-    }
+    /* Open specified terminal, once for each of
+       stdin/stdout/stderr.  */
+    for (i = 0; i < 3; i++)
+      {
+	stream[i] = open_terminal_stream (tty_name);
+	make_cleanup_fclose (stream[i]);
+      }
 
-  ui = new_ui (stream[0], stream[1], stream[2]);
-  make_cleanup (delete_ui_cleanup, ui);
+    ui = new_ui (stream[0], stream[1], stream[2]);
+    make_cleanup (delete_ui_cleanup, ui);
 
-  ui->async = 1;
+    ui->async = 1;
 
-  current_ui = ui;
+    current_ui = ui;
 
-  set_top_level_interpreter (interpreter_name);
+    set_top_level_interpreter (interpreter_name);
 
-  interp_pre_command_loop (top_level_interpreter ());
+    interp_pre_command_loop (top_level_interpreter ());
 
-  discard_cleanups (failure_chain);
+    discard_cleanups (failure_chain);
 
-  /* This restores the previous UI and frees argv.  */
-  do_cleanups (success_chain);
+    /* This restores the previous UI and frees argv.  */
+    do_cleanups (success_chain);
+  }
 
   printf_unfiltered ("New UI allocated\n");
 }
@@ -562,14 +564,12 @@ void
 wait_sync_command_done (void)
 {
   /* Processing events may change the current UI.  */
-  struct cleanup *old_chain = make_cleanup_restore_current_ui ();
+  scoped_restore save_ui = make_scoped_restore (&current_ui);
   struct ui *ui = current_ui;
 
   while (gdb_do_one_event () >= 0)
     if (ui->prompt_state != PROMPT_BLOCKED)
       break;
-
-  do_cleanups (old_chain);
 }
 
 /* See top.h.  */
@@ -1036,7 +1036,7 @@ gdb_readline_wrapper (const char *prompt)
   back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
 
   /* Processing events may change the current UI.  */
-  make_cleanup_restore_current_ui ();
+  scoped_restore save_ui = make_scoped_restore (&current_ui);
 
   if (cleanup->target_is_async_orig)
     target_async (0);

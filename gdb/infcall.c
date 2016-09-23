@@ -519,8 +519,6 @@ call_thread_fsm_should_stop (struct thread_fsm *self,
 
   if (stop_stack_dummy == STOP_STACK_DUMMY)
     {
-      struct cleanup *old_chain;
-
       /* Done.  */
       thread_fsm_set_finished (self);
 
@@ -530,13 +528,9 @@ call_thread_fsm_should_stop (struct thread_fsm *self,
       f->return_value = get_call_return_value (&f->return_meta_info);
 
       /* Break out of wait_sync_command_done.  */
-      old_chain = make_cleanup_restore_current_ui ();
-      current_ui = f->waiting_ui;
+      scoped_restore save_ui = make_scoped_restore (&current_ui, f->waiting_ui);
       target_terminal_ours ();
       f->waiting_ui->prompt_state = PROMPT_NEEDED;
-
-      /* This restores the previous UI.  */
-      do_cleanups (old_chain);
     }
 
   return 1;

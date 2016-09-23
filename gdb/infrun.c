@@ -3903,8 +3903,7 @@ fetch_inferior_event (void *client_data)
   /* Events are always processed with the main UI as current UI.  This
      way, warnings, debug output, etc. are always consistently sent to
      the main console.  */
-  make_cleanup_restore_current_ui ();
-  current_ui = main_ui;
+  scoped_restore save_ui = make_scoped_restore (&current_ui, main_ui);
 
   /* End up with readline processing input, if necessary.  */
   make_cleanup (reinstall_readline_callback_handler_cleanup, NULL);
