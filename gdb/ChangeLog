@@ -1,5 +1,23 @@
 2016-10-12  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (generic_emit_char, count_next_character)
+	(generic_printstr): Update.
+	* charset.c (struct wchar_iterator): Move to charset.h.
+	(wchar_iterator::wchar_iterator): Rename from
+	make_wchar_iterator, turn into a constructor.
+	(wchar_iterator::~wchar_iterator): Rename from
+	do_cleanup_iterator, turn into a destructor.
+	(make_cleanup_wchar_iterator): Remove.
+	(wchar_iterator::iterate): Rename from wchar_iterate.  Remove
+	"iter" argument.  Update.
+	* charset.h: Include <vector>.
+	(class wchar_iterator): New class, from old struct
+	wchar_iterator.
+	(make_wchar_iterator, make_cleanup_wchar_iterator): Don't
+	declare.
+
+2016-10-12  Tom Tromey  <tom@tromey.com>
+
 	* selftest.c: Include <vector>, not "vec.h".
 	(self_test_function_ptr): Remove.
 	(tests): Now a std::vector.
