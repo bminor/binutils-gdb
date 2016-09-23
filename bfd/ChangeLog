@@ -1,3 +1,24 @@
+2016-09-23  Akihiko Odaki  <akihiko.odaki.4i@stu.hosei.ac.jp>
+
+	PR ld/20595
+	* elf-bfd.h (struct elf_backend_data): Add
+	elf_backend_count_output_relocs callback to count relocations in
+	the final output.
+	* elf-arm.c (elf32_arm_add_relocation): Deleted.
+	(elf32_arm_write_section): Move additional relocation to emit_relocs.
+	(elf32_arm_count_output_relocs): New function.
+	(emit_relocs): New function.
+	(elf32_arm_emit_relocs): New function.
+	(elf32_arm_vxworks_emit_relocs): New function.
+	(elf_backend_emit_relocs): Updated to use the new functions.
+	(elf_backend_count_output_relocs): New define.
+	* bfd/elflink.c (bfd_elf_final_link): Do not add additional_reloc_count
+	to the relocation count.
+	(_bfd_elf_link_size_reloc_section): Use callback to count the
+	relocations which will be in output.
+	(_bfd_elf_default_count_output_relocs): New function.
+	* bfd/elfxx-target.h (elf_backend_count_output_relocs): New define.
+
 2016-09-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Allow
