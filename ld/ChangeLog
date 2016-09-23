@@ -1,3 +1,9 @@
+2016-09-23  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* emulparams/elf64_s390.sh: Change TEXT_START_ADDR to 256MB.
+	* testsuite/ld-s390/tlsbin_64.dd: Adjust testcase accordingly.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+
 2016-09-22  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/elf32.em (_try_needed): In verbose mode, report failed
