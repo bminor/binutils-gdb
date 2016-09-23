@@ -1,3 +1,8 @@
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (struct restore_ui_out_closure): Remove.
+	* objfiles.h (terminate_minimal_symbol_table): Don't declare.
+
 2016-09-23  Yao Qi  <yao.qi@linaro.org>
 
 	* nat/linux-osdata.c (linux_xfer_osdata_threads): Replace

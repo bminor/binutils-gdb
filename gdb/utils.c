@@ -332,12 +332,6 @@ make_cleanup_htab_delete (htab_t htab)
   return make_cleanup (do_htab_delete_cleanup, htab);
 }
 
-struct restore_ui_out_closure
-{
-  struct ui_out **variable;
-  struct ui_out *value;
-};
-
 struct restore_ui_file_closure
 {
   struct ui_file **variable;
