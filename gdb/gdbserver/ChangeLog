@@ -1,3 +1,9 @@
+2016-09-23  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add common/new-op.c.
+	(OBS): Add common/new-op.o.
+	(new-op.o): New rule.
+
 2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* .gitinore: Ignore more files.

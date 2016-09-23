@@ -893,7 +893,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
 	common/errors.c common/common-debug.c common/common-exceptions.c \
 	common/btrace-common.c common/fileio.c common/common-regcache.c \
-	common/signals-state-save-restore.c \
+	common/signals-state-save-restore.c common/new-op.c \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -1088,7 +1088,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
 	common-exceptions.o btrace-common.o fileio.o \
-	common-regcache.o \
+	common-regcache.o new-op.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -2288,6 +2288,10 @@ common-regcache.o: ${srcdir}/common/common-regcache.c
 
 signals-state-save-restore.o: $(srcdir)/common/signals-state-save-restore.c
 	$(COMPILE) $(srcdir)/common/signals-state-save-restore.c
+	$(POSTCOMPILE)
+
+new-op.o: ${srcdir}/common/new-op.c
+	$(COMPILE) $(srcdir)/common/new-op.c
 	$(POSTCOMPILE)
 
 #
