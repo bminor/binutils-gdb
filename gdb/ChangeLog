@@ -1,3 +1,10 @@
+2016-10-12  Tom Tromey  <tom@tromey.com>
+
+	* selftest.c: Include <vector>, not "vec.h".
+	(self_test_function_ptr): Remove.
+	(tests): Now a std::vector.
+	(register_self_test, run_self_tests): Update.
+
 2016-10-13  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 
