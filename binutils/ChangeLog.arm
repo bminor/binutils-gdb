@@ -1,3 +1,9 @@
+2016-09-23  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* objdump.c (dump_section_header): Handle SEC_ELF_PURECODE.
+	* readelf.c (get_elf_section_flags): Handle PURECODE.
+	(process_section_headers): Add purecode to help message.
+
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* readelf.c (display_arm_attribute): Add output for Tag_DSP_extension.

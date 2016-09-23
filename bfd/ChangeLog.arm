@@ -1,3 +1,22 @@
+2016-09-23  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* bfd-in2.h (SEC_ELF_PURECODE): New.
+	* elf32-arm.c (THUMB32_MOVT): New veneer macro.
+	(THUMB32_MOVW): Likewise.
+	(elf32_arm_stub_long_branch_thumb2_only_pure): New.
+	(DEF_STUBS): Define long_branch_thumb2_only_pure.
+	(arm_stub_is_thumb): Add new veneer stub.
+	(arm_type_of_stub): Use new veneer.
+	(arm_stub_required_alignment): Add new veneer.
+	(elf32_arm_post_process_headers): Set p_flag.
+	(elf32_arm_fake_sections): Handle SEC_ELF_PURECODE.
+	(elf32_arm_section_flags): New.
+	(elf_backend_section_flags): Define to elf32_arm_section_flags.
+	(elf32_arm_lookup_section_flags): New.
+	(elf_backend_lookup_section_flags_hook): Define to
+	elf32_arm_lookup_section_flags.
+	* section.c (SEC_ELF_PURECODE): NEW.
+
 2016-09-22  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	Backport from mainline

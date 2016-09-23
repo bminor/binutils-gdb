@@ -1,3 +1,7 @@
+2016-09-23  Andre Vieria  <andre.simoesdiasvieira@arm.com>
+
+	* arm.h (SHF_ARM_PURECODE): New.
+
 2016-05-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm.h (enum arm_st_branch_type): Add ST_BRANCH_ENUM_SIZE enumerator.

@@ -489,6 +489,8 @@ dump_section_header (bfd *abfd, asection *section,
   PF (SEC_SMALL_DATA, "SMALL_DATA");
   if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
     PF (SEC_COFF_SHARED, "SHARED");
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    PF (SEC_ELF_PURECODE, "PURECODE");
   PF (SEC_THREAD_LOCAL, "THREAD_LOCAL");
   PF (SEC_GROUP, "GROUP");
 
