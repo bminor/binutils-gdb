@@ -2464,7 +2464,7 @@ windows_kill_inferior (struct target_ops *ops)
 	break;
     }
 
-  target_mourn_inferior ();	/* Or just windows_mourn_inferior?  */
+  target_mourn_inferior (inferior_ptid);	/* Or just windows_mourn_inferior?  */
 }
 
 static void
