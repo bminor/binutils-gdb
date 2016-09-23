@@ -706,22 +706,22 @@ execute_command_to_string (char *p, int from_tty)
   str_file = mem_fileopen ();
 
   make_cleanup_ui_file_delete (str_file);
-  make_cleanup_restore_ui_file (&gdb_stdout);
-  make_cleanup_restore_ui_file (&gdb_stderr);
-  make_cleanup_restore_ui_file (&gdb_stdlog);
-  make_cleanup_restore_ui_file (&gdb_stdtarg);
-  make_cleanup_restore_ui_file (&gdb_stdtargerr);
 
   if (ui_out_redirect (current_uiout, str_file) < 0)
     warning (_("Current output protocol does not support redirection"));
   else
     make_cleanup_ui_out_redirect_pop (current_uiout);
 
-  gdb_stdout = str_file;
-  gdb_stderr = str_file;
-  gdb_stdlog = str_file;
-  gdb_stdtarg = str_file;
-  gdb_stdtargerr = str_file;
+  scoped_restore save_stdout
+    = make_scoped_restore (&gdb_stdout, str_file);
+  scoped_restore save_stderr
+    = make_scoped_restore (&gdb_stderr, str_file);
+  scoped_restore save_stdlog
+    = make_scoped_restore (&gdb_stdlog, str_file);
+  scoped_restore save_stdtarg
+    = make_scoped_restore (&gdb_stdtarg, str_file);
+  scoped_restore save_stdtargerr
+    = make_scoped_restore (&gdb_stdtargerr, str_file);
 
   execute_command (p, from_tty);
 

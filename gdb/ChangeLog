@@ -1,5 +1,14 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* utils.c (make_cleanup_restore_ui_file, do_restore_ui_file)
+	(struct restore_ui_file_closure): Remove.
+	* utils.h (make_cleanup_restore_ui_file): Don't declare.
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Use
+	scoped_restore.
+	* top.c (execute_command_to_string): Use scoped_restore.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* common/scoped_restore.h: New file.
 	* utils.h: Include scoped_restore.h.
 	* top.c (execute_command_to_string): Use scoped_restore.
