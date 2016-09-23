@@ -585,7 +585,8 @@ linux_xfer_osdata_threads (gdb_byte *readbuf,
 		  || NAMELEN (dp) > sizeof ("4294967295") - 1)
 		continue;
 
-	      sprintf (procentry, "/proc/%s", dp->d_name);
+	      xsnprintf (procentry, sizeof (procentry), "/proc/%s",
+			 dp->d_name);
 	      if (stat (procentry, &statbuf) == 0
 		  && S_ISDIR (statbuf.st_mode))
 		{
@@ -797,7 +798,8 @@ linux_xfer_osdata_fds (gdb_byte *readbuf,
 		  || NAMELEN (dp) > sizeof ("4294967295") - 1)
 		continue;
 
-	      sprintf (procentry, "/proc/%s", dp->d_name);
+	      xsnprintf (procentry, sizeof (procentry), "/proc/%s",
+			 dp->d_name);
 	      if (stat (procentry, &statbuf) == 0
 		  && S_ISDIR (statbuf.st_mode))
 		{

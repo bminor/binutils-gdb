@@ -1,3 +1,9 @@
+2016-09-23  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/linux-osdata.c (linux_xfer_osdata_threads): Replace
+	sprintf with xsnprintf.
+	(linux_xfer_osdata_fds): Likewise.
+
 2016-09-23  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (SFILES): Add common/new-op.c.
