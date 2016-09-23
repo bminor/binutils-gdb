@@ -4255,15 +4255,12 @@ arm_insert_single_step_breakpoint (struct gdbarch *gdbarch,
 				   struct address_space *aspace,
 				   CORE_ADDR pc)
 {
-  struct cleanup *old_chain
-    = make_cleanup_restore_integer (&arm_override_mode);
-
-  arm_override_mode = IS_THUMB_ADDR (pc);
+  scoped_restore save_override_mode
+    = make_scoped_restore (&arm_override_mode,
+			   (int) IS_THUMB_ADDR (pc));
   pc = gdbarch_addr_bits_remove (gdbarch, pc);
 
   insert_single_step_breakpoint (gdbarch, aspace, pc);
-
-  do_cleanups (old_chain);
 }
 
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand

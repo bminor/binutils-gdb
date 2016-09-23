@@ -1,5 +1,28 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* common/scoped_restore.h: New file.
+	* utils.h: Include scoped_restore.h.
+	* top.c (execute_command_to_string): Use scoped_restore.
+	* python/python.c (python_interactive_command): Use
+	scoped_restore.
+	(python_command, execute_gdb_command): Likewise.
+	* printcmd.c (do_one_display): Use scoped_restore.
+	* mi/mi-main.c (exec_continue): Use scoped_restore.
+	* mi/mi-cmd-var.c (mi_cmd_var_assign): Use scoped_restore.
+	* linux-fork.c (checkpoint_command): Use scoped_restore.
+	* infrun.c (restore_execution_direction): Remove.
+	(fetch_inferior_event): Use scoped_restore.
+	* compile/compile.c (compile_file_command): Use
+	scoped_restore.
+	(compile_code_command, compile_print_command): Likewise.
+	* cli/cli-script.c (execute_user_command): Use
+	scoped_restore.
+	(while_command, if_command, script_from_file): Likewise.
+	* arm-tdep.c (arm_insert_single_step_breakpoint): Use
+	scoped_restore.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (read_xcoff_symtab): Make "filestring" const.
 
 2016-10-21  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>

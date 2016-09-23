@@ -3879,17 +3879,6 @@ all_uis_on_sync_execution_starting (void)
     }
 }
 
-/* A cleanup that restores the execution direction to the value saved
-   in *ARG.  */
-
-static void
-restore_execution_direction (void *arg)
-{
-  enum exec_direction_kind *save_exec_dir = (enum exec_direction_kind *) arg;
-
-  execution_direction = *save_exec_dir;
-}
-
 /* Asynchronous version of wait_for_inferior.  It is called by the
    event loop whenever a change of state is detected on the file
    descriptor corresponding to the target.  It can be called more than
@@ -3906,7 +3895,6 @@ fetch_inferior_event (void *client_data)
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   struct cleanup *ts_old_chain;
-  enum exec_direction_kind save_exec_dir = execution_direction;
   int cmd_done = 0;
   ptid_t waiton_ptid = minus_one_ptid;
 
@@ -3945,8 +3933,8 @@ fetch_inferior_event (void *client_data)
      event.  */
   target_dcache_invalidate ();
 
-  make_cleanup (restore_execution_direction, &save_exec_dir);
-  execution_direction = target_execution_direction ();
+  scoped_restore save_exec_dir
+    = make_scoped_restore (&execution_direction, target_execution_direction ());
 
   ecs->ptid = do_target_wait (waiton_ptid, &ecs->ws,
 			      target_can_async_p () ? TARGET_WNOHANG : 0);

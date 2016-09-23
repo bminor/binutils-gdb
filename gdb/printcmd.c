@@ -1937,7 +1937,6 @@ undisplay_command (char *args, int from_tty)
 static void
 do_one_display (struct display *d)
 {
-  struct cleanup *old_chain;
   int within_current_scope;
 
   if (d->enabled_p == 0)
@@ -1989,8 +1988,8 @@ do_one_display (struct display *d)
   if (!within_current_scope)
     return;
 
-  old_chain = make_cleanup_restore_integer (&current_display_number);
-  current_display_number = d->number;
+  scoped_restore save_display_number
+    = make_scoped_restore (&current_display_number, d->number);
 
   annotate_display_begin ();
   printf_filtered ("%d", d->number);
@@ -2078,7 +2077,6 @@ do_one_display (struct display *d)
   annotate_display_end ();
 
   gdb_flush (gdb_stdout);
-  do_cleanups (old_chain);
 }
 
 /* Display all of the values on the auto-display chain which can be

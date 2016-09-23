@@ -301,7 +301,7 @@ exec_continue (char **argv, int argc)
     }
   else
     {
-      struct cleanup *back_to = make_cleanup_restore_integer (&sched_multi);
+      scoped_restore save_multi = make_scoped_restore (&sched_multi);
 
       if (current_context->all)
 	{
@@ -316,7 +316,6 @@ exec_continue (char **argv, int argc)
 	     same.  */
 	  continue_1 (1);
 	}
-      do_cleanups (back_to);
     }
 }
 
