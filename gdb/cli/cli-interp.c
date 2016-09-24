@@ -99,12 +99,10 @@ should_print_stop_to_console (struct interp *console_interp,
 static void
 cli_on_normal_stop (struct bpstats *bs, int print_frame)
 {
-  struct switch_thru_all_uis state;
-
   if (!print_frame)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *interp = top_level_interpreter ();
       struct cli_interp *cli = as_cli_interp (interp);
@@ -124,9 +122,7 @@ cli_on_normal_stop (struct bpstats *bs, int print_frame)
 static void
 cli_on_signal_received (enum gdb_signal siggnal)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -142,9 +138,7 @@ cli_on_signal_received (enum gdb_signal siggnal)
 static void
 cli_on_end_stepping_range (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -160,9 +154,7 @@ cli_on_end_stepping_range (void)
 static void
 cli_on_signal_exited (enum gdb_signal siggnal)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -178,9 +170,7 @@ cli_on_signal_exited (enum gdb_signal siggnal)
 static void
 cli_on_exited (int exitstatus)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -196,9 +186,7 @@ cli_on_exited (int exitstatus)
 static void
 cli_on_no_history (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -240,7 +228,6 @@ cli_on_command_error (void)
 static void
 cli_on_user_selected_context_changed (user_selected_what selection)
 {
-  struct switch_thru_all_uis state;
   struct thread_info *tp;
 
   /* This event is suppressed.  */
@@ -249,7 +236,7 @@ cli_on_user_selected_context_changed (user_selected_what selection)
 
   tp = find_thread_ptid (inferior_ptid);
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 

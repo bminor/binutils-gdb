@@ -5238,8 +5238,6 @@ watchpoint_check (void *p)
     }
   else
     {
-      struct switch_thru_all_uis state;
-
       /* This seems like the only logical thing to do because
          if we temporarily ignored the watchpoint, then when
          we reenter the block in which it is valid it contains
@@ -5254,7 +5252,7 @@ watchpoint_check (void *p)
 	 already.  So we have no choice but print the information
 	 here.  */
 
-      SWITCH_THRU_ALL_UIS (state)
+      SWITCH_THRU_ALL_UIS ()
         {
 	  struct ui_out *uiout = current_uiout;
 
@@ -5435,9 +5433,7 @@ bpstat_check_watchpoint (bpstat bs)
 	    case 0:
 	      /* Error from catch_errors.  */
 	      {
-		struct switch_thru_all_uis state;
-
-		SWITCH_THRU_ALL_UIS (state)
+		SWITCH_THRU_ALL_UIS ()
 	          {
 		    printf_filtered (_("Watchpoint %d deleted.\n"),
 				     b->base.number);

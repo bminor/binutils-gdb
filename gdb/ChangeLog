@@ -1,5 +1,37 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-interp.c (tui_on_normal_stop, tui_on_signal_received)
+	(tui_on_end_stepping_range, tui_on_signal_exited, tui_on_exited)
+	(tui_on_no_history, tui_on_user_selected_context_changed):
+	Update.
+	* top.h (switch_thru_all_uis): New class.
+	(SWITCH_THRU_ALL_UIS): Rewrite.
+	(make_cleanup_restore_current_ui, switch_thru_all_uis_init)
+	(switch_thru_all_uis_cond, switch_thru_all_uis_next): Don't
+	declare.
+	* mi/mi-interp.c (mi_new_thread, mi_thread_exit)
+	(mi_record_changed, mi_inferior_added, mi_inferior_appeared)
+	(mi_inferior_exit, mi_inferior_removed, mi_on_signal_received)
+	(mi_on_end_stepping_range, mi_on_signal_exited, mi_on_exited)
+	(mi_on_no_history, mi_on_normal_stop, mi_traceframe_changed)
+	(mi_tsv_created, mi_tsv_deleted, mi_tsv_modified)
+	(mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified, mi_output_running_pid, mi_on_resume)
+	(mi_solib_loaded, mi_solib_unloaded, mi_command_param_changed)
+	(mi_memory_changed, mi_user_selected_context_changed): Update.
+	* infrun.c (all_uis_check_sync_execution_done)
+	(all_uis_on_sync_execution_starting, normal_stop): Update.
+	* event-top.c (restore_ui_cleanup)
+	(make_cleanup_restore_current_ui, switch_thru_all_uis_init)
+	(switch_thru_all_uis_cond, switch_thru_all_uis_next): Remove.
+	* cli/cli-interp.c (cli_on_normal_stop, cli_on_signal_received)
+	(cli_on_end_stepping_range, cli_on_signal_exited, cli_on_exited)
+	(cli_on_no_history, cli_on_user_selected_context_changed):
+	Update.
+	* breakpoint.c (watchpoint_check): Update.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (record_minimal_symbol, scan_xcoff_symtab): Add
 	"reader" argument.  Update.
 	(xcoff_initial_scan): Update.

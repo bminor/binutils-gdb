@@ -70,12 +70,10 @@ tui_exit (void)
 static void
 tui_on_normal_stop (struct bpstats *bs, int print_frame)
 {
-  struct switch_thru_all_uis state;
-
   if (!print_frame)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *interp = top_level_interpreter ();
       struct interp *tui = as_tui_interp (interp);
@@ -95,9 +93,7 @@ tui_on_normal_stop (struct bpstats *bs, int print_frame)
 static void
 tui_on_signal_received (enum gdb_signal siggnal)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *tui = as_tui_interp (top_level_interpreter ());
 
@@ -113,9 +109,7 @@ tui_on_signal_received (enum gdb_signal siggnal)
 static void
 tui_on_end_stepping_range (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *tui = as_tui_interp (top_level_interpreter ());
 
@@ -131,9 +125,7 @@ tui_on_end_stepping_range (void)
 static void
 tui_on_signal_exited (enum gdb_signal siggnal)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *tui = as_tui_interp (top_level_interpreter ());
 
@@ -149,9 +141,7 @@ tui_on_signal_exited (enum gdb_signal siggnal)
 static void
 tui_on_exited (int exitstatus)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *tui = as_tui_interp (top_level_interpreter ());
 
@@ -167,9 +157,7 @@ tui_on_exited (int exitstatus)
 static void
 tui_on_no_history (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *tui = as_tui_interp (top_level_interpreter ());
 
@@ -211,7 +199,6 @@ tui_on_command_error (void)
 static void
 tui_on_user_selected_context_changed (user_selected_what selection)
 {
-  struct switch_thru_all_uis state;
   struct thread_info *tp;
 
   /* This event is suppressed.  */
@@ -220,7 +207,7 @@ tui_on_user_selected_context_changed (user_selected_what selection)
 
   tp = find_thread_ptid (inferior_ptid);
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *tui = as_tui_interp (top_level_interpreter ());
 

@@ -447,56 +447,6 @@ struct ui *main_ui;
 struct ui *current_ui;
 struct ui *ui_list;
 
-/* A cleanup handler that restores the current UI.  */
-
-static void
-restore_ui_cleanup (void *data)
-{
-  current_ui = (struct ui *) data;
-}
-
-/* See top.h.  */
-
-struct cleanup *
-make_cleanup_restore_current_ui (void)
-{
-  return make_cleanup (restore_ui_cleanup, current_ui);
-}
-
-/* See top.h.  */
-
-void
-switch_thru_all_uis_init (struct switch_thru_all_uis *state)
-{
-  state->iter = ui_list;
-  state->old_chain = make_cleanup_restore_current_ui ();
-}
-
-/* See top.h.  */
-
-int
-switch_thru_all_uis_cond (struct switch_thru_all_uis *state)
-{
-  if (state->iter != NULL)
-    {
-      current_ui = state->iter;
-      return 1;
-    }
-  else
-    {
-      do_cleanups (state->old_chain);
-      return 0;
-    }
-}
-
-/* See top.h.  */
-
-void
-switch_thru_all_uis_next (struct switch_thru_all_uis *state)
-{
-  state->iter = state->iter->next;
-}
-
 /* Get a pointer to the current UI's line buffer.  This is used to
    construct a whole line of input from partial input.  */
 

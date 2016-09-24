@@ -344,11 +344,10 @@ static void
 mi_new_thread (struct thread_info *t)
 {
   struct inferior *inf = find_inferior_ptid (t->ptid);
-  struct switch_thru_all_uis state;
 
   gdb_assert (inf);
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -371,12 +370,10 @@ mi_new_thread (struct thread_info *t)
 static void
 mi_thread_exit (struct thread_info *t, int silent)
 {
-  struct switch_thru_all_uis state;
-
   if (silent)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -401,9 +398,7 @@ static void
 mi_record_changed (struct inferior *inferior, int started, const char *method,
 		   const char *format)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -447,9 +442,7 @@ mi_record_changed (struct inferior *inferior, int started, const char *method,
 static void
 mi_inferior_added (struct inferior *inf)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *interp;
       struct mi_interp *mi;
@@ -480,9 +473,7 @@ mi_inferior_added (struct inferior *inf)
 static void
 mi_inferior_appeared (struct inferior *inf)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -504,9 +495,7 @@ mi_inferior_appeared (struct inferior *inf)
 static void
 mi_inferior_exit (struct inferior *inf)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -533,9 +522,7 @@ mi_inferior_exit (struct inferior *inf)
 static void
 mi_inferior_removed (struct inferior *inf)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -584,9 +571,7 @@ find_mi_interp (void)
 static void
 mi_on_signal_received (enum gdb_signal siggnal)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = find_mi_interp ();
 
@@ -603,9 +588,7 @@ mi_on_signal_received (enum gdb_signal siggnal)
 static void
 mi_on_end_stepping_range (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = find_mi_interp ();
 
@@ -622,9 +605,7 @@ mi_on_end_stepping_range (void)
 static void
 mi_on_signal_exited (enum gdb_signal siggnal)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = find_mi_interp ();
 
@@ -641,9 +622,7 @@ mi_on_signal_exited (enum gdb_signal siggnal)
 static void
 mi_on_exited (int exitstatus)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = find_mi_interp ();
 
@@ -660,9 +639,7 @@ mi_on_exited (int exitstatus)
 static void
 mi_on_no_history (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = find_mi_interp ();
 
@@ -734,9 +711,7 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
 static void
 mi_on_normal_stop (struct bpstats *bs, int print_frame)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       if (as_mi_interp (top_level_interpreter ()) == NULL)
 	continue;
@@ -777,12 +752,10 @@ struct mi_suppress_notification mi_suppress_notification =
 static void
 mi_traceframe_changed (int tfnum, int tpnum)
 {
-  struct switch_thru_all_uis state;
-
   if (mi_suppress_notification.traceframe)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -811,9 +784,7 @@ mi_traceframe_changed (int tfnum, int tpnum)
 static void
 mi_tsv_created (const struct trace_state_variable *tsv)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -839,9 +810,7 @@ mi_tsv_created (const struct trace_state_variable *tsv)
 static void
 mi_tsv_deleted (const struct trace_state_variable *tsv)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -869,9 +838,7 @@ mi_tsv_deleted (const struct trace_state_variable *tsv)
 static void
 mi_tsv_modified (const struct trace_state_variable *tsv)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct ui_out *mi_uiout;
@@ -909,15 +876,13 @@ mi_tsv_modified (const struct trace_state_variable *tsv)
 static void
 mi_breakpoint_created (struct breakpoint *b)
 {
-  struct switch_thru_all_uis state;
-
   if (mi_suppress_notification.breakpoint)
     return;
 
   if (b->number <= 0)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct ui_out *mi_uiout;
@@ -963,15 +928,13 @@ mi_breakpoint_created (struct breakpoint *b)
 static void
 mi_breakpoint_deleted (struct breakpoint *b)
 {
-  struct switch_thru_all_uis state;
-
   if (mi_suppress_notification.breakpoint)
     return;
 
   if (b->number <= 0)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -996,15 +959,13 @@ mi_breakpoint_deleted (struct breakpoint *b)
 static void
 mi_breakpoint_modified (struct breakpoint *b)
 {
-  struct switch_thru_all_uis state;
-
   if (mi_suppress_notification.breakpoint)
     return;
 
   if (b->number <= 0)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -1045,9 +1006,8 @@ static int
 mi_output_running_pid (struct thread_info *info, void *arg)
 {
   ptid_t *ptid = (ptid_t *) arg;
-  struct switch_thru_all_uis state;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
 
@@ -1133,7 +1093,6 @@ static void
 mi_on_resume (ptid_t ptid)
 {
   struct thread_info *tp = NULL;
-  struct switch_thru_all_uis state;
 
   if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
     tp = inferior_thread ();
@@ -1144,7 +1103,7 @@ mi_on_resume (ptid_t ptid)
   if (tp->control.in_infcall)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct cleanup *old_chain;
@@ -1164,9 +1123,7 @@ mi_on_resume (ptid_t ptid)
 static void
 mi_solib_loaded (struct so_list *solib)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct ui_out *uiout;
@@ -1205,9 +1162,7 @@ mi_solib_loaded (struct so_list *solib)
 static void
 mi_solib_unloaded (struct so_list *solib)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct ui_out *uiout;
@@ -1247,12 +1202,10 @@ mi_solib_unloaded (struct so_list *solib)
 static void
 mi_command_param_changed (const char *param, const char *value)
 {
-  struct switch_thru_all_uis state;
-
   if (mi_suppress_notification.cmd_param_changed)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct ui_out *mi_uiout;
@@ -1287,12 +1240,10 @@ static void
 mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
 		   ssize_t len, const bfd_byte *myaddr)
 {
-  struct switch_thru_all_uis state;
-
   if (mi_suppress_notification.memory)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct ui_out *mi_uiout;
@@ -1341,7 +1292,6 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
 static void
 mi_user_selected_context_changed (user_selected_what selection)
 {
-  struct switch_thru_all_uis state;
   struct thread_info *tp;
 
   /* Don't send an event if we're responding to an MI command.  */
@@ -1350,7 +1300,7 @@ mi_user_selected_context_changed (user_selected_what selection)
 
   tp = find_thread_ptid (inferior_ptid);
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
       struct ui_out *mi_uiout;

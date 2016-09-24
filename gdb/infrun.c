@@ -3857,9 +3857,7 @@ check_curr_ui_sync_execution_done (void)
 void
 all_uis_check_sync_execution_done (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       check_curr_ui_sync_execution_done ();
     }
@@ -3870,9 +3868,7 @@ all_uis_check_sync_execution_done (void)
 void
 all_uis_on_sync_execution_starting (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       if (current_ui->prompt_state == PROMPT_NEEDED)
 	async_disable_stdin ();
@@ -8217,7 +8213,6 @@ normal_stop (void)
   ptid_t last_ptid;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   ptid_t pid_ptid;
-  struct switch_thru_all_uis state;
 
   get_last_target_status (&last_ptid, &last);
 
@@ -8282,7 +8277,7 @@ normal_stop (void)
       && last.kind != TARGET_WAITKIND_EXITED
       && last.kind != TARGET_WAITKIND_NO_RESUMED)
     {
-      SWITCH_THRU_ALL_UIS (state)
+      SWITCH_THRU_ALL_UIS ()
 	{
 	  target_terminal_ours_for_output ();
 	  printf_filtered (_("[Switching to %s]\n"),
@@ -8294,7 +8289,7 @@ normal_stop (void)
 
   if (last.kind == TARGET_WAITKIND_NO_RESUMED)
     {
-      SWITCH_THRU_ALL_UIS (state)
+      SWITCH_THRU_ALL_UIS ()
 	if (current_ui->prompt_state == PROMPT_BLOCKED)
 	  {
 	    target_terminal_ours_for_output ();
@@ -8311,7 +8306,7 @@ normal_stop (void)
   if (stopped_by_random_signal)
     disable_current_display ();
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       async_enable_stdin ();
     }
