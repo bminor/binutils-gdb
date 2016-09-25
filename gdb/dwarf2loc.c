@@ -39,6 +39,7 @@
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
 #include <algorithm>
+#include <vector>
 
 extern int dwarf_always_disassemble;
 
@@ -1697,8 +1698,7 @@ read_pieced_value (struct value *v)
   struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (v));
   size_t type_len;
   size_t buffer_size = 0;
-  gdb_byte *buffer = NULL;
-  struct cleanup *cleanup;
+  std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (v)));
 
@@ -1706,8 +1706,6 @@ read_pieced_value (struct value *v)
     internal_error (__FILE__, __LINE__,
 		    _("Should not be able to create a lazy value with "
 		      "an enclosing type"));
-
-  cleanup = make_cleanup (free_current_contents, &buffer);
 
   contents = value_contents_raw (v);
   bits_to_skip = 8 * value_offset (v);
@@ -1754,9 +1752,9 @@ read_pieced_value (struct value *v)
       if (buffer_size < this_size)
 	{
 	  buffer_size = this_size;
-	  buffer = (gdb_byte *) xrealloc (buffer, buffer_size);
+	  buffer.reserve (buffer_size);
 	}
-      intermediate_buffer = buffer;
+      intermediate_buffer = buffer.data ();
 
       /* Copy from the source to DEST_BUFFER.  */
       switch (p->location)
@@ -1779,11 +1777,11 @@ read_pieced_value (struct value *v)
 	      }
 
 	    if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
-					   this_size, buffer,
+					   this_size, buffer.data (),
 					   &optim, &unavail))
 	      {
 		/* Just so garbage doesn't ever shine through.  */
-		memset (buffer, 0, this_size);
+		memset (buffer.data (), 0, this_size);
 
 		if (optim)
 		  mark_value_bits_optimized_out (v, offset, this_size_bits);
@@ -1797,7 +1795,7 @@ read_pieced_value (struct value *v)
 	  read_value_memory (v, offset,
 			     p->v.mem.in_stack_memory,
 			     p->v.mem.addr + source_offset,
-			     buffer, this_size);
+			     buffer.data (), this_size);
 	  break;
 
 	case DWARF_VALUE_STACK:
@@ -1855,8 +1853,6 @@ read_pieced_value (struct value *v)
 
       offset += this_size_bits;
     }
-
-  do_cleanups (cleanup);
 }
 
 static void
@@ -1871,8 +1867,7 @@ write_pieced_value (struct value *to, struct value *from)
   struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (to));
   size_t type_len;
   size_t buffer_size = 0;
-  gdb_byte *buffer = NULL;
-  struct cleanup *cleanup;
+  std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (to)));
 
@@ -1881,8 +1876,6 @@ write_pieced_value (struct value *to, struct value *from)
       mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
       return;
     }
-
-  cleanup = make_cleanup (free_current_contents, &buffer);
 
   contents = value_contents (from);
   bits_to_skip = 8 * value_offset (to);
@@ -1936,9 +1929,9 @@ write_pieced_value (struct value *to, struct value *from)
 	  if (buffer_size < this_size)
 	    {
 	      buffer_size = this_size;
-	      buffer = (gdb_byte *) xrealloc (buffer, buffer_size);
+	      buffer.reserve (buffer_size);
 	    }
-	  source_buffer = buffer;
+	  source_buffer = buffer.data ();
 	  need_bitwise = 1;
 	}
 
@@ -1962,7 +1955,7 @@ write_pieced_value (struct value *to, struct value *from)
 		int optim, unavail;
 
 		if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
-					       this_size, buffer,
+					       this_size, buffer.data (),
 					       &optim, &unavail))
 		  {
 		    if (optim)
@@ -1976,7 +1969,7 @@ write_pieced_value (struct value *to, struct value *from)
 				     "bitfield; containing word "
 				     "is unavailable"));
 		  }
-		copy_bitwise (buffer, dest_offset_bits,
+		copy_bitwise (buffer.data (), dest_offset_bits,
 			      contents, source_offset_bits,
 			      this_size_bits,
 			      bits_big_endian);
@@ -1991,10 +1984,10 @@ write_pieced_value (struct value *to, struct value *from)
 	    {
 	      /* Only the first and last bytes can possibly have any
 		 bits reused.  */
-	      read_memory (p->v.mem.addr + dest_offset, buffer, 1);
+	      read_memory (p->v.mem.addr + dest_offset, buffer.data (), 1);
 	      read_memory (p->v.mem.addr + dest_offset + this_size - 1,
-			   buffer + this_size - 1, 1);
-	      copy_bitwise (buffer, dest_offset_bits,
+			   &buffer[this_size - 1], 1);
+	      copy_bitwise (buffer.data (), dest_offset_bits,
 			    contents, source_offset_bits,
 			    this_size_bits,
 			    bits_big_endian);
@@ -2009,8 +2002,6 @@ write_pieced_value (struct value *to, struct value *from)
 	}
       offset += this_size_bits;
     }
-
-  do_cleanups (cleanup);
 }
 
 /* An implementation of an lval_funcs method to see whether a value is
@@ -3054,9 +3045,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 			   const gdb_byte *op_ptr, const gdb_byte *op_end,
 			   struct dwarf2_per_cu_data *per_cu)
 {
-  struct cleanup *cleanups;
-  int i, *offsets;
-  VEC(int) *dw_labels = NULL, *patches = NULL;
+  int i;
+  std::vector<int> dw_labels, patches;
   const gdb_byte * const base = op_ptr;
   const gdb_byte *previous_piece = op_ptr;
   enum bfd_endian byte_order = gdbarch_byte_order (arch);
@@ -3064,14 +3054,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
   unsigned int addr_size_bits = 8 * addr_size;
   int bits_big_endian = gdbarch_bits_big_endian (arch);
 
-  offsets = XNEWVEC (int, op_end - op_ptr);
-  cleanups = make_cleanup (xfree, offsets);
-
-  for (i = 0; i < op_end - op_ptr; ++i)
-    offsets[i] = -1;
-
-  make_cleanup (VEC_cleanup (int), &dw_labels);
-  make_cleanup (VEC_cleanup (int), &patches);
+  std::vector<int> offsets (op_end - op_ptr, -1);
 
   /* By default we are making an address.  */
   loc->kind = axs_lvalue_memory;
@@ -3584,8 +3567,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  offset = extract_signed_integer (op_ptr, 2, byte_order);
 	  op_ptr += 2;
 	  i = ax_goto (expr, aop_goto);
-	  VEC_safe_push (int, dw_labels, op_ptr + offset - base);
-	  VEC_safe_push (int, patches, i);
+	  dw_labels.push_back (op_ptr + offset - base);
+	  patches.push_back (i);
 	  break;
 
 	case DW_OP_bra:
@@ -3594,8 +3577,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  /* Zero extend the operand.  */
 	  ax_zero_ext (expr, addr_size_bits);
 	  i = ax_goto (expr, aop_if_goto);
-	  VEC_safe_push (int, dw_labels, op_ptr + offset - base);
-	  VEC_safe_push (int, patches, i);
+	  dw_labels.push_back (op_ptr + offset - base);
+	  patches.push_back (i);
 	  break;
 
 	case DW_OP_nop:
@@ -3704,15 +3687,13 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
     }
 
   /* Patch all the branches we emitted.  */
-  for (i = 0; i < VEC_length (int, patches); ++i)
+  for (i = 0; i < patches.size (); ++i)
     {
-      int targ = offsets[VEC_index (int, dw_labels, i)];
+      int targ = offsets[dw_labels[i]];
       if (targ == -1)
 	internal_error (__FILE__, __LINE__, _("invalid label"));
-      ax_label (expr, VEC_index (int, patches, i), targ);
+      ax_label (expr, patches[i], targ);
     }
-
-  do_cleanups (cleanups);
 }
 
 

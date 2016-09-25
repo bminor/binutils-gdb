@@ -1,5 +1,11 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2loc.c: Include <vector>.
+	(read_pieced_value, write_pieced_value)
+	(dwarf2_compile_expr_to_ax): Use std::vector.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (print_stack_frame_to_uiout): Use scoped_restore.
 	* ui-out.c (make_cleanup_restore_current_uiout)
 	(restore_current_uiout_cleanup): Remove.
