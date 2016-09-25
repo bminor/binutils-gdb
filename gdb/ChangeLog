@@ -1,5 +1,10 @@
 2016-10-12  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (trace_dump_command): Remove unnecessary
+	null_cleanup.
+
+2016-10-12  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (generic_emit_char, count_next_character)
 	(generic_printstr): Update.
 	* charset.c (struct wchar_iterator): Move to charset.h.
