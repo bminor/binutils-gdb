@@ -1,5 +1,19 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* maint.h (scoped_command_stats): New class.
+	(make_command_stats_cleanup): Don't declare.
+	* maint.c (struct cmd_stats): Remove.
+	(~scoped_command_stats): Rename from report_command_stats.  Now a
+	destructor.
+	(scoped_command_stats): Rename from make_command_stats_cleanup.
+	Now a constructor.
+	* main.c (captured_main_1): New function.  Use
+	scoped_command_stats.
+	(captured_main): Call captured_main_1.
+	* event-top.c (command_handler): Use scoped_command_stats.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (mi_cmd_data_read_memory): Use gdb::unique_ptr.
 	Remove some cleanups.
 

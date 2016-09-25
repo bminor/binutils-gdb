@@ -752,31 +752,6 @@ static int per_command_symtab;
 static struct cmd_list_element *per_command_setlist;
 static struct cmd_list_element *per_command_showlist;
 
-/* Records a run time and space usage to be used as a base for
-   reporting elapsed time or change in space.  */
-
-struct cmd_stats 
-{
-  /* Zero if the saved time is from the beginning of GDB execution.
-     One if from the beginning of an individual command execution.  */
-  int msg_type;
-  /* Track whether the stat was enabled at the start of the command
-     so that we can avoid printing anything if it gets turned on by
-     the current command.  */
-  int time_enabled : 1;
-  int space_enabled : 1;
-  int symtab_enabled : 1;
-  long start_cpu_time;
-  struct timeval start_wall_time;
-  long start_space;
-  /* Total number of symtabs (over all objfiles).  */
-  int start_nr_symtabs;
-  /* A count of the compunits.  */
-  int start_nr_compunit_symtabs;
-  /* Total number of blocks.  */
-  int start_nr_blocks;
-};
-
 /* Set whether to display time statistics to NEW_VALUE
    (non-zero means true).  */
 
@@ -827,31 +802,38 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
   *nr_blocks_ptr = nr_blocks;
 }
 
-/* As indicated by display_time and display_space, report GDB's elapsed time
-   and space usage from the base time and space provided in ARG, which
-   must be a pointer to a struct cmd_stat.  This function is intended
-   to be called as a cleanup.  */
+/* As indicated by display_time and display_space, report GDB's
+   elapsed time and space usage from the base time and space recorded
+   in this object.  */
 
-static void
-report_command_stats (void *arg)
+scoped_command_stats::~scoped_command_stats ()
 {
-  struct cmd_stats *start_stats = (struct cmd_stats *) arg;
-  int msg_type = start_stats->msg_type;
+  /* Early exit if we're not reporting any stats.  It can be expensive to
+     compute the pre-command values so don't collect them at all if we're
+     not reporting stats.  Alas this doesn't work in the startup case because
+     we don't know yet whether we will be reporting the stats.  For the
+     startup case collect the data anyway (it should be cheap at this point),
+     and leave it to the reporter to decide whether to print them.  */
+  if (m_msg_type
+      && !per_command_time
+      && !per_command_space
+      && !per_command_symtab)
+    return;
 
-  if (start_stats->time_enabled && per_command_time)
+  if (m_time_enabled && per_command_time)
     {
-      long cmd_time = get_run_time () - start_stats->start_cpu_time;
+      long cmd_time = get_run_time () - m_start_cpu_time;
       struct timeval now_wall_time, delta_wall_time, wait_time;
 
       gettimeofday (&now_wall_time, NULL);
       timeval_sub (&delta_wall_time,
-		   &now_wall_time, &start_stats->start_wall_time);
+		   &now_wall_time, &m_start_wall_time);
 
       /* Subtract time spend in prompt_for_continue from walltime.  */
       wait_time = get_prompt_for_continue_wait_time ();
       timeval_sub (&delta_wall_time, &delta_wall_time, &wait_time);
 
-      printf_unfiltered (msg_type == 0
+      printf_unfiltered (!m_msg_type
 			 ? _("Startup time: %ld.%06ld (cpu), %ld.%06ld (wall)\n")
 			 : _("Command execution time: %ld.%06ld (cpu), %ld.%06ld (wall)\n"),
 			 cmd_time / 1000000, cmd_time % 1000000,
@@ -859,15 +841,15 @@ report_command_stats (void *arg)
 			 (long) delta_wall_time.tv_usec);
     }
 
-  if (start_stats->space_enabled && per_command_space)
+  if (m_space_enabled && per_command_space)
     {
 #ifdef HAVE_SBRK
       char *lim = (char *) sbrk (0);
 
       long space_now = lim - lim_at_start;
-      long space_diff = space_now - start_stats->start_space;
+      long space_diff = space_now - m_start_space;
 
-      printf_unfiltered (msg_type == 0
+      printf_unfiltered (!m_msg_type
 			 ? _("Space used: %ld (%s%ld during startup)\n")
 			 : _("Space used: %ld (%s%ld for this command)\n"),
 			 space_now,
@@ -876,7 +858,7 @@ report_command_stats (void *arg)
 #endif
     }
 
-  if (start_stats->symtab_enabled && per_command_symtab)
+  if (m_symtab_enabled && per_command_symtab)
     {
       int nr_symtabs, nr_compunit_symtabs, nr_blocks;
 
@@ -885,54 +867,32 @@ report_command_stats (void *arg)
 			   " #compunits: %d (+%d),"
 			   " #blocks: %d (+%d)\n"),
 			 nr_symtabs,
-			 nr_symtabs - start_stats->start_nr_symtabs,
+			 nr_symtabs - m_start_nr_symtabs,
 			 nr_compunit_symtabs,
 			 (nr_compunit_symtabs
-			  - start_stats->start_nr_compunit_symtabs),
+			  - m_start_nr_compunit_symtabs),
 			 nr_blocks,
-			 nr_blocks - start_stats->start_nr_blocks);
+			 nr_blocks - m_start_nr_blocks);
     }
 }
 
-/* Create a cleanup that reports time and space used since its creation.
-   MSG_TYPE is zero for gdb startup, otherwise it is one(1) to report
-   data for individual commands.  */
-
-struct cleanup *
-make_command_stats_cleanup (int msg_type)
+scoped_command_stats::scoped_command_stats (bool msg_type)
+: m_msg_type (msg_type)
 {
-  struct cmd_stats *new_stat;
-
-  /* Early exit if we're not reporting any stats.  It can be expensive to
-     compute the pre-command values so don't collect them at all if we're
-     not reporting stats.  Alas this doesn't work in the startup case because
-     we don't know yet whether we will be reporting the stats.  For the
-     startup case collect the data anyway (it should be cheap at this point),
-     and leave it to the reporter to decide whether to print them.  */
-  if (msg_type != 0
-      && !per_command_time
-      && !per_command_space
-      && !per_command_symtab)
-    return make_cleanup (null_cleanup, 0);
-
-  new_stat = XCNEW (struct cmd_stats);
-
-  new_stat->msg_type = msg_type;
-
-  if (msg_type == 0 || per_command_space)
+  if (!m_msg_type || per_command_space)
     {
 #ifdef HAVE_SBRK
       char *lim = (char *) sbrk (0);
-      new_stat->start_space = lim - lim_at_start;
-      new_stat->space_enabled = 1;
+      m_start_space = lim - lim_at_start;
+      m_space_enabled = 1;
 #endif
     }
 
   if (msg_type == 0 || per_command_time)
     {
-      new_stat->start_cpu_time = get_run_time ();
-      gettimeofday (&new_stat->start_wall_time, NULL);
-      new_stat->time_enabled = 1;
+      m_start_cpu_time = get_run_time ();
+      gettimeofday (&m_start_wall_time, NULL);
+      m_time_enabled = 1;
     }
 
   if (msg_type == 0 || per_command_symtab)
@@ -940,16 +900,14 @@ make_command_stats_cleanup (int msg_type)
       int nr_symtabs, nr_compunit_symtabs, nr_blocks;
 
       count_symtabs_and_blocks (&nr_symtabs, &nr_compunit_symtabs, &nr_blocks);
-      new_stat->start_nr_symtabs = nr_symtabs;
-      new_stat->start_nr_compunit_symtabs = nr_compunit_symtabs;
-      new_stat->start_nr_blocks = nr_blocks;
-      new_stat->symtab_enabled = 1;
+      m_start_nr_symtabs = nr_symtabs;
+      m_start_nr_compunit_symtabs = nr_compunit_symtabs;
+      m_start_nr_blocks = nr_blocks;
+      m_symtab_enabled = 1;
     }
 
   /* Initalize timer to keep track of how long we waited for the user.  */
   reset_prompt_for_continue_wait_time ();
-
-  return make_cleanup_dtor (report_command_stats, new_stat, xfree);
 }
 
 /* Handle unknown "mt set per-command" arguments.

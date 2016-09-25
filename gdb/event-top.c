@@ -562,13 +562,12 @@ void
 command_handler (char *command)
 {
   struct ui *ui = current_ui;
-  struct cleanup *stat_chain;
   char *c;
 
   if (ui->instream == ui->stdin_stream)
     reinitialize_more_filter ();
 
-  stat_chain = make_command_stats_cleanup (1);
+  scoped_command_stats stat_reporter (true);
 
   /* Do not execute commented lines.  */
   for (c = command; *c == ' ' || *c == '\t'; c++)
@@ -580,8 +579,6 @@ command_handler (char *command)
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions ();
     }
-
-  do_cleanups (stat_chain);
 }
 
 /* Append RL, an input line returned by readline or one of its

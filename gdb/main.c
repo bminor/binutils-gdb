@@ -441,12 +441,12 @@ typedef struct cmdarg {
 /* Define type VEC (cmdarg_s).  */
 DEF_VEC_O (cmdarg_s);
 
-static int
-captured_main (void *data)
+static void
+captured_main_1 (struct captured_main_args *context)
 {
-  struct captured_main_args *context = (struct captured_main_args *) data;
   int argc = context->argc;
   char **argv = context->argv;
+
   static int quiet = 0;
   static int set_args = 0;
   static int inhibit_home_gdbinit = 0;
@@ -486,14 +486,14 @@ captured_main (void *data)
   int save_auto_load;
   struct objfile *objfile;
 
-  struct cleanup *pre_stat_chain;
+  struct cleanup *chain;
 
 #ifdef HAVE_SBRK
-  /* Set this before calling make_command_stats_cleanup.  */
+  /* Set this before constructing scoped_command_stats.  */
   lim_at_start = (char *) sbrk (0);
 #endif
 
-  pre_stat_chain = make_command_stats_cleanup (0);
+  scoped_command_stats stat_reporter (false);
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -510,7 +510,7 @@ captured_main (void *data)
   notice_open_fds ();
   save_original_signals_state ();
 
-  make_cleanup (VEC_cleanup (cmdarg_s), &cmdarg_vec);
+  chain = make_cleanup (VEC_cleanup (cmdarg_s), &cmdarg_vec);
   dirsize = 1;
   dirarg = (char **) xmalloc (dirsize * sizeof (*dirarg));
   ndir = 0;
@@ -1139,8 +1139,15 @@ captured_main (void *data)
       quit_force (NULL, 0);
     }
 
-  /* Show time and/or space usage.  */
-  do_cleanups (pre_stat_chain);
+  do_cleanups (chain);
+}
+
+static void
+captured_main (void *data)
+{
+  struct captured_main_args *context = (struct captured_main_args *) data;
+
+  captured_main_1 (context);
 
   /* NOTE: cagney/1999-11-07: There is probably no reason for not
      moving this loop and the code found in captured_command_loop()
