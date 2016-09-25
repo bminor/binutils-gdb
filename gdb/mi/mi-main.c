@@ -1416,7 +1416,6 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct ui_out *uiout = current_uiout;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   CORE_ADDR addr;
   long total_bytes, nr_cols, nr_rows;
   char word_format;
@@ -1424,7 +1423,6 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   long word_size;
   char word_asize;
   char aschar;
-  gdb_byte *mbuf;
   int nr_bytes;
   long offset = 0;
   int oind = 0;
@@ -1509,13 +1507,13 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 
   /* Create a buffer and read it in.  */
   total_bytes = word_size * nr_rows * nr_cols;
-  mbuf = XCNEWVEC (gdb_byte, total_bytes);
-  make_cleanup (xfree, mbuf);
+
+  gdb::unique_ptr<gdb_byte[]> mbuf (new gdb_byte[total_bytes]);
 
   /* Dispatch memory reads to the topmost target, not the flattened
      current_target.  */
   nr_bytes = target_read (current_target.beneath,
-			  TARGET_OBJECT_MEMORY, NULL, mbuf,
+			  TARGET_OBJECT_MEMORY, NULL, mbuf.get (),
 			  addr, total_bytes);
   if (nr_bytes <= 0)
     error (_("Unable to read memory."));
@@ -1569,7 +1567,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	    else
 	      {
 		ui_file_rewind (stream);
-		print_scalar_formatted (mbuf + col_byte, word_type, &opts,
+		print_scalar_formatted (&mbuf[col_byte], word_type, &opts,
 					word_asize, stream);
 		ui_out_field_stream (uiout, NULL, stream);
 	      }
@@ -1596,7 +1594,6 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
       }
     do_cleanups (cleanup_stream);
   }
-  do_cleanups (cleanups);
 }
 
 void

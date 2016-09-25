@@ -1,5 +1,10 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (mi_cmd_data_read_memory): Use gdb::unique_ptr.
+	Remove some cleanups.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-interp.c (tui_on_normal_stop, tui_on_signal_received)
 	(tui_on_end_stepping_range, tui_on_signal_exited, tui_on_exited)
 	(tui_on_no_history, tui_on_user_selected_context_changed):
