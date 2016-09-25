@@ -1024,7 +1024,6 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 			  const struct elfinfo *ei)
 {
   bfd *synth_abfd, *abfd = objfile->obfd;
-  struct cleanup *back_to;
   long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
   asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
   asymbol *synthsyms;
@@ -1053,7 +1052,6 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
     }
 
   minimal_symbol_reader reader (objfile);
-  back_to = make_cleanup (null_cleanup, NULL);
 
   /* Allocate struct to keep track of the symfile.  */
   dbx = XCNEW (struct dbx_symfile_info);
@@ -1135,16 +1133,14 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 					 &synthsyms);
   if (synthcount > 0)
     {
-      asymbol **synth_symbol_table;
       long i;
 
-      make_cleanup (xfree, synthsyms);
-      synth_symbol_table = XNEWVEC (asymbol *, synthcount);
+      gdb::unique_ptr<asymbol *[]>
+	synth_symbol_table (new asymbol *[synthcount]);
       for (i = 0; i < synthcount; i++)
 	synth_symbol_table[i] = synthsyms + i;
-      make_cleanup (xfree, synth_symbol_table);
       elf_symtab_read (reader, objfile, ST_SYNTHETIC, synthcount,
-		       synth_symbol_table, 1);
+		       synth_symbol_table.get (), 1);
     }
 
   /* Install any minimal symbols that have been collected as the current
@@ -1154,7 +1150,6 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
      which will do this.  */
 
   reader.install ();
-  do_cleanups (back_to);
 
   if (symtab_create_debug)
     fprintf_unfiltered (gdb_stdlog, "Done reading minimal symbols.\n");
