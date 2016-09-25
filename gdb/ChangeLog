@@ -1,5 +1,10 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-dump.c (dump_memory_to_file): Use gdb::unique_ptr.
+	(restore_binary_file): Likewise.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* maint.h (scoped_command_stats): New class.
 	(make_command_stats_cleanup): Don't declare.
 	* maint.c (struct cmd_stats): Remove.
