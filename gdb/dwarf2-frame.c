@@ -382,14 +382,14 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   ctx.baton = this_frame;
   ctx.funcs = &dwarf2_frame_ctx_funcs;
 
-  dwarf_expr_push_address (&ctx, initial, initial_in_stack_memory);
-  dwarf_expr_eval (&ctx, exp, len);
+  ctx.push_address (initial, initial_in_stack_memory);
+  ctx.eval (exp, len);
 
   if (ctx.location == DWARF_VALUE_MEMORY)
-    result = dwarf_expr_fetch_address (&ctx, 0);
+    result = ctx.fetch_address (0);
   else if (ctx.location == DWARF_VALUE_REGISTER)
     result = read_addr_from_reg (this_frame,
-				 value_as_long (dwarf_expr_fetch (&ctx, 0)));
+				 value_as_long (ctx.fetch (0)));
   else
     {
       /* This is actually invalid DWARF, but if we ever do run across

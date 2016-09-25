@@ -1,5 +1,25 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2loc.c (per_cu_dwarf_call)
+	(dwarf_expr_push_dwarf_reg_entry_value)
+	(dwarf2_evaluate_loc_desc_full, dwarf2_locexpr_baton_eval)
+	(needs_dwarf_reg_entry_value)
+	(dwarf2_loc_desc_get_symbol_read_needs): Update.
+	* dwarf2expr.h (dwarf_expr_context) <push_address, eval, fetch,
+	fetch_address, fetch_in_stack_memory, address_type, grow_stack,
+	push, stack_empty_p, add_piece, get_base_type, execute_stack_op,
+	pop>: New method declarations.
+	(dwarf_expr_push_address, dwarf_expr_eval, dwarf_expr_fetch)
+	(dwarf_expr_fetch_address, dwarf_expr_fetch_in_stack_memory):
+	Don't declare.
+	* dwarf2expr.c (address_type, grow_stack, push, push_address)
+	(pop, fetch, fetch_address, fetch_in_stack_memory)
+	(stack_empty_p, add_piece, eval, get_base_type)
+	(execute_stack_op): Rename.  Turn into methods.
+	* dwarf2-frame.c (execute_stack_op): Update.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Stack-allocate
 	dwarf_expr_context.  Remove cleanups.
 	(dwarf2_locexpr_baton_eval)

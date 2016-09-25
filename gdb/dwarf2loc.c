@@ -561,7 +561,7 @@ per_cu_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset,
   /* DW_OP_call_ref is currently not supported.  */
   gdb_assert (block.per_cu == per_cu);
 
-  dwarf_expr_eval (ctx, block.data, block.size);
+  ctx->eval (block.data, block.size);
 }
 
 /* Helper interface of per_cu_dwarf_call for dwarf2_evaluate_loc_desc.  */
@@ -1300,7 +1300,7 @@ dwarf_expr_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
   ctx->offset = dwarf2_per_cu_text_offset (baton_local.per_cu);
   ctx->baton = &baton_local;
 
-  dwarf_expr_eval (ctx, data_src, size);
+  ctx->eval (data_src, size);
 
   ctx->gdbarch = saved_ctx.gdbarch;
   ctx->addr_size = saved_ctx.addr_size;
@@ -2319,7 +2319,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
   TRY
     {
-      dwarf_expr_eval (&ctx, data, size);
+      ctx.eval (data, size);
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -2371,7 +2371,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int dwarf_regnum
-	      = longest_to_int (value_as_long (dwarf_expr_fetch (&ctx, 0)));
+	      = longest_to_int (value_as_long (ctx.fetch (0)));
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, dwarf_regnum);
 
 	    if (byte_offset != 0)
@@ -2399,8 +2399,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	case DWARF_VALUE_MEMORY:
 	  {
 	    struct type *ptr_type;
-	    CORE_ADDR address = dwarf_expr_fetch_address (&ctx, 0);
-	    int in_stack_memory = dwarf_expr_fetch_in_stack_memory (&ctx, 0);
+	    CORE_ADDR address = ctx.fetch_address (0);
+	    int in_stack_memory = ctx.fetch_in_stack_memory (0);
 
 	    /* DW_OP_deref_size (and possibly other operations too) may
 	       create a pointer instead of an address.  Ideally, the
@@ -2431,7 +2431,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
 	case DWARF_VALUE_STACK:
 	  {
-	    struct value *value = dwarf_expr_fetch (&ctx, 0);
+	    struct value *value = ctx.fetch (0);
 	    gdb_byte *contents;
 	    const gdb_byte *val_bytes;
 	    size_t n = TYPE_LENGTH (value_type (value));
@@ -2559,14 +2559,14 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   ctx.funcs = &dwarf_expr_ctx_funcs;
   ctx.baton = &baton;
 
-  dwarf_expr_eval (&ctx, dlbaton->data, dlbaton->size);
+  ctx.eval (dlbaton->data, dlbaton->size);
 
   switch (ctx.location)
     {
     case DWARF_VALUE_REGISTER:
     case DWARF_VALUE_MEMORY:
     case DWARF_VALUE_STACK:
-      *valp = dwarf_expr_fetch_address (&ctx, 0);
+      *valp = ctx.fetch_address (0);
       if (ctx.location == DWARF_VALUE_REGISTER)
 	*valp = dwarf_expr_read_addr_from_reg (&baton, *valp);
       return 1;
@@ -2809,7 +2809,7 @@ needs_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
   nf_baton->needs = SYMBOL_NEEDS_FRAME;
 
   /* The expression may require some stub values on DWARF stack.  */
-  dwarf_expr_push_address (ctx, 0, 0);
+  ctx->push_address (0, 0);
 }
 
 /* DW_OP_GNU_addr_index doesn't require a frame.  */
@@ -2874,7 +2874,7 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
   ctx.baton = &baton;
   ctx.funcs = &symbol_needs_ctx_funcs;
 
-  dwarf_expr_eval (&ctx, data, size);
+  ctx.eval (data, size);
 
   in_reg = ctx.location == DWARF_VALUE_REGISTER;
 

@@ -133,6 +133,12 @@ struct dwarf_expr_context
   dwarf_expr_context ();
   ~dwarf_expr_context ();
 
+  void push_address (CORE_ADDR value, int in_stack_memory);
+  void eval (const gdb_byte *addr, size_t len);
+  struct value *fetch (int n);
+  CORE_ADDR fetch_address (int n);
+  int fetch_in_stack_memory (int n);
+
   /* The stack of values, allocated with xmalloc.  */
   struct dwarf_stack_value *stack;
 
@@ -203,6 +209,17 @@ struct dwarf_expr_context
      two cases need to be handled separately.)  */
   int num_pieces;
   struct dwarf_expr_piece *pieces;
+
+private:
+
+  struct type *address_type () const;
+  void grow_stack (size_t need);
+  void push (struct value *value, int in_stack_memory);
+  int stack_empty_p () const;
+  void add_piece (ULONGEST size, ULONGEST offset);
+  struct type *get_base_type (cu_offset die, int size);
+  void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
+  void pop ();
 };
 
 
@@ -252,15 +269,6 @@ struct dwarf_expr_piece
   /* The piece offset, in bits.  */
   ULONGEST offset;
 };
-
-void dwarf_expr_push_address (struct dwarf_expr_context *ctx,
-			      CORE_ADDR value,
-			      int in_stack_memory);
-void dwarf_expr_eval (struct dwarf_expr_context *ctx, const gdb_byte *addr,
-		      size_t len);
-struct value *dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n);
-CORE_ADDR dwarf_expr_fetch_address (struct dwarf_expr_context *ctx, int n);
-int dwarf_expr_fetch_in_stack_memory (struct dwarf_expr_context *ctx, int n);
 
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 				     const char *);
