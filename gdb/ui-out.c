@@ -952,24 +952,6 @@ ui_out_destroy (struct ui_out *uiout)
   xfree (uiout);
 }
 
-/* Cleanup that restores a previous current uiout.  */
-
-static void
-restore_current_uiout_cleanup (void *arg)
-{
-  struct ui_out *saved_uiout = (struct ui_out *) arg;
-
-  current_uiout = saved_uiout;
-}
-
-/* See ui-out.h.  */
-
-struct cleanup *
-make_cleanup_restore_current_uiout (void)
-{
-  return make_cleanup (restore_current_uiout_cleanup, current_uiout);
-}
-
 /* Standard gdb initialization hook.  */
 
 void

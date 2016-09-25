@@ -1,5 +1,13 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (print_stack_frame_to_uiout): Use scoped_restore.
+	* ui-out.c (make_cleanup_restore_current_uiout)
+	(restore_current_uiout_cleanup): Remove.
+	* infrun.c (print_stop_event): Use scoped_restore.
+	* ui-out.h (make_cleanup_restore_current_uiout): Don't declare.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* elfread.c (elf_read_minimal_symbols): Use gdb::unique_ptr.
 
 2016-10-21  Tom Tromey  <tom@tromey.com>

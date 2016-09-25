@@ -149,15 +149,9 @@ print_stack_frame_to_uiout (struct ui_out *uiout, struct frame_info *frame,
 			    int print_level, enum print_what print_what,
 			    int set_current_sal)
 {
-  struct cleanup *old_chain;
-
-  old_chain = make_cleanup_restore_current_uiout ();
-
-  current_uiout = uiout;
+  scoped_restore save_uiout = make_scoped_restore (&current_uiout, uiout);
 
   print_stack_frame (frame, print_level, print_what, set_current_sal);
-
-  do_cleanups (old_chain);
 }
 
 /* Show or print a stack frame FRAME briefly.  The output is formatted

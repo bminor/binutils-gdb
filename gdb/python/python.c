@@ -648,7 +648,7 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
       scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-      make_cleanup_restore_current_uiout ();
+      scoped_restore save_uiout = make_scoped_restore (&current_uiout);
 
       /* Use the console interpreter uiout to have the same print format
 	for console or MI.  */

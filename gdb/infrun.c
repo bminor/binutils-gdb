@@ -8084,22 +8084,20 @@ print_stop_location (struct target_waitstatus *ws)
 void
 print_stop_event (struct ui_out *uiout)
 {
-  struct cleanup *old_chain;
   struct target_waitstatus last;
   ptid_t last_ptid;
   struct thread_info *tp;
 
   get_last_target_status (&last_ptid, &last);
 
-  old_chain = make_cleanup_restore_current_uiout ();
-  current_uiout = uiout;
+  {
+    scoped_restore save_uiout = make_scoped_restore (&current_uiout, uiout);
 
-  print_stop_location (&last);
+    print_stop_location (&last);
 
-  /* Display the auto-display expressions.  */
-  do_displays ();
-
-  do_cleanups (old_chain);
+    /* Display the auto-display expressions.  */
+    do_displays ();
+  }
 
   tp = inferior_thread ();
   if (tp->thread_fsm != NULL
