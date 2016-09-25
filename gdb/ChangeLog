@@ -1,5 +1,9 @@
 2016-10-12  Tom Tromey  <tom@tromey.com>
 
+	* machoread.c (macho_symfile_read_all_oso): Use std::string.
+
+2016-10-12  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (trace_dump_command): Remove unnecessary
 	null_cleanup.
 
