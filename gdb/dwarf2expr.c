@@ -91,45 +91,32 @@ dwarf_expr_address_type (struct dwarf_expr_context *ctx)
 
 /* Create a new context for the expression evaluator.  */
 
-struct dwarf_expr_context *
-new_dwarf_expr_context (void)
+dwarf_expr_context::dwarf_expr_context ()
+: stack (NULL),
+  stack_len (0),
+  stack_allocated (10),
+  gdbarch (NULL),
+  addr_size (0),
+  ref_addr_size (0),
+  offset (0),
+  recursion_depth (0),
+  max_recursion_depth (0x100),
+  location (DWARF_VALUE_MEMORY),
+  len (0),
+  data (NULL),
+  initialized (0),
+  num_pieces (0),
+  pieces (NULL)
 {
-  struct dwarf_expr_context *retval;
-
-  retval = XCNEW (struct dwarf_expr_context);
-  retval->stack_len = 0;
-  retval->stack_allocated = 10;
-  retval->stack = XNEWVEC (struct dwarf_stack_value, retval->stack_allocated);
-  retval->num_pieces = 0;
-  retval->pieces = 0;
-  retval->max_recursion_depth = 0x100;
-  return retval;
+  this->stack = XNEWVEC (struct dwarf_stack_value, this->stack_allocated);
 }
 
-/* Release the memory allocated to CTX.  */
+/* Clean up a dwarf_expr_context.  */
 
-void
-free_dwarf_expr_context (struct dwarf_expr_context *ctx)
+dwarf_expr_context::~dwarf_expr_context ()
 {
-  xfree (ctx->stack);
-  xfree (ctx->pieces);
-  xfree (ctx);
-}
-
-/* Helper for make_cleanup_free_dwarf_expr_context.  */
-
-static void
-free_dwarf_expr_context_cleanup (void *arg)
-{
-  free_dwarf_expr_context ((struct dwarf_expr_context *) arg);
-}
-
-/* Return a cleanup that calls free_dwarf_expr_context.  */
-
-struct cleanup *
-make_cleanup_free_dwarf_expr_context (struct dwarf_expr_context *ctx)
-{
-  return make_cleanup (free_dwarf_expr_context_cleanup, ctx);
+  xfree (this->stack);
+  xfree (this->pieces);
 }
 
 /* Expand the memory allocated to CTX's stack to contain at least

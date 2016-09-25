@@ -130,6 +130,9 @@ struct dwarf_stack_value
    its current state and its callbacks.  */
 struct dwarf_expr_context
 {
+  dwarf_expr_context ();
+  ~dwarf_expr_context ();
+
   /* The stack of values, allocated with xmalloc.  */
   struct dwarf_stack_value *stack;
 
@@ -249,11 +252,6 @@ struct dwarf_expr_piece
   /* The piece offset, in bits.  */
   ULONGEST offset;
 };
-
-struct dwarf_expr_context *new_dwarf_expr_context (void);
-void free_dwarf_expr_context (struct dwarf_expr_context *ctx);
-struct cleanup *
-    make_cleanup_free_dwarf_expr_context (struct dwarf_expr_context *ctx);
 
 void dwarf_expr_push_address (struct dwarf_expr_context *ctx,
 			      CORE_ADDR value,

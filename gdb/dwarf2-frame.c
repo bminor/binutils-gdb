@@ -369,29 +369,27 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  CORE_ADDR offset, struct frame_info *this_frame,
 		  CORE_ADDR initial, int initial_in_stack_memory)
 {
-  struct dwarf_expr_context *ctx;
   CORE_ADDR result;
   struct cleanup *old_chain;
 
-  ctx = new_dwarf_expr_context ();
-  old_chain = make_cleanup_free_dwarf_expr_context (ctx);
-  make_cleanup_value_free_to_mark (value_mark ());
+  dwarf_expr_context ctx;
+  old_chain = make_cleanup_value_free_to_mark (value_mark ());
 
-  ctx->gdbarch = get_frame_arch (this_frame);
-  ctx->addr_size = addr_size;
-  ctx->ref_addr_size = -1;
-  ctx->offset = offset;
-  ctx->baton = this_frame;
-  ctx->funcs = &dwarf2_frame_ctx_funcs;
+  ctx.gdbarch = get_frame_arch (this_frame);
+  ctx.addr_size = addr_size;
+  ctx.ref_addr_size = -1;
+  ctx.offset = offset;
+  ctx.baton = this_frame;
+  ctx.funcs = &dwarf2_frame_ctx_funcs;
 
-  dwarf_expr_push_address (ctx, initial, initial_in_stack_memory);
-  dwarf_expr_eval (ctx, exp, len);
+  dwarf_expr_push_address (&ctx, initial, initial_in_stack_memory);
+  dwarf_expr_eval (&ctx, exp, len);
 
-  if (ctx->location == DWARF_VALUE_MEMORY)
-    result = dwarf_expr_fetch_address (ctx, 0);
-  else if (ctx->location == DWARF_VALUE_REGISTER)
+  if (ctx.location == DWARF_VALUE_MEMORY)
+    result = dwarf_expr_fetch_address (&ctx, 0);
+  else if (ctx.location == DWARF_VALUE_REGISTER)
     result = read_addr_from_reg (this_frame,
-				 value_as_long (dwarf_expr_fetch (ctx, 0)));
+				 value_as_long (dwarf_expr_fetch (&ctx, 0)));
   else
     {
       /* This is actually invalid DWARF, but if we ever do run across
