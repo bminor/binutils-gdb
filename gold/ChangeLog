@@ -3,6 +3,7 @@
 	* aarch64.cc (Target_aarch64::is_erratum_835769_sequence): Avoid
 	compiler warning.
 	* output.cc (Output_segment::set_section_addresses): Likewise.
+	* testsuite/Makefile.in: Regenerate.
 
 2016-09-02  Doug Kwan  <dougkwan@google.com>
 
