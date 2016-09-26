@@ -1,3 +1,7 @@
+2016-09-26  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_wait_1): Call debug_exit.
+
 2016-09-23  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (SFILES): Add common/new-op.c.
