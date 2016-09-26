@@ -5998,6 +5998,8 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       return FALSE;
     }
 
+  _bfd_elf_ppc_merge_fp_attributes (ibfd, obfd);
+
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
   _bfd_elf_merge_object_attributes (ibfd, obfd);
 

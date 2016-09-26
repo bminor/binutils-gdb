@@ -2376,6 +2376,8 @@ extern unsigned int _bfd_elf_ppc_at_tprel_transform
   (unsigned int, unsigned int);
 /* PowerPC elf_object_p tweak.  */
 extern bfd_boolean _bfd_elf_ppc_set_arch (bfd *);
+/* PowerPC .gnu.attributes handling common to both 32-bit and 64-bit.  */
+extern void _bfd_elf_ppc_merge_fp_attributes (bfd *, bfd *);
 
 /* Exported interface for writing elf corefile notes. */
 extern char *elfcore_write_note

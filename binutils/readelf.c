@@ -13237,47 +13237,77 @@ display_power_gnu_attribute (unsigned char * p,
 			     const unsigned char * const end)
 {
   unsigned int len;
-  int val;
+  unsigned int val;
 
   if (tag == Tag_GNU_Power_ABI_FP)
     {
       val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Power_ABI_FP: ");
+      if (len == 0)
+	{
+	  printf (_("<corrupt>\n"));
+	  return p;
+	}
 
-      switch (val)
+      if (val > 15)
+	printf ("(%#x), ", val);
+
+      switch (val & 3)
 	{
 	case 0:
-	  printf (_("Hard or soft float\n"));
+	  printf (_("unspecified hard/soft float, "));
 	  break;
 	case 1:
-	  printf (_("Hard float\n"));
+	  printf (_("hard float, "));
 	  break;
 	case 2:
-	  printf (_("Soft float\n"));
+	  printf (_("soft float, "));
 	  break;
 	case 3:
-	  printf (_("Single-precision hard float\n"));
+	  printf (_("single-precision hard float, "));
 	  break;
-	default:
-	  printf ("??? (%d)\n", val);
+	}
+
+      switch (val & 0xC)
+	{
+	case 0:
+	  printf (_("unspecified long double\n"));
+	  break;
+	case 4:
+	  printf (_("128-bit IBM long double\n"));
+	  break;
+	case 8:
+	  printf (_("64-bit long double\n"));
+	  break;
+	case 12:
+	  printf (_("128-bit IEEE long double\n"));
 	  break;
 	}
       return p;
-   }
+    }
 
   if (tag == Tag_GNU_Power_ABI_Vector)
     {
       val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Power_ABI_Vector: ");
-      switch (val)
+      if (len == 0)
+	{
+	  printf (_("<corrupt>\n"));
+	  return p;
+	}
+
+      if (val > 3)
+	printf ("(%#x), ", val);
+
+      switch (val & 3)
 	{
 	case 0:
-	  printf (_("Any\n"));
+	  printf (_("unspecified\n"));
 	  break;
 	case 1:
-	  printf (_("Generic\n"));
+	  printf (_("generic\n"));
 	  break;
 	case 2:
 	  printf ("AltiVec\n");
@@ -13285,39 +13315,39 @@ display_power_gnu_attribute (unsigned char * p,
 	case 3:
 	  printf ("SPE\n");
 	  break;
-	default:
-	  printf ("??? (%d)\n", val);
-	  break;
 	}
       return p;
-   }
+    }
 
   if (tag == Tag_GNU_Power_ABI_Struct_Return)
     {
-      if (p == end)
-	{
-	  warn (_("corrupt Tag_GNU_Power_ABI_Struct_Return\n"));
-	  return p;
-	}
-
       val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Power_ABI_Struct_Return: ");
-      switch (val)
-       {
-       case 0:
-         printf (_("Any\n"));
-         break;
-       case 1:
-         printf ("r3/r4\n");
-         break;
-       case 2:
-         printf (_("Memory\n"));
-         break;
-       default:
-         printf ("??? (%d)\n", val);
-         break;
-       }
+      if (len == 0)
+	{
+	  printf (_("<corrupt>\n"));
+	  return p;
+	}
+
+      if (val > 2)
+	printf ("(%#x), ", val);
+
+      switch (val & 3)
+	{
+	case 0:
+	  printf (_("unspecified\n"));
+	  break;
+	case 1:
+	  printf ("r3/r4\n");
+	  break;
+	case 2:
+	  printf (_("memory\n"));
+	  break;
+	case 3:
+	  printf ("???\n");
+	  break;
+	}
       return p;
     }
 
