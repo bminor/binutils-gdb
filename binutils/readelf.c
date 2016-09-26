@@ -5273,7 +5273,7 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* 19 */ { STRING_COMMA_LEN ("ORDERED") },
       /* 20 */ { STRING_COMMA_LEN ("COMPRESSED") },
       /* ARM specific.  */
-      /* 22 */ { STRING_COMMA_LEN ("ARM_PURECODE") },
+      /* 21 */ { STRING_COMMA_LEN ("ARM_PURECODE") },
     };
 
   if (do_section_details)
@@ -5347,7 +5347,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 		case EM_ARM:
 		  switch (flag)
 		    {
-		    case SHF_ARM_PURECODE: sindex = 22; break;
+		    case SHF_ARM_PURECODE: sindex = 21; break;
 		    default: break;
 		    }
 		  break;
