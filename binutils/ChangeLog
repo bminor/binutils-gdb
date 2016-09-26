@@ -1,5 +1,12 @@
 2016-09-26  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (display_power_gnu_attribute): Catch truncated section
+	for all powerpc attributes.  Display long double ABI.  Don't
+	capitalize words, except for names.  Show known bits of tag values
+	when some unknown bits are present.  Whitespace fixes.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
 	* nm.c (get_elf_symbol_type): Don't use sprintf with translated
 	strings, use asprintf instead.
 	(get_coff_symbol_type): Likewise.

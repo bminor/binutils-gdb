@@ -1,3 +1,7 @@
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc.h (Tag_GNU_Power_ABI_FP): Comment on new values.
+
 2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* opcode/aarch64.h (aarch64_cond): Bump array size to 4.
