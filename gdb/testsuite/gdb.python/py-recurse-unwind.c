@@ -37,6 +37,10 @@ aaa (int arg)
 int
 main ()
 {
-  aaa (123);
+  int i;
+
+  for (i = 0; i < 10; i++)
+    aaa (123);
+
   return 0;
 }

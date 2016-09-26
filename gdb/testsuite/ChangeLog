@@ -1,3 +1,13 @@
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.python/py-recurse-unwind.c (main): Add loop.
+	* gdb.python/py-recurse-unwind.py (TestUnwinder): Add calls
+	to read_register() and gdb.parse_and_eval().  Make each code
+	call a separate case that can be individually tested.
+	* gdb.python/py-recurse-unwind.exp (cont_and_backtrace): New
+	proc. Call cont_and_backtrace for each of the code paths that
+	we want to test in the unwinder.
+
 2016-11-15  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.dwarf2/bitfield-parent-optimized-out.exp: Fix DWARF code for
