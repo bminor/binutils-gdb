@@ -1,6 +1,14 @@
 2016-09-26  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	Backport from mainline
+	2016-02-16  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Section): Fix up texinfo snafus in previous
+	update.
+
+2016-09-25  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	Backport from mainline
 	2016-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (.section): Document that numeric values can now
