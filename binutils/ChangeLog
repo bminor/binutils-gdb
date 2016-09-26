@@ -1,3 +1,9 @@
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (get_elf_symbol_type): Don't use sprintf with translated
+	strings, use asprintf instead.
+	(get_coff_symbol_type): Likewise.
+
 2016-09-19  Alan Modra  <amodra@gmail.com>
 
 	* nm.c (print_symbol): Remove is_synthetic param.  Test sym->flags
