@@ -1705,8 +1705,6 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 {
   int pid = -1;
 
-  target_terminal::ours ();
-
   /* We loop when we get a non-standard exception rather than return
      with a SPURIOUS because resume can try and step or modify things,
      which needs a current_thread->h.  But some of these exceptions mark

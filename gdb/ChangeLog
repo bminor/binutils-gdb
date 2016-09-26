@@ -1,3 +1,8 @@
+2018-08-02  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (windows_nat_target::wait): Remove a spurious
+	target_terminal::ours().
+
 2018-09-23  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* aarch64-linux-tdep.c (aarch64_linux_supply_sve_regset): Change type
