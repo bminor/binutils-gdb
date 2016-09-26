@@ -1,3 +1,8 @@
+2016-09-26  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-xtensa.c (xg_reverse_shift_count): Pass cnt_arg instead of
+	cnt_argp to concat.
+
 2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
 
 	* Makefile.in: Regenerate.

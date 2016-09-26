@@ -2228,7 +2228,7 @@ xg_reverse_shift_count (char **cnt_argp)
   cnt_arg = *cnt_argp;
 
   /* replace the argument with "31-(argument)" */
-  new_arg = concat ("31-(", cnt_argp, ")", (char *) NULL);
+  new_arg = concat ("31-(", cnt_arg, ")", (char *) NULL);
 
   free (cnt_arg);
   *cnt_argp = new_arg;
