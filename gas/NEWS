@@ -1,4 +1,7 @@
 -*- text -*-
+* Add ability to set section flags and types via numeric values for ELF
+  based targets.
+
 * Support for the ARMv8-M architecture has been added to the ARM port.  Support
   for the ARMv8-M Security and DSP Extensions has also been added to the ARM
   port.

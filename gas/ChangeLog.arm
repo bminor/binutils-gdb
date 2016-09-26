@@ -1,3 +1,22 @@
+2016-09-26  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	Backport from mainline
+	2016-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (.section): Document that numeric values can now
+	be used for the flags and type fields of the ELF target's .section
+	directive.  Add notes about the restrictions on setting flags and
+	types.
+	* config/obj-elf.c (obj_elf_change_section): Allow known sections
+	to be given processor specific section types.  Allow processor and
+	application specific flags of a section to be set after
+	definition.
+	(obj_elf_parse_section_letters): Handle parsing numeric values.
+	(obj_elf_section_type): Handle parsing numeric values.
+	(obj_elf_section): Allow numeric type values.
+	* config/obj-elf.h (obj_elf_change_section): Update prototype.
+	* NEWS: Mention the new feature.
+
 2016-08-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	Backport from mainline

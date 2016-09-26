@@ -1,3 +1,15 @@
+2016-09-26  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	Backport from mainline
+	2016-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/elf/section10.d: New test.
+	* testsuite/gas/elf/section10.s: Source file for new test.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+	* testsuite/gas/i386/ilp32/x86-64-unwind.d: Remove dependency upon
+	the description of the flags produced by readelf.
+	* testsuite/gas/tic6x/scomm-directive-4.d: Likewise.
+
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* gas/arm/arch7em-bad.d: Rename to ...

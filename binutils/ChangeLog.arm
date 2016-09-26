@@ -1,5 +1,18 @@
 2016-09-26  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	Backport from mainline
+	2016-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_section_type_name): Add hex prefix to offsets
+	printed for LOPROC and LOOS values.  Ensure that a result is
+	always returned for the V850 target, even when an unrecognised
+	processor specific value is encountered.
+	(process_section_headers): Display key values in the order in
+	which they appear to the user.  Add the "C (compressed)" value to
+	the list.
+
+2016-09-26  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* readelf.c (get_elf_section_flags): Fix readelf after purecode
 	backport.
 
