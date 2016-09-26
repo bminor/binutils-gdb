@@ -1,3 +1,8 @@
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+
 2016-08-30  Nick Clifton  <nickc@redhat.com>
 
 	PR gprof/20499
