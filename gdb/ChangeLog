@@ -1,5 +1,58 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2loc.c (struct dwarf_expr_context_funcs): Don't declare.
+	(dwarf_expr_read_addr_from_reg, dwarf_expr_get_reg_value)
+	(dwarf_expr_read_mem, dwarf_expr_frame_base): Rename; turn into
+	methods.
+	(get_frame_pc_for_per_cu_dwarf_call): New function.
+	(dwarf_expr_frame_cfa, dwarf_expr_frame_pc)
+	(dwarf_expr_tls_address): Rename; turn into methods.
+	(per_cu_dwarf_call): Remove arguments.  Use
+	get_frame_pc_for_per_cu_dwarf_call.
+	(dwarf_evaluate_loc_desc): New class.
+	(dwarf_expr_dwarf_call, dwarf_expr_context)
+	(dwarf_expr_push_dwarf_reg_entry_value)
+	(dwarf_expr_get_addr_index, dwarf_expr_get_obj_addr): Rename; turn
+	into methods.
+	(dwarf_expr_ctx_funcs): Remove.
+	(dwarf2_evaluate_loc_desc_full): Update.
+	(dwarf2_locexpr_baton_eval): Update.
+	(symbol_needs_eval_context): New class.
+	(symbol_needs_read_addr_from_reg, symbol_needs_get_reg_value)
+	(symbol_needs_read_mem, symbol_needs_frame_base)
+	(symbol_needs_frame_cfa, symbol_needs_tls_address)
+	(symbol_needs_dwarf_call, needs_dwarf_reg_entry_value): Rename;
+	turn into methods.
+	(needs_get_addr_index, needs_get_obj_addr): Remove; turn into
+	methods.
+	(symbol_needs_ctx_funcs): Remove.
+	(dwarf2_loc_desc_get_symbol_read_needs): Update.
+	* dwarf2expr.h (struct dwarf_expr_context_funcs): Remove; turn
+	contents into methods.
+	(struct dwarf_expr_context) <baton, funcs>: Remove.
+	<read_addr_from_reg, get_reg_value, read_mem, get_frame_base,
+	get_frame_cfa, get_frame_pc, get_tls_address, dwarf_call,
+	impl_get_base_type, push_dwarf_block_entry_value, get_addr_index,
+	get_object_address>: Declare new methods.
+	(ctx_no_get_frame_base, ctx_no_get_frame_cfa)
+	(ctx_no_get_frame_pc, ctx_no_get_tls_address, ctx_no_dwarf_call)
+	(ctx_no_get_base_type, ctx_no_push_dwarf_reg_entry_value)
+	(ctx_no_get_addr_index): Don't declare.
+	* dwarf2expr.c (get_base_type): Use impl_get_base_type.
+	(execute_stack_op): Update.
+	(ctx_no_get_frame_base, ctx_no_get_frame_cfa)
+	(ctx_no_get_frame_pc, ctx_no_get_tls_address, ctx_no_dwarf_call)
+	(ctx_no_get_base_type, ctx_no_push_dwarf_reg_entry_value)
+	(ctx_no_get_addr_index): Remove; now methods on
+	dwarf_expr_context.
+	* dwarf2-frame.c (read_addr_from_reg): Take a frame_info, not a
+	baton.
+	(class dwarf_expr_executor): New class.
+	(get_reg_value, read_mem): Rename, turn into methods.
+	(execute_stack_op): Use dwarf_expr_executor.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2loc.c (per_cu_dwarf_call)
 	(dwarf_expr_push_dwarf_reg_entry_value)
 	(dwarf2_evaluate_loc_desc_full, dwarf2_locexpr_baton_eval)

@@ -414,20 +414,11 @@ base_types_equal_p (struct type *t1, struct type *t2)
 struct type *
 dwarf_expr_context::get_base_type (cu_offset die, int size)
 {
-  struct type *result;
-
-  if (this->funcs->get_base_type)
-    {
-      result = this->funcs->get_base_type (this, die);
-      if (result == NULL)
-	error (_("Could not find type for DW_OP_GNU_const_type"));
-      if (size != 0 && TYPE_LENGTH (result) != size)
-	error (_("DW_OP_GNU_const_type has different sizes for type and data"));
-    }
-  else
-    /* Anything will do.  */
-    result = builtin_type (this->gdbarch)->builtin_int;
-
+  struct type *result = this->impl_get_base_type (die);
+  if (result == NULL)
+    error (_("Could not find type for DW_OP_GNU_const_type"));
+  if (size != 0 && TYPE_LENGTH (result) != size)
+    error (_("DW_OP_GNU_const_type has different sizes for type and data"));
   return result;
 }
 
@@ -698,13 +689,13 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_GNU_addr_index:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	  result = (this->funcs->get_addr_index) (this->baton, uoffset);
+	  result = this->get_addr_index (uoffset);
 	  result += this->offset;
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 	case DW_OP_GNU_const_index:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	  result = (this->funcs->get_addr_index) (this->baton, uoffset);
+	  result = this->get_addr_index (uoffset);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
@@ -888,8 +879,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_breg31:
 	  {
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    result = (this->funcs->read_addr_from_reg) (this->baton,
-						       op - DW_OP_breg0);
+	    result = this->read_addr_from_reg (op - DW_OP_breg0);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -898,7 +888,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  {
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    result = (this->funcs->read_addr_from_reg) (this->baton, reg);
+	    result = this->read_addr_from_reg (reg);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -918,14 +908,12 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    /* FIXME: cagney/2003-03-26: This code should be using
                get_frame_base_address(), and then implement a dwarf2
                specific this_base method.  */
-	    (this->funcs->get_frame_base) (this->baton, &datastart, &datalen);
+	    this->get_frame_base (&datastart, &datalen);
 	    eval (datastart, datalen);
 	    if (this->location == DWARF_VALUE_MEMORY)
 	      result = fetch_address (0);
 	    else if (this->location == DWARF_VALUE_REGISTER)
-	      result = (this->funcs->read_addr_from_reg)
-			  (this->baton,
-			   value_as_long (fetch (0)));
+	      result = this->read_addr_from_reg (value_as_long (fetch (0)));
 	    else
 	      error (_("Not implemented: computing frame "
 		       "base using explicit value operator"));
@@ -1011,7 +999,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    else
 	      type = address_type;
 
-	    (this->funcs->read_mem) (this->baton, buf, addr, addr_size);
+	    this->read_mem (buf, addr, addr_size);
 
 	    /* If the size of the object read from memory is different
 	       from the type length, we need to zero-extend it.  */
@@ -1220,7 +1208,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  break;
 
 	case DW_OP_call_frame_cfa:
-	  result = (this->funcs->get_frame_cfa) (this->baton);
+	  result = this->get_frame_cfa ();
 	  result_val = value_from_ulongest (address_type, result);
 	  in_stack_memory = 1;
 	  break;
@@ -1237,7 +1225,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  returned.  */
 	  result = value_as_long (fetch (0));
 	  pop ();
-	  result = (this->funcs->get_tls_address) (this->baton, result);
+	  result = this->get_tls_address (result);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
@@ -1313,7 +1301,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    offset.cu_off = extract_unsigned_integer (op_ptr, 2, byte_order);
 	    op_ptr += 2;
-	    this->funcs->dwarf_call (this, offset);
+	    this->dwarf_call (offset);
 	  }
 	  goto no_push;
 
@@ -1323,7 +1311,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    offset.cu_off = extract_unsigned_integer (op_ptr, 4, byte_order);
 	    op_ptr += 4;
-	    this->funcs->dwarf_call (this, offset);
+	    this->dwarf_call (offset);
 	  }
 	  goto no_push;
 	
@@ -1341,10 +1329,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    if (kind_u.dwarf_reg != -1)
 	      {
 		op_ptr += len;
-		this->funcs->push_dwarf_reg_entry_value (this,
-						  CALL_SITE_PARAMETER_DWARF_REG,
-							kind_u,
-							-1 /* deref_size */);
+		this->push_dwarf_reg_entry_value (CALL_SITE_PARAMETER_DWARF_REG,
+						  kind_u,
+						  -1 /* deref_size */);
 		goto no_push;
 	      }
 
@@ -1356,9 +1343,8 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		if (deref_size == -1)
 		  deref_size = this->addr_size;
 		op_ptr += len;
-		this->funcs->push_dwarf_reg_entry_value (this,
-						  CALL_SITE_PARAMETER_DWARF_REG,
-							kind_u, deref_size);
+		this->push_dwarf_reg_entry_value (CALL_SITE_PARAMETER_DWARF_REG,
+						  kind_u, deref_size);
 		goto no_push;
 	      }
 
@@ -1374,10 +1360,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    kind_u.param_offset.cu_off = extract_unsigned_integer (op_ptr, 4,
 								   byte_order);
 	    op_ptr += 4;
-	    this->funcs->push_dwarf_reg_entry_value (this,
-					       CALL_SITE_PARAMETER_PARAM_OFFSET,
-						    kind_u,
-						    -1 /* deref_size */);
+	    this->push_dwarf_reg_entry_value (CALL_SITE_PARAMETER_PARAM_OFFSET,
+					      kind_u,
+					      -1 /* deref_size */);
 	  }
 	  goto no_push;
 
@@ -1409,7 +1394,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    type_die.cu_off = uoffset;
 
 	    type = get_base_type (type_die, 0);
-	    result_val = this->funcs->get_reg_value (this->baton, type, reg);
+	    result_val = this->get_reg_value (type, reg);
 	  }
 	  break;
 
@@ -1448,7 +1433,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_push_object_address:
 	  /* Return the address of the object we are currently observing.  */
-	  result = (this->funcs->get_object_address) (this->baton);
+	  result = this->get_object_address ();
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
@@ -1472,75 +1457,6 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 abort_expression:
   this->recursion_depth--;
   gdb_assert (this->recursion_depth >= 0);
-}
-
-/* Stub dwarf_expr_context_funcs.get_frame_base implementation.  */
-
-void
-ctx_no_get_frame_base (void *baton, const gdb_byte **start, size_t *length)
-{
-  error (_("%s is invalid in this context"), "DW_OP_fbreg");
-}
-
-/* Stub dwarf_expr_context_funcs.get_frame_cfa implementation.  */
-
-CORE_ADDR
-ctx_no_get_frame_cfa (void *baton)
-{
-  error (_("%s is invalid in this context"), "DW_OP_call_frame_cfa");
-}
-
-/* Stub dwarf_expr_context_funcs.get_frame_pc implementation.  */
-
-CORE_ADDR
-ctx_no_get_frame_pc (void *baton)
-{
-  error (_("%s is invalid in this context"), "DW_OP_GNU_implicit_pointer");
-}
-
-/* Stub dwarf_expr_context_funcs.get_tls_address implementation.  */
-
-CORE_ADDR
-ctx_no_get_tls_address (void *baton, CORE_ADDR offset)
-{
-  error (_("%s is invalid in this context"), "DW_OP_form_tls_address");
-}
-
-/* Stub dwarf_expr_context_funcs.dwarf_call implementation.  */
-
-void
-ctx_no_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset)
-{
-  error (_("%s is invalid in this context"), "DW_OP_call*");
-}
-
-/* Stub dwarf_expr_context_funcs.get_base_type implementation.  */
-
-struct type *
-ctx_no_get_base_type (struct dwarf_expr_context *ctx, cu_offset die)
-{
-  error (_("Support for typed DWARF is not supported in this context"));
-}
-
-/* Stub dwarf_expr_context_funcs.push_dwarf_block_entry_value
-   implementation.  */
-
-void
-ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
-				   enum call_site_parameter_kind kind,
-				   union call_site_parameter_u kind_u,
-				   int deref_size)
-{
-  internal_error (__FILE__, __LINE__,
-		  _("Support for DW_OP_GNU_entry_value is unimplemented"));
-}
-
-/* Stub dwarf_expr_context_funcs.get_addr_index implementation.  */
-
-CORE_ADDR
-ctx_no_get_addr_index (void *baton, unsigned int index)
-{
-  error (_("%s is invalid in this context"), "DW_OP_GNU_addr_index");
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

@@ -25,69 +25,6 @@
 #include "leb128.h"
 #include "gdbtypes.h"
 
-struct dwarf_expr_context;
-
-/* Virtual method table for struct dwarf_expr_context below.  */
-
-struct dwarf_expr_context_funcs
-{
-  /* Return the value of register number REGNUM (a DWARF register number),
-     read as an address.  */
-  CORE_ADDR (*read_addr_from_reg) (void *baton, int regnum);
-
-  /* Return a value of type TYPE, stored in register number REGNUM
-     of the frame associated to the given BATON.
-
-     REGNUM is a DWARF register number.  */
-  struct value *(*get_reg_value) (void *baton, struct type *type, int regnum);
-
-  /* Read LENGTH bytes at ADDR into BUF.  */
-  void (*read_mem) (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t length);
-
-  /* Return the location expression for the frame base attribute, in
-     START and LENGTH.  The result must be live until the current
-     expression evaluation is complete.  */
-  void (*get_frame_base) (void *baton, const gdb_byte **start, size_t *length);
-
-  /* Return the CFA for the frame.  */
-  CORE_ADDR (*get_frame_cfa) (void *baton);
-
-  /* Return the PC for the frame.  */
-  CORE_ADDR (*get_frame_pc) (void *baton);
-
-  /* Return the thread-local storage address for
-     DW_OP_GNU_push_tls_address or DW_OP_form_tls_address.  */
-  CORE_ADDR (*get_tls_address) (void *baton, CORE_ADDR offset);
-
-  /* Execute DW_AT_location expression for the DWARF expression subroutine in
-     the DIE at DIE_OFFSET in the CU from CTX.  Do not touch STACK while it
-     being passed to and returned from the called DWARF subroutine.  */
-  void (*dwarf_call) (struct dwarf_expr_context *ctx, cu_offset die_offset);
-
-  /* Return the base type given by the indicated DIE.  This can throw
-     an exception if the DIE is invalid or does not represent a base
-     type.  If can also be NULL in the special case where the
-     callbacks are not performing evaluation, and thus it is
-     meaningful to substitute a stub type of the correct size.  */
-  struct type *(*get_base_type) (struct dwarf_expr_context *ctx, cu_offset die);
-
-  /* Push on DWARF stack an entry evaluated for DW_TAG_GNU_call_site's
-     parameter matching KIND and KIND_U at the caller of specified BATON.
-     If DEREF_SIZE is not -1 then use DW_AT_GNU_call_site_data_value instead of
-     DW_AT_GNU_call_site_value.  */
-  void (*push_dwarf_reg_entry_value) (struct dwarf_expr_context *ctx,
-				      enum call_site_parameter_kind kind,
-				      union call_site_parameter_u kind_u,
-				      int deref_size);
-
-  /* Return the address indexed by DW_OP_GNU_addr_index.
-     This can throw an exception if the index is out of range.  */
-  CORE_ADDR (*get_addr_index) (void *baton, unsigned int index);
-
-  /* Return the `object address' for DW_OP_push_object_address.  */
-  CORE_ADDR (*get_object_address) (void *baton);
-};
-
 /* The location of a value.  */
 enum dwarf_value_location
 {
@@ -159,13 +96,6 @@ struct dwarf_expr_context
   /* Offset used to relocate DW_OP_addr and DW_OP_GNU_addr_index arguments.  */
   CORE_ADDR offset;
 
-  /* An opaque argument provided by the caller, which will be passed
-     to all of the callback functions.  */
-  void *baton;
-
-  /* Callback functions.  */
-  const struct dwarf_expr_context_funcs *funcs;
-
   /* The current depth of dwarf expression recursion, via DW_OP_call*,
      DW_OP_fbreg, DW_OP_push_object_address, etc., and the maximum
      depth we'll tolerate before raising an error.  */
@@ -209,6 +139,93 @@ struct dwarf_expr_context
      two cases need to be handled separately.)  */
   int num_pieces;
   struct dwarf_expr_piece *pieces;
+
+  /* Return the value of register number REGNUM (a DWARF register number),
+     read as an address.  */
+  virtual CORE_ADDR read_addr_from_reg (int regnum) = 0;
+
+  /* Return a value of type TYPE, stored in register number REGNUM
+     of the frame associated to the given BATON.
+
+     REGNUM is a DWARF register number.  */
+  virtual struct value *get_reg_value (struct type *type, int regnum) = 0;
+
+  /* Read LENGTH bytes at ADDR into BUF.  */
+  virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length) = 0;
+
+  /* Return the location expression for the frame base attribute, in
+     START and LENGTH.  The result must be live until the current
+     expression evaluation is complete.  */
+  virtual void get_frame_base (const gdb_byte **start, size_t *length)
+  {
+    error (_("%s is invalid in this context"), "DW_OP_fbreg");
+  }
+
+  /* Return the CFA for the frame.  */
+  virtual CORE_ADDR get_frame_cfa ()
+  {
+    error (_("%s is invalid in this context"), "DW_OP_call_frame_cfa");
+  }
+
+  /* Return the PC for the frame.  */
+  virtual CORE_ADDR get_frame_pc ()
+  {
+    error (_("%s is invalid in this context"), "DW_OP_GNU_implicit_pointer");
+  }
+
+  /* Return the thread-local storage address for
+     DW_OP_GNU_push_tls_address or DW_OP_form_tls_address.  */
+  virtual CORE_ADDR get_tls_address (CORE_ADDR offset)
+  {
+    error (_("%s is invalid in this context"), "DW_OP_form_tls_address");
+  }
+
+  /* Execute DW_AT_location expression for the DWARF expression
+     subroutine in the DIE at DIE_OFFSET in the CU.  Do not touch
+     STACK while it being passed to and returned from the called DWARF
+     subroutine.  */
+  virtual void dwarf_call (cu_offset die_offset)
+  {
+    error (_("%s is invalid in this context"), "DW_OP_call*");
+  }
+
+  /* Return the base type given by the indicated DIE.  This can throw
+     an exception if the DIE is invalid or does not represent a base
+     type.  If can also be NULL in the special case where the
+     callbacks are not performing evaluation, and thus it is
+     meaningful to substitute a stub type of the correct size.  */
+  virtual struct type *impl_get_base_type (cu_offset die)
+  {
+    /* Anything will do.  */
+    return builtin_type (this->gdbarch)->builtin_int;
+  }
+
+  /* Push on DWARF stack an entry evaluated for DW_TAG_GNU_call_site's
+     parameter matching KIND and KIND_U at the caller of specified BATON.
+     If DEREF_SIZE is not -1 then use DW_AT_GNU_call_site_data_value instead of
+     DW_AT_GNU_call_site_value.  */
+  virtual void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
+					   union call_site_parameter_u kind_u,
+					   int deref_size)
+  {
+    internal_error (__FILE__, __LINE__,
+		    _("Support for DW_OP_GNU_entry_value is unimplemented"));
+  }
+
+  /* Return the address indexed by DW_OP_GNU_addr_index.
+     This can throw an exception if the index is out of range.  */
+  virtual CORE_ADDR get_addr_index (unsigned int index)
+  {
+    error (_("%s is invalid in this context"), "DW_OP_GNU_addr_index");
+  }
+
+  /* Return the `object address' for DW_OP_push_object_address.  */
+  virtual CORE_ADDR get_object_address ()
+  {
+    internal_error (__FILE__, __LINE__,
+		    _("Support for DW_OP_push_object_address "
+		      "is unimplemented"));
+  }
 
 private:
 
@@ -272,22 +289,6 @@ struct dwarf_expr_piece
 
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 				     const char *);
-
-/* Stub dwarf_expr_context_funcs implementations.  */
-
-void ctx_no_get_frame_base (void *baton, const gdb_byte **start,
-			    size_t *length);
-CORE_ADDR ctx_no_get_frame_cfa (void *baton);
-CORE_ADDR ctx_no_get_frame_pc (void *baton);
-CORE_ADDR ctx_no_get_tls_address (void *baton, CORE_ADDR offset);
-void ctx_no_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset);
-struct type *ctx_no_get_base_type (struct dwarf_expr_context *ctx,
-				   cu_offset die);
-void ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
-					enum call_site_parameter_kind kind,
-					union call_site_parameter_u kind_u,
-					int deref_size);
-CORE_ADDR ctx_no_get_addr_index (void *baton, unsigned int index);
 
 int dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end);
 
