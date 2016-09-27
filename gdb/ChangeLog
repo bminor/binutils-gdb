@@ -1,3 +1,11 @@
+2016-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* target.c (target_supports_multi_process): New function, moved
+	from...
+	* target.h (target_supports_multi_process): ... here.  Remove
+	macro.
+	* target/target.h (target_supports_multi_process): New prototype.
+
 2016-10-06  Pedro Alves  <palves@redhat.com>
 
 	* cp-valprint.c (vtbl_ptr_name): Write "extern const" instead of

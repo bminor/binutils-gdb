@@ -1380,12 +1380,6 @@ struct address_space *target_thread_address_space (ptid_t);
 
 int target_info_proc (const char *, enum info_proc_what);
 
-/* Returns true if this target can debug multiple processes
-   simultaneously.  */
-
-#define	target_supports_multi_process()	\
-     (*current_target.to_supports_multi_process) (&current_target)
-
 /* Returns true if this target can disable address space randomization.  */
 
 int target_supports_disable_randomization (void);

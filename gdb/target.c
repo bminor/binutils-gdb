@@ -2727,6 +2727,14 @@ target_supports_disable_randomization (void)
   return 0;
 }
 
+/* See target/target.h.  */
+
+int
+target_supports_multi_process (void)
+{
+  return (*current_target.to_supports_multi_process) (&current_target);
+}
+
 char *
 target_get_osdata (const char *type)
 {
