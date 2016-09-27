@@ -1,3 +1,11 @@
+2016-10-10  Christophe Lyon  <christophe.lyon@linaro.org>
+	Backport from mainline
+	2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	PR ld/20608
+	* elf32-arm.c (arm_type_of_stub): Handle the case when the pre-PLT
+	Thumb-ARM stub is too far.
+
 2016-09-06  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	Backport from mainline
