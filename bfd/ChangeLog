@@ -1,3 +1,7 @@
+2016-11-03  Tristan Gingold  <gingold@adacore.com>
+
+	* config.bfd: Deprecate many old triplets.
+
 2016-11-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.
