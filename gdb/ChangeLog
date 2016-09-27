@@ -1,5 +1,16 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* riscv-tdep.c (riscv_isa_xlen): Add fall-through comment.
+	* utils.c (can_dump_core) <LIMIT_CUR>: Add fall-through comment.
+	* eval.c (fetch_subexp_value) <MEMORY_ERROR>: Add fall-through
+	comment.
+	* d-valprint.c (d_val_print) <TYPE_CODE_STRUCT>: Add fall-through
+	comment.
+	* coffread.c (coff_symtab_read) <C_LABEL>: Add fall-through
+	comment.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2loc.c (unimplemented): Add ATTRIBUTE_NORETURN.
 
 2018-05-04  Tom Tromey  <tom@tromey.com>

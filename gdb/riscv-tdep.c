@@ -369,6 +369,7 @@ riscv_isa_xlen (struct gdbarch *gdbarch)
     {
     default:
       warning (_("unknown xlen size, assuming 4 bytes"));
+      /* Fall through.  */
     case 1:
       return 4;
     case 2:

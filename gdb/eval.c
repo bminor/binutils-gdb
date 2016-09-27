@@ -215,6 +215,7 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
 	case MEMORY_ERROR:
 	  if (!preserve_errors)
 	    break;
+	  /* Fall through.  */
 	default:
 	  throw_exception (ex);
 	  break;

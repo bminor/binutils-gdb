@@ -928,6 +928,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	     backtraces, so filter them out (from phdm@macqel.be).  */
 	  if (within_function)
 	    break;
+	  /* Fall through.  */
 	case C_STAT:
 	case C_THUMBLABEL:
 	case C_THUMBSTAT:

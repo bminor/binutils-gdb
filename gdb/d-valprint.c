@@ -88,6 +88,7 @@ d_val_print (struct type *type, int embedded_offset,
 				  stream, recurse, val, options);
 	if (ret == 0)
 	  break;
+	/* Fall through.  */
       default:
 	c_val_print (type, embedded_offset, address, stream,
 		     recurse, val, options);

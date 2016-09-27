@@ -275,6 +275,7 @@ can_dump_core (enum resource_limit_kind limit_kind)
     case LIMIT_CUR:
       if (rlim.rlim_cur == 0)
 	return 0;
+      /* Fall through.  */
 
     case LIMIT_MAX:
       if (rlim.rlim_max == 0)
