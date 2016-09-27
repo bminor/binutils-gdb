@@ -3945,17 +3945,43 @@ arm_type_of_stub (struct bfd_link_info *info,
 	  /* Note when dealing with PLT entries: the main PLT stub is in
 	     ARM mode, so if the branch is in Thumb mode, another
 	     Thumb->ARM stub will be inserted later just before the ARM
-	     PLT stub. We don't take this extra distance into account
-	     here, because if a long branch stub is needed, we'll add a
-	     Thumb->Arm one and branch directly to the ARM PLT entry
-	     because it avoids spreading offset corrections in several
-	     places.  */
+	     PLT stub. If a long branch stub is needed, we'll add a
+	     Thumb->Arm one and branch directly to the ARM PLT entry.
+	     Here, we have to check if a pre-PLT Thumb->ARM stub
+	     is needed and if it will be close enough.  */
 
 	  destination = (splt->output_section->vma
 			 + splt->output_offset
 			 + root_plt->offset);
 	  st_type = STT_FUNC;
-	  branch_type = ST_BRANCH_TO_ARM;
+
+	  /* Thumb branch/call to PLT: it can become a branch to ARM
+	     or to Thumb. We must perform the same checks and
+	     corrections as in elf32_arm_final_link_relocate.  */
+	  if ((r_type == R_ARM_THM_CALL)
+	      || (r_type == R_ARM_THM_JUMP24))
+	    {
+	      if (globals->use_blx
+		  && r_type == R_ARM_THM_CALL
+		  && !thumb_only)
+		{
+		  /* If the Thumb BLX instruction is available, convert
+		     the BL to a BLX instruction to call the ARM-mode
+		     PLT entry.  */
+		  branch_type = ST_BRANCH_TO_ARM;
+		}
+	      else
+		{
+		  if (!thumb_only)
+		    /* Target the Thumb stub before the ARM PLT entry.  */
+		    destination -= PLT_THUMB_STUB_SIZE;
+		  branch_type = ST_BRANCH_TO_THUMB;
+		}
+	    }
+	  else
+	    {
+	      branch_type = ST_BRANCH_TO_ARM;
+	    }
 	}
     }
   /* Calls to STT_GNU_IFUNC symbols should go through a PLT.  */
@@ -3991,6 +4017,15 @@ arm_type_of_stub (struct bfd_link_info *info,
                   || (r_type == R_ARM_THM_JUMP19))
 	      && !use_plt))
 	{
+	  /* If we need to insert a Thumb-Thumb long branch stub to a
+	     PLT, use one that branches directly to the ARM PLT
+	     stub. If we pretended we'd use the pre-PLT Thumb->ARM
+	     stub, undo this now.  */
+	  if ((branch_type == ST_BRANCH_TO_THUMB) && use_plt && !thumb_only) {
+	    branch_type = ST_BRANCH_TO_ARM;
+	    branch_offset += PLT_THUMB_STUB_SIZE;
+	  }
+
 	  if (branch_type == ST_BRANCH_TO_THUMB)
 	    {
 	      /* Thumb to thumb.  */

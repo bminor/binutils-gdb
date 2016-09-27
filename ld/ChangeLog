@@ -1,3 +1,12 @@
+2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	PR ld/20608
+	* testsuite/ld-arm/arm-elf.exp: Handle new testcase.
+	* testsuite/ld-arm/farcall-mixed-app2.d: New file.
+	* testsuite/ld-arm/farcall-mixed-app2.r: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.s: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.sym: Likewise.
+
 2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
 
 	* Makefile.in: Regenerate.
