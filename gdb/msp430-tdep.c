@@ -908,8 +908,8 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      code_model = ca_tdep->code_model;
 	      break;
 	    }
-	  /* Otherwise, fall through...  */
 	}
+	/* Fall through.  */
       default:
 	error (_("Unknown msp430 isa"));
 	break;

@@ -1668,7 +1668,7 @@ yylex (void)
 	  lexptr++;
 	  return '-';
 	}
-      /* FALL THRU into number case.  */
+      /* FALL THRU.  */
 
     try_number:
     case '0':

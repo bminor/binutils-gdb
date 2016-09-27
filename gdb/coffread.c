@@ -964,7 +964,8 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	    /* At least on a 3b1, gcc generates swbeg and string labels
 	       that look like this.  Ignore them.  */
 	    break;
-	  /* Fall in for static symbols that don't start with '.'  */
+	  /* For static symbols that don't start with '.'...  */
+	  /* Fall through.  */
 	case C_THUMBEXT:
 	case C_THUMBEXTFUNC:
 	case C_EXT:

@@ -2531,9 +2531,9 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	  }
 	  /* FALLTHROUGH */
 
+	case C_FCN:
 	  /* C_FCN is .bf and .ef symbols.  I think it is sufficient
 	     to handle only the C_FUN and C_EXT.  */
-	case C_FCN:
 
 	case C_BSTAT:
 	case C_ESTAT:

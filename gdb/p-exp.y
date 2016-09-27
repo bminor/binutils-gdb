@@ -1224,7 +1224,7 @@ yylex (void)
 	  goto symbol;		/* Nope, must be a symbol.  */
 	}
 
-      /* FALL THRU into number case.  */
+      /* FALL THRU.  */
 
     case '0':
     case '1':

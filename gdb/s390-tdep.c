@@ -4318,7 +4318,8 @@ ex:
 		      return -1;
 		    break;
 		  }
-		/* For other instructions, fallthru.  */
+		/* For other instructions... */
+		/* Fall through.  */
 	      default:
 		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown KM* function %02x at %s.\n",
 				    (int)tmp, paddress (gdbarch, addr));
@@ -4620,7 +4621,8 @@ ex:
 		      return -1;
 		    break;
 		  }
-		/* For KLMD, fallthru.  */
+		/* For KLMD...  */
+		/* Fall through.  */
 	      default:
 		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown KMAC function %02x at %s.\n",
 				    (int)tmp, paddress (gdbarch, addr));

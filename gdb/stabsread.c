@@ -723,7 +723,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  /* SunPRO (3.0 at least) static variable encoding.  */
 	  if (gdbarch_static_transform_name_p (gdbarch))
 	    goto normal;
-	  /* ... fall through ...  */
+	  /* fall through */
 
 	default:
 	  complaint (&symfile_complaints, _("Unknown C++ symbol name `%s'"),
@@ -2532,7 +2532,8 @@ read_member_functions (struct field_info *fip, const char **pp,
 	      complaint (&symfile_complaints,
 			 _("member function type missing, got '%c'"),
 			 (*pp)[-1]);
-	      /* Fall through into normal member function.  */
+	      /* Normal member function.  */
+	      /* Fall through.  */
 
 	    case '.':
 	      /* normal member function.  */

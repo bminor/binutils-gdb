@@ -2883,9 +2883,9 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       unknown_symtype_complaint (hex_string (type));
       /* FALLTHROUGH */
 
-      /* The following symbol types don't need the address field
-         relocated, since it is either unused, or is absolute.  */
     define_a_symbol:
+      /* These symbol types don't need the address field relocated,
+         since it is either unused, or is absolute.  */
     case N_GSYM:		/* Global variable.  */
     case N_NSYMS:		/* Number of symbols (Ultrix).  */
     case N_NOMAP:		/* No map?  (Ultrix).  */

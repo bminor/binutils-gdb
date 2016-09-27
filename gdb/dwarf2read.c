@@ -10578,7 +10578,8 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       cu->processing_has_namespace_info = 1;
       if (read_namespace_alias (die, cu))
 	break;
-      /* The declaration is not a global namespace alias: fall through.  */
+      /* The declaration is not a global namespace alias.  */
+      /* Fall through.  */
     case DW_TAG_imported_module:
       cu->processing_has_namespace_info = 1;
       if (die->child != NULL && (die->tag == DW_TAG_imported_declaration

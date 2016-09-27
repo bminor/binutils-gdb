@@ -7675,7 +7675,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  putpkt (buf);
 	  break;
 	}
-      /* else fallthrough */
+      /* fallthrough */
     default:
       warning (_("Invalid remote reply: %s"), buf);
       break;

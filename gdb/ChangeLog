@@ -1,5 +1,36 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* s390-tdep.c (s390_process_record): Fix fall-through comments.
+	* xcoffread.c (scan_xcoff_symtab): Move comment later.
+	* symfile.c (section_is_mapped): Fix fall-through comment.
+	* stabsread.c (define_symbol, read_member_functions): Fix
+	fall-through comment.
+	* s390-linux-tdep.c (s390_process_record): Fix fall-through
+	comment.
+	* remote.c (remote_wait_as): Fix fall-through comment.
+	* p-exp.y (yylex): Fix fall-through comment.
+	* nat/x86-dregs.c (x86_length_and_rw_bits): Fix fall-through
+	comment.
+	* msp430-tdep.c (msp430_gdbarch_init): Fix fall-through comment.
+	* mdebugread.c (parse_partial_symbols): Fix fall-through comment.
+	* jv-exp.y (yylex): Fix fall-through comment.
+	* go-exp.y (lex_one_token): Fix fall-through comment.
+	* gdbtypes.c (get_discrete_bounds, rank_one_type): Fix
+	fall-through comment.
+	* f-exp.y (yylex): Fix fall-through comment.
+	* dwarf2read.c (process_die): Fix fall-through comments.
+	* dbxread.c (process_one_symbol): Fix fall-through comment.
+	* d-exp.y (lex_one_token): Fix fall-through comment.
+	* cp-name-parser.y (yylex): Fix fall-through comment.
+	* coffread.c (coff_symtab_read): Fix fall-through comment.
+	* c-exp.y (lex_one_token): Fix fall-through comment.
+	* arm-tdep.c (arm_decode_miscellaneous): Fix fall-through
+	comment.
+	* arch/arm.c (arm_instruction_changes_pc): Fix fall-through
+	comment.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	PR python/22730:
 	* NEWS: Mention gdb.execute change.
 	* gdbcmd.h (execute_control_command): Don't declare.

@@ -2592,7 +2592,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	  last_was_structop = true;
 	  goto symbol;		/* Nope, must be a symbol. */
 	}
-      /* FALL THRU into number case.  */
+      /* FALL THRU.  */
 
     case '0':
     case '1':

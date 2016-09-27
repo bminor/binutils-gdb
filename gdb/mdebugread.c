@@ -3698,7 +3698,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  break;
 		default:
 		  unknown_ext_complaint (debug_info->ssext + psh->iss);
-		  /* Fall through, pretend it's global.  */
+		  /* Pretend it's global.  */
+		  /* Fall through.  */
 		case stGlobal:
 		  /* Global common symbols are resolved by the runtime loader,
 		     ignore them.  */
