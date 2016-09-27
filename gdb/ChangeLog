@@ -1,3 +1,9 @@
+2016-09-27  Fredrik Hederstierna  <fredrik.hederstierna@verisure.com>
+
+	* arm-tdep.c (arm_m_addr_is_magic): New function.
+	(arm_addr_bits_remove): Call arm_m_addr_is_magic.
+	(arm_m_exception_unwind_sniffer): Likewise.
+
 2016-09-21  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch32-linux-nat.c (aarch32_gp_regcache_collect): Keep
