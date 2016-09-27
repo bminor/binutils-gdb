@@ -2865,7 +2865,7 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 /* A helper function that throws an unimplemented error mentioning a
    given DWARF operator.  */
 
-static void
+static void ATTRIBUTE_NORETURN
 unimplemented (unsigned int op)
 {
   const char *name = get_DW_OP_name (op);

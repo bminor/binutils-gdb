@@ -1,5 +1,9 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2loc.c (unimplemented): Add ATTRIBUTE_NORETURN.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* s390-tdep.c (s390_process_record): Fix fall-through comments.
 	* xcoffread.c (scan_xcoff_symtab): Move comment later.
 	* symfile.c (section_is_mapped): Fix fall-through comment.
