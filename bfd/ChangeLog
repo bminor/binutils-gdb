@@ -1,3 +1,9 @@
+2016-09-27  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20634
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Put 0 in the
+	timestamp field if real time values are not being stored.
+
 2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
 
 	* warning.m4 (AC_EGREP_CPP_FOR_BUILD): Introduce macro
