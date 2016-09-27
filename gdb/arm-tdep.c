@@ -465,6 +465,62 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
   return 0;
 }
 
+/* Determine if the address specified equals any of these magic return
+   values, called EXC_RETURN, defined by the ARM v6-M and v7-M
+   architectures.
+
+   From ARMv6-M Reference Manual B1.5.8
+   Table B1-5 Exception return behavior
+
+   EXC_RETURN    Return To        Return Stack
+   0xFFFFFFF1    Handler mode     Main
+   0xFFFFFFF9    Thread mode      Main
+   0xFFFFFFFD    Thread mode      Process
+
+   From ARMv7-M Reference Manual B1.5.8
+   Table B1-8 EXC_RETURN definition of exception return behavior, no FP
+
+   EXC_RETURN    Return To        Return Stack
+   0xFFFFFFF1    Handler mode     Main
+   0xFFFFFFF9    Thread mode      Main
+   0xFFFFFFFD    Thread mode      Process
+
+   Table B1-9 EXC_RETURN definition of exception return behavior, with
+   FP
+
+   EXC_RETURN    Return To        Return Stack    Frame Type
+   0xFFFFFFE1    Handler mode     Main            Extended
+   0xFFFFFFE9    Thread mode      Main            Extended
+   0xFFFFFFED    Thread mode      Process         Extended
+   0xFFFFFFF1    Handler mode     Main            Basic
+   0xFFFFFFF9    Thread mode      Main            Basic
+   0xFFFFFFFD    Thread mode      Process         Basic
+
+   For more details see "B1.5.8 Exception return behavior"
+   in both ARMv6-M and ARMv7-M Architecture Reference Manuals.  */
+
+static int
+arm_m_addr_is_magic (CORE_ADDR addr)
+{
+  switch (addr)
+    {
+      /* Values from Tables in B1.5.8 the EXC_RETURN definitions of
+	 the exception return behavior.  */
+      case 0xffffffe1:
+      case 0xffffffe9:
+      case 0xffffffed:
+      case 0xfffffff1:
+      case 0xfffffff9:
+      case 0xfffffffd:
+	/* Address is magic.  */
+	return 1;
+
+      default:
+	/* Address is not magic.  */
+	return 0;
+    }
+}
+
 /* Remove useless bits from addresses in a running program.  */
 static CORE_ADDR
 arm_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
@@ -472,7 +528,7 @@ arm_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
   /* On M-profile devices, do not strip the low bit from EXC_RETURN
      (the magic exception return address).  */
   if (gdbarch_tdep (gdbarch)->is_m
-      && (val & 0xfffffff0) == 0xfffffff0)
+      && arm_m_addr_is_magic (val))
     return val;
 
   if (arm_apcs_32)
@@ -2991,14 +3047,8 @@ arm_m_exception_unwind_sniffer (const struct frame_unwind *self,
   /* No need to check is_m; this sniffer is only registered for
      M-profile architectures.  */
 
-  /* Exception frames return to one of these magic PCs.  Other values
-     are not defined as of v7-M.  See details in "B1.5.8 Exception
-     return behavior" in "ARMv7-M Architecture Reference Manual".  */
-  if (this_pc == 0xfffffff1 || this_pc == 0xfffffff9
-      || this_pc == 0xfffffffd)
-    return 1;
-
-  return 0;
+  /* Check if exception frame returns to a magic PC value.  */
+  return arm_m_addr_is_magic (this_pc);
 }
 
 /* Frame unwinder for M-profile exceptions.  */

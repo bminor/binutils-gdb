@@ -1,3 +1,9 @@
+2016-09-27  Fredrik Hederstierna  <fredrik.hederstierna@verisure.com>
+
+	* arm-tdep.c (arm_m_addr_is_magic): New function.
+	(arm_addr_bits_remove): Call arm_m_addr_is_magic.
+	(arm_m_exception_unwind_sniffer): Likewise.
+
 2016-09-23  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-nat.c (windows_delete_thread): Adjusting call to
