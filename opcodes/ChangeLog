@@ -1,3 +1,9 @@
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-opc.c (arc_flag_operands): Add F_DI14.
+	(arc_flag_classes): Add C_DI14.
+	* arc-nps400-tbl.h: Add new exc instructions.
+
 2016-11-03  Graham Markall  <graham.markall@embecosm.com>
 
 	* arc-dis.c (arc_insn_length): Return length 8 for instructions with

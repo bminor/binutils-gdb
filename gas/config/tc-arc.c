@@ -1720,9 +1720,22 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	  switch (operand->flags & ARC_OPERAND_TYPECHECK_MASK)
 	    {
             case ARC_OPERAND_ADDRTYPE:
-              /* Check to be an address type.  */
-              if (tok[tokidx].X_op != O_addrtype)
-                goto match_failed;
+	      {
+		const char *errmsg = NULL;
+
+		/* Check to be an address type.  */
+		if (tok[tokidx].X_op != O_addrtype)
+		  goto match_failed;
+
+		/* All address type operands need to have an insert
+		   method in order to check that we have the correct
+		   address type.  */
+		gas_assert (operand->insert != NULL);
+		(*operand->insert) (0, tok[tokidx].X_add_number,
+				    &errmsg);
+		if (errmsg != NULL)
+		  goto match_failed;
+	      }
               break;
 
 	    case ARC_OPERAND_IR:

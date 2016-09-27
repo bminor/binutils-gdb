@@ -1249,7 +1249,9 @@ const struct arc_flag_operand arc_flag_operands[] =
   { "di", 1, 1, 5, 1 },
 #define F_DI11    (F_DI5 + 1)
   { "di", 1, 1, 11, 1 },
-#define F_DI15    (F_DI11 + 1)
+#define F_DI14    (F_DI11 + 1)
+  { "di", 1, 1, 14, 1 },
+#define F_DI15    (F_DI14 + 1)
   { "di", 1, 1, 15, 1 },
 
   /* ARCv2 specific.  */
@@ -1407,7 +1409,9 @@ const struct arc_flag_class arc_flag_classes[] =
 
 #define C_DI20	    (C_DHARD + 1)
   { F_CLASS_OPTIONAL, { F_DI11, F_NULL }},
-#define C_DI16	    (C_DI20 + 1)
+#define C_DI14	    (C_DI20 + 1)
+  { F_CLASS_OPTIONAL, { F_DI14, F_NULL }},
+#define C_DI16	    (C_DI14 + 1)
   { F_CLASS_OPTIONAL, { F_DI15, F_NULL }},
 #define C_DI26	    (C_DI16 + 1)
   { F_CLASS_OPTIONAL, { F_DI5, F_NULL }},

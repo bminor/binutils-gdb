@@ -713,3 +713,17 @@ XLDST_LIKE("xst", 0xe)
 
 /* dcmac  a,[cm:A],[cm:b],size */
 { "dcmac", 0x500007c023000000, 0xf80007ffffc00000, ARC_OPCODE_ARC700, PROTOCOL_DECODE, NPS400, { NPS_RA_64, BRAKET, NPS_CM, COLON, NPS_UIMM16_0_64, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_RBdouble_64, BRAKETdup, NPS_PROTO_SIZE }, { 0 }},
+
+/* Atomic Operations.  */
+
+/* exc<.di><.f> a,a,[xa:b] */
+{ "exc", 0x48060c21, 0xf80fbfff, ARC_OPCODE_ARC700, NONE, NPS400, { NPS_R_DST_3B, NPS_R_SRC1_3B, BRAKET, NPS_XA, COLON, NPS_R_SRC2_3B, BRAKETdup }, { C_DI14, C_NPS_F }},
+
+/* exc<.di><.f> a,a,[sd:b] */
+{ "exc", 0x48060c61, 0xf80fbfff, ARC_OPCODE_ARC700, NONE, NPS400, { NPS_R_DST_3B, NPS_R_SRC1_3B, BRAKET, NPS_SD, COLON, NPS_R_SRC2_3B, BRAKETdup }, { C_DI14, C_NPS_F }},
+
+/* exc<.di><.f> a,a,[xd:b] */
+{ "exc", 0x48060c81, 0xf80fbfff, ARC_OPCODE_ARC700, NONE, NPS400, { NPS_R_DST_3B, NPS_R_SRC1_3B, BRAKET, NPS_XD, COLON, NPS_R_SRC2_3B, BRAKETdup }, { C_DI14, C_NPS_F }},
+
+/* exc<.di><.f> a,a,[b] */
+{ "exc", 0x48060c01, 0xf80fbfff, ARC_OPCODE_ARC700, NONE, NPS400, { NPS_R_DST_3B, NPS_R_SRC1_3B, BRAKET, NPS_R_SRC2_3B, BRAKETdup }, { C_DI14, C_NPS_F }},
