@@ -548,14 +548,14 @@
 #ifndef elf_backend_emit_relocs
 #define elf_backend_emit_relocs			_bfd_elf_link_output_relocs
 #endif
+#ifndef elf_backend_update_relocs
+#define elf_backend_update_relocs		NULL
+#endif
 #ifndef elf_backend_count_relocs
 #define elf_backend_count_relocs		NULL
 #endif
 #ifndef elf_backend_count_additional_relocs
 #define elf_backend_count_additional_relocs	NULL
-#endif
-#ifndef elf_backend_count_output_relocs
-#define elf_backend_count_output_relocs		_bfd_elf_default_count_output_relocs
 #endif
 #ifndef elf_backend_sort_relocs_p
 #define elf_backend_sort_relocs_p		NULL
@@ -778,9 +778,9 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_get_target_dtag,
   elf_backend_ignore_undef_symbol,
   elf_backend_emit_relocs,
+  elf_backend_update_relocs,
   elf_backend_count_relocs,
   elf_backend_count_additional_relocs,
-  elf_backend_count_output_relocs,
   elf_backend_sort_relocs_p,
   elf_backend_grok_prstatus,
   elf_backend_grok_psinfo,

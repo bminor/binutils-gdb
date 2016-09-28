@@ -14669,7 +14669,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		break;
 	      }
 	    else goto jump_over;
-	      
+
 	    /* Fall through.  */
 
 	  case R_ARM_MOVW_ABS_NC:
@@ -14860,6 +14860,167 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
     }
 
   return TRUE;
+}
+
+static void
+elf32_arm_update_relocs (asection *o,
+			 struct bfd_elf_section_reloc_data *reldata)
+{
+  void (*swap_in) (bfd *, const bfd_byte *, Elf_Internal_Rela *);
+  void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
+  const struct elf_backend_data *bed;
+  _arm_elf_section_data *eado;
+  struct bfd_link_order *p;
+  bfd_byte *erela_head, *erela;
+  Elf_Internal_Rela *irela_head, *irela;
+  Elf_Internal_Shdr *rel_hdr;
+  bfd *abfd;
+  unsigned int count;
+
+  eado = get_arm_elf_section_data (o);
+
+  if (!eado || eado->elf.this_hdr.sh_type != SHT_ARM_EXIDX)
+    return;
+
+  abfd = o->owner;
+  bed = get_elf_backend_data (abfd);
+  rel_hdr = reldata->hdr;
+
+  if (rel_hdr->sh_entsize == bed->s->sizeof_rel)
+    {
+      swap_in = bed->s->swap_reloc_in;
+      swap_out = bed->s->swap_reloc_out;
+    }
+  else if (rel_hdr->sh_entsize == bed->s->sizeof_rela)
+    {
+      swap_in = bed->s->swap_reloca_in;
+      swap_out = bed->s->swap_reloca_out;
+    }
+  else
+    abort ();
+
+  erela_head = rel_hdr->contents;
+  irela_head = (Elf_Internal_Rela *) bfd_zmalloc
+    ((NUM_SHDR_ENTRIES (rel_hdr) + 1) * sizeof (*irela_head));
+
+  erela = erela_head;
+  irela = irela_head;
+  count = 0;
+
+  for (p = o->map_head.link_order; p; p = p->next)
+    {
+      if (p->type == bfd_section_reloc_link_order
+	  || p->type == bfd_symbol_reloc_link_order)
+	{
+	  (*swap_in) (abfd, erela, irela);
+	  erela += rel_hdr->sh_entsize;
+	  irela++;
+	  count++;
+	}
+      else if (p->type == bfd_indirect_link_order)
+	{
+	  struct bfd_elf_section_reloc_data *input_reldata;
+	  arm_unwind_table_edit *edit_list, *edit_tail;
+	  _arm_elf_section_data *eadi;
+	  bfd_size_type j;
+	  bfd_vma offset;
+	  asection *i;
+
+	  i = p->u.indirect.section;
+
+	  eadi = get_arm_elf_section_data (i);
+	  edit_list = eadi->u.exidx.unwind_edit_list;
+	  edit_tail = eadi->u.exidx.unwind_edit_tail;
+	  offset = o->vma + i->output_offset;
+
+	  if (eadi->elf.rel.hdr &&
+	      eadi->elf.rel.hdr->sh_entsize == rel_hdr->sh_entsize)
+	    input_reldata = &eadi->elf.rel;
+	  else if (eadi->elf.rela.hdr &&
+		   eadi->elf.rela.hdr->sh_entsize == rel_hdr->sh_entsize)
+	    input_reldata = &eadi->elf.rela;
+	  else
+	    abort ();
+
+	  if (edit_list)
+	    {
+	      for (j = 0; j < NUM_SHDR_ENTRIES (input_reldata->hdr); j++)
+		{
+		  arm_unwind_table_edit *edit_node, *edit_next;
+		  bfd_vma bias;
+		  bfd_vma index;
+
+		  (*swap_in) (abfd, erela, irela);
+		  index = (irela->r_offset - offset) / 8;
+
+		  bias = 0;
+		  edit_node = edit_list;
+		  for (edit_next = edit_list;
+		       edit_next && edit_next->index <= index;
+		       edit_next = edit_node->next)
+		    {
+		      bias++;
+		      edit_node = edit_next;
+		    }
+
+		  if (edit_node->type != DELETE_EXIDX_ENTRY
+		      || edit_node->index != index)
+		    {
+		      irela->r_offset -= bias * 8;
+		      irela++;
+		      count++;
+		    }
+
+		  erela += rel_hdr->sh_entsize;
+		}
+
+	      if (edit_tail->type == INSERT_EXIDX_CANTUNWIND_AT_END)
+		{
+		  /* New relocation entity.  */
+		  asection *text_sec = edit_tail->linked_section;
+		  asection *text_out = text_sec->output_section;
+		  bfd_vma exidx_offset = offset + i->size - 8;
+
+		  irela->r_addend = 0;
+		  irela->r_offset = exidx_offset;
+		  irela->r_info = ELF32_R_INFO
+		    (text_out->target_index, R_ARM_PREL31);
+		  irela++;
+		  count++;
+		}
+	    }
+	  else
+	    {
+	      for (j = 0; j < NUM_SHDR_ENTRIES (input_reldata->hdr); j++)
+		{
+		  (*swap_in) (abfd, erela, irela);
+		  erela += rel_hdr->sh_entsize;
+		  irela++;
+		}
+
+	      count += NUM_SHDR_ENTRIES (input_reldata->hdr);
+	    }
+	}
+    }
+
+  reldata->count = count;
+  rel_hdr->sh_size = count * rel_hdr->sh_entsize;
+
+  erela = erela_head;
+  irela = irela_head;
+  while (count > 0)
+    {
+      (*swap_out) (abfd, irela, erela);
+      erela += rel_hdr->sh_entsize;
+      irela++;
+      count--;
+    }
+
+  free (irela_head);
+
+  /* Hashes are no longer valid.  */
+  free (reldata->hashes);
+  reldata->hashes = NULL;
 }
 
 /* Unwinding tables are not referenced directly.  This pass marks them as
@@ -17777,7 +17938,6 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
 	  push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			      create_instruction_branch_absolute
 			      (initial_insn_addr - current_stub_contents));
-			       
 
       /* Fill the remaining of the stub with deterministic contents.  */
       current_stub_contents =
@@ -18163,7 +18323,7 @@ stm32l4xx_create_replacing_stub_vldm (struct elf32_arm_link_hash_table * htab,
     }
   else
     {
-      bfd_boolean is_dp = /* DP encoding. */
+      bfd_boolean is_dp = /* DP encoding.  */
 	(initial_insn & 0xfe100f00) == 0xec100b00;
       bfd_boolean is_ia_nobang = /* (IA without !).  */
 	(((initial_insn << 7) >> 28) & 0xd) == 0x4;
@@ -19054,82 +19214,8 @@ elf32_arm_count_additional_relocs (asection *sec)
   return arm_data == NULL ? 0 : arm_data->additional_reloc_count;
 }
 
-static unsigned int
-elf32_arm_count_output_relocs (struct bfd_link_info *  info,
-			       asection *              o,
-			       bfd_boolean             rela)
-{
-  struct bfd_elf_section_data *esdo;
-  struct bfd_link_order *p;
-  bfd_size_type count;
-
-  esdo = elf_section_data (o->output_section);
-  if (esdo->this_hdr.sh_type != SHT_ARM_EXIDX)
-    return _bfd_elf_default_count_output_relocs (info, o, rela);
-
-  /* PR 20595: Skip relocations for deleted exidx entries.  */
-  count = 0;
-  for (p = o->map_head.link_order; p != NULL; p = p->next)
-    {
-      struct _arm_elf_section_data *arm_data;
-      struct bfd_elf_section_data *esd;
-      arm_unwind_table_edit *edit_list;
-      Elf_Internal_Rela *relocs;
-      asection *sec;
-      bfd_size_type num_rel;
-      bfd_size_type num_rela;
-      unsigned int i;
-
-      if (p->type == bfd_section_reloc_link_order
-	  || p->type == bfd_symbol_reloc_link_order)
-	{
-	  count++;
-	  continue;
-	}
-
-      sec = p->u.indirect.section;
-      arm_data = get_arm_elf_section_data (sec);
-      esd = &arm_data->elf;
-
-      if (arm_data->additional_reloc_count)
-	count += arm_data->additional_reloc_count;
-
-      edit_list = arm_data->u.exidx.unwind_edit_list;
-      if (!edit_list)
-	{
-	  count += sec->reloc_count;
-	  continue;
-	}
-
-      relocs = _bfd_elf_link_read_relocs (sec->owner, sec, NULL, NULL,
-					  info->keep_memory);
-      num_rel = esd->rel.hdr ? NUM_SHDR_ENTRIES (esd->rel.hdr) : 0;
-      num_rela = esd->rela.hdr ? NUM_SHDR_ENTRIES (esd->rela.hdr) : 0;
-      if (rela)
-	relocs += num_rel;
-
-      for (i = 0; i < (rela ? num_rela : num_rel); i++)
-	{
-	  arm_unwind_table_edit *edit_node;
-	  unsigned int index;
-
-	  index = (relocs[i].r_offset - sec->vma) / 8;
-
-	  for (edit_node = edit_list;
-	       edit_node->next && edit_node->next->index > index;
-	       edit_node++);
-
-	  if (edit_node->type != DELETE_EXIDX_ENTRY
-	      || edit_node->index != index)
-	    count++;
-	}
-    }
-
-  return count;
-}
-
 /* Called to set the sh_flags, sh_link and sh_info fields of OSECTION which
-   has a type >= SHT_LOOS.  Returns TRUE if these fields were initialised 
+   has a type >= SHT_LOOS.  Returns TRUE if these fields were initialised
    FALSE otherwise.  ISECTION is the best guess matching section from the
    input bfd IBFD, but it might be NULL.  */
 
@@ -19172,7 +19258,7 @@ elf32_arm_copy_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
 		  == iheaders[isection->sh_link]->bfd_section->output_section)
 		break;
 	  }
-	    
+
 	if (i == 0)
 	  {
 	    /* Failing that we have to find a matching section ourselves.  If
@@ -19256,139 +19342,6 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
     sym->flags |= BSF_KEEP;
 }
 
-static bfd_boolean
-emit_relocs (bfd *                          output_bfd,
-	     asection *                     input_section,
-	     Elf_Internal_Shdr *            input_rel_hdr,
-	     Elf_Internal_Rela *            internal_relocs,
-	     struct elf_link_hash_entry **  rel_hash,
-	     bfd_boolean (*                 fallback) (bfd *, asection *,
-						       Elf_Internal_Shdr *,
-						       Elf_Internal_Rela *,
-						       struct elf_link_hash_entry **))
-{
-  _arm_elf_section_data *arm_data;
-  struct bfd_elf_section_reloc_data *output_reldata;
-  Elf_Internal_Shdr *output_rel_hdr;
-  Elf_Internal_Rela *irela;
-  Elf_Internal_Rela *irelaend;
-  asection *output_section;
-  const struct elf_backend_data *bed;
-  void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
-  struct bfd_elf_section_data *esdo;
-  arm_unwind_table_edit *edit_list, *edit_tail;
-  bfd_byte *erel;
-  bfd_vma offset;
-
-  arm_data = get_arm_elf_section_data (input_section);
-
-  if (!arm_data || arm_data->elf.this_hdr.sh_type != SHT_ARM_EXIDX)
-    goto fallback_label;
-
-  edit_list = arm_data->u.exidx.unwind_edit_list;
-  edit_tail = arm_data->u.exidx.unwind_edit_tail;
-
-  if (!edit_list)
-    goto fallback_label;
-
-  output_section = input_section->output_section;
-  offset = output_section->vma + input_section->output_offset;
-
-  bed = get_elf_backend_data (output_bfd);
-  esdo = elf_section_data (output_section);
-  if (esdo->rel.hdr && esdo->rel.hdr->sh_entsize == input_rel_hdr->sh_entsize)
-    {
-      output_reldata = &esdo->rel;
-      swap_out = bed->s->swap_reloc_out;
-    }
-  else if (esdo->rela.hdr
-	   && esdo->rela.hdr->sh_entsize == input_rel_hdr->sh_entsize)
-    {
-      output_reldata = &esdo->rela;
-      swap_out = bed->s->swap_reloca_out;
-    }
-  else
-    {
-      (*_bfd_error_handler)
-	(_("%B: relocation size mismatch in %B section %A"),
-	 output_bfd, input_section->owner, input_section);
-	 bfd_set_error (bfd_error_wrong_format);
-      return FALSE;
-    }
-
-  output_rel_hdr = output_reldata->hdr;
-  erel = output_rel_hdr->contents;
-  erel += output_reldata->count * input_rel_hdr->sh_entsize;
-
-  irela = internal_relocs;
-  irelaend = irela + (NUM_SHDR_ENTRIES (input_rel_hdr)
-		      * bed->s->int_rels_per_ext_rel);
-  while (irela < irelaend)
-    {
-      arm_unwind_table_edit *edit_node, *edit_next;
-      Elf_Internal_Rela rel;
-      bfd_vma bias;
-      bfd_vma index;
-
-      index = (irela->r_offset - offset) / 8;
-
-      bias = 0;
-      edit_node = edit_list;
-      for (edit_next = edit_list;
-	   edit_next && edit_next->index <= index;
-	   edit_next = edit_node->next)
-	{
-	  bias++;
-	  edit_node = edit_next;
-	}
-
-      if (edit_node->type != DELETE_EXIDX_ENTRY || edit_node->index != index)
-	{
-	  rel.r_offset = irela->r_offset - bias * 8;
-	  rel.r_info = irela->r_info;
-	  rel.r_addend = irela->r_addend;
-
-	  (*swap_out) (output_bfd, &rel, erel);
-	  erel += output_rel_hdr->sh_entsize;
-	  output_reldata->count++;
-	}
-
-      irela += bed->s->int_rels_per_ext_rel;
-    }
-
-  if (edit_tail->type == INSERT_EXIDX_CANTUNWIND_AT_END)
-    {
-      /* New relocation entity.  */
-      asection *text_sec = edit_tail->linked_section;
-      asection *text_out = text_sec->output_section;
-      bfd_vma exidx_offset = offset + input_section->size - 8;
-      Elf_Internal_Rela rel;
-
-      rel.r_addend = 0;
-      rel.r_offset = exidx_offset;
-      rel.r_info = ELF32_R_INFO (text_out->target_index, R_ARM_PREL31);
-      (*swap_out) (output_bfd, &rel, erel);
-      output_reldata->count++;
-    }
-
-  return TRUE;
-
-fallback_label:
-  return fallback (output_bfd, input_section, input_rel_hdr,
-		   internal_relocs, rel_hash);
-}
-
-static bfd_boolean
-elf32_arm_emit_relocs (bfd *                          output_bfd,
-		       asection *                     input_section,
-		       Elf_Internal_Shdr *            input_rel_hdr,
-		       Elf_Internal_Rela *            internal_relocs,
-		       struct elf_link_hash_entry **  rel_hash)
-{
-  return emit_relocs (output_bfd, input_section, input_rel_hdr, internal_relocs,
-		      rel_hash, _bfd_elf_link_output_relocs);
-}
-
 #undef  elf_backend_copy_special_section_fields
 #define elf_backend_copy_special_section_fields elf32_arm_copy_special_section_fields
 
@@ -19419,12 +19372,12 @@ elf32_arm_emit_relocs (bfd *                          output_bfd,
 #define bfd_elf32_bfd_final_link		elf32_arm_final_link
 #define bfd_elf32_get_synthetic_symtab  elf32_arm_get_synthetic_symtab
 
-#define elf_backend_emit_relocs			elf32_arm_emit_relocs
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook
 #define elf_backend_gc_mark_extra_sections	elf32_arm_gc_mark_extra_sections
 #define elf_backend_gc_sweep_hook               elf32_arm_gc_sweep_hook
 #define elf_backend_check_relocs                elf32_arm_check_relocs
+#define elf_backend_update_relocs		elf32_arm_update_relocs
 #define elf_backend_relocate_section		elf32_arm_relocate_section
 #define elf_backend_write_section		elf32_arm_write_section
 #define elf_backend_adjust_dynamic_symbol	elf32_arm_adjust_dynamic_symbol
@@ -19449,7 +19402,6 @@ elf32_arm_emit_relocs (bfd *                          output_bfd,
 #define elf_backend_begin_write_processing      elf32_arm_begin_write_processing
 #define elf_backend_add_symbol_hook		elf32_arm_add_symbol_hook
 #define elf_backend_count_additional_relocs	elf32_arm_count_additional_relocs
-#define elf_backend_count_output_relocs		elf32_arm_count_output_relocs
 #define elf_backend_symbol_processing		elf32_arm_backend_symbol_processing
 
 #define elf_backend_can_refcount       1
@@ -19616,17 +19568,6 @@ elf32_arm_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
   elf_vxworks_final_write_processing (abfd, linker);
 }
 
-static bfd_boolean
-elf32_arm_vxworks_emit_relocs (bfd *                          output_bfd,
-			       asection *                     input_section,
-			       Elf_Internal_Shdr *            input_rel_hdr,
-			       Elf_Internal_Rela *            internal_relocs,
-			       struct elf_link_hash_entry **  rel_hash)
-{
-  return emit_relocs (output_bfd, input_section, input_rel_hdr, internal_relocs,
-		      rel_hash, elf_vxworks_emit_relocs);
-}
-
 #undef  elf32_bed
 #define elf32_bed elf32_arm_vxworks_bed
 
@@ -19635,7 +19576,7 @@ elf32_arm_vxworks_emit_relocs (bfd *                          output_bfd,
 #undef  elf_backend_final_write_processing
 #define elf_backend_final_write_processing	elf32_arm_vxworks_final_write_processing
 #undef  elf_backend_emit_relocs
-#define elf_backend_emit_relocs			elf32_arm_vxworks_emit_relocs
+#define elf_backend_emit_relocs			elf_vxworks_emit_relocs
 
 #undef  elf_backend_may_use_rel_p
 #define elf_backend_may_use_rel_p	0
@@ -19998,8 +19939,7 @@ elf32_arm_symbian_plt_sym_val (bfd_vma i, const asection *plt,
 #define ELF_DYNAMIC_SEC_FLAGS \
   (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED)
 
-#undef  elf_backend_emit_relocs
-#define elf_backend_emit_relocs			elf32_arm_emit_relocs
+#undef elf_backend_emit_relocs
 
 #undef  bfd_elf32_bfd_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_create	elf32_arm_symbian_link_hash_table_create

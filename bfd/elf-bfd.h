@@ -756,6 +756,8 @@ typedef asection * (*elf_gc_mark_hook_fn)
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
 
+struct bfd_elf_section_reloc_data;
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -768,7 +770,7 @@ struct elf_backend_data
   /* The ELF machine code (EM_xxxx) for this backend.  */
   int elf_machine_code;
 
-  /* EI_OSABI. */
+  /* EI_OSABI.  */
   int elf_osabi;
 
   /* The maximum page size for this backend.  */
@@ -1173,6 +1175,11 @@ struct elf_backend_data
     (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
      struct elf_link_hash_entry **);
 
+  /* Update relocations.  It is allowed to change the number and the order.
+     In such a case hashes should be invalidated.  */
+  void (*elf_backend_update_relocs)
+    (asection *, struct bfd_elf_section_reloc_data *);
+
   /* Count relocations.  Not called for relocatable links
      or if all relocs are being preserved in the output.  */
   unsigned int (*elf_backend_count_relocs)
@@ -1182,11 +1189,6 @@ struct elf_backend_data
      additional relocations needs to be created.  */
   unsigned int (*elf_backend_count_additional_relocs)
     (asection *);
-
-  /* Count relocations to be output.  The result may be different if the
-     input relocations are expected to be modified by the backend.  */
-  unsigned int (* elf_backend_count_output_relocs)
-    (struct bfd_link_info *, asection *, bfd_boolean is_rela);
 
   /* Say whether to sort relocs output by ld -r and ld --emit-relocs,
      by r_offset.  If NULL, default to true.  */
@@ -1381,7 +1383,7 @@ struct elf_backend_data
   /* This is non-zero if static TLS segments require a special alignment.  */
   unsigned static_tls_alignment;
 
-  /* Alignment for the PT_GNU_STACK segment. */
+  /* Alignment for the PT_GNU_STACK segment.  */
   unsigned stack_align;
 
   /* Flag bits to assign to a section of type SHT_STRTAB.  */
@@ -1677,13 +1679,13 @@ struct output_elf_obj_tdata
    symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
    field in the ELF header structure.  */
 enum elf_gnu_symbols
-  {
-    elf_gnu_symbol_none = 0,
-    elf_gnu_symbol_any = 1 << 0,
-    elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
-    elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
-    elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
-  };
+{
+  elf_gnu_symbol_none = 0,
+  elf_gnu_symbol_any = 1 << 0,
+  elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
+  elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
+  elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
+};
 
 typedef struct elf_section_list
 {
@@ -1691,8 +1693,7 @@ typedef struct elf_section_list
   unsigned int               ndx;
   struct elf_section_list *  next;
 } elf_section_list;
-  
-    
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -2157,9 +2158,6 @@ extern bfd_boolean _bfd_elf_link_output_relocs
   (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
    struct elf_link_hash_entry **);
 
-extern unsigned int _bfd_elf_default_count_output_relocs
-  (struct bfd_link_info * ATTRIBUTE_UNUSED, asection *, bfd_boolean);
-
 extern bfd_boolean _bfd_elf_adjust_dynamic_copy
   (struct bfd_link_info *, struct elf_link_hash_entry *, asection *);
 
@@ -2396,7 +2394,7 @@ extern bfd_boolean _bfd_elf_ppc_set_arch (bfd *);
 /* PowerPC .gnu.attributes handling common to both 32-bit and 64-bit.  */
 extern void _bfd_elf_ppc_merge_fp_attributes (bfd *, bfd *);
 
-/* Exported interface for writing elf corefile notes. */
+/* Exported interface for writing elf corefile notes.  */
 extern char *elfcore_write_note
   (bfd *, char *, int *, const char *, int, const void *, int);
 extern char *elfcore_write_prpsinfo

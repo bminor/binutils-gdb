@@ -1,3 +1,22 @@
+2016-09-28  Akihiko Odaki  <akihiko.odaki.4i@stu.hosei.ac.jp>
+
+	PR ld/20636
+	* elf-bfd.h (struct elf_backend_data): Delete
+	elf_backend_count_output_relocs callback and add
+	elf_backend_update_relocs.
+	* elf32-arm.c (elf32_arm_count_output_relocs): Deleted.
+	(emit_relocs): Deleted.
+	(elf32_arm_emit_relocs): Deleted.
+	(elf_backend_emit_relocs): Updated not to use the old functions.
+	(elf32_arm_update_relocs): New function.
+	(elf_backend_update_relocs): New define.
+	* elflink.c (bfd_elf_final_link): Add additional_reloc_count to the
+	relocation count. Call elf_backend_emit_relocs.
+	(_bfd_elf_size_reloc_section): Do not call
+	elf_backend_count_output_relocs.
+	* elfxx-target.h (elf_backend_count_output_relocs): Deleted.
+	(elf_backend_update_relocs): New define.
+
 2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>
 
 	PR ld/20608

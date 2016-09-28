@@ -2449,23 +2449,13 @@ _bfd_elf_link_read_relocs (bfd *abfd,
    section header for a section containing relocations for O.  */
 
 static bfd_boolean
-_bfd_elf_link_size_reloc_section (bfd *abfd, struct bfd_link_info *info,
-				  asection *o, bfd_boolean rela)
+_bfd_elf_link_size_reloc_section (bfd *abfd,
+				  struct bfd_elf_section_reloc_data *reldata)
 {
-  struct bfd_elf_section_data *esdo;
-  const struct elf_backend_data *bed;
-  struct bfd_elf_section_reloc_data *reldata;
-  Elf_Internal_Shdr *rel_hdr;
-  unsigned int count;
-
-  esdo = elf_section_data (o);
-  reldata = rela ? &esdo->rela : &esdo->rel;
-  rel_hdr = reldata->hdr;
+  Elf_Internal_Shdr *rel_hdr = reldata->hdr;
 
   /* That allows us to calculate the size of the section.  */
-  bed = get_elf_backend_data (abfd);
-  count = (*bed->elf_backend_count_output_relocs) (info, o, rela);
-  rel_hdr->sh_size = count * rel_hdr->sh_entsize;
+  rel_hdr->sh_size = rel_hdr->sh_entsize * reldata->count;
 
   /* The contents field must last into write_object_contents, so we
      allocate it with bfd_alloc rather than malloc.  Also since we
@@ -2552,20 +2542,6 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
   output_reldata->count += NUM_SHDR_ENTRIES (input_rel_hdr);
 
   return TRUE;
-}
-
-unsigned int
-_bfd_elf_default_count_output_relocs (struct bfd_link_info *  info ATTRIBUTE_UNUSED,
-				      asection *              o,
-				      bfd_boolean             rela)
-{
-  struct bfd_elf_section_data *esdo;
-  struct bfd_elf_section_reloc_data *reldata;
-
-  esdo = elf_section_data (o);
-  reldata = rela ? &esdo->rela : &esdo->rel;
-
-  return reldata->count;
 }
 
 /* Make weak undefined symbols in PIE dynamic.  */
@@ -8354,6 +8330,7 @@ ext64b_r_offset (const void *p)
 
 static bfd_boolean
 elf_link_adjust_relocs (bfd *abfd,
+			asection *sec,
 			struct bfd_elf_section_reloc_data *reldata,
 			bfd_boolean sort)
 {
@@ -8411,6 +8388,9 @@ elf_link_adjust_relocs (bfd *abfd,
 			   | (irela[j].r_info & r_type_mask));
       (*swap_out) (abfd, irela, erela);
     }
+
+  if (bed->elf_backend_update_relocs)
+    (*bed->elf_backend_update_relocs) (sec, reldata);
 
   if (sort && count != 0)
     {
@@ -11310,12 +11290,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       struct bfd_elf_section_data *esdo = elf_section_data (o);
-      unsigned int additional_reloc_count = 0;
       o->reloc_count = 0;
 
       for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  unsigned int reloc_count = 0;
+	  unsigned int additional_reloc_count = 0;
 	  struct bfd_elf_section_data *esdi = NULL;
 
 	  if (p->type == bfd_section_reloc_link_order
@@ -11401,14 +11381,21 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  if (reloc_count == 0)
 	    continue;
 
+	  reloc_count += additional_reloc_count;
 	  o->reloc_count += reloc_count;
 
 	  if (p->type == bfd_indirect_link_order && emit_relocs)
 	    {
 	      if (esdi->rel.hdr)
+		{
 		  esdo->rel.count += NUM_SHDR_ENTRIES (esdi->rel.hdr);
+		  esdo->rel.count += additional_reloc_count;
+		}
 	      if (esdi->rela.hdr)
+		{
 		  esdo->rela.count += NUM_SHDR_ENTRIES (esdi->rela.hdr);
+		  esdo->rela.count += additional_reloc_count;
+		}
 	    }
 	  else
 	    {
@@ -11419,7 +11406,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    }
 	}
 
-      if (o->reloc_count > 0 || additional_reloc_count > 0)
+      if (o->reloc_count > 0)
 	o->flags |= SEC_RELOC;
       else
 	{
@@ -11457,11 +11444,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       if ((o->flags & SEC_RELOC) != 0)
 	{
 	  if (esdo->rel.hdr
-	      && !(_bfd_elf_link_size_reloc_section (abfd, info, o, FALSE)))
+	      && !(_bfd_elf_link_size_reloc_section (abfd, &esdo->rel)))
 	    goto error_return;
 
 	  if (esdo->rela.hdr
-	      && !(_bfd_elf_link_size_reloc_section (abfd, info, o, TRUE)))
+	      && !(_bfd_elf_link_size_reloc_section (abfd, &esdo->rela)))
 	    goto error_return;
 	}
 
@@ -11963,10 +11950,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
       sort = bed->sort_relocs_p == NULL || (*bed->sort_relocs_p) (o);
       if (esdo->rel.hdr != NULL
-	  && !elf_link_adjust_relocs (abfd, &esdo->rel, sort))
+	  && !elf_link_adjust_relocs (abfd, o, &esdo->rel, sort))
 	return FALSE;
       if (esdo->rela.hdr != NULL
-	  && !elf_link_adjust_relocs (abfd, &esdo->rela, sort))
+	  && !elf_link_adjust_relocs (abfd, o, &esdo->rela, sort))
 	return FALSE;
 
       /* Set the reloc_count field to 0 to prevent write_relocs from
