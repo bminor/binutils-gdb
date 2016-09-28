@@ -600,6 +600,22 @@ cfi_add_CFA_offset (unsigned regno, offsetT offset)
     as_bad (_("register save offset not a multiple of %u"), abs_data_align);
 }
 
+/* Add a DW_CFA_val_offset record to the CFI data.  */
+
+void
+cfi_add_CFA_val_offset (unsigned regno, offsetT offset)
+{
+  unsigned int abs_data_align;
+
+  gas_assert (DWARF2_CIE_DATA_ALIGNMENT != 0);
+  cfi_add_CFA_insn_reg_offset (DW_CFA_val_offset, regno, offset);
+
+  abs_data_align = (DWARF2_CIE_DATA_ALIGNMENT < 0
+		    ? -DWARF2_CIE_DATA_ALIGNMENT : DWARF2_CIE_DATA_ALIGNMENT);
+  if (offset % abs_data_align)
+    as_bad (_("register save offset not a multiple of %u"), abs_data_align);
+}
+
 /* Add a DW_CFA_def_cfa record to the CFI data.  */
 
 void
@@ -727,6 +743,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_val_encoded_addr", dot_cfi_val_encoded_addr, 0 },
     { "cfi_inline_lsda", dot_cfi_inline_lsda, 0 },
     { "cfi_label", dot_cfi_label, 0 },
+    { "cfi_val_offset", dot_cfi, DW_CFA_val_offset },
     { NULL, NULL, 0 }
   };
 
@@ -825,6 +842,13 @@ dot_cfi (int arg)
       cfi_parse_separator ();
       offset = cfi_parse_const ();
       cfi_add_CFA_offset (reg1, offset);
+      break;
+
+    case DW_CFA_val_offset:
+      reg1 = cfi_parse_reg ();
+      cfi_parse_separator ();
+      offset = cfi_parse_const ();
+      cfi_add_CFA_val_offset (reg1, offset);
       break;
 
     case CFI_rel_offset:
@@ -1680,6 +1704,23 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	}
       break;
 
+    case DW_CFA_val_offset:
+      regno = insn->u.ri.reg;
+      offset = insn->u.ri.offset / DWARF2_CIE_DATA_ALIGNMENT;
+      if (offset < 0)
+	{
+	  out_one (DW_CFA_val_offset_sf);
+	  out_uleb128 (regno);
+	  out_sleb128 (offset);
+	}
+      else
+	{
+	  out_one (DW_CFA_val_offset);
+	  out_uleb128 (regno);
+	  out_uleb128 (offset);
+	}
+      break;
+
     case DW_CFA_register:
       out_one (DW_CFA_register);
       out_uleb128 (insn->u.rr.reg1);
@@ -2516,6 +2557,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_val_encoded_addr", dot_cfi_dummy, 0 },
     { "cfi_label", dot_cfi_dummy, 0 },
     { "cfi_inline_lsda", dot_cfi_dummy, 0 },
+    { "cfi_val_offset", dot_cfi_dummy, 0 },
     { NULL, NULL, 0 }
   };
 

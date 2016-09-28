@@ -6418,7 +6418,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
-		printf ("  DW_CFA_val_offset: %s%s at cfa%+ld\n",
+		printf ("  DW_CFA_val_offset: %s%s is cfa%+ld\n",
 			reg_prefix, regname (reg, 0),
 			roffs * fc->data_factor);
 	      if (*reg_prefix == '\0')
@@ -6653,7 +6653,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (frame_need_space (fc, reg) < 0)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
-		printf ("  DW_CFA_val_offset_sf: %s%s at cfa%+ld\n",
+		printf ("  DW_CFA_val_offset_sf: %s%s is cfa%+ld\n",
 			reg_prefix, regname (reg, 0),
 			(long)(l * fc->data_factor));
 	      if (*reg_prefix == '\0')
