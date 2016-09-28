@@ -1,3 +1,12 @@
+2016-10-06  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/leave_enter.d: New file.
+	* testsuite/gas/arc/leave_enter.s: Likewise.
+	* testsuite/gas/arc/regnames.d: Likewise.
+	* testsuite/gas/arc/regnames.s: Likewise.
+	* config/tc-arc.c (arc_parse_name): Don't match reg names against
+	confirmed symbol names.
+
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
 	* app.c (do_scrub_chars): Move fall through comment.

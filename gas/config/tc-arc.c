@@ -3331,8 +3331,7 @@ arc_parse_name (const char *name,
   if (!assembling_insn)
     return FALSE;
 
-  /* Handle only registers and address types.  */
-  if (e->X_op != O_absent)
+  if (e->X_op == O_symbol)
     return FALSE;
 
   sym = hash_find (arc_reg_hash, name);
