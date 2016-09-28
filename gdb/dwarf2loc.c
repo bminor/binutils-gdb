@@ -1672,12 +1672,17 @@ read_pieced_value (struct value *v)
   gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (v);
-  struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (v));
+  struct frame_info *frame;
   size_t type_len;
   size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (v)));
+
+  /* VALUE_FRAME_ID is used instead of VALUE_NEXT_FRAME_ID here
+     because FRAME is passed to get_frame_register_bytes(), which
+     does its own "->next" operation.  */
+  frame = frame_find_by_id (VALUE_FRAME_ID (v));
 
   if (value_type (v) != value_enclosing_type (v))
     internal_error (__FILE__, __LINE__,
@@ -1841,13 +1846,18 @@ write_pieced_value (struct value *to, struct value *from)
   const gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (to);
-  struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (to));
+  struct frame_info *frame;
   size_t type_len;
   size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (to)));
 
+  /* VALUE_FRAME_ID is used instead of VALUE_NEXT_FRAME_ID here
+     because FRAME is passed to get_frame_register_bytes() and
+     put_frame_register_bytes(), both of which do their own "->next"
+     operations.  */
+  frame = frame_find_by_id (VALUE_FRAME_ID (to));
   if (frame == NULL)
     {
       mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
@@ -2301,7 +2311,10 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   if (ctx.num_pieces > 0)
     {
       struct piece_closure *c;
-      struct frame_id frame_id = get_frame_id (frame);
+      struct frame_id frame_id
+        = frame == NULL 
+	  ? null_frame_id
+	  : get_frame_id (get_next_frame_sentinel_okay (frame));
       ULONGEST bit_size = 0;
       int i;
 
@@ -2316,7 +2329,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	 closure but before allocating the result.  */
       do_cleanups (value_chain);
       retval = allocate_computed_value (type, &pieced_value_funcs, c);
-      VALUE_FRAME_ID (retval) = frame_id;
+      VALUE_NEXT_FRAME_ID (retval) = frame_id;
       set_value_offset (retval, byte_offset);
     }
   else

@@ -2305,6 +2305,22 @@ get_prev_frame (struct frame_info *this_frame)
   return get_prev_frame_always (this_frame);
 }
 
+struct frame_id
+get_prev_frame_id_by_id (struct frame_id id)
+{
+  struct frame_id prev_id;
+  struct frame_info *frame;
+  
+  frame = frame_find_by_id (id);
+
+  if (frame != NULL)
+    prev_id = get_frame_id (get_prev_frame (frame));
+  else
+    prev_id = null_frame_id;
+
+  return prev_id;
+}
+
 CORE_ADDR
 get_frame_pc (struct frame_info *frame)
 {

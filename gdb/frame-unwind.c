@@ -210,7 +210,8 @@ frame_unwind_got_optimized (struct frame_info *frame, int regnum)
   mark_value_bytes_optimized_out (val, 0, TYPE_LENGTH (type));
   VALUE_LVAL (val) = lval_register;
   VALUE_REGNUM (val) = regnum;
-  VALUE_FRAME_ID (val) = get_frame_id (frame);
+  VALUE_NEXT_FRAME_ID (val)
+    = get_frame_id (get_next_frame_sentinel_okay (frame));
   return val;
 }
 

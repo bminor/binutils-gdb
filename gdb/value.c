@@ -262,9 +262,11 @@ struct value
      bitfields.  */
   struct value *parent;
 
-  /* Frame register value is relative to.  This will be described in
-     the lval enum above as "lval_register".  */
-  struct frame_id frame_id;
+  /* Frame ID of "next" frame to which a register value is relative.  A
+     register value is indicated when the lval enum (above) is set to
+     lval_register.  So, if the register value is found relative to frame F,
+     then the frame id of F->next will be stored in next_frame_id.  */
+  struct frame_id next_frame_id;
 
   /* Type of the value.  */
   struct type *type;
@@ -943,7 +945,7 @@ allocate_value_lazy (struct type *type)
   val->enclosing_type = type;
   VALUE_LVAL (val) = not_lval;
   val->location.address = 0;
-  VALUE_FRAME_ID (val) = null_frame_id;
+  VALUE_NEXT_FRAME_ID (val) = null_frame_id;
   val->offset = 0;
   val->bitpos = 0;
   val->bitsize = 0;
@@ -1582,9 +1584,9 @@ deprecated_value_internalvar_hack (struct value *value)
 }
 
 struct frame_id *
-deprecated_value_frame_id_hack (struct value *value)
+deprecated_value_next_frame_id_hack (struct value *value)
 {
-  return &value->frame_id;
+  return &value->next_frame_id;
 }
 
 short *
@@ -1786,7 +1788,7 @@ value_copy (struct value *arg)
   val->offset = arg->offset;
   val->bitpos = arg->bitpos;
   val->bitsize = arg->bitsize;
-  VALUE_FRAME_ID (val) = VALUE_FRAME_ID (arg);
+  VALUE_NEXT_FRAME_ID (val) = VALUE_NEXT_FRAME_ID (arg);
   VALUE_REGNUM (val) = VALUE_REGNUM (arg);
   val->lazy = arg->lazy;
   val->embedded_offset = value_embedded_offset (arg);
@@ -3228,7 +3230,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
     }
   set_value_component_location (v, arg1);
   VALUE_REGNUM (v) = VALUE_REGNUM (arg1);
-  VALUE_FRAME_ID (v) = VALUE_FRAME_ID (arg1);
+  VALUE_NEXT_FRAME_ID (v) = VALUE_NEXT_FRAME_ID (arg1);
   return v;
 }
 
@@ -3974,7 +3976,7 @@ value_fetch_lazy (struct value *val)
     }
   else if (VALUE_LVAL (val) == lval_register)
     {
-      struct frame_info *frame;
+      struct frame_info *next_frame;
       int regnum;
       struct type *type = check_typedef (value_type (val));
       struct value *new_val = val, *mark = value_mark ();
@@ -3985,27 +3987,33 @@ value_fetch_lazy (struct value *val)
 
       while (VALUE_LVAL (new_val) == lval_register && value_lazy (new_val))
 	{
-	  struct frame_id frame_id = VALUE_FRAME_ID (new_val);
+	  struct frame_id next_frame_id = VALUE_NEXT_FRAME_ID (new_val);
 
-	  frame = frame_find_by_id (frame_id);
+	  next_frame = frame_find_by_id (next_frame_id);
 	  regnum = VALUE_REGNUM (new_val);
 
-	  gdb_assert (frame != NULL);
+	  gdb_assert (next_frame != NULL);
 
 	  /* Convertible register routines are used for multi-register
 	     values and for interpretation in different types
 	     (e.g. float or int from a double register).  Lazy
 	     register values should have the register's natural type,
 	     so they do not apply.  */
-	  gdb_assert (!gdbarch_convert_register_p (get_frame_arch (frame),
+	  gdb_assert (!gdbarch_convert_register_p (get_frame_arch (next_frame),
 						   regnum, type));
 
-	  new_val = get_frame_register_value (frame, regnum);
+	  /* FRAME was obtained, above, via VALUE_NEXT_FRAME_ID. 
+	     Since a "->next" operation was performed when setting
+	     this field, we do not need to perform a "next" operation
+	     again when unwinding the register.  That's why
+	     frame_unwind_register_value() is called here instead of
+	     get_frame_register_value().  */
+	  new_val = frame_unwind_register_value (next_frame, regnum);
 
 	  /* If we get another lazy lval_register value, it means the
-	     register is found by reading it from the next frame.
-	     get_frame_register_value should never return a value with
-	     the frame id pointing to FRAME.  If it does, it means we
+	     register is found by reading it from NEXT_FRAME's next frame.
+	     frame_unwind_register_value should never return a value with
+	     the frame id pointing to NEXT_FRAME.  If it does, it means we
 	     either have two consecutive frames with the same frame id
 	     in the frame chain, or some code is trying to unwind
 	     behind get_prev_frame's back (e.g., a frame unwind
@@ -4014,7 +4022,7 @@ value_fetch_lazy (struct value *val)
 	     in this situation.  */
 	  if (VALUE_LVAL (new_val) == lval_register
 	      && value_lazy (new_val)
-	      && frame_id_eq (VALUE_FRAME_ID (new_val), frame_id))
+	      && frame_id_eq (VALUE_NEXT_FRAME_ID (new_val), next_frame_id))
 	    internal_error (__FILE__, __LINE__,
 			    _("infinite loop while fetching a register"));
 	}
@@ -4034,6 +4042,9 @@ value_fetch_lazy (struct value *val)
       if (frame_debug)
 	{
 	  struct gdbarch *gdbarch;
+	  struct frame_info *frame;
+	  /* VALUE_FRAME_ID is used here, instead of VALUE_NEXT_FRAME_ID,
+	     so that the frame level will be shown correctly.  */
 	  frame = frame_find_by_id (VALUE_FRAME_ID (val));
 	  regnum = VALUE_REGNUM (val);
 	  gdbarch = get_frame_arch (frame);

@@ -434,10 +434,18 @@ extern void set_value_address (struct value *, CORE_ADDR);
 extern struct internalvar **deprecated_value_internalvar_hack (struct value *);
 #define VALUE_INTERNALVAR(val) (*deprecated_value_internalvar_hack (val))
 
-/* Frame register value is relative to.  This will be described in the
-   lval enum above as "lval_register".  */
-extern struct frame_id *deprecated_value_frame_id_hack (struct value *);
-#define VALUE_FRAME_ID(val) (*deprecated_value_frame_id_hack (val))
+/* Frame ID of "next" frame to which a register value is relative.  A
+   register value is indicated by VALUE_LVAL being set to lval_register.
+   So, if the register value is found relative to frame F, then the
+   frame id of F->next will be stored in VALUE_NEXT_FRAME_ID.  */
+extern struct frame_id *deprecated_value_next_frame_id_hack (struct value *);
+#define VALUE_NEXT_FRAME_ID(val) (*deprecated_value_next_frame_id_hack (val))
+
+/* Frame ID of frame to which a register value is relative.  This is
+   similar to VALUE_NEXT_FRAME_ID, above, but may not be assigned to. 
+   Note that VALUE_FRAME_ID effectively undoes the "next" operation
+   that was performed during the assignment to VALUE_NEXT_FRAME_ID.  */
+#define VALUE_FRAME_ID(val) (get_prev_frame_id_by_id (VALUE_NEXT_FRAME_ID (val)))
 
 /* Register number if the value is from a register.  */
 extern short *deprecated_value_regnum_hack (struct value *);

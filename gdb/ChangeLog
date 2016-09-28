@@ -1,5 +1,33 @@
 2016-11-16  Kevin Buettner  <kevinb@redhat.com>
 
+	* value.h (VALUE_FRAME_ID): Rename to VALUE_NEXT_FRAME_ID. Update
+	comment.  Create new VALUE_FRAME_ID which is defined in terms of
+	VALUE_NEXT_FRAME_ID.
+	(deprecated_value_frame_id_hack): Rename to
+	deprecated_value_next_frame_id_hack.
+	* dwarf2loc.c, findvar.c, frame-unwind.c, sentinel-frame.c,
+	valarith.c, valops.c, value.c: Adjust nearly all occurences of
+	VALUE_FRAME_ID to VALUE_NEXT_FRAME_ID.	Add comments for those
+	which did not change.
+	* value.c (struct value): Rename frame_id field to next_frame_id.
+	Update comment.
+	(deprecated_value_frame_id_hack): Rename to
+	deprecated_value_next_frame_id_hack.
+	(value_fetch_lazy): Call frame_unwind_register_value()
+	instead of get_frame_register_value().
+	* frame.c (get_prev_frame_id_by_id): New function.
+	* frame.h (get_prev_frame_id_by_id): Declare.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Make
+	VALUE_NEXT_FRAME_ID refer to the next frame.
+	* findvar.c (value_of_register_lazy): Likewise.
+	(default_value_from_register): Likewise.
+	(value_from_register): Likewise.
+	* frame_unwind.c (frame_unwind_got_optimized): Likewise.
+	* sentinel-frame.c (sentinel_frame_prev_register): Likewise.
+	* value.h (VALUE_FRAME_ID): Update comment describing this macro.
+
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
 	* frame.h (enum frame_id_stack_status): Add FID_STACK_SENTINEL.
 	(struct frame_id): Increase number of bits required for storing
 	stack status to 3 from 2.
