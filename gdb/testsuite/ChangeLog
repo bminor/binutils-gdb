@@ -1,3 +1,8 @@
+2016-09-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/infcall-input.c: New file.
+	* gdb.base/infcall-input.exp: New file.
+
 2016-09-22  Yao Qi  <yao.qi@linaro.org>
 
 	* lib/gdbserver-support.exp: Rename mi_gdb_exit.

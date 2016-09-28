@@ -1,3 +1,8 @@
+2016-09-28  Pedro Alves  <palves@redhat.com>
+
+	* infcall.c (run_inferior_call): Remove input from the event
+	loop while running the infcall.
+
 2016-09-27  Fredrik Hederstierna  <fredrik.hederstierna@verisure.com>
 
 	* arm-tdep.c (arm_m_addr_is_magic): New function.

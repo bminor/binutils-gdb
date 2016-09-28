@@ -584,6 +584,8 @@ run_inferior_call (struct call_thread_fsm *sm,
      fetch_inferior_event.  */
   current_ui->async = 0;
 
+  delete_file_handler (current_ui->input_fd);
+
   call_thread->control.in_infcall = 1;
 
   clear_proceed_status (0);
@@ -617,6 +619,10 @@ run_inferior_call (struct call_thread_fsm *sm,
      state again here.  In other cases, stdin will be re-enabled by
      inferior_event_handler, when an exception is thrown.  */
   current_ui->prompt_state = saved_prompt_state;
+  if (current_ui->prompt_state == PROMPT_BLOCKED)
+    delete_file_handler (current_ui->input_fd);
+  else
+    ui_register_input_event_handler (current_ui);
   current_ui->async = saved_ui_async;
 
   /* At this point the current thread may have changed.  Refresh
