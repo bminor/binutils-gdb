@@ -1,3 +1,26 @@
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* frame.h (enum frame_id_stack_status): Add FID_STACK_SENTINEL.
+	(struct frame_id): Increase number of bits required for storing
+	stack status to 3 from 2.
+	(sentinel_frame_id): New declaration.
+	(get_next_frame_sentinel_okay): Declare.
+	(frame_find_by_id_sentinel_okay): Declare.
+	* frame.c (current_frame): Rename this static global to...
+	(sentinel_frame): ...this static global, which has also been
+	moved an earlier location in the file.
+	(fprint_frame_id): Add case for sentinel frame id.
+	(get_frame_id): Return early for sentinel frame.
+	(sentinel_frame_id): Define.
+	(frame_find_by_id): Add case for sentinel_frame_id.
+	(create_sentinel_frame): Use sentinel_frame_id for this_id.value
+	instead of null_frame_id.
+	(get_current_frame): Add local declaration for `current_frame'.
+	Remove local declaration for `sentinel_frame.'
+	(get_next_frame_sentinel_okay): New function.
+	(reinit_frame_cache): Use `sentinel_frame' in place of
+	`current_frame'.
+
 2016-11-15  Pedro Alves  <palves@redhat.com>
 
 	* gnulib/update-gnulib.sh (GNULIB_COMMIT_SHA1): Set to
