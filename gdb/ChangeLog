@@ -1,5 +1,10 @@
 2016-11-16  Kevin Buettner  <kevinb@redhat.com>
 
+	* python/py-unwind.c (pending_framepy_read_register): Use
+	value_of_register() instead of get_frame_register_value().
+
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
 	* value.h (VALUE_FRAME_ID): Rename to VALUE_NEXT_FRAME_ID. Update
 	comment.  Create new VALUE_FRAME_ID which is defined in terms of
 	VALUE_NEXT_FRAME_ID.

@@ -407,7 +407,12 @@ pending_framepy_read_register (PyObject *self, PyObject *args)
 
   TRY
     {
-      val = get_frame_register_value (pending_frame->frame_info, regnum);
+      /* Fetch the value associated with a register, whether it's
+	 a real register or a so called "user" register, like "pc",
+	 which maps to a real register.  In the past,
+	 get_frame_register_value() was used here, which did not
+	 handle the user register case.  */
+      val = value_of_register (regnum, pending_frame->frame_info);
       if (val == NULL)
         PyErr_Format (PyExc_ValueError,
                       "Cannot read register %d from frame.",
