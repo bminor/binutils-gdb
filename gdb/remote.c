@@ -1800,7 +1800,7 @@ remote_add_inferior (int fake_pid_p, int pid, int attached,
   /* If no main executable is currently open then attempt to
      open the file that was executed to create this inferior.  */
   if (try_open_exec && get_exec_file (0) == NULL)
-    exec_file_locate_attach (pid, 1);
+    exec_file_locate_attach (pid, 0, 1);
 
   return inf;
 }

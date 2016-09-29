@@ -1,3 +1,12 @@
+2016-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/20609 - attach of JIT-debug-enabled inf 7.11.1 regression
+	* exec.c (exec_file_locate_attach): Add parameter defer_bp_reset.
+	Use it.
+	* gdbcore.h (exec_file_locate_attach): Add parameter defer_bp_reset.
+	* infcmd.c (setup_inferior): Update caller.
+	* remote.c (remote_add_inferior): Likewise.
+
 2016-09-28  Pedro Alves  <palves@redhat.com>
 
 	* infcall.c (run_inferior_call): Remove input from the event
