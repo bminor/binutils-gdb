@@ -1,3 +1,19 @@
+2016-09-29  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (L): Make compulsory.
+	(LOPT): New, optional form of L.
+	(HTM_R): Define as LOPT.
+	(L0, L1): Delete.
+	(L32OPT): New, optional for 32-bit L.
+	(L2OPT): New, 2-bit L for dcbf.
+	(SVC_LEC): Update.
+	(L2): Define.
+	(insert_l0, extract_l0, insert_l1, extract_l2): Delete.
+	(powerpc_opcodes <cmpli, cmpi, cmpl, cmp>): Use L32OPT.
+	<dcbf>: Use L2OPT.
+	<tlbiel, tlbie>: Use LOPT.
+	<wclr, wclrall>: Use L2.
+
 2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
 
 	* Makefile.in: Regenerate.

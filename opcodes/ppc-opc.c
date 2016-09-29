@@ -62,10 +62,6 @@ static unsigned long insert_dxdn (unsigned long, long, ppc_cpu_t, const char **)
 static long extract_dxdn (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_fxm (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_fxm (unsigned long, ppc_cpu_t, int *);
-static unsigned long insert_l0 (unsigned long, long, ppc_cpu_t, const char **);
-static long extract_l0 (unsigned long, ppc_cpu_t, int *);
-static unsigned long insert_l1 (unsigned long, long, ppc_cpu_t, const char **);
-static long extract_l1 (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_li20 (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_li20 (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_ls (unsigned long, long, ppc_cpu_t, const char **);
@@ -429,20 +425,24 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The L field in a D or X form instruction.  */
 #define L IMM20 + 1
+  { 0x1, 21, NULL, NULL, 0 },
+
+  /* The optional L field in tlbie and tlbiel instructions.  */
+#define LOPT L + 1
   /* The R field in a HTM X form instruction.  */
-#define HTM_R L
+#define HTM_R LOPT
   { 0x1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
-  /* The L field in an X form instruction which must be zero.  */
-#define L0 L + 1
-  { 0x1, 21, insert_l0, extract_l0, PPC_OPERAND_OPTIONAL },
+  /* The optional (for 32-bit) L field in cmp[l][i] instructions.  */
+#define L32OPT LOPT + 1
+  { 0x1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL32 },
 
-  /* The L field in an X form instruction which must be one.  */
-#define L1 L0 + 1
-  { 0x1, 21, insert_l1, extract_l1, 0 },
+  /* The L field in dcbf instruction.  */
+#define L2OPT L32OPT + 1
+  { 0x3, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The LEV field in a POWER SVC form instruction.  */
-#define SVC_LEV L1 + 1
+#define SVC_LEV L2OPT + 1
   { 0x7f, 5, NULL, NULL, 0 },
 
   /* The LEV field in an SC form instruction.  */
@@ -688,6 +688,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define STRM SR + 1
   /* The T field in a tlbilx form instruction.  */
 #define T STRM
+  /* The L field in wclr instructions.  */
+#define L2 STRM
   { 0x3, 21, NULL, NULL, 0 },
 
   /* The ESYNC field in an X (sync) form instruction.  */
@@ -1481,58 +1483,6 @@ extract_fxm (unsigned long insn,
     }
 
   return mask;
-}
-
-/* The L field in an X form instruction which must have the value zero.  */
-
-static unsigned long
-insert_l0 (unsigned long insn,
-	   long value,
-	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg)
-{
-  if (value != 0)
-    *errmsg = _("invalid operand constant");
-  return insn & ~(0x1 << 21);
-}
-
-static long
-extract_l0 (unsigned long insn,
-	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	    int *invalid)
-{
-  long value;
-
-  value = (insn >> 21) & 0x1;
-  if (value != 0)
-    *invalid = 1;
-  return value;
-}
-
-/* The L field in an X form instruction which must have the value one.  */
-
-static unsigned long
-insert_l1 (unsigned long insn,
-	   long value,
-	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg)
-{
-  if (value != 1)
-    *errmsg = _("invalid operand constant");
-  return insn | (0x1 << 21);
-}
-
-static long
-extract_l1 (unsigned long insn,
-	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	    int *invalid)
-{
-  long value;
-
-  value = (insn >> 21) & 0x1;
-  if (value != 1)
-    *invalid = 1;
-  return value;
 }
 
 static unsigned long
@@ -3890,12 +3840,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"cmplwi",	OPL(10,0),	OPL_MASK,    PPCCOM,	PPCVLE,		{OBF, RA, UISIGNOPT}},
 {"cmpldi",	OPL(10,1),	OPL_MASK,    PPC64,	PPCVLE,		{OBF, RA, UISIGNOPT}},
-{"cmpli",	OP(10),		OP_MASK,     PPC,	PPCVLE,		{BF, L, RA, UISIGNOPT}},
+{"cmpli",	OP(10),		OP_MASK,     PPC,	PPCVLE,		{BF, L32OPT, RA, UISIGNOPT}},
 {"cmpli",	OP(10),		OP_MASK,     PWRCOM,	PPC|PPCVLE,	{BF, RA, UISIGNOPT}},
 
 {"cmpwi",	OPL(11,0),	OPL_MASK,    PPCCOM,	PPCVLE,		{OBF, RA, SI}},
 {"cmpdi",	OPL(11,1),	OPL_MASK,    PPC64,	PPCVLE,		{OBF, RA, SI}},
-{"cmpi",	OP(11),		OP_MASK,     PPC,	PPCVLE,		{BF, L, RA, SI}},
+{"cmpi",	OP(11),		OP_MASK,     PPC,	PPCVLE,		{BF, L32OPT, RA, SI}},
 {"cmpi",	OP(11),		OP_MASK,     PWRCOM,	PPC|PPCVLE,	{BF, RA, SI}},
 
 {"addic",	OP(12),		OP_MASK,     PPCCOM,	PPCVLE,		{RT, RA, SI}},
@@ -4713,7 +4663,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"cmpw",	XOPL(31,0,0),	XCMPL_MASK,  PPCCOM,	0,		{OBF, RA, RB}},
 {"cmpd",	XOPL(31,0,1),	XCMPL_MASK,  PPC64,	0,		{OBF, RA, RB}},
-{"cmp",		X(31,0),	XCMP_MASK,   PPC,	0,		{BF, L, RA, RB}},
+{"cmp",		X(31,0),	XCMP_MASK,   PPC,	0,		{BF, L32OPT, RA, RB}},
 {"cmp",		X(31,0),	XCMPL_MASK,  PWRCOM,	PPC,		{BF, RA, RB}},
 
 {"twlgt",	XTO(31,4,TOLGT), XTO_MASK,   PPCCOM,	0,		{RA, RB}},
@@ -4821,7 +4771,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"cmplw",	XOPL(31,32,0),	XCMPL_MASK,  PPCCOM,	0,		{OBF, RA, RB}},
 {"cmpld",	XOPL(31,32,1),	XCMPL_MASK,  PPC64,	0,		{OBF, RA, RB}},
-{"cmpl",	X(31,32),	XCMP_MASK,   PPC,	0,		{BF, L, RA, RB}},
+{"cmpl",	X(31,32),	XCMP_MASK,   PPC,	0,		{BF, L32OPT, RA, RB}},
 {"cmpl",	X(31,32),	XCMPL_MASK,  PWRCOM,	PPC,		{BF, RA, RB}},
 
 {"lvsr",	X(31,38),	X_MASK,	     PPCVEC,	0,		{VD, RA0, RB}},
@@ -4907,7 +4857,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ldarx",	X(31,84),	XEH_MASK,    PPC64,	0,		{RT, RA0, RB, EH}},
 
 {"dcbfl",	XOPL(31,86,1),	XRT_MASK,    POWER5,	PPC476,		{RA0, RB}},
-{"dcbf",	X(31,86),	XLRT_MASK,   PPC,	0,		{RA0, RB, L}},
+{"dcbf",	X(31,86),	XLRT_MASK,   PPC,	0,		{RA0, RB, L2OPT}},
 
 {"lbzx",	X(31,87),	X_MASK,	     COM,	0,		{RT, RA0, RB}},
 
@@ -5149,7 +5099,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ehpriv",	X(31,270),	0xffffffff,  E500MC|PPCA2, 0,		{0}},
 
 {"tlbiel",	X(31,274),	X_MASK|1<<20,POWER9,	PPC476,		{RB, RSO, RIC, PRS, X_R}},
-{"tlbiel",	X(31,274),	XRTLRA_MASK, POWER4,	POWER9|PPC476,	{RB, L}},
+{"tlbiel",	X(31,274),	XRTLRA_MASK, POWER4,	POWER9|PPC476,	{RB, LOPT}},
 
 {"mfapidi",	X(31,275),	X_MASK,	     BOOKE,	E500|TITAN,	{RT, RA}},
 
@@ -5183,7 +5133,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"tlbie",	X(31,306),	X_MASK|1<<20,POWER9,	TITAN,		{RB, RS, RIC, PRS, X_R}},
 {"tlbie",	X(31,306),	XRA_MASK,    POWER7,	POWER9|TITAN,	{RB, RS}},
-{"tlbie",	X(31,306),	XRTLRA_MASK, PPC,    E500|POWER7|TITAN,	{RB, L}},
+{"tlbie",	X(31,306),	XRTLRA_MASK, PPC,    E500|POWER7|TITAN,	{RB, LOPT}},
 {"tlbi",	X(31,306),	XRT_MASK,    POWER,	0,		{RA0, RB}},
 
 {"mfvsrld",	X(31,307),	XX1RB_MASK,  PPCVSX3,	0,		{RA, XS6}},
@@ -6234,8 +6184,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"stvfrxl",	X(31,933),	X_MASK,	     PPCVEC2,	0,		{VS, RA0, RB}},
 
 {"wclrone",	XOPL2(31,934,2),XRT_MASK,    PPCA2,	0,		{RA0, RB}},
-{"wclrall",	X(31,934),	XRARB_MASK,  PPCA2,	0,		{L}},
-{"wclr",	X(31,934),	X_MASK,	     PPCA2,	0,		{L, RA0, RB}},
+{"wclrall",	X(31,934),	XRARB_MASK,  PPCA2,	0,		{L2}},
+{"wclr",	X(31,934),	X_MASK,	     PPCA2,	0,		{L2, RA0, RB}},
 
 {"stvrxl",	X(31,935),	X_MASK,	     CELL,	0,		{VS, RA0, RB}},
 

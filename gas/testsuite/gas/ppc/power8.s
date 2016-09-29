@@ -5,7 +5,7 @@ power8:
 	tabortdc.    20,11,10
 	tabortwci.   17,10,-13
 	tabortdci.   29,3,-5
-	tbegin.
+	tbegin.      0
 	tcheck       7
 	tend.        0
 	tend.

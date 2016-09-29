@@ -274,8 +274,8 @@ Disassembly of section \.text:
 .*:	(f3 89 ef 6f|6f ef 89 f3) 	xvxsigsp vs60,vs61
 .*:	(7c 06 39 c0|c0 39 06 7c) 	cmpeqb  cr0,r6,r7
 .*:	(7f 86 39 c0|c0 39 86 7f) 	cmpeqb  cr7,r6,r7
-.*:	(7c 08 49 80|80 49 08 7c) 	cmprb   cr0,r8,r9
-.*:	(7f 88 49 80|80 49 88 7f) 	cmprb   cr7,r8,r9
+.*:	(7c 08 49 80|80 49 08 7c) 	cmprb   cr0,0,r8,r9
+.*:	(7f 88 49 80|80 49 88 7f) 	cmprb   cr7,0,r8,r9
 .*:	(7c 28 49 80|80 49 28 7c) 	cmprb   cr0,1,r8,r9
 .*:	(7f a8 49 80|80 49 a8 7f) 	cmprb   cr7,1,r8,r9
 .*:	(7d e0 01 00|00 01 e0 7d) 	setb    r15,cr0

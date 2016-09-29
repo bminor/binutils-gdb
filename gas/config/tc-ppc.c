@@ -2695,7 +2695,8 @@ md_assemble (char *str)
       const struct powerpc_operand *operand;
 
       operand = &powerpc_operands[*opindex_ptr];
-      if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
+      if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
+	  && !((operand->flags & PPC_OPERAND_OPTIONAL32) != 0 && ppc_obj64))
 	{
 	  unsigned int opcount;
 	  unsigned int num_operands_expected;
@@ -2765,6 +2766,7 @@ md_assemble (char *str)
       /* If this is an optional operand, and we are skipping it, just
 	 insert a zero.  */
       if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
+	  && !((operand->flags & PPC_OPERAND_OPTIONAL32) != 0 && ppc_obj64)
 	  && skip_optional)
 	{
 	  long val = ppc_optional_operand_value (operand);
