@@ -1,5 +1,10 @@
 2016-11-03  Graham Markall  <graham.markall@embecosm.com>
 
+	* config/tc-arc.c (assemble_insn): Replace use of ARC_SHORT with
+	arc_opcode_len.
+
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
 	* config/tc-arc.c (struct arc_insn): Replace short_insn flag with
 	len field.
 	(apply_fixups): Update to use len field.

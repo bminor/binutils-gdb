@@ -1,3 +1,8 @@
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* opcode/arc.h (arc_opcode_len): Declare.
+	(ARC_SHORT): Delete.
+
 2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
 	    Andrew Waterman <andrew@sifive.com>
 

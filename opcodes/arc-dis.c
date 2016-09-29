@@ -272,12 +272,12 @@ find_format_from_table (struct disassemble_info *info,
 
       opcode = &arc_table[i++];
 
-      if (ARC_SHORT (opcode->mask) && (insn_len == 2))
+      if ((arc_opcode_len (opcode) == 2) && (insn_len == 2))
 	{
 	  if (OPCODE_AC (opcode->opcode) != OPCODE_AC (insn[0]))
 	    continue;
 	}
-      else if (!ARC_SHORT (opcode->mask) && (insn_len == 4))
+      else if ((arc_opcode_len (opcode) == 4) && (insn_len == 4))
 	{
 	  if (OPCODE (opcode->opcode) != OPCODE (insn[0]))
 	    continue;
@@ -400,12 +400,12 @@ find_format_long_instructions (unsigned *insn,
 
       opcode = &arc_long_opcodes[i].base_opcode;
 
-      if (ARC_SHORT (opcode->mask) && (*insn_len == 2))
+      if ((arc_opcode_len (opcode) == 2) && (*insn_len == 2))
         {
           if (OPCODE_AC (opcode->opcode) != OPCODE_AC (insn[0]))
             continue;
         }
-      else if (!ARC_SHORT (opcode->mask) && (*insn_len == 4))
+      else if ((arc_opcode_len (opcode) == 4) && (*insn_len == 4))
         {
           if (OPCODE (opcode->opcode) != OPCODE (insn[0]))
             continue;

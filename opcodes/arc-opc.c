@@ -2648,3 +2648,13 @@ const struct arc_long_opcode arc_long_opcodes[] =
 };
 
 const unsigned arc_num_long_opcodes = ARRAY_SIZE (arc_long_opcodes);
+
+/* Return length of instruction represented by OPCODE in bytes.  */
+
+int
+arc_opcode_len (const struct arc_opcode *opcode)
+{
+  if (opcode->mask < 0x10000ull)
+    return 2;
+  return 4;
+}

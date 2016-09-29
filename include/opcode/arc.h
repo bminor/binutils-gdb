@@ -175,6 +175,9 @@ extern const unsigned arc_num_long_opcodes;
    instructions.  */
 extern const struct arc_opcode arc_opcodes[];
 
+/* Return length of an instruction represented by OPCODE, in bytes.  */
+extern int arc_opcode_len (const struct arc_opcode *opcode);
+
 /* CPU Availability.  */
 #define ARC_OPCODE_NONE     0x0000
 #define ARC_OPCODE_ARC600   0x0001  /* ARC 600 specific insns.  */
@@ -227,10 +230,6 @@ extern const struct arc_opcode arc_opcodes[];
 /* V1 specific.  */
 #define ARC_XMAC     0x1000
 #define ARC_CRC      0x1000
-
-/* A macro to check for short instructions.  */
-#define ARC_SHORT(mask)				\
-  (((mask) & 0xFFFF0000) ? 0 : 1)
 
 /* The operands table is an array of struct arc_operand.  */
 struct arc_operand
