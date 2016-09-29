@@ -77,7 +77,8 @@ static bfd_boolean nds32_elf_relocate_section
 static bfd_boolean nds32_elf_object_p (bfd *);
 static void nds32_elf_final_write_processing (bfd *, bfd_boolean);
 static bfd_boolean nds32_elf_set_private_flags (bfd *, flagword);
-static bfd_boolean nds32_elf_merge_private_bfd_data (bfd *, bfd *);
+static bfd_boolean nds32_elf_merge_private_bfd_data
+  (bfd *, struct bfd_link_info *);
 static bfd_boolean nds32_elf_print_private_bfd_data (bfd *, void *);
 static bfd_boolean nds32_elf_gc_sweep_hook
   (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
@@ -5988,8 +5989,9 @@ nds32_check_vec_size (bfd *ibfd)
    object file when linking.  */
 
 static bfd_boolean
-nds32_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+nds32_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
   flagword out_16regs;

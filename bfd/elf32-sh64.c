@@ -44,7 +44,7 @@ static bfd_boolean sh64_elf_new_section_hook
 static bfd_boolean sh64_elf_copy_private_data
   (bfd *, bfd *);
 static bfd_boolean sh64_elf_merge_private_data
-  (bfd *, bfd *);
+  (bfd *, struct bfd_link_info *);
 static bfd_boolean sh64_elf_fake_sections
   (bfd *, Elf_Internal_Shdr *, asection *);
 static bfd_boolean sh64_elf_set_private_flags
@@ -203,11 +203,12 @@ sh64_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 }
 
 static bfd_boolean
-sh64_elf_merge_private_data (bfd *ibfd, bfd *obfd)
+sh64_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags, new_flags;
 
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour

@@ -768,8 +768,9 @@ iq2000_elf_set_private_flags (bfd *abfd, flagword flags)
    file to the output object file when linking.  */
 
 static bfd_boolean
-iq2000_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+iq2000_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags, old_partial;
   flagword new_flags, new_partial;
   bfd_boolean error = FALSE;

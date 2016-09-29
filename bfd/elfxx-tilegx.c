@@ -4426,8 +4426,9 @@ tilegx_additional_program_headers (bfd *abfd,
 
 
 bfd_boolean
-_bfd_tilegx_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+_bfd_tilegx_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   const char *targ1 = bfd_get_target (ibfd);
   const char *targ2 = bfd_get_target (obfd);
 

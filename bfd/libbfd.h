@@ -267,7 +267,7 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
 #define _bfd_generic_bfd_copy_private_bfd_data \
   ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
 #define _bfd_generic_bfd_merge_private_bfd_data \
-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_true)
 #define _bfd_generic_bfd_set_private_flags \
   ((bfd_boolean (*) (bfd *, flagword)) bfd_true)
 #define _bfd_generic_bfd_copy_private_section_data \
@@ -3154,7 +3154,7 @@ void *bfd_arch_default_fill (bfd_size_type count,
 
 /* Extracted from linker.c.  */
 bfd_boolean _bfd_generic_verify_endian_match
-   (bfd *ibfd, bfd *obfd);
+   (bfd *ibfd, struct bfd_link_info *info);
 
 #ifdef __cplusplus
 }

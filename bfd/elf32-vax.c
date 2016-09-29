@@ -50,7 +50,6 @@ static bfd_vma elf_vax_plt_sym_val (bfd_vma, const asection *,
 				    const arelent *);
 
 static bfd_boolean elf32_vax_set_private_flags (bfd *, flagword);
-static bfd_boolean elf32_vax_merge_private_bfd_data (bfd *, bfd *);
 static bfd_boolean elf32_vax_print_private_bfd_data (bfd *, void *);
 
 static reloc_howto_type howto_table[] = {
@@ -499,8 +498,9 @@ elf32_vax_set_private_flags (bfd *abfd, flagword flags)
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 static bfd_boolean
-elf32_vax_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf32_vax_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword in_flags;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour

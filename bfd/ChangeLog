@@ -1,5 +1,80 @@
 2016-10-07  Alan Modra  <amodra@gmail.com>
 
+	* targets.c (bfd_target <_bfd_merge_private_bfd_data>): Replace
+	obfd param with struct bfd_link_info param.  Update all callers.
+	* linker.c (bfd_merge_private_bfd_data): Likewise.
+	(_bfd_generic_verify_endian_match): Likewise.
+	* aoutf1.h (sunos_merge_private_bfd_data): Likewise.
+	* coff-arm.c (coff_arm_merge_private_bfd_data): Likewise.
+	* elf-attrs.c (_bfd_elf_merge_object_attributes): Likewise.
+	* elf-bfd.h (_bfd_elf_ppc_merge_fp_attributes): Likewise.
+	(_bfd_elf_merge_object_attributes): Likewise.
+	* elf-m10300.c (_bfd_mn10300_elf_merge_private_bfd_data): Likewise.
+	* elf-s390-common.c (elf_s390_merge_obj_attributes): Likewise.
+	* elf32-arc.c (arc_elf_merge_private_bfd_data): Likewise.
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Likewise.
+	(elf32_arm_merge_private_bfd_data): Likewise.
+	* elf32-bfin.c (elf32_bfin_merge_private_bfd_data): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_merge_private_bfd_data): Likewise.
+	* elf32-cris.c (cris_elf_merge_private_bfd_data): Likewise.
+	* elf32-frv.c (frv_elf_merge_private_bfd_data): Likewise.
+	* elf32-h8300.c (elf32_h8_merge_private_bfd_data): Likewise.
+	* elf32-i370.c (i370_elf_merge_private_bfd_data): Likewise.
+	* elf32-iq2000.c (iq2000_elf_merge_private_bfd_data): Likewise.
+	* elf32-m32c.c (m32c_elf_merge_private_bfd_data): Likewise.
+	* elf32-m32r.c (m32r_elf_merge_private_bfd_data): Likewise.
+	* elf32-m68hc1x.c (_bfd_m68hc11_elf_merge_private_bfd_data): Likewise.
+	* elf32-m68hc1x.h (_bfd_m68hc11_elf_merge_private_bfd_data): Likewise.
+	* elf32-m68k.c (elf32_m68k_merge_private_bfd_data): Likewise.
+	* elf32-mcore.c (mcore_elf_merge_private_bfd_data): Likewise.
+	* elf32-mep.c (mep_elf_merge_private_bfd_data): Likewise.
+	* elf32-msp430.c (elf32_msp430_merge_mspabi_attributes): Likewise.
+	(elf32_msp430_merge_private_bfd_data): Likewise.
+	* elf32-mt.c (mt_elf_merge_private_bfd_data): Likewise.
+	* elf32-nds32.c (nds32_elf_merge_private_bfd_data): Likewise.
+	* elf32-nios2.c (nios2_elf32_merge_private_bfd_data): Likewise.
+	* elf32-or1k.c (elf32_or1k_merge_private_bfd_data): Likewise.
+	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): Likewise.
+	(ppc_elf_merge_obj_attributes): Likewise.
+	(ppc_elf_merge_private_bfd_data): Likewise.
+	* elf32-rl78.c (rl78_elf_merge_private_bfd_data): Likewise.
+	* elf32-rx.c (rx_elf_merge_private_bfd_data): Likewise.
+	* elf32-s390.c (elf32_s390_merge_private_bfd_data): Likewise.
+	* elf32-score.c (s3_elf32_score_merge_private_bfd_data): Likewise.
+	(elf32_score_merge_private_bfd_data): Likewise.
+	* elf32-score.h (s7_elf32_score_merge_private_bfd_data): Likewise.
+	* elf32-score7.c (s7_elf32_score_merge_private_bfd_data): Likewise.
+	* elf32-sh.c (sh_merge_bfd_arch, sh_elf_merge_private_data): Likewise.
+	* elf32-sh64.c (sh64_elf_merge_private_data): Likewise.
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_merge_attributes): Likewise.
+	(elf32_tic6x_merge_private_bfd_data): Likewise.
+	* elf32-v850.c (v850_elf_merge_private_bfd_data): Likewise.
+	* elf32-vax.c (elf32_vax_merge_private_bfd_data): Likewise.
+	* elf32-visium.c (visium_elf_merge_private_bfd_data): Likewise.
+	* elf32-xtensa.c (elf_xtensa_merge_private_bfd_data): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_merge_private_bfd_data): Likewise.
+	* elf64-ppc.c (ppc64_elf_merge_private_bfd_data): Likewise.
+	* elf64-s390.c (elf64_s390_merge_private_bfd_data): Likewise.
+	* elf64-sh64.c (sh_elf64_merge_private_data): Likewise.
+	* elf64-sparc.c (elf64_sparc_merge_private_bfd_data): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_merge_private_bfd_data): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_merge_private_bfd_data): Likewise.
+	* elfxx-mips.c (mips_elf_merge_obj_e_flags): Likewise.
+	(mips_elf_merge_obj_attributes): Likewise.
+	(_bfd_mips_elf_merge_private_bfd_data): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_merge_private_bfd_data): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_merge_private_bfd_data): Likewise.
+	* elfxx-sparc.h (_bfd_sparc_elf_merge_private_bfd_data): Likewise.
+	* elfxx-target.h (bfd_elfNN_bfd_merge_private_bfd_data): Likewise.
+	* elfxx-tilegx.c (_bfd_tilegx_elf_merge_private_bfd_data): Likewise.
+	* elfxx-tilegx.h (_bfd_tilegx_elf_merge_private_bfd_data): Likewise.
+	* libbfd-in.h (_bfd_generic_bfd_merge_private_bfd_data): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am (LIBBFD_H_FILES): Update.
 	* doc/Makefile.am (LIBBFD_H_DEP): Likewise.
 	* cpu-sh.c (sh_merge_bfd_arch): Move to..

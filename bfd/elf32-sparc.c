@@ -67,8 +67,9 @@ elf32_sparc_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
    object file when linking.  */
 
 static bfd_boolean
-elf32_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf32_sparc_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   bfd_boolean error;
   unsigned long ibfd_mach;
   /* FIXME: This should not be static.  */
@@ -109,7 +110,7 @@ elf32_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       return FALSE;
     }
 
-  return _bfd_sparc_elf_merge_private_bfd_data (ibfd, obfd);
+  return _bfd_sparc_elf_merge_private_bfd_data (ibfd, info);
 }
 
 /* The final processing done just before writing out the object file.

@@ -4967,8 +4967,9 @@ elf32_bfin_print_private_bfd_data (bfd * abfd, void * ptr)
    object file when linking.  */
 
 static bfd_boolean
-elf32_bfin_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf32_bfin_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags, new_flags;
   bfd_boolean error = FALSE;
 

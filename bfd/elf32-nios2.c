@@ -2916,8 +2916,9 @@ nios2_elf32_build_stubs (struct bfd_link_info *info)
    object file when linking.  */
 
 static bfd_boolean
-nios2_elf32_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+nios2_elf32_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags;
   flagword new_flags;
 
@@ -2925,7 +2926,7 @@ nios2_elf32_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     return TRUE;
 
   /* Check if we have the same endianness.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
@@ -2968,7 +2969,7 @@ nios2_elf32_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  _bfd_elf_merge_object_attributes (ibfd, info);
 
   return TRUE;
 }

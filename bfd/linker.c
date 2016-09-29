@@ -3338,20 +3338,20 @@ FUNCTION
 	bfd_merge_private_bfd_data
 
 SYNOPSIS
-	bfd_boolean bfd_merge_private_bfd_data (bfd *ibfd, bfd *obfd);
+	bfd_boolean bfd_merge_private_bfd_data
+	  (bfd *ibfd, struct bfd_link_info *info);
 
 DESCRIPTION
 	Merge private BFD information from the BFD @var{ibfd} to the
-	the output file BFD @var{obfd} when linking.  Return <<TRUE>> on success,
+	the output file BFD when linking.  Return <<TRUE>> on success,
 	<<FALSE>> on error.  Possible error returns are:
 
 	o <<bfd_error_no_memory>> -
 	Not enough memory exists to create private data for @var{obfd}.
 
-.#define bfd_merge_private_bfd_data(ibfd, obfd) \
-.     BFD_SEND (obfd, _bfd_merge_private_bfd_data, \
-.		(ibfd, obfd))
-
+.#define bfd_merge_private_bfd_data(ibfd, info) \
+.     BFD_SEND ((info)->output_bfd, _bfd_merge_private_bfd_data, \
+.		(ibfd, info))
 */
 
 /*
@@ -3360,7 +3360,7 @@ INTERNAL_FUNCTION
 
 SYNOPSIS
 	bfd_boolean _bfd_generic_verify_endian_match
-	  (bfd *ibfd, bfd *obfd);
+	  (bfd *ibfd, struct bfd_link_info *info);
 
 DESCRIPTION
 	Can be used from / for bfd_merge_private_bfd_data to check that
@@ -3369,8 +3369,10 @@ DESCRIPTION
 */
 
 bfd_boolean
-_bfd_generic_verify_endian_match (bfd *ibfd, bfd *obfd)
+_bfd_generic_verify_endian_match (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
+
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)

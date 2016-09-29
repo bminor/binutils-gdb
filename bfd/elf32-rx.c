@@ -3083,8 +3083,9 @@ describe_flags (flagword flags)
    object file when linking.  */
 
 static bfd_boolean
-rx_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+rx_elf_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags;
   flagword new_flags;
   bfd_boolean error = FALSE;

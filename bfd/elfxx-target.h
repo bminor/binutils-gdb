@@ -223,7 +223,7 @@
 #endif
 #ifndef bfd_elfNN_bfd_merge_private_bfd_data
 #define bfd_elfNN_bfd_merge_private_bfd_data \
-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_set_private_flags
 #define bfd_elfNN_bfd_set_private_flags \

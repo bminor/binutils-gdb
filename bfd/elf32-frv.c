@@ -6349,8 +6349,9 @@ frv_elf_arch_extension_p (flagword base, flagword extension)
    object file when linking.  */
 
 static bfd_boolean
-frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags, old_partial;
   flagword new_flags, new_partial;
   bfd_boolean error = FALSE;

@@ -4656,8 +4656,9 @@ ppc_elf_check_relocs (bfd *abfd,
 /* Warn for conflicting Tag_GNU_Power_ABI_FP attributes between IBFD
    and OBFD, and merge non-conflicting ones.  */
 void
-_bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, bfd *obfd)
+_bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
 
@@ -4725,13 +4726,15 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, bfd *obfd)
 /* Merge object attributes from IBFD into OBFD.  Warn if
    there are conflicting attributes.  */
 static bfd_boolean
-ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
+ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd;
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
 
-  _bfd_elf_ppc_merge_fp_attributes (ibfd, obfd);
+  _bfd_elf_ppc_merge_fp_attributes (ibfd, info);
 
+  obfd = info->output_bfd;
   in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
   out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
 
@@ -4800,7 +4803,7 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  _bfd_elf_merge_object_attributes (ibfd, info);
 
   return TRUE;
 }
@@ -4809,8 +4812,9 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
    object file when linking.  */
 
 static bfd_boolean
-ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+ppc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags;
   flagword new_flags;
   bfd_boolean error;
@@ -4819,10 +4823,10 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     return TRUE;
 
   /* Check if we have the same endianness.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
-  if (!ppc_elf_merge_obj_attributes (ibfd, obfd))
+  if (!ppc_elf_merge_obj_attributes (ibfd, info))
     return FALSE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;

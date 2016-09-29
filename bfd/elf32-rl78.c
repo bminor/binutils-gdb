@@ -1156,8 +1156,9 @@ rl78_cpu_name (flagword flags)
    object file when linking.  */
 
 static bfd_boolean
-rl78_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+rl78_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword new_flags;
   flagword old_flags;
   bfd_boolean error = FALSE;

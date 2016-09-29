@@ -542,8 +542,9 @@ arc_info_to_howto_rel (bfd * abfd ATTRIBUTE_UNUSED,
    object file when linking.  */
 
 static bfd_boolean
-arc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   unsigned short mach_ibfd;
   static unsigned short mach_obfd = EM_NONE;
   flagword out_flags;
@@ -551,7 +552,7 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   asection *sec;
 
    /* Check if we have the same endianess.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   /* Collect ELF flags.  */

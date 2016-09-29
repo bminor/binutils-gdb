@@ -4942,8 +4942,9 @@ _bfd_sparc_elf_plt_sym_val (bfd_vma i, const asection *plt, const arelent *rel)
    object file when linking.  */
 
 bfd_boolean
-_bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+_bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
 
@@ -4974,9 +4975,8 @@ _bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   out_attr->i |= in_attr->i;
   out_attr->type = 1;
 
-
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  _bfd_elf_merge_object_attributes (ibfd, info);
 
   return TRUE;
 }

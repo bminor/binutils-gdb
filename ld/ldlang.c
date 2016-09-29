@@ -6055,7 +6055,7 @@ lang_check (void)
 	     information which is needed in the output file.  */
 	  if (!command_line.warn_mismatch)
 	    pfn = bfd_set_error_handler (ignore_bfd_errors);
-	  if (!bfd_merge_private_bfd_data (input_bfd, link_info.output_bfd))
+	  if (!bfd_merge_private_bfd_data (input_bfd, &link_info))
 	    {
 	      if (command_line.warn_mismatch)
 		einfo (_("%P%X: failed to merge target specific data"

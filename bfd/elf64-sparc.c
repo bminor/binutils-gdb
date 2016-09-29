@@ -636,8 +636,9 @@ elf64_sparc_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *asym)
    object file when linking.  */
 
 static bfd_boolean
-elf64_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf64_sparc_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   bfd_boolean error;
   flagword new_flags, old_flags;
   int new_mm, old_mm;
@@ -715,7 +716,7 @@ elf64_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
           return FALSE;
         }
     }
-  return _bfd_sparc_elf_merge_private_bfd_data (ibfd, obfd);
+  return _bfd_sparc_elf_merge_private_bfd_data (ibfd, info);
 }
 
 /* MARCO: Set the correct entry size for the .stab section.  */

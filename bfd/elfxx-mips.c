@@ -15063,8 +15063,9 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
    if there are conflicting settings.  */
 
 static bfd_boolean
-mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
+mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   struct mips_elf_obj_tdata *out_tdata = mips_elf_tdata (obfd);
   flagword old_flags;
   flagword new_flags;
@@ -15255,8 +15256,9 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
 /* Merge object attributes from IBFD into OBFD.  Raise an error if
    there are conflicting attributes.  */
 static bfd_boolean
-mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
+mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   bfd *abi_fp_bfd;
@@ -15398,7 +15400,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  return _bfd_elf_merge_object_attributes (ibfd, obfd);
+  return _bfd_elf_merge_object_attributes (ibfd, info);
 }
 
 /* Merge object ABI flags from IBFD into OBFD.  Raise an error if
@@ -15437,8 +15439,9 @@ mips_elf_merge_obj_abiflags (bfd *ibfd, bfd *obfd)
    object file when linking.  */
 
 bfd_boolean
-_bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+_bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   struct mips_elf_obj_tdata *out_tdata;
   struct mips_elf_obj_tdata *in_tdata;
   bfd_boolean null_input_bfd = TRUE;
@@ -15446,7 +15449,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   bfd_boolean ok;
 
   /* Check if we have the same endianness.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     {
       _bfd_error_handler
 	(_("%B: endianness incompatible with that of the selected emulation"),
@@ -15575,9 +15578,9 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       ok = TRUE;
     }
   else
-    ok = mips_elf_merge_obj_e_flags (ibfd, obfd);
+    ok = mips_elf_merge_obj_e_flags (ibfd, info);
 
-  ok = mips_elf_merge_obj_attributes (ibfd, obfd) && ok;
+  ok = mips_elf_merge_obj_attributes (ibfd, info) && ok;
 
   ok = mips_elf_merge_obj_abiflags (ibfd, obfd) && ok;
 

@@ -502,13 +502,14 @@ mt_elf_set_private_flags (bfd *    abfd,
    object file when linking.  */
 
 static bfd_boolean
-mt_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+mt_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword     old_flags, new_flags;
   bfd_boolean  ok = TRUE;
 
   /* Check if we have the same endianness.  */
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   /* If they're not both mt, then merging is meaningless, so just

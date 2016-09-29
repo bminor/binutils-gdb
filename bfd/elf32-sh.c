@@ -6422,11 +6422,12 @@ sh_find_elf_flags (unsigned int arch_set)
    that fits the requirements then an error is emitted.  */
 
 static bfd_boolean
-sh_merge_bfd_arch (bfd *ibfd, bfd *obfd)
+sh_merge_bfd_arch (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   unsigned int old_arch, new_arch, merged_arch;
 
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   old_arch = sh_get_arch_up_from_bfd_mach (bfd_get_mach (obfd));
@@ -6466,9 +6467,9 @@ sh_merge_bfd_arch (bfd *ibfd, bfd *obfd)
    calls sh_merge_bfd_arch() to check dsp/fpu compatibility.  */
 
 static bfd_boolean
-sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
+sh_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
 {
-  extern bfd_boolean sh_merge_bfd_arch (bfd *, bfd *);
+  bfd *obfd = info->output_bfd;
 
   if (! is_sh_elf (ibfd) || ! is_sh_elf (obfd))
     return TRUE;
@@ -6483,7 +6484,7 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 	elf_elfheader (obfd)->e_flags &= ~EF_SH_PIC;
     }
 
-  if (! sh_merge_bfd_arch (ibfd, obfd))
+  if (! sh_merge_bfd_arch (ibfd, info))
     {
       _bfd_error_handler ("%B: uses instructions which are incompatible "
 			  "with instructions used in previous modules",

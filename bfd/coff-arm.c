@@ -2168,8 +2168,9 @@ coff_arm_adjust_symndx (bfd *obfd ATTRIBUTE_UNUSED,
    targets, eg different CPUs or different APCS's.     */
 
 static bfd_boolean
-coff_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+coff_arm_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   BFD_ASSERT (ibfd != NULL && obfd != NULL);
 
   if (ibfd == obfd)

@@ -2271,11 +2271,12 @@ sh_elf64_copy_private_data (bfd *ibfd, bfd *obfd)
 }
 
 static bfd_boolean
-sh_elf64_merge_private_data (bfd *ibfd, bfd *obfd)
+sh_elf64_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags, new_flags;
 
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour

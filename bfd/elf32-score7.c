@@ -3824,12 +3824,13 @@ s7_elf32_score_print_private_bfd_data (bfd *abfd, void * ptr)
 }
 
 bfd_boolean
-s7_elf32_score_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+s7_elf32_score_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword in_flags;
   flagword out_flags;
 
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;

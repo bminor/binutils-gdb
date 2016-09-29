@@ -3973,15 +3973,12 @@ elf_s390_plt_sym_val (bfd_vma i, const asection *plt,
    object file when linking.  */
 
 static bfd_boolean
-elf64_s390_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf64_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
-  if (!is_s390_elf (ibfd) || !is_s390_elf (obfd))
+  if (!is_s390_elf (ibfd) || !is_s390_elf (info->output_bfd))
     return TRUE;
 
-  if (!elf_s390_merge_obj_attributes (ibfd, obfd))
-    return FALSE;
-
-  return TRUE;
+  return elf_s390_merge_obj_attributes (ibfd, info);
 }
 
 /* Why was the hash table entry size definition changed from

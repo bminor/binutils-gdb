@@ -3457,13 +3457,14 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
    object file when linking.  */
 
 static bfd_boolean
-elf_xtensa_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf_xtensa_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   unsigned out_mach, in_mach;
   flagword out_flag, in_flag;
 
   /* Check if we have the same endianness.  */
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   /* Don't even pretend to support mixed-format linking.  */

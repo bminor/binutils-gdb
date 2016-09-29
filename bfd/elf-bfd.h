@@ -2392,7 +2392,7 @@ extern unsigned int _bfd_elf_ppc_at_tprel_transform
 /* PowerPC elf_object_p tweak.  */
 extern bfd_boolean _bfd_elf_ppc_set_arch (bfd *);
 /* PowerPC .gnu.attributes handling common to both 32-bit and 64-bit.  */
-extern void _bfd_elf_ppc_merge_fp_attributes (bfd *, bfd *);
+extern void _bfd_elf_ppc_merge_fp_attributes (bfd *, struct bfd_link_info *);
 
 /* Exported interface for writing elf corefile notes.  */
 extern char *elfcore_write_note
@@ -2508,7 +2508,8 @@ extern char *_bfd_elf_attr_strdup (bfd *, const char *);
 extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
 extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, unsigned int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
-extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
+extern bfd_boolean _bfd_elf_merge_object_attributes
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_low (bfd *, bfd *, int);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_list (bfd *, bfd *);
 extern Elf_Internal_Shdr *_bfd_elf_single_rel_hdr (asection *sec);

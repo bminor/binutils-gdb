@@ -2406,8 +2406,9 @@ data_model (int model)
    Raise an error if there are conflicting attributes.  */
 
 static bfd_boolean
-elf32_msp430_merge_mspabi_attributes (bfd *ibfd, bfd *obfd)
+elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   bfd_boolean result = TRUE;
@@ -2509,8 +2510,9 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, bfd *obfd)
    object file when linking.  */
 
 static bfd_boolean
-elf32_msp430_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+elf32_msp430_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   /* Make sure that the machine number reflects the most
      advanced version of the MSP architecture required.  */
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -2519,7 +2521,7 @@ elf32_msp430_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 			       max (bfd_get_mach (ibfd), bfd_get_mach (obfd)));
 #undef max
 
-  return elf32_msp430_merge_mspabi_attributes (ibfd, obfd);
+  return elf32_msp430_merge_mspabi_attributes (ibfd, info);
 }
 
 static bfd_boolean

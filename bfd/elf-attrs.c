@@ -571,8 +571,9 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
    attributes.  */
 
 bfd_boolean
-_bfd_elf_merge_object_attributes (bfd *ibfd, bfd *obfd)
+_bfd_elf_merge_object_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   int vendor;

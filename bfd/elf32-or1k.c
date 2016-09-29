@@ -2765,8 +2765,9 @@ or1k_elf_set_private_flags (bfd *abfd, flagword flags)
    EF_OR1K_NODELAY flag setting.  */
 
 static bfd_boolean
-elf32_or1k_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
 

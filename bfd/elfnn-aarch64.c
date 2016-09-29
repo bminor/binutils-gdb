@@ -6522,15 +6522,16 @@ elfNN_aarch64_set_private_flags (bfd *abfd, flagword flags)
    object file when linking.  */
 
 static bfd_boolean
-elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
   bfd_boolean flags_compatible = TRUE;
   asection *sec;
 
   /* Check if we have the same endianess.  */
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (!is_aarch64_elf (ibfd) || !is_aarch64_elf (obfd))

@@ -4154,11 +4154,12 @@ cris_elf_print_private_bfd_data (bfd *abfd, void * ptr)
 /* Don't mix files with and without a leading underscore.  */
 
 static bfd_boolean
-cris_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+cris_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   int imach, omach;
 
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour

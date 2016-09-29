@@ -2760,8 +2760,9 @@ v850_elf_set_private_flags (bfd *abfd, flagword flags)
    to the output object file when linking.  */
 
 static bfd_boolean
-v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+v850_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
   bfd_boolean result = TRUE;

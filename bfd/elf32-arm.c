@@ -13492,8 +13492,9 @@ elf32_arm_attributes_forbid_div (const obj_attribute *attr)
    are conflicting attributes.  */
 
 static bfd_boolean
-elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
+elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   /* Some tags have 0 = don't care, 1 = strong requirement,
@@ -14048,7 +14049,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  if (!_bfd_elf_merge_object_attributes (ibfd, obfd))
+  if (!_bfd_elf_merge_object_attributes (ibfd, info))
     return FALSE;
 
   /* Check for any attributes not known on ARM.  */
@@ -14076,7 +14077,7 @@ elf32_arm_versions_compatible (unsigned iver, unsigned over)
    object file when linking.  */
 
 static bfd_boolean
-elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd);
+elf32_arm_merge_private_bfd_data (bfd *, struct bfd_link_info *);
 
 /* Display the flags field.  */
 
@@ -19595,21 +19596,22 @@ elf32_arm_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
    object file when linking.  */
 
 static bfd_boolean
-elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
   bfd_boolean flags_compatible = TRUE;
   asection *sec;
 
   /* Check if we have the same endianness.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (! is_arm_elf (ibfd) || ! is_arm_elf (obfd))
     return TRUE;
 
-  if (!elf32_arm_merge_eabi_attributes (ibfd, obfd))
+  if (!elf32_arm_merge_eabi_attributes (ibfd, info))
     return FALSE;
 
   /* The input BFD must have had its flags initialised.  */

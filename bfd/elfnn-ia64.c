@@ -4702,8 +4702,9 @@ elfNN_ia64_set_private_flags (bfd *abfd, flagword flags)
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 static bfd_boolean
-elfNN_ia64_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elfNN_ia64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
   bfd_boolean ok = TRUE;

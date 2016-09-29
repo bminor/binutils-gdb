@@ -4018,12 +4018,13 @@ s3_elf32_score_print_private_bfd_data (bfd *abfd, void * ptr)
 }
 
 static bfd_boolean
-s3_elf32_score_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+s3_elf32_score_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword in_flags;
   flagword out_flags;
 
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;
@@ -4392,12 +4393,12 @@ elf32_score_print_private_bfd_data (bfd *abfd, void * ptr)
 }
 
 static bfd_boolean
-elf32_score_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf32_score_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
-  if (bfd_get_mach (obfd) == bfd_mach_score3)
-    return s3_elf32_score_merge_private_bfd_data (ibfd, obfd);
+  if (bfd_get_mach (info->output_bfd) == bfd_mach_score3)
+    return s3_elf32_score_merge_private_bfd_data (ibfd, info);
   else
-    return s7_elf32_score_merge_private_bfd_data (ibfd, obfd);
+    return s7_elf32_score_merge_private_bfd_data (ibfd, info);
 }
 
 static bfd_boolean

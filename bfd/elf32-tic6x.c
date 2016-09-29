@@ -3730,8 +3730,9 @@ elf32_tic6x_array_alignment_to_tag (int align)
    succeeded, FALSE otherwise.  */
 
 static bfd_boolean
-elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
+elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   bfd_boolean result = TRUE;
   obj_attribute *in_attr;
   obj_attribute *out_attr;
@@ -3916,7 +3917,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_ABI_compatibility attributes and any common GNU ones.  */
-  if (!_bfd_elf_merge_object_attributes (ibfd, obfd))
+  if (!_bfd_elf_merge_object_attributes (ibfd, info))
     return FALSE;
 
   result &= _bfd_elf_merge_unknown_attribute_list (ibfd, obfd);
@@ -3925,15 +3926,15 @@ elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
 }
 
 static bfd_boolean
-elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf32_tic6x_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
-  if (! is_tic6x_elf (ibfd) || ! is_tic6x_elf (obfd))
+  if (! is_tic6x_elf (ibfd) || ! is_tic6x_elf (info->output_bfd))
     return TRUE;
 
-  if (!elf32_tic6x_merge_attributes (ibfd, obfd))
+  if (!elf32_tic6x_merge_attributes (ibfd, info))
     return FALSE;
 
   return TRUE;

@@ -5999,8 +5999,9 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
    object file when linking.  */
 
 static bfd_boolean
-ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+ppc64_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   unsigned long iflags, oflags;
 
   if ((ibfd->flags & BFD_LINKER_CREATED) != 0)
@@ -6009,7 +6010,7 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (!is_ppc64_elf (ibfd) || !is_ppc64_elf (obfd))
     return TRUE;
 
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   iflags = elf_elfheader (ibfd)->e_flags;
@@ -6031,10 +6032,10 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       return FALSE;
     }
 
-  _bfd_elf_ppc_merge_fp_attributes (ibfd, obfd);
+  _bfd_elf_ppc_merge_fp_attributes (ibfd, info);
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  _bfd_elf_merge_object_attributes (ibfd, info);
 
   return TRUE;
 }

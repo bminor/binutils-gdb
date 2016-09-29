@@ -1725,8 +1725,10 @@ _bfd_cr16_elf_object_p (bfd *abfd)
    object file when linking.  */
 
 static bfd_boolean
-_bfd_cr16_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+_bfd_cr16_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
+
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;

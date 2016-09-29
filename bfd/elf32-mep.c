@@ -568,14 +568,15 @@ mep_elf_set_private_flags (bfd *    abfd,
    object file when linking.  */
 
 static bfd_boolean
-mep_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+mep_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   static bfd *last_ibfd = 0;
   flagword old_flags, new_flags;
   flagword old_partial, new_partial;
 
   /* Check if we have the same endianness.  */
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == FALSE)
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
