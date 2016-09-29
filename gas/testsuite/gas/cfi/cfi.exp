@@ -136,4 +136,5 @@ if { ![istarget "hppa64*-*"] } then {
   }
   run_dump_test "cfi-common-7"
   run_dump_test "cfi-common-8"
+  run_dump_test "cfi-common-9"
 }

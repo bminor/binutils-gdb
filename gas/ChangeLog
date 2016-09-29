@@ -1,3 +1,13 @@
+2016-10-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	PR gas/20648
+	* dw2gencfi.c (dot_cfi_sections): Refine the check for
+	inconsistent .cfi_sections to only consider compact vs non
+	compact forms.
+	* testsuite/gas/cfi/cfi-common-9.d: New file.
+	* testsuite/gas/cfi/cfi-common-9.s: New file.
+	* testsuite/gas/cfi/cfi.exp: Run new test.
+
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
 	* app.c: Add missing fall through comments.

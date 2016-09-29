@@ -1269,7 +1269,10 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
       }
 
   demand_empty_rest_of_line ();
-  if (cfi_sections_set && cfi_sections != sections)
+  if (cfi_sections_set
+      && (sections & (CFI_EMIT_eh_frame | CFI_EMIT_eh_frame_compact))
+      && (cfi_sections & (CFI_EMIT_eh_frame | CFI_EMIT_eh_frame_compact))
+	 != (sections & (CFI_EMIT_eh_frame | CFI_EMIT_eh_frame_compact)))
     as_bad (_("inconsistent uses of .cfi_sections"));
   cfi_sections = sections;
 }
