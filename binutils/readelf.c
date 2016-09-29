@@ -16385,6 +16385,7 @@ process_arch_specific (FILE * file)
       return process_nds32_specific (file);
       break;
     case EM_PPC:
+    case EM_PPC64:
       return process_power_specific (file);
       break;
     case EM_S390:
