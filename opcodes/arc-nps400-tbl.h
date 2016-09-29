@@ -20,7 +20,7 @@
 { "decode1", 0x48038040, 0xf80f83e0, ARC_OPCODE_ARC700, BITOP, NPS400, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_BITOP_SRC_POS, NPS_BITOP_SIZE }, { C_NPS_F }},
 
 /* decode1.cl<.f> */
-{ "decode1", 0x48038060, 0xf80803e0, ARC_OPCODE_ARC700, BITOP, NPS400, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_BITOP_DST_POS_SZ }, { C_NPS_CL, C_NPS_F }},
+{ "decode1", 0x48038060, 0xf80f83e0, ARC_OPCODE_ARC700, BITOP, NPS400, { NPS_R_DST_3B, NPS_R_SRC2_3B, NPS_BITOP_DST_POS_SZ }, { C_NPS_CL, C_NPS_F }},
 
 /* fbset<.f> */
 { "fbset", 0x48038000, 0xf80f83e0, ARC_OPCODE_ARC700, BITOP, NPS400, { NPS_R_DST_3B, NPS_R_SRC1_3B, NPS_R_SRC2_3B, NPS_BITOP_SRC_POS, NPS_BITOP_SIZE }, { C_NPS_F }},
@@ -356,7 +356,7 @@ ADDL_LIKE ("xorl", 0xE, NPS_UIMM16)
 { "zncv", 0x3e35703e, 0xffff703f, ARC_OPCODE_ARC700, ARITH, NPS400, { ZA, LIMM, RC }, { C_NPS_ZNCV }},
 
 /* zncv<.rd|.wr> 0,limm,u6   00111110011101010111uuuuuu111110 */
-{ "zncv", 0x3e75703e, 0xffff7000, ARC_OPCODE_ARC700, ARITH, NPS400, { ZA, LIMM, UIMM6_20 }, { C_NPS_ZNCV }},
+{ "zncv", 0x3e75703e, 0xffff703f, ARC_OPCODE_ARC700, ARITH, NPS400, { ZA, LIMM, UIMM6_20 }, { C_NPS_ZNCV }},
 
 /* zncv<.rd|.wr> 0,limm,s12   00111110101101010111ssssssSSSSSS */
 { "zncv", 0x3eb57000, 0xffff7000, ARC_OPCODE_ARC700, ARITH, NPS400, { ZA, LIMM, SIMM12_20 }, { C_NPS_ZNCV }},
@@ -604,7 +604,7 @@ XLDST_LIKE("xst", 0xe)
 { "efabgt", 0x3e0d703e, 0xfffff03f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, LIMM, RC }, { 0 }},
 
 /* efabgt 0, src1, limm */
-{ "efabgt", 0x380d0fbe, 0xf8ff80ff, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, LIMM }, { 0 }},
+{ "efabgt", 0x380d0fbe, 0xf8ff8fff, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, LIMM }, { 0 }},
 
 /* efabgt 0, src1, src2 */
 { "efabgt", 0x380d003e, 0xf8ff003f, ARC_OPCODE_ARC700, BMU, NPS400, { ZA, RB, RC }, { 0 }},
