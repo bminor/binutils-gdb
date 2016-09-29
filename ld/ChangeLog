@@ -1,3 +1,13 @@
+2016-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20528
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	merge 2 sections with different SHF_EXCLUDE.
+	* testsuite/ld-elf/pr20528a.d: New file.
+	* testsuite/ld-elf/pr20528a.s: Likewise.
+	* testsuite/ld-elf/pr20528b.d: Likewise.
+	* testsuite/ld-elf/pr20528b.s: Likewise.
+
 2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>
 
 	PR ld/20608

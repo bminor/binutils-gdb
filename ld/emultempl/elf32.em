@@ -1907,9 +1907,16 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	   lang_insert_orphan to create a new output section.  */
 	constraint = SPECIAL;
 
+	/* SEC_EXCLUDE is cleared when doing a relocatable link.  But
+	   we can't merge 2 input sections with the same name when only
+	   one of them has SHF_EXCLUDE.  */
 	if (os->bfd_section != NULL
 	    && (os->bfd_section->flags == 0
-		|| (((s->flags ^ os->bfd_section->flags)
+		|| ((!bfd_link_relocatable (&link_info)
+		     || (((elf_section_flags (s)
+			  ^ elf_section_flags (os->bfd_section))
+			 & SHF_EXCLUDE) == 0))
+		    && ((s->flags ^ os->bfd_section->flags)
 		     & (SEC_LOAD | SEC_ALLOC)) == 0
 		    && _bfd_elf_match_sections_by_type (link_info.output_bfd,
 							os->bfd_section,
