@@ -1,3 +1,9 @@
+2016-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/20609 - attach of JIT-debug-enabled inf 7.11.1 regression
+	* gdb.base/jit-attach-pie.c: New file.
+	* gdb.base/jit-attach-pie.exp: New file.
+
 2016-09-28  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/infcall-input.c: New file.

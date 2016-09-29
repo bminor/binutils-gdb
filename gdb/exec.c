@@ -157,7 +157,7 @@ exception_print_same (struct gdb_exception e1, struct gdb_exception e2)
 /* See gdbcore.h.  */
 
 void
-exec_file_locate_attach (int pid, int from_tty)
+exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
 {
   char *exec_file, *full_exec_path = NULL;
   struct cleanup *old_chain;
@@ -232,6 +232,8 @@ exec_file_locate_attach (int pid, int from_tty)
 
   TRY
     {
+      if (defer_bp_reset)
+	current_inferior ()->symfile_flags |= SYMFILE_DEFER_BP_RESET;
       symbol_file_add_main (full_exec_path, from_tty);
     }
   CATCH (err, RETURN_MASK_ERROR)
@@ -240,6 +242,7 @@ exec_file_locate_attach (int pid, int from_tty)
 	warning ("%s", err.message);
     }
   END_CATCH
+  current_inferior ()->symfile_flags &= ~SYMFILE_DEFER_BP_RESET;
 
   do_cleanups (old_chain);
 }
