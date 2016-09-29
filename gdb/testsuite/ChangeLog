@@ -1,3 +1,9 @@
+2016-09-29  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp <cmprb>: Update tests to account for
+	the compulsory L operand changes.
+	* gdb.arch/powerpc-power.s: Likewise.
+
 2016-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/20609 - attach of JIT-debug-enabled inf 7.11.1 regression
