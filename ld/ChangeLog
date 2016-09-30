@@ -1,5 +1,11 @@
 2016-09-30  Alan Modra  <amodra@gmail.com>
 
+	* scripttempl/v850.sc: Don't reference __ctbp, __ep, __gp when
+	not relocating.
+	* scripttempl/v850_rh850.sc: Likewise.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
 	PR ld/20528
 	* testsuite/ld-elf/pr20528a.d: xfail generic elf targets.  Allow
 	multiple .text sections for hppa-linux.
