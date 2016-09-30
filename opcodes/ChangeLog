@@ -1,3 +1,8 @@
+2016-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20657
+	* i386-dis.c (putop): Don't assign alt twice.
+
 2016-09-29  Jiong Wang  <jiong.wang@arm.com>
 
 	PR target/20553
