@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "compile-internal.h"
+#include "compile-cplus.hh"
 #include "gdb_assert.h"
 #include "symtab.h"
 #include "parser-defs.h"
@@ -169,7 +170,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
     }
   else
     {
-      struct function_template_defn *template_decl = NULL;
+      compile::cplus::templates::function_template_defn *template_decl = NULL;
       /* Squash compiler warning.  */
       gcc_cp_symbol_kind_flags kind = GCC_CP_FLAG_BASE;
       CORE_ADDR addr = 0;
@@ -200,7 +201,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 
 	case LOC_BLOCK:
 	  {
-	    int ignore;
+	    bool ignore;
 	    char *special_name;
 	    const char *func_name;
 
@@ -238,20 +239,27 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 
 		/* Find the template definition, defining the template,
 		   if needed.  */
-		template_decl = find_function_template_defn (instance, tsym);
-		if (template_decl != NULL)
+		template_decl = compile::cplus::templates::find_function_template_defn (instance, tsym);
+		if (template_decl == NULL)
 		  {
-		    /* Construct the template specialization.  This will
-		       be used later.  */
-		    targs.n_elements = tsym->template_arguments->n_arguments;
-		    targs.kinds = XNEWVEC (char ,targs.n_elements);
-		    make_cleanup (xfree, targs.kinds);
-		    targs.elements = XNEWVEC (gcc_cp_template_arg, targs.n_elements);
-		    make_cleanup (xfree, targs.elements);
-		    enumerate_template_arguments (instance, &targs,
-						  (struct template_defn *) template_decl,
-						  tsym->template_arguments);
+		    /* We didn't find one, but we've been told that this
+		       symbol is a function template.  There's not much
+		       we can do here...  */
+		    break;
 		  }
+
+		/* Construct the template specialization.  This will
+		   be used later.  */
+		targs.n_elements = tsym->template_arguments->n_arguments;
+		targs.kinds = XNEWVEC (char ,targs.n_elements);
+		make_cleanup (xfree, targs.kinds);
+		targs.elements
+		  = XNEWVEC (gcc_cp_template_arg, targs.n_elements);
+		make_cleanup (xfree, targs.elements);
+		compile::cplus::templates::enumerate_template_arguments (instance,
+									&targs,
+									template_decl,
+									tsym->template_arguments);
 	      }
 	  }
 	  break;
@@ -404,7 +412,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 				     SYMBOL_NATURAL_NAME (sym.symbol));
 		}
 	      CPCALL (specialize_function_template, instance,
-		      get_template_decl (template_decl),
+		      template_decl->decl (),
 		      &targs,
 		      addr,
 		      filename,
@@ -623,7 +631,7 @@ regexp_search_symbols (struct compile_cplus_instance *instance,
   return found;
 }
 
-/* See compile-internal.h.  */
+/* See compile-cplus.hh.  */
 
 void
 gcc_cplus_convert_symbol (void *datum,
@@ -694,7 +702,7 @@ gcc_cplus_convert_symbol (void *datum,
 	      struct block_symbol *elt;
 
 	      /* Define any template generics from the found symbols.  */
-	      compile_cplus_define_templates (instance, search_result.symbols);
+	      compile::cplus::templates::define_templates (instance, search_result.symbols);
 
 	      /* Convert each found symbol.  */
 	      for (ix = 0;
@@ -766,7 +774,7 @@ gcc_cplus_convert_symbol (void *datum,
   return;
 }
 
-/* See compile-internal.h.  */
+/* See compile-cplus.hh.  */
 
 gcc_address
 gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
@@ -1020,7 +1028,7 @@ generate_cplus_for_for_one_variable (struct compile_cplus_instance *compiler,
   END_CATCH
 }
 
-/* See compile-internal.h.  */
+/* See compile-cplus.hh.  */
 
 unsigned char *
 generate_cplus_for_variable_locations (struct compile_cplus_instance *compiler,

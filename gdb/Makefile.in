@@ -302,7 +302,7 @@ SUBDIR_GCC_COMPILE_OBS = \
 	compile-c-types.o compile-cplus-types.o \
 	compile-object-load.o compile-object-run.o \
 	compile-loc2c.o compile-c-support.o \
-	compile-cplus-support.o
+	compile-cplus-support.o compile-cplus-templates.o
 
 SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile.c \
@@ -316,7 +316,8 @@ SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile-object-run.h \
 	compile/compile-loc2c.c \
 	compile/compile-c-support.c \
-	compile/compile-cplus-support.c
+	compile/compile-cplus-support.c \
+	compile/compile-cplus-templates.cc
 
 # Guile sub directory definitons for guile support.
 
@@ -2024,6 +2025,10 @@ compile-c-support.o: $(srcdir)/compile/compile-c-support.c
 
 compile-cplus-support.o: $(srcdir)/compile/compile-cplus-support.c
 	$(COMPILE) $(srcdir)/compile/compile-cplus-support.c
+	$(POSTCOMPILE)
+
+compile-cplus-templates.o: $(srcdir)/compile/compile-cplus-templates.cc
+	$(COMPILE) $(srcdir)/compile/compile-cplus-templates.cc
 	$(POSTCOMPILE)
 
 

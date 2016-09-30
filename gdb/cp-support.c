@@ -616,6 +616,47 @@ cp_canonicalize_string (const char *string)
   return ret;
 }
 
+// See description in cp-support.h.
+
+parsed_demangle_info::parsed_demangle_info (const char *mangled_name,
+					    int options)
+  : m_mangled_name (mangled_name), m_options (options)
+{
+  m_info = cp_mangled_name_to_comp (mangled_name, options,
+				    &m_memory, &m_name_storage);
+}
+
+parsed_demangle_info::parsed_demangle_info (const parsed_demangle_info &o)
+  : parsed_demangle_info (o.m_mangled_name.c_str (), o.m_options)
+{
+}
+
+// See description in cp-support.h.
+
+parsed_demangle_info::~parsed_demangle_info ()
+{
+  if (m_info != NULL)
+    cp_demangled_name_parse_free (m_info);
+  xfree (m_memory);
+  xfree (m_name_storage);
+}
+
+// See description in cp-support.h.
+
+const struct demangle_component *
+parsed_demangle_info::tree (void) const
+{
+  return m_info->tree;
+}
+
+// See description in cp-support.h.
+
+const struct demangle_parse_info *
+parsed_demangle_info::info (void) const
+{
+  return m_info;
+}
+
 /* See description in cp-support.h.  */
 
 struct demangle_parse_info *

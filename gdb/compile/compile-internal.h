@@ -19,29 +19,20 @@
 
 #include "hashtab.h"
 #include "gcc-c-interface.h"
-#include "gcc-cp-interface.h"
 #include "common/enum-flags.h"
 
 /* enum-flags wrapper.  */
 DEF_ENUM_FLAGS_TYPE (enum gcc_qualifiers, gcc_qualifiers_flags);
-DEF_ENUM_FLAGS_TYPE (enum gcc_cp_qualifiers, gcc_cp_qualifiers_flags);
-DEF_ENUM_FLAGS_TYPE (enum gcc_cp_ref_qualifiers, gcc_cp_ref_qualifiers_flags);
-DEF_ENUM_FLAGS_TYPE (enum gcc_cp_symbol_kind, gcc_cp_symbol_kind_flags);
 
 /* Debugging flag for the "compile" family of commands.  */
 
 extern int compile_debug;
-
-/* Flag to enable internal debugging for C++ type-conversion.  */
-
-extern int debug_compile_cplus_types;
 
 /* Flag to enable internal debugging for oracle requests.  */
 
 extern int debug_compile_oracle;
 
 struct block;
-struct function_template_defn;
 
 /* An object of this type holds state associated with a given
    compilation job.  */
@@ -88,35 +79,12 @@ struct compile_c_instance
   htab_t symbol_err_map;
 };
 
-/* A subclass of compile_instance that is specific to the C++ front
-   end.  */
-struct compile_cplus_instance
-{
-  /* Base class.  Note that the base class vtable actually points to a
-     gcc_c_fe_vtable.  */
-
-  struct compile_instance base;
-
-  /* Map from gdb types to gcc types.  */
-
-  htab_t type_map;
-
-  /* Map from gdb symbols to gcc error messages to emit.  */
-
-  htab_t symbol_err_map;
-
-  /* A cache of function template definitions.  */
-  htab_t function_template_defns;
-
-  /* A cache of class template definitions.  */
-  htab_t class_template_defns;
-};
-
 /* A helper macro that takes a compile_c_instance and returns its
    corresponding gcc_c_context.  */
 
  #define C_CTX(I) ((struct gcc_c_context *) ((I)->base.fe))
  #define CP_CTX(I) ((struct gcc_cp_context *) ((I)->base.fe))
+
 /* Define header and footers for different scopes.  */
 
 /* A simple scope just declares a function named "_gdb_expr", takes no
@@ -158,9 +126,6 @@ extern int compile_register_name_demangle (struct gdbarch *gdbarch,
 struct type;
 extern gcc_type convert_type (struct compile_c_instance *instance,
 			      struct type *type);
-extern gcc_type convert_cplus_type (struct compile_cplus_instance *instance,
-				    struct type *type,
-				    enum gcc_cp_symbol_kind nested_access);
 
 /* A callback suitable for use as the GCC C symbol oracle.  */
 
@@ -170,28 +135,10 @@ extern gcc_c_oracle_function gcc_convert_symbol;
 
 extern gcc_c_symbol_address_function gcc_symbol_address;
 
-/* A callback suitable for use as the GCC C++ symbol oracle.  */
-
-extern gcc_cp_oracle_function gcc_cplus_convert_symbol;
-
-/* A callback suitable for use as the GCC C++ address oracle.  */
-
-extern gcc_cp_symbol_address_function gcc_cplus_symbol_address;
-
-/* Callbacks suitable for use as the GCC C++ enter/leave scope requests.  */
-
-extern gcc_cp_enter_leave_user_expr_scope_function gcc_cplus_enter_scope;
-extern gcc_cp_enter_leave_user_expr_scope_function gcc_cplus_leave_scope;
-
 /* Instantiate a GDB object holding state for the GCC context FE.  The
    new object is returned.  */
 
 extern struct compile_instance *new_compile_instance (struct gcc_c_context *fe);
-
-/* Instantiate a GDB object holding state for the GCC context FE.  The
-   new object is returned.  */
-
-extern struct compile_instance *new_cplus_compile_instance (struct gcc_cp_context *fe);
 
 /* Emit code to compute the address for all the local variables in
    scope at PC in BLOCK.  Returns a malloc'd vector, indexed by gdb
@@ -205,25 +152,9 @@ extern unsigned char *generate_c_for_variable_locations
       const struct block *block,
       CORE_ADDR pc);
 
-/* Emit code to compute the address for all the local variables in
-   scope at PC in BLOCK.  Returns a malloc'd vector, indexed by gdb
-   register number, where each element indicates if the corresponding
-   register is needed to compute a local variable.  */
-
-extern unsigned char *generate_cplus_for_variable_locations
-     (struct compile_cplus_instance *compiler,
-      struct ui_file *stream,
-      struct gdbarch *gdbarch,
-      const struct block *block,
-      CORE_ADDR pc);
-
 /* Get the GCC mode attribute value for a given type size.  */
 
 extern const char *c_get_mode_for_size (int size);
-
-/* Get the GCC mode attribute value for a given type size.  */
-
-extern const char *cplus_get_mode_for_size (int size);
 
 /* Given a dynamic property, return an xmallocd name that is used to
    represent its size.  The result must be freed by the caller.  The
@@ -232,72 +163,5 @@ extern const char *cplus_get_mode_for_size (int size);
 
 struct dynamic_prop;
 extern char *c_get_range_decl_name (const struct dynamic_prop *prop);
-extern char *cplus_get_range_decl_name (const struct dynamic_prop *prop);
-
-/* A macro to help with calling the plug-in.  */
-#define CPCALL(OP,CONTEXT,...)						\
-  (CP_CTX ((CONTEXT))->cp_ops->OP (CP_CTX ((CONTEXT)), ##__VA_ARGS__))
-
-struct compile_cplus_context;
-extern void ccp_push_processing_context (struct compile_cplus_instance *,
-					 struct compile_cplus_context *);
-extern int ccp_need_new_context (const struct compile_cplus_context *);
-
-extern void ccp_pop_processing_context (struct compile_cplus_instance *,
-					struct compile_cplus_context *);
-extern struct compile_cplus_context *
-  new_processing_context (struct compile_cplus_instance *,
-			  const char *, struct type *, gcc_type *);
-
-extern void delete_processing_context (struct compile_cplus_context *);
-
-/* Maybe canonicalize FIELD_NAME with function field METHOD_FIELD (may
-   be NULL for non-constructors) and METHOD_TYPE (may not be NULL).
-
-   If the field is not represented by one of the plug-in's "special functions,"
-   (operators, ctors, dtors), return FIELD_NAME.
-
-   Otherwise return the unique plug-in identifier for the function.
-
-   If memory was allocated for the name (required by some function types),
-   it *OUTNAME will be set and should be used over the return value.  It
-   must subsequently be freed by the caller.
-
-   If the given method should be ignored (not defined to the plug-in),
-   IGNORE will be set to 1.  */
-
-extern const char *
-  maybe_canonicalize_special_function (const char *field_name,
-				       const struct fn_field *method_field,
-				       const struct type *method_type,
-				       char **outname,
-				       int *ignore);
-
-/* Loop over SYMBOLS, defining any generic template definitions for
-   any template symbols in the list.  */
-
-extern void
-  compile_cplus_define_templates (struct compile_cplus_instance *instance,
-				  VEC (block_symbol_d) *symbols);
-
-/* Find the generic template definition for TSYM or NULL if none was
-   found.  */
-
-extern struct function_template_defn *
-  find_function_template_defn (struct compile_cplus_instance *instance,
-			       struct template_symbol *tsym);
-
-/* Enumerate the template arguments fo template DEFN into DEST.  */
-
-extern void
-  enumerate_template_arguments (struct compile_cplus_instance *instance,
-				struct gcc_cp_template_args *dest,
-				const struct template_defn *defn,
-				const struct template_argument_info *arg_info);
-
-/* Return the gcc_decl of the given generic template definition.  */
-
-extern gcc_decl
-  get_template_decl (const struct function_template_defn *templ_defn);
 
 #endif /* GDB_COMPILE_INTERNAL_H */

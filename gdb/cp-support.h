@@ -29,6 +29,8 @@
 #include "gdb_vecs.h"
 #include "gdb_obstack.h"
 
+#include <string>
+
 /* Opaque declarations.  */
 
 struct symbol;
@@ -60,6 +62,22 @@ struct demangle_parse_info
   struct obstack obstack;
 };
 
+class parsed_demangle_info
+{
+ public:
+  parsed_demangle_info (const char *mangled_name, int options);
+  parsed_demangle_info (const parsed_demangle_info &o);
+  ~parsed_demangle_info ();
+  const struct demangle_component *tree (void) const;
+  const struct demangle_parse_info *info (void) const;
+
+ private:
+  std::string m_mangled_name;
+  int m_options;
+  void *m_memory;
+  char *m_name_storage;
+  struct demangle_parse_info *m_info;
+};
 
 /* Functions from cp-support.c.  */
 

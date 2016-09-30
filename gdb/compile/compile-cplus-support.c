@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "compile-internal.h"
+#include "compile-cplus.hh"
 #include "compile.h"
 #include "gdb-dlfcn.h"
 #include "c-lang.h"
@@ -26,7 +27,7 @@
 #include "macroscope.h"
 #include "regcache.h"
 
-/* See compile-internal.h.  */
+/* See compile-cplus.hh.  */
 
 const char *
 cplus_get_mode_for_size (int size)
@@ -54,7 +55,7 @@ cplus_get_mode_for_size (int size)
   return mode;
 }
 
-/* See compile-internal.h.  */
+/* See compile-cplus.hh.  */
 
 char *
 cplus_get_range_decl_name (const struct dynamic_prop *prop)
