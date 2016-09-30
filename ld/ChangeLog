@@ -1,3 +1,7 @@
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (ignore_bfd_errors): Update params.
+
 2016-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20528

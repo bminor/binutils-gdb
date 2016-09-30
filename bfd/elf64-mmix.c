@@ -172,7 +172,7 @@ extern void mmix_elf_symbol_processing (bfd *, asymbol *);
 
 /* Only intended to be called from a debugger.  */
 extern void mmix_dump_bpo_gregs
-  (struct bfd_link_info *, bfd_error_handler_type);
+  (struct bfd_link_info *, void (*) (const char *, ...));
 
 static void
 mmix_set_relaxable_size (bfd *, asection *, void *);
@@ -2485,7 +2485,7 @@ bpo_reloc_request_sort_fn (const void * p1, const void * p2)
 
 void
 mmix_dump_bpo_gregs (struct bfd_link_info *link_info,
-		     bfd_error_handler_type pf)
+		     void (*pf) (const char *fmt, ...))
 {
   bfd *bpo_greg_owner;
   asection *bpo_gregs_section;

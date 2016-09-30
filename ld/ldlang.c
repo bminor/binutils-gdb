@@ -5984,7 +5984,8 @@ lang_end (void)
    BFD.  */
 
 static void
-ignore_bfd_errors (const char *s ATTRIBUTE_UNUSED, ...)
+ignore_bfd_errors (const char *fmt ATTRIBUTE_UNUSED,
+		   va_list ap ATTRIBUTE_UNUSED)
 {
   /* Don't do anything.  */
 }

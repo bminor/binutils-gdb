@@ -1218,7 +1218,8 @@ coff_write_native_symbol (bfd *abfd,
 }
 
 static void
-null_error_handler (const char * fmt ATTRIBUTE_UNUSED, ...)
+null_error_handler (const char *fmt ATTRIBUTE_UNUSED,
+		    va_list ap ATTRIBUTE_UNUSED)
 {
 }
 

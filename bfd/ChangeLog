@@ -1,3 +1,25 @@
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	* bfd-in.h: Include stdarg.h.
+	* bfd.c (bfd_error_handler_type): Make like vprintf.
+	(_bfd_error_internal): Rename from _bfd_error_handler.  Make static.
+	(error_handler_internal): New function, split out from..
+	(_bfd_default_error_handler): ..here.  Rename to _bfd_error_handler.
+	(bfd_set_error_handler): Update.
+	(bfd_get_error_handler, bfd_get_assert_handler): Delete.
+	(_bfd_assert_handler): Make static.
+	* coffgen.c (null_error_handler): Update params.
+	* elf-bfd.h (struct elf_backend_data <link_order_error_handler>):
+	Don't use bfd_error_handler_type.
+	* elf64-mmix.c (mmix_dump_bpo_gregs): Likewise.
+	* elfxx-target.h (elf_backend_link_order_error_handler): Default
+	to _bfd_error_handler.
+	* libbfd-in.h (_bfd_default_error_handler): Don't declare.
+	(bfd_assert_handler_type): Likewise.
+	(_bfd_error_handler): Update.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2016-09-28  Akihiko Odaki  <akihiko.odaki.4i@stu.hosei.ac.jp>
 
 	PR ld/20636

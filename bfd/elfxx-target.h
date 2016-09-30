@@ -660,7 +660,7 @@
 #endif
 
 #ifndef elf_backend_link_order_error_handler
-#define elf_backend_link_order_error_handler _bfd_default_error_handler
+#define elf_backend_link_order_error_handler _bfd_error_handler
 #endif
 
 #ifndef elf_backend_common_definition
