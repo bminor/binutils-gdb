@@ -156,8 +156,8 @@ spu_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   /* PR 17512: file: 90c2a92e.  */
   if (r_type >= R_SPU_max)
     {
-      (*_bfd_error_handler) (_("%B: unrecognised SPU reloc number: %d"),
-			     abfd, r_type);
+      _bfd_error_handler (_("%B: unrecognised SPU reloc number: %d"),
+			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_SPU_NONE;
     }
@@ -1014,9 +1014,9 @@ needs_ovl_stub (struct elf_link_hash_entry *h,
 					       sym,
 					       sym_sec);
 		}
-	      (*_bfd_error_handler) (_("warning: call to non-function"
-				       " symbol %s defined in %B"),
-				     sym_sec->owner, sym_name);
+	      _bfd_error_handler
+		(_("warning: call to non-function symbol %s defined in %B"),
+		 sym_sec->owner, sym_name);
 
 	    }
 	}
@@ -1895,16 +1895,16 @@ define_ovtab_symbol (struct spu_link_hash_table *htab, const char *name)
     }
   else if (h->root.u.def.section->owner != NULL)
     {
-      (*_bfd_error_handler) (_("%B is not allowed to define %s"),
-			     h->root.u.def.section->owner,
-			     h->root.root.string);
+      _bfd_error_handler (_("%B is not allowed to define %s"),
+			  h->root.u.def.section->owner,
+			  h->root.root.string);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
   else
     {
-      (*_bfd_error_handler) (_("you are not allowed to define %s in a script"),
-			     h->root.root.string);
+      _bfd_error_handler (_("you are not allowed to define %s in a script"),
+			  h->root.root.string);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
@@ -1937,8 +1937,8 @@ spu_elf_build_stubs (struct bfd_link_info *info)
 	      s = h->root.u.def.section->output_section;
 	      if (spu_elf_section_data (s)->u.o.ovl_index)
 		{
-		  (*_bfd_error_handler) (_("%s in overlay section"),
-					 h->root.root.string);
+		  _bfd_error_handler (_("%s in overlay section"),
+				      h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -1966,7 +1966,7 @@ spu_elf_build_stubs (struct bfd_link_info *info)
 
       if (htab->stub_err)
 	{
-	  (*_bfd_error_handler) (_("overlay stub relocation overflow"));
+	  _bfd_error_handler (_("overlay stub relocation overflow"));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -1975,7 +1975,7 @@ spu_elf_build_stubs (struct bfd_link_info *info)
 	{
 	  if (htab->stub_sec[i]->size != htab->stub_sec[i]->rawsize)
 	    {
-	      (*_bfd_error_handler)  (_("stubs don't match calculated size"));
+	      _bfd_error_handler  (_("stubs don't match calculated size"));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4793,7 +4793,7 @@ spu_elf_emit_fixup (bfd * output_bfd, struct bfd_link_info *info,
       if (qaddr != (base & ~(bfd_vma) 15))
 	{
 	  if ((sfixup->reloc_count + 1) * FIXUP_RECORD_SIZE > sfixup->size)
-	    (*_bfd_error_handler) (_("fatal error while creating .fixup"));
+	    _bfd_error_handler (_("fatal error while creating .fixup"));
 	  FIXUP_PUT (output_bfd, htab, sfixup->reloc_count, qaddr | bit);
 	  sfixup->reloc_count++;
 	}
@@ -5026,7 +5026,7 @@ spu_elf_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     bfd_get_section_name (input_bfd, input_section),

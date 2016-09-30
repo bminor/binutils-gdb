@@ -137,8 +137,9 @@ elf32_dlx_relocate16 (bfd *abfd,
   /* Can not support a long jump to sections other then .text.  */
   if (strcmp (input_section->name, symbol->section->output_section->name) != 0)
     {
-      (*_bfd_error_handler) (_("BFD Link Error: branch (PC rel16) to section (%s) not supported"),
-			     symbol->section->output_section->name);
+      _bfd_error_handler
+	(_("BFD Link Error: branch (PC rel16) to section (%s) not supported"),
+	 symbol->section->output_section->name);
       return bfd_reloc_undefined;
     }
 
@@ -199,8 +200,9 @@ elf32_dlx_relocate26 (bfd *abfd,
   /* Can not support a long jump to sections other then .text   */
   if (strcmp (input_section->name, symbol->section->output_section->name) != 0)
     {
-      (*_bfd_error_handler) (_("BFD Link Error: jump (PC rel26) to section (%s) not supported"),
-			     symbol->section->output_section->name);
+      _bfd_error_handler
+	(_("BFD Link Error: jump (PC rel26) to section (%s) not supported"),
+	 symbol->section->output_section->name);
       return bfd_reloc_undefined;
     }
 

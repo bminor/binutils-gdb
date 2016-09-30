@@ -1376,7 +1376,7 @@ score_elf_create_local_got_entry (bfd *abfd,
     {
       (*loc)->gotidx = -1;
       /* We didn't allocate enough space in the GOT.  */
-      (*_bfd_error_handler)
+      _bfd_error_handler
         (_("not enough GOT space for local GOT entries"));
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -2631,7 +2631,8 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
         }
       else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
         {
-          (*_bfd_error_handler) (_("%s: Malformed reloc detected for section %s"), abfd, name);
+	  _bfd_error_handler
+	    (_("%s: Malformed reloc detected for section %s"), abfd, name);
           bfd_set_error (bfd_error_bad_value);
           return FALSE;
         }
@@ -2687,7 +2688,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
         case R_SCORE_CALL15:
           if (h == NULL)
             {
-              (*_bfd_error_handler)
+	      _bfd_error_handler
                 (_("%B: CALL15 reloc at 0x%lx not against global symbol"),
                  abfd, (unsigned long) rel->r_offset);
               bfd_set_error (bfd_error_bad_value);
@@ -3856,7 +3857,7 @@ s7_elf32_score_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   if (((in_flags & EF_SCORE_PIC) != 0) != ((out_flags & EF_SCORE_PIC) != 0))
     {
-      (*_bfd_error_handler) (_("%B: warning: linking PIC files with non-PIC files"), ibfd);
+      _bfd_error_handler (_("%B: warning: linking PIC files with non-PIC files"), ibfd);
     }
 
   /* Maybe dependency fix compatibility should be checked here.  */

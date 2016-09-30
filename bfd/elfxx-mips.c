@@ -3751,7 +3751,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   if (g->assigned_low_gotno > g->assigned_high_gotno)
     {
       /* We didn't allocate enough space in the GOT.  */
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("not enough GOT space for local GOT entries"));
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -5620,7 +5620,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   if ((mips16_branch_reloc_p (r_type) && target_is_micromips_code_p)
       || (micromips_branch_reloc_p (r_type) && target_is_16_bit_code_p))
    {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("MIPS16 and microMIPS functions cannot call each other"));
       return bfd_reloc_notsupported;
    }
@@ -7116,7 +7116,7 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
 					&intopt);
 	  if (intopt.size < sizeof (Elf_External_Options))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: Warning: bad `%s' option size %u smaller than its header"),
 		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
 	      break;
@@ -7349,7 +7349,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 					&intopt);
 	  if (intopt.size < sizeof (Elf_External_Options))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: Warning: bad `%s' option size %u smaller than its header"),
 		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
 	      break;
@@ -8119,7 +8119,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       r_symndx = mips16_stub_symndx (bed, sec, relocs, rel_end);
       if (r_symndx == 0)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: Warning: cannot determine the target function for"
 	       " stub section `%s'"),
 	     abfd, name);
@@ -8244,7 +8244,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       r_symndx = mips16_stub_symndx (bed, sec, relocs, rel_end);
       if (r_symndx == 0)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: Warning: cannot determine the target function for"
 	       " stub section `%s'"),
 	     abfd, name);
@@ -8375,7 +8375,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	h = NULL;
       else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: Malformed reloc detected for section %s"),
 	     abfd, name);
 	  bfd_set_error (bfd_error_bad_value);
@@ -8450,7 +8450,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    return FALSE;
 	  if (htab->is_vxworks && !bfd_link_pic (info))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: GOT reloc at 0x%lx not expected in executables"),
 		 abfd, (unsigned long) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
@@ -8587,7 +8587,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MICROMIPS_CALL16:
 	  if (h == NULL)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: CALL16 reloc at 0x%lx not against global symbol"),
 		 abfd, (unsigned long) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
@@ -8872,7 +8872,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_MIPS_26:
 	    case R_MICROMIPS_26_S1:
 	      howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, r_type, FALSE);
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		 abfd, howto->name,
 		 (h) ? h->root.root.string : "a local symbol");
@@ -9368,9 +9368,9 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      some that we can't convert.  */
   if (!htab->use_plts_and_copy_relocs || bfd_link_pic (info))
     {
-      (*_bfd_error_handler) (_("non-dynamic relocations refer to "
-			       "dynamic symbol %s"),
-			     h->root.root.string);
+      _bfd_error_handler (_("non-dynamic relocations refer to "
+			    "dynamic symbol %s"),
+			  h->root.root.string);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -10277,7 +10277,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			name = bfd_elf_sym_name (input_bfd, symtab_hdr,
 						 local_syms + r_symndx,
 						 sec);
-		      (*_bfd_error_handler)
+		      _bfd_error_handler
 			(_("%B: Can't find matching LO16 reloc against `%s' for %s at 0x%lx in section `%A'"),
 			 input_bfd, input_section, name, howto->name,
 			 rel->r_offset);
@@ -10819,7 +10819,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      /* ADDIUPC has a span of +/-16MB, check we're in range.  */
 	      if (gotpc_offset + 0x1000000 >= 0x2000000)
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("%B: `%A' offset of %ld from `%A' "
 		       "beyond the range of ADDIUPC"),
 		     output_bfd,
@@ -11382,7 +11382,7 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
       /* ADDIUPC has a span of +/-16MB, check we're in range.  */
       if (gotpc_offset + 0x1000000 >= 0x2000000)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: `%A' offset of %ld from `%A' beyond the range of ADDIUPC"),
 	     output_bfd,
 	     htab->sgotplt->output_section,
@@ -14294,7 +14294,7 @@ update_mips_abiflags_isa (bfd *abfd, Elf_Internal_ABIFlags_v0 *abiflags)
     case E_MIPS_ARCH_64R2: new_isa = LEVEL_REV (64, 2); break;
     case E_MIPS_ARCH_64R6: new_isa = LEVEL_REV (64, 6); break;
     default:
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: Unknown architecture %s"),
 	 abfd, bfd_printable_name (abfd));
     }
@@ -14823,7 +14823,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    gptab_bss_sec = o;
 	  else
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%s: illegal section name `%s'"),
 		 bfd_get_filename (abfd), o->name);
 	      bfd_set_error (bfd_error_nonrepresentable_section);
@@ -15100,7 +15100,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
   if (((new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0)
       != ((old_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: warning: linking abicalls files with non-abicalls files"),
 	 ibfd);
       ok = TRUE;
@@ -15117,7 +15117,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
   /* Compare the ISAs.  */
   if (mips_32bit_flags_p (old_flags) != mips_32bit_flags_p (new_flags))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: linking 32-bit code with 64-bit code"),
 	 ibfd);
       ok = FALSE;
@@ -15148,7 +15148,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
       else
 	{
 	  /* The ISAs aren't compatible.  */
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: linking %s module with previous %s modules"),
 	     ibfd,
 	     bfd_printable_name (ibfd),
@@ -15171,7 +15171,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
 	  || (elf_elfheader (ibfd)->e_ident[EI_CLASS]
 	      != elf_elfheader (obfd)->e_ident[EI_CLASS]))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: ABI mismatch: linking %s module with previous %s modules"),
 	     ibfd,
 	     elf_mips_abi_name (ibfd),
@@ -15195,7 +15195,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
 
       if (m16_mis || micro_mis)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: ASE mismatch: linking %s module with previous %s modules"),
 	     ibfd,
 	     m16_mis ? "MIPS16" : "microMIPS",
@@ -15240,7 +15240,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
   /* Warn about any other mismatches */
   if (new_flags != old_flags)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: uses different e_flags (0x%lx) fields than previous modules "
 	   "(0x%lx)"),
 	 ibfd, (unsigned long) new_flags,
@@ -15447,7 +15447,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   /* Check if we have the same endianness.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: endianness incompatible with that of the selected emulation"),
 	 ibfd);
       return FALSE;
@@ -15461,7 +15461,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: ABI is incompatible with that of the selected emulation"),
 	 ibfd);
       return FALSE;
@@ -15513,27 +15513,27 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
       if (LEVEL_REV (in_abiflags.isa_level, in_abiflags.isa_rev)
 	  < LEVEL_REV (abiflags.isa_level, abiflags.isa_rev))
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%B: warning: Inconsistent ISA between e_flags and "
 	     ".MIPS.abiflags"), ibfd);
       if (abiflags.fp_abi != Val_GNU_MIPS_ABI_FP_ANY
 	  && in_abiflags.fp_abi != abiflags.fp_abi)
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%B: warning: Inconsistent FP ABI between .gnu.attributes and "
 	     ".MIPS.abiflags"), ibfd);
       if ((in_abiflags.ases & abiflags.ases) != abiflags.ases)
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%B: warning: Inconsistent ASEs between e_flags and "
 	     ".MIPS.abiflags"), ibfd);
       /* The isa_ext is allowed to be an extension of what can be inferred
 	 from e_flags.  */
       if (!mips_mach_extends_p (bfd_mips_isa_ext_mach (abiflags.isa_ext),
 				bfd_mips_isa_ext_mach (in_abiflags.isa_ext)))
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%B: warning: Inconsistent ISA extensions between e_flags and "
 	     ".MIPS.abiflags"), ibfd);
       if (in_abiflags.flags2 != 0)
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%B: warning: Unexpected flag in the flags2 field of "
 	     ".MIPS.abiflags (0x%lx)"), ibfd,
 	   (unsigned long) in_abiflags.flags2);

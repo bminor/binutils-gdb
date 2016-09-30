@@ -2105,7 +2105,7 @@ xcoff64_create_csect_from_smclas (bfd *abfd, union internal_auxent *aux,
     }
   else
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: symbol `%s' has unrecognized smclas %d"),
 	 abfd, symbol_name, aux->x_csect.x_smclas);
       bfd_set_error (bfd_error_bad_value);

@@ -1,3 +1,58 @@
+2016-09-29  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp <cmprb>: Update tests to account for
+	the compulsory L operand changes.
+	* gdb.arch/powerpc-power.s: Likewise.
+
+2016-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/20609 - attach of JIT-debug-enabled inf 7.11.1 regression
+	* gdb.base/jit-attach-pie.c: New file.
+	* gdb.base/jit-attach-pie.exp: New file.
+
+2016-09-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/infcall-input.c: New file.
+	* gdb.base/infcall-input.exp: New file.
+
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp: Rename mi_gdb_exit.
+	(gdb_exit): Rename it to ...
+	(gdbserver_gdb_exit): ...  Close GDBserver.
+	(gdb_exit): New proc, call gdbserver_gdb_exit.
+	(mi_gdb_exit): Likewise.
+
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
+	* boards/gdbserver-base.exp (gdb_server_prog): Set the absolute
+	path.
+	* boards/remote-gdbserver-on-localhost.exp: Use gdbserver-base.
+	Remove duplication.
+
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp: Check the existence of
+	gdbserver_orig_gdb_exit rather than gdbserver_gdb_exit.
+
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.xml/tdesc-regs.exp: set core-regs for arc*-*-elf32.
+
+2016-09-21  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/20604:
+	* gdb.base/quit.exp: New file.
+
+2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* .gitignore: New file.
+
+2016-09-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdb.arch/mips16-thunks.exp: Use `standard_output_file'
+	throughout.
+
 2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* lib/gdb.exp: No longer skip hardware breakpoint tests on s390.

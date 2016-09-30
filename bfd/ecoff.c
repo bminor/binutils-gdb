@@ -959,7 +959,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
   if (internal_ptr - internal < (ptrdiff_t) bfd_get_symcount (abfd))
     {
       bfd_get_symcount (abfd) = internal_ptr - internal;
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: warning: isymMax (%ld) is greater than ifdMax (%d)\n"),
 	 abfd, ecoff_data (abfd)->debug_info.symbolic_header.isymMax,
 	 ecoff_data (abfd)->debug_info.symbolic_header.ifdMax);

@@ -1279,9 +1279,13 @@ const struct arc_flag_operand arc_flag_operands[] =
   { "d",  1, 1, 5, 1 },
 #define F_DFAKE	   (F_D + 1)
   { "d",  0, 0, 0, 1 },
+#define F_DNZ_ND   (F_DFAKE + 1)
+  { "nd", 0, 1, 16, 0 },
+#define F_DNZ_D	   (F_DNZ_ND + 1)
+  { "d",  1, 1, 16, 1 },
 
   /* Data size.  */
-#define F_SIZEB1   (F_DFAKE + 1)
+#define F_SIZEB1   (F_DNZ_D + 1)
   { "b", 1, 2, 1, 1 },
 #define F_SIZEB7   (F_SIZEB1 + 1)
   { "b", 1, 2, 7, 1 },
@@ -1485,8 +1489,10 @@ const struct arc_flag_class arc_flag_classes[] =
   { F_CLASS_OPTIONAL, { F_NT, F_T, F_NULL } },
 #define C_D	    (C_T + 1)
   { F_CLASS_OPTIONAL, { F_ND, F_D, F_NULL } },
+#define C_DNZ_D     (C_D + 1)
+  { F_CLASS_OPTIONAL, { F_DNZ_ND, F_DNZ_D, F_NULL } },
 
-#define C_DHARD	    (C_D + 1)
+#define C_DHARD	    (C_DNZ_D + 1)
   { F_CLASS_OPTIONAL, { F_DFAKE, F_NULL } },
 
 #define C_DI20	    (C_DHARD + 1)

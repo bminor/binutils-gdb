@@ -83,6 +83,11 @@ am33_2.0*-*-linux*)
 			solib-svr4.o"
 	;;
 
+arc*-*-*)
+	# Target: baremetal ARC elf32 target
+	gdb_target_obs="arc-tdep.o"
+	;;
+
 arm*-wince-pe | arm*-*-mingw32ce*)
 	# Target: ARM based machine running Windows CE (win32)
 	gdb_target_obs="arm.o arm-get-next-pcs.o arm-tdep.o \

@@ -342,8 +342,8 @@ elf_s390_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
     default:
       if (r_type >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0]))
 	{
-	  (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
-				 abfd, (int) r_type);
+	  _bfd_error_handler (_("%B: invalid relocation type %d"),
+			      abfd, (int) r_type);
 	  r_type = R_390_NONE;
 	}
       cache_ptr->howto = &elf_howto_table[r_type];
@@ -1002,8 +1002,8 @@ elf_s390_check_relocs (bfd *abfd,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
-				 abfd, r_symndx);
+	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+			      abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -1231,7 +1231,7 @@ elf_s390_check_relocs (bfd *abfd,
 	    {
 	      if (old_tls_type == GOT_NORMAL || tls_type == GOT_NORMAL)
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("%B: `%s' accessed both as normal and thread local symbol"),
 		     abfd, h->root.root.string);
 		  return FALSE;
@@ -2343,7 +2343,7 @@ invalid_tls_insn (bfd *input_bfd,
   reloc_howto_type *howto;
 
   howto = elf_howto_table + ELF32_R_TYPE (rel->r_info);
-  (*_bfd_error_handler)
+  _bfd_error_handler
     (_("%B(%A+0x%lx): invalid instruction for TLS relocation %s"),
      input_bfd,
      input_section,
@@ -3392,7 +3392,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	       && h->def_dynamic)
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
@@ -3448,7 +3448,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	       (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
 	  else
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);

@@ -378,13 +378,9 @@ initialize_decoder_tree (void)
 static void __attribute__ ((format (printf, 2, 3)))
 indented_print (unsigned int indent, const char *format, ...)
 {
-  /* 80 number of spaces pluc a NULL terminator.  */
-  static const char spaces[81] =
-    "                                                                                ";
   va_list ap;
   va_start (ap, format);
-  assert (indent <= 80);
-  printf ("%s", &spaces[80 - indent]);
+  printf ("%*s", (int) indent, "");
   vprintf (format, ap);
   va_end (ap);
 }

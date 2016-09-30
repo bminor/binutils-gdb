@@ -34,6 +34,7 @@ extern "C" {
 
 #include "ansidecl.h"
 #include "symcat.h"
+#include <stdarg.h>
 #include <sys/stat.h>
 
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)

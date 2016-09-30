@@ -614,7 +614,12 @@ coff_amd64_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 #if defined(COFF_WITH_PE)
   if (howto->pc_relative)
     {
-      *addendp -= 4;
+#ifndef DONT_EXTEND_AMD64
+      if (rel->r_type == R_AMD64_PCRQUAD)
+	*addendp -= 8;
+      else
+#endif
+	*addendp -= 4;
 
       /* If the symbol is defined, then the generic code is going to
          add back the symbol value in order to cancel out an

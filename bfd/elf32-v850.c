@@ -464,7 +464,7 @@ v850_elf_perform_lo16_relocation (bfd *abfd, unsigned long *insn,
 	}
       else
 	{
-	  (*_bfd_error_handler) (_("FAILED to find previous HI16 reloc"));
+	  _bfd_error_handler (_("FAILED to find previous HI16 reloc"));
 	  return FALSE;
 	}
     }
@@ -2534,8 +2534,9 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 	    case V850_NOTE_DATA_SIZE:
 	      if (oval == EF_RH850_DOUBLE32)
 		{
-		  _bfd_error_handler (_("error: %B uses 64-bit doubles but %B uses 32-bit doubles"),
-				      ibfd, obfd);
+		  _bfd_error_handler
+		    (_("error: %B uses 64-bit doubles but "
+		       "%B uses 32-bit doubles"), ibfd, obfd);
 		  result = FALSE;
 		}
 	      else
@@ -2547,8 +2548,9 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 	    case V850_NOTE_FPU_INFO:
 	      if (oval == EF_RH850_FPU20)
 		{
-		  _bfd_error_handler (_("error: %B uses FPU-3.0 but %B only supports FPU-2.0"),
-				     ibfd, obfd);
+		  _bfd_error_handler
+		    (_("error: %B uses FPU-3.0 but %B only supports FPU-2.0"),
+		     ibfd, obfd);
 		  result = FALSE;
 		}
 	      else
@@ -2802,8 +2804,8 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     {
       if ((in_flags & EF_V800_850E3) != (out_flags & EF_V800_850E3))
 	{
-	  _bfd_error_handler (_("%B: Architecture mismatch with previous modules"),
-			      ibfd);
+	  _bfd_error_handler
+	    (_("%B: Architecture mismatch with previous modules"), ibfd);
 	  elf_elfheader (obfd)->e_flags |= EF_V800_850E3;
 	}
 
@@ -2858,8 +2860,8 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  return result;
 	}
 
-      _bfd_error_handler (_("%B: Architecture mismatch with previous modules"),
-			  ibfd);
+      _bfd_error_handler
+	(_("%B: Architecture mismatch with previous modules"), ibfd);
     }
 
   return result;
@@ -3590,19 +3592,21 @@ v850_elf_relax_section (bfd *abfd,
 		}
 	      else
 		{
-		  ((*_bfd_error_handler)
-		   ("%s: 0x%lx: warning: R_V850_LONGCALL points to unrecognized insns",
-		    bfd_get_filename (abfd), (unsigned long) irel->r_offset));
-
+		  _bfd_error_handler
+		    ("%s: 0x%lx: warning: R_V850_LONGCALL points to "
+		     "unrecognized insns",
+		     bfd_get_filename (abfd), (unsigned long) irel->r_offset);
 		  continue;
 		}
 
 	      if (no_match >= 0)
 		{
-		  ((*_bfd_error_handler)
-		   ("%s: 0x%lx: warning: R_V850_LONGCALL points to unrecognized insn 0x%x",
-		    bfd_get_filename (abfd), (unsigned long) irel->r_offset+no_match, insn[no_match]));
-
+		  _bfd_error_handler
+		    ("%s: 0x%lx: warning: R_V850_LONGCALL points to "
+		     "unrecognized insn 0x%x",
+		     bfd_get_filename (abfd),
+		     (unsigned long) irel->r_offset + no_match,
+		     insn[no_match]);
 		  continue;
 		}
 
@@ -3641,9 +3645,10 @@ v850_elf_relax_section (bfd *abfd,
 		  || lo_irelfn == irelend
 		  || irelcall  == irelend)
 		{
-		  ((*_bfd_error_handler)
-		   ("%s: 0x%lx: warning: R_V850_LONGCALL points to unrecognized reloc",
-		    bfd_get_filename (abfd), (unsigned long) irel->r_offset ));
+		  _bfd_error_handler
+		    ("%s: 0x%lx: warning: R_V850_LONGCALL points to "
+		     "unrecognized reloc",
+		     bfd_get_filename (abfd), (unsigned long) irel->r_offset);
 
 		  continue;
 		}
@@ -3679,10 +3684,11 @@ v850_elf_relax_section (bfd *abfd,
 
 	      if (symval + irelcall->r_addend != irelcall->r_offset + 4)
 		{
-		  ((*_bfd_error_handler)
-		   ("%s: 0x%lx: warning: R_V850_LONGCALL points to unrecognized reloc 0x%lx",
-		    bfd_get_filename (abfd), (unsigned long) irel->r_offset, irelcall->r_offset ));
-
+		  _bfd_error_handler
+		    ("%s: 0x%lx: warning: R_V850_LONGCALL points to "
+		     "unrecognized reloc 0x%lx",
+		     bfd_get_filename (abfd), (unsigned long) irel->r_offset,
+		     irelcall->r_offset);
 		  continue;
 		}
 
@@ -3820,19 +3826,21 @@ v850_elf_relax_section (bfd *abfd,
 		}
 	      else
 		{
-		  ((*_bfd_error_handler)
-		   ("%s: 0x%lx: warning: R_V850_LONGJUMP points to unrecognized insns",
-		    bfd_get_filename (abfd), (unsigned long) irel->r_offset));
-
+		  _bfd_error_handler
+		    ("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
+		     "unrecognized insns",
+		     bfd_get_filename (abfd), (unsigned long) irel->r_offset);
 		  continue;
 		}
 
 	      if (no_match >= 0)
 		{
-		  ((*_bfd_error_handler)
-		   ("%s: 0x%lx: warning: R_V850_LONGJUMP points to unrecognized insn 0x%x",
-		    bfd_get_filename (abfd), (unsigned long) irel->r_offset+no_match, insn[no_match]));
-
+		  _bfd_error_handler
+		    ("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
+		     "unrecognized insn 0x%x",
+		     bfd_get_filename (abfd),
+		     (unsigned long) irel->r_offset + no_match,
+		     insn[no_match]);
 		  continue;
 		}
 
@@ -3860,10 +3868,10 @@ v850_elf_relax_section (bfd *abfd,
 	      if (   hi_irelfn == irelend
 		  || lo_irelfn == irelend)
 		{
-		  ((*_bfd_error_handler)
-		   ("%s: 0x%lx: warning: R_V850_LONGJUMP points to unrecognized reloc",
-		    bfd_get_filename (abfd), (unsigned long) irel->r_offset ));
-
+		  _bfd_error_handler
+		    ("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
+		     "unrecognized reloc",
+		     bfd_get_filename (abfd), (unsigned long) irel->r_offset);
 		  continue;
 		}
 

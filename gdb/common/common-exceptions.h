@@ -21,6 +21,7 @@
 #define COMMON_EXCEPTIONS_H
 
 #include <setjmp.h>
+#include <new>
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be less than zero.  enum value 0 is reserved for internal use
@@ -282,6 +283,25 @@ struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
 };
 
 #endif /* GDB_XCPT_TRY || GDB_XCPT_RAW_TRY */
+
+/* An exception type that inherits from both std::bad_alloc and a gdb
+   exception.  This is necessary because operator new can only throw
+   std::bad_alloc, and OTOH, we want exceptions thrown due to memory
+   allocation error to be caught by all the CATCH/RETURN_MASK_ALL
+   spread around the codebase.  */
+
+struct gdb_quit_bad_alloc
+  : public gdb_exception_RETURN_MASK_QUIT,
+    public std::bad_alloc
+{
+  explicit gdb_quit_bad_alloc (gdb_exception ex)
+    : std::bad_alloc ()
+  {
+    gdb_exception *self = this;
+
+    *self = ex;
+  }
+};
 
 /* *INDENT-ON* */
 

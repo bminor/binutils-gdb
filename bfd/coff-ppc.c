@@ -844,7 +844,7 @@ ppc_record_toc_entry (bfd *abfd,
 	  /* The size must fit in a 16-bit displacement.  */
 	  if (global_toc_size > 65535)
 	    {
-	      (*_bfd_error_handler) (_("TOC overflow"));
+	      _bfd_error_handler (_("TOC overflow"));
 	      bfd_set_error (bfd_error_file_too_big);
 	      return FALSE;
 	    }
@@ -862,7 +862,7 @@ ppc_record_toc_entry (bfd *abfd,
 	  /* The size must fit in a 16-bit displacement.  */
 	  if (global_toc_size >= 65535)
 	    {
-	      (*_bfd_error_handler) (_("TOC overflow"));
+	      _bfd_error_handler (_("TOC overflow"));
 	      bfd_set_error (bfd_error_file_too_big);
 	      return FALSE;
 	    }
@@ -1037,7 +1037,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
       switch (r_type)
 	{
 	default:
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: unsupported relocation type 0x%02x"), input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -1127,8 +1127,9 @@ coff_ppc_relocate_section (bfd *output_bfd,
 		    /* The size must still fit in a 16-bit displacement.  */
 		    if ((bfd_vma) our_toc_offset >= 65535)
 		      {
-			(*_bfd_error_handler)
-			  (_("%B: Relocation for %s of %lx exceeds Toc size limit"),
+			_bfd_error_handler
+			  (_("%B: Relocation for %s of %lx exceeds "
+			     "Toc size limit"),
 			   input_bfd, name,
 			   (unsigned long) our_toc_offset);
 			bfd_set_error (bfd_error_bad_value);
@@ -1180,7 +1181,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	    if ((r_flags & IMAGE_REL_PPC_TOCDEFN) != IMAGE_REL_PPC_TOCDEFN
 		&& (bfd_vma) our_toc_offset > toc_section->size)
 	      {
-		(*_bfd_error_handler)
+		_bfd_error_handler
 		  (_("%B: Relocation exceeds allocated TOC (%lx)"),
 		   input_bfd, (unsigned long) toc_section->size);
 		bfd_set_error (bfd_error_bad_value);
@@ -1234,7 +1235,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	    else
 	      my_name = h->root.root.root.string;
 
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
 	      (_("Warning: unsupported reloc %s <file %B, section %A>\n"
 		 "sym %ld (%s), r_vaddr %ld (%lx)"),
 	       input_bfd, input_section, howto->name,
@@ -1252,7 +1253,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	      break;
 	    my_name = h->root.root.root.string;
 
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
 	      (_("%B: Out of order IMGLUE reloc for %s"), input_bfd, my_name);
 	    bfd_set_error (bfd_error_bad_value);
 	    return FALSE;
@@ -1759,9 +1760,9 @@ ppc_coff_rtype2howto (arelent *relent, struct internal_reloc *internal)
 	howto = ppc_coff_howto_table + IMAGE_REL_PPC_TOCREL16;
       break;
     default:
-      (*_bfd_error_handler) (_("warning: unsupported reloc %s [%d] used -- it may not work"),
-			     ppc_coff_howto_table[r_type].name,
-			     r_type);
+      _bfd_error_handler
+	(_("warning: unsupported reloc %s [%d] used -- it may not work"),
+	 ppc_coff_howto_table[r_type].name, r_type);
       howto = ppc_coff_howto_table + r_type;
       break;
     }
@@ -1830,9 +1831,9 @@ coff_ppc_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       howto = ppc_coff_howto_table + r_type;
       break;
     default:
-      (*_bfd_error_handler) (_("warning: unsupported reloc %s [%d] used -- it may not work"),
-			     ppc_coff_howto_table[r_type].name,
-			     r_type);
+      _bfd_error_handler
+	(_("warning: unsupported reloc %s [%d] used -- it may not work"),
+	 ppc_coff_howto_table[r_type].name, r_type);
       howto = ppc_coff_howto_table + r_type;
       break;
     }

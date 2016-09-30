@@ -18813,7 +18813,6 @@ static const struct asm_psr v7m_psrs[] =
   {"primask",	   0x10}, {"PRIMASK",	   0x10},
   {"basepri",	   0x11}, {"BASEPRI",	   0x11},
   {"basepri_max",  0x12}, {"BASEPRI_MAX",  0x12},
-  {"basepri_max",  0x12}, {"BASEPRI_MASK", 0x12}, /* Typo, preserved for backwards compatibility.  */
   {"faultmask",	   0x13}, {"FAULTMASK",	   0x13},
   {"control",	   0x14}, {"CONTROL",	   0x14},
   {"msp_ns",	   0x88}, {"MSP_NS",	   0x88},

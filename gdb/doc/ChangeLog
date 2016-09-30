@@ -1,3 +1,29 @@
+2016-09-28  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Packets) <z0>: Use "software breakpoint" rather
+	than "memory breakpoint".  Further document "kind".  Move
+	protocol-details link earlier.
+	<z1>: Document the cmd_list argument.  Fix typo.
+	<g>: Remove incorrect sentence.
+	(Stop Reply Packets): Document "OK" response to requests when in
+	non-stop mode.
+	<swbreak>: Use "software breakpoint" rather than "memory
+	breakpoint".
+	<create>: Document that "R" is ignored.
+	<W, X, w>: Document formatting of "AA".
+	(Notification Packets): Use "%Stop", not "%%Stop".
+
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.texinfo (Embedded Processors): Document ARC.
+	(Synopsys ARC): New section.
+	(Standard Target Features): Document ARC features.
+	(ARC Features): New section.
+
+2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* .gitignore: New file.
+
 2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Input/Output): Mention possibility to unset

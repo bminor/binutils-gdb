@@ -14095,7 +14095,6 @@ putop (const char *in_template, int sizeflag)
 	  cond = 0;
 	  break;
 	case '{':
-	  alt = 0;
 	  if (intel_syntax)
 	    {
 	      while (*++p != '|')

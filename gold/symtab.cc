@@ -882,6 +882,7 @@ Symbol_table::define_default_version(Sized_symbol<size>* sym,
 	;
       else if (pdef->second->is_from_dynobj()
 	       && sym->is_from_dynobj()
+	       && pdef->second->is_defined()
 	       && pdef->second->object() != sym->object())
         ;
       else

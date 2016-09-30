@@ -19,6 +19,10 @@ set|show compile-gcc
   running on MS-Windows use to assign names to threads in the
   debugger.
 
+* New targets
+
+Synopsys ARC			arc*-*-elf32
+
 *** Changes in GDB 7.12
 
 * GDB and GDBserver now build with a C++ compiler by default.

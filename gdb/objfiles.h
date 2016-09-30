@@ -501,8 +501,6 @@ extern CORE_ADDR entry_point_address (void);
 
 extern void build_objfile_section_table (struct objfile *);
 
-extern void terminate_minimal_symbol_table (struct objfile *objfile);
-
 extern struct objfile *objfile_separate_debug_iterate (const struct objfile *,
                                                        const struct objfile *);
 

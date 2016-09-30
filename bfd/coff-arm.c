@@ -1741,7 +1741,7 @@ coff_arm_relocate_section (bfd *output_bfd,
 	case bfd_reloc_ok:
 	  break;
 	case bfd_reloc_outofrange:
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: bad reloc address 0x%lx in section `%A'"),
 	     input_bfd, input_section, (unsigned long) rel->r_vaddr);
 	  return FALSE;

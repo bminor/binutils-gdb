@@ -2660,7 +2660,7 @@ setup_inferior (int from_tty)
   /* If no exec file is yet known, try to determine it from the
      process itself.  */
   if (get_exec_file (0) == NULL)
-    exec_file_locate_attach (ptid_get_pid (inferior_ptid), from_tty);
+    exec_file_locate_attach (ptid_get_pid (inferior_ptid), 1, from_tty);
   else
     {
       reopen_exec_file ();

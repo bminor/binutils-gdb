@@ -87,8 +87,8 @@ subdir = .
 DIST_COMMON = NEWS README ChangeLog $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/configure \
 	$(am__configure_deps) $(srcdir)/config.in \
-	$(srcdir)/../mkinstalldirs $(top_srcdir)/po/Make-in \
-	ftruncate.c pread.c mremap.c ffsll.c yyscript.h yyscript.c \
+	$(srcdir)/../mkinstalldirs $(top_srcdir)/po/Make-in ffsll.c \
+	mremap.c ftruncate.c pread.c yyscript.h yyscript.c \
 	$(srcdir)/../depcomp $(srcdir)/../ylwrap
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
@@ -409,6 +409,7 @@ TARGETOBJS = @TARGETOBJS@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
+WARN_CFLAGS_FOR_BUILD = @WARN_CFLAGS_FOR_BUILD@
 WARN_CXXFLAGS = @WARN_CXXFLAGS@
 WARN_WRITE_STRINGS = @WARN_WRITE_STRINGS@
 XGETTEXT = @XGETTEXT@

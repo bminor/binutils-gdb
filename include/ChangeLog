@@ -1,3 +1,129 @@
+2016-09-29  Alan Modra  <amodra@gmail.com>
+
+	* opcode/ppc.h (PPC_OPERAND_OPTIONAL32): Define.
+
+2016-09-26  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (insn_class_t): Add two new classes.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc.h (Tag_GNU_Power_ABI_FP): Comment on new values.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (aarch64_cond): Bump array size to 4.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_SVE): New macro.
+	(OP_MOV_P_P, OP_MOV_Z_P_Z, OP_MOV_Z_V, OP_MOV_Z_Z, OP_MOV_Z_Zi)
+	(OP_MOVM_P_P_P, OP_MOVS_P_P, OP_MOVZS_P_P_P, OP_MOVZ_P_P_P)
+	(OP_NOTS_P_P_P_Z, OP_NOT_P_P_P_Z): New aarch64_ops.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (sve_cpy, sve_index, sve_limm, sve_misc)
+	(sve_movprfx, sve_pred_zm, sve_shift_pred, sve_shift_unpred)
+	(sve_size_bhs, sve_size_bhsd, sve_size_hsd, sve_size_sd): New
+	aarch64_insn_classes.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_SVE_Rm): New aarch64_opnd.
+	(AARCH64_OPND_SVE_Rn_SP, AARCH64_OPND_SVE_VZn, AARCH64_OPND_SVE_Vd)
+	(AARCH64_OPND_SVE_Vm, AARCH64_OPND_SVE_Vn): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_SVE_FPIMM8): New aarch64_opnd.
+	(AARCH64_OPND_SVE_I1_HALF_ONE, AARCH64_OPND_SVE_I1_HALF_TWO)
+	(AARCH64_OPND_SVE_I1_ZERO_ONE): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_SIMM5): New aarch64_opnd.
+	(AARCH64_OPND_SVE_AIMM, AARCH64_OPND_SVE_ASIMM)
+	(AARCH64_OPND_SVE_INV_LIMM, AARCH64_OPND_SVE_LIMM)
+	(AARCH64_OPND_SVE_LIMM_MOV, AARCH64_OPND_SVE_SHLIMM_PRED)
+	(AARCH64_OPND_SVE_SHLIMM_UNPRED, AARCH64_OPND_SVE_SHRIMM_PRED)
+	(AARCH64_OPND_SVE_SHRIMM_UNPRED, AARCH64_OPND_SVE_SIMM5)
+	(AARCH64_OPND_SVE_SIMM5B, AARCH64_OPND_SVE_SIMM6)
+	(AARCH64_OPND_SVE_SIMM8, AARCH64_OPND_SVE_UIMM3)
+	(AARCH64_OPND_SVE_UIMM7, AARCH64_OPND_SVE_UIMM8)
+	(AARCH64_OPND_SVE_UIMM8_53): Likewise.
+	(aarch64_sve_dupm_mov_immediate_p): Declare.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_SVE_ADDR_RI_S4xVL): New aarch64_opnd.
+	(AARCH64_OPND_SVE_ADDR_RI_S4x2xVL, AARCH64_OPND_SVE_ADDR_RI_S4x3xVL)
+	(AARCH64_OPND_SVE_ADDR_RI_S4x4xVL, AARCH64_OPND_SVE_ADDR_RI_S6xVL)
+	(AARCH64_OPND_SVE_ADDR_RI_S9xVL): Likewise.
+	(AARCH64_MOD_MUL_VL): New aarch64_modifier_kind.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_SVE_ADDR_RI_U6): New aarch64_opnd.
+	(AARCH64_OPND_SVE_ADDR_RI_U6x2, AARCH64_OPND_SVE_ADDR_RI_U6x4)
+	(AARCH64_OPND_SVE_ADDR_RI_U6x8, AARCH64_OPND_SVE_ADDR_RR)
+	(AARCH64_OPND_SVE_ADDR_RR_LSL1, AARCH64_OPND_SVE_ADDR_RR_LSL2)
+	(AARCH64_OPND_SVE_ADDR_RR_LSL3, AARCH64_OPND_SVE_ADDR_RX)
+	(AARCH64_OPND_SVE_ADDR_RX_LSL1, AARCH64_OPND_SVE_ADDR_RX_LSL2)
+	(AARCH64_OPND_SVE_ADDR_RX_LSL3, AARCH64_OPND_SVE_ADDR_RZ)
+	(AARCH64_OPND_SVE_ADDR_RZ_LSL1, AARCH64_OPND_SVE_ADDR_RZ_LSL2)
+	(AARCH64_OPND_SVE_ADDR_RZ_LSL3, AARCH64_OPND_SVE_ADDR_RZ_XTW_14)
+	(AARCH64_OPND_SVE_ADDR_RZ_XTW_22, AARCH64_OPND_SVE_ADDR_RZ_XTW1_14)
+	(AARCH64_OPND_SVE_ADDR_RZ_XTW1_22, AARCH64_OPND_SVE_ADDR_RZ_XTW2_14)
+	(AARCH64_OPND_SVE_ADDR_RZ_XTW2_22, AARCH64_OPND_SVE_ADDR_RZ_XTW3_14)
+	(AARCH64_OPND_SVE_ADDR_RZ_XTW3_22, AARCH64_OPND_SVE_ADDR_ZI_U5)
+	(AARCH64_OPND_SVE_ADDR_ZI_U5x2, AARCH64_OPND_SVE_ADDR_ZI_U5x4)
+	(AARCH64_OPND_SVE_ADDR_ZI_U5x8, AARCH64_OPND_SVE_ADDR_ZZ_LSL)
+	(AARCH64_OPND_SVE_ADDR_ZZ_SXTW, AARCH64_OPND_SVE_ADDR_ZZ_UXTW):
+	Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_SVE_PATTERN_SCALED): New
+	aarch64_opnd.
+	(AARCH64_MOD_MUL): New aarch64_modifier_kind.
+	(aarch64_opnd_info): Make shifter.amount an int64_t and
+	rearrange the fields.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_SVE_PATTERN): New aarch64_opnd.
+	(AARCH64_OPND_SVE_PRFOP): Likewise.
+	(aarch64_sve_pattern_array): Declare.
+	(aarch64_sve_prfop_array): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_QLF_P_Z): New aarch64_opnd_qualifier.
+	(AARCH64_OPND_QLF_P_M): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (AARCH64_OPND_CLASS_SVE_REG): New
+	aarch64_operand_class.
+	(AARCH64_OPND_CLASS_PRED_REG): Likewise.
+	(AARCH64_OPND_SVE_Pd, AARCH64_OPND_SVE_Pg3, AARCH64_OPND_SVE_Pg4_5)
+	(AARCH64_OPND_SVE_Pg4_10, AARCH64_OPND_SVE_Pg4_16)
+	(AARCH64_OPND_SVE_Pm, AARCH64_OPND_SVE_Pn, AARCH64_OPND_SVE_Pt)
+	(AARCH64_OPND_SVE_Za_5, AARCH64_OPND_SVE_Za_16, AARCH64_OPND_SVE_Zd)
+	(AARCH64_OPND_SVE_Zm_5, AARCH64_OPND_SVE_Zm_16, AARCH64_OPND_SVE_Zn)
+	(AARCH64_OPND_SVE_Zn_INDEX, AARCH64_OPND_SVE_ZnxN)
+	(AARCH64_OPND_SVE_Zt, AARCH64_OPND_SVE_ZtxN): New aarch64_opnds.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (aarch64_opcode): Add a tied_operand field.
+	(AARCH64_OPDE_UNTIED_OPERAND): New aarch64_operand_error_kind.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* opcode/aarch64.h (F_STRICT): New flag.
+
 2016-09-07  Richard Earnshaw  <rearnsha@arm.com>
 
 	* opcode/arm.h (ARM_ARCH_V8A_CRC): New architecture.

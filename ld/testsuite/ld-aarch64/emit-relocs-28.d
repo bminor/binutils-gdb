@@ -11,9 +11,9 @@ Disassembly of section .text:
 .* <\.text>:
   .*:	.* 	adrp	x2, .* <.*>
 			.*: R_AARCH64_P32_ADR_PREL_PG_HI21	_GLOBAL_OFFSET_TABLE_
-  .*:	.* 	ldr	x0, \[x2,#.*\]
+  .*:	.* 	ldr	x0, \[x2, #.*\]
 			.*: R_AARCH64_P32_LD32_GOTPAGE_LO14	globala
-  .*:	.* 	ldr	x0, \[x2,#.*\]
+  .*:	.* 	ldr	x0, \[x2, #.*\]
 			.*: R_AARCH64_P32_LD32_GOTPAGE_LO14	globalb
-  .*:	.* 	ldr	x0, \[x2,#.*\]
+  .*:	.* 	ldr	x0, \[x2, #.*\]
 			.*: R_AARCH64_P32_LD32_GOTPAGE_LO14	globalc

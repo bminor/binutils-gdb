@@ -3436,7 +3436,7 @@ mips_elf_n32_rtype_to_howto (unsigned int r_type, bfd_boolean rela_p)
 	}
       if (r_type >= R_MIPS_max)
 	{
-	  (*_bfd_error_handler) (_("unrecognised MIPS reloc number: %d"), r_type);
+	  _bfd_error_handler (_("unrecognised MIPS reloc number: %d"), r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  r_type = R_MIPS_NONE;
 	}

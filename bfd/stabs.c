@@ -274,7 +274,7 @@ _bfd_link_section_stabs (bfd *abfd,
       symstroff = stroff + bfd_get_32 (abfd, sym + STRDXOFF);
       if (symstroff >= stabstrsec->size)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): Stabs entry has invalid string index."),
 	     abfd, stabsec, (long) (sym - stabbuf));
 	  bfd_set_error (bfd_error_bad_value);

@@ -275,8 +275,8 @@ tic54x_lookup_howto (arelent *internal,
 	}
     }
 
-  (*_bfd_error_handler) (_("Unrecognized reloc type 0x%x"),
-			 (unsigned int) dst->r_type);
+  _bfd_error_handler (_("Unrecognized reloc type 0x%x"),
+		      (unsigned int) dst->r_type);
   abort ();
 }
 
@@ -360,7 +360,7 @@ tic54x_reloc_processing (arelent *relent,
     {
       if (reloc->r_symndx < 0 || reloc->r_symndx >= obj_conv_table_size (abfd))
         {
-          (*_bfd_error_handler)
+          _bfd_error_handler
             (_("%B: warning: illegal symbol index %ld in relocs"),
              abfd, reloc->r_symndx);
           relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;

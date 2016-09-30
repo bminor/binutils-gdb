@@ -13,7 +13,7 @@ Disassembly of section .text:
    1000c:	d53bd042 	mrs	x2, tpidr_el0
    10010:	d2a00000 	movz	x0, #0x0, lsl #16
    10014:	f2800100 	movk	x0, #0x8
-   10018:	f8606820 	ldr	x0, \[x1,x0\]
+   10018:	f8606820 	ldr	x0, \[x1, x0\]
    1001c:	8b020000 	add	x0, x0, x2
    10020:	d503201f 	nop
    10024:	0000ffdc 	.word	0x0000ffdc

@@ -4831,6 +4831,9 @@ value that is added/substracted from the previous offset.
 Previous value of @var{register} is saved at offset @var{offset} from
 CFA.
 
+@subsection @code{.cfi_val_offset @var{register}, @var{offset}}
+Previous value of @var{register} is CFA + @var{offset}.
+
 @subsection @code{.cfi_rel_offset @var{register}, @var{offset}}
 Previous value of @var{register} is saved at offset @var{offset} from
 the current CFA register.  This is transformed to @code{.cfi_offset}

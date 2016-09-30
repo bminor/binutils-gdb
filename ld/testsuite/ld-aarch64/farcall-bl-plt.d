@@ -8,9 +8,9 @@
 Disassembly of section .plt:
 
 .* <foo@plt.*>:
-.*:	a9bf7bf0 	stp	x16, x30, \[sp,#-16\]!
+.*:	a9bf7bf0 	stp	x16, x30, \[sp, #-16\]!
 .*:	.* 	adrp	x16, .* <__foo_veneer\+.*>
-.*:	.* 	ldr	x17, \[x16,#.*\]
+.*:	.* 	ldr	x17, \[x16, #.*\]
 .*:	.* 	add	x16, x16, #.*
 .*:	d61f0220 	br	x17
 .*:	d503201f 	nop
@@ -19,7 +19,7 @@ Disassembly of section .plt:
 
 .* <foo@plt>:
 .*:	.* 	adrp	x16, .* <__foo_veneer\+.*>
-.*:	.* 	ldr	x17, \[x16,#.*\]
+.*:	.* 	ldr	x17, \[x16, #.*\]
 .*:	.* 	add	x16, x16, #.*
 .*:	d61f0220 	br	x17
 

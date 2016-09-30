@@ -1078,8 +1078,8 @@ func:
 	.long  0xf389ef6f    /* <+4172>:  xvxsigsp vs60,vs61         */
 	.long  0x7c0639c0    /* <+4176>:  cmpeqb  cr0,r6,r7          */
 	.long  0x7f8639c0    /* <+4180>:  cmpeqb  cr7,r6,r7          */
-	.long  0x7c084980    /* <+4184>:  cmprb   cr0,r8,r9          */
-	.long  0x7f884980    /* <+4188>:  cmprb   cr7,r8,r9          */
+	.long  0x7c084980    /* <+4184>:  cmprb   cr0,0,r8,r9        */
+	.long  0x7f884980    /* <+4188>:  cmprb   cr7,0,r8,r9        */
 	.long  0x7c284980    /* <+4192>:  cmprb   cr0,1,r8,r9        */
 	.long  0x7fa84980    /* <+4196>:  cmprb   cr7,1,r8,r9        */
 	.long  0x7de00100    /* <+4200>:  setb    r15,cr0            */

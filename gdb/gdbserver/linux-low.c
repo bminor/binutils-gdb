@@ -3452,6 +3452,8 @@ linux_wait_1 (ptid_t ptid,
 
 	  linux_resume_one_lwp (event_child, 0, 0, NULL);
 
+	  if (debug_threads)
+	    debug_exit ();
 	  return ignore_event (ourstatus);
 	}
     }
@@ -3547,6 +3549,9 @@ linux_wait_1 (ptid_t ptid,
 
       linux_resume_one_lwp (event_child, event_child->stepping,
 			    0, NULL);
+
+      if (debug_threads)
+	debug_exit ();
       return ignore_event (ourstatus);
     }
 
@@ -3602,6 +3607,10 @@ linux_wait_1 (ptid_t ptid,
 	  linux_resume_one_lwp (event_child, event_child->stepping,
 				WSTOPSIG (w), info_p);
 	}
+
+      if (debug_threads)
+	debug_exit ();
+
       return ignore_event (ourstatus);
     }
 
@@ -3682,6 +3691,10 @@ linux_wait_1 (ptid_t ptid,
 	unsuspend_all_lwps (event_child);
 
       proceed_all_lwps ();
+
+      if (debug_threads)
+	debug_exit ();
+
       return ignore_event (ourstatus);
     }
 

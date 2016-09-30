@@ -1,3 +1,317 @@
+2016-09-29  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20553
+	* testsuite/gas/aarch64/advsimd-fp16.s (indexed_elem): New high index
+	testcases for H and S variants.  New low index testcases for D variant.
+	* testsuite/gas/aarch64/advsimd-fp16.d: Update expected results.
+
+2016-09-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Handle PPC_OPERAND_OPTIONAL32.
+	* testsuite/gas/ppc/power8.s: Provide tbegin. operand.
+	* testsuite/gas/ppc/power9.d: Update cmprb disassembly.
+
+2016-09-26  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* config/tc-xtensa.c (xg_reverse_shift_count): Pass cnt_arg instead of
+	cnt_argp to concat.
+
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_elf_gnu_attribute): New function.
+	(md_pseudo_table <ELF>): Handle "gnu_attribute".
+
+2016-09-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (v7m_psrs): Remove BASEPRI_MASK MRS/MSR special
+	register and redundant basepri_max.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (print_operands): Print spaces between
+	operands.
+	* testsuite/gas/aarch64/ilp32-basic.d: Expect spaces after ","
+	in addresses.
+	* testsuite/gas/aarch64/ldst-reg-imm-post-ind.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-imm-pre-ind.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-pair.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-reg-offset.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-uns-imm.d: Likewise.
+	* testsuite/gas/aarch64/ldst-reg-unscaled-imm.d: Likewise.
+	* testsuite/gas/aarch64/reloc-insn.d: Likewise.
+	* testsuite/gas/aarch64/sve.d: Likewise.
+	* testsuite/gas/aarch64/symbol.d: Likewise.
+	* testsuite/gas/aarch64/system.d: Likewise.
+	* testsuite/gas/aarch64/tls-desc.d: Likewise.
+	* testsuite/gas/aarch64/sve-invalid.l: Expect spaces after ","
+	in suggested alternatives.
+	* testsuite/gas/aarch64/verbose-error.l: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (output_operand_error_record): Use "must be"
+	rather than "should be" or "expected to be" in error messages.
+	(parse_operands): Likewise.
+	* testsuite/gas/aarch64/diagnostic.l: Likewise.
+	* testsuite/gas/aarch64/legacy_reg_names.l: Likewise.
+	* testsuite/gas/aarch64/sve-invalid.l: Likewise.
+	* testsuite/gas/aarch64/sve-reg-diagnostic.l: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (opcode_lookup): Search for the end of
+	a condition name, rather than assuming that it will have exactly
+	2 characters.
+	(parse_operands): Likewise.
+	* testsuite/gas/aarch64/alias.d: Add new condition-code comments
+	to the expected output.
+	* testsuite/gas/aarch64/beq_1.d: Likewise.
+	* testsuite/gas/aarch64/float-fp16.d: Likewise.
+	* testsuite/gas/aarch64/int-insns.d: Likewise.
+	* testsuite/gas/aarch64/no-aliases.d: Likewise.
+	* testsuite/gas/aarch64/programmer-friendly.d: Likewise.
+	* testsuite/gas/aarch64/reloc-insn.d: Likewise.
+	* testsuite/gas/aarch64/b_c_1.d, testsuite/gas/aarch64/b_c_1.s:
+	New test.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/gas/aarch64/diagnostic.s,
+	testsuite/gas/aarch64/diagnostic.l: Add tests for
+	invalid uses of MUL VL and MUL in base AArch64 instructions.
+	* testsuite/gas/aarch64/sve-add.s, testsuite/gas/aarch64/sve-add.d,
+	testsuite/gas/aarch64/sve-dup.s, testsuite/gas/aarch64/sve-dup.d,
+	testsuite/gas/aarch64/sve-invalid.s,
+	testsuite/gas/aarch64/sve-invalid.d,
+	testsuite/gas/aarch64/sve-invalid.l,
+	testsuite/gas/aarch64/sve-reg-diagnostic.s,
+	testsuite/gas/aarch64/sve-reg-diagnostic.d,
+	testsuite/gas/aarch64/sve-reg-diagnostic.l,
+	testsuite/gas/aarch64/sve.s, testsuite/gas/aarch64/sve.d: New tests.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* doc/c-aarch64.texi: Document the "sve" feature.
+	* config/tc-aarch64.c (REG_TYPE_R_Z_BHSDQ_VZP): New register type.
+	(get_reg_expected_msg): Handle it.
+	(parse_operands): When parsing operands of an SVE instruction,
+	disallow immediates that match REG_TYPE_R_Z_BHSDQ_VZP.
+	(aarch64_features): Add an entry for SVE.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Handle the new SVE core
+	and FP register operands.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (double_precision_operand_p): New function.
+	(parse_operands): Use it to calculate the dp_p input to
+	parse_aarch64_imm_float.  Handle the new SVE FP immediate operands.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Handle the new SVE integer
+	immediate operands.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (SHIFTED_NONE, SHIFTED_MUL_VL): New
+	parse_shift_modes.
+	(parse_shift): Handle SHIFTED_MUL_VL.
+	(parse_address_main): Add an imm_shift_mode parameter.
+	(parse_address, parse_sve_address): Update accordingly.
+	(parse_operands): Handle MUL VL addressing modes.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (REG_TYPE_SVE_BASE, REG_TYPE_SVE_OFFSET): New
+	register types.
+	(get_reg_expected_msg): Handle them.
+	(aarch64_addr_reg_parse): New function, split out from
+	aarch64_reg_parse_32_64.  Handle Z registers too.
+	(aarch64_reg_parse_32_64): Call it.
+	(parse_address_main): Add base_qualifier, offset_qualifier,
+	base_type and offset_type parameters.  Handle SVE base and offset
+	registers.
+	(parse_address): Update call to parse_address_main.
+	(parse_sve_address): New function.
+	(parse_operands): Parse the new SVE address operands.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (SHIFTED_MUL): New parse_shift_mode.
+	(parse_shift): Handle it.  Reject AARCH64_MOD_MUL for all other
+	shift modes.  Skip range tests for AARCH64_MOD_MUL.
+	(process_omitted_operand): Handle AARCH64_OPND_SVE_PATTERN_SCALED.
+	(parse_operands): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_enum_string): New function.
+	(po_enum_or_fail): New macro.
+	(parse_operands): Handle AARCH64_OPND_SVE_PATTERN and
+	AARCH64_OPND_SVE_PRFOP.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (vector_el_type): Add NT_zero and NT_merge.
+	(parse_vector_type_for_operand): Assert that the skipped character
+	is a '.'.
+	(parse_predication_for_operand): New function.
+	(parse_typed_reg): Parse /z and /m suffixes for predicate registers.
+	(vectype_to_qualifier): Handle NT_zero and NT_merge.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (NTA_HASVARWIDTH): New macro.
+	(AARCH64_REG_TYPES): Add ZN and PN.
+	(get_reg_expected_msg): Handle them.
+	(parse_vector_type_for_operand): Add a reg_type parameter.
+	Skip the width for Zn and Pn registers.
+	(parse_typed_reg): Extend vector handling to Zn and Pn.  Update the
+	call to parse_vector_type_for_operand.  Set HASVARTYPE for Zn and Pn,
+	expecting the width to be 0.
+	(parse_vector_reg_list): Restrict error about [BHSD]nn operands to
+	REG_TYPE_VN.
+	(vectype_to_qualifier): Use S_[BHSD] qualifiers for NTA_HASVARWIDTH.
+	(parse_operands): Handle the new Zn and Pn operands.
+	(REGSET16): New macro, split out from...
+	(REGSET31): ...here.
+	(reg_names): Add Zn and Pn entries.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (output_operand_error_record): Handle
+	AARCH64_OPDE_UNTIED_OPERAND.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (find_best_match): Simplify, allowing an
+	instruction with all-NIL qualifiers to fail to match.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_address_main): Remove reloc and
+	accept_reg_post_index parameters.  Parse relocations and register
+	post indexes unconditionally.
+	(parse_address): Remove accept_reg_post_index parameter.
+	Update call to parse_address_main.
+	(parse_address_reloc): Delete.
+	(parse_operands): Call parse_address instead of parse_address_main.
+	Update existing callers of parse_address and make them check
+	inst.reloc.type where appropriate.
+	* testsuite/gas/aarch64/diagnostic.s: Add tests for relocations
+	in ADDR_SIMPLE, SIMD_ADDR_SIMPLE, ADDR_SIMM7 and ADDR_SIMM9 addresses.
+	Also test for invalid uses of post-index register addressing.
+	* testsuite/gas/aarch64/diagnostic.l: Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (REG_TYPE_R_Z, REG_TYPE_R_SP): New register
+	types.
+	(get_reg_expected_msg): Handle them and REG_TYPE_R64_SP.
+	(aarch64_check_reg_type): Simplify.
+	(aarch64_reg_parse_32_64): Return the reg_entry instead of the
+	register number.  Return the type as a qualifier rather than an
+	"isreg32" boolean.  Remove reject_sp, reject_rz and isregzero
+	parameters.
+	(parse_shifter_operand): Update call to aarch64_parse_32_64_reg.
+	Use get_reg_expected_msg.
+	(parse_address_main): Likewise.  Use aarch64_check_reg_type.
+	(po_int_reg_or_fail): Replace reject_sp and reject_rz parameters
+	with a reg_type parameter.  Update call to aarch64_parse_32_64_reg.
+	Use aarch64_check_reg_type to test the result.
+	(parse_operands): Update after the above changes.  Parse ADDR_SIMPLE
+	addresses normally before enforcing the syntax restrictions.
+	* testsuite/gas/aarch64/diagnostic.s: Add tests for a post-index
+	zero register and for a stack pointer index.
+	* testsuite/gas/aarch64/diagnostic.l: Update accordingly.
+	Also update existing diagnostic messages after the above changes.
+	* testsuite/gas/aarch64/illegal-lse.l: Update the error message
+	for 32-bit register bases.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_aarch64_imm_float): Remove range check.
+	(parse_operands): Check the range of 8-bit FP immediates here instead.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_aarch64_imm_float): Report a specific
+	low-severity error for registers.
+	(parse_operands): Report an invalid floating point constant for
+	if parsing an FPIMM8 fails, and if no better error has been
+	recorded.
+	* testsuite/gas/aarch64/diagnostic.s,
+	testsuite/gas/aarch64/diagnostic.l: Add tests for integer operands
+	to FMOV.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (aarch64_double_precision_fmovable): Rename
+	to...
+	(can_convert_double_to_float): ...this.  Accept any double-precision
+	value that converts to single precision without loss of precision.
+	(parse_aarch64_imm_float): Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_immediate_expression): Add a
+	reg_type parameter.
+	(parse_constant_immediate): Likewise, and update calls.
+	(parse_aarch64_imm_float): Likewise.
+	(parse_big_immediate): Likewise.
+	(po_imm_nc_or_fail): Update accordingly, passing down a new
+	imm_reg_type variable.
+	(po_imm_of_fail): Likewise.
+	(parse_operands): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_neon_reg_list): Rename to...
+	(parse_vector_reg_list): ...this and take a register type
+	as input.
+	(parse_operands): Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_neon_type_for_operand): Rename to...
+	(parse_vector_type_for_operand): ...this.
+	(parse_typed_reg): Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (neon_type_el): Rename to...
+	(vector_type_el): ...this.
+	(parse_neon_type_for_operand): Update accordingly.
+	(parse_typed_reg): Likewise.
+	(aarch64_reg_parse): Likewise.
+	(vectype_to_qualifier): Likewise.
+	(parse_operands): Likewise.
+	(eq_neon_type_el): Likewise.  Rename to...
+	(eq_vector_type_el): ...this.
+	(parse_neon_reg_list): Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (neon_el_type: Rename to...
+	(vector_el_type): ...this.
+	(neon_type_el): Update accordingly.
+	(parse_neon_type_for_operand): Likewise.
+	(vectype_to_qualifier): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* config/tc-aarch64.c (parse_neon_operand_type): Delete.
+	(parse_typed_reg): Call parse_neon_type_for_operand directly.
+
 2016-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/textinsnxop.d: New file.

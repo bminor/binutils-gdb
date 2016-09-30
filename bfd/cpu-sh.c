@@ -520,7 +520,7 @@ sh_merge_bfd_arch (bfd *ibfd, bfd *obfd)
 
   if (!SH_VALID_CO_ARCH_SET (merged_arch))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	("%B: uses %s instructions while previous modules use %s instructions",
 	 ibfd,
 	 SH_ARCH_SET_HAS_DSP (new_arch) ? "dsp" : "floating point",
@@ -530,7 +530,7 @@ sh_merge_bfd_arch (bfd *ibfd, bfd *obfd)
     }
   else if (!SH_VALID_ARCH_SET (merged_arch))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	("internal error: merge of architecture '%s' with architecture '%s' produced unknown architecture\n",
 	 bfd_printable_name (obfd),
 	 bfd_printable_name (ibfd));

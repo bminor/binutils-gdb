@@ -598,11 +598,11 @@ SUBSECTION
 	problem.  They call a BFD error handler function.  This
 	function may be overridden by the program.
 
-	The BFD error handler acts like printf.
+	The BFD error handler acts like vprintf.
 
 CODE_FRAGMENT
 .
-.typedef void (*bfd_error_handler_type) (const char *, ...);
+.typedef void (*bfd_error_handler_type) (const char *, va_list);
 .
 */
 
@@ -634,10 +634,9 @@ static const char *_bfd_error_program_name;
 	integer_for_the_%d);
  */
 
-void
-_bfd_default_error_handler (const char *fmt, ...)
+static void
+error_handler_internal (const char *fmt, va_list ap)
 {
-  va_list ap;
   char *bufp;
   const char *new_fmt, *p;
   size_t avail = 1000;
@@ -651,7 +650,6 @@ _bfd_default_error_handler (const char *fmt, ...)
   else
     fprintf (stderr, "BFD: ");
 
-  va_start (ap, fmt);
   new_fmt = fmt;
   bufp = buf;
 
@@ -782,7 +780,6 @@ _bfd_default_error_handler (const char *fmt, ...)
     }
 
   vfprintf (stderr, new_fmt, ap);
-  va_end (ap);
 
   /* On AIX, putc is implemented as a macro that triggers a -Wunused-value
      warning, so use the fputc function to avoid it.  */
@@ -796,7 +793,17 @@ _bfd_default_error_handler (const char *fmt, ...)
    function pointer permits a program linked against BFD to intercept
    the messages and deal with them itself.  */
 
-bfd_error_handler_type _bfd_error_handler = _bfd_default_error_handler;
+static bfd_error_handler_type _bfd_error_internal = error_handler_internal;
+
+void
+_bfd_error_handler (const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+  _bfd_error_internal (fmt, ap);
+  va_end (ap);
+}
 
 /*
 FUNCTION
@@ -815,8 +822,8 @@ bfd_set_error_handler (bfd_error_handler_type pnew)
 {
   bfd_error_handler_type pold;
 
-  pold = _bfd_error_handler;
-  _bfd_error_handler = pnew;
+  pold = _bfd_error_internal;
+  _bfd_error_internal = pnew;
   return pold;
 }
 
@@ -838,23 +845,6 @@ void
 bfd_set_error_program_name (const char *name)
 {
   _bfd_error_program_name = name;
-}
-
-/*
-FUNCTION
-	bfd_get_error_handler
-
-SYNOPSIS
-	bfd_error_handler_type bfd_get_error_handler (void);
-
-DESCRIPTION
-	Return the BFD error handler function.
-*/
-
-bfd_error_handler_type
-bfd_get_error_handler (void)
-{
-  return _bfd_error_handler;
 }
 
 /*
@@ -891,14 +881,14 @@ _bfd_default_assert_handler (const char *bfd_formatmsg,
 			     int bfd_line)
 
 {
-  (*_bfd_error_handler) (bfd_formatmsg, bfd_version, bfd_file, bfd_line);
+  _bfd_error_handler (bfd_formatmsg, bfd_version, bfd_file, bfd_line);
 }
 
 /* Similar to _bfd_error_handler, a program can decide to exit on an
    internal BFD error.  We use a non-variadic type to simplify passing
    on parameters to other functions, e.g. _bfd_error_handler.  */
 
-bfd_assert_handler_type _bfd_assert_handler = _bfd_default_assert_handler;
+static bfd_assert_handler_type _bfd_assert_handler = _bfd_default_assert_handler;
 
 /*
 FUNCTION
@@ -920,23 +910,6 @@ bfd_set_assert_handler (bfd_assert_handler_type pnew)
   pold = _bfd_assert_handler;
   _bfd_assert_handler = pnew;
   return pold;
-}
-
-/*
-FUNCTION
-	bfd_get_assert_handler
-
-SYNOPSIS
-	bfd_assert_handler_type bfd_get_assert_handler (void);
-
-DESCRIPTION
-	Return the BFD assert handler function.
-*/
-
-bfd_assert_handler_type
-bfd_get_assert_handler (void)
-{
-  return _bfd_assert_handler;
 }
 
 /*
@@ -1097,14 +1070,14 @@ void
 _bfd_abort (const char *file, int line, const char *fn)
 {
   if (fn != NULL)
-    (*_bfd_error_handler)
+    _bfd_error_handler
       (_("BFD %s internal error, aborting at %s:%d in %s\n"),
        BFD_VERSION_STRING, file, line, fn);
   else
-    (*_bfd_error_handler)
+    _bfd_error_handler
       (_("BFD %s internal error, aborting at %s:%d\n"),
        BFD_VERSION_STRING, file, line);
-  (*_bfd_error_handler) (_("Please report this bug.\n"));
+  _bfd_error_handler (_("Please report this bug.\n"));
   _exit (EXIT_FAILURE);
 }
 

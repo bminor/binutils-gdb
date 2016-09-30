@@ -1,3 +1,29 @@
+2016-09-29  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_arch_specific): Call process_power_specific
+	for EM_PPC64.
+
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.am: Replace AM_CLFAGS with AM_CFLAGS_FOR_BUILD
+	when building with CC_FOR_BUILD compiler.
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (display_power_gnu_attribute): Catch truncated section
+	for all powerpc attributes.  Display long double ABI.  Don't
+	capitalize words, except for names.  Show known bits of tag values
+	when some unknown bits are present.  Whitespace fixes.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (get_elf_symbol_type): Don't use sprintf with translated
+	strings, use asprintf instead.
+	(get_coff_symbol_type): Likewise.
+
 2016-09-19  Alan Modra  <amodra@gmail.com>
 
 	* nm.c (print_symbol): Remove is_synthetic param.  Test sym->flags

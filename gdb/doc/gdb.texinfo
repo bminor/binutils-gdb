@@ -22041,6 +22041,7 @@ acceptable commands.
 
 
 @menu
+* ARC::                         Synopsys ARC
 * ARM::                         ARM
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
@@ -22050,6 +22051,30 @@ acceptable commands.
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
 @end menu
+
+@node ARC
+@subsection Synopsys ARC
+@cindex Synopsys ARC
+@cindex ARC specific commands
+@cindex ARC600
+@cindex ARC700
+@cindex ARC EM
+@cindex ARC HS
+
+@value{GDBN} provides the following ARC-specific commands:
+
+@table @code
+@item set debug arc
+@kindex set debug arc
+Control the level of ARC specific debug messages.  Use 0 for no messages (the
+default) and 1 for debug messages.  At present higher values offer no further
+messages.
+
+@item show debug arc
+@kindex show debug arc
+Show the level of ARC specific debugging in operation.
+
+@end table
 
 @node ARM
 @subsection ARM
@@ -35249,8 +35274,7 @@ Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} packet are
 determined by the @value{GDBN} internal gdbarch functions
-@code{DEPRECATED_REGISTER_RAW_SIZE} and @code{gdbarch_register_name}.  The
-specification of several standard @samp{g} packets is specified below.
+@code{DEPRECATED_REGISTER_RAW_SIZE} and @code{gdbarch_register_name}.
 
 When reading registers from a trace frame (@pxref{Analyze Collected
 Data,,Using the Collected Data}), the stub may also return a string of
@@ -35747,22 +35771,25 @@ be implemented in an idempotent way.}
 @itemx Z0,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}@r{[};cmds:@var{persist},@var{cmd_list}@dots{}@r{]}
 @cindex @samp{z0} packet
 @cindex @samp{Z0} packet
-Insert (@samp{Z0}) or remove (@samp{z0}) a memory breakpoint at address
+Insert (@samp{Z0}) or remove (@samp{z0}) a software breakpoint at address
 @var{addr} of type @var{kind}.
 
-A memory breakpoint is implemented by replacing the instruction at
+A software breakpoint is implemented by replacing the instruction at
 @var{addr} with a software breakpoint or trap instruction.  The
-@var{kind} is target-specific and typically indicates the size of
-the breakpoint in bytes that should be inserted.  E.g., the @sc{arm}
-and @sc{mips} can insert either a 2 or 4 byte breakpoint.  Some
-architectures have additional meanings for @var{kind};
-@var{cond_list} is an optional list of conditional expressions in bytecode
-form that should be evaluated on the target's side.  These are the
-conditions that should be taken into consideration when deciding if
-the breakpoint trigger should be reported back to @var{GDBN}.
+@var{kind} is target-specific and typically indicates the size of the
+breakpoint in bytes that should be inserted.  E.g., the @sc{arm} and
+@sc{mips} can insert either a 2 or 4 byte breakpoint.  Some
+architectures have additional meanings for @var{kind}
+(@pxref{Architecture-Specific Protocol Details}); if no
+architecture-specific value is being used, it should be @samp{0}.
+@var{kind} is hex-encoded.  @var{cond_list} is an optional list of
+conditional expressions in bytecode form that should be evaluated on
+the target's side.  These are the conditions that should be taken into
+consideration when deciding if the breakpoint trigger should be
+reported back to @value{GDBN}.
 
 See also the @samp{swbreak} stop reason (@pxref{swbreak stop reason})
-for how to best report a memory breakpoint event to @value{GDBN}.
+for how to best report a software breakpoint event to @value{GDBN}.
 
 The @var{cond_list} parameter is comprised of a series of expressions,
 concatenated without separators. Each expression has the following form:
@@ -35791,10 +35818,8 @@ actual conditional expression in bytecode form.
 
 @end table
 
-see @ref{Architecture-Specific Protocol Details}.
-
 @emph{Implementation note: It is possible for a target to copy or move
-code that contains memory breakpoints (e.g., when implementing
+code that contains software breakpoints (e.g., when implementing
 overlays).  The behavior of this packet, in the presence of such a
 target, is not defined.}
 
@@ -35809,15 +35834,16 @@ for an error
 @end table
 
 @item z1,@var{addr},@var{kind}
-@itemx Z1,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}
+@itemx Z1,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}@r{[};cmds:@var{persist},@var{cmd_list}@dots{}@r{]}
 @cindex @samp{z1} packet
 @cindex @samp{Z1} packet
 Insert (@samp{Z1}) or remove (@samp{z1}) a hardware breakpoint at
 address @var{addr}.
 
 A hardware breakpoint is implemented using a mechanism that is not
-dependant on being able to modify the target's memory.  The @var{kind}
-and @var{cond_list} have the same meaning as in @samp{Z0} packets.
+dependent on being able to modify the target's memory.  The
+@var{kind}, @var{cond_list}, and @var{cmd_list} arguments have the
+same meaning as in @samp{Z0} packets.
 
 @emph{Implementation note: A hardware breakpoint is not affected by code
 movement.}
@@ -35897,6 +35923,10 @@ when the target halts.  In the below the exact meaning of @dfn{signal
 number} is defined by the header @file{include/gdb/signals.h} in the
 @value{GDBN} source code.
 
+In non-stop mode, the server will simply reply @samp{OK} to commands
+such as @samp{vCont}; any stop will be the subject of a future
+notification.  @xref{Remote Non-Stop}.
+
 As in the description of request packets, we include spaces in the
 reply templates for clarity; these are not part of the reply packet's
 syntax.  No @value{GDBN} stop reply packet uses spaces to separate its
@@ -35975,7 +36005,7 @@ for more information.
 
 @item swbreak
 @anchor{swbreak stop reason}
-The packet indicates a memory breakpoint instruction was executed,
+The packet indicates a software breakpoint instruction was executed,
 irrespective of whether it was @value{GDBN} that planted the
 breakpoint or the breakpoint is hardcoded in the program.  The @var{r}
 part must be left empty.
@@ -36062,7 +36092,8 @@ The packet indicates that the thread was just created.  The new thread
 is stopped until @value{GDBN} sets it running with a resumption packet
 (@pxref{vCont packet}).  This packet should not be sent by default;
 @value{GDBN} requests it with the @ref{QThreadEvents} packet.  See
-also the @samp{w} (@ref{thread exit event}) remote reply below.
+also the @samp{w} (@pxref{thread exit event}) remote reply below.  The
+@var{r} part is ignored.
 
 @end table
 
@@ -36071,10 +36102,11 @@ also the @samp{w} (@ref{thread exit event}) remote reply below.
 The process exited, and @var{AA} is the exit status.  This is only
 applicable to certain targets.
 
-The second form of the response, including the process ID of the exited
-process, can be used only when @value{GDBN} has reported support for
-multiprocess protocol extensions; see @ref{multiprocess extensions}.
-The @var{pid} is formatted as a big-endian hex string.
+The second form of the response, including the process ID of the
+exited process, can be used only when @value{GDBN} has reported
+support for multiprocess protocol extensions; see @ref{multiprocess
+extensions}.  Both @var{AA} and @var{pid} are formatted as big-endian
+hex strings.
 
 @item X @var{AA}
 @itemx X @var{AA} ; process:@var{pid}
@@ -36083,7 +36115,8 @@ The process terminated with signal @var{AA}.
 The second form of the response, including the process ID of the
 terminated process, can be used only when @value{GDBN} has reported
 support for multiprocess protocol extensions; see @ref{multiprocess
-extensions}.  The @var{pid} is formatted as a big-endian hex string.
+extensions}.  Both @var{AA} and @var{pid} are formatted as big-endian
+hex strings.
 
 @anchor{thread exit event}
 @cindex thread exit event, remote reply
@@ -36092,6 +36125,7 @@ extensions}.  The @var{pid} is formatted as a big-endian hex string.
 The thread exited, and @var{AA} is the exit status.  This response
 should not be sent by default; @value{GDBN} requests it with the
 @ref{QThreadEvents} packet.  See also @ref{thread create event} above.
+@var{AA} is formatted as a big-endian hex string.
 
 @item N
 There are no resumed threads left in the target.  In other words, even
@@ -38663,7 +38697,7 @@ the process shall be repeated.
 The process of asynchronous notification can be illustrated by the
 following example:
 @smallexample
-<- @code{%%Stop:T0505:98e7ffbf;04:4ce6ffbf;08:b1b6e54c;thread:p7526.7526;core:0;}
+<- @code{%Stop:T0505:98e7ffbf;04:4ce6ffbf;08:b1b6e54c;thread:p7526.7526;core:0;}
 @code{...}
 -> @code{vStopped}
 <- @code{T0505:68f37db7;04:40f37db7;08:63850408;thread:p7526.7528;core:0;}
@@ -40931,6 +40965,7 @@ registers using the capitalization used in the description.
 
 @menu
 * AArch64 Features::
+* ARC Features::
 * ARM Features::
 * i386 Features::
 * MicroBlaze Features::
@@ -40955,6 +40990,45 @@ targets.  It should contain registers @samp{x0} through @samp{x30},
 The @samp{org.gnu.gdb.aarch64.fpu} feature is optional.  If present,
 it should contain registers @samp{v0} through @samp{v31}, @samp{fpsr},
 and @samp{fpcr}.
+
+@node ARC Features
+@subsection ARC Features
+@cindex target descriptions, ARC Features
+
+ARC processors are highly configurable, so even core registers and their number
+are not completely predetermined.  In addition flags and PC registers which are
+important to @value{GDBN} are not ``core'' registers in ARC.  It is required
+that one of the core registers features is present.
+@samp{org.gnu.gdb.arc.aux-minimal} feature is mandatory.
+
+The @samp{org.gnu.gdb.arc.core.v2} feature is required for ARC EM and ARC HS
+targets with a normal register file.  It should contain registers @samp{r0}
+through @samp{r25}, @samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}, @samp{blink},
+@samp{lp_count} and @samp{pcl}.  This feature may contain register @samp{ilink}
+and any of extension core registers @samp{r32} through @samp{r59/acch}.
+@samp{ilink} and extension core registers are not available to read/write, when
+debugging GNU/Linux applications, thus @samp{ilink} is made optional.
+
+The @samp{org.gnu.gdb.arc.core-reduced.v2} feature is required for ARC EM and
+ARC HS targets with a reduced register file.  It should contain registers
+@samp{r0} through @samp{r3}, @samp{r10} through @samp{r15}, @samp{gp},
+@samp{fp}, @samp{sp}, @samp{r30}, @samp{blink}, @samp{lp_count} and @samp{pcl}.
+This feature may contain register @samp{ilink} and any of extension core
+registers @samp{r32} through @samp{r59/acch}.
+
+The @samp{org.gnu.gdb.arc.core.arcompact} feature is required for ARCompact
+targets with a normal register file.  It should contain registers @samp{r0}
+through @samp{r25}, @samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}, @samp{blink},
+@samp{lp_count} and @samp{pcl}.  This feature may contain registers
+@samp{ilink1}, @samp{ilink2} and any of extension core registers @samp{r32}
+through @samp{r59/acch}.  @samp{ilink1} and @samp{ilink2} and extension core
+registers are not available when debugging GNU/Linux applications.  The only
+difference with @samp{org.gnu.gdb.arc.core.v2} feature is in the names of
+@samp{ilink1} and @samp{ilink2} registers and that @samp{r30} is mandatory in
+ARC v2, but @samp{ilink2} is optional on ARCompact.
+
+The @samp{org.gnu.gdb.arc.aux-minimal} feature is required for all ARC
+targets.  It should contain registers @samp{pc} and @samp{status32}.
 
 @node ARM Features
 @subsection ARM Features

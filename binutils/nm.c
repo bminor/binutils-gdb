@@ -342,7 +342,8 @@ set_output_format (char *f)
 static const char *
 get_elf_symbol_type (unsigned int type)
 {
-  static char buff [32];
+  static char *bufp;
+  int n;
 
   switch (type)
     {
@@ -353,21 +354,25 @@ get_elf_symbol_type (unsigned int type)
     case STT_FILE:     return "FILE";
     case STT_COMMON:   return "COMMON";
     case STT_TLS:      return "TLS";
-    default:
-      if (type >= STT_LOPROC && type <= STT_HIPROC)
-	sprintf (buff, _("<processor specific>: %d"), type);
-      else if (type >= STT_LOOS && type <= STT_HIOS)
-	sprintf (buff, _("<OS specific>: %d"), type);
-      else
-	sprintf (buff, _("<unknown>: %d"), type);
-      return buff;
     }
+
+  free (bufp);
+  if (type >= STT_LOPROC && type <= STT_HIPROC)
+    n = asprintf (&bufp, _("<processor specific>: %d"), type);
+  else if (type >= STT_LOOS && type <= STT_HIOS)
+    n = asprintf (&bufp, _("<OS specific>: %d"), type);
+  else
+    n = asprintf (&bufp, _("<unknown>: %d"), type);
+  if (n < 0)
+    fatal ("%s", xstrerror (errno));
+  return bufp;
 }
 
 static const char *
 get_coff_symbol_type (const struct internal_syment *sym)
 {
-  static char buff [32];
+  static char *bufp;
+  int n;
 
   switch (sym->n_sclass)
     {
@@ -378,16 +383,19 @@ get_coff_symbol_type (const struct internal_syment *sym)
 
   if (!sym->n_type)
     return "None";
-    
+
   switch (DTYPE(sym->n_type))
     {
     case DT_FCN: return "Function";
     case DT_PTR: return "Pointer";
     case DT_ARY: return "Array";
     }
-  
-  sprintf (buff, _("<unknown>: %d/%d"), sym->n_sclass, sym->n_type);
-  return buff;
+
+  free (bufp);
+  n = asprintf (&bufp, _("<unknown>: %d/%d"), sym->n_sclass, sym->n_type);
+  if (n < 0)
+    fatal ("%s", xstrerror (errno));
+  return bufp;
 }
 
 /* Print symbol name NAME, read from ABFD, with printf format FORM,

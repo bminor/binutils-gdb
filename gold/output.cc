@@ -4398,7 +4398,7 @@ Output_segment::set_section_addresses(const Target* target,
   this->offset_ = orig_off;
 
   off_t off = 0;
-  uint64_t ret;
+  uint64_t ret = 0;
   for (int i = 0; i < static_cast<int>(ORDER_MAX); ++i)
     {
       if (i == static_cast<int>(ORDER_RELRO_LAST))

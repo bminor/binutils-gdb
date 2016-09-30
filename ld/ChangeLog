@@ -1,3 +1,138 @@
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/v850.sc: Don't reference __ctbp, __ep, __gp when
+	not relocating.
+	* scripttempl/v850_rh850.sc: Likewise.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20528
+	* testsuite/ld-elf/pr20528a.d: xfail generic elf targets.  Allow
+	multiple .text sections for hppa-linux.
+	* testsuite/ld-elf/pr20528b.d: Likewise.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (default_bfd_error_handler): New function pointer.
+	(ld_bfd_error_handler): New function.
+	(main): Arrange to call it on bfd errors/warnings.
+	(ld_bfd_assert_handler): Enable tail call.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (ignore_bfd_errors): Update params.
+
+2016-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20528
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	merge 2 sections with different SHF_EXCLUDE.
+	* testsuite/ld-elf/pr20528a.d: New file.
+	* testsuite/ld-elf/pr20528a.s: Likewise.
+	* testsuite/ld-elf/pr20528b.d: Likewise.
+	* testsuite/ld-elf/pr20528b.s: Likewise.
+
+2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	PR ld/20608
+	* testsuite/ld-arm/arm-elf.exp: Handle new testcase.
+	* testsuite/ld-arm/farcall-mixed-app2.d: New file.
+	* testsuite/ld-arm/farcall-mixed-app2.r: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.s: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.sym: Likewise.
+
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/attr-gnu-4-4.s: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-14.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-24.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-34.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-41.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-32.d: Adjust expected warning.
+	* testsuite/ld-powerpc/attr-gnu-8-23.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-01.d: Adjust expected output.
+	* testsuite/ld-powerpc/attr-gnu-4-02.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-03.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-10.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-11.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-20.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-22.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-33.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-8-11.d: Likewise.
+	* testsuite/ld-powerpc/powerpc.exp: Don't run deleted tests.
+
+2016-09-23  Akihiko Odaki  <akihiko.odaki.4i@stu.hosei.ac.jp>
+
+	PR ld/20595
+	* testsuite/ld-arm/unwind-4.d: Add -q option to linker command
+	line and -r option to objdump command line.  Match emitted relocs
+	to make sure that superflous relocs are not generated.
+
+2016-09-23  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* emulparams/elf64_s390.sh: Change TEXT_START_ADDR to 256MB.
+	* testsuite/ld-s390/tlsbin_64.dd: Adjust testcase accordingly.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+
+2016-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (_try_needed): In verbose mode, report failed
+	attempts to find a needed library.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/ld-aarch64/emit-relocs-28.d: Expect spaces after ","
+	in addresses.
+	* testsuite/ld-aarch64/emit-relocs-301-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-301.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-302-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-302.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-310-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-310.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-313.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-515-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-515.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-516-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-516.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-531.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-532.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-533.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-534.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-535.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-536.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-537.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-538.d: Likewise.
+	* testsuite/ld-aarch64/erratum835769.d: Likewise.
+	* testsuite/ld-aarch64/erratum843419.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-plt.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-plt.d: Likewise.
+	* testsuite/ld-aarch64/gc-plt-relocs.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-21.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-7c.d: Likewise.
+	* testsuite/ld-aarch64/tls-desc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-desc-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-desc.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-ie-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-all.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gd-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gdesc-ie-2.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gdesc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-large-desc-ie-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-large-desc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-tiny-desc.d: Likewise.
+	* testsuite/ld-aarch64/tls-tiny-gd.d: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/ld-aarch64/emit-relocs-280.d: Match branch comments.
+	* testsuite/ld-aarch64/weak-undefined.d: Likewise.
+
 2016-09-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld.texinfo (Input Section Basics): Expand the description of

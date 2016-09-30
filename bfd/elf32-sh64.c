@@ -227,8 +227,8 @@ sh64_elf_merge_private_data (bfd *ibfd, bfd *obfd)
       else
 	msg = _("%s: object size does not match that of target %s");
 
-      (*_bfd_error_handler) (msg, bfd_get_filename (ibfd),
-			     bfd_get_filename (obfd));
+      _bfd_error_handler (msg, bfd_get_filename (ibfd),
+			  bfd_get_filename (obfd));
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
     }
@@ -244,7 +244,7 @@ sh64_elf_merge_private_data (bfd *ibfd, bfd *obfd)
   /* We don't allow linking in non-SH64 code.  */
   else if ((new_flags & EF_SH_MACH_MASK) != EF_SH5)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	("%s: uses non-SH64 instructions while previous modules use SH64 instructions",
 	 bfd_get_filename (ibfd));
       bfd_set_error (bfd_error_bad_value);
@@ -447,7 +447,7 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	      && h->root.type != bfd_link_hash_indirect))
 	{
 	  /* Make sure we don't get confused on invalid input.  */
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%s: encountered datalabel symbol in input"),
 	     bfd_get_filename (abfd));
 	  bfd_set_error (bfd_error_bad_value);
@@ -543,7 +543,7 @@ shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
 	       unknown destination (or when relaxing) will get us here.  */
 	    if ((insn & SHMEDIA_PTB_BIT) != 0)
 	      {
-		(*_bfd_error_handler)
+		_bfd_error_handler
 		  (_("%s: GAS error: unexpected PTB insn with R_SH_PT_16"),
 		   bfd_get_filename (input_section->owner));
 		return FALSE;
@@ -592,7 +592,7 @@ shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
     }
   if (dropped != 0)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: error: unaligned relocation type %d at %08x reloc %p\n"),
 	 input_section->owner, ELF32_R_TYPE (rel->r_info),
 	 (unsigned) rel->r_offset, relocation);
@@ -668,7 +668,7 @@ sh64_elf_final_write_processing (bfd *abfd,
 				      ld_generated_cranges_size))
 	{
 	  bfd_set_error (bfd_error_file_truncated);
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%s: could not write out added .cranges entries"),
 	     bfd_get_filename (abfd));
 	}
@@ -728,7 +728,7 @@ sh64_elf_final_write_processing (bfd *abfd,
 					  cranges_size))
 	    {
 	      bfd_set_error (bfd_error_file_truncated);
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%s: could not write out sorted .cranges entries"),
 		 bfd_get_filename (abfd));
 	    }

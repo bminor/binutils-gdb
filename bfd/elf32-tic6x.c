@@ -2521,9 +2521,9 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	    }
 	  else
 	    {
-	      (*_bfd_error_handler) (_("%B: SB-relative relocation but "
-				       "__c6xabi_DSBT_BASE not defined"),
-				     input_bfd);
+	      _bfd_error_handler (_("%B: SB-relative relocation but "
+				    "__c6xabi_DSBT_BASE not defined"),
+				  input_bfd);
 	      ok = FALSE;
 	      continue;
 	    }
@@ -2629,7 +2629,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 		 symbols.  Make this an error; the compiler isn't
 		 allowed to pass us these kinds of things.  */
 	      if (h == NULL)
-		(*_bfd_error_handler)
+		_bfd_error_handler
 		  (_("%B, section %A: relocation %s with non-zero addend %d"
 		     " against local symbol"),
 		   input_bfd,
@@ -2637,7 +2637,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 		   elf32_tic6x_howto_table[r_type].name,
 		   rel->r_addend);
 	      else
-		(*_bfd_error_handler)
+		_bfd_error_handler
 		  (_("%B, section %A: relocation %s with non-zero addend %d"
 		     " against symbol `%s'"),
 		   input_bfd,
@@ -2667,8 +2667,8 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	  /* Invalid in relocatable object.  */
 	default:
 	  /* Unknown relocation.  */
-	  (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
-				 input_bfd, r_type);
+	  _bfd_error_handler (_("%B: invalid relocation type %d"),
+			      input_bfd, r_type);
 	  ok = FALSE;
 	  continue;
 	}
@@ -2806,9 +2806,8 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
-				 abfd,
-				 r_symndx);
+	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+			      abfd, r_symndx);
 	  return FALSE;
 	}
 

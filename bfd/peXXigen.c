@@ -527,7 +527,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
     /* PR 17512: Corrupt PE binaries can cause seg-faults.  */
     if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
       {
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
 	   abfd, a->NumberOfRvaAndSizes);
 	bfd_set_error (bfd_error_bad_value);
@@ -879,6 +879,8 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
   /* Only use a real timestamp if the option was chosen.  */
   if ((pe_data (abfd)->insert_timestamp))
     H_PUT_32 (abfd, time (0), filehdr_out->f_timdat);
+  else
+    H_PUT_32 (abfd, 0, filehdr_out->f_timdat);
 
   PUT_FILEHDR_SYMPTR (abfd, filehdr_in->f_symptr,
 		      filehdr_out->f_symptr);
@@ -1082,9 +1084,9 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
 	H_PUT_16 (abfd, scnhdr_int->s_nlnno, scnhdr_ext->s_nlnno);
       else
 	{
-	  (*_bfd_error_handler) (_("%s: line number overflow: 0x%lx > 0xffff"),
-				 bfd_get_filename (abfd),
-				 scnhdr_int->s_nlnno);
+	  _bfd_error_handler (_("%s: line number overflow: 0x%lx > 0xffff"),
+			      bfd_get_filename (abfd),
+			      scnhdr_int->s_nlnno);
 	  bfd_set_error (bfd_error_file_truncated);
 	  H_PUT_16 (abfd, 0xffff, scnhdr_ext->s_nlnno);
 	  ret = 0;

@@ -218,7 +218,7 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
   plugin_handle = dlopen (pname, RTLD_NOW);
   if (!plugin_handle)
     {
-      (*_bfd_error_handler)("%s\n", dlerror ());
+      _bfd_error_handler ("%s\n", dlerror ());
       return 0;
     }
 

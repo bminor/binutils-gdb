@@ -53,6 +53,8 @@
 #include "gdb_bfd.h"
 #include "btrace.h"
 
+#include <vector>
+
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
 
@@ -943,7 +945,6 @@ objfile_relocate (struct objfile *objfile,
        debug_objfile = objfile_separate_debug_iterate (objfile, debug_objfile))
     {
       struct section_addr_info *objfile_addrs;
-      struct section_offsets *new_debug_offsets;
       struct cleanup *my_cleanups;
 
       objfile_addrs = build_section_addr_info_from_objfile (objfile);
@@ -956,15 +957,13 @@ objfile_relocate (struct objfile *objfile,
 
       gdb_assert (debug_objfile->num_sections
 		  == gdb_bfd_count_sections (debug_objfile->obfd));
-      new_debug_offsets = 
-	((struct section_offsets *)
-	 xmalloc (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections)));
-      make_cleanup (xfree, new_debug_offsets);
-      relative_addr_info_to_section_offsets (new_debug_offsets,
+      std::vector<struct section_offsets>
+	new_debug_offsets (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections));
+      relative_addr_info_to_section_offsets (new_debug_offsets.data (),
 					     debug_objfile->num_sections,
 					     objfile_addrs);
 
-      changed |= objfile_relocate1 (debug_objfile, new_debug_offsets);
+      changed |= objfile_relocate1 (debug_objfile, new_debug_offsets.data ());
 
       do_cleanups (my_cleanups);
     }

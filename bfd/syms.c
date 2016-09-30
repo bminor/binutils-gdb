@@ -1075,7 +1075,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		  || r->howto->bitpos != 0
 		  || r->howto->dst_mask != 0xffffffff)
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("Unsupported .stab relocation"));
 		  bfd_set_error (bfd_error_invalid_operation);
 		  if (reloc_vector != NULL)

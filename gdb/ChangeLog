@@ -1,3 +1,144 @@
+2016-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/20609 - attach of JIT-debug-enabled inf 7.11.1 regression
+	* exec.c (exec_file_locate_attach): Add parameter defer_bp_reset.
+	Use it.
+	* gdbcore.h (exec_file_locate_attach): Add parameter defer_bp_reset.
+	* infcmd.c (setup_inferior): Update caller.
+	* remote.c (remote_add_inferior): Likewise.
+
+2016-09-28  Pedro Alves  <palves@redhat.com>
+
+	* infcall.c (run_inferior_call): Remove input from the event
+	loop while running the infcall.
+
+2016-09-27  Fredrik Hederstierna  <fredrik.hederstierna@verisure.com>
+
+	* arm-tdep.c (arm_m_addr_is_magic): New function.
+	(arm_addr_bits_remove): Call arm_m_addr_is_magic.
+	(arm_m_exception_unwind_sniffer): Likewise.
+
+2016-09-23  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (windows_delete_thread): Adjusting call to
+	target_mourn_inferior to include ptid_t argument.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_dyn_string_delete): Remove declaration.
+	* utils.c: Don't include dyn-string.h.
+	(do_dyn_string_delete, make_cleanup_dyn_string_delete): Remove.
+	* cli/cli-cmds.c: Include <string>.  Don't include dyn-string.h.
+	(argv_to_string): Rename.  Change return type to std::string.
+	(alias_command): Use std::string.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
+	* objfiles.c: Include <vector>.
+	(objfile_relocate): Use std::vector.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c: Include <string> and <vector>.
+	(rust_evaluate_funcall): Use std::vector, std::string.
+	(rust_evaluate_subexp): Use std::string.
+	(rust_lookup_symbol_nonlocal): Use std::string.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
+	* cp-namespace.c: Include <string>.
+	(cp_search_static_and_baseclasses)
+	(cp_lookup_symbol_imports_or_template, find_symbol_in_baseclass):
+	Use std::string.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-sig.c: Include <string>.
+	(signal_catchpoint_print_one): Use std::string.
+
+2016-09-23  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (struct restore_ui_out_closure): Remove.
+	* objfiles.h (terminate_minimal_symbol_table): Don't declare.
+
+2016-09-23  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/linux-osdata.c (linux_xfer_osdata_threads): Replace
+	sprintf with xsnprintf.
+	(linux_xfer_osdata_fds): Likewise.
+
+2016-09-23  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add common/new-op.c.
+	(COMMON_OBS): Add common/new-op.o.
+	(new-op.o): New rule.
+	* common/common-exceptions.h: Include <new>.
+	(struct gdb_quit_bad_alloc): New type.
+	* common/new-op.c: New file.
+
+2016-09-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (ppc_process_record_op31): Fix
+	regcache_raw_read_unsigned call using the correct parameter type.
+
+2016-09-22  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c: Fix ARI warning for printf(%p).
+
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* MAINTAINERS (Write After Approval): Add Anton Kolesov.
+
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add arc-tdep.o.
+	(HFILES_NO_SRCDIR): Add arc-tdep.h.
+	(ALLDEPFILES): Add arc-tdep.c.
+	* NEWS: Mention new ARC port.
+	* configure.tgt: Add ARC.
+	* arc-tdep.c: New file.
+	* arc-tdep.h: New file.
+	* features/Makefile (XMLTOC): Add arc-v2.xml and arc-arcompact.xml.
+	* features/arc-v2.xml: New file.
+	* features/arc-v2.c: New file (generated).
+	* features/arc-arcompact.xml: New file.
+	* features/arc-arcompact.c: New file (generated).
+
+2016-09-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (ppc_process_record_op63): Fix return of instruction
+	handlers.
+
+2016-09-21  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/20604:
+	* top.h (quit_force): Update.
+	* top.c (quit_force): Changed type of first argument.  Don't
+	evaluate expression.  Pass NULL to kill_or_detach.
+	* cli/cli-cmds.c (quit_command): Evaluate "args".
+
+2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* .gitignore: Ignore more files.
+	* data-directory/.gitignore: Likewise.
+
+2016-09-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (PPC_DQ): New macro.
+	(ppc_process_record_op4): Add Power ISA 3.0 instructions.
+	(ppc_process_record_op19): Likewise.
+	(ppc_process_record_op31): Likewise.
+	(ppc_process_record_op59): Likewise.
+	(ppc_process_record_op60): Likewise.
+	(ppc_process_record_op63): Likewise.
+	(ppc_process_record): Likewise.
+	(ppc_process_record_op61): New function.
+
+2016-09-21  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c (aarch32_gp_regcache_collect): Keep
+	bits 20 to 23.
+
 2016-09-20  Tom Tromey  <tom@tromey.com>
 
 	* python/py-value.c (convert_value_from_python): Make PyInt_Check

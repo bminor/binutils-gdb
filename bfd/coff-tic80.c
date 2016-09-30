@@ -436,8 +436,8 @@ rtype2howto (arelent *cache_ptr, struct internal_reloc *dst)
 	}
     }
 
-  (*_bfd_error_handler) (_("Unrecognized reloc type 0x%x"),
-			 (unsigned int) dst->r_type);
+  _bfd_error_handler (_("Unrecognized reloc type 0x%x"),
+		      (unsigned int) dst->r_type);
   cache_ptr->howto = tic80_howto_table + 0;
 }
 
@@ -665,7 +665,7 @@ coff_tic80_relocate_section (bfd *output_bfd,
 	case bfd_reloc_ok:
 	  break;
 	case bfd_reloc_outofrange:
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: bad reloc address 0x%lx in section `%A'"),
 	     input_bfd, input_section, (unsigned long) rel->r_vaddr);
 	  return FALSE;

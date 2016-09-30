@@ -1202,9 +1202,8 @@ metag_add_stub (const char *stub_name,
 				TRUE, FALSE);
   if (hsh == NULL)
     {
-      (*_bfd_error_handler) (_("%B: cannot create stub entry %s"),
-			     section->owner,
-			     stub_name);
+      _bfd_error_handler (_("%B: cannot create stub entry %s"),
+			  section->owner, stub_name);
       return NULL;
     }
 
@@ -1928,7 +1927,7 @@ elf_metag_relocate_section (bfd *output_bfd,
 	case R_METAG_TLS_LE_LO16:
 	  if (bfd_link_pic (info))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B(%A+0x%lx): R_METAG_TLS_LE/IENONPIC relocation not permitted in shared object"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, howto->name);
@@ -2286,7 +2285,7 @@ elf_metag_check_relocs (bfd *abfd,
 		name = hh->eh.root.root.string;
 	      else
 		name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		 abfd, elf_metag_howto_table[r_type].name, name);
 	      bfd_set_error (bfd_error_bad_value);

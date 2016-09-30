@@ -43,6 +43,7 @@ typedef enum
   ARITH,
   AUXREG,
   BITOP,
+  BITSTREAM,
   BMU,
   BRANCH,
   CONTROL,
@@ -55,7 +56,8 @@ typedef enum
   LOGICAL,
   MEMORY,
   NET,
-  PMU
+  PMU,
+  XY
 } insn_class_t;
 
 /* Instruction Subclass.  */

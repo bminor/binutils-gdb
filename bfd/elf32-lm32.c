@@ -1052,7 +1052,7 @@ lm32_elf_relocate_section (bfd *output_bfd,
 
               /* Addend should be zero.  */
               if (rel->r_addend != 0)
-                (*_bfd_error_handler) (_("internal error: addend should be zero for R_LM32_16_GOT"));
+		_bfd_error_handler (_("internal error: addend should be zero for R_LM32_16_GOT"));
 
               r = _bfd_final_link_relocate (howto,
                                             input_bfd,
@@ -1551,7 +1551,7 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
       if (lm32fdpic_fixup32_section (info)->size
               != (lm32fdpic_fixup32_section (info)->reloc_count * 4))
         {
-          (*_bfd_error_handler)
+	  _bfd_error_handler
             ("LINKER BUG: .rofixup section size mismatch: size/4 %d != relocs %d",
             lm32fdpic_fixup32_section (info)->size/4,
             lm32fdpic_fixup32_section (info)->reloc_count);
@@ -1573,7 +1573,7 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
           BFD_ASSERT (hend->u.def.value == value);
           if (hend->u.def.value != value)
             {
-              (*_bfd_error_handler)
+	      _bfd_error_handler
                 ("LINKER BUG: .rofixup section hend->u.def.value != value: %ld != %ld", hend->u.def.value, value);
               return FALSE;
             }

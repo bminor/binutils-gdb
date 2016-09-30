@@ -133,6 +133,7 @@ static void ppc_elf_rdata (int);
 static void ppc_elf_lcomm (int);
 static void ppc_elf_localentry (int);
 static void ppc_elf_abiversion (int);
+static void ppc_elf_gnu_attribute (int);
 #endif
 
 #ifdef TE_PE
@@ -270,6 +271,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "lcomm",	ppc_elf_lcomm,	0 },
   { "localentry", ppc_elf_localentry,	0 },
   { "abiversion", ppc_elf_abiversion,	0 },
+  { "gnu_attribute", ppc_elf_gnu_attribute, 0},
 #endif
 
 #ifdef TE_PE
@@ -2314,6 +2316,28 @@ ppc_elf_abiversion (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Parse a .gnu_attribute directive.  */
+static void
+ppc_elf_gnu_attribute (int ignored ATTRIBUTE_UNUSED)
+{
+  int tag = obj_elf_vendor_attribute (OBJ_ATTR_GNU);
+
+  /* Check validity of defined powerpc tags.  */
+  if (tag == Tag_GNU_Power_ABI_FP
+      || tag == Tag_GNU_Power_ABI_Vector
+      || tag == Tag_GNU_Power_ABI_Struct_Return)
+    {
+      unsigned int val;
+
+      val = bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_GNU, tag);
+
+      if ((tag == Tag_GNU_Power_ABI_FP && val > 15)
+	  || (tag == Tag_GNU_Power_ABI_Vector && val > 3)
+	  || (tag == Tag_GNU_Power_ABI_Struct_Return && val > 2))
+	as_warn (_("unknown .gnu_attribute value"));
+    }
+}
+
 /* Set ABI version in output file.  */
 void
 ppc_elf_end (void)
@@ -2671,7 +2695,8 @@ md_assemble (char *str)
       const struct powerpc_operand *operand;
 
       operand = &powerpc_operands[*opindex_ptr];
-      if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
+      if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
+	  && !((operand->flags & PPC_OPERAND_OPTIONAL32) != 0 && ppc_obj64))
 	{
 	  unsigned int opcount;
 	  unsigned int num_operands_expected;
@@ -2741,6 +2766,7 @@ md_assemble (char *str)
       /* If this is an optional operand, and we are skipping it, just
 	 insert a zero.  */
       if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
+	  && !((operand->flags & PPC_OPERAND_OPTIONAL32) != 0 && ppc_obj64)
 	  && skip_optional)
 	{
 	  long val = ppc_optional_operand_value (operand);

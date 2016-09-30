@@ -5620,7 +5620,7 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
 	if (fc->col_type[r] != DW_CFA_unreferenced)
 	  {
 	    if (r == fc->ra)
-	      printf ("ra      ");
+	      printf ("ra    ");
 	    else
 	      printf ("%-5s ", regname (r, 1));
 	  }
@@ -6331,19 +6331,25 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_restore:
-	      if (opa >= (unsigned int) cie->ncols
-		  || opa >= (unsigned int) fc->ncols)
+	      if (opa >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_restore: %s%s\n",
 			reg_prefix, regname (opa, 0));
-	      if (*reg_prefix == '\0')
+	      if (*reg_prefix != '\0')
+		break;
+
+	      if (opa >= (unsigned int) cie->ncols
+		  || (do_debug_frames_interp
+		      && cie->col_type[opa] == DW_CFA_unreferenced))
+		{
+		  fc->col_type[opa] = DW_CFA_undefined;
+		  fc->col_offset[opa] = 0;
+		}
+	      else
 		{
 		  fc->col_type[opa] = cie->col_type[opa];
 		  fc->col_offset[opa] = cie->col_offset[opa];
-		  if (do_debug_frames_interp
-		      && fc->col_type[opa] == DW_CFA_unreferenced)
-		    fc->col_type[opa] = DW_CFA_undefined;
 		}
 	      break;
 
@@ -6418,7 +6424,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
-		printf ("  DW_CFA_val_offset: %s%s at cfa%+ld\n",
+		printf ("  DW_CFA_val_offset: %s%s is cfa%+ld\n",
 			reg_prefix, regname (reg, 0),
 			roffs * fc->data_factor);
 	      if (*reg_prefix == '\0')
@@ -6430,13 +6436,20 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_restore_extended:
 	      reg = LEB ();
-	      if (reg >= (unsigned int) cie->ncols
-		  || reg >= (unsigned int) fc->ncols)
+	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_restore_extended: %s%s\n",
 			reg_prefix, regname (reg, 0));
-	      if (*reg_prefix == '\0')
+	      if (*reg_prefix != '\0')
+		break;
+
+	      if (reg >= (unsigned int) cie->ncols)
+		{
+		  fc->col_type[reg] = DW_CFA_undefined;
+		  fc->col_offset[reg] = 0;
+		}
+	      else
 		{
 		  fc->col_type[reg] = cie->col_type[reg];
 		  fc->col_offset[reg] = cie->col_offset[reg];
@@ -6653,7 +6666,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (frame_need_space (fc, reg) < 0)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
-		printf ("  DW_CFA_val_offset_sf: %s%s at cfa%+ld\n",
+		printf ("  DW_CFA_val_offset_sf: %s%s is cfa%+ld\n",
 			reg_prefix, regname (reg, 0),
 			(long)(l * fc->data_factor));
 	      if (*reg_prefix == '\0')

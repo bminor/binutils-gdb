@@ -41,6 +41,7 @@ extern "C" {
 
 #include "ansidecl.h"
 #include "symcat.h"
+#include <stdarg.h>
 #include <sys/stat.h>
 
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
@@ -6928,13 +6929,11 @@ const char *bfd_errmsg (bfd_error_type error_tag);
 void bfd_perror (const char *message);
 
 
-typedef void (*bfd_error_handler_type) (const char *, ...);
+typedef void (*bfd_error_handler_type) (const char *, va_list);
 
 bfd_error_handler_type bfd_set_error_handler (bfd_error_handler_type);
 
 void bfd_set_error_program_name (const char *);
-
-bfd_error_handler_type bfd_get_error_handler (void);
 
 
 typedef void (*bfd_assert_handler_type) (const char *bfd_formatmsg,
@@ -6943,8 +6942,6 @@ typedef void (*bfd_assert_handler_type) (const char *bfd_formatmsg,
                                          int bfd_line);
 
 bfd_assert_handler_type bfd_set_assert_handler (bfd_assert_handler_type);
-
-bfd_assert_handler_type bfd_get_assert_handler (void);
 
 long bfd_get_reloc_upper_bound (bfd *abfd, asection *sect);
 

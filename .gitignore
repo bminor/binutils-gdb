@@ -15,6 +15,7 @@
 *.o
 *.pyc
 *.tmp
+*.a
 
 .deps
 .libs
@@ -49,3 +50,12 @@ lost+found
 # ignore ./contrib/gcc_update output
 LAST_UPDATED
 REVISION
+
+stamp-*
+*.stamp
+
+# ignore in-tree prerequisites
+/mpfr*
+/mpc*
+/gmp*
+/isl*

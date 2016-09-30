@@ -559,6 +559,12 @@ set armeabitests_nonacl {
       {readelf -Ds farcall-mixed-app.sym}}
      "farcall-mixed-app-v5"}
 
+    {"Mixed ARM/Thumb2 dynamic application with farcalls" "tmpdir/mixed-lib.so -T arm-dyn.ld --section-start .mid_thumb=0x10081c0 --section-start .far_arm=0x2100000 --section-start .far_thumb=0x2200000" "" ""
+     {farcall-mixed-app2.s}
+     {{objdump -fdw farcall-mixed-app2.d} {objdump -Rw farcall-mixed-app2.r}
+      {readelf -Ds farcall-mixed-app2.sym}}
+     "farcall-mixed-app2"}
+
     {"Mixed ARM/Thumb shared library with long branches (v4t)" "-shared -T arm-lib.ld" "" "-march=armv4t"
      {farcall-mixed-lib1.s farcall-mixed-lib2.s}
      {{objdump -fdw farcall-mixed-lib-v4t.d}}
