@@ -1,3 +1,9 @@
+2016-10-05  Tom Tromey  <tom@tromey.com>
+
+	PR remote/20655:
+	* tracepoint.c (handle_tracepoint_bkpts): Check
+	ipa_error_tracepoint, not ipa_stopping_tracepoint.
+
 2016-10-05  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv: Update the path of arm-*.xml files.
