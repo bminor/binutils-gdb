@@ -997,9 +997,10 @@ stmp-bfd-h: bfd-in3.h
 	rm -f bfd-tmp.h
 	touch stmp-bfd-h
 
-BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
-	reloc.c syms.c bfd.c bfdio.c bfdwin.c \
-	archive.c corefile.c targets.c format.c compress.c
+BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c \
+	bfdio.c bfdwin.c section.c archures.c reloc.c \
+	syms.c bfd.c archive.c corefile.c targets.c format.c \
+	linker.c simple.c compress.c
 BFD64_H_FILES = archive64.c
 LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c bfdio.c bfdwin.c \
 	cache.c reloc.c archures.c elf.c

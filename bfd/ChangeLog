@@ -1,5 +1,11 @@
 2016-09-30  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (BFD_H_FILES): Add linker.c and simple.c.  Sort
+	as per comment at head of bfd-in2.h.
+	* Makefile.in: Regenerate.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
 	* aout-adobe.c: Replace (*_bfd_error_handler) (...) with
 	_bfd_error_handler (...) throughout.
 	* aout-cris.c, * aoutx.h, * archive.c, * bfd.c, * binary.c,
