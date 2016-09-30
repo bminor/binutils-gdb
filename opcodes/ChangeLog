@@ -1,3 +1,8 @@
+2016-09-29  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20553
+	* aarch64-tbl.h (fmla, fmls, fmul, fmulx): Fix opcode mask field.
+
 2016-09-29  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (L): Make compulsory.

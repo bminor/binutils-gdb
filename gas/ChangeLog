@@ -1,3 +1,10 @@
+2016-09-29  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20553
+	* testsuite/gas/aarch64/advsimd-fp16.s (indexed_elem): New high index
+	testcases for H and S variants.  New low index testcases for D variant.
+	* testsuite/gas/aarch64/advsimd-fp16.d: Update expected results.
+
 2016-09-29  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_assemble): Handle PPC_OPERAND_OPTIONAL32.
