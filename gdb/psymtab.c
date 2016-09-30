@@ -1577,7 +1577,7 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
   struct partial_symbol *sym1 = (struct partial_symbol *) addr1;
   struct partial_symbol *sym2 = (struct partial_symbol *) addr2;
 
-  return (memcmp (&sym1->ginfo.value, &sym1->ginfo.value,
+  return (memcmp (&sym1->ginfo.value, &sym2->ginfo.value,
                   sizeof (sym1->ginfo.value)) == 0
 	  && sym1->ginfo.language == sym2->ginfo.language
           && PSYMBOL_DOMAIN (sym1) == PSYMBOL_DOMAIN (sym2)

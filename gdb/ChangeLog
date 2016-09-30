@@ -1,3 +1,9 @@
+2016-10-05  Tom Tromey  <tom@tromey.com>
+
+	PR symtab/20652:
+	* psymtab.c (psymbol_compare): Correctly compare "ginfo.value"
+	fields.
+
 2016-10-05  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* dwarf2expr.c (dwarf_expr_require_composition): Allow
