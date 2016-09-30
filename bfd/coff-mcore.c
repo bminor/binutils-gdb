@@ -365,7 +365,7 @@ coff_mcore_relocate_section (bfd * output_bfd,
   if (   input_bfd->xvec->byteorder != output_bfd->xvec->byteorder
       && output_bfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: compiled for a %s system and target is %s.\n"),
 	 input_bfd,
          bfd_big_endian (input_bfd) ? _("big endian") : _("little endian"),

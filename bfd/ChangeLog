@@ -1,5 +1,38 @@
 2016-09-30  Alan Modra  <amodra@gmail.com>
 
+	* aout-adobe.c: Replace (*_bfd_error_handler) (...) with
+	_bfd_error_handler (...) throughout.
+	* aout-cris.c, * aoutx.h, * archive.c, * bfd.c, * binary.c,
+	* cache.c, * coff-alpha.c, * coff-arm.c, * coff-h8300.c,
+	* coff-i860.c, * coff-mcore.c, * coff-ppc.c, * coff-rs6000.c,
+	* coff-sh.c, * coff-tic4x.c, * coff-tic54x.c, * coff-tic80.c,
+	* coff64-rs6000.c, * coffcode.h, * coffgen.c, * cofflink.c,
+	* coffswap.h, * cpu-arm.c, * cpu-m68k.c, * cpu-sh.c, * dwarf2.c,
+	* ecoff.c, * elf-eh-frame.c, * elf-m10300.c, * elf.c, * elf32-arc.c,
+	* elf32-arm.c, * elf32-avr.c, * elf32-bfin.c, * elf32-cr16.c,
+	* elf32-cris.c, * elf32-crx.c, * elf32-dlx.c, * elf32-frv.c,
+	* elf32-hppa.c, * elf32-i370.c, * elf32-i386.c, * elf32-lm32.c,
+	* elf32-m32c.c, * elf32-m32r.c, * elf32-m68hc1x.c, * elf32-m68k.c,
+	* elf32-mcore.c, * elf32-mep.c, * elf32-metag.c, * elf32-microblaze.c,
+	* elf32-mips.c, * elf32-nds32.c, * elf32-nios2.c, * elf32-or1k.c,
+	* elf32-pj.c, * elf32-ppc.c, * elf32-rl78.c, * elf32-s390.c,
+	* elf32-score.c, * elf32-score7.c, * elf32-sh.c, * elf32-sh64.c,
+	* elf32-sparc.c, * elf32-spu.c, * elf32-tic6x.c, * elf32-tilepro.c,
+	* elf32-v850.c, * elf32-vax.c, * elf32-xtensa.c, * elf64-alpha.c,
+	* elf64-hppa.c, * elf64-ia64-vms.c, * elf64-mips.c, * elf64-mmix.c,
+	* elf64-ppc.c, * elf64-s390.c, * elf64-sh64.c, * elf64-sparc.c,
+	* elf64-x86-64.c, * elfcode.h, * elfcore.h, * elflink.c,
+	* elfn32-mips.c, * elfnn-aarch64.c, * elfnn-ia64.c, * elfxx-mips.c,
+	* elfxx-sparc.c, * elfxx-tilegx.c, * hpux-core.c, * i386linux.c,
+	* ieee.c, * ihex.c, * libbfd.c, * linker.c, * m68klinux.c,
+	* mach-o.c, * merge.c, * mmo.c, * oasys.c, * osf-core.c, * pdp11.c,
+	* pe-mips.c, * peXXigen.c, * pef.c, * plugin.c, * reloc.c,
+	* rs6000-core.c, * sco5-core.c, * som.c, * sparclinux.c, * srec.c,
+	* stabs.c, * syms.c, * vms-alpha.c, * vms-lib.c, * vms-misc.c,
+	* xcofflink.c: Likewise.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Include stdarg.h.
 	* bfd.c (bfd_error_handler_type): Make like vprintf.
 	(_bfd_error_internal): Rename from _bfd_error_handler.  Make static.

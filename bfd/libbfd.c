@@ -785,7 +785,7 @@ _bfd_generic_get_section_contents (bfd *abfd,
 
   if (section->compress_status != COMPRESS_SECTION_NONE)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: unable to get decompressed section %A"),
 	 abfd, section);
       bfd_set_error (bfd_error_invalid_operation);
@@ -939,7 +939,7 @@ _bfd_generic_verify_endian_match (bfd *ibfd, bfd *obfd)
       else
 	msg = _("%B: compiled for a little endian system and target is big endian");
 
-      (*_bfd_error_handler) (msg, ibfd);
+      _bfd_error_handler (msg, ibfd);
 
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;

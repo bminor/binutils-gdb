@@ -1314,7 +1314,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	case EGSD__C_SYMM:
 	case EGSD__C_SYMV:
 	default:
-	  (*_bfd_error_handler) (_("Unknown EGSD subtype %d"), gsd_type);
+	  _bfd_error_handler (_("Unknown EGSD subtype %d"), gsd_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -1345,7 +1345,7 @@ _bfd_vms_push (bfd *abfd, bfd_vma val, unsigned int reloc)
   if (PRIV (stackptr) >= STACKSIZE)
     {
       bfd_set_error (bfd_error_bad_value);
-      (*_bfd_error_handler) (_("Stack overflow (%d) in _bfd_vms_push"), PRIV (stackptr));
+      _bfd_error_handler (_("Stack overflow (%d) in _bfd_vms_push"), PRIV (stackptr));
       exit (1);
     }
 }
@@ -1358,7 +1358,7 @@ _bfd_vms_pop (bfd *abfd, bfd_vma *val, unsigned int *rel)
   if (PRIV (stackptr) == 0)
     {
       bfd_set_error (bfd_error_bad_value);
-      (*_bfd_error_handler) (_("Stack underflow in _bfd_vms_pop"));
+      _bfd_error_handler (_("Stack underflow in _bfd_vms_pop"));
       exit (1);
     }
   PRIV (stackptr)--;
@@ -1595,7 +1595,7 @@ _bfd_vms_etir_name (int cmd)
 
     default:
       /* These names have not yet been added to this switch statement.  */
-      (*_bfd_error_handler) (_("unknown ETIR command %d"), cmd);
+      _bfd_error_handler (_("unknown ETIR command %d"), cmd);
     }
 
   return NULL;
@@ -1781,8 +1781,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
             psect = bfd_getl32 (ptr);
             if ((unsigned int) psect >= PRIV (section_count))
               {
-                (*_bfd_error_handler) (_("bad section index in %s"),
-                                       _bfd_vms_etir_name (cmd));
+		_bfd_error_handler (_("bad section index in %s"),
+				    _bfd_vms_etir_name (cmd));
                 bfd_set_error (bfd_error_bad_value);
                 return FALSE;
               }
@@ -1794,8 +1794,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
         case ETIR__C_STA_LI:
         case ETIR__C_STA_MOD:
         case ETIR__C_STA_CKARG:
-          (*_bfd_error_handler) (_("unsupported STA cmd %s"),
-                                 _bfd_vms_etir_name (cmd));
+	  _bfd_error_handler (_("unsupported STA cmd %s"),
+			      _bfd_vms_etir_name (cmd));
           return FALSE;
           break;
 
@@ -1970,14 +1970,14 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
         case ETIR__C_STO_RB:
         case ETIR__C_STO_AB:
         case ETIR__C_STO_LP_PSB:
-          (*_bfd_error_handler) (_("%s: not supported"),
-                                 _bfd_vms_etir_name (cmd));
+	  _bfd_error_handler (_("%s: not supported"),
+			      _bfd_vms_etir_name (cmd));
           return FALSE;
           break;
         case ETIR__C_STO_HINT_GBL:
         case ETIR__C_STO_HINT_PS:
-          (*_bfd_error_handler) (_("%s: not implemented"),
-                                 _bfd_vms_etir_name (cmd));
+	  _bfd_error_handler (_("%s: not implemented"),
+			      _bfd_vms_etir_name (cmd));
           return FALSE;
           break;
 
@@ -2001,8 +2001,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
              lw	psect index
              qw	offset.  */
         case ETIR__C_STC_PS:
-          (*_bfd_error_handler) (_("%s: not supported"),
-                                 _bfd_vms_etir_name (cmd));
+	  _bfd_error_handler (_("%s: not supported"),
+			      _bfd_vms_etir_name (cmd));
           return FALSE;
           break;
 
@@ -2092,8 +2092,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           /* 214 Store-conditional NOP, BSR or HINT at psect + offset
              arg: none.  */
         case ETIR__C_STC_NBH_PS:
-          (*_bfd_error_handler) ("%s: not supported",
-                                 _bfd_vms_etir_name (cmd));
+	  _bfd_error_handler ("%s: not supported",
+			      _bfd_vms_etir_name (cmd));
           return FALSE;
           break;
 
@@ -2232,8 +2232,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           if (rel1 != RELC_NONE || rel2 != RELC_NONE)
             {
             bad_context:
-              (*_bfd_error_handler) (_("invalid use of %s with contexts"),
-                                     _bfd_vms_etir_name (cmd));
+	      _bfd_error_handler (_("invalid use of %s with contexts"),
+				  _bfd_vms_etir_name (cmd));
               return FALSE;
             }
           if ((int)op2 < 0)		/* Shift right.  */
@@ -2248,8 +2248,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
         case ETIR__C_OPR_ROT:       /* Rotate.  */
         case ETIR__C_OPR_REDEF:     /* Redefine symbol to current location.  */
         case ETIR__C_OPR_DFLIT:     /* Define a literal.  */
-          (*_bfd_error_handler) (_("%s: not supported"),
-                                 _bfd_vms_etir_name (cmd));
+	  _bfd_error_handler (_("%s: not supported"),
+			      _bfd_vms_etir_name (cmd));
           return FALSE;
           break;
 
@@ -2266,7 +2266,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           break;
 
         default:
-          (*_bfd_error_handler) (_("reserved cmd %d"), cmd);
+	  _bfd_error_handler (_("reserved cmd %d"), cmd);
           return FALSE;
           break;
         }
@@ -2351,7 +2351,7 @@ _bfd_vms_slurp_eeom (bfd *abfd)
   PRIV (eom_data).eom_w_comcod = bfd_getl16 (eeom->comcod);
   if (PRIV (eom_data).eom_w_comcod > 1)
     {
-      (*_bfd_error_handler) (_("Object module NOT error-free !\n"));
+      _bfd_error_handler (_("Object module NOT error-free !\n"));
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -3671,7 +3671,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 	  unsigned int irel;
 
 	  if (section->reloc_count == 0)
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
 	      (_("SEC_RELOC with no relocs in section %s"), section->name);
 
 #if VMS_DEBUG
@@ -3724,8 +3724,8 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 
 		  /* Regular relocs are intertwined with binary data.  */
 	          if (curr_addr > addr)
-		    (*_bfd_error_handler) (_("Size error in section %s"),
-					   section->name);
+		    _bfd_error_handler (_("Size error in section %s"),
+					section->name);
 		  size = addr - curr_addr;
 		  sto_imm (abfd, section, size, curr_data, curr_addr);
 		  curr_data += size;
@@ -3883,7 +3883,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  break;
 
 		case ALPHA_R_BSR:
-		  (*_bfd_error_handler) (_("Spurious ALPHA_R_BSR reloc"));
+		  _bfd_error_handler (_("Spurious ALPHA_R_BSR reloc"));
 		  break;
 
 		case ALPHA_R_LDA:
@@ -3924,8 +3924,8 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  break;
 
 		default:
-		  (*_bfd_error_handler) (_("Unhandled relocation %s"),
-		  			 rptr->howto->name);
+		  _bfd_error_handler (_("Unhandled relocation %s"),
+				      rptr->howto->name);
 		  break;
 		}
 
@@ -3937,8 +3937,8 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 	    {
 	      /* Output rest of section.  */
 	      if (curr_addr > section->size)
-		(*_bfd_error_handler) (_("Size error in section %s"),
-				       section->name);
+		_bfd_error_handler (_("Size error in section %s"),
+				    section->name);
 	      size = section->size - curr_addr;
 	      sto_imm (abfd, section, size, curr_data, curr_addr);
 	      curr_data += size;
@@ -4214,8 +4214,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		  break;
 
 		default:
-		  (*_bfd_error_handler) (_("unknown source command %d"),
-					 cmd);
+		  _bfd_error_handler (_("unknown source command %d"),
+				      cmd);
 		  cmd_length = 2;
 		  break;
 		}
@@ -4274,31 +4274,31 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		  break;
 
 		case DST__K_SET_LINUM_INCR:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_SET_LINUM_INCR not implemented"));
 		  cmd_length = 2;
 		  break;
 
 		case DST__K_SET_LINUM_INCR_W:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_SET_LINUM_INCR_W not implemented"));
 		  cmd_length = 3;
 		  break;
 
 		case DST__K_RESET_LINUM_INCR:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_RESET_LINUM_INCR not implemented"));
 		  cmd_length = 1;
 		  break;
 
 		case DST__K_BEG_STMT_MODE:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_BEG_STMT_MODE not implemented"));
 		  cmd_length = 1;
 		  break;
 
 		case DST__K_END_STMT_MODE:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_END_STMT_MODE not implemented"));
 		  cmd_length = 1;
 		  break;
@@ -4325,25 +4325,25 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		  break;
 
 		case DST__K_SET_PC:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_SET_PC not implemented"));
 		  cmd_length = 2;
 		  break;
 
 		case DST__K_SET_PC_W:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_SET_PC_W not implemented"));
 		  cmd_length = 3;
 		  break;
 
 		case DST__K_SET_PC_L:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_SET_PC_L not implemented"));
 		  cmd_length = 5;
 		  break;
 
 		case DST__K_SET_STMTNUM:
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("DST__K_SET_STMTNUM not implemented"));
 		  cmd_length = 2;
 		  break;
@@ -4387,8 +4387,7 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		    }
 		  else
 		    {
-		      (*_bfd_error_handler) (_("unknown line command %d"),
-					     cmd);
+		      _bfd_error_handler (_("unknown line command %d"), cmd);
 		      cmd_length = 2;
 		    }
 		  break;
@@ -4846,7 +4845,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
             case ETIR__C_CTL_SETRB:
               if (prev_cmd != ETIR__C_STA_PQ)
                 {
-                  (*_bfd_error_handler)
+		  _bfd_error_handler
                     (_("Unknown reloc %s + %s"), _bfd_vms_etir_name (prev_cmd),
                      _bfd_vms_etir_name (cmd));
                   return FALSE;
@@ -4863,7 +4862,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
                 {
                   if (prev_cmd != ETIR__C_STA_GBL)
                     {
-                      (*_bfd_error_handler)
+		      _bfd_error_handler
                         (_("Unknown reloc %s + %s"), _bfd_vms_etir_name (cmd),
                          _bfd_vms_etir_name (ETIR__C_STA_LW));
                       return FALSE;
@@ -4877,7 +4876,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
 			         /* ALPHA_R_REFQUAD und_section, step 2 */
               if (prev_cmd != -1 && prev_cmd != ETIR__C_STA_GBL)
                 {
-                  (*_bfd_error_handler)
+		  _bfd_error_handler
                     (_("Unknown reloc %s + %s"), _bfd_vms_etir_name (cmd),
                      _bfd_vms_etir_name (ETIR__C_STA_QW));
                   return FALSE;
@@ -4893,9 +4892,9 @@ alpha_vms_slurp_relocs (bfd *abfd)
                   && prev_cmd != ETIR__C_STA_LW
                   && prev_cmd != ETIR__C_STA_PQ)
                 {
-                  (*_bfd_error_handler) (_("Unknown reloc %s + %s"),
-                                         _bfd_vms_etir_name (prev_cmd),
-                                         _bfd_vms_etir_name (ETIR__C_STO_LW));
+		  _bfd_error_handler (_("Unknown reloc %s + %s"),
+				      _bfd_vms_etir_name (prev_cmd),
+				      _bfd_vms_etir_name (ETIR__C_STO_LW));
                   return FALSE;
                 }
               reloc_code = BFD_RELOC_32;
@@ -4905,9 +4904,9 @@ alpha_vms_slurp_relocs (bfd *abfd)
 			         /* ALPHA_R_REFQUAD abs_section, step 2 */
               if (prev_cmd != ETIR__C_OPR_ADD && prev_cmd != ETIR__C_STA_QW)
                 {
-                  (*_bfd_error_handler) (_("Unknown reloc %s + %s"),
-                                         _bfd_vms_etir_name (prev_cmd),
-                                         _bfd_vms_etir_name (ETIR__C_STO_QW));
+		  _bfd_error_handler (_("Unknown reloc %s + %s"),
+				      _bfd_vms_etir_name (prev_cmd),
+				      _bfd_vms_etir_name (ETIR__C_STO_QW));
                   return FALSE;
                 }
               reloc_code = BFD_RELOC_64;
@@ -4916,9 +4915,9 @@ alpha_vms_slurp_relocs (bfd *abfd)
             case ETIR__C_STO_OFF: /* ALPHA_R_REFQUAD others, step 2 */
               if (prev_cmd != ETIR__C_STA_PQ)
                 {
-                  (*_bfd_error_handler) (_("Unknown reloc %s + %s"),
-                                         _bfd_vms_etir_name (prev_cmd),
-                                         _bfd_vms_etir_name (ETIR__C_STO_OFF));
+		  _bfd_error_handler (_("Unknown reloc %s + %s"),
+				      _bfd_vms_etir_name (prev_cmd),
+				      _bfd_vms_etir_name (ETIR__C_STO_OFF));
                   return FALSE;
                 }
               reloc_code = BFD_RELOC_64;
@@ -4928,9 +4927,9 @@ alpha_vms_slurp_relocs (bfd *abfd)
                                   /* ALPHA_R_REFQUAD und_section, step 3 */
               if (prev_cmd != ETIR__C_STA_LW && prev_cmd != ETIR__C_STA_QW)
                 {
-                  (*_bfd_error_handler) (_("Unknown reloc %s + %s"),
-                                         _bfd_vms_etir_name (prev_cmd),
-                                         _bfd_vms_etir_name (ETIR__C_OPR_ADD));
+		  _bfd_error_handler (_("Unknown reloc %s + %s"),
+				      _bfd_vms_etir_name (prev_cmd),
+				      _bfd_vms_etir_name (ETIR__C_OPR_ADD));
                   return FALSE;
                 }
               prev_cmd = ETIR__C_OPR_ADD;
@@ -4983,8 +4982,8 @@ alpha_vms_slurp_relocs (bfd *abfd)
               continue;
 
             default:
-              (*_bfd_error_handler) (_("Unknown reloc %s"),
-                                     _bfd_vms_etir_name (cmd));
+	      _bfd_error_handler (_("Unknown reloc %s"),
+				  _bfd_vms_etir_name (cmd));
               return FALSE;
             }
 
@@ -4996,14 +4995,14 @@ alpha_vms_slurp_relocs (bfd *abfd)
             /* Get section to which the relocation applies.  */
             if (cur_psect < 0 || cur_psect > (int)PRIV (section_count))
               {
-                (*_bfd_error_handler) (_("Invalid section index in ETIR"));
+		_bfd_error_handler (_("Invalid section index in ETIR"));
                 return FALSE;
               }
 
             sec = PRIV (sections)[cur_psect];
             if (sec == bfd_abs_section_ptr)
               {
-                (*_bfd_error_handler) (_("Relocation for non-REL psect"));
+		_bfd_error_handler (_("Relocation for non-REL psect"));
                 return FALSE;
               }
 
@@ -5050,8 +5049,8 @@ alpha_vms_slurp_relocs (bfd *abfd)
                     }
                 if (sym == NULL)
                   {
-                    (*_bfd_error_handler) (_("Unknown symbol in command %s"),
-                                           _bfd_vms_etir_name (cmd));
+		    _bfd_error_handler (_("Unknown symbol in command %s"),
+					_bfd_vms_etir_name (cmd));
                     reloc->sym_ptr_ptr = NULL;
                   }
                 else
@@ -5451,7 +5450,7 @@ alpha_vms_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
       case BFD_RELOC_ALPHA_LDA:		alpha_type = ALPHA_R_LDA;	break;
       case BFD_RELOC_ALPHA_BOH:		alpha_type = ALPHA_R_BOH;	break;
       default:
-	(*_bfd_error_handler) ("reloc (%d) is *UNKNOWN*", code);
+	_bfd_error_handler ("reloc (%d) is *UNKNOWN*", code);
 	return NULL;
     }
   vms_debug2 ((2, "reloc is %s\n", alpha_howto_table[alpha_type].name));

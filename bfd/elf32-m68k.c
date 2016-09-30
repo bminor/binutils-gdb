@@ -348,8 +348,8 @@ rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 
   if (indx >= (unsigned int) R_68K_max)
     {
-      (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
-			     abfd, (int) indx);
+      _bfd_error_handler (_("%B: invalid relocation type %d"),
+			  abfd, (int) indx);
       indx = R_68K_NONE;
     }
   cache_ptr->howto = &howto_table[indx];
@@ -1670,17 +1670,17 @@ elf_m68k_add_entry_to_got (struct elf_m68k_got *got,
     /* This BFD has too many relocation.  */
     {
       if (got->n_slots[R_8] > ELF_M68K_R_8_MAX_N_SLOTS_IN_GOT (info))
-	(*_bfd_error_handler) (_("%B: GOT overflow: "
-				 "Number of relocations with 8-bit "
-				 "offset > %d"),
-			       abfd,
-			       ELF_M68K_R_8_MAX_N_SLOTS_IN_GOT (info));
+	_bfd_error_handler (_("%B: GOT overflow: "
+			      "Number of relocations with 8-bit "
+			      "offset > %d"),
+			    abfd,
+			    ELF_M68K_R_8_MAX_N_SLOTS_IN_GOT (info));
       else
-	(*_bfd_error_handler) (_("%B: GOT overflow: "
-				 "Number of relocations with 8- or 16-bit "
-				 "offset > %d"),
-			       abfd,
-			       ELF_M68K_R_8_16_MAX_N_SLOTS_IN_GOT (info));
+	_bfd_error_handler (_("%B: GOT overflow: "
+			      "Number of relocations with 8- or 16-bit "
+			      "offset > %d"),
+			    abfd,
+			    ELF_M68K_R_8_16_MAX_N_SLOTS_IN_GOT (info));
 
       return NULL;
     }
@@ -3918,7 +3918,7 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	case R_68K_TLS_LE8:
 	  if (bfd_link_dll (info))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B(%A+0x%lx): R_68K_TLS_LE32 relocation not permitted "
 		   "in shared object"),
 		 input_bfd, input_section, (long) rel->r_offset, howto->name);
@@ -4117,7 +4117,7 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
@@ -4151,7 +4151,7 @@ elf_m68k_relocate_section (bfd *output_bfd,
 		    name = bfd_section_name (input_bfd, sec);
 		}
 
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		((sym_type == STT_TLS
 		  ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
 		  : _("%B(%A+0x%lx): %s used with non-TLS symbol %s")),
@@ -4190,7 +4190,7 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	       (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
 	  else
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);

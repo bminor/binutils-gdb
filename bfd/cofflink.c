@@ -344,7 +344,7 @@ coff_link_add_symbols (bfd *abfd,
 		       & COFF_LINK_HASH_PE_SECTION_SYMBOL) == 0
 		      && (*sym_hash)->root.type != bfd_link_hash_undefined
 		      && (*sym_hash)->root.type != bfd_link_hash_undefweak)
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
 		      ("Warning: symbol `%s' is both section and non-section",
 		       name);
 
@@ -445,7 +445,7 @@ coff_link_add_symbols (bfd *abfd,
   		          && !(DTYPE ((*sym_hash)->type) == DTYPE (sym.n_type)
   		               && (BTYPE ((*sym_hash)->type) == T_NULL
   		                   || BTYPE (sym.n_type) == T_NULL)))
-  			(*_bfd_error_handler)
+			_bfd_error_handler
   			  (_("Warning: type of symbol `%s' changed from %d to %d in %B"),
   			   abfd, name, (*sym_hash)->type, sym.n_type);
 
@@ -2362,7 +2362,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	  if ((o->flags & SEC_RELOC) != 0
 	      && o->reloc_count != 0)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: relocs in section `%A', but it has no contents"),
 		 input_bfd, o);
 	      bfd_set_error (bfd_error_no_contents);
@@ -2721,7 +2721,7 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
 	      if (sec->reloc_count > 0xffff
 		  && (! obj_pe (output_bfd)
 		      || bfd_link_relocatable (flaginfo->info)))
-		(*_bfd_error_handler)
+		_bfd_error_handler
 		  (_("%s: %s: reloc overflow: 0x%lx > 0xffff"),
 		   bfd_get_filename (output_bfd),
 		   bfd_get_section_name (output_bfd, sec),
@@ -2730,7 +2730,7 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
 	      if (sec->lineno_count > 0xffff
 		  && (! obj_pe (output_bfd)
 		      || bfd_link_relocatable (flaginfo->info)))
-		(*_bfd_error_handler)
+		_bfd_error_handler
 		  (_("%s: warning: %s: line number overflow: 0x%lx > 0xffff"),
 		   bfd_get_filename (output_bfd),
 		   bfd_get_section_name (output_bfd, sec),
@@ -2954,7 +2954,7 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
       else if (symndx < 0
 	       || (unsigned long) symndx >= obj_raw_syment_count (input_bfd))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    ("%B: illegal symbol index %ld in relocs", input_bfd, symndx);
 	  return FALSE;
 	}
@@ -3115,7 +3115,7 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	case bfd_reloc_ok:
 	  break;
 	case bfd_reloc_outofrange:
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: bad reloc address 0x%lx in section `%A'"),
 	     input_bfd, input_section, (unsigned long) rel->r_vaddr);
 	  return FALSE;

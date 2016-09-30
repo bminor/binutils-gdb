@@ -1673,7 +1673,7 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
       addr = bfd_get_signed_32 (abfd, contents + offset) + offset;
       if (addr <= last_addr)
 	{
-	  (*_bfd_error_handler) (_("%B: %s not in order"), sec->owner, sec->name);
+	  _bfd_error_handler (_("%B: %s not in order"), sec->owner, sec->name);
 	  return FALSE;
 	}
 
@@ -1686,15 +1686,15 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
   addr -= (sec->output_section->vma + sec->output_offset + sec->rawsize);
   if (addr & 1)
     {
-      (*_bfd_error_handler) (_("%B: %s invalid input section size"),
-			     sec->owner, sec->name);
+      _bfd_error_handler (_("%B: %s invalid input section size"),
+			  sec->owner, sec->name);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
   if (last_addr >= addr + sec->rawsize)
     {
-      (*_bfd_error_handler) (_("%B: %s points past end of text section"),
-			     sec->owner, sec->name);
+      _bfd_error_handler (_("%B: %s points past end of text section"),
+			  sec->owner, sec->name);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -2123,7 +2123,7 @@ _bfd_elf_fixup_eh_frame_hdr (struct bfd_link_info *info)
       sec = hdr_info->u.compact.entries[i];
       if (sec->output_section != osec)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("Invalid output section for .eh_frame_entry: %s"),
 	     sec->output_section->name);
 	  return FALSE;
@@ -2146,7 +2146,7 @@ _bfd_elf_fixup_eh_frame_hdr (struct bfd_link_info *info)
 
   if (i != 0)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("Invalid contents in %s section"), osec->name);
       return FALSE;
     }

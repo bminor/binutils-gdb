@@ -383,8 +383,8 @@ elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
       && ((indx = r_type - R_386_vt_offset) - R_386_ext2
 	  >= R_386_vt - R_386_ext2))
     {
-      (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
-			     abfd, (int) r_type);
+      _bfd_error_handler (_("%B: invalid relocation type %d"),
+			  abfd, (int) r_type);
       indx = R_386_NONE;
     }
   /* PR 17512: file: 0f67f69d.  */
@@ -1555,7 +1555,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	    }
 	}
 
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
 	   "in section `%A' failed"),
 	 abfd, sec, from->name, to->name, name,
@@ -1642,7 +1642,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
       else
 	name = h->root.root.string;
 
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: direct GOT relocation R_386_GOT32X against `%s' without base register can not be used when making a shared object"),
 	 abfd, name);
       return FALSE;
@@ -1898,9 +1898,8 @@ elf_i386_check_relocs (bfd *abfd,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
-				 abfd,
-				 r_symndx);
+	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+			      abfd, r_symndx);
 	  goto error_return;
 	}
 
@@ -2098,7 +2097,7 @@ elf_i386_check_relocs (bfd *abfd,
 		    else
 		      name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
 					     NULL);
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
 		      (_("%B: `%s' accessed both as normal and "
 			 "thread local symbol"),
 		       abfd, name);
@@ -2186,7 +2185,7 @@ do_relocation:
 		    else
 		      name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
 					       NULL);
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
 		      (_("%B: unsupported non-PIC call to IFUNC `%s'"),
 		       abfd, name);
 		      bfd_set_error (bfd_error_bad_value);
@@ -3767,7 +3766,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  && ((indx = r_type - R_386_tls_offset) - R_386_ext
 	      >= R_386_ext2 - R_386_ext))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
 	     input_bfd, input_section, r_type);
 	  bfd_set_error (bfd_error_bad_value);
@@ -4046,7 +4045,7 @@ bad_ifunc_reloc:
 	      else
 		name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
 					 NULL);
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't supported"), input_bfd,
 		 howto->name, name);
@@ -4293,7 +4292,7 @@ disallow_got32:
 		  else
 		    name = h->root.root.string;
 
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("%B: direct GOT relocation %s against `%s' without base register can not be used when making a shared object"),
 		     input_bfd, howto->name, name);
 		  bfd_set_error (bfd_error_bad_value);
@@ -4340,7 +4339,7 @@ disallow_got32:
 		      break;
 		    }
 
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("%B: relocation R_386_GOTOFF against undefined %s `%s' can not be used when making a shared object"),
 		     input_bfd, v, h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
@@ -4351,7 +4350,7 @@ disallow_got32:
 			   || h->type == STT_OBJECT)
 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("%B: relocation R_386_GOTOFF against protected %s `%s' can not be used when making a shared object"),
 		     input_bfd,
 		     h->type == STT_FUNC ? "function" : "data",
@@ -5142,7 +5141,7 @@ disallow_got32:
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
@@ -5181,7 +5180,7 @@ check_relocation_error:
 	       (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
 	  else
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
@@ -5855,7 +5854,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
     {
       if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
 	  return FALSE;
 	}

@@ -154,7 +154,7 @@ ieee_write_id (bfd *abfd, const char *id)
     }
   else
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%s: string too long (%d chars, max 65535)"),
 	 bfd_get_filename (abfd), length);
       bfd_set_error (bfd_error_invalid_operation);
@@ -288,7 +288,7 @@ ieee_write_expression (bfd *abfd,
 	    }
 	  else
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%s: unrecognized symbol `%s' flags 0x%x"),
 		 bfd_get_filename (abfd), bfd_asymbol_name (symbol),
 		 symbol->flags);
@@ -823,7 +823,7 @@ ieee_slurp_external_symbols (bfd *abfd)
 		    parse_int (&ieee->h, &value);
 		    break;
 		  default:
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
 		      (_("%B: unimplemented ATI record %u for symbol %u"),
 		       abfd, symbol_attribute_def, symbol_name_index);
 		    bfd_set_error (bfd_error_bad_value);
@@ -847,7 +847,7 @@ ieee_slurp_external_symbols (bfd *abfd)
 		parse_int (&ieee->h, &value);
 		if (value != 0x3f)
 		  {
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
 		      (_("%B: unexpected ATN type %d in external part"),
 			 abfd, (int) value);
 		    bfd_set_error (bfd_error_bad_value);
@@ -869,7 +869,7 @@ ieee_slurp_external_symbols (bfd *abfd)
 			break;
 
 		      default:
-			(*_bfd_error_handler)
+			_bfd_error_handler
 			  (_("%B: unexpected type after ATN"), abfd);
 			bfd_set_error (bfd_error_bad_value);
 			return FALSE;

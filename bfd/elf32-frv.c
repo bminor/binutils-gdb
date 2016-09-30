@@ -6364,9 +6364,10 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     new_flags &= ~EF_FRV_PIC;
 
 #ifdef DEBUG
-  (*_bfd_error_handler) ("old_flags = 0x%.8lx, new_flags = 0x%.8lx, init = %s, filename = %s",
-			 old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no",
-			 bfd_get_filename (ibfd));
+  _bfd_error_handler
+    ("old_flags = 0x%.8lx, new_flags = 0x%.8lx, init = %s, filename = %s",
+     old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no",
+     bfd_get_filename (ibfd));
 #endif
 
   if (!elf_flags_init (obfd))			/* First call, no flags set.  */
@@ -6514,7 +6515,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	      old_flags &= ~ EF_FRV_PIC_FLAGS;
 #ifndef FRV_NO_PIC_ERROR
 	      error = TRUE;
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%s: compiled with %s and linked with modules that use non-pic relocations"),
 		 bfd_get_filename (ibfd),
 		 (new_flags & EF_FRV_BIGPIC) ? "-fPIC" : "-fpic");
@@ -6567,7 +6568,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       if (new_opt[0])
 	{
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%s: compiled with %s and linked with modules compiled with %s"),
 	     bfd_get_filename (ibfd), new_opt, old_opt);
 	}
@@ -6579,7 +6580,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  old_flags |= new_partial;
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%s: uses different unknown e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	     bfd_get_filename (ibfd), (long)new_partial, (long)old_partial);
 	}
@@ -6600,11 +6601,11 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     {
       error = TRUE;
       if (IS_FDPIC (obfd))
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%s: cannot link non-fdpic object file into fdpic executable"),
 	   bfd_get_filename (ibfd));
       else
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%s: cannot link fdpic object file into non-fdpic executable"),
 	   bfd_get_filename (ibfd));
     }

@@ -2490,8 +2490,8 @@ ppc64_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   type = ELF64_R_TYPE (dst->r_info);
   if (type >= ARRAY_SIZE (ppc64_elf_howto_table))
     {
-      (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
-			     abfd, (int) type);
+      _bfd_error_handler (_("%B: invalid relocation type %d"),
+			  abfd, (int) type);
       type = R_PPC64_NONE;
     }
   cache_ptr->howto = ppc64_elf_howto_table[type];
@@ -6016,14 +6016,14 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   if (iflags & ~EF_PPC64_ABI)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B uses unknown e_flags 0x%lx"), ibfd, iflags);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
   else if (iflags != oflags && iflags != 0)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: ABI version %ld is not compatible with ABI version %ld output"),
 	 ibfd, iflags, oflags);
       bfd_set_error (bfd_error_bad_value);
@@ -7599,7 +7599,7 @@ tocsave_find (struct ppc_link_hash_table *htab,
     return NULL;
   if (ent.sec == NULL || ent.sec->output_section == NULL)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: undefined symbol on R_PPC64_TOCSAVE relocation"));
       return NULL;
     }
@@ -7917,7 +7917,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 		 something silly in .opd with the assembler.  No .opd
 		 optimization for them!  */
 	    broken_opd:
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: .opd is not a regular array of opd entries"), ibfd);
 	      broken = TRUE;
 	      break;
@@ -7926,7 +7926,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	  if ((r_type = ELF64_R_TYPE (rel->r_info)) != R_PPC64_ADDR64
 	      || (r_type = ELF64_R_TYPE ((rel + 1)->r_info)) != R_PPC64_TOC)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: unexpected reloc type %u in .opd section"),
 		 ibfd, r_type);
 	      broken = TRUE;
@@ -7947,7 +7947,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 		sym_name = bfd_elf_sym_name (ibfd, symtab_hdr, sym,
 					     sym_sec);
 
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: undefined sym `%s' in .opd section"),
 		 ibfd, sym_name);
 	      broken = TRUE;
@@ -8851,7 +8851,7 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
 
       if ((toc_inf->skip[i] & (ref_from_discarded | can_optimize)) != 0)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%s defined on removed toc entry"), eh->elf.root.root.string);
 	  do
 	    ++i;
@@ -9475,7 +9475,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  if ((skip[i] & (ref_from_discarded | can_optimize)) != 0)
 		    {
 		      if (local_toc_syms)
-			(*_bfd_error_handler)
+			_bfd_error_handler
 			  (_("%s defined on removed toc entry"),
 			   bfd_elf_sym_name (ibfd, symtab_hdr, sym, NULL));
 		      do
@@ -12104,8 +12104,8 @@ group_sections (struct bfd_link_info *info,
 
 	  big_sec = total > group_size;
 	  if (big_sec && !suppress_size_errors)
-	    (*_bfd_error_handler) (_("%B section %A exceeds stub group size"),
-				     tail->owner, tail);
+	    _bfd_error_handler (_("%B section %A exceeds stub group size"),
+				tail->owner, tail);
 	  curr_toc = htab->sec_info[tail->id].toc_off;
 
 	  while ((prev = htab->sec_info[curr->id].u.list) != NULL

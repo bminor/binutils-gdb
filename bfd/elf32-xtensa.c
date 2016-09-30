@@ -912,8 +912,8 @@ xtensa_read_table_entries (bfd *abfd,
 	  if (blocks[blk - 1].address == blocks[blk].address &&
 	      blocks[blk - 1].size != 0)
 	    {
-	      (*_bfd_error_handler) (_("%B(%A): invalid property table"),
-				     abfd, section);
+	      _bfd_error_handler (_("%B(%A): invalid property table"),
+				  abfd, section);
 	      bfd_set_error (bfd_error_bad_value);
 	      free (blocks);
 	      return -1;
@@ -1003,8 +1003,8 @@ elf_xtensa_check_relocs (bfd *abfd,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
-				 abfd, r_symndx);
+	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+			      abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -1179,7 +1179,7 @@ elf_xtensa_check_relocs (bfd *abfd,
 	    tls_type |= old_tls_type;
 	  else
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: `%s' accessed both as normal and thread local symbol"),
 		 abfd,
 		 h ? h->root.root.string : "<local>");
@@ -2777,7 +2777,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
       if (rel->r_offset >= input_size
 	  && ELF32_R_TYPE (rel->r_info) != R_XTENSA_NONE)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): relocation offset out of range (size=0x%x)"),
 	     input_bfd, input_section, rel->r_offset, input_size);
 	  bfd_set_error (bfd_error_bad_value);
@@ -2801,7 +2801,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	      || h->root.type == bfd_link_hash_defweak)
 	  && IS_XTENSA_TLS_RELOC (r_type) != (sym_type == STT_TLS))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    ((sym_type == STT_TLS
 	      ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
 	      : _("%B(%A+0x%lx): %s used with non-TLS symbol %s")),
@@ -3058,7 +3058,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
@@ -3162,7 +3162,7 @@ elf_xtensa_combine_prop_entries (bfd *output_bfd,
   sgotloc_size = sgotloc->size;
   if (sgotloc_size != section_size)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("internal inconsistency in size of .got.loc section"));
       return -1;
     }
@@ -3478,7 +3478,7 @@ elf_xtensa_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   in_mach = in_flag & EF_XTENSA_MACH;
   if (out_mach != in_mach)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: incompatible machine type. Output is 0x%x. Input is 0x%x"),
 	 ibfd, out_mach, in_mach);
       bfd_set_error (bfd_error_wrong_format);
@@ -6544,7 +6544,7 @@ extend_ebb_bounds_forward (ebb_t *ebb)
 				  entry_end - ebb->end_offset);
       if (insn_block_len != (entry_end - ebb->end_offset))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): could not decode instruction; possible configuration mismatch"),
 	     ebb->sec->owner, ebb->sec, ebb->end_offset + insn_block_len);
 	  return FALSE;
@@ -6620,7 +6620,7 @@ extend_ebb_bounds_backward (ebb_t *ebb)
 				  ebb->start_offset - block_begin);
       if (insn_block_len != ebb->start_offset - block_begin)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): could not decode instruction; possible configuration mismatch"),
 	     ebb->sec->owner, ebb->sec, ebb->end_offset + insn_block_len);
 	  return FALSE;
@@ -7733,7 +7733,7 @@ compute_text_actions (bfd *abfd,
       simplify_size = get_asm_simplify_size (contents, sec_size, r_offset);
       if (simplify_size == 0)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): could not decode instruction for XTENSA_ASM_SIMPLIFY relocation; possible configuration mismatch"),
 	     sec->owner, sec, r_offset);
 	  continue;
@@ -7991,7 +7991,7 @@ compute_ebb_proposed_actions (ebb_constraint *ebb_table)
   return TRUE;
 
  decode_error:
-  (*_bfd_error_handler)
+  _bfd_error_handler
     (_("%B(%A+0x%lx): could not decode instruction; possible configuration mismatch"),
      ebb->sec->owner, ebb->sec, offset);
   return FALSE;
@@ -10767,7 +10767,7 @@ do_fix_for_relocatable_link (Elf_Internal_Rela *rel,
     {
       if (r_type != R_XTENSA_ASM_EXPAND)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B(%A+0x%lx): unexpected fix for %s relocation"),
 	     input_bfd, input_section, rel->r_offset,
 	     elf_howto_table[r_type].name);

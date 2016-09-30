@@ -3256,8 +3256,8 @@ avr_add_stub (const char *stub_name,
 
   if (hsh == NULL)
     {
-      (*_bfd_error_handler) (_("%B: cannot create stub entry %s"),
-                             NULL, stub_name);
+      _bfd_error_handler (_("%B: cannot create stub entry %s"),
+			  NULL, stub_name);
       return NULL;
     }
 

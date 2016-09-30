@@ -808,8 +808,8 @@ mn10300_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_MN10300_MAX)
     {
-      (*_bfd_error_handler) (_("%B: unrecognised MN10300 reloc number: %d"),
-			     abfd, r_type);
+      _bfd_error_handler (_("%B: unrecognised MN10300 reloc number: %d"),
+			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_MN10300_NONE;
     }
@@ -1022,7 +1022,7 @@ mn10300_do_tls_transition (bfd *         input_bfd,
       break;
 
     default:
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%s: Unsupported transition from %s to %s"),
 	 bfd_get_filename (input_bfd),
 	 elf_mn10300_howto_table[r_type].name,
@@ -1214,7 +1214,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 		    /* Transition GD->IE.  */
 		    tls_type = GOT_TLS_IE;
 		  else
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
 		      (_("%B: %s' accessed both as normal and thread local symbol"),
 		       abfd, h ? h->root.root.string : "<local>");
 		}
@@ -2109,7 +2109,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 		   && _bfd_elf_section_offset (output_bfd, info, input_section,
 					       rel->r_offset) != (bfd_vma) -1)
 
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
 	      (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	       input_bfd,
 	       input_section,

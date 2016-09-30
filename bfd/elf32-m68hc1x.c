@@ -161,8 +161,8 @@ m68hc12_add_stub (const char *stub_name, asection *section,
                                          TRUE, FALSE);
   if (stub_entry == NULL)
     {
-      (*_bfd_error_handler) (_("%B: cannot create stub entry %s"),
-			     section->owner, stub_name);
+      _bfd_error_handler (_("%B: cannot create stub entry %s"),
+			  section->owner, stub_name);
       return NULL;
     }
 
@@ -1347,14 +1347,14 @@ _bfd_m68hc11_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   /* Check ABI compatibility.  */
   if ((new_flags & E_M68HC11_I32) != (old_flags & E_M68HC11_I32))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: linking files compiled for 16-bit integers (-mshort) "
            "and others for 32-bit integers"), ibfd);
       ok = FALSE;
     }
   if ((new_flags & E_M68HC11_F64) != (old_flags & E_M68HC11_F64))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: linking files compiled for 32-bit double (-fshort-double) "
            "and others for 64-bit double"), ibfd);
       ok = FALSE;
@@ -1363,7 +1363,7 @@ _bfd_m68hc11_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   /* Processor compatibility.  */
   if (!EF_M68HC11_CAN_MERGE_MACH (new_flags, old_flags))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: linking files compiled for HCS12 with "
            "others compiled for HC12"), ibfd);
       ok = FALSE;
@@ -1379,7 +1379,7 @@ _bfd_m68hc11_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   /* Warn about any other mismatches */
   if (new_flags != old_flags)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	 ibfd, (unsigned long) new_flags, (unsigned long) old_flags);
       ok = FALSE;

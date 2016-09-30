@@ -442,7 +442,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	case 2: reg -= 2; break;
 	case 6: reg -= 4; break;
 	default:
-          (*_bfd_error_handler)
+	  _bfd_error_handler
             (_("%B: Only registers %%g[2367] can be declared using STT_REGISTER"),
              abfd);
 	  return FALSE;
@@ -462,7 +462,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 
       if (p->name != NULL && strcmp (p->name, *namep))
 	{
-          (*_bfd_error_handler)
+	  _bfd_error_handler
             (_("Register %%g%d used incompatibly: %s in %B, previously %s in %B"),
              abfd, p->abfd, (int) sym->st_value,
              **namep ? *namep : "#scratch",
@@ -485,7 +485,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 
 		  if (type > STT_FUNC)
 		    type = 0;
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("Symbol `%s' has differing types: REGISTER in %B, previously %s in %B"),
 		     abfd, p->abfd, *namep, stt_types[type]);
 		  return FALSE;
@@ -530,7 +530,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 
 	    if (type > STT_FUNC)
 	      type = 0;
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
 	      (_("Symbol `%s' has differing types: %s in %B, previously REGISTER in %B"),
 	       abfd, p->abfd, *namep, stt_types[type]);
 	    return FALSE;
@@ -683,7 +683,7 @@ elf64_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	      && (old_flags & EF_SPARC_HAL_R1))
 	    {
 	      error = TRUE;
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: linking UltraSPARC specific with HAL specific code"),
 		 ibfd);
 	    }
@@ -702,7 +702,7 @@ elf64_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       if (new_flags != old_flags)
         {
           error = TRUE;
-          (*_bfd_error_handler)
+	  _bfd_error_handler
             (_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
              ibfd, (long) new_flags, (long) old_flags);
         }

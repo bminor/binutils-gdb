@@ -1477,7 +1477,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
       row = COMMON_ROW;
       if (!bfd_link_relocatable (info)
 	  && strcmp (name, "__gnu_lto_slim") == 0)
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%s: plugin needed to handle lto object"),
 	   bfd_get_filename (abfd));
     }
@@ -1738,7 +1738,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  if (inh->type == bfd_link_hash_indirect
 	      && inh->u.i.link == h)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: indirect symbol `%s' to `%s' is a loop"),
 		 abfd, name, string);
 	      bfd_set_error (bfd_error_invalid_operation);
@@ -2606,7 +2606,7 @@ default_indirect_link_order (bfd *output_bfd,
 	 because somebody is attempting to link together different
 	 types of object files.  Handling this case correctly is
 	 difficult, and sometimes impossible.  */
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("Attempt to do relocatable link with %s input and %s output"),
 	 bfd_get_target (input_bfd), bfd_get_target (output_bfd));
       bfd_set_error (bfd_error_wrong_format);

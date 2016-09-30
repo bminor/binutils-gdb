@@ -136,14 +136,14 @@ mep_reloc_type_lookup
 
     default:
       /* Pacify gcc -Wall.  */
-      (*_bfd_error_handler) (_("mep: no reloc for code %d"), code);
+      _bfd_error_handler (_("mep: no reloc for code %d"), code);
       return NULL;
     }
 
   if (mep_elf_howto_table[type].type != type)
     {
-      (*_bfd_error_handler) (_("MeP: howto %d has type %d"),
-			     type, mep_elf_howto_table[type].type);
+      _bfd_error_handler (_("MeP: howto %d has type %d"),
+			  type, mep_elf_howto_table[type].type);
       abort ();
     }
 

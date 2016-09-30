@@ -859,11 +859,9 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
   if (offset >= sec->rawsize)
     {
       if (offset > sec->rawsize)
-	{
-	  (*_bfd_error_handler)
-	    (_("%s: access beyond end of merged section (%ld)"),
-	     bfd_get_filename (sec->owner), (long) offset);
-	}
+	_bfd_error_handler
+	  (_("%s: access beyond end of merged section (%ld)"),
+	   bfd_get_filename (sec->owner), (long) offset);
       return secinfo->first_str ? sec->size : 0;
     }
 

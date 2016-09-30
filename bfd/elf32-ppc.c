@@ -2041,8 +2041,8 @@ ppc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_PPC_max)
     {
-      (*_bfd_error_handler) (_("%B: unrecognised PPC reloc number: %d"),
-			     abfd, r_type);
+      _bfd_error_handler (_("%B: unrecognised PPC reloc number: %d"),
+			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_PPC_NONE;
     }
@@ -2052,8 +2052,8 @@ ppc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
      ELF32_R_TYPE (dst->r_info) is necessarily a valid relocation.  */
   if (!cache_ptr->howto)
     {
-      (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
-                             abfd, r_type);
+      _bfd_error_handler (_("%B: invalid relocation type %d"),
+			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
 
       cache_ptr->howto = ppc_elf_howto_table[R_PPC_NONE];
@@ -2827,7 +2827,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
     free (buffer);
 
   if (error_message)
-    (*_bfd_error_handler) (error_message, ibfd, APUINFO_SECTION_NAME);
+    _bfd_error_handler (error_message, ibfd, APUINFO_SECTION_NAME);
 }
 
 /* Prevent the output section from accumulating the input sections'
@@ -2867,7 +2867,7 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
   buffer = bfd_malloc (length);
   if (buffer == NULL)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("failed to allocate space for new APUinfo section."));
       return;
     }
@@ -2887,10 +2887,10 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
     }
 
   if (length != asec->size)
-    (*_bfd_error_handler) (_("failed to compute new APUinfo section."));
+    _bfd_error_handler (_("failed to compute new APUinfo section."));
 
   if (! bfd_set_section_contents (abfd, asec, buffer, (file_ptr) 0, length))
-    (*_bfd_error_handler) (_("failed to install new APUinfo section."));
+    _bfd_error_handler (_("failed to install new APUinfo section."));
 
   free (buffer);
 
@@ -3968,7 +3968,7 @@ is_branch_reloc (enum elf_ppc_reloc_type r_type)
 static void
 bad_shared_reloc (bfd *abfd, enum elf_ppc_reloc_type r_type)
 {
-  (*_bfd_error_handler)
+  _bfd_error_handler
     (_("%B: relocation %s cannot be used when making a shared object"),
      abfd,
      ppc_elf_howto_table[r_type]->name);
@@ -4848,7 +4848,7 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  && (old_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0)
 	{
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: compiled with -mrelocatable and linked with "
 	       "modules compiled normally"), ibfd);
 	}
@@ -4856,7 +4856,7 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
 	{
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: compiled normally and linked with "
 	       "modules compiled with -mrelocatable"), ibfd);
 	}
@@ -4883,7 +4883,7 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       if (new_flags != old_flags)
 	{
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: uses different e_flags (0x%lx) fields "
 	       "than previous modules (0x%lx)"),
 	     ibfd, (long) new_flags, (long) old_flags);
@@ -9352,7 +9352,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 	    else
 	      {
-		(*_bfd_error_handler)
+		_bfd_error_handler
 		  (_("%B: the target (%s) of a %s relocation is "
 		     "in the wrong output section (%s)"),
 		   input_bfd,

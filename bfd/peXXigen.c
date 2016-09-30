@@ -527,7 +527,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
     /* PR 17512: Corrupt PE binaries can cause seg-faults.  */
     if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
       {
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
 	   abfd, a->NumberOfRvaAndSizes);
 	bfd_set_error (bfd_error_bad_value);
@@ -1084,9 +1084,9 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
 	H_PUT_16 (abfd, scnhdr_int->s_nlnno, scnhdr_ext->s_nlnno);
       else
 	{
-	  (*_bfd_error_handler) (_("%s: line number overflow: 0x%lx > 0xffff"),
-				 bfd_get_filename (abfd),
-				 scnhdr_int->s_nlnno);
+	  _bfd_error_handler (_("%s: line number overflow: 0x%lx > 0xffff"),
+			      bfd_get_filename (abfd),
+			      scnhdr_int->s_nlnno);
 	  bfd_set_error (bfd_error_file_truncated);
 	  H_PUT_16 (abfd, 0xffff, scnhdr_ext->s_nlnno);
 	  ret = 0;

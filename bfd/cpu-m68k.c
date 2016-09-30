@@ -259,7 +259,7 @@ bfd_m68k_compatible (const bfd_arch_info_type *a,
 	  if (!cpu32_fido_mix_warning)
 	    {
 	      cpu32_fido_mix_warning = 1;
-	      (*_bfd_error_handler) ("warning: linking CPU32 objects with fido objects");
+	      _bfd_error_handler ("warning: linking CPU32 objects with fido objects");
 	    }
 	  return bfd_lookup_arch (a->arch,
 				  bfd_m68k_features_to_mach (fido_a | m68881));

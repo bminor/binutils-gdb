@@ -286,8 +286,8 @@ sco5_core_file_p (bfd *abfd)
 	  secname = NULL;	/* Ignore these */
 	  break;
 	default:
-	  (*_bfd_error_handler) ("Unhandled SCO core file section type %d\n",
-				 chead.cs_stype);
+	  _bfd_error_handler ("Unhandled SCO core file section type %d\n",
+			      chead.cs_stype);
 	  continue;
 	}
 

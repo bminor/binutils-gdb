@@ -522,8 +522,8 @@ bfd_pef_scan (bfd *abfd,
   bfd_pef_convert_architecture (header->architecture, &cputype, &cpusubtype);
   if (cputype == bfd_arch_unknown)
     {
-      (*_bfd_error_handler) (_("bfd_pef_scan: unknown architecture 0x%lx"),
-			       header->architecture);
+      _bfd_error_handler (_("bfd_pef_scan: unknown architecture 0x%lx"),
+			  header->architecture);
       return -1;
     }
   bfd_set_arch_mach (abfd, cputype, cpusubtype);

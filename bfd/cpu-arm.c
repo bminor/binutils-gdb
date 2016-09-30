@@ -331,7 +331,7 @@ bfd_arm_update_notes (bfd *abfd, const char *note_section)
       if (! bfd_set_section_contents (abfd, arm_arch_section, buffer,
 				      (file_ptr) 0, buffer_size))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("warning: unable to update contents of %s section in %s"),
 	     note_section, bfd_get_filename (abfd));
 	  goto FAIL;
