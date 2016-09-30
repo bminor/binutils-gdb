@@ -1,3 +1,9 @@
+2016-09-30  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdbserver/20627
+	* target.c (target_stop_and_wait): Don't call
+	target_continue_no_signal, use resume_stop instead.
+
 2016-09-26  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-low.c (linux_wait_1): Call debug_exit.
