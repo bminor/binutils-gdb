@@ -1,5 +1,12 @@
 2016-09-30  Alan Modra  <amodra@gmail.com>
 
+	* ldmain.c (default_bfd_error_handler): New function pointer.
+	(ld_bfd_error_handler): New function.
+	(main): Arrange to call it on bfd errors/warnings.
+	(ld_bfd_assert_handler): Enable tail call.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.c (ignore_bfd_errors): Update params.
 
 2016-09-29  H.J. Lu  <hongjiu.lu@intel.com>

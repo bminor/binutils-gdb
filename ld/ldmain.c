@@ -158,6 +158,7 @@ static struct bfd_link_callbacks link_callbacks =
 };
 
 static bfd_assert_handler_type default_bfd_assert_handler;
+static bfd_error_handler_type default_bfd_error_handler;
 
 struct bfd_link_info link_info;
 
@@ -172,15 +173,24 @@ ld_cleanup (void)
     unlink_if_ordinary (output_filename);
 }
 
-/* If there's a BFD assertion, we'll notice and exit with an error
-   unless otherwise instructed.  */
+/* Hook to notice BFD assertions.  */
 
 static void
 ld_bfd_assert_handler (const char *fmt, const char *bfdver,
 		       const char *file, int line)
 {
-  (*default_bfd_assert_handler) (fmt, bfdver, file, line);
   config.make_executable = FALSE;
+  (*default_bfd_assert_handler) (fmt, bfdver, file, line);
+}
+
+/* Hook the bfd error/warning handler for --fatal-warnings.  */
+
+static void
+ld_bfd_error_handler (const char *fmt, va_list ap)
+{
+  if (config.fatal_warnings)
+    config.make_executable = FALSE;
+  (*default_bfd_error_handler) (fmt, ap);
 }
 
 int
@@ -216,6 +226,9 @@ main (int argc, char **argv)
      likely to signal incorrect output being generated but otherwise may
      leave no trace.  */
   default_bfd_assert_handler = bfd_set_assert_handler (ld_bfd_assert_handler);
+
+  /* Also hook the bfd error/warning handler for --fatal-warnings.  */
+  default_bfd_error_handler = bfd_set_error_handler (ld_bfd_error_handler);
 
   xatexit (ld_cleanup);
 
