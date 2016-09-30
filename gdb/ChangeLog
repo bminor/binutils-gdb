@@ -1,5 +1,10 @@
 2016-10-05  Tom Tromey  <tom@tromey.com>
 
+	PR breakpoints/20653:
+	* location.c (string_to_explicit_location): Use NULL, not '\0'.
+
+2016-10-05  Tom Tromey  <tom@tromey.com>
+
 	PR symtab/20652:
 	* psymtab.c (psymbol_compare): Correctly compare "ginfo.value"
 	fields.
