@@ -1,5 +1,12 @@
 2016-09-30  Alan Modra  <amodra@gmail.com>
 
+	PR ld/20528
+	* testsuite/ld-elf/pr20528a.d: xfail generic elf targets.  Allow
+	multiple .text sections for hppa-linux.
+	* testsuite/ld-elf/pr20528b.d: Likewise.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
 	* ldmain.c (default_bfd_error_handler): New function pointer.
 	(ld_bfd_error_handler): New function.
 	(main): Arrange to call it on bfd errors/warnings.
