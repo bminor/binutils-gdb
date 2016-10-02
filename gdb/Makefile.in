@@ -423,6 +423,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/memory-map-selftests.c \
 	unittests/memrange-selftests.c \
 	unittests/offset-type-selftests.c \
+	unittests/observable-selftests.c \
 	unittests/optional-selftests.c \
 	unittests/ptid-selftests.c \
 	unittests/rsp-low-selftests.c \
@@ -1057,7 +1058,7 @@ COMMON_SFILES = \
 	namespace.c \
 	objc-lang.c \
 	objfiles.c \
-	observer.c \
+	observable.c \
 	opencl-lang.c \
 	osabi.c \
 	osdata.c \
@@ -1589,8 +1590,6 @@ generated_files = \
 	config.h \
 	gcore \
 	jit-reader.h \
-	observer.h \
-	observer.inc \
 	$(GNULIB_H) \
 	$(NAT_GENERATED_FILES)
 
@@ -1950,7 +1949,7 @@ tags: TAGS
 clean mostlyclean: $(CONFIG_CLEAN)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(CLEANDIRS)" subdir_do
 	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp version.c-tmp
-	rm -f init.c version.c observer.h observer.inc
+	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
 	rm -f test-cp-name-parser$(EXEEXT)
@@ -2136,12 +2135,6 @@ $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ $(srcdir)/../COPYING3 $(srcdir)/copy
 version.c: Makefile version.in $(srcdir)/../bfd/version.h $(srcdir)/common/create-version.sh
 	$(ECHO_GEN) $(SHELL) $(srcdir)/common/create-version.sh $(srcdir) \
 	    $(host_alias) $(target_alias) version.c
-
-observer.h: observer.sh doc/observer.texi
-	${srcdir}/observer.sh h ${srcdir}/doc/observer.texi observer.h
-
-observer.inc: observer.sh doc/observer.texi
-	${srcdir}/observer.sh inc ${srcdir}/doc/observer.texi observer.inc
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \

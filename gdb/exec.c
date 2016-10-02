@@ -29,7 +29,7 @@
 #include "completer.h"
 #include "value.h"
 #include "exec.h"
-#include "observer.h"
+#include "observable.h"
 #include "arch-utils.h"
 #include "gdbthread.h"
 #include "progspace.h"
@@ -378,7 +378,7 @@ exec_file_attach (const char *filename, int from_tty)
     }
 
   bfd_cache_close_all ();
-  observer_notify_executable_changed ();
+  gdb::observers::executable_changed.notify ();
 }
 
 /*  Process the first arg in ARGS as the new exec file.

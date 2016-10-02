@@ -34,7 +34,7 @@
 #include "frame-base.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "observer.h"
+#include "observable.h"
 #include "objfiles.h"
 #include "gdbthread.h"
 #include "block.h"
@@ -2923,7 +2923,7 @@ _initialize_frame (void)
 
   frame_stash_create ();
 
-  observer_attach_target_changed (frame_observer_target_changed);
+  gdb::observers::target_changed.attach (frame_observer_target_changed);
 
   add_prefix_cmd ("backtrace", class_maintenance, set_backtrace_cmd, _("\
 Set backtrace specific variables.\n\

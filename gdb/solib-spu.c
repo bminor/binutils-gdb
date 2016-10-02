@@ -30,7 +30,7 @@
 #include "solist.h"
 #include "inferior.h"
 #include "objfiles.h"
-#include "observer.h"
+#include "observable.h"
 #include "breakpoint.h"
 #include "gdbthread.h"
 #include "gdb_bfd.h"
@@ -545,7 +545,7 @@ spu_solib_loaded (struct so_list *so)
 void
 _initialize_spu_solib (void)
 {
-  observer_attach_solib_loaded (spu_solib_loaded);
+  gdb::observers::solib_loaded.attach (spu_solib_loaded);
   ocl_program_data_key = register_objfile_data ();
 }
 

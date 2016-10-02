@@ -46,7 +46,7 @@
 #include "gdbthread.h"
 #include "extension.h"
 #include "interps.h"
-#include "observer.h"
+#include "observable.h"
 #include "maint.h"
 #include "filenames.h"
 #include "frame.h"
@@ -1959,7 +1959,7 @@ static void
 set_gdb_datadir (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_gdb_data_directory (staged_gdb_datadir);
-  observer_notify_gdb_datadir_changed ();
+  gdb::observers::gdb_datadir_changed.notify ();
 }
 
 /* "show" command for the gdb_datadir configuration variable.  */

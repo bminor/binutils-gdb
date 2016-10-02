@@ -39,7 +39,7 @@
 #include "block.h"
 #include "disasm.h"
 #include "target-float.h"
-#include "observer.h"
+#include "observable.h"
 #include "solist.h"
 #include "parser-defs.h"
 #include "charset.h"
@@ -2623,7 +2623,7 @@ _initialize_printcmd (void)
 
   current_display_number = -1;
 
-  observer_attach_free_objfile (clear_dangling_display_expressions);
+  gdb::observers::free_objfile.attach (clear_dangling_display_expressions);
 
   add_info ("address", info_address_command,
 	    _("Describe where symbol SYM is stored."));

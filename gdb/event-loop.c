@@ -34,7 +34,7 @@
 #include <sys/types.h>
 #include "gdb_sys_time.h"
 #include "gdb_select.h"
-#include "observer.h"
+#include "observable.h"
 #include "top.h"
 
 /* Tell create_file_handler what events we are interested in.
@@ -382,7 +382,7 @@ start_event_loop (void)
 	     get around to resetting the prompt, which leaves readline
 	     in a messed-up state.  Reset it here.  */
 	  current_ui->prompt_state = PROMPT_NEEDED;
-	  observer_notify_command_error ();
+	  gdb::observers::command_error.notify ();
 	  /* This call looks bizarre, but it is required.  If the user
 	     entered a command that caused an error,
 	     after_char_processing_hook won't be called from

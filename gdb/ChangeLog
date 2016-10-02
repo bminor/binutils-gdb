@@ -1,3 +1,52 @@
+2018-03-19  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* unittests/observable-selftests.c: New file.
+	* common/observable.h: New file.
+	* observable.h: New file.
+	* ada-lang.c, ada-tasks.c, agent.c, aix-thread.c, annotate.c,
+	arm-tdep.c, auto-load.c, auxv.c, break-catch-syscall.c,
+	breakpoint.c, bsd-uthread.c, cli/cli-interp.c, cli/cli-setshow.c,
+	corefile.c, dummy-frame.c, event-loop.c, event-top.c, exec.c,
+	extension.c, frame.c, gdbarch.c, guile/scm-breakpoint.c,
+	infcall.c, infcmd.c, inferior.c, inflow.c, infrun.c, jit.c,
+	linux-tdep.c, linux-thread-db.c, m68klinux-tdep.c,
+	mi/mi-cmd-break.c, mi/mi-interp.c, mi/mi-main.c, objfiles.c,
+	ppc-linux-nat.c, ppc-linux-tdep.c, printcmd.c, procfs.c,
+	python/py-breakpoint.c, python/py-finishbreakpoint.c,
+	python/py-inferior.c, python/py-unwind.c, ravenscar-thread.c,
+	record-btrace.c, record-full.c, record.c, regcache.c, remote.c,
+	riscv-tdep.c, sol-thread.c, solib-aix.c, solib-spu.c, solib.c,
+	spu-multiarch.c, spu-tdep.c, stack.c, symfile-mem.c, symfile.c,
+	symtab.c, thread.c, top.c, tracepoint.c, tui/tui-hooks.c,
+	tui/tui-interp.c, valops.c: Update all users.
+	* tui/tui-hooks.c (tui_bp_created_observer)
+	(tui_bp_deleted_observer, tui_bp_modified_observer)
+	(tui_inferior_exit_observer, tui_before_prompt_observer)
+	(tui_normal_stop_observer, tui_register_changed_observer):
+	Remove.
+	(tui_observers_token): New global.
+	(attach_or_detach, tui_attach_detach_observers): New functions.
+	(tui_install_hooks, tui_remove_hooks): Use
+	tui_attach_detach_observers.
+	* record-btrace.c (record_btrace_thread_observer): Remove.
+	(record_btrace_thread_observer_token): New global.
+	* observer.sh: Remove.
+	* observer.c: Rename to observable.c.
+	* observable.c (namespace gdb_observers): Define new objects.
+	(observer_debug): Move into gdb_observers namespace.
+	(struct observer, struct observer_list, xalloc_observer_list_node)
+	(xfree_observer_list_node, generic_observer_attach)
+	(generic_observer_detach, generic_observer_notify): Remove.
+	(_initialize_observer): Update.
+	Don't include observer.inc.
+	* Makefile.in (generated_files): Remove observer.h, observer.inc.
+	(clean mostlyclean): Likewise.
+	(observer.h, observer.inc): Remove targets.
+	(SUBDIR_UNITTESTS_SRCS): Add observable-selftests.c.
+	(COMMON_SFILES): Use observable.c, not observer.c.
+	* .gitignore: Remove observer.h.
+
 2018-03-18  Tom Tromey  <tom@tromey.com>
 
 	* solib.c (gdb_bfd_lookup_symbol_from_symtab): Use

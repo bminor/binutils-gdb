@@ -25,7 +25,7 @@
 #include "inferior.h"
 #include "command.h"
 #include "ravenscar-thread.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbcmd.h"
 #include "top.h"
 #include "regcache.h"
@@ -632,7 +632,7 @@ _initialize_ravenscar (void)
 
   /* Notice when the inferior is created in order to push the
      ravenscar ops if needed.  */
-  observer_attach_inferior_created (ravenscar_inferior_created);
+  gdb::observers::inferior_created.attach (ravenscar_inferior_created);
 
   complete_target_initialization (&ravenscar_ops);
 

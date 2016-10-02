@@ -24,7 +24,7 @@
 #include "mi-out.h"
 #include "breakpoint.h"
 #include "mi-getopt.h"
-#include "observer.h"
+#include "observable.h"
 #include "mi-main.h"
 #include "mi-cmd-break.h"
 #include "language.h"
@@ -84,7 +84,7 @@ setup_breakpoint_reporting (void)
 {
   if (! mi_breakpoint_observers_installed)
     {
-      observer_attach_breakpoint_created (breakpoint_notify);
+      gdb::observers::breakpoint_created.attach (breakpoint_notify);
       mi_breakpoint_observers_installed = 1;
     }
 
@@ -394,7 +394,7 @@ mi_cmd_break_passcount (const char *command, char **argv, int argc)
   if (t)
     {
       t->pass_count = p;
-      observer_notify_breakpoint_modified (t);
+      gdb::observers::breakpoint_modified.notify (t);
     }
   else
     {

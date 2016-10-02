@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "observer.h"
+#include "observable.h"
 #include "frame.h"
 #include "inferior.h"
 #include "gdbthread.h"
@@ -2500,7 +2500,7 @@ _initialize_ppc_linux_nat (void)
   t->to_read_description = ppc_linux_read_description;
   t->to_auxv_parse = ppc_linux_auxv_parse;
 
-  observer_attach_thread_exit (ppc_linux_thread_exit);
+  gdb::observers::thread_exit.attach (ppc_linux_thread_exit);
 
   /* Register the target.  */
   linux_nat_add_target (t);

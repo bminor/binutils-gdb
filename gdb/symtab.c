@@ -54,7 +54,7 @@
 #include <ctype.h>
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "observer.h"
+#include "observable.h"
 #include "solist.h"
 #include "macrotab.h"
 #include "macroscope.h"
@@ -5917,7 +5917,7 @@ If zero then the symbol cache is disabled."),
 	   _("Flush the symbol cache for each program space."),
 	   &maintenancelist);
 
-  observer_attach_executable_changed (symtab_observer_executable_changed);
-  observer_attach_new_objfile (symtab_new_objfile_observer);
-  observer_attach_free_objfile (symtab_free_objfile_observer);
+  gdb::observers::executable_changed.attach (symtab_observer_executable_changed);
+  gdb::observers::new_objfile.attach (symtab_new_objfile_observer);
+  gdb::observers::free_objfile.attach (symtab_free_objfile_observer);
 }

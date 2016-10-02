@@ -46,7 +46,7 @@
 #include "regcache.h"
 #include "gdbcmd.h"
 #include "ppc-tdep.h"
-#include "observer.h"
+#include "observable.h"
 #include "objfiles.h"
 
 #include <procinfo.h>
@@ -1859,11 +1859,11 @@ _initialize_aix_thread (void)
   complete_target_initialization (&aix_thread_ops);
 
   /* Notice when object files get loaded and unloaded.  */
-  observer_attach_new_objfile (new_objfile);
+  gdb::observers::new_objfile.attach (new_objfile);
 
   /* Add ourselves to inferior_created event chain.
      This is needed to enable the thread target on "attach".  */
-  observer_attach_inferior_created (aix_thread_inferior_created);
+  gdb::observers::inferior_created.attach (aix_thread_inferior_created);
 
   add_setshow_boolean_cmd ("aix-thread", class_maintenance, &debug_aix_thread,
 			   _("Set debugging of AIX thread module."),

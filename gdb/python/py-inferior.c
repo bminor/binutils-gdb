@@ -22,7 +22,7 @@
 #include "gdbthread.h"
 #include "inferior.h"
 #include "objfiles.h"
-#include "observer.h"
+#include "observable.h"
 #include "python-internal.h"
 #include "arch-utils.h"
 #include "language.h"
@@ -926,18 +926,18 @@ gdbpy_initialize_inferior (void)
   infpy_inf_data_key =
     register_inferior_data_with_cleanup (NULL, py_free_inferior);
 
-  observer_attach_new_thread (add_thread_object);
-  observer_attach_thread_exit (delete_thread_object);
-  observer_attach_normal_stop (python_on_normal_stop);
-  observer_attach_target_resumed (python_on_resume);
-  observer_attach_inferior_call_pre (python_on_inferior_call_pre);
-  observer_attach_inferior_call_post (python_on_inferior_call_post);
-  observer_attach_memory_changed (python_on_memory_change);
-  observer_attach_register_changed (python_on_register_change);
-  observer_attach_inferior_exit (python_inferior_exit);
-  observer_attach_new_objfile (python_new_objfile);
-  observer_attach_inferior_added (python_new_inferior);
-  observer_attach_inferior_removed (python_inferior_deleted);
+  gdb::observers::new_thread.attach (add_thread_object);
+  gdb::observers::thread_exit.attach (delete_thread_object);
+  gdb::observers::normal_stop.attach (python_on_normal_stop);
+  gdb::observers::target_resumed.attach (python_on_resume);
+  gdb::observers::inferior_call_pre.attach (python_on_inferior_call_pre);
+  gdb::observers::inferior_call_post.attach (python_on_inferior_call_post);
+  gdb::observers::memory_changed.attach (python_on_memory_change);
+  gdb::observers::register_changed.attach (python_on_register_change);
+  gdb::observers::inferior_exit.attach (python_inferior_exit);
+  gdb::observers::new_objfile.attach (python_new_objfile);
+  gdb::observers::inferior_added.attach (python_new_inferior);
+  gdb::observers::inferior_removed.attach (python_inferior_deleted);
 
   membuf_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&membuf_object_type) < 0)

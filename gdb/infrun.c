@@ -38,7 +38,7 @@
 #include "inf-loop.h"
 #include "regcache.h"
 #include "value.h"
-#include "observer.h"
+#include "observable.h"
 #include "language.h"
 #include "solib.h"
 #include "main.h"
@@ -2899,7 +2899,7 @@ clear_proceed_status (int step)
       inferior->control.stop_soon = NO_STOP_QUIETLY;
     }
 
-  observer_notify_about_to_proceed ();
+  gdb::observers::about_to_proceed.notify ();
 }
 
 /* Returns true if TP is still stopped at a breakpoint that needs
@@ -3816,7 +3816,7 @@ check_curr_ui_sync_execution_done (void)
       && !gdb_in_secondary_prompt_p (ui))
     {
       target_terminal::ours ();
-      observer_notify_sync_execution_done ();
+      gdb::observers::sync_execution_done.notify ();
       ui_register_input_event_handler (ui);
     }
 }
@@ -5069,7 +5069,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 	  /* Support the --return-child-result option.  */
 	  return_child_result_value = ecs->ws.value.integer;
 
-	  observer_notify_exited (ecs->ws.value.integer);
+	  gdb::observers::exited.notify (ecs->ws.value.integer);
 	}
       else
 	{
@@ -5098,7 +5098,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 Cannot fill $_exitsignal with the correct signal number.\n"));
 	    }
 
-	  observer_notify_signal_exited (ecs->ws.value.sig);
+	  gdb::observers::signal_exited.notify (ecs->ws.value.sig);
 	}
 
       gdb_flush (gdb_stdout);
@@ -5392,7 +5392,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       if (handle_stop_requested (ecs))
 	return;
 
-      observer_notify_no_history ();
+      gdb::observers::no_history.notify ();
       stop_waiting (ecs);
       return;
     }
@@ -6096,7 +6096,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	{
 	  /* The signal table tells us to print about this signal.  */
 	  target_terminal::ours_for_output ();
-	  observer_notify_signal_received (ecs->event_thread->suspend.stop_signal);
+	  gdb::observers::signal_received.notify (ecs->event_thread->suspend.stop_signal);
 	  target_terminal::inferior ();
 	}
 
@@ -8205,7 +8205,7 @@ normal_stop (void)
   update_thread_list ();
 
   if (last.kind == TARGET_WAITKIND_STOPPED && stopped_by_random_signal)
-    observer_notify_signal_received (inferior_thread ()->suspend.stop_signal);
+    gdb::observers::signal_received.notify (inferior_thread ()->suspend.stop_signal);
 
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until
@@ -8330,10 +8330,10 @@ normal_stop (void)
   /* Notify observers about the stop.  This is where the interpreters
      print the stop event.  */
   if (!ptid_equal (inferior_ptid, null_ptid))
-    observer_notify_normal_stop (inferior_thread ()->control.stop_bpstat,
+    gdb::observers::normal_stop.notify (inferior_thread ()->control.stop_bpstat,
 				 stop_print_frame);
   else
-    observer_notify_normal_stop (NULL, stop_print_frame);
+    gdb::observers::normal_stop.notify (NULL, stop_print_frame);
 
   annotate_stopped ();
 
@@ -9438,10 +9438,10 @@ enabled by default on some platforms."),
   inferior_ptid = null_ptid;
   target_last_wait_ptid = minus_one_ptid;
 
-  observer_attach_thread_ptid_changed (infrun_thread_ptid_changed);
-  observer_attach_thread_stop_requested (infrun_thread_stop_requested);
-  observer_attach_thread_exit (infrun_thread_thread_exit);
-  observer_attach_inferior_exit (infrun_inferior_exit);
+  gdb::observers::thread_ptid_changed.attach (infrun_thread_ptid_changed);
+  gdb::observers::thread_stop_requested.attach (infrun_thread_stop_requested);
+  gdb::observers::thread_exit.attach (infrun_thread_thread_exit);
+  gdb::observers::inferior_exit.attach (infrun_inferior_exit);
 
   /* Explicitly create without lookup, since that tries to create a
      value with a void typed value, and when we get here, gdbarch

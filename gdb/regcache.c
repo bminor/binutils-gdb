@@ -24,7 +24,7 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "observer.h"
+#include "observable.h"
 #include "regset.h"
 #include <forward_list>
 
@@ -1868,8 +1868,9 @@ _initialize_regcache (void)
   regcache_descr_handle
     = gdbarch_data_register_post_init (init_regcache_descr);
 
-  observer_attach_target_changed (regcache_observer_target_changed);
-  observer_attach_thread_ptid_changed (regcache::regcache_thread_ptid_changed);
+  gdb::observers::target_changed.attach (regcache_observer_target_changed);
+  gdb::observers::thread_ptid_changed.attach
+    (regcache::regcache_thread_ptid_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   _("Force gdb to flush its register cache (maintainer command)"));

@@ -39,7 +39,7 @@
 #include "regcache.h"
 #include "reggroups.h"
 #include "block.h"
-#include "observer.h"
+#include "observable.h"
 #include "infcall.h"
 #include "dwarf2.h"
 #include "dwarf2-frame.h"
@@ -2771,14 +2771,14 @@ _initialize_spu_tdep (void)
   register_gdbarch_init (bfd_arch_spu, spu_gdbarch_init);
 
   /* Add ourselves to objfile event chain.  */
-  observer_attach_new_objfile (spu_overlay_new_objfile);
+  gdb::observers::new_objfile.attach (spu_overlay_new_objfile);
   spu_overlay_data = register_objfile_data ();
 
   /* Install spu stop-on-load handler.  */
-  observer_attach_new_objfile (spu_catch_start);
+  gdb::observers::new_objfile.attach (spu_catch_start);
 
   /* Add ourselves to normal_stop event chain.  */
-  observer_attach_normal_stop (spu_attach_normal_stop);
+  gdb::observers::normal_stop.attach (spu_attach_normal_stop);
 
   /* Add root prefix command for all "set spu"/"show spu" commands.  */
   add_prefix_cmd ("spu", no_class, set_spu_command,

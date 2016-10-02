@@ -52,7 +52,7 @@
 #include "linespec.h"
 #include "extension.h"
 #include "gdbcmd.h"
-#include "observer.h"
+#include "observable.h"
 #include "common/gdb_optional.h"
 #include "common/byte-vector.h"
 
@@ -573,8 +573,8 @@ mi_cmd_thread_select (const char *command, char **argv, int argc)
   /* Notify if the thread has effectively changed.  */
   if (!ptid_equal (inferior_ptid, previous_ptid))
     {
-      observer_notify_user_selected_context_changed (USER_SELECTED_THREAD
-						     | USER_SELECTED_FRAME);
+      gdb::observers::user_selected_context_changed.notify
+	(USER_SELECTED_THREAD | USER_SELECTED_FRAME);
     }
 }
 
@@ -2024,8 +2024,8 @@ mi_execute_command (const char *cmd, int from_tty)
 
 	  if (report_change)
 	    {
-		observer_notify_user_selected_context_changed
-		  (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
+	      gdb::observers::user_selected_context_changed.notify
+		(USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 	    }
 	}
     }

@@ -35,7 +35,7 @@
 #include "ada-lang.h"
 #include "gdbthread.h"
 #include "event-top.h"
-#include "observer.h"
+#include "observable.h"
 #include "top.h"
 #include "interps.h"
 #include "thread-fsm.h"
@@ -903,7 +903,7 @@ call_function_by_hand_dummy (struct value *function,
       target_values_type = values_type;
     }
 
-  observer_notify_inferior_call_pre (inferior_ptid, funaddr);
+  gdb::observers::inferior_call_pre.notify (inferior_ptid, funaddr);
 
   /* Determine the location of the breakpoint (and possibly other
      stuff) that the called function will return to.  The SPARC, for a
@@ -1176,7 +1176,7 @@ call_function_by_hand_dummy (struct value *function,
 
     e = run_inferior_call (sm, tp, real_pc);
 
-    observer_notify_inferior_call_post (call_thread_ptid, funaddr);
+    gdb::observers::inferior_call_post.notify (call_thread_ptid, funaddr);
 
     tp = find_thread_ptid (call_thread_ptid);
     if (tp != NULL)

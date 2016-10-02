@@ -36,7 +36,7 @@
 #include "cp-support.h"
 #include "target-float.h"
 #include "tracepoint.h"
-#include "observer.h"
+#include "observable.h"
 #include "objfiles.h"
 #include "extension.h"
 #include "byte-vector.h"
@@ -1177,7 +1177,7 @@ value_assign (struct value *toval, struct value *fromval)
 	      }
 	  }
 
-	observer_notify_register_changed (frame, value_reg);
+	gdb::observers::register_changed.notify (frame, value_reg);
 	break;
       }
 
@@ -1208,7 +1208,7 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_register:
     case lval_computed:
 
-      observer_notify_target_changed (&current_target);
+      gdb::observers::target_changed.notify (&current_target);
 
       /* Having destroyed the frame cache, restore the selected
 	 frame.  */

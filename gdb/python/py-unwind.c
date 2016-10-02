@@ -23,7 +23,7 @@
 #include "gdb_obstack.h"
 #include "gdbcmd.h"
 #include "language.h"
-#include "observer.h"
+#include "observable.h"
 #include "python-internal.h"
 #include "regcache.h"
 #include "valprint.h"
@@ -662,7 +662,7 @@ gdbpy_initialize_unwind (void)
         &setdebuglist, &showdebuglist);
   pyuw_gdbarch_data
       = gdbarch_data_register_post_init (pyuw_gdbarch_data_init);
-  observer_attach_architecture_changed (pyuw_on_new_gdbarch);
+  gdb::observers::architecture_changed.attach (pyuw_on_new_gdbarch);
 
   if (PyType_Ready (&pending_frame_object_type) < 0)
     return -1;

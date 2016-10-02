@@ -25,7 +25,7 @@
 #include "breakpoint.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"
-#include "observer.h"
+#include "observable.h"
 #include "cli/cli-script.h"
 #include "ada-lang.h"
 #include "arch-utils.h"
@@ -1086,9 +1086,9 @@ gdbpy_initialize_breakpoints (void)
 			      (PyObject *) &breakpoint_object_type) < 0)
     return -1;
 
-  observer_attach_breakpoint_created (gdbpy_breakpoint_created);
-  observer_attach_breakpoint_deleted (gdbpy_breakpoint_deleted);
-  observer_attach_breakpoint_modified (gdbpy_breakpoint_modified);
+  gdb::observers::breakpoint_created.attach (gdbpy_breakpoint_created);
+  gdb::observers::breakpoint_deleted.attach (gdbpy_breakpoint_deleted);
+  gdb::observers::breakpoint_modified.attach (gdbpy_breakpoint_modified);
 
   /* Add breakpoint types constants.  */
   for (i = 0; pybp_codes[i].name; ++i)

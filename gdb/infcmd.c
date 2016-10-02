@@ -42,7 +42,7 @@
 #include "block.h"
 #include "solib.h"
 #include <ctype.h>
-#include "observer.h"
+#include "observable.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
 #include "cli/cli-decode.h"
@@ -499,7 +499,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
      if the now pushed target supports hardware watchpoints.  */
   breakpoint_re_set ();
 
-  observer_notify_inferior_created (target, from_tty);
+  gdb::observers::inferior_created.notify (target, from_tty);
 }
 
 /* Kill the inferior if already running.  This function is designed

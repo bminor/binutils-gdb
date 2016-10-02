@@ -22,7 +22,7 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "arch-utils.h"
-#include "observer.h"
+#include "observable.h"
 #include "inferior.h"
 #include "regcache.h"
 #include "symfile.h"
@@ -410,8 +410,8 @@ _initialize_spu_multiarch (void)
   complete_target_initialization (&spu_ops);
 
   /* Install observers to watch for SPU objects.  */
-  observer_attach_inferior_created (spu_multiarch_inferior_created);
-  observer_attach_solib_loaded (spu_multiarch_solib_loaded);
-  observer_attach_solib_unloaded (spu_multiarch_solib_unloaded);
+  gdb::observers::inferior_created.attach (spu_multiarch_inferior_created);
+  gdb::observers::solib_loaded.attach (spu_multiarch_solib_loaded);
+  gdb::observers::solib_unloaded.attach (spu_multiarch_solib_unloaded);
 }
 

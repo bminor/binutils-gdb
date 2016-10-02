@@ -21,7 +21,7 @@
 #include "gdbcmd.h"
 #include "completer.h"
 #include "record.h"
-#include "observer.h"
+#include "observable.h"
 #include "inferior.h"
 #include "common/common-utils.h"
 #include "cli/cli-utils.h"
@@ -311,7 +311,7 @@ cmd_record_stop (const char *args, int from_tty)
   printf_unfiltered (_("Process record is stopped and all execution "
 		       "logs are deleted.\n"));
 
-  observer_notify_record_changed (current_inferior (), 0, NULL, NULL);
+  gdb::observers::record_changed.notify (current_inferior (), 0, NULL, NULL);
 }
 
 /* The "set record" command.  */

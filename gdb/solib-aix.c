@@ -24,7 +24,7 @@
 #include "objfiles.h"
 #include "symtab.h"
 #include "xcoffread.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbcmd.h"
 
 /* Variable controlling the output of the debugging traces for
@@ -791,7 +791,7 @@ _initialize_solib_aix (void)
 
   solib_aix_inferior_data_handle = register_inferior_data ();
 
-  observer_attach_normal_stop (solib_aix_normal_stop_observer);
+  gdb::observers::normal_stop.attach (solib_aix_normal_stop_observer);
 
   /* Debug this file's internals.  */
   add_setshow_boolean_cmd ("aix-solib", class_maintenance,

@@ -41,7 +41,7 @@
 #include "trad-frame.h"
 #include "frame-unwind.h"
 #include "tramp-frame.h"
-#include "observer.h"
+#include "observable.h"
 #include "auxv.h"
 #include "elf/common.h"
 #include "elf/ppc64.h"
@@ -1857,9 +1857,9 @@ _initialize_ppc_linux_tdep (void)
                          ppc_linux_init_abi);
 
   /* Attach to observers to track __spe_current_active_context.  */
-  observer_attach_inferior_created (ppc_linux_spe_context_inferior_created);
-  observer_attach_solib_loaded (ppc_linux_spe_context_solib_loaded);
-  observer_attach_solib_unloaded (ppc_linux_spe_context_solib_unloaded);
+  gdb::observers::inferior_created.attach (ppc_linux_spe_context_inferior_created);
+  gdb::observers::solib_loaded.attach (ppc_linux_spe_context_solib_loaded);
+  gdb::observers::solib_unloaded.attach (ppc_linux_spe_context_solib_unloaded);
 
   /* Initialize the Linux target descriptions.  */
   initialize_tdesc_powerpc_32l ();

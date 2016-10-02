@@ -34,7 +34,7 @@
 #include "defs.h"
 #include "remote.h"
 #include "remote-notif.h"
-#include "observer.h"
+#include "observable.h"
 #include "event-loop.h"
 #include "target.h"
 #include "inferior.h"

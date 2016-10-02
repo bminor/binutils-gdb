@@ -25,7 +25,7 @@
 #include "ui-out.h"
 #include "filenames.h"
 #include "command.h"
-#include "observer.h"
+#include "observable.h"
 #include "objfiles.h"
 #include "cli/cli-script.h"
 #include "gdbcmd.h"
@@ -1543,7 +1543,7 @@ _initialize_auto_load (void)
     = register_program_space_data_with_cleanup (NULL,
 						auto_load_pspace_data_cleanup);
 
-  observer_attach_new_objfile (auto_load_new_objfile);
+  gdb::observers::new_objfile.attach (auto_load_new_objfile);
 
   add_setshow_boolean_cmd ("gdb-scripts", class_support,
 			   &auto_load_gdb_scripts, _("\
@@ -1653,7 +1653,7 @@ This options has security implications for untrusted inferiors."),
 				     show_auto_load_safe_path,
 				     auto_load_set_cmdlist_get (),
 				     auto_load_show_cmdlist_get ());
-  observer_attach_gdb_datadir_changed (auto_load_gdb_datadir_changed);
+  gdb::observers::gdb_datadir_changed.attach (auto_load_gdb_datadir_changed);
 
   cmd = add_cmd ("add-auto-load-safe-path", class_support,
 		 add_auto_load_safe_path,

@@ -49,7 +49,7 @@
 #include "block.h"
 #include "solib.h"
 #include "solist.h"
-#include "observer.h"
+#include "observable.h"
 #include "memattr.h"
 #include "ada-lang.h"
 #include "top.h"
@@ -903,7 +903,7 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
     }
   mark_breakpoint_modified (b);
 
-  observer_notify_breakpoint_modified (b);
+  gdb::observers::breakpoint_modified.notify (b);
 }
 
 /* Completion for the "condition" command.  */
@@ -1172,7 +1172,7 @@ breakpoint_set_commands (struct breakpoint *b,
   validate_commands_for_breakpoint (b, commands.get ());
 
   b->commands = std::move (commands);
-  observer_notify_breakpoint_modified (b);
+  gdb::observers::breakpoint_modified.notify (b);
 }
 
 /* Set the internal `silent' flag on the breakpoint.  Note that this
@@ -1186,7 +1186,7 @@ breakpoint_set_silent (struct breakpoint *b, int silent)
 
   b->silent = silent;
   if (old_silent != silent)
-    observer_notify_breakpoint_modified (b);
+    gdb::observers::breakpoint_modified.notify (b);
 }
 
 /* Set the thread for this breakpoint.  If THREAD is -1, make the
@@ -1199,7 +1199,7 @@ breakpoint_set_thread (struct breakpoint *b, int thread)
 
   b->thread = thread;
   if (old_thread != thread)
-    observer_notify_breakpoint_modified (b);
+    gdb::observers::breakpoint_modified.notify (b);
 }
 
 /* Set the task for this breakpoint.  If TASK is 0, make the
@@ -1212,7 +1212,7 @@ breakpoint_set_task (struct breakpoint *b, int task)
 
   b->task = task;
   if (old_task != task)
-    observer_notify_breakpoint_modified (b);
+    gdb::observers::breakpoint_modified.notify (b);
 }
 
 void
@@ -1269,7 +1269,7 @@ commands_command_1 (const char *arg, int from_tty,
 	 {
 	   validate_commands_for_breakpoint (b, cmd.get ());
 	   b->commands = cmd;
-	   observer_notify_breakpoint_modified (b);
+	   gdb::observers::breakpoint_modified.notify (b);
 	 }
      });
 }
@@ -2655,7 +2655,7 @@ insert_bp_location (struct bp_location *bl,
 	    {
 	      /* See also: disable_breakpoints_in_shlibs.  */
 	      bl->shlib_disabled = 1;
-	      observer_notify_breakpoint_modified (bl->owner);
+	      gdb::observers::breakpoint_modified.notify (bl->owner);
 	      if (!*disabled_breaks)
 		{
 		  fprintf_unfiltered (tmp_error_stream, 
@@ -5321,7 +5321,7 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
       bs->stop = 0;
       /* Increase the hit count even though we don't stop.  */
       ++(b->hit_count);
-      observer_notify_breakpoint_modified (b);
+      gdb::observers::breakpoint_modified.notify (b);
     }	
 }
 
@@ -5476,7 +5476,7 @@ bpstat_stop_status (const address_space *aspace,
 	  if (bs->stop)
 	    {
 	      ++(b->hit_count);
-	      observer_notify_breakpoint_modified (b);
+	      gdb::observers::breakpoint_modified.notify (b);
 
 	      /* We will stop here.  */
 	      if (b->disposition == disp_disable)
@@ -7639,7 +7639,7 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 	loc->inserted = 0;
 
 	/* This may cause duplicate notifications for the same breakpoint.  */
-	observer_notify_breakpoint_modified (b);
+	gdb::observers::breakpoint_modified.notify (b);
 
 	if (!disabled_shlib_breaks)
 	  {
@@ -7722,7 +7722,7 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 	}
 
       if (bp_modified)
-	observer_notify_breakpoint_modified (b);
+	gdb::observers::breakpoint_modified.notify (b);
     }
 }
 
@@ -8250,7 +8250,7 @@ install_breakpoint (int internal, std::unique_ptr<breakpoint> &&arg, int update_
     set_tracepoint_count (breakpoint_count);
   if (!internal)
     mention (b);
-  observer_notify_breakpoint_created (b);
+  gdb::observers::breakpoint_created.notify (b);
 
   if (update_gll)
     update_global_location_list (UGLL_MAY_INSERT);
@@ -9989,7 +9989,7 @@ break_range_command (const char *arg, int from_tty)
   b->loc->length = length;
 
   mention (b);
-  observer_notify_breakpoint_created (b);
+  gdb::observers::breakpoint_created.notify (b);
   update_global_location_list (UGLL_MAY_INSERT);
 }
 
@@ -11744,7 +11744,7 @@ download_tracepoint_locations (void)
       t = (struct tracepoint *) b;
       t->number_on_target = b->number;
       if (bp_location_downloaded)
-	observer_notify_breakpoint_modified (b);
+	gdb::observers::breakpoint_modified.notify (b);
     }
 }
 
@@ -13257,7 +13257,7 @@ delete_breakpoint (struct breakpoint *bpt)
      a problem in that process, we'll be asked to delete the half-created
      watchpoint.  In that case, don't announce the deletion.  */
   if (bpt->number)
-    observer_notify_breakpoint_deleted (bpt);
+    gdb::observers::breakpoint_deleted.notify (bpt);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
@@ -13732,7 +13732,7 @@ update_breakpoint_locations (struct breakpoint *b,
   }
 
   if (!locations_are_equal (existing_locations, b->loc))
-    observer_notify_breakpoint_modified (b);
+    gdb::observers::breakpoint_modified.notify (b);
 }
 
 /* Find the SaL locations corresponding to the given LOCATION.
@@ -14029,7 +14029,7 @@ set_ignore_count (int bptnum, int count, int from_tty)
 			       "crossings of breakpoint %d."),
 			     count, bptnum);
 	}
-      observer_notify_breakpoint_modified (b);
+      gdb::observers::breakpoint_modified.notify (b);
       return;
     }
 
@@ -14332,7 +14332,7 @@ disable_breakpoint (struct breakpoint *bpt)
 
   update_global_location_list (UGLL_DONT_INSERT);
 
-  observer_notify_breakpoint_modified (bpt);
+  gdb::observers::breakpoint_modified.notify (bpt);
 }
 
 /* Enable or disable the breakpoint(s) or breakpoint location(s)
@@ -14458,7 +14458,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
   bpt->enable_count = count;
   update_global_location_list (UGLL_MAY_INSERT);
 
-  observer_notify_breakpoint_modified (bpt);
+  gdb::observers::breakpoint_modified.notify (bpt);
 }
 
 
@@ -14938,7 +14938,7 @@ static void
 trace_pass_set_count (struct tracepoint *tp, int count, int from_tty)
 {
   tp->pass_count = count;
-  observer_notify_breakpoint_modified (tp);
+  gdb::observers::breakpoint_modified.notify (tp);
   if (from_tty)
     printf_filtered (_("Setting tracepoint %d's passcount to %d\n"),
 		     tp->number, count);
@@ -15578,9 +15578,9 @@ _initialize_breakpoint (void)
 
   initialize_breakpoint_ops ();
 
-  observer_attach_solib_unloaded (disable_breakpoints_in_unloaded_shlib);
-  observer_attach_free_objfile (disable_breakpoints_in_freed_objfile);
-  observer_attach_memory_changed (invalidate_bp_value_on_memory_change);
+  gdb::observers::solib_unloaded.attach (disable_breakpoints_in_unloaded_shlib);
+  gdb::observers::free_objfile.attach (disable_breakpoints_in_freed_objfile);
+  gdb::observers::memory_changed.attach (invalidate_bp_value_on_memory_change);
 
   breakpoint_objfile_key
     = register_objfile_data_with_cleanup (NULL, free_breakpoint_objfile_data);
@@ -16131,6 +16131,6 @@ agent-printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
 
   automatic_hardware_breakpoints = 1;
 
-  observer_attach_about_to_proceed (breakpoint_about_to_proceed);
-  observer_attach_thread_exit (remove_threaded_breakpoints);
+  gdb::observers::about_to_proceed.attach (breakpoint_about_to_proceed);
+  gdb::observers::thread_exit.attach (remove_threaded_breakpoints);
 }

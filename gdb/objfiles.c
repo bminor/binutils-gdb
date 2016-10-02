@@ -46,7 +46,7 @@
 #include "addrmap.h"
 #include "arch-utils.h"
 #include "exec.h"
-#include "observer.h"
+#include "observable.h"
 #include "complaints.h"
 #include "psymtab.h"
 #include "solist.h"
@@ -617,7 +617,7 @@ free_objfile_separate_debug (struct objfile *objfile)
 objfile::~objfile ()
 {
   /* First notify observers that this objfile is about to be freed.  */
-  observer_notify_free_objfile (this);
+  gdb::observers::free_objfile.notify (this);
 
   /* Free all separate debug objfiles.  */
   free_objfile_separate_debug (this);

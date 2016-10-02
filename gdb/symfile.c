@@ -46,7 +46,7 @@
 #include "hashtab.h"
 #include "readline/readline.h"
 #include "block.h"
-#include "observer.h"
+#include "observable.h"
 #include "exec.h"
 #include "parser-defs.h"
 #include "varobj.h"
@@ -1152,13 +1152,13 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 
   if (objfile->sf == NULL)
     {
-      observer_notify_new_objfile (objfile);
+      gdb::observers::new_objfile.notify (objfile);
       return objfile;	/* No symbols.  */
     }
 
   finish_new_objfile (objfile, add_flags);
 
-  observer_notify_new_objfile (objfile);
+  gdb::observers::new_objfile.notify (objfile);
 
   bfd_cache_close_all ();
   return (objfile);
@@ -2511,14 +2511,14 @@ reread_symbols (void)
       clear_symtab_users (0);
 
       /* clear_objfile_data for each objfile was called before freeing it and
-	 observer_notify_new_objfile (NULL) has been called by
+	 gdb::observers::new_objfile.notify (NULL) has been called by
 	 clear_symtab_users above.  Notify the new files now.  */
       for (auto iter : new_objfiles)
-	observer_notify_new_objfile (iter);
+	gdb::observers::new_objfile.notify (objfile);
 
       /* At least one objfile has changed, so we can consider that
          the executable we're debugging has changed too.  */
-      observer_notify_executable_changed ();
+      gdb::observers::executable_changed.notify ();
     }
 }
 
@@ -2755,7 +2755,7 @@ clear_symtab_users (symfile_add_flags add_flags)
   clear_displays ();
   clear_last_displayed_sal ();
   clear_pc_function_cache ();
-  observer_notify_new_objfile (NULL);
+  gdb::observers::new_objfile.notify (NULL);
 
   /* Clear globals which might have pointed into a removed objfile.
      FIXME: It's not clear which of these are supposed to persist
@@ -3761,7 +3761,7 @@ _initialize_symfile (void)
 {
   struct cmd_list_element *c;
 
-  observer_attach_free_objfile (symfile_free_objfile);
+  gdb::observers::free_objfile.attach (symfile_free_objfile);
 
 #define READNOW_READNEVER_HELP \
   "The '-readnow' option will cause GDB to read the entire symbol file\n\

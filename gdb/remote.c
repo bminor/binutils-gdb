@@ -36,7 +36,7 @@
 #include "remote-notif.h"
 #include "regcache.h"
 #include "value.h"
-#include "observer.h"
+#include "observable.h"
 #include "solib.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
@@ -3824,9 +3824,9 @@ print_one_stopped_thread (struct thread_info *thread)
       enum gdb_signal sig = ws->value.sig;
 
       if (signal_print_state (sig))
-	observer_notify_signal_received (sig);
+	gdb::observers::signal_received.notify (sig);
     }
-  observer_notify_normal_stop (NULL, 1);
+  gdb::observers::normal_stop.notify (NULL, 1);
 }
 
 /* Process all initial stop replies the remote side sent in response
@@ -13925,10 +13925,10 @@ _initialize_remote (void)
   add_target (&extended_remote_ops);
 
   /* Hook into new objfile notification.  */
-  observer_attach_new_objfile (remote_new_objfile);
+  gdb::observers::new_objfile.attach (remote_new_objfile);
   /* We're no longer interested in notification events of an inferior
      when it exits.  */
-  observer_attach_inferior_exit (discard_pending_stop_replies);
+  gdb::observers::inferior_exit.attach (discard_pending_stop_replies);
 
 #if 0
   init_remote_threadtests ();

@@ -44,7 +44,7 @@
 #include "remote.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
-#include "observer.h"
+#include "observable.h"
 
 #include "arch/arm.h"
 #include "arch/arm-get-next-pcs.h"
@@ -9547,7 +9547,7 @@ _initialize_arm_tdep (void)
     = register_objfile_data_with_cleanup (NULL, arm_objfile_data_free);
 
   /* Add ourselves to objfile event chain.  */
-  observer_attach_new_objfile (arm_exidx_new_objfile);
+  gdb::observers::new_objfile.attach (arm_exidx_new_objfile);
   arm_exidx_data_key
     = register_objfile_data_with_cleanup (NULL, arm_exidx_data_free);
 

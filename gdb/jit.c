@@ -30,7 +30,7 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "inferior.h"
-#include "observer.h"
+#include "observable.h"
 #include "objfiles.h"
 #include "regcache.h"
 #include "symfile.h"
@@ -1499,9 +1499,9 @@ _initialize_jit (void)
 			     show_jit_debug,
 			     &setdebuglist, &showdebuglist);
 
-  observer_attach_inferior_created (jit_inferior_created);
-  observer_attach_inferior_exit (jit_inferior_exit_hook);
-  observer_attach_breakpoint_deleted (jit_breakpoint_deleted);
+  gdb::observers::inferior_created.attach (jit_inferior_created);
+  gdb::observers::inferior_exit.attach (jit_inferior_exit_hook);
+  gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted);
 
   jit_objfile_data =
     register_objfile_data_with_cleanup (NULL, free_objfile_data);

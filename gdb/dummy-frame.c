@@ -26,7 +26,7 @@
 #include "frame-unwind.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbthread.h"
 #include "infcall.h"
 
@@ -424,5 +424,5 @@ _initialize_dummy_frame (void)
 	   _("Print the contents of the internal dummy-frame stack."),
 	   &maintenanceprintlist);
 
-  observer_attach_inferior_created (cleanup_dummy_frames);
+  gdb::observers::inferior_created.attach (cleanup_dummy_frames);
 }

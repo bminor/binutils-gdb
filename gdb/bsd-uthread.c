@@ -22,7 +22,7 @@
 #include "gdbthread.h"
 #include "inferior.h"
 #include "objfiles.h"
-#include "observer.h"
+#include "observable.h"
 #include "regcache.h"
 #include "solib.h"
 #include "solist.h"
@@ -554,7 +554,7 @@ _initialize_bsd_uthread (void)
 
   bsd_uthread_data = gdbarch_data_register_pre_init (bsd_uthread_init);
 
-  observer_attach_inferior_created (bsd_uthread_inferior_created);
-  observer_attach_solib_loaded (bsd_uthread_solib_loaded);
-  observer_attach_solib_unloaded (bsd_uthread_solib_unloaded);
+  gdb::observers::inferior_created.attach (bsd_uthread_inferior_created);
+  gdb::observers::solib_loaded.attach (bsd_uthread_solib_loaded);
+  gdb::observers::solib_unloaded.attach (bsd_uthread_solib_unloaded);
 }

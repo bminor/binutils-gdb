@@ -20,7 +20,7 @@
 #include "value.h"
 #include <ctype.h>
 #include "arch-utils.h"
-#include "observer.h"
+#include "observable.h"
 
 #include "ui-out.h"
 
@@ -511,20 +511,20 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	case var_filename:
 	case var_optional_filename:
 	case var_enum:
-	  observer_notify_command_param_changed (name, *(char **) c->var);
+	  gdb::observers::command_param_changed.notify (name, *(char **) c->var);
 	  break;
 	case var_boolean:
 	  {
 	    const char *opt = *(int *) c->var ? "on" : "off";
 
-	    observer_notify_command_param_changed (name, opt);
+	    gdb::observers::command_param_changed.notify (name, opt);
 	  }
 	  break;
 	case var_auto_boolean:
 	  {
 	    const char *s = auto_boolean_enums[*(enum auto_boolean *) c->var];
 
-	    observer_notify_command_param_changed (name, s);
+	    gdb::observers::command_param_changed.notify (name, s);
 	  }
 	  break;
 	case var_uinteger:
@@ -533,7 +533,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	    char s[64];
 
 	    xsnprintf (s, sizeof s, "%u", *(unsigned int *) c->var);
-	    observer_notify_command_param_changed (name, s);
+	    gdb::observers::command_param_changed.notify (name, s);
 	  }
 	  break;
 	case var_integer:
@@ -543,7 +543,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	    char s[64];
 
 	    xsnprintf (s, sizeof s, "%d", *(int *) c->var);
-	    observer_notify_command_param_changed (name, s);
+	    gdb::observers::command_param_changed.notify (name, s);
 	  }
 	  break;
 	}

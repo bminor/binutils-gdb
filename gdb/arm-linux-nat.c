@@ -24,7 +24,7 @@
 #include "linux-nat.h"
 #include "target-descriptions.h"
 #include "auxv.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbthread.h"
 
 #include "arm-tdep.h"

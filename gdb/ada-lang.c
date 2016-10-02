@@ -48,7 +48,7 @@
 #include "annotate.h"
 #include "valprint.h"
 #include "source.h"
-#include "observer.h"
+#include "observable.h"
 #include "vec.h"
 #include "stack.h"
 #include "gdb_vecs.h"
@@ -14720,9 +14720,9 @@ DWARF attribute."),
      NULL, xcalloc, xfree);
 
   /* The ada-lang observers.  */
-  observer_attach_new_objfile (ada_new_objfile_observer);
-  observer_attach_free_objfile (ada_free_objfile_observer);
-  observer_attach_inferior_exit (ada_inferior_exit);
+  gdb::observers::new_objfile.attach (ada_new_objfile_observer);
+  gdb::observers::free_objfile.attach (ada_free_objfile_observer);
+  gdb::observers::inferior_exit.attach (ada_inferior_exit);
 
   /* Setup various context-specific data.  */
   ada_inferior_data

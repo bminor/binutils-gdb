@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbcmd.h"
 #include "target.h"
 #include "ada-lang.h"
@@ -1444,8 +1444,8 @@ _initialize_tasks (void)
   ada_tasks_inferior_data_handle = register_inferior_data ();
 
   /* Attach various observers.  */
-  observer_attach_normal_stop (ada_tasks_normal_stop_observer);
-  observer_attach_new_objfile (ada_tasks_new_objfile_observer);
+  gdb::observers::normal_stop.attach (ada_tasks_normal_stop_observer);
+  gdb::observers::new_objfile.attach (ada_tasks_new_objfile_observer);
 
   /* Some new commands provided by this module.  */
   add_info ("tasks", info_tasks_command,

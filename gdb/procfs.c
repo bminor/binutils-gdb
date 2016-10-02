@@ -45,7 +45,7 @@
 #include "inflow.h"
 #include "auxv.h"
 #include "procfs.h"
-#include "observer.h"
+#include "observable.h"
 #include "common/scoped_fd.h"
 
 /* This module provides the interface between GDB and the
@@ -3751,7 +3751,7 @@ proc_untrace_sysexit_cmd (const char *args, int from_tty)
 void
 _initialize_procfs (void)
 {
-  observer_attach_inferior_created (procfs_inferior_created);
+  gdb::observers::inferior_created.attach (procfs_inferior_created);
 
   add_com ("proc-trace-entry", no_class, proc_trace_sysentry_cmd,
 	   _("Give a trace of entries into the syscall."));

@@ -24,7 +24,7 @@
 #include "inferior.h"
 #include "valprint.h"
 #include "gdbcore.h"
-#include "observer.h"
+#include "observable.h"
 #include "filestuff.h"
 #include "objfiles.h"
 
@@ -579,7 +579,7 @@ This is information provided by the operating system at program startup."));
     = register_inferior_data_with_cleanup (NULL, auxv_inferior_data_cleanup);
 
   /* Observers used to invalidate the auxv cache when needed.  */
-  observer_attach_inferior_exit (invalidate_auxv_cache_inf);
-  observer_attach_inferior_appeared (invalidate_auxv_cache_inf);
-  observer_attach_executable_changed (invalidate_auxv_cache);
+  gdb::observers::inferior_exit.attach (invalidate_auxv_cache_inf);
+  gdb::observers::inferior_appeared.attach (invalidate_auxv_cache_inf);
+  gdb::observers::executable_changed.attach (invalidate_auxv_cache);
 }

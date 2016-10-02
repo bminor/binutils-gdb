@@ -33,7 +33,7 @@
 #include "event-loop.h"
 #include "inf-loop.h"
 #include "gdb_bfd.h"
-#include "observer.h"
+#include "observable.h"
 #include "infrun.h"
 #include "common/gdb_unlinker.h"
 #include "common/byte-vector.h"
@@ -851,7 +851,7 @@ record_full_open (const char *name, int from_tty)
 
   record_full_init_record_breakpoints ();
 
-  observer_notify_record_changed (current_inferior (),  1, "full", NULL);
+  gdb::observers::record_changed.notify (current_inferior (),  1, "full", NULL);
 }
 
 /* "to_close" target method.  Close the process record target.  */

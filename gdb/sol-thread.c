@@ -63,7 +63,7 @@
 #include "regcache.h"
 #include "solib.h"
 #include "symfile.h"
-#include "observer.h"
+#include "observable.h"
 #include "procfs.h"
 #include "symtab.h"
 #include "minsyms.h"
@@ -1229,7 +1229,7 @@ _initialize_sol_thread (void)
 	   _("Show info on Solaris user threads."), &maintenanceinfolist);
 
   /* Hook into new_objfile notification.  */
-  observer_attach_new_objfile (sol_thread_new_objfile);
+  gdb::observers::new_objfile.attach (sol_thread_new_objfile);
   return;
 
  die:

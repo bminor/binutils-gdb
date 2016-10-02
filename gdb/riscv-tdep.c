@@ -53,7 +53,7 @@
 #include "common-defs.h"
 #include "opcode/riscv-opc.h"
 #include "cli/cli-decode.h"
-#include "observer.h"
+#include "observable.h"
 
 /* The stack must be 16-byte aligned.  */
 #define SP_ALIGNMENT 16
@@ -2641,8 +2641,8 @@ _initialize_riscv_tdep (void)
     = register_inferior_data_with_cleanup (NULL, riscv_inferior_data_cleanup);
 
   /* Observers used to invalidate the inferior data when needed.  */
-  observer_attach_inferior_exit (riscv_invalidate_inferior_data);
-  observer_attach_inferior_appeared (riscv_invalidate_inferior_data);
+  gdb::observers::inferior_exit.attach (riscv_invalidate_inferior_data);
+  gdb::observers::inferior_appeared.attach (riscv_invalidate_inferior_data);
 
   /* Add root prefix command for all "set debug riscv" and "show debug
      riscv" commands.  */

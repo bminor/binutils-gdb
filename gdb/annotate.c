@@ -22,7 +22,7 @@
 #include "target.h"
 #include "gdbtypes.h"
 #include "breakpoint.h"
-#include "observer.h"
+#include "observable.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "top.h"
@@ -592,7 +592,7 @@ breakpoint_changed (struct breakpoint *b)
 void
 _initialize_annotate (void)
 {
-  observer_attach_breakpoint_created (breakpoint_changed);
-  observer_attach_breakpoint_deleted (breakpoint_changed);
-  observer_attach_breakpoint_modified (breakpoint_changed);
+  gdb::observers::breakpoint_created.attach (breakpoint_changed);
+  gdb::observers::breakpoint_deleted.attach (breakpoint_changed);
+  gdb::observers::breakpoint_modified.attach (breakpoint_changed);
 }

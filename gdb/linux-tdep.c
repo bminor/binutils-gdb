@@ -32,7 +32,7 @@
 #include "cli/cli-utils.h"
 #include "arch-utils.h"
 #include "gdb_obstack.h"
-#include "observer.h"
+#include "observable.h"
 #include "objfiles.h"
 #include "infcall.h"
 #include "gdbcmd.h"
@@ -2513,8 +2513,8 @@ _initialize_linux_tdep (void)
   linux_inferior_data
     = register_inferior_data_with_cleanup (NULL, linux_inferior_data_cleanup);
   /* Observers used to invalidate the cache when needed.  */
-  observer_attach_inferior_exit (invalidate_linux_cache_inf);
-  observer_attach_inferior_appeared (invalidate_linux_cache_inf);
+  gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf);
+  gdb::observers::inferior_appeared.attach (invalidate_linux_cache_inf);
 
   add_setshow_boolean_cmd ("use-coredump-filter", class_files,
 			   &use_coredump_filter, _("\

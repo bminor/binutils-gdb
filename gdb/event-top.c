@@ -32,7 +32,7 @@
 #include "cli/cli-script.h"     /* for reset_command_nest_depth */
 #include "main.h"
 #include "gdbthread.h"
-#include "observer.h"
+#include "observable.h"
 #include "continuations.h"
 #include "gdbcmd.h"		/* for dont_repeat() */
 #include "annotate.h"
@@ -428,7 +428,7 @@ top_level_prompt (void)
 
   /* Give observers a chance of changing the prompt.  E.g., the python
      `gdb.prompt_hook' is installed as an observer.  */
-  observer_notify_before_prompt (get_prompt ());
+  gdb::observers::before_prompt.notify (get_prompt ());
 
   prompt = get_prompt ();
 

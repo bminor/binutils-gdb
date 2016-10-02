@@ -658,7 +658,7 @@ enum block_enum
   FIRST_LOCAL_BLOCK = 2
 };
 
-/* User selection used in observer.h and multiple print functions.  */
+/* User selection used in observable.h and multiple print functions.  */
 
 enum user_selected_what_flag
   {

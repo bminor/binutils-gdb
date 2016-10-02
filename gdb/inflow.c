@@ -24,7 +24,7 @@
 #include "terminal.h"
 #include "target.h"
 #include "gdbthread.h"
-#include "observer.h"
+#include "observable.h"
 #include <signal.h>
 #include <fcntl.h>
 #include "gdb_select.h"
@@ -989,7 +989,7 @@ _initialize_inflow (void)
   /* OK, figure out whether we have job control.  */
   have_job_control ();
 
-  observer_attach_inferior_exit (inflow_inferior_exit);
+  gdb::observers::inferior_exit.attach (inflow_inferior_exit);
 
   inflow_inferior_data
     = register_inferior_data_with_cleanup (NULL, inflow_inferior_data_cleanup);

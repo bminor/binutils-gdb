@@ -36,7 +36,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include "ui-out.h"
-#include "observer.h"
+#include "observable.h"
 #include "annotate.h"
 #include "cli/cli-decode.h"
 #include "gdb_regex.h"
@@ -207,7 +207,7 @@ set_thread_exited (thread_info *tp, int silent)
 
   if (tp->state != THREAD_EXITED)
     {
-      observer_notify_thread_exit (tp, silent);
+      gdb::observers::thread_exit.notify (tp, silent);
 
       /* Tag it as exited.  */
       tp->state = THREAD_EXITED;
@@ -299,7 +299,7 @@ add_thread_silent (ptid_t ptid)
 	  tp->state = THREAD_STOPPED;
 	  switch_to_thread (ptid);
 
-	  observer_notify_new_thread (tp);
+	  gdb::observers::new_thread.notify (tp);
 
 	  /* All done.  */
 	  return tp;
@@ -310,7 +310,7 @@ add_thread_silent (ptid_t ptid)
     }
 
   tp = new_thread (inf, ptid);
-  observer_notify_new_thread (tp);
+  gdb::observers::new_thread.notify (tp);
 
   return tp;
 }
@@ -821,7 +821,7 @@ thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
   tp = find_thread_ptid (old_ptid);
   tp->ptid = new_ptid;
 
-  observer_notify_thread_ptid_changed (old_ptid, new_ptid);
+  gdb::observers::thread_ptid_changed.notify (old_ptid, new_ptid);
 }
 
 /* See gdbthread.h.  */
@@ -901,7 +901,7 @@ set_running (ptid_t ptid, int running)
 	any_started = 1;
     }
   if (any_started)
-    observer_notify_target_resumed (ptid);
+    gdb::observers::target_resumed.notify (ptid);
 }
 
 static int
@@ -1000,7 +1000,7 @@ set_stop_requested (ptid_t ptid, int stop)
   /* Call the stop requested observer so other components of GDB can
      react to this request.  */
   if (stop)
-    observer_notify_thread_stop_requested (ptid);
+    gdb::observers::thread_stop_requested.notify (ptid);
 }
 
 void
@@ -1037,7 +1037,7 @@ finish_thread_state (ptid_t ptid)
     }
 
   if (any_started)
-    observer_notify_target_resumed (ptid);
+    gdb::observers::target_resumed.notify (ptid);
 }
 
 void
@@ -1786,8 +1786,8 @@ thread_command (const char *tidstr, int from_tty)
 	}
       else
 	{
-	  observer_notify_user_selected_context_changed (USER_SELECTED_THREAD
-							 | USER_SELECTED_FRAME);
+	  gdb::observers::user_selected_context_changed.notify
+	    (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 	}
     }
 }

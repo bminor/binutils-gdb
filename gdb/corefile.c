@@ -30,7 +30,7 @@
 #include "dis-asm.h"
 #include <sys/stat.h>
 #include "completer.h"
-#include "observer.h"
+#include "observable.h"
 #include "cli/cli-utils.h"
 
 /* You can have any number of hooks for `exec_file_command' command to
@@ -408,7 +408,7 @@ write_memory_with_notification (CORE_ADDR memaddr, const bfd_byte *myaddr,
 				ssize_t len)
 {
   write_memory (memaddr, myaddr, len);
-  observer_notify_memory_changed (current_inferior (), memaddr, len, myaddr);
+  gdb::observers::memory_changed.notify (current_inferior (), memaddr, len, myaddr);
 }
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned

@@ -49,7 +49,7 @@
 #include "target.h"
 #include "value.h"
 #include "symfile.h"
-#include "observer.h"
+#include "observable.h"
 #include "auxv.h"
 #include "elf/common.h"
 #include "gdb_bfd.h"
@@ -219,5 +219,5 @@ _initialize_symfile_mem (void)
 
   /* Want to know of each new inferior so that its vsyscall info can
      be extracted.  */
-  observer_attach_inferior_created (add_vsyscall_page);
+  gdb::observers::inferior_created.attach (add_vsyscall_page);
 }

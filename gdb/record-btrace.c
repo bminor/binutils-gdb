@@ -26,7 +26,7 @@
 #include "target.h"
 #include "gdbcmd.h"
 #include "disasm.h"
-#include "observer.h"
+#include "observable.h"
 #include "cli/cli-utils.h"
 #include "source.h"
 #include "ui-out.h"
@@ -44,8 +44,9 @@
 /* The target_ops of record-btrace.  */
 static struct target_ops record_btrace_ops;
 
-/* A new thread observer enabling branch tracing for the new thread.  */
-static struct observer *record_btrace_thread_observer;
+/* Token associated with a new-thread observer enabling branch tracing
+   for the new thread.  */
+static const gdb::observers::token record_btrace_thread_observer_token;
 
 /* Memory access types used in set/show record btrace replay-memory-access.  */
 static const char replay_memory_access_read_only[] = "read-only";
@@ -166,8 +167,8 @@ record_btrace_auto_enable (void)
 {
   DEBUG ("attach thread observer");
 
-  record_btrace_thread_observer
-    = observer_attach_new_thread (record_btrace_enable_warn);
+  gdb::observers::new_thread.attach (record_btrace_enable_warn,
+				     record_btrace_thread_observer_token);
 }
 
 /* Disable automatic tracing of new threads.  */
@@ -175,14 +176,9 @@ record_btrace_auto_enable (void)
 static void
 record_btrace_auto_disable (void)
 {
-  /* The observer may have been detached, already.  */
-  if (record_btrace_thread_observer == NULL)
-    return;
-
   DEBUG ("detach thread observer");
 
-  observer_detach_new_thread (record_btrace_thread_observer);
-  record_btrace_thread_observer = NULL;
+  gdb::observers::new_thread.detach (record_btrace_thread_observer_token);
 }
 
 /* The record-btrace async event handler function.  */
@@ -210,7 +206,7 @@ record_btrace_push_target (void)
   record_btrace_generating_corefile = 0;
 
   format = btrace_format_short_string (record_btrace_conf.format);
-  observer_notify_record_changed (current_inferior (), 1, "btrace", format);
+  gdb::observers::record_changed.notify (current_inferior (), 1, "btrace", format);
 }
 
 /* Disable btrace on a set of threads on scope exit.  */
@@ -257,8 +253,6 @@ record_btrace_open (const char *args, int from_tty)
 
   if (!target_has_execution)
     error (_("The program is not being run."));
-
-  gdb_assert (record_btrace_thread_observer == NULL);
 
   ALL_NON_EXITED_THREADS (tp)
     if (args == NULL || *args == 0 || number_is_in_list (args, tp->global_num))

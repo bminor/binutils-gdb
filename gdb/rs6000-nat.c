@@ -33,7 +33,7 @@
 #include "rs6000-tdep.h"
 #include "rs6000-aix-tdep.h"
 #include "exec.h"
-#include "observer.h"
+#include "observable.h"
 #include "xcoffread.h"
 
 #include <sys/ptrace.h>

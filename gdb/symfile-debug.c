@@ -28,7 +28,7 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
-#include "observer.h"
+#include "observable.h"
 #include "source.h"
 #include "symtab.h"
 #include "symfile.h"

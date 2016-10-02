@@ -27,7 +27,7 @@
 #include "mi/mi-common.h"
 #include "valprint.h"
 #include "arch-utils.h"
-#include "observer.h"
+#include "observable.h"
 #include "xml-syscall.h"
 
 /* An instance of this type is used to represent a syscall catchpoint.
@@ -632,7 +632,7 @@ _initialize_break_catch_syscall (void)
 {
   initialize_syscall_catchpoint_ops ();
 
-  observer_attach_inferior_exit (clear_syscall_counts);
+  gdb::observers::inferior_exit.attach (clear_syscall_counts);
   catch_syscall_inferior_data
     = register_inferior_data_with_cleanup (NULL,
 					   catch_syscall_inferior_data_cleanup);

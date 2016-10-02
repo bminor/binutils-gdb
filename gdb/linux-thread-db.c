@@ -35,7 +35,7 @@
 #include "solib.h"
 #include "solib-svr4.h"
 #include "gdbcore.h"
-#include "observer.h"
+#include "observable.h"
 #include "linux-nat.h"
 #include "nat/linux-procfs.h"
 #include "nat/linux-ptrace.h"
@@ -960,7 +960,7 @@ thread_db_new_objfile (struct objfile *objfile)
   if (objfile != NULL
       /* libpthread with separate debug info has its debug info file already
 	 loaded (and notified without successful thread_db initialization)
-	 the time observer_notify_new_objfile is called for the library itself.
+	 the time gdb::observers::new_objfile.notify is called for the library itself.
 	 Static executables have their separate debug info loaded already
 	 before the inferior has started.  */
       && objfile->separate_debug_objfile_backlink == NULL
@@ -1715,10 +1715,10 @@ Usage: info auto-load libthread-db"),
 	   auto_load_info_cmdlist_get ());
 
   /* Add ourselves to objfile event chain.  */
-  observer_attach_new_objfile (thread_db_new_objfile);
+  gdb::observers::new_objfile.attach (thread_db_new_objfile);
 
   /* Add ourselves to inferior_created event chain.
      This is needed to handle debugging statically linked programs where
      the new_objfile observer won't get called for libpthread.  */
-  observer_attach_inferior_created (thread_db_inferior_created);
+  gdb::observers::inferior_created.attach (thread_db_inferior_created);
 }

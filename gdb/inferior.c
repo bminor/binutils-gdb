@@ -26,7 +26,7 @@
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "ui-out.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbcore.h"
 #include "symfile.h"
 #include "environ.h"
@@ -109,7 +109,7 @@ add_inferior_silent (int pid)
       last->next = inf;
     }
 
-  observer_notify_inferior_added (inf);
+  gdb::observers::inferior_added.notify (inf);
 
   if (pid != 0)
     inferior_appeared (inf, pid);
@@ -176,7 +176,7 @@ delete_inferior (struct inferior *todel)
   else
     inferior_list = inf->next;
 
-  observer_notify_inferior_removed (inf);
+  gdb::observers::inferior_removed.notify (inf);
 
   /* If this program space is rendered useless, remove it. */
   if (program_space_empty_p (inf->pspace))
@@ -206,7 +206,7 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
 
   iterate_over_threads (delete_thread_of_inferior, &arg);
 
-  observer_notify_inferior_exit (inf);
+  gdb::observers::inferior_exit.notify (inf);
 
   inf->pid = 0;
   inf->fake_pid_p = 0;
@@ -284,7 +284,7 @@ inferior_appeared (struct inferior *inf, int pid)
   inf->has_exit_code = 0;
   inf->exit_code = 0;
 
-  observer_notify_inferior_appeared (inf);
+  gdb::observers::inferior_appeared.notify (inf);
 }
 
 void
@@ -713,7 +713,7 @@ inferior_command (const char *args, int from_tty)
 	  switch_to_thread (tp->ptid);
 	}
 
-      observer_notify_user_selected_context_changed
+      gdb::observers::user_selected_context_changed.notify
 	(USER_SELECTED_INFERIOR
 	 | USER_SELECTED_THREAD
 	 | USER_SELECTED_FRAME);
@@ -724,7 +724,8 @@ inferior_command (const char *args, int from_tty)
       switch_to_thread (null_ptid);
       set_current_program_space (inf->pspace);
 
-      observer_notify_user_selected_context_changed (USER_SELECTED_INFERIOR);
+      gdb::observers::user_selected_context_changed.notify
+	(USER_SELECTED_INFERIOR);
     }
 }
 

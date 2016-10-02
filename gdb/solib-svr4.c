@@ -33,7 +33,7 @@
 #include "infrun.h"
 #include "regcache.h"
 #include "gdbthread.h"
-#include "observer.h"
+#include "observable.h"
 
 #include "solist.h"
 #include "solib.h"

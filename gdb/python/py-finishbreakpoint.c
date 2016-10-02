@@ -26,7 +26,7 @@
 #include "gdbthread.h"
 #include "arch-utils.h"
 #include "language.h"
-#include "observer.h"
+#include "observable.h"
 #include "inferior.h"
 #include "block.h"
 #include "location.h"
@@ -416,8 +416,8 @@ gdbpy_initialize_finishbreakpoints (void)
 			      (PyObject *) &finish_breakpoint_object_type) < 0)
     return -1;
 
-  observer_attach_normal_stop (bpfinishpy_handle_stop);
-  observer_attach_inferior_exit (bpfinishpy_handle_exit);
+  gdb::observers::normal_stop.attach (bpfinishpy_handle_stop);
+  gdb::observers::inferior_exit.attach (bpfinishpy_handle_exit);
 
   return 0;
 }

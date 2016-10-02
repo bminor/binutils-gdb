@@ -26,7 +26,7 @@
 #include "top.h"		/* for "execute_command" */
 #include "event-top.h"
 #include "infrun.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbthread.h"
 #include "thread-fsm.h"
 
@@ -461,14 +461,14 @@ _initialize_cli_interp (void)
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
 
   /* If changing this, remember to update tui-interp.c as well.  */
-  observer_attach_normal_stop (cli_on_normal_stop);
-  observer_attach_end_stepping_range (cli_on_end_stepping_range);
-  observer_attach_signal_received (cli_on_signal_received);
-  observer_attach_signal_exited (cli_on_signal_exited);
-  observer_attach_exited (cli_on_exited);
-  observer_attach_no_history (cli_on_no_history);
-  observer_attach_sync_execution_done (cli_on_sync_execution_done);
-  observer_attach_command_error (cli_on_command_error);
-  observer_attach_user_selected_context_changed
+  gdb::observers::normal_stop.attach (cli_on_normal_stop);
+  gdb::observers::end_stepping_range.attach (cli_on_end_stepping_range);
+  gdb::observers::signal_received.attach (cli_on_signal_received);
+  gdb::observers::signal_exited.attach (cli_on_signal_exited);
+  gdb::observers::exited.attach (cli_on_exited);
+  gdb::observers::no_history.attach (cli_on_no_history);
+  gdb::observers::sync_execution_done.attach (cli_on_sync_execution_done);
+  gdb::observers::command_error.attach (cli_on_command_error);
+  gdb::observers::user_selected_context_changed.attach
     (cli_on_user_selected_context_changed);
 }

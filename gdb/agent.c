@@ -51,7 +51,7 @@ set_can_use_agent (const char *args, int from_tty, struct cmd_list_element *c)
     can_use_agent = can_use_agent_off;
 }
 
-#include "observer.h"
+#include "observable.h"
 #include "objfiles.h"
 
 static void
@@ -66,7 +66,7 @@ agent_new_objfile (struct objfile *objfile)
 void
 _initialize_agent (void)
 {
-  observer_attach_new_objfile (agent_new_objfile);
+  gdb::observers::new_objfile.attach (agent_new_objfile);
 
   add_setshow_enum_cmd ("agent", class_run,
 			can_use_agent_enum,

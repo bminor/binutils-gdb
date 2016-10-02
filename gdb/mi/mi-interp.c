@@ -30,7 +30,7 @@
 #include "mi-out.h"
 #include "mi-console.h"
 #include "mi-common.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbthread.h"
 #include "solist.h"
 #include "objfiles.h"
@@ -1353,33 +1353,33 @@ _initialize_mi_interp (void)
   interp_factory_register (INTERP_MI3, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  observer_attach_signal_received (mi_on_signal_received);
-  observer_attach_end_stepping_range (mi_on_end_stepping_range);
-  observer_attach_signal_exited (mi_on_signal_exited);
-  observer_attach_exited (mi_on_exited);
-  observer_attach_no_history (mi_on_no_history);
-  observer_attach_new_thread (mi_new_thread);
-  observer_attach_thread_exit (mi_thread_exit);
-  observer_attach_inferior_added (mi_inferior_added);
-  observer_attach_inferior_appeared (mi_inferior_appeared);
-  observer_attach_inferior_exit (mi_inferior_exit);
-  observer_attach_inferior_removed (mi_inferior_removed);
-  observer_attach_record_changed (mi_record_changed);
-  observer_attach_normal_stop (mi_on_normal_stop);
-  observer_attach_target_resumed (mi_on_resume);
-  observer_attach_solib_loaded (mi_solib_loaded);
-  observer_attach_solib_unloaded (mi_solib_unloaded);
-  observer_attach_about_to_proceed (mi_about_to_proceed);
-  observer_attach_traceframe_changed (mi_traceframe_changed);
-  observer_attach_tsv_created (mi_tsv_created);
-  observer_attach_tsv_deleted (mi_tsv_deleted);
-  observer_attach_tsv_modified (mi_tsv_modified);
-  observer_attach_breakpoint_created (mi_breakpoint_created);
-  observer_attach_breakpoint_deleted (mi_breakpoint_deleted);
-  observer_attach_breakpoint_modified (mi_breakpoint_modified);
-  observer_attach_command_param_changed (mi_command_param_changed);
-  observer_attach_memory_changed (mi_memory_changed);
-  observer_attach_sync_execution_done (mi_on_sync_execution_done);
-  observer_attach_user_selected_context_changed
+  gdb::observers::signal_received.attach (mi_on_signal_received);
+  gdb::observers::end_stepping_range.attach (mi_on_end_stepping_range);
+  gdb::observers::signal_exited.attach (mi_on_signal_exited);
+  gdb::observers::exited.attach (mi_on_exited);
+  gdb::observers::no_history.attach (mi_on_no_history);
+  gdb::observers::new_thread.attach (mi_new_thread);
+  gdb::observers::thread_exit.attach (mi_thread_exit);
+  gdb::observers::inferior_added.attach (mi_inferior_added);
+  gdb::observers::inferior_appeared.attach (mi_inferior_appeared);
+  gdb::observers::inferior_exit.attach (mi_inferior_exit);
+  gdb::observers::inferior_removed.attach (mi_inferior_removed);
+  gdb::observers::record_changed.attach (mi_record_changed);
+  gdb::observers::normal_stop.attach (mi_on_normal_stop);
+  gdb::observers::target_resumed.attach (mi_on_resume);
+  gdb::observers::solib_loaded.attach (mi_solib_loaded);
+  gdb::observers::solib_unloaded.attach (mi_solib_unloaded);
+  gdb::observers::about_to_proceed.attach (mi_about_to_proceed);
+  gdb::observers::traceframe_changed.attach (mi_traceframe_changed);
+  gdb::observers::tsv_created.attach (mi_tsv_created);
+  gdb::observers::tsv_deleted.attach (mi_tsv_deleted);
+  gdb::observers::tsv_modified.attach (mi_tsv_modified);
+  gdb::observers::breakpoint_created.attach (mi_breakpoint_created);
+  gdb::observers::breakpoint_deleted.attach (mi_breakpoint_deleted);
+  gdb::observers::breakpoint_modified.attach (mi_breakpoint_modified);
+  gdb::observers::command_param_changed.attach (mi_command_param_changed);
+  gdb::observers::memory_changed.attach (mi_memory_changed);
+  gdb::observers::sync_execution_done.attach (mi_on_sync_execution_done);
+  gdb::observers::user_selected_context_changed.attach
     (mi_user_selected_context_changed);
 }

@@ -51,7 +51,7 @@
 #include "safe-ctype.h"
 #include "symfile.h"
 #include "extension.h"
-#include "observer.h"
+#include "observable.h"
 #include "common/def-vector.h"
 
 /* The possible choices of "set print frame-arguments", and the value
@@ -2277,7 +2277,7 @@ select_frame_command (const char *level_exp, int from_tty)
 
   select_frame (parse_frame_specification (level_exp, NULL));
   if (get_selected_frame_if_set () != prev_frame)
-    observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
+    gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
 }
 
 /* The "frame" command.  With no argument, print the selected frame
@@ -2291,7 +2291,7 @@ frame_command (const char *level_exp, int from_tty)
 
   select_frame (parse_frame_specification (level_exp, NULL));
   if (get_selected_frame_if_set () != prev_frame)
-    observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
+    gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
   else
     print_selected_thread_frame (current_uiout, USER_SELECTED_FRAME);
 }
@@ -2324,7 +2324,7 @@ static void
 up_command (const char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
+  gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
 }
 
 /* Select the frame down one or COUNT_EXP stack levels from the previously
@@ -2363,7 +2363,7 @@ static void
 down_command (const char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
+  gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
 }
 
 void

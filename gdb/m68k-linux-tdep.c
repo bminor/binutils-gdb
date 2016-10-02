@@ -32,7 +32,7 @@
 #include "glibc-tdep.h"
 #include "solib-svr4.h"
 #include "auxv.h"
-#include "observer.h"
+#include "observable.h"
 #include "elf/common.h"
 #include "linux-tdep.h"
 #include "regset.h"
@@ -426,5 +426,5 @@ _initialize_m68k_linux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_m68k, 0, GDB_OSABI_LINUX,
 			  m68k_linux_init_abi);
-  observer_attach_inferior_created (m68k_linux_inferior_created);
+  gdb::observers::inferior_created.attach (m68k_linux_inferior_created);
 }

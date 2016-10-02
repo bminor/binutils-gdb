@@ -36,7 +36,7 @@
 #include "completer.h"
 #include "block.h"
 #include "dictionary.h"
-#include "observer.h"
+#include "observable.h"
 #include "user-regs.h"
 #include "valprint.h"
 #include "gdbcore.h"
@@ -315,7 +315,7 @@ delete_trace_state_variable (const char *name)
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     if (strcmp (name, tsv->name) == 0)
       {
-	observer_notify_tsv_deleted (tsv);
+	gdb::observers::tsv_deleted.notify (tsv);
 
 	xfree ((void *)tsv->name);
 	VEC_unordered_remove (tsv_s, tvariables, ix);
@@ -390,7 +390,7 @@ trace_variable_command (const char *args, int from_tty)
       if (tsv->initial_value != initval)
 	{
 	  tsv->initial_value = initval;
-	  observer_notify_tsv_modified (tsv);
+	  gdb::observers::tsv_modified.notify (tsv);
 	}
       printf_filtered (_("Trace state variable $%s "
 			 "now has initial value %s.\n"),
@@ -402,7 +402,7 @@ trace_variable_command (const char *args, int from_tty)
   tsv = create_trace_state_variable (name.c_str ());
   tsv->initial_value = initval;
 
-  observer_notify_tsv_created (tsv);
+  gdb::observers::tsv_created.notify (tsv);
 
   printf_filtered (_("Trace state variable $%s "
 		     "created, with initial value %s.\n"),
@@ -417,7 +417,7 @@ delete_trace_variable_command (const char *args, int from_tty)
       if (query (_("Delete all trace state variables? ")))
 	VEC_free (tsv_s, tvariables);
       dont_repeat ();
-      observer_notify_tsv_deleted (NULL);
+      gdb::observers::tsv_deleted.notify (NULL);
       return;
     }
 
@@ -1659,7 +1659,7 @@ start_tracing (const char *notes)
 					  loc->gdbarch);
 
       if (bp_location_downloaded)
-	observer_notify_breakpoint_modified (b);
+	gdb::observers::breakpoint_modified.notify (b);
     }
   VEC_free (breakpoint_p, tp_vec);
 
@@ -2175,7 +2175,7 @@ tfind_1 (enum trace_find_type type, int num,
   set_tracepoint_num (tp ? tp->number : target_tracept);
 
   if (target_frameno != get_traceframe_number ())
-    observer_notify_traceframe_changed (target_frameno, tracepoint_number);
+    gdb::observers::traceframe_changed.notify (target_frameno, tracepoint_number);
 
   set_current_traceframe (target_frameno);
 
@@ -3240,7 +3240,7 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
   /* Notify 'breakpoint-modified' observer that at least one of B's
      locations was changed.  */
   for (ix = 0; VEC_iterate (breakpoint_p, modified_tp, ix, b); ix++)
-    observer_notify_breakpoint_modified (b);
+    gdb::observers::breakpoint_modified.notify (b);
 
   VEC_free (breakpoint_p, modified_tp);
   free_uploaded_tps (uploaded_tps);
@@ -3287,7 +3287,7 @@ create_tsv_from_upload (struct uploaded_tsv *utsv)
   tsv->initial_value = utsv->initial_value;
   tsv->builtin = utsv->builtin;
 
-  observer_notify_tsv_created (tsv);
+  gdb::observers::tsv_created.notify (tsv);
 
   return tsv;
 }

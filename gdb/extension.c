@@ -28,7 +28,7 @@
 #include "event-top.h"
 #include "extension.h"
 #include "extension-priv.h"
-#include "observer.h"
+#include "observable.h"
 #include "cli/cli-script.h"
 #include "python/python.h"
 #include "guile/guile.h"
@@ -945,5 +945,5 @@ ext_lang_before_prompt (const char *current_gdb_prompt)
 void
 _initialize_extension (void)
 {
-  observer_attach_before_prompt (ext_lang_before_prompt);
+  gdb::observers::before_prompt.attach (ext_lang_before_prompt);
 }
