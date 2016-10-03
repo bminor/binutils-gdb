@@ -769,6 +769,7 @@ struct mi_suppress_notification mi_suppress_notification =
     0,
     0,
     0,
+    0,
   };
 
 /* Emit notification on changing a traceframe.  */
@@ -1334,6 +1335,64 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
     }
 }
 
+/* Emit an event when the selection context (inferior, thread, frame)
+   changed.  */
+
+static void
+mi_user_selected_context_changed (user_selected_what selection)
+{
+  struct switch_thru_all_uis state;
+  struct thread_info *tp;
+
+  /* Don't send an event if we're responding to an MI command.  */
+  if (mi_suppress_notification.user_selected_context)
+    return;
+
+  tp = find_thread_ptid (inferior_ptid);
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+      struct ui_out *mi_uiout;
+      struct cleanup *old_chain;
+
+      if (mi == NULL)
+	continue;
+
+      mi_uiout = interp_ui_out (top_level_interpreter ());
+
+      ui_out_redirect (mi_uiout, mi->event_channel);
+
+      old_chain = make_cleanup_ui_out_redirect_pop (mi_uiout);
+
+      make_cleanup_restore_target_terminal ();
+      target_terminal_ours_for_output ();
+
+      if (selection & USER_SELECTED_INFERIOR)
+	print_selected_inferior (mi->cli_uiout);
+
+      if (tp != NULL
+	  && (selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME)))
+	{
+	  print_selected_thread_frame (mi->cli_uiout, selection);
+
+	  fprintf_unfiltered (mi->event_channel,
+			      "thread-selected,id=\"%d\"",
+			      tp->global_num);
+
+	  if (tp->state != THREAD_RUNNING)
+	    {
+	      if (has_stack_frames ())
+		print_stack_frame_to_uiout (mi_uiout, get_selected_frame (NULL),
+					    1, SRC_AND_LOC, 1);
+	    }
+	}
+
+      gdb_flush (mi->event_channel);
+      do_cleanups (old_chain);
+    }
+}
+
 static int
 report_initial_inferior (struct inferior *inf, void *closure)
 {
@@ -1466,4 +1525,6 @@ _initialize_mi_interp (void)
   observer_attach_command_param_changed (mi_command_param_changed);
   observer_attach_memory_changed (mi_memory_changed);
   observer_attach_sync_execution_done (mi_on_sync_execution_done);
+  observer_attach_user_selected_context_changed
+    (mi_user_selected_context_changed);
 }

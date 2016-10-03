@@ -1,3 +1,14 @@
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
+	* gdb.texinfo (Context management): Update mention of frame
+	change notifications.
+	(gdb/mi Async Records): Document frame field in
+	=thread-select event.
+	* observer.texi (GDB Observers): New user_selected_context_changed
+	observer.
+
 2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Input/Output): Mention possibility to unset

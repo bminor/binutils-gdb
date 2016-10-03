@@ -523,4 +523,7 @@ extern int number_of_inferiors (void);
 
 extern struct inferior *add_inferior_with_spaces (void);
 
+/* Print the current selected inferior.  */
+extern void print_selected_inferior (struct ui_out *uiout);
+
 #endif /* !defined (INFERIOR_H) */
