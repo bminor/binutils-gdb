@@ -2,6 +2,13 @@
 2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/20487
+	* gdb.mi/user-selected-context-sync.exp: New file.
+	* gdb.mi/user-selected-context-sync.c: New file.
+
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
 	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Adapt
 	=thread-select-event check.
 
