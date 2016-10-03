@@ -53,6 +53,7 @@
 #include "linespec.h"
 #include "extension.h"
 #include "gdbcmd.h"
+#include "observer.h"
 
 #include <ctype.h>
 #include "gdb_sys_time.h"
@@ -564,16 +565,28 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
 {
   enum gdb_rc rc;
   char *mi_error_message;
+  ptid_t previous_ptid = inferior_ptid;
 
   if (argc != 1)
     error (_("-thread-select: USAGE: threadnum."));
 
   rc = gdb_thread_select (current_uiout, argv[0], &mi_error_message);
 
+  /* If thread switch did not succeed don't notify or print.  */
   if (rc == GDB_RC_FAIL)
     {
       make_cleanup (xfree, mi_error_message);
       error ("%s", mi_error_message);
+    }
+
+  print_selected_thread_frame (current_uiout,
+			       USER_SELECTED_THREAD | USER_SELECTED_FRAME);
+
+  /* Notify if the thread has effectively changed.  */
+  if (!ptid_equal (inferior_ptid, previous_ptid))
+    {
+      observer_notify_user_selected_context_changed (USER_SELECTED_THREAD
+						     | USER_SELECTED_FRAME);
     }
 }
 
@@ -2097,6 +2110,34 @@ mi_print_exception (const char *token, struct gdb_exception exception)
   fputs_unfiltered ("\n", mi->raw_stdout);
 }
 
+/* Determine whether the parsed command already notifies the
+   user_selected_context_changed observer.  */
+
+static int
+command_notifies_uscc_observer (struct mi_parse *command)
+{
+  if (command->op == CLI_COMMAND)
+    {
+      /* CLI commands "thread" and "inferior" already send it.  */
+      return (strncmp (command->command, "thread ", 7) == 0
+	      || strncmp (command->command, "inferior ", 9) == 0);
+    }
+  else /* MI_COMMAND */
+    {
+      if (strcmp (command->command, "interpreter-exec") == 0
+	  && command->argc > 1)
+	{
+	  /* "thread" and "inferior" again, but through -interpreter-exec.  */
+	  return (strncmp (command->argv[1], "thread ", 7) == 0
+		  || strncmp (command->argv[1], "inferior ", 9) == 0);
+	}
+
+      else
+	/* -thread-select already sends it.  */
+	return strcmp (command->command, "thread-select") == 0;
+    }
+}
+
 void
 mi_execute_command (const char *cmd, int from_tty)
 {
@@ -2124,8 +2165,15 @@ mi_execute_command (const char *cmd, int from_tty)
   if (command != NULL)
     {
       ptid_t previous_ptid = inferior_ptid;
+      struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
       command->token = token;
+
+      if (command->cmd != NULL && command->cmd->suppress_notification != NULL)
+        {
+          make_cleanup_restore_integer (command->cmd->suppress_notification);
+          *command->cmd->suppress_notification = 1;
+        }
 
       if (do_timings)
 	{
@@ -2161,10 +2209,9 @@ mi_execute_command (const char *cmd, int from_tty)
 	  /* Don't try report anything if there are no threads --
 	     the program is dead.  */
 	  && thread_count () != 0
-	  /* -thread-select explicitly changes thread. If frontend uses that
-	     internally, we don't want to emit =thread-selected, since
-	     =thread-selected is supposed to indicate user's intentions.  */
-	  && strcmp (command->command, "thread-select") != 0)
+	  /* If the command already reports the thread change, no need to do it
+	     again.  */
+	  && !command_notifies_uscc_observer (command))
 	{
 	  struct mi_interp *mi
 	    = (struct mi_interp *) top_level_interpreter_data ();
@@ -2185,22 +2232,14 @@ mi_execute_command (const char *cmd, int from_tty)
 
 	  if (report_change)
 	    {
-	      struct thread_info *ti = inferior_thread ();
-	      struct cleanup *old_chain;
-
-	      old_chain = make_cleanup_restore_target_terminal ();
-	      target_terminal_ours_for_output ();
-
-	      fprintf_unfiltered (mi->event_channel,
-				  "thread-selected,id=\"%d\"",
-				  ti->global_num);
-	      gdb_flush (mi->event_channel);
-
-	      do_cleanups (old_chain);
+		observer_notify_user_selected_context_changed
+		  (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 	    }
 	}
 
       mi_parse_free (command);
+
+      do_cleanups (cleanup);
     }
 }
 
@@ -2276,12 +2315,6 @@ mi_cmd_execute (struct mi_parse *parse)
     }
 
   current_context = parse;
-
-  if (parse->cmd->suppress_notification != NULL)
-    {
-      make_cleanup_restore_integer (parse->cmd->suppress_notification);
-      *parse->cmd->suppress_notification = 1;
-    }
 
   if (parse->cmd->argv_func != NULL)
     {

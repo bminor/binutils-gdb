@@ -218,6 +218,12 @@ struct cmd_list_element
 
     /* Link pointer for aliases on an alias list.  */
     struct cmd_list_element *alias_chain;
+
+    /* If non-null, the pointer to a field in 'struct
+       cli_suppress_notification', which will be set to true in cmd_func
+       when this command is being executed.  It will be set back to false
+       when the command has been executed.  */
+    int *suppress_notification;
   };
 
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,

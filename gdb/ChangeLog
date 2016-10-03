@@ -1,3 +1,61 @@
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
+	* NEWS: Mention new frame field of =thread-selected event.
+	* cli/cli-decode.c (add_cmd): Initialize c->suppress_notification.
+	(add_com_suppress_notification): New function definition.
+	(cmd_func): Set and restore the suppress_notification flag.
+	* cli/cli-deicode.h (struct cmd_list_element)
+	<suppress_notification>: New field.
+	* cli/cli-interp.c (cli_suppress_notification): New global variable.
+	(cli_on_user_selected_context_changed): New function.
+	(_initialize_cli_interp): Attach to user_selected_context_changed
+	observer.
+	* command.h (struct cli_suppress_notification): New structure.
+	(cli_suppress_notification): New global variable declaration.
+	(add_com_suppress_notification): New function declaration.
+	* defs.h (enum user_selected_what_flag): New enum.
+	(user_selected_what): New enum flag type.
+	* frame.h (print_stack_frame_to_uiout): New function declaration.
+	* gdbthread.h (print_selected_thread_frame): New function declaration.
+	* inferior.c (print_selected_inferior): New function definition.
+	(inferior_command): Remove printing of inferior/thread/frame switch
+	notifications, notify user_selected_context_changed observer.
+	* inferior.h (print_selected_inferior): New function declaration.
+	* mi/mi-cmds.c (struct mi_cmd): Add user_selected_context
+	suppression to stack-select-frame and thread-select commands.
+	* mi/mi-interp.c (struct mi_suppress_notification)
+	<user_selected_context>: Initialize.
+	(mi_user_selected_context_changed): New function definition.
+	(_initialize_mi_interp): Attach to user_selected_context_changed.
+	* mi/mi-main.c (mi_cmd_thread_select): Print thread selection reply.
+	(mi_execute_command): Handle notification suppression.  Notify
+	user_selected_context_changed observer on thread change instead of printing
+	event directly.  Don't send it if command already sends the notification.
+	(command_notifies_uscc_observer): New function.
+	(mi_cmd_execute): Don't handle notification suppression.
+	* mi/mi-main.h (struct mi_suppress_notification)
+	<user_selected_context>: New field.
+	* stack.c (print_stack_frame_to_uiout): New function definition.
+	(select_frame_command): Notify user_selected_context_changed
+	observer.
+	(frame_command): Call print_selected_thread_frame if there's no frame
+	change or notify user_selected_context_changed observer if there is.
+	(up_command): Notify user_selected_context_changed observer.
+	(down_command): Likewise.
+	(_initialize_stack): Suppress user_selected_context notification for
+	command select-frame.
+	* thread.c (thread_command): Notify
+	user_selected_context_changed if the thread has changed, print
+	thread info directly if it hasn't.
+	(do_captured_thread_select): Do not print thread switch event.
+	(print_selected_thread_frame): New function definition.
+	* tui/tui-interp.c (tui_on_user_selected_context_changed):
+	New function definition.
+	(_initialize_tui_interp): Attach to user_selected_context_changed
+	observer.
+
 2016-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/20609 - attach of JIT-debug-enabled inf 7.11.1 regression

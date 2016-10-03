@@ -115,6 +115,17 @@ struct cmd_list_element;
 
 typedef void cmd_cfunc_ftype (char *args, int from_tty);
 
+/* This structure specifies notifications to be suppressed by a cli
+   command interpreter.  */
+
+struct cli_suppress_notification
+{
+  /* Inferior, thread, frame selected notification suppressed?  */
+  int user_selected_context;
+};
+
+extern struct cli_suppress_notification cli_suppress_notification;
+
 /* Forward-declarations of the entry-points of cli/cli-decode.c.  */
 
 /* API to the manipulation of command lists.  */
@@ -217,6 +228,11 @@ extern struct cmd_list_element *add_com (const char *, enum command_class,
 
 extern struct cmd_list_element *add_com_alias (const char *, const char *,
 					       enum command_class, int);
+
+extern struct cmd_list_element *add_com_suppress_notification
+		       (const char *name, enum command_class theclass,
+			cmd_cfunc_ftype *fun, const char *doc,
+			int *supress_notification);
 
 extern struct cmd_list_element *add_info (const char *,
 					  cmd_cfunc_ftype *fun,

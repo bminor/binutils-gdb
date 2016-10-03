@@ -152,6 +152,10 @@ signal-event EVENTID
 
     =record-started,thread-group="i1",method="btrace",format="bts"
 
+* MI async record =thread-selected now includes the frame field.  For example:
+
+     =thread-selected,id="3",frame={level="0",addr="0x00000000004007c0"}
+
 * New targets
 
 Andes NDS32			nds32*-*-elf

@@ -25832,13 +25832,13 @@ identifier for thread and frame to operate on.
 Usually, each top-level window in a frontend allows the user to select
 a thread and a frame, and remembers the user selection for further
 operations.  However, in some cases @value{GDBN} may suggest that the
-current thread be changed.  For example, when stopping on a breakpoint
-it is reasonable to switch to the thread where breakpoint is hit.  For
-another example, if the user issues the CLI @samp{thread} command via
-the frontend, it is desirable to change the frontend's selected thread to the
-one specified by user.  @value{GDBN} communicates the suggestion to
-change current thread using the @samp{=thread-selected} notification.
-No such notification is available for the selected frame at the moment.
+current thread or frame be changed.  For example, when stopping on a
+breakpoint it is reasonable to switch to the thread where breakpoint is
+hit.  For another example, if the user issues the CLI @samp{thread} or
+@samp{frame} commands via the frontend, it is desirable to change the
+frontend's selection to the one specified by user.  @value{GDBN}
+communicates the suggestion to change current thread and frame using the
+@samp{=thread-selected} notification.
 
 Note that historically, MI shares the selected thread with CLI, so 
 frontends used the @code{-thread-select} to execute commands in the
@@ -26484,13 +26484,18 @@ A thread either was created, or has exited.  The @var{id} field
 contains the global @value{GDBN} identifier of the thread.  The @var{gid}
 field identifies the thread group this thread belongs to.
 
-@item =thread-selected,id="@var{id}"
-Informs that the selected thread was changed as result of the last
-command.  This notification is not emitted as result of @code{-thread-select}
-command but is emitted whenever an MI command that is not documented
-to change the selected thread actually changes it.  In particular,
-invoking, directly or indirectly (via user-defined command), the CLI
-@code{thread} command, will generate this notification.
+@item =thread-selected,id="@var{id}"[,frame="@var{frame}"]
+Informs that the selected thread or frame were changed.  This notification
+is not emitted as result of the @code{-thread-select} or
+@code{-stack-select-frame} commands, but is emitted whenever an MI command
+that is not documented to change the selected thread and frame actually
+changes them.  In particular, invoking, directly or indirectly
+(via user-defined command), the CLI @code{thread} or @code{frame} commands,
+will generate this notification.  Changing the thread or frame from another
+user interface (see @ref{Interpreters}) will also generate this notification.
+
+The @var{frame} field is only present if the newly selected thread is
+stopped.  See @ref{GDB/MI Frame Information} for the format of its value.
 
 We suggest that in response to this notification, front ends
 highlight the selected thread and cause subsequent commands to apply to

@@ -206,6 +206,37 @@ tui_on_command_error (void)
   display_gdb_prompt (NULL);
 }
 
+/* Observer for the user_selected_context_changed notification.  */
+
+static void
+tui_on_user_selected_context_changed (user_selected_what selection)
+{
+  struct switch_thru_all_uis state;
+  struct thread_info *tp;
+
+  /* This event is suppressed.  */
+  if (cli_suppress_notification.user_selected_context)
+    return;
+
+  tp = find_thread_ptid (inferior_ptid);
+
+  SWITCH_THRU_ALL_UIS (state)
+    {
+      struct interp *tui = as_tui_interp (top_level_interpreter ());
+
+      if (tui == NULL)
+	continue;
+
+      if (selection & USER_SELECTED_INFERIOR)
+	print_selected_inferior (tui_ui_out (tui));
+
+      if (tp != NULL
+	  && ((selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME))))
+	print_selected_thread_frame (tui_ui_out (tui), selection);
+
+    }
+}
+
 /* These implement the TUI interpreter.  */
 
 static void *
@@ -323,4 +354,6 @@ _initialize_tui_interp (void)
   observer_attach_no_history (tui_on_no_history);
   observer_attach_sync_execution_done (tui_on_sync_execution_done);
   observer_attach_command_error (tui_on_command_error);
+  observer_attach_user_selected_context_changed
+    (tui_on_user_selected_context_changed);
 }
