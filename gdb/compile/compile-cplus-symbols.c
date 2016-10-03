@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "compile-internal.h"
-#include "compile-cplus.hh"
+#include "compile-cplus.h"
 #include "gdb_assert.h"
 #include "symtab.h"
 #include "parser-defs.h"
@@ -631,7 +631,7 @@ regexp_search_symbols (struct compile_cplus_instance *instance,
   return found;
 }
 
-/* See compile-cplus.hh.  */
+/* See compile-cplus.h.  */
 
 void
 gcc_cplus_convert_symbol (void *datum,
@@ -774,7 +774,7 @@ gcc_cplus_convert_symbol (void *datum,
   return;
 }
 
-/* See compile-cplus.hh.  */
+/* See compile-cplus.h.  */
 
 gcc_address
 gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
@@ -1028,7 +1028,7 @@ generate_cplus_for_for_one_variable (struct compile_cplus_instance *compiler,
   END_CATCH
 }
 
-/* See compile-cplus.hh.  */
+/* See compile-cplus.h.  */
 
 unsigned char *
 generate_cplus_for_variable_locations (struct compile_cplus_instance *compiler,

@@ -19,7 +19,7 @@
 
 #include "gcc-cp-interface.h"
 #include "common/enum-flags.h"
-#include "compile-cplus-templates.hh"
+#include "compile-cplus-templates.h"
 
 struct type;
 
@@ -49,8 +49,6 @@ struct compile_cplus_instance
 
   htab_t symbol_err_map;
 
-  // !!keiths: If I moved these into another class, I could probably
-  // avoid having to #include compile-cplus-templates.hh everywhere...
   // A cache of function template definitions.
   compile::cplus::templates::function_template_defn_map *function_template_defns;
   

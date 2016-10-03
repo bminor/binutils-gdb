@@ -317,7 +317,7 @@ SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile-loc2c.c \
 	compile/compile-c-support.c \
 	compile/compile-cplus-support.c \
-	compile/compile-cplus-templates.cc
+	compile/compile-cplus-templates.c
 
 # Guile sub directory definitons for guile support.
 
@@ -2027,8 +2027,8 @@ compile-cplus-support.o: $(srcdir)/compile/compile-cplus-support.c
 	$(COMPILE) $(srcdir)/compile/compile-cplus-support.c
 	$(POSTCOMPILE)
 
-compile-cplus-templates.o: $(srcdir)/compile/compile-cplus-templates.cc
-	$(COMPILE) $(srcdir)/compile/compile-cplus-templates.cc
+compile-cplus-templates.o: $(srcdir)/compile/compile-cplus-templates.c
+	$(COMPILE) $(srcdir)/compile/compile-cplus-templates.c
 	$(POSTCOMPILE)
 
 

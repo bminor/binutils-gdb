@@ -21,7 +21,7 @@
 #include "defs.h"
 #include "gdbtypes.h"
 #include "compile-internal.h"
-#include "compile-cplus.hh"
+#include "compile-cplus.h"
 #include "gdb_assert.h"
 #include "symtab.h"
 #include "source.h"
@@ -133,7 +133,7 @@ compile::cplus::get_current_search_block (void)
   return block;
 }
 
-// See description in compile-cplus.hh.
+// See description in compile-cplus.h.
 
 char *
 compile::cplus::decl_name (const char *natural)
@@ -168,7 +168,7 @@ compile::cplus::decl_name (const char *natural)
   return name;
 }
 
-// See description in compile-cplus.hh.
+// See description in compile-cplus.h.
 
 int
 compile::cplus::is_varargs_p (const struct type *type)
@@ -787,7 +787,7 @@ ccp_convert_reference (struct compile_cplus_instance *instance,
   return compile::cplus::convert_reference_base (instance, target);
 }
 
-// See description in compile-cplus.hh.
+// See description in compile-cplus.h.
 
 gcc_type
 compile::cplus::convert_pointer_base (struct compile_cplus_instance *instance,
@@ -1208,7 +1208,7 @@ is_binary_method (const struct type *type)
  return len > 1;
 }
 
-/* See compile-cplus.hh.  */
+/* See compile-cplus.h.  */
 
 const char *
 maybe_canonicalize_special_function (const char *field_name,
@@ -2199,7 +2199,7 @@ ccp_convert_bool (struct compile_cplus_instance *instance, struct type *type)
   return result;
 }
 
-// See description in compile-cplus.hh.
+// See description in compile-cplus.h.
 
 gcc_type
 compile::cplus::convert_qualified_base (struct compile_cplus_instance *instance,
@@ -2397,7 +2397,7 @@ convert_type_cplus_basic (struct compile_cplus_instance *instance,
   }
 }
 
-/* See compile-cplus.hh.  */
+/* See compile-cplus.h.  */
 
 gcc_type
 convert_cplus_type (struct compile_cplus_instance *instance,
@@ -2445,7 +2445,7 @@ delete_instance (struct compile_instance *c)
   xfree (instance);
 }
 
-/* See compile-cplus.hh.  */
+/* See compile-cplus.h.  */
 
 struct compile_instance *
 new_cplus_compile_instance (struct gcc_cp_context *fe)

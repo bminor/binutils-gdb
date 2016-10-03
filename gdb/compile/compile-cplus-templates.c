@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "compile-internal.h"
-#include "compile-cplus.hh"
+#include "compile-cplus.h"
 #include "cp-support.h"
 #include "demangle.h"
 #include "typeprint.h"
@@ -74,7 +74,7 @@ static void print_function_template_arglist
   (const struct demangle_component *comp,
    const struct template_symbol *tsymbol, struct ui_file *stream);
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 void
 compile::cplus::templates::function_template_defn::
@@ -83,7 +83,7 @@ destroy (compile::cplus::templates::function_template_map_item p)
   delete p.second;
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 compile::cplus::templates::
 function_template_defn::
@@ -98,7 +98,7 @@ function_template_defn (std::string generic, parsed_demangle_info info,
 {
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 void
 compile::cplus::templates::class_template_defn::
@@ -265,7 +265,7 @@ maybe_define_new_function_template (struct compile_cplus_instance *instance,
     }
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 void
 compile::cplus::templates::
@@ -294,7 +294,7 @@ define_templates (struct compile_cplus_instance *instance,
   compile::cplus::templates::emit_class_template_decls (instance);
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 compile::cplus::templates::function_template_defn *
 compile::cplus::templates::
@@ -359,7 +359,7 @@ compute_class_template_generic (std::string name, struct type *type)
   return string_generic;
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 compile::cplus::templates::class_template_defn *
 compile::cplus::templates::
@@ -656,7 +656,7 @@ print_conversion_node (const struct demangle_component *comp,
     }
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 void
 compile::cplus::templates::
@@ -702,7 +702,7 @@ maybe_define_new_class_template (struct compile_cplus_instance *instance,
     }
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 void
 compile::cplus::templates::
@@ -908,7 +908,7 @@ enumerate_template_parameter_kinds (struct compile_cplus_instance *instance,
     }
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 void
 compile::cplus::templates::
@@ -1384,7 +1384,7 @@ define_function_template (struct compile_cplus_instance *instance,
   do_cleanups (back_to);
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 void
 compile::cplus::templates::
@@ -1488,7 +1488,7 @@ define_class_template (struct compile_cplus_instance *instance,
   delete_processing_context (pctx);
 }
 
-// See description in compile-cplus-templates.hh.
+// See description in compile-cplus-templates.h.
 
 void
 compile::cplus::templates::
