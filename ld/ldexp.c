@@ -417,6 +417,32 @@ fold_unary (etree_type *tree)
     }
 }
 
+/* Arithmetic operators, bitwise AND, bitwise OR and XOR keep the
+   section of one of their operands only when the other operand is a
+   plain number.  Losing the section when operating on two symbols,
+   ie. a result of a plain number, is required for subtraction and
+   XOR.  It's justifiable for the other operations on the grounds that
+   adding, multiplying etc. two section relative values does not
+   really make sense unless they are just treated as numbers.
+   The same argument could be made for many expressions involving one
+   symbol and a number.  For example, "1 << x" and "100 / x" probably
+   should not be given the section of x.  The trouble is that if we
+   fuss about such things the rules become complex and it is onerous
+   to document ld expression evaluation.  */
+static void
+arith_result_section (const etree_value_type *lhs)
+{
+  if (expld.result.section == lhs->section)
+    {
+      if (expld.section == bfd_abs_section_ptr
+	  && !config.sane_expr)
+	/* Duplicate the insanity in exp_fold_tree_1 case etree_value.  */
+	expld.result.section = bfd_abs_section_ptr;
+      else
+	expld.result.section = NULL;
+    }
+}
+
 static void
 fold_binary (etree_type *tree)
 {
@@ -483,26 +509,10 @@ fold_binary (etree_type *tree)
 
       switch (tree->type.node_code)
 	{
-	  /* Arithmetic operators, bitwise AND, bitwise OR and XOR
-	     keep the section of one of their operands only when the
-	     other operand is a plain number.  Losing the section when
-	     operating on two symbols, ie. a result of a plain number,
-	     is required for subtraction and XOR.  It's justifiable
-	     for the other operations on the grounds that adding,
-	     multiplying etc. two section relative values does not
-	     really make sense unless they are just treated as
-	     numbers.
-	     The same argument could be made for many expressions
-	     involving one symbol and a number.  For example,
-	     "1 << x" and "100 / x" probably should not be given the
-	     section of x.  The trouble is that if we fuss about such
-	     things the rules become complex and it is onerous to
-	     document ld expression evaluation.  */
 #define BOP(x, y) \
 	case x:							\
 	  expld.result.value = lhs.value y expld.result.value;	\
-	  if (expld.result.section == lhs.section)		\
-	    expld.result.section = NULL;			\
+	  arith_result_section (&lhs);				\
 	  break;
 
 	  /* Comparison operators, logical AND, and logical OR always
@@ -536,8 +546,7 @@ fold_binary (etree_type *tree)
 				  % (bfd_signed_vma) expld.result.value);
 	  else if (expld.phase != lang_mark_phase_enum)
 	    einfo (_("%F%S %% by zero\n"), tree->binary.rhs);
-	  if (expld.result.section == lhs.section)
-	    expld.result.section = NULL;
+	  arith_result_section (&lhs);
 	  break;
 
 	case '/':
@@ -546,8 +555,7 @@ fold_binary (etree_type *tree)
 				  / (bfd_signed_vma) expld.result.value);
 	  else if (expld.phase != lang_mark_phase_enum)
 	    einfo (_("%F%S / by zero\n"), tree->binary.rhs);
-	  if (expld.result.section == lhs.section)
-	    expld.result.section = NULL;
+	  arith_result_section (&lhs);
 	  break;
 
 	case MAX_K:
