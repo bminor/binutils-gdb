@@ -1252,6 +1252,19 @@ exp_fold_tree_no_dot (etree_type *tree)
   exp_fold_tree_1 (tree);
 }
 
+static void
+exp_value_fold (etree_type *tree)
+{
+  exp_fold_tree_no_dot (tree);
+  if (expld.result.valid_p)
+    {
+      tree->type.node_code = INT;
+      tree->value.value = expld.result.value;
+      tree->value.str = NULL;
+      tree->type.node_class = etree_value;
+    }
+}
+
 etree_type *
 exp_binop (int code, etree_type *lhs, etree_type *rhs)
 {
@@ -1263,6 +1276,12 @@ exp_binop (int code, etree_type *lhs, etree_type *rhs)
   new_e->binary.lhs = lhs;
   new_e->binary.rhs = rhs;
   new_e->type.node_class = etree_binary;
+  if (lhs->type.node_class == etree_value
+      && rhs->type.node_class == etree_value
+      && code != ALIGN_K
+      && code != DATA_SEGMENT_ALIGN
+      && code != DATA_SEGMENT_RELRO_END)
+    exp_value_fold (new_e);
   return new_e;
 }
 
@@ -1278,6 +1297,10 @@ exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
   new_e->trinary.cond = cond;
   new_e->trinary.rhs = rhs;
   new_e->type.node_class = etree_trinary;
+  if (cond->type.node_class == etree_value
+      && lhs->type.node_class == etree_value
+      && rhs->type.node_class == etree_value)
+    exp_value_fold (new_e);
   return new_e;
 }
 
@@ -1291,6 +1314,12 @@ exp_unop (int code, etree_type *child)
   new_e->unary.type.lineno = child->type.lineno;
   new_e->unary.child = child;
   new_e->unary.type.node_class = etree_unary;
+  if (child->type.node_class == etree_value
+      && code != ALIGN_K
+      && code != ABSOLUTE
+      && code != NEXT
+      && code != DATA_SEGMENT_END)
+    exp_value_fold (new_e);
   return new_e;
 }
 

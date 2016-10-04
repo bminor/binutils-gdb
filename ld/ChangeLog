@@ -1,3 +1,8 @@
+2016-10-04  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_value_fold): New function.
+	(exp_unop, exp_binop, exp_trinop): Use it.
+
 2016-09-30  Alan Modra  <amodra@gmail.com>
 
 	* scripttempl/v850.sc: Don't reference __ctbp, __ep, __gp when
