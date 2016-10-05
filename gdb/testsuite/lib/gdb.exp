@@ -2176,6 +2176,13 @@ proc with_timeout_factor { factor body } {
 # Return 1 if _Complex types are supported, otherwise, return 0.
 
 gdb_caching_proc support_complex_tests {
+
+    if { [gdb_skip_float_test] } {
+	# If floating point is not supported, _Complex is not
+	# supported.
+	return 0
+    }
+
     # Set up, compile, and execute a test program containing _Complex types.
     # Include the current process ID in the file names to prevent conflicts
     # with invocations for multiple testsuites.

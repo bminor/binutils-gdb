@@ -1,3 +1,8 @@
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (support_complex_tests): Return zero if
+	gdb_skip_float_test return true.
+
 2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
 
