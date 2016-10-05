@@ -1,3 +1,13 @@
+2016-10-05  Terry Guo  <terry.guo@arm.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in: Adjust the path of rules.
+	* configure.srv: Update the path of xml files.
+	* regformats/arm-with-iwmmxt.dat: Regenerated.
+	* regformats/arm-with-neon.dat: Likewise.
+	* regformats/arm-with-vfpv2.dat: Likewise.
+	* regformats/arm-with-vfpv3.dat Likewise.
+
 2016-09-30  Yao Qi  <yao.qi@linaro.org>
 
 	PR gdbserver/20627

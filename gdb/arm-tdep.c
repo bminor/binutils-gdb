@@ -60,13 +60,13 @@
 #include "record-full.h"
 #include <algorithm>
 
-#include "features/arm-with-m.c"
-#include "features/arm-with-m-fpa-layout.c"
-#include "features/arm-with-m-vfp-d16.c"
-#include "features/arm-with-iwmmxt.c"
-#include "features/arm-with-vfpv2.c"
-#include "features/arm-with-vfpv3.c"
-#include "features/arm-with-neon.c"
+#include "features/arm/arm-with-m.c"
+#include "features/arm/arm-with-m-fpa-layout.c"
+#include "features/arm/arm-with-m-vfp-d16.c"
+#include "features/arm/arm-with-iwmmxt.c"
+#include "features/arm/arm-with-vfpv2.c"
+#include "features/arm/arm-with-vfpv3.c"
+#include "features/arm/arm-with-neon.c"
 
 static int arm_debug;
 

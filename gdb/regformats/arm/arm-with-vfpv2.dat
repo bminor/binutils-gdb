@@ -1,7 +1,7 @@
 # THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
-# Generated from: arm-with-neon.xml
-name:arm_with_neon
-xmltarget:arm-with-neon.xml
+# Generated from: arm/arm-with-vfpv2.xml
+name:arm_with_vfpv2
+xmltarget:arm-with-vfpv2.xml
 expedite:r11,sp,pc
 32:r0
 32:r1
@@ -45,20 +45,4 @@ expedite:r11,sp,pc
 64:d13
 64:d14
 64:d15
-64:d16
-64:d17
-64:d18
-64:d19
-64:d20
-64:d21
-64:d22
-64:d23
-64:d24
-64:d25
-64:d26
-64:d27
-64:d28
-64:d29
-64:d30
-64:d31
 32:fpscr

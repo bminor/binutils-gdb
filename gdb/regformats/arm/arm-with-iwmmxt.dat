@@ -1,5 +1,5 @@
 # THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
-# Generated from: arm-with-iwmmxt.xml
+# Generated from: arm/arm-with-iwmmxt.xml
 name:arm_with_iwmmxt
 xmltarget:arm-with-iwmmxt.xml
 expedite:r11,sp,pc

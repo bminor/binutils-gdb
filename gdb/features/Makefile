@@ -44,7 +44,8 @@
 #   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
 
 WHICH = aarch64 \
-	arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
+	arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
+	arm/arm-with-neon \
 	i386/i386 i386/i386-linux \
 	i386/i386-mmx i386/i386-mmx-linux \
 	i386/amd64 i386/amd64-linux \
@@ -150,13 +151,13 @@ XMLTOC = \
 	aarch64.xml \
 	arc-v2.xml \
 	arc-arcompact.xml \
-	arm-with-iwmmxt.xml \
-	arm-with-m-fpa-layout.xml \
-	arm-with-m-vfp-d16.xml \
-	arm-with-m.xml \
-	arm-with-neon.xml \
-	arm-with-vfpv2.xml \
-	arm-with-vfpv3.xml \
+	arm/arm-with-iwmmxt.xml \
+	arm/arm-with-m-fpa-layout.xml \
+	arm/arm-with-m-vfp-d16.xml \
+	arm/arm-with-m.xml \
+	arm/arm-with-neon.xml \
+	arm/arm-with-vfpv2.xml \
+	arm/arm-with-vfpv3.xml \
 	i386/amd64-avx-linux.xml \
 	i386/amd64-avx.xml \
 	i386/amd64-avx512-linux.xml \
@@ -270,7 +271,7 @@ cfiles: $(CFILES)
 	sh ../../move-if-change $@.tmp $@
 
 # Other dependencies.
-$(outdir)/arm-with-iwmmxt.dat: arm-core.xml xscale-iwmmxt.xml
+$(outdir)/arm/arm-with-iwmmxt.dat: arm/arm-core.xml arm/xscale-iwmmxt.xml
 $(outdir)/i386/i386.dat: i386/32bit-core.xml i386/32bit-sse.xml
 $(outdir)/i386/i386-linux.dat: i386/32bit-core.xml i386/32bit-sse.xml \
 			       i386/32bit-linux.xml
