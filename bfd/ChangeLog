@@ -1,5 +1,44 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* coff-h8300.c: Spell fall through comments consistently.
+	* coffgen.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elfxx-aarch64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* cpu-ns32k.c: Add missing fall through comments.
+	* elf-m10300.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-avr.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-rx.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* ieee.c: Likewise.
+	* oasys.c: Likewise.
+	* pdp11.c: Likewise.
+	* srec.c: Likewise.
+	* versados.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* coffcode.h (coff_slurp_symbol_table): Revert accidental commit
 	made 2015-01-08.
 	* elf32-nds32.c (nds32_elf_grok_psinfo): Add missing break.

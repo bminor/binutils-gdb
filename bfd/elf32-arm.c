@@ -10041,6 +10041,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_ABS12:
       if (!globals->vxworks_p)
 	return elf32_arm_abs12_reloc (input_bfd, hit_data, value + addend);
+      /* Fall through.  */
 
     case R_ARM_PC24:
     case R_ARM_ABS32:

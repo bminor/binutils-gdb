@@ -1156,10 +1156,15 @@ build_immediate_table (void)
 	    switch (log_e)
 	      {
 	      case 1: imm = (imm <<  2) | imm;
+		/* Fall through.  */
 	      case 2: imm = (imm <<  4) | imm;
+		/* Fall through.  */
 	      case 3: imm = (imm <<  8) | imm;
+		/* Fall through.  */
 	      case 4: imm = (imm << 16) | imm;
+		/* Fall through.  */
 	      case 5: imm = (imm << 32) | imm;
+		/* Fall through.  */
 	      case 6: break;
 	      default: abort ();
 	      }
@@ -1969,7 +1974,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		case OP_MOV_IMM_WIDEN:
 		  imm = ~imm;
-		  /* Fall through...  */
+		  /* Fall through.  */
 		case OP_MOV_IMM_WIDE:
 		  if (!aarch64_wide_constant_p (imm, esize == 4, NULL))
 		    {

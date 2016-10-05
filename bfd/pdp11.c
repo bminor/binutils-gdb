@@ -2985,6 +2985,7 @@ aout_link_write_other_symbol (struct bfd_hash_entry *bh, void *data)
     case bfd_link_hash_undefweak:
       type = N_WEAKU;
       val = 0;
+      /* Fall through.  */
     case bfd_link_hash_indirect:
     case bfd_link_hash_warning:
       /* FIXME: Ignore these for now.  The circumstances under which

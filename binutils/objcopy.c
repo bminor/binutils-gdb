@@ -4302,7 +4302,7 @@ copy_main (int argc, char *argv[])
 	      {
 	      case OPTION_CHANGE_SECTION_ADDRESS:
 		p->vma_val = val;
-		/* Drop through.  */
+		/* Fall through.  */
 
 	      case OPTION_CHANGE_SECTION_LMA:
 		p->lma_val = val;

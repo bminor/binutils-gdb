@@ -1,5 +1,22 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* aarch64-opc.c: Spell fall through comments consistently.
+	* i386-dis.c: Likewise.
+	* aarch64-dis.c: Add missing fall through comments.
+	* aarch64-opc.c: Likewise.
+	* arc-dis.c: Likewise.
+	* arm-dis.c: Likewise.
+	* i386-dis.c: Likewise.
+	* m68k-dis.c: Likewise.
+	* mep-asm.c: Likewise.
+	* ns32k-dis.c: Likewise.
+	* sh-dis.c: Likewise.
+	* tic4x-dis.c: Likewise.
+	* tic6x-dis.c: Likewise.
+	* vax-dis.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* arc-ext.c (create_map): Add missing break.
 	* msp430-decode.opc (encode_as): Likewise.
 	* msp430-decode.c: Regenerate.

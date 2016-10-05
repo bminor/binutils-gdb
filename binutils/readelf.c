@@ -426,7 +426,7 @@ print_vma (bfd_vma vma, print_mode mode)
     {
     case FULL_HEX:
       nc = printf ("0x");
-      /* Drop through.  */
+      /* Fall through.  */
 
     case LONG_HEX:
 #ifdef BFD64
@@ -439,11 +439,11 @@ print_vma (bfd_vma vma, print_mode mode)
     case DEC_5:
       if (vma <= 99999)
 	return printf ("%5" BFD_VMA_FMT "d", vma);
-      /* Drop through.  */
+      /* Fall through.  */
 
     case PREFIX_HEX:
       nc = printf ("0x");
-      /* Drop through.  */
+      /* Fall through.  */
 
     case HEX:
       return nc + printf ("%" BFD_VMA_FMT "x", vma);
@@ -1292,6 +1292,7 @@ dump_relocations (FILE * file,
 	      rtype = elf_msp430x_reloc_type (type);
 	      break;
 	    }
+	  /* Fall through.  */
 	case EM_MSP430_OLD:
 	  rtype = elf_msp430_reloc_type (type);
 	  break;
@@ -4450,7 +4451,7 @@ parse_args (int argc, char ** argv)
 	default:
 	  /* xgettext:c-format */
 	  error (_("Invalid option '-%c'\n"), c);
-	  /* Drop through.  */
+	  /* Fall through.  */
 	case '?':
 	  usage (stderr);
 	}
@@ -9679,6 +9680,7 @@ process_dynamic_section (FILE * file)
 	case DT_SYMENT	:
 	case DT_RELENT	:
 	  dynamic_info[entry->d_tag] = entry->d_un.d_val;
+	  /* Fall through.  */
 	case DT_PLTPADSZ:
 	case DT_MOVEENT	:
 	case DT_MOVESZ	:
@@ -11494,6 +11496,7 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	  case 10: /* R_MSP430_SYM_DIFF */
 	    if (uses_msp430x_relocs ())
 	      break;
+	    /* Fall through.  */
 	  case 21: /* R_MSP430X_SYM_DIFF */
 	    saved_sym = symtab + get_reloc_symindex (reloc->r_info);
 	    return TRUE;
@@ -12011,6 +12014,7 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_MSP430:
       if (uses_msp430x_relocs ())
 	return reloc_type == 2; /* R_MSP430_ABS16.  */
+      /* Fall through.  */
     case EM_MSP430_OLD:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
     case EM_NDS32:
@@ -14241,6 +14245,7 @@ process_attributes (FILE * file,
 		      goto do_numlist;
 		    case 3:
 		      printf (_("Symbol Attributes:"));
+		      /* Fall through.  */
 		    do_numlist:
 		      for (;;)
 			{
@@ -16418,8 +16423,8 @@ get_file_header (FILE * file)
   /* Determine how to read the rest of the header.  */
   switch (elf_header.e_ident[EI_DATA])
     {
-    default: /* fall through */
-    case ELFDATANONE: /* fall through */
+    default:
+    case ELFDATANONE:
     case ELFDATA2LSB:
       byte_get = byte_get_little_endian;
       byte_put = byte_put_little_endian;

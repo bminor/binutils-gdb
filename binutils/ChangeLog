@@ -1,5 +1,15 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* dlltool.c: Spell fall through comments consistently.
+	* objcopy.c: Likewise.
+	* readelf.c: Likewise.
+	* dwarf.c: Add missing fall through comments.
+	* elfcomm.c: Likewise.
+	* sysinfo.y: Likewise.
+	* readelf.c: Likewise.  Also remove extraneous comments.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* cxxfilt.c (usage): Add ATTRIBUTE_NORETURN.
 	* elfedit.c (usage): Likewise.
 	* nm.c (usage): Likewise.

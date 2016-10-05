@@ -2327,6 +2327,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 			goto error_return;
 		    }
 		}
+	      /* Fall through.  */
 
 	    case R_X86_64_32S:
 	    case R_X86_64_PC64:
@@ -2525,6 +2526,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_32:
 	  if (!ABI_64_P (abfd))
 	    goto pointer;
+	  /* Fall through.  */
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32S:

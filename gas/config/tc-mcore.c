@@ -979,7 +979,7 @@ md_assemble (char * str)
 	  as_bad (_("M340 specific opcode used when assembling for M210"));
 	  break;
 	}
-      /* drop through...  */
+      /* Fall through.  */
     case O2:
       op_end = parse_reg (op_end + 1, & reg);
       inst |= reg;

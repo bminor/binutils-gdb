@@ -317,6 +317,7 @@ z80_start_line_hook (void)
 	      *p++ = buf[2];
 	      break;
 	    }
+	  /* Fall through.  */
 	case '"':
 	  for (quote = *p++; quote != *p && '\n' != *p; ++p)
 	    /* No escapes.  */ ;
@@ -874,6 +875,7 @@ emit_mr (char prefix, char opcode, const char *args)
 	    }
 	  check_mach (INS_UNPORT);
 	}
+      /* Fall through.  */
     case O_register:
       emit_mx (prefix, opcode, 0, & arg_m);
       break;
@@ -1776,6 +1778,7 @@ emit_mulub (char prefix ATTRIBUTE_UNUSED, char opcode, const char * args)
 	      *q = opcode + ((reg - 'b') << 3);
 	      break;
 	    }
+	  /* Fall through.  */
 	default:
 	  ill_op ();
 	}

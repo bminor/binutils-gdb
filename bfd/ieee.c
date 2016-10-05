@@ -2597,10 +2597,13 @@ write_int (int value)
 	{
 	case 4:
 	  OUT (value >> 24);
+	  /* Fall through.  */
 	case 3:
 	  OUT (value >> 16);
+	  /* Fall through.  */
 	case 2:
 	  OUT (value >> 8);
+	  /* Fall through.  */
 	case 1:
 	  OUT (value);
 	}
@@ -2753,15 +2756,19 @@ drop_int (struct output_buffer_struct *buf)
 	case 0x84:
 	  ch = THIS ();
 	  NEXT ();
+	  /* Fall through.  */
 	case 0x83:
 	  ch = THIS ();
 	  NEXT ();
+	  /* Fall through.  */
 	case 0x82:
 	  ch = THIS ();
 	  NEXT ();
+	  /* Fall through.  */
 	case 0x81:
 	  ch = THIS ();
 	  NEXT ();
+	  /* Fall through.  */
 	case 0x80:
 	  break;
 	}
@@ -2791,18 +2798,22 @@ copy_int (void)
 	  ch = THIS ();
 	  NEXT ();
 	  OUT (ch);
+	  /* Fall through.  */
 	case 0x83:
 	  ch = THIS ();
 	  NEXT ();
 	  OUT (ch);
+	  /* Fall through.  */
 	case 0x82:
 	  ch = THIS ();
 	  NEXT ();
 	  OUT (ch);
+	  /* Fall through.  */
 	case 0x81:
 	  ch = THIS ();
 	  NEXT ();
 	  OUT (ch);
+	  /* Fall through.  */
 	case 0x80:
 	  break;
 	}
@@ -2833,12 +2844,15 @@ copy_till_end (void)
 	case 0x84:
 	  OUT (THIS ());
 	  NEXT ();
+	  /* Fall through.  */
 	case 0x83:
 	  OUT (THIS ());
 	  NEXT ();
+	  /* Fall through.  */
 	case 0x82:
 	  OUT (THIS ());
 	  NEXT ();
+	  /* Fall through.  */
 	case 0x81:
 	  OUT (THIS ());
 	  NEXT ();

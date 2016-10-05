@@ -2775,6 +2775,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_FRV_32:
 	  if (! IS_FDPIC (output_bfd))
 	    goto non_fdpic;
+	  /* Fall through.  */
 
 	case R_FRV_GOT12:
 	case R_FRV_GOTHI:

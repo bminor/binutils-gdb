@@ -5312,6 +5312,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_AARCH64_16:
 #if ARCH_SIZE == 64
@@ -7323,6 +7324,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
+	  /* Fall through.  */
 
 	case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
 	case BFD_RELOC_AARCH64_ADR_HI21_PCREL:

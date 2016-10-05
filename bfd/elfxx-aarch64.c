@@ -319,7 +319,7 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
 	  /* Force use of MOVZ.  */
 	  contents = reencode_movzn_to_movz (contents);
 	}
-      /* fall through */
+      /* Fall through.  */
 
       /* Group relocations to create a 16, 32, 48 or 64 bit unsigned
          data or abs address inline.  */

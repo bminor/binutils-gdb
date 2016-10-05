@@ -703,6 +703,7 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
           if (minor_opcode < 4)
             return 2;
         }
+      /* Fall through.  */
     case bfd_mach_arc_arc600:
       return (major_opcode > 0xb) ? 2 : 4;
       break;

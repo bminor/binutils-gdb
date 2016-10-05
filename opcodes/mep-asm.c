@@ -745,6 +745,7 @@ expand_string (const char *in, int first_only)
 		  break;
 		case '(':
 		  depth++;
+		  /* Fall through.  */
 		default:
 		  args[narg].len++;
 		  break;

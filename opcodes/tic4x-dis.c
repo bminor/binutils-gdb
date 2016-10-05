@@ -467,6 +467,7 @@ tic4x_print_op (struct disassemble_info *info,
                 return 0;
               break;
             }
+	  /* Fall through.  */
 
 	case 'J': /* Indirect (short) 8--15.  */
 	  if (! tic4x_print_indirect (info, INDIRECT_SHORT,

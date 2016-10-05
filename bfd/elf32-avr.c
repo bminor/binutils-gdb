@@ -2682,6 +2682,7 @@ elf32_avr_relax_section (bfd *abfd,
                   }
               }
           }
+	  /* Fall through.  */
 
         default:
           {

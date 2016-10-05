@@ -1000,11 +1000,14 @@ apply_fix (char *ptr, bfd_reloc_code_real_type type, expressionS *operand,
       *ptr++ = n >> 24;
       *ptr++ = n >> 20;
       *ptr++ = n >> 16;
+      /* Fall through.  */
     case 4:			/* 4 nibbles == 16 bits.  */
       *ptr++ = n >> 12;
       *ptr++ = n >> 8;
+      /* Fall through.  */
     case 2:
       *ptr++ = n >> 4;
+      /* Fall through.  */
     case 1:
       *ptr++ = n >> 0;
       break;
@@ -1152,7 +1155,7 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
               /*case ARG_IMMNMINUS1: not used.  */
 	      case ARG_IMM4M1:
 		imm_operand->X_add_number--;
-                /* Drop through.  */
+                /* Fall through.  */
 	      case ARG_IMM4:
                 if (imm_operand->X_add_number > 15)
 		  as_bad (_("immediate value out of range"));
@@ -1160,7 +1163,7 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
 		break;
 	      case ARG_NIM8:
 		imm_operand->X_add_number = -imm_operand->X_add_number;
-                /* Drop through.  */
+                /* Fall through.  */
 	      case ARG_IMM8:
 		output_ptr = apply_fix (output_ptr, BFD_RELOC_8, imm_operand, 2);
 		break;

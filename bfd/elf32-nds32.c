@@ -11229,6 +11229,7 @@ nds32_elf_relax_letlsls (struct bfd_link_info *link_info, bfd *abfd,
 	  success = 1;
 	  break;
 	}
+      /* Fall through.  */
     case (N32_OP6_MEM << 8) | N32_MEM_LH:
     case (N32_OP6_MEM << 8) | N32_MEM_SH:
     case (N32_OP6_MEM << 8) | N32_MEM_LHS:
@@ -11243,6 +11244,7 @@ nds32_elf_relax_letlsls (struct bfd_link_info *link_info, bfd *abfd,
 	  success = 1;
 	  break;
 	}
+      /* Fall through.  */
     case (N32_OP6_MEM << 8) | N32_MEM_LW:
     case (N32_OP6_MEM << 8) | N32_MEM_SW:
       /* The range is +/-64k.  */
@@ -11256,6 +11258,7 @@ nds32_elf_relax_letlsls (struct bfd_link_info *link_info, bfd *abfd,
 	  success = 1;
 	  break;
 	}
+      /* Fall through.  */
     default:
       break;
     }

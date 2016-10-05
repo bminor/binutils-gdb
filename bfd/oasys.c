@@ -612,6 +612,7 @@ oasys_object_p (bfd *abfd)
 	  break;
 	case oasys_record_is_data_enum:
 	  oasys->first_data_record = bfd_tell (abfd) - record.header.length;
+	  /* Fall through.  */
 	case oasys_record_is_debug_enum:
 	case oasys_record_is_module_enum:
 	case oasys_record_is_named_section_enum:

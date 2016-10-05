@@ -3958,6 +3958,7 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 		       rel->r_offset, input_section->size);
 		    break;
 		  }
+		/* Fall through.  */
 	      default:
 		(*info->callbacks->reloc_overflow) (info,
 						    &h->root,

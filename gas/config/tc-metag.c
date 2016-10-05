@@ -2683,6 +2683,7 @@ parse_alu (const char *line, metag_insn *insn,
 	      insn->bits |= (1 << 7);
 	      break;
 	    }
+	  /* Fall through.  */
 	default:
 	  as_bad (_("invalid quickrot register specified"));
 	  return NULL;

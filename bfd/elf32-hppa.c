@@ -3951,7 +3951,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		}
 	      plabel = 1;
 	    }
-	  /* Fall through and possibly emit a dynamic relocation.  */
+	  /* Fall through.  */
 
 	case R_PARISC_DIR17F:
 	case R_PARISC_DIR17R:

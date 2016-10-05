@@ -1197,6 +1197,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 	      goto dogot;
 	    case (int) R_MICROBLAZE_TLSLD:
 	      tls_type = (TLS_TLS | TLS_LD);
+	      /* Fall through.  */
 	    dogot:
 	    case (int) R_MICROBLAZE_GOT_64:
 	      {
@@ -2401,8 +2402,10 @@ microblaze_elf_check_relocs (bfd * abfd,
           goto dogottls;
         case R_MICROBLAZE_TLSLD:
           tls_type |= (TLS_TLS | TLS_LD);
+	  /* Fall through.  */
         dogottls:
           sec->has_tls_reloc = 1;
+	  /* Fall through.  */
         case R_MICROBLAZE_GOT_64:
           if (htab->sgot == NULL)
             {

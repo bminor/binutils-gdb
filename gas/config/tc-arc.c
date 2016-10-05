@@ -1836,7 +1836,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		    if (tok[tokidx].X_op != O_constant)
 		      goto de_fault;
 		  }
-		  /* Fall-through */
+		  /* Fall through.  */
 		case O_constant:
 		  /* Check the range.  */
 		  if (operand->bits != 32
@@ -1908,6 +1908,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 			goto match_failed;
 		      break;
 		    }
+		  /* Fall through.  */
 		default:
 		de_fault:
 		  if (operand->default_reloc == 0)
@@ -1926,6 +1927,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		    case O_tlsie:
 		      if (!(operand->flags & ARC_OPERAND_LIMM))
 			goto match_failed;
+		      /* Fall through.  */
 		    case O_absent:
 		      if (!generic_reloc_p (operand->default_reloc))
 			goto match_failed;
@@ -3022,6 +3024,7 @@ md_apply_fix (fixS *fixP,
     case BFD_RELOC_ARC_TLS_LE_32:
       gas_assert (!fixP->fx_addsy);
       gas_assert (!fixP->fx_subsy);
+      /* Fall through.  */
 
     case BFD_RELOC_ARC_GOTOFF:
     case BFD_RELOC_ARC_32_ME:
@@ -3047,6 +3050,7 @@ md_apply_fix (fixS *fixP,
 
     case BFD_RELOC_ARC_S21W_PCREL_PLT:
       reloc = BFD_RELOC_ARC_S21W_PCREL;
+      /* Fall through.  */
 
     case BFD_RELOC_ARC_S25W_PCREL:
     case BFD_RELOC_ARC_S21W_PCREL:
@@ -3868,6 +3872,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	      image = insert_operand (image, operand, regs, NULL, 0);
 	      break;
 	    }
+	  /* Fall through.  */
 
 	default:
 	  /* This operand needs a relocation.  */

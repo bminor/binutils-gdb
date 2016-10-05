@@ -153,9 +153,8 @@ it:
     break;
   case 'g':
     printf("\tchecksum(ffile,raw, idx, IT_%s_CODE);\n", it);
-
+    /* Fall through.  */
   case 'i':
-
   case 'o':
   case 'c':
     printf("}\n");
@@ -182,6 +181,7 @@ repeat_it_field: '(' REPEAT NAME
 	      printf("\tprintf(\"repeat %%d\\n\", %s);\n",$3);
 	      if (rdepth==2)
 	      printf("\tprintf(\"repeat %%d\\n\", %s[n]);\n",$3);
+	      /* Fall through.  */
 	    case 'i':
 	    case 'g':
 	    case 'o':

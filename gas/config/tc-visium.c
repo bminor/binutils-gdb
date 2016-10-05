@@ -1520,8 +1520,7 @@ md_assemble (char *str0)
 	  return;
 	}
       this_dest = r1;
-
-      /* fall through...  */
+      /* Fall through.  */
 
     case mode_i:
       /* MOVIL/WRTL traditionally get an implicit "%l" applied

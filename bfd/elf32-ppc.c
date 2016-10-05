@@ -4160,7 +4160,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	  tls_type = TLS_TLS | TLS_DTPREL;
 	dogottls:
 	  sec->has_tls_reloc = 1;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	  /* GOT16 relocations */
 	case R_PPC_GOT16:
@@ -4232,7 +4232,7 @@ ppc_elf_check_relocs (bfd *abfd,
 
 	case R_PPC_SDAREL16:
 	  htab->sdata[0].sym->ref_regular = 1;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	case R_PPC_VLE_SDAREL_LO16A:
 	case R_PPC_VLE_SDAREL_LO16D:
@@ -5167,7 +5167,7 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	case R_PPC_REL32:
 	  if (h == NULL || h == htab->elf.hgot)
 	    break;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	case R_PPC_ADDR32:
 	case R_PPC_ADDR24:
@@ -5182,6 +5182,7 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	case R_PPC_UADDR16:
 	  if (bfd_link_pic (info))
 	    break;
+	  /* Fall through.  */
 
 	case R_PPC_PLT32:
 	case R_PPC_PLTREL24:
@@ -5409,7 +5410,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		    case R_PPC_GOT_TLSLD16:
 		    case R_PPC_GOT_TLSLD16_LO:
 		      expecting_tls_get_addr = 1;
-		      /* Fall thru */
+		      /* Fall through.  */
 
 		    case R_PPC_GOT_TLSLD16_HI:
 		    case R_PPC_GOT_TLSLD16_HA:
@@ -5427,7 +5428,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		    case R_PPC_GOT_TLSGD16:
 		    case R_PPC_GOT_TLSGD16_LO:
 		      expecting_tls_get_addr = 1;
-		      /* Fall thru */
+		      /* Fall through.  */
 
 		    case R_PPC_GOT_TLSGD16_HI:
 		    case R_PPC_GOT_TLSGD16_HA:
@@ -8154,7 +8155,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_ADDR14_BRTAKEN:
 	case R_PPC_REL14_BRTAKEN:
 	  branch_bit = BRANCH_PREDICT_BIT;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	  /* Branch not taken prediction relocations.  */
 	case R_PPC_ADDR14_BRNTAKEN:
@@ -8978,7 +8979,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			      + htab->plt->output_offset
 			      + ent->plt.offset);
 	    }
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	case R_PPC_RELAX:
 	  {
@@ -9480,7 +9481,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     alone (it will be set to zero elsewhere in the link).  */
 	  if (sec == NULL)
 	    break;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	case R_PPC_PLT16_HA:
 	case R_PPC_GOT16_HA:

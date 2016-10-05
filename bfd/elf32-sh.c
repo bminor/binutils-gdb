@@ -5881,6 +5881,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      /* This may require an rofixup.  */
 	      if (!htab->fdpic_p)
 		break;
+	      /* Fall through.  */
 	    case R_SH_GOTPLT32:
 	    case R_SH_GOT32:
 	    case R_SH_GOT20:

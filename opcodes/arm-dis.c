@@ -4686,6 +4686,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 
 		    case 'S':
 		      allow_unpredictable = TRUE;
+		      /* Fall through.  */
 		    case 's':
                       if ((given & 0x004f0000) == 0x004f0000)
 			{

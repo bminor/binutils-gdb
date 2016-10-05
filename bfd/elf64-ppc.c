@@ -5471,7 +5471,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  tls_type = TLS_TLS | TLS_DTPREL;
 	dogottls:
 	  sec->has_tls_reloc = 1;
-	  /* Fall thru */
+	  /* Fall through */
 
 	case R_PPC64_GOT16:
 	case R_PPC64_GOT16_DS:
@@ -5619,6 +5619,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TOC16_DS:
 	  htab->do_multi_toc = 1;
 	  ppc64_elf_tdata (abfd)->has_small_toc_reloc = 1;
+	  /* Fall through.  */
 	case R_PPC64_TOC16_LO:
 	case R_PPC64_TOC16_HI:
 	case R_PPC64_TOC16_HA:
@@ -8524,7 +8525,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		    case R_PPC64_GOT_TLSLD16_LO:
 		      expecting_tls_get_addr = 1;
 		      found_tls_get_addr_arg = 1;
-		      /* Fall thru */
+		      /* Fall through.  */
 
 		    case R_PPC64_GOT_TLSLD16_HI:
 		    case R_PPC64_GOT_TLSLD16_HA:
@@ -8544,7 +8545,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		    case R_PPC64_GOT_TLSGD16_LO:
 		      expecting_tls_get_addr = 1;
 		      found_tls_get_addr_arg = 1;
-		      /* Fall thru */
+		      /* Fall through. */
 
 		    case R_PPC64_GOT_TLSGD16_HI:
 		    case R_PPC64_GOT_TLSGD16_HA:
@@ -8575,7 +8576,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		    case R_PPC64_TLSGD:
 		    case R_PPC64_TLSLD:
 		      found_tls_get_addr_arg = 1;
-		      /* Fall thru */
+		      /* Fall through.  */
 
 		    case R_PPC64_TLS:
 		    case R_PPC64_TOC16:
@@ -9268,7 +9269,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			    }
 			  if ((opc & (0x3f << 2)) == (58u << 2))
 			    break;
-			  /* Fall thru */
+			  /* Fall through.  */
 
 			default:
 			  /* Wrong sort of reloc, or not a ld.  We may
@@ -14073,18 +14074,18 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_ADDR14_BRTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
 	  insn = 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field.  */
-	  /* Fall thru.  */
+	  /* Fall through.  */
 
 	  /* Branch not taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRNTAKEN:
 	case R_PPC64_REL14_BRNTAKEN:
 	  insn |= bfd_get_32 (output_bfd,
 			      contents + rel->r_offset) & ~(0x01 << 21);
-	  /* Fall thru.  */
+	  /* Fall through.  */
 
 	case R_PPC64_REL14:
 	  max_br_offset = 1 << 15;
-	  /* Fall thru.  */
+	  /* Fall through.  */
 
 	case R_PPC64_REL24:
 	  /* Calls to functions with a different TOC, such as calls to
@@ -14730,7 +14731,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_DTPREL64:
 	  if (htab->elf.tls_sec != NULL)
 	    addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	  /* Relocations that may need to be propagated if this is a
 	     dynamic object.  */
@@ -15073,7 +15074,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     alone (it will be set to zero elsewhere in the link).  */
 	  if (sec == NULL)
 	    break;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	case R_PPC64_GOT16_HA:
 	case R_PPC64_PLTGOT16_HA:

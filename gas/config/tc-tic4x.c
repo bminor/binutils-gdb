@@ -2638,9 +2638,11 @@ md_apply_fix (fixS *fixP, valueT *value, segT seg ATTRIBUTE_UNUSED)
     {
     case BFD_RELOC_32:
       buf[3] = val >> 24;
+      /* Fall through.  */
     case BFD_RELOC_24:
     case BFD_RELOC_24_PCREL:
       buf[2] = val >> 16;
+      /* Fall through.  */
     case BFD_RELOC_16:
     case BFD_RELOC_16_PCREL:
     case BFD_RELOC_LO16:
@@ -2718,24 +2720,28 @@ md_parse_option (int c, const char *arg)
 
     case 'b':
       as_warn (_("Option -b is depreciated, please use -mbig"));
+      /* Fall through.  */
     case OPTION_BIG:             /* big model */
       tic4x_big_model = 1;
       break;
 
     case 'p':
       as_warn (_("Option -p is depreciated, please use -mmemparm"));
+      /* Fall through.  */
     case OPTION_MEMPARM:         /* push args */
       tic4x_reg_args = 0;
       break;
 
     case 'r':
       as_warn (_("Option -r is depreciated, please use -mregparm"));
+      /* Fall through.  */
     case OPTION_REGPARM:        /* register args */
       tic4x_reg_args = 1;
       break;
 
     case 's':
       as_warn (_("Option -s is depreciated, please use -msmall"));
+      /* Fall through.  */
     case OPTION_SMALL:		/* small model */
       tic4x_big_model = 0;
       break;

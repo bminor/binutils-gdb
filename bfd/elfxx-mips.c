@@ -11645,7 +11645,8 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 		}
 	      /* In case if we don't have global got symbols we default
 		 to setting DT_MIPS_GOTSYM to the same value as
-		 DT_MIPS_SYMTABNO, so we just fall through.  */
+		 DT_MIPS_SYMTABNO.  */
+	      /* Fall through.  */
 
 	    case DT_MIPS_SYMTABNO:
 	      name = ".dynsym";

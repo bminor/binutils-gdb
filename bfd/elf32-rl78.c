@@ -1958,6 +1958,7 @@ rl78_offset_for_reloc (bfd *                    abfd,
 	default:
 	reloc_computes_value:
 	  symval = rl78_compute_complex_reloc (r_type, symval, input_section);
+	  /* Fall through.  */
 	case R_RL78_DIR32:
 	case R_RL78_DIR24S:
 	case R_RL78_DIR16:

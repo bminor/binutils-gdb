@@ -2551,7 +2551,7 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
 
             default:
               msg = _("internal error: unknown error");
-              /* fall through */
+              /* Fall through.  */
 
             common_error:
 	      (*info->callbacks->warning) (info, msg, name, input_bfd,
@@ -3466,7 +3466,8 @@ s7_bfd_score_elf_finish_dynamic_sections (bfd *output_bfd,
                 }
               /* In case if we don't have global got symbols we default
                   to setting DT_SCORE_GOTSYM to the same value as
-                  DT_SCORE_SYMTABNO, so we just fall through.  */
+                  DT_SCORE_SYMTABNO.  */
+	      /* Fall through.  */
 
             case DT_SCORE_SYMTABNO:
               name = ".dynsym";

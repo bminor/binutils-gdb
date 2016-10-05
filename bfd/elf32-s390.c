@@ -1124,6 +1124,7 @@ elf_s390_check_relocs (bfd *abfd,
 	case R_390_GOTOFF32:
 	  if (h == NULL || !s390_is_ifunc_symbol_p (h) || !h->def_regular)
 	    break;
+	  /* Fall through.  */
 
 	case R_390_PLT12DBL:
 	case R_390_PLT16DBL:
@@ -2802,6 +2803,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 			    + h ->plt.offset);
 	      goto do_relocation;
 	    }
+	  /* Fall through.  */
 
 	case R_390_8:
 	case R_390_16:

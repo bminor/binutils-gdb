@@ -5432,6 +5432,7 @@ pa_ip (char *str)
 		{
 		case SGL:
 		  opcode |= 0x20;
+		  /* Fall through.  */
 		case DBL:
 		  the_insn.fpof1 = flag;
 		  continue;

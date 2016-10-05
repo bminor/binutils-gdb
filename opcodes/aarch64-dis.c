@@ -788,10 +788,15 @@ decode_limm (uint32_t esize, aarch64_insn value, int64_t *result)
   switch (simd_size)
     {
     case  2: imm = (imm <<  2) | imm;
+      /* Fall through.  */
     case  4: imm = (imm <<  4) | imm;
+      /* Fall through.  */
     case  8: imm = (imm <<  8) | imm;
+      /* Fall through.  */
     case 16: imm = (imm << 16) | imm;
+      /* Fall through.  */
     case 32: imm = (imm << 32) | imm;
+      /* Fall through.  */
     case 64: break;
     default: assert (0); return 0;
     }

@@ -1947,6 +1947,7 @@ elf_i386_check_relocs (bfd *abfd,
 
 	    case R_386_GOTOFF:
 	      eh->gotoff_ref = 1;
+	      /* Fall through.  */
 	    case R_386_32:
 	    case R_386_PC32:
 	    case R_386_PLT32:

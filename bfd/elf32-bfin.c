@@ -2695,6 +2695,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	case R_BFIN_BYTE4_DATA:
 	  if (! IS_FDPIC (output_bfd))
 	    goto non_fdpic;
+	  /* Fall through.  */
 
 	case R_BFIN_GOT17M4:
 	case R_BFIN_GOTHI:

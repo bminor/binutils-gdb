@@ -1,5 +1,10 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* lexsup.c: Spell fall through comments consistently and add
+	missing fall through comments.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* plugin.c (asymbol_from_plugin_symbol): Avoid compiler warning
 	by adding return.
 

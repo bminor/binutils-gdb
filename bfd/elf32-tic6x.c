@@ -2365,6 +2365,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 		  goto done_reloc;
 		}
 	    }
+	  /* Fall through.  */
 
 	case R_C6000_PCR_S12:
 	case R_C6000_PCR_S10:

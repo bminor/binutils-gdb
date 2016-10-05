@@ -1177,6 +1177,7 @@ dot_cfi_val_encoded_addr (int ignored ATTRIBUTE_UNUSED)
     case O_constant:
       if ((encoding & 0x70) != DW_EH_PE_pcrel)
 	break;
+      /* Fall through.  */
     default:
       encoding = DW_EH_PE_omit;
       break;

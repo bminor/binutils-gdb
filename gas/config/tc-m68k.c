@@ -3003,7 +3003,7 @@ m68k_ip (char *instring)
 				TAB (ABSTOPCREL, SZ_UNDEF));
 		      break;
 		    }
-		  /* Fall through into long.  */
+		  /* Fall through.  */
 		case SIZE_LONG:
 		  if (isvar (&opP->disp))
 		    add_fix ('l', &opP->disp, 0, 0);
@@ -3109,6 +3109,7 @@ m68k_ip (char *instring)
 	      break;
 	    case '3':
 	      tmpreg &= 0xFF;
+	      /* Fall through.  */
 	    case '8':
 	    case 'C':
 	    case 'j':

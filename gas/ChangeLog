@@ -1,5 +1,53 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* app.c: Add missing fall through comments.
+	* dw2gencfi.c: Likewise.
+	* expr.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-cr16.c: Likewise.
+	* config/tc-crx.c: Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-metag.c: Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-rx.c: Likewise.
+	* config/tc-score.c: Likewise.
+	* config/tc-score7.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* config/obj-elf.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* depend.c: Spell fall through comments consistently.
+	* config/tc-arm.c: Likewise.
+	* config/tc-d10v.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-visium.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* as.h (as_assert): Add ATTRIBUTE_NORETURN.
 
 2016-10-06  Alan Modra  <amodra@gmail.com>

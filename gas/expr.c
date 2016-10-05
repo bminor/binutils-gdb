@@ -1008,6 +1008,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
       /* '~' is permitted to start a label on the Delta.  */
       if (is_name_beginner (c))
 	goto isname;
+      /* Fall through.  */
     case '!':
     case '-':
     case '+':

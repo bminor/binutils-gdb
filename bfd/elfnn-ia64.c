@@ -4485,6 +4485,7 @@ missing_tls_sec:
 		       rel->r_offset, input_section->size);
 		    break;
 		  }
+		/* Fall through.  */
 	      default:
 		(*info->callbacks->reloc_overflow) (info,
 						    &h->root,

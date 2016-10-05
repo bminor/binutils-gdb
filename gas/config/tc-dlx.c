@@ -780,6 +780,7 @@ machine_ip (char *str)
 	      reg_shift = 21;
 	      goto general_reg;
 	    }
+	  /* Fall through.  */
 
 	  /* The immediate 16 bits literal, bit 0-15.  */
 	case 'i':

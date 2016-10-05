@@ -1470,6 +1470,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 	  && h != NULL
 	  && ! SYMBOL_REFERENCES_LOCAL (info, h))
 	return bfd_reloc_dangerous;
+      /* Fall through.  */
     case R_MN10300_GOT32:
       /* Issue 2052223:
 	 Taking the address of a protected function in a shared library
