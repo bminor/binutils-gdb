@@ -668,7 +668,6 @@ symbol_set_language (struct general_symbol_info *gsymbol,
   if (gsymbol->language == language_cplus
       || gsymbol->language == language_d
       || gsymbol->language == language_go
-      || gsymbol->language == language_java
       || gsymbol->language == language_objc
       || gsymbol->language == language_fortran)
     {
@@ -787,25 +786,6 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
    comes from the per-BFD storage_obstack.  LINKAGE_NAME is copied,
    so the pointer can be discarded after calling this function.  */
 
-/* We have to be careful when dealing with Java names: when we run
-   into a Java minimal symbol, we don't know it's a Java symbol, so it
-   gets demangled as a C++ name.  This is unfortunate, but there's not
-   much we can do about it: but when demangling partial symbols and
-   regular symbols, we'd better not reuse the wrong demangled name.
-   (See PR gdb/1039.)  We solve this by putting a distinctive prefix
-   on Java names when storing them in the hash table.  */
-
-/* FIXME: carlton/2003-03-13: This is an unfortunate situation.  I
-   don't mind the Java prefix so much: different languages have
-   different demangling requirements, so it's only natural that we
-   need to keep language data around in our demangling cache.  But
-   it's not good that the minimal symbol has the wrong demangled name.
-   Unfortunately, I can't think of any easy solution to that
-   problem.  */
-
-#define JAVA_PREFIX "##JAVA$$"
-#define JAVA_PREFIX_LEN 8
-
 void
 symbol_set_names (struct general_symbol_info *gsymbol,
 		  const char *linkage_name, int len, int copy_name,
@@ -814,24 +794,13 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   struct demangled_name_entry **slot;
   /* A 0-terminated copy of the linkage name.  */
   const char *linkage_name_copy;
-  /* A copy of the linkage name that might have a special Java prefix
-     added to it, for use when looking names up in the hash table.  */
-  const char *lookup_name;
-  /* The length of lookup_name.  */
-  int lookup_len;
   struct demangled_name_entry entry;
   struct objfile_per_bfd_storage *per_bfd = objfile->per_bfd;
 
   if (gsymbol->language == language_ada)
     {
       /* In Ada, we do the symbol lookups using the mangled name, so
-         we can save some space by not storing the demangled name.
-
-         As a side note, we have also observed some overlap between
-         the C++ mangling and Ada mangling, similarly to what has
-         been observed with Java.  Because we don't store the demangled
-         name with the symbol, we don't need to use the same trick
-         as Java.  */
+         we can save some space by not storing the demangled name.  */
       if (!copy_name)
 	gsymbol->name = linkage_name;
       else
@@ -851,42 +820,20 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   if (per_bfd->demangled_names_hash == NULL)
     create_demangled_names_hash (objfile);
 
-  /* The stabs reader generally provides names that are not
-     NUL-terminated; most of the other readers don't do this, so we
-     can just use the given copy, unless we're in the Java case.  */
-  if (gsymbol->language == language_java)
+  if (linkage_name[len] != '\0')
     {
       char *alloc_name;
 
-      lookup_len = len + JAVA_PREFIX_LEN;
-      alloc_name = (char *) alloca (lookup_len + 1);
-      memcpy (alloc_name, JAVA_PREFIX, JAVA_PREFIX_LEN);
-      memcpy (alloc_name + JAVA_PREFIX_LEN, linkage_name, len);
-      alloc_name[lookup_len] = '\0';
-
-      lookup_name = alloc_name;
-      linkage_name_copy = alloc_name + JAVA_PREFIX_LEN;
-    }
-  else if (linkage_name[len] != '\0')
-    {
-      char *alloc_name;
-
-      lookup_len = len;
-      alloc_name = (char *) alloca (lookup_len + 1);
+      alloc_name = (char *) alloca (len + 1);
       memcpy (alloc_name, linkage_name, len);
-      alloc_name[lookup_len] = '\0';
+      alloc_name[len] = '\0';
 
-      lookup_name = alloc_name;
       linkage_name_copy = alloc_name;
     }
   else
-    {
-      lookup_len = len;
-      lookup_name = linkage_name;
-      linkage_name_copy = linkage_name;
-    }
+    linkage_name_copy = linkage_name;
 
-  entry.mangled = lookup_name;
+  entry.mangled = linkage_name_copy;
   slot = ((struct demangled_name_entry **)
 	  htab_find_slot (per_bfd->demangled_names_hash,
 			  &entry, INSERT));
@@ -903,7 +850,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       int demangled_len = demangled_name ? strlen (demangled_name) : 0;
 
       /* Suppose we have demangled_name==NULL, copy_name==0, and
-	 lookup_name==linkage_name.  In this case, we already have the
+	 linkage_name_copy==linkage_name.  In this case, we already have the
 	 mangled name saved, and we don't have a demangled name.  So,
 	 you might think we could save a little space by not recording
 	 this in the hash table at all.
@@ -911,14 +858,14 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 It turns out that it is actually important to still save such
 	 an entry in the hash table, because storing this name gives
 	 us better bcache hit rates for partial symbols.  */
-      if (!copy_name && lookup_name == linkage_name)
+      if (!copy_name && linkage_name_copy == linkage_name)
 	{
 	  *slot
 	    = ((struct demangled_name_entry *)
 	       obstack_alloc (&per_bfd->storage_obstack,
 			      offsetof (struct demangled_name_entry, demangled)
 			      + demangled_len + 1));
-	  (*slot)->mangled = lookup_name;
+	  (*slot)->mangled = linkage_name;
 	}
       else
 	{
@@ -931,9 +878,9 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	    = ((struct demangled_name_entry *)
 	       obstack_alloc (&per_bfd->storage_obstack,
 			      offsetof (struct demangled_name_entry, demangled)
-			      + lookup_len + demangled_len + 2));
+			      + len + demangled_len + 2));
 	  mangled_ptr = &((*slot)->demangled[demangled_len + 1]);
-	  strcpy (mangled_ptr, lookup_name);
+	  strcpy (mangled_ptr, linkage_name_copy);
 	  (*slot)->mangled = mangled_ptr;
 	}
 
@@ -946,7 +893,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	(*slot)->demangled[0] = '\0';
     }
 
-  gsymbol->name = (*slot)->mangled + lookup_len - len;
+  gsymbol->name = (*slot)->mangled;
   if ((*slot)->demangled[0] != '\0')
     symbol_set_demangled_name (gsymbol, (*slot)->demangled,
 			       &per_bfd->storage_obstack);
@@ -965,7 +912,6 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
     case language_cplus:
     case language_d:
     case language_go:
-    case language_java:
     case language_objc:
     case language_fortran:
       if (symbol_get_demangled_name (gsymbol) != NULL)
@@ -992,7 +938,6 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
     case language_cplus:
     case language_d:
     case language_go:
-    case language_java:
     case language_objc:
     case language_fortran:
       dem_name = symbol_get_demangled_name (gsymbol);
@@ -1852,7 +1797,7 @@ demangle_for_lookup (const char *name, enum language lang,
 
   modified_name = name;
 
-  /* If we are using C++, D, Go, or Java, demangle the name before doing a
+  /* If we are using C++, D, or Go, demangle the name before doing a
      lookup, so we can always binary search.  */
   if (lang == language_cplus)
     {
@@ -1872,16 +1817,6 @@ demangle_for_lookup (const char *name, enum language lang,
 	      modified_name = demangled_name;
 	      make_cleanup (xfree, demangled_name);
 	    }
-	}
-    }
-  else if (lang == language_java)
-    {
-      demangled_name = gdb_demangle (name,
-				     DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
-      if (demangled_name)
-	{
-	  modified_name = demangled_name;
-	  make_cleanup (xfree, demangled_name);
 	}
     }
   else if (lang == language_d)
@@ -2736,11 +2671,9 @@ symbol_matches_domain (enum language symbol_language,
 		       domain_enum domain)
 {
   /* For C++ "struct foo { ... }" also defines a typedef for "foo".
-     A Java class declaration also defines a typedef for the class.
      Similarly, any Ada type declaration implicitly defines a typedef.  */
   if (symbol_language == language_cplus
       || symbol_language == language_d
-      || symbol_language == language_java
       || symbol_language == language_ada)
     {
       if ((domain == VAR_DOMAIN || domain == STRUCT_DOMAIN)
@@ -5370,7 +5303,6 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
   /* Prepare SYM_TEXT_LEN for compare_symbol_name.  */
 
   if (current_language->la_language == language_cplus
-      || current_language->la_language == language_java
       || current_language->la_language == language_fortran)
     {
       /* These languages may have parameters entered by user but they are never

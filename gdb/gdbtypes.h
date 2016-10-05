@@ -926,10 +926,6 @@ struct cplus_struct_type
 
     int is_dynamic : 2;
 
-    /* * Non-zero if this type came from a Java CU.  */
-
-    unsigned int is_java : 1;
-
     /* * The base class which defined the virtual function table pointer.  */
 
     struct type *vptr_basetype;
@@ -1309,7 +1305,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define BASETYPE_VIA_PUBLIC(thistype, index) \
   ((!TYPE_FIELD_PRIVATE(thistype, index)) && (!TYPE_FIELD_PROTECTED(thistype, index)))
 #define TYPE_CPLUS_DYNAMIC(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_dynamic
-#define TYPE_CPLUS_REALLY_JAVA(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_java
 
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \

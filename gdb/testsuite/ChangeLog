@@ -1,3 +1,15 @@
+2016-10-06  Tom Tromey  <tom@tromey.com>
+
+	* gdb.compile/compile.exp: Change java tests to rust.
+	* gdb.base/setshow.exp: Change java tests to rust.
+	* gdb.base/default.exp: Remove java from language list.
+	* README (Examples): Update language example.
+	* gdb.python/py-lookup-type.exp (test_lookup_type): Remove java
+	test.
+	* lib/gdb.exp (skip_java_tests): Remove.
+	* lib/java.exp: Remove.
+	* gdb.java: Remove.
+
 2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* gdb.arch/mips-fcr.exp: New test.

@@ -1,3 +1,10 @@
+2016-10-06  Tom Tromey  <tom@tromey.com>
+
+	* guile.texi (Types In Guile): Remove Java mentions.
+	* python.texi (Types In Python): Remove Java mentions.
+	* gdb.texinfo (Address Locations, Supported Languages)
+	(Index Section Format): Remove Java mentions.
+
 2016-08-15  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Target Description Format): Update docs on "end"

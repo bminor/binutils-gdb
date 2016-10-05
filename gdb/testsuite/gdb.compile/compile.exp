@@ -322,9 +322,9 @@ gdb_test "show compile-args" \
     "Compile command command-line arguments are .*"
 gdb_test "compile code -z" "Unknown argument.*"
 
-gdb_test "set lang java" \
+gdb_test "set lang rust" \
     "Warning: the current language does not match this frame."
-gdb_test "compile code globalvar" "No compiler support for language java\\."
+gdb_test "compile code globalvar" "No compiler support for language rust\\."
 gdb_test_no_output "set lang auto"
 
 gdb_test_no_output "compile code union union_type newdecl_u"

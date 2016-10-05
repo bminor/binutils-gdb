@@ -196,9 +196,9 @@ extern void quit_serial_event_clear (void);
    Note that there's ambiguity between the mangling schemes of some of
    these languages, so some symbols could be successfully demangled by
    several languages.  For that reason, the constants here are sorted
-   in the order we'll attempt demangling them.  For example: Java and
-   Rust use C++ mangling, so must come after C++; Ada must come last
-   (see ada_sniff_from_mangled_name).  */
+   in the order we'll attempt demangling them.  For example: Rust uses
+   C++ mangling, so must come after C++; Ada must come last (see
+   ada_sniff_from_mangled_name).  */
 
 enum language
   {
@@ -207,7 +207,6 @@ enum language
     language_c,			/* C */
     language_objc,		/* Objective-C */
     language_cplus,		/* C++ */
-    language_java,		/* Java */
     language_d,			/* D */
     language_go,		/* Go */
     language_fortran,		/* Fortran */

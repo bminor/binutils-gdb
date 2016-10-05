@@ -3318,12 +3318,6 @@ find_linespec_symbols (struct linespec_state *state,
 	 name into namespaces${SCOPE_OPERATOR}class_name and method_name.  */
       scope_op = "::";
       p = find_toplevel_string (lookup_name, scope_op);
-      if (p == NULL)
-	{
-	  /* No C++ scope operator.  Try Java.  */
-	  scope_op = ".";
-	  p = find_toplevel_string (lookup_name, scope_op);
-	}
 
       last = NULL;
       while (p != NULL)

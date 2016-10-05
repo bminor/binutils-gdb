@@ -7941,7 +7941,7 @@ Any expression valid in the current working language.
 
 @item @var{funcaddr}
 An address of a function or procedure derived from its name.  In C,
-C@t{++}, Java, Objective-C, Fortran, minimal, and assembly, this is
+C@t{++}, Objective-C, Fortran, minimal, and assembly, this is
 simply the function's name @var{function} (and actually a special case
 of a valid expression).  In Pascal and Modula-2, this is
 @code{&@var{function}}.  In Ada, this is @code{@var{function}'Address}
@@ -14440,7 +14440,7 @@ being set automatically by @value{GDBN}.
 @node Supported Languages
 @section Supported Languages
 
-@value{GDBN} supports C, C@t{++}, D, Go, Objective-C, Fortran, Java,
+@value{GDBN} supports C, C@t{++}, D, Go, Objective-C, Fortran,
 OpenCL C, Pascal, Rust, assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
@@ -41653,7 +41653,7 @@ switch (die->tag)
     break;
   case DW_TAG_enumerator:
     kind = VARIABLE;
-    is_static = (language != CPLUS && language != JAVA);
+    is_static = language != CPLUS;
     break;
   case DW_TAG_subprogram:
     kind = FUNCTION;
@@ -41677,7 +41677,7 @@ switch (die->tag)
   case DW_TAG_union_type:
   case DW_TAG_enumeration_type:
     kind = TYPE;
-    is_static = (language != CPLUS && language != JAVA);
+    is_static = language != CPLUS;
     break;
   default:
     assert (0);

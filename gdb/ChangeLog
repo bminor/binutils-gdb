@@ -1,3 +1,42 @@
+2016-10-06  Tom Tromey  <tom@tromey.com>
+
+	* MAINTAINERS: Remove Java test maintainer.
+	* varobj.h (java_varobj_ops): Don't declare.
+	* valprint.h (struct value_print_options)
+	<pascal_static_field_print>: Update comment.
+	* utils.c (producer_is_gcc): Remove java reference.
+	* symtab.h (struct general_symbol_info): Remove java references.
+	(SYMBOL_SEARCH_NAME): Likewise.
+	* objfiles.c (allocate_objfile): Update comment.
+	* linespec.c (find_linespec_symbols): Remove java references.
+	* gnu-v3-abi.c (gnuv3_rtti_type, gnuv3_baseclass_offset): Remove
+	java references.
+	* gdbtypes.h (struct cplus_struct_type) <is_java>: Remove.
+	(TYPE_CPLUS_REALLY_JAVA): Remove.
+	* c-varobj.c (enum vsections): Update comment.
+	* symtab.c (symbol_set_language, symbol_set_names)
+	(symbol_natural_name, symbol_demangled_name)
+	(demangle_for_lookup, symbol_matches_domain)
+	(default_make_symbol_completion_list_break_on_1): Remove java
+	references.
+	(JAVA_PREFIX, JAVA_PREFIX_LEN): Remove.
+	* psymtab.c (match_partial_symbol, psymtab_search_name)
+	(lookup_partial_symbol): Remove java references.
+	* dwarf2read.c (find_slot_in_mapped_hash): Remove java references.
+	(add_partial_symbol, dwarf2_compute_name, dwarf2_physname)
+	(dwarf2_add_member_fn, is_vtable_name, read_structure_type)
+	(process_structure_scope, read_subroutine_type)
+	(read_subrange_type, load_partial_dies)
+	(new_symbol_full, determine_prefix, typename_concat)
+	(dwarf2_name): Remove java references.
+	(set_cu_language): Treat Java as C++.
+	* c-typeprint.c (c_type_print_args): Remove java reference.
+	* defs.h (enum language) <language_java>: Remove.
+	* Makefile.in (SFILES, HFILES_NO_SRCDIR, COMMON_OBS, YYFILES)
+	(YYOBJ, local-maintainer-clean): Don't mention java files.
+	* jv-exp.y, jv-lang.c, jv-lang.h, jv-typeprint.c, jv-valprint.c,
+	jv-varobj.c: Remove.
+
 2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-tdep.c (mips_pseudo_register_type): Make FCRs always

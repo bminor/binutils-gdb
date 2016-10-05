@@ -53,7 +53,6 @@
 #include "block.h"
 #include "addrmap.h"
 #include "typeprint.h"
-#include "jv-lang.h"
 #include "psympriv.h"
 #include <sys/stat.h>
 #include "completer.h"
@@ -3007,7 +3006,6 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
   int (*cmp) (const char *, const char *);
 
   if (current_language->la_language == language_cplus
-      || current_language->la_language == language_java
       || current_language->la_language == language_fortran
       || current_language->la_language == language_d)
     {
@@ -6757,8 +6755,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 /* Functions used to compute the fully scoped name of a partial DIE.
 
    Normally, this is simple.  For C++, the parent DIE's fully scoped
-   name is concatenated with "::" and the partial DIE's name.  For
-   Java, the same thing occurs except that "." is used instead of "::".
+   name is concatenated with "::" and the partial DIE's name.
    Enumerators are an exception; they use the scope of their parent
    enumeration type, i.e. the name of the enumeration type is not
    prepended to the enumerator.
@@ -7048,8 +7045,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   built_actual_name != NULL,
 			   STRUCT_DOMAIN, LOC_TYPEDEF,
-			   (cu->language == language_cplus
-			    || cu->language == language_java)
+			   cu->language == language_cplus
 			   ? &objfile->global_psymbols
 			   : &objfile->static_psymbols,
 			   0, cu->language, objfile);
@@ -7059,8 +7055,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_CONST,
-			   (cu->language == language_cplus
-			    || cu->language == language_java)
+			   cu->language == language_cplus
 			   ? &objfile->global_psymbols
 			   : &objfile->static_psymbols,
 			   0, cu->language, objfile);
@@ -8435,9 +8430,8 @@ do_ui_file_peek_last (void *object, const char *buffer, long length)
 
 /* Compute the fully qualified name of DIE in CU.  If PHYSNAME is nonzero,
    compute the physname for the object, which include a method's:
-   - formal parameters (C++/Java),
+   - formal parameters (C++),
    - receiver type (Go),
-   - return type (Java).
 
    The term "physname" is a bit confusing.
    For C++, for example, it is the demangled name.
@@ -8484,7 +8478,7 @@ dwarf2_compute_name (const char *name,
 
   /* These are the only languages we know how to qualify names in.  */
   if (name != NULL
-      && (cu->language == language_cplus || cu->language == language_java
+      && (cu->language == language_cplus
 	  || cu->language == language_fortran || cu->language == language_d
 	  || cu->language == language_rust))
     {
@@ -8635,27 +8629,18 @@ dwarf2_compute_name (const char *name,
 		}
 	    }
 
-	  /* For Java and C++ methods, append formal parameter type
+	  /* For C++ methods, append formal parameter type
 	     information, if PHYSNAME.  */
 
 	  if (physname && die->tag == DW_TAG_subprogram
-	      && (cu->language == language_cplus
-		  || cu->language == language_java))
+	      && cu->language == language_cplus)
 	    {
 	      struct type *type = read_type_die (die, cu);
 
 	      c_type_print_args (type, buf, 1, cu->language,
 				 &type_print_raw_options);
 
-	      if (cu->language == language_java)
-		{
-		  /* For java, we must append the return type to method
-		     names.  */
-		  if (die->tag == DW_TAG_subprogram)
-		    java_print_type (TYPE_TARGET_TYPE (type), "", buf,
-				     0, 0, &type_print_raw_options);
-		}
-	      else if (cu->language == language_cplus)
+	      if (cu->language == language_cplus)
 		{
 		  /* Assume that an artificial first parameter is
 		     "this", but do not crash if it is not.  RealView
@@ -8703,7 +8688,7 @@ dwarf2_compute_name (const char *name,
    not have a name.  NAME may either be from a previous call to
    dwarf2_name or NULL.
 
-   The output string will be canonicalized (if C++/Java).  */
+   The output string will be canonicalized (if C++).  */
 
 static const char *
 dwarf2_full_name (const char *name, struct die_info *die, struct dwarf2_cu *cu)
@@ -8716,7 +8701,7 @@ dwarf2_full_name (const char *name, struct die_info *die, struct dwarf2_cu *cu)
    allocated on the objfile_objstack or NULL if the DIE does not have a
    name.
 
-   The output string will be canonicalized (if C++/Java).  */
+   The output string will be canonicalized (if C++).  */
 
 static const char *
 dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
@@ -8768,10 +8753,7 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
       else
 	{
 	  demangled = gdb_demangle (mangled,
-				    (DMGL_PARAMS | DMGL_ANSI
-				     | (cu->language == language_java
-					? DMGL_JAVA | DMGL_RET_POSTFIX
-					: DMGL_RET_DROP)));
+				    (DMGL_PARAMS | DMGL_ANSI | DMGL_RET_DROP));
 	}
       if (demangled)
 	{
@@ -12901,7 +12883,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   fnp = &new_fnfield->fnfield;
 
   /* Delay processing of the physname until later.  */
-  if (cu->language == language_cplus || cu->language == language_java)
+  if (cu->language == language_cplus)
     {
       add_to_method_list (type, i, flp->length - 1, fieldname,
 			  die, cu);
@@ -13087,11 +13069,8 @@ is_vtable_name (const char *name, struct dwarf2_cu *cu)
   static const char vptr[] = "_vptr";
   static const char vtable[] = "vtable";
 
-  /* Look for the C++ and Java forms of the vtable.  */
-  if ((cu->language == language_java
-       && startswith (name, vtable))
-       || (startswith (name, vptr)
-       && is_cplus_marker (name[sizeof (vptr) - 1])))
+  /* Look for the C++ form of the vtable.  */
+  if (startswith (name, vptr) && is_cplus_marker (name[sizeof (vptr) - 1]))
     return 1;
 
   return 0;
@@ -13194,7 +13173,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   if (name != NULL)
     {
       if (cu->language == language_cplus
-	  || cu->language == language_java
 	  || cu->language == language_d
 	  || cu->language == language_rust)
 	{
@@ -13468,9 +13446,6 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
 
       do_cleanups (back_to);
-
-      if (HAVE_CPLUS_STRUCT (type))
-	TYPE_CPLUS_REALLY_JAVA (type) = cu->language == language_java;
     }
 
   quirk_gcc_member_function_pointer (type, objfile);
@@ -14675,19 +14650,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	      if (attr)
 		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = DW_UNSND (attr);
 	      else
-		{
-		  TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
-
-		  /* GCC/43521: In java, the formal parameter
-		     "this" is sometimes not marked with DW_AT_artificial.  */
-		  if (cu->language == language_java)
-		    {
-		      const char *name = dwarf2_name (child_die, cu);
-
-		      if (name && !strcmp (name, "this"))
-			TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 1;
-		    }
-		}
+		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 	      arg_type = die_type (child_die, cu);
 
 	      /* RealView does not mark THIS as const, which the testsuite
@@ -15023,7 +14986,6 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       low_default_is_valid = 1;
       break;
     case language_d:
-    case language_java:
     case language_objc:
     case language_rust:
       low.data.const_val = 0;
@@ -15741,8 +15703,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  else if (building_psymtab)
 	    add_psymbol_to_list (part_die->name, strlen (part_die->name), 0,
 				 VAR_DOMAIN, LOC_CONST,
-				 (cu->language == language_cplus
-				  || cu->language == language_java)
+				 cu->language == language_cplus
 				 ? &objfile->global_psymbols
 				 : &objfile->static_psymbols,
 				 0, cu->language, objfile);
@@ -17077,6 +17038,7 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_UPC:
       cu->language = language_c;
       break;
+    case DW_LANG_Java:
     case DW_LANG_C_plus_plus:
     case DW_LANG_C_plus_plus_11:
     case DW_LANG_C_plus_plus_14:
@@ -17097,9 +17059,6 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
       break;
     case DW_LANG_Mips_Assembler:
       cu->language = language_asm;
-      break;
-    case DW_LANG_Java:
-      cu->language = language_java;
       break;
     case DW_LANG_Ada83:
     case DW_LANG_Ada95:
@@ -18659,7 +18618,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 
 	  {
-	    /* NOTE: carlton/2003-11-10: C++ and Java class symbols shouldn't
+	    /* NOTE: carlton/2003-11-10: C++ class symbols shouldn't
 	       really ever be static objects: otherwise, if you try
 	       to, say, break of a class's method and you're in a file
 	       which doesn't mention that class, it won't work unless
@@ -18670,16 +18629,12 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    if (!suppress_add)
 	      {
 		list_to_add = (cu->list_in_scope == &file_symbols
-			       && (cu->language == language_cplus
-				   || cu->language == language_java)
+			       && cu->language == language_cplus
 			       ? &global_symbols : cu->list_in_scope);
 
 		/* The semantics of C++ state that "struct foo {
-		   ... }" also defines a typedef for "foo".  A Java
-		   class declaration also defines a typedef for the
-		   class.  */
+		   ... }" also defines a typedef for "foo".  */
 		if (cu->language == language_cplus
-		    || cu->language == language_java
 		    || cu->language == language_ada
 		    || cu->language == language_d
 		    || cu->language == language_rust)
@@ -18715,8 +18670,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	       DW_TAG_class_type, etc. block.  */
 
 	    list_to_add = (cu->list_in_scope == &file_symbols
-			   && (cu->language == language_cplus
-			       || cu->language == language_java)
+			   && cu->language == language_cplus
 			   ? &global_symbols : cu->list_in_scope);
 	  }
 	  break;
@@ -19354,7 +19308,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
   struct type *parent_type;
   char *retval;
 
-  if (cu->language != language_cplus && cu->language != language_java
+  if (cu->language != language_cplus
       && cu->language != language_fortran && cu->language != language_d
       && cu->language != language_rust)
     return "";
@@ -19510,8 +19464,6 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
   if (suffix == NULL || suffix[0] == '\0'
       || prefix == NULL || prefix[0] == '\0')
     sep = "";
-  else if (cu->language == language_java)
-    sep = ".";
   else if (cu->language == language_d)
     {
       /* For D, the 'main' function could be defined in any module, but it
@@ -19622,36 +19574,6 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       if (attr != NULL && DW_STRING (attr) != NULL)
 	return DW_STRING (attr);
       return CP_ANONYMOUS_NAMESPACE_STR;
-
-    case DW_TAG_subprogram:
-      /* Java constructors will all be named "<init>", so return
-	 the class name when we see this special case.  */
-      if (cu->language == language_java
-	  && DW_STRING (attr) != NULL
-	  && strcmp (DW_STRING (attr), "<init>") == 0)
-	{
-	  struct dwarf2_cu *spec_cu = cu;
-	  struct die_info *spec_die;
-
-	  /* GCJ will output '<init>' for Java constructor names.
-	     For this special case, return the name of the parent class.  */
-
-	  /* GCJ may output subprogram DIEs with AT_specification set.
-	     If so, use the name of the specified DIE.  */
-	  spec_die = die_specification (die, &spec_cu);
-	  if (spec_die != NULL)
-	    return dwarf2_name (spec_die, spec_cu);
-
-	  do
-	    {
-	      die = die->parent;
-	      if (die->tag == DW_TAG_class_type)
-		return dwarf2_name (die, cu);
-	    }
-	  while (die->tag != DW_TAG_compile_unit
-		 && die->tag != DW_TAG_partial_unit);
-	}
-      break;
 
     case DW_TAG_class_type:
     case DW_TAG_interface_type:

@@ -47,8 +47,6 @@ test_lookup_type "fortran" "character"
 
 test_lookup_type "go" "int32"
 
-test_lookup_type "java" "byte"
-
 test_lookup_type "modula-2" "CARDINAL"
 
 test_lookup_type "opencl" "ushort"

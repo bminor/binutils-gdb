@@ -3199,7 +3199,7 @@ producer_is_gcc (const char *producer, int *major, int *minor)
       if (minor == NULL)
 	minor = &min;
 
-      /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
+      /* Skip any identifier after "GNU " - such as "C11" or "C++".
 	 A full producer string might look like:
 	 "GNU C 4.7.2"
 	 "GNU Fortran 4.8.2 20140120 (Red Hat 4.8.2-16) -mtune=generic ..."
