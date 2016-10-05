@@ -130,7 +130,7 @@ static int    sub_op2;
 
 %}
 
-%name-prefix="rx_"
+%name-prefix "rx_"
 
 %union {
   int regno;

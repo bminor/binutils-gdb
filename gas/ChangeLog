@@ -1,3 +1,8 @@
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* config/rl78-parse.y: Don't use deprecated %name-prefix.
+	* config/rx-parse.y: Likewise.
+
 2016-09-29  Jiong Wang  <jiong.wang@arm.com>
 
 	PR target/20553
