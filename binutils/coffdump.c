@@ -267,6 +267,7 @@ dump_coff_where (struct coff_where *p)
       break;
     case coff_where_strtag:
       printf ("STRTAG");
+      break;
     case coff_where_entag:
       printf ("ENTAG");
       break;

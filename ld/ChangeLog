@@ -1,3 +1,8 @@
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (asymbol_from_plugin_symbol): Avoid compiler warning
+	by adding return.
+
 2016-10-04  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (Expression Section): Update result of arithmetic

@@ -1,5 +1,18 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-arc.c (find_opcode_match): Add missing break.
+	* config/tc-i960.c (get_cdisp): Likewise.
+	* config/tc-metag.c (parse_swap, md_apply_fix): Likewise.
+	* config/tc-mt.c (md_parse_option): Likewise.
+	* config/tc-nds32.c (nds32_apply_fix): Likewise.
+	* config/tc-hppa.c (pa_ip): Assert rather than testing last
+	condition of multiple if statements.
+	* config/tc-s390.c (s390_exp_compare): Return 0 on error.
+	* config/tc-tic4x.c (tic4x_operand_parse): Add as_bad and break
+	out of case rather than falling into next case.  Formatting.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* config/rl78-parse.y: Don't use deprecated %name-prefix.
 	* config/rx-parse.y: Likewise.
 

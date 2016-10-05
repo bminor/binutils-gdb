@@ -170,6 +170,7 @@ create_map (unsigned char *block,
 	    arc_extension_map.
 	      coreRegisters[number - FIRST_EXTENSION_CORE_REGISTER].name
 	      = xstrdup (name);
+	    break;
 	  }
 
 	case EXT_COND_CODE:

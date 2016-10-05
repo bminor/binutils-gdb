@@ -1,5 +1,12 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* coffcode.h (coff_slurp_symbol_table): Revert accidental commit
+	made 2015-01-08.
+	* elf32-nds32.c (nds32_elf_grok_psinfo): Add missing break.
+	* reloc.c (bfd_default_reloc_type_lookup): Add missing breaks.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* elf32-epiphany.c (epiphany_final_link_relocate): Use bitwise
 	OR in arithmetic expression, not boolean OR.
 

@@ -2040,6 +2040,7 @@ parse_swap (const char *line, metag_insn *insn,
 	  as_bad (_("PC, CT, TR and TT are treated as if they are a single unit but operands must be in different units"));
 	  return NULL;
 	}
+      break;
 
     default:
       /* Registers must be in different units.  */
@@ -7109,6 +7110,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
     case BFD_RELOC_64:
       md_number_to_chars (buf, value, 8);
+      break;
 
     case BFD_RELOC_METAG_RELBRANCH:
       if (!value)

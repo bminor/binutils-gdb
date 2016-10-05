@@ -3505,8 +3505,9 @@ pa_ip (char *str)
 			/* M bit is explicit in the major opcode.  */
 			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
 		      }
-		    else if (*args == 'e')
+		    else
 		      {
+			gas_assert (*args == 'e');
 			/* Stash the ma/mb flag temporarily in the
 			   instruction.  We will use (and remove it)
 			   later when handling 'J', 'K', '<' & '>'.  */

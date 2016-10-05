@@ -430,6 +430,8 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
 	default:
 	  einfo (_("%P%F: unknown ELF symbol visibility: %d!\n"),
 		 ldsym->visibility);
+	  return LDPS_ERR;
+
 	case LDPV_DEFAULT:
 	  visibility = STV_DEFAULT;
 	  break;

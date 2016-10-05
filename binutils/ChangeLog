@@ -1,3 +1,8 @@
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* coffdump.c (dump_coff_where): Add missing break.
+	* stabs.c (stab_xcoff_builtin_type): Likewise.
+
 2016-09-29  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_arch_specific): Call process_power_specific

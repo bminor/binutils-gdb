@@ -577,6 +577,7 @@ get_cdisp (const char *dispP, /* Displacement as specified in source instruction
     {
     case O_illegal:
       as_bad (_("expression syntax error"));
+      break;
 
     case O_symbol:
       if (S_GET_SEGMENT (e.X_add_symbol) == now_seg

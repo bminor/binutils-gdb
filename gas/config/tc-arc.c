@@ -1929,6 +1929,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		    case O_absent:
 		      if (!generic_reloc_p (operand->default_reloc))
 			goto match_failed;
+		      break;
 		    default:
 		      break;
 		    }

@@ -5055,14 +5055,14 @@ coff_slurp_symbol_table (bfd * abfd)
 #if defined(TIC80COFF) || defined(TICOFF)
 	    case C_UEXT:	/* Tentative external definition.  */
 #endif
+	    case C_EXTLAB:	/* External load time label.  */
+	    case C_HIDDEN:	/* Ext symbol in dmert public lib.  */
 	    default:
 	      _bfd_error_handler
 		(_("%B: Unrecognized storage class %d for %s symbol `%s'"),
 		 abfd, src->u.syment.n_sclass,
 		 dst->symbol.section->name, dst->symbol.name);
 	      ret = FALSE;
-	    case C_EXTLAB:	/* External load time label.  */
-	    case C_HIDDEN:	/* Ext symbol in dmert public lib.  */
 	      dst->symbol.flags = BSF_DEBUGGING;
 	      dst->symbol.value = (src->u.syment.n_value);
 	      break;

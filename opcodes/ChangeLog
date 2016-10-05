@@ -1,5 +1,11 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* arc-ext.c (create_map): Add missing break.
+	* msp430-decode.opc (encode_as): Likewise.
+	* msp430-decode.c: Regenerate.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* cr16-dis.c (print_insn_cr16): Don't use boolean OR in arithmetic.
 	* crx-dis.c (print_insn_crx): Likewise.
 

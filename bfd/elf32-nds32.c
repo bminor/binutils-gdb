@@ -3046,6 +3046,7 @@ nds32_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 	_bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
       elf_tdata (abfd)->core->command =
 	_bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+      break;
 
     default:
       return FALSE;

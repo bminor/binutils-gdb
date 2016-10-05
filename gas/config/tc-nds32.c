@@ -6605,6 +6605,7 @@ nds32_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  break;
 	case BFD_RELOC_64:
 	  md_number_to_chars (where, value, 8);
+	  break;
 	default:
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("Internal error: Unknown fixup type %d (`%s')"),
