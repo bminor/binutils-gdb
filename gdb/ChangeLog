@@ -1,3 +1,8 @@
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile: Remove i386/*-expedite. Add i386-expedite,
+	amd64-expedite, and x32-expedite.
+
 2016-10-05  Terry Guo  <terry.guo@arm.com>
 	    Yao Qi  <yao.qi@linaro.org>
 
