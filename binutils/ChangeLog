@@ -1,5 +1,18 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* cxxfilt.c (usage): Add ATTRIBUTE_NORETURN.
+	* elfedit.c (usage): Likewise.
+	* nm.c (usage): Likewise.
+	* objcopy.c (copy_usage, strip_usage): Likewise.
+	* srconv.c (show_usage): Likewise.
+	* strings.c (usage): Likewise.
+	* sysdump.c (show_usage): Likewise.
+	* srconv.c: Remove unneeded forward function declarations.
+	* strings.c: Likewise.
+	* sysdump.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* coffdump.c (dump_coff_where): Add missing break.
 	* stabs.c (stab_xcoff_builtin_type): Likewise.
 

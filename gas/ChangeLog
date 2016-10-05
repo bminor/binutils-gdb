@@ -1,5 +1,9 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* as.h (as_assert): Add ATTRIBUTE_NORETURN.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-arc.c (find_opcode_match): Add missing break.
 	* config/tc-i960.c (get_cdisp): Likewise.
 	* config/tc-metag.c (parse_swap, md_apply_fix): Likewise.
