@@ -727,7 +727,7 @@ print_insn_crx (bfd_vma memaddr, struct disassemble_info *info)
   /* Find a matching opcode in table.  */
   is_decoded = match_opcode ();
   /* If found, print the instruction's mnemonic and arguments.  */
-  if (is_decoded > 0 && (words[0] << 16 || words[1]) != 0)
+  if (is_decoded > 0 && (words[0] != 0 || words[1] != 0))
     {
       info->fprintf_func (info->stream, "%s", instruction->mnemonic);
       if ((currInsn.nargs = get_number_of_operands ()) != 0)

@@ -1,3 +1,8 @@
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* elf32-epiphany.c (epiphany_final_link_relocate): Use bitwise
+	OR in arithmetic expression, not boolean OR.
+
 2016-09-30  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (BFD_H_FILES): Add linker.c and simple.c.  Sort

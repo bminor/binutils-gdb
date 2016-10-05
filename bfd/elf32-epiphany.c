@@ -420,9 +420,10 @@ epiphany_final_link_relocate (reloc_howto_type *  howto,
       relocation += rel->r_addend;
       if ((unsigned int) relocation > 0x7ff)
 	return bfd_reloc_outofrange;
+      /* Fall through.  */
     disp11:
-      relocation = ((relocation & 7) << 5)
-	|| ((relocation & 0x7f8 )  << 13);
+      relocation = (((relocation & 7) << 5)
+		    | ((relocation & 0x7f8 ) << 13));
       return _bfd_relocate_contents (howto, input_bfd, relocation,
 				     contents + rel->r_offset);
 
