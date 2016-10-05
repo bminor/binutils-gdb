@@ -61,8 +61,8 @@ case "${target}" in
 			srv_xmlfiles="aarch64.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-core.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-fpu.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm-core.xml arm-vfpv3.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm-with-neon.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm/arm-core.xml arm/arm-vfpv3.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm/arm-with-neon.xml"
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			ipa_obj="linux-aarch64-ipa.o aarch64-ipa.o"

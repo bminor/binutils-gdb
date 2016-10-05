@@ -1,3 +1,7 @@
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Update the path of arm-*.xml files.
+
 2016-10-05  Terry Guo  <terry.guo@arm.com>
 	    Yao Qi  <yao.qi@linaro.org>
 
