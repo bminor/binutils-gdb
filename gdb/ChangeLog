@@ -1,3 +1,10 @@
+2016-10-05  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2expr.c (dwarf_expr_require_composition): Allow
+	DW_OP_GNU_uninit.
+	(execute_stack_op): Use dwarf_expr_require_composition instead of
+	copying its logic.
+
 2016-10-05  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	arc-tdep.c (arc_frame_prev_register): Remove annoying log message.

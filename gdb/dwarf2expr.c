@@ -401,16 +401,15 @@ safe_skip_leb128 (const gdb_byte *buf, const gdb_byte *buf_end)
 
 
 /* Check that the current operator is either at the end of an
-   expression, or that it is followed by a composition operator.  */
+   expression, or that it is followed by a composition operator or by
+   DW_OP_GNU_uninit (which should terminate the expression).  */
 
 void
 dwarf_expr_require_composition (const gdb_byte *op_ptr, const gdb_byte *op_end,
 				const char *op_name)
 {
-  /* It seems like DW_OP_GNU_uninit should be handled here.  However,
-     it doesn't seem to make sense for DW_OP_*_value, and it was not
-     checked at the other place that this function is called.  */
-  if (op_ptr != op_end && *op_ptr != DW_OP_piece && *op_ptr != DW_OP_bit_piece)
+  if (op_ptr != op_end && *op_ptr != DW_OP_piece && *op_ptr != DW_OP_bit_piece
+      && *op_ptr != DW_OP_GNU_uninit)
     error (_("DWARF-2 expression error: `%s' operations must be "
 	     "used either alone or in conjunction with DW_OP_piece "
 	     "or DW_OP_bit_piece."),
@@ -818,13 +817,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_reg29:
 	case DW_OP_reg30:
 	case DW_OP_reg31:
-	  if (op_ptr != op_end 
-	      && *op_ptr != DW_OP_piece
-	      && *op_ptr != DW_OP_bit_piece
-	      && *op_ptr != DW_OP_GNU_uninit)
-	    error (_("DWARF-2 expression error: DW_OP_reg operations must be "
-		     "used either alone or in conjunction with DW_OP_piece "
-		     "or DW_OP_bit_piece."));
+	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_reg");
 
 	  result = op - DW_OP_reg0;
 	  result_val = value_from_ulongest (address_type, result);
