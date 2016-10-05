@@ -7,7 +7,7 @@
 
 2016-10-05  Anton Kolesov  <anton.kolesov@synopsys.com>
 
-	arc-tdep.c (arc_frame_prev_register): Remove annoying log message.
+	* arc-tdep.c (arc_frame_prev_register): Remove annoying log message.
 
 2016-10-05  Yao Qi  <yao.qi@linaro.org>
 
