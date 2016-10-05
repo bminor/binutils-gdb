@@ -10673,8 +10673,7 @@ Target_mips<size, big_endian>::Scan::local(
           // no symbol (e.g. part of a compound relocation).
           if (r_sym == 0)
             break;
-
-          // FALLTHROUGH
+	  // Fall through.
 
         case elfcpp::R_MIPS16_26:
         case elfcpp::R_MIPS_26:
@@ -10903,7 +10902,6 @@ Target_mips<size, big_endian>::Scan::global(
       // Most static relocations require pointer equality, except
       // for branches.
       mips_sym->set_pointer_equality_needed();
-
       // Fall through.
 
     case elfcpp::R_MIPS_26:
@@ -11183,8 +11181,7 @@ Target_mips<size, big_endian>::Scan::global(
           // and has a special meaning.
           if (!mips_obj->is_newabi() && strcmp(gsym->name(), "_gp_disp") == 0)
             break;
-
-          // FALLTHROUGH
+	  // Fall through.
 
         case elfcpp::R_MIPS16_26:
         case elfcpp::R_MIPS_26:

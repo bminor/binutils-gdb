@@ -1,3 +1,19 @@
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* aarch64.cc: Spell fall through comments as "// Fall through.".
+	* arm.cc: Likewise.
+	* mips.cc: Likewise.
+	* powerpc.cc: Likewise.
+	* s390.cc: Likewise.
+	* sparc.cc: Likewise.
+	* x86_64.cc: Likewise.
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Add missing
+	fall through comments.
+	* sparc.cc: (Target_sparc::Scan::global): Likewise.
+	(Target_sparc::Relocate::relocate): Likewise.
+	* tilegx.cc (Target_tilegx::Relocate::relocate): Likewise.
+	* resolve.cc (symbol_to_bits): Add missing break.
+
 2016-09-26  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/20238
