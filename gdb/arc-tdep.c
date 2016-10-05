@@ -876,9 +876,6 @@ static struct value *
 arc_frame_prev_register (struct frame_info *this_frame,
 			 void **this_cache, int regnum)
 {
-  if (arc_debug)
-    debug_printf ("arc: frame_prev_register (regnum = %d)\n", regnum);
-
   if (*this_cache == NULL)
     *this_cache = arc_make_frame_cache (this_frame);
   struct arc_frame_cache *cache = (struct arc_frame_cache *) (*this_cache);
