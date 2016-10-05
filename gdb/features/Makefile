@@ -68,6 +68,9 @@ WHICH = aarch64 \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
 	rs6000/powerpc-vsx64l rs6000/powerpc-cell32l rs6000/powerpc-cell64l \
+	rs6000/powerpc-isa205-32l rs6000/powerpc-isa205-64l \
+	rs6000/powerpc-isa205-altivec32l rs6000/powerpc-isa205-altivec64l \
+	rs6000/powerpc-isa205-vsx32l rs6000/powerpc-isa205-vsx64l \
 	s390-linux32 s390-linux64 s390x-linux64 \
 	s390-linux32v1 s390-linux64v1 s390x-linux64v1 \
 	s390-linux32v2 s390-linux64v2 s390x-linux64v2 \
