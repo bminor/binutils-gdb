@@ -1,3 +1,7 @@
+2016-10-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-signal.exp (backtrace 10): Fix #2 typo.
+
 2016-10-05  Yao Qi  <yao.qi@linaro.org>
 
 	* lib/gdb.exp (support_complex_tests): Return zero if
