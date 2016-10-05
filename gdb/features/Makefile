@@ -215,6 +215,10 @@ XMLTOC = \
 	s390x-linux64v1.xml \
 	s390x-linux64v2.xml \
 	s390x-te-linux64.xml \
+	s390-tevx-linux64.xml \
+	s390-vx-linux64.xml \
+	s390x-tevx-linux64.xml \
+	s390x-vx-linux64.xml \
 	tic6x-c62x-linux.xml \
 	tic6x-c62x.xml \
 	tic6x-c64x-linux.xml \

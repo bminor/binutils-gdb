@@ -1,5 +1,11 @@
 2016-10-05  Yao Qi  <yao.qi@linaro.org>
 
+	* features/Makefile (XMLTOC): Add s390-tevx-linux64.xml,
+	s390-vx-linux64.xml, s390x-tevx-linux64.xml and
+	s390x-vx-linux64.xml.
+
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
 	* features/Makefile: Remove i386/*-expedite. Add i386-expedite,
 	amd64-expedite, and x32-expedite.
 
