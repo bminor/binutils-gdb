@@ -1,5 +1,10 @@
 2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* gdb.arch/mips-fcr.exp: New test.
+	* gdb.arch/mips-fcr.c: Source for the new test.
+
+2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* gdb.base/solib-disc.exp: Use `standard_output_file'
 	throughout.
 
