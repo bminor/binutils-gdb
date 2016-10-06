@@ -1,5 +1,11 @@
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Add fall
+	through comment.
+	* tilegx.cc (Target_tilegx::Relocate::relocate): Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
 	* aarch64.cc: Spell fall through comments as "// Fall through.".
 	* arm.cc: Likewise.
 	* mips.cc: Likewise.

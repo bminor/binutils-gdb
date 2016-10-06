@@ -4649,10 +4649,8 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
               } // else if (opt_t == tls::TLSOPT_TO_LE)
                 //   both GD/IE are turned into LE, which
                 //   is absolute relocation.
-                //
-                //  |  go through
-                //  |
-                //  V
+                // Fall through.
+
             // LE
             //
             // tp

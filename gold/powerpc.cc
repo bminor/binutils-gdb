@@ -8007,6 +8007,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  maybe_dq_reloc = true;
 	  break;
 	}
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR16:
     case elfcpp::R_POWERPC_REL16:
     case elfcpp::R_PPC64_TOC16:
