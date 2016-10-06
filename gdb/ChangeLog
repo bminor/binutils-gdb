@@ -1,3 +1,19 @@
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* cp-valprint.c (vtbl_ptr_name): Write "extern const" instead of
+	EXPORTED_CONST.
+	* stub-termcap.c: Remove __cplusplus checks.
+	* common/common-defs.h [!__cplusplus] (EXTERN_C, EXTERN_C_PUSH,
+	EXTERN_C_POP): Delete.
+	* common/common-exceptions.h (GDB_XCPT_SJMP): Update comments.
+	(GDB_XCPT) [!__cplusplus]: Delete.
+	(throw_exception, throw_exception_sjlj): Update comments.
+	* guile/guile-internal.h (as_a_scm_t_subr) [!__cplusplus]: Delete.
+	* guile/guile.c (extension_language_guile): Write "extern const"
+	instead of EXPORTED_CONST.
+	* features/feature_to_c.sh: Don't emit !__cplusplus code.  Write
+	"extern const" instead of EXPORTED_CONST.
+
 2016-10-06  Doug Evans  <dje@google.com>
 
 	* python/py-value.c (valpy_long): Handle unsigned values.

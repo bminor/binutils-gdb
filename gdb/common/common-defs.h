@@ -75,14 +75,8 @@
 #include "cleanups.h"
 #include "common-exceptions.h"
 
-#ifdef __cplusplus
-# define EXTERN_C extern "C"
-# define EXTERN_C_PUSH extern "C" {
-# define EXTERN_C_POP }
-#else
-# define EXTERN_C extern
-# define EXTERN_C_PUSH
-# define EXTERN_C_POP
-#endif
+#define EXTERN_C extern "C"
+#define EXTERN_C_PUSH extern "C" {
+#define EXTERN_C_POP }
 
 #endif /* COMMON_DEFS_H */

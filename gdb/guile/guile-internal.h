@@ -50,8 +50,6 @@ typedef struct
 
 #define END_VARIABLES { NULL, SCM_BOOL_F, NULL }
 
-#ifdef __cplusplus
-
 /* Although scm_t_subr is meant to hold a function pointer, at least
    in some versions of guile, it is actually a typedef to "void *".
    That means that in C++, an explicit cast is necessary to convert
@@ -88,12 +86,6 @@ as_a_scm_t_subr (SCM (*func) (SCM, SCM, SCM))
   return (scm_t_subr) func;
 }
 
-#else
-
-/* In C, just do an implicit conversion.  */
-#define as_a_scm_t_subr(func) func
-
-#endif
 /* Scheme functions to define during initialization.  */
 
 typedef struct
