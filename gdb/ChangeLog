@@ -1,3 +1,7 @@
+2016-10-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* frame.h: Forward-declare struct ui_out.
+
 2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-tdep.c (mips_pseudo_register_type): Make FCRs always
