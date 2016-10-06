@@ -54,10 +54,15 @@ proc test_value_creation {} {
   if { $gdb_py_is_py3k == 0 } {
     gdb_py_test_silent_cmd "python i = gdb.Value (5L)" "create long value" 1
   }
+
+  gdb_py_test_silent_cmd "python l = gdb.Value(0xffffffff12345678)" "create large unsigned 64-bit value" 1
+  gdb_test "python print long(l)" "18446744069720004216" "large unsigned 64-bit int conversion to python"
+
   gdb_py_test_silent_cmd "python f = gdb.Value (1.25)" "create double value" 1
   gdb_py_test_silent_cmd "python a = gdb.Value ('string test')" "create 8-bit string value" 1
   gdb_test "python print (a)" "\"string test\"" "print 8-bit string"
   gdb_test "python print (a.__class__)" "<(type|class) 'gdb.Value'>" "verify type of 8-bit string"
+
   if { $gdb_py_is_py3k == 0 } {
     gdb_py_test_silent_cmd "python a = gdb.Value (u'unicode test')" "create unicode value" 1
     gdb_test "python print (a)" "\"unicode test\"" "print Unicode string"

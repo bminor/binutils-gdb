@@ -1,3 +1,7 @@
+2016-10-06  Doug Evans  <dje@google.com>
+
+	* python/py-value.c (valpy_long): Handle unsigned values.
+
 2016-10-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* frame.h: Forward-declare struct ui_out.

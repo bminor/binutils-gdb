@@ -1,3 +1,8 @@
+2016-10-06  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-value.exp (test_value_creation): Add test for large
+	unsigned 64-bit value.
+
 2016-10-06  Tom Tromey  <tom@tromey.com>
 
 	* gdb.compile/compile.exp: Change java tests to rust.
