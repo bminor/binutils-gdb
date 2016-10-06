@@ -250,7 +250,6 @@ annotate_source (Source_File *sf, unsigned int max_width,
 	      (*annote) (annotation, max_width, line_num, arg);
 	      fputs (annotation, ofp);
 	      ++line_num;
-	      new_line = FALSE;
 	    }
 
 	  new_line = (buf[i] == '\n');

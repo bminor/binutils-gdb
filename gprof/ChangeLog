@@ -1,3 +1,9 @@
+2016-10-06  Tom Tromey  <tromey@sourceware.org>
+
+	PR gprof/20656
+	* source.c (annotate_source): Delete redundant assignment to
+	new_line.
+
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
 	* gprof.c: Add missing fall through comments.
