@@ -15,9 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* Simple standalone program using the JIT API.  */
-
-#include "jit-simple-jit.c"
+/* A stub program that links with a simple library that uses the JIT
+   API.  */
 
 int
 main (void)

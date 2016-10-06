@@ -1,5 +1,20 @@
 2016-10-06  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/jit-simple-dl.c: New file.
+	* gdb.base/jit-simple-jit.c: New file, factored out from ...
+	* gdb.base/jit-simple.c: ... this.
+	* gdb.base/jit-simple.exp (jit_run): Delete.
+	(build_jit): New proc.
+	(jit_test_reread): Recompile either the main program or the shared
+	library, depending on what is being tested.  Skip changing address
+	if caller wants to.  Compare before/after addresses.  If testing
+	standalone, explicitly load the binary.  Test "maint info
+	breakpoints".
+	(top level): Add "standalone vs shared lib" and "change address"
+	vs "same address" axes.
+
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/jit-simple.exp (top level) Delete get_compiler_info
 	call.
 	(jit_run): Delete.

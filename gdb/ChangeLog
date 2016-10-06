@@ -1,3 +1,8 @@
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* jit.c (free_objfile_data): Delete the JIT breakpoint and clear
+	the cached code address.
+
 2016-10-03  Simon Marchi  <simark@simark.ca>
 
 	* infrun.c (restore_current_uiout_cleanup): Move to ui-out.c.
