@@ -77,6 +77,7 @@ struct frame_base;
 struct block;
 struct gdbarch;
 struct ui_file;
+struct ui_out;
 
 /* Status of a given frame's stack.  */
 
