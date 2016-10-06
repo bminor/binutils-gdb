@@ -40722,16 +40722,13 @@ Bitfield values may be named with the empty string, @samp{""},
 in which case the field is ``filler'' and its value is not printed.
 Not all bits need to be specified, so ``filler'' fields are optional.
 
-The @var{start} value is required, and @var{end} and @var{type}
-are optional.
+The @var{start} and @var{end} values are required, and @var{type}
+is optional.
 The field's @var{start} must be less than or equal to its @var{end},
 and zero represents the least significant bit.
-The default value of @var{end} is @var{start}, a single bit field.
 
-The default value of @var{type} depends on whether the
-@var{end} was specified.  If @var{end} is specified then the default
-value of @var{type} is an unsigned integer.  If @var{end} is unspecified
-then the default value of @var{type} is @code{bool}.
+The default value of @var{type} is @code{bool} for single bit fields,
+and an unsigned integer otherwise.
 
 Which to choose?  Structures or flags?
 

@@ -1,3 +1,9 @@
+2016-08-15  Doug Evans  <dje@google.com>
+
+	* gdb.xml/extra-regs.xml: Update, end field now required, default type
+	for single bitfields is bool.
+	* gdb.xml/tdesc-regs.exp: Ditto.
+
 2016-10-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/i386-signal.exp (backtrace 10): Fix #2 typo.

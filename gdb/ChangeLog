@@ -1,3 +1,30 @@
+2016-10-06  Doug Evans  <dje@google.com>
+
+	* features/aarch64-core.xml (cpsr_flags): Elide "type" and specify
+	"end" in all fields.
+	* features/aarch64.c: Regenerate.
+	* features/i386/32bit-mpx.xml (_bndcfgu): Specify type of "preserved"
+	and "enabled" fields. Correct size of "enabled" field.
+	* features/i386/64bit-mpx.xml (_bndcfgu): Specify type of "preserved"
+	and "enabled" fields.
+	* features/i386/i386-avx-mpx-linux.c: Regenerate.
+	* features/i386/i386-avx-mpx.c: Regenerate.
+	* features/i386/i386-avx512-linux.c: Regenerate.
+	* features/i386/i386-avx512.c: Regenerate.
+	* features/i386/i386-mpx-linux.c: Regenerate.
+	* features/i386/i386-mpx.c: Regenerate.
+	* features/arc-arcompact.c: Regenerate.
+	* features/arc-v2.c: Regenerate.
+	* xml-tdesc.c (tdesc_start_field): Require "end" spec.  Single bit
+	fields default to "bool" type.
+
+	Revert 2016-03-15  Doug Evans  <dje@google.com>
+	* features/i386/32bit-core.xml (i386_eflags): Remove "end" spec.
+	* features/i386/32bit-sse.xml (i386_eflags): Ditto.
+	* features/i386/64bit-core.xml (i386_eflags): Ditto.
+	* features/i386/64bit-sse.xml (i386_eflags): Ditto.
+	* features/i386/x32-core.xml (i386_eflags): Ditto.
+
 2016-10-05  Tom Tromey  <tom@tromey.com>
 
 	PR breakpoints/20653:

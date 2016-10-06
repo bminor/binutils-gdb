@@ -54,19 +54,19 @@ initialize_tdesc_arc_arcompact (void)
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.arc.aux-minimal");
   type = tdesc_create_flags (feature, "status32_type", 4);
-  tdesc_add_bitfield (type, "H", 0, 0);
+  tdesc_add_flag (type, 0, "H");
   tdesc_add_bitfield (type, "E", 1, 2);
   tdesc_add_bitfield (type, "A", 3, 4);
-  tdesc_add_bitfield (type, "AE", 5, 5);
-  tdesc_add_bitfield (type, "DE", 6, 6);
-  tdesc_add_bitfield (type, "U", 7, 7);
-  tdesc_add_bitfield (type, "V", 8, 8);
-  tdesc_add_bitfield (type, "C", 9, 9);
-  tdesc_add_bitfield (type, "N", 10, 10);
-  tdesc_add_bitfield (type, "Z", 11, 11);
-  tdesc_add_bitfield (type, "L", 12, 12);
-  tdesc_add_bitfield (type, "R", 13, 13);
-  tdesc_add_bitfield (type, "SE", 14, 14);
+  tdesc_add_flag (type, 5, "AE");
+  tdesc_add_flag (type, 6, "DE");
+  tdesc_add_flag (type, 7, "U");
+  tdesc_add_flag (type, 8, "V");
+  tdesc_add_flag (type, 9, "C");
+  tdesc_add_flag (type, 10, "N");
+  tdesc_add_flag (type, 11, "Z");
+  tdesc_add_flag (type, 12, "L");
+  tdesc_add_flag (type, 13, "R");
+  tdesc_add_flag (type, 14, "SE");
 
   tdesc_create_reg (feature, "pc", 34, 1, NULL, 32, "code_ptr");
   tdesc_create_reg (feature, "status32", 35, 1, NULL, 32, "status32_type");

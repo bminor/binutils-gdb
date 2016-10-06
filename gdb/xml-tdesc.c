@@ -382,13 +382,19 @@ tdesc_start_field (struct gdb_xml_parser *parser,
     {
       struct tdesc_type *t = data->current_type;
 
+      /* Older versions of gdb can't handle elided end values.
+         Stick with that for now, to help ensure backward compatibility.
+	 E.g., If a newer gdbserver is talking to an older gdb.  */
+      if (end == -1)
+	gdb_xml_error (parser, _("Missing end value"));
+
       if (data->current_type_size == 0)
 	gdb_xml_error (parser,
 		       _("Bitfields must live in explicitly sized types"));
 
       if (field_type_id != NULL
 	  && strcmp (field_type_id, "bool") == 0
-	  && !(start == end || end == -1))
+	  && start != end)
 	{
 	  gdb_xml_error (parser,
 			 _("Boolean fields must be one bit in size"));
@@ -400,29 +406,20 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 			 "64 bits (unsupported)"),
 		       field_name);
 
-      if (end != -1)
-	{
-	  /* Assume that the bit numbering in XML is "lsb-zero".  Most
-	     architectures other than PowerPC use this ordering.  In the
-	     future, we can add an XML tag to indicate "msb-zero"
-	     numbering.  */
-	  if (start > end)
-	    gdb_xml_error (parser, _("Bitfield \"%s\" has start after end"),
-			   field_name);
-	  if (end >= data->current_type_size * TARGET_CHAR_BIT)
-	    gdb_xml_error (parser,
-			   _("Bitfield \"%s\" does not fit in struct"));
-	}
+      /* Assume that the bit numbering in XML is "lsb-zero".  Most
+	 architectures other than PowerPC use this ordering.  In the
+	 future, we can add an XML tag to indicate "msb-zero" numbering.  */
+      if (start > end)
+	gdb_xml_error (parser, _("Bitfield \"%s\" has start after end"),
+		       field_name);
+      if (end >= data->current_type_size * TARGET_CHAR_BIT)
+	gdb_xml_error (parser,
+		       _("Bitfield \"%s\" does not fit in struct"));
 
-      if (end == -1)
-	{
-	  if (field_type != NULL)
-	    tdesc_add_typed_bitfield (t, field_name, start, start, field_type);
-	  else
-	    tdesc_add_flag (t, start, field_name);
-	}
-      else if (field_type != NULL)
+      if (field_type != NULL)
 	tdesc_add_typed_bitfield (t, field_name, start, end, field_type);
+      else if (start == end)
+	tdesc_add_flag (t, start, field_name);
       else
 	tdesc_add_bitfield (t, field_name, start, end);
     }
