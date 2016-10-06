@@ -108,21 +108,6 @@ static linkclass decodelist = NULL;
 
 /* Functions implementation.  */
 
-/* Return TRUE when two classes are not opcode conflicting.  */
-
-static bfd_boolean
-is_compatible_p (insn_class_t     classA,
-		 insn_subclass_t  sclassA,
-		 insn_class_t     classB,
-		 insn_subclass_t  sclassB)
-{
-  if (classA == DSP && sclassB == DPX)
-    return FALSE;
-  if (sclassA == DPX && classB == DSP)
-    return FALSE;
-  return TRUE;
-}
-
 /* Add a new element to the decode list.  */
 
 static void
@@ -141,54 +126,34 @@ add_to_decodelist (insn_class_t     insn_class,
    disassembled.  */
 
 static bfd_boolean
-skip_this_opcode (const struct arc_opcode *  opcode,
-		  struct disassemble_info *  info)
+skip_this_opcode (const struct arc_opcode *opcode)
 {
   linkclass t = decodelist;
-  bfd_boolean addme = TRUE;
 
   /* Check opcode for major 0x06, return if it is not in.  */
   if (arc_opcode_len (opcode) == 4
       && OPCODE_32BIT_INSN (opcode->opcode) != 0x06)
     return FALSE;
 
-  while (t != NULL
-	 && is_compatible_p (t->insn_class, t->subclass,
-			     opcode->insn_class, opcode->subclass))
+  /* or not a known truble class.  */
+  switch (opcode->insn_class)
+    {
+    case FLOAT:
+    case DSP:
+      break;
+    default:
+      return FALSE;
+    }
+
+  while (t != NULL)
     {
       if ((t->insn_class == opcode->insn_class)
 	  && (t->subclass == opcode->subclass))
-	addme = FALSE;
+	return FALSE;
       t = t->nxt;
     }
 
-  /* If we found an incompatibility then we must skip.  */
-  if (t != NULL)
-    return TRUE;
-
-  /* Even if we do not precisely know the if the right mnemonics
-     is correctly displayed, keep the disassmbled code class
-     consistent.  */
-  if (addme)
-    {
-      switch (opcode->insn_class)
-	{
-	case DSP:
-	case FLOAT:
-	  /* Add to the conflict list only the classes which
-	     counts.  */
-	  add_to_decodelist (opcode->insn_class, opcode->subclass);
-	  /* Warn if we have to decode an opcode and no preferred
-	     classes have been chosen.  */
-	  info->fprintf_func (info->stream, _("\n\
-Warning: disassembly may be wrong due to guessed opcode class choice.\n\
- Use -M<class[,class]> to select the correct opcode class(es).\n\t\t\t\t"));
-	  break;
-	default:
-	  break;
-	}
-    }
-  return FALSE;
+  return TRUE;
 }
 
 static bfd_vma
@@ -243,8 +208,10 @@ find_format_from_table (struct disassemble_info *info,
 {
   unsigned int i = 0;
   const struct arc_opcode *opcode = NULL;
+  const struct arc_opcode *t_op = NULL;
   const unsigned char *opidx;
   const unsigned char *flgidx;
+  bfd_boolean warn_p = FALSE;
 
   do
     {
@@ -337,14 +304,28 @@ find_format_from_table (struct disassemble_info *info,
 	continue;
 
       if (insn_len == 4
-	  && overlaps
-	  && skip_this_opcode (opcode, info))
-	continue;
+	  && overlaps)
+	{
+	  warn_p = TRUE;
+	  t_op = opcode;
+	  if (skip_this_opcode (opcode))
+	    continue;
+	}
 
       /* The instruction is valid.  */
       return opcode;
     }
   while (opcode->mask);
+
+  if (warn_p)
+    {
+      info->fprintf_func (info->stream,
+			  _("\nWarning: disassembly may be wrong due to "
+			    "guessed opcode class choice.\n"
+			    "Use -M<class[,class]> to select the correct "
+			    "opcode class(es).\n\t\t\t\t"));
+      return t_op;
+    }
 
   return NULL;
 }
@@ -694,18 +675,22 @@ parse_option (char *option)
     add_to_decodelist (FLOAT, DPX);
 
   else if (CONST_STRNEQ (option, "quarkse_em"))
-    add_to_decodelist (FLOAT, QUARKSE);
+    {
+      add_to_decodelist (FLOAT, DPX);
+      add_to_decodelist (FLOAT, SPX);
+      add_to_decodelist (FLOAT, QUARKSE);
+    }
 
   else if (CONST_STRNEQ (option, "fpuda"))
     add_to_decodelist (FLOAT, DPA);
 
-  else if (CONST_STRNEQ (option, "fpud"))
+  else if (CONST_STRNEQ (option, "fpus"))
     {
       add_to_decodelist (FLOAT, SP);
       add_to_decodelist (FLOAT, CVT);
     }
 
-  else if (CONST_STRNEQ (option, "fpus"))
+  else if (CONST_STRNEQ (option, "fpud"))
     {
       add_to_decodelist (FLOAT, DP);
       add_to_decodelist (FLOAT, CVT);

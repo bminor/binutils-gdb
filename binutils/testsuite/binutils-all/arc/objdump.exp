@@ -46,7 +46,7 @@ if [is_remote host] {
 
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble $objfile"]
 
-set want "Warning: disassembly.*dsubh12\[ \t\]*r0,r2,r4.*dmulh12.f\[ \t\]*r0,r2,r4.*dmulh11.f"
+set want "Warning: disassembly.*vmac2hnfr\[ \t\]*r0,r2,r4.*dmulh12.f\[ \t\]*r0,r2,r4.*dmulh11.f"
 
 if [regexp $want $got] then {
     pass "Warning test"
