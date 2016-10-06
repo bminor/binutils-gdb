@@ -1079,6 +1079,13 @@ mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (mips_float_register_p (gdbarch, rawnum))
     return rawtype;
 
+  /* Floating-point control registers are always 32-bit even though for
+     backwards compatibility reasons 64-bit targets will transfer them
+     as 64-bit quantities even if using XML descriptions.  */
+  if (rawnum == mips_regnum (gdbarch)->fp_control_status
+      || rawnum == mips_regnum (gdbarch)->fp_implementation_revision)
+    return builtin_type (gdbarch)->builtin_int32;
+
   /* Use pointer types for registers if we can.  For n32 we can not,
      since we do not have a 64-bit pointer type.  */
   if (mips_abi_regsize (gdbarch)
@@ -1111,7 +1118,7 @@ mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
      with the displayed type.  */
   if (gdbarch_osabi (gdbarch) != GDB_OSABI_IRIX
       && gdbarch_osabi (gdbarch) != GDB_OSABI_LINUX
-      && rawnum >= MIPS_EMBED_FP0_REGNUM + 32
+      && rawnum >= MIPS_FIRST_EMBED_REGNUM
       && rawnum <= MIPS_LAST_EMBED_REGNUM)
     return builtin_type (gdbarch)->builtin_int32;
 
