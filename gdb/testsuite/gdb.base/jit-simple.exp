@@ -18,16 +18,6 @@ if {[skip_shlib_tests]} {
     return -1
 }
 
-if {[get_compiler_info]} {
-    warning "Could not get compiler info"
-    untested jit-simple.exp
-    return 1
-}
-
-#
-# test running programs
-#
-
 standard_testfile
 
 if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
@@ -35,39 +25,43 @@ if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1
 }
 
-# A helper for jit_test_reread that invokes gdb_run_cmd.
-proc jit_run {msg} {
-    global decimal gdb_prompt
-
-    gdb_run_cmd
-    gdb_test "" "Inferior .* exited.*" $msg
-}
-
 # Test re-running an inferior with a JIT descriptor, where the JIT
 # descriptor changes address between runs.
 # http://sourceware.org/bugzilla/show_bug.cgi?id=13431
 proc jit_test_reread {} {
     global testfile binfile subdir srcfile srcdir
+    global hex
 
-    clean_restart $testfile
-
-    # jit_run "initial run"
-    runto_main
-
-    gdb_test "print &__jit_debug_descriptor" "= .*" "blah 1"
-
-    gdb_rename_execfile $binfile ${binfile}x
-
-    if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DSPACER}] != "" } {
-	fail "recompile $srcfile"
-    } else {
-	pass "recompile $srcfile"
-
-	# jit_run "second run"
+    with_test_prefix "initial run" {
+	clean_restart $testfile
 
 	runto_main
-	gdb_test "print &__jit_debug_descriptor" "= .*" "blah 1"
+
+	set addr_before [get_hexadecimal_valueof "&__jit_debug_descriptor" 0 \
+			     "get address of __jit_debug_descriptor"]
     }
+
+    with_test_prefix "second run" {
+	# Ensure that the new executable is at least one second newer
+	# than the old.  If the recompilation happens in the same
+	# second, gdb might not reload the executable automatically.
+	sleep 1
+
+	gdb_rename_execfile $binfile ${binfile}x
+	if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DSPACER}] != "" } {
+	    fail "recompile"
+	    return
+	} else {
+	    pass "recompile"
+	}
+
+	runto_main
+
+	set addr_after [get_hexadecimal_valueof "&__jit_debug_descriptor" 0 \
+			    "get address of __jit_debug_descriptor"]
+    }
+
+    gdb_assert {$addr_before != $addr_after} "address changed"
 }
 
 jit_test_reread
