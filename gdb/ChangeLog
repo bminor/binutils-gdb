@@ -1,3 +1,8 @@
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* jit.c (free_objfile_data): Delete the JIT breakpoint and clear
+	the cached code address.
+
 2016-10-06  Doug Evans  <dje@google.com>
 
 	* features/aarch64-core.xml (cpsr_flags): Elide "type" and specify
