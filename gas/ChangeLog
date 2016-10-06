@@ -1,3 +1,8 @@
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* app.c (do_scrub_chars): Move fall through comment.
+	* expr.c (operand): Likewise.
+
 2016-10-06  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	PR gas/20648

@@ -1322,8 +1322,8 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 	      else
 		UNGET (quot);
 	    }
-	  /* FALL THROUGH */
 #endif
+	  /* Fall through.  */
 
 	case LEX_IS_SYMBOL_COMPONENT:
 	  if (state == 10)
