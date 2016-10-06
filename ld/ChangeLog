@@ -1,3 +1,9 @@
+2016-10-06  Ludovic Courtès  <ludo@gnu.org>
+
+	* emulparams/elf32bmipn32-defs.sh: Shift quote of
+	"x$EMULATION_NAME" to the left to work around
+	<http://ftp.gnu.org/gnu/bash/bash-4.2-patches/bash42-007>.
+
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
 	* lexsup.c: Spell fall through comments consistently and add
