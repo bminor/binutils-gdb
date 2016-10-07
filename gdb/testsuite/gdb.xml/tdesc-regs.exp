@@ -35,6 +35,7 @@ switch -glob -- [istarget] {
 	set core-regs {arc-v2.xml}
     }
     "arm*-*-*" {
+	set regdir "arm/"
         set core-regs {arm-core.xml}
     }
     "*m68k-*-*" {
