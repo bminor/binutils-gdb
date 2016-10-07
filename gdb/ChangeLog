@@ -1,3 +1,7 @@
+2016-10-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 7.12.
+
 2016-10-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* frame.h: Forward-declare struct ui_out.
