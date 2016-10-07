@@ -4233,17 +4233,13 @@ cris_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 static bfd_boolean
 cris_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  /* Call the base function.  */
-  if (!_bfd_elf_copy_private_bfd_data (ibfd, obfd))
-    return FALSE;
-
-  /* If output is big-endian for some obscure reason, stop here.  */
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == FALSE)
-    return FALSE;
-
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
+
+  /* Call the base function.  */
+  if (!_bfd_elf_copy_private_bfd_data (ibfd, obfd))
+    return FALSE;
 
   /* Do what we really came here for.  */
   return bfd_set_arch_mach (obfd, bfd_arch_cris, bfd_get_mach (ibfd));

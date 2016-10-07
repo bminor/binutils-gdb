@@ -508,7 +508,7 @@ mt_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   bfd_boolean  ok = TRUE;
 
   /* Check if we have the same endianness.  */
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == FALSE)
+  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
     return FALSE;
 
   /* If they're not both mt, then merging is meaningless, so just

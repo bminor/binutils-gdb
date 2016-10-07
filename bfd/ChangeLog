@@ -1,3 +1,31 @@
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (LIBBFD_H_FILES): Update.
+	* doc/Makefile.am (LIBBFD_H_DEP): Likewise.
+	* cpu-sh.c (sh_merge_bfd_arch): Move to..
+	* elf32-sh.c: ..here, and make static.
+	* elf32-arc.c (arc_elf_merge_private_bfd_data): Delete extraneous
+	error.
+	* elf32-cris.c (cris_elf_merge_private_bfd_data): Don't call
+	_bfd_generic_verify_endian_match.
+	* elf32-microblaze.c (microblaze_elf_merge_private_bfd_data): Delete.
+	(bfd_elf32_bfd_merge_private_bfd_data): Define as
+	_bfd_generic_verify_endian_match.
+	* elf32-mt.c (mt_elf_merge_private_bfd_data): Don't test
+	boolean == FALSE.
+	* elf32-xgate.c (_bfd_xgate_elf_merge_private_bfd_data): Delete.
+	(bfd_elf32_bfd_merge_private_bfd_data): Don't define.
+	* elf32-xgate.h (_bfd_xgate_elf_merge_private_bfd_data): Delete.
+	* libbfd-in.h (_bfd_generic_verify_endian_match): Delete.
+	* libbfd.c (_bfd_generic_verify_endian_match): Move to..
+	* linker.c: ..here, and make internal.
+	* bfd.c (bfd_merge_private_bfd_data): Move to..
+	* linker.c: ..here.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
 	* coff-h8300.c: Spell fall through comments consistently.

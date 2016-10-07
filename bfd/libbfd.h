@@ -1,6 +1,6 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "libbfd-in.h", "init.c", "libbfd.c", "bfdio.c", 
-   "bfdwin.c", "cache.c", "reloc.c", "archures.c" and "elf.c".
+   generated from "libbfd-in.h", "libbfd.c", "bfdio.c", "bfdwin.c", 
+   "cache.c", "reloc.c", "archures.c" and "linker.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* libbfd.h -- Declarations used by bfd library *implementation*.
@@ -754,10 +754,6 @@ extern bfd_size_type _bfd_stringtab_add
 /* Write out a string table.  */
 extern bfd_boolean _bfd_stringtab_emit
   (bfd *, struct bfd_strtab_hash *);
-
-/* Check that endianness of input and output file match.  */
-extern bfd_boolean _bfd_generic_verify_endian_match
-  (bfd *, bfd *);
 
 /* Macros to tell if bfds are read or write enabled.
 
@@ -868,7 +864,6 @@ extern bfd_vma read_unsigned_leb128 (bfd *, bfd_byte *, unsigned int *);
 extern bfd_signed_vma read_signed_leb128 (bfd *, bfd_byte *, unsigned int *);
 extern bfd_vma safe_read_leb128 (bfd *, bfd_byte *, unsigned int *,
 				 bfd_boolean, const bfd_byte * const);
-/* Extracted from init.c.  */
 /* Extracted from libbfd.c.  */
 bfd_boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);
 
@@ -3157,7 +3152,10 @@ void *bfd_arch_default_fill (bfd_size_type count,
     bfd_boolean is_bigendian,
     bfd_boolean code);
 
-/* Extracted from elf.c.  */
+/* Extracted from linker.c.  */
+bfd_boolean _bfd_generic_verify_endian_match
+   (bfd *ibfd, bfd *obfd);
+
 #ifdef __cplusplus
 }
 #endif

@@ -552,12 +552,7 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
    /* Check if we have the same endianess.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    {
-      _bfd_error_handler (_("ERROR: Endian Match failed. Attempting to link "
-			    "%B with binary %s of opposite endian-ness"),
-			  ibfd, bfd_get_filename (obfd));
-      return FALSE;
-    }
+    return FALSE;
 
   /* Collect ELF flags.  */
   in_flags = elf_elfheader (ibfd)->e_flags & EF_ARC_MACH_MSK;

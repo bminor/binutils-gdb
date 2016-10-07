@@ -1408,27 +1408,6 @@ DESCRIPTION
 
 /*
 FUNCTION
-	bfd_merge_private_bfd_data
-
-SYNOPSIS
-	bfd_boolean bfd_merge_private_bfd_data (bfd *ibfd, bfd *obfd);
-
-DESCRIPTION
-	Merge private BFD information from the BFD @var{ibfd} to the
-	the output file BFD @var{obfd} when linking.  Return <<TRUE>>
-	on success, <<FALSE>> on error.  Possible error returns are:
-
-	o <<bfd_error_no_memory>> -
-	Not enough memory exists to create private data for @var{obfd}.
-
-.#define bfd_merge_private_bfd_data(ibfd, obfd) \
-.     BFD_SEND (obfd, _bfd_merge_private_bfd_data, \
-.		(ibfd, obfd))
-
-*/
-
-/*
-FUNCTION
 	bfd_set_private_flags
 
 SYNOPSIS

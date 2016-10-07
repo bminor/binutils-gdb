@@ -1,3 +1,7 @@
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* sh-opc.h (sh_merge_bfd_arch): Delete prototype.
+
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
 	* aarch64-opc.c: Spell fall through comments consistently.

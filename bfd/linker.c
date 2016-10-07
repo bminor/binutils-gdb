@@ -3332,3 +3332,58 @@ _bfd_generic_link_check_relocs (bfd *abfd ATTRIBUTE_UNUSED,
 {
   return TRUE;
 }
+
+/*
+FUNCTION
+	bfd_merge_private_bfd_data
+
+SYNOPSIS
+	bfd_boolean bfd_merge_private_bfd_data (bfd *ibfd, bfd *obfd);
+
+DESCRIPTION
+	Merge private BFD information from the BFD @var{ibfd} to the
+	the output file BFD @var{obfd} when linking.  Return <<TRUE>> on success,
+	<<FALSE>> on error.  Possible error returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{obfd}.
+
+.#define bfd_merge_private_bfd_data(ibfd, obfd) \
+.     BFD_SEND (obfd, _bfd_merge_private_bfd_data, \
+.		(ibfd, obfd))
+
+*/
+
+/*
+INTERNAL_FUNCTION
+	_bfd_generic_verify_endian_match
+
+SYNOPSIS
+	bfd_boolean _bfd_generic_verify_endian_match
+	  (bfd *ibfd, bfd *obfd);
+
+DESCRIPTION
+	Can be used from / for bfd_merge_private_bfd_data to check that
+	endianness matches between input and output file.  Returns
+	TRUE for a match, otherwise returns FALSE and emits an error.
+*/
+
+bfd_boolean
+_bfd_generic_verify_endian_match (bfd *ibfd, bfd *obfd)
+{
+  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
+      && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
+      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
+    {
+      if (bfd_big_endian (ibfd))
+	_bfd_error_handler (_("%B: compiled for a big endian system "
+			      "and target is little endian"), ibfd);
+      else
+	_bfd_error_handler (_("%B: compiled for a little endian system "
+			      "and target is big endian"), ibfd);
+      bfd_set_error (bfd_error_wrong_format);
+      return FALSE;
+    }
+
+  return TRUE;
+}

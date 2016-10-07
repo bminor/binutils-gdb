@@ -1596,21 +1596,6 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 
   return ret;
 }
-
-/* Merge backend specific data from an object file to the output
-   object file when linking.
-
-   Note: We only use this hook to catch endian mismatches.  */
-static bfd_boolean
-microblaze_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
-{
-  /* Check if we have the same endianess.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    return FALSE;
-
-  return TRUE;
-}
-
 
 /* Calculate fixup value for reference.  */
 
@@ -3500,7 +3485,7 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 #define bfd_elf32_bfd_is_local_label_name       microblaze_elf_is_local_label_name
 #define elf_backend_relocate_section		microblaze_elf_relocate_section
 #define bfd_elf32_bfd_relax_section             microblaze_elf_relax_section
-#define bfd_elf32_bfd_merge_private_bfd_data    microblaze_elf_merge_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data    _bfd_generic_verify_endian_match
 #define bfd_elf32_bfd_reloc_name_lookup		microblaze_elf_reloc_name_lookup
 
 #define elf_backend_gc_mark_hook		microblaze_elf_gc_mark_hook
