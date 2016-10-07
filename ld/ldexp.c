@@ -1273,11 +1273,13 @@ exp_value_fold (etree_type *tree)
     }
 }
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 etree_type *
 exp_binop (int code, etree_type *lhs, etree_type *rhs)
 {
-  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->binary));
-
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->binary),
+						      sizeof (new_e->value)));
   new_e->type.node_code = code;
   new_e->type.filename = lhs->type.filename;
   new_e->type.lineno = lhs->type.lineno;
@@ -1296,8 +1298,8 @@ exp_binop (int code, etree_type *lhs, etree_type *rhs)
 etree_type *
 exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
 {
-  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->trinary));
-
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->trinary),
+						      sizeof (new_e->value)));
   new_e->type.node_code = code;
   new_e->type.filename = cond->type.filename;
   new_e->type.lineno = cond->type.lineno;
@@ -1315,8 +1317,8 @@ exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
 etree_type *
 exp_unop (int code, etree_type *child)
 {
-  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->unary));
-
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->unary),
+						      sizeof (new_e->value)));
   new_e->unary.type.node_code = code;
   new_e->unary.type.filename = child->type.filename;
   new_e->unary.type.lineno = child->type.lineno;

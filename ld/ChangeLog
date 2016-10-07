@@ -1,5 +1,11 @@
 2016-10-07  Alan Modra  <amodra@gmail.com>
 
+	* ldexp.c (MAX): Define.
+	(exp_unop, exp_binop, exp_trinop): Alloc at least enough for
+	etree_type.value.
+
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/ld-lib.exp (is_generic_elf): New, extracted from..
 	* testsuite/ld-elf/elf.exp: ..here.
 
