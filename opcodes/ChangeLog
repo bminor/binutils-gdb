@@ -1,3 +1,9 @@
+2016-10-07  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20667
+	* aarch64-opc.c (aarch64_print_operand): Always print operand if it's
+	available.
+
 2016-10-07  Alan Modra  <amodra@gmail.com>
 
 	* sh-opc.h (sh_merge_bfd_arch): Delete prototype.

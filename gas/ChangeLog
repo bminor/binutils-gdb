@@ -1,3 +1,10 @@
+2016-10-07  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20667
+	* testsuite/gas/aarch64/sys-rt-reg.s: Test source for instructions using
+	SYS_Rt reg.
+	* testsuite/gas/aarch64/sys-rt-reg.d: New testcase.
+
 2016-10-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/leave_enter.d: New file.
