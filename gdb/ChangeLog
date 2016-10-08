@@ -1,3 +1,8 @@
+2016-10-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.c (push_level): Remove "id" parameter.
+	(ui_out_begin): Update call.
+
 2016-10-07  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.12 released.
