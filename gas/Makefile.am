@@ -437,7 +437,7 @@ check-DEJAGNU: site.exp
 
 # The m68k operand parser.
 
-EXTRA_as_new_SOURCES += config/m68k-parse.y config/bfin-parse.y
+EXTRA_as_new_SOURCES += config/m68k-parse.y
 
 # If m68k-parse.y is in a different directory, then ylwrap will use an
 # absolute path when it invokes yacc, which will cause yacc to put the
@@ -479,13 +479,10 @@ endif
 m68k-parse.h: ; @true
 $(srcdir)/config/m68k-parse.h: ; @true
 
+EXTRA_as_new_SOURCES += config/bfin-parse.y
 bfin-parse.c: $(srcdir)/config/bfin-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-parse.y y.tab.c bfin-parse.c y.tab.h bfin-parse.h -- $(YACCCOMPILE) -d ;
 bfin-parse.h: bfin-parse.c
-bfin-parse.@OBJEXT@: bfin-parse.c \
- $(srcdir)/config/bfin-aux.h $(srcdir)/config/bfin-defs.h \
- $(INCDIR)/elf/common.h $(INCDIR)/elf/bfin.h
-
 bfin-parse.h: ; @true
 $(srcdir)/config/bfin-parse.h: ; @true
 
@@ -503,20 +500,17 @@ endif
 	$(COMPILE) -c $(srcdir)/config/bfin-lex-wrapper.c $(NO_WERROR)
 endif
 
+EXTRA_as_new_SOURCES += config/rl78-parse.y
 rl78-parse.c: $(srcdir)/config/rl78-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rl78-parse.y y.tab.c rl78-parse.c y.tab.h rl78-parse.h -- $(YACCCOMPILE) -d ;
 rl78-parse.h: rl78-parse.c
-rl78-parse.@OBJEXT@: rl78-parse.c rl78-parse.h $(srcdir)/config/rl78-defs.h \
- $(INCDIR)/elf/common.h $(INCDIR)/elf/rl78.h
-
 rl78-defs.h: ; @true
+$(srcdir)/config/rl78-defs.h: ; @true
 
+EXTRA_as_new_SOURCES += config/rx-parse.y
 rx-parse.c: $(srcdir)/config/rx-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rx-parse.y y.tab.c rx-parse.c y.tab.h rx-parse.h -- $(YACCCOMPILE) -d ;
 rx-parse.h: rx-parse.c
-rx-parse.@OBJEXT@: rx-parse.c rx-parse.h $(srcdir)/config/rx-defs.h \
- $(INCDIR)/elf/common.h $(INCDIR)/elf/rx.h
-
 rx-defs.h: ; @true
 $(srcdir)/config/rx-defs.h: ; @true
 
