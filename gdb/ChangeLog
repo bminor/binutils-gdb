@@ -1,5 +1,10 @@
 2016-10-10  Yao Qi  <yao.qi@linaro.org>
 
+	* m32c-tdep.c (m32c_gdbarch_init): Rename local 'arch' by
+	'gdbarch'.
+
+2016-10-10  Yao Qi  <yao.qi@linaro.org>
+
 	* v850-tdep.c (v850_breakpoint_from_pc): Use the right
 	breakpoint instruction.
 	(v850_dbtrap_breakpoint_from_pc): Remove.
