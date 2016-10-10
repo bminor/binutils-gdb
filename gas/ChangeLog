@@ -1,3 +1,15 @@
+2016-10-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* testsuite/gas/cfi/cfi-common-1.d: Adjust regexps for mips64.
+	* testsuite/gas/cfi/cfi-common-2.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-3.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-4.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-5.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-7.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-8.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-9.d: Likewise.
+	* testsuite/gas/cfi/cfi-mips-1.d: Likewise.
+
 2016-10-08  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (EXTRA_as_new_SOURCES): Add config/rl78-parse.y and
