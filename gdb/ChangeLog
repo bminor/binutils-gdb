@@ -1,3 +1,10 @@
+2016-10-10  Yao Qi  <yao.qi@linaro.org>
+
+	* v850-tdep.c (v850_breakpoint_from_pc): Use the right
+	breakpoint instruction.
+	(v850_dbtrap_breakpoint_from_pc): Remove.
+	(v850_gdbarch_init): Update.
+
 2016-10-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ui-out.c (push_level): Remove "id" parameter.
