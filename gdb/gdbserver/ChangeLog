@@ -1,3 +1,7 @@
+2016-10-10  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.c (enum arm_breakpoint_kinds): Remove.
+
 2016-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* target.c (target_supports_multi_process): New function, moved

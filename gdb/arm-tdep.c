@@ -7900,7 +7900,7 @@ arm_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
   if (arm_pc_is_thumb (gdbarch, *pcptr) && *kindptr == 4)
     /* The documented magic value for a 32-bit Thumb-2 breakpoint, so
        that this is not confused with a 32-bit ARM breakpoint.  */
-    *kindptr = 3;
+    *kindptr = ARM_BP_KIND_THUMB2;
 }
 
 /* Extract from an array REGBUF containing the (raw) register state a

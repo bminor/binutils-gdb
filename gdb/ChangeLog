@@ -1,5 +1,11 @@
 2016-10-10  Yao Qi  <yao.qi@linaro.org>
 
+	* arch/arm.h (enum arm_breakpoint_kinds): New.
+	* arm-tdep.c (arm_remote_breakpoint_from_pc): Use
+	ARM_BP_KIND_THUMB2.
+
+2016-10-10  Yao Qi  <yao.qi@linaro.org>
+
 	* m32c-tdep.c (m32c_gdbarch_init): Rename local 'arch' by
 	'gdbarch'.
 

@@ -219,14 +219,6 @@ arm_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-/* Enum describing the different kinds of breakpoints.  */
-enum arm_breakpoint_kinds
-{
-   ARM_BP_KIND_THUMB = 2,
-   ARM_BP_KIND_THUMB2 = 3,
-   ARM_BP_KIND_ARM = 4,
-};
-
 /* Implementation of linux_target_ops method "breakpoint_kind_from_pc".
 
    Determine the type and size of breakpoint to insert at PCPTR.  Uses the
