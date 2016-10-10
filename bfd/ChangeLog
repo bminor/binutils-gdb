@@ -2293,6 +2293,7 @@
 
 2016-04-05  Maciej W. Rozycki  <macro@imgtec.com>
 
+	PR ld/19908
 	* elflink.c (elf_link_add_object_symbols): Always turn hidden
 	and internal symbols which have a dynamic index into local
 	ones.
