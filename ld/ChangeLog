@@ -1,3 +1,9 @@
+2016-10-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* emulparams/elf64_s390.sh: Move binary start to 16M.
+	* testsuite/ld-s390/tlsbin_64.dd: Adjust testcases accordingly.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+
 2016-10-07  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (MAX): Define.
