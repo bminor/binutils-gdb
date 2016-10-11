@@ -1,3 +1,13 @@
+2016-10-11  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20535
+	* emultempl/elf32.em (_search_needed): Add support for pseudo
+	environment variables supported by ld.so.  Namely $ORIGIN, $LIB
+	and $PLATFORM.
+	* configure.ac: Add getauxval to list AC_CHECK_FUNCS list.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2016-10-11  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_do_assignments_1): Descend into output section
