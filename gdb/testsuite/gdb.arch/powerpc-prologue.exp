@@ -24,7 +24,7 @@ if {[istarget *-*-aix*] || ![istarget "powerpc-*-*"]} then {
 
 set testfile "powerpc-prologue"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile [standard_output_file ${testfile}]
 
 # Don't use "debug", so that we don't have line information for the assembly
 # fragments.

@@ -152,7 +152,7 @@ for {set i 0} {$i < 32} {incr i 1} {
 # later when loading the core file (i.e., different register values for different
 # vector register banks).
 
-set corefile "${objdir}/${subdir}/vsx-core.test"
+set corefile [standard_output_file vsx-core.test]
 set core_supported [gdb_gcore_cmd "$corefile" "Save a VSX-enabled corefile"]
 
 # Now run the F32~F63/VR0~VR31 tests.
