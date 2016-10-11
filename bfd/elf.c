@@ -11034,10 +11034,12 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
-/* It is only used by x86-64 so far.  */
+/* It is only used by x86-64 so far.
+   ??? This repeats *COM* id of zero.  sec->id is supposed to be unique,
+   but current usage would allow all of _bfd_std_section to be zero.  t*/
 asection _bfd_elf_large_com_section
-  = BFD_FAKE_SECTION (_bfd_elf_large_com_section,
-		      SEC_IS_COMMON, NULL, "LARGE_COMMON", 0);
+  = BFD_FAKE_SECTION (_bfd_elf_large_com_section, NULL,
+		      "LARGE_COMMON", 0, SEC_IS_COMMON);
 
 void
 _bfd_elf_post_process_headers (bfd * abfd,
