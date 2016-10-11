@@ -1,5 +1,9 @@
 2016-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.arch/powerpc-prologue.c (optimized_1): New declaration.
+
+2016-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.arch/powerpc-prologue.exp: Use standard_output_file
 	* gdb.arch/ppc64-symtab-cordic.exp: Likewise.
 	* gdb.arch/vsx-regs.exp: Likewise.
