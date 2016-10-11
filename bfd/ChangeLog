@@ -1,3 +1,10 @@
+2016-10-12  Alan Modra  <amodra@gmail.com>
+
+	* section.c (BFD_FAKE_SECTION): Reorder parameters.  Formatting.
+	(STD_SECTION): Adjust to suit.
+	* elf.c (_bfd_elf_large_com_section): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2016-10-11  Alan Modra  <amodra@gmail.com>
 
 	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Handle symbols
