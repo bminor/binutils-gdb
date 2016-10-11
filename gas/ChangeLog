@@ -1,3 +1,8 @@
+2016-10-11  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20666
+	* testsuite/gas/aarch64/alias-2.d: Update expected results.
+
 2016-10-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* testsuite/gas/cfi/cfi-common-1.d: Adjust regexps for mips64.

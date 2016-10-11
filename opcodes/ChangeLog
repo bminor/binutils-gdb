@@ -1,3 +1,8 @@
+2016-10-11  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20666
+	* aarch64-asm.c (convert_bfc_to_bfm): Fix dest index.
+
 2016-10-07  Jiong Wang  <jiong.wang@arm.com>
 
 	PR target/20667

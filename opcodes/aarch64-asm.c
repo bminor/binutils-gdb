@@ -1539,7 +1539,7 @@ convert_bfc_to_bfm (aarch64_inst *inst)
   /* Insert XZR.  */
   copy_operand_info (inst, 3, 2);
   copy_operand_info (inst, 2, 1);
-  copy_operand_info (inst, 2, 0);
+  copy_operand_info (inst, 0, 0);
   inst->operands[1].reg.regno = 0x1f;
 
   /* Convert the immedate operand.  */
