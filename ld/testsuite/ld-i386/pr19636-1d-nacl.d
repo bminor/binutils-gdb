@@ -92,7 +92,7 @@ Disassembly of section .plt:
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
-[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmp    6a <_start-0x16>
+[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmp    6a <\.plt\+0x6a>
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	90                   	nop

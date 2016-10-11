@@ -1,3 +1,11 @@
+2016-10-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-i386/pr19636-1d-nacl.d: Adjust for objdump change.
+	* testsuite/ld-i386/pr19636-2c-nacl.d: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.dd: Likewise.
+	* testsuite/ld-x86-64/plt-nacl.pd: Likewise.
+	* testsuite/ld-x86-64/pr19636-2d-nacl.d: Likewise.
+
 2016-10-11  Nick Clifton  <nickc@redhat.com>
 
 	* ld-aarch64/emit-relocs-515-be.d: Adjust output to match change
