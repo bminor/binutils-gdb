@@ -1,3 +1,11 @@
+2016-10-11  Alan Modra  <amodra@gmail.com>
+
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Handle symbols
+	defined temporarily with bfd_und_section.
+	* elflink.c (_bfd_elf_gc_keep): Don't set SEC_KEEP for bfd_und_section.
+	* elfxx-mips.c (mips_elf_local_pic_function_p): Exclude defined
+	symbols with bfd_und_section.
+
 2016-10-07  Alan Modra  <amodra@gmail.com>
 
 	* targets.c (bfd_target <_bfd_merge_private_bfd_data>): Replace

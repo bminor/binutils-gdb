@@ -1077,6 +1077,7 @@ exp_fold_tree_1 (etree_type *tree)
 		 before relaxation and so be stripped incorrectly.  */
 	      if (expld.phase == lang_mark_phase_enum
 		  && expld.section != bfd_abs_section_ptr
+		  && expld.section != bfd_und_section_ptr
 		  && !(expld.result.valid_p
 		       && expld.result.value == 0
 		       && (is_value (tree->assign.src, 0)
@@ -1085,7 +1086,8 @@ exp_fold_tree_1 (etree_type *tree)
 			   || is_align_conditional (tree->assign.src))))
 		expld.section->flags |= SEC_KEEP;
 
-	      if (!expld.result.valid_p)
+	      if (!expld.result.valid_p
+		  || expld.section == bfd_und_section_ptr)
 		{
 		  if (expld.phase != lang_mark_phase_enum)
 		    einfo (_("%F%S invalid assignment to"

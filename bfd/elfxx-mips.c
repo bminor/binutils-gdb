@@ -1808,6 +1808,7 @@ mips_elf_local_pic_function_p (struct mips_elf_link_hash_entry *h)
 	   || h->root.root.type == bfd_link_hash_defweak)
 	  && h->root.def_regular
 	  && !bfd_is_abs_section (h->root.root.u.def.section)
+	  && !bfd_is_und_section (h->root.root.u.def.section)
 	  && (!ELF_ST_IS_MIPS16 (h->root.other)
 	      || (h->fn_stub && h->need_fn_stub))
 	  && (PIC_OBJECT_P (h->root.root.u.def.section->owner)

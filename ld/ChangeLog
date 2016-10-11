@@ -1,3 +1,14 @@
+2016-10-11  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_do_assignments_1): Descend into output section
+	statements that do not yet have bfd sections.  Set symbol section
+	temporarily for symbols defined in such statements to the undefined
+	section.  Don't error on data or reloc statements until final phase.
+	* ldexp.c (exp_fold_tree_1 <etree_assign>): Handle bfd_und_section
+	in expld.section.
+	* testsuite/ld-mmix/bpo-10.d: Adjust.
+	* testsuite/ld-mmix/bpo-11.d: Adjust.
+
 2016-10-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* emulparams/elf64_s390.sh: Move binary start to 16M.

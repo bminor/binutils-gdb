@@ -1877,7 +1877,10 @@ elf_x86_64_convert_load_reloc (bfd *abfd, asection *sec,
 	     bfd_elf_record_link_assignment.   */
 	  if (h->def_regular
 	      && (h->root.type == bfd_link_hash_new
-		  || h->root.type == bfd_link_hash_undefined))
+		  || h->root.type == bfd_link_hash_undefined
+		  || ((h->root.type == bfd_link_hash_defined
+		       || h->root.type == bfd_link_hash_defweak)
+		      && h->root.u.def.section == bfd_und_section_ptr)))
 	    {
 	      /* Skip since R_X86_64_32/R_X86_64_32S may overflow.  */
 	      if (require_reloc_pc32)

@@ -5618,6 +5618,7 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 	case lang_output_section_statement_enum:
 	  {
 	    lang_output_section_statement_type *os;
+	    bfd_vma newdot;
 
 	    os = &(s->output_section_statement);
 	    os->after_end = *found_end;
@@ -5629,18 +5630,24 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 		    prefer_next_section = FALSE;
 		  }
 		dot = os->bfd_section->vma;
+	      }
+	    newdot = lang_do_assignments_1 (os->children.head,
+					    os, os->fill, dot, found_end);
+	    if (!os->ignored)
+	      {
+		if (os->bfd_section != NULL)
+		  {
+		    /* .tbss sections effectively have zero size.  */
+		    if (!IS_TBSS (os->bfd_section)
+			|| bfd_link_relocatable (&link_info))
+		      dot += TO_ADDR (os->bfd_section->size);
 
-		lang_do_assignments_1 (os->children.head,
-				       os, os->fill, dot, found_end);
-
-		/* .tbss sections effectively have zero size.  */
-		if (!IS_TBSS (os->bfd_section)
-		    || bfd_link_relocatable (&link_info))
-		  dot += TO_ADDR (os->bfd_section->size);
-
-		if (os->update_dot_tree != NULL)
-		  exp_fold_tree (os->update_dot_tree, bfd_abs_section_ptr,
-				 &dot);
+		    if (os->update_dot_tree != NULL)
+		      exp_fold_tree (os->update_dot_tree,
+				     bfd_abs_section_ptr, &dot);
+		  }
+		else
+		  dot = newdot;
 	      }
 	  }
 	  break;
@@ -5664,7 +5671,7 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 	      if (expld.result.section != NULL)
 		s->data_statement.value += expld.result.section->vma;
 	    }
-	  else
+	  else if (expld.phase == lang_final_phase_enum)
 	    einfo (_("%F%P: invalid data statement\n"));
 	  {
 	    unsigned int size;
@@ -5697,7 +5704,7 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 			 bfd_abs_section_ptr, &dot);
 	  if (expld.result.valid_p)
 	    s->reloc_statement.addend_value = expld.result.value;
-	  else
+	  else if (expld.phase == lang_final_phase_enum)
 	    einfo (_("%F%P: invalid reloc statement\n"));
 	  dot += TO_ADDR (bfd_get_reloc_size (s->reloc_statement.howto));
 	  break;
@@ -5733,7 +5740,8 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 		*found_end = TRUE;
 	    }
 	  exp_fold_tree (s->assignment_statement.exp,
-			 current_os->bfd_section,
+			 (current_os->bfd_section != NULL
+			  ? current_os->bfd_section : bfd_und_section_ptr),
 			 &dot);
 	  break;
 
