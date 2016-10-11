@@ -1,3 +1,18 @@
+2016-10-11  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (is_significant_symbol_name): New function.
+	(remove_useless_symbols): Do not remove significanr symbols.
+	(find_symbol_for_address): If an exact match for the specified
+	address has not been found, try scanning the dynamic relocs to see
+	if one of these matches the address.  If so, use the symbol
+	associated with the reloc.
+	(objdump_print_addr_with_symbol): Do not print offsets to symbols
+	with no value.
+	(disassemble_section): Only use dynamic relocs if the user
+	requested this.
+	(disassemble_data): Always load dynamic relocs if they are
+	available.
+
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
 	* dlltool.c: Spell fall through comments consistently.

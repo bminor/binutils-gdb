@@ -12,7 +12,7 @@ Disassembly of section .text:
    10008:	8b020021 	add	x1, x1, x2
    1000c:	d2a00000 	movz	x0, #0x0, lsl #16
    10010:	8b000020 	add	x0, x1, x0
-   10014:	9400000c 	bl	10044 \<test\+0x44\>
+   10014:	9400000c 	bl	10044 \<.*\>
    10018:	d503201f 	nop
    1001c:	0000ffe4 	.word	0x0000ffe4
    10020:	00000000 	.word	0x00000000
