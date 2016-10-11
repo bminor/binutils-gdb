@@ -1,3 +1,13 @@
+2016-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/20682
+	* aarch64-tdep.c: Replace 32 with AARCH64_D_REGISTER_COUNT.
+	(aarch64_analyze_prologue): Extend array 'regs' for D registers.
+	Assert that operand 0 and 1 can be X or D registers.  Update
+	register number for D registers.  Update registers in frame
+	cache.
+	* aarch64-tdep.h (AARCH64_D_REGISTER_COUNT): New macro.
+
 2016-10-10  Yao Qi  <yao.qi@linaro.org>
 
 	* arch/arm.h (enum arm_breakpoint_kinds): New.

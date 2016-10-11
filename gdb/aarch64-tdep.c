@@ -68,7 +68,7 @@
 
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0
-#define AARCH64_D0_REGNUM (AARCH64_Q0_REGNUM + 32)
+#define AARCH64_D0_REGNUM (AARCH64_Q0_REGNUM + AARCH64_D_REGISTER_COUNT)
 #define AARCH64_S0_REGNUM (AARCH64_D0_REGNUM + 32)
 #define AARCH64_H0_REGNUM (AARCH64_S0_REGNUM + 32)
 #define AARCH64_B0_REGNUM (AARCH64_H0_REGNUM + 32)
@@ -206,11 +206,12 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int i;
-  pv_t regs[AARCH64_X_REGISTER_COUNT];
+  /* Track X registers and D registers in prologue.  */
+  pv_t regs[AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT];
   struct pv_area *stack;
   struct cleanup *back_to;
 
-  for (i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
+  for (i = 0; i < AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT; i++)
     regs[i] = pv_register (i, 0);
   stack = make_pv_area (AARCH64_SP_REGNUM, gdbarch_addr_bit (gdbarch));
   back_to = make_cleanup_free_pv_area (stack);
@@ -328,13 +329,15 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	       && strcmp ("stp", inst.opcode->name) == 0)
 	{
 	  /* STP with addressing mode Pre-indexed and Base register.  */
-	  unsigned rt1 = inst.operands[0].reg.regno;
-	  unsigned rt2 = inst.operands[1].reg.regno;
+	  unsigned rt1;
+	  unsigned rt2;
 	  unsigned rn = inst.operands[2].addr.base_regno;
 	  int32_t imm = inst.operands[2].addr.offset.imm;
 
-	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt);
-	  gdb_assert (inst.operands[1].type == AARCH64_OPND_Rt2);
+	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt
+		      || inst.operands[0].type == AARCH64_OPND_Ft);
+	  gdb_assert (inst.operands[1].type == AARCH64_OPND_Rt2
+		      || inst.operands[1].type == AARCH64_OPND_Ft2);
 	  gdb_assert (inst.operands[2].type == AARCH64_OPND_ADDR_SIMM7);
 	  gdb_assert (!inst.operands[2].addr.offset.is_reg);
 
@@ -348,6 +351,17 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  if (pv_area_store_would_trash (stack,
 					 pv_add_constant (regs[rn], imm + 8)))
 	    break;
+
+	  rt1 = inst.operands[0].reg.regno;
+	  rt2 = inst.operands[1].reg.regno;
+	  if (inst.operands[0].type == AARCH64_OPND_Ft)
+	    {
+	      /* Only bottom 64-bit of each V register (D register) need
+		 to be preserved.  */
+	      gdb_assert (inst.operands[0].qualifier == AARCH64_OPND_QLF_S_D);
+	      rt1 += AARCH64_X_REGISTER_COUNT;
+	      rt2 += AARCH64_X_REGISTER_COUNT;
+	    }
 
 	  pv_area_store (stack, pv_add_constant (regs[rn], imm), 8,
 			 regs[rt1]);
@@ -406,6 +420,16 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 
       if (pv_area_find_reg (stack, gdbarch, i, &offset))
 	cache->saved_regs[i].addr = offset;
+    }
+
+  for (i = 0; i < AARCH64_D_REGISTER_COUNT; i++)
+    {
+      int regnum = gdbarch_num_regs (gdbarch);
+      CORE_ADDR offset;
+
+      if (pv_area_find_reg (stack, gdbarch, i + AARCH64_X_REGISTER_COUNT,
+			    &offset))
+	cache->saved_regs[i + regnum + AARCH64_D0_REGNUM].addr = offset;
     }
 
   do_cleanups (back_to);
