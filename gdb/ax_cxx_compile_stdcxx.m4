@@ -1,3 +1,12 @@
+# Copyright (c) 2016 Free Software Foundation, Inc.
+#
+# Originally based on the AX_CXX_COMPILE_STDCXX macro found at the url
+# below.
+#
+# Local GDB customizations:
+#
+# - AC_SUBST CXX_DIALECT instead of changing CXX/CXXCPP.
+#
 # ===========================================================================
 #   http://www.gnu.org/software/autoconf-archive/ax_cxx_compile_stdcxx.html
 # ===========================================================================
@@ -58,6 +67,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
         [$3], [optional], [ax_cxx_compile_cxx$1_required=false],
         [m4_fatal([invalid third argument `$3' to AX_CXX_COMPILE_STDCXX])])
   AC_LANG_PUSH([C++])dnl
+  CXX_DIALECT=""
   ac_success=no
   AC_CACHE_CHECK(whether $CXX supports C++$1 features by default,
   ax_cv_cxx_compile_cxx$1,
@@ -81,10 +91,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
           [eval $cachevar=no])
          CXX="$ac_save_CXX"])
       if eval test x\$$cachevar = xyes; then
-        CXX="$CXX $switch"
-        if test -n "$CXXCPP" ; then
-          CXXCPP="$CXXCPP $switch"
-        fi
+        CXX_DIALECT="$switch"
         ac_success=yes
         break
       fi
@@ -107,10 +114,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
           [eval $cachevar=no])
          CXX="$ac_save_CXX"])
       if eval test x\$$cachevar = xyes; then
-        CXX="$CXX $switch"
-        if test -n "$CXXCPP" ; then
-          CXXCPP="$CXXCPP $switch"
-        fi
+        CXX_DIALECT="$switch"
         ac_success=yes
         break
       fi
@@ -131,6 +135,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
               [define if the compiler supports basic C++$1 syntax])
   fi
   AC_SUBST(HAVE_CXX$1)
+  AC_SUBST(CXX_DIALECT)
 ])
 
 

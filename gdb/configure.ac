@@ -38,6 +38,10 @@ AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
+# We require a C++11 compiler.  Check if one is available, and if
+# necessary, set CXX_DIALECT to some -std=xxx switch.
+AX_CXX_COMPILE_STDCXX(11, , mandatory)
+
 # Dependency checking.
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])

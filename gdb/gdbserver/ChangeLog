@@ -1,3 +1,12 @@
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (CXX_DIALECT): Get from configure.
+	(COMPILE.pre, CC_LD): Append $(CXX_DIALECT).
+	* acinclude.m4: Include ../ax_cxx_compile_stdcxx.m4.
+	* configure.ac: Call AX_CXX_COMPILE_STDCXX.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2016-10-27  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-low.c (linux_supports_range_stepping): Return true if

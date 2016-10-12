@@ -1,5 +1,17 @@
 2016-10-28  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (CXX_DIALECT): Get from configure.
+	(COMPILE.pre, CC_LD): Append $(CXX_DIALECT).
+	(FLAGS_TO_PASS): Pass CXX_DIALECT.
+	* acinclude.m4: Include ax_cxx_compile_stdcxx.m4.
+	* ax_cxx_compile_stdcxx.m4: Add FSF copyright header.  Set and
+	AC_SUBST CXX_DIALECT instead of changing CXX/CXXCPP.
+	* configure.ac: Call AX_CXX_COMPILE_STDCXX.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
 	* ax_cxx_compile_stdcxx.m4: New file.
 
 2016-10-28  Pedro Alves  <palves@redhat.com>

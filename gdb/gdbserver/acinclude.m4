@@ -29,6 +29,8 @@ m4_include(../libiberty.m4)
 dnl For GDB_AC_PTRACE.
 m4_include(../ptrace.m4)
 
+m4_include(../ax_cxx_compile_stdcxx.m4)
+
 dnl Check for existence of a type $1 in libthread_db.h
 dnl Based on BFD_HAVE_SYS_PROCFS_TYPE in bfd/bfd.m4.
 
