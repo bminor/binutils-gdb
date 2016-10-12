@@ -1,5 +1,10 @@
 2016-10-12  Anton Kolesov  <anton.kolesov@synopsys.com>
 
+	* arc-newlib-tdep.c: New file.
+	* configure.tgt: Add newlib support for ARC.
+
+2016-10-12  Anton Kolesov  <anton.kolesov@synopsys.com>
+
 	* arc-tdep.h (struct gdbarch_tdep) <jb_pc>: New field.
 	* arc-tdep.c (arc_get_longjmp_target): New function.
 	(arc_gdbarch_init): Set get_longjmp_target if jb_pc is non-negative.
