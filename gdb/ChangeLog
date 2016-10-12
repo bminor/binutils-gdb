@@ -1,5 +1,12 @@
 2016-10-12  Anton Kolesov  <anton.kolesov@synopsys.com>
 
+	* arc-tdep.h (struct gdbarch_tdep) <jb_pc>: New field.
+	* arc-tdep.c (arc_get_longjmp_target): New function.
+	(arc_gdbarch_init): Set get_longjmp_target if jb_pc is non-negative.
+	(arc_dump_tdep): Print jb_pc.
+
+2016-10-12  Anton Kolesov  <anton.kolesov@synopsys.com>
+
 	* arc-tdep.h (struct gdbarch_tdep): New.
 	* arc-tdep.c (arc_gdbarch_init): Allocate gdbarch_tdep.
 
