@@ -1,5 +1,11 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* main.c: Include <vector>.
+	(cmdarg_s): Remove typedef.  Don't define VEC.
+	(captured_main_1): Use vector, not VEC.  Remove cleanups.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2loc.c (struct dwarf_expr_context_funcs): Don't declare.
 	(dwarf_expr_read_addr_from_reg, dwarf_expr_get_reg_value)
 	(dwarf_expr_read_mem, dwarf_expr_frame_base): Rename; turn into
