@@ -77,6 +77,12 @@ enum arc_regnum
 
 extern int arc_debug;
 
+/* Target-dependent information.  */
+
+struct gdbarch_tdep
+{
+};
+
 /* Utility functions used by other ARC-specific modules.  */
 
 static inline int

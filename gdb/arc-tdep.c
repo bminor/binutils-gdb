@@ -1159,7 +1159,10 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (!arc_tdesc_init (info, &tdesc, &tdesc_data))
     return NULL;
 
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, NULL);
+  /* Allocate the ARC-private target-dependent information structure, and the
+     GDB target-independent information structure.  */
+  struct gdbarch_tdep *tdep = XCNEW (struct gdbarch_tdep);
+  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Data types.  */
   set_gdbarch_short_bit (gdbarch, 16);
