@@ -921,8 +921,8 @@ print_insn_arc (bfd_vma memaddr,
     }
 
   memset (&iter, 0, sizeof (iter));
-  lowbyte  = ((info->endian == BFD_ENDIAN_LITTLE) ? 1 : 0);
-  highbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 0 : 1);
+  highbyte  = ((info->endian == BFD_ENDIAN_LITTLE) ? 1 : 0);
+  lowbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 0 : 1);
 
   if (info->section && info->section->owner)
     header = elf_elfheader (info->section->owner);
@@ -1025,13 +1025,13 @@ print_insn_arc (bfd_vma memaddr,
       return size;
     }
 
-  insn_len = arc_insn_length (buffer[lowbyte], buffer[highbyte], info);
+  insn_len = arc_insn_length (buffer[highbyte], buffer[lowbyte], info);
   pr_debug ("instruction length = %d bytes\n", insn_len);
 
   switch (insn_len)
     {
     case 2:
-      insn[0] = (buffer[lowbyte] << 8) | buffer[highbyte];
+      insn[0] = (buffer[highbyte] << 8) | buffer[lowbyte];
       break;
 
     default:
