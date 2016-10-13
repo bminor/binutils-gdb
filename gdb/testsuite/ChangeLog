@@ -1,3 +1,8 @@
+2016-10-13  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/structs.exp: Invoke gdb_skip_float_test, and do
+	floating point tests if $skip_float_test is false.
+
 2016-10-12  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.python/py-value.c (main): Check if argv is NULL before using it.
