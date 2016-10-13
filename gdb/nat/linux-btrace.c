@@ -103,11 +103,6 @@ perf_event_new_data (const struct perf_event_buffer *pev)
   return *pev->data_head != pev->last_head;
 }
 
-/* Try to determine the size of a pointer in bits for the OS.
-
-   This is the same as the size of a pointer for the inferior process
-   except when a 32-bit inferior is running on a 64-bit OS.  */
-
 /* Copy the last SIZE bytes from PEV ending at DATA_HEAD and return a pointer
    to the memory holding the copy.
    The caller is responsible for freeing the memory.  */
