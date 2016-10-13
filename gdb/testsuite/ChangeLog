@@ -1,5 +1,12 @@
 2016-10-13  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/code_elim.exp (get_var_address): Remove.
+	* gdb.base/relocate.exp: Likewise.
+	* gdb.base/shreloc.exp: Likewise.
+	* lib/gdb.exp (get_var_address): New.
+
+2016-10-13  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/structs.exp: Invoke gdb_skip_float_test, and do
 	floating point tests if $skip_float_test is false.
 
