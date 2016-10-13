@@ -1,3 +1,8 @@
+2016-10-13  Pedro Alves  <palves@redhat.com>
+
+	* contrib/ari/gdb_ari.sh (boolean): Suggest bool instead.
+	(false, true): Remove checks.
+
 2016-10-12  Tom Tromey  <tom@tromey.com>
 
 	* machoread.c (macho_symfile_read_all_oso): Use std::string.
