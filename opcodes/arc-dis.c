@@ -296,7 +296,7 @@ find_format_from_table (struct disassemble_info *info,
       /* Possible candidate, check the operands.  */
       for (opidx = opcode->operands; *opidx; opidx++)
 	{
-	  int value;
+	  int value, limmind;
 	  const struct arc_operand *operand = &arc_operands[*opidx];
 
 	  if (operand->flags & ARC_OPERAND_FAKE)
@@ -309,11 +309,12 @@ find_format_from_table (struct disassemble_info *info,
 
 	  /* Check for LIMM indicator.  If it is there, then make sure
 	     we pick the right format.  */
+	  limmind = (isa_mask & ARC_OPCODE_ARCV2) ? 0x1E : 0x3E;
 	  if (operand->flags & ARC_OPERAND_IR
 	      && !(operand->flags & ARC_OPERAND_LIMM))
 	    {
 	      if ((value == 0x3E && insn_len == 4)
-		  || (value == 0x1E && insn_len == 2))
+		  || (value == limmind && insn_len == 2))
 		{
 		  invalid = TRUE;
 		  break;

@@ -1,3 +1,10 @@
+2016-10-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/shortlimm_a7.d: New file.
+	* testsuite/gas/arc/shortlimm_a7.s: Likewise.
+	* testsuite/gas/arc/shortlimm_hs.d: Likewise.
+	* testsuite/gas/arc/shortlimm_hs.s: Likewise.
+
 2016-10-11  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/tls.d: Adjust output to match change in objdump.

@@ -1,3 +1,7 @@
+2016-10-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (ARC_OPCODE_ARCV2): New define.
+
 2016-09-29  Alan Modra  <amodra@gmail.com>
 
 	* opcode/ppc.h (PPC_OPERAND_OPTIONAL32): Define.
