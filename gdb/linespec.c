@@ -1328,7 +1328,6 @@ decode_line_2 (struct linespec_state *self,
   int i;
   struct cleanup *old_chain;
   VEC (const_char_ptr) *filters = NULL;
-  struct get_number_or_range_state state;
   struct decode_line_2_item *items;
   int items_count;
 
@@ -1409,12 +1408,10 @@ decode_line_2 (struct linespec_state *self,
   if (args == 0 || *args == 0)
     error_no_arg (_("one or more choice numbers"));
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      int num;
-
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
 
       if (num == 0)
 	error (_("canceled"));

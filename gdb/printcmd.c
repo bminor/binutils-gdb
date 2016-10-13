@@ -1876,19 +1876,18 @@ map_display_numbers (char *args,
 				       void *),
 		     void *data)
 {
-  struct get_number_or_range_state state;
   int num;
 
   if (args == NULL)
     error_no_arg (_("one or more display numbers"));
 
-  init_number_or_range (&state, args);
+  number_or_range_parser parser (args);
 
-  while (!state.finished)
+  while (!parser.finished ())
     {
-      const char *p = state.string;
+      const char *p = parser.cur_tok ();
 
-      num = get_number_or_range (&state);
+      num = parser.get_number ();
       if (num == 0)
 	warning (_("bad display number at or near '%s'"), p);
       else

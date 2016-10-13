@@ -31,7 +31,7 @@ struct value;
 struct block;
 struct gdbpy_breakpoint_object;
 struct gdbscm_breakpoint_object;
-struct get_number_or_range_state;
+struct number_or_range_parser;
 struct thread_info;
 struct bpstats;
 struct bp_location;
@@ -1587,8 +1587,8 @@ extern struct tracepoint *get_tracepoint_by_number_on_target (int num);
 
 /* Find a tracepoint by parsing a number in the supplied string.  */
 extern struct tracepoint *
-     get_tracepoint_by_number (char **arg, 
-			       struct get_number_or_range_state *state);
+  get_tracepoint_by_number (char **arg,
+			    number_or_range_parser *parser);
 
 /* Return a vector of all tracepoints currently defined.  The vector
    is newly allocated; the caller should free when done with it.  */

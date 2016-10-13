@@ -578,12 +578,10 @@ mem_enable_command (char *args, int from_tty)
     }
   else
     {
-      struct get_number_or_range_state state;
-
-      init_number_or_range (&state, args);
-      while (!state.finished)
+      number_or_range_parser parser (args);
+      while (!parser.finished ())
 	{
-	  num = get_number_or_range (&state);
+	  num = parser.get_number ();
 	  mem_enable (num);
 	}
     }
@@ -610,27 +608,24 @@ mem_disable (int num)
 static void
 mem_disable_command (char *args, int from_tty)
 {
-  int num;
-  struct mem_region *m;
-  int ix;
-
   require_user_regions (from_tty);
 
   target_dcache_invalidate ();
 
   if (args == NULL || *args == '\0')
     {
+      struct mem_region *m;
+      int ix;
+
       for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
 	m->enabled_p = 0;
     }
   else
     {
-      struct get_number_or_range_state state;
-
-      init_number_or_range (&state, args);
-      while (!state.finished)
+      number_or_range_parser parser (args);
+      while (!parser.finished ())
 	{
-	  num = get_number_or_range (&state);
+	  int num = parser.get_number ();
 	  mem_disable (num);
 	}
     }
@@ -666,9 +661,6 @@ mem_delete (int num)
 static void
 mem_delete_command (char *args, int from_tty)
 {
-  int num;
-  struct get_number_or_range_state state;
-
   require_user_regions (from_tty);
 
   target_dcache_invalidate ();
@@ -681,10 +673,10 @@ mem_delete_command (char *args, int from_tty)
       return;
     }
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
       mem_delete (num);
     }
 

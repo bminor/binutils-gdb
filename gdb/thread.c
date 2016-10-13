@@ -1825,20 +1825,19 @@ thread_apply_command (char *tidlist, int from_tty)
   char *cmd = NULL;
   struct cleanup *old_chain;
   char *saved_cmd;
-  struct tid_range_parser parser;
+  tid_range_parser parser;
 
   if (tidlist == NULL || *tidlist == '\000')
     error (_("Please specify a thread ID list"));
 
-  tid_range_parser_init (&parser, tidlist, current_inferior ()->num);
-  while (!tid_range_parser_finished (&parser))
+  parser.init (tidlist, current_inferior ()->num);
+  while (!parser.finished ())
     {
       int inf_num, thr_start, thr_end;
 
-      if (!tid_range_parser_get_tid_range (&parser,
-					   &inf_num, &thr_start, &thr_end))
+      if (!parser.get_tid_range (&inf_num, &thr_start, &thr_end))
 	{
-	  cmd = (char *) tid_range_parser_string (&parser);
+	  cmd = (char *) parser.cur_tok ();
 	  break;
 	}
     }
@@ -1856,32 +1855,31 @@ thread_apply_command (char *tidlist, int from_tty)
 
   make_cleanup_restore_current_thread ();
 
-  tid_range_parser_init (&parser, tidlist, current_inferior ()->num);
-  while (!tid_range_parser_finished (&parser)
-	 && tid_range_parser_string (&parser) < cmd)
+  parser.init (tidlist, current_inferior ()->num);
+  while (!parser.finished () && parser.cur_tok () < cmd)
     {
       struct thread_info *tp = NULL;
       struct inferior *inf;
       int inf_num, thr_num;
 
-      tid_range_parser_get_tid (&parser, &inf_num, &thr_num);
+      parser.get_tid (&inf_num, &thr_num);
       inf = find_inferior_id (inf_num);
       if (inf != NULL)
 	tp = find_thread_id (inf, thr_num);
 
-      if (tid_range_parser_star_range (&parser))
+      if (parser.in_star_range ())
 	{
 	  if (inf == NULL)
 	    {
 	      warning (_("Unknown inferior %d"), inf_num);
-	      tid_range_parser_skip (&parser);
+	      parser.skip_range ();
 	      continue;
 	    }
 
 	  /* No use looking for threads past the highest thread number
 	     the inferior ever had.  */
 	  if (thr_num >= inf->highest_thread_num)
-	    tid_range_parser_skip (&parser);
+	    parser.skip_range ();
 
 	  /* Be quiet about unknown threads numbers.  */
 	  if (tp == NULL)
@@ -1890,8 +1888,7 @@ thread_apply_command (char *tidlist, int from_tty)
 
       if (tp == NULL)
 	{
-	  if (show_inferior_qualified_tids ()
-	      || tid_range_parser_qualified (&parser))
+	  if (show_inferior_qualified_tids () || parser.tid_is_qualified ())
 	    warning (_("Unknown thread %d.%d"), inf_num, thr_num);
 	  else
 	    warning (_("Unknown thread %d"), thr_num);

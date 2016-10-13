@@ -1,3 +1,39 @@
+2016-10-13  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* tid-parse.h (tid_range_parser): New class.
+	(enum tid_range_state): Move into tid_range_parser's scope.
+	Remove TID_RANGE_ prefix from all values.
+	(tid_range_parser_get_tid, tid_range_parser_get_tid_range)
+	(tid_range_parser_star_range, tid_range_parser_finished)
+	(tid_range_parser_skip, tid_range_parser_qualified): Don't
+	declare.
+	(tid_is_in_list): Update comment.
+	* tid-parse.c (tid_range_parser::tid_range_parser): New.
+	(init, finished, get_string, skip, tid_is_qualified)
+	(get_tid_or_range, get_tid_range, get_tid, star_range): Rename;
+	turn into methods.
+	(tid_is_in_list): Adjust.
+	* cli/cli-utils.h (number_or_range_parser): New class.
+	(init_number_or_range, get_number_or_range)
+	(number_range_setup_range): Don't declare.
+	* cli/cli-utils.c
+	(number_or_range_parser::number_or_range_parser): New.
+	(init_number_or_range, get_number_or_range)
+	(number_range_setup_range): Rename; turn into methods.
+	(number_is_in_list): Adjust.
+	* breakpoint.c (map_breakpoint_numbers): Adjust.  Use bool.
+	(trace_pass_command, get_tracepoint_by_number): Adjust.
+	* breakpoint.h (get_tracepoint_by_number): Adjust.
+	* inferior.c (detach_inferior_command, kill_inferior_command)
+	(remove_inferior_command): Adjust.
+	* linespec.c (decode_line_2): Adjust.
+	* memattr.c (mem_enable_command, mem_disable_command)
+	(mem_delete_command): Adjust.
+	* printcmd.c (map_display_numbers): Adjust.
+	* reverse.c (delete_bookmark_command, bookmarks_info): Adjust.
+	* thread.c (thread_apply_command): Adjust.
+
 2016-10-12  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* arc-newlib-tdep.c: New file.

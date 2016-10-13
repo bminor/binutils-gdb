@@ -651,17 +651,15 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 static void
 detach_inferior_command (char *args, int from_tty)
 {
-  int num, pid;
   struct thread_info *tp;
-  struct get_number_or_range_state state;
 
   if (!args || !*args)
     error (_("Requires argument (inferior id(s) to detach)"));
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
 
       if (!valid_gdb_inferior_id (num))
 	{
@@ -669,7 +667,7 @@ detach_inferior_command (char *args, int from_tty)
 	  continue;
 	}
 
-      pid = gdb_inferior_id_to_pid (num);
+      int pid = gdb_inferior_id_to_pid (num);
       if (pid == 0)
 	{
 	  warning (_("Inferior ID %d is not running."), num);
@@ -692,17 +690,15 @@ detach_inferior_command (char *args, int from_tty)
 static void
 kill_inferior_command (char *args, int from_tty)
 {
-  int num, pid;
   struct thread_info *tp;
-  struct get_number_or_range_state state;
 
   if (!args || !*args)
     error (_("Requires argument (inferior id(s) to kill)"));
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
 
       if (!valid_gdb_inferior_id (num))
 	{
@@ -710,7 +706,7 @@ kill_inferior_command (char *args, int from_tty)
 	  continue;
 	}
 
-      pid = gdb_inferior_id_to_pid (num);
+      int pid = gdb_inferior_id_to_pid (num);
       if (pid == 0)
 	{
 	  warning (_("Inferior ID %d is not running."), num);
@@ -788,18 +784,14 @@ info_inferiors_command (char *args, int from_tty)
 static void
 remove_inferior_command (char *args, int from_tty)
 {
-  int num;
-  struct inferior *inf;
-  struct get_number_or_range_state state;
-
   if (args == NULL || *args == '\0')
     error (_("Requires an argument (inferior id(s) to remove)"));
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
-      inf = find_inferior_id (num);
+      int num = parser.get_number ();
+      struct inferior *inf = find_inferior_id (num);
 
       if (inf == NULL)
 	{
