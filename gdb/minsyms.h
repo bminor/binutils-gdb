@@ -93,35 +93,35 @@ class minimal_symbol_reader
      ADDRESS - the address of the symbol
      MS_TYPE - the type of the symbol
      SECTION - the symbol's section
-     appropriate obj_section for the minimal symbol.  This can be NULL.
-     OBJFILE - the objfile associated with the minimal symbol.  */
+  */
 
   struct minimal_symbol *record_full (const char *name,
 				      int name_len,
-				      int copy_name,
+				      bool copy_name,
 				      CORE_ADDR address,
 				      enum minimal_symbol_type ms_type,
 				      int section);
 
   /* Like record_full, but:
      - uses strlen to compute NAME_LEN,
-     - passes COPY_NAME = 1,
+     - passes COPY_NAME = true,
      - and passes a default SECTION, depending on the type
 
      This variant does not return the new symbol.  */
 
-  void record (const char *, CORE_ADDR, enum minimal_symbol_type);
+  void record (const char *name, CORE_ADDR address,
+	       enum minimal_symbol_type ms_type);
 
   /* Like record_full, but:
      - uses strlen to compute NAME_LEN,
-     - passes COPY_NAME = 1.  */
+     - passes COPY_NAME = true.  */
 
   struct minimal_symbol *record_with_info (const char *name,
 					   CORE_ADDR address,
 					   enum minimal_symbol_type ms_type,
 					   int section)
   {
-    return record_full (name, strlen (name), 1, address, ms_type, section);
+    return record_full (name, strlen (name), true, address, ms_type, section);
   }
 
  private:

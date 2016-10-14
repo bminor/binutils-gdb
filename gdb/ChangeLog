@@ -1,5 +1,16 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* minsyms.h (minimal_symbol_reader::record_full): "copy_name" now
+	a bool.
+	(record, record_with_info): Update.
+	* minsyms.c (record): Fix indentation.
+	(record_full): Fix indentation.  Update for type change.
+	* elfread.c (record_minimal_symbol): "copy_name" now a bool.
+	(elf_symtab_read): "copy_names" now a bool.
+	(elf_rel_plt_read, elf_read_minimal_symbols): Update.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* main.c: Include <vector>.
 	(cmdarg_s): Remove typedef.  Don't define VEC.
 	(captured_main_1): Use vector, not VEC.  Remove cleanups.

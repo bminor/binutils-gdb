@@ -943,7 +943,7 @@ minimal_symbol_reader::~minimal_symbol_reader ()
 
 void
 minimal_symbol_reader::record (const char *name, CORE_ADDR address,
-				      enum minimal_symbol_type ms_type)
+			       enum minimal_symbol_type ms_type)
 {
   int section;
 
@@ -974,10 +974,9 @@ minimal_symbol_reader::record (const char *name, CORE_ADDR address,
 
 struct minimal_symbol *
 minimal_symbol_reader::record_full (const char *name, int name_len,
-					   int copy_name,
-					   CORE_ADDR address,
-					   enum minimal_symbol_type ms_type,
-					   int section)
+				    bool copy_name, CORE_ADDR address,
+				    enum minimal_symbol_type ms_type,
+				    int section)
 {
   struct msym_bunch *newobj;
   struct minimal_symbol *msymbol;

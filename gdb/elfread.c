@@ -192,7 +192,7 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
 
 static struct minimal_symbol *
 record_minimal_symbol (minimal_symbol_reader &reader,
-		       const char *name, int name_len, int copy_name,
+		       const char *name, int name_len, bool copy_name,
 		       CORE_ADDR address,
 		       enum minimal_symbol_type ms_type,
 		       asection *bfd_section, struct objfile *objfile)
@@ -229,7 +229,7 @@ static void
 elf_symtab_read (minimal_symbol_reader &reader,
 		 struct objfile *objfile, int type,
 		 long number_of_symbols, asymbol **symbol_table,
-		 int copy_names)
+		 bool copy_names)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   asymbol *sym;
@@ -488,7 +488,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		{
 		  int len = atsign - sym->name;
 
-		  record_minimal_symbol (reader, sym->name, len, 1, symaddr,
+		  record_minimal_symbol (reader, sym->name, len, true, symaddr,
 					 ms_type, sym->section, objfile);
 		}
 	    }
@@ -505,8 +505,8 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		{
 		  struct minimal_symbol *mtramp;
 
-		  mtramp = record_minimal_symbol (reader, sym->name, len - 4, 1,
-						  symaddr,
+		  mtramp = record_minimal_symbol (reader, sym->name, len - 4,
+						  true, symaddr,
 						  mst_solib_trampoline,
 						  sym->section, objfile);
 		  if (mtramp)
@@ -612,7 +612,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 
       msym = record_minimal_symbol (reader, string_buffer,
 				    name_len + got_suffix_len,
-                                    1, address, mst_slot_got_plt, got_plt,
+                                    true, address, mst_slot_got_plt, got_plt,
 				    objfile);
       if (msym)
 	SET_MSYMBOL_SIZE (msym, ptr_size);
@@ -1078,7 +1078,8 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 	       bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
 
-      elf_symtab_read (reader, objfile, ST_REGULAR, symcount, symbol_table, 0);
+      elf_symtab_read (reader, objfile, ST_REGULAR, symcount, symbol_table,
+		       false);
     }
 
   /* Add the dynamic symbols.  */
@@ -1104,7 +1105,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 	       bfd_errmsg (bfd_get_error ()));
 
       elf_symtab_read (reader, objfile, ST_DYNAMIC, dynsymcount,
-		       dyn_symbol_table, 0);
+		       dyn_symbol_table, false);
 
       elf_rel_plt_read (reader, objfile, dyn_symbol_table);
     }
@@ -1140,7 +1141,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
       for (i = 0; i < synthcount; i++)
 	synth_symbol_table[i] = synthsyms + i;
       elf_symtab_read (reader, objfile, ST_SYNTHETIC, synthcount,
-		       synth_symbol_table.get (), 1);
+		       synth_symbol_table.get (), true);
     }
 
   /* Install any minimal symbols that have been collected as the current
