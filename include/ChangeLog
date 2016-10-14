@@ -1,3 +1,8 @@
+2016-10-14  Pedro Alves  <palves@redhat.com>
+
+	* ansidecl.h (GCC_FINAL): Delete.
+	(OVERRIDE, FINAL): New, moved from gcc/coretypes.h.
+
 2016-10-14  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* opcode/arc.h (ARC_OPCODE_ARCV2): New define.
