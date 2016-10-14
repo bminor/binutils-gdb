@@ -1,5 +1,10 @@
 2016-10-14  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.texinfo (Using Trace Files): Fix typo.
+	(GDB/MI Tracepoint Commands): Likewise.
+
+2016-10-14  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.texinfo (GDB/MI Tracepoint Commands): Document -ctf switch
 	of -trace-save.
 
