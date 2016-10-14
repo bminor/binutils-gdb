@@ -1,3 +1,10 @@
+2016-10-14  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* solib-aix.c (solib_aix_bfd_open): Call solib_find so that sysroot
+	path is set properly if program has a dependency on .a archive and
+	sysroot is set via set sysroot command.
+
 2016-10-14  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* nat/linux-btrace.c: Remove leftover comment.
