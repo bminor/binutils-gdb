@@ -30934,13 +30934,17 @@ body=[variable=@{name="$trace_timestamp",initial="0"@}
 @subsubheading Synopsis
 
 @smallexample
- -trace-save [-r ] @var{filename}
+ -trace-save [ -r ] [ -ctf ] @var{filename}
 @end smallexample
 
 Saves the collected trace data to @var{filename}.  Without the
 @samp{-r} option, the data is downloaded from the target and saved
 in a local file.  With the @samp{-r} option the target is asked
 to perform the save.
+
+By default, this command will save the trace in the tfile format.  You can
+supply the optional @samp{-ctf} argument to save it the CTF format. See
+@ref{Trace Files} for more information about CTF.
 
 @subsubheading @value{GDBN} Command
 

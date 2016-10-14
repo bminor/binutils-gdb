@@ -1,3 +1,8 @@
+2016-10-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Tracepoint Commands): Document -ctf switch
+	of -trace-save.
+
 2016-10-06  Tom Tromey  <tom@tromey.com>
 
 	* guile.texi (Types In Guile): Remove Java mentions.
