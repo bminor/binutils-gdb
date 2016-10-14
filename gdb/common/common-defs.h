@@ -49,6 +49,9 @@
 #include <stdint.h>
 
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#include <strings.h>	/* for strcasecmp and strncasecmp */
+#endif
 #include <errno.h>
 #include <alloca.h>
 
