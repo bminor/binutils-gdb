@@ -119,10 +119,24 @@ perf_event_read (const struct perf_event_buffer *pev, __u64 data_head,
   if (size == 0)
     return NULL;
 
+  /* We should never ask for more data than the buffer can hold.  */
+  buffer_size = pev->size;
+  gdb_assert (size <= buffer_size);
+
+  /* If we ask for more data than we seem to have, we wrap around and read
+     data from the end of the buffer.  This is already handled by the %
+     BUFFER_SIZE operation, below.  Here, we just need to make sure that we
+     don't underflow.
+
+     Note that this is perfectly OK for perf event buffers where data_head
+     doesn'grow indefinitely and instead wraps around to remain within the
+     buffer's boundaries.  */
+  if (data_head < size)
+    data_head += buffer_size;
+
   gdb_assert (size <= data_head);
   data_tail = data_head - size;
 
-  buffer_size = pev->size;
   begin = pev->mem;
   start = begin + data_tail % buffer_size;
   stop = begin + data_head % buffer_size;
@@ -153,10 +167,7 @@ perf_event_read_all (struct perf_event_buffer *pev, gdb_byte **data,
   __u64 data_head;
 
   data_head = *pev->data_head;
-
   size = pev->size;
-  if (data_head < size)
-    size = (size_t) data_head;
 
   *data = perf_event_read (pev, data_head, size);
   *psize = size;

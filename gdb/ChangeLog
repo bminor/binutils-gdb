@@ -1,3 +1,8 @@
+2016-11-14  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* nat/linux-btrace.c (perf_event_read): Allow data_head < size.
+	* nat/linux-btrace.c (perf_event_read_all): Do not adjust size.
+
 2016-11-12  Tom Tromey  <tom@tromey.com>
 
 	* rust-exp.y (super_name): Use std::vector.
