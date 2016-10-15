@@ -1,3 +1,7 @@
+2016-10-15  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/spu_ovl.o_c: Regenerate.
+
 2016-10-14  Alan Modra  <amodra@gmail.com>
 
 	* scripttempl/DWARF.sc: Add .debug_addr.
