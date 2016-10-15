@@ -244,11 +244,11 @@ pretty_print_one_value (PyObject *printer, struct value **out_value)
    NULL if there is no display_hint method, or if the method did not
    return a string.  On error, print stack trace and return NULL.  On
    success, return an xmalloc()d string.  */
-char *
+gdb::unique_xmalloc_ptr<char>
 gdbpy_get_display_hint (PyObject *printer)
 {
   PyObject *hint;
-  char *result = NULL;
+  gdb::unique_xmalloc_ptr<char> result;
 
   if (! PyObject_HasAttr (printer, gdbpy_display_hint_cst))
     return NULL;
@@ -279,20 +279,20 @@ print_stack_unless_memory_error (struct ui_file *stream)
     {
       struct cleanup *cleanup;
       PyObject *type, *value, *trace;
-      char *msg;
 
       PyErr_Fetch (&type, &value, &trace);
       cleanup = make_cleanup_py_decref (type);
       make_cleanup_py_decref (value);
       make_cleanup_py_decref (trace);
 
-      msg = gdbpy_exception_to_string (type, value);
-      make_cleanup (xfree, msg);
+      gdb::unique_xmalloc_ptr<char>
+	msg (gdbpy_exception_to_string (type, value));
 
       if (msg == NULL || *msg == '\0')
 	fprintf_filtered (stream, _("<error reading variable>"));
       else
-	fprintf_filtered (stream, _("<error reading variable: %s>"), msg);
+	fprintf_filtered (stream, _("<error reading variable: %s>"),
+			  msg.get ());
 
       do_cleanups (cleanup);
     }
@@ -647,16 +647,13 @@ print_children (PyObject *printer, const char *hint,
 	}
       else if (gdbpy_is_string (py_v))
 	{
-	  char *output;
+	  gdb::unique_xmalloc_ptr<char> output;
 
 	  output = python_string_to_host_string (py_v);
 	  if (!output)
 	    gdbpy_print_stack ();
 	  else
-	    {
-	      fputs_filtered (output, stream);
-	      xfree (output);
-	    }
+	    fputs_filtered (output.get (), stream);
 	}
       else
 	{
@@ -713,7 +710,7 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   PyObject *printer = NULL;
   PyObject *val_obj = NULL;
   struct value *value;
-  char *hint = NULL;
+  gdb::unique_xmalloc_ptr<char> hint;
   struct cleanup *cleanups;
   enum ext_lang_rc result = EXT_LANG_RC_NOP;
   enum string_repr_result print_result;
@@ -767,13 +764,12 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 
   /* If we are printing a map, we want some special formatting.  */
   hint = gdbpy_get_display_hint (printer);
-  make_cleanup (free_current_contents, &hint);
 
   /* Print the section */
-  print_result = print_string_repr (printer, hint, stream, recurse,
+  print_result = print_string_repr (printer, hint.get (), stream, recurse,
 				    options, language, gdbarch);
   if (print_result != string_repr_error)
-    print_children (printer, hint, stream, recurse, options, language,
+    print_children (printer, hint.get (), stream, recurse, options, language,
 		    print_result == string_repr_none);
 
   result = EXT_LANG_RC_OK;

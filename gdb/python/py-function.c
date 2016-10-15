@@ -94,7 +94,6 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
   if (!result)
     {
       PyObject *ptype, *pvalue, *ptraceback;
-      char *msg;
 
       PyErr_Fetch (&ptype, &pvalue, &ptraceback);
 
@@ -102,8 +101,8 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
 	 When fetching the error message we need to make our own copy,
 	 we no longer own ptype, pvalue after the call to PyErr_Restore.  */
 
-      msg = gdbpy_exception_to_string (ptype, pvalue);
-      make_cleanup (xfree, msg);
+      gdb::unique_xmalloc_ptr<char>
+	msg (gdbpy_exception_to_string (ptype, pvalue));
 
       if (msg == NULL)
 	{
@@ -131,7 +130,7 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
 	  gdbpy_print_stack ();
 	  if (msg != NULL && *msg != '\0')
 	    error (_("Error occurred in Python convenience function: %s"),
-		   msg);
+		   msg.get ());
 	  else
 	    error (_("Error occurred in Python convenience function."));
 	}
@@ -140,7 +139,7 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
 	  Py_XDECREF (ptype);
 	  Py_XDECREF (pvalue);
 	  Py_XDECREF (ptraceback);
-	  error ("%s", msg);
+	  error ("%s", msg.get ());
 	}
     }
 
@@ -165,7 +164,7 @@ static int
 fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 {
   const char *name;
-  char *docstring = NULL;
+  gdb::unique_xmalloc_ptr<char> docstring;
 
   if (! PyArg_ParseTuple (args, "s", &name))
     return -1;
@@ -191,9 +190,9 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 	}
     }
   if (! docstring)
-    docstring = xstrdup (_("This function is not documented."));
+    docstring.reset (xstrdup (_("This function is not documented.")));
 
-  add_internal_function (name, docstring, fnpy_call, self);
+  add_internal_function (name, docstring.release (), fnpy_call, self);
   return 0;
 }
 

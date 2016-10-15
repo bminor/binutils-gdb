@@ -514,13 +514,11 @@ frapy_read_var (PyObject *self, PyObject *args)
     var = symbol_object_to_symbol (sym_obj);
   else if (gdbpy_is_string (sym_obj))
     {
-      char *var_name;
-      struct cleanup *cleanup;
+      gdb::unique_xmalloc_ptr<char>
+	var_name (python_string_to_target_string (sym_obj));
 
-      var_name = python_string_to_target_string (sym_obj);
       if (!var_name)
 	return NULL;
-      cleanup = make_cleanup (xfree, var_name);
 
       if (block_obj)
 	{
@@ -529,7 +527,6 @@ frapy_read_var (PyObject *self, PyObject *args)
 	    {
 	      PyErr_SetString (PyExc_RuntimeError,
 			       _("Second argument must be block."));
-	      do_cleanups (cleanup);
 	      return NULL;
 	    }
 	}
@@ -541,13 +538,12 @@ frapy_read_var (PyObject *self, PyObject *args)
 
 	  if (!block)
 	    block = get_frame_block (frame, NULL);
-	  lookup_sym = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
+	  lookup_sym = lookup_symbol (var_name.get (), block, VAR_DOMAIN, NULL);
 	  var = lookup_sym.symbol;
 	  block = lookup_sym.block;
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
-	  do_cleanups (cleanup);
 	  gdbpy_convert_exception (except);
 	  return NULL;
 	}
@@ -556,13 +552,10 @@ frapy_read_var (PyObject *self, PyObject *args)
       if (!var)
 	{
 	  PyErr_Format (PyExc_ValueError,
-			_("Variable '%s' not found."), var_name);
-	  do_cleanups (cleanup);
+			_("Variable '%s' not found."), var_name.get ());
 
 	  return NULL;
 	}
-
-      do_cleanups (cleanup);
     }
   else
     {

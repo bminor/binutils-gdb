@@ -264,7 +264,8 @@ extern void varobj_get_child_range (const struct varobj *var, int *from,
 
 extern void varobj_set_child_range (struct varobj *var, int from, int to);
 
-extern char *varobj_get_display_hint (const struct varobj *var);
+extern gdb::unique_xmalloc_ptr<char>
+     varobj_get_display_hint (const struct varobj *var);
 
 extern int varobj_get_num_children (struct varobj *var);
 

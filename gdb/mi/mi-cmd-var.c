@@ -50,7 +50,6 @@ print_varobj (struct varobj *var, enum print_values print_values,
 {
   struct ui_out *uiout = current_uiout;
   int thread_id;
-  char *display_hint;
 
   ui_out_field_string (uiout, "name", varobj_get_objname (var));
   if (print_expression)
@@ -79,12 +78,9 @@ print_varobj (struct varobj *var, enum print_values print_values,
   if (varobj_get_frozen (var))
     ui_out_field_int (uiout, "frozen", 1);
 
-  display_hint = varobj_get_display_hint (var);
+  gdb::unique_xmalloc_ptr<char> display_hint = varobj_get_display_hint (var);
   if (display_hint)
-    {
-      ui_out_field_string (uiout, "displayhint", display_hint);
-      xfree (display_hint);
-    }
+    ui_out_field_string (uiout, "displayhint", display_hint.get ());
 
   if (varobj_is_dynamic_p (var))
     ui_out_field_int (uiout, "dynamic", 1);
@@ -378,7 +374,6 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   enum print_values print_values;
   int ix;
   int from, to;
-  char *display_hint;
 
   if (argc < 1 || argc > 4)
     error (_("-var-list-children: Usage: "
@@ -408,12 +403,9 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   else
     print_values = PRINT_NO_VALUES;
 
-  display_hint = varobj_get_display_hint (var);
+  gdb::unique_xmalloc_ptr<char> display_hint = varobj_get_display_hint (var);
   if (display_hint)
-    {
-      ui_out_field_string (uiout, "displayhint", display_hint);
-      xfree (display_hint);
-    }
+    ui_out_field_string (uiout, "displayhint", display_hint.get ());
 
   if (from < to)
     {
@@ -721,7 +713,6 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
   
   for (i = 0; VEC_iterate (varobj_update_result, changes, i, r); ++i)
     {
-      char *display_hint;
       int from, to;
       struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
@@ -767,12 +758,10 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	ui_out_field_int (uiout, "new_num_children", 
 			  varobj_get_num_children (r->varobj));
 
-      display_hint = varobj_get_display_hint (r->varobj);
+      gdb::unique_xmalloc_ptr<char> display_hint
+	= varobj_get_display_hint (r->varobj);
       if (display_hint)
-	{
-	  ui_out_field_string (uiout, "displayhint", display_hint);
-	  xfree (display_hint);
-	}
+	ui_out_field_string (uiout, "displayhint", display_hint.get ());
 
       if (varobj_is_dynamic_p (r->varobj))
 	ui_out_field_int (uiout, "dynamic", 1);

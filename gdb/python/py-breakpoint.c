@@ -440,7 +440,8 @@ bppy_get_condition (PyObject *self, void *closure)
 static int
 bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
 {
-  char *exp;
+  gdb::unique_xmalloc_ptr<char> exp_holder;
+  const char *exp = NULL;
   gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
   struct gdb_exception except = exception_none;
 
@@ -456,9 +457,10 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
     exp = "";
   else
     {
-      exp = python_string_to_host_string (newvalue);
-      if (exp == NULL)
+      exp_holder = python_string_to_host_string (newvalue);
+      if (exp_holder == NULL)
 	return -1;
+      exp = exp_holder.get ();
     }
 
   TRY
@@ -470,9 +472,6 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
       except = ex;
     }
   END_CATCH
-
-  if (newvalue != Py_None)
-    xfree (exp);
 
   GDB_PY_SET_HANDLE_EXCEPTION (except);
 
@@ -680,18 +679,20 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   TRY
     {
-      char *copy = xstrdup (skip_spaces_const (spec));
-      struct cleanup *cleanup = make_cleanup (xfree, copy);
+      gdb::unique_xmalloc_ptr<char>
+	copy_holder (xstrdup (skip_spaces_const (spec)));
+      char *copy = copy_holder.get ();
 
       switch (type)
 	{
 	case bp_breakpoint:
 	  {
 	    struct event_location *location;
+	    struct cleanup *cleanup;
 
 	    location
 	      = string_to_event_location_basic (&copy, current_language);
-	    make_cleanup_delete_event_location (location);
+	    cleanup = make_cleanup_delete_event_location (location);
 	    create_breakpoint (python_gdbarch,
 			       location, NULL, -1, NULL,
 			       0,
@@ -700,6 +701,8 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 			       AUTO_BOOLEAN_TRUE,
 			       &bkpt_breakpoint_ops,
 			       0, 1, internal_bp, 0);
+
+	    do_cleanups (cleanup);
 	    break;
 	  }
         case bp_watchpoint:
@@ -717,8 +720,6 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	default:
 	  error(_("Do not understand breakpoint type to set."));
 	}
-
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1043,7 +1044,7 @@ static int
 local_setattro (PyObject *self, PyObject *name, PyObject *v)
 {
   gdbpy_breakpoint_object *obj = (gdbpy_breakpoint_object *) self;
-  char *attr = python_string_to_host_string (name);
+  gdb::unique_xmalloc_ptr<char> attr (python_string_to_host_string (name));
 
   if (attr == NULL)
     return -1;
@@ -1051,7 +1052,7 @@ local_setattro (PyObject *self, PyObject *name, PyObject *v)
   /* If the attribute trying to be set is the "stop" method,
      but we already have a condition set in the CLI or other extension
      language, disallow this operation.  */
-  if (strcmp (attr, stop_func) == 0)
+  if (strcmp (attr.get (), stop_func) == 0)
     {
       const struct extension_language_defn *extlang = NULL;
 
@@ -1063,7 +1064,6 @@ local_setattro (PyObject *self, PyObject *name, PyObject *v)
 	{
 	  char *error_text;
 
-	  xfree (attr);
 	  error_text
 	    = xstrprintf (_("Only one stop condition allowed.  There is"
 			    " currently a %s stop condition defined for"
@@ -1074,8 +1074,6 @@ local_setattro (PyObject *self, PyObject *name, PyObject *v)
 	  return -1;
 	}
     }
-
-  xfree (attr);
 
   return PyObject_GenericSetAttr ((PyObject *)self, name, v);
 }

@@ -148,21 +148,19 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	}
       else
 	{
-	  char *string;
-
-	  string = python_string_to_host_string (value);
+	  gdb::unique_xmalloc_ptr<char>
+	    string (python_string_to_host_string (value));
 	  if (string == NULL)
 	    return -1;
 
 	  xfree (self->value.stringval);
-	  self->value.stringval = string;
+	  self->value.stringval = string.release ();
 	}
       break;
 
     case var_enum:
       {
 	int i;
-	char *str;
 
 	if (! gdbpy_is_string (value))
 	  {
@@ -171,13 +169,13 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	    return -1;
 	  }
 
-	str = python_string_to_host_string (value);
+	gdb::unique_xmalloc_ptr<char>
+	  str (python_string_to_host_string (value));
 	if (str == NULL)
 	  return -1;
 	for (i = 0; self->enumeration[i]; ++i)
-	  if (! strcmp (self->enumeration[i], str))
+	  if (! strcmp (self->enumeration[i], str.get ()))
 	    break;
-	xfree (str);
 	if (! self->enumeration[i])
 	  {
 	    PyErr_SetString (PyExc_RuntimeError,
@@ -301,10 +299,10 @@ set_attr (PyObject *obj, PyObject *attr_name, PyObject *val)
 /* A helper function which returns a documentation string for an
    object. */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 get_doc_string (PyObject *object, PyObject *attr)
 {
-  char *result = NULL;
+  gdb::unique_xmalloc_ptr<char> result;
 
   if (PyObject_HasAttr (object, attr))
     {
@@ -319,7 +317,7 @@ get_doc_string (PyObject *object, PyObject *attr)
       Py_XDECREF (ds_obj);
     }
   if (! result)
-    result = xstrdup (_("This command is not documented."));
+    result.reset (xstrdup (_("This command is not documented.")));
   return result;
 }
 
@@ -327,10 +325,10 @@ get_doc_string (PyObject *object, PyObject *attr)
    argument ARG.  ARG can be NULL.  METHOD should return a Python
    string.  If this function returns NULL, there has been an error and
    the appropriate exception set.  */
-static char *
+static gdb::unique_xmalloc_ptr<char>
 call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
 {
-  char *data = NULL;
+  gdb::unique_xmalloc_ptr<char> data;
   PyObject *result = PyObject_CallMethodObjArgs (obj, method, arg, NULL);
 
   if (! result)
@@ -365,7 +363,7 @@ get_set_value (char *args, int from_tty,
 	       struct cmd_list_element *c)
 {
   PyObject *obj = (PyObject *) get_cmd_context (c);
-  char *set_doc_string;
+  gdb::unique_xmalloc_ptr<char> set_doc_string;
   struct cleanup *cleanup = ensure_python_env (get_current_arch (),
 					       current_language);
   PyObject *set_doc_func = PyString_FromString ("get_set_string");
@@ -387,8 +385,7 @@ get_set_value (char *args, int from_tty,
       set_doc_string  = get_doc_string (obj, set_doc_cst);
     }
 
-  make_cleanup (xfree, set_doc_string);
-  fprintf_filtered (gdb_stdout, "%s\n", set_doc_string);
+  fprintf_filtered (gdb_stdout, "%s\n", set_doc_string.get ());
 
   Py_XDECREF (set_doc_func);
   do_cleanups (cleanup);
@@ -413,7 +410,7 @@ get_show_value (struct ui_file *file, int from_tty,
 		const char *value)
 {
   PyObject *obj = (PyObject *) get_cmd_context (c);
-  char *show_doc_string = NULL;
+  gdb::unique_xmalloc_ptr<char> show_doc_string;
   struct cleanup *cleanup = ensure_python_env (get_current_arch (),
 					       current_language);
   PyObject *show_doc_func = PyString_FromString ("get_show_string");
@@ -433,9 +430,7 @@ get_show_value (struct ui_file *file, int from_tty,
       if (! show_doc_string)
 	goto error;
 
-      make_cleanup (xfree, show_doc_string);
-
-      fprintf_filtered (file, "%s\n", show_doc_string);
+      fprintf_filtered (file, "%s\n", show_doc_string.get ());
     }
   else
     {
@@ -443,8 +438,7 @@ get_show_value (struct ui_file *file, int from_tty,
 	 callback function does not exist, then attempt to read the
 	 show_doc attribute.  */
       show_doc_string  = get_doc_string (obj, show_doc_cst);
-      make_cleanup (xfree, show_doc_string);
-      fprintf_filtered (file, "%s %s\n", show_doc_string, value);
+      fprintf_filtered (file, "%s %s\n", show_doc_string.get (), value);
     }
 
   Py_XDECREF (show_doc_func);
@@ -614,7 +608,7 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
 			   _("The enumeration item not a string."));
 	  return 0;
 	}
-      self->enumeration[i] = python_string_to_host_string (item);
+      self->enumeration[i] = python_string_to_host_string (item).release ();
       Py_DECREF (item);
       if (self->enumeration[i] == NULL)
 	{
@@ -716,9 +710,9 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   if (! cmd_name)
     return -1;
 
-  set_doc = get_doc_string (self, set_doc_cst);
-  show_doc = get_doc_string (self, show_doc_cst);
-  doc = get_doc_string (self, gdbpy_doc_cst);
+  set_doc = get_doc_string (self, set_doc_cst).release ();
+  show_doc = get_doc_string (self, show_doc_cst).release ();
+  doc = get_doc_string (self, gdbpy_doc_cst).release ();
 
   Py_INCREF (self);
 
