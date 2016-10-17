@@ -2011,6 +2011,7 @@ get_dynamic_type (unsigned long type)
 
     case DT_PREINIT_ARRAY: return "PREINIT_ARRAY";
     case DT_PREINIT_ARRAYSZ: return "PREINIT_ARRAYSZ";
+    case DT_SYMTAB_SHNDX: return "SYMTAB_SHNDX";
 
     case DT_CHECKSUM:	return "CHECKSUM";
     case DT_PLTPADSZ:	return "PLTPADSZ";
@@ -2340,6 +2341,29 @@ get_machine_name (unsigned e_machine)
     case EM_TILEGX:		return "Tilera TILE-Gx multicore architecture family";
     case EM_CUDA:		return "NVIDIA CUDA architecture";
     case EM_XGATE:		return "Motorola XGATE embedded processor";
+    case EM_CLOUDSHIELD:	return "CloudShield architecture family";
+    case EM_COREA_1ST:		return "KIPO-KAIST Core-A 1st generation processor family";
+    case EM_COREA_2ND:		return "KIPO-KAIST Core-A 2nd generation processor family";
+    case EM_OPEN8:		return "Open8 8-bit RISC soft processor core";
+    case EM_VIDEOCORE5:		return "Broadcom VideoCore V processor";
+    case EM_56800EX:		return "Freescale 56800EX Digital Signal Controller (DSC)";
+    case EM_BA1:		return "Beyond BA1 CPU architecture";
+    case EM_BA2:		return "Beyond BA2 CPU architecture";
+    case EM_XCORE:		return "XMOS xCORE processor family";
+    case EM_MCHP_PIC:		return "Microchip 8-bit PIC(r) family";
+    case EM_KM32:		return "KM211 KM32 32-bit processor";
+    case EM_KMX32:		return "KM211 KMX32 32-bit processor";
+    case EM_KMX16:		return "KM211 KMX16 16-bit processor";
+    case EM_KMX8:		return "KM211 KMX8 8-bit processor";
+    case EM_KVARC:		return "KM211 KVARC processor";
+    case EM_CDP:		return "Paneve CDP architecture family";
+    case EM_COGE:		return "Cognitive Smart Memory Processor";
+    case EM_COOL:		return "Bluechip Systems CoolEngine";
+    case EM_NORC:		return "Nanoradio Optimized RISC";
+    case EM_CSR_KALIMBA:	return "CSR Kalimba architecture family";
+    case EM_Z80:		return "Zilog Z80";
+    case EM_AMDGPU:		return "AMD GPU architecture";
+    case EM_RISCV:		return "RISC-V";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;
@@ -3534,6 +3558,8 @@ get_osabi_name (unsigned int osabi)
     case ELFOSABI_NSK:		return "HP - Non-Stop Kernel";
     case ELFOSABI_AROS:		return "AROS";
     case ELFOSABI_FENIXOS:	return "FenixOS";
+    case ELFOSABI_CLOUDABI:	return "Nuxi CloudABI";
+    case ELFOSABI_OPENVOS:	return "Stratus Technologies OpenVOS";
     default:
       if (osabi >= 64)
 	switch (elf_header.e_machine)
@@ -6254,18 +6280,31 @@ static const char *
 get_group_flags (unsigned int flags)
 {
   static char buff[32];
-  switch (flags)
+
+  if (flags == 0)
+    return "";
+  else if (flags == GRP_COMDAT)
+    return "COMDAT ";
+
+  snprintf (buff, 14, _("[0x%x: "), flags);
+
+  flags &= ~ GRP_COMDAT;
+  if (flags & GRP_MASKOS)
     {
-    case 0:
-      return "";
-
-    case GRP_COMDAT:
-      return "COMDAT ";
-
-   default:
-      snprintf (buff, sizeof (buff), _("[<unknown>: 0x%x] "), flags);
-      break;
+      strcat (buff, "<OS specific>");
+      flags &= ~ GRP_MASKOS;
     }
+
+  if (flags & GRP_MASKPROC)
+    {
+      strcat (buff, "<PROC specific>");
+      flags &= ~ GRP_MASKPROC;
+    }
+
+  if (flags)
+    strcat (buff, "<unknown>");
+
+  strcat (buff, "]");
   return buff;
 }
 

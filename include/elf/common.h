@@ -74,6 +74,8 @@
 #define ELFOSABI_AROS	     15	/* AROS */
 #define ELFOSABI_FENIXOS     16 /* FenixOS */
 #define ELFOSABI_CLOUDABI    17 /* Nuxi CloudABI */
+#define ELFOSABI_OPENVOS     18 /* Stratus Technologies OpenVOS */
+
 #define ELFOSABI_C6000_ELFABI 64 /* Bare-metal TMS320C6000 */
 #define ELFOSABI_C6000_LINUX 65 /* Linux TMS320C6000 */
 #define ELFOSABI_ARM	     97	/* ARM */
@@ -289,23 +291,46 @@
 #define EM_AARCH64	183	/* ARM 64-bit architecture */
 #define EM_ARM184	184	/* Reserved by ARM */
 #define EM_AVR32	185	/* Atmel Corporation 32-bit microprocessor family */
-#define EM_STM8	186	/* STMicroeletronics STM8 8-bit microcontroller */
+#define EM_STM8		186	/* STMicroeletronics STM8 8-bit microcontroller */
 #define EM_TILE64	187	/* Tilera TILE64 multicore architecture family */
 #define EM_TILEPRO	188	/* Tilera TILEPro multicore architecture family */
 #define EM_MICROBLAZE	189	/* Xilinx MicroBlaze 32-bit RISC soft processor core */
 #define EM_CUDA		190	/* NVIDIA CUDA architecture */
 #define EM_TILEGX	191	/* Tilera TILE-Gx multicore architecture family */
+#define EM_CLOUDSHIELD 	192 	/* CloudShield architecture family */
+#define EM_COREA_1ST 	193 	/* KIPO-KAIST Core-A 1st generation processor family */
+#define EM_COREA_2ND 	194 	/* KIPO-KAIST Core-A 2nd generation processor family */
 #define EM_ARC_COMPACT2 195	/* Synopsys ARCompact V2 */
+#define EM_OPEN8 	196 	/* Open8 8-bit RISC soft processor core */
 #define EM_RL78		197	/* Renesas RL78 family.  */
+#define EM_VIDEOCORE5 	198 	/* Broadcom VideoCore V processor */
 #define EM_78K0R	199	/* Renesas 78K0R.  */
+#define EM_56800EX 	200 	/* Freescale 56800EX Digital Signal Controller (DSC) */
+#define EM_BA1 		201 	/* Beyond BA1 CPU architecture */
+#define EM_BA2 		202 	/* Beyond BA2 CPU architecture */
+#define EM_XCORE 	203 	/* XMOS xCORE processor family */
+#define EM_MCHP_PIC 	204 	/* Microchip 8-bit PIC(r) family */
 #define EM_INTEL205	205	/* Reserved by Intel */
 #define EM_INTEL206	206	/* Reserved by Intel */
 #define EM_INTEL207	207	/* Reserved by Intel */
 #define EM_INTEL208	208	/* Reserved by Intel */
 #define EM_INTEL209	209	/* Reserved by Intel */
+#define EM_KM32 	210 	/* KM211 KM32 32-bit processor */
+#define EM_KMX32 	211 	/* KM211 KMX32 32-bit processor */
+#define EM_KMX16 	212 	/* KM211 KMX16 16-bit processor */
+#define EM_KMX8 	213 	/* KM211 KMX8 8-bit processor */
+#define EM_KVARC 	214 	/* KM211 KVARC processor */
+#define EM_CDP 		215 	/* Paneve CDP architecture family */
+#define EM_COGE 	216 	/* Cognitive Smart Memory Processor */
+#define EM_COOL 	217 	/* Bluechip Systems CoolEngine */
+#define EM_NORC 	218 	/* Nanoradio Optimized RISC */
+#define EM_CSR_KALIMBA 	219 	/* CSR Kalimba architecture family */
+#define EM_Z80 		220 	/* Zilog Z80 */
 #define EM_VISIUM	221	/* Controls and Data Services VISIUMcore processor */
 #define EM_FT32         222     /* FTDI Chip FT32 high performance 32-bit RISC architecture */
 #define EM_MOXIE        223     /* Moxie processor family */
+#define EM_AMDGPU 	224 	/* AMD GPU architecture */
+#define EM_RISCV 	243 	/* RISC-V */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
@@ -523,7 +548,7 @@
 					   are not to be further
 					   relocated.  */
 
-/* Compression types */
+/* Compression types.  */
 #define ELFCOMPRESS_ZLIB   1		/* Compressed with zlib.  */
 #define ELFCOMPRESS_LOOS   0x60000000	/* OS-specific semantics, lo */
 #define ELFCOMPRESS_HIOS   0x6FFFFFFF	/* OS-specific semantics, hi */
@@ -774,6 +799,7 @@
 #define DT_ENCODING	32
 #define DT_PREINIT_ARRAY   32
 #define DT_PREINIT_ARRAYSZ 33
+#define DT_SYMTAB_SHNDX    34
 
 /* Note, the Oct 4, 1999 draft of the ELF ABI changed the values
    for DT_LOOS and DT_HIOS.  Some implementations however, use
@@ -962,6 +988,8 @@
 /* Section Group Flags.	 */
 
 #define GRP_COMDAT		0x1	/* A COMDAT group */
+#define GRP_MASKOS 	 0x0ff00000	/* Bits in this range reserved for OS specific use.  */
+#define GRP_MASKPROC 	 0xf0000000	/* Bits in this range reserved for processor use.  */
 
 /* Auxv a_type values.  */
 
