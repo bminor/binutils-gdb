@@ -1,6 +1,11 @@
 2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.trace/mi-trace-save.exp (test_trace_save_wrong_num_args):
+	Change test message.
+
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/mi-trace-save.exp (test_trace_save_wrong_num_args):
 	Update comment.
 
 2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
