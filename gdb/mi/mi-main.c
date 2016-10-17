@@ -2699,6 +2699,11 @@ mi_cmd_trace_save (char *command, char **argv, int argc)
 	  break;
 	}
     }
+
+  if (argc - oind != 1)
+    error (_("Exactly one argument required "
+	     "(file in which to save trace data)"));
+
   filename = argv[oind];
 
   if (generate_ctf)

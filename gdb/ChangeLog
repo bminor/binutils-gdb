@@ -1,3 +1,8 @@
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-main.c (mi_cmd_trace_save): Check if argument is present
+	before using it.
+
 2016-10-17  Pedro Alves  <palves@redhat.com>
 
 	* charset.h (class wchar_iterator) [PHONY_ICONV] <m_desc>: Use

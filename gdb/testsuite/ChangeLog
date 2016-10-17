@@ -1,3 +1,7 @@
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/mi-trace-save.exp: New file.
+
 2016-10-13  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/code_elim.exp (get_var_address): Remove.
