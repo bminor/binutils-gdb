@@ -1,5 +1,21 @@
 2016-10-17  Nick Clifton  <nickc@redhat.com>
 
+	* readelf.c (apply_relocations): Fail if the symbol table section
+	linked to by the reloc section does not have either the SHT_SYMTAB
+	or SHT_DYNSYM type.
+	(print_gnu_note): Decode the contents of NT_GNU_HWCAP notes.
+	Print the contents of unknown note types.
+	(process_note): Add the file and section to the parameter list.
+	Use print_symbol to display the note name.
+	Display the contents of unknown note types.
+	(process_corefile_note_segment): Rename to process_notes_at.
+	Add section parameter.  Apply relocations to the notes when
+	loading from a section.  Display section name when processing
+	notes in a section.
+	* testsuite/binutils-all/readelf.n: Update expected output.
+
+2016-10-17  Nick Clifton  <nickc@redhat.com>
+
 	* readelf.c (get_dynamic_type): Add DT_SYMTAB_SHNDX.
 	(get_machine_type): Add EM_CLOUDSHIELD, EM_COREA_1ST,
 	EM_COREA_2ND, EM_OPEN8, EM_VIDEOCORE5, EM_56800EX, EM_BA1, EM_BA2,
