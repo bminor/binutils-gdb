@@ -21,7 +21,7 @@ load_lib mi-support.exp
 
 mi_gdb_start
 
-# Test without the required "filename" argument.
+# Test with the wrong number of arguments.
 
 proc test_trace_save_wrong_num_args { } {
     set err_re [string_to_regexp "^error,msg=\"Exactly one argument required (file in which to save trace data)\""]
