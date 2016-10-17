@@ -131,7 +131,11 @@ class wchar_iterator
  private:
 
   /* The underlying iconv descriptor.  */
+#ifdef PHONY_ICONV
+  int m_desc;
+#else
   iconv_t m_desc;
+#endif
 
   /* The input string.  This is updated as we convert characters.  */
   const gdb_byte *m_input;

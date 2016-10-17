@@ -1,3 +1,8 @@
+2016-10-17  Pedro Alves  <palves@redhat.com>
+
+	* charset.h (class wchar_iterator) [PHONY_ICONV] <m_desc>: Use
+	'int' as type.
+
 2016-10-14  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
