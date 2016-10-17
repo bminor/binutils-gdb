@@ -2,7 +2,7 @@
 #name: Check for correct disassembly of scondd llockd.
 #as: -mcpu=archs
 
-dump.o:     file format elf32-littlearc
+.*: +file format .*arc.*
 
 
 Disassembly of section .text:

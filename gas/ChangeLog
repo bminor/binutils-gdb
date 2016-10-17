@@ -1,5 +1,9 @@
 2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* testsuite/arc/dis-inv.d: Fixed matching.
+
+2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* testsuite/arc/dis-inv.s: Test to validate patch.
 	* testsuite/arc/dis-inv.d: Likewise.
 
