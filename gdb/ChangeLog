@@ -1,3 +1,8 @@
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* tilegx-tdep.c (tilegx_analyze_prologue): Use the `long long'
+	type for `operands'.
+
 2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* mi/mi-main.c (mi_cmd_trace_save): Check if argument is present
