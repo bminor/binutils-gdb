@@ -1,5 +1,11 @@
 2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* i386-tdep.c (i386_mpx_info_bounds): Make sure the architecture
+	is `bfd_arch_i386' before proceeding.
+	(i386_mpx_set_bounds): Likewise.
+
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* tilegx-tdep.c (tilegx_analyze_prologue): Use the `long long'
 	type for `operands'.
 
