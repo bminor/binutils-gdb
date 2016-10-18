@@ -1,3 +1,8 @@
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-arm.c (elf32_arm_update_relocs): Rename `index' local
+	variable to `reloc_index'.
+
 2016-10-12  Alan Modra  <amodra@gmail.com>
 
 	* section.c (BFD_FAKE_SECTION): Reorder parameters.  Formatting.

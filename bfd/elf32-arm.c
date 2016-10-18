@@ -14948,15 +14948,15 @@ elf32_arm_update_relocs (asection *o,
 		{
 		  arm_unwind_table_edit *edit_node, *edit_next;
 		  bfd_vma bias;
-		  bfd_vma index;
+		  bfd_vma reloc_index;
 
 		  (*swap_in) (abfd, erela, irela);
-		  index = (irela->r_offset - offset) / 8;
+		  reloc_index = (irela->r_offset - offset) / 8;
 
 		  bias = 0;
 		  edit_node = edit_list;
 		  for (edit_next = edit_list;
-		       edit_next && edit_next->index <= index;
+		       edit_next && edit_next->index <= reloc_index;
 		       edit_next = edit_node->next)
 		    {
 		      bias++;
@@ -14964,7 +14964,7 @@ elf32_arm_update_relocs (asection *o,
 		    }
 
 		  if (edit_node->type != DELETE_EXIDX_ENTRY
-		      || edit_node->index != index)
+		      || edit_node->index != reloc_index)
 		    {
 		      irela->r_offset -= bias * 8;
 		      irela++;
