@@ -1,5 +1,10 @@
 2016-10-18  Pedro Alves  <palves@redhat.com>
 
+	* common/common-defs.h (__STDC_CONSTANT_MACROS)
+	(__STDC_LIMIT_MACROS): Delete.
+
+2016-10-18  Pedro Alves  <palves@redhat.com>
+
 	* gnulib/update-gnulib.sh (GNULIB_COMMIT_SHA1): Set to
 	2692e23a48e21f6daa029e8af9f1a143b7532f47.
 	* gnulib/configure, gnulib/config.in, gnulib/aclocal.m4:
