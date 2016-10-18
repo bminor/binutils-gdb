@@ -1,5 +1,11 @@
 2016-10-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutis/20699
+	* i386-dis.c (OP_E_memory): Check addr32flag in stead of
+	sizeflag.
+
+2016-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutis/20704
 	* i386-dis.c (three_byte_table): Remove the remaining SSE5 support.
 

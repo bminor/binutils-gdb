@@ -15523,7 +15523,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	    if (riprel)
 	      {
 		set_op (disp, 1);
-		oappend (sizeflag & AFLAG ? "(%rip)" : "(%eip)");
+		oappend (!addr32flag ? "(%rip)" : "(%eip)");
 	      }
 	  }
 
@@ -15538,7 +15538,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	  if (intel_syntax && riprel)
 	    {
 	      set_op (disp, 1);
-	      oappend (sizeflag & AFLAG ? "rip" : "eip");
+	      oappend (!addr32flag ? "rip" : "eip");
 	    }
 	  *obufp = '\0';
 	  if (havebase)
