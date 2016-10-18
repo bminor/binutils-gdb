@@ -1,3 +1,8 @@
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* aarch64-dis.c (aarch64_ext_sve_addr_rr_lsl): Rename `index'
+	local variable to `index_regno'.
+
 2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* arc-tbl.h: Removed any "inv.+" instructions from the table.
