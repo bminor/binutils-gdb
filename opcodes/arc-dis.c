@@ -595,6 +595,10 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
 	  else if (minor_opcode == 0x10 || minor_opcode == 0x11)
 	    return 8;
         }
+      if (major_opcode == 0xa)
+        {
+          return 8;
+        }
       /* Fall through.  */
     case bfd_mach_arc_arc600:
       return (major_opcode > 0xb) ? 2 : 4;

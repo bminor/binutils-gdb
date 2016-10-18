@@ -1,3 +1,8 @@
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* testsuite/gas/arc/nps-400-9.d: Added.
+	* testsuite/gas/arc/nps-400-9.s: Added.
+
 2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.c (struct arc_insn): Change type of insn field.

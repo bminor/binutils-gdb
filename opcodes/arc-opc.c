@@ -1026,6 +1026,7 @@ MAKE_1BASED_INSERT_EXTRACT_FUNCS (bits_to_scramble, 12, 8, 3)
 MAKE_1BASED_INSERT_EXTRACT_FUNCS (bdlen_max_len, 5, 256, 8)
 MAKE_1BASED_INSERT_EXTRACT_FUNCS (bd_num_buff, 6, 8, 3)
 MAKE_1BASED_INSERT_EXTRACT_FUNCS (pmu_num_job, 6, 4, 2)
+MAKE_1BASED_INSERT_EXTRACT_FUNCS (proto_size, 16, 64, 6)
 
 static unsigned long long
 insert_nps_min_hofs (unsigned long long insn ATTRIBUTE_UNUSED,
@@ -1082,6 +1083,30 @@ MAKE_INSERT_NPS_ADDRTYPE (cm, CM)
 MAKE_INSERT_NPS_ADDRTYPE (csd, CSD)
 MAKE_INSERT_NPS_ADDRTYPE (cxa, CXA)
 MAKE_INSERT_NPS_ADDRTYPE (cxd, CXD)
+
+static unsigned long long
+insert_nps_rbdouble_64 (unsigned long long insn ATTRIBUTE_UNUSED,
+                        long long int value ATTRIBUTE_UNUSED,
+                        const char **errmsg ATTRIBUTE_UNUSED)
+{
+  if (value < 0 || value > 31)
+    *errmsg = _("Value must be in the range 0 to 31");
+  return insn | (value << 43) | (value << 48);
+}
+
+
+static long long int
+extract_nps_rbdouble_64 (unsigned long long insn ATTRIBUTE_UNUSED,
+                         bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value1 = (insn >> 43) & 0x1F;
+  int value2 = (insn >> 48) & 0x1F;
+
+  if (value1 != value2)
+    *invalid = TRUE;
+
+  return value1;
+}
 
 /* Include the generic extract/insert functions.  Order is important
    as some of the functions present in the .h may be disabled via
@@ -2088,8 +2113,28 @@ const struct arc_operand arc_operands[] =
 
 #define NPS_R_SRC2_3B_64	(NPS_R_SRC1_3B_64 + 1)
   { 3, 53, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_53_src2, extract_nps_3bit_reg_at_53_src2 },
-};
 
+#define NPS_RA_64               (NPS_R_SRC2_3B_64 + 1)
+  { 6, 53, 0, ARC_OPERAND_IR, NULL, NULL },
+
+#define NPS_RB_64               (NPS_RA_64 + 1)
+  { 5, 48, 0, ARC_OPERAND_IR, NULL, NULL },
+
+#define NPS_RBdup_64            (NPS_RB_64 + 1)
+  { 5, 43, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, NULL, NULL },
+
+#define NPS_RBdouble_64         (NPS_RBdup_64 + 1)
+  { 10, 43, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_rbdouble_64, extract_nps_rbdouble_64 },
+
+#define NPS_RC_64               (NPS_RBdouble_64 + 1)
+  { 5, 43, 0, ARC_OPERAND_IR, NULL, NULL },
+
+#define NPS_UIMM16_0_64         (NPS_RC_64 + 1)
+  { 16, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL },
+
+#define NPS_PROTO_SIZE         (NPS_UIMM16_0_64 + 1)
+  { 6, 16, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_proto_size, extract_nps_proto_size }
+};
 const unsigned arc_num_operands = ARRAY_SIZE (arc_operands);
 
 const unsigned arc_Toperand = FKT_T;

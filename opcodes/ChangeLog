@@ -1,3 +1,14 @@
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* arc-dis.c (arc_insn_length): Return length 8 for instructions with
+	major opcode 0xa.
+	* arc-nps-400-tbl.h: Add dcmac instruction.
+	* arc-opc.c (arc_operands): Added operands for dcmac instruction.
+	(insert_nps_rbdouble_64): Added.
+	(extract_nps_rbdouble_64): Added.
+	(insert_nps_proto_size): Added.
+	(extract_nps_proto_size): Added.
+
 2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-dis.c (struct arc_operand_iterator): Remove all fields

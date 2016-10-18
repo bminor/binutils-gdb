@@ -56,6 +56,7 @@ typedef enum
   LOGICAL,
   MEMORY,
   NET,
+  PROTOCOL_DECODE,
   PMU,
   XY
 } insn_class_t;
