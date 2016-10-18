@@ -1,3 +1,8 @@
+2016-10-18  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h: Include "gdb_unique_ptr.h".
+	* common/gdb_unique_ptr.h: New.
+
 2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* i386-tdep.c (i386_mpx_info_bounds): Make sure the architecture
