@@ -1,5 +1,10 @@
 2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elf32-nds32.c (nds32_elf_check_relocs): Avoid aliasing warning
+	from GCC.
+
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elf32-arm.c (elf32_arm_update_relocs): Rename `index' local
 	variable to `reloc_index'.
 
