@@ -1,3 +1,7 @@
+2016-10-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
 2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf32-nds32.c (nds32_elf_check_relocs): Avoid aliasing warning
