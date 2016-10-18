@@ -287,7 +287,7 @@ enum versioned_symbol_info
   symbol_public
 };
 
-static const char * get_symbol_version_string
+static const char *get_symbol_version_string
   (FILE *file, int is_dynsym, const char *strtab,
    unsigned long int strtab_size, unsigned int si,
    Elf_Internal_Sym *psym, enum versioned_symbol_info *sym_info,
@@ -1966,7 +1966,7 @@ get_solaris_dynamic_type (unsigned long type)
     case 0x7ffffffe: return "USED";
     case 0x7fffffff: return "FILTER";
 
-    default: return NULL;      
+    default: return NULL;
     }
 }
 
@@ -2347,8 +2347,8 @@ get_machine_name (unsigned e_machine)
     case EM_OPEN8:		return "Open8 8-bit RISC soft processor core";
     case EM_VIDEOCORE5:		return "Broadcom VideoCore V processor";
     case EM_56800EX:		return "Freescale 56800EX Digital Signal Controller (DSC)";
-    case EM_BA1 :		return "Beyond BA1 CPU architecture";
-    case EM_BA2 :		return "Beyond BA2 CPU architecture";
+    case EM_BA1:		return "Beyond BA1 CPU architecture";
+    case EM_BA2:		return "Beyond BA2 CPU architecture";
     case EM_XCORE:		return "XMOS xCORE processor family";
     case EM_MCHP_PIC:		return "Microchip 8-bit PIC(r) family";
     case EM_KM32:		return "KM211 KM32 32-bit processor";
@@ -2356,12 +2356,12 @@ get_machine_name (unsigned e_machine)
     case EM_KMX16:		return "KM211 KMX16 16-bit processor";
     case EM_KMX8:		return "KM211 KMX8 8-bit processor";
     case EM_KVARC:		return "KM211 KVARC processor";
-    case EM_CDP :		return "Paneve CDP architecture family";
+    case EM_CDP:		return "Paneve CDP architecture family";
     case EM_COGE:		return "Cognitive Smart Memory Processor";
     case EM_COOL:		return "Bluechip Systems CoolEngine";
     case EM_NORC:		return "Nanoradio Optimized RISC";
     case EM_CSR_KALIMBA:	return "CSR Kalimba architecture family";
-    case EM_Z80 :		return "Zilog Z80";
+    case EM_Z80:		return "Zilog Z80";
     case EM_AMDGPU:		return "AMD GPU architecture";
     case EM_RISCV:		return "RISC-V";
     default:
@@ -15802,7 +15802,7 @@ print_v850_note (Elf_Internal_Note * pnote)
   return 0;
 }
 
-static int 
+static int
 process_netbsd_elf_note (Elf_Internal_Note * pnote)
 {
   unsigned int version;
@@ -15815,11 +15815,11 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
         printf ("  NetBSD\t\t0x%08lx\tIDENT %u (%u.%u%s%c)\n", pnote->descsz,
 		version, version / 100000000, (version / 1000000) % 100,
 		(version / 10000) % 100 > 26 ? "Z" : "",
-		'A' + (version / 10000) % 26); 
+		'A' + (version / 10000) % 26);
       else
 	printf ("  NetBSD\t\t0x%08lx\tIDENT %u (%u.%u.%u)\n", pnote->descsz,
 	        version, version / 100000000, (version / 1000000) % 100,
-		(version / 100) % 100); 
+		(version / 100) % 100);
       return 1;
 
     case NT_NETBSD_MARCH:
