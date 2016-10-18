@@ -1,3 +1,8 @@
+2016-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20704
+	* i386-dis.c (three_byte_table): Remove the remaining SSE5 support.
+
 2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* aarch64-dis.c (aarch64_ext_sve_addr_rr_lsl): Rename `index'
