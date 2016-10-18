@@ -39,6 +39,7 @@ IMPORTED_GNULIB_MODULES="\
     frexpl \
     inttypes \
     lstat \
+    limits-h \
     memchr \
     memmem \
     pathmax \
@@ -57,7 +58,7 @@ IMPORTED_GNULIB_MODULES="\
 "
 
 # The gnulib commit ID to use for the update.
-GNULIB_COMMIT_SHA1="1029a8112290f6eee9d7878a391c49db42c999bd"
+GNULIB_COMMIT_SHA1="2692e23a48e21f6daa029e8af9f1a143b7532f47"
 
 # The expected version number for the various auto tools we will
 # use after the import.
