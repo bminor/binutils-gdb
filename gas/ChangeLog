@@ -1,3 +1,11 @@
+2016-10-19  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (encode_arm_shift): Generate unpredictable warning
+	for register-shifted register instructions.
+	* testsuite/gas/arm/shift-bad-pc.d: New.
+	* testsuite/gas/arm/shift-bad-pc.l: New.
+	* testsuite/gas/arm/shift-bad-pc.s: New.
+
 2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* testsuite/arc/dis-inv.d: Fixed matching.
