@@ -591,6 +591,7 @@ hppa_add_stub (const char *stub_name,
 				      TRUE, FALSE);
   if (hsh == NULL)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: cannot create stub entry %s"),
 			  section->owner, stub_name);
       return NULL;
@@ -842,6 +843,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	      || sym_value - 8 + (1 << (22 + 1)) >= (1 << (22 + 2))))
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
 	     hsh->target_section->owner,
 	     stub_sec,
@@ -1280,6 +1282,7 @@ elf32_hppa_check_relocs (bfd *abfd,
 	  if (bfd_link_pic (info))
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: relocation %s can not be used when making a shared object; recompile with -fPIC"),
 		 abfd,
 		 elf_hppa_howto_table[r_type].name);
@@ -2788,6 +2791,7 @@ get_local_syms (bfd *output_bfd, bfd *input_bfd, struct bfd_link_info *info)
 		    }
 		  else
 		    {
+		      /* xgettext:c-format */
 		      _bfd_error_handler (_("%B: duplicate export stub %s"),
 					  input_bfd, stub_name);
 		    }
@@ -3442,6 +3446,7 @@ final_link_relocate (asection *input_section,
 		   and convert the associated add instruction, so issue an
 		   error.  */
 		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("%B(%A+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
 		   input_bfd,
 		   input_section,
@@ -3607,6 +3612,7 @@ final_link_relocate (asection *input_section,
       && value + addend + max_branch_offset >= 2*max_branch_offset)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
 	 input_bfd,
 	 input_section,
@@ -4297,6 +4303,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	  if (rstatus == bfd_reloc_notsupported || !warned_undef)
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B(%A+0x%lx): cannot handle %s for %s"),
 		 input_bfd,
 		 input_section,

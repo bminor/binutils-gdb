@@ -597,6 +597,7 @@ alpha_adjust_reloc_in (bfd *abfd,
 {
   if (intern->r_type > ALPHA_R_GPVALUE)
     {
+      /* xgettext:c-format */
       _bfd_error_handler
 	(_("%B: unknown/unsupported relocation type %d"),
 	 abfd, intern->r_type);
@@ -1513,6 +1514,7 @@ alpha_relocate_section (bfd *output_bfd,
 
 	default:
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: unknown relocation type %d"),
 	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);

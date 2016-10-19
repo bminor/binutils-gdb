@@ -1059,6 +1059,7 @@ bfd_set_file_flags (bfd *abfd, flagword flags)
 void
 bfd_assert (const char *file, int line)
 {
+  /* xgettext:c-format */
   (*_bfd_assert_handler) (_("BFD %s assertion fail %s:%d"),
 			  BFD_VERSION_STRING, file, line);
 }
@@ -1071,10 +1072,12 @@ _bfd_abort (const char *file, int line, const char *fn)
 {
   if (fn != NULL)
     _bfd_error_handler
+      /* xgettext:c-format */
       (_("BFD %s internal error, aborting at %s:%d in %s\n"),
        BFD_VERSION_STRING, file, line, fn);
   else
     _bfd_error_handler
+      /* xgettext:c-format */
       (_("BFD %s internal error, aborting at %s:%d\n"),
        BFD_VERSION_STRING, file, line);
   _bfd_error_handler (_("Please report this bug.\n"));

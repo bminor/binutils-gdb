@@ -303,6 +303,7 @@ i370_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_I370_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: unrecognised I370 reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
@@ -354,7 +355,8 @@ i370_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   else					/* Incompatible flags.  */
     {
       _bfd_error_handler
-	("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
+	/* xgettext:c-format */
+	(_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	 ibfd, (long) new_flags, (long) old_flags);
 
       bfd_set_error (bfd_error_bad_value);
@@ -1075,7 +1077,8 @@ i370_elf_relocate_section (bfd *output_bfd,
       if ((unsigned) r_type >= (unsigned) R_I370_max
 	  || !i370_elf_howto_table[(int)r_type])
 	{
-	  _bfd_error_handler ("%B: unknown relocation type %d",
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%B: unknown relocation type %d"),
 			      input_bfd, (int) r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -1158,7 +1161,7 @@ i370_elf_relocate_section (bfd *output_bfd,
 	{
 	default:
 	  _bfd_error_handler
-	    ("%B: unknown relocation type %d for symbol %s",
+	    (_("%B: unknown relocation type %d for symbol %s"),
 	     input_bfd, (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -1299,7 +1302,8 @@ i370_elf_relocate_section (bfd *output_bfd,
 	case (int) R_I370_COPY:
 	case (int) R_I370_RELATIVE:
 	  _bfd_error_handler
-	    ("%B: Relocation %s is not yet supported for symbol %s.",
+	    /* xgettext:c-format */
+	    (_("%B: Relocation %s is not yet supported for symbol %s."),
 	     input_bfd,
 	     i370_elf_howto_table[(int) r_type]->name,
 	     sym_name);

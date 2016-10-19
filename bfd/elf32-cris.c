@@ -463,6 +463,7 @@ cris_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_CRIS_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid CRIS reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -1110,6 +1111,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   != (bfd_vma) -1))
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B, section %A: unresolvable relocation %s against symbol `%s'"),
 		     input_bfd,
 		     input_section,
@@ -1172,8 +1174,10 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    {
 	      _bfd_error_handler
 		((h->got.offset == (bfd_vma) -1)
+		 /* xgettext:c-format */
 		 ? _("%B, section %A: No PLT nor GOT for relocation %s"
 		     " against symbol `%s'")
+		 /* xgettext:c-format */
 		 : _("%B, section %A: No PLT for relocation %s"
 		     " against symbol `%s'"),
 		 input_bfd,
@@ -1299,6 +1303,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   allowed to pass us these kinds of things.  */
 		if (h == NULL)
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B, section %A: relocation %s with non-zero addend %d"
 		       " against local symbol"),
 		     input_bfd,
@@ -1307,6 +1312,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		     rel->r_addend);
 		else
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B, section %A: relocation %s with non-zero addend %d"
 		       " against symbol `%s'"),
 		     input_bfd,
@@ -1333,6 +1339,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   && h->root.type == bfd_link_hash_undefweak))))
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s is"
 		   " not allowed for global symbol: `%s'"),
 		 input_bfd,
@@ -1349,6 +1356,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (sgot == NULL)
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s with no GOT created"),
 		 input_bfd,
 		 input_section,
@@ -1564,9 +1572,11 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      _bfd_error_handler
 		((h->root.type == bfd_link_hash_undefined)
 		 /* We shouldn't get here for GCC-emitted code.  */
+		 /* xgettext:c-format */
 		 ? _("%B, section %A: relocation %s has an undefined"
 		     " reference to `%s', perhaps a declaration mixup?")
-		 : ("%B, section %A: relocation %s is"
+		 /* xgettext:c-format */
+		 : _("%B, section %A: relocation %s is"
 		     " not allowed for `%s', a global symbol with default"
 		     " visibility, perhaps a declaration mixup?"),
 		 input_bfd,
@@ -1650,6 +1660,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 symbols.  Make this an error; the compiler isn't allowed
 		 to pass us these kinds of things.  */
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s with non-zero addend %d"
 		   " against symbol `%s'"),
 		 input_bfd,
@@ -1803,6 +1814,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 compiler isn't allowed to pass us these kinds of
 		 things.  */
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s with non-zero addend %d"
 		   " against symbol `%s'"),
 		 input_bfd,
@@ -1937,6 +1949,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      && h->root.type != bfd_link_hash_undefined)
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s is"
 		   " not allowed for symbol: `%s'"
 		   " which is defined outside the program,"
@@ -3229,6 +3242,7 @@ cris_elf_check_relocs (bfd *abfd,
 	      if (bfd_get_mach (dynobj) == bfd_mach_cris_v10_v32)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B, section %A:\n  v10/v32 compatible object %s"
 		       " must not contain a PIC relocation"),
 		     abfd, sec);
@@ -3337,6 +3351,7 @@ cris_elf_check_relocs (bfd *abfd,
 	  if (bfd_link_pic (info))
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A:\n  relocation %s not valid"
 		   " in a shared object;"
 		   " typically an option mixup, recompile with -fPIC"),
@@ -3551,6 +3566,7 @@ cris_elf_check_relocs (bfd *abfd,
 	    {
 	      /* FIXME: How do we make this optionally a warning only?  */
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A:\n  relocation %s should not"
 		   " be used in a shared object; recompile with -fPIC"),
 		 abfd,
@@ -3973,6 +3989,7 @@ elf_cris_discard_excess_dso_dynamics (struct elf_cris_link_hash_entry *h,
       {
 	/* FIXME: How do we make this optionally a warning only?  */
 	_bfd_error_handler
+	  /* xgettext:c-format */
 	  (_("%B, section `%A', to symbol `%s':\n"
 	     "  relocation %s should not be used"
 	     " in a shared object; recompile with -fPIC"),

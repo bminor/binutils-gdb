@@ -161,6 +161,7 @@ m68hc12_add_stub (const char *stub_name, asection *section,
                                          TRUE, FALSE);
   if (stub_entry == NULL)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: cannot create stub entry %s"),
 			  section->owner, stub_name);
       return NULL;
@@ -1166,6 +1167,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
               && m68hc11_addr_is_banked (pinfo, insn_addr)
               && phys_page != insn_page && !(e_flags & E_M68HC11_NO_BANK_WARNING))
             {
+	      /* xgettext:c-format */
               msg = _("banked address [%lx:%04lx] (%lx) is not in the same bank "
                       "as current banked address [%lx:%04lx] (%lx)");
               buf = xmalloc (strlen (msg) + 128);
@@ -1181,6 +1183,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
           if (phys_page != 0 && insn_page == 0)
             {
+	      /* xgettext:c-format */
               msg = _("reference to a banked address [%lx:%04lx] in the "
                       "normal address space at %04lx");
               buf = xmalloc (strlen (msg) + 128);
@@ -1381,6 +1384,7 @@ _bfd_m68hc11_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (new_flags != old_flags)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	 ibfd, (unsigned long) new_flags, (unsigned long) old_flags);
       ok = FALSE;

@@ -786,6 +786,7 @@ _bfd_generic_get_section_contents (bfd *abfd,
   if (section->compress_status != COMPRESS_SECTION_NONE)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: unable to get decompressed section %A"),
 	 abfd, section);
       bfd_set_error (bfd_error_invalid_operation);
@@ -940,6 +941,7 @@ warn_deprecated (const char *what,
       /* Note: separate sentences in order to allow
 	 for translation into other languages.  */
       if (func)
+	/* xgettext:c-format */
 	fprintf (stderr, _("Deprecated %s called at %s line %d in %s\n"),
 		 what, file, line, func);
       else

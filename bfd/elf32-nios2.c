@@ -2225,6 +2225,7 @@ nios2_add_stub (const char *stub_name,
 				TRUE, FALSE);
   if (hsh == NULL)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: cannot create stub entry %s"),
 			  section->owner,
 			  stub_name);
@@ -2962,6 +2963,7 @@ nios2_elf32_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       /* So far, the only incompatible flags denote incompatible
 	 architectures.  */
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("error: %B: Conflicting CPU architectures %d/%d"),
 	 ibfd, new_flags, old_flags);
       bfd_set_error (bfd_error_bad_value);
@@ -3846,6 +3848,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		    {
 		      if (h)
 			name = h->root.root.string;
+		      /* xgettext:c-format */
 		      format = _("Unable to reach %s (at 0x%08x) from the "
 				 "global pointer (at 0x%08x) because the "
 				 "offset (%d) is out of the allowed range, "
@@ -4367,6 +4370,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	      if (bfd_link_dll (info))
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B(%A+0x%lx): R_NIOS2_TLS_LE16 relocation not "
 		       "permitted in shared object"),
 		     input_bfd, input_section,

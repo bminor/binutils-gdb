@@ -2816,6 +2816,7 @@ bfd_mach_o_build_exec_seg_command (bfd *abfd, bfd_mach_o_segment_command *seg)
       if (s->addr < vma)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("section address (%lx) below start of segment (%lx)"),
 	       (unsigned long) s->addr, (unsigned long) vma);
 	  return FALSE;
@@ -3586,6 +3587,7 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
       || bfd_bread (&raw, symwidth, abfd) != symwidth)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
         (_("bfd_mach_o_read_symtab_symbol: unable to read %d bytes at %lu"),
          symwidth, (unsigned long) symoff);
       return FALSE;
@@ -3604,6 +3606,7 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
   if (stroff >= sym->strsize)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
         (_("bfd_mach_o_read_symtab_symbol: name out of range (%lu >= %lu)"),
          (unsigned long) stroff,
          (unsigned long) sym->strsize);
@@ -3686,6 +3689,7 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
 	      if (section != 0)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("bfd_mach_o_read_symtab_symbol: "
 		       "symbol \"%s\" specified invalid section %d (max %lu): "
 		       "setting to undefined"),
@@ -3704,6 +3708,7 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
 	  break;
 	default:
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("bfd_mach_o_read_symtab_symbol: "
 	       "symbol \"%s\" specified invalid type field 0x%x: "
 	       "setting to undefined"), s->symbol.name, symtype);
@@ -4941,6 +4946,7 @@ bfd_mach_o_scan (bfd *abfd,
   if (cputype == bfd_arch_unknown)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
         (_("bfd_mach_o_scan: unknown architecture 0x%lx/0x%lx"),
          header->cputype, header->cpusubtype);
       return FALSE;

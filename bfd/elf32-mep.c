@@ -142,6 +142,7 @@ mep_reloc_type_lookup
 
   if (mep_elf_howto_table[type].type != type)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("MeP: howto %d has type %d"),
 			  type, mep_elf_howto_table[type].type);
       abort ();
@@ -385,6 +386,7 @@ mep_info_to_howto_rela
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_MEP_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid MEP reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -614,6 +616,7 @@ mep_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	old_flags = (old_flags & ~EF_MEP_CPU_MASK) | new_partial;
       else
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B and %B are for different cores"), last_ibfd, ibfd);
 	  bfd_set_error (bfd_error_invalid_target);
 	  return FALSE;
@@ -631,6 +634,7 @@ mep_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	old_flags = (old_flags & ~EF_MEP_INDEX_MASK) | new_partial;
       else
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B and %B are for different configurations"), last_ibfd, ibfd);
 	  bfd_set_error (bfd_error_invalid_target);
 	  return FALSE;

@@ -7118,6 +7118,7 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
 	  if (intopt.size < sizeof (Elf_External_Options))
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: Warning: bad `%s' option size %u smaller than its header"),
 		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
 	      break;
@@ -7351,6 +7352,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	  if (intopt.size < sizeof (Elf_External_Options))
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: Warning: bad `%s' option size %u smaller than its header"),
 		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
 	      break;
@@ -8121,6 +8123,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx == 0)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: Warning: cannot determine the target function for"
 	       " stub section `%s'"),
 	     abfd, name);
@@ -8246,6 +8249,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx == 0)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: Warning: cannot determine the target function for"
 	       " stub section `%s'"),
 	     abfd, name);
@@ -8377,6 +8381,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: Malformed reloc detected for section %s"),
 	     abfd, name);
 	  bfd_set_error (bfd_error_bad_value);
@@ -8452,6 +8457,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (htab->is_vxworks && !bfd_link_pic (info))
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: GOT reloc at 0x%lx not expected in executables"),
 		 abfd, (unsigned long) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
@@ -8589,6 +8595,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (h == NULL)
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: CALL16 reloc at 0x%lx not against global symbol"),
 		 abfd, (unsigned long) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
@@ -8874,6 +8881,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_MICROMIPS_26_S1:
 	      howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, r_type, FALSE);
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		 abfd, howto->name,
 		 (h) ? h->root.root.string : "a local symbol");
@@ -10279,6 +10287,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 						 local_syms + r_symndx,
 						 sec);
 		      _bfd_error_handler
+			/* xgettext:c-format */
 			(_("%B: Can't find matching LO16 reloc against `%s' for %s at 0x%lx in section `%A'"),
 			 input_bfd, input_section, name, howto->name,
 			 rel->r_offset);
@@ -10821,6 +10830,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      if (gotpc_offset + 0x1000000 >= 0x2000000)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B: `%A' offset of %ld from `%A' "
 		       "beyond the range of ADDIUPC"),
 		     output_bfd,
@@ -11384,6 +11394,7 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
       if (gotpc_offset + 0x1000000 >= 0x2000000)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: `%A' offset of %ld from `%A' beyond the range of ADDIUPC"),
 	     output_bfd,
 	     htab->sgotplt->output_section,
@@ -14297,6 +14308,7 @@ update_mips_abiflags_isa (bfd *abfd, Elf_Internal_ABIFlags_v0 *abiflags)
     case E_MIPS_ARCH_64R6: new_isa = LEVEL_REV (64, 6); break;
     default:
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: Unknown architecture %s"),
 	 abfd, bfd_printable_name (abfd));
     }
@@ -14826,6 +14838,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  else
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%s: illegal section name `%s'"),
 		 bfd_get_filename (abfd), o->name);
 	      bfd_set_error (bfd_error_nonrepresentable_section);
@@ -15152,6 +15165,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  /* The ISAs aren't compatible.  */
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: linking %s module with previous %s modules"),
 	     ibfd,
 	     bfd_printable_name (ibfd),
@@ -15175,6 +15189,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
 	      != elf_elfheader (obfd)->e_ident[EI_CLASS]))
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: ABI mismatch: linking %s module with previous %s modules"),
 	     ibfd,
 	     elf_mips_abi_name (ibfd),
@@ -15199,6 +15214,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
       if (m16_mis || micro_mis)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: ASE mismatch: linking %s module with previous %s modules"),
 	     ibfd,
 	     m16_mis ? "MIPS16" : "microMIPS",
@@ -15215,6 +15231,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
   /* Compare NaN encodings.  */
   if ((new_flags & EF_MIPS_NAN2008) != (old_flags & EF_MIPS_NAN2008))
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: linking %s module with previous %s modules"),
 			  ibfd,
 			  (new_flags & EF_MIPS_NAN2008
@@ -15229,6 +15246,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
   /* Compare FP64 state.  */
   if ((new_flags & EF_MIPS_FP64) != (old_flags & EF_MIPS_FP64))
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: linking %s module with previous %s modules"),
 			  ibfd,
 			  (new_flags & EF_MIPS_FP64
@@ -15243,6 +15261,7 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
   /* Warn about any other mismatches */
   if (new_flags != old_flags)
     {
+      /* xgettext:c-format */
       _bfd_error_handler
 	(_("%B: uses different e_flags (0x%lx) fields than previous modules "
 	   "(0x%lx)"),
@@ -15329,17 +15348,20 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  in_string = _bfd_mips_fp_abi_string (in_fp);
 	  /* First warn about cases involving unrecognised ABIs.  */
 	  if (!out_string && !in_string)
+	    /* xgettext:c-format */
 	    _bfd_error_handler
 	      (_("Warning: %B uses unknown floating point ABI %d "
 		 "(set by %B), %B uses unknown floating point ABI %d"),
 	       obfd, abi_fp_bfd, ibfd, out_fp, in_fp);
 	  else if (!out_string)
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("Warning: %B uses unknown floating point ABI %d "
 		 "(set by %B), %B uses %s"),
 	       obfd, abi_fp_bfd, ibfd, out_fp, in_string);
 	  else if (!in_string)
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("Warning: %B uses %s (set by %B), "
 		 "%B uses unknown floating point ABI %d"),
 	       obfd, abi_fp_bfd, ibfd, out_string, in_fp);
@@ -15353,6 +15375,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      else if (out_fp == Val_GNU_MIPS_ABI_FP_SOFT)
 		in_string = "-mhard-float";
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("Warning: %B uses %s (set by %B), %B uses %s"),
 		 obfd, abi_fp_bfd, ibfd, out_string, in_string);
 	    }
@@ -15371,6 +15394,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  {
 	  case Val_GNU_MIPS_ABI_MSA_128:
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("Warning: %B uses %s (set by %B), "
 		 "%B uses unknown MSA ABI %d"),
 	       obfd, abi_msa_bfd, ibfd,
@@ -15382,6 +15406,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      {
 	      case Val_GNU_MIPS_ABI_MSA_128:
 		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("Warning: %B uses unknown MSA ABI %d "
 		     "(set by %B), %B uses %s"),
 		     obfd, abi_msa_bfd, ibfd,
@@ -15390,6 +15415,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 
 	      default:
 		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("Warning: %B uses unknown MSA ABI %d "
 		     "(set by %B), %B uses unknown MSA ABI %d"),
 		   obfd, abi_msa_bfd, ibfd,

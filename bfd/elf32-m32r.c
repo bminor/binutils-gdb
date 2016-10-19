@@ -1282,6 +1282,7 @@ m32r_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type > (unsigned int) R_M32R_GNU_VTENTRY)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid M32R reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -2444,6 +2445,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type < 0 || r_type >= (int) R_M32R_max)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: unknown relocation type %d"),
 			      input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
@@ -2565,6 +2567,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   != (bfd_vma) -1))
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 		     input_bfd,
 		     input_section,
@@ -3009,6 +3012,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		else
 		  {
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B: The target (%s) of an %s relocation is in the wrong section (%A)"),
 		       input_bfd,
 		       sec,

@@ -285,6 +285,7 @@ elf_x86_64_rtype_to_howto (bfd *abfd, unsigned r_type)
     {
       if (r_type >= (unsigned int) R_X86_64_standard)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: invalid relocation type %d"),
 			      abfd, (int) r_type);
 	  r_type = R_X86_64_NONE;
@@ -1654,6 +1655,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	}
 
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
 	   "in section `%A' failed"),
 	 abfd, sec, from->name, to->name, name,
@@ -1712,6 +1714,7 @@ elf_x86_64_need_pic (bfd *input_bfd, asection *sec,
       pic = _("; recompile with -fPIC");
     }
 
+  /* xgettext:c-format */
   _bfd_error_handler (_("%B: relocation %s against %s%s`%s' can "
 			"not be used when making a shared object%s"),
 		      input_bfd, howto->name, und, v, name, pic);
@@ -2207,6 +2210,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  goto error_return;
@@ -2270,6 +2274,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
 					   NULL);
 		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("%B: relocation %s against symbol `%s' isn't "
 		     "supported in x32 mode"), abfd,
 		   x86_64_elf_howto_table[r_type].name, name);
@@ -2459,6 +2464,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      name = bfd_elf_sym_name (abfd, symtab_hdr,
 					       isym, NULL);
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B: '%s' accessed both as normal and thread local symbol"),
 		       abfd, name);
 		    bfd_set_error (bfd_error_bad_value);
@@ -3458,6 +3464,7 @@ elf_x86_64_readonly_dynrelocs (struct elf_link_hash_entry *h,
 
 	  if ((info->warn_shared_textrel && bfd_link_pic (info))
 	      || info->error_textrel)
+	    /* xgettext:c-format */
 	    info->callbacks->einfo (_("%P: %B: warning: relocation against `%s' in readonly section `%A'\n"),
 				    p->sec->owner, h->root.root.string,
 				    p->sec);
@@ -3666,6 +3673,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 		      info->flags |= DF_TEXTREL;
 		      if ((info->warn_shared_textrel && bfd_link_pic (info))
 			  || info->error_textrel)
+			/* xgettext:c-format */
 			info->callbacks->einfo (_("%P: %B: warning: relocation in readonly section `%A'\n"),
 						p->sec->owner, p->sec);
 		    }
@@ -4150,6 +4158,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
       if (r_type >= (int) R_X86_64_standard)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
 	     input_bfd, input_section, r_type);
 	  bfd_set_error (bfd_error_bad_value);
@@ -4377,6 +4386,7 @@ bad_ifunc_reloc:
 		name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
 					 NULL);
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't supported"), input_bfd,
 		 howto->name, name);
@@ -4402,6 +4412,7 @@ do_ifunc_pointer:
 		    name = bfd_elf_sym_name (input_bfd, symtab_hdr,
 					     sym, NULL);
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B: relocation %s against STT_GNU_IFUNC "
 		       "symbol `%s' has non-zero addend: %d"),
 		     input_bfd, howto->name, name, rel->r_addend);
@@ -4637,6 +4648,7 @@ do_ifunc_pointer:
 		    }
 
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B: relocation R_X86_64_GOTOFF64 against undefined %s `%s' can not be used when making a shared object"),
 		     input_bfd, v, h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
@@ -4649,6 +4661,7 @@ do_ifunc_pointer:
 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
 		{
 		  _bfd_error_handler
+	      /* xgettext:c-format */
 		    (_("%B: relocation R_X86_64_GOTOFF64 against protected %s `%s' can not be used when making a shared object"),
 		     input_bfd,
 		     h->type == STT_FUNC ? "function" : "data",
@@ -4916,6 +4929,7 @@ direct:
 						     sym, NULL);
 			  if (addend < 0)
 			    _bfd_error_handler
+			      /* xgettext:c-format */
 			      (_("%B: addend -0x%x in relocation %s against "
 				 "symbol `%s' at 0x%lx in section `%A' is "
 				 "out of range"),
@@ -4924,6 +4938,7 @@ direct:
 			       (unsigned long) rel->r_offset);
 			  else
 			    _bfd_error_handler
+			      /* xgettext:c-format */
 			      (_("%B: addend 0x%x in relocation %s against "
 				 "symbol `%s' at 0x%lx in section `%A' is "
 				 "out of range"),
@@ -5547,6 +5562,7 @@ direct:
 				      rel->r_offset) != (bfd_vma) -1)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
@@ -5586,6 +5602,7 @@ check_relocation_error:
 	  else
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
@@ -5778,6 +5795,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 
       /* Check PC-relative offset overflow in PLT entry.  */
       if ((plt_got_pcrel_offset + 0x80000000) > 0xffffffff)
+	/* xgettext:c-format */
 	info->callbacks->einfo (_("%F%B: PC-relative offset overflow in PLT entry for `%s'\n"),
 				output_bfd, h->root.root.string);
 
@@ -5836,6 +5854,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		 check relocation index for overflow since branch displacement
 		 will overflow first.  */
 	      if (plt0_offset > 0x80000000)
+		/* xgettext:c-format */
 		info->callbacks->einfo (_("%F%B: branch displacement overflow in PLT entry for `%s'\n"),
 					output_bfd, h->root.root.string);
 	      bfd_put_32 (output_bfd, - plt0_offset,
@@ -5900,6 +5919,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       got_after_plt = got->output_section->vma > plt->output_section->vma;
       if ((got_after_plt && got_pcrel_offset < 0)
 	  || (!got_after_plt && got_pcrel_offset > 0))
+	/* xgettext:c-format */
 	info->callbacks->einfo (_("%F%B: PC-relative offset overflow in GOT PLT entry for `%s'\n"),
 				output_bfd, h->root.root.string);
 

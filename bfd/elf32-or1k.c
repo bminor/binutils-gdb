@@ -740,6 +740,7 @@ or1k_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_OR1K_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid OR1K reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -1643,6 +1644,7 @@ or1k_elf_check_relocs (bfd *abfd,
                                    name + 5) != 0)
                       {
 			_bfd_error_handler
+			  /* xgettext:c-format */
                           (_("%B: bad relocation section name `%s\'"),
                            abfd, name);
                       }

@@ -437,6 +437,7 @@ iq2000_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
     default:
       if (r_type >= (unsigned int) R_IQ2000_max)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: invalid IQ2000 reloc number: %d"), abfd, r_type);
 	  r_type = 0;
 	}
@@ -827,6 +828,7 @@ iq2000_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  error = TRUE;
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: compiled with %s and linked with modules compiled with %s"),
 	     bfd_get_filename (ibfd), new_opt, old_opt);
 	}
@@ -840,6 +842,7 @@ iq2000_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  error = TRUE;
 
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	     bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
 	}

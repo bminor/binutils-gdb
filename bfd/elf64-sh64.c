@@ -1540,6 +1540,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      if (howto->rightshift || howto->src_mask != 0xffffffff)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
 		     input_bfd, input_section,
 		     (long) rel->r_offset, howto->name);
@@ -1636,6 +1637,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   != (bfd_vma) -1))
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 		     input_bfd,
 		     input_section,
@@ -1679,6 +1681,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (dropped != 0)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: error: unaligned relocation type %d at %08x reloc %08x\n"),
 	     bfd_get_filename (input_bfd), (int)r_type, (unsigned)rel->r_offset, (unsigned)relocation);
 	  bfd_set_error (bfd_error_bad_value);
@@ -2289,11 +2292,14 @@ sh_elf64_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
 
       if (bfd_get_arch_size (ibfd) == 32
 	  && bfd_get_arch_size (obfd) == 64)
+	/* xgettext:c-format */
 	msg = _("%s: compiled as 32-bit object and %s is 64-bit");
       else if (bfd_get_arch_size (ibfd) == 64
 	       && bfd_get_arch_size (obfd) == 32)
+	/* xgettext:c-format */
 	msg = _("%s: compiled as 64-bit object and %s is 32-bit");
       else
+	/* xgettext:c-format */
 	msg = _("%s: object size does not match that of target %s");
 
       _bfd_error_handler (msg, bfd_get_filename (ibfd),

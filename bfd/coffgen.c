@@ -174,6 +174,7 @@ make_a_section_from_file (bfd *abfd,
 	  if (!bfd_init_section_compress_status (abfd, return_section))
 	    {
 	      _bfd_error_handler
+		/* xgettext: c-format */
 		(_("%B: unable to initialize compress status for section %s"),
 		 abfd, name);
 	      return FALSE;
@@ -197,6 +198,7 @@ make_a_section_from_file (bfd *abfd,
 	  if (!bfd_init_section_decompress_status (abfd, return_section))
 	    {
 	      _bfd_error_handler
+		/* xgettext: c-format */
 		(_("%B: unable to initialize decompress status for section %s"),
 		 abfd, name);
 	      return FALSE;
@@ -1705,6 +1707,7 @@ _bfd_coff_read_string_table (bfd *abfd)
   if (strsize < STRING_SIZE_SIZE)
     {
       _bfd_error_handler
+	/* xgettext: c-format */
 	(_("%B: bad string table size %lu"), abfd, (unsigned long) strsize);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -2953,6 +2956,7 @@ coff_gc_sweep (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	  o->flags |= SEC_EXCLUDE;
 
 	  if (info->print_gc_sections && o->size != 0)
+	    /* xgettext: c-format */
             _bfd_error_handler (_("Removing unused section '%s' in file '%B'"), sub, o->name);
 
 #if 0

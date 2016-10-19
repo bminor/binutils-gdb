@@ -960,6 +960,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
     {
       bfd_get_symcount (abfd) = internal_ptr - internal;
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: warning: isymMax (%ld) is greater than ifdMax (%d)\n"),
 	 abfd, ecoff_data (abfd)->debug_info.symbolic_header.isymMax,
 	 ecoff_data (abfd)->debug_info.symbolic_header.ifdMax);
@@ -1536,6 +1537,7 @@ _bfd_ecoff_print_symbol (bfd *abfd,
 		if (ECOFF_IS_STAB (&ecoff_ext.asym))
 		  ;
 		else if (ecoffsymbol (symbol)->local)
+		  /* xgettext:c-format */
 		  fprintf (file, _("\n      End+1 symbol: %-7ld   Type:  %s"),
 			   ((long)
 			    (AUX_GET_ISYM (bigendian,

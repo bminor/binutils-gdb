@@ -591,6 +591,7 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, struct bfd_link_info *info)
       if (in_attr->i > 0 && strcmp (in_attr->s, "gnu") != 0)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 		(_("error: %B: Object has vendor-specific contents that "
 		   "must be processed by the '%s' toolchain"),
 		 ibfd, in_attr->s);
@@ -600,6 +601,7 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, struct bfd_link_info *info)
       if (in_attr->i != out_attr->i
 	  || (in_attr->i != 0 && strcmp (in_attr->s, out_attr->s) != 0))
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("error: %B: Object tag '%d, %s' is "
 				"incompatible with tag '%d, %s'"),
 			      ibfd,

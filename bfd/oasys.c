@@ -877,6 +877,7 @@ oasys_write_sections (bfd *abfd)
       if (!ISDIGIT (s->name[0]))
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: can not represent section `%s' in oasys"),
 	     bfd_get_filename (abfd), s->name);
 	  bfd_set_error (bfd_error_nonrepresentable_section);

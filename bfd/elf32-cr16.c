@@ -647,7 +647,7 @@ elf_cr16_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     if (code == cr16_reloc_map[i].bfd_reloc_enum)
       return &cr16_elf_howto_table[cr16_reloc_map[i].cr16_reloc_type];
 
-  _bfd_error_handler ("Unsupported CR16 relocation type: 0x%x\n", code);
+  _bfd_error_handler (_("Unsupported CR16 relocation type: 0x%x\n"), code);
   return NULL;
 }
 
@@ -675,6 +675,7 @@ elf_cr16_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
 
   if (r_type >= R_CR16_MAX)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: unrecognised CR16 reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);

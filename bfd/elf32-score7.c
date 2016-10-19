@@ -2632,6 +2632,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
       else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
         {
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: Malformed reloc detected for section %s"), abfd, name);
           bfd_set_error (bfd_error_bad_value);
           return FALSE;
@@ -2689,6 +2690,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
           if (h == NULL)
             {
 	      _bfd_error_handler
+		/* xgettext:c-format */
                 (_("%B: CALL15 reloc at 0x%lx not against global symbol"),
                  abfd, (unsigned long) rel->r_offset);
               bfd_set_error (bfd_error_bad_value);

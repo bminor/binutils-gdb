@@ -1739,6 +1739,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	      && inh->u.i.link == h)
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: indirect symbol `%s' to `%s' is a loop"),
 		 abfd, name, string);
 	      bfd_set_error (bfd_error_invalid_operation);
@@ -2607,6 +2608,7 @@ default_indirect_link_order (bfd *output_bfd,
 	 types of object files.  Handling this case correctly is
 	 difficult, and sometimes impossible.  */
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("Attempt to do relocatable link with %s input and %s output"),
 	 bfd_get_target (input_bfd), bfd_get_target (output_bfd));
       bfd_set_error (bfd_error_wrong_format);
@@ -2892,6 +2894,7 @@ _bfd_handle_already_linked (asection *sec,
 
     case SEC_LINK_DUPLICATES_ONE_ONLY:
       info->callbacks->einfo
+	/* xgettext:c-format */
 	(_("%B: ignoring duplicate section `%A'\n"),
 	 sec->owner, sec);
       break;
@@ -2901,6 +2904,7 @@ _bfd_handle_already_linked (asection *sec,
 	;
       else if (sec->size != l->sec->size)
 	info->callbacks->einfo
+	  /* xgettext:c-format */
 	  (_("%B: duplicate section `%A' has different size\n"),
 	   sec->owner, sec);
       break;
@@ -2910,6 +2914,7 @@ _bfd_handle_already_linked (asection *sec,
 	;
       else if (sec->size != l->sec->size)
 	info->callbacks->einfo
+	  /* xgettext:c-format */
 	  (_("%B: duplicate section `%A' has different size\n"),
 	   sec->owner, sec);
       else if (sec->size != 0)
@@ -2918,15 +2923,18 @@ _bfd_handle_already_linked (asection *sec,
 
 	  if (!bfd_malloc_and_get_section (sec->owner, sec, &sec_contents))
 	    info->callbacks->einfo
+	      /* xgettext:c-format */
 	      (_("%B: could not read contents of section `%A'\n"),
 	       sec->owner, sec);
 	  else if (!bfd_malloc_and_get_section (l->sec->owner, l->sec,
 						&l_sec_contents))
 	    info->callbacks->einfo
+	      /* xgettext:c-format */
 	      (_("%B: could not read contents of section `%A'\n"),
 	       l->sec->owner, l->sec);
 	  else if (memcmp (sec_contents, l_sec_contents, sec->size) != 0)
 	    info->callbacks->einfo
+	      /* xgettext:c-format */
 	      (_("%B: duplicate section `%A' has different contents\n"),
 	       sec->owner, sec);
 

@@ -182,6 +182,7 @@ elf_cr16c_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (r_type >= RINDEX_16C_MAX)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid CR16C reloc number: %d"), abfd, r_type);
       r_type = 0;
     }

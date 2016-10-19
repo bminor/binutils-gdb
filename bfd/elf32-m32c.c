@@ -301,6 +301,7 @@ m32c_info_to_howto_rela
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_M32C_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid M32C reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -879,6 +880,7 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  error = TRUE;
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: compiled with %s and linked with modules compiled with %s"),
 	     bfd_get_filename (ibfd), new_opt, old_opt);
 	}
@@ -891,6 +893,7 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  error = TRUE;
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	     bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
 	}

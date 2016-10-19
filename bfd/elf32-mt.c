@@ -238,6 +238,7 @@ mt_info_to_howto_rela
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_MT_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid MT reloc number: %d"), abfd, r_type);
       r_type = 0;
     }

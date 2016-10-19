@@ -422,20 +422,25 @@ ppcboot_bfd_print_private_bfd_data (bfd *abfd, void * farg)
 	  && !sector_begin && !sector_length)
 	continue;
 
+      /* xgettext:c-format */
       fprintf (f, _("\nPartition[%d] start  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"), i,
 	       tdata->header.partition[i].partition_begin.ind,
 	       tdata->header.partition[i].partition_begin.head,
 	       tdata->header.partition[i].partition_begin.sector,
 	       tdata->header.partition[i].partition_begin.cylinder);
 
+      /* xgettext:c-format */
       fprintf (f, _("Partition[%d] end    = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"), i,
 	       tdata->header.partition[i].partition_end.ind,
 	       tdata->header.partition[i].partition_end.head,
 	       tdata->header.partition[i].partition_end.sector,
 	       tdata->header.partition[i].partition_end.cylinder);
 
+      /* xgettext:c-format */
       fprintf (f, _("Partition[%d] sector = 0x%.8lx (%ld)\n"),
 	       i, (unsigned long) sector_begin, sector_begin);
+
+      /* xgettext:c-format */
       fprintf (f, _("Partition[%d] length = 0x%.8lx (%ld)\n"),
 	       i, (unsigned long) sector_length, sector_length);
     }

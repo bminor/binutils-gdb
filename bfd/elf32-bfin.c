@@ -1599,6 +1599,7 @@ bfin_relocate_section (bfd * output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section, (long) rel->r_offset, h->root.root.string);
@@ -1629,6 +1630,7 @@ bfin_relocate_section (bfd * output_bfd,
 	  else
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
@@ -2730,6 +2732,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 						       rel->r_addend))
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: relocation at `%A+0x%x' references symbol `%s' with nonzero addend"),
 		 input_bfd, input_section, rel->r_offset, name);
 	      return FALSE;
@@ -4908,6 +4911,7 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	default:
 	bad_reloc:
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: unsupported relocation type %i"),
 	     abfd, ELF32_R_TYPE (rel->r_info));
 	  return FALSE;

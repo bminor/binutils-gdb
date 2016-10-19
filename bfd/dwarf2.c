@@ -546,6 +546,7 @@ read_section (bfd *           abfd,
      that the client wants.  Validate it here to avoid trouble later.  */
   if (offset != 0 && offset >= *section_size)
     {
+      /* xgettext: c-format */
       _bfd_error_handler (_("Dwarf Error: Offset (%lu)"
 			    " greater than or equal to %s size (%lu)."),
 			  (long) offset, section_name, *section_size);
@@ -1717,6 +1718,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   if (lh.total_length > stash->dwarf_line_size)
     {
       _bfd_error_handler
+	/* xgettext: c-format */
 	(_("Dwarf Error: Line info data is bigger (0x%lx) than the section (0x%lx)"),
 	 (long) lh.total_length, (long) stash->dwarf_line_size);
       bfd_set_error (bfd_error_bad_value);
@@ -2774,6 +2776,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
   if (addr_size > sizeof (bfd_vma))
     {
       _bfd_error_handler
+	/* xgettext: c-format */
 	(_("Dwarf Error: found address size '%u', this reader"
 	   " can not handle sizes greater than '%u'."),
 	 addr_size,

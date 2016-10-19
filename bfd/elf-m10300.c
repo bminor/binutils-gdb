@@ -808,6 +808,7 @@ mn10300_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_MN10300_MAX)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: unrecognised MN10300 reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
@@ -1023,6 +1024,7 @@ mn10300_do_tls_transition (bfd *         input_bfd,
 
     default:
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%s: Unsupported transition from %s to %s"),
 	 bfd_get_filename (input_bfd),
 	 elf_mn10300_howto_table[r_type].name,
@@ -1215,6 +1217,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 		    tls_type = GOT_TLS_IE;
 		  else
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B: %s' accessed both as normal and thread local symbol"),
 		       abfd, h ? h->root.root.string : "<local>");
 		}
@@ -2111,6 +2114,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 					       rel->r_offset) != (bfd_vma) -1)
 
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	       input_bfd,
 	       input_section,
@@ -2175,6 +2179,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 		msg = _("error: inappropriate relocation type for shared"
 			" library (did you forget -fpic?)");
 	      else if (r_type == R_MN10300_GOT32)
+		/* xgettext:c-format */
 		msg = _("%B: taking the address of protected function"
 			" '%s' cannot be done when making a shared library");
 	      else

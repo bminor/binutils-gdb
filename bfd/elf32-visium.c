@@ -477,6 +477,7 @@ visium_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
     default:
       if (r_type >= (unsigned int) R_VISIUM_max)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: invalid Visium reloc number: %d"), abfd, r_type);
 	  r_type = 0;
 	}
@@ -812,9 +813,9 @@ visium_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
       if (mismatch)
 	_bfd_error_handler
-	  (_
-	   ("%s: compiled %s -mtune=%s and linked with modules"
-	    " compiled %s -mtune=%s"),
+	  /* xgettext:c-format */
+	  (_("%s: compiled %s -mtune=%s and linked with modules"
+	     " compiled %s -mtune=%s"),
 	   bfd_get_filename (ibfd), new_opt_with, opt_arch, old_opt_with,
 	   opt_arch);
     }

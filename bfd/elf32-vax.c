@@ -286,6 +286,7 @@ rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_VAX_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: unrecognised VAX reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
@@ -659,6 +660,7 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		  h->got.refcount++;
 		  if (eh->got_addend != (bfd_vma) rel->r_addend)
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: warning: GOT addend of %ld to `%s' does"
 			 " not match previous GOT addend of %ld"),
 			 bfd_get_filename (abfd), rel->r_addend,
@@ -1546,6 +1548,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 	    }
 	  else if (rel->r_addend != 0)
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: warning: PLT addend of %d to `%s' from %s section ignored"),
 		      bfd_get_filename (input_bfd), rel->r_addend,
 		      h->root.root.string,
@@ -1671,12 +1674,14 @@ elf_vax_relocate_section (bfd *output_bfd,
 		{
 		  if (h != NULL)
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: warning: %s relocation against symbol `%s' from %s section"),
 		      bfd_get_filename (input_bfd), howto->name,
 		      h->root.root.string,
 		      bfd_get_section_name (input_bfd, input_section));
 		  else
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: warning: %s relocation to 0x%x from %s section"),
 		      bfd_get_filename (input_bfd), howto->name,
 		      outrel.r_addend,

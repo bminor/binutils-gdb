@@ -464,6 +464,7 @@ mmo_make_section (bfd *abfd, const char *secname)
       if (newsecname == NULL)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: No core to allocate section name %s\n"),
 	     bfd_get_filename (abfd), secname);
 	  bfd_set_error (bfd_error_system_call);
@@ -539,6 +540,7 @@ mmo_object_p (bfd *abfd)
   if (abfd->tdata.mmo_data->lop_stab_symbol == NULL)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%s: No core to allocate a symbol %d bytes long\n"),
 	 bfd_get_filename (abfd), abfd->tdata.mmo_data->max_symbol_length);
       goto bad_final;
@@ -952,6 +954,7 @@ mmo_write_loc_chunk (bfd *abfd, bfd_vma vma, const bfd_byte *loc,
       if ((vma & 3) != 0)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: attempt to emit contents at non-multiple-of-4 address 0x%lx\n"),
 	     bfd_get_filename (abfd), (unsigned long) vma);
 	  bfd_set_error (bfd_error_bad_value);
@@ -1393,6 +1396,7 @@ SUBSECTION
 		[abfd->tdata.mmo_data->symbol_position] = 0;
 
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%s: unsupported wide character sequence"
 		   " 0x%02X 0x%02X after symbol name starting with `%s'\n"),
 		 bfd_get_filename (abfd), c, c2,
@@ -1627,6 +1631,7 @@ mmo_scan (bfd *abfd)
 	    {
 	    default:
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%s: invalid mmo file: unsupported lopcode `%d'\n"),
 		 bfd_get_filename (abfd), buf[1]);
 	      bfd_set_error (bfd_error_bad_value);
@@ -1637,6 +1642,7 @@ mmo_scan (bfd *abfd)
 	      if (y != 0 || z != 1)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%s: invalid mmo file: expected YZ = 1 got YZ = %d for lop_quote\n"),
 		     bfd_get_filename (abfd), y*256+z);
 		  bfd_set_error (bfd_error_bad_value);
@@ -1673,6 +1679,7 @@ mmo_scan (bfd *abfd)
 	      else
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_loc\n"),
 		     bfd_get_filename (abfd), z);
 		  bfd_set_error (bfd_error_bad_value);
@@ -1722,6 +1729,7 @@ mmo_scan (bfd *abfd)
 		else
 		  {
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_fixo\n"),
 		       bfd_get_filename (abfd), z);
 		    bfd_set_error (bfd_error_bad_value);
@@ -1761,6 +1769,7 @@ mmo_scan (bfd *abfd)
 		if (y != 0)
 		  {
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: invalid mmo file: expected y = 0, got y = %d for lop_fixrx\n"),
 		       bfd_get_filename (abfd), y);
 		    bfd_set_error (bfd_error_bad_value);
@@ -1770,6 +1779,7 @@ mmo_scan (bfd *abfd)
 		if (z != 16 && z != 24)
 		  {
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: invalid mmo file: expected z = 16 or z = 24, got z = %d for lop_fixrx\n"),
 		       bfd_get_filename (abfd), z);
 		    bfd_set_error (bfd_error_bad_value);
@@ -1793,6 +1803,7 @@ mmo_scan (bfd *abfd)
 		else
 		  {
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: invalid mmo file: leading byte of operand word must be 0 or 1, got %d for lop_fixrx\n"),
 		       bfd_get_filename (abfd), buf[0]);
 		    bfd_set_error (bfd_error_bad_value);
@@ -1816,6 +1827,7 @@ mmo_scan (bfd *abfd)
 		  if (fname == NULL)
 		    {
 		      _bfd_error_handler
+			/* xgettext:c-format */
 			(_("%s: cannot allocate file name for file number %d, %d bytes\n"),
 			 bfd_get_filename (abfd), y, z * 4 + 1);
 		      bfd_set_error (bfd_error_system_call);
@@ -1836,6 +1848,7 @@ mmo_scan (bfd *abfd)
 		  if (file_names[y] != NULL)
 		    {
 		      _bfd_error_handler
+			/* xgettext:c-format */
 			(_("%s: invalid mmo file: file number %d `%s',"
 			   " was already entered as `%s'\n"),
 			 bfd_get_filename (abfd), y, fname, file_names[y]);
@@ -1849,6 +1862,7 @@ mmo_scan (bfd *abfd)
 	      if (file_names[y] == NULL)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%s: invalid mmo file: file name for number %d"
 		       " was not specified before use\n"),
 		     bfd_get_filename (abfd), y);
@@ -1955,6 +1969,7 @@ mmo_scan (bfd *abfd)
 	      if (y != 0 || z != 0)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%s: invalid mmo file: fields y and z of lop_stab"
 		       " non-zero, y: %d, z: %d\n"),
 		     bfd_get_filename (abfd), y, z);
@@ -1991,6 +2006,7 @@ mmo_scan (bfd *abfd)
 		if (statbuf.st_size != curpos)
 		  {
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: invalid mmo file: lop_end not last item in"
 			 " file\n"),
 		       bfd_get_filename (abfd));
@@ -2004,6 +2020,7 @@ mmo_scan (bfd *abfd)
 		if ((long) (y * 256 + z) * 4 != (curpos - stab_loc) - 4)
 		  {
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%s: invalid mmo file: YZ of lop_end (%ld)"
 			 " not equal to the number of tetras to the preceding"
 			 " lop_stab (%ld)\n"),
@@ -2714,6 +2731,7 @@ mmo_internal_add_3_sym (bfd *abfd, struct mmo_symbol_trie *rootp,
   if (trie->sym.name != NULL)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%s: invalid symbol table: duplicate symbol `%s'\n"),
 	 bfd_get_filename (abfd), trie->sym.name);
       bfd_set_error (bfd_error_bad_value);
@@ -2956,6 +2974,7 @@ mmo_write_symbols_and_terminator (bfd *abfd)
 	    sprintf_vma (vmas_start, vma_start);
 
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: Bad symbol definition: `Main' set to %s rather"
 		 " than the start address %s\n"),
 	       bfd_get_filename (abfd), vmas_main, vmas_start);
@@ -3054,6 +3073,7 @@ mmo_write_symbols_and_terminator (bfd *abfd)
       struct mmo_symbol sym;
 
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%s: warning: symbol table too large for mmo, larger than 65535"
 	   " 32-bit words: %d.  Only `Main' will be emitted.\n"),
 	 bfd_get_filename (abfd), trie_len);
@@ -3099,6 +3119,7 @@ mmo_write_symbols_and_terminator (bfd *abfd)
 	 isn't debugged and abort if we get here.  Instead emit a
 	 diagnostic and fail "normally".  */
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%s: internal error, symbol table changed size from %d to %d"
 	   " words\n"),
 	 bfd_get_filename (abfd), trie_len,
@@ -3151,6 +3172,7 @@ mmo_write_section_unless_reg_contents (bfd *abfd, asection *sec, void *p)
 	     make it carry contents, so we don't have a test-case for
 	     this.  */
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: internal error, internal register section %s had"
 	       " contents\n"),
 	     bfd_get_filename (abfd), sec->name);
@@ -3208,11 +3230,13 @@ mmo_write_object_contents (bfd *abfd)
 	    /* Provide better error message for the case of too many
 	       global registers.  */
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: too many initialized registers; section length %ld\n"),
 	       bfd_get_filename (abfd),
 	       (long) sec->size);
 	  else
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: invalid start address for initialized registers of"
 		 " length %ld: 0x%lx%08lx\n"),
 	       bfd_get_filename (abfd),

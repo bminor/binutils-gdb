@@ -223,6 +223,7 @@ tic4x_reloc_processing (arelent *relent,
       if (reloc->r_symndx < 0 || reloc->r_symndx >= obj_conv_table_size (abfd))
         {
 	  _bfd_error_handler
+	    /* xgettext: c-format */
             (_("%s: warning: illegal symbol index %ld in relocs"),
              bfd_get_filename (abfd), reloc->r_symndx);
           relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;

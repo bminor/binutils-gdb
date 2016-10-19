@@ -7973,6 +7973,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	  if (symbol == NULL)
 	    {
 	      link_info->callbacks->einfo
+		/* xgettext:c-format */
 		(_("%X%P: %B(%A): error: relocation for offset %V has no value\n"),
 		 abfd, input_section, (* parent)->address);
 	      goto error_return;
@@ -8038,6 +8039,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     complete binaries.  Do not abort, but issue an error
 		     message instead.  */
 		  link_info->callbacks->einfo
+		    /* xgettext:c-format */
 		    (_("%X%P: %B(%A): relocation \"%R\" goes out of range\n"),
 		     abfd, input_section, * parent);
 		  goto error_return;
@@ -8047,6 +8049,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     This error can result when processing a corrupt binary.
 		     Do not abort.  Issue an error message instead.  */
 		  link_info->callbacks->einfo
+		    /* xgettext:c-format */
 		    (_("%X%P: %B(%A): relocation \"%R\" is not supported\n"),
 		     abfd, input_section, * parent);
 		  goto error_return;
@@ -8055,6 +8058,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		  /* PR 17512; file: 90c2a92e.
 		     Report unexpected results, without aborting.  */
 		  link_info->callbacks->einfo
+		    /* xgettext:c-format */
 		    (_("%X%P: %B(%A): relocation \"%R\" returns an unrecognized value %x\n"),
 		     abfd, input_section, * parent, r);
 		  break;

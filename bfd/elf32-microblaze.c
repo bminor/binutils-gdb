@@ -652,6 +652,7 @@ microblaze_elf_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_MICROBLAZE_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: unrecognised MicroBlaze reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
@@ -956,6 +957,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 
       if (r_type < 0 || r_type >= (int) R_MICROBLAZE_max)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%s: unknown relocation type %d"),
 			      bfd_get_filename (input_bfd), (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
@@ -1083,6 +1085,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		    else
 		      {
 			_bfd_error_handler
+			  /* xgettext:c-format */
 			  (_("%s: The target (%s) of an %s relocation "
 			     "is in the wrong section (%s)"),
 			   bfd_get_filename (input_bfd),
@@ -1130,6 +1133,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		    else
 		      {
 			_bfd_error_handler
+			  /* xgettext:c-format */
 			  (_("%s: The target (%s) of an %s relocation "
 			     "is in the wrong section (%s)"),
 			   bfd_get_filename (input_bfd),

@@ -1148,7 +1148,8 @@ NAME (aout, set_section_contents) (bfd *abfd,
       && section != obj_datasec (abfd))
     {
       _bfd_error_handler
-	("%s: can not represent section `%s' in a.out object file format",
+	/* xgettext:c-format */
+	(_("%s: can not represent section `%s' in a.out object file format"),
 	 bfd_get_filename (abfd), bfd_get_section_name (abfd, section));
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
@@ -1380,7 +1381,8 @@ translate_to_native_sym_flags (bfd *abfd,
       /* This case occurs, e.g., for the *DEBUG* section of a COFF
 	 file.  */
       _bfd_error_handler
-	("%B: can not represent section for symbol `%s' in a.out object file format",
+	/* xgettext:c-format */
+	(_("%B: can not represent section for symbol `%s' in a.out object file format"),
 	 abfd, cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
@@ -1407,7 +1409,8 @@ translate_to_native_sym_flags (bfd *abfd,
   else
     {
       _bfd_error_handler
-	("%B: can not represent section `%A' in a.out object file format",
+	/* xgettext:c-format */
+	(_("%B: can not represent section `%A' in a.out object file format"),
 	 abfd, sec);
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
@@ -3701,7 +3704,8 @@ NAME (aout, final_link) (bfd *abfd,
 		 work out the number of relocs needed, and then multiply
 		 by the reloc size.  */
 	      _bfd_error_handler
-		("%s: relocatable link from %s to %s not supported",
+		/* xgettext:c-format */
+		(_("%s: relocatable link from %s to %s not supported"),
 		 bfd_get_filename (abfd),
 		 sub->xvec->name, abfd->xvec->name);
 	      bfd_set_error (bfd_error_invalid_operation);

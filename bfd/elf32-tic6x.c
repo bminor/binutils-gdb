@@ -2631,6 +2631,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 		 allowed to pass us these kinds of things.  */
 	      if (h == NULL)
 		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("%B, section %A: relocation %s with non-zero addend %d"
 		     " against local symbol"),
 		   input_bfd,
@@ -2639,6 +2640,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 		   rel->r_addend);
 	      else
 		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("%B, section %A: relocation %s with non-zero addend %d"
 		     " against symbol `%s'"),
 		   input_bfd,
@@ -2668,6 +2670,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	  /* Invalid in relocatable object.  */
 	default:
 	  /* Unknown relocation.  */
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: invalid relocation type %d"),
 			      input_bfd, r_type);
 	  ok = FALSE;
@@ -2807,6 +2810,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  return FALSE;
@@ -3642,6 +3646,7 @@ elf32_tic6x_obj_attrs_handle_unknown (bfd *abfd, int tag)
   if ((tag & 127) < 64)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: error: unknown mandatory EABI object attribute %d"),
 	 abfd, tag);
       bfd_set_error (bfd_error_bad_value);
@@ -3650,6 +3655,7 @@ elf32_tic6x_obj_attrs_handle_unknown (bfd *abfd, int tag)
   else
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: warning: unknown EABI object attribute %d"),
 	 abfd, tag);
       return TRUE;
@@ -3763,6 +3769,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
       < in_attr[Tag_ABI_stack_align_needed].i)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("error: %B requires more stack alignment than %B preserves"),
 	 ibfd, obfd);
       result = FALSE;
@@ -3771,6 +3778,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
       < out_attr[Tag_ABI_stack_align_needed].i)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("error: %B requires more stack alignment than %B preserves"),
 	 obfd, ibfd);
       result = FALSE;
@@ -3816,6 +3824,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   if (array_align_out < array_expect_in)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("error: %B requires more array alignment than %B preserves"),
 	 ibfd, obfd);
       result = FALSE;
@@ -3823,6 +3832,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   if (array_align_in < array_expect_out)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("error: %B requires more array alignment than %B preserves"),
 	 obfd, ibfd);
       result = FALSE;
@@ -3845,6 +3855,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      && out_attr[i].i != in_attr[i].i)
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("warning: %B and %B differ in wchar_t size"), obfd, ibfd);
 	    }
 	  break;
@@ -3863,6 +3874,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  if (out_attr[i].i != in_attr[i].i)
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("warning: %B and %B differ in whether code is "
 		   "compiled for DSBT"),
 		 obfd, ibfd);

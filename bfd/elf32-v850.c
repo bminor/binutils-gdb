@@ -1898,6 +1898,7 @@ v850_elf_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_V850_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid V850 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -1916,6 +1917,7 @@ v850_elf_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_V850_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid V850 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -2520,6 +2522,7 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 	      if (oval == EF_RH850_DATA_ALIGN4)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("error: %B needs 8-byte aligment but %B is set for 4-byte alignment"),
 				      ibfd, obfd);
 		  result = FALSE;
@@ -2535,6 +2538,7 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 	      if (oval == EF_RH850_DOUBLE32)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("error: %B uses 64-bit doubles but "
 		       "%B uses 32-bit doubles"), ibfd, obfd);
 		  result = FALSE;
@@ -2549,6 +2553,7 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 	      if (oval == EF_RH850_FPU20)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("error: %B uses FPU-3.0 but %B only supports FPU-2.0"),
 		     ibfd, obfd);
 		  result = FALSE;
@@ -3594,8 +3599,9 @@ v850_elf_relax_section (bfd *abfd,
 	      else
 		{
 		  _bfd_error_handler
-		    ("%s: 0x%lx: warning: R_V850_LONGCALL points to "
-		     "unrecognized insns",
+		    /* xgettext:c-format */
+		    (_("%s: 0x%lx: warning: R_V850_LONGCALL points to "
+		       "unrecognized insns"),
 		     bfd_get_filename (abfd), (unsigned long) irel->r_offset);
 		  continue;
 		}
@@ -3603,8 +3609,9 @@ v850_elf_relax_section (bfd *abfd,
 	      if (no_match >= 0)
 		{
 		  _bfd_error_handler
-		    ("%s: 0x%lx: warning: R_V850_LONGCALL points to "
-		     "unrecognized insn 0x%x",
+		    /* xgettext:c-format */
+		    (_("%s: 0x%lx: warning: R_V850_LONGCALL points to "
+		       "unrecognized insn 0x%x"),
 		     bfd_get_filename (abfd),
 		     (unsigned long) irel->r_offset + no_match,
 		     insn[no_match]);
@@ -3647,8 +3654,9 @@ v850_elf_relax_section (bfd *abfd,
 		  || irelcall  == irelend)
 		{
 		  _bfd_error_handler
-		    ("%s: 0x%lx: warning: R_V850_LONGCALL points to "
-		     "unrecognized reloc",
+		    /* xgettext:c-format */
+		    (_("%s: 0x%lx: warning: R_V850_LONGCALL points to "
+		       "unrecognized reloc"),
 		     bfd_get_filename (abfd), (unsigned long) irel->r_offset);
 
 		  continue;
@@ -3686,8 +3694,9 @@ v850_elf_relax_section (bfd *abfd,
 	      if (symval + irelcall->r_addend != irelcall->r_offset + 4)
 		{
 		  _bfd_error_handler
-		    ("%s: 0x%lx: warning: R_V850_LONGCALL points to "
-		     "unrecognized reloc 0x%lx",
+		    /* xgettext:c-format */
+		    (_("%s: 0x%lx: warning: R_V850_LONGCALL points to "
+		       "unrecognized reloc 0x%lx"),
 		     bfd_get_filename (abfd), (unsigned long) irel->r_offset,
 		     irelcall->r_offset);
 		  continue;
@@ -3828,8 +3837,9 @@ v850_elf_relax_section (bfd *abfd,
 	      else
 		{
 		  _bfd_error_handler
-		    ("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
-		     "unrecognized insns",
+		    /* xgettext:c-format */
+		    (_("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
+		       "unrecognized insns"),
 		     bfd_get_filename (abfd), (unsigned long) irel->r_offset);
 		  continue;
 		}
@@ -3837,8 +3847,9 @@ v850_elf_relax_section (bfd *abfd,
 	      if (no_match >= 0)
 		{
 		  _bfd_error_handler
-		    ("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
-		     "unrecognized insn 0x%x",
+		    /* xgettext:c-format */
+		    (_("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
+		       "unrecognized insn 0x%x"),
 		     bfd_get_filename (abfd),
 		     (unsigned long) irel->r_offset + no_match,
 		     insn[no_match]);
@@ -3870,8 +3881,9 @@ v850_elf_relax_section (bfd *abfd,
 		  || lo_irelfn == irelend)
 		{
 		  _bfd_error_handler
-		    ("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
-		     "unrecognized reloc",
+		    /* xgettext:c-format */
+		    (_("%s: 0x%lx: warning: R_V850_LONGJUMP points to "
+		       "unrecognized reloc"),
 		     bfd_get_filename (abfd), (unsigned long) irel->r_offset);
 		  continue;
 		}
