@@ -140,6 +140,7 @@ recognized:
 @code{exynos-m1},
 @code{marvell-pj4},
 @code{marvell-whitney},
+@code{falkor},
 @code{qdf24xx},
 @code{xgene1},
 @code{xgene2},

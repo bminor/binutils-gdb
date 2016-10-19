@@ -1,3 +1,10 @@
+2016-11-03  Siddhesh Poyarekar  <siddhesh.poyarekar@linaro.org>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add falkor.
+	* config/tc-arm.c (arm_cpus): Likewise.
+	* doc/c-aarch64.texi: Likewise.
+	* doc/c-arm.texi: Likewise.
+
 2016-11-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/20754
