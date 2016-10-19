@@ -2246,6 +2246,7 @@ _bfd_elf_ppc_set_arch (bfd *abfd)
 		case PPC_APUINFO_BRLOCK:
 		  if (mach != bfd_mach_ppc_vle)
 		    mach = bfd_mach_ppc_e500;
+		  break;
 
 		case PPC_APUINFO_VLE:
 		  mach = bfd_mach_ppc_vle;

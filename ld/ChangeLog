@@ -1,3 +1,30 @@
+2016-10-14  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/DWARF.sc: Add .debug_addr.
+
+2016-10-10  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	Backport from mainline
+	2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	PR ld/20608
+	* testsuite/ld-arm/arm-elf.exp: Handle new testcase.
+	* testsuite/ld-arm/farcall-mixed-app2.d: New file.
+	* testsuite/ld-arm/farcall-mixed-app2.r: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.s: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.sym: Likewise.
+
+2016-09-06  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	Backport from mainline
+	2016-09-02  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20545
+	* testsuite/ld-avr/avr-prop-7.d: New test.
+	* testsuite/ld-avr/avr-prop-7.s: New test.
+	* testsuite/ld-avr/avr-prop-8.d: New test.
+	* testsuite/ld-avr/avr-prop-8.s: New test.
+
 2016-08-09  Roland McGrath  <roland@hack.frob.com>
 
 	* emulparams/armelf.sh (GENERATE_PIE_SCRIPT): Set to yes.

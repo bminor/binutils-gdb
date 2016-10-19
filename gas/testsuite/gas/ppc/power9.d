@@ -280,14 +280,6 @@ Disassembly of section \.text:
 .*:	(7f a8 49 80|80 49 a8 7f) 	cmprb   cr7,1,r8,r9
 .*:	(7d e0 01 00|00 01 e0 7d) 	setb    r15,cr0
 .*:	(7d fc 01 00|00 01 fc 7d) 	setb    r15,cr7
-.*:	(7e 00 01 01|01 01 00 7e) 	setbool r16,lt
-.*:	(7e 01 01 01|01 01 01 7e) 	setbool r16,gt
-.*:	(7e 02 01 01|01 01 02 7e) 	setbool r16,eq
-.*:	(7e 03 01 01|01 01 03 7e) 	setbool r16,so
-.*:	(7e 1c 01 01|01 01 1c 7e) 	setbool r16,4\*cr7\+lt
-.*:	(7e 1d 01 01|01 01 1d 7e) 	setbool r16,4\*cr7\+gt
-.*:	(7e 1e 01 01|01 01 1e 7e) 	setbool r16,4\*cr7\+eq
-.*:	(7e 1f 01 01|01 01 1f 7e) 	setbool r16,4\*cr7\+so
 .*:	(7f 40 52 1a|1a 52 40 7f) 	lxvl    vs26,0,r10
 .*:	(7f 14 52 1b|1b 52 14 7f) 	lxvl    vs56,r20,r10
 .*:	(7f 60 5b 1a|1a 5b 60 7f) 	stxvl   vs27,0,r11
@@ -331,6 +323,7 @@ Disassembly of section \.text:
 .*:	(4c e0 80 04|04 80 e0 4c) 	addpcis r7,-32768
 .*:	(4c e0 80 04|04 80 e0 4c) 	addpcis r7,-32768
 .*:	(7c 00 02 a4|a4 02 00 7c) 	slbsync
+.*:	(7d 40 06 a4|a4 06 40 7d) 	slbiag  r10
 .*:	(7d 40 5b a4|a4 5b 40 7d) 	slbieg  r10,r11
 .*:	(7c 60 27 26|26 27 60 7c) 	slbmfee r3,r4
 .*:	(7c 60 27 26|26 27 60 7c) 	slbmfee r3,r4
@@ -344,14 +337,9 @@ Disassembly of section \.text:
 .*:	(7c 00 1a 24|24 1a 00 7c) 	tlbiel  r3
 .*:	(7c 00 1a 24|24 1a 00 7c) 	tlbiel  r3
 .*:	(7c 8f 1a 24|24 1a 8f 7c) 	tlbiel  r3,r4,3,1,1
-.*:	(7c 0c 6e 0c|0c 6e 0c 7c) 	copy    r12,r13
-.*:	(7c 2c 6e 0c|0c 6e 2c 7c) 	copy_first r12,r13
-.*:	(7c 2c 6e 0c|0c 6e 2c 7c) 	copy_first r12,r13
-.*:	(7c 0a 5f 0c|0c 5f 0a 7c) 	paste   r10,r11
-.*:	(7c 0a 5f 0c|0c 5f 0a 7c) 	paste   r10,r11
-.*:	(7c 2a 5f 0d|0d 5f 2a 7c) 	paste_last r10,r11
-.*:	(7c 2a 5f 0d|0d 5f 2a 7c) 	paste_last r10,r11
-.*:	(7c 00 06 8c|8c 06 00 7c) 	cp_abort
+.*:	(7c 2c 6e 0c|0c 6e 2c 7c) 	copy    r12,r13
+.*:	(7c 2a 5f 0d|0d 5f 2a 7c) 	paste\.  r10,r11
+.*:	(7c 00 06 8c|8c 06 00 7c) 	cpabort
 .*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
 .*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
 .*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
@@ -359,8 +347,6 @@ Disassembly of section \.text:
 .*:	(7c 20 04 ac|ac 04 20 7c) 	lwsync
 .*:	(7c 40 04 ac|ac 04 40 7c) 	ptesync
 .*:	(7c 40 04 ac|ac 04 40 7c) 	ptesync
-.*:	(7c 07 04 ac|ac 04 07 7c) 	sync    0,7
-.*:	(7c 28 04 ac|ac 04 28 7c) 	sync    1,8
 .*:	(7e 80 04 cc|cc 04 80 7e) 	ldat    r20,0,0
 .*:	(7e 8a e4 cc|cc e4 8a 7e) 	ldat    r20,r10,28
 .*:	(7e a0 04 8c|8c 04 a0 7e) 	lwat    r21,0,0
@@ -373,8 +359,6 @@ Disassembly of section \.text:
 .*:	(7c 00 f6 e4|e4 f6 00 7c) 	rmieg   r30
 .*:	(7d 40 7a 6a|6a 7a 40 7d) 	ldmx    r10,0,r15
 .*:	(7d 43 7a 6a|6a 7a 43 7d) 	ldmx    r10,r3,r15
-.*:	(7d 60 83 6a|6a 83 60 7d) 	lwzmx   r11,0,r16
-.*:	(7d 63 83 6a|6a 83 63 7d) 	lwzmx   r11,r3,r16
 .*:	(4c 00 02 e4|e4 02 00 4c) 	stop
 .*:	(7c 00 00 3c|3c 00 00 7c) 	wait    
 .*:	(7c 00 00 3c|3c 00 00 7c) 	wait    
@@ -397,9 +381,6 @@ Disassembly of section \.text:
 .*:	(7d 6c 69 54|54 69 6c 7d) 	addex   r11,r12,r13,0
 .*:	(7d 6c 6b 54|54 6b 6c 7d) 	addex   r11,r12,r13,1
 .*:	(7d 6c 6d 54|54 6d 6c 7d) 	addex   r11,r12,r13,2
-.*:	(7e b6 b9 55|55 b9 b6 7e) 	addex\.  r21,r22,r23,0
-.*:	(7e b6 bb 55|55 bb b6 7e) 	addex\.  r21,r22,r23,1
-.*:	(7e b6 bd 55|55 bd b6 7e) 	addex\.  r21,r22,r23,2
 .*:	(ff 20 04 8e|8e 04 20 ff) 	mffs    f25
 .*:	(ff 20 04 8f|8f 04 20 ff) 	mffs\.   f25
 .*:	(ff 41 04 8e|8e 04 41 ff) 	mffsce  f26
@@ -410,12 +391,4 @@ Disassembly of section \.text:
 .*:	(ff d7 04 8e|8e 04 d7 ff) 	mffscrni f30,0
 .*:	(ff d7 1c 8e|8e 1c d7 ff) 	mffscrni f30,3
 .*:	(ff f8 04 8e|8e 04 f8 ff) 	mffsl   f31
-.*:	(7e 8a 01 76|76 01 8a 7e) 	brd     r10,r20
-.*:	(7e ab 01 b6|b6 01 ab 7e) 	brh     r11,r21
-.*:	(7e cc 01 36|36 01 cc 7e) 	brw     r12,r22
-.*:	(11 6a 63 77|77 63 6a 11) 	nandxor r10,r11,r12,r13
-.*:	(12 b4 b5 f6|f6 b5 b4 12) 	xor3    r20,r21,r22,r23
-.*:	(11 6a 60 34|34 60 6a 11) 	rldixor r10,r11,0,r12
-.*:	(11 6a 66 f4|f4 66 6a 11) 	rldixor r10,r11,27,r12
-.*:	(11 6a 67 f5|f5 67 6a 11) 	rldixor r10,r11,63,r12
 #pass

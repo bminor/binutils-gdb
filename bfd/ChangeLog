@@ -1,3 +1,35 @@
+2016-10-10  Christophe Lyon  <christophe.lyon@linaro.org>
+	Backport from mainline
+	2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	PR ld/20608
+	* elf32-arm.c (arm_type_of_stub): Handle the case when the pre-PLT
+	Thumb-ARM stub is too far.
+
+2016-09-06  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	Backport from mainline
+	2016-09-02  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20545
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Add parameter
+	delete_shrinks_insn. Modify computation of shrinked_insn_address.
+	Compute shrink_boundary and adjust addend only if
+	addend_within_shrink_boundary.
+	(elf32_avr_relax_section): Modify calls to
+	elf32_avr_relax_delete_bytes to pass extra parameter.
+
+2016-09-01  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (synthetic_opd): New static var.
+	(compare_symbols): Don't treat symbols in .opd specially for ELFv2.
+	(ppc64_elf_get_synthetic_symtab): Likewise.  Comment.
+
+2016-08-30  Alan Modra  <amodra@gmail.com>
+
+	PR 20531
+	* elf32-ppc.c (_bfd_elf_ppc_set_arch): Add missing "break".
+
 2016-08-19  Alan Modra  <amodra@gmail.com>
 
 	PR 20472
