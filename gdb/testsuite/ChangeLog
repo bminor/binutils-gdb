@@ -1,3 +1,8 @@
+2016-10-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+    	* gdb.base/killed-outside.exp: Remove $options from a call to
+    	`prepare_for_testing'.
+
 2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.trace/mi-trace-save.exp (test_trace_save_wrong_num_args):
