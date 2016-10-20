@@ -1,0 +1,122 @@
+2016-10-20  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	Backport from 2.25.
+	
+	2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (ARM_ARCH_V8_1A): Add the CRC_EXT_ARMV8 co-processor
+	feature macro.
+	(ARM_ARCH_V8_2A): Likewise.
+
+	2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (aarch64_opnd): Add AARCH64_OPND_BARRIER_PSB.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (aarch64_hint_options): Add "csync".
+	(aarch64_print_operands): Handle AARCH64_OPND_BARRIER_PSB.
+	* aarch64-tbl.h (aarch64_feature_stat_profile): New.
+	(STAT_PROFILE): New.
+	(aarch64_opcode_table): Add "psb".
+	(AARCH64_OPERANDS): Add "BARRIER_PSB".
+
+	2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (aarch64_hint_options): Declare.
+	(aarch64_opnd_info): Add field hint_option.
+
+	2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_PROFILE): New.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (aarch64_sys_ins_reg_supported_p): Declare.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (aarch64_sys_ins_reg): Replace has_xt with flags.
+	(aarch64_sys_ins_reg_has_xt): Declare.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_RAS): New.
+	(AARCH64_ARCH_V8_2): Add AARCH64_FEATURE_RAS.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_F16): Fix clash with
+	AARCH64_FEATURE_V8_1.
+	(AARCH64_ARCH_V8_1): Add AARCH64_FEATURE_CRC.
+	(AARCH64_ARCH_V8_2): Add AARCH64_FEATURE_CRC and
+	AARCH64_FEATURE_V8_1.
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (aarch64_op): Add OP_BFC.
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_F16): New.
+	(AARCH64_ARCH_V8_2): Add AARCH64_FEATURE_F16 to ARMv8.2
+	features.
+
+	2015-11-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_V8_1): New.
+	(AARCH64_ARCH_v8_1): Add AARCH64_FEATURE_V8_1.
+
+	2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (ARM_EXT2_V8_2A): New.
+	(ARM_ARCH_V8_2A): New.
+
+	2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_V8_2): New.
+	(AARCH64_ARCH_V8_2): New.
+
+	2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_V8_1): New.
+
+	2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1): New.
+	(ARM_ARCH_V8_1A): New.
+	(ARM_ARCH_V8_1A_FP): New.
+	(ARM_ARCH_V8_1A_SIMD): New.
+	(ARM_ARCH_V8_1A_CRYPTOV1): New.
+	(ARM_FEATURE_CORE): New.
+
+	2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* arm.h (arm_feature_set): Extended to provide more available bits.
+	(ARM_ANY): Updated to follow above new definition.
+	(ARM_CPU_HAS_FEATURE): Likewise.
+	(ARM_CPU_IS_ANY): Likewise.
+	(ARM_MERGE_FEATURE_SETS): Likewise.
+	(ARM_CLEAR_FEATURE): Likewise.
+	(ARM_FEATURE): Likewise.
+	(ARM_FEATURE_COPY): New macro.
+	(ARM_FEATURE_EQUAL): Likewise.
+	(ARM_FEATURE_ZERO): Likewise.
+	(ARM_FEATURE_CORE_EQUAL): Likewise.
+	(ARM_FEATURE_LOW): Likewise.
+	(ARM_FEATURE_CORE_LOW): Likewise.
+	(ARM_FEATURE_CORE_COPROC): Likewise.
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_RDMA): New.
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_LOR): New.
+
+	2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_PAN): New.
+	(aarch64_sys_reg_supported_p): Declare.
+	(aarch64_pstatefield_supported_p): Declare.

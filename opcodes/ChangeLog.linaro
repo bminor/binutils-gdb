@@ -1,0 +1,211 @@
+2016-10-20  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	Backport from 2.25
+
+	2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add "esb".
+	(thumb_opcodes): Likewise.
+
+	2015-12-02  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm-dis.c (arm_opcodes): <ldaexh>: Fix typo...
+	<ldah>: ... to this.
+
+	2015-06-16  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* arm-dis.c (print_insn_coprocessor): Avoid negative shift.
+
+	2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_hint): New.
+	* aarch64-asm.h (aarch64_ins_hint): Declare.
+	* aarch64-dis.c (aarch64_ext_hint): New.
+	* aarch64-dis.h (aarch64_ext_hint): Declare.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (aarch64_hint_options): New.
+	* aarch64-tbl.h (AARCH64_OPERANDS): Fix typos.
+
+	2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-gen.c (find_alias_opcode): Set max_num_aliases to 16.
+
+	2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_reg): Add pbmlimitr_el1, pmbptr_el1,
+	pmbsr_el1, pmbidr_el1, pmscr_el1, pmsicr_el1, pmsirr_el1,
+	pmsfcr_el1, pmsevfr_el1, pmslatfr_el1, pmsidr_el1, pmscr_el2 and
+	pmscr_el2.
+	(aarch64_sys_reg_supported_p): Add architecture feature tests for
+	the new registers.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs_at): Add "s1e1rp" and "s1e1wp".
+	(aarch64_sys_ins_reg_supported_p): Add ARMv8.2 system register
+	feature test for "s1e1rp" and "s1e1wp".
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs_dc): Add "cvap".
+	(aarch64_sys_ins_reg_supported_p): New.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-dis.c (aarch64_ext_regrt_sysins): Replace use of has_xt
+	with aarch64_sys_ins_reg_has_xt.
+	(aarch64_ext_sysins_op): Likewise.
+	* aarch64-opc.c (operand_general_constraint_met_p): Likewise.
+	(F_HASXT): New.
+	(aarch64_sys_regs_ic): Update for changes to aarch64_sys_ins_reg.
+	(aarch64_sys_regs_dc): Likewise.
+	(aarch64_sys_regs_at): Likewise.
+	(aarch64_sys_regs_tlbi): Likewise.
+	(aarch64_sys_ins_reg_has_xt): New.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Add "uao".
+	(aarch64_sys_reg_supported_p): Add comment.  Add checks for "uao".
+	(aarch64_pstatefields): Add "uao".
+	(aarch64_pstatefield_supported_p): Add checks for "uao".
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Add "vsesr_el2", "erridr_el1",
+	"errselr_el1", "erxfr_el1", "erxctlr", "erxaddr_el1",
+	"erxmisc0_el1", "erxmisc1_el1", "disr_el1" and "vdisr_el2".
+	(aarch64_sys_reg_supported_p): Add architecture feature tests for
+	new registers.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-tbl.h (aarch64_feature_ras): New.
+	(RAS): New.
+	(aarch64_opcode_table): Add "esb".
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (half_conv_t): New.
+	(expand_fp_imm): Replace is_dp flag with the parameter size to
+	specify the number of bytes for the required expansion.  Treat
+	a 16-bit expansion like a 32-bit expansion.  Add check for an
+	unsupported size request.  Update comment.
+	(aarch64_print_operand): Update to support 16-bit floating point
+	values.  Update for changes to expand_fp_imm.
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_fp_f16): New.
+	(FP_F16): New.
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (aarchr64_opcode_table): Update "rev", add
+	"rev64".
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-asm.c (convert_bfc_to_bfm): New.
+	(convert_to_real): Add case for OP_BFC.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-dis.c: (convert_bfm_to_bfc): New.
+	(convert_to_alias): Add case for OP_BFC.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (operand_general_constraint_met_p): Weaken assert
+	to allow width operand in three-operand instructions.
+	* aarch64-tbl.h (QL_BF1): New.
+	(aarch64_feature_v8_2): New.
+	(ARMV8_2): New.
+	(aarch64_opcode_table): Add "bfc".
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-dis.c: Weaken assert.
+	* aarch64-gen.c: Include the instruction in the list of its
+	possible aliases.
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Add "id_aa64mmfr2_el1".
+	(aarch64_sys_reg_supported_p): Add ARMv8.2 system register
+	feature test.
+
+	2015-11-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Add spsr_el12, elr_el12,
+	sctlr_el12, cpacr_el12, ttbr1_el2, ttbr0_el12, ttbr1_el12,
+	tcr_el12, afsr0_el12, afsr1_el12, esr_el12, far_el12, mair_el12,
+	amair_el12, vbar_el12, contextidr_el2, contextidr_el12,
+	cntkctl_el12, cntp_tval_el02, cntp_ctl_el02, cntp_cval_el02,
+	cntv_tval_el02, cntv_ctl_el02, cntv_cval_el02, cnthv_tval_el2,
+	cnthv_ctl_el2, cnthv_cval_el2.
+	(aarch64_sys_reg_supported_p): Update for the new system
+	registers.
+
+	2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* arm-dis.c (opcode32): Updated to use new arm feature struct.
+	(opcode16): Likewise.
+	(coprocessor_opcodes): Replace bit with feature struct.
+	(neon_opcodes): Likewise.
+	(arm_opcodes): Likewise.
+	(thumb_opcodes): Likewise.
+	(thumb32_opcodes): Likewise.
+	(print_insn_coprocessor): Likewise.
+	(print_insn_arm): Likewise.
+	(select_arm_features): Follow new feature struct.
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add "setpan".
+	(thumb_opcodes): Add "setpan".
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (select_arm_features): Rework to avoid used of redefined
+	macros.
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_rdma): New.
+	(RDMA): New.
+	(aarch64_opcode_table): Add "sqrmlah" and "sqrdmlsh" instructions.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_lor): New.
+	(LOR): New.
+	(aarch64_opdocde_table): Add "ldlar", "ldlarb", "ldlarh", "stllr",
+	"stllrb", "stllrh".
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+	2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (F_ARCHEXT): New.
+	(aarch64_sys_regs): Add "pan".
+	(aarch64_sys_reg_supported_p): New.
+	(aarch64_pstatefields): Add "pan".
+	(aarch64_pstatefield_supported_p): New.
+
+	2015-03-10  Renlin Li  <renlin.li@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Remove strub, ldurb, ldursb,
+	stur, ldur, sturh, ldurh, ldursh, ldursw, prfum F_HAS_ALIAS flag and
+	related alias.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.

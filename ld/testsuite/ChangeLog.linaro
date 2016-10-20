@@ -1,0 +1,34 @@
+2016-10-20  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	Backport from 2.25.
+
+	2015-01-13  Thomas Preud'homme <thomas.preudhomme@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Added relocs-257-symbolic-func test.
+	* ld-aarch64/relocs-257-symbolic-func.d: New file.
+	* ld-aarch64/relocs-257-symbolic-func.s: Likewise.
+
+	2015-07-25  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/symbolic-func.s,
+	* ld-elf/symbolic-func.r: New test.
+	* ld-elf/elf.exp: Run it.
+
+	2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Add erratum843419 test.
+	* ld-aarch64/erratum843419.d: New.
+	* ld-aarch64/erratum843419.s: New.
+
+	2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/erratum835769.d: Adjust for initial branch over stub
+	section.
+	* ld-aarch64/farcall-b.d: Likewise.
+	* ld-aarch64/farcall-bl.d: Likewise.
+	* ld-aarch64/farcall-back.d: Likewise.
+
+	2015-03-25  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/erratum835769.d: Adjust for removal of padding before
+	835769 workaround stubs.

@@ -1,0 +1,138 @@
+2016-10-20  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	Backport from 2.25.
+
+	2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_ext_v8_2): New.
+	(insns): Add "esb".
+	* testsuite/gas/arm/armv8_2-a.d: New.
+	* testsuite/gas/arm/armv8_2-a.s: New.
+
+	2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_hint_opt_hsh): New.
+	(parse_barrier_psb): New.
+	(parse_operands): Add case for AARCH64_OPND_BARRIER_PSB.
+	(md_begin): Set up aarch64_hint_opt_hsh.
+
+	2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "profile".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "profile".
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (parse_sys_ins_reg): Add check of
+	architectural support for system register.
+
+	2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* doc/c-aarch64.texi (AArch64 Extensions): Update entry for crc.
+
+	2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "fp16".
+	* doc/c-aarch64.texi (Architecture Extensions): Add "fp16".
+
+	2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_archs): Add "armv8.2-a".
+	* doc/c-arm.texi (-march): Add "armv8.2-a".
+
+	2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_archs): Add "armv8.2-a".
+	* doc/c-aarch64.texi (-march): Likewise.
+
+	2015-07-16  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_fpus): Add crypto-neon-fp-armv8.1.
+	* doc/c-arm.texi (-mfpu=): Likewise.  Correct the entry for
+	neon-fp-armv8.1.
+
+	2015-06-04  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* NEWS: Mention ARMv8.1 support in the Aarch64 port.
+	* config/tc-aarch64.c (aarch64_arch_option_table): Add "armv8.1-a".
+	* doc/c-aarch64.texi (-march): Add "armv8.1-a".
+
+	2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_archs): Add "armv8.1-a".
+	* doc/c-arm.texi (ARM Options, -march): Add "armv8.1-a".
+	* NEWS: Mention ARMv8.1 support.
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_ext_pan): New.
+	(do_setpan): New, encode an ARM SETPAN instruction.
+	(do_t_setpan): New, encode a Thumb SETPAN instruction.
+	(insns): Add "setpan".
+	(arm_extensions): Add "pan".
+	* doc/c-arm.texi (ARM Options): Add "pan" to list of -mcpu processor
+	extensions.
+
+	2015-03-24  Terry Guo  <terry.guo@arm.com>
+
+	* config/tc-arm.c (no_cpu_selected): Use new macro to compare
+	features.
+	(parse_psr): Likewise.
+	(do_t_mrs): Likewise.
+	(do_t_msr): Likewise.
+	(static const arm_feature_set arm_ext_*): Defined with new macros.
+	(static const arm_feature_set arm_cext_*): Likewise.
+	(static const arm_feature_set fpu_fpa_ext_*): Likewise.
+	(static const arm_feature_set fpu_vfp_ext_*): Likewise.
+	(deprecated_coproc_regs): Likewise.
+	(UL_BARRIER): Likewise.
+	(barrier_opt_names): Likewise.
+	(arm_cpus): Likewise.
+	(arm_extensions): Likewise.
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "rdma".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "rdma".
+
+	2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "lor".
+	* doc/c-aarch64.c (Aarch64 Extensions): Add "lor" to list of
+	architecture extensions.
+
+	2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (parse_sys_reg): New parameter.  Check target
+	support.  Fix whitespace.
+	(parse_operands): Update for parse_sys_reg changes.
+	(aarch64_features): Add "pan".
+	* doc/c-aarch64.texi (Aarch64 Extensions): Add "pan".
+
+	2015-02-03  Renlin Li  <renlin.li@arm.com>
+
+	* doc/c-aarch64.texi (.arch): Document the directive.
+	(.arch_extension): Likewise.
+
+	2014-11-18  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-aarch64.c (s_aarch64_arch_extension): New.
+	(md_pseudo_table): Add arch_extension.
+	(aarch64_parse_features): New parameter "ext_only". Handle it.
+	(aarch64_parse_cpu, aarch64_parse_arch, s_aarch64_cpu,
+	s_aarch64_arch): Pass FALSE as new third argument of
+	aarch64_parse_features().
+
+	2015-01-07  Jan Beulich <jbeulich@suse.com>
+
+	* config/tc-arm.c (struct arm_option_extension_value_table):
+	Split field "value" into fields "merge_value" and "clear_value".
+	(arm_extensions): Adjust initializer accordingly.
+
+	2015-06-17  Nicolas Pitre <nico@linaro.org>
+
+	* as.c (show_usage): Document --sectname-subst.
+	(parse_args): Add --sectname-subst.
+	* as.h (flag_sectname_subst): New.
+	* config/obj-elf.c (obj_elf_section_name): Add %S substitution.
+	* doc/as.texinfo: Document it.
