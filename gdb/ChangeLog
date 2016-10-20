@@ -1,3 +1,7 @@
+2016-10-20  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.tgt: Don't configure if target is *-*-vxworks*.
+
 2016-10-19  Pedro Alves  <palves@redhat.com>
 
 	* config.in: Regenerate.
