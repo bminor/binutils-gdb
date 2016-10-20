@@ -3290,12 +3290,8 @@ proc get_compiler_info {{arg ""}} {
     }
 
     # Set the legacy symbols.
-    set gcc_compiled     0
-    if { [regexp "^gcc-1-" "$compiler_info" ] } { set gcc_compiled 1 }
-    if { [regexp "^gcc-2-" "$compiler_info" ] } { set gcc_compiled 2 }
-    if { [regexp "^gcc-3-" "$compiler_info" ] } { set gcc_compiled 3 }
-    if { [regexp "^gcc-4-" "$compiler_info" ] } { set gcc_compiled 4 }
-    if { [regexp "^gcc-5-" "$compiler_info" ] } { set gcc_compiled 5 }
+    set gcc_compiled 0
+    regexp "^gcc-(\[0-9\]+)-" "$compiler_info" matchall gcc_compiled
 
     # Log what happened.
     verbose -log "get_compiler_info: $compiler_info"

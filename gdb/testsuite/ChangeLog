@@ -1,3 +1,7 @@
+2016-10-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/gdb.exp (get_compiler_info): Generalize gcc_compile regexp.
+
 2016-10-19  Maciej W. Rozycki  <macro@imgtec.com>
 
     	* gdb.base/killed-outside.exp: Remove $options from a call to
