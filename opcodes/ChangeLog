@@ -1,3 +1,12 @@
+2016-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20705
+	* i386-dis.c (get_valid_dis386): Ignore the REX_B bit and
+	the highest bit in VEX.vvvv for the 3-byte VEX prefix in
+	32-bit mode.  Don't check vex.register_specifier in 32-bit
+	mode.
+	(OP_VEX): Check for invalid mask registers.
+
 2016-10-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/20699

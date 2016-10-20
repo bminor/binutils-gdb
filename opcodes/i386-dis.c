@@ -13022,17 +13022,20 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	}
       codep++;
       vex.w = *codep & 0x80;
-      if (vex.w && address_mode == mode_64bit)
-	rex |= REX_W;
-
-      vex.register_specifier = (~(*codep >> 3)) & 0xf;
-      if (address_mode != mode_64bit
-	  && vex.register_specifier > 0x7)
+      if (address_mode == mode_64bit)
 	{
-	  dp = &bad_opcode;
-	  return dp;
+	  if (vex.w)
+	    rex |= REX_W;
+	  vex.register_specifier = (~(*codep >> 3)) & 0xf;
 	}
-
+      else
+	{
+	  /* For the 3-byte VEX prefix in 32-bit mode, the REX_B bit
+	     is ignored, other REX bits are 0 and the highest bit in
+	     VEX.vvvv is also ignored.  */
+	  rex = 0;
+	  vex.register_specifier = (~(*codep >> 3)) & 0x7;
+	}
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
 	{
@@ -13072,16 +13075,10 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       rex_ignored = rex;
       rex = (*codep & 0x80) ? 0 : REX_R;
 
+      /* For the 2-byte VEX prefix in 32-bit mode, the highest bit in
+	 VEX.vvvv is 1.  */
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
-      if (address_mode != mode_64bit
-	  && vex.register_specifier > 0x7)
-	{
-	  dp = &bad_opcode;
-	  return dp;
-	}
-
       vex.w = 0;
-
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
 	{
@@ -15266,6 +15263,11 @@ OP_E_register (int bytemode, int sizeflag)
       break;
     case mask_bd_mode:
     case mask_mode:
+      if (reg > 0x7)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
       names = names_mask;
       break;
     case 0:
@@ -15795,6 +15797,11 @@ OP_G (int bytemode, int sizeflag)
       break;
     case mask_bd_mode:
     case mask_mode:
+      if ((modrm.reg + add) > 0x7)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
       oappend (names_mask[modrm.reg + add]);
       break;
     default:
@@ -17225,6 +17232,11 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  break;
 	case mask_bd_mode:
 	case mask_mode:
+	  if (reg > 0x7)
+	    {
+	      oappend ("(bad)");
+	      return;
+	    }
 	  names = names_mask;
 	  break;
 	default:
@@ -17245,6 +17257,11 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  break;
 	case mask_bd_mode:
 	case mask_mode:
+	  if (reg > 0x7)
+	    {
+	      oappend ("(bad)");
+	      return;
+	    }
 	  names = names_mask;
 	  break;
 	default:
