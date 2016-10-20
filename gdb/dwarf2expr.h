@@ -156,16 +156,10 @@ struct dwarf_expr_context
   /* Return the location expression for the frame base attribute, in
      START and LENGTH.  The result must be live until the current
      expression evaluation is complete.  */
-  virtual void get_frame_base (const gdb_byte **start, size_t *length)
-  {
-    error (_("%s is invalid in this context"), "DW_OP_fbreg");
-  }
+  virtual void get_frame_base (const gdb_byte **start, size_t *length) = 0;
 
   /* Return the CFA for the frame.  */
-  virtual CORE_ADDR get_frame_cfa ()
-  {
-    error (_("%s is invalid in this context"), "DW_OP_call_frame_cfa");
-  }
+  virtual CORE_ADDR get_frame_cfa () = 0;
 
   /* Return the PC for the frame.  */
   virtual CORE_ADDR get_frame_pc ()
@@ -175,19 +169,13 @@ struct dwarf_expr_context
 
   /* Return the thread-local storage address for
      DW_OP_GNU_push_tls_address or DW_OP_form_tls_address.  */
-  virtual CORE_ADDR get_tls_address (CORE_ADDR offset)
-  {
-    error (_("%s is invalid in this context"), "DW_OP_form_tls_address");
-  }
+  virtual CORE_ADDR get_tls_address (CORE_ADDR offset) = 0;
 
   /* Execute DW_AT_location expression for the DWARF expression
      subroutine in the DIE at DIE_OFFSET in the CU.  Do not touch
      STACK while it being passed to and returned from the called DWARF
      subroutine.  */
-  virtual void dwarf_call (cu_offset die_offset)
-  {
-    error (_("%s is invalid in this context"), "DW_OP_call*");
-  }
+  virtual void dwarf_call (cu_offset die_offset) = 0;
 
   /* Return the base type given by the indicated DIE.  This can throw
      an exception if the DIE is invalid or does not represent a base
@@ -206,26 +194,14 @@ struct dwarf_expr_context
      DW_AT_GNU_call_site_value.  */
   virtual void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
 					   union call_site_parameter_u kind_u,
-					   int deref_size)
-  {
-    internal_error (__FILE__, __LINE__,
-		    _("Support for DW_OP_GNU_entry_value is unimplemented"));
-  }
+					   int deref_size) = 0;
 
   /* Return the address indexed by DW_OP_GNU_addr_index.
      This can throw an exception if the index is out of range.  */
-  virtual CORE_ADDR get_addr_index (unsigned int index)
-  {
-    error (_("%s is invalid in this context"), "DW_OP_GNU_addr_index");
-  }
+  virtual CORE_ADDR get_addr_index (unsigned int index) = 0;
 
   /* Return the `object address' for DW_OP_push_object_address.  */
-  virtual CORE_ADDR get_object_address ()
-  {
-    internal_error (__FILE__, __LINE__,
-		    _("Support for DW_OP_push_object_address "
-		      "is unimplemented"));
-  }
+  virtual CORE_ADDR get_object_address () = 0;
 
 private:
 

@@ -351,6 +351,50 @@ class dwarf_expr_executor : public dwarf_expr_context
   {
     read_memory (addr, buf, len);
   }
+
+  void get_frame_base (const gdb_byte **start, size_t *length) OVERRIDE
+  {
+    invalid ("DW_OP_fbreg");
+  }
+
+  void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
+				   union call_site_parameter_u kind_u,
+				   int deref_size) OVERRIDE
+  {
+    invalid ("DW_OP_GNU_entry_value");
+  }
+
+  CORE_ADDR get_object_address () OVERRIDE
+  {
+    invalid ("DW_OP_push_object_address");
+  }
+
+  CORE_ADDR get_frame_cfa () OVERRIDE
+  {
+    invalid ("DW_OP_call_frame_cfa");
+  }
+
+  CORE_ADDR get_tls_address (CORE_ADDR offset) OVERRIDE
+  {
+    invalid ("DW_OP_form_tls_address");
+  }
+
+  void dwarf_call (cu_offset die_offset) OVERRIDE
+  {
+    invalid ("DW_OP_call*");
+  }
+
+  CORE_ADDR get_addr_index (unsigned int index)
+  {
+    invalid ("DW_OP_GNU_addr_index");
+  }
+
+ private:
+
+  void invalid (const char *op) ATTRIBUTE_NORETURN
+  {
+    error (_("%s is invalid in this context"), op);
+  }
 };
 
 static CORE_ADDR

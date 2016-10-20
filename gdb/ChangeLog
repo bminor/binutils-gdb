@@ -1,5 +1,17 @@
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2expr.h (class dwarf_expr_context)
+	<get_frame_base, get_frame_cfa, get_tls_address, dwarf_call,
+	push_dwarf_block_entry_value, get_addr_index, get_object_address>:
+	Now pure virtual.
+	* dwarf2-frame.c (class dwarf_expr_executor)
+	<get_frame_base, get_frame_cfa, get_tls_address, dwarf_call,
+	push_dwarf_block_entry_value, get_addr_index, get_object_address>:
+	New methods.
+	<invalid>: New method.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
 	* minsyms.h (minimal_symbol_reader::record_full): "copy_name" now
 	a bool.
 	(record, record_with_info): Update.
