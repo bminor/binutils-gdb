@@ -2010,7 +2010,7 @@ search_struct_method (const char *name, struct value **arg1p,
 	}
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
-	  int j, k;
+	  int j = 0, k;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 
 	  name_matched = 1;
