@@ -1131,6 +1131,12 @@ x86_64_overflow_pc32.err: x86_64_overflow_pc32.o gcctestdir/ld
 	  exit 1; \
 	fi
 
+check_PROGRAMS += pr17704a_test
+pr17704a_test.o: pr17704a_test.s
+	$(TEST_AS) --64  -o $@ $<
+pr17704a_test: pr17704a_test.o gcctestdir/ld
+	gcctestdir/ld --icf=all -o $@ $<
+
 check_SCRIPTS += x32_overflow_pc32.sh
 check_DATA += x32_overflow_pc32.err
 MOSTLYCLEANFILES += x32_overflow_pc32.err

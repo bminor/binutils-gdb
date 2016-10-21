@@ -1,3 +1,15 @@
+2016-10-21  Gergely Nagy  <ngg@tresorit.com>
+
+	PR gold/17704
+	* icf.cc (match_sections): Add new parameter section_addraligns.
+	Check section alignment and keep the section with the strictest
+	alignment.
+	(find_identical_sections): New local variable section_addraligns.
+	Store each section's alignment.
+	* testsuite/pr17704a_test.s: New file.
+	* testsuite/Makefile.am (pr17704a_test): New test.
+	* testsuite/Makefile.in: Regenerate.
+
 2016-10-06  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Add fall
