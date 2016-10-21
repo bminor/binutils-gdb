@@ -988,7 +988,6 @@ enum
   PREFIX_MOD_3_0FAE_REG_4,
   PREFIX_0FAE_REG_6,
   PREFIX_0FAE_REG_7,
-  PREFIX_RM_0_0FAE_REG_7,
   PREFIX_0FB8,
   PREFIX_0FBC,
   PREFIX_0FBD,
@@ -4092,13 +4091,6 @@ static const struct dis386 prefix_table[][4] = {
     { "clflush",	{ Mb }, 0 },
     { Bad_Opcode },
     { "clflushopt",	{ Mb }, 0 },
-  },
-
-  /* PREFIX_RM_0_0FAE_REG_7 */
-  {
-    { "sfence",		{ Skip_MODRM }, 0 },
-    { Bad_Opcode },
-    { "pcommit",		{ Skip_MODRM }, 0 },
   },
 
   /* PREFIX_0FB8 */
@@ -12484,7 +12476,8 @@ static const struct dis386 rm_table[][8] = {
   },
   {
     /* RM_0FAE_REG_7 */
-    { PREFIX_TABLE (PREFIX_RM_0_0FAE_REG_7) },
+    { "sfence",		{ Skip_MODRM }, 0 },
+
   },
 };
 

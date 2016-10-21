@@ -1,3 +1,15 @@
+2016-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Remove .pcommit.
+	* doc/c-i386.texi: Likewise.
+	* testsuite/gas/i386/i386.exp: Remove pcommit tests.
+	* testsuite/gas/i386/pcommit-intel.d: Removed.
+	* testsuite/gas/i386/pcommit.d: Likewise.
+	* testsuite/gas/i386/pcommit.s: Likewise.
+	* testsuite/gas/i386/x86-64-pcommit-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-pcommit.d: Likewise.
+	* testsuite/gas/i386/x86-64-pcommit.s: Likewise.
+
 2016-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/20705

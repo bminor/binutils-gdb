@@ -5891,12 +5891,6 @@ clwb, 1, 0x660fae, 0x6, 2, CpuCLWB, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_
 
 // CLWB instructions end.
 
-// PCOMMIT instructions.
-
-pcommit, 0, 0x660fae, 0xf8, 2, CpuPCOMMIT, IgnoreSize|ImmExt|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-
-// PCOMMIT instructions end.
-
 // AVX512IFMA instructions
 
 vpmadd52huq, 3, 0x66B5, None, 1, CpuAVX512IFMA, Modrm|EVex=1|Masking=3|VexOpcode=1|VexVVVV=1|VexW=2|VecESize=1|Broadcast=2|Disp8MemShift=6|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM|Qword|ZMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegZMM, RegZMM }

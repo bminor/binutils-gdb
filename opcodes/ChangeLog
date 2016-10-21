@@ -1,3 +1,16 @@
+2016-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PREFIX_RM_0_0FAE_REG_7): Removed.
+	(prefix_table): Remove the PREFIX_RM_0_0FAE_REG_7 entry.
+	(rm_table): Update the RM_0FAE_REG_7 entry.
+	* i386-gen.c (cpu_flag_init): Remove CPU_PCOMMIT_FLAGS.
+	(cpu_flags): Remove CpuPCOMMIT.
+	* i386-opc.h (CpuPCOMMIT): Removed.
+	(i386_cpu_flags): Remove cpupcommit.
+	* i386-opc.tbl: Remove pcommit.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2016-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutis/20705
