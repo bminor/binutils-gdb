@@ -1,3 +1,9 @@
+2016-10-21  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* xcoffread.c (read_xcoff_symtab): Make name of current file as
+	pst->filename instead of _start_ in AIX.
+
 2016-10-21  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
 	* solist.h (struct target_so_ops): Delete special_symbol_handling
