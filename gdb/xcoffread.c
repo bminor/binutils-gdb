@@ -1026,7 +1026,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
   union internal_auxent fcn_aux_saved = main_aux;
   struct context_stack *newobj;
 
-  char *filestring = pst->filename;	/* Name of the current file.  */
+  const char *filestring = pst->filename;	/* Name of the current file.  */
 
   const char *last_csect_name;	/* Last seen csect's name.  */
 

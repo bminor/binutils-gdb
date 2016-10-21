@@ -1,3 +1,7 @@
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (read_xcoff_symtab): Make "filestring" const.
+
 2016-10-21  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
