@@ -548,14 +548,6 @@ solib_aix_solib_create_inferior_hook (int from_tty)
     }
 }
 
-/* Implement the "special_symbol_handling" target_so_ops method.  */
-
-static void
-solib_aix_special_symbol_handling (void)
-{
-  /* Nothing needed.  */
-}
-
 /* Implement the "current_sos" target_so_ops method.  */
 
 static struct so_list *
@@ -832,8 +824,6 @@ _initialize_solib_aix (void)
   solib_aix_so_ops.clear_solib = solib_aix_clear_solib;
   solib_aix_so_ops.solib_create_inferior_hook
     = solib_aix_solib_create_inferior_hook;
-  solib_aix_so_ops.special_symbol_handling
-    = solib_aix_special_symbol_handling;
   solib_aix_so_ops.current_sos = solib_aix_current_sos;
   solib_aix_so_ops.open_symbol_file_object
     = solib_aix_open_symbol_file_object;

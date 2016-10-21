@@ -1,3 +1,21 @@
+2016-10-21  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	* solist.h (struct target_so_ops): Delete special_symbol_handling
+	hook.
+	* solib.c (solib_add, reload_shared_libraries): Adjust.
+	* solib-aix.c (solib_aix_special_symbol_handling): Delete
+	(_initialize_solib_aix): Adjust
+	* solib-darwin.c (darwin_special_symbol_handling): Delete
+	(_initialize_darwin_solib): Adjust
+	* solib-dsbt.c (dsbt_special_symbol_handling): Delete
+	(_initialize_dsbt_solib): Adjust
+	* solib-frv.c (frv_special_symbol_handling): Delete
+	(_initialize_frv_solib): Adjust
+	* solib-svr4.c (svr4_special_symbol_handling): Delete
+	(_initialize_svr4_solib): Adjust
+	* solib-target.c (solib_target_special_symbol_handling): Delete
+	(_initialize_solib_target): Adjust
+
 2016-10-20  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.tgt: Don't configure if target is *-*-vxworks*.

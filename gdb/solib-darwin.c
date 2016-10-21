@@ -423,14 +423,6 @@ darwin_in_dynsym_resolve_code (CORE_ADDR pc)
   return 0;
 }
 
-
-/* No special symbol handling.  */
-
-static void
-darwin_special_symbol_handling (void)
-{
-}
-
 /* A wrapper for bfd_mach_o_fat_extract that handles reference
    counting properly.  This will either return NULL, or return a new
    reference to a BFD.  */
@@ -693,7 +685,6 @@ _initialize_darwin_solib (void)
   darwin_so_ops.free_so = darwin_free_so;
   darwin_so_ops.clear_solib = darwin_clear_solib;
   darwin_so_ops.solib_create_inferior_hook = darwin_solib_create_inferior_hook;
-  darwin_so_ops.special_symbol_handling = darwin_special_symbol_handling;
   darwin_so_ops.current_sos = darwin_current_sos;
   darwin_so_ops.open_symbol_file_object = open_symbol_file_object;
   darwin_so_ops.in_dynsym_resolve_code = darwin_in_dynsym_resolve_code;

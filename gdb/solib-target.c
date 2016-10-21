@@ -310,12 +310,6 @@ solib_target_current_sos (void)
 }
 
 static void
-solib_target_special_symbol_handling (void)
-{
-  /* Nothing needed.  */
-}
-
-static void
 solib_target_solib_create_inferior_hook (int from_tty)
 {
   /* Nothing needed.  */
@@ -503,8 +497,6 @@ _initialize_solib_target (void)
   solib_target_so_ops.clear_solib = solib_target_clear_solib;
   solib_target_so_ops.solib_create_inferior_hook
     = solib_target_solib_create_inferior_hook;
-  solib_target_so_ops.special_symbol_handling
-    = solib_target_special_symbol_handling;
   solib_target_so_ops.current_sos = solib_target_current_sos;
   solib_target_so_ops.open_symbol_file_object
     = solib_target_open_symbol_file_object;

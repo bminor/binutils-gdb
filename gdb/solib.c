@@ -1038,13 +1038,9 @@ solib_add (const char *pattern, int from_tty,
 
     if (loaded_any_symbols)
       {
-	const struct target_so_ops *ops = solib_ops (target_gdbarch ());
-
 	/* Getting new symbols may change our opinion about what is
 	   frameless.  */
 	reinit_frame_cache ();
-
-	ops->special_symbol_handling ();
       }
   }
 }
@@ -1468,8 +1464,6 @@ reload_shared_libraries (char *ignored, int from_tty,
      structures that are now freed.  Also, getting new symbols may
      change our opinion about what is frameless.  */
   reinit_frame_cache ();
-
-  ops->special_symbol_handling ();
 }
 
 /* Wrapper for reload_shared_libraries that replaces "remote:"

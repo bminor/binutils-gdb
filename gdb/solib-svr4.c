@@ -2552,14 +2552,6 @@ enable_break (struct svr4_info *info, int from_tty)
   return 0;
 }
 
-/* Implement the "special_symbol_handling" target_so_ops method.  */
-
-static void
-svr4_special_symbol_handling (void)
-{
-  /* Nothing to do.  */
-}
-
 /* Read the ELF program headers from ABFD.  Return the contents and
    set *PHDRS_SIZE to the size of the program headers.  */
 
@@ -3327,7 +3319,6 @@ _initialize_svr4_solib (void)
   svr4_so_ops.clear_so = svr4_clear_so;
   svr4_so_ops.clear_solib = svr4_clear_solib;
   svr4_so_ops.solib_create_inferior_hook = svr4_solib_create_inferior_hook;
-  svr4_so_ops.special_symbol_handling = svr4_special_symbol_handling;
   svr4_so_ops.current_sos = svr4_current_sos;
   svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
   svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;
