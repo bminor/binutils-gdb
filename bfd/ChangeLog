@@ -1,5 +1,10 @@
 2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* elf32-arc.c (elf_arc_relocate_section): Fixed reassign of indirect
+	symbols.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* elf32-arc.c (elf_arc_check_relocs): Added condition to disable
 	warning and "Bad value" for local symbols ARC_32 or ARC_32_ME relocs.
 

@@ -1588,7 +1588,12 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
+	  {
+	    struct elf_link_hash_entry *h_old = h;
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	    if (h->got.glist == 0 && h_old->got.glist != h->got.glist)
+	      h->got.glist = h_old->got.glist;
+	  }
 
 	  /* TODO: Need to validate what was the intention.  */
 	  /* BFD_ASSERT ((h->dynindx == -1) || (h->forced_local != 0)); */
