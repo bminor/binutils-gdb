@@ -1,3 +1,9 @@
+2016-10-24  Yao Qi  <yao.qi@linaro.org>
+
+	PR server/20733
+	* linux-aarch64-low.c (append_insns): Cast the return value to
+	'uint32_t *'.
+
 2016-10-10  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch32-low.c (enum arm_breakpoint_kinds): Remove.
