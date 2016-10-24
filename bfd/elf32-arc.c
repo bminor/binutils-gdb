@@ -1938,7 +1938,8 @@ elf_arc_check_relocs (bfd *			 abfd,
 	       and the dynamic linker can not resolve these.  However
 	       the error should not occur for e.g. debugging or
 	       non-readonly sections.  */
-	    if ((bfd_link_dll (info) && !bfd_link_pie (info))
+	    if (h != NULL
+		&& (bfd_link_dll (info) && !bfd_link_pie (info))
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& (sec->flags & SEC_READONLY) != 0
 		&& ((sec->flags & SEC_CODE) != 0
