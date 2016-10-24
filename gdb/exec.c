@@ -152,7 +152,7 @@ exception_print_same (struct gdb_exception e1, struct gdb_exception e2)
 
   return (e1.reason == e2.reason
 	  && e1.error == e2.error
-	  && strcmp (e1.message, e2.message) == 0);
+	  && strcmp (msg1, msg2) == 0);
 }
 
 /* See gdbcore.h.  */

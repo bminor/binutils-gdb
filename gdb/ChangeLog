@@ -1,3 +1,8 @@
+2016-10-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* exec.c (exception_print_same): Fix string comparison to use
+	statically-allocated ones.
+
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2expr.h (class dwarf_expr_context)
